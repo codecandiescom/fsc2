@@ -106,11 +106,8 @@
 
 
 #include "fsc2.h"
-#include <sys/ipc.h>
 #include <sys/shm.h>
-#include <sys/param.h>
 
-#define SHMMNI 128
 
 /* locally used routines */
 
@@ -230,18 +227,46 @@ void end_comm( void )
 
 
 /*-----------------------------------------------------------*/
+/*-----------------------------------------------------------*/
+
+void *get_shm( int *shm_id, long len )
+{
+	void *buf;
+
+
+	/* Now try to get a shared memory segment - if it fails and the reason is
+	   that no segments or no memory for segments is left wait for some time
+	   and hope for the parent process to remove other segments in between. */
+
+	while ( ( *shm_id = shmget( IPC_PRIVATE, len, IPC_CREAT | 0600 ) ) < 0 )
+	{
+		if ( errno == ENOSPC )           /* wait for 10 ms */
+			usleep( 10000 );
+		else                             /* non-recoverable failure... */
+			return ( void * ) -1;
+	}
+
+	/* Attach to the shared memory segment - if this should fail (improbable)
+	   delete the segment, print an error message and stop the measurement */
+
+	if ( ( buf = shmat( *shm_id, NULL, 0 ) ) == ( void * ) - 1 )
+		return ( void * ) -1;
+
+	return buf;
+}
+
+
+/*-----------------------------------------------------------*/
 /* new_data_callback() is responsible for either honoring a  */
 /* a REQUEST or storing and displaying DATA from the child.  */
-/* Actually, this routine is just a callback function for an */
-/* invisible button in the form shown while the experiment   */
-/* is running and that is synthetically triggered from the   */
-/* parents NEW_DATA signal handler.                          */ 
+/* Actually, this routine is the handler for an idle call-   */
+/* back.                                                     */
 /* The message queue is read as long as the low marker has   */
 /* not reached the high marker, both being incremented in a  */
 /* wrap-around fashion.                                      */
 /*-----------------------------------------------------------*/
 
-void new_data_callback( FL_OBJECT *a, long b )
+int new_data_callback( XEvent *a, void *b )
 {
 	a = a;
 	b = b;
@@ -258,6 +283,8 @@ void new_data_callback( FL_OBJECT *a, long b )
 		else
 			accept_new_data( );
 	}
+
+	return 0;
 }
 
 
@@ -267,7 +294,7 @@ void new_data_callback( FL_OBJECT *a, long b )
 /* that contains at least information about the type of message. Many   */
 /* of the messages can only be read by the parent. These are:           */
 /* C_EPRINT, C_SHOW_MESSAGE, C_SHOW_ALERT, C_SHOW_CHOICES,              */
-/* C_SHOW_FSELECTOR, C_PROG, C_OUTPUT and C_CLEAR_CURVE.                */
+/* C_SHOW_FSELECTOR, C_PROG and C_OUTPUT.                               */
 /* These are the implemented requests.                                  */
 /* The remaining types are used for passing the replies to the request  */
 /* back to the child process. These are the only ones where a return    */
@@ -502,18 +529,6 @@ long reader( void *ret )
 			/* send string from input form to child */
 
 			writer( C_STR, show_input( str[ 0 ], str[ 1 ] ) );
-			retval = 0;
-			break;
-
-		case C_CLEAR_CURVE :
-			assert( I_am == PARENT );       /* only to be read by the parent */
-
-			kill( child_pid, DO_SEND );
-
-			/* Clear the curve with the number from the headers `data.len'
-			   entry */
-
-			clear_curve( header.data.len );
 			retval = 0;
 			break;
 
@@ -841,16 +856,6 @@ void writer( int type, ... )
 			for ( i = 0; i < 2; i++ )
 				if ( header.data.str_len[ i ] > 0 )
 					write( pd[ WRITE ], str[ i ], header.data.str_len[ i ] );
-			break;
-
-		case C_CLEAR_CURVE :
-			assert( I_am == CHILD );      /* only to be written by the child */
-
-			/* Put the curve number on the headers `data.len' entry and send
-			   REQUEST to the parent */
-
-			header.data.len = va_arg( ap, long );
-			write( pd[ WRITE ], &header, sizeof( CS ) );
 			break;
 
 		case C_STR :

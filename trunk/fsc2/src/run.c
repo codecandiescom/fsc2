@@ -4,13 +4,8 @@
 
 
 #include "fsc2.h"
-#include <sys/ipc.h>
-#include <sys/shm.h>
-#include <sys/param.h>
 #include "gpib.h"
 
-
-#define SHMMNI 128
 
 extern int exp_runparse( void );              /* from exp_run_parser.y */
 
@@ -127,6 +122,8 @@ bool run( void )
 	fl_remove_signal_callback( SIGCHLD );
 	fl_add_signal_callback( SIGCHLD, run_sigchld_handler, NULL );
 
+	fl_set_idle_callback( new_data_callback, NULL );
+
 	fl_set_cursor( FL_ObjWin( main_form->run ), XC_left_ptr );
 
 	/* Here the experiment really starts - process for doing it is forked. */
@@ -200,7 +197,6 @@ void new_data_handler( int sig_type )
 		Message_Queue[ message_queue_high ].shm_id = Key->shm_id;
 		Message_Queue[ message_queue_high ].type = Key->type;
 		message_queue_high = ( message_queue_high + 1 ) % QUEUE_SIZE;
-		fl_trigger_object( run_form->redraw_dummy);
 
 		signal( NEW_DATA, new_data_handler );
 		if ( Key->type == DATA )
@@ -318,6 +314,7 @@ void stop_measurement( FL_OBJECT *a, long b )
 
 	signal( NEW_DATA, SIG_DFL );
 	fl_remove_signal_callback( QUITTING );
+	fl_set_idle_callback( 0, NULL );
 
 	/* reset all the devices and finally the GPIB bus */
 

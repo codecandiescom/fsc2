@@ -11,7 +11,7 @@
 #include "c4.xbm"
 #include "c5.xbm"
 
-#include "ua.xbm"             /* up, down, left and right arrow bitmaps */
+#include "ua.xbm"             /* arrow bitmaps */
 #include "da.xbm"
 #include "la.xbm"
 #include "ra.xbm"
@@ -142,14 +142,15 @@ void start_graphics( void )
 
 	setup_canvas( &G.x_axis, run_form->x_axis );
 	setup_canvas( &G.y_axis, run_form->y_axis );
-	setup_canvas( &G.canvas, run_form->canvas );
 	if ( G.dim == 2 )
 		setup_canvas( &G.canvas, run_form->z_axis );
+	setup_canvas( &G.canvas, run_form->canvas );
 
 	if ( G.is_init )
 		G_struct_init( );
 
-	redraw_all_1d( );
+	if ( G.dim == 1 )
+		redraw_all_1d( );
 
 	fl_raise_form( run_form->run );
 }
@@ -485,6 +486,7 @@ void setup_canvas( Canvas *c, FL_OBJECT *obj )
 
 	if ( G.is_init )
 	{
+
 		attributes.backing_store = NotUseful;
 		attributes.background_pixmap = None;
 		XChangeWindowAttributes( G.d, FL_ObjWin( c->obj ),
@@ -591,6 +593,10 @@ void redraw_axis( int coord )
 	int i;
 
 
+	/* First draw the label - for the x-axis it's just done by drawing the
+	   string while for the y- and z-axis we have to copy a pixmap since the
+	   label is a string rotated by 90 degree which we have drawn in advance */
+
 	if ( coord == X )
 	{
 		c = &G.x_axis;
@@ -617,15 +623,22 @@ void redraw_axis( int coord )
 	if ( ! G.is_scale_set )                   /* no scaling -> no scale */
 		return;
 
-	for ( i = 0; i < G.nc; i++ )
-	{
-		cv = G.curve[ i ];
-		if ( cv->active )
-			break;
-	}
+	/* Find out the active curve for the label */
 
-	if ( i == G.nc )                          /* no active curve -> no scale */
-		return;
+	if ( G.dim == 1 )
+	{
+		for ( i = 0; i < G.nc; i++ )
+		{
+			cv = G.curve[ i ];
+			if ( cv->active )
+				break;
+		}
+
+		if ( i == G.nc )                      /* no active curve -> no scale */
+			return;
+	}
+	else
+		cv = G.curve[ G.active_curve ];
 
 	make_scale( cv, c, coord );
 }
@@ -1098,24 +1111,7 @@ void clear_curve( long curve )
 	Curve_1d *cv = G.curve[ curve ];
 
 
-	if ( curve < 0 || curve >= G.nc )
-	{
-		eprint( WARN, "%s:%ld: Can't clear curve %ld, curve does not exist.\n",
-				Fname, Lc, curve + 1 );
-		return;
-	}
-
-	if ( TEST_RUN )
-		return;
-
-	if ( I_am == PARENT )
-	{
-		for ( i = 0; i < G.nx; i++ )
-			cv->points[ i ].exist = UNSET;
-		cv->count = 0;
-	}
-	else
-		writer( C_CLEAR_CURVE, curve );
-
-	redraw_canvas_1d( &G.canvas );
+	for ( i = 0; i < G.nx; i++ )
+		cv->points[ i ].exist = UNSET;
+	cv->count = 0;
 }

@@ -41,7 +41,6 @@ static bool display_file( char *name, FILE *fp );
 
 int main( int argc, char *argv[ ] )
 {
-
 #if defined MDEBUG
 	if ( mcheck( NULL ) != 0 )
 	{

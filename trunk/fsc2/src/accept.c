@@ -4,12 +4,10 @@
 
 
 #include "fsc2.h"
-#include <sys/ipc.h>
-#include <sys/shm.h>
-#include <sys/param.h>
 
 
-
+static bool unpack_and_accept( void *ptr );
+static bool other_data_request( int type, void * ptr );
 static void accept_1d_data( long x_index, long curve, int type, void *ptr );
 static void accept_2d_data( long x_index, long y_index, long curve, int type,
 							void *ptr );
@@ -25,23 +23,16 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 void accept_new_data( void )
 {
 	void *buf,
-		 *ptr,
-		 *ptr_next;
-	int i;
-	int nsets;
-	long x_index,
-		 y_index,
-		 curve;
-	int type;
-	long len;
+		 *ptr;
 	int mq_next;
 	int shm_id;
-
+	bool result;
 
 	
 	while ( 1 )
 	{
-		/* Attach to the shared memory segment */
+		/* Attach to the shared memory segment pointed to by the oldest
+		   entry in the message queue */
 
 		if ( ( buf = shmat( Message_Queue[ message_queue_low ].shm_id,
 							NULL, SHM_RDONLY ) ) == ( void * ) - 1 )
@@ -57,69 +48,19 @@ void accept_new_data( void )
 
 		ptr = buf + 4 * sizeof( char ) + sizeof( long );
 
-		/* Get the number of data sets */
+		/* Unpack and accept the data sets */
 
-		nsets = *( ( int * ) ptr);
-		ptr += sizeof( int );
+		result = unpack_and_accept( ptr );
 
-		/* Accept the new data from each data set */
-
-		for ( i = 0; i < nsets; ptr = ptr_next, i++ )
-		{
-			x_index = *( ( long * ) ptr );
-			ptr += sizeof( long );
-
-			y_index = *( ( long * ) ptr );
-			ptr += sizeof( long );
-
-			curve = *( ( long * ) ptr );
-			ptr += sizeof( long );
-
-			type = *( ( int * ) ptr );
-			ptr += sizeof( int );
-			
-			switch ( type )
-			{
-				case INT_VAR :
-					ptr_next = ptr + sizeof( long );
-					break;
-
-				case FLOAT_VAR :
-					ptr_next = ptr + sizeof( double );
-					break;
-
-				case INT_TRANS_ARR :
-					len = *( ( long * ) ptr );
-					ptr_next = ptr + ( len + 1 ) * sizeof( long );
-					break;
-
-				case FLOAT_TRANS_ARR :
-					len = *( ( long * ) ptr );
-					ptr_next = ptr + sizeof( long ) + len * sizeof( double );
-					break;
-			}
-
-			TRY
-			{
-				if ( G.dim == 1 )
-					accept_1d_data( x_index, curve, type, ptr );
-				else
-					accept_2d_data( x_index, y_index, curve, type, ptr );
-				TRY_SUCCESS;
-			}
-			CATCH( EXCEPTION )
-			{
-				shmdt( ( void * ) buf );
-				shmctl( Message_Queue[ message_queue_low ].shm_id,
-						IPC_RMID, NULL );
-				THROW( EXCEPTION );
-			}
-		}
-
-		/* Finally detach from shared memory segment and remove it */
+		/* Detach from shared memory segment and remove it */
 
 		shmdt( ( void * ) buf );
 		shmctl( Message_Queue[ message_queue_low ].shm_id, IPC_RMID, NULL );
+
+		/* If accepting the data failed throw an exception */
+
+		if ( ! result )
+			THROW( EXCEPTION );
 
 		/* Increment the queue pointer */
 
@@ -139,27 +80,123 @@ void accept_new_data( void )
 		   the entries and accept the data - this way the drawing of all data
 		   is done before REQUESTs are honored */
 
-		mq_next = ( message_queue_low + 1 ) % QUEUE_SIZE;
+  		mq_next = ( message_queue_low + 1 ) % QUEUE_SIZE;
 
-		if ( mq_next == message_queue_high )
-			break;                                  /* REQUEST is last entry */
+  		if ( mq_next == message_queue_high )
+  			break;                                  /* REQUEST is last entry */
 
-		/* Swap current REQUEST with next DATA set */
+  		/* Swap current REQUEST with next DATA set */
 
-		shm_id = Message_Queue[ mq_next ].shm_id;
+  		shm_id = Message_Queue[ mq_next ].shm_id;
 
-		Message_Queue[ mq_next ].shm_id =
-			                         Message_Queue[ message_queue_low ].shm_id;
-		Message_Queue[ mq_next ].type = REQUEST;
+  		Message_Queue[ mq_next ].shm_id =
+  			                         Message_Queue[ message_queue_low ].shm_id;
+  		Message_Queue[ mq_next ].type = REQUEST;
 
-		Message_Queue[ message_queue_low ].shm_id = shm_id;
-		Message_Queue[ message_queue_low ].type = DATA;
-	}
+  		Message_Queue[ message_queue_low ].shm_id = shm_id;
+  		Message_Queue[ message_queue_low ].type = DATA;
+  	}
 
 	/* Finally display the new data by redrawing the canvas */
 
 	if ( G.dim == 1 )
 		redraw_all_1d( );
+}
+
+
+/*---------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/
+
+bool unpack_and_accept( void *ptr )
+{
+	int i;
+	int nsets;
+	void *ptr_next;
+	long x_index,
+		 y_index,
+		 curve;
+	int type;
+	long len;
+
+
+	nsets = *( ( int * ) ptr);
+	ptr += sizeof( int );
+
+	if ( nsets < 0 )
+		return other_data_request( nsets, ptr );
+
+	/* Accept the new data from all data set */
+
+	for ( i = 0; i < nsets; ptr = ptr_next, i++ )
+	{
+		x_index = *( ( long * ) ptr );
+		ptr += sizeof( long );
+
+		y_index = *( ( long * ) ptr );
+		ptr += sizeof( long );
+
+		curve = *( ( long * ) ptr );
+		ptr += sizeof( long );
+
+		type = *( ( int * ) ptr );
+		ptr += sizeof( int );
+			
+		switch ( type )
+		{
+			case INT_VAR :
+				ptr_next = ptr + sizeof( long );
+				break;
+
+			case FLOAT_VAR :
+				ptr_next = ptr + sizeof( double );
+				break;
+
+			case INT_TRANS_ARR :
+				len = *( ( long * ) ptr );
+				ptr_next = ptr + ( len + 1 ) * sizeof( long );
+				break;
+
+			case FLOAT_TRANS_ARR :
+				len = *( ( long * ) ptr );
+				ptr_next = ptr + sizeof( long ) + len * sizeof( double );
+				break;
+		}
+
+		TRY
+		{
+			if ( G.dim == 1 )
+				accept_1d_data( x_index, curve, type, ptr );
+			else
+				accept_2d_data( x_index, y_index, curve, type, ptr );
+			TRY_SUCCESS;
+		}
+		CATCH( EXCEPTION )
+			return FAIL;
+	}
+
+	return OK;
+}
+
+
+bool other_data_request( int type, void * ptr )
+{
+	long i;
+	long count;
+	long *ca;
+
+	/* Currently there is only one allowed type... */
+
+	if ( type != D_CLEAR_CURVE )
+		return FAIL;
+
+	count = *( ( long * ) ptr );
+	ptr += sizeof( long );
+	ca = ( long * ) ptr;
+
+	for ( i = 0; i < count; i++ )
+		clear_curve( ca[ i ] );
+
+	return OK;
 }
 
 

@@ -6,9 +6,22 @@
 #define COMM_HEADER
 
 #include "fsc2.h"
-#include <sys/param.h>
+#include <sys/shm.h>
+
+
+/* Maximum number of shared memory segments - I didn't find a better way to
+   determine tkis number yet. In principal, it should be taken from one of the
+   include files, but alas, for the current version of Linux the header files
+   seem to be broken in this respect... */
 
 #define SHMMNI 128
+
+/* Maximum number of shared memory segments plus some safety margin - the
+   queue has always to be larger than the maximum number of shared segments,
+   so make sure SHMMNI is correct ! */
+
+# define QUEUE_SIZE ( SHMMNI + 8 )   
+
 
 
 enum {
@@ -58,14 +71,12 @@ enum {
 };
 
 
-# define QUEUE_SIZE ( SHMMNI + 1 )   /* maximum number of shared memory
-										segments + 1 */
-
 bool setup_comm( void );
 void end_comm( void );
+void *get_shm( int *shm_id, long len );
+int new_data_callback( XEvent *a, void *b );
 long reader( void *ret );
 void writer( int type, ... );
-int new_data_callback( XEvent *a, void *b );
 
 
 #endif  /* ! COMM_HEADER */

@@ -4,8 +4,6 @@
 
 
 #include "fsc2.h"
-#include <sys/ipc.h>
-#include <sys/shm.h>
 
 
 typedef struct {
@@ -1337,7 +1335,6 @@ Var *f_display( Var *v )
 {
 	DPoint *dp;
 	int shm_id;
-	struct shmid_ds shm_buf;
 	long len = 0;                    /* total length of message to send */
 	void *buf;
 	void *ptr;
@@ -1411,36 +1408,12 @@ Var *f_display( Var *v )
 		pause( );
 	do_send = UNSET;
 
-	/* Now try to get a shared memory segment - if it fails and the reason is
-	   that no segments or no memory for segments is left wait for some time
-	   and hope for the parent process to remove other segments in between. */
+	/* Now try to get a shared memory segment */
 
-	do
-	{
-		shm_id = shmget( IPC_PRIVATE, len, IPC_CREAT | 0600 );
-
-		if ( shm_id < 0 )
-		{
-			if ( errno == ENOSPC )
-				usleep( 10000 );
-			else                             /* non-recoverable failure... */
-			{
-				T_free( dp );
-				eprint( FATAL, "Internal communication problem at %s:%d.\n",
-						__FILE__, __LINE__ );
-				THROW( EXCEPTION );
-			}
-		}
-	} while ( shm_id < 0 );
-
-	/* Attach to the shared memory segment - if this should fail (improbable)
-	   delete the segment, print an error message and stop the measurement */
-
-	if ( ( buf = shmat( shm_id, NULL, 0 ) ) == ( void * ) - 1 )
+	if ( ( buf = get_shm( &shm_id, len ) ) == ( void * ) - 1 )
 	{
 		T_free( dp );
-		shmctl( shm_id, IPC_RMID, &shm_buf );       /* delete the segment */
-		eprint( FATAL, "Internal communication error at %s:%d.\n",
+		eprint( FATAL, "Internal communication problem at %s:%d.\n",
 				__FILE__, __LINE__ );
 		THROW( EXCEPTION );
 	}
@@ -1648,36 +1621,142 @@ DPoint *eval_display_args( Var *v, int *nsets )
 Var *f_clearcv( Var *v )
 {
 	long curve;
+	long count = 0;
+	long *ca = NULL;
+	int shm_id;
+	long len = 0;                    /* total length of message to send */
+	void *buf;
+	void *ptr;
+	int type = D_CLEAR_CURVE;
 
+
+	/* This function can only be called in the EXPERIMENT section and needs
+	   a previous graphics initialisation */
+
+	if ( ! G.is_init )
+	{
+		if ( TEST_RUN )
+			eprint( WARN, "$s:%ld: Can't clear curve, missing graphics "
+					"initialisation.\n!", Fname, Lc );
+		return vars_push( INT_VAR, 0 );
+	}
 
 	/* If there is no argument default to curve 1 */
 
 	if ( v == NULL )
 	{
-		clear_curve( 0 );
-		return vars_push( INT_VAR, 1 );
+		if ( TEST_RUN )
+			return vars_push( INT_VAR, 1 );
+
+		ca = T_malloc( sizeof( long ) );
+		*ca = 0;
+		count = 1;
 	}
 
 	/* Otherwise run through all arguments, treating each as a new curve
 	   number */
 
-	while ( v )
+	while ( v != NULL )
 	{
+		/* Check variable type and get curve number */
+
 		vars_check( v, INT_VAR | FLOAT_VAR );         /* get number of curve */
 
 		if ( v->type == INT_VAR )
-			curve = v->val.lval - 1;
+			curve = v->val.lval;
 		else
 		{
-			eprint( WARN, "%s:%ld: Floating point value used as curve "
-					"number.\n", Fname, Lc );
-			curve = lround( v->val.dval ) - 1;
+			if ( TEST_RUN )
+				eprint( WARN, "%s:%ld: Floating point value used as curve "
+						"number.\n", Fname, Lc );
+			curve = lround( v->val.dval );
 		}
 
-		clear_curve( curve );
+		/* Make sure the curve exists */
+
+		if ( curve < 0 || curve > G.nc )
+		{
+			if ( TEST_RUN )
+				eprint( WARN, "%s:%ld: Can't clear curve %ld, curve does not "
+						"exist.\n", Fname, Lc, curve );
+
+			if ( ca != NULL )
+				T_free( ca );
+
+			return vars_push( INT_VAR, 0 );
+		}
+
+		/* Store curve number */
+
+		ca = T_realloc( ca, ( count + 1 ) * sizeof( long ) );
+		ca[ count++ ] = curve - 1;
 
 		v = v->next;
 	}
+
+	/* In a test run this all there is to be done */
+
+	if ( TEST_RUN )
+	{
+		T_free( ca );
+		return vars_push( INT_VAR, 1 );
+	}
+
+	/* Now starts the code only to be executed by the child, i.e. while the
+	   measurement is running. */
+
+	assert( I_am == CHILD );
+
+	while ( ! do_send )             /* wait for parent to become ready */
+		pause( );
+	do_send = UNSET;
+
+	/* Now try to get a shared memory segment */
+
+	len = 4 * sizeof( char ) + sizeof( int ) + count * sizeof( long );
+
+	if ( ( buf = get_shm( &shm_id, len ) ) == ( void * ) - 1 )
+	{
+		T_free( ca );
+		eprint( FATAL, "Internal communication problem at %s:%d.\n",
+				__FILE__, __LINE__ );
+		THROW( EXCEPTION );
+	}
+
+	/* Copy all data into the shared memory segment */
+
+	ptr = buf;
+
+	memcpy( ptr, "fsc2", 4 * sizeof( char ) );     /* magic id */
+	ptr += 4 * sizeof( char );
+
+	memcpy( ptr, &len, sizeof( long ) );           /* total length */
+	ptr += sizeof( long );
+
+	memcpy( ptr, &type, sizeof( int ) );           /* type indicator  */
+	ptr += sizeof( int );
+
+	memcpy( ptr, &count, sizeof( long ) );         /* curve number count */
+	ptr += sizeof( long );
+
+	memcpy( ptr, ca, count * sizeof( long ) );     /* array of curve numbers */
+
+	/* Detach from the segment with the data */
+
+	shmdt( ( void * ) buf );
+
+	/* Get rid of the array of curve numbers */
+
+	T_free( ca );
+	
+	/* Finally tell parent about the identifier etc. */
+
+	Key->shm_id = shm_id;
+	Key->type = DATA;
+
+	kill( getppid( ), NEW_DATA );           /* signal parent the new data */
+
+	/* All the rest has now to be done by the parent process... */
 
 	return vars_push( INT_VAR, 1 );
 }
