@@ -1059,9 +1059,9 @@ Var *digitizer_lock_keyboard( Var *v )
 		vars_check( v, INT_VAR | FLOAT_VAR | STR_VAR );
 
 		if ( v->type == INT_VAR )
-			lock = v->val.lval == 0 ? UNSET : UNSET;
+			lock = v->val.lval == 0 ? UNSET : SET;
 		else if ( v->type == FLOAT_VAR )
-			lock = v->val.dval == 0.0 ? UNSET : UNSET;
+			lock = v->val.dval == 0.0 ? UNSET : SET;
 		else
 		{
 			if ( ! strcasecmp( v->val.sptr, "OFF" ) )
