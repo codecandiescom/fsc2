@@ -318,8 +318,12 @@ void er023m_set_ct( int ct_mult )
 
 	er023m.nb = er023m_nb( );
 
-	er023m.min = 128 * ct_mult;
-	er023m.scale_factor = 2.0 / ( double ) ( 512 * ct_mult - 1 - er023m.min );
+	/* Be careful with the constants used in the following - they are
+	   determined experimentally (and don't work for CT settings in the
+	   region between 125 and 200, i.e. 40 ms and 64 ms) */
+
+	er023m.min = 102.4 * ct_mult;
+	er023m.scale_factor = 2.0 / ( double ) ( 529.28 * ct_mult - er023m.min );
 }
 
 
