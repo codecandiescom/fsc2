@@ -27,6 +27,8 @@ Var *pulser_reset( Var *v );
 /* Definitions needed for the pulser */
 
 #define Ticks long              // for times in units of the pulsers time base
+#define Ticks_max l_max
+#define Ticks_min l_min
 
 
 /* name of device as given in GPIB configuration file /etc/gpib.conf */
@@ -132,6 +134,15 @@ typedef struct _C_ {
 
 typedef struct
 {
+	bool is_used;
+	char blk_name[ 9 ];
+	Ticks start;
+	long repeat;
+} BLOCK;
+
+
+typedef struct
+{
 	int device;              // GPIB number of the device
 
 	double timebase;         // time base of the digitizer
@@ -159,6 +170,12 @@ typedef struct
 	bool needs_update;       // set if pulse properties have been changed in
                              // test run or experiment
 	bool is_running;         // set if the pulser is in run mode
+
+	BLOCK block[ 2 ];        // blocks needed for padding
+
+	Ticks mem_size;          // size of the complete sequence, i.e. including
+	                         // the memory needed for padding
+	Ticks grace_period;      //
 
 } DG2020;
 
@@ -292,6 +309,8 @@ const char *dg2020_pticks( Ticks ticks );
 CHANNEL *dg2020_get_next_free_channel( void );
 int dg2020_start_compare( const void *A, const void *B );
 bool dg2020_find_phase_pulse( PULSE *p, PULSE ***pl, int *num );
+Ticks dg2020_get_max_seq_len( void );
+void dg2020_calc_padding( void );
 
 
 /* The functions from dg2020_init.c */
@@ -312,10 +331,14 @@ void dg2020_set_phase_pulse_pos_and_len( FUNCTION *f, PULSE *np,
 
 void dg2020_do_update( void );
 void dg2020_reorganize_pulses( bool flag );
-bool dg2020_do_checks( FUNCTION *f );
+void dg2020_do_checks( FUNCTION *f );
 void dg2020_full_reset( void );
 PULSE *dg2020_delete_pulse( PULSE *p );
-void dg2020_reorganize_phases( bool flag );
+void dg2020_reorganize_phases( FUNCTION *f, bool flag );
+void dg2020_recalc_phase_pulse( FUNCTION *f, PULSE *phase_p,
+								PULSE *p, int nth, bool flag );
+void dg2020_finalize_phase_pulses( int func );
+void dg2020_commit( FUNCTION * f );
 
 
 /* Finally the functions from dg2020_gpib.c */

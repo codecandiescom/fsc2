@@ -488,6 +488,10 @@ void dg2020_create_phase_pulses( int func )
 
 
 /*---------------------------------------------------------------------------
+  f = pointer to the phase function the new pulse belongs to
+  p = pointer to pulse the new phase pulse is associated with
+  pos = position of p in the list of pulses of this function
+  pod = 0 / 1: the pod for the new phase pulse
 ---------------------------------------------------------------------------*/
 
 PULSE *dg2020_new_phase_pulse( FUNCTION *f, PULSE *p, int nth, int pos,
@@ -580,6 +584,7 @@ void dg2020_set_phase_pulse_pos_and_len( FUNCTION *f, PULSE *np,
 	int ppp_num;                  // and the length of this list
 	PULSE *pp, *pn;
 	int i;
+	static PULSE *for_pulse;
 
 
 	if ( ( np->is_pos = p->is_pos ) == SET )
@@ -589,7 +594,7 @@ void dg2020_set_phase_pulse_pos_and_len( FUNCTION *f, PULSE *np,
 			/* We try to start the phase pulse for the first pulse as early as
 			   possible, i.e. even within the delay for the phase function */
 
-			if ( p->pos - f->delay < p->function->psd )
+			if ( p->pos - f->delay < f->psd )
 			{
 				eprint( FATAL, "DG2020: Pulse %ld starts too early to allow "
 						"setting of a phase pulse.\n", p->num );
@@ -628,8 +633,7 @@ void dg2020_set_phase_pulse_pos_and_len( FUNCTION *f, PULSE *np,
 			   and its predecessor use the same phase sequence and thus both
 			   their phase pulses get merged into one pulse. */
 
-			if ( p->pos - np->pos < p->function->psd &&
-				 p->pc != pp->pc )
+			if ( p->pos - np->pos < f->psd && p->pc != pp->pc )
 			{
 				np->pos = np->initial_pos = p->pos - f->psd;
 				if ( dg2020_find_phase_pulse( pp, &pppl, &ppp_num ) )
@@ -641,6 +645,15 @@ void dg2020_set_phase_pulse_pos_and_len( FUNCTION *f, PULSE *np,
 					T_free( pppl );
 				}
 			}
+
+			/* If the phase pulse is very near to the end of the previous
+			   (real) pulse we utter a warning */
+
+			if ( p != for_pulse && p->pc != pp->pc &&
+				 np->pos - pp->pos - pp->len < dg2020.grace_period )
+				eprint( SEVERE, "%s:%ld: DG2020: Pulses %ld and %ld are "
+						"so close that problems with phase switching may "
+						"result.\n", Fname, Lc, pp->num, p->num );
 		}
 	}
 
@@ -660,4 +673,6 @@ void dg2020_set_phase_pulse_pos_and_len( FUNCTION *f, PULSE *np,
 				( p->pos + p->len + pn->pos ) / 2 - np->pos;
 		}
 	}
+
+	for_pulse = p;
 }

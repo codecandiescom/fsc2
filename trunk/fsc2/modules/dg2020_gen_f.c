@@ -34,6 +34,13 @@ bool dg2020_store_timebase( double timebase )
 	dg2020.function[ PULSER_CHANNEL_PHASE_2 ].psd =
 		( Ticks ) ceil( DEFAULT_PHASE_SWITCH_DELAY / timebase );
 
+	if ( GRACE_PERIOD != 0 )
+		dg2020.grace_period = Ticks_max( ( Ticks ) ceil( GRACE_PERIOD /
+														 dg2020.timebase ),
+										 1 );
+	else
+		dg2020.grace_period = 0;
+
 	return OK;
 }
 

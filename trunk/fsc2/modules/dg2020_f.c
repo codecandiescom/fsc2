@@ -87,6 +87,8 @@ int dg2020_init_hook( void )
 	dg2020.is_trig_in_level = UNSET;
 	dg2020.is_repeat_time = UNSET;
 	
+	dg2020.block[ 0 ].is_used = dg2020.block[ 1 ].is_used = UNSET;
+
 	for ( i = 0; i < MAX_PODS; i++ )
 	{
 		dg2020.pod[ i ].function = NULL;
@@ -162,6 +164,15 @@ int dg2020_end_of_test_hook( void )
 	   state */
 
 	dg2020_full_reset( );
+
+	/* Now we've got to find out about the maximum sequence length, set up
+	   padding to achieve the repeat time and set the lengths of the last
+	   phase pulses in the channels needing phase cycling */
+
+	dg2020.max_seq_len = dg2020_get_max_seq_len( );
+	dg2020_calc_padding( );
+	dg2020_finalize_phase_pulses( PULSER_CHANNEL_PHASE_1 );
+	dg2020_finalize_phase_pulses( PULSER_CHANNEL_PHASE_2 );
 
 	return 1;	
 }
@@ -345,7 +356,7 @@ Var *pulser_increment( Var *v )
 	if ( v == NULL )
 		for( p = dg2020_Pulses; p != NULL; p = p->next )
 			if ( p->num > 0 && p->is_active && p->dlen != 0 )
-				pulser_shift( vars_push( INT_VAR, p->num ) );
+				pulser_increment( vars_push( INT_VAR, p->num ) );
 
 	/* Otherwise run through the supplied pulse list */
 
