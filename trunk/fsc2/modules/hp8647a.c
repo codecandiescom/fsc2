@@ -405,7 +405,7 @@ Var *synthesizer_attenuation( Var *v )
 	if ( att > MIN_ATTEN || att < MAX_ATTEN )
 	{
 		eprint( FATAL, "%s:%ld: %s: RF attenuation (%g db) not within valid "
-				"range (%g dB to %g dB).\n", Fname, Lc, DEVICE_NAME, att,
+				"range (%g db to %g db).\n", Fname, Lc, DEVICE_NAME, att,
 				MAX_ATTEN, MIN_ATTEN );
 		if ( ! TEST_RUN && I_am == CHILD )
 			return vars_push( FLOAT_VAR, hp8647a.attenuation );
@@ -423,7 +423,7 @@ Var *synthesizer_attenuation( Var *v )
 		if ( hp8647a.attenuation_is_set )
 		{
 			eprint( SEVERE, "%s:%ld: %s: RF attenuation has already been set "
-					"in the PREPARATIONS section to %g dB, keeping old "
+					"in the PREPARATIONS section to %g db, keeping old "
 					"value.\n", Fname, Lc, DEVICE_NAME, hp8647a.attenuation );
 			return vars_push( FLOAT_VAR, hp8647a.attenuation );
 		}

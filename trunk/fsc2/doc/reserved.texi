@@ -33,7 +33,7 @@
 @item @code{cosh}             @tab Built-in function (@pxref{cosh})
 @item                         @tab
 @item @code{date}             @tab Built-in function (@pxref{date})
-@item @code{dB}               @tab Unit, Decibel
+@item @code{db}               @tab Unit, Decibel
 @item @code{DEL}              @tab
 @item @code{DELAY}            @tab
 @item @code{DELL}             @tab

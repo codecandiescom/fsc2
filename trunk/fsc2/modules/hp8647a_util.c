@@ -209,12 +209,12 @@ double hp8647a_get_att( double freq )
 	{
 		if ( ! TEST_RUN && I_am == PARENT )
 			eprint( SEVERE, "%s: Attenuation dynamic range is insufficient "
-					"(f = %g MHz), using %f dB instead of %f dB.\n",
+					"(f = %g MHz), using %f db instead of %f db.\n",
 					DEVICE_NAME, freq * 1.0e-6, MAX_ATTEN, att );
 		else
 			eprint( SEVERE, "%s:%ld: %s: Attenuation dynamic range is "
-					"insufficient (f = %g MHz) , using %f dB instead of "
-					"%f dB.\n", Fname, Lc, DEVICE_NAME, freq * 1.0e-6,
+					"insufficient (f = %g MHz) , using %f db instead of "
+					"%f db.\n", Fname, Lc, DEVICE_NAME, freq * 1.0e-6,
 					MAX_ATTEN, att );
 		att = MAX_ATTEN;
 	}
@@ -222,12 +222,12 @@ double hp8647a_get_att( double freq )
 	{
 		if ( ! TEST_RUN && I_am == PARENT )
 			eprint( SEVERE, "%s: Attenuation dynamic range is insufficient "
-					"(f = %g MHz), using %f dB instead of %f dB.\n",
+					"(f = %g MHz), using %f db instead of %f db.\n",
 					DEVICE_NAME, freq * 1.0e-6, MIN_ATTEN, att );
 		else
 			eprint( SEVERE, "%s:%ld: %s: Attenuation dynamic range is "
-					"insufficient (f = %g MHz) , using %f dB instead of "
-					"%f dB.\n", Fname, Lc, DEVICE_NAME, freq * 1.0e-6,
+					"insufficient (f = %g MHz) , using %f db instead of "
+					"%f db.\n", Fname, Lc, DEVICE_NAME, freq * 1.0e-6,
 					MIN_ATTEN, att );
 		att = MIN_ATTEN;
 	}

@@ -52,8 +52,8 @@ INT      [0-9]+
 EXPO     [EDed][+-]?{INT}
 FLOAT    [+-]?((([0-9]+"."[0-9]*)|([0-9]*"."[0-9]+)){EXPO}?)|({INT}{EXPO})
 D        {INT}|{FLOAT}
-IU       {INT}[\n\t ]*((("k"|"M"|"G")*"Hz")|"dB")
-FU       {FLOAT}[\n\t ]*((("k"|"M"|"G")*"Hz")|"dB")
+IU       {INT}[\n\t ]*((("k"|"M"|"G")*"Hz")|"db")
+FU       {FLOAT}[\n\t ]*((("k"|"M"|"G")*"Hz")|"db")
 DU       {IU}|{FU}
 
 
@@ -355,9 +355,9 @@ static void hp8647a_new_table_entry( int type, double val )
 	{
 		if ( val > MIN_ATTEN - MAX_ATTEN )
 		{
-			eprint( FATAL, "%s: Attenuation of %f dB in table file `%s', "
+			eprint( FATAL, "%s: Attenuation of %f db in table file `%s', "
 					"line %ld, can't be achieved, maximum dynamic range is "
-					"%f dB.\n", DEVICE_NAME, val, hp8647a.table_file,
+					"%f db.\n", DEVICE_NAME, val, hp8647a.table_file,
 					hp8647a_Lc, MIN_ATTEN - MAX_ATTEN );
 			THROW( EXCEPTION );
 		}

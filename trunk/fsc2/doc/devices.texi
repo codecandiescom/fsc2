@@ -754,7 +754,7 @@ been set by calling the function with an argument).
 @findex synthesizer_attenuation()
 The function queries or sets the output attenuation. If called to set
 the attenuation it accepts one argument, the attenuation in the range
-between @w{+10 dB} and @w{-136 dB}.
+between @w{+10 db} and @w{-136 db}.
 
 Before the @code{EXPERIMENT} section this function can't be called in
 query mode, i.e. without an argument (unless the attenuation has already
@@ -804,10 +804,10 @@ default table file is used (typically this is
 installation).
 
 The table file must consist of pairs of entries, a frequency and a
-corresponding attenuation in dB. The attenuation is being added to the
+corresponding attenuation in db. The attenuation is being added to the
 'raw' attenuation, i.e.@: to achieve an higher attenuation and a lower
 output power a negative attenuation has to be specified.  If no unit are
-given in the table file (i.e.@: @code{MHz} and @code{dB}) the first
+given in the table file (i.e.@: @code{MHz} and @code{db}) the first
 member of an entry must be the frequency, the second the attenuation.
 The entries in the file don't have to be sorted in any way, and
 the frequencies don't have to spaced equally.
@@ -818,12 +818,12 @@ characters (a unit will also work as a separator) and the entries don't
 have to be separated by a newline. Thus all the following entries would
 be valid:
 @example
-7.90000000 MHz,   -1.90000000 dB
--2.10000000 dB 8.00000000 MHz   
-8.1E6 -2.2 8.20000000 MHz : -2.30000000 dB 8300 kHz
+7.90000000 MHz,   -1.90000000 db
+-2.10000000 db 8.00000000 MHz   
+8.1E6 -2.2 8.20000000 MHz : -2.30000000 db 8300 kHz
 
-   -2.4 dB
-8.70000000MHz-2.40000000dB
+   -2.4 db
+8.70000000MHz-2.40000000db
 @end example
 @noindent
 As you see also blank lines don't matter. Finally, all lines starting

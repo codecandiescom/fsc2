@@ -186,7 +186,7 @@ Here's the complete list:
 @item @code{V}  @tab Volt (and @code{nV, uV, mV, kV} and @code{MV})
 @item @code{A}  @tab Ampere (and @code{nA, uA, mA, kA} and @code{MA})
 @item @code{Hz} @tab Hertz (and @code{nHz, uHz, mHz, kHz} and @code{MHz})
-@item @code{dB} @tab dB (decibel)
+@item @code{db} @tab db (decibel)
 @end multitable
 @end quotation
 

@@ -56,14 +56,14 @@ bool hp8647a_init( const char *name )
 			if ( att < MAX_ATTEN )
 			{
 				eprint( SEVERE, "%s: Attenuation range is insufficient, using "
-						"%f dB instead of %f dB.\n",
+						"%f db instead of %f db.\n",
 						DEVICE_NAME, MAX_ATTEN, att );
 				att = MAX_ATTEN;
 			}
 			if ( att > MIN_ATTEN )
 			{
 				eprint( SEVERE, "%s: Attenuation range is insufficient, using "
-						"%f dB instead of %f dB.\n",
+						"%f db instead of %f db.\n",
 						DEVICE_NAME, MIN_ATTEN, att );
 				att = MIN_ATTEN;
 			}
