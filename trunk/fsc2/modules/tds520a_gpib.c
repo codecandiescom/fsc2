@@ -589,14 +589,14 @@ double tds520a_get_area( int channel, WINDOW *w )
 	long length = 40;
 
 
-	/* set measurement type to area */
+	/* Set measurement type to area */
 
     if ( gpib_write( tds520a.device, "MEASU:IMM:TYP ARE\n" ) == FAILURE )
 		tds520a_gpib_failure( );
 
 	assert( channel >= 0 && channel < TDS520A_AUX1 );
 
-	/* set channel (if the channel is not already set) */
+	/* Set channel (if the channel is not already set) */
 
 	if ( channel != tds520a.meas_source )
 	{
@@ -607,12 +607,25 @@ double tds520a_get_area( int channel, WINDOW *w )
 		tds520a.meas_source = channel;
 	}
 
-	/* set the cursors */
+	/* Set the cursors */
 
 	tds520a_set_meas_window( w );
 
-	/* get the the area */
+	/* Wait for measurement to finish (use polling) */
 
+	do
+	{
+		length = 40;
+		usleep( 100000 );
+		if ( gpib_write( tds520a.device, "BUSY?\n" ) == FAILURE ||
+			 gpib_read( tds520a.device, reply, &length ) == FAILURE )
+			tds520a_gpib_failure( );
+	} while ( reply[ 0 ] == '1' ); 
+
+
+	/* Get the the area */
+
+	length = 40;
 	if ( gpib_write( tds520a.device, "*WAI\n" ) == FAILURE ||
 		 gpib_write( tds520a.device, "MEASU:IMM:VAL?\n" ) == FAILURE ||
 		 gpib_read( tds520a.device, reply, &length ) == FAILURE )
@@ -657,10 +670,21 @@ bool tds520a_get_curve( int channel, WINDOW *w, double **data, long *length )
 
 	tds520a_set_curve_window( w );
 
+	/* Wait for measurement to finish (use polling) */
+
+	do
+	{
+		len = 10;
+		usleep( 100000 );
+		if ( gpib_write( tds520a.device, "BUSY?\n" ) == FAILURE ||
+			 gpib_read( tds520a.device, reply, &len ) == FAILURE )
+			tds520a_gpib_failure( );
+	} while ( reply[ 0 ] == '1' ); 
+
+
 	/* Ask digitizer to send the curve */
 
-	if ( gpib_write( tds520a.device, "*WAI\n" ) == FAILURE ||
-		 gpib_write( tds520a.device, "CURV?\n" ) == FAILURE )
+	if ( gpib_write( tds520a.device, "CURV?\n" ) == FAILURE )
 		tds520a_gpib_failure( );
 
 	/* Read just the first two bytes, these are a '#' character plus the
