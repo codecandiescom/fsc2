@@ -1,0 +1,29 @@
+DEVICES:
+
+VARIABLES:
+
+f, df = 1.0 / 3, sf = 3400, ef = 3500;
+I, J;
+N = int ( ( ef - sf ) / df ) + 1;
+d1[ N ], d2[ N ];
+
+PREPARATIONS:
+
+init_1d( 2, N, sf, df, "Field [ G ]", "Signal [uV]" );
+
+EXPERIMENT:
+
+
+FOR J = 1 : 2 {
+	print( "Starting #. run\n", J );
+	FOR I = 1 : N {
+ 		d1[ I ] = ( d1[ I ] * float( J - 1 )
+ 				  	+ grandom( ) + - 0.5 * ( I - N / 2 ) *
+ 				      exp( - ( I - N / 2 )^2 / 55.0^2 ) ) / float( J );
+		d2[ I ] = ( d2[ I ] * float( J - 1 )
+				    + grandom( ) + 0.07 * ( I - N / 2 ) *
+					  exp( - ( I - N / 2 )^2 / 55.0^2 ) ) / float( J );
+		display( I, d1[ I ], 1, I, d2[ I ], 2 );
+		wait( 0.05 );
+	}
+}
