@@ -637,16 +637,17 @@ Var *monochromator_load_calibration( Var * v )
 }
 
 
-/*-------------------------------------------------------------------*/
-/* Function returns an array of two values that are suitable for use */
-/* as axis description parameters required by by the change_scale()  */
-/* function (if the camera uses binning the second element may have  */
-/* to be multiplied by the x-binning width). Please note: since the  */
-/* axis is not really completely linear, the axis that gets displyed */
-/* when using these values is not 100% correct!                      */
-/*-------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*/
+/* Function returns an array of two wavelength values that are suitable */
+/* for use as axis description parameters (start of axis and increment) */
+/* required by by the change_scale() function (if the camera uses       */
+/* binning the second element may have to be multiplied by the          */
+/* x-binning width). Please note: since the axis is not really          */
+/* completely linear, the axis that gets displyed when using these      */
+/* values is not 100% correct!                                          */
+/*----------------------------------------------------------------------*/
 
-Var *monochromator_wavelength_axis( Var * v )
+Var *monochromator_wavelength_axis( Var *v )
 {
 	Var *cv;
 	double pixel_width;
@@ -765,6 +766,32 @@ Var *monochromator_wavelength_axis( Var * v )
 	cv = vars_push( FLOAT_ARR, NULL, 2 );
 	cv->val.dpnt[ 1 ] = ( wl_hi - wl_low ) / ( num_pixels - 1 );
 	cv->val.dpnt[ 0 ] = wl - 0.5 * cv->val.dpnt[ 1 ] * ( num_pixels - 1 );
+
+	return cv;
+}
+
+
+/*----------------------------------------------------------------------*/
+/* Function returns an array of two wavenumber values that are suitable */
+/* for use as axis description parameters (start of axis and increment) */
+/* required by by the change_scale() function (if the camera uses       */
+/* binning the second element may have to be multiplied by the          */
+/* x-binning width). Please note: since the axis is not really          */
+/* completely linear, the axis that gets displyed when using these      */
+/* values is not 100% correct!                                          */
+/*----------------------------------------------------------------------*/
+
+Var *monochromator_wavenumber_axis( Var * v )
+{
+	Var *cv;
+
+
+	too_many_arguments( v );
+
+	cv = monochromator_wavelength_axis( NULL );
+
+	cv->val.dpnt[ 0 ] = spex_cd2a_wl2mwn( cv->val.dpnt[ 0 ] );
+	cv->val.dpnt[ 1 ] = - spex_cd2a_cwn( cv->val.dpnt[ 1 ] );
 
 	return cv;
 }

@@ -864,6 +864,9 @@ Var *monochromator_offset( Var *v )
 	if ( v == NULL )
 		return vars_push( FLOAT_VAR, spex_cd2a.offset );
 
+	/* A new offset can only be set for wavenumber driven monochromators
+	   while in absolute wavenumber mode */
+
 	if ( spex_cd2a.mode == WND )
 	{
 		print( FATAL, "Monochromator offset can't be set while in relative "
@@ -1118,8 +1121,8 @@ Var *monochromator_wavelength_axis( Var *v )
 	}
 	else
 	{
-		print( WARN, "Requesting wavelength axis for monochromator running "
-			   "in wavenumber mode.\n" );
+		print( WARN, "Requesting wavelength axis for wavenumber driven "
+			   "monochromator.\n" );
 		cv->val.dpnt[ 0 ] =
 			spex_cd2a_SAwn2Uwl( spex_cd2a_wl2Awn( wl )
 								+ 0.5 * ( num_pixels - 1 )
@@ -1207,8 +1210,8 @@ Var *monochromator_wavenumber_axis( Var *v )
 
 	if ( spex_cd2a.mode == WL )
 	{
-		print( WARN, "Requesting wavenumber axis for monochromator running "
-			   "in wavelength mode!\n" );
+		print( WARN, "Requesting wavenumber axis for wavelength driven "
+			   "monochromator.\n" );
 		cv->val.dpnt[ 0 ] = 
 			spex_cd2a_SAwn2Uwl( spex_cd2a_wl2Awn( wl )
 								+ 0.5 * ( num_pixels - 1 )

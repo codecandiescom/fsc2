@@ -221,6 +221,7 @@ double spex_cd2a_UMwn2S2wl( double wn );
 double spex_cd2a_Swl2UAwn( double wl );
 double spex_cd2a_UAwn2Swl( double wn );
 double spex_cd2a_UMwn2Swl( double wn );
+double spex_cd2a_SAwn2Uwl( double wn );
 
 
 #endif /* ! SPEX_CD2A_HEADER */

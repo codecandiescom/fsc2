@@ -37,6 +37,7 @@ long get_long( Var *v, const char *snippet );
 double get_double( Var *v, const char *snippet );
 long get_strict_long( Var *v, const char *snippet );
 bool get_boolean( Var *v );
+Var *get_element( Var *v, int len, ... );
 double is_mult_ns( double val, const char * text );
 char *translate_escape_sequences( char *str );
 double experiment_time( void );

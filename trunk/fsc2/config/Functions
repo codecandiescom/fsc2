@@ -349,6 +349,7 @@ monochromator_wavenumber, -1, ALL;        // set/query wavenumber
 monochromator_install_grating, 2, EXP;    // install new grating
 monochromator_groove_density, -1, EXP;    // get groove density of grating
 monochromator_wavelength_axis, -1, EXP;   // caclulate wavelength axis
+monochromator_wavenumber_axis, -1, EXP;   // caclulate wavenumber axis
 monochromator_calc_wavelength, -1, EXP;   // calculate wavelength from pixel
 monochromator_set_calibration, -1, EXP;   // manually set calibration
 monochromator_load_calibration, -1, EXP;  // read in calibration file

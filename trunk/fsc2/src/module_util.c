@@ -232,6 +232,57 @@ bool get_boolean( Var *v )
 }
 
 
+/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*/
+
+Var *get_element( Var *v, int len, ... )
+{
+	va_list ap;
+	long cur_idx;
+
+
+	vars_check( v, INT_ARR | FLOAT_ARR | INT_REF | FLOAT_REF );
+
+	if ( len <= 0 || v->dim < len )
+		THROW( EXCEPTION );
+
+	va_start( ap, len );
+
+	while ( len-- > 0 )
+	{
+		cur_idx = va_arg( ap, long );
+
+		if ( cur_idx < 0 || cur_idx >= v->len )
+		{
+			va_end( ap );
+			THROW( EXCEPTION );
+		}
+
+		if ( v->dim > 1 )
+		{
+			fsc2_assert( v != NULL && v->val.vptr != NULL );
+			v = v->val.vptr[ cur_idx ];
+		}
+		else
+		{
+			if ( v->type == INT_ARR )
+			{
+				fsc2_assert( v != NULL && v->val.lpnt != NULL );
+				v = vars_push( INT_VAR, v->val.lpnt[ cur_idx ] );
+			}
+			else
+			{
+				fsc2_assert( v != NULL && v->val.dpnt != NULL );
+				v = vars_push( FLOAT_VAR, v->val.dpnt[ cur_idx ] );
+			}
+		}
+	}
+
+	va_end( ap );
+	return v;
+}
+
+
 /*---------------------------------------------------------------------------*/
 /* Function tests if the time (in seconds) it gets passed is a reasonable    */
 /* integer multiple of 1 ns and tries to reduce rounding errors. If the time */

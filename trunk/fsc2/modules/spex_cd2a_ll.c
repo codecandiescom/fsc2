@@ -250,6 +250,8 @@ void spex_cd2a_set_laser_line( void )
 	char mess[ 11 ] = "LL0";
 
 
+	fsc2_assert( spex_cd2a.mode & WN_MODES );
+
 	if ( FSC2_MODE != EXPERIMENT )
 		return;
 
