@@ -287,8 +287,9 @@ static int fll_count_functions( Func *fncts, int num_def_func )
 }
 
 
-/*--------------------------------------------------------*/
-/*--------------------------------------------------------*/
+/*--------------------------------------------------------------------------*/
+/* Function for comparing function names, used in sorting the function list */
+/*--------------------------------------------------------------------------*/
 
 static int ffl_func_cmp2( const void *a, const void *b )
 {
