@@ -251,8 +251,6 @@ Var *vars_new( char *name )
 		var_list->prev = vp;     /* (if this isn't the very first) */ 
     var_list = vp;               /* make it the head of the list */
 
-	Var_Count++;                 /* increment variable counter */
-
 	return vp;                   /* return pointer to the structure */
 }
 
@@ -902,8 +900,6 @@ void free_vars( void )
 		free( var_list );
 		var_list = vp;
 	}
-
-	Var_Count = 0;
 }
 
 
