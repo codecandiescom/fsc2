@@ -417,7 +417,7 @@ sub ll_valid {
 # setting of the laser line
 
 sub get_line {
-	my $laser_line;
+	my $reply;
 	my ( $f, $fn ) = mkstemp( "/tmp/spex_cam_laserlineXXXXXX" );
 
 	$f->autoflush( 1 );
@@ -448,17 +448,24 @@ EOF
 		main::show_message( "Can't start fsc2" );
 		return;
 	}
-	$laser_line = <$g>;
+	$reply = <$g>;
 	close $g;
 	unlink $fn;
 
-	unless ( $laser_line =~ /^\d+(\.\d*)?$/ ) {
+	if ( defined $reply and $reply =~ /$Please press the "REMOTE" button/ ) {
+		main::show_message( "Please press the \"REMOTE\" button at\n" .
+							"the console to allow computer control\n" .
+							"of the monochromator." );
+		return;
+	}
+
+	unless ( defined $reply and $reply =~ /^\d+(\.\d*)?$/ ) {
 		main::show_message( "Can't determine monochromators laser " .
 							"line setting" );
 		return;
 	}
 
-	return $laser_line;
+	return $reply;
 }
 
 
@@ -488,12 +495,20 @@ EOF
 		main::show_message( "Can't start fsc2" );
 		return;
 	}
+
 	my $reply = <$g>;
 	close $g;
 	unlink $fn;
 
 	main::show_message( "Can't set monochromators laser line" )
 		  if defined $reply;
+
+	if ( $reply =~ /$Please press the "REMOTE" button/ ) {
+		main::show_message( "Please press the \"REMOTE\" button at\n" .
+							"the console to allow computer control\n" .
+							"of the monochromator." );
+		return;
+	}
 }
 
 
@@ -1657,6 +1672,13 @@ EOF
 	$pd = <$g>;
 	close $g;
 	unlink $fn;
+
+	if ( defined $reply and $reply =~ /$Please press the "REMOTE" button/ ) {
+		main::show_message( "Please press the \"REMOTE\" button at\n" .
+							"the console to allow computer control\n" .
+							"of the monochromator." );
+		return;
+	}
 
 	unless ( defined $pd and $pd =~ /^\d+(\.\d*)?$/ ) {
 		main::show_message( "Can't determine pixel width of camera" );
@@ -3416,6 +3438,14 @@ EOF
 
 	close $g;
 	unlink $fn;
+
+	if ( defined $res[ 0 ] and
+		 $res[ 0 ] =~ /$Please press the "REMOTE" button/ ) {
+		main::show_message( "Please press the \"REMOTE\" button at\n" .
+							"the console to allow computer control\n" .
+							"of the monochromator." );
+		return;
+	}
 
 	unless ( @res == 10 ) {
 		main::show_message( "Can't determine monochromator and camera " .
