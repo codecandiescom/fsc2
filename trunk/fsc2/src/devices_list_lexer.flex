@@ -142,7 +142,7 @@ bool device_list_parse( void )
 
 	if ( Fname != NULL )
 	    T_free( Fname );
-	Fname = get_string_copy( "Devices" );
+	Fname = get_string_copy( libdir "/Devices" );
 
 	if ( ( devices_listin = fopen( Fname, "r" ) ) == NULL )
 	{

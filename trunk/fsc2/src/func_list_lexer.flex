@@ -156,7 +156,10 @@ void func_list_parse( Func **fncts, int num_def_func, int *num_func )
 
 	if ( Fname != NULL )
 	    T_free( Fname );
-	Fname = get_string_copy( "Functions" );
+
+	Fname = get_string( strlen( libdir ) + strlen( "/Functions" ) );
+	strcpy( Fname, libdir );
+	strcat( Fname, "/Functions" );
 
 	if ( ( func_listin = fopen( Fname, "r" ) ) == NULL )
 	{

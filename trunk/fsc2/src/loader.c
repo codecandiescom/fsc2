@@ -103,8 +103,10 @@ void load_functions( Device *dev )
 
 	/* Put together name of library to be loaded */
 
-	lib_name = get_string( strlen( dev->name ) + 3 );
-	strcpy( lib_name, dev->name );
+	lib_name = get_string( strlen( libdir ) + strlen( dev->name ) + 4 );
+	strcpy( lib_name, libdir );
+	strcat( lib_name, "/" );
+	strcat( lib_name, dev->name );
 	strcat( lib_name, ".so" );
 
 	/* Increase memory allocated for library handles and try to open
