@@ -26,6 +26,7 @@
 
 
 extern Fsc2_Assert Assert_struct;      /* defined fsc2_assert.c */
+extern int fail_mess_fd;               /* defined in dump.c     */
 
 
 /*------------------------------------------------------------------------*/

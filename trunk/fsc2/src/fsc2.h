@@ -130,8 +130,6 @@ Var *var_list = NULL;        /* list of all variables used in the program */
 Var *Var_Stack = NULL;       /* list for stack of variables used in evaluation
 								of expressions and function calls */
 
-int fail_mess_fd = -1;
-
 Device *Device_List = NULL;
 Device_Name *Device_Name_List = NULL;
 
@@ -202,8 +200,6 @@ extern Prg_Token *prg_token;
 extern long prg_length;
 extern Prg_Token *cur_prg_token;
 extern long On_Stop_Pos;
-
-extern int fail_mess_fd;
 
 extern Device *Device_List;
 extern Device_Name *Device_Name_List;

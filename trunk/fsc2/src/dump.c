@@ -163,10 +163,10 @@ void DumpStack( void )
 		   the address it's still possible to find out via the debugger
 		   where the shit hit the fan.) */
 
-		sprintf( buf, "%p\n", ( int * ) * ( EBP + 1 ) );
+		sprintf( buf, "%p\n", ( void * ) * ( EBP + 1 ) );
 		write( pipe_fd[ DUMP_PARENT_WRITE ], buf, strlen( buf ) );
 
-		sprintf( buf, "#%-3d %-10p  ", k++, ( int * ) * ( EBP + 1 ) );
+		sprintf( buf, "#%-3d %-10p  ", k++, ( void * ) * ( EBP + 1 ) );
 		write( answer_fd[ DUMP_ANSWER_WRITE ], buf, strlen( buf ) );
 
 		/* Copy ADDR2LINE's reply to the answer pipe */
