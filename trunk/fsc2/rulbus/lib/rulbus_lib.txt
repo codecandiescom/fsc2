@@ -13,7 +13,9 @@ Contents:
     VI  RB8515 (Clock Card) Functions
     VII Example Programs
 
+
 ======================================================================
+
 
 I Rulbus Configuration File
 ---------------------------
@@ -351,6 +353,14 @@ indicating the reason for the failure.
 IV RB8510 (12-bit DAC) Functions
 --------------------------------
 
+On intitialization (when rulbus_open_card() is called) no changes
+of the already set output voltage of the DAC are done and the last
+set voltages remains at the output of the DAC when the connection
+to the DAC is closed.
+
+
+----------------------------------------------------------------------
+
 int rulbus_dac12_set_voltage( int handle, double volts )
 
 Using this function you can set the output voltage of the connector
@@ -367,6 +377,13 @@ indicating the reason for the failure.
 
 V RB8514 (Delay Card) Functions
 -------------------------------
+
+On intitialization (when rulbus_open_card() is called) no changes to
+the state of the card will be done and also none when the connection
+to the card is closed.
+
+
+----------------------------------------------------------------------
 
 int rulbus_delay_set_delay( int handle, unsigned long delay )
 
@@ -442,6 +459,7 @@ delay. It rturns 1 in this case or 0 if the card isn't just creating
 a delay. On failure a negative value indicating the reason for the
 failure is returned.
 
+
 ----------------------------------------------------------------------
 
 int rulbus_delay_software_start( int handle )
@@ -458,6 +476,13 @@ indicating the reason for the failure.
 
 VI RB8515 (Clock Card) Functions
 --------------------------------
+
+On intitialization (when rulbus_open_card() is called) no changes
+are done to an already set output frequency of the card and when
+the connection to the card is closed will remain to be output.
+
+
+----------------------------------------------------------------------
 
 int rulbus_clock_set_frequency( int handle, int freq )
 

@@ -42,8 +42,13 @@ extern int rulbus_errno;
 int rulbus_adc12_set_channel( int handle, int channel );
 int rulbus_adc12_set_gain( int handle, int gain );
 int rulbus_adc12_set_trigger_mode( int handle, int mode );
-int rulbus_adc12_conversion_done( int handle );
+int rulbus_adc12_check_convert( int handle, double *volts );
 int rulbus_adc12_convert( int handle, double *volts );
+
+#define RULBUS_ADC12_GAIN_1         1
+#define RULBUS_ADC12_GAIN_2         2
+#define RULBUS_ADC12_GAIN_4         4
+#define RULBUS_ADC12_GAIN_8         8
 
 #define RULBUS_ADC12_INT_TRIG       0
 #define RULBUS_ADC12_EXT_TRIG       1
@@ -95,7 +100,7 @@ int rulbus_clock_set_frequency( int handle, int freq );
 #define RULBUS_CLOCK_FREQ_1MHz      5
 #define RULBUS_CLOCK_FREQ_10MHz     6
 #define RULBUS_CLOCK_FREQ_100MHz    7
-
+,a
 
 /* Error codes of the library */
 
@@ -119,25 +124,28 @@ int rulbus_clock_set_frequency( int handle, int freq );
 #define RULBUS_DUP_NAM  -17
 #define RULBUS_ADD_DUP  -18
 #define RULBUS_TYP_DUP  -19
-#define RULBUS_CRD_CNT  -20
-#define RULBUS_NO_CRD   -21
-#define RULBUS_CRD_NAM  -22
-#define RULBUS_INV_TYP  -23
-#define RULBUS_ADD_CFL  -24
-#define RULBUS_TYP_HND  -25
-#define RULBUS_NO_INIT  -26
-#define RULBUS_INV_ARG  -27
-#define RULBUS_INV_CRD  -28
-#define RULBUS_INV_HND  -29
-#define RULBUS_CRD_NOP  -30
-#define RULBUS_INV_OFF  -31
-#define RULBUS_WRT_ERR  -32
-#define RULBUS_RD_ERR   -33
-#define RULBUS_CRD_BSY  -34
-#define RULBUS_RNG_DUP  -35
-#define RULBUS_POL_DUP  -36
-#define RULBUS_INV_POL  -37
-#define RULBUS_NO_RNG   -38
-#define RULBUS_INV_RNG  -39
-#define RULBUS_NO_POL   -40
-#define RULBUS_INV_VLT  -41
+#define RULBUS_CHN_DUP  -20
+#define RULBUS_CHN_INV  -21
+#define RULBUS_MIS_CHN  -22
+#define RULBUS_RNG_DUP  -23
+#define RULBUS_POL_DUP  -24
+#define RULBUS_INV_POL  -25
+#define RULBUS_NO_RNG   -26
+#define RULBUS_INV_RNG  -27
+#define RULBUS_NO_POL   -28
+#define RULBUS_CRD_CNT	-29
+#define RULBUS_NO_CRD   -30
+#define RULBUS_CRD_NAM  -31
+#define RULBUS_INV_TYP  -32
+#define RULBUS_ADD_CFL  -33
+#define RULBUS_TYP_HND  -34
+#define RULBUS_NO_INIT  -35
+#define RULBUS_INV_ARG  -36
+#define RULBUS_INV_CRD  -37
+#define RULBUS_INV_HND  -38
+#define RULBUS_CRD_NOP  -39
+#define RULBUS_INV_OFF  -40
+#define RULBUS_WRT_ERR  -41
+#define RULBUS_RD_ERR   -42
+#define RULBUS_CRD_BSY  -43
+#define RULBUS_INV_VLT  -44
