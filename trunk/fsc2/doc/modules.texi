@@ -338,12 +338,12 @@ long get_strict_long( Var *var, const char *snippet )
 This function has the same arguments as the two other functions but it
 will throw an exception (see below what this means) when getting passed
 a floating point number, stopping the interpretation of the @code{EDL}
-program except while doing the experiment, in which case only a warning
+script except while doing the experiment, in which case only a warning
 message is printed and the floating point number is converted to the
 nearest integer, which is then returned (thus avoiding the termination
 of a running experiment). But usually the wrong parameter should already
 have been found during the test run, thus forcing the user to correct
-her program.
+her script.
 
 Finally, there is a function for the case that you want a boolean
 variable, i.e.@: a variable that can be either true or false. This
@@ -500,7 +500,7 @@ Var *square( Var *var )
 @noindent
 As you see it's checked first that the variable passed to the function
 has the correct type - both integer and floating point values are ok
-(otherwise the interpretation of the @code{EDL} program would stop).
+(otherwise the interpretation of the @code{EDL} script would stop).
 Next we distinguish between the possibilities that the value is an
 integer or a floating point number by testing the @code{type} field of
 the variable. Then we create either a new integer variable by calling
@@ -726,7 +726,7 @@ the device type, e.g.
 @noindent
 The device type string is used by @code{fsc2} to figure out if more
 than one device with the same functionality is being used by an
-@code{EDL} program. You probably already have read that when you have
+@code{EDL} script. You probably already have read that when you have
 two such devices you can access the second device by appending a
 '@code{#2}' when calling an @code{EDL}-function. But, obviously, for
 this to work @code{fsc2} must know which devices have similar
@@ -768,40 +768,40 @@ Another important point is that if in two modules with different
 @code{generic_type} settings the same function name is used only one of
 this modules can be used at the same time. If the user tries to list
 both modules simultaneously in the @code{DEVICES} section an error
-message will be printed and interpretation of the program will be
+message will be printed and interpretation of the script will be
 stopped. Thus it must be avoided to use identical @code{EDL} function
 names in modules for devices of different types.
 
 
 @subsection Global variables
 
-First there is a global variable@footnote{Actually, @code{FSC2_MODE}
+First, there is a global variable@footnote{Actually, @code{FSC2_MODE}
 isn't a real variable. While you can obtain its value you can't assign
 values to it, and if your try the compiler will complain about an error
 like '@code{invalid lvalue in assignment}'.}, called @code{FSC2_MODE},
 which tells you in which context your module function is called. There
-are three different contexts: First you have to distinguish between the
-program interpreting the @code{VARIABLES} or @code{PREPARATIONS} section
-and, on the other hand, when interpreting the @code{EXPERIMENT}
-section. During the handling of the @code{VARIABLES} or
-@code{PREPARATIONS} section the devices are not initialized and can't be
-accessed and the @code{EDL} program interpretation @code{FSC2_MODE}
-is set to the predefined value @code{PREPARATION}.
+are three different contexts: the program can be either interpreting the
+@code{VARIABLES} or @code{PREPARATIONS} section, do a test run, or do
+the experiment. While the program is interpreting the @code{VARIABLES}
+or @code{PREPARATIONS} section @code{FSC2_MODE} is set to the predefined
+value @code{PREPARATION}. At this stage the devices are not initialized
+yet and can't be accessed.
 
-But before the real experiment is started a test run of the
-@code{EXPERIMENT} section must be done. While in this context your
-module function still can't access the devices but must try to return
+Before the real experiment is started a test run of the
+@code{EXPERIMENT} section must is done. In this context your module
+function still can't access the devices but must try to return
 reasonable dummy data. That means that the module functions should at
-least return data of the same type as it will do in the actual
+least return data of the same type as they will do in the actual
 experiment. E.g., if a function will return an array during the
 experiment it should do the same during the a test run, even though the
 data in the array probably are going to be completely bogus. During the
 the test run the variable @code{FSC2_MODE} is set to @code{TEST}.
 
 Finally the experiment gets started. Now your module can talk to the
-devices and can return 'real' values. To indicate this @code{FSC2_MODE}
-is set to the value @code{EXPERIMENT} (it's already set to this value
-when the @code{exp_hook} functions (see below) are run).
+devices and can return 'real' values. During this stage the
+@code{FSC2_MODE} variable is set to the value @code{EXPERIMENT} (it's
+already set to this value when the @code{exp_hook} functions (see below)
+are run).
 
 Thus you will probably often have constructs like the following in your
 module functions:
