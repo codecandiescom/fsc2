@@ -89,9 +89,10 @@ SHELL            := /bin/sh
 CC               := gcc
 CFLAGS           := -ggdb -O2 -I/usr/X11R6/include/X11 -Wall -Wwrite-strings \
 					-Wstrict-prototypes -Wmissing-declarations -W
-				    # -DMDEBUG # for malloc debugging
-				    # -DDEBUG
-				    # -DMAX_DEBUG # for debugging of the digitizer modules
+					# -DNDEBUG    # switches off build-in debugging code 
+					# -DMDEBUG    # for malloc debugging
+					# -DDEBUG
+					# -DMAX_DEBUG # for debugging of the digitizer modules
 LD				 := ld
 LIBS             := -L/usr/X11R6/lib -L/usr/local/lib -lforms -lX11 -lm -ldl
 				    # -lmcheck   # for malloc debugging

@@ -320,7 +320,7 @@ static int func_cmp2( const void *a, const void *b )
 /* This function is called to really execute an EDL function.    */
 /* It must be able to also handle situations where, for example, */
 /* an EDL function calls another EDL function, which throws an   */
-/* exception, that is caught by thje first function etc.         */
+/* exception that then is caught by the first function etc.      */
 /*---------------------------------------------------------------*/
 
 Var *func_call( Var *f )
@@ -329,7 +329,7 @@ Var *func_call( Var *f )
 	Var *ret = NULL;
 	int ac;
 #ifndef NDEBUG
-	volatile Func *cur_func;
+	Func *cur_func;
 	int i;
 
 
