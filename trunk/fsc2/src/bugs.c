@@ -42,28 +42,28 @@ void bug_report_callback( FL_OBJECT *a, long b )
 
 	fprintf( tmp,
 			 "Please enter a description of the bug you found. Also list\n"
-			 "further information about the circumstances that triggered\n"
-			 "the bug as far as you think they might be relevant. Were\n"
-			 "you able to reproduce the bug?\n"
+			 "information about the circumstances that triggered the bug\n"
+			 "as far as you think they might be relevant. Were you able\n"
+			 "to reproduce the bug?\n"
 			 "\n\n\n\n\n\n\n\n\n"
 			 " Please do not change anything below this line. Thank you.\n"
 		     "***********************************************************\n" );
 	
-	fprintf( tmp, "Content of main browser:\n\n" );
+	fprintf( tmp, "Content of program browser:\n\n" );
 	lines = fl_get_browser_maxline( main_form->browser );
 	for ( i = 1; i <= lines; i++ )
 		fprintf( tmp, "%s\n", fl_get_browser_line( main_form->browser, i ) );
 	fprintf( tmp, "--------------------------------------------------\n\n" );
 
-	fprintf( tmp, "Content of error browser:\n\n" );
+	fprintf( tmp, "Content of output browser:\n\n" );
 	lines = fl_get_browser_maxline( main_form->error_browser );
 	for ( i = 1; i <= lines; i++ )
 		fprintf( tmp, "%s\n",
 				 fl_get_browser_line( main_form->error_browser, i ) );
 	fprintf( tmp, "--------------------------------------------------\n\n" );
 
-	/* Append some more useful information, i.e the user name and his current
-	   directory as well as the location of the library */
+	/* Append other informations, i.e the user name and his current directory
+	   as well as the location of the library */
 
 	fprintf( tmp, "Current user: %s\n", ( getpwuid( getuid( ) ) )->pw_name );
 	getcwd( cur_dir, PATH_MAX );
@@ -72,7 +72,7 @@ void bug_report_callback( FL_OBJECT *a, long b )
 	fclose( tmp );
 
 	/* Append a directory listing of configuration files and modules
-	   to allow check of permissions */
+	   to allow a check of the permissions */
 
 	cmd = get_string( strlen( "ls -al  >> " ) + strlen( libdir ) +
 					  strlen( "/Devices" ) + strlen( filename ) );
@@ -152,7 +152,7 @@ void bug_report_callback( FL_OBJECT *a, long b )
 	system( cmd );
 	T_free( cmd );
 
-	/* Put together the command for invoking the editor */
+	/* Assemble the command for invoking the editor */
 
 	ed = getenv( "EDITOR" );
 	if ( ed == NULL || *ed == '\0' )
@@ -171,7 +171,7 @@ void bug_report_callback( FL_OBJECT *a, long b )
 
 	fl_set_cursor( FL_ObjWin( a ), XC_left_ptr );
 
-	/* Invoke the editor - when finished ask the user who to proceed */
+	/* Invoke the editor - when finished ask the user how to proceed */
 
 	do
 	{
@@ -201,7 +201,7 @@ void bug_report_callback( FL_OBJECT *a, long b )
 		if ( cc == 1 )
 			user = ( getpwuid( getuid( ) ) )->pw_name;
 
-		/* Put together the command for sending the mail */
+		/* Assemble the command for sending the mail */
 
 		cmd = get_string( strlen( "mail -s \"fsc2 bug report\" -c    < " ) +
 						  + strlen( jens ) + strlen( filename ) +
