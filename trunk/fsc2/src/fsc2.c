@@ -142,7 +142,7 @@ int main( int argc, char *argv[ ] )
 /* and creates all the forms needed by the program.*/
 /*-------------------------------------------------*/
 
-bool xforms_init( int *argc, char *argv[] )
+static bool xforms_init( int *argc, char *argv[] )
 {
 	FL_Coord h, H;
 	FL_Coord x1, y1, w1, h1, x2, y2, w2, h2;
@@ -200,7 +200,7 @@ bool xforms_init( int *argc, char *argv[] )
 /* forms previously needed by the program. */
 /*-----------------------------------------*/
 
-void xforms_close( void )
+static void xforms_close( void )
 {
 	if ( fl_form_is_visible( main_form->fsc2 ) )
 		fl_hide_form( main_form->fsc2 );
@@ -645,7 +645,7 @@ void run_file( FL_OBJECT *a, long b )
 /*   * FILE pointer for the file                                      */
 /*--------------------------------------------------------------------*/
 
-bool display_file( char *name, FILE *fp )
+static bool display_file( char *name, FILE *fp )
 {
 	int len, key;
 	long lc, cc, i;                         /* line and char counter */

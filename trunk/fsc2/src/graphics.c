@@ -195,7 +195,7 @@ void start_graphics( void )
 /*----------------------------------------------------------------------*/
 /*----------------------------------------------------------------------*/
 
-void G_struct_init( void )
+static void G_struct_init( void )
 {
 	static bool first_time = SET;
 	int x, y;
@@ -267,7 +267,7 @@ void G_struct_init( void )
 /*----------------------------------------------------------------------*/
 /*----------------------------------------------------------------------*/
 
-void G_init_curves_1d( void )
+static void G_init_curves_1d( void )
 {
 	int i, j;
 	Curve_1d *cv;
@@ -363,7 +363,7 @@ void G_init_curves_1d( void )
 /*----------------------------------------------------------------------*/
 /*----------------------------------------------------------------------*/
 
-void G_init_curves_2d( void )
+static void G_init_curves_2d( void )
 {
 	int i, j;
 	Curve_2d *cv;
@@ -480,7 +480,7 @@ void G_init_curves_2d( void )
 /* pixmap and then rotate this pixmap 'by hand'.                        */
 /*----------------------------------------------------------------------*/
 
-void create_label_pixmap( int coord )
+static void create_label_pixmap( int coord )
 {
 	Pixmap pm;
 	int width, height;
@@ -657,7 +657,7 @@ void free_graphics( void )
 /*---------------------------------------------------------*/
 /*---------------------------------------------------------*/
 
-void canvas_off( Canvas *c, FL_OBJECT *obj )
+sttic void canvas_off( Canvas *c, FL_OBJECT *obj )
 {
 	FL_HANDLE_CANVAS ch;
 
@@ -688,7 +688,7 @@ void canvas_off( Canvas *c, FL_OBJECT *obj )
 /*--------------------------------------------------------------*/
 /*--------------------------------------------------------------*/
 
-void setup_canvas( Canvas *c, FL_OBJECT *obj )
+static void setup_canvas( Canvas *c, FL_OBJECT *obj )
 {
 	XSetWindowAttributes attributes;
 	FL_HANDLE_CANVAS ch;

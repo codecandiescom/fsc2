@@ -137,7 +137,7 @@ const char *show_input( const char *content, const char *label )
 }
 
 
-const char *handle_input( const char *content, const char *label )
+static const char *handle_input( const char *content, const char *label )
 {
 	if ( label != NULL && label != '\0' )
 		fl_set_object_label( input_form->comm_input, label );

@@ -16,7 +16,7 @@ typedef struct {
 
 
 static void f_wait_alarm_handler( int sig_type );
-DPoint *eval_display_args( Var *v, int *npoints );
+static DPoint *eval_display_args( Var *v, int *npoints );
 static int get_save_file( Var **v, const char *calling_function );
 static void print_array( Var *v, long cur_dim, long *start, int fid );
 static void print_slice( Var *v, int fid );
@@ -1085,7 +1085,7 @@ Var *f_wait( Var *v )
 /* but without it the alarm signal would kill the process, i.e. the child.  */
 /*--------------------------------------------------------------------------*/
 
-void f_wait_alarm_handler( int sig_type )
+static void f_wait_alarm_handler( int sig_type )
 {
 	if ( sig_type != SIGALRM )
 		return;
@@ -1566,7 +1566,7 @@ Var *f_display( Var *v )
 /*--------------------------------------------------------*/
 /*--------------------------------------------------------*/
 
-DPoint *eval_display_args( Var *v, int *nsets )
+static DPoint *eval_display_args( Var *v, int *nsets )
 {
 	DPoint *dp = NULL;
 
@@ -2087,7 +2087,7 @@ getfile_retry:
 /* family of functions.                                                */
 /*---------------------------------------------------------------------*/
 
-int get_save_file( Var **v, const char *calling_function )
+static int get_save_file( Var **v, const char *calling_function )
 {
 	Var *get_file_ptr;
 	Var *file;
@@ -2273,7 +2273,7 @@ Var *f_save( Var *v )
 }
 
 
-void print_array( Var *v, long cur_dim, long *start, int fid )
+static void print_array( Var *v, long cur_dim, long *start, int fid )
 {
 	long i;
 
@@ -2295,7 +2295,7 @@ void print_array( Var *v, long cur_dim, long *start, int fid )
 }
 
 
-void print_slice( Var *v, int fid )
+static void print_slice( Var *v, int fid )
 {
 	long i;
 
@@ -2570,7 +2570,7 @@ Var *f_save_o( Var *v )
 /* 3. Comment string to prepend to each line                                 */
 /*---------------------------------------------------------------------------*/
 
-void print_browser( int browser, int fid, const char* comment )
+static void print_browser( int browser, int fid, const char* comment )
 {
 	char *line;
 

@@ -182,7 +182,7 @@ bool run( void )
 /* parent with excessive amounts of data and signals).               */
 /*-------------------------------------------------------------------*/
 
-void new_data_handler( int sig_type )
+static void new_data_handler( int sig_type )
 {
 	assert( sig_type == NEW_DATA );
 
@@ -211,7 +211,7 @@ void new_data_handler( int sig_type )
 /* and reacts by sending (another) DO_QUIT signal.                */
 /*----------------------------------------------------------------*/
 
-void quitting_handler( int sig_type, void *data )
+static void quitting_handler( int sig_type, void *data )
 {
 	data = data;
 
@@ -230,7 +230,7 @@ void quitting_handler( int sig_type, void *data )
 /* of its callback function run_sigchld_callback().                  */
 /*-------------------------------------------------------------------*/
 
-void run_sigchld_handler( int sig_type )
+static void run_sigchld_handler( int sig_type )
 {
 	int return_status;
 	int pid;
@@ -338,7 +338,7 @@ void stop_measurement( FL_OBJECT *a, long b )
 /* again when the experiment is finished.                   */
 /*----------------------------------------------------------*/
 
-void set_buttons_for_run( int active )
+static void set_buttons_for_run( int active )
 {
 	if ( active == 0 )
 	{
@@ -393,7 +393,7 @@ int return_status;
 /* to handle.                                                       */
 /*------------------------------------------------------------------*/
 
-void run_child( void )
+static void run_child( void )
 {
 	I_am = CHILD;
 
@@ -445,7 +445,7 @@ void run_child( void )
 /* by the parent to the child asking it to send (further) data. */
 /*--------------------------------------------------------------*/
 
-void do_send_handler( int sig_type )
+static void do_send_handler( int sig_type )
 {
 	assert( sig_type == DO_SEND );
 	signal( DO_SEND, do_send_handler );
@@ -460,7 +460,7 @@ void do_send_handler( int sig_type )
 /* with devices expecting to be serviced.                               */
 /*----------------------------------------------------------------------*/
 
-void do_quit_handler( int sig_type )
+static void do_quit_handler( int sig_type )
 {
 	assert( sig_type == DO_QUIT );
 	signal( DO_QUIT, do_quit_handler );
@@ -473,7 +473,7 @@ void do_quit_handler( int sig_type )
 /* executed by the child it's got to honour the `do_quit' flag.         */
 /*----------------------------------------------------------------------*/
 
-void do_measurement( void )
+static void do_measurement( void )
 {
 	Prg_Token *cur;
 	bool react_to_do_quit = SET;

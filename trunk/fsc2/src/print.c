@@ -36,7 +36,6 @@ static void print_header( FILE *fp, char *name );
 static void eps_make_scale( FILE *fp, void *cv, int coord );
 static void eps_draw_curve_1d( FILE *fp, int i );
 static void eps_draw_contour( FILE *fp, int cn );
-
 static void do_print( char *name, const char *command );
 static int start_printing( char **argv, char *name );
 
@@ -194,7 +193,7 @@ void print_2d( FL_OBJECT *obj, long data )
 /* and, for printing to file mode, select the file              */
 /*--------------------------------------------------------------*/
 
-int get_print_file( FILE **fp, char **name )
+static int get_print_file( FILE **fp, char **name )
 {
 	FL_OBJECT *obj;
 	char filename[ ] = P_tmpdir "/fsc2.eps.XXXXXX";
@@ -450,7 +449,7 @@ void print_callback( FL_OBJECT *obj, long data )
 /* Prints the header of the EPS-file as well as date, user and fsc2 logo. */
 /*------------------------------------------------------------------------*/
 
-void print_header( FILE *fp, char *name )
+static void print_header( FILE *fp, char *name )
 {
 	time_t d;
 
@@ -521,7 +520,7 @@ void print_header( FILE *fp, char *name )
 /* Draws the scales for both 1D and 2D graphics */
 /*----------------------------------------------*/
 
-void eps_make_scale( FILE *fp, void *cv, int coord )
+static void eps_make_scale( FILE *fp, void *cv, int coord )
 {
 	double rwc_delta,          /* distance between small ticks (in rwc) */
 		   order,              /* and its order of magitude */
@@ -735,7 +734,7 @@ void eps_make_scale( FILE *fp, void *cv, int coord )
 /*-------------------------------------------------------*/
 /*-------------------------------------------------------*/
 
-void eps_draw_curve_1d( FILE *fp, int i )
+static void eps_draw_curve_1d( FILE *fp, int i )
 {
 	Curve_1d *cv = G.curve[ i ];
 	double s2d[ 2 ];
@@ -807,7 +806,7 @@ void eps_draw_curve_1d( FILE *fp, int i )
 /*-------------------------------------------------------*/
 /*-------------------------------------------------------*/
 
-void eps_draw_contour( FILE *fp, int cn )
+static void eps_draw_contour( FILE *fp, int cn )
 {
 	Curve_2d *cv = G.curve_2d[ cn ];
 	double s2d[ 2 ] = { w * cv->s2d[ X ] / G.canvas.w,
@@ -966,7 +965,7 @@ void eps_draw_contour( FILE *fp, int cn )
    make it delete this file by itself. */
 
 
-void do_print( char *name, const char *command )
+static void do_print( char *name, const char *command )
 {
 	char *cptr;
 	char *cmd_line = NULL;
@@ -1047,7 +1046,7 @@ void do_print( char *name, const char *command )
 /* Starts a `grand-parent' process to do the actual printing. */
 /*------------------------------------------------------------*/
 
-int start_printing( char **argv, char *name )
+static int start_printing( char **argv, char *name )
 {
 	int status = EXIT_FAILURE;
 	char *a;

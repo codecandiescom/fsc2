@@ -628,7 +628,7 @@ long reader( void *ret )
 /*    3. Number of bytes to read                                */
 /*--------------------------------------------------------------*/
 
-bool pipe_read( int fd, void *buf, size_t bytes_to_read )
+static bool pipe_read( int fd, void *buf, size_t bytes_to_read )
 {
 	long bytes_read;
 	long already_read = 0;
@@ -648,9 +648,9 @@ bool pipe_read( int fd, void *buf, size_t bytes_to_read )
 		   parent also sents a DO_SEND signal. This interrupts the childs
 		   read(), returning -1 with errno set to EINTR while nothing has been
 		   read yet. Alas, ignoring the -1 and restarting the read does only
-		   work if the signal comes in BEFORE the first byte has been read
-		   since nothing tells us how many bytes aleady have been read. To
-		   make sure, at least for the DO_SEND signal, that the signal is
+		   work if the signal is raised BEFORE the first byte has been read
+		   since nothing tells us how many bytes already have been read. To
+		   make sure (at least for the DO_SEND signal) that the signal is
 		   received before the read starts the parent sends the signal always
 		   before replying to a request. Quite another problem is the DO_QUIT
 		   signal - let's hope the read is atomic or it's never going to
@@ -929,7 +929,11 @@ void writer( int type, ... )
 }
 
 
-void send_browser( FL_OBJECT *browser )
+/*------------------------------------------------------------------*/
+/* Sends all lines of one of the browsers successively to the child */
+/*------------------------------------------------------------------*/
+
+static void send_browser( FL_OBJECT *browser )
 {
 	const char *line;
 	int i = 0;
