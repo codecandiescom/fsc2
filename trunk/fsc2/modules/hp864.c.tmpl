@@ -624,7 +624,7 @@ Var *synthesizer_use_table( Var *v )
 			hp864_tmpl.table_file = tfname;
 			TRY_SUCCESS;
 		}
-		CATCH( EXCEPTION )
+		OTHERWISE
 		{
 			T_free( tfname );
 			RETHROW( );
@@ -638,7 +638,7 @@ Var *synthesizer_use_table( Var *v )
 		hp864_tmpl_read_table( tfp );
 		TRY_SUCCESS;
 	}
-	CATCH( EXCEPTION )
+	OTHERWISE
 	{
 		fclose( tfp );
 		hp864_tmpl.table_file = CHAR_P T_free( hp864_tmpl.table_file );

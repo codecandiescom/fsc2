@@ -203,6 +203,8 @@ void spectrapro_300i_read_calib( FILE *fp, const char *calib_file )
 			   calib_file, spectrapro_300i_Lc );
 		THROW( EXCEPTION );
 	}
+	OTHERWISE
+		RETHROW( );
 
 	for ( i = 0; i < MAX_GRATINGS; i++ )
 	{

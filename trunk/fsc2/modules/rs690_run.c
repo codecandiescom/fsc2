@@ -237,6 +237,8 @@ static bool rs690_update_pulses( bool flag )
 
 				return FAIL;
 			}
+			OTHERWISE
+				RETHROW( );
 		}
 	}
 

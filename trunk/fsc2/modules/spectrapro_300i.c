@@ -554,6 +554,9 @@ Var *monochromator_load_calibration( Var * v )
 			T_free( calib_file );
 			RETHROW( );
 		}
+		OTHERWISE
+			RETHROW( );
+
 	}
 
 	TRY
@@ -567,6 +570,8 @@ Var *monochromator_load_calibration( Var * v )
 		T_free( calib_file );
 		RETHROW( );
 	}
+	OTHERWISE
+		RETHROW( );
 
 	fclose( cfp );
 	T_free( calib_file );

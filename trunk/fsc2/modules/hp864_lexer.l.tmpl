@@ -197,6 +197,8 @@ void hp864_tmpl_read_table( FILE *fp )
 			   hp864_tmpl.table_file, hp864_tmpl_Lc );
 		THROW( EXCEPTION );
 	}
+	OTHERWISE
+		RETHROW( );
 }
 
 
