@@ -177,7 +177,6 @@ int er035m_sas_exp_hook( void )
 {
 	char buffer[ 21 ], *bp;
 	long length = 20;
-	int try_count = 0;
 	Var *v;
 	long retries;
 	int cur_res;
@@ -261,16 +260,12 @@ try_again:
 				THROW( EXCEPTION );
 
 			case '4' :      /* TRANS L-H -> test again */
-				if ( try_count++ < 10 )
-					goto try_again;
-				print( FATAL, "Can't find the field.\n" );
-				THROW( EXCEPTION );
+				fsc2_usleep( 500000, SET );
+				goto try_again;
 
 			case '5' :      /* TRANS L-H -> test again */
-				if ( try_count++ < 10 )
-					goto try_again;
-				print( FATAL, "Can't find the field.\n" );
-				THROW( EXCEPTION );
+				fsc2_usleep( 500000, SET );
+				goto try_again;
 
 			case '6' :      /* MOD OFF -> error (should never happen) */
 				print( FATAL, "Modulation is switched off.\n" );

@@ -240,15 +240,13 @@ try_again:
 				THROW( EXCEPTION );
 
 			case '4' :      /* TRANS L-H -> test again */
-				if ( try_count++ < 10 )
-					goto try_again;
+				fsc2_usleep( 500000, SET );
 				print( FATAL, "NMR gaussmeter can't find the actual "
 					   "field.\n" );
 				THROW( EXCEPTION );
 
 			case '5' :      /* TRANS L-H -> test again */
-				if ( try_count++ < 10 )
-					goto try_again;
+				fsc2_usleep( 500000, SET );
 				print( FATAL, "NMR gaussmeter can't find the actual "
 					   "field.\n" );
 				THROW( EXCEPTION );
