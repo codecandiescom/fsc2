@@ -574,18 +574,18 @@ the device type, e.g.
 #define DEVICE_TYPE     "digitizer"
 @end example
 @noindent
-This device type is used by the program to figure out if more than one
-device with the same functionality is being used by an @acronym{EDL}
-program. You probably already have read that when you have two such
-devices you can access the second device by appending a '@code{#2}' when
-calling an @acronym{EDL}-function. But, obviously, for this to work
-@acronym{fsc2} must know which devices have similar capabilities and
-which don't. This is done via the device type string. Thus if you decide
-which device type string you're going to use please first check the
-device types of other devices as defined in their configuration files.
-If your device is similar enough to one of the exiting devices pick the
-same device type string, otherwise pick a descriptive name. Please also
-see the next section.
+The device type string is used by @acronyn{fsc2} to figure out if more
+than one device with the same functionality is being used by an
+@acronym{EDL} program. You probably already have read that when you have
+two such devices you can access the second device by appending a
+'@code{#2}' when calling an @acronym{EDL}-function. But, obviously, for
+this to work @acronym{fsc2} must know which devices have similar
+capabilities and which don't. This it interferes from the device type
+string. Thus if you decide which device type string you're going to use
+please first check the device types of other devices as defined in their
+configuration files.  If your device is similar enough to one of the
+exiting devices pick the same device type string, otherwise pick a
+descriptive name. Please also see the next section.
 
 
 
