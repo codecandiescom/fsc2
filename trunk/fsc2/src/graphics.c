@@ -179,16 +179,18 @@ void start_graphics( void )
 		if ( G.font != NULL )
 			XTextExtents( G.font, "Xp", 2, &dummy, &G.font_asc, &G.font_desc,
 						  &font_prop );
+
+		/* Create the canvas axes */
+		
+		setup_canvas( &G.x_axis, run_form->x_axis );
+		setup_canvas( &G.y_axis, run_form->y_axis );
+		if ( G.dim == 2 )
+			setup_canvas( &G.z_axis, run_form->z_axis );
+
+		/* Create the canvas itself */
+
+		setup_canvas( &G.canvas, run_form->canvas );
 	}
-
-	/* Create the canvas and the axes */
-
-	setup_canvas( &G.x_axis, run_form->x_axis );
-	setup_canvas( &G.y_axis, run_form->y_axis );
-	if ( G.dim == 2 )
-		setup_canvas( &G.z_axis, run_form->z_axis );
-
-	setup_canvas( &G.canvas, run_form->canvas );
 
 	if ( G.is_init )
 		G_struct_init( );
