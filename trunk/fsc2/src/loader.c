@@ -25,7 +25,7 @@ extern Func Def_Fncts[ ];   /* structures for list of built-in functions */
 void load_all_drivers( void )
 {
 	Device *cd;
-	bool saved_need_gpib;
+	bool saved_need_GPIB;
 	bool saved_need_Serial_Port[ NUM_SERIAL_PORTS ];
 	int i;
 
@@ -45,13 +45,13 @@ void load_all_drivers( void )
 	/* This done we run the init hooks (if they exist) and warn if they didn't
 	   return successfully (if an init hook thinks it should kill the whole
 	   program it's supposed to throw an exception). To keep the modules
-	   writers from erroneously unsetting the global variables `need_gpib' and
+	   writers from erroneously unsetting the global variables `need_GPIB' and
 	   `need_Serial_Port' they are stored before each init_hook() function is
 	   called and, if necessary, are restored to their previous values. */
 
 	for ( cd = Device_List; cd != NULL; cd = cd->next )
 	{
-		saved_need_gpib = need_gpib;
+		saved_need_GPIB = need_GPIB;
 		memcpy( saved_need_Serial_Port, need_Serial_Port,
 				NUM_SERIAL_PORTS * sizeof( bool ) );
 
@@ -60,8 +60,8 @@ void load_all_drivers( void )
 			eprint( WARN, "Initialisation of module `%s.so' failed.",
 					cd->name );
 
-		if ( need_gpib == UNSET && saved_need_gpib == SET )
-			need_gpib = SET;
+		if ( need_GPIB == UNSET && saved_need_GPIB == SET )
+			need_GPIB = SET;
 		for ( i = 0; i < NUM_SERIAL_PORTS; i++ )
 			if ( need_Serial_Port[ i ] == UNSET &&
 				 saved_need_Serial_Port[ i ] == SET )
