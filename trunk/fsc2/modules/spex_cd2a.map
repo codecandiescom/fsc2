@@ -26,9 +26,8 @@ VERS_1.0 {
 	global:
 				generic_type;
 				device_name;
-				rb_pulser_*_hook;
-				pulser_*;
+				spex_cd2a_*_hook;
+				monochromator_*;
 
 	local:      *;
 };
-

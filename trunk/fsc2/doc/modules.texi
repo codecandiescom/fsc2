@@ -1246,6 +1246,106 @@ or need to set the environment variable @code{LD_LIBRARY_PATH} to
 point to the place where the library can be found.
 
 
+@subsection Linker scripts
+
+As you may have noticed, for every of the modules made of more than a
+single source file there exists a file with the extension @code{map}.
+This file is a linker script which restricts the number of symbols
+exported by the shared library representing the module to the smallest
+possible subset.
+
+The reason for the existence of these linker scripts is to avoid name
+space polution, unfortunately not too uncommon a problem with @code{C}.
+For the modules made from single source files this isn't much of a
+problem. As you will notice in these files each and every function and
+global variable that does not need to be visible outside of the scope of
+the file is declared static, thus already reducing the number of visible
+symbols of the library to the bare minimum. It's different for libraries
+that get made from several files, here usually at least some of the
+functions and global variables need a scope that isn't restricted to
+just the file where they are defined in. To restrict the visibility of
+these symbols to the library (so that they are not "picked up" by the
+@code{fsc2} program when the module gets loaded) the linker scripts are
+used. Within a linker script it's possible to declare which of the
+functions and global variables of the library are to be exported and
+which ones not.
+
+Of course, using a linker scripts isn't required, a module might work
+perfectly well without one. They are only meant to help keep things
+cleanly separated and thereby reducing the probability of making some
+difficult to trace errors. But if you feel you don't need them you can
+just as well skip the rest of the subsection.
+
+To be able to write a linker script one needs to know which symbols must
+be exported by a module. And there are only three classes of symbols.
+First, there are the two global variables that need to be exported by
+each and every module, @code{generic_type} and @code{device_name}. Both
+of them have been discussed in detail above. Then there are the hook
+functions.  And finally we have the @code{EDL} functions, i.e.@: the
+functions that get invoked when an function call for the module is found
+in an @code{EDL} script. And, luckily, both the hook functions as well
+as the @code{EDL} functions have to have simply structured names. The
+names of hook functions have to start with the name of the module they
+belong to and to end in the word @code{_hook}. @code{EDL} functions
+always start with the name of the type of the device the module
+controls, e.g.@: all @code{EDL} functions for a pulser start with
+@code{pulser_}.
+
+With taking just a bit of care when writing a module the simple pattern
+used for both hook and @code{EDL} functions makes writing a linker
+script extremely simple. The only thing to keep in mind is to avoid to
+use names for other types of functions or global variables that would
+fit these patterns (which isn't really difficult). Already for the
+purpose of self-documentation it seems to be advisable to avoid function
+names that start with the generic type of the device -- functions with
+these names should stand out to be easily recognizable as @code{EDL}
+function. And having functions that start of with the module name and
+end in the string @code{_hook} usually makes not much sense anyway
+(except for hook functions of course).
+
+Under these conditions a linker script (i.e.@: the file ending with the
+extension @code{map}) for e.g.@: a pulser with module name @code{abcd}
+may look like this:
+@example
+VERS_1.0 {
+    global:    generic_type;
+               device_name;
+               abcd_*_hook;
+               pulser_*;
+    local:     *;
+};
+@end example
+
+All the interesting things are enclosed in curly braces. You have two
+sections, one for @code{global} symbols (i.e.@: functions and global
+variables exported by the module) and another one for @code{local}
+symbols. Into the section for @code{global} symbols belong the two
+variables that every module needs to export, @code{generic_type} and
+@code{device_name}. Then there are the hook functions -- and as you can
+see things are much simplified by the fact that the @code{*} can be used
+as a wildcard character. Finally, all functions starting with the
+generic type of the device, the @code{EDL} functions also belong to this
+set. The section for @code{local} symbols is even simpler, a simple
+@code{*} stands for all the remaining symbols of the module that
+otherwise would get also exported even though they aren't needed.
+
+Both these sections for global and local symbols are enclosed by curly
+braces and at the very start you have just @code{VERS_1.0}. This is no
+magic but is due to the fact that these kinds of linker scripts are
+usually used to control what symbols different versions of a library do
+export. Here we don't care at all about versions of the modules, you
+should always use the ones compiled for the version of @code{fsc2}
+you're using anyway, but we have to start of with the version command,
+so I picked @code{1.0} as being as good as any other value. But if you
+prefer to make this @code{VERS_127.3} instead it should still work.
+
+If you create such a linker script for a module just name it like the
+name of the module and append the @code{map} extension. Then it will be
+automatically used by the @code{Makefile} that takes care of creating
+the shared library for the module. But if it does not exist creating the
+module will also work without pronblems.
+
+
 @subsection Making @code{fsc2} aware of the module
 
 @code{fsc2} must be made aware of the existence of a new module and of

@@ -26,9 +26,8 @@ VERS_1.0 {
 	global:
 				generic_type;
 				device_name;
-				rb_pulser_*_hook;
-				pulser_*;
+				rs_spec10_*_hook;
+				ccd_camera_*;
 
 	local:      *;
 };
-

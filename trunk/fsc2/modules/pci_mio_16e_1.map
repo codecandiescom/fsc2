@@ -26,9 +26,8 @@ VERS_1.0 {
 	global:
 				generic_type;
 				device_name;
-				rb_pulser_*_hook;
-				pulser_*;
+				pci_mio_16e_1_*_hook;
+				daq_*;
 
 	local:      *;
 };
-

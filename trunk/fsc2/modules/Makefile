@@ -130,37 +130,44 @@ export        # export all symbols to the sub-makefiles
 # Making the modules consisting of just one file is simple, to make the
 # more complicated modules we need to create temporary makefiles from a
 # template and then invoke them. For the Tektronix digitizers and the
-# HP864* synthesizers also the sources are created from templates.
+# HP864* synthesizers also the sources as well as the linker map files
+# are created from templates.
 
 all:
 	$(MAKE) -C .. modules
 
 modules:
 	$(MAKE) $(addsuffix .so,$(simp_modules))
-	@for n in $(tds_list); do                                      \
-		o=`echo $$n | tr "a-z" "A-Z"`;                             \
-		for m in "" _util _gpib; do                                \
-			if [ ! -e $$n$$m.c -o tds$$m.c.tmpl -nt $$n$$m.c       \
-				 -o $$n.h -nt $$n$$m.c ]; then                     \
-				sed "s/tds_tmpl/$$n/g;s/TDS_TMPL/$$o/g"            \
-					tds$$m.c.tmpl > $$n$$m.c;                      \
-			fi;                                                    \
-		done;                                                      \
+	@for n in $(tds_list); do                                       \
+		o=`echo $$n | tr "a-z" "A-Z"`;                              \
+		for m in "" _util _gpib; do                                 \
+			if [ ! -e $$n$$m.c -o tds$$m.c.tmpl -nt $$n$$m.c        \
+				 -o $$n.h -nt $$n$$m.c ]; then                      \
+				sed "s/tds_tmpl/$$n/g;s/TDS_TMPL/$$o/g"             \
+					tds$$m.c.tmpl > $$n$$m.c;                       \
+			fi;                                                     \
+		done;                                                       \
+		if [ ! -e tds$$n.map -a -e tds.map.tmpl ]; then             \
+				sed "s/tds_tmpl/$$n/g" tds.map.tmpl > $$n.map;      \
+		fi;                                                         \
 	done;
-	@for n in $(hp864_list); do                                    \
-		o=`echo $$n | tr "a-z" "A-Z"`;                             \
-		for m in .c _util.c _gpib.c _lexer.l; do                   \
-			if [ ! -e $$n$$m -o hp864$$m.tmpl -nt $$n$$m           \
-				 -o $$n.h -nt $$n$$m ]; then                       \
-				sed "s/hp864_tmpl/$$n/g;s/HP864_TMPL/$$o/g"        \
-					hp864$$m.tmpl > $$n$$m;                        \
-			fi;                                                    \
-		done;                                                      \
+	@for n in $(hp864_list); do                                     \
+		o=`echo $$n | tr "a-z" "A-Z"`;                              \
+		for m in .c _util.c _gpib.c _lexer.l; do                    \
+			if [ ! -e $$n$$m -o hp864$$m.tmpl -nt $$n$$m            \
+				 -o $$n.h -nt $$n$$m ]; then                        \
+				sed "s/hp864_tmpl/$$n/g;s/HP864_TMPL/$$o/g"         \
+					hp864$$m.tmpl > $$n$$m;                         \
+			fi;                                                     \
+		done;                                                       \
+		if [ ! -e $$n.map -a -e hp864.map.tmpl ]; then              \
+				sed "s/hp864_tmpl/$$n/g" hp864.map.tmpl > $$n.map;  \
+		fi;                                                         \
 	done;
-	@for m in $(shell echo $(comp_modules) | cut -f1- -d' '); do   \
-		sed "s/##/$$m/g" Makefile.tmpl > $$m.make &&               \
-		$(MAKE) -f $$m.make;                                       \
-		$(RM) $(RMFLAGS) $$m.make;                                 \
+	@for m in $(shell echo $(comp_modules) | cut -f1- -d' '); do    \
+		sed "s/##/$$m/g" Makefile.tmpl > $$m.make &&                \
+		$(MAKE) -f $$m.make;                                        \
+		$(RM) $(RMFLAGS) $$m.make;                                  \
 	done;
 
 
@@ -253,18 +260,20 @@ clean:
 
 distclean:
 	$(MAKE) clean
-	-for n in $(tds_list); do                    \
-		for m in "" _util _gpib; do              \
-			$(RM) $(RMFLAGS) $$n$$m.c;           \
-		done;                                    \
+	-for n in $(tds_list); do                     \
+		for m in "" _util _gpib; do               \
+			$(RM) $(RMFLAGS) $$n$$m.c;            \
+		done;                                     \
+		$(RM) $(RMFLAGS) $$n.map;                 \
 	done;
-	-for n in $(hp864_list); do                  \
-		for m in .c _util.c _gpib.c _lexer.l; do \
-			$(RM) $(RMFLAGS) $$n$$m;             \
-		done;                                    \
+	-for n in $(hp864_list); do                   \
+		for m in .c _util.c _gpib.c _lexer.l; do  \
+			$(RM) $(RMFLAGS) $$n$$m;              \
+		done;                                     \
+		$(RM) $(RMFLAGS) $$n.map;                 \
 	done;
-	-for n in $(s_band_list); do                 \
-		$(RM) $(RMFLAGS) $$n.c;                  \
+	-for n in $(s_band_list); do                  \
+		$(RM) $(RMFLAGS) $$n.c;                   \
 	done;
 	-$(RM) $(RMFLAGS) *.so
 
