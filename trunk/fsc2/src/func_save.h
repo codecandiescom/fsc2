@@ -35,6 +35,7 @@ typedef struct {
 } FILE_LIST;
 
 
+Var *f_openf( Var *var );
 Var *f_getf(    Var *v );
 Var *f_clonef(  Var *v );
 Var *f_save(    Var *v );

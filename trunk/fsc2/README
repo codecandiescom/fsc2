@@ -12,7 +12,7 @@ In contrast, fsc2 basically interprets a rather simple but powerful
 scripting language (in the following called EDL for Experiment Description
 Language) and has a strictly modular approach to handling of devices.
 This allows you to easily set up a completely new experiment (or to change
-an already existing experiment description) and in a short time without
+an already existing experiment description) in a short time without
 any detailed knowledge of the internals of fsc2 nor on how exactly the
 devices have to be controlled.
 
@@ -21,15 +21,15 @@ Some key features:
 * The EDL language is similar to other medium to high level languages,
   borrowing from e.g. MathLab, C, Fortran and Perl etc. Moreover, it
   comes with a lot of functions for displaying and saving measured
-  data in a completely user defined way. Thus writing a description
+  data in completely user defined ways. Thus writing a description
   for a new experiment (or adapting an already existing EDL script)
-  won't be very difficult for anyone remotely acqainted with one of the
+  won't be difficult for anyone remotely acqainted with one of the
   above mentioned programming languages.
 
 * Device are not hard-coded into fsc2. Instead, devices are dealt with
   by modules that get loaded on demand (a single instruction in an EDL
   script). This allows to employ a different device with similar
-  functionality by usually changing not more than a single line in the
+  functionality by usually changing not more than a single line in an
   EDL script.
 
 * Currently fsc2 controls devices that are either connected via the serial
@@ -39,9 +39,12 @@ Some key features:
 * fsc2 allows other programs to send it EDL scripts to execute. This
   allows to write a set of scripts for standard experiments that
   automatically create EDL scripts from user input (e.g. via a graphical
-  interface). Once such scripts have been created, the "normal" user
-  hasn't even to know how to write EDL programs. Several examples of such
-  scripts, written in Perl/Tk, are included in the distribution of fsc2.
+  interface). The package comes with a tool that automatically can generate
+  such scripts from (slightly modified) EDL programs. Once such a script
+  has been created, "normal" user don't even have to know how to write EDL
+  programs, thus having all the convenience of the traditional type of
+  programs but without sacrificing the flexibility of fsc2. Several examples
+  of such scripts, written in Perl/Tk, are included in the distribution.
 
 * fsc2 comes with a simple web server (only running on user demand) that
   allows the experimentator to remotely monitor the current state of the
@@ -53,10 +56,10 @@ Some key features:
   part of the package and can be used as a starting point for the
   development of new ones.
 
-* An extensive 150+ page documentation (in TeX, info, PostScript and PDF
-  format), covering the graphical interface, the EDL language, device
-  functions as well as the writing of new device modules, is part of the
-  fsc2 package.
+* An extensive 150+ page documentation (in HTML, info, PostScript and PDF
+  format), covering all aspects of fsc2 from the graphical interface, the
+  EDL language, device functions to writing of new device modules, is part
+  of the fsc2 package.
 
 * fsc2 has been extensively tested and is currently used to control seven
   EPR spectrometers, using a broad range of different devices and   
@@ -93,7 +96,7 @@ fsc2, see below).
 
 Of course, there are some limitations: Due to my professional background
 fsc2 has been written with the different types of EPR (Electron Paramagnetic
-Resonance) experiments in mind. On the other hand, fsc2's basic concept
+Resonance) experiments in mind. On the other hand, fsc2's basic concepts
 should make it easy to use it also for a large range of other types of
 spectrometers.
 
@@ -107,6 +110,6 @@ or read the HTTP version of the documentation at
        http://www.physik.fu-berlin/~toerring/fsc2
 
 
-                                           Regards, Jens Toerring
+                                        Regards, Jens Thoms Toerring
 
                                      Jens.Toerring@physik.fu-berlin.de
