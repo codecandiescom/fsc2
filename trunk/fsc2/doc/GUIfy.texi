@@ -516,7 +516,9 @@ eval@{ START_FIELD < END_FIELD @}
 Thus, in the comparisons you have the whole power of Perl at your finger
 tips, including all of its regular expression evaluation machinery. If
 you know Perl you'll be able to do really weird things with this, you
-could even write complete little Perl scripts into the @w{condition ;-)}
+could even put complete little Perl scripts into the @w{condition ;-)}
+Be careful not to change the variables from within the condition unless
+that's exactly what you want to do.
 
 
 @node Interfacing, , fsc2_guify, GUI-fying
