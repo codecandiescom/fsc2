@@ -24,6 +24,7 @@
 #if ! defined COMM_HEADER
 #define COMM_HEADER
 
+
 #include "fsc2.h"
 #include <sys/ipc.h>
 #include <sys/shm.h>
@@ -43,7 +44,6 @@
    so make sure SHMMNI is correct ! */
 
 #define QUEUE_SIZE ( SHMMNI + 8 )
-
 
 
 enum {
@@ -104,7 +104,6 @@ typedef struct {
 		long str_len[ 4 ];
 	} data;
 } CommStruct;
-
 
 
 typedef struct {
