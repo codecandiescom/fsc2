@@ -155,7 +155,7 @@ int rulbus_adc12_card_init( int handle )
 	
 
 /*----------------------------------------------------------------*
- * Function for deactivation a card (gets invoked automatically
+ * Function for deactivating a card (gets invoked automatically
  * by the rulbus_card_close( ) function, so it's not to be called
  * by the user directly)
  *----------------------------------------------------------------*/
