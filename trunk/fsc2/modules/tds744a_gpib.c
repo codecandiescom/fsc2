@@ -707,7 +707,6 @@ bool tds744a_get_curve( int channel, WINDOW *w, double **data, long *length,
 			tds744a_gpib_failure( );
 	}
 
-
 	/* Wait for measurement to finish (use polling) */
 
 	do
@@ -739,7 +738,7 @@ bool tds744a_get_curve( int channel, WINDOW *w, double **data, long *length,
 	/* Now get all the data bytes... */
 
 	if ( gpib_write( tds744a.device, "CURV?\n" ) == FAILURE ||
-		 gpib_read_w( tds744a.device, buffer, length ) == FAILURE )
+		 gpib_read( tds744a.device, buffer, length ) == FAILURE )
 	{
 		T_free( buffer );
 		T_free( *data );
