@@ -2011,6 +2011,7 @@ Var *f_display_2d( Var *v )
 static DPoint *eval_display_args( Var *v, int dim, int *nsets )
 {
 	DPoint *dp = NULL;
+	Var *cv;
 
 
 	*nsets = 0;
@@ -2070,8 +2071,7 @@ static DPoint *eval_display_args( Var *v, int dim, int *nsets )
 			THROW( EXCEPTION );
 		}
 
-		vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
-					   FLOAT_REF | INT_REF );
+		vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR );
 
 		dp[ *nsets ].v = v;
 
