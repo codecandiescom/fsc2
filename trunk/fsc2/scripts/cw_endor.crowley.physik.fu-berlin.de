@@ -313,7 +313,7 @@ sub store_defs {
 
 	print F "# Do not edit - created automatically!\n";
 	print F "$lockin\n$start_freq\n$end_freq\n$step_freq\n$atten\n" .
-	    "$mod_freq\n$mod_ampl\nN_runs\n$tc\n$sens\n";
+	        "$mod_freq\n$mod_ampl\n$N_runs\n$tc\n$sens\n";
 
 	close F;
 }

@@ -313,10 +313,11 @@ sub store_defs {
 	$atten = 0 if $atten eq ".";
 	$mod_freq = 0 if $mod_freq eq ".";
 	$mod_ampl = 0 if $mod_ampl eq ".";
+	$current = 0 if $current eq ".";
 
 	print F "# Do not edit - created automatically!\n";
 	print F "$start_freq\n$end_freq\n$step_freq\n$atten\n" .
-	    "$mod_freq\n$mod_ampl\nN_runs\n$tc\n$sens\n";
+	        "$mod_freq\n$mod_ampl\n$N_runs\n$tc\n$sens\n$current\n";
 
 	close F;
 }
