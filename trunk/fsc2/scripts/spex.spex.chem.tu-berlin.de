@@ -43,9 +43,13 @@ my %wp = ( '-side'   => 'left',
 		   '-fill'   => 'x',
 		   '-padx'   => '3m',
 		   '-expand' => 1 );
+my %defs;
 
+
+get_defs( );
 my $mw = MainWindow->new( );
 $mw->title( "SPEX" );
+$mw->geometry( $defs{ 'main_geometry' } ) if defined $defs{ 'main_geometry' };
 
 $f0 = $mw->Frame( )->pack( '-side' => 'top',
 						   '-padx' => '2m',
@@ -60,7 +64,10 @@ $f3 = $f0->Button( '-text' => "Calibration",
 				   '-command' => \&calib );
 $f4 = $mw->Frame(  );
 $f5 = $mw->Button( '-text' => "Quit",
-				   '-command' => sub { $mw->destroy } );
+				   '-command' => sub { $mw->geometry( ) =~ /^\d+x\d+(.*)$/;
+									   $defs{ 'main_geometry' } = $1;
+									   store_defs( );
+									   $mw->destroy } );
 
 $f1->pack( %fp );
 $f2->pack( %fp );
@@ -673,19 +680,21 @@ EOF
 ##########################################################
 
 sub exp_setup {
-	my ( $swn, $ewn, $sz, $mt, $Ns ) = get_defs( );
+	my ( $swn, $ewn, $sz, $mt, $Ns ) = ( 0, 0, 0, 0, 0 );
 
-	$swn = 0 unless defined $swn;
-	$ewn = 0 unless defined $ewn;
-	$sz = 0 unless defined $sz;
-	$mt = 0 unless defined $mt;
-	$Ns = 0 unless defined $Ns;
+	$swn = $defs{ 'swn' } if defined $defs{ 'swn' };
+	$ewn = $defs{ 'ewn' } if defined $defs{ 'ewn' };
+	$sz  = $defs{ 'sz' }  if defined $defs{ 'sz' };
+	$mt  = $defs{ 'mt' }  if defined $defs{ 'mt' };
+	$Ns  = $defs{ 'Ns' }  if defined $defs{ 'Ns' };
 
 	my $balloon = $mw->Balloon( );
 
 	$f1->configure( '-state' => 'disabled' );
 
 	my $smw = $mw->Toplevel( '-title' => "SPEX measurement" );
+	$smw->geometry( $defs{ 'exp_geometry' } )
+		if defined $defs{ 'exp_geometry' };
 
 	my $x1 = $smw->Frame( );
 	my $x1_l1 = $x1->Label( '-text'           => 'Start wavenumber:',
@@ -793,11 +802,11 @@ sub exp_setup {
 							'-command' => sub { start_exp( $swn, $ewn, $sz,
 														   $mt, $Ns ); } );
 	my $f7_q = $smw->Button( '-text' => 'Quit',
-							 '-command' => sub { store_defs( $swn, $ewn, $sz,
-															 $mt, $Ns );
-								 				 $f1->configure( '-state' =>
-														 		 "normal" );
-												 $smw->destroy } );
+							 '-command' =>
+							 sub { $smw->geometry( ) =~ /^\d+x\d+(.*)$/;
+								   $defs{ 'exp_geometry' } = $1;
+								   $f1->configure( '-state' => "normal" );
+								   $smw->destroy } );
 	$f7->pack( '-side' => 'top',
 			   '-fill' => 'x',
 			   '-padx' => '4m' );
@@ -829,7 +838,8 @@ sub is_unsigned_numeric {
 sub get_defs {
 
 	local *F;
-	my ( $ne, $swn, $ewn, $sz, $mt, $Ns );
+	my $ne;
+
 
 	if ( $ARGV[ 0 ] ) {
 		open( F, "<$ARGV[ 0 ]" ) or return;
@@ -839,32 +849,40 @@ sub get_defs {
 
 	goto done_reading unless defined( $ne = <F> ) and $ne =~ /^#/;
 
-	goto done_reading unless defined( $ne = <F> ) and is_numeric( $ne );
+	goto done_reading unless defined( $ne = <F> )
+		and $ne =~ /^[+-]\d+[+-]\d+$/;
 	chomp $ne;
-	$swn = $ne;
+	$defs{ 'main_geometry' } = $ne;
+
+	goto done_reading unless defined( $ne = <F> )
+		and $ne =~ /^[+-]\d+[+-]\d+$/;
+	chomp $ne;
+	$defs{ 'exp_geometry' } = $ne;
 
 	goto done_reading unless defined( $ne = <F> ) and is_numeric( $ne );
 	chomp $ne;
-	$ewn = $ne;
+	$defs{ 'swn' } = $ne;
+
+	goto done_reading unless defined( $ne = <F> ) and is_numeric( $ne );
+	chomp $ne;
+	$defs{ 'ewn' } = $ne;
 
 	goto done_reading unless defined( $ne = <F> )
 		 and is_unsigned_numeric( $ne );
 	chomp $ne;
-	$sz = $ne;
+	$defs{ 'sz' } = $ne;
 
 	goto done_reading unless defined( $ne = <F> )
 		 and is_unsigned_numeric( $ne );
 	chomp $ne;
-	$mt = $ne;
+	$defs{ 'mt' } = $ne;
 
 	goto done_reading unless defined( $ne = <F> ) and $ne =~ /^s*\d*\s*$/;
 	chomp $ne;
-	$Ns = $ne;
+	$defs{ 'Ns' } = $ne;
 
   done_reading:
 	close F;
-
-	return ( $swn, $ewn, $sz, $mt, $Ns );
 }
 
 
@@ -873,18 +891,27 @@ sub get_defs {
 sub store_defs {
 	local *F;
 
-	my ( $swn, $ewn, $sz, $mt, $Ns ) = @_;
-
 	mkdir "$ENV{ HOME }/.fsc2", 0777 unless -e "$ENV{ HOME }/.fsc2";
 	open( F, ">$ENV{ HOME }/.fsc2/spex" ) or return;
 
-	$swn = 0 if $swn eq ".";
-	$ewn = 0 if $ewn eq ".";
-	$sz = 0 if $sz eq ".";
-	$mt = 0 if $mt eq ".";
+	$defs{ 'main_geometry' } = "+0+0"
+		unless defined $defs{ 'main_geometry' } and
+			   $defs{ 'main_geometry' } =~ /^[-+]\d+[-+]\d+$/;
+	$defs{ 'exp_geometry' } = "+0+0"
+		unless defined $defs{ 'exp_geometry' } and
+			   $defs{ 'exp_geometry' } =~ /^[-+]\d+[-+]\d+$/;
+	$defs{ 'swn' } = 0 if ! defined $defs{ 'swn' } or $defs{ 'swn' } eq ".";
+	$defs{ 'ewn' } = 0 if ! defined $defs{ 'ewn' } or $defs{ 'ewn' } eq ".";
+	$defs{ 'sz' }  = 0 if ! defined $defs{ 'sz' }  or $defs{ 'sz' }  eq ".";
+	$defs{ 'mt' }  = 0 if ! defined $defs{ 'mt' }  or $defs{ 'mt' }  eq ".";
+	$defs{ 'Ns' }  = 1 if ! defined $defs{ 'Ns' }
+		or $defs{ 'mt' }  !~ /^\d+$/;
 
 	print F "# Do not edit - created automatically!\n";
-	print F "$swn\n$ewn\n$sz\n$mt\n$Ns\n";
+	print F $defs{ 'main_geometry' } . "\n" . $defs{ 'exp_geometry' } . "\n" .
+			$defs{ 'swn' } . "\n" . $defs{ 'ewn' } . "\n" .
+			$defs{ 'sz' } . "\n" . $defs{ 'mt' } . " \n" . $defs{ 'Ns' } .
+			"\n";
 
 	close F;
 }
@@ -1055,7 +1082,16 @@ FOR I = 1 : N_scans {
 	F_cur = clone_file( F_all, "dat", sprint( "scan_#.dat", I ) );
 	output_value( B_cr, I );
 	output_value( B_cwn, start_wn );
+
+	object_enable( B_rel, "OFF" );
+	object_enable( B_abs, "OFF" );
+	object_enable( B_cwn, "OFF" );
+
 	monochromator_start_scan( );
+
+	object_enable( B_rel, "ON" );
+	object_enable( B_abs, "ON" );
+	object_enable( B_cwn, "ON" );
 
 	FOR J = 1 : N_points {
 
