@@ -811,8 +811,8 @@ sub run {
 	# Add a validation handler for the data in the entry field
 
 	$f[ 3 ]->configure( -validate => 'key',
-						-vcmd => sub{ line_valid( shift, $f[ 6 ],
-												  $laser_line ) } );
+						-vcmd => sub{ cam_line_valid( shift, $f[ 6 ],
+													  $laser_line ) } );
 
 	# Focus should be in the entry field and cursor after the last character
 
@@ -829,7 +829,7 @@ sub run {
 # "Apply" button of the form if the value isn't within the range of values
 # the line can be set to.
 
-sub line_valid {
+sub cam_line_valid {
 	my ( $new, $start_button, $laser_line ) = @_;
     my $float_rep = '[+-]?((\d+(\.(\d+)?)?)|(\.\d+))([eE]\+?\d+)?';
 
@@ -906,7 +906,7 @@ CCD_size[ 2 ] = ccd_camera_pixel_area( );
 exposure_time = 0.1 s;
 ROI[ 4 ] = ccd_camera_roi( );
 BIN[ 2 ] = ccd_camera_binning( );
-pixel_diff = -1.0;
+pixel_diff = 0.0;
 w = float( CCD_size[ 1 ] - 1 );
 lpos = 0.0;
 old_lpos;
@@ -918,6 +918,7 @@ new;
 new_wn;
 ll;
 J = 1;
+State = 0;
 
 PREPARATIONS:
 
@@ -926,17 +927,8 @@ init_1d( 1, 0, - 0.5 * w, 1, "Pixel position", "Counts" );
 
 EXPERIMENT:
 
-hide_toolbox( "ON" );
-B_et = input_create( "FLOAT_INPUT", exposure_time, "Exposure time [s]" );
-B_gs = button_create( "NORMAL_BUTTON", "Get spectrum" );
-B_lpos = input_create( "FLOAT_INPUT", lpos, "Observed line position [cm^-1]",
-                       "%.4f" );
-B_find = button_create( "NORMAL_BUTTON", "Find line" );
-B_conf  = button_create( "NORMAL_BUTTON", "Accept line position" );
-hide_toolbox( "OFF" );
-
 ll = monochromator_laser_line( );
-IF ll >= 1.0e-3 cm^-1 {
+IF ll != 0.0 {
 	wn = ll - wn;
 	monochromator_laser_line( 0 cm^-1 );
 }
@@ -945,6 +937,15 @@ monochromator_wavenumber( wn );
 
 ccd_camera_roi( "ALL" );
 ccd_camera_binning( "NONE" );
+
+hide_toolbox( "ON" );
+B_et = input_create( "FLOAT_INPUT", exposure_time, "Exposure time [s]" );
+B_gs = button_create( "NORMAL_BUTTON", "Get spectrum" );
+B_lpos = input_create( "FLOAT_INPUT", lpos, "Observed line position [pixel]",
+                       "", "%.4f" );
+B_find = button_create( "NORMAL_BUTTON", "Find line" );
+B_conf  = button_create( "NORMAL_BUTTON", "Accept line position" );
+hide_toolbox( "OFF" );
 
 Spec = spike_remove( ccd_camera_get_spectrum( ) );
 display( 1, Spec );
@@ -1001,14 +1002,13 @@ FOREVER {
 
 	IF button_state( B_conf ) {
 		object_enable( B_conf, "OFF" );
-		IF pixel_diff < 0.0 {
+		IF State == 0 {
 			old_lpos = lpos;
 			IF lpos <= 0.0 {
 				new_wn = wn - ( 0.3 - lpos / w ) * tw;
 			} ELSE {
 				new_wn = wn + ( 0.3 + lpos / w ) * tw;
 			}
-			pixel_diff = 0.0;
 	        object_enable( B_gs, "OFF" );
 			monochromator_wavenumber( new_wn );
 			clear_marker( );
@@ -1018,13 +1018,15 @@ FOREVER {
 			lpos = 0.0;
 		    input_value( B_lpos, lpos );
 	        object_enable( B_gs, "ON" );
-		} ELSE IF pixel_diff == 0.0{
+			State = 1;
+		} ELSE {
 			IF lpos == old_lpos {
 				NEXT;
 			}
-			pixel_diff = ( new_wn ) / ( old_lpos - lpos );
+			pixel_diff = ( new_wn - wn ) / ( old_lpos - lpos );
 			IF pixel_diff <= 0 cm^-1 {
-				pixel_diff = 0.0;
+				State = 0;
+				monochromator_wavenumber( wn );
 				NEXT;
 			}
 	        object_enable( B_gs, "OFF" );
@@ -1117,9 +1119,9 @@ FOREVER {
 		tw = ( CCD_size[ 1 ] - 1 ) * pixel_diff;
 		wn = new_wn;
 		IF lpos <= 0.0 {
-			new_wn -= ( 0.3 /* + 0.05 * random( ) */ - lpos / w ) * tw;
+			new_wn -= ( 0.3 + 0.05 * random( ) - lpos / w ) * tw;
 		} ELSE {
-			new_wn += ( 0.3 /* + 0.05 * random( ) */ + lpos / w ) * tw;
+			new_wn += ( 0.3 + 0.05 * random( ) + lpos / w ) * tw;
 		}
 		monochromator_wavenumber( new_wn );
 		old_lpos = lpos;
@@ -1221,7 +1223,7 @@ sub run {
 
 	$f[ 5 ] = $f[ 0 ]->Frame( );
 	$f[ 6 ] = $f[ 5 ]->Button( -text => "Start Calib.",
-							   -command => sub{ cam_calib( $$line );
+							   -command => sub{ mono_calib( $$line );
 												$top->deiconify;
 												$f[ 0 ]->destroy } );
 	$f[ 7 ] = $f[ 5 ]->Button( -text => "Quit",
@@ -1257,13 +1259,15 @@ sub run {
 	# Add a validation handler for the data in the entry field
 
 	$f[ 3 ]->configure( -validate => 'key',
-						-vcmd => sub{ line_valid( shift, $f[ 6 ],
-												  $laser_line ) } );
+						-vcmd => sub{ mono_line_valid( shift, $f[ 6 ],
+													   $laser_line ) } );
 
 	# Focus should be in the entry field and cursor after the last character
 
 	$f[ 3 ]->focus;
 	$f[ 3 ]->icursor( 'end' );
+
+	mono_line_valid( $$line, $f[ 6 ], $laser_line );
 
 	MainLoop;
 }
@@ -1275,7 +1279,7 @@ sub run {
 # "Apply" button of the form if the value isn't within the range of values
 # the line can be set to.
 
-sub line_valid {
+sub mono_line_valid {
 	my ( $new, $start_button, $laser_line ) = @_;
     my $float_rep = '[+-]?((\d+(\.(\d+)?)?)|(\.\d+))([eE]\+?\d+)?';
 
@@ -1302,7 +1306,7 @@ sub line_valid {
 
 #############################################
 
-sub cam_calib {
+sub mono_calib {
 	my $line = shift;
     my $fh;
 
@@ -1352,7 +1356,7 @@ CCD_size[ 2 ] = ccd_camera_pixel_area( );
 w = 0.5 * ( CCD_size[ 1 ] - 1 );
 old_calib[ 2 ];
 old_offset;
-lpos = 0.0;
+lpos = wn;
 ROI[ 4 ];
 BIN[ 2 ];
 B_cl, B_et, B_gs, B_lpos, B_find, B_conf, B_acc = -1;
@@ -1372,13 +1376,13 @@ old_offset = old_calib[ 1 ];
 pixel_diff = old_calib[ 2 ];
 
 ll = monochromator_laser_line( );
-IF ll >= 1.0e-3 cm^-1 {
+IF ll != 0.0 {
 	wn = ll - wn;
 	monochromator_laser_line( 0 cm^-1 );
 	change_scale_1d( ll - wn - old_calib[ 2 ] * w, old_calib[ 2 ] );
 } ELSE {
 	change_label_1d( "Wavenumber [abs. cm^-1]" );
-	change_scale_1d( wn - old_calib[ 2 ] * w, - old_calib[ 2 ] );
+	change_scale_1d( wn + old_calib[ 2 ] * w, - old_calib[ 2 ] );
 }
 
 monochromator_wavenumber( wn );
@@ -1389,19 +1393,15 @@ ccd_camera_binning( "NONE" );
 Spec = spike_remove( ccd_camera_get_spectrum( ) );
 display( 1, Spec );
 
-IF ll >= 1.0e-3 cm^-1 {
-   	draw_marker_1d( round( ( ll - wn + lpos ) / pixel_diff + w ) + 1 );
-} ELSE {
-   	draw_marker_1d( round( ( wn - lpos ) / pixel_diff + w ) + 1 );
-}
+draw_marker_1d( round( w ) + 1 );
 
 hide_toolbox( "ON" );
-B_cl = output_create( "FLOAT_OUTPUT", ll >= 1.0e-3 cm^-1 ? ll - wn : wn,
+B_cl = output_create( "FLOAT_OUTPUT", ll != 0 ? ll - wn : wn,
 					  "Expected peak position [cm^-1]" );
 B_et = input_create( "FLOAT_INPUT", exposure_time, "Exposure time [s]" );
 B_gs = button_create( "NORMAL_BUTTON", "Get spectrum" );
-B_lpos = input_create( "FLOAT_INPUT", lpos, "Observed line position [cm^-1]",
-                       "%.4f" );
+B_lpos = input_create( "FLOAT_INPUT", ll != 0 ? ll - wn : wn,
+					   "Observed line position [cm^-1]", "", "%.4f" );
 B_find = button_create( "NORMAL_BUTTON", "Find line" );
 B_conf  = button_create( "NORMAL_BUTTON", "Accept line position" );
 B_acc  = button_create( "PUSH_BUTTON", "Accept calibration" );
@@ -1436,17 +1436,17 @@ FOREVER {
 
     IF toolbox_changed( B_lpos ) {
         new = input_value( B_lpos );
-        IF new == lpos OR abs( new ) > w {
+        IF new == lpos OR abs( new - wn ) / pixel_diff > w {
 		    input_value( B_lpos, lpos );
             NEXT;
         }
 
         lpos = new;
         clear_marker_1d( );
-		IF ll >= 1.0e-3 cm^-1 {
-        	draw_marker_1d( round( ( ll - wn + lpos ) / pixel_diff + w ) + 1 );
+		IF ll != 0 {
+       		draw_marker_1d( round( ( lpos - wn ) / pixel_diff + w ) + 1 );
 		} ELSE {
-        	draw_marker_1d( round( ( wn - lpos ) / pixel_diff + w ) + 1 );
+       		draw_marker_1d( round( ( wn - lpos ) / pixel_diff + w ) + 1 );
 		}
 		object_enable( B_conf, "ON" );
     }
@@ -1457,7 +1457,11 @@ FOREVER {
             NEXT;
         }
 
-        lpos = ( new - w ) * pixel_diff;
+		IF ll != 0 {
+        	lpos = ll - wn + ( new - w ) * pixel_diff;
+		} ELSE {
+			lpos = wn - ( new - w ) * pixel_diff;
+		}
         input_value( B_lpos, lpos );
         clear_marker( );
         draw_marker_1d( round( new ) + 1 );
@@ -1465,10 +1469,10 @@ FOREVER {
     }
 
 	IF button_state( B_conf ) {
-		IF ll >= 1.0e-3 cm^-1 {
-			monochromator_calibrate( - lpos, pixel_diff );
+		IF ll != 0.0 {
+			monochromator_calibrate( ll - wn - lpos, pixel_diff );
 		} ELSE {
-			monochromator_calibrate( ll - lpos, pixel_diff );
+			monochromator_calibrate( wn - lpos, pixel_diff );
 		}
 		object_enable( B_gs, "OFF" );
 		clear_marker_1d( );
@@ -1480,13 +1484,15 @@ FOREVER {
 		object_enable( B_acc, "ON" );
 	}
 
-	IF button_state( B_acc ) { }
+	IF button_changed( B_acc ) {
+		button_state( B_acc );
+	}
 }
 
 
 ON_STOP:
 
-IF B_acc == -1 OR ! button_state( B_acc ) {
+IF ! button_state( B_acc ) {
 	old_calib = monochromator_calibrate( );
 	monochromator_calibrate( old_calib[ 1 ], pixel_diff );
 	monochromator_calibrate( old_offset, pixel_diff );
