@@ -57,16 +57,11 @@ static void egg4402_query( char *buffer, long *length, bool wait_for_stop );
 static bool egg4402_command( const char *cmd );
 
 
-typedef struct EGG4402 EGG4402;
-
-struct EGG4402 {
+static struct {
 	int device;
 	bool fatal_error;  /* set on communication errors to avoid long delays on
 						  exit due to communication with non-reacting device */
-};
-
-
-static EGG4402 egg4402;
+} egg4402;
 
 
 /*------------------------------------*/

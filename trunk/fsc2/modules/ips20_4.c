@@ -89,10 +89,6 @@ static void ips20_4_comm_failure( void );
 #define MESSAGE_AVAILABLE 0x10
 
 
-
-typedef struct  IPS20_4 IPS20_4;
-
-
 struct IPS20_4 {
 	int device;
 
@@ -157,8 +153,7 @@ enum {
 };
 
 
-IPS20_4 ips20_4;
-IPS20_4 ips20_4_stored;
+static struct IPS20_4 ips20_4, ips20_4_stored;
 
 
 /*-----------------------------------*/
