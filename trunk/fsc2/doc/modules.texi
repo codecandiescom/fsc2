@@ -123,7 +123,7 @@ typedef struct Var
         long   *lpnt;        /* pointer to integer arrays */
         double *dpnt;        /* pointer to floating point arrays */
         char   *sptr;        /* for string constants */
-		struct Var **vptr;   /* for array references */
+        struct Var **vptr;   /* for array references */
     @} val;
     int dim;                 /* dimension of array */
     ssize_t len;             /* length of array */
