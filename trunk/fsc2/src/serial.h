@@ -42,22 +42,6 @@ void fsc2_request_serial_port( int sn, const char *devname );
 void fsc2_serial_init( void );
 void fsc2_serial_cleanup( void );
 int fsc2_serial_open( int sn, int flags );
-ssize_t fsc2_serial_write( int fd, const void *buf, size_t count );
-ssize_t fsc2_serial_read( int fd, void *buf, size_t count );
-int fsc2_serial_close( int fd );
-int fsc2_tcgetattr( int fd, struct termios *termios_p );
-int fsc2_tcsetattr( int fd, int optional_actions, struct termios *termios_p );
-int fsc2_tcsendbreak ( int fd, int duration );
-int fsc2_tcdrain( int fd );
-int fsc2_tcflush( int fd, int queue_selector );
-int fsc2_tcflow( int fd, int action );
-int fsc2_cfmakeraw( struct termios *termios_p );
-speed_t fsc2_cfgetospeed( struct termios *termios_p );
-int fsc2_cfsetospeed( struct termios *termios_p, speed_t speed );
-speed_t fsc2_cfgetispeed( struct termios *termios_p );
-int fsc2_cfsetispeed( struct termios *termios_p, speed_t speed );
-pid_t fsc2_tcgetpgrp( int fd );
-int fsc2_tcsetpgrp( int fd, pid_t pgrpid );
 
 
 #endif   /* ! SERIAL_HEADER */

@@ -1034,7 +1034,7 @@ bool magnet_do( int command )
 							O_WRONLY | O_EXCL | O_NOCTTY | O_NONBLOCK ) ) < 0 )
 				return FAIL;
 
-			fsc2_tcgetattr( magnet.fd, &magnet.old_tio );
+			tcgetattr( magnet.fd, &magnet.old_tio );
 			memcpy( &magnet.new_tio, &magnet.old_tio,
 					sizeof( struct termios ) );
 
@@ -1044,15 +1044,15 @@ bool magnet_do( int command )
 
 			magnet.new_tio.c_cflag &= ~ ( PARENB | CSTOPB | CSIZE );
 			magnet.new_tio.c_cflag |= CS8 | CRTSCTS;
-			fsc2_cfsetospeed( &magnet.new_tio, SERIAL_BAUDRATE );
+			cfsetospeed( &magnet.new_tio, SERIAL_BAUDRATE );
 
-			fsc2_tcflush( magnet.fd, TCIFLUSH );
-			fsc2_tcsetattr( magnet.fd, TCSANOW, &magnet.new_tio );
+			tcflush( magnet.fd, TCIFLUSH );
+			tcsetattr( magnet.fd, TCSANOW, &magnet.new_tio );
 			break;
 
 		case SERIAL_TRIGGER :                 /* send trigger pattern */
 			data[ 0 ] = 0x20;
-			fsc2_serial_write( magnet.fd, ( void * ) &data, 1 );
+			write( magnet.fd, ( void * ) &data, 1 );
 			usleep( SERIAL_TIME );
 			break;
 
@@ -1061,13 +1061,13 @@ bool magnet_do( int command )
 		    data[ 0 ] = ( unsigned char ) 
 				( 0x40 | ( ( volt >> 8 ) & 0xF ) | ( ( volt >> 3 ) & 0x10 ) );
 			data[ 1 ] = ( unsigned char ) ( 0x80 | ( volt & 0x07F ) );
-			fsc2_serial_write( magnet.fd, &data, 2 );
+			write( magnet.fd, &data, 2 );
 			break;
 
 		case SERIAL_EXIT :                    /* reset and close serial port */
-			fsc2_tcflush( magnet.fd, TCIFLUSH );
-			fsc2_tcsetattr( magnet.fd, TCSANOW, &magnet.old_tio );
-			fsc2_serial_close( magnet.fd );
+			tcflush( magnet.fd, TCIFLUSH );
+			tcsetattr( magnet.fd, TCSANOW, &magnet.old_tio );
+			close( magnet.fd );
 			break;
 
 		default :

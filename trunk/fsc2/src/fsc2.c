@@ -30,13 +30,7 @@
 #include <mcheck.h>
 #endif
 
-
-
-/* External functions that are needed here but which can't for some reason be
-   defined via a header file */
-
-extern void fsc2_serial_init( void );
-extern void fsc2_serial_cleanup( void );
+#include "serial.h"
 
 
 /* Locally used global variables */

@@ -798,7 +798,7 @@ static bool er035m_s_comm( int type, ... )
 							  O_RDWR | O_EXCL | O_NOCTTY | O_NONBLOCK ) ) < 0 )
 				return FAIL;
 
-			fsc2_tcgetattr( nmr.fd, &nmr.old_tio );
+			tcgetattr( nmr.fd, &nmr.old_tio );
 			memcpy( &nmr.new_tio, &nmr.old_tio, sizeof( struct termios ) );
 
 			/* Switch off parity checking and use of 2 stop bits and clear
@@ -809,8 +809,8 @@ static bool er035m_s_comm( int type, ... )
 			nmr.new_tio.c_cflag &= ~ ( PARENB | CSTOPB | CSIZE );
 
 			nmr.new_tio.c_cflag |= CS8 | CLOCAL | CREAD;
-			fsc2_cfsetospeed( &nmr.new_tio, SERIAL_BAUDRATE );
-			fsc2_cfsetispeed( &nmr.new_tio, 0 );
+			cfsetospeed( &nmr.new_tio, SERIAL_BAUDRATE );
+			cfsetispeed( &nmr.new_tio, 0 );
 
 			nmr.new_tio.c_iflag = IGNBRK;
 			nmr.new_tio.c_oflag = 0;
@@ -819,15 +819,15 @@ static bool er035m_s_comm( int type, ... )
 
 			nmr.new_tio.c_lflag = 0;
 
-			fsc2_tcflush( nmr.fd, TCIOFLUSH );
-			fsc2_tcsetattr( nmr.fd, TCSANOW, &nmr.new_tio );
+			tcflush( nmr.fd, TCIOFLUSH );
+			tcsetattr( nmr.fd, TCSANOW, &nmr.new_tio );
 			break;
 
 		case SERIAL_EXIT :
 			er035m_s_write( "LOC" );
-			fsc2_tcflush( nmr.fd, TCIOFLUSH );
-			fsc2_tcsetattr( nmr.fd, TCSANOW, &nmr.old_tio );
-			fsc2_serial_close( nmr.fd );
+			tcflush( nmr.fd, TCIOFLUSH );
+			tcsetattr( nmr.fd, TCSANOW, &nmr.old_tio );
+			close( nmr.fd );
 			break;
 
 		case SERIAL_WRITE :
@@ -836,7 +836,7 @@ static bool er035m_s_comm( int type, ... )
 			va_end( ap );
 
 			len = strlen( buf );
-			if ( fsc2_serial_write( nmr.fd, buf, len ) != len )
+			if ( write( nmr.fd, buf, len ) != len )
 				return FAIL;
 			break;
 
@@ -854,7 +854,7 @@ static bool er035m_s_comm( int type, ... )
 			{
 				if ( len < 0 )
 					usleep( ER035M_S_WAIT );
-				len = fsc2_serial_read( nmr.fd, buf, *lptr );
+				len = read( nmr.fd, buf, *lptr );
 			}
 			while ( len < 0 && errno == EAGAIN && read_retries-- > 0 );
 				
