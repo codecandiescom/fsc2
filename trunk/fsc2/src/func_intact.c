@@ -1587,7 +1587,6 @@ static FL_OBJECT *append_object_to_form( IOBJECT *io )
 	}
 
 	fl_set_object_gravity( io->self, FL_NoGravity, FL_NoGravity );
-	fl_set_object_resize( io->self, FL_RESIZE_NONE );
 	fl_set_object_lsize( io->self, FONT_SIZE );
 	fl_set_object_lstyle( io->self, FL_BOLD_STYLE );
 	fl_set_object_callback( io->self, tools_callback, 0 );

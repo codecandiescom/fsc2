@@ -1,0 +1,119 @@
+#!/usr/local/bin/fsc2
+
+DEVICES:
+
+er035m_s;
+aeg_x_band;
+tds520;
+
+
+VARIABLES:
+
+
+start_field = 4250 G; 
+end_field   = 2750 G;
+
+field_step  = -5 G;
+
+field       = start_field;
+
+N_steps = round( ( end_field - start_field ) / field_step ) + 1;
+N_runs = 1;
+
+curve[ * ];
+base_curve[ * ];
+Pretrigger;
+NUM_BASE_CURVES = 10;
+ground;
+
+Rec_len;
+trig_pos;
+time_base;
+
+
+I, J, K;
+
+N_averages = 16;
+
+
+PREPARATIONS:
+
+digitizer_num_averages( N_averages );
+
+init_2d( 3, 0, N_steps, 0, 0, start_field, field_step, "Time / us",
+	"Magnetic Field / G", "Signal / mV" );
+
+EXPERIMENT:
+
+Rec_len = digitizer_record_length( );
+trig_pos = digitizer_trigger_position( );
+time_base = digitizer_timebase( );
+
+Pretrigger = int( 0.9 * trig_pos * Rec_len );
+change_scale( - trig_pos * Rec_len / 50.0 * time_base * 1.e6,
+	      time_base / 50.0 * 1e6 );
+
+set_field( start_field );
+save_program( "% " );
+fsave( "% Number of runs     = #\n", N_runs );
+fsave( "% Start field        = # G\n", start_field );
+fsave( "% End field          = # G\n", end_field );
+fsave( "% Field step width   = # G\n", field_step );
+fsave( "% Sensitivity        = # mV/div\n",
+	   digitizer_sensitivity( CH1 ) * 1.0e3 );
+fsave( "% Number of averages = #\n", N_averages );
+fsave( "% Time base          = # us/div\n", time_base * 1.0e6 );
+fsave( "% Number of points   = #\n", Rec_len );
+fsave( "% Trigger position   = #\n", int( Rec_len * trig_pos ) );
+fsave( "% Slice length       = # us\n", Rec_len * time_base / 50 * 1.0e6 );
+save_comment( "% " );
+
+FOR J = 1 : N_runs {
+
+    print( "Starting #. run of #\n", J, N_runs );
+
+    FOR I = 1 : N_steps {
+
+	digitizer_start_acquisition( );
+	curve = digitizer_get_curve_fast( CH1 );
+	
+	IF Pretrigger != 0 {
+	    ground = mean( slice( curve, 1, Pretrigger ) );
+	} ELSE {
+	    ground = 0;
+	}
+
+	IF I <= NUM_BASE_CURVES {
+	    IF I != 1 {
+	    	base_curve *= ( float( I ) - 1.0 ) / float(  I );
+	    }
+	    base_curve += ( curve - ground ) / I;
+	}
+
+	display( 1, I, ( curve - ground ) * 1000.0 , 1,
+			 1, I, curve * 1000.0, 2,
+			 1, I, 1000.0 * ( curve - ground - base_curve ) , 3 );
+	save( curve );
+	
+        field += field_step;
+        set_field( field, 0.3 G );
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,32 +1,20 @@
 /*
-	EDL program for time-resolved ENDOR on transient radicals
-
-	$Id$
+	Test EDL program for time-resolved ENDOR on transient radicals
 */
 	
-
-DEVICES:
-
-hp8647a;                     // RF synthesizer
-tds520;                      // digitizer
-er035m_sas;                  // gauss meter
-
 
 VARIABLES:
 
 start_freq  =   8 MHz;
 end_freq    =  22 MHz;
-step_freq   = 100 kHz;          
+step_freq   = 250 kHz;
 
-attenuation =  -5 dB;
+attenuation = -5 db;
 
-N_runs      = 20;            // how many times to repeat the whole experiment
-N_averages  = 16;            // number of averages per frequency point
+N_runs      =  2;            // how many times to repeat the whole experiment
+N_averages  = 16;            // number of averages per frequency
 
 N_max_base_curves = 10;      // how many curve to use for baseline correction
-
-Channel = CH1;               // input channel of the digitizer
-
 
 /***********************************************/
 /* Nothing needs to be changed below this line */
@@ -36,9 +24,9 @@ freq = start_freq;
 
 N_steps = round( ( end_freq - start_freq ) / step_freq ) + 1;
 
-curve[ * ];                      // for new raw data
-mean_curve[ N_steps, * ];        // complete field of averaged data
-base_curve[ * ];                 // averaged baseline curve
+curve[ 500 ];
+mean_curve[ N_steps, * ];
+base_curve[ * ];
 Pretrigger;
 ground = 0.0;
 mean_ground[ N_steps ];
@@ -56,25 +44,17 @@ N_base_curves;
 integ, base_int;
 integral[ 2 ];
 
-I, J, K;                         // counters
-
-F1, F2, F3;                      // file handlers
-S1, S2;                          // slider handlers
-B1, B2;                          // button handlers
+F1, F2, F3;
+I, J, K;
+S1, S2;
+B1, B2;
 
 End_index;
+M;
 Is_stored = 0;
 
 
 PREPARATIONS:
-
-synthesizer_use_table( );
-synthesizer_attenuation( attenuation );
-synthesizer_frequency( start_freq );
-synthesizer_att_ref_freq( 14 MHz );
-synthesizer_modulation( "OFF" );
-
-digitizer_num_averages( N_averages );
 
 init_2d( 3, 0, N_steps, 0, 0, start_freq * 1.0e-6, step_freq * 1.0e-6,
 		 "Time / us", "Radio frequency / MHz", "Signal / mV" );
@@ -82,15 +62,9 @@ init_2d( 3, 0, N_steps, 0, 0, start_freq * 1.0e-6, step_freq * 1.0e-6,
 
 EXPERIMENT:
 
-synthesizer_state( "ON" );
-
-/* Get the digitizers record length, trigger position and time base to be able
-   to readjust the RF scale and to find out how many points we have before the
-   laser starts - these points are used to get rid of changing 'zero levels' */
-
-Rec_len   = digitizer_record_length( );
-trig_pos  = digitizer_trigger_position( );
-time_base = digitizer_timebase( );
+Rec_len = 500;
+trig_pos = 0.1;
+time_base = 100 ns;
 
 time_res  = time_base * 1.0e9 / 50.0;
 
@@ -100,11 +74,13 @@ max_time   = min_time + Rec_len * time_res;
 Pretrigger = int( 0.9 * trig_pos * Rec_len );
 change_scale( min_time * 1.0e-3, time_res * 1.0e-3);
 
-/* Get a file for storing all data */
+mean_curve[ 1 ] = float_slice( Rec_len );
+base_curve = float_slice( Rec_len );
+
+/* Get a file for storing all data and write experiments parameter */
 
 F1 = get_file( "File for storing complete data sets:" );
 F2 = get_file( "File for storing averaged data sets:" );
-
 IF is_file( F2 ) {
 	fsave( F2, "% Start frequency  = # MHz\n", start_freq * 1.0e-6 );
 	fsave( F2, "% End frequency    = # MHz\n", end_freq * 1.0e-6 );
@@ -113,9 +89,6 @@ IF is_file( F2 ) {
 	fsave( F2, "% Record length    = #\n", Rec_len );
 	fsave( F2, "% Trigger position = #\n", int( trig_pos * Rec_len ) );
 	fsave( F2, "% Time base        = # ns\n", time_base * 1.0e-9 );
-	fsave( F2, "%Sensitivity       = # mV\n",
-		   1.0e3 * digitizer_sensitivity( Channel ) );
-	fsave( F2, "% Field            = # G\n", measure_field( ) );
 	save_comment( F2, "% ", "Sample: \nMicrowave frequency: \n"
 				  "Microwave power: \nTemperature: \n" );
 }
@@ -142,9 +115,6 @@ FOR J = 1 : N_runs
 	/* Set the synthesizer to the start frequency and start an acquisition */
 
 	freq = start_freq;
-	synthesizer_frequency( freq );
-
-	digitizer_start_acquisition( );
 
     FOR I = 1 : N_steps
 	{
@@ -152,7 +122,22 @@ FOR J = 1 : N_runs
 
 		/* Get next curve from the digitizer */
 
-		curve = digitizer_get_curve_fast( Channel );
+		wait( 0.5 s );
+		FOR M = 1 : Rec_len
+		{
+			IF M < Rec_len / 10
+			{
+				curve[ M ] = 2.5e-9 * random();
+			}
+			ELSE
+			{
+				curve[ M ] =
+					  1.0e-9 * exp( - ( 0.1 * ( I - N_steps / 2 ) )^2
+						            - 0.005 * ( M - Rec_len / 10 ) )
+                    + 2.5e-9 * random( ) + 5.0e-9;
+			}
+		}
+		curve += 2.0e-9 * random( );
 
 		/* If this wasn't the very last curve of the run set the new frequency
 		   and already start the next masurement, so we're not loosing time 
@@ -160,11 +145,9 @@ FOR J = 1 : N_runs
 
 		IF I != N_steps {
 	        freq += step_freq;
-			synthesizer_frequency( freq );
-			digitizer_start_acquisition( );
 		}
 
-		/* Write the new date to file */
+		/* Save the new date to file */
 
 		IF is_file( F1 ) {
 			fsave( F1, "% #.run, frequency = # MHz\n\n", J, freq * 1.0e-6 );
@@ -173,11 +156,7 @@ FOR J = 1 : N_runs
 
 		/* Add the new curve to the results from previous runs */
 
-		IF J != 1 {
-			mean_curve[ I ] = ( ( J - 1 ) * mean_curve[ I ] + curve ) / J;
-		} ELSE {
-			mean_curve[ I ] = curve;
-		}
+		mean_curve[ I ] = ( ( J - 1 ) * mean_curve[ I ] + curve ) / J;
 		Is_stored = 1;
 
 		/* Calculate the mean of the data before the trigger used to get rid
@@ -188,17 +167,12 @@ FOR J = 1 : N_runs
 			mean_ground[ I ] = ( ( J - 1 ) * mean_ground[ I ] + ground ) / J;
 		}
 
-		/* At the start of run add up curves used for baseline correction */
+		/* At the start of a run add up curves to be used as baseline */
 
 		IF I <= N_max_base_curves {
-			IF I == 1 & J == 1 {
-				N_base_curves = 1;
-				base_curve = curve - ground;
-			} ELSE {
-				N_base_curves += 1;
-		    	base_curve = ( 1.0 - 1.0 / N_base_curves ) * base_curve
-	    		             + ( curve - ground ) / N_base_curves;
-			}
+			N_base_curves = ( J - 1 ) * N_max_base_curves + I;
+	    	base_curve = ( 1.0 - 1.0 / N_base_curves ) * base_curve
+	    	             + ( curve - ground ) / N_base_curves;
 		}
 
 		/* Calculate the values of the integration window (now using 'curve'
@@ -241,7 +215,8 @@ FOR J = 1 : N_runs
 			}
 
 			base_int = 1.0e3 * mean( base_curve, Start_pos, Width );
-			FOR K = 1 : End_index {
+			FOR K = 1 : End_index
+			{
 				integral[ 1 ] = 1.0e3 * mean( mean_curve[ K ],
 											  Start_pos, Width );
 				integral[ 2 ] = integral[ 1 ] - base_int
@@ -253,12 +228,7 @@ FOR J = 1 : N_runs
 	}
 }
 
-
-/* Post-experiment stuff */
-
 ON_STOP:
-
-synthesizer_state( "OFF" );
 
 /* Save the averaged data if a file has been selected */
 
@@ -267,8 +237,7 @@ IF ! Is_stored {           // Check if data of last trace were stored
 	freq = start_freq + I * step_freq;
 }
 
-IF is_file( F2 )
-{
+IF is_file( F2 ) {
 	IF J < N_runs {
 		fsave( F2, "% Number of runs: #\n", J );
 	} ELSE {
@@ -295,18 +264,19 @@ IF is_file( F2 )
 	}
 }
 
-/* Create two buttons for saving integrals and finally stopping */
+/* Create two buttons for saving integrals and stopping */
 
 B1 = button_create( "NORMAL_BUTTON", "Save" );
 B2 = button_create( "NORMAL_BUTTON", "Done" );
 
 FOREVER
 {
-	IF button_state( B2 ) {          // check Done button
+	IF button_state( B2 )           // check Done button
+	{
 		BREAK;
 	}
 
-	IF button_state( B1 )            // check Save button
+	IF button_state( B1 )           // check Save button
 	{
 		F3 = get_file( "File for storing integrated region:" );		
 		IF is_file( F3 ) {
@@ -347,8 +317,9 @@ FOREVER
 
 	new_start_time = slider_value( S1 );
 	new_end_time   = slider_value( S2 );
-	IF start_time == new_start_time & end_time == new_end_time {
-		wait( 0.3 s );
+	IF start_time == new_start_time & end_time == new_end_time
+	{
+		wait( 0.2 s );
 		NEXT;
 	}
 
@@ -376,7 +347,8 @@ FOREVER
 	}
 
 	base_int = 1.0e3 * mean( base_curve, Start_pos, Width );
-	FOR K = 1 : End_index {
+	FOR K = 1 : End_index
+	{
 		integral[ 1 ] = 1.0e3 * mean( mean_curve[ K ], Start_pos, Width );
 		integral[ 2 ] = integral[ 1 ] - base_int - 1.0e3 * mean_ground[ K ];
 		display( 1, K, integral[ 1 ], 3,
