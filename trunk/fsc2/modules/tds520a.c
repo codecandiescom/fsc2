@@ -431,7 +431,7 @@ Var *digitizer_trigger_position( Var *v )
 		else if ( I_am == PARENT )
 		{
 			if ( tds520a.is_trig_pos )
-				return vars_push( FLOAT_VAR, tds520.trig_pos );
+				return vars_push( FLOAT_VAR, tds520a.trig_pos );
 
 			eprint( FATAL, "%s:%ld: %s: Function `digitizer_trigger_position' "
 					"with no argument can only be used in the EXPERIMENT "

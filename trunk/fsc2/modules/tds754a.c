@@ -427,6 +427,9 @@ Var *digitizer_trigger_position( Var *v )
 		}
 		else if ( I_am == PARENT )
 		{
+			if ( tds754a.is_trig_pos )
+				return vars_push( FLOAT_VAR, tds754a.trig_pos );
+
 			eprint( FATAL, "%s:%ld: %s: Function `digitizer_trigger_position' "
 					"with no argument can only be used in the EXPERIMENT "
 					"section.\n", Fname, Lc, DEVICE_NAME );
