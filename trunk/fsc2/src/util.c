@@ -659,7 +659,6 @@ char *handle_escape( char *str )
 FILE *filter_edl( const char *name, FILE *fp )
 {
 	int pd[ 2 ];
-	pid_t pid;
 	fd_set rfds;
 	int rs;
 
@@ -672,7 +671,7 @@ FILE *filter_edl( const char *name, FILE *fp )
 		return NULL;
 	}
 
-	if ( ( pid =  fork( ) ) < 0 )
+	if ( ( Internals.fsc2_clean_pid = fork( ) ) < 0 )
 	{
 		if ( errno == ENOMEM || errno == EAGAIN )
 			print( FATAL, "Starting the test procedure failed, running out "
@@ -682,7 +681,7 @@ FILE *filter_edl( const char *name, FILE *fp )
 
 	/* Here's the childs code */
 
-	if ( pid == 0 )
+	if ( Internals.fsc2_clean_pid == 0 )
 	{
 		char *cmd = NULL;
 
@@ -744,7 +743,7 @@ FILE *filter_edl( const char *name, FILE *fp )
 
 		fclose( stdout );
 		T_free( cmd );
-		_exit( EXIT_FAILURE );
+		_exit( EXIT_SUCCESS );
 	}
 
 	/* And finally the code for the parent */

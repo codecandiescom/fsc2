@@ -163,6 +163,9 @@ struct INTERNALS {
 	uid_t EUID;                  /* User and group ID the program was */
 	gid_t EGID;				     /* started with */
 
+	pid_t fsc2_clean_pid;        /* pid and return status of child executing */
+	int fsc2_clean_status;       /* the fsc2_clean filter */
+
 	pid_t child_pid;             /* pid of child process doing the
                                     measurement */
 	pid_t conn_pid;              /* pid of child process for handling

@@ -184,10 +184,10 @@ bool scan_main( const char *name, FILE *fp )
 	fclose( splitin );
 
 	/* Wait for the child process doing the filtering to die and also check
-	   it's return status */
+	   its return value */
 
 	while ( Internals.fsc2_clean_pid != -1 )
-		fsc2_usleep( 10000 );
+		fsc2_usleep( 10000, UNSET );
 
 	if ( WIFEXITED( Internals.fsc2_clean_status ) == 0 )
 	{

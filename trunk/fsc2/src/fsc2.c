@@ -291,6 +291,7 @@ static void globals_init( const char *pname )
 	lower_permissions( );
 
     Internals.child_pid = 0;
+	Internals.fsc2_clean_pid = 0;
     Internals.http_pid = 0;
 
 	/* Set up a lot of global variables */
@@ -1903,6 +1904,7 @@ void main_sig_handler( int signo )
 {
 	int errno_saved;
 	pid_t pid;
+	int status;
 #if ! defined( NDEBUG ) && defined( ADDR2LINE ) && ! defined __STRICT_ANSI__
 	int *EBP;           /* assumes sizeof( int ) equals size of pointers */
 #endif
@@ -1912,12 +1914,20 @@ void main_sig_handler( int signo )
 	{
 		case SIGCHLD :
 			errno_saved = errno;
-			while ( ( pid = waitpid( -1, NULL, WNOHANG ) ) > 0 )
+			while ( ( pid = waitpid( -1, &status, WNOHANG ) ) > 0 )
+			{
 				if ( pid == Internals.http_pid )
 				{
 					Internals.http_pid = -1;
 					Internals.http_server_died = SET;
 				}
+
+				if ( pid == Internals.fsc2_clean_pid )
+				{
+					Internals.fsc2_clean_pid = -1;
+					Internals.fsc2_clean_status = status;
+				}
+			}
 			errno = errno_saved;
 			return;
 
