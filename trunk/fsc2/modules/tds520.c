@@ -51,7 +51,7 @@ static Var *get_amplitude( Var *v, bool use_cursor );
 #define TEST_SENSITIVITY  0.01
 #define TEST_NUM_AVG      16
 #define TEST_TRIG_POS     0.1
-#define TEST_TRIG_CHANNEL 1
+#define TEST_TRIG_CHANNEL 0
 
 
 /*******************************************/
