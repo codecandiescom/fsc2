@@ -42,9 +42,9 @@ void load_all_drivers( void )
 	for ( cd = Device_List; cd != NULL; cd = cd->next )
 		load_functions( cd );
 
-	/* This done we run the init hooks (if they exist) and warn if they didn't
+	/* This done we run the init hooks (if they exist) and warn if they don't
 	   return successfully (if an init hook thinks it should kill the whole
-	   program it's supposed to throw an exception). To keep the modules
+	   program it is supposed to throw an exception). To keep the modules
 	   writers from erroneously unsetting the global variables `need_GPIB' and
 	   `need_Serial_Port' they are stored before each init_hook() function is
 	   called and, if necessary, are restored to their previous values. */
