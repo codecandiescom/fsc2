@@ -132,6 +132,7 @@
 
 static bool pipe_read( int fd, char *buf, size_t bytes_to_read );
 static void send_browser( FL_OBJECT *browser );
+inline static bool parent_write( const void *buf, size_t size );
 
 
 /*----------------------------------------------------------------*/
@@ -405,14 +406,15 @@ long reader( void *ret )
 
 			sema_post( semaphore );
 
+			/* Get rid of the string  */
+
+			str[ 0 ] = T_free( str[ 0 ] );
+
 			/* Send back just one character as indicator that the message has
 			   been read by the user */
 
-			write( pd[ WRITE ], "X", 1 );
+			parent_write( "X", 1 );
 
-			/* Get rid of the string and return */
-
-			str[ 0 ] = T_free( str[ 0 ] );
 			retval = 0;
 			break;
 
@@ -433,15 +435,15 @@ long reader( void *ret )
 
 			sema_post( semaphore );
 
+			/* Get rid of the string */
+
+			str[ 0 ] = T_free( str[ 0 ] );
+
 			/* Send back just one character as indicator that the alert has
 			   been acknowledged by the user */
 
-			write( pd[ WRITE ], "X", 1 );
+			parent_write( "X", 1 );
 
-			/* Get rid of the string and return */
-
-			str[ 0 ] = T_free( str[ 0 ] );
-			retval = 0;
 			break;
 
 		case C_SHOW_CHOICES :
@@ -1051,9 +1053,18 @@ void writer( int type, ... )
 			fsc2_assert( I_am == PARENT );
 
 			header.data.len = va_arg( ap, ptrdiff_t );
-			write( pd[ WRITE ], &header, sizeof( CommStruct ) );
+
+			if ( ! parent_write( &header, sizeof( CommStruct ) ) )
+			{
+				va_end( ap );
+				THROW( CHILD_DIED_EXCEPTION );
+			}
 			data = va_arg( ap, void * );
-			write( pd[ WRITE ], data, ( size_t ) header.data.len );
+			if ( ! parent_write( data, ( size_t ) header.data.len ) )
+			{
+				va_end( ap );
+				THROW( CHILD_DIED_EXCEPTION );
+			}
 			break;
 
 		case C_LAYOUT_REPLY : case C_BDELETE_REPLY :
@@ -1062,7 +1073,11 @@ void writer( int type, ... )
 		case C_ODELETE_REPLY :
 			fsc2_assert( I_am == PARENT );
 			header.data.long_data = va_arg( ap, long );
-			write( pd[ WRITE ], &header, sizeof( CommStruct ) );
+			if ( ! parent_write( &header, sizeof( CommStruct ) ) )
+			{
+				va_end( ap );
+				THROW( CHILD_DIED_EXCEPTION );
+			}
 			break;
 
 		case C_STR :
@@ -1076,38 +1091,63 @@ void writer( int type, ... )
 			else 
 				header.data.len = ( ptrdiff_t ) strlen( str[ 0 ] );
 
-			write( pd[ WRITE ], &header, sizeof( CommStruct ) );
+			if ( ! parent_write( &header, sizeof( CommStruct ) ) )
+			{
+				va_end( ap );
+				THROW( CHILD_DIED_EXCEPTION );
+			}
 
 			if ( header.data.len > 0 )
-				write( pd[ WRITE ], str[ 0 ], ( size_t ) header.data.len );
+				if ( ! parent_write( str[ 0 ], ( size_t ) header.data.len ) )
+				{
+					va_end( ap );
+					THROW( CHILD_DIED_EXCEPTION );
+				}
+
 			break;
 
 		case C_INT :
 			fsc2_assert( I_am == PARENT );
 
 			header.data.int_data = va_arg( ap, int );
-			write( pd[ WRITE ], &header, sizeof( CommStruct ) );
+			if ( parent_write( &header, sizeof( CommStruct ) ) )
+			{
+				va_end( ap );
+				THROW( CHILD_DIED_EXCEPTION );
+			}
 			break;
 
 		case C_LONG :
 			fsc2_assert( I_am == PARENT );
 
 			header.data.long_data = va_arg( ap, long );
-			write( pd[ WRITE ], &header, sizeof( CommStruct ) );
+			if ( ! parent_write( &header, sizeof( CommStruct ) ) )
+			{
+				va_end( ap );
+				THROW( CHILD_DIED_EXCEPTION );
+			}
 			break;
 
 		case C_FLOAT :
 			fsc2_assert( I_am == PARENT );
 
 			header.data.float_data = va_arg( ap, float );
-			write( pd[ WRITE ], &header, sizeof( CommStruct ) );
+			if ( ! parent_write( &header, sizeof( CommStruct ) ) )
+			{
+				va_end( ap );
+				THROW( CHILD_DIED_EXCEPTION );
+			}
 			break;
 
 		case C_DOUBLE :
 			fsc2_assert( I_am == PARENT );
 
 			header.data.double_data = va_arg( ap, double );
-			write( pd[ WRITE ], &header, sizeof( CommStruct ) );
+			if ( parent_write( &header, sizeof( CommStruct ) ) )
+			{
+				va_end( ap );
+				THROW( CHILD_DIED_EXCEPTION );
+			}
 			break;
 
 		default :                     /* this should never be reached... */
@@ -1132,6 +1172,20 @@ static void send_browser( FL_OBJECT *browser )
 		writer( C_STR, line );
 
 	writer( C_STR, NULL );
+}
+
+
+/*------------------------------------------------------------------*/
+/* Function for the parent process to write data to the pipe to the */
+/* child process doing the measurements. If the child suddenly dies */
+/* and the SIGPIPE signal comes before the SIGCHLD all the parent   */
+/* needs to do is to stop writing (SIGPIPE gets ignored) because    */
+/* all clean-up is done when the SIGCHLD signal gets received.      */
+/*------------------------------------------------------------------*/
+
+inline static bool parent_write( const void *buf, size_t size )
+{
+	return write( pd[ WRITE ], buf, size ) >= 0 || errno != EPIPE;
 }
 
 
