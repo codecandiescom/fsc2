@@ -2407,7 +2407,7 @@ Modifier-5 key is pressed.
 
 @end table
 
-The value returned in last array element is the sum of the above values
+The value returned in last the array element is the sum of the above values
 for the keys currently pressed. I.e.@: when someone holds down both the
 Shift modifier key and the Control modifier key the returned value will
 be 5. To find out if e.g.@: the Control modifier key is pressed you
