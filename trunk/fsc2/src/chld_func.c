@@ -1808,9 +1808,9 @@ bool exp_clabel( char *buffer, ptrdiff_t len )
 			pos += sizeof ID;
 
 			EDL.Fname = pos;                          /* current file name */
+			pos += strlen( pos ) + 1;
 
 			vars_push( STR_VAR, pos );                /* get label string */
-			pos += strlen( pos ) + 1;
 
 			/* Call the function */
 

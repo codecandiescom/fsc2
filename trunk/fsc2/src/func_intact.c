@@ -63,6 +63,7 @@ static bool needs_pos = SET;
 static Var *f_layout_child( long layout );
 static void f_objdel_child( Var *v );
 static void f_objdel_parent( Var *v );
+static Var *f_obj_clabel_child( long ID, char *label );
 static int tool_box_close_handler( FL_FORM *a, void *b );
 static FL_OBJECT *append_object_to_form( IOBJECT *io );
 static void tools_callback( FL_OBJECT *ob, long data );
@@ -484,6 +485,129 @@ static void f_objdel_parent( Var *v )
 			THROW( EXCEPTION );
 #endif
 	}
+}
+
+
+/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*/
+
+Var *f_obj_clabel( Var *v )
+{
+	IOBJECT *io;
+	char *label = NULL;
+	long ID;
+
+
+	CLOBBER_PROTECT( v );
+	CLOBBER_PROTECT( label );
+
+	/* We need at least the ID of the button */
+
+	ID = get_strict_long( v, "object ID" );
+
+	if ( ID < ID_OFFSET )
+	{
+		print( FATAL, "Invalid object identifier.\n" );
+		THROW( EXCEPTION );
+	}
+
+	v = vars_pop( v );
+
+	if ( v->type != STR_VAR )
+	{
+		print( FATAL, "Second argument isn't a string.\n" );
+		THROW( EXCEPTION );
+	}
+
+	/* The child has to get parent to change the label */
+
+	if ( Internals.I_am == CHILD )
+		return f_obj_clabel_child( ID, v->val.sptr );
+
+	/* No tool box -> no objects -> no object label change possible... */
+
+	if ( Tool_Box == NULL || Tool_Box->objs == NULL )
+	{
+		print( FATAL, "No objects have been defined yet.\n" );
+		THROW( EXCEPTION );
+	}
+
+	/* Check the ID parameter */
+
+	io = find_object_from_ID( ID );
+
+	if ( io == NULL )
+	{
+		print( FATAL, "Invalid object identifier.\n" );
+		THROW( EXCEPTION );
+	}
+
+	TRY
+	{
+		label = T_strdup( v->val.sptr );
+		check_label( label );
+		convert_escapes( label );
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+	{
+		T_free( label );
+		RETHROW( );
+	}
+
+	T_free( io->label );
+	io->label = label;
+
+	fl_set_object_label( io->self, io->label );
+
+	return vars_push( INT_VAR, 1 );
+}
+
+
+/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*/
+
+static Var *f_obj_clabel_child( long ID, char *label )
+{
+	char *buffer, *pos;
+	size_t len;
+	bool result;
+
+
+	len = sizeof EDL.Lc + sizeof ID + strlen( label ) + 1;
+
+	if ( EDL.Fname )
+		len += strlen( EDL.Fname ) + 1;
+	else
+		len++;
+
+	pos = buffer = CHAR_P T_malloc( len );
+
+	memcpy( pos, &EDL.Lc, sizeof EDL.Lc );   /* current line number */
+	pos += sizeof EDL.Lc;
+
+	memcpy( pos, &ID, sizeof ID );           /* button ID */
+	pos += sizeof ID;
+
+	if ( EDL.Fname )
+	{
+		strcpy( pos, EDL.Fname );             /* current file name */
+		pos += strlen( EDL.Fname ) + 1;
+	}
+	else
+		*pos++ = '\0';
+
+	strcpy( pos, label );
+	pos += strlen( label ) + 1;
+
+	/* Ask the parent to change the label */
+
+	result = exp_clabel( buffer, pos - buffer );
+
+	if ( result == FAIL )      /* failure -> bomb out */
+		THROW( EXCEPTION );
+
+	return vars_push( INT_VAR, 1 );
 }
 
 
