@@ -286,6 +286,9 @@ endif
 export            # export all variables to sub-makes
 
 
+############## End of configuration section ##############
+
+
 # Switch off all implicit rules
 
 .SUFFIXES:
@@ -382,8 +385,7 @@ distclean:
 	$(MAKE) -C doc distclean
 	$(MAKE) -C utils distclean
 	$(MAKE) clean
-	-$(RM) $(RMFLAGS) fsc2 fsc2_clean fsc2_connect fsc2_start fsc2_test \
-					  fsc2_load *.so *~
+	-$(RM) $(RMFLAGS) *~
 
 
 # Clean up everything for a distribution and create a zipped tarball

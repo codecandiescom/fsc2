@@ -36,7 +36,7 @@ export headers        # export list of header files to the modules Makefile
 
 
 .SUFFIXES:
-.PHONY:    all clean res gpib
+.PHONY:    all modules res gpib clean
 
 
 # Default target - make only if RESOLUTION and GPIB_LIBRARY are set correctly
