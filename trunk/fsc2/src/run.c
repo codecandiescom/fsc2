@@ -223,7 +223,7 @@ bool run( void )
 
 static bool no_prog_to_be_run( void )
 {
-	bool ret = OK;
+	bool ret;
 
 
 	fl_set_cursor( FL_ObjWin( main_form->run ), XC_watch );
@@ -242,6 +242,7 @@ static bool no_prog_to_be_run( void )
 	{
 		vars_pop( f_dtime( NULL ) );
 		run_exp_hooks( );
+		ret = OK;
 		TRY_SUCCESS;
 	}
 	OTHERWISE
@@ -592,7 +593,7 @@ static void set_buttons_for_run( int active )
 
 static void run_child( void )
 {
-	int return_status = OK;
+	int return_status;
 
 
 	I_am = CHILD;
@@ -619,6 +620,7 @@ static void run_child( void )
 
 	TRY {
 		do_measurement( );               /* run the experiment */
+		return_status = OK;
 		TRY_SUCCESS;
 	}
 	OTHERWISE                            /* catch all exceptions */

@@ -81,6 +81,7 @@ MAIL_ADDRESS     := Jens.Toerring@physik.fu-berlin.de
 # Here follow settings determining the make process - which compiler and
 # tools to use as well as their respective options. Better leave this alone
 # if you don't have a good reason...
+# Don't use -fomit-frame-pointer in CFLAGS on Intel processors
 ##############################################################################
 
 SHELL            := /bin/sh
