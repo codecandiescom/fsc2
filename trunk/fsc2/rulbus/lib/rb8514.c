@@ -244,7 +244,7 @@ int rulbus_rb8514_delay_set_delay( int handle, double delay, int force )
 	/* Check that the card isn't currently creating a delay - if it is tell
 	   the user it's busy unless the 'force' flag is set (which allows the
 	   user to set a new delay even though a delay is already created, which
-	   then ends prematurely) */
+	   then gets ended prematurely) */
 
 	if ( ( retval = rulbus_read( handle, STATUS_ADDR, &byte, 1 ) ) != 1 )
 		 return rulbus_errno = retval;
