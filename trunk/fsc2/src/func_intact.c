@@ -6,7 +6,6 @@
 #include "fsc2.h"
 
 
-
 static IOBJECT *find_object_from_ID( long ID );
 static void recreate_Tool_Box( void );
 static FL_OBJECT *append_object_to_form( IOBJECT *io );
@@ -15,8 +14,12 @@ static void convert_escapes( char *str );
 
 
 
-/*--------------------------------------------------------*/
-
+/*-----------------------------------------------------------*/
+/* Function sets the layout of the tool box, either vertical */
+/* or horizontal by passing either 0 or 1  or "vert[ical]"   */
+/* or "hori[zontal]" (case in-sensitive). Must be called     */
+/* before any object (button or slider) is created.          */
+/*-----------------------------------------------------------*/
 
 Var *f_layout( Var *v )
 {
@@ -27,6 +30,13 @@ Var *f_layout( Var *v )
 	{
 		eprint( FATAL, "%s:%ld Layout of tool box must be set before any "
 				"buttons or sliders are created.\n", Fname, Lc );
+		THROW( EXCEPTION );
+	}
+
+	if ( v == NULL )
+	{
+		eprint( FATAL, "%s:%ld: Missing parameter in call of `layout'.\n",
+				Fname, Lc );
 		THROW( EXCEPTION );
 	}
 
@@ -51,6 +61,9 @@ Var *f_layout( Var *v )
 			THROW( EXCEPTION );
 		}
 	}
+
+	/* The child has no control over the graphical stuff, it has to pass all
+	   requests concerning them to the parent... */
 
 	if ( I_am == CHILD )
 	{
@@ -79,16 +92,20 @@ Var *f_layout( Var *v )
 		else
 			*( ( char * ) pos++ ) = '\0';
 
+		/* Bomb out if parent failed to set layout type */
+
 		if ( ! exp_layout( buffer, ( long ) ( pos - buffer ) ) )
 			THROW( EXCEPTION );
 
 		return vars_push( INT_VAR, ( long ) layout );
 	}
 
+	/* Set up structure for tool box */
+
 	Tool_Box = T_malloc( sizeof( TOOL_BOX ) );
 	Tool_Box->layout = layout;
-	Tool_Box->Tools = NULL;
-	Tool_Box->objs = NULL;
+	Tool_Box->Tools = NULL;               /* no form created yet */
+	Tool_Box->objs = NULL;                /* and also no objects */
 
 	return vars_push( INT_VAR, ( long ) layout );
 }
@@ -109,9 +126,11 @@ Var *f_bcreate( Var *v )
 	long ID = 0;
 
 
+	/* At least the type of the button must be specified */
+
 	if ( v == NULL )
 	{
-		eprint( FATAL, "%s:%ld: Missing parameters in call of "
+		eprint( FATAL, "%s:%ld: Missing parameter in call of "
 				"`button_create'.\n", Fname, Lc );
 		THROW( EXCEPTION );
 	}
@@ -356,15 +375,18 @@ Var *f_bcreate( Var *v )
 }
 
 
-/*-----------------------------*/
-/* Deletes one or more buttons */
-/*-----------------------------*/
+/*--------------------------------------*/
+/* Deletes one or more buttons          */
+/* Parameter are one or more button IDs */
+/*--------------------------------------*/
 
 Var *f_bdelete( Var *v )
 {
 	IOBJECT *io, *nio; 
 	long new_anchor;
 
+
+	/* We need the ID of the button to delete */
 
 	if ( v == NULL )
 	{
@@ -373,14 +395,14 @@ Var *f_bdelete( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	/* All the arguments are button numbers */
+	/* Loop over all button numbers */
 
 	while ( v != NULL )
 	{
 		/* Since the buttons 'belong' to the parent, the child needs to ask
 		   the parent to delete the button. The ID of each button to be deleted
 		   gets passed to te parent in a buffer and the parent is asked to
-		   delete th button */
+		   delete the button */
 
 		if ( I_am == CHILD )
 		{
@@ -539,6 +561,8 @@ Var *f_bstate( Var *v )
 	int state;
 
 
+	/* We need at least the ID of the button */
+
 	if ( v == NULL )
 	{
 		eprint( FATAL, "%s:%ld: Missing parameters in call of "
@@ -557,7 +581,7 @@ Var *f_bstate( Var *v )
 		long len;
 
 
-		/* Basid check of button identifier - always the first parameter */
+		/* Basic check of button identifier - always the first parameter */
 
 		if ( v->type != INT_VAR || v->val.lval < 0 )
 		{
@@ -664,6 +688,9 @@ Var *f_bstate( Var *v )
 		return vars_push( INT_VAR, io->state != 0 ? 1 : 0 );
 	}
 
+	/* The optional second argument is the state to be set - but take care,
+	   the state of NORMAL_BUTTONs can't be set */
+
 	vars_check( v, INT_VAR | FLOAT_VAR );
 
 	if ( io->type == NORMAL_BUTTON )
@@ -682,20 +709,25 @@ Var *f_bstate( Var *v )
 		io->state = v->val.dval != 0.0 ? 1 : 0;
 	}
 
-	if ( ! TEST_RUN )
-	{
-		fl_set_button( io->self, io->state );
-		XFlush( fl_get_display( ) );
-	}
+	/* If this isn't a test run set the button state */
 
-	if ( io->type == RADIO_BUTTON )
+	if ( ! TEST_RUN )
+		fl_set_button( io->self, io->state );
+
+	/* If one of the radio buttons is set all the other buttons belonging
+	   to the group must become unset */
+
+	if ( io->type == RADIO_BUTTON && io->state == 1 )
 	{
 		for ( oio = Tool_Box->objs; oio != NULL; oio = oio->next )
 		{
-			if ( oio == io || oio->type != RADIO_BUTTON )
+			if ( oio == io || oio->type != RADIO_BUTTON ||
+				 oio->group != io->group )
 				continue;
-			if ( oio->group == io->group )
-				oio->state = io->state ? 0 : 1;
+
+			oio->state = 0;
+			if ( ! TEST_RUN )
+				fl_set_button( oio->self, oio->state );
 		}
 	}
 
@@ -724,6 +756,9 @@ Var *f_screate( Var *v )
 	char *help_text = NULL;
 	long ID = 0;
 
+
+	/* We need at least the type of the slider and the minimum and maximum
+	   value */
 
 	if ( v == NULL )
 	{
@@ -761,7 +796,7 @@ Var *f_screate( Var *v )
 
 	if ( ( v = vars_pop( v ) ) == NULL )
 	{
-		eprint( FATAL, "%s:%ld: Missing start value in call of "
+		eprint( FATAL, "%s:%ld: Missing minimum value in call of "
 				"`slider_create'.\n", Fname, Lc );
 		THROW( EXCEPTION );
 	}
@@ -771,7 +806,7 @@ Var *f_screate( Var *v )
 
 	if ( ( v = vars_pop( v ) ) == NULL )
 	{
-		eprint( FATAL, "%s:%ld: Missing end value in call of "
+		eprint( FATAL, "%s:%ld: Missing maximum value in call of "
 				"`slider_create'.\n", Fname, Lc );
 		THROW( EXCEPTION );
 	}
@@ -781,8 +816,8 @@ Var *f_screate( Var *v )
 
 	if ( end_val <= start_val )
 	{
-		eprint( FATAL, "%s:%ld: End value not larger than start value in call "
-				"of `slider_create'.\n", Fname, Lc );
+		eprint( FATAL, "%s:%ld: Maxinmum not larger than minimum value in "
+				"call of `slider_create'.\n", Fname, Lc );
 		THROW( EXCEPTION );
 	}
 
@@ -1521,13 +1556,26 @@ static void convert_escapes( char *str )
 
 	while ( ( ptr = strchr( ptr, '\\' ) ) != NULL )
 	{
-		if ( *( ptr + 1 ) == '\\' )
-			memcpy( ptr + 1, ptr + 2, strlen( ptr + 2 ) + 1 );
-			
-		if ( *( ptr + 1 ) == 'n' )
+		switch ( * ( ptr + 1 ) )
 		{
-			memcpy( ptr + 1, ptr + 2, strlen( ptr + 2 ) + 1 );
-			*ptr = '\n';
+			case '\\' :
+				memcpy( ptr + 1, ptr + 2, strlen( ptr + 2 ) + 1 );
+				break;
+			
+			case 'n' :
+				memcpy( ptr + 1, ptr + 2, strlen( ptr + 2 ) + 1 );
+				*ptr = '\n';
+				break;
+
+			case 't' :
+				memcpy( ptr + 1, ptr + 2, strlen( ptr + 2 ) + 1 );
+				*ptr = '\t';
+				break;
+				
+			case 'r' :
+				memcpy( ptr + 1, ptr + 2, strlen( ptr + 2 ) + 1 );
+				*ptr = '\r';
+				break;
 		}
 
 		ptr++;
