@@ -133,7 +133,6 @@ Var *vars_push( int type, ... );
 Var *vars_pop( Var *v );
 void vars_del_stack( void );
 void vars_clean_up( void );
-void free_vars( void );
 void vars_check( Var *v, int type );
 void vars_warn_new( Var *v );
 bool vars_exist( Var *v );
