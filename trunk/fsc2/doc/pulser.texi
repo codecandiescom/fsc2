@@ -565,11 +565,11 @@ actual pattern length becomes larger than the one specified.
 
 Usually, pulses that in the test run are found to be unused in the
 experiment are deleted and a warning message is printed. Any further
-reference to or use of these deleted pulses would lead to the
-immediate termination of the experiment. But there are a few situations
-where it can't be detected in the test run that a pulse is needed
+reference to or use of these deleted pulses would lead to the immediate
+termination of the experiment. But there are a few situations where it
+can't be detected in the test run that a pulse is actually needed
 (e.g.@: if it is only used in an untestable @code{IF} construct) and it
-gets deleted eventhough is needed. In this case it is possible to force
+gets deleted eventhough it is needed. In this case it is possible to force
 the program to keep all pulses, even if they seem to be unused. This is
 done by specifying the keyword @code{KEEP_ALL_PULSES} in the
 @code{ASSIGNMENTS} section, i.e.@: just write
@@ -663,7 +663,12 @@ lengths have to be identical to the lengths of the phase sequences.
 @cindex @code{DELTA_LENGTH}
 @cindex @code{PHASE_CYCLE}
 
-Every pulse has at least three properties: a unique number, a function
+
+While the basic setup of the pulse happens in the @code{ASSIGNMENTS}
+and, possibly, in the @code{PHASES} section, the definition of the
+pulses is done in the @code{PREPARATIONS} section.
+
+Each pulse has at least three properties: a unique number, a function
 and a start position. Actually, pulses also need a length, but as
 long as the length is not set (or is 0) the pulse stays switched
 off.  All pulses are defined in the @code{PREPARATIONS} section of the
