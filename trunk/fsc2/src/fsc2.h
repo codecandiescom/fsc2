@@ -118,7 +118,7 @@ Pulser_Struct pulser_struct;
 ASSIGNMENTS assignment[ PULSER_CHANNEL_NUM_FUNC ];
 
 Phase_Sequence *PSeq == NULL;
-Acquisition_Sequence ASeq[ 2 ];
+Acquisition_Sequence ASeq[ 2 ] = { { 0, NULL, 0 }, { 0, NULL, 0 } };
 
 long Cur_Pulse = -1;
 
