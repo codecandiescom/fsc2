@@ -563,8 +563,8 @@ Now here is the complete @code{EDL} script:
 @end example
 
 I hope that this script doesn't look too daunting, but most of its
-length is due to checking and reacting for user input, the real content
-is rather small as you will see.
+length is due to checking for and reacting to user input, the real
+content is rather small as you will see.
 
 The @code{DEVICES} section again is very simple, we're just loading the
 modules for the @code{Bruker} field controller and the @code{SR530}
