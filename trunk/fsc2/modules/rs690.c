@@ -121,6 +121,8 @@ int rs690_init_hook( void )
 	rs690.dump_file = NULL;
 	rs690.show_file = NULL;
 
+	rs690.max_seq_len = 0;
+
 	rs690.is_shape_2_defense = UNSET;
 	rs690.is_defense_2_shape = UNSET;
 	rs690.shape_2_defense_too_near = 0;
@@ -159,6 +161,7 @@ int rs690_init_hook( void )
 		f->num_pulses = 0;
 		f->pulses = NULL;
 		f->num_channels = 0;
+		f->max_seq_len = 0;
 		f->pm = NULL;
 		f->delay = 0;
 		f->is_delay = UNSET;

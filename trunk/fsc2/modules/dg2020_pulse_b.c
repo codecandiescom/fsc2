@@ -478,6 +478,28 @@ bool dg2020_change_pulse_position( long pnum, double p_time )
 	p->has_been_active |= ( p->is_active = IS_ACTIVE( p ) );
 	p->needs_update = NEEDS_UPDATE( p );
 
+	/* Also shift shape and TWT pulses associated with the pulse */
+
+	if ( p->sp != NULL )
+	{
+		p->sp->pos = p->pos;
+		p->sp->old_pos = p->old_pos;
+		p->sp->is_old_pos = p->is_old_pos;
+		
+		p->sp->has_been_active |= ( p->sp->is_active = p->is_active );
+		p->sp->needs_update = p->needs_update;
+	}
+
+	if ( p->tp != NULL )
+	{
+		p->tp->pos = p->pos;
+		p->tp->old_pos = p->old_pos;
+		p->tp->is_old_pos = p->is_old_pos;
+
+		p->tp->has_been_active |= ( p->tp->is_active = p->is_active );
+		p->tp->needs_update = p->needs_update;
+	}
+
 	if ( p->needs_update )
 		dg2020.needs_update = SET;
 
@@ -535,6 +557,28 @@ bool dg2020_change_pulse_length( long pnum, double p_time )
 
 	p->has_been_active |= ( p->is_active = IS_ACTIVE( p ) );
 	p->needs_update = NEEDS_UPDATE( p );
+
+	/* Also lengthen shape and TWT pulses associated with the pulse */
+
+	if ( p->sp != NULL )
+	{
+		p->sp->len = p->len;
+		p->sp->old_len = p->old_len;
+		p->sp->is_old_len = p->is_old_len;
+
+		p->sp->has_been_active |= ( p->sp->is_active = p->is_active );
+		p->sp->needs_update = p->needs_update;
+	}
+
+	if ( p->tp != NULL )
+	{
+		p->tp->len = p->len;
+		p->tp->old_len = p->old_len;
+		p->tp->is_old_len = p->is_old_len;
+
+		p->tp->has_been_active |= ( p->tp->is_active = p->is_active );
+		p->tp->needs_update = p->needs_update;
+	}
 
 	if ( p->needs_update )
 		dg2020.needs_update = SET;
