@@ -61,9 +61,9 @@ char *get_string( const char *fmt, ... )
 			continue;
 		}
 
-		if ( wr + 1 > len )        /* newer glibs return the number of chars */
-		{                          /* needed, not counting the trailing '\0' */
-			len = wr + 1;
+		if ( ( size_t ) wr + 1 > len )   /* newer glibs return the number of */
+		{	                             /* chars needed, not counting the   */
+			len = wr + 1;                /* trailing '\0'                    */
 			continue;
 		}
 
