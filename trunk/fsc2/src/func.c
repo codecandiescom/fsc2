@@ -63,39 +63,39 @@ static bool Dont_Save;
 */
 
 
-Var *f_int( Var *v  );
-Var *f_float( Var *v  );
-Var *f_round( Var *v  );
-Var *f_floor( Var *v  );
-Var *f_ceil( Var *v  );
-Var *f_abs( Var *v );
-Var *f_sin( Var *v  );
-Var *f_cos( Var *v  );
-Var *f_tan( Var *v  );
-Var *f_asin( Var *v  );
-Var *f_acos( Var *v  );
-Var *f_atan( Var *v  );
-Var *f_sinh( Var *v  );
-Var *f_cosh( Var *v  );
-Var *f_tanh( Var *v  );
-Var *f_exp( Var *v  );
-Var *f_ln( Var *v  );
-Var *f_log( Var *v  );
-Var *f_sqrt( Var *v  );
-Var *f_print( Var *v  );
-Var *f_wait( Var *v  );
+Var *f_int(     Var *v );
+Var *f_float(   Var *v );
+Var *f_round(   Var *v );
+Var *f_floor(   Var *v );
+Var *f_ceil(    Var *v );
+Var *f_abs(     Var *v );
+Var *f_sin(     Var *v );
+Var *f_cos(     Var *v );
+Var *f_tan(     Var *v );
+Var *f_asin(    Var *v );
+Var *f_acos(    Var *v );
+Var *f_atan(    Var *v );
+Var *f_sinh(    Var *v );
+Var *f_cosh(    Var *v );
+Var *f_tanh(    Var *v );
+Var *f_exp(     Var *v );
+Var *f_ln(      Var *v );
+Var *f_log(     Var *v );
+Var *f_sqrt(    Var *v );
+Var *f_print(   Var *v );
+Var *f_wait(    Var *v );
 Var *f_init_1d( Var *v );
 Var *f_init_2d( Var *v );
 Var *f_display( Var *v );
-Var *f_dim( Var *v );
-Var *f_size( Var *v );
-Var *f_sizes( Var *v );
-Var *f_getf( Var *v );
-Var *f_save( Var *v );
-Var *f_fsave( Var *v );
-Var *f_save_p( Var *v );
-Var *f_save_o( Var *v );
-Var *f_save_c( Var * );
+Var *f_dim(     Var *v );
+Var *f_size(    Var *v );
+Var *f_sizes(   Var *v );
+Var *f_getf(    Var *v );
+Var *f_save(    Var *v );
+Var *f_fsave(   Var *v );
+Var *f_save_p(  Var *v );
+Var *f_save_o(  Var *v );
+Var *f_save_c(  Var *v );
 
 
 /* The following variables are shared with loader.c which adds further 
@@ -143,7 +143,7 @@ Func Def_Fncts[ ] =              /* List of built-in functions */
 	{ "save_output",  f_save_o,       -1, ACCESS_EXP, 0 },
 	{ "save_comment", f_save_c,       -1, ACCESS_EXP, 0 },
 	{ NULL,           NULL,            0, 0,          0 }
-	                                     /* marks last entry, don't remove ! */
+	                   /* last set marks the very last entry, don't remove ! */
 };
 
 
@@ -157,7 +157,7 @@ bool functions_init( void )
 	No_File_Numbers = UNSET;
 	Dont_Save = UNSET;
 
-	/* count number of built-in functions */
+	/* Count number of built-in functions */
 
 	for ( Num_Def_Func = 0; Def_Fncts[ Num_Def_Func ].fnct != NULL;
 		  Num_Def_Func++ )
@@ -165,7 +165,8 @@ bool functions_init( void )
 
 	Num_Func = Num_Def_Func;
 
-	/* 1. Get new memory for the functions structures and copy the built in
+	/*
+	   1. Get new memory for the functions structures and copy the built in
 	      functions into it.
 	   2. Parse the function name data base `Functions' where all additional
 	      functions have to be listed.
@@ -215,12 +216,12 @@ void functions_exit( void )
 }
 
 
-/*------------------------------------------------------------------------*/
-/* Function tries to find a function in the list of built-in and loaded   */
-/* functions. If it does it creates a new variable on the variables stack */
-/* with a pointer to the function and returns a pointer to the variable.  */
-/* If the function can't be found it returns a NULL pointer.              */
-/*------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*/
+/* Function tries to find a function in the list of built-in and loaded */
+/* functions. If it finds it it creates a new variable on the variables */ 
+/* stack with a pointer to the function and returns a pointer to the    */
+/* variable. If the function can't be found it returns a NULL pointer.  */
+/*----------------------------------------------------------------------*/
 
 Var *func_get( const char *name, int *access )
 {
@@ -228,9 +229,9 @@ Var *func_get( const char *name, int *access )
 	Var *ret;
 
 
-	/* try to find the function by its name and if found create a variable
-	   on the variable stack with a pointer to the actual function and the
-	   number of arguments. Also copy the functions name and access flag. */
+	/* Try to find the function by its name and if found create a variable on
+	   the variable stack with a pointer to the function and the number of
+	   arguments. Also copy the functions name and access flag. */
 
 	for ( i = 0; i < Num_Func; i++ )
 	{
@@ -268,14 +269,13 @@ Var *func_call( Var *f )
 	int i;
 	
 
-	/* Check that it's really a function variable - you can never be sure
-	   someone isn't trying to be using some undocumented features but doesn't
-	   get it right. (Do we really need this?) */
+	/* Check (and double-check) that it's really a function variable - one
+	   can never be sure someone really got it right... */
 
 	if ( f->type != FUNC )
 	{
-		eprint( FATAL, "%s:%ld: Variable passed to `func_call()' doesn't "
-				"have type `FUNC'.\n", Fname, Lc );
+		eprint( FATAL, "%s:%ld: Variable passed to `func_call()' isn't "
+				"of type `FUNC'.\n", Fname, Lc );
 		THROW( EXCEPTION );
 	}
 
@@ -295,11 +295,13 @@ Var *func_call( Var *f )
 
 	if ( f->dim >= 0 )
 	{
+		/* Count number of arguments on the stack */
+
 		for ( ac = 0, ap = f->next; ap != NULL; ++ac, ap = ap->next )
 			;
 
 		/* If there are too many arguments utter a warning and remove the
-		   superfluous variables */
+		   superfluous ones */
 
 		if ( ac > f->dim )
 		{
@@ -315,8 +317,7 @@ Var *func_call( Var *f )
 			}
 		}
 
-		/* Less arguments on the stack than needed by the function is a fatal
-		   error. */
+		/* Less arguments than needed by the function is a fatal error. */
 
 		if ( ac < f->dim )
 		{
@@ -334,7 +335,7 @@ Var *func_call( Var *f )
 	else
 		ret = ( *f->val.fnct )( NULL );
 
-	/* Finally do clean up, remove the variable with the function and all
+	/* Finally do clean up, i.e. remove the variable with the function and all
 	   parameters - just keep the return value */
 
 	for ( ap = f; ap != ret; ap = apn )
