@@ -75,24 +75,24 @@ sub read_input {
 		defined( $line = <$if> ) or die "Premature end of input at line $..\n";
 		$line =~ /^TB: (\d+(\.\d+)?([eE][+-]?\d+)?)$/
 			or die "Invalid input at line $..\n";
+		$time_base = $1;
 	} else {
 		defined( $line = <$if> ) or exit 1;
 		$line =~ /^TB: (\d+(\.\d+)?([eE][+-]?\d+)?)$/ or exit 1;
+		$time_base = $1;
 	}
-
-	$time_base = $1;
 
 	# Read the total negative delay
 
 	if ( $verbose ) {
 		defined( $line = <$if> ) or die "Premature end of input at line $..\n";
-		$line =~ /^D: (\d+)?$/ or die "Invalid input at line $..\n";
+		$line =~ /^D: (\d+)$/ or die "Invalid input at line $..\n";
+		$Delay = $1;
 	} else {
 		defined( $line = <$if> ) or exit 1;
-		$line =~ /^D: (\d+)?$/ or exit 1;
+		$line =~ /^D: (\d+)$/ or exit 1;
+		$Delay = $1;
 	}
-
-	$Delay = $1;
 
 	if ( $verbose ) {
 		defined( $line = <$if> ) or die "Premature end of input at line $..\n";
