@@ -235,6 +235,15 @@ continuous sweeps (instead of simulating a sweep by stepping the
 current) the second argument isn't the sweep step size but must be the
 sweep rate in units of @code{A/s}.
 
+For the @strong{Bruker ER032M} field controller for some combinations of
+the start field and field step size deviations between the requested
+field and the real field may result of up to @w{25 mG}. If the maximum
+field deviation was larger than @w{5 mG} at the end of the test run as
+well as the experiment the maximum field deviation is printed out. To
+minimize these deviations use a start field that is a multiple of @w{50
+mG} and avoid sweeps with more than about 2000 steps away from the start
+field.
+
 
 @anchor{magnet_fast_init}
 @item magnet_fast_init()
@@ -277,6 +286,13 @@ can only be called in the @code{EXPERIMENT} section.
 
 For the Oxford magnet sweep power supply (@code{ips20_4}) this function will
 automatically stop a running sweep.
+
+For the @strong{Bruker ER032M} field controller setting a field with
+this function while also having initialized the magnet using
+@code{magnet_setup()} may result in deviations between the requested
+field and the real field of up to @w{25 mG}. If the maximum field
+deviation was larger than @w{5 mG} at the end of the test run as well
+as the experiment the maximum field deviation is printed out.
 
 
 @anchor{sweep_up}
