@@ -324,9 +324,7 @@ Var *lockin_sensitivity( Var *v )
 				DEVICE_NAME, Cur_Func );
 	sens = VALUE( v );
 
-	if ( ( v = vars_pop( v ) ) != NULL )
-		eprint( WARN, SET, "%s: Superfluous argument%s in call of function "
-				"%s().\n", DEVICE_NAME, v->next != NULL ? "s" : "", Cur_Func );
+	too_many_arguments( v, DEVICE_NAME );
 	
 	if ( sens < 0.0 )
 	{
@@ -441,9 +439,7 @@ Var *lockin_time_constant( Var *v )
 				"in %s().\n", DEVICE_NAME, Cur_Func );
 	tc = VALUE( v );
 
-	if ( ( v = vars_pop( v ) ) != NULL )
-		eprint( WARN, SET, "%s: Superfluous argument%s in call of function "
-				"%s().\n", DEVICE_NAME, v->next != NULL ? "s" : "", Cur_Func );
+	too_many_arguments( v, DEVICE_NAME );
 
 	if ( tc <= 0.0 )
 	{
@@ -553,9 +549,7 @@ Var *lockin_phase( Var *v )
 				DEVICE_NAME, Cur_Func );
 	phase = VALUE( v );
 
-	if ( ( v = vars_pop( v ) ) != NULL )
-		eprint( WARN, SET, "%s: Superfluous argument%s in call of function "
-				"%s().\n", DEVICE_NAME, v->next != NULL ? "s" : "", Cur_Func );
+	too_many_arguments( v, DEVICE_NAME );
 	
 	while ( phase >= 360.0 )    /* convert to 0-359 degree range */
 		phase -= 360.0;
@@ -671,9 +665,7 @@ Var *lockin_dac_voltage( Var *v )
 
 	voltage = VALUE( v );
 
-	if ( ( v = vars_pop( v ) ) != NULL )
-		eprint( WARN, SET, "%s: Superfluous argument%s in call of function "
-				"%s().\n", DEVICE_NAME, v->next != NULL ? "s" : "", Cur_Func );
+	too_many_arguments( v, DEVICE_NAME );
 
 	if ( fabs( voltage ) > 10.24 )
 	{

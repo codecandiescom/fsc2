@@ -448,7 +448,7 @@ Var *lockin_dac_voltage( Var *v )
 		THROW( EXCEPTION )
 	}
 
-	too_many_arguments( v );
+	too_many_arguments( v, DEVICE_NAME );
 	
 	sr810.dac_voltage[ port - 1 ] = voltage;
 
@@ -497,7 +497,7 @@ Var *lockin_sensitivity( Var *v )
 				DEVICE_NAME, Cur_Func );
 	sens = VALUE( v );
 
-	too_many_arguments( v );
+	too_many_arguments( v, DEVICE_NAME );
 	
 	if ( sens < 0.0 )
 	{
@@ -612,7 +612,7 @@ Var *lockin_time_constant( Var *v )
 				"%s().\n", DEVICE_NAME, Cur_Func );
 	tc = VALUE( v );
 
-	too_many_arguments( v );
+	too_many_arguments( v, DEVICE_NAME );
 	
 	if ( tc < 0.0 )
 	{
@@ -727,7 +727,7 @@ Var *lockin_phase( Var *v )
 				DEVICE_NAME, Cur_Func );
 	phase = VALUE( v );
 
-	too_many_arguments( v );
+	too_many_arguments( v, DEVICE_NAME );
 	
 	while ( phase >= 360.0 )    /* convert to 0-359 degree range */
 		phase -= 360.0;
@@ -781,7 +781,7 @@ Var *lockin_harmonic( Var *v )
 	else
 		harm = v->val.lval;
 
-	too_many_arguments( v );
+	too_many_arguments( v, DEVICE_NAME );
 
 	if ( FSC2_MODE == TEST )
 		freq = MIN_MOD_FREQ;
@@ -864,7 +864,7 @@ Var *lockin_ref_freq( Var *v )
 				"frequency in %s().\n", DEVICE_NAME, Cur_Func );
 	freq = VALUE( v );
 
-	too_many_arguments( v );
+	too_many_arguments( v, DEVICE_NAME );
 	
 	if ( FSC2_MODE != TEST && sr810_get_mod_mode( ) != MOD_MODE_INTERNAL )
 	{
@@ -933,7 +933,7 @@ Var *lockin_ref_level( Var *v )
 				"%s().\n", DEVICE_NAME, Cur_Func );
 	level = VALUE( v );
 
-	too_many_arguments( v );
+	too_many_arguments( v, DEVICE_NAME );
 	
 	if ( level < MIN_MOD_LEVEL || level > MAX_MOD_LEVEL )
 	{
@@ -986,7 +986,7 @@ Var *lockin_lock_keyboard( Var *v )
 		}
 	}
 
-	too_many_arguments( v );
+	too_many_arguments( v, DEVICE_NAME );
 	
 	if ( FSC2_MODE == EXPERIMENT )
 		sr810_lock_state( lock );
