@@ -34,7 +34,6 @@
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <fcntl.h>
 #include <sys/ioctl.h>
 
 #include "ni6601.h"
@@ -245,6 +244,7 @@ int ni6601_stop_counter( int board, int counter )
 	int ret;
 	int state;
 	NI6601_DISARM d;
+	int pulser;
 
 
 	error_message = "";
@@ -273,7 +273,11 @@ int ni6601_stop_counter( int board, int counter )
 	}
 
 	if ( dev_info[ board ].state[ counter ] == NI6601_COUNTER_RUNNING )
-		ni6601_stop_counter( board, counter & 1 ? counter - 1 : counter + 1 );
+	{
+		pulser = counter & 1 ? counter - 1 : counter + 1;
+		if ( dev_info[ board ].state[ pulser ] == NI6601_PULSER_RUNNING )
+			ni6601_stop_pulses( board, pulser );
+	}
 
 	dev_info[ board ].state[ counter ] = NI6601_IDLE;
 
