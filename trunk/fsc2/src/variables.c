@@ -1797,7 +1797,7 @@ void vars_ass_from_trans_ptr( Var *src, Var *dest )
 
 	/* Again being paranoid... */
 
-	assert( dest->flags & NEED_SLICE );
+	assert( dest->flags & NEED_SLICE || dest->flags & NEED_ALLOC );
 
 	d = dest->from;
 
