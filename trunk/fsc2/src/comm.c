@@ -9,9 +9,9 @@
    be accepted as fast as possible so that the child can continue with the
    measurement immediately. The other type of messages are requests by the
    child for the parent to do some things for it, e.g. display an alert box,
-   and possibly return the user selection. The protocoll for requests is
-   quite simple - the child sends the request and waits for the answer by
-   the parent, knowing exactly what kind of data to expect.
+   and possibly return the users input. The protocoll for requests is quite
+   simple - the child sends the request and waits for the answer by the
+   parent, knowing exactly what kind of data to expect.
 
    The first problem to be addressed is how to make the parent aware of data
    send by the child. This is handled by two signals, DO_SEND and NEW_DATA.
