@@ -208,7 +208,8 @@ int me6x00_close( int board )
 	}
 
 	if ( dev_info[ board ].fd >= 0 )
-		close( dev_info[ board ].fd );
+		if ( close( dev_info[ board ].fd ) == -1 && errno == EINTR )
+			/* empty */ ;
 
 	dev_info[ board ].is_init = 0;
 

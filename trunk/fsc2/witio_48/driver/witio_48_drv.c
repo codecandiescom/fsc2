@@ -41,7 +41,8 @@ static int witio_48_open( struct inode *inode_p, struct file *file_p );
 static int witio_48_release( struct inode *inode_p, struct file * file_p );
 static int witio_48_ioctl( struct inode *inode_p, struct file *file_p,
 			   unsigned int cmd, unsigned long arg );
-static int witio_48_set_mode( WITIO_48_MODE *state );
+static int witio_48_set_mode( WITIO_48_DIO_MODE *state );
+static int witio_48_get_mode( WITIO_48_DIO_MODE *state );
 static int witio_48_dio_out( WITIO_48_DATA *data );
 static void witio_48_3x8_dio_out( WITIO_48_DATA *data );
 static void witio_48_2x12_dio_out( WITIO_48_DATA *data );
@@ -278,7 +279,7 @@ static int witio_48_ioctl( struct inode *inode_p, struct file *file_p,
 			   unsigned int cmd, unsigned long arg )
 {
 	int ret_val = 0;
-	WITIO_48_MODE state_struct;
+	WITIO_48_DIO_MODE state_struct;
 	WITIO_48_DATA data_struct;
 
 
@@ -293,11 +294,22 @@ static int witio_48_ioctl( struct inode *inode_p, struct file *file_p,
 	}
 
     switch ( cmd ) {
-	    case WITIO_48_IOC_MODE :
+	    case WITIO_48_IOC_SET_MODE :
 		    if ( witio_48_get_from_user( arg, ( void * ) &state_struct,
 						 sizeof state_struct ) ) 
 			    return -EACCES;
 		    ret_val = witio_48_set_mode( &state_struct );
+		    break;
+
+	    case WITIO_48_IOC_GET_MODE :
+		    if ( witio_48_get_from_user( arg, ( void * ) &state_struct,
+						 sizeof state_struct ) ) 
+			    return -EACCES;
+		    if ( ( ret_val = witio_48_get_mode( &state_struct ) )
+			 != 0 )
+			    break;
+		    __copy_to_user( ( WITIO_48_DIO_MODE * ) arg, &state_struct,
+				    sizeof( WITIO_48_DIO_MODE ) );
 		    break;
 
 	    case WITIO_48_IOC_DIO_OUT :
@@ -345,7 +357,7 @@ static int witio_48_get_from_user( unsigned long arg, void *to, size_t len )
 /* Function for setting the I/O-mode */
 /*-----------------------------------*/
 
-static int witio_48_set_mode( WITIO_48_MODE *state )
+static int witio_48_set_mode( WITIO_48_DIO_MODE *state )
 {
 	/* Check if the DIO number is valid */
 
@@ -359,6 +371,23 @@ static int witio_48_set_mode( WITIO_48_MODE *state )
 		return -EINVAL;
 
 	board.states[ state->dio ].mode = state->mode;
+
+	return 0;
+}
+
+
+/*-------------------------------------*/
+/* Function for returning the I/O-mode */
+/*-------------------------------------*/
+
+static int witio_48_get_mode( WITIO_48_DIO_MODE *state )
+{
+	/* Check if the DIO number is valid */
+
+	if ( state->dio < WITIO_48_DIO_1 || state->dio > WITIO_48_DIO_2 )
+		return -EINVAL;
+
+	state->mode = board.states[ state->dio ].mode;
 
 	return 0;
 }

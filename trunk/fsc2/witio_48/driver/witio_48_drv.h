@@ -31,7 +31,7 @@ typedef enum {
 	WITIO_48_MODE_2x12,
 	WITIO_48_MODE_1x24,
 	WITIO_48_MODE_16_8
-} WITIO_48_MODES;
+} WITIO_48_MODE;
 
 
 typedef enum {
@@ -48,9 +48,9 @@ typedef enum {
 
 
 typedef struct {
-	WITIO_48_DIO   dio;
-	WITIO_48_MODES mode;
-} WITIO_48_MODE;
+	WITIO_48_DIO  dio;
+	WITIO_48_MODE mode;
+} WITIO_48_DIO_MODE;
 
 
 typedef struct {
@@ -62,11 +62,14 @@ typedef struct {
 
 #define WITIO_48_MAGIC_IOC    'j'
 
-#define WITIO_48_IOC_MODE    _IOW ( WITIO_48_MAGIC_IOC, 0x90, WITIO_48_MODE * )
+#define WITIO_48_IOC_SET_MODE _IOW ( WITIO_48_MAGIC_IOC, 0x90, \
+				     WITIO_48_DIO_MODE * )
+#define WITIO_48_IOC_GET_MODE _IOWR( WITIO_48_MAGIC_IOC, 0x90, \
+				     WITIO_48_DIO_MODE * )
 #define WITIO_48_IOC_DIO_OUT _IOW ( WITIO_48_MAGIC_IOC, 0x91, WITIO_48_DATA * )
 #define WITIO_48_IOC_DIO_IN  _IOWR( WITIO_48_MAGIC_IOC, 0x92, WITIO_48_DATA * )
 
-#define WITIO_48_MIN_NR      _IOC_NR( WITIO_48_IOC_MODE )
+#define WITIO_48_MIN_NR      _IOC_NR( WITIO_48_IOC_SET_MODE )
 #define WITIO_48_MAX_NR      _IOC_NR( WITIO_48_IOC_DIO_IN )
 
 
@@ -134,7 +137,7 @@ struct Registers {
 
 
 struct State {
-	WITIO_48_MODES mode;
+	WITIO_48_MODE mode;
 	unsigned char state[ 3 ];
 	unsigned char out_value[ 3 ];
 };
@@ -153,7 +156,7 @@ struct Board {
 
 #if defined WITIO_48_DEBUG
 #define PDEBUG( fmt, args... ) \
-	{ printk( KERN_DEBUG NI6601_NAME ": " fmt, ## args ); }
+	{ printk( KERN_DEBUG "witio_48: " fmt, ## args ); }
 #else
 #define PDEBUG( ftm, args... )
 #endif
