@@ -23,9 +23,9 @@
 The most simple approach would be to have a set of functions for each
 individual device, i.e.@: to have a different function for e.g.@:
 fetching data from each of a series of different digitizing
-oscilloscopes.  But this would be a nuisance for someone writing @b{EDL}
-programs because whenever for example the oscilloscope has to be
-changed also all the programs have to be adjusted to the special
+oscilloscopes.  But this would be a nuisance for someone writing
+@acronym{EDL} programs because whenever for example the oscilloscope has
+to be changed also all the programs have to be adjusted to the special
 capabilities of the digitizer that's just using.
 
 Thus it's reasonable to have generic functions for a similar devices
@@ -81,8 +81,8 @@ name instead.
 
 Since it is not possible to measure the field using just the magnet
 power supply it is necessary also to specify a gaussmeter to enable
-@b{fsc2} to control the magnet. The module name of the gaussmeter has to
-appear @b{before} the magnet module entry in the @code{DEVICES}
+@acronym{fsc2} to control the magnet. The module name of the gaussmeter
+has to appear @b{before} the magnet module entry in the @code{DEVICES}
 section. See the next section for the implemented gaussmeters and the
 related functions.
 
@@ -104,11 +104,12 @@ section starts.
 @item magnet_fast_init()
 @findex magnet_fast_init()
 Calling this functions in the @code{PREPARATIONS} section will shorten
-the time @b{fsc2} uses for calibration of the field sweep at the start
-of the experiment. Unfortunately, this also reduces the precision of the
-field sweep. Whenever an experiment is restarted (i.e.@: if no new EDL
-file is loaded in between) this shortened calibration is done to check
-that the parameters didn't check significantly since the last run.
+the time @acronym{fsc2} uses for calibration of the field sweep at the
+start of the experiment. Unfortunately, this also reduces the precision
+of the field sweep. Whenever an experiment is restarted (i.e.@: if no
+new @acronym{EDL} file is loaded in between) this shortened calibration
+is done to check that the parameters didn't check significantly since
+the last run.
 
 
 @item set_field()
@@ -183,7 +184,8 @@ and have to be specified in the @code{DEVICES} section @b{before} the
 magnet module.
 
 There are only two functions for gaussmeters, both only to be used in
-queries and in the @code{EXPERIMENT} section of the EDL program only.
+queries and in the @code{EXPERIMENT} section of the @acronym{EDL}
+program only.
 
 @table @samp
 @item find_field()
@@ -286,7 +288,7 @@ models SR510 and SR530 the allowed values for the required arguments are
 corresponding to the different numbers of DAC ports and their numbering
 printed on the back side. If no further argument is given the function
 returns the current voltage applied to the DAC port (which is
-atomatically set to @w{0 V} at the initialization of the lock-in
+automatically set to @w{0 V} at the initialization of the lock-in
 amplifier if no voltage has been set previous to the @code{EXPERIMENT}
 section). If a second argument is given the DAC will be set to the
 corresponding voltage. The function returns the voltage that has been
