@@ -2258,12 +2258,8 @@ static void recreate_Tool_Box( void )
 
 	fl_end_form( );
 
-	printf( "last: x = %d, y = %d\n", last_io->x, last_io->y );
-
 	Tool_Box->w = last_io->x + OBJ_WIDTH + OFFSET_X0;
 	Tool_Box->h = last_io->y + OBJ_HEIGHT + OFFSET_Y0;
-
-	printf( "Tool: x = %d, y = %d\n", Tool_Box->w, Tool_Box->h );
 
 	fl_set_form_size( Tool_Box->Tools, Tool_Box->w, Tool_Box->h );
 	fl_adjust_form_size( Tool_Box->Tools );
