@@ -476,7 +476,7 @@ double hp8647a_set_mod_ampl( int type, double ampl )
 							( double ) MAX_PHASE_AMPL );
 				THROW( EXCEPTION );
 			}
-			sprintf( cmd, "PM:DEV: %.*f RAD", ampl < 9.95 ? 2 : 1, ampl );
+			sprintf( cmd, "PM:DEV %.*f RAD", ampl < 9.95 ? 2 : 1, ampl );
 			break;
 
 		default :                         /* this can never happen... */
