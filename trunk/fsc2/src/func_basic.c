@@ -27,6 +27,7 @@
 
 static void get_array_params( Var *v, size_t *len, long **ilp, double **idp );
 static double gauss_random( void );
+static double datanh( double arg );
 
 static bool grand_is_old = UNSET;
 
@@ -873,6 +874,204 @@ Var *f_tanh( Var *v )
 	T_free( rdp );
 
 	return new_var;
+}
+
+
+/*-----------------------------------------------*/
+/* Inverse of sinh of argument (result is float) */
+/*-----------------------------------------------*/
+
+Var *f_asinh( Var *v )
+{
+	Var *new_var;
+	size_t i;
+	size_t len;
+	double *rdp;
+	long *ilp;
+	double *idp;
+	double arg, new_arg;
+	int sgn;
+	bool is_int;
+
+
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_CONT_ARR | FLOAT_CONT_ARR |
+				   ARR_REF | ARR_PTR | INT_ARR | FLOAT_ARR );
+
+	if ( v->type & ( INT_VAR | FLOAT_VAR ) )
+	{
+		arg = VALUE( v );
+		sgn = arg >= 0.0 ? 1 : -1;
+		new_arg = arg = sqrt( 1.0 / ( 1.0 + 1.0 / ( arg * arg ) ) );
+
+		if ( new_arg >= 1.0 )
+		{
+			print( FATAL, "Argument (%f) out of range.\n", arg );
+			THROW( EXCEPTION );
+		}
+
+		return vars_push( FLOAT_VAR, sgn * datanh( new_arg ) );
+	}
+
+	get_array_params( v, &len, &ilp, &idp );
+
+	is_int = ilp != NULL ? SET : UNSET;
+	rdp = T_malloc( len * sizeof *rdp );
+	for ( i = 0; i < len; i++ )
+	{
+		arg = is_int ? ( double ) *ilp++ : *idp++;
+		sgn = arg >= 0.0 ? 1 : -1;
+		new_arg = sqrt( 1.0 / ( 1.0 + 1.0 / ( arg * arg ) ) );
+
+		if ( new_arg >= 1.0 )
+		{
+			print( FATAL, "Argument #%ld (%f) out of range.\n",
+				   i + 1, arg );
+			THROW( EXCEPTION );
+		}
+
+		rdp[ i ] = sgn * datanh( new_arg );
+	}
+
+	new_var = vars_push( FLOAT_ARR, rdp, len );
+	new_var->flags |= v->flags & IS_DYNAMIC;
+
+	T_free( rdp );
+
+	return new_var;
+}
+
+
+/*-----------------------------------------------*/
+/* Inverse of cosh of argument (result is float) */
+/*-----------------------------------------------*/
+
+Var *f_acosh( Var *v )
+{
+	Var *new_var;
+	size_t i;
+	size_t len;
+	double *rdp;
+	long *ilp;
+	double *idp;
+	double arg, new_arg;
+	bool is_int;
+
+
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_CONT_ARR | FLOAT_CONT_ARR |
+				   ARR_REF | ARR_PTR | INT_ARR | FLOAT_ARR );
+
+	if ( v->type & ( INT_VAR | FLOAT_VAR ) )
+	{
+		arg = VALUE( v );
+		if ( arg < 1.0 ||
+			 ( new_arg = sqrt( 1.0 - 1.0 / ( arg * arg ) ) ) >= 1.0 )
+		{
+			print( FATAL, "Argument (%f) out of range.\n", arg );
+			THROW( EXCEPTION );
+		}
+
+		return vars_push( FLOAT_VAR, datanh( new_arg ) );
+	}
+
+	get_array_params( v, &len, &ilp, &idp );
+
+	is_int = ilp != NULL ? SET : UNSET;
+	rdp = T_malloc( len * sizeof *rdp );
+	for ( i = 0; i < len; i++ )
+	{
+		arg = is_int ? ( double ) *ilp++ : *idp++;
+		if ( arg < 1.0 ||
+			 ( new_arg = sqrt( 1.0 - 1.0 / ( arg * arg ) ) ) >= 1.0 )
+		{
+			print( FATAL, "Argument #%ld (%f) out of range.\n", i + 1, arg );
+			THROW( EXCEPTION );
+		}
+
+		rdp[ i ] = datanh( new_arg );
+	}
+
+	new_var = vars_push( FLOAT_ARR, rdp, len );
+	new_var->flags |= v->flags & IS_DYNAMIC;
+
+	T_free( rdp );
+
+	return new_var;
+}
+
+
+/*-----------------------------------------------*/
+/* Inverse of tanh of argument (result is float) */
+/*-----------------------------------------------*/
+
+Var *f_atanh( Var *v )
+{
+	Var *new_var;
+	size_t i;
+	size_t len;
+	double *rdp;
+	long *ilp;
+	double *idp;
+	double arg;
+	bool is_int;
+
+
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_CONT_ARR | FLOAT_CONT_ARR |
+				   ARR_REF | ARR_PTR | INT_ARR | FLOAT_ARR );
+
+	if ( v->type & ( INT_VAR | FLOAT_VAR ) )
+	{
+		arg = VALUE( v );
+		if ( arg >= 1.0 || arg <= -1.0 )
+		{
+			print( FATAL, "Argument (%f) out of range.\n", arg );
+			THROW( EXCEPTION );
+		}
+
+		return vars_push( FLOAT_VAR, datanh( arg ) );
+	}
+
+	get_array_params( v, &len, &ilp, &idp );
+
+	is_int = ilp != NULL ? SET : UNSET;
+	rdp = T_malloc( len * sizeof *rdp );
+	for ( i = 0; i < len; i++ )
+	{
+		arg = is_int ? ( double ) *ilp++ : *idp++;
+		if ( arg >= 1.0 || arg <= -1.0 )
+		{
+			print( FATAL, "Argument #%ld (%f) out of range.\n", i + 1, arg );
+			THROW( EXCEPTION );
+		}
+
+		rdp[ i ] = datanh( arg );
+	}
+
+	new_var = vars_push( FLOAT_ARR, rdp, len );
+	new_var->flags |= v->flags & IS_DYNAMIC;
+
+	T_free( rdp );
+
+	return new_var;
+}
+
+
+/*-----------------------------------*/
+/*-----------------------------------*/
+
+static double datanh( double arg )
+{
+	int sgn;
+
+	sgn = arg >= 0 ? 1 : -1;
+	arg = fabs( arg );
+
+	if ( 1.0 - arg < DBL_EPSILON )
+	{
+		print( SEVERE, "Argument overflow.\n" );
+		arg = 1.0 - DBL_EPSILON;
+	}
+
+	return sgn * 0.5 * log( ( 1.0 + arg ) / ( 1.0 - arg ) );
 }
 
 

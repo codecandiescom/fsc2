@@ -1443,6 +1443,27 @@ of an array).
 Returns the hyperbolic tangent of the argument (simple number or all
 elements of an array).
 
+
+@anchor{asinh}
+@item asinh()
+@findex asinh()
+Returns the inverse of the hyperbolic sine function of the argument
+(simple number or all elements of an array).
+
+
+@anchor{acosh}
+@item acosh()
+@findex acosh()
+Returns the inverse of the hyperbolic cosine function of the argument
+(simple number or all elements of an array).
+
+
+@anchor{atanh}
+@item atanh()
+@findex atanh()
+Returns the inverse of the hyperbolic tangent function of the argument
+(simple number or all elements of an array).
+
 @end table
 
 
