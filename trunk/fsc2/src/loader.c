@@ -43,11 +43,11 @@ static int func_cmp( const void *a, const void *b );
 static void resolve_generic_type( Device *dev );
 
 
-/*------------------------------------------------------------------------*/
-/* Function to be called after the DEVICES section is read in. It loads   */
-/* the library files and tries to resolve the references to the functions */
-/* listed in `Functions' and stores pointers to the functions in `Fncts'. */
-/*------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
+/* Function is called after the DEVICES section has been read in. It loads */
+/* the library files and tries to resolve the references to the functions  */
+/* listed in `Functions' and stores pointers to the functions in `Fncts'.  */
+/*-------------------------------------------------------------------------*/
 
 void load_all_drivers( void )
 {
