@@ -536,6 +536,157 @@ void spectrapro_300i_get_gratings( void )
 /*--------------------------------------------------------*/
 /*--------------------------------------------------------*/
 
+long spectrapro_300i_get_offset( long grating )
+{
+	const char *reply;
+	char *sp, *nsp;
+	long offset = 0;
+	long i;
+
+
+	fsc2_assert( grating >= 1 && grating <= MAX_GRATINGS );
+
+	reply = spectrapro_300i_talk( "MONO-EESTATUS", 4096, 1 );
+
+	if ( ( sp = strstr( reply, "offset" ) ) == NULL )
+	{
+		T_free( ( void * ) reply );
+		spectrapro_300i_comm_fail( );
+	}
+
+	sp += strlen( "offset" );
+
+	for ( i = 0; i < grating; i++ )
+	{
+		offset = strtol( sp, &nsp, 10 );
+		if ( sp == nsp ||
+			 ( ( offset == LONG_MIN || offset == LONG_MAX ) &&
+			   errno == ERANGE ) )
+		{
+			T_free( ( void * ) reply );
+			spectrapro_300i_comm_fail( );
+		}
+		sp = nsp;
+	}
+
+	T_free( ( void * ) reply );
+	return offset;
+}
+	
+
+/*--------------------------------------------------------*/
+/*--------------------------------------------------------*/
+
+void spectrapro_300i_set_offset( long grating, long offset )
+{
+	char *buf;
+
+
+	fsc2_assert( grating >= 1 && grating <= MAX_GRATINGS );
+
+	grating--;
+
+	fsc2_assert( spectrapro_300i.grating[ grating ].is_installed );
+	fsc2_assert ( labs( offset - ( grating % 3 ) * INIT_OFFSET ) <=
+				  INIT_OFFSET_RANGE /
+				  spectrapro_300i.grating[ grating ].grooves );
+
+	buf = get_string( "%ld %ld INIT-SP300-OFFSET", offset, grating );
+
+	TRY
+	{
+		spectrapro_300i_send( buf );
+		T_free( buf );
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+	{
+		T_free( buf );
+		RETHROW( );
+	}
+
+	T_free( buf );
+
+	spectrapro_300i_send( "MONO-RESET" );
+}
+
+
+/*--------------------------------------------------------*/
+/*--------------------------------------------------------*/
+
+long spectrapro_300i_get_adjust( long grating )
+{
+	const char *reply;
+	char *sp, *nsp;
+	long gadjust = 0;
+	long i;
+
+
+	fsc2_assert( grating >= 1 && grating <= MAX_GRATINGS );
+
+	reply = spectrapro_300i_talk( "MONO-EESTATUS", 4096, 1 );
+
+	if ( ( sp = strstr( reply, "adjust" ) ) == NULL )
+	{
+		T_free( ( void * ) reply );
+		spectrapro_300i_comm_fail( );
+	}
+
+	sp += strlen( "offset" );
+
+	for ( i = 0; i < grating; i++ )
+	{
+		gadjust = strtol( sp, &nsp, 10 );
+		if ( sp == nsp ||
+			 ( ( gadjust == LONG_MIN || gadjust == LONG_MAX ) &&
+			   errno == ERANGE ) )
+		{
+			T_free( ( void * ) reply );
+			spectrapro_300i_comm_fail( );
+		}
+		sp = nsp;
+	}
+
+	T_free( ( void * ) reply );
+	return gadjust;
+}
+	
+
+/*--------------------------------------------------------*/
+/*--------------------------------------------------------*/
+
+void spectrapro_300i_set_adjust( long grating, long adjust )
+{
+	char *buf;
+
+
+	fsc2_assert( grating >= 1 && grating <= MAX_GRATINGS );
+	fsc2_assert( spectrapro_300i.grating[ grating - 1 ].is_installed );
+	fsc2_assert ( labs( adjust - INIT_ADJUST ) <= INIT_ADJUST_RANGE );
+
+	buf = get_string( "%ld %ld INIT-SP300-GADJUST", adjust, grating - 1 );
+
+	TRY
+	{
+		spectrapro_300i_send( buf );
+		T_free( buf );
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+	{
+		T_free( buf );
+		RETHROW( );
+	}
+
+	T_free( buf );
+
+	spectrapro_300i_send( "MONO-RESET" );
+}
+
+
+/*--------------------------------------------------------*/
+/*--------------------------------------------------------*/
+
 void spectrapro_300i_install_grating( char *part_no, long grating )
 {
 	char *buf;
@@ -758,11 +909,11 @@ static bool spectrapro_300i_comm( int type, ... )
 			/* Set transfer mode to 8 bit, no parity and 1 stop bit (8N1)
 			   and ignore control lines, don't use flow control. */
 
-			spectrapro_300i.tio->c_cflag  = 0;
-			spectrapro_300i.tio->c_cflag  = CLOCAL | CREAD | CS8;
-			spectrapro_300i.tio->c_iflags = IGNBRK;
-			spectrapro_300i.tio->c_oflags = 0;
-			spectrapro_300i.tio->c_lflags = 0;
+			spectrapro_300i.tio->c_cflag = 0;
+			spectrapro_300i.tio->c_cflag = CLOCAL | CREAD | CS8;
+			spectrapro_300i.tio->c_iflag = IGNBRK;
+			spectrapro_300i.tio->c_oflag = 0;
+			spectrapro_300i.tio->c_lflag = 0;
 			cfsetispeed( spectrapro_300i.tio, SERIAL_BAUDRATE );
 			cfsetospeed( spectrapro_300i.tio, SERIAL_BAUDRATE );
 
