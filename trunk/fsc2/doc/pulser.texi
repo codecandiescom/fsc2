@@ -192,45 +192,6 @@ HFS9003} the allowed trigger level range is @w{-4.7 V} to @w{+4.7 V}.
 
 @c ########################################################
 
-@anchor{Maximum pulse pattern length}
-@subsection Maximum pulse pattern length
-@cindex Maximum pulse pattern length
-@cindex @code{MAXIMUM_PATTERN_LENGTH}
-
-In most cases the program will be able to figure out automatically how
-long the length of the longest pulse pattern in the experiment is going
-to be when doing the test run. The longest pulse pattern length is
-needed to set up the pulser correctly. Unfortunately, there are certain
-syntax constructs that make it difficult or even impossible to find out
-this maximum pattern length. These constructs are @code{FOREVER} loops
-and sometimes cases, where changes of pulse positions or lengths are
-done within @code{IF-ELSE} or @code{UNLESS-ELSE} constructs (please also
-see the discussion of the problems introduced by @code{FOREVER} loops
-and @code{IF} and @code{ELSE} constructs, @pxref{Control structures}).
-
-Whenever there is a reason to suspect that these problems may occur one
-can set the maximum pulse pattern length manually (i.e.@: the end point
-of the last pulse when it has been set to its latest position in the
-experiment. This is done by a statement in the @code{ASSIGMENTS} section
-starting with the @code{MAXIMUM_PATTERN_LENGTH} keyword@footnote{In
-@code{MAXIMUM_PATTERN_LENGTH} @code{MAXIMUM} can be abbreviated to
-@code{MAX}, @code{PATTERN} to @code{PATT} and @code{LENGTH} to
-@code{LEN}. The intermediate underscore characters are also optional.}:
-@example
-MAXIMUM_PATTERN_LENGTH: 1.2 us
-@end example
-This will tell the program to expect a maximum pattern length of 1.2
-micro-seconds. Unless in the test run a longer pattern length is found,
-this value is used. It is not a problem to specify too long a maximum
-pattern length, so a conservative guess will do. The only penality
-incurred is a slightly longer time needed to set up the pulser at the
-start of the experiment. On the other hand, too short a pattern length
-will lead to the experiment being stopped with an error message when the
-actual pattern length becomes larger than the one specified.
-
-
-@c ########################################################
-
 @anchor{Channel setup}
 @subsubsection Channel setup
 @cindex Channel setup
@@ -554,6 +515,68 @@ between the pulses is large enough to allow setting the phase pulses. If
 the pulse distances get very small it may drop the grace period but the
 phase switch delay will always be there (or the program will abort with
 an error message).
+
+
+@c ########################################################
+
+@anchor{Maximum pulse pattern length}
+@subsubsection Maximum pulse pattern length
+@cindex Maximum pulse pattern length
+@cindex @code{MAXIMUM_PATTERN_LENGTH}
+
+In most cases the program will be able to figure out automatically how
+long the length of the longest pulse pattern in the experiment is going
+to be when doing the test run. The longest pulse pattern length is
+needed to set up the pulser correctly. Unfortunately, there are certain
+syntax constructs that make it difficult or even impossible to find out
+this maximum pattern length. These constructs are @code{FOREVER} loops
+and sometimes cases, where changes of pulse positions or lengths are
+done within @code{IF-ELSE} or @code{UNLESS-ELSE} constructs (please also
+see the discussion of the problems introduced by @code{FOREVER} loops
+and @code{IF} and @code{ELSE} constructs, @pxref{Control structures}).
+
+Whenever there is a reason to suspect that these problems may occur one
+can set the maximum pulse pattern length manually (i.e.@: the end point
+of the last pulse when it has been set to its latest position in the
+experiment. This is done by a statement in the @code{ASSIGMENTS} section
+starting with the @code{MAXIMUM_PATTERN_LENGTH} keyword@footnote{In
+@code{MAXIMUM_PATTERN_LENGTH} @code{MAXIMUM} can be abbreviated to
+@code{MAX}, @code{PATTERN} to @code{PATT} and @code{LENGTH} to
+@code{LEN}. The intermediate underscore characters are also optional.}:
+@example
+MAXIMUM_PATTERN_LENGTH: 1.2 us
+@end example
+This will tell the program to expect a maximum pattern length of 1.2
+micro-seconds. Unless in the test run a longer pattern length is found,
+this value is used. It is not a problem to specify too long a maximum
+pattern length, so a conservative guess will do. The only penality
+incurred is a slightly longer time needed to set up the pulser at the
+start of the experiment. On the other hand, too short a pattern length
+will lead to the experiment being stopped with an error message when the
+actual pattern length becomes larger than the one specified.
+
+
+@c ########################################################
+
+@anchor{Keeping unused pulses}
+@subsubsection Keeping unused pulses
+@cindex Keeping unused pulses
+@cindex @code{KEEP_ALL_PULSES}
+
+Usually, pulses that in the test run are found to be unused in the
+experiment are deleted and a warning message is printed. Any further
+reference to or use of these deleted pulses would lead to the
+immediate termination of the experiment. But there are a few situations
+where it can't be detected in the test run that a pulse is needed
+(e.g.@: if it is only used in an untestable @code{IF} construct) and it
+gets deleted eventhough is needed. In this case it is possible to force
+the program to keep all pulses, even if they seem to be unused. This is
+done by specifying the keyword @code{KEEP_ALL_PULSES} in the
+@code{ASSIGNMENTS} section, i.e.@: just write
+@example
+KEEP_ALL_PULSES;
+@end example
+and pulses will not be deleted even if they seem to be unused.
 
 
 @c ########################################################
