@@ -2377,6 +2377,14 @@ static DPoint *eval_display_args( Var *v, int dim, int *nsets )
 					continue;
 				}
 
+				if ( v->dim > dim )
+				{
+					print( FATAL, "Dimension of data array larger than %d\n",
+						   dim );
+					T_free( dp );
+					THROW( EXCEPTION );
+				}
+
 				dp[ *nsets ].len = sizeof( long );
 				for ( i = 0; i < v->len; i++ )
 				{
@@ -2395,6 +2403,14 @@ static DPoint *eval_display_args( Var *v, int dim, int *nsets )
 					if ( ( v = v->next ) != NULL )
 						v = v->next;
 					continue;
+				}
+
+				if ( v->dim > dim )
+				{
+					print( FATAL, "Dimension of data array larger than %d\n",
+						   dim );
+					T_free( dp );
+					THROW( EXCEPTION );
 				}
 
 				dp[ *nsets ].len = sizeof( long );

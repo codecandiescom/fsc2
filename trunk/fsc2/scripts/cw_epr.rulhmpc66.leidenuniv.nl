@@ -639,8 +639,8 @@ sr810;
 
 VARIABLES:
 
-start_field = $start_field A;
-sweep_rate    = $sweep_rate A / 1 s;
+start_field = $start_field G;
+sweep_rate    = $sweep_rate G / 1 s;
 Num_Points    = $num_points;
 
 tc = $TC;
@@ -823,8 +823,8 @@ sr810;
 
 VARIABLES:
 
-start_field = $start_field A;
-sweep_rate    = $sweep_rate A / 1 s;
+start_field = $start_field G;
+sweep_rate    = $sweep_rate G / 1 s;
 Num_Points    = $num_points;
 
 tc = $TC;
@@ -833,7 +833,7 @@ kd = $kdw Hz;
 data[ *, * ];
 avg[ Num_Points ];
 
-I = 0, J = 0, K;
+I, J = 0, K;
 File;
 field = start_field;
 ";
@@ -876,8 +876,8 @@ print F
 		display( I, data[ J, I ], 1, I, ( avg[ I ] + data[ J, I ] ) / J, 2 );
 	}
 
-	magnet_sweep( \"STOP\" );
 	lockin_auto_acquisition( \"OFF\" );
+	magnet_sweep( \"STOP\" );
 
 	avg += data[ J ];
 	clear_curve( 1, 3 );
@@ -904,21 +904,21 @@ print F "    lockin_auto_acquisition( \"ON\" );
 		display( I, data[ J, I ], 1, I, ( avg[ I ] + data[ J, I ] ) / J, 2 );
 	}
 
-	magnet_sweep( \"STOP\" );
 	lockin_auto_acquisition( \"OFF\" );
+	magnet_sweep( \"STOP\" );
 
 	avg += data[ J ];
 	clear_curve( 1, 3 );
-	display( 1, data, 3 );
+	display( 1, data[ J ], 3 );
 }
 
 
 ON_STOP:
 
+lockin_auto_acquisition( \"OFF\" );
 IF magnet_sweep( ) {
 	magnet_sweep( \"STOP\" );
 }
-lockin_auto_acquisition( \"OFF\" );
 
 IF J == 1 {
 	FOR K = 1 : I - 1 {
