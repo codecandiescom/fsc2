@@ -22,7 +22,10 @@
 
 emacs_dir = /usr/share/emacs/site-lisp
 
-all: edl-mod.elc
+all:
+	$(MAKE) utils
+
+utils: edl-mod.elc
 
 edl-mod.elc: edl-mod.el
 	emacs -batch -f batch-byte-compile edl-mod.el

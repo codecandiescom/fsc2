@@ -41,7 +41,8 @@ To create the complete documentation beside Perl you also need
 20) gzip
 
 
-The XFORMS library is available from e.g. (some links may be outdated)
+While fsc2 works with the older XFORMS library version 0.89, which may be
+still available in binary only form from e.g.
 
   ftp.cs.ruu.nl/pub/XFORMS
   einstein.phys.uwm.edu/pub/xforms
@@ -50,6 +51,11 @@ The XFORMS library is available from e.g. (some links may be outdated)
   ftp.via.ecp.fr/pub2/xforms
   ftp.unipi.it/pub/mirror/xforms
   ftp.uni-trier.de/pub/unix/X11/xforms
+
+you may prefer to use the newer version 1.0 version which is distributed
+under the GPL and can be downloaded from
+
+  ftp://ncmir.ucsd.edu/pub/xforms/OpenSource/xforms-1.0-release.tgz
 
 
 The GPIB library consists of a library and a module to interface GPIB
@@ -317,7 +323,7 @@ files and directories (assuming you've used the default locations, i.e.
 /usr/local/share/doc/fsc2/      (directory)
 /usr/local/man/man1/fsc2.1.gz   (file)
 /usr/local/info/fsc2.info.gz    (file)
-/usr/local/info/fsc2-*.info.gz  (file, with * being a numbers between 1 and 10)
+/usr/local/info/fsc2-*.info.gz  (file, with * being a numbers between 1 and 15)
 
 
 E) Getting started
@@ -342,7 +348,7 @@ Just start by typing 'fsc2 edl/qq.edl' or 'fsc2 edl/z.edl' (assuming you're
 still in fsc2's main directory) and click onto the "Start" button to get an
 idea about how fsc2 displays 1- and 2-dimensional data sets.
 
-              February 2, 2003             Much luck, Jens
+              February 4, 2003             Much luck, Jens
 --
        _  _____  _____
       | ||_   _||_   _|         Jens.Toerring@physik.fu-berlin.de
