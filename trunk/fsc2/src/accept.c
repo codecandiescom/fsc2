@@ -6,8 +6,8 @@
 #include "fsc2.h"
 
 
-static bool unpack_and_accept( void *ptr );
-static bool other_data_request( int type, void * ptr );
+static void	unpack_and_accept( void *ptr );
+static void	other_data_request( int type, void * ptr );
 static void accept_1d_data( long x_index, long curve, int type, void *ptr );
 static void accept_2d_data( long x_index, long y_index, long curve, int type,
 							void *ptr );
@@ -28,7 +28,6 @@ void accept_new_data( void )
 	void *buf;
 	int mq_next;
 	int shm_id;
-	bool result;
 
 	
 	while ( 1 )
@@ -46,16 +45,27 @@ void accept_new_data( void )
 
 		/* Unpack and accept the data sets (skip the length field) */
 
-		result = unpack_and_accept( buf + sizeof( long ) );
+		TRY
+		{
+			unpack_and_accept( buf + sizeof( long ) );
+			TRY_SUCCESS;
+		}
+		OTHERWISE
+		{
+			detach_shm( buf, &Message_Queue[ message_queue_low ].shm_id );
+			stop_measurement( NULL, 0 );
+			if ( exception_id == OUT_OF_MEMORY_EXCEPTION )
+				eprint( FATAL, "Running out of memory.\n" );
+			else
+				eprint( FATAL, "Experiment stopped due to unknown "
+						"reasons.\n" );
+			printf( "shit shit shit!\n" );
+			return;
+		}
 
 		/* Detach from shared memory segment and remove it */
 
 		detach_shm( buf, &Message_Queue[ message_queue_low ].shm_id );
-
-		/* If accepting the data failed throw an exception */
-
-		if ( ! result )
-			THROW( EXCEPTION );
 
 		/* Increment the queue pointer */
 
@@ -105,7 +115,7 @@ void accept_new_data( void )
 /* This function should *not* throw exceptions but return 'FAIL' instead !   */
 /*---------------------------------------------------------------------------*/
 
-static bool unpack_and_accept( void *ptr )
+static void unpack_and_accept( void *ptr )
 {
 	int i;
 	int nsets;
@@ -121,7 +131,10 @@ static bool unpack_and_accept( void *ptr )
 	ptr += sizeof( int );
 
 	if ( nsets < 0 )                     /* special for clear curve commands */
-		return other_data_request( nsets, ptr );
+	{
+		other_data_request( nsets, ptr );
+		return;
+	}
 
 	/* Accept the new data from all data set */
 
@@ -162,29 +175,21 @@ static bool unpack_and_accept( void *ptr )
 			default :
 				eprint( FATAL, "Internal communication error at %s:%d.\n",
 						__FILE__, __LINE__ );
-				return FAIL;
+				THROW( EXCEPTION );
 		}
 
-		TRY
-		{
-			if ( G.dim == 1 )
-				accept_1d_data( x_index, curve, type, ptr );
-			else
-				accept_2d_data( x_index, y_index, curve, type, ptr );
-			TRY_SUCCESS;
-		}
-		CATCH( EXCEPTION )
-			return FAIL;
+		if ( G.dim == 1 )
+			accept_1d_data( x_index, curve, type, ptr );
+		else
+			accept_2d_data( x_index, y_index, curve, type, ptr );
 	}
-
-	return OK;
 }
 
 
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
-static bool other_data_request( int type, void * ptr )
+static void other_data_request( int type, void * ptr )
 {
 	long i;
 	long count;
@@ -214,10 +219,10 @@ static bool other_data_request( int type, void * ptr )
 			break;
 
 		default :
-			return FAIL;
+			eprint( FATAL, "Internal communication error at %s:%d.\n",
+					__FILE__, __LINE__ );
+			THROW( EXCEPTION );
 	}
-
-	return OK;
 }
 
 
@@ -775,3 +780,4 @@ static bool incr_x_and_y( long x_index, long len, long y_index )
 	ret = cut_num_points_changed( X, new_Gnx );
 	return ret || cut_num_points_changed( Y, y_index + 1 );
 }
+
