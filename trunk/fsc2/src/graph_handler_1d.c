@@ -890,8 +890,10 @@ static void reconfigure_window_1d( Canvas *c, int w, int h )
 }
 
 
-/*----------------------------------------------------------*/
-/*----------------------------------------------------------*/
+/*---------------------------------------------------------*/
+/* Recalculates the points to be displayed from the scaled */
+/* points for all curves.                                  */
+/*---------------------------------------------------------*/
 
 static void recalc_XPoints_1d( void )
 {
@@ -903,10 +905,10 @@ static void recalc_XPoints_1d( void )
 }
 
 
-/*-----------------------------------------------------------------*/
-/* Recalculates the graphics data for a curve using the the curves */
-/* settings for the scale and the offset.                          */
-/*-----------------------------------------------------------------*/
+/*----------------------------------------------------------------*/
+/* Recalculates the graphic data for a curve using the the curves */
+/* settings for the scale and the offset.                         */
+/*----------------------------------------------------------------*/
 
 void recalc_XPoints_of_curve_1d( Curve_1d *cv )
 {

@@ -273,7 +273,7 @@ static void cut_calc_curve( int dir, long index, bool has_been_shown )
 				                       = cv->shift[ X ] = cv->shift[ Y ] = 0.0;
 	}
 
-	/* If the index is resonable store it (if called with index smaller than
+	/* If the index is reasonable store it (if called with index smaller than
 	   zero keep the old index) */
 
 	if ( index >= 0 )
