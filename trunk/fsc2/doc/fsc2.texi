@@ -96,6 +96,7 @@ devices to be used in the experiment.
 * Built-in Functions::      Description of all built-in functions
 * Device Functions::        Description of functions for accessing devices
 * Using Pulsers::           How to work with the pulsers
+* Example EDL Scripts::     A set of example scripts
 * Command Line Options::    How to invoke @code{fsc2}
 * GUI-fying::               How to add a GUI to an @code{EDL} programs
 * Cloning Devices::         Creating modules for identical devices
@@ -144,6 +145,7 @@ translation approved by the Free Software Foundation.
 @include builtins.texi
 @include devices.texi
 @include pulser.texi
+@include examples.texi
 @include cmd.texi
 @include GUIfy.texi
 @include cloning.texi
