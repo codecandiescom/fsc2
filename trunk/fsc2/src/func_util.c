@@ -2011,7 +2011,6 @@ Var *f_display_2d( Var *v )
 static DPoint *eval_display_args( Var *v, int dim, int *nsets )
 {
 	DPoint *dp = NULL;
-	Var *cv;
 
 
 	*nsets = 0;
