@@ -1537,40 +1537,20 @@ bool test_for_cond( Prg_Token *cur )
 	if ( cur->count.forl.act->type == INT_VAR )
 	{
 		if ( ! sign )     /* `incr' has positive sign */
-		{
-			if ( cur->count.forl.act->val.lval <= cur->count.forl.end.lval )
-				return OK;
-			else
-				return FAIL;
-		}
+			return cur->count.forl.act->val.lval <= cur->count.forl.end.lval;
 		else              /* `incr' has negative sign */
-		{
-			if ( cur->count.forl.act->val.lval >= cur->count.forl.end.lval )
-				return OK;
-			else
-				return FAIL;
-		}
+			return cur->count.forl.act->val.lval >= cur->count.forl.end.lval;
 	}
 	else
 	{
 		if ( ! sign )     /* `incr' has positive sign */
-		{
-			if ( cur->count.forl.act->val.dval <= 
-				   ( cur->count.forl.end.type == INT_VAR ?
-			            cur->count.forl.end.lval : cur->count.forl.end.dval ) )
-				return OK;
-			else
-				return FAIL;
-		}
+			return cur->count.forl.act->val.dval <= 
+					   ( cur->count.forl.end.type == INT_VAR ?
+						 cur->count.forl.end.lval : cur->count.forl.end.dval );
 		else              /* `incr' has negative sign */
-		{
-			if ( cur->count.forl.act->val.dval >=
-				   ( cur->count.forl.end.type == INT_VAR ?
-				        cur->count.forl.end.lval : cur->count.forl.end.dval ) )
-				return OK;
-			else
-				return FAIL;
-		}
+			return cur->count.forl.act->val.dval >=
+					   ( cur->count.forl.end.type == INT_VAR ?
+						 cur->count.forl.end.lval : cur->count.forl.end.dval );
 	}
 
 	/* We can't end up here... */
