@@ -187,8 +187,6 @@ Var *synthesizer_name( Var *v )
 Var *synthesizer_state( Var *v )
 {
 	bool state;
-	int res;
-	const char *on_off_str[ ] = { "ON", "OFF" };
 
 
 	if ( v == NULL )              /* i.e. return the current state */
