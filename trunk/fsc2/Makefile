@@ -492,9 +492,9 @@ endif
 # Create a header file with configuration info
 
 config:
-	echo $(CONFFLAGS) > config.h.in
-	echo -e "/*--- Created automatically, dont' change ---*/\n" > config.h
-	sed 's/\-D/\#define /g;s/\=/ /g;s/ \#/\~\#/g' config.h.in | \
+	echo "/*--- Created automatically, dont' change ---*/" > config.h
+	@echo " $(CONFFLAGS)" | \
+	sed 's/ \-D\([A-Za-z][A-Za-z0-9_]*\)\=\{0,1\}/~\#define \1 /g' - | \
 	tr '~' '\n' | sort | uniq >> config.h
 	$(RM) $(RMFLAGS) config.h.in
 
