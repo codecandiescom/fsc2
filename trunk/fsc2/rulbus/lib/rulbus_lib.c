@@ -569,10 +569,10 @@ int rulbus_read( int handle, unsigned char offset, unsigned char *data,
 }
 
 
-/*-------------------------------------------------------------------*
- * Function to do the remaining checks on the data just read in from
- * the configuration file
- *-------------------------------------------------------------------*/
+/*-------------------------------------------------*
+ * Function to do the remaining checks on the data
+ * just read in from the configuration file
+ *-------------------------------------------------*/
 
 static int rulbus_check_config( void )
 {
@@ -606,10 +606,10 @@ static int rulbus_check_config( void )
 }
 
 
-/*-------------------------------------------------------------------*
- * Function to get rid of all memory when either an fatal error was
- * detected or the RULBUS is "closed"
- *-------------------------------------------------------------------*/
+/*-------------------------------------------------------*
+ * Function to get rid of all memory when either a fatal
+ * error was detected or the RULBUS is "closed"
+ *-------------------------------------------------------*/
 
 static void rulbus_cleanup( void )
 {
@@ -634,10 +634,10 @@ static void rulbus_cleanup( void )
 }
 
 
-/*----------------------------------------------------------------*
- * Function for writing a number of bytes to a certain address at
- * one of the racks.
- *----------------------------------------------------------------*/
+/*-------------------------------------------*
+ * Function for writing a number of bytes to
+ * a certain address at one of the racks.
+ *-------------------------------------------*/
 
 static int rulbus_write_rack( unsigned char rack, unsigned char addr,
 							  unsigned char *data, size_t len )
@@ -663,10 +663,10 @@ static int rulbus_write_rack( unsigned char rack, unsigned char addr,
 }
 
 
-/*------------------------------------------------------------------*
- * Function for reading a number of bytes from a certain address at
- * one of the racks.
- *------------------------------------------------------------------*/
+/*---------------------------------------------*
+ * Function for reading a number of bytes from
+ * a certain address at one of the racks.
+ *---------------------------------------------*/
 
 static int rulbus_read_rack( unsigned char rack, unsigned char addr,
 							 unsigned char *data, size_t len )
@@ -692,10 +692,10 @@ static int rulbus_read_rack( unsigned char rack, unsigned char addr,
 }
 
 
-/*--------------------------------------------------------------*
- * Function returns some informations about the cards as far as
- * specified by the configuration file
- *--------------------------------------------------------------*/
+/*----------------------------------------------------*
+ * Function returns some informations about the cards
+ * as far as specified in the configuration file
+ *----------------------------------------------------*/
 
 int rulbus_get_card_info( const char *card_name, RULBUS_CARD_INFO *card_info )
 {
@@ -752,7 +752,8 @@ int rulbus_get_card_info( const char *card_name, RULBUS_CARD_INFO *card_info )
 
 	if ( i == rulbus_num_cards )
 	{
-		rulbus_cleanup( );
+		if ( ! rulbus_in_use )
+			rulbus_cleanup( );
 		return rulbus_errno = RULBUS_INVALID_CARD_NAME;
 	}
 
@@ -763,7 +764,9 @@ int rulbus_get_card_info( const char *card_name, RULBUS_CARD_INFO *card_info )
 	card_info->has_ext_trigger = rulbus_card[ i ].has_ext_trigger;
 	card_info->intr_delay = rulbus_card[ i ].intr_delay;
 
-	rulbus_cleanup( );
+	if ( ! rulbus_in_use )
+		rulbus_cleanup( );
+
 	return RULBUS_OK;	
 }
 
