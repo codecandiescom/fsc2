@@ -1562,16 +1562,16 @@ bool test_for_cond( Prg_Token *cur )
 }
 
 
-/*--------------------------------------------------------------------------*/
-/* Functions saves or restores all variables depending on `flag'. If `flag' */
-/* is set the variables are saved, otherwise they are copied back from the  */
-/* backup into the normal variables space. Don't use the saved variables -  */
-/* the internal pointers are not adjusted. Currently, for string variables  */
-/* the string is not saved but just the pointer to the string but since     */
-/* they should never change this shouldn't be a problem.                    */
-/* Never ever change the memory locations of the variables between saving   */
-/* and restoring !!!                                                        */
-/*--------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*/
+/* This functions saves or restores all variables depending on `flag'. If */
+/* `flag' is set the variables are saved, otherwise they are copied back  */
+/* from the backup into the normal variables space. Don't use the saved   */
+/* variables - the internal pointers are not adjusted. Currently, for     */
+/* string variables the string is not saved but just the pointer to the   */
+/* string but since they should never change this shouldn't be a problem. */
+/* Never ever change the memory locations of the variables between saving */
+/* and restoring !!!                                                      */
+/*------------------------------------------------------------------------*/
 
 static void save_restore_variables( bool flag )
 {
