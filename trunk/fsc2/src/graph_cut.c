@@ -949,9 +949,9 @@ bool cut_data_rescaled( long curve, double y_min, double y_max )
 /* Function gets called by accept_2d_data() whenever the number of points */
 /* in x- or y-direction changes. The first argument is the direction the  */
 /* data set changed (i.e. if there are new data in x- or in y-direction)  */
-/* while the second is the new number of points in this direction.        */
-/* This function does not get the new data, it just has to extend and     */
-/* initialize the memory that will be used for them.                      */
+/* while the second is the new number of points in this direction. This   */
+/* function does not get the new data, it just extends and initializes    */
+/* the memory that will be used for them.                                 */
 /*------------------------------------------------------------------------*/
 
 bool cut_num_points_changed( int dir, long num_points )
