@@ -44,7 +44,7 @@ Var *gaussmeter_name( Var *v );
 Var *find_field( Var *v );
 Var *gaussmeter_resolution( Var *v );
 Var *gaussmeter_wait( Var *v );
-Var *pulser_command( Var *v );
+Var *gaussmeter_command( Var *v );
 
 
 static double bh15_get_field( void );
@@ -237,7 +237,7 @@ Var *gaussmeter_resolution( Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_command( Var *v )
+Var *gaussmeter_command( Var *v )
 {
 	static char *cmd;
 

@@ -46,11 +46,13 @@ Var *gaussmeter_name( Var *v );
 Var *measure_field( Var *v );
 Var *gaussmeter_resolution( Var *v );
 Var *gaussmeter_probe_orientation( Var *v );
+Var *gaussmeter_command( Var *v );
 
 
 static bool pt2025_init( const char *name );
 static double pt2025_get_field( void );
 static void pt2025_set_resolution( int res );
+static bool pt2005_command( const char *cmd );
 
 
 #define PROBE_ORIENTATION_PLUS       0
@@ -258,6 +260,37 @@ Var *gaussmeter_probe_orientation( Var *v )
 }
 
 
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+Var *gaussmeter_command( Var *v )
+{
+	static char *cmd;
+
+
+	cmd = NULL;
+	vars_check( v, STR_VAR );
+	
+	if ( FSC2_MODE == EXPERIMENT )
+	{
+		TRY
+		{
+			cmd = translate_escape_sequences( T_strdup( v->val.sptr ) );
+			pt2025_command( cmd );
+			T_free( cmd );
+			TRY_SUCCESS;
+		}
+		OTHERWISE
+		{
+			T_free( cmd );
+			RETHROW( );
+		}
+	}
+
+	return vars_push( INT_VAR, 1 );
+}
+
+
 /**********************************************************/
 /*                                                        */
 /*              Internal functions                        */
@@ -406,6 +439,21 @@ static void pt2025_set_resolution( int res )
 		print( FATAL, "Can't access the NMR gaussmeter.\n" );
 		THROW( EXCEPTION );
 	}
+}
+
+
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+
+static bool pt2025_command( const char *cmd )
+{
+	if ( gpib_write( pt2025.device, cmd, strlen( cmd ) ) == FAILURE )
+	{
+		print( FATAL, "Can't access the NMR gaussmeter.\n" );
+		THROW( EXCEPTION );
+	}
+
+	return OK;
 }
 
 

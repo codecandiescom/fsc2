@@ -90,6 +90,7 @@ gaussmeter_wait, 0, EXP;        // wait for field to stabilize
 measure_field, 0, EXP;          // return field value (ER035M_SA, ER035M_SAS
 								// and PT2025)
 gaussmeter_probe_orientation, -1, ALL;
+gaussmeter_command, 1, EXP;
 
 
 /* Functions exported by the pulser drivers (DG2020, HFS9000)
@@ -206,6 +207,7 @@ synthesizer_command, 1, EXP;
 boxcar_name, 0, ALL;
 boxcar_curve_length, -1, EXP;
 boxcar_get_curve, -1, EXP;
+boxcar_command, 1, EXP;
 
 
 /* Functions exported by the voltmeter (Kontron 4060) */
