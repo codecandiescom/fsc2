@@ -390,30 +390,30 @@ button for starting the experiment.
 @node cw-EPR monitor script, Hahn-echo detected EPR script, GUI-fying the script, Example EDL Scripts
 @section cw-EPR monitor script
 
-Before doing a real experiment one often needs to optimize the
-experimental parameters like phase, amplification etc. In these cases it
-would be rather inconvenient to always start an experiment, check for
-e.g@: the signal intensity, adjust the parameters and restart again
-another test experiment. One rather would have a program where it
-possible to adjust the parameters while scanning the field region where
-the signal is to be expected. This can be done easily with a another
-@code{EDL} script. Here we also will make use of the built-in methods to
-create additional graphical elements like buttons, input fields etc.
+Before doing a real experiment one often needs to optimize the experimental
+parameters like phase, amplification etc. In these cases it would be rather
+inconvenient to have start an experiment in order to check e.g@: the signal
+intensity, adjust the parameters and start another test experiment. One
+rather would have a program where it's possible to adjust the parameters
+while scanning the field region where the signal is to be expected. This
+can be done easily with a another @code{EDL} script. Here we also will
+make use of the built-in methods to create additional graphical elements
+like buttons, input fields etc.
 
-Before starting to write such a script lets collect the requirements:
+Before starting to write such a script let's collect the requirements:
 @itemize @bullet
 @item It should be possible to sweep up and down as well as to stop the
       sweep. Whenever the sweep direction is changed or the sweep is
       stopped a marker should be drawn.
-@item We need two entry fields to be able to enter a new field value and
-      sweep step size.
+@item We need two input fields to be able to set a new magnetic field
+      value and sweep step size.
 @item The current field should be displayed in an output field.
 @item It should be possible to stop and restart acquiring new data from
       the lock-in amplifier.
 @item We would like to be able to clear the display when the old data
       aren't needed anymore.
 @item While running the test experiment the lock-in amplifiers keyboard
-      should still be usable to allow adjustment of phase, sensitivity,
+      should still be usable to allow adjustments of phase, sensitivity,
       time constant etc.
 @end itemize
 
@@ -865,7 +865,7 @@ digitizer instead of a lock-in amplifier to do the detection:
  1 DEVICES:
  2
  3 dg2020_b;     // pulser
- 4 tds754a;      // digitzer
+ 4 tds754a;      // digitizer
  5 er032m;       // field controller
  6
  7
@@ -887,7 +887,7 @@ digitizer instead of a lock-in amplifier to do the detection:
 33 ASSIGNMENTS:
 34 
 35 TIMEBASE:     5 ns;
-36 TRIGGER_MODE: INTERNAL, REPEAT_FREQUENCY = 200 Hz;
+36 TRIGGER_MODE: INTERNAL, REPEAT_FREQUENCY = 100 Hz;
 37 
 38 MICROWAVE:     POD = 1, V_HIGH = 5 V, V_LOW = 0 V;
 39 DETECTION:     POD = 3;
@@ -1087,9 +1087,9 @@ part is probably how the pulses are moved during the experiment.
 @example
  1DEVICES:
  2
- 3 ips120_10;
- 4 rb_pulser;
- 5 rb8509;
+ 3 ips120_10;            // magnet power supply
+ 4 rb_pulser;            // pulser
+ 5 rb8509;               // ADC (connected to boxcar)
  6
  7 VARIABLES:
  8
@@ -1174,9 +1174,9 @@ written to a file.
 @example
  1 DEVICES:
  2
- 3 er035m_s;
- 4 aeg_x_band;
- 5 TDS754A;
+ 3 er035m_s;          // gaussmeter
+ 4 aeg_x_band;        // magnet
+ 5 tds754a;           // digitizer
  6
  7
  8 VARIABLES:
