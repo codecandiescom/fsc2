@@ -539,7 +539,7 @@ Var *f_wait( Var *v )
 
 	if ( lrnd( modf( how_long, &secs ) * 1.0e6 ) == 0 && lrnd( secs ) == 0 )
 	{
-		print( WARN, "Argument is less than 1 ms.\n" );
+		print( WARN, "Argument is less than 1 us.\n" );
 		return vars_push( INT_VAR, -1L );
 	}
 
