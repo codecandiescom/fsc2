@@ -724,6 +724,7 @@ static void canvas_off( Canvas *c, FL_OBJECT *obj )
 			fl_remove_canvas_handler( obj, ConfigureNotify, ch );
 			fl_remove_canvas_handler( obj, ButtonPress, ch );
 			fl_remove_canvas_handler( obj, ButtonRelease, ch );
+			fl_remove_canvas_handler( obj, KeyRelease, ch );
 			fl_remove_canvas_handler( obj, MotionNotify, ch );
 		}
 
@@ -757,13 +758,11 @@ static void setup_canvas( Canvas *c, FL_OBJECT *obj )
 
 	if ( G.is_init )
 	{
-
 		attributes.backing_store = NotUseful;
 		attributes.background_pixmap = None;
 		XChangeWindowAttributes( G.d, FL_ObjWin( c->obj ),
 								 CWBackingStore | CWBackPixmap,
 								 &attributes );
-
 		c->is_box = UNSET;
 
 		fl_remove_selected_xevent( FL_ObjWin( obj ),
@@ -772,9 +771,10 @@ static void setup_canvas( Canvas *c, FL_OBJECT *obj )
 								Button1MotionMask | Button2MotionMask );
 
 		fl_add_canvas_handler( c->obj, ConfigureNotify, ch, ( void * ) c );
-			fl_add_canvas_handler( c->obj, ButtonPress, ch, ( void * ) c );
-			fl_add_canvas_handler( c->obj, ButtonRelease, ch, ( void * ) c );
-			fl_add_canvas_handler( c->obj, MotionNotify, ch, ( void * ) c );
+		fl_add_canvas_handler( c->obj, ButtonPress, ch, ( void * ) c );
+		fl_add_canvas_handler( c->obj, ButtonRelease, ch, ( void * ) c );
+		fl_add_canvas_handler( c->obj, KeyRelease, ch, ( void * ) c );
+		fl_add_canvas_handler( c->obj, MotionNotify, ch, ( void * ) c );
 
 		c->font_gc = XCreateGC( G.d, FL_ObjWin( obj ), 0, 0 );
 		XSetForeground( G.d, c->font_gc, fl_get_pixel( FL_BLACK ) );
