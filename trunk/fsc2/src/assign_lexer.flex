@@ -153,13 +153,13 @@ WS          [\n=: ]+
 
 			/* handling of error messages from the cleaner */
 {ERR}		{
-				eprint( FATAL, "%s", assigntext + 2 );
+				eprint( FATAL, "%s\n", assigntext + 2 );
 				THROW( EXCEPTION );
 			}
 
 {ESTR}		{
 				assigntext = strchr( assigntext, '\x03' );
-				eprint( FATAL, "%s", assigntext + 2 );
+				eprint( FATAL, "%s\n", assigntext + 2 );
 				THROW( EXCEPTION );
 			}
 
@@ -370,7 +370,7 @@ WS          [\n=: ]+
 
 {CTRL}      {
 				eprint( FATAL, "%s:%ld: Flow control structures can't be used "
-						"in the ASSIGNMENTS section.", Fname, Lc );
+						"in the ASSIGNMENTS section.\n", Fname, Lc );
 				THROW( EXCEPTION );
 			}
 
@@ -389,7 +389,7 @@ WS          [\n=: ]+
 					if ( acc == ACCESS_EXP )
 					{
 						eprint( FATAL, "%s:%ld: Function `%s' can only be "
-								"used in the EXPERIMENT section.",
+								"used in the EXPERIMENT section.\n",
 								 Fname, Lc, assigntext );
 						THROW( EXCEPTION );
 					}
@@ -401,7 +401,7 @@ WS          [\n=: ]+
 				if ( ( assignlval.vptr = vars_get( assigntext ) ) == NULL )
 				{
 					eprint(	FATAL, "%s:%ld: Variable `%s' has not been "
-							"declared.", Fname, Lc, assigntext );
+							"declared.\n", Fname, Lc, assigntext );
 					 THROW( EXCEPTION );
 				}
 
@@ -438,7 +438,7 @@ WS          [\n=: ]+
 			/* handling of invalid input (i.e. everything else) */
 .           {
 				eprint( FATAL, "%s:%ld: Invalid input in ASSIGNMENTS section: "
-						"`%s'", Fname, Lc, assigntext );
+						"`%s'.\n", Fname, Lc, assigntext );
 				THROW( EXCEPTION );
 			}
 
@@ -461,7 +461,7 @@ int assignments_parser( FILE *in )
 	if ( compilation.sections[ ASSIGNMENTS_SECTION ] )
 	{
 		eprint( FATAL, "%s:%ld: Multiple instances of ASSIGNMENTS section "
-		        "label.", Fname, Lc );
+		        "label.\n", Fname, Lc );
 		THROW( EXCEPTION );
 	}
 	compilation.sections[ ASSIGNMENTS_SECTION ] = SET;

@@ -18,7 +18,7 @@ void *T_malloc( size_t size )
 
 	if ( mem == NULL )
 	{
-		eprint( FATAL, "%s:%ld: Running out of memory.", Fname, Lc );
+		eprint( FATAL, "%s:%ld: Running out of memory.\n", Fname, Lc );
 		THROW( OUT_OF_MEMORY_EXCEPTION );
 	}
 
@@ -38,7 +38,7 @@ void *T_calloc( size_t nmemb, size_t size )
 
 	if ( mem == NULL )
 	{
-		eprint( FATAL, "%s:%ld: Running out of memory.", Fname, Lc );
+		eprint( FATAL, "%s:%ld: Running out of memory.\n", Fname, Lc );
 		THROW( OUT_OF_MEMORY_EXCEPTION );
 	}
 
@@ -57,7 +57,7 @@ void *T_realloc( void *ptr, size_t size )
 
 	if ( new_ptr == NULL )
 	{
-		eprint( FATAL, "%s:%ld: Running out of memory.", Fname, Lc );
+		eprint( FATAL, "%s:%ld: Running out of memory.\n", Fname, Lc );
 		THROW( OUT_OF_MEMORY_EXCEPTION );
 	}
 
@@ -89,7 +89,7 @@ long T_atol( const char *txt )
 	ret = strtol( txt, NULL, 10 );
 	if ( errno == ERANGE )
 	{
-		eprint( FATAL, "%s:%ld: Integer number out of range: %s.",
+		eprint( FATAL, "%s:%ld: Integer number out of range: %s.\n",
 				Fname, Lc, txt );
 		THROW( EXCEPTION );
 	}
@@ -106,7 +106,7 @@ double T_atof( const char *txt )
 	ret = strtod( txt, NULL );
 	if ( errno == ERANGE )
 	{
-		eprint( FATAL, "%s:%ld: Floating point number out of range: %s.",
+		eprint( FATAL, "%s:%ld: Floating point number out of range: %s.\n",
 				Fname, Lc, txt );
 		THROW( EXCEPTION );
 	}
