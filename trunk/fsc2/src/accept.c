@@ -49,13 +49,20 @@ static bool need_2d_redraw;
 static bool need_cut_redraw;
 
 
-/*---------------------------------------------------------------------------*/
-/* This is the function that takes the new data from the message queue and   */
-/* displays them. On a call of this function all data sets in the queue will */
-/* be accepted, if there is a REQUEST in between (there can only be one at a */
-/* time because REQUESTS need a reply) it will be moved to the end of the    */
-/* queue and then are dealt with by the the calling routine.                 */
-/*---------------------------------------------------------------------------*/
+#define MAX_ACCEPT_TIME  0.2    /* 200 ms */
+
+
+/*--------------------------------------------------------------------------*/
+/* This is the function that takes the new data from the message queue and  */
+/* displays them. The function is invoked as a idle callback, i.e. whenever */
+/* the program has some unused time. For a limited time (currently set to   */
+/* 200 ms) and schedules them to be displayed. Data sets for REQUEST type   */
+/* data are moved to the end of the message queue (there can only be one at */
+/* a time because REQUESTS need a reply to the child process). When all     */
+/* sets have been removed from the message queue (or the maximum time in    */
+/* the accept loop is over) all parts of the display windows that changed   */
+/* due to the new data get udated.                                          */
+/*--------------------------------------------------------------------------*/
 
 void accept_new_data( void )
 {
@@ -70,7 +77,7 @@ void accept_new_data( void )
 	CLOBBER_PROTECT( dim );
 
 	/* Get the time we arrived here, it's later used to avoid spending too
-	   much time in the follwoing loop */
+	   much time in the loop for accepting data sets */
 
 	gettimeofday( &time_struct, NULL );
 	start_time = time_struct.tv_sec + 1.0e-6 * time_struct.tv_sec;
@@ -83,10 +90,10 @@ void accept_new_data( void )
 
 	while ( 1 )
 	{
-		/* Attach to the shared memory segment pointed to by the oldest
-		   entry in the message queue - even though this should never
-		   fail it sometimes does (2.0 kernels only?) so we better have
-		   a bit more of error output until this is sorted out. */
+		/* Attach to the shared memory segment pointed to by the oldest entry
+		   in the message queue - even though this should never fail it
+		   sometimes does (seems to be 2.0 kernels only) so we better have a
+		   bit more of error output until this is finally sorted out. */
 
 		if ( ( buf =
 			    ( char * ) attach_shm( Comm.MQ->slot[ Comm.MQ->low ].shm_id ) )
@@ -106,8 +113,9 @@ void accept_new_data( void )
 			THROW( EXCEPTION );
 		}
 
-		/* Unpack and accept the data sets (skip the length field) - if an
-		   exception happens detach from segment and re-throw the exception */
+		/* Unpack and accept the data sets (skip the length field, it's not
+		   needed) - if an exception happens detach from the segment and
+		   re-throw the exception */
 
 		TRY
 		{
@@ -142,19 +150,18 @@ void accept_new_data( void )
 
 		gettimeofday( &time_struct, NULL );
 		if ( time_struct.tv_sec + 1.0e-6 * time_struct.tv_sec
-			 - start_time >= 0.2 )
+			 - start_time >= MAX_ACCEPT_TIME )
 			break;
 
 		/* Accept next data set if next slot in message queue contains DATA */
 
-		if ( Comm.MQ->slot[ Comm.MQ->low ].type == DATA_1D ||
-			 Comm.MQ->slot[ Comm.MQ->low ].type == DATA_2D )
+		if ( Comm.MQ->slot[ Comm.MQ->low ].type & ( DATA_1D | DATA_2D ) )
 			continue;
 
 		/* Otherwise the next slot is occupied by a REQUEST. If this is the
 		   last occupied slot we're done (the calling routine will deal with
-		   it). Otherwise there are more DATA that we handle first by
-		   exchanging them with the current REQUEST entry. */
+		   it). Otherwise there are more DATA that we handle first by swapping
+		   them with the REQUEST entry */
 
   		if ( ( mq_next = ( Comm.MQ->low + 1 ) % QUEUE_SIZE ) == Comm.MQ->high )
   			break;
@@ -166,8 +173,8 @@ void accept_new_data( void )
   		Comm.MQ->slot[ mq_next ].type = REQUEST;
   	}
 
-	/* Finally display the new data by redrawing the canvases that really
-	   have been changed due to the new data */
+	/* After being done with unpacking we display the new data by redrawing
+	   the canvases that have been changed because of the new data */
 
 	if ( dim & 1 )
 	{
@@ -195,7 +202,7 @@ void accept_new_data( void )
 
 
 /*------------------------------------------------------------------*/
-/* This function examines the new data interpreting the start field */
+/* This function examines the new data by looking at the first item */
 /* and calls the appropriate functions for dealing with the data.   */
 /*------------------------------------------------------------------*/
 
@@ -212,9 +219,9 @@ static void unpack_and_accept( int dim, char *ptr )
 
 
 	/* The first item of a new data package indicates the amount of data
-	   sets that needs handling. The only exeption is when this indicator
-	   is negative, in which case these aren't data to be displayed but
-	   special commands for clearing curves, scale changes etc. */
+	   sets that needs handling. When the first item is a negative number
+	   it isn't data to be displayed but special commands for clearing
+	   curves, scale changes etc. */
 
 	memcpy( &nsets, ptr, sizeof nsets );
 	ptr += sizeof nsets;
@@ -225,7 +232,7 @@ static void unpack_and_accept( int dim, char *ptr )
 		return;
 	}
 
-	/* Accept the new data from all data set */
+	/* Accept the new data for the different types of data sets */
 
 	for ( i = 0; i < nsets; ptr = ptr_next, i++ )
 	{
@@ -287,11 +294,11 @@ static void unpack_and_accept( int dim, char *ptr )
 }
 
 
-/*--------------------------------------------------------------------------*/
-/* Function for handling special commands that come disguised as data, like */
-/* commands for clearing curves, changing scales etc. Here the type of the  */
-/* command is determined and the appropriate functions are called.          */
-/*--------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
+/* Function for handling special commands that come disguised as data like */
+/* commands for clearing curves, changing scales etc. Here the type of the */
+/* command is determined and the appropriate functions are called.         */
+/*-------------------------------------------------------------------------*/
 
 static void other_data_request( int dim, int type, char *ptr )
 {
@@ -407,10 +414,10 @@ static void other_data_request( int dim, int type, char *ptr )
 }
 
 
-/*---------------------------------------------------------------------*/
-/* This function handles the storing and displaying of new data points */
-/* when 1D graphics is used.                                           */
-/*---------------------------------------------------------------------*/
+/*--------------------------------------------------------*/
+/* function for storing and displaying of new data points */
+/* for the 1D graphic (when normal display mode is used). */
+/*--------------------------------------------------------*/
 
 static void accept_1d_data( long x_index, long curve, int type, char *ptr )
 {
@@ -588,8 +595,10 @@ static void accept_1d_data( long x_index, long curve, int type, char *ptr )
 }
 
 
-/*---------------------------------------------------------------------*/
-/*---------------------------------------------------------------------*/
+/*--------------------------------------------------------*/
+/* Function for handling new data for the 1D display when */
+/* "sliding window" mode is used.                         */
+/*--------------------------------------------------------*/
 
 static void accept_1d_data_sliding( long curve, int type, char *ptr )
 {
@@ -775,10 +784,12 @@ static void accept_1d_data_sliding( long curve, int type, char *ptr )
 
 
 
-/*---------------------------------------------------------------------*/
-/* This function handles the storing and displaying of new data points */
-/* when 2D graphics is used.                                           */
-/*---------------------------------------------------------------------*/
+/*----------------------------------------------------------------*/
+/* Function for storing and displaying of new data points for the */
+/* 2D display (sorry if it's a bit hard to understand, but quite  */
+/* a bit of work has gone into getting the function to make it as */
+/* fast as possible...)                                           */
+/*----------------------------------------------------------------*/
 
 static void accept_2d_data( long x_index, long y_index, long curve, int type,
 							char *ptr )
@@ -1035,8 +1046,15 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 }
 
 
-/*----------------------------------------------------------*/
-/*----------------------------------------------------------*/
+/*---------------------------------------------------------------------*/
+/* Function used by all functions that unpack new data to be displayed */
+/* to figure out how many new data there really are. When invoked *ptr */
+/* points to the start of the new data set, and 'type' indicates the   */
+/* type of the new data (integer or floating point numbers, 1D or      */
+/* multi-dimensional array). It returns the number of of new data      */
+/* points and '*ptr' is pointing to the start of the new data when the */
+/* function returns.                                                   */
+/*---------------------------------------------------------------------*/
 
 static long get_number_of_new_points( char **ptr, int type )
 {
