@@ -569,7 +569,6 @@ EOT
     # and the Apply- and Quit-button
 
     print <<"EOT";
-
 \$fsc2_main_frame->pack( \%fp, -pady => '1m' );
 \$fsc2_main_window->Optionmenu( -options => \\\@fsc2_how_to_run,
                                 -textvariable => \\\$fsc2_how_to_run,
