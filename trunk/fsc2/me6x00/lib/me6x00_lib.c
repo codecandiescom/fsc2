@@ -151,7 +151,6 @@ int me6x00_num_dacs( int board, unsigned int *num_dacs )
 }
 
 
-
 /*--------------------------------------------------*/
 /* Returns the serial number of the addresses board */
 /*--------------------------------------------------*/
