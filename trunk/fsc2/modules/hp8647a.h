@@ -57,7 +57,6 @@
 
 int hp8647a_init_hook( void );
 int hp8647a_test_hook( void );
-int hp8647a_end_of_test_hook( void );
 int hp8647a_exp_hook( void );
 int hp8647a_end_of_exp_hook( void );
 void hp8647a_exit_hook( void );

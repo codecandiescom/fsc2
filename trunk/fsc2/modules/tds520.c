@@ -76,8 +76,6 @@ static Var *get_amplitude( Var *v, bool use_cursor );
 
 
 static struct {
-	bool is_reacting;
-
 	bool is_timebase;
 	double timebase;
 
@@ -97,7 +95,6 @@ static struct {
 
 	bool is_sens[ TDS520_CH2 + 1 ];
 	double sens[ TDS520_CH2 + 1 ];
-
 } tds520_store;
 
 
@@ -155,8 +152,6 @@ int tds520_exp_hook( void )
 	/* Store the state the digitizer was set to in the preparations section -
 	   we need this when starting the same experiment again... */
 
-	tds520_store.is_reacting = tds520.is_reacting;
-
 	tds520_store.is_timebase = tds520.is_timebase;
 	tds520_store.timebase    = tds520.is_timebase;
 
@@ -207,7 +202,7 @@ int tds520_end_of_exp_hook( void )
 	/* Reset the digitizer to the state it was set to in the preparations
 	   section - we need this when starting the same experiment again... */
 
-	tds520.is_reacting      = tds520_store.is_reacting;
+	tds520.is_reacting      = UNSET;
 
 	tds520.is_timebase      = tds520_store.is_timebase;
 	tds520.is_timebase      = tds520_store.timebase;

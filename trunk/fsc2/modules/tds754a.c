@@ -77,6 +77,31 @@ static Var *get_amplitude( Var *v, bool use_cursor );
 #define TEST_TRIG_CHANNEL 0
 
 
+static struct {
+	bool is_equal_width;
+
+	bool is_timebase;
+	double timebase;
+
+	bool is_num_avg;
+	long num_avg;
+
+	bool is_rec_len;
+	long rec_len;
+
+	bool is_trig_pos;
+	double trig_pos;
+
+	int data_source;
+	int meas_source;
+
+	bool lock_state;
+
+	bool is_sens[ TDS754A_CH4 + 1 ];
+	double sens[ TDS754A_CH4 + 1 ];
+} tds754a_store;
+
+
 /*******************************************/
 /*   We start with the hook functions...   */
 /*******************************************/
@@ -125,6 +150,37 @@ int tds754a_init_hook( void )
 
 int tds754a_exp_hook( void )
 {
+	int i;
+
+
+	/* Store the state the digitizer was set to in the preparations section -
+	   we need this when starting the same experiment again... */
+
+	tds754a_store.is_equal_width = tds754a.is_equal_width;
+
+	tds754a_store.is_timebase    = tds754a.is_timebase;
+	tds754a_store.timebase       = tds754a.is_timebase;
+
+	tds754a_store.is_num_avg     = tds754a.is_num_avg;
+	tds754a_store.num_avg        = tds754a.num_avg;
+
+	tds754a_store.is_rec_len     = tds754a.is_rec_len;
+	tds754a_store.rec_len        = tds754a.rec_len;
+
+	tds754a_store.is_trig_pos    = tds754a.is_trig_pos;
+	tds754a_store.trig_pos       = tds754a.trig_pos;
+
+	tds754a_store.data_source    = tds754a.data_source;
+	tds754a_store.meas_source    = tds754a.meas_source;
+
+	tds754a_store.lock_state     = tds754a.lock_state;
+
+	for ( i = TDS754A_CH1; i <= TDS754A_CH4; i++ )
+	{
+		tds754a_store.is_sens[ i ] = tds754a.is_sens[ i ];
+		tds754a_store.sens[ i ]    = tds754a.sens[ i ];
+	}
+
 	if ( ! tds754a_init( DEVICE_NAME ) )
 	{
 		eprint( FATAL, UNSET, "%s: Initialization of device failed: %s\n",
@@ -144,7 +200,40 @@ int tds754a_exp_hook( void )
 
 int tds754a_end_of_exp_hook( void )
 {
+	int i;
+
 	tds754a_finished( );
+
+	/* Reset the digitizer to the state it was set to in the preparations
+	   section - we need this when starting the same experiment again... */
+
+	tds754a.is_reacting          = UNSET;
+
+	tds754a_store.is_equal_width = tds754a.is_equal_width;
+
+	tds754a.is_timebase          = tds754a_store.is_timebase;
+	tds754a.is_timebase          = tds754a_store.timebase;
+
+	tds754a_store.is_num_avg     = tds754a.is_num_avg;
+	tds754a.num_avg              = tds754a_store.num_avg;
+
+	tds754a.is_rec_len           = tds754a_store.is_rec_len;
+	tds754a.rec_len              = tds754a_store.rec_len;
+
+	tds754a.is_trig_pos          = tds754a_store.is_trig_pos;
+	tds754a.trig_pos             = tds754a_store.trig_pos;
+
+	tds754a.data_source          = tds754a_store.data_source;
+	tds754a.meas_source          = tds754a_store.meas_source;
+
+	tds754a.lock_state = tds754a_store.lock_state;
+
+	for ( i = TDS754A_CH1; i <= TDS754A_CH4; i++ )
+	{
+		tds754a.is_sens[ i ] = tds754a_store.is_sens[ i ];
+		tds754a.sens[ i ]    = tds754a_store.sens[ i ];
+	}
+
 	return 1;
 }
 

@@ -34,9 +34,6 @@ const char generic_type[ ] = DEVICE_TYPE;
 static HP8647A hp8647a_backup;
 
 
-/*******************************************/
-/*   the hook functions...                 */
-/*******************************************/
 
 /*------------------------------------*/
 /* Init hook function for the module. */
@@ -106,24 +103,11 @@ int hp8647a_test_hook( void )
 			                hp8647a_get_att_from_table( hp8647a.att_ref_freq );
 	}
 
-	/* Save the current state of the device structure which has to be reset
-	   to this state after the the test run */
+	/* Save the current state of the device structure which always has to be
+	   reset to this state at the start of the experiment */
 
 	memcpy( &hp8647a_backup, &hp8647a, sizeof( HP8647A ) );
 
-	return 1;
-}
-
-
-/*------------------------------------*/
-/* Test hook function for the module. */
-/*------------------------------------*/
-
-int hp8647a_end_of_test_hook( void )
-{
-	/* Restore device structure to the state at the start of the test run */
-
-	memcpy( &hp8647a, &hp8647a_backup, sizeof( HP8647A ) );
 	return 1;
 }
 
@@ -134,6 +118,10 @@ int hp8647a_end_of_test_hook( void )
 
 int hp8647a_exp_hook( void )
 {
+	/* Restore device structure to the state at the start of the test run */
+
+	memcpy( &hp8647a, &hp8647a_backup, sizeof( HP8647A ) );
+
 	if ( ! hp8647a_init( DEVICE_NAME ) )
 	{
 		eprint( FATAL, UNSET, "%s: Initialization of device failed: %s\n",

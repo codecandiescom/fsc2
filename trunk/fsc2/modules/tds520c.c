@@ -77,6 +77,31 @@ static Var *get_amplitude( Var *v, bool use_cursor );
 #define TEST_TRIG_CHANNEL 0
 
 
+static struct {
+	bool is_equal_width;
+
+	bool is_timebase;
+	double timebase;
+
+	bool is_num_avg;
+	long num_avg;
+
+	bool is_rec_len;
+	long rec_len;
+
+	bool is_trig_pos;
+	double trig_pos;
+
+	int data_source;
+	int meas_source;
+
+	bool lock_state;
+
+	bool is_sens[ TDS520C_CH2 + 1 ];
+	double sens[ TDS520C_CH2 + 1 ];
+} tds520c_store;
+
+
 /*******************************************/
 /*   We start with the hook functions...   */
 /*******************************************/
@@ -125,6 +150,37 @@ int tds520c_init_hook( void )
 
 int tds520c_exp_hook( void )
 {
+	int i;
+
+
+	/* Store the state the digitizer was set to in the preparations section -
+	   we need this when starting the same experiment again... */
+
+	tds520c_store.is_equal_width = tds520c.is_equal_width;
+
+	tds520c_store.is_timebase    = tds520c.is_timebase;
+	tds520c_store.timebase       = tds520c.is_timebase;
+
+	tds520c_store.is_num_avg     = tds520c.is_num_avg;
+	tds520c_store.num_avg        = tds520c.num_avg;
+
+	tds520c_store.is_rec_len     = tds520c.is_rec_len;
+	tds520c_store.rec_len        = tds520c.rec_len;
+
+	tds520c_store.is_trig_pos    = tds520c.is_trig_pos;
+	tds520c_store.trig_pos       = tds520c.trig_pos;
+
+	tds520c_store.data_source    = tds520c.data_source;
+	tds520c_store.meas_source    = tds520c.meas_source;
+
+	tds520c_store.lock_state     = tds520c.lock_state;
+
+	for ( i = TDS520C_CH1; i <= TDS520C_CH2; i++ )
+	{
+		tds520c_store.is_sens[ i ] = tds520c.is_sens[ i ];
+		tds520c_store.sens[ i ]    = tds520c.sens[ i ];
+	}
+
 	if ( ! tds520c_init( DEVICE_NAME ) )
 	{
 		eprint( FATAL, UNSET, "%s: Initialization of device failed: %s\n",
@@ -144,7 +200,41 @@ int tds520c_exp_hook( void )
 
 int tds520c_end_of_exp_hook( void )
 {
+	int i;
+
+
 	tds520c_finished( );
+
+	/* Reset the digitizer to the state it was set to in the preparations
+	   section - we need this when starting the same experiment again... */
+
+	tds520c.is_reacting          = UNSET;
+
+	tds520c_store.is_equal_width = tds520c.is_equal_width;
+
+	tds520c.is_timebase          = tds520c_store.is_timebase;
+	tds520c.is_timebase          = tds520c_store.timebase;
+
+	tds520c_store.is_num_avg     = tds520c.is_num_avg;
+	tds520c.num_avg              = tds520c_store.num_avg;
+
+	tds520c.is_rec_len           = tds520c_store.is_rec_len;
+	tds520c.rec_len              = tds520c_store.rec_len;
+
+	tds520c.is_trig_pos          = tds520c_store.is_trig_pos;
+	tds520c.trig_pos             = tds520c_store.trig_pos;
+
+	tds520c.data_source          = tds520c_store.data_source;
+	tds520c.meas_source          = tds520c_store.meas_source;
+
+	tds520c.lock_state = tds520c_store.lock_state;
+
+	for ( i = TDS520C_CH1; i <= TDS520C_CH2; i++ )
+	{
+		tds520c.is_sens[ i ] = tds520c_store.is_sens[ i ];
+		tds520c.sens[ i ]    = tds520c_store.sens[ i ];
+	}
+
 	return 1;
 }
 

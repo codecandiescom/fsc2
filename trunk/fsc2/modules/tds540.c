@@ -73,6 +73,32 @@ static double max_sens = 1e-3,
 #define TEST_TRIG_CHANNEL 0
 
 
+static struct {
+	bool is_equal_width;
+
+	bool is_timebase;
+	double timebase;
+
+	bool is_num_avg;
+	long num_avg;
+
+	bool is_rec_len;
+	long rec_len;
+
+	bool is_trig_pos;
+	double trig_pos;
+
+	int data_source;
+	int meas_source;
+
+	bool lock_state;
+
+	bool is_sens[ TDS540_CH4 + 1 ];
+	double sens[ TDS540_CH4 + 1 ];
+} tds540_store;
+
+
+
 /*******************************************/
 /*   We start with the hook functions...   */
 /*******************************************/
@@ -121,6 +147,37 @@ int tds540_init_hook( void )
 
 int tds540_exp_hook( void )
 {
+	int i;
+
+
+	/* Store the state the digitizer was set to in the preparations section -
+	   we need this when starting the same experiment again... */
+
+	tds540_store.is_equal_width = tds540.is_equal_width;
+
+	tds540_store.is_timebase    = tds540.is_timebase;
+	tds540_store.timebase       = tds540.is_timebase;
+
+	tds540_store.is_num_avg     = tds540.is_num_avg;
+	tds540_store.num_avg        = tds540.num_avg;
+
+	tds540_store.is_rec_len     = tds540.is_rec_len;
+	tds540_store.rec_len        = tds540.rec_len;
+
+	tds540_store.is_trig_pos    = tds540.is_trig_pos;
+	tds540_store.trig_pos       = tds540.trig_pos;
+
+	tds540_store.data_source    = tds540.data_source;
+	tds540_store.meas_source    = tds540.meas_source;
+
+	tds540_store.lock_state     = tds540.lock_state;
+
+	for ( i = TDS540_CH1; i <= TDS540_CH4; i++ )
+	{
+		tds540_store.is_sens[ i ] = tds540.is_sens[ i ];
+		tds540_store.sens[ i ]    = tds540.sens[ i ];
+	}
+
 	if ( ! tds540_init( DEVICE_NAME ) )
 	{
 		eprint( FATAL, UNSET, "%s: Initialization of device failed: %s\n",
@@ -140,7 +197,41 @@ int tds540_exp_hook( void )
 
 int tds540_end_of_exp_hook( void )
 {
+	int i;
+
+
 	tds540_finished( );
+
+	/* Reset the digitizer to the state it was set to in the preparations
+	   section - we need this when starting the same experiment again... */
+
+	tds540.is_reacting          = UNSET;
+
+	tds540_store.is_equal_width = tds540.is_equal_width;
+
+	tds540.is_timebase          = tds540_store.is_timebase;
+	tds540.is_timebase          = tds540_store.timebase;
+
+	tds540_store.is_num_avg     = tds540.is_num_avg;
+	tds540.num_avg              = tds540_store.num_avg;
+
+	tds540.is_rec_len           = tds540_store.is_rec_len;
+	tds540.rec_len              = tds540_store.rec_len;
+
+	tds540.is_trig_pos          = tds540_store.is_trig_pos;
+	tds540.trig_pos             = tds540_store.trig_pos;
+
+	tds540.data_source          = tds540_store.data_source;
+	tds540.meas_source          = tds540_store.meas_source;
+
+	tds540.lock_state = tds540_store.lock_state;
+
+	for ( i = TDS540_CH1; i <= TDS540_CH4; i++ )
+	{
+		tds540.is_sens[ i ] = tds540_store.is_sens[ i ];
+		tds540.sens[ i ]    = tds540_store.sens[ i ];
+	}
+
 	return 1;
 }
 
