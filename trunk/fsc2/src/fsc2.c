@@ -154,6 +154,10 @@ void xforms_init( int *argc, char *argv[] )
 	fl_set_canvas_decoration( run_form->y_axis, FL_FRAME_BOX );
 	fl_set_canvas_decoration( run_form->canvas, FL_NO_FRAME );
 
+	/* Create the form for writing a comment */
+
+	input_form = create_form_input_form( );
+
 	/* Set some properties of goodies */
 
 	fl_set_fselector_fontsize( FL_MEDIUM_SIZE );
