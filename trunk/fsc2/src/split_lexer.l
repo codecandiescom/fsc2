@@ -174,8 +174,12 @@ bool scan_main( const char *name, FILE *fp )
 
 	/* Make the lexer read its input from the output of fsc2_clean */
 
+	Internals.fsc2_clean_died = UNSET;
 	if ( ( splitin = filter_edl( name, fp ) ) == NULL )
+	{
+		Internals.fsc2_clean_died = SET;
 		return FAIL;
+	}
 
 	/* The next rather simple looking line is were the predigested EDL file,
 	   i.e. what we get back from fsc2_clean, is read in and tested for
@@ -186,17 +190,13 @@ bool scan_main( const char *name, FILE *fp )
 
 	fclose( splitin );
 
-	/* Wait for the child process doing the filtering to die and also check
-	   its return value (unless we already detected a failure, in which case
-	   writing out another error message doesn't make sense) */
-
-	while ( Internals.fsc2_clean_pid != -1 )
+	while ( ! Internals.fsc2_clean_died )
 		fsc2_usleep( 10000, UNSET );
 
-	if ( split_error == OK && WIFEXITED( Internals.fsc2_clean_status ) == 0 )
+	if ( split_error == OK && ! Internals.fsc2_clean_status_ok )
 	{
 		print( FATAL, "Parsing the EDL script '%s' failed due to some "
-			   "internal problems.\n" );
+			   "internal problems.\n", name );
 		split_error = FAIL;
 	}
 

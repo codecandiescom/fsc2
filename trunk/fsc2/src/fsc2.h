@@ -163,14 +163,15 @@ struct INTERNALS {
 	uid_t EUID;                  /* User and group ID the program was */
 	gid_t EGID;				     /* started with */
 
-	pid_t fsc2_clean_pid;        /* pid and return status of child executing */
-	int fsc2_clean_status;       /* the fsc2_clean filter */
+	pid_t fsc2_clean_pid;
+	volatile sig_atomic_t fsc2_clean_status_ok;
+	volatile sig_atomic_t fsc2_clean_died;
 
 	pid_t child_pid;             /* pid of child process doing the
                                     measurement */
 	pid_t conn_pid;              /* pid of child process for handling
 									communication with scripts */
-	pid_t http_pid;              /* pid of child process that is a http server
+	volatile pid_t http_pid;     /* pid of child process that is a http server
 									to allow viewing fsc2's state */
 	int http_port;               /* port the http server is running on */
 

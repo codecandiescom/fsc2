@@ -292,6 +292,7 @@ static void globals_init( const char *pname )
 
     Internals.child_pid = 0;
 	Internals.fsc2_clean_pid = 0;
+	Internals.fsc2_clean_died = SET;
     Internals.http_pid = 0;
 
 	/* Set up a lot of global variables */
@@ -1875,14 +1876,14 @@ static void conn_request_handler( void )
 static void set_main_signals( void )
 {
 	struct sigaction sact;
-	int sig_list[ ] = { SIGHUP, SIGINT, SIGQUIT, SIGILL, SIGABRT, SIGFPE,
-						SIGALRM, SIGSEGV, SIGPIPE, SIGTERM, SIGUSR1, SIGUSR2,
-						SIGCHLD, SIGCONT, SIGTTIN, SIGTTOU, SIGBUS, SIGVTALRM,
-						0 };
-	int i;
+	int sig_list[ ] = { SIGHUP, SIGINT, SIGQUIT, SIGILL, SIGABRT,
+						SIGFPE, SIGALRM, SIGSEGV, SIGPIPE, SIGTERM,
+						SIGUSR1, SIGUSR2, SIGCHLD, SIGCONT, SIGTTIN,
+						SIGTTOU, SIGBUS, SIGVTALRM };
+	size_t i;
 
 
-	for ( i = 0; sig_list[ i ] != 0; i++ )
+	for ( i = 0; i < sizeof sig_list / sizeof sig_list[ 0 ]; i++ )
 	{
 		sact.sa_handler = main_sig_handler;
 		sigemptyset( &sact.sa_mask );
@@ -1916,16 +1917,20 @@ void main_sig_handler( int signo )
 			errno_saved = errno;
 			while ( ( pid = waitpid( -1, &status, WNOHANG ) ) > 0 )
 			{
+					fprintf( stderr, "%ld %ld\n", ( long ) pid, ( long ) Internals.fsc2_clean_pid );
 				if ( pid == Internals.http_pid )
 				{
 					Internals.http_pid = -1;
 					Internals.http_server_died = SET;
 				}
 
-				if ( pid == Internals.fsc2_clean_pid )
+				if ( ! Internals.fsc2_clean_died &&
+					 pid == Internals.fsc2_clean_pid )
 				{
-					Internals.fsc2_clean_pid = -1;
-					Internals.fsc2_clean_status = status;
+					fprintf( stderr, "%ld\n", ( long ) Internals.fsc2_clean_pid );
+					Internals.fsc2_clean_pid = 0;
+					Internals.fsc2_clean_died = SET;
+					Internals.fsc2_clean_status_ok = WIFEXITED( status );
 				}
 			}
 			errno = errno_saved;

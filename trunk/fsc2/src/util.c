@@ -659,9 +659,13 @@ char *handle_escape( char *str )
 FILE *filter_edl( const char *name, FILE *fp )
 {
 	int pd[ 2 ];
+	int pdt[ 2 ];
 	fd_set rfds;
 	int rs;
+	char c;
 
+
+	/* The first set of pipes is needed to read the output of 'fsc2_clean' */
 
 	if ( pipe( pd ) == -1 )
 	{
@@ -671,8 +675,32 @@ FILE *filter_edl( const char *name, FILE *fp )
 		return NULL;
 	}
 
+	/* The second set of pipes is only needed to make sure that the parent
+	   runs first by having the parent write something to the pipe and the
+	   child process waiting for it. This is required because otherwise it
+	   sometimes (especially for short EDL scripts) happens that the whole
+	   child process is already finished and dead before the parent even
+	   knows about its PID. In this case the signal handler does not know
+	   about the child aleady running and would thus not store the childs
+	   return value which we still need to figure out if 'fsc2_clean' did
+	   exit successfully. */
+
+	if ( pipe( pdt ) == -1 )
+	{
+		close( pd[ 0 ] );
+		close( pd[ 1 ] );
+		if ( errno == EMFILE || errno == ENFILE )
+			print( FATAL, "Starting the test procedure failed, running out "
+				   "of system resources.\n" );
+		return NULL;
+	}
+
 	if ( ( Internals.fsc2_clean_pid = fork( ) ) < 0 )
 	{
+		close( pd[ 0 ] );
+		close( pd[ 1 ] );
+		close( pdt[ 0 ] );
+		close( pdt[ 1 ] );
 		if ( errno == ENOMEM || errno == EAGAIN )
 			print( FATAL, "Starting the test procedure failed, running out "
 				   "of system resources.\n" );
@@ -687,6 +715,15 @@ FILE *filter_edl( const char *name, FILE *fp )
 
 
 		CLOBBER_PROTECT( cmd );
+
+		/* First of all things wait for a single char from the parent, it
+		   doesn't matter what get written, we need just to know that the
+		   parent has run and thus knows about the childs PID. */
+
+		close( pdt[ 1 ] );
+		while ( read( pdt[ 0 ], &c, 1 ) < 1 )
+			/* empty */ ;
+		close( pdt[ 0 ] );
 
 		/* Make sure we start at the beginnig of the file - the last run
 		   may have been stopped by the user and the file may now be
@@ -746,7 +783,14 @@ FILE *filter_edl( const char *name, FILE *fp )
 		_exit( EXIT_SUCCESS );
 	}
 
-	/* And finally the code for the parent */
+	/* And finally the code for the parent: first thing to do is to send a
+	   single byte to the child so it knows we already have its PID. */
+
+	close( pdt[ 0 ] );
+	write( pdt[ 1 ], &c, 1);
+	close( pdt[ 1 ] );
+
+	/* Close write side of the important pipe, we're only going to read */
 
 	close( pd[ 1 ] );
 
