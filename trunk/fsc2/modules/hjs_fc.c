@@ -78,6 +78,10 @@ static struct HJS_FC {
 	char *gm_gf_func;
 	char *gm_res_func;
 
+	double dac_min_volts;
+	double dac_max_volts;
+	double dac_resolution;
+
 	double cur_volts;       /* current voltage at the DAC output */
 	double act_field;		/* used internally */
 	double target_field;
@@ -101,10 +105,6 @@ static struct HJS_FC {
 
 #define WAIT_LENGTH         100000UL    /* 100 ms */
 
-
-#define DAC_MAX_VOLTAGE     10.0
-#define DAC_MIN_VOLTAGE      0.0
-#define DAC_RESOLUTION      ( ( DAC_MAX_VOLTAGE - DAC_MIN_VOLTAGE ) / 4095.0 )
 
 /* Field value that will be returned during a test run */
 
@@ -240,6 +240,36 @@ int hjs_fc_init_hook( void )
 			THROW( EXCEPTION );
 		}
 
+		/* Finally determine the minimum and maximum output voltage and
+		   the voltage resolution of the DAC */
+
+		func = get_string( "daq_dac_parameter#%d", dev_num );
+
+		if ( ! func_exists( func ) ||
+			 ( Func_ptr = func_get( func, &acc ) ) == NULL )
+		{
+			print( FATAL, "Function for determining the DAC parameters is "
+				   "missing.\n" );
+			THROW( EXCEPTION );
+		}
+
+		func = CHAR_P T_free( func );
+		vars_push( STR_VAR, DEVICE_NAME );    /* push the new pass-phrase */
+
+		v = func_call( Func_ptr );
+
+		if ( v->type != FLOAT_ARR || v->len != 3 )
+		{
+			print( FATAL, "Unexpected data received from DAC.\n" );
+			THROW( EXCEPTION );
+		}
+
+		hjs_fc.dac_min_volts = v->val.dpnt[ 0 ];
+		hjs_fc.dac_max_volts = v->val.dpnt[ 1 ];
+		hjs_fc.dac_resolution = v->val.dpnt[ 2 ];
+
+		vars_pop( v );
+
 		TRY_SUCCESS;
 	}
 	OTHERWISE
@@ -333,11 +363,11 @@ int hjs_fc_exp_hook( void )
 	   the DAC. */
 
 	if ( hjs_fc.is_field_step &&
-		 fabs( hjs_fc.field_step / hjs_fc.slope ) < DAC_RESOLUTION )
+		 fabs( hjs_fc.field_step / hjs_fc.slope ) < hjs_fc.dac_resolution )
 	{
 		print( FATAL, "Field step size for sweeps is too small, the minimum "
 			   "possible step size is %.2lf G.\n",
-			   DAC_RESOLUTION * hjs_fc.slope );
+			   hjs_fc.dac_resolution * hjs_fc.slope );
 		THROW( EXCEPTION );
 	}
 
@@ -384,7 +414,7 @@ void hjs_fc_child_exit_hook( void )
 	if ( ( cur_volts = hjs_fc.cur_volts ) == 0.0 )
 		return;
 
-	mini_step = HJS_FC_FIELD_SET_MULTIPLIER * DAC_RESOLUTION;
+	mini_step = HJS_FC_FIELD_SET_MULTIPLIER * hjs_fc.dac_resolution;
 
 	/* If the constants for the field at a DAC voltage of 0 V and for
 	   the change of the field with the DAC voltage as measured during
@@ -573,7 +603,8 @@ Var *reset_field( Var *v )
 static void hjs_fc_init( void )
 {
 	size_t i;
-	double test_volts[ ] = { DAC_MIN_VOLTAGE, 1.0, 2.0, 7.5, DAC_MAX_VOLTAGE };
+	double test_volts[ ] = { hjs_fc.dac_min_volts, 1.0, 2.0, 7.5,
+							 hjs_fc.dac_max_volts };
 	size_t num_test_data = 	sizeof test_volts / sizeof test_volts[ 0 ];
 	double test_gauss[ num_test_data + 1 ];
 	double cur_volts;
@@ -584,17 +615,17 @@ static void hjs_fc_init( void )
 
 	hjs_fc.B0V = test_gauss[ 0 ] = hjs_fc_get_field( );
 
-	cur_volts = DAC_MIN_VOLTAGE;
-	mini_step = HJS_FC_FIELD_SET_MULTIPLIER * DAC_RESOLUTION;
+	cur_volts = hjs_fc.dac_min_volts;
+	mini_step = HJS_FC_FIELD_SET_MULTIPLIER * hjs_fc.dac_resolution;
 
 	/* For the test voltages set in 'test_volts' get the magnetic field */
 
 	for ( i = 1; i < num_test_data; i++ )
 	{
-		if ( test_volts[ i ] < DAC_MIN_VOLTAGE ||
-			 test_volts[ i ] > DAC_MAX_VOLTAGE ||
+		if ( test_volts[ i ] < hjs_fc.dac_min_volts ||
+			 test_volts[ i ] > hjs_fc.dac_max_volts ||
 			 ( i > 0 && fabs( test_volts[ i - 1 ] - test_volts[ i ] )
-			   			< DAC_RESOLUTION ) )
+			   			< hjs_fc.dac_resolution ) )
 		{
 			print( FATAL, "Internal error detected at %s:%d.\n",
 				   __FILE__, __LINE__ );
@@ -640,7 +671,7 @@ static void hjs_fc_init( void )
 	/* Check that we at least have a field resolution of 0.1 G with the
 	   value we got from our tests */
 
-	if ( DAC_RESOLUTION / hjs_fc.slope > 0.1 )
+	if ( hjs_fc.dac_resolution / hjs_fc.slope > 0.1 )
 	{
 		print( FATAL, "Minimum field resolution is higher than 0.1 G.\n" );
 		THROW( EXCEPTION );
@@ -677,7 +708,7 @@ static double hjs_fc_set_field( double field, double error_margin )
 	if ( error_margin < 0.2 )
 		error_margin = 0.2;
 
-	mini_step = HJS_FC_FIELD_SET_MULTIPLIER * DAC_RESOLUTION;
+	mini_step = HJS_FC_FIELD_SET_MULTIPLIER * hjs_fc.dac_resolution;
 
 	/* If the constants for the field at a DAC voltage of 0 V and for
 	   the change of the field with the DAC voltage as measured during
@@ -706,15 +737,17 @@ static double hjs_fc_set_field( double field, double error_margin )
 				 ( mini_step < 0.0 && cur_volts < v_step ) )
 				cur_volts = v_step;
 
-			if ( ( cur_volts < DAC_MIN_VOLTAGE && hjs_fc.slope > 0.0 ) ||
-				 ( cur_volts > DAC_MAX_VOLTAGE && hjs_fc.slope < 0.0 ) )
+			if ( ( cur_volts < hjs_fc.dac_min_volts && hjs_fc.slope > 0.0 ) ||
+				 ( cur_volts > hjs_fc.dac_max_volts && hjs_fc.slope < 0.0 ) )
 			{
 				print( FATAL, "Can't sweep field to %.2f G, it's too low.\n",
 					   field );
 				THROW( EXCEPTION );
 			}
-			else if ( ( cur_volts < DAC_MIN_VOLTAGE && hjs_fc.slope < 0.0 ) ||
-					  ( cur_volts > DAC_MAX_VOLTAGE && hjs_fc.slope > 0.0 ) )
+			else if ( ( cur_volts < hjs_fc.dac_min_volts &&
+						hjs_fc.slope < 0.0 ) ||
+					  ( cur_volts > hjs_fc.dac_max_volts &&
+						hjs_fc.slope > 0.0 ) )
 			{
 				print( FATAL, "Can't sweep field to %.2f G, it's too high.\n",
 					   field );
@@ -765,7 +798,7 @@ static double hjs_fc_sweep_to( double new_field )
 	if ( FSC2_MODE == TEST )
 		return new_field;
 
-	mini_step = HJS_FC_FIELD_SET_MULTIPLIER * DAC_RESOLUTION;
+	mini_step = HJS_FC_FIELD_SET_MULTIPLIER * hjs_fc.dac_resolution;
 
 	/* Calculate the DAC voltage for the new field. Before we then set it we
 	   check that this wouldn't require setting the DAC to a value outside
@@ -774,15 +807,15 @@ static double hjs_fc_sweep_to( double new_field )
 	cur_volts = hjs_fc.cur_volts;
 	v_step = cur_volts + ( new_field - hjs_fc.act_field ) / hjs_fc.slope;
 
-	if ( ( v_step < DAC_MIN_VOLTAGE && hjs_fc.slope > 0.0 ) ||
-		 ( v_step > DAC_MAX_VOLTAGE && hjs_fc.slope < 0.0 ) )
+	if ( ( v_step < hjs_fc.dac_min_volts && hjs_fc.slope > 0.0 ) ||
+		 ( v_step > hjs_fc.dac_max_volts && hjs_fc.slope < 0.0 ) )
 	{
 		print( FATAL, "Can't sweep field to %.2f G, it's too low.\n",
 			   new_field );
 		THROW( EXCEPTION );
 	}
-	else if ( ( v_step < DAC_MIN_VOLTAGE && hjs_fc.slope < 0.0 ) ||
-			  ( v_step > DAC_MAX_VOLTAGE && hjs_fc.slope > 0.0 ) )
+	else if ( ( v_step < hjs_fc.dac_min_volts && hjs_fc.slope < 0.0 ) ||
+			  ( v_step > hjs_fc.dac_max_volts && hjs_fc.slope > 0.0 ) )
 	{
 		print( FATAL, "Can't sweep field to %.2f G, it's too high.\n",
 			   new_field );
