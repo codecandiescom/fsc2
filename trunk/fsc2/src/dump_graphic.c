@@ -283,7 +283,7 @@ static void dump_as_ppm( FILE *fp, XImage *image )
 
 	/* Get some information about the image */
 
-	bits_used = bits_per_item  = image->bitmap_unit;
+	bits_used = bits_per_item = image->bitmap_unit;
 	bits_per_pixel = image->bits_per_pixel;
 
 	if ( bits_per_pixel == 32 )
@@ -291,7 +291,7 @@ static void dump_as_ppm( FILE *fp, XImage *image )
 	else 
 		pixel_mask = ( ( ( unsigned long ) 1 ) << bits_per_pixel ) - 1;
 
-	bit_order  = image->bitmap_bit_order;
+	bit_order = image->bitmap_bit_order;
 
 	/* Loop through the complete image, line by line */
 
