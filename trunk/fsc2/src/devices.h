@@ -32,6 +32,7 @@ typedef struct Dev_ {
 	Lib_Struct driver;
 	bool is_loaded;
 	const char *generic_type;
+	const char *device_name;
 	struct Dev_ *next;
 	struct Dev_ *prev;
 	int count;

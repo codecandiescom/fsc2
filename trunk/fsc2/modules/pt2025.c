@@ -29,6 +29,7 @@
 
 #include "pt2025.conf"
 
+const char device_name[ ]  = DEVICE_NAME;
 const char generic_type[ ] = DEVICE_TYPE;
 
 

@@ -693,33 +693,36 @@ new and descriptive name. Please also see the next section.
 
 @subsection Variables a module should define
 
-In the previous section the meaning of the device type string has
-already been discussed. While the definition of the string should go
-into the configuration file for the device, no memory has been allocated
-for this string yet. This should be done as one of the first things after
-the include files having been included. Each and every device module
-should define a constant character array called @code{generic_type},
-that contains the device type string, i.e.@: one of the first lines
-should always be
+In the previous section the meaning of the device name and type type
+strings has already been discussed. While the definition of the strings
+should go into the configuration file for the device, no memory has been
+allocated for these strings yet. This should be done as one of the first
+things after the include files having been included. Each and every
+device module should define two constant character arrays called
+@code{device_name} and @code{generic_type}, that contain the device name
+and type strings, i.e.@: one of the first lines should always be
 @example
+const char device_name[ ]  = DEVICE_NAME;
 const char generic_type[ ] = DEVICE_TYPE;
 @end example
 or
 @example
+const char *device_name  = DEVICE_NAME;
 const char *generic_type = DEVICE_TYPE;
 @end example
-@acronym{fsc2} will try to find a variable with this name in the module
-to find out about the type of the device. If this variable does not
-exist it won't have any information about the device type and having
-another device of the same type recognized automatically will not work.
+@acronym{fsc2} will use the first variable with the name for printing of
+warnings and error messages. Tes second string is needed to find out
+about the type of the device. If this variable does not exist it won't
+have any information about the device type and having another device of
+the same type recognized automatically will not work.
 
 Another important point is that if in two modules with different
-@code{generic_type} settings the same function is exported only one of
-this modules can be used. If the user tries to list both modules
-simultaneously in the @code{DEVICES} section an error message will be
-printed and interpretation of the program will be stopped. Thus it
-must be avoided to use identical @acronym{EDL} function names in modules
-for unrelated devices.
+@code{generic_type} settings the same function name is used only one of
+this modules can be used at the same time. If the user tries to list
+both modules simultaneously in the @code{DEVICES} section an error
+message will be printed and interpretation of the program will be
+stopped. Thus it must be avoided to use identical @acronym{EDL} function
+names in modules for devices of different types.
 
 
 @subsection Global variables
