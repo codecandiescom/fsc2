@@ -54,7 +54,7 @@ int me6000_end_of_exp_hook( void );
 void me6000_exit_hook( void );
 
 Var *daq_name( Var *v );
-Var *daq_voltage( Var *v );
+Var *daq_set_voltage( Var *v );
 
 
 /* Locally used functions */
@@ -226,7 +226,7 @@ Var *daq_name( Var *v )
 /*---------------------------------------------------------------*/
 /*---------------------------------------------------------------*/
 
-Var *daq_voltage( Var *v )
+Var *daq_set_voltage( Var *v )
 {
 	long channel;
 	int dac;

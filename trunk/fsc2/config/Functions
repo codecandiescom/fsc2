@@ -259,10 +259,12 @@ freq_counter_measure, 0, EXP;
 freq_counter_command, 1, EXP;
 
 
-/* Functions exported by DA converters (ME-6000 and ME6100) */
+/* Functions exported by DAQ cards and devices (ME-6000 and ME6100, home
+   build DA and ADC from Heinz-Juergen Steinhoffs group) */
 
-dac_name, 0, ALL;
-dac_voltage, -1, ALL;
+daq_name, 0, ALL;
+daq_set_voltage, -1, ALL;
+daq_get_voltage, -1, ALL;
 
 
 /* Functions exported by event counters (NatInst 6601) */
