@@ -400,7 +400,7 @@ static int AI_channel_setup( Board *board, unsigned int num_channels,
 
 	/* Check that the channel associated with a channel with differential
 	   coupling is not used - channels with differential coupling can only
-	   be in the ranges i = 0..7,16..23,32..29,48..55 and the channel
+	   be in the ranges i = 0..7,16..23,32..39,48..55 and the channel
 	   associated to it has to have the number (i + 8) */
 
 	for ( i = 0; i < board->type->ai_num_channels; i++ ) {

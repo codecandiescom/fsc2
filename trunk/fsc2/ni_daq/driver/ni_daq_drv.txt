@@ -12,15 +12,17 @@ and PCI-6071E) and has only been tested with the PCI-MIO-16E-1
 
 While the driver supports the open(), close(), read(), poll() and select()
 system calls, most of its functionality can only be used via ioctl() calls.
-Since they are that important I will start with then and only will talk
-about the other functions at the end of the documentation.
+Since they are that important I am going to start with them and will write
+about the other functions at the end of the documentation only.
 
-The functionality of the driver can be basically devided into 5 subsystems.
-The first one is the analog input (AI) system, the second the analog output
-(AO) system, the third the general purpose counter and timer (GPCT) system,
-the fourth the digital I/O (DIO) system, and the fifth beeing a catch-all
-system, the miscellaneous (MSC) system (for dealing with the boards
-timebases, trigger setup etc.).
+The functionality of the driver is devided into 5 subsystems:
+
+1. Analog Input (AI) subsystem
+2. Analog Output (AO) subsystem
+3. General Purpose Counter and Timer (GPCT) subsystem
+4. Digital I/O (DIO) subsystem
+5. Miscellaneous (MSC) subsystem (for dealing with the boards timebases,
+   trigger setup etc.).
 
 Accordingly, there are 5 different ioctl() calls, one for each of the
 subsystems. The structures passed to the kernel with the ioctl() all
@@ -48,28 +50,21 @@ these structures:
 
   typedef struct {
       NI_DAQ_GPCT_CMD cmd;
-  
       unsigned int counter;
       NI_DAQ_STATE output_state;
-  
       unsigned long low_ticks;
       unsigned long high_ticks;
 	  unsigned long delay_ticks;
-  
       NI_DAQ_INPUT gate;
       NI_DAQ_INPUT source;
-  
       NI_DAQ_POLARITY output_polarity;
       NI_DAQ_POLARITY source_polarity;
       NI_DAQ_POLARITY gate_polarity;
-  
       int continuous;
 	  int delay_start;
       int wait_for_end;
       unsigned long count;
-  
       NI_DAQ_CLOCK_SPEED_VALUE speed;
-  
       int is_armed;
   } NI_DAQ_GPCT_ARG;
 
@@ -117,22 +112,24 @@ are typedef'ed as
       NI_DAQ_AI_ACQ_STOP
   } NI_DAQ_AI_CMD;
 
-The different AI specific commands are discussed in the following. Please
-note that There's no command to fetch the data sampled during an acquisistion,
-this is done using the read() system call (see section 6.3).
+The different AI specific commands are discussed in the following.
+Please note that There's no command to fetch the data sampled during
+an acquisistion, this is done using the read() system call (see
+section 6.3).
 
 
 1.1 NI_DAQ_AI_SET_CLOCK_SPEED
 -----------------------------
 
-The time base used for timings of the AI subsystem can be either the boards
-fast or the slow timebase. While the slow timebase has a rate of either
-200 kHz or 100 kHz (which is common for all subsystems and can be set
-by a ioctl() call for the MSC subsystem) the fast timebase rate can be
-switched between 20 MHz and 10 MHz by an ioctl() call for the AI subsystem
-with the 'cmd' element of the NI_DAQ_AI_ARG structure being set to
-NI_DAQ_AI_SET_CLOCK_SPEED. In this case the 'speed' element of the
-structure must be set to one of the values from the enumeration
+The time base used for timings of the AI subsystem can be either the
+boards fast or the slow timebase. While the slow timebase has a rate
+of either 200 kHz or 100 kHz (which is common for all subsystems and
+can be set by a ioctl() call for the MSC subsystem) the fast timebas
+rate can be switched between 20 MHz and 10 MHz by an ioctl() call for
+the AI subsystem with the 'cmd' element of the NI_DAQ_AI_ARG structure
+being set to NI_DAQ_AI_SET_CLOCK_SPEED. In this case the 'speed'
+element of the structure must be set to one of the values from the
+enumeration
 
   typedef enum {
       NI_DAQ_FULL_SPEED,
@@ -202,9 +199,9 @@ NI_DAQ_AI_TYPE_Differential is for differential voltage measurements.
 These use use two AI channels and return the voltage differene between
 the channels. For these setting the channel number specicfied in the
 'channels' argument must be between 0 and 7, 16 and 23, 32 and 39 or
-19 and 55 (of course depending on the number of AI channels the board
-has). As the second channel the channel with the the number of the first
-channel plus 8 is than automatically used.
+48 and 55 (of course depending on the number of AI channels the board
+has). As the second channel the channel with the number of the first
+channel, incremented by 8, is than automatically used.
 
 NI_DAQ_AI_TYPE_NRSE is for single-ended nonreferenced measurements,
 i.e. where the ground of the signal is defined by the ground input line
@@ -447,9 +444,9 @@ during an acquisition. This value must be between 1 and 2^24.
 Finally starting an AI acquisition can be done by an ioctl() call for
 the AI subsystem with the 'cmd' element of the NI_DAQ_AI_ARG structure
 being set to NI_DAQ_AI_ACQ_START. Note that this isn't the only way
-to start an acquisition: When an acquisition is set up also a call of
-the read() system call for the driver (see section 6.3) will automatically
-start the acquisition.
+to start an acquisition: When an acquisition is set up also a call
+of the read() system call for the driver (see section 6.3) will auto-
+matically start the acquisition.
 
 
 1.6 NI_DAQ_AI_ACQ_WAIT
@@ -531,10 +528,10 @@ voltage is ised as the DAC reference. Otherwise, the voltage applied to the
 EXT_REF input is used for the DACs reference voltage. Not all boards allow
 to set this bit to NI_DAQ_ENABLED.
 
-The 'reglitch' element when set to NI_DAQ_ENABLED configures the DAC of the
-selected channel to have a more uniform glitch when changing the output
-at the expense of a higher average glitch energy. Not all boards allow
-this element to be set to NI_DAQ_ENABLED.
+The 'reglitch' element when set to NI_DAQ_ENABLED configures the DAC of
+the selected channel to have a more uniform glitch when changing the
+output at the expense of a higher average glitch energy. Not all boards
+allow this element to be set to NI_DAQ_ENABLED.
 
 Finally, the 'polarity' element must have one of the enumerated values 
 
@@ -557,14 +554,15 @@ element is to be set to the number of the channel to be setup (between 0
 and the maximum number of AO channels minus one) and the 'value' element
 must be set to a number representing the voltage to be output.
 
-When the channel is configured in bipolar mode for boards with 12-bit DACs
-the allowed range for 'value' is between -2048 and +2047, while for 16-bit
-DACs the range is -32768 to +32767, with the lower end of the range standing
-for the most negative voltage that can be created from the reference voltage
-and the upper end for the maximum positive voltage. If configured for
-unipolar output the range is 0 to 4095 for boards with 12-bit DACs and
-0 to 65535 for 16-bit DACs, 0 standing for 0 V and the upper end of the range
-for the maximum voltage that can be derived from the reference voltage.
+When the channel is configured in bipolar mode for boards with 12-bit
+DACs the allowed range for 'value' is between -2048 and +2047, while
+for 16-bit DACs the range is -32768 to +32767, with the lower end of
+the range standing for the most negative voltage that can be created
+from the reference voltage and the upper end for the maximum positive
+voltage. If configured for unipolar output the range is 0 to 4095 for
+boards with 12-bit DACs and 0 to 65535 for 16-bit DACs, 0 standing for
+0 V and the upper end of the range for the maximum voltage that can be
+derived from the reference voltage.
 
 
 ==================================================================
@@ -595,11 +593,11 @@ The different GPCT specific commands are discussed in the following.
 The time base used for timings of the GPCT subsystem can be either the
 boards fast or the slow timebase. While the slow timebase has a rate of
 either 200 kHz or 100 kHz (which is common for all subsystems and can be
-set by a ioctl() call for the MSC subsystem) the fast timebase rate can be
-switched between 20 MHz and 10 MHz by an ioctl() call for the GPCT
+set by a ioctl() call for the MSC subsystem) the fast timebase rate can
+be switched between 20 MHz and 10 MHz by an ioctl() call for the GPCT
 subsystem with the 'cmd' element of the NI_DAQ_GPCT_ARG structure being
-set to NI_DAQ_GPCT_SET_CLOCK_SPEED. In this case the 'speed' element of the
-structure must be set to one of the values from the enumeration
+set to NI_DAQ_GPCT_SET_CLOCK_SPEED. In this case the 'speed' element of
+the structure must be set to one of the values from the enumeration
 
   typedef enum {
       NI_DAQ_FULL_SPEED,
@@ -613,9 +611,9 @@ when set to NI_DAQ_FULL_SPEED the fast timebase is switched to run at
 3.2 NI_DAQ_GPCT_GET_CLOCK_SPEED
 -------------------------------
 
-To find out about the current setting for the fast timebase for the GPCT
-subsystem make an ioctl() call for the GPCT subsystem with the 'cmd'
-element of the NI_DAQ_GPCT_ARG structure being set to
+To find out about the current setting for the fast timebase for the
+GPCT subsystem make an ioctl() call for the GPCT subsystem with the
+'cmd' element of the NI_DAQ_GPCT_ARG structure being set to
 NI_DAQ_GPCT_GET_CLOCK_SPEED. On return the 'speed' element of the
 structure is going to be set to either NI_DAQ_FULL_SPEED or
 NI_DAQ_HALF_SPEED, indicating that the fast timebase is running at
@@ -625,12 +623,12 @@ NI_DAQ_HALF_SPEED, indicating that the fast timebase is running at
 3.3 NI_DAQ_GPCT_COUNTER_OUTPUT_STATE
 ------------------------------------
 
-To enable or disable output for one of the two counters (e.g. when it's
-used to create pulses) make an ioctl() call for the GPCT subsystem
+To enable or disable output for one of the two counters (e.g. when it
+is used to create pulses) make an ioctl() call for the GPCT subsystem
 with the 'cmd' element of the NI_DAQ_GPCT_ARG structure being set to
 NI_DAQ_GPCT_COUNTER_OUTPUT_STATE. In this case the 'counter' element
-of the structure must be set to the number of the counter (0 or 1) and
-the 'state' element to a value from the enumeration
+of the structure must be set to the number of the counter (0 or 1)
+and the 'state' element to a value from the enumeration
 
   typedef enum {
       NI_DAQ_DISABLED,
@@ -644,10 +642,11 @@ enabled.
 3.4 NI_DAQ_GPCT_START_COUNTER
 -----------------------------
 
-To start a counter make an ioctl() call for the GPCT subsystem with the
-'cmd' element of the NI_DAQ_GPCT_ARG structure being set to
+To start a counter make an ioctl() call for the GPCT subsystem with
+the 'cmd' element of the NI_DAQ_GPCT_ARG structure being set to
 NI_DAQ_GPCT_START_COUNTER. In this case the 'counter' element of the
-structure must be set to the number of the counter (0 or 1) to be started.
+structure must be set to the number of the counter (0 or 1) to be
+started.
 
 The 'source' element must be set to the source of what the counter is
 supposed to count. It can be set to either NI_DAQ_IN_TIMEBASE1 (to count
@@ -1087,7 +1086,7 @@ initialize all subsystems to the states they are supposed to be in.
 -----------
 
 When close() is called and the user that open()ed the board is closing
-its last file handle for the board all activity if the board is stopped.
+its last file handle for the board all activity of the board is stopped.
 
 
 6.3 read()
@@ -1096,15 +1095,15 @@ its last file handle for the board all activity if the board is stopped.
 The read() system call for the board is to be used to fetch data from
 an AI acquisition. If an acquisition was correctly initialized but not
 yet started it is automatically started by calling read(). If there was
-no valid AI acquisition initialization read() returns indicating failure
-and errno is set to EINVAL.
+no valid AI acquisition initialization the read() call returns a value
+indicating failure (i.e. -1) and errno is set to EINVAL.
 
 Invoking read() returns as many data as are currently available. If none
 are available yet and the boards device file was open()ed in blocking
 mode the function blocks until data become available. If the board was
-opened in non-blocking mode and there are no data an return value
-indicating error (-1) is returned an errno is set to EAGAIN. A return
-of -1 is returned and errno is set to EINTR when a signal is received
+opened in non-blocking mode and there are no data a value indicating
+error (i.e. -1) is returned an errno is set to EAGAIN. A value of -1
+is also returned and errno is set to EINTR when a signal is received
 before data have become available.
 
 The number of data points returned by a read() call is always a multiple
@@ -1127,8 +1126,8 @@ from the oldest scan for the first channel, the next for the second channel
 etc., and this pattern is repeated for all scans up to the newest one (or
 the one where the user supplied buffer has been filled up).
 
-The return value of the read() call is the number of bytes that have been
-transfered to the user.
+On success the return value of the read() call is the number of bytes that
+have been transfered to the user.
 
 
 6.4 poll() and select()
