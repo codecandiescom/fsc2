@@ -366,7 +366,7 @@ bool dg2020_prep_cmd( char **cmd, int channel, Ticks address, Ticks length )
 
 	/* Get enough memory for the command string */
 
-	*cmd = T_malloc( length + 50 );
+	*cmd = T_malloc( length + 50L );
 
 	/* Set up the command string */
 

@@ -405,8 +405,9 @@ Var *boxcar_get_curve( Var *v )
 	}
 
 	/* Get a buffer large enough to hold all data */
+	/* !!!!!! Is the size we need for the buffer correct ? */
 
-	length = num_points * 15 * sizeof( char ) + 1;
+	length = num_points * 15 + 1;
 	buffer = T_malloc( length );
 
 	/* Set transfer type to ASCII float */

@@ -338,7 +338,7 @@ static void hfs9000_commit( FUNCTION *f, bool flag )
 	   First allocate memory for the old and the new states of the channels
 	   used by the function */
 
-	f->channel->old = T_calloc( 2 * hfs9000.max_seq_len, sizeof( char ) );
+	f->channel->old = T_calloc( 2 * hfs9000.max_seq_len, 1 );
 	f->channel->new = f->channel->old + hfs9000.max_seq_len;
 
 	/* Now loop over all pulses and pick the ones that need changes */
