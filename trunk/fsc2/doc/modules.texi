@@ -2455,7 +2455,7 @@ should be printed out and an exception has to be thrown.
 
 @item bool get_pulse_position( long pulse_number, double *ptime )
 This function is called by @code{fsc2} to find out about the current
-position of a pulse (@strong} not including function delays) from the
+position of a pulse (@strong{not} including function delays) from the
 module. If a pulse with the number passed to the function exists
 (otherwise the module should print out an error message and throw an
 exception), it should set the variable pointed to by the second argument
