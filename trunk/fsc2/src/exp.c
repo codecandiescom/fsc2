@@ -580,11 +580,7 @@ static void setup_while_or_repeat( int type, long *pos )
 				setup_while_or_repeat( EDL.prg_token[ i ].token, &i );
 				break;
 
-			case NEXT_TOK :
-				EDL.prg_token[ i ].start = cur;
-				break;
-
-			case BREAK_TOK :
+			case NEXT_TOK : case BREAK_TOK :
 				EDL.prg_token[ i ].start = cur;
 				break;
 
