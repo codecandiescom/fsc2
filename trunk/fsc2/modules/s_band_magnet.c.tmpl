@@ -56,7 +56,7 @@ Var *reset_field( Var *v );
 static double s_band_magnet_tmpl_field_check( double field, bool *err_flag );
 static int magnet_field_to_DAC( double field );
 static double magnet_DAC_to_field( int DAC_value );
-static bool magnet_goto_field( double field );
+static double magnet_goto_field( double field );
 static bool magnet_do( int command );
 
 
@@ -153,6 +153,10 @@ int s_band_magnet_tmpl_exp_hook( void )
 	else
 		magnet_goto_field( S_BAND_MAGNET_TMPL_MIN_FIELD );
 
+	/* >>> Should we wait here a bit ? <<< */
+/*
+	fsc2_usleep( 1000000, 0 );
+*/
 	magnet.is_opened = SET;
 
 	return 1;
@@ -280,7 +284,7 @@ Var *set_field( Var *v )
 
 	field = get_double( v, "magnetic field" );
 
-	/* Check the new field value and reduce value if necessary */
+	/* Check the new field value */
 
 	field = s_band_magnet_tmpl_field_check( field, &err_flag );
 
@@ -292,11 +296,7 @@ Var *set_field( Var *v )
 		return vars_push( FLOAT_VAR, magnet.field = field );
 	}
 
-	if ( ! magnet_goto_field( field ) )
-	{
-		print( FATAL, "Can't reach requested field of %f G.\n", field );
-		THROW( EXCEPTION );
-	}
+	magnet_goto_field( field );
 
 	return vars_push( FLOAT_VAR, magnet.field );
 }
@@ -498,7 +498,7 @@ static double magnet_DAC_to_field( int DAC_value )
 /*-----------------------------------------------------*/
 /*-----------------------------------------------------*/
 
-static bool magnet_goto_field( double field )
+static double magnet_goto_field( double field )
 {
 	magnet.DAC_value = magnet_field_to_DAC( field );
 	magnet_do( SERIAL_VOLTAGE );
