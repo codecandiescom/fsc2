@@ -347,6 +347,8 @@ bool hfs9000_get_channel_state( int channel )
 
 	sprintf( cmd, "PGENA:CH%1d:OUT?\n", channel );
 	hfs9000_command( cmd );
+	if ( gpib_read( hfs9000.device, reply, &len ) == FAILURE )
+		hfs9000_gpib_failure( );
 	return reply[ 0 ] == '1';
 }
 
