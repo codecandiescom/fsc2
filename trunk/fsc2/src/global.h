@@ -153,7 +153,7 @@ typedef struct
 } Compilation;
 
 
-/* directions of pipe */
+/* Access directions of pipe */
 
 enum {
 	READ = 0,
