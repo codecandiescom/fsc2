@@ -545,8 +545,8 @@ sub missing_host_field {
 		   	   "<H1>Bad Request</H1>$crlf" .
 		   	   "<P>Your browser send a request that this server could not " .
 		   	   "understand:$crlf" .
-		   	   "Client sent HTTP/1.1 request without hostname (see RFC2616 " .
-		   	   "section 14.23)</P>$crlf" .
+		   	   "Client sent HTTP/1.1 request without a hostname (see " .
+			   "RFC2616 section 14.23)</P>$crlf" .
 			   "</HR><ADDRESS>fsc2 HTTP server v$version at $hostname " .
 			   "Port $port</ADDRESS>$crlf</BODY></HTML>$crlf";
 
