@@ -366,6 +366,7 @@ Var *ccd_camera_get_picture( Var *v )
 	double divs;
 	uns16 bin[ 2 ];
 	uns16 urc[ 2 ];
+	uns32 size;
 
 
 	UNUSED_ARGUMENT( v );
@@ -400,15 +401,13 @@ Var *ccd_camera_get_picture( Var *v )
 
 	if ( width == 0 )
 	{
-		rs_spec10->ccd.bin[ X ] =
-					 rs_spec10->ccd.roi[ X + 2 ] - rs_spec10->ccd.roi[ X ] + 1;
+		rs_spec10->ccd.bin[ X ] = urc[ X ] - rs_spec10->ccd.roi[ X ] + 1;
 		width = 1;
 	}
 
 	if ( height == 0 )
 	{
-		rs_spec10->ccd.bin[ Y ] =
-					 rs_spec10->ccd.roi[ Y + 2 ] - rs_spec10->ccd.roi[ Y ] + 1;
+		rs_spec10->ccd.bin[ Y ] = urc[ Y ] - rs_spec10->ccd.roi[ Y ] + 1;
 		height = 1;
 	}
 
@@ -426,16 +425,16 @@ Var *ccd_camera_get_picture( Var *v )
 	   back to it's original size) */
 
 	rs_spec10->ccd.roi[ X + 2 ] =
-						 rs_spec10->ccd.roi[ X ] + rs_spec10->ccd.bin[ X ] - 1;
+				 rs_spec10->ccd.roi[ X ] + width * rs_spec10->ccd.bin[ X ] - 1;
 	rs_spec10->ccd.roi[ Y + 2 ] =
-						 rs_spec10->ccd.roi[ Y ] + rs_spec10->ccd.bin[ Y ] - 1;
+				rs_spec10->ccd.roi[ Y ] + height * rs_spec10->ccd.bin[ Y ] - 1;
 
 	/* Now try to get the picture */
 
 	TRY
 	{
 		if ( FSC2_MODE == EXPERIMENT )
-			frame = rs_spec10_get_pic( );
+			frame = rs_spec10_get_pic( &size );
 		else
 		{
 			max_val = ~ ( uns16 ) 0 + 1;
@@ -508,7 +507,7 @@ Var *ccd_camera_get_picture( Var *v )
 		rs_spec10->ccd.bin[ X ] = bin[ X ];
 		rs_spec10->ccd.bin[ Y ] = bin[ Y ];
 		rs_spec10->ccd.roi[ X + 2 ] = urc[ X ];
-		rs_spec10->ccd.roi[ Y + 2 ] = urc[ X ];
+		rs_spec10->ccd.roi[ Y + 2 ] = urc[ Y ];
 		RETHROW( );
 	}
 
@@ -517,7 +516,181 @@ Var *ccd_camera_get_picture( Var *v )
 	rs_spec10->ccd.bin[ X ] = bin[ X ];
 	rs_spec10->ccd.bin[ Y ] = bin[ Y ];
 	rs_spec10->ccd.roi[ X + 2 ] = urc[ X ];
-	rs_spec10->ccd.roi[ Y + 2 ] = urc[ X ];
+	rs_spec10->ccd.roi[ Y + 2 ] = urc[ Y ];
+
+	return nv;
+}
+
+
+/*-----------------------------------------------*/
+/*-----------------------------------------------*/
+
+Var *ccd_camera_get_spectrum( Var *v )
+{
+	uns16 *frame = NULL;
+	long width, height;
+	long w;
+	unsigned long max_val;
+	Var *nv = NULL;
+	long i, j, k;
+	long *bin_arr = NULL;
+	long *bap;
+	long *cl;
+	uns16 *cf;
+	long *dest;
+	double divs;
+	uns16 bin[ 2 ];
+	uns16 urc[ 2 ];
+	uns32 size;
+
+
+	UNUSED_ARGUMENT( v );
+
+	CLOBBER_PROTECT( frame );
+	CLOBBER_PROTECT( width );
+	CLOBBER_PROTECT( height );
+	CLOBBER_PROTECT( nv );
+	CLOBBER_PROTECT( bin_arr );
+	CLOBBER_PROTECT( bin[ X ] );
+	CLOBBER_PROTECT( bin[ Y ] );
+	CLOBBER_PROTECT( urc[ X ] );
+	CLOBBER_PROTECT( urc[ Y ] );
+
+	/* Store the oringinal binning size and the position of the upper right
+	   hand corner, they might become adjusted and need to be reset at the
+	   end */
+
+	bin[ X ] = rs_spec10->ccd.bin[ X ];
+	bin[ Y ] = rs_spec10->ccd.bin[ Y ];
+	urc[ X ] = rs_spec10->ccd.roi[ X + 2 ];
+	urc[ Y ] = rs_spec10->ccd.roi[ Y + 2 ];
+
+	/* Calculate how many points the picture will have after binning */
+
+	width  = ( urc[ X ] - rs_spec10->ccd.roi[ X ] + 1 ) / bin[ X ];
+
+	/* If the binning area is larger than the ROI reduce the binning sizes
+	   to fit the the ROI sizes (the binning sizes are reset to their original
+	   values before returning from the function) */
+
+	if ( width == 0 )
+	{
+		rs_spec10->ccd.bin[ X ] = urc[ X ] - rs_spec10->ccd.roi[ X ] + 1;
+		width = 1;
+	}
+
+	rs_spec10->ccd.bin[ Y ] = urc[ Y ] - rs_spec10->ccd.roi[ Y ] + 1;
+
+	if ( rs_spec10->ccd.bin[ X ] != bin[ X ] )
+		print( SEVERE, "Binning parameter had to be changed from %ld "
+			   "to %ld because binning width was larger than ROI.\n",
+			   bin[ X ], rs_spec10->ccd.bin[ X ] );
+
+	/* Reduce the ROI to the area we really need (in case the ROI sizes aren't
+	   integer multiples of the binning sizes) by moving the upper right hand
+	   corner nearer to the lower left hand corner in order to speed up
+	   fetching the picture a bit (before the function returns the ROI is set
+	   back to it's original size) */
+
+	rs_spec10->ccd.roi[ X + 2 ] =
+				 rs_spec10->ccd.roi[ X ] + width * rs_spec10->ccd.bin[ X ] - 1;
+	rs_spec10->ccd.roi[ Y + 2 ] =
+						 rs_spec10->ccd.roi[ Y ] + rs_spec10->ccd.bin[ Y ] - 1;
+
+	/* Now try to get the picture */
+
+	TRY
+	{
+		if ( FSC2_MODE == EXPERIMENT )
+			frame = rs_spec10_get_pic( &size );
+		else
+		{
+			max_val = ~ ( uns16 ) 0 + 1;
+
+			frame = UNS16_P T_malloc( width * sizeof *frame );
+			for ( i = 0; i < width; i++ )
+				frame[ i ] = random( ) % max_val;
+		}
+
+		nv = vars_push( INT_ARR, NULL, width );
+
+		/* There is a bug in the PVCAM library: For some parallel hardware
+		   binning sizes the library needs two more bytes than would be
+		   required to hold all points (when stored as 2-byte values). In
+		   these cases the very first point of the returned array contains
+		   a bogus value and the real data seem to start only at the second
+		   array element. This hack tries to avoid this problem.*/
+
+		cf = frame + size / sizeof *frame - width;
+
+		/* During the test run or for hardware binning or without binning (i.e.
+		   if both binning sizes are 1) we can leave most of the work to the
+		   camera, otherwise we have to do the binning ourselves */
+
+		if ( FSC2_MODE == TEST ||
+			 rs_spec10->ccd.bin_mode == HARDWARE_BINNING ||
+			 ( rs_spec10->ccd.bin[ X ] == 1 && rs_spec10->ccd.bin[ Y ] == 1 ) )
+
+		{
+			cl = nv->val.lpnt;
+			for ( j = 0; j < width; j++ )
+				*cl++ = ( long ) *cf++;
+		}
+		else
+		{
+			w = width * rs_spec10->ccd.bin[ X ];
+			divs = 1.0 / ( rs_spec10->ccd.bin[ X ] );
+
+			bin_arr = LONG_P T_malloc( w * sizeof *bin_arr );
+
+			memset( bin_arr, 0, w * sizeof *bin_arr );
+
+			/* Add up all values for the current piece in y-direction */
+
+			for ( bap = bin_arr, j = 0; j < w; j++, bap++ )
+				for ( k = 0; k < rs_spec10->ccd.bin[ Y ]; k++, cf++ )
+					*bap += ( long ) *cf;
+
+			/* Now do the binning in x-direction for all pieces - since
+			   with hardware binning the sum of all pixel counts is
+			   divided by the number of pixels in the binning area we also
+			   have to do this division for the total result of each of
+			   the pieces. */
+
+			for ( bap = bin_arr, dest = nv->val.lpnt,
+					  j = 0; j < width; j++, dest++ )
+			{
+				for ( k = 0; k < rs_spec10->ccd.bin[ X ]; k++, bap++ )
+					*dest += *bap;
+				*dest = lrnd( *dest * divs );
+			}
+
+			bin_arr = LONG_P T_free( bin_arr );
+		}
+
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+	{
+		if ( bin_arr != NULL )
+			T_free( bin_arr );
+		if ( frame != NULL )
+			T_free( frame );
+		if ( nv != NULL )
+			vars_pop( nv );
+		rs_spec10->ccd.bin[ X ] = bin[ X ];
+		rs_spec10->ccd.bin[ Y ] = bin[ Y ];
+		rs_spec10->ccd.roi[ X + 2 ] = urc[ X ];
+		rs_spec10->ccd.roi[ Y + 2 ] = urc[ Y ];
+		RETHROW( );
+	}
+
+	T_free( frame );
+
+	rs_spec10->ccd.bin[ X ] = bin[ X ];
+	rs_spec10->ccd.bin[ Y ] = bin[ Y ];
+	rs_spec10->ccd.roi[ X + 2 ] = urc[ X ];
+	rs_spec10->ccd.roi[ Y + 2 ] = urc[ Y ];
 
 	return nv;
 }
