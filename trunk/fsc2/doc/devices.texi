@@ -392,9 +392,6 @@ of the arguments).
 
 @item ER023M
 No argument is allowed -- the function returns a floating point value.
-The range of the returned values and also the value representing a @i{zero
-signal} depends in a strange way on the conversion time and isn't
-explained in the manuals at all.
 @end table
 The function can only be called in the @code{EXPERIMENT} section.
 
@@ -492,18 +489,6 @@ Before the @code{EXPERIMENT} section this function can't be called
 as a query, i.e.@: without an argument.
 
 
-@item lockin_conversion_time()
-@findex lockin_conversion_time()
-This function only exists for the @strong{ER023M Signal Channel} and
-queries or sets the internal integration time of the lock-in
-amplifier. Valid values are times that are multiples of @code{320 us},
-with a lowest factor of 10 and a maximum factor of 9999,
-thus allowing conversion times between @code{3.2 ms} and @code{3.2 s}.
-
-Before the @code{EXPERIMENT} section this function can't be called
-without an argument, i.e.@: as a query.
-
-
 @item lockin_phase()
 @findex lockin_phase()
 The function queries or sets the phase of the lock-in amplifier. If
@@ -518,8 +503,8 @@ without an argument, i.e.@: as a query.
 @item lockin_ref_freq()
 @findex lockin_ref_freq()
 The function can be used to query the modulation frequency and, for the
-@strong{SR810}, @strong{SR830} and @strong{ER023M}, to set the
-modulation frequency (both the other models need an external modulation
+@strong{SR810}, @strong{SR830} and @strong{ER023M} to set the modulation
+frequency (both the other models need an external modulation
 frequency). If called with no argument the current modulation frequency
 is returned. If called with an argument (@strong{SR810}, @strong{SR830}
 and @strong{ER023M} only) the modulation frequency is set.
@@ -571,11 +556,16 @@ This function exists for the @strong{Bruker ER023M} signal channel only
 and either queries or sets the time that the built-in ADC takes to
 convert a voltage into a binary data value. The voltage resolution is
 higher for longer conversion times. Possible conversion times are
-integer multiples of @w{320 us} in the range between 1 and 9999. If no
-argument is supplied to the function the current conversion time is
-returned. If there is an argument this is used as the new conversion
+integer multiples of @w{320 us} in the range between 10 and 9999, thus
+allowing conversion times between @code{3.2 ms} and ca.@: @code{3.2 s}.
+If no argument is supplied to the function the current conversion time
+is returned. If there is an argument this is used as the new conversion
 time. If the argument is not an integer multiple of @w{320 us} (within
 the possible range) the nearest allowed conversion time is used.
+
+Before the @code{EXPERIMENT} section this function can't be called
+without an argument, i.e.@: as a query.
+
 
 @item lockin_resonator()
 @findex lockin_resonator()
@@ -583,6 +573,9 @@ This function exists for the @strong{Bruker ER023M} signal channel only
 and queries or returns the selected resonator. If called without an
 argument it returns either @code{1} or @code{2} for the first or second
 resonator. It accepts the same values as arguments to select a resonator.
+
+Before the @code{EXPERIMENT} section this function can't be called
+without an argument, i.e.@: as a query.
 
 
 @item lockin_is_overload()
@@ -595,6 +588,8 @@ find out if an overload has occurred while the data value was measured
 otherwise @code{0} is returned). Calling this function (or fetching the
 data value) will reset the overload condition and calls of the function
 will return @code{0} as long as no further overloads occur.
+
+The function can only be used in the @code{EXPERIMENT} section.
 
 @end table
 
