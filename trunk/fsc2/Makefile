@@ -192,6 +192,7 @@ ifeq ($(machine_name),crowley.physik.fu-berlin.de)
 	OWNER              := fsc2
 	GROUP              := uucp
 	GPIB_LIBRARY       := JTT
+	MACHINE            := $(machine_name)
 	INSTALL_MACHINE    := install-$(machine_name)
 	UNINSTALL_MACHINE  := uninstall-$(machine_name)
 endif
@@ -223,17 +224,17 @@ endif
 ifeq ($(machine_name),tresr.physik.fu-berlin.de)
 	OWNER              := fsc2
 	GROUP              := uucp
-	 GPIB_LIBRARY       := LLP
-	 INSTALL_MACHINE    := install-$(machine_name)
-	 UNINSTALL_MACHINE  := uninstall-$(machine_name)
+	GPIB_LIBRARY       := LLP
+	INSTALL_MACHINE    := install-$(machine_name)
+	UNINSTALL_MACHINE  := uninstall-$(machine_name)
 endif
 
 ifeq ($(machine_name),crowley.none)
 	OWNER              := fsc2
 	GROUP              := uucp
-	 GPIB_LIBRARY       := JTT
-	 INSTALL_MACHINE    := install-$(machine_name)
-	 UNINSTALL_MACHINE  := uninstall-$(machine_name)
+	GPIB_LIBRARY       := JTT
+	INSTALL_MACHINE    := install-$(machine_name)
+	UNINSTALL_MACHINE  := uninstall-$(machine_name)
 endif
 
 # Pass lots of variables to the source files...
@@ -361,14 +362,26 @@ export            # export all variables to sub-makes
 # Switch off all implicit rules
 
 .SUFFIXES:
-.PHONY: all install-strip install uninstall version clean distclean \
-		tags pack ZIP
+.PHONY: all install-strip install uninstall version   \
+		clean distclean tags pack ZIP                 \
+		specific-pion.anorg.chemie.uni-frankfurt.de   \
+		specific-install-crowley.physik.fu-berlin.de  \
+		specific-door.physik.fu-berlin.de             \
+		specific-isaak.physik.fu-berlin.de            \
+		specific-tresr.physik.fu-berlin.de            \
+		install-tresr.physik.fu-berlin.de             \
+		specific-sunone.chemie.unibas.ch              \
+		specific-moebi.physik.fu-berlin.de            \
+		specific-crowley.none
 
 
 # Default rule: make the main program, the primary lexer and the modules
 # (the Makefile for modules is called via the Makefile in src)
 
 all:
+	if [ $(INSTALL_MACHINE) != "install-unknown" ]; then                 \
+		$(MAKE) specific-$(machine_name);                                \
+	fi
 	-@grep '$$Id\: ' Makefile $(sdir)/Makefile $(sdir)/*.[chly]          \
 				     $(mdir)/Makefile $(mdir)/*.[chl]                    \
 					 $(cdir)/Functions $(cdir)/Devices $(cdir)/*.conf |  \
@@ -468,6 +481,33 @@ tags:
 pack:
 	$(MAKE) distclean
 	cd ..; tar -c fsc2 | gzip -c -9 > fsc2.tgz
+
+
+# Some actions specific to the different well-known machines
+
+specific-pion.anorg.chemie.uni-frankfurt.de:
+
+specific-install-crowley.physik.fu-berlin.de:
+
+specific-door.physik.fu-berlin.de:
+
+specific-isaak.physik.fu-berlin.de:
+
+specific-tresr.physik.fu-berlin.de:
+
+install-tresr.physik.fu-berlin.de:
+	sed -e 's/\"ER032M\"/\"Field\"/' \
+		$(cdir)/er032m.conf > $(cdir)/er032m.conf.new
+	mv $(cdir)/er032m.conf.new $(cdir)/er032m.conf
+	sed -e 's/\"LECROY9400\"/\"LeCroy9450\"/' \
+		$(cdir)/er032m.conf > $(cdir)/er032m.conf.new
+	mv $(cdir)/er032m.conf.new $(cdir)/er032m.conf
+
+specific-sunone.chemie.unibas.ch:
+
+specific-moebi.physik.fu-berlin.de:
+
+specific-crowley.none:
 
 
 # Create zipped tarball and write it to the ZIP drive (at home or on isaak
