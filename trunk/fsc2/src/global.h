@@ -195,6 +195,8 @@ extern const char *Phase_Types[ ];
 /* Define the acquisition types used in phase cycling */
 
 enum {
+	ACQ_PLUS_U,
+	ACQ_MINUS_U,
 	ACQ_PLUS_A,
 	ACQ_MINUS_A,
 	ACQ_PLUS_B,
