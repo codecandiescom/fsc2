@@ -37,6 +37,10 @@ ifdef WITH_NI6601
 simp_modules  += ni6601
 endif
 
+ifdef WITH_WITIO_48
+simp_modules  += witio_48
+endif
+
 comp_modules    := dg2020_f dg2020_b hfs9000 ep385 rs690 er023m lecroy9400  \
 				   hp8672a $(hp864_list) $(tds_list) spectrapro_300i
 

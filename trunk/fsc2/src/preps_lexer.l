@@ -351,7 +351,7 @@ FUNC        {IDENT}"#"[0-9]+
 
 				while ( ! isdigit( *txt ) )
 					txt++;
-				varslval.lval = T_atol( txt );
+				prepslval.lval = T_atol( txt );
                 return INT_TOKEN;
             }
 

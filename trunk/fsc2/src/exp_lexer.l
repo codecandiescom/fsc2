@@ -246,7 +246,7 @@ FUNC        {IDENT}"#"[0-9]+
 
 				while ( ! isdigit( *txt ) )
 					txt++;
-				varslval.lval = T_atol( txt );
+				exp_val.lval = T_atol( txt );
                 return E_INT_TOKEN;
             }
 

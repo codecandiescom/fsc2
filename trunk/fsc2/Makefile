@@ -142,6 +142,17 @@ SERIAL_LOCK_DIR   := /var/lock
 # me6000_libs     := libme6x00.so
 
 
+# The next two lines must be uncommented if you want support for the Wasco
+# WITIO-48 DIO card. If the library for the card isn't in a place where the
+# linker will find it automatically you need to specify the full absolut path
+# for the library (e.g. '/usr/xxx/yyy/libwitio_48.so'). You must make sure
+# that the library for the card is already installed if you want to build
+# fsc2 with support for the card.
+
+# WITH_WITIO_48   := yes
+# witio_48_libs   := libwitio_48.so
+
+
 # The follwoing three lines must be uncommented when you want support for the
 # Roper Scientific Spec-10 CCD camera. Depending on where you installed the
 # header files required by the PVCAM library (which is need to access the
@@ -427,6 +438,8 @@ ifeq ($(machine_name),dorimare.nowhere)
 	WITH_SPEC10        := yes
 	rs_spec10_incl     := /usr/local/include/pvcam
 	rs_spec10_libs     := libpvcam.so
+	WITH_WITIO_48      := yes
+	witio_48_libs      := libwitio_48.so
 	INSTALL_MACHINE    := install-$(machine_name)
 	UNINSTALL_MACHINE  := uninstall-$(machine_name)
 endif
