@@ -23,15 +23,23 @@ static char *title = NULL;
 static bool delete_file = UNSET;
 static bool delete_old_file = UNSET;
 
+enum {
+	DO_LOAD   =  1,
+	DO_TEST   =  2,
+	DO_START  =  4,
+	DO_SIGNAL =  8,
+	DO_DELETE = 16,
+};
+
 
 /* Locally used functions */
 
+static int scan_args( int *argc, char *argv[ ], char **fname );
 static void final_exit_handler( void );
 static bool display_file( char *name, FILE *fp );
 static void start_editor( void );
 static void start_help_browser( void );
 static void set_main_signals( void );
-static void usage( void );
 
 
 
@@ -41,13 +49,12 @@ static void usage( void );
 
 int main( int argc, char *argv[ ] )
 {
-	bool do_load = UNSET;
-	bool do_test = UNSET;
-	bool do_start = UNSET;
-	bool do_signal = UNSET;
-	bool do_delete = UNSET;
 	char *fname;
-	int cur_arg;
+	int flags;
+	int i;
+
+	for ( i = 0; i < argc; i++ )
+		printf( "fsc2: %s\n", argv[ i ] );
 
 
 #if defined MDEBUG
@@ -58,41 +65,9 @@ int main( int argc, char *argv[ ] )
 	}
 #endif
 
-	/* First we have to test for the "-t" and the "-h" or "--help" option.
-	   If they are present no graphics are started. When "-t" is found the
-	   file is just tested and the output is sent to stderr -- this can be
-	   used to test a file e.g. with emacs' "M-x compile" feature or from
-	   the shell. For "-h" or "--help" the usage information is printed
-	   and the program exits immediately. */
+	/* First we have to test for command line arguments */
 
-	if ( argc != 1 )
-	{
-		cur_arg = 0;
-		while ( ++cur_arg < argc )
-		{
-			if ( ! strcmp( argv[ cur_arg ], "-t" ) )
-			{
-				/* no file name with "-t" option ? */
-
-				if ( ++cur_arg == argc )
-				{
-					fprintf( stderr, "fsc2 -t: No input file.\n" );
-					return EXIT_FAILURE;
-				}
-
-				just_testing = SET;      /* set "just_testing"-mode flag */
-
-				seteuid( getuid( ) );
-				setegid( getgid( ) );
-				return scan_main( argv[ cur_arg ] ) ?
-					EXIT_SUCCESS : EXIT_FAILURE;
-			}
-
-			if ( ! strcmp( argv[ cur_arg ], "-h" ) ||
-				 ! strcmp( argv[ cur_arg ], "--help" ) )
-				usage( );
-		}
-	}
+	flags = scan_args( &argc, argv, &fname );
 
 	/* Check via the lock file if there is already a process holding a lock,
 	   otherwise create one. This, as well as the following check for stale
@@ -123,98 +98,15 @@ int main( int argc, char *argv[ ] )
 		return EXIT_FAILURE;
 	}
 
-	/* Now we check for remaining  options. With the option '-S' the program
-	   is started immediately, while with '-T' it is tested. If the option
-	   '-s' is found fsc2 will send its parent process a SIGUSR1 signal when
-	   it got started successfully. And with "-d" the input file will be
-	   deleted automatically when the program is done with it. */
-
-	if ( argc != 1 )
-	{
-		cur_arg = 1;
-		while ( cur_arg < argc )
-		{
-			if ( ! strcmp( argv[ cur_arg ], "-s" ) )
-			{
-				do_signal = SET;
-				cur_arg++;
-				continue;
-			}
-
-			if ( ! strcmp( argv[ cur_arg ], "--delete" ) )
-			{
-				do_delete = SET;
-				cur_arg++;
-				continue;
-			}
-
-			if ( ! strncmp( argv[ cur_arg ], "-S", 2 ) )
-			{
-				if ( do_test )
-				{
-					eprint( FATAL, "fsc2: Can't have both flags `-S' and "
-							        "`-T'.\n" );
-					cur_arg++;
-					continue;
-				}
-
-				if ( argv[ cur_arg ][ 2 ] == '\0' && cur_arg + 1 >= argc )
-				{
-					eprint( FATAL, "fsc2 -S: No input file.\n" );
-					cur_arg++;
-					continue;
-				}
-
-				fname = argv[ cur_arg ][ 2 ] != '\0' ?
-					    &argv[ cur_arg ][ 2 ] : argv[ ++cur_arg ];
-
-				do_load = SET;
-				do_start = SET;
-				cur_arg++;
-				continue;
-			}
-
-			if ( ! strncmp( argv[ cur_arg ], "-T", 2 ) )
-			{
-				if ( do_start )
-				{
-					eprint( FATAL, "fsc2: Can't have both flags `-S' and "
-							"`-T'.\n" );
-					cur_arg++;
-					continue;
-				}
-
-				if ( argv[ cur_arg ][ 2 ] == '\0' && cur_arg + 1 >= argc )
-				{
-					eprint( FATAL, "fsc2 -T: No input file\n" );
-					cur_arg++;
-					continue;
-				}
-
-				fname = argv[ cur_arg ][ 2 ] != '\0' ?
-					    &argv[ cur_arg ][ 2 ] : argv[ ++cur_arg ];
-
-				do_load = SET;
-				do_test = SET;
-				cur_arg++;
-				continue;
-			}
-
-			do_load = SET;
-			fname = argv[ cur_arg ];
-			break;
-		}
-	}
-
 	/* If '-d' was given on the command line store flags that are tested to
 	   find out if the files needs to be deleted */
 
-	if ( do_delete )
+	if ( flags & DO_DELETE )
 		delete_file = delete_old_file = SET;
 
 	/* If there is a file as argument try to load it */
 
-	if ( do_load )
+	if ( flags & DO_LOAD )
 	{
 		TRY
 		{
@@ -236,21 +128,22 @@ int main( int argc, char *argv[ ] )
 	/* If starting the server for external connections succeeds we can
 	   really start the main loop */
 
-	if ( ( conn_pid = spawn_conn( ( do_test || do_start ) && is_loaded ) )
+	if ( ( conn_pid =
+		            spawn_conn( flags & ( DO_TEST | DO_START ) && is_loaded ) )
 		 != -1 )
 	{
 		/* Trigger test or start of current EDL program if the appropriate
 		   flags were passed to the program on the command line */
 
-		if ( do_test && is_loaded )
+		if ( flags & DO_TEST && is_loaded )
 			fl_trigger_object( main_form->test_file );
-		if ( do_start && is_loaded )
+		if ( flags & DO_START && is_loaded )
 			fl_trigger_object( main_form->run );
 
 		/* If required send signal to parent process, then loop until quit
 		   button is pressed */
 
-		if ( do_signal )
+		if ( flags & DO_SIGNAL )
 			kill( getppid( ), SIGUSR1 );
 
 		/* And here's the main loop of the program... */
@@ -267,6 +160,122 @@ int main( int argc, char *argv[ ] )
 	xforms_close( );
 
 	return EXIT_SUCCESS;
+}
+
+
+/*------------------------------------------------------------*/  
+/*------------------------------------------------------------*/  
+
+static int scan_args( int *argc, char *argv[ ], char **fname )
+{
+	int flags = 0;
+	int i;
+
+
+	if ( *argc == 1 )
+		return flags;
+
+	while ( *argc > 1 )
+	{
+		if ( ! strcmp( argv[ 1 ], "-t" ) )
+		{
+			/* no file name with "-t" option ? */
+
+			if ( *argc == 2)
+			{
+				fprintf( stderr, "fsc2 -t: No input file.\n" );
+				exit( EXIT_FAILURE );
+			}
+
+			just_testing = SET;      /* set "just_testing"-mode flag */
+
+			seteuid( getuid( ) );
+			setegid( getgid( ) );
+			exit( scan_main( argv[ 1 ] ) ? EXIT_SUCCESS : EXIT_FAILURE );
+		}
+
+		if ( ! strcmp( argv[ 1 ], "-h" ) || ! strcmp( argv[ 1 ], "--help" ) )
+			usage( );
+
+		if ( ! strcmp( argv[ 1 ], "-s" ) )
+		{
+			flags |= DO_SIGNAL;
+			for ( i = 1; i < *argc; i++ )
+				argv[ i ] = argv[ i + 1 ];
+			*argc -= 1;
+			continue;
+		}
+
+		if ( ! strcmp( argv[ 1 ], "--delete" ) )
+		{
+			flags |= DO_DELETE;
+			for ( i = 1; i < *argc; i++ )
+				argv[ i ] = argv[ i + 1 ];
+			*argc -= 1;
+			continue;
+		}
+
+		if ( ! strncmp( argv[ 1 ], "-S", 2 ) )
+		{
+			if ( flags & DO_TEST )
+			{
+				eprint( FATAL, "fsc2: Can't have both flags `-S' and "
+						"`-T'.\n" );
+				usage( );
+			}
+
+			if ( argv[ 1 ][ 2 ] == '\0' && *argc == 2 )
+			{
+				eprint( FATAL, "fsc2 -S: No input file.\n" );
+				usage( );
+			}
+
+			*fname = argv[ 1 ][ 2 ] != '\0' ? &argv[ 1 ][ 2 ] : argv[ 2 ];
+			
+			for ( i = 1; i < *argc - 1; i++ )
+				argv[ i ] = argv[ i + 2 ];
+			*argc -= 2;
+
+			flags |= DO_LOAD | DO_START;
+			break;
+		}
+
+		if ( ! strncmp( argv[ 1 ], "-T", 2 ) )
+		{
+			if ( flags & DO_START )
+			{
+				eprint( FATAL, "fsc2: Can't have both flags `-S' and "
+						"`-T'.\n" );
+				usage( );
+			}
+
+			if ( argv[ 1 ][ 2 ] == '\0' && *argc == 2 )
+			{
+				eprint( FATAL, "fsc2 -T: No input file\n" );
+				usage( );
+			}
+
+			*fname = argv[ 1 ][ 2 ] != '\0' ? &argv[ 1 ][ 2 ] : argv[ 2 ];
+
+			for ( i = 1; i < *argc - 1; i++ )
+				argv[ i ] = argv[ i + 2 ];
+			*argc -= 2;
+
+			flags |= DO_LOAD | DO_TEST;
+			break;
+		}
+
+		if ( argv[ 1 ][ 0 ] != '-' && *argc == 2 )
+		{
+			flags |= DO_LOAD;
+			*fname = argv[ 1 ];
+			argv[ 1 ] = NULL;
+			*argc -= 1;
+			break;
+		}
+	}
+
+	return flags;
 }
 
 
@@ -1224,9 +1233,7 @@ void usage( void )
 			 "  -T FILE    run syntax check on FILE\n"
 			 "  -S FILE    start interpreting FILE (i.e. start the "
 			 "experiment)\n"
-			 "  --delete FILE\n"
-			 "             delete input file FILE when fsc2 is done with "
-			 "it.\n"
+			 "  --delete   delete input file when fsc2 is done with it\n"
 			 "  -geometry geometry\n"
 			 "             specify preferred size and position of main "
 			 "window\n"
