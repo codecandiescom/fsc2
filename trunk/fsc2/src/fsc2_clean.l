@@ -476,7 +476,7 @@ int main( int argc, char *argv[ ] )
 	}
 	CATCH( MISPLACED_SHEBANG )
 	{
-		printf( "\x03\n%s: '#!' must appear on first line instead of "
+		printf( "\x03\n%s: '#!' must appear on the very first line instead of "
 				"line %ld.\n", Fname, Lc );
 		exit( EXIT_FAILURE );
 	}
