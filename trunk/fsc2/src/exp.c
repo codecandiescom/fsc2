@@ -86,7 +86,13 @@ void store_exp( FILE *in )
 
 	while ( ( ret = prim_explex( ) ) != 0 )
 	{
-		/* get or extend memory for storing the tokens in chunks */
+		if ( ret == ON_STOP_TOK )
+		{
+			On_Stop_Pos = prg_length;
+			continue;
+		}
+
+		/* Get or extend memory for storing the tokens in chunks */
 
 		if ( prg_length % PRG_CHUNK_SIZE == 0 )
 			prg_token = T_realloc( prg_token, ( prg_length + PRG_CHUNK_SIZE )
@@ -165,6 +171,8 @@ void forget_prg( void )
 	long i;
 
 
+	On_Stop_Pos = -1;
+
 	/* check if anything has to be done at all */
 
 	if ( prg_token == NULL )
@@ -218,6 +226,7 @@ void forget_prg( void )
 void prim_loop_setup( void )
 {
 	long i;
+	long cur_pos;
 
 
 	for ( i = 0; i < prg_length; ++i )
@@ -225,11 +234,25 @@ void prim_loop_setup( void )
 		switch( prg_token[ i ].token )
 		{
 			case WHILE_TOK : case REPEAT_TOK : case FOR_TOK :
+				cur_pos = i;
 				setup_while_or_repeat( prg_token[ i ].token, &i );
+				if ( cur_pos < On_Stop_Pos && i > On_Stop_Pos )
+				{
+					eprint( FATAL, "ON_QUIT label is located within a "
+							"loop.\n" );
+					THROW( EXCEPTION );
+				}
 				break;
 
 			case IF_TOK :
+				cur_pos = i;
 				setup_if_else( &i, NULL );
+				if ( cur_pos < On_Stop_Pos && i > On_Stop_Pos )
+				{
+					eprint( FATAL, "ON_QUIT label is located within an "
+							"if-else construct.\n" );
+					THROW( EXCEPTION );
+				}
 				break;
 		}
 	}
@@ -482,6 +505,7 @@ void setup_if_else( long *pos, Prg_Token *cur_wr )
 void prim_exp_run( void )
 {
 	Prg_Token *cur;
+	long old_FLL = File_List_Len;
 
 	if ( Fname != NULL )
 		T_free( Fname );
@@ -600,13 +624,19 @@ void prim_exp_run( void )
 		Fname = NULL;
 		save_restore_pulses( UNSET );
 		save_restore_variables( UNSET );
+		
+		File_List_Len = old_FLL;
+		close_all_files( );
+			
 		TEST_RUN = UNSET;
 		PASSTHROU( );
 	}
 
+
 	Fname = NULL;
 	save_restore_pulses( UNSET );
 	save_restore_variables( UNSET );
+	File_List_Len = old_FLL;
 	TEST_RUN = UNSET;
 }
 

@@ -11,6 +11,8 @@
 
 
 static void f_wait_alarm_handler( int sig_type );
+static void formated_save( Var *v, int fid );
+static void unformated_save( Var *v, int fid );
 
 
 
@@ -73,6 +75,8 @@ Var *f_display( Var *v );
 Var *f_dim( Var *v );
 Var *f_size( Var *v );
 Var *f_sizes( Var *v );
+Var *f_getf( Var *v );
+Var *f_save( Var *v );
 
 
 /* The following variables are shared with loader.c which adds further 
@@ -112,6 +116,8 @@ Func Def_Fncts[ ] =              /* List of built-in functions */
 	{ "dim",          f_dim,           1, ACCESS_ALL, 0 },
 	{ "size",         f_size,          2, ACCESS_ALL, 0 },
 	{ "sizes",        f_sizes,         1, ACCESS_ALL, 0 },
+	{ "get_file",     f_getf,         -1, ACCESS_ALL, 0 },
+	{ "save",         f_save,         -1, ACCESS_ALL, 0 },
 	{ NULL,           NULL,            0, 0,          0 }
 	                                     /* marks last entry, don't remove ! */
 };
@@ -859,9 +865,6 @@ Var *f_wait( Var *v )
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
 
-	if ( TEST_RUN )
-		return vars_push( INT_VAR, 1 );
-
 	if ( v->type == INT_VAR )
 		how_long = v->val.lval;
 	else
@@ -873,6 +876,9 @@ Var *f_wait( Var *v )
 				"function.\n", Fname, Lc );
 		THROW( EXCEPTION );
 	}
+
+	if ( TEST_RUN )
+		return vars_push( INT_VAR, 1 );
 
 	/* set everything up for sleeping */
 
@@ -893,9 +899,10 @@ Var *f_wait( Var *v )
 	} while ( ! do_quit &&
 			  ( sleepy.it_value.tv_sec > 0 || sleepy.it_value.tv_usec > 0 ) );
 
-	signal( SIGALRM, SIG_DFL );
-
-	/* return 1 if end of sleping time was reached, 0 if do_quit was set */
+	/* Return 1 if end of sleping time was reached, 0 if do_quit was set */
+	/* Don't reset the alarm signal handler, because after receipt of a
+	   'do_quit' signal the timer may still be running and send a signal
+	   that kills the child ! */
 
 	return vars_push( INT_VAR, do_quit ? 0 : 1 );
 }
@@ -1302,4 +1309,285 @@ Var *f_sizes( Var *v )
 {
 	vars_check( v, ARR_REF );
 	return vars_push( INT_TRANS_ARR, v->from->sizes, ( long ) v->from->dim );
+}
+
+
+/*---------------------------------------------------------------------------*/
+/* Function allows the user to select a file using the file selector. If the */
+/* already file exists confirmation by the user is required. Then the file   */
+/* is opened - if this fails the file selector is shown again. The FILE      */
+/* pointer returned is stored in an array of FILE pointers for each of the   */
+/* open files. The returned value is an INT_VAR with the index in the FILE   */
+/* pointer array or -1 if no file was selected.                              */
+/* (Optional) Input variables:                                               */
+/* 1. Message string                                                         */
+/* 2. Default pattern for file name                                          */
+/* 3. Default directory                                                      */
+/* 4. Default file name                                                      */
+/*---------------------------------------------------------------------------*/
+
+Var *f_getf( Var *var )
+{
+	Var *cur;
+	int i;
+	char *s[ 4 ] = { NULL, NULL, NULL, NULL };
+	const char *r;
+	FILE *fp;
+	long len;
+	struct stat stat_buf;
+
+
+	/* While test is running just return a dummy value */
+
+	if ( TEST_RUN )
+		return vars_push( INT_VAR, File_List_Len++ );
+
+	/* Check the arguments and supply default values if necessary */
+
+	for ( i = 0, cur = var; i < 4 && cur != NULL; i++, cur = cur->next )
+	{
+		vars_check( cur, STR_VAR );
+		s[ i ] = cur->val.sptr;
+	}
+
+	/* First string is the message */
+
+	if ( s[ 0 ] == NULL || s[ 0 ] == "" )
+		s[ 0 ] = get_string_copy( "Please enter a file name:" );
+	else
+		s[ 0 ] = get_string_copy( s[ 0 ] );
+
+	/* Second string is the is the file name pattern */
+
+	if ( s[ 1 ] == NULL || s[ 1 ] == "" )
+		s[ 1 ] = get_string_copy( "*.*" );
+	else
+		s[ 1 ] = get_string_copy( s[ 1 ] );
+
+	/* Third string is the default directory */
+
+	if ( s[ 2 ] == NULL || s[ 2 ] == "" )
+	{
+		s[ 2 ] = NULL;
+		len = 0;
+		do
+		{
+			len += PATH_MAX;
+			s[ 2 ] = T_realloc( s[ 2 ], len );
+			getcwd( s[ 2 ], len );
+		} while ( s[ 2 ] == NULL && errno == ERANGE );
+		if ( s[ 2 ] == NULL )
+			s[ 2 ] = get_string_copy( "" );
+	}
+	else
+		s[ 2 ] = get_string_copy( s[ 2 ] );
+
+	if ( s[ 3 ] == NULL )
+		s[ 3 ] = get_string_copy( "" );
+	else
+		s[ 3 ] = get_string_copy( s[ 3 ] );
+		   
+
+getfile_retry:
+
+	/* Try to get a filename - on 'Cancel' request confirmation */
+
+	r = show_fselector( s[ 0 ], s[ 2 ], s[ 1 ], s[ 3 ] );
+
+	if ( ( r == NULL || *r == '\0' ) &&
+		 1 != show_choices( "Do you really want to cancel selecting\n"
+							"the file name ? Data might get lost!",
+							2, "Yes", "No", NULL, 2 ) )
+		 goto getfile_retry;
+
+	if ( r == NULL || *r == '\0' )         /* on 'Cancel' with confirmation */
+	{
+		for ( i = 0; i < 4; i++ )
+			T_free( s[ i ] );
+		return vars_push( INT_VAR, -1 );
+	}
+
+	/* Now ask for confirmation if the file already exists and try to open
+	   it for writing */
+
+	if  ( 0 == stat( r, &stat_buf ) &&
+		  1 != show_choices( "The selected file does already exist!\n"
+							 " Do you really want to overwrite it?",
+							 2, "Yes", "No", NULL, 2 ) )
+		goto getfile_retry;
+
+	if ( ( fp = fopen( r, "w" ) ) == NULL )
+	{
+		switch( errno )
+		{
+			case EMFILE :
+				show_message( "Sorry, you have too many open files!\n"
+							  "Please close at least one and retry." );
+				break;
+
+			case ENFILE :
+				show_message( "Sorry, system limit for open files exceeded!\n"
+							  " Please try to close some files and retry." );
+				break;
+
+			case ENOSPC :
+				show_message( "Sorry, no space left on device for more file!\n"
+							  "    Please delete some files and retry." );
+				break;
+
+			default :
+				show_message( "Sorry, can't open selected file for writing!\n"
+							  "       Please select a different file." );
+		}
+
+		goto getfile_retry;
+	}
+
+	File_List = T_realloc( File_List, 
+						   ( File_List_Len + 1 ) * sizeof( FILE * ) );
+	File_List[ File_List_Len ] = fp;
+
+	for ( i = 0; i < 4; i++ )
+		T_free( s[ i ] );
+
+	return vars_push( INT_VAR, File_List_Len++ );
+}
+
+
+void close_all_files( void )
+{
+	int i;
+
+	if ( File_List == NULL )
+	{
+		File_List_Len = 0;
+		return;
+	}
+
+	for ( i = 0; i < File_List_Len; i++ )
+		fclose( File_List[ i ] );
+	T_free( File_List );
+	File_List = NULL;
+	File_List_Len = 0;
+}
+
+
+Var *f_save( Var *v )
+{
+	Var *get_file_ptr;
+	Var *file;
+	int file_num;
+	static bool no_file_number = UNSET;
+	int access;
+
+
+	/* If no file has been selected yet get a file and use it exclusively
+	   (i.e. also expect in later calls that no file identifier is given),
+	   otherwise the first variable has to be the file identifier */
+
+	if ( File_List_Len == 0 )
+	{
+		no_file_number = SET;
+		get_file_ptr = func_get( "get_file", &access );
+		assert( get_file_ptr != NULL );           /* again being paranoid... */
+		file = func_call( get_file_ptr );         /* get the file name */
+		if ( file->val.lval < 0 )
+		{
+			vars_pop( file );
+			return vars_push( INT_VAR, 0 );
+		}
+		vars_pop( file );
+		file_num = 0;
+	}
+	else if ( ! no_file_number )                 /* file numbers are given */
+	{
+		if ( v != NULL )
+		{
+			vars_check( v, INT_VAR );
+			file_num = file->val.lval;
+		}
+		else
+		{
+			eprint( WARN, "%s:%ld: Call of `save()' without any arguments.\n",
+					Fname, Lc );
+			return vars_push( INT_VAR, 0 );
+		}
+		v = v->next;
+	}
+	else
+		file_num = 0;
+
+	/* Check that the file identifier is reasonable */
+
+	if ( file_num < 0 )
+	{
+		eprint( WARN, "%s:%ld: File never has been opened, skipping "
+				"`save()' command.\n", Fname, Lc );
+		return vars_push( INT_VAR, 0 );
+	}
+
+	if ( file_num >= File_List_Len )
+	{
+		eprint( FATAL, "%s:%ld: Invalid file identifier.\n", Fname, Lc );
+		THROW( EXCEPTION );
+	}
+
+	if ( v == NULL )
+	{
+		eprint( WARN, "%s:%ld: Call of `save()' without any data.\n",
+				Fname, Lc );
+		return vars_push( INT_VAR, 0 );
+	}
+
+	if ( TEST_RUN )
+		return vars_push( INT_VAR, 1 );
+
+	if ( v->type == STR_VAR )
+		formated_save( v, file_num );
+	else
+		unformated_save( v, file_num );
+
+	return vars_push( INT_VAR, 1 );
+}
+
+
+void formated_save( Var *v, int fid )
+{
+}
+
+void unformated_save( Var *v, int fid )
+{
+	long i;
+
+	do
+	{
+		switch( v->type )
+		{
+			case INT_VAR :
+				fprintf( File_List[ fid ], "%ld\n", v->val.lval );
+				break;
+
+			case FLOAT_VAR :
+				fprintf( File_List[ fid ], "%#g\n", v->val.dval );
+				break;
+
+			case STR_VAR :
+				fprintf( File_List[ fid ], "%s\n", v->val.sptr );
+				break;
+
+			case INT_TRANS_ARR :
+				for ( i = 0; i < v->len; i++ )
+					fprintf( File_List[ fid ], "%ld\n", v->val.lpnt[ i ] );
+				break;
+				
+			case FLOAT_TRANS_ARR :
+				for ( i = 0; i < v->len; i++ )
+					fprintf( File_List[ fid ], "%#g\n", v->val.dpnt[ i ] );
+				break;
+		}
+
+		v = v->next;
+	} while ( v );
+
+	fflush( File_List[ fid ] );
 }
