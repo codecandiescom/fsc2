@@ -775,15 +775,58 @@ argument can't be used).
 
 @item synthesizer_sweep_up()
 @findex synthesizer_sweep_up()
+If there has been set both a frequency and a step frequency the function
+will increment the synthesizers frequency. It returns the newly set
+frequency. The function can only be called in the @code{EXPERIMENT}
+section.
 
 @item synthesizer_sweep_down()
 @findex synthesizer_sweep_down()
+If there has been set both a frequency and a step frequency the function
+will decrement the synthesizers frequency. It returns the newly set
+frequency. The function can only be called in the @code{EXPERIMENT}
+section.
 
 @item synthesizer_reset_frequency()
 @findex synthesizer_reset_frequency()
+If a frequency has been set at all the function will reset the
+synthesizers frequency to the frequency that has been set at first. The
+function can only be called in the @code{EXPERIMENT} section.
 
 @item synthesizer_use_table()
 @findex synthesizer_use_table()
+This function tells the program to also adjust the attenuation when a
+new freqency is set. To find out which attenuation has to be set for a
+new frequency a table file is used. The name of this table file can be
+passed to the function as a (string) argument. If no argument is given a
+default table file is used (typically this is
+@file{/usr/local/lib/fsc2/hp8647a.table}, but it may depend on the
+installation).
+
+The table file must consist of pairs of entries, a frequency and a
+corresponding attenuation in dB. The attenuation is being added to the
+'raw' attenuation, i.e.@: to achieve an higher attenuation and a lower
+output power a negative attenuation has to be specified.  If no unit are
+given in the table file (i.e.@: @code{MHz} and @code{dB}) the first
+member of an entry must be the frequency, the second the attenuation.
+The entries in the file don't have to be sorted in any way:
+
+The items in the table file can be separated by spaces, commata,
+semicolons, colons, tabs or newlines or any combination of these
+characters (a unit will also work as a separator) and the entries don't
+have to be separated by a newline. Thus all the following entries would
+be valid:
+@example
+7.90000000 MHz,   -1.90000000 dB
+-2.10000000 dB 8.00000000 MHz   
+8.1E6 -2.2 8.20000000 MHz : -2.30000000 dB 8300 kHz
+
+   -2.4 dB
+8.40000000MHz-2.40000000dB
+@end example
+@noindent
+As you see also blank lines don't matter. Finally, all lines starting
+with a hash character, `@code{#}', are treated as comments.
 
 @item synthesizer_att_ref_freq()
 @findex synthesizer_att_ref_freq()
