@@ -26,7 +26,7 @@ static void canvas_off( Canvas *c, FL_OBJECT *obj );
 
 
 /*----------------------------------------------------------------------*/
-/* Initializes and shows the window for displaying measurement results. */
+/* Initialises and shows the window for displaying measurement results. */
 /*----------------------------------------------------------------------*/
 
 void start_graphics( void )
@@ -68,13 +68,13 @@ void start_graphics( void )
 	if ( G.dim == 1 )
 	{
 		fl_set_object_helper( run_form->curve_1_button, 
-							  "Extempt curve 1 from\nrescaling operations" );
+							  "Exempt curve 1 from\nrescaling operations" );
 		fl_set_object_helper( run_form->curve_2_button, 
-							  "Extempt curve 2 from\nrescaling operations" );
+							  "Exempt curve 2 from\nrescaling operations" );
 		fl_set_object_helper( run_form->curve_3_button, 
-							  "Extempt curve 3 from\nrescaling operations" );
+							  "Exempt curve 3 from\nrescaling operations" );
 		fl_set_object_helper( run_form->curve_4_button, 
-							  "Extempt curve 4 from\nrescaling operations" );
+							  "Exempt curve 4 from\nrescaling operations" );
 
 		fl_set_object_callback( run_form->print_button, print_1d, 0 );
 	}
@@ -143,7 +143,7 @@ void start_graphics( void )
 	/* Finally draw the form */
 
 	fl_show_form( run_form->run, FL_PLACE_MOUSE | FL_FREE_SIZE, FL_FULLBORDER,
-				  "fsc: Display" );
+				  "fsc2: Display" );
 
 	G.d = FL_FormDisplay( run_form->run );
 
@@ -215,7 +215,7 @@ static void G_struct_init( void )
 	if ( keymask & Button3Mask )
 		G.raw_button_state |= 4;
 
-	/* On the first call create the different cursors and the colors needed
+	/* On the first call create the different cursors and the colours needed
 	   for 2D displays */
 
 	if ( first_time )
@@ -234,7 +234,7 @@ static void G_struct_init( void )
 		create_colors( );
 	}
 
-	/* Define colors for the curves (in principal this should be made
+	/* Define colours for the curves (in principal this should be made
        configurable by the user) */
 
 	G.colors[ 0 ] = FL_TOMATO;
@@ -296,7 +296,7 @@ static void G_init_curves_1d( void )
 		cv->xpoints = NULL;
 		cv->xpoints = T_malloc( G.nx * sizeof( XPoint ) );
 
-		/* Create a GC for drawing the curve and set its color */
+		/* Create a GC for drawing the curve and set its colour */
 
 		cv->gc = XCreateGC( G.d, G.canvas.pm, 0, 0 );
 		XSetForeground( G.d, cv->gc, fl_get_pixel( G.colors[ i ] ) );
@@ -338,7 +338,7 @@ static void G_init_curves_1d( void )
 		G.ra_w = ra_width;
 		G.ra_h = ra_width;
 
-		/* Create a GC for the font and set the appropriate color */
+		/* Create a GC for the font and set the appropriate colour */
 
 		cv->font_gc = XCreateGC( G.d, FL_ObjWin( G.canvas.obj ), 0, 0 );
 		if ( G.font != NULL )
@@ -394,7 +394,7 @@ static void G_init_curves_2d( void )
 		cv->xpoints_s = NULL;
 		cv->xpoints_s = T_malloc( G.nx * G.ny * sizeof( XPoint ) );
 
-		/* Create a GC for drawing the curve and set its color */
+		/* Create a GC for drawing the curve and set its colour */
 
 		cv->gc = XCreateGC( G.d, G.canvas.pm, 0, 0 );
 		XSetForeground( G.d, cv->gc, fl_get_pixel( G.colors[ i ] ) );
@@ -436,7 +436,7 @@ static void G_init_curves_2d( void )
 		G.ra_w = ra_width;
 		G.ra_h = ra_width;
 
-		/* Create a GC for the font and set the appropriate color */
+		/* Create a GC for the font and set the appropriate colour */
 
 		cv->font_gc = XCreateGC( G.d, FL_ObjWin( G.canvas.obj ), 0, 0 );
 		if ( G.font != NULL )
@@ -501,7 +501,7 @@ static void create_label_pixmap( int coord )
 						strlen( G.label[ coord ] ) ) + 10;
 	height = G.font_asc + G.font_desc + 5;
 
-	/* Create the intermediate pixmap, fill with color of the axis canvas and
+	/* Create the intermediate pixmap, fill with colour of the axis canvas and
 	   draw the text */
 
     pm = XCreatePixmap( G.d, FL_ObjWin( c->obj ), width, height,
@@ -800,7 +800,7 @@ void redraw_axis( int coord )
 
 	/* First draw the label - for the x-axis it's just done by drawing the
 	   string while for the y- and z-axis we have to copy a pixmap since the
-	   label is a string rotated by 90 degree thta has been drawn in advance */
+	   label is a string rotated by 90 degree that has been drawn in advance */
 
 	if ( coord == X )
 	{
@@ -956,9 +956,9 @@ void switch_off_special_cursors( void )
 }
 
 
-/*-------------------------------------------*/
-/* Undos the last action as far as possible. */
-/*-------------------------------------------*/
+/*--------------------------------------------*/
+/* Undoes the last action as far as possible. */
+/*--------------------------------------------*/
 
 void undo_button_callback( FL_OBJECT *a, long b )
 {
@@ -1060,7 +1060,7 @@ void fs_button_callback( FL_OBJECT *a, long b )
 	a = a;
 	b = b;
 
-	/* Rescaling is useless if graphic isn't initialized */
+	/* Rescaling is useless if graphic isn't initialised */
 
 	if ( ! G.is_init )
 		return;
@@ -1140,7 +1140,7 @@ void curve_button_callback( FL_OBJECT *obj, long data )
 		/* Change the help string for the button */
 
 		if ( fl_get_button( obj ) )
-			sprintf( hstr, "Extempt curve %ld from\nrescaling operations",
+			sprintf( hstr, "Exempt curve %ld from\nrescaling operations",
 					 data );
 		else
 			sprintf( hstr, "Include curve %ld into\nrescaling operations",

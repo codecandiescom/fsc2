@@ -270,7 +270,7 @@ static int get_print_file( FILE **fp, char **name )
 	}
 
 	fl_show_form( print_form->print, FL_PLACE_MOUSE, FL_TRANSIENT,
-				  "fsc: Print" );
+				  "fsc2: Print" );
 
 	/* Let the user fill in the form */
 
@@ -310,7 +310,7 @@ static int get_print_file( FILE **fp, char **name )
 	fl_hide_form( print_form->print );
 	fl_free_form( print_form->print );
 
-	/* If cancel button was pressed (or an error happend) return now */
+	/* If cancel button was pressed (or an error happened) return now */
 
 	if ( obj == print_form->cancel_button )
 	{
@@ -523,7 +523,7 @@ static void print_header( FILE *fp, char *name )
 static void eps_make_scale( FILE *fp, void *cv, int coord )
 {
 	double rwc_delta,          /* distance between small ticks (in rwc) */
-		   order,              /* and its order of magitude */
+		   order,              /* and its order of magnitude */
 		   mag;
 	double d_delta_fine,       /* distance between small ticks (in points) */
 		   d_start_fine,       /* position of first small tick (in points) */
@@ -746,7 +746,7 @@ static void eps_draw_curve_1d( FILE *fp, int i )
 
 	fprintf( fp, "gs 0.2 slw 1 slc\n" );
 
-	/* Set the either the color or the dash type for the different curves */
+	/* Set the either the colour or the dash type for the different curves */
 
 	switch ( i )
 	{
@@ -946,7 +946,7 @@ static void eps_draw_contour( FILE *fp, int cn )
    signal the exit status is already reaped by pclose(). Thus, if we're
    running an handler for SIGCHLD signals it will be triggered but the handler
    will wait for the death of another child instead of the process that exited
-   due to the pclose(). While this might be ok as long as there are no other
+   due to the pclose(). While this might be OK as long as there are no other
    child processes, at least while the measurement is running there is at
    least one other child, the child we forked to do the measurement. Now,
    after the the pclose() call the parent process will hang in the SIGCHLD

@@ -99,7 +99,7 @@ void press_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
 	G.button_state |= ( 1 << ( ev->xbutton.button - 1 ) );
 
 	/* Find out which window gets the mouse events (all following mouse events
-	   go to this windw until all buttons are released) */
+	   go to this window until all buttons are released) */
 	   
 
 	if ( obj == run_form->x_axis )        /* in x-axis window */
@@ -621,7 +621,7 @@ bool zoom_x_2d( Canvas *c )
 	/* If the mouse was moved to lower values zoom the display by a factor
 	   of up to 4 (if the mouse was moved over the whole length of the
 	   scale) while keeping the point the move was started at the same
-	   position. If the mouse was movep upwards demagnify by the inverse
+	   position. If the mouse was moved upwards demagnify by the inverse
 	   factor. */
 
 	if ( G.start[ X ] > c->ppos[ X ] )
@@ -659,7 +659,7 @@ bool zoom_y_2d( Canvas *c )
 	save_scale_state_2d( cv );
 
 	/* Get the value in the interval [0, 1] corresponding to the mouse
-	   posaition */
+	   position */
 
 	py = ( ( double ) G.canvas.h - 1.0 - G.start[ Y ] ) / cv->s2d[ Y ]
 		 - cv->shift[ Y ];
@@ -667,7 +667,7 @@ bool zoom_y_2d( Canvas *c )
 	/* If the mouse was moved to lower values zoom the display by a factor
 	   of up to 4 (if the mouse was moved over the whole length of the
 	   scale) while keeping the point the move was started at the same
-	   position. If the mouse was movep upwards demagnify by the inverse
+	   position. If the mouse was moved upwards demagnify by the inverse
 	   factor. */
 
 	if ( G.start[ Y ] < c->ppos[ Y ] )
@@ -783,7 +783,7 @@ bool zoom_z_2d( Canvas *c )
 	/* If the mouse was moved to lower values zoom the display by a factor
 	   of up to 4 (if the mouse was moved over the whole length of the
 	   scale) while keeping the point the move was started at the same
-	   position. If the mouse was movep upwards demagnify by the inverse
+	   position. If the mouse was moved upwards demagnify by the inverse
 	   factor. */
 
 	factor = d_min( 4.0,
@@ -1172,8 +1172,8 @@ void repaint_canvas_2d( Canvas *c )
 
 
 	/* If no or either the middle or the left button is pressed no extra stuff
-	   has to be drawn so just copy the pixmp with the curves into the
-	   window. Also in the case that the graphics was never initialized this
+	   has to be drawn so just copy the pixmap with the curves into the
+	   window. Also in the case that the graphics was never initialised this
 	   is all to be done. */
 
 	if ( ! ( G.button_state & 1 ) || ! G.is_init )
@@ -1450,7 +1450,7 @@ void fs_rescale_2d( Curve_2d *cv )
 void make_scale_2d( Curve_2d *cv, Canvas *c, int coord )
 {
 	double rwc_delta,          /* distance between small ticks (in rwc) */
-		   order,              /* and its order of magitude */
+		   order,              /* and its order of magnitude */
 		   mag;
 	double d_delta_fine,       /* distance between small ticks (in points) */
 		   d_start_fine,       /* position of first small tick (in points) */
@@ -1570,7 +1570,7 @@ void make_scale_2d( Curve_2d *cv, Canvas *c, int coord )
 
 	if ( coord == X )
 	{
-		/* Draw colored line of scale */
+		/* Draw coloured line of scale */
 
 		y = 20;
 		XSetForeground( G.d, cv->gc,
@@ -1608,7 +1608,7 @@ void make_scale_2d( Curve_2d *cv, Canvas *c, int coord )
 	}
 	else if ( coord == Y )
 	{
-		/* Draw colored line of scale */
+		/* Draw coloured line of scale */
 
 		x = c->w - 21;
 		XSetForeground( G.d, cv->gc,
@@ -1643,7 +1643,7 @@ void make_scale_2d( Curve_2d *cv, Canvas *c, int coord )
 	}
 	else
 	{
-		/* Draw colored line of scale */
+		/* Draw coloured line of scale */
 
 		x = 46;
 		XSetForeground( G.d, cv->gc,
