@@ -595,6 +595,7 @@ FILE *filter_edl( const char *name, FILE *fp )
 			eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
 					__FILE__, __LINE__ );
 #endif
+		close( pd[ 0 ] );
 		return NULL;
 	}
 
