@@ -329,6 +329,12 @@ int get_lib_symbol( const char *from, const char *symbol, void **symbol_ptr )
 }
 
 
+/*-------------------------------------------------------------*/
+/* The function runs the exit hook functions for a modules (if */
+/* this hasn't already been done and if there exists one) and  */
+/* than closes the connection to the modules.                  */
+/*-------------------------------------------------------------*/
+
 void unload_device( Device *dev )
 {
 
