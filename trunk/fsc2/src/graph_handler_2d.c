@@ -38,7 +38,7 @@ static bool zoom_x_2d( Canvas *c );
 static bool zoom_y_2d( Canvas *c );
 static bool zoom_xy_2d( Canvas *c );
 static bool zoom_z_2d( Canvas *c );
-static void shift_XPoints_of_curve_2d( Canvas *c, Curve_2d *cv );
+static bool shift_XPoints_of_curve_2d( Canvas *c, Curve_2d *cv );
 static void reconfigure_window_2d( Canvas *c, int w, int h );
 static void recalc_XPoints_2d( void );
 static void make_color_scale( Canvas *c, Curve_2d *cv );
@@ -394,11 +394,8 @@ static void release_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev,
 
 				if ( G.active_curve != -1 &&
 					 G.curve_2d[ G.active_curve ]->is_scale_set )
-				{
-					shift_XPoints_of_curve_2d( c,
+					scale_changed = shift_XPoints_of_curve_2d( c,
 											   G.curve_2d[ G.active_curve ] );
-					scale_changed = SET;
-				}
 				
 				redraw_canvas_2d( &G.canvas );
 				redraw_canvas_2d( &G.x_axis );
@@ -410,11 +407,8 @@ static void release_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev,
 
 				if ( G.active_curve != -1 &&
 					 G.curve_2d[ G.active_curve ]->is_scale_set )
-				{
-					shift_XPoints_of_curve_2d( c,
+					scale_changed = shift_XPoints_of_curve_2d( c,
 											   G.curve_2d[ G.active_curve ] );
-					scale_changed = SET;
-				}
 				
 				redraw_canvas_2d( &G.canvas );
 				redraw_canvas_2d( &G.y_axis );
@@ -426,11 +420,8 @@ static void release_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev,
 
 				if ( G.active_curve != -1 &&
 					 G.curve_2d[ G.active_curve ]->is_scale_set )
-				{
-					shift_XPoints_of_curve_2d( c,
+					scale_changed = shift_XPoints_of_curve_2d( c,
 											   G.curve_2d[ G.active_curve ] );
-					scale_changed = SET;
-				}
 				
 				redraw_canvas_2d( &G.canvas );
 				redraw_canvas_2d( &G.z_axis );
@@ -444,11 +435,8 @@ static void release_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev,
 
 				if ( G.active_curve != -1 &&
 					 G.curve_2d[ G.active_curve ]->is_scale_set )
-				{
-					shift_XPoints_of_curve_2d( c,
+					scale_changed = shift_XPoints_of_curve_2d( c,
 											   G.curve_2d[ G.active_curve ] );
-					scale_changed = SET;
-				}
 				
 				redraw_canvas_2d( &G.canvas );
 				redraw_canvas_2d( &G.x_axis );
@@ -460,11 +448,8 @@ static void release_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev,
 
 				if ( G.active_curve != -1 &&
 					 G.curve_2d[ G.active_curve ]->is_scale_set )
-				{
-					shift_XPoints_of_curve_2d( c,
+					scale_changed = shift_XPoints_of_curve_2d( c,
 											   G.curve_2d[ G.active_curve ] );
-					scale_changed = SET;
-				}
 				
 				redraw_canvas_2d( &G.canvas );
 				redraw_canvas_2d( &G.y_axis );
@@ -476,11 +461,8 @@ static void release_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev,
 
 				if ( G.active_curve != -1 &&
 					 G.curve_2d[ G.active_curve ]->is_scale_set )
-				{
-					shift_XPoints_of_curve_2d( c,
+					scale_changed = shift_XPoints_of_curve_2d( c,
 											   G.curve_2d[ G.active_curve ] );
-					scale_changed = SET;
-				}
 				
 				redraw_canvas_2d( &G.canvas );
 				redraw_canvas_2d( &G.z_axis );
@@ -605,10 +587,8 @@ static void motion_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev,
 		case 2 :                               /* middle button */
 			if ( G.active_curve != -1 &&
 				 G.curve_2d[ G.active_curve ]->is_scale_set )
-			{
-				shift_XPoints_of_curve_2d( c, G.curve_2d[ G.active_curve ] );
-				scale_changed = SET;
-			}
+				scale_changed = shift_XPoints_of_curve_2d( c,
+												G.curve_2d[ G.active_curve ] );
 
 			G.start[ X ] = c->ppos[ X ];
 			G.start[ Y ] = c->ppos[ Y ];
@@ -1019,7 +999,7 @@ static bool zoom_z_2d( Canvas *c )
 /* offset to all XPoints instead of going through all the scalings...    */
 /*-----------------------------------------------------------------------*/
 
-static void shift_XPoints_of_curve_2d( Canvas *c, Curve_2d *cv )
+static bool shift_XPoints_of_curve_2d( Canvas *c, Curve_2d *cv )
 {
 	long i, count;
 	int dx = 0,
@@ -1054,7 +1034,7 @@ static void shift_XPoints_of_curve_2d( Canvas *c, Curve_2d *cv )
 	{
 		dz = factor * ( c->ppos[ Y ] - G.start[ Y ] );
 		cv->shift[ Z ] -= ( double ) dz / cv->s2d[ Z ];
-		return;
+		return SET;
 	}
 
 	/* Add the shifts to the XPoints */
@@ -1077,6 +1057,8 @@ static void shift_XPoints_of_curve_2d( Canvas *c, Curve_2d *cv )
 			cv->up &= ( xps->y + cv->h <= 0 );
 			cv->down &= ( xps->y >= ( int ) G.canvas.h );
 	}
+
+	return SET;
 }
 
 
