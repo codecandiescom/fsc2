@@ -172,6 +172,8 @@ void spex_cd2a_set_wavelength( void )
 			spex_cd2a_print( mess + 2, 8, 1.0e10 * spex_cd2a.wavelength );
 	}
 
+	fprintf( stderr, "%s\n", mess );
+
 	spex_cd2a_write( PARAMETER, mess );
 
 	/* ...and ask the monochromator to move to it */
@@ -438,6 +440,8 @@ static void spex_cd2a_print( char *mess, int digits, double val )
 
 void spex_cd2a_open( void )
 {
+#ifndef SPEX_CD2A_TEST
+
 	/* We need exclusive access to the serial port and we also need non-
 	   blocking mode to avoid hanging indefinitely if the other side does not
 	   react. O_NOCTTY is set because the serial port should not become the
@@ -528,6 +532,8 @@ void spex_cd2a_open( void )
 
 	fsc2_tcflush( SERIAL_PORT, TCIOFLUSH );
 	fsc2_tcsetattr( SERIAL_PORT, TCSANOW, spex_cd2a.tio );
+
+#endif
 
 	spex_cd2a.is_open = SET;
 }
