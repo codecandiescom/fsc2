@@ -366,14 +366,19 @@ int gpib_init_device( const char *device_name, int *dev )
 
     if ( cur_dev->number < 0 || gpib_status & GPIB_ERR )
 	{
+		raise_permissions( );
+		gpib_log_date( );
+		fprintf( gpib_log, "%s\n", gpib_error_buffer );
+		lower_permissions( );
+
 		T_free( cur_dev->name );
 		if ( cur_dev->prev != NULL )
 			cur_dev->prev->next = NULL;
 		else
 			gpib_dev_list = NULL;
 		T_free( cur_dev );
-        sprintf( gpib_error_msg, "Can't initialize device %s, status = 0x%x",
-				 device_name, gpib_status );
+        sprintf( gpib_error_msg, "Can't initialize device %s: %s",
+				 device_name, gpib_error_buffer );
 		return FAILURE;
 	}
 
