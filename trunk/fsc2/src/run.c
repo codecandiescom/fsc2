@@ -419,6 +419,9 @@ static void set_buttons_for_run( int active )
 		fl_deactivate_object( main_form->quit );
 		fl_set_object_lcol( main_form->quit, FL_INACTIVE_COL );
 
+		fl_deactivate_object( main_form->help );
+		fl_set_object_lcol( main_form->help, FL_INACTIVE_COL );
+
 		fl_unfreeze_form( main_form->fsc2 );
 	}
 	else
@@ -439,6 +442,9 @@ static void set_buttons_for_run( int active )
 
 		fl_activate_object( main_form->quit );
 		fl_set_object_lcol( main_form->quit, FL_BLACK );
+
+		fl_activate_object( main_form->help );
+		fl_set_object_lcol( main_form->help, FL_BLACK );
 
 		fl_unfreeze_form( main_form->fsc2 );
 

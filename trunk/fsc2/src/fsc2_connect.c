@@ -18,6 +18,7 @@
 #include <unistd.h>
 #include <errno.h>
 #include <assert.h>
+#include <limits.h>
 #include <signal.h>
 #include <sys/types.h>
 #include <sys/stat.h>

@@ -1139,7 +1139,7 @@ void main_sig_handler( int signo )
 
 void notify_conn( int signo )
 {
-	if ( conn_pid <= 0 )
+	if ( conn_pid <= 0 || child_pid != 0 )
 		return;
 	kill( conn_pid, signo );
 	if ( ! conn_child_replied )

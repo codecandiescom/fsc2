@@ -5,9 +5,7 @@
 use strict;
 use Tk;
 
-local *F;
-
-my $lockin     = 'sr810';
+my $lockin     = 'SR810';
 my $start_freq = 8;
 my $end_freq   = 22;
 my $step_freq  = 25;
@@ -46,7 +44,7 @@ my $f1_l1 = $f1->Label( '-text' => 'Start frequency:',
 my $f1_v = $f1->Entry( '-textvariable' => \$start_freq,
 					   '-width' => '6',
 					   '-validate' => 'key',
-					   '-vcmd' => \&is_numeric,
+					   '-validatecommand' => \&is_numeric,
 					   '-relief' => 'sunken' );
 my $f1_l2 = $f1->Label( '-text' => 'MHz',
 						'-width' => 3 );
@@ -64,7 +62,7 @@ my $f2_l1 = $f2->Label( '-text' => 'End frequency:',
 my $f2_v = $f2->Entry( '-textvariable' => \$end_freq,
 					   '-width' => '6',
 					   '-validate' => 'key',
-					   '-vcmd' => \&is_numeric,
+					   '-validatecommand' => \&is_numeric,
 					   '-relief' => 'sunken' );
 my $f2_l2 = $f2->Label( '-text' => 'MHz',
 						'-width' => 3 );
@@ -82,7 +80,7 @@ my $f3_l1 = $f3->Label( '-text' => 'Step frequency:',
 my $f3_v = $f3->Entry( '-textvariable' => \$step_freq,
 					   '-width' => '6',
 					   '-validate' => 'key',
-					   '-vcmd' => \&is_numeric,
+					   '-validatecommand' => \&is_numeric,
 					   '-relief' => 'sunken' );
 my $f3_l2 = $f3->Label( '-text' => 'kHz',
 						'-width' => 3 );
@@ -100,7 +98,7 @@ my $f4_l1 = $f4->Label( '-text' => 'Attenuation:',
 my $f4_v = $f4->Entry( '-textvariable' => \$atten,
 					   '-width' => '6',
 					   '-validate' => 'key',
-					   '-vcmd' => \&is_numeric,
+					   '-validatecommand' => \&is_numeric,
 					   '-relief' => 'sunken' );
 my $f4_l2 = $f4->Label( '-text' => 'db',
 						'-width' => 3 );
@@ -118,7 +116,7 @@ my $f5_l1 = $f5->Label( '-text' => 'Modulation frequency:',
 my $f5_v = $f5->Entry( '-textvariable' => \$mod_freq,
 					   '-width' => '6',
 					   '-validate' => 'key',
-					   '-vcmd' => \&is_numeric,
+					   '-validatecommand' => \&is_numeric,
 					   '-relief' => 'sunken' );
 my $f5_l2 = $f5->Label( '-text' => 'kHz',
 						'-width' => 3 );
@@ -136,7 +134,7 @@ my $f6_l1 = $f6->Label( '-text' => 'Modulation amplitude:',
 my $f6_v = $f6->Entry( '-textvariable' => \$mod_ampl,
 					   '-width' => '6',
 					   '-validate' => 'key',
-					   '-vcmd' => \&is_numeric,
+					   '-validatecommand' => \&is_numeric,
 					   '-relief' => 'sunken' );
 my $f6_l2 = $f6->Label( '-text' => 'kHz',
 						'-width' => 3 );
@@ -154,7 +152,7 @@ my $f7_l1 = $f7->Label( '-text' => 'Number of runs:',
 my $f7_v = $f7->Entry( '-textvariable' => \$N_runs,
 					   '-width' => '6',
 					   '-validate' => 'key',
-					   '-vcmd' => \&is_numeric,
+					   '-validatecommand' => \&is_numeric,
 					   '-relief' => 'sunken' );
 my $f7_l2 = $f7->Label( '-text' => '    ',
 						'-width' => 3 );
@@ -170,8 +168,7 @@ my $f8_l = $f8->Label( '-text' => 'Lock-in amplifier:',
 						'-width' => '20',
 						'anchor' => 'w' );
 my $f8_m = $f8->Optionmenu( '-options' =>
-							[ ( 'sr510', 'sr530', 'sr810', 'sr830' ) ],
-							'-text' => 'sr810',
+							[ ( 'SR510', 'SR530', 'SR810', 'SR830' ) ],
 							'-width' => 9,
 							'-variable' => \$lockin,
 							'-command' => [ \&li_conf, $lockin ] );
@@ -209,7 +206,7 @@ sub li_conf {
 
 	my ( $self, $li ) = @_;
 
-	if ( $li =~ /^sr8/ ) {
+	if ( $li =~ /^SR8/ ) {
 		unless ( $f5->{ is_shown } == 1 ) {
 			$f5_l1 = $f5->Label( '-text' => 'Modulation frequency:',
 								 '-width' => '20',
@@ -217,7 +214,7 @@ sub li_conf {
 			$f5_v = $f5->Entry( '-textvariable' => \$mod_freq,
 								'-width' => '6',
 								'-validate' => 'key',
-								'-vcmd' => \&is_numeric,
+								'-validatecommand' => \&is_numeric,
 								'-relief' => 'sunken' );
 			$f5_l2 = $f5->Label( '-text' => 'kHz',
 								 '-width' => 3 );
@@ -243,6 +240,8 @@ sub write_out {
 
 return if &do_checks( ) != 0;
 
+local *F;
+
 my $how2;
 my $text = "";
 
@@ -255,9 +254,11 @@ open( F, "|fsc2_$how2" ) or die "Can't find utility.\n";
 print F
 "DEVICES:
 
-hp8647a;
-$lockin;
+hp8647a;\n";
 
+print F lc( $lockin ), ";\n";
+print F
+"
 
 VARIABLES:
 
@@ -267,21 +268,25 @@ step_freq   = $step_freq kHz;
 
 attenuation = $atten db;
 
-mod_freq    = $mod_freq kHz;
-mod_ampl    = $mod_ampl kHz;
+";
+
+if ( $lockin =~ /^SR8/ ) {
+	print F "mod_freq    = $mod_freq kHz;\n";
+} else {
+	print F "mod_freq;\n";
+}
+
+print F
+"mod_ampl    = $mod_ampl kHz;
 
 N_runs      = $N_runs;
 
-
-/***********************************************************/
-/* The following variables normally shouldn't be changed ! */
-/***********************************************************/
 
 I = 0;
 J;
 K = 1;
 
-N_points = ceil( ( end_freq - start_freq ) / step_freq ) + 1;
+N_points = ceil( abs( ( end_freq - start_freq ) / step_freq ) ) + 1;
 data[ N_points ];
 mean[ N_points ];
 tc;
@@ -310,15 +315,12 @@ File_2 = get_file( \"File for storing final result:\" );
 # Neither the SR510 nor the SR530 can set the reference frequency nor
 # its level...
 
-if ( $lockin =~ /^sr8/ ) {
+if ( $lockin =~ /^SR8/ ) {
 	print F
 "lockin_ref_freq( mod_freq );
-lockin_ref_level( 1 V );
-";
+lockin_ref_level( 1 V );\n";
 } else {
-	print F
-"mod_freq = lockin_ref_freq( );
-";
+	print F "mod_freq = lockin_ref_freq( );\n";
 }
 
 print F
@@ -352,8 +354,11 @@ synthesizer_state( 0 );
 IF I > 0
 {
 	save_program( File_2, \"% \" );
-	fsave( File_2, \"%\\n% Lock-in sens. = # V, time const. = # s, phase = #\\n\"
-		   \"% Mod. freq. = # kHz, mod. ampl. = # kHz\\n%\\n\",
+	fsave( File_2, \"%\\n% Lock-in sens.  = # V\\n\"
+		           \"% Time constant  = # s\\n\"
+		           \"% Phase          = #\\n\"
+		           \"% Mod. frequency = # kHz\\n\"
+		           \"% Mod. amplitude = # kHz\\n%\\n\",
 		   lockin_sensitivity( ), tc, lockin_phase( ),
 		   mod_freq * 1e-3, mod_ampl * 1e-3 );
 	save_comment( File_2, \"% \", \"Sample: \\nTemperature = \\nField = \\n\",
@@ -444,8 +449,15 @@ sub do_checks {
 	}
 
 	if ( $end_freq < $start_freq && $step_freq > 0 ) {
-		$text = "End frequency lower than start frequency\n" .
+		$text = "End frequency lower than start frequency " .
 		        "while step frequency isn't negative.";
+		&show_message( $text );
+		return -1;
+	}
+
+	if ( $end_freq > $start_freq && $step_freq < 0 ) {
+		$text = "End frequency higher than start frequency " .
+		        "but step frequency is negative.";
 		&show_message( $text );
 		return -1;
 	}
@@ -468,7 +480,7 @@ sub do_checks {
 		return -1;
 	}
 
-	if ( $lockin =~ /^sr8/ ) {
+	if ( $lockin =~ /^SR8/ ) {
 		if ( $mod_freq =~ /^$/ ) {
 			$text = "End frequency hasn't been set.";
 			&show_message( $text );
