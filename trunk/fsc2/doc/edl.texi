@@ -1696,10 +1696,30 @@ to 16 levels deep.
 
 The name of the file to be included must follow the @code{#INCLUDE}
 directly (i.e.@: on the same line and only with spaces and tab
-characters in between). It also must be included in double quotes and
-the file name must be either given with an absolute path or with a path
-relative to the directory @code{fsc2} was started from (i.e.@: the
-current working directory of @code{fsc2}).
+characters in between). It also must be included either in double quotes
+(i.e.@: have the form @code{"..."}) or in angle braces @code{<} and
+@code{>} (i.e.@: have the form @code{<...>}).
+
+When the file name is enclosed in double quotes @code{fsc2} tries to
+figure out the location where it is stored by the follwoing algorithm:
+@itemize
+@item If the name starts with a slash, @code{/} it is assumed that the
+      file is given with a complete, absolute path.
+@item If the file name starts with a tilde directly followed by a slash,
+      i.e.@: with @code{~/}, the tilde is replaced by the name of
+      the users home directory.
+@item If the file name starts with any other character its path is taken
+      to be relative to the path of the file it is included from.
+@end itemize
+
+If the file name is enclosed in @code{<} and @code{>} a default include
+directory compiled into @code{fsc2} will prepended to the file name,
+whatever the name of the file is. If no default directory has been
+compiled into @code{fsc2} an error message is printed and interpretation
+of the script is stopped.
+
+If the included file can't be opened an error message is printed and
+interpretation of the script is abandoned.
 
 
 @anchor{#EXIT statement}

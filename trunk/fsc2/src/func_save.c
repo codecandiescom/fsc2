@@ -1567,6 +1567,8 @@ static long print_browser( int browser, int fid, const char* comment )
 /* a file specified in an #INCLUDE directive.           */
 /*------------------------------------------------------*/
 
+#define MAX_INCLUDE_DEPTH 16         /* should be identical to the same
+										value in fsc2_clean.l */
 #define PRINT_BUF_SIZE 1025
 
 static long print_include( int fid, char *cp, const char *comment,
@@ -1577,6 +1579,7 @@ static long print_include( int fid, char *cp, const char *comment,
 	FILE *finc = NULL;
 	char buf[ PRINT_BUF_SIZE ];
 	static long count;
+	static int level;
 	char *file_name = NULL;
 	struct passwd *pwe;
 
@@ -1586,7 +1589,17 @@ static long print_include( int fid, char *cp, const char *comment,
 	CLOBBER_PROTECT( cp );
 
 	if ( ! strcmp( cur_file, EDL.in_file ) )
-		 count = 0L;
+	{
+		level = 0;
+		count = 0L;
+	}
+	else level++;
+
+	if ( level > MAX_INCLUDE_DEPTH )
+	{
+		level--;
+		return count;
+	}
 
 	/* Skip leading white space */
 
@@ -1599,7 +1612,10 @@ static long print_include( int fid, char *cp, const char *comment,
 	delim = *ep++;
 
 	if ( delim != '"' && delim != '<' )
+	{
+		level--;
 		return count;
+	}
 	else if ( delim == '<' )
 		delim = '>';
 
@@ -1609,7 +1625,10 @@ static long print_include( int fid, char *cp, const char *comment,
 	/* Give up when no file name could be extracted */
 
 	if ( *ep == '\0' || ( delim != '"' && delim != '>' ) )
+	{
+		level--;
 		return count;
+	}
 
 	*ep = '\0';
 
@@ -1657,6 +1676,7 @@ static long print_include( int fid, char *cp, const char *comment,
 				strcat( file_name, "/" );
 			strcat( file_name, cp );
 #else
+			level--;
 			return count;
 #endif
 		}
@@ -1664,6 +1684,7 @@ static long print_include( int fid, char *cp, const char *comment,
 	}
 	OTHERWISE
 	{
+		level--;
 		T_free( file_name );
 		return count;
 	}
@@ -1672,13 +1693,13 @@ static long print_include( int fid, char *cp, const char *comment,
 
 	if ( ( finc = fopen( file_name, "r" ) ) == NULL )
 	{
+		level--;
 		T_free( file_name );
 		return count;
 	}
 
 	/* Now print the include file, taking care of include files within the
-	   include file - the limitation within fsc2_clean to a maximum of
-	   16 levels makes sure that we don't get into an infinite recursion. */
+	   include file */
 
 	TRY
 	{
@@ -1705,11 +1726,13 @@ static long print_include( int fid, char *cp, const char *comment,
 	}
 	OTHERWISE
 	{
+		level--;
 		fclose( finc );
 		T_free( file_name );
 		RETHROW( );
 	}
 
+	level--;
 	T_free( file_name );
 	return count;
 }
