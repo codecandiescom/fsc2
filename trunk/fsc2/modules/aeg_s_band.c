@@ -120,9 +120,9 @@ int aeg_s_band_init_hook( void )
 
 	/* Check if there's a field meter */
 
-	if ( ! exist_device( "er035m" ) &&
-		 ! exist_device( "er035m_s" ) &&
-		 ! exist_device( "bh15" ) )
+	if ( ! exists_device( "er035m" ) &&
+		 ! exists_device( "er035m_s" ) &&
+		 ! exists_device( "bh15" ) )
 	{
 		eprint( FATAL, "%s: Can't find a field meter.\n", DEVICE_NAME );
 		THROW( EXCEPTION );
@@ -134,10 +134,10 @@ int aeg_s_band_init_hook( void )
 	   automatically into the correct sequence instead of this hack, but
 	   that's not as simple as it might look... */
 
-	if ( exist_device( "er035m" ) )
+	if ( exists_device( "er035m" ) )
 		ret = get_lib_symbol( "er035m", "is_gaussmeter",
 							  ( void ** ) &is_gaussmeter );
-	else if ( exist_device( "er035m_s" ) )
+	else if ( exists_device( "er035m_s" ) )
 		ret = get_lib_symbol( "er035m_s", "is_gaussmeter",
 							  ( void ** ) &is_gaussmeter );
 	else
@@ -163,21 +163,21 @@ int aeg_s_band_init_hook( void )
 	/* Check that the functions exported by the field meter driver(s) can be
 	   accessed (so we don't have to do it later again and again) */
 
-	if ( ! exist_function( "find_field" ) )
+	if ( ! exists_function( "find_field" ) )
 	{
 		eprint( FATAL, "%s: No function available to do field measurements.\n",
 				DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
 
-	if ( ! exist_function( "field_meter_wait" ) )
+	if ( ! exists_function( "field_meter_wait" ) )
 	{
 		eprint( FATAL, "%s: Function needed for field measurements not "
 				"available.\n", DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
 
-	if ( ! exist_function( "field_resolution" ) )
+	if ( ! exists_function( "field_resolution" ) )
 	{
 		eprint( FATAL, "%s: Function to determine field measurement "
 				"resolution is missing.\n", DEVICE_NAME );
@@ -523,7 +523,7 @@ Var *reset_field( Var *v )
 
 static double aeg_s_band_field_check( double field, bool *err_flag )
 {
-	if ( exist_device( "er035m" ) )
+	if ( exists_device( "er035m" ) )
 	{
 		if ( field < AEG_S_BAND_WITH_ER035M_MIN_FIELD )
 		{
@@ -556,7 +556,7 @@ static double aeg_s_band_field_check( double field, bool *err_flag )
 		}
 	}
 
-	if ( exist_device( "bh15" ) )
+	if ( exists_device( "bh15" ) )
 	{
 		if ( field < AEG_S_BAND_WITH_BH15_MIN_FIELD )
 		{
