@@ -1420,8 +1420,8 @@ only if either it has already been called with an argument or in the
 @item digitizer_trigger_position()
 @findex digitizer_trigger_position()
 The function queries (if called with no argument) or sets (if called
-with an argument) the amount of pre-trigger, i.e.@: the portion of the
-trace shown with data before the trigger was detected. The function
+with an argument) the amount of pre-triggering, i.e.@: the portion of
+the trace shown with data before the trigger was detected. The function
 accepts or returns values from the interval @w{[0, 1]} (where 0 means
 that the trigger is at the very first point of the trace, i.e.@: no
 pre-trigger is used, and 1 that it's at the last point, i.e.@: the
