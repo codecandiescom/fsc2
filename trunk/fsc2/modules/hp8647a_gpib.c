@@ -63,12 +63,12 @@ bool hp8647a_init( const char *name )
 						DEVICE_NAME, MAX_ATTEN, att );
 				att = MAX_ATTEN;
 			}
-			if ( att > MIN_ATTEN )
+			if ( att > hp8647a.min_attenuation )
 			{
 				eprint( SEVERE, "%s: Attenuation range is insufficient, using "
 						"%f db instead of %f db.\n",
-						DEVICE_NAME, MIN_ATTEN, att );
-				att = MIN_ATTEN;
+						DEVICE_NAME, hp8647a.min_attenuation, att );
+				att = hp8647a.min_attenuation;
 			}
 		}
 		else
@@ -196,7 +196,7 @@ double hp8647a_set_attenuation( double att )
 	char cmd[ 100 ];
 
 
-	assert( att >= MAX_ATTEN && att <= MIN_ATTEN );
+	assert( att >= MAX_ATTEN && att <= hp8647a.min_attenuation );
 
 	sprintf( cmd, "POW:AMPL %6.1f\n", att );
 	if ( gpib_write( hp8647a.device, cmd, strlen( cmd ) ) == FAILURE )
