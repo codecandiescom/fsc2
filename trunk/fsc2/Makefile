@@ -118,7 +118,7 @@ CFLAGS           := -ggdb -O2 -I/usr/X11R6/include/X11 \
 				    # -pedantic
 				    # -DNDEBUG            # switch off build-in debugging code 
 				    # -DMDEBUG            # for malloc debugging
-LFLAGS			 := -shared -fpic         # needed for libraries
+LFLAGS			 := -O2 -shared -fpic     # needed for libraries
 LIBS             := -L/usr/X11R6/lib -L/usr/local/lib -lforms -lX11 -lm -ldl
 				    # -lmcheck   # for malloc debugging
 				    # -lefence   # to run with efence
