@@ -578,7 +578,7 @@ static int rulbus_epp_init( void )
 
         /* Reset the device by toggling the !reset bit - afterwards always
 		   wait a bit for the RC-network to follow the reset line (thanks
-		   to Marin Moene for sending in a patch to do that correctly). */
+		   to Martin Moene for sending me a patch to do that correctly). */
 
         ctrl = inb( CTRL_BYTE );
         outb( ctrl & ~ SPP_nReset, CTRL_BYTE );
