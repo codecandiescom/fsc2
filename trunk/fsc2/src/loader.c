@@ -127,7 +127,8 @@ void load_functions( Device *dev )
 
 	dev->is_loaded = SET;
 	dev->driver.is_init_hook = dev->driver.is_test_hook =
-		dev->driver.is_exp_hook = dev->driver.is_exit_hook = UNSET;
+		dev->driver.is_exp_hook = dev->driver.is_exit_hook = 
+		dev->driver.is_end_of_exp_hook = UNSET;
 
 	/* If there is function with the name of the library file and the
 	   appended string "_init_hook" store it and set corresponding flag */
@@ -157,6 +158,15 @@ void load_functions( Device *dev )
 	dev->driver.exp_hook = dlsym( dev->driver.handle, hook_func_name );
 	if ( dlerror( ) == NULL )
 		dev->driver.is_exp_hook = SET;
+
+	/* Get end-of-experiment hook function if available */
+
+	strcpy( hook_func_name, dev->name );
+	strcat( hook_func_name, "_end_of_exp_hook" );	
+
+	dev->driver.end_of_exp_hook = dlsym( dev->driver.handle, hook_func_name );
+	if ( dlerror( ) == NULL )
+		dev->driver.is_end_of_exp_hook = SET;
 
 	/* Finally check if there's also an exit hook function */
 
@@ -255,8 +265,34 @@ void run_exp_hooks( void )
 }
 
 
+/*--------------------------------------------------------------------*/
+/* Functions runs the end-of-experiment hook functions of all modules */
+/*--------------------------------------------------------------------*/
+
+void run_end_of_exp_hooks( void )
+{
+	Device *cd;
+
+
+	/* Each of the end-of-experiment hooks must be run to get all instruments
+	   back in a usable state, eventhough the function failed for one */
+
+	for ( cd = Device_List; cd != NULL; cd = cd->next )
+	{
+		TRY
+		{
+			if ( cd->is_loaded && cd->driver.is_end_of_exp_hook &&
+				 ! cd->driver.end_of_exp_hook( ) )
+				eprint( WARN, "Resetting module `%s.so' after experiment "
+						"failed.\n", cd->name );
+			TRY_SUCCESS;
+		}
+	}
+}
+
+
 /*-------------------------------------------------------*/
-/* Functions runs the test hook functions of all modules */
+/* Functions runs the exit hook functions of all modules */
 /*-------------------------------------------------------*/
 
 void run_exit_hooks( void )
