@@ -468,7 +468,7 @@ static int MSC_set_speed( Board *board, unsigned int divider,
 
 	caf &= ~ FOUT_Divider_Field;
 	if ( divider < 16 )
-		caf |= divider & FOUT_Divider_Field;
+		caf |= divider;
 
 	board->MSC.divider = divider;
 
