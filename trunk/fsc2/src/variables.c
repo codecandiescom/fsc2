@@ -404,7 +404,6 @@ Var *vars_add( Var *v1, Var *v2 )
 	vars_check( v2, INT_VAR | FLOAT_VAR | STR_VAR | ARR_REF | ARR_PTR |
 				    INT_ARR | FLOAT_ARR );
 
-
 	/* Add the values while taking care to get the type right */
 
 	if ( v1->type & ( INT_CONT_ARR | FLOAT_CONT_ARR | INT_ARR |
@@ -497,7 +496,6 @@ Var *vars_sub( Var *v1, Var *v2 )
 	vars_check( v2, INT_VAR | FLOAT_VAR | ARR_REF | ARR_PTR |
 				    INT_ARR | FLOAT_ARR );
 
-
 	/* Subtract the values while taking care to get the type right */
 
 	switch ( v1->type )
@@ -570,7 +568,6 @@ Var *vars_mult( Var *v1, Var *v2 )
 				    INT_ARR | FLOAT_ARR | ARR_REF | ARR_PTR );
 	vars_check( v2, INT_VAR | FLOAT_VAR | ARR_REF | ARR_PTR |
 				    INT_ARR | FLOAT_ARR );
-
 
 	/* Multiply the values while taking care to get the type right */
 
@@ -645,7 +642,6 @@ Var *vars_div( Var *v1, Var *v2 )
 	vars_check( v2, INT_VAR | FLOAT_VAR | ARR_REF | ARR_PTR |
 				    INT_ARR | FLOAT_ARR );
 
-
 	/* Divide the values while taking care to get the type right */
 
 	switch ( v1->type )
@@ -719,7 +715,6 @@ Var *vars_mod( Var *v1, Var *v2 )
 	vars_check( v2, INT_VAR | FLOAT_VAR | ARR_REF | ARR_PTR |
 				    INT_ARR | FLOAT_ARR );
 
-
 	/* Divide the values while taking care to get the type right */
 
 	switch ( v1->type )
@@ -792,7 +787,6 @@ Var *vars_pow( Var *v1, Var *v2 )
 				    INT_ARR | FLOAT_ARR | ARR_REF | ARR_PTR );
 	vars_check( v2, INT_VAR | FLOAT_VAR | ARR_REF | ARR_PTR |
 				    INT_ARR | FLOAT_ARR );
-
 
 	/* Divide the values while taking care to get the type right */
 
