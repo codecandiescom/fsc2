@@ -118,6 +118,7 @@ enum {
 
 
 Var *vars_get( char *name );
+void vars_sort( void );
 Var *vars_new( char *name );
 Var *vars_add( Var *v1, Var *v2 );
 Var *vars_sub( Var *v1, Var *v2 );

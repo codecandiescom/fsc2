@@ -384,6 +384,8 @@ int variables_parser( FILE *in )
 
 	varsparse( );
 
+	vars_sort( );
+
 	return Vars_Next_Section;
 }
 
