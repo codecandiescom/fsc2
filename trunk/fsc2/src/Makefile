@@ -84,7 +84,7 @@ fsc2_clean.c: fsc2_clean.l $(headers)
 	$(FLEX) -B -o$@ $<
 
 
-# Make utilities for interfacing with fsc2
+# Make utility for interfacing with fsc2
 
 fsc2_connect: fsc2_connect.o
 	$(CC) -o $@ $^
