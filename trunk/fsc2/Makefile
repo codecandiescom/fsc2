@@ -96,6 +96,8 @@ MAIL_ADDRESS     := Jens.Toerring@physik.fu-berlin.de
 # you want to keep me from getting meaningful messages about crashes).
 ##############################################################################
 
+#MPATROL          := YES                  # define this in order to use mpatrol
+
 OPT              := -O2
 
 SHELL            := /bin/sh
@@ -121,9 +123,17 @@ CFLAGS           := -ggdb $(OPT) -I/usr/X11R6/include/X11 \
 				    # -DNDEBUG            # switch off build-in debugging code 
 				    # -DMDEBUG            # for malloc debugging
 LFLAGS			 := $(OPT) -shared -fpic  # needed for libraries
-LIBS             := -L/usr/X11R6/lib -L/usr/local/lib -lforms -lX11 -lm -ldl
+
+ifeq ($(MPATROL),YES)
+	CFLAGS       += -DMPATROL
+	LIBS         := -L/usr/local/lib -lmpatrol -lelf -L/usr/X11R6/lib -lforms \
+					-lX11 -lm -ldl
+else
+	LIBS         := -L/usr/X11R6/lib  -lforms -lX11 -lm -ldl
 				    # -lmcheck   # for malloc debugging
 				    # -lefence   # to run with efence
+endif
+
 BISON            := bison
 BISONFLAGS       := -d -v -t -p
 FLEX             := flex
@@ -134,6 +144,8 @@ LN               := ln
 LNFLAGS          := -s
 INSTALL          := install
 EXEC_INSTALL     := install
+
+
 
 
 ############################################################################
@@ -351,7 +363,6 @@ else
 		endif
 	endif
 endif
-
 
 export            # export all variables to sub-makes
 
