@@ -22,6 +22,10 @@ int dg2020_init_hook( void )
 	int i;
 
 
+	/* Set global variable to indicate that GPIB bus is needed */
+
+	need_GPIB = SET;
+
 	/* First we test that the name entry in the pulser structure is NULL,
 	   otherwise we've got to assume, that another pulser driver has already
 	   been installed. */
