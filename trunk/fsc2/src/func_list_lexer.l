@@ -38,7 +38,6 @@ static int ffl_func_cmp2( const void *a, const void *b );
 static void fll_get_functions( Func *fncts, size_t num_predef_func );
 
 static long Comm_Lc;
-static bool Eol;
 
 #define INT_TOKEN    256
 #define ALL_TOKEN    257
@@ -78,10 +77,7 @@ IDENT    [A-Za-z][A-Za-z_0-9]*
 {REM1}		Lc++;
 
 			/* handling of C++ style comment not spanning a whole line */
-{REM2}		{
-				Lc++;
-				Eol = SET;
-			}
+{REM2}		Lc++;
 
 			/* handling of C style comment */
 {REM3}		{
@@ -95,10 +91,7 @@ IDENT    [A-Za-z][A-Za-z_0-9]*
 {REM5}      /* skipping all '*'s not followed by a '/' */
 
 			/* end of line character in a comment */
-\n			{
-				Lc++;
-				Eol = SET;
-			}
+\n			Lc++;
 
 			/* handling of EOF within a comment -> fatal error */
 <<EOF>>     {
@@ -112,7 +105,6 @@ IDENT    [A-Za-z][A-Za-z_0-9]*
 
 			/* end of comment and end of line */
 {EREM2}     {
-				Eol = SET;
 				Lc++;
 				yy_pop_state( );
 			}
@@ -130,18 +122,12 @@ IDENT    [A-Za-z][A-Za-z_0-9]*
 {LWS}       /* dumps of leading white space */
 
 			/* dumps trailing white space */
-{TWS}       {
-				Lc++;
-				Eol = SET;
-			}
+{TWS}       Lc++;
 
 {WS}        /* dump (other) white space */
 
 			/* writes out EOL character */
-\n			{
-				Lc++;
-				Eol = SET;
-			}
+\n			Lc++;
 
 ,           /* skip commas */
 
@@ -265,7 +251,6 @@ static size_t fll_count_functions( Func *fncts, size_t num_predef_func )
 
 
 	Lc = 1;
-	Eol = SET;
 
 	while ( ( ret_token = func_listlex( ) ) != 0 )
 	{
@@ -336,7 +321,6 @@ static void fll_get_functions( Func *fncts, size_t num_predef_func )
 
 
 	Lc = 1;
-	Eol = SET;
 	state = 0;
 	act = cur = num_predef_func;
 

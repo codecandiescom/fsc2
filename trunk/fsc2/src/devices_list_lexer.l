@@ -33,7 +33,6 @@
 #include "fsc2.h"
 
 static long Comm_Lc;
-static bool Eol;
 
 int devices_listlex( void );
 
