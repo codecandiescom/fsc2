@@ -184,7 +184,7 @@ void end_comm( void )
 
 	/* Handle remaining messages */
 
-	if ( Comm.MQ->low != Comm.MQ->high )
+	while ( Comm.MQ->low != Comm.MQ->high )
 		new_data_handler( );
 
 	/* Get rid of all the shared memory segments */
