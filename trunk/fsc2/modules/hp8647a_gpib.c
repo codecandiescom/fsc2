@@ -22,6 +22,8 @@ bool hp8647a_init( const char *name )
 	if ( gpib_init_device( name, &hp8647a.device ) == FAILURE )
         return FAIL;
 
+	HP8647A_INIT = SET;
+
 	/* If frequency and attenuation need to be set do it now, otherwise get
 	   frequency and attenuation set at the synthesizer and store it */
 
@@ -83,6 +85,8 @@ bool hp8647a_init( const char *name )
 		if ( hp8647a.mod_ampl_is_set[ i ] )
 			hp8647a_set_mod_ampl( i, hp8647a.mod_ampl[ i ] );
 	}
+
+	HP8647A_INIT = UNSET;
 
 	return OK;
 }
@@ -214,6 +218,9 @@ int hp8647a_set_mod_type( int type )
 	/* The manual is not really clear about this but it looks as if we
 	   have to make sure that only one modulation type is switched on... */
 
+	if ( I_am == PARENT && ! HP8647A_INIT )
+		return type;
+
 	for ( i = 1; i < NUM_MOD_TYPES; i++ )
 	{
 		sprintf( cmd, "%s:STAT OFF", 
@@ -278,15 +285,16 @@ int hp8647a_set_mod_source( int type, int source )
 
 	if ( type != MOD_TYPE_FM && source == MOD_SOURCE_DC )
 	{
-		if ( I_am == PARENT && ! TEST_RUN )
-			eprint( FATAL, "%s: Modulation source %s can't be used for "
-					"%s modulation.\n", DEVICE_NAME,
+		if ( I_am == PARENT && HP8647A_INIT )
+			eprint( SEVERE, "%s: Modulation source \"%s\" can't be used for "
+					"%s modulation, using \"AC\" instead.\n", DEVICE_NAME,
 					mod_sources[ source ], mod_types[ type ] );
 		else
-			eprint( FATAL, "%s:%ld: %s: Modulation source %s can't be used "
-					"for %s modulation.\n", Fname, Lc, DEVICE_NAME,
+			eprint( SEVERE, "%s:%ld: %s: Modulation source \"%s\" can't be "
+					"used for %s modulation, using \"AC\" instead.\n",
+					Fname, Lc, DEVICE_NAME,
 					mod_sources[ source ], mod_types[ type ] );
-		THROW( EXCEPTION );
+		source = MOD_SOURCE_AC;
 	}
 
 	sprintf( cmd1, "%s:SOUR ", types[ type ] );
@@ -315,6 +323,9 @@ int hp8647a_set_mod_source( int type, int source )
 		default :                         /* this can never happen... */
 			assert( 1 == 0 );
 	}
+
+	if ( I_am == PARENT && ! HP8647A_INIT )
+		return source;
 
 	if ( gpib_write( hp8647a.device, cmd1, strlen( cmd1 ) ) == FAILURE ||
 		 gpib_write( hp8647a.device, cmd2, strlen( cmd2 ) ) == FAILURE )
@@ -347,7 +358,7 @@ int hp8647a_get_mod_source( int type )
 
 	source = buffer[ 0 ] == 'I' ? 0 : 1;
 
-	length = 0;
+	length = 100;
 	if ( source == 0 )
 	{
 		sprintf( cmd, "%s:INT:FREQ?", types[ type ] );
@@ -383,7 +394,7 @@ double hp8647a_set_mod_ampl( int type, double ampl )
 
 	if ( ampl < 0.0 )
 	{
-		if ( I_am == PARENT && ! TEST_RUN )
+		if ( I_am == PARENT && HP8647A_INIT )
 			eprint( FATAL, "%s: Invalid negative %s modulation amplitude of "
 					"%g %s.\n", DEVICE_NAME,
 					type != MOD_TYPE_PHASE ? types[ type ] : "phase",
@@ -403,7 +414,7 @@ double hp8647a_set_mod_ampl( int type, double ampl )
 		case MOD_TYPE_FM :
 			if ( ampl > MAX_FM_AMPL )
 			{
-				if ( I_am == PARENT && ! TEST_RUN )
+				if ( I_am == PARENT && HP8647A_INIT )
 					eprint( FATAL, "%s: FM modulation amplitude of %.1f kHz "
 							"is too large, valid range is 0 - %.1f kHz.\n",
 							DEVICE_NAME, ampl * 1.0e-3, MAX_FM_AMPL * 1.0e-3 );
@@ -420,7 +431,7 @@ double hp8647a_set_mod_ampl( int type, double ampl )
 		case MOD_TYPE_AM :
 			if ( ampl > MAX_AM_AMPL )
 			{
-				if ( I_am == PARENT && ! TEST_RUN )
+				if ( I_am == PARENT && HP8647A_INIT )
 					eprint( FATAL, "%s: AM modulation amplitude of %.1f %% is "
 							"too large, valid range is 0 - %.1f %%.\n",
 							DEVICE_NAME, ampl, ( double ) MAX_AM_AMPL );
@@ -437,7 +448,7 @@ double hp8647a_set_mod_ampl( int type, double ampl )
 		case MOD_TYPE_PHASE :
 			if ( ampl > MAX_PHASE_AMPL )
 			{
-				if ( I_am == PARENT && ! TEST_RUN )
+				if ( I_am == PARENT && HP8647A_INIT )
 					eprint( FATAL, "%s: Phase modulation amplitude of "
 							"%.1f rad is too large, valid range is "
 							"0 - %.1f rad.\n", DEVICE_NAME, ampl,
@@ -455,6 +466,9 @@ double hp8647a_set_mod_ampl( int type, double ampl )
 		default :                         /* this can never happen... */
 			assert( 1 == 0 );
 	}
+
+	if ( I_am == PARENT && ! HP8647A_INIT )
+		return ampl;
 
 	if ( gpib_write( hp8647a.device, cmd, strlen( cmd ) ) == FAILURE )
 		hp8647a_comm_failure( );

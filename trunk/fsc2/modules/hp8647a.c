@@ -127,6 +127,7 @@ int hp8647a_exp_hook( void )
 
 int hp8647a_end_of_exp_hook( void )
 {
+	HP8647A_INIT = UNSET;
 	hp8647a_finished( );
 	hp8647a.device = -1;
 
@@ -141,6 +142,7 @@ int hp8647a_end_of_exp_hook( void )
 
 void hp8647a_exit_hook( void )
 {
+	HP8647A_INIT = UNSET;
 	if ( hp8647a.table_file != NULL )
 	{
 		T_free( hp8647a.table_file );
@@ -750,8 +752,8 @@ Var *synthesizer_modulation( Var *v )
 
 	while ( v )
 	{
-		if ( ( 1 << ( res = hp8647a_set_mod_param( v, &ampl, &what ) - 1 ) )
-			 & set )
+		if ( ( 1 << ( ( res = hp8647a_set_mod_param( v, &ampl, &what ) )
+					  - 1 ) ) & set )
 			eprint( SEVERE, "%s:%ld: %s: Parameter for modulation %s set more "
 					"than once in call of `synthesizer_modulation'.\n",
 					Fname, Lc, DEVICE_NAME, str[ res ] );
@@ -782,25 +784,21 @@ Var *synthesizer_modulation( Var *v )
 	{
 		if ( type != UNDEFINED )
 		{
-			if ( I_am == CHILD )
-				hp8647a_set_mod_type( type );
-			hp8647a.mod_type = type;
+			hp8647a.mod_type = hp8647a_set_mod_type( type );
 			hp8647a.mod_type_is_set = SET;
 		}
 
 		if ( source != UNDEFINED )
 		{
-			if ( I_am == CHILD )
-				hp8647a_set_mod_source( hp8647a.mod_type, source );
-			hp8647a.mod_source[ hp8647a.mod_type ] = source;
+			hp8647a.mod_source[ hp8647a.mod_type ] =
+							hp8647a_set_mod_source( hp8647a.mod_type, source );
 			hp8647a.mod_source_is_set[ hp8647a.mod_type ] = SET;
 		}
 
 		if ( ampl >= 0.0 )
 		{
-			if ( I_am == CHILD )
-				hp8647a_set_mod_ampl( hp8647a.mod_type, ampl );
-			hp8647a.mod_ampl[ hp8647a.mod_type ] = ampl;
+			hp8647a.mod_ampl[ hp8647a.mod_type ] =
+								hp8647a_set_mod_ampl( hp8647a.mod_type, ampl );
 			hp8647a.mod_ampl_is_set[ hp8647a.mod_type ] = SET;
 		}
 	}
@@ -840,7 +838,9 @@ Var *synthesizer_mod_type( Var *v )
 		if ( ! hp8647a.mod_type_is_set )
 			return vars_push( INT_VAR, -1 );
 
-		hp8647a.mod_type = hp8647a_get_mod_type( );
+		if ( ! TEST_RUN )
+			hp8647a.mod_type = hp8647a_get_mod_type( );
+
 		if ( hp8647a.mod_type != UNDEFINED )
 		{
 			hp8647a.mod_type_is_set = SET;
@@ -913,8 +913,10 @@ Var *synthesizer_mod_source( Var *v )
 			THROW( EXCEPTION );
 		}
 
-		hp8647a.mod_source[ hp8647a.mod_type ] =
+		if ( ! TEST_RUN )
+			hp8647a.mod_source[ hp8647a.mod_type ] =
 			                        hp8647a_get_mod_source( hp8647a.mod_type );
+
 		hp8647a.mod_source_is_set[ hp8647a.mod_type ] = SET;
 		return vars_push( INT_VAR, hp8647a.mod_source[ hp8647a.mod_type ] );
 	}
@@ -1001,6 +1003,7 @@ Var *synthesizer_mod_ampl( Var *v )
 
 		hp8647a.mod_ampl[ hp8647a.mod_type ] =
 			                          hp8647a_get_mod_ampl( hp8647a.mod_type );
+
 		hp8647a.mod_ampl_is_set[ hp8647a.mod_type ] = SET;
 
 		return vars_push( INT_VAR, hp8647a.mod_ampl[ hp8647a.mod_type ] );
