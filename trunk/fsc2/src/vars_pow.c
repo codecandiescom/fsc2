@@ -103,6 +103,8 @@ static Var *vars_int_var_pow( Var *v1, Var *v2, bool exc )
 	double dr;
 
 
+	vars_arith_len_check( v1, v2, "exponentiation" );
+
 	switch ( v2->type )
 	{
 		case INT_VAR :
@@ -136,13 +138,6 @@ static Var *vars_int_var_pow( Var *v1, Var *v2, bool exc )
 			break;
 
 		case INT_ARR :
-			if ( v2->len == 0 )
-			{
-				print( FATAL, "Length of array used in power is "
-					   "still unknown.\n" );
-				THROW( EXCEPTION );
-			}
-
 			if ( v2->flags & IS_TEMP )
 				new_var = v2;
 			else
@@ -166,13 +161,6 @@ static Var *vars_int_var_pow( Var *v1, Var *v2, bool exc )
 			break;
 
 		case FLOAT_ARR :
-			if ( v2->len == 0 )
-			{
-				print( FATAL, "Length of array used in power is "
-					   "still unknown.\n" );
-				THROW( EXCEPTION );
-			}
-
 			if ( v2->flags & IS_TEMP )
 				new_var = v2;
 			else
@@ -278,6 +266,8 @@ static Var *vars_float_var_pow( Var *v1, Var *v2, bool exc )
 	double dr;
 
 
+	vars_arith_len_check( v1, v2, "exponentiation" );
+
 	switch ( v2->type )
 	{
 		case INT_VAR :
@@ -301,13 +291,6 @@ static Var *vars_float_var_pow( Var *v1, Var *v2, bool exc )
 			break;
 
 		case INT_ARR :
-			if ( v2->len == 0 )
-			{
-				print( FATAL, "Length of array used in power is "
-					   "still unknown.\n" );
-				THROW( EXCEPTION );
-			}
-
 			if ( v2->flags & IS_TEMP )
 				new_var = v2;
 			else
@@ -337,13 +320,6 @@ static Var *vars_float_var_pow( Var *v1, Var *v2, bool exc )
 			break;
 
 		case FLOAT_ARR :
-			if ( v2->len == 0 )
-			{
-				print( FATAL, "Length of array used in power is "
-					   "still unknown.\n" );
-				THROW( EXCEPTION );
-			}
-
 			if ( v2->flags & IS_TEMP )
 				new_var = v2;
 			else
@@ -444,6 +420,8 @@ static Var *vars_int_arr_pow( Var *v1, Var *v2, bool exc )
 	double dr;
 
 
+	vars_arith_len_check( v1, v2, "exponentiation" );
+
 	switch ( v2->type )
 	{
 		case INT_VAR :
@@ -455,12 +433,6 @@ static Var *vars_int_arr_pow( Var *v1, Var *v2, bool exc )
 			break;
 
 		case INT_ARR :
-			if ( v1->len != v2->len )
-			{
-				print( FATAL, "Lengths of arrays in power differ.\n" );
-				THROW( EXCEPTION );
-			}
-
 			if ( v1->flags & IS_TEMP && v1 != v2 )
 			{
 				vt = v1;
@@ -492,12 +464,6 @@ static Var *vars_int_arr_pow( Var *v1, Var *v2, bool exc )
 			break;
 
 		case FLOAT_ARR :
-			if ( v1->len != v2->len )
-			{
-				print( FATAL, "Lengths of arrays in power differ.\n" );
-				THROW( EXCEPTION );
-			}
-
 			if ( v2->flags & IS_TEMP )
 				new_var = v2;
 			else
@@ -568,6 +534,8 @@ static Var *vars_float_arr_pow( Var *v1, Var *v2, bool exc )
 	double dr;
 
 
+	vars_arith_len_check( v1, v2, "exponentiation" );
+
 	switch ( v2->type )
 	{
 		case INT_VAR :
@@ -583,12 +551,6 @@ static Var *vars_float_arr_pow( Var *v1, Var *v2, bool exc )
 			break;
 
 		case FLOAT_ARR :
-			if ( v1->len != v2->len )
-			{
-				print( FATAL, "Lengths of arrays in power differ.\n" );
-				THROW( EXCEPTION );
-			}
-
 			if ( v1->flags & IS_TEMP )
 			{
 				vt = v1;
@@ -664,6 +626,8 @@ static Var *vars_ref_pow( Var *v1, Var *v2, bool exc )
 	ssize_t i;
 
 
+	vars_arith_len_check( v1, v2, "exponentiation" );
+
 	switch ( v2->type )
 	{
 		case INT_VAR :
@@ -703,17 +667,9 @@ static Var *vars_ref_pow( Var *v1, Var *v2, bool exc )
 				for ( i = 0; i < new_var->len; i++ )
 					vars_pow_i( v1, new_var->val.vptr[ i ], exc );
 			else
-			{
-				if ( v1->len != new_var->len )
-				{
-					print( FATAL, "Lengths of arrays in power "
-						   "differ.\n" );
-					THROW( EXCEPTION );
-				}
 				for ( i = 0; i < new_var->len; i++ )
 					vars_pow_i( v1->val.vptr[ i ], new_var ->val.vptr[ i ],
 								exc );
-			}
 
 			if ( v1 != v2 )
 				vars_pop( v1 );

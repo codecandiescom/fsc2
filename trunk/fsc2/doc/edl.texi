@@ -30,6 +30,7 @@
 * Sections::                The sections of an EDL program.
 * Syntax::                  Basic syntax of EDL programs.
 * Variables::               Using variables and arrays.
+* Assignment operations::   Assigning to variables.
 * Arithmetic::              Doing calculations with variables.
 * Control structures::      Flow control in EDL programs.
 * Miscellaneous::           Additional syntactic elements
@@ -316,7 +317,7 @@ parenthesis). If a function does accept more than one argument its
 arguments have to be separated by commas.
 
 
-@node Variables, Arithmetic, Syntax, EDL
+@node Variables, Assignment operations, Syntax, EDL
 @section Variables
 @cindex variables
 @cindex arrays
@@ -333,7 +334,9 @@ VARIABLES:
 @end example
 
 
+@anchor{Variable names}
 @subsection Variable names
+@cindex Variable names
 
 Names of variables (and also of functions) always start with a
 character, i.e.@: A-Z or a-z. The remaining part of the variable name
@@ -378,7 +381,9 @@ with capitals only). In the appendix you'll find a list of (hopefully) all
 reserved words.
 
 
+@anchor{Variable types}
 @subsection Variable types
+@cindex Variable types
 
 Variables can be divided into two classes, variables to hold integer
 values and variables for storing floating point values.
@@ -386,8 +391,8 @@ values and variables for storing floating point values.
 Integer variables (on machines with 32-bit processors) can hold data in
 the interval @w{[-2^31, 2^31 - 1]}, i.e.@: they run from @w{-2147483648}
 all the way up to @w{+2147483647}. In contrast, floating point variables
-can have much larger values (up to ca.@: 10^300), the exact limits
-depending on the machine @code{fsc2} is running on.
+can have much larger values (typically up to ca.@: 10^300), the exact
+limits depending on the machine @code{fsc2} is running on.
 
 To distinguish between integer and floating point variables the case of
 the first character of the variables name is important: if the name
@@ -397,15 +402,18 @@ floating point variables. (Actually, changing just one line of
 @code{fsc2} allows to change to a completely different behavior.)
 
 
-@subsection Arrays
+@anchor{Arrays and matrices}
+@subsection Arrays and matrices
+@cindex Arrays and matrices
 
-Beside `normal' variables you can also use arrays. The names of arrays
-follow the same convention as that of normal variables, i.e.@: if an
-array name starts with an upper case character it's an array consisting
-of integers only and if it starts with a lower case character it's a
-floating point array. To define an array in the @code{VARIABLES} section
-just append the sizes of the dimensions of the array, separated by
-commas, in square brackets. E.g.@: the lines
+Beside `normal' variables you can also use arrays and matrices (i.e.@:
+more-dimensional arrays). The names of arrays follow the same convention
+as that of normal variables, i.e.@: if an array name starts with an
+upper case character it's an array consisting of integers only and if it
+starts with a lower case character it's a floating point array. To
+define a normal, fixed sized array in the @code{VARIABLES} section just
+append the sizes of the dimensions of the array, separated by commas, in
+square brackets. E.g.@: the lines
 @example
 F[ 100 ];
 b[ 4, 7, 3 ];
@@ -418,75 +426,259 @@ be easily changed if you adjust a single line in the code for
 @code{fsc2}...).
 
 All elements of an arrays are automatically initialized to zero. On the
-other hand, arrays can also be initialized within the @code{EDL} file
-by equating the array to a list of values, enclosed in curly braces:
+other hand, 1-dimensional arrays can also be initialized within the
+@code{EDL} file by equating the array to a list of values, enclosed in
+curly braces:
 @example
 C[ 3 ] = @{ 2, 1, -1 @};
 d[ 5 ] = @{ sqrt( 2.0 ), sqrt( 3.0 ) + 1 @};
-E[ 2, 3 ] = @{ 1, 2, 3, 4, 5, 6 @};
 @end example
 @noindent
 The first line in the example shows the simplest way -- each element of
 the integer array @code{C} is initialized by an element from the
 list. In the second line there are less initializers than the array
 @code{d} has elements, thus only the first two elements are set, i.e.@:
-@code{d[ 1 ]} and @code{d[ 2 ]}, while the remaining elements are
+@code{d[1]} and @code{d[2]}, while the remaining elements are
 automatically set to zero. Besides, you can see that function calls,
-arithmetic etc.@: can be used in the initialization. The third example
-shows the initialization of a multidimensional array, the elements of
-the array @code{E} being set starting with the first row and continuing
-with the next rows until all initializers are used up. Thus the array
-@code{E} will be initialized to
-@example
-E[ 1, 1 ] = 1     E[ 1, 2 ] = 2     E[ 1, 3 ] = 3
-E[ 2, 1 ] = 4     E[ 2, 2 ] = 5     E[ 2, 3 ] = 6
-@end example
+arithmetic etc.@: can be used in the initialization.
 
+To initialize more-dimensional arrays you must enclose the 1-dimensional
+arrays they basically are built up from each in a pair of curly braces,
+but you also can use an already initialized matrix of a lower dimension.
+You may also leave out parts of the initialization by using a pair of
+empty curly braces as an empty set (the dimension of the empty set is
+recognized automatically, so you won't need empty sets within empty
+sets).
+@example
+E[ 3, 4 ] = @{ @{ 1, 2, 3 @},
+               @{ 4, 5, 6 @} @};
+F[ 2, 3, 4 ] = @{ @{ @{ 1, 2, 3, 4 @},
+                     @{ @},
+                     @{ 9, 8, 7, 6 @},
+                     @{ 3, 5, 7, 9 @}
+                   @},
+                   E
+               @};
+G[ 4, 3, 4 ] = @{ @{ @},
+                  E
+               @};
+@end example
+@noindent
+You also need not to specify as many initilaizer elements as there are
+elements in the matrix to be initialized, for missing elements the
+matrix remains uninitialized.
+
+You can also initialize all elements of an array or a matrix by just
+equating it to a number:
+@example
+D[ 3 ] = 1;
+f[ 3, 6 ] = sqrt( 42.0 );
+@end example
+This will assign the value 1 to all elements of the array @code{D} and
+the square root of 42 to all 18 elements of the 2-dimensional matrix
+@code{f}.
+
+
+@anchor{Variable sized arrays and matrices}
+@subsection Variable sized arrays and matrices
+@cindex Variable sized arrays and matrices
 
 There are some situations where one doesn't know the size of an array in
-advance, e.g.@: arrays to be used for storing a trace from a digitizer,
-so declaring its size in advance in the @code{VARIABLES} section is not
-possible. Therefor, one may also define arrays with the size of the last
-dimension remaining undefined by specifying a @code{*} instead of a
-number:
+advance, e.g.@: the size of the array to be used for storing a trace
+from a digitizer or the of the 2-dimensional field for a complete
+picture from a CCD-camera. So declaring the size in advance in the
+@code{VARIABLES} section is not possible. Therefore it is also possible
+to create arrays with sizes that change automatically when required. This
+is done by specifying a @code{*} instead of a number for the size:
 @example
-G[ * ];
+M[ * ];
 h[ 2, * ];
+I[ *, *, * ];
 @end example
 @noindent
 This defines an 1-dimensional integer array @code{G} with a still
-undefined number of elements and a 2-dimensional floating point matrix
-@code{h} with two rows of unknown length. The sizes of these arrays
-remain undefined until 1-dimensional arrays are assigned to them. The
-following assignment will set the length of @code{G} to 3 by assigning
-the second row of elements of @code{E} to @code{G}:
+undefined number of elements, a 2-dimensional floating point matrix
+@code{h} with two rows of unknown length and a 3-dimensional array with
+all sizes being variable sized.
+
+The only restriction in declaring variable sized matrices is that you
+can't declare matrices with only the higher dimensions being variable
+sized but the lower ones fixed. I.e.@: the following definition is
+@strong{not} possible:
 @example
-G = E[ 2 ];
+h[ *, 2 ];  /* WRONG! */
 @end example
-@noindent
-because the length of the rows of @code{E} is three. After this assignment
-the size of @code{G} is fixed and can't be changed anymore.
 
-In the same way the assignment
+The length of array @code{M} in the above example remains indertermined
+until a value is assigned to at least one of the array element. If you
+now assign a value to the 25th element like this
 @example
-h[ 2 ] = d;
+M[ 25 ] = 42;
 @end example
-@noindent
-will set the rank of @code{h} to 2x5 (because the length of @code{d} is 5).
+the array will suddenly have 25 elements with the first 24 being set to
+zero and the 25th set to @code{42}. You can also lengthen the array at
+a later time by assigning a value to an element with an higher index,
+e.g.
+@example
+M[ 50 ] = 84;
+@end example
+Now the array has 50 elements and now also all elements between the
+25th and the 50th are initialized to zero.
 
-Of course, these are somewhat contrived examples, in a real experiments
-arrays with undefined sizes are usually used for storing data received
-from functions that return arrays of a size that would be difficult or
-impossible to determine before the experiment is actually started,
-e.g.@: curves fetched from a digitizing oscilloscope.
+But there's also another way to change the size of the array. You can
+assign another array to @code{M} and in this case the length of @code{M}
+is resized to fit the length of the array you assign to it. E.g.@: if
+you had an array defined as
+@example
+H[ 10 ] = @{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 @};
+@end example
+and you now assign @code{H} to @code{M}
+@example
+M = H;
+@end example
+@code{M} will also have 10 elements afterwards, with the same values as
+the elements of @code{H}.
 
-Please note that only 1-dimensional variable sized arrays can be
-initialized in which case the size of the array is set automatically to
-the number of initializers supplied (and then can't be changed
-anymore). More-dimensional variable sized arrays can not be initialized.
+Some care has to be taken: it is also possible to shrink the length of a
+variable sized array by assigning a another arrray to it. If @code{M}
+had already been given a length by e.g.@: assigning a value to its 25th
+element then assigning the shorter array @code{H} to it will
+automatically shorten @code{M} to 10 elements and the values of the
+11th to the 25th element are lost.
+
+To understand how more-dimensional, variable sized arrays work it is
+probably best to think of them not in terms of matrices but of arrays
+of arrays (of arrays... etc.). For example, a two-dimensional array like
+@example
+j[ *, * ];
+@end example
+can be thought of as an array (of still undetermined length) of arrays
+which also have no length yet (or a length of 0). When you now assign
+a value to one of the lowest-level arrays like
+@example
+j[ 7, 9 ] = 3.1415927;
+@end example
+the third sub-array of @code{j} will suddenly spring into existence,
+having a length of 9 (with all elements of this sub-array except the 9th
+being initialized to 0). But this does @strong{not} also create other
+sub-arrays -- the 1st to the 6th sub-array are still undefined (having a
+length of 0).
+
+Only if you assign a value to the elements of one of these other
+sub-arrays it will start to exist, e.g.@: by having
+@example
+j[ 3, 2 ] = 2.7182818;
+@end example
+Now the 3rd and the 7th sub-array of @code{j} exist - but no others.
+And both these sub-arrays have different lengths, the 3rd sub-array has
+a length of only 2, while the 9th sub-array has a length of 9.
 
 
-@node Arithmetic, Control structures, Variables, EDL
+Of course, the sub-arrays can also be created by assigning another
+array. E.g.
+@example
+k[ 3 ] = @{ -1.0, 0. 1.0 @};
+j[ 5 ] = k;
+@end example
+will create the 5th sub-array of @code{j} with a length of 3 and its
+values being identical to the ones of the array @code{k}. From this
+example you can also see, that sub-arrays of an array can be simply
+specified by off the index for the element of the sub-array, i.e.@:
+@code{j[5]} stands for the complete 5th sub-array of @code{j} (and the
+@code{k} on the right hand side represents the complete array @code{k}).
+
+But @code{j} can also be set by assigning another 2-dimensional matrix
+to it.
+@example
+l[ 3, 2 ] = @{ 1.0, 2.0, 3.0, 4.0, 5.0, 6.0 @};
+j = l;
+@end example
+Since @code{l} is a matrix of rank 3x2 after the assignment @code{j}
+will have the same rank (and the elements of @code{j} and @code{l}
+will, of course, be identical).
+
+
+The same, of course, can be done with "matrices" of higher dimensions.
+If you have a 3-dimensional matrix you can assign numbers to its
+elements, 1-dimensional arrays to its sub-sub-arrays, 2-dimensional
+"matrices" to its sub-matrices and, of course, assign a complete
+3-dimensional matrix to it.
+
+
+@node Assignment operations, Arithmetic, Variables, EDL
+@section Assignment operations
+@cindex Assignment operations
+
+Assignments of the kind described above also work with fixed sized
+arrays and matrices but, of course, then the sizes of the quantities on
+the left and the right side must be identical or an error will be
+flagged.
+
+But @code{fsc2} tries to be even more clever: when the dimensions of a
+quantitiy the left side of an equation is larger than the dimension of
+the quantity on the right hand side it tries to assign the quantity on
+the right hand side to as many elements or sub-arrays on the left hand
+side as possible. You already have seen this in the discussion of the
+initialization of (fixed size) arrays and matrices: when a number is
+assigned to an array or matrix all elements of the array or matrix are
+set to this number. To repeat:
+@example
+B[ 3 ] = 9;
+b[ 2, 9 ] = sin( atan( 1.0 ) );
+@end example
+sets all elements of the array @code{B} to 9 and all 18 elements of the
+2-dimensional matrix @code{b} to the sine of 45 degrees (atan(1)
+evaluates to a quarter of pi).
+
+The same assignment can also be done for variable sized arrays and
+matrixes, but only the already existibg elements can be set (if i.e.@:
+only a single sub-array of a 2-dimensional "matrix" has been created yet
+only the elements of this sub-array can be set).
+
+But this does not only work for numbers on the right hand side but also
+for arrays and even matrices. When you have for example a 2-dimensional
+matrix on the left hand side and a one-dimensional array on the right 
+the array is automatically assigned to all of the sub-arrays of the
+matrix. If you have in the @code{VARIABLES} section:
+@example
+z1[ 2 ] = @{ 3, 5 @};
+z2[ 2, * ] = xx;
+@end example
+this will set up both the sub-arrays of @code{z2} to have 2 elements each
+and set both sub-arrays to the same values as the ones of @code{z1}.
+
+Within the other sections you have to write this a bit differently (but
+even simpler) indicate that you want to set all sub-arrays of @code{z2}
+at once by just writing
+@example
+z2 = z1;
+@end example
+It's basically just a abbreviation for the longer form
+@example
+z2[ 1 ] = z1;
+z2[ 2 ] = z1;
+@end example
+or the even longer form of
+@example
+z2[ 1, 1 ] = z1[ 1 ];
+z2[ 1, 2 ] = z1[ 2 ];
+z2[ 2, 1 ] = z1[ 1 ];
+z2[ 2, 2 ] = z1[ 2 ];
+@end example
+
+Of course, the same also works with arrays of higher dimensions. If you
+have e.g.@: a 3-dimensional matrix, assigning it a number will set all
+of its elements (i.e.@: the elements of the sub-sub-arrays its made up
+from), assigning it a 1-dimensional arrays will set all sub-sub-arrays
+to be identical to the 1-dimenensional array on the right hand side,
+assigning it a 2-dimensional matrix will set all its sub-matrices and
+assigning it another 3-dimensional matrix will make the matrix on the
+left hand side identical to the one on the right hand side. Of course,
+if the matrix on the left hand side isn't variable sized, itssizes must
+fit the sizes of the quantity on the right hand side.
+
+
+@node Arithmetic, Control structures, Assignment operations, EDL
 @section Arithmetic
 @cindex Arithmetic
 
@@ -579,9 +771,9 @@ As the usual mathematics dictate non-integer exponents can only be used
 with non-negative bases!
 
 
-@subsection Assignment operators
-@cindex assignment operators
-@cindex @code{=} (assignment)
+@anchor{Arithmetic-assignment operators}
+@subsection Arithmetic-assignment operators
+@cindex Arithmetic-assignment operators
 @cindex @code{+=} (add and assign)
 @cindex @code{-=} (subtract and assign)
 @cindex @code{*=} (multiply and assign)
@@ -611,8 +803,9 @@ assignment operators
 @end example
 
 
+@anchor{Operator precedence}
 @subsection Operator precedence
-@cindex operator precedence
+@cindex Operator precedence
 
 Usually one doesn't need to think about the precedence of operators. We
 already learned in primary school that multiplication and division have
@@ -712,13 +905,16 @@ doubt, use parenthesis -- this won't slow down the program but will
 often make the program easier to understand.
 
 
-@subsection Arithmetic with arrays
-@cindex Arithmetic with arrays
+@anchor{Arithmetic with arrays and matrices}
+@subsection Arithmetic with arrays and matrices
+@cindex Arithmetic with arrays and matrices
 
 Beside the usual arithmetic with numbers it is also possible to use
-arithmetic with one-dimensional arrays. As long as the sizes of two
-arrays are identical they can be added or subtracted. For example, if
-the arrays @code{a} and @code{b} are defined as
+whole arrays and more-dimensional matrices in arithmetic expressions.
+Lets start with 1-dimensional arrays. As long as the sizes of the two
+arrays are identical they can be added or subtracted as if they were
+numbers. For example, if the arrays @code{a} and @code{b} are defined
+as
 @example
   a[ 3 ] = @{ 0.5,  1.0,  2.0 @};
   b[ 3 ] = @{ 1.0, -2.0, -3.0 @};
@@ -737,8 +933,9 @@ by simply prepending it with a minus sign
   -a         ->   @{ -0.5, -1.0, -2.0 @};
 @end example
 
-But it's also possible to add a number to each element of an array or
-to subtract a number (or to subtract all array elements from a number):
+But it's also possible to add a number to each of the elements of an
+array or to subtract a number (or to subtract all array elements from a
+number):
 @example
   a + 5      ->   @{ 5.5, 6.0, 7.0 @}
   a - 3      ->   @{ -2.5, -2.0, -1.0 @}
@@ -784,12 +981,102 @@ arrays and simple numbers, also resulting in arrays:
   2 ^ a      ->   @{ 1.414215, 2.0, 4.0 @}
 @end example
 
+All these kinds of arithmetics also work with more-dimensional arrays.
+If the size of two matrices are identical they can be added together
+or suvbstracted from each other, then elements can be mutiplicated or
+divided in an element by element fashion (take care, multiplication
+of two 2-dimensional matrices does @strong{don't} work in the usual
+mathematical way, but the first elements of the first rows of both
+matrices get multiplicated, forming the first element of the first row
+of the resulting matrix). And also the modulo and exponentiation
+operations work as well as the negation.
+
+And as for 1-dimensional arrays a single number can be e.g.@: added to
+each of the elements of a more-dimensional array. I.e.@: if @code{M} is
+a 3-dimensional matrix you can add the number 3 to each of it's elements
+(as far as they exist yet in the case of variable sized matrices) by
+simply writing
+@example
+M += 3;
+@end example
+Of course, this also works with all the other kinds of arithmetic
+operations. The only requirement is, if @code{M} is a variable sized
+matrix, all elements exist, i.e.@: if for example a sub-array isn't yet
+defined @code{fsc2} will flag an error because it doesn't know how to
+add a number to an array that not exists yet.
+
+If you want to add a number to only a sub-array of the matrix
+@example
+M[ 2 ] += 3;
+@end example
+would add 3 to each elements of the 2nd sub-array of @code{M} (which is
+a matrix of rank 4x5).
+
+But you can also add a whole 1-dimensional array to each of the
+sub-arrays of a matrix. Lets again assume that @code{M} 3-dimensional,
+e.g. a matrix of rank 3x4x5. If @code{a} is now a 1-dimensional array
+of length 5 you can add it to all of @code{M}'s 12 sub-sub-arrays by
+writing
+@example
+M += a;
+@end example
+If you would have to write the same using just the elements you would
+have to write 60 additions instead, i.e.@:
+@example
+M[ 1, 1, 1 ] += a[ 1 ];
+M[ 1, 1, 2 ] += a[ 2 ];
+...
+M[ 1, 1, 5 ] += a[ 5 ];
+M[ 1, 2, 1 ] += a[ 1 ];
+...
+...
+M[ 3, 4, 5 ] += a[ 5 ];
+@end example
+Of course, this could also be done using a @code{FOR} loop, see below,
+but would still be a lot longer.
+
+If you instead want to add the array @code{a} only to all the sub-array
+in the 2nd set of sub-arrays of @code{M} you could simply write
+@example
+M[ 2 ] += a;
+@end example
+instead of doing it explicitely in the longer form
+@example
+M[ 2, 1 ] += a;
+M[ 2, 2 ] += a;
+M[ 2, 3 ] += a;
+M[ 2, 4 ] += a;
+@end example
+
+Finally, you can also directly add a 2-dimensional matrix to all
+sub-matrices of a 3-dimensional matrix, or, generally, you can add an
+n-dimensional matrix to all n-dimensional sub-matrices of a
+m-dimensional matrix, given that m is larger than n and that the ranks
+of the sub-matrices are identical, by just writing them as if they were
+simple numbers. The same holds for all the other types of arithmetic
+operations. In all cases @code{fsc2} will automatically try to get it
+right and spare you from having to write all kinds of loops to get the
+same effect.
+
+You can also mix objects of different ranks in an expression: if
+@code{M} is, for example, a 3-dimensional matrix, @code{N} is a
+2-dimensional matrix and @code{R} a 1-dimensional array you can write
+@example
+M += N - R * 3;
+@end example
+In this case each element of @code{R} will first be multiplied by 3 and
+the resulting array is then subtracted from each of the sub-arrays of
+@code{N}. Finally, @code{N} is added to each of the sub-matrices of
+@code{M}.
+
+
 Further, the built-in arithmetic functions can (as far as this makes any
-sense) be applied to arrays. In every case the function is applied to
-each element of the array, thus the result is another array with its
-elements being the results of applying the function to each of the input
-array elements. For example, again using the array @code{a} defined
-above, applying the @code{sqrt()} function results in:
+sense) be applied to arrays and matrices. In every case the function is
+applied to each element of the array or matrix, thus the result is
+another array or matrix of the same rank with its elements being the
+results of applying the function to each of the input array
+elements. For example, again using the array @code{a} defined above,
+applying the @code{sqrt()} function results in:
 @example
   sqrt( a )  ->   @{ 0.7071068, 1.0, 1.1414215 @}
 @end example
@@ -798,6 +1085,7 @@ Finally, for obvious reasons, when computed assignments are used
 (i.e.@: `@code{+=}', `@code{-=}', `@code{*=}', `@code{/=}', `@code{%=}'
 or `@code{^=}') the left hand side variable of an equation has to be an
 array when arithmetic with arrays is used.
+
 
 
 @node Control structures, Miscellaneous, Arithmetic, EDL

@@ -72,7 +72,7 @@ static void prepserror( const char *s );
 
 %token NT_TOKEN UT_TOKEN MT_TOKEN T_TOKEN KT_TOKEN MGT_TOKEN
 %token NU_TOKEN UU_TOKEN MU_TOKEN KU_TOKEN MEG_TOKEN
-%type <vptr> expr unit list1 list2 lhs
+%type <vptr> expr unit list1 l1e lhs
 
 
 %left EQ NE LT LE GT GE
@@ -107,7 +107,7 @@ line:    P_TOK prop
        | lhs DIVA expr              { vars_assign( vars_div( $1, $3 ), $1 ); }
        | lhs MODA expr              { vars_assign( vars_mod( $1, $3 ), $1 ); }
        | lhs EXPA expr              { vars_assign( vars_pow( $1, $3 ), $1 ); }
-       | FUNC_TOKEN '(' list3 ')'   { vars_pop( func_call( $1 ) ); }
+       | FUNC_TOKEN '(' list2 ')'   { vars_pop( func_call( $1 ) ); }
        | FUNC_TOKEN '['             { print( FATAL, "'%s' is a predefined "
 											 "function.\n", $1->name );
 	                                  THROW( EXCEPTION ); }
@@ -148,7 +148,7 @@ expr:    INT_TOKEN unit           { $$ = apply_unit( vars_push( INT_VAR, $1 ),
        | VAR_TOKEN                { $$ = vars_push_copy( $1 ); }
        | VAR_TOKEN '['            { vars_arr_start( $1 ); }
          list1 ']'                { $$ = vars_arr_rhs( $4 ); }
-       | FUNC_TOKEN '(' list3 ')' { $$ = func_call( $1 ); }
+       | FUNC_TOKEN '(' list2 ')' { $$ = func_call( $1 ); }
        | VAR_REF
        | VAR_TOKEN '('            { print( FATAL, "'%s' isn't a function.\n",
 										   $1->name );
@@ -196,47 +196,28 @@ unit:    /* empty */              { $$ = NULL; }
 /* list of indices for access of array element */
 
 list1:   /* empty */              { $$ = vars_push( UNDEF_VAR ); }
-       | list2 l1e                { $$ = $1; }
-	   | ','                      { print( FATAL, "Superfluous comma in "
-										   "array index list.\n" );
-	                                THROW( EXCEPTION ); }
+       | l1e                      { $$ = $1; }
 ;
 
-list2:   expr                     { $$ = $1; }
-       | list2 ',' expr           { $$ = $3; }
-;
-
-l1e:     /* empty */
-       | ','                       { print( FATAL, "Superfluous comma in "
-											"array index list.\n" );
-	                                 THROW( EXCEPTION ); }
+l1e:     expr                     { $$ = $1; }
+       | l1e ',' expr             { $$ = $3; }
 ;
 
 /* list of function arguments */
 
-list3:   /* empty */
-       | list4 l3e
-       | ','                       { print( FATAL, "Superfluous comma in "
-											"function argument list.\n" );
-	                                 THROW( EXCEPTION ); }
+list2:   /* empty */
+       | l2e
 ;
 
-l3e:     /* empty */
-       | ','                       { print( FATAL, "Superfluous comma in "
-											"function argument list.\n" );
-	                                 THROW( EXCEPTION ); }
-;
-
-list4:   exprs
-       | list4 ',' exprs
+l2e:     exprs
+       | l2e ',' exprs
 ;
 
 exprs:   expr                     { }
-       | STR_TOKEN                { vars_push( STR_VAR, $1 ); }
-         strs
+       | strs
 ;
 
-strs:    /* empty */
+strs:    STR_TOKEN                { vars_push( STR_VAR, $1 ); }
        | strs STR_TOKEN           { Var *v = vars_push( STR_VAR, $2 );
 	                                vars_add( v->prev, v ); }
 ;

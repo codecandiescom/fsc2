@@ -32,10 +32,6 @@ static Var *vars_int_arr_add( Var *v1, Var *v2 );
 static Var *vars_float_arr_add( Var *v1, Var *v2 );
 static Var *vars_ref_add( Var *v1, Var *v2 );
 
-static const char *ld = "Lengths of arrays or matrices in addition differ or "
-                        "parts of of the matrices don't exist.\n";
-static const char *su = "Length of array or size of matrix used in addition "
-                        "is still unknown.\n";
 
 /*--------------------------------------------------------*/
 /*--------------------------------------------------------*/
@@ -78,12 +74,12 @@ Var *vars_add( Var *v1, Var *v2 )
 			break;
 
 #ifndef NDEBUG
-		default :
-			eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
-					__FILE__, __LINE__ );
-			THROW( EXCEPTION );
+			default :
+				eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
+						__FILE__, __LINE__ );
+				THROW( EXCEPTION );
 #endif
-	}
+		}
 
 	return new_var;
 }
@@ -123,6 +119,8 @@ static Var *vars_int_var_add( Var *v1, Var *v2 )
 	void *gp;
 
 
+	vars_arith_len_check( v1, v2, "addition" );
+
 	switch ( v2->type )
 	{
 		case INT_VAR :
@@ -139,12 +137,6 @@ static Var *vars_int_var_add( Var *v1, Var *v2 )
 			break;
 
 		case INT_ARR :
-			if ( v2->len == 0 )
-			{
-				print( FATAL, su );
-				THROW( EXCEPTION );
-			}
-
 			if ( v2->flags & IS_TEMP )
 				new_var = v2;
 			else
@@ -161,12 +153,6 @@ static Var *vars_int_var_add( Var *v1, Var *v2 )
 			break;
 
 		case FLOAT_ARR :
-			if ( v2->len == 0 )
-			{
-				print( FATAL, su );
-				THROW( EXCEPTION );
-			}
-
 			if ( v2->flags & IS_TEMP )
 				new_var = v2;
 			else
@@ -236,6 +222,8 @@ static Var *vars_float_var_add( Var *v1, Var *v2 )
 	void *gp;
 
 
+	vars_arith_len_check( v1, v2, "addition" );
+
 	switch ( v2->type )
 	{
 		case INT_VAR :
@@ -249,12 +237,6 @@ static Var *vars_float_var_add( Var *v1, Var *v2 )
 			break;
 
 		case INT_ARR :
-			if ( v2->len == 0 )
-			{
-				print( FATAL, su );
-				THROW( EXCEPTION );
-			}
-
 			if ( v2->flags & IS_TEMP )
 				new_var = v2;
 			else
@@ -272,12 +254,6 @@ static Var *vars_float_var_add( Var *v1, Var *v2 )
 			break;
 
 		case FLOAT_ARR :
-			if ( v2->len == 0 )
-			{
-				print( FATAL, su );
-				THROW( EXCEPTION );
-			}
-
 			if ( v2->flags & IS_TEMP )
 				new_var = v2;
 			else
@@ -343,6 +319,8 @@ static Var *vars_int_arr_add( Var *v1, Var *v2 )
 	ssize_t i;
 
 
+	vars_arith_len_check( v1, v2, "addition" );
+
 	switch ( v2->type )
 	{
 		case INT_VAR :
@@ -354,12 +332,6 @@ static Var *vars_int_arr_add( Var *v1, Var *v2 )
 			break;
 
 		case INT_ARR :
-			if ( v1->len != v2->len )
-			{
-				print( FATAL, ld );
-				THROW( EXCEPTION );
-			}
-
 			if ( v1->flags & IS_TEMP )
 			{
 				vt = v1;
@@ -382,12 +354,6 @@ static Var *vars_int_arr_add( Var *v1, Var *v2 )
 			break;
 
 		case FLOAT_ARR :
-			if ( v1->len != v2->len )
-			{
-				print( FATAL, ld );
-				THROW( EXCEPTION );
-			}
-
 			if ( v2->flags & IS_TEMP )
 				new_var = v2;
 			else
@@ -441,6 +407,8 @@ static Var *vars_float_arr_add( Var *v1, Var *v2 )
 	ssize_t i;
 
 
+	vars_arith_len_check( v1, v2, "addition" );
+
 	switch ( v2->type )
 	{
 		case INT_VAR :
@@ -456,12 +424,6 @@ static Var *vars_float_arr_add( Var *v1, Var *v2 )
 			break;
 
 		case FLOAT_ARR :
-			if ( v1->len != v2->len )
-			{
-				print( FATAL, ld );
-				THROW( EXCEPTION );
-			}
-
 			if ( v1->flags & IS_TEMP )
 			{
 				vt = v1;
@@ -522,6 +484,8 @@ static Var *vars_ref_add( Var *v1, Var *v2 )
 	ssize_t i;
 
 
+	vars_arith_len_check( v1, v2, "addition" );
+
 	switch ( v2->type )
 	{
 		case INT_VAR :
@@ -560,15 +524,8 @@ static Var *vars_ref_add( Var *v1, Var *v2 )
 				for ( i = 0; i < new_var->len; i++ )
 					vars_add( v1, new_var->val.vptr[ i ] );
 			else
-			{
-				if ( v1->len != new_var->len )
-				{
-					print( FATAL, ld );
-					THROW( EXCEPTION );
-				}
 				for ( i = 0; i < new_var->len; i++ )
 					vars_add( v1->val.vptr[ i ], new_var ->val.vptr[ i ] );
-			}
 
 			if ( v1 != v2 )
 				vars_pop( v1 );

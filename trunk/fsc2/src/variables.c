@@ -145,6 +145,7 @@
 static Var *vars_setup_new_array( Var *v, int dim );
 static void vars_arr_create( Var *a, Var *v, int dim );
 static Var *vars_init_elements( Var *a, Var *v );
+static void vars_do_init( Var *src, Var *dest );
 static Var *vars_lhs_pointer( Var *v, int dim );
 static void vars_assign_to_1d( Var *src, Var *dest );
 static void vars_assign_to_nd( Var *src, Var *dest );
@@ -395,7 +396,6 @@ static void vars_arr_create( Var *a, Var *v, int dim )
 	   dimensions */
 
 	a->val.vptr = VAR_PP T_malloc( a->len * sizeof *a->val.vptr );
-	a->from = a;
 
 	for ( i = 0; i < a->len; i++ )
 		a->val.vptr[ i ] = NULL;
@@ -409,6 +409,129 @@ static void vars_arr_create( Var *a, Var *v, int dim )
 }
 
 
+/*---------------------------------------------------------------------*/
+/* Function gets called when a list of initializers (enclosed in curly */
+/* braces) gets found in the input of the VARIABLES section.           */
+/*---------------------------------------------------------------------*/
+
+Var *vars_init_list( Var *v, ssize_t level )
+{
+	ssize_t count = 0;
+	ssize_t i;
+	Var *cv, *nv;
+	int type = INT_VAR;
+
+
+	/* Find the start of the of list initializers, marked by a variable of
+	   type REF_PTR */
+
+	while ( v->type != REF_PTR )
+		v = v->prev;
+
+	v = vars_pop( v );
+
+	/* Variables of lower dimensions than the one required here are left-
+	   overs from previous calls, they are still needed for the final
+	   assignment of the initialization data to the RHS array. */
+
+	while ( v != NULL && v->dim < level && v->flags & INIT_ONLY )
+		v = v->next;
+
+	if ( v == NULL || v->dim < level )
+	{
+		print( FATAL, "Syntax error in initializer list (possibly a missing "
+			   "set of curly braces).\n" );
+		THROW( EXCEPTION );
+	}
+
+	/* Count the number of initializers, skipping variables with too low
+	   a dimension and complaining about variables with too high a
+	   dimensions */
+
+	for ( cv = v; cv != NULL; cv = cv->next )
+	{
+		if ( cv->dim > level )
+		{
+			print( FATAL, "Object with too high a dimension in initializer "
+				   "list.\n" );
+			THROW( EXCEPTION );
+		}
+		else if ( cv->dim == level )
+		{
+			count++;
+			if ( level == 0 && cv->type == FLOAT_VAR )
+				type = FLOAT_VAR;
+		}
+		else if ( ! ( cv->flags & INIT_ONLY ) )
+		{
+			print( FATAL, "Syntax error in initializer list (possibly a "
+				   "missing set of curly braces).\n" );
+			THROW( EXCEPTION );
+		}
+	}
+
+	/* If there's only a variable of UNDEF_TYPE this means we got just an
+	   empty list */
+
+	if ( count == 1 && v->type == UNDEF_VAR )
+	{
+		v->dim++;
+		return v;
+	}
+
+	/* If we're at the lowest level (i.e. at the level of simple integer or
+	   floating point variables) make an array out of them */
+
+	if ( level == 0 )
+	{
+		if ( type == INT_VAR )
+		{
+			nv = vars_push( INT_ARR, NULL, count );
+			nv->flags |= INIT_ONLY;
+			nv->val.lpnt = LONG_P T_malloc( nv->len * sizeof *nv->val.lpnt );
+			for ( i = 0; i < nv->len; i++, v = vars_pop( v ) )
+				nv->val.lpnt[ i ] = v->val.lval;
+		}
+		else
+		{
+			nv = vars_push( FLOAT_ARR, NULL, count );
+			nv->flags |= INIT_ONLY;
+			nv->val.dpnt = DOUBLE_P T_malloc( nv->len * sizeof *nv->val.dpnt );
+			for ( i = 0; i < nv->len; i++, v = vars_pop( v ) )
+				if ( v->type == INT_VAR )
+					nv->val.dpnt[ i ] = ( double ) v->val.lval;
+				else
+					nv->val.dpnt[ i ] = v->val.dval;
+		}
+
+		return nv;
+	}
+
+	/* Otherwise create an array of a dimension one higher than the current
+	   level */
+
+	nv = vars_push( FLOAT_REF, NULL );
+	nv->flags |= DONT_RECURSE | INIT_ONLY;
+	nv->dim = v->dim + 1;
+	nv->len = count;
+	nv->val.vptr = VAR_PP T_malloc( nv->len * sizeof *nv->val.vptr );
+	for ( i = 0; i < nv->len; v = v->next )
+	{
+		if ( v->dim != level )
+			continue;
+
+		v->flags |= INIT_ONLY;
+
+		if ( v->type == UNDEF_VAR )
+			nv->val.vptr[ i++ ] = NULL;
+		else
+			nv->val.vptr[ i++ ] = v;
+	}
+
+	return nv;
+}
+
+
 /*--------------------------------------------------------------------------*/
 /* Function initializes a new array. When called the stack at 'v' contains  */
 /* all the data for the initialization (the last data on top of the stack)  */
@@ -418,78 +541,162 @@ static void vars_arr_create( Var *a, Var *v, int dim )
 
 void vars_arr_init( Var *v )
 {
-	ssize_t num_init;
-	ssize_t num_req;
-	Var  *a, *cv;
+	Var *dest;
 
+
+	if ( v == NULL )
+	{
+		vars_del_stack( );
+		return;
+	}
+
+	/* Find the reference to the variable to be initialized */
+
+	for ( dest = v; dest->prev != NULL; dest = dest->prev )
+		/* empty */ ;
+
+	dest = dest->from;
 
 	/* If there are no initialization data this is indicated by a variable
 	   of type UNDEF_VAR - just pop it as well as the array pointer */
 
-	if ( v->type == UNDEF_VAR )
+	if ( v->type == UNDEF_VAR && v->dim == dest->dim )
 	{
-		vars_pop( v->prev );
-		vars_pop( v );
+		vars_del_stack( );
 		return;
 	}
 
-	/* The variable pointer this function gets passed is a pointer to the very
-       last of the initialization data on the variable stack. Now we've got to
-       work our way up the variable stack until we find the first non-data
-       variable which must be of REF_PTR type. While doing so, we count the
-       number of initializers 'num_init' on the stack. */
-
-	num_init = 0;
-	while ( v->type != REF_PTR )
+	if ( v->dim != dest->dim )
 	{
-		vars_check( v, INT_VAR | FLOAT_VAR );
-		v = v->prev;
-		num_init++;
-	}
-
-	a = v->from;
-	v = vars_pop( v );
-	vars_check( a, INT_ARR | FLOAT_ARR | INT_REF | FLOAT_REF );
-
-	if ( a->type & ( INT_REF | FLOAT_REF ) && a->flags & IS_DYNAMIC )
-	{
-		print( FATAL, "Dynamically sized matrices can't be initialized.\n" );
+		print( FATAL, "Dimensions of variable '%s' and initializer list "
+			   "differ.\n", dest->name );
+		vars_del_stack( );
 		THROW( EXCEPTION );
 	}
 
-	if ( a->type & ( INT_ARR | FLOAT_ARR ) && a->flags & IS_DYNAMIC )
+	vars_do_init( v, dest );
+	vars_del_stack( );
+}
+
+
+/*--------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------*/
+
+static void vars_do_init( Var *src, Var *dest )
+{
+	ssize_t i;
+
+
+	switch ( dest->type )
 	{
-		a->len = num_init;
-		if ( a->type == INT_ARR )
-			a->val.lpnt = LONG_P T_malloc( a->len * sizeof *a->val.lpnt );
-		else
-			a->val.dpnt = LONG_P T_malloc( a->len * sizeof *a->val.dpnt );
+		case INT_ARR :
+			if ( dest->flags & IS_DYNAMIC )
+			{
+				dest->len = src->len;
+				dest->val.lpnt = LONG_P T_calloc( dest->len,
+												  sizeof *dest->val.lpnt );
+			}
+			else if ( src->len > dest->len )
+				print( WARN, "Superfluous intitialization data.\n" );
+
+			if ( src->type == INT_ARR )
+				memcpy( dest->val.lpnt, src->val.lpnt,
+						( dest->len < src->len ? dest->len : src->len )
+						* sizeof *dest->val.lpnt );
+			else
+			{
+				print( WARN, "Intialization of integer array with floating "
+					   "point values.\n" );
+				for ( i = 0; i < ( dest->len < src->len ?
+								   dest->len : src->len ); i++ )
+					dest->val.lpnt[ i ] = ( long ) src->val.dpnt[ i ];
+			}
+			return;
+
+		case FLOAT_ARR :
+			if ( dest->flags & IS_DYNAMIC )
+			{
+				dest->len = src->len;
+				dest->val.dpnt = DOUBLE_P T_calloc( dest->len,
+													sizeof *dest->val.dpnt );
+			}
+			else if ( src->len > dest->len )
+				print( WARN, "Superfluous intitialization data.\n" );
+
+			if ( src->type == FLOAT_ARR )
+				memcpy( dest->val.dpnt, src->val.dpnt,
+						( dest->len < src->len ? dest->len : src->len )
+						* sizeof *dest->val.dpnt );
+			else
+				for ( i = 0; i < ( dest->len < src->len ?
+								   dest->len : src->len ); i++ )
+					dest->val.dpnt[ i ] = ( double ) src->val.lpnt[ i ];
+			return;
+
+		case INT_REF :
+			if ( dest->flags & IS_DYNAMIC )
+			{
+				dest->len = src->len;
+				dest->val.dpnt = VAR_PP T_malloc( dest->len
+												  * sizeof *dest->val.vptr );
+				for ( i = 0; i < dest->len; i++ )
+					dest->val.vptr[ i ] = NULL;
+			}
+			else if ( src->len > dest->len )
+				print( WARN, "Superfluous intitialization data.\n" );
+
+			for ( i = 0; i < ( dest->len < src->len ?
+							   dest->len : src->len ); i++ )
+			{
+				if ( dest->val.vptr[ i ] == NULL )
+				{
+					dest->val.vptr[ i ] = vars_new( NULL );
+					if ( dest->flags & IS_DYNAMIC )
+						dest->val.vptr[ i ]->flags |= IS_DYNAMIC;
+					dest->val.vptr[ i ]->dim = dest->dim - 1;
+					if ( dest->dim > 2 )
+						dest->val.vptr[ i ]->type = INT_REF;
+					else
+						dest->val.vptr[ i ]->type = INT_ARR;
+				}
+				if ( src->val.vptr[ i ] != NULL )
+					vars_do_init( src->val.vptr[ i ], dest->val.vptr[ i ] );
+			}
+			return;
+
+		case FLOAT_REF :
+			if ( dest->flags & IS_DYNAMIC )
+			{
+				dest->len = src->len;
+				dest->val.dpnt = VAR_PP T_malloc( dest->len
+												  * sizeof *dest->val.vptr );
+				for ( i = 0; i < dest->len; i++ )
+					dest->val.vptr[ i ] = NULL;
+			}
+			else if ( src->len > dest->len )
+				print( WARN, "Superfluous intitialization data.\n" );
+
+			for ( i = 0; i < ( dest->len < src->len ?
+							   dest->len : src->len ); i++ )
+			{
+				if ( dest->val.vptr[ i ] == NULL )
+				{
+					dest->val.vptr[ i ] = vars_new( NULL );
+					if ( dest->flags & IS_DYNAMIC )
+						dest->val.vptr[ i ]->flags |= IS_DYNAMIC;
+					dest->val.vptr[ i ]->dim = dest->dim - 1;
+					if ( dest->dim > 2 )
+						dest->val.vptr[ i ]->type = FLOAT_REF;
+					else
+						dest->val.vptr[ i ]->type = FLOAT_ARR;
+				}
+				if ( src->val.vptr[ i ] != NULL )
+					vars_do_init( src->val.vptr[ i ], dest->val.vptr[ i ] );
+			}
+			return;
 	}
 
-	/* Figure out number of required initialization data and compare to
-	   the number of data we got. Getting too many is an error. */
-
-	cv = a;
-	num_req = 1; 
-	while ( 1 )
-	{
-		num_req *= cv->len;
-		if ( cv->type & ( INT_ARR | FLOAT_ARR ) )
-			 break;
-		cv = cv->val.vptr[ 0 ];
-	}
-
-	if ( num_init < num_req )
-		print( WARN, "Less initializers (%ld) for array '%s' than it has "
-			   "elements (%ld).\n", num_init, a->name, num_req );
-
-	if ( num_init > num_req )
-	{
-		print( FATAL, "Too many initializers for array '%s'.\n", a->name );
-		THROW( EXCEPTION );
-	}
-
-	vars_init_elements( a, v );
+	fsc2_assert( 1 == 0 );
 }
 
 
@@ -901,13 +1108,13 @@ static void vars_assign_to_1d( Var *src, Var *dest )
 		dest->flags &= ~NEW_VARIABLE;
 	}
 
-	if ( dest->type & ( INT_ARR | FLOAT_ARR ) )
+	if ( src->type & ( INT_ARR | FLOAT_ARR ) )
 	{
 		print( FATAL, "Can't assign array to a simple variable.\n" );
 		THROW( EXCEPTION );
 	}
 
-	if ( dest->type & ( INT_REF | FLOAT_REF ) )
+	if ( src->type & ( INT_REF | FLOAT_REF ) )
 	{
 		print( FATAL, "Can't assign matrix to a simple variable.\n" );
 		THROW( EXCEPTION );
@@ -1083,13 +1290,24 @@ static long vars_set_all( Var *v, long l, double d )
 
 static void vars_assign_to_nd_from_nd( Var *src, Var *dest )
 {
+	ssize_t i;
+
+
 	/* The dimensions of both arrays must be identical */
 
-	if ( dest->dim != src->dim )
+	if ( dest->dim < src->dim )
 	{
-		print( FATAL, "Can't assign between arrays of different "
-			   "dimensions.\n" );
+		print( FATAL, "Left hand side of assignment has lower dimension than "
+			   "right hand side.\n" );
 		THROW ( EXCEPTION );
+	}
+
+	if ( dest->dim > src->dim )
+	{
+		for ( i = 0; i < dest->len; i++ )
+			if ( dest->val.vptr[ i ] != NULL )
+				vars_assign_to_nd_from_nd( src, dest->val.vptr[ i ] );
+		return;
 	}
 
 	/* Unless the destination array is dynamically sized the sizes of
@@ -1403,10 +1621,12 @@ Var *vars_push( int type, ... )
 			break;
 
 		case INT_VAR :
+			nsv->dim = 0;
 			nsv->val.lval = va_arg( ap, long );
 			break;
 
 		case FLOAT_VAR :
+			nsv->dim = 0;
 			nsv->val.dval = va_arg( ap, double );
 			break;
 
@@ -1464,9 +1684,12 @@ Var *vars_push( int type, ... )
 
 		case INT_REF : case FLOAT_REF :
 			src = va_arg( ap, Var * );
-			if ( src->type == REF_PTR )
-				src = src->from;
-			vars_ref_copy( nsv, src, UNSET );
+			if ( src != NULL )
+			{
+				if ( src->type == REF_PTR )
+					src = src->from;
+				vars_ref_copy( nsv, src, UNSET );
+			}
 			break;
 
 		case REF_PTR :
@@ -1599,7 +1822,7 @@ Var *vars_make( int type, Var *src )
 /* This also works with making a FLOAT type copy of an INT type array or  */
 /* matrix. Note that sub-matrices do not go onto the stack but into the   */
 /* variables list (but without a name attached to them and the IS_TEMP    */
-/* flag set) - this is needed to keep the convention workinng that an EDL */
+/* flag set) - this is needed to keep the convention working that an EDL  */
 /* functions gets one variable one the stack for each of its arguments.   */
 /*------------------------------------------------------------------------*/
 
@@ -1799,9 +2022,12 @@ Var *vars_pop( Var *v )
 			break;
 
 		case INT_REF : case FLOAT_REF :
-			for ( i = 0; i < v->len; i++ )
-				if ( v->val.vptr[ i ] != NULL )
-					vars_free( v->val.vptr[ i ], SET );
+			if ( ! ( v->flags & DONT_RECURSE ) )
+			{
+				for ( i = 0; i < v->len; i++ )
+					if ( v->val.vptr[ i ] != NULL )
+						vars_free( v->val.vptr[ i ], SET );
+			}
 			T_free( v->val.vptr );
 	}
 

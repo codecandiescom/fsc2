@@ -83,6 +83,8 @@ static Var *vars_int_var_mult( Var *v1, Var *v2 )
 	void *gp;
 
 
+	vars_arith_len_check( v1, v2, "multiplication" );
+
 	switch ( v2->type )
 	{
 		case INT_VAR :
@@ -99,13 +101,6 @@ static Var *vars_int_var_mult( Var *v1, Var *v2 )
 			break;
 
 		case INT_ARR :
-			if ( v2->len == 0 )
-			{
-				print( FATAL, "Length of array used in multiplication is "
-					   "still unknown.\n" );
-				THROW( EXCEPTION );
-			}
-
 			if ( v2->flags & IS_TEMP )
 				new_var = v2;
 			else
@@ -122,13 +117,6 @@ static Var *vars_int_var_mult( Var *v1, Var *v2 )
 			break;
 
 		case FLOAT_ARR :
-			if ( v2->len == 0 )
-			{
-				print( FATAL, "Length of array used in multiplication is "
-					   "still unknown.\n" );
-				THROW( EXCEPTION );
-			}
-
 			if ( v2->flags & IS_TEMP )
 				new_var = v2;
 			else
@@ -198,6 +186,8 @@ static Var *vars_float_var_mult( Var *v1, Var *v2 )
 	void *gp;
 
 
+	vars_arith_len_check( v1, v2, "multiplication" );
+
 	switch ( v2->type )
 	{
 		case INT_VAR :
@@ -211,13 +201,6 @@ static Var *vars_float_var_mult( Var *v1, Var *v2 )
 			break;
 
 		case INT_ARR :
-			if ( v2->len == 0 )
-			{
-				print( FATAL, "Length of array used in multiplication is "
-					   "still unknown.\n" );
-				THROW( EXCEPTION );
-			}
-
 			if ( v2->flags & IS_TEMP )
 				new_var = v2;
 			else
@@ -235,13 +218,6 @@ static Var *vars_float_var_mult( Var *v1, Var *v2 )
 			break;
 
 		case FLOAT_ARR :
-			if ( v2->len == 0 )
-			{
-				print( FATAL, "Length of array used in multiplication is "
-					   "still unknown.\n" );
-				THROW( EXCEPTION );
-			}
-
 			if ( v2->flags & IS_TEMP )
 				new_var = v2;
 			else
@@ -307,6 +283,8 @@ static Var *vars_int_arr_mult( Var *v1, Var *v2 )
 	ssize_t i;
 
 
+	vars_arith_len_check( v1, v2, "multiplication" );
+
 	switch ( v2->type )
 	{
 		case INT_VAR :
@@ -318,12 +296,6 @@ static Var *vars_int_arr_mult( Var *v1, Var *v2 )
 			break;
 
 		case INT_ARR :
-			if ( v1->len != v2->len )
-			{
-				print( FATAL, "Lengths of arrays in multilication differ.\n" );
-				THROW( EXCEPTION );
-			}
-
 			if ( v1->flags & IS_TEMP )
 			{
 				vt = v1;
@@ -346,13 +318,6 @@ static Var *vars_int_arr_mult( Var *v1, Var *v2 )
 			break;
 
 		case FLOAT_ARR :
-			if ( v1->len != v2->len )
-			{
-				print( FATAL, "Lengths of arrays in multiplication "
-					   "differ.\n" );
-				THROW( EXCEPTION );
-			}
-
 			if ( v2->flags & IS_TEMP )
 				new_var = v2;
 			else
@@ -406,6 +371,8 @@ static Var *vars_float_arr_mult( Var *v1, Var *v2 )
 	ssize_t i;
 
 
+	vars_arith_len_check( v1, v2, "multiplication" );
+
 	switch ( v2->type )
 	{
 		case INT_VAR :
@@ -421,13 +388,6 @@ static Var *vars_float_arr_mult( Var *v1, Var *v2 )
 			break;
 
 		case FLOAT_ARR :
-			if ( v1->len != v2->len )
-			{
-				print( FATAL, "Lengths of arrays in multiplication "
-					   "differ.\n" );
-				THROW( EXCEPTION );
-			}
-
 			if ( v1->flags & IS_TEMP )
 			{
 				vt = v1;
@@ -488,6 +448,8 @@ static Var *vars_ref_mult( Var *v1, Var *v2 )
 	ssize_t i;
 
 
+	vars_arith_len_check( v1, v2, "multiplication" );
+
 	switch ( v2->type )
 	{
 		case INT_VAR :
@@ -526,16 +488,8 @@ static Var *vars_ref_mult( Var *v1, Var *v2 )
 				for ( i = 0; i < new_var->len; i++ )
 					vars_mult( v1, new_var->val.vptr[ i ] );
 			else
-			{
-				if ( v1->len != new_var->len )
-				{
-					print( FATAL, "Lengths of arrays in multiplication "
-						   "differ.\n" );
-					THROW( EXCEPTION );
-				}
 				for ( i = 0; i < new_var->len; i++ )
 					vars_mult( v1->val.vptr[ i ], new_var ->val.vptr[ i ] );
-			}
 
 			if ( v1 != v2 )
 				vars_pop( v1 );

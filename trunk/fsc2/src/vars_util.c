@@ -320,3 +320,46 @@ Var *vars_lnegate( Var *v )
 }
 
 
+/*-----------------------------------------------------------------------*/
+/* Function gets called from the functions for the arithmetic operations */
+/* to make sure that arrays and matrices passed to the functions have a  */
+/* known length.                                                         */
+/*-----------------------------------------------------------------------*/
+
+void vars_arith_len_check( Var *v1, Var *v2, const char *op )
+{
+	ssize_t len1 = -1, len2 = -1;
+
+
+	if ( v1->type & ( INT_ARR | FLOAT_ARR | INT_REF | FLOAT_REF ) )
+	{
+		len1 = v1->len;
+		if ( len1 < 1 )
+		{
+			print( FATAL, "Length of array or matrix used in %s is unknown.\n",
+				   op );
+			THROW( EXCEPTION );
+		}
+	}
+
+	if ( v2->type & ( INT_ARR | FLOAT_ARR | INT_REF | FLOAT_REF ) )
+	{
+		len2 = v2->len;
+		if ( len2 < 1 )
+		{
+			print( FATAL, "Length of array or matrix used in %s is unknown.\n",
+				   op );
+			THROW( EXCEPTION );
+		}
+	}
+
+	if ( len1 < 0 || len2 < 0 )
+		return;
+
+	if ( len1 != len2 && v1->dim == v2->dim )
+	{
+		print( FATAL, "Lengths of arrays or matrices used in %s differ.\n",
+			   op );
+		THROW( EXCEPTION );
+	}
+}
