@@ -474,8 +474,12 @@ void print( int severity, const char *fmt, ... )
 }
 
 
-/*------------------------------------------------------------------------*/
-/*------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
+/* This routine takes the input file and feeds it to 'fsc2_clean' which is */
+/* running as a child process. The output of fsc2_clean gets written to a  */
+/* pipe for which an immediately readable stream is returned by the        */
+/* function (or NULL instead on most errors).                              */
+/*-------------------------------------------------------------------------*/
 
 FILE *filter_edl( const char *name, FILE *fp )
 {
@@ -488,14 +492,16 @@ FILE *filter_edl( const char *name, FILE *fp )
 	if ( pipe( pd ) == -1 )
 	{
 		if ( errno == EMFILE || errno == ENFILE )
-			print( FATAL, "Running out of system resources.\n" );
+			print( FATAL, "Starting the test procedure failed, running out "
+				   "of system resources.\n" );
 		return NULL;
 	}
 
 	if ( ( pid =  fork( ) ) < 0 )
 	{
 		if ( errno == ENOMEM || errno == EAGAIN )
-			print( FATAL, "Running out of memory.\n" );
+			print( FATAL, "Starting the test procedure failed, running out "
+				   "of system resources.\n" );
 		return NULL;
 	}
 	else if ( pid == 0 )
@@ -508,10 +514,22 @@ FILE *filter_edl( const char *name, FILE *fp )
 		   positioned somewhere in the middle */
 
 		rewind( fp );
+		lseek( fileno( fp ), 0, SEEK_SET );      /* paranoia... */
 
 		close( pd[ 0 ] );
-		dup2( fileno( fp ), STDIN_FILENO );
-		dup2( pd[ 1 ], STDOUT_FILENO );
+
+		if ( dup2( fileno( fp ), STDIN_FILENO ) == -1 ||
+			 dup2( pd[ 1 ], STDOUT_FILENO ) == -1 )
+		{
+			if ( errno == EMFILE )
+				 write( pd[ 1 ], "\x03\nStart the test procedure failed, "
+						"running out of system resources.\n", 68 );
+			else
+				 write( pd[ 1 ], "\x03\nStart the test procedure failed, "
+						"internal error detected.\n", 60 );
+			close( pd[ 1 ] );
+			goto filter_failure;
+		}
 
 		TRY
 		{
@@ -522,11 +540,22 @@ FILE *filter_edl( const char *name, FILE *fp )
 			TRY_SUCCESS;
 		}
 		OTHERWISE
-			_exit( EXIT_FAILURE );
+		{
+			printf( "\x03\nStarting the test procedure failed, not enough "
+					"memory left.\n" );
+			goto filter_failure;
+		}
 
 		execl( cmd, "fsc2_clean", name, NULL );
-		printf( "\x03\nTest procedure failed, utility '%s' not found.\n",
-				cmd );
+
+		/* On failure to exec fsc2_clean we send an error message back that
+		   the lexer has to deal with. */
+
+		printf( "\x03\nStarting the test procedure failed, utility '%s' not "
+				"correctly installed.\n", cmd );
+
+	filter_failure:
+
 		fclose( stdout );
 		fclose( fp );
 		T_free( cmd );
@@ -535,9 +564,8 @@ FILE *filter_edl( const char *name, FILE *fp )
 
 	close( pd[ 1 ] );
 
-	/* Wait until the child process had a chance to write to the pipe, other-
-	   wise, if the parent would be too fast in trying to read, it only gets
-	   an EOF. */
+	/* Wait until the child process had a chance to write to the pipe, if the
+	   parent is too fast in trying to read it it only will see an EOF. */
 
 	FD_ZERO( &rfds );
 	FD_SET( pd[ 0 ], &rfds );
@@ -548,7 +576,13 @@ FILE *filter_edl( const char *name, FILE *fp )
 	if ( rs == -1 )
 	{
 		if ( errno == ENOMEM )
-			print( FATAL, "Running out of system resources.\n" );
+			print( FATAL, "Starting the test procedure failed, running out "
+				   "of system resources.\n" );
+#ifndef NDEBUG
+		else
+			eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
+					__FILE__, __LINE__ );
+#endif
 		return NULL;
 	}
 
