@@ -953,7 +953,7 @@ TIMEBASE:      5 ns;
 TRIGGER_MODE:  INTERNAL, REP_FREQ = 200 Hz;
 
 MW:            POD = 1, 2, 3, 4, 5, INVERTED, V_HIGH = 5 V, V_LOW = 0 V;
-DETECTION:     POD = 0,                       V_HIGH = 5 V, V_LOW = 0 V;;
+DETECTION:     POD = 0,                       V_HIGH = 5 V, V_LOW = 0 V;
       
        
 PHASE_SETUP:   MW,           // cycle microwave channel
