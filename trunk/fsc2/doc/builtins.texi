@@ -35,20 +35,19 @@
 In this chapter all functions built into @acronym{fsc2} are discussed in
 detail. These functions are available even when no device modules have
 been specified in the @code{DEVICES} section (or this section is
-missing). In principle, functions can be used in the @code{VARIABLES},
-@code{PREPARATIONS} and @code{EXPERIMENT} section of an @acronym{EDL}
-program. But please note that not all of the following functions can be
-used in all these sections of an @acronym{EDL} program but some of them
-only in the @code{PREPARATIONS} or the @code{EXPERIMENT} section.
-
+missing). Many functions can be used in the @code{VARIABLES},
+@code{PREPARATIONS} as well as the @code{EXPERIMENT} section of an
+@acronym{EDL} program, but there are some that can be used in either
+@code{PREPARATIONS} or the @code{EXPERIMENT} section only.
 
 The built-in functions can be roughly divided into four classes. The
-first class of functions are functions for dealing with the output of
-the program, either by writing text to the browser in the lower half of
-the main window, by writing data etc.@: into files (including functions
-for specifying the files to be used) or by drawing the measured data
+first class of functions are functions for drawing the measured data
 onto the screen, i.e.@: the main area of the display window (including
-functions for changing the axis scaling and labels etc.@:).
+functions for changing the axis scaling and labels etc.@:), functions
+for dealing with the output of the program, either by writing text to
+the browser in the lower half of the main window, or by writing data
+etc.@: into files (including functions for specifying the files to be
+used).
 
 The second class of functions are interaction functions, functions that
 allow to deal with additional graphical objects like buttons, sliders and
@@ -63,91 +62,55 @@ consists of functions for dealing with time or date issues or for
 determining the sizes of arrays and other.
 
 
-
 @node Output functions, Interaction functions, Built-in Functions, Built-in Functions
 @section Output functions
 @cindex output functions
 
+Before delving into the details of the functions for drawing measured
+data into the main display window a short explanation of the basic ideas
+probably is in order. You have to distingish between 1D- and
+2D-display. In 1D-display to display a new data point you have to
+specify the @i{x}- and the @i{y}-coordinate of the point. The
+@i{x}-coordinate is always an integer number, where @code{1} indicates
+the left-most point in the window. For the @i{y}-coordinate you simply
+specify the measured value. To be able to draw a meaningful @i{x}-axis
+the programm needs another piece of information: the starting point of
+the @i{x}-axis and the difference between the points drawn at the
+@i{x}-axis. For example, if you do an cw-EPR experiment, starting with a
+field of @w{3400 G} with spacing of @w{0.5 G} between the data points
+you will have to tell the program in the graphic initialization. If you
+now specify when drawing a new point an @i{x}-coordinate of @code{11}
+the point will appear at an axis position of @w{3410 G} because the
+point numbered @code{1} is drawn at @w{3400 G}, the point numbered
+@code{2} at @w{3400.5 G} etc.@:, so the point numbered @code{11} will
+appear at @w{3410 G}.
+
+In contrast, for a 2D-display you have to specify three coordinates for
+a new data point. Here both the @i{x}- amd @i{y}-coordinate are integers,
+both starting at @code{1}. The point with both the @i{x}- and
+@i{y}-coordinate set to @code{1} is the left-most point at the bottom of
+the window. The third coordinate is the measured value, which usually
+will be a floating point number. As already in case of 1D-displays tzhe
+program needs some more information to be able to draw useful axis. But
+here not only the starting point and increment for the @i{x}-axis must
+be given but also values for the @i{y}-axis.
+
+Finally, another point: If you have not only one data point to draw but
+a whole array you can do this without having to draw each point on its
+own. Instead, when in the function for drawing you enter a
+(ome-dimensional) array instead of a value (as the @i{y}-coordinate for
+1D-display or the @i{z}-coordinate for 2D-display) all the points of the
+array will be drawn, starting at the place you specified and from there
+to the right, i.e.@: always in the @i{x}-direction.
+
+
 @table @samp
-@anchor{print}
-@item print()
-@findex print()
-This function prints text into the output browser in the main form of
-@acronym{fsc2}.  It needs a @i{format string}
-@cindex format string
-as its very first argument. The @i{format string} can contain any text
-as well as a special character, @code{#},
-@findex # @r{(in @code{print()} function)}
-that works as a placeholder for data to be printed in its place.  Here's
-a first simple example: You want to print the value of a variable called
-@code{I}, that has been assigned a value of 3. Now,
-@example
-print( "The value of I is #.\n", I );
-@end example
-@noindent
-will print, when the program is interpreted,
-@example
-The value of I is 3.
-@end example
-@noindent
-But you can have not only one but as many placeholder characters in the
-@i{format string} as you need. Of course, the number of placeholder
-characters has to match the number of variables (or data) following the
-@i{format string}. If the number of @code{#}'s and the number of
-variables to be printed doesn't fit a warning is printed. If there are
-too many @code{#}'s the superfluous ones are simply printed aout, but if
-there are not enough only as many variables as there are @code{#}'s are
-printed, the remaining data are discarded.
-
-You may use @code{print()} to print integer or floating point values
-(that includes the return values of functions) and variables and strings
-(i.e.@: text enclosed in double quotes, @code{"}).  Here's a longer,
-somewhat contrived example:
-@example
-print( "The # of # is #\n", "sine", x, sin( x ) );
-@end example
-@noindent
-This will print (assuming @code{x} equals @code{0.5}):
-@example
-The sine of 0.500000 is 0.479426
-@end example
-
-There are special sequences allowed in the @i{format string}. They all
-start with an @i{escape character}, the backslash @code{\}. Here's a
-list of all recognized special sequences:
-@table @samp
-@cindex escape characters (in @code{print()} function)
-@item \n
-Linefeed character: Ends a line, everything following it starts on a new
-line. Thus several lines can be printed at once by one call of
-@code{print()}. @code{print()} does not automatically add a linefeed by
-itself.
-@item \t
-Embeds a tabulator character in the text, tab stops are set at every
-eighth character position.
-@item \\
-Prints a backslash, @code{\}, thus switching off the special meaning of the
-backslash as an escape character.
-@item \"
-Prints a quote -- use it to embed quotes into the @i{format
-string}.
-@item \#
-Prints a @code{#}, thus switching off the special meaning of the
-@code{#} character as a placeholder for variables to be printed.
-@item \T
-While normally nothing is printed during the test run of the
-@code{EXPERIMENT} section of an @acronym{EDL} program, if the @i{format
-string} starts with this escape sequence the @code{print()} function
-will produce output already in the test run (the @code{T} is never
-printed).
-@end table
-
 @anchor{init_1d}
 @item init_1d()
 @findex init_1d()
 Initializes the display for one-dimensional experiments -- without a
 call to this function (or @code{init_2d()}, see below) no data can be
-displayed. The function takes up to six arguments, all of them being
+displayed. The function accepts up to six arguments, all of them being
 optional. These are:
 @enumerate
 @item
@@ -157,22 +120,20 @@ curves. If not given it defaults to 1.
 Number of points, if missing, zero or negative it will be treated as
 unknown and default to 64 points. If the specified value (or the default
 value) turns out to be too small it is adjusted automatically in the
-experiment so that all data fit into the display (as long as the
+experiment so that all data again fit into the display (as long as the
 @code{FS} button is switched on).
 @item
 Start value of the @i{x}-axis. If missing (or undefined, see next point)
-point numbers are printed, starting with @code{1} (if @acronym{FORTRAN}
-style array offsets are used, for C style arrays the starting value is
-@code{0}).
+point numbers are printed, starting with @code{1}.
 @item
 Increment for data along the @i{x}-axis (thus restricting the display to
 equally spaced data). Setting it to zero implies that the start value
 and the increment are undefined and point numbers are shown
 instead. Negative increments are handled correctly.
 @item
-String variable with label to be shown at the @i{x}-axis.
+String variable with the label to be shown at the @i{x}-axis.
 @item
-String variable with label to be shown at the @i{y}-axis.
+String variable with the label to be shown at the @i{y}-axis.
 @end enumerate
 
 Formally, the function with its arguments can be written as
@@ -182,7 +143,6 @@ init_1d( [ n_curves [ , n_points [ , start, increment ] ], ]
 @end example
 @noindent
 This means that the function can be called in all of the following ways:
-
 @example
 init_1d( n_curves, n_points, start, increment, x_label, y_label )
 init_1d( n_curves, n_points, start, increment, x_label )
@@ -209,8 +169,7 @@ This function can only be used in the @code{PREPARATIONS} section of an
 @item init_2d()
 @findex init_2d()
 Initializes the display for two-dimensional experiments. The function
-takes up to nine arguments, all of them being optional. The arguments
-are:
+accepts up to nine arguments, all of them optional. The arguments are:
 @enumerate
 @item
 Number of data sets to be displayed, maximum is currently 4. If not
@@ -265,8 +224,8 @@ This function has to be called to display data in 1-dimensional as well as
 @item
 The (@i{x}) point number (coordinate) where the data point (if only a
 single number is given as the third argument) or the coordinate where
-the first data point of an data array passed as third argument is to be
-shown.
+the first data point of an data array passed as the third argument is to
+be shown.
 @item
 Only in 2D-experiments: The @i{y}-point number (coordinate) of the data
 point or the coordinate for the first data point of an data array
@@ -366,6 +325,80 @@ curve. Invalid arguments are discarded and an error message is printed.
 
 This function can only be used in the @code{EXPERIMENT} section of an
 @acronym{EDL} program.
+
+
+@anchor{print}
+@item print()
+@findex print()
+This function prints text into the output browser in the main form of
+@acronym{fsc2}.  It needs a @i{format string}
+@cindex format string
+as its very first argument. The @i{format string} can contain any text
+as well as a special character, @code{#},
+@findex # @r{(in @code{print()} function)}
+that works as a placeholder for data to be printed in its place.  Here's
+a first simple example: You want to print the value of a variable called
+@code{I}, that has been assigned a value of 3. Now,
+@example
+print( "The value of I is #.\n", I );
+@end example
+@noindent
+will print, when the program is interpreted,
+@example
+The value of I is 3.
+@end example
+@noindent
+But you can have not only one but as many placeholder characters in the
+@i{format string} as you need. Of course, the number of placeholder
+characters has to match the number of variables (or data) following the
+@i{format string}. If the number of @code{#}'s and the number of
+variables to be printed doesn't fit a warning is printed. If there are
+too many @code{#}'s the superfluous ones are simply printed aout, but if
+there are not enough only as many variables as there are @code{#}'s are
+printed, the remaining data are discarded.
+
+You may use @code{print()} to print integer or floating point values
+(that includes the return values of functions) and variables and strings
+(i.e.@: text enclosed in double quotes, @code{"}).  Here's a longer,
+somewhat contrived example:
+@example
+print( "The # of # is #\n", "sine", x, sin( x ) );
+@end example
+@noindent
+This will print (assuming @code{x} equals @code{0.5}):
+@example
+The sine of 0.500000 is 0.479426
+@end example
+
+There are special sequences allowed in the @i{format string}. They all
+start with an @i{escape character}, the backslash @code{\}. Here's a
+list of all recognized special sequences:
+@table @samp
+@cindex escape characters (in @code{print()} function)
+@item \n
+Linefeed character: Ends a line, everything following it starts on a new
+line. Thus several lines can be printed at once by one call of
+@code{print()}. @code{print()} does not automatically add a linefeed by
+itself.
+@item \t
+Embeds a tabulator character in the text, tab stops are set at every
+eighth character position.
+@item \\
+Prints a backslash, @code{\}, thus switching off the special meaning of the
+backslash as an escape character.
+@item \"
+Prints a quote -- use it to embed quotes into the @i{format
+string}.
+@item \#
+Prints a @code{#}, thus switching off the special meaning of the
+@code{#} character as a placeholder for variables to be printed.
+@item \T
+While normally nothing is printed during the test run of the
+@code{EXPERIMENT} section of an @acronym{EDL} program, if the @i{format
+string} starts with this escape sequence the @code{print()} function
+will produce output already in the test run (the @code{T} is never
+printed).
+@end table
 
 
 @anchor{get_file}
