@@ -116,5 +116,7 @@ Var *f_screate( Var *v );
 Var *f_sdelete( Var *v );
 Var *f_svalue( Var *v );
 
+void tools_clear( void );
+
 
 #endif   /* ! INTERACTIVE_HEADER */
