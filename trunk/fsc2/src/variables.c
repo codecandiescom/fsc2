@@ -273,8 +273,8 @@ Var *vars_arr_lhs( Var *v )
 	for ( dim = 0, cv = v->next; cv != 0; dim++, cv = cv->next )
 		/* empty */ ;
 
-	/* If the array is new we need to set it up, otherwise just determine
-	   the referenced element */
+	/* If the array is new (i.e. we're still in the VARIABLES section) set
+	   it up, otherwise return a pointer to the referenced element */
 
 	if ( v->from->type == UNDEF_VAR )
 		return vars_setup_new_array( v, dim );
@@ -290,6 +290,8 @@ static Var* vars_setup_new_array( Var *v, int dim )
 {
 	Var *a = v->from;
 
+
+	/* We can't continue with a (LHS) definition like "a[ ]"...*/
 
 	if ( v->next->type == UNDEF_VAR )
 	{
