@@ -1739,20 +1739,19 @@ void repaint_canvas_2d( Canvas *c )
 /*---------------------------------------------------------*/
 /*---------------------------------------------------------*/
 
-int get_mouse_pos_2d( double *pa )
+int get_mouse_pos_2d( double *pa, unsigned int *keymask )
 {
 	Curve_2d *cv;
 	int ppos[ 2 ];
-	unsigned int keymask;
 	long a_index;
 
+
+	fl_get_win_mouse( FL_ObjWin( G2.canvas.obj ),
+					  ppos + X, ppos + Y, keymask );
 
 	if ( G2.active_curve == -1 ||
 		 ! G2.curve_2d[ G2.active_curve ]->is_scale_set )
 		return 0;
-
-	fl_get_win_mouse( FL_ObjWin( G2.canvas.obj ),
-					  ppos + X, ppos + Y, &keymask );
 
 	cv = G2.curve_2d[ G2.active_curve ];
 

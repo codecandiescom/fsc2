@@ -393,32 +393,32 @@ int rs690_exp_hook( void )
 	   "ASK_FOR_SHAPE_DEFENSE_DISTANCE_CONFORMATION" */
 
 #if defined ASK_FOR_SHAPE_DEFENSE_DISTANCE_CONFORMATION
-	if ( ! rs690.is_confirmation && 
+	if ( ! rs690.is_confirmation &&
 		 ( rs690.is_shape_2_defense || rs690.is_defense_2_shape ) )
 	{
-		char str[ 500 ];
+		char mstr[ 500 ];
 
 		if ( rs690.is_shape_2_defense && rs690.is_defense_2_shape )
 		{
-			sprintf( str, "Minimum distance between SHAPE and DEFENSE\n"
+			sprintf( mstr, "Minimum distance between SHAPE and DEFENSE\n"
 					 "pulses has been changed to %s",
 					 rs690_pticks( rs690.shape_2_defense ) );
-			sprintf( str + strlen( str ), " and %s.\n"
+			sprintf( mstr + strlen( mstr ), " and %s.\n"
 					 "***** Is this really what you want? *****",
 					 rs690_pticks( rs690.defense_2_shape ) );
 		}
 		else if ( rs690.is_shape_2_defense )
-			sprintf( str, "Minimum distance between SHAPE and DEFENSE\n"
+			sprintf( mstr, "Minimum distance between SHAPE and DEFENSE\n"
 					 "pulses has been changed to %s.\n"
 					 "***** Is this really what you want? *****",
 					 rs690_pticks( rs690.shape_2_defense ) );
 		else
-			sprintf( str, "Minimum distance between DEFENSE and SHAPE\n"
+			sprintf( mstr, "Minimum distance between DEFENSE and SHAPE\n"
 					 "pulses has been changed to %s.\n"
 					 "***** Is this really what you want? *****",
 					 rs690_pticks( rs690.defense_2_shape ) );
 
-		if ( 2 != show_choices( str, 2, "Abort", "Yes", NULL, 1 ) )
+		if ( 2 != show_choices( mstr, 2, "Abort", "Yes", NULL, 1 ) )
 			THROW( EXCEPTION );
 
 		rs690.is_confirmation = SET;

@@ -2094,24 +2094,22 @@ static void repaint_cut_canvas( Canvas *c )
 /*----------------------------------------------------------*/
 /*----------------------------------------------------------*/
 
-int get_mouse_pos_cut( double *pa )
+int get_mouse_pos_cut( double *pa, unsigned int *keymask )
 {
 	Curve_1d *cv = &G2.cut_curve;
 	Curve_2d *scv;
 	int r_coord;
 	int ppos[ 2 ];
-	unsigned int keymask;
 
+
+	fl_get_win_mouse( FL_ObjWin( G2.cut_canvas.obj ),
+					  ppos + X, ppos + Y, keymask );
 
 	if ( ! G2.is_cut || G2.active_curve == -1 ||
 		 ! G2.curve_2d[ G2.active_curve ]->is_scale_set )
 		return 0;
 
 	scv = G2.curve_2d[ G2.active_curve ];
-
-	fl_get_win_mouse( FL_ObjWin( G2.cut_canvas.obj ),
-					  ppos + X, ppos + Y, &keymask );
-
 
 	if ( ppos[ X ] < 0 || ppos[ X ] > ( int ) G2.cut_canvas.w - 1 ||
 		 ppos[ Y ] < 0 || ppos[ Y ] > ( int ) G2.cut_canvas.h - 1 )

@@ -1396,19 +1396,18 @@ void repaint_canvas_1d( Canvas *c )
 /*---------------------------------------------------------*/
 /*---------------------------------------------------------*/
 
-int get_mouse_pos_1d( double *pa )
+int get_mouse_pos_1d( double *pa, unsigned int *keymask )
 {
 	Curve_1d *cv;
 	long i;
 	int ppos[ 2 ];
-	unsigned int keymask;
 
 
 	if ( G.coord_display != 1 || ! G1.is_scale_set )
 		return 0;
 
 	fl_get_win_mouse( FL_ObjWin( G1.canvas.obj ),
-					  ppos + X, ppos + Y, &keymask );
+					  ppos + X, ppos + Y, keymask );
 
 	if ( ppos[ X ] < 0 || ppos[ X ] > ( int ) G1.canvas.w - 1 ||
 		 ppos[ Y ] < 0 || ppos[ Y ] > ( int ) G1.canvas.h - 1 )
