@@ -194,6 +194,7 @@ Var *digitizer_start_acquisition( Var *v );
 Var *digitizer_get_curve( Var *v );
 Var *digitizer_get_curve_fast( Var *v );
 Var *digitizer_run( Var *v );
+Var *digitizer_command( Var *v );
 
 
 /* declaration of internally used functions */
@@ -231,6 +232,7 @@ void lecroy9400_start_acquisition( void );
 void lecroy9400_get_curve( int ch, WINDOW *w, double **array, long *length,
 						   bool use_cursor );
 void lecroy9400_free_running( void );
+bool lecroy9400_command( const char *cmd );
 void lecroy9400_gpib_failure( void );
 
 

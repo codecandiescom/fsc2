@@ -226,6 +226,7 @@ Var *digitizer_get_amplitude( Var *v );
 Var *digitizer_get_amplitude_fast( Var *v );
 Var *digitizer_run( Var *v );
 Var *digitizer_lock_keyboard( Var *v );
+Var *digitizer_command( Var *v );
 
 
 /* Declaration of internally used functions */
@@ -274,6 +275,7 @@ void tds754a_get_curve( int channel, WINDOW *w, double **data, long *length,
 double tds754a_get_amplitude( int channel, WINDOW *w, bool use_cursor );
 void tds754a_free_running( void );
 void tds754a_lock_state( bool lock );
+bool tds754a_command( const char *cmd );
 
 
 /* Unfortunately, the digitizer sometimes seems to have problems returning

@@ -279,7 +279,7 @@ void tds520c_get_curve( int channel, WINDOW *w, double **data, long *length,
 double tds520c_get_amplitude( int channel, WINDOW *w, bool use_cursor );
 void tds520c_free_running( void );
 void tds520c_lock_state( bool lock );
-void tds520c_command( const char *cmd );
+bool tds520c_command( const char *cmd );
 
 
 /*
