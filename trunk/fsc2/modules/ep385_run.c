@@ -312,6 +312,7 @@ static void ep385_defense_twt_check( void )
 
 void ep385_full_reset( void )
 {
+	int i;
 	PULSE *p = ep385_Pulses;
 
 
@@ -349,6 +350,9 @@ void ep385_full_reset( void )
 	}
 
 	ep385.is_running = ep385.has_been_running;
+
+	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
+		ep385.function[ i ].next_phase = 0;
 
 	ep385_pulse_start_setup( );
 }

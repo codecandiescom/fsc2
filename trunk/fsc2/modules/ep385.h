@@ -1,4 +1,4 @@
-/*
+*
   $Id$
 
   Copyright (C) 1999-2002 Jens Thoms Toerring
@@ -148,8 +148,6 @@ typedef struct _C_ {
 	int self;
 	FUNCTION *function;
 	bool needs_update;
-	bool state;
-
 	int num_pulses;
 	int num_active_pulses;
 	int old_num_active_pulses;
@@ -334,7 +332,6 @@ void ep385_cw_setup( void );
 bool ep385_init( const char *name );
 bool ep385_run( bool state );
 bool ep385_set_channels( void );
-bool ep385_set_channel_state( int channel, bool flag );
 
 
 /*

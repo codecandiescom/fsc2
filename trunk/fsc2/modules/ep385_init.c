@@ -478,6 +478,8 @@ void ep385_pulse_start_setup( void )
 		{
 			ch = f->channel[ j ];
 
+			ch->needs_update = SET;
+
 			if ( ch->num_pulses == 0 )
 			{
 				ch->num_active_pulses = ch->old_num_active_pulses = 0;

@@ -27,6 +27,9 @@
 
 static void ep385_gpib_failure( void );
 
+#define gpib_write( a, b, c ) fprintf( stderr, "%s\n", ( b ) )
+#define gpib_init_device( a, b ) 1
+
 
 /*----------------------------------------------------------------*/
 /*----------------------------------------------------------------*/
@@ -51,7 +54,7 @@ bool ep385_init( const char *name )
 	if ( ep385.is_trig_in_mode && ep385.trig_in_mode == EXTERNAL )
 		strcat( cmd, "STS1;" );
 	else
-		strcat( cmd, "STS3;IEC1;" );
+		strcat( cmd, "STS3;IEC0;" );
 
 	/* Set the shot-repetition time (if the user didn't specify one set the
 	   shortesrt possible one) */
@@ -92,8 +95,12 @@ bool ep385_init( const char *name )
 
 bool ep385_run( bool state )
 {
-	if ( gpib_write( ep385.device, state ? "TIM;SFT\r" : "TIM;STP\r", 8 )
-		 == FAILURE )
+	const char *buf;
+
+
+	buf = state ? "TIM;SET;TRY;SFT\r" : "TIM;STP\r";
+
+	if ( gpib_write( ep385.device, buf , strlen( buf ) ) == FAILURE )
 		ep385_gpib_failure( );
 
 	return OK;
@@ -125,14 +132,16 @@ bool ep385_set_channels( void )
 			if ( ! ch->needs_update )
 				continue;
 
-			sprintf( buf, "DIG;SLT%d;PSD2,", j + CHANNEL_OFFSET );
+			sprintf( buf, "DIG;SLT%d;PSD2,",
+					 f->channel[ j ]->self + CHANNEL_OFFSET );
 			if ( ch->num_active_pulses == 0 )
 				strcat( buf, "1,0,0,0,0\r" );
 			else
 			{
 				sprintf( buf + strlen( buf ), "%d,", ch->num_active_pulses );
 				for ( k = 0; k < ch->num_active_pulses; k++ )
-					sprintf( buf, "%ld,0,%ld,0,", ch->pulse_params[ k ].pos,
+					sprintf( buf + strlen( buf ), "%ld,0,%ld,0,",
+							 ch->pulse_params[ k ].pos,
 							 ch->pulse_params[ k ].pos +
 							 ch->pulse_params[ k ].len );
 				buf[ strlen( buf ) - 1 ] = '\r';
@@ -143,24 +152,6 @@ bool ep385_set_channels( void )
 		}
 	}
 
-	return OK;
-}
-
-/*--------------------------------------------------------------*/
-/*--------------------------------------------------------------*/
-
-bool ep385_set_channel_state( int channel, bool flag )
-{
-/*
-	char cmd[ 100 ];
-
-	fsc2_assert ( channel >= MIN_CHANNEL && channel <= MAX_CHANNEL );
-
-	sprintf( cmd, "*WAI;:PGENA:CH%1d:OUTP %s\n", channel,
-			 flag ? "ON" : "OFF" );
-	if ( gpib_write( ep385.device, cmd, strlen( cmd ) ) == FAILURE )
-		ep385_gpib_failure( );
-*/
 	return OK;
 }
 

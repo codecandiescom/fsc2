@@ -104,6 +104,7 @@ int ep385_init_hook( void )
 	ep385.is_neg_delay = UNSET;
 	ep385.neg_delay = 0;
 	ep385.is_running = SET;
+	ep385.has_been_running = SET;
 	ep385.is_timebase = UNSET;
 	ep385.timebase_mode = EXTERNAL;
 
