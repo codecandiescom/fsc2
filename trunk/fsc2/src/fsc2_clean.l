@@ -444,7 +444,7 @@ int main( int argc, char *argv[ ] )
 		if ( ! strcmp( argv[ 1 ], "-h" ) || ! strcmp( argv[ 1 ], "--help" ) )
 		{
 			usage( );
-			return EXIT_FAILRE;
+			return EXIT_FAILURE;
 		}
 
 		yyin = stdin;
