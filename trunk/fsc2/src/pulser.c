@@ -171,7 +171,7 @@ double is_mult_ns( double val, const char *text )
 
 void p_assign_pod( long func, Var *v )
 {
-	long pod;
+	static long pod;
 
 
 	is_pulser_driver( );
@@ -206,7 +206,20 @@ void p_assign_pod( long func, Var *v )
 
 	is_pulser_func( pulser_struct.assign_function,
 					"assigning function to pod" );
-	( *pulser_struct.assign_function )( func, pod );
+
+	call_push( NULL, pulser_struct.name );
+	TRY
+	{
+		( *pulser_struct.assign_function )( func, pod );
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+	{
+		call_pop( );
+		PASSTHROUGH( );
+	}
+
+	call_pop( );
 }
 
 
@@ -220,7 +233,7 @@ void p_assign_pod( long func, Var *v )
 
 void p_assign_channel( long func, Var *v )
 {
-	long channel;
+	static long channel;
 
 
 	fsc2_assert( func >= PULSER_CHANNEL_FUNC_MIN &&
@@ -242,18 +255,30 @@ void p_assign_channel( long func, Var *v )
 
 	/* Finally call the function (if it exists...) */
 
-	if ( pulser_struct.assign_channel_to_function == NULL )
+	call_push( NULL, pulser_struct.name );
+	TRY
 	{
-		is_pulser_func( pulser_struct.assign_function,
-						"assigning function to pod" );
-		( *pulser_struct.assign_function )( func, channel );
+		if ( pulser_struct.assign_channel_to_function == NULL )
+		{
+			is_pulser_func( pulser_struct.assign_function,
+							"assigning function to pod" );
+			( *pulser_struct.assign_function )( func, channel );
+		}
+		else
+		{
+			is_pulser_func( pulser_struct.assign_channel_to_function,
+							"assigning function to channel" );
+			( *pulser_struct.assign_channel_to_function )( func, channel );
+		}
+		TRY_SUCCESS;
 	}
-	else
+	OTHERWISE
 	{
-		is_pulser_func( pulser_struct.assign_channel_to_function,
-						"assigning function to channel" );
-		( *pulser_struct.assign_channel_to_function )( func, channel );
+		call_pop( );
+		PASSTHROUGH( );
 	}
+
+	call_pop( );
 }
 
 
@@ -263,7 +288,7 @@ void p_assign_channel( long func, Var *v )
 
 void p_set_delay( long func, Var *v )
 {
-	double delay;
+	static double delay;
 
 
 	fsc2_assert( func >= PULSER_CHANNEL_FUNC_MIN &&
@@ -280,7 +305,20 @@ void p_set_delay( long func, Var *v )
 	/* Finally call the function (if it exists...) */
 
 	is_pulser_func( pulser_struct.set_function_delay, "setting a delay" );
-	( *pulser_struct.set_function_delay )( func, delay );
+
+	call_push( NULL, pulser_struct.name );
+	TRY
+	{
+		( *pulser_struct.set_function_delay )( func, delay );
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+	{
+		call_pop( );
+		PASSTHROUGH( );
+	}
+
+	call_pop( );
 }
 
 
@@ -294,7 +332,20 @@ void p_inv( long func )
 				 func <= PULSER_CHANNEL_FUNC_MAX );
 
 	is_pulser_func( pulser_struct.invert_function, "inverting a channel" );
-	( *pulser_struct.invert_function )( func );
+
+	call_push( NULL, pulser_struct.name );
+	TRY
+	{
+		( *pulser_struct.invert_function )( func );
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+	{
+		call_pop( );
+		PASSTHROUGH( );
+	}
+
+	call_pop( );
 }
 
 
@@ -305,7 +356,7 @@ void p_inv( long func )
 
 void p_set_v_high( long func, Var *v )
 {
-	double voltage;
+	static double voltage;
 
 
 	fsc2_assert( func >= PULSER_CHANNEL_FUNC_MIN &&
@@ -321,7 +372,20 @@ void p_set_v_high( long func, Var *v )
 
 	is_pulser_func( pulser_struct.set_function_high_level,
 					"setting high voltage level" );
-	( *pulser_struct.set_function_high_level )( func, voltage );
+
+	call_push( NULL, pulser_struct.name );
+	TRY
+	{
+		( *pulser_struct.set_function_high_level )( func, voltage );
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+	{
+		call_pop( );
+		PASSTHROUGH( );
+	}
+
+	call_pop( );
 }
 
 
@@ -332,7 +396,7 @@ void p_set_v_high( long func, Var *v )
 
 void p_set_v_low( long func, Var *v )
 {
-	double voltage;
+	static double voltage;
 
 
 	fsc2_assert( func >= PULSER_CHANNEL_FUNC_MIN &&
@@ -348,7 +412,20 @@ void p_set_v_low( long func, Var *v )
 
 	is_pulser_func( pulser_struct.set_function_low_level,
 					"setting low voltage level" );
-	( *pulser_struct.set_function_low_level )( func, voltage );
+
+	call_push( NULL, pulser_struct.name );
+	TRY
+	{
+		( *pulser_struct.set_function_low_level )( func, voltage );
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+	{
+		call_pop( );
+		PASSTHROUGH( );
+	}
+
+	call_pop( );
 }
 
 
@@ -358,7 +435,8 @@ void p_set_v_low( long func, Var *v )
 
 void p_set_timebase( Var *v )
 {
-	double timebase;
+	static double timebase;
+
 
 	/* Check the variable and get its value */
 
@@ -371,7 +449,20 @@ void p_set_timebase( Var *v )
 	/* Finally call the function (if it exists...) */
 
 	is_pulser_func( pulser_struct.set_timebase,"setting the timebase" );
-	( *pulser_struct.set_timebase )( timebase );
+
+	call_push( NULL, pulser_struct.name );
+	TRY
+	{
+		( *pulser_struct.set_timebase )( timebase );
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+	{
+		call_pop( );
+		PASSTHROUGH( );
+	}
+
+	call_pop( );
 }
 
 
@@ -381,7 +472,8 @@ void p_set_timebase( Var *v )
 
 void p_set_trigger_mode( Var *v )
 {
-	int mode;
+	static int mode;
+
 
 	/* Check the variable and get its value */
 
@@ -407,7 +499,20 @@ void p_set_trigger_mode( Var *v )
 
 	is_pulser_func( pulser_struct.set_trigger_mode,
 					"setting the trigger mode" );
-	( *pulser_struct.set_trigger_mode )( mode );
+
+	call_push( NULL, pulser_struct.name );
+	TRY
+	{
+		( *pulser_struct.set_trigger_mode )( mode );
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+	{
+		call_pop( );
+		PASSTHROUGH( );
+	}
+
+	call_pop( );
 }
 
 /*------------------------------------------------------------------*/
@@ -416,7 +521,8 @@ void p_set_trigger_mode( Var *v )
 
 void p_set_trigger_slope( Var *v )
 {
-	int slope;
+	static int slope;
+
 
 	/* Check the variable and get its value */
 
@@ -442,7 +548,20 @@ void p_set_trigger_slope( Var *v )
 
 	is_pulser_func( pulser_struct.set_trig_in_slope,
 					"setting the trigger slope" );
-	( *pulser_struct.set_trig_in_slope )( slope );
+
+	call_push( NULL, pulser_struct.name );
+	TRY
+	{
+		( *pulser_struct.set_trig_in_slope )( slope );
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+	{
+		call_pop( );
+		PASSTHROUGH( );
+	}
+
+	call_pop( );
 }
 
 
@@ -452,7 +571,7 @@ void p_set_trigger_slope( Var *v )
 
 void p_set_trigger_level( Var *v )
 {
-	double level;
+	static double level;
 
 
 	/* Check the variable and get its value */
@@ -465,7 +584,20 @@ void p_set_trigger_level( Var *v )
 
 	is_pulser_func( pulser_struct.set_trig_in_level,
 					"setting the trigger level" );
-	( *pulser_struct.set_trig_in_level )( level );
+
+	call_push( NULL, pulser_struct.name );
+	TRY
+	{
+		( *pulser_struct.set_trig_in_level )( level );
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+	{
+		call_pop( );
+		PASSTHROUGH( );
+	}
+
+	call_pop( );
 }
 
 
@@ -475,7 +607,7 @@ void p_set_trigger_level( Var *v )
 
 void p_set_trigger_impedance( Var *v )
 {
-	int state;
+	static int state;
 
 
 	/* Check the variable and get its value */
@@ -488,7 +620,20 @@ void p_set_trigger_impedance( Var *v )
 
 	is_pulser_func( pulser_struct.set_trig_in_impedance,
 					"setting the trigger impedance" );
-	( *pulser_struct.set_trig_in_impedance )( state );
+
+	call_push( NULL, pulser_struct.name );
+	TRY
+	{
+		( *pulser_struct.set_trig_in_impedance )( state );
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+	{
+		call_pop( );
+		PASSTHROUGH( );
+	}
+
+	call_pop( );
 }
 
 
@@ -498,7 +643,7 @@ void p_set_trigger_impedance( Var *v )
 
 void p_set_rep_time( Var *v )
 {
-	double rep_time;
+	static double rep_time;
 
 
 	/* Check the variable and get its value */
@@ -509,7 +654,8 @@ void p_set_rep_time( Var *v )
 
 	if ( rep_time < 9.9e-10 )
 	{
-		eprint( FATAL, SET, "Invalid repeat time: %g s.\n", rep_time );
+		eprint( FATAL, SET, "Invalid repeat time: %g ns.\n",
+				rep_time * 1.0e9 );
 		THROW( EXCEPTION );
 	}
 
@@ -518,7 +664,20 @@ void p_set_rep_time( Var *v )
 	/* Finally call the function (if it exists...) */
 
 	is_pulser_func( pulser_struct.set_repeat_time, "setting a repeat time" );
-	( *pulser_struct.set_repeat_time )( rep_time );
+
+	call_push( NULL, pulser_struct.name );
+	TRY
+	{
+		( *pulser_struct.set_repeat_time )( rep_time );
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+	{
+		call_pop( );
+		PASSTHROUGH( );
+	}
+
+	call_pop( );
 }
 
 
@@ -528,7 +687,7 @@ void p_set_rep_time( Var *v )
 
 void p_set_rep_freq( Var *v )
 {
-	double freq, rep_time;
+	static double freq, rep_time;
 
 
 	/* Check the variable and get its value */
@@ -539,7 +698,8 @@ void p_set_rep_freq( Var *v )
 
 	if ( freq > 1.01e9 || freq <= 0.0 )
 	{
-		eprint( FATAL, SET, "Invalid repeat frequency: %g s.\n", freq );
+		eprint( FATAL, SET, "Invalid repeat frequency: %g GHz.\n",
+				freq * 1.0e0-9 );
 		THROW( EXCEPTION );
 	}
 
@@ -551,7 +711,20 @@ void p_set_rep_freq( Var *v )
 
 	is_pulser_func( pulser_struct.set_repeat_time,
 					"setting a repeat frequency" );
-	( *pulser_struct.set_repeat_time )( rep_time );
+
+	call_push( NULL, pulser_struct.name );
+	TRY
+	{
+		( *pulser_struct.set_repeat_time )( rep_time );
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+	{
+		call_pop( );
+		PASSTHROUGH( );
+	}
+
+	call_pop( );
 }
 
 
@@ -564,7 +737,8 @@ void p_set_rep_freq( Var *v )
 
 void p_set_max_seq_len( Var *v )
 {
-	double seq_len;
+	static double seq_len;
+
 
 	/* Check the variable and get its value */
 
@@ -578,7 +752,20 @@ void p_set_max_seq_len( Var *v )
 
     is_pulser_func( pulser_struct.set_max_seq_len,
                     "setting a maximum pattern length" );
-	( *pulser_struct.set_max_seq_len )( seq_len );
+
+	call_push( NULL, pulser_struct.name );
+	TRY
+	{
+		( *pulser_struct.set_max_seq_len )( seq_len );
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+	{
+		call_pop( );
+		PASSTHROUGH( );
+	}
+
+	call_pop( );
 }
 
 
@@ -593,54 +780,64 @@ void p_phase_ref( int func, int ref )
     is_pulser_func( pulser_struct.set_phase_reference,
                     "setting a function for phase cycling" );
 
-	if ( pulser_struct.needs_phase_pulses )
+	call_push( NULL, pulser_struct.name );
+	TRY
 	{
-		if ( func < PULSER_CHANNEL_FUNC_MIN ||
-			 func > PULSER_CHANNEL_FUNC_MAX )
+		if ( pulser_struct.needs_phase_pulses )
 		{
-			eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
-					__FILE__, __LINE__ );
-			THROW( EXCEPTION );
+			if ( func < PULSER_CHANNEL_FUNC_MIN ||
+				 func > PULSER_CHANNEL_FUNC_MAX )
+			{
+				eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
+						__FILE__, __LINE__ );
+				THROW( EXCEPTION );
+			}
+
+			if ( func != PULSER_CHANNEL_PHASE_1 &&
+				 func != PULSER_CHANNEL_PHASE_2 )
+			{
+				print( FATAL, "Function `%s' can't be used as PHASE "
+					   "function.\n", Function_Names[ func ] );
+				THROW( EXCEPTION );
+			}
+
+			if ( ref == PULSER_CHANNEL_PHASE_1 ||
+				 ref == PULSER_CHANNEL_PHASE_2 )
+			{
+				print( FATAL, "A PHASE function can't be phase cycled.\n" );
+				THROW( EXCEPTION );
+			}
+		}
+		else
+		{
+			if ( ( func != 0 && func != 1 )    ||
+				 ref < PULSER_CHANNEL_FUNC_MIN ||
+				 ref > PULSER_CHANNEL_FUNC_MAX )
+			{
+				eprint( FATAL, UNSET, "Internal error detected at s:%d.\n",
+						__FILE__, __LINE__ );
+				THROW( EXCEPTION );
+			}
+
+			if ( ref == PULSER_CHANNEL_PHASE_1 ||
+				 ref == PULSER_CHANNEL_PHASE_2 )
+			{
+				print( FATAL, "Phase functions can't be used with this "
+					   "driver.\n" );
+				THROW( EXCEPTION );
+			}
 		}
 
-		if ( func != PULSER_CHANNEL_PHASE_1 &&
-			 func != PULSER_CHANNEL_PHASE_2 )
-		{
-			eprint( FATAL, SET, "%s: Function `%s' can't be used as PHASE "
-					"functions.\n",
-					pulser_struct.name, Function_Names[ func ] );
-			THROW( EXCEPTION );
-		}
-
-		if ( ref == PULSER_CHANNEL_PHASE_1 ||
-			 ref == PULSER_CHANNEL_PHASE_2 )
-		{
-			eprint( FATAL, SET, "%s: A PHASE function can't be phase "
-					"cycled.\n", pulser_struct.name );
-			THROW( EXCEPTION );
-		}
+		( *pulser_struct.set_phase_reference )( func, ref );
+		TRY_SUCCESS;
 	}
-	else
+	OTHERWISE
 	{
-		if ( ( func != 0 && func != 1 )    ||
-			 ref < PULSER_CHANNEL_FUNC_MIN ||
-			 ref > PULSER_CHANNEL_FUNC_MAX )
-		{
-			eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
-					__FILE__, __LINE__ );
-			THROW( EXCEPTION );
-		}
-
-		if ( ref == PULSER_CHANNEL_PHASE_1 ||
-			 ref == PULSER_CHANNEL_PHASE_2 )
-		{
-			eprint( FATAL, SET, "%s: Phase functions can't be used with this "
-					"driver.\n", pulser_struct.name );
-			THROW( EXCEPTION );
-		}
+		call_pop( );
+		PASSTHROUGH( );
 	}
 
-    ( *pulser_struct.set_phase_reference )( func, ref );
+	call_pop( );
 }
 
 
@@ -651,7 +848,20 @@ void p_phase_ref( int func, int ref )
 long p_new( long pnum )
 {
 	is_pulser_func( pulser_struct.new_pulse, "creating a new pulse" );
-	( *pulser_struct.new_pulse )( pnum );
+
+	call_push( NULL, pulser_struct.name );
+	TRY
+	{
+		( *pulser_struct.new_pulse )( pnum );
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+	{
+		call_pop( );
+		PASSTHROUGH( );
+	}
+
+	call_pop( );
 	return pnum;
 }
 
@@ -665,67 +875,81 @@ void p_set( long pnum, int type, Var *v )
 	/* Now the correct driver function is called. All switches just check that
 	   the variable has the correct type and the driver function exists. */
 
-	switch ( type )
+	call_push( NULL, pulser_struct.name );
+	TRY
 	{
-		case P_FUNC :
-			if ( v->type != INT_VAR ||
-				 v->val.lval < PULSER_CHANNEL_FUNC_MIN ||
-				 v->val.lval > PULSER_CHANNEL_FUNC_MAX )
-			{
-				eprint( FATAL, SET, "Invalid function.\n" );
-				THROW( EXCEPTION );
-			}
-			is_pulser_func( pulser_struct.set_pulse_function,
-							"setting a pulse function" );
-			( *pulser_struct.set_pulse_function )( pnum, ( int ) v->val.lval );
-			vars_pop( v );
-			break;
+		switch ( type )
+		{
+			case P_FUNC :
+				if ( v->type != INT_VAR ||
+					 v->val.lval < PULSER_CHANNEL_FUNC_MIN ||
+					 v->val.lval > PULSER_CHANNEL_FUNC_MAX )
+				{
+					eprint( FATAL, SET, "Invalid function.\n" );
+					THROW( EXCEPTION );
+				}
+				is_pulser_func( pulser_struct.set_pulse_function,
+								"setting a pulse function" );
+				( *pulser_struct.set_pulse_function )( pnum,
+													   ( int ) v->val.lval );
+				vars_pop( v );
+				break;
 
-		case P_POS :
-			vars_check( v, INT_VAR | FLOAT_VAR );
-			is_pulser_func( pulser_struct.set_pulse_position,
-							"setting a pulse position" );
-			( *pulser_struct.set_pulse_position )( pnum, VALUE( v ) );
-			vars_pop( v );
-			break;
+			case P_POS :
+				vars_check( v, INT_VAR | FLOAT_VAR );
+				is_pulser_func( pulser_struct.set_pulse_position,
+								"setting a pulse position" );
+				( *pulser_struct.set_pulse_position )( pnum, VALUE( v ) );
+				vars_pop( v );
+				break;
 
-		case P_LEN :
-			vars_check( v, INT_VAR | FLOAT_VAR );
-			is_pulser_func( pulser_struct.set_pulse_length,
-							"setting a pulse length" );
-			( *pulser_struct.set_pulse_length )( pnum, VALUE( v ) );
-			vars_pop( v );
-			break;
+			case P_LEN :
+				vars_check( v, INT_VAR | FLOAT_VAR );
+				is_pulser_func( pulser_struct.set_pulse_length,
+								"setting a pulse length" );
+				( *pulser_struct.set_pulse_length )( pnum, VALUE( v ) );
+				vars_pop( v );
+				break;
 
-		case P_DPOS :
-			vars_check( v, INT_VAR | FLOAT_VAR );
-			is_pulser_func( pulser_struct.set_pulse_position_change,
-							"setting a pulse position change" );
-			( *pulser_struct.set_pulse_position_change )( pnum, VALUE( v ) );
-			vars_pop( v );
-			break;
+			case P_DPOS :
+				vars_check( v, INT_VAR | FLOAT_VAR );
+				is_pulser_func( pulser_struct.set_pulse_position_change,
+								"setting a pulse position change" );
+				( *pulser_struct.set_pulse_position_change )( pnum,
+															  VALUE( v ) );
+				vars_pop( v );
+				break;
 
-		case P_DLEN :
-			vars_check( v, INT_VAR | FLOAT_VAR );
-			is_pulser_func( pulser_struct.set_pulse_length_change,
-							"setting a pulse length change" );
-			( *pulser_struct.set_pulse_length_change )( pnum, VALUE( v ) );
-			vars_pop( v );
-			break;
+			case P_DLEN :
+				vars_check( v, INT_VAR | FLOAT_VAR );
+				is_pulser_func( pulser_struct.set_pulse_length_change,
+								"setting a pulse length change" );
+				( *pulser_struct.set_pulse_length_change )( pnum, VALUE( v ) );
+				vars_pop( v );
+				break;
 
-		case P_PHASE :
-			vars_check( v, INT_VAR );
-			is_pulser_func( pulser_struct.set_pulse_phase_cycle,
-							"setting a pulse phase cycle" );
-			fprintf( stderr, "cycle = %ld\n", v->val.lval );
-			( *pulser_struct.set_pulse_phase_cycle )( pnum, v->val.lval );
-			vars_pop( v );
-			break;
+			case P_PHASE :
+				vars_check( v, INT_VAR );
+				is_pulser_func( pulser_struct.set_pulse_phase_cycle,
+								"setting a pulse phase cycle" );
+				( *pulser_struct.set_pulse_phase_cycle )( pnum, v->val.lval );
+				vars_pop( v );
+				break;
 
-		default:
-			fsc2_assert( 1 == 0 );
-			break;
+			default:
+				fsc2_assert( 1 == 0 );
+				break;
+		}
+
+		TRY_SUCCESS;
 	}
+	OTHERWISE
+	{
+		call_pop( );
+		PASSTHROUGH( );
+	}
+
+	call_pop( );
 }
 
 
@@ -747,58 +971,72 @@ Var *p_get_by_num( long pnum, int type )
 	int function;
 	double ptime;
 	long cycle;
-	Var *v = NULL;
+	static Var *v;
 
 
-	switch ( type )
+	v = NULL;
+
+	call_push( NULL, pulser_struct.name );
+	TRY
 	{
-		case P_FUNC :
-			is_pulser_func( pulser_struct.get_pulse_function,
-							"returning a pulses function" );
-			( *pulser_struct.get_pulse_function )( pnum, &function );
-			v = vars_push( INT_VAR, ( long ) function );
-			break;
+		switch ( type )
+		{
+			case P_FUNC :
+				is_pulser_func( pulser_struct.get_pulse_function,
+								"returning a pulses function" );
+				( *pulser_struct.get_pulse_function )( pnum, &function );
+				v = vars_push( INT_VAR, ( long ) function );
+				break;
 
-		case P_POS :
-			is_pulser_func( pulser_struct.get_pulse_position,
-							"returning a pulses position" );
-			( *pulser_struct.get_pulse_position )( pnum, &ptime );
-			v = vars_push( FLOAT_VAR, ptime );
-			break;
+			case P_POS :
+				is_pulser_func( pulser_struct.get_pulse_position,
+								"returning a pulses position" );
+				( *pulser_struct.get_pulse_position )( pnum, &ptime );
+				v = vars_push( FLOAT_VAR, ptime );
+				break;
 
-		case P_LEN :
-			is_pulser_func( pulser_struct.get_pulse_length,
-							"returning a pulses length" );
-			( *pulser_struct.get_pulse_length )( pnum, &ptime );
-			v = vars_push( FLOAT_VAR, ptime );
-			break;
+			case P_LEN :
+				is_pulser_func( pulser_struct.get_pulse_length,
+								"returning a pulses length" );
+				( *pulser_struct.get_pulse_length )( pnum, &ptime );
+				v = vars_push( FLOAT_VAR, ptime );
+				break;
 
-		case P_DPOS :
-			is_pulser_func( pulser_struct.get_pulse_position_change,
-							"returning a pulses position change" );
-			( *pulser_struct.get_pulse_position_change )( pnum, &ptime );
-			v = vars_push( FLOAT_VAR, ptime );
-			break;
+			case P_DPOS :
+				is_pulser_func( pulser_struct.get_pulse_position_change,
+								"returning a pulses position change" );
+				( *pulser_struct.get_pulse_position_change )( pnum, &ptime );
+				v = vars_push( FLOAT_VAR, ptime );
+				break;
 
-		case P_DLEN :
-			is_pulser_func( pulser_struct.get_pulse_length_change,
-							"returning a pulses length change" );
-			( *pulser_struct.get_pulse_length_change )( pnum, &ptime );
-			v = vars_push( FLOAT_VAR, ptime );
-			break;
+			case P_DLEN :
+				is_pulser_func( pulser_struct.get_pulse_length_change,
+								"returning a pulses length change" );
+				( *pulser_struct.get_pulse_length_change )( pnum, &ptime );
+				v = vars_push( FLOAT_VAR, ptime );
+				break;
 
-		case P_PHASE :
-			is_pulser_func( pulser_struct.get_pulse_phase_cycle,
-							"returning a pulses phase cycle" );
-			( *pulser_struct.get_pulse_phase_cycle )( pnum, &cycle );
-			v = vars_push( INT_VAR, cycle );
-			break;
+			case P_PHASE :
+				is_pulser_func( pulser_struct.get_pulse_phase_cycle,
+								"returning a pulses phase cycle" );
+				( *pulser_struct.get_pulse_phase_cycle )( pnum, &cycle );
+				v = vars_push( INT_VAR, cycle );
+				break;
 
-		default :
-			fsc2_assert ( 1 == 0 );
-			break;
+			default :
+				fsc2_assert ( 1 == 0 );
+				break;
+		}
+
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+	{
+		call_pop( );
+		PASSTHROUGH( );
 	}
 
+	call_pop( );
 	return v;
 }
 
@@ -827,7 +1065,19 @@ void p_phs_setup( int func, int type, int pod, long val )
 					"setting up phase channels" );
 	is_pulser_func( pulser_struct.phase_setup, "setting up phase channels" );
 
-	( *pulser_struct.phase_setup_prep )( func, type, pod, val );	
+	call_push( NULL, pulser_struct.name );
+	TRY
+	{
+		( *pulser_struct.phase_setup_prep )( func, type, pod, val );	
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+	{
+		call_pop( );
+		PASSTHROUGH( );
+	}
+
+	call_pop( );
 }
 
 
@@ -839,7 +1089,19 @@ void p_phs_end( int func )
 {
 	fsc2_assert( func == 0 || func == 1 );      /* phase function correct ? */
 
-	( *pulser_struct.phase_setup )( func );
+	call_push( NULL, pulser_struct.name );
+	TRY
+	{
+		( *pulser_struct.phase_setup )( func );
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+	{
+		call_pop( );
+		PASSTHROUGH( );
+	}
+
+	call_pop( );
 }
 
 
@@ -857,11 +1119,23 @@ void p_set_psd( int func, Var *v )
 	is_pulser_func( pulser_struct.set_phase_switch_delay,
 					"setting a phase switch delay" );
 
-	if ( func == 0 || func == 2 )
-	( *pulser_struct.set_phase_switch_delay )( func == 0 ?
-											   PULSER_CHANNEL_PHASE_1 :
-											   PULSER_CHANNEL_PHASE_2,
-											   VALUE( v ) );
+
+	call_push( NULL, pulser_struct.name );
+	TRY
+	{
+		( *pulser_struct.set_phase_switch_delay )( func == 0 ?
+												   PULSER_CHANNEL_PHASE_1 :
+												   PULSER_CHANNEL_PHASE_2,
+												   VALUE( v ) );
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+	{
+		call_pop( );
+		PASSTHROUGH( );
+	}
+
+	call_pop( );
 	vars_pop( v );
 }
 
@@ -876,8 +1150,19 @@ void p_set_gp( Var *v )
 	is_pulser_func( pulser_struct.set_grace_period,
 					"setting a grace period" );
 
-	( *pulser_struct.set_grace_period )( VALUE( v ) );
+	call_push( NULL, pulser_struct.name );
+	TRY
+	{
+		( *pulser_struct.set_grace_period )( VALUE( v ) );
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+	{
+		call_pop( );
+		PASSTHROUGH( );
+	}
 
+	call_pop( );
 	vars_pop( v );
 }
 
@@ -891,14 +1176,27 @@ void keep_all_pulses( void )
 {
 	is_pulser_func( pulser_struct.keep_all_pulses,
 					"enforcing of keeping all pulses" );
-	( *pulser_struct.keep_all_pulses )( );
+
+	call_push( NULL, pulser_struct.name );
+	TRY
+	{
+		( *pulser_struct.keep_all_pulses )( );
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+	{
+		call_pop( );
+		PASSTHROUGH( );
+	}
+
+	call_pop( );
 }
 
 
-/*------------------------------------------------------------*/
-/* Checks if a function keyword is PHASE and if it is, if the */
-/* the pulser driver supports phase switches.                 */
-/*------------------------------------------------------------*/
+/*-----------------------------------------------------------*/
+/* Checks if a function keyword is PHASE and if it is if the */
+/* the pulser driver supports phase switches.                */
+/*-----------------------------------------------------------*/
 
 void p_exists_function( int function )
 {
@@ -909,8 +1207,9 @@ void p_exists_function( int function )
 		   function == PULSER_CHANNEL_PHASE_2 ) &&
 		 ! pulser_struct.needs_phase_pulses )
 	{
-		eprint( FATAL, SET, "%s: Pulse setup has no phase switches, so "
-				"PHASE functions can't be used.\n" );
+		eprint( FATAL, SET, "%s: Pulser driver does not support phase "
+				"switches, so PHASE functions can't be used.\n",
+				pulser_struct.name );
 		THROW( EXCEPTION );
 	}
 }

@@ -167,7 +167,7 @@ int bh15_exp_hook( void )
 
 	if ( gpib_write( bh15.device, "RU\r", 3 ) == FAILURE )
 	{
-		eprint( FATAL, "Can't access the Bruker BH15 field controller.\n" );
+		print( FATAL, "Can't access the Bruker BH15 field controller.\n" );
 		THROW( EXCEPTION );
 	}
 

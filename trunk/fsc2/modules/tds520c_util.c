@@ -130,8 +130,8 @@ void tds520c_do_pre_exp_checks( void )
 
 		if ( width == 0.0 )
 		{
-			eprint( FATAL, UNSET, "%s: Can't determine a reasonable value for "
-					"still undefined window widths.\n", DEVICE_NAME );
+			print( FATAL, "Can't determine a reasonable value for still "
+				   "undefined window widths.\n" );
 			THROW( EXCEPTION );
 		}
 
@@ -250,9 +250,8 @@ static void tds520c_window_check_2( void )
 			cs = ( cs / tb ) * tb;
 			dcs = cs * fac / TDS520C_POINTS_PER_DIV;
 			buffer = T_strdup( tds520c_ptime( dcs ) );
-			eprint( WARN, UNSET, "%s: Start point of window %ld had to be "
-					"readjusted from %s to %s.\n", DEVICE_NAME, w->num,
-					tds520c_ptime( w->start ), buffer );
+			print( WARN, "Start point of window %ld had to be readjusted from "
+				   "%s to %s.\n", w->num, tds520c_ptime( w->start ), buffer );
 			T_free( buffer );
 			w->start = dcs;
 		}
@@ -274,9 +273,8 @@ static void tds520c_window_check_2( void )
 		{
 			dcd = tds520c.timebase / TDS520C_POINTS_PER_DIV;
 			buffer = T_strdup( tds520c_ptime( dcd ) );
-			eprint( SEVERE, UNSET, "%s: Width of window %ld had to be "
-					"readjusted from %s to %s.\n", DEVICE_NAME, w->num,
-					tds520c_ptime( w->width  ), buffer );
+			print( SEVERE, "Width of window %ld had to be readjusted from %s "
+				   "to %s.\n", w->num, tds520c_ptime( w->width  ), buffer );
 			T_free( buffer );
 			w->width = dcd;
 		}
@@ -285,9 +283,8 @@ static void tds520c_window_check_2( void )
 			cd = ( cd / tb ) * tb;
 			dcd = cd * fac / TDS520C_POINTS_PER_DIV;
 			buffer = T_strdup( tds520c_ptime( dcd ) );
-			eprint( WARN, UNSET, "%s: Width of window %ld had to be "
-					"readjusted from %s to %s.\n", DEVICE_NAME, w->num,
-					tds520c_ptime( w->width  ), buffer );
+			print( WARN, "Width of window %ld had to be readjusted from %s to "
+				   "%s.\n", w->num, tds520c_ptime( w->width  ), buffer );
 			T_free( buffer );
 			w->width = dcd;
 		}
@@ -321,8 +318,8 @@ static void tds520c_window_check_3( void )
              w->start < - tds520c.trig_pos * window ||
              w->start + w->width < - tds520c.trig_pos * window )
         {
-			eprint( FATAL, UNSET, "%s: Window %ld doesn't fit into current "
-					"digitizer time range.\n", DEVICE_NAME, w->num );
+			print( FATAL, "Window %ld doesn't fit into current digitizer time "
+				   "range.\n" );
 			THROW( EXCEPTION );
 		}
 
@@ -336,8 +333,8 @@ static void tds520c_window_check_3( void )
 
 		if ( w->end_num - w->start_num <= 0 )
         {
-			eprint( FATAL, UNSET, "%s: Window %ld has width of less than 1 "
-					"point.\n", DEVICE_NAME, w->num );
+			print( FATAL, "Window %ld has width of less than 1 point.\n",
+				   w->num );
 			THROW( EXCEPTION );
 		}
     }
@@ -482,14 +479,12 @@ long tds520c_translate_channel( int dir, long channel )
 			case DIGITIZER_CHANNEL_FUNC_F :
 			case DIGITIZER_CHANNEL_EXT    :
 			case DIGITIZER_CHANNEL_EXT10  :
-				eprint( FATAL, SET, "%s: Digitizer has no channel %s as used "
-						"in %s().\n", DEVICE_NAME,
-						Digitizer_Channel_Names[ channel ], Cur_Func );
+				print( FATAL, "Digitizer has no channel %s.\n",
+					   Digitizer_Channel_Names[ channel ] );
 				THROW( EXCEPTION );
 
 			default :
-				eprint( FATAL, SET, "%s: Invalid channel number %ld used in "
-						"%s().\n", DEVICE_NAME, channel, Cur_Func );
+				print( FATAL, "Invalid channel number %ld.\n", channel );
 				THROW( EXCEPTION );
 		}
 
@@ -536,8 +531,8 @@ long tds520c_translate_channel( int dir, long channel )
 				return DIGITIZER_CHANNEL_LINE;
 
 			default :
-				eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
-						__FILE__, __LINE__ );
+				print( FATAL, "Internal error detected at %s:%d.\n",
+					   __FILE__, __LINE__ );
 				THROW( EXCEPTION );
 		}
 
@@ -553,8 +548,7 @@ long tds520c_translate_channel( int dir, long channel )
 
 void tds520c_store_state( TDS520C *dest, TDS520C *src )
 {
-	WINDOW *w;
-	int i;
+	WINDOW *w, *dw;
 
 
 	while ( dest->w != NULL )
@@ -572,14 +566,17 @@ void tds520c_store_state( TDS520C *dest, TDS520C *src )
 		return;
 	}
 
-	dest->w = T_malloc( src->num_windows * sizeof( WINDOW ) );
-	for ( i = 0, w = src->w; w != NULL; i++, w = w->next )
+	dw = dest->w = T_malloc( sizeof( WINDOW ) );
+	memcpy( dest->w, src->w, sizeof( WINDOW ) );
+	dest->w->next = dest->w->prev = NULL;
+
+	for ( w = src->w->next; w != NULL; w = w->next )
 	{
-		memcpy( dest->w + i, w, sizeof( WINDOW ) );
-		if ( i != 0 )
-			dest->w->prev = dest->w - 1;
-		if ( w->next != NULL )
-			dest->w->next = dest->w + 1;
+		dw->next = T_malloc( sizeof( WINDOW ) );
+		memcpy( dw->next, w, sizeof( WINDOW ) );
+		dw->next->prev = dw;
+		dw = dw->next;
+		dw->next = NULL;
 	}
 }
 

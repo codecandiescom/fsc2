@@ -556,8 +556,7 @@ long tds744a_translate_channel( int dir, long channel )
 
 void tds744a_store_state( TDS744A *dest, TDS744A *src )
 {
-	WINDOW *w;
-	int i;
+	WINDOW *w, *dw;
 
 
 	while ( dest->w != NULL )
@@ -575,14 +574,17 @@ void tds744a_store_state( TDS744A *dest, TDS744A *src )
 		return;
 	}
 
-	dest->w = T_malloc( src->num_windows * sizeof( WINDOW ) );
-	for ( i = 0, w = src->w; w != NULL; i++, w = w->next )
+	dw = dest->w = T_malloc( sizeof( WINDOW ) );
+	memcpy( dest->w, src->w, sizeof( WINDOW ) );
+	dest->w->next = dest->w->prev = NULL;
+
+	for ( w = src->w->next; w != NULL; w = w->next )
 	{
-		memcpy( dest->w + i, w, sizeof( WINDOW ) );
-		if ( i != 0 )
-			dest->w->prev = dest->w - 1;
-		if ( w->next != NULL )
-			dest->w->next = dest->w + 1;
+		dw->next = T_malloc( sizeof( WINDOW ) );
+		memcpy( dw->next, w, sizeof( WINDOW ) );
+		dw->next->prev = dw;
+		dw = dw->next;
+		dw->next = NULL;
 	}
 }
 

@@ -187,8 +187,8 @@ int sr530_exp_hook( void )
 
 	if ( ! sr530_init( DEVICE_NAME ) )
 	{
-		eprint( FATAL, UNSET, "%s: Initialization of device failed: %s\n",
-				DEVICE_NAME, gpib_error_msg );
+		print( FATAL, "Initialization of device failed: %s\n",
+			   gpib_error_msg );
 		THROW( EXCEPTION );
 	}
 
@@ -281,9 +281,8 @@ static double get_single_channel_data( Var *v )
 
 	if ( channel != 1 && channel != 2 )
 	{
-		eprint( FATAL, SET, "%s: Invalid channel number %ld in call of "
-				"%s(), valid is 1 or 2.\n",
-				DEVICE_NAME, channel, Cur_Func );
+		print( FATAL, "Invalid channel number %ld, valid channels are "
+			   "1 or 2.\n", channel );
 		THROW( EXCEPTION );
 	}
 
@@ -310,9 +309,8 @@ Var *lockin_get_adc_data( Var *v )
 
 	if ( port < 1 || port > 4 )
 	{
-		eprint( FATAL, SET, "%s: Invalid ADC channel number (%ld) "
-				"in call of 'lockin_get_adc_data', valid channel are in "
-				"the range 1-4.\n", DEVICE_NAME, port );
+		print( FATAL, "Invalid ADC channel number (%ld), valid channels are "
+			   "in the range between 1 and 4.\n", port );
 		THROW( EXCEPTION );
 	}
 
@@ -357,8 +355,7 @@ Var *lockin_sensitivity( Var *v )
 
 	if ( sens < 0.0 )
 	{
-		eprint( FATAL, SET, "%s: Invalid negative sensitivity in %s().\n",
-				DEVICE_NAME, Cur_Func );
+		print( FATAL, "Invalid negative sensitivity.\n", Cur_Func );
 		THROW( EXCEPTION );
 	}
 
@@ -388,17 +385,17 @@ Var *lockin_sensitivity( Var *v )
 		 ! sr530.sens_warn  )                       /* no warn message yet ? */
 	{
 		if ( sens >= 1.0e-3 )
-			eprint( WARN, SET, "%s: Can't set sensitivity to %.0lf mV, "
-					"using %.0lf V instead.\n", DEVICE_NAME,
-					sens * 1.0e3, sens_list[ sens_index ] * 1.0e3 );
+			print( WARN, "Can't set sensitivity to %.0lf mV, using %.0lf V "
+				   "instead.\n",
+				   sens * 1.0e3, sens_list[ sens_index ] * 1.0e3 );
 		else if ( sens >= 1.0e-6 ) 
-			eprint( WARN, SET, "%s: Can't set sensitivity to %.0lf uV, "
-					"using %.0lf uV instead.\n", DEVICE_NAME,
-					sens * 1.0e6, sens_list[ sens_index ] * 1.0e6 );
+			print( WARN, "Can't set sensitivity to %.0lf uV, using %.0lf uV "
+				   "instead.\n",
+				   sens * 1.0e6, sens_list[ sens_index ] * 1.0e6 );
 		else
-			eprint( WARN, SET, "%s: Can't set sensitivity to %.0lf nV, "
-					"using %.0lf nV instead.\n", DEVICE_NAME,
-					sens * 1.0e9, sens_list[ sens_index ] * 1.0e9 );
+			print( WARN, "Can't set sensitivity to %.0lf nV, using %.0lf nV "
+				   "instead.\n",
+				   sens * 1.0e9, sens_list[ sens_index ] * 1.0e9 );
 		sr530.sens_warn = SET;
 	}
 
@@ -412,13 +409,13 @@ Var *lockin_sensitivity( Var *v )
 		if ( ! sr530.sens_warn )                      /* no warn message yet */
 		{
 		if ( sens >= 1.0e-3 )
-			eprint( WARN, SET, "%s: Sensitivity of %.0lf mV is too low, "
-					"using %.0lf mV instead.\n", DEVICE_NAME,
-					sens * 1.0e3, sens_list[ sens_index ] * 1.0e3 );
+			print( WARN, "Sensitivity of %.0lf mV is too low, using %.0lf mV "
+				   "instead.\n",
+				   sens * 1.0e3, sens_list[ sens_index ] * 1.0e3 );
 		else
-			eprint( WARN, SET, "%s: Sensitivity of %.0lf nV is too high,"
-					" using %.0lf nV instead.\n", DEVICE_NAME,
-					sens * 1.0e9, sens_list[ sens_index ] * 1.0e9 );
+			print( WARN, "Sensitivity of %.0lf nV is too high, using %.0lf nV "
+				   "instead.\n",
+				   sens * 1.0e9, sens_list[ sens_index ] * 1.0e9 );
 			sr530.sens_warn = SET;
 		}
 	}
@@ -466,8 +463,7 @@ Var *lockin_time_constant( Var *v )
 
 	if ( tc < 0.0 )
 	{
-		eprint( FATAL, SET, "%s: Invalid negative time constant in %s().\n",
-				DEVICE_NAME, Cur_Func );
+		print( FATAL, "Invalid negative time constant.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -491,13 +487,11 @@ Var *lockin_time_constant( Var *v )
 		 fabs( tc - tc_list[ tc_index ] ) > tc * 1.0e-2 )   /* error > 1% ? */
 	{
 		if ( tc >= 1.0 )
-			eprint( WARN, SET, "%s: Can't set time constant to %g s, "
-					"using %.0lf s instead.\n", DEVICE_NAME, tc,
-					tc_list[ tc_index ] );
+			print( WARN, "Can't set time constant to %g s, using %.0lf s "
+				   "instead.\n", tc, tc_list[ tc_index ] );
 		else
-			eprint( WARN, SET, "%s: Can't set time constant to %g s, "
-					"using %.0lf ms instead.\n", DEVICE_NAME,
-					tc, tc_list[ tc_index ] * 1.0e3 );
+			print( WARN, "Can't set time constant to %g ms, using %.0lf ms "
+				   "instead.\n", tc * 1.0e3, tc_list[ tc_index ] * 1.0e3 );
 	}
 	
 	if ( tc_index == UNDEF_SENS_INDEX )                   /* not found yet ? */
@@ -508,13 +502,11 @@ Var *lockin_time_constant( Var *v )
 			tc_index = TC_ENTRIES - 1;
 
 		if ( tc >= 1.0 )
-			eprint( WARN, SET, "%s: Time constant of %g s is too large, "
-					"using %.0lf s instead.\n", DEVICE_NAME, tc,
-					tc_list[ tc_index ] );
+			print( WARN, "Time constant of %g s is too large, using %.0lf s "
+				   "instead.\n", tc, tc_list[ tc_index ] );
 		else
-			eprint( WARN, SET, "%s: Time constant of %g s is too short, "
-					"using %.0lf ms instead.\n", DEVICE_NAME, tc,
-					tc_list[ tc_index ] * 1.0e3 );
+			print( WARN, "Time constant of %g ms is too short, using %.0lf ms "
+				   "instead.\n", tc * 1.0e3, tc_list[ tc_index ] * 1.0e3 );
 	}
 
 	too_many_arguments( v );
@@ -593,17 +585,14 @@ Var *lockin_ref_freq( Var *v )
 {
 	if ( v != NULL )
 	{
-		eprint( FATAL, SET, "%s: Reference frequency cannot be set for "
-				"this model.\n", DEVICE_NAME );
+		print( FATAL, "Reference frequency cannot be set for this model.\n" );
 		THROW( EXCEPTION );
 	}
 
 	switch ( FSC2_MODE )
 	{
 		case PREPARATION :
-			eprint( FATAL, SET, "%s: Function %s() can only be used in the "
-					"EXPERIMENT section.\n", DEVICE_NAME, Cur_Func );
-			THROW( EXCEPTION );
+			no_query_possible( );
 
 		case TEST :
 			return vars_push( FLOAT_VAR, SR530_TEST_REF_FREQUENCY );
@@ -630,8 +619,7 @@ Var *lockin_dac_voltage( Var *v )
 
 	if ( v == NULL )
 	{
-		eprint( FATAL, SET, "%s: Missing arguments in call of function "
-				"%s()'.\n", DEVICE_NAME, Cur_Func );
+		print( FATAL, "Missing arguments.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -641,9 +629,9 @@ Var *lockin_dac_voltage( Var *v )
 
 	if ( channel < first_DAC_port || channel > last_DAC_port )
 	{
-		eprint( FATAL, SET, "%s: Invalid lock-in DAC channel number %ld, "
-				"valid channels are in the range from %d to %d.\n",
-				DEVICE_NAME, channel, first_DAC_port, last_DAC_port );
+		print( FATAL, "Invalid lock-in DAC channel number %ld, valid channels "
+			   "are in the range from %d to %d.\n",
+				channel, first_DAC_port, last_DAC_port );
 		THROW( EXCEPTION );
 	}
 
@@ -652,12 +640,7 @@ Var *lockin_dac_voltage( Var *v )
 	if ( ( v = vars_pop( v ) ) == NULL )
 	{
 		if ( FSC2_MODE == PREPARATION )
-		{
-			eprint( FATAL, SET, "%s: Function %s() with only one argument can "
-					"only be used in the EXPERIMENT section.\n",
-					DEVICE_NAME, Cur_Func );
-			THROW( EXCEPTION );
-		}
+			no_query_possible( );
 
 		return vars_push( FLOAT_VAR,
 						  sr530.dac_voltage[ channel - first_DAC_port ] );
@@ -669,8 +652,8 @@ Var *lockin_dac_voltage( Var *v )
 
 	if ( fabs( voltage ) > 10.24 )
 	{
-		eprint( FATAL, SET, "%s: DAC voltage of %f V is out of valid "
-				"range (+/-10.24 V).\n", DEVICE_NAME, voltage );
+		print( FATAL, "DAC voltage of %f V is out of valid range "
+			   "(+/-10.24 V).\n", voltage );
 		THROW( EXCEPTION );
 	}
 
@@ -1049,8 +1032,7 @@ static void sr530_lock_state( bool lock )
 
 static void sr530_failure( void )
 {
-	eprint( FATAL, UNSET, "%s: Can't access the lock-in amplifier.\n",
-			DEVICE_NAME );
+	print( FATAL, "Can't access the lock-in amplifier.\n" );
 	THROW( EXCEPTION );
 }
 

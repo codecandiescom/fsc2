@@ -154,10 +154,6 @@ Func Def_Fncts[ ] =              /* List of built-in functions */
 
 static int func_cmp1( const void *a, const void *b );
 static int func_cmp2( const void *a, const void *b );
-static Call_Stack *call_push( Func *f );
-static Call_Stack *call_pop( void );
-
-
 
 
 /*--------------------------------------------------------------------*/
@@ -427,7 +423,8 @@ Var *func_call( Var *f )
 	/* Now call the function after storing some information about the
 	   function on the call stack */
 
-	call_push( f->val.fnct );
+	call_push( f->val.fnct,
+			   f->val.fnct->device ? f->val.fnct->device->name : NULL );
 
 	TRY
 	{
@@ -488,7 +485,7 @@ Var *func_call( Var *f )
 /*---------------------------------------------------------------*/
 /*---------------------------------------------------------------*/
 
-static Call_Stack *call_push( Func *f )
+Call_Stack *call_push( Func *f, const char *device_name )
 {
 	if ( CS == NULL )
 	{
@@ -503,10 +500,9 @@ static Call_Stack *call_push( Func *f )
 		CS->next = NULL;
 	}
 
-	CS->f = f;
-
-	Cur_Dev  = CS->f->device;
-	Cur_Func = CS->f->name;
+	if ( ( CS->f = f ) != NULL )
+		Cur_Func = CS->f->name;
+	CS->dev_name = device_name;
 
 	return CS;
 }
@@ -515,11 +511,10 @@ static Call_Stack *call_push( Func *f )
 /*---------------------------------------------------------------*/
 /*---------------------------------------------------------------*/
 
-static Call_Stack *call_pop( void )
+Call_Stack *call_pop( void )
 {
 	if ( CS == NULL )
 	{
-		Cur_Dev  = NULL;
 		Cur_Func = NULL;
 		return NULL;
 	}
@@ -528,13 +523,14 @@ static Call_Stack *call_pop( void )
 	{
 		CS = CS->prev;
 		CS->next = T_free( CS->next );
-		Cur_Dev  = CS->f->device;
-		Cur_Func = CS->f->name;
+		if ( CS->f!= NULL )
+			Cur_Func = CS->f->name;
+		else
+			Cur_Func = NULL;
 	}
 	else
 	{
 		CS = T_free( CS );
-		Cur_Dev  = NULL;
 		Cur_Func = NULL;
 	}
 

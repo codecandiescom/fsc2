@@ -366,14 +366,12 @@ long tds520_translate_channel( int dir, long channel )
 			case DIGITIZER_CHANNEL_FUNC_F :
 			case DIGITIZER_CHANNEL_EXT    :
 			case DIGITIZER_CHANNEL_EXT10  :
-				eprint( FATAL, SET, "%s: Digitizer has no channel %s as used "
-						"in %s().\n", DEVICE_NAME,
-						Digitizer_Channel_Names[ channel ], Cur_Func );
+				print( FATAL, "Digitizer has no channel %s.\n",
+					   Digitizer_Channel_Names[ channel ] );
 				THROW( EXCEPTION );
 
 			default :
-				eprint( FATAL, SET, "%s: Invalid channel number %ld used in "
-						"%s().\n", DEVICE_NAME, channel, Cur_Func );
+				print( FATAL, "Invalid channel number %ld.\n", channel );
 				THROW( EXCEPTION );
 		}
 	}
@@ -434,8 +432,7 @@ long tds520_translate_channel( int dir, long channel )
 
 void tds520_store_state( TDS520 *dest, TDS520 *src )
 {
-	WINDOW *w;
-	int i;
+	WINDOW *w, *dw;
 
 
 	while ( dest->w != NULL )
@@ -453,14 +450,17 @@ void tds520_store_state( TDS520 *dest, TDS520 *src )
 		return;
 	}
 
-	dest->w = T_malloc( src->num_windows * sizeof( WINDOW ) );
-	for ( i = 0, w = src->w; w != NULL; i++, w = w->next )
+	dw = dest->w = T_malloc( sizeof( WINDOW ) );
+	memcpy( dest->w, src->w, sizeof( WINDOW ) );
+	dest->w->next = dest->w->prev = NULL;
+
+	for ( w = src->w->next; w != NULL; w = w->next )
 	{
-		memcpy( dest->w + i, w, sizeof( WINDOW ) );
-		if ( i != 0 )
-			dest->w->prev = dest->w - 1;
-		if ( w->next != NULL )
-			dest->w->next = dest->w + 1;
+		dw->next = T_malloc( sizeof( WINDOW ) );
+		memcpy( dw->next, w, sizeof( WINDOW ) );
+		dw->next->prev = dw;
+		dw = dw->next;
+		dw->next = NULL;
 	}
 }
 

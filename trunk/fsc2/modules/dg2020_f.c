@@ -47,8 +47,8 @@ int dg2020_f_init_hook( void )
 
 	if ( pulser_struct.name != NULL )
 	{
-		eprint( FATAL, SET, "While loading driver for DG2020_F found that "
-				"driver for pulser %s is already installed.\n",
+		eprint( FATAL, UNSET, "While loading driver for DG2020_F found that "
+				"driver for pulser %s is already loaded.\n",
 				pulser_struct.name );
 		THROW( EXCEPTION );
 	}
@@ -736,24 +736,8 @@ Var *pulser_lock_keyboard( Var *v )
 		lock = SET;
 	else
 	{
-		vars_check( v, INT_VAR | FLOAT_VAR | STR_VAR );
-
-		if ( v->type == INT_VAR )
-			lock = v->val.lval == 0 ? UNSET : UNSET;
-		else if ( v->type == FLOAT_VAR )
-			lock = v->val.dval == 0.0 ? UNSET : UNSET;
-		else
-		{
-			if ( ! strcasecmp( v->val.sptr, "OFF" ) )
-				lock = UNSET;
-			else if ( ! strcasecmp( v->val.sptr, "ON" ) )
-				lock = SET;
-			else
-			{
-				print( FATAL, "Invalid argument.\n" );
-				THROW( EXCEPTION );
-			}
-		}
+		lock = get_boolean( v );
+		too_many_arguments( v );
 	}
 
 	if ( FSC2_MODE == EXPERIMENT )

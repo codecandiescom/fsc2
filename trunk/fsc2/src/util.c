@@ -329,6 +329,132 @@ void eprint( int severity, bool print_fl, const char *fmt, ... )
 }
 
 
+void print( int severity, const char *fmt, ... )
+{
+	char buffer[ FL_BROWSER_LINELENGTH + 1 ];
+	char *cp = buffer;
+	int space_left = FL_BROWSER_LINELENGTH;
+	int count;
+	va_list ap;
+
+
+	if ( severity != NO_ERROR )
+		compilation.error[ severity ] += 1;
+
+	if ( ! just_testing )
+	{
+		if ( severity == FATAL )
+		{
+			strcpy( buffer, "@C1@f" );
+			cp += 5;
+			space_left -= 5;
+		}
+
+		if ( severity == SEVERE )
+		{
+			strcpy( buffer, "@C2@f" );
+			cp += 5;
+			space_left -= 5;
+		}
+
+		if ( severity == WARN )
+		{
+			strcpy( buffer, "@C4@f" );
+			cp += 5;
+			space_left -= 5;
+		}
+
+		if ( ! IN_HOOK && Fname )
+		{
+			count = snprintf( cp, ( size_t ) space_left, "%s:%ld: ",
+							  Fname, Lc );
+			space_left -= count;
+			cp += count;
+		}
+
+		if ( CS != NULL )
+		{
+			if ( CS->f == NULL )
+			{
+				if ( CS->dev_name != NULL )
+				{
+					count = snprintf( cp, ( size_t ) space_left, "%s: ",
+									  CS->dev_name );
+					space_left -= count;
+					cp += count;
+				}
+			}
+			else
+			{
+				if ( CS->f->device != NULL )
+				{
+					count = snprintf( cp, ( size_t ) space_left, "%s: ",
+									  CS->f->device->name );
+					space_left -= count;
+					cp += count;
+				}
+
+				if ( CS->f->name != NULL )
+				{
+					count = snprintf( cp, ( size_t ) space_left, "%s(): ",
+									  CS->f->name );
+					space_left -= count;
+					cp += count;
+				}
+			}
+		}
+
+		va_start( ap, fmt );
+		vsnprintf( cp, ( size_t ) space_left, fmt, ap );
+		va_end( ap );
+
+		if ( I_am == PARENT )
+		{
+			fl_freeze_form( main_form->error_browser->form );
+			fl_addto_browser_chars( main_form->error_browser, buffer );
+
+			fl_set_browser_topline( main_form->error_browser,
+				  fl_get_browser_maxline( main_form->error_browser )
+				- fl_get_browser_screenlines( main_form->error_browser ) + 1 );
+
+			fl_unfreeze_form( main_form->error_browser->form );
+		}
+		else
+			writer( C_EPRINT, buffer );
+	}
+	else                               /* simple test run ? */
+	{
+		if ( severity != NO_ERROR )
+			fprintf( stdout, "%c ", severity[ "FSW" ] );      /* Hehe... */
+
+		if ( ! IN_HOOK && Fname )
+			fprintf( stdout, "%s:%ld: ", Fname, Lc );
+
+		if ( CS != NULL )
+		{
+			if ( CS->f == NULL )
+			{
+				if ( CS->dev_name != NULL )
+					fprintf( stdout, "%s: ", CS->dev_name );
+			}
+			else
+			{
+				if ( CS->f->device != NULL )
+					fprintf( stdout, "%s: ", CS->f->device->name );
+
+				if ( CS->f->name != NULL )
+					fprintf( stdout, "%s(): ", CS->f->name );
+			}
+		}
+
+		va_start( ap, fmt );
+		vfprintf( stdout, fmt, ap );
+		va_end( ap );
+		fflush( stdout );
+	}
+}
+
+
 /*------------------------------------------------------------------------*/
 /* There can be only one instance of fsc2 running (except simple test     */
 /* runs that only do a syntax check of an EDL program). To check if there */
