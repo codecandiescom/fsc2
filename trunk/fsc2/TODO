@@ -5,3 +5,8 @@
    only shows up under unreasonable situations (i.e. when doing stress
    tests) solving the problem has a rather low position on my priority
    list...
+
+2. It's not completely clear if calling pulser_reset() and friends also
+   do a pulser_update() automatically for all pulser modules. Question
+   is if this should be done, but more importantly, all modules should
+   have the same behaviour (which then should be documented).

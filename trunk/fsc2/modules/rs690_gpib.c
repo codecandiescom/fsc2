@@ -389,8 +389,8 @@ static void rs690_calc_tables( void )
 	rs690.new_table.middle_loops = 0;
 	rs690.new_table.table_loops_3 = 0;
 
-	/* If no repetition time is to be used we only have to make sure that the
-	   last FS (representing a no pulse state) to be long enough. */
+	/* If no repetition time is to be used we only have to make sure that
+	   the last FS (representing a no pulse state) to be long enough. */
 
 	if ( ! rs690.is_repeat_time )
 	{
@@ -404,10 +404,11 @@ static void rs690_calc_tables( void )
 		return;
 	}
 
-	/* If the pulse sequence is that long that it's not more than 
-	   MAX_TICKS_PER_ENTRY times the time base shorter than the repetition
-	   time, the repetition time is created by the last FS. We only have to
-	   make sure it's not too short. */
+	/* If the repetition time is only MAX_TICKS_PER_ENTRY (times the time
+	   base) longer than the pulse sequence the repetition time is created
+	   by using the last FS. We only have to make sure it's not too short,
+	   i.e. is at least 2 Ticks long for an 8 ns time base and 4 Ticks for
+	   a 4 ns time base. */
 
 	if ( rs690.last_new_fs->len <= MAX_TICKS_PER_ENTRY )
 	{
@@ -420,13 +421,14 @@ static void rs690_calc_tables( void )
 		return;
 	}
 
-	/* In all other cases the last FS is longer than MAX_TICKS_PER_ENTRY.
+	/* Otherwise the last FS is stilll longer than MAX_TICKS_PER_ENTRY.
 	   We reduce the last FS's length to everything that that isn't a
-	   multiple of MAX_TICKS_PER_ENTRY (only in case this would be 0
+	   multiple of MAX_TICKS_PER_ENTRY (only in case it then would be 0
 	   we set it to MAX_TICKS_PER_ENTRY). If we would be left with an
-	   FS that is too short we have use an additional table into which we
-	   put half a maximum length time slice and to the last FS we add
-	   half a maximum length time slice to make it long enough. */
+	   FS that is too short (i.e. 1 Tick for an 8 ns time base or less then
+	   4 Ticks for a 4 ns time base) we have use an additional table into
+	   which we put half of a maximum length time slice and to the last FS
+	   we add half a maximum length time slice to make it long enough. */
 
 	count = rs690.last_new_fs->len;
 
@@ -441,7 +443,7 @@ static void rs690_calc_tables( void )
 	}
 
 	/* The remaining time is now dalt with by a second and third additional
-	   tables, both of the maximum length time slice. The first one is the
+	   table, both of the maximum length time slice. The first one is the
 	   only one needed when the remaining time can be dealt with by
 	   MAX_LOOP_REPETITIONS of this second table, otherwise we also need
 	   the third one, where we also may use middle loop repetitions (but
@@ -462,8 +464,10 @@ static void rs690_calc_tables( void )
 }
 
 
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
+/*----------------------------------------------------------------*/
+/* Utility function for constructing and sending the data for the */
+/* individual table words.                                        */
+/*----------------------------------------------------------------*/
 
 static void rs690_table_set( int i, int k, FS *n )
 {
@@ -516,8 +520,9 @@ static void rs690_gpib_failure( void )
 }
 
 
-/*--------------------------------------------------------------*/
-/*--------------------------------------------------------------*/
+/*--------------------------------------*/
+/* Function for debugging purposes only.*/
+/*--------------------------------------*/
 
 static void rs690_check( void )
 {
