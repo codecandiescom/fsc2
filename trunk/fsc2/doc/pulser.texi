@@ -851,8 +851,7 @@ experiment. Two microwave pulses are needed, a pi-half and a pi pulse,
 plus a detection pulse to trigger the digitizer. This trigger pulse must
 move twice as fast as the second microwave pulse because the distance of
 the echo from the second pulse is always as large as the distance
-between both the microwave pulses and must thus be shifted twice as fast
-as the second microwave pulse.
+between both the microwave pulses.
 @example
 DEVICES:
 
