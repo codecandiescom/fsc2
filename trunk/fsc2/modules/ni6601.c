@@ -621,20 +621,11 @@ Var *counter_continuous_pulses( Var *v )
 
 Var *counter_dio_read( Var *v )
 {
-	int counter;
 	long mask;
 	unsigned char bits = 0;
 
 
 	if ( v == NULL )
-	{
-		print( FATAL, "Missing arguments.\n" );
-		THROW( EXCEPTION );
-	}
-
-	counter = ni6601_counter_number( get_strict_long( v, "counter channel" ) );
-
-	if ( ( v = vars_pop( v ) ) == NULL )
 		mask = 0xFF;
 	else
 	{
@@ -645,8 +636,6 @@ Var *counter_dio_read( Var *v )
 				   mask );
 			THROW( EXCEPTION );
 		}
-
-		too_many_arguments( v );
 	}
 
 	if ( FSC2_MODE == EXPERIMENT &&
