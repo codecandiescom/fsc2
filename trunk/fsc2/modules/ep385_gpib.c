@@ -29,9 +29,9 @@ static void ep385_gpib_failure( void );
 
 
 #ifdef EP385_GPIB_DEBUG
-#warning "**********************************"
-#warning "ep385.so made for DEBUG mode only!"
-#warning "**********************************"
+#warning "***************************************"
+#warning "ep385.fsc2_so made for DEBUG mode only!"
+#warning "***************************************"
 
 #define gpib_write( a, b, c ) fprintf( stderr, "%s\n", ( b ) )
 #define gpib_init_device( a, b ) 1

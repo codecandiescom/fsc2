@@ -837,7 +837,7 @@ pack:
 
 packages:
 	@for dir in Fcntl_Lock me6x00 ni6601 ni_daq rulbus witio_48; do  \
-		$(MAKE) -C $$dir distclean;                                 \
+		$(MAKE) -C $$dir distclean;                                  \
 		tar -c $$dir | gzip -c -9 > ../$$dir.tar.gz;                 \
 	done
 

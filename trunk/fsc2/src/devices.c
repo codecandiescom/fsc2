@@ -70,19 +70,22 @@ void device_add( const char *name )
 	if ( ( ld_path = getenv( "LD_LIBRARY_PATH" ) ) != NULL )
 	{
 		ld = T_strdup( ld_path );
+
 		for ( ldc = strtok( ld, ":" ); ldc != NULL; ldc = strtok( NULL, ":" ) )
 		{
-			lib_name = get_string( "%s%s%s.so", ldc, slash( ldc ), dev_name );
+			lib_name = get_string( "%s%s%s.fsc2_so", ldc, slash( ldc ),
+								   dev_name );
 			if ( lstat( lib_name, &buf ) == 0 )
 				break;
 			lib_name = CHAR_P T_free( lib_name );
 		}
+
 		T_free( ld );
 	}
 
 	if ( lib_name == NULL && ! ( Internals.cmdline_flags & DO_CHECK ) )
 	{
-		lib_name = get_string( "%s%s%s.so",
+		lib_name = get_string( "%s%s%s.fsc2_so",
 							   libdir, slash( libdir ), dev_name );
 		if ( lstat( lib_name, &buf ) < 0 )
 			lib_name = CHAR_P T_free( lib_name );
@@ -90,7 +93,7 @@ void device_add( const char *name )
 
 	if ( lib_name == NULL )
 	{
-		eprint( FATAL, UNSET, "Can't find or access module '%s.so'.\n",
+		eprint( FATAL, UNSET, "Can't find or access module '%s.fsc2_so'.\n",
 				dev_name );
 		T_free( dev_name );
 		THROW( EXCEPTION );
@@ -134,19 +137,19 @@ void device_add( const char *name )
 
 		real_name[ length ] = '\0';
 
-		/* Now check that module has the extension ".so" and strip it off */
+		/* Check that module has the extension ".fsc2_so" and strip it off */
 
-		if ( strcmp( real_name + length - 3, ".so" ) )
+		if ( strcmp( real_name + length - 8, ".fsc2_so" ) )
 		{
 			eprint( FATAL, UNSET, "Module '%s' used for device '%s' hasn't "
-					"extension \".so\".\n", real_name, dev_name );
+					"extension \".fsc2_so\".\n", real_name, dev_name );
 			T_free( lib_name );
 			T_free( dev_name );
 			T_free( real_name );
 			THROW( EXCEPTION );
 		}
 
-		*( real_name + length - 3 ) = '\0';
+		*( real_name + length - 8 ) = '\0';
 	}
 
 	T_free( lib_name );

@@ -154,9 +154,9 @@ static void dg2020_gpib_failure( void );
 
 
 #ifdef DG2020_B_GPIB_DEBUG
-#warning "*************************************"
-#warning "dg2020_b.so made for DEBUG mode only!"
-#warning "*************************************"
+#warning "******************************************"
+#warning "dg2020_b.fsc2_so made for DEBUG mode only!"
+#warning "******************************************"
 
 #define gpib_write( a, b, c ) ( fprintf( stderr, "%s\n", ( b ) ), SUCCESS )
 #define gpib_read( a, b, c ) ( SUCCESS )

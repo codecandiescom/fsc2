@@ -113,8 +113,8 @@ void load_all_drivers( void )
 				call_push( NULL, cd, cd->device_name, cd->count );
 
 				if ( ! cd->driver.init_hook( ) )
-					eprint( WARN, UNSET, "Initialisation of module '%s.so' "
-							"failed.\n", cd->name );
+					eprint( WARN, UNSET, "Initialisation of module "
+							"'%s.fsc2_so' failed.\n", cd->name );
 				call_pop( );
 				vars_del_stack( );
 			}
@@ -198,59 +198,45 @@ bool exists_function( const char *name )
 }
 
 
-/*-------------------------------------------------------------------*/
-/* Function dlopens a library file with the name passed to it (after */
-/* adding the extension '.so') and then tries to find all references */
-/* to functions listed in the function data base 'Functions'.        */
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------*/
+/* Function dlopens a library file with the name passed to it  */
+/* (after adding the extension '.fsc2_so') and then tries to   */
+/* find all references to functions listed in the function     */
+/* data base 'Functions'.                                      */
+/*-------------------------------------------------------------*/
 
 static void load_functions( Device *dev )
 {
 	char *lib_name;
-	char *ld_path;
-	char *ld = NULL;
-	char *ldc;
 
 
 	dev->driver.handle = NULL;
 
-	/* Try to open the library for the device. We first try to find it in
-	   directories defined by the environment variable "LD_LIBRARY_PATH". */
+	/* Try to open the library for the device. We first try to find it
+	   automatically, i.e. in the directories defined by the environment
+	   variable "LD_LIBRARY_PATH" (the modules should never end up in
+	   the places were the linker looks for them by default). */
 
-	if ( ( ld_path = getenv( "LD_LIBRARY_PATH" ) ) != NULL )
-	{
-		ld = T_strdup( ld_path );
-		for ( ldc = strtok( ld, ":" ); ldc != NULL; ldc = strtok( NULL, ":" ) )
-		{
-			lib_name = get_string( "%s%s%s.so", ldc, slash( ldc ), dev->name );
+	lib_name = get_string( "%s.fsc2_so", dev->name );
 
-			if ( ( dev->driver.handle = dlopen( lib_name, RTLD_NOW ) )
-				 != NULL )
-			{
-				dev->driver.lib_name = lib_name;
-				break;
-			}
-
-			T_free( lib_name );
-		}
-		T_free( ld );
-	}
+	if ( ( dev->driver.handle = dlopen( lib_name, RTLD_NOW ) ) != NULL )
+		dev->driver.lib_name = lib_name;
+	else
+		T_free( lib_name );
 
 	/* If this didn't work try it the normal way using the compiled in library
 	   path or, if the device name starts with an absolute path, using this
 	   path (this may happen when the device is specified using an alternative
 	   name and thus we have to follow a symbolic link). The exception is when
-	   the DO_CHECK flag is defined, where the compiled in path (or everything
-	   except what is defined in LD_LIBRARY_PATH) is *not* what we want... */
+	   the DO_CHECK flag is defined, where the compiled in path is *not* what
+	   we want... */
 
 	if ( dev->driver.handle == NULL &&
-		 ! ( Internals.cmdline_flags & DO_CHECK ) )
+		 ! ( Internals.cmdline_flags & DO_CHECK ) &&
+		 dev->name[ 0 ] != '/' )
 	{
-		if ( dev->name[ 0 ] != '/' )
-			lib_name = get_string( "%s%s%s.so", libdir, slash( libdir ),
-								   dev->name );
-		else
-			lib_name = get_string( "%s.so", dev->name );
+		lib_name = get_string( "%s%s%s.fsc2_so", libdir, slash( libdir ),
+							   dev->name );
 
 		if ( ( dev->driver.handle = dlopen( lib_name, RTLD_NOW ) ) != NULL )
 			dev->driver.lib_name = lib_name;
@@ -850,8 +836,8 @@ void run_child_exit_hooks( void )
 /* other and probably more difficult or dangerous method to do it anyway. */
 /*                                                                        */
 /* ->                                                                     */
-/*    1. Name of the module (without the '.so' extension) the symbol is   */
-/*       to be loaded from                                                */
+/*    1. Name of the module (without the '.fsc2_so' extension) the symbol */
+/*       is to be loaded from                                             */
 /*    2. Name of the symbol to be loaded                                  */
 /*    3. Pointer to void pointer for returning the address of the symbol  */
 /*                                                                        */

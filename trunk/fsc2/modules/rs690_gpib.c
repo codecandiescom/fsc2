@@ -38,9 +38,9 @@ static int rs690_write( int device_no, const char *s, long len );
 
 
 #ifdef RS690_GPIB_DEBUG
-#warning "**********************************"
-#warning "rs690.so made for DEBUG mode only!"
-#warning "**********************************"
+#warning "***************************************"
+#warning "rs690.fsc2_so made for DEBUG mode only!"
+#warning "***************************************"
 
 #define gpib_write( a, b, c ) ( fprintf( stderr, "%s\n", ( b ) ), SUCCESS )
 #define gpib_read( a, b, c ) ( SUCCESS )

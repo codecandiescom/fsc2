@@ -585,8 +585,9 @@ Var *func_call( Var *f )
 				eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
 						__FILE__, __LINE__ );
 			else
-				print( FATAL, "Function %s() from module %s.so messed up the "
-					   "variable stack at %s:%d.\n", EDL.Call_Stack->f->name,
+				print( FATAL, "Function %s() from module %s.fsc2_so messed up "
+					   "the variable stack at %s:%d.\n",
+					   EDL.Call_Stack->f->name,
 					   EDL.Call_Stack->f->device->name, __FILE__, __LINE__ );
 			call_pop( );
 			RETHROW( );
@@ -611,7 +612,7 @@ Var *func_call( Var *f )
 			eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
 					__FILE__, __LINE__ );
 		else
-			print( FATAL, "Function %s() from module %s.so messed up the "
+			print( FATAL, "Function %s() from module %s.fsc2_so messed up the "
 				   "variables stack at %s:%d.\n", EDL.Call_Stack->f->name,
 				   EDL.Call_Stack->f->device->name, __FILE__, __LINE__ );
 		THROW( EXCEPTION );
