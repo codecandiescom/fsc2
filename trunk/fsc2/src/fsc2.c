@@ -435,7 +435,7 @@ void test_file( FL_OBJECT *a, long b )
 	struct stat file_stat;
 
 
-	a->u_ldata	= 0;
+	a->u_ldata = 0;
 	b = b;
 
 	/* While program is being tested the test can be aborted by pressing the
