@@ -12,7 +12,7 @@
 prefix         = $(shell pwd)
 bindir         = $(prefix)
 libdir         = $(prefix)
-auxdir         = $(libdir)/aux
+auxdir         = $(prefix)/aux
 
 GPIB_CONF      = /etc/gpib.conf
 GPIB_LOG       = /tmp/gpib.log
@@ -58,40 +58,6 @@ RMFLAGS        = -f
 ########### (unless you really know what you're doing ...) #################
 ############################################################################
 
-VPATH          = .:src:modules
-
-c_sources      = fsc2.c pulser.c util.c exceptions.c variables.c vars_util.c \
-				 func.c func_basic.c func_util.c T.c phases.c exp.c devices.c \
-				 gpib.c run.c comm.c chld_func.c graphics.c accept.c \
-				 graph_handler_1d.c graph_handler_2d.c loader.c bugs.c print.c
-
-ifeq ($(SIZE),HI_RES)
-	c_sources += fsc2_rsc_hr.c
-	CFLAGS    += -DSIZE=1
-else
-	c_sources += fsc2_rsc_lr.c
-	CFLAGS    += -DSIZE=0
-endif
-
-bison_sources  = $(notdir $(wildcard src/*_parser.y))
-flex_sources   = $(notdir $(wildcard src/*_lexer.flex))
-sources        = $(bison_sources:.y=.c) $(flex_sources:.flex=.c) \
-				 ${c_sources}
-objects        = $(sources:.c=.o)
-headers        = ${c_sources:.c=.h} global.h
-modules        = User_Functions.c \
-				 sr510.c sr530.c sr810.c sr830.c \
-				 aeg_s_band.c aeg_x_band.c \
-				 er035m.c er035m_s.c er035m_sa.c bh15.c
-dg2020_f       = dg2020_f.c dg2020_gen_f.c dg2020_pulse_f.c dg2020_init_f.c \
-				 dg2020_run_f.c dg2020_util_f.c dg2020_gpib_f.c
-dg2020_b       = dg2020_b.c dg2020_gen_b.c dg2020_pulse_b.c dg2020_util_b.c \
-				 dg2020_init_b.c dg2020_run_b.c dg2020_gpib_b.c
-tds754a        = tds754a.c tds754a_gpib.c tds754a_util.c
-tds520a        = tds520a.c tds520a_gpib.c tds520a_util.c
-hp8647a        = hp8647a.c hp8647a_util.c hp8647a_gpib.c hp8647a_lexer.c
-
-
 
 # Pass GPIB_LOG, GPIB_CONF and AWK via macros to the source files
 # Don't forget to escape all double quotes (`"') with backslashes.
@@ -116,8 +82,11 @@ ifdef libdir
 endif
 
 ifdef auxdir
-	CFLAGS += -Dauxdir=\"$(auxdir:/=)/\"
+	CFLAGS += -Dauxdir=\"$(auxdir:/=)/\" -I$(auxdir)
 endif
+
+
+export            # export all variables to sub-makes
 
 
 # Switch off all implicit rules and set suffices of file to be made by make
@@ -126,97 +95,15 @@ endif
 .PHONY: all clean distclean pack
 
 
-# default rule: make the main program, the modules and the primary lexer
+# default rule: make the main program, the primary lexer and the modules
+# (the Makefile for modules is called via the Makefile in src)
 
-all: fsc2 fsc2_clean mods
-
-
-# make the main program from the c, flex and bison source files
-
-fsc2: test $(objects)
-	$(CC) -o $@ $(objects) $(LIBS) $(LDFLAGS)
-	if [ `hostname --fqdn` = "pion.anorg.chemie.uni-frankfurt.de" ]; then \
-		mv gpib.c gpib_old.c; \
-		mv gpib.h gpib_old.h; \
-		mv gpib_new.c gpib.c; \
-		mv gpib_new.h gpib.h; \
-	fi;
-
-test:
-	if [ `hostname --fqdn` = "pion.anorg.chemie.uni-frankfurt.de" ]; then \
-		mv gpib.c gpib_new.c; \
-		mv gpib.h gpib_new.h; \
-		mv gpib_old.c gpib.c; \
-		mv gpib_old.h gpib.h; \
-	fi;
-
-
-%.o: %.c $(headers)
-	$(CC) $(CFLAGS) -c -o $@ $<
-
-%.c: %.y $(headers)
-	$(BISON) $(BISONFLAGS) $(notdir $(patsubst %_parser.y,%,$<)) -o $@ $<
-
-%.c: %.flex $(headers)
-	$(FLEX) $(FLEXFLAGS)$(notdir $(patsubst %_lexer.flex,%,$<)) -o$@ $<
-	sed -e 's/register char \*yy_cp, \*yy_bp;/register char \*yy_cp = NULL, \*yy_bp = NULL;/' $@ > $@.x
-	mv -f $@.x $@
-
-
-# make the primary lexer that's utilized by the main program
-
-fsc2_clean: fsc2_clean.o exceptions.o
-	$(CC) -o $@ $^ -lfl -lm
-
-fsc2_clean.c: fsc2_clean.flex $(headers)
-	$(FLEX) -B -o$@ $<
-
-
-# make the modules - the pulser and digitizer modules have to be handled
-# specially since each has its own header file and is divided into several
-# source files
-
-mods: dg2020_f.so dg2020_b.so tds754a.so tds520a.so hp8647a.so \
-	  $(modules:.c=.so)
-
-dg2020_f.so: ${dg2020_f:.c=.lo}
-	$(CC) -shared -o $@ ${dg2020_f:.c=.lo} -lm $(LDFLAGS)
-	chmod 644 $@
-
-dg2020_b.so: ${dg2020_b:.c=.lo}
-	$(CC) -shared -o $@ ${dg2020_b:.c=.lo} -lm $(LDFLAGS)
-	chmod 644 $@
-
-tds754a.so: ${tds754a:.c=.lo}
-	$(CC) -shared -o $@ ${tds754a:.c=.lo} -lm $(LDFLAGS)
-	chmod 644 $@
-
-tds520a.so: ${tds520a:.c=.lo}
-	$(CC) -shared -o $@ ${tds520a:.c=.lo} -lm $(LDFLAGS)
-	chmod 644 $@
-
-hp8647a.so: ${hp8647a:.c=.lo}
-	$(CC) -shared -o $@ ${hp8647a:.c=.lo} -lm $(LDFLAGS)
-	chmod 644 $@
-
-%.so: %.lo
-	$(CC) -shared -o $@ $*.lo -lm $(LDFLAGS)
-	chmod 644 $@
-
-
-${dg2020_f:.c=.lo}: dg2020_f.h $(headers)
-${dg2020_b:.c=.lo}: dg2020_b.h $(headers)
-${tds754a:.c=.lo}: tds754a.h $(headers)
-${tds520a:.c=.lo}: tds520a.h $(headers)
-${hp8647a:.c=.lo}: hp8647a.h $(headers)
-
-hp8647a_lexer.c: modules/hp8647a_lexer.flex $(header)
-	$(FLEX) $(FLEXFLAGS)$(notdir $(patsubst %lexer.flex,%,$<)) -o$@ $<
-	sed -e 's/register char \*yy_cp, \*yy_bp;/register char \*yy_cp = NULL, \*yy_bp = NULL;/' $@ > $@.x
-	mv -f $@.x $@
-
-%.lo: %.c $(headers)
-	$(CC) $(CFLAGS) -c -fPIC $< -o $*.lo
+all:
+	$(MAKE) -C src all
+	cp src/fsc2 .
+	cp src/fsc2_clean .
+	cp modules/*.so .
+	$(MAKE) -C src untest
 
 
 # Install the program in $bindir and all the other stuff in $libdir and $auxdir
@@ -290,14 +177,12 @@ ps-docs:
 # `distclean' also removes all executables and shared libraries
 
 clean:
-	$(RM) $(RMFLAGS) *.o *.output *_parser.c *_parser.h *_lexer.c \
-					 fsc2_clean.c *.lo mem
+	$(MAKE) -C src clean
+	$(MAKE) -C modules clean
 
 distclean:
 	$(MAKE) clean
-	$(RM) $(RMFLAGS) fsc2 fsc2_clean *.so TAGS *~
-	$(MAKE) -C doc distclean
-
+	$(RM) $(RMFLAGS) fsc2 fsc2_clean *.so *~
 
 pack:
 	$(MAKE) distclean
