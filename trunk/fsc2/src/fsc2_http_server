@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w -T
+#!/usr/bin/perl -T
 # -*- cperl -*-
 #
 #  $Id$
@@ -24,6 +24,7 @@
 
 
 use strict;
+use warnings;
 use IO::Socket::INET;
 use POSIX;
 use Fcntl_Lock;
