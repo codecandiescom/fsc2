@@ -498,21 +498,27 @@ Var *f_obj_clabel( Var *v )
 
 	/* We first need the ID of the button */
 
-	ID = get_strict_long( v, "object ID" );
-
-	if ( ID < ID_OFFSET )
+	if ( Internals.mode != TEST )
 	{
-		print( FATAL, "Invalid object identifier.\n" );
-		THROW( EXCEPTION );
-	}
+		ID = get_strict_long( v, "object ID" );
 
-	v = vars_pop( v );
+		if ( ID < ID_OFFSET )
+		{
+			print( FATAL, "Invalid object identifier.\n" );
+			THROW( EXCEPTION );
+		}
+
+		v = vars_pop( v );
+	}
 
 	if ( v->type != STR_VAR )
 	{
 		print( FATAL, "Second argument isn't a string.\n" );
 		THROW( EXCEPTION );
 	}
+
+	if ( Internals.mode != TEST )
+		return vars_push( INT_VAR, 1 );
 
 	/* The child has to get parent to change the label */
 
@@ -614,6 +620,10 @@ Var *f_obj_xable( Var *v )
 	IOBJECT *io;
 	long ID;
 	bool state;
+
+
+	if ( Internals.mode == TEST )
+		return vars_push( INT_VAR, get_boolean( v->next ) ? 1L : 0L );
 
 	/* We first need the ID of the button */
 
