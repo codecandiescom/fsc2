@@ -845,7 +845,7 @@ constant setting that has been set.
 
 
 For the @strong{SR510} and @strong{SR530} lock-ins valid time constant
-settings are @{1 ms} and @w{100 s} with steps of about a factor of 3,
+settings are @w{1 ms} and @w{100 s} with steps of about a factor of 3,
 i.e. you can use @w{10 ms}, @w{30 ms}, @w{100 ms} etc. The POST time
 constant is set to a value equal or lower than the time constant.
 
