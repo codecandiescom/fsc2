@@ -289,10 +289,10 @@ Var *temp_contr_lock_keyboard( Var *v )
 	{
 		lock = get_boolean( v ) ? LOCK_STATE_REMOTE_LLO : LOCK_STATE_REMOTE;
 		too_many_arguments( v );
-	}
 
-	if ( FSC2_MODE == EXPERIMENT )
-		lakeshore330_lock( lock - 1 );
+		if ( FSC2_MODE == EXPERIMENT )
+			lakeshore330_lock( lock - 1 );
+	}
 
 	return vars_push( INT_VAR, lock == LOCK_STATE_REMOTE_LLO ? 1L : 0L );
 }
