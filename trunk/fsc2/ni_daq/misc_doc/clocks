@@ -31,7 +31,7 @@ controlled by a set of flags in the 'Clock_and_FOUT' register.
    register to 0, otherwise to a value between 1 and 15).
 
 Using these settings a frequency between a maximum of 20 MHz and a minimum
-of 6.25 z can be output at the FREQ_OUT pin.
+of 6.25 kHz can be output at the FREQ_OUT pin.
 
 For the AI, AO and GPCT subsystem of the boards only frequencies of 20 MHz
 and 10 MHz can be realized with the fast clock and 200 kHz and 100 kHz using
@@ -40,7 +40,7 @@ for the subsystem. For the AI subsystem a source setting of 'AI_IN_TIMEBASE1'
 and 'IN_TIMEBASE2' can be used, for the AO system 'AO_IN_TIMEBASE1' and
 'IN_TIMEBASE2' and for the GPCT system 'G_IN_TIMEBASE1' and 'IN_TIMEBASE2'.
 
-As the names already indicate, the fast timebases (x_IN_TIMEBASE1) of the
+As the names already indicate the fast timebases (x_IN_TIMEBASE1) of the
 subsystems are independent of each other. Each can be switched between
 20 MHz and 10 MHz individually by setting the 'AI_Source_Divide_By_2',
 'AO_Source_Divide_By_2' and 'G_Source_Divide_By_2' bit, respectively.
