@@ -28,13 +28,13 @@ void load_all_drivers( void )
 
 
 	/* Treat "User_Functions" also as a kind of device driver and append
-	   the device structure at the end of the list of devices*/
+	   the device structure at the end of the list of devices */
 
 	device_append_to_list( "User_Functions" );
 
-	/* Link all functions from the device drivers (including "User_Functions"
-	   which comes last) and try to resolve the functions from the function
-	   list */
+	/* Link all functions from the device drivers (including "User_Functions",
+	   which always comes last) and try to resolve the functions from the
+	   function list */
 
 	for ( cd = Device_List; cd != NULL; cd = cd->next )
 		load_functions( cd );
@@ -257,7 +257,7 @@ void run_test_hooks( void )
 	for ( cd = Device_List; cd != NULL; cd = cd->next )
 		if ( cd->is_loaded && cd->driver.is_test_hook &&
 			 ! cd->driver.test_hook( ) )
-			eprint( SEVERE, "Initialisation for test run of module `%s.so' "
+			eprint( SEVERE, "Initialisation for test run of module `%s' "
 					"failed.\n", cd->name );
 }
 
@@ -273,8 +273,8 @@ void run_end_of_test_hooks( void )
 	for ( cd = Device_List; cd != NULL; cd = cd->next )
 		if ( cd->is_loaded && cd->driver.is_end_of_test_hook &&
 			 ! cd->driver.end_of_test_hook( ) )
-			eprint( SEVERE, "Final checks after test run failed fer module "
-					"`%s.so'.\n", cd->name );
+			eprint( SEVERE, "Final checks after test run failed for module "
+					"`%s'.\n", cd->name );
 }
 
 
@@ -289,7 +289,7 @@ void run_exp_hooks( void )
 	for ( cd = Device_List; cd != NULL; cd = cd->next )
 		if ( cd->is_loaded && cd->driver.is_exp_hook &&
 			 ! cd->driver.exp_hook( ) )
-			eprint( SEVERE, "Initialisation for experiment of module `%s.so' "
+			eprint( SEVERE, "Initialisation for experiment of module `%s' "
 					"failed.\n", cd->name );
 }
 
@@ -312,7 +312,7 @@ void run_end_of_exp_hooks( void )
 		{
 			if ( cd->is_loaded && cd->driver.is_end_of_exp_hook &&
 				 ! cd->driver.end_of_exp_hook( ) )
-				eprint( SEVERE, "Resetting module `%s.so' after experiment "
+				eprint( SEVERE, "Resetting module `%s' after experiment "
 						"failed.\n", cd->name );
 			TRY_SUCCESS;
 		}
