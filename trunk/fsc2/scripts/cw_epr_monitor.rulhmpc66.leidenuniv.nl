@@ -194,9 +194,8 @@ FOREVER {
 		}
 	}
 
-	/* Check if a new current has been set - if yes go to the new current
-	   (which automatically stops a sweep) after checking that it's within
-	   the allowed limits */
+	/* Check if a new field has been set - if yes set it (which automatically
+	   stops a sweep) after checking that it's within the allowed limits */
 
 	new_set_field = input_value( New_Field );
 	IF abs( new_set_field - new_field ) > 0.149 G {
@@ -210,15 +209,13 @@ FOREVER {
 			current_field = set_field( new_field );
 			draw_marker( I + 1, "RED" );
 		}
-		input_value( Current_Field, current_field );
+		output_value( Current_Field, current_field );
 	}
 
 	/* Check if a new sweep rate has been set - if yes set the new rate after
-	   checking that it's within the allowed limits - take care: the user
-	   input is in A/min while the magnet driver expects sweep rates in A/s.
-	   Because any data stored in the lock-ins internal data buffer have
-	   become meaningless stop and restart auto-acquisition to clean out the
-	   buffer. */
+	   checking that it's within the allowed limits. Because any data stored
+	   in the lock-ins internal data buffer have become meaningless stop and
+	   restart auto-acquisition to clean out the buffer. */
 
 	new_sweep_rate = abs( input_value( Sweep_Rate ) );
 	IF abs( sweep_rate - new_sweep_rate ) > 0.01 {
@@ -272,7 +269,7 @@ FOREVER {
 	/* If the magnet is sweeping the field get a new data point, otherwise
 	   wait a short moment to keep the program from using up the complete
 	   computer time. If we already have acquired MAX_POINTS data points or the
-	   magnet sweep has been haltet because one of the current limits had been
+	   magnet sweep has been haltet because one of the field limits has been
 	   reached also stop the sweep without further user intervention. */
 
 	IF ! Pause_State {
