@@ -1549,6 +1549,7 @@ void change_scale( int is_set, double *vals )
 void rescale( long new_nx, long new_ny )
 {
 	long i, j, k;
+	Curve_1d *cv1;
 	Curve_2d *cv;
 	long max_x = 0,
 		 max_y = 0;
@@ -1558,9 +1559,6 @@ void rescale( long new_nx, long new_ny )
 
 	if ( G.dim == 1 )
 	{
-		Curve_1d *cv1;
-
-
 		/* Return immediately on unreasonable values */
 
 		if ( new_nx < 0 )
@@ -1579,7 +1577,7 @@ void rescale( long new_nx, long new_ny )
 		/* Make sure we don't rescale to less than the current number of
 		   points (or the minumum value, if larger) */
 
-		if ( new_nx == 0 )
+		if ( new_nx == 0 || new_nx < DEFAULT_1D_X_POINTS )
 		{
 			if ( max_x < DEFAULT_1D_X_POINTS )
 				max_x = DEFAULT_1D_X_POINTS;
@@ -1596,7 +1594,8 @@ void rescale( long new_nx, long new_ny )
 			cv1->xpoints = T_realloc( cv1->xpoints,
 									  max_x * sizeof( XPoint ) );
 
-			for ( i = G.nx, sp = G.curve[ k ]->points + i; i < max_x; i++ )
+			for ( i = G.nx, sp = G.curve[ k ]->points + i; i < max_x;
+				  sp++, i++ )
 				sp->exist = UNSET;
 		}
 
