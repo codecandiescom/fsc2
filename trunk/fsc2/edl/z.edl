@@ -56,6 +56,8 @@ FOR K = 1 : M
 	wait( 500ms );
 }
 
+change_scale( 0, 1, 0, 1 );
+
 #EXIT
 
 ON_STOP:
