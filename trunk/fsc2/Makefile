@@ -609,11 +609,11 @@ config.h: Makefile
 built:
 	-@cat config.h > version
 	-@echo >> version
-	-@grep '$$Id\: ' Makefile $(sdir)/Makefile $(sdir)/*.[chly]          \
-				     $(mdir)/Makefile $(mdir)/*.[chl]                    \
-					 $(cdir)/Functions $(cdir)/Devices $(cdir)/*.conf |  \
-		grep -v 'sed\|grep' |                                            \
-		sed -e 's/^.*$$Id\: \(.*\) jens Exp $$.*/\1/g' >> version
+	-@grep '$$Id\: ' Makefile $(sdir)/Makefile $(sdir)/*.[chly]             \
+					 $(mdir)/Makefile $(mdir)/*.[chl]                       \
+					 $(cdir)/Functions $(cdir)/Devices $(cdir)/*.conf |     \
+	grep -v 'sed\|grep' |                                               \
+	sed -e 's/^.*$$Id\: \(.*,v [0-9]\{1,\}\.[0-9]\{1,\} [0-9]\{4\}\/[0-9]\{2\}\/[0-9]\{2\} [\0-9]\{2\}:[0-9]\{2\}:[0-9]\{2\}\).*/\1/g' >> version
 	-@gzip -c -9 version | uuencode - > version.ugz
 	-@$(RM) $(RMFLAGS) version
 
