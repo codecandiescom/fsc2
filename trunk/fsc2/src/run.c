@@ -296,7 +296,10 @@ void stop_measurement( FL_OBJECT *a, long b )
 	if ( b == 0 )                /* callback from stop button ? */
 	{
 		if ( child_pid != 0 )            /* child is still kicking... */
+		{
+			fl_set_cursor( FL_ObjWin( run_form->stop ), XC_watch );
 			kill( child_pid, DO_QUIT );
+		}
 		else                             /* child has already exited */
 		{
 			stop_graphics( );
