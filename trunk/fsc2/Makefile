@@ -3,10 +3,6 @@ flex_sources   = $(wildcard *_lexer.flex)
 sources        = $(bison_sources:.y=.c) $(flex_sources:.flex=.c) \
 			     fsc2.c assign.c util.c exceptions.c variables.c func.c T.c \
 				 phases.c ppcheck.c
-cstuff         = fsc2.c assign.c util.c exceptions.c variables.c func.c T.c \
-				 phases.c ppcheck.c
-headers        = fsc2.h assign.h exceptions.h T.h phases.h func.h ppcheck.h \
-                 util.h variables.h
 objects        = $(sources:.c=.o)
 CFLAGS         = -ggdb -Wall -Wwrite-strings -Wstrict-prototypes \
 			     -Wmissing-prototypes -Wmissing-declarations -DDEBUG
@@ -70,4 +66,4 @@ clean:
 	   fsc_clean.c fsc_clean.o TAGS
 
 tags:
-	etags -T $(cstuff) $(headers) *.flex *.y *.h
+	etags -T *.c *.h *.flex *.y *.h

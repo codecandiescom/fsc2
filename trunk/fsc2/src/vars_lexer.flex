@@ -1,3 +1,12 @@
+/*
+  $Id$
+  $Log$
+  Revision 1.4  1999/07/16 22:39:41  jens
+  *** empty log message ***
+
+*/
+
+
 /**************************************************************/
 /* This is the lexer for the VARIABLES section of an EDL file */
 /**************************************************************/
@@ -16,12 +25,12 @@
    otherwise it would also read in input into its internal buffer belonging
    to the calling lexer  */
 
+#define YY_INPUT( buf, result, max_size )                          \
+        {                                                          \
+	        int c = fgetc( variablesin );                          \
+	        result = ( c == EOF ) ? YY_NULL : ( buf[ 0 ] = c, 1 ); \
+        }
 
-#define YY_INPUT( buf, result, max_size )                  \
-{                                                          \
-	int c = fgetc( variablesin );                          \
-	result = ( c == EOF ) ? YY_NULL : ( buf[ 0 ] = c, 1 ); \
-}
 
 
 #include "fsc2.h"
@@ -43,29 +52,27 @@ int Vars_Next_Section;
 %}
 
 
-FILE        \x1\n.+\n
-LNUM        \x2\n[0-9]+\n
-ERR         \x3\n.+\n
+FILE        \x1\n.+\n                   /* filename */
+LNUM        \x2\n[0-9]+\n               /* line number */
+ERR         \x3\n.+\n                   /* error message */
 
-ASS         ^[ \t]*ASS(IGNMENT)?S?:
-DEF         ^[ \t]*DEF(AULT)?S?:
-VAR         ^[ \t]*VAR(IABLE)?S?:
-PHAS        ^[ \t]*PHA(SE)?S?:
-PREP        ^[ \t]*PREP(ARATION)?S?:
-EXP         ^[ \t]*EXP(ERIMENT)?:
+ASS         ^[ \t]*ASS(IGNMENT)?S?:     /* ASSIGNMENTS section */
+DEF         ^[ \t]*DEF(AULT)?S?:        /* DEFAULTS section */
+VAR         ^[ \t]*VAR(IABLE)?S?:       /* VARIABLES section */
+PHAS        ^[ \t]*PHA(SE)?S?:          /* PHASES section */
+PREP        ^[ \t]*PREP(ARATION)?S?:    /* PREPARATIONS section */
+EXP         ^[ \t]*EXP(ERIMENT)?:       /* EXPERIMENT section */
 
-ESTR        \x5.*\x3\n.*\n
-STR         \x5.*\x6
+STR         \x5.*\x6                    /* print format string */
+ESTR        \x5.*\x3\n.*\n              /* string with error */
 
 INT         [0-9]+
 EXPO        [EDed][+-]?{INT}
 FLOAT       ((([0-9]+"."[0-9]*)|([0-9]*"."[0-9]+)){EXPO}?)|({INT}{EXPO})
 
-WS          [\n \t]+
-
-IDENT       [A-Za-z]+[A-Za-z0-9_]*
-
-UNREC       [^\n \t;,\(\)\=\+\-\*\/\[\]\{\}\%\^]+
+IDENT       [A-Za-z]+[A-Za-z0-9_]*                   /* identifier */
+WS          [\n \t]+                                 /* white space */
+UNREC       [^\n \t;,\(\)\=\+\-\*\/\[\]\{\}\%\^]+    /* invalid input */
 
 
 		/*---------------*/
@@ -228,6 +235,8 @@ UNREC       [^\n \t;,\(\)\=\+\-\*\/\[\]\{\}\%\^]+
 
 int variables_parser( FILE *in )
 {
+	/* don't allow more than one VARIABLES section */
+
 	if ( compilation.sections[ VARIABLES_SECTION ] )
 	{
 		eprint( FATAL, "%s:%ld: Multiple instances of VARIABLES section "
@@ -236,8 +245,8 @@ int variables_parser( FILE *in )
 	}
 	compilation.sections[ VARIABLES_SECTION ] = SET;
 
-	Vars_Next_Section = OK;
-
+	Vars_Next_Section = OK;    /* until now... (allows section_parser()
+								  to catch several common errors) */
 	variablesin = in;
 
 	TRY
