@@ -30,25 +30,25 @@ my @version = split /\./, $Tk::VERSION;
 die "Installed Perl-Tk version is $Tk::VERSION but Tk800.022 is required.\n"
 	if $version[ 0 ] + 0.001 * $version[ 1 ] < 800.022;
 
-my $start_cur          = 0;
-my $end_cur 	       = 0;
-my $cur_step	       = 1;
-my $num_runs	       = 1;
-my $tc_fact  	       = 1;
-my $tc			       = "Don't set";
-my $sens		       = "Don't set";
-my $how			       = 'Start experiment';
-my $bridge		       = 'cw';
+my $start_cur        = 0;
+my $end_cur 	     = 0;
+my $cur_step	     = 1;
+my $num_runs	     = 1;
+my $tc_fact  	     = 1;
+my $tc			     = "Don't set";
+my $sens		     = "Don't set";
+my $how			     = 'Start experiment';
+my $bridge		     = 'cw';
 
 
-my %fp = ( '-side' => 'top',
-		   '-fill' => 'x',
-		   '-padx' => '2m',
-		   '-pady' => '2m' );
+my %fp = ( '-side'   => 'top',
+		   '-fill'   => 'x',
+		   '-padx'   => '2m',
+		   '-pady'   => '2m' );
 
-my %wp = ( '-side' => 'left',
-		   '-fill' => 'x',
-		   '-padx' => '3m',
+my %wp = ( '-side'   => 'left',
+		   '-fill'   => 'x',
+		   '-padx'   => '3m',
 		   '-expand' => 1 );
 
 # Get defaults
@@ -62,18 +62,18 @@ $mw->title( "cw_epr" );
 my $ballon = $mw->Balloon( );
 
 my $f1 = $mw->Frame( );
-my $f1_l1 = $f1->Label( '-text' => 'Start current:',
-						'-width' => '20',
-						'anchor' => 'w' );
-my $f1_v = $f1->Entry( '-textvariable' => \$start_cur,
-					   '-width' => '8',
-					   '-validate' => 'key',
+my $f1_l1 = $f1->Label( '-text'           => 'Start current:',
+						'-width'          => '20',
+						'anchor'          => 'w' );
+my $f1_v = $f1->Entry( '-textvariable'    => \$start_cur,
+					   '-width'           => '8',
+					   '-validate'        => 'key',
 					   '-validatecommand' => \&is_signed_numeric,
-					   '-relief' => 'sunken' );
-$ballon->attach( $f1_v,
-				 '-balloonmsg' => "Enter the start current (in Ampere)" );
-my $f1_l2 = $f1->Label( '-text' => 'A',
-						'-width' => 1 );
+					   '-relief'          => 'sunken' );
+$ballon->attach( $f1_v, '-balloonmsg'     =>
+				        "Enter the start current (in Ampere)" );
+my $f1_l2 = $f1->Label( '-text'           => 'A',
+						'-width'          => 1 );
 
 $f1->pack( %fp );
 $f1_l1->pack( %wp );
@@ -82,18 +82,18 @@ $f1_l2->pack( %wp );
 
 
 my $f2 = $mw->Frame( );
-my $f2_l1 = $f2->Label( '-text' => 'End current:',
-						'-width' => '20',
-						'anchor' => 'w' );
-my $f2_v = $f2->Entry( '-textvariable' => \$end_cur,
-					   '-width' => '8',
-					   '-validate' => 'key',
+my $f2_l1 = $f2->Label( '-text'           => 'End current:',
+						'-width'          => '20',
+						'anchor'          => 'w' );
+my $f2_v = $f2->Entry( '-textvariable'    => \$end_cur,
+					   '-width'           => '8',
+					   '-validate'        => 'key',
 					   '-validatecommand' => \&is_signed_numeric,
-					   '-relief' => 'sunken' );
-$ballon->attach( $f2_v,
-				 '-balloonmsg' => "Enter the end current (in Ampere)" );
-my $f2_l2 = $f2->Label( '-text' => 'A',
-						'-width' => 1 );
+					   '-relief'          => 'sunken' );
+$ballon->attach( $f2_v, '-balloonmsg'     =>
+				        "Enter the end current (in Ampere)" );
+my $f2_l2 = $f2->Label( '-text'           => 'A',
+						'-width'          => 1 );
 
 $f2->pack( %fp );
 $f2_l1->pack( %wp );
@@ -102,19 +102,18 @@ $f2_l2->pack( %wp );
 
 
 my $f3 = $mw->Frame( );
-my $f3_l1 = $f3->Label( '-text' => 'Current step size:',
-						'-width' => '20',
-						'anchor' => 'w' );
-my $f3_v = $f3->Entry( '-textvariable' => \$cur_step,
-					   '-width' => '8',
-					   '-validate' => 'key',
+my $f3_l1 = $f3->Label( '-text'           => 'Current step size:',
+						'-width'          => '20',
+						'anchor'          => 'w' );
+my $f3_v = $f3->Entry( '-textvariable'    => \$cur_step,
+					   '-width'           => '8',
+					   '-validate'        => 'key',
 					   '-validatecommand' => \&is_signed_numeric,
-					   '-relief' => 'sunken' );
-$ballon->attach( $f3_v,
-				 '-balloonmsg' => "Enter the size of the current steps " .
-				 "(in Ampere)" );
-my $f3_l2 = $f3->Label( '-text' => 'A',
-						'-width' => 1 );
+					   '-relief'          => 'sunken' );
+$ballon->attach( $f3_v, '-balloonmsg'     =>
+				        "Enter the size of the current\nsteps (in Ampere)" );
+my $f3_l2 = $f3->Label( '-text'           => 'A',
+						'-width'          => 1 );
 
 $f3->pack( %fp );
 $f3_l1->pack( %wp );
@@ -123,18 +122,17 @@ $f3_l2->pack( %wp );
 
 
 my $f4 = $mw->Frame( );
-my $f4_l1 = $f4->Label( '-text' => 'Number of runs:',
-						'-width' => '20',
-						'anchor' => 'w' );
-my $f4_v = $f4->Entry( '-textvariable' => \$num_runs,
-					   '-width' => '8',
-					   '-validate' => 'key',
+my $f4_l1 = $f4->Label( '-text'           => 'Number of runs:',
+						'-width'          => '20',
+						'anchor'          => 'w' );
+my $f4_v = $f4->Entry( '-textvariable'    => \$num_runs,
+					   '-width'           => '8',
+					   '-validate'        => 'key',
 					   '-validatecommand' => sub { $_[ 0 ] =~ /^\s*\d*\s*$/ },
 					   '-relief' => 'sunken' );
-$ballon->attach( $f4_v,
-				 '-balloonmsg' => "Enter the number of runs" );
-my $f4_l2 = $f4->Label( '-text' => ' ',
-						'-width' => 1 );
+$ballon->attach( $f4_v, '-balloonmsg'     => "Enter the number of runs" );
+my $f4_l2 = $f4->Label( '-text'           => ' ',
+						'-width'          => 1 );
 
 $f4->pack( %fp );
 $f4_l1->pack( %wp );
@@ -142,20 +140,20 @@ $f4_v->pack( %wp );
 $f4_l2->pack( %wp );
 
 
-my $f5 = $mw->Frame( '-width' => '29' );
-my $f5_l1 = $f5->Label( '-text' => 'Waiting time:',
-						'-width' => '20',
-						'anchor' => 'w' );
-my $f5_v = $f5->Entry( '-textvariable' => \$tc_fact,
-					   '-width' => '7',
-					   '-validate' => 'key',
+my $f5 = $mw->Frame( '-width'             => '29' );
+my $f5_l1 = $f5->Label( '-text'           => 'Waiting time:',
+						'-width'          => '20',
+						'anchor'          => 'w' );
+my $f5_v = $f5->Entry( '-textvariable'    => \$tc_fact,
+					   '-width'           => '7',
+					   '-validate'        => 'key',
 					   '-validatecommand' => \&is_numeric,
-					   '-relief' => 'sunken' );
-$ballon->attach( $f5_v,
-				 '-balloonmsg' => "Enter the number of lock-in time " .
-				 "constants\nwaited before a new data point is recorded" );
-my $f5_l2 = $f5->Label( '-text' => '* tc',
-						'-width' => 2 );
+					   '-relief'          => 'sunken' );
+$ballon->attach( $f5_v, '-balloonmsg'     =>
+				        "Enter the number of lock-in time constants\n" .
+				        "waited before a new data point is recorded" );
+my $f5_l2 = $f5->Label( '-text'           => '* tc',
+						'-width'          => 2 );
 
 $f5->pack( %fp );
 $f5_l1->pack( %wp );
@@ -165,14 +163,14 @@ $f5_l2->pack( %wp );
 
 
 my $f6 = $mw->Frame( );
-my $f6_l = $f6->Label( '-text' => 'Time constant (tc):',
-					   '-width' => '20',
-					   'anchor' => 'w' );
-my $f6_m = $f6->Optionmenu( '-options' =>
+my $f6_l = $f6->Label( '-text'          => 'Time constant (tc):',
+					   '-width'         => '20',
+					   'anchor'         => 'w' );
+my $f6_m = $f6->Optionmenu( '-options'  =>
                             [ ( "Don't set", '100 s', ' 30 s', ' 10 s',
                                 '  3 s', '  1 s', '300 ms', '100 ms', ' 30 ms',
                                 ' 10 ms', '  3 ms', '  1 ms' ) ],
-							'-width' => 9,
+							'-width'    => 9,
 							'-variable' => \$tc );
 $ballon->attach( $f6_m,
 				 '-balloonmsg' => "Select the lock-in amplifiers time " .
@@ -183,10 +181,10 @@ $f6_m->pack( %wp );
 
 
 my $f7 = $mw->Frame( );
-my $f7_l = $f7->Label( '-text' => 'Sensitivity:',
-					   '-width' => '20',
-					   'anchor' => 'w' );
-my $f7_m = $f7->Optionmenu( '-options' =>
+my $f7_l = $f7->Label( '-text'          => 'Sensitivity:',
+					   '-width'         => '20',
+					   'anchor'         => 'w' );
+my $f7_m = $f7->Optionmenu( '-options'  =>
 							[ ( "Don't set", '500 mV', '200 mV', '100 mV',
 								' 50 mV', ' 20 mV', ' 10 mV', '  5 mv',
 								'  2 mV', '  1 mV', '500 uV', '200 uV',
@@ -194,36 +192,38 @@ my $f7_m = $f7->Optionmenu( '-options' =>
 								'  5 uV', '  2 uV', '  1 uV',
 								'500 nV', '200 nV', '100 nV', ' 50 nV',
 								' 10 nV', '  5 nV', '  2 nV', '  1 nV' ) ],
-							'-width' => 9,
+							'-width'    => 9,
 							'-variable' => \$sens );
-$ballon->attach( $f7_m,
-				 '-balloonmsg' => "Select the lock-in amplifiers " .
-				 "sensitivity" );
+$ballon->attach( $f7_m, '-balloonmsg'   =>
+				        "Select the lock-in amplifiers sensitivity" );
 $f7->pack( %fp );
 $f7_l->pack( %wp );
 $f7_m->pack( %wp );
 
 
-my $f9_m = $mw->Optionmenu( '-options' => [ ( 'Start experiment',
-											  'Test program',
-											  'Load into fsc2' ) ],
-							'-variable' => \$how,
+my $f9_m = $mw->Optionmenu( '-options'     => [ ( 'Start experiment',
+												  'Test program',
+												  'Load into fsc2' ) ],
+							'-variable'    => \$how,
 						  )->pack( '-padx' => '3m',
 								   '-pady' => '3m' );
-$ballon->attach( $f9_m,
-				 '-balloonmsg' => "Run fsc2 immediately, test\n" .
-				                  "or just load the program" );
+$ballon->attach( $f9_m, '-balloonmsg'      => "Run fsc2 immediately, test\n" .
+				                              "or just load the program" );
 
 my $f10 = $mw->Frame( );
-my $f10_a = $mw->Button( '-text' => 'Apply',
+my $f10_a = $mw->Button( '-text'    => 'Apply',
 						 '-command' => \&write_out );
-my $f10_q = $mw->Button( '-text' => 'Quit',
+my $f10_q = $mw->Button( '-text'    => 'Quit',
 						 '-command' => sub { &store_defs; $mw->destroy } );
-$f10->pack( '-side' => 'top',
-			'-fill' => 'x',
-			'-padx' => '4m' );
-$f10_a->pack( %wp, 'padx' => '5m', '-pady' => '3m' );
-$f10_q->pack( %wp, 'padx' => '5m', '-pady' => '3m' );
+$f10->pack( '-side'                 => 'top',
+			'-fill'                 => 'x',
+			'-padx'                 => '4m' );
+$f10_a->pack( %wp,
+			  'padx'                => '5m',
+			  '-pady'               => '3m' );
+$f10_q->pack( %wp,
+			  'padx'                => '5m',
+			  '-pady'               => '3m' );
 
 
 MainLoop;
