@@ -1078,8 +1078,8 @@ static void accept_2d_data( long x_index, long y_index, long curve,
  * points to the start of the new data set, and 'type' indicates the
  * type of the new data (integer or floating point numbers, 1D or
  * multi-dimensional array). It returns the number of of new data
- * points and '*ptr' is pointing to the start of the new data when the
- * function returns.
+ * points and '*ptr' is pointing to the start of the data within the
+ * set (i.e. after the header) when the function returns.
  *---------------------------------------------------------------------*/
 
 static long get_number_of_new_points( char **ptr, Var_Type_T type )
@@ -1153,15 +1153,14 @@ static long get_number_of_new_points( char **ptr, Var_Type_T type )
 static bool get_new_extrema( double *max, double *min, char *ptr,
 							 long len, Var_Type_T type )
 {
-	double data, old_max, old_min;
+	double data;
 	long i, j;
 	long ldata;
 	long x_len;
 	long y_len;
+	double old_max = *max;
+	double old_min = *min;
 
-
-	old_max = *max;
-	old_min = *min;
 
 	if ( type & ( INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR ) )
 		for ( i = 0; i < len; i++ )
