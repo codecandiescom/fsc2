@@ -71,7 +71,7 @@ script:
 
 1. Default parallel port base address: The Rulbus interface is going
    to be connected to one of the parallel ports of your computer. To
-   tell the module on which port to look out for the Rulbus interface
+   tell the module on which port to look for the Rulbus interface
    you have to tell it the base address of the port. For nomal PCs
    this usually is 0x378 for LPT1 and 0x278 for LPT2, but on some
    it may also be at address 0x3BC. If in doubt load the parport module
@@ -80,11 +80,11 @@ script:
    using the command "cat /dev/lp0" (don't worry about error messages)
    and then look in /proc/ioports for lines with 'parportX' (where X
    is a number). Then take the lowest address for the port the Rulbus
-   interface is going to be connected from the leftmost column as the
-   base address. If you later want to use the module with a different
-   parallel port you don't have to recompile it, you can tell the
-   module to use a different base address by loading it with the "base"
-   option, i.e. use e.g. 
+   interface is going to be connected to from the leftmost column of
+   the output as the base address. If you later want to use the module
+   with a different parallel port you don't have to recompile it, you
+   can tell the module to use a different base address by loading it
+   with the "base" option, i.e. use e.g. 
 
 	   modprobe -k rulbus_epp base=0x378
 
@@ -119,12 +119,18 @@ script:
    doesn't you may have to apply a few changes to the script and install
    it as well as the links in the runlevel directories manually.)
 
+   If you should decide later to use a different major device number for
+   the module you can overrule the compiled in default value by using
+   the "major" option, i.e. to make the module use a major device number
+   of 88 load the module using e.g.
+
+       modprobe -k rulbus_epp major=88
+
 3. Debugging code: When debugging code is included into the driver internal
    function calls as well as some additional information will be added to
-   the kernel messages (e.g. '/var/log/messages' or '/var/log/debug' on some
-   systems). That's a lot of stuff, so please use it only when you want to
-   debug the module and check regularly that your root file system isn't
-   running out of space!
+   the kernel messages (e.g. '/var/log/messages' or '/var/log/debug' on
+   some systems). Don't forget to regularly check that your root file
+   system isn't running out of space!
 
 4. Installation directory: Include files will be installed in the 'include'
    subdirectory of the install directory, the library in the 'lib'
