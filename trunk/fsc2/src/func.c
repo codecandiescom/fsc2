@@ -3,7 +3,6 @@
 */
 
 
-
 #include "fsc2.h"
 #include <sys/ipc.h>
 #include <sys/shm.h>
@@ -507,12 +506,19 @@ Var *f_cos( Var *v )
 
 Var *f_tan( Var *v )
 {
+	double res;
+
 	vars_check( v, INT_VAR | FLOAT_VAR );
 
 	if ( v->type == INT_VAR )
-		return vars_push( FLOAT_VAR, tan( ( double ) v->val.lval ) );
+		res = tan( ( double ) v->val.lval );
 	else
-		return vars_push( FLOAT_VAR, tan( v->val.dval ) );
+		res = tan( v->val.dval );
+
+	if ( fabs( res ) == HUGE_VAL && errno == ERANGE )
+		eprint( SEVERE, "%s:%ld: Overflow in function `tan()'.\n", Fname, Lc );
+
+	return vars_push( FLOAT_VAR, res );
 }
 
 
@@ -589,12 +595,20 @@ Var *f_atan( Var *v )
 
 Var *f_sinh( Var *v )
 {
+	double res;
+
 	vars_check( v, INT_VAR | FLOAT_VAR );
 
 	if ( v->type == INT_VAR )
-		return vars_push( FLOAT_VAR, sinh( ( double ) v->val.lval ) );
+		res = sinh( ( double ) v->val.lval );
 	else
-		return vars_push( FLOAT_VAR, sinh( v->val.dval ) );
+		res = sinh( v->val.dval );
+
+	if ( fabs( res ) == HUGE_VAL && errno == ERANGE )
+		eprint( SEVERE, "%s:%ld: Overflow in function `sinh()'.\n",
+				Fname, Lc );
+
+	return vars_push( FLOAT_VAR, res );
 }
 
 
@@ -604,12 +618,20 @@ Var *f_sinh( Var *v )
 
 Var *f_cosh( Var *v )
 {
+	double res;
+
 	vars_check( v, INT_VAR | FLOAT_VAR );
 
 	if ( v->type == INT_VAR )
-		return vars_push( FLOAT_VAR, cosh( ( double ) v->val.lval ) );
+		res = cosh( ( double ) v->val.lval );
 	else
-		return vars_push( FLOAT_VAR, cosh( v->val.dval ) );
+		res = cosh( v->val.dval );
+
+	if ( res == HUGE_VAL && errno == ERANGE )
+		eprint( SEVERE, "%s:%ld: Overflow in function `cosh()'.\n",
+				Fname, Lc );
+
+	return vars_push( FLOAT_VAR, res );
 }
 
 
@@ -647,7 +669,8 @@ Var *f_exp( Var *v )
 	res = exp( arg );
 
 	if ( res == 0.0 && errno == ERANGE )
-		eprint( WARN, "%s:%ld: Underflow in function `exp()'.\n", Fname, Lc );
+		eprint( WARN, "%s:%ld: Underflow in function `exp()' - result is 0.\n",
+				Fname, Lc );
 
 	if ( res == HUGE_VAL && errno == ERANGE )
 		eprint( SEVERE, "%s:%ld: Overflow in function `exp()'.\n", Fname, Lc );
@@ -2262,6 +2285,14 @@ Var *f_save_o( Var *v )
 	return vars_push( INT_VAR, 1 );
 }
 
+
+/*---------------------------------------------------------------------------*/
+/* Writes either the contnt of the program or the error browser into a file. */
+/* Input parameter:                                                          */
+/* 1. 0: writes program browser, 1: error browser                            */
+/* 2. File identifier                                                        */
+/* 3. Comment string to prepend to each line                                 */
+/*---------------------------------------------------------------------------*/
 
 void print_browser( int browser, int fid, const char* comment )
 {
