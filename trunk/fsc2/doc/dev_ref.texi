@@ -56,6 +56,7 @@
 * kontron4060::     Kontron 4060 Voltmeter
 * lakeshore330::    Lake Shore 330 Temperature Controller
 * lecroy9400::      LeCroy Digitizing Oscilloscope 9400
+* mcn700::          F.u.G. Elektronik Power Supply MCN 700-2000
 * me6000::          Meilhaus Electronic GmbH ME-6000 and ME-6100 DAC card
 * ni6601::          National Instruments 6601 GPCT card
 * pci_mio_16e_1::   National Instruments PCI-MIO-16E-1 DAQ card
@@ -1388,7 +1389,7 @@ character, set @code{set-reos} and @code{set-xeos} to @code{yes} and
 @c #############################################################
 
 
-@node lecroy9400, me6000, lakeshore330, Device Reference
+@node lecroy9400, mcn700, lakeshore330, Device Reference
 @iftex
 @subheading LeCroy Digitizing Oscilloscope 9400
 @end iftex
@@ -1424,6 +1425,36 @@ channels, 2 function channels (needed for averaging).
 @item @code{digitizer_get_curve()}            @tab @ref{digitizer_get_curve,,digitizer_get_curve()}
 @c @code{@item digitizer_get_curve_fast()}    @tab @ref{@item digitizer_get_curve_fast,,@item digitizer_get_curve_fast()}
 @c @code{@item digitizer_run()}               @tab @ref{@item digitizer_run,,@item digitizer_run()}
+@end multitable
+
+
+@c #############################################################
+
+@node mcn700, me6000, lecroy9400, Device Reference
+@iftex
+@subheading F.u.G. Elektronik Power Supply MCN 700-2000
+@end iftex
+@ifnottex
+@section F.u.G. Elektronik Power Supply MCN 700-2000
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{mcn700}
+
+@paragraphindent 0
+@strong{Description}: Power supply, voltage range @w{0 -} @w{2000 V}
+with @w{1 V} resolution, current range @w{0 -} @w{300 mA} with
+@w{1 mA} resolution.
+
+@paragraphindent 0
+@strong{Controlled via}: GPIB bus (IEEE 488).
+
+@paragraphindent 0
+@strong{Supported functions}:
+@multitable @columnfractions .45 .45
+@item @code{powersupply_name()}           @tab @ref{powersupply_name,,powersupply_name()}
+@item @code{powersupply_voltage()}        @tab @ref{powersupply_voltage,,powersupply_voltage()}
+@item @code{powersupply_current()}        @tab @ref{powersupply_current,,powersupply_current()}
 @end multitable
 
 

@@ -363,7 +363,8 @@ monochromator_laser_line, -1, EXP;
 monochromator_shutter_limits, -1, ALL;
 
 
-/* Functions exported by the power supply (Thurlby&Thandar PL330DP) */
+/* Functions exported by the power supply (Thurlby&Thandar PL330DP,
+                                           F.u.G. MCN700-2000) */
 
 powersupply_name, 0, ALL;			   // returns the device name
 powersupply_damping, 2, EXP;		   // sets damping of output to on/off
