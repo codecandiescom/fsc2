@@ -8,7 +8,7 @@ VARIABLES:
 
 start_freq  =  8 MHz;
 end_freq    = 22 MHz;
-step_freq   = 25 kHz;
+step_freq   = 25 kHz;          
 
 attenuation = -5 db;
 
@@ -18,15 +18,20 @@ mod_ampl    = 80 kHz;
 N_runs      = 20;
 
 
+/***********************************************************/
+/* The following variables normally shouldn't be changed ! */
+/***********************************************************/
+
 I = 0;
 J;
 K = 1;
 
-N_points = int( ( end_freq - start_freq ) / step_freq ) + 1;
+N_points = ceil( ( end_freq - start_freq ) / step_freq ) + 1;
 data[ N_points ];
 mean[ N_points ];
 tc;
 File_1, File_2;
+
 
 PREPARATIONS:
 
@@ -51,17 +56,15 @@ tc = lockin_time_constant( );
 
 synthesizer_state( 1 );
 
-FOR I = 1 : N_runs {
+FOR I = 1 : N_runs
+{
+	print( "Starting #. run of #\n", I, N_runs );
 
-	print( "Starting #. run\n", I );
-
-    FOR J = 1 : N_points { 
-
+    FOR J = 1 : N_points 
+	{
         data[ J ] = lockin_get_data( );
-        display( J, ( mean[ J ] + data[ J ] ) / I, 1, J, data[ J ], 2 );
-        IF J < N_points {
-            synthesizer_frequency( start_freq + J * step_freq );
-        }
+        display( J, data[ J ], 1, J, ( mean[ J ] + data[ J ] ) / I, 2 );
+	    synthesizer_frequency( start_freq + J * step_freq );
         wait( tc );
     }
 
@@ -71,17 +74,20 @@ FOR I = 1 : N_runs {
     synthesizer_frequency( start_freq );
 }
 
+
 ON_STOP:
 
 synthesizer_state( 0 );
 
-IF I > 0 {
+IF I > 0
+{
 	save_program( File_2, "% " );
-	fsave( File_2, "%\n% Sens: # V, TC = # s, Phase = #\n" +
-		   "% Mod_Freq = # kHz, Mod_Ampl = # kHz\n%\n",
+	fsave( File_2, "%\n% Lock-in sens. = # V, time const. = # s, phase = #\n" +
+		   "% Mod. freq. = # kHz, mod. ampl. = # kHz\n%\n",
 		   lockin_sensitivity( ), tc, lockin_phase( ),
-			mod_freq * 1e-3, mod_ampl * 1e-3 );
-	save_comment( File_2, "% " );
+		   mod_freq * 1e-3, mod_ampl * 1e-3 );
+	save_comment( File_2, "% ", "Sample: \nTemperature = \nField = \n",
+				  "Please enter additional comments:" );
 	fsave( File_2, "%\n" );
 	save( File_2, mean / K );
 }
