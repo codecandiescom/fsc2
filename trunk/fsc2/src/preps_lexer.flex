@@ -232,7 +232,7 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 
 {P}/[\t \n,;] {
 				prepslval.vptr = vars_push( INT_VAR, p_num( prepstext ) );
-				return( RPP_TOK );
+				return RPP_TOK;
 			}
 
 {PS}		{   /* Phase sequence */
