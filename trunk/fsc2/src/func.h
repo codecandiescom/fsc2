@@ -20,6 +20,7 @@ typedef struct
 
 bool functions_init( void );
 void functions_exit( void );
+void load_all_functions( void );
 void load_functions( const char *name );
 Var *func_get( char *name, int *access );
 Var *func_call( Var *f );

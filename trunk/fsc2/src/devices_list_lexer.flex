@@ -172,6 +172,12 @@ void device_list_parse( void )
 		free( Fname );
 		PASSTHROU( );
 	}
+	CATCH( LIBRARY_EXCEPTION )
+	{
+		fclose( devices_listin );
+		free( Fname );
+		PASSTHROU( );
+	}
 
 	fclose( devices_listin );
 }

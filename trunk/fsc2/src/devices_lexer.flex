@@ -162,6 +162,7 @@ int devices_parser( FILE *in )
 	{
 		device_list_parse( );	
 		devicesparse( );
+		load_all_functions( );
 	}
 	CATCH( INVALID_INPUT_EXCEPTION )
 	{

@@ -125,7 +125,8 @@ bool functions_init( void )
 	      functions into it.
 	   2. Parse the file `Functions' where all additional functions have to
 	      be listed.
-	   3. Get addresses of all functions defined in file `User_Functions.c'.
+	   3. Get addresses of all functions declared in `Functions and defined
+	      in file `User_Functions.c' aka `User_Functions.so'
 	*/
 
 	TRY
@@ -133,13 +134,7 @@ bool functions_init( void )
 		fncts = T_malloc( ( num_def_func + 1 ) * sizeof( Func ) );
 		memcpy( fncts, def_fncts, ( num_def_func + 1 ) * sizeof( Func ) );
 		func_list_parse( &fncts, num_def_func, &num_func );
-		load_functions( "User_Functions" );
    		TRY_SUCCESS;
-	}
-	CATCH( LIBRARY_EXCEPTION )
-	{
-		functions_exit( );
-		return FAIL;
 	}
 	CATCH( OUT_OF_MEMORY_EXCEPTION )
 	{
@@ -188,6 +183,20 @@ void functions_exit( void )
 	Num_Libs = 0;
 }
 
+
+
+void load_all_functions( void )
+{
+	Device *cd;
+
+	load_functions( "User_Functions" );
+
+	for ( cd = Dev_List; cd != NULL; cd = cd->next )
+	{
+		load_functions( cd->name );
+		cd->is_loaded = SET;
+	}
+}
 
 
 void load_functions( const char *name )

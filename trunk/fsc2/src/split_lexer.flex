@@ -266,6 +266,8 @@ bool section_parser( int section )
 					"line.\n", Fname, Lc );
 			return FAIL;
 		}
+		CATCH( LIBRARY_EXCEPTION )
+			return FAIL;
 		CATCH( FLOATING_POINT_EXCEPTION )
 			return FAIL;
 		CATCH( PRINT_SYNTAX_EXCEPTION )

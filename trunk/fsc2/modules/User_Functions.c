@@ -15,9 +15,10 @@ Var *float_slice( Var *var );
 
 
 
-/* Here examples for init and exit hok functions - the init hook function will
-   be called directly after the library is loaded while the exit hook function
-   is called immediately before the library is unloaded. */
+/* Here examples for init and exit hok functions - the init hook function
+   will be called directly after all libraries are loaded while the exit
+   hook function is called immediately before the library is unloaded.
+*/
 
 int User_Functions_init_hook( void )
 {
@@ -32,7 +33,7 @@ void User_Functions_exit_hook( void )
 
 
 /****************************************************************/
-/* Enter the definition of all nedded functions below this line */
+/* Enter the definition of all needed functions below this line */
 /****************************************************************/
 
 
