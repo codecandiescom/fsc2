@@ -198,6 +198,8 @@ UNREC       [^\n \t;,\(\)\=\+\-\*\/\[\]\{\}\%\^]+
 ","         return( ',' );       /* list separator */
 "("         return( '(' );       /* start of function argument list */
 ")"         return( ')' );       /* end of function argument list */
+"{"         return( '{' );       /* start of initialisation data list */
+"}"         return( '}' );       /* end of initialisation data list */
 "+"         return( '+' );       /* addition operator */
 "-"         return( '-' );       /* subtraction operator or unary minus */
 "*"         return( '*' );       /* multiplication operator */
