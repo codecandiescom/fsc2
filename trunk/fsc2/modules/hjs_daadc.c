@@ -387,7 +387,7 @@ static int hjs_daadc_in_out( int out )
 	unsigned int in_val;
 
 
-	/* Split up the 12 bit input data into 4-bit chunks and store them in
+	/* Split up the 12-bit input data into 4-bit chunks and store them in
 	   lower nibbles of the output bytes. The upper nibbles are control
 	   bits. The fourth byte to be send is control data only, telling the
 	   DAC and output the data (and at the same time to convert the
