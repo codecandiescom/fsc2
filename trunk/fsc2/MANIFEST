@@ -4,6 +4,7 @@
 #
 
 COPYING
+Changes
 INSTALL
 MANIFEST
 Makefile
@@ -101,6 +102,7 @@ doc/cmd.texi
 doc/dev_ref.texi
 doc/devices.texi
 doc/edl.texi
+doc/emacs.texi
 doc/examples.texi
 doc/forward.png
 doc/fsc2.1
@@ -226,14 +228,6 @@ modules/tds520c.h
 modules/tds540.h
 modules/tds744a.h
 modules/tds754a.h
-modules/tds8647a.c
-modules/tds8647a_gpib.c
-modules/tds8647a_lexer.l
-modules/tds8647a_util.c
-modules/tds8648b.c
-modules/tds8648b_gpib.c
-modules/tds8648b_lexer.l
-modules/tds8648b_util.c
 modules/tds_gpib.c.tmpl
 modules/tds_util.c.tmpl
 
