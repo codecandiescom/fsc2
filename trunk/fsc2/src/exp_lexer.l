@@ -261,8 +261,9 @@ FUNC        {IDENT}"#"[0-9]+
 				exp_val.vptr = vars_get( exptext );
 				if ( exp_val.vptr == NULL )
 				{
-					eprint( FATAL, "%s:%ld: Variable `%s' has not been "
-							"declared.\n", Fname, Lc, exptext );
+					eprint( FATAL, "%s:%ld: Variable or function `%s' has not "
+								   "been declared or loaded.\n",
+								   Fname, Lc, exptext );
 					 THROW( EXCEPTION );
 				}
 

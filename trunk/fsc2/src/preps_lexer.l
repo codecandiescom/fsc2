@@ -361,8 +361,9 @@ FUNC        {IDENT}"#"[0-9]+
 
 				if ( ( prepslval.vptr = vars_get( prepstext ) ) == NULL )
 				{
-					eprint( FATAL, "%s:%ld: Variable `%s' has not been "
-							"declared.\n", Fname, Lc, prepstext );
+					eprint( FATAL, "%s:%ld: Variable or function `%s' has not "
+								   "been declared ort loaded.\n",
+								   Fname, Lc, prepstext );
 					THROW( EXCEPTION );
 				}
 

@@ -410,8 +410,9 @@ WS          [\n=: ]+
 
 				if ( ( assignlval.vptr = vars_get( assigntext ) ) == NULL )
 				{
-					eprint(	FATAL, "%s:%ld: Variable `%s' has not been "
-							"declared.\n", Fname, Lc, assigntext );
+					eprint(	FATAL, "%s:%ld: Variable or function `%s' has not "
+								   "been declared or loaded.\n",
+								   Fname, Lc, assigntext );
 					 THROW( EXCEPTION );
 				}
 
