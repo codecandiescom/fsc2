@@ -992,7 +992,7 @@ Var *synthesizer_mod_ampl( Var *v )
 
 		hp8647a.mod_ampl_is_set[ hp8647a.mod_type ] = SET;
 
-		return vars_push( INT_VAR, hp8647a.mod_ampl[ hp8647a.mod_type ] );
+		return vars_push( FLOAT_VAR, hp8647a.mod_ampl[ hp8647a.mod_type ] );
 	}
 
 	if ( ! hp8647a.mod_type_is_set )
