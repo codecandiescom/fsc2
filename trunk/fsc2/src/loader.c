@@ -1,5 +1,5 @@
 /*
-  $Id
+  $Id:
 */
 
 
@@ -7,12 +7,12 @@
 #include "fsc2.h"
 
 
-/* Variables shared with func.c */
-
+/* Variables imported from func.c */
 
 extern int num_def_func;    /* number of built-in functions */
-extern int num_func;        /* number of built-in  and listed functions */
+extern int num_func;        /* number of built-in and listed functions */
 extern Func *fncts;         /* structure for list of functions */
+extern Func def_fncts[ ];   /* structures for list of built-in functions */
 
 
 
@@ -204,7 +204,7 @@ void load_functions( Device *dev )
 		}
 
 		/* Allow overloading of built-in functions - but only once, next time
-		   just print strong warning and do nothing */
+		   just print severe warning and do nothing */
 
 		if ( num < num_def_func && fncts[ num ].fnct != NULL )
 		{
