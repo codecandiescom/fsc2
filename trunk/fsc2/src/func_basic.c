@@ -121,18 +121,24 @@ Var *f_int( Var *v )
 	}
 
 	if ( ilp != NULL )
-		return vars_push( INT_TRANS_ARR, ilp, len );
-
-	rlp = T_malloc( len * sizeof( long ) );
-	for ( i = 0; i < len; idp++, i++ )
+		new_var = vars_push( INT_TRANS_ARR, ilp, len );
+	else
 	{
-		if ( *idp > LONG_MAX || *idp < LONG_MIN )
-			eprint( SEVERE, "%s:%ld: Integer overflow in function `int()'.\n",
-					Fname, Lc );
-		rlp[ i ] = ( long ) *idp;
+		rlp = T_malloc( len * sizeof( long ) );
+		for ( i = 0; i < len; idp++, i++ )
+		{
+			if ( *idp > LONG_MAX || *idp < LONG_MIN )
+				eprint( SEVERE, "%s:%ld: Integer overflow in function "
+						"`int()'.\n", Fname, Lc );
+			rlp[ i ] = ( long ) *idp;
+		}
+
+		new_var = vars_push( INT_TRANS_ARR, rlp, len );
 	}
-	new_var = vars_push( INT_TRANS_ARR, rlp, len );
+
+	new_var->flags |= v->flags & IS_DYNAMIC;
 	T_free( rlp );
+
 	return new_var;
 }
 
@@ -168,12 +174,16 @@ Var *f_float( Var *v )
 	}
 
 	if ( idp != NULL )
-		return vars_push( FLOAT_TRANS_ARR, idp, len );
+		new_var = vars_push( FLOAT_TRANS_ARR, idp, len );
+	else
+	{
+		rdp = T_malloc( len * sizeof( double ) );
+		for ( i = 0; i < len; i++ )
+			rdp[ i ] = ( double ) *ilp++;
+		new_var = vars_push( FLOAT_TRANS_ARR, rdp, len );
+	}
 
-	rdp = T_malloc( len * sizeof( double ) );
-	for ( i = 0; i < len; i++ )
-		rdp[ i ] = ( double ) *ilp++;
-	new_var = vars_push( FLOAT_TRANS_ARR, rdp, len );
+	new_var->flags |= v->flags & IS_DYNAMIC;
 	T_free( rdp );
 	return new_var;
 }
@@ -214,18 +224,22 @@ Var *f_round( Var *v )
 	}
 
 	if ( ilp != NULL )
-		return vars_push( INT_TRANS_ARR, ilp, len );
-
-	rlp = T_malloc( len * sizeof( long ) );
-	for ( i = 0; i < len; idp++, i++ )
+		new_var = vars_push( INT_TRANS_ARR, ilp, len );
+	else
 	{
-		if ( *idp >= LONG_MAX - 0.5 || *idp <= LONG_MIN + 0.5 )
-			eprint( SEVERE, "%s:%ld: Integer overflow in function "
-					"`round()'.\n", Fname, Lc );
-		rlp[ i ] = ( long ) ( 2 * *idp ) - ( long ) *idp;
+		rlp = T_malloc( len * sizeof( long ) );
+		for ( i = 0; i < len; idp++, i++ )
+		{
+			if ( *idp >= LONG_MAX - 0.5 || *idp <= LONG_MIN + 0.5 )
+				eprint( SEVERE, "%s:%ld: Integer overflow in function "
+						"`round()'.\n", Fname, Lc );
+			rlp[ i ] = ( long ) ( 2 * *idp ) - ( long ) *idp;
+		}
+
+		new_var = vars_push( INT_TRANS_ARR, rlp, len );
 	}
 
-	new_var = vars_push( INT_TRANS_ARR, rlp, len );
+	new_var->flags |= v->flags & IS_DYNAMIC;
 	T_free( rlp );
 	return new_var;
 }
@@ -264,18 +278,22 @@ Var *f_floor( Var *v )
 	}
 
 	if ( ilp != NULL )
-		return vars_push( INT_TRANS_ARR, ilp, len );
-
-	rlp = T_malloc( len * sizeof( long ) );
-	for ( i = 0; i < len; idp++, i++ )
+		new_var = vars_push( INT_TRANS_ARR, ilp, len );
+	else
 	{
-		if ( *idp < LONG_MIN )
-			eprint( SEVERE, "%s:%ld: Integer overflow in function "
-					"`floor()'.\n", Fname, Lc );
-		rlp[ i ] = ( long ) floor( *idp );
+		rlp = T_malloc( len * sizeof( long ) );
+		for ( i = 0; i < len; idp++, i++ )
+		{
+			if ( *idp < LONG_MIN )
+				eprint( SEVERE, "%s:%ld: Integer overflow in function "
+						"`floor()'.\n", Fname, Lc );
+			rlp[ i ] = ( long ) floor( *idp );
+		}
+
+		new_var = vars_push( INT_TRANS_ARR, rlp, len );
 	}
 
-	new_var = vars_push( INT_TRANS_ARR, rlp, len );
+	new_var->flags |= v->flags & IS_DYNAMIC;
 	T_free( rlp );
 	return new_var;
 }
@@ -314,19 +332,24 @@ Var *f_ceil( Var *v )
 	}
 
 	if ( ilp != NULL )
-		return vars_push( INT_TRANS_ARR, ilp, len );
-
-	rlp = T_malloc( len * sizeof( long ) );
-	for ( i = 0; i < len; idp++, i++ )
+		new_var = vars_push( INT_TRANS_ARR, ilp, len );
+	else
 	{
-		if ( *idp < LONG_MIN )
-			eprint( SEVERE, "%s:%ld: Integer overflow in function `ceil()'.\n",
-					Fname, Lc );
-		rlp[ i ] = ( long ) ceil( *idp );
+		rlp = T_malloc( len * sizeof( long ) );
+		for ( i = 0; i < len; idp++, i++ )
+		{
+			if ( *idp < LONG_MIN )
+				eprint( SEVERE, "%s:%ld: Integer overflow in function "
+						"`ceil()'.\n", Fname, Lc );
+			rlp[ i ] = ( long ) ceil( *idp );
+		}
+
+		new_var = vars_push( INT_TRANS_ARR, rlp, len );
 	}
 
-	new_var = vars_push( INT_TRANS_ARR, rlp, len );
+	new_var->flags |= v->flags & IS_DYNAMIC;
 	T_free( rlp );
+
 	return new_var;
 }
 
@@ -386,6 +409,7 @@ Var *f_abs( Var *v )
 		T_free( rdp );
 	}
 
+	new_var->flags |= v->flags & IS_DYNAMIC;
 	return new_var;
 }
 
@@ -419,7 +443,10 @@ Var *f_sin( Var *v )
 	else
 		for ( i = 0; i < len; i++ )
 			rdp[ i ] = sin( *idp++ );
+
 	new_var = vars_push( FLOAT_TRANS_ARR, rdp, len );
+	new_var->flags |= v->flags & IS_DYNAMIC;
+
 	T_free( rdp );
 
 	return new_var;
@@ -455,7 +482,10 @@ Var *f_cos( Var *v )
 	else
 		for ( i = 0; i < len; i++ )
 			rdp[ i ] = cos( *idp++ );
+
 	new_var = vars_push( FLOAT_TRANS_ARR, rdp, len );
+	new_var->flags |= v->flags & IS_DYNAMIC;
+
 	T_free( rdp );
 
 	return new_var;
@@ -503,6 +533,8 @@ Var *f_tan( Var *v )
 	}
 
 	new_var = vars_push( FLOAT_TRANS_ARR, rdp, len );
+	new_var->flags |= v->flags & IS_DYNAMIC;
+
 	T_free( rdp );
 
 	return new_var;
@@ -558,6 +590,8 @@ Var *f_asin( Var *v )
 	}
 
 	new_var = vars_push( FLOAT_TRANS_ARR, rdp, len );
+	new_var->flags |= v->flags & IS_DYNAMIC;
+
 	T_free( rdp );
 
 	return new_var;
@@ -613,6 +647,8 @@ Var *f_acos( Var *v )
 	}
 
 	new_var = vars_push( FLOAT_TRANS_ARR, rdp, len );
+	new_var->flags |= v->flags & IS_DYNAMIC;
+
 	T_free( rdp );
 
 	return new_var;
@@ -650,6 +686,8 @@ Var *f_atan( Var *v )
 			rdp[ i ] = atan( *idp++ );
 
 	new_var = vars_push( FLOAT_TRANS_ARR, rdp, len );
+	new_var->flags |= v->flags & IS_DYNAMIC;
+
 	T_free( rdp );
 
 	return new_var;
@@ -699,6 +737,8 @@ Var *f_sinh( Var *v )
 	}
 
 	new_var = vars_push( FLOAT_TRANS_ARR, rdp, len );
+	new_var->flags |= v->flags & IS_DYNAMIC;
+
 	T_free( rdp );
 
 	return new_var;
@@ -748,6 +788,8 @@ Var *f_cosh( Var *v )
 	}
 
 	new_var = vars_push( FLOAT_TRANS_ARR, rdp, len );
+	new_var->flags |= v->flags & IS_DYNAMIC;
+
 	T_free( rdp );
 
 	return new_var;
@@ -783,7 +825,10 @@ Var *f_tanh( Var *v )
 	else
 		for ( i = 0; i < len; i++ )
 			rdp[ i ] = tanh( *idp++ );
+
 	new_var = vars_push( FLOAT_TRANS_ARR, rdp, len );
+	new_var->flags |= v->flags & IS_DYNAMIC;
+
 	T_free( rdp );
 
 	return new_var;
@@ -840,6 +885,8 @@ Var *f_exp( Var *v )
 	}
 
 	new_var = vars_push( FLOAT_TRANS_ARR, rdp, len );
+	new_var->flags |= v->flags & IS_DYNAMIC;
+
 	T_free( rdp );
 
 	return new_var;
@@ -907,6 +954,8 @@ Var *f_ln( Var *v )
 	}
 
 	new_var = vars_push( FLOAT_TRANS_ARR, rdp, len );
+	new_var->flags |= v->flags & IS_DYNAMIC;
+
 	T_free( rdp );
 
 	return new_var;
@@ -974,6 +1023,8 @@ Var *f_log( Var *v )
 	}
 
 	new_var = vars_push( FLOAT_TRANS_ARR, rdp, len );
+	new_var->flags |= v->flags & IS_DYNAMIC;
+
 	T_free( rdp );
 
 	return new_var;
@@ -1030,6 +1081,8 @@ Var *f_sqrt( Var *v )
 	}
 
 	new_var = vars_push( FLOAT_TRANS_ARR, rdp, len );
+	new_var->flags |= v->flags & IS_DYNAMIC;
+
 	T_free( rdp );
 
 	return new_var;
@@ -1254,6 +1307,9 @@ Var *f_slice( Var *v )
 	double *idp;
 	long index;
 	long slice_len;
+	Var *new_var;
+	double *ndp;
+	long *nlp;
 
 
 	vars_check( v, INT_ARR | FLOAT_ARR | ARR_REF | ARR_PTR |
@@ -1298,15 +1354,34 @@ Var *f_slice( Var *v )
 	}
 
 
-	/* !!!!!
-	   This test needs still some thinking about because of problems in the
-	   test run with dynamically assigned arrays */
+	/* Test that the slice is within the arrays range */
 
-	if ( index + slice_len >= len && ! TEST_RUN )
+	if ( index + slice_len >= len &&
+		 ! ( TEST_RUN && ( v->flags & IS_DYNAMIC ) ) )
 	{
 		eprint( FATAL, "%s:%ld: Sum of index and slice length parameter "
 				"exceeds length of array in function slice.\n", Fname, Lc );
 		THROW( EXCEPTION );
+	}
+
+	if ( index + slice_len >= len )
+	{
+		if ( ilp != NULL )
+		{
+			nlp = T_calloc( slice_len, sizeof( long ) );
+			memcpy( nlp, ilp + index, ( len - index ) * sizeof( long ) );
+			new_var = vars_push( INT_TRANS_ARR, nlp, slice_len );
+			T_free( nlp );
+		}
+		else
+		{
+			ndp = T_calloc( slice_len, sizeof( double ) );
+			memcpy( nlp, idp + index, ( len - index ) * sizeof( double ) );
+			new_var = vars_push( FLOAT_TRANS_ARR, ndp, slice_len );
+			T_free( ndp );
+		}
+
+		return new_var;
 	}
 
 	if ( ilp != NULL )
