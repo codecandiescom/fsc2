@@ -244,6 +244,7 @@ Var *f_print( Var *v )
 Var *f_wait( Var *v )
 {
 	struct itimerval sleepy;
+	struct sigaction sact;
 	double how_long;
 	double secs;
 
@@ -271,26 +272,75 @@ Var *f_wait( Var *v )
 	if ( TEST_RUN )
 		return vars_push( INT_VAR, 1 );
 
+	/* If the child has been asked to stop it won't wait anymore */
+
+	if ( do_quit )
+		return vars_push( INT_VAR, 0 );
+
 	/* Set everything up for sleeping */
 
     sleepy.it_interval.tv_sec = sleepy.it_interval.tv_usec = 0;
 	sleepy.it_value.tv_usec = lround( modf( how_long, &secs ) * 1.0e6 );
 	sleepy.it_value.tv_sec = ( long ) secs;
 
-	/* Wait for SIGALRM or DO_QUIT signal, ignore DO_SEND */
+	/* Now here comes the tricky part: We have to wait for either the SIGALRM
+	   or the DO_QUIT signal but must be immune to DO_SEND signals. A naive
+	   implementation would define a variable 'is_alarm' to be set in the
+	   signal handler for SIGALRM, initialize it to zero and then do
+
+	   setitimer( ITIMER_REAL, &sleepy, NULL );
+	   while( ! is_alarm && ! do_quit )
+	       pause( );
+
+	   Unfortunately, there is a nasty race condition: If one of the signal
+	   handlers get executed between the check for its flag and the pause()
+	   the pause() gets started even though it shouldn't. And this actually
+	   happens sometimes, freezing the child process.
+
+	   To avoid this race condition a sigsetjmp() is executed before calling
+	   setitimer() and starting to wait. Since the SIGALRM can't have happend
+	   yet the sigsetjmp( ) will always return 0. Now we set a flag telling
+	   the signal handler that the jump buffer is initialized. Next we start
+	   setitimer() and finally start the pause(). This is done in an endless
+	   loop because the pause() can also be ended by a DO_SEND signal which we
+	   have to ignore. In the signal handler for both SIGALRM and the DO_QUIT
+	   signal a siglongjmp() is done if the 'can_jmp_alrm' flag is set,
+	   getting us to the point after the 'if'-block because it will always
+	   return with to the point where we called sigsetjmp() with a non-zero
+	   return value.
+
+	   Actually, there is still one race condition left: When the DO_QUIT
+	   signal comes in after the sigsetjmp() but before 'can_jmp_alrm' is set
+	   the signal handler will not siglongjmp() but simply return. In this
+	   (fortunately rather improbable case) the DO_QUIT signal will get lost
+	   and pause() will be run until the SIGALRM is triggered. But the only
+	   scenario for this to happen is when the user clicks on the stop button
+	   at an really unlucky moment. And if the wait period isn't too long he
+	   will probably never notice that he triggered the race condition -
+	   otherwise he simply has to click the stop button a second time.  */
 
 	if ( sigsetjmp( alrm_env, 1 ) == 0 )
 	{
-		can_jmp_alrm = SET;
+		can_jmp_alrm = 1;
 		setitimer( ITIMER_REAL, &sleepy, NULL );
 		for( ; ; )
 			pause( );
 	}
 
-	/* Return 1 if end of sleeping time was reached, 0 if do_quit was set.
-	   Set handling for SIGALRM to ignore, because after receipt of a
-	   'do_quit' signal the timer may still be running and otherwise the 
-	   resulting signal could kill the child prematurely */
+	/* Return 1 if end of sleeping time was reached, 0 if 'do_quit' was set.
+	   In case the wait was ended because of a DO_QUIT signal we have to set
+	   the handling of SIGALRM to ignore, because after receipt of a
+	   'do_quit' signal the timer may still be running and the finally
+	   arriving signal could kill the child prematurely. */
+
+	if ( do_quit )
+	{
+		sact.sa_handler = SIG_IGN;
+		sigemptyset( &sact.sa_mask );
+		sact.sa_flags = 0;
+		if ( sigaction( SIGALRM, &sact, NULL ) < 0 )
+			_exit( -1 );
+	}
 
 	return vars_push( INT_VAR, do_quit ? 0 : 1 );
 }

@@ -579,21 +579,23 @@ static void run_child( void )
 }
 
 
-/*---------------------------------------------------------------*/
-/* This is the signal handler for all three signals the child is */
-/* interested in. The signal handler should always be installed  */
-/* for a signal with blocking both the other signals to avoid    */
-/* interrupting the handler with another signal thus interfering */
-/* with the return via siglongjump().                            */
-/* And there's an additional twist: The SIGALRM signal can only  */
-/* come from the f_wait() function (see func_util.c). Here we    */
-/* we wait in a pause() for SIGALRM to get a reliable timer. On  */
-/* the other hand, the pause() also has to be interruptible by   */
-/* the DO_QUIT signal, so by falling through from the switch of  */
-/* for this signal it is guaranteed that also this signal will   */
-/* end the pause(). In all other cases (i.e. when we're not      */
-/* waiting in the pause() in f_wait()) nothing bad happens.      */
-/*---------------------------------------------------------------*/
+/*----------------------------------------------------------------*/
+/* This is the signal handler for all three signals the child is  */
+/* interested in. The signal handler should always be installed   */
+/* for a signal with blocking both the other signals to avoid     */
+/* interrupting the handler with another signal thus interfering  */
+/* with the return via siglongjump().                             */
+/* And there's an additional twist: The SIGALRM signal can only   */
+/* come from the f_wait() function (see func_util.c). Here we     */
+/* we wait in a pause() for SIGALRM to get a reliable timer. On   */
+/* the other hand, the pause() also has to be interruptible by    */
+/* the DO_QUIT signal, so by falling through from the switch of   */
+/* for this signal it is guaranteed that also this signal will    */
+/* end the pause() - it works even when the handler, while        */
+/* handling a SIGALRM signal, is interrupted by a DO_QUIT signal. */
+/* In all other cases (i.e. when we're not waiting in the pause() */
+/* in f_wait()) nothing bad happens.                              */
+/*----------------------------------------------------------------*/
 
 void child_sig_handler( int signo )
 {
