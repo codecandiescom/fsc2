@@ -55,10 +55,6 @@ void store_exp( FILE *in )
 	char *cur_Fname = NULL;
 
 
-	/* run the test hook functions from the modules */
-
-	run_test_hooks( );
-
 	/* set input file */
 
 	prim_expin = in;
@@ -444,16 +440,15 @@ void setup_if_else( long *pos, Prg_Token *cur_wr )
 void prim_exp_run( void )
 {
 	Prg_Token *cur;
-	int xyz = 3;
 
 	if ( Fname != NULL )
 		T_free( Fname );
 	Fname = NULL;
 
 
-	while ( xyz-- ) {
 	TRY
 	{
+		run_test_hooks( );
 		save_restore_variables( SET );
 
 		cur_prg_token = prg_token;
@@ -550,7 +545,6 @@ void prim_exp_run( void )
 
 	Fname = NULL;
 	save_restore_variables( UNSET );
-}
 }
 
 
