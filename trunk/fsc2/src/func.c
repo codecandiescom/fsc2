@@ -1531,6 +1531,7 @@ DPoint *eval_display_args( Var *v, int *nsets )
 
 		if ( dp[ *nsets ].nx < 0 )
 		{
+			T_free( dp );
 			eprint( FATAL, "%s:%ld: Invalid x-index (%ld) in `display()'.\n",
 					Fname, Lc, dp[ *nsets ].nx + ARRAY_OFFSET );
 			THROW( EXCEPTION );
@@ -1544,6 +1545,7 @@ DPoint *eval_display_args( Var *v, int *nsets )
 		{
 			if ( v == NULL )
 			{
+				T_free( dp );
 				eprint( FATAL, "%s:%ld: Missing y-index in `display()'.\n",
 						Fname, Lc );
 				THROW( EXCEPTION );
@@ -1558,6 +1560,7 @@ DPoint *eval_display_args( Var *v, int *nsets )
 
 			if ( dp[ *nsets ].nx < 0 )
 			{
+				T_free( dp );
 				eprint( FATAL, "%s:%ld: Invalid y-index (%ld) in "
 						"`display()'.\n",
 						Fname, Lc, dp[ *nsets ].ny + ARRAY_OFFSET );
@@ -1572,6 +1575,7 @@ DPoint *eval_display_args( Var *v, int *nsets )
 
 		if ( v == NULL )
 		{
+			T_free( dp );
 			eprint( FATAL, "%s:%ld: Missing data in `display()'.\n",
 					Fname, Lc );
 			THROW( EXCEPTION );
@@ -1602,6 +1606,7 @@ DPoint *eval_display_args( Var *v, int *nsets )
 
 		if ( dp[ *nsets ].nc < 0 || dp[ *nsets ].nc >= G.nc )
 		{
+			T_free( dp );
 			eprint( FATAL, "%s:%ld: Invalid curve number (%ld) in "
 					"`display()'.\n", Fname, Lc, dp[ *nsets ].nc + 1 );
 			THROW( EXCEPTION );
