@@ -147,10 +147,7 @@ bool tds520_init( const char *name )
 
     if ( gpib_write( tds520.device, "ACQ:STOPA RUNST;STATE RUN\n", 26 )
 		 == FAILURE )
-    {
-        gpib_local( tds520.device );
         return FAIL;
-    }
 
 	return OK;
 }

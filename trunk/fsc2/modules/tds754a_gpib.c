@@ -153,10 +153,7 @@ bool tds754a_init( const char *name )
 
     if ( gpib_write( tds754a.device, "ACQ:STOPA RUNST;STATE RUN\n", 26 )
 		 == FAILURE )
-    {
         gpib_local( tds754a.device );
-        return FAIL;
-    }
 
 	return OK;
 }
