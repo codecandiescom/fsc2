@@ -83,7 +83,7 @@ ${tds520a:.c=.o}:  tds520a.h
 ${tds520:.c=.o}:   tds520.h
 ${hp8647a:.c=.o}:  hp8647a.h
 
-hp8647a_lexer.c: hp8647a_lexer.f $(src_header)
+hp8647a_lexer.c: hp8647a_lexer.l $(src_header)
 	$(FLEX) $(FLEXFLAGS)$(patsubst %lexer.l,%,$<) -o$@ $<
 	sed -e 's/register char \*yy_cp, \*yy_bp;/\
 			register char \*yy_cp = NULL, \*yy_bp = NULL;/' $@ > $@.x

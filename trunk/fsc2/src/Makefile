@@ -60,7 +60,7 @@ modules:
 %.c: %.y $(headers)
 	$(BISON) $(BISONFLAGS) $(patsubst %_parser.y,%,$<) -o $@ $<
 
-%.c: %.flex $(headers)
+%.c: %.l $(headers)
 	$(FLEX) $(FLEXFLAGS)$(patsubst %_lexer.l,%,$<) -o$@ $<
 	sed -e 's/register char \*yy_cp, \*yy_bp;/\
 		register char \*yy_cp = NULL, \*yy_bp = NULL;/' $@ > $@.x
