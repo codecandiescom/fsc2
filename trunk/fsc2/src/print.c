@@ -505,6 +505,8 @@ static void start_printing( FILE *fp, char *name, long what )
 			 	 "end %% fsc2Dict\n"
 				 "%%%%EOF\n" );
 
+	fflush( fp );
+
 	if ( print_type != S2P )
 	{
 		fclose( fp );
@@ -555,7 +557,7 @@ static void print_header( FILE *fp, char *name )
 			     "%%%%EndComments\n",
 			 irnd( 72.0 * paper_width / INCH ),
 			 irnd( 72.0 * paper_height / INCH ),
-			 ctime( &d ), name ? name : "none",
+			 ctime( &d ), name ? name : "(none)",
 			 getpwuid( getuid( ) )->pw_name,
 			 getpwuid( getuid( ) )->pw_gecos );
 
