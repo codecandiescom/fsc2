@@ -627,8 +627,9 @@ static void cut_calc_curve( int dir, long index, bool has_been_shown )
 
 			CG.is_fs[ G.active_curve ] = SET;
 			fl_set_button( cut_form->cut_full_scale_button, 1 );
-			fl_set_object_helper( cut_form->cut_full_scale_button,
-								  "Switch off automatic rescaling" );
+			if ( ! ( cmdline_flags & NO_BALLOON ) )
+				fl_set_object_helper( cut_form->cut_full_scale_button,
+									  "Switch off automatic rescaling" );
 		}
 		else
 		{
@@ -656,9 +657,10 @@ static void cut_calc_curve( int dir, long index, bool has_been_shown )
 
 			CG.is_fs[ G.active_curve ] = UNSET;
 			fl_set_button( cut_form->cut_full_scale_button, 0 );
-			fl_set_object_helper( cut_form->cut_full_scale_button,
-								  "Rescale curves to fit into the window\n"
-								  "and switch on automatic rescaling" );
+			if ( ! ( cmdline_flags & NO_BALLOON ) )
+				fl_set_object_helper( cut_form->cut_full_scale_button,
+									  "Rescale curves to fit into the window\n"
+									  "and switch on automatic rescaling" );
 		}
 	}
 	else if ( CG.is_fs[ G.active_curve ] )
@@ -794,8 +796,9 @@ void cut_new_curve_handler( void )
 		if ( CG.is_fs[ G.active_curve ] )
 		{
 			fl_set_button( cut_form->cut_full_scale_button, 1 );
-			fl_set_object_helper( cut_form->cut_full_scale_button,
-								  "Switch off automatic rescaling" );
+			if ( ! ( cmdline_flags & NO_BALLOON ) )
+				fl_set_object_helper( cut_form->cut_full_scale_button,
+									  "Switch off automatic rescaling" );
 		}
 		else
 		{
@@ -813,9 +816,10 @@ void cut_new_curve_handler( void )
 			}
 
 			fl_set_button( cut_form->cut_full_scale_button, 0 );
-			fl_set_object_helper( cut_form->cut_full_scale_button,
-								  "Rescale curve to fit into the window\n"
-								  "and switch on automatic rescaling" );
+			if ( ! ( cmdline_flags & NO_BALLOON ) )
+				fl_set_object_helper( cut_form->cut_full_scale_button,
+									  "Rescale curve to fit into the window\n"
+									  "and switch on automatic rescaling" );
 		}
 
 		CG.curve = G.active_curve;
@@ -1531,9 +1535,10 @@ static void cut_release_handler( FL_OBJECT *obj, Window window,
 		{
 			CG.is_fs[ G.active_curve ] = UNSET;
 			fl_set_button( cut_form->cut_full_scale_button, 0 );
-			fl_set_object_helper( cut_form->cut_full_scale_button,
-								  "Rescale curve to fit into the window\n"
-								  "and switch on automatic rescaling" );
+			if ( ! ( cmdline_flags & NO_BALLOON ) )
+				fl_set_object_helper( cut_form->cut_full_scale_button,
+									  "Rescale curve to fit into the window\n"
+									  "and switch on automatic rescaling" );
 		}
 
 		cut_recalc_XPoints( );
@@ -1639,9 +1644,10 @@ static void cut_motion_handler( FL_OBJECT *obj, Window window,
 			{
 				CG.is_fs[ G.active_curve ] = UNSET;
 				fl_set_button( cut_form->cut_full_scale_button, 0 );
-				fl_set_object_helper( cut_form->cut_full_scale_button,
-									  "Rescale curve to fit into the window\n"
-									  "and switch on automatic rescaling" );
+				if ( ! ( cmdline_flags & NO_BALLOON ) )
+					fl_set_object_helper( cut_form->cut_full_scale_button,
+									   "Rescale curve to fit into the window\n"
+									   "and switch on automatic rescaling" );
 			}
 
 			redraw_cut_canvas( &G.cut_canvas );
@@ -1693,9 +1699,10 @@ void cut_undo_button_callback( FL_OBJECT *a, long b )
 	{
 		CG.is_fs[ G.active_curve ] = UNSET;
 		fl_set_button( cut_form->cut_full_scale_button, 0 );
-		fl_set_object_helper( cut_form->cut_full_scale_button,
-							  "Rescale curve to fit into the window\n"
-							  "and switch on automatic rescaling" );
+		if ( ! ( cmdline_flags & NO_BALLOON ) )
+			fl_set_object_helper( cut_form->cut_full_scale_button,
+								  "Rescale curve to fit into the window\n"
+								  "and switch on automatic rescaling" );
 	}
 
 	redraw_all_cut_canvases( );
@@ -1726,13 +1733,14 @@ void cut_fs_button_callback( FL_OBJECT *a, long b )
 
 	if ( state )
 	{
-		fl_set_object_helper( cut_form->cut_full_scale_button,
-							  "Switch off automatic rescaling" );
+		if ( ! ( cmdline_flags & NO_BALLOON ) )
+			fl_set_object_helper( cut_form->cut_full_scale_button,
+								  "Switch off automatic rescaling" );
 		
 		cut_calc_curve( -1, -1, SET );
 		redraw_all_cut_canvases( );
 	}
-	else
+	else if ( ! ( cmdline_flags & NO_BALLOON ) )
 		fl_set_object_helper( cut_form->cut_full_scale_button,
 							  "Rescale curve to fit into the window\n"
 							  "and switch on automatic rescaling" );

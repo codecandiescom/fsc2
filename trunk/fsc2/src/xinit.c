@@ -264,15 +264,18 @@ bool xforms_init( int *argc, char *argv[ ] )
 
 	main_form = G_Funcs.create_form_fsc2( );
 
-	fl_set_object_helper( main_form->Load, "Load new EDL program" );
-	fl_set_object_helper( main_form->Edit, "Edit loaded EDL program" );
-	fl_set_object_helper( main_form->reload, "Reload EDL program" );
-	fl_set_object_helper( main_form->test_file, "Start syntax and "
-						  "plausibility check" );
-	fl_set_object_helper( main_form->run, "Start loaded EDL program" );
-	fl_set_object_helper( main_form->quit, "Quit fsc2" );
-	fl_set_object_helper( main_form->help, "Show documentation" );
-	fl_set_object_helper( main_form->bug_report, "Mail a bug report" );
+	if ( ! ( cmdline_flags & NO_BALLOON ) )
+	{
+		fl_set_object_helper( main_form->Load, "Load new EDL program" );
+		fl_set_object_helper( main_form->Edit, "Edit loaded EDL program" );
+		fl_set_object_helper( main_form->reload, "Reload EDL program" );
+		fl_set_object_helper( main_form->test_file, "Start syntax and "
+							  "plausibility check" );
+		fl_set_object_helper( main_form->run, "Start loaded EDL program" );
+		fl_set_object_helper( main_form->quit, "Quit fsc2" );
+		fl_set_object_helper( main_form->help, "Show documentation" );
+		fl_set_object_helper( main_form->bug_report, "Mail a bug report" );
+	}
 
 	fl_set_browser_fontstyle( main_form->browser, FL_FIXED_STYLE );
 	fl_set_browser_fontstyle( main_form->error_browser, FL_FIXED_STYLE );

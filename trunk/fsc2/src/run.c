@@ -504,7 +504,8 @@ void stop_measurement( FL_OBJECT *a, long b )
 	fl_freeze_form( run_form->run );
 	fl_set_object_label( run_form->stop, "Close" );
 	fl_set_button_shortcut( run_form->stop, "C", 1 );
-	fl_set_object_helper( run_form->stop, "Remove this window" );
+	if ( ! ( cmdline_flags & NO_BALLOON ) )
+		fl_set_object_helper( run_form->stop, "Remove this window" );
 	fl_unfreeze_form( run_form->run );
 }
 
