@@ -450,7 +450,7 @@ ON_STOP:
 
 fsave( \"\\n\" );
 FOR I = 1 : N_points \{
-	fsave( \"# #\\n\", start_field + ( I - 1 ) * field_step, data[ I ] );
+	fsave( \"# #\\n\", start_cur + ( I - 1 ) * cur_step, data[ I ] );
 \}
 ";
 } else {

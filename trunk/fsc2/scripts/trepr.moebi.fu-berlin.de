@@ -37,7 +37,8 @@ my $field_error        = "";
 my $hidden_field_error = "";
 my $num_runs           = 1;
 my $pulses_per_trace   = 10;
-my $digitizer          = 'TDS520A';
+my @digitizers         = qw/ TDS520 TDS520A TDS520C TDS540 TDS744A TDS754A /;
+my $digitizer          = $digitizers[ 0 ];
 my @channels_1         = qw/ CH1 CH2 MATH1 MATH2 MATH3 /;
 my @channels_2         = qw/ CH1 CH2 CH3 CH4 MATH1 MATH2 MATH3 /;
 my $channels           = \@channels_1;
@@ -49,11 +50,12 @@ my $trig_channels      = \@trig_channels_1;
 my $trig_channel       = $trig_channels_1[ 0 ];
 my $num_avg            = 1;
 my $how                = 'Start experiment';
-my $calls              = 0;
 
 
-#my ( $f8_m, $f9_m );
 
+# Get defaults
+
+&get_defs;
 
 my %fp = ( '-side' => 'top',
 		   '-fill' => 'x',
@@ -65,131 +67,136 @@ my %wp = ( '-side' => 'left',
 		   '-padx' => '3m',
 		   '-expand' => 1 );
 
-
 my $mw = MainWindow->new( );
 $mw->title( "Time resolved EPR" );
 
-
 my $f1 = $mw->Frame( );
-my $f1_l1 = $f1->Label( '-text' => 'Start field:',
-						'-width' => '20',
-						'anchor' => 'w' );
-my $f1_v = $f1->Entry( '-textvariable' => \$start_field,
-					   '-width' => '8',
-					   '-validate' => 'key',
+my $f1_l1 = $f1->Label( '-text'           => 'Start field:',
+						'-width'          => '20',
+						'anchor'          => 'w' );
+my $f1_v = $f1->Entry( '-textvariable'    => \$start_field,
+					   '-width'           => '8',
+					   '-validate'        => 'key',
 					   '-validatecommand' => \&is_numeric,
-					   '-relief' => 'sunken' );
-my $f1_l2 = $f1->Label( '-text' => 'G',
-						'-width' => 1 );
+					   '-relief'          => 'sunken' );
+my $f1_l2 = $f1->Label( '-text'           => 'G',
+						'-width'          => 1 );
 
 
 my $f2 = $mw->Frame( );
-my $f2_l1 = $f2->Label( '-text' => 'End field:',
-						'-width' => '20',
-						'anchor' => 'w' );
-my $f2_v = $f2->Entry( '-textvariable' => \$end_field,
-					   '-width' => '8',
-					   '-validate' => 'key',
+my $f2_l1 = $f2->Label( '-text'           => 'End field:',
+						'-width'          => '20',
+						'anchor'          => 'w' );
+my $f2_v = $f2->Entry( '-textvariable'    => \$end_field,
+					   '-width'           => '8',
+					   '-validate'        => 'key',
 					   '-validatecommand' => \&is_numeric,
-					   '-relief' => 'sunken' );
-my $f2_l2 = $f2->Label( '-text' => 'G',
-						'-width' => 1 );
+					   '-relief'          => 'sunken' );
+my $f2_l2 = $f2->Label( '-text'           => 'G',
+						'-width'          => 1 );
 
 
 my $f3 = $mw->Frame( );
-my $f3_l1 = $f3->Label( '-text' => 'Field step size:',
-						'-width' => '20',
-						'anchor' => 'w' );
-my $f3_v = $f3->Entry( '-textvariable' => \$field_step,
-					   '-width' => '8',
-					   '-validate' => 'key',
+my $f3_l1 = $f3->Label( '-text'           => 'Field step size:',
+						'-width'          => '20',
+						'anchor'          => 'w' );
+my $f3_v = $f3->Entry( '-textvariable'    => \$field_step,
+					   '-width'           => '8',
+					   '-validate'        => 'key',
 					   '-validatecommand' => \&is_numeric,
-					   '-relief' => 'sunken' );
-my $f3_l2 = $f3->Label( '-text' => 'G',
-						'-width' => 1 );
+					   '-relief'          => 'sunken' );
+my $f3_l2 = $f3->Label( '-text'           => 'G',
+						'-width'          => 1 );
 
 
 my $f5 = $mw->Frame( );
-my $f5_l1 = $f5->Label( '-text' => 'Maximum field error:',
-						'-width' => '20',
-						'anchor' => 'w' );
-my $f5_v = $f5->Entry( '-textvariable' => \$field_error,
-					   '-width' => '8',
-					   '-validate' => 'key',
+my $f5_l1 = $f5->Label( '-text'           => 'Maximum field error:',
+						'-width'          => '20',
+						'anchor'          => 'w' );
+my $f5_v = $f5->Entry( '-textvariable'    => \$field_error,
+					   '-width'           => '8',
+					   '-validate'        => 'key',
 					   '-validatecommand' => \&is_numeric,
-					   '-relief' => 'sunken',
-					   'state' => $sweep_method eq 'sweep' ?
-					   'disabled' : 'normal' );
-my $f5_l2 = $f5->Label( '-text' => 'G',
-						'-width' => 1 );
+					   '-relief'          => 'sunken',
+					   'state'            => $sweep_method eq 'sweep' ?
+					                              'disabled' : 'normal' );
+my $f5_l2 = $f5->Label( '-text'           => 'G',
+						'-width'          => 1 );
 
 
 my $f4 = $mw->Frame( );
-my $f4_l = $f4->Label( '-text' => 'Sweep method:',
-						'-width' => '20',
-						'anchor' => 'w' );
-my $f4_m = $f4->Optionmenu( '-options' =>
-							[ ( 'sweep', 'set_field' ) ],
-							'-width' => 9,
-							'-variable' => \$sweep_method,
-						    '-command' => \&set_sweep_method );
+my $f4_l = $f4->Label( '-text'              => 'Sweep method:',
+						'-width'            => '20',
+						'anchor'            => 'w' );
+my $f4_m = $f4->Optionmenu( '-options'      => [ ( 'sweep', 'set_field' ) ],
+							'-width'        => 9,
+						    '-command'      => \&set_sweep_method,
+							'-textvariable' => \$sweep_method );
 
 
 my $f6 = $mw->Frame( );
-my $f6_l1 = $f6->Label( '-text' => 'Number of runs:',
-						'-width' => '20',
-						'anchor' => 'w' );
-my $f6_v = $f6->Entry( '-textvariable' => \$num_runs,
-					   '-width' => '8',
-					   '-validate' => 'key',
+my $f6_l1 = $f6->Label( '-text'           => 'Number of runs:',
+						'-width'          => '20',
+						'anchor'          => 'w' );
+my $f6_v = $f6->Entry( '-textvariable'    => \$num_runs,
+					   '-width'           => '8',
+					   '-validate'        => 'key',
 					   '-validatecommand' => sub { $_[ 0 ] =~ /^\s*\d*\s*$/ },
-					   '-relief' => 'sunken' );
-my $f6_l2 = $f6->Label( '-text' => ' ',
-						'-width' => 1 );
+					   '-relief'          => 'sunken' );
+my $f6_l2 = $f6->Label( '-text'           => ' ',
+						'-width'          => 1 );
 
 my $f7 = $mw->Frame( );
-my $f7_l1 = $f7->Label( '-text' => 'Laser flashes per trace:',
-						'-width' => '20',
-						'anchor' => 'w' );
-my $f7_v = $f7->Entry( '-textvariable' => \$pulses_per_trace,
-					   '-width' => '8',
-					   '-validate' => 'key',
+my $f7_l1 = $f7->Label( '-text'           => 'Laser flashes per trace:',
+						'-width'          => '20',
+						'anchor'          => 'w' );
+my $f7_v = $f7->Entry( '-textvariable'    => \$pulses_per_trace,
+					   '-width'           => '8',
+					   '-validate'        => 'key',
 					   '-validatecommand' => sub { $_[ 0 ] =~ /^\s*\d*\s*$/ },
-					   '-relief' => 'sunken' );
-my $f7_l2 = $f7->Label( '-text' => ' ',
-						'-width' => 1 );
+					   '-relief'          => 'sunken' );
+my $f7_l2 = $f7->Label( '-text'           => ' ',
+						'-width'          => 1 );
 
 
 my $f8 = $mw->Frame( );
-my $f8_l1 = $f8->Label( '-text' => 'Digitizer:',
-						'-width' => '20',
-						'anchor' => 'w' );
-my $f8_m = $f8->Optionmenu( '-options' => [ 'TDS520', 'TDS520A', 'TDS520C',
-											'TDS540', 'TDS744A', 'TDS754A' ],
-							'-width' => 9,
-							'-command' => \&digitizer_check,
-							'-variable' => \$digitizer );
-
+my $f8_l1 = $f8->Label( '-text'             => 'Digitizer:',
+						'-width'            => '20',
+						'anchor'            => 'w' );
+my $f8_m = $f8->Optionmenu( '-options'      => \@digitizers,
+							'-width'        => 9,
+							'-textvariable' => \$digitizer );
 
 my $f9 = $mw->Frame( );
-my $f9_l1 = $f9->Label( '-text' => 'Measurement channel:',
-						'-width' => '20',
-						'anchor' => 'w' );
-my $f9_m = $f9->Optionmenu( '-options' => $channels,
-							'-width' => 9,
-							'-variable' => \$channel );
+my $f9_l1 = $f9->Label( '-text'             => 'Measurement channel:',
+						'-width'            => '20',
+						'anchor'            => 'w' );
+my $f9_m = $f9->Optionmenu( '-options'      => $channels,
+							'-width'        => 9,
+							'-textvariable' => \$channel );
 
 my $f10 = $mw->Frame( );
-my $f10_l1 = $f10->Label( '-text' => 'Trigger channel:',
-						  '-width' => '20',
-						  'anchor' => 'w' );
-my $f10_m = $f10->Optionmenu( '-options' => $trig_channels,
-							  '-width' => 9,
-						 '-variable' => \$trig_channel );
+my $f10_l1 = $f10->Label( '-text'             => 'Trigger channel:',
+						  '-width'            => '20',
+						  'anchor'            => 'w' );
+my $f10_m = $f10->Optionmenu( '-options'      => $trig_channels,
+							  '-width'        => 9,
+							  '-textvariable' => \$trig_channel );
 
-# Get defaults
+$f8_m->configure( '-command' => \&digitizer_check );
 
-&get_defs;
+
+my $f11 = $mw->Optionmenu( '-options'      => [ ( 'Start experiment',
+												  'Test program',
+												  'Load into fsc2' ) ],
+						   '-textvariable' => \$how );
+
+my $f12 = $mw->Frame( );
+my $f12_a = $mw->Button( '-text'          => 'Apply',
+						 '-command'       => \&write_out );
+my $f12_q = $mw->Button( '-text'          => 'Quit',
+						 '-command'       =>
+						     sub { &store_defs; $mw->destroy } );
 
 # Now show all the stuff
 
@@ -238,21 +245,19 @@ $f9_m->pack( %wp );
 $f10->pack( %fp );
 $f10_l1->pack( %wp );
 $f10_m->pack( %wp );
+$f11->pack( '-padx'   => '3m',
+			'-pady'   => '3m' );
+$f12->pack( '-side'   => 'top',
+			'-fill'   => 'x',
+			'-padx'   => '4m' );
+$f12_a->pack( %wp,
+			  'padx'  => '5m',
+			  '-pady' => '3m' );
+$f12_q->pack( %wp,
+			  'padx'  => '5m',
+			  '-pady' => '3m' );
 
-
-$mw->Optionmenu( '-options' => [ ( 'Start experiment', 'Test program',
-								   'Load into fsc2' ) ],
-				 '-variable' => \$how,
-				 '-command' => \&write_out
-			   )->pack( '-padx' => '3m',
-						'-pady' => '3m' );
-
-
-
-$mw->Button( '-text' => 'Quit',
-			 '-command' => sub { &store_defs; $mw->destroy }
-		   )->pack( '-padx' => '3m',
-					'-pady' => '3m' );
+$channel = "CH2";
 
 MainLoop;
 
@@ -262,21 +267,20 @@ MainLoop;
 # Callback function for the digitizer menu, makes sure only channels that
 # exist for the selected digitizer can be picked - fortunately, $channel
 # and $trig_channel will be changed automatically if they are not in the
-# new set of channels. Actually, the options method for Optionmenus isn't
-# officially documented but if you look at the source you'll find it...
+# new set of channels.
 
 sub digitizer_check {
 
 	if ( $digitizer =~ /TDS520(A)?/ ) {
 		$channels = \@channels_1;
-		$f8_m->options( $channels );
+		$f9_m->configure( '-options' => $channels );
 		$trig_channels = \@trig_channels_1;
-		$f9_m->options( $trig_channels );
+		$f10_m->configure( '-options' => $trig_channels );
 	} else {
 		$channels = \@channels_2;
-		$f8_m->options( $channels );
+		$f9_m->configure( '-options' => $channels );
 		$trig_channels = \@trig_channels_2;
-		$f9_m->options( $trig_channels );
+		$f10_m->configure( '-options' => $trig_channels );
 	}
 }
 
@@ -300,6 +304,18 @@ sub is_signed_numeric {
 	$new_val =~ /^[+-]?((\d+\.?(\d+)?)|(\.(\d+)?))?$/;
 }
 
+
+#############################################
+# Checks if the first argument equals one of the
+# remaining arguments when compared as strings
+
+sub is_string_in {
+	my $item = shift;
+	for ( @_ ) {
+		return 1 if $item eq $_;
+	}
+	return 0;
+}
 
 #############################################
 #
@@ -389,65 +405,71 @@ sub set_sweep_method {
 # Reads default settings
 
 sub get_defs {
+	local *F;
+	my $ne;
 
-local *F;
-my $ne;
+	if ( $ARGV[ 0 ] ) {
+		open( F, "<$ARGV[ 0 ]" ) or return;
+	} else {
+		open( F, "<$ENV{ HOME }/.fsc2/trepr" ) or return;
+	}
 
-if ( $ARGV[ 0 ] ) {
-	open( F, "<$ARGV[ 0 ]" ) or return;
-} else {
-	open( F, "<$ENV{ HOME }/.fsc2/trepr" ) or return;
-}
+	goto done_reading unless defined( $ne = <F> ) and $ne =~ /^#/;
 
-goto done_reading unless defined( $ne = <F> ) and $ne =~ /^#/;
+	goto done_reading unless defined( $ne = <F> ) and is_numeric( $ne );
+	chomp $ne;
+	$start_field = $ne;
 
-goto done_reading unless defined( $ne = <F> ) and is_numeric( $ne );
-chomp $ne;
-$start_field = $ne;
+	goto done_reading unless defined( $ne = <F> ) and is_numeric( $ne );
+	chomp $ne;
+	$end_field = $ne;
 
-goto done_reading unless defined( $ne = <F> ) and is_numeric( $ne );
-chomp $ne;
-$end_field = $ne;
+	goto done_reading unless defined( $ne = <F> ) and is_numeric( $ne );
+	chomp $ne;
+	$field_step = $ne;
 
-goto done_reading unless defined( $ne = <F> ) and is_numeric( $ne );
-chomp $ne;
-$field_step = $ne;
+	goto done_reading unless defined( $ne = <F> )
+		and $ne =~ /^(sweep)|(set_field)$/;
+	chomp $ne;
+	$sweep_method = $ne;
 
-goto done_reading unless defined( $ne = <F> )
-	and $ne =~ /^(sweep)|(set_field)$/;
-chomp $ne;
-$sweep_method = $ne;
+	goto done_reading unless defined( $ne = <F> ) and is_numeric( $ne );
+	chomp $ne;
+	$hidden_field_error = $ne;
+	$field_error = $ne if $sweep_method =~ /set_field/;
 
-goto done_reading unless defined( $ne = <F> ) and is_numeric( $ne );
-chomp $ne;
-$hidden_field_error = $ne;
-$field_error = $ne if $sweep_method =~ /set_field/;
+	goto done_reading unless defined( $ne = <F> ) and $ne =~ /^\d+$/;
+	chomp $ne;
+	$num_runs = $ne;
 
-goto done_reading unless defined( $ne = <F> ) and $ne =~ /^\d+$/;
-chomp $ne;
-$num_runs = $ne;
+	goto done_reading unless defined( $ne = <F> );
+	chomp $ne;
+	goto done_reading unless is_string_in( $ne, @digitizers );
+	$digitizer = $ne;
 
-goto done_reading unless defined( $ne = <F> ) and
-	$ne =~ /^TDS(520)|(520A)|(520C)|(540)|(744A)|(754A)$/;
-chomp $ne;
-$digitizer = $ne;
+	if ( $digitizer =~ /TDS520(A)?/ ) {
+		$channels = \@channels_1;
+		$trig_channels = \@trig_channels_1;
+	} else {
+		$channel = $channels_2[ 0 ];
+		$channels = \@channels_2;
+		$trig_channel = $trig_channels_2[ 0 ];
+		$trig_channels = \@trig_channels_2;
+	}
 
-goto done_reading unless defined( $ne = <F> ) and
-	$ne =~ /^(CH[1-4])|(MATH[1-3])$/;
-chomp $ne;
-$channel = $ne;
+	goto done_reading unless defined( $ne = <F> );
+	chomp $ne;
+	goto done_reading unless is_string_in( $ne, @$channels );
+	$channel = $ne;
 
-digitizer_check();
+	goto done_reading unless defined( $ne = <F> );
+	chomp $ne;
+	goto done_reading unless is_string_in( $ne, @$trig_channels );
+	$trig_channel = $ne;
 
-goto done_reading unless defined( $ne = <F> ) and
-	$ne =~ /^(CH[1-4])|(AUX[12]?)|(LIN)$/;
-chomp $ne;
-$trig_channel = $ne;
+  done_reading:
 
-digitizer_check();
-
-done_reading:
-close F;
+	close F;
 }
 
 
@@ -492,7 +514,6 @@ sub show_message {
 
 sub write_out {
 
-return if $calls == 0;
 return if &do_checks( ) != 0;
 
 local *F;
@@ -511,7 +532,7 @@ $digitizer;
 VARIABLES:
 
 start_field = $start_field G;
-end_fied= $end_field G;
+end_field= $end_field G;
 field_step = $field_step G;
 
 
@@ -540,6 +561,8 @@ init_2d( 2, 0, N, 0, 1, start_field, field_step, \"Time / us\",
 
 magnet_setup( start_field, field_step );
 
+digitizer_num_averages( Num_avg );
+digitizer_trigger_channel( $trig_channel );
 
 EXPERIMENT:
 
@@ -552,9 +575,6 @@ Pretrigger = int( 0.9 * trig_pos * Rec_len );
 
 change_scale( min_time * 1.0e6, time_res * 1.0e6 );
 
-digitizer_num_averages( Num_avg );
-digitizer_trigger_channel( $trig_channel );
-
 File = get_file( );
 fsave( File, \"% Start field     = # G\\n\"
 	         \"% End field       = # G\\n\"
@@ -563,7 +583,7 @@ fsave( File, \"% Start field     = # G\\n\"
 	     	 \"% Time resolution = # us\\n\"
 	     	 \"% Trigger pos.    = #\\n\"
 	     	 \"% Record length   = #\\n\",
-	     start_cur, end_cur, cur_step, Num_avg, time_res * 1.0e6,
+	     start_field, end_field, field_step, Num_avg, time_res * 1.0e6,
 	     trig_pos * Rec_len, Rec_len );
 save_program( File, \"% \" );
 save_comment( File, \"% \" );
@@ -580,7 +600,7 @@ FOR I = 1 : N {
     display( 1, I, curve * 1.0e3, 1,
              1, I, ( curve - ground ) * 1.0e3, 2 );
 
-    fsave( File, \"\\n% #.: Field = # G\\n\\n\", I, cur );
+    fsave( File, \"\\n% #.: Field = # G\\n\\n\", I, field );
     save( File, curve );
 
     field = sweep_up( );

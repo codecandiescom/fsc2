@@ -37,7 +37,8 @@ extern Func Def_Fncts[ ];   /* structures for list of built-in functions */
 static void resolve_hook_functions( Device *dev, char *dev_name );
 static void load_functions( Device *dev );
 static void resolve_functions( Device *dev );
-static void add_function( int index, void *new_func, Device *new_dev );
+static int add_function( int index, void *new_func, Device *new_dev,
+						 int num_new );
 static int func_cmp( const void *a, const void *b );
 
 
@@ -312,6 +313,7 @@ static void resolve_functions( Device *dev )
 	char buf[ 12 ];
 	char *temp;
 	long len;
+	int num_new_funcs = 0;
 	Func *f = Fncts;
 
 
@@ -366,8 +368,10 @@ static void resolve_functions( Device *dev )
 			}
 		}
 		else
-			add_function( num, cur, dev );
+			num_new_funcs += add_function( num, cur, dev, num_new_funcs );
 	}
+
+	Num_Func += num_new_funcs;
 }
 
 
@@ -380,14 +384,15 @@ static void resolve_functions( Device *dev )
 /* current device.                                                      */
 /*----------------------------------------------------------------------*/
 
-static void add_function( int index, void *new_func, Device *new_dev )
+static int add_function( int index, void *new_func, Device *new_dev,
+						 int num_new )
 {
 	int i;
 	char *new_func_name;
 	char buf[ 12 ];
 	long len;
 	char *temp;
-	Func *f;;
+	Func *f;
 
 
 	/* Because when adding a multiple defined function it is appended to
@@ -399,7 +404,7 @@ static void add_function( int index, void *new_func, Device *new_dev )
 	   current library we just return. */
 
 	if ( Fncts[ index ].device == new_dev )
-		return;
+		return 0;
 
 	/* Find out the correct device number - this is the next number after
 	   the highest device number of all devices that had twins in the current
@@ -418,7 +423,7 @@ static void add_function( int index, void *new_func, Device *new_dev )
 		else
 			new_dev->count = 2;
 
-		for ( i = 0, f = Fncts; i < Num_Func; f++, i++ )
+		for ( i = 0, f = Fncts; i < Num_Func + num_new; f++, i++ )
 			if ( f->device == new_dev )
 			{
 				snprintf( buf, 12, "#%d", new_dev->count );
@@ -452,8 +457,8 @@ static void add_function( int index, void *new_func, Device *new_dev )
 
 	/* Add an entry for the new function to the list of functions */
 
-	Fncts = T_realloc( Fncts, ( Num_Func + 1 ) * sizeof( Func ) );
-	f = Fncts + Num_Func;
+	Fncts = T_realloc( Fncts, ( Num_Func + num_new + 1 ) * sizeof( Func ) );
+	f = Fncts + Num_Func + num_new;
 	memcpy( f, Fncts + index, sizeof( Func ) );
 	
 	f->fnct   = new_func;
@@ -474,7 +479,7 @@ static void add_function( int index, void *new_func, Device *new_dev )
 		strcpy( ( char * ) f->name + len, buf );
 	}
 
-	Num_Func++;
+	return 1;
 }
 
 
