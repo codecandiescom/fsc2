@@ -114,3 +114,255 @@ Var *float_slice( Var *var )
 
 	return ret;
 }
+
+
+Var *get_phase_cycled_area_1d( Var *v )
+{
+	Var *func_ptr;
+	Var *ret_v;
+	Var *vn;
+	bool is_get_area;
+	bool is_get_area_fast;
+	long acq_seq;
+	long channel;
+	long num_windows;
+	long *win_list;
+	long seq_len;
+	long i;
+
+
+	/* At the very start lets figure out if there are functions for phase
+       cycling and for obtaining an area */
+
+	if ( ( funct_ptr = func_get( "pulser_next_phase" ) ) == NULL )
+	{
+		eprint( FATAL, "%s:%ld: get_phase_cycled_area_1d(): No pulser module "
+				"loaded supplying a function to do phase cycling.\n",
+				Fname, Lc );
+		THROW( EXCEPTION );
+	}
+	vars_pop( func_ptr );
+
+	if ( ( func_ptr = func_get( "pulser_phase_reset" ) ) == NULL )
+	{
+		eprint( FATAL, "%s:%ld: get_phase_cycled_area_1d(): No pulser module "
+				"loaded supplying a function to do phase cycling.\n",
+				Fname, Lc );
+		THROW( EXCEPTION );
+	}
+	vars_pop( func_ptr );
+
+	if ( ( func_ptr = func_get( "pulser_update" ) ) == NULL )
+	{
+		eprint( FATAL, "%s:%ld: get_phase_cycled_area_1d(): No pulser module "
+				"loaded supplying a function to do phase cycling.\n",
+				Fname, Lc );
+		THROW( EXCEPTION );
+	}
+	vars_pop( func_ptr );
+
+	if ( ( func_ptr = func_get( "digitizer_start_acquisition" ) ) == NULL )
+	{
+		eprint( FATAL, "%s:%ld: get_phase_cycled_area_1d(): No digitizer "
+				"module loaded supplying a function to do an acquisition.\n",
+				Fname, Lc );
+		THROW( EXCEPTION );
+	}
+	vars_pop( func_ptr );
+
+	is_get_area = ( ( func_ptr = func_get( "digitizer_get_area" ) ) == NULL ) ?
+		                                                           UNSET : SET;
+	if ( is_get_area )
+		vars_pop( func_ptr );
+
+	is_get_area_fast = ( ( func_ptr = func_get( "digitizer_get_area_fast" ) )
+						 == NULL ) ? UNSET : SET;
+	if ( is_get_area_fast )
+		vars_pop( func_ptr );
+
+	if ( ! is_get_area && ! is_get_area_fast )
+	{
+		eprint( FATAL, "%s:%ld: get_phase_cycled_area_1d(): No digitizer "
+				"module loaded supplying a function to obtain an area.\n",
+				Fname, Lc );
+		THROW( EXCEPTION );
+	}
+
+	/* We also need to check that a phase sequence and at least one
+	   acquisition sequence has been defined */
+
+	if ( PSeq == NULL )
+	{
+		eprint( FATAL, "%s:%ld: get_phase_cycled_area_1d(): No phase sequence "
+				"has been defined.\n", Fname, Lc );
+		THROW( EXCEPTION );
+	}
+
+	seq_len = PSeq->len;
+
+	if ( ! ASeq[ 0 ].defined && ! ASeq[ 1 ].defined )
+
+	{
+		eprint( FATAL, "%s:%ld: get_phase_cycled_area_1d(): No acquisition "
+				"sequence has been defined.\n",
+				Fname, Lc );
+		THROW( EXCEPTION );
+	}
+
+	/* Next step: check the parameter */
+
+	if ( v == NULL )
+	{
+		eprint( FATAL, "%s:%ld: get_phase_cycled_area_1d(): Missing "
+				"arguments.\n", Fname, Lc );
+		THROW( EXCEPTION );
+	}
+
+	/* First parameter is the acqusition sequence number */
+
+	vars_check( v, INT_VAR | FLOAT_VAR );
+
+	if ( v->type == INT_VAR )
+		acq_seq = v->val.lval;
+	else
+	{
+		eprint( WARN, "%s:%ld: get_phase_cycled_area_1d(): Floating point "
+				"value used as acquisition sequence number.\n", Fname, Lc );
+		acq_seq = lround( v->val.dval );
+	}
+
+	if ( acq_seq != 1 && acq_seq != 2 )
+	{
+		eprint( FATAL, "%s:%ld: get_phase_cycled_area_1d(): Invalid "
+				"acquisition sequence number: %ld.\n", Fname, Lc, acq_seq );
+		THROW( EXCEPTION );
+	}
+
+	acq_seq--;
+
+	if ( ( v = vars_pop( v ) ) == NULL )
+	{
+		eprint( FATAL, "%s:%ld: get_phase_cycled_area_1d(): Missing second"
+				"argument (i.e. chnnel number).\n", Fname, Lc );
+		THROW( EXCEPTION );
+	}
+
+	/* The next parameter is the channel number - hopefully, it was specified
+	   by a symbol and the digitier module has already ok'ed it, but we can't
+	   be sure... */
+
+	vars_check( v, INT_VAR | FLOAT_VAR );
+
+	if ( v->type == INT_VAR )
+		channel = v->val.lval;
+	else
+	{
+		eprint( WARN, "%s:%ld: get_phase_cycled_area_1d(): Floating point "
+				"number used as channel number.\n", Fname, Lc );
+		channel = lround( v->val.dval );
+	}
+
+	if ( ( func_ptr = func_get( "digitizer_meas_channel_ok" ) ) == NULL )
+	{
+		eprint( FATAL, "%s:%ld: get_phase_cycled_area_1d(): Digitizer module "
+				"does not supply function needed.\n", Fname, Lc );
+		THROW( EXCEPTION );
+	}
+
+	vars_push( INT_VAR, channel );
+	ret_v = vars_call( func_ptr );
+
+	if ( ret_v->val.lval == 0 )
+	{
+		vars_pop( ret_v );
+		eprint( FATAL, "%s:%ld: get_phase_cycled_area_1d(): Invalid channel "
+				"number: %ld.\n", Fname, Lc, channel );
+		THROW( EXCEPTION );
+	}
+
+	vars_pop( ret_v );
+
+	/* Now we got to count the remaining arguments on the stack to find out
+	   how many windows there are and build up the window list */
+
+	num_windows = 1;
+	vn = v = vars_pop( v );
+
+	while ( ( vn = vn->next ) != NULL )
+		num_windows++;
+
+	win_list = T_malloc( num_windows * sizeof( long ) );
+
+	if ( v !== NULL )
+	{
+		for ( i = 0; i < num_windows; i++ )
+		{
+			TRY
+			{
+				vars_check( v, INT_VAR | FLOAT_VAR );
+				TRY_SUCCESS;
+			}
+			CATCH( EXCEPTION )
+			{
+				T_free( win_list );
+				THROW( EXCEPTION );
+			}
+
+			if ( v->type == INT_VAR )
+				win_list[ i ] = v->val.lval;
+			else
+			{
+				eprint( WARN, "%s:%ld: get_phase_cycled_area_1d(): Floating "
+						"point value used as window number.\n", Fname, c );
+				win_list[ i ] = lround( v->val.dval );
+			}
+
+			v = vars_pop( v );
+		}
+	}
+	else
+		win_list[ 0 ] = -1;              /* No window to be used ! */
+
+
+	/* also get memory for the data */
+
+	data = T_malloc( num_windows * sizeof( double ) );
+	for ( i = 0; i < num_windows; i++ )
+		data[ i ] = 0.0;
+
+	/* Now we can really start. First we reset the phase sequence */
+
+	vars_pop( vars_call( func_get( "pulser_phase_reset" ) ) );
+	vars_pop( vars_call( func_get( "pulser_update" ) ) );
+
+	for ( i = 0; i < seq_len; i++ )
+	{
+		vars_pop( vars_call( func_get( "digitizer_start_acquisition" ) ) );
+		for ( j = 0; j < num_windows; j++ )
+		{
+			if ( is_get_area_fast )
+			{
+				if ( win_list[ i ] >= 0 )
+					vn = digitizer_get_area_fast(
+						vars_push( INT_VAR, channel ),
+						vars_push( INT_VAR, win_list[ j ] ) );
+				else
+					vn = digitizer_get_area_fast(
+						vars_push( INT_VAR, channel ) );
+			}
+			else
+			{
+				if ( win_list[ i ] >= 0 )
+					vn = digitizer_get_area(
+						vars_push( INT_VAR, channel ),
+						vars_push( INT_VAR, win_list[ j ] ) );
+				else
+					vn = digitizer_get_area_( vars_push( INT_VAR, channel ) );
+			}
+		}
+
+		if ( ASeq[ acq_seq ].sequence[ i ] = 
+		data[ i ] = 
+	}
+
+}
