@@ -133,8 +133,6 @@ Var *pulse_get_by_addr( Pulse *p, int type )
 									"Position change", "Length change",
 									"Maximum Length" };
 	int i, j;
-	long i_data;
-	double f_data;
 
 
 	/* test that the referenced pulse exists */
@@ -173,67 +171,42 @@ Var *pulse_get_by_addr( Pulse *p, int type )
 	switch ( type )
 	{
 		case P_FUNC :
-			return( vars_push( INT_VAR, &p->func ) );
+			return( vars_push( INT_VAR, p->func ) );
 
 		case P_POS :
 			if ( p->pos % Default_Time_Base )
-			{
-				f_data = ( double ) p->pos / ( double ) Default_Time_Base;
-				return( vars_push( FLOAT_VAR, &f_data ) );
-			}
+				return( vars_push( FLOAT_VAR,( double ) p->pos /
+								             ( double ) Default_Time_Base ) );
 			else
-			{
-				i_data = p->pos / Default_Time_Base;
-				return( vars_push( INT_VAR, &i_data ) );
-			}
+				return( vars_push( INT_VAR, p->pos / Default_Time_Base ) );
 
 		case P_LEN :
 			if ( p->len % Default_Time_Base )
-			{
-				f_data = ( double ) p->len / ( double ) Default_Time_Base;
-				return( vars_push( FLOAT_VAR, &f_data ) );
-			}
+				return( vars_push( FLOAT_VAR, ( double ) p->len /
+								              ( double ) Default_Time_Base ) );
 			else
-			{
-				i_data = p->len / Default_Time_Base;
-				return( vars_push( INT_VAR, &i_data ) );
-			}
+				return( vars_push( INT_VAR, p->len / Default_Time_Base ) );
 
 		case P_DPOS :
 			if ( p->dpos % Default_Time_Base )
-			{
-				f_data = ( double ) p->dpos / ( double ) Default_Time_Base;
-				return( vars_push( FLOAT_VAR, &f_data ) );
-			}
+				return( vars_push( FLOAT_VAR, ( double ) p->dpos /
+								              ( double ) Default_Time_Base ) );
 			else
-			{
-				i_data = p->dpos / Default_Time_Base;
-				return( vars_push( INT_VAR, &i_data ) );
-			}
+				return( vars_push( INT_VAR, p->dpos / Default_Time_Base ) );
 
 		case P_DLEN :
 			if ( p->dlen % Default_Time_Base )
-			{
-				f_data = ( double ) p->dlen / ( double ) Default_Time_Base;
-				return( vars_push( FLOAT_VAR, &f_data ) );
-			}
+				return( vars_push( FLOAT_VAR, ( double ) p->dlen /
+								              ( double ) Default_Time_Base ) );
 			else
-			{
-				i_data = p->dlen / Default_Time_Base;
-				return( vars_push( INT_VAR, &i_data ) );
-			}
+				return( vars_push( INT_VAR, p->dlen / Default_Time_Base ) );
 
 		case P_MAXLEN :
 			if ( p->maxlen % Default_Time_Base )
-			{
-				f_data = ( double ) p->maxlen / ( double ) Default_Time_Base;
-				return( vars_push( FLOAT_VAR, &f_data ) );
-			}
+				return( vars_push( FLOAT_VAR, ( double ) p->maxlen /
+								              ( double ) Default_Time_Base ) );
 			else
-			{
-				i_data = p->maxlen / Default_Time_Base;
-				return( vars_push( INT_VAR, &i_data ) );
-			}
+				return( vars_push( INT_VAR, p->maxlen / Default_Time_Base ) );
 	}
 
 	assert( 1 == 0 );      /* this should never happen... */
