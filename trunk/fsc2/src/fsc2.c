@@ -529,6 +529,9 @@ void load_file( FL_OBJECT *a, long reload )
 		main_form->Load->u_ldata = 0;
 	}
 
+	fl_activate_object( main_form->test_file );
+	fl_set_object_lcol( main_form->test_file, FL_BLACK );
+
 	notify_conn( UNBUSY_SIGNAL );
 }
 
@@ -689,11 +692,10 @@ void test_file( FL_OBJECT *a, long b )
 	}
 
 	/* If fsc2 is too busy testing a program to react to clicks on the "Stop
-	   Test" button (this seems to happen when what the program does is mostly
-	   output to the error browser) and the user presses the button several
-	   times strange things happen, especially the "Quit" button becoming
-	   unusable.  The following helps avoiding to execute the handler again
-	   while it's already running... */
+	   Test" button and the user presses the button several times strange
+	   things happen, especially the "Quit" button becoming unusable.  The
+	   following helps avoiding to execute the handler again while it's
+	   already running... */
 
 	if ( in_test )
 		return;
@@ -782,6 +784,8 @@ void test_file( FL_OBJECT *a, long b )
 
 	fl_set_object_label( main_form->test_file, "Test" );
 	fl_set_button_shortcut( main_form->test_file, "T", 1 );
+	fl_deactivate_object( main_form->test_file );
+	fl_set_object_lcol( main_form->test_file, FL_INACTIVE );
 	fl_activate_object( main_form->Load );
 	fl_set_object_lcol( main_form->Load, FL_BLACK );
 	fl_activate_object( main_form->reload );

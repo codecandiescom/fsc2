@@ -539,9 +539,6 @@ static void set_buttons_for_run( int active )
 		fl_deactivate_object( main_form->reload );
 		fl_set_object_lcol( main_form->reload, FL_INACTIVE_COL );
 
-		fl_deactivate_object( main_form->test_file );
-		fl_set_object_lcol( main_form->test_file, FL_INACTIVE_COL );
-
 		fl_deactivate_object( main_form->run );
 		fl_set_object_lcol( main_form->run, FL_INACTIVE_COL );
 
@@ -562,9 +559,6 @@ static void set_buttons_for_run( int active )
 
 		fl_activate_object( main_form->reload );
 		fl_set_object_lcol( main_form->reload, FL_BLACK );
-
-		fl_activate_object( main_form->test_file );
-		fl_set_object_lcol( main_form->test_file, FL_BLACK );
 
 		fl_activate_object( main_form->run );
 		fl_set_object_lcol( main_form->run, FL_BLACK );
