@@ -30,6 +30,10 @@ static bool print_browser( int browser, int fid, const char* comment );
 static void T_fprintf( int file_num, const char *fmt, ... );
 
 
+/* Flag used in f_wait() and its siganl handler, f_wait_alarm_handler() */
+
+static volatile bool is_sigalarm = UNSET;
+
 
 /*------------------------------------------------------------------------
    Prints variable number of arguments using a format string supplied as
@@ -268,29 +272,27 @@ Var *f_wait( Var *v )
 	if ( TEST_RUN )
 		return vars_push( INT_VAR, 1 );
 
-	/* set everything up for sleeping */
+	/* Set everything up for sleeping */
 
     sleepy.it_interval.tv_sec = sleepy.it_interval.tv_usec = 0;
 	sleepy.it_value.tv_usec = lround( modf( how_long, &secs ) * 1.0e6 );
 	sleepy.it_value.tv_sec = ( long ) secs;
 
+	is_sigalarm = UNSET;
 	signal( SIGALRM, f_wait_alarm_handler );
 	setitimer( ITIMER_REAL, &sleepy, NULL );
 
-	/* wake up only after sleeping time or if DO_QUIT signal is received */
+	/* Wake up if SIGALRM or DO_QUIT signal is received */
 
-	do
-	{
+	while ( ! do_quit && ! is_sigalarm )
 		pause( );
-		getitimer( ITIMER_REAL, &sleepy );
-	} while ( ! do_quit &&
-			  ( sleepy.it_value.tv_sec > 0 || sleepy.it_value.tv_usec > 0 ) );
 
-	/* Return 1 if end of sleping time was reached, 0 if do_quit was set.
-	   Do not reset the alarm signal handler, because after receipt of a
-	   'do_quit' signal the timer may still be running and send a signal
-	   that could kill the child prematurely ! */
+	/* Return 1 if end of sleeping time was reached, 0 if do_quit was set.
+	   Set handling for SIGALRM to ignore, because after receipt of a
+	   'do_quit' signal the timer may still be running and otherwise the 
+	   resulting signal could kill the child prematurely ! */
 
+	signal( SIGALRM, SIG_IGN );
 	return vars_push( INT_VAR, do_quit ? 0 : 1 );
 }
 
@@ -303,10 +305,9 @@ Var *f_wait( Var *v )
 
 static void f_wait_alarm_handler( int sig_type )
 {
-	if ( sig_type != SIGALRM )
-		return;
-
+	assert( sig_type == SIGALRM );
 	signal( SIGALRM, f_wait_alarm_handler );
+	is_sigalarm = SET;
 }
 
 
