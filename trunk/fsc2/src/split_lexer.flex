@@ -223,7 +223,7 @@ bool section_parser( int section )
 		   in a TRY environment (see `exceptions.c' and `exception.h' for
 		   the gory details) - if the try fails, in many cases (i.e. in the
 		   ones common to all lexers and easily to be handled centrally) we
-		   will end up here and ave tocatch the error. First we check if the
+		   will end up here and ave to catch the error. First we check if the
 		   lexer returned unsuccessfully. In this case the error was already
 		   caught by a CATCH and a FAIL state was returned, so we immediately
 		   return unsuccessfully to splitlex(). Then we check if there was
