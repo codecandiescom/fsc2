@@ -581,13 +581,14 @@ temperature controller transfering data between GPIB and Oxford ISOBUS.
 @paragraphindent 0
 @strong{Supported functions}:
 @multitable @columnfractions .45 .45
-@item @code{magnet_name()}        @tab @ref{magnet_name}
-@item @code{magnet_setup()}       @tab @ref{magnet_setup}
-@item @code{get_field()}          @tab @ref{get_field}
-@item @code{set_field()}          @tab @ref{set_field}
-@item @code{magnet_sweep_rate()}  @tab @ref{magnet_sweep_rate}
-@item @code{magnet_sweep()}       @tab @ref{magnet_sweep}
-@item @code{reset_field()}        @tab @ref{reset_field}
+@item @code{magnet_name()}              @tab @ref{magnet_name}
+@item @code{magnet_setup()}             @tab @ref{magnet_setup}
+@item @code{get_field()}                @tab @ref{get_field}
+@item @code{set_field()}                @tab @ref{set_field}
+@item @code{magnet_sweep_rate()}        @tab @ref{magnet_sweep_rate}
+@item @code{magnet_sweep()}             @tab @ref{magnet_sweep}
+@item @code{reset_field()}              @tab @ref{reset_field}
+@item @code{magnet_goto_current_on_end} @tab @ref{magnet_goto_current_on_end}
 @end multitable
 
 

@@ -395,6 +395,7 @@ be swept to @b{after} the experiment has ended (per default the magnet
 would stay at the last field position). This function can be called in
 the @code{PREPARATION} as well the @code{EXPERIMENT} section and returns
 the target current the magnet will sweep to after the end of the experiment.
+If called more than once the current of the last call will be used.
 
 
 @end table

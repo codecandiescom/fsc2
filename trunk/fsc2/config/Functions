@@ -63,11 +63,6 @@ sweep_up, 0, EXP;               // sweep magnet up
 sweep_down, 0, EXP;             // sweep magnet down
 
 
-/* Functions only supported by the Oxford IPS20-4 sweep power supply driver */
-
-magnet_goto_current_on_end, 1, ALL; // keep sweeping after end of experiment
-
-
 /* Functions for the W_BAND power supply driver only */
 
 magnet_use_correction, 0, PREP; // if called field corrections are applied
@@ -76,8 +71,9 @@ magnet_use_dac_port, 1, PREP;   // to set the lock-ins DAC port to be used
 
 /* Functions for the Oxford IPS20-4 sweep power supply driver only */
 
-magnet_sweep, -1, EXP;          // starts or stops a sweep
-magnet_sweep_rate, -1, ALL;     // set or query a sweep rate
+magnet_sweep, -1, EXP;              // starts or stops a sweep
+magnet_sweep_rate, -1, ALL;         // set or query a sweep rate
+magnet_goto_current_on_end, 1, ALL; // keep sweeping after end of experiment
 
 
 /* Functions exported by the field meter drivers (BH15, ER035M) */
