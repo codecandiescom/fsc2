@@ -242,7 +242,7 @@ extern bool need_Serial_Port[ NUM_SERIAL_PORTS ];
 extern bool just_testing;
 
 extern FD_fsc2 *main_form;
-extern FL_FORM *fsc2_main_form
+extern FL_FORM *fsc2_main_form;
 extern FD_run *run_form;
 extern FL_FORM *run_main_form;
 extern FD_input_form *input_form;
