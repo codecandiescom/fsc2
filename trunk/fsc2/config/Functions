@@ -276,3 +276,14 @@ counter_single_pulse, 2, EXP;
 counter_continuous_pulses, -1, EXP;
 counter_dio_read, -1, EXP;
 counter_dio_write, -1, EXP;
+
+
+/* Functions exported by CCD camera modules (Spec-10) */
+
+ccd_camera_name, 0, ALL;
+ccd_camera_roi, -1, ALL;
+ccd_camera_binning, -1, ALL;
+ccd_camera_binning_method, -1, ALL;
+ccd_camera_exposure_time, -1, ALL;
+ccd_camera_get_pic, 0, EXP;
+ccd_camera_temperature, -1, ALL;

@@ -57,6 +57,7 @@ typedef struct
 		uns16 roi[ 4 ];
 		long bin[ 2 ];
 		bool bin_mode;            /* 0: hardware binning, 1: software bin. */
+		uns32 exp_time;           /* exposure time in multiples of 1 us */
 	} ccd;
 
 	struct {
@@ -94,6 +95,8 @@ extern RS_SPEC10 *rs_spec10, rs_spec10_prep, rs_spec10_test, rs_spec10_exp;
 #define HARDWARE_BINNING         0
 #define SOFTWARE_BINNING         1
 
+#define CCD_EXPOSURE_RESOLUTION   1.0e-6       /*   1 us */
+
 
 /* Functions from rs_spec10.c */
 
@@ -107,6 +110,7 @@ Var *ccd_camera_name( Var *v );
 Var *ccd_camera_roi( Var *v );
 Var *ccd_camera_binning( Var *v );
 Var *ccd_camera_binning_method( Var *v );
+Var *ccd_camera_exposure_time( Var *v );
 Var *ccd_camera_get_pic( Var *v );
 Var *ccd_camera_temperature( Var *v );
 

@@ -87,6 +87,7 @@ void rs_spec10_init_camera( void )
 static void rs_spec10_ccd_init( void )
 {
 	uns16 ret_uns16;
+	uns32 set_uns32;
 
 
 	if ( ! pl_get_param( rs_spec10->handle, PARAM_SER_SIZE, ATTR_ACCESS,
@@ -109,8 +110,7 @@ static void rs_spec10_ccd_init( void )
 		THROW( EXCEPTION );
 	}
 
-	/* Now we start trying to find out about the device properties, first
-	   the number of pixels in x- and y-direction */
+	/* Get the the number of pixels in x- and y-direction */
 
 	if ( ! pl_get_param( rs_spec10->handle, PARAM_SER_SIZE, ATTR_MAX,
 						 ( void_ptr ) &ret_uns16 ) )
@@ -134,103 +134,29 @@ static void rs_spec10_ccd_init( void )
 			   ( long ) rs_spec10->ccd.max_size[ Y ] );
 		THROW( EXCEPTION );
 	}
-}
 
+	/* Set CLEAR_PRE_EXPOSURE mode (since we don't have a shutter and time
+	   between exposures is probably rather long this seems to be the most
+	   reasonable mode) */
 
-/*-----------------------------------------*/
-/*-----------------------------------------*/
-
-uns16 *rs_spec10_get_pic( void )
-{
-	rgn_type region;
-    uns32 size;
-	uns16 *frame;
-	int16 status;
-	uns32 dummy;
-
-
-	region.s1   = rs_spec10->ccd.roi[ 0 ];
-	region.s2   = rs_spec10->ccd.roi[ 1 ];
-	region.p1   = rs_spec10->ccd.roi[ 2 ];
-	region.p2   = rs_spec10->ccd.roi[ 3 ];
-
-	if ( rs_spec10->ccd.bin_mode == HARDWARE_BINNING )
-	{
-		region.sbin = rs_spec10->ccd.bin[ 0 ];
-		region.pbin = rs_spec10->ccd.bin[ 1 ];
-	}
-	else
-	{
-		region.sbin = 1;
-		region.pbin = 1;
-	}
-
-	if ( ! pl_exp_init_seq( ) )
+	set_uns32 = CLEAR_PRE_EXPOSURE;
+	if ( ! pl_set_param( rs_spec10->handle, PARAM_CLEAR_MODE,
+						 ( void_ptr ) &set_uns32 ) )
 		rs_spec10_error_handling( );
 
-	if ( ! pl_exp_setup_seq( rs_spec10->handle, 1, 1, &region,
-							 TIMED_MODE, 100, &size ) )
-	{
-		pl_exp_uninit_seq( );
+	/* Set the time resolution for the exposure time to 1 us. The number
+	   passed to pl_exp_setup_seq() must thus be in units of 1 us. */
+
+	set_uns32 = EXP_RES_ONE_MICROSEC;
+	if ( ! pl_set_param( rs_spec10->handle, PARAM_EXP_RES,
+						 ( void_ptr ) &set_uns32 ) )
 		rs_spec10_error_handling( );
-	}
 
-	/* Now we need memory for storing the new picture. The manual requires
-	   this memory to be protected against swapping, thus we must mlock()
-	   it. */
-
-	TRY
-	{
-		frame = T_malloc( size );
-		if ( mlock( frame, size ) == 1 )
-		{
-			print( FATAL, "Failure to obtain properly protected memory.\n" );
-			THROW( EXCEPTION );
-		}
-		TRY_SUCCESS;
-	}
-	OTHERWISE
-	{
-		pl_exp_abort( rs_spec10->handle, CCS_HALT );
-		pl_exp_uninit_seq( );
-		RETHROW( );
-	}
-
-	if ( ! pl_exp_start_seq( rs_spec10->handle, frame ) )
-	{
-		pl_exp_abort( rs_spec10->handle, CCS_HALT );
-		pl_exp_uninit_seq( );
-		munlock( frame, size );
-		T_free( frame );
-		rs_spec10_error_handling( );
-	}
-
-	/* Loop until data are available */
-
-	TRY
-	{
-		do
-		{
-			stop_on_user_request( );
-			if ( ! pl_exp_check_status( rs_spec10->handle, &status, &dummy ) )
-				rs_spec10_error_handling( );
-		} while ( status != READOUT_COMPLETE );
-	}
-	OTHERWISE
-	{
-		pl_exp_abort( rs_spec10->handle, CCS_HALT );
-		pl_exp_uninit_seq( );
-		munlock( frame, size );
-		T_free( frame );
-		RETHROW( );
-	}
-
-    pl_exp_finish_seq( rs_spec10->handle, frame, 0 );
-	pl_exp_uninit_seq();
-
-	munlock( frame, size );
-
-	return frame;
+	/* We might also need to set the shutter mode to OPEN_NO_CHANGE,
+	   set the number of clears (with PARAM_CLEAR_CYCLES).
+	   What about gain settings ?
+	   We probably also should look how long the speed table is...
+	   But all of this can only be done when we have the camera. */
 }
 
 
@@ -355,6 +281,103 @@ static void rs_spec10_temperature_init( void )
 
 		rs_spec10_set_temperature( rs_spec10->temp.setpoint );
 	}
+}
+
+
+/*-----------------------------------------*/
+/*-----------------------------------------*/
+
+uns16 *rs_spec10_get_pic( void )
+{
+	rgn_type region;
+    uns32 size;
+	uns16 *frame;
+	int16 status;
+	uns32 dummy;
+
+
+	region.s1   = rs_spec10->ccd.roi[ 0 ];
+	region.s2   = rs_spec10->ccd.roi[ 1 ];
+	region.p1   = rs_spec10->ccd.roi[ 2 ];
+	region.p2   = rs_spec10->ccd.roi[ 3 ];
+
+	if ( rs_spec10->ccd.bin_mode == HARDWARE_BINNING )
+	{
+		region.sbin = rs_spec10->ccd.bin[ 0 ];
+		region.pbin = rs_spec10->ccd.bin[ 1 ];
+	}
+	else
+	{
+		region.sbin = 1;
+		region.pbin = 1;
+	}
+
+	if ( ! pl_exp_init_seq( ) )
+		rs_spec10_error_handling( );
+
+	if ( ! pl_exp_setup_seq( rs_spec10->handle, 1, 1, &region, TIMED_MODE,
+							 rs_spec10->ccd.exp_time, &size ) )
+	{
+		pl_exp_uninit_seq( );
+		rs_spec10_error_handling( );
+	}
+
+	/* Now we need memory for storing the new picture. The manual requires
+	   this memory to be protected against swapping, thus we must mlock()
+	   it. */
+
+	TRY
+	{
+		frame = T_malloc( size );
+		if ( mlock( frame, size ) == 1 )
+		{
+			print( FATAL, "Failure to obtain properly protected memory.\n" );
+			THROW( EXCEPTION );
+		}
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+	{
+		pl_exp_abort( rs_spec10->handle, CCS_HALT );
+		pl_exp_uninit_seq( );
+		RETHROW( );
+	}
+
+	if ( ! pl_exp_start_seq( rs_spec10->handle, frame ) )
+	{
+		pl_exp_abort( rs_spec10->handle, CCS_HALT );
+		pl_exp_uninit_seq( );
+		munlock( frame, size );
+		T_free( frame );
+		rs_spec10_error_handling( );
+	}
+
+	/* Loop until data are available */
+
+	TRY
+	{
+		do
+		{
+			stop_on_user_request( );
+			if ( ! pl_exp_check_status( rs_spec10->handle, &status, &dummy ) )
+				rs_spec10_error_handling( );
+		} while ( status != READOUT_COMPLETE );
+	}
+	OTHERWISE
+	{
+		pl_exp_abort( rs_spec10->handle, CCS_HALT );
+		pl_exp_uninit_seq( );
+		munlock( frame, size );
+		T_free( frame );
+		RETHROW( );
+	}
+
+    pl_exp_finish_seq( rs_spec10->handle, frame, 0 );
+	pl_exp_uninit_seq();
+
+	munlock( frame, size );
+
+	return frame;
 }
 
 

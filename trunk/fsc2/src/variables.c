@@ -154,6 +154,8 @@ static long vars_set_all( Var *v, long l, double d );
 static void vars_size_check( Var *src, Var *dest );
 static void vars_arr_assign( Var *src, Var *dest );
 static void free_all_vars( void );
+static Var *vars_push_submatrix( Var *from, int type, int dim,
+								 ssize_t *sizes );
 static void vars_ref_copy( Var *nsv, Var *cp, bool exact_copy );
 static void vars_ref_copy_create( Var *nsv, Var *src, bool exact_copy );
 static void *vars_get_pointer( ssize_t *iter, ssize_t depth, Var *p );
@@ -1676,6 +1678,129 @@ Var *vars_push_copy( Var *v )
 
 	fsc2_assert( 1 == 0 );
 	return NULL;
+}
+
+
+/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*/
+
+Var *vars_push_matrix( int type, int dim, ... )
+{
+	Var *nv;
+	va_list ap;
+	ssize_t *sizes;
+	ssize_t i;
+
+
+	if ( ! ( type & ( INT_REF | FLOAT_REF ) ) || dim < 2 )
+	{
+		eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
+				__FILE__, __LINE__ );
+		THROW( EXCEPTION );
+	}
+
+	nv = vars_push( type, NULL );
+
+	sizes = malloc( dim * sizeof *sizes );
+
+	va_start( ap, dim );
+	
+	for ( i = 0; i < dim; i++ )
+	{
+		sizes[ i ] = ( ssize_t ) va_arg( ap, long );
+		if ( sizes[ i ] == 0 )
+		{
+			va_end( ap );
+			T_free( sizes );
+			eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
+					__FILE__, __LINE__ );
+			THROW( EXCEPTION );
+		}
+	}
+	
+	va_end( ap );
+
+	TRY
+	{
+		nv->val.vptr = T_malloc( sizes[ 0 ] * sizeof *nv->val.vptr );
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+	{
+		T_free( sizes );
+		RETHROW( );
+	}
+
+	for ( i = 0; i < sizes[ 0 ]; i++ )
+		nv->val.vptr[ i ] = NULL;
+
+	TRY
+	{
+		for ( i = 0; i < sizes[ 0 ]; i++ )
+			nv->val.vptr[ i ] = vars_push_submatrix( nv, type, dim - 1,
+													 sizes + 1 );
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+	{
+		for ( i = 0; i < sizes[ 0 ] && nv->val.vptr[ i ] != NULL; i++ )
+			vars_free( nv->val.vptr[ i ], SET );
+		T_free( sizes );
+		RETHROW( );
+	}
+
+	nv->len = sizes[ 0 ];
+	nv->dim = dim;
+
+	T_free( sizes );
+	return nv;
+}
+
+
+/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*/
+
+static Var *vars_push_submatrix( Var *from, int type, int dim, ssize_t *sizes )
+{
+	Var *nv;
+	ssize_t i;
+
+
+	nv = vars_new( NULL );
+	nv->flags |= IS_TEMP;
+	nv->from = from;
+	nv->dim = dim;
+	nv->len = sizes[ 0 ];
+
+	if ( dim == 1 )
+	{
+		if ( type == INT_REF )
+		{
+			nv->type = type = INT_ARR;
+			nv->val.lpnt = T_calloc( nv->len, sizeof *nv->val.lpnt );
+		}
+		else
+		{
+			nv->type = FLOAT_ARR;
+			nv->val.dpnt = T_malloc( nv->len * sizeof *nv->val.dpnt );
+			for ( i = 0; i < sizes[ 0 ]; i++ )
+				nv->val.dpnt[ i ] = 0.0;
+		}
+
+		return nv;
+	}
+
+	nv->type = type;
+	nv->val.vptr = T_malloc( nv->len * sizeof *nv->val.vptr );
+
+	for ( i = 0; i < nv->len; i++ )
+		nv->val.vptr[ i ] = NULL;
+
+	for ( i = 0; i < nv->len; i++ )
+		nv->val.vptr[ i ] = vars_push_submatrix( nv, type,
+												 dim - 1, sizes + 1 );
+
+	return nv;
 }
 
 

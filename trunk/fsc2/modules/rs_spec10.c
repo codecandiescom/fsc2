@@ -56,6 +56,9 @@ int rs_spec10_init_hook( void )
 	rs_spec10->ccd.bin[ X ] = 1;
 	rs_spec10->ccd.bin[ Y ] = 1;
 
+	rs_spec10->ccd.exp_time =
+						   lrnd( CCD_EXPOSURE_TIME / CCD_EXPOSURE_RESOLUTION );
+
 	rs_spec10->ccd.bin_mode = HARDWARE_BINNING;  
 
 	/* Try to initialize the library */
@@ -261,41 +264,7 @@ Var *ccd_camera_binning( Var *v )
 	}
 
 	if ( ( v = vars_pop( v ) ) != NULL )
-	{
-		vars_check( v, INT_VAR | FLOAT_VAR | STR_VAR );
-
-		switch ( v->type )
-		{
-			case INT_VAR :
-				if ( v->val.lval == 0 )
-					rs_spec10->ccd.bin_mode = HARDWARE_BINNING;
-				else
-					rs_spec10->ccd.bin_mode = SOFTWARE_BINNING;
-				break;
-
-			case FLOAT_VAR :
-				if ( lrnd( v->val.dval ) == 0 )
-					rs_spec10->ccd.bin_mode = HARDWARE_BINNING;
-				else
-					rs_spec10->ccd.bin_mode = SOFTWARE_BINNING;
-				break;
-
-			case STR_VAR :
-				if ( ! strcasecmp( v->val.sptr, "soft" ) ||
-					 ! strcasecmp( v->val.sptr, "software" ) )
-					rs_spec10->ccd.bin_mode = SOFTWARE_BINNING;
-				else if ( ! strcasecmp( v->val.sptr, "hard" ) ||
-						  ! strcasecmp( v->val.sptr, "hardware" ) )
-					rs_spec10->ccd.bin_mode = HARDWARE_BINNING;
-				else
-				{
-					print( FATAL, "Unrecognized string '%s' used for binning "
-						   "method.\n", v->val.sptr );
-					THROW( EXCEPTION );
-				}
-				break;
-		}
-	}
+		vars_pop( ccd_camera_binning_method( v ) );
 
 	too_many_arguments( v );
 
@@ -351,6 +320,30 @@ Var *ccd_camera_binning_method( Var *v )
 	too_many_arguments( v );
 
 	return vars_push( INT_VAR, rs_spec10->ccd.bin_mode ? 1L : 0L );
+}
+
+
+/*--------------------------------------------------*/
+/*--------------------------------------------------*/
+
+Var *ccd_camera_exposure_time( Var *v )
+{
+	double et;
+
+
+	if ( v == NULL )
+		return vars_push( FLOAT_VAR,
+						  rs_spec10->ccd.exp_time * CCD_EXPOSURE_RESOLUTION );
+
+	et = get_double( v, "exposure time" );
+
+	rs_spec10->ccd.exp_time = ( uns32 ) lrnd( et / 
+											  CCD_EXPOSURE_RESOLUTION );
+
+	too_many_arguments( v );
+
+	return vars_push( FLOAT_VAR,
+					  rs_spec10->ccd.exp_time * CCD_EXPOSURE_RESOLUTION );
 }
 
 

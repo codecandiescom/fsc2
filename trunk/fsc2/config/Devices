@@ -115,3 +115,8 @@ me6000        // ME-6000 DAC card
 // Event counter (NI6601 board)
 
 ni6601
+
+
+// Roper Scientific Spec-10 CCD camera
+
+rs_spec10
