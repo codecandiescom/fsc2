@@ -249,13 +249,14 @@ never at all!
 
 @item save()
 @findex save()
-Writes one or more data or complete arrays to a file. But there's a
-caveat: If @code{get_file()} has been called before the first argument
-has to be the file number returned by the call to tell @b{fsc2} which
-file to use. If, on the other hand, @code{get_file()} hasn't been called
-before, the user is asked to select a file now and all further
-@code{save_xxx()}-calls will use this one file and the first argument
-will always be assumed to be a value to be written to this file!
+Writes one or more data or complete arrays to a file. But some care has
+to be used: If @w{@code{get_file()}} has been called before the first
+argument has to be the file number returned by the call to tell @b{fsc2}
+which file to use. If, on the other hand, @code{get_file()} hasn't been
+called before, the user is asked to select a file now and all further
+calls of functions of the @w{@code{save_xxx()}} type will use this one
+file and the first argument will be assumed to be a value to be written
+to this file!
 
 All arguments (following the file identifier if there's one) are
 data. The types of these data may be
@@ -275,8 +276,8 @@ Complete more-dimensional arrays
 @end itemize
 
 The function saves data in an unformatted fashion, i.e.@: each data
-value is written onto a new line. The only exception is more-dimensional
-arrays - here a empty line is printed between the individual slices of
+value is written on a new line. The only exception is more-dimensional
+arrays - here an empty line is output between the individual slices of
 the array. Here's an example: The array
 
 @example
@@ -340,32 +341,34 @@ X[ 3, 2 ] = 6
 
 @item save_program()
 @findex save_program()
-This functions writes the @b{EDL} program into a file. As usual, the
-first argument may be a file identifier - the same rules apply as for
-@code{save()} and @code{fsave()}. The second argument may be a string
-that is prepended to each line of the program, i.e.@: a comment character
-to make other programs like @code{MATHLAB} or @code{octave} skip these
-lines.
+This functions writes the currently run @b{EDL} program into a file. As
+usual, the first argument may be a file identifier - the same rules
+apply as for @code{save()} and @code{fsave()}. The second argument can
+be a string that is prepended to each line of the program, i.e.@: a
+comment character to make other programs like @code{MATHLAB} or
+@code{octave} skip these lines.
 
 
 @item save_output()
 @findex save_output()
 This function has the same arguments as @code{save_program()} but prints
-the content of the output window into the file.
+the content of the output window (i.e.@: the bottom browser window in
+the main form) into the file.
 
 
 @item save_comment()
 @findex save_comment()
 This function is used to print comments into the file. When it is called a
-small editor is shown and the user may write her comments. These will be then
+small editor is shown and the user may enter comments. These will be then
 written into the file.
 
-The first argument may as usual be a file identifier. The second
-argument is again a string to be prepended to each line of the
-comment. The third argument is a string that will appear in the comment
-editor when it is opened - use "@code{\n}" to separate the lines of a
-multi-line text. The last argument is the label string to be shown on
-top of the editor - it defaults to "Please enter a comment:".
+The first argument may as usual be a file identifier (or may be missing
+if @w{@code{get_file()}} hasn't been called). The second argument is
+again a string to be prepended to each line of the comment. The third
+argument is a preset string that appears in the comment editor when it is
+opened - use "@code{\n}" to separate the lines of a multi-line text. The
+last argument is the label string to be shown on top of the editor - it
+defaults to "Please enter a comment:".
 @end table
 
 
