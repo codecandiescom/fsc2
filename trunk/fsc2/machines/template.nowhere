@@ -2,16 +2,18 @@
 #
 #########################################################################
 #
-# If you are using this template file for setting up an installation of
-# fsc2 taylored for your machine please copy it to a file with your
-# machines fully qualified hostname as its name (just type 'hostname -f'
-# on the command line to find out its name, or, if you're really lazy try
-# the command "cp template.nowhere `hostname -f`"). Then edit this file,
-# it will be evaluated automatically during the make process.
+#  If you are using this template file for setting up an installation of
+#  fsc2 taylored for your machine please copy it to a file with your
+#  machines fully qualified hostname as its name (just type 'hostname -f'
+#  on the command line to find out its name, or, if you're really lazy try
+#  the command "cp template.nowhere `hostname -f`"). Then edit this file,
+#  it will be evaluated automatically during the make process.
 #
-# Please note: When in the following there is some talk about "commenting
-# out a variable" this simply means that you have to put a hash character
-# ('#') at the beginning of the line where the variable is set.
+#  Please note: When in the following there is some talk about "commenting
+#  out a variable" this simply means that you have to put a hash character
+#  ('#') at the beginning of the line where the variable is set.
+#
+#  Please also note that all settings are case-sensitive!
 #
 #########################################################################
 

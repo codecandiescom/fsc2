@@ -9,6 +9,10 @@ involved will look for files with names starting with the fully
 qualified hostname of the machine in this directory and include
 them if they exist.
 
+For the basic configuration there's a template file, 'template.nowhere'.
+You just have to copy it to a file with the fully qualified hostname
+(use 'hostname -f' to find it out) and then edit this file.
+
 Up to three files will get included. As an example in the following
 it is assumed that the fully qualified hostname of the machine fsc2
 is to be compiled and installed is 'hex.unseen.edu'. In the process
