@@ -312,47 +312,6 @@ Var *magnet_setup( Var *v )
 		eprint( WARN, "%s:%ld: %s: Integer value used for field step width.\n",
 				Fname, Lc, DEVICE_NAME );
 
-	if ( exist_device( "er035m" ) )
-	{
-		if ( VALUE( v ) < AEG_X_BAND_WITH_ER035M_MIN_FIELD )
-		{
-			eprint( FATAL, "%s:%ld: %s: Start field (%lf G) too low for "
-					"Bruker ER035M gaussmeter, minimum is %d G.\n",
-					Fname, Lc, DEVICE_NAME, VALUE( v ),
-					( int ) AEG_X_BAND_WITH_ER035M_MIN_FIELD );
-			THROW( EXCEPTION );
-		}
-        
-		if ( VALUE( v ) > AEG_X_BAND_WITH_ER035M_MAX_FIELD )
-		{
-			eprint( FATAL, "%s:%ld: %s: Start field (%lf G) too high for "
-					"Bruker ER035M gaussmeter, maximum is %d G.\n",
-					Fname, Lc, DEVICE_NAME, VALUE( v ),
-					( int ) AEG_X_BAND_WITH_ER035M_MAX_FIELD );
-			THROW( EXCEPTION );
-		}
-	}
-
-	if ( exist_device( "bh15" ) )
-	{
-		if ( VALUE( v ) < AEG_X_BAND_WITH_BH15_MIN_FIELD )
-		{
-			eprint( FATAL, "%s:%ld: %s: Start field (%lf G) too low for "
-					"Bruker BH15 field controller, minimum is %d G.\n",
-					Fname, Lc, DEVICE_NAME, VALUE( v ),
-					( int ) AEG_X_BAND_WITH_BH15_MIN_FIELD );
-			THROW( EXCEPTION );
-		}
-        
-		if ( VALUE( v ) > AEG_X_BAND_WITH_BH15_MAX_FIELD )
-		{
-			eprint( FATAL, "%s:%ld: %s: Start field (%lf G) too high for "
-					"Bruker BH15 field controller, maximum is %d G.\n",
-					Fname, Lc, DEVICE_NAME, VALUE( v ),
-					( int ) AEG_X_BAND_WITH_BH15_MAX_FIELD );
-			THROW( EXCEPTION );
-		}
-	}
 
 	if ( VALUE( v->next ) < AEG_X_BAND_MIN_FIELD_STEP )
 	{
@@ -550,6 +509,77 @@ Var *reset_field( Var *v )
 /*                                                                           */
 /*****************************************************************************/
 
+
+double aeg_x_band_field_check( double field, bool *err_flag )
+{
+	if ( exist_device( "er035m" ) )
+	{
+		if ( field < AEG_X_BAND_WITH_ER035M_MIN_FIELD )
+		{
+			eprint( FATAL, "%s:%ld: %s: Start field (%lf G) too low for "
+					"Bruker ER035M gaussmeter, minimum is %d G.\n",
+					Fname, Lc, DEVICE_NAME, field,
+					( int ) AEG_X_BAND_WITH_ER035M_MIN_FIELD );
+			if ( ! TEST_RUN )
+			{
+				*err_flag = SET;
+				return AEG_X_BAND_WITH_ER035M_MIN_FIELD;
+			}
+			else
+				THROW( EXCEPTION );
+		}
+        
+		if ( field > AEG_X_BAND_WITH_ER035M_MAX_FIELD )
+		{
+			eprint( FATAL, "%s:%ld: %s: Start field (%lf G) too high for "
+					"Bruker ER035M gaussmeter, maximum is %d G.\n",
+					Fname, Lc, DEVICE_NAME, field,
+					( int ) AEG_X_BAND_WITH_ER035M_MAX_FIELD );
+			if ( ! TEST_RUN )
+			{
+				*err_flag = SET;
+				return AEG_X_BAND_WITH_ER035M_MAX_FIELD;
+			}
+			else
+				THROW( EXCEPTION );
+		}
+	}
+
+	if ( exist_device( "bh15" ) )
+	{
+		if ( field < AEG_X_BAND_WITH_BH15_MIN_FIELD )
+		{
+			eprint( FATAL, "%s:%ld: %s: Start field (%lf G) too low for "
+					"Bruker BH15 field controller, minimum is %d G.\n",
+					Fname, Lc, DEVICE_NAME, field,
+					( int ) AEG_X_BAND_WITH_BH15_MIN_FIELD );
+			if ( ! TEST_RUN )
+			{
+				*err_flag = SET;
+				return AEG_X_BAND_WITH_BH15_MIN_FIELD;
+			}
+			else
+				THROW( EXCEPTION );
+		}
+        
+		if ( field > AEG_X_BAND_WITH_BH15_MAX_FIELD )
+		{
+			eprint( FATAL, "%s:%ld: %s: Start field (%lf G) too high for "
+					"Bruker BH15 field controller, maximum is %d G.\n",
+					Fname, Lc, DEVICE_NAME, field,
+					( int ) AEG_X_BAND_WITH_BH15_MAX_FIELD );
+			if ( ! TEST_RUN )
+			{
+				*err_flag = SET;
+				return AEG_X_BAND_WITH_BH15_MAX_FIELD;
+			}
+			else
+				THROW( EXCEPTION );
+		}
+	}
+
+	return field;
+}
 
 
 #define sign( x ) ( ( ( x ) >= 0.0 ) ? 1.0 : -1.0 )

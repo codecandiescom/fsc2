@@ -22,7 +22,6 @@
 /* Exported functions */
 
 int aeg_s_band_init_hook( void );
-int aeg_s_band_test_hook( void );
 int aeg_s_band_exp_hook( void );
 int aeg_s_band_end_of_exp_hook( void );
 void aeg_s_band_exit_hook( void );
@@ -38,6 +37,7 @@ Var *reset_field( Var *v );
 
 /* Locally used functions */
 
+static double aeg_s_band_field_check( double field, bool *err_flag );
 static bool magnet_init( void );
 static bool magnet_goto_field( double field );
 static bool magnet_goto_field_rec( double field, int rec );
@@ -213,12 +213,6 @@ int aeg_s_band_init_hook( void )
 }
 
 
-int aeg_s_band_test_hook( void )
-{
-	return 1;
-}
-
-
 /*---------------------------------------------------------------------*/
 /* Opens connection to the power supply and calibrates the field sweep */
 /*---------------------------------------------------------------------*/
@@ -296,6 +290,9 @@ void aeg_s_band_exit_hook( void )
 
 Var *magnet_setup( Var *v )
 {
+	bool err_flag = UNSET;
+
+
 	/* check that both variables are reasonable */
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
@@ -308,47 +305,11 @@ Var *magnet_setup( Var *v )
 		eprint( WARN, "%s:%ld: %s: Integer value used for field step width.\n",
 				Fname, Lc, DEVICE_NAME );
 
-	if ( exist_device( "er035m" ) )
-	{
-		if ( VALUE( v ) < AEG_S_BAND_WITH_ER035M_MIN_FIELD )
-		{
-			eprint( FATAL, "%s:%ld: %s: Start field (%lf G) too low for "
-					"Bruker ER035M gaussmeter, minimum is %d G.\n",
-					Fname, Lc, DEVICE_NAME, VALUE( v ),
-					( int ) AEG_S_BAND_WITH_ER035M_MIN_FIELD );
-			THROW( EXCEPTION );
-		}
-        
-		if ( VALUE( v ) > AEG_S_BAND_WITH_ER035M_MAX_FIELD )
-		{
-			eprint( FATAL, "%s:%ld: %s: Start field (%lf G) too high for "
-					"Bruker ER035M gaussmeter, maximum is %d G.\n",
-					Fname, Lc, DEVICE_NAME, VALUE( v ),
-					( int ) AEG_S_BAND_WITH_ER035M_MAX_FIELD );
-			THROW( EXCEPTION );
-		}
-	}
+	/* Check that new field value is still within bounds */
 
-	if ( exist_device( "bh15" ) )
-	{
-		if ( VALUE( v ) < AEG_S_BAND_WITH_BH15_MIN_FIELD )
-		{
-			eprint( FATAL, "%s:%ld: %s: Start field (%lf G) too low for "
-					"Bruker BH15 field controller, minimum is %d G.\n",
-					Fname, Lc, DEVICE_NAME, VALUE( v ),
-					( int ) AEG_S_BAND_WITH_BH15_MIN_FIELD );
-			THROW( EXCEPTION );
-		}
-        
-		if ( VALUE( v ) > AEG_S_BAND_WITH_BH15_MAX_FIELD )
-		{
-			eprint( FATAL, "%s:%ld: %s: Start field (%lf G) too high for "
-					"Bruker BH15 field controller, maximum is %d G.\n",
-					Fname, Lc, DEVICE_NAME, VALUE( v ),
-					( int ) AEG_S_BAND_WITH_BH15_MAX_FIELD );
-			THROW( EXCEPTION );
-		}
-	}
+	aeg_s_band_field_check( VALUE( v ), &err_flag );
+	if ( err_flag )
+		THROW( EXCEPTION );
 
 	if ( VALUE( v->next ) < AEG_S_BAND_MIN_FIELD_STEP )
 	{
@@ -385,55 +346,17 @@ Var *magnet_fast_init( Var *v )
 Var *set_field( Var *v )
 {
 	double field;
+	bool err_flag = UNSET;
 
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
 	if ( v->type == INT_VAR )
 		eprint( WARN, "%s:%ld: %s: Integer value used for magnetic field.\n",
 				Fname, Lc, DEVICE_NAME );
-	field = VALUE( v );
 
-	if ( exist_device( "er035m" ) )
-	{
-		if ( VALUE( v ) < AEG_S_BAND_WITH_ER035M_MIN_FIELD )
-		{
-			eprint( FATAL, "%s:%ld: %s: Field (%lf G) too low for Bruker "
-					"ER035M gaussmeter, minimum is %d G.\n",
-					Fname, Lc, DEVICE_NAME, VALUE( v ),
-					( int ) AEG_S_BAND_WITH_ER035M_MIN_FIELD );
-			THROW( EXCEPTION );
-		}
-        
-		if ( magnet.field > AEG_S_BAND_WITH_ER035M_MAX_FIELD )
-		{
-			eprint( FATAL, "%s:%ld: %s: Field (%lf G) too high for Bruker "
-					"ER035M gaussmeter, maximum is %d G.\n",
-					Fname, Lc, DEVICE_NAME, VALUE( v ),
-					( int ) AEG_S_BAND_WITH_ER035M_MAX_FIELD );
-			THROW( EXCEPTION );
-		}
-	}
+	/* Check the new field value and reduce value if necessary */
 
-	if ( exist_device( "bh15" ) )
-	{
-		if ( VALUE( v ) < AEG_S_BAND_WITH_BH15_MIN_FIELD )
-		{
-			eprint( FATAL, "%s:%ld: %s: Field (%lf G) too low for Bruker "
-					"BH15 field controller, minimum is %d G.\n",
-					Fname, Lc, DEVICE_NAME, VALUE( v ),
-					( int ) AEG_S_BAND_WITH_BH15_MIN_FIELD );
-			THROW( EXCEPTION );
-		}
-        
-		if ( magnet.field > AEG_S_BAND_WITH_BH15_MAX_FIELD )
-		{
-			eprint( FATAL, "%s:%ld: %s: Field (%lf G) too high for Bruker "
-					"BH15 field controller, maximum is %d G.\n",
-					Fname, Lc, DEVICE_NAME, VALUE( v ),
-					( int ) AEG_S_BAND_WITH_BH15_MAX_FIELD );
-			THROW( EXCEPTION );
-		}
-	}
+	field = aeg_s_band_field_check( VALUE( v ), &err_flag );
 
 	if ( ( v = vars_pop( v ) ) != NULL )
 	{
@@ -462,6 +385,9 @@ Var *set_field( Var *v )
 
 Var *sweep_up( Var *v )
 {
+	bool err_flag = UNSET;
+
+
 	v = v;
 
 	if ( ! magnet.is_field_step )
@@ -470,6 +396,12 @@ Var *sweep_up( Var *v )
 				Fname, Lc, DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
+
+	/* Check that new field value is still within bounds */
+
+	aeg_s_band_field_check( magnet.act_field + magnet.field_step, &err_flag );
+	if ( err_flag )
+		return vars_push( FLOAT_VAR, magnet.act_field );
 
 	if ( ! TEST_RUN )
 	{
@@ -489,8 +421,10 @@ Var *sweep_up( Var *v )
 
 Var *sweep_down( Var *v )
 {
-	v = v;
+	bool err_flag = UNSET;
 
+
+	v = v;
 
 	if ( ! magnet.is_field_step )
 	{
@@ -498,6 +432,12 @@ Var *sweep_down( Var *v )
 				Fname, Lc, DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
+
+	/* Check that new field value is still within bounds */
+
+	aeg_s_band_field_check( magnet.act_field - magnet.field_step, &err_flag );
+	if ( err_flag )
+		return vars_push( FLOAT_VAR, magnet.act_field );
 
 	if ( ! TEST_RUN )
 	{
@@ -547,6 +487,75 @@ Var *reset_field( Var *v )
 /*****************************************************************************/
 
 
+static double aeg_s_band_field_check( double field, bool *err_flag )
+{
+	if ( exist_device( "er035m" ) )
+	{
+		if ( field < AEG_S_BAND_WITH_ER035M_MIN_FIELD )
+		{
+			eprint( FATAL, "%s:%ld: %s: Field (%lf G) too low for Bruker "
+					"ER035M gaussmeter, minimum is %d G.\n",
+					Fname, Lc, DEVICE_NAME, field,
+					( int ) AEG_S_BAND_WITH_ER035M_MIN_FIELD );
+			if ( ! TEST_RUN )
+			{
+				*err_flag = SET;
+				return AEG_S_BAND_WITH_ER035M_MIN_FIELD;
+			}
+			else
+				THROW( EXCEPTION );
+		}
+        
+		if ( field > AEG_S_BAND_WITH_ER035M_MAX_FIELD )
+		{
+			eprint( FATAL, "%s:%ld: %s: Field (%lf G) too high for Bruker "
+					"ER035M gaussmeter, maximum is %d G.\n",
+					Fname, Lc, DEVICE_NAME, field,
+					( int ) AEG_S_BAND_WITH_ER035M_MAX_FIELD );
+			if ( ! TEST_RUN )
+			{
+				*err_flag = SET;
+				return AEG_S_BAND_WITH_ER035M_MAX_FIELD;
+			}
+			else
+				THROW( EXCEPTION );
+		}
+	}
+
+	if ( exist_device( "bh15" ) )
+	{
+		if ( field < AEG_S_BAND_WITH_BH15_MIN_FIELD )
+		{
+			eprint( FATAL, "%s:%ld: %s: Field (%lf G) too low for Bruker "
+					"BH15 field controller, minimum is %d G.\n",
+					Fname, Lc, DEVICE_NAME, field,
+					( int ) AEG_S_BAND_WITH_BH15_MIN_FIELD );
+			if ( ! TEST_RUN )
+			{
+				*err_flag = SET;
+				return AEG_S_BAND_WITH_BH15_MIN_FIELD;
+			}
+			else
+				THROW( EXCEPTION );
+		}
+        
+		if ( field > AEG_S_BAND_WITH_BH15_MAX_FIELD )
+		{
+			eprint( FATAL, "%s:%ld: %s: Field (%lf G) too high for Bruker "
+					"BH15 field controller, maximum is %d G.\n",
+					Fname, Lc, DEVICE_NAME, field,
+					( int ) AEG_S_BAND_WITH_BH15_MAX_FIELD );
+			if ( ! TEST_RUN )
+			{
+				*err_flag = SET;
+				return AEG_S_BAND_WITH_BH15_MAX_FIELD;
+			}
+			else
+				THROW( EXCEPTION );
+		}
+	}
+}
+
 
 #define sign( x ) ( ( ( x ) >= 0.0 ) ? 1.0 : -1.0 )
 
@@ -566,8 +575,6 @@ Var *reset_field( Var *v )
 #define MAGNET_MAX_TRIES       3      /* number of retries after failure of 
 										 magnet field convergence to target
 										 point */
-
-
 
 /* The sweep of the magnet is done by applying a voltage for a certain time
    (to be adjusted manually on the front panel but which should be left at
