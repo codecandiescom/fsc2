@@ -25,9 +25,10 @@ typedef struct _IOBJ_ {
 
 	char *label;            /* object label */
 	char *help_text;        /* objects help text */
+	char *form_str;         /* C format string for in/output objects */
 
-	volatile int state;     /* state (on/off) of press count (buttons) 
-							   or did text change (input objects) */
+	volatile int state;     /* state (on/off) of press count (buttons) */
+
 	FL_OBJECT *group;       /* group (RADIO) button belongs to */
 	long partner;
 
