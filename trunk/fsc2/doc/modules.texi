@@ -173,11 +173,11 @@ typedef struct Var_
 @noindent
 There are only four types of variables you have to know about:
 
-@multitable {FLOAT_TRANS_ARR} {a one-dimensional array of floating point values}
+@multitable {FLOAT_ARR} {a one-dimensional array of floating point values}
 @item @code{INT_VAR} @tab a variable for integer values
 @item @code{FLOAT_VAR} @tab a variable for floating point values
-@item @code{INT_TRANS_ARR} @tab a one-dimensional array of integer values
-@item @code{FLOAT_TRANS_ARR} @tab a one-dimensional array of floating
+@item @code{INT_ARR} @tab a one-dimensional array of integer values
+@item @code{FLOAT_ARR} @tab a one-dimensional array of floating
 point values
 @end multitable
 
@@ -361,7 +361,7 @@ supposed to be a @code{double} value. Of course, you don't have to use
 new variable holding the value.
 
 For arrays @code{vars_push()} the first argument is either
-@code{INT_TRANS_ARRAY} or @code{FLOAT_TRANS_ARRAY}, The second argument
+@code{INT_ARRAY} or @code{FLOAT_ARRAY}, The second argument
 is a pointer to the array (i.e.@: its first argument). For creating an
 array variable it also needs a third argument, the length of the array
 (as a @code{long} integer). If you want to return an array with two
@@ -369,7 +369,7 @@ integer arguments you would use something like
 @example
     data[ 0 ] = 1;
     data[ 1 ] = 2;
-    return vars_push( INT_TRANS_ARRAY, data, 2 );
+    return vars_push( INT_ARRAY, data, 2 );
 @end example
 @noindent
 assuming that @code{data} is an array of @code{long int}s.
@@ -448,7 +448,7 @@ you've got to do is call the function @code{vars_push()} as
 
     ...
 
-    return vars_push( INT_TRANS_ARR, data, len );
+    return vars_push( INT_ARR, data, len );
     T_free( data );
     return ret;
 @end example
@@ -458,7 +458,7 @@ for storing the data. It is your responsibility to free this memory
 before you return from your function, @acronym{fsc2} just uses a copy of
 the data you pass to it using @code{vars_push()}. As you probably already
 guessed, if you want to return a float array, you will have to use
-@code{FLOAT_TRANS_ARR} instead of @code{INT_TRANS_ARR} in the call to
+@code{FLOAT_ARR} instead of @code{INT_ARR} in the call to
 @code{vars_push()}.
 
 The same method may be used if your function has to return two different
@@ -486,7 +486,7 @@ Var *my_function( Var *var )
     v[ 0 ] = ...;    /* just fill in all the stuff you */
     v[ 1 ] = ...;    /* need to calculate both data    */
 
-    return vars_push( INT_TRANS_ARR, v, 2 );
+    return vars_push( INT_ARR, v, 2 );
 @}
 @end example
 
