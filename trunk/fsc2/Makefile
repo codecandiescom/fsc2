@@ -97,7 +97,7 @@ export            # export all variables to sub-makes
 # Switch off all implicit rules and set suffices of file to be made by make
 
 .SUFFIXES:
-.PHONY: all install clean distclean pack
+.PHONY: all install-strip install clean distclean pack
 
 
 # default rule: make the main program, the primary lexer and the modules
@@ -129,7 +129,7 @@ install:
 	$(INSTALL) -d $(libdir)
 	$(INSTALL) -d $(auxdir)
 	$(INSTALL) -d $(docdir)
-	$(MAKE) -C utils install
+
 	$(INSTALL) -m 755 -o fsc2 -g fsc2 fsc2_connect $(bindir)
 	$(RM) $(RMFLAGS) $(bindir)/fsc2_start $(bindir)/fsc2_test \
 					 $(bindir)/fsc2_load
@@ -137,21 +137,19 @@ install:
 	ln -s $(bindir)/fsc2_connect $(bindir)/fsc2_test
 	ln -s $(bindir)/fsc2_connect $(bindir)/fsc2_load
 	$(INSTALL) -m 755 -o fsc2 -g fsc2 fsc2_clean $(libdir)
+
+	$(INSTALL) -m 644 -o fsc2 -g fsc2 *.so $(libdir)
+
 	$(INSTALL) -m 644 -o fsc2 -g fsc2 Functions $(libdir)
 	$(INSTALL) -m 644 -o fsc2 -g fsc2 Devices $(libdir)
-	$(INSTALL) -m 644 -o fsc2 -g fsc2 *.so $(libdir)
-	$(RM) $(RMFLAGS) $(libdir)/hfs9003.so $(libdir)/w_band.so
-	ln -s $(libdir)/hfs9000.so $(libdir)/hfs9003.so
-	ln -s $(libdir)/keithley228a.so $(libdir)/w_band.so
-	$(INSTALL) -m 644 -o fsc2 -g fsc2 hp8647a.table $(libdir)
 	$(INSTALL) -m 644 -o fsc2 -g fsc2 aux/*.xpm $(auxdir)
-	$(MAKE) install-$(shell hostname -f)
-	$(MAKE) -C scripts all
-	$(INSTALL) -m 444 -o fsc2 -g fsc2 doc/fsc2.html $(docdir)
-	$(INSTALL) -m 444 -o fsc2 -g fsc2 doc/fsc2_*.html $(docdir)
-	$(INSTALL) -m 444 -o fsc2 -g fsc2 doc/fsc2.ps $(docdir)
-	$(INSTALL) -m 444 -o fsc2 -g fsc2 doc/fsc2.pdf $(docdir)
 
+	$(MAKE) -C utils install
+	if `grep install-$(shell hostname -f) ./Makefile > /dev/null`; then \
+		$(MAKE) install-$(shell hostname -f); \
+	fi
+	$(MAKE) -C scripts install
+	$(MAKE) -C doc install
 
 install-pion.anorg.chemie.uni-frankfurt.de:
 	$(RM) $(RMFLAGS)  $(libdir)/dg2020.so $(libdir)/s_band.so \
@@ -174,6 +172,7 @@ install-pion.anorg.chemie.uni-frankfurt.de:
 	chown fsc2.fsc2 $(libdir)/tds520c.so
 
 install-crowley.physik.fu-berlin.de:
+	$(INSTALL) -m 644 -o fsc2 -g fsc2 hp8647a.table $(libdir)
 	$(RM) $(RMFLAGS) $(libdir)/gaussmeter.so $(libdir)/synthesizer.so \
 					 $(libdir)/boxcar.so
 	ln -s $(libdir)/er035m_sas.so $(libdir)/gaussmeter.so
@@ -193,7 +192,10 @@ install-moebi.physik.fu-berlin.de:
 	ln -s $(libdir)/er035m_s.so $(libdir)/gaussmeter.so
 	chown fsc2.fsc2 $(libdir)/gaussmeter.so
 
-install-crowley.none: ;
+install-wband.physik.fu-berlin.de:
+	$(RM) $(RMFLAGS) $(libdir)/hfs9003.so $(libdir)/w_band.so
+	ln -s $(libdir)/hfs9000.so $(libdir)/hfs9003.so
+	ln -s $(libdir)/keithley228a.so $(libdir)/w_band.so
 
 
 # make all types of documentation

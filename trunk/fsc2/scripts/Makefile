@@ -1,7 +1,7 @@
 # $Id$
 
-# list of all scripts for the current machine (i.e. all scripts with name
-# extension equal to the machines FQDN)
+# list of all scripts for the current machine (i.e. all scripts whose
+# extension is equal to the machines FQDN)
 
 scripts = $(wildcard *.$(shell hostname -f))
 
