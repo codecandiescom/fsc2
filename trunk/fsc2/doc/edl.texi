@@ -1595,6 +1595,13 @@ as if the included file had been pasted into the current @code{EDL}
 program. Included files may also contain @code{#INCLUDE} statements, up
 to 16 levels deep.
 
+The name of the file to be included must follow the @code{#INCLUDE}
+directly (i.e.@: on the same line and only with spaces and tab
+characters in between). It also must be included in double quotes and
+the file name must be either given with an absolute path or with a path
+relative to the directory @code{fsc2} was started from (i.e.@: the
+current working directory of @code{fsc2}).
+
 
 @anchor{#EXIT statement}
 @subsection @code{#EXIT} statement

@@ -38,6 +38,7 @@ static void ff_format_check( Var *v );
 static long do_printf( long file_num, Var *v );
 static long print_browser( int browser, int fid, const char* comment );
 static long T_fprintf( long fn, const char *fmt, ... );
+static long print_include( int fid, char *cp, const char *comment );
 
 
 /*----------------------------------------------------------------*/
@@ -1501,7 +1502,7 @@ Var *f_save_o( Var *v )
 static long print_browser( int browser, int fid, const char* comment )
 {
 	char *line;
-	char *lp;
+	char *lp, *cp;
 	long count;
 
 
@@ -1517,8 +1518,20 @@ static long print_browser( int browser, int fid, const char* comment )
 		if ( line != NULL )
 		{
 			if ( browser == 0 )
+			{
 				while ( *lp++ != ':' )
 					/* empty */ ;
+
+				cp = lp++;
+				while ( *cp == ' ' || *cp == '\t' )
+					cp++;
+				if ( ! strncmp( cp, "#INCLUDE", 8 ) )
+				{
+					count += T_fprintf( fid, "%s%s\n", comment, lp );
+					count += print_include( fid, cp + 8, comment );
+					continue;
+				}
+			}
 			else if ( *line == '@' )
 			{
 				lp++;
@@ -1533,6 +1546,90 @@ static long print_browser( int browser, int fid, const char* comment )
 	}
 
 	count += T_fprintf( fid, "%s\n", comment );
+
+	return count;
+}
+
+
+/*------------------------------------------------------*/
+/* Function for (recursively if necessary) printing out */
+/* a file specified in an #INCLUDE directive.           */
+/*------------------------------------------------------*/
+
+#define PRINT_BUF_SIZE 1025
+
+static long print_include( int fid, char *cp, const char *comment )
+{
+	char delim;
+	static char *ncp;
+	char *ep;
+	static FILE *finc;
+	char buf[ PRINT_BUF_SIZE ];
+	static long count;
+
+
+	ncp = cp;
+	count = 0L;
+
+	/* Skip leading white space */
+
+	while ( *ncp == ' ' || *ncp == '\t' )
+		ncp++;
+
+	/* Try to extract the file name */
+
+	ep = ncp++;
+	delim = *ep++;
+	if ( delim == '<' )
+		delim = '>';
+	while ( *ep != '\0' && *ep != delim )
+		ep++;
+
+	/* Give up when no file name could be extracted */
+
+	if ( *ep == '\0' || ( delim != '"' && delim != '>' ) )
+		return 0L;
+
+	*ep = '\0';
+
+	/* Try to open the include file, give up on failure */
+
+	if ( ( finc = fopen( ncp, "r" ) ) == NULL )
+		return 0L;
+
+	/* Now print the include file, taking care of include files within the
+	   include file - the limitation within fsc2_clean to a maximum of
+	   16 levels makes sure that we don't get into an infinite recursion. */
+
+	TRY
+	{
+		count = T_fprintf( fid, "%s//--- %s - start -----------------\n",
+						   comment, ncp );
+
+		while ( fgets( buf, PRINT_BUF_SIZE, finc ) != NULL )
+		{
+			count += T_fprintf( fid, "%s%s", comment, buf );
+
+			ep = buf;
+			while ( *ep && ( *ep == ' ' || *ep == '\t' ) )
+				ep++;
+
+			if ( ! strncmp( ep, "#INCLUDE", 8 ) )
+				count += print_include( fid, ep + 8, comment );
+		}
+
+		fclose( finc );
+
+		return count += T_fprintf( fid,
+								   "%s//--- %s - end ------------------\n",
+								   comment, ncp );
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+	{
+		fclose( finc );
+		RETHROW( );
+	}
 
 	return count;
 }

@@ -1106,6 +1106,10 @@ can be a string that is prepended to each line of the program, i.e.@: a
 comment character to make other programs like @acronym{MATHLAB} or
 @acronym{octave} skip these lines.
 
+If @code{#INCLUDE} statements are found in the @code{EDL} script also
+the included files get saved into the output file, embedded into the
+text of the script.
+
 This function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} program.
 
