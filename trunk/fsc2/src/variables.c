@@ -927,7 +927,7 @@ void vars_check( Var *v, int type )
 	                         "ARRAY REFERENCE" };
 	
 	/* Being paranoid we first check that the variable exists at all -
-	   probably this can be left out later. */
+	   probably this can vanish later. */
 
 	assert( vars_exist( v ) );
 
@@ -1941,7 +1941,7 @@ Var *apply_unit( Var *var, Var *unit )
 
 		/* Here starts the paranoia section... */
 
-		vars_check( var , ~UNDEF_VAR );
+		vars_check( var, ~UNDEF_VAR );
 		assert( 1 == 0 );
 	}
 	else
