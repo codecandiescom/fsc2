@@ -299,7 +299,7 @@ void daq_irq_disable( Board *board, int irq )
 /* by calling the function with the state argument being           */
 /* "NI_DAQ_UNUSED". A subsystem can also "release" all of its PFI  */
 /* lines by calling the function with the channel argument being   */
-/** set to "NI_DAQ_ALL".                                           */
+/* set to "NI_DAQ_ALL".                                            */
 /* The function returns 0 on success and 1 on errors.              */
 /*-----------------------------------------------------------------*/
 
@@ -512,8 +512,10 @@ static int MSC_clock_output( Board *board, NI_DAQ_CLOCK_TYPE clock,
 }
 
 
-/*-----------------------------------------------------------*/
-/*-----------------------------------------------------------*/
+/*--------------------------------------------------------*/
+/* Selects the trigger mode (either TTL digital or analog */
+/* with the required level(s)).                           */
+/*--------------------------------------------------------*/
 
 static int MSC_trigger_setup( Board *board, NI_DAQ_TRIG_TYPE trigger_type,
 			      int trigger_high, int trigger_low )
@@ -740,3 +742,4 @@ int MSC_board_properties( Board *board, NI_DAQ_BOARD_PROPERTIES *arg )
  * tab-width: 8
  * End:
  */
+                                                                                                                                            
