@@ -61,7 +61,7 @@ void accept_new_data( void )
 		if ( ( buf = attach_shm( Message_Queue[ message_queue_low ].shm_id ) )
 			 == ( void * ) - 1 )
 		{
-#if defined ( DEBUG )
+#ifndef NDEBUG
 			eprint( FATAL, UNSET, "Internal communication error at %s:%d, "
 					"message_queue_low = %d, shm_id = %d.\n"
 					"*** PLEASE SEND A BUG REPORT CITING THESE LINES *** "
@@ -308,7 +308,7 @@ static void accept_1d_data( long x_index, long curve, int type, char *ptr )
 
 	/* Test if the curve number is OK */
 
-#if defined ( DEBUG )
+#ifndef NDEBUG
 	if ( curve >= G.nc )
 	{
 		eprint( FATAL, SET, "Internal error detected at %s:%d, there is no "
@@ -344,6 +344,15 @@ static void accept_1d_data( long x_index, long curve, int type, char *ptr )
 					__FILE__, __LINE__ );
 			THROW( EXCEPTION )
 	}
+
+#ifndef NDEBUG
+	if ( len <= 0 )
+	{
+		eprint( FATAL, SET, "Internal error detected at %s:%d, no points"
+				"to be drawn: %ld.\n", __FILE__, __LINE__, len );
+		THROW( EXCEPTION )
+	}
+#endif
 
 	/* If the number of points exceeds the size of the arrays for the curves
 	   we have to increase the sizes for all curves. But take care: While
@@ -519,7 +528,7 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 
 	/* Test if the curve number is OK */
 
-#if defined ( DEBUG )
+#ifndef NDEBUG
 	if ( curve >= G.nc )
 	{
 		eprint( FATAL, SET, "Internal error detected at %s:%d, there is no "
@@ -557,6 +566,15 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 					__FILE__, __LINE__ );
 			THROW( EXCEPTION )
 	}
+
+#ifndef NDEBUG
+	if ( len <= 0 )
+	{
+		eprint( FATAL, SET, "Internal error detected at %s:%d, no points"
+				"to be drawn: %ld.\n", __FILE__, __LINE__, len );
+		THROW( EXCEPTION )
+	}
+#endif
 
 	/* Now test if the new data fit into the already allocated memory,
 	   otherwise extend the memory area. */
@@ -691,6 +709,9 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 	/* Tell the cross section handler about the new data */
 
 	need_cut_redraw |= cut_new_points( curve, x_index, y_index, len );
+
+	/* Nothing is to be done, i.e. nothing to be really drawn, when there is
+	   nothing to display yet, i.e. as long no scaling for the curve is set */
 
 	if ( ! cv->is_scale_set )
 		return;
