@@ -1618,7 +1618,7 @@ the @code{fsc2} package)
 @c #############################################################
 
 
-@node rb8510, rb_pulser, rb_pulser, Device Reference
+@node rb8510, rb_pulser, rb8509, Device Reference
 @iftex
 @subheading Rulbus 12-bit DAC Card
 @end iftex

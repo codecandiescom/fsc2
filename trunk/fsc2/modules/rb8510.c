@@ -169,14 +169,26 @@ Var *daq_name( Var *v )
 }
 
 
-/*----------------------------------*
- * Function sets the output voltage
- *----------------------------------*/
+/*---------------------------------------------*
+ * Function sets or returns the output voltage
+ *--------------------------------------------*/
 
 Var *daq_set_voltage( Var *v )
 {
 	double volts;
 
+
+	if ( v == NULL )
+	{
+		if ( ! rb8510.volts_is_set )
+		{
+			print( FATAL, "Can't determine output voltage because it never "
+				   "has been set.\n" );
+			THROW( EXCEPTION );
+		}
+
+		return vars_push( FLOAT_VAR, rb8510.volts );
+	}
 
 	volts = get_double( v, "DAC output voltage" );
 	too_many_arguments( v );
@@ -201,6 +213,7 @@ Var *daq_set_voltage( Var *v )
 			rb8510.Vmax = volts;
 		else if ( volts < rb8510.Vmin )
 			rb8510.Vmin = volts;
+		rb8510.volts = volts;
 
 		return vars_push( FLOAT_VAR, rb8510.volts );
 	}
@@ -225,6 +238,8 @@ Var *daq_set_voltage( Var *v )
 			   rulbus_strerror( ) );
 		THROW( EXCEPTION );
 	}
+
+	rb8510.volts = volts;
 
 	return vars_push( FLOAT_VAR, volts );
 }

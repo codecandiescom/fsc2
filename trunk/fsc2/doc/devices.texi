@@ -3027,13 +3027,18 @@ does not accept any parameters and can only by used in the
 @cindex DAQ Functions
 Currently, the supported data acquisition (DAQ) devices are the National
 Instruments PCI-MIO-16E-1 card, the @strong{Meilhaus Electronic GmbH}
-digital-to-analog converter cards ME-6000 and ME-6100, and a
-home-built DA and AD converter from the group of H.-J.@: Steinhoff at
-the University of Osnabrueck.
+digital-to-analog converter cards ME-6000 and ME-6100, a home-built DA
+and AD converter from the group of H.-J.@: Steinhoff at the University
+of Osnabrueck and the 12-bit RB8509 ADC and the 12-bit RB8510 DAC card
+connected via the Rulbus (Rijksuniversiteit Leiden BUS).
 
 Both the National Instruments PCI-MIO-16E-1 card and the ME-6000 and
 ME-6100 cards require that a kernel module and an additional library
 (both coming with @code{fsc2}) have been successfully installed.
+
+The RB8509 and RB8510 ADC and DAC cards both require that a kernel
+module and an additional library (coming with @code{fsc2}) have been
+successfully installed.
 
 The modules for these devices are loaded by specifying
 @example
@@ -3041,6 +3046,7 @@ pci_mio_16e_1
 me6000
 hjs_daadc
 rb8509
+rb8510
 @end example
 @noindent
 in the @code{DEVICES} section. 
@@ -3709,8 +3715,8 @@ argument has to be the output port, specified by one of the symbolic
 values between @code{CH0} and and @code{CH1} for the PCI-MIO-16E-1 card
 and between @code{CH1} and @code{CH15} for the ME-6000 and ME-6100 cards
 (don't try to use simple numbers instead!). For the home-built AD and DA
-converter this argument can't be specified since it has only a single output.
-This function can not be used with the Rulbus RB8905 ADC card.
+converter as well as the RB8510 DAC card this argument can't be
+specified since both have only a single output.
 
 If the PCI-MIO-16E-1 card he channel is in biploar mode and uses the
 internal voltage reference the second argument, the voltage to be
@@ -3728,6 +3734,11 @@ argument is the output voltage. It must be between @w{0 V} and the
 maximum voltage that has been spcified in the call of the function
 @code{daq_maximum_output_voltage()}. If this function hasn't been called
 the default maximum output voltage is @w{+10 V}.
+
+Also the module for the Rulbus RB8510 12-bit DAC allows only a single
+argument, the output voltage. Since there are different versions of the
+card with different output voltage ranges the possible range can only be
+determined at the start of the experiment.
 
 If an output voltage has already been set for an output port the last
 set voltage is returned when the function is called without a second
