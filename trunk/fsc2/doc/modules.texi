@@ -338,7 +338,7 @@ see the typedef for variables above the value is stored in the union
     @code{var->INT}@ @ @ @ (which is a macro standing for @code{var->val.lval})
 @end quotation
 @noindent
-and what you get is a value of type @code{long int} --- @acronym{fsc2}
+and what you get is a value of type @code{long int} -- @acronym{fsc2}
 is using long integers internally. On the other hand, if the type of the
 variable is @code{FLOAT_VAR} you get at the data with
 @quotation
@@ -1462,7 +1462,7 @@ numbered 3. Next it will inform the module that the pulse function the
 new pulse 3 is associated with is the function for microwave pulses.
 Next it detects that the start position of the new pulse is defined in
 terms of the values that (hopefully) have been already set for the pulse
-1 and must ask the module for the stat position of pulse 1. Using the
+1 and must ask the module for the start position of pulse 1. Using the
 returned value @acronym{fsc2} now can calculate the start position of
 the new pulse 3 and must then call another function in the module to
 tell the module about this position. Finally, another function in the
@@ -1567,7 +1567,7 @@ available with the driver. You can be sure that all time values that
 these function receive are integer multiples of one nanosecond.
 
 
-Execpt four of the functions for setting pulse properties, i.e.@:
+Except four of the functions for setting pulse properties, i.e.@:
 @code{set_pulse_position()}, @code{set_pulse_length()},
 @code{set_pulse_position_change()} and @code{set_pulse_length_change()},
 and the functions for asking pulse properties from the module, i.e.@:
@@ -1608,7 +1608,7 @@ type of pulsers this function is called to assign a pulse function to
 one of the internal channels (and @strong{not} the output connector,
 this is what the next function is for, see below), while for the second
 type of pulsers th function is for assigning a pulse function to one of
-the output conectors.
+the output connectors.
 
 As discussed in the chapter about pulsers (@pxref{Channel setup}) there
 are 15 different types of pulse functions. To avoid having to change
@@ -1665,7 +1665,7 @@ channels and independent output channels this function is used to
 associate a pulse function to one of the output functions, i.e.@: if in
 the function description the @code{POD} keyword is found:
 @example
-ASSIGNEMENTS:
+ASSIGNMENTS:
   MW: POD = 3, ...
 @end example
 Only one function should be assignable to an output connector.
@@ -1683,7 +1683,7 @@ This function is called to set the low voltage level to be output for a
 certain pulse function, i.e.@: when the @code{V_LOW} keyword is found in
 the function description. To stay compatible with other pulser modules I
 would recommend not to accept low voltage levels that are actually
-higher than the high volatge level and to tell the user to use the
+higher than the high voltage level and to tell the user to use the
 function @code{invert_function()} instead.
 
 
@@ -1692,7 +1692,7 @@ This function is called to tell the pulser module that the output for a
 certain pulse function has to be reversed polarity, i.e.@: that a high
 voltage is to be output for a pulse off state while a high voltage has
 to be output while a pulse with this function is switched on. The
-function is automatically caleed for the @code{INV} or @code{INVERT}
+function is automatically called for the @code{INV} or @code{INVERT}
 keyword in the pulse function description.
 
 
@@ -1788,7 +1788,7 @@ during the test run the value you get can be plain wrong if the
 @code{IF}/@code{ELSE} constructs etc.@: because it is not possible to
 determine during the test run which branches of the @acronym{EDL}
 program will be run in the real experiment. The
-@code{MAXIMUM_SEQUENCE_LENGTH} command should allow the user to correvt
+@code{MAXIMUM_SEQUENCE_LENGTH} command should allow the user to correct
 the possible wrong value when necessary.
 
 The obvious question is why bother at all to determine the maximum
@@ -1809,7 +1809,7 @@ be used.
 
 The question, of course, is why delete pulses at all that are never used
 and not keep them? The reason is that when doing phase cycling it can
-happen that for each additional pulse lots of channels in the digitzer
+happen that for each additional pulse lots of channels in the digitizer
 are needed, even to the point that the number of channels gets exceeded.
 Therefor, as a default, pulses that are found to be never used during
 the test run are removed (after printing out a message to the user).
@@ -1848,7 +1848,7 @@ ASSIGNMENTS:
 @end example
 In this case @code{MICROWAVE} is again the function that has to be phase
 cycled and is passed to the function as the second argument. The first
-argument is either @code{0} or @code{1}, depeding on if the this for the
+argument is either @code{0} or @code{1}, depending on if the this for the
 first phase cycled function (i.e.@: when the command in @acronym{EDL}
 program starts with either @code{PHASE_SETUP} or @code{PASE_SETUP_1}) or
 for the second phase cycled function (i.e.@: for @code{PHASE_SETUP_2}).
@@ -1901,7 +1901,7 @@ PHASE_SETUP_1:  +X: POD_1 = ON, POD2 = OFF,
                 -X: POD2 = 0, 0,
                 -Y: 1, 1;
 @end example
-is expected in the @acronym{EDL} program. The first line indictaes that
+is expected in the @acronym{EDL} program. The first line indicates that
 the phase function 1 is to be used to control phase pulses for microwave
 pulses and the output pods to be used are the pods 2 and 3. The
 following lines are supposed to tell the module that in order to create
@@ -1909,20 +1909,20 @@ a @code{+X} phase pulse the first output pod set in the definition of
 the first phase function (@code{PHASE_1}) (i.e.@: pod 2) must be in the
 high state, while the second pod (i.e.@: pod 3) must be low.
 
-For this kind of pahse setup the function @code{phase_setup_prep()} will
+For this kind of phase setup the function @code{phase_setup_prep()} will
 be called exactly 8 times in a row, 2 times for each phase type (i.e.@:
 @code{+X}, @code{+Y}, @code{-X} and @code{-Y}). It will be called always
 with the first argument set to @code{0} to indicate that
 @code{PHASE_SETUP_1} is currently done (where @code{PHASE_SETUP} without
 a number is just a short form for this), in for @code{PHASE_SETUP_2} the
-first paramater would be @code{1}.
+first parameter would be @code{1}.
 
 The second argument is type of phase, in @file{src/global.h} an
 enumeration defining @code{PHASE_PLUS_X} for a phase of @code{+X},
 @code{PHASE_PLUS_Y} for @code{+Y}, @code{PHASE_MINUS_X} for @code{-X} and
 @code{PHASE_MINUS_Y} for @code{-Y} is defined and should be used in your
 module. There is also a @code{PHASE_CW} pseudo phase type defined in
-case your module has to supprot a special cw-mode configuration.
+case your module has to support a special cw-mode configuration.
 
 The third argument is the output pod to use, where @code{0} stands for
 the first pod defined previously for the phase function, i.e.@: in our
@@ -1984,7 +1984,7 @@ with the first phase setup), and the second is the phase type (i.e.@:
 this case no meaning at all and its value should be discarded. The
 fourth and final is the output pod or channel to be used for a pulse
 with the current phase. Thus, the function would be called in the
-following sequence (wihtout any other intervening calls except possibly
+following sequence (without any other intervening calls except possibly
 @code{set_phase_reference()}):
 @example
 phase_setup_prep( 0, PHASE_PLUS_X, (discard), 1 );   
@@ -2007,7 +2007,7 @@ now do some sanity checks on the data it received from the previous
 
 @item bool new_pulse( long pulse_number )
 This function is called when a new pulse definition is found in the
-@code{PREPARATONS} section, i.e.@: for lines starting like this
+@code{PREPARATIONS} section, i.e.@: for lines starting like this
 @example
   PULSE_13: ...
 @end example
@@ -2027,9 +2027,9 @@ This function is called when the function of a new pulse is set in the
 The first argument is the pulse number (you can be sure that the
 function @code{new_pulse()} will have been called before with this pulse
 number as argument) and the pulse function number as the second argument
-(see the discussion of pulse function number aboe in the description of
-the function @w{@code{assign_channel_to_function()}}). If you don't have
-a god reason to do othrwise I would recommend to allow neither
+(see the discussion of pulse function numbers above in the description
+of the function @w{@code{assign_channel_to_function()}}). If you don't
+have a god reason to do otherwise I would recommend to allow neither
 @w{@code{PULSER_CHANNEL_PHASE_1}} nor @w{@code{PULSER_CHANNEL_PHASE_2}}
 as pulse functions because these functions are usually reserved for
 internally generated phase pulses.
@@ -2047,7 +2047,7 @@ for lines like
 @example
   P13.START = 260 ns;
 @end example
-If you need different handling of both situatins you can asign a new
+If you need different handling of both situations you can assign a new
 function pointer to the corresponding structure entry at the start of
 the @code{EXPERIMENT} section, for example in the @code{exp_hook}
 function (or at any other time it is convenient).
@@ -2056,7 +2056,7 @@ As in the case of the @code{set_pulse_function()} function the first
 argument is the pulse number, the second the start position of the pulse
 in seconds (but guaranteed to be an integer multiple of @w{1 ns}, you
 still will have to check if it's not negative and also that it isn't an
-integer multiple of the pulsers timebase).
+integer multiple of the pulsers time base).
 
 
 @item bool set_pulse_length( long pulse_number, double ptime )
@@ -2140,7 +2140,7 @@ has to be thrown.
 @item bool get_pulse_length_change( long pulse_number, double *ptime )
 This function should return the current setting of the length change
 setting for the pulse indexed by the argument in the variable pointed to
-by the second argument. If no lange change value has been set for the
+by the second argument. If no length change value has been set for the
 pulse an error message should be printed out and an exception has to be
 thrown.
 
