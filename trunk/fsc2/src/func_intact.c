@@ -6,6 +6,7 @@
 #include "fsc2.h"
 
 
+
 static IOBJECT *find_object_from_ID( long ID );
 static void recreate_Tool_Box( void );
 static FL_OBJECT *append_object_to_form( IOBJECT *io );
@@ -14,12 +15,13 @@ static void convert_escapes( char *str );
 
 
 
-/*-----------------------------------------------------------*/
-/* Function sets the layout of the tool box, either vertical */
-/* or horizontal by passing either 0 or 1  or "vert[ical]"   */
-/* or "hori[zontal]" (case in-sensitive). Must be called     */
-/* before any object (button or slider) is created.          */
-/*-----------------------------------------------------------*/
+/*------------------------------------------------------------*/
+/* Function sets the layout of the tool box, either vertical  */
+/* or horizontal by passing it either 0 or 1  or "vert[ical]" */
+/* or "hori[zontal]" (case in-sensitive). Must be called      */
+/* before any object (button or slider) is created (or after  */
+/* all of them have been deleted again :).                    */
+/*------------------------------------------------------------*/
 
 Var *f_layout( Var *v )
 {
@@ -540,7 +542,7 @@ Var *f_bdelete( Var *v )
 
 	/* The child process is already done here, and in a test run we're also */
 
-	if ( I_am == CHILD || TEST_RUN )
+	if ( I_am == CHILD || TEST_RUN || ! Tool_Box )
 		return vars_push( INT_VAR, 1 );
 
 	/* Redraw the form without the deleted buttons */
@@ -652,7 +654,7 @@ Var *f_bstate( Var *v )
 
 	/* No tool box -> no buttons -> no button state to set or get... */
 
-	if ( Tool_Box == NULL || Tool_Box->objs == NULL)
+	if ( Tool_Box == NULL || Tool_Box->objs == NULL )
 	{
 		eprint( FATAL, "%s:%ld: No buttons have been defined yet.\n",
 				Fname, Lc );
@@ -767,6 +769,8 @@ Var *f_screate( Var *v )
 		THROW( EXCEPTION );
 	}
 
+	/* Check the type parameter */
+
 	vars_check( v, INT_VAR | FLOAT_VAR | STR_VAR );
 
 	if ( v->type == INT_VAR || v->type == FLOAT_VAR )
@@ -794,6 +798,8 @@ Var *f_screate( Var *v )
 		}
 	}
 
+	/* Get the minimum value for the slider */
+
 	if ( ( v = vars_pop( v ) ) == NULL )
 	{
 		eprint( FATAL, "%s:%ld: Missing minimum value in call of "
@@ -810,6 +816,8 @@ Var *f_screate( Var *v )
 				"`slider_create'.\n", Fname, Lc );
 		THROW( EXCEPTION );
 	}
+
+	/* Get the maximum value and make sure it's larger than the minimum */
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
 	end_val = VALUE( v );
@@ -843,6 +851,9 @@ Var *f_screate( Var *v )
 			;
 	}
 	
+	/* Again, the child process has to pass the parameter to the parent and
+	   ask it to create the slider */
+
 	if ( I_am == CHILD )
 	{
 		void *buffer, *pos;
@@ -903,10 +914,16 @@ Var *f_screate( Var *v )
 		else
 			*( ( char * ) pos++ ) = '\0';
 
+		/* Ask parent to create the slider - it returns an array width two
+		   elements, the first indicating if it was successful, the second
+		   being the sliders ID */
+
 		result = exp_screate( buffer, ( long ) ( pos - buffer ) );
 
 		T_free( label );
 		T_free( help_text );
+
+		/* Bomb out if parent returns failure */
 
 		if ( result[ 0 ] == 0 )
 		{
@@ -954,6 +971,8 @@ Var *f_screate( Var *v )
 	new_io->label = label;
 	new_io->help_text = help_text;
 	
+	/* If this isn't a test run the slider must also be drawn */
+
 	if ( ! TEST_RUN )
 		recreate_Tool_Box( );
 
@@ -970,6 +989,8 @@ Var *f_sdelete( Var *v )
 	IOBJECT *io;
 
 
+	/* At least one slider ID is needed... */
+
 	if ( v == NULL )
 	{
 		eprint( FATAL, "%s:%ld: Missing parameter in call of "
@@ -977,13 +998,20 @@ Var *f_sdelete( Var *v )
 		THROW( EXCEPTION );
 	}
 
+	/* Loop over all slider IDs */
+
 	while ( v != NULL )
 	{
+		/* Child has no control over the sliders, it has to ask the parent
+		   process to delete the button */
+
 		if ( I_am == CHILD )
 		{
 			void *buffer, *pos;
 			long len;
 
+
+			/* Very basic sanity check */
 
 			if ( v->type != INT_VAR || v->val.lval < 0 )
 			{
@@ -1000,11 +1028,11 @@ Var *f_sdelete( Var *v )
 
 			pos = buffer = T_malloc( len );
 
-			memcpy( pos, &Lc, sizeof( long ) );
+			memcpy( pos, &Lc, sizeof( long ) );  /* current line number */
 			pos += sizeof( long );
 
 			memcpy( pos, &v->val.lval, sizeof( long ) );
-			pos += sizeof( long );
+			pos += sizeof( long );               /* slider ID */
 
 			if ( Fname )
 			{
@@ -1016,11 +1044,15 @@ Var *f_sdelete( Var *v )
 
 			v = vars_pop( v );
 
+			/* Bomb out on failure */
+
 			if ( ! exp_sdelete( buffer, ( long ) ( pos - buffer ) ) )
 				THROW( EXCEPTION );
 
-			continue;
+			continue;                   /* delete next slider */
 		}
+
+		/* No tool box -> no sliders to delete */
 
 		if ( Tool_Box == NULL || Tool_Box->objs == NULL )
 		{
@@ -1028,6 +1060,8 @@ Var *f_sdelete( Var *v )
 					Fname, Lc );
 			THROW( EXCEPTION );
 		}
+
+		/* Check that slider with the ID exists */
 
 		if ( v->type != INT_VAR || v->val.lval < 0 ||
 			 ( io = find_object_from_ID( v->val.lval ) ) == NULL ||
@@ -1048,7 +1082,7 @@ Var *f_sdelete( Var *v )
 		else
 			Tool_Box->objs = io->next;
 
-		/* Delete the button */
+		/* Delete the slider object if its drawn */
 
 		if ( ! TEST_RUN && io->self )
 		{
@@ -1059,6 +1093,8 @@ Var *f_sdelete( Var *v )
 		T_free( io->label );
 		T_free( io->help_text );
 		T_free( io );
+
+		/* If this was the very last object delete also the form */
 
 		if ( Tool_Box->objs == NULL )
 		{
@@ -1082,10 +1118,12 @@ Var *f_sdelete( Var *v )
 
 
 		v = vars_pop( v );
-	}
+	}	
 
-	if ( I_am == CHILD || TEST_RUN )
+	if ( I_am == CHILD || TEST_RUN || ! Tool_Box )
 		return vars_push( INT_VAR, 1 );
+
+	/* Redraw the tool box without the slider */
 
 	recreate_Tool_Box( );
 
@@ -1103,12 +1141,17 @@ Var *f_svalue( Var *v )
 	int type;
 
 
+	/* We need at least the sliders ID */
+
 	if ( v == NULL )
 	{
 		eprint( FATAL, "%s:%ld: Missing parameters in call of "
 				"`slider_value'.\n", Fname, Lc );
 		THROW( EXCEPTION );
 	}
+
+	/* Again, the child has to pass the arguments to the parent and ask it
+	   to set or return the slider value */
 
 	if ( I_am == CHILD )
 	{
@@ -1120,6 +1163,8 @@ Var *f_svalue( Var *v )
 		long len;
 
 
+		/* Very basic sanity check... */
+
 		if ( v->type != INT_VAR || v->val.lval < 0 )
 		{
 			eprint( FATAL, "%s:%ld: Invalid slider identifier in "
@@ -1128,10 +1173,12 @@ Var *f_svalue( Var *v )
 		}
 		ID = v->val.lval;
 		
+		/* Another arguments means that the slider value is to be set */
+
 		if ( ( v = vars_pop( v ) ) != NULL )
 		{
-			state = 1;
 			vars_check( v, INT_VAR | FLOAT_VAR );
+			state = 1;
 			val = VALUE( v );
 		}
 
@@ -1151,16 +1198,16 @@ Var *f_svalue( Var *v )
 
 		pos = buffer = T_malloc( len );
 
-		memcpy( pos, &Lc, sizeof( long ) );
+		memcpy( pos, &Lc, sizeof( long ) );     /* current line number */
 		pos += sizeof( long );
 
-		memcpy( pos, &ID, sizeof( long ) );
+		memcpy( pos, &ID, sizeof( long ) );     /* sliders ID */
 		pos += sizeof( long );
 
-		memcpy( pos, &state, sizeof( long ) );
+		memcpy( pos, &state, sizeof( long ) );  /* needs slider setting ? */
 		pos += sizeof( long );
 
-		memcpy( pos, &val, sizeof( double ) );
+		memcpy( pos, &val, sizeof( double ) );  /* new slider value */
 		pos += sizeof( double );
 
 		if ( Fname )
@@ -1171,7 +1218,13 @@ Var *f_svalue( Var *v )
 		else
 			*( ( char * ) pos++ ) = '\0';
 		
+		/* Ask parent to set or get the slider value - it will return an array
+		   with two doubles, the first indicating if it was successful (when
+		   the value is positive) the second is the slider value */
+
 		res = exp_sstate( buffer, ( long ) ( pos - buffer ) );
+
+		/* Bomb out on failure */
 
 		if ( res[ 0 ] < 0 )
 		{
@@ -1184,12 +1237,16 @@ Var *f_svalue( Var *v )
 		return vars_push( FLOAT_VAR, val );
 	}
 
+	/* No tool box -> no sliders... */
+
 	if ( Tool_Box == NULL || Tool_Box->objs == NULL )
 	{
 		eprint( FATAL, "%s:%ld: No slider have been defined yet.\n",
 				Fname, Lc );
 		THROW( EXCEPTION );
 	}
+
+	/* Check that ID is ID of a slider */
 
 	if ( v->type != INT_VAR || v->val.lval < 0 ||
 		 ( io = find_object_from_ID( v->val.lval ) ) == NULL ||
@@ -1201,8 +1258,14 @@ Var *f_svalue( Var *v )
 		THROW( EXCEPTION );
 	}
 
+	/* If there are no more arguments just set the sliders value */
+
 	if ( ( v = vars_pop( v ) ) == NULL )
 		return vars_push( FLOAT_VAR, io->value );
+
+	/* Otherwise check the next argument, i.e. the value to be set - it
+	   must be within the sliders range, if it doesn't fit reduce it to
+	   the allowed range */
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
 	type = v->type;
@@ -1211,23 +1274,20 @@ Var *f_svalue( Var *v )
 
 	if ( io->value > io->end_val )
 	{
-		eprint( WARN, "%s:%ld: Value too large in `slider_value'.\n",
+		eprint( SEVERE, "%s:%ld: Value too large in `slider_value'.\n",
 				Fname, Lc );
 		io->value = io->end_val;
 	}
 
 	if ( io->value < io->start_val )
 	{
-		eprint( WARN, "%s:%ld: Value too small in `slider_value'.\n",
+		eprint( SEVERE, "%s:%ld: Value too small in `slider_value'.\n",
 				Fname, Lc );
 		io->value = io->start_val;
 	}
 	
 	if ( ! TEST_RUN )
-	{
 		fl_set_slider_value( io->self, io->value );
-		XFlush( fl_get_display( ) );
-	}
 
 	if ( ( v = vars_pop( v ) ) != NULL )
 	{
@@ -1497,8 +1557,12 @@ static FL_OBJECT *append_object_to_form( IOBJECT *io )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------------*/
+/* Callback function for all the objects in the tool box.   */
+/* The states or values are stored in the object structures */
+/* to be used by the functions button_state() and           */
+/* slider_value()                                           */
+/*----------------------------------------------------------*/
 
 static void tools_callback( FL_OBJECT *obj, long data )
 {
@@ -1513,8 +1577,7 @@ static void tools_callback( FL_OBJECT *obj, long data )
 		if ( io->self == obj )
 			break;
 
-	if ( io == NULL )        /* should never happen */
-		return;
+	assert( io != NULL );            /* this can never happen :) */
 
 	switch ( io->type )
 	{
@@ -1530,10 +1593,10 @@ static void tools_callback( FL_OBJECT *obj, long data )
 			io->state = fl_get_button( obj );
 			for ( oio = Tool_Box->objs; oio != NULL; oio = oio->next )
 			{
-				if ( oio == io || oio->type != RADIO_BUTTON )
+				if ( oio == io || oio->type != RADIO_BUTTON ||
+					 oio->group != io->group || io->state == 0 )
 					continue;
-				if ( oio->group == io->group )
-					oio->state = io->state ? 0 : 1;
+				oio->state = 0;
 			}
 			break;
 
@@ -1541,18 +1604,22 @@ static void tools_callback( FL_OBJECT *obj, long data )
 			io->value = fl_get_slider_value( obj );
 			break;
 
-		default :
+		default :                 /* this can never happen :) */
 			assert( 1 == 0 );
 	}
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*------------------------------------------------------*/
+/* Function to convert character sequences in the label */
+/* help text strings that are escape sequences into the */
+/* corresponding ASCII characters.                      */
+/*------------------------------------------------------*/
 
 static void convert_escapes( char *str )
 {
 	char *ptr = str;
+
 
 	while ( ( ptr = strchr( ptr, '\\' ) ) != NULL )
 	{
