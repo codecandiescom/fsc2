@@ -1104,14 +1104,13 @@ Var *synthesizer_mod_ampl( Var *v )
 			fsc2_assert( 1 == 0 );
 	}
 
-	if ( FSC2_MODE != EXPERIMENT )
-		hp864_tmpl.mod_ampl[ hp864_tmpl.mod_type ] = ampl;
-	else
-		hp864_tmpl.mod_ampl[ hp864_tmpl.mod_type ] =
-		                        hp864_tmpl_get_mod_ampl( hp864_tmpl.mod_type );
+	if ( FSC2_MODE == EXPERIMENT )
+		hp864_tmpl_set_mod_ampl( hp864_tmpl.mod_type, ampl );
+
+	hp864_tmpl.mod_ampl[ hp864_tmpl.mod_type ] = ampl;
 	hp864_tmpl.mod_ampl_is_set[ hp864_tmpl.mod_type ] = SET;
 
-	return vars_push( FLOAT_VAR, hp864_tmpl.mod_ampl[ hp864_tmpl.mod_type ] );
+	return vars_push( FLOAT_VAR, ampl );
 }
 
 

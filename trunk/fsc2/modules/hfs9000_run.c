@@ -86,6 +86,7 @@ static bool hfs9000_update_pulses( bool flag )
 
 
 	CLOBBER_PROTECT( i );
+	CLOBBER_PROTECT( needed_update );
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 	{
