@@ -219,8 +219,8 @@ void tds744a_do_pre_exp_checks( void )
 
 		w->start_num = lround( ( w->start + tds744a.trig_pos * window )
 							   * TDS_POINTS_PER_DIV / tds744a.timebase ) + 1;
-		w->end_num = lround( ( w->start
-							   + w->width + tds744a.trig_pos * window )
+		w->end_num = lround( ( w->start + w->width
+							   + tds744a.trig_pos * window )
 							 * TDS_POINTS_PER_DIV / tds744a.timebase ) + 1;
     }
 
