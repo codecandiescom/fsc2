@@ -230,24 +230,23 @@ TRIGGER_MODE: INTERNAL, REPEAT_FREQUENCY = 100 Hz;
 to set the repetition rate of the experiment to @w{100 Hz}. The repeat
 time must be an integer multiple of the time base of the pulser.
 
-if a repetition time is specified when using an external trigger a
-repetition time or frequency obviously can't be enforced. It can only be
-guaranteed that the pulse sequence is as long as the repetition time,
-thus keeping the pulser from getting restarted before the end of the
-repetition time.
+When using an external trigger a repetition time or frequency can't be
+enforced for obvious reasons. It can only be guaranteed that the pulse
+sequence is as long as the repetition time, thus keeping the pulser from
+getting restarted before the end of the repetition time.
 
-For the @strong{Tektronix HFS9000} no repetition frequency or rate can
+For the @strong{Tektronix HFS9003} no repetition frequency or rate can
 be set, so an external trigger has to be used to determine the
 repetition rate of the experiment, otherwise the pulser will repeat the
 pulse sequence at the highest possible rate.
 
-For the @strong{Bruker EP385} pulser the highest repetition frequency is
-about @w{976.56 Hz} (when using the internal clock, otherwise multiply
-the external clocks oscillation period by 160768 to compute the exact
-length of the minimum repeat time). Repetition times can be only set to
-multiples of @w{102.4 us} (or in increments of 12800 times the external
-clocks oscillation period). If necessary, repetition frequencies are set
-to the next lower allowed value.
+For the @strong{Bruker EP385} pulse programmer the highest repetition
+frequency is about @w{976.56 Hz} (when using the internal clock,
+otherwise multiply the external clocks oscillation period by 160768 to
+compute the exact length of the minimum repeat time). Repetition times
+can be only set to multiples of @w{102.4 us} (or in increments of 12800
+times the external clocks oscillation period). If necessary, repetition
+frequencies are adjusted automatically to the next lower allowed value.
 
 For the @strong{Interface Technology RS690} it might happen that for
 certain pulse settings the repetition time must be lengthened slightly,
@@ -282,14 +281,14 @@ HFS9003} the allowed trigger level range is @w{-4.7 V} to @w{+4.7 V}.
 For the @strong{Interface Technology RS690} no input trigger level nor
 input impedance can be set, but it has two trigger input connectors, one
 for @code{TTL} and one for @code{ECL} level trigger input. To
-distinguish between both the input ports the additional keywords
+distinguish between the two trigger input ports the additional keywords
 @code{TTL} and @code{ECL} may be used. If none is given the @code{TTL}
 level input port is used per default.
 
 If you need to control more than one pulser you must have a
 @code{TRIGGER_MODE} statement for each of the pulsers. In this case you
-need to append a @code{#} and the number of the pulser to tell the
-@code{fsc2} for which pulser the trigger mode is to be used.
+need to append a @code{#} and the number of the pulser to tell
+@code{fsc2} for which pulser the trigger mode setting is to be used.
 
 
 @c ########################################################
@@ -325,18 +324,18 @@ output channels of the pulser. The basic idea is to abstract from the
 real output connectors of the pulser and to use symbolic names for them.
 So, instead of telling the pulser to output a pulse at e.g.@: the output
 connector @w{numbered 1} during the experiment, in the
-@code{ASSIGNMENTS} section output connectors are associated with
-symbolic names for the functions and these symbolic names are used when
-specifying pulses. While this may be only a convenience in simple
+@code{ASSIGNMENTS} section output connectors get associated with
+symbolic names for their functions and these symbolic names are used
+when specifying pulses. While this may be only a convenience in simple
 experiments (you only have to apply changes in one place when changing
 the output connectors instead of finding and changing it for all pulses
 concerned) it makes doing phase cycling much simpler because here the
 same pulse may have to be output at different output connectors,
 depending on the current phase. Instead of always specifying which
 output connector to use for a certain phase for each pulse, the program
-is told about which connectors to use for a function (and which phase)
-and then it's left to the program to do all the bookkeeping about when
-to use which output connector.
+is told which connectors to use for a function (and which phase) and
+then it's left to the program to figure out when to use which of the
+output connectors.
 
 The following symbolic names for pulse functions are defined:
 @itemize @bullet
@@ -394,22 +393,23 @@ controlling the phase switches, i.e.@: it's pulses are created
 automatically.
 
 The functions @code{OTHER_1} to @code{OTHER_4} should be used in cases
-where none of the function names seem to fit the special purpose you
-have in mind for the pulses of this function.
+where none of the other function names seem to fit the special purpose
+you have in mind for the pulses of this function.
 
 Before giving an example it is important to point out that there are
 some major differences between the @strong{Sony/Tektronix DG2020} on the
 one hand and the @strong{Tektronix HFS9003} and the @strong{Bruker
-EP385} on the other. The latter pulsers are quite simple in that they
-have just a number of output connectors. In the @strong{Bruker EP385}
-they are simply called @code{CH0} to @code{CH7}, while for the
-@strong{Tektronix HFS9003} they are divided into sets of channels
-belonging to the different channel boards in the device (at least one
-board and a maximum of three), so channels are named @code{A1} to
-@code{A4}, @code{B1} to @code{B4} and @code{C1} to
-@code{C4}. Additionally, the @strong{Tektronix HFS9003} has a trigger
-output channel that can produce a single pulse of @w{5 ns} duration,
-this special channel is named @code{TRIG_OUT}.
+EP385} on the other regarding the number and nomenclature of the output
+connectors. The latter pulsers are quite simple in that they have just
+output connectors. In the @strong{Bruker EP385} they are simply called
+@code{CH0} to @code{CH7}, while for the @strong{Tektronix HFS9003} they
+are divided into sets of channels belonging to the different channel
+boards in the device (with at least one board and a maximum of three),
+so channels are named @code{A1} to @code{A4}, @code{B1} to @code{B4} and
+@code{C1} to @code{C4}. Additionally, the @strong{Tektronix HFS9003} has
+a trigger output channel that can produce a single pulse of @w{5 ns}
+duration, this special channel is named @code{TRIG_OUT} (or
+@code{TRIGOUT}, @code{TRIGGER_OUT} or @code{TRIGGEROUT} ).
 
 In contrast, the @strong{Sony/Tektronix DG2020} has 36 internal channels
 (named @code{CH0} to @code{CH35}) that have to be mapped to what is
@@ -433,32 +433,23 @@ For the @strong{Tektronix HFS9003} simply a channel is associated with a
 function by statements like (the keyword @code{CHANNEL} can be replaced
 by @code{CH})
 @example
-MICROWAVE: CHANNEL = A1;
-RF:        CHANNEL = A2;
-RF_GATE:   CH = B3;
-DETECTION: CHANNEL = TRIG_OUT;
+MICROWAVE: CHANNEL = A1;          /* board A, channel 1 */
+RF:        CHANNEL = A2;          /* board A, channel 2 */
+RF_GATE:   CH = B3;               /* board B, channel 3 */
+DETECTION: CHANNEL = TRIG_OUT;    /* TRIG_OUT connector */
 @end example
 @noindent
 (where the @code{A} in the channel specifier stands for the first
 channel card and @code{B} for the second card) or, for the
 @strong{Interface Technology RS690},
 @example
-MICROWAVE: CHANNEL = A3;
-RF:        CHANNEL = B7;
-RF_GATE:   CH = C5;
-DETECTION: CHANNEL = D15;
+MICROWAVE: CHANNEL = A3;          /* connector A, channel 3 */
+RF:        CHANNEL = B7;          /* connector B, channel 7 */
+RF_GATE:   CH = C5;               /* connector C, channel 5 */
+DETECTION: CHANNEL = D15;         /* connector D, channel 15 */
 @end example
 @noindent
-The output channels usually are numbered as printed on the device, one
-exception is the trigger-out channel of the @strong{Tektronix HFS9003},
-that is called @code{TRIG_OUT}, and has some special properties, e.g.@:
-allowing only one pulse of fixed length.  The keyword @code{TRIG_OUT} by
-either @code{TRIGOUT}, @code{TRIGGER_OUT} or
-@code{TRIGGEROUT}. 
 
-
-Please note: the @strong{Tektronix HFS9003} has only 4 channels and does
-not allow assignment of more than one channel to a single function.
 
 For the @strong{Sony/Tektronix DG2020} the function gets associated with
 one (or more pods, see below why sometimes more than one is needed):
@@ -483,6 +474,9 @@ RF:        POD = P6              CHANNEL = 35;
 RF_GATE:   POD = P7              CHANNEL = 17;
 DETECTION: POD = P11;   // leave it to the program to select the channel
 @end example
+
+Please note: the @strong{Tektronix HFS9003} does not allow assignment of
+more than one channel to a single function.
 
 Here a list of the pod and/or channel numbers that can be used for the
 pulsers:
