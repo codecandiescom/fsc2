@@ -67,7 +67,6 @@ ifeq ($(NI6601_KERNEL_SOURCE),)
 	else                                            \
 		cp $(MODULE) /lib/modules/misc;             \
 	fi
-	depmod -a
 endif
 	install -d $(incl_dir)
 	install -m 644 ni6601_drv.h $(incl_dir)

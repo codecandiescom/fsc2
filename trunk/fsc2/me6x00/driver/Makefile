@@ -61,7 +61,6 @@ ifeq ($(ME6X00_KERNEL_SOURCE),)
 	else                                           \
 		cp me6x00.o /lib/modules/misc;             \
 	fi
-	depmod -a
 endif
 	install -d $(incl_dir)
 	install -m 644 me6x00_drv.h $(incl_dir)

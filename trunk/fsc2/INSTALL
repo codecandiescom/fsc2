@@ -151,8 +151,8 @@ look for them by setting the variable GPIB_HEADER_DIR accordingly.
 The next two variables, NUM_SERIAL_PORTS and SERIAL_LOCK_DIR, are used for
 dealing with the serial ports. NUM_SERIAL_PORTS should be set to the number
 of serial ports that your computer has (or how many of these you want fsc2
-to have access to). If the variable is not set (or is set to 0) no serial
-ports can be used.
+to have access to). If the variable is not set (or set to 0) no serial ports
+can be used.
 
 SERIAL_LOCK_DIR must be a string with the name of the directory where UUCP
 type lock files for the serial ports are created (there is a convention that
@@ -169,14 +169,14 @@ left-padded with spaces and with a trailing newline). In this case fsc2 will
 not try to remove stale lock files and instead print an error message to the
 terminal that the lock file has to be removed manually.
 
-WITH_ME6000 is the variable that conrols if support for ME-6000 and ME-6100
+WITH_ME6000 is a variable that conrols if support for ME-6000 and ME-6100
 DAC boards by Meihaus Electronic GmbH will be compiled into fsc2. Please
 note that you have to install the kernel driver and the library for accessing
 the board *BEFORE* starting to compile fsc2. The kernel module and the
 library are in the 'me6x00' subdirectory. Please cd into this subdirectory
 and type 'INSTALL' to compile and install both.
 
-WITH_NI6601 is the variable that conrols if support for the National
+WITH_NI6601 is a variable that conrols if support for the National
 Instruments 6601 GPCT (counter and timer) board will be compiled into
 fsc2. Please note that you have to install the kernel driver and the
 library for accessing the board *BEFORE* starting to compile fsc2. The
@@ -185,9 +185,10 @@ cd into this subdirectory and type 'INSTALL' to compile and install both.
 
 The WITH_HTTP_SERVER variable tells if support for the web server should
 be built into fsc2. Just comment out the line and the web server won't be
-available. If the web server gets included the next variable,
+available. If the web server gets included into fsc2 the next variable,
 DEFAULT_HTTP_PORT, determines on which port the web server will listen for
-incoming connections by default.
+incoming connections by default (use a number above 1023, lower numbered
+ports are only accessible by programs with root privileges).
 
 The final variable to be set is the email address of the person that will
 receive bug reports and notifications if fsc2 crashes. Usually, you should
@@ -209,11 +210,11 @@ the documentation). This does *not* mean that the program didn't compile
 succesfully!
 
 Please don't start 'make' from one of the subdirectories, this is bound to
-fail in most cases and will never create everything you'll need.
+fail in most cases and will not create everything you'll need.
 
 If you get more than a few warnings (about problems with fsc2, not header
-files included by fsc2) during the compilation stage of the program (or
-the make process fails completely) please send me an email with the output
+files included by fsc2) during the compilation stage of the program or if
+the make process fails completely please send me an email with the output
 of make. You can save the output of make to a file, e.g. 'makelog', by
 running make with the command
 
@@ -262,6 +263,7 @@ files and directories (assuming you've used the default locations, i.e.
 /usr/local/bin/fsc2             (file)
 /usr/local/bin/fsc2_connect     (file)
 /usr/local/bin/fsc2_guify       (file)
+/usr/local/bin/fsc2_pulses      (file)
 /usr/local/bin/fsc2_clean       (file)
 /usr/local/bin/fsc2_test        (symbolic link)
 /usr/local/bin/fsc2_load        (symbolic link)
@@ -296,8 +298,7 @@ Just start by typing 'fsc2 edl/a.edl' or 'fsc2 edl/z.edl' (assuming you're
 still in fsc2's main directory) and click onto the "Start" button to get an
 idea about how fsc2 displays 1- and 2-dimensional data sets.
 
-             August 28, 2002               Much luck, Jens
-
+             November 21, 2002             Much luck, Jens
 --
        _  _____  _____
       | ||_   _||_   _|         Jens.Toerring@physik.fu-berlin.de
