@@ -34,7 +34,7 @@ headers       = ${c_sources:.c=.h} global.h
 
 export headers        # export list of header files to the modules Makefile
 
-SLFLAGS        = -shared -fpic 
+SLFLAGS        = -shared -fpic
 
 
 .SUFFIXES:
