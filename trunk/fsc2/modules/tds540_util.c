@@ -76,7 +76,7 @@ void tds540_do_pre_exp_checks( void )
 
 	is_width = tds540_window_check_1( );
 
-	/* That's all if no windows have been defined we switch off gated
+	/* That's all if no windows have been defined - we switch off gated
 	   measurement mode, i.e. all measurement operations are done on the
 	   whole curve */
 
