@@ -74,7 +74,7 @@ inline long get_long( Var *v, const char *snippet, const char *device_name )
 
 	if ( v->type == FLOAT_VAR )
 		eprint( WARN, SET, "%s: Floating point number used as %s in %s().\n",
-				snippet, device_name, Cur_Func );
+				device_name, snippet, Cur_Func );
 
 	return v->type == INT_VAR ? v->val.lval : ( long ) v->val.dval;
 }
@@ -89,8 +89,8 @@ inline double get_double( Var *v, const char *snippet,
 	vars_check( v, INT_VAR | FLOAT_VAR );
 
 	if ( v->type == INT_VAR )
-		eprint( WARN, SET, "Integer value used as %s in %s().\n",
-				snippet, device_name, Cur_Func );
+		eprint( WARN, SET, "%s: Integer number used as %s in %s().\n",
+				device_name, snippet, Cur_Func );
 
 	return VALUE( v );
 }
