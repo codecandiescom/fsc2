@@ -1,0 +1,13 @@
+# -*-sh-*-
+#
+# $Id$
+
+grep '^\s*#define[ \t]\+CCD_PIXEL_HEIGHT[ \t]\+400\s*$' \
+	 $cdir/rs_spec10.conf > /dev/null;
+if [ ! $! ]; then
+    echo "xxx";
+	sed 's/^\s*\(#define CCD_PIXEL_HEIGHT\).*$/\1 400/' $cdir/rs_spec10.conf \
+		> $cdir/rs_spec10.conf.new;
+	mv $cdir/rs_spec10.conf.new $cdir/rs_spec10.conf;
+fi
+
