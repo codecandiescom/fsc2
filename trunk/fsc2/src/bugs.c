@@ -18,7 +18,7 @@ void bug_report_callback( FL_OBJECT *a, long b )
 	char filename[ ] = P_tmpdir "/fsc2XXXXXX";
 	int lines;
 	int i;
-	char *cmd, *jens, *user;
+	char *cmd, *user;
 	char cur_dir[ PATH_MAX ];
 	char *ed;
 	int res, cc;
@@ -196,15 +196,6 @@ void bug_report_callback( FL_OBJECT *a, long b )
 
 	if ( res == 1 )
 	{
-		/* Check if I have an account on this machine, if not send mail to my 
-		   account on masklin */
-
-		if ( getpwnam( "jens" ) == NULL )
-			jens =
-			   get_string_copy( "jens@masklin.anorg.chemie.uni-frankfurt.de" );
-		else
-			jens = get_string_copy( "jens" );
-
 		/* Ask the user if he wants a carbon copy */
 
 		cc = fl_show_question( "Do you want a copy of the bug report ?", 0 );
@@ -224,7 +215,7 @@ void bug_report_callback( FL_OBJECT *a, long b )
 			strcat( cmd, user );
 			strcat( cmd, " " );
 		}
-		strcat( cmd, jens );           /* append my mail address */
+		strcat( cmd, MAIL_ADDRESS );
 		T_free( jens );
 
 		strcat( cmd, " < " );          /* append the file name to be mailed */

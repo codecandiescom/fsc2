@@ -9,7 +9,7 @@
 #define _GNU_SOURCE 1
 
 
-/* define my email address for bug reports
+/* define my email address for bug reports */
 
 #define MAIL_ADDRESS "Jens.Toerring@physik.fu-berlin.de"
 
