@@ -45,6 +45,6 @@ hp8647a       // HP RF synthesizer
 
 egg4402       // EG&G PARC box-car
 
-kontron4060;  // Kontron 4060 voltmeter
+kontron4060   // Kontron 4060 voltmeter
 
-lakeshore330; // Lake Shore 330 temperature controller
+lakeshore330  // Lake Shore 330 temperature controller
