@@ -611,7 +611,7 @@ static double hjs_sfc_set_field( double field )
 
 	vars_push( STR_VAR, DEVICE_NAME );         /* push the pass-phrase */
 	vars_push( FLOAT_VAR, v_step );
-	vars_pop( func_call( Func_ptr );
+	vars_pop( func_call( Func_ptr ) );
 
 	return hjs_sfc.B0V + v_step * hjs_sfc.slope;
 }
