@@ -452,8 +452,8 @@ int ep385_exp_hook( void )
 
 int ep385_end_of_exp_hook( void )
 {
-	int i;
-	FUNCTION *fp;
+	int i, j;
+	FUNCTION *f;
 
 
 	if ( ! ep385_is_needed )

@@ -473,6 +473,60 @@ int dg2020_diff( char *old_p, char *new_p, Ticks *start, Ticks *length )
 }
 
 
+/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*/
+
+void dg2020_dump_channels( FILE *fp )
+{
+	FUNCTION *f;
+	CHANNEL *ch;
+	int i, j, k;
+
+
+	if ( fp == NULL )
+		return;
+
+	fprintf( fp, "===\n" );
+
+	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
+	{
+		f = dg2020.function + i;
+
+		if ( ! f->is_needed && f->num_channels == 0 )
+			continue;
+
+		for ( j = 0; j < f->num_channels; j++ )
+		{
+			ch = f->channel[ j ];
+
+			if ( ! ch->needs_update )
+				continue;
+
+			fprintf( fp, "%s:%d", f->name, ch->self );
+			for ( k = 0; k < f->num_active_pulses; k++ )
+				if ( f->self == PULSER_CHANNEL_PULSE_SHAPE &&
+					 f->pulse_params[ k ].pulse->sp != NULL )
+					fprintf( fp, " (%ld) %ld %ld",
+							 f->pulse_params[ k ].pulse->sp->num,
+							 f->pulse_params[ k ].pos,
+							 f->pulse_params[ k ].len );
+				else if ( f->self == PULSER_CHANNEL_TWT &&
+						  f->pulse_params[ k ].pulse->tp != NULL )
+					fprintf( fp, " (%ld) %ld %ld",
+							 f->pulse_params[ k ].pulse->tp->num,
+							 f->pulse_params[ k ].pos,
+							 f->pulse_params[ k ].len );
+				else
+					fprintf( fp, " %ld %ld %ld",
+							 f->pulse_params[ k ].pulse->num,
+							 f->pulse_params[ k ].pos,
+							 f->pulse_params[ k ].len );
+			fprintf( fp, "\n" );
+		}
+	}
+}
+
+
 /*
  * Local variables:
  * tags-file-name: "../TAGS"

@@ -84,6 +84,14 @@ bool dg2020_new_pulse( long pnum )
 	cp->needs_update = UNSET;
 	cp->has_been_active = cp->was_active = UNSET;
 
+	cp->left_shape_warning = UNSET;
+	cp->right_shape_warning = UNSET;
+	cp->sp = NULL;
+
+	cp->left_twt_warning = UNSET;
+	cp->right_twt_warning = UNSET;
+	cp->tp = NULL;
+
 	return OK;
 }
 
@@ -106,7 +114,7 @@ bool dg2020_set_pulse_function( long pnum, int function )
 	if ( p->is_function )
 	{
 		print( FATAL, "The function of pulse #%ld has already been set to "
-			   "'%s'.\n", pnum, Function_Names[ p->function->self ] );
+			   "'%s'.\n", pnum, p->function->name );
 		THROW( EXCEPTION );
 	}
 

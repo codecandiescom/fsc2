@@ -60,14 +60,15 @@ bool dg2020_do_update( void )
 }
 
 
-/*--------------------------------------------------------------------------*/
-/* This function sorts the pulses and checks that the pulses don't overlap. */
-/*--------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*/
+/* Function sorts the pulses and checks that the pulses don't overlap. */
+/*---------------------------------------------------------------------*/
 
 bool dg2020_reorganize_pulses( bool flag )
 {
 	static int i;
-	FUNCTION *f;
+	int j;
+	static FUNCTION *f;
 	PULSE *p;
 
 
@@ -95,6 +96,12 @@ bool dg2020_reorganize_pulses( bool flag )
 		}
 		CATCH( EXCEPTION )
 		{
+			for ( j = 0; j <= i; j++ )
+			{
+				f = dg2020.function + j;
+				f->pulse_params = PULSE_PARAMS_P T_free( f->pulse_params );
+			}
+
 			if ( flag )
 				THROW( EXCEPTION );
 
@@ -129,48 +136,84 @@ bool dg2020_reorganize_pulses( bool flag )
 void dg2020_do_checks( FUNCTION *f )
 {
 	PULSE *p;
-	int i;
+	PULSE_PARAMS *pp;
+	int i, j;
 
+
+	f->num_active_pulses = 0;
 
 	for ( i = 0; i < f->num_pulses; i++ )
+		if ( f->pulses[ i ]->is_active )
+			f->num_active_pulses++;
+
+	if ( f->num_active_pulses == 0 )
+		return;
+
+	f->pulse_params = PULSE_PARAMS_P T_malloc( f->num_active_pulses++ *
+											   sizeof *f->pulse_params );
+	
+	for ( j = 0, i = 0; i < f->num_pulses; i++ )
 	{
 		p = f->pulses[ i ];
 
-		if ( p->is_active )
+		if ( ! p->is_active )
+			continue;
+
+		pp = f->pulse_params + j;
+
+		pp->pulse= p;
+		pp->pos = p->pos + f->delay;
+		pp->len = p->len;
+
+		if ( f->uses_auto_shape_pulses )
 		{
-			/* Check that pulses still fit into the pulser memory (while in
-			   test run) or the maximum sequence length (in the real run) */
+			pp->pos -= f->left_shape_padding;
+			pp->len += f->left_shape_padding + f->right_shape_padding;
+		}
 
-			f->max_seq_len = Ticks_max( f->max_seq_len, p->pos + p->len );
-			if ( f->delay + f->max_seq_len >
+		if ( f->self == PULSER_CHANNEL_TWT && p->tp != NULL )
+		{
+			pp->pos -= p->tp->function->left_twt_padding;
+			pp->len +=   p->tp->function->left_twt_padding
+				       + p->tp->function->right_twt_padding;
+		}
+	}
+
+	dg2020_shape_padding_check( f );
+	dg2020_twt_padding_check( f );
+
+	for ( i = 0; i < f->num_active_pulses; i++ )
+	{
+		pp = f->pulse_params + i;
+
+		/* Check that pulses still fit into the pulser memory (while in
+		   test run) or the maximum sequence length (in the real run) */
+
+		f->max_seq_len = Ticks_max( f->max_seq_len, pp->pos + pp->len );
+		if ( f->delay + f->max_seq_len >
 				 ( FSC2_MODE == TEST ? MAX_PULSER_BITS : dg2020.max_seq_len ) )
-			{
-				if ( FSC2_MODE == TEST )
-					print( FATAL, "Pulse sequence for function '%s' does not "
-						   "fit into the pulsers memory.\n",
-						   Function_Names[ f->self ] );
-				else
-					print( FATAL, "Pulse sequence for function '%s' is too "
-						   "long. Perhaps you should try the "
-						   "MAXIMUM_PATTERN_LENGTH command.\n",
-						   Function_Names[ f->self ] );
-				THROW( EXCEPTION );
-			}
-
-			f->num_active_pulses = i + 1;
+		{
+			if ( FSC2_MODE == TEST )
+				print( FATAL, "Pulse sequence for function '%s' does not fit "
+					   "into the pulsers memory.\n", f->name );
+			else
+				print( FATAL, "Pulse sequence for function '%s' is too long. "
+					   "Perhaps you should try the MAXIMUM_PATTERN_LENGTH "
+					   "command.\n", f->name );
+			THROW( EXCEPTION );
 		}
 
 		/* Check for overlap of pulses */
 
-		if ( i + 1 < f->num_pulses && f->pulses[ i + 1 ]->is_active &&
-			 p->pos + p->len > f->pulses[ i + 1 ]->pos )
+		if ( i + 1 < f->num_active_pulses &&
+			 pp->pos + pp->len > f->pulse_params[ i + 1 ].pos )
 		{
 			if ( dg2020_IN_SETUP )
-				print( FSC2_MODE == TEST ? FATAL : SEVERE, "Pulses %ld and "
-					   "%ld overlap.\n", p->num, f->pulses[ i + 1 ]->num );
+				print( FATAL, "Pulses #%ld and #%ld overlap.\n",
+					   pp->pulse->num, f->pulse_params[ i + 1 ].pulse->num );
 			else
-				print( FATAL, "Pulses %ld and %ld begin to overlap.\n",
-					   p->num, f->pulses[ i + 1 ]->num );
+				print( FATAL, "Pulses #%ld and #%ld begin to overlap.\n",
+					   pp->pulse->num, f->pulse_params[ i + 1 ].pulse->num );
 			THROW( EXCEPTION );
 		}
 	}
@@ -181,6 +224,210 @@ void dg2020_do_checks( FUNCTION *f )
 		   dg2020.function[ PULSER_CHANNEL_TWT ].is_used ||
 		   dg2020.function[ PULSER_CHANNEL_TWT_GATE ].is_used ) )
 		dg2020_defense_shape_check( f );
+}
+
+
+/*------------------------------------------------*/
+/*------------------------------------------------*/
+
+void dg2020_shape_padding_check( FUNCTION *f )
+{
+	PULSE_PARAMS *pp, *ppp;
+	int i;
+
+
+	if ( f->self == PULSER_CHANNEL_PULSE_SHAPE ||
+		 ! f->uses_auto_shape_pulses ||
+		 f->num_active_pulses == 0 )
+		return;
+
+	/* Check that first pulse don't starts to early */
+
+	pp = f->pulse_params;
+	if ( pp->pos < 0 )
+	{
+		if ( ! pp->pulse->left_shape_warning )
+		{
+			print( SEVERE, "Pulse #%ld too early to set left shape padding "
+				   "of %s.\n", pp->pulse->num,
+				   dg2020_pticks( f->left_shape_padding ) );
+			pp->pulse->left_shape_warning = SET;
+		}
+
+		dg2020.left_shape_warning++;
+		pp->pulse->function->min_left_shape_padding =
+					l_min( pp->pulse->function->min_left_shape_padding,
+						   pp->pulse->function->left_shape_padding + pp->pos );
+		pp->len += pp->pos;
+		pp->pos = 0;
+	}
+
+	/* Shorten intermediate pulses if they would overlap */
+
+	for ( i = 1; i < f->num_active_pulses; i++ )
+	{
+		ppp = pp;
+		pp = pp + 1;
+
+		if ( ppp->pos + ppp->len > pp->pos )
+			ppp->len -= ppp->pos + ppp->len - pp->pos;
+	}
+
+	/* Check that last pulse isn't too long */
+
+	pp = f->pulse_params + f->num_active_pulses - 1;
+
+	if ( pp->pos + pp->len>
+				 ( FSC2_MODE == TEST ? MAX_PULSER_BITS : dg2020.max_seq_len ) )
+	{
+		if ( ! pp->pulse->right_shape_warning )
+		{
+
+			if ( FSC2_MODE == TEST )
+				print( SEVERE, "Pulse #%ld too long to set right shape "
+					   "padding of %s.\n", pp->pulse->num,
+					   dg2020_pticks( f->right_shape_padding ) );
+			else
+			{
+				print( SEVERE, "Pulse #%ld too long to set right shape "
+					   "padding of %s. Perhaps you should try the "
+					   "MAXIMUM_PATTERN_LENGTH command.\n", pp->pulse->num,
+					   dg2020_pticks( f->right_shape_padding ) );
+				THROW( EXCEPTION );
+			}
+
+			pp->pulse->right_shape_warning = SET;
+		}
+
+		dg2020.right_shape_warning++;
+		pp->pulse->function->min_right_shape_padding =
+			l_min( pp->pulse->function->min_right_shape_padding,
+				   pp->pulse->function->right_shape_padding + pp->pos );
+		pp->len = MAX_PULSER_BITS - pp->pos;
+	}
+}
+
+
+/*------------------------------------------------*/
+/*------------------------------------------------*/
+
+void dg2020_twt_padding_check( FUNCTION *f )
+{
+	PULSE_PARAMS *pp, *ppp;
+	int i;
+
+	if ( f->self != PULSER_CHANNEL_TWT || ! f->has_auto_twt_pulses ||
+		 f->num_active_pulses == 0 )
+		return;
+
+	/* Check that first TWT pulse doesn't start too early (this only can
+	   happen for automatically created pulses) */
+
+	pp = f->pulse_params;
+	if ( pp->pulse->tp != NULL && pp->pos < 0 )
+	{
+		if ( ! pp->pulse->left_twt_warning )
+		{
+			if ( FSC2_MODE == TEST )
+				print( SEVERE, "Pulse #%ld too early to set left padding of "
+					   "%s for its TWT pulse.\n", pp->pulse->tp->num,
+					   dg2020_pticks(
+						   		 pp->pulse->tp->function->left_twt_padding ) );
+			pp->pulse->left_twt_warning = SET;
+		}
+
+		dg2020.left_twt_warning++;
+		pp->pulse->function->min_left_twt_padding =
+					  l_min( pp->pulse->function->min_left_twt_padding,
+							 pp->pulse->function->left_twt_padding + pp->pos );
+		pp->len += pp->pos;
+		pp->pos = 0;
+	}
+
+	/* Shorten intermediate pulses so they don't overlap - if necessary even
+	   remove pulses if a pulse is completely within the area of its
+	   predecessor */
+
+	for ( i = 1; i < f->num_active_pulses; i++ )
+	{
+		ppp = pp;
+		pp = pp + 1;
+
+		if ( pp->pos < 0 )
+		{
+			if ( ! pp->pulse->left_twt_warning )
+			{
+				print( SEVERE, "Pulse #%ld too early to set left padding of "
+					   "%s for its TWT pulse.\n",
+					   pp->pulse->tp->num, dg2020_pticks(
+								 pp->pulse->tp->function->left_twt_padding ) );
+				pp->pulse->left_twt_warning = SET;
+			}
+
+			dg2020.left_twt_warning++;
+			pp->pulse->function->min_left_twt_padding =
+					  l_min( pp->pulse->function->min_left_twt_padding,
+							 pp->pulse->function->left_twt_padding + pp->pos );
+			pp->len += pp->pos;
+			pp->pos = 0;
+		}
+
+		if ( ppp->pos == pp->pos )
+		{
+			if ( ppp->len <= pp->len )
+				memmove( ppp, pp,
+						 ( f->num_active_pulses-- - i-- ) * sizeof *pp );
+			else
+				memmove( pp, pp + 1,
+						 ( f->num_active_pulses-- - --i ) * sizeof *pp );
+			continue;
+		}
+
+		if ( ppp->pos + ppp->len > pp->pos )
+		{
+			if ( ppp->pos + ppp->len >= pp->pos + pp->len )
+			{
+				memmove( pp, pp + 1,
+					  ( --f->num_active_pulses - --i ) * sizeof *pp );
+			}
+			else
+				ppp->len -= ppp->pos + ppp->len - pp->pos;
+		}
+	}
+
+	/* Check that the last TWT pulse isn't too long (can only happen for
+	   automatically created pulses) */
+
+	pp = f->pulse_params + f->num_active_pulses - 1;
+	if ( pp->pos + pp->len>
+				 ( FSC2_MODE == TEST ? MAX_PULSER_BITS : dg2020.max_seq_len ) )
+	{
+		if ( ! pp->pulse->right_twt_warning )
+		{
+			if ( FSC2_MODE == TEST )
+				print( SEVERE, "Pulse #%ld too long to set right padding of "
+					   "%s for its TWT pulse.\n", pp->pulse->tp->num,
+					   dg2020_pticks(
+								pp->pulse->tp->function->right_twt_padding ) );
+			else
+			{
+				print( FATAL, "Pulse #%ld too long to set right padding of "
+					   "%s for its TWT pulse. Perhaps you should try the "
+					   "MAXIMUM_PATTERN_LENGTH command.\n", pp->pulse->tp->num,
+					   dg2020_pticks(
+								pp->pulse->tp->function->right_twt_padding ) );
+				THROW( EXCEPTION );
+			}
+
+			pp->pulse->right_twt_warning = SET;
+		}
+
+		dg2020.right_twt_warning++;
+		pp->pulse->function->min_right_twt_padding =
+			l_min( pp->pulse->function->min_right_twt_padding,
+				   pp->pulse->function->right_twt_padding + pp->pos );
+		pp->len = MAX_PULSER_BITS - pp->pos;
+	}
 }
 
 
@@ -234,14 +481,14 @@ static void dg2020_defense_shape_check( FUNCTION *shape )
 				if ( dg2020_IN_SETUP )
 				{
 					print( SEVERE, "Distance between PULSE_SHAPE pulse "
-						   "%ld and DEFENSE pulse #%ld is shorter than "
+						   "#%ld and DEFENSE pulse #%ld is shorter than "
 						   "%s.\n", shape_p->num, defense_p->num,
 						   dg2020_ptime( dg2020_ticks2double(
 												  dg2020.shape_2_defense ) ) );
 				}
 				else if ( ! dg2020.shape_2_defense_too_near )
 					print( SEVERE, "Distance between PULSE_SHAPE pulse "
-						   "%ld and DEFENSE pulse #%ld got shorter than "
+						   "#%ld and DEFENSE pulse #%ld got shorter than "
 						   "%s.\n", shape_p->num, defense_p->num,
 						   dg2020_ptime( dg2020_ticks2double(
 												  dg2020.shape_2_defense ) ) );
@@ -394,6 +641,16 @@ PULSE *dg2020_delete_pulse( PULSE *p )
 	int i;
 
 
+	/* If the pulse has an associated shape pulse delete it */
+
+	if ( p->sp && p->sp->function->self == PULSER_CHANNEL_PULSE_SHAPE )
+		dg2020_delete_pulse( p->sp );
+
+	/* If the pulse has an associated TWT pulse also delete it */
+
+	if ( p->tp && p->sp->function->self == PULSER_CHANNEL_TWT )
+		dg2020_delete_pulse( p->tp );
+
 	/* First we've got to remove the pulse from its functions pulse list */
 
 	for ( i = 0; i < p->function->num_pulses; i++ )
@@ -422,7 +679,7 @@ PULSE *dg2020_delete_pulse( PULSE *p )
 		p->function->pulses = PULSE_PP T_free( p->function->pulses );
 
 		print( SEVERE, "Function '%s' isn't used at all because all its "
-			   "pulses are unused.\n", Function_Names[ p->function->self ] );
+			   "pulses are unused.\n", p->function->name );
 		p->function->is_used = UNSET;
 	}
 

@@ -39,6 +39,7 @@ const char generic_type[ ] = DEVICE_TYPE;
 int dg2020_b_init_hook( void )
 {
 	int i, j;
+	FUNCTION *f;
 
 
 	pulser_struct.name     = DEVICE_NAME;
@@ -109,11 +110,23 @@ int dg2020_b_init_hook( void )
 	dg2020.neg_delay = 0;
 	dg2020.is_max_seq_len = UNSET;
 
+	dg2020.trig_in_mode = INTERNAL;
+	dg2020.repeat_time = 0;
+
+	dg2020.dump_file = NULL;
+	dg2020.show_file = NULL;
+
 	dg2020.is_shape_2_defense = UNSET;
 	dg2020.is_defense_2_shape = UNSET;
 	dg2020.shape_2_defense_too_near = UNSET;
 	dg2020.defense_2_shape_too_near = UNSET;
 	dg2020.is_confirmation = UNSET;
+
+	dg2020.auto_shape_pulses = UNSET;
+	dg2020.left_shape_warning = dg2020.right_shape_warning = 0;
+
+	dg2020.auto_twt_pulses = UNSET;
+	dg2020.left_twt_warning = dg2020.right_twt_warning = 0;
 
 	dg2020.block[ 0 ].is_used = dg2020.block[ 1 ].is_used = UNSET;
 
@@ -125,25 +138,31 @@ int dg2020_b_init_hook( void )
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 	{
-		dg2020.function[ i ].self = i;
-		dg2020.function[ i ].is_used = UNSET;
-		dg2020.function[ i ].is_needed = UNSET;
+		f = dg2020.function + i;
+		f->self = i;
+		f->name = Function_Names[ i ];
+		f->is_used = UNSET;
+		f->is_needed = UNSET;
 		for ( j = 0; j < MAX_PODS_PER_FUNC; j++ )
-			dg2020.function[ i ].pod[ j ] = NULL;
-		dg2020.function[ i ].num_pods = 0;
-		dg2020.function[ i ].num_channels = 0;
-		dg2020.function[ i ].num_pulses = 0;
-		dg2020.function[ i ].pulses = NULL;
-		dg2020.function[ i ].phase_setup = NULL;
-		dg2020.function[ i ].next_phase = 0;
-		dg2020.function[ i ].is_inverted = UNSET;
-		dg2020.function[ i ].delay = 0;
-		dg2020.function[ i ].is_delay = UNSET;
-		dg2020.function[ i ].is_high_level = UNSET;
-		dg2020.function[ i ].is_low_level = UNSET;
-		dg2020.function[ i ].pm = NULL;
-		dg2020.function[ i ].pcm = NULL;
-		dg2020.function[ i ].pc_len = 1;
+			f->pod[ j ] = NULL;
+		f->num_pods = 0;
+		f->num_channels = 0;
+		f->num_pulses = 0;
+		f->pulses = NULL;
+		f->phase_setup = NULL;
+		f->next_phase = 0;
+		f->is_inverted = UNSET;
+		f->delay = 0;
+		f->is_delay = UNSET;
+		f->is_high_level = UNSET;
+		f->is_low_level = UNSET;
+		f->pm = NULL;
+		f->pcm = NULL;
+		f->pc_len = 1;
+		f->uses_auto_shape_pulses = UNSET;
+		f->uses_auto_twt_pulses = UNSET;
+		f->has_auto_twt_pulses = UNSET;
+		f->max_len = 0;
 	}
 
 	for ( i = 0; i < MAX_CHANNELS; i++ )
@@ -187,9 +206,28 @@ int dg2020_b_test_hook( void )
 	/* Check consistency of pulse settings and do everything to setup the
 	   pulser for the test run */
 
-	dg2020_IN_SETUP = SET;
-	dg2020_init_setup( );
-	dg2020_IN_SETUP = UNSET;
+	TRY {
+		dg2020_IN_SETUP = SET;
+		dg2020_init_setup( );
+		dg2020_IN_SETUP = UNSET;
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+	{
+		if ( dg2020.dump_file )
+		{
+			fclose( dg2020.dump_file );
+			dg2020.dump_file = NULL;
+		}
+
+		if ( dg2020.show_file )
+		{
+			fclose( dg2020.show_file );
+			dg2020.show_file = NULL;
+		}
+
+		RETHROW( );
+	}
 
 	/* We need some somewhat different functions (or disable some of them) for
 	   setting of pulse properties */
@@ -212,6 +250,18 @@ int dg2020_b_test_hook( void )
 
 int dg2020_b_end_of_test_hook( void )
 {
+	if ( dg2020.dump_file != NULL )
+	{
+		fclose( dg2020.dump_file );
+		dg2020.dump_file = NULL;
+	}
+
+	if ( dg2020.show_file != NULL )
+	{
+		fclose( dg2020.show_file );
+		dg2020.show_file = NULL;
+	}
+
 	if ( ! dg2020_is_needed || dg2020.is_cw_mode )
 		return 1;
 
@@ -399,6 +449,387 @@ Var *pulser_name( Var *v )
 {
 	v = v;
 	return vars_push( STR_VAR, DEVICE_NAME );
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+Var *pulser_automatic_shape_pulses( Var *v )
+{
+	long func;
+	double dl, dr;
+
+
+	/* We need at least one argument, the function shape pulse are to be
+	   created for. */
+
+	if ( v == NULL )
+	{
+		print( FATAL, "Missing parameter.\n" );
+		THROW( EXCEPTION );
+	}
+
+	/* Determine the function number */
+
+	func = get_strict_long( v, "pulser function" );
+
+	/* Check that the function argument is reasonable */
+
+	if ( func < 0 || func >= PULSER_CHANNEL_NUM_FUNC )
+	{
+		print( FATAL, "Invalid pulser function (%ld).\n", func );
+		THROW( EXCEPTION );
+	}
+
+	if ( func == PULSER_CHANNEL_PULSE_SHAPE ||
+		 func == PULSER_CHANNEL_TWT ||
+		 func == PULSER_CHANNEL_TWT_GATE ||
+		 func == PULSER_CHANNEL_PHASE_1 ||
+		 func == PULSER_CHANNEL_PHASE_2 )
+	{
+		print( FATAL, "Shape pulses can't be set for function '%s'.\n",
+			   Function_Names[ func ] );
+		THROW( EXCEPTION );
+	}
+
+	/* Check that a channel has been set for shape pulses */
+
+	if ( dg2020.function[ PULSER_CHANNEL_PULSE_SHAPE ].num_channels == 0 )
+	{
+		print( FATAL, "No channel has been set for function '%s' needed for "
+			   "creating shape pulses.\n",
+			   Function_Names[ PULSER_CHANNEL_PULSE_SHAPE ] );
+		THROW( EXCEPTION );
+	}
+
+	/* Complain if automatic shape pulses have already been switched on for
+	   the function */
+
+	if ( dg2020.function[ func ].uses_auto_shape_pulses )
+	{
+		print( FATAL, "Use of automatic shape pulses for function '%s' has "
+			   "already been switched on.\n", Function_Names[ func ] );
+		THROW( EXCEPTION );
+	}
+
+	dg2020.auto_shape_pulses = SET;
+	dg2020.function[ func ].uses_auto_shape_pulses = SET;
+
+	/* Look for left and right side padding arguments for the functions
+	   pulses */
+
+	if ( ( v = vars_pop( v ) ) != NULL )
+	{
+		dl = get_double( v, "left side shape pulse padding" );
+		if ( dl < 0 )
+		{
+			print( FATAL, "Can't use negative left side shape pulse "
+				   "padding.\n" );
+			THROW( EXCEPTION );
+		}
+		dg2020.function[ func ].left_shape_padding = dg2020_double2ticks( dl );
+
+		if ( ( v = vars_pop( v ) ) != NULL )
+		{
+			dr = get_double( v, "right side shape pulse padding" );
+			if ( dr < 0 )
+			{
+				print( FATAL, "Can't use negative right side shape pulse "
+					   "padding.\n" );
+				THROW( EXCEPTION );
+			}
+			dg2020.function[ func ].right_shape_padding =
+													 dg2020_double2ticks( dr );
+		}
+		else
+			dg2020.function[ func ].right_shape_padding =
+					lrnd( ceil( AUTO_SHAPE_RIGHT_PADDING / dg2020.timebase ) );
+	}
+	else
+	{
+		dg2020.function[ func ].left_shape_padding =
+					lrnd( ceil( AUTO_SHAPE_LEFT_PADDING / dg2020.timebase ) );
+		dg2020.function[ func ].right_shape_padding =
+					lrnd( ceil( AUTO_SHAPE_RIGHT_PADDING / dg2020.timebase ) );
+	}
+
+	too_many_arguments( v );
+
+	dg2020.function[ func ].min_left_shape_padding = 
+									 dg2020.function[ func ].left_shape_padding;
+	dg2020.function[ func ].min_right_shape_padding =
+									dg2020.function[ func ].right_shape_padding;
+
+	return vars_push( INT_VAR, 1 );
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+Var *pulser_automatic_twt_pulses( Var *v )
+{
+	long func;
+	double dl, dr;
+
+
+	/* We need at least one argument, the function TWT pulse are to be
+	   created for. */
+
+	if ( v == NULL )
+	{
+		print( FATAL, "Missing parameter.\n" );
+		THROW( EXCEPTION );
+	}
+
+	/* Determine the function number */
+
+	func = get_strict_long( v, "pulser function" );
+
+	/* Check that the function argument is reasonable */
+
+	if ( func < 0 || func >= PULSER_CHANNEL_NUM_FUNC )
+	{
+		print( FATAL, "Invalid pulser function (%ld).\n", func );
+		THROW( EXCEPTION );
+	}
+
+	if ( func == PULSER_CHANNEL_TWT ||
+		 func == PULSER_CHANNEL_TWT_GATE ||
+		 func == PULSER_CHANNEL_PULSE_SHAPE ||
+		 func == PULSER_CHANNEL_PHASE_1 ||
+		 func == PULSER_CHANNEL_PHASE_2 )
+	{
+		print( FATAL, "TWT pulses can't be set for function '%s'.\n",
+			   Function_Names[ func ] );
+		THROW( EXCEPTION );
+	}
+
+	/* Check that a channel has been set for TWT pulses */
+
+	if ( dg2020.function[ PULSER_CHANNEL_TWT ].num_channels == 0 )
+	{
+		print( FATAL, "No channel has been set for function '%s' needed for "
+			   "creating TWT pulses.\n",
+			   Function_Names[ PULSER_CHANNEL_TWT ] );
+		THROW( EXCEPTION );
+	}
+
+	/* Complain if automatic TWT pulses have already been switched on for
+	   the function */
+
+	if ( dg2020.function[ func ].uses_auto_twt_pulses )
+	{
+		print( FATAL, "Use of automatic TWT pulses for function '%s' has "
+			   "already been switched on.\n", Function_Names[ func ] );
+		THROW( EXCEPTION );
+	}
+
+	dg2020.auto_twt_pulses = SET;
+	dg2020.function[ func ].uses_auto_twt_pulses = SET;
+
+	/* Look for left and right side padding arguments for the functions
+	   pulses */
+
+	if ( ( v = vars_pop( v ) ) != NULL )
+	{
+		dl = get_double( v, "left side TWT pulse padding" );
+		if ( dl < 0 )
+		{
+			print( FATAL, "Can't use negative left side TWT pulse "
+				   "padding.\n" );
+			THROW( EXCEPTION );
+		}
+		dg2020.function[ func ].left_twt_padding = dg2020_double2ticks( dl );
+
+		if ( ( v = vars_pop( v ) ) != NULL )
+		{
+			dr = get_double( v, "right side TWT pulse padding" );
+			if ( dr < 0 )
+			{
+				print( FATAL, "Can't use negative right side TWT pulse "
+					   "padding.\n" );
+				THROW( EXCEPTION );
+			}
+			dg2020.function[ func ].right_twt_padding =
+													 dg2020_double2ticks( dr );
+		}
+		else
+			dg2020.function[ func ].right_twt_padding =
+					  lrnd( ceil( AUTO_TWT_RIGHT_PADDING / dg2020.timebase ) );
+	}
+	else
+	{
+		dg2020.function[ func ].left_twt_padding =
+					   lrnd( ceil( AUTO_TWT_LEFT_PADDING / dg2020.timebase ) );
+		dg2020.function[ func ].right_twt_padding =
+					  lrnd( ceil( AUTO_TWT_RIGHT_PADDING / dg2020.timebase ) );
+	}
+
+	too_many_arguments( v );
+
+	dg2020.function[ func ].min_left_twt_padding = 
+									 dg2020.function[ func ].left_twt_padding;
+	dg2020.function[ func ].min_right_twt_padding =
+									 dg2020.function[ func ].right_twt_padding;
+
+	return vars_push( INT_VAR, 1 );
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+Var *pulser_show_pulses( Var *v )
+{
+	int pd[ 2 ];
+	pid_t pid;
+
+
+	v = v;
+
+	if ( FSC2_IS_CHECK_RUN )
+		return vars_push( INT_VAR, 1 );
+
+	if ( dg2020.show_file != NULL )
+		return vars_push( INT_VAR, 1 );
+
+	if ( pipe( pd ) == -1 )
+	{
+		if ( errno == EMFILE || errno == ENFILE )
+			print( FATAL, "Failure, running out of system resources.\n" );
+		return vars_push( INT_VAR, 0 );
+	}
+
+	if ( ( pid =  fork( ) ) < 0 )
+	{
+		if ( errno == ENOMEM || errno == EAGAIN )
+			print( FATAL, "Failure, running out of system resources.\n" );
+		return vars_push( INT_VAR, 0 );
+	}
+
+	/* Here's the childs code */
+
+	if ( pid == 0 )
+	{
+		static char *cmd = NULL;
+
+
+		close( pd[ 1 ] );
+
+		if ( dup2( pd[ 0 ], STDIN_FILENO ) == -1 )
+		{
+			goto filter_failure;
+			close( pd[ 0 ] );
+		}
+
+		close( pd[ 0 ] );
+
+		TRY
+		{
+			cmd = get_string( "%s%sfsc2_pulses", bindir, slash( bindir ) );
+			TRY_SUCCESS;
+		}
+		OTHERWISE
+			goto filter_failure;
+
+		execl( cmd, "fsc2_pulses", NULL );
+
+	filter_failure:
+
+		T_free( cmd );
+		_exit( EXIT_FAILURE );
+	}
+
+	/* And finally the code for the parent */
+
+	close( pd[ 0 ] );
+	dg2020.show_file = fdopen( pd[ 1 ], "w" );
+
+	return vars_push( INT_VAR, 1 );
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+Var *pulser_dump_pulses( Var *v )
+{
+	char *name;
+	char *m;
+	struct stat stat_buf;
+
+
+	v = v;
+
+	if ( FSC2_IS_CHECK_RUN )
+		return vars_push( INT_VAR, 1 );
+
+	if ( dg2020.dump_file != NULL )
+	{
+		print( WARN, "Pulse dumping is already switched on.\n" );
+		return vars_push( INT_VAR, 1 );
+	}
+
+	do
+	{
+		name = T_strdup( fl_show_fselector( "File for dumping pulses:", "./",
+											"*.pls", NULL ) );
+		if ( name == NULL || *name == '\0' )
+		{
+			T_free( name );
+			return vars_push( INT_VAR, 0 );
+		}
+
+		if  ( 0 == stat( name, &stat_buf ) )
+		{
+			m = get_string( "The selected file does already exist:\n%s\n"
+							"\nDo you really want to overwrite it?", name );
+			if ( 1 != show_choices( m, 2, "Yes", "No", NULL, 2 ) )
+			{
+				T_free( m );
+				name = CHAR_P T_free( name );
+				continue;
+			}
+			T_free( m );
+		}
+
+		if ( ( dg2020.dump_file = fopen( name, "w+" ) ) == NULL )
+		{
+			switch( errno )
+			{
+				case EMFILE :
+					show_message( "Sorry, you have too many open files!\n"
+								  "Please close at least one and retry." );
+					break;
+
+				case ENFILE :
+					show_message( "Sorry, system limit for open files "
+								  "exceeded!\n Please try to close some "
+								  "files and retry." );
+				break;
+
+				case ENOSPC :
+					show_message( "Sorry, no space left on device for more "
+								  "file!\n    Please delete some files and "
+								  "retry." );
+					break;
+
+				default :
+					show_message( "Sorry, can't open selected file for "
+								  "writing!\n       Please select a "
+								  "different file." );
+			}
+
+			name = CHAR_P T_free( name );
+			continue;
+		}
+	} while ( dg2020.dump_file == NULL );
+
+	T_free( name );
+
+	return vars_push( INT_VAR, 1 );
 }
 
 
@@ -666,6 +1097,28 @@ Var *pulser_shift( Var *v )
 		p->has_been_active |= ( p->is_active = IS_ACTIVE( p ) );
 		p->needs_update = NEEDS_UPDATE( p );
 
+		/* Also shift shape and TWT pulses associated with the pulse */
+
+		if ( p->sp != NULL )
+		{
+			p->sp->pos = p->pos;
+			p->sp->old_pos = p->old_pos;
+			p->sp->is_old_pos = p->is_old_pos;
+
+			p->sp->has_been_active |= ( p->sp->is_active = p->is_active );
+			p->sp->needs_update = p->needs_update;
+		}
+
+		if ( p->tp != NULL )
+		{
+			p->tp->pos = p->pos;
+			p->tp->old_pos = p->old_pos;
+			p->tp->is_old_pos = p->is_old_pos;
+
+			p->tp->has_been_active |= ( p->tp->is_active = p->is_active );
+			p->tp->needs_update = p->needs_update;
+		}
+
 		if ( p->needs_update )
 			dg2020.needs_update = SET;
 	}
@@ -749,6 +1202,28 @@ Var *pulser_increment( Var *v )
 
 		p->has_been_active |= ( p->is_active = IS_ACTIVE( p ) );
 		p->needs_update = NEEDS_UPDATE( p );
+
+		/* Also lengthen shape and TWT pulses associated with the pulse */
+
+		if ( p->sp != NULL )
+		{
+			p->sp->len = p->len;
+			p->sp->old_len = p->old_len;
+			p->sp->is_old_len = p->is_old_len;
+
+			p->sp->has_been_active |= ( p->sp->is_active = p->is_active );
+			p->sp->needs_update = p->needs_update;
+		}
+
+		if ( p->tp != NULL )
+		{
+			p->tp->len = p->len;
+			p->tp->old_len = p->old_len;
+			p->tp->is_old_len = p->is_old_len;
+
+			p->tp->has_been_active |= ( p->tp->is_active = p->is_active );
+			p->tp->needs_update = p->needs_update;
+		}
 
 		/* If the pulse was or is active we've got to update the pulser */
 
@@ -991,6 +1466,36 @@ Var *pulser_pulse_reset( Var *v )
 
 		p->has_been_active |= ( p->is_active = IS_ACTIVE( p ) );
 		p->needs_update = NEEDS_UPDATE( p );
+
+		/* Also reset shape and TWT pulses associated with the pulse */
+
+		if ( p->sp != NULL )
+		{
+			p->sp->pos = p->pos;
+			p->sp->old_pos = p->old_pos;
+			p->sp->is_old_pos = p->is_old_pos;
+
+			p->sp->len = p->len;
+			p->sp->old_len = p->old_len;
+			p->sp->is_old_len = p->is_old_len;
+
+			p->sp->has_been_active |= ( p->sp->is_active = p->is_active );
+			p->sp->needs_update = p->needs_update;
+		}
+
+		if ( p->tp != NULL )
+		{
+			p->tp->pos = p->pos;
+			p->tp->old_pos = p->old_pos;
+			p->tp->is_old_pos = p->is_old_pos;
+
+			p->tp->len = p->len;
+			p->tp->old_len = p->old_len;
+			p->tp->is_old_len = p->is_old_len;
+
+			p->tp->has_been_active |= ( p->tp->is_active = p->is_active );
+			p->tp->needs_update = p->needs_update;
+		}
 
 		if ( p->needs_update )
 			dg2020.needs_update = SET;

@@ -113,7 +113,7 @@ static void ep385_init_print( FILE *fp )
 	if ( fp == NULL )
 		return;
 
-	fprintf( ep385.dump_file, "TB: %g\nD: %ld\n===\n", ep385.timebase,
+	fprintf( fp, "TB: %g\nD: %ld\n===\n", ep385.timebase,
 			 ep385.neg_delay );
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 	{
@@ -123,7 +123,7 @@ static void ep385_init_print( FILE *fp )
 			continue;
 
 		for ( j = 0; j < f->num_channels; j++ )
-			fprintf( ep385.dump_file, "%s:%d %ld\n",
+			fprintf( fp, "%s:%d %ld\n",
 					 f->name, f->channel[ j ]->self, f->delay );
 	}
 }

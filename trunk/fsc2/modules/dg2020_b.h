@@ -42,6 +42,10 @@ void dg2020_b_exit_hook( void );
 
 
 Var *pulser_name( Var *v );
+Var *pulser_automatic_shape_pulses( Var *v );
+Var *pulser_automatic_twt_pulses( Var *v );
+Var *pulser_show_pulses( Var *v );
+Var *pulser_dump_pulses( Var *v );
 Var *pulser_shape_to_defense_minimum_distance( Var *v );
 Var *pulser_defense_to_shape_minimum_distance( Var *v );
 Var *pulser_state( Var *v );
@@ -113,8 +117,16 @@ Var *pulser_lock_keyboard( Var *v );
 
 /* typedefs of structures needed in the module */
 
+typedef struct {
+	Ticks pos;
+	Ticks len;
+	struct _p_ *pulse;
+} PULSE_PARAMS;
+
+
 typedef struct _F_ {
 	int self;                   /* the functions number */
+	const char *name;          /* name of function */
 	bool is_used;               /* set if the function has been declared in
 								   the ASSIGNMENTS section */
 	bool is_needed;             /* set if the function has been assigned
@@ -152,6 +164,23 @@ typedef struct _F_ {
 
 	bool *pm;
 	struct _C_ **pcm;           /* phase matrix */
+
+	PULSE_PARAMS *pulse_params;
+
+	bool uses_auto_shape_pulses;
+	Ticks left_shape_padding;
+	Ticks right_shape_padding;
+	Ticks min_left_shape_padding;
+	Ticks min_right_shape_padding;
+
+	bool uses_auto_twt_pulses;
+	bool has_auto_twt_pulses;
+	Ticks left_twt_padding;
+	Ticks right_twt_padding;
+	Ticks min_left_twt_padding;
+	Ticks min_right_twt_padding;
+
+	Ticks max_len;
 
 } FUNCTION;
 
@@ -241,6 +270,17 @@ typedef struct {
 
 	bool is_confirmation;
 
+	FILE *show_file;
+	FILE *dump_file;
+
+	bool auto_shape_pulses;
+	long left_shape_warning;
+	long right_shape_warning;
+
+	bool auto_twt_pulses;
+	long left_twt_warning;
+	long right_twt_warning;
+
 } DG2020;
 
 
@@ -293,6 +333,18 @@ typedef struct _p_ {
 
 	bool needs_update;       /* set if the pulses properties have been
 								changed in test run or experiment */
+
+	bool left_shape_warning; /* stores if for pulse the left or right shape */
+	bool right_shape_warning;/* padding couldn't be set correctly */
+	struct _p_ *sp;          /* for normal pulses reference to related shape
+								pulse (if such exists), for shape pulses
+								reference to pulse it is associated with */
+
+	bool left_twt_warning;   /* stores if for pulse the left or right TWT */
+	bool right_twt_warning;  /* padding couldn't be set correctly */
+	struct _p_ *tp;          /* for normal pulses reference to related TWT
+								pulse (if such exists), for TWT pulses
+								reference to pulse it is associated with */
 } PULSE;
 
 
@@ -379,6 +431,7 @@ void dg2020_calc_padding( void );
 bool dg2020_prep_cmd( char **cmd, int channel, Ticks address, Ticks length );
 void dg2020_set( char *arena, Ticks start, Ticks len, Ticks offset );
 int dg2020_diff( char *old_p, char *new_p, Ticks *start, Ticks *length );
+void dg2020_dump_channels( FILE *fp );
 
 
 /* The functions from dg2020_init_b.c */
@@ -390,6 +443,8 @@ void dg2020_init_setup( void );
 
 bool dg2020_do_update( void );
 bool dg2020_reorganize_pulses( bool flag );
+void dg2020_shape_padding_check( FUNCTION *f );
+void dg2020_twt_padding_check( FUNCTION *f );
 void dg2020_do_checks( FUNCTION *f );
 void dg2020_full_reset( void );
 PULSE *dg2020_delete_pulse( PULSE *p );

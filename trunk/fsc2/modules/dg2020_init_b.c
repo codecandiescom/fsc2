@@ -129,7 +129,7 @@ void dg2020_basic_pulse_check( void )
 		{
 			print( FATAL, "Function '%s' of pulse #%ld hasn't been declared "
 				   "in the ASSIGNMENTS section.\n",
-				   Function_Names[ p->function->self ], p->num );
+				   p->function->name, p->num );
 			THROW( EXCEPTION );
 		}
 
@@ -166,7 +166,7 @@ void dg2020_basic_pulse_check( void )
 			{
 				print( FATAL, "Phase %ld needs phase cycling but its "
 					   "function '%s' has only one pod assigned to it.\n",
-					   p->num, Function_Names[ p->function->self ] );
+					   p->num, p->function->name );
 				THROW( EXCEPTION );
 			}
 
@@ -174,7 +174,7 @@ void dg2020_basic_pulse_check( void )
 			{
 				print( FATAL, "Pulse #%ld needs phase cycling but a phase "
 					   "setup for its function '%s' is missing.\n",
-					   p->num, Function_Names[ p->function->self ] );
+					   p->num, p->function->name );
 				THROW( EXCEPTION );
 			}
 
@@ -199,7 +199,7 @@ void dg2020_basic_pulse_check( void )
 			{
 				print( FATAL, "Function '%s' has more than one pod but "
 					   "association between pods and phases is missing.\n",
-					   Function_Names[ p->function->self ] );
+					   p->function->name );
 				THROW( EXCEPTION );
 			}
 			p->pc = dg2020_create_dummy_phase_seq( );
@@ -394,7 +394,7 @@ static void dg2020_phase_setup_check( FUNCTION *f )
 		{
 			print( FATAL, "According to the the phase setup pod %d is needed "
 				   "for function '%s' but it's not assigned to it.\n",
-				   f->phase_setup->pod[ i ]->self, Function_Names[ f->self ] );
+				   f->phase_setup->pod[ i ]->self, f->name );
 			THROW( EXCEPTION );
 		}
 	}
@@ -409,8 +409,7 @@ static void dg2020_phase_setup_check( FUNCTION *f )
 		{
 			print( FATAL, "Phase type '%s' is needed for function '%s' but it "
 				   "hasn't been not defined in a PHASE_SETUP command.\n",
-				   Phase_Types[ i + PHASE_PLUS_X ],
-				   Function_Names[ f->self ] );
+				   Phase_Types[ i + PHASE_PLUS_X ], f->name );
 			THROW( EXCEPTION );
 		}
 	}
@@ -709,7 +708,7 @@ static void dg2020_cw_init( void )
 	if ( f->phase_setup == NULL )
 	{
 		print( FATAL, "CW mode needs a phase setup for the function '%s'.\n",
-			   Function_Names[ f->self ] );
+			   f->name );
 		THROW( EXCEPTION );
 	}
 
@@ -726,7 +725,7 @@ static void dg2020_cw_init( void )
 	if ( f->num_pods <= 1 )
 	{
 		print( FATAL, "Not enough pods (i.e. not at least 2) have been "
-			   "assigned to function '%s'.\n", Function_Names[ f->self ] );
+			   "assigned to function '%s'.\n", f->name );
 		THROW( EXCEPTION );
 	}
 
