@@ -263,7 +263,7 @@ sub run {
 		my ( $fw, $fh ) = ( $f[ 0 ]->width, $f[ 0 ]->height );
 		$geom =~ /^\d+x\d+([+-]\d+)([+-]\d+)/;
 		my ( $bx, $by ) = ( $1, $2 );
-		my $nx = $tx + int( ( $tw - $fw ) / 2 );
+		my $nx = $tx - int( ( $tw - $fw ) / 2 );
 		my $ny = $ty + $by;
 		$geom = sprintf "%+d%+d", $nx, $ny;
 		$f[ 0 ]->geometry( $geom );
@@ -787,7 +787,7 @@ sub run {
 		my ( $fw, $fh ) = ( $f[ 0 ]->width, $f[ 0 ]->height );
 		$geom =~ /^\d+x\d+([+-]\d+)([+-]\d+)/;
 		my ( $bx, $by ) = ( $1, $2 );
-		my $nx = $tx + int( ( $tw - $fw ) / 2 );
+		my $nx = $tx - int( ( $tw - $fw ) / 2 );
 		my $ny = $ty + $by;
 		$geom = sprintf "%+d%+d", $nx, $ny;
 		$f[ 0 ]->geometry( $geom );
@@ -1233,7 +1233,7 @@ sub run {
 		my ( $fw, $fh ) = ( $f[ 0 ]->width, $f[ 0 ]->height );
 		$geom =~ /^\d+x\d+([+-]\d+)([+-]\d+)/;
 		my ( $bx, $by ) = ( $1, $2 );
-		my $nx = $tx + int( ( $tw - $fw ) / 2 );
+		my $nx = $tx - int( ( $tw - $fw ) / 2 );
 		my $ny = $ty + $by;
 		$geom = sprintf "%+d%+d", $nx, $ny;
 		$f[ 0 ]->geometry( $geom );
@@ -1739,7 +1739,7 @@ sub run {
 		my ( $fw, $fh ) = ( $f[ 0 ]->width, $f[ 0 ]->height );
 		$geom =~ /^\d+x\d+([+-]\d+)([+-]\d+)/;
 		my ( $bx, $by ) = ( $1, $2 );
-		my $nx = $tx + int( ( $tw - $fw ) / 2 );
+		my $nx = $tx - int( ( $tw - $fw ) / 2 );
 		my $ny = $ty + $by;
 		$geom = sprintf "%+d%+d", $nx, $ny;
 		$f[ 0 ]->geometry( $geom );
@@ -2196,7 +2196,7 @@ sub run {
 		my ( $fw, $fh ) = ( $f[ 0 ]->width, $f[ 0 ]->height );
 		$geom =~ /^\d+x\d+([+-]\d+)([+-]\d+)/;
 		my ( $bx, $by ) = ( $1, $2 );
-		my $nx = $tx + int( ( $tw - $fw ) / 2 );
+		my $nx = $tx - int( ( $tw - $fw ) / 2 );
 		my $ny = $ty + $by;
 		$geom = sprintf "%+d%+d", $nx, $ny;
 		$f[ 0 ]->geometry( $geom );
