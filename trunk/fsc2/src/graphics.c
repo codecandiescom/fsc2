@@ -158,11 +158,8 @@ void start_graphics( void )
 	}
 	else
 	{
-		pixmap_file = get_string( strlen( auxdir ) + strlen( "/undo.xpm" ) );
-		strcpy( pixmap_file, auxdir );
-		if ( auxdir[ strlen( auxdir ) - 1 ] != '/' )
-			strcat( pixmap_file, "/" );
-		strcat( pixmap_file, "undo.xpm" );
+		pixmap_file = get_init_string( "%s%sundo.xpm", auxdir,
+							auxdir[ strlen( auxdir ) - 1 ] != '/' ? "/" : "" );
 
 		if ( access( pixmap_file, R_OK ) == 0 )
 		{
@@ -186,12 +183,9 @@ void start_graphics( void )
 		}
 		T_free( pixmap_file );
 
-		pixmap_file = get_string(   strlen( auxdir )
-								  + strlen( "/printer.xpm" ) );
-		strcpy( pixmap_file, auxdir );
-		if ( auxdir[ strlen( auxdir ) - 1 ] != '/' )
-			strcat( pixmap_file, "/" );
-		strcat( pixmap_file, "printer.xpm" );
+		pixmap_file = get_init_string( "%s%sprinter.xpm", auxdir,
+							auxdir[ strlen( auxdir ) - 1 ] != '/' ? "/" : "" );
+
 		if ( access( pixmap_file, R_OK ) == 0 )
 		{
 			fl_set_pixmapbutton_file( run_form->print_button, pixmap_file );

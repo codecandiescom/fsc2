@@ -35,6 +35,47 @@ char *get_string( size_t len )
 }
 
 
+/*----------------------------------------------------------------*/
+/* Function gets a format string like in printf and all arguments */
+/* and returns a string into which the arguments are printed.     */
+/*----------------------------------------------------------------*/
+
+char *get_init_string( const char *fmt, ... )
+{
+	char *c = NULL;
+	int len = 128;
+	va_list ap;
+	int wr;
+
+
+	while ( 1 )
+	{
+		c = T_realloc( c, len );
+		va_start( ap, fmt );
+		wr = vsnprintf( c, len, fmt, ap );
+		va_end( ap );
+
+		if ( wr < 0 )       /* indicates not enough space under older glibs */
+		{
+			len *= 2;
+			continue;
+		}
+
+		if ( wr + 1 > len ) /* newer glibs return the number of chars needed */
+		{
+			len = wr + 1;
+			continue;
+		}
+
+		if ( wr + 1 < len )
+			T_realloc( c, wr + 1 );
+		break;
+	}
+
+	return c;
+}
+
+
 /*---------------------------------------------------------------*/
 /* Converts all upper case characters in a string to lower case. */
 /*---------------------------------------------------------------*/

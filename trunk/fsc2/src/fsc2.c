@@ -1195,18 +1195,16 @@ static void start_help_browser( void )
 	{
 		av[ 0 ] = T_strdup( "opera" );
 		av[ 1 ] = T_strdup( "-newbrowser" );
-		av[ 2 ] = get_string( 15 + strlen( docdir ) );
-		strcpy( av[ 2 ], "file:/" );
-		strcat( av[ 2 ], docdir );
-		strcat( av[ 2 ], "fsc2.html" );
+		av[ 2 ] = get_init_string( "file:%s%s%sfsc2.html",
+				 docdir[ 0 ] != '/' ? "/" : "", docdir,
+				 docdir[ strlen( docdir ) - 1 ] != '/' ? "/" : "" );
 	}
 	else if ( browser && ! strcasecmp( browser, "konqueror" ) )
 	{
 		av[ 0 ] = T_strdup( "konqueror" );
-		av[ 1 ] = get_string( 15 + strlen( docdir ) );
-		strcpy( av[ 1 ], "file:/" );
-		strcat( av[ 1 ], docdir );
-		strcat( av[ 1 ], "fsc2.html" );
+		av[ 1 ] = get_init_string( "file:%s%s%sfsc2.html",
+							docdir[ 0 ] != '/' ? "/" : "", docdir,
+							docdir[ strlen( docdir ) - 1 ] != '/' ? "/" : "" );
 	}
 	else if ( browser && ( ! strcasecmp( browser, "lynx" ) ||
 						   ! strcasecmp( browser, "w3m" ) ) )
@@ -1214,17 +1212,15 @@ static void start_help_browser( void )
 		av[ 0 ] = T_strdup( "xterm" );
 		av[ 1 ] = T_strdup( "-e" );
 		av[ 2 ] = T_strdup( browser );
-		av[ 3 ] = get_string( 9 + strlen( docdir ) );
-		strcpy( av[ 3 ], docdir );
-		strcat( av[ 3 ], "fsc2.html" );
+		av[ 3 ] = get_init_string( "%s%sfsc2.html", docdir,
+							docdir[ strlen( docdir ) - 1 ] != '/' ? "/" : "" );
 	}
 	else if ( browser && strcasecmp( browser, "netscape" ) )
 	{
 		av[ 0 ] = T_strdup( browser );
-		av[ 1 ] = get_string( 15 + strlen( docdir ) );
-		strcpy( av[ 1 ], "file:/" );
-		strcat( av[ 1 ], docdir );
-		strcat( av[ 1 ], "fsc2.html" );
+		av[ 1 ] = get_init_string( "file:%s%s%sfsc2.html",
+							docdir[ 0 ] != '/' ? "/" : "", docdir,
+							docdir[ strlen( docdir ) - 1 ] != '/' ? "/" : "" );
 	}
 	else
 	{
@@ -1234,19 +1230,16 @@ static void start_help_browser( void )
 		av[ 0 ] = T_strdup( "netscape" );
 
 		if ( system( "xwininfo -name Netscape >/dev/null 2>&1" ) )
-		{
-			av[ 1 ] = get_string( 15 + strlen( docdir ) );
-			strcpy( av[ 1 ], "file:/" );
-			strcat( av[ 1 ], docdir );
-			strcat( av[ 1 ], "fsc2.html" );
-		}
+			av[ 1 ] = get_init_string( "file:%s%s%sfsc2.html",
+							docdir[ 0 ] != '/' ? "/" : "", docdir,
+							docdir[ strlen( docdir ) - 1 ] != '/' ? "/" : "" );
 		else
 		{
 			av[ 1 ] = T_strdup( "-remote" );
-			av[ 2 ] = get_string( 35 + strlen( docdir ) );
-			strcpy( av[ 2 ], "openURL(file:/" );
-			strcat( av[ 2 ], docdir );
-			strcat( av[ 2 ], "fsc2.html,new-window)" );
+			av[ 2 ] = get_init_string(
+							"openURL(file:%s%s%sfsc2.html,new-window)",
+							docdir[ 0 ] != '/' ? "/" : "", docdir,
+							docdir[ strlen( docdir ) - 1 ] != '/' ? "/" : "" );
 		}
 	}
 
