@@ -201,7 +201,7 @@ bool scan_main( const char *name, FILE *fp )
 /* label is used to call the next lexer. On failure several common    */
 /* errors are caught (if the lexer didn't do it by itself) and the    */
 /* failure is signaled back to splitlex(). On success we only return  */
-/* to splitlex() end of the input file(s).                            */
+/* to splitlex() on end of the input file(s).                         */
 /* ->                                                                 */
 /*    * number (label) of first section found by splitlex()           */
 /* <-                                                                 */
