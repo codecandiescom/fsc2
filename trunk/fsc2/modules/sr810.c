@@ -46,7 +46,6 @@ const char generic_type[ ] = DEVICE_TYPE;
 #define SR810_TEST_HARMONIC      1
 #define SR810_TEST_MOD_MODE      1         // this must be INTERNAL, i.e. 1
 
-
 #define NUM_ADC_PORTS         4
 #define NUM_DAC_PORTS         4
 #define DAC_MAX_VOLTAGE       10.5
@@ -64,8 +63,22 @@ const char generic_type[ ] = DEVICE_TYPE;
 #define MAX_HARMONIC          19999
 #define MIN_HARMONIC          1
 
-#define NUM_CHANNELS          4        /* 11 would be possible but this doesn't
-										  make too much sense... */
+#define NUM_CHANNELS          9
+#define NUM_DIRECT_CHANNELS   8
+
+#define DSP_CH_UNDEF          0
+#define DSP_CH_X              1
+#define DSP_CH_Y              2
+#define DSP_CH_R              3
+#define DSP_CH_theta          4
+#define DSP_CH_AUX1           5
+#define DSP_CH_AUX2           6
+#define DSP_CH_AUX3           7
+#define DSP_CH_AUX4           8
+#define DSP_CH_Xnoise         9         // only to be used in auto mode
+
+#define MAX_DATA_AT_ONCE      6
+#define MAX_STORED_DATA    8191
 
 
 /* Declaration of exported functions */
@@ -87,6 +100,9 @@ Var *lockin_ref_freq( Var *v );
 Var *lockin_harmonic( Var *v );
 Var *lockin_ref_mode( Var *v );
 Var *lockin_ref_level( Var *v );
+Var *lockin_auto_setup( Var *v );
+Var *lockin_get_sample_time( Var *v );
+Var *lockin_auto_acquisition( Var *v );
 Var *lockin_lock_keyboard( Var *v );
 
 
@@ -115,6 +131,15 @@ typedef struct
 	bool is_harmonic;
 	double dac_voltage[ NUM_DAC_PORTS ];
 	bool is_dac_voltage[ NUM_DAC_PORTS ];
+
+	bool is_auto_running;
+	bool is_auto_setup;
+	long st_index;
+	bool set_sample_time_to_tc;
+	long dsp_ch;
+	long data_fetched;
+	long stored_data;
+
 } SR810;
 
 
@@ -124,6 +149,8 @@ static SR810 sr810_stored;
 
 #define UNDEF_SENS_INDEX -1
 #define UNDEF_TC_INDEX   -1
+#define UNDEF_ST_INDEX   -1
+
 
 /* Lists of valid sensitivity settings */
 
@@ -133,14 +160,42 @@ static double sens_list[ ] = { 2.0e-9, 5.0e-9, 1.0e-8, 2.0e-8, 5.0e-8, 1.0e-7,
 							   2.0e-3, 5.0e-3, 1.0e-2, 2.0e-2, 5.0e-2, 1.0e-1,
 							   2.0e-1, 5.0e-1, 1.0 };
 
+#define SENS_ENTRIES ( sizeof sens_list / sizeof sens_list[ 0 ] )
+
 /* List of all available time constants */
 
 static double tc_list[ ] = { 1.0e-5, 3.0e-5, 1.0e-4, 3.0e-4, 1.0e-3, 3.0e-3,
 							 1.0e-2, 3.0e-2, 1.0e-1, 3.0e-1, 1.0, 3.0, 1.0e1,
 							 3.0e1, 1.0e2, 3.0e2, 1.0e3, 3.0e3, 1.0e4, 3.0e4 };
-
-#define SENS_ENTRIES ( sizeof sens_list / sizeof sens_list[ 0 ] )
 #define TC_ENTRIES ( sizeof tc_list / sizeof tc_list[ 0 ] )
+
+
+/* List of sample times that can be used in auto-acquisition. Shortest time
+   is 1 / 512 Hz, then multiply repeatedly by 2 to get all the other sample
+   times (there is also the possiblity that no sample time is used but an
+   external trigger). */
+
+#define ST_ENTRIES       14
+#define ST_TRIGGRED      -2
+
+static double st_list[ ST_ENTRIES ];
+
+
+/* The first list tells what type of measured data can be displayed in each
+   of the two channels of the lock-in. For example, 'X' can only be displayed
+   in channel 1, while Y noise can only be displayed via channel 2. The second
+   list is for translating the number the numbers we get back from the lock-in
+   when we ask it what it currently displays in one of the channels into the
+   numbers the user knows about. */
+
+static long dsp_ch_list[ ] = { DSP_CH_X, DSP_CH_R, DSP_CH_AUX1,
+							   DSP_CH_AUX2, DSP_CH_Xnoise, DSP_CH_UNDEF };
+
+static long dsp_to_symbol[ ] = { DSP_CH_X, DSP_CH_R, DSP_CH_Xnoise,
+								 DSP_CH_AUX1, DSP_CH_AUX2, DSP_CH_UNDEF };
+				
+#define D2S_ENTRIES ( sizeof dsp_to_symbol / sizeof dsp_to_symbol[ 0 ] )
+
 
 /* Declaration of all functions used only within this file */
 
@@ -148,9 +203,11 @@ static bool sr810_init( const char *name );
 static double sr810_get_data( void );
 static void sr810_get_xy_data( double *data, long *channels,
 							   int num_channels );
+static void sr810_get_xy_auto_data( double *data, long *channels,
+									int num_channels );
 static double sr810_get_adc_data( long channel );
-static double sr810_get_dac_data( long port );
 static double sr810_set_dac_data( long channel, double voltage );
+static double sr810_get_dac_data( long port );
 static double sr810_get_sens( void );
 static void sr810_set_sens( int sens_index );
 static double sr810_get_tc( void );
@@ -164,21 +221,27 @@ static long sr810_get_harmonic( void );
 static long sr810_set_harmonic( long harmonic );
 static double sr810_get_mod_level( void );
 static double sr810_set_mod_level( double level );
+static long sr810_set_sample_time( long st_index );
+static long sr810_get_sample_time( void );
+static void sr810_set_display_channel( long type );
+static long sr810_get_display_channel( void );
+static void sr810_auto( int flag );
+static double sr810_get_auto_data( int type );
 static void sr810_lock_state( bool lock );
 static void sr810_failure( void );
 
 
 
-/*------------------------------------*/
-/* Init hook function for the module. */
-/*------------------------------------*/
+/*-----------------------------------*/
+/* Init hook function for the module */
+/*-----------------------------------*/
 
 int sr810_init_hook( void )
 {
 	int i;
 
 
-	/* Set global variable to indicate that GPIB bus is needed */
+	/* Set global variable to indicate that device needs the GPIB bus */
 
 	need_GPIB = SET;
 
@@ -186,20 +249,33 @@ int sr810_init_hook( void )
 
 	sr810.device = -1;
 
-	sr810.sens_index   = UNDEF_SENS_INDEX;
-	sr810.sens_warn    = UNSET;
-	sr810.is_phase     = UNSET;
-	sr810.tc_index     = UNDEF_TC_INDEX;
-	sr810.tc_warn      = UNSET;
-	sr810.is_mod_freq  = UNSET;
-	sr810.is_harmonic  = UNSET;
-	sr810.is_mod_level = UNSET;
+	sr810.sens_index            = UNDEF_SENS_INDEX;
+	sr810.sens_warn             = UNSET;
+	sr810.is_phase              = UNSET;
+	sr810.tc_index              = UNDEF_TC_INDEX;
+	sr810.tc_warn               = UNSET;
+	sr810.is_mod_freq           = UNSET;
+	sr810.is_mod_level          = UNSET;
+	sr810.is_harmonic           = UNSET;
+	sr810.is_auto_running       = UNSET;
+	sr810.is_auto_setup         = UNSET;
+	sr810.st_index              = UNDEF_ST_INDEX;
+	sr810.set_sample_time_to_tc = UNSET;
+	sr810.stored_data           = 0;
+	sr810.data_fetched          = 0;
+	sr810.dsp_ch                = DSP_CH_UNDEF;
 
 	for ( i = 0; i < NUM_DAC_PORTS; i++ )
 	{
 		sr810.dac_voltage[ i ] = 0.0;
 		sr810.is_dac_voltage[ i ] = UNSET;
 	}
+
+	/* Set up the sample time list - shortest time come first */
+
+	st_list[ 0 ] = 1.0 / 512.0;
+	for ( i = 1; i < ST_ENTRIES; i++ )
+		st_list[ i ] = 2.0 * st_list[ i - 1 ];
 
 	return 1;
 }
@@ -243,10 +319,15 @@ int sr810_exp_hook( void )
 
 int sr810_end_of_exp_hook( void )
 {
+	sr810_auto( 0 );
+
 	/* Switch lock-in back to local mode */
 
 	if ( sr810.device >= 0 )
 		gpib_local( sr810.device );
+
+	sr810.data_fetched = 0;
+	sr810.stored_data = 0;
 
 	sr810.device = -1;
 
@@ -275,34 +356,56 @@ Var *lockin_name( Var *v )
 }
 
 
-/*-----------------------------------------------------------------*/
-/* Function returns the lock-in voltage(s). If called without an   */
-/* argument the value is the X channel voltage is returned, other- */
-/* wise a transient array is returned with the voltages of the X   */
-/* and Y channel. All voltages are in in V, the range depending on */
-/* the current sensitivity setting.                                */
+/*-------------------------------------------------------------------*/
+/* Function returns divers the lock-in signals. If called without an */
+/* argument the value is the X channel voltage is returned. There    */
+/* can be up to six arguments indicating the type of measured data   */
+/* to return. It can be used:                                        */
+/* 1: X signal                                                       */
+/* 2: Y signal                                                       */
+/* 3: Amplitude R of signal                                          */
+/* 4: Phase theta of signal (relative to reference)                  */
+/* 5: Voltage at ADC 1                                               */
+/* 6: Voltage at ADC 2                                               */
+/* 7: Voltage at ADC 3                                               */
+/* 8: Voltage at ADC 4                                               */
+/* 9: X noise (available in auto-acquisition mode only)              */
+/* 10: Y noise (available in auto-acquisition mode only)             */
+/* If there is no or just one argument a single floating point       */
+/* number is returned, otherwise an array of single floating point   */
+/* numbers just large enough to hold all requested data.             */
 /*-----------------------------------------------------------------*/
 
 Var *lockin_get_data( Var *v )
 {
-	double data[ 6 ] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
-	long channels[ 6 ];
+	double data[ MAX_DATA_AT_ONCE ] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+	long channels[ MAX_DATA_AT_ONCE ];
 	int num_channels;
 	bool using_dummy_channels = UNSET;
-	int i;
+	int i, j;
 
+
+	/* No argument means just return the X data value */
 
 	if ( v == NULL )
 	{
 		if ( FSC2_MODE == TEST )           /* return dummy value in test run */
-			return vars_push( FLOAT_VAR, data[ 0 ] );
-
-		return vars_push( FLOAT_VAR, sr810_get_data( ) );
+			return vars_push( FLOAT_VAR, 0.0 );
+		else
+			return vars_push( FLOAT_VAR, sr810_get_data( ) );
 	}
 
-	for ( num_channels = i = 0; i < 6 && v != NULL; i++, v = vars_pop( v ) )
+	for ( num_channels = i = 0; i < MAX_DATA_AT_ONCE && v != NULL;
+		  i++, v = vars_pop( v ) )
 	{
 		channels[ i ] = get_long( v, "channel number" );
+		
+		if ( channels[ i ] ==  DSP_CH_Xnoise && ! sr810.is_auto_running )
+		{
+			print( FATAL, "X noise can only be measured while "
+				   "auto-acquisition is running.\n" );
+			THROW( EXCEPTION );
+		}
 
 		if ( channels[ i ] < 1 || channels[ i ] > NUM_CHANNELS )
 		{
@@ -310,12 +413,24 @@ Var *lockin_get_data( Var *v )
 			THROW( EXCEPTION );
 		}
 
+		for ( j = 0; j < i; j++ )
+			if ( channels[ i ] == channels[ j ] )
+			{
+				print( FATAL, "Channel %d found more than once in argument "
+					   "list.\n", channels[ i ] );
+				THROW( EXCEPTION );
+			}
+
 		num_channels++;
 	}
 
 	if ( v != NULL )
-		print( SEVERE, "More than 6 parameters, discarding superfluous "
-			   "ones.\n" );
+	{
+		print( SEVERE, "More than %d parameters, discarding superfluous "
+			   "ones.\n", MAX_DATA_AT_ONCE );
+		while ( ( v = vars_pop( v ) ) != NULL )
+			;
+	}
 
 	if ( FSC2_MODE == TEST )
 	{
@@ -331,7 +446,7 @@ Var *lockin_get_data( Var *v )
 	if ( num_channels == 1 )
 	{
 		using_dummy_channels = SET;
-		channels[ num_channels++ ] = channels[ 0 ] % NUM_CHANNELS + 1;
+		channels[ num_channels++ ] = channels[ 0 ] % NUM_DIRECT_CHANNELS + 1;
 	}
 
 	sr810_get_xy_data( data, channels, num_channels );
@@ -346,8 +461,8 @@ Var *lockin_get_data( Var *v )
 /*---------------------------------------------------------------*/
 /* Function returns the voltage at one of the 4 ADC ports on the */
 /* backside of the lock-in amplifier. The argument must be an    */
-/* integers between 1 and 4.                                     */
-/* Returned values are in the interval [ -10.5 V, +10.5 V ].     */
+/* integer between 1 and 4.                                      */
+/* Returned values are in the range between -10.5 V and +10.5 V. */
 /*---------------------------------------------------------------*/
 
 Var *lockin_get_adc_data( Var *v )
@@ -360,7 +475,7 @@ Var *lockin_get_adc_data( Var *v )
 	if ( port < 1 || port > NUM_ADC_PORTS )
 	{
 		print( FATAL, "Invalid ADC channel number (%ld), valid channels are "
-			   "in the range betwenn 1 and %d.\n", port, NUM_ADC_PORTS );
+			   "in the range between 1 and %d.\n", port, NUM_ADC_PORTS );
 		THROW( EXCEPTION );
 	}
 
@@ -394,12 +509,12 @@ Var *lockin_dac_voltage( Var *v )
 
 	/* Get and check the port number */
 
-	port = get_double( v, "DAC port number" );
+	port = get_long( v, "DAC port number" );
 
 	if ( port < 1 || port > NUM_DAC_PORTS )
 	{
 		print( FATAL, "Invalid DAC channel number (%ld), valid channels are "
-			   "in the range between 1 and%d.\n", port, NUM_DAC_PORTS );
+			   "in the range between 1 and %d.\n", port, NUM_DAC_PORTS );
 		THROW( EXCEPTION );
 	}
 
@@ -448,10 +563,14 @@ Var *lockin_sensitivity( Var *v )
 
 
 	if ( v == NULL )
-		switch ( FSC2_MODE )
+		switch( FSC2_MODE )
 		{
 			case PREPARATION :
-				no_query_possible( );
+				if ( sr810.sens_index == UNDEF_SENS_INDEX )
+					no_query_possible( );
+				else
+					return vars_push( FLOAT_VAR,
+									  sens_list[ sr810.sens_index ] );
 
 			case TEST :
 				return vars_push( FLOAT_VAR,
@@ -460,7 +579,7 @@ Var *lockin_sensitivity( Var *v )
 								  sens_list[ sr810.sens_index ] );
 
 			case EXPERIMENT :
-				return vars_push( FLOAT_VAR, sr810_get_sens( ) );
+			return vars_push( FLOAT_VAR, sr810_get_sens( ) );
 		}
 
 	sens = get_double( v, "sensitivity" );
@@ -471,17 +590,18 @@ Var *lockin_sensitivity( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	/* We try to match the sensitivity passed to the function by checking if
-	   it fits in between two of the valid values and setting it to the nearer
-	   one and, if this doesn't work, we set it to the minimum or maximum
-	   value, depending on the size of the argument. If the value does not fit
-	   within 1 percent, we utter a warning message (but only once). */
+	/* Try to match the sensitivity passed to the function by checking if it
+	   fits in between two of the valid values and setting it to the nearer
+	   one and, if this doesn't work, set it to the minimum or maximum value,
+	   depending on the size of the argument. If the value does not fit within
+	   1 percent, utter a warning message (but only once). */
 
 	for ( i = 0; i < SENS_ENTRIES - 2; i++ )
 		if ( sens >= sens_list[ i ] && sens <= sens_list[ i + 1 ] )
 		{
-			sens_index = i + ( ( sens_list[ i ] / sens > sens /
-								 sens_list[ i + 1 ] ) ? 0 : 1 );
+			sens_index = i +
+				   ( ( sens_list[ i ] / sens >
+					   sens / sens_list[ i + 1 ] ) ? 0 : 1 );
 			break;
 		}
 
@@ -491,6 +611,7 @@ Var *lockin_sensitivity( Var *v )
 
 	if ( sens_index >= 0 &&                                 /* value found ? */
 		 fabs( sens - sens_list[ sens_index ] ) > sens * 1.0e-2 &&
+                                                            /* error > 1% ? */
 		 ! sr810.sens_warn  )                            /* no warning yet ? */
 	{
 		if ( sens >= 1.0e-3 )
@@ -498,8 +619,8 @@ Var *lockin_sensitivity( Var *v )
 				   "instead.\n",
 				   sens * 1.0e3, sens_list[ sens_index ] * 1.0e3 );
 		else if ( sens >= 1.0e-6 ) 
-			print( WARN, "Can't set sensitivity to %.0lf uV, using %.0lf uV "
-				   "instead.\n",
+			print( WARN, "%s: Can't set sensitivity to %.0lf uV, using "
+				   "%.0lf uV instead.\n",
 				   sens * 1.0e6, sens_list[ sens_index ] * 1.0e6 );
 		else
 			print( WARN, "Can't set sensitivity to %.0lf nV, using %.0lf nV "
@@ -518,8 +639,8 @@ Var *lockin_sensitivity( Var *v )
 		if ( ! sr810.sens_warn )                      /* no warn message yet */
 		{
 			if ( sens >= 1.0 )
-				print( WARN, "Sensitivity of %.0lf mV is too low, using %.0lf "
-					   "mV instead.\n",
+				print( WARN, "Sensitivity of %.0lf V is too low, using "
+					   "%.0lf V instead.\n",
 					   sens * 1.0e3, sens_list[ sens_index ] * 1.0e3 );
 			else
 				print( WARN, "Sensitivity of %.0lf nV is too high, using "
@@ -530,7 +651,7 @@ Var *lockin_sensitivity( Var *v )
 	}
 
 	too_many_arguments( v );
-	
+
 	sr810.sens_index = sens_index;
 
 	if ( FSC2_MODE == EXPERIMENT )
@@ -549,7 +670,7 @@ Var *lockin_sensitivity( Var *v )
 Var *lockin_time_constant( Var *v )
 {
 	double tc;
-	int tc_index = UNDEF_SENS_INDEX;
+	int tc_index = UNDEF_TC_INDEX;
 	unsigned int i;
 
 
@@ -557,7 +678,10 @@ Var *lockin_time_constant( Var *v )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
-				no_query_possible( );
+				if ( sr810.tc_index == UNDEF_TC_INDEX )
+					no_query_possible( );
+				else
+					vars_push( FLOAT_VAR, tc_list[ sr810.tc_index ] );
 
 			case TEST :
 				return vars_push( FLOAT_VAR, sr810.tc_index == UNDEF_TC_INDEX ?
@@ -565,7 +689,7 @@ Var *lockin_time_constant( Var *v )
 								  tc_list[ sr810.tc_index ] );
 
 			case EXPERIMENT :
-			return vars_push( FLOAT_VAR, sr810_get_tc( ) );
+				return vars_push( FLOAT_VAR, sr810_get_tc( ) );
 		}
 
 	tc = get_double( v, "time constant" );
@@ -591,8 +715,8 @@ Var *lockin_time_constant( Var *v )
 		}
 
 	if ( tc_index >= 0 &&                                   /* value found ? */
-		 fabs( tc - tc_list[ tc_index ] ) > tc * 1.0e-2 &&   /* error > 1% ? */
-		 ! sr810.tc_warn )                               /* no warning yet ? */
+		 fabs( tc - tc_list[ tc_index ] ) > tc * 1.0e-2 &&  /* error > 1% ? */
+		 ! sr810.tc_warn )                          /* no warning yet ? */
 	{
 		if ( tc > 1.0e3 )
 			print( WARN, "Can't set time constant to %.0lf ks, using %.0lf ks "
@@ -608,7 +732,7 @@ Var *lockin_time_constant( Var *v )
 				   "instead.\n", tc * 1.0e6, tc_list[ tc_index ] * 1.0e6 );
 		sr810.tc_warn = SET;
 	}
-	
+
 	if ( tc_index == UNDEF_TC_INDEX )                     /* not found yet ? */
 	{
 		if ( tc < tc_list[ 0 ] )
@@ -619,7 +743,7 @@ Var *lockin_time_constant( Var *v )
 		if ( ! sr810.tc_warn )                      /* no warn message yet ? */
 		{
 			if ( tc >= 3.0e4 )
-				print( WARN, " Time constant of %.0lf ks is too large, using "
+				print( WARN, "Time constant of %.0lf ks is too large, using "
 					   "%.0lf ks instead.\n",
 					   tc * 1.0e-3, tc_list[ tc_index ] * 1.0e-3 );
 			else
@@ -631,8 +755,9 @@ Var *lockin_time_constant( Var *v )
 	}
 
 	too_many_arguments( v );
-	
+
 	sr810.tc_index = tc_index;
+
 	if ( FSC2_MODE == EXPERIMENT )
 		sr810_set_tc( tc_index );
 	
@@ -659,14 +784,17 @@ Var *lockin_phase( Var *v )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
-				no_query_possible( );
+				if ( ! sr810.is_phase )
+					no_query_possible( );
+				else
+					return vars_push( FLOAT_VAR, sr810.phase );
 
 			case TEST :
 				return vars_push( FLOAT_VAR, sr810.is_phase ?
 								  sr810.phase : SR810_TEST_PHASE );
 
 			case EXPERIMENT :
-			return vars_push( FLOAT_VAR, sr810_get_phase( ) );
+				return vars_push( FLOAT_VAR, sr810_get_phase( ) );
 		}
 
 	/* Otherwise set phase to value passed to the function */
@@ -685,14 +813,14 @@ Var *lockin_phase( Var *v )
 	}
 
 	too_many_arguments( v );
-	
+
 	sr810.phase    = phase;
 	sr810.is_phase = SET;
 
-	if ( FSC2_MODE != EXPERIMENT )
-		return vars_push( FLOAT_VAR, phase );
+	if ( FSC2_MODE == EXPERIMENT )
+		sr810_set_phase( phase );
 
-	return vars_push( FLOAT_VAR, sr810_set_phase( phase ) );
+	return vars_push( FLOAT_VAR, phase );
 }
 
 
@@ -718,7 +846,7 @@ Var *lockin_harmonic( Var *v )
 	}
 
 	harm = get_long( v, "harmonic" );
-
+	
 	if ( FSC2_MODE == TEST )
 		freq = MIN_MOD_FREQ;
 	else
@@ -733,8 +861,8 @@ Var *lockin_harmonic( Var *v )
 
 	if ( freq > MAX_MOD_FREQ / ( double ) harm )
 	{
-		print( FATAL, "Modulation frequency of %f Hz with harmonic set to %ld "
-			   "is not within valid range (%f Hz - %f kHz).\n", freq, harm,
+		print( FATAL, "Modulation frequency of %f Hz with harmonic set to "
+			   "%ld is not within valid range (%f Hz - %f kHz).\n", freq, harm,
 			   MIN_MOD_FREQ, 1.0e-3 * MAX_MOD_FREQ / ( double ) harm );
 		THROW( EXCEPTION );
 	}
@@ -761,7 +889,6 @@ Var *lockin_ref_mode( Var *v )
 
 	if ( FSC2_MODE == TEST )
 		return vars_push( INT_VAR, SR810_TEST_MOD_MODE );
-
 	return vars_push( INT_VAR, sr810_get_mod_mode( ) );
 }
 
@@ -776,13 +903,16 @@ Var *lockin_ref_freq( Var *v )
 	double freq;
 
 
-	/* Without an argument just return current frequency settting */
+	/* Without an argument just return current phase settting */
 
 	if ( v == NULL )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
-				no_query_possible( );
+				if ( ! sr810.is_mod_freq )
+					no_query_possible( );
+				else
+					return vars_push( FLOAT_VAR, sr810.mod_freq );
 
 			case TEST :
 				return vars_push( FLOAT_VAR, sr810.is_mod_freq ?
@@ -793,7 +923,7 @@ Var *lockin_ref_freq( Var *v )
 		}
 
 	freq = get_double( v, "modulation frequency" );
-
+	
 	if ( FSC2_MODE != TEST && sr810_get_mod_mode( ) != MOD_MODE_INTERNAL )
 	{
 		print( FATAL, "Can't set modulation frequency while modulation source "
@@ -802,7 +932,7 @@ Var *lockin_ref_freq( Var *v )
 	}
 
 	if ( FSC2_MODE == TEST )
-		harm = sr810.is_harmonic ? sr810.harmonic : 1;
+		harm = sr810.is_harmonic ? sr810.harmonic : SR810_TEST_HARMONIC;
 	else
 		harm = sr810_get_harmonic( );
 
@@ -821,7 +951,7 @@ Var *lockin_ref_freq( Var *v )
 	}
 
 	too_many_arguments( v );
-	
+
 	sr810.mod_freq    = freq;
 	sr810.is_mod_freq = SET;
 
@@ -844,7 +974,10 @@ Var *lockin_ref_level( Var *v )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
-				no_query_possible( );
+				if ( ! sr810.is_mod_level )
+					no_query_possible( );
+				else
+					return vars_push( FLOAT_VAR, sr810.mod_level );
 
 			case TEST :
 				return vars_push( FLOAT_VAR, sr810.is_mod_level ?
@@ -864,7 +997,7 @@ Var *lockin_ref_level( Var *v )
 	}
 
 	too_many_arguments( v );
-	
+
 	sr810.mod_level = level;
 	sr810.is_mod_level = SET;
 
@@ -872,6 +1005,241 @@ Var *lockin_ref_level( Var *v )
 		return vars_push( FLOAT_VAR, level );
 
 	return vars_push( FLOAT_VAR, sr810_set_mod_level( level ) );
+}
+
+
+/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+
+Var *lockin_auto_setup( Var *v )
+{
+	double st;
+	double tc;
+	long st_index = UNDEF_ST_INDEX;
+    long dsp_ch;
+	int i;
+
+
+	/* If called with no arguments the auto-setup is undone - no data
+	   will be stored anymore in the internal buffer */
+
+	if ( v == NULL )
+	{
+		if ( FSC2_MODE == PREPARATION )
+		{
+			print( FATAL, "Missing arguments.\n" );
+			THROW( EXCEPTION );
+		}
+
+		print( SEVERE, "Missing arguments.\n" );
+		return vars_push( INT_VAR, 0 );
+	}
+
+	/* An integer value of 0 means that we should use a sample time equal to
+	   or larger than the lock-in's time constant (but as similar as possible).
+	   An integer value of -1 tells us that an external triggger, applied to
+	   the rear panel trigger input is going to be used (the user will have to
+	   take care that the trigger rate is not above 512 Hz or she will never
+	   get any data...). */
+
+	if ( v->type == INT_VAR && ( v->val.lval == 0 || v->val.lval == -1 ) )
+	{
+		if ( v->val.lval == 0 )
+		{
+			sr810.set_sample_time_to_tc = SET;
+
+			if ( FSC2_MODE != PREPARATION )
+			{
+				if ( FSC2_MODE == TEST )
+					tc = sr810.tc_index != UNDEF_TC_INDEX ?
+						SR810_TEST_TIME_CONSTANT : tc_list[ sr810.tc_index ];
+				else
+					tc = sr810_get_tc( );
+
+				st_index = 0;
+				while ( st_index < ST_ENTRIES - 1 && st_list[ st_index ] < tc )
+					st_index++;
+			}
+			else
+				st_index = ST_TRIGGRED;
+		}
+	}
+	else
+	{
+		st = get_double( v, "sample time" );
+
+		if ( st <= 0.0 )
+		{
+			print( FATAL, "Invalid zero or negative sample time.\n" );
+			THROW( EXCEPTION );
+		}
+
+		/* We try to match the sample time passed to the function by checking
+		   if it fits in between two of the valid values and setting it to the
+		   nearer one and, if this doesn't work, we set it to the minimum or
+		   maximum value, depending on the size of the argument. If the value
+		   does not fit within 5 percent, we utter a warning message (but only
+		   once). */
+	
+		for ( i = 0; i < ST_ENTRIES - 2; i++ )
+			if ( st >= st_list[ i ] && st <= st_list[ i + 1 ] )
+			{
+				st_index = i + ( ( st / st_list[ i ] <
+								   st_list[ i + 1 ] / st ) ? 0 : 1 );
+				break;
+			}
+
+		if ( st_index >= 0 &&                               /* value found ? */
+			 fabs( st - st_list[ st_index ] ) > st * 5.0e-2 )/* error > 5% ? */
+		{
+			if ( st >= 1.0 )
+				print( WARN, "Can't set sample time to %.0lf s, using %.0lf s "
+					   "instead.\n", st, st_list[ st_index ] );
+			else
+				print( WARN, "Can't set sample time to %.0lf ms, using "
+					   "%.0lf ms instead.\n", st * 1.0e3,
+					   st_list[ st_index ] * 1.0e3 );
+		}
+
+		if ( st_index == UNDEF_ST_INDEX )                 /* not found yet ? */
+		{
+			if ( st < st_list[ 0 ] )
+				st_index = 0;
+			else
+				st_index = ST_ENTRIES - 1;
+
+			if ( st > st_list[ ST_ENTRIES - 1 ] * 1.05 )
+				print( WARN, "Sample time of %.0lf s is too large, using "
+					   "%.0lf s instead.\n", st, st_list[ st_index ] );
+			else if ( st < st_list[ 0 ] * 0.95 )
+				print( WARN, "Sample time of %.0lf ms is too small, using "
+					   "%.0lf ms instead.\n",
+					   st * 1.0e3, st_list[ st_index ] * 1.0e3 );
+		}
+	}
+
+	/* The next (optional) parameters are the channels to be displayed
+	   (which in turn are the channels the values are sampled from). Not
+	   all combinations are possible, the first channnel allows only
+	   'X' and 'R' (corresponding to the numbers 1 and 3), while the
+	   second channel can only display 'Y' and 'theta' (coded by the
+	   numbers 2 and 4). All other combinations must be rejected. */
+
+	if ( ( v = vars_pop( v ) ) == NULL )
+			dsp_ch = DSP_CH_UNDEF;
+	else
+	{
+		dsp_ch = get_long( v, "channel to display" );
+
+		/* Accept '0' to mean don't change channel display setting */
+
+		if ( dsp_ch == 0 )
+			dsp_ch = DSP_CH_UNDEF;
+		else
+			for ( i = 0; ; i++ )
+			{
+				if ( dsp_ch_list[ i ] == DSP_CH_UNDEF )
+				{
+					print( FATAL, "Invalid display type (%ld).\n", dsp_ch );
+					THROW( EXCEPTION );
+				}
+
+				if ( dsp_ch == dsp_ch_list[ i ] )
+					break;
+			}
+	}
+
+	too_many_arguments( v );
+
+	sr810.is_auto_setup = SET;
+	sr810.st_index = st_index;
+	sr810.dsp_ch = dsp_ch;
+
+	/* In the experiment we now must set up the lock-in. If it is already
+	   running in auto mode it must be stopped and all already accumulated
+	   data have to be thrown away before setting the new state. Afterwards
+	   it must be restarted in this case. */
+
+	if ( FSC2_MODE == EXPERIMENT )
+	{
+		if ( sr810.is_auto_running )
+			sr810_auto( 0 );
+
+		sr810_set_sample_time( st_index );
+		sr810_set_display_channel( sr810.dsp_ch );
+
+		if ( sr810.is_auto_running )
+			sr810_auto( 1 );
+	}
+
+	return vars_push( INT_VAR, 1 );
+}
+
+
+/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+
+Var *lockin_get_sample_time( Var *v )
+{
+	long st_index;
+	double tc;
+
+
+	v = v;
+
+	st_index = sr810.st_index;
+
+	switch ( FSC2_MODE )
+	{
+		case TEST :
+			if ( st_index == UNDEF_ST_INDEX )
+			{
+				tc = sr810.tc_index != UNDEF_TC_INDEX ?
+					SR810_TEST_TIME_CONSTANT : tc_list[ sr810.tc_index ];
+				st_index = 0;
+				while ( st_index < ST_ENTRIES - 1 && st_list[ st_index ] < tc )
+					st_index++;
+			}
+			break;
+
+		case EXPERIMENT :
+			st_index = sr810_get_sample_time( );
+			break;
+	}
+
+	if ( st_index == ST_TRIGGRED )
+		return vars_push( FLOAT_VAR, 0 );
+	return vars_push( FLOAT_VAR, st_list[ st_index ] );
+}
+
+
+/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+
+Var *lockin_auto_acquisition( Var *v )
+{
+	bool state;
+
+
+	if ( ! sr810.is_auto_setup )
+	{
+		print( FATAL, "Missing initialization of auto-acquisition, use "
+			   "function lockin_auto_setup().\n" );
+		THROW( EXCEPTION );
+	}
+
+	if ( v == 0 )
+		return vars_push( INT_VAR, ( long ) sr810.is_auto_running );
+
+	state = get_boolean( v );
+	too_many_arguments( v );
+
+	if ( FSC2_MODE == EXPERIMENT )
+		sr810_auto( state );
+
+	sr810.is_auto_running = state;
+
+	return vars_push( INT_VAR, ( long ) state );
 }
 
 
@@ -890,7 +1258,7 @@ Var *lockin_lock_keyboard( Var *v )
 		lock = get_boolean( v );
 		too_many_arguments( v );
 	}
-	
+
 	if ( FSC2_MODE == EXPERIMENT )
 		sr810_lock_state( lock );
 
@@ -898,15 +1266,15 @@ Var *lockin_lock_keyboard( Var *v )
 }
 
 
+
 /******************************************************/
 /* The following functions are only used internally ! */
 /******************************************************/
 
 
-/*------------------------------------------------------------------*/
-/* Function initializes the Stanford lock-in amplifier and tests if */
-/* it can be accessed by asking it to send its status byte.         */
-/*------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------*/
+/* Function initialises the lock-in amplifier at the start of the experiment */
+/*---------------------------------------------------------------------------*/
 
 static bool sr810_init( const char *name )
 {
@@ -942,9 +1310,11 @@ static bool sr810_init( const char *name )
 	if ( length > 2 )
 	{
 		do
+		{
+			stop_on_user_request( );
 			length = 20;
-		while ( gpib_read( sr810.device, buffer, &length ) != FAILURE &&
-				length == 20 );
+		} while ( gpib_read( sr810.device, buffer, &length ) != FAILURE &&
+				  length == 20 );
 	}
 
 	/* If sensitivity, time constant or phase were set in one of the
@@ -971,10 +1341,23 @@ static bool sr810_init( const char *name )
 		sr810_set_mod_level( sr810.mod_level );
 
 	for ( i = 0; i < NUM_DAC_PORTS; i++ )
-		if ( sr810.is_dac_voltage )
+		if ( sr810.is_dac_voltage[ i ] )
 			sr810_set_dac_data( i + 1, sr810.dac_voltage[ i ] );
 		else
 			sr810.dac_voltage[ i ] = sr810_get_dac_data( i + 1 );
+
+	/* Stop any still running auto-acquisition and clear the internal buffer */
+
+	sr810_auto( 0 );
+
+	if ( sr810.is_auto_setup )
+	{
+		sr810_set_sample_time( sr810.st_index );
+		if ( sr810.dsp_ch != DSP_CH_UNDEF )
+			sr810_set_display_channel( sr810.dsp_ch );
+		else
+			sr810_get_display_channel( );
+	}
 
 	return OK;
 }
@@ -986,11 +1369,19 @@ static bool sr810_init( const char *name )
 
 static double sr810_get_data( void )
 {
-	char buffer[ 50 ] = "OUTP?1\n";
+	char buffer[ 50 ];
 	long length = 50;
 
 
-	if ( gpib_write( sr810.device, buffer, strlen( buffer ) ) == FAILURE ||
+	/* If in auto mode and the X channel is displayed in CH1 return the
+	   data from the lock-in's internal bufer */
+
+	if ( sr810.is_auto_running && sr810.dsp_ch == DSP_CH_X )
+		return sr810_get_auto_data( DSP_CH_X );
+
+	/* Otherwise return fetch the directly measured data */
+
+	if ( gpib_write( sr810.device, "OUTP?1\n", 7 ) == FAILURE ||
 		 gpib_read( sr810.device, buffer, &length ) == FAILURE )
 		sr810_failure( );
 
@@ -1012,19 +1403,24 @@ static void sr810_get_xy_data( double *data, long *channels, int num_channels )
 	int i;
 
 
-	fsc2_assert( num_channels >= 2 && num_channels <= 6 );
+	fsc2_assert( num_channels >= 2 && num_channels <= MAX_DATA_AT_ONCE );
 
-	/* Assembe te command to be send to the lock-in */
+	/* Assemble the command to be send to the lock-in - if we find that
+	   one of the channel gets its data from the lock-in's internal buffer
+	   pass everything to a different function. */
 
 	for ( i = 0; i < num_channels; i++ )
 	{
-		fsc2_assert( channels[ i ] > 0 && channels[ i ] <= NUM_CHANNELS );
+		if ( sr810.is_auto_running )
+			if ( channels[ i ] == sr810.dsp_ch )
+			{
+				sr810_get_xy_auto_data( data, channels, num_channels );
+				return;
+			}
 
-		if ( i == 0 )
-			sprintf( cmd + strlen( cmd ), "%ld\n", channels[ i ] );
-		else
-			sprintf( cmd + strlen( cmd ), ",%ld\n", channels[ i ] );
+		sprintf( cmd + strlen( cmd ), i == 0 ? "%ld" : ",%ld", channels[ i ] );
 	}
+	strcat( cmd, "\n" );
 
 	/* Get the data from the lock-in */
 
@@ -1039,17 +1435,83 @@ static void sr810_get_xy_data( double *data, long *channels, int num_channels )
 
 	for ( i = 0; i < num_channels; bp_cur = bp_next, i++ )
 	{
-		bp_next = strchr( bp_cur, ',' ) + 1;
-
-		if ( bp_next == NULL )
+		if ( i != num_channels - 1 )
 		{
-			print( FATAL, "Lock-in amplifier does not react properly.\n" );
-			THROW( EXCEPTION );
+			bp_next = strchr( bp_cur, ',' ) + 1;
+
+			if ( bp_next == NULL )
+			{
+				print( FATAL, "Lock-in amplifier does not react properly.\n" );
+				THROW( EXCEPTION );
+			}
+			else
+				*( bp_next - 1 ) = '\0';
 		}
-		else
-			*( bp_next - 1 ) = '\0';
 
 		data[ i ] = T_atod( bp_cur );
+	}
+}
+
+
+/*------------------------------------------------------------*/
+/*------------------------------------------------------------*/
+
+static void sr810_get_xy_auto_data( double *data, long *channels,
+									int num_channels )
+{
+	int i, nk;
+	bool need_auto_data = UNSET;
+	struct {
+		int pos;
+		long type;
+		double data;
+	} auto_channel;
+	long new_channels[ MAX_DATA_AT_ONCE - 1 ];
+
+
+	/* First we've got to figure out is data must be fetched from the
+	   lock-in's internal buffer and at which position in the data buffer
+	   it has to be returned. */
+
+	for ( nk = i = 0; i < num_channels; i++ )
+	{
+		if ( channels[ i ] == sr810.dsp_ch )
+		{
+			auto_channel.pos = i;
+			auto_channel.type = channels[ i ];
+			need_auto_data = SET;
+			continue;
+		}
+
+		new_channels[ nk++ ] = channels[ i ];
+	}
+
+	/* First fetch the 'normal' data by calling the 'normal' function again
+	   (take care that it needs to return data for at least 2 channels). */
+
+	if ( nk > 0 )
+	{
+		if ( nk == 1 )
+		{
+			new_channels[ 1 ] = new_channels[ 0 ] % NUM_DIRECT_CHANNELS + 1;
+			sr810_get_xy_data( data, new_channels, nk + 1 );
+		}
+		else
+			sr810_get_xy_data( data, new_channels, nk );
+	}
+
+	/* Now also fetch the auto-data and insert it into the correct position
+	   in the data array */
+
+	if ( need_auto_data )
+	{
+		auto_channel.data = sr810_get_auto_data( auto_channel.type  );
+
+		if ( auto_channel.pos < nk )
+			memmove( data + auto_channel.pos + 1,
+					 data + auto_channel.pos,
+					 ( nk - auto_channel.pos ) * sizeof *data );
+		data[ auto_channel.pos ] = auto_channel.data;
 	}
 }
 
@@ -1078,11 +1540,11 @@ static double sr810_get_adc_data( long channel )
 }
 
 
-/*-------------------------------------------------------------------*/
-/* sr810_set_dac_data () sets the voltage at one of the 4 DAC ports. */
-/* -> Number of the DAC channel (1-4)                                */
-/* -> Voltage to be set (-10.5 V - +10.5 V)                          */
-/*-------------------------- ----------------------------------------*/
+/*------------------------------------------------------*/
+/* Function sets the voltage at one of the 4 DAC ports. */
+/* -> Number of the DAC channel (1-4)                   */
+/* -> Voltage to be set (-10.5 V - +10.5 V)             */
+/*-------------------------- ---------------------------*/
 
 static double sr810_set_dac_data( long port, double voltage )
 {
@@ -1100,10 +1562,10 @@ static double sr810_set_dac_data( long port, double voltage )
 }
 
 
-/*---------------------------------------------------------------------*/
-/* sr810_get_dac_data() returns the voltage at one of the 4 DAC ports. */
-/* -> Number of the DAC channel (1-4)                                  */
-/*-------------------------- ------------------------------------------*/
+/*---------------------------------------------------------*/
+/* Function returns the voltage at one of the 4 DAC ports. */
+/* -> Number of the DAC channel (1-4)                      */
+/*-------------------------- ------------------------------*/
 
 static double sr810_get_dac_data( long port )
 {
@@ -1113,7 +1575,7 @@ static double sr810_get_dac_data( long port )
 
 	fsc2_assert( port >= 1 && port <= 4 );
 
-	sprintf( buffer, "AUXV %ld\n", port );
+	sprintf( buffer, "AUXV? %ld\n", port );
 	if ( gpib_write( sr810.device, buffer, strlen( buffer ) ) == FAILURE ||
 		 gpib_read( sr810.device, buffer, &len )== FAILURE )
 		sr810_failure( );
@@ -1190,15 +1652,15 @@ static double sr810_get_tc( void )
 /* Fuunction sets the time constant to one of the valid values. The  */
 /* parameter can be in the range from 0 to 19, where 0 is 10 us and  */
 /* 19 is 30 ks - these and the other values in between are listed in */
-/* the global array 'tc_list' (cf. start of file)                    */
+/* the global array 'tc_list' (cf. start of file).                   */
 /*-------------------------------------------------------------------*/
 
 static void sr810_set_tc( int tc_index )
 {
-	char buffer[ 10 ] = "OFLT ";
+	char buffer[ 20 ];
 
 
-	sprintf( buffer + 5, "%d\n", tc_index );
+	sprintf( buffer, "OFLT %d\n", tc_index );
 	if ( gpib_write( sr810.device, buffer, strlen( buffer ) ) == FAILURE )
 		sr810_failure( );
 }
@@ -1206,7 +1668,7 @@ static void sr810_set_tc( int tc_index )
 
 /*-----------------------------------------------------------*/
 /* Function returns the current phase setting of the lock-in */
-/* amplifier (in degrees between 0 and 359).                 */
+/* amplifier (in degree between 0 and 359).                  */
 /*-----------------------------------------------------------*/
 
 static double sr810_get_phase( void )
@@ -1294,7 +1756,7 @@ static double sr810_set_mod_freq( double freq )
 	real_freq = sr810_get_mod_freq( );
 	if ( ( real_freq - freq ) / freq > 1.0e-4 && real_freq - freq > 1.0e-4 )
 	{
-		print( FATAL, "Failed to set modulation frequency to %f Hz.\n" );
+		print( FATAL, "Failed to set modulation frequency to %f Hz.\n", freq );
 		THROW( EXCEPTION );
 	}
 
@@ -1302,9 +1764,8 @@ static double sr810_set_mod_freq( double freq )
 }
 
 
-/*---------------------------------------------------------*/
-/* Returns 1 for internal, 0 for external reference source */
-/*---------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
 
 static long sr810_get_mod_mode( void )
 {
@@ -1407,6 +1868,242 @@ static double sr810_set_mod_level( double level )
 /*---------------------------------------------------------------*/
 /*---------------------------------------------------------------*/
 
+static long sr810_set_sample_time( long st_index )
+{
+	char cmd[ 100 ];
+
+
+	fsc2_assert( st_index != ST_TRIGGRED ||
+				 ( st_index >= 0 && st_index < ST_ENTRIES ) );
+
+	if ( st_index == ST_TRIGGRED )
+		sprintf( cmd, "SRAT 14\n" );
+	else
+		sprintf( cmd, "SRAT %ld\n", ST_ENTRIES - 1 - st_index );
+	if ( gpib_write( sr810.device, cmd, strlen( cmd ) ) == FAILURE )
+		sr810_failure( );
+
+	return st_index;
+}
+
+
+/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+
+static long sr810_get_sample_time( void )
+{
+	char buffer[ 100 ];
+	long length = 100;
+	long st_index;
+
+
+	if ( gpib_write( sr810.device, "SRAT ?\n", 7 ) == FAILURE ||
+		 gpib_read( sr810.device, buffer, &length ) == FAILURE )
+		sr810_failure( );
+
+	buffer[ length - 1 ] = '\0';
+	st_index = T_atol( buffer );
+	if ( ( st_index = T_atol( buffer ) ) == 14 )
+		st_index = ST_TRIGGRED;
+	else
+		st_index = ST_ENTRIES - 1 - st_index;
+
+	return st_index;
+}
+
+
+/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+
+static void sr810_set_display_channel( long type )
+{
+	char cmd[ 100 ];
+	int symbol_to_dsp[ ] = { 0, 0, 1, 3, 4, 2 };
+#ifndef NDEBUG
+	int i;
+#endif
+
+
+	/* My usual paranoia... */
+
+#ifndef NDEBUG
+	for ( i = 0; ; i++ )
+	{
+		if ( dsp_ch_list[ i ] == DSP_CH_UNDEF )
+		{
+			eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
+					__FILE__, __LINE__ );
+			THROW( EXCEPTION );
+		}
+
+		if ( dsp_ch_list[ i ] == type )
+			break;
+	}
+#endif
+
+	sprintf( cmd, "DDEF %d,0\n", symbol_to_dsp[ type ] );
+	if ( gpib_write( sr810.device, cmd, strlen( cmd ) ) == FAILURE )
+		sr810_failure( );
+}
+
+
+/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+
+static long sr810_get_display_channel( void )
+{
+	char buffer[ 100 ];
+	long length = 100;
+	long type;
+	char *sptr;
+
+
+	if ( gpib_write( sr810.device, "DDEF?\n", 6 ) == FAILURE ||
+		 gpib_read( sr810.device, buffer, &length ) == FAILURE )
+		sr810_failure( );
+
+	buffer[ length - 1 ] = '\0';
+	sptr = strchr( buffer, ',' );
+	if ( sptr == NULL )
+	{
+		print( FATAL, "Received invalid reply from device.\n" );
+		THROW( EXCEPTION );
+	}
+
+	*sptr = '\0';
+	if ( ( type = T_atol( buffer ) ) >= ( int ) D2S_ENTRIES )
+	{
+		print( FATAL, "Received invalid reply from device.\n" );
+		THROW( EXCEPTION );
+	}
+
+	/* If the display shows ratios of the ADC input switch it off */
+
+	if ( *( sptr + 1 ) != '0' )
+	{
+		type += 2;
+		sr810_set_display_channel( type + 2 );
+	}
+
+	return dsp_to_symbol[ type ];
+}
+
+
+/*-----------------------------------------------------------------*/
+/* Starts and stops auto-acquisition mode (i.e. storing of data at */
+/* constant time intervals). We only use "Shot" mode which has the */
+/* drawback that the number of data points sampled is limited to a */
+/* maximum of 16383 points for each of the two channels but avoids */
+/* problems with having to pause acquisition while reading data    */
+/* (which would make timing less exact). Hopefully, 16383 points   */
+/* will be enough in all cases.                                    */
+/* When stopped the buffer holding the data is automatically       */
+/* cleared. When an external trigger instead of the internal clock */
+/* is used the trigger start mode is automatically activated or    */
+/* deactivated.                                                    */
+/*-----------------------------------------------------------------*/
+
+static void sr810_auto( int flag )
+{
+	char cmd_1[ 2 ][ 6 ] = { "REST\n", "STRT\n",  };
+	char cmd_2[ 2 ][ 8 ] = { "TSTR 0\n", "TSTR 1\n" };
+
+
+	fsc2_assert( sr810.is_auto_setup == SET );
+	fsc2_assert( flag == 0 || flag == 1 );
+
+	if ( gpib_write( sr810.device, cmd_1[ flag ], 5 ) == FAILURE )
+		sr810_failure( );
+
+	if ( sr810.st_index == ST_TRIGGRED &&
+		 gpib_write( sr810.device, cmd_2[ flag ], 7 ) == FAILURE )
+		sr810_failure( );
+
+	if ( flag == 0 )
+	{
+		sr810.data_fetched = 0;
+		sr810.stored_data = 0;
+	}
+}	
+
+
+/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+
+static double sr810_get_auto_data( int type )
+{
+	char cmd[ 100 ];
+	char buffer[ 100 ];
+	long length = 100;
+	int channel;
+	char *ptr;
+
+
+#ifndef NDEBUG
+	if ( sr810.dsp_ch != type )
+	{
+		eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
+				__FILE__, __LINE__ );
+		THROW( EXCEPTION );
+	}
+#endif
+
+	/* Check if the internal buffer did overflow (i.e. if we already fetched
+	   the maximum amount of data). In this case we need to take desperate
+	   measures: we simply empty the buffer completely, tell the user about
+	   the problem and hope for the best... */
+
+	if ( sr810.data_fetched >= MAX_STORED_DATA )
+	{
+		print( SEVERE, "Internal lock-in buffer did overflow for CH%1d, "
+			   "data in both channnels may have been lost.\n", channel + 1 );
+		if ( gpib_write( sr810.device, "REST\n", 5 ) == FAILURE )
+			sr810_failure( );
+
+		sr810.data_fetched = 0;
+		sr810.stored_data = 0;
+	}
+
+	/* Unless we already know that there are still unfetched data poll until
+	   data are available in the buffer (the 'data_fetched' entry in the
+	   lock-in's structure tells us how many we already got, so there must be
+	   at least on more data in the buffer or we have to wait). Unless an
+	   extremely slow external trigger is used polling can take up to 16 s in
+	   the worst (but probably rather unrealistic) case. */
+
+	while ( sr810.stored_data <= sr810.data_fetched )
+	{
+		stop_on_user_request( );
+
+		length = 100;
+		if ( gpib_write( sr810.device, "SPTS?\n", 6 ) == FAILURE ||
+			 gpib_read( sr810.device, buffer, &length ) == FAILURE )
+			sr810_failure( );
+
+		buffer[ length - 1 ] = '\0';
+
+		ptr = buffer;
+		while ( ! isdigit( *ptr ) )
+			ptr++;
+
+		sr810.stored_data = T_atol( ptr );
+	} 
+
+	sprintf( cmd, "TRCA? %ld,1\n", sr810.data_fetched++ );
+
+	length = 100;
+	if ( gpib_write( sr810.device, cmd, strlen( cmd) ) == FAILURE ||
+		 gpib_read( sr810.device, buffer, &length ) == FAILURE )
+		sr810_failure( );
+
+	buffer[ length - 1 ] = '\0';
+	return T_atod( buffer );
+}
+
+
+/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+
 static void sr810_lock_state( bool lock )
 {
 	char cmd[ 100 ];
@@ -1423,7 +2120,7 @@ static void sr810_lock_state( bool lock )
 
 static void sr810_failure( void )
 {
-	print( FATAL, "Can't access the lock-in amplifier.\n" );
+	print( FATAL, "%s: Can't access the lock-in amplifier.\n" );
 	THROW( EXCEPTION );
 }
 

@@ -153,7 +153,7 @@ static SR830 sr830_stored;
 #define UNDEF_SENS_INDEX -1
 #define UNDEF_TC_INDEX   -1
 #define UNDEF_ST_INDEX   -1
-#define ST_TRIGGRED      -2
+
 
 /* Lists of valid sensitivity settings */
 
@@ -172,28 +172,42 @@ static double tc_list[ ] = { 1.0e-5, 3.0e-5, 1.0e-4, 3.0e-4, 1.0e-3, 3.0e-3,
 #define TC_ENTRIES ( sizeof tc_list / sizeof tc_list[ 0 ] )
 
 
-#define ST_ENTRIES 14
+/* List of sample times that can be used in auto-acquisition. Shortest time
+   is 1 / 512 Hz, then multiply repeatedly by 2 to get all the other sample
+   times (there is also the possiblity that no sample time is used but an
+   external trigger). */
+
+#define ST_ENTRIES       14
+#define ST_TRIGGRED      -2
 
 static double st_list[ ST_ENTRIES ];
 
 
-static long dsp_ch_list[ ][ DISPLAY_CHANNELS ] =
-							{ { DSP_CH_X, DSP_CH_Y },
-							  { DSP_CH_R, DSP_CH_theta },
-							  { DSP_CH_AUX1, DSP_CH_AUX2 },
-							  { DSP_CH_AUX3, DSP_CH_AUX4 },
-							  { DSP_CH_Xnoise, DSP_CH_Ynoise },
-							  { DSP_CH_UNDEF, DSP_CH_UNDEF }
-							};
-static int symbol_to_dsp[ ] = { 0, 0, 0, 1, 1, 3, 4, 3, 4, 2, 2 };
-static long dsp_to_symbol[ ][ DISPLAY_CHANNELS ] =
-							{ { DSP_CH_X, DSP_CH_Y },
-							  { DSP_CH_R, DSP_CH_theta },
-							  { DSP_CH_Xnoise, DSP_CH_Ynoise },
-							  { DSP_CH_AUX1, DSP_CH_AUX2 },
-							  { DSP_CH_AUX3, DSP_CH_AUX4 } };
+/* The first list tells what type of measured data can be displayed in each
+   of the two channels of the lock-in. For example, 'X' can only be displayed
+   in channel 1, while Y noise can only be displayed via channel 2. The second
+   list is for translating the number the numbers we get back from the lock-in
+   when we ask it what it currently displays in one of the channels into the
+   numbers the user knows about. */
 
+static long dsp_ch_list[ ][ DISPLAY_CHANNELS ] =
+											{ { DSP_CH_X, DSP_CH_Y },
+											  { DSP_CH_R, DSP_CH_theta },
+											  { DSP_CH_AUX1, DSP_CH_AUX3 },
+											  { DSP_CH_AUX2, DSP_CH_AUX4 },
+											  { DSP_CH_Xnoise, DSP_CH_Ynoise },
+											  { DSP_CH_UNDEF, DSP_CH_UNDEF }
+											};
+
+static long dsp_to_symbol[ ][ DISPLAY_CHANNELS ] =
+											{ { DSP_CH_X, DSP_CH_Y },
+											  { DSP_CH_R, DSP_CH_theta },
+											  { DSP_CH_Xnoise, DSP_CH_Ynoise },
+											  { DSP_CH_AUX1, DSP_CH_AUX3 },
+											  { DSP_CH_AUX2, DSP_CH_AUX4 } };
+				
 #define D2S_ENTRIES ( sizeof dsp_to_symbol / sizeof dsp_to_symbol[ 0 ][ 0 ] )
+
 
 /* Declaration of all functions used only within this file */
 
@@ -230,16 +244,16 @@ static void sr830_failure( void );
 
 
 
-/*------------------------------------*/
-/* Init hook function for the module. */
-/*------------------------------------*/
+/*-----------------------------------*/
+/* Init hook function for the module */
+/*-----------------------------------*/
 
 int sr830_init_hook( void )
 {
 	int i;
 
 
-	/* Set global variable to indicate that GPIB bus is needed */
+	/* Set global variable to indicate that device needs the GPIB bus */
 
 	need_GPIB = SET;
 
@@ -273,7 +287,7 @@ int sr830_init_hook( void )
 		sr830.dsp_ch[ i ] = DSP_CH_UNDEF;
 	}
 
-	/* Set up the sample time list - shortest times come first */
+	/* Set up the sample time list - shortest time come first */
 
 	st_list[ 0 ] = 1.0 / 512.0;
 	for ( i = 1; i < ST_ENTRIES; i++ )
@@ -362,12 +376,23 @@ Var *lockin_name( Var *v )
 }
 
 
-/*-----------------------------------------------------------------*/
-/* Function returns the lock-in voltage(s). If called without an   */
-/* argument the value is the X channel voltage is returned, other- */
-/* wise a transient array is returned with the voltages of the X   */
-/* and Y channel. All voltages are in in V, the range depending on */
-/* the current sensitivity setting.                                */
+/*-------------------------------------------------------------------*/
+/* Function returns divers the lock-in signals. If called without an */
+/* argument the value is the X channel voltage is returned. There    */
+/* can be up to six arguments indicating the type of measured data   */
+/* to return. It can be used:                                        */
+/* 1: X signal                                                       */
+/* 2: Y signal                                                       */
+/* 3: Amplitude R of signal                                          */
+/* 4: Phase theta of signal (relative to reference)                  */
+/* 5: Voltage at ADC 1                                               */
+/* 6: Voltage at ADC 2                                               */
+/* 7: Voltage at ADC 3                                               */
+/* 8: Voltage at ADC 4                                               */
+/* 9: X noise (available in auto-acquisition mode only)              */
+/* If there is no or just one argument a single floating point       */
+/* number is returned, otherwise an array of single floating point   */
+/* numbers just large enough to hold all requested data.             */
 /*-----------------------------------------------------------------*/
 
 Var *lockin_get_data( Var *v )
@@ -412,9 +437,9 @@ Var *lockin_get_data( Var *v )
 			if ( j == DISPLAY_CHANNELS )
 			{
 				print( FATAL, "%c noise can only be measured when it's "
-					   "displayed in CH%d display.\n",
+					   "displayed in CH%c display.\n",
 					   channels[ i ] == DSP_CH_Xnoise ? 'X' : 'Y',
-					   channels[ i ] == DSP_CH_Xnoise ? 1 : 2 );
+					   channels[ i ] == DSP_CH_Xnoise ? '1' : '2' );
 				THROW( EXCEPTION );
 			}
 		}
@@ -424,6 +449,14 @@ Var *lockin_get_data( Var *v )
 			print( FATAL, "Invalid channel number %ld.\n", channels[ i ] );
 			THROW( EXCEPTION );
 		}
+
+		for ( j = 0; j < i; j++ )
+			if ( channels[ i ] == channels[ j ] )
+			{
+				print( FATAL, "Channel %d found more than once in argument "
+					   "list.\n", channels[ i ] );
+				THROW( EXCEPTION );
+			}
 
 		num_channels++;
 	}
@@ -1024,23 +1057,27 @@ Var *lockin_auto_setup( Var *v )
 	int i, j;
 
 
+	/* If called with no arguments the auto-setup is undone - no data
+	   will be stored anymore in the internal buffer */
+
 	if ( v == NULL )
 	{
 		if ( FSC2_MODE == PREPARATION )
 		{
-			print( FATAL, "Function can't be used for queries.\n" );
+			print( FATAL, "Missing arguments.\n" );
 			THROW( EXCEPTION );
 		}
 
-		print( SEVERE, "Function can't be used for queries.\n" );
+		print( SEVERE, "Missing arguments.\n" );
 		return vars_push( INT_VAR, 0 );
 	}
 
-	/* An integer value of 0 means that we should use a sample time equal
-	   or larger than the lock-in's time constant. A value of -1 tells
-	   us that an external triggger, applied to the rear panel trigger input
-	   is going to be used (the user wil have to take care that the trigger
-	   rate is not above 512 Hz). */
+	/* An integer value of 0 means that we should use a sample time equal to
+	   or larger than the lock-in's time constant (but as similar as possible).
+	   An integer value of -1 tells us that an external triggger, applied to
+	   the rear panel trigger input is going to be used (the user will have to
+	   take care that the trigger rate is not above 512 Hz or she will never
+	   get any data...). */
 
 	if ( v->type == INT_VAR && ( v->val.lval == 0 || v->val.lval == -1 ) )
 	{
@@ -1118,7 +1155,7 @@ Var *lockin_auto_setup( Var *v )
 		}
 	}
 
-	/* The next (optional) parameter are the channels to be displayed
+	/* The next (optional) parameters are the channels to be displayed
 	   (which in turn are the channels the values are sampled from). Not
 	   all combinations are possible, the first channnel allows only
 	   'X' and 'R' (corresponding to the numbers 1 and 3), while the
@@ -1286,10 +1323,9 @@ Var *lockin_lock_keyboard( Var *v )
 /******************************************************/
 
 
-/*------------------------------------------------------------------*/
-/* Function initialises the Stanford lock-in amplifier and tests if */
-/* it can be accessed by asking it to send its status byte.         */
-/*------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------*/
+/* Function initialises the lock-in amplifier at the start of the experiment */
+/*---------------------------------------------------------------------------*/
 
 static bool sr830_init( const char *name )
 {
@@ -1325,9 +1361,11 @@ static bool sr830_init( const char *name )
 	if ( length > 2 )
 	{
 		do
+		{
+			stop_on_user_request( );
 			length = 20;
-		while ( gpib_read( sr830.device, buffer, &length ) != FAILURE &&
-				length == 20 );
+		} while ( gpib_read( sr830.device, buffer, &length ) != FAILURE &&
+				  length == 20 );
 	}
 
 	/* If sensitivity, time constant or phase were set in one of the
@@ -1483,9 +1521,9 @@ static void sr830_get_xy_auto_data( double *data, long *channels,
 	long new_channels[ MAX_DATA_AT_ONCE - 1 ];
 
 
-	/* First we'vo got to figure out how many of the data can be got from
-	   the lock-in's internal buffer and at which position in the data
-	   buffer they have to be returned. */
+	/* First we've got to figure out how many of the data must be fetched from
+	   the lock-in's internal buffer and at which position in the data buffer
+	   they have to be returned. */
 
 	for ( ak = nk = i = 0; i < num_channels; i++ )
 	{
@@ -1494,11 +1532,10 @@ static void sr830_get_xy_auto_data( double *data, long *channels,
 			{
 				auto_channels[ ak ].pos = i;
 				auto_channels[ ak++ ].type = channels[ i ];
-				break;
+				continue;
 			}
 
-		if ( j == DISPLAY_CHANNELS )
-			new_channels[ nk++ ] = channels[ i ];
+		new_channels[ nk++ ] = channels[ i ];
 	}
 
 	/* First fetch the 'normal' data by calling the 'normal' function again
@@ -1934,6 +1971,7 @@ static long sr830_get_sample_time( void )
 static void sr830_set_display_channel( int channel, long type )
 {
 	char cmd[ 100 ];
+	int symbol_to_dsp[ ] = { 0, 0, 0, 1, 1, 3, 4, 3, 4, 2, 2 };
 #ifndef NDEBUG
 	int i;
 #endif

@@ -458,45 +458,143 @@ measured values of the corresponding channels.
 
 @item SR810
 @itemx SR830
-If no argument is specified the measured value at channel 1 is returned.
-If one parameter is passed to the function the value at the
-corresponding channel is returned. Possible channel numbers and their
-meaning are:
+If no argument is specified the 'X' signal is returned. If a parameter
+is passed to the function the value at the corresponding channel is
+returned. Possible channel numbers and their meaning are (please note
+that some of these can only be used when in auto-acquisition mode, see
+below in the explanation of the functions @code{lockin_auto_setup()} and
+@code{lockin_auto_acquisition} and some even then with the
+@strong{SR830} only):
 @table @samp
 @item 1
-Channel @code{1}
+'X' signal
 @item 2
-Channel @code{2}
+'Y' signal - in auto-acquisition mode only available for the
+@strong{SR830}
 @item 3
-Amplitude of data from channel @code{1} and @code{2} in polar coordinates
+Amplitude 'R' of data from X channel (@code{1}) and Y channel (@code{2})
+in polar coordinates
 @item 4
-Phase of data from channel @code{1} and @code{2} in polar coordinates
+Phase 'theta' of data from channel @code{1} and @code{2} (relative to
+reference) in polar coordinates - in auto-acquisition mode only
+available for the @strong{SR830}
 @item 5
 Voltage at rear panel auxiliary ADC input 1
 @item 6
 Voltage at rear panel auxiliary ADC input 2
 @item 7
-Voltage at rear panel auxiliary ADC input 3
+Voltage at rear panel auxiliary ADC input 3 - in auto-acquisition mode
+only available for the @strong{SR830}
 @item 8
-Voltage at rear panel auxiliary ADC input 4
+Voltage at rear panel auxiliary ADC input 4 - in auto-acquisition mode
+only available for the @strong{SR830}
 @item 9
 X noise data - this is only allowed when the lock-in-amplifier is
-running in auto-acquisition mode (see below) and the CH1 display is set
-to display X noise.
+running in auto-acquisition mode and the CH1 display is set to display X
+noise.
 @item 10
-Y noise data - this is only allowed when the lock-in-amplifier is
-running in auto-acquisition mode (see below) and the CH2 display is set
-to display Y noise.
+Y noise data - only available for the @strong{SR830} and only allowed
+when the lock-in-amplifier is running in auto-acquisition mode and the
+CH2 display is set to display Y noise.
 @end table
-Of these values up to 6 can be passed to the function. If there is more
-than one argument a 1-dimensional array is returned with as many data as
-there were arguments (in the sequence corresponding to the one of the
-arguments).
+
+A maximum 6 different channels can be passed to the function which must
+all be different. If there is more than one argument a 1-dimensional
+array is returned with as many data as there were arguments (in the
+sequence corresponding to the one of the arguments).
 
 @item ER023M
 No argument is allowed -- the function returns a floating point value.
 @end table
 
+
+@item lockin_auto_setup()
+@findex lockin_auto_setup()
+This function is only available for the Stanford Research lock-in
+amplifiers @strong{SR810} and @strong{SR830}. Both these lock-in
+amplifiers have the capability to automatically acquire data at fixed
+time intervalls (or on receiving an external trigger) and store the data
+into an internal buffer. Using this acquisition mode one can be sure
+that the data have been sampled at well-defined times (in contrast to
+normal measurements where the exact time interval can vary slightly
+depending on how busy the computer is). Data can be acquired in this
+mode only from the channel(s) displayed at the front side, which means
+that the @code{SR810} can only sample only one data type in this mode
+(because it only has one displayable channel) while the @code{SR830} can
+sample two data types simultaneously.
+
+This function must be used to setup the auto-acquisition (if not called
+auto-acquisition can't be started). The first parameter passed to the
+function is the sample time, i.e.@: the time interval at which data are
+sampled. Sample times can range between @w{1.953125 ms} (@w{512 Hz}) and
+@w{16 s}. Allowed values are powers of 2, multiplied by the shortest
+sample time. As an alternative an @strong{interger} value of @code{0} or
+@code{-1} can be passed to the function. If it is @code{0} a sample time
+equal or larger than the lock-in's time constant is used. If @code{-1}
+is passed to the function it is assumed that an external trigger,
+applied to the rear trigger input, is going to be used - the user has to
+take care that the trigger input rate is not larger than @w{512 Hz}.
+
+The next one or two parameter define which data type should be sampled
+in auto-acqusition mode (the @code{SR810} only accepts one data type
+arguments while the @code{SR830} accepts two). You may specify integer
+numbers with exactly the same meaning as the arguments to the function
+@code{lockin_get_data()}. This will also automatically switch the type
+of data displayed on the front side channels to the specified values.
+Not all combinations are possible, the following list shows which
+values are allowed
+@multitable @columnfractions 0.1 .35 .35
+@item @tab 1st argument @tab 2nd argument
+@item @tab @code{1} (X) @tab @code{2} (Y)
+@item @tab @code{3} (R) @tab @code{4} (theta)
+@item @tab @code{5} (ADC 1) @tab @code{6} (ADC 3)
+@item @tab @code{7} (ADC 2) @tab @code{8} (ADC 4)
+@item @tab @code{9} (X noise) @tab @code{10} (Y noise)
+@end multitable
+For the @code{SR810} only the first column is relevant.
+
+Additionaly you also may specify a value of @code{0}, indicating that
+the function to be displayed should not be changed, i.e.@: the data type
+already set manually should be used.
+
+This function can be used in all sections of an @acronym{EDL}
+program. If the auto-acquisition setup is changed during an already
+running auto-acquisition all data stored in the lock-in's internal
+buffer are discarded before th measurement continues using the new
+settings.
+
+
+@item lockin_auto_acquisition()
+@findex lockin_auto_acquisition()
+This function is only available for the Stanford Research lock-in
+amplifiers @strong{SR810} and @strong{SR830}. It allows to start or stop
+the automatic acquisition of data at constant time intervals. Before
+this function can be used auto-acquisition must be initialized by a call
+of the function @code{lockin_auto_setup()}.
+
+When called with an argument of @code{1} (or a string @code{"ON}")
+auto-acquisition is started. If you now request data from one of the
+channels configured to be used in @code{lockin_auto_setup()} via the
+function @code{lockin_get_data()} the next data sample from the internal
+buffer of the lock-in amplifier will be returned (instead of returning
+the value at the moment of the call of the function).
+
+When called with an argument of @code{0} (or a string @code{"OFF"})
+auto-acquisition is stopped and the internal buffer of the lock-in is
+cleared. Calls of @code{lockin_get_data()} will again return values
+measured in the 'normal' way.
+
+@strong{Important}: The sizes of the internal buffers of the lock-in
+amplifiers are restricted: while the @code{SR830} can store up to 16383
+data points for each of the two channel, the @code{SR810} can only store
+a maximum of 8191 samples. If the program detects, when fetching new
+data, that the maximum number of data have allready been fetched from
+the lock-in the internal buffer is cleared. In this case data which
+should have been acquired between the time the lock-in's internal buffer
+got filled up and the moment the program noticed that the buffers are
+full will be lost and an error message will be printed. Thus prudence
+dictates to stop auto-acquisition, thereby automatically clearing the
+lock-in's internal buffers, whenever possible.
 
 
 @item lockin_get_adc_data()
