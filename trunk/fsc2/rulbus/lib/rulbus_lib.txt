@@ -287,7 +287,7 @@ the function rulbus_close() is invoked.
 III RB8509 (12-bit ADC) Functions
 ---------------------------------
 
-On intitialization (when rulbus_open_card() is called) the card is
+On intitialization (when rulbus_card_open() is called) the card is
 set up to use channel 0, a gain of 1 and to use internal trigger
 mode.
 
@@ -404,7 +404,7 @@ indicating the reason for the failure.
 IV RB8510 (12-bit DAC) Functions
 --------------------------------
 
-On intitialization (when rulbus_open_card() is called) no changes
+On intitialization (when rulbus_card_open() is called) no changes
 of the already set output voltage of the DAC are done and the last
 set voltages remains at the output of the DAC when the connection
 to the DAC is closed.
@@ -427,7 +427,7 @@ they are NULL). This function can fail only due to an invalid
 int rulbus_dac12_set_voltage( int handle, double volts )
 
 Using this function you can set the output voltage of the connector
-associated with the handle you received when calling rulbus_open_card().
+associated with the handle you received when calling rulbus_card_open().
 Obviously, the voltage must be within the range of voltages the DAC
 can output as they were specified in the configuration file.
 
@@ -441,18 +441,27 @@ indicating the reason for the failure.
 V RB8514 (Delay Card) Functions
 -------------------------------
 
-On intitialization (when rulbus_open_card() is called) no changes to
-the state of the card will be done and also none when the connection
-to the card is closed.
+On intitialization (when rulbus_card_open() is called) a delay it may
+be currently creating is stopped, the delay is set to 0 and the creation
+of start or end pulses is switched off. When the card is closed (either
+directly by a call of rulbus_card_close() or indirectly on a call of
+rulbus_close()) the card is left in the state it is at that moment.
 
 
 ----------------------------------------------------------------------
 
-int rulbus_delay_set_delay( int handle, unsigned long delay )
+int rulbus_delay_set_delay( int handle, unsigned long delay, int force )
 
 The function is for setting the number of ticks of an external clock
 during which the card will output a pulse. It must be a number between
-1 and 16777216 (2^24).
+0 and 16777215 (2^24 - 1). Setting a delay of 0 will create no output
+at the gate outputs, just a start or end pulse (if they are enabled).
+
+Usually when the card is just in the process of creating a delay the
+function will return the error RULBUS_CRD_BSY and not set a new delay.
+To force the function to set a new delay value even in this case (and
+thereby ending the currently created delay prematurely) the function
+must be called with the 'force' argument set to a non-zero value.
 
 On success the function returns RULBUS_OK, otherwise a negative value
 indicating the reason for the failure.
@@ -542,7 +551,7 @@ indicating the reason for the failure.
 VI RB8515 (Clock Card) Functions
 --------------------------------
 
-On intitialization (when rulbus_open_card() is called) no changes
+On intitialization (when rulbus_card_open() is called) no changes
 are done to an already set output frequency of the card and when
 the connection to the card is closed will remain to be output.
 
@@ -552,7 +561,7 @@ the connection to the card is closed will remain to be output.
 int rulbus_clock_set_frequency( int handle, int freq )
 
 This function lets you set the frequency of the clock card. Beside the
-handle for the card (as returned by rulbus_open_card()) the function
+handle for the card (as returned by rulbus_card_open()) the function
 expects the requested output frequency as the second argument in the
 form of one of the following constants
 
