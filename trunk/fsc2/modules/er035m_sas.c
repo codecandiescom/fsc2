@@ -1177,13 +1177,13 @@ static bool er035m_sas_comm( int type, ... )
 			lptr = va_arg( ap, size_t * );
 			va_end( ap );
 
-			/* Read from the gaussmeter, give it up to 2 seconds time to
-			   respond */
+			/* Try to read from the gaussmeter, give it up to 2 seconds time
+			   to respond */
 
 			len = fsc2_serial_read( SERIAL_PORT, buf, *lptr,
-									10 * ER035M_S_WAIT, UNSET );
+									10 * ER035M_SAS_WAIT, UNSET );
 
-			if ( len < 0 )
+			if ( len <= 0 )
 			{
 				*lptr = 0;
 				return FAIL;
