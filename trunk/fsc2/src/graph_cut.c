@@ -958,7 +958,7 @@ bool cut_num_points_changed( int dir, long num_points )
 
 	/* The new entries are not set yet */
 
-	for ( k = CG.nx, sp = G.cut_curve.points + k ; k < num_points; sp++, k++ )
+	for ( k = CG.nx, sp = G.cut_curve.points + k; k < num_points; sp++, k++ )
 		sp->exist = UNSET;
 
 	/* In full scale mode the x-axis scale must be reset and all points need to
