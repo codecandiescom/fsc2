@@ -36,7 +36,7 @@ extern char *exptext;
 /* locally used functions */
 
 int exp_runparse( void );
-int exp_runerror( const char *s );
+void exp_runerror( const char *s );
 
 %}
 
@@ -310,9 +310,9 @@ strs:    /* empty */
 %%
 
 
-int exp_runerror ( const char *s )
+void exp_runerror ( const char *s )
 {
-	s = s;                    /* stupid but avoids compiler warning */
+	s = s;                    /* avoid compiler warning */
 
 
 	eprint( FATAL, SET, "Syntax error in EXPERIMENT section.\n" );

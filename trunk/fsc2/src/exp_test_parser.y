@@ -36,7 +36,9 @@ extern int exp_testlex( void );
 /* locally used functions */
 
 int exp_testparse( void );
-int exp_testerror( const char *s );
+void exp_testerror( const char *s );
+
+static bool no_error_print = UNSET;
 
 %}
 
@@ -125,20 +127,21 @@ int exp_testerror( const char *s );
 
 %%
 
+all:     /* empty */
+       | input
+;
 
-input:   eol                 { YYACCEPT; }
-       | cond                { YYACCEPT; }
-       | line eol            { YYACCEPT; }
-       | line line           { eprint( FATAL, SET, "Missing semicolon"
-									   " before (or on) this line.\n" );
-	                           THROW( EXCEPTION ); }
-       | line ','            { eprint( FATAL, SET, "Missing semicolon"
-									   " before (or on) this line.\n" );
-	                           THROW( EXCEPTION ); }
+input:   eol
+       | cond
+       | line eol
 ;
 
 eol:     ';'
        | '}'
+       |                           { no_error_print = SET; }
+         error                     { eprint( FATAL, SET, "Missing semicolon "
+											 "before (or on) this line.\n" );
+	                                 THROW( EXCEPTION ); }
 ;
 
 cond:    FOR_TOK E_VAR_TOKEN '=' expr ':' expr fi '{'
@@ -149,12 +152,10 @@ cond:    FOR_TOK E_VAR_TOKEN '=' expr ':' expr fi '{'
        | IF_TOK expr '{'
        | UNLESS_TOK expr '{'
        | ELSE_TOK et
-       | BREAK_TOK eol
-       | CONT_TOK eol
 ;
 
 fi:      /* empty */
-	   | ':' 
+	   | ':' expr
 ;
 
 et:      '{'
@@ -171,7 +172,9 @@ line:    E_VAR_TOKEN ass                              { }
           { eprint( FATAL, SET, "`%s' is a variable, not a funnction.\n",
 					$1->name );
 		    THROW( EXCEPTION ); }
-       | pt ass                                       { }
+       | pt ass
+       | BREAK_TOK
+       | CONT_TOK
 ;
 
 pt:      E_PPOS
@@ -195,18 +198,18 @@ expr:    E_INT_TOKEN unit                             { }
        | E_VAR_TOKEN '[' list1 ']' unit               { }
        | E_FUNC_TOKEN '(' list2 ')' unit              { }
        | E_VAR_REF                                    { }
-       | E_FUNC_TOKEN '['          { eprint( FATAL, SET, "`%s' is a predefined"
-											 " function.\n", $1->name );
-	                                 THROW( EXCEPTION ); }
-       | E_VAR_TOKEN '('          { eprint( FATAL, SET, "`%s' is a variable,"
-											 " not a function.\n", $1->name );
-	                                 THROW( EXCEPTION ); }
-       | pt                                           { }
-       | bin                                          { }
-       | '+' expr %prec E_NEG                         { }
-       | '-' expr %prec E_NEG                         { }
-       | '(' expr ')' unit                            { }
-       | E_NOT expr                                   { }
+       | E_FUNC_TOKEN '['         { eprint( FATAL, SET, "`%s' is a predefined "
+									        "function.\n", $1->name );
+	                                THROW( EXCEPTION ); }
+       | E_VAR_TOKEN '('          { eprint( FATAL, SET, "`%s' is a variable, "
+											"not a function.\n", $1->name );
+	                                THROW( EXCEPTION ); }
+       | pt
+       | bin
+       | '+' expr %prec E_NEG
+       | '-' expr %prec E_NEG
+       | '(' expr ')' unit
+       | E_NOT expr
 ;
 
 bin:     expr E_AND expr
@@ -268,11 +271,16 @@ strs:    /* empty */
 %%
 
 
-int exp_testerror ( const char *s )
+void exp_testerror( const char *s )
 {
 	s = s;                    /* stupid but avoids compiler warning */
 
 
-	eprint( FATAL, SET, "Syntax error in EXPERIMENT section.\n" );
-	THROW( EXCEPTION );
+	if ( ! no_error_print )
+	{
+		eprint( FATAL, SET, "Syntax error in EXPERIMENT section.\n" );
+		THROW( EXCEPTION );
+	}
+
+	no_error_print = UNSET;
 }
