@@ -236,13 +236,14 @@ display( n_x_point, n_y_point, data [ , n_curve [ , ... ] ] )
 @anchor{change_scale}
 @findex change_scale()
 This function allows it to change the scale settings (originally set in
-the call of @code{init_1d()} or @code{init_2d()} after an experiment has
-been started. With a one-dimensional display the function can be passed
-a maximum of two arguments, the new start value of the @i{x}-axis and
-the new @i{x}-increment. For two-dimensional display the function also
-accepts a new start value for the @i{y}-axis as well as the
-@i{y}-increment. If one of these velues should remain unchanged instead
-of a value a string (e.g.@ @code{"keep"}) can be passed as the argument.
+the call of @w{@code{init_1d()}} or @w{@code{init_2d()}}) after an
+experiment has been started. With a one-dimensional display the function
+can be passed a maximum of two arguments, the new start value of the
+@i{x}-axis and the new @i{x}-increment. For two-dimensional display the
+function also accepts a new start value for the @i{y}-axis as well as
+the @i{y}-increment. If one of these velues should remain unchanged
+instead of a value a string (e.g.@ @code{"keep"}) can be passed as the
+argument.
 
 
 @item clear_curve()
@@ -258,7 +259,7 @@ curve. Invalid arguments are discarded and an error message is printed.
 @findex get_file()
 Opens a new file and returns a unique identifier for the file that can
 be stored in an integer variable and is to be used in calls to functions
-of the @code{save_xxx()}-family. If no argument is given a file selector
+of the @w{@code{save_xxx()}}-family. If no argument is given a file selector
 is shown and lets the user choose a file. If opening the selected file
 fails the user is asked to select a different file name. If the user
 cancels the selection of a file (s)he is asked for confirmation since
@@ -631,6 +632,12 @@ round( 8.6 ) = 9     round( -8.6 ) = -8
 Returns the absolute value of an integer or floating point number (or
 the elements of an array) .
 
+@item mean()
+@anchor{mean}
+@findex mean()
+Expects an one-dimensional array as in input and returns the mean value
+of all elements of the array.
+
 @item sqrt()
 @anchor{sqrt}
 @findex sqrt()
@@ -745,6 +752,32 @@ less precise. If the argument is negative the function will print an
 error message and return immediately. The maximum time the function
 accepts is more than 2.1 billion seconds (or about 68 years).
 
+@item slice()
+@anchor{slice}
+@findex slice()
+The function returns a part (slice) of an one-dimensional array. It
+expects at least two arguments, the array the values are to be taken
+from and the number of the start element of the slice to be returned.
+Usually, you also will pass it a third argument, the length of the slice
+to be returned. If this argument is missing an array made up from all
+elements from the start element to the end of the array is returned.
+
+For an array defined as
+@example
+X[ 8 ] = @{ 1, 2, 3, 4, 5, 6, 7, 8 @}
+@end example
+@noindent
+the call of @code{slice}
+@example
+slice( X, 3, 4 );
+@end example
+@noindent
+will return an array with 4 elements containing the data
+@example
+3, 4, 5, 6
+@end example
+
+
 @item dim()
 @anchor{dim}
 @findex dim()
@@ -756,6 +789,7 @@ X[ 4, 2, 5 ]
 @end example
 @noindent
 it will return 3.
+
 
 @item size()
 @anchor{size}

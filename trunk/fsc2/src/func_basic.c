@@ -1312,6 +1312,13 @@ Var *f_slice( Var *v )
 	long *nlp;
 
 
+	if ( v == NULL || v->next != NULL )
+	{
+		eprint( FATAL, "%s:%ld: Not enough parameter in call of function "
+				"`slice'.\n", Fname, Lc );
+		THROW( EXCEPTION );
+	}
+
 	vars_check( v, INT_ARR | FLOAT_ARR | ARR_REF | ARR_PTR |
 				   INT_TRANS_ARR | FLOAT_TRANS_ARR );
 
@@ -1335,23 +1342,28 @@ Var *f_slice( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	vars_check( v->next->next, INT_VAR | FLOAT_VAR );
-
-	if ( v->next->type == FLOAT_VAR )
+	if ( v->next->next != NULL )
 	{
-		eprint( WARN, "%s:%ld: Float value used as slice length parameter in "
-				"function `slice'.\n", Fname, Lc );
-		slice_len = lround( v->next->next->val.dval );
+		vars_check( v->next->next, INT_VAR | FLOAT_VAR );
+
+		if ( v->next->type == FLOAT_VAR )
+		{
+			eprint( WARN, "%s:%ld: Float value used as length of slice "
+					"parameter in function `slice'.\n", Fname, Lc );
+			slice_len = lround( v->next->next->val.dval );
+		}
+		else
+			slice_len = v->next->next->val.lval;
+
+		if ( slice_len < 1 )
+		{
+			eprint( FATAL, "%s:%ld; Zero or negative slice length used in "
+					"function `slice'.\n", Fname, Lc );
+			THROW( EXCEPTION );
+		}
 	}
 	else
-		slice_len = v->next->next->val.lval;
-
-	if ( slice_len < 1 )
-	{
-		eprint( FATAL, "%s:%ld; Zero or negative slice length used in "
-				"function `slice'.\n", Fname, Lc );
-		THROW( EXCEPTION );
-	}
+		slice_len = len - index - 1;
 
 	/* Test that the slice is within the arrays range */
 
