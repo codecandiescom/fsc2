@@ -31,6 +31,8 @@ enum {
 	DO_DELETE = 16,
 };
 
+static volatile int fsc2_death = 0;
+
 
 /* Locally used functions */
 
@@ -327,6 +329,16 @@ static void final_exit_handler( void )
 
 	setuid( EUID );
 	unlink( LOCKFILE );
+
+	/* If program was killed by a signal indicating an unrecoverable error
+	   print out a message */
+
+	if ( fsc2_death != 0 && fsc2_death != SIGTERM )
+	{
+		death_mail( fsc2_death );
+		fprintf( stderr, "fsc2 (%d, %s) killed by %s signal.\n", getpid( ),
+				 I_am == CHILD ? "CHILD" : "PARENT", strsignal( fsc2_death ) );
+	}
 }
 
 
@@ -617,6 +629,8 @@ void test_file( FL_OBJECT *a, long b )
 	struct stat file_stat;
 	static bool in_test = UNSET;
 
+
+	assert( 1 == 0 );
 
 	a->u_ldata = 0;
 	b = b;
@@ -1202,13 +1216,11 @@ void main_sig_handler( int signo )
 		case SIGTTIN : case SIGTTOU : case SIGVTALRM :
 			return;
 
-		/* All the remaining signals are deadly... */
+		/* All the remaining signals are deadly... We set fsc2_death to the
+		   signal so final_exit_handler can do appropriate things. */
 
 		default :
-			final_exit_handler( );
-			if ( signo != SIGTERM )
-				fprintf( stderr, "fsc2 (%d) killed by %s signal.\n",
-						 getpid( ), strsignal( signo ) );
+			fsc2_death = signo;
 			exit( -1 );
 	}
 }
@@ -1293,3 +1305,5 @@ void usage( void )
 	T_free( dd );
 	exit( EXIT_SUCCESS );
 }
+
+

@@ -268,3 +268,61 @@ void bug_report_callback( FL_OBJECT *a, long b )
 	sigaction( SIGCHLD, &oact, NULL );
 	notify_conn( UNBUSY_SIGNAL );
 }
+
+
+/*-----------------------------------------------------*/
+/* This function sends a mail to me when fsc2 crashes. */
+/*-----------------------------------------------------*/
+
+void death_mail( int signo )
+{
+	FILE *tmp;
+	int tmp_fd;
+	char filename[ ] = P_tmpdir "/fsc2XXXXXX";
+	char cur_line[ FL_BROWSER_LINELENGTH ];
+	char *clp;
+	int lines;
+	int i;
+	char *cmd;
+
+
+	if ( ( tmp_fd = mkstemp( filename ) ) < 0 ||
+		 ( tmp = fdopen( tmp_fd, "w" ) ) == NULL )
+		return;
+
+	fprintf( tmp, "fsc2 (%d, %s) killed by %s signal.\n\n", getpid( ),
+			 I_am == CHILD ? "CHILD" : "PARENT", strsignal( signo ) );
+
+	fprintf( tmp, "Fname = %s, Lc = %ld\n\n", Fname, Lc );
+
+	fprintf( tmp, "Content of program browser:\n\n" );
+	lines = fl_get_browser_maxline( main_form->browser );
+	for ( i = 1; i <= lines; i++ )
+	{
+		strcpy( cur_line, fl_get_browser_line( main_form->browser, i ) );
+		clp = cur_line;
+		if ( *clp == '@' )
+			while ( *clp++ != 'f' )
+				;
+		fprintf( tmp, "%s\n", clp );
+	}
+	fprintf( tmp, "--------------------------------------------------\n\n" );
+
+	fprintf( tmp, "Content of output browser:\n\n" );
+	lines = fl_get_browser_maxline( main_form->error_browser );
+	for ( i = 1; i <= lines; i++ )
+		fprintf( tmp, "%s\n",
+				 fl_get_browser_line( main_form->error_browser, i ) );
+	fprintf( tmp, "--------------------------------------------------\n\n" );
+
+	cmd = get_string( strlen( "mail -s \"fsc2 crash\" " ) +
+					  + strlen( MAIL_ADDRESS ) + strlen( filename ) + 3 );
+	strcpy( cmd, "mail -s \"fsc2 crash\" " );
+	strcat( cmd, MAIL_ADDRESS );
+	strcat( cmd, " < " );
+	strcat( cmd, filename );
+
+	system( cmd );                 /* send the mail */
+	T_free( cmd );
+	unlink( filename );                /* delete the temporary file */
+}
