@@ -6,7 +6,7 @@
 #define FSC2_HEADER
 
 
-#define _GNU_SOURCE
+#define _GNU_SOURCE 1
 
 
 /* AWK might be defined via compiler flags - otherwise define it here */
