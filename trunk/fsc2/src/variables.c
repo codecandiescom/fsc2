@@ -2,6 +2,9 @@
    $Id$
 
    $Log$
+   Revision 1.14  1999/07/19 22:25:09  jens
+   *** empty log message ***
+
    Revision 1.13  1999/07/19 07:40:08  jens
    *** empty log message ***
 
@@ -1495,12 +1498,21 @@ void vars_check( Var *v )
 	if ( v->type == UNDEF_VAR )
 	{
 		if ( v->name != NULL )
+		{
 			eprint( FATAL, "%s:%ld: There is no variable named `%s'.\n",
 					Fname, Lc, v->name );
+			THROW( VARIABLES_EXCEPTION );
+		}
 		else
-			eprint( FATAL, "%s:%ld: INTERNAL ERROR: Transient variable does "
-					"not exist.\n", Fname, Lc );
-		THROW( VARIABLES_EXCEPTION );
+		{
+			/* ERROR: undefined transient variables shouldn't have a name
+			   (with the only exception for functions, but then we should
+			   never end up here...) */ 
+
+			eprint( FATAL, "fsc2: INTERNAL ERROR detected at %s.\n",
+					__FILE__, __LINE__ );
+			exit( EXIT_FAILURE );
+		}
 	}
 
 	if ( v->type != INT_VAR && v->type != FLOAT_VAR )
@@ -1531,8 +1543,15 @@ void vars_warn_new( Var *v )
 			eprint( WARN, "%s:%ld: WARNING: Variable `%s' has never been "
 					"assigned a value.\n", Fname, Lc, v->name );
 		else
-			eprint( WARN, "%s:%ld: INTERNAL WARNING: Transient variable has "
-					"`new_flag' set.\n", Fname, Lc );
+		{
+			/* ERROR: transient variables shouldn't have a name (with the
+			   only exception for functions, but then we should never end
+			   up here...) */ 
+
+			eprint( FATAL, "fsc2: INTERNAL ERROR detected at %s.\n",
+					__FILE__, __LINE__ );
+			exit( EXIT_FAILURE );
+		}
 	}
 }
 
