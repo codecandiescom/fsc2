@@ -131,13 +131,13 @@ uninstall:
 	-install-info --delete fsc2 $(infodir)/dir
 	-$(RM) $(RMFLAGS) $(infodir)/fsc2.info*.gz
 	if [ -z "`ls -a $(docdir)`" ]; then   \
-		rmdir $(coddir);                  \
+		rmdir $(docdir);                  \
 	fi
 	if [ -z "`ls -a $(infodir)`" ]; then  \
-		rmdir $(coddir);                  \
+		rmdir $(infodir);                 \
 	fi
 	if [ -z "`ls -a $(mandir)`" ]; then   \
-		rmdir $(coddir);                  \
+		rmdir $(mandir);                  \
 	fi
 
 

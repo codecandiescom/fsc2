@@ -357,6 +357,9 @@ uninstall:
 	if [ -z "`ls -a $(bindir)`" ]; then  \
 		rmdir $(bindir);                 \
 	fi
+	if [ -z "`ls -a $(auxdir)`" ]; then  \
+		rmdir $(auxdir);                 \
+	fi
 	if [ -z "`ls -a $(libdir)`" ]; then  \
 		rmdir $(libdir);                 \
 	fi
