@@ -443,6 +443,8 @@ FUNC        {IDENT}"#"[0-9]+
 "/="        return DIVA;
 "%="        return MODA;
 "^="        return EXPA;
+"?"         return '?';
+":"         return ':';
 
             /* Quasi-assignment operator for pulse properties */
 
