@@ -41,6 +41,7 @@ typedef struct _W {
 	double width;               /* width of window (in time units)			 */
 	long start_num;				/* first point of window                     */
 	long end_num;				/* last point of window                      */
+	bool is_start;              /* flag, set if start of window has been set */
 	bool is_width;              /* flag, set if width of window has been set */
 	long num_points;            /* number of data points between the cursors */
 	struct _W *next;            /* pointer to next window structure			 */

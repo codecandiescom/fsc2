@@ -101,7 +101,10 @@ bool tds520_init( const char *name )
 	{
 		tds520_set_cursor( 1, cp2 );
 		tds520_set_cursor( 2, cp1 );
+		tds520.cursor_pos = cp2;
 	}
+	else
+		tds520.cursor_pos = cp1;
 
     /* Switch off repetitive acquisition mode */
 

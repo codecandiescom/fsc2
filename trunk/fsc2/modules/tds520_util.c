@@ -4,7 +4,7 @@
 
 #include "tds520.h"
 
-static bool tds520_window_check_1( void );
+static void tds520_window_check_1( bool *is_start, bool *is_width );
 static void tds520_window_check_2( void );
 static void tds520_window_check_3( void );
 
@@ -53,7 +53,7 @@ void tds520_delete_windows( void )
 void tds520_do_pre_exp_checks( void )
 {
 	WINDOW *w;
-	bool is_width = SET;
+	bool is_start, is_width;
     double width;
 	int i;
 
@@ -71,14 +71,30 @@ void tds520_do_pre_exp_checks( void )
 			tds520_display_channel( i );
 
 	/* Remove all unused windows and test if for all other windows the
-	   width is set */
+	   start position and width is set */
 
-	is_width = tds520_window_check_1( );
+	tds520_window_check_1( &is_start, &is_width);
+
+	/* If there are no windows we're already done */
+
+	if ( tds520.w == NULL )
+		return;
+
+	/* If start position isn't set for all windows set it to the position of
+	   the left cursor */
+
+	if ( ! is_start )
+		for ( w = tds520.w; w != NULL; w = w->next )
+			if ( ! w->is_start )
+			{
+				w->start = tds520.cursor_pos;
+				w->is_start = SET;
+			}
 
 	/* If no width is set for all windows get the distance of the cursors on
 	   the digitizers screen and use it as the default width. */
 
-	if ( tds520.w != NULL && ! is_width )
+	if ( ! is_width )
 	{
 		tds520_get_cursor_distance( &width );
 
@@ -112,11 +128,12 @@ void tds520_do_pre_exp_checks( void )
 /* a width is set - this is returned to the calling function     */
 /*---------------------------------------------------------------*/
 
-bool tds520_window_check_1( void )
+static void tds520_window_check_1( bool *is_start, bool *is_width )
 {
 	WINDOW *w, *wn;
-	bool is_width = SET;
 
+
+	*is_start = *is_width = SET;
 
 	for ( w = tds520.w; w != NULL; )
 	{
@@ -133,12 +150,14 @@ bool tds520_window_check_1( void )
 			continue;
 		}
 
+		if ( ! w->is_start )
+			*is_start = UNSET;
+
 		if ( ! w->is_width )
-			is_width = UNSET;
+			*is_width = UNSET;
+
 		w = w->next;
 	}
-
-	return is_width;
 }
 
 
@@ -155,7 +174,7 @@ bool tds520_window_check_1( void )
 /* equal - than we can use tracking cursors.                           */
 /*---------------------------------------------------------------------*/
 
-void tds520_window_check_2( void )
+static void tds520_window_check_2( void )
 {
 	WINDOW *w;
     double dcs, dcd, dtb, fac;
@@ -235,7 +254,7 @@ void tds520_window_check_2( void )
 /* and the end of the windows in units of points.              */
 /*-------------------------------------------------------------*/
 
-void tds520_window_check_3( void )
+static void tds520_window_check_3( void )
 {
 	WINDOW *w;
     double window;

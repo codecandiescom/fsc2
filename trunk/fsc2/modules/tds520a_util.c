@@ -4,7 +4,7 @@
 
 #include "tds520a.h"
 
-static bool tds520a_window_check_1( void );
+static void tds520a_window_check_1( bool *is_start, bool *is_width );
 static void tds520a_window_check_2( void );
 static void tds520a_window_check_3( void );
 
@@ -52,7 +52,7 @@ void tds520a_delete_windows( void )
 void tds520a_do_pre_exp_checks( void )
 {
 	WINDOW *w;
-	bool is_width;
+	bool is_start, is_width;
     double width;
 	int i;
 
@@ -70,10 +70,10 @@ void tds520a_do_pre_exp_checks( void )
 		if ( tds520a.channels_in_use[ i ] )
 			tds520a_display_channel( i );
 
-	/* Remove all unused windows and test if for all other windows the width
-	   is set */
+	/* Remove all unused windows and test if for all other windows the start
+	   position and the width is set */
 
-	is_width = tds520a_window_check_1( );
+	tds520a_window_check_1( &is_start, &is_width);
 
 	/* That's all if no windows have been defined, we just switch off gated
 	   measurement mode, i.e. all measurement operations are done on the whole
@@ -86,10 +86,21 @@ void tds520a_do_pre_exp_checks( void )
 		return;
 	}
 
+	/* If start position isn't set for all windows set it to the position of
+	   the left cursor */
+
+	if ( ! is_start )
+		for ( w = tds520a.w; w != NULL; w = w->next )
+			if ( ! w->is_start )
+			{
+				w->start = tds520a.cursor_pos;
+				w->is_start = SET;
+			}
+
 	/* If not get the distance of the cursors on the digitizers screen and
 	   use it as the default width. */
 
-	if ( tds520a.w != NULL && ! is_width )
+	if ( ! is_width )
 	{
 		tds520a_get_cursor_distance( &width );
 
@@ -141,11 +152,12 @@ void tds520a_do_pre_exp_checks( void )
 /* a width is set - this is returned to the calling function     */
 /*---------------------------------------------------------------*/
 
-bool tds520a_window_check_1( void )
+static void tds520a_window_check_1( bool *is_start, bool *is_width )
 {
 	WINDOW *w, *wn;
-	bool is_width = SET;
 
+
+	*is_start = *is_width = SET;
 
 	for ( w = tds520a.w; w != NULL; )
 	{
@@ -162,12 +174,12 @@ bool tds520a_window_check_1( void )
 			continue;
 		}
 
+		if ( ! w->is_start )
+			*is_start = UNSET;
 		if ( ! w->is_width )
-			is_width = UNSET;
+			*is_width = UNSET;
 		w = w->next;
 	}
-
-	return is_width;
 }
 
 
@@ -184,7 +196,7 @@ bool tds520a_window_check_1( void )
 /* equal - than we can use tracking cursors.                           */
 /*---------------------------------------------------------------------*/
 
-void tds520a_window_check_2( void )
+static void tds520a_window_check_2( void )
 {
 	WINDOW *w;
     double dcs, dcd, dtb, fac;
@@ -271,7 +283,7 @@ void tds520a_window_check_2( void )
 /* and the end of the windows in units of points.              */
 /*-------------------------------------------------------------*/
 
-void tds520a_window_check_3( void )
+static void tds520a_window_check_3( void )
 {
 	WINDOW *w;
     double window;

@@ -107,7 +107,10 @@ bool tds754a_init( const char *name )
 	{
 		tds754a_set_cursor( 1, cp2 );
 		tds754a_set_cursor( 2, cp1 );
+		tds754a.cursor_pos = cp2;
 	}
+	else
+		tds754a.cursor_pos = cp1;
 
     /* Switch off repetitive acquisition mode */
 

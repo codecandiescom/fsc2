@@ -142,6 +142,7 @@ void tds744a_exit_hook( void )
 Var *digitizer_define_window( Var *v )
 {
 	double win_start, win_width = 0;
+	bool is_win_start = UNSET;
 	bool is_win_width = UNSET;
 	WINDOW *w;
 
@@ -153,24 +154,19 @@ Var *digitizer_define_window( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	if ( v == NULL )
-	{
-		eprint( FATAL, "%s:%ld: %s: Missing parameter in call of function "
-				"`digitizer_define_window', need at least start position.\n",
-				Fname, Lc, DEVICE_NAME );
-		THROW( EXCEPTION );
-	}
-
-	/* Get the start point of the window */
-
-	vars_check( v, INT_VAR | FLOAT_VAR );
-	win_start = VALUE( v );
-	v = vars_pop( v );
-
-	/* If there's a second parameter take it to be the window width */
-
 	if ( v != NULL )
 	{
+		/* Get the start point of the window */
+
+		vars_check( v, INT_VAR | FLOAT_VAR );
+		win_start = VALUE( v );
+		is_win_start = SET;
+		v = vars_pop( v );
+
+		/* If there's a second parameter take it to be the window width */
+
+		if ( v != NULL )
+		{
 			vars_check( v, INT_VAR | FLOAT_VAR );
 			win_width = VALUE( v );
 			if ( win_width <= 0.0 )
@@ -191,6 +187,7 @@ Var *digitizer_define_window( Var *v )
 				while ( ( v = vars_pop( v ) ) != NULL )
 					;
 			}
+		}
 	}
 
 	/* Create a new window structure and append it to the list of windows */
@@ -212,15 +209,14 @@ Var *digitizer_define_window( Var *v )
 
 	w->next = NULL;
 	w->num = tds744a.num_windows++ + WINDOW_START_NUMBER;
-	w->start = win_start;
+
+	if ( is_win_start )
+		w->start = win_start;
+	w->is_start = is_win_start;
 
 	if ( is_win_width )
-	{
 		w->width = win_width;
-		w->is_width = SET;
-	}
-	else
-		w->is_width = UNSET;
+	w->is_width = is_win_width;
 
 	w->is_used = UNSET;
 
