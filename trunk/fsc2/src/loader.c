@@ -210,7 +210,7 @@ static void load_functions( Device *dev )
 		{
 			lib_name = get_string( "%s%s%s.so", ldc, slash( ldc ), dev->name );
 
-			if ( ( dev->driver.handle = dlopen( lib_name, RTLD_LAZY ) )
+			if ( ( dev->driver.handle = dlopen( lib_name, RTLD_NOW ) )
 				 != NULL )
 			{
 				dev->driver.lib_name = lib_name;

@@ -27,15 +27,12 @@
 
 # See the comments for the correspondig rules for simple modules in the
 # main makefile on why these rules have this somewhat complicated form.
-# If a version script exists we try to use it.
+
 
 ##.so: $(##:.c=.o)
-	@if [ -a ##.map ]; then                                           \
-		map="-Wl,--version-script=##.map";                            \
-	fi;                                                               \
 	if [ -z "$($(patsubst %.so,%_libs,$@))" ]; then                   \
-		echo "$(CC) $(LFLAGS) $^ -o $@ $$map";                        \
-		$(CC) $(LFLAGS) $^ -o $@ $$map;                               \
+		echo "$(CC) $(LFLAGS) $^ -o $@";                              \
+		$(CC) $(LFLAGS) $^ -o $@;                                     \
 		chmod 644 $@;                                                 \
 	else                                                              \
 		for l in "$($(patsubst %.so,%_libs,$@))"; do                  \
@@ -46,8 +43,8 @@
 				libs="$$libs $$l";                                    \
 			fi;                                                       \
 		done;                                                         \
-		echo "$(CC) $(LFLAGS) $^ $$libs -o $@ $$map";                 \
-		$(CC) $$libs -shared -o $@.lib_test $$map 2>/dev/null;        \
+		echo "$(CC) $(LFLAGS) $^ $$libs -o $@";                       \
+		$(CC) $$libs -shared -o $@.lib_test 2>/dev/null;              \
 		if [ -e $@.lib_test ]; then                                   \
 			$(RM) $(RMFLAGS) $@.lib_test;                             \
 			$(CC) $(LFLAGS) $^ $$libs -o $@;                          \
