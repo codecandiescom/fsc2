@@ -57,6 +57,7 @@ int hfs9000_init_hook( void )
 	pulser_struct.set_trig_in_level = hfs9000_set_trig_in_level;
 	pulser_struct.set_trig_in_slope = hfs9000_set_trig_in_slope;
 	pulser_struct.set_trig_in_impedance = NULL;
+	pulser_struct.set_min_seq_len = hfs9000_set_min_seq_len;
 
 	pulser_struct.set_phase_reference = NULL;
 
@@ -95,6 +96,7 @@ int hfs9000_init_hook( void )
 	hfs9000.is_neg_delay = UNSET;
 	hfs9000.neg_delay = 0;
 	hfs9000.max_seq_len = 0;
+	hfs9000.is_max_seq_len = UNSET;
 
 	for ( i = 0; i <= MAX_CHANNEL; i++ )
 	{

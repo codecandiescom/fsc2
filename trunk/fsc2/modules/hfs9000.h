@@ -149,6 +149,7 @@ typedef struct {
 	bool is_neg_delay;       // if any of the functions has a negative delay
 
 	long max_seq_len;        // maximum length of all pulse sequences
+	bool is_max_seq_len;
 
 	FUNCTION function[ PULSER_CHANNEL_NUM_FUNC ];
 	CHANNEL channel[ MAX_CHANNEL + 1 ];   /* zero is for TRIGGER_OUT ! */
@@ -247,6 +248,7 @@ bool hfs9000_set_function_low_level( int function, double voltage );
 bool hfs9000_set_trigger_mode( int mode );
 bool hfs9000_set_trig_in_level( double voltage );
 bool hfs9000_set_trig_in_slope( int slope );
+bool hfs9000_set_min_seq_len( double seq_len )
 
 
 /* These are the functions from hfs9000_pulse.c */
