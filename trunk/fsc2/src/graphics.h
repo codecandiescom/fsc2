@@ -239,6 +239,8 @@ struct Graphics {
 
 	int coord_display;            /* set when coordinates are shown in one
 									 of the display windows */
+	int dist_display;             /* set when differences between coordinates
+									 are shown in one of the display windows */
 
 	unsigned int up_arrow_w,      /* sizes of out of range markers */
 		         up_arrow_h,
@@ -380,7 +382,6 @@ struct Graphics_2d {
 
 void start_graphics( void );
 void stop_graphics( void );
-void graphics_free( void );
 void make_label_string( char *lstr, double num, int res );
 void create_label_pixmap( Canvas *c, int coord, char *label );
 void switch_off_special_cursors( void );

@@ -51,6 +51,7 @@ static void G_init_curves_1d( void );
 static void G_init_curves_2d( void );
 static void setup_canvas( Canvas *c, FL_OBJECT *obj );
 static void canvas_off( Canvas *c, FL_OBJECT *obj );
+static void graphics_free( void );
 
 static Graphics *G_stored = NULL;
 static Graphics_1d *G_1d_stored = NULL;
@@ -104,7 +105,7 @@ static struct {
 
 void start_graphics( void )
 {
-	int i;
+	long i;
 	unsigned diff;
 
 
@@ -114,6 +115,7 @@ void start_graphics( void )
 	G.font = NULL;
 
 	G.coord_display = 0;
+	G.dist_display  = 0;
 
 	CG.is_shown = UNSET;
 	CG.curve = -1;
@@ -439,20 +441,24 @@ static void set_default_sizes( void )
 	{
 		if ( GI.is_size || GI.is_1d_size )
 			fl_set_form_size( GUI.run_form_1d->run_1d,
-							  GI.display_1d_w, GI.display_1d_h );
+							  ( FL_Coord ) GI.display_1d_w,
+							  ( FL_Coord ) GI.display_1d_h );
 		if ( GI.is_pos || GI.is_1d_pos )
 			fl_set_form_position( GUI.run_form_1d->run_1d,
-								  GI.display_1d_x, GI.display_1d_y );
+								  ( FL_Coord ) GI.display_1d_x,
+								  ( FL_Coord ) GI.display_1d_y );
 	}
 
 	if ( G.dim & 2 )
 	{
 		if ( GI.is_size || GI.is_2d_size )
 			fl_set_form_size( GUI.run_form_2d->run_2d,
-							  GI.display_2d_w, GI.display_2d_h );
+							  ( FL_Coord ) GI.display_2d_w,
+							  ( FL_Coord ) GI.display_2d_h );
 		if ( GI.is_pos || GI.is_2d_pos )
 			fl_set_form_position( GUI.run_form_2d->run_2d,
-								  GI.display_2d_x, GI.display_2d_y );
+								  ( FL_Coord ) GI.display_2d_x,
+								  ( FL_Coord ) GI.display_2d_y );
 	}
 }
 
@@ -962,7 +968,7 @@ static void G_struct_init( void )
 
 static void G_init_curves_1d( void )
 {
-	int i, j;
+	long i, j;
 	Curve_1d *cv;
 	unsigned int depth;
 
@@ -1064,7 +1070,7 @@ static void G_init_curves_1d( void )
 
 static void G_init_curves_2d( void )
 {
-	int i, j;
+	long i, j;
 	Curve_2d *cv;
 	Scaled_Point *sp;
 	unsigned int depth;
@@ -1423,7 +1429,7 @@ void stop_graphics( void )
 /*--------------------------------------------------------------*/
 /*--------------------------------------------------------------*/
 
-void graphics_free( void )
+static void graphics_free( void )
 {
 	long i;
 	int coord;
@@ -1655,7 +1661,7 @@ void redraw_axis_1d( int coord )
 	Canvas *c;
 	Curve_1d *cv = NULL;
 	int width;
-	int i;
+	long i;
 
 
 	fsc2_assert( coord == X || coord == Y );
@@ -1768,7 +1774,7 @@ void make_label_string( char *lstr, double num, int res )
 	int n, mag;
 
 
-	if ( num == 0 )
+	if ( num == 0.0 )
 	{
 		sprintf( lstr, "0" );
 		return;
@@ -1989,7 +1995,7 @@ void undo_button_callback_2d( FL_OBJECT *a, long b )
 void fs_button_callback_1d( FL_OBJECT *a, long b )
 {
 	int state;
-	int i;
+	long i;
 
 
 	UNUSED_ARGUMENT( a );
@@ -2211,7 +2217,7 @@ void curve_button_callback_2d( FL_OBJECT *obj, long data )
 		if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
 			fl_set_object_helper( obj, hstr );
 
-		G2.active_curve = data - 1;
+		G2.active_curve = ( int ) ( data - 1 );
 		G2.curve_2d[ G2.active_curve ]->active = SET;
 
 		fl_set_button( GUI.run_form_2d->full_scale_button_2d,
@@ -2280,7 +2286,7 @@ void change_scale_1d( int is_set, void *ptr )
 
 void change_scale_2d( int is_set, void *ptr )
 {
-	int i;
+	long i;
 	double vals[ 4 ];
 
 
