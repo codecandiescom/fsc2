@@ -55,8 +55,17 @@
 @item @code{CH3}              @tab Digitizer channel name
 @item @code{CH4}              @tab Digitizer channel name
 @item @code{CHANNEL}          @tab
+@item @code{change_label}     @tab Built-in function (@ref{change_label})
+@item @code{change_label_1d}  @tab Built-in function (@ref{change_label_1d})
+@item @code{change_label_2d}  @tab Built-in function (@ref{change_label_2d})
+@item @code{change_scale}     @tab Built-in function (@ref{change_scale})
+@item @code{change_scale_1d}  @tab Built-in function (@ref{change_scale_1d})
+@item @code{change_scale_2d}  @tab Built-in function (@ref{change_scale_2d})
 @item @code{clear_curve}      @tab Built-in function (@ref{clear_curve})
+@item @code{clear_curve_1d}   @tab Built-in function (@ref{clear_curve_1d})
+@item @code{clear_curve_2d}   @tab Built-in function (@ref{clear_curve_2d})
 @item @code{clone_file}       @tab Built-in function (@ref{clone_file})
+@item @code{clear_marker}     @tab Built-in function (@ref{clear_marker})
 @item @code{cos}              @tab Built-in function (@ref{cos})
 @item @code{cosh}             @tab Built-in function (@ref{cosh})
 @item                         @tab
@@ -89,12 +98,15 @@
 @item @code{DEVICES:}         @tab Starts the @code{DEVICES} section
 @item @code{dim}              @tab Built-in function (@ref{dim})
 @item @code{display}          @tab Built-in function (@ref{display})
+@item @code{display_1d}       @tab Built-in function (@ref{display_1d})
+@item @code{display_2d}       @tab Built-in function (@ref{display_2d})
 @item @code{DL}               @tab Pulse @code{DELTA_LENGTH} keyword
 @item @code{D_L}              @tab Pulse @code{DELTA_LENGTH} keyword
 @item @code{DLEN}             @tab Pulse @code{DELTA_LENGTH} keyword
 @item @code{D_LEN}            @tab Pulse @code{DELTA_LENGTH} keyword
 @item @code{DLENGTH}          @tab Pulse @code{DELTA_LENGTH} keyword
 @item @code{D_LENGTH}         @tab Pulse @code{DELTA_LENGTH} keyword
+@item @code{draw_marker}      @tab Built-in function (@ref{draw_marker})
 @item @code{DS}               @tab Pulse @code{DELTA_START} keyword
 @item @code{D_S}              @tab Pulse @code{DELTA_START} keyword
 @item @code{DSTART}           @tab Pulse @code{DELTA_START} keyword
@@ -231,6 +243,7 @@
 @item @code{PULSE@i{[0-9]+}}  @tab
 @item @code{PULSE_@i{[0-9]+}} @tab
 @item                         @tab
+@item @code{random}           @tab Built-in function (@ref{random})
 @item @code{REPEAT}           @tab Keyword for @code{REPEAT} loops (@ref{REPEAT loops})
 @item @code{REPF}             @tab Pulser @code{REPETITION_FREQUENCY} keyword
 @item @code{REP_F}            @tab Pulser @code{REPETITION_FREQUENCY} keyword
@@ -252,11 +265,13 @@
 @item @code{REP_T}            @tab Pulser @code{REPETITION_TIME} keyword
 @item @code{REPTIME}          @tab Pulser @code{REPETITION_TIME} keyword
 @item @code{REP_TIME}         @tab Pulser @code{REPETITION_TIME} keyword
-@item @code{random}           @tab Built-in function (@ref{random})
 @item @code{REF1}             @tab Digitizer channel name
 @item @code{REF2}             @tab Digitizer channel name
 @item @code{REF3}             @tab Digitizer channel name
 @item @code{REF4}             @tab Digitizer channel name
+@item @code{rescale}          @tab Built-in function (@ref{rescale})
+@item @code{rescale_1d}       @tab Built-in function (@ref{rescale_1d})
+@item @code{rescale_2d}       @tab Built-in function (@ref{rescale_2d})
 @item @code{rms}              @tab Built-in function (@ref{rms})
 @item @code{round}            @tab Built-in function (@ref{round})
 @item                         @tab
