@@ -36,10 +36,12 @@
    another lexer we thus avoid reading stuff which is to be handled by
    the calling lexer. */
 
-#define YY_INPUT( buf, result, max_size )                  \
-{                                                          \
-	int c = fgetc( splitin );                              \
-	result = ( c == EOF ) ? YY_NULL : ( buf[ 0 ] = c, 1 ); \
+#define YY_INPUT( buf, result, max_size )                   \
+{                                                           \
+	int c;                                                  \
+	while ( ( c = fgetc( expin ) ) == EOF )                 \
+		/* empty */ ;                                       \
+	result = ( c == 0x07 ) ? YY_NULL : ( buf[ 0 ] = c, 1 ); \
 }
 
 
