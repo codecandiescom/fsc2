@@ -12,7 +12,7 @@
 
 /*******************************************************************/
 /* Here is defined to which DAC port of the different lock-ins the */
-/*     modulation input of the power supply is connected           */
+/*     modulation input of the power supply is connected to        */
 /*******************************************************************/
 
 #define	SR510_DAC_PORT 6
@@ -40,6 +40,7 @@ int keithley228a_exp_hook( void );
 int keithley228a_end_of_exp_hook( void );
 
 Var *magnet_setup( Var *v );
+Var *magnet_use_correction( Var *v );
 Var *set_current( Var *v );
 Var *sweep_up( Var *v );
 Var *sweep_down( Var *v );
@@ -54,10 +55,13 @@ static double keithley228a_goto_current( double current );
 static double keithley228a_set_current( double current );
 static void keithley228a_gpib_failure( void );
 static double keithley228a_current_check( double current );
+static void keithley228a_get_corrected_current( double c, double *psc,
+												double *dacv );
 
 
 
 typedef struct {
+
 	int device;               /* GPIB number of the device */
 
 	bool state;               /* STANDBY or OPERATE */
@@ -72,6 +76,8 @@ typedef struct {
 
 	bool is_req_current;      /* flag, set if start current is defined */
 	bool is_current_step;     /* flag, set if current step size is defined */
+
+	bool use_correction;      /* flag, set if corrections are to be applied */
 
 } Keithley228a;
 
@@ -135,8 +141,9 @@ int keithley228a_init_hook( void )
 
 	/* Unset some flags in the power supplies structure */
 
-	keithley228a.is_req_current = UNSET;
+	keithley228a.is_req_current  = UNSET;
 	keithley228a.is_current_step = UNSET;
+	keithley228a.use_correction  = UNSET;
 
 	return 1;
 }
@@ -209,6 +216,25 @@ Var *magnet_setup( Var *v )
 	keithley228a.current_step = VALUE( v->next );
 	keithley228a.is_req_current = keithley228a.is_current_step = SET;
 
+	return vars_push( INT_VAR, 1 );
+}
+
+
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+
+Var *magnet_use_correction( Var *v )
+{
+	if ( v != NULL )
+	{
+		eprint( WARN, "%s:%ld: %s: Superfluous parameter in call of "
+				"`sweep_up'.\n", Fname, Lc, DEVICE_NAME );
+
+		while ( ( v = vars_pop( v ) ) )
+			;
+	}
+
+	keithley228a.use_correction = SET;
 	return vars_push( INT_VAR, 1 );
 }
 
@@ -605,24 +631,31 @@ static double keithley228a_set_current( double new_current )
 
 	assert( fabs( new_current > 10.0 ) );       /* paranoia ? */
 
-	if ( fabs( new_current ) >= 0.04 )
+	if ( ! keithley228a.use_correction )
 	{
-		power_supply_current = 1.0e-2 * lround( 1.e-2 * new_current );
-		dac_volts = V_TO_A_FACTOR * fabs( power_supply_current - new_current );
-	}
-	else
-	{
-		if ( new_current > 0.0 )
+		if ( fabs( new_current ) >= 0.04 )
 		{
-			power_supply_current = 0.04;
-			dac_volts = V_TO_A_FACTOR * ( new_current - 0.04 );
+			power_supply_current = 1.0e-2 * lround( 1.e-2 * new_current );
+			dac_volts = V_TO_A_FACTOR
+				        * fabs( power_supply_current - new_current );
 		}
 		else
 		{
-			power_supply_current = -0.04;
-			dac_volts = - V_TO_A_FACTOR * ( new_current + 0.04 );
+			if ( new_current > 0.0 )
+			{
+				power_supply_current = 0.04;
+				dac_volts = V_TO_A_FACTOR * ( new_current - 0.04 );
+			}
+			else
+			{
+				power_supply_current = -0.04;
+				dac_volts = - V_TO_A_FACTOR * ( new_current + 0.04 );
+			}
 		}
 	}
+	else
+		keithley228a_get_corrected_current( new_current, &power_supply_current,
+											&dac_volts );
 
 	/* Set current on power supply */
 
@@ -672,4 +705,169 @@ static double keithley228a_current_check( double current )
 	}
 
 	return current;
+}
+
+
+/*--------------------------------------------------------------------------*/
+/* The following function for calculating corrections to reduce non-        */
+/* linearities and small jumps has been directly taken from the previous    */
+/* program. Here's the comment from this program about the rationale and    */
+/* the way it is done (sorry, to lazy to translate it especially since I'm  */
+/* not sure if it still is a reasonable approach and if the data used are   */
+/* still valid):                                                            */
+/* Nun zu den weiteren Feinheiten : Leider stellte sich heraus, dass das    */
+/* Power Supply zwar sein Spezifikationen erfuellt, aber eben nur gerade.   */
+/* Die erreichte Genauigkeit von 10 mA beim Sweepbereich von 10 A ist	    */
+/* aber bei weitem nicht ausreichend, da dies bereits einem Fehler von	    */
+/* ca. 1 G entspricht. Allerdings sind die Abweichungen von der Lineari-    */
+/* taet einigermassen reproduzierbar, was dazu genutzt wird, diese Nicht-   */
+/* linearitaeten per Software durch Anlegen der passenden Spannungen am	    */
+/* Modulationseingang des Power Supplys wieder auszugleichen.			    */
+/* Die Nichtlinearitaeten bestehen aus zwei Teilen, einmal einer langsamen  */
+/* Drift in Abhaengigkeit vom gesetzten Strom und vielen ca. 3 mA grossen   */
+/* Stromspruengen, die in (nicht ganz regelmaessigen) Abstaenden von 0.12 A	*/
+/* bis 0.14 A auftreten.												    */
+/* Die langsame Drift wurde mehrfach gemessen und dann die sich ergebende   */
+/* Kurve stueckweise durch Gerade approximiert - die Endpunkte dieser In-   */
+/* tervalle sind im Array 'ranges' gespeichert, der zu den jeweiligen In-   */
+/* tervallen gehoerende Anstieg und Offset der angepassten Geraden in den   */
+/* beiden Arrays 'slopes' und 'offsets'. Bei der Berechnung der vom DAC	    */
+/* auszugebenden Spannung wird zuerst bestimmt, in welches Intervall der zu */
+/* setzende Strom gehoert und anschliessend die zugehoerige Korrektur auf   */
+/* die Spannung fuer den DAC 'dac_volts' aufgeschlagen.					    */
+/* Fuer die oben genannten kleinen Spruenge stellte sich heraus, dass diese */
+/* bei negativen Stroemen immer in Abstaenden von 0.12 A oder 0.13 A auf-	*/
+/* traten, und zwar jeweils mehrere Spruenge in Abstaenden von 0.13 A, ge-  */
+/* folgt von einem Sprung nach 0.12 A, die Amplitude der Spruenge betraegt  */
+/* im negativen Strombereich 3.2 mA. Im positiven Strombereich traten	    */
+/* ebenfalls jeweils mehrere Spruenge in 0.13 A Abstaenden auf, gefolgt von */
+/* einem im Abstand von 0.14 A. Die Amplitude der Spruenge betraegt 3.0 mA. */
+/* Genauer gesagt heisst das, dass der Sweep nicht linear ist, sondern zwi- */
+/* schen den Sprungpunkten der Sweep nicht steil genug ist, was dann	    */
+/* durch den Stromsprung ausgeglichen ist -	der Sweep stellt also mehr	    */
+/* oder minder eine Art Treppenfunktion dar, mit allerdings nicht waage-    */
+/* rechten 'Treppenstufen'.												    */
+/* Hier die vollstaendige Liste der am Power Supply gesetzten Stroeme, bei  */
+/* denen Spruenge im ausgegebenen Strom auftraten :						    */
+/* -9.98, -9.85, -9.72, -9.60, -9.47, -9.35, -9.22, -9.09, -8.97, -8.84,    */
+/* -8.71, -8.59, -8.46, -8.34, -8.21, -8.08, -7.96, -7.83, -7.70, -7.58,    */
+/* -7.45, -7.33, -7.20, -7.07, -6.95, -6.82, -6.69, -6.57, -6.44, -6.32,    */
+/* -6.19, -6.06, -5.94, -5.81, -5.69, -5.56, -5.43, -5.31, -5.18, -5.05,    */
+/* -4.93, -4.80, -4.68, -4.55, -4.42, -4.30, -4.17, -4.04, -3.92, -3.79,    */
+/* -3.67, -3.54, -3.41, -3.29, -3.16, -3.03, -2.91, -2.78, -2.66, -2.53,    */
+/* -2.40, -2.28, -2.15, -2.02, -1.90, -1.77, -1.65, -1.52, -1.39, -1.27,    */
+/* -1.14, -1.01, -0.89, -0.76, -0.64, -0.51, -0.38, -0.26, -0.13,  0.00,    */
+/* 0.14, 0.27, 0.40, 0.53, 0.66, 0.79, 0.92, 1.06, 1.19, 1.32, 1.45,	    */
+/* 1.58, 1.71, 1.84, 1.97, 2.11, 2.24, 2.37, 2.50, 2.63, 2.76, 2.89,	    */
+/* 3.02, 3.16, 3.29, 3.42, 3.55, 3.68, 3.81, 3.94, 4.07, 4.21, 4.34,	    */
+/* 4.47, 4.60, 4.73, 4.86, 4.99, 5.12, 5.26, 5.39, 5.52, 5.65, 5.78,	    */
+/* 5.91, 6.04, 6.18, 6.31, 6.44, 6.57, 6.70, 6.83, 6.96, 7.09, 7.23,	    */
+/* 7.36, 7.49, 7.62, 7.75, 7.88, 8.01, 8.14, 8.28, 8.41, 8.54, 8.67,	    */
+/* 8.80, 8.93, 9.06, 9.19, 9.33, 9.46, 9.59, 9.72, 9.85, 9.98			    */
+/* In den beiden Listen 'neg_jumps' und 'pos_jumps' sind jeweils die	    */
+/* Punkte gespeichert, bei denen sich die Abstaende zwischen den Spruengen  */
+/* aendern. Hieraus wird dann die notwendige Korrektur berechnet. Im Be-	*/
+/* reich direkt um Null wird keine Korrektur vorgenommen, da dort die	    */
+/* Nichtlinearitaeten des Power Supply selbst mit allem Tricks nicht aus-   */
+/* zugleichen sind.														    */
+/*--------------------------------------------------------------------------*/
+
+static void keithley228a_get_corrected_current( double c, double *psc,
+												double *dacv )
+{
+	int i;
+	double del;
+
+	static double
+		ranges[ ] =    { -7.5, -5.5, -4.5, -1.7, -0.007, 0.004, 5.3, 7.2,
+						 9.0 },
+		slopes[ ] =    { 0.0010, 0.000916, 0.000441, -0.000444, -0.001576,
+						 0.0, -0.001027, 0.001396, 0.00429, 0.005472 },
+		offsets[ ] =   { 0.00793, 0.007257, 0.004831, 0.000866, -0.000962,
+						 0.0, 0.000252, -0.012237, -0.033361, -0.043436 },
+	    pos_jumps[ ] = { 0.00, 0.14, 0.92, 1.06, 1.97, 2.11, 3.02, 3.16,
+					    4.07, 4.21, 5.12, 5.26, 6.04, 6.18, 7.09, 7.23,
+					    8.14, 8.28, 9.19, 9.33, 10.0, 100.0 },
+	    neg_jumps[ ] = { 0.00, -0.13, -0.26, -0.38, -0.64, -0.76, -0.89,
+						 -1.01, -1.27, -1.39, -1.65, -1.77, -1.90, -2.02,
+						 -2.28, -2.40, -2.66, -2.78, -2.91, -3.03, -3.29,
+						 -3.41, -3.67, -3.79, -3.92, -4.04, -4.30, -4.42,
+						 -4.68, -4.80, -4.93, -5.05, -5.31, -5.43, -5.69,
+						 -5.81, -5.94, -6.06, -6.32, -6.44, -6.57, -6.69,
+						 -6.95, -7.07, -7.33, -7.45, -7.58, -7.70, -7.96,
+						 -8.08, -8.34, -8.46, -8.59, -8.71, -8.97, -9.09,
+						 -9.35, -9.47, -9.60, -9.72, -10.0, -100.0 };
+
+
+	 if ( fabs( c ) >= 0.04 )
+	 {
+		 *psc = 1.0e-2 * lround( 1.e-2 * c );
+		 *dacv = V_TO_A_FACTOR * fabs( *psc - c );
+	 }
+	 else
+	 {
+		 if ( c >= 0.0 )
+		 {
+			 if ( c < 0.001)
+				 c = 0.001;
+			 *psc = 0.04;
+			 *dacv = V_TO_A_FACTOR * ( c - 0.04 );
+		 }
+		 else
+		 {
+			 if ( c > -0.007)
+				 c = -0.007;
+			 *psc = - 0.04;
+			 *dacv = - V_TO_A_FACTOR * ( c + 0.04 );
+		 }
+	 }
+	 
+	 /* Try to correct for non-linearities */
+
+	 for ( i = 0; i < 9; i++ )
+		 if ( c < ranges[ i ] )
+			 break;
+			
+	 if ( c >= 0.0 )
+		 *dacv -= V_TO_A_FACTOR * ( slopes[ i ] * c + offsets[ i ] );
+	 else
+		 *dacv += V_TO_A_FACTOR * ( slopes[ i ] * c + offsets[ i ] );
+
+
+	 /* Try to correct for the 3 mA jumps */
+
+	 if ( c >= 0.0 )
+	 {
+		 i = 1;
+		 while ( lround( 1.0e6 * c ) >= lround( 1.0e6 * pos_jumps[ i ] ) )
+			 i++;
+
+		 c -= pos_jumps[ i - 1 ];
+		 if ( i & 1 )							/* i ungerade ? */
+			 del = 0.14;
+		 else
+			 c = fmod( lround( 1.0e6 * c ) * 1.0e-6, del = 0.13 );
+		 *dacv += V_TO_A_FACTOR * 0.0030 * ( c / del - 0.5 );
+		 *dacv -= V_TO_A_FACTOR * 0.004;
+	 }
+	 else
+	 {
+		 i = 0;
+		 do
+		 {
+			 if ( lround( 1.0e6 * c ) <= lround( 1.0e6 * neg_jumps[ i ] ) &&
+				  lround( 1.0e6 * c ) > lround( 1.0e6 * neg_jumps[ i + 1 ] ) )
+			 {
+				 c -= neg_jumps[ i ];
+				 if ( i & 1 )					/* i ungerade ? */
+					 c = fmod( 1.0e-6 * lround( 1.0e6 * c ), del = 0.13 );
+				 else
+					 del = 0.12;
+				 break;
+			 }
+		 } while ( ++i );
+
+		 *dacv -= V_TO_A_FACTOR * 0.0032 * ( c / del + 0.5 );
+		 *dacv -= V_TO_A_FACTOR * 0.004;
+	 }
 }
