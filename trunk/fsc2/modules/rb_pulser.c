@@ -57,7 +57,11 @@ int rb_pulser_init_hook( void )
 
 	need_RULBUS = SET;
 
+#ifndef FIXED_TIMEBASE
 	pulser_struct.set_timebase = rb_pulser_store_timebase;
+#else
+	pulser_struct.set_timebase = NULL;
+#endif
 
 	pulser_struct.set_trigger_mode = rb_pulser_set_trigger_mode;
 	pulser_struct.set_repeat_time = rb_pulser_set_repeat_time;
@@ -100,7 +104,13 @@ int rb_pulser_init_hook( void )
 
 	rb_pulser.is_needed = SET;
 
+#ifndef FIXED_TIMEBASE
 	rb_pulser.is_timebase = UNSET;
+#else
+	rb_pulser.timebase = 1.0e-8;;
+	rb_pulser.is_timebase = SET;
+#endif
+
 	rb_pulser.is_trig_in_mode = UNSET;
 	rb_pulser.is_trig_in_slope = UNSET;
 	rb_pulser.is_rep_time = UNSET;
@@ -587,7 +597,9 @@ static void rb_pulser_card_setup( void )
 
 
 	clock_card[ ERT_CLOCK ].name  = ERT_CLOCK_CARD;
+#ifndef FIXED_TIMEBASE
 	clock_card[ TB_CLOCK ].name   = TB_CLOCK_CARD;
+#endif
 
 	for ( i = 0; i < NUM_CLOCK_CARDS; i++ )
 		clock_card[ i ].handle = -1;

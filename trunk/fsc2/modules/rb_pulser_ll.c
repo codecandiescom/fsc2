@@ -111,6 +111,16 @@ void rb_pulser_init( void )
 								   RULBUS_DELAY_FALLING_EDGE ) != RULBUS_OK )
 			rb_pulser_failure( SET, "Failure to initialize pulser" );
 
+	/* Have the clock feeding the delay cards (except the ERT card run at
+	   the frequency required for the timebase */
+
+#ifndef FIXED_TIMEBASE
+	if ( rulbus_clock_set_frequency( clock_card[ TB_CLOCK ].handle,
+									 clock_card[ TB_CLOCK ].freq )
+																 != RULBUS_OK )
+		rb_pulser_failure( SET, "Failure to start pulser" );
+#endif
+
 	/* Initialize synthesizer if it's required for RF pulses */
 
 	rb_pulser_synthesizer_init( );
@@ -233,9 +243,8 @@ void rb_pulser_run( bool state )
 			   the card accordingly and the make the card output end pulses
 			   on both the first and second start/end pulse connector */
 
-			if ( rulbus_clock_set_frequency(
-								 		   clock_card[ ERT_CLOCK ].handle,
-								 		   clock_card[ ERT_CLOCK ].freq )
+			if ( rulbus_clock_set_frequency( clock_card[ ERT_CLOCK ].handle,
+											 clock_card[ ERT_CLOCK ].freq )
 				 												!= RULBUS_OK ||
 				 rulbus_delay_set_delay( delay_card[ ERT_DELAY ].handle,
 										 delay_card[ ERT_DELAY ].delay,
@@ -262,7 +271,7 @@ void rb_pulser_run( bool state )
 	else                        /* stop the pulser */
 	{
 		/* To stop the pulser keep the ERT delay card from emitting end pulses
-		   that would trigger the folllowing cards, then stop the clock card
+		   that would trigger the following cards, then stop the clock card
 		   feeding the ERT delay card and finally set the delay for the card
 		   to 0 */
 
@@ -277,7 +286,6 @@ void rb_pulser_run( bool state )
 									 0, 1 ) != RULBUS_OK )
 			rb_pulser_failure( SET, "Failure to stop pulser" );
 	}
-
 }
 
 

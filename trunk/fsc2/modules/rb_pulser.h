@@ -38,13 +38,21 @@
 
 
 #define NUM_DELAY_CARDS  10
+
+#ifndef FIXED_TIMEBASE
 #define NUM_CLOCK_CARDS   2
+#else
+#define NUM_CLOCK_CARDS   1
+#endif
 
 #define DELAY_CARD        0
 #define CLOCK_CARD        1
 
 #define ERT_CLOCK         0
+
+#ifndef FIXED_TIMEBASE
 #define TB_CLOCK          1
+#endif
 
 #define ERT_DELAY         0
 #define INIT_DELAY        1
