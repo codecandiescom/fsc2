@@ -3162,7 +3162,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor {ccd_camera_pixel_size}
-@item ccd_camera_pixel_size()}
+@item ccd_camera_pixel_size()
 @findex ccd_camera_pixel_size()
 The function takes no arguments and returns the width of a pixel of the
 CCD chip.
