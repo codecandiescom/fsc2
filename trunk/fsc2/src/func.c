@@ -529,9 +529,9 @@ Var *f_print( Var *v )
 		if ( *cp == '#' )
 			s++;
 
-	/* get string long enough to replace each `#' by a 3-char sequence */
+	/* get string long enough to replace each `#' by a 4-char sequence */
 
-	fmt = get_string( strlen( v->val.sptr ) + 2 * s + 1 );
+	fmt = get_string( strlen( v->val.sptr ) + 3 * s + 1 );
 	strcpy( fmt, v->val.sptr );
 
 	for ( cp = fmt; *cp != '\0' ; ++cp )
@@ -541,12 +541,13 @@ Var *f_print( Var *v )
 		if ( *cp != '\\' && *cp != '#' )
 			continue;
 
-		/* convert format descriptor (unescaped `#') to 3 \x01 */
+		/* convert format descriptor (unescaped `#') to 4 \x01 */
 
 		if ( *cp == '#' )
 		{
 			for ( ep = fmt + strlen( fmt ) + 1; ep != cp; --ep )
-				*( ep + 2 ) = *ep;
+				*( ep + 3 ) = *ep;
+			*cp++ = '\x01';
 			*cp++ = '\x01';
 			*cp++ = '\x01';
 			*cp = '\x01';
@@ -606,7 +607,7 @@ Var *f_print( Var *v )
 
 	cp = fmt;
 	cv = v->next;
-	while ( ( ep = strstr( cp, "\x01\x01\x01" ) ) != NULL )
+	while ( ( ep = strstr( cp, "\x01\x01\x01\x01" ) ) != NULL )
 	{
 		switch ( cv->type )
 		{
@@ -616,7 +617,7 @@ Var *f_print( Var *v )
 				break;
 
 			case FLOAT_VAR :
-				strcpy( ep, "%g" );
+				strcpy( ep, "%#g" );
 				eprint( NO_ERROR, cp, cv->val.dval );
 				break;
 
@@ -626,7 +627,7 @@ Var *f_print( Var *v )
 				break;
 		}
 
-		cp = ep + 3;
+		cp = ep + 4;
 		vars_pop( cv );
 		cv = v->next;
 	}
