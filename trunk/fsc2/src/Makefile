@@ -74,7 +74,7 @@ fsc2: $(objects)
 	$(CC) -o $@ $(objects) $(LIBS) -Wl,-E
 
 %.o: %.c $(headers)
-	$(CC) $(CFLAGS) -c -o $@ $<
+	$(CC) $(CFLAGS) $(INCLUDES) -c -o $@ $<
 
 %.c %.h: %.y $(headers)
 	$(BISON) $(BISONFLAGS) $(patsubst %_parser.y,%,$<) \
@@ -116,7 +116,7 @@ fsc2_connect: fsc2_connect.o
 	chmod 644 $@
 
 $(resources:.fd=.o): %.o: %.c %.h
-	$(CC) $(CFLAGS) $(LFLAGS)  -c $< -o $@
+	$(CC) $(CFLAGS) $(INCLUDES) $(LFLAGS)  -c $< -o $@
 
 %.c %.h: %.fd
 	fdesign -convert $<

@@ -29,34 +29,34 @@
 # main makefile on why these rules have this somewhat complicated form.
 
 ##.so: $(##:.c=.o)
-	@if [ -z "$($(patsubst %.so,%_libs,$@))" ]; then               \
-		echo "$(CC) $(LFLAGS) $^ -o $@";                           \
-		$(CC) $(LFLAGS) $^ -o $@;                                  \
-		chmod 644 $@;                                              \
-	else                                                           \
-		for l in "$($(patsubst %.so,%_libs,$@))"; do               \
-			if [ "$(notdir $$l)" == "$$l" ]; then                  \
-				l=$${l%.so};                                       \
-				libs="$$libs -l$${l#lib}";                         \
-			else                                                   \
-				libs="$$libs $$l";                                 \
-			fi;                                                    \
-		done;                                                      \
-		echo "$(CC) $(LFLAGS) $^ $$libs -o $@";                    \
-		$(CC) $$libs -shared -o $@.lib_test 2>/dev/null;           \
-		if [ -e $@.lib_test ]; then                                \
-			$(RM) $(RMFLAGS) $@.lib_test;                          \
-			$(CC) $(LFLAGS) $^ $$libs -o $@;                       \
-			chmod 644 $@;                                          \
-		else                                                       \
-			echo "warning: $@ not created, libraries not found.";  \
-		fi;                                                        \
+	@if [ -z "$($(patsubst %.so,%_libs,$@))" ]; then                  \
+		echo "$(CC) $(LFLAGS) $^ -o $@";                              \
+		$(CC) $(LFLAGS) $^ -o $@;                                     \
+		chmod 644 $@;                                                 \
+	else                                                              \
+		for l in "$($(patsubst %.so,%_libs,$@))"; do                  \
+			if [ "$(notdir $$l)" == "$$l" ]; then                     \
+				l=$${l%.so};                                          \
+				libs="$$libs -l$${l#lib}";                            \
+			else                                                      \
+				libs="$$libs $$l";                                    \
+			fi;                                                       \
+		done;                                                         \
+		echo "$(CC) $(LFLAGS) $^ $$libs -o $@";                       \
+		$(CC) $$libs -shared -o $@.lib_test 2>/dev/null;              \
+		if [ -e $@.lib_test ]; then                                   \
+			$(RM) $(RMFLAGS) $@.lib_test;                             \
+			$(CC) $(LFLAGS) $^ $$libs -o $@;                          \
+			chmod 644 $@;                                             \
+		else                                                          \
+			echo "warning: $@ not created, libraries not found.";     \
+		fi;                                                           \
 	fi
 
 $(##:.c=.o): %.o: %.c ##.h $(cdir)/##.conf $(src_headers)
-	@incl="$(foreach i,$(##_incl),-I$(i))";                        \
-	echo "$(CC) $$incl $(CFLAGS) -c $(LFLAGS) $< -o $@";           \
-	$(CC) $$incl $(CFLAGS) -c $(LFLAGS) $< -o $@
+	@incl="$(foreach i,$(##_incl),-I$(i))";                           \
+	echo "$(CC) $(CFLAGS) $$incl $(INCLUDES) -c $(LFLAGS) $< -o $@";  \
+	$(CC) $(CFLAGS) $$incl $(INCLUDES) -c $(LFLAGS) $< -o $@
 
 
 # The replacement of 'ECHO' by 'FLEX_ECHO' in the files created by flex is

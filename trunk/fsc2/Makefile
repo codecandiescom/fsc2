@@ -120,6 +120,38 @@ NUM_SERIAL_PORTS  := 2
 SERIAL_LOCK_DIR   := /var/lock
 
 
+# The next two lines must be uncommented if you want support for the National
+# Instruments 6601 GPCT card. If the library for the card isn't in a place
+# where the linker will find it automatically you need to specify the full
+# absolut path for the library (e.g. '/usr/xxx/yyy/libni6601.so').
+
+# WITH_NI6601     := yes
+# ni6601_libs     := libni6601.so
+
+
+# Uncommented the next two lines if you want support for the Meilhaus
+# Electronics 6000 or 6100 DAC card. If the library for the card isn't in a
+# place where the linker will find it automatically you need to specify the
+# full absolut path for the library  (e.g. '/opt/zzz/ttt/libme6x00.so').
+
+# WITH_ME6000     := yes
+# me6000_libs     := libme6x00.so
+
+
+# The follwoing three lines must be uncommented when you want support for the
+# Roper Scientific Spec-10 CCD camera. Depending on where you installed the
+# header files required by the PVCAM library (which is need to access the
+# camera) you may have to change the 'rs_spec10_incl' variable to the name
+# of the installation directory. The third variable, 'rs_spec10_libs', must
+# be changed if the library isn't in a place where the linker will find it
+# automatically, in this case it must be the full absolute path to of the
+# library (e.g. '/usr/lib/pvcam/libpvcam.so').
+
+# WITH_SPEC10     := yes
+# rs_spec10_incl  := /usr/local/include/pvcam
+# rs_spec10_libs  := libpvcam.so
+
+
 # Comment out the next two lines if you don't want the ability to run a HTTP
 # server that allows to monitor fsc2's current state via the Internet. The
 # default port number the HTTP server will listen on can be set by the second
@@ -187,8 +219,6 @@ SHELL            := /bin/sh
 CC               := gcc
 CFLAGS           := $(OPTIMIZATION) \
 					-ggdb \
-					-I$(fdir) -I$(adir) -I/usr/X11R6/include \
-					-I/usr/X11R6/include/X11 -I/usr/local/include \
 					-Wall \
 					-Wwrite-strings \
 					-Wstrict-prototypes \
@@ -210,6 +240,10 @@ CFLAGS           := $(OPTIMIZATION) \
 				    # -Wundef             # fails in bison/flex created files
 				    # -ansi               # fails on inline/asm
 				    # -pedantic
+INCLUDES         :=	-I$(fdir) -I$(adir) -I/usr/X11R6/include \
+					-I/usr/X11R6/include/X11 -I/usr/local/include \
+
+
 LFLAGS			 := $(OPT) -shared -fpic  # needed for libraries
 
 ifeq ($(MPATROL),YES)
@@ -324,6 +358,13 @@ ifeq ($(machine_name),single.physik.fu-berlin.de)
 	GPIB_LIBRARY       := NONE
 	NUM_SERIAL_PORTS   := 2
 	SERIAL_LOCK_DIR    := /var/lock
+	WITH_NI6601        := yes
+	ni6601_libs        := libni6601.so
+	WITH_ME6000        := yes
+	me6000_libs        := libme6x00.so
+	WITH_SPEC10        := yes
+	rs_spec10_incl     := /usr/local/include/pvcam
+	rs_spec10_libs     := libpvcam.so
 	INSTALL_MACHINE    := install-$(machine_name)
 	UNINSTALL_MACHINE  := uninstall-$(machine_name)
 endif
@@ -364,6 +405,13 @@ ifeq ($(machine_name),dorimare.nowhere)
 	GPIB_LIBRARY       := JTT
 	NUM_SERIAL_PORTS   := 2
 	SERIAL_LOCK_DIR    := /var/lock
+	WITH_NI6601        := yes
+	ni6601_libs        := libni6601.so
+	WITH_ME6000        := yes
+	me6000_libs        := libme6x00.so
+	WITH_SPEC10        := yes
+	rs_spec10_incl     := /usr/local/include/pvcam
+	rs_spec10_libs     := libpvcam.so
 	INSTALL_MACHINE    := install-$(machine_name)
 	UNINSTALL_MACHINE  := uninstall-$(machine_name)
 endif
@@ -412,7 +460,7 @@ endif
 
 
 ifdef GPIB_HEADER_DIR
-	CFLAGS += -I$(GPIB_HEADER_DIR)
+	INCLUDES += -I$(GPIB_HEADER_DIR)
 endif
 
 ifdef MAIL_ADDRESS
@@ -472,7 +520,7 @@ ifneq ($(GPIB_LIBRARY),NONE)
 	ifdef GPIB_CONF_FILE
 		CONFFLAGS        += -DGPIB_CONF_FILE=\"$(GPIB_CONF_FILE)\"
 	else
-		CFLAGS           += -I/usr/local/include/gpib
+		INCLUDES         += -I/usr/local/include/gpib
 	endif
 	LIBS                 += -lgpib
 endif
@@ -480,7 +528,7 @@ endif
 
 ifeq ($(GPIB_LIBRARY),LLP)
 	GPIB_LIBRARY         := llp
-	CFLAGS               += -I/usr/local/include/gpib
+	INCLUDES             += -I/usr/local/include/gpib
 	LIBS                 += -lfl
 else
 	ifeq ($(GPIB_LIBRARY),NI)

@@ -57,29 +57,9 @@ lecroy9400    := lecroy9400.c lecroy9400_gpib.c  lecroy9400_util.c
 rs_spec10     := rs_spec10.c rs_spec10_int.c rs_spec10_util.c
 
 
-# For modules that require header files in non-standard places where the
-# compiler would not find them automatically you must specify the full
-# path(s) here.
-
-rs_spec10_incl := /usr/local/include/pvcam
-#rs_spec10_incl := /usr/local/pvcam/examples
-
-
-# For modules that need to be linked against special libraries a variable
-# needs to be defined here, consisting of the name of the module followed
-# by the string "_libs". It got to be assigned the name(s) of the required
-# libraries. If a library is not in one of the standard places where the
-# linker looks for libraries (e.g. /usr/lib, /usr/local/lib) it must be
-# specified with its absolute path.
-
-me6000_libs    := libme6x00.so
-ni6601_libs    := libni6601.so
-rs_spec10_libs := libpvcam.so
-
-
 src_headers   := $(addprefix $(sdir)/,$(headers)) $(sdir)/fsc2_module.h
 
-CFLAGS        += -I$(sdir) -I$(cdir)
+INCLUDES      += -I$(sdir) -I$(cdir)
 
 
 export        # export all symbols to the sub-makefiles
@@ -148,9 +128,9 @@ modules:
 
 
 # The following rule looks a bit complicated because we have to check if
-# additional libraries are required by each module. These libraries have
-# to be defined by a variables consisting of the name of the module and the
-# the string "_libs". If no additional libraries are requires we compile
+# additional libraries are required the individual modules. These libraries
+# have to be defined by a variables consisting of the name of the module and
+# the the string "_libs". If no additional libraries are requires we compile
 # the module immediately. Otherwise we've got to distinguish between
 # libraries given with an absolute path (which are passed to gcc just as
 # they are) and libraries without a path, which are supposed to be in the
@@ -193,9 +173,9 @@ $(addsuffix .so,$(simp_modules)): %.so: %.o
 # of the module and followed by "_incl")
 
 $(addsuffix .o,$(simp_modules)): %.o: %.c $(cdir)/%.conf $(src_headers)
-	@incl="$(foreach i,$($(patsubst %.o,%_incl,$@)),-I$(i))";      \
-	echo "$(CC) $$incl $(CFLAGS) -c $(LFLAGS) $< -o $@";           \
-	$(CC) $$incl $(CFLAGS) -c $(LFLAGS) $< -o $@
+	@incl="$(foreach i,$($(patsubst %.o,%_incl,$@)),-I$(i))";         \
+	echo "$(CC) $$incl $(INCLUDES) $(CFLAGS) -c $(LFLAGS) $< -o $@";  \
+	$(CC) $$incl $(INCLUDES) $(CFLAGS) -c $(LFLAGS) $< -o $@
 
 
 # Also the modules for controlling the Frankfurt S-band magnet are made
