@@ -283,7 +283,11 @@ where these variables are defined must be uncommented and the
 additional variables for the include paths and the exact locations
 for the required libraries may have to be changed. Please see the
 comments in the Makefile or the template file in the 'machines'
-directory for details.
+directory for details. Please note that defining WITH_SPEC10 will
+lead to a few warnings during the compilation of the corresponding
+module of fsc2 since the header files for the pvcam library for
+the Roper Scientific Spec-10 CCD have some issues I can't do any-
+thing about.
 
 
 Moreover, support for the National Instruments PCI-MIO-16E-1 and the
@@ -441,7 +445,7 @@ Just start by typing 'fsc2 edl/qq.edl' or 'fsc2 edl/z.edl' (assuming you're
 still in fsc2's main directory) and click on the "Start" button to get an
 idea about how fsc2 displays 1- and 2-dimensional data sets.
 
-                        May 27, 2004         Much luck, Jens
+                      June 25, 2004         Much luck, Jens
 --
        _  _____  _____
       | ||_   _||_   _|         Jens.Toerring@physik.fu-berlin.de
