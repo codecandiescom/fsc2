@@ -136,13 +136,18 @@ Suported devices
   * Keithley 228A (used as W-band superconducting magnet power supply)
   * Oxford Magnet Sweep Power Supply IPS20-4
   * AEG Magnet Power Supply (home-build computer control, S-, X-Band)
+  * Simple field control via a DA converter (Steinhoff group, Osnabrueck;
+	requires home-build DA converter HJS_DAADC)
+  * Field control via a DA converter and gaussmeter (Steinhoff group,
+	Osnabrueck; requires home-build DA converter HJS_DAADC, Bruker BNM12
+	gaussmeter and WITIO-48 DIO card) 
 
  Field meters
 
   * Bruker Hall Effect Field Controller BH 15
   * Bruker NMR Gaussmeter ER035M (F0, F1 probe, serial port and GPIB version)
   * Metrolab NMR Teslameter PT2025
-  * Bruker NMR Gaussmeter BMN12
+  * Bruker NMR Gaussmeter BMN12 (requires WITIO-48 DIO card)
 
  Microwave and RF synthesizers:
 
@@ -150,7 +155,7 @@ Suported devices
   * Hewlett-Packard Synthesizer HP8648B
   * Hewlett-Packard Synthesizer HP8672A
 
- Freuqency counters:
+ Frequency counters:
 
   * Hewlett-Packard Frequency Counter HP5340A
 
@@ -209,7 +214,7 @@ Support
 -------
 
 While I am prepared to help for free as far as my time allows, you also
-can hire me for e.g. writing drivers for ubsupported devices, creating
+can hire me for e.g. writing drivers for unsupported devices, creating
 scripts for experiments, installation support, instructing users etc.
 Please send me an email to discuss conditions.
 
