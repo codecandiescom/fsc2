@@ -32,15 +32,15 @@ typedef union {
 #define	E_US_TOKEN	    270
 #define	E_MS_TOKEN	    271
 #define	E_S_TOKEN	    272
-#define	E_NV_TOKEN	    273
-#define	E_UV_TOKEN	    274
-#define	E_MV_TOKEN	    275
-#define	E_V_TOKEN	    276
-#define	E_MG_TOKEN	    277
-#define	E_G_TOKEN	    278
-#define	E_MHZ_TOKEN	    279
-#define	E_KHZ_TOKEN	    280
-#define	E_HZ_TOKEN	    281
+#define	E_NT_TOKEN	    273
+#define	E_UT_TOKEN	    274
+#define	E_MT_TOKEN	    275
+#define	E_T_TOKEN	    276
+#define	E_NU_TOKEN	    277
+#define	E_UU_TOKEN	    278
+#define	E_MU_TOKEN	    279
+#define	E_KU_TOKEN	    280
+#define	E_MEG_TOKEN	    281
 #define	E_NEG	        282
 
 #define IF_TOK         2049

@@ -157,20 +157,20 @@ expr:    E_INT_TOKEN unit         { if ( $2 == NULL )
                                       $$ = vars_mult( $2, $4 ); }
 ;
 
-unit:    /* empty */              { $$ = NULL }
-       | E_NS_TOKEN               { $$ = vars_push( INT_VAR, 1L ); }
-       | E_US_TOKEN               { $$ = vars_push( INT_VAR, 1000L ); }
-       | E_MS_TOKEN               { $$ = vars_push( INT_VAR, 1000000L ); }
-       | E_S_TOKEN                { $$ = vars_push( INT_VAR, 1000000000L ); }
-       | E_NV_TOKEN               { $$ = vars_push( FLOAT_VAR, 1.0e-9 ); }
-       | E_UV_TOKEN               { $$ = vars_push( FLOAT_VAR, 1.0e-6 ); }
-       | E_MV_TOKEN               { $$ = vars_push( FLOAT_VAR, 1.0e-3 ); }
-       | E_V_TOKEN                { $$ = vars_push( INT_VAR, 1 ); }
-       | E_MG_TOKEN               { $$ = vars_push( FLOAT_VAR, 1.0e-3 ); }
-       | E_G_TOKEN                { $$ = vars_push( INT_VAR, 1 ); }
-       | E_MHZ_TOKEN              { $$ = vars_push( FLOAT_VAR, 1.0e6 ); }
-       | E_KHZ_TOKEN              { $$ = vars_push( FLOAT_VAR, 1.0e3 ); }
-       | E_HZ_TOKEN               { $$ = vars_push( INT_VAR, 1 ); }
+unit:    /* empty */               { $$ = NULL; }
+       | NS_TOKEN                  { $$ = vars_push( INT_VAR, 1L ); }
+       | US_TOKEN                  { $$ = vars_push( INT_VAR, 1000L ); }
+       | MS_TOKEN                  { $$ = vars_push( INT_VAR, 1000000L ); }
+       | S_TOKEN                   { $$ = vars_push( INT_VAR, 1000000000L ); }
+       | NT_TOKEN                  { $$ = vars_push( FLOAT_VAR, 1.0e-5 ); }
+       | UT_TOKEN                  { $$ = vars_push( FLOAT_VAR, 1.0e-2 ); }
+       | MT_TOKEN                  { $$ = vars_push( FLOAT_VAR, 10.0 ); }
+       | T_TOKEN                   { $$ = vars_push( INT_VAR, 1.0e4 ); }
+       | NU_TOKEN                  { $$ = vars_push( FLOAT_VAR, 1.0e-9 ); }
+       | UU_TOKEN                  { $$ = vars_push( INT_VAR, 1.0e-6 ); }
+       | MU_TOKEN                  { $$ = vars_push( FLOAT_VAR, 1.0e-3 ); }
+       | KU_TOKEN                  { $$ = vars_push( FLOAT_VAR, 1.0e3 ); }
+       | MEG_TOKEN                 { $$ = vars_push( INT_VAR, 1.0e6 ); }
 ;
 
 
