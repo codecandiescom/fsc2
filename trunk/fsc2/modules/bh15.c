@@ -2,8 +2,8 @@
   $Id$
 */
 
-#include "fsc2.h"
-#include "gpib.h"
+#include "../fsc2.h"
+#include "../gpib.h"
 
 
 int bh15_init_hook( void );

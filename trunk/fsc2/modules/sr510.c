@@ -3,8 +3,8 @@
 */
 
 
-#include "fsc2.h"
-#include "gpib.h"
+#include "../fsc2.h"
+#include "../gpib.h"
 
 
 /* name of device as given in GPIB configuration file /etc/gpib.conf */

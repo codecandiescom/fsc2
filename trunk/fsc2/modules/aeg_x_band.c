@@ -2,7 +2,7 @@
   $Id$
 */
 
-#include "fsc2.h"
+#include "../fsc2.h"
 #include <termios.h>
 #include <unistd.h>
 #include <sys/types.h>
