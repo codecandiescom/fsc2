@@ -357,8 +357,9 @@ uninstall:
 	fi
 
 
-# `clean' deletes all the files remaining from the compilation while
-# `distclean' also removes all executables, shared libraries and documentation
+# `clean' deletes all the files remaining from the compilation and needed for
+# an installation while `distclean' also removes all executables, shared
+# libraries and documentation
 
 clean:
 	$(MAKE) -C src clean
