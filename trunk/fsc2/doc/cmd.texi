@@ -20,7 +20,7 @@
 @c Boston, MA 02111-1307, USA.
 
 
-@node Command Line Options, GUI, Overview, Top
+@node Command Line Options, Modules, Using Pulsers, Top
 @chapter Command line options
 @cindex command line options
 

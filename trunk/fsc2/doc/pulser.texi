@@ -20,7 +20,7 @@
 @c Boston, MA 02111-1307, USA.
 
 
-@node Using Pulsers, Interfacing, Device Functions, Top
+@node Using Pulsers, Command Line Options, Device Functions, Top
 @chapter Using Pulsers
 
 @ifinfo
