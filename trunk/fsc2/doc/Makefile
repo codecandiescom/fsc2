@@ -26,17 +26,13 @@ fsc2.html: $(docs)
 ps: fsc2.ps
 
 fsc2.ps: $(docs)
-	if `which texi2dvi`; then \
-		texi2dvi -c fsc2.texi; \
-		dvips fsc2.dvi; \
-	fi
+	texi2dvi -c fsc2.texi
+	dvips fsc2.dvi
 
 pdf: fsc2.pdf
 
 fsc2.pdf: $(docs)
-	if `which texi2dvi`; then \
-		texi2dvi --pdf -c fsc2.texi; \
-	fi
+	texi2dvi --pdf -c fsc2.texi
 
 clean:
 	$(RM) $(RMFLAGS) fsc2.dvi *.log
