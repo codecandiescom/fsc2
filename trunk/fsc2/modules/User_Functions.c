@@ -22,12 +22,12 @@ Var *float_slice( Var *var );
 
 int User_Functions_init_hook( void )
 {
-	printf( "This is User_Functions_init_hook()\n" );
+	eprint( NO_ERROR, "This is User_Functions_init_hook()\n" );
 	return( 1 );
 }
 void User_Functions_exit_hook( void )
 {
-	printf( "This is User_Functions_exit_hook()\n" );
+	eprint( NO_ERROR, "This is User_Functions_exit_hook()\n" );
 }
 
 

@@ -18,8 +18,9 @@ int dg2020_init_hook( void )
 
 	ret = get_lib_symbol( "User_Functions", "square", &x );
 	if ( ret != LIB_NO_ERR )
-		printf( "dg2020_init_hook: Error while loading symbol: %d\n", ret );
+		eprint( NO_ERROR, "dg2020_init_hook: Error while loading symbol: %d\n",
+				ret );
 	else
-		printf( "dg2020_init_hook: Address of symbol: %p\n", x );
+		eprint( NO_ERROR, "dg2020_init_hook: Address of symbol: %p\n", x );
 	return( 1 );
 }
