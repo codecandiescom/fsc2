@@ -1,0 +1,245 @@
+#
+# $Id$
+#
+
+ WITIO-48 Library Manual
+ =======================
+
+The library (and the corresponding kernel module) only supports a subset
+of the functionality of the board. They only allow to use the board as
+a simple DIO device implemented by the two 82C55A chips on the board and
+only uses mode 0 ("Betriebsart 0"). The 8254/82C54 timer/counter chips
+on the board are not supported.
+
+The 24-bit wide DIOs can be split up into either three 8-bit DIOs, two
+12-bit DIO, one 24-bit DIOs or one 16-bit and one 8-bit DIO. Splitting
+is done programatically whenever necessary. Each of (split up) DIOs can
+be used for input as well as output and the direction can be changed.
+
+To use the kernel module and the library you need a device file for
+the board called 'witio_48' in the '/dev' directory.
+
+To use the library your program must include the header file 'witio_48.h'.
+
+The library supplies the following functions:
+
+witio_48_set_mode()
+witio_48_get_mode()
+witio_48_dio_out()
+witio_48_dio_in()
+witio_48_close()
+witio_48_error_message()
+
+All functions return an integer, indicating success or failure. On success,
+'WITIO_48_OK' (which is just 0) is returned. On failure a negative number,
+is returned, indicating the type of failure. The following values can be
+expected:
+
+    WITIO_48_OK        Function call was successful
+    WITIO_48_ERR_ICA   Invalid channel number specified
+    WITIO_48_ERR_ICM   Channel number can't be used with the current I/O mode
+    WITIO_48_ERR_IVD   Invalid DIO number
+    WITIO_48_ERR_IMD   Invalid mode
+    WITIO_48_ERR_IDV   Invalid output value
+    WITIO_48_ERR_BNO   Device file for the board is not open
+    WITIO_48_ERR_BBS   The board is already in use by another process
+    WITIO_48_ERR_NDV   Driver for board not loaded or board does not exist
+    WITIO_48_ERR_ACS   Missing permission to open the device file
+    WITIO_48_ERR_DFM   Device file for the board does not exist
+    WITIO_48_ERR_DFP   Unspecified error when opening the device file
+    WITIO_48_ERR_INT   Internal driver or library error
+
+Except the functions witio_48_close() and witio_48_error_message() all
+functions may return one of the following error codes in case of failure:
+
+    WITIO_48_ERR_IVD    WITIO_48_ERR_BNO    WITIO_48_ERR_BBS
+    WITIO_48_ERR_NDV    WITIO_48_ERR_ACS    WITIO_48_ERR_DFM
+    WITIO_48_ERR_DFP    WITIO_48_ERR_INT
+
+They won't be listed anymore in the description of the functions below.
+
+There is no need to "open" the board before using it - the first call
+to one of the functions will automatically open the boards device file
+and make it exclusively accessible by the process that opened the board
+this way.
+
+Processes that get started by a call to the exec-family of functions
+won't be able to access the board, i.e. the close-on-exec flag is
+set for the file handle used for accessing the board.
+
+All functions (except witio_48_close() and witio_48_error_message())
+expect the number of the DIO chip to be used as the first argument.
+This must be either 0 or 1, or instead of directly specifying the
+number either 'WITIO_48_DIO_1' or 'WITIO_48_DIO_2'.
+
+Wherever a I/O mode value is passed to a function or returned by a
+function (i.e. a value specifying how the 24-bit DIO is split into
+sub-DIOs), an unsigned integer between 0 and 3 is valid. Instead of
+using numbers directly you should use either 'WITIO_48_MODE_3x8',
+'WITIO_48_2x12', 'WITIO_48_1x24' or 'WITIO_48_16_8'.
+
+When sending data to or receiving data from the board a channel
+argument is required to specify which of the sub-DIOs is to be used.
+A channel number is an unsigned integer between 0 and 2. Insted of
+using numbers one may use 'WITIO_48_CHANNEL_0', 'WITIO_48_CHANNEL_1'
+and 'WITIO_48_CHANNEL_2' instead. Please note that depending on the
+current setting of the I/O mode not all of these channels may be
+valid.
+
+Data send to or received from the board are always exchanged as an
+unsigned long. Please note that depending on the current I/O mode,
+only a sub-range of the full range of values representable by an
+unsigned long is valid.
+
+
+======================================================================
+
+int witio_48_set_mode( WITIO_48_DIO dio, WITIO_48_MODE mode )
+
+The function splits up the DIO specified by the first argument into
+sub-DIOs according to the value of the second argument.
+
+    WITIO_48_DIO  dio   number of the DIO
+    WITIO_48_MODE mode  mode type
+
+The 'mode' argument can be either 'WITIO_48_MODE_3x8', 'WITIO_48_MODE_2x12',
+'WITIO_48_MODE_1x24' or 'WITIO_48_MODE_16_8.
+
+For 'WITIO_48_MODE_3x8' the 24-bit DIO is split up into 3 sub-DIOs with
+8-bit width each. In this mode three channels can be used, where for
+channel 'WITIO_48_CHANNEL_0' the value is mapped to the A-pins of the
+connector, for channel 'WITIO_48_CHANNEL_1' the value is mapped to the
+B-pins and for channel 'WITIO_48_CHANNEL_2' to the C-pins.
+
+For 'WITIO_48_MODE_2x12' the 24-bit DIO is split up into two 12-bit wide
+DIOs. In this mode two channels can be used. For channel 'WITIO_48_CHANNEL_0'
+the topmost 4-bits of the value are mapped to the upper 4 C-pins and the
+lower 8-bits of the value to the A-pins. For channel 'WITIO_48_CHANNEL_1'
+the upper for bits of a value get mapped to the lower 4 C-pins and the
+lower 8 bit are mapped to th B-pins.
+
+For 'WITIO_48_MODE_1x24' the 24-bit DIO isn't split up but used as it is.
+In this I/O mode only the single channel 'WITIO_48_CHANNEL_0' can be used
+and the topmost 8 bits of a value are mapped to the C-pins of the connector,
+the middle 8 bits to the B-pins and the lowest 8 bits to the A-pins.
+
+For 'WITIO_48_MODE_16_8' it is split up into a 16-bit and an 8bit wide DIO.
+'WITIO_48_CHANNEL_0' is the 16-bit wide DIO and the upper 8 bits of a value
+are mapped to the B-pins of the connector and the lower 8 bits to the A-pins.
+'WITIO_48_CHANNEL_1' is the 8-bit wide DIO and a value is mapped to the
+C-pins.
+
+Beside the error codes mentioned above the function may return:
+
+    WITIO_48_ERR_IMD   Invalid mode
+
+
+======================================================================
+
+int witio_48_get_mode( WITIO_48_DIO dio, WITIO_48_MODE *mode )
+
+The function returns the current I/O mode for the DIO specified as the
+first argument cia the second argument.
+
+    WITIO_48_DIO  dio    number of the DIO
+    WITIO_48_MODE *mode  pointer mode type
+
+The value returned via the 'mode' pointer is either 'WITIO_48_MODE_3x8',
+'WITIO_48_MODE_2x12', 'WITIO_48_MODE_1x24' or 'WITIO_48_MODE_16_8. If
+you don't want to use the WITIO_48_MODE type you may use an unsigned
+long instead.
+
+When specifying a NULL pointer as the second argument the current mode
+for the DIO is determined, but the function will not try to dereference
+the NULL pointer and return 'WITIO_48_OK' immediately.
+
+
+======================================================================
+
+int witio_48_dio_out( WITIO_48_DIO dio, WITIO_48_CHANNEL channel,
+                      unsigned long value )
+
+The function outputs the value given as the third argument at the sub-DIO
+specified by the second argument of the DIO passed as the first argument.
+
+    WITIO_48_DIO     dio       number of the DIO
+    WITIO_48_CHANNEL channel   number of the channel (sub-DIO)
+    unsigned long    value     value to output at the sub-DIO
+
+Depending on the current I/O mode not all valid channel values can
+be used. Also the allowed range of values to be output is restricted
+to a subset of the values representable by an unsigned long variable.
+The following table lists the allowed channels and ranges.
+
+ |--------------------|--------------------|-------------------------|
+ |        mode        |     channels       |       ranges            |
+ |--------------------|--------------------|-------------------------|
+ | WITIO_48_MODE_3x8  | WITIO_48_CHANNEL_0 | 0 - 255 (0xFF)          |
+ |                    | WITIO_48_CHANNEL_1 | 0 - 255 (0xFF)          |
+ |                    | WITIO_48_CHANNEL_2 | 0 - 255 (0xFF)          |
+ |--------------------|--------------------|-------------------------|
+ | WITIO_48_MODE_2x12 | WITIO_48_CHANNEL_0 | 0 - 4095 (0xFFF)        |
+ |                    | WITIO_48_CHANNEL_1 | 0 - 4095 (0xFFF)        |
+ |--------------------|--------------------|-------------------------|
+ | WITIO_48_MODE_1x24 | WITIO_48_CHANNEL_0 | 0 - 16777215 (0xFFFFFF) |
+ |--------------------|--------------------|-------------------------|
+ | WITIO_48_MODE_16_8 | WITIO_48_CHANNEL_0 | 0 - 65536 (0xFFFF)      |
+ |                    | WITIO_48_CHANNEL_1 | 0 - 255 (0xFF)          |
+ |--------------------|--------------------|-------------------------|
+
+Beside the error codes mentioned above the function may return:
+
+    WITIO_48_ERR_ICA   Invalid channel number
+    WITIO_48_ERR_ICM   Channel number can't be used with the current I/O mode
+    WITIO_48_ERR_IVD   Invalid DIO number
+    WITIO_48_ERR_IDV   Invalid output value
+
+
+======================================================================
+
+int witio_48_dio_in( WITIO_48_DIO dio, WITIO_48_CHANNEL channel,
+					 unsigned long *value )
+
+The Function returns via the pointer specified as the third argument
+the value at the sub-DIO passed as the second argument from the DIO
+chip specified as the first argument.
+
+    WITIO_48_DIO     dio       number of the DIO
+    WITIO_48_CHANNEL channel   number of the channel (sub-DIO)
+    unsigned long    *value    pointer for returnind the value at the sub-DIO
+
+Depending on the current I/O mode not all channel values can be used.
+See the table in the description of the function witio_48_dio_out()
+above to find out the valid channel numbers for a certain I/O mode
+as well as the range of values to be expected.
+
+When specifying a NULL pointer as the third argument a value will be
+fetched from the DIO but the function will not try to dereference the
+NULL pointer and return 'WITIO_48_OK' immediately.
+
+Beside the error codes mentioned above the function may return:
+
+    WITIO_48_ERR_ICA   Invalid channel number
+    WITIO_48_ERR_ICM   Channel number can't be used with the current I/O mode
+    WITIO_48_ERR_IVD   Invalid DIO number
+
+
+======================================================================
+
+int ni6601_close( void )
+
+The function can be used to close the boards device file and thus make
+the board accessible by other processes.
+
+The function returns in case of failure (device file wasn't open):
+
+    NI6601_ERR_BNO
+
+
+======================================================================
+
+const char *witio_48_error_message( void )
+
+The function returns a short error message about the reason the last
+call of one of the functions in the library failed. If there was no
+error during the last functuin call an empty string is returned.
