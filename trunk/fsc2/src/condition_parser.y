@@ -33,7 +33,7 @@
 /* locally used functions */
 
 int conditionparse( void );
-int conditionerror( const char *s );
+void conditionerror( const char *s );
 
 %}
 
@@ -206,9 +206,9 @@ strs:    /* empty */
 %%
 
 
-int conditionerror( const char *s )
+void conditionerror( const char *s )
 {
-	s = s;                    /* stupid but avoids compiler warning */
+	s = s;                    /* avoid compiler warning */
 
 	eprint( FATAL, SET, "Syntax error in loop or IF/UNLESS condition.\n" );
 	THROW( EXCEPTION );

@@ -35,7 +35,7 @@ extern char *devicestext;
 
 /* locally used functions */
 
-int deviceserror( const char *s );
+void deviceserror( const char *s );
 
 
 %}
@@ -69,7 +69,7 @@ sep:     ';'
 %%
 
 
-int deviceserror ( const char *s )
+void deviceserror ( const char *s )
 {
 	s = s;                    /* stupid but avoids compiler warning */
 

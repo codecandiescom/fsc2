@@ -35,7 +35,7 @@ extern char *assigntext;
 
 /* locally used functions */
 
-int assignerror( const char *s );
+void assignerror( const char *s );
 void ass_func( int function );
 void set_protocol( long prot );
 
@@ -509,7 +509,7 @@ gp:       GP_TOKEN expr            { set_protocol( PHASE_FFM_PROT );
 %%
 
 
-int assignerror ( const char *s )
+void assignerror ( const char *s )
 {
 	s = s;                                 /* avoid compiler warning */
 
@@ -517,7 +517,7 @@ int assignerror ( const char *s )
 		eprint( FATAL, SET, "Unexpected end of file in ASSIGNMENTS "
 				"section.\n" );
 	else
-		eprint( FATAL, SET, "Syntax error near token `%s'.\n", assigntext );
+		eprint( FATAL, SET, "Syntax error near `%s'.\n", assigntext );
 	THROW( EXCEPTION );
 }
 
