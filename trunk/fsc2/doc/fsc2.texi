@@ -40,7 +40,7 @@
 @sp 4
 @center @titlefont{fsc2}
 @sp 4
-@center A Program for the Remote Control of EPR Spectrometers
+@center A Program for the Remote Control of Spectrometers
 @sp 2
 @center January 2003
 @sp 10
