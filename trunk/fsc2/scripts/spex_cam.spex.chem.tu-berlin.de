@@ -595,7 +595,7 @@ FOREVER {
 		ROI[ 3 ] = ( ( New - ROI[ 1 ] + 1 ) / BIN[ 1 ] )
 				   * BIN[ 1 ] + ROI[ 1 ] - 1;
 		input_value( B_roi[ 3 ], ROI[ 3 ] != ROI[ 1 ] ?
-					 ROI[ 3 ] : ROI[ 1 ] + BIN[ 1 ] + 1);
+					 ROI[ 3 ] : ROI[ 1 ] + BIN[ 1 ] + 1 );
 		ccd_camera_roi( ROI );
 	}
 
@@ -1662,7 +1662,7 @@ sub run {
 	$f[ 18 ] = $f[ 17 ]->Label( -text => "Spectral resolution:",
 								-width => 20,
 								-anchor => 'w' );
-	$f[ 19 ] = $f[ 17 ]->Label( -text => $pixel_diff * $BIN[ 1 ],
+	$f[ 19 ] = $f[ 17 ]->Label( -text => $pixel_diff * $BIN[ 0 ],
 								-width => 10,
 								-anchor => 'w' );
 	$f[ 20 ] = $f[ 17 ]->Label( -text => " cm^-1",
@@ -1832,7 +1832,7 @@ N_scans = $$N_scans;
 laser_line;
 cwn_offset;
 spec[ * ];
-avg_spec[ * ];
+avg[ * ];
 wn[ * ];
 B_rel,B_abs, B_wl, B_eas, I_scan;
 I, J;
@@ -1858,7 +1858,7 @@ CCD_size = ccd_camera_pixel_area( );
 ROI = ccd_camera_roi( );
 Bin = ccd_camera_binning( );
 
-N_Points = ( ROI[ 3 ] - ROI[ 1 ] ) / Bin[ 1 ];
+N_Points = ( ROI[ 3 ] - ROI[ 1 ] + 1 ) / Bin[ 1 ];
 step_wn = calib[ 2 ] * Bin[ 1 ];
 
 cwn_offset = 0.5 * calib[ 2 ]
@@ -1872,9 +1872,8 @@ IF laser_line != 0.0 {
 	start_wn = cwn - 0.5 * ( N_Points - 1 ) * step_wn;
 	change_label_1d( "Wavenumbers [rel. cm^-1]", "Counts" );
 	change_scale( start_wn, step_wn );
-	FOR J = 1 : N_Points {
-		wn[ J ] = start_wn + ( J - 1 ) * step_wn;
-	}
+	wn = lin_space( start_wn, start_wn + ( N_Points + 1 ) * step_wn,
+                    N_Points );
 
 	B_rel = button_create( "RADIO_BUTTON", "Relative wavenumbers" );
 	B_abs = button_create( "RADIO_BUTTON", B_rel, "Absolute wavenumbers" );
@@ -1884,9 +1883,8 @@ IF laser_line != 0.0 {
 	start_wn = cwn + 0.5 * ( N_Points - 1 ) * step_wn;
 	change_label_1d( "Wavenumbers [abs. cm^-1]", "Counts" );
 	change_scale( start_wn, - step_wn );
-	FOR J = 1 : N_Points {
-		wn[ J ] = start_wn - ( J - 1 ) * step_wn;
-	}
+	wn = lin_space( start_wn, start_wn - ( N_Points + 1 ) * step_wn,
+                    N_Points );
 
 	B_abs = button_create( "RADIO_BUTTON", "Absolute wavenumbers" );
 	B_wl  = button_create( "RADIO_BUTTON", B_abs, "Wavelengths" );
@@ -1896,6 +1894,7 @@ IF laser_line != 0.0 {
 B_eas = button_create( "PUSH_BUTTON", "Stop at end of running scan" );
 hide_toolbox( 0 );
 
+avg[ N_Points ] = 0.0;
 F_all = get_file( "", "*.dat", "", "", "dat" );
 
 FOR I = 1 : N_scans {
@@ -1904,17 +1903,12 @@ FOR I = 1 : N_scans {
 
 	F_cur = clone_file( F_all, "dat", sprint( "scan_#.dat", I ) );
 	FOR J = 1 : N_Points {
-		fsave( F_cur, "# #\n", wn[ J ], spec[ J ] );
+		fsave( F_cur, "# #\\n", wn[ J ], spec[ J ] );
 	}
 
 	spec = spike_remove( spec );
-	IF ( I == 1 ) {
-		avg_spec = spec;
-	} ELSE {
-		avg_spec += spec;
-	}
-
-	display_1d( 1, spec, 1, 1, avg_spec / I, 2 );
+	avg += spec;
+	display_1d( 1, spec, 1, 1, avg / I, 2 );
 
 	IF toolbox_changed( ) {
 		IF button_state( B_eas ) {
@@ -1957,14 +1951,15 @@ fsave( F_all, "\\# Date:               # #\\n"
               "\\# Resolution        = # cm^-1\\n"
               "\\# Exposure time     = # s\\n"
               "\\# Number of scans   = #\\n",
-              date( ), time( ), cwn, ( N_Points - 1 ) * calib[ 2 ],
+              date( ), time( ), cwn, ( N_Points - 1 ) * Bin[ 1 ] * calib[ 2 ],
               calib[ 2 ] *  Bin [ 1 ], exposure_time, N_scans );
 IF laser_line != 0.0 {
-    fsave( F_all, "\\# Laser lin         = # cm^-1\\n", laser_line );
-}
+    fsave( F_all, "\\# Laser line        = # cm^-1\\n\\n", laser_line );
+} ELSE {
+	fsave( F_all, "\\n" );
 
 FOR J = 1 : N_Points {
-	fsave( F_all, "# #\n", wn[ J ], avg_spec[ J ] / I );
+	fsave( F_all, "# #\\n", wn[ J ], avg[ J ] / I );
 }
 EOF
     close $fh;
@@ -2043,7 +2038,7 @@ sub run {
 		return;
 	}
 
-	$wn_width = ( ( $ROI[ 2 ] - $ROI[ 0 ] ) + 1 ) * $pixel_diff;
+	$wn_width = ( $ROI[ 2 ] - $ROI[ 0 ] + 1 ) * $pixel_diff;
 	$cwn_offset = 0.5 * $pixel_diff
 				  * ( $ccd_w - ( $ROI[ 2 ] + $ROI[ 0 ] - 1 ) );
 
@@ -2113,7 +2108,7 @@ sub run {
 	$f[ 22 ] = $f[ 21 ]->Label( -text => "Spectral resolution:",
 								-width => 20,
 								-anchor => 'w' );
-	$f[ 23 ] = $f[ 21 ]->Label( -text => $pixel_diff * $BIN[ 1 ],
+	$f[ 23 ] = $f[ 21 ]->Label( -text => $pixel_diff * $BIN[ 0 ],
 								-width => 10,
 								-anchor => 'w' );
 	$f[ 24 ] = $f[ 21 ]->Label( -text => " cm^-1",
@@ -2362,7 +2357,7 @@ cwn_offset;                            // offset to monochromator center wave-
                                        // number to adjust for off-center ROI
                                        // and non-fitting start wavenumber
 spec[ * ];                             // array for spectrum
-avg_spec[ * ];                         // array of averaged spectra
+avg[ * ];                              // array of averaged spectra
 wn[ * ];                               // array of wavenumbers of spectrum
 B_rel,B_abs, B_wl, B_eas, I_scan;      // button identifierrs
 I, J;
@@ -2432,6 +2427,7 @@ IF laser_line != 0.0 {
 B_eas = button_create( "PUSH_BUTTON", "Stop at end of running scan" );
 hide_toolbox( 0 );
 
+avg[ N_Points ] = 0.0;
 F_all = get_file( "", "*.dat", "", "", "dat" );
 
 FOR I = 1 : N_scans {
@@ -2445,14 +2441,8 @@ FOR I = 1 : N_scans {
 	}
 
 	spec = spike_remove( spec );
-
-	IF ( I == 1 ) {
-		avg_spec = spec;
-	} ELSE {
-		avg_spec += spec;
-	}
-
-	display_1d( 1, spec, 1, 1, avg_spec / I, 2 );
+	avg += spec;
+	display_1d( 1, spec, 1, 1, avg / I, 2 );
 
 	IF ! toolbox_changed( ) {
 		NEXT;
@@ -2507,7 +2497,7 @@ IF laser_line != 0.0 {
 }
 
 FOR J = 1 : N_Points {
-	fsave( F_all, "# #\\n", wn[ J ], avg_spec[ J ] / I );
+	fsave( F_all, "# #\\n", wn[ J ], avg[ J ] / I );
 }
 EOF
     close $fh;
@@ -2653,7 +2643,6 @@ IF laser_line != 0.0 {
 }
 
 N_Points = ( N_specs - 1 ) * ( CCD_Points - Overlap_Points ) + CCD_Points;
-avg[ N_Points ] = 0.0;
 
 // Create the toolbox and set the display axis
 
@@ -2676,6 +2665,7 @@ IF laser_line != 0.0 {
 B_eas = button_create( "PUSH_BUTTON", "Stop at end of running scan" );
 hide_toolbox( 0 );
 
+avg[ N_Points ] = 0.0;
 F_all = get_file( "", "*.dat", "", "", "dat" );
 
 FOR I = 1 : N_scans {
