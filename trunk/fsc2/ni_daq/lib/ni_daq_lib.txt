@@ -623,12 +623,12 @@ return immediately with as many data as where avaiable (if 'wait_for_data'
 is zero) or if the function should only return when the acquisition is
 complete (if 'wait_for_data' is non-zero).
 
-On success the function returns the number of data that have been acquired
-for each channel (but never more than 'num_data_per_channel'). On failure
-the function returns one of the following error codes
+On success the function returns the number of data points that have been
+acquired for each channel (but never more than 'num_data_per_channel').
+On failure the function returns one of the following error codes
 
     NI_DAQ_ERR_NSB    NI_DAQ_ERR_BNO   NI_DAQ_ERR_INT    NI_DAQ_ERR_NCS
-    NI_DAQ_ERR_NAS    NI_DAQ_ERR_NEM
+    NI_DAQ_ERR_NAS    NI_DAQ_ERR_NEM   NI_DAQ_ERR_SIG
 
 
 ======================================================================
