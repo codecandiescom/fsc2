@@ -57,13 +57,14 @@ c_sources      = fsc2.c fsc2_rsc.c pulser.c util.c exceptions.c variables.c \
 sources        = $(bison_sources:.y=.c) $(flex_sources:.flex=.c) \
 				 ${c_sources}
 objects        = $(sources:.c=.o)
-modules        = User_Functions.c tds754a.c sr510.c sr810.c s_band.c \
-				 aeg_x_band.c er035m.c bh15.c hp8647a.c
+modules        = User_Functions.c tds754a.c tds520a.c sr510.c sr810.c \
+				 s_band.c aeg_x_band.c er035m.c bh15.c hp8647a.c
 dg2020_f       = dg2020_f.c dg2020_gen_f.c dg2020_pulse_f.c dg2020_init_f.c \
 				 dg2020_run_f.c dg2020_util_f.c dg2020_gpib_f.c
 dg2020_b       = dg2020_b.c dg2020_gen_b.c dg2020_pulse_b.c dg2020_util_b.c \
 				 dg2020_init_b.c dg2020_run_b.c dg2020_gpib_b.c
 tds754a        = tds754a.c tds754a_gpib.c tds754a_util.c
+tds520a        = tds520a.c tds520a_gpib.c tds520a_util.c
 header         = ${c_sources:.c=.h} global.h
 
 # Pass GPIB_LOG, GPIB_CONF and AWK via macros to the source files
@@ -117,7 +118,7 @@ fsc2: $(objects) $(header)
 # specially since each has its own header file and is divided into several
 # source files
 
-mods: dg2020_f.so dg2020_b.so tds754a.so $(modules:.c=.so)
+mods: dg2020_f.so dg2020_b.so tds754a.so tds520a.so $(modules:.c=.so)
 
 dg2020_f.so: ${dg2020_f:.c=.lo} dg2020_f.h
 	$(CC) -shared -o $@ ${dg2020_f:.c=.lo} -lm $(LDFLAGS)
@@ -131,6 +132,10 @@ tds754a.so: ${tds754a:.c=.lo} tds754a.h
 	$(CC) -shared -o $@ ${tds754a:.c=.lo} -lm $(LDFLAGS)
 	chmod 644 $@
 
+tds520.so: ${tds520a:.c=.lo} tds520a.h
+	$(CC) -shared -o $@ ${tds520a:.c=.lo} -lm $(LDFLAGS)
+	chmod 644 $@
+
 %.so: %.lo
 	$(CC) -shared -o $@ $*.lo -lm $(LDFLAGS)
 	chmod 644 $@
@@ -138,6 +143,7 @@ tds754a.so: ${tds754a:.c=.lo} tds754a.h
 ${dg2020_f:.c=.lo}: dg2020_f.h
 ${dg2020_b:.c=.lo}: dg2020_b.h
 ${tds754a:.c=.lo}: tds754a.h
+${tds520a:.c=.lo}: tds520a.h
 
 %.lo: %.c $(header)
 	$(CC) $(CFLAGS) -c -fPIC $< -o $*.lo
@@ -166,7 +172,7 @@ install:
 tags:
 	etags -T ${c_sources} *.flex *.y ${c_sources:.c=.h} $(header)  \
 		  ${modules} ${dg2020_f} dg2020_f.h ${dg2020_b} dg2020_b.h \
-		  ${tds754a} tds754a.h
+		  ${tds754a} tds754a.h ${tds520a} tds520a.h
 
 
 clean: 
