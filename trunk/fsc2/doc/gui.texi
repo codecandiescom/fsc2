@@ -57,14 +57,14 @@ loaded @acronym{EDL} program you have to click onto this button to
 make @acronym{fsc2} load the changed file.
 @item The @code{Edit} button - when you click onto it an editor will
 open up with the curently loaded @acronym{EDL} program. Which
-editor to use depends on the environment variable @code{EDITOR},
-when it isn't set @code{vi} is used as the default editor.
+editor will be used depends on the environment variable @code{EDITOR},
+if it isn't set @code{vi} is used as the default editor.
 @item The @code{Test} button lets you check an @acronym{EDL} program 
-after it has been loaded. While the test running the buttons label
-changes to @code{Stop Test} to let you abort the test. After the test
-finished succesfully the button becomes inactive until a new program is
-loaded (or the current program is reloaded).
-@item Using the @code{Start} button you start execution of the
+after it has been loaded. While the test is running the buttons label is
+changed to @code{Stop Test} and can be used toabort the test. After the
+test finished succesfully the button becomes inactive until a new
+program is loaded (or the current program is reloaded).
+@item Using the @code{Start} button you start the execution of the
 @acronym{EDL} program, i.e.@ you start the experiment.
 @item The @code{Quit} button aborts @acronym{fsc2}.
 @item Pressing the @code{Help} button will try to start a browser with
@@ -72,7 +72,7 @@ the documentation for @acronym{fsc2}. You can select the browser to
 use by setting the environment variable @code{BROWSER} to the name of
 your favourite browser (at least opera, netscape, konqueror, lynx and
 w3m should work without problems). Default browser is Netscape.
-@item Finally, the @code{Bug report} button will open an editor window
+@item The @code{Bug report} button will open an editor window
 where you can compose a bug report. When you're finished the program
 will let you mail me the bug report.
 @end itemize
@@ -97,10 +97,13 @@ loaded @acronym{EDL} program you have to click onto this button to
 make @acronym{fsc2} load the changed file.
 @item The @code{Edit} button - when you click onto it an editor will
 open up with the curently loaded @acronym{EDL} program. Which
-editor to use depends on the environment variable @code{EDITOR},
-when it isn't set @code{vi} is used as the default editor.
+editor will be used depends on the environment variable @code{EDITOR},
+if it isn't set @code{vi} is used as the default editor.
 @item The @code{Test} button lets you check an @acronym{EDL} program 
-after it has been loaded.
+after it has been loaded. While the test is running the buttons label is
+changed to @code{Stop Test} and can be used toabort the test. After the
+test finished succesfully the button becomes inactive until a new
+program is loaded (or the current program is reloaded).
 @item Using the @code{Start} button you start execution of the
 @acronym{EDL} program, i.e.@ you start the measurement.
 @item The @code{Quit} button is for leaving @acronym{fsc2}.
@@ -119,16 +122,18 @@ pressing the key for this letter each button can be triggered via the
 keyboard - but note that, if the underlined letter is an uppercase
 character, you have to enter the uppercase character from the keyboard!
 
-While the test of the the @acronym{EDL} program is runnin most of the
+While the test of the the @acronym{EDL} program is running most of the
 buttons can not be used anymore (as indicated by their labels becoming
 grayed out). The label of the @code{Test} button will become @code{Stop
 Test} - so if you want to stop the test press the @code{Test} button
-again.
+again. After a successful test the @code{Test} button will remain grayed
+out until a new program is loaded.
 
-During the test @acronym{fsc2} may detect problems with @acronym{EDL}
-program or even errors. It then will print messages in the lower
-browser. There are three categories of messages: Warnings, messages for
-severe problems and fatal error messages. Warnings are printed in green,
-messages for severe problems in blue and messages for fatal errors in
-red (in the latter case the test is also aborted immediately).
+During the test @acronym{fsc2} may detect problems with the
+@acronym{EDL} program or even errors. It then will print messages in the
+lower browser. There are three categories of messages: Warnings,
+messages for severe problems and fatal error messages. Warnings are
+printed in green, messages for severe problems in blue and messages for
+fatal errors in red (in the latter case the test is also aborted
+immediately).
 
