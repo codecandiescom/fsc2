@@ -49,7 +49,7 @@
 
 #include <linux/kernel.h>
 #include <linux/parport.h>
-#include <linux/stddef.h>             /* for definition of NULL              */
+#include <linux/stddef.h>
 #include <linux/init.h>
 #include <linux/wait.h>
 #include <linux/delay.h>
@@ -57,11 +57,6 @@
 #include <linux/slab.h>
 #include <asm/uaccess.h>
 #include <asm/io.h>
-
-
-#if defined ( CONFIG_PROC_FS )
-#include <linux/proc_fs.h>
-#endif
 
 
 #define RULBUS_EPP_NAME  "rulbus_epp"
@@ -81,7 +76,7 @@ static int rulbus_read( RULBUS_EPP_IOCTL_ARGS *rulbus_arg );
 static int rulbus_write( RULBUS_EPP_IOCTL_ARGS *rulbus_arg );
 static void rulbus_epp_attach( struct parport *port );
 static void rulbus_epp_detach( struct parport *port );
-static void rulbus_epp_init( void );
+static int rulbus_epp_init( void );
 static inline int rulbus_clear_epp_timeout( void );
 static inline unsigned char rulbus_epp_timout_check( void );
 static inline unsigned char rulbus_parport_read_data( void );
@@ -99,14 +94,13 @@ struct parport_driver rulbus_drv = { RULBUS_EPP_NAME,
 static struct rulbus_device {
         struct parport *port;
         struct pardevice *dev;
-        unsigned char rack;
         int in_use;                 /* set when device is opened */
-        int is_claimed;
+        int is_claimed;             /* set while we have exclusive access */
         uid_t owner;                /* current owner of the device */
         spinlock_t spinlock;
+        unsigned char rack;         /* currently addressed rack */
         unsigned char direction;
-} rulbus = { NULL, NULL, 0xf0, 0, 0 };
-
+} rulbus = { NULL, NULL, 0xf0 };
 
 
 struct file_operations rulbus_file_ops = {
@@ -120,18 +114,44 @@ struct file_operations rulbus_file_ops = {
 static int major = RULBUS_EPP_MAJOR;
 static unsigned long base = RULBUS_EPP_BASE;
 
-#define STATUS_BYTE ( base + 1 )
-#define CTRL_BYTE   ( base + 2 )
-#define ADDR_BYTE   ( base + 3 )
-#define DATA_BYTE   ( base + 4 )
 
 #define FORWARD     0
 #define REVERSE     1
 
 
-/*-------------------------------------------------------*
- * Function that gets executed when the module is loaded
- *-------------------------------------------------------*/
+#define STATUS_BYTE         ( base + 1 )
+#define CTRL_BYTE           ( base + 2 )
+#define ADDR_BYTE           ( base + 3 )
+#define DATA_BYTE           ( base + 4 )
+
+
+/* Bits in SPP status byte */
+
+#define EPP_Timeout         ( 1 << 0 )   /* EPP timeout (reserved in SPP) */
+#define SPP_Reserved2       ( 1 << 1 )   /* SPP reserved2 */
+#define SPP_nIRQ            ( 1 << 2 )   /* SPP !IRQ */
+#define SPP_nError          ( 1 << 3 )   /* SPP !error */
+#define SPP_SelectIn        ( 1 << 4 )   /* SPP select in */
+#define SPP_PaperOut        ( 1 << 5 )   /* SPP paper out */
+#define SPP_nAck            ( 1 << 6 )   /* SPP !acknowledge */
+#define SPP_nBusy           ( 1 << 7 )   /* SPP !busy */
+
+
+/* Bits in SPP control byte */
+
+#define SPP_Strobe          ( 1 << 0 )   /* SPP strobe */
+#define SPP_AutoLF          ( 1 << 1 )   /* SPP auto linefeed */
+#define SPP_nReset          ( 1 << 2 )   /* SPP !reset */
+#define SPP_SelectPrinter   ( 1 << 3 )   /* SPP select printer */
+#define SPP_EnaIRQVAL       ( 1 << 4 )   /* SPP enable IRQ */
+#define SPP_EnaBiDirect     ( 1 << 5 )   /* SPP enable bidirectional */
+#define SPP_Unused1         ( 1 << 6 )   /* SPP unused1 */
+#define SPP_Unused2	        ( 1 << 7 )   /* SPP unused2 */
+
+
+/*------------------------------------------------------*
+ * Function that gets invoked when the module is loaded
+ *------------------------------------------------------*/
 
 static int __init rulbus_init( void )
 {
@@ -170,9 +190,9 @@ static int __init rulbus_init( void )
 }
 
 
-/*------------------------------------------------------*
- * Function gets executed when the module gets unloaded
- *------------------------------------------------------*/
+/*---------------------------------------------------*
+ * Function gets invoked when the module is unloaded
+ *---------------------------------------------------*/
 
 static void __exit rulbus_cleanup( void )
 {
@@ -193,11 +213,11 @@ static void __exit rulbus_cleanup( void )
 }
 
 
-/*---------------------------------------------------------------------*
- * Function that gets called automatically for each detected parport -
- * we pick the one with the right base address and try to register a
- * driver for it.
- *---------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ * Function that gets called automatically for each detected parport,
+ * it picks the one with the right base address and tries to register
+ * a driver for it.
+ *--------------------------------------------------------------------*/
 
 static void rulbus_epp_attach( struct parport *port )
 {
@@ -289,9 +309,7 @@ static int rulbus_open( struct inode *inode_p, struct file *file_p )
                 return -EIO;
         }
 
-        rulbus_epp_init( );
-
-        if ( rulbus_epp_interface_present( ) != 0  ) {
+        if ( rulbus_epp_init( ) != 0  ) {
                 printk( KERN_NOTICE "Rulbus interface not present.\n" );
                 parport_release( rulbus.dev );
                 spin_unlock( &rulbus.spinlock );
@@ -346,11 +364,12 @@ static int rulbus_release( struct inode *inode_p, struct file *file_p )
 }
 
 
-/*------------------------------------------------------*
- *------------------------------------------------------*/
+/*----------------------------------------------------*
+ * Function dealing with ioctl() calls for the device
+ *----------------------------------------------------*/
 
 static int rulbus_ioctl( struct inode *inode_p, struct file *file_p,
-             unsigned int cmd, unsigned long arg )
+						 unsigned int cmd, unsigned long arg )
 {
         RULBUS_EPP_IOCTL_ARGS rulbus_arg;
         int ret;
@@ -382,20 +401,12 @@ static int rulbus_ioctl( struct inode *inode_p, struct file *file_p,
                         return -EINVAL;
         }
 
-        if ( ret < 0 )
-                return ret;
-
-        if ( copy_to_user( ( RULBUS_EPP_IOCTL_ARGS * ) arg, &rulbus_arg,
-                           sizeof rulbus_arg ) ) {
-                printk( KERN_NOTICE "Can't write to user space\n" );
-                return -EACCES;
-        }
-
         return ret;
 }
 
 
 /*------------------------------------------------------*
+ * Function for reading data from a card
  *------------------------------------------------------*/
 
 static int rulbus_read( RULBUS_EPP_IOCTL_ARGS *rulbus_arg )
@@ -404,6 +415,8 @@ static int rulbus_read( RULBUS_EPP_IOCTL_ARGS *rulbus_arg )
         unsigned char *bp;
         int i;
 
+
+		/* Plausibility checks */
 
         if ( rulbus_arg->rack & 0xF0 ) {
                 printk( KERN_NOTICE "Invalid rack number.\n" );
@@ -416,7 +429,7 @@ static int rulbus_read( RULBUS_EPP_IOCTL_ARGS *rulbus_arg )
         }
 
         if ( rulbus_arg->len < 1 ) {
-                printk( KERN_NOTICE "Invalid number of bytes to be read.\n" );
+                printk( KERN_NOTICE "Invalid number of bytes to read.\n" );
                 return -EINVAL;
         }
 
@@ -449,8 +462,8 @@ static int rulbus_read( RULBUS_EPP_IOCTL_ARGS *rulbus_arg )
         for ( bp = data, i = rulbus_arg->len; i > 0; bp++, i-- )
                 *bp = rulbus_parport_read_data( );
 
-        /* Copy what we just read to the user-space buffer and deallocate the
-		   kernel buffer */
+        /* Copy all that has just been read to the user-space buffer and
+		   deallocate the kernel buffer */
 
 		if ( copy_to_user( rulbus_arg->data, data, rulbus_arg->len ) ) {
 				kfree( data );
@@ -464,8 +477,9 @@ static int rulbus_read( RULBUS_EPP_IOCTL_ARGS *rulbus_arg )
 }
 
 
-/*------------------------------------------------------*
- *------------------------------------------------------*/
+/*-------------------------------------*
+ * Function for writing data to a card
+ *-------------------------------------*/
 
 static int rulbus_write( RULBUS_EPP_IOCTL_ARGS *rulbus_arg )
 {
@@ -473,6 +487,8 @@ static int rulbus_write( RULBUS_EPP_IOCTL_ARGS *rulbus_arg )
         unsigned char *bp;
         int i;
 
+
+		/* Plausibility checks */
 
         if ( rulbus_arg->rack & 0xF0 ) {
                 printk( KERN_NOTICE "Invalid rack number.\n" );
@@ -490,9 +506,10 @@ static int rulbus_write( RULBUS_EPP_IOCTL_ARGS *rulbus_arg )
                 return -EINVAL;
         }
 
-        /* If there's just a single byte to be written use the 'byte' field of
-           the RULBUS_EPP_IOCTL_ARGS structure, otherwise we need to allocate
-           a buffer and copy everything there from user-space */
+        /* If there's just a single byte to be written the 'byte' field of
+           the RULBUS_EPP_IOCTL_ARGS structure is used, otherwise a buffer
+		   needs to be allocated and everything gets copied there from user-
+		   space */
 
         if ( rulbus_arg->len == 1 )
                 data = &rulbus_arg->byte;
@@ -539,27 +556,33 @@ static int rulbus_write( RULBUS_EPP_IOCTL_ARGS *rulbus_arg )
 }
 
 
-/*------------------------------------------------------*
- *------------------------------------------------------*/
+/*------------------------------------------*
+ * Function to initialize the parallel port
+ *------------------------------------------*/
 
-static void rulbus_epp_init( void )
+static int rulbus_epp_init( void )
 {
         unsigned char ctrl;
 
 
-        outb( 0x04, CTRL_BYTE );
+        outb( SPP_nReset, CTRL_BYTE );
 
-        /* Reset the device */
+        /* Reset the device by toggling the !reset bit */
 
         ctrl = inb( CTRL_BYTE );
-        outb( ctrl & 0xFB, CTRL_BYTE ); /* EPP Reset (SPP Init) line assert */
+        outb( ctrl & ~ SPP_nReset, CTRL_BYTE );
 		udelay( 1000 );
-        outb( ctrl | 0x04, CTRL_BYTE ); /* EPP Reset (SPP Init) de-assert */
+        outb( ctrl | SPP_nReset, CTRL_BYTE );
+
+		/* Finally check if the interface can be detected */
+
+		return rulbus_epp_interface_present( );
 }
 
 
-/*------------------------------------------------------*
- *------------------------------------------------------*/
+/*-----------------------------------------------------*
+ * Function to check for and clear a timeout condition
+ *-----------------------------------------------------*/
 
 static inline int rulbus_clear_epp_timeout( void )
 {
@@ -575,19 +598,24 @@ static inline int rulbus_clear_epp_timeout( void )
 
         inb( STATUS_BYTE );
         status = inb( STATUS_BYTE );
-        outb( status | 0x01, STATUS_BYTE );   /* Some reset by writing 1 */
-        outb( status & 0xfe, STATUS_BYTE );   /* Others by writing 0     */
+
+		/* Some chips reset the timeout condition by setting the lowest bit,
+		   others by resetting it */
+
+        outb( status | EPP_Timeout, STATUS_BYTE );
+        outb( status & ~ EPP_Timeout, STATUS_BYTE );
 
         return ! rulbus_epp_timout_check( );
 }
 
 
-/*------------------------------------------------------*
- *------------------------------------------------------*/
+/*-------------------------------------------------------*
+ * Function tests if last transfer resulted in a timeout
+ *-------------------------------------------------------*/
 
 static inline unsigned char rulbus_epp_timout_check( void )
 {
-        return inb( STATUS_BYTE ) & 0x01;
+        return inb( STATUS_BYTE ) & EPP_Timeout;
 }
 
 
@@ -639,18 +667,22 @@ static inline void rulbus_parport_write_addr( unsigned char addr )
 }
 
 
-/*------------------------------------------------------*
- *------------------------------------------------------*/
+/*--------------------------------------------------------------------------*
+ * Reverse the port direction by enabling or disabling the bi-direction bit
+ *--------------------------------------------------------------------------*/
 
 static inline void rulbus_parport_reverse( void )
 {
         rulbus.direction ^= 1;
-        outb( inb( CTRL_BYTE ) ^ 0x20, CTRL_BYTE );
+        outb( inb( CTRL_BYTE ) ^ SPP_EnaBiDirect, CTRL_BYTE );
 }
 
 
-/*------------------------------------------------------*
- *------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * Function tries to determine if the Rulbus interface is present
+ * by writing to different address patterns and then checking if
+ * they can be read back.
+ *----------------------------------------------------------------*/
 
 static int rulbus_epp_interface_present( void )
 {
