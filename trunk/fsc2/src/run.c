@@ -147,6 +147,10 @@ bool run( void )
 	if ( child_pid != -1 )           /* if fork() succeeded */
 		return OK;
 
+	signal( SIGCHLD, main_sig_handler );
+	signal( SIGUSR1, main_sig_handler );
+	signal( SIGUSR2, main_sig_handler );
+
 	switch ( errno )
 	{
 		case EAGAIN :
@@ -164,13 +168,9 @@ bool run( void )
 	}
 
 	child_pid = 0;
-
 	end_comm( );
-
-	signal( SIGCHLD, main_sig_handler );
-	signal( SIGUSR1, main_sig_handler );
-	signal( SIGUSR2, main_sig_handler );
 	run_end_of_exp_hooks( );
+
 	if ( need_GPIB )
 		gpib_shutdown( );
 	stop_measurement( NULL, 1 );
@@ -180,7 +180,7 @@ bool run( void )
 
 /*-------------------------------------------------------------------*/
 /* Checks if new errors etc. were found while running the exp_hooks. */
-/* If so ask the user if she wants to continue - if no an exception  */
+/* If so ask the user if she wants to continue - if not an exception */
 /* is thrown.                                                        */
 /*-------------------------------------------------------------------*/
 
@@ -490,6 +490,19 @@ static void run_child( void )
 
 	I_am = CHILD;
 
+    /* Set up pipes for communication with parent process */
+
+	close( pd[ WRITE ] );
+	close( pd[ 2 ] );
+	pd[ WRITE ] = pd[ 3 ];
+
+	/* Set up pointers and global variables used with the signal handlers */
+
+	return_status = OK;
+	cur_prg_token = prg_token;
+	do_send = do_quit = UNSET;
+
+	/* Set up signals */
 
 	signal( SIGILL,  SIG_DFL );
 	signal( SIGABRT, SIG_DFL );
@@ -498,19 +511,6 @@ static void run_child( void )
 	signal( SIGPIPE, SIG_DFL );
 	signal( SIGTERM, SIG_DFL );
 	signal( SIGBUS,  SIG_DFL );
-
-    /* Set up pipes for communication with parent process */
-
-	close( pd[ WRITE ] );
-	close( pd[ 2 ] );
-	pd[ WRITE ] = pd[ 3 ];
-
-	/* Set up pointers and global variables used with the signal handlers
-	   and set the handlers for the DO_SEND and DO_QUIT signals */
-
-	return_status = OK;
-	cur_prg_token = prg_token;
-	do_send = do_quit = UNSET;
 
 	sact.sa_handler = child_sig_handler;
 	sigemptyset( &sact.sa_mask );
@@ -579,23 +579,20 @@ static void run_child( void )
 }
 
 
-/*----------------------------------------------------------------*/
-/* This is the signal handler for all three signals the child is  */
-/* interested in. The signal handler should always be installed   */
-/* for a signal with blocking both the other signals to avoid     */
-/* interrupting the handler with another signal thus interfering  */
-/* with the return via siglongjump().                             */
-/* And there's an additional twist: The SIGALRM signal can only   */
-/* come from the f_wait() function (see func_util.c). Here we     */
-/* we wait in a pause() for SIGALRM to get a reliable timer. On   */
-/* the other hand, the pause() also has to be interruptible by    */
-/* the DO_QUIT signal, so by falling through from the switch of   */
-/* for this signal it is guaranteed that also this signal will    */
-/* end the pause() - it works even when the handler, while        */
-/* handling a SIGALRM signal, is interrupted by a DO_QUIT signal. */
-/* In all other cases (i.e. when we're not waiting in the pause() */
-/* in f_wait()) nothing bad happens.                              */
-/*----------------------------------------------------------------*/
+/*------------------------------------------------------------*/
+/* This is the signal handler for the three signals the child */
+/* is interested in.                                          */
+/* There's a twist: The SIGALRM signal can only come from the */
+/* f_wait() function (see func_util.c). Here we we wait in a  */
+/*  pause() for SIGALRM to get a reliable timer. On the other */
+/* hand, the pause() also has to be interruptible by the      */
+/* DO_QUIT signal, so by falling through from the switch of   */
+/* for this signal it is guaranteed that also this signal     */
+/* will end the pause() - it works even when the handler,     */
+/* while handling a SIGALRM signal, is interrupted by a       */
+/* DO_QUIT signal. In all other cases (i.e. when we're not    */
+/* waiting in the pause() in f_wait()) nothing bad happens.   */
+/*------------------------------------------------------------*/
 
 void child_sig_handler( int signo )
 {

@@ -644,7 +644,7 @@ Var *f_display( Var *v )
 	int i;
 
 
-	/* We can't display data without a previous initialisation */
+	/* We can't display data without a previous initialization */
 
 	if ( ! G.is_init )
 	{
