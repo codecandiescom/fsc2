@@ -684,9 +684,6 @@ int gpib_write( int device, const char *buffer, long length )
 static void gpib_write_start( const char *dev_name, const char *buffer,
 							  long length )
 {
-    long i;
-
-
     gpib_log_function_start( "gpib_write", dev_name );
 	raise_permissions( );
     fprintf( gpib_log, "-> There are %ld bytes to be sent\n", length );
@@ -789,9 +786,6 @@ int gpib_read( int device, char *buffer, long *length )
 static void gpib_read_end( const char *dev_name, char *buffer, long received,
 						   long expected )
 {
-    long i;
-
-
     if ( ll > LL_ERR || ( ibsta & IBERR ) )
         gpib_log_function_end( "gpib_read", dev_name );
 
@@ -826,7 +820,7 @@ int gpib_serial_poll( int device, unsigned char *stb )
 	if ( ( devp = gpib_get_dev( device ) ) == NULL )
 	{
 		sprintf( gpib_error_msg, "CALL of gpib_serial_poll for unknown device "
-				 "(device number %d)\n", devp->name );
+				 "(device number %d)\n", device );
 		return FAILURE;
 	}
 
