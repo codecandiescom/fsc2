@@ -82,15 +82,15 @@ void dg2020_basic_pulse_check( void )
 
 		if ( ! p->is_function )
 		{
-			print( FATAL, "Pulse %ld is not associated with a function.\n",
+			print( FATAL, "Pulse #%ld is not associated with a function.\n",
 				   p->num );
 			THROW( EXCEPTION );
 		}
 
 		if ( ! p->function->is_used )
 		{
-			print( FATAL, "Function '%s' of pulse %ld hasn't been declared in "
-				   "the ASSIGNMENTS section.\n",
+			print( FATAL, "Function '%s' of pulse #%ld hasn't been declared "
+				   "in the ASSIGNMENTS section.\n",
 				   Function_Names[ p->function->self ], p->num );
 			THROW( EXCEPTION );
 		}
@@ -115,7 +115,7 @@ void dg2020_basic_pulse_check( void )
 		if ( p->is_pos && p->is_len && p->len != 0 &&
 			 p->pos + p->len + p->function->delay >= MAX_PULSER_BITS )
 		{
-			print( FATAL, "Pulse %ld does not fit into the pulsers memory. "
+			print( FATAL, "Pulse #%ld does not fit into the pulsers memory. "
 				   "You could try a longer pulser time base.\n", p->num );
 			THROW( EXCEPTION );
 		}
@@ -134,7 +134,7 @@ void dg2020_basic_pulse_check( void )
 
 			if ( p->function->phase_setup == NULL )
 			{
-				print( FATAL, "Pulse %ld needs phase cycling but a phase "
+				print( FATAL, "Pulse #%ld needs phase cycling but a phase "
 					   "setup for its function '%s' is missing.\n",
 					   p->num, Function_Names[ p->function->self ] );
 				THROW( EXCEPTION );
@@ -145,7 +145,7 @@ void dg2020_basic_pulse_check( void )
 				cur_type = p->pc->sequence[ i ];
 				if  ( cur_type < PHASE_PLUS_X || cur_type > PHASE_CW )
 				{
-					print( FATAL, "Pulse %ld needs phase type '%s' but this "
+					print( FATAL, "Pulse #%ld needs phase type '%s' but this "
 						   "type isn't possible with this driver.\n",
 						   p->num, Phase_Types[ cur_type ] );
 					THROW( EXCEPTION );

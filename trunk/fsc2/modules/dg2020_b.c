@@ -109,6 +109,12 @@ int dg2020_b_init_hook( void )
 	dg2020.neg_delay = 0;
 	dg2020.is_max_seq_len = UNSET;
 
+	dg2020.is_shape_2_defense = UNSET;
+	dg2020.is_defense_2_shape = UNSET;
+	dg2020.shape_2_defense_too_near = UNSET;
+	dg2020.defense_2_shape_too_near = UNSET;
+	dg2020.is_confirmation = UNSET;
+
 	dg2020.block[ 0 ].is_used = dg2020.block[ 1 ].is_used = UNSET;
 
 	for ( i = 0; i < MAX_PODS; i++ )
@@ -220,6 +226,25 @@ int dg2020_b_end_of_test_hook( void )
 	dg2020.max_seq_len = dg2020_get_max_seq_len( );
 	dg2020_calc_padding( );
 
+	/* If in the test it was found that shape and defense pulses got too
+	   near to each other bail out */
+
+	if ( dg2020.shape_2_defense_too_near )
+	{
+		print( FATAL, "Distance between PULSE_SHAPE and DEFENSE pulses was "
+			   "shorter than %s during the test run.\n",
+			   dg2020_ptime( dg2020_ticks2double( dg2020.shape_2_defense ) ) );
+		THROW( EXCEPTION );
+	}
+
+	if ( dg2020.defense_2_shape_too_near )
+	{
+		print( FATAL, "Distance between DEFENSE and PULSE_SHAPE pulses was "
+			   "shorter than %s during the test run.\n",
+			   dg2020_ptime( dg2020_ticks2double( dg2020.defense_2_shape ) ) );
+		THROW( EXCEPTION );
+	}
+
 	return 1;
 }
 
@@ -234,6 +259,50 @@ int dg2020_b_exp_hook( void )
 
 	if ( ! dg2020_is_needed )
 		return 1;
+
+	/* Extra safety net: If the minimum distances between shape and defense
+	   pulses have been changed by calling the appropriate functions ask
+	   the user the first time the experiment gets started if (s)he is 100%
+	   sure that's what (s)he really wants. This can be switched off by
+	   commenting out the definition in config/dg2020.conf of
+	   "ASK_FOR_SHAPE_DEFENSE_DISTANCE_CONFORMATION" */
+
+#if defined ASK_FOR_SHAPE_DEFENSE_DISTANCE_CONFORMATION
+	if ( ! dg2020.is_confirmation && 
+		 ( dg2020.is_shape_2_defense || dg2020.is_defense_2_shape ) )
+	{
+		char str[ 500 ];
+
+		if ( dg2020.is_shape_2_defense && dg2020.is_defense_2_shape )
+		{
+			sprintf( str, "Minimum distance between SHAPE and DEFENSE\n"
+					 "pulses has been changed to %s",
+					 dg2020_ptime( 
+						 dg2020_ticks2double( dg2020.shape_2_defense ) ) );
+			sprintf( str + strlen( str ), " and %s.\n"
+					 "***** Is this really what you want? *****",
+					 dg2020_ptime(
+						 dg2020_ticks2double( dg2020.defense_2_shape ) ) );
+		}
+		else if ( dg2020.is_shape_2_defense )
+			sprintf( str, "Minimum distance between SHAPE and DEFENSE\n"
+					 "pulses has been changed to %s.\n"
+					 "***** Is this really what you want? *****",
+					 dg2020_ptime(
+						 dg2020_ticks2double( dg2020.shape_2_defense ) ) );
+		else
+			sprintf( str, "Minimum distance between DEFENSE and SHAPE\n"
+					 "pulses has been changed to %s.\n"
+					 "***** Is this really what you want? *****",
+					 dg2020_ptime(
+						 dg2020_ticks2double( dg2020.defense_2_shape ) ) );
+
+		if ( 2 != show_choices( str, 2, "Abort", "Yes", "", 1 ) )
+			THROW( EXCEPTION );
+
+		dg2020.is_confirmation = SET;
+	}
+#endif
 
 	/* Initialize the device */
 
@@ -333,6 +402,82 @@ Var *pulser_name( Var *v )
 {
 	v = v;
 	return vars_push( STR_VAR, DEVICE_NAME );
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+Var *pulser_shape_to_defense_minimum_distance( Var *v )
+{
+	double s2d;
+
+
+	if ( ! dg2020.is_timebase )
+	{
+		print( FATAL, "Can't set a time because no pulser time base has been "
+			   "set.\n" );
+		THROW( EXCEPTION );
+	}
+
+	if ( dg2020.is_shape_2_defense )
+	{
+		print( FATAL, "SHAPE to DEFENSE pulse minimum distance has already "
+			   "been set to %s.\n",
+			   dg2020_ptime( dg2020_ticks2double( dg2020.shape_2_defense ) ) );
+		THROW( EXCEPTION );
+	}
+
+	s2d = get_double( v, "SHAPE to DEFENSE pulse minimum distance" );
+
+	if ( s2d < 0 )
+	{
+		print( FATAL, "Negative SHAPE to DEFENSE pulse minimum distance.\n" );
+		THROW( EXCEPTION );
+	}
+
+	dg2020.shape_2_defense = dg2020_double2ticks( s2d );
+	dg2020.is_shape_2_defense = SET;
+
+	return vars_push( FLOAT_VAR, s2d );
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+Var *pulser_defense_to_shape_minimum_distance( Var *v )
+{
+	double d2s;
+
+
+	if ( ! dg2020.is_timebase )
+	{
+		print( FATAL, "Can't set a time because no pulser time base has been "
+			   "set.\n" );
+		THROW( EXCEPTION );
+	}
+
+	if ( dg2020.is_defense_2_shape )
+	{
+		print( FATAL, "DEFENSE to SHAPE pulse minimum distance has already "
+			   "been set to %s.\n",
+			   dg2020_ptime( dg2020_ticks2double( dg2020.defense_2_shape ) ) );
+		THROW( EXCEPTION );
+	}
+
+	d2s = get_double( v, "DEFENSE to SHAPE pulse minimum distance" );
+
+	if ( d2s < 0 )
+	{
+		print( FATAL, "Negative DEFENSE to SHAPE pulse minimum distance.\n" );
+		THROW( EXCEPTION );
+	}
+
+	dg2020.defense_2_shape = dg2020_double2ticks( d2s );
+	dg2020.is_defense_2_shape = SET;
+
+	return vars_push( FLOAT_VAR, d2s );
 }
 
 
@@ -492,7 +637,7 @@ Var *pulser_shift( Var *v )
 
 		if ( ! p->is_pos )
 		{
-			print( FATAL, "Pulse %ld has no position set, so shifting it is "
+			print( FATAL, "Pulse #%ld has no position set, so shifting it is "
 				   "impossible.\n", p->num );
 			THROW( EXCEPTION );
 		}
@@ -500,7 +645,7 @@ Var *pulser_shift( Var *v )
 		if ( ! p->is_dpos )
 		{
 			print( FATAL, "Amount of position change hasn't been defined for "
-				   "pulse %ld.\n", p->num );
+				   "pulse #%ld.\n", p->num );
 			THROW( EXCEPTION );
 		}
 
@@ -512,7 +657,7 @@ Var *pulser_shift( Var *v )
 
 		if ( ( p->pos += p->dpos ) < 0 )
 		{
-			print( FATAL, "Shifting the position of pulse %ld leads to an "
+			print( FATAL, "Shifting the position of pulse #%ld leads to an "
 				   "invalid  negative position of %s.\n",
 				   p->num, dg2020_pticks( p->pos ) );
 			THROW( EXCEPTION );
@@ -576,8 +721,8 @@ Var *pulser_increment( Var *v )
 
 		if ( ! p->is_len )
 		{
-			print( FATAL, "Pulse %ld has no length set, so incrementing it is "
-				   "impossibe.\n", p->num );
+			print( FATAL, "Pulse #%ld has no length set, so incrementing it "
+				   "is impossibe.\n", p->num );
 			THROW( EXCEPTION );
 		}
 
@@ -596,7 +741,7 @@ Var *pulser_increment( Var *v )
 
 		if ( ( p->len += p->dlen ) < 0 )
 		{
-			print( FATAL, "Incrementing the length of pulse %ld leads to an "
+			print( FATAL, "Incrementing the length of pulse #%ld leads to an "
 				   "invalid negative pulse length of %s.\n",
 				   p->num, dg2020_pticks( p->len ) );
 			THROW( EXCEPTION );

@@ -275,14 +275,14 @@ void eprint( int severity, bool print_fl, const char *fmt, ... )
 
 		if ( severity == SEVERE )
 		{
-			strcpy( buffer, "@C2@f" );
+			strcpy( buffer, "@C4@f" );
 			cp += 5;
 			space_left -= 5;
 		}
 
 		if ( severity == WARN )
 		{
-			strcpy( buffer, "@C4@f" );
+			strcpy( buffer, "@C2@f" );
 			cp += 5;
 			space_left -= 5;
 		}
@@ -364,14 +364,14 @@ void print( int severity, const char *fmt, ... )
 
 		if ( severity == SEVERE )
 		{
-			strcpy( buffer, "@C2@f" );
+			strcpy( buffer, "@C4@f" );
 			cp += 5;
 			space_left -= 5;
 		}
 
 		if ( severity == WARN )
 		{
-			strcpy( buffer, "@C4@f" );
+			strcpy( buffer, "@C2@f" );
 			cp += 5;
 			space_left -= 5;
 		}
