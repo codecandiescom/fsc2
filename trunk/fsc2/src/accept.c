@@ -61,7 +61,7 @@ void accept_new_data( void )
 		if ( ( buf = attach_shm( Message_Queue[ message_queue_low ].shm_id ) )
 			 == ( void * ) - 1 )
 		{
-#if defined  ( DEBUG )
+#if defined ( DEBUG )
 			eprint( FATAL, UNSET, "Internal communication error at %s:%d, "
 					"message_queue_low = %d, shm_id = %d.\n"
 					"*** PLEASE SEND A BUG REPORT CITING THESE LINES *** "
@@ -308,11 +308,14 @@ static void accept_1d_data( long x_index, long curve, int type, char *ptr )
 
 	/* Test if the curve number is OK */
 
+#if defined ( DEBUG )
 	if ( curve >= G.nc )
 	{
-		eprint( FATAL, SET, "There is no curve %ld.\n", curve + 1 );
+		eprint( FATAL, SET, "Internal error detected at %s:%d, there is no "
+				"curve %ld.\n", __FILE__, __LINE__, curve + 1 );
 		THROW( EXCEPTION )
 	}
+#endif
 
 	/* Get the amount of new data and a pointer to the start of the data */
 
@@ -516,11 +519,14 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 
 	/* Test if the curve number is OK */
 
+#if defined ( DEBUG )
 	if ( curve >= G.nc )
 	{
-		eprint( FATAL, SET, "There is no curve %ld.\n", curve + 1 );
+		eprint( FATAL, SET, "Internal error detected at %s:%d, there is no "
+				"curve %ld.\n", __FILE__, __LINE__, curve + 1 );
 		THROW( EXCEPTION )
 	}
+#endif
 
 	cv = G.curve_2d[ curve ];
 
