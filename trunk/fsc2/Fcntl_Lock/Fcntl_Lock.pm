@@ -150,7 +150,8 @@ sub l_whence {
 
 ###########################################################
 # l_start can be both positive and negative (it only may not point to
-# something before the start of the file but that we can't check here).
+# something before the start of the file but that's not something we
+# can check here).
 
 sub l_start {
     my $flock_struct = shift;
@@ -161,10 +162,10 @@ sub l_start {
 
 
 ###########################################################
-# Negative lengths may be allowed on some systems, e.g. on TRUE64 the man
-# page says that when l_len is positive, the lock starts at l_start and ends
-# at l_start + l_len, while for negative lengths the locked region is from
-# l_start + l_len to l_start - 1.
+# Note: Negative lengths may be allowed on some systems, e.g. on TRUE64 the
+# man page says that when l_len is positive, the lock starts at l_start and
+# ends at l_start + l_len, while for negative lengths the locked region is
+# from l_start + l_len to l_start - 1.
 
 sub l_len {
     my $flock_struct = shift;
@@ -186,7 +187,7 @@ sub l_pid {
 
 
 ###########################################################
-#
+# Returns the errno for a failed call of fcntl_lock()
 
 sub fcntl_errno {
     my $flock_struct = shift;
@@ -195,7 +196,8 @@ sub fcntl_errno {
 
 
 ###########################################################
-#
+# Returns some (hopefully) useful string to the user about the reason for
+# the failed call of fcntl_lock()
 
 sub fcntl_error {
     my $flock_struct = shift;
@@ -204,7 +206,7 @@ sub fcntl_error {
 
 
 ###########################################################
-#
+# Returns the systems error message for the a failed call of fcntl_lock()
 
 sub fcntl_system_error {
 	local $!;
@@ -214,7 +216,9 @@ sub fcntl_system_error {
 
 
 ###########################################################
-#
+# Sould we include something here to make sure the user isn't passing
+# invalid values to fcntl(), e.g. l_start values that point to some
+# place *before* the start of the file?
 
 sub fcntl_lock {
 	my ( $flock_struct, $fh, $action ) = @_;
@@ -231,7 +235,9 @@ sub fcntl_lock {
 	if ( $ret = C_fcntl_lock( $fd, $action, $flock_struct, $err ) ) {
 		$flock_struct->{ errno } = $flock_struct->{ error } = undef;
 	} else {
+		# Hope this never will happen... */
 		die "Internal error in Fcntl_Lock module detected" if $err;
+
 		$flock_struct->{ errno } = $! + 0;
 		$flock_struct->{ error } = defined $fcntl_error_texts{ $! + 0 } ?
 			$fcntl_error_texts{ $! + 0 } : "Unexpected error: $!";
@@ -322,7 +328,9 @@ lseek(2).
 
 Queries or sets the length of the region (in bytes) in the file to be
 locked. A value of 0 means a lock (starting at B<l_start>) to the very end of
-the file.
+the file. On some systems l_len is allowed to be negative, see the fcntl(2)
+man page for details.
+
 
 =item B<l_pid>
 
@@ -331,6 +339,7 @@ when determining the current owner of a lock, in which case the PID of the
 process holding the lock is returned in this member.
 
 =back
+
 
 When not initialized the flock structure entry B<l_type> is set to B<F_RDLCK>
 by default, B<l_whence> to B<SEEK_SET>, and both B<l_start> and B<l_len> to 0,
