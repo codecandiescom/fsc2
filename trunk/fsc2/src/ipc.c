@@ -225,7 +225,7 @@ void delete_stale_shms( void )
 
 				if ( shm_seg.shm_nattch != 0 )          /* attach count != 0 */
 					fprintf( stderr, "Stale shared memory segment has attach "
-							 "count of %ld.\nPossibly one of fsc2s processes "
+							 "count of %ld.\nPossibly one of fsc2's processes "
 							 "survived...\n", shm_seg.shm_nattch );
 				else
 					shmctl( shm_id, IPC_RMID, NULL );
