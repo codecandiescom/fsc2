@@ -22,7 +22,6 @@ static bool zoom_z_2d( Canvas *c );
 static void shift_XPoints_of_curve_2d( Canvas *c, Curve_2d *cv );
 static void reconfigure_window_2d( Canvas *c, int w, int h );
 static void recalc_XPoints_2d( void );
-static void redraw_canvas_2d( Canvas *c );
 static void make_color_scale( Canvas *c, Curve_2d *cv );
 
 
