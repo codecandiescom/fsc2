@@ -24,10 +24,12 @@
 @chapter Internals
 
 
-In this chapter I will try to explain in some detail how @code{fsc2}
-does work internally. I hope that this will help especially if you try
-to write a new module for a device (or if you get upset about things
-@code{fsc2} does differently from the way you would like it to).
+In this chapter I will try to explain in some more detail how
+@code{fsc2} works internally. I hope that this will help especially if
+you're going try to write a new module for a device (or if you get upset
+about things @code{fsc2} does differently from the way you would like it
+to).
+
 
 As you will already have understood, @code{fsc2} is basically an
 interpreter for @code{EDL} scripts. Normal interpreters interpret each
@@ -43,6 +45,7 @@ be stopped due to obvious logical errors in the @code{EDL} script. The
 device modules are involved, i.e.@: they already can do all kinds of
 checks on what can be expected to happen during the real experiment and
 detect possible problems.
+
 
 Only if all these tests succeeded the third step, the execution of the
 @code{EXPERIMENT} section of the @code{EDL} script, is started, i.e.@:
@@ -71,9 +74,9 @@ having an extension of @code{.l}. As you will see there's such a file
 for each of the different sections an @code{EDL} script may
 contain. Actually, there are some extra ones, @file{split_lexer.l} is
 the central switch for the first stage that calls the individual
-tokenizers in turn when finding a section label and also deals with
-error conditions that can't be handled by the section interpreters. Two
-extra tokenizers, @file{devices_list_lexer.l} and
+tokenizers in turn on finding a new section label and also deals with
+error conditions that couldn't be handled by the section
+interpreters. Two extra tokenizers, @file{devices_list_lexer.l} and
 @file{func_list_lexer.l} are for analyzing the files with the list of
 device modules, @file{conf/Devices}, and the list of functions,
 @file{conf/Functions} (they also contain some additional @code{C} code
@@ -87,11 +90,11 @@ directly with the input files (there can be more than one when there are
 an extra program, @file{fsc2_clean} that translates the input @code{EDL}
 script into a form that the main program understands. @code{fsc2_clean}
 for example removes all comments, includes files for @code{#INCLUDE}
-statements, adds information about line numbers and file names etc.@:,
-and then passes this cleaned-up input to @code{fsc2}. If you are
-interested what @code{fsc2} really sees of an @code{EDL} file you can
-run @code{fsc2_clean} with the @code{EDL} file as its standard input,
-i.e.@:
+statements, adds information about line numbers and file names, deals
+with physical units etc.@:, and then passes this cleaned-up input to
+@code{fsc2}. If you are interested what @code{fsc2} really sees of an
+@code{EDL} file you can run @code{fsc2_clean} with the @code{EDL} file
+as its standard input, i.e.@:
 @example
 fsc2_clean < edl_script.edl
 @end example
@@ -100,25 +103,25 @@ fsc2_clean < edl_script.edl
 non-printable characters).
 
 
-In the sections preceeding the @code{EXPERIMENT} section the lines of
-the @code{EDL} script are also already executed. E.g.@: during the
+The lines of @code{EDL} script in the sections preceeding the
+@code{EXPERIMENT} section are executed immediately. E.g.@: during the
 handling of the @code{DEVICES} section the modules for the listed
 devices are loaded and the functions defined in the modules are included
-into @code{fsc2}'s internal list of functions that can be used from
-within the @code{EDL} script. While reading the @code{VARIABLES}
-section the newly defined variables are added to @code{fsc2}'s list of
-variables, and, if necessary, also initialized.
+into @code{fsc2}s internal list of functions that can be used from
+within the @code{EDL} script. While reading the @code{VARIABLES} section
+the newly defined variables are added to @code{fsc2}s list of variables,
+and, if necessary, initialized.
 
 
 While the tokenizers (i.e.@: the files with an extension of @code{.l})
 are used for splitting of the input into manageable tokens, the
 execution of the code (now consisting of a stream of tokens) is done in
 the files with an extension of @code{.y} (or, to be precise, by the code
-created from these files). In these files, the parsers, actions (mostly
-a few lines of @code{C} code) are executed for syntactically correct
-sets of tokens. Because actions can only be executed for input with the
-right syntax, these files also define what is syntactically correct and
-what is not.
+generated from these files). In these files, the parsers, actions
+(mostly a few lines of @code{C} code) are executed for syntactically
+correct sets of tokens. Because actions can only be executed for input
+with valid syntax, these files practically define what is syntactically
+correct and what is not.
 
 
 To give you an example, here's a very simple statement from an
@@ -161,20 +164,20 @@ are @i{per definitionem} syntactically incorrect. For example, there is
 no rule on how to deal with a sequence of tokens as the one above but
 with the integer number missing. Because the parser looks at the
 statements token by token it won't complain while getting the first four
-tokens up to the plus. Only if the end of statement operator, the
-semicolon, is found directly after the plus sign it will recognize
-that there is no rule on how to deal with the situation, print the error
-message @code{Syntax error near token ';'} (plus the file name and line
-number) and abort.
+tokens up to and including the plus operator. Only if the end of
+statement operator, the semicolon, is found directly after the plus sign
+it will recognize that there is no rule on how to deal with the
+situation, print the error message @code{Syntax error near token ';'}
+(plus the file name and line number) and abort.
 
 
 The @code{EXPERIMENT} section is handled differently. Most important,
 the code of the @code{EXPERIMENT} section is not executed at this
 stage. It is just split up into its tokens and only some rudimentary
-kind of syntax check is done, e.g.@: undefined variables or mismatched
-braces etc.@: are detected. Instead, an internal list of all the
-tokens the @code{EXPERIMENT} section consists of is created. This list
-is later used to test and execute the @code{EXPERIMENT} section.
+syntax check is done, e.g.@: undefined variables or mismatched braces
+etc.@: are detected. Instead, an internal list of all the tokens the
+@code{EXPERIMENT} section consists of is created. This list is later
+used to test and execute the @code{EXPERIMENT} section.
 
 
 Writers of modules should know that the modules already get loaded when
@@ -184,13 +187,14 @@ function, that automatically gets called when the module has just been
 loaded.  This allows for example to set the internal variables of the
 module to a well-defined state. This function may not call any functions
 accessing the device because neither the GPIB bus nor the serials ports
-are configured at this moment.
+(or any other devices like ISA or PCI cards) are configured at this
+moment.
 
 
 While handling the part of the @code{EDL} script up to the start of
 the @code{EXPERIMENT} section, functions from the modules may be called
 (unless they have been explicitely declared to be used only during the
-experiment). Usually, such function calls will be used to define the
+experiment). Usually such function calls will be used to define the
 state of the device at the start of the experiment. For example, the
 @code{PREPARATIONS} section may contain a line like
 @example
@@ -205,18 +209,19 @@ take care of dealing with units, they are already translated by
 function for setting the lock-in amplifiers sensitivity should now check
 the argument it got passed (there may or may not be a sensitivity
 setting of @code{0.0001} and only the module knows about this). If the
-argument is reasonable the module should store the value, to be set when
-the lock-in amplifier finally gets initialized at the start of the
+argument is reasonable the module should store the value as to be set
+when the lock-in amplifier finally gets initialized at the start of the
 experiment.
+
 
 How to deal with wrong arguments or arguments that don't fit (e.g.@: if
 the argument is @code{40 uV} but the lock-in amplifier has only
 sensitivity settings of @code{30 uV} and @code{100 uV}) is completely up
 to the writer of the module, @code{fsc2} will accept whatever the module
-returns. For example, the module may accept the argument after
-converting it to something more fitting and printing out a warning or it
-may bail out and tell @code{fsc2} to stop with interpreting the
-@code{EDL} script.
+returns. For example, the module may accept the argument after changing
+it to something to the next possible sensitivity setting and printing
+out a warning or it may bail out and tell @code{fsc2} to stop
+interpreting the @code{EDL} script.
 
 
 Another thing module writers should keep in mind is that this first (and
@@ -231,6 +236,7 @@ changed during the experiment.
 
 @node Second stage of interpretation, Third stage of interpretation, First stage of interpretation, Internals
 @section Second stage of interpretation
+
 
 The second stage of the interpretation of an @code{EDL} script is
 the test run of the @code{EXPERIMENT} section. A test run is necessary
@@ -276,22 +282,22 @@ and the module should test at the time of device initialization if these
 arguments were really acceptable and, if not, stop the experiment.
 
 
-One real-world example of this case are the settings for a "window" for
-the digitizers, defining the part of a curve that get returned or that
-is integrated over etc. Because during the test run neither the time
-base nor the amount of pre-trigger the digitizer is set to are known
-(unless both have been set explicitely from the @code{EDL} script) it
-can't be tested if the windows start and end position are within the
-time slice the digitizer measures. Thus the module can just store these
-settings and tell @code{fsc2} that they seem to be reasonable. Only when
-the experiment starts and the module has it's first chance of finding
-out the real time base and pre-trigger setting it can do the necessary
-checks on the windows settings and should abort the experiment at the
-earliest possible point of time if necessary.
+A typical example of this case are the settings for a "window" for the
+digitizers, defining the part of a curve that gets returned or that is
+integrated over etc. Because during the test run neither the time base
+nor the amount of pre-trigger the digitizer is set to are known (unless
+both have been set explicitely from the @code{EDL} script) it can't be
+tested if the windows start and end positions are within the time range
+the digitizer measures. Thus the module can just store these settings
+and report to @code{fsc2} that they seem to be reasonable. Only when the
+experiment starts and the module has its first chance of finding out the
+time base and pre-trigger setting it can do the necessary checks on the
+windows settings and should abort the experiment at the earliest
+possible point if necessary.
 
 
-To make things a bit easier when writing modules two hook functions can
-be defined within a module that get called automatically at the start of
+To make things a bit easier when writing modules hook functions can be
+defined within a module that get called automatically at the start of
 the test run and after the test run finished successfully.
 
 
@@ -299,19 +305,19 @@ the test run and after the test run finished successfully.
 @section Third stage of interpretation
 
 
-The third and final stage of the interpretation of an @code{EDL}
-script is running the real experiment. This third stage may be repeated
+In the third and final stage of the interpretation of an @code{EDL}
+script the real experiment is run. This third stage may be repeated
 several times if the user restarts an experiment without reloading the
 @code{EDL} file.
 
 
-At the start of the third stage first the GPIB bus and the serial ports
-are initialized (at least if one of the devices needs them). Next hook
+At the start of the third stage the GPIB bus and the serial ports are
+initialized (at least if one of the devices needs them). Next the hook
 functions in the modules are called that allow the modules to initialize
 the devices and do all checks they find necessary. If this was
-successful the graphics for the experiment is initialized, opening up
-the display window. When all this has been done @code{fsc2} is ready
-to do the experiment, i.e.@: to interpret the @code{EXPERIMENT} section.
+successful the graphics for the experiment are initialized, opening up
+the display windows. When all this has been done @code{fsc2} is ready to
+do the experiment, i.e.@: to interpret the @code{EXPERIMENT} section.
 
 
 But there is a twist. Just before starting to interpret the
@@ -344,12 +350,18 @@ blocked. This, of course, also applies to all other actions the user may
 initiate, e.g.@: resizing of windows, magnification of data etc.
 
 
+Another advantage is, of course, that on machines with more than one
+processor the workload can be distributed on two processors.
+
+
 The approach requires some channels of communication between the two
 processes. Because the user interaction task has to draw the new data
-the other task, executing the experiment, will have to send its newly
-acquired data to the user interaction task and, the other way round, the
-user interaction task must be able to stop the experiment when the user
-hits the @code{Stop} button. But this is done in a way that usually
+the other task, executing the experiment, is producing they will have to
+send from the experiment tasl to the user interaction task. And, the
+other way round, the user interaction task must be able to send back
+information received from the user (e.g.@: which file name got selected)
+and to stop the experiment when the user hits the @code{Stop}
+button. Care has been taken that this is done in a way that usually
 can't be impeded by user interventions. The only exceptions are cases
 where the further execution of the experiment depends on user input,
 e.g.@: if within the experiment a new file has to be opened and the name
@@ -362,31 +374,30 @@ experiment) is basically a one-way communication -- the child process
 must pass on newly acquired data to the parent process to be drawn. The
 child processes writes the new data (together with the information where
 they are to be drawn) into a shared memory segment and stores the key
-for this memory segment in a still unused slot in another buffer (that
-also resides in shared memory). Then it sends the parent process a
-signal to inform it that new data are available and continues
-immediately.
+for this memory segment in an unused slot in another buffer (that also
+resides in shared memory). Then it sends the parent process a signal to
+inform it that new data are available and continues immediately.
 
 
-The parent, one the other hand, gets interrupted immediately by the
-signal (even while it is doing some other tasks on behalf of the user),
-removes and stores the key for the memory segment, and can now deal with
-the new data whenever it has the time to do so.
+The user interaction process gets interrupted by the signal (even
+while it is doing some other tasks on behalf of the user), removes and
+stores the key for the memory segment, and can now deal with the new
+data whenever it has the time to do so.
 
 
-Problems can arise only if the child process creates new data at a much
-higher rate than the parent can accept them, in which case the buffer
-for memory segment keys would fill up@footnote{The buffer is guarded
-against overflows by a semaphore that is initialized to the number of
-slots in the buffer and on which the child process does a down operation
-before writing data into the buffer while the parent process posts it
-after removing an item.}. Only in this case the child process will have
-to halt the experiment until the parent empties some of the slots for
-keys in the buffer. But, fortunately, in practice this rarely
-happens. And as a further safeguard against this happening the parent is
-written in a way that it will empty slots in the buffer as fast as
-possible, if necessary deferring to draw data or to react to user
-requests.
+Problems can arise only if the child process for running the experiment
+creates new data at a much higher rate than the parent can accept them,
+in which case the buffer for memory segment keys would fill
+up@footnote{The buffer is guarded against overflows by a semaphore that
+is initialized to the number of slots in the buffer and on which the
+child process does a down operation before writing data into the buffer
+while the parent process posts it after removing an item.}. Only in this
+case the child process will have to suspend the experiment until the
+parent empties some of the slots for keys in the buffer. But,
+fortunately, in practice this rarely happens. And as a further safeguard
+against this happening the parent is written in a way that it will empty
+slots in the buffer as fast as possible, if necessary deferring to draw
+data or to react to user requests.
 
 
 There is also a second communication channel for cases where the task
@@ -394,4 +405,5 @@ running the experiment needs some user input. Typical cases are requests
 for file names, but also requests for information about the state of
 objects in the toolbox. Here the task running the experiment always has
 to wait for a reaction by the user interaction task (which in turn may
-have to wait for user input).
+have to wait for user input). This communication channel is realized by
+a pair of pipes between the processes.
