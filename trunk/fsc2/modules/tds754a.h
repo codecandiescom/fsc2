@@ -1,7 +1,7 @@
 /*
   $Id$
 
-  Copyright (C) 1999-2002 Jens Thoms Toerring
+  Copyright (C) 1999-2003 Jens Thoms Toerring
 
   This file is part of fsc2.
 
@@ -21,6 +21,9 @@
   Boston, MA 02111-1307, USA.
 */
 
+
+#if ! defined TDS754A_HEADER
+#define TDS754A_HEADER
 
 
 #include "fsc2_module.h"
@@ -284,6 +287,10 @@ bool tds754a_command( const char *cmd );
 
 #define gpib_read( a, b, c ) \
 		( usleep( 2000 ), gpib_read( ( a ), ( b ), ( c ) ) )
+
+
+#endif /* ! TDS754A_HEADER */
+
 
 /*
  * Local variables:

@@ -1,7 +1,7 @@
 /*
   $Id$
 
-  Copyright (C) 1999-2002 Jens Thoms Toerring
+  Copyright (C) 1999-2003 Jens Thoms Toerring
 
   This file is part of fsc2.
 
@@ -150,8 +150,7 @@ expr:    E_INT_TOKEN unit         { if ( ! condition_gobble )
 		                                $$ = apply_unit(
 		                                    vars_push( FLOAT_VAR, $1 ), $2 ); }
        | E_VAR_TOKEN              { if ( ! condition_gobble )
-		                                $$ = vars_add( vars_push( INT_VAR, 0 ),
-													   $1 );
+		                                $$ = vars_push_copy( $1 );
 	                                else
 										vars_pop( $1 ); }
        | E_VAR_TOKEN '['          { if ( ! condition_gobble )

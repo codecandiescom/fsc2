@@ -22,6 +22,9 @@
 */
 
 
+#if ! defined DG2020_B_HEADER
+#define DG2020_B_HEADER
+
 #include "fsc2_module.h"
 
 
@@ -134,7 +137,7 @@ Var *pulser_command( Var *v );
 typedef struct {
 	Ticks pos;
 	Ticks len;
-	struct _p_ *pulse;
+	struct PULSE *pulse;
 } PULSE_PARAMS;
 
 
@@ -144,21 +147,21 @@ typedef struct _F_ {
 	bool is_used;               /* set if the function has been declared in
 								   the ASSIGNMENTS section */
 
-	struct _P_ *pod[ MAX_PODS_PER_FUNC ];   /* list of pointers to pods 
+	struct POD *pod[ MAX_PODS_PER_FUNC ];   /* list of pointers to pods 
 											   assigned to the function */
 	int num_pods;
 
 	int num_channels;           /* number of channels assigned to function */
 	int num_needed_channels;    /* number of channels really needed */
-	struct _C_ *channel[ MAX_CHANNELS ];  /* list of pointers to channels
+	struct CHANNEL *channel[ MAX_CHANNELS ];  /* list of pointers to channels
 											 assigned to the function */
 	bool need_constant;
 
 	int num_pulses;             /* number of pulses assigned to the function */
 	int num_active_pulses;      /* number of pulses currenty in use */
-	struct _p_ **pulses;        /* list of pulse pointers */
+	struct PULSE **pulses;      /* list of pulse pointers */
 
-	struct _PHS_ *phase_setup;
+	struct PHASE_SETUP *phase_setup;
 	int next_phase;
 	int pc_len;                 /* length of the phase cycle */
 
@@ -176,7 +179,7 @@ typedef struct _F_ {
 	bool is_low_level;          /* specified for the function */
 
 	bool *pm;
-	struct _C_ **pcm;           /* phase matrix */
+	struct CHANNEL **pcm;       /* phase matrix */
 
 	PULSE_PARAMS *pulse_params;
 	PULSE_PARAMS *old_pulse_params;
@@ -201,13 +204,13 @@ typedef struct _F_ {
 } FUNCTION;
 
 
-typedef struct _P_ {
+typedef struct POD {
 	int self;                   /* pod number */
 	FUNCTION *function;         /* the function the pod is assigned to */
 } POD;
 
 
-typedef struct _C_ {
+typedef struct CHANNEL {
 	int self;
 	FUNCTION *function;
 	bool needs_update;
@@ -224,7 +227,7 @@ typedef struct {
 } BLOCK;
 
 
-typedef struct _PHS_ {
+typedef struct PHASE_SETUP {
 	bool is_defined;
 	bool is_set[ PHASE_MINUS_Y - PHASE_PLUS_X + 1 ];
 	bool is_needed[ PHASE_MINUS_Y - PHASE_PLUS_X + 1 ];
@@ -307,7 +310,7 @@ typedef struct {
 } DG2020;
 
 
-typedef struct _p_ {
+typedef struct PULSE {
 
 	long num;                /* number of the pulse (automatically created
 								pulses have negative, normal pulses
@@ -316,8 +319,8 @@ typedef struct _p_ {
 	bool was_active;
 	bool has_been_active;    /* used to find useless pulses */
 
-	struct _p_ *next;
-	struct _p_ *prev;
+	struct PULSE *next;
+	struct PULSE *prev;
 
 	FUNCTION *function;      /* function the pulse is associated with */
 
@@ -358,13 +361,13 @@ typedef struct _p_ {
 
 	bool left_shape_warning; /* stores if for pulse the left or right shape */
 	bool right_shape_warning;/* padding couldn't be set correctly */
-	struct _p_ *sp;          /* for normal pulses reference to related shape
+	struct PULSE *sp;        /* for normal pulses reference to related shape
 								pulse (if such exists), for shape pulses
 								reference to pulse it is associated with */
 
 	bool left_twt_warning;   /* stores if for pulse the left or right TWT */
 	bool right_twt_warning;  /* padding couldn't be set correctly */
-	struct _p_ *tp;          /* for normal pulses reference to related TWT
+	struct PULSE *tp;        /* for normal pulses reference to related TWT
 								pulse (if such exists), for TWT pulses
 								reference to pulse it is associated with */
 	PULSE_PARAMS *pp;
@@ -497,6 +500,9 @@ bool dg2020_set_constant( int channel, Ticks address,
 						  Ticks length, int state );
 bool dg2020_lock_state( bool lock );
 bool dg2020_command( const char *cmd );
+
+
+#endif /* ! DG2020_B_HEADER */
 
 
 /*

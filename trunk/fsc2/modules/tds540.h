@@ -1,7 +1,7 @@
 /*
   $Id$
 
-  Copyright (C) 1999-2002 Jens Thoms Toerring
+  Copyright (C) 1999-2003 Jens Thoms Toerring
 
   This file is part of fsc2.
 
@@ -20,6 +20,10 @@
   the Free Software Foundation, 59 Temple Place - Suite 330,
   Boston, MA 02111-1307, USA.
 */
+
+
+#if ! defined TDS540_HEADER
+#define TDS540_HEADER
 
 
 #include "fsc2_module.h"
@@ -271,6 +275,9 @@ double tds540_get_amplitude( int channel, WINDOW *w, bool use_cursor );
 void tds540_free_running( void );
 void tds540_lock_state( bool lock );
 bool tds540_command( const char *cmd );
+
+
+#endif /* ! TDS540_HEADER */
 
 
 /*

@@ -1,7 +1,7 @@
 /*
   $Id$
 
-  Copyright (C) 1999-2002 Jens Thoms Toerring
+  Copyright (C) 1999-2003 Jens Thoms Toerring
 
   This file is part of fsc2.
 
@@ -20,6 +20,9 @@
   the Free Software Foundation, 59 Temple Place - Suite 330,
   Boston, MA 02111-1307, USA.
 */
+
+#if ! defined TDS520_HEADER
+#define TDS520_HEADER
 
 
 #include "fsc2_module.h"
@@ -78,7 +81,7 @@
 /* Structure for description of a 'window' on the digitizer, made up from the
    area between the pair of cursors */
 
-typedef struct W_ {
+typedef struct WINDOW {
 	long num;                   /* number of window                          */
 	double start;               /* start of window (in time units)           */
 	double width;               /* width of window (in time units)           */
@@ -87,15 +90,14 @@ typedef struct W_ {
 	bool is_start;              /* flag, set if start of window has been set */
 	bool is_width;              /* flag, set if width of window has been set */
 	long num_points;            /* number of data points between the cursors */
-	struct W_ *next;            /* pointer to next window structure          */
-	struct W_ *prev;            /* pointer to previous window structure      */
+	struct WINDOW *next;        /* pointer to next window structure          */
+	struct WINDOW *prev;        /* pointer to previous window structure      */
 } WINDOW;
 
 
 /* Structure that describes the internal state of the digitizer */
 
-typedef struct
-{
+typedef struct {
 	int device;                          /* device number for GPIB transfers */
 
 	bool is_reacting;
@@ -274,6 +276,9 @@ double tds520_get_amplitude( int channel, WINDOW *w, bool use_cursor );
 void tds520_free_running( void );
 void tds520_lock_state( bool lock );
 bool tds520_command( const char *cmd );
+
+
+#endif /* ! TDS520_HEADER */
 
 
 /*

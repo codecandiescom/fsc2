@@ -1,5 +1,5 @@
 /*-----------------------------------------------------------------------
-	This script is for testing soem aspects of 2D-graphics of fsc2,
+	This script is for testing some aspects of 2D-graphics of fsc2,
 	No warnings or errors should occur or something is seriously broken.
 
 	$Id$
@@ -8,9 +8,9 @@
 VARIABLES:
 
 M = 200;
-m = float( M );
-f[ 4, 2 ] = { 0.0, 0.0, 0.0, m, m, m, m, 0.0 };
-d = m;
+em = float( M );
+f[ 4, 2 ] = { 0.0, 0.0, 0.0, em, em, em, em, 0.0 };
+d = em;
 v[ * ] = { 0.0, 0.0 };
 vt;
 I;
@@ -20,7 +20,7 @@ l[ M ];
 
 PREPARATIONS:
 
-init_2d( 1, M, M, 0, 1.0 / m, 0, 1.0 / m );
+init_2d( 1, M, M, 0, 1.0 / em, 0, 1.0 / em );
 
 EXPERIMENT:
 

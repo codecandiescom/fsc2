@@ -475,7 +475,7 @@ int ep385_exp_hook( void )
 
 int ep385_end_of_exp_hook( void )
 {
-	ep385_run( UNSET );
+	ep385_run( STOP );
 	gpib_local( ep385.device );
 
 	/* Reset the internal representation back to its initial state

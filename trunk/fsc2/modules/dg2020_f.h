@@ -21,6 +21,9 @@
   Boston, MA 02111-1307, USA.
 */
 
+#if ! defined DG2020_F_HEADER
+#define DG2020_F_HEADER
+
 
 #include "fsc2_module.h"
 
@@ -126,7 +129,7 @@ typedef struct {                 /* needed in phase setup */
 } PHS;
 
 
-typedef struct _F_ {
+typedef struct FUNCTION {
 
 	int self;                  /* the functions number */
 	const char *name;
@@ -136,8 +139,8 @@ typedef struct _F_ {
 	bool is_needed;            /* set if the function has been assigned
 								  pulses */
 
-	struct _P_ *pod;           /* points to the pod assigned to the function */
-	struct _P_ *pod2;          /* points to the second pod assigned to the
+	struct POD *pod;           /* points to the pod assigned to the function */
+	struct POD *pod2;          /* points to the second pod assigned to the
 								    function (phase functions only) */
 
 	PHS phs;                   /* phase functions only: how to translate
@@ -146,19 +149,19 @@ typedef struct _F_ {
 
 	int num_channels;          /* number of channels assigned to function */
 	int num_needed_channels;   /* number of channels really needed */
-	struct _C_ *channel[ MAX_CHANNELS ];
+	struct CHANNEL *channel[ MAX_CHANNELS ];
 
 	int num_pulses;            /* number of pulses assigned to the function */
 	int num_active_pulses;     /* number of pulses currently in use */
-	struct _p_ **pulses;       /* list of pulse pointers */
+	struct PULSE **pulses;     /* list of pulse pointers */
 
 	bool needs_phases;         /* set if phase cycling is needed */
 
 	int next_phase;
-	struct _F_ *phase_func;    /* for phase functions here is stored which
-	                              function it's going to take care of while
-								  for normal functions it's a pointer to the
-								  phase function responsible for it. */
+	struct FUNCTION *phase_func;  /* for phase functions here is stored which
+									 function it's going to take care of while
+									 for normal functions it's a pointer to the
+									 phase function responsible for it. */
 
 	Ticks psd;                 /* delay due to phase switches (only needed */
 	bool is_psd;               /* for the phase functions) */
@@ -179,20 +182,19 @@ typedef struct _F_ {
 } FUNCTION;
 
 
-typedef struct _P_ {
+typedef struct POD {
 	int self;
 	FUNCTION *function;
 } POD;
 
 
-typedef struct _C_ {
+typedef struct CHANNEL {
 	int self;
 	FUNCTION *function;
 } CHANNEL;
 
 
-typedef struct
-{
+typedef struct {
 	bool is_used;
 	char blk_name[ 9 ];
 	Ticks start;
@@ -251,7 +253,7 @@ typedef struct
 } DG2020;
 
 
-typedef struct _p_ {
+typedef struct PULSE {
 
 	long num;                /* number of the pulse (pulses used for realize
 								phase cycling have negative, normal pulses
@@ -261,8 +263,8 @@ typedef struct _p_ {
 	bool was_active;
 	bool has_been_active;    /* used to find useless pulses */
 
-	struct _p_ *next;
-	struct _p_ *prev;
+	struct PULSE *next;
+	struct PULSE *prev;
 
 	FUNCTION *function;      /* function the pulse is associated with */
 
@@ -299,7 +301,7 @@ typedef struct _p_ {
 	CHANNEL *channel;        /* channel the pulse belongs to - only needed
 								for phase pulses */
 
-	struct _p_ *for_pulse;   /* only for phase cycling pulses: the pulse the
+	struct PULSE *for_pulse; /* only for phase cycling pulses: the pulse the
 								phase cycling pulse is used for */
 
 	bool needs_update;       /* set if the pulses properties have been changed
@@ -447,6 +449,9 @@ bool dg2020_set_trigger_in_impedance( int state );
 void dg2020_gpib_failure( void );
 bool dg2020_lock_state( bool lock );
 bool dg2020_command( const char *cmd );
+
+
+#endif /* ! DG2020_F_HEADER */
 
 
 /*

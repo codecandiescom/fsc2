@@ -21,6 +21,9 @@
   Boston, MA 02111-1307, USA.
 */
 
+#if ! defined RS690_HEADER
+#define RS690_HEADER
+
 
 #include "fsc2_module.h"
 
@@ -114,7 +117,7 @@ Var *pulser_command( Var *v );
 /* typedefs of structures needed in the module */
 
 
-typedef struct _F_ {
+typedef struct {
 	int self;                  /* the functions number */
 	const char *name;          /* name of function */
 	bool is_used;              /* set if the function has been declared in
@@ -122,16 +125,16 @@ typedef struct _F_ {
 	bool is_needed;            /* set if the function has been assigned
 								  pulses */
 	int num_channels;
-	struct _C_ *channel[ MAX_CHANNELS ];
+	struct CHANNEL *channel[ MAX_CHANNELS ];
 							   /* channels assigned to function */
 
 	int num_pulses;            /* number of pulses assigned to the function */
-	struct _p_ **pulses;       /* list of pulse pointers */
+	struct PULSE **pulses;     /* list of pulse pointers */
 
-	struct _p_ ***pl;          /* array of currently active pulse lists */
-	struct _p_ ***pm;          /* (channel x phases) pulse list matrix */
+	struct PULSER ***pl;       /* array of currently active pulse lists */
+	struct PULSER ***pm;       /* (channel x phases) pulse list matrix */
 
-	struct _PHS_ *phase_setup;
+	struct PHASE_SETUP *phase_setup;
 	int next_phase;
 	int pc_len;                 /* length of the phase cycle */
 
@@ -162,11 +165,11 @@ typedef struct _F_ {
 typedef struct {
 	Ticks pos;
 	Ticks len;
-	struct _p_ *pulse;
+	struct PULSE *pulse;
 } PULSE_PARAMS;
 
 
-typedef struct _C_ {
+typedef struct CHANNEL {
 	int self;
 	FUNCTION *function;
 	bool needs_update;
@@ -180,7 +183,7 @@ typedef struct _C_ {
 } CHANNEL;
 
 
-typedef struct _PHS_ {
+typedef struct PHASE_SETUP {
 	bool is_defined;
 	bool is_set[ PHASE_MINUS_Y - PHASE_PLUS_X + 1 ];
 	bool is_needed[ PHASE_MINUS_Y - PHASE_PLUS_X + 1 ];
@@ -189,12 +192,12 @@ typedef struct _PHS_ {
 } PHASE_SETUP;
 
 
-typedef struct _FS_ {
+typedef struct FS {
 	unsigned short fields[ 4 * NUM_HSM_CARDS ];   /* data for all channels */
-	Ticks pos;                         /* position of the slice */
-	Ticks len;                         /* length of the slice */
+	Ticks pos;                                    /* position of the slice */
+	Ticks len;                                    /* length of the slice */
 	bool is_composite;
-	struct _FS_ *next;
+	struct FS *next;
 } FS;
 
 
@@ -286,7 +289,7 @@ typedef struct {
 } RS690;
 
 
-typedef struct _p_ {
+typedef struct PULSE {
 
 	long num;                /* (positive) number of the pulse */
 
@@ -294,8 +297,8 @@ typedef struct _p_ {
 	bool was_active;
 	bool has_been_active;    /* used to find useless pulses */
 
-	struct _p_ *next;
-	struct _p_ *prev;
+	struct PULSE *next;
+	struct PULSE *prev;
 
 	FUNCTION *function;      /* function the pulse is associated with */
 
@@ -333,12 +336,12 @@ typedef struct _p_ {
 								in test run or experiment */
 
 	bool left_shape_warning;
-	struct _p_ *sp;          /* for normal pulses reference to related shape
+	struct PULSE *sp;        /* for normal pulses reference to related shape
 								pulse (if such exists), for shape pulses
 								reference to pulse it is associated with */
 
 	bool left_twt_warning;
-	struct _p_ *tp;          /* for normal pulses reference to related TWT
+	struct PULSE *tp;        /* for normal pulses reference to related TWT
 								pulse (if such exists), for TWT pulses
 								reference to pulse it is associated with */
 } PULSE;
@@ -453,6 +456,9 @@ bool rs690_run( bool state );
 bool rs690_lock_state( bool lock );
 bool rs690_set_channels( void );
 bool rs690_command( const char *cmd );
+
+
+#endif /* ! RS690_HEADER */
 
 
 /*
