@@ -3115,35 +3115,36 @@ scan consists of one or more conversions, depending on the number of
 channels involved. To acquire a a curve several scans have to be done.
 
 But before even a single scan can be done, the card must be told about
-all the channels are to be sampled. The first The first argument the
+all the channels that are to be sampled. Thus the first argument the
 function expects is a channel number, specified by one of the symbolic
 names between @code{CH0} and @code{CH15}.
 
-The second, required argument is the range to use for the channel. For
+The second non-optional argument is the range to use for the channel. For
 channels set up for bipolar input the allowed ranges are @w{10 V},
 @w{5 V}, @w{2.5 V}, @w{1 V}, @w{500 mV}, @w{250 mV}, @w{100 mV} and
 @w{50 mV}, while for channels to be used in uniploar mode the possible
 range settings are @w{10 V}, @w{5 V}, @w{2 V}, @w{1 V}, @w{500 mV},
 @w{200 mV} and @w{100 mV}.
 
-Then follow three optional settings. The first one is the coupling of
-the channel, which must be given by one of the strings @code{"Ground"},
-@code{"Floating"} or @code{"Differential"}. The first one,
-@code{"Ground"}, means that a ground-referenced signal source is
-connected to the channel and is, therefore, already connected to a
-common ground. @code{"Floating"} means that the signal source is in no
-way connected to the ground system and is therefore free
-floating. Examples are e.g.@: batteries, thermocouples, transformers
-etc. Finally, @code{"Differential"} is for cases where the signals
-source has its own reference signal or signal return path. In these
-cases two inputs channels are required, one from the range @code{CH0} to
-@code{CH7} and the second being the number of the first channel
-incremented by 8 - thus if one of the channels involved is @code{CH0}
-the other channel to be used for differential input is @code{CH8}
-etc. This second channel must not be set up, it's already clear from the
-setup for the first channel (which must be between @code{CH0} and
-@code{CH7}) that it's is going to be used and how. When not given
-the coupling will be set per default to @code{"Ground"}.
+After these two required values three optional settings can follow. The
+first one is the coupling of the channel, which must be given by one of
+the strings @code{"Ground"}, @code{"Floating"} or
+@code{"Differential"}. The first one, @code{"Ground"}, means that a
+ground-referenced signal source is connected to the channel and is,
+therefore, already connected to a common ground. @code{"Floating"} means
+that the signal source is in no way connected to the ground system and
+is therefore free floating. Examples are e.g.@: batteries,
+thermocouples, transformers etc. Finally, @code{"Differential"} is for
+cases where the signals source has its own reference signal or signal
+return path. In these cases two inputs channels are required, one from
+the range @code{CH0} to @code{CH7} and the second being the number of
+the first channel incremented by 8 - thus if one of the channels
+involved is @code{CH0} the other channel to be used for differential
+input is @code{CH8} etc. This second channel must not be set up, it's
+already clear from the setup for the first channel (which must be
+between @code{CH0} and @code{CH7}) that it's is going to be used and
+how. When not given the coupling will be set per default to
+@code{"Ground"}.
 
 The next optional argument is the polarity of the channel, specified
 by the strings @code{"BIPLOAR"} or @code{"UNIPLOAR"}. Per default
