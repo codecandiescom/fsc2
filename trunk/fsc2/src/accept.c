@@ -52,10 +52,10 @@ void accept_new_data( void )
 	char *buf;
 	int mq_next;
 	int type;
-	static int dim;
+	int dim = 0;
 
 
-	dim = 0;
+	CLOBBER_PROTECT( dim );
 
 	while ( 1 )
 	{
