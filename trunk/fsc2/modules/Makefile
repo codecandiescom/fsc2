@@ -44,7 +44,7 @@ endif
 
 comp_modules    := dg2020_f dg2020_b hfs9000 ep385 rs690 er023m lecroy9400  \
 				   hp8672a $(hp864_list) $(tds_list) spectrapro_300i        \
-				   hjs_attenuator hjs_sfc lecroy9400_s
+				   hjs_attenuator hjs_sfc lecroy9400_s spex_cd2a
 
 ifdef WITH_SPEC10
 comp_modules    += rs_spec10
@@ -82,6 +82,7 @@ spectrapro_300i := spectrapro_300i.c spectrapro_300i_ll.c  \
 hjs_attenuator  := hjs_attenuator.c hjs_attenuator_lexer.c
 hjs_sfc         := hjs_sfc.c hjs_sfc_lexer.c
 hjs_fc          := hjs_fc.c hjs_fc_lexer.c
+spex_cd2a       := spex_cd2a.c spex_cd2a_ll.c
 
 src_headers   := $(addprefix $(sdir)/,$(headers)) $(sdir)/fsc2_module.h
 

@@ -1917,17 +1917,21 @@ void main_sig_handler( int signo )
 			errno_saved = errno;
 			while ( ( pid = waitpid( -1, &status, WNOHANG ) ) > 0 )
 			{
-					fprintf( stderr, "%ld %ld\n", ( long ) pid, ( long ) Internals.fsc2_clean_pid );
+				/* Remember when the HTTP server should have died, we need
+				   then to reset the button for it */
+
 				if ( pid == Internals.http_pid )
 				{
 					Internals.http_pid = -1;
 					Internals.http_server_died = SET;
 				}
 
+				/* Also store the return status of the child process running
+				   'fsc2_clean', it's used to check if everything went fine */
+
 				if ( ! Internals.fsc2_clean_died &&
 					 pid == Internals.fsc2_clean_pid )
 				{
-					fprintf( stderr, "%ld\n", ( long ) Internals.fsc2_clean_pid );
 					Internals.fsc2_clean_pid = 0;
 					Internals.fsc2_clean_died = SET;
 					Internals.fsc2_clean_status_ok = WIFEXITED( status );

@@ -154,9 +154,9 @@ Var *monochromator_name( Var *v )
 }
 
 
-/*-------------------------------------------------------------*/
-/* Function for setting or quering the currently used  grating */
-/*-------------------------------------------------------------*/
+/*------------------------------------------------------------*/
+/* Function for setting or quering the currently used grating */
+/*------------------------------------------------------------*/
 
 Var *monochromator_grating( Var *v )
 {

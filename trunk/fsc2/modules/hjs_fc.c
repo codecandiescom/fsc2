@@ -257,7 +257,7 @@ int hjs_fc_exp_hook( void )
 
 	TRY
 	{
-		if ( hjs_fc.use_calib_file )
+		if ( ! hjs_fc.use_calib_file )
 			hjs_fc_init_with_measured_data( );
 		else
 			hjs_fc_init_with_calib_file( );

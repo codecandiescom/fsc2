@@ -321,6 +321,10 @@ monochromator_load_calibration, -1, EXP;  // read in calibration file
 monochromator_zero_offset, -1, EXP;
 monochromator_grating_adjust, -1, EXP;
 monochromator_calibrate, -1, EXP;
+monochromator_init, 2, PREP;
+monochromator_wavenumber, -1, ALL;
+monochromator_laser_line, -1, ALL;
+monochromator_shutter_limits, -1, ALL;
 
 
 /* Functions exported by the power supply (Thurlby&Thandar PL330DP) */
