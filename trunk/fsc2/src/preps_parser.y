@@ -206,7 +206,7 @@ expr:    INT_TOKEN unit           { if ( $2 == NULL )
 									  $$ = vars_mult( $2, $4 ); }
 ;
 
-unit:    /* empty */               { $$ = vars_push( INT_VAR, 1L ); }
+unit:    /* empty */               { $$ = NULL; }
        | NS_TOKEN                  { $$ = vars_push( INT_VAR, 1L ); }
        | US_TOKEN                  { $$ = vars_push( INT_VAR, 1000L ); }
        | MS_TOKEN                  { $$ = vars_push( INT_VAR, 1000000L ); }

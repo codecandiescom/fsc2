@@ -210,6 +210,7 @@ Var *func_get( const char *name, int *access )
 
 
 /*------------------------------------------------------------------------*/
+/* Here's the function that finally calls a EDL function-
 /*------------------------------------------------------------------------*/
 
 Var *func_call( Var *f )
@@ -222,8 +223,8 @@ Var *func_call( Var *f )
 	
 
 	/* Check that it's really a function variable - you can never be sure
-	   someone isn't trying to be using some undocumented features but didn't
-	   got ot right. */
+	   someone isn't trying to be using some undocumented features but doesn't
+	   get it right. (Do we really need this?) */
 
 	if ( f->type != FUNC )
 	{

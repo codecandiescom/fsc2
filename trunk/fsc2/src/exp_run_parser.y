@@ -111,28 +111,54 @@ line:    E_VAR_TOKEN '=' expr      { vars_assign( $3, $1 ); }
 	                                 THROW( EXCEPTION ); }
 ;
 
-expr:    E_INT_TOKEN unit         { $$ = vars_mult( vars_push( INT_VAR, $1 ), 
-													$2 ); }
-       | E_FLOAT_TOKEN unit       { $$ = vars_mult( vars_push( FLOAT_VAR, $1 ),
-													$2 ); }
-       | E_VAR_TOKEN unit         { $$ = vars_mult( $1, $2 ); }
+expr:    E_INT_TOKEN unit         { if ( $2 == NULL )
+	                                  $$ = vars_push( INT_VAR, $1 );
+                                    else
+									   $$ = vars_mult(
+                                              vars_push( INT_VAR, $1 ), $2 ); }
+       | E_FLOAT_TOKEN unit       { if ( $2 == NULL )
+	                                  $$ = vars_push( FLOAT_VAR, $1 );
+                                     else
+                                       $$ = vars_mult(
+                                            vars_push( FLOAT_VAR, $1 ), $2 ); }
+       | E_VAR_TOKEN unit         { if ( $2 == NULL )
+	                                  $$ = $1;
+	                                else
+                                      $$ = vars_mult( $1, $2 ); }
        | E_VAR_TOKEN '['          { vars_arr_start( $1 ); }
          list1 ']'                { CV = vars_arr_rhs( $4 ); }
-         unit                     { if ( CV->type & ( INT_VAR | FLOAT_VAR ) )
+         unit                     { if ( $7 == NULL )
+			                          $$ = CV;
+		                            else
+									{
+									  if ( CV->type & ( INT_VAR | FLOAT_VAR ) )
 			                            $$ = vars_mult( CV, $7 );
+									  else
+									  {
+										eprint( FATAL, "%s:%ld: Can't apply "
+												 "a unit to a non-number.\n",
+												Fname, Lc );
+										THROW( EXCEPTION );
+									  }
+									}
+                                  }
+       | E_FUNC_TOKEN '(' list2
+         ')'                      { CV = func_call( $1 ); }
+         unit                     { if ( $6 == NULL )
+			                          $$ = CV;
 		                            else
 									{
-										vars_pop( $7 );
-									    $$ = CV;
-									} }
-       | E_FUNC_TOKEN '(' list2 ')'{ CV = func_call( $1 ); }
-         unit                     { if ( CV->type & ( INT_VAR | FLOAT_VAR ) )
-			                            $$ = vars_mult( CV, $6 );
-		                            else
-									{
-										vars_pop( $6 );
-									    $$ = CV;
-									} }
+									  if ( CV->type & ( INT_VAR | FLOAT_VAR ) )
+										$$ = vars_mult( CV, $6 );
+									  else
+									  {
+										 eprint( FATAL, "%s:%ld: Can't apply "
+												 "a unit to a non-number.\n",
+												 Fname, Lc );
+										 THROW( EXCEPTION );
+									  }
+									}
+                                  }
        | E_VAR_REF                { $$ = $1; }
        | E_VAR_TOKEN '('          { eprint( FATAL, "%s:%ld: `%s' isn't a "
 											"function.\n", Fname, Lc,
@@ -156,10 +182,13 @@ expr:    E_INT_TOKEN unit         { $$ = vars_mult( vars_push( INT_VAR, $1 ),
        | expr '%' expr            { $$ = vars_mod( $1, $3 ); }
        | expr '^' expr            { $$ = vars_pow( $1, $3 ); }
        | '-' expr %prec E_NEG     { $$ = vars_negate( $2 ); }
-       | '(' expr ')' unit        { $$ = vars_mult( $2, $4 ); }
+       | '(' expr ')' unit        { if ( $4 == NULL )
+	                                  $$ = $2;
+                                    else
+                                      $$ = vars_mult( $2, $4 ); }
 ;
 
-unit:    /* empty */              { $$ = vars_push( INT_VAR, 1L ); }
+unit:    /* empty */              { $$ = NULL }
        | E_NS_TOKEN               { $$ = vars_push( INT_VAR, 1L ); }
        | E_US_TOKEN               { $$ = vars_push( INT_VAR, 1000L ); }
        | E_MS_TOKEN               { $$ = vars_push( INT_VAR, 1000000L ); }
@@ -167,12 +196,12 @@ unit:    /* empty */              { $$ = vars_push( INT_VAR, 1L ); }
        | E_NV_TOKEN               { $$ = vars_push( FLOAT_VAR, 1.0e-9 ); }
        | E_UV_TOKEN               { $$ = vars_push( FLOAT_VAR, 1.0e-6 ); }
        | E_MV_TOKEN               { $$ = vars_push( FLOAT_VAR, 1.0e-3 ); }
-       | E_V_TOKEN                { $$ = vars_push( FLOAT_VAR, 1.0 ); }
+       | E_V_TOKEN                { $$ = vars_push( INT_VAR, 1 ); }
        | E_MG_TOKEN               { $$ = vars_push( FLOAT_VAR, 1.0e-3 ); }
-       | E_G_TOKEN                { $$ = vars_push( FLOAT_VAR, 1.0 ); }
+       | E_G_TOKEN                { $$ = vars_push( INT_VAR, 1 ); }
        | E_MHZ_TOKEN              { $$ = vars_push( FLOAT_VAR, 1.0e6 ); }
        | E_KHZ_TOKEN              { $$ = vars_push( FLOAT_VAR, 1.0e3 ); }
-       | E_HZ_TOKEN               { $$ = vars_push( FLOAT_VAR, 1.0 ); }
+       | E_HZ_TOKEN               { $$ = vars_push( INT_VAR, 1 ); }
 ;
 
 
