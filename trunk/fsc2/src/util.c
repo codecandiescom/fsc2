@@ -28,7 +28,7 @@ static struct {
 	bool has_raise_been_run;
 	pid_t old_euid;
 	gid_t old_egid;
-} fsc2_perms = { OFF, 0, 0 };
+} fsc2_perms = { UNSET, 0, 0 };
 
 
 /*-----------------------------------------------------------------*/
