@@ -1266,13 +1266,13 @@ to 16 levels deep.
 @subsection @code{#EXIT} statement
 @cindex #EXIT statement
 
-When the @code{#EXIT} statement is found in an @code{EDL} program
-this is equivalent to the end of the file - everything following the
-statement is discarded. In the main file of an @code{EDL} program
-this means that this is the end of the @code{EDL} program. If instead
-the current file is an included file (see the @code{#INCLUDE} statement)
-@code{fsc2} will immediately return to reading the file the current
-file was included from.
+When the @code{#EXIT} statement is found in an @code{EDL} program this
+is equivalent to the end of the file - everything following the
+statement is discarded. In the main file of an @code{EDL} program this
+means that this is the end of the @code{EDL} program. If instead the
+file containing the @code{#EXIT} statement is an included file (see the
+@code{#INCLUDE} statement) @code{fsc2} will immediately return to
+reading the file the file was included from.
 
 
 @anchor{#QUIT statement}
