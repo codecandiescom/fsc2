@@ -944,6 +944,8 @@ delta_tau =  25 ns;   // and the change of this distance
 t_0       = 400 ns;   // start distance between 2nd & 3rd pulse
 delta_t   =  50 ns;   // and the change of this distance
 
+Curve_length = 128;   // number of points of curve
+
 area, data;
 I, J;
 
@@ -996,7 +998,7 @@ init_1d( );
 
 EXPERIMENT:
 
-FOR I = 1: 128 @{
+FOR I = 1: Curve_length @{
     data = 0.0;
     FOR J = 1 : 4 @{
         digitizer_start_acquisition( );
