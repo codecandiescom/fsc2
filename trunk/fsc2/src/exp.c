@@ -1145,7 +1145,7 @@ void save_restore_variables( bool flag )
 		assert( var_list_copy != NULL );    /* don't restore without save ! */
 		assert( var_list == old_var_list );       /* just a bit paranoid... */
 
-		/* get rid of memory for array that might have been changed during
+		/* get rid of memory for arrays that might have been changed during
 		   the test */
 
 		for ( cpy = var_list; cpy != NULL; cpy = cpy->next )
@@ -1175,7 +1175,8 @@ void save_restore_variables( bool flag )
 /*----------------------------------------------------------------------*/
 /* This takes care of deleting the copy of the stored variables when an */
 /* exception happens while the test run is underway (or even if we ran  */
-/* out of memory while we made the copy.                                */
+/* out of memory while we made the copy. (free_vars() will take care of */
+/* the variables themselves.)                                           */
 /*----------------------------------------------------------------------*/
 
 void delete_var_list_copy( void )
