@@ -202,7 +202,6 @@ void start_fsc2( const char *pname, const char *fname )
 	int ac = 0;
 	char *prog_name;
 	pid_t new_pid;
-	int i;
 
 
 	if ( ( av[ 0 ] = malloc( ( bindir ? strlen( bindir ) + 1 : 0 ) + 6 ) )
@@ -239,9 +238,6 @@ void start_fsc2( const char *pname, const char *fname )
 	}
 
 	av[ ac++ ] = ( char * ) fname;
-
-	for ( i = 0; i < ac; i++ )
-		printf( "fsc2_connect: %s\n", av[ i ] );
 
 	signal( SIGUSR1, sig_handler );
 	signal( SIGCHLD, sig_handler );

@@ -51,10 +51,6 @@ int main( int argc, char *argv[ ] )
 {
 	char *fname;
 	int flags;
-	int i;
-
-	for ( i = 0; i < argc; i++ )
-		printf( "fsc2: %s\n", argv[ i ] );
 
 
 #if defined MDEBUG
