@@ -5,12 +5,12 @@
 
 
 A large part of @code{fsc2} has been written while I was working in the
-groups of Prof.@: Th.@: Prisner (J.-W.-Goethe-University,
-Frankfurt/Main) and Prof.@: K.@: M@"obius (Free University Berlin). Both
-where so kind to allow me to spend quite large amounts of time on
-getting it to the state it is in now. Prof.@: R.@: Bittl (Free
-University Berlin) supported the development by emplyoing me part-time
-to extend the program and write further device drivers.
+groups of Prof.@: Th.@: Prisner (J.-W.-Goethe-Universit@"at,
+Frankfurt/Main) and Prof.@: K.@: M@"obius (Freie Universit@"at
+Berlin). Both where so kind to allow me to spend quite large amounts of
+time on getting it to the state it is in now. Prof.@: R.@: Bittl (Freie
+Universit@"at Berlin) supported the development by emplyoing me
+part-time to extend the program and write further device drivers.
 
 All the people using the program so far have from time to time been
 (mis)used as alpha-testers. The first one accepting this unpleasant role
