@@ -228,6 +228,7 @@ for function/output channels declared as @code{INVERTED}).
 @item @code{pulser_defense_to_shape_minimum_distance()} @tab @ref{pulser_defense_to_shape_minimum_distance}
 @item @code{pulser_automatic_shape_pulses()} @tab @ref{pulser_automatic_shape_pulses}
 @item @code{pulser_automatic_twt_pulses()} @tab @ref{pulser_automatic_twt_pulses}
+@item @code{pulser_minimum_twt_pulse_distance()} @tab @ref{pulser_minimum_twt_pulse_distance}
 @item @code{pulser_keep_all_pulses()} @tab @ref{pulser_keep_all_pulses}
 @item @code{pulser_maximum_pattern_length()} @tab @ref{pulser_maximum_pattern_length}
 @item @code{pulser_show_pulses()}    @tab @ref{pulser_show_pulses}
@@ -364,6 +365,7 @@ Output channels: 8
 @item @code{pulser_defense_to_shape_minimum_distance()} @tab @ref{pulser_defense_to_shape_minimum_distance}
 @item @code{pulser_automatic_shape_pulses()} @tab @ref{pulser_automatic_shape_pulses}
 @item @code{pulser_automatic_twt_pulses()} @tab @ref{pulser_automatic_twt_pulses}
+@item @code{pulser_minimum_twt_pulse_distance()} @tab @ref{pulser_minimum_twt_pulse_distance}
 @item @code{pulser_show_pulses()}    @tab @ref{pulser_show_pulses}
 @item @code{pulser_dump_pulses()}    @tab @ref{pulser_dump_pulses}
 @end multitable
@@ -679,6 +681,7 @@ the repetition time may become larger by @w{8 ns}.
 @item @code{pulser_defense_to_shape_minimum_distance()} @tab @ref{pulser_defense_to_shape_minimum_distance}
 @item @code{pulser_automatic_shape_pulses()} @tab @ref{pulser_automatic_shape_pulses}
 @item @code{pulser_automatic_twt_pulses()} @tab @ref{pulser_automatic_twt_pulses}
+@item @code{pulser_minimum_twt_pulse_distance()} @tab @ref{pulser_minimum_twt_pulse_distance}
 @item @code{pulser_show_pulses()}     @tab @ref{pulser_show_pulses}
 @item @code{pulser_dump_pulses()}     @tab @ref{pulser_dump_pulses}
 @end multitable
