@@ -231,7 +231,7 @@ bool dg2020_init( const char *name )
 		if ( f->num_pods == 1 )
 			dg2020_channel_assign( f->channel[ 0 ]->self, f->pod[ 0 ]->self );
 		else
-			for ( j = 0; j <= PHASE_CW - PHASE_PLUS_X + 1; j++ )
+			for ( j = 0; j <= PHASE_CW - PHASE_PLUS_X; j++ )
 				if ( f->phase_setup->is_set[ j ] )
 					dg2020_channel_assign( f->pcm[ j * f->pc_len + 0 ]->self,
 										   f->phase_setup->pod[ j ]->self );
@@ -570,10 +570,6 @@ bool dg2020_set_constant( int channel, Ticks address, Ticks length, int state )
 	Ticks m, n;
 	char s = ( state ? '1' : '0' );
 
-/*
-	printf( "SET: ch = %2d to %1d, at: %8ld, len = %8ld\n", channel, state,
-			address, length );
-*/
 
 	address++;        /* because of the first unset bit */
 

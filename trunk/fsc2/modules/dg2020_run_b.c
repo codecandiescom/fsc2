@@ -118,6 +118,59 @@ void dg2020_do_checks( FUNCTION *f )
 
 
 /*----------------------------------------------------------------------------
+  Function creates all active pulses in the channels of the pulser assigned
+  to the function passed as argument.
+----------------------------------------------------------------------------*/
+
+
+void dg2020_set_pulses( FUNCTION *f )
+{
+	PULSE *p;
+	Ticks start, end;
+	int i, j;
+
+
+	assert( f->self != PULSER_CHANNEL_PHASE_1 &&
+			f->self != PULSER_CHANNEL_PHASE_2 );
+
+	/* Always set the very first bit to LOW state, see the rant about the bugs 
+	   in the pulser firmware at the start of dg2020_gpib.c. Then set the rest
+	   of the channels to off state. */
+
+	for ( i = 0; i < f->num_needed_channels; i++ )
+	{
+		dg2020_set_constant( f->channel[ i ]->self, -1, 1, LOW );
+		dg2020_set_constant( f->channel[ i ]->self, 0, dg2020.max_seq_len,
+							 OFF( f ) );
+	}
+
+	/* Now simply run through all active pulses of the channel */
+
+	for ( p = f->pulses[ 0 ], i = 0; i < f->num_pulses && p->is_active;
+		  p = f->pulses[ ++i ] )
+	{
+		/* Set the area of the pulse itself */
+
+		start = p->pos + f->delay;
+		end = p->pos + p->len + f->delay;
+
+		for ( j = 0; j < f->pc_len; j++ )
+		{
+			if ( p->channel[ j ] == NULL )        /* skip unused channels */
+				continue;
+
+			if ( start != end )
+				dg2020_set_constant( p->channel[ j ]->self, start, end - start,
+									 ON( f ) );
+		}
+	}
+
+	for ( p = f->pulses[ 0 ], i = 0; i < f->num_pulses; p = f->pulses[ ++i ] )
+		p->was_active = p->is_active;
+}
+
+
+/*----------------------------------------------------------------------------
   Function is called after the test run to reset all the variables describing
   the state of the pulser to their initial values
 ----------------------------------------------------------------------------*/
@@ -326,4 +379,26 @@ void dg2020_commit( FUNCTION * f, bool flag )
 		f->channel[ i ]->needs_update = UNSET;
 		T_free( f->channel[ i ]->old );
 	}
+}
+
+
+/*-----------------------------------------------------------------------------
+  Sets the additional bock used for maintaining the requested repetion time
+  to the low state
+-----------------------------------------------------------------------------*/
+
+void dg2020_clear_padding_block( FUNCTION *f )
+{
+	int i;
+
+
+	if ( ! f->is_used ||
+		 ! dg2020.block[ 1 ].is_used )
+		return;
+
+	for ( i = 0; i < f->num_channels; i++ )
+		dg2020_set_constant( f->channel[ i ]->self,
+							 dg2020.block[ 1 ].start - 1,
+							 dg2020.mem_size - dg2020.block[ 1 ].start,
+							 OFF( f ) );
 }
