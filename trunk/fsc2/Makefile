@@ -26,7 +26,7 @@ AWK            = /usr/bin/awk
 ##############################################################################
 # Here follow settings determining the make process - which compiler and
 # tools to use as well as the respective options. Better leave them alone
-# if you don't have real good reasons...
+# if you don't have really good reasons...
 ##############################################################################
 
 SHELL          = /bin/sh
@@ -50,7 +50,7 @@ RMFLAGS        = -f
 
 
 ############################################################################
-###########     Don't change anything below this line     ##################
+###########     Don't change anything below this line      #################
 ########### (unless you really know what you're doing ...) #################
 ############################################################################
 
@@ -106,7 +106,7 @@ endif
 # Switch off all implicit rules and set suffices of file to be made by make
 
 .SUFFIXES:
-.SUFFIXES: .c .o .h
+.SUFFIXES: .c .o .h .so .lo
 .PHONY: all clean distclean
 
 
