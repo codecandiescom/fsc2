@@ -13,6 +13,9 @@
 
 bool tds754a_init( const char *name )
 {
+	int ch;
+
+
 	if ( gpib_init_device( name, &tds754a.device ) == FAILURE )
         return FAIL;
 
@@ -82,6 +85,13 @@ bool tds754a_init( const char *name )
 
 	if ( tds754a.is_num_avg == SET )
 		tds754a_set_num_avg( tds754a.num_avg );
+
+	/* Switch on all channels that have been used in the experiment section
+	   and that aren't already switched on */
+
+	for ( ch = 0; ch < MAX_CHANNELS; ch++ )
+		if ( tds754a.channels_in_use[ ch ] )
+			tds754a_display_channel( ch );
 
     /* Switch to running until run/stop button is pressed and start running */
 
@@ -444,16 +454,28 @@ bool tds754a_set_track_cursors( bool flag )
 
 
 /*----------------------------------------------------*/
-/* Function switches gated measurement mode on or off */
 /*----------------------------------------------------*/
 
-bool tds754a_set_gated_meas( bool flag )
+bool tds754a_set_snap( bool flag )
 {
-	char cmd[ 20 ] = "MEASU:GAT ";
+	char cmd[ 50 ];
 
-	strcat( cmd, flag ? "ON" : "OFF" );
-    if ( gpib_write( tds754a.device, cmd, strlen( cmd ) ) == FAILURE )
-		tds754a_gpib_failure( );
+	if ( flag )
+	{
+		strcpy( cmd, "DAT SNA" );
+		if ( gpib_write( tds754a.device, cmd, strlen( cmd ) ) == FAILURE )
+			tds754a_gpib_failure( );
+	}
+	else
+	{
+		strcpy( cmd, "DAT STAR 1" );
+		if ( gpib_write( tds754a.device, cmd, strlen( cmd ) ) == FAILURE )
+			tds754a_gpib_failure( );
+		strcpy( cmd, "DAT STOP " );
+		sprintf( cmd + strlen( cmd ), "%ld", tds754a.rec_len );
+		if ( gpib_write( tds754a.device, cmd, strlen( cmd ) ) == FAILURE )
+			tds754a_gpib_failure( );
+	}		
 
 	return OK;
 }
@@ -472,6 +494,10 @@ bool tds754a_display_channel( int channel )
 
 	assert( channel >= 0 && channel < TDS754A_AUX );
 
+	/* Get the channels sensitivity */
+
+	tds754a_get_sens( channel );
+
 	/* check if channel is already displayed */
 
     strcat( cmd, Channel_Names[ channel ] );
@@ -489,10 +515,36 @@ bool tds754a_display_channel( int channel )
         strcat( cmd, " ON" );
         if ( gpib_write( tds754a.device, cmd, strlen( cmd ) ) == FAILURE )
 			tds754a_gpib_failure( );
-		sleep( 2 );                  // do we really need this ?
+//		sleep( 2 );                  // do we really need this ?
     }
 
 	return OK;
+}
+
+
+/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*/
+
+double tds754a_get_sens( int channel )
+{
+    char cmd[ 20 ];
+    char reply[30];
+    long length = 30;
+
+
+	assert( channel >= 0 && channel < TDS754A_AUX );
+
+	strcpy( cmd, Channel_Names[ channel ] );
+	strcat( cmd, ":SCA?" );
+
+	if ( gpib_write( tds754a.device, cmd, strlen( cmd ) ) == FAILURE ||
+		 gpib_read( tds754a.device, reply, &length ) == FAILURE )
+		tds754a_gpib_failure( );
+
+    reply[ length - 1 ] = '\0';
+	tds754a.channel_sens[ channel ] = T_atof( reply );
+
+	return tds754a.channel_sens[ channel ];
 }
 
 
@@ -507,17 +559,19 @@ bool tds754a_start_aquisition( void )
     /* Start an acquisition:
        1. clear the SESR register to allow SRQs
        2. set state to run
+	   3. set stop after sequence
        3. tell digitizer to set the operation complete bit in the SESR when
 	      the measurement is finished, this, in turn will set the ESB-bit in
           the status byte register which leads to a SRQ */
 
     if ( ! tds754a_clear_SESR( ) ||
          gpib_write( tds754a.device, "ACQ:STATE RUN", 13 ) == FAILURE ||
+		 gpib_write( tds754a.device, "ACQ:STOPA SEQ", 13 ) == FAILURE ||
          gpib_write( tds754a.device, "*OPC", 4 ) == FAILURE )
 		tds754a_gpib_failure( );
 
     /* Now all left to do is to wait for a SRQ (don't test return status
-       for RQS bit set - it obviously never is (?)) */
+       for RQS bit - it's obviously never set (?)) */
 
     if ( gpib_wait( tds754a.device, RQS, &status ) == FAILURE )
 		tds754a_gpib_failure( );
@@ -536,17 +590,14 @@ double tds754a_get_area( int channel, WINDOW *w )
 	long length = 40;
 
 
-    /* Now we can measure the data:
-       1. set measurement type to area
-	   2. set the cursors if necessary
-       2. measure all the areas:
-          a. set channel (if the channel is not already set) 
-          b. get the value of the area */
+	/* set measurement type to area */
 
     if ( gpib_write( tds754a.device, "MEASU:IMM:TYP AREA", 18 ) == FAILURE )
 		tds754a_gpib_failure( );
 
 	assert( channel >= 0 && channel < TDS754A_AUX );
+
+	/* set channel (if the channel is not already set) */
 
 	if ( channel != tds754a.meas_source )
 	{
@@ -556,7 +607,11 @@ double tds754a_get_area( int channel, WINDOW *w )
 		tds754a.meas_source = channel;
 	}
 
+	/* set the cursors */
+
 	tds754a_set_meas_window( w );
+
+	/* get the the area */
 
 	if ( gpib_write( tds754a.device, "MEASU:IMM:VAL?", 14 ) == FAILURE ||
 		 gpib_read( tds754a.device, reply, &length ) == FAILURE )
@@ -573,9 +628,24 @@ double tds754a_get_area( int channel, WINDOW *w )
 bool tds754a_get_curve( int channel, WINDOW *w, double **data, long *length )
 {
 	char cmd[ 40 ];
+	char reply[ 10 ];
+	long len;
+	char *buffer;
+	long i;
+	double scale;
 
 
 	assert( channel >= 0 && channel < TDS754A_AUX );
+
+	/* Calculate the scale factor for converting the data returned by the
+	   digitizer (2-byte integers) into real voltage levels - this still
+	   needs some changes but I don't have the manual here...
+	   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
+
+	scale = 10.24 * tds754a.channel_sens[ channel ] /
+		( double ) tds754a.num_avg;        // still need maximum value...
+
+	/* Set the data source channel (if it's not already set correctly) */ 
 
 	if ( channel != tds754a.data_source )
 	{
@@ -586,12 +656,60 @@ bool tds754a_get_curve( int channel, WINDOW *w, double **data, long *length )
 		tds754a.data_source = channel;
 	}
 
-	tds754a_set_window( w );
+	/* Set the cursors */
+
+	tds754a_set_curve_window( w );
+
+	/* Ask digitizer to send the curve */
 
 	if ( gpib_write( tds754a.device, "CURV?", 5 ) == FAILURE )
 		tds754a_gpib_failure( );
 
-	/* !!!!!!!!!! Still some stuff to do */
+	/* Read just the first two bytes, these are a '#' character plus the
+	   number of digits of the following number */
+
+	len = 2;
+	if ( gpib_read( tds754a.device, reply, &len ) == FAILURE )
+		tds754a_gpib_failure( );
+
+	/* Get the number of data bytes to follow */
+
+	len = ( long ) ( reply[ 1 ] - '0' );
+	if ( gpib_read( tds754a.device, reply, &len ) == FAILURE )
+		tds754a_gpib_failure( );
+
+	reply[ len - 1 ] = '\0';
+
+	/* The number of data bytes is twice the number of data points plus
+	   one byte for the line feed character */
+
+    len = T_atol( reply );
+	*length = ( len - 1 ) / 2;
+
+	*data = T_malloc( *length * sizeof( long ) );
+	buffer = T_malloc( len );
+
+	/* Now get all the data bytes... */
+
+	if ( gpib_read( tds754a.device, buffer, &len ) == FAILURE )
+	{
+		T_free( buffer );
+		T_free( *data );
+		tds754a_gpib_failure( );
+	}
+
+	/* ....and copy them to the final destination (the data are INTEL format
+	   2-byte integers, so the following requires sizeof( short ) == 2 and
+	   only work on a machine with INTEL format - there got to be better ways
+	   to do it..) Also scale data so that we get the real measured
+	   voltage. */
+
+	assert( sizeof( short ) == 2 );
+
+	for ( i = 0; i < *length; i++ )
+		*( *data + i ) = scale * ( double ) *( ( short * ) buffer + i );
+
+	T_free( buffer );
 
 	return OK;
 }

@@ -246,6 +246,32 @@ void tds754a_set_meas_window( WINDOW *w )
 /*-----------------------------------------------------------------*/
 /*-----------------------------------------------------------------*/
 
+void tds754a_set_curve_window( WINDOW *w )
+{
+	tds754a_set_window( w );
+
+	if ( w != NULL )
+	{
+		if ( ! tds754a.snap_state )
+		{
+			tds754a_set_snap( SET );
+			tds754a.snap_state = SET;
+		}
+	}
+	else
+	{
+		if ( tds754a.snap_state )
+		{
+			tds754a_set_snap( UNSET );
+			tds754a.snap_state = UNSET;
+		}
+	}
+}
+
+
+/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*/
+
 void tds754a_set_window( WINDOW *w )
 {
 	if ( w == NULL )

@@ -14,6 +14,7 @@
 
 #define MAX_CHANNELS  13         /* number of channel names */
 
+#define TDS754A_UNDEF -1
 #define TDS754A_CH1    0
 #define TDS754A_CH2    1
 #define TDS754A_CH3    2
@@ -57,6 +58,7 @@ typedef struct
 	bool is_equal_width;      // all windows have equal width -> tracking
 	                          // cursors can be used without further checking
 	bool gated_state;         // Gated measurements ?
+	bool snap_state;
 
 	int trigger_channel;
 	bool is_trigger_channel;
@@ -70,6 +72,7 @@ typedef struct
 	int data_source;          // currently selected data source channel
 
 	bool channels_in_use[ MAX_CHANNELS ];
+	double channel_sens[ MAX_CHANNELS ];
 } TDS754A;
 
 
@@ -89,9 +92,19 @@ Var *digitizer_timebase( Var *v );
 Var *digitizer_num_averages( Var *v );
 Var *digitizer_get_channel_number( Var *v );
 Var *digitizer_trigger_channel( Var *v );
+Var *digitizer_start_acquisition( Var *v );
+Var *digitizer_get_area( Var *v );
+Var *digitizer_get_curve( Var *v );
 
 
 /* declaration of internally used functions */
+
+const char *tds754a_ptime( double time );
+void tds754a_delete_windows( void );
+void tds754a_do_pre_exp_checks( void );
+void tds754a_set_meas_window( WINDOW *w );
+void tds754a_set_curve_window( WINDOW *w );
+void tds754a_set_window( WINDOW *w );
 
 bool tds754a_init( const char *name );
 double tds754a_get_timebase( void );
@@ -105,17 +118,14 @@ bool tds754a_get_cursor_distance( double *cd );
 bool tds754a_set_trigger_channel( const char *name );
 int tds754a_get_trigger_channel( void );
 void tds754a_gpib_failure( void );
-const char *tds754a_ptime( double time );
-void tds754a_delete_windows( void );
-void tds754a_do_pre_exp_checks( void );
-void tds754a_set_meas_window( WINDOW *w );
-void tds754a_set_window( WINDOW *w );
 bool tds754a_clear_SESR( void );
 void tds754a_finished( void );
 bool tds754a_set_cursor( int cur_num, double pos );
 bool tds754a_set_track_cursors( bool flag );
 bool tds754a_set_gated_meas( bool flag );
+bool tds754a_set_snap( bool flag );
 bool tds754a_display_channel( int channel );
+double tds754a_get_sens( int channel );
 bool tds754a_start_aquisition( void );
 double tds754a_get_area( int channel, WINDOW *w );
 bool tds754a_get_curve( int channel, WINDOW *w, double **data, long *length );

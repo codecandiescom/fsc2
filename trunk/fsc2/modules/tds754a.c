@@ -31,6 +31,8 @@ int tds754a_init_hook( void )
 	tds754a.is_timebase = UNSET;
 	tds754a.is_num_avg = UNSET;
 	tds754a.num_windows = 0;
+	tds754a.data_source = TDS754A_UNDEF;
+	tds754a.meas_source = TDS754A_UNDEF;
 
 	return 1;
 }
@@ -378,7 +380,6 @@ Var *digitizer_get_channel_number( Var *v )
 /*-------------------------------------------------------------------*/
 /* digitizer_set_trigger_channel() sets the channel that is used for */
 /* triggering.                                                       */
-//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 /*-------------------------------------------------------------------*/
 
 
@@ -433,4 +434,189 @@ Var *digitizer_trigger_channel( Var *v )
 
 	vars_pop( v );
 	return vars_push( INT_VAR, 1 );
+}
+
+
+Var *digitizer_start_acquisition( Var *v )
+{
+	v = v;
+	tds754a_start_aquisition( );
+	return vars_push( INT_VAR, 1 );
+}
+
+Var *digitizer_get_area( Var *v )
+{
+	WINDOW *w;
+	int ch;
+
+
+	/* The first variable got to be a channel number */
+
+	if ( v == NULL )
+	{
+		eprint( FATAL, "%s:%ld: TDS754A: Missing arguments in call of "
+				"function `digitizer_get_area'.", Fname, Lc );
+		THROW( EXCEPTION );
+	}
+
+	vars_check( v, INT_VAR );
+	for ( ch = 0; ch <= TDS754A_REF4; ch++ )
+		if ( ch == ( int ) v->val.lval )
+			break;
+
+	if ( ch > TDS754A_REF4 )
+	{
+		eprint( FATAL, "%s:%ld: TDS754A: Invalid channel specification.",
+				Fname, Lc );
+		THROW( EXCEPTION );
+	}
+
+	tds754a.channels_in_use[ ch ] = SET;
+
+	v = vars_pop( v );
+
+	/* Now check if there's a variable with a window number and check it */
+
+	if ( v != NULL )
+	{
+		vars_check( v, INT_VAR );
+		if ( ( w = tds754a.w ) == NULL )
+		{
+			eprint( FATAL, "%s:%ld: TDS754A: No measurement windows have been "
+					"defined.", Fname, Lc );
+			THROW( EXCEPTION );
+		}
+
+		while ( w != NULL )
+		{
+			if ( w->num == v->val.lval )
+			{
+				w->is_used = SET;
+				v = vars_pop( v );
+				break;
+			}
+			w = w->next;
+		}
+
+		if ( w == NULL )
+		{
+			eprint( FATAL, "%s:%ld: TDS754A: Measurement window %ld has not "
+					"been defined.", Fname, Lc, v->val.lval );
+			THROW( EXCEPTION );
+		}
+	}
+	else
+		w = NULL;
+
+	if ( v != NULL )
+	{
+		eprint( WARN, "%s:%ld: TDS754A: Superfluous arguments in call of "
+				"function `digitizer_get_area'.", Fname, Lc );
+		while ( ( v = vars_pop( v ) ) != NULL )
+			;
+	}
+
+	/* Talk to digitizer only in the real experiment, otherwise return a dummy
+	   value */
+
+	if ( I_am == CHILD )
+		return vars_push( FLOAT_VAR, tds754a_get_area( ch, w ) );
+
+	return vars_push( FLOAT_VAR, 1.234e-8 );
+}
+
+
+Var *digitizer_get_curve( Var *v )
+{
+	WINDOW *w;
+	int ch, i;
+	double *array;
+	long length;
+	Var *nv;
+
+
+	/* The first variable got to be a channel number */
+
+	if ( v == NULL )
+	{
+		eprint( FATAL, "%s:%ld: TDS754A: Missing arguments in call of "
+				"function `digitizer_get_area'.", Fname, Lc );
+		THROW( EXCEPTION );
+	}
+
+	vars_check( v, INT_VAR );
+	for ( ch = 0; ch <= TDS754A_REF4; ch++ )
+		if ( ch == ( int ) v->val.lval )
+			break;
+
+	if ( ch > TDS754A_REF4 )
+	{
+		eprint( FATAL, "%s:%ld: TDS754A: Invalid channel specification.",
+				Fname, Lc );
+		THROW( EXCEPTION );
+	}
+
+	tds754a.channels_in_use[ ch ] = SET;
+
+	v = vars_pop( v );
+
+	/* Now check if there's a variable with a window number and check it */
+
+	if ( v != NULL )
+	{
+		vars_check( v, INT_VAR );
+		if ( ( w = tds754a.w ) == NULL )
+		{
+			eprint( FATAL, "%s:%ld: TDS754A: No measurement windows have been "
+					"defined.", Fname, Lc );
+			THROW( EXCEPTION );
+		}
+
+		while ( w != NULL )
+		{
+			if ( w->num == v->val.lval )
+			{
+				w->is_used = SET;
+				v = vars_pop( v );
+				break;
+			}
+			w = w->next;
+		}
+
+		if ( w == NULL )
+		{
+			eprint( FATAL, "%s:%ld: TDS754A: Measurement window %ld has not "
+					"been defined.", Fname, Lc, v->val.lval );
+			THROW( EXCEPTION );
+		}
+	}
+	else
+		w = NULL;
+
+	if ( v != NULL )
+	{
+		eprint( WARN, "%s:%ld: TDS754A: Superfluous arguments in call of "
+				"function `digitizer_get_area'.", Fname, Lc );
+		while ( ( v = vars_pop( v ) ) != NULL )
+			;
+	}
+
+	/* Talk to digitizer only in the real experiment, otherwise return a dummy
+	   array */
+
+	if ( I_am == CHILD )
+	{
+		tds754a_get_curve( ch, w, &array, &length );
+		nv = vars_push( FLOAT_TRANS_ARR, array, length );
+		T_free( array );
+		return nv;
+	}
+
+	length = 123;
+	array = T_malloc( length * sizeof( long ) );
+	for ( i = 0; i < length; i++ )
+		array[ i ] = 1.0e-7 * sin( M_PI * i / 122.0 );
+	nv = vars_push( FLOAT_TRANS_ARR, array, length );
+	T_free( array );
+	return nv;
 }
