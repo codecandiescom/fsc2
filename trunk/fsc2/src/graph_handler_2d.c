@@ -1335,14 +1335,14 @@ void repaint_canvas_2d( Canvas *c )
 				strcpy( buf, " " );
 				make_label_string( buf + 1, x_pos, ( int ) floor( log10( fabs(
 					cv->rwc_delta[ X ] ) / cv->s2d[ X ] ) ) - 2 );
-				strcat( buf, ",  " ); 
+				strcat( buf, "   " ); 
 				make_label_string( buf + strlen( buf ), y_pos,
 								   ( int ) floor( log10( fabs(
 									 cv->rwc_delta[ Y ] ) /
 														cv->s2d[ Y ] ) ) - 2 );
 				if ( index != -1 )
 				{
-					strcat( buf, ",  " ); 
+					strcat( buf, "   " ); 
 					make_label_string( buf + strlen( buf ), z_pos,
 									   ( int ) floor( log10( fabs(
 										                cv->rwc_delta[ Z ] ) /
@@ -1412,9 +1412,9 @@ void repaint_canvas_2d( Canvas *c )
 					                                              cv->s2d[ Y ];
 
 				if ( index_1 == -1 || index_2 == -1 )
-					sprintf( buf, "%#g,  %#g ", x_pos, y_pos );
+					sprintf( buf, "%#g   %#g ", x_pos, y_pos );
 				else
-					sprintf( buf, "%#g,  %#g,  %#g ", x_pos, y_pos,
+					sprintf( buf, "%#g   %#g   %#g ", x_pos, y_pos,
 							 z_pos_1 - z_pos_2 );
 				if ( G.font != NULL )
 					XDrawImageString( G.d, pm, cv->font_gc, 5,
