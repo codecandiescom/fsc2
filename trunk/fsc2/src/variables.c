@@ -25,12 +25,12 @@
 #include "fsc2.h"
 
 
-/* Some typedefs needed due to the limitations of va_arg() (also see the
-   C-FAQ 15.11 on this point): FnctPtr is a pointer to a Var pointer returning
-   function with a Var pointer as argument. */
+/* Some typedefs needed due to the limitations of va_arg() (also have a look
+   at the C-FAQ 15.11 about this): FnctPtr is a pointer to a Var pointer
+   returning function with a Var pointer as argument. */
 
-typedef Var *VarretFnct( Var * );
-typedef VarretFnct *FnctPtr;
+typedef Var *Var_pointer_returning_Function( Var * );
+typedef Var_pointer_returning_Function *FnctPtr;
 
 
 /* local variables */
@@ -268,9 +268,10 @@ Var *vars_get( char *name )
 
 /*----------------------------------------------------------------*/
 /* Function is called after the VARIABLES section has been parsed */
-/* to sort the list of variables defined there so that a variable */
+/* to sort the list of variables just created so that a variable  */
 /* can be found using a binary search instead of running through  */
-/* the whole linked list each time.                               */
+/* the whole linked list each time (that this is much faster is   */
+/* probably just wishful thinking...).                            */
 /*----------------------------------------------------------------*/
 
 void vars_sort( void )
@@ -319,8 +320,9 @@ void vars_sort( void )
 }
 
 
-/*----------------------------------------------------------*/
-/*----------------------------------------------------------*/
+/*----------------------------------------------------*/
+/* Function used for qsort'ing the list of variables. */
+/*----------------------------------------------------*/
 
 static int comp_vars_1( const void *a, const void *b )
 {
@@ -328,8 +330,9 @@ static int comp_vars_1( const void *a, const void *b )
 }
 
 
-/*----------------------------------------------------------*/
-/*----------------------------------------------------------*/
+/*------------------------------------------*/
+/* Function used in bsearch for a variable. */
+/*------------------------------------------*/
 
 static int comp_vars_2( const void *a, const void *b )
 {
@@ -376,7 +379,7 @@ Var *vars_new( char *name )
 
 /*---------------------------------------------------------------------*/
 /* vars_add() adds two variables or array slices and pushes the result */
-/* on the stack                                                        */
+/* onto the stack.                                                     */
 /* ->                                                                  */
 /*    * pointers to two variable structures                            */
 /* <-                                                                  */
@@ -470,7 +473,7 @@ Var *vars_add( Var *v1, Var *v2 )
 
 /*-------------------------------------------------------------------*/
 /* vars_sub() subtracts two variables or array slices and pushes the */
-/* result on the stack                                               */
+/* result onto the stack.                                            */
 /* ->                                                                */
 /*    * pointers to two variable structures                          */
 /* <-                                                                */
@@ -544,7 +547,7 @@ Var *vars_sub( Var *v1, Var *v2 )
 
 /*-----------------------------------------------------------------*/
 /* vars_mult() multiplies two variables or array slices and pushes */
-/* the result on the stack                                         */
+/* the result onto the stack.                                      */
 /* ->                                                              */
 /*    * pointers to two variable structures                        */
 /* <-                                                              */
@@ -618,7 +621,7 @@ Var *vars_mult( Var *v1, Var *v2 )
 
 /*-----------------------------------------------------------------*/
 /* vars_div() divides two variables or array slices and pushes the */
-/* result on the stack                                             */
+/* result onto the stack.                                          */
 /* ->                                                              */
 /*    * pointers to two variable structures                        */
 /* <-                                                              */
@@ -692,7 +695,7 @@ Var *vars_div( Var *v1, Var *v2 )
 
 /*-------------------------------------------------------------------*/
 /* vars_mod() pushes the modulo of the two variables or array slices */
-/* on the stack                                                      */
+/* onto the stack.                                                   */
 /* ->                                                                */
 /*    * pointers to two variable structures                          */
 /* <-                                                                */
@@ -766,7 +769,7 @@ Var *vars_mod( Var *v1, Var *v2 )
 
 /*------------------------------------------------------------------*/
 /* vars_pow() takes `v1' to the power of `v2' and pushes the result */
-/* on the stack                                                     */
+/* onto the stack.                                                  */
 /* ->                                                               */
 /*    * pointers to two variable structures                         */
 /* <-                                                               */
@@ -960,13 +963,14 @@ Var *vars_negate( Var *v )
 
 /*--------------------------------------------------------------------------*/
 /* vars_comp() is used for comparing the values of two variables. There are */
-/* three types of comparison, it can be tested if two variables are equal,  */
-/* the first one is less than the second or if the first is less or equal   */
-/* than the second variable (tests for greater or greater or equal can be   */
-/* done simply by switching the arguments).                                 */
+/* three types of comparison - it can be tested if two variables are equal, */
+/* if the first one is less than the second or if the first is less or      */
+/* equal than the second variable (tests for greater or greater or equal    */
+/* can be done simply by switching the arguments).                          */
 /* In comparisons between floating point numbers not only the numbers are   */
 /* compared but, in order to reduce problems due to rounding errors, also   */
-/* the numbers when the last significant bit is changed.                    */
+/* the numbers when the last significant bit is changed (if there's a       */
+/* function in libc that allow us to do this...).                           */
 /* ->                                                                       */
 /*    * type of comparison (COMP_EQUAL, COMP_UNEQUAL, COMP_LESS or          */
 /*      COMP_LESS_EQUAL)                                                    */
@@ -1261,7 +1265,8 @@ Var *vars_pop( Var *v )
 		return NULL;
 
 #ifndef NDEBUG
-	/* Figure out if 'v' is really on the stack otherwise we have a bug */
+	/* Figure out if 'v' is really on the stack - otherwise we have found
+	   a new bug */
 
 	for ( stack = Var_Stack; stack && stack != v; stack = stack->next )
 		prev = stack;
@@ -1315,9 +1320,9 @@ Var *vars_pop( Var *v )
 }
 
 
-/*-----------------------------------------------------*/
-/* vars_del_stack() deletes all entries from the stack */
-/*-----------------------------------------------------*/
+/*----------------------------------------------------------------*/
+/* vars_del_stack() deletes all entries from the variables stack. */
+/*----------------------------------------------------------------*/
 
 void vars_del_stack( void )
 {
@@ -1462,21 +1467,31 @@ static void vars_warn_new( Var *v )
 }
 
 
-/*------------------------------------------------------------*/
-/* vars_exist() checks if a variable really exists by looking */
-/* it up in the variable list or on the variable stack.       */
-/*------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+/* vars_exist() checks if a variable really exists by looking it */
+/* up in the variable list or on the variable stack (depending   */
+/* on what type of variable it is).                              */
+/*---------------------------------------------------------------*/
 
 bool vars_exist( Var *v )
 {
 	Var *lp;
 
 
-	for ( lp = v->is_on_stack ? Var_Stack : var_list; lp && lp != v;
-		  lp = lp->next )
-		;
+	if ( v->is_on_stack )
+		for ( lp = Var_Stack; lp != NULL && lp != v; lp = lp->next )
+			;
+	else
+	{
+		if ( is_sorted )
+			lp = bsearch( v->name, var_list, num_vars, sizeof( Var ),
+						  comp_vars_2 );
+		else
+			for ( lp = var_list; lp != NULL && lp != v; lp = lp->next )
+				;
+	}
 
-	/* If variable can't be found in one of the lists we're fucked */
+	/* If the variable can't be found in the lists we've got a problem... */
 
 	fsc2_assert( lp == v );
 	return lp == v;
@@ -1515,7 +1530,7 @@ Var *vars_arr_start( Var *v )
 	else
 		vars_check( v, INT_CONT_ARR | FLOAT_CONT_ARR );
 
-	/* Push variable with generic pointer to array onto the stack */
+	/* Push variable with generic pointer to an array onto the stack */
 
 	ret = vars_push( ARR_PTR, NULL, v );
 	return ret;
