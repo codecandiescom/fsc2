@@ -25,11 +25,12 @@
 use strict;
 use IO::Socket::INET;
 use POSIX;
-use bytes;
 
 
 my $client;            # The Most Important Entity ;-)
 my $max_reqs = 16;     # how many simultaneous requests get accepted
+my $crlf = "\r\n";     # RFC 2616 requires this as the newline
+my $has_pnmtopng;      # does the pnmtopng utility exist?
 
 
 # Check if we got a port number as the first command line argument...
@@ -65,6 +66,13 @@ $SIG{ PIPE } = sub { close $client; exit 0 };
 # deals with them
 
 $SIG{ CHLD } = sub { 1 until waitpid( -1, WNOHANG ) == -1 };
+
+
+# Check if the pnmtopng utility is available, otherwise we can't send
+# the display and cross section windows of fsc2
+
+my @a = `echo -n "P6 1 1 255\n000" | pnmtopng 2>/dev/null`;
+$has_pnmtopng = defined $a[ 0 ];
 
 
 # Ok, fire up the server - isn't OOP plus helpful modules a nice thing? ;-)
@@ -216,25 +224,25 @@ HTTP
 	# clain to understand png) and the status information
 
 	if ( $state =~ /^[0-3]$/o ) {
-		print "<TITLE>fsc2: $st1[ $state ]</TITLE></HEAD>\r\n";
+		print "<TITLE>fsc2: $st1[ $state ]</TITLE></HEAD>$crlf";
 
 		print "<P><CENTER><IMG SRC=\"fsc2." . ( $has_gif ? "gif" : "png" ) .
-			  "\" ALT=\"fsc2\"></CENTER></P>\r\n" if $has_png or $has_gif;
+			  "\" ALT=\"fsc2\"></CENTER></P>$crlf" if $has_png or $has_gif;
 
-		print "<P><CENTER><H1>Status:  $st2[ $state ]</H1></CENTER>\r\n" .
+		print "<P><CENTER><H1>Status:  $st2[ $state ]</H1></CENTER>$crlf" .
 			  "<CENTER>(" . strftime( "%a", localtime ) . ", "  .
-			  strftime( "%d %b %G %T %Z", localtime ) . ")</CENTER></P>\r\n";
+			  strftime( "%d %b %G %T %Z", localtime ) . ")</CENTER></P>$crlf";
 	} else {
-		print "<TITLE>fsc2: WEIRD</TITLE></HEAD>\r\n";
+		print "<TITLE>fsc2: WEIRD</TITLE></HEAD>$crlf";
 
 		print "<P><CENTER><IMG SRC=\"fsc2." . ( $has_gif ? "gif" : "png" ) .
-			  "\"ALT=\"fsc2\"></CENTER></P>\r\n" if $has_png or $has_gif;
+			  "\"ALT=\"fsc2\"></CENTER></P>$crlf" if $has_png or $has_gif;
 
 		print &uq( <<'HTTP' );
 :			<P><CENTER><H1>Status:  Something weird is happening here...
 :			</H1></CENTER>
 :			<P>Ok, you seem to have found a bug. Please tell nobody ;-)
-:			</P>\r\n</BODY></HTML>
+:			</P>$crlf</BODY></HTML>
 HTTP
 		return;
 	}
@@ -243,7 +251,7 @@ HTTP
 	# displays - only PNG format is supported for legal reasons that I
 	# am not inclined to try to even understand
 
-	if ( $state =~ /^[1-3]$/o and $has_png ) {
+	if ( $state =~ /^[1-3]$/o and $has_pnmtopng and $has_png ) {
 		stdout_lock( 1 ) or exit 1;
 		print STDOUT 'W';
 		1 while defined ( $pic = <STDIN> ) and $state =~ /^$/o;
@@ -275,23 +283,22 @@ HTTP
 		chomp;
 		s/^@(C)(\d+)@(f)(.*)$/$4/o;
 		if ( ! ( defined $2 and defined $colors[ $2 - 1 ] ) ) {
-			$txt .= "$_\r\n";
+			$txt .= "$_$crlf";
 		} else {
 			$txt .= "<FONT COLOR=#" . $colors[ $2 - 1 ] .
-				    ">$_</FONT>\r\n";
+				    ">$_</FONT>$crlf";
 		}
 	}
 	stdout_lock( 0 );
 
-	print "<H2>Output browser:</H2>\r\n" .
-		  "<P><PRE>$txt</PRE></P>\r\n" if defined $txt;
-
-	print "</BODY></HTML>\r\n";
+	print "<H2>Output browser:</H2>$crlf<P><PRE>$txt</PRE></P>$crlf"
+		if defined $txt;
+	print "</BODY></HTML>$crlf";
 }
 
 
 #########################################################
-# Passes the fsc2 logo file on to the client if it can be found where we
+# Sends the fsc2 logo file to the client if it can be found where we
 # expect it (also telling the client via the expiry date that the logo
 # won't change anytime in the near future, so it may happily cache it)
 
@@ -311,12 +318,12 @@ sub serve_logo {
 :		Server: fsc2/0.1
 :		Allow: GET
 :		Accept-Ranges: none
-:		Connection: close\r\n" .
+:		Connection: close" .
 :		Expires: $edate
 :		Content-Type: image/$type
 HTTP
 
-	print "Content-Length: " . ( stat( $auxdir . $file ) )[ 7 ] . "\r\n\r\n";
+	print "Content-Length: " . ( stat( $auxdir . $file ) )[ 7 ] . "$crlf$crlf";
 
 	print <$fh>;
 	close $fh;
@@ -336,7 +343,6 @@ sub serve_pics {
 	my $fh;
 	my $file;
 	my @data;
-	my $len = 0;
 
 
 	# We need a special SIGPIPE handler here because we must remove the
@@ -353,7 +359,12 @@ sub serve_pics {
 	1 while defined ( $state = <STDIN> ) and $state =~ /^$/o;
 	return stdout_lock( 0 ) unless defined $state;
 
-	if ( $state !~ /^0$/o ) {
+	# If we get a positive reply from fsc2 (it's sending us a character which
+	# is not '0') the next thing it sends is the name of a file with the
+	# requested graphic in ppm format, which we then have to convert to png
+	# before passing it on to the browser
+
+	if ( $state !~ /^0$/o and $has_pnmtopng ) {
 		$file = <STDIN>;
 		chomp $file;
 		@data = `pnmtopng -compression 9 $file`;
@@ -374,13 +385,12 @@ sub serve_pics {
 :		Content-Type: image/png
 HTTP
 
-	if ( $state !~ /^0$/o ) {
-		$len += length for @data;
-		print "Content-Length: $len\r\n\r\n";
+	if ( $state !~ /^0$/o and $has_pnmtopng ) {
+		print "Content-Length: " . len( @data ) . "$crlf$crlf";
 		print @data;
 		unlink $file;
 	} else {
-		print "Content-Length: " . ( stat( $file ) )[ 7 ] . "\r\n\r\n";
+		print "Content-Length: " . ( stat( $file ) )[ 7 ] . "$crlf$crlf";
 		print <$fh>;
 		close $fh;
 	}
@@ -438,13 +448,13 @@ sub illegal_request {
 HTTP
 
 	if ( $type !~ /^GET$/o ) {
-		print "<P>This simple server only supports GET requests.</P>\r\n";
+		print "<P>This simple server only supports GET requests.</P>$crlf";
 	} else {
 		$string =~ s/\r*\n$//o;
-		print "<P>Malformed request: <SAMP>$string</SAMP>.</P>\r\n";
+		print "<P>Malformed request: <SAMP>$string</SAMP>.</P>$crlf";
 	}
 
-	print "<HR>\r\n</BODY></HTML>\r\n";
+	print "<HR>$crlf</BODY></HTML>$crlf";
 }
 
 
@@ -479,6 +489,17 @@ sub stdout_lock {
 
 sub uq {
 	my $s = shift;
-	$s =~ s/^:\t*(.*)\n/$1\r\n/gm;
+	$s =~ s/^:\t*(.*)\n/$1$crlf/gm;
 	$s;
+}
+
+
+#########################################################
+# Returns the total length (in bytes) of an array
+
+sub len {
+	use bytes;
+
+	my $l = 0;
+	$l += length for @_;
 }
