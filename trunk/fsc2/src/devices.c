@@ -7,8 +7,14 @@
 
 
 
-/* The string passed to the function is already allocated to the program
-   and has to be deallocated here to avoid a memory leak! */
+/*--------------------------------------------------------------------------*/
+/* This function is called for each device found in the DEVICES section of  */
+/* the EDL file. It first checks if the device is listed in the device data */
+/* base file "Devices". Then it appends a new structure for the device to   */
+/* the end of the linked list.                                              */
+/* ATTENTION: The string passed to the function is already allocated to the */
+/* program and has to be deallocated here to avoid a memory leak!           */
+/*--------------------------------------------------------------------------*/
 
 void device_add( char *dev_name )
 {
@@ -48,6 +54,11 @@ void device_add( char *dev_name )
 }
 
 
+/*---------------------------------------------------------------*/
+/*  Function createa a new Device structure and append it to the */ 
+/* list of devices.                                              */
+/*---------------------------------------------------------------*/
+
 void device_append_to_list( const char *dev_name )
 {
 	Device *cd;
@@ -76,15 +87,20 @@ void device_append_to_list( const char *dev_name )
 }
 
 
+/*---------------------------------------------------------------------*/
+/* Function deletes the whole list of device structures after running  */
+/* the corresponding exit hook functions unloading the modules.        */
+/*---------------------------------------------------------------------*/
+
 void delete_devices( void )
 {
 	Device *cd, *cdp;
 
 
-	if ( Device_List == NULL )
+	if ( Device_List == NULL )         /* list is empty (does not exist) ? */
 		return;
 
-	/* Get last element of list */
+	/* Get last element of list - always delete last entry first */
 
 	for( cd = Device_List; cd->next != NULL; cd = cd->next )
 		;
@@ -102,6 +118,11 @@ void delete_devices( void )
 	Device_List = NULL;
 }
 
+
+/*-------------------------------------------------------------*/
+/* Function deletes the list of known devices as read from the */
+/* device data base file "Devices".                            */
+/*-------------------------------------------------------------*/
 
 void delete_device_name_list( void )
 {
