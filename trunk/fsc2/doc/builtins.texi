@@ -249,13 +249,16 @@ never at all!
 
 @item save()
 @findex save()
-Saves one or more data or one-dimensional arrays. The first argument is a
-file identifier as returned by @code{get_file()}. If
-@code{get_file()} never has been called before the user is asked to
-select a file, but use of more than this file then becomes impossible!
+Writes one or more data or complete arrays to a file. But there's a
+caveat: If @code{get_file()} has been called before the first argument
+has to be the file number returned by the call to tell @b{fsc2} which
+file to use. If, on the other hand, @code{get_file()} hasn't been called
+before, the user is asked to select a file now and all further
+@code{save_xxx()}-calls will use this one file and the first argument
+will always be assumed to be a value to be written to this file!
 
-All arguments following the (optional) file identifier are data. The types of
-these data may be
+All arguments (following the file identifier if there's one) are
+data. The types of these data may be
 
 @itemize @bullet
 @item
@@ -263,8 +266,7 @@ Integer data
 @item
 Floating point data
 @item
-Strings (with no interpretation of escape sequences, see also
-@code{fsave()})
+Strings (with no interpretation of escape sequences, see also @code{fsave()})
 @item
 One-dimensional arrays (or slices of arrays) of integer or floating point
 type
@@ -272,10 +274,10 @@ type
 Complete more-dimensional arrays
 @end itemize
 
-This form of the function saves data in an unformatted fashion, i.e.@:
-each data value is written onto a new line. The only exception is
-more-dimensional arrays - here a empty line is printed between the
-individual slices of the array. Here's an example: The array
+The function saves data in an unformatted fashion, i.e.@: each data
+value is written onto a new line. The only exception is more-dimensional
+arrays - here a empty line is printed between the individual slices of
+the array. Here's an example: The array
 
 @example
 X[ 3, 2 ] = @{ 1, 2, 3, 4, 5, 6 @}
