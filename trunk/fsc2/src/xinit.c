@@ -203,8 +203,6 @@ bool xforms_init( int *argc, char *argv[] )
 	{
 		flags = XParseGeometry( ( char * ) xresources[ GEOMETRY ].var,
 								&wx, &wy, &ww, &wh );
-		if ( XValue & flags && YValue & flags )
-			fl_set_form_position( main_form->fsc2, wx, wy );
 		if ( WidthValue & flags && HeightValue & flags )
 		{
 			if ( ww < WIN_MIN_WIDTH )
@@ -216,8 +214,11 @@ bool xforms_init( int *argc, char *argv[] )
 		}
 
 		if ( XValue & flags && YValue & flags )
-			fl_show_form( main_form->fsc2, FL_PLACE_POSITION,
+		{
+			fl_set_form_position( main_form->fsc2, wx, wy );
+			fl_show_form( main_form->fsc2, FL_PLACE_GEOMETRY,
 						  FL_FULLBORDER, "fsc2" );
+		}
 		else
 			fl_show_form( main_form->fsc2, FL_PLACE_MOUSE | FL_FREE_SIZE,
 						  FL_FULLBORDER, "fsc2" );

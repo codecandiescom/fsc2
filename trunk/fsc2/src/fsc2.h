@@ -59,6 +59,7 @@
 
 #include "fsc2_rsc.h"
 #include "global.h"               /* must be the very first to be included ! */
+#include "xinit.h"
 #include "comm.h"
 #include "ipc.h"
 #include "exceptions.h"

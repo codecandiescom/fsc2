@@ -35,8 +35,12 @@ static int cur_1,
 	       cur_5,
 	       cur_6,
 	       cur_7;
+static int display_x, display_y, display_w, display_h;
+static bool display_has_been_shown = UNSET;
 
 extern FL_resource xresources[ ];
+
+
 
 #if ( SIZE == HI_RES )
 #define WIN_MIN_1D_WIDTH   400
@@ -66,7 +70,8 @@ void start_graphics( void )
 	XCharStruct font_prop;
 	int dummy;
 	char *pixmap_file;
-	int flags, x, y, w, h;
+	int flags;
+	bool needs_pos = UNSET;
 
 
 	/* Create the forms for running experiments */
@@ -223,41 +228,68 @@ void start_graphics( void )
 
 	/* Finally draw the form */
 
-	if ( * ( ( char * ) xresources[ DISPLAYGEOMETRY ].var ) != '\0' )
+	if ( ! display_has_been_shown &&
+		 * ( ( char * ) xresources[ DISPLAYGEOMETRY ].var ) != '\0' )
 	{
 		flags = XParseGeometry( ( char * ) xresources[ DISPLAYGEOMETRY ].var,
-								&x, &y, &w, &h );
-		if ( XValue & flags && YValue & flags )
-			fl_set_form_position( run_form->run, x, y );
+								&display_x, &display_y,
+								&display_w, &display_h );
 		if ( WidthValue & flags && HeightValue & flags )
 		{
 			if ( G.dim == 1 )
 			{
-				if ( w < WIN_MIN_1D_WIDTH )
-					w = WIN_MIN_1D_WIDTH;
+				if ( display_w < WIN_MIN_1D_WIDTH )
+					display_w = WIN_MIN_1D_WIDTH;
 			}
 			else
 			{
-				if ( w < WIN_MIN_2D_WIDTH )
-					w = WIN_MIN_2D_WIDTH;
+				if ( display_w < WIN_MIN_2D_WIDTH )
+					display_w = WIN_MIN_2D_WIDTH;
 			}
 
-			if ( h < WIN_MIN_HEIGHT )
-				h = WIN_MIN_HEIGHT;
+			if ( display_h < WIN_MIN_HEIGHT )
+				display_h = WIN_MIN_HEIGHT;
 
-			fl_set_form_size( run_form->run, w, h );
+			fl_set_form_size( run_form->run, display_w, display_h );
 		}
 
 		if ( XValue & flags && YValue & flags )
-			fl_show_form( run_form->run, FL_PLACE_POSITION,
-						  FL_FULLBORDER, "fsc2: Display" );
-		else
-			fl_show_form( run_form->run, FL_PLACE_MOUSE | FL_FREE_SIZE,
-						  FL_FULLBORDER, "fsc2: Display" );
+		{
+			XWindowAttributes attr;
+			Window root, parent, *children;
+			int nchilds;
+
+			XQueryTree( fl_display, main_form->fsc2->window, &root,
+						&parent, &children, &nchilds );
+			XQueryTree( fl_display, parent, &root,
+						&parent, &children, &nchilds );
+			XGetWindowAttributes( fl_display, parent, &attr );
+
+			display_x += main_form->fsc2->x - attr.x - 1;
+			display_y += main_form->fsc2->y - attr.y - 1;
+
+			fl_set_form_position( run_form->run, display_x, display_y );
+			needs_pos = SET;
+		}
 	}
-	else
-		fl_show_form( run_form->run, FL_PLACE_MOUSE | FL_FREE_SIZE,
-					  FL_FULLBORDER, "fsc2: Display" );
+
+	if ( display_has_been_shown )
+	{
+		if ( G.dim == 2 )
+		{
+			if ( display_w < WIN_MIN_2D_WIDTH )
+				display_w = WIN_MIN_2D_WIDTH;
+		}
+
+		fl_set_form_geometry( run_form->run, display_x, display_y,
+							  display_w, display_h );
+		needs_pos = SET;
+	}
+
+	fl_show_form( run_form->run, needs_pos ?
+				  FL_PLACE_POSITION : FL_PLACE_MOUSE | FL_FREE_SIZE, 
+				  FL_FULLBORDER, "fsc2: Display" );
+	display_has_been_shown = SET;
 
 	G.d = FL_FormDisplay( run_form->run );
 
@@ -327,6 +359,7 @@ int run_form_close_handler( FL_FORM *a, void *b )
 {
 	a = a;
 	b = b;
+
 	if ( child_pid == 0 )          /* if child has already exited */
 		stop_measurement( run_form->stop, 0 );
 	return FL_IGNORE;
@@ -743,7 +776,16 @@ void stop_graphics( void )
 	}
 
 	if ( run_form && fl_form_is_visible( run_form->run ) )
-			fl_hide_form( run_form->run );
+	{
+		display_x = run_form->run->x;
+		display_y = run_form->run->y;
+		display_w = run_form->run->w;
+		display_h = run_form->run->h;
+
+		fl_hide_form( run_form->run );
+	}
+	else
+		display_has_been_shown = UNSET;
 
 	if ( run_form )
 		fl_free_form( run_form->run );

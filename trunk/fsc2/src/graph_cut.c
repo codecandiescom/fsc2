@@ -72,6 +72,8 @@ static int cur_1,
 	       cur_6,
 	       cur_7,
 	       cur_8;
+static int cut_x, cut_y, cut_w, cut_h;
+static bool cut_has_been_shown = UNSET;
 
 
 /*-----------------------------------------------------------------------*/
@@ -87,7 +89,8 @@ static int cur_1,
 
 void cut_show( int dir, long index )
 {
-	int flags, x, y, w, h;
+	bool needs_pos = UNSET;
+	int flags;
 
 
 	/* Don't do anything if no curve is currently displayed */
@@ -107,33 +110,52 @@ void cut_show( int dir, long index )
 
 	if ( ! is_shown )
 	{
-		if ( * ( ( char * ) xresources[ CUTGEOMETRY ].var ) != '\0' )
+		if ( ! cut_has_been_shown &&
+			 * ( ( char * ) xresources[ CUTGEOMETRY ].var ) != '\0' )
 		{
 			flags = XParseGeometry( ( char * ) xresources[ CUTGEOMETRY ].var,
-									&x, &y, &w, &h );
-			if ( XValue & flags && YValue & flags )
-				fl_set_form_position( cut_form->cut, x, y );
+									&cut_x, &cut_y, &cut_w, &cut_h );
 			if ( WidthValue & flags && HeightValue & flags )
 			{
-				if ( w < WIN_MIN_WIDTH )
-					w = WIN_MIN_WIDTH;
+				if ( cut_w < WIN_MIN_WIDTH )
+					cut_w = WIN_MIN_WIDTH;
 
-				if ( h < WIN_MIN_HEIGHT )
-					h = WIN_MIN_HEIGHT;
+				if ( cut_h < WIN_MIN_HEIGHT )
+					cut_h = WIN_MIN_HEIGHT;
 
-				fl_set_form_size( cut_form->cut, w, h );
+				fl_set_form_size( cut_form->cut, cut_w, cut_h );
 			}
 
 			if ( XValue & flags && YValue & flags )
-				fl_show_form( cut_form->cut, FL_PLACE_POSITION,
-							  FL_FULLBORDER, "fsc2: Cross section" );
-			else
-				fl_show_form( cut_form->cut, FL_PLACE_MOUSE | FL_FREE_SIZE,
-							  FL_FULLBORDER, "fsc2: Cross section" );
+			{
+				XWindowAttributes attr;
+				Window root, parent, *children;
+				int nchilds;
+
+				XQueryTree( fl_display, main_form->fsc2->window, &root,
+							&parent, &children, &nchilds );
+				XQueryTree( fl_display, parent, &root,
+							&parent, &children, &nchilds );
+				XGetWindowAttributes( fl_display, parent, &attr );
+
+				cut_x += main_form->fsc2->x - attr.x - 1;
+				cut_y += main_form->fsc2->y - attr.y - 1;
+
+				fl_set_form_position( cut_form->cut, cut_x, cut_y );
+				needs_pos = SET;
+			}
 		}
-		else
-			fl_show_form( cut_form->cut, FL_PLACE_MOUSE | FL_FREE_SIZE,
-						  FL_FULLBORDER, "fsc2: Cross section" );
+
+		if ( cut_has_been_shown )
+		{
+			fl_set_form_geometry( cut_form->cut, cut_x, cut_y, cut_w, cut_h );
+			needs_pos = SET;
+		}
+
+		fl_show_form( cut_form->cut, needs_pos ?
+					  FL_PLACE_GEOMETRY : FL_PLACE_MOUSE | FL_FREE_SIZE,
+					  FL_FULLBORDER, "fsc2: Cross section" );
+		cut_has_been_shown = SET;
 
 		cut_setup_canvas( &G.cut_x_axis, cut_form->cut_x_axis );
 		cut_setup_canvas( &G.cut_y_axis, cut_form->cut_y_axis );
@@ -1534,10 +1556,22 @@ void cut_form_close( void )
 		cv->points  = T_free( cv->points );
 		cv->xpoints = T_free( cv->xpoints );
 
-		fl_hide_form( cut_form->cut );
+		if ( cut_form->cut )
+			fl_hide_form( cut_form->cut );
 	}
 
-	fl_free_form( cut_form->cut );
+	if ( cut_form->cut )
+	{
+		cut_x = cut_form->cut->x;
+		cut_y = cut_form->cut->y;
+		cut_w = cut_form->cut->w;
+		cut_h = cut_form->cut->h;
+
+		fl_free_form( cut_form->cut );
+	}
+	else
+		cut_has_been_shown = UNSET;
+
 	is_shown = is_mapped = UNSET;
 }
 

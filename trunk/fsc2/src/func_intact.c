@@ -18,6 +18,9 @@ static void convert_escapes( char *str );
 extern FL_resource xresources[ ];
 extern FL_IOPT xcntl;
 
+static int tool_x, tool_y, tool_w, tool_h;
+static bool tool_has_been_shown = UNSET;
+
 
 #if ( SIZE == HI_RES )
 #define WIN_MIN_WIDTH  50
@@ -545,8 +548,16 @@ Var *f_bdelete( Var *v )
 		{
 			if ( ! TEST_RUN )
 			{
-				fl_hide_form( Tool_Box->Tools );
-				fl_free_form( Tool_Box->Tools );
+				if ( Tool_Box->Tools )
+				{
+					tool_x = Tool_Box->Tools->x;
+					tool_y = Tool_Box->Tools->y;
+
+					fl_hide_form( Tool_Box->Tools );
+					fl_free_form( Tool_Box->Tools );
+				}
+				else
+					tool_has_been_shown = UNSET;
 			}
 
 			Tool_Box = T_free( Tool_Box );
@@ -1200,8 +1211,16 @@ Var *f_sdelete( Var *v )
 		{
 			if ( ! TEST_RUN )
 			{
-				fl_hide_form( Tool_Box->Tools );
-				fl_free_form( Tool_Box->Tools );
+				if ( Tool_Box->Tools )
+				{
+					tool_x = Tool_Box->Tools->x;
+					tool_y = Tool_Box->Tools->y;
+
+					fl_hide_form( Tool_Box->Tools );
+					fl_free_form( Tool_Box->Tools );
+				}
+				else
+					tool_has_been_shown = UNSET;
 			}
 
 			Tool_Box = T_free( Tool_Box );
@@ -1843,8 +1862,16 @@ Var *f_idelete( Var *v )
 		{
 			if ( ! TEST_RUN )
 			{
-				fl_hide_form( Tool_Box->Tools );
-				fl_free_form( Tool_Box->Tools );
+				if ( Tool_Box->Tools )
+				{
+					tool_x = Tool_Box->Tools->x;
+					tool_y = Tool_Box->Tools->y;
+
+					fl_hide_form( Tool_Box->Tools );
+					fl_free_form( Tool_Box->Tools );
+				}
+				else
+					tool_has_been_shown = UNSET;
 			}
 
 			Tool_Box = T_free( Tool_Box );
@@ -2124,7 +2151,12 @@ void tools_clear( void )
 		return;
 
 	if ( Tool_Box->Tools )
+	{
+		tool_x = Tool_Box->Tools->x;
+		tool_y = Tool_Box->Tools->y;
+
 		fl_hide_form( Tool_Box->Tools );
+	}
 
 	for ( io = Tool_Box->objs; io != NULL; io = next )
 	{
@@ -2143,6 +2175,8 @@ void tools_clear( void )
 
 	if ( Tool_Box->Tools )
 		fl_free_form( Tool_Box->Tools );
+	else
+		tool_has_been_shown = UNSET;
 
 	Tool_Box = T_free( Tool_Box );
 }
@@ -2155,7 +2189,7 @@ static void recreate_Tool_Box( void )
 {
 	IOBJECT *io, *last_io;
 	bool needs_pos = SET;
-	int flags, wx, wy, ww, wh;
+	int flags;
 
 
 	if ( TEST_RUN )        /* just to make sure... */
@@ -2166,7 +2200,7 @@ static void recreate_Tool_Box( void )
 
 	if ( Tool_Box->Tools != NULL )
 	{
-		if ( fl_form_is_visible ( Tool_Box->Tools ) )
+		if ( fl_form_is_visible( Tool_Box->Tools ) )
 			fl_hide_form( Tool_Box->Tools );
 
 		for ( io = Tool_Box->objs; io != NULL; io = io->next )
@@ -2183,23 +2217,47 @@ static void recreate_Tool_Box( void )
 	}
 
 	if ( Tool_Box->Tools != NULL )
+	{
+		needs_pos = SET;
+		tool_x = Tool_Box->Tools->x;
+		tool_y = Tool_Box->Tools->y;
 		fl_addto_form( Tool_Box->Tools );
+	}
 	else
 	{
 		needs_pos = UNSET;
 		Tool_Box->Tools = fl_bgn_form( FL_UP_BOX, 100, 100 );
 
-		if ( * ( ( char * ) xresources[ TOOLGEOMETRY ].var ) != '\0' )
+		if ( ! tool_has_been_shown &&
+			 * ( ( char * ) xresources[ TOOLGEOMETRY ].var ) != '\0' )
 		{
 			flags = XParseGeometry( ( char * ) xresources[ TOOLGEOMETRY ].var,
-									&wx, &wy, &ww, &wh );
+									&tool_x, &tool_y, &tool_w, &tool_h );
 
 			if ( XValue & flags && YValue & flags )
 			{
-				fl_set_form_position( Tool_Box->Tools, wx, wy );
+				XWindowAttributes attr;
+				Window root, parent, *children;
+				int nchilds;
+
+				XQueryTree( fl_display, main_form->fsc2->window, &root,
+							&parent, &children, &nchilds );
+				XQueryTree( fl_display, parent, &root,
+							&parent, &children, &nchilds );
+				XGetWindowAttributes( fl_display, parent, &attr );
+
+				tool_x += main_form->fsc2->x - attr.x - 1;
+				tool_y += main_form->fsc2->y - attr.y - 1;
 				needs_pos = SET;
 			}
 		}
+	}
+
+	if ( tool_has_been_shown )
+	{
+		needs_pos = SET;
+		tool_x -= 1;
+		tool_y -= 1;
 	}
 
 	for ( io = Tool_Box->objs; io != NULL; io = io->next )
@@ -2216,10 +2274,19 @@ static void recreate_Tool_Box( void )
 	fl_set_form_size( Tool_Box->Tools, Tool_Box->w, Tool_Box->h );
 	fl_adjust_form_size( Tool_Box->Tools );
 
-	fl_show_form( Tool_Box->Tools, needs_pos ?
-				  FL_PLACE_POSITION : ( FL_PLACE_MOUSE | FL_FREE_SIZE ),
+	if ( needs_pos )
+	{
+		fl_set_form_position( Tool_Box->Tools, tool_x, tool_y);
+		fl_show_form( Tool_Box->Tools, FL_PLACE_POSITION,
+					  FL_FULLBORDER, "fsc2: Tools" );
+	}
+	else
+		fl_show_form( Tool_Box->Tools, FL_PLACE_MOUSE | FL_FREE_SIZE,
 				  FL_FULLBORDER, "fsc2: Tools" );
-	fl_winminsize( Tool_Box->Tools->window, WIN_MIN_WIDTH, WIN_MIN_HEIGHT );
+
+	tool_has_been_shown = SET;
+	fl_winminsize( Tool_Box->Tools->window,
+				   WIN_MIN_WIDTH, WIN_MIN_HEIGHT );
 }
 
 
