@@ -30,6 +30,8 @@
 
 #include "fsc2.h"
 
+void exp_runparser_init( void );
+
 extern int exp_runlex( void );
 extern char *exptext;
 
@@ -39,6 +41,7 @@ static int wpp;        /* which pulse property */
 
 int exp_runparse( void );
 static void exp_runerror( const char *s );
+static int dont_exec = 0;
 
 %}
 
@@ -108,7 +111,7 @@ static void exp_runerror( const char *s );
 %type <lval> plhs
 
 
-
+%left '?' ':'
 %left E_AND E_OR E_XOR
 %left E_EQ E_NE E_LT E_LE E_GT E_GE
 %left '+' '-'
@@ -170,72 +173,165 @@ plhs:    E_PPOS                    { wpp = P_POS; $$ = $1; }
        | E_PDLEN                   { wpp = P_DLEN; $$ = $1; }
 ;
 
-expr:    E_INT_TOKEN unit          { $$ = apply_unit( vars_push( INT_VAR, $1 ),
-													  $2 ); }
-       | E_FLOAT_TOKEN unit        { $$ = apply_unit(
+expr:    E_INT_TOKEN unit          { if ( ! dont_exec )
+	                                     $$ = apply_unit( vars_push( INT_VAR,
+														  $1 ), $2 ); }
+       | E_FLOAT_TOKEN unit        { if ( ! dont_exec )
+		                                 $$ = apply_unit(
 		                                    vars_push( FLOAT_VAR, $1 ), $2 ); }
-       | E_VAR_TOKEN               { $$ = vars_push_copy( $1 ); }
-       | E_VAR_TOKEN '['           { vars_arr_start( $1 ); }
-         list1 ']'                 { $$ = vars_arr_rhs( $4 ); }
+       | E_VAR_TOKEN               { if ( ! dont_exec )
+		                                  $$ = vars_push_copy( $1 ); }
+       | E_VAR_TOKEN '['           { if ( ! dont_exec )
+                                         vars_arr_start( $1 ); }
+         list1 ']'                 { if ( ! dont_exec )
+                                         $$ = vars_arr_rhs( $4 ); }
        | E_FUNC_TOKEN '(' list2
-         ')'                       { $$ = func_call( $1 ); }
-       | E_VAR_REF                 { $$ = $1; }
+         ')'                       { if ( ! dont_exec )
+                                         $$ = func_call( $1 );
+	                                 else
+										 vars_pop( $1 ); }
+       | E_VAR_REF                 { if ( dont_exec )
+										 vars_pop( $1 ); }
        | E_VAR_TOKEN '('           { print( FATAL, "'%s' isn't a function.\n", 
 											$1->name );
 	                                 THROW( EXCEPTION ); }
        | E_FUNC_TOKEN '['          { print( FATAL, "'%s' is a predefined"
 											 " function.\n", $1->name );
 	                                 THROW( EXCEPTION ); }
-       | E_PPOS                    { $$ = p_get_by_num( $1, P_POS ); }
-       | E_PLEN                    { $$ = p_get_by_num( $1, P_LEN ); }
-       | E_PDPOS                   { $$ = p_get_by_num( $1, P_DPOS ); }
-       | E_PDLEN                   { $$ = p_get_by_num( $1, P_DLEN ); }
-       | expr E_AND expr           { $$ = vars_comp( COMP_AND, $1, $3 ); }
-       | expr E_OR expr            { $$ = vars_comp( COMP_OR, $1, $3 ); }
-       | expr E_XOR expr           { $$ = vars_comp( COMP_XOR, $1, $3 ); }
-       | E_NOT expr %prec E_NOT    { $$ = vars_lnegate( $2 ); }
-       | expr E_EQ expr            { $$ = vars_comp( COMP_EQUAL, $1, $3 ); }
-       | expr E_NE expr            { $$ = vars_comp( COMP_UNEQUAL, $1, $3 ); }
-       | expr E_LT expr            { $$ = vars_comp( COMP_LESS, $1, $3 ); }
-       | expr E_GT expr            { $$ = vars_comp( COMP_LESS, $3, $1 ); }
-       | expr E_LE expr            { $$ = vars_comp( COMP_LESS_EQUAL,
-													 $1, $3 ); }
-       | expr E_GE expr            { $$ = vars_comp( COMP_LESS_EQUAL,
-													 $3, $1 ); }
-       | expr '+' expr             { $$ = vars_add( $1, $3 ); }
-       | expr '-' expr             { $$ = vars_sub( $1, $3 ); }
-       | expr '*' expr             { $$ = vars_mult( $1, $3 ); }
-       | expr '/' expr             { $$ = vars_div( $1, $3 ); }
-       | expr '%' expr             { $$ = vars_mod( $1, $3 ); }
-       | expr '^' expr             { $$ = vars_pow( $1, $3 ); }
-       | '+' expr %prec E_NEG      { $$ = $2; }
-       | '-' expr %prec E_NEG      { $$ = vars_negate( $2 ); }
-       | '(' expr ')'              { $$ = $2; }
+       | E_PPOS                    { if ( ! dont_exec )
+		                                  $$ = p_get_by_num( $1, P_POS ); }
+       | E_PLEN                    { if ( ! dont_exec )
+		                                  $$ = p_get_by_num( $1, P_LEN ); }
+       | E_PDPOS                   { if ( ! dont_exec )
+		                                  $$ = p_get_by_num( $1, P_DPOS ); }
+       | E_PDLEN                   { if ( ! dont_exec )
+		                                  $$ = p_get_by_num( $1, P_DLEN ); }
+	   | expr E_AND                { if ( ! dont_exec )
+	                                 {
+										 if ( ! check_result( $1 ) )
+										 {
+											 dont_exec++;
+											 vars_pop( $1 );
+										 }
+									 }
+									 else
+										 dont_exec++;
+	                               }
+	     expr                      { if ( ! dont_exec )
+                                         $$ = vars_comp( COMP_AND, $1, $4 );
+		                             else if ( ! --dont_exec )
+										 $$ = vars_push( INT_VAR, 0L );
+		                           }
+       | expr E_OR                 { if ( ! dont_exec )
+	                                 {
+										 if ( check_result( $1 ) )
+										 {
+											 dont_exec++;
+										     vars_pop( $1 );
+										 }
+									 }
+									 else
+										 dont_exec++;
+	                               }
+	     expr                      { if ( ! dont_exec )
+                                         $$ = vars_comp( COMP_OR, $1, $4 );
+		                             else if ( ! --dont_exec )
+										 $$ = vars_push( INT_VAR, 1L );
+		                           }
+       | expr E_XOR expr           { if ( ! dont_exec )
+		                                  $$ = vars_comp( COMP_XOR, $1, $3 ); }
+       | E_NOT expr %prec E_NOT    { if ( ! dont_exec )
+		                                  $$ = vars_lnegate( $2 ); }
+       | expr E_EQ expr            { if ( ! dont_exec )
+		                                $$ = vars_comp( COMP_EQUAL, $1, $3 ); }
+       | expr E_NE expr            { if ( ! dont_exec )
+		                              $$ = vars_comp( COMP_UNEQUAL, $1, $3 ); }
+       | expr E_LT expr            { if ( ! dont_exec )
+		                                 $$ = vars_comp( COMP_LESS, $1, $3 ); }
+       | expr E_GT expr            { if ( ! dont_exec )
+		                                 $$ = vars_comp( COMP_LESS, $3, $1 ); }
+       | expr E_LE expr            { if ( ! dont_exec )
+		                                  $$ = vars_comp( COMP_LESS_EQUAL,
+														  $1, $3 ); }
+       | expr E_GE expr            { if ( ! dont_exec )
+		                                  $$ = vars_comp( COMP_LESS_EQUAL,
+														  $3, $1 ); }
+       | expr '+' expr             { if ( ! dont_exec )
+		                                  $$ = vars_add( $1, $3 ); }
+       | expr '-' expr             { if ( ! dont_exec )
+		                                  $$ = vars_sub( $1, $3 ); }
+       | expr '*' expr             { if ( ! dont_exec )
+		                                  $$ = vars_mult( $1, $3 ); }
+       | expr '/' expr             { if ( ! dont_exec )
+		                                  $$ = vars_div( $1, $3 ); }
+       | expr '%' expr             { if ( ! dont_exec )
+		                                  $$ = vars_mod( $1, $3 ); }
+       | expr '^' expr             { if ( ! dont_exec )
+		                                  $$ = vars_pow( $1, $3 ); }
+       | '+' expr %prec E_NEG      { if ( ! dont_exec )
+		                                  $$ = $2; }
+       | '-' expr %prec E_NEG      { if ( ! dont_exec )
+		                                  $$ = vars_negate( $2 ); }
+       | '(' expr ')'              { if ( ! dont_exec )
+		                                  $$ = $2; }
+       | expr '?'                  { if ( ! dont_exec )
+	                                 {
+		                                 if ( ! check_result( $1 ) )
+		                                     dont_exec++;
+		                                 vars_pop( $1 );
+									 }
+	                                 else
+										 dont_exec +=2;
+	                               }
+		 expr ':'                  { if ( ! dont_exec )
+										 dont_exec++;
+		 							 else
+										 dont_exec--;
+	                               }
+		 expr                      { if ( ! dont_exec )
+										 $$ = $7;
+		                             else if ( ! --dont_exec )
+									     $$ = $4;
+                                   }
 ;
 
 unit:    /* empty */               { $$ = NULL; }
-       | E_NT_TOKEN                { $$ = vars_push( FLOAT_VAR, 1.0e-5 ); }
-       | E_UT_TOKEN                { $$ = vars_push( FLOAT_VAR, 1.0e-2 ); }
-       | E_MT_TOKEN                { $$ = vars_push( FLOAT_VAR, 10.0 ); }
-       | E_T_TOKEN                 { $$ = vars_push( FLOAT_VAR, 1.0e4 ); }
-       | E_KT_TOKEN                { $$ = vars_push( FLOAT_VAR, 1.0e7 ); }
-       | E_MGT_TOKEN               { $$ = vars_push( FLOAT_VAR, 1.0e10 ); }
-       | E_NU_TOKEN                { $$ = vars_push( FLOAT_VAR, 1.0e-9 ); }
-       | E_UU_TOKEN                { $$ = vars_push( FLOAT_VAR, 1.0e-6 ); }
-       | E_MU_TOKEN                { $$ = vars_push( FLOAT_VAR, 1.0e-3 ); }
-       | E_KU_TOKEN                { $$ = vars_push( FLOAT_VAR, 1.0e3 ); }
-       | E_MEG_TOKEN               { $$ = vars_push( FLOAT_VAR, 1.0e6 ); }
+       | E_NT_TOKEN                { if ( ! dont_exec )
+		                                 $$ = vars_push( FLOAT_VAR, 1.0e-5 ); }
+       | E_UT_TOKEN                { if ( ! dont_exec )
+		                                 $$ = vars_push( FLOAT_VAR, 1.0e-2 ); }
+       | E_MT_TOKEN                { if ( ! dont_exec )
+		                                 $$ = vars_push( FLOAT_VAR, 10.0 ); }
+       | E_T_TOKEN                 { if ( ! dont_exec )
+		                                 $$ = vars_push( FLOAT_VAR, 1.0e4 ); }
+       | E_KT_TOKEN                { if ( ! dont_exec )
+		                                 $$ = vars_push( FLOAT_VAR, 1.0e7 ); }
+       | E_MGT_TOKEN               { if ( ! dont_exec )
+		                                 $$ = vars_push( FLOAT_VAR, 1.0e10 ); }
+       | E_NU_TOKEN                { if ( ! dont_exec )
+		                                 $$ = vars_push( FLOAT_VAR, 1.0e-9 ); }
+       | E_UU_TOKEN                { if ( ! dont_exec )
+		                                 $$ = vars_push( FLOAT_VAR, 1.0e-6 ); }
+       | E_MU_TOKEN                { if ( ! dont_exec )
+		                                 $$ = vars_push( FLOAT_VAR, 1.0e-3 ); }
+       | E_KU_TOKEN                { if ( ! dont_exec )
+		                                 $$ = vars_push( FLOAT_VAR, 1.0e3 ); }
+       | E_MEG_TOKEN               { if ( ! dont_exec )
+		                                 $$ = vars_push( FLOAT_VAR, 1.0e6 ); }
 ;
 
 
 /* list of indices for access of an array element */
 
-list1:   /* empty */                 { $$ = vars_push( UNDEF_VAR ); }
+list1:   /* empty */                 { if ( ! dont_exec )
+		                                  $$ = vars_push( UNDEF_VAR ); }
 	   | l1e
 ;
 
-l1e:     expr                        { $$ = $1; }
-       | l1e ',' expr                { $$ = $3; }
+l1e:     expr                        { if ( ! dont_exec )
+		                                  $$ = $1; }
+       | l1e ',' expr                { if ( ! dont_exec )
+		                                  $$ = $3; }
 ;
 
 /* list of function arguments */
@@ -248,18 +344,25 @@ l2e:     exprs
        | l2e ',' exprs
 ;
 
-exprs:   expr                     { }
+exprs:   expr                      { }
        | strs
 ;
 
-strs:    E_STR_TOKEN              { vars_push( STR_VAR, $1 ); }
-       | strs E_STR_TOKEN         { Var *v = vars_push( STR_VAR, $2 );
-	                                vars_add( v->prev, v ); }
+strs:    E_STR_TOKEN               { if ( ! dont_exec )
+		                                  vars_push( STR_VAR, $1 ); }
+       | strs E_STR_TOKEN          { if ( ! dont_exec )
+	                                 {
+		                                  Var *v = vars_push( STR_VAR, $2 );
+										  vars_add( v->prev, v ); }
+	                               }
 ;
 
 
 %%
 
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
 
 static void exp_runerror ( const char *s )
 {
@@ -267,6 +370,15 @@ static void exp_runerror ( const char *s )
 
 	print( FATAL, "Syntax error in EXPERIMENT section.\n" );
 	THROW( EXCEPTION );
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+void exp_runparser_init( void )
+{
+	dont_exec = 0;
 }
 
 

@@ -33,7 +33,7 @@ const char device_name[ ]  = DEVICE_NAME;
 const char generic_type[ ] = DEVICE_TYPE;
 
 
-#define EGG4402_TEST_CURVE_LENGTH  4096
+#define EGG4402_TEST_CURVE_LENGTH  4096L
 
 /* Declaration of exported functions */
 
@@ -466,7 +466,7 @@ Var *boxcar_command( Var *v )
 		}
 	}
 
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 

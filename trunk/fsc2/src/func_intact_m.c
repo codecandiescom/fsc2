@@ -250,13 +250,13 @@ Var *f_mdelete( Var *v )
 	} while ( ( v = vars_pop( v ) ) != NULL );
 
 	if ( Internals.I_am == CHILD || Internals.mode == TEST || ! Tool_Box )
-		return vars_push( INT_VAR, 1 );
+		return vars_push( INT_VAR, 1L );
 
 	/* Redraw the tool box without the menu */
 
 	recreate_Tool_Box( );
 
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 
@@ -423,7 +423,7 @@ Var *f_mchoice( Var *v )
 	   item */
 
 	if ( ( v = vars_pop( v ) ) == NULL )
-		return vars_push( INT_VAR, io->state );
+		return vars_push( INT_VAR, ( long ) io->state );
 
 	/* The optional second argument is the menu item to be set */
 
@@ -453,7 +453,7 @@ Var *f_mchoice( Var *v )
 
 		print( SEVERE, "Invalid menu item number %ld, there are only %ld "
 			   "items.\n", io->num_items );
-		return vars_push( INT_VAR, io->state );
+		return vars_push( INT_VAR, ( long ) io->state );
 	}
 
 	/* If this isn't a test run set the new menu item */
@@ -599,7 +599,7 @@ Var *f_mchanged( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	return vars_push( INT_VAR, io->is_changed );
+	return vars_push( INT_VAR, ( long ) io->is_changed );
 }
 
 

@@ -260,7 +260,7 @@ Var *gaussmeter_command( Var *v )
 		}
 	}
 
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 
@@ -271,7 +271,7 @@ Var *gaussmeter_wait( Var *v )
 {
 	UNUSED_ARGUMENT( v );
 	fsc2_usleep( 100000, UNSET );
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 

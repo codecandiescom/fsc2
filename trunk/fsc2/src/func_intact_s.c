@@ -383,13 +383,13 @@ Var *f_sdelete( Var *v )
 	} while ( ( v = vars_pop( v ) ) != NULL );
 
 	if ( Internals.I_am == CHILD || Internals.mode == TEST || ! Tool_Box )
-		return vars_push( INT_VAR, 1 );
+		return vars_push( INT_VAR, 1L );
 
 	/* Redraw the tool box without the slider */
 
 	recreate_Tool_Box( );
 
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 
@@ -712,7 +712,7 @@ Var *f_schanged( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	return vars_push( INT_VAR, io->is_changed );
+	return vars_push( INT_VAR, ( long ) io->is_changed );
 }
 
 

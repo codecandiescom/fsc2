@@ -126,6 +126,7 @@ enum {
 
 Var *vars_get( char *name );
 Var *vars_new( char *name );
+void vars_arr_create( Var *a, Var *v, int dim, bool is_temp );
 Var *vars_push_copy( Var *v );
 Var *vars_push( int type, ... );
 Var *vars_pop( Var *v );

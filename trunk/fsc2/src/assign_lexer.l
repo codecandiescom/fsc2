@@ -53,6 +53,8 @@
 #include "fsc2.h"
 #include "assign_parser.h"
 
+extern void assignparser_init( void );
+
 
 int assignlex( void );
 extern void assignparse( void );
@@ -548,6 +550,8 @@ WS          [\n=: ]+
 "/"         return '/';       /* division operator */
 "%"         return '%';       /* modulo operator */
 "^"         return '^';       /* exponentiation operator */
+"?"         return '?';
+":"         return ':';
 
 {WS}        /* skip prettifying characters */
 
@@ -579,7 +583,7 @@ WS          [\n=: ]+
 
 int assignments_parser( FILE *in )
 {
-	static bool is_restart = UNSET;
+	static bool needs_restart = UNSET;
 
 
 	if ( EDL.compilation.sections[ ASSIGNMENTS_SECTION ] )
@@ -593,10 +597,12 @@ int assignments_parser( FILE *in )
 
 	/* Keep the lexer happy... */
 
-	if ( is_restart )
+	if ( needs_restart )
 	    assignrestart( assignin );
 	else
-		 is_restart = SET;
+		 needs_restart = SET;
+
+	assignparser_init( );
 
 	assignparse( );
 

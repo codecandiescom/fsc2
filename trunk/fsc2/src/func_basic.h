@@ -69,6 +69,7 @@ Var *f_slice(   Var *v );
 Var *f_square(  Var *v );
 Var *f_islice(  Var *v );
 Var *f_fslice(  Var *v );
+Var *f_lspace(  Var *v );
 
 
 #endif  /* ! FUNC_BASIC_HEADER */

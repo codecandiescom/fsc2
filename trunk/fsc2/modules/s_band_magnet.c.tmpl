@@ -281,7 +281,7 @@ Var *magnet_setup( Var *v )
 	magnet.field_step = step * magnet.resolution;
 	magnet.is_start_field = magnet.is_field_step = SET;
 
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 

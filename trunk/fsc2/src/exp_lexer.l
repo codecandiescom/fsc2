@@ -342,7 +342,7 @@ FUNC        {IDENT}"#"[0-9]+
 "/="        return E_DIVA;
 "%="        return E_MODA;
 "^="        return E_EXPA;
-
+"?"         return '?';
 
 			/* Handling of end of statement character */
 ";"			return ';';

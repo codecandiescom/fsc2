@@ -119,6 +119,7 @@ static bool in_cond;
 %token E_NT_TOKEN E_UT_TOKEN E_MT_TOKEN E_T_TOKEN E_KT_TOKEN E_MGT_TOKEN
 %token E_NU_TOKEN E_UU_TOKEN E_MU_TOKEN E_KU_TOKEN E_MEG_TOKEN
 
+%left '?' ':'
 %left E_AND E_OR E_XOR
 %left E_EQ E_NE E_LT E_LE E_GT E_GE
 %left '+' '-'
@@ -240,6 +241,7 @@ bin:     expr E_AND expr
        | expr '/' expr
        | expr '%' expr
        | expr '^' expr
+       | expr '?' expr ':' expr
 ;
 
 unit:    /* empty */

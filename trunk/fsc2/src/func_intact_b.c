@@ -383,13 +383,13 @@ Var *f_bdelete( Var *v )
 	   tool box is already deleted) */
 
 	if ( Internals.I_am == CHILD || Internals.mode == TEST || ! Tool_Box )
-		return vars_push( INT_VAR, 1 );
+		return vars_push( INT_VAR, 1L );
 
 	/* Redraw the form without the deleted buttons */
 
 	recreate_Tool_Box( );
 
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 
@@ -584,10 +584,10 @@ Var *f_bstate( Var *v )
 		{
 			state = io->state;
 			io->state = 0;
-			return vars_push( INT_VAR, state );
+			return vars_push( INT_VAR, ( long ) state );
 		}
 
-		return vars_push( INT_VAR, io->state != 0 ? 1 : 0 );
+		return vars_push( INT_VAR, io->state != 0 ? 1L : 0L );
 	}
 
 	/* The optional second argument is the state to be set - but take care,
@@ -634,7 +634,7 @@ Var *f_bstate( Var *v )
 
 	too_many_arguments( v );
 
-	return vars_push( INT_VAR, io->state );
+	return vars_push( INT_VAR, ( long ) io->state );
 }
 
 
@@ -758,7 +758,7 @@ Var *f_bchanged( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	return vars_push( INT_VAR, io->is_changed );
+	return vars_push( INT_VAR, ( long ) io->is_changed );
 }
 
 

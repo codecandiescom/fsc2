@@ -60,9 +60,7 @@ FOREVER {
 	FOR I = 1 : Num_Points {
 
 		data[ I ] = lockin_get_data( );
-		IF is_file( File2 ) {
-			fsave( File2, " #", data[ I ] );
-		}
+		fsave( File2, " #", data[ I ] );
 		display( I, data[ I ], 1, I, ( avg[ I ] + data[ I ] ) / J, 2 );
 	}
 
@@ -95,28 +93,26 @@ IF J == 1 {                 // if experiment was stopped during the first run
 	avg /= J;
 }
 
-IF is_file( File1 ) {
-	fsave( File1,
-		   "% # #\n"
-		   "% Magnet:\n"
-		   "%    Start current:        # A\n"
-		   "%	 End current:          # A\n"
-		   "%	 Sweep rate:           # A/min\n"
-		   "% Lock-In:\n"
-		   "%	 Sensitivity:          # mV\n"
-		   "%	 Time constant:        # s\n"
-		   "%    Acquisition rate:     # Hz\n"
-		   "%	 Phase:			       # degree\n"
-		   "%    Modulation frequency: # Khz\n"
-		   "%    Modulation amplitude: # V \n"
-		   "% Number of runs:          #\n",
-		   date(), time(),
-		   start_current, start_current + ( Num_Points - 1 ) * sweep_rate / kd,
-		   sweep_rate * 60.0, lockin_sensitivity( ) * 1.0e3, tc, kd,
-		   lockin_phase( ), lockin_ref_freq( ) * 1.0e3, lockin_ref_level( ),
-		   J );
+fsave( File1,
+	   "% # #\n"
+	   "% Magnet:\n"
+	   "%    Start current:        # A\n"
+	   "%	 End current:          # A\n"
+	   "%	 Sweep rate:           # A/min\n"
+	   "% Lock-In:\n"
+	   "%	 Sensitivity:          # mV\n"
+	   "%	 Time constant:        # s\n"
+	   "%    Acquisition rate:     # Hz\n"
+	   "%	 Phase:			       # degree\n"
+	   "%    Modulation frequency: # Khz\n"
+	   "%    Modulation amplitude: # V \n"
+	   "% Number of runs:          #\n",
+	   date(), time(),
+	   start_current, start_current + ( Num_Points - 1 ) * sweep_rate / kd,
+	   sweep_rate * 60.0, lockin_sensitivity( ) * 1.0e3, tc, kd,
+	   lockin_phase( ), lockin_ref_freq( ) * 1.0e3, lockin_ref_level( ),
+	   J );
 
-	save_comment( File1, "% ", "Sample:  \nTemperature:  \n" );
+save_comment( File1, "% ", "Sample:  \nTemperature:  \n" );
 
-	save( File1, slice( avg, 1, Num_Points ) );
-}
+save( File1, slice( avg, 1, Num_Points ) );

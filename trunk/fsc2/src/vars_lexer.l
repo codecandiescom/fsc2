@@ -53,7 +53,7 @@
 
 #include "fsc2.h"
 #include "vars_parser.h"
-
+extern void varsparser_init( void );
 
 int varslex( void );
 
@@ -322,6 +322,8 @@ UNIT        ("n"|"u"|"m"|"k"|"M")?("m"|"s"|"G"|"V"|"A"|"Hz"|"dB"|"db"|"T")
 "&"         return AND;       /* logical and operator */
 "|"         return OR;        /* logical or operator */
 "~"         return XOR;       /* logical exclusive or (xor) operator */
+"?"         return '?';
+":"         return ':';
 
 			/* Handling of end of statement character */
 ";"			return ';';
@@ -374,7 +376,7 @@ UNIT        ("n"|"u"|"m"|"k"|"M")?("m"|"s"|"G"|"V"|"A"|"Hz"|"dB"|"db"|"T")
 
 int variables_parser( FILE *in )
 {
-	static bool is_restart = UNSET;
+	static bool needs_restart = UNSET;
 
 
 	/* Don't allow more than one VARIABLES section */
@@ -390,10 +392,12 @@ int variables_parser( FILE *in )
 
 	/* Keep the lexer happy... */
 
-	if ( is_restart )
+	if ( needs_restart )
 	    varsrestart( varsin );
 	else
-		is_restart = SET;
+		needs_restart = SET;
+
+	varsparser_init( );
 
 	varsparse( );
 

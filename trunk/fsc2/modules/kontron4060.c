@@ -148,7 +148,7 @@ Var *voltmeter_ac_measurement( Var *v )
 		kontron4060_failure( );
 
 	kontron4060.meas_type = MEAS_TYPE_AC;
-	return vars_push( INT_VAR, 1  );
+	return vars_push( INT_VAR, 1L );
 }
 
 
@@ -165,7 +165,7 @@ Var *voltmeter_dc_measurement( Var *v )
 		kontron4060_failure( );
 
 	kontron4060.meas_type = MEAS_TYPE_DC;
-	return vars_push( INT_VAR, 1  );
+	return vars_push( INT_VAR, 1L );
 }
 
 
@@ -222,7 +222,7 @@ Var *voltmeter_command( Var *v )
 		}
 	}
 
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 

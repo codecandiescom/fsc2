@@ -611,7 +611,7 @@ Var *gaussmeter_probe_orientation( Var *v )
 		}
 
 		if ( FSC2_MODE == TEST )
-			return vars_push( INT_VAR, 1 );
+			return vars_push( INT_VAR, 1L );
 
 		return vars_push( INT_VAR, ( long ) nmr.probe_orientation );
 	}
@@ -647,7 +647,7 @@ Var *gaussmeter_command( Var *v )
 		T_free( cmd );
 	}
 
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 

@@ -101,6 +101,12 @@ typedef struct {
 
 #define MAX_INPUT_CHARS 32
 
+#define IS_BUTTON( io )  \
+		( ( io )->type >= NORMAL_BUTTON && ( io )->type <= RADIO_BUTTON )
+#define IS_SLIDER( io )  \
+		( ( io )->type >= NORMAL_SLIDER && ( io )->type <= SLOW_VALUE_SLIDER )
+
+
 
 /* exported functions */
 

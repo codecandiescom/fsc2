@@ -74,24 +74,22 @@ max_time   = min_time + Rec_len * time_res;
 Pretrigger = int( 0.9 * trig_pos * Rec_len );
 change_scale( min_time * 1.0e-3, time_res * 1.0e-3);
 
-mean_curve[ 1 ] = float_slice( Rec_len );
+mean_curve = float_slice( N_steps, Rec_len );
 base_curve = float_slice( Rec_len );
 
 /* Get a file for storing all data and write experiment parameter */
 
 F1 = get_file( "File for storing complete data sets:" );
 F2 = get_file( "File for storing averaged data sets:" );
-IF is_file( F2 ) {
-	fsave( F2, "% Start frequency  = # MHz\n", start_freq * 1.0e-6 );
-	fsave( F2, "% End frequency    = # MHz\n", end_freq * 1.0e-6 );
-	fsave( F2, "% Step frequency   = # kHz\n", step_freq * 1.0e-3 );
-	fsave( F2, "% Attenuation      = # dB\n", attenuation );
-	fsave( F2, "% Record length    = #\n", Rec_len );
-	fsave( F2, "% Trigger position = #\n", int( trig_pos * Rec_len ) );
-	fsave( F2, "% Time base        = # ns\n", time_base * 1.0e-9 );
-	save_comment( F2, "% ", "Sample: \nMicrowave frequency: \n"
-				  "Microwave power: \nTemperature: \n" );
-}
+fsave( F2, "% Start frequency  = # MHz\n", start_freq * 1.0e-6 );
+fsave( F2, "% End frequency    = # MHz\n", end_freq * 1.0e-6 );
+fsave( F2, "% Step frequency   = # kHz\n", step_freq * 1.0e-3 );
+fsave( F2, "% Attenuation      = # dB\n", attenuation );
+fsave( F2, "% Record length    = #\n", Rec_len );
+fsave( F2, "% Trigger position = #\n", int( trig_pos * Rec_len ) );
+fsave( F2, "% Time base        = # ns\n", time_base * 1.0e-9 );
+save_comment( F2, "% ", "Sample: \nMicrowave frequency: \n"
+			  "Microwave power: \nTemperature: \n" );
 
 /* Create the sliders for setting the integration window limits */
 
@@ -150,11 +148,8 @@ FOR J = 1 : N_runs
 
 		/* Save the new date to file */
 
-		IF is_file( F1 )
-		{
-			fsave( F1, "% #.run, frequency = # MHz\n\n", J, freq * 1.0e-6 );
-			save( F1, curve );
-		}
+		fsave( F1, "% #.run, frequency = # MHz\n\n", J, freq * 1.0e-6 );
+		save( F1, curve );
 
 		/* Add the new curve to the results from previous runs */
 
@@ -249,40 +244,37 @@ IF ! Is_stored            // Check if data of last trace were stored
 	freq = start_freq + I * step_freq;
 }
 
-IF is_file( F2 )
+IF J < N_runs
 {
-	IF J < N_runs
-	{
-		fsave( F2, "% Number of runs: #\n", J );
-	}
-	ELSE
-	{
-		fsave( F2, "% Number of runs: #\n", N_runs );
-	}
+	fsave( F2, "% Number of runs: #\n", J );
+}
+ELSE
+{
+	fsave( F2, "% Number of runs: #\n", N_runs );
+}
 
-	IF I < N_steps
-	{
-		fsave( F2, "% Last run not finished, end frequency was # MHz\n",
- 			   freq * 1.0e-6 );
-	}
-	save_program( F2, "% " );
+IF I < N_steps
+{
+	fsave( F2, "% Last run not finished, end frequency was # MHz\n",
+		   freq * 1.0e-6 );
+}
+save_program( F2, "% " );
 
-	IF J == 1 & I < N_steps
-	{
-		End_index = I;
-	}
-	ELSE
-	{
-		End_index = N_steps;
-	}
+IF J == 1 & I < N_steps
+{
+	End_index = I;
+}
+ELSE
+{
+	End_index = N_steps;
+}
 
-	freq = start_freq;
-	FOR I = 1 : End_index
-	{
-		fsave( F2, "\n% Frequency: # MHz\n\n", freq * 1.0e-6 );
-		freq += step_freq;
-		save( F2, mean_curve[ I ] );
-	}
+freq = start_freq;
+FOR I = 1 : End_index
+{
+	fsave( F2, "\n% Frequency: # MHz\n\n", freq * 1.0e-6 );
+	freq += step_freq;
+	save( F2, mean_curve[ I ] );
 }
 
 /* Create two buttons for saving integrals and stopping */
@@ -300,42 +292,40 @@ FOREVER
 	IF button_state( B1 )           // check Save button
 	{
 		F3 = get_file( "File for storing integrated region:" );		
-		IF is_file( F3 ) {
-			IF start_time < end_time
-			{
-				fsave( F3, "% Integration window from # ns to # ns\n"
-						   "% (times relative to trigger)\n\n"
-						   "% Integral over raw data\n\n",
-					   start_time, end_time );
-			}
-			ELSE
-			{
-				fsave( F3, "% Integration window from # ns to # ns\n"
-						   "% (times relative to trigger)\n"
-						   "% Integrals over raw data:\n\n",
-					   end_time, start_time );
-			}
+		IF start_time < end_time
+		{
+			fsave( F3, "% Integration window from # ns to # ns\n"
+					   "% (times relative to trigger)\n\n"
+					   "% Integral over raw data\n\n",
+				   start_time, end_time );
+		}
+		ELSE
+		{
+			fsave( F3, "% Integration window from # ns to # ns\n"
+					   "% (times relative to trigger)\n"
+					   "% Integrals over raw data:\n\n",
+				   end_time, start_time );
+		}
 
-			IF J == 1 & I < N_steps
-			{
-				End_index = I;
-			}
-			ELSE
-			{
-				End_index = N_steps;
-			}
+		IF J == 1 & I < N_steps
+		{
+			End_index = I;
+		}
+		ELSE
+		{
+			End_index = N_steps;
+		}
 
-			base_int = mean( base_curve, Start_pos, Width );
-			FOR K = 1 : End_index
-			{
-				fsave( F3, "#\n", mean( mean_curve[ K ], Start_pos, Width ) );
-			}
-			fsave( F3, "\n% Integrals over preprocessed data:\n\n" );
-			FOR K = 1 : End_index
-			{
-				fsave( F3, "#\n", mean( mean_curve[ K ], Start_pos, Width )
-								  - base_int - mean_ground[ K ] );
-			}
+		base_int = mean( base_curve, Start_pos, Width );
+		FOR K = 1 : End_index
+		{
+			fsave( F3, "#\n", mean( mean_curve[ K ], Start_pos, Width ) );
+		}
+		fsave( F3, "\n% Integrals over preprocessed data:\n\n" );
+		FOR K = 1 : End_index
+		{
+			fsave( F3, "#\n", mean( mean_curve[ K ], Start_pos, Width )
+							  - base_int - mean_ground[ K ] );
 		}
 
 		NEXT;

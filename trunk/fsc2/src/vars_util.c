@@ -257,21 +257,23 @@ static Var *vars_str_comp( int comp_type, Var *v1, Var *v2 )
 	switch ( comp_type )
 	{
 		case COMP_EQUAL :
-			vars_push( INT_VAR, strcmp( v1->val.sptr, v2->val.sptr ) ? 0 : 1 );
+			vars_push( INT_VAR,
+					   strcmp( v1->val.sptr, v2->val.sptr ) ? 0L : 1L );
 			break;
 			
 		case COMP_UNEQUAL :
-			vars_push( INT_VAR, strcmp( v1->val.sptr, v2->val.sptr ) ? 1 : 0 );
+			vars_push( INT_VAR,
+					   strcmp( v1->val.sptr, v2->val.sptr ) ? 1L : 0L );
 			break;
 
 		case COMP_LESS :
 			vars_push( INT_VAR,
-					   strcmp( v1->val.sptr, v2->val.sptr ) < 0 ? 1 : 0 );
+					   strcmp( v1->val.sptr, v2->val.sptr ) < 0 ? 1L : 0L );
 			break;
 
 		case COMP_LESS_EQUAL :
 			vars_push( INT_VAR,
-					   strcmp( v1->val.sptr, v2->val.sptr ) <= 0 ? 1 : 0 );
+					   strcmp( v1->val.sptr, v2->val.sptr ) <= 0 ? 1L : 0L );
 			break;
 
 		case COMP_AND :
@@ -310,9 +312,9 @@ Var *vars_lnegate( Var *v )
 
 	if ( ( v->type == INT_VAR && v->INT == 0 ) ||
 		 ( v->type == FLOAT_VAR && v->FLOAT == 0.0 ) )
-		new_var = vars_push( INT_VAR, 1 );
+		new_var = vars_push( INT_VAR, 1L );
 	else
-		new_var = vars_push( INT_VAR, 0 );
+		new_var = vars_push( INT_VAR, 0L );
 
 	vars_pop( v );
 
@@ -336,8 +338,8 @@ void vars_arith_len_check( Var *v1, Var *v2, const char *op )
 		len1 = v1->len;
 		if ( len1 < 1 )
 		{
-			print( FATAL, "Length of array or matrix used in %s is unknown.\n",
-				   op );
+			print( FATAL, "Length of array or matrix used in %s is "
+				   "unknown.\n", op );
 			THROW( EXCEPTION );
 		}
 	}

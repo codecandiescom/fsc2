@@ -164,6 +164,7 @@ bool test_condition( Prg_Token *cur );
 void get_max_repeat_count( Prg_Token *cur );
 void get_for_cond( Prg_Token *cur );
 bool test_for_cond( Prg_Token *cur );
+bool check_result( Var *v );
 
 
 #endif   /* ! EXP_HEADER */

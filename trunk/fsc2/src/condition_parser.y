@@ -31,10 +31,11 @@
 
 #include "fsc2.h"
 
+int conditionparse( void );
+void conditionparser_init( void );
+
 /* locally used functions */
 
-int conditionparse( void );
-static bool check_result( Var *v );
 static void conditionerror( const char *s );
 
 
@@ -44,21 +45,21 @@ static void conditionerror( const char *s );
    is false (for the AND case) or true (for OR). In theses cases the second
    expression must not be evaluated where it is especially important not to
    run functions that might have side-effects. Thus when such a case is
-   detected 'condition_gobble' is set to 1 which will prevent the evaluation.
-   At the end of the expression 'condition_gobble' is decremented back to 0.
+   detected 'dont_exec' is set to 1 which will prevent the evaluation.
+   At the end of the expression 'dont_exec' is decremented back to 0.
 
    A further problem are cases like 'expr1 | ( expr2 & expr3 ) | expr4'. If,
    e.g. expr2 is false expr3 must not evaluated but expr4 must (at least if
    expr 1 was false). So, skipping all the rest after expr2 is not possible
-   and thus 'condition_gobble' must work as a counter, incremented on expr2
-   and again decremented at the end of expr3. Thus it's again 0 when expr4
-   is dealt with which in turn is evaluated.
+   and thus 'dont_exec' must work as a counter, incremented on expr2 and again
+   decremented at the end of expr3. Thus it's again 0 when expr4 is dealt with
+   which in turn is evaluated.
 
-   'condition_gobble' must be set to zero before the parser is started to make
-   sure it's 0 even if, due to syntax errors etc., the last run of the parser
-   was interrupted with 'condition_gobble' being still non-zero. */
+   'dont_exec' must be set to zero before the parser is started to make sure
+   it's 0 even if, due to syntax errors etc., the last run of the parser was
+   interrupted with 'dont_exec' being still non-zero. */
 
-int condition_gobble;
+static int dont_exec = 0;
 
 
 %}
@@ -127,7 +128,7 @@ int condition_gobble;
 %token E_NU_TOKEN E_UU_TOKEN E_MU_TOKEN E_KU_TOKEN E_MEG_TOKEN
 %type <vptr> expr unit list1 l1e
 
-
+%left '?' ':'
 %left E_AND E_OR E_XOR
 %left E_EQ E_NE E_LT E_LE E_GT E_GE
 %left '+' '-'
@@ -143,154 +144,169 @@ int condition_gobble;
 input:   expr                     { YYACCEPT; }
 ;
 
-expr:    E_INT_TOKEN unit         { if ( ! condition_gobble )
+expr:    E_INT_TOKEN unit         { if ( ! dont_exec )
                                         $$ = apply_unit( vars_push( INT_VAR,
 																  $1 ), $2 ); }
-       | E_FLOAT_TOKEN unit       { if ( ! condition_gobble )
+       | E_FLOAT_TOKEN unit       { if ( ! dont_exec )
 		                                $$ = apply_unit(
 		                                    vars_push( FLOAT_VAR, $1 ), $2 ); }
-       | E_VAR_TOKEN              { if ( ! condition_gobble )
-		                                $$ = vars_push_copy( $1 );
-	                                else
-										vars_pop( $1 ); }
-       | E_VAR_TOKEN '['          { if ( ! condition_gobble )
-		                                vars_arr_start( $1 );
-	                                else
-										vars_pop( $1 ); }
-         list1                    { if ( $4 == NULL && ! condition_gobble )
+       | E_VAR_TOKEN              { if ( ! dont_exec )
+		                                $$ = vars_push_copy( $1 ); }
+       | E_VAR_TOKEN '['          { if ( ! dont_exec )
+		                                vars_arr_start( $1 ); }
+         list1                    { if ( $4 == NULL && ! dont_exec )
                                         $$ = vars_push( UNDEF_VAR ); }
-		 ']'                      { if ( ! condition_gobble )
+		 ']'                      { if ( ! dont_exec )
                                         $$ = vars_arr_rhs( $4 ); }
        | E_FUNC_TOKEN '(' list2
-         ')'                      { if ( ! condition_gobble )
+         ')'                      { if ( ! dont_exec )
 			                            $$ = func_call( $1 );
 	                                else
 										vars_pop( $1 ); }
-       | E_VAR_REF                { if ( condition_gobble )
+       | E_VAR_REF                { if ( dont_exec )
 		                                 vars_pop( $1 ); }
-       | E_STR_TOKEN              { if ( ! condition_gobble )
-		                                 $$ = vars_push( STR_VAR, $<sptr>1 ); }
        | E_VAR_TOKEN '('          { print( FATAL, "'%s' isn't a function.\n",
 										   $1->name );
 	                                THROW( EXCEPTION ); }
        | E_FUNC_TOKEN '['         { print( FATAL, "'%s' is a predefined "
                                             "function.\n", $1->name );
 	                                THROW( EXCEPTION ); }
-       | E_PPOS                   { if ( ! condition_gobble )
+       | E_PPOS                   { if ( ! dont_exec )
                                         $$ = p_get_by_num( $1, P_POS ); }
-       | E_PLEN                   { if ( ! condition_gobble )
+       | E_PLEN                   { if ( ! dont_exec )
                                         $$ = p_get_by_num( $1, P_LEN ); }
-       | E_PDPOS                  { if ( ! condition_gobble )
+       | E_PDPOS                  { if ( ! dont_exec )
                                         $$ = p_get_by_num( $1, P_DPOS ); }
-       | E_PDLEN                  { if ( ! condition_gobble )
+       | E_PDLEN                  { if ( ! dont_exec )
                                         $$ = p_get_by_num( $1, P_DLEN ); }
-	   | expr E_AND               { if ( ! condition_gobble )
+	   | expr E_AND               { if ( ! dont_exec )
 	                                {
                                         if ( ! check_result( $1 ) )
-											condition_gobble = 1;
+										{
+											dont_exec++;
+											vars_pop( $1 );
+										}
 									}
 									else
-										condition_gobble++;
+										dont_exec++;
 	                              }
-	     expr                     { if ( ! condition_gobble )
+	     expr                     { if ( ! dont_exec )
                                         $$ = vars_comp( COMP_AND, $1, $4 );
-		                            else
-									{
-									    if ( condition_gobble == 1 )
-										     $$ = $1;
-										condition_gobble--;
-									}
+		                            else if ( ! --dont_exec )
+										$$ = vars_push( INT_VAR, 0 );
 		                          }
-       | expr E_OR                { if ( ! condition_gobble )
+       | expr E_OR                { if ( ! dont_exec )
 	                                {
                                         if ( check_result( $1 ) )
-											condition_gobble = 1;
+										{
+											dont_exec++;
+											vars_pop( $1 );
+										}
 									}
 									else
-										condition_gobble++;
+										dont_exec++;
 	                              }
-	     expr                     { if ( ! condition_gobble )
+	     expr                     { if ( ! dont_exec )
                                         $$ = vars_comp( COMP_OR, $1, $4 );
-		                            else
-									{
-									    if ( condition_gobble == 1 )
-										     $$ = $1;
-										condition_gobble--;
-									}
+		                            else if ( ! --dont_exec )
+										$$ = vars_push( INT_VAR, 1 );
 		                          }
-       | expr E_XOR expr          { if ( ! condition_gobble )
+       | expr E_XOR expr          { if ( ! dont_exec )
                                         $$ = vars_comp( COMP_XOR, $1, $3 ); }
-       | E_NOT expr               { if ( ! condition_gobble )
+       | E_NOT expr               { if ( ! dont_exec )
                                         $$ = vars_lnegate( $2 ); }
-       | expr E_EQ expr           { if ( ! condition_gobble )
+       | expr E_EQ expr           { if ( ! dont_exec )
                                         $$ = vars_comp( COMP_EQUAL, $1, $3 ); }
-       | expr E_NE expr           { if ( ! condition_gobble )
+       | expr E_NE expr           { if ( ! dont_exec )
                                         $$ = vars_comp( COMP_UNEQUAL,
 														$1, $3 ); }
-       | expr E_LT expr           { if ( ! condition_gobble )
+       | expr E_LT expr           { if ( ! dont_exec )
                                         $$ = vars_comp( COMP_LESS, $1, $3 ); }
-       | expr E_GT expr           { if ( ! condition_gobble )
+       | expr E_GT expr           { if ( ! dont_exec )
                                         $$ = vars_comp( COMP_LESS, $3, $1 ); }
-       | expr E_LE expr           { if ( ! condition_gobble )
+       | expr E_LE expr           { if ( ! dont_exec )
                                         $$ = vars_comp( COMP_LESS_EQUAL,
 														$1, $3 ); }
-       | expr E_GE expr           { if ( ! condition_gobble )
+       | expr E_GE expr           { if ( ! dont_exec )
                                         $$ = vars_comp( COMP_LESS_EQUAL,
 														$3, $1 ); }
-       | expr '+' expr            { if ( ! condition_gobble )
+       | expr '+' expr            { if ( ! dont_exec )
                                         $$ = vars_add( $1, $3 ); }
-       | expr '-' expr            { if ( ! condition_gobble )
+       | expr '-' expr            { if ( ! dont_exec )
                                         $$ = vars_sub( $1, $3 ); }
-       | expr '*' expr            { if ( ! condition_gobble )
+       | expr '*' expr            { if ( ! dont_exec )
                                         $$ = vars_mult( $1, $3 ); }
-       | expr '/' expr            { if ( ! condition_gobble )
+       | expr '/' expr            { if ( ! dont_exec )
                                         $$ = vars_div( $1, $3 ); }
-       | expr '%' expr            { if ( ! condition_gobble )
+       | expr '%' expr            { if ( ! dont_exec )
                                         $$ = vars_mod( $1, $3 ); }
-       | expr '^' expr            { if ( ! condition_gobble )
+       | expr '^' expr            { if ( ! dont_exec )
                                         $$ = vars_pow( $1, $3 ); }
-       | '+' expr %prec E_NEG     { if ( ! condition_gobble )
+       | '+' expr %prec E_NEG     { if ( ! dont_exec )
                                         $$ = $2; }
-       | '-' expr %prec E_NEG     { if ( ! condition_gobble )
+       | '-' expr %prec E_NEG     { if ( ! dont_exec )
                                         $$ = vars_negate( $2 ); }
-       | '(' expr ')'             { if ( ! condition_gobble )
+       | '(' expr ')'             { if ( ! dont_exec )
                                         $$ = $2; }
+       | expr '?'                  { if ( ! dont_exec )
+	                                 {
+		                                 if ( ! check_result( $1 ) )
+		                                     dont_exec++;
+		                                 vars_pop( $1 );
+									 }
+	                                 else
+										 dont_exec += 2;
+	                               }
+		 expr ':'                  { if ( ! dont_exec )
+										 dont_exec++;
+		 							 else
+										 dont_exec--;
+	                               }
+		 expr                      { if ( ! dont_exec )
+										 $$ = $7;
+		                             else if ( ! -- dont_exec )
+									     $$ = $4;
+                                   }
 ;
 
-unit:    /* empty */              { $$ = NULL; }
-       | E_NT_TOKEN               { if ( ! condition_gobble )
+unit:    /* empty */              { if ( ! dont_exec )
+                                        $$ = NULL; }
+       | E_NT_TOKEN               { if ( ! dont_exec )
                                         $$ = vars_push( FLOAT_VAR, 1.0e-5 ); }
-       | E_UT_TOKEN               { if ( ! condition_gobble )
+       | E_UT_TOKEN               { if ( ! dont_exec )
                                         $$ = vars_push( FLOAT_VAR, 1.0e-2 ); }
-       | E_MT_TOKEN               { if ( ! condition_gobble )
+       | E_MT_TOKEN               { if ( ! dont_exec )
                                         $$ = vars_push( FLOAT_VAR, 10.0 ); }
-       | E_T_TOKEN                { if ( ! condition_gobble )
+       | E_T_TOKEN                { if ( ! dont_exec )
                                         $$ = vars_push( FLOAT_VAR, 1.0e4 ); }
-       | E_KT_TOKEN               { if ( ! condition_gobble )
+       | E_KT_TOKEN               { if ( ! dont_exec )
                                         $$ = vars_push( FLOAT_VAR, 1.0e7 ); }
-       | E_MGT_TOKEN              { if ( ! condition_gobble )
+       | E_MGT_TOKEN              { if ( ! dont_exec )
                                         $$ = vars_push( FLOAT_VAR, 1.0e10 ); }
-       | E_NU_TOKEN               { if ( ! condition_gobble )
+       | E_NU_TOKEN               { if ( ! dont_exec )
                                         $$ = vars_push( FLOAT_VAR, 1.0e-9 ); }
-       | E_UU_TOKEN               { if ( ! condition_gobble )
+       | E_UU_TOKEN               { if ( ! dont_exec )
                                         $$ = vars_push( FLOAT_VAR, 1.0e-6 ); }
-       | E_MU_TOKEN               { if ( ! condition_gobble )
+       | E_MU_TOKEN               { if ( ! dont_exec )
                                         $$ = vars_push( FLOAT_VAR, 1.0e-3 ); }
-       | E_KU_TOKEN               { if ( ! condition_gobble )
+       | E_KU_TOKEN               { if ( ! dont_exec )
                                         $$ = vars_push( FLOAT_VAR, 1.0e3 ); }
-       | E_MEG_TOKEN              { if ( ! condition_gobble )
+       | E_MEG_TOKEN              { if ( ! dont_exec )
                                         $$ = vars_push( FLOAT_VAR, 1.0e6 ); }
 ;
 
 
 /* list of indices for access of an array element */
 
-list1:   /* empty */                 { $$ = vars_push( UNDEF_VAR ); }
+list1:   /* empty */                 { if ( ! dont_exec )
+	                                       $$ = vars_push( UNDEF_VAR ); }
 	   | l1e
 ;
 
-l1e:     expr                        { $$ = $1; }
-       | l1e ',' expr                { $$ = $3; }
+l1e:     expr                        { if ( ! dont_exec )
+	                                       $$ = $1; }
+       | l1e ',' expr                { if ( ! dont_exec )
+	                                       $$ = $3; }
 ;
 
 /* list of function arguments */
@@ -303,33 +319,21 @@ l2e:     exprs
        | l2e ',' exprs
 ;
 
-exprs:   expr                     { }
+exprs:   expr                       { }
        | strs
 ;
 
-strs:    E_STR_TOKEN              { vars_push( STR_VAR, $1 ); }
-       | strs E_STR_TOKEN         { Var *v = vars_push( STR_VAR, $2 );
-	                                vars_add( v->prev, v ); }
+strs:    E_STR_TOKEN                { if ( ! dont_exec )
+	                                       vars_push( STR_VAR, $1 ); }
+       | strs E_STR_TOKEN           { if ( ! dont_exec )
+	                                  {
+	                                       Var *v = vars_push( STR_VAR, $2 );
+	                                       vars_add( v->prev, v );
+									  }
+	                                }
 ;
 
 %%
-
-
-/*---------------------------------------------------------*/
-/*---------------------------------------------------------*/
-
-static bool check_result( Var *v )
-{
-    if ( ! ( v->type & ( INT_VAR | FLOAT_VAR ) ) )
-		return FALSE;
-
-	/* Test the result - everything nonzero returns OK */
-
-	if ( v->type == INT_VAR )
-		return v->val.lval ? OK : FAIL;
-	else
-		return v->val.dval != 0.0 ? OK : FAIL;
-}
 
 
 /*---------------------------------------------------------*/
@@ -341,6 +345,14 @@ static void conditionerror( const char *s )
 
 	print( FATAL, "Syntax error in loop or IF/UNLESS condition.\n" );
 	THROW( EXCEPTION );
+}
+
+/*---------------------------------------------------------*/
+/*---------------------------------------------------------*/
+
+void conditionparser_init( void )
+{
+	dont_exec = 0;
 }
 
 

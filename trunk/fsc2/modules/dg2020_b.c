@@ -695,7 +695,7 @@ Var *pulser_automatic_shape_pulses( Var *v )
 	dg2020.function[ func ].min_right_shape_padding =
 								   dg2020.function[ func ].right_shape_padding;
 
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 
@@ -814,7 +814,7 @@ Var *pulser_automatic_twt_pulses( Var *v )
 	dg2020.function[ func ].min_right_twt_padding =
 									 dg2020.function[ func ].right_twt_padding;
 
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 
@@ -828,7 +828,7 @@ Var *pulser_show_pulses( Var *v )
 	if ( ! FSC2_IS_CHECK_RUN )
 		dg2020.do_show_pulses = SET;
 
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 
@@ -842,7 +842,7 @@ Var *pulser_dump_pulses( Var *v )
 	if ( ! FSC2_IS_CHECK_RUN )
 		dg2020.do_dump_pulses = SET;
 
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 
@@ -929,7 +929,7 @@ Var *pulser_keep_all_pulses( Var *v )
 {
 	UNUSED_ARGUMENT( v );
 	dg2020_keep_all( );
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 
@@ -976,7 +976,7 @@ Var *pulser_channel_state( Var *v )
 	UNUSED_ARGUMENT( v );
 	print( SEVERE, "Individual pod channels can't be switched on or off with "
 		   "this device.\n" );
-	return vars_push( INT_VAR, 0 );
+	return vars_push( INT_VAR, 0L );
 }
 
 
@@ -991,7 +991,7 @@ Var *pulser_update( Var *v )
 	UNUSED_ARGUMENT( v );
 
 	if ( ! dg2020_is_needed )
-		return vars_push( INT_VAR, 1 );
+		return vars_push( INT_VAR, 1L );
 
 	/* Send all changes to the pulser */
 
@@ -1003,7 +1003,7 @@ Var *pulser_update( Var *v )
 	if ( FSC2_MODE == EXPERIMENT )
 		dg2020_run( dg2020.is_running );
 
-	return vars_push( INT_VAR, state ? 1 : 0 );
+	return vars_push( INT_VAR, state ? 1L : 0L );
 }
 
 
@@ -1021,7 +1021,7 @@ Var *pulser_shift( Var *v )
 
 
 	if ( ! dg2020_is_needed )
-		return vars_push( INT_VAR, 1 );
+		return vars_push( INT_VAR, 1L );
 
 	/* An empty pulse list means that we have to shift all active pulses that
 	   have a position change time value set */
@@ -1102,7 +1102,7 @@ Var *pulser_shift( Var *v )
 			dg2020.needs_update = SET;
 	}
 
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 
@@ -1120,7 +1120,7 @@ Var *pulser_increment( Var *v )
 
 
 	if ( ! dg2020_is_needed )
-		return vars_push( INT_VAR, 1 );
+		return vars_push( INT_VAR, 1L );
 
 	/* An empty pulse list means that we have to increment all active pulses
 	   that have a length change time value set */
@@ -1204,7 +1204,7 @@ Var *pulser_increment( Var *v )
 			dg2020.needs_update = SET;
 	}
 
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 
@@ -1219,7 +1219,7 @@ Var *pulser_next_phase( Var *v )
 
 
 	if ( ! dg2020_is_needed )
-		return vars_push( INT_VAR, 1 );
+		return vars_push( INT_VAR, 1L );
 
 	if ( v == NULL )
 	{
@@ -1231,13 +1231,13 @@ Var *pulser_next_phase( Var *v )
 			 FSC2_MODE == TEST )
 		{
 			print( SEVERE, "Phase cycling isn't used for any function.\n" );
-			return vars_push( INT_VAR, 0 );
+			return vars_push( INT_VAR, 0L );
 		}
 
 		if ( dg2020_phs[ 0 ].function != NULL )
-			res &= pulser_next_phase( vars_push( INT_VAR, 1 ) )->val.lval;
+			res &= pulser_next_phase( vars_push( INT_VAR, 1L ) )->val.lval;
 		if ( dg2020_phs[ 1 ].function != NULL )
-			res &= pulser_next_phase( vars_push( INT_VAR, 2 ) )->val.lval;
+			res &= pulser_next_phase( vars_push( INT_VAR, 2L ) )->val.lval;
 		return vars_push( INT_VAR, res );
 	}
 
@@ -1265,7 +1265,7 @@ Var *pulser_next_phase( Var *v )
 			if ( FSC2_MODE == TEST )
 				print( SEVERE, "Function '%s' to be phase cycled is not "
 					   "used.\n", Function_Names[ f->self ] );
-			return vars_push( INT_VAR, 0 );
+			return vars_push( INT_VAR, 0L );
 		}
 
 		if ( ++f->next_phase >= f->pc_len )
@@ -1279,10 +1279,10 @@ Var *pulser_next_phase( Var *v )
 					 ! dg2020_channel_assign(
 						 f->pcm[ j * f->pc_len + f->next_phase ]->self,
 						 f->phase_setup->pod[ j ]->self ) )
-					return vars_push( INT_VAR, 0 );
+					return vars_push( INT_VAR, 0L );
 	}
 
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 
@@ -1294,7 +1294,7 @@ Var *pulser_reset( Var *v )
 	UNUSED_ARGUMENT( v );
 
 	if ( ! dg2020_is_needed )
-		return vars_push( INT_VAR, 1 );
+		return vars_push( INT_VAR, 1L );
 
 	vars_pop( pulser_pulse_reset( NULL ) );
 	if ( dg2020_phs[ 0 ].function != NULL ||
@@ -1316,7 +1316,7 @@ Var *pulser_phase_reset( Var *v )
 
 
 	if ( ! dg2020_is_needed )
-		return vars_push( INT_VAR, 1 );
+		return vars_push( INT_VAR, 1L );
 
 	if ( v == NULL )
 	{
@@ -1325,14 +1325,14 @@ Var *pulser_phase_reset( Var *v )
 			 FSC2_MODE == TEST )
 		{
 			print( SEVERE, "Phase cycling isn't used for any function.\n" );
-			return vars_push( INT_VAR, 0 );
+			return vars_push( INT_VAR, 0L );
 		}
 
 		if ( dg2020_phs[ 0 ].function != NULL )
-			vars_pop( pulser_phase_reset( vars_push( INT_VAR, 1 ) ) );
+			vars_pop( pulser_phase_reset( vars_push( INT_VAR, 1L ) ) );
 		if ( dg2020_phs[ 1 ].function != NULL )
-			vars_pop( pulser_phase_reset( vars_push( INT_VAR, 2 ) ) );
-		return vars_push( INT_VAR, 1 );
+			vars_pop( pulser_phase_reset( vars_push( INT_VAR, 2L ) ) );
+		return vars_push( INT_VAR, 1L );
 	}
 
 	for ( ; v != NULL; v = vars_pop( v ) )
@@ -1353,7 +1353,7 @@ Var *pulser_phase_reset( Var *v )
 			if ( FSC2_MODE == TEST )
 				print( SEVERE, "Function '%s' to be phase cycled is not "
 					   "used.\n", Function_Names[ f->self ] );
-			return vars_push( INT_VAR, 0 );
+			return vars_push( INT_VAR, 0L );
 		}
 
 		f->next_phase = 0;
@@ -1365,10 +1365,10 @@ Var *pulser_phase_reset( Var *v )
 					 ! dg2020_channel_assign(
 						 					f->pcm[ j * f->pc_len + 0 ]->self,
 											f->phase_setup->pod[ j ]->self ) )
-					return vars_push( INT_VAR, 0 );
+					return vars_push( INT_VAR, 0L );
 	}
 
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 
@@ -1381,7 +1381,7 @@ Var *pulser_pulse_reset( Var *v )
 
 
 	if ( ! dg2020_is_needed )
-		return vars_push( INT_VAR, 1 );
+		return vars_push( INT_VAR, 1L );
 
 	/* An empty pulse list means that we have to reset all pulses (even the
        inactive ones) */
@@ -1396,7 +1396,7 @@ Var *pulser_pulse_reset( Var *v )
 			if ( p->num >= 0 )
 				vars_pop( pulser_pulse_reset( vars_push( INT_VAR, p->num ) ) );
 
-		return vars_push( INT_VAR, 1 );
+		return vars_push( INT_VAR, 1L );
 	}
 
 	/* Otherwise run through the supplied pulse list */
@@ -1470,7 +1470,7 @@ Var *pulser_pulse_reset( Var *v )
 			dg2020.needs_update = SET;
 	}
 
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 
@@ -1493,7 +1493,7 @@ Var *pulser_lock_keyboard( Var *v )
 	if ( FSC2_MODE == EXPERIMENT )
 		dg2020_lock_state( lock );
 
-	return vars_push( INT_VAR, lock ? 1 : 0 );
+	return vars_push( INT_VAR, lock ? 1L : 0L );
 }
 
 
@@ -1524,7 +1524,7 @@ Var *pulser_command( Var *v )
 		}
 	}
 
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 

@@ -352,23 +352,23 @@ Var *pulser_show_pulses( Var *v )
 	UNUSED_ARGUMENT( v );
 
 	if ( FSC2_IS_CHECK_RUN )
-		return vars_push( INT_VAR, 1 );
+		return vars_push( INT_VAR, 1L );
 
 	if ( hfs9000.show_file != NULL )
-		return vars_push( INT_VAR, 1 );
+		return vars_push( INT_VAR, 1L );
 
 	if ( pipe( pd ) == -1 )
 	{
 		if ( errno == EMFILE || errno == ENFILE )
 			print( FATAL, "Failure, running out of system resources.\n" );
-		return vars_push( INT_VAR, 0 );
+		return vars_push( INT_VAR, 0L );
 	}
 
 	if ( ( pid =  fork( ) ) < 0 )
 	{
 		if ( errno == ENOMEM || errno == EAGAIN )
 			print( FATAL, "Failure, running out of system resources.\n" );
-		return vars_push( INT_VAR, 0 );
+		return vars_push( INT_VAR, 0L );
 	}
 
 	/* Here's the childs code */
@@ -409,7 +409,7 @@ Var *pulser_show_pulses( Var *v )
 	close( pd[ 0 ] );
 	hfs9000.show_file = fdopen( pd[ 1 ], "w" );
 
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 
@@ -426,12 +426,12 @@ Var *pulser_dump_pulses( Var *v )
 	UNUSED_ARGUMENT( v );
 
 	if ( FSC2_IS_CHECK_RUN )
-		return vars_push( INT_VAR, 1 );
+		return vars_push( INT_VAR, 1L );
 
 	if ( hfs9000.dump_file != NULL )
 	{
 		print( WARN, "Pulse dumping is already switched on.\n" );
-		return vars_push( INT_VAR, 1 );
+		return vars_push( INT_VAR, 1L );
 	}
 
 	do
@@ -441,7 +441,7 @@ Var *pulser_dump_pulses( Var *v )
 		if ( name == NULL || *name == '\0' )
 		{
 			T_free( name );
-			return vars_push( INT_VAR, 0 );
+			return vars_push( INT_VAR, 0L );
 		}
 
 		if  ( 0 == stat( name, &stat_buf ) )
@@ -491,7 +491,7 @@ Var *pulser_dump_pulses( Var *v )
 
 	T_free( name );
 
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 
@@ -502,7 +502,7 @@ Var *pulser_keep_all_pulses( Var *v )
 {
 	UNUSED_ARGUMENT( v );
 	hfs9000_keep_all( );
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 
@@ -570,8 +570,7 @@ Var *pulser_channel_state( Var *v )
 	v = vars_pop( v );
 	if ( v == NULL )
 		return vars_push( INT_VAR,
-						  ( long ) ( hfs9000.channel[ channel ].state ?
-									 1 : 0 ) );
+						  hfs9000.channel[ channel ].state ? 1L : 0L ) );
 
 	if ( v->type == INT_VAR )
 		state = v->val.lval != 0 ? SET : UNSET;
@@ -607,14 +606,14 @@ Var *pulser_update( Var *v )
 	UNUSED_ARGUMENT( v );
 
 	if ( ! hfs9000_is_needed )
-		return vars_push( INT_VAR, 1 );
+		return vars_push( INT_VAR, 1L );
 
 	/* Send all changes to the pulser */
 
 	if ( hfs9000.needs_update )
-		return vars_push( INT_VAR, hfs9000_do_update( ) ? 1 : 0 );
+		return vars_push( INT_VAR, hfs9000_do_update( ) ? 1L : 0L );
 
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 
@@ -632,7 +631,7 @@ Var *pulser_shift( Var *v )
 
 
 	if ( ! hfs9000_is_needed )
-		return vars_push( INT_VAR, 1 );
+		return vars_push( INT_VAR, 1L );
 
 	/* An empty pulse list means that we have to shift all active pulses that
 	   have a position change time value set */
@@ -686,7 +685,7 @@ Var *pulser_shift( Var *v )
 			hfs9000.needs_update = SET;
 	}
 
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 
@@ -704,7 +703,7 @@ Var *pulser_increment( Var *v )
 
 
 	if ( ! hfs9000_is_needed )
-		return vars_push( INT_VAR, 1 );
+		return vars_push( INT_VAR, 1L );
 
 	/* An empty pulse list means that we have to increment all active pulses
 	   that have a length change time value set */
@@ -767,7 +766,7 @@ Var *pulser_increment( Var *v )
 			hfs9000.needs_update = SET;
 	}
 
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 
@@ -791,7 +790,7 @@ Var *pulser_pulse_reset( Var *v )
 
 
 	if ( ! hfs9000_is_needed )
-		return vars_push( INT_VAR, 1 );
+		return vars_push( INT_VAR, 1L );
 
 	/* An empty pulse list means that we have to reset all pulses (even the
        inactive ones) */
@@ -844,7 +843,7 @@ Var *pulser_pulse_reset( Var *v )
 			hfs9000.needs_update = SET;
 	}
 
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 
@@ -855,7 +854,7 @@ Var *pulser_lock_keyboard( Var *v )
 {
 	UNUSED_ARGUMENT( v );
 	print( SEVERE, "Function can't be used for this device.\n" );
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 
@@ -898,7 +897,7 @@ Var *pulser_command( Var *v )
 		}
 	}
 
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 

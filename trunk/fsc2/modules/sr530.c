@@ -696,7 +696,7 @@ Var *lockin_lock_keyboard( Var *v )
 	if ( FSC2_MODE == EXPERIMENT )
 		sr530_lock_state( lock );
 
-	return vars_push( INT_VAR, lock ? 1 : 0);
+	return vars_push( INT_VAR, lock ? 1L : 0L );
 }
 
 
@@ -727,7 +727,7 @@ Var *lockin_command( Var *v )
 		}
 	}
 
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 

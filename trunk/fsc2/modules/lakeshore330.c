@@ -175,7 +175,7 @@ Var *temp_contr_sample_channel( Var *v )
 	long channel;
 
 	if ( v == NULL )
-		return vars_push( INT_VAR, lakeshore330.sample_channel );
+		return vars_push( INT_VAR, ( long ) lakeshore330.sample_channel );
 
 	vars_check( v, INT_VAR | FLOAT_VAR | STR_VAR );
 
@@ -206,7 +206,8 @@ Var *temp_contr_sample_channel( Var *v )
 		return vars_push( INT_VAR, channel + 1 );
 	}
 
-	return vars_push( INT_VAR, lakeshore330_sample_channel( channel ) + 1 );
+	return vars_push( INT_VAR,
+					 ( long ) ( lakeshore330_sample_channel( channel ) + 1 ) );
 }
 
 
@@ -295,7 +296,7 @@ Var *temp_contr_lock_keyboard( Var *v )
 	if ( FSC2_MODE == EXPERIMENT )
 		lakeshore330_lock( lock - 1 );
 
-	return vars_push( INT_VAR, lock == LOCK_STATE_REMOTE_LLO ? 1 : 0 );
+	return vars_push( INT_VAR, lock == LOCK_STATE_REMOTE_LLO ? 1L : 0L );
 }
 
 
@@ -326,7 +327,7 @@ Var *temp_contr_command( Var *v )
 		}
 	}
 
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 

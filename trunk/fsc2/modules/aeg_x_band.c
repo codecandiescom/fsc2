@@ -332,7 +332,7 @@ Var *magnet_setup( Var *v )
 	magnet.field_step = field_step;
 	magnet.is_field = magnet.is_field_step = SET;
 
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 
@@ -345,7 +345,7 @@ Var *magnet_fast_init( Var *v )
 {
 	UNUSED_ARGUMENT( v );
 	magnet.fast_init = SET;
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 

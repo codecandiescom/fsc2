@@ -38,18 +38,15 @@ tc = lockin_time_constant( );
 FILE1 = get_file( "File for raw data:" );
 FILE2 = get_file( "FILE for averaged data:" );
 
-IF is_file( FILE2 ) {
-	fsave( FILE2, "% Start field   = # G\n", start_field );
-	fsave( FILE2, "% End field     = # G\n",
-		   start_field + N_points * field_step );
-	fsave( FILE2, "% Field step    = # G\n", field_step );
-	fsave( FILE2, "% Sensitivity   = # V\n", lockin_sensitivity( ) );
-	fsave( FILE2, "% Time constant = # s\n", tc );
-	save_comment( FILE2, "% ", "Sample: \nMicrowave frequency: \n"
-			     "Microwave power: \nTemperature: \n" );
-	save_program( FILE2, "% " );
-}
-
+fsave( FILE2, "% Start field   = # G\n", start_field );
+fsave( FILE2, "% End field     = # G\n",
+	   start_field + N_points * field_step );
+fsave( FILE2, "% Field step    = # G\n", field_step );
+fsave( FILE2, "% Sensitivity   = # V\n", lockin_sensitivity( ) );
+fsave( FILE2, "% Time constant = # s\n", tc );
+save_comment( FILE2, "% ", "Sample: \nMicrowave frequency: \n"
+		     "Microwave power: \nTemperature: \n" );
+save_program( FILE2, "% " );
 
 FOR J = 1 : 2 * N_runs {
 

@@ -41,6 +41,8 @@
 Token_Val exp_val;                        /* also used by exp_lexer.l */
 static bool in_for_lex = UNSET;           /* set while handling for loop
 											 condition part */
+static int in_cond = 0;                   /* counts conditional construts in
+											 conditionals */
 static long token_count;
 static CB_Stack *cb_stack = NULL;         /* curly brace stack */
 
@@ -48,7 +50,9 @@ extern int exp_testparse( void );         /* from exp_parser.y */
 extern void exp_test_init( void );
 
 extern int exp_runparse( void );          /* from exp_run_parser.y */
+extern int exp_runparser_init( void );    /* from exp_run_parser.y */
 extern int conditionparse( void );        /* from condition_parser.y */
+extern void conditionparser_init( void ); /* from condition_parser.y */
 
 extern int explex( void );                /* from exp_lexer.flex */
 extern FILE *expin;                       /* from exp_lexer.flex */
@@ -58,7 +62,6 @@ extern void exprestart( FILE *fp );
 extern Token_Val exp_runlval;             /* from exp_run_parser.y */
 extern Token_Val exp_testlval;            /* from exp_test_parser.y */
 extern Token_Val conditionlval;           /* from condition_parser.y */
-extern int condition_gobble;              /* from condition_parser.y */
 
 /* local functions */
 
@@ -837,6 +840,8 @@ void exp_test_run( void )
 
 
 	EDL.Fname = CHAR_P T_free( EDL.Fname );
+	in_for_lex = UNSET;
+	in_cond = 0;
 
 	TRY
 	{
@@ -856,6 +861,8 @@ void exp_test_run( void )
 		vars_pop( f_dtime( NULL ) );
 
 		run_test_hooks( );
+
+		exp_runparser_init( );
 
 		EDL.cur_prg_token = EDL.prg_token;
 		token_count = 0;
@@ -890,7 +897,7 @@ void exp_test_run( void )
 			}
 
 			/* Now deal with the token at hand - the function only returns
-			   when contro[ structure tokens are found */
+			   when control structure tokens are found */
 
 			deal_with_token_in_test( );
 		}
@@ -1074,7 +1081,7 @@ int exp_runlex( void )
 				break;
 
 			case E_FUNC_TOKEN :
-				ret = vars_push( INT_VAR, 0 );
+				ret = vars_push( INT_VAR, 0L );
 				from = ret->from;
 				next = ret->next;
 				prev = ret->prev;
@@ -1087,7 +1094,7 @@ int exp_runlex( void )
 				break;
 
 			case E_VAR_REF :
-				ret = vars_push( INT_VAR, 0 );
+				ret = vars_push( INT_VAR, 0L );
 				from = ret->from;
 				next = ret->next;
 				prev = ret->prev;
@@ -1135,7 +1142,18 @@ int conditionlex( void )
 			case '{' :                 /* always signifies end of condition */
 				return 0;
 
+			case '?' :
+				in_cond++;
+				EDL.cur_prg_token++;
+				return '?';
+
 			case ':' :                 /* separator in for loop condition */
+				if ( in_cond > 0 )
+				{
+					in_cond--;
+					EDL.cur_prg_token++;
+					return ':';
+				}
 				if ( in_for_lex )
 					return 0;
 				print( FATAL, "Syntax error in condition at token ':'.\n" );
@@ -1147,7 +1165,7 @@ int conditionlex( void )
 				return E_STR_TOKEN;
 
 			case E_FUNC_TOKEN :
-				ret = vars_push( INT_VAR, 0 );
+				ret = vars_push( INT_VAR, 0L );
 				from = ret->from;
 				next = ret->next;
 				prev = ret->prev;
@@ -1161,7 +1179,7 @@ int conditionlex( void )
 				return E_FUNC_TOKEN;
 
 			case E_VAR_REF :
-				ret = vars_push( INT_VAR, 0 );
+				ret = vars_push( INT_VAR, 0L );
 				from = ret->from;
 				next = ret->next;
 				prev = ret->prev;
@@ -1202,7 +1220,7 @@ bool test_condition( Prg_Token *cur )
 
 
 	EDL.cur_prg_token++;                        /* skip the WHILE or IF etc. */
-	condition_gobble = 0;
+	conditionparser_init( );
 	conditionparse( );                          /* get the value */
 	fsc2_assert( EDL.Var_Stack->next == NULL ); /* Paranoia as usual... */
 	fsc2_assert( EDL.cur_prg_token->token == '{' );
@@ -1554,6 +1572,23 @@ bool test_for_cond( Prg_Token *cur )
 #endif
 
 	return FAIL;
+}
+
+
+/*---------------------------------------------------------*/
+/*---------------------------------------------------------*/
+
+bool check_result( Var *v )
+{
+    if ( ! ( v->type & ( INT_VAR | FLOAT_VAR ) ) )
+		return FALSE;
+
+	/* Test the result - everything nonzero returns OK */
+
+	if ( v->type == INT_VAR )
+		return v->val.lval ? OK : FAIL;
+	else
+		return v->val.dval != 0.0 ? OK : FAIL;
 }
 
 

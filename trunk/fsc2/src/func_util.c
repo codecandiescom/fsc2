@@ -71,7 +71,7 @@ Var *f_print( Var *v )
 	/* A call to print() without any argument prints nothing */
 
 	if ( v == NULL )
-		return vars_push( INT_VAR, 0 );
+		return vars_push( INT_VAR, 0L );
 
 	/* Make sure the first argument is a string */
 
@@ -234,7 +234,7 @@ Var *f_print( Var *v )
 	   printed variables */
 
 	T_free( fmt );
-	return vars_push( INT_VAR, n );
+	return vars_push( INT_VAR, ( long ) n );
 }
 
 
@@ -288,7 +288,7 @@ Var *f_showm( Var *v )
 		show_message( mess );
 
 	T_free( mess );
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 
@@ -315,8 +315,8 @@ Var *f_wait( Var *v )
 	{
 		print( WARN, "Negative time value.\n" );
 		if ( Internals.mode == TEST )
-			return vars_push( INT_VAR, 1 );
-		return vars_push( INT_VAR, EDL.do_quit ? 0 : 1 );
+			return vars_push( INT_VAR, 1L );
+		return vars_push( INT_VAR, EDL.do_quit ? 0L : 1L );
 	}
 
 	if ( how_long > ( double ) LONG_MAX )
@@ -338,7 +338,7 @@ Var *f_wait( Var *v )
 	if ( Internals.mode == TEST )
 	{
 		EDL.experiment_time += how_long;
-		return vars_push( INT_VAR, 1 );
+		return vars_push( INT_VAR, 1L );
 	}
 
 	/* Set everything up for sleeping */
@@ -401,7 +401,7 @@ Var *f_wait( Var *v )
 	if ( EDL.do_quit )
 		sleepy.it_value.tv_usec = sleepy.it_value.tv_sec  = 0;
 
-	return vars_push( INT_VAR, EDL.do_quit ? 0 : 1 );
+	return vars_push( INT_VAR, EDL.do_quit ? 0L : 1L );
 }
 
 
@@ -519,7 +519,7 @@ Var *f_init_1d( Var *v )
 		G1.label[ i ] = NULL;
 	}
 
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 
@@ -650,7 +650,7 @@ Var *f_init_2d( Var *v )
 	G2.label[ X ] = T_strdup( v->val.sptr );
 
 	if ( ( v = vars_pop( v ) ) == NULL )
-		return vars_push( INT_VAR, 1 );
+		return vars_push( INT_VAR, 1L );
 
 	vars_check( v, STR_VAR );
 	G2.label[ Y ] = T_strdup( v->val.sptr );
@@ -677,7 +677,7 @@ Var *f_init_2d( Var *v )
 		G2.label[ i ] = NULL;
 	}
 
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 
@@ -702,7 +702,7 @@ Var *f_dmode( Var *v )
 	{
 		print( SEVERE, "Can't change display mode, missing graphics "
 			   "initialization.\n" );
-		return vars_push( INT_VAR, 0 );
+		return vars_push( INT_VAR, 0L );
 	}
 
 	/* No change of display mode for 2D graphics possible */
@@ -710,7 +710,7 @@ Var *f_dmode( Var *v )
 	if ( G.dim == 2 )
 	{
 		print( SEVERE, "Display mode can only be changed for 1D display.\n" );
-		return vars_push( INT_VAR, 0 );
+		return vars_push( INT_VAR, 0L );
 	}
 
 	/* Check the arguments */
@@ -757,7 +757,7 @@ Var *f_dmode( Var *v )
 	if ( Internals.mode == TEST )
 	{
 		G1.nx = width;
-		return vars_push( INT_VAR, 1 );
+		return vars_push( INT_VAR, 1L );
 	}
 
 	/* If we get here as the parent we're still in the PREPARATIONS phase
@@ -774,7 +774,7 @@ Var *f_dmode( Var *v )
 			G1.nx_orig = G1.nx = width;
 		}
 
-		return vars_push( INT_VAR, 1 );
+		return vars_push( INT_VAR, 1L );
 	}
 
 	/* Otherwise we're running the experiment and must tell the parent to
@@ -816,7 +816,7 @@ Var *f_dmode( Var *v )
 
 	send_data( DATA_1D, shm_id );
 
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 
@@ -832,7 +832,7 @@ Var *f_cscale( Var *v )
 	{
 		print( SEVERE, "Can't change scale, missing graphics "
 			   "initialization.\n" );
-		return vars_push( INT_VAR, 0 );
+		return vars_push( INT_VAR, 0L );
 	}
 
 	if ( G.dim == 3 )
@@ -870,7 +870,7 @@ Var *f_cscale_1d( Var *v )
 	{
 		print( SEVERE, "Can't change scale, missing graphics "
 			   "initialization.\n" );
-		return vars_push( INT_VAR, 0 );
+		return vars_push( INT_VAR, 0L );
 	}
 
 	if ( ! ( G.dim & 1 ) )
@@ -908,7 +908,7 @@ Var *f_cscale_1d( Var *v )
 	/* In a test run we're already done */
 
 	if ( Internals.mode == TEST )
-		return vars_push( INT_VAR, 1 );
+		return vars_push( INT_VAR, 1L );
 
 	/* Function can only be used in experiment section */
 
@@ -954,7 +954,7 @@ Var *f_cscale_1d( Var *v )
 
 	send_data( DATA_1D, shm_id );
 
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 
@@ -979,7 +979,7 @@ Var *f_cscale_2d( Var *v )
 	{
 		print( SEVERE, "Can't change scale, missing graphics "
 			   "initialization.\n" );
-		return vars_push( INT_VAR, 0 );
+		return vars_push( INT_VAR, 0L );
 	}
 
 	if ( ! ( G.dim & 2 ) )
@@ -1030,7 +1030,7 @@ Var *f_cscale_2d( Var *v )
 	/* In a test run we're already done */
 
 	if ( Internals.mode == TEST )
-		return vars_push( INT_VAR, 1 );
+		return vars_push( INT_VAR, 1L );
 
 	/* Function can only be used in experiment section */
 
@@ -1082,7 +1082,7 @@ Var *f_cscale_2d( Var *v )
 
 	send_data( DATA_2D, shm_id );
 
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 
@@ -1098,7 +1098,7 @@ Var *f_clabel( Var *v )
 	{
 		print( SEVERE, "Can't change labels, missing graphics "
 			   "initialization.\n" );
-		return vars_push( INT_VAR, 0 );
+		return vars_push( INT_VAR, 0L );
 	}
 
 	if ( G.dim == 3 )
@@ -1137,7 +1137,7 @@ Var *f_clabel_1d( Var *v )
 	{
 		print( SEVERE, "Can't change labels, missing graphics "
 			   "initialization.\n" );
-		return vars_push( INT_VAR, 0 );
+		return vars_push( INT_VAR, 0L );
 	}
 
 	if ( ! ( G.dim & 1 ) )
@@ -1172,7 +1172,7 @@ Var *f_clabel_1d( Var *v )
 	/* In a test run we're already done */
 
 	if ( Internals.mode == TEST )
-		return vars_push( INT_VAR, 1 );
+		return vars_push( INT_VAR, 1L );
 
 	/* Function can only be used in experiment section */
 
@@ -1226,7 +1226,7 @@ Var *f_clabel_1d( Var *v )
 
 	send_data( DATA_1D, shm_id );
 
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 
@@ -1252,7 +1252,7 @@ Var *f_clabel_2d( Var *v )
 	{
 		print( SEVERE, "Can't change labels, missing graphics "
 			   "initialization.\n" );
-		return vars_push( INT_VAR, 0 );
+		return vars_push( INT_VAR, 0L );
 	}
 
 	if ( ! ( G.dim & 2 ) )
@@ -1294,7 +1294,7 @@ Var *f_clabel_2d( Var *v )
 	/* In a test run we're already done */
 
 	if ( Internals.mode == TEST )
-		return vars_push( INT_VAR, 1 );
+		return vars_push( INT_VAR, 1L );
 
 	/* Function can only be used in experiment section */
 
@@ -1349,7 +1349,7 @@ Var *f_clabel_2d( Var *v )
 
 	send_data( DATA_2D, shm_id );
 
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 
@@ -1366,7 +1366,7 @@ Var *f_rescale( Var *v )
 	{
 		print( SEVERE, "Can't change number of points, missing "
 			   "initialization.\n" );
-		return vars_push( INT_VAR, 0 );
+		return vars_push( INT_VAR, 0L );
 	}
 
 	if ( G.dim == 3 )
@@ -1404,7 +1404,7 @@ Var *f_rescale_1d( Var *v )
 	{
 		print( SEVERE, "Can't change number of points, missing "
 			   "initialization.\n" );
-		return vars_push( INT_VAR, 0 );
+		return vars_push( INT_VAR, 0L );
 	}
 
 	if ( ! ( G.dim & 1 ) )
@@ -1435,7 +1435,7 @@ Var *f_rescale_1d( Var *v )
 	/* In a test run we're already done */
 
 	if ( Internals.mode == TEST )
-		return vars_push( INT_VAR, 1 );
+		return vars_push( INT_VAR, 1L );
 
 	/* Function can only be used in experiment section */
 
@@ -1474,7 +1474,7 @@ Var *f_rescale_1d( Var *v )
 
 	send_data( DATA_1D, shm_id );
 
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 
@@ -1499,7 +1499,7 @@ Var *f_rescale_2d( Var *v )
 	{
 		print( SEVERE, "Can't change number of points, missing "
 			   "initialization.\n" );
-		return vars_push( INT_VAR, 0 );
+		return vars_push( INT_VAR, 0L );
 	}
 
 	if ( ! ( G.dim & 2 ) )
@@ -1541,7 +1541,7 @@ Var *f_rescale_2d( Var *v )
 	/* In a test run we're already done */
 
 	if ( Internals.mode == TEST )
-		return vars_push( INT_VAR, 1 );
+		return vars_push( INT_VAR, 1L );
 
 	/* Function can only be used in experiment section */
 
@@ -1583,7 +1583,7 @@ Var *f_rescale_2d( Var *v )
 
 	send_data( DATA_2D, shm_id );
 
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 
@@ -1603,7 +1603,7 @@ Var *f_display( Var *v )
 			G.is_warn = SET;
 		}
 
-		return vars_push( INT_VAR, 0 );
+		return vars_push( INT_VAR, 0L );
 	}
 
 	if ( G.dim == 3 )
@@ -1645,7 +1645,7 @@ Var *f_display_1d( Var *v )
 			G.is_warn = SET;
 		}
 
-		return vars_push( INT_VAR, 0 );
+		return vars_push( INT_VAR, 0L );
 	}
 
 	if ( ! ( G.dim & 1 ) )
@@ -1664,7 +1664,7 @@ Var *f_display_1d( Var *v )
 	if ( Internals.mode == TEST )
 	{
 		T_free( dp );
-		return vars_push( INT_VAR, 1 );
+		return vars_push( INT_VAR, 1L );
 	}
 
 	fsc2_assert( Internals.I_am == CHILD );
@@ -1804,7 +1804,7 @@ Var *f_display_1d( Var *v )
 
 	send_data( DATA_1D, shm_id );
 
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 
@@ -1833,7 +1833,7 @@ Var *f_display_2d( Var *v )
 			G.is_warn = SET;
 		}
 
-		return vars_push( INT_VAR, 0 );
+		return vars_push( INT_VAR, 0L );
 	}
 
 	if ( ! ( G.dim & 2 ) )
@@ -1852,7 +1852,7 @@ Var *f_display_2d( Var *v )
 	if ( Internals.mode == TEST )
 	{
 		T_free( dp );
-		return vars_push( INT_VAR, 1 );
+		return vars_push( INT_VAR, 1L );
 	}
 
 	fsc2_assert( Internals.I_am == CHILD );
@@ -2001,7 +2001,7 @@ Var *f_display_2d( Var *v )
 
 	send_data( DATA_2D, shm_id );
 
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 
@@ -2126,7 +2126,7 @@ Var *f_clearcv( Var *v )
 		if ( Internals.mode == TEST )
 			print( WARN, "Can't clear curve, missing graphics "
 				   "initialisation.\n" );
-		return vars_push( INT_VAR, 0 );
+		return vars_push( INT_VAR, 0L );
 	}
 
 	if ( G.dim == 3 )
@@ -2167,7 +2167,7 @@ Var *f_clearcv_1d( Var *v )
 		if ( Internals.mode == TEST )
 			print( WARN, "Can't clear curve, missing graphics "
 				   "initialisation.\n" );
-		return vars_push( INT_VAR, 0 );
+		return vars_push( INT_VAR, 0L );
 	}
 
 	if ( ! ( G.dim & 1 ) )
@@ -2182,7 +2182,7 @@ Var *f_clearcv_1d( Var *v )
 	if ( v == NULL )
 	{
 		if ( Internals.mode == TEST )
-			return vars_push( INT_VAR, 1 );
+			return vars_push( INT_VAR, 1L );
 
 		ca = LONG_P T_malloc( sizeof *ca );
 		*ca = 0;
@@ -2217,7 +2217,7 @@ Var *f_clearcv_1d( Var *v )
 		if ( ca == NULL )
 		{
 			print( SEVERE, "No valid argument found.\n" );
-			return vars_push( INT_VAR, 0 );
+			return vars_push( INT_VAR, 0L );
 		}
 	}
 
@@ -2226,7 +2226,7 @@ Var *f_clearcv_1d( Var *v )
 	if ( Internals.mode == TEST )
 	{
 		T_free( ca );
-		return vars_push( INT_VAR, 1 );
+		return vars_push( INT_VAR, 1L );
 	}
 
 	/* Now starts the code only to be executed by the child, i.e. while the
@@ -2277,7 +2277,7 @@ Var *f_clearcv_1d( Var *v )
 
 	/* All the rest has now to be done by the parent process... */
 
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 
@@ -2305,7 +2305,7 @@ Var *f_clearcv_2d( Var *v )
 		if ( Internals.mode == TEST )
 			print( WARN, "Can't clear curve, missing graphics "
 				   "initialisation.\n" );
-		return vars_push( INT_VAR, 0 );
+		return vars_push( INT_VAR, 0L );
 	}
 
 	if ( ! ( G.dim & 2 ) )
@@ -2320,7 +2320,7 @@ Var *f_clearcv_2d( Var *v )
 	if ( v == NULL )
 	{
 		if ( Internals.mode == TEST )
-			return vars_push( INT_VAR, 1 );
+			return vars_push( INT_VAR, 1L );
 
 		ca = LONG_P T_malloc( sizeof *ca );
 		*ca = 0;
@@ -2355,7 +2355,7 @@ Var *f_clearcv_2d( Var *v )
 		if ( ca == NULL )
 		{
 			print( SEVERE, "No valid argument found.\n" );
-			return vars_push( INT_VAR, 0 );
+			return vars_push( INT_VAR, 0L );
 		}
 	}
 
@@ -2364,7 +2364,7 @@ Var *f_clearcv_2d( Var *v )
 	if ( Internals.mode == TEST )
 	{
 		T_free( ca );
-		return vars_push( INT_VAR, 1 );
+		return vars_push( INT_VAR, 1L );
 	}
 
 	/* Now starts the code only to be executed by the child, i.e. while the
@@ -2415,7 +2415,7 @@ Var *f_clearcv_2d( Var *v )
 
 	/* All the rest has now to be done by the parent process... */
 
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 
@@ -2430,7 +2430,7 @@ Var *f_setmark( Var *v )
 		if ( Internals.mode == TEST )
 			print( WARN, "Can't draw marker, missing graphics "
 				   "initialisation.\n" );
-		return vars_push( INT_VAR, 0 );
+		return vars_push( INT_VAR, 0L );
 	}
 
 	if ( G.dim == 3 )
@@ -2472,19 +2472,19 @@ Var *f_setmark_1d( Var *v )
 	{
 		print( WARN, "Can't set a marker, missing graphics "
 			   "initialisation.\n" );
-		return vars_push( INT_VAR, 0 );
+		return vars_push( INT_VAR, 0L );
 	}
 
 	if ( ! ( G.dim & 1 ) )
 	{
 		print( WARN, "Can't set 1D marker, use draw_marker_2d() instead.\n" );
-		return vars_push( INT_VAR, 0 );
+		return vars_push( INT_VAR, 0L );
 	}
 
 	if ( v == NULL )
 	{
 		print( WARN, "Missing arguments\n" );
-		return vars_push( INT_VAR, 0 );
+		return vars_push( INT_VAR, 0L );
 	}
 
 	position = get_long( v, "marker position" ) - ARRAY_OFFSET;
@@ -2524,7 +2524,7 @@ Var *f_setmark_1d( Var *v )
 	/* In a test run this all there is to be done */
 
 	if ( Internals.mode == TEST )
-		return vars_push( INT_VAR, 1 );
+		return vars_push( INT_VAR, 1L );
 	
 	/* Now starts the code only to be executed by the child, i.e. while the
 	   measurement is running. */
@@ -2568,7 +2568,7 @@ Var *f_setmark_1d( Var *v )
 
 	/* All the rest has now to be done by the parent process... */
 
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 
@@ -2599,19 +2599,19 @@ Var *f_setmark_2d( Var *v )
 	{
 		print( WARN, "Can't set a marker, missing graphics "
 			   "initialisation.\n" );
-		return vars_push( INT_VAR, 0 );
+		return vars_push( INT_VAR, 0L );
 	}
 
 	if ( ! ( G.dim & 2 ) )
 	{
 		print( WARN, "Can't set 2D marker, use draw_marker_1d() instead.\n" );
-		return vars_push( INT_VAR, 0 );
+		return vars_push( INT_VAR, 0L );
 	}
 
 	if ( v == NULL )
 	{
 		print( WARN, "Missing arguments\n" );
-		return vars_push( INT_VAR, 0 );
+		return vars_push( INT_VAR, 0L );
 	}
 
 	x_pos = get_long( v, "marker x-position" ) - ARRAY_OFFSET;
@@ -2625,7 +2625,7 @@ Var *f_setmark_2d( Var *v )
 	if ( ( v = vars_pop( v ) ) == NULL )
 	{
 		print( WARN, "Missing y-position arguments\n" );
-		return vars_push( INT_VAR, 0 );
+		return vars_push( INT_VAR, 0L );
 	}
 
 	y_pos = get_long( v, "marker y-position" ) - ARRAY_OFFSET;
@@ -2644,7 +2644,7 @@ Var *f_setmark_2d( Var *v )
 		{
 			print( SEVERE, "Can't clear marker on 2D curve %ld, curve does "
 				   "not exist.\n", curve + 1 );
-			return vars_push( INT_VAR, 0 );
+			return vars_push( INT_VAR, 0L );
 		}
 
 		if ( ( v = vars_pop( v ) ) != NULL )
@@ -2677,7 +2677,7 @@ Var *f_setmark_2d( Var *v )
 	/* In a test run this all there is to be done */
 
 	if ( Internals.mode == TEST )
-		return vars_push( INT_VAR, 1 );
+		return vars_push( INT_VAR, 1L );
 	
 	/* Now starts the code only to be executed by the child, i.e. while the
 	   measurement is running. */
@@ -2728,7 +2728,7 @@ Var *f_setmark_2d( Var *v )
 
 	/* All the rest has now to be done by the parent process... */
 
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 
@@ -2743,7 +2743,7 @@ Var *f_clearmark( Var *v )
 		if ( Internals.mode == TEST )
 			print( WARN, "Can't clear markers, missing graphics "
 				   "initialisation.\n" );
-		return vars_push( INT_VAR, 0 );
+		return vars_push( INT_VAR, 0L );
 	}
 
 	if ( G.dim == 3 )
@@ -2780,14 +2780,14 @@ Var *f_clearmark_1d( Var *v )
 	{
 		print( WARN, "Can't clear markers, missing graphics "
 			   "initialisation.\n" );
-		return vars_push( INT_VAR, 0 );
+		return vars_push( INT_VAR, 0L );
 	}
 
 	if ( ! ( G.dim & 1 ) )
     {
         print( WARN, "Can't clear 1D markers, use clear_marker_2d() "
 			   "instead.\n" );
-        return vars_push( INT_VAR, 0 );
+        return vars_push( INT_VAR, 0L );
     }
 
 	if ( v != NULL )
@@ -2797,7 +2797,7 @@ Var *f_clearmark_1d( Var *v )
 	/* In a test run this all there is to be done */
 
 	if ( Internals.mode == TEST )
-		return vars_push( INT_VAR, 1 );
+		return vars_push( INT_VAR, 1L );
 	
 	/* Now starts the code only to be executed by the child, i.e. while the
 	   measurement is running. */
@@ -2835,7 +2835,7 @@ Var *f_clearmark_1d( Var *v )
 
 	/* All the rest has now to be done by the parent process... */
 
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 	
 
@@ -2851,7 +2851,7 @@ Var *f_clearmark_2d( Var *v )
 	int type = D_CLEAR_MARKERS;
 	int shm_id;
 	int i;
-	long curves[ MAX_CURVES ] = { -1, -1, -1, -1 };
+	long curves[ MAX_CURVES ] = { -1L, -1L, -1L, -1L };
 
 
 	UNUSED_ARGUMENT( v );
@@ -2863,14 +2863,14 @@ Var *f_clearmark_2d( Var *v )
 	{
 		print( WARN, "Can't clear markers, missing graphics "
 			   "initialisation.\n" );
-		return vars_push( INT_VAR, 0 );
+		return vars_push( INT_VAR, 0L );
 	}
 
 	if ( ! ( G.dim & 2 ) )
     {
         print( WARN, "Can't clear 2D markers, use clear_marker_1d() "
 			   "instead.\n" );
-        return vars_push( INT_VAR, 0 );
+        return vars_push( INT_VAR, 0L );
     }
 
 	/* Check for a list of curve numbers */
@@ -2892,7 +2892,7 @@ Var *f_clearmark_2d( Var *v )
 	/* In a test run this all there is to be done */
 
 	if ( Internals.mode == TEST )
-		return vars_push( INT_VAR, 1 );
+		return vars_push( INT_VAR, 1L );
 	
 	/* Now starts the code only to be executed by the child, i.e. while the
 	   measurement is running. */
@@ -2933,7 +2933,7 @@ Var *f_clearmark_2d( Var *v )
 
 	/* All the rest has now to be done by the parent process... */
 
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 	
 

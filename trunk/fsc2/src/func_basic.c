@@ -114,7 +114,10 @@ Var *f_int( Var *v )
 				if ( v->val.vptr[ i ] == NULL )
 					new_var->val.vptr[ i ] = NULL;
 				else
+				{
 					new_var->val.vptr[ i ] = f_int( v->val.vptr[ i ] );
+					new_var->val.vptr[ i ]->from = new_var;
+				}
 			return new_var;
 	}
 
@@ -164,7 +167,10 @@ Var *f_float( Var *v )
 				if ( v->val.vptr[ i ] == NULL )
 					new_var->val.vptr[ i ] = NULL;
 				else
+				{
 					new_var->val.vptr[ i ] = f_float( v->val.vptr[ i ] );
+					new_var->val.vptr[ i ]->from = new_var;
+				}
 			return new_var;
 	}
 
@@ -221,7 +227,10 @@ Var *f_round( Var *v )
 				if ( v->val.vptr[ i ] == NULL )
 					new_var->val.vptr[ i ] = NULL;
 				else
+				{
 					new_var->val.vptr[ i ] = f_round( v->val.vptr[ i ] );
+					new_var->val.vptr[ i ]->from = new_var;
+				}
 			return new_var;
 	}
 
@@ -277,7 +286,10 @@ Var *f_floor( Var *v )
 				if ( v->val.vptr[ i ] == NULL )
 					new_var->val.vptr[ i ] = NULL;
 				else
+				{
 					new_var->val.vptr[ i ] = f_floor( v->val.vptr[ i ] );
+					new_var->val.vptr[ i ]->from = new_var;
+				}
 			return new_var;
 	}
 
@@ -333,7 +345,10 @@ Var *f_ceil( Var *v )
 				if ( v->val.vptr[ i ] == NULL )
 					new_var->val.vptr[ i ] = NULL;
 				else
+				{
 					new_var->val.vptr[ i ] = f_ceil( v->val.vptr[ i ] );
+					new_var->val.vptr[ i ]->from = new_var;
+				}
 			return new_var;
 	}
 
@@ -391,7 +406,10 @@ Var *f_abs( Var *v )
 				if ( v->val.vptr[ i ] == NULL )
 					new_var->val.vptr[ i ] = NULL;
 				else
+				{
 					new_var->val.vptr[ i ] = f_ceil( v->val.vptr[ i ] );
+					new_var->val.vptr[ i ]->from = new_var;
+				}
 			return new_var;
 
 		case FLOAT_REF :
@@ -400,7 +418,10 @@ Var *f_abs( Var *v )
 				if ( v->val.vptr[ i ] == NULL )
 					new_var->val.vptr[ i ] = NULL;
 				else
+				{
 					new_var->val.vptr[ i ] = f_ceil( v->val.vptr[ i ] );
+					new_var->val.vptr[ i ]->from = new_var;
+				}
 			return new_var;
 	}
 
@@ -594,7 +615,10 @@ Var *f_sin( Var *v )
 				if ( v->val.vptr[ i ] == NULL )
 					new_var->val.vptr[ i ] = NULL;
 				else
+				{
 					new_var->val.vptr[ i ] = f_sin( v->val.vptr[ i ] );
+					new_var->val.vptr[ i ]->from = new_var;
+				}
 			return new_var;
 	}
 
@@ -646,7 +670,10 @@ Var *f_cos( Var *v )
 				if ( v->val.vptr[ i ] == NULL )
 					new_var->val.vptr[ i ] = NULL;
 				else
+				{
 					new_var->val.vptr[ i ] = f_cos( v->val.vptr[ i ] );
+					new_var->val.vptr[ i ]->from = new_var;
+				}
 			return new_var;
 	}
 
@@ -711,7 +738,10 @@ Var *f_tan( Var *v )
 				if ( v->val.vptr[ i ] == NULL )
 					new_var->val.vptr[ i ] = NULL;
 				else
+				{
 					new_var->val.vptr[ i ] = f_tan( v->val.vptr[ i ] );
+					new_var->val.vptr[ i ]->from = new_var;
+				}
 			return new_var;
 	}
 
@@ -783,7 +813,10 @@ Var *f_asin( Var *v )
 				if ( v->val.vptr[ i ] == NULL )
 					new_var->val.vptr[ i ] = NULL;
 				else
+				{
 					new_var->val.vptr[ i ] = f_asin( v->val.vptr[ i ] );
+					new_var->val.vptr[ i ]->from = new_var;
+				}
 			return new_var;
 	}
 
@@ -855,7 +888,10 @@ Var *f_acos( Var *v )
 				if ( v->val.vptr[ i ] == NULL )
 					new_var->val.vptr[ i ] = NULL;
 				else
+				{
 					new_var->val.vptr[ i ] = f_acos( v->val.vptr[ i ] );
+					new_var->val.vptr[ i ]->from = new_var;
+				}
 			return new_var;
 	}
 
@@ -904,7 +940,10 @@ Var *f_atan( Var *v )
 				if ( v->val.vptr[ i ] == NULL )
 					new_var->val.vptr[ i ] = NULL;
 				else
+				{
 					new_var->val.vptr[ i ] = f_atan( v->val.vptr[ i ] );
+					new_var->val.vptr[ i ]->from = new_var;
+				}
 			return new_var;
 	}
 
@@ -967,7 +1006,10 @@ Var *f_sinh( Var *v )
 				if ( v->val.vptr[ i ] == NULL )
 					new_var->val.vptr[ i ] = NULL;
 				else
+				{
 					new_var->val.vptr[ i ] = f_sinh( v->val.vptr[ i ] );
+					new_var->val.vptr[ i ]->from = new_var;
+				}
 			return new_var;
 	}
 
@@ -1030,7 +1072,10 @@ Var *f_cosh( Var *v )
 				if ( v->val.vptr[ i ] == NULL )
 					new_var->val.vptr[ i ] = NULL;
 				else
+				{
 					new_var->val.vptr[ i ] = f_cosh( v->val.vptr[ i ] );
+					new_var->val.vptr[ i ]->from = new_var;
+				}
 			return new_var;
 	}
 
@@ -1079,7 +1124,10 @@ Var *f_tanh( Var *v )
 				if ( v->val.vptr[ i ] == NULL )
 					new_var->val.vptr[ i ] = NULL;
 				else
+				{
 					new_var->val.vptr[ i ] = f_tanh( v->val.vptr[ i ] );
+					new_var->val.vptr[ i ]->from = new_var;
+				}
 			return new_var;
 	}
 
@@ -1166,7 +1214,10 @@ Var *f_asinh( Var *v )
 				if ( v->val.vptr[ i ] == NULL )
 					new_var->val.vptr[ i ] = NULL;
 				else
+				{
 					new_var->val.vptr[ i ] = f_asinh( v->val.vptr[ i ] );
+					new_var->val.vptr[ i ]->from = new_var;
+				}
 			return new_var;
 	}
 
@@ -1244,7 +1295,10 @@ Var *f_acosh( Var *v )
 				if ( v->val.vptr[ i ] == NULL )
 					new_var->val.vptr[ i ] = NULL;
 				else
+				{
 					new_var->val.vptr[ i ] = f_acosh( v->val.vptr[ i ] );
+					new_var->val.vptr[ i ]->from = new_var;
+				}
 			return new_var;
 	}
 
@@ -1320,7 +1374,10 @@ Var *f_atanh( Var *v )
 				if ( v->val.vptr[ i ] == NULL )
 					new_var->val.vptr[ i ] = NULL;
 				else
+				{
 					new_var->val.vptr[ i ] = f_atanh( v->val.vptr[ i ] );
+					new_var->val.vptr[ i ]->from = new_var;
+				}
 			return new_var;
 	}
 
@@ -1389,7 +1446,10 @@ Var *f_exp( Var *v )
 				if ( v->val.vptr[ i ] == NULL )
 					new_var->val.vptr[ i ] = NULL;
 				else
+				{
 					new_var->val.vptr[ i ] = f_exp( v->val.vptr[ i ] );
+					new_var->val.vptr[ i ]->from = new_var;
+				}
 			return new_var;
 	}
 
@@ -1472,7 +1532,10 @@ Var *f_ln( Var *v )
 				if ( v->val.vptr[ i ] == NULL )
 					new_var->val.vptr[ i ] = NULL;
 				else
+				{
 					new_var->val.vptr[ i ] = f_ln( v->val.vptr[ i ] );
+					new_var->val.vptr[ i ]->from = new_var;
+				}
 			return new_var;
 	}
 
@@ -1555,7 +1618,10 @@ Var *f_log( Var *v )
 				if ( v->val.vptr[ i ] == NULL )
 					new_var->val.vptr[ i ] = NULL;
 				else
+				{
 					new_var->val.vptr[ i ] = f_log( v->val.vptr[ i ] );
+					new_var->val.vptr[ i ]->from = new_var;
+				}
 			return new_var;
 	}
 
@@ -1628,7 +1694,10 @@ Var *f_sqrt( Var *v )
 				if ( v->val.vptr[ i ] == NULL )
 					new_var->val.vptr[ i ] = NULL;
 				else
+				{
 					new_var->val.vptr[ i ] = f_sqrt( v->val.vptr[ i ] );
+					new_var->val.vptr[ i ]->from = new_var;
+				}
 			return new_var;
 	}
 
@@ -1786,7 +1855,7 @@ Var *f_setseed( Var *v )
 
 	grand_is_old = UNSET;
 	srandom( arg );
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 
@@ -2357,7 +2426,10 @@ Var *f_square( Var *v )
 				if ( v->val.vptr[ i ] == NULL )
 					new_var->val.vptr[ i ] = NULL;
 				else
+				{
 					new_var->val.vptr[ i ] = f_square( v->val.vptr[ i ] );
+					new_var->val.vptr[ i ]->from = new_var;
+				}
 			return new_var;
 
 		case FLOAT_REF :
@@ -2366,7 +2438,10 @@ Var *f_square( Var *v )
 				if ( v->val.vptr[ i ] == NULL )
 					new_var->val.vptr[ i ] = NULL;
 				else
+				{
 					new_var->val.vptr[ i ] = f_ceil( v->val.vptr[ i ] );
+					new_var->val.vptr[ i ]->from = new_var;
+				}
 			return new_var;
 	}
 
@@ -2380,9 +2455,10 @@ Var *f_square( Var *v )
 
 Var *f_islice( Var *v )
 {
-	long *array;
 	long size;
 	Var *ret;
+	Var *cv;
+	int dim;
 
 
 	size = get_long( v, "array size" );
@@ -2398,10 +2474,32 @@ Var *f_islice( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	array = LONG_P T_calloc( ( size_t ) size, sizeof *array );
-	ret = vars_push( INT_ARR, array, ( ssize_t ) size );
-	T_free( array );
+	if ( v->next== NULL )
+		ret = vars_push( INT_ARR, NULL, ( ssize_t ) size );
+	else
+	{
+		for ( dim = 1, cv = v->next; cv != NULL; cv = cv->next )
+			dim++;
 
+		/* Create a new reference on the stack and move it from the end
+		   of the stack to the position just before the first variable
+		   with the sizes */
+
+		ret = vars_push( INT_REF, NULL );
+
+		v->prev->next = ret;
+		ret->next = v;
+		v->prev = ret;
+		for ( cv = v; cv->next != ret; cv = cv->next )
+			/* empty */ ;
+		cv->next = NULL;
+
+		vars_arr_create( ret, v, dim, SET );
+
+		while ( ( v = vars_pop( v ) ) != NULL )
+			/* empty */ ;
+	}
+		
 	return ret;
 }
 
@@ -2411,28 +2509,87 @@ Var *f_islice( Var *v )
 
 Var *f_fslice( Var *v )
 {
-	double *array;
 	long size;
 	Var *ret;
-	long i;
+	Var *cv;
+	int dim;
 
 
 	size = get_long( v, "array size" );
 
 	if ( size <= 0 )
 	{
-		print( FATAL, "Zero or negative value (%ld) used as array size.\n",
-			   size );
+		if ( v->type == INT_VAR )
+			print( FATAL, "Negative or zero value (%ld) used as array size.\n",
+				   v->val.lval );
+		else
+			print( FATAL, "Negative or zero value (%f) used as array size.\n",
+				   v->val.dval );
 		THROW( EXCEPTION );
 	}
 
-	array = DOUBLE_P T_malloc( size * sizeof *array );
-	for( i = 0; i < size; i++ )
-		*( array + i ) = 0.0;
-	ret = vars_push( FLOAT_ARR, array, ( ssize_t ) size );
-	T_free( array );
+	if ( v->next== NULL )
+		ret = vars_push( FLOAT_ARR, NULL, ( ssize_t ) size );
+	else
+	{
+		for ( dim = 1, cv = v->next; cv != NULL; cv = cv->next )
+			dim++;
 
+		/* Create a new reference on the stack and move it from the end
+		   of the stack to the position just before the first variable
+		   with the sizes */
+
+		ret = vars_push( FLOAT_REF, NULL );
+
+		v->prev->next = ret;
+		ret->next = v;
+		v->prev = ret;
+		for ( cv = v; cv->next != ret; cv = cv->next )
+			/* empty */ ;
+		cv->next = NULL;
+
+		vars_arr_create( ret, v, dim, SET );
+
+		while ( ( v = vars_pop( v ) ) != NULL )
+			/* empty */ ;
+	}
+		
 	return ret;
+}
+
+
+/*------------------------------------------------------------*/
+/*------------------------------------------------------------*/
+
+Var *f_lspace( Var *v )
+{
+	Var *nv;
+	ssize_t i;
+	double start;
+	double end;
+	double incr;
+	long num;
+	double *d, cv;
+
+
+	start = get_double( v, NULL );
+	end = get_double( v = vars_pop( v ), NULL );
+	num = get_long( v = vars_pop( v ), "number of points" );
+
+	if ( num < 2 )
+	{
+		print( FATAL, "Invalid number of points.\n" );
+		THROW( EXCEPTION );
+	}
+
+	incr = ( end - start ) / ( num - 1 );
+
+	nv = vars_push( FLOAT_ARR, NULL, num );
+	for ( d = nv->val.dpnt, cv = start, i = 0; i < num;
+		  d++, cv += incr, i++ )
+		*d = cv;
+
+	return nv;
 }
 
 

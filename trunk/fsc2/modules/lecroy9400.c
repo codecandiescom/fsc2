@@ -589,7 +589,7 @@ Var *digitizer_averaging( Var *v )
 	lecroy9400_set_up_averaging( channel, source_ch, num_avg,
 								 reject, rec_len );
 
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 
@@ -689,7 +689,7 @@ Var *digitizer_record_length( Var *v )
 	print( FATAL, "Currently the record length can only be queried\n" );
 	THROW( EXCEPTION );
 
-	return vars_push( INT_VAR, -1 );
+	return vars_push( INT_VAR, -1L );
 }
 
 
@@ -764,9 +764,9 @@ Var *digitizer_meas_channel_ok( Var *v )
 								get_strict_long( v, "channel number" ), flag );
 
 	if ( channel < 0 || channel > LECROY9400_FUNC_F )
-		return vars_push( INT_VAR, 0 );
+		return vars_push( INT_VAR, 0L );
 	else
-		return vars_push( INT_VAR, 1 );
+		return vars_push( INT_VAR, 1L );
 }
 
 
@@ -833,7 +833,7 @@ Var *digitizer_trigger_channel( Var *v )
 
 	too_many_arguments( v );
 
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 
@@ -847,7 +847,7 @@ Var *digitizer_start_acquisition( Var *v )
 	if ( FSC2_MODE == EXPERIMENT )
 		lecroy9400_start_acquisition( );
 
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 
@@ -974,7 +974,7 @@ Var *digitizer_run( Var *v )
 	if ( FSC2_MODE == EXPERIMENT )
 		lecroy9400_free_running( );
 
-	return vars_push( INT_VAR,1 );
+	return vars_push( INT_VAR,1L );
 }
 
 
@@ -1005,7 +1005,7 @@ Var *digitizer_command( Var *v )
 		}
 	}
 
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 

@@ -825,7 +825,7 @@ Var *lockin_is_overload( Var *v )
 	UNUSED_ARGUMENT( v );
 
 	if ( FSC2_MODE == TEST )
-		return vars_push( INT_VAR, 0 );
+		return vars_push( INT_VAR, 0L );
 
 	if ( er023m.st_is_valid )
 		return vars_push( INT_VAR, ( long ) ( er023m.st & 1 ) );
@@ -864,7 +864,7 @@ Var *lockin_command( Var *v )
 		}
 	}
 
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 

@@ -48,7 +48,7 @@ static long T_fprintf( long fn, const char *fmt, ... );
 Var *f_is_file( Var *v )
 {
 	UNUSED_ARGUMENT( v );
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 
@@ -662,12 +662,12 @@ Var *f_save( Var *v )
 	/* Determine the file identifier */
 
 	if ( ( file_num = get_save_file( &v ) ) == FILE_NUMBER_NOT_OPEN )
-		return vars_push( INT_VAR, 0 );
+		return vars_push( INT_VAR, 0L );
 
 	if ( v == NULL )
 	{
 		print( WARN, "Missing arguments.\n" );
-		return vars_push( INT_VAR, 0 );
+		return vars_push( INT_VAR, 0L );
 	}
 
 	do
@@ -750,12 +750,12 @@ Var *f_fsave( Var *v )
 	/* Determine the file identifier */
 
 	if ( ( file_num = get_save_file( &v ) ) == FILE_NUMBER_NOT_OPEN )
-		return vars_push( INT_VAR, 0 );
+		return vars_push( INT_VAR, 0L );
 
 	if ( v == NULL )
 	{
 		print( WARN, "Missing arguments.\n" );
-		return vars_push( INT_VAR, 0 );
+		return vars_push( INT_VAR, 0L );
 	}
 
 	if ( v->type != STR_VAR )
@@ -901,12 +901,12 @@ Var *f_ffsave( Var *v )
 	/* Determine the file identifier */
 
 	if ( ( file_num = get_save_file( &v ) ) == FILE_NUMBER_NOT_OPEN )
-		return vars_push( INT_VAR, 0 );
+		return vars_push( INT_VAR, 0L );
 
 	if ( v == NULL )
 	{
 		print( WARN, "Missing arguments.\n" );
-		return vars_push( INT_VAR, 0 );
+		return vars_push( INT_VAR, 0L );
 	}
 
 	if ( v->type != STR_VAR )
@@ -1443,18 +1443,18 @@ Var *f_save_p( Var *v )
 	/* Determine the file identifier */
 
 	if ( ( file_num = get_save_file( &v ) ) == FILE_NUMBER_NOT_OPEN )
-		return vars_push( INT_VAR, 0 );
+		return vars_push( INT_VAR, 0L );
 
 	if ( v != NULL )
 		vars_check( v, STR_VAR );
 
 	if ( Internals.mode == TEST )
-		return vars_push( INT_VAR, 1 );
+		return vars_push( INT_VAR, 1L );
 
 	if ( ! print_browser( 0, file_num, v != NULL ? v->val.sptr : "" ) )
 		THROW( EXCEPTION );
 
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 
@@ -1475,18 +1475,18 @@ Var *f_save_o( Var *v )
 	/* Determine the file identifier */
 
 	if ( ( file_num = get_save_file( &v ) ) == FILE_NUMBER_NOT_OPEN )
-		return vars_push( INT_VAR, 0 );
+		return vars_push( INT_VAR, 0L );
 
 	if ( v != NULL )
 		vars_check( v, STR_VAR );
 
 	if ( Internals.mode == TEST )
-		return vars_push( INT_VAR, 1 );
+		return vars_push( INT_VAR, 1L );
 
 	if ( ! print_browser( 1, file_num, v != NULL ? v->val.sptr : "" ) )
 		THROW( EXCEPTION );
 
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 
@@ -1559,10 +1559,10 @@ Var *f_save_c( Var *v )
 	/* Determine the file identifier */
 
 	if ( ( file_num = get_save_file( &v ) ) == FILE_NUMBER_NOT_OPEN )
-		return vars_push( INT_VAR, 0 );
+		return vars_push( INT_VAR, 0L );
 
 	if ( Internals.mode == TEST )
-		return vars_push( INT_VAR, 1 );
+		return vars_push( INT_VAR, 1L );
 
 	/* Try to get the comment chars to prepend to each line */
 
@@ -1598,12 +1598,12 @@ Var *f_save_c( Var *v )
 		 r = T_strdup( show_input( c, l ) );
 
 	if ( r == NULL )
-		return vars_push( INT_VAR, 1 );
+		return vars_push( INT_VAR, 1L );
 
 	if ( *r == '\0' )
 	{
 		T_free( r );
-		return vars_push( INT_VAR, 1 );
+		return vars_push( INT_VAR, 1L );
 	}
 
 	cl = r;
@@ -1625,7 +1625,7 @@ Var *f_save_c( Var *v )
 
 	T_free( r );
 
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 

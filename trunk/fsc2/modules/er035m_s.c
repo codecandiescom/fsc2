@@ -657,7 +657,7 @@ Var *gaussmeter_probe_orientation( Var *v )
 		}
 
 		if ( FSC2_MODE == TEST )
-			return vars_push( INT_VAR, 1 );
+			return vars_push( INT_VAR, 1L );
 
 		return vars_push( INT_VAR, ( long ) nmr.probe_orientation );
 	}
@@ -699,7 +699,7 @@ Var *gaussmeter_command( Var *v )
 		T_free( cmd );
 	}
 
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 
@@ -713,7 +713,7 @@ Var *gaussmeter_wait( Var *v )
 	if ( FSC2_MODE == EXPERIMENT && nmr.is_needed )
 		fsc2_usleep( ( nmr.resolution == LOW ? 10 : 20 ) * E2_US, UNSET );
 
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 

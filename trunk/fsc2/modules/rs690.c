@@ -620,7 +620,7 @@ Var *pulser_automatic_shape_pulses( Var *v )
 	rs690.function[ func ].min_right_shape_padding =
 									rs690.function[ func ].right_shape_padding;
 
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 
@@ -739,7 +739,7 @@ Var *pulser_automatic_twt_pulses( Var *v )
 	rs690.function[ func ].min_right_twt_padding =
 									  rs690.function[ func ].right_twt_padding;
 
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 
@@ -753,7 +753,7 @@ Var *pulser_show_pulses( Var *v )
 	if ( ! FSC2_IS_CHECK_RUN )
 		rs690.do_show_pulses = SET;
 
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 
@@ -767,7 +767,7 @@ Var *pulser_dump_pulses( Var *v )
 	if ( ! FSC2_IS_CHECK_RUN )
 		rs690.do_dump_pulses = SET;
 
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 
@@ -842,7 +842,7 @@ Var *pulser_state( Var *v )
 
 
 	if ( v == NULL )
-		return vars_push( INT_VAR, 1 );
+		return vars_push( INT_VAR, 1L );
 
 	state = get_boolean( v );
 
@@ -850,7 +850,7 @@ Var *pulser_state( Var *v )
 		return vars_push( INT_VAR, ( long ) ( rs690.is_running = state ) );
 
 	rs690_run( state );
-	return vars_push( INT_VAR, rs690.is_running );
+	return vars_push( INT_VAR, ( long ) rs690.is_running );
 }
 
 
@@ -862,7 +862,7 @@ Var *pulser_channel_state( Var *v )
 	UNUSED_ARGUMENT( v );
 	print( SEVERE, "Individual channels can't be switched on or off for "
 		   "this device.\n" );
-	return vars_push( INT_VAR, 0 );
+	return vars_push( INT_VAR, 0L );
 }
 
 
@@ -874,14 +874,14 @@ Var *pulser_update( Var *v )
 	UNUSED_ARGUMENT( v );
 
 	if ( ! rs690_is_needed )
-		return vars_push( INT_VAR, 1 );
+		return vars_push( INT_VAR, 1L );
 
 	/* Send all changes to the pulser */
 
 	if ( rs690.needs_update )
-		return vars_push( INT_VAR, rs690_do_update( ) ? 1 : 0 );
+		return vars_push( INT_VAR, rs690_do_update( ) ? 1L : 0L );
 
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 
@@ -899,7 +899,7 @@ Var *pulser_shift( Var *v )
 
 
 	if ( ! rs690_is_needed )
-		return vars_push( INT_VAR, 1 );
+		return vars_push( INT_VAR, 1L );
 
 	/* An empty pulse list means that we have to shift all active pulses that
 	   have a position change time value set */
@@ -975,7 +975,7 @@ Var *pulser_shift( Var *v )
 			rs690.needs_update = SET;
 	}
 
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 
@@ -993,7 +993,7 @@ Var *pulser_increment( Var *v )
 
 
 	if ( ! rs690_is_needed )
-		return vars_push( INT_VAR, 1 );
+		return vars_push( INT_VAR, 1L );
 
 	/* An empty pulse list means that we have to increment all active pulses
 	   that have a length change time value set */
@@ -1071,7 +1071,7 @@ Var *pulser_increment( Var *v )
 			rs690.needs_update = SET;
 	}
 
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 
@@ -1083,7 +1083,7 @@ Var *pulser_reset( Var *v )
 	UNUSED_ARGUMENT( v );
 
 	if ( ! rs690_is_needed )
-		return vars_push( INT_VAR, 1 );
+		return vars_push( INT_VAR, 1L );
 
 	in_reset = SET;
 
@@ -1107,7 +1107,7 @@ Var *pulser_pulse_reset( Var *v )
 
 
 	if ( ! rs690_is_needed )
-		return vars_push( INT_VAR, 1 );
+		return vars_push( INT_VAR, 1L );
 
 	/* An empty pulse list means that we have to reset all pulses (even the
        inactive ones). Do't explicitely reset automatically created pulses
@@ -1192,7 +1192,7 @@ Var *pulser_pulse_reset( Var *v )
 			rs690.needs_update = SET;
 	}
 
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 
@@ -1206,7 +1206,7 @@ Var *pulser_next_phase( Var *v )
 
 
 	if ( ! rs690_is_needed )
-		return vars_push( INT_VAR, 1 );
+		return vars_push( INT_VAR, 1L );
 
 	if ( v == NULL )
 	{
@@ -1215,14 +1215,14 @@ Var *pulser_next_phase( Var *v )
 			 FSC2_MODE == TEST )
 		{
 			print( SEVERE, "Phase cycling isn't used for any function.\n" );
-			return vars_push( INT_VAR, 0 );
+			return vars_push( INT_VAR, 0L );
 		}
 
 		if ( rs690_phs[ 0 ].function != NULL )
-			vars_pop( pulser_next_phase( vars_push( INT_VAR, 1 ) ) );
+			vars_pop( pulser_next_phase( vars_push( INT_VAR, 1L ) ) );
 		if ( rs690_phs[ 1 ].function != NULL )
-			vars_pop( pulser_next_phase( vars_push( INT_VAR, 2 ) ) );
-		return vars_push( INT_VAR, 1 );
+			vars_pop( pulser_next_phase( vars_push( INT_VAR, 2L ) ) );
+		return vars_push( INT_VAR, 1L );
 	}
 
 	for ( ; v != NULL; v = vars_pop( v ) )
@@ -1249,7 +1249,7 @@ Var *pulser_next_phase( Var *v )
 			if ( FSC2_MODE == TEST )
 				print( SEVERE, "Function '%s' to be phase cycled is not "
 					   "used.\n", f->name );
-			return vars_push( INT_VAR, 0 );
+			return vars_push( INT_VAR, 0L );
 		}
 
 		if ( ++f->next_phase >= f->pc_len )
@@ -1258,7 +1258,7 @@ Var *pulser_next_phase( Var *v )
 
 	rs690.needs_update = SET;
 	pulser_update( NULL );
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 
@@ -1272,7 +1272,7 @@ Var *pulser_phase_reset( Var *v )
 
 
 	if ( ! rs690_is_needed )
-		return vars_push( INT_VAR, 1 );
+		return vars_push( INT_VAR, 1L );
 
 	if ( v == NULL )
 	{
@@ -1281,14 +1281,14 @@ Var *pulser_phase_reset( Var *v )
 			 FSC2_MODE == TEST )
 		{
 			print( SEVERE, "Phase cycling isn't used for any function.\n" );
-			return vars_push( INT_VAR, 0 );
+			return vars_push( INT_VAR, 0L );
 		}
 
 		if ( rs690_phs[ 0 ].function != NULL )
-			vars_pop( pulser_phase_reset( vars_push( INT_VAR, 1 ) ) );
+			vars_pop( pulser_phase_reset( vars_push( INT_VAR, 1L ) ) );
 		if ( rs690_phs[ 1 ].function != NULL )
-			vars_pop( pulser_phase_reset( vars_push( INT_VAR, 2 ) ) );
-		return vars_push( INT_VAR, 1 );
+			vars_pop( pulser_phase_reset( vars_push( INT_VAR, 2L ) ) );
+		return vars_push( INT_VAR, 1L );
 	}
 
 	for ( ; v != NULL; v = vars_pop( v ) )
@@ -1308,7 +1308,7 @@ Var *pulser_phase_reset( Var *v )
 			if ( FSC2_MODE == TEST )
 				print( SEVERE, "Function '%s' to be phase cycled is not "
 					   "used.\n", f->name );
-			return vars_push( INT_VAR, 0 );
+			return vars_push( INT_VAR, 0L );
 		}
 
 		f->next_phase = 0;
@@ -1317,7 +1317,7 @@ Var *pulser_phase_reset( Var *v )
 	rs690.needs_update = SET;
 	if ( ! in_reset )
 		pulser_update( NULL );
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 
@@ -1340,10 +1340,8 @@ Var *pulser_lock_keyboard( Var *v )
 	if ( FSC2_MODE == EXPERIMENT )
 		rs690_lock_state( lock );
 
-	return vars_push( INT_VAR, lock ? 1 : 0 );
+	return vars_push( INT_VAR, lock ? 1L : 0L );
 }
-
-
 
 
 /*----------------------------------------------------*/
@@ -1373,7 +1371,7 @@ Var *pulser_command( Var *v )
 		}
 	}
 
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 

@@ -334,7 +334,7 @@ Var *magnet_setup( Var *v )
 	keithley228a.current_step = cur_step;
 	keithley228a.is_req_current = keithley228a.is_current_step = SET;
 
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 
@@ -532,7 +532,7 @@ Var *magnet_command( Var *v )
 		}
 	}
 
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 
@@ -860,7 +860,7 @@ static double keithley228a_set_current( double new_current )
 	fn = get_string( "lockin_dac_voltage%s", keithley228a.lockin_append );
 	func_ptr = func_get( fn, &acc );
 	T_free( fn );
-	vars_push( INT_VAR, keithley228a.lockin_dac_port );
+	vars_push( INT_VAR, ( long ) keithley228a.lockin_dac_port );
 	vars_push( FLOAT_VAR, dac_volts );
 	vars_pop( func_call( func_ptr ) );
 

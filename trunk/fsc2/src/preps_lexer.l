@@ -53,7 +53,7 @@
 
 #include "fsc2.h"
 #include "preps_parser.h"
-
+extern void prepsparser_init( void );
 
 int prepslex( void );
 
@@ -445,13 +445,7 @@ FUNC        {IDENT}"#"[0-9]+
 "^="        return EXPA;
 "?"         return '?';
 ":"         return ':';
-
-            /* Quasi-assignment operator for pulse properties */
-
-":"         return ':';
-
-			/* Handling of end of statement character */
-";"			return ';';
+";"			return ';';       /* end of statement character */
 
 {WS}        /* Skip white space */
 
@@ -491,7 +485,7 @@ FUNC        {IDENT}"#"[0-9]+
 
 int preparations_parser( FILE *in )
 {
-	static bool is_restart = UNSET;
+	static bool needs_restart = UNSET;
 
 
 	if ( EDL.compilation.sections[ PREPARATIONS_SECTION ] )
@@ -506,10 +500,12 @@ int preparations_parser( FILE *in )
 
 	/* Keep the lexer happy... */
 
-	if ( is_restart )
+	if ( needs_restart )
 	    prepsrestart( prepsin );
 	else
-		 is_restart = SET;
+		 needs_restart = SET;
+
+	prepsparser_init( );
 
 	prepsparse( );
 

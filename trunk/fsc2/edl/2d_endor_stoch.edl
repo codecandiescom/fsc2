@@ -116,20 +116,18 @@ change_scale( min_time * 1.0e-3, time_res * 1.0e-3 );
 F1 = get_file( "File for storing complete data sets:" );
 F2 = get_file( "File for storing averaged data sets:" );
 
-IF is_file( F2 ) {
-    fsave( F2, "% Start frequency  = # MHz\n", start_freq * 1.0e-6 );
-    fsave( F2, "% End frequency    = # MHz\n", end_freq * 1.0e-6 );
-    fsave( F2, "% Step frequency   = # kHz\n", step_freq * 1.0e-3 );
-    fsave( F2, "% Attenuation      = # dB\n", attenuation );
-    fsave( F2, "% Record length    = #\n", Rec_len );
-    fsave( F2, "% Trigger position = #\n", int( trig_pos * Rec_len ) );
-    fsave( F2, "% Time base        = # ns\n", time_base * 1.0e-9 );
-    fsave( F2, "%Sensitivity       = # mV\n",
-           1.0e3 * digitizer_sensitivity( Channel ) );
-    fsave( F2, "% Field            = # G\n", measure_field( ) );
-    save_comment( F2, "% ", "Sample: \nMicrowave frequency: \n"
-                  "Microwave power: \nTemperature: \n" );
-}
+fsave( F2, "% Start frequency  = # MHz\n", start_freq * 1.0e-6 );
+fsave( F2, "% End frequency    = # MHz\n", end_freq * 1.0e-6 );
+fsave( F2, "% Step frequency   = # kHz\n", step_freq * 1.0e-3 );
+fsave( F2, "% Attenuation      = # dB\n", attenuation );
+fsave( F2, "% Record length    = #\n", Rec_len );
+fsave( F2, "% Trigger position = #\n", int( trig_pos * Rec_len ) );
+fsave( F2, "% Time base        = # ns\n", time_base * 1.0e-9 );
+fsave( F2, "%Sensitivity       = # mV\n",
+       1.0e3 * digitizer_sensitivity( Channel ) );
+fsave( F2, "% Field            = # G\n", measure_field( ) );
+save_comment( F2, "% ", "Sample: \nMicrowave frequency: \n"
+              "Microwave power: \nTemperature: \n" );
 
 /* Set the integration window limits */
 
@@ -186,12 +184,9 @@ FOR I = 1 : N_steps {
 	SIndex = int( N_steps * random( ) );
 }
 
-IF is_file( F1 ) {
-	fsave( F1, "\# List of frequencies in a run (in MHz)\n\n" );
-	save( F1, Stoch * 1.0e-6 );
-	fsave( F1, "\n" );
-}
-
+fsave( F1, "\# List of frequencies in a run (in MHz)\n\n" );
+save( F1, Stoch * 1.0e-6 );
+fsave( F1, "\n" );
 
 /* Now, finally, we can start the experiment */
 
@@ -238,10 +233,8 @@ FOR J = 1 : N_runs
 
         /* Write the new date to file */
 
-        IF is_file( F1 ) {
-            fsave( F1, "% #. run, frequency = # MHz\n\n", J, freq * 1.0e-6 );
-            save( F1, curve );
-        }
+        fsave( F1, "% #. run, frequency = # MHz\n\n", J, freq * 1.0e-6 );
+        save( F1, curve );
 
         /* If this wasn't the very last run set the new frequency and already
 		   start the next masurement, so we're not loosing time doing all the
@@ -306,33 +299,30 @@ IF ! Is_stored {           // Check if data of last trace were stored
     freq = start_freq + Stoch[ I ] * step_freq;
 }
 
-IF is_file( F2 )
-{
-    IF J < N_runs {
-        fsave( F2, "% Number of runs: #\n", J );
-    } ELSE {
-        fsave( F2, "% Number of runs: #\n", N_runs );
-    }
+IF J < N_runs {
+    fsave( F2, "% Number of runs: #\n", J );
+} ELSE {
+    fsave( F2, "% Number of runs: #\n", N_runs );
+}
 
-    IF I < N_steps {
-        fsave( F2, "% Last run not finished, last index was #\n", I );
-    }
-    save_program( F2, "% " );
+IF I < N_steps {
+    fsave( F2, "% Last run not finished, last index was #\n", I );
+}
+save_program( F2, "% " );
 
-    IF J == 1 & I < N_steps {
-        End_index = I;
-    } ELSE {
-        End_index = N_steps;
-    }
+IF J == 1 & I < N_steps {
+    End_index = I;
+} ELSE {
+    End_index = N_steps;
+}
 
-    freq = start_freq;
-    FOR I = 0 : ( End_index - 1 ) {
-        fsave( F2, "\n% Frequency: # MHz\n\n", freq * 1.0e-6 );
-        freq += step_freq;
-		J = 1;
-		WHILE I != Stoch[ J ] {
-			J += 1;
-		}
-        save( F2, mean_curve[ J ] );
-    }
+freq = start_freq;
+FOR I = 0 : ( End_index - 1 ) {
+    fsave( F2, "\n% Frequency: # MHz\n\n", freq * 1.0e-6 );
+    freq += step_freq;
+	J = 1;
+	WHILE I != Stoch[ J ] {
+		J += 1;
+	}
+    save( F2, mean_curve[ J ] );
 }

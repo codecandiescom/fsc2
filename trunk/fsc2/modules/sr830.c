@@ -1082,7 +1082,7 @@ Var *lockin_auto_setup( Var *v )
 		}
 
 		print( SEVERE, "Missing arguments.\n" );
-		return vars_push( INT_VAR, 0 );
+		return vars_push( INT_VAR, 0L );
 	}
 
 	/* An integer value of 0 means that we should use a sample time equal to
@@ -1235,7 +1235,7 @@ Var *lockin_auto_setup( Var *v )
 			sr830_auto( 1 );
 	}
 
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 
@@ -1325,7 +1325,7 @@ Var *lockin_lock_keyboard( Var *v )
 	if ( FSC2_MODE == EXPERIMENT )
 		sr830_lock_state( lock );
 
-	return vars_push( INT_VAR, lock ? 1 : 0 );
+	return vars_push( INT_VAR, lock ? 1L : 0L );
 }
 
 
@@ -1356,7 +1356,7 @@ Var *lockin_command( Var *v )
 		}
 	}
 
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 

@@ -601,7 +601,7 @@ Var *digitizer_display_channel( Var *v )
 		tds_tmpl.channels_in_use[ channel ] = SET;
 	} while ( ( v = vars_pop( v ) ) != NULL );
 
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 
@@ -1024,9 +1024,9 @@ Var *digitizer_meas_channel_ok( Var *v )
 										v->next != NULL );
 
 	if ( channel < 0 || channel >= NUM_DISPLAYABLE_CHANNELS )
-		return vars_push( INT_VAR, 0 );
+		return vars_push( INT_VAR, 0L );
 	else
-		return vars_push( INT_VAR, 1 );
+		return vars_push( INT_VAR, 1L );
 }
 
 
@@ -1106,7 +1106,7 @@ Var *digitizer_trigger_channel( Var *v )
 
 	too_many_arguments( v );
 
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 
@@ -1120,7 +1120,7 @@ Var *digitizer_start_acquisition( Var *v )
 	if ( FSC2_MODE == EXPERIMENT )
 		tds_tmpl_start_acquisition( );
 
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 
@@ -1426,7 +1426,7 @@ Var *digitizer_run( Var *v )
 	if ( FSC2_MODE == EXPERIMENT )
 		tds_tmpl_free_running( );
 
-	return vars_push( INT_VAR,1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 
@@ -1450,7 +1450,7 @@ Var *digitizer_lock_keyboard( Var *v )
 		tds_tmpl_lock_state( lock );
 
 	tds_tmpl.lock_state = lock;
-	return vars_push( INT_VAR, lock ? 1 : 0 );
+	return vars_push( INT_VAR, lock ? 1L : 0L );
 }
 
 
@@ -1481,7 +1481,7 @@ Var *digitizer_command( Var *v )
 		}
 	}
 
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 

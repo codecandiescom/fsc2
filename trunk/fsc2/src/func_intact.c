@@ -284,7 +284,7 @@ Var *f_layout( Var *v )
 				{
 					print( FATAL, "Unknown layout keyword '%s', using default "
 						   "vertical layout.\n", v->val.sptr );
-					return vars_push( INT_VAR, 0 );
+					return vars_push( INT_VAR, 0L );
 				}
 		}
 
@@ -369,7 +369,7 @@ Var *f_objdel( Var *v )
 			f_objdel_parent( v );
 	} while ( ( v = vars_pop( v ) ) != NULL );
 
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 
@@ -1297,7 +1297,7 @@ Var *f_tb_changed( Var *v )
 	/* No toolbox -> no objects -> no object can have changed */
 
 	if ( Tool_Box == NULL )
-		return vars_push( INT_VAR, 0 );	
+		return vars_push( INT_VAR, 0L );	
 
 	/* If there's a list of objects loop over it until the first changed one
 	   is found. If none of them were changed return 0. Don't tell about
@@ -1314,7 +1314,7 @@ Var *f_tb_changed( Var *v )
 				return vars_push( INT_VAR, io->ID );
 		}
 
-		return vars_push( INT_VAR, 0 );
+		return vars_push( INT_VAR, 0L );
 	}
 
 	/* If there were no arguments loop over all objects */
@@ -1327,7 +1327,7 @@ Var *f_tb_changed( Var *v )
 			return vars_push( INT_VAR, io->ID );
 	}
 
-	return vars_push( INT_VAR, 0 );
+	return vars_push( INT_VAR, 0L );
 }
 
 
@@ -1446,12 +1446,12 @@ Var *f_tb_wait( Var *v )
 		duration = -1.0;
 
 	if ( Internals.mode == TEST )
-		return vars_push( INT_VAR, 0 );
+		return vars_push( INT_VAR, 0L );
 
 	Internals.tb_wait = 0;
 
-	/* First check if there's already an object with a state marked as
-	   changed. If there is one the ID of the first one we find is returned
+	/* First check if there's already an object with its state being marked
+	   as changed. If there is one the ID of the first one we find is returned
 	   immediately. If there's a list of objects onl check for changes of
 	   objects in the list, otherwise check all objects. Don't tell about
 	   changed output objects, they only can be changed by calls of EDL
@@ -1467,7 +1467,7 @@ Var *f_tb_wait( Var *v )
 			if ( io->is_changed )
 			{
 				tb_wait_handler( io->ID );
-				return vars_push( INT_VAR, 0 );
+				return vars_push( INT_VAR, 0L );
 			}
 		}
 	}
@@ -1480,7 +1480,7 @@ Var *f_tb_wait( Var *v )
 			if ( io->is_changed )
 			{
 				tb_wait_handler( io->ID );
-				return vars_push( INT_VAR, 0 );
+				return vars_push( INT_VAR, 0L );
 			}
 		}
 	}
@@ -1514,7 +1514,7 @@ Var *f_tb_wait( Var *v )
 	if ( duration > 0.0 && duration < 1.0e-3 )
 	{
 		tb_wait_handler( 0 );
-		return vars_push( INT_VAR, 0 );
+		return vars_push( INT_VAR, 0L );
 	}
 
 	/* If the duration is a real time (i.e. larger than 1 ms) set up a timer */
@@ -1530,7 +1530,7 @@ Var *f_tb_wait( Var *v )
 	else
 		Internals.tb_wait = TB_WAIT_RUNNING_WITH_NO_TIMER;
 
-	return vars_push( INT_VAR, 0 );
+	return vars_push( INT_VAR, 0L );
 }
 
 

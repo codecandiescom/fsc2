@@ -236,7 +236,7 @@ Var *gaussmeter_probe_orientation( Var *v )
 		}
 
 		if ( FSC2_MODE == TEST )
-			return vars_push( INT_VAR, 1 );
+			return vars_push( INT_VAR, 1L );
 
 		return vars_push( INT_VAR, ( long ) pt2025.probe_orientation );
 	}
@@ -297,7 +297,7 @@ Var *gaussmeter_command( Var *v )
 		}
 	}
 
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 

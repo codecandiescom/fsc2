@@ -625,7 +625,7 @@ Var *synthesizer_use_table( Var *v )
 	hp8672a.table_file = CHAR_P T_free( hp8672a.table_file );
 	hp8672a.use_table = SET;
 
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 
@@ -746,7 +746,7 @@ Var *synthesizer_modulation( Var *v )
 	if ( FSC2_MODE == EXPERIMENT )
 		hp8672a_set_modulation( );
 
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 
@@ -761,7 +761,7 @@ Var *synthesizer_mod_type( Var *v )
 	if ( v == NULL )
 	{
 		if ( ! hp8672a.mod_type_is_set )
-			return vars_push( INT_VAR, -1 );
+			return vars_push( INT_VAR, -1L );
 
 		if ( hp8672a.mod_type != UNDEFINED )
 		{
@@ -771,7 +771,7 @@ Var *synthesizer_mod_type( Var *v )
 		else
 		{
 			hp8672a.mod_type_is_set = UNSET;
-			return vars_push( INT_VAR, -1 );
+			return vars_push( INT_VAR, -1L );
 		}
 	}
 
@@ -805,7 +805,7 @@ Var *synthesizer_mod_type( Var *v )
 		 hp8672a.mod_ampl_is_set[ hp8672a.mod_type ] )
 		hp8672a_set_modulation( );
 
-	return vars_push( INT_VAR, res );
+	return vars_push( INT_VAR, ( long ) res );
 }
 
 
@@ -894,7 +894,7 @@ Var *synthesizer_command( Var *v )
 		}
 	}
 
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 

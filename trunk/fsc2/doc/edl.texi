@@ -905,7 +905,7 @@ To make your intentions more clear to human readers of your
 @code{EDL} programs it's probably a good idea to use parenthesis in
 these cases even if they are not strictly required.
 
-Finally, the lowest precedence operators are the comparison operators
+The operators with the second-lowest precedence are the comparison operators
 (also the be discussed below in more detail), i.e.@: the test for equality,
 `@code{==}' (not to be confused with the assignment operator
 `@code{=}'), the test for inequality, `@code{!=}', and the remaining
@@ -913,6 +913,17 @@ four comparison operators `@code{<}', `@code{<=}', `@code{>}' and
 `@code{>=}', i.e.@: @i{less than}, @i{less or equal}, @i{larger} and
 @i{larger or equal}. If more than one of these operators appears in an
 expression evaluation is done left to right.
+
+Finally, the lowest precedence has the conditional operator, which
+has the form
+@example
+ expression_1 ? expression_2 : expression_3
+@end example
+@noindent
+Which tests @code{expression_1} and then results in @code{expression_2}
+if the result of the test was positive or in @code{expression_3} if the
+test failed, a more detailed explanation is given below. The low
+precedence means that all the three expressions are always evaluated
 
 Actually, there are also the assignment operators. But these are only
 used after all of the other operators have been evaluated, so there is

@@ -28,6 +28,7 @@
 
 
 extern int exp_runparse( void );              /* from exp_run_parser.y */
+extern int exp_runparser_init( void );        /* from exp_run_parser.y */
 extern FL_resource xresources[ ];             /* from xinit.c */
 
 
@@ -1072,6 +1073,8 @@ static void child_confirmation_handler( int signo )
 static void do_measurement( void )
 {
 	EDL.react_to_do_quit = SET;
+
+	exp_runparser_init( );
 
 	while ( EDL.cur_prg_token != NULL &&
 			EDL.cur_prg_token < EDL.prg_token + EDL.prg_length )
