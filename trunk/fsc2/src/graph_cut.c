@@ -66,7 +66,7 @@ static bool cut_zoom_x( Canvas *c );
 static bool cut_zoom_y( Canvas *c );
 static bool cut_zoom_xy( Canvas *c );
 static void cut_save_scale_state( void );
-static void delete_all_cut_markers( void );
+
 
 
 extern FL_resource xresources[ ];
@@ -2957,7 +2957,7 @@ void delete_cut_marker( long x_pos )
 /*----------------------------------------------------------*/
 /*----------------------------------------------------------*/
 
-static void delete_all_cut_markers( void )
+void delete_all_cut_markers( void )
 {
 	Marker_1D *m, *mn;
 
