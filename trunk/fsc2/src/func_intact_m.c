@@ -35,9 +35,9 @@ static Var_T *f_mchoice_child( Var_T *v );
 static Var_T *f_mchanged_child( Var_T *v );
 
 
-/*---------------------------------------------------------*/
-/* Function for appending a new menu object to the toolbox */
-/*---------------------------------------------------------*/
+/*---------------------------------------------------------*
+ * Function for appending a new menu object to the toolbox
+ *---------------------------------------------------------*/
 
 Var_T *f_mcreate( Var_T *var )
 {
@@ -162,11 +162,11 @@ Var_T *f_mcreate( Var_T *var )
 }
 
 
-/*-----------------------------------------------------------------*/
-/* Part of the f_mcreate() function run by the child process only, */
-/* indirectly invoking the f_mcreate() function in the parent via  */
-/* the message passing mechanism.                                  */
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ * Part of the f_mcreate() function run by the child process only,
+ * indirectly invoking the f_mcreate() function in the parent via
+ * the message passing mechanism.
+ *-----------------------------------------------------------------*/
 
 static Var_T *f_mcreate_child( Var_T *v, size_t len, long num_strs )
 {
@@ -226,9 +226,9 @@ static Var_T *f_mcreate_child( Var_T *v, size_t len, long num_strs )
 }
 
 
-/*--------------------------------------------------------------------------*/
-/* Deletes one or more menu objects, parameter(s) are one or more menu IDs. */
-/*--------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------*
+ * Deletes one or more menu objects, parameter(s) are one or more menu IDs.
+ *--------------------------------------------------------------------------*/
 
 Var_T *f_mdelete( Var_T *v )
 {
@@ -264,11 +264,11 @@ Var_T *f_mdelete( Var_T *v )
 }
 
 
-/*-----------------------------------------------------------------*/
-/* Part of the f_mdelete() function run by the child process only, */
-/* indirectly invoking the f_mdelete() function in the parent via  */
-/* the message passing mechanism.                                  */
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ * Part of the f_mdelete() function run by the child process only,
+ * indirectly invoking the f_mdelete() function in the parent via
+ * the message passing mechanism.
+ *-----------------------------------------------------------------*/
 
 static void f_mdelete_child( Var_T *v )
 {
@@ -317,10 +317,10 @@ static void f_mdelete_child( Var_T *v )
 }
 
 
-/*---------------------------------------------------------*/
-/* Part of the f_mdelete() function only run by the parent */
-/* process, which actually removes the menu.               */
-/*---------------------------------------------------------*/
+/*---------------------------------------------------------*
+ * Part of the f_mdelete() function only run by the parent
+ * process, which actually removes the menu.
+ *---------------------------------------------------------*/
 
 static void f_mdelete_parent( Var_T *v )
 {
@@ -384,9 +384,9 @@ static void f_mdelete_parent( Var_T *v )
 }
 
 
-/*----------------------------------------------------*/
-/* Sets or returns the selected item in a menu object */
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ * Sets or returns the selected item in a menu object
+ *----------------------------------------------------*/
 
 Var_T *f_mchoice( Var_T *v )
 {
@@ -477,11 +477,11 @@ Var_T *f_mchoice( Var_T *v )
 }
 
 
-/*-----------------------------------------------------------------*/
-/* Part of the f_mchoice() function run by the child process only, */
-/* indirectly invoking the f_mchoice() function in the parent via  */
-/* the message passing mechanism.                                  */
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ * Part of the f_mchoice() function run by the child process only,
+ * indirectly invoking the f_mchoice() function in the parent via
+ * the message passing mechanism.
+ *-----------------------------------------------------------------*/
 
 static Var_T *f_mchoice_child( Var_T *v )
 {
@@ -570,9 +570,9 @@ static Var_T *f_mchoice_child( Var_T *v )
 }
 
 
-/*-------------------------------------------------------*/
-/* Returns if the selected item of a menu object changed */
-/*-------------------------------------------------------*/
+/*-------------------------------------------------------*
+ * Returns if the selected item of a menu object changed
+ *-------------------------------------------------------*/
 
 Var_T *f_mchanged( Var_T *v )
 {
@@ -615,11 +615,11 @@ Var_T *f_mchanged( Var_T *v )
 }
 
 
-/*------------------------------------------------------------------*/
-/* Part of the f_mchanged() function run by the child process only, */
-/* indirectly invoking the f_mAchanged() function in the parent via  */
-/* the message passing mechanism.                                   */
-/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ * Part of the f_mchanged() function run by the child process only,
+ * indirectly invoking the f_mAchanged() function in the parent via
+ * the message passing mechanism.
+ *------------------------------------------------------------------*/
 
 static Var_T *f_mchanged_child( Var_T *v )
 {
