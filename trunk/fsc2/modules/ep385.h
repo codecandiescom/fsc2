@@ -235,7 +235,6 @@ typedef struct {
 	bool is_confirmation;
 
 	FILE *show_file;
-
 	FILE *dump_file;
 
 	bool auto_shape_pulses;
