@@ -1278,6 +1278,7 @@ void curve_button_callback( FL_OBJECT *obj, long data )
 	if ( G.dim == 1 )
 	{
 		G.curve[ data - 1 ]->active ^= SET;
+
 		/* Change the help string for the button */
 
 		if ( fl_get_button( obj ) )
@@ -1297,6 +1298,37 @@ void curve_button_callback( FL_OBJECT *obj, long data )
 	}
 	else
 	{
+		/* We get a negative curve number if this handler is called via the
+		   hidden curve buttons in the cross section window and have to set
+		   the correct state of the buttons in the main display window */
+
+		if ( data < 0 )
+		{
+			data = - data;
+			switch( data )
+			{
+				case 1:
+					fl_set_button( run_form->curve_1_button,
+								   G.active_curve == 0 ? 0 : 1 );
+					break;
+
+				case 2:
+					fl_set_button( run_form->curve_2_button,
+								   G.active_curve == 1 ? 0 : 1 );
+					break;
+
+				case 3:
+					fl_set_button( run_form->curve_3_button,
+								   G.active_curve == 2 ? 0 : 1 );
+					break;
+
+				case 4:
+					fl_set_button( run_form->curve_4_button,
+								   G.active_curve == 3 ? 0 : 1 );
+					break;
+			}
+		}
+
 		/* Make buttons work like radio buttons but also allow switching off
 		   all of them */
 

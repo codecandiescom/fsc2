@@ -308,16 +308,17 @@ FD_cut *create_form_cut(void)
 
   fdui->cut = fl_bgn_form(FL_NO_BOX, 1030, 800);
   obj = fl_add_box(FL_UP_BOX,0,0,1030,800,"");
-  fdui->cut_y_axis = obj = fl_add_canvas(FL_NORMAL_CANVAS,95,10,150,715,"");
-    fl_set_object_gravity(obj, FL_NorthWest, FL_SouthWest);
-    fl_set_object_resize(obj, FL_RESIZE_Y);
+  obj = fl_add_button(FL_NORMAL_BUTTON,150,105,30,35,"");
+    fl_set_button_shortcut(obj,"1",1);
+    fl_set_object_boxtype(obj,FL_NO_BOX);
+    fl_set_object_callback(obj,curve_button_callback,-1);
   fdui->cut_undo_button = obj = fl_add_pixmapbutton(FL_NORMAL_BUTTON,15,200,60,70,"Undo");
     fl_set_button_shortcut(obj,"U",1);
     fl_set_object_color(obj,FL_COL1,FL_BLACK);
     fl_set_object_lalign(obj,FL_ALIGN_BOTTOM|FL_ALIGN_INSIDE);
     fl_set_object_gravity(obj, FL_NorthWest, FL_NorthWest);
     fl_set_object_callback(obj,cut_undo_button_callback,0);
-  fdui->cut_canvas = obj = fl_add_canvas(FL_NORMAL_CANVAS,245,10,610,715,"");
+  fdui->cut_canvas = obj = fl_add_canvas(FL_NORMAL_CANVAS,245,10,615,715,"");
     fl_set_object_gravity(obj, FL_NorthWest, FL_SouthEast);
   fdui->cut_print_button = obj = fl_add_pixmapbutton(FL_NORMAL_BUTTON,15,300,60,70,"Print");
     fl_set_button_shortcut(obj,"P",1);
@@ -330,7 +331,7 @@ FD_cut *create_form_cut(void)
     fl_set_object_lsize(obj,FL_LARGE_SIZE);
     fl_set_object_gravity(obj, FL_SouthWest, FL_SouthWest);
     fl_set_object_callback(obj,cut_close_callback,0);
-  fdui->cut_x_axis = obj = fl_add_canvas(FL_NORMAL_CANVAS,245,725,610,65,"");
+  fdui->cut_x_axis = obj = fl_add_canvas(FL_NORMAL_CANVAS,245,725,615,65,"");
     fl_set_object_gravity(obj, FL_SouthWest, FL_SouthEast);
     fl_set_object_resize(obj, FL_RESIZE_X);
   fdui->cut_full_scale_button = obj = fl_add_button(FL_PUSH_BUTTON,175,740,45,45,"FS");
@@ -342,6 +343,21 @@ FD_cut *create_form_cut(void)
     fl_set_button(obj, 1);
   fdui->cut_z_axis = obj = fl_add_canvas(FL_NORMAL_CANVAS,860,10,160,780,"");
     fl_set_object_gravity(obj, FL_NorthEast, FL_SouthEast);
+    fl_set_object_resize(obj, FL_RESIZE_Y);
+  obj = fl_add_button(FL_NORMAL_BUTTON,150,160,30,35,"");
+    fl_set_button_shortcut(obj,"2",1);
+    fl_set_object_boxtype(obj,FL_NO_BOX);
+    fl_set_object_callback(obj,curve_button_callback,-2);
+  obj = fl_add_button(FL_NORMAL_BUTTON,150,215,30,35,"");
+    fl_set_button_shortcut(obj,"3",1);
+    fl_set_object_boxtype(obj,FL_NO_BOX);
+    fl_set_object_callback(obj,curve_button_callback,-3);
+  obj = fl_add_button(FL_NORMAL_BUTTON,150,270,30,35,"");
+    fl_set_button_shortcut(obj,"4",1);
+    fl_set_object_boxtype(obj,FL_NO_BOX);
+    fl_set_object_callback(obj,curve_button_callback,-4);
+  fdui->cut_y_axis = obj = fl_add_canvas(FL_NORMAL_CANVAS,95,10,150,715,"");
+    fl_set_object_gravity(obj, FL_NorthWest, FL_SouthWest);
     fl_set_object_resize(obj, FL_RESIZE_Y);
   fl_end_form();
 

@@ -1036,7 +1036,7 @@ argument:
 Name: cut
 Width: 620
 Height: 450
-Number of Objects: 9
+Number of Objects: 13
 
 --------------------
 class: FL_BOX
@@ -1059,7 +1059,7 @@ argument:
 --------------------
 class: FL_CANVAS
 type: NORMAL_CANVAS
-box: 160 5 350 390
+box: 160 5 355 390
 boxtype: FL_NO_BOX
 colors: FL_BLACK FL_BLACK
 alignment: FL_ALIGN_CENTER
@@ -1071,24 +1071,6 @@ shortcut:
 resize: FL_RESIZE_ALL
 gravity: FL_NorthWest FL_SouthEast
 name: cut_canvas
-callback: 
-argument: 
-
---------------------
-class: FL_CANVAS
-type: NORMAL_CANVAS
-box: 65 5 95 390
-boxtype: FL_FRAME_BOX
-colors: FL_COL1 FL_COL1
-alignment: FL_ALIGN_CENTER
-style: FL_NORMAL_STYLE
-size: FL_DEFAULT_SIZE
-lcol: FL_BLACK
-label: 
-shortcut: 
-resize: FL_RESIZE_Y
-gravity: FL_NorthWest FL_SouthWest
-name: cut_y_axis
 callback: 
 argument: 
 
@@ -1168,7 +1150,7 @@ argument: 0
 --------------------
 class: FL_CANVAS
 type: NORMAL_CANVAS
-box: 160 395 350 50
+box: 160 395 355 50
 boxtype: FL_FRAME_BOX
 colors: FL_NoColor FL_COL1
 alignment: FL_ALIGN_CENTER
@@ -1198,6 +1180,96 @@ shortcut:
 resize: FL_RESIZE_Y
 gravity: FL_NorthEast FL_SouthEast
 name: cut_z_axis
+callback: 
+argument: 
+
+--------------------
+class: FL_BUTTON
+type: NORMAL_BUTTON
+box: 105 40 20 20
+boxtype: FL_NO_BOX
+colors: FL_COL1 FL_COL1
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_BLACK
+label: 
+shortcut: 1
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: 
+callback: curve_button_callback
+argument: -1
+
+--------------------
+class: FL_BUTTON
+type: NORMAL_BUTTON
+box: 105 75 20 20
+boxtype: FL_NO_BOX
+colors: FL_COL1 FL_COL1
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_BLACK
+label: 
+shortcut: 2
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: 
+callback: curve_button_callback
+argument: -2
+
+--------------------
+class: FL_BUTTON
+type: NORMAL_BUTTON
+box: 105 110 20 20
+boxtype: FL_NO_BOX
+colors: FL_COL1 FL_COL1
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_BLACK
+label: 
+shortcut: 3
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: 
+callback: curve_button_callback
+argument: -3
+
+--------------------
+class: FL_BUTTON
+type: NORMAL_BUTTON
+box: 105 145 20 20
+boxtype: FL_NO_BOX
+colors: FL_COL1 FL_COL1
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_BLACK
+label: 
+shortcut: 4
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: 
+callback: curve_button_callback
+argument: -4
+
+--------------------
+class: FL_CANVAS
+type: NORMAL_CANVAS
+box: 65 5 95 390
+boxtype: FL_FRAME_BOX
+colors: FL_COL1 FL_COL1
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_BLACK
+label: 
+shortcut: 
+resize: FL_RESIZE_Y
+gravity: FL_NorthWest FL_SouthWest
+name: cut_y_axis
 callback: 
 argument: 
 
