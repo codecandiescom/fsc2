@@ -171,7 +171,7 @@ categories, built-in functions and device functions. Built-in functions
 always available, even when there is no @code{DEVICES} section. In
 contrast, device functions are bound to certain devices and can only be
 called when the device they are defined for is listed in the
-@code{DEVICE} section. For example, the functions
+@code{DEVICES} section. For example, the functions
 @w{@code{lockin_sensitivity}}, @w{@code{lockin_time_constant}} and
 @w{@code{lockin_get_data}} are obviously targeted at the lock-in
 amplifier and are only available when a lock-in amplifier module is
