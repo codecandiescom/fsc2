@@ -202,7 +202,7 @@ int lecroy9400_get_tb_index( double timebase );
 const char *lecroy9400_ptime( double p_time );
 void lecroy9400_delete_windows( LECROY9400 *s );
 void lecroy9400_do_pre_exp_checks( void );
-long lecroy9400_translate_channel( int dir, long channel );
+long lecroy9400_translate_channel( int dir, long channel, bool flag );
 void lecroy9400_store_state( LECROY9400 *src, LECROY9400 *dest );
 
 bool lecroy9400_init( const char *name );

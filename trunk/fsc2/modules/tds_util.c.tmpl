@@ -454,10 +454,14 @@ static void tds_tmpl_window_check_3( WINDOW *w )
 /* The function is used to translate back and forth between the */
 /* channel numbers the way the user specifies them in the EDL   */
 /* program and the channel numbers as specified in the header   */
-/* file.                                                        */
+/* file. When the channel number can't be maped correctly, the  */
+/* way the function reacts depends on the value of the third    */
+/* argument: If this is UNSET, an error message gets printed    */
+/* and an exception ios thrown. If it is SET -1 is returned to  */
+/* indicate the error.                                          */
 /*--------------------------------------------------------------*/
 
-long tds_tmpl_translate_channel( int dir, long channel )
+long tds_tmpl_translate_channel( int dir, long channel, bool flag )
 {
 	if ( dir == GENERAL_TO_TDS_TMPL )
 	{
@@ -472,6 +476,8 @@ long tds_tmpl_translate_channel( int dir, long channel )
 #ifdef TDS_TMPL_CH3
 				return TDS_TMPL_CH3;
 #else
+				if ( flag )
+					return -1;
 				print( FATAL, "Digitizer has no channel %s.\n",
 					   Digitizer_Channel_Names[ channel ] );
 				THROW( EXCEPTION );
@@ -480,6 +486,8 @@ long tds_tmpl_translate_channel( int dir, long channel )
 #ifdef TDS_TMPL_CH4
 				return TDS_TMPL_CH4;
 #else
+				if ( flag )
+					return -1;
 				print( FATAL, "Digitizer has no channel %s.\n",
 					   Digitizer_Channel_Names[ channel ] );
 				THROW( EXCEPTION );
@@ -509,6 +517,8 @@ long tds_tmpl_translate_channel( int dir, long channel )
 #ifdef TDS_TMPL_AUX
 				return TDS_TMPL_AUX;
 #else
+				if ( flag )
+					return -1;
 				print( FATAL, "Digitizer has no channel %s.\n",
 					   Digitizer_Channel_Names[ channel ] );
 				THROW( EXCEPTION );
@@ -517,6 +527,8 @@ long tds_tmpl_translate_channel( int dir, long channel )
 #ifdef TDS_TMPL_AUX1
 				return TDS_TMPL_AUX1;
 #else
+				if ( flag )
+					return -1;
 				print( FATAL, "Digitizer has no channel %s.\n",
 					   Digitizer_Channel_Names[ channel ] );
 				THROW( EXCEPTION );
@@ -525,6 +537,8 @@ long tds_tmpl_translate_channel( int dir, long channel )
 #ifdef TDS_TMPL_AUX2
 				return TDS_TMPL_AUX2;
 #else
+				if ( flag )
+					return -1;
 				print( FATAL, "Digitizer has no channel %s.\n",
 					   Digitizer_Channel_Names[ channel ] );
 				THROW( EXCEPTION );
@@ -538,11 +552,15 @@ long tds_tmpl_translate_channel( int dir, long channel )
 			case DIGITIZER_CHANNEL_FUNC_F :
 			case DIGITIZER_CHANNEL_EXT    :
 			case DIGITIZER_CHANNEL_EXT10  :
+				if ( flag )
+					return -1;
 				print( FATAL, "Digitizer has no channel %s.\n",
 					   Digitizer_Channel_Names[ channel ] );
 				THROW( EXCEPTION );
 
 			default :
+				if ( flag )
+					return -1;
 				print( FATAL, "Invalid channel number %ld.\n", channel );
 				THROW( EXCEPTION );
 		}
@@ -606,7 +624,6 @@ long tds_tmpl_translate_channel( int dir, long channel )
 		}
 	}
 
-	fsc2_assert( 1 == 0 );
 	return -1;
 }
 

@@ -565,13 +565,13 @@ Var *digitizer_display_channel( Var *v )
 	do
 	{
 		channel = tds_tmpl_translate_channel( GENERAL_TO_TDS_TMPL,
-									  get_strict_long( v, "channel number" ) );
+							   get_strict_long( v, "channel number" ), UNSET );
 
 		if ( channel >= MAX_CHANNELS )
 		{
 			print( FATAL, "Invalid channel number: %ld.\n",
 				   tds_tmpl_translate_channel( TDS_TMPL_TO_GENERAL,
-											   channel ) );
+											   channel, UNSET ) );
 			THROW( EXCEPTION );
 		}
 
@@ -719,7 +719,7 @@ Var *digitizer_sensitivity( Var *v )
 	}
 
 	channel = tds_tmpl_translate_channel( GENERAL_TO_TDS_TMPL,
-									  get_strict_long( v, "channel number" ) );
+							   get_strict_long( v, "channel number" ), UNSET );
 
 	if ( channel >= NUM_NORMAL_CHANNELS )
 	{
@@ -991,18 +991,24 @@ Var *digitizer_trigger_position( Var *v )
 /*----------------------------------------------------------------------*/
 /* This is not a function that users should usually call but a function */
 /* that allows other functions to check if a certain number stands for  */
-/* channel that can be used in measurements.                            */
+/* channel that can be used in measurements. Normally, an exception     */
+/* gets thrown (and an error message gets printed) when the channel     */
+/* number isn't ok. Only when the function gets called with a second    */
+/* argument it returns with either 0 or 1, indicating false or true.    */
 /*----------------------------------------------------------------------*/
 
 Var *digitizer_meas_channel_ok( Var *v )
 {
 	long channel;
+	bool flag;;
 
+
+	flag = v->next != NULL;
 
 	channel = tds_tmpl_translate_channel( GENERAL_TO_TDS_TMPL,
-									  get_strict_long( v, "channel number" ) );
+						        get_strict_long( v, "channel number" ), flag );
 
-	if ( channel >= NUM_DISPLAYABLE_CHANNELS )
+	if ( channel < 0 || channel >= NUM_DISPLAYABLE_CHANNELS )
 		return vars_push( INT_VAR, 0 );
 	else
 		return vars_push( INT_VAR, 1 );
@@ -1027,21 +1033,24 @@ Var *digitizer_trigger_channel( Var *v )
 				if ( ! tds_tmpl.is_trigger_channel )
 					no_query_possible( );
 				return vars_push( INT_VAR, tds_tmpl_translate_channel(
-							   TDS_TMPL_TO_GENERAL, tds_tmpl.trigger_channel ) );
+							 		  TDS_TMPL_TO_GENERAL,
+									  tds_tmpl.trigger_channel, UNSET ) );
 
 			case TEST :
 				return vars_push( INT_VAR, tds_tmpl_translate_channel(
-							   TDS_TMPL_TO_GENERAL, tds_tmpl.is_trigger_channel ?
-							   tds_tmpl.trigger_channel :
-							   TDS_TMPL_TEST_TRIG_CHANNEL ) );
+							 TDS_TMPL_TO_GENERAL, tds_tmpl.is_trigger_channel ?
+							 tds_tmpl.trigger_channel :
+							 TDS_TMPL_TEST_TRIG_CHANNEL, UNSET ) );
 
 			case EXPERIMENT :
 				return vars_push( INT_VAR, tds_tmpl_translate_channel(
-						TDS_TMPL_TO_GENERAL, tds_tmpl_get_trigger_channel( ) ) );
+								  TDS_TMPL_TO_GENERAL,
+								  tds_tmpl_get_trigger_channel( ), UNSET ) );
 		}
 
 	in_channel = get_strict_long( v, "channel number" );
-	channel = tds_tmpl_translate_channel( GENERAL_TO_TDS_TMPL, in_channel );
+	channel = tds_tmpl_translate_channel( GENERAL_TO_TDS_TMPL,
+										  in_channel, UNSET );
 
     switch ( channel )
     {
@@ -1135,7 +1144,7 @@ static Var *get_area( Var *v, bool use_cursor )
 	}
 
 	ch = ( int ) tds_tmpl_translate_channel( GENERAL_TO_TDS_TMPL,
-									  get_strict_long( v, "channel number" ) );
+					           get_strict_long( v, "channel number" ), UNSET );
 
 	if ( ch >= NUM_DISPLAYABLE_CHANNELS )
 	{
@@ -1229,7 +1238,7 @@ static Var *get_curve( Var *v, bool use_cursor )
 	}
 
 	ch = ( int ) tds_tmpl_translate_channel( GENERAL_TO_TDS_TMPL,
-									  get_strict_long( v, "channel number" ) );
+						       get_strict_long( v, "channel number" ), UNSET );
 
 	if ( ch >= NUM_DISPLAYABLE_CHANNELS )
 	{
@@ -1336,7 +1345,7 @@ static Var *get_amplitude( Var *v, bool use_cursor )
 	}
 
 	ch = ( int ) tds_tmpl_translate_channel( GENERAL_TO_TDS_TMPL,
-									  get_strict_long( v, "channel number" ) );
+							   get_strict_long( v, "channel number" ), UNSET );
 
 	if ( ch >= NUM_DISPLAYABLE_CHANNELS )
 	{

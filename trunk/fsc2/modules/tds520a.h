@@ -232,7 +232,7 @@ void tds520a_set_tracking( WINDOW *w );
 void tds520a_set_meas_window( WINDOW *w );
 void tds520a_set_curve_window( WINDOW *w );
 void tds520a_set_window( WINDOW *w );
-long tds520a_translate_channel( int dir, long channel );
+long tds520a_translate_channel( int dir, long channel, bool flag );
 void tds520a_store_state( TDS520A *dest, TDS520A *src );
 void tds520a_state_check( double timebase, long rec_len, double trig_pos );
 

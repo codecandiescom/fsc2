@@ -236,7 +236,7 @@ void tds754a_set_tracking( WINDOW *w );
 void tds754a_set_meas_window( WINDOW *w );
 void tds754a_set_curve_window( WINDOW *w );
 void tds754a_set_window( WINDOW *w );
-long tds754a_translate_channel( int dir, long channel );
+long tds754a_translate_channel( int dir, long channel, bool flag );
 void tds754a_store_state( TDS754A *dest, TDS754A *src );
 void tds754a_state_check( double timebase, long rec_len, double trig_pos );
 

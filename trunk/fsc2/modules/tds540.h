@@ -231,7 +231,7 @@ void tds540_set_tracking( WINDOW *w );
 void tds540_set_meas_window( WINDOW *w );
 void tds540_set_curve_window( WINDOW *w );
 void tds540_set_window( WINDOW *w );
-long tds540_translate_channel( int dir, long channel );
+long tds540_translate_channel( int dir, long channel, bool flag );
 void tds540_store_state( TDS540 *dest, TDS540 *src );
 void tds540_state_check( double timebase, long rec_len, double trig_pos );
 

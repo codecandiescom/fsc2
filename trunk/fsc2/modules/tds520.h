@@ -236,7 +236,7 @@ const char *tds520_ptime( double p_time );
 void tds520_delete_windows( TDS520 *s );
 void tds520_do_pre_exp_checks( void );
 void tds520_window_checks( WINDOW *w );
-long tds520_translate_channel( int dir, long channel );
+long tds520_translate_channel( int dir, long channel, bool flag );
 void tds520_store_state( TDS520 *dest, TDS520 *src );
 void tds520_state_check( double timebase, long rec_len, double trig_pos );
 

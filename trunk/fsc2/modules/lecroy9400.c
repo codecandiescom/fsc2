@@ -370,7 +370,7 @@ Var *digitizer_sensitivity( Var *v )
 	}
 
 	channel = lecroy9400_translate_channel( GENERAL_TO_LECROY9400,
-									  get_strict_long( v, "channel number" ) );
+						       get_strict_long( v, "channel number" ), UNSET );
 
 	if ( channel > LECROY9400_CH2 )
 	{
@@ -481,7 +481,7 @@ Var *digitizer_averaging( Var *v )
 	/* Get the channel to use for averaging */
 
 	channel = lecroy9400_translate_channel( GENERAL_TO_LECROY9400,
-									  get_strict_long( v, "channel number" ) );
+							   get_strict_long( v, "channel number" ), UNSET );
 
 	if ( channel != LECROY9400_FUNC_E && channel != LECROY9400_FUNC_F )
 	{
@@ -500,7 +500,7 @@ Var *digitizer_averaging( Var *v )
 	}
 
 	source_ch = lecroy9400_translate_channel( GENERAL_TO_LECROY9400,
-									  get_strict_long( v, "channel number" ) );
+							   get_strict_long( v, "channel number" ), UNSET );
 
 	if ( source_ch != LECROY9400_CH1 && source_ch != LECROY9400_CH2 )
 	{
@@ -630,7 +630,7 @@ Var *digitizer_num_averages( Var *v )
 	}
 
 	channel = lecroy9400_translate_channel( GENERAL_TO_LECROY9400,
-									  get_strict_long( v, "channel number" ) );
+							   get_strict_long( v, "channel number" ), UNSET );
 
 	if ( channel != LECROY9400_FUNC_E && channel != LECROY9400_FUNC_F )
 	{
@@ -690,7 +690,7 @@ Var *digitizer_record_length( Var *v )
 	}
 
 	channel = lecroy9400_translate_channel( GENERAL_TO_LECROY9400,
-									  get_strict_long( v, "channel number" ) );
+							   get_strict_long( v, "channel number" ), UNSET );
 
 	if ( channel != LECROY9400_FUNC_E && channel != LECROY9400_FUNC_F )
 	{
@@ -761,18 +761,24 @@ Var *digitizer_trigger_position( Var *v )
 /*----------------------------------------------------------------------*/
 /* This is not a function that users should usually call but a function */
 /* that allows other functions to check if a certain number stands for  */
-/* channel that can be used in measurements.                            */
+/* channel that can be used in measurements. Normally, an exception     */
+/* gets thrown (and an error message gets printed) when the channel     */
+/* number isn't ok. Only when the function gets called with a second    */
+/* argument it returns with either 0 or 1, indicating false or true.    */
 /*----------------------------------------------------------------------*/
 
 Var *digitizer_meas_channel_ok( Var *v )
 {
 	long channel;
+	bool flag;
 
+
+	flag = v->next != NULL;
 
 	channel = lecroy9400_translate_channel( GENERAL_TO_LECROY9400,
-									  get_strict_long( v, "channel number" ) );
+								get_strict_long( v, "channel number" ), flag );
 
-	if ( channel > LECROY9400_FUNC_F )
+	if ( channel < 0 || channel > LECROY9400_FUNC_F )
 		return vars_push( INT_VAR, 0 );
 	else
 		return vars_push( INT_VAR, 1 );
@@ -798,20 +804,25 @@ Var *digitizer_trigger_channel( Var *v )
 			case TEST :
 				if ( lecroy9400.is_trigger_channel )
 					return vars_push( INT_VAR, lecroy9400_translate_channel(
-						LECROY9400_TO_GENERAL, lecroy9400.trigger_channel ) );
+										  LECROY9400_TO_GENERAL,
+										  lecroy9400.trigger_channel,
+										  UNSET ) );
 				else
 					return vars_push( INT_VAR, lecroy9400_translate_channel(
-					   LECROY9400_TO_GENERAL, LECROY9400_TEST_TRIG_CHANNEL ) );
+										  LECROY9400_TO_GENERAL,
+										  LECROY9400_TEST_TRIG_CHANNEL,
+										  UNSET ) );
 				break;
 
 			case EXPERIMENT :
 				return vars_push( INT_VAR, lecroy9400_translate_channel(
-					LECROY9400_TO_GENERAL,
-					lecroy9400_get_trigger_source( ) ) );
+									  LECROY9400_TO_GENERAL,
+									  lecroy9400_get_trigger_source( ),
+									  UNSET) );
 		}
 
 	channel = lecroy9400_translate_channel( GENERAL_TO_LECROY9400,
-									  get_strict_long( v, "channel number" ) );
+							   get_strict_long( v, "channel number" ), UNSET );
 
 	if ( channel >= MAX_CHANNELS )
 	{
@@ -897,7 +908,7 @@ static Var *get_curve( Var *v, bool use_cursor )
 	}
 
 	ch = ( int ) lecroy9400_translate_channel( GENERAL_TO_LECROY9400,
-									  get_strict_long( v, "channel number" ) );
+							   get_strict_long( v, "channel number" ), UNSET );
 
 	if ( ch < LECROY9400_CH1 ||
 		 ( ch > LECROY9400_CH2 && ch < LECROY9400_FUNC_E ) ||
