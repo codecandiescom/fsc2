@@ -385,7 +385,7 @@ int er035m_s_end_of_exp_hook( void )
 
 void er035m_s_end_hook( void )
 {
-	nmr.is_needed = 0;
+	nmr.is_needed = UNSET;
 }
 
 
