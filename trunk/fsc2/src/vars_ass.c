@@ -51,9 +51,9 @@ static long vars_assign_snd_range_from_nd_2( Var_T *dest, Var_T *src,
 											 ssize_t end, ssize_t cur );
 
 
-/*--------------------------------------------------------*/
-/* This is the central function for assigning new values. */
-/*--------------------------------------------------------*/
+/*--------------------------------------------------------*
+ * This is the central function for assigning new values.
+ *--------------------------------------------------------*/
 
 void vars_assign( Var_T *src, Var_T *dest )
 {
@@ -121,9 +121,9 @@ void vars_assign( Var_T *src, Var_T *dest )
 }
 
 
-/*----------------------------------------------------------*/
-/* Assignment to a variable or a single element of an array */
-/*----------------------------------------------------------*/
+/*----------------------------------------------------------*
+ * Assignment to a variable or a single element of an array
+ *----------------------------------------------------------*/
 
 static long vars_assign_to_1d( Var_T *src, Var_T *dest )
 {
@@ -209,9 +209,9 @@ static long vars_assign_to_1d( Var_T *src, Var_T *dest )
 }
 
 
-/*-------------------------------------------------*/
-/* Assignment to an one- or more-dimensional array */
-/*-------------------------------------------------*/
+/*-------------------------------------------------*
+ * Assignment to an one- or more-dimensional array
+ *-------------------------------------------------*/
 
 static long vars_assign_to_nd( Var_T *src, Var_T *dest )
 {
@@ -276,10 +276,10 @@ static long vars_assign_to_nd( Var_T *src, Var_T *dest )
 }
 
 
-/*------------------------------------------------------------------*/
-/* Assignment of a single value to all elements of an one- or more- */
-/* dimensional array                                                */
-/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ * Assignment of a single value to all elements of an one- or more-
+ * dimensional array
+ *------------------------------------------------------------------*/
 
 static long vars_assign_to_nd_from_1d( Var_T *src, Var_T *dest )
 {
@@ -319,10 +319,10 @@ static long vars_assign_to_nd_from_1d( Var_T *src, Var_T *dest )
 }
 
 
-/*-----------------------------------------------------*/
-/* Assigns the same value to all elements of a one- or */
-/* more-dimensional array.                             */
-/*-----------------------------------------------------*/
+/*-----------------------------------------------------*
+ * Assigns the same value to all elements of a one- or
+ * more-dimensional array.
+ *-----------------------------------------------------*/
 
 static long vars_set_all( Var_T *v, long l, double d )
 {
@@ -350,10 +350,10 @@ static long vars_set_all( Var_T *v, long l, double d )
 }
 
 
-/*-------------------------------------------------*/
-/* Assigns the same value to a slice of an one- or */
-/* more dimensional array                          */
-/*-------------------------------------------------*/
+/*-------------------------------------------------*
+ * Assigns the same value to a slice of an one- or
+ * more dimensional array
+ *-------------------------------------------------*/
 
 static long vars_assign_to_snd_from_1d( Var_T *src, Var_T *dest, Var_T *sub )
 {
@@ -387,8 +387,8 @@ static long vars_assign_to_snd_from_1d( Var_T *src, Var_T *dest, Var_T *sub )
 }
 
 
-/*------------------------------------------------------------------*/
-/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ *------------------------------------------------------------------*/
 
 static long vars_assign_to_snd_range_from_1d( Var_T *dest, Var_T *sub,
 											  ssize_t cur, long l, double d )
@@ -446,9 +446,9 @@ static long vars_assign_to_snd_range_from_1d( Var_T *dest, Var_T *sub,
 }
 
 
-/*--------------------------------*/
-/* Assign of an array to an array */
-/*--------------------------------*/
+/*--------------------------------*
+ * Assign of an array to an array
+ *--------------------------------*/
 
 static long vars_assign_to_nd_from_nd( Var_T *src, Var_T *dest )
 {
@@ -482,9 +482,9 @@ static long vars_assign_to_nd_from_nd( Var_T *src, Var_T *dest )
 }
 
 
-/*-------------------------------------------------*/
-/* Checks if the sizes of two arrays are identical */
-/*-------------------------------------------------*/
+/*-------------------------------------------------*
+ * Checks if the sizes of two arrays are identical
+ *-------------------------------------------------*/
 
 static void vars_size_check( Var_T *src, Var_T *dest )
 {
@@ -509,8 +509,8 @@ static void vars_size_check( Var_T *src, Var_T *dest )
 }
 
 
-/*------------------------------------------------------------------*/
-/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ *------------------------------------------------------------------*/
 
 static long vars_arr_assign( Var_T *src, Var_T *dest )
 {
@@ -519,8 +519,8 @@ static long vars_arr_assign( Var_T *src, Var_T *dest )
 }
 
 
-/*------------------------------------------------------------------*/
-/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ *------------------------------------------------------------------*/
 
 static long vars_arr_assign_1d( Var_T *src, Var_T *dest )
 {
@@ -582,8 +582,8 @@ static long vars_arr_assign_1d( Var_T *src, Var_T *dest )
 }
 
 
-/*------------------------------------------------------------------*/
-/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ *------------------------------------------------------------------*/
 
 static long vars_arr_assign_nd( Var_T *src, Var_T *dest )
 {
@@ -645,9 +645,9 @@ static long vars_arr_assign_nd( Var_T *src, Var_T *dest )
 }
 
 
-/*----------------------------------------------------------*/
-/* Assignment of an array to an array specified with ranges */
-/*----------------------------------------------------------*/
+/*----------------------------------------------------------*
+ * Assignment of an array to an array specified with ranges
+ *----------------------------------------------------------*/
 
 static long vars_assign_to_snd_from_nd( Var_T *src, Var_T *dest, Var_T *sub )
 {
@@ -681,8 +681,8 @@ static long vars_assign_to_snd_from_nd( Var_T *src, Var_T *dest, Var_T *sub )
 }
 
 
-/*--------------------------------------------*/
-/*--------------------------------------------*/
+/*--------------------------------------------*
+ *--------------------------------------------*/
 
 static long vars_assign_snd_range_from_nd( Var_T *dest, Var_T *sub,
 										   ssize_t cur, Var_T *src )
@@ -728,8 +728,8 @@ static long vars_assign_snd_range_from_nd( Var_T *dest, Var_T *sub,
 }
 
 
-/*--------------------------------------------*/
-/*--------------------------------------------*/
+/*--------------------------------------------*
+ *--------------------------------------------*/
 
 static long vars_assign_snd_range_from_nd_1( Var_T *dest, Var_T *src,
 											 Var_T *sub, ssize_t start,
@@ -780,8 +780,8 @@ static long vars_assign_snd_range_from_nd_1( Var_T *dest, Var_T *src,
 }
 
 
-/*--------------------------------------------*/
-/*--------------------------------------------*/
+/*--------------------------------------------*
+ *--------------------------------------------*/
 
 static long vars_assign_snd_range_from_nd_2( Var_T *dest, Var_T *src,
 											 Var_T *sub, ssize_t start,

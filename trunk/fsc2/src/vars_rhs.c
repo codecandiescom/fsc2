@@ -38,12 +38,12 @@ static void prune_stage_2( Var_T *nv );
 static void vars_fix_dims( Var_T *v, int max_dim );
 
 
-/*--------------------------------------------------------------------------*/
-/* Function is called if an element of an array or a sub-array is accessed. */
-/* Prior to the call of this function vars_arr_start() has been called and  */
-/* a REF_PTR type variable, pointing to the array variable, had been pushed */
-/* onto the stack.                                                          */
-/*--------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------*
+ * Function is called if an element of an array or a sub-array is accessed.
+ * Prior to the call of this function vars_arr_start() has been called and
+ * a REF_PTR type variable, pointing to the array variable, had been pushed
+ * onto the stack.
+ *--------------------------------------------------------------------------*/
 
 Var_T *vars_arr_rhs( Var_T *v )
 {
@@ -120,8 +120,8 @@ Var_T *vars_arr_rhs( Var_T *v )
 }
 		
 
-/*-------------------------------------------------------------*/
-/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*
+ *-------------------------------------------------------------*/
 
 static int vars_check_rhs_indices( Var_T **v, Var_T **a, int *range_count )
 {
@@ -244,10 +244,10 @@ static int vars_check_rhs_indices( Var_T **v, Var_T **a, int *range_count )
 }
 
 
-/*-------------------------------------------------------------*/
-/* Function to extract a subarray or submatrix from an array   */
-/* or matrix that appears somewhere on the RHS of a statement. */
-/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*
+ * Function to extract a subarray or submatrix from an array
+ * or matrix that appears somewhere on the RHS of a statement.
+ *-------------------------------------------------------------*/
 
 static Var_T *vars_arr_rhs_slice( Var_T *a, Var_T *v, int index_count,
 								  int range_count )
@@ -308,8 +308,8 @@ static Var_T *vars_arr_rhs_slice( Var_T *a, Var_T *v, int index_count,
 }
 
 
-/*-------------------------------------------------------------*/
-/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*
+ *-------------------------------------------------------------*/
 
 static void vars_arr_rhs_slice_prune( Var_T *nv, Var_T *v, Var_T *a,
 									  Var_T *end )
@@ -322,8 +322,9 @@ static void vars_arr_rhs_slice_prune( Var_T *nv, Var_T *v, Var_T *a,
 		prune_stage_2( nv );
 }
 
-/*--------------------------------------------------------*/
-/*--------------------------------------------------------*/
+
+/*--------------------------------------------------------*
+ *--------------------------------------------------------*/
 
 static bool prune_stage_1( Var_T *nv, Var_T *v, Var_T *a, Var_T *end,
 						   bool *needs_stage_2 )
@@ -453,8 +454,8 @@ static bool prune_stage_1( Var_T *nv, Var_T *v, Var_T *a, Var_T *end,
 }
 
 
-/*--------------------------------------------------------*/
-/*--------------------------------------------------------*/
+/*--------------------------------------------------------*
+ *--------------------------------------------------------*/
 
 static void prune_stage_2( Var_T *nv )
 {
@@ -498,8 +499,8 @@ static void prune_stage_2( Var_T *nv )
 }
 
 
-/*--------------------------------------------------------*/
-/*--------------------------------------------------------*/
+/*--------------------------------------------------------*
+ *--------------------------------------------------------*/
 
 static void vars_fix_dims( Var_T *v, int max_dim )
 {
@@ -516,13 +517,13 @@ static void vars_fix_dims( Var_T *v, int max_dim )
 }
 
 
-/*----------------------------------------------------------------------*/
-/* This function is needed when on the left hand side of a statement an */
-/* array is specified with ranges and it's also going to be needed on   */
-/* the right hand side (because an operator like "+=" is used). Then we */
-/* have to convert the SUB_REF_PTR from the LHS into an array usuable   */
-/* on the RHS which this function does.                                 */
-/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*
+ * This function is needed when on the left hand side of a statement an
+ * array is specified with ranges and it's also going to be needed on
+ * the right hand side (because an operator like "+=" is used). Then we
+ * have to convert the SUB_REF_PTR from the LHS into an array usuable
+ * on the RHS which this function does.
+ *----------------------------------------------------------------------*/
 
 Var_T *vars_subref_to_rhs_conv( Var_T *v )
 {

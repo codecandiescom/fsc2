@@ -39,13 +39,13 @@ static Var_T *vars_lhs_simple_pointer( Var_T *a, Var_T *cv, Var_T *v,
 static Var_T *vars_lhs_range_pointer( Var_T *a, Var_T *cv, Var_T *v, int dim );
 
 
-/*----------------------------------------------------------------------*/
-/* The function is called when the end of an array access (indicated by */
-/* the ']') is found on the left hand side of an assignment. If it is   */
-/* called for a new array the indices found on the stack are the sizes  */
-/* for the different dimensions of the array and are used to set up the */
-/* the array.                                                           */
-/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*
+ * The function is called when the end of an array access (indicated by
+ * the ']') is found on the left hand side of an assignment. If it is
+ * called for a new array the indices found on the stack are the sizes
+ * for the different dimensions of the array and are used to set up the
+ * the array.
+ *----------------------------------------------------------------------*/
 
 Var_T *vars_arr_lhs( Var_T *v )
 {
@@ -71,12 +71,12 @@ Var_T *vars_arr_lhs( Var_T *v )
 }
 
 
-/*--------------------------------------------------------------*/
-/* Picks the indices from the stack, does sanity checks on them */
-/* and converts ranges, consistiting of a pair of numbers with  */
-/* a colon in between, into a pair of a positive and a negative */
-/* number.                                                      */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ * Picks the indices from the stack, does sanity checks on them
+ * and converts ranges, consistiting of a pair of numbers with
+ * a colon in between, into a pair of a positive and a negative
+ * number.
+ *--------------------------------------------------------------*/
 
 static int vars_check_lhs_indices( Var_T **v, int *range_count )
 {
@@ -210,11 +210,11 @@ static int vars_check_lhs_indices( Var_T **v, int *range_count )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/* Function is called when the closing ']' is found in the definition of */
-/* an array in the VARIABLES section. It creates the array as far as     */
-/*  possible (i.e. if the sizes are specified including the sub-arrays). */
-/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ * Function is called when the closing ']' is found in the definition of
+ * an array in the VARIABLES section. It creates the array as far as
+ *  possible (i.e. if the sizes are specified including the sub-arrays).
+ *-----------------------------------------------------------------------*/
 
 static Var_T* vars_setup_new_array( Var_T *v, int dim )
 {
@@ -247,9 +247,9 @@ static Var_T* vars_setup_new_array( Var_T *v, int dim )
 }
 
 
-/*----------------------------------------------------------------------*/
-/* Function creates a new array by creating recursively all sub-arrays. */
-/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*
+ * Function creates a new array by creating recursively all sub-arrays.
+ *----------------------------------------------------------------------*/
 
 void vars_arr_create( Var_T *a, Var_T *v, int dim, bool is_temp )
 {
@@ -361,18 +361,18 @@ void vars_arr_create( Var_T *a, Var_T *v, int dim, bool is_temp )
 }
 
 
-/*---------------------------------------------------------------------*/
-/* Function gets called when a list of initializers (enclosed in curly */
-/* braces) gets found in the input of the VARIABLES section. Since the */
-/* initializer list can contain further list etc. the function can get */
-/* several times until we have reached the highest level list. During  */
-/* this process the variable stack can become quite messed up and for  */
-/* bookkeeping purposes two extra flags, INIT_ONLY and DONT_RECURSE,   */
-/* are used with the stack variables involved. INIT_ONLY signifies     */
-/* that the variable is on the stack for good reasons and DONT_RECURSE */
-/* tells the functions for popping variables not to delete sub-arrays  */
-/* of the variable.                                                    */
-/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*
+ * Function gets called when a list of initializers (enclosed in curly
+ * braces) gets found in the input of the VARIABLES section. Since the
+ * initializer list can contain further list etc. the function can get
+ * several times until we have reached the highest level list. During
+ * this process the variable stack can become quite messed up and for
+ * bookkeeping purposes two extra flags, INIT_ONLY and DONT_RECURSE,
+ * are used with the stack variables involved. INIT_ONLY signifies
+ * that the variable is on the stack for good reasons and DONT_RECURSE
+ * tells the functions for popping variables not to delete sub-arrays
+ * of the variable.
+ *---------------------------------------------------------------------*/
 
 Var_T *vars_init_list( Var_T *v, ssize_t level )
 {
@@ -522,12 +522,12 @@ Var_T *vars_init_list( Var_T *v, ssize_t level )
 }
 
 
-/*--------------------------------------------------------------------------*/
-/* Function initializes a new array. When called the stack at 'v' contains  */
-/* all the data for the initialization (the last data on top of the stack)  */
-/* and, directly below the data, an REF_PTR to the array to be initialized. */
-/* If 'v' is NULL no initialization has to be done.                         */
-/*--------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------*
+ * Function initializes a new array. When called the stack at 'v' contains
+ * all the data for the initialization (the last data on top of the stack)
+ * and, directly below the data, an REF_PTR to the array to be initialized.
+ * If 'v' is NULL no initialization has to be done.
+ *--------------------------------------------------------------------------*/
 
 void vars_arr_init( Var_T *v )
 {
@@ -573,10 +573,10 @@ void vars_arr_init( Var_T *v )
 }
 
 
-/*------------------------------------------------------------------*/
-/* Function does the assignment of data from an initializer list,   */
-/* being distributed over the stack to the left hand side variable. */
-/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ * Function does the assignment of data from an initializer list,
+ * being distributed over the stack to the left hand side variable.
+ *------------------------------------------------------------------*/
 
 static void vars_do_init( Var_T *src, Var_T *dest )
 {
@@ -707,10 +707,10 @@ static void vars_do_init( Var_T *src, Var_T *dest )
 }
 
 
-/*--------------------------------------------------------------------*/
-/* Initializes the elements of array or matrix 'a' with the values of */
-/* the variables on the stack (first of which is 'v').                */
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ * Initializes the elements of array or matrix 'a' with the values of
+ * the variables on the stack (first of which is 'v').
+ *--------------------------------------------------------------------*/
 
 static Var_T *vars_init_elements( Var_T *a, Var_T *v )
 {
@@ -755,14 +755,14 @@ static Var_T *vars_init_elements( Var_T *a, Var_T *v )
 }
 
 
-/*----------------------------------------------------------------------*/
-/* Function pushes a variable with a pointer to an array element on the */
-/* left hand side of an EDL statement onto the stack. Depending on what */
-/* the left hand side evaluates to this is either a variable of INT_PTR */
-/* or FLOAT_PTR type (when a singe element of an array or matrix is     */
-/* addressed) or of type REF_PTR (if the LHS resolves to a simple array */
-/* or (sub-) matrix but the indices do not involve ranges).             */
-/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*
+ * Function pushes a variable with a pointer to an array element on the
+ * left hand side of an EDL statement onto the stack. Depending on what
+ * the left hand side evaluates to this is either a variable of INT_PTR
+ * or FLOAT_PTR type (when a singe element of an array or matrix is
+ * addressed) or of type REF_PTR (if the LHS resolves to a simple array
+ * or (sub-) matrix but the indices do not involve ranges).
+ *----------------------------------------------------------------------*/
 
 static Var_T *vars_lhs_pointer( Var_T *v, int dim )
 {
@@ -805,14 +805,14 @@ static Var_T *vars_lhs_pointer( Var_T *v, int dim )
 }
 
 
-/*------------------------------------------------------------------------*/
-/* This function is invoked when the indices on the stack did contain one */
-/* or more ranges. It first checks that the indices/ranges fit the sizes  */
-/* of the indexed aray (or enlarges it if necessary and possible) and the */
-/* pushes a variable of type SUB_REF_PTR onto ths stack that has a 'from' */
-/* field pointing to the indexed array and contains an array of all the   */
-/* indices (with negative values for range start values).                 */
-/*------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*
+ * This function is invoked when the indices on the stack did contain one
+ * or more ranges. It first checks that the indices/ranges fit the sizes
+ * of the indexed aray (or enlarges it if necessary and possible) and the
+ * pushes a variable of type SUB_REF_PTR onto ths stack that has a 'from'
+ * field pointing to the indexed array and contains an array of all the
+ * indices (with negative values for range start values).
+ *------------------------------------------------------------------------*/
 
 static Var_T *vars_lhs_sub_pointer( Var_T *v, int dim, int range_count )
 {
@@ -853,10 +853,10 @@ static Var_T *vars_lhs_sub_pointer( Var_T *v, int dim, int range_count )
 }
 
 
-/*-----------------------------------------------------------------*/
-/* Function to be called when a simple index (not part of a range) */
-/* is found on the stack.                                          */
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ * Function to be called when a simple index (not part of a range)
+ * is found on the stack.
+ *-----------------------------------------------------------------*/
 
 static Var_T *vars_lhs_simple_pointer( Var_T *a, Var_T *cv, Var_T *v,
 									   int dim )
@@ -948,10 +948,10 @@ static Var_T *vars_lhs_simple_pointer( Var_T *a, Var_T *cv, Var_T *v,
 }
 
 
-/*--------------------------------------------------------------------*/
-/* Function to be called when a range (consisting of first a negative */
-/* and a positive value) is found on the stack.                       */
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ * Function to be called when a range (consisting of first a negative
+ * and a positive value) is found on the stack.
+ *--------------------------------------------------------------------*/
 
 static Var_T *vars_lhs_range_pointer( Var_T *a, Var_T *cv, Var_T *v, int dim )
 {

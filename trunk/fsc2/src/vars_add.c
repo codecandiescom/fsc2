@@ -33,9 +33,9 @@ static Var_T *vars_float_arr_add( Var_T *v1, Var_T *v2 );
 static Var_T *vars_ref_add( Var_T *v1, Var_T *v2 );
 
 
-/*---------------------------------------------------------*/
-/* Function for adding of two variables of arbitrary types */
-/*---------------------------------------------------------*/
+/*---------------------------------------------------------*
+ * Function for adding of two variables of arbitrary types
+ *---------------------------------------------------------*/
 
 Var_T *vars_add( Var_T *v1, Var_T *v2 )
 {
@@ -114,9 +114,9 @@ Var_T *vars_add( Var_T *v1, Var_T *v2 )
 }
 
 
-/*-----------------------------------------------------------*/
-/* Function for "adding" (i.e. concatenation) of two strings */
-/*-----------------------------------------------------------*/
+/*-----------------------------------------------------------*
+ * Function for "adding" (i.e. concatenation) of two strings
+ *-----------------------------------------------------------*/
 
 static Var_T *vars_str_var_add( Var_T *v1, Var_T *v2 )
 {
@@ -133,9 +133,9 @@ static Var_T *vars_str_var_add( Var_T *v1, Var_T *v2 )
 }
 
 
-/*-------------------------------------------------------------------------*/
-/* Function for adding a variable of arbitrary type to an integer variable */
-/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*
+ * Function for adding a variable of arbitrary type to an integer variable
+ *-------------------------------------------------------------------------*/
 
 static Var_T *vars_int_var_add( Var_T *v1, Var_T *v2 )
 {
@@ -237,10 +237,10 @@ static Var_T *vars_int_var_add( Var_T *v1, Var_T *v2 )
 }
 
 
-/*--------------------------------------------------*/
-/* Function for adding a variable of arbitrary type */
-/* to a floating point variable                     */
-/*--------------------------------------------------*/
+/*--------------------------------------------------*
+ * Function for adding a variable of arbitrary type
+ * to a floating point variable
+ *--------------------------------------------------*/
 
 static Var_T *vars_float_var_add( Var_T *v1, Var_T *v2 )
 {
@@ -331,9 +331,9 @@ static Var_T *vars_float_var_add( Var_T *v1, Var_T *v2 )
 }
 
 
-/*-------------------------------------------------------------------------*/
-/* Function for adding a variable of arbitrary type to an 1D integer array */
-/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*
+ * Function for adding a variable of arbitrary type to an 1D integer array
+ *-------------------------------------------------------------------------*/
 
 static Var_T *vars_int_arr_add( Var_T *v1, Var_T *v2 )
 {
@@ -420,10 +420,10 @@ static Var_T *vars_int_arr_add( Var_T *v1, Var_T *v2 )
 }
 
 
-/*--------------------------------------------------*/
-/* Function for adding a variable of arbitrary type */
-/* to an 1D floating point array                    */
-/*--------------------------------------------------*/
+/*--------------------------------------------------*
+ * Function for adding a variable of arbitrary type
+ * to an 1D floating point array
+ *--------------------------------------------------*/
 
 static Var_T *vars_float_arr_add( Var_T *v1, Var_T *v2 )
 {
@@ -503,10 +503,10 @@ static Var_T *vars_float_arr_add( Var_T *v1, Var_T *v2 )
 }
 
 
-/*-------------------------------------------------------*/
-/* Function for adding a variable of arbitrary type to a */
-/* a more-dimensional integer or floating point array    */
-/*-------------------------------------------------------*/
+/*-----------------------------------------------------*/
+ * Function for adding a variable of arbitrary type to
+ * a more-dimensional integer or floating point array
+ *-----------------------------------------------------*/
 
 static Var_T *vars_ref_add( Var_T *v1, Var_T *v2 )
 {
