@@ -28,7 +28,7 @@ AWK            = /usr/bin/awk
 
 SHELL          = /bin/sh
 CC             = gcc
-CFLAGS        += -I. -I./src -I./modules -I./aux -ggdb -Wall -Wwrite-strings \
+CFLAGS        += -ggdb -Wall -Wwrite-strings \
 				 -Wstrict-prototypes -Wmissing-prototypes \
 				 -Wmissing-declarations -W \
 				 # -DDEBUG \
@@ -51,7 +51,7 @@ RMFLAGS        = -f
 ############################################################################
 
 
-VPATH          = src:modules
+VPATH          = .:src:modules
 
 
 c_sources      = fsc2.c fsc2_rsc.c pulser.c util.c exceptions.c variables.c \
@@ -89,6 +89,8 @@ endif
 ifdef AWK
     CFLAGS += -DAWK=\"$(AWK)\"
 endif
+
+CFLAGS += $(patsubst %,-I%,$(subst :, ,$(VPATH))) -Iaux
 
 ifdef libdir
 	CFLAGS += -Dlibdir=\"$(libdir:/=)/\"
@@ -188,13 +190,13 @@ tags:
 		  ${tds754a} tds754a.h ${tds520a} tds520a.h
 
 
-clean: 
+clean:
 	$(RM) $(RMFLAGS) *.o *.output *_parser.c *_parser.h \
-		*_lexer.c fsc2_clean.c *.lo *.so TAGS mem
+		*_lexer.c fsc2_clean.c *.lo *.so mem
 
-distclean: 
-	$(RM) $(RMFLAGS) fsc2 fsc2_clean *.o *.output *_parser.c *_parser.h \
-		*_lexer.c fsc2_clean.c *.lo *.so TAGS mem
+distclean:
+	$(MAKE) clean
+	$(RM) $(RMFLAGS) fsc2 fsc2_clean TAGS
 
 # don't delete intermediate files created by bison and flex
 
