@@ -858,17 +858,15 @@ static void lower_permissions( void )
 /* loop over a write() call until all bytes got written.                     */
 /*---------------------------------------------------------------------------*/
 
-#define OUTPUT_TRY_LENGTH 128
+#define OUTPUT_TRY_LENGTH 256
 
 static ssize_t output( const char *fmt, ... )
 {
 	static char *c = NULL;
 	static size_t len = OUTPUT_TRY_LENGTH;
-	va_list ap;
-	int wr;
 	size_t bytes_to_write;
-	ssize_t bytes_written = 0;
-	size_t already_written = 0;
+	ssize_t last_written;
+	size_t total_bytes_written = 0;
 
 
 	if ( c == NULL )
@@ -876,6 +874,11 @@ static ssize_t output( const char *fmt, ... )
 
 	while ( 1 )
 	{
+		va_list ap;
+		int wr;
+		size_t new_len;
+
+
 		va_start( ap, fmt );
 		wr = vsnprintf( c, len, fmt, ap );
 		va_end( ap );
@@ -887,37 +890,37 @@ static ssize_t output( const char *fmt, ... )
 		if ( wr >= 0 && ( size_t ) wr + 1 <= len )
 			break;
 
-		if ( wr < 0 )                    /* for older glibcs */
-			len *= 2;
+		/* Usually double the size of the buffer, only when this wouldn't be
+		   enough (as far as we can figure out) allocate as much as needed.
+		   Update the 'len' variable only after the realloc call succeeded,
+		   otherwise it would be wrong when we're running out of memory in
+		   the realloc call. */
 
-		if ( ( size_t ) wr + 1 > len )   /* for newer glibcs */
-			len = wr + 1;
+		new_len = 2 * len;
+		if ( wr >= 0 && ( size_t ) wr + 1 > new_len )
+			new_len = ( size_t ) wr + 1;
 
-		c = CHAR_P T_realloc( c, len );
+		c = CHAR_P T_realloc( c, new_len );
+		len = new_len;
 	}
 
 	bytes_to_write = strlen( c );
 
 	while ( bytes_to_write > 0 )
 	{
-		bytes_written = write( STDOUT_FILENO, c + already_written,
-							   bytes_to_write );
+		if ( ( last_written = write( STDOUT_FILENO, c + total_bytes_written,
+									 bytes_to_write ) ) < 0 )
+		{
+			if ( errno == EINTR )   /* non-deadly signal has been received ? */
+				continue;
+			THROW( EXCEPTION );     /* sorry, can't continue */
+		}
 
-		/* Check if a non-deadly signal has been received */
-
-		if ( bytes_written == -1 && errno == EINTR )
-			continue;
-
-		/* Throw an exception on real errors */
-
-		if ( bytes_written <= 0 )
-			THROW( EXCEPTION );
-
-		bytes_to_write -= bytes_written;
-		already_written += bytes_written;
+		bytes_to_write -= last_written;
+		total_bytes_written += last_written;
 	}
 
-	return bytes_written;
+	return total_bytes_written;
 }
 
 
