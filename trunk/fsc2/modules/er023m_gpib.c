@@ -44,7 +44,7 @@ bool er023m_init( const char *name )
 
 		/* Make lock-in send its status byte to test that it reacts */
 
-		er023m_sb( );
+		er023m_st( );
 
 		/* Switch off service requests */
 
@@ -128,14 +128,6 @@ bool er023m_init( const char *name )
 		else
 			er023m.re = er023m_get_re( );
 
-		/* Set the device to single mode */
-
-		er023m_mode( SINGLE_MODE );
-
-		/* Find out how many data bytes will be send with these settings */
-		
-		er023m.nb = er023m_get_nb( );
-
 		/* Set ED mode, i.e. show receiver level on display */
 
 		if ( gpib_write( er023m.device, "ED\r", 3 ) == FAILURE )
@@ -171,13 +163,14 @@ unsigned int er023m_get_data( void )
 	/* Bring lock-in into talker mode, this should make it send one ADC data
 	   point automatically (when in SINGLE mode) */
 
-	if ( gpib_read( er023m.device, buf, &len ) == FAILURE )
+	if ( gpib_write( er023m.device, "SM\r", 3 ) == FAILURE ||
+		 gpib_read( er023m.device, buf, &len ) == FAILURE )
 		er023m_failure( );
 
 	/* The device should send as many bytes for a data point as it told us
 	   it would, plus an EOS character */
 
-	if ( len != er023m.nb + 1 )
+	if ( len != er023m.nb )
 		er023m_failure( );
 
 	/* The device sends positive numbers only, LSB first */
@@ -203,7 +196,7 @@ int er023m_get_rg( void )
 		er023m_failure( );
 
 	buf[ len - 1 ] = '\0';
-	return T_atoi( buf );
+	return T_atoi( buf + 2 );
 }
 
 
@@ -237,7 +230,7 @@ int er023m_get_tc( void )
 		er023m_failure( );
 
 	buf[ len - 1 ] = '\0';
-	return T_atoi( buf );
+	return T_atoi( buf + 2 );
 }
 
 
@@ -254,6 +247,8 @@ void er023m_set_tc( int tc_index )
 	sprintf( buf, "TC%d\r", tc_index );
 	if ( gpib_write( er023m.device, buf, strlen( buf ) ) == FAILURE )
 		er023m_failure( );
+
+	er023m_get_nb( );
 }
 
 
@@ -271,7 +266,7 @@ int er023m_get_ph( void )
 		er023m_failure( );
 
 	buf[ len - 1 ] = '\0';
-	return T_atoi( buf );
+	return T_atoi( buf + 2 );
 }
 
 
@@ -305,7 +300,7 @@ int er023m_get_ma( void )
 		er023m_failure( );
 
 	buf[ len - 1 ] = '\0';
-	return T_atoi( buf );
+	return T_atoi( buf + 2 );
 }
 
 
@@ -339,7 +334,7 @@ int er023m_get_of( void )
 		er023m_failure( );
 
 	buf[ len - 1 ] = '\0';
-	return T_atoi( buf );
+	return T_atoi( buf + 2 );
 }
 
 
@@ -373,7 +368,7 @@ int er023m_get_ct( void )
 		er023m_failure( );
 
 	buf[ len - 1 ] = '\0';
-	return T_atoi( buf );
+	return T_atoi( buf + 2 );
 }
 
 
@@ -390,6 +385,8 @@ void er023m_set_ct( int ct_mult )
 	sprintf( buf, "CT%d\r", ct_mult );
 	if ( gpib_write( er023m.device, buf, strlen( buf ) ) == FAILURE )
 		er023m_failure( );
+
+	er023m_get_nb( );
 }
 
 
@@ -406,7 +403,7 @@ int er023m_get_mf( void )
 		er023m_failure( );
 
 	buf[ len - 1 ] = '\0';
-	return T_atoi( buf );
+	return T_atoi( buf + 2 );
 }
 
 
@@ -440,7 +437,7 @@ int er023m_get_ha( void )
 		er023m_failure( );
 
 	buf[ len - 1 ] = '\0';
-	return T_atoi( buf ) - 1;
+	return T_atoi( buf + 2 ) - 1;
 }
 
 
@@ -474,7 +471,7 @@ int er023m_get_re( void )
 		er023m_failure( );
 
 	buf[ len - 1 ] = '\0';
-	return T_atoi( buf ) - 1;
+	return T_atoi( buf + 2 ) - 1;
 }
 
 
@@ -501,7 +498,6 @@ int er023m_get_nb( void )
 {
 	char buf[ 30 ];
 	long len = 30;
-	int nb;
 	unsigned int fac;
 	int i;
 
@@ -511,30 +507,17 @@ int er023m_get_nb( void )
 		er023m_failure( );
 
 	buf[ len - 1 ] = '\0';
-	nb = T_atoi( buf );
+	er023m.nb = T_atoi( buf + 2 );
 
-	fsc2_assert( nb > 0 && nb <= MAX_NB &&
-				 nb <= ( int ) sizeof( unsigned int ) );
+	fsc2_assert( er023m.nb > 0 && er023m.nb <= MAX_NB &&
+				 er023m.nb <= ( int ) sizeof( unsigned int ) );
 
-	for ( fac = 0, i = 0; i < nb; i++ )
+	for ( fac = 255, i = 1; i < er023m.nb; i++ )
 		fac = fac * 256 + 255;
 
 	er023m.scale_factor = 2.0 / ( double ) fac;
 
-	return nb;
-}
-
-
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
-
-void er023m_mode( int mode )
-{
-	fsc2_assert( mode == SINGLE_MODE || mode == CONTINUOUS_MODE );
-
-	if ( gpib_write( er023m.device,
-					 mode == SINGLE_MODE ? "SM\r" : "CM\r", 3 ) == FAILURE )
-		er023m_failure( );
+	return er023m.nb;
 }
 
 
@@ -557,19 +540,19 @@ void er023m_srq( int on_off )
 /*---------------------------------------------------------------*/
 /*---------------------------------------------------------------*/
 
-unsigned char er023m_sb( void )
+unsigned char er023m_st( void )
 {
 	char buf[ 30 ];
 	long len = 30;
 	int sb;
 
 
-	if ( gpib_write( er023m.device, "SB\r", 3 ) == FAILURE ||
+	if ( gpib_write( er023m.device, "ST\r", 3 ) == FAILURE ||
 		 gpib_read( er023m.device, buf, &len ) == FAILURE )
 		er023m_failure( );
 
 	buf[ len - 1 ] = '\0';
-	sb = T_atoi( buf );
+	sb = T_atoi( buf + 2 );
 
 	fsc2_assert( sb >= 0 && sb <= 255 );
 

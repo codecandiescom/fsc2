@@ -146,7 +146,7 @@ extern double mf_list[ MAX_MF_INDEX + 1 ];
 #define SRQ_OFF               0
 #define SRQ_ON                1
 
-#define MAX_NB                3          /* maximum number of bytes that get
+#define MAX_NB                4          /* maximum number of bytes that get
 											send for a ADC data point */
 
 
@@ -237,7 +237,6 @@ void er023m_set_ha( int ha );
 int er023m_get_re( void );
 void er023m_set_re( int re );
 int er023m_get_nb( void );
-void er023m_mode( int mode );
 void er023m_srq( int on_off );
-unsigned char er023m_sb( void );
+unsigned char er023m_st( void );
 void er023m_failure( void );

@@ -22,7 +22,7 @@
 */
 
 
-#define ER023_MAIN
+#define ER023M_MAIN
 
 #include "er023m.h"
 
