@@ -98,7 +98,7 @@ bool hfs9000_assign_channel_to_function( int function, long channel )
 					   "once to function '%s'.\n",
 						Function_Names[ c->function->self ] );
 			else
-				print( SEVERE, "Channel %ld is assignedmore than once to "
+				print( SEVERE, "Channel %ld is assigned more than once to "
 					   "function '%s'.\n",
 						channel, Function_Names[ c->function->self ] );
 			return FAIL;
