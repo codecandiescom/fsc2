@@ -1,3 +1,7 @@
+/*
+  $Id$
+*/
+
 /***************************************************************************/
 /*                                                                         */
 /*      The following code is taken from an article by Peter Simons        */

@@ -1,13 +1,5 @@
 /*
    $Id$
-
-   $Log$
-   Revision 1.4  1999/07/27 22:20:30  jens
-   *** empty log message ***
-
-   Revision 1.3  1999/07/16 22:55:39  jens
-   Mostly just cosmetic changes.
-
 */
 
 

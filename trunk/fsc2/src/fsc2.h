@@ -1,3 +1,7 @@
+/*
+  $Id$
+*/
+
 #if ! defined FSC2_HEADER
 #define FSC2_HEADER
 

@@ -1,3 +1,7 @@
+/*
+  $Id$
+*/
+
 /****************************************************************/
 /* This is the lexer for the ASSIGNMENTS section of an EDL file */
 /****************************************************************/
@@ -259,11 +263,11 @@ WS          [\n=: ]+
 					return FUNC_TOKEN;
 				}
 
-				/* if it's not a function it's got to be a variable */
+				/* if it's not a function it should be a variable */
 
-				if ( ( assignlval.vptr = vars_get( assigntext ) )
-				     == NULL )
-			         assignlval.vptr = vars_new( assigntext );
+				if ( ( assignlval.vptr = vars_get( assigntext ) ) == NULL )
+					 THROW( ACCESS_NONEXISTING_VARIABLE );
+
 				return VAR_TOKEN;
 			}
 
@@ -335,6 +339,12 @@ int assignments_parser( FILE *in )
 				"`%s'\n", Fname, Lc, assigntext );
 		return FAIL;
     }
+	CATCH( ACCESS_NONEXISTING_VARIABLE )
+	{
+		eprint( FATAL, "%s:%ld: Variable `%s' has never been declared.\n",
+				Fname, Lc, assigntext );
+		return FAIL;
+	}
 	CATCH( CLEANER_EXCEPTION )
 	{
 		eprint( FATAL, "%s", assigntext + 2 );

@@ -1,3 +1,7 @@
+/*
+  $Id$
+*/
+
 #if ! defined T_HEADER
 #define T_HEADER
 

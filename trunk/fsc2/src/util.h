@@ -1,3 +1,7 @@
+/*
+  $Id$
+*/
+
 #if ! defined UTIL_HEADER
 #define UTIL_HEADER
 

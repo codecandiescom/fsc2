@@ -1,3 +1,7 @@
+/*
+  $Id$
+*/
+
 #if ! defined PHASES_HEADER
 #define PHASES_HEADER
 

@@ -1,30 +1,9 @@
-#include "fsc2.h"
-
 /*
    $Id$
-
-   $Log$
-   Revision 1.11  1999/07/27 22:09:35  jens
-   *** empty log message ***
-
-   Revision 1.10  1999/07/27 21:33:34  jens
-   *** empty log message ***
-
-   Revision 1.9  1999/07/27 16:19:13  jens
-   *** empty log message ***
-
-   Revision 1.8  1999/07/22 16:37:26  jens
-   *** empty log message ***
-
-   Revision 1.7  1999/07/21 23:01:56  jens
-   *** empty log message ***
-
-   Revision 1.6  1999/07/21 07:15:25  jens
-   *** empty log message ***
-
 */
 
 
+#include "fsc2.h"
 
 
 /* When in the input an identifier is found it is always tried first if the

@@ -1,3 +1,8 @@
+/*
+  $Id$
+*/
+
+
 #if ! defined FSC2_GLOBAL
 #define FSC2_GLOBAL
 

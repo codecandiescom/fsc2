@@ -1,3 +1,7 @@
+/*
+  $Id$
+*/
+
 #define FSC2_MAIN
 
 #include "fsc2.h"

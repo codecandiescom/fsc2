@@ -1,3 +1,7 @@
+/*
+  $Id$
+*/
+
 #if ! defined FUNC_HEADER
 #define FUNC_HEADER
 

@@ -1,3 +1,7 @@
+/*
+  $Id$
+*/
+
 #if ! defined PULSE_HEADER
 #define PULSE_HEADER
 
