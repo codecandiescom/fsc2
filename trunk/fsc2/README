@@ -87,19 +87,19 @@ Currently suported devices
 * LeCroy Digitizing Oscilloscope 9400
 * Sony/Tektronix Data Generator DG2020
 * Tektronix Stimulus System HFS9003
-* Bruker EP 385 Pulse Programmer
+* Bruker EP385 Pulse Programmer
 * Stanford Research Lock-In Amplifier SR510, SR530, SR810, SR830
 * AEG Magnet Power Supply (home-build computer control, S-, X-Band)
-* Bruker Field controller ER 032 M
+* Bruker Field controller ER032M
 * Keithley 228A (used as superconducting magnet power supply)
 * Oxford Magnet Sweep Power Supply IPS20-4
 * Bruker Hall Effect Field Controller BH 15
-* Bruker NMR Gaussmeter ER 035 M (F0, F1 probe, serial port and GPIB version)
+* Bruker NMR Gaussmeter ER035M (F0, F1 probe, serial port and GPIB version)
 * Metrolab NMR Teslameter PT2025
 * Hewlett-Packard RF Synthesizer HP8647A
 * Hewlett-Packard RF Synthesizer HP8672A
 * Hewlett-Packard Frequency Counter HP5340A
-* Bruker Signal Channel ER 023 M
+* Bruker Signal Channel ER023M
 * Lake Shore 330 Temperature Controller
 * Kontron 4060 Voltmeter
 * EG&G PARC Box-Car Integrator 4402 (download of measured data only)
