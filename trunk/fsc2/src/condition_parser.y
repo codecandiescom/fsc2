@@ -71,7 +71,7 @@ static Var *CV;
 %token <dval> E_FLOAT_TOKEN
 %token <sptr> E_STR_TOKEN
 %token E_EQ E_LT E_LE E_GT E_GE
-%token <lval> E_PPOS E_PLEN E_PDPOS E_PDLEN
+%token <lval> E_PPOS E_PLEN E_PDPOS E_PDLEN E_PMAXLEN
 
 %token E_NT_TOKEN E_UT_TOKEN E_MT_TOKEN E_T_TOKEN
 %token E_NU_TOKEN E_UU_TOKEN E_MU_TOKEN E_KU_TOKEN E_MEG_TOKEN
