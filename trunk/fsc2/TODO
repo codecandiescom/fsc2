@@ -16,5 +16,5 @@
    displayed (but the program does not crash). Since it will probably
    take a lot of work to get this resolved and, on the other hand, it
    only shows up under unreasonable situations (i.e. when doing stress
-   testing) solving the problem has a rather low position on my priority
+   tests) solving the problem has a rather low position on my priority
    list...
