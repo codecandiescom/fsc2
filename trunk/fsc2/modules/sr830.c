@@ -244,6 +244,7 @@ static void sr830_auto( int flag );
 static double sr830_get_auto_data( int type );
 static void sr830_lock_state( bool lock );
 static bool sr830_command( const char *cmd );
+static bool sr830_talk( const char *cmd, char *reply, long *length );
 static void sr830_failure( void );
 
 
@@ -1480,10 +1481,7 @@ static double sr830_get_data( void )
 
 	/* Otherwise return fetch the directly measured data */
 
-	if ( gpib_write( sr830.device, "OUTP?1\n", 7 ) == FAILURE ||
-		 gpib_read( sr830.device, buffer, &length ) == FAILURE )
-		sr830_failure( );
-
+	sr830_talk( "OUTP?1\n", buffer, &length );
 	buffer[ length - 1 ] = '\0';
 	return T_atod( buffer );
 }
@@ -1535,9 +1533,7 @@ static void sr830_get_xy_data( double *data, long *channels, int num_channels,
 
 	/* Get the data from the lock-in */
 
-	if ( gpib_write( sr830.device, cmd, strlen( cmd ) ) == FAILURE ||
-		 gpib_read( sr830.device, buffer, &length ) == FAILURE )
-		sr830_failure( );
+	sr830_talk( cmd, buffer, &length );
 
 	/* Disassemble the reply */
 
@@ -1663,11 +1659,9 @@ static double sr830_get_adc_data( long channel )
 	fsc2_assert( channel >= 1 && channel <= 4 );
 	buffer[ 5 ] = ( char ) channel + '0';
 
-	if ( gpib_write( sr830.device, buffer, strlen( buffer ) ) == FAILURE ||
-		 gpib_read( sr830.device, buffer, &length ) == FAILURE )
-		sr830_failure( );
-
+	sr830_talk( buffer, buffer, &length );
 	buffer[ length - 1 ] = '\0';
+
 	return T_atod( buffer );
 }
 
@@ -1687,8 +1681,7 @@ static double sr830_set_dac_data( long port, double voltage )
 	fsc2_assert( voltage >= DAC_MIN_VOLTAGE && voltage <= DAC_MAX_VOLTAGE );
 
 	sprintf( buffer, "AUXV %ld,%f\n", port, voltage );
-	if ( gpib_write( sr830.device, buffer, strlen( buffer ) ) == FAILURE )
-		sr830_failure( );
+	sr830_command( buffer );
 
 	return voltage;
 }
@@ -1708,10 +1701,7 @@ static double sr830_get_dac_data( long port )
 	fsc2_assert( port >= 1 && port <= 4 );
 
 	sprintf( buffer, "AUXV? %ld\n", port );
-	if ( gpib_write( sr830.device, buffer, strlen( buffer ) ) == FAILURE ||
-		 gpib_read( sr830.device, buffer, &len )== FAILURE )
-		sr830_failure( );
-
+	sr830_talk( buffer, buffer, &len );
 	buffer[ len - 1 ] = '\0';
 	return T_atod( buffer );
 }
@@ -1730,10 +1720,7 @@ static double sr830_get_sens( void )
 
 	/* Ask lock-in for the sensitivity setting */
 
-	if ( gpib_write( sr830.device, "SENS?\n", 6 ) == FAILURE ||
-		 gpib_read( sr830.device, buffer, &length ) == FAILURE )
-		sr830_failure( );
-
+	sr830_talk( "SENS?\n", buffer, &length );
 	buffer[ length - 1 ] = '\0';
 	sens = sens_list[ T_atol( buffer ) ];
 
@@ -1754,8 +1741,7 @@ static void sr830_set_sens( int sens_index )
 
 
 	sprintf( buffer, "SENS %d\n", sens_index );
-	if ( gpib_write( sr830.device, buffer, strlen( buffer ) ) == FAILURE )
-		sr830_failure( );
+	sr830_command( buffer );
 }
 
 
@@ -1771,10 +1757,7 @@ static double sr830_get_tc( void )
 	long length = 10;
 
 
-	if ( gpib_write( sr830.device, "OFLT?\n", 6 ) == FAILURE ||
-		 gpib_read( sr830.device, buffer, &length ) == FAILURE )
-		sr830_failure( );
-
+	sr830_talk( "OFLT?\n", buffer, &length );
 	buffer[ length - 1 ] = '\0';
 	return tc_list[ T_atol( buffer ) ];
 }
@@ -1793,8 +1776,7 @@ static void sr830_set_tc( int tc_index )
 
 
 	sprintf( buffer, "OFLT %d\n", tc_index );
-	if ( gpib_write( sr830.device, buffer, strlen( buffer ) ) == FAILURE )
-		sr830_failure( );
+	sr830_command( buffer );
 }
 
 
@@ -1810,10 +1792,7 @@ static double sr830_get_phase( void )
 	double phase;
 
 
-	if ( gpib_write( sr830.device, "PHAS?\n", 6 ) == FAILURE ||
-		 gpib_read( sr830.device, buffer, &length ) == FAILURE )
-		sr830_failure( );
-
+	sr830_talk( "PHAS?\n", buffer, &length );
 	buffer[ length - 1 ] = '\0';
 	phase = T_atod( buffer );
 
@@ -1842,9 +1821,7 @@ static double sr830_set_phase( double phase )
 
 
 	sprintf( buffer, "PHAS %.2f\n", phase );
-	if ( gpib_write( sr830.device, buffer, strlen( buffer ) ) == FAILURE )
-		sr830_failure( );
-
+	sr830_command( buffer );
 	return phase;
 }
 
@@ -1858,10 +1835,7 @@ static double sr830_get_mod_freq( void )
 	long length = 40;
 
 
-	if ( gpib_write( sr830.device, "FREQ?\n", 6 ) == FAILURE ||
-		 gpib_read( sr830.device, buffer, &length ) == FAILURE )
-		sr830_failure( );
-
+	sr830_talk( "FREQ?\n", buffer, &length );
 	buffer[ length - 1 ] = '\0';
 	return T_atod( buffer );
 }
@@ -1877,8 +1851,7 @@ static double sr830_set_mod_freq( double freq )
 
 
 	sprintf( buffer, "FREQ %.4f\n", freq );
-	if ( gpib_write( sr830.device, buffer, strlen( buffer ) ) == FAILURE )
-		sr830_failure( );
+	sr830_command( buffer );
 
 	/* Take care: The product of the harmonic and the modulation frequency
 	   can't be larger than 102 kHz, otherwise the modulation frequency is
@@ -1905,10 +1878,7 @@ static long sr830_get_mod_mode( void )
 	long length = 10;
 
 
-	if ( gpib_write( sr830.device, "FMOD?\n", 6 ) == FAILURE ||
-		 gpib_read( sr830.device, buffer, &length ) == FAILURE )
-		sr830_failure( );
-
+	sr830_talk( "FMOD?\n", &length );
 	buffer[ length - 1 ] = '\0';
 	return T_atol( buffer );
 }
@@ -1923,10 +1893,7 @@ static long sr830_get_harmonic( void )
 	long length = 20;
 
 
-	if ( gpib_write( sr830.device, "HARM?\n", 6 ) == FAILURE ||
-		 gpib_read( sr830.device, buffer, &length ) == FAILURE )
-		sr830_failure( );
-
+	sr830_talk( "HARM?\n", buffer, &length );
 	buffer[ length - 1 ] = '\0';
 	return  T_atol( buffer );
 }
@@ -1943,8 +1910,7 @@ static long sr830_set_harmonic( long harmonic )
 	fsc2_assert( harmonic >= MIN_HARMONIC && harmonic <= MAX_HARMONIC );
 
 	sprintf( buffer, "HARM %ld\n", harmonic );
-	if ( gpib_write( sr830.device, buffer, strlen( buffer ) ) == FAILURE )
-		sr830_failure( );
+	sr830_command( buffer );
 
 	/* Take care: The product of the harmonic and the modulation frequency
 	   can't be larger than 102 kHz, otherwise the harmonic is reduced to a
@@ -1970,10 +1936,7 @@ static double sr830_get_mod_level( void )
 	long length = 20;
 
 
-	if ( gpib_write( sr830.device, "SLVL?\n", 6 ) == FAILURE ||
-		 gpib_read( sr830.device, buffer, &length ) == FAILURE )
-		sr830_failure( );
-
+	sr830_talk( "SLVL?\n", buffer, &length );
 	buffer[ length - 1 ] = '\0';
 	return T_atod( buffer );
 }
@@ -1990,9 +1953,7 @@ static double sr830_set_mod_level( double level )
 	fsc2_assert( level >= MIN_MOD_LEVEL && level <= MAX_MOD_LEVEL );
 
 	sprintf( buffer, "SLVL %f\n", level );
-	if ( gpib_write( sr830.device, buffer, strlen( buffer ) ) == FAILURE )
-		sr830_failure( );
-
+	sr830_command( buffer );
 	return level;
 }
 
@@ -2012,9 +1973,8 @@ static long sr830_set_sample_time( long st_index )
 		sprintf( cmd, "SRAT 14\n" );
 	else
 		sprintf( cmd, "SRAT %ld\n", ST_ENTRIES - 1 - st_index );
-	if ( gpib_write( sr830.device, cmd, strlen( cmd ) ) == FAILURE )
-		sr830_failure( );
 
+	sr830_command( cmd );
 	return st_index;
 }
 
@@ -2029,12 +1989,10 @@ static long sr830_get_sample_time( void )
 	long st_index;
 
 
-	if ( gpib_write( sr830.device, "SRAT ?\n", 7 ) == FAILURE ||
-		 gpib_read( sr830.device, buffer, &length ) == FAILURE )
-		sr830_failure( );
-
+	sr830_talk( "SRAT ?\n", buffer, &length );
 	buffer[ length - 1 ] = '\0';
 	st_index = T_atol( buffer );
+
 	if ( ( st_index = T_atol( buffer ) ) == 14 )
 		st_index = ST_TRIGGRED;
 	else
@@ -2076,8 +2034,7 @@ static void sr830_set_display_channel( int channel, long type )
 #endif
 
 	sprintf( cmd, "DDEF %d,%d,0\n", channel + 1, symbol_to_dsp[ type ] );
-	if ( gpib_write( sr830.device, cmd, strlen( cmd ) ) == FAILURE )
-		sr830_failure( );
+	sr830_command( cmd );
 }
 
 
@@ -2096,12 +2053,10 @@ static long sr830_get_display_channel( int channel )
 	fsc2_assert( channel >= 0 && channel < DISPLAY_CHANNELS );
 
 	sprintf( cmd, "DDEF? %d\n", channel );
-	if ( gpib_write( sr830.device, cmd, strlen( cmd ) ) == FAILURE ||
-		 gpib_read( sr830.device, buffer, &length ) == FAILURE )
-		sr830_failure( );
-
+	sr830_talk( cmd, buffer, &length );
 	buffer[ length - 1 ] = '\0';
 	sptr = strchr( buffer, ',' );
+
 	if ( sptr == NULL )
 	{
 		print( FATAL, "Received invalid reply from device.\n" );
@@ -2151,14 +2106,10 @@ static void sr830_auto( int flag )
 	fsc2_assert( sr830.is_auto_setup == SET );
 	fsc2_assert( flag == 0 || flag == 1 );
 
-	if ( gpib_write( sr830.device, cmd_1[ flag ], strlen( cmd_1[ flag ] ) )
-		 == FAILURE )
-		sr830_failure( );
+	sr830_command( cmd_1[ flag ] );
 
-	if ( sr830.st_index == ST_TRIGGRED &&
-		 gpib_write( sr830.device, cmd_2[ flag ], strlen( cmd_2[ flag ] ) )
-		 == FAILURE )
-		sr830_failure( );
+	if ( sr830.st_index == ST_TRIGGRED )
+		sr830_command( cmd_2[ flag ] );
 
 	if ( flag == 0 )
 	{
@@ -2208,8 +2159,7 @@ static double sr830_get_auto_data( int type )
 	{
 		print( SEVERE, "Internal lock-in buffer did overflow for CH%1d, "
 			   "data in both channnels may have been lost.\n", channel + 1 );
-		if ( gpib_write( sr830.device, "REST\n", 5 ) == FAILURE )
-			sr830_failure( );
+		sr830_command( "REST\n" );
 
 		for ( i = 0; i < DISPLAY_CHANNELS; i++ )
 			sr830.data_fetched[ i ] = 0;
@@ -2249,9 +2199,7 @@ static double sr830_get_auto_data( int type )
 		stop_on_user_request( );
 
 		length = 100;
-		if ( gpib_write( sr830.device, "SPTS?\n", 6 ) == FAILURE ||
-			 gpib_read( sr830.device, buffer, &length ) == FAILURE )
-			sr830_failure( );
+		sr830_talk( "SPTS?\n", buffer, &length );
 
 		/* Store the time where we received the last data item */
 
@@ -2268,12 +2216,8 @@ static double sr830_get_auto_data( int type )
 
 	sprintf( cmd, "TRCA? %d,%ld,1\n",
 			 channel + 1, sr830.data_fetched[ channel ]++ );
-
 	length = 100;
-	if ( gpib_write( sr830.device, cmd, strlen( cmd) ) == FAILURE ||
-		 gpib_read( sr830.device, buffer, &length ) == FAILURE )
-		sr830_failure( );
-
+	sr830_talk( cmd, buffer, &length );
 	buffer[ length - 1 ] = '\0';
 	return T_atod( buffer );
 }
@@ -2288,8 +2232,7 @@ static void sr830_lock_state( bool lock )
 
 
 	sprintf( cmd, "OVRM %c\n", lock ? '0' : '1' );
-	if ( gpib_write( sr830.device, cmd, strlen( cmd ) ) == FAILURE )
-		sr830_failure( );
+	sr830_command( cmd );
 }
 
 
@@ -2299,6 +2242,18 @@ static void sr830_lock_state( bool lock )
 static bool sr830_command( const char *cmd )
 {
 	if ( gpib_write( sr830.device, cmd, strlen( cmd ) ) == FAILURE )
+		sr830_failure( );
+	return OK;
+}
+
+
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+
+static bool sr830_talk( const char *cmd, char *reply, long *length )
+{
+	if ( gpib_write( sr830.device, cmd, strlen( cmd ) ) == FAILURE ||
+		 gpib_read( sr830.device, reply, length ) == FAILURE )
 		sr830_failure( );
 	return OK;
 }
