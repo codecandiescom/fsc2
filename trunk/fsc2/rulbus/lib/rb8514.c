@@ -452,15 +452,43 @@ int rulbus_rb8514_delay_set_output_pulse_polarity( int handle, int type,
 	if ( ctrl == card->ctrl )
 		return rulbus_errno = RULBUS_OK;
 
-	card->ctrl = ctrl;
-
 	if ( ( retval = rulbus_write( handle, CONTROL_ADDR,
 								  &card->ctrl, 1 ) ) != 1 )
 		return rulbus_errno = retval;
 
+	card->ctrl = ctrl;
+
 	return rulbus_errno = RULBUS_OK;
 }
 
+
+/*-----------------------------------------------------------------*
+ * Function to start a delay via software (by toggling the trigger
+ * slope bit). Please note that this swithes the cards trigger
+ * input slope to raising edge!
+ *-----------------------------------------------------------------*/
+
+int rulbus_rb8514_software_start( int handle )
+{
+	RULBUS_RB8514_DELAY_CARD *card;
+	unsigned char bytes[ 3 ];
+	size_t i;
+	int retval;
+
+	if ( ( card = rulbus_rb8514_delay_card_find( handle ) ) == NULL )
+		return rulbus_errno = RULBUS_INVALID_CARD_HANDLE;
+
+	bytes[ 0 ] = bytes[ 2 ] = card->ctrl & ~ TRIGGER_ON_FALLING_EDGE;
+	bytes[ 1 ] = card->ctrl | TRIGGER_ON_FALLING_EDGE;
+	
+	if ( ( retval = rulbus_write( handle, CONTROL_ADDR, bytes, 3 ) ) != 1 )
+		return rulbus_errno = retval;
+
+	card->ctrl = bytes[ 2 ];
+
+	return rulbus_errno = RULBUS_OK;
+}
+	
 
 /*-----------------------------------------------------------------*
  * Function to determine if the card is currently creating a delay

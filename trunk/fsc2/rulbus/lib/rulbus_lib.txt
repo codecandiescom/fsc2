@@ -668,7 +668,7 @@ indicating the reason for the failure.
 
 int rulbus_rb8514_delay_set_trigger( int handle, int edge )
 
-This function lets youu select if the delay is started on the raising
+This function lets you select if the delay is started on the raising
 or the falling edge of an external trigger. To make the card start
 on the raising edge pass it the constant RULBUS_RB8514_DELAY_RAISING_EDGE
 as the second argument, otherwise RULBUS_RB8514_DELAY_FALLING_EDGE.
@@ -718,6 +718,18 @@ applied to. The 'pol' argument determines the polarity of the selected
 pulses and can be either RULBUS_RB8514_DELAY_POLARITY_POSITIVE to output
 a positive voltage for the start or end pulse, or, to create pulses with
 negative polarity, RULBUS_RB8514_DELAY_POLARITY_NEGATIVE.
+
+On success the function returns RULBUS_OK, otherwise a negative value
+indicating the reason for the failure.
+
+
+----------------------------------------------------------------------
+
+int rulbus_rb8514_software_start( int handle )
+
+This function allows to start the creation of a delay via software.
+Please note calling this function will switch the trigger input slope
+to trigger on raising edge, whatever it was set to before!
 
 On success the function returns RULBUS_OK, otherwise a negative value
 indicating the reason for the failure.

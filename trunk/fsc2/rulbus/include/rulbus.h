@@ -117,6 +117,7 @@ int rulbus_rb8514_delay_set_output_pulse( int /* handle */, int /* output */,
 int rulbus_rb8514_delay_set_output_pulse_polarity( int /* handle */,
 						   int /* type */,
 						   int /* pol */ );
+int rulbus_rb8514_software_start( int /* handle */ );
 int rulbus_rb8514_delay_busy( int /* handle */ );
 int rulbus_rb8514_delay_software_start( int /* handle */ );
 double rulbus_rb8514_delay_get_intrinsic_delay( int /* handle */ );
