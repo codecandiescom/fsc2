@@ -160,10 +160,10 @@ sub l_start {
 
 
 ###########################################################
-# Take care: negative lengths may be allowed, e.g. on TRUE64 the man page
-# says that when l_len is positive, the lock starts at l_start and ends at
-# l_start + l_len, while for negative lengths the lock instead is for the
-# region from l_start + l_len to l_start - 1.
+# Negative lengths may be allowed on some systems, e.g. on TRUE64 the man
+# page says that when l_len is positive, the lock starts at l_start and ends
+# at l_start + l_len, while for negative lengths the locked region is from
+# l_start + l_len to l_start - 1.
 
 sub l_len {
     my $flock_struct = shift;
