@@ -13,7 +13,8 @@ The following tools and libraries are needed to compile, install and run fsc2:
  5) install
  6) sed
  7) XFORMS library (version 0.89 or higher)
- 8) GPIB library (will also compile and run without, see below)
+ 8) GPIB library (will also compile and run without but with very restricted
+    functionality, see below)
 
 Optionally, you should have
 
@@ -154,7 +155,12 @@ variable. A possible problem arises if you use programs creating lock files
 not in the HDB UUCP format (the PID being stored in a ten byte string,
 left-padded with spaces and with a trailing newline). In this case fsc2 will
 not try to remove stale lock files and instead print an error message to the
-terminal and the lock file has to be removed manually.
+terminal that the lock file has to be removed manually.
+
+The WITH_HTTP_SERVER variable tells if support for the web server should be
+built into fsc2. Just comment out the line and it's going to vanish. If the
+web server gets included the next variable, DEFAULT_HTTP_PORT, tells on
+which port the web server will listen for incoming connections by default.
 
 The final variable to be set is the email address of the person that will
 receive bug reports and notifications if fsc2 crashes. Usually, you should
@@ -245,7 +251,7 @@ Just start by typing 'fsc2 edl/a.edl' or 'fsc2 edl/z.edl' (assuming you're
 still in fsc2's main directory) and click onto the "Start" button to get an
 idea about how fsc2 displays 1- and 2-dimensional data sets.
 
-             January 19, 2002             Have fun, Jens
+             March 13, 2002               Much luck, Jens
 
 -----------------------------------------------------------------------------
        _  _____  _____
