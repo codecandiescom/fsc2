@@ -13,11 +13,13 @@
 
 
 
-/*---------------------------------------------------------------------------
-  Function is called in the experiment after pulses have been changed to
-  update the pulser accordingly. No checking has to be done except in the
-  test run.
-----------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
+/* Function is called in the experiment after pulses have been changed to  */
+/* update the pulser accordingly. Before pulses are set the new values are */
+/* checked. If the check fails in the test run the program aborts while in */
+/* the real experiment an error message is printed and the pulses are      */
+/* reset to their original positions.                                      */
+/*-------------------------------------------------------------------------*/
 
 void dg2020_do_update( void )
 {
@@ -46,10 +48,10 @@ void dg2020_do_update( void )
 }
 
 
-/*---------------------------------------------------------------------------
-  This function sorts the pulses, and if called with 'flag' set, also checks
-  that the pulses don't overlap.
----------------------------------------------------------------------------*/
+/*----------------------------------------------------------------*/
+/* This function sorts the pulses, and if called with 'flag' set, */
+/* also checks that the pulses don't overlap.                     */
+/*----------------------------------------------------------------*/
 
 bool dg2020_reorganize_pulses( bool flag )
 {
@@ -116,10 +118,10 @@ bool dg2020_reorganize_pulses( bool flag )
 }
 
 
-/*---------------------------------------------------------------------------
-  Function can be called after pulses have been changed to check if the new
-  settings are still ok.
-----------------------------------------------------------------------------*/
+/*----------------------------------------------------------------*/
+/* Function can be called after pulses have been changed to check */
+/* if the new settings are still ok.                              */
+/*----------------------------------------------------------------*/
 
 void dg2020_do_checks( FUNCTION *f )
 {
@@ -133,13 +135,24 @@ void dg2020_do_checks( FUNCTION *f )
 
 		if ( p->is_active )
 		{
+			/* Check that pulses still fit into the pulser memory (while in
+			   test run) or the maximum sequence length (in the real run) */
+
 			f->max_seq_len = Ticks_max( f->max_seq_len, p->pos + p->len );
-			if ( f->delay + f->max_seq_len >= MAX_PULSER_BITS )
+			if ( f->delay + f->max_seq_len >=
+				 		  ( TEST_RUN ? MAX_PULSER_BITS : dg2020.max_seq_len ) )
 			{
-				eprint( FATAL, "%s:%ld: %s: Pulse sequence for function "
-						"`%s' does not fit into the pulsers memory. Maybe, "
-						"you could try a longer pulser time base.\n", Fname,
-						Lc, pulser_struct.name, Function_Names[ f->self ] );
+				if ( TEST_RUN )
+					eprint( FATAL, "%s:%ld: %s: Pulse sequence for function "
+							"`%s' does not fit into the pulsers memory. "
+							"Maybe, you could try a longer pulser time "
+							"base.\n", Fname, Lc, pulser_struct.name,
+							Function_Names[ f->self ] );
+				else
+					eprint( SEVERE, "%s:%ld: %s: Pulse sequence for function "
+							"`%s' is too long. You could try to set a higher "
+							"MAXIMUM_PATTER_LENGTH.\n", Fname, Lc,
+							pulser_struct.name, Function_Names[ f->self ] );
 				THROW( EXCEPTION );
 			}
 
@@ -150,8 +163,9 @@ void dg2020_do_checks( FUNCTION *f )
 			 p->pos + p->len > f->pulses[ i + 1 ]->pos )
 		{
 			if ( dg2020_IN_SETUP )
-				eprint( FATAL, "%s: Pulses %ld and %ld overlap.\n",
-						pulser_struct.name, p->num, f->pulses[ i + 1 ]->num );
+				eprint( TEST_RUN ? FATAL : SEVERE, "%s: Pulses %ld and %ld "
+						"overlap.\n", pulser_struct.name, p->num,
+						f->pulses[ i + 1 ]->num );
 			else
 				eprint( FATAL, "%s:%ld: %s: Pulses %ld and %ld begin to "
 						"overlap.\n", Fname, Lc, pulser_struct.name, p->num,
@@ -162,13 +176,14 @@ void dg2020_do_checks( FUNCTION *f )
 }
 
 
-/*----------------------------------------------------------------------------
-  The function readjusts the phase pulses of a phase function. An important
-  aim is to keep the number of changes to the phase pulses at a minimum
-  because changing pulses takes quite some time and thus slows down the
-  experiment. Therefore the phase pulses are only adjusted if they come too
-  near to the pulses in the neighborhood of the pulse they're associated with.
-----------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/
+/* The function readjusts the phase pulses of a phase function. An important */
+/* aim is to keep the number of changes to the phase pulses at a minimum     */
+/* because changing pulses takes quite some time and thus slows down the     */
+/* experiment. Therefore the phase pulses are only adjusted if they come too */
+/* near to the pulses in the neighborhood of the pulse they're associated    */
+/* with.                                                                     */
+/*---------------------------------------------------------------------------*/
 
 void dg2020_reorganize_phases( FUNCTION *f, bool flag )
 {
@@ -214,8 +229,8 @@ void dg2020_reorganize_phases( FUNCTION *f, bool flag )
 }
 
 
-/*----------------------------------------------------------------------------
-----------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------*/
 
 void dg2020_recalc_phase_pulse( FUNCTION *f, PULSE *phase_p,
 								PULSE *p, int nth, bool flag )
@@ -490,10 +505,10 @@ done_setting:
 }
 
 
-/*----------------------------------------------------------------------------
-  Function is called after the test run to reset all the variables describing
-  the state of the pulser to their initial values
-----------------------------------------------------------------------------*/
+/*------------------------------------------------------------------*/
+/* Function is called after the test run to reset all the variables */
+/* describing the state of the pulser to their initial values       */
+/*------------------------------------------------------------------*/
 
 void dg2020_full_reset( void )
 {
@@ -537,10 +552,10 @@ void dg2020_full_reset( void )
 }
 
 
-/*----------------------------------------------------------------------------
-  Function deletes a pulse and returns a pointer to the next pulse in the
-  pulse list.
-----------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
+/* Function deletes a pulse and returns a pointer to the next pulse in the */
+/* pulse list.                                                             */
+/*-------------------------------------------------------------------------*/
 
 PULSE *dg2020_delete_pulse( PULSE *p )
 {
@@ -604,12 +619,12 @@ PULSE *dg2020_delete_pulse( PULSE *p )
 }
 
 
-/*----------------------------------------------------------------------------
-  After the test run, when all things have been checkes and the maximum length
-  of the pulse sequence is known, we can finally calculate the lengths of the
-  last phase pulses of a phase function - they simply last to the end of the
-  pulse sequence.
-----------------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*/
+/* After the test run, when all things have been checked and the maximum */
+/* length of the pulse sequence is known, we can finally calculate the   */
+/* lengths of the last phase pulses of a phase function - they simply    */
+/* last to the end of the pulse sequence.                                */
+/*-----------------------------------------------------------------------*/
 
 void dg2020_finalize_phase_pulses( int func )
 {
@@ -638,11 +653,10 @@ void dg2020_finalize_phase_pulses( int func )
 }
 
 
-/*----------------------------------------------------------------------------
-  Function creates all active pulses in the channels of the pulser assigned
-  to the function passed as argument.
-----------------------------------------------------------------------------*/
-
+/*------------------------------------------------------------------*/
+/* Function creates all active pulses in the channels of the pulser */
+/* assigned to the function passed as argument.                     */
+/*------------------------------------------------------------------*/
 
 void dg2020_set_pulses( FUNCTION *f )
 {
@@ -714,15 +728,15 @@ void dg2020_set_pulses( FUNCTION *f )
 }
 
 
-/*----------------------------------------------------------------------------
-  Function creates the active pulses in the diverse channels assigned to a
-  phase function. Here the problem is that the pulses are not well sorted
-  in the pulse list of the function and belong to different channels. To
-  make live simple we create a dummy function that gets 'assigned' a sorted
-  list of the pulses belonging to one of the phase functions channels and
-  can than call dg2020_set_pulses() on this dummy function to do all the
-  real work.
-----------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/
+/* Function creates the active pulses in the diverse channels assigned to a  */
+/* phase function. Here the problem is that the pulses are not well sorted   */
+/* in the pulse list of the function and belong to different channels. To    */
+/* make live simple we create a dummy function that gets 'assigned' a sorted */
+/* list of the pulses belonging to one of the phase functions channels and   */
+/* can than call dg2020_set_pulses() on this dummy function to do all the    */
+/* real work.                                                                */
+/*---------------------------------------------------------------------------*/
 
 void dg2020_set_phase_pulses( FUNCTION *f )
 {
@@ -767,11 +781,12 @@ void dg2020_set_phase_pulses( FUNCTION *f )
 }
 
 
-/*----------------------------------------------------------------------------
-  Changes the pulse pattern in the channel belonging to function 'f' so that
-  the data in the pulser get in sync with the its internal representation.
-  Care has taken to minimize the number of commands and their length.
-----------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*/
+/* Changes the pulse pattern in the channel belonging to function 'f' */
+/* so that the data in the pulser get in sync with the its internal   */
+/* representation. Care has taken to minimize the number of commands  */
+/* and their length.                                                  */
+----------------------------------------------------------------------*/
 
 void dg2020_commit( FUNCTION * f, bool flag )
 {
@@ -861,11 +876,11 @@ void dg2020_commit( FUNCTION * f, bool flag )
 }
 
 
-/*--------------------------------------------------------------------------
-  Changes the pulse pattern in the channel belonging to the phase function
-  'f' so that the data in the pulser get in sync with the its internal
-  representation. Actually, the real work is done in dg2020_commit( ).
-----------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------*/
+/* Changes the pulse pattern in the channel belonging to the phase function */
+/* 'f' so that the data in the pulser get in sync with the its internal     */
+/* representation. Actually, the real work is done in dg2020_commit().      */
+/*--------------------------------------------------------------------------*/
 
 void dg2020_commit_phases( FUNCTION * f, bool flag )
 {
@@ -891,10 +906,10 @@ void dg2020_commit_phases( FUNCTION * f, bool flag )
 }
 
 
-/*-----------------------------------------------------------------------------
-  Sets the additional bock used for maintaining the requested repetion time
-  to the low state
------------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/
+/* Sets the additional bock used for maintaining the requested repetion time */
+/* to the low state                                                          */
+/*---------------------------------------------------------------------------*/
 
 void dg2020_clear_padding_block( FUNCTION *f )
 {

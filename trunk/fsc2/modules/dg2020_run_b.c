@@ -13,11 +13,13 @@ static void dg2020_defense_twt_check( void );
 #define OFF( f )          ( ( f )->is_inverted ? HIGH : LOW )
 
 
-/*---------------------------------------------------------------------------
-  Function is called in the experiment after pulses have been changed to
-  update the pulser accordingly. No checking has to be done except in the
-  test run.
-----------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
+/* Function is called in the experiment after pulses have been changed to  */
+/* update the pulser accordingly. Before pulses are set the new values are */
+/* checked. If the check fails in the test run the program aborts while in */
+/* the real experiment an error message is printed and the pulses are      */
+/* reset to their original positions.                                      */
+/*-------------------------------------------------------------------------*/
 
 void dg2020_do_update( void )
 {
@@ -34,9 +36,9 @@ void dg2020_do_update( void )
 }
 
 
-/*---------------------------------------------------------------------------
-  This function sorts the pulses and checks that the pulses don't overlap.
----------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------*/
+/* This function sorts the pulses and checks that the pulses don't overlap. */
+/*--------------------------------------------------------------------------*/
 
 bool dg2020_reorganize_pulses( bool flag )
 {
@@ -59,8 +61,8 @@ bool dg2020_reorganize_pulses( bool flag )
 				   dg2020_start_compare );
 
 		/* Check the new pulse positions and lengths, if they're not ok stop
-		   program if it's doing the test run, while for the real run just
-		   reset the pulses to their previous positions and lengths */
+		   program while doing the test run. For the real run just reset the
+		   pulses to their previous positions and lengths and return FAIL. */
 
 		TRY
 		{
@@ -94,11 +96,11 @@ bool dg2020_reorganize_pulses( bool flag )
 }
 
 
-/*------------------------------------------------------------------------
-  Function is called after pulses have been changed to check if the new
-  settings are still ok, i.e. that they still fit into the pulsers memory
-  and don't overlap.
---------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
+/* Function is called after pulses have been changed to check if the new   */
+/* settings are still ok, i.e. that they still fit into the pulsers memory */
+/* and don't overlap.                                                      */
+/*-------------------------------------------------------------------------*/
 
 void dg2020_do_checks( FUNCTION *f )
 {
@@ -111,29 +113,43 @@ void dg2020_do_checks( FUNCTION *f )
 
 		if ( p->is_active )
 		{
+			/* Check that pulses still fit into the pulser memory (while in
+			   test run) or the maximum sequence length (in the real run) */
+
 			f->max_seq_len = Ticks_max( f->max_seq_len, p->pos + p->len );
-			if ( f->delay + f->max_seq_len >= MAX_PULSER_BITS )
+			if ( f->delay + f->max_seq_len >=
+						  ( TEST_RUN ? MAX_PULSER_BITS : dg2020.max_seq_len ) )
 			{
-				eprint( FATAL, "%s:%ld: %s: Pulse sequence for function "
-						"`%s' does not fit into the pulsers memory. Maybe, "
-						"you could try a longer pulser time base.\n", Fname,
-						Lc, pulser_struct.name, Function_Names[ f->self ] );
+				if ( TEST_RUN )
+					eprint( FATAL, "%s:%ld: %s: Pulse sequence for function "
+							"`%s' does not fit into the pulsers memory. "
+							"Maybe, you could try a longer pulser time "
+							"base.\n", Fname, Lc, pulser_struct.name, 
+							Function_Names[ f->self ] );
+				else
+					eprint( SEVERE, "%s:%ld: %s: Pulse sequence for function "
+							"`%s' is too long. You could try to set a higher "
+							"MAXIMUM_PATTER_LENGTH.\n", Fname, Lc,
+							pulser_struct.name, Function_Names[ f->self ] );
 				THROW( EXCEPTION );
 			}
 
 			f->num_active_pulses = i + 1;
 		}
 
+		/* Check for overlap of pulses */
+
 		if ( i + 1 < f->num_pulses && f->pulses[ i + 1 ]->is_active &&
 			 p->pos + p->len > f->pulses[ i + 1 ]->pos )
 		{
 			if ( dg2020_IN_SETUP )
-				eprint( FATAL, "%s: Pulses %ld and %ld overlap.\n",
-						pulser_struct.name, p->num, f->pulses[ i + 1 ]->num );
+				eprint( TEST_RUN ? FATAL : SEVERE, "%s: Pulses %ld and %ld "
+						"overlap.\n", pulser_struct.name, p->num,
+						f->pulses[ i + 1 ]->num );
 			else
 				eprint( FATAL, "%s:%ld: %s: Pulses %ld and %ld begin to "
-						"overlap.\n", Fname, Lc, pulser_struct.name, p->num,
-						f->pulses[ i + 1 ]->num );
+						"overlap.\n", Fname, Lc, pulser_struct.name,
+						p->num, f->pulses[ i + 1 ]->num );
 			THROW( EXCEPTION );
 		}
 	}
@@ -193,10 +209,10 @@ static void dg2020_defense_twt_check( void )
 	}
 }
 
-/*----------------------------------------------------------------------------
-  Function creates all active pulses in the channels of the pulser assigned
-  to the function passed as argument.
-----------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/
+/* Function creates all active pulses in the channels of the pulser assigned */
+/* to the function passed as argument.                                       */
+/*---------------------------------------------------------------------------*/
 
 void dg2020_set_pulses( FUNCTION *f )
 {
@@ -245,10 +261,10 @@ void dg2020_set_pulses( FUNCTION *f )
 }
 
 
-/*----------------------------------------------------------------------------
-  Function is called after the test run to reset all the variables describing
-  the state of the pulser to their initial values
-----------------------------------------------------------------------------*/
+/*------------------------------------------------------------------*/
+/* Function is called after the test run to reset all the variables */
+/* describing the state of the pulser to their initial values       */
+/*------------------------------------------------------------------*/
 
 void dg2020_full_reset( void )
 {
@@ -292,10 +308,10 @@ void dg2020_full_reset( void )
 }
 
 
-/*----------------------------------------------------------------------------
-  Function deletes a pulse and returns a pointer to the next pulse in the
-  pulse list.
-----------------------------------------------------------------------------*/
+/*-------------------------------------------------------*/
+/* Function deletes a pulse and returns a pointer to the */
+/* next pulse in the pulse list.                         */
+/*-------------------------------------------------------*/
 
 PULSE *dg2020_delete_pulse( PULSE *p )
 {
@@ -346,11 +362,12 @@ PULSE *dg2020_delete_pulse( PULSE *p )
 }
 
 
-/*----------------------------------------------------------------------------
-  Changes the pulse pattern in the channels belonging to function 'f' so that
-  the data in the pulser get in sync with the its internal representation.
-  Some care has taken to minimize the number of commands and their length.
-----------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*/
+/* Changes the pulse pattern in the channels belonging to function 'f' */
+/* so that the data in the pulser get in sync with the its internal    */
+/* representation. Some care has taken to minimize the number of       */
+/* commands and their length.                                          */
+/*---------------------------------------------------------------------*/
 
 void dg2020_commit( FUNCTION *f, bool flag )
 {
@@ -459,7 +476,6 @@ void dg2020_commit( FUNCTION *f, bool flag )
 
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
-
 
 void dg2020_cw_setup( void )
 {
