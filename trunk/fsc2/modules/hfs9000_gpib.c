@@ -43,23 +43,20 @@ bool hfs9000_init( const char *name )
 	if ( gpib_init_device( name, &hfs9000.device ) == FAILURE )
 		return FAIL;
 
-	if ( gpib_write( hfs9000.device, "HEADER OFF\n", 11 ) == FAILURE )
-		hfs9000_gpib_failure( );
+	hfs9000_command( "HEADER OFF\n" );
 
 	strcpy( cmd, "FPAN:MESS \"***  REMOTE  -  Keyboard disabled !  ***\"\n");
-	if ( gpib_write( hfs9000.device, cmd, strlen( cmd ) ) == FAILURE )
-		hfs9000_gpib_failure( );
+	hfs9000_command( cmd );
 
 	/* Get current run state ans stop the pulser */
 
-	if ( gpib_write( hfs9000.device, "TBAS:RUN?\n", 10 ) == FAILURE ||
-		 gpib_read( hfs9000.device, reply, &len ) == FAILURE )
+	hfs9000_command( "TBAS:RUN?\n" );
+	if ( gpib_read( hfs9000.device, reply, &len ) == FAILURE )
 		hfs9000_gpib_failure( );
 
 	hfs9000.has_been_running = reply[ 0 ] == '1';
 
-	if ( gpib_write( hfs9000.device, "TBAS:RUN OFF\n", 13 ) == FAILURE )
-		hfs9000_gpib_failure( );
+	hfs9000_command( "TBAS:RUN OFF\n" );
 
 	/* Set timebase for pulser */
 
@@ -68,12 +65,11 @@ bool hfs9000_init( const char *name )
 		strcpy( cmd, "TBAS:PER " );
 		gcvt( hfs9000.timebase, 9, cmd + strlen( cmd) );
 		strcat( cmd, "\n" );
-		if ( gpib_write( hfs9000.device, cmd, strlen( cmd ) ) == FAILURE )
-			hfs9000_gpib_failure( );
+		hfs9000_command( cmd );
 	}
 	else
 	{
-		print( FATAL, "Timebase of pulser has not been set.\n" );
+		print( FATAL, "Time base of pulser has not been set.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -86,8 +82,7 @@ bool hfs9000_init( const char *name )
 			continue;
 
 		sprintf( cmd, "PGENA:CH%1d:OUTP OFF\n", i );
-		if ( gpib_write( hfs9000.device, cmd, strlen( cmd ) ) == FAILURE )
-			hfs9000_gpib_failure( );
+		hfs9000_command( cmd );
 	}
 
 	/* Set lead delay to zero for all used channels */
@@ -99,8 +94,7 @@ bool hfs9000_init( const char *name )
 			 ! hfs9000.channel[ i ].function->is_used )
 			continue;
 		cmd[ 8 ] = ( char ) i + '0';
-		if ( gpib_write( hfs9000.device, cmd, strlen( cmd ) ) == FAILURE )
-			hfs9000_gpib_failure( );
+		hfs9000_command( cmd );
 	}
 
 	/* Set duty cycle to 100% for all used channels */
@@ -112,8 +106,7 @@ bool hfs9000_init( const char *name )
 			 ! hfs9000.channel[ i ].function->is_used )
 			continue;
 		cmd[ 8 ] = ( char ) i + '0';
-		if ( gpib_write( hfs9000.device, cmd, strlen( cmd ) ) == FAILURE )
-			hfs9000_gpib_failure( );
+		hfs9000_command( cmd );
 	}
 
 	/* Set polarity for all used channels */
@@ -126,8 +119,7 @@ bool hfs9000_init( const char *name )
 		sprintf( cmd, "PGENA:CH%1d:POL %s\n", i,
 				 hfs9000.channel[ i ].function->is_inverted ?
 				 "COMP" : "NORM" );
-		if ( gpib_write( hfs9000.device, cmd, strlen( cmd ) ) == FAILURE )
-			hfs9000_gpib_failure( );
+		hfs9000_command( cmd );
 	}
 
 	/* Set raise/fall times for pulses to maximum speed for all channels */
@@ -138,8 +130,7 @@ bool hfs9000_init( const char *name )
 			 ! hfs9000.channel[ i ].function->is_used )
 			continue;
 		sprintf( cmd, "PGENA:CH%1d:TRANS MIN\n", i );
-		if ( gpib_write( hfs9000.device, cmd, strlen( cmd ) ) == FAILURE )
-			hfs9000_gpib_failure( );
+		hfs9000_command( cmd );
 	}
 
 	/* Set pulse type to RZ (Return to Zero) for all used channels */
@@ -151,8 +142,7 @@ bool hfs9000_init( const char *name )
 			 ! hfs9000.channel[ i ].function->is_used )
 			continue;
 		cmd[ 8 ] = ( char ) i + '0';
-		if ( gpib_write( hfs9000.device, cmd, strlen( cmd ) ) == FAILURE )
-			hfs9000_gpib_failure( );
+		hfs9000_command( cmd );
 	}
 
 	/* Set channel voltage levels */
@@ -166,29 +156,25 @@ bool hfs9000_init( const char *name )
 		if ( hfs9000.channel[ i ].function->is_high_level )
 		{
 			sprintf( cmd, "PGENA:CH%1d:HLIM MAX\n", i );
-			if ( gpib_write( hfs9000.device, cmd, strlen( cmd ) ) == FAILURE )
-				hfs9000_gpib_failure( );
+			hfs9000_command( cmd );
 
 			sprintf( cmd, "PGENA:CH%1d:HIGH ", i );
 			gcvt( hfs9000.channel[ i ].function->high_level,
 				  5, cmd + strlen( cmd ) );
 			strcat( cmd, "\n" );
-			if ( gpib_write( hfs9000.device, cmd, strlen( cmd ) ) == FAILURE )
-				hfs9000_gpib_failure( );
+			hfs9000_command( cmd );
 		}
 
 		if ( hfs9000.channel[ i ].function->is_low_level )
 		{
 			sprintf( cmd, "PGENA:CH%1d:LLIM MIN\n", i );
-			if ( gpib_write( hfs9000.device, cmd, strlen( cmd ) ) == FAILURE )
-				hfs9000_gpib_failure( );
+			hfs9000_command( cmd );
 
 			sprintf( cmd, "PGENA:CH%1d:LOW ", i );
 			gcvt( hfs9000.channel[ i ].function->low_level,
 				  5, cmd + strlen( cmd ) );
 			strcat( cmd, "\n" );
-			if ( gpib_write( hfs9000.device, cmd, strlen( cmd ) ) == FAILURE )
-				hfs9000_gpib_failure( );
+			hfs9000_command( cmd );
 		}
 	}
 
@@ -202,8 +188,7 @@ bool hfs9000_init( const char *name )
 
 		sprintf( cmd, "PGENA:CH%1d:SIGN \"%s\"\n", i,
 				 Function_Names[ hfs9000.channel[ i ].function->self ] );
-		if ( gpib_write( hfs9000.device, cmd, strlen( cmd ) ) == FAILURE )
-			hfs9000_gpib_failure( );
+		hfs9000_command( cmd );
 	}
 
 	/* Switch all used channels on, all other off */
@@ -216,16 +201,14 @@ bool hfs9000_init( const char *name )
 
 		sprintf( cmd, "PGENA:CH%1d:OUTP %s\n", i,
 				 hfs9000.channel[ i ].function->is_used ? "ON" : "OFF" );
-		if ( gpib_write( hfs9000.device, cmd, strlen( cmd ) ) == FAILURE )
-			hfs9000_gpib_failure( );
+		hfs9000_command( cmd );
 	}
 
 	hfs9000_setup_trig_in( );
 
-	if ( gpib_write( hfs9000.device, "VECT:STAR 0\n", 12 ) == FAILURE ||
-		 gpib_write( hfs9000.device, "VECT:END 65535\n", 15 ) == FAILURE ||
-		 gpib_write( hfs9000.device, "VECT:LOOP 65535\n", 16 ) == FAILURE )
-		hfs9000_gpib_failure( );
+	hfs9000_command( "VECT:STAR 0\n" );
+	hfs9000_command( "VECT:END 65535\n" );
+	hfs9000_command( "VECT:LOOP 65535\n" );
 
 	return OK;
 }
@@ -252,30 +235,19 @@ static void hfs9000_setup_trig_in( void )
 
 	if ( hfs9000.is_trig_in_mode && hfs9000.trig_in_mode == INTERNAL )
 	{
-		strcpy( cmd, "TBAS:TIN:INP OFF\n" );
-		if ( gpib_write( hfs9000.device, cmd, strlen( cmd ) ) == FAILURE )
-			hfs9000_gpib_failure( );
-
-		strcpy( cmd, "TBAS:MODE ABUR\n" );
-		if ( gpib_write( hfs9000.device, cmd, strlen( cmd ) ) == FAILURE )
-			hfs9000_gpib_failure( );
+		hfs9000_command( "TBAS:TIN:INP OFF\n" );
+		hfs9000_command( "TBAS:MODE ABUR\n" );
 	}
 	else
 	{
-		strcpy( cmd, "TBAS:TIN:INP ON\n" );
-		if ( gpib_write( hfs9000.device, cmd, strlen( cmd ) ) == FAILURE )
-			hfs9000_gpib_failure( );
-
-		strcpy( cmd, "TBAS:MODE BURS\n" );
-		if ( gpib_write( hfs9000.device, cmd, strlen( cmd ) ) == FAILURE )
-			hfs9000_gpib_failure( );
+		hfs9000_command( "TBAS:TIN:INP ON\n" );
+		hfs9000_command( "TBAS:MODE BURS\n" );
 
 		if ( hfs9000.is_trig_in_slope )
 		{
 			sprintf( cmd, "TBAS:TIN:SLOP %s\n",
 					 hfs9000.trig_in_slope == POSITIVE ? "POS" : "NEG" );
-			if ( gpib_write( hfs9000.device, cmd, strlen( cmd ) ) == FAILURE )
-				hfs9000_gpib_failure( );
+			hfs9000_command( cmd );
 		}
 
 		if ( hfs9000.is_trig_in_level )
@@ -283,8 +255,7 @@ static void hfs9000_setup_trig_in( void )
 			strcpy( cmd, "TBAS:TIN:LEV " );
 			gcvt( hfs9000.trig_in_level, 8, cmd + strlen( cmd ) );
 			strcat( cmd, "\n" );
-			if ( gpib_write( hfs9000.device, cmd, strlen( cmd ) ) == FAILURE )
-				hfs9000_gpib_failure( );
+			hfs9000_command( cmd );
 		}
 
 		/* Set all channel delays to maximum negative value (-60 ns) */
@@ -296,17 +267,12 @@ static void hfs9000_setup_trig_in( void )
 				continue;
 
 			sprintf( cmd, "PGENA:CH%1d:CDEL MIN\n", i );
-			if ( gpib_write( hfs9000.device, cmd, strlen( cmd ) ) == FAILURE )
-				hfs9000_gpib_failure( );
+			hfs9000_command( cmd );
 		}
 
 		if ( hfs9000.channel[ HFS9000_TRIG_OUT ].function == NULL ||
 			 hfs9000.channel[ HFS9000_TRIG_OUT ].function->is_used )
-		{
-			strcpy( cmd, "TBAS:TOUT:PRET 60E-9\n" );
-			if ( gpib_write( hfs9000.device, cmd, strlen( cmd ) ) == FAILURE )
-				hfs9000_gpib_failure( );
-		}
+			hfs9000_command( "TBAS:TOUT:PRET 60E-9\n" );
 	}
 }
 
@@ -321,8 +287,7 @@ bool hfs9000_set_constant( int channel, Ticks start, Ticks length, int state )
 
 	sprintf( cmd, "*WAI;:PGENA:CH%1d:BDATA:FILL %ld,%ld,%s\n",
 			 channel, start, length, state ? "#HFF" : "0" );
-	if ( gpib_write( hfs9000.device, cmd, strlen( cmd ) ) == FAILURE )
-		hfs9000_gpib_failure( );
+	hfs9000_command( cmd );
 
 	return OK;
 }
@@ -340,8 +305,7 @@ bool hfs9000_set_trig_out_pulse( void )
 
 
 	sprintf( cmd, "TBAS:TOUT:PER %ld\n", p->pos + f->delay );
-	if ( gpib_write( hfs9000.device, cmd, strlen( cmd ) ) == FAILURE )
-		hfs9000_gpib_failure( );
+	hfs9000_command( cmd );
 
 	return OK;
 }
@@ -363,10 +327,7 @@ bool hfs9000_run( bool flag )
 
 
 	sprintf( cmd, "*WAI;:TBAS:RUN %s\n", flag ? "ON" : "OFF" );
-
-	if ( gpib_write( hfs9000.device, cmd, strlen( cmd ) ) == FAILURE )
-		hfs9000_gpib_failure( );
-
+	hfs9000_command( cmd );
 	hfs9000.is_running = flag;
 	return OK;
 }
@@ -385,10 +346,7 @@ bool hfs9000_get_channel_state( int channel )
 	fsc2_assert ( channel >= MIN_CHANNEL && channel <= MAX_CHANNEL );
 
 	sprintf( cmd, "PGENA:CH%1d:OUT?\n", channel );
-	if ( gpib_write( hfs9000.device, cmd, strlen( cmd ) ) == FAILURE ||
-		 gpib_read( hfs9000.device, reply, &len ) == FAILURE )
-		hfs9000_gpib_failure( );
-
+	hfs9000_command( cmd );
 	return reply[ 0 ] == '1';
 }
 
@@ -405,8 +363,7 @@ bool hfs9000_set_channel_state( int channel, bool flag )
 
 	sprintf( cmd, "*WAI;:PGENA:CH%1d:OUTP %s\n", channel,
 			 flag ? "ON" : "OFF" );
-	if ( gpib_write( hfs9000.device, cmd, strlen( cmd ) ) == FAILURE )
-		hfs9000_gpib_failure( );
+	hfs9000_command( cmd );
 
 	return OK;
 }
