@@ -596,7 +596,8 @@ void p_set( long pnum, int type, Var *v )
 			vars_check( v, INT_VAR );
 			is_pulser_func( pulser_struct.set_pulse_phase_cycle,
 							"setting a pulse phase cycle" );
-			( *pulser_struct.set_pulse_phase_cycle )( pnum, v->val.lval );
+			( *pulser_struct.set_pulse_phase_cycle )( pnum, 
+													  ( int ) v->val.lval );
 			vars_pop( v );
 			break;
 

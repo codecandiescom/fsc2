@@ -44,16 +44,22 @@
 typedef struct {
 	int self;
 
-	bool is_used;
-	bool is_needed;
+	bool is_used;                // function has been mentioned in ASSIGNMENTS
+	bool is_needed;              // functin has been assigned pulses
 
-	struct _P_ *pod;
-	bool is_inverted;
+	struct _P_ *pod;             // points to the pod assigned to the function
+	struct _P_ *pod2;            // points to the second pod assigned to the 
+	                             // function (phase functions only)
 
-	int num_channels;
+	int num_channels;            // number of channels assigned to function
 	struct _C_ *channel[ MAX_CHANNELS ];
 
-	Ticks delay;
+	int num_pulses;              // number of pulses assigned to the function
+	struct _p_ **pulses;         // list of pulse pointers
+
+	bool is_inverted;
+
+	Ticks delay;                 // delay for the function/pod combination
 	bool is_delay;
 
 	double high_level;
@@ -107,6 +113,7 @@ typedef struct _p_ {
 	Ticks len;
 	Ticks dpos;
 	Ticks dlen;
+	Phase_Sequence *pc;
 	Ticks maxlen;
 	long num_repl;
 	long *repl_list;
@@ -151,6 +158,7 @@ static bool set_pulse_position( long pnum, double time );
 static bool set_pulse_length( long pnum, double time );
 static bool set_pulse_position_change( long pnum, double time );
 static bool set_pulse_length_change( long pnum, double time );
+static bool set_pulse_phase_cycle( long pnum, int cycle );
 static bool set_pulse_maxlen( long pnum, double time );
 static bool set_pulse_replacements( long pnum, long num_repl, 
 									long *repl_list );
@@ -160,6 +168,7 @@ static bool get_pulse_position( long pnum, double *time );
 static bool get_pulse_length( long pnum, double *time );
 static bool get_pulse_position_change( long pnum, double *time );
 static bool get_pulse_length_change( long pnum, double *time );
+static bool get_pulse_phase_cycle( long pnum, int *cycle );
 static bool get_pulse_maxlen( long pnum, double *time );
 
 static Ticks double2ticks( double time );
@@ -170,3 +179,6 @@ static const char *ptime( double time );
 static const char *pticks( Ticks ticks );
 static void check_consistency( void );
 
+
+static void basic_pulse_check( void );
+static void basic_function_check( void );

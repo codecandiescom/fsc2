@@ -57,6 +57,7 @@ int dg2020_init_hook( void )
 	pulser_struct.set_pulse_length = set_pulse_length;
 	pulser_struct.set_pulse_position_change = set_pulse_position_change;
 	pulser_struct.set_pulse_length_change = set_pulse_length_change;
+	pulser_struct.set_pulse_phase_cycle = set_pulse_phase_cycle;
 	pulser_struct.set_pulse_maxlen = set_pulse_maxlen;
 	pulser_struct.set_pulse_replacements = set_pulse_replacements;
 
@@ -65,6 +66,7 @@ int dg2020_init_hook( void )
 	pulser_struct.get_pulse_length = get_pulse_length;
 	pulser_struct.get_pulse_position_change = get_pulse_position_change;
 	pulser_struct.get_pulse_length_change = get_pulse_length_change;
+	pulser_struct.get_pulse_phase_cycle = get_pulse_phase_cycle;
 	pulser_struct.get_pulse_maxlen = get_pulse_maxlen;
 
 
@@ -87,6 +89,8 @@ int dg2020_init_hook( void )
 		dg2020.function[ i ].is_needed = UNSET;
 		dg2020.function[ i ].pod = NULL;
 		dg2020.function[ i ].num_channels = 0;
+		dg2020.function[ i ].num_pulses = 0;
+		dg2020.function[ i ].pulses = NULL;
 		dg2020.function[ i ].is_inverted = UNSET;
 		dg2020.function[ i ].delay = 0;
 		dg2020.function[ i ].is_delay = UNSET;
@@ -191,7 +195,32 @@ static bool assign_function( int function, long pod )
 	}
 
 	f->is_used = SET;
-	f->pod = p;
+
+	/* Except for the phase functions only one pod can be assigned */
+
+	if ( f->pod != NULL )
+	{
+		if ( f->self != PULSER_CHANNEL_PHASE_1 && 
+			 f->self != PULSER_CHANNEL_PHASE_2 )
+		{
+			eprint( FATAL, "%s:%ld: DG2020: A pod has already been assigned "
+					"to function `%s'.\n", Fname, Lc,
+					Function_Names[ f->self ] );
+			THROW( EXCEPTION );
+		}
+
+		if ( f->pod2 != NULL )
+		{
+			eprint( FATAL, "%s:%ld: DG2020: There have already been two pods "
+					"assigned to function `%s'.\n", Fname, Lc,
+					Function_Names[ f->self ] );
+			THROW( EXCEPTION );
+		}
+
+		f->pod2 = p;
+	}
+	else
+		f->pod = p;
 	
 	p->function = f;
 	return OK;
@@ -531,6 +560,7 @@ static bool new_pulse( long pnum )
 	}
 
 	cp->next = NULL;
+	cp->pc = NULL;
 
 	cp->num = pnum;
 	cp->is_function = UNSET;
@@ -558,6 +588,15 @@ static bool set_pulse_function( long pnum, int function )
 		eprint( FATAL, "%s:%ld: DG2020: The function of pulse %ld has already "
 				"been set to `%s'.\n", Fname, Lc, pnum,
 				Function_Names[ p->function->self ] );
+		THROW( EXCEPTION );
+	}
+
+	if ( function == PULSER_CHANNEL_PHASE_1 || 
+		 function == PULSER_CHANNEL_PHASE_2 )
+	{
+		eprint( FATAL, "%s:%ld: You can't set pulses for the PHASE function, "
+				"all pulses needed will be created automatically.\n",
+				Fname, Lc );
 		THROW( EXCEPTION );
 	}
 
@@ -598,7 +637,6 @@ static bool set_pulse_position( long pnum, double time )
 static bool set_pulse_length( long pnum, double time )
 {
 	PULSE *p = get_pulse( pnum );
-
 
 	if ( p->is_len )
 	{
@@ -664,6 +702,41 @@ static bool set_pulse_length_change( long pnum, double time )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
+static bool set_pulse_phase_cycle( long pnum, int cycle )
+{
+	PULSE *p = get_pulse( pnum );
+	Phase_Sequence *pc = PSeq;
+
+
+	if ( p->pc != NULL )
+	{
+		eprint( FATAL, "%s:%ld: DG2020: Pulse %ld has already been assigned "
+				"a phase cycle.\n", Fname, Lc, pnum );
+		THROW(EXCEPTION );
+	}
+
+	while ( pc != NULL )
+	{
+		if ( pc->num == cycle )
+			break;
+		pc = pc->next;
+	}
+
+	if ( pc == NULL )
+	{
+		eprint( FATAL, "%s:%ld: DG2020: Referenced phase sequence %d hasn't "
+				"been defined.\n", Fname, Lc, cycle );
+		THROW( EXCEPTION );
+	}
+
+	p->pc = pc;
+	return OK;
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
 static bool set_pulse_maxlen( long pnum, double time )
 {
 	PULSE *p = get_pulse( pnum );
@@ -690,6 +763,7 @@ static bool set_pulse_maxlen( long pnum, double time )
 static bool set_pulse_replacements( long pnum, long num_repl, long *repl_list )
 {
 	PULSE *p = get_pulse( pnum );
+	long i;
 
 
 	if ( p->num_repl )
@@ -698,6 +772,17 @@ static bool set_pulse_replacements( long pnum, long num_repl, long *repl_list )
 				"have already been set.\n", Fname, Lc, pnum );
 		THROW( EXCEPTION );
 	}
+
+	/* Make sure the pulse isn't replaced by itself */
+
+	for ( i = 0; i < num_repl; i++ )
+		if ( repl_list[ i ] == pnum )
+		{
+			eprint( FATAL, "%s:%ld: DG2020: Pulse %ld can't be replaced by "
+					"itself (see %ld. replacement pulse).\n",
+					Fname, Lc, pnum, i + 1 );
+			THROW( EXCEPTION );
+		}
 
 	p->num_repl = num_repl;
 	p->repl_list = get_memcpy( repl_list, num_repl * sizeof( long ) );
@@ -808,6 +893,26 @@ static bool get_pulse_length_change( long pnum, double *time )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
+static bool get_pulse_phase_cycle( long pnum, int *cycle )
+{
+	PULSE *p = get_pulse( pnum );
+
+
+	if ( p->pc == NULL )
+	{
+		eprint( FATAL, "%s:%ld: DG2020: No phase cycle has been set for "
+				"pulse %ld.\n", Fname, Lc, pnum );
+		THROW(EXCEPTION );
+	}
+
+	*cycle = p->pc->num;
+	return OK;
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
 static bool get_pulse_maxlen( long pnum, double *time )
 {
 	PULSE *p = get_pulse( pnum );
@@ -823,7 +928,6 @@ static bool get_pulse_maxlen( long pnum, double *time )
 	*time = ticks2double( p->maxlen );
 	return OK;
 }
-
 
 
 /*-----------------------------------------------------------------*/
@@ -963,25 +1067,208 @@ static const char *pticks( Ticks ticks )
 
 static void check_consistency( void )
 {
+	basic_pulse_check( );
+	basic_function_check( );
+}
+
+
+
+/*--------------------------------------------------------------------------
+  Function runs through all pulses and checks that at least:
+  1. the function is set
+  2. the start position is set
+  3. the length is set (only exception: if pulse function is DETECTION
+     and no length is set it's more or less silently set to one tick)
+  4. the sum of function delay, pulse start position and length does not
+     exceed the pulsers memory
+  5. if the pulse has replacement pulses check that 
+     a. the pulse does't need phase cycling
+     b. the replacement pulses exist and
+	    have the same function and that
+	    they dont't have replacement pulses on their own.
+--------------------------------------------------------------------------*/
+
+static void basic_pulse_check( void )
+{
+	PULSE *p, *cp;
 	int i;
 
-	/* Check that or each function that's used there's also a pod assigned to
-       it */
+
+	for ( p = Pulses; p != NULL; p = p->next )
+	{
+		/* Check the pulse function */
+
+		if ( p->function == NULL )
+		{
+			eprint( FATAL, "DG2020: Pulse %ld has no function assigned to"
+					"it.\n", p->num );
+			THROW( EXCEPTION );
+		}
+
+		/* Check the start position */
+
+		if ( ! p->is_pos )
+		{
+			eprint( FATAL, "DG2020: No start position has been set for "
+					"pulse %ld.\n", p->num );
+			THROW( EXCEPTION );
+		}
+
+		/* Check the pulse length */
+
+		if ( ! p->is_len )
+		{
+			if ( p->function == &dg2020.function[ PULSER_CHANNEL_DET ] )
+			{
+				eprint( WARN, "DG2020: Length of detection pulse %ld is being "
+						"set to %s\n", p->num, ptime( 1 ) );
+				p->len = 1;
+				p->is_len = SET;
+			}
+			else
+			{
+				eprint( FATAL, "DG2020: Length of pulse %ld has not been "
+						"set.\n", p->num );
+				THROW( EXCEPTION );
+			}
+		}
+
+		/* Check that the pulse fits into the pulsers memory */
+
+		if ( p->pos + p->len + p->function->delay >= MAX_PULSER_BITS )
+		{
+			eprint( FATAL, "DG2020: Pulse %ld does not fit into the pulsers "
+					"memory. Maybe, you could try a longer pulser time "
+					"base.\n", p->num );
+			THROW( EXCEPTION );
+		}
+
+		/* Check the replacement pulses */
+
+		if ( p->num_repl != 0 )
+		{
+			if ( p->pc != NULL )
+			{
+				eprint( FATAL, "DG2020: Pulse %ld needs replacement pulses "
+						"and phase cycling. This isn't implemented (yet?).\n",
+						p->num );
+				THROW( EXCEPTION );
+			}
+
+			for ( i = 0; i < p->num_repl; i++ )
+			{
+				cp = Pulses;            /* try to find the replacement pulse */
+				while ( cp != NULL )
+				{
+					if ( cp->num == p->repl_list[ i ] )
+						break;
+					cp = cp->next;
+				}
+
+				if ( cp == NULL )             /* replacement pulse not found */
+				{
+					eprint( FATAL, "DG2020: Replacement pulse %ld for pulse "
+							"%ld does not exist.\n",
+							p->repl_list[ i ], p->num );
+					THROW( EXCEPTION );
+				}
+
+				if ( p->function != cp->function )
+				{
+					eprint( FATAL, "DG2020: Pulse %ld and its replacement "
+							"pulse %ld have different functions.\n",
+							p->num, cp->num );
+					THROW( EXCEPTION );
+				}
+
+				if ( cp->num_repl != 0 )
+				{
+					eprint( FATAL, "DG2020: Pulse %ld is a replacement pulse "
+							"for pulse %ld, so it can't have replacement "
+							"pulses of its own.\n", cp->num, p->num );
+					THROW( EXCEPTION );
+				}
+			}
+		}
+	}
+}
+
+
+static void basic_function_check( void )
+{
+	int i;
+	FUNCTION *f;
+	PULSE *cp;
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 	{
-		if ( dg2020.function[ i ].is_used && ! dg2020.function[ i ].is_needed )
+		f = &dg2020.function[ i ];
+
+		/* Don't do anything if function has never been mentioned */
+
+		if ( ! f->is_used )
+			continue;
+
+		/* Check if the function that has been defined is really needed (i.e.
+		   has pulses assigned to it) - exceptions are the PHASE functions
+		   that get pulses assigned to them automatically and that are only
+		   needed if pulse sequences have been defined */
+
+		if ( f->self != PULSER_CHANNEL_PHASE_1 &&
+			 f->self != PULSER_CHANNEL_PHASE_2 )
 		{
-			eprint( WARN, "DG2020: No pulses have been assigned to function "
-					"`%s'.\n", Function_Names[ i ] );
+			if ( f->is_used && ! f->is_needed )
+			{
+				eprint( WARN, "DG2020: No pulses have been assigned to "
+						"function `%s'.\n", Function_Names[ i ] );
+				f->is_used = UNSET;
+				continue;
+			}
+		}
+		else
+		{
+			if ( PSeq == NULL )
+			{
+				eprint( WARN, "DG2020: Functions `%s' won't be needed, "
+						"because no phase sequences have been defined.\n",
+						Function_Names[ f->self ] );
+				f->is_used = UNSET;
+			}
+			else
+			{
+				if ( f->pod == NULL || f->pod2 == NULL)
+				{
+					eprint( FATAL, "DG2020: Function `%s' needs two pods "
+							"assigned to it.\n", Function_Names[ i ] );
+					THROW( EXCEPTION );
+				}
+			}
+
+			continue;
 		}
 
-		if ( dg2020.function[ i ].is_needed &&
-			 dg2020.function[ i ].pod == NULL )
+		/* Make sure there's a pod assigned to the function */
+
+		if ( f->pod == NULL )
 		{
 			eprint( FATAL, "DG2020: No pod has been assigned to "
 					"function `%s'.\n", Function_Names[ i ] );
 			THROW( EXCEPTION );
 		}
+
+		/* Assemble a list of all pulses assigned to the function */
+
+		for ( cp = Pulses; cp != NULL; cp = cp->next )
+		{
+			if ( cp->function != f )
+				continue;
+
+			f->num_pulses++;
+			f->pulses = T_realloc( f->pulses,
+								   f->num_pulses * sizeof( PULSE * ) );
+			f->pulses[ f->num_pulses - 1 ] = cp;
+		}
+
+		assert( f->num_pulses > 0 );    /* paranoia ? */
 	}
 }

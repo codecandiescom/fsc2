@@ -33,6 +33,7 @@ typedef struct {
 	bool ( *set_pulse_length )( long pulse_number, double time );
 	bool ( *set_pulse_position_change )( long pulse_number, double time );
 	bool ( *set_pulse_length_change )( long pulse_number, double time );
+	bool ( *set_pulse_phase_cycle )( long pulse_number, int cycle );
 	bool ( *set_pulse_maxlen )( long pulse_number, double time );
 	bool ( *set_pulse_replacements )( long pulse_number,
 									  long number_of_replacement_pulses,
@@ -43,6 +44,7 @@ typedef struct {
 	bool ( *get_pulse_length )( long pulse_number, double *time );
 	bool ( *get_pulse_position_change )( long pulse_number, double *time );
 	bool ( *get_pulse_length_change )( long pulse_number, double *time );
+	bool ( *get_pulse_phase_cycle )( long pulse_number, int *cycle );
 	bool ( *get_pulse_maxlen )( long pulse_number, double *time );
 
 } Pulser_Struct;
@@ -55,8 +57,9 @@ enum {
 	P_LEN     = ( 1 << 2 ),
 	P_DPOS    = ( 1 << 3 ),
 	P_DLEN    = ( 1 << 4 ),
-	P_MAXLEN  = ( 1 << 5 ),
-	P_REPL    = ( 1 << 6 )
+	P_PHASE   = ( 1 << 5 ),
+	P_MAXLEN  = ( 1 << 6 ),
+	P_REPL    = ( 1 << 7 )
 };
 
 
