@@ -854,7 +854,7 @@ static bool incr_x_and_y( long x_index, long len, long y_index )
 				sp->exist = UNSET;
 		}
 
-		for ( ; j < newGny; j++ )
+		for ( ; j < new_Gny; j++ )
 			for ( k = 0; k < new_Gnx; sp++, k++ )
 				sp->exist = UNSET;
 
