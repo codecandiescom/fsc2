@@ -137,8 +137,8 @@ input:   /* empty */
 eol:     ';'
        | '}'
        |                         { dont_print_error = SET; }
-         error                   { eprint( FATAL, SET, "Missing semicolon "
-										   "before (or on) this line.\n" );
+         error                   { print( FATAL, "Missing semicolon before "
+										  "(or on) this line.\n" );
 	                               THROW( EXCEPTION ); }
 ;
 
@@ -164,8 +164,8 @@ fi:      /* empty */
 
 ls:      '{'
        |                         { dont_print_error = SET; }
-         error                   { eprint( FATAL, SET, "Syntax error in "
-									       "loop or IF/UNLESS condition.\n" );
+         error                   { print( FATAL, "Syntax error in loop or "
+										  "IF/UNLESS condition.\n" );
 	                               THROW( EXCEPTION ); }
 ;
 
@@ -178,11 +178,10 @@ line:    E_VAR_TOKEN ass                              { }
        | E_VAR_TOKEN '[' list1 ']' ass                { }
        | E_FUNC_TOKEN '(' list2 ')'                   { }
        | E_FUNC_TOKEN '['
-          { eprint( FATAL, SET, "`%s' is a predefined function.\n", $1->name );
+          { print( FATAL, "`%s' is a predefined function.\n", $1->name );
 		    THROW( EXCEPTION ); }
        | E_VAR_TOKEN '('
-          { eprint( FATAL, SET, "`%s' is a variable, not a funnction.\n",
-					$1->name );
+          { print( FATAL, "`%s' is a variable, not a funnction.\n", $1->name );
 		    THROW( EXCEPTION ); }
        | pt ass
        | BREAK_TOK
@@ -210,10 +209,10 @@ expr:    E_INT_TOKEN unit                { }
        | E_VAR_TOKEN '[' list1 ']' unit  { }
        | E_FUNC_TOKEN '(' list2 ')' unit { }
        | E_VAR_REF                       { }
-       | E_FUNC_TOKEN '['         { eprint( FATAL, SET, "`%s' is a predefined "
+       | E_FUNC_TOKEN '['         { print( FATAL, "%s' is a predefined "
 									        "function.\n", $1->name );
 	                                THROW( EXCEPTION ); }
-       | E_VAR_TOKEN '('          { eprint( FATAL, SET, "`%s' is a variable, "
+       | E_VAR_TOKEN '('          { print( FATAL, "`%s' is a variable, "
 											"not a function.\n", $1->name );
 	                                THROW( EXCEPTION ); }
        | pt
@@ -301,18 +300,17 @@ static void exp_testerror( const char *s )
 
 	if ( ! dont_print_error && ! in_cond )
 	{
-		eprint( FATAL, SET, "Syntax error in EXPERIMENT section.\n" );
+		print( FATAL, "Syntax error in EXPERIMENT section.\n" );
 		THROW( EXCEPTION );
 	}
 
 	if ( in_cond )
 	{
 		if ( ( EDL.cur_prg_token - 1 )->token == '=' )
-			eprint( FATAL, SET, "Assignment '=' used in loop or IF/UNLESS "
-					"condition instead of comparison '=='.\n" );
+			print( FATAL, "Assignment '=' used in loop or IF/UNLESS condition "
+				   "instead of comparison '=='.\n" );
 		else
-			eprint( FATAL, SET, "Syntax error in loop or IF/UNLESS "
-					"condition.\n" );
+			print( FATAL, "Syntax error in loop or IF/UNLESS condition.\n" );
 
 		in_cond = UNSET;
 		THROW( EXCEPTION );

@@ -232,10 +232,10 @@ expr:    E_INT_TOKEN unit          { $$ = apply_unit( vars_push( INT_VAR, $1 ),
          ')'                       { $$ = func_call( $1 ); }
          unit                      { $$ = apply_unit( $<vptr>5, $6 ); }
        | E_VAR_REF
-       | E_VAR_TOKEN '('           { eprint( FATAL, SET, "`%s' isn't a "
-											 "function.\n", $1->name );
+       | E_VAR_TOKEN '('           { print( FATAL, "`%s' isn't a function.\n", 
+											$1->name );
 	                                 THROW( EXCEPTION ); }
-       | E_FUNC_TOKEN '['          { eprint( FATAL, SET, "`%s' is a predefined"
+       | E_FUNC_TOKEN '['          { print( FATAL, "`%s' is a predefined"
 											 " function.\n", $1->name );
 	                                 THROW( EXCEPTION ); }
        | E_PPOS                    { $$ = p_get_by_num( $1, P_POS ); }
@@ -313,7 +313,7 @@ static void exp_runerror ( const char *s )
 	s = s;                    /* avoid compiler warning */
 
 
-	eprint( FATAL, SET, "Syntax error in EXPERIMENT section.\n" );
+	print( FATAL, "Syntax error in EXPERIMENT section.\n" );
 	THROW( EXCEPTION );
 }
 
