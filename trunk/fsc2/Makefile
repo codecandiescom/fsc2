@@ -813,20 +813,23 @@ MANIFEST:
 pion.anorg.chemie.uni-frankfurt.de:
 
 crowley.physik.fu-berlin.de:
-	sed -e 's/^#define SERIAL_PORT[ \t]*.*$$/#define SERIAL_PORT     0/'  \
+	sed -e 's/^#define SERIAL_PORT.*$$/#define SERIAL_PORT     0/'  \
 		$(cdir)/er035m_sas.conf > $(cdir)/er035m_sas.conf.new
 	mv $(cdir)/er035m_sas.conf.new $(cdir)/er035m_sas.conf
 
 door.physik.fu-berlin.de:
 
 isaak.physik.fu-berlin.de:
-	sed -e 's/^#define SERIAL_PORT[ \t]*.*$$/#define SERIAL_PORT     1/'  \
+	sed -e 's/^#define SERIAL_PORT.*$$/#define SERIAL_PORT     1/'  \
 		$(cdir)/er035m_sas.conf > $(cdir)/er035m_sas.conf.new
 	mv $(cdir)/er035m_sas.conf.new $(cdir)/er035m_sas.conf
 
 moebpc3.physik.fu-berlin.de:
 
 single.physik.fu-berlin.de:
+	sed -e 's|^#define DEFAULT_CALIB_FILE.*$$|#define DEFAULT_CALIB_FILE "/home/studier/edl/calib/spectrapro_300i.calib"|' \
+		$(cdir)/spectrapro_300i.conf > $(cdir)/spectrapro_300i.conf.new
+	mv $(cdir)/spectrapro_300i.conf.new $(cdir)/spectrapro_300i.conf
 
 tresr.physik.fu-berlin.de:
 	sed -e 's/\"ER032M\"/\"Field\"/'                           \

@@ -3016,6 +3016,12 @@ installed. To to be able to work with the camera also the Linux device
 driver for the PCI board used for the communication with camera, also
 supplied by Roper Scientific, must be installed.
 
+@strong{Please note}: At the start of the experiment the target
+temperature for the camera is set to the lowest possible value unless a
+target temperature is explicitely set using the function
+@code{ccd_camera_temerature()} (see below).
+
+
 @table @samp
 
 @anchor{ccd_camera_name}
