@@ -1,0 +1,100 @@
+DEVICES:
+
+hfs9000;
+tds754a;
+
+
+VARIABLES:
+
+timebase = 5 ns;
+tau = 300 ns;
+delta_tau = 20 ns;
+pi_half_pulse_len = 50 ns;
+Num_Points   = 512;
+Num_Averages = 100;
+W1, W2;
+I;
+data;
+
+ASSIGNMENTS:
+
+// Time base of the pulser
+
+TIMEBASE:     timebase;
+
+// Use an external trigger to start a new pulse sequence
+
+TRIGGER_MODE: EXTERNAL;
+
+// First type of pulses are microwave pulses that should appear on the
+// output connector for channel 1
+
+MICROWAVE:    CH = 1,    V_HIGH = 5 V, V_LOW = 0 V;
+
+// As the detection pulse for triggering the digitizer use the built-in
+// trigger output of the pulser
+
+DETECTION:    CH = TRIGGER_OUT;
+
+
+PREPARATIONS:
+
+// First microwave pulse, starting at time 0
+
+P1: FUNCTION    = MICROWAVE,
+	START       = 0 ns,
+	LENGTH      = pi_half_pulse_len;
+
+// Second microwave pulse, starting tau after the end of the first pulse
+// and going to be shifted during the experiment in delta_tau steps
+
+P2: FUNCTION    = P1.FUNCTION,
+	START       = P1.START + P1.LENGTH + tau,
+	LENGTH      = 2 * pi_half_pulse_len,
+	DELTA_START = delta_tau;
+
+// Trigger pulse, should be exactly on top of the echo, which moves twice
+// as fast as the second pulse (because the pulse will come from the
+// pulsers trigger output no pulse length can be set)
+
+P3: FUNCTION    = DETECTION,
+	START       = 1.5 * P1.LENGTH + P2.LENGTH + 2 * tau,
+	DSTART      = 2 * delta_tau;
+
+// Set up the digitizer, set the trigger position to the middle so that the
+// echo appears at the center of the screen
+
+digitizer_timebase( 50 ns );
+digitizer_trigger_position( 0.5 );
+digitizer_num_averages( Num_Averages );
+
+// Define a window covering the center of the echo...
+
+W1 = digitizer_define_window( -5 ns, 10 ns );
+
+// ...and a second window far off from the echo for measuring the background
+
+W2 = digitizer_define_window( 200 ns, 10 ns );
+
+init_1d( 1, Num_Points, 0, delta_tau * 1e9, "Pulse separation [ns]",
+		 "Echo intensity" );
+
+
+EXPERIMENT:
+
+FOR I = 1 : Num_Points {
+
+	// Start the digitizer and fetch the difference between the area
+	// at the echo position and the area of the background (the signal
+	// is expected on channel 1 of the digitizer)
+
+	digitizer_start_acquisition( );
+	data = digitizer_get_area( CH1, W1 ) - digitizer_get_area( CH1, W2 );
+
+	display( I, data );
+
+	// All left to be done is shifting all pulses
+
+	pulser_shift( );
+	pulser_update( );
+}

@@ -21,6 +21,20 @@
   Boston, MA 02111-1307, USA.
 */
 
+/*
+   The HP5340A is a very old device, it's from 1973, thus even pre-dating
+   the GPIB standard. Its programming capabilities are rather limited,
+   especially one can't find out the settings of the device made via the
+   front panel and one either has to set all parameters via the program
+   or none at all. Thus, to keep things simple, all settings must be made
+   via the front panel and the only function that is supported is querying
+   the measured frequency.
+
+   The device is set to a state where it measures new frequencies with an
+   internal sample rate (which can be adjusted via a knob at the front
+   panel) and to output data only when it becomes addressed as talker.
+*/
+
 
 #include "fsc2_module.h"
 
@@ -62,6 +76,10 @@ static struct {
 
 int hp5340a_init_hook( void )
 {
+	/* Set global variable to indicate that GPIB bus is needed */
+
+	need_GPIB = SET;
+
 	hp5340a.device = -1;
 	return 1;
 }

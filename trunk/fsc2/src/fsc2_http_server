@@ -178,8 +178,9 @@ sub serve {
 			# This is for the MS Internet Exploder which claims to be able
 			# to accept all formats, i.e. sends "Accept: */*".
 
-			if ( $txt =~ m{\s+\*/\*(\s+)|(\r*$)} )
+			if ( $txt =~ m{\s+\*/\*(\s+)|(\r*$)} ) {
 				$f{ $_ } = 1 for ( keys %f );
+			}
 		} else {
 			$is_host_field = 1;
 		}

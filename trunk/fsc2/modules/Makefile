@@ -24,7 +24,7 @@ s_band_list   := s_band_magnet_narrow s_band_magnet_broad
 tds_list      := tds754a tds744a tds540 tds520c tds520a tds520
 
 simp_modules  := User_Functions.c sr510.c sr530.c sr810.c sr830.c \
-				 aeg_s_band.c aeg_x_band.c er035m.c er035m_s.c \
+				 aeg_s_band.c aeg_x_band.c er035m.c er035m_s.c hp5340a.c \
 				 er035m_sa.c er035m_sas.c bh15.c keithley228a.c egg4402.c \
 				 kontron4060.c lakeshore330.c pt2025.c er032m.c ips20_4.c \
 				 $(addsuffix .c,$(s_band_list))

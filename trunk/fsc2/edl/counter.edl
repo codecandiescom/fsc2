@@ -1,0 +1,21 @@
+DEVICES:
+
+hp5340a;
+
+
+VARIABLES:
+
+freq;
+I;
+
+
+PREPARATIONS:
+
+init_1d( );
+
+EXPERIMENT:
+
+FOR I = 1 : 1000 {
+	freq = freq_counter_measure( );
+	display( I, freq );
+}
