@@ -636,24 +636,6 @@ void sigchld_handler( int sig_type, void *data )
 }
 
 
-/*-----------------------------------------------------------*/
-/* new_data_callback() is responsible for really storing the */
-/* data from the experiment and then displaying them - a lot */
-/* of work has still be done for this function.              */
-/* Actually, new_data_callback() is the callback function    */
-/* for an invisible button in the form shown as long as the  */
-/* experiment is running - this button is triggered by the   */
-/* function get_data_from_pipe() when new data have arrived. */
-/*-----------------------------------------------------------*/
-
-void new_data_callback( FL_OBJECT *a, long b )
-{
-	a = a;
-	b = b;
-	reader( NULL );
-}
-
-
 void clean_up( void )
 {
 	int i;
@@ -703,10 +685,6 @@ void clean_up( void )
 	/* delete stored program */
 
 	forget_prg( );
-
-	/* delete all data buffers used for drawing */
-
-	delete_all_data_buffers( );
 
 	/* unset used flags for all serial ports */
 
