@@ -1,5 +1,10 @@
 /* 
    $Id$
+
+   $Log$
+   Revision 1.7  1999/07/16 19:31:39  jens
+   *** empty log message ***
+
 */
 
 #include "fsc2.h"
