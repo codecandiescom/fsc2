@@ -966,20 +966,21 @@ EOT
 # insert here name of icon images for buttons
 # Icons are used, if $T2H_ICONS and resp. value are set
 
+$T2H_ICONS=1;
 %T2H_ACTIVE_ICONS =
   (
-   'Top',         '',
-   'Contents',    '',
+   'Top',         'home.png',
+   'Contents',    'toc.png',
    'Overview',    '',
-   'Index',       '',
-   'Back',        '',
-   'FastBack',    '',
+   'Index',       'index.png',
+   'Back',        'prev.png',
+   'FastBack',    'back.png',
    'Prev',        '',
-   'Up',          '',
+   'Up',          'up.png',
    'Next',        '',
-   'Forward',     '',
-   'FastForward', '',
-   'About' ,      '',
+   'Forward',     'next.png',
+   'FastForward', 'forward.png',
+   'About' ,      'help.png',
    'First',       '',
    'Last',        '',
    ' ',           ''
@@ -989,18 +990,18 @@ EOT
 
 %T2H_PASSIVE_ICONS =
   (
-   'Top',         '',
-   'Contents',    '',
+   'Top',         'inactive.png',
+   'Contents',    'inactive.png',
    'Overview',    '',
-   'Index',       '',
-   'Back',        '',
-   'FastBack',    '',
+   'Index',       'inactive.png',
+   'Back',        'inactive.png',
+   'FastBack',    'inactive.png',
    'Prev',        '',
-   'Up',          '',
+   'Up',          'inactive.png',
    'Next',        '',
-   'Forward',     '',
-   'FastForward', '',
-   'About',       '',
+   'Forward',     'inactive.png',
+   'FastForward', 'inactive.png',
+   'About',       'inactive.png',
    'First',       '',
    'Last',        '',
   );
