@@ -44,15 +44,15 @@ This chapter tries to describe how to write new modules for use with
 Modules allow to extend the set of commands that can be used in an
 @code{EDL} script. This is especially important if a new device needs to
 be integrated into @code{fsc2}. You don't have to change @code{fsc2}
-itself but just write a new module for the devices. For this you don't
+itself but just write a new module for the device. To do so you don't
 have to understand completely how the @code{fsc2} works. You only must
-be able to write functions in C for the communication with the new
-device and understand a few basics about @code{fsc2}s variables. But
-modules may also be used for other purposes beside handling devices,
-one might also write modules that supply new mathematical functions or
-other useful functionalities. But the following discussion will
-concentrate on modules for new devices, writing other kinds of modules
-is even simpler.
+have a working knowledge of C and understand a few basics about
+@code{fsc2}s variables (and, of course, you must know how your device
+works and how to communicate with it). But modules may also be used for
+other purposes beside handling devices, one might also write modules
+that supply new mathematical functions or other useful functionalities.
+But the following discussion will concentrate on modules for new
+devices, writing other kinds of modules is even simpler.
 
 I want to start with a short summary what a module usually contains and
 how to make @code{fsc2} aware of its existence. The most important
@@ -97,7 +97,7 @@ to files in the @file{config} directory, called @file{Devices} and
 the list of the new functions.
 
 All these subjects are discussed in detail in the following. But before 
-I do so I want to start with an exlpanation of the special type of
+I do so I want to start with an explanation of the special type of
 variables used within @code{fsc2}.
 
 
@@ -413,14 +413,14 @@ stored in the @code{dim} field of the variables structure. For the data
 of such arrays the @code{vptr} field in the @code{val} union of the
 variable structure is relevent, @code{vptr} is an array of variable
 pointers, pointing to the next lower-dimension sub-arrays. How many of
-such subarrays exist can be determined from the @code{len} field of the
+such sub-arrays exist can be determined from the @code{len} field of the
 variable structure. As already for the one-dimensional arrays care has
 to be taken to check that @code{len} isn't @code{0} in case none of the
-subarrays have been defined yet for variable sized arrays.
+sub-arrays have been defined yet for variable sized arrays.
 
-If the dimension of a variable is 2 all the subarrays are
+If the dimension of a variable is 2 all the sub-arrays are
 one-dimensional arrays (i.e.@: have a type of @code{INT_ARR} or
-@code{FLOAT_ARR} and one can the values of these subarrays as described
+@code{FLOAT_ARR} and one can the values of these sub-arrays as described
 in the previous section.
 
 For arrays of higher dimensions the pointers in the @code{val.vptr}
@@ -432,7 +432,7 @@ pointing a three-dimensional floating point array one would have to use
 @example
   var->val.vptr[ 3 ]->val.vptr[ 2 ]->val.dpnt[ 5 ]
 @end example
-Of course, before one tries to access the element oe always should check
+Of course, before one tries to access the element one always should check
 that @code{var->len} is at least @code{4}, @code{var->val.vptr[3]->len}
 is at least @code{3} and @code{var->val.vptr[3]->val.vptr[2]->len} is
 at least @code{6}.
