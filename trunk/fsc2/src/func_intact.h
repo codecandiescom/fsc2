@@ -50,6 +50,8 @@ typedef struct _IOBJ_ {
 
 	volatile int state;       /* state (on/off) of press count (buttons)
 								 or currently seletced menu item */
+	volatile bool is_changed; /* set when objects state changed but state 
+								 change wasn't detected by the script yet */
 
 	FL_OBJECT *group;         /* group a radio button belongs to */
 	long partner;
@@ -78,16 +80,18 @@ typedef struct {
 
 
 
-#define NORMAL_BUTTON 0
-#define PUSH_BUTTON   1
-#define RADIO_BUTTON  2
-#define NORMAL_SLIDER 3
-#define VALUE_SLIDER  4
-#define INT_INPUT     5
-#define FLOAT_INPUT   6
-#define INT_OUTPUT    7
-#define FLOAT_OUTPUT  8
-#define MENU          9
+#define NORMAL_BUTTON      0
+#define PUSH_BUTTON        1
+#define RADIO_BUTTON       2
+#define NORMAL_SLIDER      3
+#define VALUE_SLIDER       4
+#define SLOW_NORMAL_SLIDER 5
+#define SLOW_VALUE_SLIDER  6
+#define INT_INPUT          7
+#define FLOAT_INPUT        8
+#define INT_OUTPUT         9
+#define FLOAT_OUTPUT      10
+#define MENU              11
 
 #define VERT          0
 #define HORI          1
