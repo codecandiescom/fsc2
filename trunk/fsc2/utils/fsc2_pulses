@@ -177,6 +177,9 @@ sub new {
 	# Find the start of the first pulse (including function delays)
 
 	my $off = $Channels->first_pulse;
+
+	exit 1 unless defined $off;
+
 	if ( $Delay == 0 and $off < 0 ) {
 		$self->{ 'offset' } = - $off;
 	} else {

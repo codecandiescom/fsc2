@@ -902,10 +902,9 @@ PULSE *ep385_delete_pulse( PULSE *p, bool warn )
 
 	/* Special care has to be taken if this is the very last pulse... */
 
-	if ( p == ep385_Pulses && p->next == NULL )
-		ep385_Pulses = PULSE_P T_free( ep385_Pulses );
-	else
-		T_free( p );
+	if ( p == ep385_Pulses )
+		ep385_Pulses = p->next;
+	T_free( p );
 
 	return pp;
 }
