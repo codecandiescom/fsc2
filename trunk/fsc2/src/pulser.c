@@ -45,7 +45,6 @@ void pulser_struct_init( void )
 /* function to avoid using a pulser function if there's no pulser driver    */
 /*--------------------------------------------------------------------------*/
 
-
 void is_pulser_driver( void )
 {
 	if ( pulser_struct.name == NULL )
