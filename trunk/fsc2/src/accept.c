@@ -25,8 +25,7 @@ static void incr_x_and_y( long x_index, long len, long y_index );
 
 void accept_new_data( void )
 {
-	void *buf,
-		 *ptr;
+	void *buf;
 	int mq_next;
 	int shm_id;
 	bool result;
@@ -46,13 +45,9 @@ void accept_new_data( void )
 			THROW( EXCEPTION );
 		}
 
-		/* Skip the magic number at the start and the total length field */
-
-		ptr = buf + 4 * sizeof( char ) + sizeof( long );
-
 		/* Unpack and accept the data sets */
 
-		result = unpack_and_accept( ptr );
+		result = unpack_and_accept( buf );
 
 		/* Detach from shared memory segment and remove it */
 

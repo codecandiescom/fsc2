@@ -27,7 +27,7 @@ void *get_shm( int *shm_id, long len )
 		must_reset = SET;
 	}
 
-	while ( ( *shm_id = shmget( IPC_PRIVATE, len,
+	while ( ( *shm_id = shmget( IPC_PRIVATE, len + 4,
 								IPC_CREAT | SHM_R | SHM_A ) ) < 0 )
 	{
 		if ( errno == ENOSPC || errno == ENOMEM)  /* wait for 10 ms */
@@ -49,6 +49,12 @@ void *get_shm( int *shm_id, long len )
 			seteuid( getuid( ) );
 		return ( void * ) -1;
 	}
+
+	/* Now write 'magic string'into the start of the shared memory to make
+	   it easier to identify it later */
+
+	memcpy( buf, "fsc2", 4 * sizeof( char ) );         /* magic id */
+	buf += 4 * sizeof( char );
 
 	if ( must_reset )
 		seteuid( getuid( ) );
@@ -83,14 +89,15 @@ void *attach_shm( int key )
 	if ( must_reset )
 		seteuid( getuid( ) );
 
-	return buf;
+	return buf + 4 * sizeof( char );
 }
 
 
 /*------------------------------------------------------------*/
+/* Function detaches from a 
 /*------------------------------------------------------------*/
 
-void detach_shm( int key, void *buf )
+void detach_shm( void *buf, int key )
 {
 	bool must_reset = UNSET;
 
@@ -101,7 +108,7 @@ void detach_shm( int key, void *buf )
 		must_reset = SET;
 	}
 	
-	shmdt( buf );
+	shmdt( buf - 4 * sizeof( char ) );
 	if ( key >= 0 )
 		shmctl( key, IPC_RMID, NULL );
 
