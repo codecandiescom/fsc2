@@ -910,8 +910,13 @@ Var *f_dmode( Var *v )
 
 	if ( ! G.is_init )
 	{
-		print( SEVERE, "Can't change display mode, missing graphics "
-			   "initialization.\n" );
+		if ( ! G.is_warn )                         /* warn only once */
+		{
+			print( SEVERE, "Can't change display mode, missing graphics "
+				   "initialization.\n" );
+			G.is_warn = SET;
+		}
+
 		return vars_push( INT_VAR, 0L );
 	}
 
@@ -1040,8 +1045,13 @@ Var *f_cscale( Var *v )
 
 	if ( ! G.is_init )
 	{
-		print( SEVERE, "Can't change scale, missing graphics "
-			   "initialization.\n" );
+		if ( ! G.is_warn )                         /* warn only once */
+		{
+			print( SEVERE, "Can't change scale, missing graphics "
+				   "initialization.\n" );
+			G.is_warn = SET;
+		}
+
 		return vars_push( INT_VAR, 0L );
 	}
 
@@ -1078,8 +1088,13 @@ Var *f_cscale_1d( Var *v )
 
 	if ( ! G.is_init )
 	{
-		print( SEVERE, "Can't change scale, missing graphics "
-			   "initialization.\n" );
+		if ( ! G.is_warn )                         /* warn only once */
+		{
+			print( SEVERE, "Can't change scale, missing graphics "
+				   "initialization.\n" );
+			G.is_warn = SET;
+		}
+
 		return vars_push( INT_VAR, 0L );
 	}
 
@@ -1187,8 +1202,13 @@ Var *f_cscale_2d( Var *v )
 
 	if ( ! G.is_init )
 	{
-		print( SEVERE, "Can't change scale, missing graphics "
-			   "initialization.\n" );
+		if ( ! G.is_warn )                         /* warn only once */
+		{
+			print( SEVERE, "Can't change scale, missing graphics "
+				   "initialization.\n" );
+			G.is_warn = SET;
+		}
+
 		return vars_push( INT_VAR, 0L );
 	}
 
@@ -1306,8 +1326,13 @@ Var *f_clabel( Var *v )
 
 	if ( ! G.is_init )
 	{
-		print( SEVERE, "Can't change labels, missing graphics "
-			   "initialization.\n" );
+		if ( ! G.is_warn )                         /* warn only once */
+		{
+			print( SEVERE, "Can't change labels, missing graphics "
+				   "initialization.\n" );
+			G.is_warn = SET;
+		}
+
 		return vars_push( INT_VAR, 0L );
 	}
 
@@ -1346,8 +1371,13 @@ Var *f_clabel_1d( Var *v )
 
 	if ( ! G.is_init )
 	{
-		print( SEVERE, "Can't change labels, missing graphics "
-			   "initialization.\n" );
+		if ( ! G.is_warn )                         /* warn only once */
+		{
+			print( SEVERE, "Can't change labels, missing graphics "
+				   "initialization.\n" );
+			G.is_warn = SET;
+		}
+
 		return vars_push( INT_VAR, 0L );
 	}
 
@@ -1462,8 +1492,13 @@ Var *f_clabel_2d( Var *v )
 
 	if ( ! G.is_init )
 	{
-		print( SEVERE, "Can't change labels, missing graphics "
-			   "initialization.\n" );
+		if ( ! G.is_warn )                         /* warn only once */
+		{
+			print( SEVERE, "Can't change labels, missing graphics "
+				   "initialization.\n" );
+			G.is_warn = SET;
+		}
+
 		return vars_push( INT_VAR, 0L );
 	}
 
@@ -1576,8 +1611,13 @@ Var *f_rescale( Var *v )
 
 	if ( ! G.is_init )
 	{
-		print( SEVERE, "Can't change number of points, missing "
-			   "initialization.\n" );
+		if ( ! G.is_warn )                         /* warn only once */
+		{
+			print( SEVERE, "Can't change number of points, missing "
+				   "initialization.\n" );
+			G.is_warn = SET;
+		}
+
 		return vars_push( INT_VAR, 0L );
 	}
 
@@ -1614,8 +1654,13 @@ Var *f_rescale_1d( Var *v )
 
 	if ( ! G.is_init )
 	{
-		print( SEVERE, "Can't change number of points, missing "
-			   "initialization.\n" );
+		if ( ! G.is_warn )                         /* warn only once */
+		{
+			print( SEVERE, "Can't change number of points, missing "
+				   "initialization.\n" );
+			G.is_warn = SET;
+		}
+
 		return vars_push( INT_VAR, 0L );
 	}
 
@@ -1706,8 +1751,13 @@ Var *f_rescale_2d( Var *v )
 
 	if ( ! G.is_init )
 	{
-		print( SEVERE, "Can't change number of points, missing "
-			   "initialization.\n" );
+		if ( ! G.is_warn )                         /* warn only once */
+		{
+			print( SEVERE, "Can't change number of points, missing "
+				   "initialization.\n" );
+			G.is_warn = SET;
+		}
+
 		return vars_push( INT_VAR, 0L );
 	}
 
@@ -1800,7 +1850,7 @@ Var *f_display( Var *v )
 	{
 		if ( ! G.is_warn )                         /* warn only once */
 		{
-			print( WARN, "Can't display data, missing initialization\n" );
+			print( SEVERE, "Can't display data, missing initialization\n" );
 			G.is_warn = SET;
 		}
 
@@ -1842,7 +1892,7 @@ Var *f_display_1d( Var *v )
 	{
 		if ( ! G.is_warn )                         /* warn only once */
 		{
-			print( WARN, "Can't display data, missing initialization\n" );
+			print( SEVERE, "Can't display data, missing initialization\n" );
 			G.is_warn = SET;
 		}
 
@@ -2016,7 +2066,7 @@ Var *f_display_2d( Var *v )
 	{
 		if ( ! G.is_warn )                         /* warn only once */
 		{
-			print( WARN, "Can't display data, missing initialization\n" );
+			print( SEVERE, "Can't display data, missing initialization\n" );
 			G.is_warn = SET;
 		}
 
@@ -2474,9 +2524,13 @@ Var *f_clearcv( Var *v )
 
 	if ( ! G.is_init )
 	{
-		if ( Internals.mode == TEST )
-			print( WARN, "Can't clear curve, missing graphics "
+		if ( ! G.is_warn )
+		{
+			print( SEVERE, "Can't clear curve, missing graphics "
 				   "initialization.\n" );
+			G.is_warn = SET;
+		}
+
 		return vars_push( INT_VAR, 0L );
 	}
 
@@ -2515,9 +2569,13 @@ Var *f_clearcv_1d( Var *v )
 
 	if ( ! G.is_init )
 	{
-		if ( Internals.mode == TEST )
-			print( WARN, "Can't clear curve, missing graphics "
+		if ( ! G.is_warn )
+		{
+			print( SEVERE, "Can't clear curve, missing graphics "
 				   "initialization.\n" );
+			G.is_warn = SET;
+		}
+
 		return vars_push( INT_VAR, 0L );
 	}
 
@@ -2653,9 +2711,13 @@ Var *f_clearcv_2d( Var *v )
 
 	if ( ! G.is_init )
 	{
-		if ( Internals.mode == TEST )
-			print( WARN, "Can't clear curve, missing graphics "
+		if ( ! G.is_warn )
+		{
+			print( SEVERE, "Can't clear curve, missing graphics "
 				   "initialization.\n" );
+			G.is_warn = SET;
+		}
+
 		return vars_push( INT_VAR, 0L );
 	}
 
@@ -2778,9 +2840,13 @@ Var *f_setmark( Var *v )
 {
 	if ( ! G.is_init )
 	{
-		if ( Internals.mode == TEST )
-			print( WARN, "Can't draw marker, missing graphics "
+		if ( ! G.is_warn )
+		{
+			print( SEVERE, "Can't draw marker, missing graphics "
 				   "initialization.\n" );
+			G.is_warn = SET;
+		}
+
 		return vars_push( INT_VAR, 0L );
 	}
 
@@ -2821,8 +2887,13 @@ Var *f_setmark_1d( Var *v )
 
 	if ( ! G.is_init )
 	{
-		print( WARN, "Can't set a marker, missing graphics "
-			   "initialization.\n" );
+		if ( ! G.is_warn )
+		{
+			print( SEVERE, "Can't set a marker, missing graphics "
+				   "initialization.\n" );
+			G.is_warn = SET;
+		}
+
 		return vars_push( INT_VAR, 0L );
 	}
 
@@ -2948,8 +3019,13 @@ Var *f_setmark_2d( Var *v )
 
 	if ( ! G.is_init )
 	{
-		print( WARN, "Can't set a marker, missing graphics "
-			   "initialization.\n" );
+		if ( ! G.is_warn )
+		{
+			print( SEVERE, "Can't set a marker, missing graphics "
+				   "initialization.\n" );
+			G.is_warn = SET;
+		}
+
 		return vars_push( INT_VAR, 0L );
 	}
 
@@ -3091,9 +3167,13 @@ Var *f_clearmark( Var *v )
 {
 	if ( ! G.is_init )
 	{
-		if ( Internals.mode == TEST )
-			print( WARN, "Can't clear markers, missing graphics "
+		if ( ! G.is_warn )
+		{
+			print( SEVERE, "Can't clear markers, missing graphics "
 				   "initialization.\n" );
+			G.is_warn = SET;
+		}
+
 		return vars_push( INT_VAR, 0L );
 	}
 
@@ -3129,8 +3209,13 @@ Var *f_clearmark_1d( Var *v )
 
 	if ( ! G.is_init )
 	{
-		print( WARN, "Can't clear markers, missing graphics "
-			   "initialization.\n" );
+		if ( ! G.is_warn )
+		{
+			print( SEVERE, "Can't clear markers, missing graphics "
+				   "initialization.\n" );
+			G.is_warn = SET;
+		}
+
 		return vars_push( INT_VAR, 0L );
 	}
 
@@ -3212,8 +3297,13 @@ Var *f_clearmark_2d( Var *v )
 
 	if ( ! G.is_init )
 	{
-		print( WARN, "Can't clear markers, missing graphics "
-			   "initialization.\n" );
+		if ( ! G.is_warn )
+		{
+			print( SEVERE, "Can't clear markers, missing graphics "
+				   "initialization.\n" );
+			G.is_warn = SET;
+		}
+
 		return vars_push( INT_VAR, 0L );
 	}
 
@@ -3308,8 +3398,13 @@ Var *f_get_pos( Var *v )
 
 	if ( ! G.is_init )
 	{
-		print( WARN, "Can't get mouse position, missing graphics "
-			   "initialization.\n" );
+		if ( ! G.is_warn )
+		{
+			print( SEVERE, "Can't get mouse position, missing graphics "
+				   "initialization.\n" );
+			G.is_warn = SET;
+		}
+
 		return nv;
 	}
 
