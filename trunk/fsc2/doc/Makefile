@@ -113,6 +113,7 @@ install:
 	$(INSTALL) -m 444 -o $(OWNER) -g $(GROUP) fsc2*.html $(docdir)
 	$(INSTALL) -m 444 -o $(OWNER) -g $(GROUP) fsc2.css $(docdir)
 	$(INSTALL) -m 444 -o $(OWNER) -g $(GROUP) fsc2fig*.png $(docdir)
+	$(INSTALL) -m 444 -o $(OWNER) -g $(GROUP) cursor*.png $(docdir)
 	if [ -f fsc2.ps ]; then \
 		$(INSTALL) -m 444 -o $(OWNER) -g $(GROUP) fsc2.ps $(docdir); \
 	fi
