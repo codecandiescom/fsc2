@@ -537,7 +537,7 @@ my \@$$_{ name } = ( \"$$_{ menu_entries }[ 0 ]\"";
 \$$$_{ name }\{ tk_entry \} = \$$$_{ name }\{ tk_frame \}->Optionmenu( " .
 "-options => \\\@$$_{ name },
 -width => $entry_width,
--textvariable => \\\$$$_{ name }\{ name \} );
+-textvariable => \\\$$$_{ name }\{ value \} );
 ";
         } elsif( $$_{ type } =~ /^file$/o ) {
             print "\$$$_{ name }\{ value \} = \"$$_{ value }\";
