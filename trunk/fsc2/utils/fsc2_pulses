@@ -123,8 +123,7 @@ sub read_input {
 		}
 
 		if ( $verbose ) {
-			die "Invalid input at line $..\n"
-				unless $i <= $#Function_Names;
+			die "Invalid input at line $..\n" unless $i <= $#Function_Names;
 		} else {
 			exit 1 unless $i <= $#Function_Names;
 		}
@@ -143,6 +142,7 @@ sub read_input {
 
 		$has_auto_pulses = 1 if $line =~ /\(\d+\)/;
 		my @bits = split /\s+/, $line;
+		print $line;
 		if ( $verbose ) {
 			die "Invalid input at line $..\n" unless $#bits % 3 == 0;
 		} else {
