@@ -82,7 +82,7 @@ synthesizer_state( 0 );
 IF I > 0
 {
 	save_program( File_2, "% " );
-	fsave( File_2, "%\n% Lock-in sens. = # V, time const. = # s, phase = #\n" +
+	fsave( File_2, "%\n% Lock-in sens. = # V, time const. = # s, phase = #\n"
 		   "% Mod. freq. = # kHz, mod. ampl. = # kHz\n%\n",
 		   lockin_sensitivity( ), tc, lockin_phase( ),
 		   mod_freq * 1e-3, mod_ampl * 1e-3 );

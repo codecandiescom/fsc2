@@ -291,8 +291,8 @@ exprs:   expr                     { }
 ;
 
 strs:    /* empty */
-       | strs '+' E_STR_TOKEN     { Var *v;
-		                            v = vars_push( STR_VAR, $3 );
+       | strs E_STR_TOKEN         { Var *v;
+		                            v = vars_push( STR_VAR, $2 );
 	                                vars_add( v->prev, v ); }
 ;
 

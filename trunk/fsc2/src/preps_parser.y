@@ -220,8 +220,8 @@ exprs:   expr                     { }
 ;
 
 strs:    /* empty */
-       | strs '+' STR_TOKEN       { Var *v;
-		                            v = vars_push( STR_VAR, $3 );
+       | strs STR_TOKEN           { Var *v;
+		                            v = vars_push( STR_VAR, $2 );
 	                                vars_add( v->prev, v ); }
 ;
 
