@@ -267,7 +267,7 @@ Fcntl_Lock - Perl extension for file locking using fcntl()
   my $fh;
   open( $fh, ">>file_name" ) or die "Can't open file: $!\n";
   unless ( $fs->fcntl_lock( $fh, F_SETLK ) ) {
-      print "Locking failed: " . $fs->error . "\n";
+      print "Locking failed: " . $fs->fcntl_error . "\n";
   }
 
 =head1 DESCRIPTION
