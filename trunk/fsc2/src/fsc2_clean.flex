@@ -65,8 +65,8 @@ bool Eol;
 
 %}
 
-REM1     ^[\t ]*"//".*
-REM2     "//".*
+REM1     ^[\t ]*"//".*\n
+REM2     [\t ]*"//".*\n
 REM3     "/*"
 REM4     [^*\n]*
 REM5     "*"+[^*/\n]*
@@ -115,6 +115,8 @@ IFNE    [^"<\t \n]*\n?
 EXIT    ^[ \t]*#exit
 QUIT    ^[ \t]*#quit
 
+
+THROU   [+-][A-Za-z]+
 KEEP    [^\t" \n(\/*),;:=%\^\-\+]+
 
 
@@ -157,10 +159,17 @@ KEEP    [^\t" \n(\/*),;:=%\^\-\+]+
 } /* end of <str> */
 
             /* handling of C++ style comment spanning a whole line */
-{REM1}		
+{REM1}		{
+				Lc++;
+			    Eol = SET;
+			}
 
 			/* handling of C++ style comment not spanning a whole line */
-{REM2}		
+{REM2}		{
+				Lc++;
+				Eol = SET;
+				printf( "\n" );
+			}
 
 			/* handling of C style comment */
 {REM3}		{
@@ -312,6 +321,15 @@ KEEP    [^\t" \n(\/*),;:=%\^\-\+]+
 "M"{UNIT}/[^a-zA-z_] printf( "\x4megunit" );
 
 			/* all the rest is simply copied to the output */
+
+{THROU}		{
+				if ( Eol )
+				{
+					printf( "\x02\n%ld\n", Lc );
+					Eol = UNSET;
+				}
+				printf( "%s", yytext );
+			}				
 
 {KEEP}		{
 				if ( Eol )
