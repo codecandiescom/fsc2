@@ -1574,7 +1574,7 @@ static bool print_array( Var *v, long cur_dim, long *start, int fid )
 			if ( v->type == INT_ARR )
 				T_fprintf( fid, "%ld\n", v->val.lpnt[ *start ] );
 			else
-				T_fprintf( fid, "%f\n", v->val.dpnt[ *start ] );
+				T_fprintf( fid, "%#.9g\n", v->val.dpnt[ *start ] );
 		}
 
 		T_fprintf( fid, "\n" );
@@ -1595,7 +1595,7 @@ static bool print_slice( Var *v, int fid )
 		if ( v->from->type == INT_ARR )
 			T_fprintf( fid, "%ld\n", * ( ( long * ) v->val.gptr + i ) );
 		else
-			T_fprintf( fid, "%f\n", * ( ( double * ) v->val.gptr + i ) );
+			T_fprintf( fid, "%#.9g\n", * ( ( double * ) v->val.gptr + i ) );
 
 	return OK;
 }
