@@ -11,8 +11,6 @@
 #endif
 
 
-
-
 /* Locally used global variables */
 
 static bool is_loaded = UNSET;       /* set when EDL file is loaded */
