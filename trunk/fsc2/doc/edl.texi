@@ -630,6 +630,9 @@ right of the expression:
 @example
  a | b & c    @r{will be treated as if written as}    ( a | b ) & c
 @end example
+But to make your intentions more clear to human readers of your
+@acronym{EDL} programs it's probably a good idea to use the
+parenthesis even when they are not required.
 
 Finally, the lowest precedence operators are the comparison operators
 (also the be discussed below in more detail), i.e.@: the test for equality,
@@ -642,7 +645,7 @@ expression evaluation is done left to right.
 
 Actually, there are also the assignment operators. But these are only
 used after all of the other operators have been evaluated, so there is
-never a necessity to enclose the right hand of an equation with
+never a necessity to enclose the right hand of an equation in
 parenthesis. And since only one assignment operator is allowed in a
 statement you don't have to worry about the order of evaluation.
 
@@ -865,7 +868,7 @@ long as it is.
 
 Sometimes, you may want to check not for the truth but for the falsehood
 of an expression. In this case you have to prepend the expression with a
-exclamation mark, `!', to reverse the meaning of a test.
+exclamation mark, `@code{!}', to reverse the meaning of a test.
 
 If you want to check for combinations of expressions you can use the
 logical @code{AND}, @code{OR} or @code{XOR} (exclusive or)
