@@ -42,6 +42,7 @@ my $tc_fac     = 1;
 my $sens       = "Don't set";
 my $how        = 'Start program';
 my $table      = "";
+my $use_er035m = "Yes";
 
 
 my %fp = ( '-side' => 'top',
@@ -274,6 +275,17 @@ $f12_b->pack( %wp );
 $f12_e->pack( %wp );
 
 
+my $f13 = $mw->Frame( );
+my $f13_l = $f13->Label( '-text'         => 'Measure field:',
+						 '-width'        => '20',
+						 'anchor'        => 'w' );
+my $f13_m = $f13->Optionmenu( '-options' => [ ( "Yes", "No" ) ],
+							  '-width'     => 9,
+							  '-textvariable'  => \$use_er035m );
+$f13->pack( %fp );
+$f13_l->pack( %wp );
+$f13_m->pack( %wp );
+
 
 $mw->Optionmenu( '-options'      => [ ( 'Start program', 'Test program',
 										'Load into fsc2' ) ],
@@ -281,16 +293,16 @@ $mw->Optionmenu( '-options'      => [ ( 'Start program', 'Test program',
 			   )->pack( '-padx'  => '3m',
 					    '-pady'  => '3m' );
 
-my $f13 = $mw->Frame( );
-my $f13_a = $mw->Button( '-text' => 'Apply',
+my $f14 = $mw->Frame( );
+my $f14_a = $mw->Button( '-text' => 'Apply',
 						 '-command' => \&write_out );
-my $f13_q = $mw->Button( '-text' => 'Quit',
+my $f14_q = $mw->Button( '-text' => 'Quit',
 						 '-command' => sub { &store_defs; $mw->destroy } );
-$f13->pack( '-side' => 'top',
+$f14->pack( '-side' => 'top',
 			'-fill' => 'x',
 			'-padx' => '4m' );
-$f13_a->pack( %wp, 'padx' => '5m', '-pady' => '3m' );
-$f13_q->pack( %wp, 'padx' => '5m', '-pady' => '3m' );
+$f14_a->pack( %wp, 'padx' => '5m', '-pady' => '3m' );
+$f14_q->pack( %wp, 'padx' => '5m', '-pady' => '3m' );
 
 
 MainLoop;
@@ -362,6 +374,11 @@ chomp $ne;
 $table = $ne;
 
 goto done_reading unless defined( $ne = <F> ) and
+	$ne =~ /^(Yes)|(No)$/;
+chomp $ne;
+$use_er035m = $ne;
+
+goto done_reading unless defined( $ne = <F> ) and
 	$ne =~ /^(Start experiment)|(Test program)|(Load into fsc2)$/;
 chomp $ne;
 $how = $ne;
@@ -389,7 +406,7 @@ sub store_defs {
 	print F "# Do not edit - created automatically!\n";
 	print F "$lockin\n$start_freq\n$end_freq\n$step_freq\n$atten\n" .
 	        "$mod_freq\n$mod_ampl\n$N_runs\n$tc\n$tc_fac\n$sens\n" .
-			"$table\n$how\n";
+			"$table\n$use_er035m\n$how\n";
 
 	close F;
 }
@@ -462,8 +479,9 @@ open( F, "|fsc2_" . lc $how )
 print F
 "DEVICES:
 
-hp8647a;
-er035m_sas;\n";
+hp8647a;\n";
+
+print F "er035m_sas;\n" if $use_er035m eq "Yes";
 
 print F lc( $lockin ), ";\n";
 print F
@@ -544,11 +562,23 @@ fsave( File_2, \"% Start frequency = # MHz\\n\"
                \"% Time constant   = # s\\n\"
                \"% Phase           = #\\n\"
                \"% Mod. frequency  = # kHz\\n\"
-               \"% Mod. amplitude  = # kHz\\n\"
-			   \"% Field at start  = # G\\n%\\n\",
+               \"% Mod. amplitude  = # kHz";
+if ( $use_er035m eq "Yes" ) {
+	print F "\\n\"
+               \"% Field at start  = # G\\n%\\n\",";
+} else {
+	print F "\\n%\\n\",";
+}
+print F "
        start_freq * 1.0e-6, end_freq * 1.0e-6, step_freq * 1.0e-3,
        lockin_sensitivity( ), tc, lockin_phase( ), mod_freq * 1.0e-3,
-       mod_ampl * 1.0e-3, measure_field( ) );
+       mod_ampl * 1.0e-3";
+if ( $use_er035m eq "Yes" ) {
+	print F " , measure_field( ) );";
+} else {
+	print F " );";
+}
+print F "
 save_comment( File_2, \"% \" );
 save_program( File_2, \"% \" );
 
