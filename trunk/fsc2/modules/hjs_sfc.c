@@ -613,11 +613,6 @@ static double hjs_sfc_set_field( double field )
 	vars_push( FLOAT_VAR, v_step );
 	vars_pop( func_call( Func_ptr );
 
-	/* We probably will have to wait here a bit for the new field to
-	   be reached */
-
-	/* .... */
-
 	return hjs_sfc.B0V + v_step * hjs_sfc.slope;
 }
 
