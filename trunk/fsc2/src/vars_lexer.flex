@@ -2,11 +2,8 @@
   $Id$
 
   $Log$
-  Revision 1.5  1999/07/16 22:39:52  jens
-  *** empty log message ***
-
-  Revision 1.4  1999/07/16 22:39:41  jens
-  *** empty log message ***
+  Revision 1.6  1999/07/16 22:54:14  jens
+  Mostly cosmetic changes.
 
 */
 
@@ -65,7 +62,7 @@ DEF         ^[ \t]*DEF(AULT)?S?:        /* DEFAULTS section */
 VAR         ^[ \t]*VAR(IABLE)?S?:       /* VARIABLES section */
 PHAS        ^[ \t]*PHA(SE)?S?:          /* PHASES section */
 PREP        ^[ \t]*PREP(ARATION)?S?:    /* PREPARATIONS section */
-EXP         ^[ \t]*EXP(ERIMENT)?:       /* EXPERIMENT section */
+EXP         ^[ \t]*EXP(ERIMENT)?S?:     /* EXPERIMENT section */
 
 STR         \x5.*\x6                    /* print format string */
 ESTR        \x5.*\x3\n.*\n              /* string with error */
@@ -100,6 +97,7 @@ UNREC       [^\n \t;,\(\)\=\+\-\*\/\[\]\{\}\%\^]+    /* invalid input */
 
 			/* handling of error messages from the cleaner */
 {ERR}		THROW( CLEANER_EXCEPTION );
+
 {ESTR}		{
 				variablestext = strchr( variablestext, '\x03' );
 				THROW( CLEANER_EXCEPTION );
@@ -226,6 +224,7 @@ UNREC       [^\n \t;,\(\)\=\+\-\*\/\[\]\{\}\%\^]+    /* invalid input */
 			/* handling of invalid input */
 {UNREC}     THROW( INVALID_INPUT_EXCEPTION );
 
+			/* handling of end of file */
 <<EOF>>	    {
 				Vars_Next_Section = NO_SECTION;
 				return( 0 );
@@ -236,6 +235,18 @@ UNREC       [^\n \t;,\(\)\=\+\-\*\/\[\]\{\}\%\^]+    /* invalid input */
 %%		/*     End of Rules     */
 		/*----------------------*/
 
+
+/*---------------------------------------------------------------*/
+/* variables_parser() first checks that it wasn't called before, */
+/* initializes a few variables and then starts the lexer/parser  */
+/* combination. If this works out ok, either the number of the   */
+/* next section or, on end of file, NO_SECTION is stored in the  */
+/* global variable `Vars_Next_Section', which is returned to the */
+/* calling section_parser(). Otherwise, some special exceptions  */
+/* are caught here (resulting in FAIL return state) or, for the  */
+/* more comman exceptions, are caught in section_parser() (in    */
+/* this case, an OK state is returned).                          */
+/*---------------------------------------------------------------*/
 
 int variables_parser( FILE *in )
 {
