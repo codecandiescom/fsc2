@@ -24,13 +24,14 @@
 @appendix Reserved Words
 
 
-
+All the words in the following list are (at least for some of the
+section of an @code{EDL} script) reserved keywords or predefined
+functions and may not be used as variable names.
 @multitable { @code{MAXIMUM_PATTERN_LENGTH} } { Starts the @code{PREPARATIONS} section and lots more of text... }
 @item @code{#EXIT}            @tab Miscellaneous (@ref{#EXIT statement})
 @item @code{#INCLUDE}         @tab Miscellaneous (@ref{#INCLUDE statement})
 @item @code{#QUIT}            @tab Miscellaneous (@ref{#QUIT statement})
 @item                         @tab
-@item @code{A}                @tab Unit, Ampere
 @item @code{abort}            @tab Built-in function (@ref{abort})
 @item @code{abs}              @tab Built-in function (@ref{abs})
 @item @code{acos}             @tab Built-in function (@ref{acos})
@@ -82,8 +83,6 @@
 @item @code{cosh}             @tab Built-in function (@ref{cosh})
 @item                         @tab
 @item @code{date}             @tab Built-in function (@ref{date})
-@item @code{dB}               @tab Unit, Decibel
-@item @code{db}               @tab Unit, Decibel
 @item @code{DEFAULT_SOURCE}   @tab Channel Name
 @item @code{DEL}              @tab @code{DELAY} keyword
 @item @code{DELAY}            @tab @code{DELAY} keyword
@@ -148,14 +147,12 @@
 @item @code{FUNCF}            @tab Digitizer channel name
 @item @code{FUNCTION}         @tab
 @item                         @tab
-@item @code{G}                @tab Unit, Gauss
 @item @code{get_file}         @tab Built-in function (@ref{get_file})
 @item @code{GRACE_PERIOD}     @tab Deprecated keyword
 @item                         @tab
 @item @code{H}                @tab @code{HIGH} keyword
 @item @code{hide_toolbox}     @tab Built-in function (@ref{hide_toolbox})
 @item @code{HIGH}             @tab @code{HIGH} keyword
-@item @code{Hz}               @tab Unit, Hertz
 @item                         @tab
 @item @code{IF}               @tab Part of @code{IF-ELSE} constructs (@ref{IF-ELSE constructs})
 @item @code{init_1d}          @tab Built-in function (@ref{init_1d})
@@ -172,17 +169,8 @@
 @item @code{INVERTED}         @tab @code{INVERTED} keyword
 @item @code{IMP}              @tab @code{IMPEDANCE} keyword
 @item @code{IMPEDANCE}        @tab @code{IMPEDANCE} keyword
-@item @code{is_file}          @tab Deprecated function
 @item                         @tab
-@item @code{kA}               @tab Unit, Kilo-Ampere
-@item @code{kdB}              @tab Unit, Kilo-Dezibel
-@item @code{kdb}              @tab Unit, Kilo-Dezibel
 @item @code{KEEP_ALL_PULSES}  @tab Deprecated keyword
-@item @code{kG}               @tab Unit, Kilo-Gauss
-@item @code{kHz}              @tab Unit, Kilo-Hertz
-@item @code{km}               @tab Unit, Kilo-Meter
-@item @code{ks}               @tab Unit, Kilo-Seconds
-@item @code{kV}               @tab Unit, Kilo-Volt
 @item                         @tab
 @item @code{L}                @tab @code{LOW} keyword / Pulse @code{LENGTH} keyword
 @item @code{layout}           @tab Built-in function (@ref{layout})
@@ -194,11 +182,7 @@
 @item @code{LINE}             @tab Digitizer trigger channel name
 @item @code{LOW}              @tab @code{LOW} keyword
 @item                         @tab
-@item @code{m}                @tab Unit, Meter
-@item @code{MA}               @tab Unit, Mega-Ampere
 @item @code{max_of}           @tab Built-in function (@ref{max_of})
-@item @code{MdB}              @tab Unit, Mega-Dezibel
-@item @code{Mdb}              @tab Unit, Mega-Dezibel
 @item @code{MATH1}            @tab Digitizer channel name
 @item @code{MATH2}            @tab Digitizer channel name
 @item @code{MATH3}            @tab Digitizer channel name
@@ -208,36 +192,13 @@
 @item @code{MEM_D}            @tab Digitizer channel name
 @item @code{MEMC}             @tab Digitizer channel name
 @item @code{MEMD}             @tab Digitizer channel name
-@item @code{MG}               @tab Unit, Mega-Gauss
-@item @code{MHz}              @tab Unit, Mega-Hertz
 @item @code{min_of}           @tab Built-in function (@ref{min_of})
-@item @code{Mm}               @tab Unit, Mega-Meter
-@item @code{Ms}               @tab Unit, Mega-Seconds
-@item @code{MV}               @tab Unit, Mega-Volt
-@item @code{mA}               @tab Unit, Milli-Ampere
-@item @code{mdB}              @tab Unit, Milli-Dezibel
-@item @code{mdb}              @tab Unit, Milli-Dezibel
-@item @code{mG}               @tab Unit, Milli-Gauss
-@item @code{mHz}              @tab Unit, Milli-Hertz
-@item @code{mm}               @tab Unit, Milli-Meter
 @item @code{MODE}             @tab
-@item @code{ms}               @tab Unit, Milli-Seconds
-@item @code{mT}               @tab Unit, Milli-Tesla
-@item @code{mV}               @tab Unit, Milli-Volt
 @item                         @tab
-@item @code{nA}               @tab Unit, Nano-Ampere
-@item @code{ndB}              @tab Unit, Nano-Dezibel
-@item @code{ndb}              @tab Unit, Nano-Dezibel
 @item @code{NEG}              @tab
 @item @code{NEGATIVE}         @tab
 @item @code{NEXT}             @tab Loop control statement (@ref{NEXT statement})
 @item @code{NEXT_GATE}        @tab Channel Name
-@item @code{nG}               @tab Unit, Nano-Gauss
-@item @code{nHz}              @tab Unit, Nano-Hertz
-@item @code{nm}               @tab Unit, Nano-Meter
-@item @code{ns}               @tab Unit, Nano-Seconds
-@item @code{nT}               @tab Unit, Nano-Tesla
-@item @code{nV}               @tab Unit, Nano-Volt
 @item                         @tab
 @item @code{object_delete}    @tab Built-in function (@ref{object_delete})
 @item @code{ON_STOP:}         @tab Label in @code{EXPERIMENT} section
@@ -297,7 +258,6 @@
 @item @code{round}            @tab Built-in function (@ref{round})
 @item                         @tab
 @item @code{S}                @tab
-@item @code{s}                @tab Unit, Seconds
 @item @code{save}             @tab Built-in function (@ref{save})
 @item @code{save_comment}     @tab Built-in function (@ref{save_comment})
 @item @code{save_output}      @tab Built-in function (@ref{save_output})
@@ -319,7 +279,6 @@
 @item @code{sqrt}             @tab Built-in function (@ref{sqrt})
 @item @code{START}            @tab
 @item                         @tab
-@item @code{T}                @tab Unit, Tesla
 @item @code{tan}              @tab Built-in function (@ref{tan})
 @item @code{tanh}             @tab Built-in function (@ref{tanh})
 @item @code{TB}               @tab Pulser @code{TIME_BASE} keyword
@@ -335,18 +294,8 @@
 @item @code{TIMEBASE_2}       @tab Channel Name
 @item @code{TTL}              @tab Input level keyword
 @item                         @tab
-@item @code{uA}               @tab Unit, Micro-Ampere
-@item @code{udB}              @tab Unit, Micro-Dezibel
-@item @code{udb}              @tab Unit, Micro-Dezibel
-@item @code{uG}               @tab Unit, Micro-Gauss
-@item @code{uHz}              @tab Unit, Micro-Hertz
-@item @code{um}               @tab Unit, Micro-Meter
-@item @code{us}               @tab Unit, Micro-Seconds
 @item @code{UNTIL}            @tab Keyword for @code{UNTIL} loops (@ref{UNTIL loops})
-@item @code{uT}               @tab Unit, Micro-Tesla
-@item @code{uV}               @tab Unit, Micro-Volt
 @item                         @tab
-@item @code{V}                @tab Unit, Volt
 @item @code{VAR:}             @tab Starts the @code{VARIABLES} section
 @item @code{VARS:}            @tab Starts the @code{VARIABLES} section
 @item @code{VARIABLE:}        @tab Starts the @code{VARIABLES} section
@@ -362,4 +311,63 @@
 @item                         @tab
 @item @code{wait}             @tab Built-in function (@ref{wait})
 @item @code{WHILE}            @tab Keyword for @code{WHILE} loops (@ref{WHILE loops})
+@end multitable
+
+
+While the following keywords can be used as variable name, they take a
+special meaning as physical units when following directly after a number
+(with only spaces or tabulator characters in between).
+@multitable { @code{mHz} } { Micro-Seconds }
+@item @code{A}                @tab Ampere
+@item @code{dB}               @tab Decibel
+@item @code{db}               @tab Decibel
+@item @code{G}                @tab Gauss
+@item @code{Hz}               @tab Hertz
+@item @code{kA}               @tab Kilo-Ampere
+@item @code{kdB}              @tab Kilo-Dezibel
+@item @code{kdb}              @tab Kilo-Dezibel
+@item @code{kG}               @tab Kilo-Gauss
+@item @code{kHz}              @tab Kilo-Hertz
+@item @code{km}               @tab Kilo-Meter
+@item @code{ks}               @tab Kilo-Seconds
+@item @code{kV}               @tab Kilo-Volt
+@item @code{m}                @tab Meter
+@item @code{MA}               @tab Mega-Ampere
+@item @code{MdB}              @tab Mega-Dezibel
+@item @code{Mdb}              @tab Mega-Dezibel
+@item @code{MG}               @tab Mega-Gauss
+@item @code{MHz}              @tab Mega-Hertz
+@item @code{Mm}               @tab Mega-Meter
+@item @code{Ms}               @tab Mega-Seconds
+@item @code{MV}               @tab Mega-Volt
+@item @code{mA}               @tab Milli-Ampere
+@item @code{mdB}              @tab Milli-Dezibel
+@item @code{mdb}              @tab Milli-Dezibel
+@item @code{mG}               @tab Milli-Gauss
+@item @code{mHz}              @tab Milli-Hertz
+@item @code{mm}               @tab Milli-Meter
+@item @code{ms}               @tab Milli-Seconds
+@item @code{mT}               @tab Milli-Tesla
+@item @code{mV}               @tab Milli-Volt
+@item @code{nA}               @tab Nano-Ampere
+@item @code{ndB}              @tab Nano-Dezibel
+@item @code{ndb}              @tab Nano-Dezibel
+@item @code{nG}               @tab Nano-Gauss
+@item @code{nHz}              @tab Nano-Hertz
+@item @code{nm}               @tab Nano-Meter
+@item @code{ns}               @tab Nano-Seconds
+@item @code{nT}               @tab Nano-Tesla
+@item @code{nV}               @tab Nano-Volt
+@item @code{s}                @tab Seconds
+@item @code{T}                @tab Tesla
+@item @code{uA}               @tab Micro-Ampere
+@item @code{udB}              @tab Micro-Dezibel
+@item @code{udb}              @tab Micro-Dezibel
+@item @code{uG}               @tab Micro-Gauss
+@item @code{uHz}              @tab Micro-Hertz
+@item @code{um}               @tab Micro-Meter
+@item @code{us}               @tab Micro-Seconds
+@item @code{uT}               @tab Micro-Tesla
+@item @code{uV}               @tab Micro-Volt
+@item @code{V}                @tab Volt
 @end multitable
