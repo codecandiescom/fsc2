@@ -208,7 +208,7 @@ Var *lockin_get_adc_data( Var *v )
 		{
 			eprint( FATAL, "%s:%ld: sr510: Invalid ADC channel number (%ld) "
 					"in call of 'lockin_get_adc_data', valid channel are in "
-					"the range 1-4.", %s:%ld: port );
+					"the range 1-4.", Fname, Lc, port );
 			THROW( EXCEPTION );
 		}
 
