@@ -534,8 +534,8 @@ void run_file( FL_OBJECT *a, long b )
 	}
 	CATCH( EXCEPTION )
 	{
-		fprintf( stderr, "Exception within run().\n" );
-		fflush( stderr );
+		fl_show_alert( "Error", "Sorry, Sorry, can't run the experiment.",
+					   "See browser for more information.", 1 );
 	}
 }
 

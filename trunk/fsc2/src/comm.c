@@ -226,17 +226,18 @@ void end_comm( void )
 }
 
 
-/*-----------------------------------------------------------*/
-/*-----------------------------------------------------------*/
+/*-----------------------------------------------------------------------*/
+/* This routine tries to get a shared memory segment - if this fails and */
+/* the reason is that no segments or no memory for segments are left it  */
+/* waits for some time hoping for the parent process to remove other     */
+/* segments in the mean time.                                            */
+/*-----------------------------------------------------------------------*/
 
 void *get_shm( int *shm_id, long len )
 {
 	void *buf;
 
 
-	/* Now try to get a shared memory segment - if it fails and the reason is
-	   that no segments or no memory for segments is left wait for some time
-	   and hope for the parent process to remove other segments in between. */
 
 	while ( ( *shm_id = shmget( IPC_PRIVATE, len, IPC_CREAT | 0600 ) ) < 0 )
 	{
@@ -247,7 +248,7 @@ void *get_shm( int *shm_id, long len )
 	}
 
 	/* Attach to the shared memory segment - if this should fail (improbable)
-	   delete the segment, print an error message and stop the measurement */
+	   return -1 and let the calling routine handle the mess... */
 
 	if ( ( buf = shmat( *shm_id, NULL, 0 ) ) == ( void * ) - 1 )
 		return ( void * ) -1;
@@ -256,22 +257,22 @@ void *get_shm( int *shm_id, long len )
 }
 
 
-/*-----------------------------------------------------------*/
-/* new_data_callback() is responsible for either honoring a  */
-/* a REQUEST or storing and displaying DATA from the child.  */
-/* Actually, this routine is the handler for an idle call-   */
-/* back.                                                     */
-/* The message queue is read as long as the low marker has   */
-/* not reached the high marker, both being incremented in a  */
-/* wrap-around fashion.                                      */
-/*-----------------------------------------------------------*/
+/*------------------------------------------------------------*/
+/* new_data_callback() is responsible for either honoring a   */
+/* a REQUEST or storing and displaying DATA from the child.   */
+/* Actually, this routine is the handler for an idle call-    */
+/* back.                                                      */
+/* The message queue is read if the low marker hasn't reached */
+/* the high marker, both being incremented in a wrap-around   */
+/* fashion.                                                   */
+/*------------------------------------------------------------*/
 
 int new_data_callback( XEvent *a, void *b )
 {
 	a = a;
 	b = b;
 
-	while ( message_queue_low != message_queue_high )
+	if ( message_queue_low != message_queue_high )
 	{
 		if ( Message_Queue[ message_queue_low ].type == REQUEST )
 		{
