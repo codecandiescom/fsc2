@@ -127,6 +127,7 @@ bool rs690_init( const char *name )
 #else
 bool rs690_init( UNUSED_ARG const char *name )
 {
+	return OK;
 }
 #endif
 
