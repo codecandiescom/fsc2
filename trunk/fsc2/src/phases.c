@@ -1,7 +1,7 @@
 #include "fsc2.h"
 
 
-long cur_aseq_num;
+long cur_aseq;
 
 
 /*---------------------------------------------------------------------*/
@@ -30,7 +30,7 @@ void acq_seq_start( long acq_num, long acq_type )
 
 	/* Check that this acquisition sequence isn't already defined */
 
-	cur_aseq_num = acq_num;
+	cur_aseq = acq_num;
 
 	if ( ASeq[ acq_num ].defined )
 		eprint( SEVERE, "%s:%ld: Multiple definition of acquisition "
@@ -39,7 +39,7 @@ void acq_seq_start( long acq_num, long acq_type )
 	/* initialize the acquisition sequence */
 
 	ASeq[ acq_num ].defined = SET;
-	ASeq[ acq_num ].sequence[ 0 ] = acq_type;
+	ASeq[ acq_num ].sequence[ 0 ] = ( int ) acq_type;
 	ASeq[ acq_num ].len = 1;
 }
 
@@ -58,7 +58,7 @@ void acq_seq_cont( long acq_type )
 
 	/* Check that the sequence doesn't get too long */
 
-	if ( ASeq[ cur_aseq_num ].len >= MAX_PHASE_SEQ_LEN )
+	if ( ASeq[ cur_aseq ].len >= MAX_PHASE_SEQ_LEN )
 	{
 		eprint( FATAL, "%s:%ld: Maximum acquisition sequence length of %d "
 				"exceeded.\n ", Fname, Lc, MAX_PHASE_SEQ_LEN );
@@ -67,7 +67,7 @@ void acq_seq_cont( long acq_type )
 
 	/* add the new acquisition type */
 
-	ASeq[ cur_aseq_num ].sequence[ ASeq[ cur_aseq_num ].len++ ] = acq_type;
+	ASeq[ cur_aseq ].sequence[ ASeq[ cur_aseq ].len++ ] = ( int ) acq_type;
 }
 
 
@@ -199,7 +199,7 @@ void phases_end( void )
 	   (if both were defined) */
 
 	if ( ASeq[ 0 ].defined && ASeq[ 1 ].defined &&
-		 ASeq[ 0 ].defined != ASeq[ 1 ].defined )
+		 ASeq[ 0 ].len != ASeq[ 1 ].len )
 	{
 		eprint( FATAL, "Different length of acqusition sequences.\n" );
 		THROW( PHASES_EXCEPTION );

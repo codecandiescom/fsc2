@@ -36,15 +36,14 @@ typedef  unsigned char  bool;
 #include "ppcheck.h"
 
 
-enum {                /* never ever change this ! */
-	   FAIL  = 0,
-	   UNSET = 0,
-       OK    = 1,
-	   SET   = 1
-};
+#define	FAIL  ( bool ) 0         /* never ever change these ! */
+#define UNSET ( bool ) 0
+#define OK    ( bool ) 1
+#define SET   ( bool ) 1
 
 
-enum {                /* error severity types */
+
+enum {                           /* error severity types */
 	   FATAL = 0,
 	   SEVERE,
 	   WARN,
@@ -52,8 +51,8 @@ enum {                /* error severity types */
 };
 
 
-enum {                /* all the different section types */
-	  NO_SECTION = OK + 1,
+enum {                           /* all the different section types */
+	  NO_SECTION = ( int ) OK + 1,
 	  ASSIGNMENTS_SECTION,
 	  DEFAULTS_SECTION,
 	  VARIABLES_SECTION,
@@ -68,14 +67,14 @@ enum {
 };
 
 
-enum {                /* phase types for phase cycling */
+enum {                           /* phase types for phase cycling */
 	   PHASE_PLUS_X,
 	   PHASE_MINUS_X,
 	   PHASE_PLUS_Y,
 	   PHASE_MINUS_Y
 };
 
-enum {                /* acquisition types for phase cycling */
+enum {                           /* acquisition types for phase cycling */
 	   ACQ_PLUS,
 	   ACQ_MINUS
 };
