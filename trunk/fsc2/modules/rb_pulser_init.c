@@ -27,20 +27,20 @@
 
 static void rb_pulser_init_print( FILE *fp );
 static void rb_pulser_basic_pulse_check( void );
-static void rb_pulser_basic_functions_check( void );
+static void rb_pulser_basic_functions_init( void );
 static void rb_pulser_rf_synth_init( void );
 
 
-/*-------------------------------------------------------------------*
- * Function does everything that needs to be done for checking and
- * completing the internal representation of the pulser at the start
- * of a test run.
- *-------------------------------------------------------------------*/
+/*-------------------------------------------------------------*
+ * Function does everything that needs to be done for checking
+ * and completing the internal representation of the pulser at
+ * the start of a test run.
+ *-------------------------------------------------------------*/
 
 void rb_pulser_init_setup( void )
 {
 	rb_pulser_basic_pulse_check( );
-	rb_pulser_basic_functions_check( );
+	rb_pulser_basic_functions_init( );
 	rb_pulser_rf_synth_init( );
 
 	
@@ -55,8 +55,10 @@ void rb_pulser_init_setup( void )
 }
 
 
-/*-------------------------------------------------------------------------*
- *-------------------------------------------------------------------------*/
+/*------------------------------------------------------*
+ * Initialization required for the pulser_show_pulses()
+ * and pulser_dump_pulses() EDL functions
+ *------------------------------------------------------*/
 
 static void rb_pulser_init_print( FILE *fp )
 {
@@ -113,10 +115,12 @@ static void rb_pulser_basic_pulse_check( void )
 }
 
 
-/*--------------------------------------------------------------------------*
- *--------------------------------------------------------------------------*/
+/*-----------------------------------------------------*
+ * Creates a list of pulses for each function that has
+ * pulses assigned to it.
+ *-----------------------------------------------------*/
 
-static void rb_pulser_basic_functions_check( void )
+static void rb_pulser_basic_functions_init( void )
 {
 	Function_T *f;
 	int i;
@@ -157,7 +161,7 @@ static void rb_pulser_basic_functions_check( void )
 
 /*------------------------------------------------------------------*
  * Finds out about the names of synthesizer related functions if RF
- * pulses could be required (i.e. there's at least a single pulse
+ * pulses could be required (i.e. if there's at least one pulse
  * marked as belonging to the RF function)
  *------------------------------------------------------------------*/
 
@@ -183,7 +187,7 @@ static void rb_pulser_rf_synth_init( void )
 		THROW( EXCEPTION );
 	}
 
-	if ( dev_num )
+	if ( dev_num == 1 )
 		func = T_strdup( SYNTHESIZER_PULSE_STATE );
 	else
 		func = get_string( SYNTHESIZER_PULSE_STATE "#%d", dev_num );
@@ -198,9 +202,10 @@ static void rb_pulser_rf_synth_init( void )
 		THROW( EXCEPTION );
 	}
 
+	vars_pop( func_ptr );
 	rb_pulser.synth_pulse_state = func;
 
-	if ( dev_num )
+	if ( dev_num == 1 )
 		func = T_strdup( SYNTHESIZER_PULSE_WIDTH );
 	else
 		func = get_string( SYNTHESIZER_PULSE_WIDTH "#%d", dev_num );
@@ -216,9 +221,10 @@ static void rb_pulser_rf_synth_init( void )
 		THROW( EXCEPTION );
 	}
 
+	vars_pop( func_ptr );
 	rb_pulser.synth_pulse_width = func;
 	
-	if ( dev_num )
+	if ( dev_num == 1 )
 		func = T_strdup( SYNTHESIZER_PULSE_DELAY );
 	else
 		func = get_string( SYNTHESIZER_PULSE_DELAY "#%d", dev_num );
@@ -236,9 +242,10 @@ static void rb_pulser_rf_synth_init( void )
 		THROW( EXCEPTION );
 	}
 
+	vars_pop( func_ptr );
 	rb_pulser.synth_pulse_delay = func;
 
-	if ( dev_num )
+	if ( dev_num == 1 )
 		func = T_strdup( SYNTHESIZER_TRIG_SLOPE );
 	else
 		func = get_string( SYNTHESIZER_TRIG_SLOPE "#%d", dev_num );
@@ -258,9 +265,10 @@ static void rb_pulser_rf_synth_init( void )
 		THROW( EXCEPTION );
 	}
 
+	vars_pop( func_ptr );
 	rb_pulser.synth_trig_slope = func;
 
-	if ( dev_num )
+	if ( dev_num == 1 )
 		func = T_strdup( SYNTHESIZER_STATE );
 	else
 		func = get_string( SYNTHESIZER_STATE "#%d", dev_num );
@@ -282,6 +290,7 @@ static void rb_pulser_rf_synth_init( void )
 		THROW( EXCEPTION );
 	}
 
+	vars_pop( func_ptr );
 	rb_pulser.synth_state = func;
 }
 
