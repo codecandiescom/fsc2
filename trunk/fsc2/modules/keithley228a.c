@@ -67,6 +67,7 @@ Var *magnet_setup( Var *v );
 Var *magnet_use_correction( Var *v );
 Var *magnet_use_dac_port( Var *v );
 Var *set_field( Var *v );
+Var *get_field( Var *v );
 Var *sweep_up( Var *v );
 Var *sweep_down( Var *v );
 Var *reset_field( Var *v );
@@ -434,6 +435,17 @@ Var *set_field( Var *v )
 
 	return vars_push( FLOAT_VAR,
 					  keithley228a_goto_current( new_current ) );
+}
+
+
+/*------------------------------------------------*/
+/* Convenience function: just returns the current */
+/*------------------------------------------------*/
+
+Var *get_field( Var *v )
+{
+	v = v;
+	return vars_push( FLOAT_VAR, keithley228a.current );
 }
 
 

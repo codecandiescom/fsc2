@@ -44,6 +44,7 @@ Var *magnet_name( Var *v );
 Var *magnet_setup( Var *v );
 Var *magnet_fast_init( Var *v );
 Var *set_field( Var *v );
+Var *get_field( Var *v );
 Var *sweep_up( Var *v );
 Var *sweep_down( Var *v );
 Var *reset_field( Var *v );
@@ -405,6 +406,24 @@ Var *set_field( Var *v )
 	}
 
 	return vars_push( FLOAT_VAR, magnet.act_field );
+}
+
+
+/*---------------------------------------------------------------------------*/
+/* Convenience function: just asks the used gaussmeter for the current field */
+/*---------------------------------------------------------------------------*/
+
+Var *get_field( Var *v )
+{
+	Var *new_var;
+	int acc;
+
+
+	v = v;
+
+	new_var = func_call( func_get( "find_field", &acc ) );
+	magnet.meas_field = new_var->val.dval;
+	return new_var;
 }
 
 
