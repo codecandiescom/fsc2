@@ -44,11 +44,11 @@ bool hfs9000_assign_channel_to_function( int function, long channel )
 	CHANNEL *c = &hfs9000.channel[ channel ];
 
 
-	if ( channel < 0 || channel >= MAX_CHANNELS )
+	if ( channel < 0 || channel >= MAX_CHANNEL )
 	{
 		eprint( FATAL, "%s:%ld: %s: Invalid channel number: %ld, valid range "
 				"is 1-%d.\n", Fname, Lc, pulser_struct.name, channel,
-				( int ) MAX_CHANNELS );
+				( int ) MAX_CHANNEL );
 		THROW( EXCEPTION );
 	}
 
@@ -118,7 +118,7 @@ bool hfs9000_invert_function( int function )
 		 hfs9000.function[ function ].channel->self == HFS9000_TRIG_OUT )
 	{
 		eprint( FATAL, "%s:%ld: %s: Function `%s' is associated with "
-				"TRIGGER_OUT channel whose polarity can't be inverted.\n",
+				"TRIGGER_OUT channel whose polarity cannot be inverted.\n",
 				Fname, Lc, pulser_struct.name, Function_Names[ function ] );
 		THROW( EXCEPTION );
 	}

@@ -90,11 +90,10 @@ int hfs9000_init_hook( void )
 	hfs9000.is_trig_in_mode = UNSET;
 	hfs9000.is_trig_in_slope = UNSET;
 	hfs9000.is_trig_in_level = UNSET;
-	hfs9000.is_repeat_time = UNSET;
 	hfs9000.is_neg_delay = UNSET;
 	hfs9000.neg_delay = 0;
 
-	for ( i = 0; i <= MAX_CHANNELS; i++ )
+	for ( i = 0; i <= MAX_CHANNEL; i++ )
 	{
 		hfs9000.channel[ i ].self = i;
 		hfs9000.channel[ i ].function = NULL;
@@ -169,11 +168,9 @@ int hfs9000_end_of_test_hook( void )
 
 	hfs9000_full_reset( );
 
-	/* Now we've got to find out about the maximum sequence length and set
-	   up padding to achieve the requested repeat time */
+	/* Now we've got to find out about the maximum sequence length */
 
 	hfs9000.max_seq_len = hfs9000_get_max_seq_len( );
-	hfs9000_calc_padding( );
 
 	return 1;
 }
@@ -201,7 +198,7 @@ int hfs9000_exp_hook( void )
 
 	/* Now we have to tell the pulser about all the pulses */
 
-	for ( i = 0; i <= MAX_CHANNELS; i++ )
+	for ( i = 0; i <= MAX_CHANNEL; i++ )
 		if ( hfs9000.channel[ i ].function->is_used )
 			hfs9000_set_pulses( hfs9000.channel[ i ].function );
 
@@ -247,7 +244,7 @@ void hfs9000_exit_hook( void )
 
 	hfs9000_Pulses = NULL;
 
-	for ( i = 0; i <= MAX_CHANNELS; i++ )
+	for ( i = 0; i <= MAX_CHANNEL; i++ )
 		if ( hfs9000.channel[ i ].function != NULL &&
 			 hfs9000.channel[ i ].function->pulses != NULL )
 			T_free( hfs9000.channel[ i ].function->pulses );
