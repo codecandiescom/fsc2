@@ -209,7 +209,7 @@ int fsc2_cfmakeraw( struct termios *termios_p )
 
 
 	raise_permissions( );
-	ret = tcflow( termios_p );
+	ret = cfmakeraw( termios_p );
 	lower_permissions( );
 
 	return ret;
