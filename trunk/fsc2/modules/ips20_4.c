@@ -610,8 +610,8 @@ Var *reset_field( Var *v )
 
 /*-----------------------------------------------------------*/
 /* This function was added on Martin Fuchs' request to allow */
-/* to keep sweeping the magnet to a predefined current even  */
-/* after the experiment has ended.                           */
+/* to keep sweeping the magnet to a predefined current after */
+/* the experiment has ended.                                 */
 /*-----------------------------------------------------------*/
 
 Var *magnet_goto_current_on_end( Var *v )

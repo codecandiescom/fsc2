@@ -385,6 +385,18 @@ If no argument is passed to the function the currently set sweep rate is
 returned. Otherwise a (positive) sweep rate in units of @code{A/s} must be
 passed to the function.
 
+
+@anchor{magnet_goto_current_on_end}
+@item magnet_goto_current_on_end()
+@findex magnet_goto_current_on_end()
+This function is only available for the Oxford magnet sweep power supply
+(@code{ips20_4}) and allows to set a target current that the magnet will
+be swept to @b{after} the experiment has ended (per default the magnet
+would stay at the last field position). This function can be called in
+the @code{PREPARATION} as well the @code{EXPERIMENT} section and returns
+the target current the magnet will sweep to after the end of the experiment.
+
+
 @end table
 
 
