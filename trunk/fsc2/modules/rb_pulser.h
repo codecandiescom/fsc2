@@ -73,7 +73,7 @@
 
 /* Minimum precision (relative to the timebase) for pulse positions and
    lengths etc. - when the user requests a position or length that can't
-   be realized with at least this precision a warning is printed */
+   be set with at least this relative precision a warning is printed */
 
 #define PRECISION         0.01
 
@@ -230,7 +230,6 @@ struct RB_Pulser {
 	bool do_show_pulses;
 	bool do_dump_pulses;
 };
-
 
 
 extern RB_Pulser_T rb_pulser;
