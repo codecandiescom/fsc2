@@ -46,7 +46,7 @@ TWS      [\t ,;:]+\n
 
 INT      [0-9]+
 EXPO     [EDed][+-]?{INT}
-FLOAT    ((([0-9]+"."[0-9]*)|([0-9]*"."[0-9]+)){EXPO}?)|({INT}{EXPO})
+FLOAT    [+-]?((([0-9]+"."[0-9]*)|([0-9]*"."[0-9]+)){EXPO}?)|({INT}{EXPO})
 D        {INT}|{FLOAT}
 IU       {INT}[\t ]*((("k"|"M"|"G")*"Hz")|"dB")
 FU       {FLOAT}[\t ]*((("k"|"M"|"G")*"Hz")|"dB")

@@ -88,22 +88,22 @@ FILE *hp8647a_open_table( char *name )
 	FILE *tfp;
 
 
-	if ( access( hp8647a.table_file, R_OK ) == -1 )
+	if ( access( name, R_OK ) == -1 )
 	{
 		if ( errno == ENOENT )       /* file not found */
 			return NULL;
 
-		T_free( name );
 		eprint( FATAL, "%s:%ld: %s: No read permission for table file "
 					"`%s'.\n", Fname, Lc, DEVICE_NAME, name );
+		T_free( name );
 		THROW( EXCEPTION )
 	}
 
-	if ( ( tfp = fopen( hp8647a.table_file, "r" ) ) == NULL )
+	if ( ( tfp = fopen( name, "r" ) ) == NULL )
 	{
-		T_free( name );
 		eprint( FATAL, "%s:%ld: %s: Can't open table file `%s'.\n", Fname, Lc,
 				DEVICE_NAME, name );
+		T_free( name );
 		THROW( EXCEPTION );
 	}
 
@@ -197,8 +197,8 @@ double hp8647a_get_att( double freq )
 	if ( ! hp8647a.use_table )
 		return hp8647a.attenuation;
 
-	att =   hp8647a.attenuation - hp8647a_get_att_from_table( freq )
-		  + hp8647a.att_at_ref_freq;
+	att =   hp8647a.attenuation + hp8647a_get_att_from_table( freq )
+		  - hp8647a.att_at_ref_freq;
 
 	if ( att < MAX_ATTEN )
 	{
