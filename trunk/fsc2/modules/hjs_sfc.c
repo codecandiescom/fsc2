@@ -44,7 +44,7 @@ struct HJS_SFC hjs_sfc, hjs_sfc_stored;
 /*                                           */
 /*-------------------------------------------*/
 
-/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*
  * Initialize the structure for the module, then lock the required DAC
  * and check that the function for setting the DAC can be found.
  *---------------------------------------------------------------------*/
