@@ -1298,8 +1298,10 @@ static void eps_draw_contour( FILE *fp, int cn )
 }
 
 
-/*----------------------------------------------------------------*/
-/*----------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+/* This routine prints a comment text into a field in the middle */
+/* of the page below the x-axis.                                 */
+/*---------------------------------------------------------------*/
 
 static void print_comm( FILE *fp )
 {
@@ -1346,8 +1348,14 @@ static void print_comm( FILE *fp )
 }
 
 
-/*----------------------------------------------------------------*/
-/*----------------------------------------------------------------*/
+/*-------------------------------------------------------------------*/
+/* The comment text to be printed is a single string with embedded   */
+/* newline characters. This routine splits this string into an array */
+/* of strings, each of them being one line of the text. The function */
+/* returns an array of strings (the calling routine must T_free()    */
+/* both all the strings as well as the array of string pointers) and */
+/* the number of lines to be printed (through the pointer argument). */
+/*-------------------------------------------------------------------*/
 
 static char **split_into_lines( int *num_lines )
 {
