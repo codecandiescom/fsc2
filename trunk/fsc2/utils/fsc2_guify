@@ -37,7 +37,7 @@ my @lines;
 my @vars;
 my $guify_entry = '^\s*==\s+';
 my $var_entry = $guify_entry .
-	'([A-Za-z0-9]+)\s+(int|float|menu)(\s+(.*))?';
+	'([A-Za-z0-9_]+)\s+(int|float|menu)(\s+(.*))?';
 my $if_entry = $guify_entry . 'if\\s+';
 my $elsif_entry = $guify_entry . "elsif\\s+";
 my $else_entry = $guify_entry . "else\\s*\$";
