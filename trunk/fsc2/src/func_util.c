@@ -287,7 +287,8 @@ Var *f_wait( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	if ( lround( modf( how_long, &secs ) * 1.0e6 ) == 0 && secs == 0.0 )
+	if ( lround( modf( how_long, &secs ) * 1.0e6 ) == 0 &&
+		 lround( secs ) == 0.0 )
 	{
 		eprint( WARN, SET, "Argument is less than 1 ms in function %s().\n",
 				Cur_Func );
