@@ -70,7 +70,7 @@ char *get_string( const char *fmt, ... )
 		break;
 	}
 
-	if ( wr + 1 < len )            /* trim string to number of needed chars */
+	if ( ( size_t ) wr + 1 < len )  /* trim string to number of needed chars */
 		T_realloc( c, ( size_t ) wr + 1 );
 
 	return c;
