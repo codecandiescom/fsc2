@@ -76,10 +76,11 @@ typedef union {
 #define E_EXPA          295
 
 /* The following don't get defined via `exp_run_parser.y' but are for local
-   use only (actually also `run.c' needs them also and gets them from here) */
+   use only (actually, also `run.c' needs them also and gets them from here) */
 
 #define IF_TOK         2049
 #define ELSE_TOK       2050
+#define UNLESS_TOK     2051
 #define WHILE_TOK      2052
 #define UNTIL_TOK      2053
 #define CONT_TOK       2054

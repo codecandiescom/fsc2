@@ -355,8 +355,9 @@ void forget_prg( void )
 
 
 /*--------------------------------------------------------------------------*/
-/* Sets up the blocks of while, repeat and for loops and if-else constructs */
-/* where a block is everything a between matching pair of curly braces.     */
+/* Sets up the blocks of WHILE, REPEAT and FOR loops and IF-ELSE and UNLESS */
+/* constructs where a block is everything between a matching pair of curly  */
+/* braces.                                                                  */
 /*--------------------------------------------------------------------------*/
 
 static void loop_setup( void )
@@ -385,13 +386,15 @@ static void loop_setup( void )
 				}
 				break;
 
-			case IF_TOK :
+			case IF_TOK : case UNLESS :
 				cur_pos = i;
 				setup_if_else( &i, NULL );
 				if ( cur_pos < On_Stop_Pos && i > On_Stop_Pos )
 				{
-					eprint( FATAL, UNSET, "ON_STOP label is located within an "
-							"IF-ELSE construct.\n" );
+					eprint( FATAL, UNSET, "ON_STOP label located within "
+							"%s-ELSE construct.\n",
+							prg_token[ cur_pos ].token == IF_TOK ?
+							"IF" : "UNLESS" );
 					THROW( EXCEPTION );
 				}
 				break;
@@ -463,13 +466,14 @@ static void setup_while_or_repeat( int type, long *pos )
 				prg_token[ i ].start = cur;
 				break;
 
-			case IF_TOK :
+			case IF_TOK : case UNLESS_TOK :
 				setup_if_else( &i, cur );
 				break;
 
 			case ELSE_TOK :
-				eprint( FATAL, UNSET, "%s:%ld: ELSE without IF in current "
-						"block.\n", prg_token[ i ].Fname, prg_token[ i ].Lc );
+				eprint( FATAL, UNSET, "%s:%ld: ELSE without IF or UNLESS in "
+						"current block.\n", prg_token[ i ].Fname,
+						prg_token[ i ].Lc );
 				THROW( EXCEPTION );
 
 			case '{' :
@@ -526,7 +530,7 @@ static void setup_if_else( long *pos, Prg_Token *cur_wr )
 	Prg_Token *cur = prg_token + *pos;
 	long i = *pos + 1;
 	bool in_if = SET;
-	bool dont_need_close_parans = UNSET;      /* set for ELSE IF constructs */
+	bool dont_need_close_parans = UNSET;      /* set for IF-ELSE constructs */
 
 
 	/* Start with some sanity checks */
@@ -541,8 +545,8 @@ static void setup_if_else( long *pos, Prg_Token *cur_wr )
 
 	if ( prg_token[ i ].token == '{' )
 	{
-		eprint( FATAL, UNSET, "%s:%ld: Missing condition after IF.\n",
-				prg_token[ i ].Fname, prg_token[ i ].Lc );
+		eprint( FATAL, UNSET, "%s:%ld: Missing condition after IF or "
+				"UNLESS.\n", prg_token[ i ].Fname, prg_token[ i ].Lc );
 	}
 
 	/* Now let's get things done... */
@@ -577,7 +581,7 @@ static void setup_if_else( long *pos, Prg_Token *cur_wr )
 				prg_token[ i ].start = cur_wr;
 				break;
 
-			case IF_TOK :
+			case IF_TOK : case UNLESS_TOK :
 				setup_if_else( &i, cur_wr );
 
 				if ( dont_need_close_parans )
@@ -602,7 +606,8 @@ static void setup_if_else( long *pos, Prg_Token *cur_wr )
 					THROW( EXCEPTION );
 				}
 				if ( prg_token[ i + 1 ].token != '{' &&
-					 prg_token[ i + 1 ].token != IF_TOK )
+					 prg_token[ i + 1 ].token != IF_TOK &&
+					 prg_token[ i + 1 ].token != UNLESS_TOK )
 				{
 					eprint( FATAL, UNSET, "%s:%ld: Missing '{' after ELSE.\n",
 							prg_token[ i ].Fname, prg_token[ i ].Lc );
@@ -617,7 +622,8 @@ static void setup_if_else( long *pos, Prg_Token *cur_wr )
 					THROW( EXCEPTION );
 				}
 
-				if(  prg_token[ i + 1 ].token == IF_TOK )
+				if (  prg_token[ i + 1 ].token == IF_TOK ||
+					  prg_token[ i + 1 ].token == UNLESS_TOK )
 				{
 					cur->end = &prg_token[ i ];
 					dont_need_close_parans = SET;
@@ -659,7 +665,7 @@ static void setup_if_else( long *pos, Prg_Token *cur_wr )
 	}
 
 	eprint( FATAL, UNSET, "Missing `}' for %s starting at %s:%ld.\n",
-			in_if ? "IF" : "ELSE", cur->Fname, cur->Lc );
+			in_if ? "IF or UNLESS" : "ELSE", cur->Fname, cur->Lc );
 	THROW( EXCEPTION );
 }
 
@@ -797,7 +803,7 @@ void exp_test_run( void )
 					cur_prg_token = cur_prg_token->start;
 					break;
 
-				case IF_TOK :
+				case IF_TOK : case UNLESS_TOK :
 					cur = cur_prg_token;
 					cur_prg_token
 						       = test_condition( cur ) ? cur->start : cur->end;
@@ -866,7 +872,7 @@ int exp_runlex( void )
 		{
 			case WHILE_TOK : case REPEAT_TOK : case BREAK_TOK :
 			case CONT_TOK : case FOR_TOK : case FOREVER_TOK :
-			case UNTIL_TOK : case IF_TOK : case ELSE_TOK :
+			case UNTIL_TOK : case IF_TOK : case UNLESS_TOK : case ELSE_TOK :
 				return 0;
 
 			case '}' :
@@ -997,13 +1003,14 @@ int conditionlex( void )
 }
 
 
-/*-------------------------------------------------------*/
-/* Function tests the condition of a WHILE, UNTIL or IF. */
-/*-------------------------------------------------------*/
+/*-----------------------------------------------------------------*/
+/* Function tests the condition of a WHILE, UNTIL or IF or UNLESS. */
+/*-----------------------------------------------------------------*/
 
 bool test_condition( Prg_Token *cur )
 {
 	bool condition;
+	bool neg_cond = UNSET;
 
 
 	cur_prg_token++;                          /* skip the WHILE or IF etc. */
@@ -1027,6 +1034,11 @@ bool test_condition( Prg_Token *cur )
 			t = "FOR loop";
 		if ( cur->token == IF_TOK )
 			t = "IF construct";
+		if ( cur->token == UNLESS_TOK )
+		{
+			t = "UNLESS construct";
+			neg_cond = SET;
+		}
 
 		cur++;
 		if ( t == NULL )
@@ -1044,6 +1056,9 @@ bool test_condition( Prg_Token *cur )
 		condition = Var_Stack->val.lval ? OK : FAIL;
 	else
 		condition = Var_Stack->val.dval ? OK : FAIL;
+
+	if ( neg_cond )
+		condition = condition == OK ? FAIL : OK;
 
 	vars_pop( Var_Stack );
 	return condition;
