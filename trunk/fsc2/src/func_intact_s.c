@@ -36,9 +36,9 @@ static Var_T *f_svalue_child( Var_T *v );
 static Var_T *f_schanged_child( Var_T *v );
 
 
-/*----------------------------------------------------*/
-/* Function for appending a new slider to the toolbox */
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ * Function for appending a new slider to the toolbox
+ *----------------------------------------------------*/
 
 Var_T *f_screate( Var_T *var )
 {
@@ -252,11 +252,11 @@ Var_T *f_screate( Var_T *var )
 }
 
 
-/*-----------------------------------------------------------------*/
-/* Part of the f_screate() function run by the child process only, */
-/* indirectly invoking the f_screate() function in the parent via  */
-/* the message passing mechanism.                                  */
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ * Part of the f_screate() function run by the child process only,
+ * indirectly invoking the f_screate() function in the parent via
+ * the message passing mechanism.
+ *-----------------------------------------------------------------*/
 
 static Var_T *f_screate_child( Var_T *v, long type, double start_val,
 							   double end_val, double step )
@@ -363,9 +363,9 @@ static Var_T *f_screate_child( Var_T *v, long type, double start_val,
 }
 
 
-/*-----------------------------------------------------------------------*/
-/* Deletes one or more sliders, parameter(s) are one or more slider IDs. */
-/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ * Deletes one or more sliders, parameter(s) are one or more slider IDs.
+ *-----------------------------------------------------------------------*/
 
 Var_T *f_sdelete( Var_T *v )
 {
@@ -401,11 +401,11 @@ Var_T *f_sdelete( Var_T *v )
 }
 
 
-/*-----------------------------------------------------------------*/
-/* Part of the f_sdelete() function run by the child process only, */
-/* indirectly invoking the f_sdelete() function in the parent via  */
-/* the message passing mechanism.                                  */
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ * Part of the f_sdelete() function run by the child process only,
+ * indirectly invoking the f_sdelete() function in the parent via
+ * the message passing mechanism.
+ *-----------------------------------------------------------------*/
 
 static void f_sdelete_child( Var_T *v )
 {
@@ -453,10 +453,10 @@ static void f_sdelete_child( Var_T *v )
 }
 
 
-/*---------------------------------------------------------*/
-/* Part of the f_sdelete() function only run by the parent */
-/* process, which actually removes the slider.             */
-/*---------------------------------------------------------*/
+/*---------------------------------------------------------*
+ * Part of the f_sdelete() function only run by the parent
+ * process, which actually removes the slider.
+ *---------------------------------------------------------*/
 
 static void f_sdelete_parent( Var_T *v )
 {
@@ -517,9 +517,9 @@ static void f_sdelete_parent( Var_T *v )
 }
 
 
-/*--------------------------------------.-------------------*/
-/* Function for quering or setting the position of a slider */
-/*----------------------------------------------------------*/
+/*--------------------------------------.-------------------*
+ * Function for quering or setting the position of a slider
+ *----------------------------------------------------------*/
 
 Var_T *f_svalue( Var_T *v )
 {
@@ -601,11 +601,11 @@ Var_T *f_svalue( Var_T *v )
 }
 
 
-/*----------------------------------------------------------------*/
-/* Part of the f_svalue() function run by the child process only, */
-/* indirectly invoking the f_svalue() function in the parent via  */
-/* the message passing mechanism.                                 */
-/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * Part of the f_svalue() function run by the child process only,
+ * indirectly invoking the f_svalue() function in the parent via
+ * the message passing mechanism.
+ *----------------------------------------------------------------*/
 
 static Var_T *f_svalue_child( Var_T *v )
 {
@@ -687,9 +687,9 @@ static Var_T *f_svalue_child( Var_T *v )
 }
 
 
-/*----------------------------------------------------------*/
-/* Function for testing if the position of a slider changed */
-/*----------------------------------------------------------*/
+/*----------------------------------------------------------*
+ * Function for testing if the position of a slider changed
+ *----------------------------------------------------------*/
 
 Var_T *f_schanged( Var_T *v )
 {
@@ -732,11 +732,11 @@ Var_T *f_schanged( Var_T *v )
 }
 
 
-/*------------------------------------------------------------------*/
-/* Part of the f_schanged() function run by the child process only, */
-/* indirectly invoking the f_schanged() function in the parent via  */
-/* the message passing mechanism.                                   */
-/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ * Part of the f_schanged() function run by the child process only,
+ * indirectly invoking the f_schanged() function in the parent via
+ * the message passing mechanism.
+ *------------------------------------------------------------------*/
 
 static Var_T *f_schanged_child( Var_T *v )
 {

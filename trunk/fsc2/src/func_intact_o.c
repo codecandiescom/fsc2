@@ -35,9 +35,9 @@ static Var_T *f_ovalue_child( Var_T *v );
 static Var_T *f_ochanged_child( Var_T *v );
 
 
-/*-----------------------------------------------------------*/
-/* For appending a new input or output object to the toolbox */
-/*-----------------------------------------------------------*/
+/*-----------------------------------------------------------*
+ * For appending a new input or output object to the toolbox
+ *-----------------------------------------------------------*/
 
 Var_T *f_ocreate( Var_T *var )
 {
@@ -282,11 +282,11 @@ Var_T *f_ocreate( Var_T *var )
 }
 
 
-/*-----------------------------------------------------------------*/
-/* Part of the f_ocreate() function run by the child process only, */
-/* indirectly invoking the f_ocreate() function in the parent via  */
-/* the message passing mechanism.                                  */
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ * Part of the f_ocreate() function run by the child process only,
+ * indirectly invoking the f_ocreate() function in the parent via
+ * the message passing mechanism.
+ *-----------------------------------------------------------------*/
 
 static Var_T *f_ocreate_child( Var_T *v, long type, long lval, double dval )
 {
@@ -436,10 +436,10 @@ static Var_T *f_ocreate_child( Var_T *v, long type, long lval, double dval )
 }
 
 
-/*----------------------------------------------*/
-/* Deletes one or more input or output objects. */
-/* Parameter are one or more object IDs         */
-/*----------------------------------------------*/
+/*----------------------------------------------*
+ * Deletes one or more input or output objects.
+ * Parameters are one or more object IDs.
+ *----------------------------------------------*/
 
 Var_T *f_odelete( Var_T *v )
 {
@@ -479,11 +479,11 @@ Var_T *f_odelete( Var_T *v )
 }
 
 
-/*-----------------------------------------------------------------*/
-/* Part of the f_odelete() function run by the child process only, */
-/* indirectly invoking the f_odelete() function in the parent via  */
-/* the message passing mechanism.                                  */
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ * Part of the f_odelete() function run by the child process only,
+ * indirectly invoking the f_odelete() function in the parent via
+ * the message passing mechanism.
+ *-----------------------------------------------------------------*/
 
 static void f_odelete_child( Var_T *v )
 {
@@ -534,10 +534,10 @@ static void f_odelete_child( Var_T *v )
 }
 
 
-/*------------------------------------------------------------------*/
-/* Part of the f_odelete() function only run by the parent process, */
-/* which actually removes the input or output object.               */
-/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ * Part of the f_odelete() function only run by the parent process,
+ * which actually removes the input or output object.
+ *------------------------------------------------------------------*/
 
 static void f_odelete_parent( Var_T *v )
 {
@@ -602,9 +602,9 @@ static void f_odelete_parent( Var_T *v )
 }
 
 
-/*----------------------------------------------------------*/
-/* Sets or returns the content of an input or output object */
-/*----------------------------------------------------------*/
+/*----------------------------------------------------------*
+ * Sets or returns the content of an input or output object
+ *----------------------------------------------------------*/
 
 Var_T *f_ovalue( Var_T *v )
 {
@@ -700,11 +700,11 @@ Var_T *f_ovalue( Var_T *v )
 }
 
 
-/*----------------------------------------------------------------*/
-/* Part of the f_ovalue() function run by the child process only, */
-/* indirectly invoking the f_ovalue() function in the parent via  */
-/* the message passing mechanism.                                 */
-/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * Part of the f_ovalue() function run by the child process only,
+ * indirectly invoking the f_ovalue() function in the parent via
+ * the message passing mechanism.
+ *----------------------------------------------------------------*/
 
 static Var_T *f_ovalue_child( Var_T *v )
 {
@@ -815,9 +815,9 @@ static Var_T *f_ovalue_child( Var_T *v )
 }
 
 
-/*--------------------------------------------------------------------------*/
-/* Function for testing if the content of an input or output object changed */
-/*--------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------*
+ * Function for testing if the content of an input or output object changed
+ *--------------------------------------------------------------------------*/
 
 Var_T *f_ochanged( Var_T *v )
 {
@@ -862,11 +862,11 @@ Var_T *f_ochanged( Var_T *v )
 }
 
 
-/*------------------------------------------------------------------*/
-/* Part of the f_ochanged() function run by the child process only, */
-/* indirectly invoking the f_ochanged() function in the parent via  */
-/* the message passing mechanism.                                   */
-/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ * Part of the f_ochanged() function run by the child process only,
+ * indirectly invoking the f_ochanged() function in the parent via
+ * the message passing mechanism.
+ *------------------------------------------------------------------*/
 
 static Var_T *f_ochanged_child( Var_T *v )
 {

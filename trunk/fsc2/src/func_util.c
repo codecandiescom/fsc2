@@ -45,19 +45,19 @@ extern sigjmp_buf Alrm_Env;                   /* defined in run.c */
 extern volatile sig_atomic_t Can_Jmp_Alrm;    /* defined in run.c */
 
 
-/*-----------------------------------------------------------------------*/
-/* Prints variable number of arguments using a format string supplied as */
-/* the first argument. Types of arguments to be printed are integer and  */
-/* float data and strings. To get a value printed the format string has  */
-/* to contain the character '#'. The escape character is the backslash,  */
-/* with a double backslash for printing one backslash. Beside the '\#'   */
-/* combination to print a '#' some of the escape sequences from printf() */
-/* ('\n', '\t', and '\"') do work. If the text should even be printed    */
-/* while the test is running the string has to start with "\T".          */
-/*                                                                       */
-/* The function returns the number of variables it printed, not counting */
-/* the format string.                                                    */
-/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ * Prints variable number of arguments using a format string supplied as
+ * the first argument. Types of arguments to be printed are integer and
+ * float data and strings. To get a value printed the format string has
+ * to contain the character '#'. The escape character is the backslash,
+ * with a double backslash for printing one backslash. Beside the '\#'
+ * combination to print a '#' some of the escape sequences from printf()
+ * ('\n', '\t', and '\"') do work. If the text should even be printed
+ * while the test is running the string has to start with "\T".
+ *
+ * The function returns the number of variables it printed, not counting
+ * the format string.
+ *-----------------------------------------------------------------------*/
 
 Var_T *f_print( Var_T *v )
 {
@@ -242,19 +242,19 @@ Var_T *f_print( Var_T *v )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/* Prints variable number of arguments using a format string supplied as */
-/* the first argument. Types of arguments to be printed are integer and	 */
-/* float data and strings. To get a value printed the format string has	 */
-/* to contain the character '#'. The escape character is the backslash,	 */
-/* with a double backslash for printing one backslash. Beside the '\#'	 */
-/* combination to print a '#' some of the escape sequences from printf() */
-/* ('\n', '\t', and '\"') do work. If the text should even be printed    */
-/* while the test is running the string has to start with "\T".          */
-/* 																		 */
-/* The function returns the number of variables it printed, not counting */
-/* the format string.													 */
-/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ * Prints variable number of arguments using a format string supplied as
+ * the first argument. Types of arguments to be printed are integer and
+ * float data and strings. To get a value printed the format string has
+ * to contain the character '#'. The escape character is the backslash,
+ * with a double backslash for printing one backslash. Beside the '\#'
+ * combination to print a '#' some of the escape sequences from printf()
+ * ('\n', '\t', and '\"') do work. If the text should even be printed
+ * while the test is running the string has to start with "\T".
+ *
+ * The function returns the number of variables it printed, not counting
+ * the format string.
+ *-----------------------------------------------------------------------*/
 
 Var_T *f_sprint( Var_T *v )
 {
@@ -448,9 +448,9 @@ Var_T *f_sprint( Var_T *v )
 }
 
 
-/*-----------------------------------------------*/
-/* Called for the EDL function "show_message()". */
-/*-----------------------------------------------*/
+/*-----------------------------------------------*
+ * Called for the EDL function "show_message()".
+ *-----------------------------------------------*/
 
 Var_T *f_showm( Var_T *v )
 {
@@ -508,13 +508,13 @@ Var_T *f_showm( Var_T *v )
 }
 
 
-/*-------------------------------------------------------------------*/
-/* f_wait() is kind of a version of usleep() that isn't disturbed by */
-/* signals - only exception: If a DO_QUIT signal is delivered to the */
-/* caller of f_wait() (i.e. the child) it returns immediately.       */
-/* ->                                                                */
-/*  * number of seconds to sleep                                     */
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * f_wait() is version of usleep() that isn't disturbed by signals -
+ * only exception: If a DO_QUIT signal is delivered to the caller of
+ * f_wait() (i.e. the child) it returns immediately.
+ * ->
+ *  * number of seconds to sleep
+ *-------------------------------------------------------------------*/
 
 Var_T *f_wait( Var_T *v )
 {
@@ -621,16 +621,16 @@ Var_T *f_wait( Var_T *v )
 }
 
 
-/*-------------------------------------------------------------------*/
-/* f_init_1d() has to be called to initialize the display system for */
-/* 1-dimensional experiments.                                        */
-/* Arguments:                                                        */
-/* 1. Number of curves to be shown (optional, defaults to 1)         */
-/* 2. Number of points (optional, 0 or negative if unknown)          */
-/* 3. Real world coordinate and increment (optional)                 */
-/* 4. x-axis label (optional)                                        */
-/* 5. y-axis label (optional)                                        */
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * f_init_1d() has to be called to initialize the display system for
+ * 1-dimensional experiments.
+ * Arguments:
+ * 1. Number of curves to be shown (optional, defaults to 1)
+ * 2. Number of points (optional, 0 or negative if unknown)
+ * 3. Real world coordinate and increment (optional)
+ * 4. x-axis label (optional)
+ * 5. y-axis label (optional)
+ *-------------------------------------------------------------------*/
 
 Var_T *f_init_1d( Var_T *v )
 {
@@ -745,10 +745,10 @@ Var_T *f_init_1d( Var_T *v )
 }
 
 
-/*-------------------------------------------------------------------*/
-/* f_init_2d() has to be called to initialize the display system for */
-/* 2-dimensional experiments.                                        */
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * f_init_2d() has to be called to initialize the display system for
+ * 2-dimensional experiments.
+ *-------------------------------------------------------------------*/
 
 Var_T *f_init_2d( Var_T *v )
 {
@@ -909,9 +909,9 @@ Var_T *f_init_2d( Var_T *v )
 }
 
 
-/*------------------------------------*/
-/* Function to change 1D display mode */
-/*------------------------------------*/
+/*------------------------------------*
+ * Function to change 1D display mode
+ *------------------------------------*/
 
 Var_T *f_dmode( Var_T *v )
 {
@@ -1059,9 +1059,9 @@ Var_T *f_dmode( Var_T *v )
 }
 
 
-/*----------------------------------------------------*/
-/* Function to change the scale during the experiment */
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ * Function to change the scale during the experiment
+ *----------------------------------------------------*/
 
 Var_T *f_cscale( Var_T *v )
 {
@@ -1099,9 +1099,9 @@ Var_T *f_cscale( Var_T *v )
 }
 
 
-/*--------------------------------------------------------------------*/
-/* Function to change the scale of a 1D display during the experiment */
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ * Function to change the scale of a 1D display during the experiment
+ *--------------------------------------------------------------------*/
 
 Var_T *f_cscale_1d( Var_T *v )
 {
@@ -1219,9 +1219,9 @@ Var_T *f_cscale_1d( Var_T *v )
 }
 
 
-/*--------------------------------------------------------------------*/
-/* Function to change the scale of a 2D display during the experiment */
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ * Function to change the scale of a 2D display during the experiment
+ *--------------------------------------------------------------------*/
 
 Var_T *f_cscale_2d( Var_T *v )
 {
@@ -1358,9 +1358,9 @@ Var_T *f_cscale_2d( Var_T *v )
 }
 
 
-/*------------------------------------------------------------------*/
-/* Function to change one or more axis labels during the experiment */
-/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ * Function to change one or more axis labels during the experiment
+ *------------------------------------------------------------------*/
 
 Var_T *f_clabel( Var_T *v )
 {
@@ -1525,10 +1525,10 @@ Var_T *f_clabel_1d( Var_T *v )
 }
 
 
-/*--------------------------------------------*/
-/* Function to change one or more axis labels */
-/* of a 2D display during the experiment      */
-/*--------------------------------------------*/
+/*--------------------------------------------*
+ * Function to change one or more axis labels
+ * of a 2D display during the experiment
+ *--------------------------------------------*/
 
 Var_T *f_clabel_2d( Var_T *v )
 {
@@ -1660,10 +1660,10 @@ Var_T *f_clabel_2d( Var_T *v )
 }
 
 
-/*---------------------------------------------------------*/
-/* Function to change the number of points to be displayed */
-/* during the experiment.                                  */
-/*---------------------------------------------------------*/
+/*---------------------------------------------------------*
+ * Function to change the number of points to be displayed
+ * during the experiment.
+ *---------------------------------------------------------*/
 
 Var_T *f_rescale( Var_T *v )
 {
@@ -1701,10 +1701,10 @@ Var_T *f_rescale( Var_T *v )
 }
 
 
-/*---------------------------------------------------------*/
-/* Function to change the number of points to be displayed */
-/* in a 1D display during the experiment.                  */
-/*---------------------------------------------------------*/
+/*---------------------------------------------------------*
+ * Function to change the number of points to be displayed
+ * in a 1D display during the experiment.
+ *---------------------------------------------------------*/
 
 Var_T *f_rescale_1d( Var_T *v )
 {
@@ -1804,10 +1804,10 @@ Var_T *f_rescale_1d( Var_T *v )
 }
 
 
-/*---------------------------------------------------------*/
-/* Function to change the number of points to be displayed */
-/* in a 2D display during the experiment.                  */
-/*---------------------------------------------------------*/
+/*---------------------------------------------------------*
+ * Function to change the number of points to be displayed
+ * in a 2D display during the experiment.
+ *---------------------------------------------------------*/
 
 Var_T *f_rescale_2d( Var_T *v )
 {
@@ -1916,9 +1916,9 @@ Var_T *f_rescale_2d( Var_T *v )
 }
 
 
-/*-------------------------------------------------------------*/
-/* f_display() is used to send new data to the display system. */
-/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*
+ * f_display() is used to send new data to the display system.
+ *-------------------------------------------------------------*/
 
 Var_T *f_display( Var_T *v )
 {
@@ -1955,9 +1955,9 @@ Var_T *f_display( Var_T *v )
 }
 
 
-/*----------------------------------------------------------------*/
-/* f_display() is used to send new 1D data to the display system. */
-/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * f_display() is used to send new 1D data to the display system.
+ *----------------------------------------------------------------*/
 
 Var_T *f_display_1d( Var_T *v )
 {
@@ -2134,9 +2134,9 @@ Var_T *f_display_1d( Var_T *v )
 }
 
 
-/*-------------------------------------------------------------------*/
-/* f_display_2d() is used to send new 2D data to the display system. */
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * f_display_2d() is used to send new 2D data to the display system.
+ *-------------------------------------------------------------------*/
 
 Var_T *f_display_2d( Var_T *v )
 {
@@ -2384,12 +2384,12 @@ Var_T *f_display_2d( Var_T *v )
 }
 
 
-/*-------------------------------------------------------------------*/
-/* This function is used to pick the arguments to the EDL functions  */
-/* display_1d() and display_2d() from the vaiables stack, check that */
-/* they make sense and then return them in an array of structures to */
-/* be used by the funcrtions f_display_1d() and f_display_2d().      */
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * This function is used to pick the arguments to the EDL functions
+ * display_1d() and display_2d() from the vaiables stack, check that
+ * they make sense and then return them in an array of structures to
+ * be used by the funcrtions f_display_1d() and f_display_2d().
+ *-------------------------------------------------------------------*/
 
 static dpoint_T *eval_display_args( Var_T *v, int dim, int *nsets )
 {
@@ -2616,9 +2616,9 @@ static dpoint_T *eval_display_args( Var_T *v, int dim, int *nsets )
 }
 
 
-/*----------------------------------------*/
-/* Function deletes all points of a curve */
-/*----------------------------------------*/
+/*----------------------------------------*
+ * Function deletes all points of a curve
+ *----------------------------------------*/
 
 Var_T *f_clearcv( Var_T *v )
 {
@@ -2657,9 +2657,9 @@ Var_T *f_clearcv( Var_T *v )
 }
 
 
-/*-------------------------------------------*/
-/* Function deletes all points of a 1D curve */
-/*-------------------------------------------*/
+/*-------------------------------------------*
+ * Function deletes all points of a 1D curve
+ *-------------------------------------------*/
 
 Var_T *f_clearcv_1d( Var_T *v )
 {
@@ -2805,9 +2805,9 @@ Var_T *f_clearcv_1d( Var_T *v )
 }
 
 
-/*-------------------------------------------*/
-/* Function deletes all points of a 2D curve */
-/*-------------------------------------------*/
+/*-------------------------------------------*
+ * Function deletes all points of a 2D curve
+ *-------------------------------------------*/
 
 Var_T *f_clearcv_2d( Var_T *v )
 {
@@ -2953,9 +2953,9 @@ Var_T *f_clearcv_2d( Var_T *v )
 }
 
 
-/*-------------------------*/
-/* Function draws a marker */
-/*-------------------------*/
+/*-------------------------*
+ * Function draws a marker
+ *-------------------------*/
 
 Var_T *f_setmark( Var_T *v )
 {
@@ -2991,9 +2991,9 @@ Var_T *f_setmark( Var_T *v )
 }
 
 
-/*----------------------------*/
-/* Function draws a 1D marker */
-/*----------------------------*/
+/*----------------------------*
+ * Function draws a 1D marker
+ *----------------------------*/
 
 Var_T *f_setmark_1d( Var_T *v )
 {
@@ -3127,9 +3127,9 @@ Var_T *f_setmark_1d( Var_T *v )
 }
 
 
-/*----------------------------*/
-/* Function draws a 2D marker */
-/*----------------------------*/
+/*----------------------------*
+ * Function draws a 2D marker
+ *----------------------------*/
 
 Var_T *f_setmark_2d( Var_T *v )
 {
@@ -3298,9 +3298,9 @@ Var_T *f_setmark_2d( Var_T *v )
 }
 
 
-/*------------------------------*/
-/* Function deletes all markers */
-/*------------------------------*/
+/*------------------------------*
+ * Function deletes all markers
+ *------------------------------*/
 
 Var_T *f_clearmark( Var_T *v )
 {
@@ -3336,9 +3336,9 @@ Var_T *f_clearmark( Var_T *v )
 }
 
 
-/*---------------------------------*/
-/* Function deletes all 1D markers */
-/*---------------------------------*/
+/*---------------------------------*
+ * Function deletes all 1D markers
+ *---------------------------------*/
 
 Var_T *f_clearmark_1d( Var_T *v )
 {
@@ -3426,9 +3426,9 @@ Var_T *f_clearmark_1d( Var_T *v )
 }
 	
 
-/*---------------------------------*/
-/* Function deletes all 2D markers */
-/*---------------------------------*/
+/*---------------------------------*
+ * Function deletes all 2D markers
+ *---------------------------------*/
 
 Var_T *f_clearmark_2d( UNUSED_ARG Var_T *v )
 {
@@ -3533,10 +3533,10 @@ Var_T *f_clearmark_2d( UNUSED_ARG Var_T *v )
 }
 
 
-/*-------------------------------------------------------*/
-/* Function for returning the current mouse position and */
-/* the state of the mouse buttons and the modifier keys. */
-/*-------------------------------------------------------*/
+/*-------------------------------------------------------*
+ * Function for returning the current mouse position and
+ * the state of the mouse buttons and the modifier keys.
+ *-------------------------------------------------------*/
 
 Var_T *f_get_pos( UNUSED_ARG Var_T *v )
 {
@@ -3608,17 +3608,17 @@ Var_T *f_get_pos( UNUSED_ARG Var_T *v )
 }
 
 
-/*---------------------------------------------------------------------*/
-/* Function for finding the peak of a signal. The function will return */
-/* useful results only when the signal to noise ratio is rather good   */
-/* (should be at least in the order of 250) and the baseline is more   */
-/* or less straight (i.e. does only changes linearly). The function    */
-/* makes no special assumptions about the form of the signal (except   */
-/* that it's a peak, not something looking like the derivative of a    */
-/* peak) and returns the index the point where the area under the peak */
-/* is half of the total area, so it should also work with asymmetric   */
-/* peaks.                                                              */
-/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*
+ * Function for finding the peak of a signal. The function will return
+ * useful results only when the signal to noise ratio is rather good
+ * (should be at least in the order of 250) and the baseline is more
+ * or less straight (i.e. does only changes linearly). The function
+ * makes no special assumptions about the form of the signal (except
+ * that it's a peak, not something looking like the derivative of a
+ * peak) and returns the index the point where the area under the peak
+ * is half of the total area, so it should also work with asymmetric
+ * peaks.
+ *---------------------------------------------------------------------*/
 
 Var_T *f_find_peak( Var_T *v )
 {
@@ -3709,11 +3709,11 @@ Var_T *f_find_peak( Var_T *v )
 }
 
 
-/*-------------------------------------------------------------------*/
-/* Function returns the index of the largest array of an element. If */
-/* there is more than one element of the largest size the index of   */
-/* the the first of these elements is returned.                      */
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * Function returns the index of the largest array of an element. If
+ * there is more than one element of the largest size the index of
+ * the the first of these elements is returned.
+ *-------------------------------------------------------------------*/
 
 Var_T *f_index_of_max( Var_T *v )
 {
@@ -3748,11 +3748,11 @@ Var_T *f_index_of_max( Var_T *v )
 }
 
 
-/*--------------------------------------------------------------------*/
-/* Function returns the index of the smallest array of an element. If */
-/* there is more than one element of the smallest size the index of   */
-/* the the first of these elements is returned.                       */
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ * Function returns the index of the smallest array of an element. If
+ * there is more than one element of the smallest size the index of
+ * the the first of these elements is returned.
+ *--------------------------------------------------------------------*/
 
 Var_T *f_index_of_min( Var_T *v )
 {
@@ -3862,19 +3862,19 @@ Var_T *f_mean_part_array( Var_T *v )
 }
 
 
-/*------------------------------------------------------------------------*/
-/* EDL function for removing spikes from an 1-dimensional array. It works */
-/* by first calculating the derivative (one-point-differences) of the     */
-/* spectrum and the mean and standard deviation. All points where the     */
-/* derivative is larger than a certain factor of the standard deviation   */
-/* (the factor being the second argument to the function) are teken to be */
-/* potential spikes. Now the set is further restricted to pairs of such   */
-/* that are not further apart than a treshold value (the third argument   */
-/* the function takes) and that have opposite signs of the derivative.    */
-/* The region between these points are taken to be spikes and the points  */
-/* in between are replaced by a straight line connecting the points just  */
-/* outside the region of the spike.                                       */
-/*------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*
+ * EDL function for removing spikes from an 1-dimensional array. It works
+ * by first calculating the derivative (one-point-differences) of the
+ * spectrum and the mean and standard deviation. All points where the
+ * derivative is larger than a certain factor of the standard deviation
+ * (the factor being the second argument to the function) are teken to be
+ * potential spikes. Now the set is further restricted to pairs of such
+ * that are not further apart than a treshold value (the third argument
+ * the function takes) and that have opposite signs of the derivative.
+ * The region between these points are taken to be spikes and the points
+ * in between are replaced by a straight line connecting the points just
+ * outside the region of the spike.
+ *------------------------------------------------------------------------*/
 
 #define OUTLIER_DEF_NUMBER 10
 
