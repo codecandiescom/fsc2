@@ -74,6 +74,7 @@
 
 #include "global.h"               /* must be the very first to be included ! */
 #include "comm.h"
+#include "ipc.h"
 #include "exceptions.h"
 #include "T.h"
 #include "util.h"
@@ -120,7 +121,7 @@ void notify_conn( int signo );
 
 #if defined ( FSC2_MAIN )
 
-int EUID;
+uid_t EUID;
 
 
 /* used in compiling the user supplied program */
@@ -161,7 +162,7 @@ int pd[ 4 ];                    /* pipe descriptors */
 int conn_pd[ 2 ];
 pid_t child_pid = 0;            /* pid of child */
 pid_t conn_pid = -1;            /* pid of communication child */
-volatile bool do_send = UNSET;  /* globals used with the signal handlers */
+int semaphore = -1;
 volatile bool do_quit = UNSET;
 volatile bool conn_child_replied = UNSET;
 bool react_to_do_quit = SET;
@@ -180,7 +181,7 @@ TOOL_BOX *Tool_Box = NULL;
 
 #else   /*  ! FSC2_MAIN */
 
-extern int EUID;
+extern uid_t EUID;
 
 extern long Lc;
 extern char *Fname;
@@ -218,7 +219,7 @@ extern int pd[ ];                  /* pipe descriptors */
 extern int conn_pd[ ];
 extern pid_t child_pid;            /* pid of child */
 extern pid_t conn_pid;
-extern volatile bool do_send;      /* globals used with the signal handlers */
+extern int semaphore;
 extern volatile bool do_quit;
 extern bool react_to_do_quit;
 extern bool exit_hooks_are_run;

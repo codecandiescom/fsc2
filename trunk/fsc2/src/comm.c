@@ -14,13 +14,10 @@
    parent, knowing exactly what kind of data to expect.
 
    The first problem to be addressed is how to make the parent aware of data
-   or requests send by the child. This is handled by two signals, DO_SEND and
-   NEW_DATA. The DO_SEND signal is raised by the parent when it is prepared to
-   accept data. The child always has to wait for this signal before it may
-   send any data or requests. Then it posts its message and raises the
-   NEW_DATA signal. Now the parent has to accept the data and when it's done
-   it again raises the DO_SEND signal. Using the DO_SEND signal avoids
-   flooding the parent with too many requests and data.
+   or requests send by the child. This is handled by a signals, NEW_DATA. 
+   The NEW_DATA signal is send by the child whenever it is sending new data.
+   Before it may send data it must wait on a semaphore that is posted by the
+   parent when it is prepared to accept new data.
 
    The communication path for request type of messages is easy to implement -
    a simple pair of pipes will do. All needed beside is a protocol for the
@@ -33,8 +30,8 @@
    parent reads the pipe and replies by sending the answer to the request via
    another pipe. No synchronisation is needed since the child will be blocked
    while reading the reply pipe until the parent finishes writing its answer
-   to the pipe. The parent will also have to send a DO_SEND signal to allow
-   the child to send further data or requests.
+   to the pipe. The parent will also have to post the semaphore to allow the
+   child to send further data or requests.
 
    The implementation for the exchange of data is a bit more complicated. Here
    the child should not be forced to wait for the parent process to finally
@@ -50,9 +47,9 @@
    parent just the identifier of the memory segment. Within the NEW_DATA
    signal handler all the parent does is to store this identifier in a message
    queue (that should have at least as many slots as there are shared memory
-   segments, see below) and then to raises the DO_SEND immediately. This way
-   the child can continue with the measurement while the parent has time to
-   handle the new data whenever it is ready to do so.
+   segments, see below) and then posts the semaphore immediately. This way the
+   child can continue with the measurement while the parent has time to handle
+   the new data whenever it is ready to do so.
 
    How does the child send memory segment identifiers to the parent? This
    also is done via a shared memory segment created before the child is
@@ -63,17 +60,16 @@
    message it is going to receive.
 
    Thus, in the NEW_DATA signal handler the parent just copies the segment
-   identifier and the type flag and, for DATA messages, raises the DO_SEND
-   signal. Finally, it creates a synthetic event for the invisible button.
-   Where do the segment identifiers get stored? Together with the segment
-   for storing the identifiers a queue is created for storing the the
-   identifiers and message type flags. The size of the queue can be rather
-   limited since there is only a limited amount of shared memory
-   segments. Thus this queue to has have only the maximum number of shared
-   memory segments plus one entries (the extra entry is for REQUEST messages
-   - there can always be only one). Beside the message queue also two
-   pointers are needed, on pointing to the oldest un-handled entry and one
-   just above the newest one.
+   identifier and the type flag and, for DATA messages, posts the semaophore.
+   Finally, it creates a synthetic event for the invisible button. Where do
+   the segment identifiers get stored? Together with the segment for storing
+   the identifiers a queue is created for storing the the identifiers and
+   message type flags. The size of the queue can be rather limited since there
+   is only a limited amount of shared memory segments. Thus this queue to has
+   have only the maximum number of shared memory segments plus one entries
+   (the extra entry is for REQUEST messages - there can always be only
+   one). Beside the message queue also two pointers are needed, on pointing to
+   the oldest un-handled entry and one just above the newest one.
 
    In the handler for the synthetically triggered, invisible button the
    parent runs through all the entries in the message queue starting with
@@ -164,11 +160,15 @@ bool setup_comm( void )
 
 	seteuid( EUID );
 	Key_Area = shmget( IPC_PRIVATE, 4 * sizeof( char ) + 2 * sizeof( int ),
-					   IPC_CREAT | 0600 );
+					   IPC_CREAT | SHM_R | SHM_A );
 
 	if ( Key_Area < 0 )
 	{
 		seteuid( getuid( ) );
+
+		sema_destroy( semaphore );
+		semaphore = -1;
+
 		for ( i = 0; i < 4; i++ )
 			close( pd[ i ] );
 		return FAIL;
@@ -178,11 +178,13 @@ bool setup_comm( void )
 	{
 		for ( i = 0; i < 4; i++ )
 			close( pd[ i ] );
+
 		sema_destroy( semaphore );
 		semaphore = -1;
 
 		shmctl( Key_Area, IPC_RMID, &shm_buf );
 		seteuid( getuid( ) );
+
 		return FAIL;
 	}
 	seteuid( getuid( ) );
@@ -199,6 +201,9 @@ bool setup_comm( void )
 	{
 		for ( i = 0; i < 4; i++ )
 			close( pd[ i ] );
+
+		sema_destroy( semaphore );
+		semaphore = -1;
 
 		seteuid( EUID );
 		shmdt( ( void * ) raw_key );
@@ -236,17 +241,17 @@ void end_comm( void )
 
 	T_free( Message_Queue );
 
-	/* Delete the semaphore */
-
-	sema_destroy( semaphore );
-	semaphore = -1;
-
 	/* Detach and remove shared memory segment used for the message queue */
 
 	seteuid( EUID );
 	shmdt( ( void * ) ( ( char * ) Key - 4 ) );
 	shmctl( Key_Area, IPC_RMID, NULL );
 	seteuid( getuid( ) );
+
+	/* Delete the semaphore */
+
+	sema_destroy( semaphore );
+	semaphore = -1;
 
 	/* Close parents side of read and write pipe */
 
@@ -771,11 +776,7 @@ static bool pipe_read( int fd, void *buf, size_t bytes_to_read )
 		   the first byte has been read by the child since nothing tells us
 		   how many bytes already have been read. To make sure (at least for
 		   the DO_SEND signal) that the signal is received before the read
-		   starts the parent sends it always before replying to a request.
-		   Quite another problem is the DO_QUIT signal - let's hope the read
-		   is atomic or it's never going to happen... The only real solution
-		   here would be to block all signals just before the read() and
-		   handle them directly afterwards. */
+		   starts the parent sends it always before replying to a request. */
 
 		if ( bytes_read == -1 && errno == EINTR )
 			continue;
