@@ -28,7 +28,7 @@
 
 #include <setjmp.h>
 
-typedef enum {
+enum {
 	NO_EXCEPTION                = 0,               /* must be 0 ! */
 	EXCEPTION                   = ( 1 << 0 ),
 	OUT_OF_MEMORY_EXCEPTION     = ( 1 << 1 ),
@@ -40,7 +40,7 @@ typedef enum {
 	MISSING_SEMICOLON_EXCEPTION = ( 1 << 7 ),
 	INVALID_INPUT_EXCEPTION     = ( 1 << 8 ),
 	USER_BREAK_EXCEPTION        = ( 1 << 9 ),
-} Exception_Type;
+};
 
 
 #define TRY \
