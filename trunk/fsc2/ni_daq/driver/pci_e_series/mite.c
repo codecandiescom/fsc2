@@ -221,13 +221,11 @@ int pci_dma_buf_setup( Board *board, NI_DAQ_SUBSYSTEM sys,
 
 		if ( sys != NI_DAQ_AO_SUBSYSTEM )
 		{
-			mdc->lc.mar =
-				cpu_to_le32( pci_map_single( board->dev,
+			mdc->lc.mar = cpu_to_le32( pci_map_single( board->dev,
 							mdc->buf, mdc->size,
 							PCI_DMA_FROMDEVICE ) );
 			if ( mdc->lc.mar == 0 )
 				break;
-
 			mdc->is_mapped = 1;
 		}
 
@@ -261,8 +259,9 @@ int pci_dma_buf_setup( Board *board, NI_DAQ_SUBSYSTEM sys,
 
 	mdc->lc.tcr = mdc->lc.mar = mdc->lc.dar = mdc->lc.lkar = 0;
 
-	/* If continuous input or output is to be done the LKAR pointer in
-	   the last link must point back to the first element */
+	/* If continuous input or output (not yet implemented!) is to be done
+	   the LKAR pointer in the last link must point back to the first
+	   element */
 
 	if ( continuous )
 		board->mite_chain[ num_links - 1 ][ i ].lc.lkar =
@@ -280,14 +279,14 @@ int pci_dma_buf_setup( Board *board, NI_DAQ_SUBSYSTEM sys,
 /* available, writing them to the 'dest' buffer. If it's clear */
 /* that all data from the acquisition have already been read   */
 /* DMA is disabled and the DMA kernel buffers are released.    */
-/* When the function returns teh 'size' points to the number   */
-/* of transfered bytes. A negative return value indicates an   */
+/* When the function returns 'size' points to the number of    */
+/* transfered bytes. A negative return value indicates an      */
 /* error, a return value of 0 means that everything went well  */
-/* and there are still further data to be expected and a value */
+/* and there are still more data to be expected and a value    */
 /* of 1 also means success but that all data to be expected    */
 /* now have been fetched and the DMA system has been shut down */
 /* (and a further call would fail unless a new acquisition has */
-/* beed started in the mean time).                             */
+/* been started in the mean time).                             */
 /* Please note: The data returned may belong to different AI   */
 /*              channels. This depends on the channel setup:   */
 /*              a scan returns a value for each channels in    */
@@ -306,7 +305,7 @@ int pci_dma_buf_get( Board *board, NI_DAQ_SUBSYSTEM sys, void *dest,
 	size_t avail;
 
 
-	/* If no DMA buffers are allocated calling the function is a bad
+	/* When no DMA buffers are allocated calling the function is a bad
 	   mistake */
 
 	if ( board->mite_chain[ sys ] == NULL ) {
@@ -322,21 +321,24 @@ int pci_dma_buf_get( Board *board, NI_DAQ_SUBSYSTEM sys, void *dest,
 		return 0;
 	}
 
+	avail *= 2 * board->AI.num_data_per_scan;
+
 	if ( avail < *size )
 		*size = avail;
 
-	/* Copy as many (of the newly acquired) bytes as possible or requested
-	   to the user buffer */
+	/* Copy as many of the newly acquired bytes as possible or requested
+	   to the user supplied buffer */
 
-	for ( mdc = board->mite_chain[ sys ]; mdc->buf != NULL && *size > 0;
+	for ( mdc = board->mite_chain[ sys ]; *size > 0 && mdc->buf != NULL;
 	      mdc++ ) {
 
-		/* Skip the current link if it has already been used up */
+		/* Skip the current link if it has already been used up, i.e.
+		   all the data it contains are already send to the user*/
 
 		if ( ( left = mdc->size - mdc->transfered ) == 0 )
 			continue;
 
-		/* Calculate how many bytes there are left in the buffer */
+		/* Calculate how many bytes there are left in the link */
 
 		transf = left >= *size ? *size : left;
 
@@ -376,7 +378,7 @@ int pci_dma_buf_get( Board *board, NI_DAQ_SUBSYSTEM sys, void *dest,
 	*size = total;
 
 	/* If all data points that can be expected have been fetched disable
-	   DMA and release the buffers and return a value indicating this */
+	   DMA, release the buffers and return 1 to indice this fact */
 
 	if ( sys_data[ sys ].max_size <= sys_data[ sys ].transfered )
 	{
@@ -388,24 +390,36 @@ int pci_dma_buf_get( Board *board, NI_DAQ_SUBSYSTEM sys, void *dest,
 }
 
 
-/*-----------------------------------------------------------------------*/
-/* Function returns the number of bytes that have been written to memory */
-/* or read by the board since the function was called the last time.     */
-/*-----------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
+/* For the AI subsystem the function returns the number of scans for which */
+/* data have been written to memory. For all other subsystems (where the   */
+/* function is not used yet) it returns the number of bytes thahave been   */
+/* written to memory or read by the board since the function was called    */
+/* the last time.                                                          */
+/*-------------------------------------------------------------------------*/
 
 size_t pci_dma_get_available( Board *board, NI_DAQ_SUBSYSTEM sys )
 {
 	u32 avail;
 
-	avail = le32_to_cpu( readl( mite_DAR( sys ) )
-			     - ( readl( mite_FCR( sys ) ) & 0x000000FF ) )
-	        - sys_data[ sys ].transfered;
+
+	/* Please note: It seems to be important to read from the MITE DAR
+	   register first and only then from the FCR register - otherwise
+	   sometimes the very last data point read later on was garbage when
+	   during the reading the data there was heavy disk I/O using DMA
+	   going on. That's also why the the next two lines aren't written
+	   as a single line, I found by looking at disassembled module that
+	   the compiler rearranged the reads to read the FCR first and the
+	   DAR only afterwards when it was written as a single line. */
+
+	avail = le32_to_cpu( readl( mite_DAR( sys ) ) );
+	avail -= ( le32_to_cpu( readl( mite_FCR( sys ) ) ) & 0x000000FF )
+	         + sys_data[ sys ].transfered;
 
 	/* Only tell about AI data for completed scans */
 
 	if ( sys == NI_DAQ_AI_SUBSYSTEM )
-		avail = ( avail / ( 2 * board->AI.num_data_per_scan) )
-			* 2 * board->AI.num_data_per_scan;
+		avail = avail / ( 2 * board->AI.num_data_per_scan );
 
 	return avail;
 }
