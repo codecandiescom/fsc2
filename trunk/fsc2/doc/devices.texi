@@ -2055,11 +2055,11 @@ of an @code{EDL} program.
 @node Synthesizer Functions, Temperature Controller Functions, Pulser Functions, Device Functions
 @section Synthesizer Functions
 @cindex Synthesizer Functions
-The only implemented synthesizers so far are the @code{HP8647A} (but
-also is works with the @code{HP8648B} synthesizer) and
-@code{HP8672A}. Their modules are loaded by specifying
+Supported synthesizers so far are the Hewlett-Packard models @code{HP8647A},
+@code{HP8648B} and @code{HP8672A}. Their modules are loaded by specifying
 @example
 hp8647a
+hp8648b
 hp8672a
 @end example
 @noindent
@@ -2095,9 +2095,10 @@ RF output.
 The function queries or sets the RF output frequency. If called to set
 the frequency it accepts a frequency as the only argument. For the
 @code{HP8647A} the frequency must be in the range between @w{250 kHz}
-and @w{1000 MHz}, for the @code{HP8672A} between @w{xxx MHz} and @w{18
-GHz}. The frequency set by the very first call of this function is also
-the function that is set automatically by a call of the function
+and @w{1000 MHz}, for the @code{HP8648B} between @w{10 kHz} and @{2 GHz}
+and for the @code{HP8672A} between @w{xxx MHz} and @w{18 GHz}. The
+frequency set by the very first call of this function is also the
+function that is set automatically by a call of the function
 @code{synthesizer_reset_frequency()} (see below).
 
 Before the @code{EXPERIMENT} section this function can't be called in
@@ -2113,8 +2114,15 @@ frequency has been set previously.
 The function queries or sets the output attenuation. If called to set
 the attenuation it accepts one argument, the attenuation. For the
 @code{HP8647A} the attenuation must be in the range between @w{+10 db}
-and @w{-136 db} with a resolution of @w{0.1 db}, for the @code{HP8672A}
-between @w{+3 db} and @w{-120 db} with a resolution of @w{1 db}.
+and @w{-136 db} with a resolution of @w{0.1 db}, for the @code{HP8648B}
+between @w{+14.5 dv} and @w{-136 db} (with the same resolution) and for
+the @code{HP8672A} between @w{+3 db} and @w{-120 db} with a resolution
+of @w{1 db}.
+
+Currently for the @code{HP8647A} the minimum attenuation that can be
+set from the program is reduced to @w{-5 db}, should you need lower
+attenuations change the definition of @code{MIN_ATTEN} in the
+configuration file for the device.
 
 Before the @code{EXPERIMENT} section this function can't be called in
 query mode, i.e.@: without an argument (unless the attenuation has already
