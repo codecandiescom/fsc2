@@ -54,18 +54,20 @@ export        # export all symbols to the sub-makefiles
 
 .SUFFIXES:
 .PHONY: all install clean distclean                     \
-        install-pion.anorg.chemie.uni-frankfurt.de      \
+		install-pion.anorg.chemie.uni-frankfurt.de      \
 		install-crowley.physik.fu-berlin.de             \
 		install-moebi.physik.fu-berlin.de               \
 		install-door.physik.fu-berlin.de                \
 		install-isaak.physik.fu-berlin.de               \
+		install-tresr.physik.fu-berlin.de               \
 		install-sunone.chemie.unibas.ch                 \
 		install-crowley.none                            \
-        uninstall-pion.anorg.chemie.uni-frankfurt.de    \
+		uninstall-pion.anorg.chemie.uni-frankfurt.de    \
 		uninstall-crowley.physik.fu-berlin.de           \
 		uninstall-moebi.physik.fu-berlin.de             \
 		uninstall-door.physik.fu-berlin.de              \
 		uninstall-isaak.physik.fu-berlin.de             \
+		uninstall-tresr.physik.fu-berlin.de             \
 		uninstall-sunone.chemie.unibas.ch               \
 		uninstall-crowley.none
 
@@ -129,15 +131,6 @@ install-crowley.physik.fu-berlin.de:
 	-$(LN) $(LNFLAGS) $(libdir)/egg4402so $(libdir)/boxcar.so
 	-chown $(OWNER).$(GROUP) $(libdir)/boxcar.so
 
-install-moebi.physik.fu-berlin.de:
-	$(MAKE) $(UNINSTALL_MACHINE)
-	-$(LN) $(LNFLAGS) $(libdir)/dg2020_b.so $(libdir)/pulser.so
-	-chown $(OWNER).$(GROUP) $(libdir)/pulser.so
-	-$(LN) $(LNFLAGS) $(libdir)/aeg_x_band.so $(libdir)/magnet.so
-	-chown $(OWNER).$(GROUP) $(libdir)/magnet.so
-	-$(LN) $(LNFLAGS) $(libdir)/er035m_s.so $(libdir)/gaussmeter.so
-	-chown $(OWNER).$(GROUP) $(libdir)/gaussmeter.so
-
 install-door.physik.fu-berlin.de:
 	$(MAKE) $(UNINSTALL_MACHINE)
 	-$(LN) $(LNFLAGS) $(libdir)/hfs9000.so $(libdir)/hfs9003.so
@@ -156,9 +149,21 @@ install-isaak.physik.fu-berlin.de:
 	-$(LN) $(LNFLAGS) $(libdir)/er035m_s.so $(libdir)/gaussmeter.so
 	-chown $(OWNER).$(GROUP) $(libdir)/gaussmeter.so
 
+install-tresr.physik.fu-berlin.de:
+	$(MAKE) $(UNINSTALL_MACHINE)
+	-$(LN) $(LNFLAGS) $(libdir)/er032m.so $(libdir)/magnet.so
+	-chown $(OWNER).$(GROUP) $(libdir)/magnet.so
+	-$(LN) $(LNFLAGS) $(libdir)/er023m.so $(libdir)/lockin.so
+	-chown $(OWNER).$(GROUP) $(libdir)/lockin.so
+
 install-sunone.chemie.unibas.ch:
+	$(MAKE) $(UNINSTALL_MACHINE)
+
+install-moebi.physik.fu-berlin.de:
+	$(MAKE) $(UNINSTALL_MACHINE)
 
 install-crowley.none:
+	$(MAKE) $(UNINSTALL_MACHINE)
 
 
 # How to uninstall the modules
@@ -184,11 +189,6 @@ uninstall-crowley.physik.fu-berlin.de:
 	-$(RM) $(RMFLAGS) $(libdir)/synthesizer.so
 	-$(RM) $(RMFLAGS) $(libdir)/boxcar.so
 
-uninstall-moebi.physik.fu-berlin.de:
-	-$(RM) $(RMFLAGS) $(libdir)/pulser.so
-	-$(RM) $(RMFLAGS) $(libdir)/magnet.so
-	-$(RM) $(RMFLAGS) $(libdir)/gaussmeter.so
-
 uninstall-door.physik.fu-berlin.de:
 	-$(RM) $(RMFLAGS) $(libdir)/hfs9003.so
 	-$(RM) $(RMFLAGS) $(libdir)/w_band.so
@@ -199,7 +199,13 @@ uninstall-isaak.physik.fu-berlin.de:
 	-$(RM) $(RMFLAGS) $(libdir)/magnet.so
 	-$(RM) $(RMFLAGS) $(libdir)/gaussmeter.so
 
+uninstall-tresr.physik.fu-berlin.de:
+	-$(RM) $(RMFLAGS) $(libdir)/magnet.so
+	-$(RM) $(RMFLAGS) $(libdir)/lockin.so
+
 uninstall-sunone.chemie.unibas.ch:
+
+uninstall-moebi.physik.fu-berlin.de:
 
 uninstall-crowley.none:
 

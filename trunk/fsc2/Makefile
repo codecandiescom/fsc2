@@ -53,14 +53,19 @@ GROUP            := uucp
 # Next set the file for writing logs about the activity on the GPIB bus.
 # Make sure that fsc2 or its users have write access to the directory the
 # log file will be created in. If not given logs will be written to stderr.
-# Finally, set the verbosity level of the GPIB logs, use HIGH, MEDIUM, LOW
-# or OFF. If not set it defaults to LOW and only errors will be logged.
+# The next variable, GPIB_LOG_LEVEL, sets the verbosity level for the GPIB
+# logs, use either HIGH, MEDIUM, LOW or OFF. If not set it defaults to LOW
+# and only errors will be logged.
+# Finally, if the header files for the GPIB library aren't either in
+# /usr/include or /usr/include (i.e. if they are, for example, in
+# /usr/include/gpib) set the last variable GPIB_HEADER_DIR to the absolute
+# path of the directory where the header file(s) for the library reside.
 
 GPIB_LIBRARY     := JTT
 GPIB_CONF_FILE   := /etc/gpib.conf
 GPIB_LOG_FILE    := /tmp/gpib.log
 GPIB_LOG_LEVEL   := HIGH
-
+#GPIB_HEADER_DIR := /usr/include/gpib
 
 # NUM_SERIAL_PORTS defines the number of serial ports that are available on
 # the computer and defaults to 0 if not set (in which case no serial ports
@@ -197,12 +202,17 @@ ifeq ($(machine_name),sunone.chemie.unibas.ch)
 	 UNINSTALL_MACHINE  := uninstall-$(machine_name)
 endif
 
+ifeq ($(machine_name),tresr.physik.fu-berlin.de)
+	 GPIB_LIBRARY       := LLP
+	 INSTALL_MACHINE    := install-$(machine_name)
+	 UNINSTALL_MACHINE  := uninstall-$(machine_name)
+endif
+
 ifeq ($(machine_name),crowley.none)
 	 GPIB_LIBRARY       := JTT
 	 INSTALL_MACHINE    := install-$(machine_name)
 	 UNINSTALL_MACHINE  := uninstall-$(machine_name)
 endif
-
 
 # Pass lots of variables to the source files...
 # For directories make sure they end with a `/'.
@@ -249,6 +259,10 @@ else
 			CFLAGS += -DGPIB_LOG_LEVEL=LL_ERR
 		endif
 	endif
+endif
+
+ifdef GPIB_HEADER_DIR
+	CFLAGS += -I$(GPIB_HEADER_DIR)
 endif
 
 ifdef MAIL_ADDRESS
