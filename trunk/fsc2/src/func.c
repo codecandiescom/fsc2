@@ -1075,7 +1075,7 @@ Var *f_wait( Var *v )
 	} while ( ! do_quit &&
 			  ( sleepy.it_value.tv_sec > 0 || sleepy.it_value.tv_usec > 0 ) );
 
-	/* Return 1 if end of cleping time was reached, 0 if do_quit was set.
+	/* Return 1 if end of sleping time was reached, 0 if do_quit was set.
 	   Do not reset the alarm signal handler, because after receipt of a
 	   'do_quit' signal the timer may still be running and send a signal
 	   that could kill the child prematurely ! */
