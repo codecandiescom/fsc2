@@ -14,7 +14,6 @@ void User_Functions_exit_hook( void );
 Var *square( Var *var );
 Var *int_slice( Var *var );
 Var *float_slice( Var *var );
-Var *filename( Var *var );
 
 
 
@@ -106,39 +105,4 @@ Var *float_slice( Var *var )
 	T_free( array );
 
 	return ret;
-}
-
-
-Var *filename( Var *var )
-{
-	Var *cur;
-	int i, j;
-	char *s[ 4 ];
-	const char *r;
-
-
-	/* While test is running just rerturn an empty string */
-
-	if ( TEST_RUN )
-		return vars_push( STR_VAR, "" );
-
-	for ( i = 0, cur = var; cur != NULL; i++, cur = cur->next )
-	{
-		vars_check( cur, STR_VAR );
-		s[ i ] = cur->val.sptr;
-	}
-
-	for ( j = i; j < 4; j++ )
-		s[ j ] = get_string_copy( "" );
-
-	r = show_fselector( s[ 0 ], s[ 1 ], s[ 2 ], s[ 3 ] );
-	if ( r != NULL )
-		cur = vars_push( STR_VAR, r );
-	else
-		cur = vars_push( STR_VAR, get_string_copy( "" ) );
-
-	for ( j = i; j < 4; j++ )
-		T_free( s[ j ] );
-
-	return cur;
 }

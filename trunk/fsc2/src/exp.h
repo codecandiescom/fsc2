@@ -7,7 +7,7 @@
 
 
 /* this typedef MUST be identical to the YYSTYPE union defined in
-   `prim_exp_parser.h' which in turn results from `prim_exp_parser.y' !!!! */
+   `prim_exp_run_parser.h' which in turn results from `prim_exp_parser.y' !! */
 
 typedef union {
 		long   lval;

@@ -56,6 +56,8 @@ VAR         ^[ \t]*VAR(IABLE)?S?:
 PHAS        ^[ \t]*PHA(SE)?S?:
 PREP        ^[ \t]*PREP(ARATION)?S?:
 EXP         ^[ \t]*EXP(ERIMENT)?:
+ON_STOP		^[ \t]*ON_STOP:
+
 
 CONT        CONT(INUE)?
 
@@ -148,7 +150,8 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 				return 0;
 			}
 
-"ON_QUIT:"  return ON_QUIT_TOK;
+{ON_STOP}   return ON_STOP_TOK;
+
 "WHILE"     return WHILE_TOK;
 "BREAK"     return BREAK_TOK;
 {CONT}      return CONT_TOK;
