@@ -19,10 +19,17 @@ Var *f_abort( Var *v )
 	v = v;                       /* keeps the compiler happy */
 
 
-	eprint( NO_ERROR, "%s:%ld: Exit due to abort().\n", Fname, Lc );
+	eprint( NO_ERROR, "%s:%ld: Exit due to call of abort().\n", Fname, Lc );
 
 	if ( ! TEST_RUN )
+	{
+		str = get_string( 50 + strlen( Fname ) );
+		strcpy( str, "Exit due to call of abort() in\n" );
+		sprintf( str + strlen( str ), "%s at line %ld.", Fname, Lc );
+		show_message( str );
+		T_free( str );
 		THROW( ABORT_EXCEPTION );
+	}
 
 	return NULL;
 }
