@@ -46,7 +46,7 @@ void load_all_drivers( void )
 	for ( cd = Device_List; cd != NULL; cd = cd->next )
 		if ( cd->is_loaded && cd->driver.is_init_hook &&
 			 ! cd->driver.init_hook( ) )
-			eprint( WARN, "Initialization of module `%s.so' failed.\n",
+			eprint( WARN, "Initialisation of module `%s.so' failed.\n",
 					cd->name );
 }
 
@@ -234,7 +234,7 @@ void run_test_hooks( void )
 	for ( cd = Device_List; cd != NULL; cd = cd->next )
 		if ( cd->is_loaded && cd->driver.is_test_hook &&
 			 ! cd->driver.test_hook( ) )
-			eprint( WARN, "Initialization for test run of module `%s.so' "
+			eprint( WARN, "Initialisation for test run of module `%s.so' "
 					"failed.\n", cd->name );
 }
 
@@ -250,7 +250,7 @@ void run_exp_hooks( void )
 	for ( cd = Device_List; cd != NULL; cd = cd->next )
 		if ( cd->is_loaded && cd->driver.is_exp_hook &&
 			 ! cd->driver.exp_hook( ) )
-			eprint( WARN, "Initialization for experiment of module `%s.so' "
+			eprint( WARN, "Initialisation for experiment of module `%s.so' "
 					"failed.\n", cd->name );
 }
 
