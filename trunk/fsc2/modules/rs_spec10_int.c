@@ -481,9 +481,9 @@ uns16 *rs_spec10_get_pic( uns32 *size )
 
 	/* Last chance for plausibility checks... */
 
-	fsc2_assert( region.s2 <= rs_spec10->ccd.max_size[ X ] &&
+	fsc2_assert( region.s2 < rs_spec10->ccd.max_size[ X ] &&
 				 region.s2 > region.s1 &&
-				 region.p2 <= rs_spec10->ccd.max_size[ Y ] &&
+				 region.p2 < rs_spec10->ccd.max_size[ Y ] &&
 				 region.p2 > region.p1 &&
 				 ( region.s2 - region.s1 + 1 ) % region.sbin == 0 &&
 				 ( region.p2 - region.p1 + 1 ) % region.pbin == 0 );
@@ -494,15 +494,15 @@ uns16 *rs_spec10_get_pic( uns32 *size )
 	if ( RS_SPEC10_MIRROR == 1 )
 	{
 		temp = region.s1;
-		region.s1 = rs_spec10->ccd.max_size[ X ] - region.s2;
-		region.s2 = rs_spec10->ccd.max_size[ X ] - temp;
+		region.s1 = rs_spec10->ccd.max_size[ X ] - region.s2  - 1;
+		region.s2 = rs_spec10->ccd.max_size[ X ] - temp - 1;
 	}
 
 	if ( RS_SPEC10_UPSIDE_DOWN == 1 )
 	{
 		temp = region.p1;
-		region.p1 = rs_spec10->ccd.max_size[ Y ] - region.p2;
-		region.p2 = rs_spec10->ccd.max_size[ Y ] - temp;
+		region.p1 = rs_spec10->ccd.max_size[ Y ] - region.p2 - 1;
+		region.p2 = rs_spec10->ccd.max_size[ Y ] - temp - 1;
 	}
 
 	/* The PVCAM library needs to load some additional data files. Unfortuna-
