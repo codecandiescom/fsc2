@@ -74,7 +74,7 @@ clean:
 
 distclean:
 	$(MAKE) clean
-	$(RM) $(RMFLAGS) *.a *.so
+	$(RM) $(RMFLAGS) *.a *.so parser.output
 
 
 .PRECIOUS: %.c %.h

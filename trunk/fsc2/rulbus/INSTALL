@@ -305,7 +305,7 @@ fi
 if [ $MAJOR -ne 0 ]; then
 	dialog --yesno \
 "Do you want to create the device file\n\
-      /dev/rulbus_epp\n\n\
+          /dev/rulbus_epp\n\n\
      for the board now?"  9 46
 
 	if [ $? -eq 0 ]; then
@@ -359,9 +359,9 @@ in the directory for init scripts yourself." 12 70
 		dialog --yesno "\
 Do you want me to copy the init script 'utils/rulbus_epp'\n\
 to the init directory '/etc/init.d' and create the\n\
-necessary runlevel links so that the RULBUS EPP module gets\n\
-loaded at boot time and the device files are created\n\
-                 automatically?" 9 60
+necessary runlevel links so that the RULBUS EPP module\n\
+gets loaded at boot time and the device files are\n\
+             created automatically?" 9 65
 
 		if [ $? -eq 0 ]; then
 			if [ -e /etc/init.d/rulbus_epp ]; then
