@@ -7,9 +7,23 @@
 
 
 #define INCH   25.4                    /* mm in an inch */
+#define S2P          1                 /* send to printer */
+#define P2F          2                 /* print to file */
+#define A4_PAPER     0
+#define A3_PAPER     1
+#define Letter_PAPER 2
+#define Legal_PAPER  3
 
-static double paper_width = 210.0;
-static double paper_height = 297.0;
+FD_print *print_form;
+
+static char *cmd = NULL;
+static int print_type = S2P;
+
+static int paper_type = A4_PAPER;
+static double paper_width;
+static double paper_height;
+
+static bool is_color = UNSET;
 
 static double x_0, y_0, w, h;          /* position and size of the frame */
 
@@ -18,41 +32,35 @@ static void print_header( FILE *fp, char *name );
 static void eps_make_scale( FILE *fp, void *cv, int coord );
 static void eps_draw_curve_1d( FILE *fp, int i );
 
+static void do_print( char *name, const char *command );
+static int start_printing( char **argv, char *name );
 
 
-/* Some implementation details: If we want to send data directly to the
-   printer it would seem to be the best idea simply create a pipe via popen()
-   to lpr(1) and this way to write the data to be printed to lpr's standard
-   input. Unfortunately, there seems to be a problem with this: Even though
-   the program gets the SIGCHLD signal the exit status is already reaped by
-   pclose(). Thus, if we're running an handler for SIGCHLD signals it will
-   triggered but the handler will wait for the death of another child instead
-   of the process that exited due to the pclose(). While this is ok as long as
-   there are no other child processes while the measurement is running there
-   is another child, the child we forked to do the measurement. Now, after the
-   the pclose() call the parent process will hang in the SIGCHLD signal
-   handler, waiting indefinitely for another child to exit, while to child
-   process doing the measurement is also hanging, waiting for the parent
-   process to send signals allowing the child process to send further data...
-*/
 
-
+/*-------------------------------------------------------*/
+/*-------------------------------------------------------*/
 
 void print_1d( FL_OBJECT *obj, long data )
 {
-	int print_type;
+	int type;
 	FILE *fp;
-	char *name;
+	char *name = NULL;
 	int i;
 
 
-	obj = obj;
 	data = data;
+
+
+	fl_deactivate_object( obj );
 
 	/* Find out about the way to print and get a file, then print the header */
 
-   if ( ( print_type = get_print_file( &fp, &name ) ) == 0 )
+   if ( ( type = get_print_file( &fp, &name ) ) == 0 )
+   {
+	   fl_activate_object( obj );
 	   return;
+   }
+
 	print_header( fp, name );
 
 	x_0 = 50;
@@ -89,19 +97,32 @@ void print_1d( FL_OBJECT *obj, long data )
 	fprintf( fp, "showpage\n" );
 	fclose( fp );
 
-	T_free( name );
+	if ( print_type == S2P )
+		do_print( name, cmd );
+
+	if ( name != NULL )
+	{
+		T_free( name );
+		name = NULL;
+	}
+
+	fl_activate_object( obj );
 }
 
 
+/*-------------------------------------------------------*/
+/*-------------------------------------------------------*/
+
 void print_2d( FL_OBJECT *obj, long data )
 {
-	int print_type;
+	int type;
 	FILE *fp;
 	char *name;
 
 
-	obj = obj;
 	data = data;
+
+	fl_deactivate_object( obj );
 
 	if ( G.active_curve == -1 )
 	{
@@ -111,8 +132,12 @@ void print_2d( FL_OBJECT *obj, long data )
 
 	/* Find out about the way to print and get a file, then print the header */
 
-	if ( ( print_type = get_print_file( &fp, &name ) ) == 0 )
+	if ( ( type = get_print_file( &fp, &name ) ) == 0 )
+	{
+		fl_activate_object( obj );
 		return;
+	}
+
 	print_header( fp, name );
 
 	x_0 = 55.0;
@@ -137,18 +162,276 @@ void print_2d( FL_OBJECT *obj, long data )
 	fprintf( fp, "showpage\n" );
 	fclose( fp );
 
-	T_free( name );
+	if ( name != NULL )
+	{
+		T_free( name );
+		name = NULL;
+	}
+
+	fl_activate_object( obj );
 }
 
+
+/*--------------------------------------------------------------*/
+/* Shows a form that allows the user to select the way to print */
+/* and, for printing to file mode, select the file              */
+/*--------------------------------------------------------------*/
 
 int get_print_file( FILE **fp, char **name )
 {
-	if ( ( *fp = fopen( "xyz.eps", "w" ) ) == NULL )
+	FL_OBJECT *obj;
+	char filename[ ] = P_tmpdir "/fsc2XXXXXX";
+	struct stat stat_buf;
+
+
+	/* Create the form for print setup */
+
+	print_form = create_form_print( );
+
+	/* If a printer command has already been set put it into the input object,
+	   otherwise set default command */
+
+	if ( cmd != NULL )
+	{
+		fl_set_input( print_form->s2p_input, cmd );
+		T_free( cmd );
+		cmd = NULL;
+	}
+	else
+		fl_set_input( print_form->s2p_input, "lpr -h" );
+
+	/* Set the paper type to the last one used (or A4 at the start) */
+
+	switch ( paper_type )
+	{
+		case A4_PAPER :
+			fl_set_button( print_form->A4, 1 );
+			paper_width = 210.0;
+			paper_height = 297.0;
+			break;
+
+		case A3_PAPER :
+			fl_set_button( print_form->A3, 1 );
+			paper_width = 297.0;
+			paper_height = 420.2;
+			break;
+
+		case Letter_PAPER :
+			fl_set_button( print_form->Letter, 1 );
+			paper_width = 215.9;
+			paper_height = 279.4;
+			break;
+
+		case Legal_PAPER :
+			fl_set_button( print_form->Legal, 1 );
+			paper_width = 215.9;
+			paper_height = 355.6;
+			break;
+	}
+
+	if ( print_type == S2P )
+	{
+		fl_set_button( print_form->s2p_button, 1 );
+		fl_set_button( print_form->p2f_button, 0 );
+		fl_deactivate_object( print_form->p2f_group );
+	}
+	else
+	{
+		fl_set_button( print_form->s2p_button, 0 );
+		fl_set_button( print_form->p2f_button, 1 );
+		fl_deactivate_object( print_form->s2p_input );
+	}
+
+	if ( is_color )
+	{
+		fl_set_button( print_form->bw_button, 0 );
+		fl_set_button( print_form->col_button, 1 );
+	}
+	else
+	{
+		fl_set_button( print_form->bw_button, 1 );
+		fl_set_button( print_form->col_button, 0 );
+	}
+
+	fl_show_form( print_form->print, FL_PLACE_MOUSE, FL_TRANSIENT,
+				  "fsc: Print" );
+
+	/* Let the user fill in the form */
+
+	do
+		obj = fl_do_forms( );
+	while ( obj != print_form->print_button &&
+			obj != print_form->cancel_button );
+
+	/* Store state of form */
+
+	TRY
+	{
+		if ( fl_get_button( print_form->s2p_button ) )
+		{
+			print_type = S2P;
+			cmd = get_string_copy( fl_get_input( print_form->s2p_input ) );
+		}
+		else
+		{
+			print_type = P2F;
+			*name = get_string_copy( fl_get_input( print_form->p2f_input ) );
+		}
+		TRY_SUCCESS;
+	}
+	CATCH (EXCEPTION )
+		obj = print_form->cancel_button;
+
+	if ( 1 == fl_get_button( print_form->A4 ) )
+		 paper_type = A4_PAPER;
+	if ( 1 == fl_get_button( print_form->A3 ) )
+		 paper_type = A3_PAPER;
+	if ( 1 == fl_get_button( print_form->Letter ) )
+		 paper_type = Letter_PAPER;
+	if ( 1 == fl_get_button( print_form->Legal ) )
+		 paper_type = Legal_PAPER;
+
+	fl_hide_form( print_form->print );
+	fl_free_form( print_form->print );
+
+	/* If cancel button was pressed (or an error happend) return now */
+
+	if ( obj == print_form->cancel_button )
+	{
+		if ( *name != NULL )
+		{
+			T_free( *name );
+			*name = NULL;
+		}
 		return 0;
-	*name = get_string_copy( "xyz.eps" );
-	return 1;
+	}
+
+	/* In send-to-printer mode try to create and open a temporary file */
+
+	if ( print_type == S2P ) 
+	{
+		/* Create a temporary file */
+
+		if ( mkstemp( filename ) < 0 ||
+			 ( *fp = fopen( filename, "w" ) ) == NULL )
+		{
+			fl_show_alert( "Error", "Sorry, can't open temporary file.",
+						   NULL, 1 );
+			return 0;
+		}
+
+		/* ... and store its name */
+
+		TRY
+		{
+			*name = get_string_copy( filename );
+			TRY_SUCCESS;
+		}
+		CATCH( EXCEPTION )
+			return 0;
+
+		return S2P;
+	}
+
+	/* In print-to-file mode ask for confirmation if the file already exists
+	   and try to open it for writing */
+
+	if  ( ( 0 == stat( *name, &stat_buf ) &&
+			1 != show_choices( "The selected file does already exist:\n"
+							   " You're sure you want to overwrite it?",
+							   2, "Yes", "No", NULL, 2 ) ) ||
+		  ( *fp = fopen( *name, "w" ) ) == NULL )
+	{
+		if ( *name != NULL )
+		{
+			T_free( *name );
+			*name = NULL;
+		}
+		return 0;
+	}
+
+	return P2F;
 }
 
+
+/*------------------------------------------------------*/
+/* Callback function for the objects in the print form. */
+/*------------------------------------------------------*/
+
+void print_callback( FL_OBJECT *obj, long data )
+{
+	const char *fn;
+
+
+	data = data;
+
+	if ( obj == print_form->s2p_button )
+	{
+		fl_activate_object( print_form->s2p_input );
+		fl_deactivate_object( print_form->p2f_group );
+		return;
+	}
+
+	if ( obj == print_form->p2f_button )
+	{
+		fl_deactivate_object( print_form->s2p_input );
+		fl_activate_object( print_form->p2f_group );
+		return;
+	}
+
+	if ( obj == print_form->p2f_browse )
+	{
+		fl_invalidate_fselector_cache( );
+		fn = fl_show_fselector( "Select output EPS file:", NULL,
+								"*.eps", NULL );
+		if ( fn != NULL )
+			fl_set_input( print_form->p2f_input, fn );
+		return;
+	}
+
+	if ( obj == print_form->A4 )
+	{
+		paper_width = 210.0;
+		paper_height = 297.0;
+		paper_type = A4_PAPER;
+		return;
+	}
+
+	if ( obj == print_form->A3 )
+	{
+		paper_width = 297.0;
+		paper_height = 420.2;
+		paper_type = A3_PAPER;
+		return;
+	}
+
+	if ( obj == print_form->Letter )
+	{
+		paper_width = 215.9;
+		paper_height = 279.4;
+		paper_type = Letter_PAPER;
+		return;
+	}
+
+	if ( obj == print_form->Legal )
+	{
+		paper_width = 215.9;
+		paper_height = 355.6;
+		paper_type = Legal_PAPER;
+		return;
+	}
+
+	if ( obj = print_form->bw_button )
+		is_color = UNSET;
+
+	if ( obj = print_form->col_button )
+		is_color = SET;
+}
+
+
+/*------------------------------------------------------------------------*/
+/* Prints the header of the EPS-file as well as date, user and fsc2 logo. */
+/*------------------------------------------------------------------------*/
 
 void print_header( FILE *fp, char *name )
 {
@@ -298,7 +581,7 @@ void eps_make_scale( FILE *fp, void *cv, int coord )
 	d_delta_fine = s2d[ coord ] * rwc_delta / fabs( G.rwc_delta[ coord ] );
 
 	/* `rwc_start' is the first value in the display (i.e. the smallest x or y
-	   value still shown in the canvas), `rwc_start_fine' the position of the
+	   value still shown in the frame), `rwc_start_fine' the position of the
 	   first small tick (both in real world coordinates) and, finally,
 	   `d_start_fine' is the same position but in points */
 
@@ -353,6 +636,8 @@ void eps_make_scale( FILE *fp, void *cv, int coord )
 
 	if ( coord == X )
 	{
+		/* Draw the x-axis label string */
+
 		if ( G.label[ X ] != NULL )
 			fprintf( fp, "%f (%s) cw sub 25 m (%s) show\n",
 					 paper_height - 25.0, G.label[ X ], G.label[ X ] );
@@ -390,6 +675,8 @@ void eps_make_scale( FILE *fp, void *cv, int coord )
 	}
 	else
 	{
+		/* Draw the y-axis label string */
+
 		if ( G.label[ Y ] != NULL )
 			fprintf( fp, "gs 25 (%s) ch add %f (%s) cw sub t 90 r 0 0 m (%s) "
 					 "show gr\n", G.label[ Y ], paper_width - 25.0,
@@ -423,6 +710,9 @@ void eps_make_scale( FILE *fp, void *cv, int coord )
 }
 
 
+/*-------------------------------------------------------*/
+/*-------------------------------------------------------*/
+
 void eps_draw_curve_1d( FILE *fp, int i )
 {
 	Curve_1d *cv = G.curve[ i ];
@@ -435,20 +725,34 @@ void eps_draw_curve_1d( FILE *fp, int i )
 
 	fprintf( fp, "gs 0.2 slw 1 slc\n" );
 
-	/* Set the dash type for the different curves */
+	/* Set the either the color or the dash type for the different curves */
 
 	switch ( i )
 	{
+		case 0 :
+			if ( is_color )
+				fprintf( fp, "1 0 0 srgb\n" );          /* red */
+			break;
+
 		case 1 :
-			fprintf( fp, "[ 1 0.8 ] 0 sd\n" );
+			if ( is_color )
+				fprintf( fp, "0 1 0 srgb\n" );          /* green */
+			else
+				fprintf( fp, "[ 1 0.8 ] 0 sd\n" );
 			break;
 
 		case 2 :
-			fprintf( fp, "[ 0.001 0.5 ] 0 sd\n" );
+			if ( is_color )
+				fprintf( fp, "1 0.75 0 srgb\n" );       /* dark yellow */
+			else
+				fprintf( fp, "[ 0.001 0.5 ] 0 sd\n" );
 			break;
 
 		case 3 :
-			fprintf( fp, "[ 0.5 0.5 0.0001 0.5 ] 0 sd\n" );
+			if ( is_color )
+				fprintf( fp, "0 0 1 srgb\n" );          /* blue */
+			else
+				fprintf( fp, "[ 0.5 0.5 0.0001 0.5 ] 0 sd\n" );
 			break;
 	}
 
@@ -458,7 +762,7 @@ void eps_draw_curve_1d( FILE *fp, int i )
 	while ( ! cv->points[ k ].exist && k < G.nx )
 		k++;
 
-	if ( k >= G.nx )
+	if ( k >= G.nx )                /* is there only just one ? */
 		return;
 
 	fprintf( fp, "%f %f m\n", x_0 + s2d[ X ] * ( k + cv->shift[ X ] ),
@@ -475,4 +779,142 @@ void eps_draw_curve_1d( FILE *fp, int i )
 	}
 
 	fprintf( fp, "s gr\n" );
+}
+
+
+/* Some implementation details: If we want to send data directly to the
+   printer the best way would seem to be to simply create a pipe via popen()
+   to lpr (or whatever the appropriate print command is) and then write the
+   data to be printed to lpr's standard input. Unfortunately, there's a
+   problem with this approach: Even though the main program gets the SIGCHLD
+   signal the exit status is already reaped by pclose(). Thus, if we're
+   running an handler for SIGCHLD signals it will be triggered but the handler
+   will wait for the death of another child instead of the process that exited
+   due to the pclose(). While this might be ok as long as there are no other
+   child processes, at least while the measurement is running there is at
+   least one other child, the child we forked to do the measurement. Now,
+   after the the pclose() call the parent process will hang in the SIGCHLD
+   signal handler, waiting indefinitely for another child to exit, while the
+   child process doing the measurement also hangs, waiting for the parent
+   process to send signals allowing the measurement child process to send
+   further data...
+
+   So, instead we write all data to a temporary file and then fork another
+   process. This process forks again and then execs lpr (or whatever printing
+   command the user asked us to use). The first forked process waits until the
+   printing process finishes and removes the temporary file before it exits.
+   This double level of forking insures that the temporary file is really
+   going to be deleted - otherwise we would have to know the correct flags for
+   the print command to make it delete this file by itself.  */
+
+
+void do_print( char *name, const char *command )
+{
+	char *cptr;
+	char *cmd_line = NULL;
+	char **argv = NULL;
+	int argc;
+	
+
+	/* Do a minimal sanity check of the print command */
+
+	if ( command == NULL || *command == '\0' )
+	{
+		fl_show_alert( "Error", "Sorry, bad print command.", NULL, 1 );
+		return;
+	}
+
+	/* Now let's try to assemble the command line, if this fails we can send
+       an error message. */
+
+	TRY
+	{
+		cmd_line = get_string_copy( command );
+
+		argv = T_malloc( 3 * sizeof( char * ) );
+		argv[ 0 ] = cptr = cmd_line;
+		argc = 1;
+
+		while ( 1 )
+		{
+			cptr = strchr( cptr, '-' );
+
+			if ( cptr == NULL )         /* no (more) options */
+				break;
+
+			if ( cptr < cmd_line + 2 )
+			{
+				fl_show_alert( "Error", "Sorry, bad print command.", NULL, 1 );
+				THROW( EXCEPTION );
+			}
+
+			if ( *( cptr - 1 ) == ' ' )
+			{
+				*( cptr - 1 ) = '\0';
+				argv = T_realloc( argv, ( argc + 3 ) * sizeof( char * ) );
+				argv[ argc++ ] = cptr;
+			}
+
+			if ( *++cptr == '\0' )      /* setup check for more options */
+				break;
+		}
+
+		argv[ argc++ ] = name;          /* finally, append the file name */
+		argv[ argc ] = NULL;            /* end of the argument list */
+
+		/* Fork another process to do the printing */
+
+		switch( fork( ) )
+		{
+			case -1 :              /* failure of fork() */
+				fl_show_alert( "Error", "Sorry, can't print results.",
+							   "Running out of resources.", 1 );
+				THROW( EXCEPTION );
+
+			case 0 :               /* the new child process */
+				_exit( start_printing( argv, name ) );
+
+			default :              /* the parent process */
+			   break;
+		}
+
+		TRY_SUCCESS;
+	}
+	CATCH( EXCEPTION )
+		unlink( name );              /* on failure delete the temporary file */
+
+	if ( argv != NULL )
+		T_free( argv );
+	if ( cmd_line != NULL )
+		T_free( cmd_line );
+}
+
+
+/*------------------------------------------------------------*/
+/* Starts a `grand-parent' process to do the actual printing. */
+/*------------------------------------------------------------*/
+
+int start_printing( char **argv, char *name )
+{
+	int status = EXIT_FAILURE;
+
+
+	signal( SIGCHLD, SIG_IGN );  /* we don't need SIGCHLD signals */
+
+	switch( fork( ) )
+	{
+		case -1 :                /* failure of fork() */
+			unlink( name );
+			break;
+
+		case 0 :                 /* the child finally execs....*/
+			if ( execvp( argv[ 0 ], argv ) < 0 )
+				_exit( EXIT_FAILURE );
+
+		default :                /* the parent waits for the child to finish */
+			wait( &status );
+			unlink( name );
+	}
+
+	return status;
 }
