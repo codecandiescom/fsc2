@@ -1157,8 +1157,8 @@ void main_sig_handler( int signo )
 		default :
 			in_signal_handler = SET;
 			final_exit_handler( );
-			fprintf( stderr, "fsc2 killed by %s signal.\n",
-					 strsignal( signo ) );
+			fprintf( stderr, "fsc2 (%d) killed by %s signal.\n",
+					 getpid( ), strsignal( signo ) );
 			exit( -1 );
 	}
 }
