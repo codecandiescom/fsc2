@@ -1,10 +1,10 @@
 /*
   $Id$
 */
-void loop_dbg( void );
-
 
 #include "fsc2.h"
+
+static bool in_for_lex = UNSET;
 
 extern int prim_exp_runparse( void );
 extern int conditionparse( void );
@@ -16,6 +16,9 @@ extern int prim_explex( void );
 extern FILE *prim_expin;
 extern Token_Val prim_exp_runlval;
 extern Token_Val conditionlval;
+
+extern char *Fname;
+extern long Lc;
 
 
 /*
@@ -115,70 +118,14 @@ void store_exp( FILE *in )
 		   used in repeat loops */
 
 		prg_token[ prg_length ].start = prg_token[ prg_length ].end = NULL;
-		prg_token[ prg_length ].max_count
-			= prg_token[ prg_length ].act_count = 0;
-
+		prg_token[ prg_length ].counter = 0;
 		prg_length++;
 	}
 
 	/* check and initialize if's and loops */
 
 	prim_loop_setup( );
-
-	loop_dbg( );
 }
-
-
-void loop_dbg( void )
-{
-	Prg_Token *cur = prg_token;
-
-
-	for ( ; cur < prg_token + prg_length; cur++ )
-	{
-		switch ( cur->token )
-		{
-			case WHILE_TOK :
-				printf( "%d: WHILE, start = %d, end = %d\n",
-						cur - prg_token, cur->start - prg_token,
-						cur->end - prg_token );
-				break;
-
-			case REPEAT_TOK :
-				printf( "%d: REPEAT, start = %d, end = %d\n",
-						cur - prg_token, cur->start - prg_token,
-						cur->end - prg_token );
-				break;
-
-			case CONT_TOK :
-				printf( "%d: CONTINUE, start = %d\n",
-						cur - prg_token, cur->start - prg_token );
-				break;
-
-			case BREAK_TOK :
-				printf( "%d: CONTINUE, end = %d\n",
-						cur - prg_token, cur->end - prg_token );
-				break;
-
-			case IF_TOK :
-				printf( "%d: IF, start = %d, end = %d\n",
-						cur - prg_token, cur->start - prg_token,
-						cur->end - prg_token );
-				break;
-
-			case ELSE_TOK :
-				printf( "%d ELSE\n",
-						cur - prg_token );
-				break;
-
-			case '}' :
-				printf( "%d: `}', end = %d\n",
-						cur - prg_token, cur->end - prg_token );
-				break;
-		}
-	}
-}
-
 
 /*------------------------------------------------------------------------*/
 /* Deallocates all memory used for storing the tokens (and their semantic */
@@ -247,7 +194,7 @@ void prim_loop_setup( void )
 	{
 		switch( prg_token[ i ].token )
 		{
-			case WHILE_TOK : case REPEAT_TOK :
+			case WHILE_TOK : case REPEAT_TOK : case FOR_TOK :
 				setup_while_or_repeat( prg_token[ i ].token, &i );
 				break;
 
@@ -272,6 +219,7 @@ void setup_while_or_repeat( int type, long *pos )
 {
 	Prg_Token *cur = prg_token + *pos;
 	long i = *pos + 1;
+	const char *t;
 
 
 	if ( i == prg_length )
@@ -298,7 +246,7 @@ void setup_while_or_repeat( int type, long *pos )
 	{
 		switch( prg_token[ i ].token )
 		{
-			case WHILE_TOK : case REPEAT_TOK :
+			case WHILE_TOK : case REPEAT_TOK : case FOR_TOK :
 				setup_while_or_repeat( prg_token[ i ].token, &i );
 				break;
 
@@ -316,8 +264,7 @@ void setup_while_or_repeat( int type, long *pos )
 
 			case ELSE_TOK :
 				eprint( FATAL, "%s:%ld: ELSE without IF in current block.\n",
-						prg_token[ i ].Fname, prg_token[ i ].Lc,
-						type == WHILE_TOK ? "while" : "repeat");
+						prg_token[ i ].Fname, prg_token[ i ].Lc );
 				THROW( BLOCK_ERROR_EXCEPTION );
 
 			case '{' :
@@ -338,8 +285,15 @@ void setup_while_or_repeat( int type, long *pos )
 		}
 	}
 
+	if ( type == WHILE_TOK )
+		t = "WHILE";
+	if ( type == REPEAT_TOK )
+		t = "REPEAT";
+	if ( type == FOR_TOK )
+		t = "FOR";
+	
 	eprint( FATAL, "Missing `}' for %s loop starting at %s:%ld.\n",
-			type == WHILE_TOK ? "WHILE" : "REPEAT", cur->Fname, cur->Lc );
+			t, cur->Fname, cur->Lc );
 	THROW( BLOCK_ERROR_EXCEPTION );
 }
 
@@ -349,6 +303,7 @@ void setup_if_else( int type, long *pos, Prg_Token *cur_wr )
 	Prg_Token *cur = prg_token + *pos;
 	long i = *pos + 1;
 	bool in_if = SET;
+	bool dont_need_close_paran = UNSET;      /* set for ELSE IF constructs */
 
 
 	if ( i == prg_length )
@@ -367,15 +322,15 @@ void setup_if_else( int type, long *pos, Prg_Token *cur_wr )
 	{
 		switch( prg_token[ i ].token )
 		{
-			case WHILE_TOK : case REPEAT_TOK :
+			case WHILE_TOK : case REPEAT_TOK : case FOR_TOK :
 				setup_while_or_repeat( prg_token[ i ].token, &i );
 				break;
 
 			case CONT_TOK :
 				if ( cur_wr == NULL )
 				{
-					eprint( FATAL, "%s:%ld: CONTINUE not within WHILE or "
-							"REPEAT loop.\n", prg_token[ i ].Fname,
+					eprint( FATAL, "%s:%ld: CONTINUE not within WHILE, REPEAT "
+							"or FOR loop.\n", prg_token[ i ].Fname,
 							prg_token[ i ].Lc );
 					THROW( BLOCK_ERROR_EXCEPTION );
 				}
@@ -385,8 +340,8 @@ void setup_if_else( int type, long *pos, Prg_Token *cur_wr )
 			case BREAK_TOK :
 				if ( cur_wr == NULL )
 				{
-					eprint( FATAL, "%s:%ld: BREAK not within WHILE or REPEAT "
-							"loop.\n", prg_token[ i ].Fname,
+					eprint( FATAL, "%s:%ld: BREAK not within WHILE, REPEAT "
+							"or FOR loop.\n", prg_token[ i ].Fname,
 							prg_token[ i ].Lc );
 					THROW( BLOCK_ERROR_EXCEPTION );
 				}
@@ -395,6 +350,18 @@ void setup_if_else( int type, long *pos, Prg_Token *cur_wr )
 
 			case IF_TOK :
 				setup_if_else( prg_token[ i ].token, &i, cur_wr );
+
+				if ( dont_need_close_paran )
+				{
+					if ( cur->end != NULL )
+						( cur->end - 1 )->end = &prg_token[ i + 1 ];
+					else
+						cur->end = &prg_token[ i + 1 ];
+					prg_token[ i ].end = &prg_token[ i + 1 ];
+					*pos = i;
+					return;
+				}
+
 				break;
 
 			case ELSE_TOK :
@@ -404,12 +371,29 @@ void setup_if_else( int type, long *pos, Prg_Token *cur_wr )
 							prg_token[ i ].Fname, prg_token[ i ].Lc );
 					THROW( BLOCK_ERROR_EXCEPTION );
 				}
-				if ( prg_token[ i + 1 ].token != '{' )
+				if ( prg_token[ i + 1 ].token != '{' &&
+					 prg_token[ i + 1 ].token != IF_TOK )
 				{
 					eprint( FATAL, "%s:%ld: Missing '{' after ELSE.\n",
 							prg_token[ i ].Fname, prg_token[ i ].Lc );
 					THROW( BLOCK_ERROR_EXCEPTION );
 				}
+
+				if ( in_if )
+				{
+					eprint( FATAL, "Missing `}' for ELSE block belonging to "
+							"IF-ELSE construct starting at %s:%ld.\n",
+							cur->Fname, cur->Lc );
+					THROW( BLOCK_ERROR_EXCEPTION );
+				}
+
+
+				if(  prg_token[ i + 1 ].token == IF_TOK )
+				{
+					cur->end = &prg_token[ i ];
+					dont_need_close_paran = SET;
+				}
+
 				break;
 
 			case '{' :
@@ -444,8 +428,8 @@ void setup_if_else( int type, long *pos, Prg_Token *cur_wr )
 		}
 	}
 
-	eprint( FATAL, "Missing `}' for %s at %s:%ld.\n", in_if ? "IF" : "ELSE",
-			cur->Fname, cur->Lc );
+	eprint( FATAL, "Missing `}' for %s starting at %s:%ld.\n",
+			in_if ? "IF" : "ELSE", cur->Fname, cur->Lc );
 	THROW( BLOCK_ERROR_EXCEPTION );
 }
 
@@ -453,8 +437,9 @@ void setup_if_else( int type, long *pos, Prg_Token *cur_wr )
 void prim_exp_run( void )
 {
 	Prg_Token *cur;
-	long i;
 
+
+	save_restore_variables( SET );
 
 	cur_prg_token = prg_token;
 
@@ -468,19 +453,48 @@ void prim_exp_run( void )
 
 			case WHILE_TOK :
 				cur = cur_prg_token;
-				cur_prg_token = test_condition( cur ) ? cur->start : cur->end;
+				if ( test_condition( cur ) )
+				{
+					cur->counter++;
+					cur_prg_token = cur->start;
+				}
+				else
+				{
+					cur->counter = 0;
+					cur_prg_token = cur->end;
+				}
 				break;
 
 			case REPEAT_TOK :
 				cur = cur_prg_token;
-				if ( cur->act_count == 0 )
+				if ( cur->counter == 0 )
 					get_max_repeat_count( cur );
+				if ( ++cur->count.repl.act <= cur->count.repl.max )
+				{
+					cur->counter++;
+					cur_prg_token = cur->start;
+				}
 				else
 				{
-					if ( ++cur->act_count <= cur->max_count )
-						cur_prg_token = cur->start;
-					else
-						cur_prg_token = cur->end;
+					cur->counter = 0;
+					cur_prg_token = cur->end;
+				}
+				break;
+
+			case FOR_TOK :
+				cur = cur_prg_token;
+				if ( cur->counter == 0 )
+					get_for_cond( cur );
+
+				if ( test_for_cond( cur ) )
+				{
+					cur->counter++;
+					cur_prg_token = cur->start;
+				}
+				else
+				{
+					cur->counter = 0;
+					cur_prg_token = cur->end;
 				}
 				break;
 
@@ -498,7 +512,10 @@ void prim_exp_run( void )
 				break;
 
 			case ELSE_TOK :
-				cur_prg_token += 2;
+				if ( ( cur_prg_token + 1 )->token == '{' )
+					 cur_prg_token += 2;
+				else
+					cur_prg_token++;
 				break;
 
 			default :
@@ -507,11 +524,7 @@ void prim_exp_run( void )
 		}
 	}
 
-	/* reset the repeat counter */
-
-	for ( i = 0; i < prg_length; i++ )
-		if ( prg_token[ i ].token == REPEAT_TOK )
-			prg_token[ i ].act_count = 0;
+	save_restore_variables( UNSET );
 }
 
 
@@ -523,10 +536,13 @@ int prim_exp_runlex( void )
 
 	if ( cur_prg_token != NULL && cur_prg_token < prg_token + prg_length )
 	{
+		Fname = cur_prg_token->Fname;
+		Lc = cur_prg_token->Lc;
+
 		switch( cur_prg_token->token )
 		{
 			case WHILE_TOK : case REPEAT_TOK : case BREAK_TOK : case CONT_TOK :
-			case IF_TOK :    case ELSE_TOK :
+			case FOR_TOK   : case IF_TOK :     case ELSE_TOK :
 				return 0;
 
 			case '}' :
@@ -576,6 +592,12 @@ int prim_exp_runlex( void )
 	return 0;
 }
 
+
+/*------------------------------------------------------------------------*/
+/* This routines returnes the tokens to the parser while the condition of */
+/* a while, repeat, for or if is parsed.                                  */
+/*------------------------------------------------------------------------*/
+
 int conditionlex( void )
 {
 	int token;
@@ -584,10 +606,20 @@ int conditionlex( void )
 
 	if ( cur_prg_token != NULL && cur_prg_token < prg_token + prg_length )
 	{
+		Fname = cur_prg_token->Fname;
+		Lc = cur_prg_token->Lc;
+
 		switch( cur_prg_token->token )
 		{
-			case '{' :
-				return '{';
+			case '{' :                 /* always signifies end of condition */
+				return 0;
+
+			case ':' :                 /* separator in for loop condition */
+				if ( in_for_lex )
+					return 0 ;
+				eprint( FATAL, "%s:%ld: Syntax error in condition at "
+						"token `:'.\n", Fname, Lc  );
+				THROW( CONDITION_EXCEPTION );
 
 			case E_STR_TOKEN :
 				conditionlval.sptr = cur_prg_token->tv.sptr;
@@ -621,6 +653,11 @@ int conditionlex( void )
 				cur_prg_token++;
 				return E_VAR_REF;
 
+			case '=' :
+				eprint( FATAL, "%s:%ld: For comparisions `==' must be used "
+						"(`=' is for assignments only).\n", Fname, Lc );
+				THROW( CONDITION_EXCEPTION );
+
 			default :
 				memcpy( &conditionlval, &cur_prg_token->tv,
 						sizeof( Token_Val ) );
@@ -634,50 +671,66 @@ int conditionlex( void )
 }
 
 
+/*------------------------------------------------*/
+/* Function tests the condition of a while or if. */
+/*------------------------------------------------*/
+
 bool test_condition( Prg_Token *cur )
 {
 	bool condition;
 
 
-	cur_prg_token++;             /* skip the keyword */
-	conditionparse( );
-	assert( Var_Stack->next == NULL );
+	cur_prg_token++;                     /* skip the WHILE or IF */
+	conditionparse( );                   /* get the value */
+	assert( Var_Stack->next == NULL );   /* Paranoia as usual... */
 	assert( cur_prg_token->token == '{' );
 
-	if ( ! ( Var_Stack->type == INT_VAR ) )
+	/* Make sure returned value is either integer or float */
+
+	if ( ! ( Var_Stack->type & ( INT_VAR | FLOAT_VAR ) ) )
 	{
-		const char *t1 = "WHILE loop",
-			       *t2 = "REPEAT loop",
-		           *t3 = "IF construct";
 		const char *t;
 
 		if ( cur->token == WHILE_TOK )
-			t = t1;
+			t = "WHILE loop";
 		if ( cur->token == REPEAT_TOK )
-			t = t2;
+			t = "REPEAT loop";
+		if ( cur->token == FOR_TOK )
+			t = "FOR loop";
 		if ( cur->token == IF_TOK )
-			t = t3;
+			t = "IF construct";
 
 		cur++;
 		eprint( FATAL, "%s:%ld: Invalid condition for %s.\n",
-				cur->Fname, cur->Lc, t3 );
+				cur->Fname, cur->Lc, t );
 		THROW( CONDITION_EXCEPTION );
 	}
 			 
-	condition = Var_Stack->val.lval ? OK : FAIL;
+	/* Test the result - erverything nonzero returns OK */
+
+	if ( Var_Stack->type == INT_VAR )
+		condition = Var_Stack->val.lval ? OK : FAIL;
+	else
+		condition = Var_Stack->val.dval ? OK : FAIL;
+
 	vars_pop( Var_Stack );
 	return( condition );
 }
 
 
+/*---------------------------------------------------------*/
+/* Functions determines the repeat count for a repeat loop */
+/*---------------------------------------------------------*/
+
 void get_max_repeat_count( Prg_Token *cur )
 {
-	cur_prg_token++;             /* skip the keyword */
-	conditionparse( );
-	assert( Var_Stack->next == NULL );
-	assert( cur_prg_token->token == '{' );
+	cur_prg_token++;                    /* skip the REPEAT token */
+	conditionparse( );                  /* get the value */
+	assert( Var_Stack->next == NULL );  /* Paranoia as usual... */
 
-	if ( ! ( Var_Stack->type & ( INT_VAR || FLOAT_VAR ) ) )
+	/* Make sure the repeat count is either int or float */
+
+	if ( ! ( Var_Stack->type & ( INT_VAR | FLOAT_VAR ) ) )
 	{
 		cur++;
 		eprint( FATAL, "%s:%ld: Invalid counter for REPEAT loop.\n",
@@ -685,19 +738,410 @@ void get_max_repeat_count( Prg_Token *cur )
 		THROW( CONDITION_EXCEPTION );
 	}
 
+	/* Set the repeat count - warn if value is float an convert to integer */
+
 	if ( Var_Stack->type == INT_VAR )
-		cur->max_count = Var_Stack->val.lval;
+		cur->count.repl.max = Var_Stack->val.lval;
 	else
 	{
 		eprint( WARN, "%s:%ld: WARNING: Floating point value used as maximum "
 				"count in REPEAT loop.\n",
 				( cur + 1 )->Fname, ( cur + 1 )->Lc );
-		cur->max_count = ( long ) Var_Stack->val.dval;
+		cur->count.repl.max = ( long ) Var_Stack->val.dval;
 	}
 
 	vars_pop( Var_Stack );
-	cur->act_count = 1;
-	cur_prg_token++;
+	cur->count.repl.act = 0;
+	cur_prg_token++;                   /* skip the `{' */
 	return;
 }
 
+
+/*--------------------------------------------------------------------------*/
+/* Function gets all parts of a for loop condition, i.e. the loop variable, */
+/* the start value assigned to the loop variable, the end value and and op- */
+/* tional increment value. If the loop variable is an integer also the end  */
+/* and increment variable have to be integers.                              */
+/*--------------------------------------------------------------------------*/
+
+void get_for_cond( Prg_Token *cur )
+{
+	/* First of all get the loop variable */
+
+	cur_prg_token++;             /* skip the FOR keyword */
+
+	/* Make sure token is a variable and next token is `=' */
+
+	if ( cur_prg_token->token != E_VAR_TOKEN ||
+		 ( cur_prg_token + 1 )->token != '=' )
+	{
+		cur++;
+		eprint( FATAL, "%s:%ld: Syntax error in condition of FOR loop.\n",
+				cur->Fname, cur->Lc );
+		THROW( CONDITION_EXCEPTION );
+	}
+
+	/* If loop variable is new set its type */
+
+	if ( cur_prg_token->tv.vptr->type == UNDEF_VAR )
+	{
+		cur_prg_token->tv.vptr->type =
+			IF_FUNC( cur_prg_token->tv.vptr->name ) ? INT_VAR : FLOAT_VAR;
+		cur_prg_token->tv.vptr->flags &= ~ NEW_VARIABLE;
+	}
+
+	/* Make sure loop variable is either integer or float */
+
+	if ( ! ( cur_prg_token->tv.vptr->type & ( INT_VAR | FLOAT_VAR ) ) )
+	{
+		cur++;
+		eprint( FATAL, "%s:%ld: FOR loop variable must be integer or float "
+				"variable.\n", cur->Fname, cur->Lc );
+		THROW( CONDITION_EXCEPTION );
+	}
+
+	/* store pointer to loop variable */
+
+	cur->count.forl.act = cur_prg_token->tv.vptr;
+
+	/* Now get start value to be assigned to loop variable */
+
+	cur_prg_token +=2;                  /* skip variable and `=' token */
+	in_for_lex = SET;                   /* allow `:' as separator */
+	conditionparse( );                  /* get start value */
+	assert( Var_Stack->next == NULL );  /* Paranoia as usual... */
+
+	/* Make sure there is at least one more token for the end loop value */
+
+	if ( cur_prg_token->token != ':' )
+	{
+		cur++;
+		in_for_lex = UNSET;
+		eprint( FATAL, "%s:%ld: Missing end value for FOR loop.\n",
+				cur->Fname, cur->Lc );
+		THROW( CONDITION_EXCEPTION );
+	}
+
+	/* Make sure the returned value is either integer or float */
+
+	if ( ! ( Var_Stack->type & ( INT_VAR | FLOAT_VAR ) ) )
+	{
+		cur++;
+		in_for_lex = UNSET;
+		eprint( FATAL, "%s:%ld: Invalid start value in FOR loop.\n",
+				cur->Fname, cur->Lc );
+		THROW( CONDITION_EXCEPTION );
+	}
+
+	/* Set start value of loop variable */
+
+	if ( Var_Stack->type == INT_VAR )
+	{
+		if ( cur->count.forl.act->type == INT_VAR )
+			cur->count.forl.act->val.lval = Var_Stack->val.lval;
+		else
+			cur->count.forl.act->val.dval = ( double ) Var_Stack->val.lval;
+	}
+	else
+	{
+		if ( cur->count.forl.act->type == INT_VAR )
+		{
+			eprint( WARN, "%s:%ld: Using floating point value in assignment "
+					"to integer FOR loop variable %s.\n", ( cur + 1 )->Fname,
+					( cur + 1 )->Lc, cur->count.forl.act->name );
+			cur->count.forl.act->val.lval = ( long ) Var_Stack->val.dval;
+		}
+		else
+			cur->count.forl.act->val.dval = Var_Stack->val.dval;
+	}
+
+	vars_pop( Var_Stack );
+
+	/* Get for loop end value */
+
+	cur_prg_token++;                      /* skip the `:' */
+	conditionparse( );                    /* get end value */
+	assert( Var_Stack->next == NULL );    /* Paranoia as usual... */
+
+	/* Make sure end value is either integer or float */
+
+	if ( ! ( Var_Stack->type & ( INT_VAR | FLOAT_VAR ) ) )
+	{
+		cur++;
+		in_for_lex = UNSET;
+		eprint( FATAL, "%s:%ld: Invalid end value for FOR loop.\n",
+				cur->Fname, cur->Lc );
+		THROW( CONDITION_EXCEPTION );
+	}
+
+	/* If loop variable is integer `end' must also be integer */
+
+	if ( cur->count.forl.act->type == INT_VAR && Var_Stack->type == FLOAT_VAR )
+	{
+		cur++;
+		in_for_lex = UNSET;
+		eprint( FATAL, "%s:%ld: End value of FOR loop is floating point "
+				"value while loop variable is an integer.\n",
+				cur->Fname, cur->Lc );
+		THROW( CONDITION_EXCEPTION );
+	}
+
+	/* Set end value of loop */
+
+	cur->count.forl.end.type = Var_Stack->type;
+	if ( Var_Stack->type == INT_VAR )
+		cur->count.forl.end.lval = Var_Stack->val.lval;
+	else
+		cur->count.forl.end.dval = Var_Stack->val.dval;
+
+	vars_pop( Var_Stack );
+
+	/* Set the increment */
+
+	if ( cur_prg_token->token != ':' )      /* no increment given */
+	{
+		if ( cur->count.forl.act->type == INT_VAR )
+		{
+			cur->count.forl.incr.type = INT_VAR;
+			cur->count.forl.incr.lval = 1;
+		}
+		else
+		{
+			cur->count.forl.incr.type = FLOAT_VAR;
+			cur->count.forl.incr.dval = 1.0;
+		}
+
+	}
+	else                                    /* get for loop incr value */
+	{	
+		cur_prg_token++;                      /* skip the `:' */
+		conditionparse( );                    /* get end value */
+		in_for_lex = UNSET;
+		assert( Var_Stack->next == NULL );    /* Paranoia as usual... */
+
+		/* Make sure increment is either inetger or float */
+
+		if ( ! ( Var_Stack->type & ( INT_VAR | FLOAT_VAR ) ) )
+		{
+			cur++;
+			eprint( FATAL, "%s:%ld: Invalid increment for FOR loop.\n",
+					cur->Fname, cur->Lc );
+			THROW( CONDITION_EXCEPTION );
+		}
+
+		/* If loop variable is integer `incr' must also be integer */
+
+		if ( cur->count.forl.act->type == INT_VAR &&
+			 Var_Stack->type == FLOAT_VAR )
+		{
+			cur++;
+			in_for_lex = UNSET;
+			eprint( FATAL, "%s:%ld: FOR loop increment is floating point "
+					"value while loop variable is an integer.\n",
+				cur->Fname, cur->Lc );
+			THROW( CONDITION_EXCEPTION );
+		}
+
+		cur->count.forl.incr.type = Var_Stack->type;
+
+		/* Check that increent isn't zero */
+
+		if ( Var_Stack->type == INT_VAR )
+		{
+			if ( Var_Stack->val.lval == 0 )
+			{
+				cur++;
+				eprint( FATAL, "%s:%ld: Zero increment for FOR loop.\n",
+						cur->Fname, cur->Lc );
+				THROW( CONDITION_EXCEPTION );
+			}
+			cur->count.forl.incr.lval = Var_Stack->val.lval;
+		}
+		else
+		{
+			if ( Var_Stack->val.dval == 0 )
+			{
+				cur++;
+				eprint( FATAL, "%s:%ld: Zero increment for FOR loop.\n",
+						cur->Fname, cur->Lc );
+				THROW( CONDITION_EXCEPTION );
+			}
+			cur->count.forl.incr.dval = Var_Stack->val.dval;
+		}
+
+		vars_pop( Var_Stack );
+	}
+
+	in_for_lex = UNSET;
+	cur_prg_token++;                /* skip the `{' */
+	return;
+
+}
+
+
+/*--------------------------------------------------*/
+/* Function tests the loop condition of a for loop. */
+/*--------------------------------------------------*/
+
+bool test_for_cond( Prg_Token *cur )
+{
+	bool sign = UNSET;
+
+
+	/* If this isn't the very first call increment the loop variable */
+
+	if ( cur->counter != 0 )
+	{
+		if ( cur->count.forl.act->type == INT_VAR )
+				cur->count.forl.act->val.lval += cur->count.forl.incr.lval;
+		else
+			cur->count.forl.act->val.dval += 
+				( cur->count.forl.incr.type == INT_VAR ?
+				       cur->count.forl.incr.lval : cur->count.forl.incr.dval );
+	}
+
+	/* get sign of increment */
+	
+	if ( ( cur->count.forl.incr.type == INT_VAR &&
+		   cur->count.forl.incr.lval < 0 ) ||
+		 ( cur->count.forl.incr.type == FLOAT_VAR &&
+		   cur->count.forl.incr.dval < 0 ) )
+		sign = SET;
+
+
+	/* If the increment is positive test if loop variable is less or equal to
+	   the end value, if increment is negative if loop variable is larger or
+	   equal to the end value. Return the result. */
+
+	if ( cur->count.forl.act->type == INT_VAR )
+	{
+		if ( ! sign )
+		{
+			if ( cur->count.forl.act->val.lval <= cur->count.forl.end.lval )
+				return OK;
+			else
+				return FAIL;
+		}
+		else
+		{
+			if ( cur->count.forl.act->val.lval >= cur->count.forl.end.lval )
+				return OK;
+			else
+				return FAIL;
+		}
+	}
+	else
+	{
+		if ( ! sign )
+		{
+			if ( cur->count.forl.act->val.dval <= 
+				   ( cur->count.forl.end.type == INT_VAR ?
+			            cur->count.forl.end.lval : cur->count.forl.end.dval ) )
+				return OK;
+			else
+				return FAIL;
+		}
+		else
+		{
+			if ( cur->count.forl.act->val.dval >=
+				   ( cur->count.forl.end.type == INT_VAR ?
+				        cur->count.forl.end.lval : cur->count.forl.end.dval ) )
+				return OK;
+			else
+				return FAIL;
+		}
+	}
+
+	assert( 1 == 0 );
+	return FAIL;
+}
+
+
+void save_restore_variables( bool flag )
+{
+	Var *cv;
+	long num_v;
+
+	/* count the number of variables */
+
+	for ( num_v = 0, cv = var_list; cv != NULL; num_v++, cv = cv->next )
+		;
+
+	/* save or restore all variables */
+
+	if ( flag )
+	{
+		var_list_copy = T_malloc( num_v * sizeof( Var ) );
+		memcpy( var_list_copy, var_list, num_v * sizeof( Var ) );
+	}
+	else
+	{
+		memcpy( var_list, var_list_copy, num_v * sizeof( Var ) );
+		free( var_list_copy );
+	}
+}
+
+
+
+
+/*###########################################################################*/
+
+/* Left in if necessary later... */
+
+void loop_dbg( void );
+void loop_dbg( void )
+{
+	Prg_Token *cur = prg_token;
+
+
+	for ( ; cur < prg_token + prg_length; cur++ )
+	{
+		switch ( cur->token )
+		{
+			case WHILE_TOK :
+				printf( "%d: WHILE, start = %d, end = %d\n",
+						cur - prg_token, cur->start - prg_token,
+						cur->end - prg_token );
+				break;
+
+			case FOR_TOK :
+				printf( "%d: FOR, start = %d, end = %d\n",
+						cur - prg_token, cur->start - prg_token,
+						cur->end - prg_token );
+				break;
+
+
+			case REPEAT_TOK :
+				printf( "%d: REPEAT, start = %d, end = %d\n",
+						cur - prg_token, cur->start - prg_token,
+						cur->end - prg_token );
+				break;
+
+			case CONT_TOK :
+				printf( "%d: CONTINUE, start = %d\n",
+						cur - prg_token, cur->start - prg_token );
+				break;
+
+			case BREAK_TOK :
+				printf( "%d: CONTINUE, end = %d\n",
+						cur - prg_token, cur->end - prg_token );
+				break;
+
+			case IF_TOK :
+				printf( "%d: IF, start = %d, end = %d\n",
+						cur - prg_token, cur->start - prg_token,
+						cur->end - prg_token );
+				break;
+
+			case ELSE_TOK :
+				printf( "%d ELSE\n",
+						cur - prg_token );
+				break;
+
+			case '}' :
+				printf( "%d: `}', end = %d\n",
+						cur - prg_token, cur->end - prg_token );
+				break;
+		}
+	}
+}

@@ -75,11 +75,12 @@ int prim_exp_runerror( const char *s );
 
 input:   /* empty */
        | input eol
-       | input line eol            { assert( Var_Stack == NULL ); }
+       | input line eol
 ;
 
-eol:     ';'
-       | '}'                       { YYACCEPT; }
+eol:     ';'                       { assert( Var_Stack == NULL ); }
+       | '}'                       { assert( Var_Stack == NULL );
+	                                 YYACCEPT; }
 
 /* currently only the variables related stuff */
 
@@ -88,10 +89,15 @@ line:    E_VAR_TOKEN '=' expr      { vars_assign( $3, $1 ); }
          list1 ']'                 { $$ = vars_arr_lhs( $$ ) }
          '=' expr                  { vars_assign( $8, $$ );
                                      assert( Var_Stack == NULL ); }
+       | E_FUNC_TOKEN '(' list2 ')'{ vars_pop( func_call( $1 ) ); }
+       | E_FUNC_TOKEN '['          { eprint( FATAL, "%s:%ld: `%s' is a "
+											 "predefined function.\n",
+											 Fname, Lc, $1->name );
+	                                 THROW( VARIABLES_EXCEPTION ); }
 ;
 
-expr:    E_INT_TOKEN               { $$ = vars_push( INT_VAR, &$1 ); }
-       | E_FLOAT_TOKEN             { $$ = vars_push( FLOAT_VAR, &$1 ); }
+expr:    E_INT_TOKEN               { $$ = vars_push( INT_VAR, $1 ); }
+       | E_FLOAT_TOKEN             { $$ = vars_push( FLOAT_VAR, $1 ); }
        | E_VAR_TOKEN               { $$ = vars_push_copy( $1 ); }
        | E_VAR_REF                 { $$ = $1; }
        | E_VAR_TOKEN '['           { $$ = vars_arr_start( $1 ); }
@@ -122,7 +128,7 @@ list2:   /* empty */
 ;
 
 exprs:   expr                      { }
-       | E_STR_TOKEN                 { vars_push( STR_VAR, $1 ); }
+       | E_STR_TOKEN               { vars_push( STR_VAR, $1 ); }
 ;
 
 

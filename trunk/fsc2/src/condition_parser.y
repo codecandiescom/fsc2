@@ -72,11 +72,11 @@ int conditionerror( const char *s );
 %%
 
 
-input:   expr '{'                  { YYACCEPT; }
+input:   expr                      { YYACCEPT; }
 ;
 
-expr:    E_INT_TOKEN               { $$ = vars_push( INT_VAR, &$1 ); }
-       | E_FLOAT_TOKEN             { $$ = vars_push( FLOAT_VAR, &$1 ); }
+expr:    E_INT_TOKEN               { $$ = vars_push( INT_VAR, $1 ); }
+       | E_FLOAT_TOKEN             { $$ = vars_push( FLOAT_VAR, $1 ); }
        | E_VAR_TOKEN               { $$ = vars_push_copy( $1 ); }
        | E_VAR_REF                 { $$ = $1; }
        | E_VAR_TOKEN '['           { $$ = vars_arr_start( $1 ); }

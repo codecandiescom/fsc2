@@ -17,31 +17,6 @@ typedef union {
 } Token_Val;
 
 
-typedef struct PT_ {
-	int token;                /* type of current token */
-	Token_Val tv;             /* token's value as needed by the parser */
-	struct PT_ *start;        /* used in if, while etc. [1] */
-	struct PT_ *end;          /* used in while, if's etc. [2] */
-	struct PT_ *altern;       /* used in if's */
-	char *Fname;              /* name of file the token comes from */
-	long Lc;                  /* number of line the token comes from */
-} Prg_Token;
-
-
-
-/*
-  [1] In while and repeat loops `start' points to the start of the executable
-	  block, in continue's it points to the corresponding while or repeat.  In
-	  if's it also points to the executable block (the on to be executed if
-	  the condition is met).
-  [2] in while and repeat loops `end' points to the statement following the
-      block. In break's it points also the statement following the loop. In
-	  if's it points to the statement following the if-else construct.
-  [3] In if's with an else `altern' points to the executable block following
-      the else.
-*/
-
-
 #define	E_VAR_TOKEN	    258
 #define	E_VAR_REF	    259
 #define	E_FUNC_TOKEN	260
@@ -65,6 +40,53 @@ typedef struct PT_ {
 #define CONT_TOK       2054
 #define BREAK_TOK      2055
 #define REPEAT_TOK     2056
+#define FOR_TOK        2057
+
+
+
+typedef struct 
+{
+	int    type;              /* type of data */
+	long   lval;              /* for long integer data */
+	double dval;              /* for floating point data */
+} Simp_Var;
+
+
+typedef struct PT_ {
+	int       token;          /* type of current token */
+	Token_Val tv;             /* token's value as needed by the parser */
+	struct    PT_ *start;     /* used in if, while etc. [1] */
+	struct    PT_ *end;       /* used in while, if's etc. [2] */
+	union {
+		struct {
+			long max;         /* maximum counter value for repeat loops */
+			long act;         /* actual counter value for repeat loops */
+		} repl;
+		struct {
+			Var *act;         /* loop variable of for loop */
+			Simp_Var end;     /* maximum value of loop variable */
+			Simp_Var incr;    /* increment for loop variable */
+		} forl;
+	} count;
+	long counter;             /* counts number of loop repetitions */
+	char      *Fname;         /* name of file the token comes from */
+	long      Lc;             /* number of line the token comes from */
+} Prg_Token;
+
+
+
+/*
+  [1] In WHILE and REPEAT tokens `start' points to the start of the executable
+	  block, in CONTINUE tokens it points to the corresponding while or
+	  repeat. In IF tokens it points to the first executable block (the on to
+	  be executed if the condition is met).
+  [2] In WHILE and REPEAT tokens `end' points to the statement following the
+      block. In BREAK tokens it points also the statement following the
+      loop. In IF tokens it points to the else (if there is one). For `}'
+      tokens of a WHILE or REPEAT token it points to the WHILE or REPEAT. In
+      IF-ELSE blocks it points to the statement directly following the if-else
+      construct.
+*/
 
 
 #include "fsc2.h"
@@ -78,5 +100,11 @@ void setup_if_else( int type, long *pos, Prg_Token *cur_wr );
 void prim_exp_run( void );
 int prim_exp_runlex( void );
 int conditionlex( void );
+bool test_condition( Prg_Token *cur );
+void get_max_repeat_count( Prg_Token *cur );
+void get_for_cond( Prg_Token *cur );
+bool test_for_cond( Prg_Token *cur );
+void save_restore_variables( bool flag );
+
 
 #endif   /* ! PRIM_EXP_HEADER */
