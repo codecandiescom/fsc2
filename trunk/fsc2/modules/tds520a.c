@@ -174,7 +174,8 @@ int tds520a_end_of_exp_hook( void )
 
 void tds520a_exit_hook( void )
 {
-	tds520a_delete_windows( );
+	tds520a_delete_windows( &tds520a );
+	tds520a_delete_windows( &tds520a_stored );
 }
 
 
