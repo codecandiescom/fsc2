@@ -408,7 +408,7 @@ bool dg2020_prep_cmd( char **cmd, int channel, Ticks address, Ticks length )
 
 void dg2020_set( bool *arena, Ticks start, Ticks len, Ticks offset )
 {
-	fsc_assert( start + len + offset <= dg2020.max_seq_len );
+	fsc2_assert( start + len + offset <= dg2020.max_seq_len );
 
 	memset( ( void * ) ( arena + offset + start ),
 			( int ) SET, len * sizeof( bool ) );
