@@ -242,8 +242,8 @@ Var *func_get_long( const char *name, int *access, bool flag )
 	{
 		if ( ! flag )
 		{
-			eprint( FATAL, "%s:%ld: Function `%s' has not been loaded.\n",
-					Fname, Lc, f->name );
+			eprint( FATAL, SET, "Function `%s' has not been loaded.\n",
+					f->name );
 			THROW( EXCEPTION );
 		}
 		else                     /* some callers do their own error handling */
@@ -286,7 +286,8 @@ Var *func_call( Var *f )
 
 	if ( f->type != FUNC )
 	{
-		eprint( FATAL, "Internal error at at %s:%d.\n", __FILE__, __LINE__ );
+		eprint( FATAL, UNSET, "Internal error at at %s:%d.\n",
+				__FILE__, __LINE__ );
 		THROW( EXCEPTION );
 	}
 
@@ -296,7 +297,8 @@ Var *func_call( Var *f )
 	
 	if ( i >= Num_Func )
 	{
-		eprint( FATAL, "Internal error at at %s:%d.\n", __FILE__, __LINE__ );
+		eprint( FATAL, UNSET, "Internal error at at %s:%d.\n",
+				__FILE__, __LINE__ );
 		THROW( EXCEPTION );
 	}
 
@@ -315,8 +317,8 @@ Var *func_call( Var *f )
 
 		if ( ac > f->dim )
 		{
-			eprint( WARN, "%s:%ld: Too many arguments for function `%s'.\n",
-					Fname, Lc, f->name );
+			eprint( WARN, SET, "Too many arguments for function `%s'.\n",
+					f->name );
 
 			for ( ac = 0, ap = f->next; ac < f->dim; ++ac, ap = ap->next )
 				;
@@ -328,8 +330,8 @@ Var *func_call( Var *f )
 
 		if ( ac < f->dim )
 		{
-			eprint( FATAL, "%s:%ld: Function `%s' needs %d argument%s but "
-					"found only %d.\n", Fname, Lc, f->name, f->dim,
+			eprint( FATAL, SET, "Function `%s' needs %d argument%s but found "
+					"only %d.\n", f->name, f->dim,
 					f->dim == 1 ? "" : "s", ac );
 			THROW( EXCEPTION );
 		}
@@ -357,11 +359,11 @@ Var *func_call( Var *f )
 	if ( ! vars_exist( f ) )
 	{
 		if ( ! Fncts[ i ].to_be_loaded )
-			eprint( FATAL, "Internal error at at %s:%d.\n",
+			eprint( FATAL, UNSET, "Internal error at at %s:%d.\n",
 					__FILE__, __LINE__ );
 		else
-			eprint( FATAL, "%s:%ld: Function %s() from module %s.so messed "
-					"up the variable stack at %s:%d.\n", Fname, Lc, f->name,
+			eprint( FATAL, SET, "Function %s() from module %s.so messed "
+					"up the variable stack at %s:%d.\n", f->name,
 					Fncts[ i ].device->name, __FILE__, __LINE__ );
 		THROW( EXCEPTION );
 	}

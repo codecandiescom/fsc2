@@ -102,13 +102,13 @@ FUNC        {IDENT}"#"[0-9]+
 
 			/* Handling of error messages from the cleaner */
 {ERR}		{
-				eprint( FATAL, "%s\n", exptext + 2 );
+				eprint( FATAL, UNSET, "%s\n", exptext + 2 );
 				THROW( EXCEPTION );
 			}
 
 {ESTR}		{
 				exptext = strchr( exptext, '\x03' );
-				eprint( FATAL, "%s\n", exptext + 2 );
+				eprint( FATAL, UNSET, "%s\n", exptext + 2 );
 				THROW( EXCEPTION );
 			}
 
@@ -227,17 +227,16 @@ FUNC        {IDENT}"#"[0-9]+
 				{
 					if ( acc == ACCESS_PREP )
 					{
-						eprint( FATAL, "%s:%ld: Function `%s' can't be used "
-								"in the EXPERIMENT section.\n",
-								Fname, Lc, exptext );
+						eprint( FATAL, SET, "Function `%s' can't be used in "
+								"the EXPERIMENT section.\n", exptext );
 						THROW( EXCEPTION );
 					}
 					return E_FUNC_TOKEN;
 				}
                 else
                 {
-                    eprint( FATAL, "%s:%ld: Function `%s' is not loaded.\n",
-							Fname, Lc, exptext );
+                    eprint( FATAL, SET, "Function `%s' is not loaded.\n",
+							exptext );
 					THROW( EXCEPTION );
                 }
             }
@@ -250,9 +249,8 @@ FUNC        {IDENT}"#"[0-9]+
 				{
 					if ( acc == ACCESS_PREP )
 					{
-						eprint( FATAL, "%s:%ld: Function `%s' can't be used "
-								"in the EXPERIMENT section.\n",
-								Fname, Lc, exptext );
+						eprint( FATAL, SET, "Function `%s' can't be used in "
+								"the EXPERIMENT section.\n", exptext );
 						THROW( EXCEPTION );
 					}
 					return E_FUNC_TOKEN;
@@ -261,9 +259,8 @@ FUNC        {IDENT}"#"[0-9]+
 				exp_val.vptr = vars_get( exptext );
 				if ( exp_val.vptr == NULL )
 				{
-					eprint( FATAL, "%s:%ld: Variable or function `%s' has not "
-								   "been declared or loaded.\n",
-								   Fname, Lc, exptext );
+					eprint( FATAL, SET, "Variable or function `%s' has not "
+								   "been declared or loaded.\n", exptext );
 					 THROW( EXCEPTION );
 				}
 
@@ -321,8 +318,8 @@ FUNC        {IDENT}"#"[0-9]+
 
 			/* Handling of invalid input */
 .           {
-				eprint( FATAL, "%s:%ld: Invalid input in EXPERIMENT section: "
-						"`%s'.\n", Fname, Lc, exptext );
+				eprint( FATAL, SET, "Invalid input in EXPERIMENT section: "
+						"`%s'.\n", exptext );
 				THROW( EXCEPTION );
 			}
 
@@ -344,8 +341,8 @@ int experiment_parser( FILE *in )
 {
 	if ( compilation.sections[ EXPERIMENT_SECTION ] )
 	{
-		eprint( FATAL, "%s:%ld: Multiple instances of EXPERIMENTS section "
-		        "label.\n", Fname, Lc );
+		eprint( FATAL, SET, "Multiple instances of EXPERIMENTS section "
+		        "label.\n" );
 		THROW( EXCEPTION );
 	}
 	compilation.sections[ EXPERIMENT_SECTION ] = SET;
@@ -355,8 +352,8 @@ int experiment_parser( FILE *in )
 
 	if ( Exp_Next_Section != NO_SECTION )
 	{
-		eprint( FATAL, "%s:%ld: EXPERIMENT section has to be the very last "
-				"section.\n", Fname, Lc );
+		eprint( FATAL, SET, "EXPERIMENT section has to be the very last "
+				"section.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -382,8 +379,8 @@ static Var *exp_get_channel_name( void )
 			 return v;
 	}
 
-	eprint( FATAL, "%s:%ld: Token `%s' can't be used, no digitizer module "
+	eprint( FATAL, SET, "Token `%s' can't be used, no digitizer module "
 			"loaded or module does not know how to interpret the token.\n",
-			Fname, Lc, exptext );
+			exptext );
 	THROW( EXCEPTION );
 }
