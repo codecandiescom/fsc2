@@ -105,15 +105,15 @@ etc.).
 For most pulsers the first statement of the @code{ASSIGNMENTS} section
 has to be the setting of the time base of the pulser unless the pulser
 has a fixed time base, in which case no setting of the time base is
-possible. Most pulsers function similarly: they have a certain number of
-time slices (usually 65536, 2^16) and for each of them the output of the
-pulser can be either set to a high or a low voltage. By setting the
-output during one or more of these time slices to a high voltage (and
-for the neighboring slices to low) pulses are created.  The time base to
-be set first in the @code{ASSIGNMENT} section is the length of each of
-these time slices. From the above it is clear, that all pulses (as well
-as all the times between pulses) have to be integer multiples of the
-length of the time base.
+possible. Most of the pulsers function similarly: they have a certain
+number of time slices (usually 65536, 2^16) and for each of them the
+output of the pulser can be either set to a high or a low voltage. By
+setting the output during one or more of these time slices to a high
+voltage (and for the neighboring slices to low) pulses are created.  The
+time base to be set first in the @code{ASSIGNMENT} section is the length
+of each of these time slices. From the above it is clear, that all
+pulses (as well as all the times between pulses) have to be integer
+multiples of the length of the time base.
 
 An exception is the @strong{Bruker EP385} pulse programmer. This pulser
 has a fixed built-in time base of @w{8 ns}. In this case a
@@ -131,7 +131,7 @@ the time base value. When one of these keywords is given the external
 clock will be used, even if the time base value is one of the three
 values that can be realized using the internal clock. When neither of
 the two keywords is given and the specified time base requires an
-external clock the @code{TTL} level colck input is used per default.
+external clock the @code{TTL} level clock input is used per default.
 
 
 The statement to set the time base, i.e.@: the length of the individual
@@ -250,6 +250,10 @@ length of the minimum repeat time). Repetition times can be only set in
 increments of @w{102.4 us} of the shortest repeat time (or in increments
 of 12800 times the external clocks oscillation period). If necessary,
 repetition frequencies are set to the next lower allowed value.
+
+For the @strong{Interface Technology RS690} it might happen that under
+certain pulse settings the repetition time must be lengthened slightly,
+but never more than three times the time base.
 
 On the other hand, when using an external trigger one may want to set
 the trigger level, slope and, possibly, the trigger input impedance. For
