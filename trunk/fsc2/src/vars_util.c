@@ -11,12 +11,12 @@ static void vars_div_check( double val );
 static void vars_mod_check( double val );
 
 
-/*-------------------------------------------------------------------*/
-/* If passed a integer or floating point variable or array slice the */
-/* function returns the number of elements and a pointer to the data */
-/* (in lpnt or dpntdepending on the type of the data, the other      */
-/* pointer is always set to NULL).                                   */
-/*-------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*/
+/* If passed an integer or floating point variable or array slice the */
+/* function returns the number of elements and a pointer to the data  */
+/* (in lpnt or dpnt depending on the type of the data, the other      */
+/* pointer is always set to NULL).                                    */
+/*--------------------------------------------------------------------*/
 
 static void vars_params( Var *v, long *elems, long **lpnt, double **dpnt )
 {
