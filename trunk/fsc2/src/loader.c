@@ -68,7 +68,7 @@ void load_all_drivers( void )
 
 		if ( cd->is_loaded && cd->driver.is_init_hook &&
 			 ! cd->driver.init_hook( ) )
-			eprint( WARN, "Initialisation of module `%s.so' failed.\n",
+			eprint( WARN, UNSET, "Initialisation of module `%s.so' failed.\n",
 					cd->name );
 
 		if ( need_GPIB == UNSET && saved_need_GPIB == SET )
@@ -170,7 +170,7 @@ static void load_functions( Device *dev )
 
 	if ( dev->driver.handle == NULL )
 	{
-		eprint( FATAL, "Can't open module for device `%s': %s\n", 
+		eprint( FATAL, UNSET, "Can't open module for device `%s': %s\n", 
 				strchr( dev->name, '/' ) == NULL ?
 				dev->name : strrchr( dev->name, '/' ) + 1, dlerror( ) );
 		T_free( lib_name );
@@ -470,7 +470,7 @@ void run_test_hooks( void )
 	for ( cd = Device_List; cd != NULL; cd = cd->next )
 		if ( cd->is_loaded && cd->driver.is_test_hook &&
 			 ! cd->driver.test_hook( ) )
-			eprint( SEVERE, "Initialisation of test run failed for "
+			eprint( SEVERE, UNSET, "Initialisation of test run failed for "
 					"module `%s'.\n", cd->name );
 }
 
@@ -486,8 +486,8 @@ void run_end_of_test_hooks( void )
 	for ( cd = Device_List; cd != NULL; cd = cd->next )
 		if ( cd->is_loaded && cd->driver.is_end_of_test_hook &&
 			 ! cd->driver.end_of_test_hook( ) )
-			eprint( SEVERE, "Final checks after test run failed for module "
-					"`%s'.\n", cd->name );
+			eprint( SEVERE, UNSET, "Final checks after test run failed for "
+					"module `%s'.\n", cd->name );
 }
 
 
@@ -502,7 +502,7 @@ void run_exp_hooks( void )
 	for ( cd = Device_List; cd != NULL; cd = cd->next )
 		if ( cd->is_loaded && cd->driver.is_exp_hook &&
 			 ! cd->driver.exp_hook( ) )
-			eprint( SEVERE, "Initialisation of experiment failed for "
+			eprint( SEVERE, UNSET, "Initialisation of experiment failed for "
 					"module `%s'.\n", cd->name );
 		else
 			cd->driver.exp_hook_is_run = SET;
@@ -535,8 +535,8 @@ void run_end_of_exp_hooks( void )
 
 			if ( cd->is_loaded && cd->driver.is_end_of_exp_hook &&
 				 ! cd->driver.end_of_exp_hook( ) )
-				eprint( SEVERE, "Resetting module `%s' after experiment "
-						"failed.\n", cd->name );
+				eprint( SEVERE, UNSET, "Resetting module `%s' after "
+						"experiment failed.\n", cd->name );
 			TRY_SUCCESS;
 		}
 	}

@@ -23,8 +23,8 @@ void acq_seq_start( long acq_num, long acq_type )
 
 	if ( ASeq[ acq_num ].defined )
 	{
-		eprint( FATAL, "%s:%ld: Acquisition sequence %c has already been "
-				"defined.\n", Fname, Lc, ( char ) ( acq_num + 'X' ) );
+		eprint( FATAL, SET, "Acquisition sequence %c has already been "
+				"defined.\n", ( char ) ( acq_num + 'X' ) );
 		THROW( EXCEPTION );
 	}
 
@@ -99,8 +99,8 @@ Phase_Sequence *phase_seq_start( long phase_seq_num )
 	{
 		if ( cp->num == phase_seq_num )
 		{
-			eprint( FATAL, "%s:%ld: Phase sequence %ld has already been "
-					"defined.\n", Fname, Lc, cp->num );
+			eprint( FATAL, SET, "Phase sequence %ld has already been "
+					"defined.\n", cp->num );
 			THROW( EXCEPTION );
 		}
 		cp = cp->next;
@@ -157,8 +157,7 @@ void phases_add_phase( Phase_Sequence *p, int phase_type )
 
 void acq_miss_list( void )
 {
-	eprint( FATAL, "%s:%ld: Missing acquisition type list.\n",
-			Fname, Lc );
+	eprint( FATAL, SET, "Missing acquisition type list.\n" );
 	THROW( EXCEPTION );
 }
 
@@ -170,8 +169,8 @@ void acq_miss_list( void )
 
 void phase_miss_list( Phase_Sequence *p )
 {
-	eprint( FATAL, "%s:%ld: Missing list of phases for phase sequence %d.\n",
-			Fname, Lc, p->num );
+	eprint( FATAL, SET, "Missing list of phases for phase sequence %d.\n",
+			p->num );
 	THROW( EXCEPTION );
 }
 
@@ -223,8 +222,8 @@ void phases_end( void )
 
 	if ( ( ASeq[ 0 ].defined || ASeq[ 1 ].defined ) && PSeq == NULL )
 	{
-		eprint( FATAL, "Aquisition sequence(s) defined but no phase sequences "
-				"in PHASES section.\n" );
+		eprint( FATAL, UNSET, "Aquisition sequence(s) defined but no phase "
+				"sequences in PHASES section.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -239,8 +238,8 @@ void phases_end( void )
 	for ( p = PSeq->next; p != NULL; p = p->next )
 		if ( p->len != PSeq->len )
 		{
-			eprint( FATAL, "Lengths of phase sequences defined in PHASES "
-					"section differ.\n" );
+			eprint( FATAL, UNSET, "Lengths of phase sequences defined in "
+					"PHASES section differ.\n" );
 			THROW( EXCEPTION );
 		}
 
@@ -261,8 +260,8 @@ void phases_end( void )
 
 	if ( ASeq[ 0 ].len != PSeq->len || ASeq[ 1 ].len != PSeq->len )
 	{
-		eprint( FATAL, "Lengths of phase and acquisition sequences defined in "
-				"PHASES section differ.\n" );
+		eprint( FATAL, UNSET, "Lengths of phase and acquisition sequences "
+				"defined in PHASES section differ.\n" );
 		THROW( EXCEPTION );
 	}
 }

@@ -120,13 +120,13 @@ FUNC        {IDENT}"#"[0-9]+
 
 			/* Handling of error messages from the cleaner */
 {ERR}		{
-				eprint( FATAL, "%s\n", prepstext + 2 );
+				eprint( FATAL, UNSET, "%s\n", prepstext + 2 );
 				THROW( EXCEPTION );
 			}
 
 {ESTR}		{
 				prepstext = strchr( prepstext, '\x03' );
-				eprint( FATAL, "%s\n", prepstext + 2 );
+				eprint( FATAL, UNSET, "%s\n", prepstext + 2 );
 				THROW( EXCEPTION );
 			}
 
@@ -307,8 +307,8 @@ FUNC        {IDENT}"#"[0-9]+
             }
 
 {CTRL}      {
-				eprint( FATAL, "%s:%ld: Flow control structures can't be used "
-						"in the PREPARATIONS section.\n", Fname, Lc );
+				eprint( FATAL, SET, "Flow control structures can't be used "
+						"in the PREPARATIONS section.\n" );
 				THROW( EXCEPTION );
 			}
 
@@ -324,17 +324,16 @@ FUNC        {IDENT}"#"[0-9]+
 				{
 					if ( acc == ACCESS_EXP )
 					{
-						eprint( FATAL, "%s:%ld: Function `%s' can only be "
-								"used in the EXPERIMENT section.\n",
-								 Fname, Lc, prepstext );
+						eprint( FATAL, SET, "Function `%s' can only be used "
+								"in the EXPERIMENT section.\n", prepstext );
 						THROW( EXCEPTION );
 					}
 					return FUNC_TOKEN;
 				}
                 else
                 {
-                    eprint( FATAL, "%s:%ld: Function `%s' is not loaded.\n",
-							Fname, Lc, prepstext );
+                    eprint( FATAL, SET, "Function `%s' is not loaded.\n",
+							prepstext );
 					THROW( EXCEPTION );
                 }
             }
@@ -349,9 +348,8 @@ FUNC        {IDENT}"#"[0-9]+
 				{
 					if ( acc == ACCESS_EXP )
 					{
-						eprint( FATAL, "%s:%ld: Function `%s' can only be "
-								"used in the EXPERIMENT section.\n",
-								 Fname, Lc, prepstext );
+						eprint( FATAL, SET, "Function `%s' can only be used "
+								"in the EXPERIMENT section.\n", prepstext );
 						THROW( EXCEPTION );
 					}
 					return FUNC_TOKEN;
@@ -361,9 +359,8 @@ FUNC        {IDENT}"#"[0-9]+
 
 				if ( ( prepslval.vptr = vars_get( prepstext ) ) == NULL )
 				{
-					eprint( FATAL, "%s:%ld: Variable or function `%s' has not "
-								   "been declared ort loaded.\n",
-								   Fname, Lc, prepstext );
+					eprint( FATAL, SET, "Variable or function `%s' has not "
+						    "been declared or loaded.\n", prepstext );
 					THROW( EXCEPTION );
 				}
 
@@ -425,8 +422,8 @@ FUNC        {IDENT}"#"[0-9]+
 
 			/* Handling of invalid input */
 .           {
-				eprint( FATAL, "%s:%ld: Invalid input in PREPARATIONS "
-						"section: `%s'.\n", Fname, Lc, prepstext );
+				eprint( FATAL, SET, "Invalid input in PREPARATIONS "
+						"section: `%s'.\n", prepstext );
 				THROW( EXCEPTION );
 			}
 
@@ -451,8 +448,8 @@ int preparations_parser( FILE *in )
 
 	if ( compilation.sections[ PREPARATIONS_SECTION ] )
 	{
-		eprint( FATAL, "%s:%ld: Multiple instances of PREPARATIONS section "
-		        "label.\n", Fname, Lc );
+		eprint( FATAL, SET, "Multiple instances of PREPARATIONS section "
+		        "label.\n" );
 		THROW( EXCEPTION );
 	}
 	compilation.sections[ PREPARATIONS_SECTION ] = SET;
@@ -491,8 +488,8 @@ static Var *preps_get_channel_name( void )
 			 return v;
 	}
 
-	eprint( FATAL, "%s:%ld: Token `%s' can't be used, no digitizer module "
+	eprint( FATAL, SET, "Token `%s' can't be used, no digitizer module "
 			"loaded or module does not know how to interpret the token.\n",
-			Fname, Lc, prepstext );
+			prepstext );
 	THROW( EXCEPTION );
 }

@@ -94,9 +94,8 @@ line:    P_TOK prop
          list1 ']'                 { vars_arr_lhs( $4 ); }
          ass                       { fsc2_assert( Var_Stack == NULL ); }
        | FUNC_TOKEN '(' list2 ')'  { vars_pop( func_call( $1 ) ); }
-       | FUNC_TOKEN '['            { eprint( FATAL, "%s:%ld: `%s' is a "
-											 "predefined function.\n",
-											 Fname, Lc, $1->name );
+       | FUNC_TOKEN '['            { eprint( FATAL, SET, "`%s' is a predefined"
+                                             " function.\n", $1->name );
 	                                 THROW( EXCEPTION ); }
 ;
 
@@ -155,13 +154,11 @@ expr:    INT_TOKEN unit           { $$ = apply_unit( vars_push( INT_VAR, $1 ),
        | FUNC_TOKEN '(' list2 ')' { CV = func_call( $1 ); }
          unit                     { $$ = apply_unit( CV, $6 ); }
        | VAR_REF                  { $$ = $1; }
-       | VAR_TOKEN '('            { eprint( FATAL, "%s:%ld: `%s' isn't a "
-											"function.\n", Fname, Lc,
-											$1->name );
+       | VAR_TOKEN '('            { eprint( FATAL, SET, "`%s' isn't a "
+											"function.\n", $1->name );
 	                                 THROW( EXCEPTION ); }
-       | FUNC_TOKEN '['           { eprint( FATAL, "%s:%ld: `%s' is a "
-											"predefined function.\n",
-											Fname, Lc, $1->name );
+       | FUNC_TOKEN '['           { eprint( FATAL, SET, "`%s' is a predefined "
+											"function.\n", $1->name );
 	                                THROW( EXCEPTION ); }
        | expr AND expr       	  { $$ = vars_comp( COMP_AND, $1, $3 ); }
        | expr OR expr        	  { $$ = vars_comp( COMP_OR, $1, $3 ); }
@@ -234,10 +231,10 @@ void prepserror ( const char *s )
 	s = s;                    /* stupid but avoids compiler warning */
 
 	if ( *prepstext == '\0' )
-		eprint( FATAL, "%s:%ld: Unexpected end of file in PREPARATIONS "
-				"section.\n", Fname, Lc );
+		eprint( FATAL, SET, "Unexpected end of file in PREPARATIONS "
+				"section.\n" );
 	else
-		eprint( FATAL, "%s:%ld: Syntax error near token `%s'.\n",
-				Fname, Lc, isprint( *prepstext ) ? prepstext : prepstext + 1 );
+		eprint( FATAL, SET, "Syntax error near token `%s'.\n",
+				isprint( *prepstext ) ? prepstext : prepstext + 1 );
 	THROW( EXCEPTION );
 }

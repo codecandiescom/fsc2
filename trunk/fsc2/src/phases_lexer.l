@@ -91,7 +91,7 @@ WS          [\n=,:. ]+
 
 			/* handling of error messages from the cleaner */
 {ERR}		{
-				eprint( FATAL, "%s\n", phasestext + 2 );
+				eprint( FATAL, UNSET, "%s\n", phasestext + 2 );
 				return 0;
 			}
 
@@ -240,8 +240,7 @@ int phases_parser( FILE *in )
 
 	if ( compilation.sections[ PHASES_SECTION ] )
 	{
-		eprint( FATAL, "%s:%ld: Multiple instances of PHASES section label.\n",
-				Fname, Lc );
+		eprint( FATAL, SET, "Multiple instances of PHASES section label.\n" );
 		THROW( EXCEPTION );
 	}
 	compilation.sections[ PHASES_SECTION ] = SET;
@@ -263,8 +262,8 @@ int phases_parser( FILE *in )
 	}
 	CATCH( INVALID_INPUT_EXCEPTION )
 	{
-		eprint( FATAL, "%s:%ld: Invalid input in PHASES section: `%s'.\n",
-				Fname, Lc, phasestext );
+		eprint( FATAL, SET, "Invalid input in PHASES section: `%s'.\n",
+				phasestext );
 		THROW( EXCEPTION );
 	}
 	OTHERWISE
