@@ -348,6 +348,23 @@ Var *digitizer_get_channel_number( Var *v )
 }
 
 
+/*----------------------------------------------------------------------*/
+/* This is not a function that users should usually call but a function */
+/* that allows other functions to check if a certain number stands for  */
+/* channel that can be used in measurements.                            */
+/*----------------------------------------------------------------------*/
+
+Var *digitizer_meas_channel_ok( Var *v )
+{
+	vars_check( v, INT_VAR );
+
+	if ( v->val.lval < TDS520_CH1 || v->val.lval > TDS520_REF4 )
+		vars_push( INT_VAR, 0 );
+	else
+		vars_push( INT_VAR, 1 );
+}
+
+
 /*-------------------------------------------------------------------*/
 /* digitizer_set_trigger_channel() sets the channel that is used for */
 /* triggering.                                                       */
