@@ -249,7 +249,7 @@ for function/output channels declared as @code{INVERTED}).
 
 @paragraphindent 0
 @strong{Description}: Sony/Tektronix Data generator DG2020, used as
-pulser for the Frankfurt S-band spectrometer,
+pulser for the Frankfurt S-band spectrometer.
 
 @paragraphindent 0
 Time base: between @w{5 ns} and @w{100 ms}@*
@@ -335,7 +335,7 @@ already measured curves is currently supported.
 
 @paragraphindent 0
 @strong{Description}: Bruker Pulse Programmer EP385, used as
-pulser for the Berlin X-band spectrometer
+pulser for the Berlin X-band spectrometer.
 
 @paragraphindent 0
 Time base: internal clock @w{8 ns}, external clock @w{8 ns} and slower@*
@@ -1062,7 +1062,7 @@ with @code{fsc2} to be installed)
 
 @paragraphindent 0
 @strong{Description}: General purpose counter and timer card with 4
-channels, used for event counting and pulse creation
+channels, used for event counting and pulse creation.
 
 @paragraphindent 0
 @strong{Controlled via}: PCI card (requires module and library coming
