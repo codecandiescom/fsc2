@@ -38,8 +38,8 @@ static bool Dont_Save;
    of the name of the function and the number of arguments and the access flag
    (the access flag tells in which sections the function may be used).
 
-   The following input should result in as may variables on the stack as there
-   are function arguments. When the argument list ends, func_call() is called.
+   The following input results in as may variables on the stack as there are
+   function arguments. When the argument list ends, func_call() is called.
    This function first checks if there are at least as many variables on the
    stack as the function needs. If there are more arguments than needed, a
    warning is printed and the superfluous variables (i.e. the last ones) are
@@ -58,8 +58,7 @@ static bool Dont_Save;
    long!) as additional arguments.
 
    On return func_call() will remove all arguments from the stack as well as
-   the variable for the function.
-*/
+   the variable for the function.  */
 
 
 Var *f_int(     Var *v );
@@ -196,6 +195,9 @@ bool functions_init( void )
 }
 
 
+/*--------------------------------------------------------*/
+/*--------------------------------------------------------*/
+
 static int func_cmp1( const void *a, const void *b )
 {
 	return strcmp( ( ( Func * ) a )->name, ( ( Func * ) b )->name );
@@ -242,6 +244,9 @@ Var *func_get( const char *name, int *access )
 }
 
 
+/*--------------------------------------------------------*/
+/*--------------------------------------------------------*/
+
 Var *func_get_long( const char *name, int *access, bool flag )
 {
 	Func *f;
@@ -277,6 +282,9 @@ Var *func_get_long( const char *name, int *access, bool flag )
 	return ret;
 }
 
+
+/*--------------------------------------------------------*/
+/*--------------------------------------------------------*/
 
 static int func_cmp2( const void *a, const void *b )
 {
@@ -391,17 +399,97 @@ Var *func_call( Var *f )
 
 Var *f_int( Var *v )
 {
-	vars_check( v, INT_VAR | FLOAT_VAR );
+	Var *new_var;
+	long i;
+	long len;
+	long *rlp;
+	double *idp;
+	
 
-	if ( v->type == INT_VAR )
-		return vars_push( INT_VAR, v->val.lval );
-	else
+
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
+				   ARR_REF | ARR_PTR | INT_TRANS_ARR | FLOAT_TRANS_ARR );
+
+	switch ( v->type )
 	{
-		if ( v->val.dval > LONG_MAX || v->val.dval < LONG_MIN )
+		case INT_VAR :
+			return vars_push( INT_VAR, v->val.lval );
+
+		case FLOAT_VAR :
+			if ( v->val.dval > LONG_MAX || v->val.dval < LONG_MIN )
+				eprint( SEVERE, "%s:%ld: Integer overflow in function "
+						"`int()'.\n", Fname, Lc );
+			return vars_push( INT_VAR, ( long ) v->val.dval );
+
+		case INT_ARR :
+			if ( v->dim != 1 )
+			{
+				eprint( FATAL, "%s:%ld: Argument of function `int()' is "
+						"neither a number nor a 1-dimensional array.\n",
+						Fname, Lc );
+				THROW( EXCEPTION );
+			}
+			return vars_push( INT_TRANS_ARR, v->val.lpnt, v->len );
+
+		case FLOAT_ARR :
+			if ( v->dim != 1 )
+			{
+				eprint( FATAL, "%s:%ld: Argument of function `int()' is "
+						"neither a number nor a 1-dimensional array.\n",
+						Fname, Lc );
+				THROW( EXCEPTION );
+			}
+			len = v->len;
+			idp = v->val.dpnt;
+			break;
+
+		case ARR_PTR :
+			len = v->from->sizes[ v->from->dim - 1 ];
+			if ( v->from->type == INT_ARR )
+				return vars_push( INT_TRANS_ARR, ( long * ) v->val.gptr, len );
+			else
+				idp = ( double * ) v->val.gptr;
+			break;
+
+		case ARR_REF :
+			if ( v->from->dim != 1 )
+			{
+				eprint( FATAL, "%s:%ld: Argument of function `int()' is "
+						"neither a number nor a 1-dimensional array.\n",
+						Fname, Lc );
+				THROW( EXCEPTION );
+			}
+			len = v->from->sizes[ 0 ];
+			if ( v->from->type == INT_ARR )
+				return vars_push( INT_TRANS_ARR, v->from->val.lpnt, len );
+			else
+				idp = v->from->val.dpnt;
+			break;
+
+		case INT_TRANS_ARR :
+			return vars_push( INT_TRANS_ARR, v->val.lpnt, v->len );
+			break;
+
+		case FLOAT_TRANS_ARR :
+			len = v->len;
+			idp = v->val.dpnt;
+			break;
+
+		default :
+			assert( 1 == 0 );
+	}
+
+	rlp = T_malloc( len * sizeof( long ) );
+	for ( i = 0; i < len; idp++, i++ )
+	{
+		if ( *idp > LONG_MAX || *idp < LONG_MIN )
 			eprint( SEVERE, "%s:%ld: Integer overflow in function `int()'.\n",
 					Fname, Lc );
-		return vars_push( INT_VAR, ( long ) v->val.dval );
+		rlp[ i ] = ( long ) *idp;
 	}
+	new_var = vars_push( INT_TRANS_ARR, rlp, len );
+	T_free( rlp );
+	return new_var;
 }
 
 
@@ -411,12 +499,90 @@ Var *f_int( Var *v )
 
 Var *f_float( Var *v )
 {
-	vars_check( v, INT_VAR | FLOAT_VAR );
+	Var *new_var;
+	long i;
+	long len;
+	double *rdp;
+	long *ilp;
+	
 
-	if ( v->type == INT_VAR )
-		return vars_push( FLOAT_VAR, ( double ) v->val.lval );
-	else
-		return vars_push( FLOAT_VAR, v->val.dval );
+
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
+				   ARR_REF | ARR_PTR | INT_TRANS_ARR | FLOAT_TRANS_ARR );
+
+	switch ( v->type )
+	{
+		case INT_VAR :
+			return vars_push( FLOAT_VAR, ( double ) v->val.lval );
+
+		case FLOAT_VAR :
+			return vars_push( FLOAT_VAR, v->val.dval );
+
+		case INT_ARR :
+			if ( v->dim != 1 )
+			{
+				eprint( FATAL, "%s:%ld: Argument of function `float()' is "
+						"neither a number nor a 1-dimensional array.\n",
+						Fname, Lc );
+				THROW( EXCEPTION );
+			}
+			len = v->sizes[ 0 ];
+			ilp = v->val.lpnt;
+			break;
+
+		case FLOAT_ARR :
+			if ( v->dim != 1 )
+			{
+				eprint( FATAL, "%s:%ld: Argument of function `float()' is "
+						"neither a number nor a 1-dimensional array.\n",
+						Fname, Lc );
+				THROW( EXCEPTION );
+			}
+			return vars_push( FLOAT_TRANS_ARR, v->val.dpnt, v->sizes[ 0 ] );
+
+		case ARR_PTR :
+			len = v->from->sizes[ v->from->dim - 1 ];
+			if ( v->from->type == INT_ARR )
+				ilp = ( long * ) v->val.gptr;
+			else
+				return vars_push( FLOAT_TRANS_ARR, ( double * ) v->val.gptr, 
+								  len );
+			break;
+
+		case ARR_REF :
+			if ( v->from->dim != 1 )
+			{
+				eprint( FATAL, "%s:%ld: Argument of function `float()' is "
+						"neither a number nor a 1-dimensional array.\n",
+						Fname, Lc );
+				THROW( EXCEPTION );
+			}
+			len = v->from->sizes[ 0 ];
+			if ( v->from->type == INT_ARR )
+				ilp = v->from->val.lpnt;
+			else
+				return vars_push( FLOAT_TRANS_ARR, v->from->val.dpnt, len );
+			break;
+
+		case INT_TRANS_ARR :
+			len = v->len;
+			ilp = v->val.lpnt;
+			break;
+
+		case FLOAT_TRANS_ARR :
+			return vars_push( FLOAT_TRANS_ARR, v->val.dpnt, v->len );
+			break;
+
+		default :
+			assert( 1 == 0 );
+	}
+
+	rdp = T_malloc( len * sizeof( double ) );
+	for ( i = 0; i < len; i++ )
+		rdp[ i ] = ( double ) *ilp++;
+	new_var = vars_push( FLOAT_TRANS_ARR, rdp, len );
+	T_free( rdp );
+	return new_var;
 }
 
 
@@ -426,18 +592,99 @@ Var *f_float( Var *v )
 
 Var *f_round( Var *v )
 {
-	vars_check( v, INT_VAR | FLOAT_VAR );
+	Var *new_var;
+	long i;
+	long len;
+	long *rlp;
+	double *idp;
 
-	if ( v->type == INT_VAR )
-		return vars_push( INT_VAR, v->val.lval );
-	else
+
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
+				   ARR_REF | ARR_PTR | INT_TRANS_ARR | FLOAT_TRANS_ARR );
+
+	switch ( v->type )
 	{
-		if ( v->val.dval >= LONG_MAX - 0.5 || v->val.dval <= LONG_MIN + 0.5 )
+		case INT_VAR :
+			return vars_push( INT_VAR, v->val.lval );
+
+		case FLOAT_VAR :
+			if ( v->val.dval >= LONG_MAX - 0.5 ||
+				 v->val.dval <= LONG_MIN + 0.5 )
+				eprint( SEVERE, "%s:%ld: Integer overflow in function "
+						"`round()'.\n", Fname, Lc );
+			return vars_push( INT_VAR,   ( long ) ( 2 * v->val.dval )
+							           - ( long ) v->val.dval );
+
+		case INT_ARR :
+			if ( v->dim != 1 )
+			{
+				eprint( FATAL, "%s:%ld: Argument of function `round()' is "
+						"neither a number nor a 1-dimensional array.\n",
+						Fname, Lc );
+				THROW( EXCEPTION );
+			}
+			return vars_push( INT_TRANS_ARR, v->val.lpnt, v->len );
+
+		case FLOAT_ARR :
+			if ( v->dim != 1 )
+			{
+				eprint( FATAL, "%s:%ld: Argument of function `round()' is "
+						"neither a number nor a 1-dimensional array.\n",
+						Fname, Lc );
+				THROW( EXCEPTION );
+			}
+			len = v->len;
+			idp = v->val.dpnt;
+			break;
+
+		case ARR_PTR :
+			len = v->from->sizes[ v->from->dim - 1 ];
+			if ( v->from->type == INT_ARR )
+				return vars_push( INT_TRANS_ARR, ( long * ) v->val.gptr, len );
+			else
+				idp = ( double * ) v->val.gptr;
+			break;
+
+		case ARR_REF :
+			if ( v->from->dim != 1 )
+			{
+				eprint( FATAL, "%s:%ld: Argument of function `round()' is "
+						"neither a number nor a 1-dimensional array.\n",
+						Fname, Lc );
+				THROW( EXCEPTION );
+			}
+			len = v->from->sizes[ 0 ];
+			if ( v->from->type == INT_ARR )
+				return vars_push( INT_TRANS_ARR, v->from->val.lpnt, len );
+			else
+				idp = v->from->val.dpnt;
+			break;
+
+		case INT_TRANS_ARR :
+			return vars_push( INT_TRANS_ARR, v->val.lpnt, v->len );
+			break;
+
+		case FLOAT_TRANS_ARR :
+			len = v->len;
+			idp = v->val.dpnt;
+			break;
+
+		default :
+			assert( 1 == 0 );
+	}
+
+	rlp = T_malloc( len * sizeof( long ) );
+	for ( i = 0; i < len; idp++, i++ )
+	{
+		if ( *idp >= LONG_MAX - 0.5 || *idp <= LONG_MIN + 0.5 )
 			eprint( SEVERE, "%s:%ld: Integer overflow in function "
 					"`round()'.\n", Fname, Lc );
-		return vars_push( INT_VAR,   ( long ) ( 2 * v->val.dval )
-                                   - ( long ) v->val.dval );
+		rlp[ i ] = ( long ) ( 2 * *idp ) - ( long ) *idp;
 	}
+
+	new_var = vars_push( INT_TRANS_ARR, rlp, len );
+	T_free( rlp );
+	return new_var;
 }
 
 
@@ -447,17 +694,97 @@ Var *f_round( Var *v )
 
 Var *f_floor( Var *v )
 {
-	vars_check( v, INT_VAR | FLOAT_VAR );
+	Var *new_var;
+	long i;
+	long len;
+	long *rlp;
+	double *idp;
 
-	if ( v->type == INT_VAR )
-		return vars_push( INT_VAR, v->val.lval );
-	else
+
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
+				   ARR_REF | ARR_PTR | INT_TRANS_ARR | FLOAT_TRANS_ARR );
+
+	switch ( v->type )
 	{
-		if ( v->val.dval < LONG_MIN )
+		case INT_VAR :
+			return vars_push( INT_VAR, v->val.lval );
+
+		case FLOAT_VAR :
+			if ( v->val.dval < LONG_MIN )
+				eprint( SEVERE, "%s:%ld: Integer overflow in function "
+						"`floor()'.\n", Fname, Lc );
+			return vars_push( INT_VAR, ( long ) floor( v->val.dval ) );
+
+		case INT_ARR :
+			if ( v->dim != 1 )
+			{
+				eprint( FATAL, "%s:%ld: Argument of function `floor()' is "
+						"neither a number nor a 1-dimensional array.\n",
+						Fname, Lc );
+				THROW( EXCEPTION );
+			}
+			return vars_push( INT_TRANS_ARR, v->val.lpnt, v->len );
+
+		case FLOAT_ARR :
+			if ( v->dim != 1 )
+			{
+				eprint( FATAL, "%s:%ld: Argument of function `floor()' is "
+						"neither a number nor a 1-dimensional array.\n",
+						Fname, Lc );
+				THROW( EXCEPTION );
+			}
+			len = v->len;
+			idp = v->val.dpnt;
+			break;
+
+		case ARR_PTR :
+			len = v->from->sizes[ v->from->dim - 1 ];
+			if ( v->from->type == INT_ARR )
+				return vars_push( INT_TRANS_ARR, ( long * ) v->val.gptr, len );
+			else
+				idp = ( double * ) v->val.gptr;
+			break;
+
+		case ARR_REF :
+			if ( v->from->dim != 1 )
+			{
+				eprint( FATAL, "%s:%ld: Argument of function `floor()' is "
+						"neither a number nor a 1-dimensional array.\n",
+						Fname, Lc );
+				THROW( EXCEPTION );
+			}
+			len = v->from->sizes[ 0 ];
+			if ( v->from->type == INT_ARR )
+				return vars_push( INT_TRANS_ARR, v->from->val.lpnt, len );
+			else
+				idp = v->from->val.dpnt;
+			break;
+
+		case INT_TRANS_ARR :
+			return vars_push( INT_TRANS_ARR, v->val.lpnt, v->len );
+			break;
+
+		case FLOAT_TRANS_ARR :
+			len = v->len;
+			idp = v->val.dpnt;
+			break;
+
+		default :
+			assert( 1 == 0 );
+	}
+
+	rlp = T_malloc( len * sizeof( long ) );
+	for ( i = 0; i < len; idp++, i++ )
+	{
+		if ( *idp < LONG_MIN )
 			eprint( SEVERE, "%s:%ld: Integer overflow in function "
 					"`floor()'.\n", Fname, Lc );
-		return vars_push( INT_VAR, ( long ) floor( v->val.dval ) );
+		rlp[ i ] = ( long ) floor( *idp );
 	}
+
+	new_var = vars_push( INT_TRANS_ARR, rlp, len );
+	T_free( rlp );
+	return new_var;
 }
 
 
@@ -467,17 +794,97 @@ Var *f_floor( Var *v )
 
 Var *f_ceil( Var *v )
 {
-	vars_check( v, INT_VAR | FLOAT_VAR );
+	Var *new_var;
+	long i;
+	long len;
+	long *rlp;
+	double *idp;
 
-	if ( v->type == INT_VAR )
-		return vars_push( INT_VAR, v->val.lval );
-	else
+
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
+				   ARR_REF | ARR_PTR | INT_TRANS_ARR | FLOAT_TRANS_ARR );
+
+	switch ( v->type )
 	{
-		if ( v->val.dval > LONG_MAX )
-			eprint( SEVERE, "%s:%ld: Integer overflow in function "
-					"`ceil()'.\n", Fname, Lc );
-		return vars_push( INT_VAR, ( long ) ceil( v->val.dval ) );
+		case INT_VAR :
+			return vars_push( INT_VAR, v->val.lval );
+
+		case FLOAT_VAR :
+			if ( v->val.dval > LONG_MAX )
+				eprint( SEVERE, "%s:%ld: Integer overflow in function "
+						"`ceil()'.\n", Fname, Lc );
+			return vars_push( INT_VAR, ( long ) ceil( v->val.dval ) );
+
+		case INT_ARR :
+			if ( v->dim != 1 )
+			{
+				eprint( FATAL, "%s:%ld: Argument of function `ceil()' is "
+						"neither a number nor a 1-dimensional array.\n",
+						Fname, Lc );
+				THROW( EXCEPTION );
+			}
+			return vars_push( INT_TRANS_ARR, v->val.lpnt, v->len );
+
+		case FLOAT_ARR :
+			if ( v->dim != 1 )
+			{
+				eprint( FATAL, "%s:%ld: Argument of function `ceil()' is "
+						"neither a number nor a 1-dimensional array.\n",
+						Fname, Lc );
+				THROW( EXCEPTION );
+			}
+			len = v->len;
+			idp = v->val.dpnt;
+			break;
+
+		case ARR_PTR :
+			len = v->from->sizes[ v->from->dim - 1 ];
+			if ( v->from->type == INT_ARR )
+				return vars_push( INT_TRANS_ARR, ( long * ) v->val.gptr, len );
+			else
+				idp = ( double * ) v->val.gptr;
+			break;
+
+		case ARR_REF :
+			if ( v->from->dim != 1 )
+			{
+				eprint( FATAL, "%s:%ld: Argument of function `ceil()' is "
+						"neither a number nor a 1-dimensional array.\n",
+						Fname, Lc );
+				THROW( EXCEPTION );
+			}
+			len = v->from->sizes[ 0 ];
+			if ( v->from->type == INT_ARR )
+				return vars_push( INT_TRANS_ARR, v->from->val.lpnt, len );
+			else
+				idp = v->from->val.dpnt;
+			break;
+
+		case INT_TRANS_ARR :
+			return vars_push( INT_TRANS_ARR, v->val.lpnt, v->len );
+			break;
+
+		case FLOAT_TRANS_ARR :
+			len = v->len;
+			idp = v->val.dpnt;
+			break;
+
+		default :
+			assert( 1 == 0 );
 	}
+
+	rlp = T_malloc( len * sizeof( long ) );
+	for ( i = 0; i < len; idp++, i++ )
+	{
+		if ( *idp < LONG_MIN )
+			eprint( SEVERE, "%s:%ld: Integer overflow in function `ceil()'.\n",
+					Fname, Lc );
+		rlp[ i ] = ( long ) ceil( *idp );
+	}
+
+	new_var = vars_push( INT_TRANS_ARR, rlp, len );
+	T_free( rlp );
+	return new_var;
 }
 
 
@@ -487,17 +894,129 @@ Var *f_ceil( Var *v )
 
 Var *f_abs( Var *v )
 {
-	vars_check( v, INT_VAR | FLOAT_VAR );
+	Var *new_var;
+	long i;
+	long len;
+	long *rlp;
+	double *rdp;
+	long *ilp;
+	double *idp;
+	int type;
 
-	if ( v->type == INT_VAR )
+
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
+				   ARR_REF | ARR_PTR | INT_TRANS_ARR | FLOAT_TRANS_ARR );
+
+	switch ( v->type )
 	{
-		if ( v->val.lval == LONG_MIN )
-			eprint( SEVERE, "%s:%ld: Integer overflow in function `abs()'.\n",
-					Fname, Lc );
-		return vars_push( INT_VAR, labs( v->val.lval ) );
+		case INT_VAR :
+			if ( v->val.lval == LONG_MIN )
+				eprint( SEVERE, "%s:%ld: Integer overflow in function "
+						"`abs()'.\n", Fname, Lc );
+			return vars_push( INT_VAR, labs( v->val.lval ) );
+
+		case FLOAT_VAR :
+			return vars_push( FLOAT_VAR, fabs( v->val.dval ) );
+
+		case INT_ARR :
+			if ( v->dim != 1 )
+			{
+				eprint( FATAL, "%s:%ld: Argument of function `abs()' is "
+						"neither a number nor a 1-dimensional array.\n",
+						Fname, Lc );
+				THROW( EXCEPTION );
+			}
+			type = INT_ARR;
+			len = v->len;
+			ilp = v->val.lpnt;
+			break;
+			
+		case FLOAT_ARR :
+			if ( v->dim != 1 )
+			{
+				eprint( FATAL, "%s:%ld: Argument of function `abs()' is "
+						"neither a number nor a 1-dimensional array.\n",
+						Fname, Lc );
+				THROW( EXCEPTION );
+			}
+			type = FLOAT_ARR;
+			len = v->len;
+			idp = v->val.dpnt;
+			break;
+			
+		case ARR_PTR :
+			len = v->from->sizes[ v->from->dim - 1 ];
+			if ( v->from->type == INT_ARR )
+			{
+				type = INT_ARR;
+				ilp = ( long * ) v->val.gptr, len;
+			}
+			else
+			{
+				type = FLOAT_ARR;
+				idp = ( double * ) v->val.gptr;
+			}
+			break;
+
+		case ARR_REF :
+			if ( v->from->dim != 1 )
+			{
+				eprint( FATAL, "%s:%ld: Argument of function `abs()' is "
+						"neither a number nor a 1-dimensional array.\n",
+						Fname, Lc );
+				THROW( EXCEPTION );
+			}
+			len = v->from->sizes[ 0 ];
+			if ( v->from->type == INT_ARR )
+			{
+				type = INT_ARR;
+				ilp = v->from->val.lpnt, len;
+			}
+			else
+			{
+				type = FLOAT_ARR;
+				idp = v->from->val.dpnt;
+			}
+			break;
+
+		case INT_TRANS_ARR :
+			type = INT_ARR;
+			len = v->len;
+			ilp = v->val.lpnt;
+			break;
+
+		case FLOAT_TRANS_ARR :
+			len = v->len;
+			idp = v->val.dpnt;
+			break;
+
+		default :
+			assert( 1 == 0 );
+	}
+
+	if ( type == INT_ARR )
+	{
+		rlp = T_malloc( len * sizeof( long ) );
+		for ( i = 0; i < len; ilp++, i++ )
+		{
+			if ( *ilp == LONG_MIN )
+				eprint( SEVERE, "%s:%ld: Integer overflow in function "
+						"`abs()'.\n", Fname, Lc );
+			rlp[ i ] = labs( *ilp );
+		}
+		new_var = vars_push( INT_TRANS_ARR, rlp, len );
+		T_free( rlp );
 	}
 	else
-		return vars_push( FLOAT_VAR, fabs( v->val.dval ) );
+	{
+		rdp = T_malloc( len * sizeof( double ) );
+		for ( i = 0; i < len; idp++, i++ )
+			rlp[ i ] = fabs( *idp );
+		new_var = vars_push( FLOAT_TRANS_ARR, rdp, len );
+		T_free( rdp );
+	}
+
+	return new_var;
 }
 
 
@@ -507,8 +1026,109 @@ Var *f_abs( Var *v )
 
 Var *f_sin( Var *v )
 {
-	vars_check( v, INT_VAR | FLOAT_VAR );
-	return vars_push( FLOAT_VAR, sin( VALUE( v ) ) );
+	Var *new_var;
+	long i;
+	long len;
+	double *rdp;
+	long *ilp;
+	double *idp;
+	int type;
+
+
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
+				   ARR_REF | ARR_PTR | INT_TRANS_ARR | FLOAT_TRANS_ARR );
+
+	switch ( v->type )
+	{
+		case INT_VAR : case FLOAT_VAR :
+			return vars_push( FLOAT_VAR, sin( VALUE( v ) ) );
+
+		case INT_ARR :
+			if ( v->dim != 1 )
+			{
+				eprint( FATAL, "%s:%ld: Argument of function `sin()' is "
+						"neither a number nor a 1-dimensional array.\n",
+						Fname, Lc );
+				THROW( EXCEPTION );
+			}
+			type = INT_ARR;
+			len = v->len;
+			ilp = v->val.lpnt;
+			break;
+			
+		case FLOAT_ARR :
+			if ( v->dim != 1 )
+			{
+				eprint( FATAL, "%s:%ld: Argument of function `sin()' is "
+						"neither a number nor a 1-dimensional array.\n",
+						Fname, Lc );
+				THROW( EXCEPTION );
+			}
+			type = FLOAT_ARR;
+			len = v->len;
+			idp = v->val.dpnt;
+			break;
+			
+		case ARR_PTR :
+			len = v->from->sizes[ v->from->dim - 1 ];
+			if ( v->from->type == INT_ARR )
+			{
+				type = INT_ARR;
+				ilp = ( long * ) v->val.gptr, len;
+			}
+			else
+			{
+				type = FLOAT_ARR;
+				idp = ( double * ) v->val.gptr;
+			}
+			break;
+
+		case ARR_REF :
+			if ( v->from->dim != 1 )
+			{
+				eprint( FATAL, "%s:%ld: Argument of function `sin()' is "
+						"neither a number nor a 1-dimensional array.\n",
+						Fname, Lc );
+				THROW( EXCEPTION );
+			}
+			len = v->from->sizes[ 0 ];
+			if ( v->from->type == INT_ARR )
+			{
+				type = INT_ARR;
+				ilp = v->from->val.lpnt, len;
+			}
+			else
+			{
+				type = FLOAT_ARR;
+				idp = v->from->val.dpnt;
+			}
+			break;
+
+		case INT_TRANS_ARR :
+			type = INT_ARR;
+			len = v->len;
+			ilp = v->val.lpnt;
+			break;
+
+		case FLOAT_TRANS_ARR :
+			len = v->len;
+			idp = v->val.dpnt;
+			break;
+
+		default :
+			assert( 1 == 0 );
+	}
+
+	rdp = T_malloc( len * sizeof( double ) );
+	for ( i = 0; i < len; i++ )
+		if ( type == INT_ARR )
+			rdp[ i ] = sin( ( double ) *ilp++ );
+		else
+			rdp[ i ] = sin( *idp++ );
+	new_var = vars_push( FLOAT_TRANS_ARR, rdp, len );
+	T_free( rdp );
+
+	return new_var;
 }
 
 
@@ -518,8 +1138,109 @@ Var *f_sin( Var *v )
 
 Var *f_cos( Var *v )
 {
-	vars_check( v, INT_VAR | FLOAT_VAR );
-	return vars_push( FLOAT_VAR, cos( VALUE( v ) ) );
+	Var *new_var;
+	long i;
+	long len;
+	double *rdp;
+	long *ilp;
+	double *idp;
+	int type;
+
+
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
+				   ARR_REF | ARR_PTR | INT_TRANS_ARR | FLOAT_TRANS_ARR );
+
+	switch ( v->type )
+	{
+		case INT_VAR : case FLOAT_VAR :
+			return vars_push( FLOAT_VAR, cos( VALUE( v ) ) );
+
+		case INT_ARR :
+			if ( v->dim != 1 )
+			{
+				eprint( FATAL, "%s:%ld: Argument of function `cos()' is "
+						"neither a number nor a 1-dimensional array.\n",
+						Fname, Lc );
+				THROW( EXCEPTION );
+			}
+			type = INT_ARR;
+			len = v->len;
+			ilp = v->val.lpnt;
+			break;
+			
+		case FLOAT_ARR :
+			if ( v->dim != 1 )
+			{
+				eprint( FATAL, "%s:%ld: Argument of function `cos()' is "
+						"neither a number nor a 1-dimensional array.\n",
+						Fname, Lc );
+				THROW( EXCEPTION );
+			}
+			type = FLOAT_ARR;
+			len = v->len;
+			idp = v->val.dpnt;
+			break;
+			
+		case ARR_PTR :
+			len = v->from->sizes[ v->from->dim - 1 ];
+			if ( v->from->type == INT_ARR )
+			{
+				type = INT_ARR;
+				ilp = ( long * ) v->val.gptr, len;
+			}
+			else
+			{
+				type = FLOAT_ARR;
+				idp = ( double * ) v->val.gptr;
+			}
+			break;
+
+		case ARR_REF :
+			if ( v->from->dim != 1 )
+			{
+				eprint( FATAL, "%s:%ld: Argument of function `cos()' is "
+						"neither a number nor a 1-dimensional array.\n",
+						Fname, Lc );
+				THROW( EXCEPTION );
+			}
+			len = v->from->sizes[ 0 ];
+			if ( v->from->type == INT_ARR )
+			{
+				type = INT_ARR;
+				ilp = v->from->val.lpnt, len;
+			}
+			else
+			{
+				type = FLOAT_ARR;
+				idp = v->from->val.dpnt;
+			}
+			break;
+
+		case INT_TRANS_ARR :
+			type = INT_ARR;
+			len = v->len;
+			ilp = v->val.lpnt;
+			break;
+
+		case FLOAT_TRANS_ARR :
+			len = v->len;
+			idp = v->val.dpnt;
+			break;
+
+		default :
+			assert( 1 == 0 );
+	}
+
+	rdp = T_malloc( len * sizeof( double ) );
+	for ( i = 0; i < len; i++ )
+		if ( type == INT_ARR )
+			rdp[ i ] = cos( ( double ) *ilp++ );
+		else
+			rdp[ i ] = cos( *idp++ );
+	new_var = vars_push( FLOAT_TRANS_ARR, rdp, len );
+	T_free( rdp );
+
+	return new_var;
 }
 
 
@@ -530,15 +1251,119 @@ Var *f_cos( Var *v )
 Var *f_tan( Var *v )
 {
 	double res;
+	Var *new_var;
+	long i;
+	long len;
+	double *rdp;
+	long *ilp;
+	double *idp;
+	int type;
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
 
-	res = tan( VALUE( v ) );
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
+				   ARR_REF | ARR_PTR | INT_TRANS_ARR | FLOAT_TRANS_ARR );
 
-	if ( fabs( res ) == HUGE_VAL && errno == ERANGE )
-		eprint( SEVERE, "%s:%ld: Overflow in function `tan()'.\n", Fname, Lc );
+	switch ( v->type )
+	{
+		case INT_VAR : case FLOAT_VAR :
+			res = tan( VALUE( v ) );
+			if ( fabs( res ) == HUGE_VAL && errno == ERANGE )
+				eprint( SEVERE, "%s:%ld: Overflow in function `tan()'.\n",
+						Fname, Lc );
+			return vars_push( FLOAT_VAR, res );
 
-	return vars_push( FLOAT_VAR, res );
+		case INT_ARR :
+			if ( v->dim != 1 )
+			{
+				eprint( FATAL, "%s:%ld: Argument of function `tan()' is "
+						"neither a number nor a 1-dimensional array.\n",
+						Fname, Lc );
+				THROW( EXCEPTION );
+			}
+			type = INT_ARR;
+			len = v->len;
+			ilp = v->val.lpnt;
+			break;
+			
+		case FLOAT_ARR :
+			if ( v->dim != 1 )
+			{
+				eprint( FATAL, "%s:%ld: Argument of function `tan()' is "
+						"neither a number nor a 1-dimensional array.\n",
+						Fname, Lc );
+				THROW( EXCEPTION );
+			}
+			type = FLOAT_ARR;
+			len = v->len;
+			idp = v->val.dpnt;
+			break;
+			
+		case ARR_PTR :
+			len = v->from->sizes[ v->from->dim - 1 ];
+			if ( v->from->type == INT_ARR )
+			{
+				type = INT_ARR;
+				ilp = ( long * ) v->val.gptr, len;
+			}
+			else
+			{
+				type = FLOAT_ARR;
+				idp = ( double * ) v->val.gptr;
+			}
+			break;
+
+		case ARR_REF :
+			if ( v->from->dim != 1 )
+			{
+				eprint( FATAL, "%s:%ld: Argument of function `tan()' is "
+						"neither a number nor a 1-dimensional array.\n",
+						Fname, Lc );
+				THROW( EXCEPTION );
+			}
+			len = v->from->sizes[ 0 ];
+			if ( v->from->type == INT_ARR )
+			{
+				type = INT_ARR;
+				ilp = v->from->val.lpnt, len;
+			}
+			else
+			{
+				type = FLOAT_ARR;
+				idp = v->from->val.dpnt;
+			}
+			break;
+
+		case INT_TRANS_ARR :
+			type = INT_ARR;
+			len = v->len;
+			ilp = v->val.lpnt;
+			break;
+
+		case FLOAT_TRANS_ARR :
+			len = v->len;
+			idp = v->val.dpnt;
+			break;
+
+		default :
+			assert( 1 == 0 );
+	}
+
+	rdp = T_malloc( len * sizeof( double ) );
+	for ( i = 0; i < len; i++ )
+	{
+		if ( type == INT_ARR )
+			rdp[ i ] = tan( ( double ) *ilp++ );
+		else
+			rdp[ i ] = tan( *idp++ );
+		if ( fabs( rdp[ i ] ) == HUGE_VAL && errno == ERANGE )
+			eprint( SEVERE, "%s:%ld: Overflow in function `tan()'.\n",
+					Fname, Lc );
+	}
+
+	new_var = vars_push( FLOAT_TRANS_ARR, rdp, len );
+	T_free( rdp );
+
+	return new_var;
 }
 
 
@@ -549,19 +1374,128 @@ Var *f_tan( Var *v )
 Var *f_asin( Var *v )
 {
 	double arg;
+	Var *new_var;
+	long i;
+	long len;
+	double *rdp;
+	long *ilp;
+	double *idp;
+	int type;
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
 
-	arg = VALUE( v );
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
+				   ARR_REF | ARR_PTR | INT_TRANS_ARR | FLOAT_TRANS_ARR );
 
-	if ( fabs( arg ) > 1.0 )
+	switch ( v->type )
 	{
-		eprint( FATAL, "%s:%ld: Argument of function `asin()' is out of "
-				"range.\n", Fname, Lc );
-		THROW( EXCEPTION );
+		case INT_VAR : case FLOAT_VAR :
+			arg = VALUE( v );
+			if ( fabs( arg ) > 1.0 )
+			{
+				eprint( FATAL, "%s:%ld: Argument of function `asin()' is out "
+						"of range.\n", Fname, Lc );
+				THROW( EXCEPTION );
+			}
+			return vars_push( FLOAT_VAR, asin( arg ) );
+
+		case INT_ARR :
+			if ( v->dim != 1 )
+			{
+				eprint( FATAL, "%s:%ld: Argument of function `asin()' is "
+						"neither a number nor a 1-dimensional array.\n",
+						Fname, Lc );
+				THROW( EXCEPTION );
+			}
+			type = INT_ARR;
+			len = v->len;
+			ilp = v->val.lpnt;
+			break;
+			
+		case FLOAT_ARR :
+			if ( v->dim != 1 )
+			{
+				eprint( FATAL, "%s:%ld: Argument of function `asin()' is "
+						"neither a number nor a 1-dimensional array.\n",
+						Fname, Lc );
+				THROW( EXCEPTION );
+			}
+			type = FLOAT_ARR;
+			len = v->len;
+			idp = v->val.dpnt;
+			break;
+			
+		case ARR_PTR :
+			len = v->from->sizes[ v->from->dim - 1 ];
+			if ( v->from->type == INT_ARR )
+			{
+				type = INT_ARR;
+				ilp = ( long * ) v->val.gptr, len;
+			}
+			else
+			{
+				type = FLOAT_ARR;
+				idp = ( double * ) v->val.gptr;
+			}
+			break;
+
+		case ARR_REF :
+			if ( v->from->dim != 1 )
+			{
+				eprint( FATAL, "%s:%ld: Argument of function `asin()' is "
+						"neither a number nor a 1-dimensional array.\n",
+						Fname, Lc );
+				THROW( EXCEPTION );
+			}
+			len = v->from->sizes[ 0 ];
+			if ( v->from->type == INT_ARR )
+			{
+				type = INT_ARR;
+				ilp = v->from->val.lpnt, len;
+			}
+			else
+			{
+				type = FLOAT_ARR;
+				idp = v->from->val.dpnt;
+			}
+			break;
+
+		case INT_TRANS_ARR :
+			type = INT_ARR;
+			len = v->len;
+			ilp = v->val.lpnt;
+			break;
+
+		case FLOAT_TRANS_ARR :
+			len = v->len;
+			idp = v->val.dpnt;
+			break;
+
+		default :
+			assert( 1 == 0 );
 	}
 
-	return vars_push( FLOAT_VAR, asin( arg ) );
+	rdp = T_malloc( len * sizeof( double ) );
+	for ( i = 0; i < len; i++ )
+	{
+		if ( type == INT_ARR )
+			arg = ( double ) *ilp++;
+		else
+			arg = *idp++;
+
+		if ( fabs( arg ) > 1.0 )
+		{
+			eprint( FATAL, "%s:%ld: Argument of function `asin()' is out "
+					"of range.\n", Fname, Lc );
+			THROW( EXCEPTION );
+		}
+
+		rdp[ i ] = asin( arg );
+	}
+
+	new_var = vars_push( FLOAT_TRANS_ARR, rdp, len );
+	T_free( rdp );
+
+	return new_var;
 }
 
 
@@ -572,19 +1506,128 @@ Var *f_asin( Var *v )
 Var *f_acos( Var *v )
 {
 	double arg;
+	Var *new_var;
+	long i;
+	long len;
+	double *rdp;
+	long *ilp;
+	double *idp;
+	int type;
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
 
-	arg = VALUE( v );
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
+				   ARR_REF | ARR_PTR | INT_TRANS_ARR | FLOAT_TRANS_ARR );
 
-	if ( fabs( arg ) > 1.0 )
+	switch ( v->type )
 	{
-		eprint( FATAL, "%s:%ld: Argument of function `acos()' is out of "
-				"range.\n",  Fname, Lc );
-		THROW( EXCEPTION );
+		case INT_VAR : case FLOAT_VAR :
+			arg = VALUE( v );
+			if ( fabs( arg ) > 1.0 )
+			{
+				eprint( FATAL, "%s:%ld: Argument of function `acos()' is out "
+						"of range.\n",  Fname, Lc );
+				THROW( EXCEPTION );
+			}
+			return vars_push( FLOAT_VAR, acos( arg ) );
+
+		case INT_ARR :
+			if ( v->dim != 1 )
+			{
+				eprint( FATAL, "%s:%ld: Argument of function `acos()' is "
+						"neither a number nor a 1-dimensional array.\n",
+						Fname, Lc );
+				THROW( EXCEPTION );
+			}
+			type = INT_ARR;
+			len = v->len;
+			ilp = v->val.lpnt;
+			break;
+			
+		case FLOAT_ARR :
+			if ( v->dim != 1 )
+			{
+				eprint( FATAL, "%s:%ld: Argument of function `acos()' is "
+						"neither a number nor a 1-dimensional array.\n",
+						Fname, Lc );
+				THROW( EXCEPTION );
+			}
+			type = FLOAT_ARR;
+			len = v->len;
+			idp = v->val.dpnt;
+			break;
+			
+		case ARR_PTR :
+			len = v->from->sizes[ v->from->dim - 1 ];
+			if ( v->from->type == INT_ARR )
+			{
+				type = INT_ARR;
+				ilp = ( long * ) v->val.gptr, len;
+			}
+			else
+			{
+				type = FLOAT_ARR;
+				idp = ( double * ) v->val.gptr;
+			}
+			break;
+
+		case ARR_REF :
+			if ( v->from->dim != 1 )
+			{
+				eprint( FATAL, "%s:%ld: Argument of function `acos()' is "
+						"neither a number nor a 1-dimensional array.\n",
+						Fname, Lc );
+				THROW( EXCEPTION );
+			}
+			len = v->from->sizes[ 0 ];
+			if ( v->from->type == INT_ARR )
+			{
+				type = INT_ARR;
+				ilp = v->from->val.lpnt, len;
+			}
+			else
+			{
+				type = FLOAT_ARR;
+				idp = v->from->val.dpnt;
+			}
+			break;
+
+		case INT_TRANS_ARR :
+			type = INT_ARR;
+			len = v->len;
+			ilp = v->val.lpnt;
+			break;
+
+		case FLOAT_TRANS_ARR :
+			len = v->len;
+			idp = v->val.dpnt;
+			break;
+
+		default :
+			assert( 1 == 0 );
 	}
 
-	return vars_push( FLOAT_VAR, acos( arg ) );
+	rdp = T_malloc( len * sizeof( double ) );
+	for ( i = 0; i < len; i++ )
+	{
+		if ( type == INT_ARR )
+			arg = ( double ) *ilp++;
+		else
+			arg = *idp++;
+
+		if ( fabs( arg ) > 1.0 )
+		{
+			eprint( FATAL, "%s:%ld: Argument of function `acos()' is out "
+					"of range.\n", Fname, Lc );
+			THROW( EXCEPTION );
+		}
+
+		rdp[ i ] = acos( arg );
+	}
+
+	new_var = vars_push( FLOAT_TRANS_ARR, rdp, len );
+	T_free( rdp );
+
+	return new_var;
 }
 
 
@@ -594,8 +1637,112 @@ Var *f_acos( Var *v )
 
 Var *f_atan( Var *v )
 {
-	vars_check( v, INT_VAR | FLOAT_VAR );
-	return vars_push( FLOAT_VAR, atan( VALUE( v ) ) );
+	Var *new_var;
+	long i;
+	long len;
+	double *rdp;
+	long *ilp;
+	double *idp;
+	int type;
+
+
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
+				   ARR_REF | ARR_PTR | INT_TRANS_ARR | FLOAT_TRANS_ARR );
+
+	switch ( v->type )
+	{
+		case INT_VAR : case FLOAT_VAR :
+			return vars_push( FLOAT_VAR, atan( VALUE( v ) ) );
+
+		case INT_ARR :
+			if ( v->dim != 1 )
+			{
+				eprint( FATAL, "%s:%ld: Argument of function `atan()' is "
+						"neither a number nor a 1-dimensional array.\n",
+						Fname, Lc );
+				THROW( EXCEPTION );
+			}
+			type = INT_ARR;
+			len = v->len;
+			ilp = v->val.lpnt;
+			break;
+			
+		case FLOAT_ARR :
+			if ( v->dim != 1 )
+			{
+				eprint( FATAL, "%s:%ld: Argument of function `atan()' is "
+						"neither a number nor a 1-dimensional array.\n",
+						Fname, Lc );
+				THROW( EXCEPTION );
+			}
+			type = FLOAT_ARR;
+			len = v->len;
+			idp = v->val.dpnt;
+			break;
+			
+		case ARR_PTR :
+			len = v->from->sizes[ v->from->dim - 1 ];
+			if ( v->from->type == INT_ARR )
+			{
+				type = INT_ARR;
+				ilp = ( long * ) v->val.gptr, len;
+			}
+			else
+			{
+				type = FLOAT_ARR;
+				idp = ( double * ) v->val.gptr;
+			}
+			break;
+
+		case ARR_REF :
+			if ( v->from->dim != 1 )
+			{
+				eprint( FATAL, "%s:%ld: Argument of function `atan()' is "
+						"neither a number nor a 1-dimensional array.\n",
+						Fname, Lc );
+				THROW( EXCEPTION );
+			}
+			len = v->from->sizes[ 0 ];
+			if ( v->from->type == INT_ARR )
+			{
+				type = INT_ARR;
+				ilp = v->from->val.lpnt, len;
+			}
+			else
+			{
+				type = FLOAT_ARR;
+				idp = v->from->val.dpnt;
+			}
+			break;
+
+		case INT_TRANS_ARR :
+			type = INT_ARR;
+			len = v->len;
+			ilp = v->val.lpnt;
+			break;
+
+		case FLOAT_TRANS_ARR :
+			len = v->len;
+			idp = v->val.dpnt;
+			break;
+
+		default :
+			assert( 1 == 0 );
+	}
+
+	rdp = T_malloc( len * sizeof( double ) );
+	for ( i = 0; i < len; i++ )
+	{
+		if ( type == INT_ARR )
+			rdp[ i ] = atan( ( double ) *ilp++ );
+		else
+			rdp[ i ] = atan( *idp++ );
+	}
+
+	new_var = vars_push( FLOAT_TRANS_ARR, rdp, len );
+	T_free( rdp );
+
+	return new_var;
 }
 
 
@@ -606,16 +1753,122 @@ Var *f_atan( Var *v )
 Var *f_sinh( Var *v )
 {
 	double res;
+	Var *new_var;
+	long i;
+	long len;
+	double *rdp;
+	long *ilp;
+	double *idp;
+	int type;
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
 
-	res = sinh( VALUE ( v ) );
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
+				   ARR_REF | ARR_PTR | INT_TRANS_ARR | FLOAT_TRANS_ARR );
 
-	if ( fabs( res ) == HUGE_VAL && errno == ERANGE )
-		eprint( SEVERE, "%s:%ld: Overflow in function `sinh()'.\n",
-				Fname, Lc );
+	switch ( v->type )
+	{
+		case INT_VAR : case FLOAT_VAR :
+			res = sinh( VALUE ( v ) );
+			if ( fabs( res ) == HUGE_VAL && errno == ERANGE )
+				eprint( SEVERE, "%s:%ld: Overflow in function `sinh()'.\n",
+						Fname, Lc );
+			return vars_push( FLOAT_VAR, res );
 
-	return vars_push( FLOAT_VAR, res );
+		case INT_ARR :
+			if ( v->dim != 1 )
+			{
+				eprint( FATAL, "%s:%ld: Argument of function `sinh()' is "
+						"neither a number nor a 1-dimensional array.\n",
+						Fname, Lc );
+				THROW( EXCEPTION );
+			}
+			type = INT_ARR;
+			len = v->len;
+			ilp = v->val.lpnt;
+			break;
+			
+		case FLOAT_ARR :
+			if ( v->dim != 1 )
+			{
+				eprint( FATAL, "%s:%ld: Argument of function `sinh()' is "
+						"neither a number nor a 1-dimensional array.\n",
+						Fname, Lc );
+				THROW( EXCEPTION );
+			}
+			type = FLOAT_ARR;
+			len = v->len;
+			idp = v->val.dpnt;
+			break;
+			
+		case ARR_PTR :
+			len = v->from->sizes[ v->from->dim - 1 ];
+			if ( v->from->type == INT_ARR )
+			{
+				type = INT_ARR;
+				ilp = ( long * ) v->val.gptr, len;
+			}
+			else
+			{
+				type = FLOAT_ARR;
+				idp = ( double * ) v->val.gptr;
+			}
+			break;
+
+		case ARR_REF :
+			if ( v->from->dim != 1 )
+			{
+				eprint( FATAL, "%s:%ld: Argument of function `sinh()' is "
+						"neither a number nor a 1-dimensional array.\n",
+						Fname, Lc );
+				THROW( EXCEPTION );
+			}
+			len = v->from->sizes[ 0 ];
+			if ( v->from->type == INT_ARR )
+			{
+				type = INT_ARR;
+				ilp = v->from->val.lpnt, len;
+			}
+			else
+			{
+				type = FLOAT_ARR;
+				idp = v->from->val.dpnt;
+			}
+			break;
+
+		case INT_TRANS_ARR :
+			type = INT_ARR;
+			len = v->len;
+			ilp = v->val.lpnt;
+			break;
+
+		case FLOAT_TRANS_ARR :
+			len = v->len;
+			idp = v->val.dpnt;
+			break;
+
+		default :
+			assert( 1 == 0 );
+	}
+
+	rdp = T_malloc( len * sizeof( double ) );
+	for ( i = 0; i < len; i++ )
+	{
+		if ( type == INT_ARR )
+			res = sinh( ( double ) *ilp++ );
+		else
+			res = sinh( *idp++ );
+
+		if ( fabs( res ) == HUGE_VAL && errno == ERANGE )
+			eprint( SEVERE, "%s:%ld: Overflow in function `sinh()'.\n",
+					Fname, Lc );
+
+		rdp[ i ] = res;
+	}
+
+	new_var = vars_push( FLOAT_TRANS_ARR, rdp, len );
+	T_free( rdp );
+
+	return new_var;
 }
 
 
@@ -626,16 +1879,122 @@ Var *f_sinh( Var *v )
 Var *f_cosh( Var *v )
 {
 	double res;
+	Var *new_var;
+	long i;
+	long len;
+	double *rdp;
+	long *ilp;
+	double *idp;
+	int type;
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
 
-	res = cosh( VALUE( v ) );
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
+				   ARR_REF | ARR_PTR | INT_TRANS_ARR | FLOAT_TRANS_ARR );
 
-	if ( res == HUGE_VAL && errno == ERANGE )
-		eprint( SEVERE, "%s:%ld: Overflow in function `cosh()'.\n",
-				Fname, Lc );
+	switch ( v->type )
+	{
+		case INT_VAR : case FLOAT_VAR :
+			res = cosh( VALUE( v ) );
+			if ( res == HUGE_VAL && errno == ERANGE )
+				eprint( SEVERE, "%s:%ld: Overflow in function `cosh()'.\n",
+						Fname, Lc );
+			return vars_push( FLOAT_VAR, res );
 
-	return vars_push( FLOAT_VAR, res );
+		case INT_ARR :
+			if ( v->dim != 1 )
+			{
+				eprint( FATAL, "%s:%ld: Argument of function `cosh()' is "
+						"neither a number nor a 1-dimensional array.\n",
+						Fname, Lc );
+				THROW( EXCEPTION );
+			}
+			type = INT_ARR;
+			len = v->len;
+			ilp = v->val.lpnt;
+			break;
+			
+		case FLOAT_ARR :
+			if ( v->dim != 1 )
+			{
+				eprint( FATAL, "%s:%ld: Argument of function `cosh()' is "
+						"neither a number nor a 1-dimensional array.\n",
+						Fname, Lc );
+				THROW( EXCEPTION );
+			}
+			type = FLOAT_ARR;
+			len = v->len;
+			idp = v->val.dpnt;
+			break;
+			
+		case ARR_PTR :
+			len = v->from->sizes[ v->from->dim - 1 ];
+			if ( v->from->type == INT_ARR )
+			{
+				type = INT_ARR;
+				ilp = ( long * ) v->val.gptr, len;
+			}
+			else
+			{
+				type = FLOAT_ARR;
+				idp = ( double * ) v->val.gptr;
+			}
+			break;
+
+		case ARR_REF :
+			if ( v->from->dim != 1 )
+			{
+				eprint( FATAL, "%s:%ld: Argument of function `cosh()' is "
+						"neither a number nor a 1-dimensional array.\n",
+						Fname, Lc );
+				THROW( EXCEPTION );
+			}
+			len = v->from->sizes[ 0 ];
+			if ( v->from->type == INT_ARR )
+			{
+				type = INT_ARR;
+				ilp = v->from->val.lpnt, len;
+			}
+			else
+			{
+				type = FLOAT_ARR;
+				idp = v->from->val.dpnt;
+			}
+			break;
+
+		case INT_TRANS_ARR :
+			type = INT_ARR;
+			len = v->len;
+			ilp = v->val.lpnt;
+			break;
+
+		case FLOAT_TRANS_ARR :
+			len = v->len;
+			idp = v->val.dpnt;
+			break;
+
+		default :
+			assert( 1 == 0 );
+	}
+
+	rdp = T_malloc( len * sizeof( double ) );
+	for ( i = 0; i < len; i++ )
+	{
+		if ( type == INT_ARR )
+			res = cosh( ( double ) *ilp++ );
+		else
+			res = cosh( *idp++ );
+
+		if ( fabs( res ) == HUGE_VAL && errno == ERANGE )
+			eprint( SEVERE, "%s:%ld: Overflow in function `cosh()'.\n",
+					Fname, Lc );
+
+		rdp[ i ] = res;
+	}
+
+	new_var = vars_push( FLOAT_TRANS_ARR, rdp, len );
+	T_free( rdp );
+
+	return new_var;
 }
 
 
@@ -645,12 +2004,109 @@ Var *f_cosh( Var *v )
 
 Var *f_tanh( Var *v )
 {
-	vars_check( v, INT_VAR | FLOAT_VAR );
+	Var *new_var;
+	long i;
+	long len;
+	double *rdp;
+	long *ilp;
+	double *idp;
+	int type;
 
-	if ( v->type == INT_VAR )
-		return vars_push( FLOAT_VAR, tanh( ( double ) v->val.lval ) );
-	else
-		return vars_push( FLOAT_VAR, tanh( v->val.dval ) );
+
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
+				   ARR_REF | ARR_PTR | INT_TRANS_ARR | FLOAT_TRANS_ARR );
+
+	switch ( v->type )
+	{
+		case INT_VAR : case FLOAT_VAR :
+			return vars_push( FLOAT_VAR, tanh( VALUE( v ) ) );
+
+		case INT_ARR :
+			if ( v->dim != 1 )
+			{
+				eprint( FATAL, "%s:%ld: Argument of function `tanh()' is "
+						"neither a number nor a 1-dimensional array.\n",
+						Fname, Lc );
+				THROW( EXCEPTION );
+			}
+			type = INT_ARR;
+			len = v->len;
+			ilp = v->val.lpnt;
+			break;
+			
+		case FLOAT_ARR :
+			if ( v->dim != 1 )
+			{
+				eprint( FATAL, "%s:%ld: Argument of function `tanh()' is "
+						"neither a number nor a 1-dimensional array.\n",
+						Fname, Lc );
+				THROW( EXCEPTION );
+			}
+			type = FLOAT_ARR;
+			len = v->len;
+			idp = v->val.dpnt;
+			break;
+			
+		case ARR_PTR :
+			len = v->from->sizes[ v->from->dim - 1 ];
+			if ( v->from->type == INT_ARR )
+			{
+				type = INT_ARR;
+				ilp = ( long * ) v->val.gptr, len;
+			}
+			else
+			{
+				type = FLOAT_ARR;
+				idp = ( double * ) v->val.gptr;
+			}
+			break;
+
+		case ARR_REF :
+			if ( v->from->dim != 1 )
+			{
+				eprint( FATAL, "%s:%ld: Argument of function `tanh()' is "
+						"neither a number nor a 1-dimensional array.\n",
+						Fname, Lc );
+				THROW( EXCEPTION );
+			}
+			len = v->from->sizes[ 0 ];
+			if ( v->from->type == INT_ARR )
+			{
+				type = INT_ARR;
+				ilp = v->from->val.lpnt, len;
+			}
+			else
+			{
+				type = FLOAT_ARR;
+				idp = v->from->val.dpnt;
+			}
+			break;
+
+		case INT_TRANS_ARR :
+			type = INT_ARR;
+			len = v->len;
+			ilp = v->val.lpnt;
+			break;
+
+		case FLOAT_TRANS_ARR :
+			len = v->len;
+			idp = v->val.dpnt;
+			break;
+
+		default :
+			assert( 1 == 0 );
+	}
+
+	rdp = T_malloc( len * sizeof( double ) );
+	for ( i = 0; i < len; i++ )
+		if ( type == INT_ARR )
+			rdp[ i ] = tanh( ( double ) *ilp++ );
+		else
+			rdp[ i ] = tanh( *idp++ );
+	new_var = vars_push( FLOAT_TRANS_ARR, rdp, len );
+	T_free( rdp );
+
+	return new_var;
 }
 
 
@@ -660,21 +2116,130 @@ Var *f_tanh( Var *v )
 
 Var *f_exp( Var *v )
 {
+	Var *new_var;
 	double res;
+	long i;
+	long len;
+	double *rdp;
+	long *ilp;
+	double *idp;
+	int type;
 
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
+				   ARR_REF | ARR_PTR | INT_TRANS_ARR | FLOAT_TRANS_ARR );
 
-	res = exp( VALUE( v ) );
+	switch ( v->type )
+	{
+		case INT_VAR : case FLOAT_VAR :
+			res = exp( VALUE( v ) );
+			if ( res == 0.0 && errno == ERANGE )
+				eprint( WARN, "%s:%ld: Underflow in function `exp()' - result "
+						"is 0.\n", Fname, Lc );
+			if ( res == HUGE_VAL && errno == ERANGE )
+				eprint( SEVERE, "%s:%ld: Overflow in function `exp()'.\n",
+						Fname, Lc );
+			return vars_push( FLOAT_VAR, res );
 
-	if ( res == 0.0 && errno == ERANGE )
-		eprint( WARN, "%s:%ld: Underflow in function `exp()' - result is 0.\n",
-				Fname, Lc );
+		case INT_ARR :
+			if ( v->dim != 1 )
+			{
+				eprint( FATAL, "%s:%ld: Argument of function `exp()' is "
+						"neither a number nor a 1-dimensional array.\n",
+						Fname, Lc );
+				THROW( EXCEPTION );
+			}
+			type = INT_ARR;
+			len = v->len;
+			ilp = v->val.lpnt;
+			break;
+			
+		case FLOAT_ARR :
+			if ( v->dim != 1 )
+			{
+				eprint( FATAL, "%s:%ld: Argument of function `exp()' is "
+						"neither a number nor a 1-dimensional array.\n",
+						Fname, Lc );
+				THROW( EXCEPTION );
+			}
+			type = FLOAT_ARR;
+			len = v->len;
+			idp = v->val.dpnt;
+			break;
+			
+		case ARR_PTR :
+			len = v->from->sizes[ v->from->dim - 1 ];
+			if ( v->from->type == INT_ARR )
+			{
+				type = INT_ARR;
+				ilp = ( long * ) v->val.gptr, len;
+			}
+			else
+			{
+				type = FLOAT_ARR;
+				idp = ( double * ) v->val.gptr;
+			}
+			break;
 
-	if ( res == HUGE_VAL && errno == ERANGE )
-		eprint( SEVERE, "%s:%ld: Overflow in function `exp()'.\n", Fname, Lc );
+		case ARR_REF :
+			if ( v->from->dim != 1 )
+			{
+				eprint( FATAL, "%s:%ld: Argument of function `exp()' is "
+						"neither a number nor a 1-dimensional array.\n",
+						Fname, Lc );
+				THROW( EXCEPTION );
+			}
+			len = v->from->sizes[ 0 ];
+			if ( v->from->type == INT_ARR )
+			{
+				type = INT_ARR;
+				ilp = v->from->val.lpnt, len;
+			}
+			else
+			{
+				type = FLOAT_ARR;
+				idp = v->from->val.dpnt;
+			}
+			break;
 
-	return vars_push( FLOAT_VAR, res );
+		case INT_TRANS_ARR :
+			type = INT_ARR;
+			len = v->len;
+			ilp = v->val.lpnt;
+			break;
+
+		case FLOAT_TRANS_ARR :
+			len = v->len;
+			idp = v->val.dpnt;
+			break;
+
+		default :
+			assert( 1 == 0 );
+	}
+
+	rdp = T_malloc( len * sizeof( double ) );
+	for ( i = 0; i < len; i++ )
+	{
+		if ( type == INT_ARR )
+			res = tanh( ( double ) *ilp++ );
+		else
+			res = tanh( *idp++ );
+
+		if ( res == 0.0 && errno == ERANGE )
+			eprint( WARN, "%s:%ld: Underflow in function `exp()' - result "
+					"is 0.\n", Fname, Lc );
+
+		if ( res == HUGE_VAL && errno == ERANGE )
+			eprint( SEVERE, "%s:%ld: Overflow in function `exp()'.\n",
+					Fname, Lc );
+
+		rdp[ i ] = res;
+	}
+
+	new_var = vars_push( FLOAT_TRANS_ARR, rdp, len );
+	T_free( rdp );
+
+	return new_var;
 }
 
 
@@ -685,24 +2250,139 @@ Var *f_exp( Var *v )
 Var *f_ln( Var *v )
 {
 	double arg, res;
+	Var *new_var;
+	long i;
+	long len;
+	double *rdp;
+	long *ilp;
+	double *idp;
+	int type;
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
 
-	arg = VALUE( v );
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
+				   ARR_REF | ARR_PTR | INT_TRANS_ARR | FLOAT_TRANS_ARR );
 
-	if ( arg <= 0.0 )
+	switch ( v->type )
 	{
-		eprint( FATAL, "%s:%ld: Argument of function `ln()' is out of "
-				"range.\n", Fname, Lc );
-		THROW( EXCEPTION );
+		case INT_VAR : case FLOAT_VAR :
+			arg = VALUE( v );
+			if ( arg <= 0.0 )
+			{
+				eprint( FATAL, "%s:%ld: Argument of function `ln()' is out of "
+						"range.\n", Fname, Lc );
+				THROW( EXCEPTION );
+			}
+
+			res = log( arg );
+			if ( res == - HUGE_VAL && errno == ERANGE )
+				eprint( SEVERE, "%s:%ld: Overflow in function `ln()'.\n",
+						Fname, Lc );
+
+			return vars_push( FLOAT_VAR, res );
+
+		case INT_ARR :
+			if ( v->dim != 1 )
+			{
+				eprint( FATAL, "%s:%ld: Argument of function `ln()' is "
+						"neither a number nor a 1-dimensional array.\n",
+						Fname, Lc );
+				THROW( EXCEPTION );
+			}
+			type = INT_ARR;
+			len = v->len;
+			ilp = v->val.lpnt;
+			break;
+			
+		case FLOAT_ARR :
+			if ( v->dim != 1 )
+			{
+				eprint( FATAL, "%s:%ld: Argument of function `ln()' is "
+						"neither a number nor a 1-dimensional array.\n",
+						Fname, Lc );
+				THROW( EXCEPTION );
+			}
+			type = FLOAT_ARR;
+			len = v->len;
+			idp = v->val.dpnt;
+			break;
+			
+		case ARR_PTR :
+			len = v->from->sizes[ v->from->dim - 1 ];
+			if ( v->from->type == INT_ARR )
+			{
+				type = INT_ARR;
+				ilp = ( long * ) v->val.gptr, len;
+			}
+			else
+			{
+				type = FLOAT_ARR;
+				idp = ( double * ) v->val.gptr;
+			}
+			break;
+
+		case ARR_REF :
+			if ( v->from->dim != 1 )
+			{
+				eprint( FATAL, "%s:%ld: Argument of function `ln()' is "
+						"neither a number nor a 1-dimensional array.\n",
+						Fname, Lc );
+				THROW( EXCEPTION );
+			}
+			len = v->from->sizes[ 0 ];
+			if ( v->from->type == INT_ARR )
+			{
+				type = INT_ARR;
+				ilp = v->from->val.lpnt, len;
+			}
+			else
+			{
+				type = FLOAT_ARR;
+				idp = v->from->val.dpnt;
+			}
+			break;
+
+		case INT_TRANS_ARR :
+			type = INT_ARR;
+			len = v->len;
+			ilp = v->val.lpnt;
+			break;
+
+		case FLOAT_TRANS_ARR :
+			len = v->len;
+			idp = v->val.dpnt;
+			break;
+
+		default :
+			assert( 1 == 0 );
 	}
 
-	res = log( arg );
+	rdp = T_malloc( len * sizeof( double ) );
+	for ( i = 0; i < len; i++ )
+	{
+		if ( type == INT_ARR )
+			arg = ( double ) *ilp++;
+		else
+			arg = *idp++;
 
-	if ( res == - HUGE_VAL && errno == ERANGE )
-		eprint( SEVERE, "%s:%ld: Overflow in function `ln()'.\n", Fname, Lc );
+		if ( arg <= 0.0 )
+		{
+			eprint( FATAL, "%s:%ld: Argument of function `ln()' is out of "
+					"range.\n", Fname, Lc );
+			THROW( EXCEPTION );
+		}
 
-	return vars_push( FLOAT_VAR, res );
+		res = log( arg );
+		if ( res == - HUGE_VAL && errno == ERANGE )
+			eprint( SEVERE, "%s:%ld: Overflow in function `ln()'.\n",
+					Fname, Lc );
+
+		rdp[ i ] = res;
+	}
+
+	new_var = vars_push( FLOAT_TRANS_ARR, rdp, len );
+	T_free( rdp );
+
+	return new_var;
 }
 
 
@@ -713,24 +2393,139 @@ Var *f_ln( Var *v )
 Var *f_log( Var *v )
 {
 	double arg, res;
+	Var *new_var;
+	long i;
+	long len;
+	double *rdp;
+	long *ilp;
+	double *idp;
+	int type;
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
 
-	arg = VALUE( v );
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
+				   ARR_REF | ARR_PTR | INT_TRANS_ARR | FLOAT_TRANS_ARR );
 
-	if ( arg <= 0.0 )
+	switch ( v->type )
 	{
-		eprint( FATAL, "%s:%ld: Argument of function `log()' is out of "
-				"range.\n", Fname, Lc );
-		THROW( EXCEPTION );
+		case INT_VAR : case FLOAT_VAR :
+			arg = VALUE( v );
+			if ( arg <= 0.0 )
+			{
+				eprint( FATAL, "%s:%ld: Argument of function `log()' is out "
+						"of range.\n", Fname, Lc );
+				THROW( EXCEPTION );
+			}
+
+			res = log10( arg );
+			if ( res == - HUGE_VAL && errno == ERANGE )
+				eprint( SEVERE, "%s:%ld: Overflow in function `log()'.\n",
+						Fname, Lc );
+
+			return vars_push( FLOAT_VAR, res );
+
+		case INT_ARR :
+			if ( v->dim != 1 )
+			{
+				eprint( FATAL, "%s:%ld: Argument of function `log()' is "
+						"neither a number nor a 1-dimensional array.\n",
+						Fname, Lc );
+				THROW( EXCEPTION );
+			}
+			type = INT_ARR;
+			len = v->len;
+			ilp = v->val.lpnt;
+			break;
+			
+		case FLOAT_ARR :
+			if ( v->dim != 1 )
+			{
+				eprint( FATAL, "%s:%ld: Argument of function `log()' is "
+						"neither a number nor a 1-dimensional array.\n",
+						Fname, Lc );
+				THROW( EXCEPTION );
+			}
+			type = FLOAT_ARR;
+			len = v->len;
+			idp = v->val.dpnt;
+			break;
+			
+		case ARR_PTR :
+			len = v->from->sizes[ v->from->dim - 1 ];
+			if ( v->from->type == INT_ARR )
+			{
+				type = INT_ARR;
+				ilp = ( long * ) v->val.gptr, len;
+			}
+			else
+			{
+				type = FLOAT_ARR;
+				idp = ( double * ) v->val.gptr;
+			}
+			break;
+
+		case ARR_REF :
+			if ( v->from->dim != 1 )
+			{
+				eprint( FATAL, "%s:%ld: Argument of function `log()' is "
+						"neither a number nor a 1-dimensional array.\n",
+						Fname, Lc );
+				THROW( EXCEPTION );
+			}
+			len = v->from->sizes[ 0 ];
+			if ( v->from->type == INT_ARR )
+			{
+				type = INT_ARR;
+				ilp = v->from->val.lpnt, len;
+			}
+			else
+			{
+				type = FLOAT_ARR;
+				idp = v->from->val.dpnt;
+			}
+			break;
+
+		case INT_TRANS_ARR :
+			type = INT_ARR;
+			len = v->len;
+			ilp = v->val.lpnt;
+			break;
+
+		case FLOAT_TRANS_ARR :
+			len = v->len;
+			idp = v->val.dpnt;
+			break;
+
+		default :
+			assert( 1 == 0 );
 	}
 
-	res = log10( arg );
+	rdp = T_malloc( len * sizeof( double ) );
+	for ( i = 0; i < len; i++ )
+	{
+		if ( type == INT_ARR )
+			arg = ( double ) *ilp++;
+		else
+			arg = *idp++;
 
-	if ( res == - HUGE_VAL && errno == ERANGE )
-		eprint( SEVERE, "%s:%ld: Overflow in function `log()'.\n", Fname, Lc );
+		if ( arg <= 0.0 )
+		{
+			eprint( FATAL, "%s:%ld: Argument of function `log()' is out "
+					"of range.\n", Fname, Lc );
+			THROW( EXCEPTION );
+		}
 
-	return vars_push( FLOAT_VAR, res );
+		res = log10( arg );
+		if ( res == - HUGE_VAL && errno == ERANGE )
+			eprint( SEVERE, "%s:%ld: Overflow in function `log()'.\n",
+					Fname, Lc );
+
+		rdp[ i ] = res;
+	}
+
+	new_var = vars_push( FLOAT_TRANS_ARR, rdp, len );
+	T_free( rdp );
+
+	return new_var;
 }
 
 
@@ -741,19 +2536,128 @@ Var *f_log( Var *v )
 Var *f_sqrt( Var *v )
 {
 	double arg;
+	Var *new_var;
+	long i;
+	long len;
+	double *rdp;
+	long *ilp;
+	double *idp;
+	int type;
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
 
-	arg = VALUE( v );
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
+				   ARR_REF | ARR_PTR | INT_TRANS_ARR | FLOAT_TRANS_ARR );
 
-	if ( arg < 0.0 )
+	switch ( v->type )
 	{
-		eprint( FATAL, "%s:%ld: Argument of function `sqrt()' is negative.\n", 
-				Fname, Lc );
-		THROW( EXCEPTION );
+		case INT_VAR : case FLOAT_VAR :
+			arg = VALUE( v );
+			if ( arg < 0.0 )
+			{
+				eprint( FATAL, "%s:%ld: Argument of function `sqrt()' is "
+						"negative.\n", Fname, Lc );
+				THROW( EXCEPTION );
+			}
+			return vars_push( FLOAT_VAR, sqrt( arg ) );
+
+		case INT_ARR :
+			if ( v->dim != 1 )
+			{
+				eprint( FATAL, "%s:%ld: Argument of function `log()' is "
+						"neither a number nor a 1-dimensional array.\n",
+						Fname, Lc );
+				THROW( EXCEPTION );
+			}
+			type = INT_ARR;
+			len = v->len;
+			ilp = v->val.lpnt;
+			break;
+			
+		case FLOAT_ARR :
+			if ( v->dim != 1 )
+			{
+				eprint( FATAL, "%s:%ld: Argument of function `log()' is "
+						"neither a number nor a 1-dimensional array.\n",
+						Fname, Lc );
+				THROW( EXCEPTION );
+			}
+			type = FLOAT_ARR;
+			len = v->len;
+			idp = v->val.dpnt;
+			break;
+			
+		case ARR_PTR :
+			len = v->from->sizes[ v->from->dim - 1 ];
+			if ( v->from->type == INT_ARR )
+			{
+				type = INT_ARR;
+				ilp = ( long * ) v->val.gptr, len;
+			}
+			else
+			{
+				type = FLOAT_ARR;
+				idp = ( double * ) v->val.gptr;
+			}
+			break;
+
+		case ARR_REF :
+			if ( v->from->dim != 1 )
+			{
+				eprint( FATAL, "%s:%ld: Argument of function `log()' is "
+						"neither a number nor a 1-dimensional array.\n",
+						Fname, Lc );
+				THROW( EXCEPTION );
+			}
+			len = v->from->sizes[ 0 ];
+			if ( v->from->type == INT_ARR )
+			{
+				type = INT_ARR;
+				ilp = v->from->val.lpnt, len;
+			}
+			else
+			{
+				type = FLOAT_ARR;
+				idp = v->from->val.dpnt;
+			}
+			break;
+
+		case INT_TRANS_ARR :
+			type = INT_ARR;
+			len = v->len;
+			ilp = v->val.lpnt;
+			break;
+
+		case FLOAT_TRANS_ARR :
+			len = v->len;
+			idp = v->val.dpnt;
+			break;
+
+		default :
+			assert( 1 == 0 );
 	}
 
-	return vars_push( FLOAT_VAR, sqrt( arg ) );
+	rdp = T_malloc( len * sizeof( double ) );
+	for ( i = 0; i < len; i++ )
+	{
+		if ( type == INT_ARR )
+			arg = ( double ) *ilp++;
+		else
+			arg = *idp++;
+
+		if ( arg < 0.0 )
+		{
+			eprint( FATAL, "%s:%ld: Argument of function `sqrt()' is "
+					"negative.\n", Fname, Lc );
+			THROW( EXCEPTION );
+		}
+
+		rdp[ i ] = sqrt( arg );
+	}
+
+	new_var = vars_push( FLOAT_TRANS_ARR, rdp, len );
+	T_free( rdp );
+
+	return new_var;
 }
 
 
@@ -1481,8 +3385,9 @@ Var *f_display( Var *v )
 					eprint( FATAL, "%s:%ld: Only one-dimensional arrays or "
 							"slices of more-dimensional arrays can be "
 							"displayed.\n", Fname, Lc );
+					T_free( dp );
+					THROW( EXCEPTION );
 				}
-
 
 				len += sizeof( long );
 
