@@ -1770,7 +1770,7 @@ Var *vars_arr_rhs( Var *v )
 	if ( a->flags & NEED_ALLOC )
 	{
 		eprint( FATAL, "%s:%ld: Array `%s' is dynamically sized and its size "
-				"still unknown.\n", Fname, Lc, a->name );
+				"is still unknown.\n", Fname, Lc, a->name );
 		THROW( EXCEPTION );
 	}
 
