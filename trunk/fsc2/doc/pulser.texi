@@ -29,8 +29,8 @@ Because of the importance of the pulser for time-resolved experiments
 there are even two additional types of sections in the @acronym{EDL} in
 order to setup the pulser. These are
 @example
-ASSIGNMENTS
-PHASES
+ASSIGNMENTS:
+PHASES:
 @end example
 While the first one deals with the basic setup of the pulser the second
 one is only necessary when phase cycling is used. Valid statements in
@@ -196,21 +196,17 @@ defined:
       @code{PULSE_SH}, @code{PULSE_SHAPE}, @code{PULSESHAPE},
       @code{PULSESHAPER}, @code{P_SH}, @code{P_SHAPE}, @code{PSHAPE},
       @code{P_SHAPER}, @code{P_SHAPER})
-@item @code{PHASE_1} (or @code{PH_1}, @code{PH1}, @code{PHASE1} or
-      @code{PHASE} or @code{PH})
-@item @code{PHASE_2} (or @code{PH_2}, @code{PH2}, @code{PHASE2})
 @item @code{OTHER_1} (or @code{OTHER1}, @code{O_1}, @code{O1},
       @code{OTHER}, @code{O})
 @item @code{OTHER_2} (or @code{OTHER2}, @code{O_2}, @code{O2})
 @item @code{OTHER_3} (or @code{OTHER3}, @code{O_3}, @code{O3})
 @item @code{OTHER_4} (or @code{OTHER4}, @code{O_4}, @code{O4})
 @end itemize
-Except for @code{PHASE_1} and @code{PHASE_2} the names of the functions
-do not enforce what the channels that will become associated with them
-are really going to be used for, but it is probably a good idea not to
-use e.g. the @code{MICRO_WAVE} channel for something completely
-different or other people will have major problems understanding what
-your @acronym{EDL} program is supposed to do.
+The names of the functions do not enforce what the channels that will
+become associated with them are really going to be used for, but it is
+probably a good idea not to use e.g. the @code{MICRO_WAVE} channel for
+something completely different or other people will have major problems
+understanding what your @acronym{EDL} program is supposed to do.
 
 Before giving an example it is important to point out that there are
 some major differences between the @strong{Sony/Tektronix DG2020} and
@@ -232,6 +228,10 @@ Please note, that usually the output channels are numbered as printed on
 the device, the only exception for the @strong{Tektronix HFS9003} is the
 trigger out channel, that is called @code{TRIGGER_OUT}, and has some
 special properties, e.g. allowing only one pulse of a fixed length.
+The keyword @code{CHANNEL} can be replaced by @code{CH} and
+@code{TRIGGER_OUT} by either @code{TRIGGEROUT}, @code{TRIG_OUT} or
+@code{TRIGOUT}.
+
 
 For the @strong{Sony/Tektronix DG2020} the function gets associated with
 one (or more pods, see below, why sometimes more than one is needed):
@@ -241,6 +241,8 @@ RF:        POD = 6;
 RF_GATE:   POD = 7;
 DETECTION: POD = 11;
 @end example
+Instaead of @code{POD} you can also simply write @code{P}.
+
 
 Optionally, for the @strong{Sony/Tektronix DG2020} you can also set
 which of the internal channels are going to be used. If you don't the
@@ -255,13 +257,136 @@ DETECTION: POD = 11;    // leave it to program to select the channel
 @end example
 
 
-Beside defining where the output for a function will apear at the output
-connectors you can also set other properties for the pulses. As far as
-the hardware allows you may set the high and the low voltage for pulses
-using the keywords @code{V_HIGH} and @code{V_LOW}:
+Beside defining at wich of the output connectors the output for a
+function will apear you can also set other properties for the pulses. As
+far as the hardware allows you may set the high and the low voltage for
+all pulses with this function by using the keywords @code{V_HIGH} and
+@code{V_LOW}:
 @example
 MICROWAVE: POD = 1, 2, 3, 4  V_HIGH = 4.3 V, V_LOW = -0.5 V;
 RF:        POD = 6           V_HIGH = 2.6 V, V_LOW = 0 V;
 RF_GATE:   POD = 7           V_HIGH = 5 V,   V_LOW = 0 V;
 @end example
+Please note that the high voltage must always be larger than the low
+voltage. Instead of @code{V_HIGH} you can also write @code{VHIGH},
+@code{V_H} or @code{VH} and for @code{V_LOW} you may use @code{VLOW},
+@code{V_L} or @code{VL}.
+
+If a function requires the output levels to be inverted (i.e.@ that the
+voltage is high while there are no pulses and low on pulses) use the
+@code{INVERTED} keyword:
+@example
+RF:        POD = 6           V_HIGH = 2.6 V, V_LOW = 0 V, INVERTED;
+@end example
+The keyword @code{INVERTED} can be shortened to @code{INVERT} or @code{INV}.
+
+Finally, in order to take care of different cable lengths a delay for a
+function can be set. This delay will be automatically added to the start
+position of each pulse of this function:
+@example
+MICROWAVE: POD = 1, 2, 3, 4  DELAY = 50 ns;
+@end example
+For obvious reasons setting negative delays is only possible when using
+internal trigger mode. The keyword @code{DELAY} can be abbreviated to
+@code{DEL}.
+
+
+@anchor{Phase channel setup}
+@subsubsection Phase channel setup
+@cindex Phase channel setup
+
+Please note that a phase channel setup can only be done with the
+@strong{Sony/Tektronix DG2020} pulser and that there are several
+differences between the Frankfurt S-band and the Berlin X-band
+spectrometer. And all the following is only relevant if phase
+cycling has to be done.
+
+@strong{Berlin X-band spectrometer}:
+
+The Berlin bridge setup is rather simple in that it expects pulses with
+different phases to appear on different input channels of the microwave
+bridge. I.e.@ the bridge has 5 different inputs (on for each phase
+@code{+X}, @code{-X}, @code{+Y} and @code{-Y} and on to be used for
+@i{cw} experiments) and the phase of the pulse coming fom the bridge
+and going to the TWT amplifier depends on which input channel was used
+for the pulse.
+
+Now you all you have to do is to tell the program once which pulser pod
+channel is connected to which phase input of the bridge (and, to allow
+some sanity checks, which functions is to be phase cycled). This is done
+via the following statement in the @code{ASSIGNMENTS} section:
+@example
+PHASE_SETUP:  MW,
+               X: POD = 1,
+              +Y: POD = 2,
+              -X: POD = 4,
+              -Y: 2,
+              CW: 3;
+@end example
+In this example you obviously want to phase cycle the microwave pulses
+and the @code{+X} input of the bridge is connected to pod channel 1 of
+the pulser etc. As usual, the keyword @code{PHASE_SETUP} can be
+abbreviated, to either @code{PH_SETUP}, @code{PHASE_S}, or @code{PHS}.
+And, since you actually can have 2 phase cycled function, you can append
+either @code{1} or @code{_1} and @code{2} or @code{_2} to distinguish
+between the two phase setups, i.e.@ @code{PHASE_SETUP_1}.
+
+
+@strong{Frankurt S-band spectrometer}:
+
+The Frankfurt spectrometer is somewhat more complicated. the bridge has
+one microwave pulse input and two further channels, that cotrol the
+setting of the bridge's phase switch. So, while a microwave pulse is sent
+to the bridge, further phase pulses have to be present to control the
+phase switch. Two pulse inputs are enough to differentiate between the 4
+phases.
+
+In order to create the phase pulses an extra function is needed for
+these pulses, which is called @code{PHASE} (or, abbreviated @code{PH}).
+For being able to feed both the bridge's phase inputs, for this function
+two pod channel outputs of the pulser are needed. The definition of the
+function looks nearly identical to the other functions, the only
+exception is that the name of the function to be phase cycled using the
+phase function is needed:
+@example
+PHASE:        MW, POD = 8, 9, V_HIGH = 5 V, V_LOW = 0 V;
+@end example
+In this example the phase function is used to phase cycle the microwave
+pulses and its pod channels are number 8 and 9.
+
+The second thing that is needed is which voltages have to be present at
+the outputs to set a certain phase. Here's an example:
+@example
+PHASE_SETUP:   X: POD_1 = OFF, POD2 = OFF,
+              +Y: POD1 = ON, POD_2 = 0,
+              -X: 0, 1,
+              -Y: 1, 1;
+@end example
+The phase setup command tells the program that to set the @code{X} phase
+the voltage at both pod outputs of the phase function have to be in the
+low state, while for the @code{Y} phase the first pod output (set to pod
+channel 8 by the @code{PHASE} command, see above) has to be in the high
+state, while the other output (pod channel 9) has to be low. @code{POD_1}
+stands here for the first pod channel of the phase function,
+@code{POD_2} for the seconf one. @code{ON} and @code{1} can both be used
+to indicate a high output state, @code{OFF} and @code{0} stand for a low
+state.
+
+There are two additional things that you 
+
+@example
+PHASE_SWITCH_DELAY_1: 40ns;
+GRACE_PERIOD: 10ns;
+@end example
+
+
+@example
+PHASE_SETUP_1:
+PHASE_SETUP_2:
+@end example
+
+
+@strong{Frankfurt S-band spectrometer}:
+
+@strong{Berlin X-band spectrometer}:
 
