@@ -275,15 +275,6 @@ Var *synthesizer_frequency( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	if ( freq < MIN_FREQ || freq > MAX_FREQ )
-	{
-		eprint( FATAL, "%s:%ld: %s: RF frequency (%f MHz) not within "
-				"synthesizers range (%f kHz - %g Mhz).\n", Fname, Lc,
-				DEVICE_NAME, 1.0e-6 * freq, 1.0e-3 * MIN_FREQ,
-				1.0e-6 * MAX_FREQ );
-		THROW( EXCEPTION );
-	}
-
 	if ( ( v = vars_pop( v ) ) != NULL )
 	{
 		eprint( WARN, "%s:%ld: %s: Superfluous arguments in call of "
@@ -291,6 +282,21 @@ Var *synthesizer_frequency( Var *v )
 				DEVICE_NAME );
 		while ( ( v = vars_pop( v ) ) != NULL )
 			;
+	}
+
+	/* In test run stop program if value is out of range while in real run
+	   just keep the current value on errors */
+
+	if ( freq < MIN_FREQ || freq > MAX_FREQ )
+	{
+		eprint( FATAL, "%s:%ld: %s: RF frequency (%f MHz) not within "
+				"synthesizers range (%f kHz - %g Mhz).\n", Fname, Lc,
+				DEVICE_NAME, 1.0e-6 * freq, 1.0e-3 * MIN_FREQ,
+				1.0e-6 * MAX_FREQ );
+		if ( ! TEST_RUN && I_am == CHILD )
+			return vars_push( FLOAT_VAR, hp8647a.freq );
+		else
+			THROW( EXCEPTION );
 	}
 
 	if ( TEST_RUN )                      /* In test run of experiment */
@@ -384,14 +390,6 @@ Var *synthesizer_attenuation( Var *v )
 
 	att = VALUE( v );
 
-	if ( att > MIN_ATTEN || att < MAX_ATTEN )
-	{
-		eprint( FATAL, "%s:%ld: %s: RF attenuation (%g db) not within valid "
-				"range (%g dB to %g dB).\n", Fname, Lc, DEVICE_NAME, att,
-				MAX_ATTEN, MIN_ATTEN );
-		THROW( EXCEPTION );
-	}
-
 	if ( ( v = vars_pop( v ) ) != NULL )
 	{
 		eprint( WARN, "%s:%ld: %s: Superfluous arguments in call of "
@@ -399,6 +397,20 @@ Var *synthesizer_attenuation( Var *v )
 				Fname, Lc, DEVICE_NAME );
 		while ( ( v = vars_pop( v ) ) != NULL )
 			;
+	}
+
+	/* Check that attenuation is within valid range, if not throw exception
+	   in test run, but in real run just don't change the attenuation */
+
+	if ( att > MIN_ATTEN || att < MAX_ATTEN )
+	{
+		eprint( FATAL, "%s:%ld: %s: RF attenuation (%g db) not within valid "
+				"range (%g dB to %g dB).\n", Fname, Lc, DEVICE_NAME, att,
+				MAX_ATTEN, MIN_ATTEN );
+		if ( ! TEST_RUN && I_am == CHILD )
+			return vars_push( FLOAT_VAR, hp8647a.attenuation );
+		else
+			THROW( EXCEPTION );
 	}
 
 	if ( TEST_RUN )                      /* In test run of experiment */
@@ -507,7 +519,10 @@ Var *synthesizer_sweep_up( Var *v )
 		eprint( FATAL, "%s:%ld: %s: RF frequency is dropping below lower "
 				"limit of %f kHz.\n", Fname, Lc, DEVICE_NAME,
 				1.0e-3 * MIN_FREQ );
-		THROW( EXCEPTION );
+		if ( ! TEST_RUN && I_am == CHILD )
+			return vars_push( FLOAT_VAR, hp8647a.freq );
+		else
+			THROW( EXCEPTION );
 	}
 
 	if ( hp8647a.freq > MAX_FREQ )
@@ -515,7 +530,10 @@ Var *synthesizer_sweep_up( Var *v )
 		eprint( FATAL, "%s:%ld: %s: RF frequency is increased above upper "
 				"limit of %f MHz.\n", Fname, Lc, DEVICE_NAME,
 				1.0e-6 * MAX_FREQ );
-		THROW( EXCEPTION );
+		if ( ! TEST_RUN && I_am == CHILD )
+			return vars_push( FLOAT_VAR, hp8647a.freq );
+		else
+			THROW( EXCEPTION );
 	}
 
 	if ( TEST_RUN )
@@ -698,7 +716,10 @@ Var *synthesizer_att_ref_freq( Var *v )
 				"of %g MHz is out of synthesizer range (%f kHz - %f MHz).\n",
 				DEVICE_NAME, hp8647a.att_ref_freq * 1.0e-6,
 				MIN_FREQ * 1.0e-3, MAX_FREQ * 1.0e-6 );
-		THROW( EXCEPTION );
+		if ( ! TEST_RUN && I_am == CHILD )
+			return vars_push( FLOAT_VAR, hp8647a.freq );
+		else
+			THROW( EXCEPTION );
 	}
 
 	hp8647a.att_ref_freq = freq;	
