@@ -146,7 +146,7 @@ sub serve {
 		unless $txt =~ m|^\s*([^ \t]+)\s+([^ \t]+)\s+HTTP/\d+\.\d+\s*\r*$|io;
 
 	my ( $req, $file ) = ( $1, $2 );
-	exit illegal_request( $req, $txt ) unless $req =~ /^GET$/io;
+	exit unsuppoted_request( $req, $txt ) unless $req =~ /^(GET)|(HEAD)$/io;
 
 	# Check if client accepts PNG, GIF or JPEG files and skip the rest of
 	# the noise, we're done listening when we get an empty line
@@ -165,13 +165,13 @@ sub serve {
 	# Ok, now it's finally our turn to send something back to the client...
 
 	if ( $file =~ m|^/(index.html*)*$|o ) {
-		serve_main( \%f );
+		serve_main( \%f, $req );
 	} elsif ( $file =~ m{^/(fsc2\.(png|gif|jpeg))$}o ) {
-		serve_logo( $1, $2 );
+		serve_logo( $1, $2, $req );
 	} elsif ( $file =~ m{^/fsc2_(a|b)\.(png|jpeg)$}o ) {
-		serve_pics( $1, $2 );
+		serve_pics( $1, $2, $req );
 	} else {
-		not_found( $file );
+		not_found( $file, $req );
 	}
 
 	close $client;
@@ -186,6 +186,7 @@ sub serve {
 sub serve_main {
 
 	my $f = shift;
+	my $req = shift;
 	my @st1 = ( "IDLE", "RUNNING" , "WAITING", "FINISHED" );
 	my @st2 = ( "Idle", "Experiment running",
 				"<FONT COLOR=#FF0000>Waiting for user input</FONT>",
@@ -207,10 +208,12 @@ sub serve_main {
 	# First send some meta-information for the browser plus the first lines
 	# of the page
 
-	print "HTTP/1.0 200 OK$crlf" . def_txt( ) .
-		  "Content-Type: text/html; charset=ISO-8859-1$crlf" .
-		  "$crlf" .
-		  "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\">$crlf" .
+	print "HTTP/1.1 200 OK$crlf" . def_txt( ) .
+		  "Content-Type: text/html; charset=ISO-8859-1$crlf$crlf";
+
+	return unless $req =~ /^GET$/io;
+
+	print "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\">$crlf" .
 		  "<HTML>$crlf<HEAD>$crlf" .
 		  "<META content=\"iso-8859-1\" http-equiv=\"charset\">$crlf" .
 		  "<META name=\"author\" content=\"fsc2\">$crlf" .
@@ -319,17 +322,17 @@ sub serve_main {
 
 sub serve_logo {
 
-	my ( $file, $ext ) = @_;
+	my ( $file, $ext, $req ) = @_;
 	my $fh;
 
 
 	open( $fh, $auxdir . $file ) or return not_found( $file );
 
-	print "HTTP/1.0 200 OK$crlf" . def_txt( 1 ) .
+	print "HTTP/1.1 200 OK$crlf" . def_txt( 1 ) .
 		  "Accept-Ranges: none$crlf" .
 		  "Content-Type: image/$ext$crlf" .
 		  "Content-Length: " . ( stat( $auxdir . $file ) )[ 7 ] . "$crlf$crlf";
-	print <$fh>;
+	print <$fh> unless $req =~ /^HEAD$/io;
 
 	close $fh;
 }
@@ -344,7 +347,7 @@ sub serve_logo {
 # in which case we send the "Not available" picture.
 
 sub serve_pics {
-	my ( $which, $ext ) = @_;
+	my ( $which, $ext, $req ) = @_;
 	my ( $state, $fh, $file, @data );
 
 
@@ -385,7 +388,7 @@ sub serve_pics {
 	}
 	stdout_lock( 0 );
 
-	print "HTTP/1.0 200 OK$crlf" . def_txt( ) .
+	print "HTTP/1.1 200 OK$crlf" . def_txt( ) .
 		  "Accept-Ranges: none$crlf" .
 		  "Content-Type: image/$ext$crlf";
 
@@ -393,11 +396,11 @@ sub serve_pics {
 		 ( ( $ext eq "png" and $has_pnmtopng ) or
 		   ( $ext eq "jpeg" and $has_ppmtojpeg ) ) ) {
 		print "Content-Length: " . len( @data ) . "$crlf$crlf";
-		print @data;
+		print @data if $req =~ /^GET$/io;
 		unlink $file;
 	} else {
 		print "Content-Length: " . ( stat( $file ) )[ 7 ] . "$crlf$crlf";
-		print <$fh>;
+		print <$fh> if $req =~ /^GET$/io;
 		close $fh;
 	}
 }
@@ -407,30 +410,55 @@ sub serve_pics {
 # Deals with requests for pages we don't know about...
 
 sub not_found {
-	my $file = shift;
+	my ( $file, $req ) = shift;
 
-	print "HTTP/1.0 404 Not Found$crlf" . def_txt( ) .
+	print "HTTP/1.1 404 Not Found$crlf" . def_txt( ) .
 		  "Content-Type: text/html; charset=iso-8859-1$crlf" .
-		  "$crlf" .
-		  "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">$crlf" .
+		  "$crlf";
+	print "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">$crlf" .
 		  "<HTML>$crlf<HEAD>$crlf" .
 		  "<TITLE>404 Not Found</TITLE>$crlf" .
 		  "</HEAD><BODY>$crlf" .
 		  "<HR>$crlf" .
 		  "<H1>Not Found</H1>$crlf" .
 		  "<P>The requested URL ($file) was not found.</P>$crlf" .
-		  "<HR>$crlf</BODY>$crlf</HTML>$crlf";
+		  "<HR>$crlf</BODY>$crlf</HTML>$crlf"
+			  if $req =~ /^GET$/io;
 }
 
 
 #########################################################
-# Deals with non-GET requests or even stranger ones...
+# Deals with requests that are neither GET nor HEAD
+
+sub unsupported_request {
+	my ( $type, $string ) = @_;
+
+
+	print "HTTP/1.1 405 Method not allowed" . def_txt( ) .
+		  "Content-Type: text/html; charset=iso-8859-1$crlf" .
+		  "$crlf" .
+		  "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 4.0//EN\">$crlf" .
+		  "<HTML>$crlf<HEAD>$crlf" .
+		  "<TITLE>405 Method not allowed</TITLE>$crlf" .
+		  "</HEAD><BODY>$crlf" .
+		  "<HR>$crlf" .
+		  "<H1>Method not allowed</H1>$crlf";
+
+	print "<P>Server supports GET and HEAD requests only.</P>$crlf";
+
+	print "<HR>$crlf</BODY>$crlf</HTML>$crlf";
+	close $client;
+}
+
+
+#########################################################
+# Deals with malformed requests
 
 sub illegal_request {
 	my ( $type, $string ) = @_;
 
 
-	print "HTTP/1.0 400 Bad Request$crlf" . def_txt( ) .
+	print "HTTP/1.1 400 Bad Request$crlf" . def_txt( ) .
 		  "Content-Type: text/html; charset=iso-8859-1$crlf" .
 		  "$crlf" .
 		  "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 4.0//EN\">$crlf" .
@@ -440,12 +468,8 @@ sub illegal_request {
 		  "<HR>$crlf" .
 		  "<H1>Bad Request</H1>$crlf";
 
-	if ( $type !~ /^GET$/o ) {
-		print "<P>This simple server only supports GET requests.</P>$crlf";
-	} else {
-		$string =~ s/\r*\n$//o;
-		print "<P>Malformed request: <SAMP>$string</SAMP>.</P>$crlf";
-	}
+	$string =~ s/\r*\n$//o;
+	print "<P>Malformed request: <SAMP>$string</SAMP>.</P>$crlf";
 
 	print "<HR>$crlf</BODY>$crlf</HTML>$crlf";
 	close $client;
@@ -457,14 +481,16 @@ sub illegal_request {
 
 sub def_txt {
 	my $date = rfc_1123_date( );
-	my $exp_date = ( @ == 0 ) ? $date : rfc_1123_date( 'next_year' );
+	my $exp_date = ( @_ == 0 ) ? $date : rfc_1123_date( 'next_year' );
 
+	my $reply = "Date: $date$crlf" .
+				"Server: fsc2/$version$crlf" .
+				"Connection: close$crlf" .
+				"Allow: GET$crlf" .
+				"Expires: $exp_date$crlf";
 
-	return "Date: $date$crlf" .
-		   "Server: fsc2/$version$crlf" .
-		   "Connection: close$crlf" .
-		   "Allow: GET$crlf" .
-		   "Expires: $exp_date$crlf";
+	$reply .= "Cache-Control: no-cache$crlf" if @_ == 0;
+	return $reply
 }
 
 
@@ -474,7 +500,7 @@ sub def_txt {
 # as the 'infinite' expiry date according to RFC 2616)
 
 sub rfc_1123_date {
-	my @gm_time = gmtime( time( ) + ( @_ == 0 ? 0 : 31557600 ) );
+	my @gm_time = gmtime( time( ) + ( @_ == 0 ? 0 : 31536000 ) );
 
 	return strftime( "%a", @gm_time ) . ", "  .
 		   strftime( "%d %b %G %T", @gm_time ) . " GMT";
