@@ -200,6 +200,13 @@ int rb_pulser_test_hook( void )
 
 	TRY
 	{
+		if ( rb_pulser.trig_in_mode == INTERNAL && ! rb_pulser.is_rep_time )
+		{
+			print( FATAL, "No experiment repetition time/frequency has been "
+				   "set.\n" );
+			THROW( EXCEPTION );
+		}
+
 		is_running_at_start = rb_pulser.is_running;
 		if ( rb_pulser.do_show_pulses )
 			rb_pulser_show_pulses( );
