@@ -451,7 +451,7 @@ Var *f_init_1d( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	if ( ( v = v->next ) == NULL )
+	if ( ( v = vars_pop( v ) ) == NULL )
 		goto init_1d_done;
 
 	if ( v->type == STR_VAR )
@@ -462,7 +462,7 @@ Var *f_init_1d( Var *v )
 	if ( G.nx <= 0 )
 		G.nx = DEFAULT_1D_X_POINTS;
 
-	if ( ( v = v->next ) == NULL )
+	if ( ( v = vars_pop( v ) ) == NULL )
 		goto init_1d_done;
 
 	if ( v->type == STR_VAR )
@@ -494,7 +494,7 @@ Var *f_init_1d( Var *v )
 			G.rwc_delta[ X ] = 1.0;
 	}
 
-	if ( ( v = v->next ) == NULL )
+	if ( ( v = vars_pop( v ) ) == NULL )
 		goto init_1d_done;
 
  labels_1d:
@@ -502,7 +502,7 @@ Var *f_init_1d( Var *v )
 	vars_check ( v, STR_VAR );
 	G.label[ X ] = T_strdup( v->val.sptr );
 
-	if ( ( v = v->next ) != NULL )
+	if ( ( v = vars_pop( v ) ) != NULL )
 	{
 		vars_check ( v, STR_VAR );
 		G.label[ Y ] = T_strdup( v->val.sptr );
@@ -562,7 +562,7 @@ Var *f_init_2d( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	if ( ( v = v->next ) == NULL )
+	if ( ( v = vars_pop( v ) ) == NULL )
 		goto init_2d_done;
 
 	if ( v->type == STR_VAR )
@@ -573,7 +573,7 @@ Var *f_init_2d( Var *v )
 	if ( G.nx <= 0 )
 		G.nx = DEFAULT_2D_X_POINTS;
 
-	if ( ( v = v->next ) == NULL )
+	if ( ( v = vars_pop( v ) ) == NULL )
 		goto init_2d_done;
 
 	if ( v->type == STR_VAR )
@@ -584,7 +584,7 @@ Var *f_init_2d( Var *v )
 	if ( G.ny <= 0 )
 		G.ny = DEFAULT_2D_Y_POINTS;
 
-	if ( ( v = v->next ) == NULL )
+	if ( ( v = vars_pop( v ) ) == NULL )
 		goto init_2d_done;
 
 	if ( v->type == STR_VAR )
@@ -613,7 +613,7 @@ Var *f_init_2d( Var *v )
 		}
 	}
 
-	if ( ( v = v->next ) == NULL )
+	if ( ( v = vars_pop( v ) ) == NULL )
 		goto init_2d_done;
 
 	if ( v->type == STR_VAR )
@@ -642,7 +642,7 @@ Var *f_init_2d( Var *v )
 		}
 	}
 
-	if ( ( v = v->next ) == NULL )
+	if ( ( v = vars_pop( v ) ) == NULL )
 		goto init_2d_done;
 
  labels_2d:
@@ -650,13 +650,13 @@ Var *f_init_2d( Var *v )
 	vars_check( v, STR_VAR );
 	G.label[ X ] = T_strdup( v->val.sptr );
 
-	if ( ( v = v->next ) == NULL )
+	if ( ( v = vars_pop( v ) ) == NULL )
 		return vars_push( INT_VAR, 1 );
 
 	vars_check( v, STR_VAR );
 	G.label[ Y ] = T_strdup( v->val.sptr );
 
-	if ( ( v = v->next ) != NULL )
+	if ( ( v = vars_pop( v ) ) != NULL )
 	{
 		vars_check( v, STR_VAR );
 		G.label[ Z ] = T_strdup( v->val.sptr );
@@ -729,7 +729,7 @@ Var *f_cscale( Var *v )
 			is_set |= 2;
 	}
 
-	if ( v != NULL && ( v = vars_pop( v ) ) != NULL )
+	if ( ( v = vars_pop( v ) ) != NULL )
 	{
 		if ( G.dim == 1 )
 		{
@@ -745,8 +745,7 @@ Var *f_cscale( Var *v )
 		}
 	}
 
-	if ( v != NULL && ( v = vars_pop( v ) ) != NULL &&
-		 v->type & ( INT_VAR | FLOAT_VAR ) )
+	if ( ( v = vars_pop( v ) ) != NULL && v->type & ( INT_VAR | FLOAT_VAR ) )
 	{
 		dy = VALUE( v );
 		if ( dy != 0.0 )
@@ -1092,8 +1091,8 @@ Var *f_display( Var *v )
 	len =   sizeof len                  /* length field itself */
 		  + sizeof nsets                /* number of sets to be sent */
 		  + nsets * (                   /* x-, y-index, number and data type */
-			    sizeof dp->nx + sizeof dp->ny + sizeof dp->nc 
-			  + sizeof dp->v->type );
+					    sizeof dp->nx + sizeof dp->ny + sizeof dp->nc 
+					  + sizeof dp->v->type );
 
 	for ( i = 0; i < nsets; i++ )
 	{
@@ -1337,13 +1336,11 @@ static DPoint *eval_display_args( Var *v, int *nsets )
 			THROW( EXCEPTION );
 		}
 
-		v = v->next;
-
-		/* for 2D experiments test and get y-index */
+		/* For 2D experiments test and get y-index */
 
 		if ( G.dim == 2 )
 		{
-			if ( v == NULL )
+			if ( ( v = v->next ) == NULL )
 			{
 				print( FATAL, "Missing y-index.\n" );
 				T_free( dp );
@@ -1359,14 +1356,12 @@ static DPoint *eval_display_args( Var *v, int *nsets )
 				T_free( dp );
 				THROW( EXCEPTION );
 			}
-
-			v = v->next;
 		}
 
 		/* Now test and get the data, i. e. store the pointer to the variable
 		   containing it */
 
-		if ( v == NULL )
+		if ( ( v = v->next ) == NULL )
 		{
 			print( FATAL, "Missing data.\n" );
 			T_free( dp );
@@ -1378,14 +1373,20 @@ static DPoint *eval_display_args( Var *v, int *nsets )
 
 		dp[ *nsets ].v = v;
 
-		v = v->next;
-
 		/* There can be several curves and we check if there's a curve number,
-		   then we test and store it. If there are no more argument we default
-		   to the first curve.*/
+		   then we test and store it. If there were only coordinates and data
+		   for on curve and there are no more argument we default to the first
+		   curve.*/
 
-		if ( v == NULL )
+		if ( ( v = v->next ) == NULL )
 		{
+			if ( *nsets != 0 )
+			{
+				print( FATAL, "Missing curve number\n" );
+				T_free( dp );
+				THROW( EXCEPTION );
+			}
+
 			dp[ *nsets ].nc = 0;
 			( *nsets )++;
 			return dp;
@@ -1401,10 +1402,9 @@ static DPoint *eval_display_args( Var *v, int *nsets )
 			THROW( EXCEPTION );
 		}
 
-		v = v->next;
-
 		( *nsets )++;
-	} while ( v != NULL );
+
+	} while ( ( v = v->next ) != NULL );
 
 	return dp;
 }

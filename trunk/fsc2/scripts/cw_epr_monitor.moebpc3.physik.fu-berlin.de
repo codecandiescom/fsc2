@@ -376,13 +376,11 @@ if ( $? != 0 ) {
 #
 
 sub show_message {
-	my $text = shift;
-
 	my $mw = MainWindow->new;
 	$mw->geometry( "-2000-2000" );
 	$mw->messageBox( '-icon' => 'error',
 					 '-type' => 'Ok',
 					 '-title' => 'Error',
-					 '-message' => $text );
+					 '-message' => $_[ 0 ] );
 	exit;
 }

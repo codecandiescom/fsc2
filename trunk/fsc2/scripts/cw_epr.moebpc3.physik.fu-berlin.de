@@ -263,6 +263,7 @@ MainLoop;
 
 
 #############################################
+#
 
 sub get_defs {
 
@@ -320,8 +321,8 @@ sub get_defs {
 	$kd = $ne;
 	$old_kd = $kd;
 
-	goto done_reading unless ( defined( $ne = <F> ) and 
-							   ( $ne =~/^$/ or is_int( $ne ) ) );
+	goto done_reading unless ( defined( $ne = <F> ) and
+		   ( $ne =~/^$/ or ( is_float2( $ne ) and $ne >= 0 ) ) );
 	chomp $ne;
 	$sleep_time = $ne;
 
@@ -337,6 +338,7 @@ sub get_defs {
 
 
 #############################################
+#
 
 sub store_defs {
 
@@ -361,13 +363,12 @@ sub store_defs {
 #
 
 sub current_check {
-	my $val = shift;
 
-	if ( $val =~ /^[+-]?\.?$/ or
-		 ( is_float1( $val ) and $val >= -7.0 and $val <= 7.0 ) ) {
-		check_eval( $val, $end_current, $num_points );
+	if ( $_[ 0 ] =~ /^[+-]?\.?$/ or
+		 ( is_float1( $_[ 0 ] ) and $_[ 0 ] >= -7.0 and $_[ 0 ] <= 7.0 ) ) {
+		check_eval( $_[ 0 ], $end_current, $num_points );
 		$f11_a->configure( '-state' => 'disabled' )
-			if $val ne $start_current;
+			if $_[ 0 ] ne $start_current;
 		return 1;
 	}
 	$f11_a->configure( '-state' => 'disabled' );
@@ -379,14 +380,13 @@ sub current_check {
 #
 
 sub end_current_check {
-	my $val = shift;
 
-	if ( $val =~ /^[+-]?\.?$/ or
-		 ( is_float2( $val ) and $val >= -7.0 and $val <= 7.0 ) ) {
-		$opt_end_cur = $val if $opt_end_cur ne $val;
-		check_eval( $start_current, $val, $num_points );
+	if ( $_[ 0 ] =~ /^[+-]?\.?$/ or
+		 ( is_float2( $_[ 0 ] ) and $_[ 0 ] >= -7.0 and $_[ 0 ] <= 7.0 ) ) {
+		$opt_end_cur = $_[ 0 ] if $opt_end_cur ne $_[ 0 ];
+		check_eval( $start_current, $_[ 0 ], $num_points );
 		$f11_a->configure( '-state' => 'disabled' )
-			if $val ne $end_current;
+			if $_[ 0 ] ne $end_current;
 		return 1;
 	}
 	$f11_a->configure( '-state' => 'disabled' );
@@ -395,21 +395,17 @@ sub end_current_check {
 
 
 #############################################
-#
+# Check that it's a number not larger than the maximum number of points
+# we can sample with the currently selected lock-in
 
 sub num_points_check {
 
-	my $val = shift;
-
-	# Check that it's a number not larger than the maximum number of points
-	# we can sample with the currently selected lock-in
-
-	if ( $val =~ /^$/ or
-		 ( is_int( $val ) and
-		   $val <= ( $lockin eq "SR830" ? 16381 : 8191 ) ) ) {
-		check_eval( $start_current, $end_current, $val );
+	if ( $_[ 0 ] =~ /^$/ or
+		 ( is_int( $_[ 0 ] ) and
+		   $_[ 0 ] <= ( $lockin eq "SR830" ? 16381 : 8191 ) ) ) {
+		check_eval( $start_current, $end_current, $_[ 0 ] );
 		$f11_a->configure( '-state' => 'disabled' )
-			if $val ne $num_points;
+			if $_[ 0 ] ne $num_points;
 		return 1;
 	}
 	$f11_a->configure( '-state' => 'disabled' );
@@ -418,15 +414,12 @@ sub num_points_check {
 
 
 #############################################
-#
+# For the SR810 we can only sample up to 8191 points, so correct the
+# number of points if necessary
 
 sub lockin_check {
-	my $l = shift;
 
-	# For the SR810 we can only sample up to 8191 points, so correct the
-	# number of points if necessary
-
-	if ( $l eq "SR810" and $num_points ne "" and $num_points > 8191 ) {
+	if ( $_[ 0 ] eq "SR810" and $num_points ne "" and $num_points > 8191 ) {
 		num_points_check( 8191 );
 		$num_points = 8191;
 	}
@@ -437,12 +430,11 @@ sub lockin_check {
 #
 
 sub tc_check {
-	my $sval = shift;
 	my $i;
 
 	# Calculate the time constant
 
-	$sval =~ /([0-9]+) (m?)s/;
+	$_[ 0 ] =~ /([0-9]+) (m?)s/;
 	my $val = $1 * ( $2 eq "m" ? 0.001 : 1.0 );
 
 	# Try to find an acquisition time that's not shorter than the time constant
@@ -466,6 +458,7 @@ sub tc_check {
 #
 
 sub tpp_set {
+
 	$tc =~ /([0-9]+) (m?)s/;
 	my $tc_val = $1 * ( $2 eq "m" ? 0.001 : 1.0 );
 
@@ -490,36 +483,36 @@ sub tpp_set {
 #
 
 sub sleep_time_check {
-	my $val = shift;
-	return ( $val =~/^$/ or is_int( $val ) );
+	return( $_[ 0 ] =~/^$/ or ( is_float2( $_[ 0 ] ) and $_[ 0 ] >= 0.0 ) );
 }
 
 
 #############################################
+#
 
 sub is_float1 {
-	my $val = shift;
-	return $val =~ /^[+-]?(([0-9]+(\.?([0-9]{1,4})?)?)|(\.[0-9]{1,4}))$/
+	return $_[ 0 ] =~ /^[+-]?(([0-9]+(\.?([0-9]{1,4})?)?)|(\.[0-9]{1,4}))$/
 }
 
 
 #############################################
+#
 
 sub is_float2 {
-	my $val = shift;
-	return $val =~ /^[+-]?(([0-9]+(\.?([0-9]+)?)?)|(\.[0-9]+))$/
+	return $_[ 0 ] =~ /^[+-]?(([0-9]+(\.?([0-9]+)?)?)|(\.[0-9]+))$/
 }
 
 
 #############################################
+#
 
 sub is_int {
-	my $val = shift;
-	return $val =~ /^0*[1-9]*[0-9]{1,4}$/;
+	return $_[ 0 ] =~ /^0*[1-9]*[0-9]{1,4}$/;
 }
 
 
 #############################################
+#
 
 sub check_eval {
 
@@ -533,6 +526,7 @@ sub check_eval {
 
 
 #############################################
+#
 
 sub evaluate {
 
@@ -570,6 +564,7 @@ sub evaluate {
 
 
 #############################################
+#
 
 sub write_out {
 
@@ -648,7 +643,7 @@ FOREVER {
 
 	reset_field( );
 ";
-print F "	wait( $sleep_time s );\n" if is_int( $sleep_time );
+print F "	wait( $sleep_time s );\n" if $sleep_time ne "";
 print F
 "
 	magnet_sweep( \"$dir\" );
@@ -726,6 +721,7 @@ IF is_file( File ) {
            \"%    Start current:        # A\\n\"
            \"%   End current:           # A\\n\"
            \"%   Sweep rate:            # A/min\\n\"
+           \"%   Start delay:           # s\\n\"
            \"% Lock-In:\\n\"
            \"%   Sensitivity:           # mV\\n\"
            \"%   Time constant:         # s\\n\"
@@ -739,10 +735,10 @@ IF is_file( File ) {
 		   start_current, start_current ";
 print F ( $dir eq "UP" ) ? "+" : "-";
 print F " ( Num_Points - 1 ) * sweep_rate / kd,
-		   sweep_rate * 60.0, lockin_sensitivity( ) * 1.0e3, tc, kd,
+		   sweep_rate * 60.0, " . ( $sleep_time ne "" ? $sleep_time : 0 ) .
+           ", lockin_sensitivity( ) * 1.0e3, tc, kd,
 		   lockin_phase( ), lockin_ref_freq( ) * 1.0e-3, lockin_ref_level( ),
 		   J, Num_Points );
-
 	save_comment( File, \"% \", \"Sample:  \\nTemperature:  \\n\" );
 }
 ";
