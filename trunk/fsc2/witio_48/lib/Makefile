@@ -31,7 +31,7 @@ incl_dir  = $(prefix)/include
 
 CFLAGS    = -ggdb -O2 -Wall -Wwrite-strings -Wstrict-prototypes \
 			-Wmissing-prototypes -Wmissing-declarations -W
-LDFLAGS   = -Wl,-E
+LDFLAGS   = -Wl,--version-script=witio_48_lib.map
 INCLUDES  = -I../driver -I.
 
 sources   = witio_48_lib.c
@@ -43,7 +43,7 @@ headers   = witio_48.h ../driver/witio_48_drv.h
 all: libwitio_48.so libwitio_48.a
 
 
-libwitio_48.so: ${sources:.c=.o} $(headers)
+libwitio_48.so: ${sources:.c=.o} $(headers) witio_48_lib.map
 	$(CC) -shared -o $@ ${sources:.c=.o} $(LDFLAGS)
 
 libwitio_48.a: ${sources:.c=.o} $(headers)

@@ -3,7 +3,7 @@
 
   Copyright (C) 2003 Jens Thoms Toerring
  
-  This library should simplify accessing the WITIO-48 DIO board by Wasci
+  This library should simplify accessing the WITIO-48 DIO board by Wasco
   by avoiding to be forced to make ioctl() calls and use higher level
   functions instead.
 
