@@ -90,8 +90,12 @@ void bug_report_callback( FL_OBJECT *a, long b )
 		strcpy( cur_line, fl_get_browser_line( main_form->browser, i ) );
 		clp = cur_line;
 		if ( *clp == '@' )
+		{
+			if ( *( clp + 1 ) == 'n' )
+				continue;
 			while ( *clp++ != 'f' )
 				;
+		}
 		fprintf( tmp, "%s\n", clp );
 	}
 
@@ -266,8 +270,12 @@ void death_mail( int signo )
 		strcpy( cur_line, fl_get_browser_line( main_form->browser, ++i ) );
 		clp = cur_line;
 		if ( *clp == '@' )
+		{
+			if ( *( clp + 1 ) == 'n' )
+				continue;
 			while ( *clp++ != 'f' )
 				;
+		}
 		fputs( clp, mail );
 		fputc( '\n', mail );
 	}
