@@ -1370,8 +1370,9 @@ static long ips20_4_talk( const char *message, char *reply, long length )
 	if ( gpib_write( ips20_4.device, message, strlen( message ) ) == FAILURE )
 		ips20_4_comm_failure( );
 
-	/* Re-enable the following if you're extremely careful, but even the
-	   LabVIEW driver by Oxford doesn't use it... */
+	/* Re-enable the following if you want to be extremely careful (that's
+	   what the manual recommends), but even the LabVIEW driver written by
+	   Oxford doesn't use it... */
 
 #if 0
 	do {
