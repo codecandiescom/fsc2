@@ -35,9 +35,9 @@
 
 /* Uncomment the next line for debugging of data sent via GPIB bus */
 
-/*
+
 #define DG2020_B_GPIB_DEBUG 1
-*/
+
 
 /* Here are all the directly exported functions (i.e. exported either implicit
    as a hook functions or via the Functions data base) */
@@ -193,6 +193,7 @@ struct FUNCTION {
 	CHANNEL **pcm;              /* phase matrix */
 
 	PULSE_PARAMS *pulse_params;
+	PULSE_PARAMS *old_pulse_params;
 	int num_params;
 
 	bool uses_auto_shape_pulses;     /* set when shape pulses are to be set */

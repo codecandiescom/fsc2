@@ -179,6 +179,7 @@ int dg2020_b_init_hook( void )
 		f->pc_len = 1;
 		f->num_active_pulses = 0;
 		f->pulse_params = NULL;
+		f->old_pulse_params = NULL;
 		f->uses_auto_shape_pulses = UNSET;
 		f->uses_auto_twt_pulses = UNSET;
 		f->max_duty_warning = 0;
@@ -543,6 +544,7 @@ int dg2020_b_end_of_exp_hook( void )
 	{
 		f = dg2020.function + i;
 		f->pulse_params = PULSE_PARAMS_P T_free( f->pulse_params );
+		f->old_pulse_params = PULSE_PARAMS_P T_free( f->old_pulse_params );
 	}
 
 	/* Finally reset the internal representation back to its initial state

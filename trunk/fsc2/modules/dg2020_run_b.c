@@ -218,7 +218,9 @@ void dg2020_do_checks( FUNCTION *f )
 	if ( f->num_active_pulses == 0 )
 		return;
 
-    f->pulse_params = PULSE_PARAMS_P T_free( f->pulse_params );
+	if ( f->old_pulse_params )
+		T_free( f->old_pulse_params );
+	f->old_pulse_params = f->pulse_params;
 	f->num_params = f->num_active_pulses;
 	f->pulse_params = PULSE_PARAMS_P T_malloc( f->num_params
 											   * sizeof *f->pulse_params );
@@ -897,12 +899,15 @@ void dg2020_set_pulses( FUNCTION *f )
 								pp->pos, pp->len );
 					dg2020_clear( pp->pulse->channel[ j ]->old_d,
 								  pp->pos, pp->len );
+
+					pp->pulse->is_old_len = pp->pulse->is_old_pos = SET;
+					pp->pulse->old_pos = pp->pulse->pos;
+					pp->pulse->old_len = pp->pulse->len;
 				}
 
 				pp->pulse->channel[ j ]->needs_update = SET;
 			}
 
-			pp->pulse->is_old_len = pp->pulse->is_old_pos = SET;
 		}
 
 	for ( i = 0; i < f->num_needed_channels; i++ )
