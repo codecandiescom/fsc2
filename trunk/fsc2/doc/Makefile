@@ -26,16 +26,25 @@ fsc2.html: $(docs)
 ps: fsc2.ps
 
 fsc2.ps: $(docs)
-	texi2dvi -c fsc2.texi
-	dvips fsc2.dvi
+	if `which texi2dvi`; then \
+		texi2dvi -c fsc2.texi; \
+		dvips fsc2.dvi; \
+	fi
 
 pdf: fsc2.pdf
 
 fsc2.pdf: $(docs)
-	texi2dvi --pdf -c fsc2.texi
+	if `which texi2dvi`; then \
+		texi2dvi --pdf -c fsc2.texi; \
+	fi
 
 clean:
 	$(RM) $(RMFLAGS) fsc2.dvi *.log
+
+install:
+	$(INSTALL) -m 444 -o fsc2 -g fsc2 fsc2*.html $(docdir)
+	$(INSTALL) -m 444 -o fsc2 -g fsc2 fsc2.ps $(docdir)
+	$(INSTALL) -m 444 -o fsc2 -g fsc2 fsc2.pdf $(docdir)
 
 distclean:
 	$(RM) $(RMFLAGS) fsc2*.html fsc2_*.html fsc2.ps fsc2.pdf *.info* *~

@@ -37,6 +37,7 @@ RM             = -rm
 RMFLAGS        = -f
 AWK            = /usr/bin/awk
 INSTALL        = install
+EXEC_INSTALL   = install
 
 
 ############################################################################
@@ -117,28 +118,28 @@ all:
 	$(MAKE) -C doc all
 
 
-# Install the program in $bindir and all the other stuff in $libdir, $auxdir
-# and $docdir. Finally (for some sites) create aliases for devices.
+# Install the program in $bindir and all the other stuff in libdir, auxdir
+# and docdir. Finally create aliases for devices fo the current machine.
 
 install-strip:
-	$(MAKE) INSTALL='$(INSTALL) -s' install
+	$(MAKE) EXEC_INSTALL='$(INSTALL) -s' install
 
 install:
 	$(INSTALL) -d $(bindir)
-	$(INSTALL) -m 6755 -o fsc2 -g fsc2 fsc2 $(bindir)
 	$(INSTALL) -d $(libdir)
 	$(INSTALL) -d $(auxdir)
 	$(INSTALL) -d $(docdir)
 
-	$(INSTALL) -m 755 -o fsc2 -g fsc2 fsc2_connect $(bindir)
+	$(EXEC_INSTALL) -m 6755 -o fsc2 -g fsc2 fsc2 $(bindir)
+	$(EXEC_INSTALL) -m 755 -o fsc2 -g fsc2 fsc2_clean $(libdir)
+	$(EXEC_INSTALL) -m 644 -o fsc2 -g fsc2 *.so $(libdir)
+	$(EXEC_INSTALL) -m 755 -o fsc2 -g fsc2 fsc2_connect $(bindir)
+
 	$(RM) $(RMFLAGS) $(bindir)/fsc2_start $(bindir)/fsc2_test \
 					 $(bindir)/fsc2_load
 	ln -s $(bindir)/fsc2_connect $(bindir)/fsc2_start
 	ln -s $(bindir)/fsc2_connect $(bindir)/fsc2_test
 	ln -s $(bindir)/fsc2_connect $(bindir)/fsc2_load
-	$(INSTALL) -m 755 -o fsc2 -g fsc2 fsc2_clean $(libdir)
-
-	$(INSTALL) -m 644 -o fsc2 -g fsc2 *.so $(libdir)
 
 	$(INSTALL) -m 644 -o fsc2 -g fsc2 Functions $(libdir)
 	$(INSTALL) -m 644 -o fsc2 -g fsc2 Devices $(libdir)
