@@ -1957,10 +1957,12 @@ due to delays really will be set.
 In an additional window the paramters of the pulse the mouse is currenty
 positioned on are displayed. These include the pulse number (when the
 pulse number is enclosed in parentheses it's an automatically created
-pulse), the position with and without delays (depending on the current
-setting of the @code{Show delays} button, in parentheses the value for
-the other button state is shown), the pulse length, its function and the
-number of the pod or channel to which the pulse will be routed.
+pulse, the number itself is identical to the pulse number of the pulse
+it was created for), the positions with and without delays (depending on
+the current setting of the @code{Show delays} button, in parentheses the
+value for the other button state is shown), the pulse length, its
+function and the number of the pod or channel to which the pulse will be
+routed.
 
 Further informations are the edge-to-edge distance to the previous and
 the next pulse (in parentheses the center-to center distance) is shown.
