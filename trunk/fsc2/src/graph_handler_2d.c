@@ -330,7 +330,7 @@ static void release_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev,
 					else if ( G2.cut_select == CUT_SELECT_X &&
 							  keymask & ShiftMask )
 						cut_show( X, lrnd(
-							( double ) ( c->box_x + c->box_w )
+							( c->box_x + c->box_w )
 							/ G2.curve_2d[ G2.active_curve ]->s2d[ X ]
 							- G2.curve_2d[ G2.active_curve ]->shift[ X ] ) );
 					break;
@@ -340,8 +340,8 @@ static void release_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev,
 						scale_changed = change_y_range_2d( c );
 					else if ( G2.cut_select == CUT_SELECT_Y &&
 							  keymask & ShiftMask )
-						cut_show( Y, lrnd( ( double )
-							   ( G2.y_axis.h - 1 - ( c->box_y + c->box_h ) )
+						cut_show( Y, lrnd(
+							   ( G2.y_axis.h - 1.0 - ( c->box_y + c->box_h ) )
 							   / G2.curve_2d[ G2.active_curve]->s2d[ Y ]
 						       - G2.curve_2d[ G2.active_curve]->shift[ Y ] ) );
 					break;
@@ -672,7 +672,7 @@ static bool change_x_range_2d( Canvas *c )
 
 	save_scale_state_2d( cv );
 
-	cv->s2d[ X ] = ( double ) ( G2.canvas.w - 1 ) / fabs( x1 - x2 );
+	cv->s2d[ X ] = ( G2.canvas.w - 1 ) / fabs( x1 - x2 );
 	cv->shift[ X ] = - d_min( x1, x2 );
 
 	recalc_XPoints_of_curve_2d( cv );
@@ -696,12 +696,10 @@ static bool change_y_range_2d( Canvas *c )
 
 	cv = G2.curve_2d[ G2.active_curve ];
 
-	cy1 = ( ( double ) G2.canvas.h - 1.0 - G.start[ Y ] ) / cv->s2d[ Y ]
-		  - cv->shift[ Y ];
-	cy2 = ( ( double ) G2.canvas.h - 1.0 - c->ppos[ Y ] ) / cv->s2d[ Y ]
-		  - cv->shift[ Y ];
+	cy1 = ( G2.canvas.h - 1.0 - G.start[ Y ] ) / cv->s2d[ Y ] - cv->shift[ Y ];
+	cy2 = ( G2.canvas.h - 1.0 - c->ppos[ Y ] ) / cv->s2d[ Y ] - cv->shift[ Y ];
 
-	new_s2d_y = ( double ) ( G2.canvas.h - 1 ) / fabs( cy1 - cy2 );
+	new_s2d_y = ( G2.canvas.h - 1 ) / fabs( cy1 - cy2 );
 
 	/* Keep the coordinates from getting out of the range of short int- X
 	   only can deal with short ints */
@@ -746,7 +744,7 @@ static bool change_xy_range_2d( Canvas *c )
 
 		cv->can_undo = SET;
 
-		cv->s2d[ X ] = ( double ) ( G2.canvas.w - 1 ) / fabs( cx1 - cx2 );
+		cv->s2d[ X ] = ( G2.canvas.w - 1 ) / fabs( cx1 - cx2 );
 		cv->shift[ X ] = - d_min( cx1, cx2 );
 
 		scale_changed = SET;
@@ -754,14 +752,14 @@ static bool change_xy_range_2d( Canvas *c )
 
 	if ( abs( G.start[ Y ] - c->ppos[ Y ] ) > 4 )
 	{
-		cy1 = ( ( double ) G2.canvas.h - 1.0 - G.start[ Y ] ) / cv->s2d[ Y ]
+		cy1 = ( G2.canvas.h - 1.0 - G.start[ Y ] ) / cv->s2d[ Y ]
 			  - cv->shift[ Y ];
-		cy2 = ( ( double ) G2.canvas.h - 1.0 - c->ppos[ Y ] ) / cv->s2d[ Y ]
+		cy2 = ( G2.canvas.h - 1.0 - c->ppos[ Y ] ) / cv->s2d[ Y ]
 			  - cv->shift[ Y ];
 
 		cv->can_undo = SET;
 
-		cv->s2d[ Y ] = ( double ) ( G2.canvas.h - 1 ) / fabs( cy1 - cy2 );
+		cv->s2d[ Y ] = ( G2.canvas.h - 1 ) / fabs( cy1 - cy2 );
 		cv->shift[ Y ] = - d_min( cy1, cy2 );
 
 		scale_changed = SET;
@@ -791,14 +789,12 @@ static bool change_z_range_2d( Canvas *c )
 
 	save_scale_state_2d( cv );
 
-	z1 = ( ( double ) G2.z_axis.h - 1.0 - G.start[ Y ] ) / cv->s2d[ Z ]
-		 - cv->shift[ Z ];
-	z2 = ( ( double ) G2.z_axis.h - 1.0 - c->ppos[ Y ] ) / cv->s2d[ Z ]
-		 - cv->shift[ Z ];
+	z1 = ( G2.z_axis.h - 1.0 - G.start[ Y ] ) / cv->s2d[ Z ] - cv->shift[ Z ];
+	z2 = ( G2.z_axis.h - 1.0 - c->ppos[ Y ] ) / cv->s2d[ Z ] - cv->shift[ Z ];
 
 	cv->shift[ Z ] = - d_min( z1, z2 );
 	cv->z_factor = 1.0 / fabs( z1 - z2 );
-	cv->s2d[ Z ] = ( double ) ( G2.z_axis.h - 1 ) * cv->z_factor;
+	cv->s2d[ Z ] = ( G2.z_axis.h - 1 ) * cv->z_factor;
 
 	return SET;
 }
@@ -830,13 +826,11 @@ static bool zoom_x_2d( Canvas *c )
 	   factor. */
 
 	if ( G.start[ X ] > c->ppos[ X ] )
-		cv->s2d[ X ] *= d_min( 4.0,
-						 1.0 + 3.0 * ( double ) ( G.start[ X ] - c->ppos[ X ] )
-							   / ( double ) G2.x_axis.w );
+		cv->s2d[ X ] *= d_min( 4.0, ( 3.0 * ( G.start[ X ] - c->ppos[ X ] ) )
+									/ G2.x_axis.w + 1 );
 	else
-		cv->s2d[ X ] /= d_min( 4.0,
-						 1.0 + 3.0 * ( double ) ( c->ppos[ X ] - G.start[ X ] )
-							   / ( double ) G2.x_axis.w );
+		cv->s2d[ X ] /= d_min( 4.0, ( 3.0 * ( c->ppos[ X ] - G.start[ X ] ) )
+									/ G2.x_axis.w + 1 );
 
 	cv->shift[ X ] = G.start[ X ] / cv->s2d[ X ] - px;
 
@@ -866,8 +860,7 @@ static bool zoom_y_2d( Canvas *c )
 	/* Get the value in the interval [0, 1] corresponding to the mouse
 	   position */
 
-	py = ( ( double ) G2.canvas.h - 1.0 - G.start[ Y ] ) / cv->s2d[ Y ]
-		 - cv->shift[ Y ];
+	py = ( G2.canvas.h - 1.0 - G.start[ Y ] ) / cv->s2d[ Y ] - cv->shift[ Y ];
 
 	/* If the mouse was moved to lower values zoom the display by a factor
 	   of up to 4 (if the mouse was moved over the whole length of the
@@ -876,16 +869,13 @@ static bool zoom_y_2d( Canvas *c )
 	   factor. */
 
 	if ( G.start[ Y ] < c->ppos[ Y ] )
-		cv->s2d[ Y ] *= d_min( 4.0,
-						 1.0 + 3.0 * ( double ) ( c->ppos[ Y ] - G.start[ Y ] )
-							   / ( double ) G2.y_axis.h );
+		cv->s2d[ Y ] *= d_min( 4.0, ( 3.0 * ( c->ppos[ Y ] - G.start[ Y ] ) )
+									/ G2.y_axis.h  + 1 );
 	else
-		cv->s2d[ Y ] /= d_min( 4.0,
-						 1.0 + 3.0 * ( double ) ( G.start[ Y ] - c->ppos[ Y ] )
-							   / ( double ) G2.y_axis.h );
+		cv->s2d[ Y ] /= d_min( 4.0, ( 3.0 * ( G.start[ Y ] - c->ppos[ Y ] ) )
+									/ G2.y_axis.h + 1 );
 
-	cv->shift[ Y ] = ( ( double ) G2.canvas.h - 1.0 - G.start[ Y ] )
-					 / cv->s2d[ Y ] - py;
+	cv->shift[ Y ] = ( G2.canvas.h - 1.0 - G.start[ Y ] ) / cv->s2d[ Y ] - py;
 
 	recalc_XPoints_of_curve_2d( cv );
 
@@ -920,12 +910,12 @@ static bool zoom_xy_2d( Canvas *c )
 
 		if ( G.start[ X ] > c->ppos[ X ] )
 			cv->s2d[ X ] *= d_min( 4.0,
-						 1.0 + 3.0 * ( double ) ( G.start[ X ] - c->ppos[ X ] )
-								   / ( double ) G2.x_axis.w );
+								   ( 3.0 * ( G.start[ X ] - c->ppos[ X ] ) )
+								   / G2.x_axis.w + 1 );
 		else
 			cv->s2d[ X ] /= d_min( 4.0,
-						 1.0 + 3.0 * ( double ) ( c->ppos[ X ] - G.start[ X ] )
-								   / ( double ) G2.x_axis.w );
+								   ( 3.0 * ( c->ppos[ X ] - G.start[ X ] ) )
+								   / G2.x_axis.w + 1 );
 
 		cv->shift[ X ] = G.start[ X ] / cv->s2d[ X ] - px;
 
@@ -936,19 +926,19 @@ static bool zoom_xy_2d( Canvas *c )
 	{
 		cv->can_undo = SET;
 
-		py = ( ( double ) G2.canvas.h - 1.0 - G.start[ Y ] ) / cv->s2d[ Y ]
+		py = ( G2.canvas.h - 1.0 - G.start[ Y ] ) / cv->s2d[ Y ]
 			 - cv->shift[ Y ];
 
 		if ( G.start[ Y ] < c->ppos[ Y ] )
 			cv->s2d[ Y ] *= d_min( 4.0,
-						 1.0 + 3.0 * ( double ) ( c->ppos[ Y ] - G.start[ Y ] )
-								   / ( double ) G2.y_axis.h );
+								   ( 3.0 * ( c->ppos[ Y ] - G.start[ Y ] ) )
+								   / G2.y_axis.h + 1 );
 		else
 			cv->s2d[ Y ] /= d_min( 4.0,
-						 1.0 + 3.0 * ( double ) ( G.start[ Y ] - c->ppos[ Y ] )
-								   / ( double ) G2.y_axis.h );
+								   ( 3.0 * ( G.start[ Y ] - c->ppos[ Y ] ) )
+								   / G2.y_axis.h + 1 );
 
-		cv->shift[ Y ] = ( ( double ) G2.canvas.h - 1.0 - G.start[ Y ] )
+		cv->shift[ Y ] = ( G2.canvas.h - 1.0 - G.start[ Y ] )
 						 / cv->s2d[ Y ] - py;
 
 			scale_changed = SET;
@@ -982,8 +972,7 @@ static bool zoom_z_2d( Canvas *c )
 	/* Get the value in the interval [0, 1] corresponding to the mouse
 	   position */
 
-	pz = ( ( double ) G2.z_axis.h - 1.0 - G.start[ Y ] ) / cv->s2d[ Z ]
-		 - cv->shift[ Z ];
+	pz = ( G2.z_axis.h - 1.0 - G.start[ Y ] ) / cv->s2d[ Z ] - cv->shift[ Z ];
 
 	/* If the mouse was moved to lower values zoom the display by a factor
 	   of up to 4 (if the mouse was moved over the whole length of the
@@ -991,9 +980,8 @@ static bool zoom_z_2d( Canvas *c )
 	   position. If the mouse was moved upwards demagnify by the inverse
 	   factor. */
 
-	factor = d_min( 4.0,
-					1.0 + 3.0 * ( double ) fabs( c->ppos[ Y ] - G.start[ Y ] )
-					/ ( double ) G2.z_axis.h );
+	factor = d_min( 4.0, ( 3.0 * fabs( c->ppos[ Y ] - G.start[ Y ] ) )
+						 / G2.z_axis.h + 1 );
 
 	if ( G.start[ Y ] < c->ppos[ Y ] )
 	{
@@ -1006,8 +994,7 @@ static bool zoom_z_2d( Canvas *c )
 		cv->z_factor /= factor;
 	}
 
-	cv->shift[ Z ] = ( ( double ) G2.z_axis.h - 1.0 - G.start[ Y ] )
-					 / cv->s2d[ Z ] - pz;
+	cv->shift[ Z ] = ( G2.z_axis.h - 1.0 - G.start[ Y ] ) / cv->s2d[ Z ] - pz;
 
 	return SET;
 }
@@ -1043,19 +1030,19 @@ static bool shift_XPoints_of_curve_2d( Canvas *c, Curve_2d *cv )
 		if ( G.drag_canvas & DRAG_2D_X & 3 )      /* x-axis or canvas window */
 		{
 			dx = factor * ( c->ppos[ X ] - G.start[ X ] );
-			cv->shift[ X ] += ( double ) dx / cv->s2d[ X ];
+			cv->shift[ X ] += dx / cv->s2d[ X ];
 		}
 
 		if ( G.drag_canvas & DRAG_2D_Y & 3 )      /* y-axis or canvas window */
 		{
 			dy = factor * ( c->ppos[ Y ] - G.start[ Y ] );
-			cv->shift[ Y ] -= ( double ) dy / cv->s2d[ Y ];
+			cv->shift[ Y ] -= dy / cv->s2d[ Y ];
 		}
 
 		if ( G.drag_canvas == DRAG_2D_Z )         /* z-axis window */
 		{
 			dz = factor * ( c->ppos[ Y ] - G.start[ Y ] );
-			cv->shift[ Z ] -= ( double ) dz / cv->s2d[ Z ];
+			cv->shift[ Z ] -= dz / cv->s2d[ Z ];
 			return SET;
 		}
 	}
@@ -1114,15 +1101,13 @@ static void reconfigure_window_2d( Canvas *c, int w, int h )
 			if ( ! cv->is_scale_set )
 				continue;
 
-			cv->s2d[ X ] *= ( double ) ( w - 1 ) / ( double ) ( old_w - 1 );
-			cv->s2d[ Y ] *= ( double ) ( h - 1 ) / ( double ) ( old_h - 1 );
+			cv->s2d[ X ] *= ( double ) ( w - 1 ) / ( old_w - 1 );
+			cv->s2d[ Y ] *= ( double ) ( h - 1 ) / ( old_h - 1 );
 
 			if ( cv->can_undo )
 			{
-				cv->old_s2d[ X ] *= ( double ) ( w - 1 )
-									/ ( double ) ( old_w - 1 );
-				cv->old_s2d[ Y ] *= ( double ) ( h - 1 )
-									/ ( double ) ( old_h - 1 );
+				cv->old_s2d[ X ] *= ( double ) ( w - 1 ) / ( old_w - 1 );
+				cv->old_s2d[ Y ] *= ( double ) ( h - 1 ) / ( old_h - 1 );
 			}
 		}
 
@@ -1134,8 +1119,9 @@ static void reconfigure_window_2d( Canvas *c, int w, int h )
 
 	/* We can't know the sequence the different canvases are reconfigured in
 	   but, on the other hand, redrawing an axis canvas is useless before the
-	   new scaling factors are set. Thus we need in the call for the canvas
-	   window to redraw also axis windows which got reconfigured before. */
+	   new scaling factors are set. Thus in the call for the redrawing the
+	   canvas window we also need to redraw the axis windows which may have
+	   gotten reconfigured before. */
 
 	delete_pixmap( c );
 	create_pixmap( c );
@@ -1148,11 +1134,10 @@ static void reconfigure_window_2d( Canvas *c, int w, int h )
 			if ( ! cv->is_scale_set )
 				continue;
 
-			cv->s2d[ Z ] *= ( double ) ( h - 1 ) / ( double ) ( old_h - 1 );
+			cv->s2d[ Z ] *= ( double ) ( h - 1 ) / ( old_h - 1 );
 
 			if ( cv->can_undo )
-				cv->old_s2d[ Z ] *= ( double ) ( h - 1 )
-									/ ( double ) ( old_h - 1 );
+				cv->old_s2d[ Z ] *= ( double ) ( h - 1 ) / ( old_h - 1 );
 		}
 	}
 
@@ -1483,8 +1468,8 @@ void repaint_canvas_2d( Canvas *c )
 
 			x_pos = ( c->ppos[ X ] + cv->w / 2 ) / cv->s2d[ X ]
 				    - cv->shift[ X ];
-			y_pos = ( ( double ) G2.canvas.h - 1.0 - c->ppos[ Y ]
-					  + cv->h / 2 ) / cv->s2d[ Y ] - cv->shift[ Y ];
+			y_pos = ( G2.canvas.h - 1.0 - c->ppos[ Y ] + cv->h / 2 )
+					/ cv->s2d[ Y ] - cv->shift[ Y ];
 
 			if ( x_pos < 0 || floor( x_pos ) >= G2.nx ||
 				 y_pos < 0 || floor( y_pos ) >= G2.ny ||
@@ -1505,7 +1490,7 @@ void repaint_canvas_2d( Canvas *c )
 			x_pos = cv->rwc_start[ X ] + cv->rwc_delta[ X ]
 				    * ( c->ppos[ X ] / cv->s2d[ X ] - cv->shift[ X ] );
 			y_pos = cv->rwc_start[ Y ] + cv->rwc_delta[ Y ]
-				    * ( ( ( double ) G2.canvas.h - 1.0 - c->ppos[ Y ] )
+				    * ( ( G2.canvas.h - 1.0 - c->ppos[ Y ] )
 						/ cv->s2d[ Y ] - cv->shift[ Y ] );
 
 			strcpy( buf, " x = " );
@@ -1530,7 +1515,7 @@ void repaint_canvas_2d( Canvas *c )
 								  G.font_asc + 5, buf, strlen( buf ) );
 		}
 
-		if ( G.button_state == 5 )
+		if ( G.button_state == 5 )            /* left and right mouse button */
 		{
 			if ( G2.active_curve != -1 &&
 				 G2.curve_2d[ G2.active_curve ]->is_scale_set )
@@ -1539,8 +1524,8 @@ void repaint_canvas_2d( Canvas *c )
 
 				x_pos = ( c->ppos[ X ] + cv->w / 2 ) / cv->s2d[ X ]
 					    - cv->shift[ X ];
-				y_pos = ( ( double ) G2.canvas.h - 1.0 - c->ppos[ Y ]
-						  + cv->h / 2 ) / cv->s2d[ Y ] - cv->shift[ Y ];
+				y_pos = ( G2.canvas.h - 1.0 - c->ppos[ Y ] + cv->h / 2 )
+						/ cv->s2d[ Y ] - cv->shift[ Y ];
 
 				if ( x_pos < 0 || floor( x_pos ) >= G2.nx ||
 					 y_pos < 0 || floor( y_pos ) >= G2.ny ||
@@ -1560,8 +1545,8 @@ void repaint_canvas_2d( Canvas *c )
 
 				x_pos = ( G.start[ X ] + cv->w / 2 ) / cv->s2d[ X ]
 					    - cv->shift[ X ];
-				y_pos = ( ( double ) G2.canvas.h - 1.0 - G.start[ Y ]
-						  + cv->h / 2 ) / cv->s2d[ Y ] - cv->shift[ Y ];
+				y_pos = ( G2.canvas.h - 1.0 - G.start[ Y ] + cv->h / 2 )
+						/ cv->s2d[ Y ] - cv->shift[ Y ];
 
 				if ( x_pos < 0 || floor( x_pos ) >= G2.nx ||
 					 y_pos < 0 || floor( y_pos ) >= G2.ny ||
@@ -1667,8 +1652,8 @@ void fs_rescale_2d( Curve_2d *cv )
 	new_rwc_delta_z = rw_max - rw_min;
 
 	cv->shift[ X ] = cv->shift[ Y ] = cv->shift[ Z ] = 0.0;
-	cv->s2d[ X ] = ( double ) ( G2.canvas.w - 1 ) / ( double ) ( G2.nx - 1 );
-	cv->s2d[ Y ] = ( double ) ( G2.canvas.h - 1 ) / ( double ) ( G2.ny - 1 );
+	cv->s2d[ X ] = ( double ) ( G2.canvas.w - 1 ) / ( G2.nx - 1 );
+	cv->s2d[ Y ] = ( double ) ( G2.canvas.h - 1 ) / ( G2.ny - 1 );
 	cv->s2d[ Z ] = ( double ) ( G2.z_axis.h - 1 );
 
 	cv->up = cv->down = cv->left = cv->right = UNSET;
@@ -1723,8 +1708,8 @@ void make_scale_2d( Curve_2d *cv, Canvas *c, int coord )
 	/* The distance between the smallest ticks should be 'G.scale_tick_dist'
 	   points - calculate the corresponding delta in real word units */
 
-	rwc_delta = ( double ) G.scale_tick_dist
-		        * fabs( cv->rwc_delta[ coord ] ) / cv->s2d[ coord ];
+	rwc_delta = G.scale_tick_dist * fabs( cv->rwc_delta[ coord ] )
+				/ cv->s2d[ coord ];
 
 	/* Now scale this distance to the interval [ 1, 10 [ */
 
@@ -1867,7 +1852,7 @@ void make_scale_2d( Curve_2d *cv, Canvas *c, int coord )
 
 		/* Draw all the ticks and numbers */
 
-		for ( cur_p = ( double ) c->h - 1.0 - d_start_fine; cur_p > - 0.5;
+		for ( cur_p = c->h - 1.0 - d_start_fine; cur_p > - 0.5;
 			  medium++, coarse++, cur_p -= d_delta_fine )
 		{
 			y = d2shrt( cur_p );
@@ -1905,7 +1890,7 @@ void make_scale_2d( Curve_2d *cv, Canvas *c, int coord )
 
 		/* Draw all the ticks and numbers */
 
-		for ( cur_p = ( double ) c->h - 1.0 - d_start_fine; cur_p > -0.5;
+		for ( cur_p = c->h - 1.0 - d_start_fine; cur_p > -0.5;
 			  medium++, coarse++, cur_p -= d_delta_fine )
 		{
 			y = d2shrt( cur_p );
@@ -1946,15 +1931,15 @@ static void make_color_scale( Canvas *c, Curve_2d *cv )
 	double h_inc;
 
 
-	h = d2ushrt( ceil( ( double ) c->h / ( double ) NUM_COLORS ) );
-	h_inc = ( double ) c->h / ( double ) NUM_COLORS;
+	h = d2ushrt( ceil( ( double ) c->h / NUM_COLORS ) );
+	h_inc = ( double ) c->h / NUM_COLORS;
 
 	XDrawLine( G.d, c->pm, c->font_gc, G.z_line_offset, 0,
 			   G.z_line_offset, c->h - 1 );
 	XDrawLine( G.d, c->pm, c->font_gc, G.z_line_offset + G.z_line_width + 1,
 			   0, G.z_line_offset + G.z_line_width + 1, c->h - 1 );
 
-	col_inc = 1.0 / ( double ) ( NUM_COLORS - 1 );
+	col_inc = 1.0 / ( NUM_COLORS - 1 );
 
 	for ( i = 0; i < NUM_COLORS; i++ )
 	{
