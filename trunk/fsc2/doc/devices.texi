@@ -481,7 +481,15 @@ as a query, i.e.@: without an argument.
 
 @item lockin_conversion_time()
 @findex lockin_conversion_time()
-This function only exists for the @strong{ER023M Signal Channel}. 
+This function only exists for the @strong{ER023M Signal Channel} and
+queries or sets the internal integration time of the lock-in
+amplifier. Valid values are times that are multiples of @code{320 us},
+with a lowest multiplicator of 10 and a maximum multiplicator of 9999,
+thus allowing conversion times between @code{3.2 ms} and @code{3.19968
+s}.
+
+Before the @code{EXPERIMENT} section this function can't be called
+without an argument, i.e.@: as a query.
 
 
 @item lockin_phase()
