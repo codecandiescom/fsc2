@@ -23,12 +23,12 @@
 # Boston, MA 02111-1307, USA.
 
 # This script allows to display the pulse settings during an experiment.
-# In takes the output of the pulser_dump_pulses() EDL function (or gets
+# It takes the output of the pulser_dump_pulses() EDL function (or gets
 # invoked directly by the pulser_show_pulses() function) and draws a
 # graphical representation of the pulses. Using buttons in the window,
-# the mouse buttons or the keyboard one can run through all pulse
-# settings during an experiment (at least as far as fsc2 can figure them
-# out from the test run).
+# the mouse buttons or the keyboard one can move through all pulse
+# settings during the experiment (at least as far as fsc2 can figure
+# them out from the test run).
 #
 # Key bindings:
 # Page Up:     next pulse settings
@@ -60,6 +60,10 @@ die "Installed Perl-Tk version is $Tk::VERSION but Tk800.022 is required.\n"
 my ( $line, $time_base, $Delay, $has_auto_pulses );
 my $verbose = 0;
 my $Channels = Channels->new;
+my @Function_Names = qw( MW PULSE_SHAPE PHASE_1 PHASE_2 TWT TWT_GATE
+						 DEFENSE DETECTION DETECTION_GATE RF RF_GATE
+						 OTHER_1 OTHER_2 OTHER_3 OTHER_4 );
+
 
 read_input( );
 Pulse_Window->new;
@@ -82,9 +86,8 @@ sub usage{
 sub read_input {
 
 	my $if = *STDIN;
-	my @Function_Names = qw( MW PULSE_SHAPE PHASE_1 PHASE_2 TWT TWT_GATE
-							 DEFENSE DETECTION DETECTION_GATE RF RF_GATE
-							 OTHER_1 OTHER_2 OTHER_3 OTHER_4 );
+	my ( $set, $old_set ) = ( "", "" );
+
 
 	# Deal with command line arguments
 
@@ -128,8 +131,9 @@ sub read_input {
 
 		for ( my $i = 0; $i < @Function_Names; $i++ ) {
 			if ( $line =~
-				 /^(($Function_Names[ $i ]):([A-H]?\d+)) ([+-]?\d+)( I)?$/ ) {
-				$Channels->add_channel( $1, $2, $3, $4, defined $5 ? 1 : 0 );
+				 /^($Function_Names[ $i ]):([A-H]?\d+) ([+-]?\d+)( I)?$/ ) {
+				$Channels->add_channel( \$Function_Names[ $i ], $2, $3,
+										defined $4 ? 1 : 0 );
 				next CHANNEL_LINE;
 			}
 		}
@@ -137,24 +141,33 @@ sub read_input {
 		fail( "Invalid input at line $..\n" );
 	}
 
-	# Read all pulse settings
+	# Read all pulse settings, skipping settings that are identical to the
+	# previous one
 
 	$has_auto_pulses = 0;
 	my $num = 0;
 	while( 1 ) {
 		last unless defined ( $line = <$if> );
+
 		if ( $line =~ /^===$/ ) {
+			next if $set eq $old_set;
+
+			for ( split /\n/, $set ) {
+				$has_auto_pulses = 1 if /\(\d+\)/;
+				my @bits = split /\s+/;
+				fail( "Invalid input at line $..\n" ) unless $#bits % 3 == 0;
+				$Channels->add_pulse_list( $num, @bits );
+			}
+
+			$old_set = $set;
+			$set ="";
 			$num++;
 			next;
 		}
-
-		$has_auto_pulses = 1 if $line =~ /\(\d+\)/;
-		my @bits = split /\s+/, $line;
-		fail( "Invalid input at line $..\n" ) unless $#bits % 3 == 0;
-		$Channels->add_pulse_list( $num, @bits );
+		$set .= $line;
 	}
 
-	fail( "No pulses patterns defined in input.\n" )unless
+	fail( "No pulses patterns defined in input.\n" ) unless
 			$Channels->num_channels > 0 and $Channels->num_steps >= 0;
 }
 
@@ -618,14 +631,13 @@ sub redraw {
 
 			my $tag = $ch->key . ":" . $cp->num;
 			$c->create( 'rectangle', $x1, $y2, $x2, $y1,
-						'-tags'    => $tag,
+						'-tags'    => [ $ch->key, $tag ],
 						'-outline' => 'white',
 						'-fill'    => 'red' );
 			$c->bind( $tag, '<Enter>' => sub {
 						  $self->dw->Enter( $tag, $self->step,
 											$self->delay ); } );
 			$c->bind( $tag, '<Leave>' => sub { $self->dw->Leave; } );
-			$c->addtag( $ch->key, 'withtag' => $tag );
 
 			$c->create( 'text', 0.5 * ( $x1 + $x2 ), $yt,
 						'-text' => $cp->num,
@@ -1015,7 +1027,9 @@ sub find_by_num {
 }
 
 #---------------------------------------------------------
-# Returns a channel object according to the key of the channel
+# Returns a channel object according to the key of the channel (the key is
+# the combination of function name and channel designator, separated by a
+# colon).
 
 sub find_by_key {
 
@@ -1054,7 +1068,7 @@ sub add_pulse_list {
 
 	fail( "Invalid input at line $..\n" ) unless defined $ch;
 
-	$ch->add_pulse_list( $step, @_ );
+	$ch->add_pulse_list( $step, $self, @_ );
 	$self->{ 'num_steps' } = $step if $step > $self->{ 'num_steps' };
 }
 
@@ -1093,6 +1107,12 @@ sub first_pulse {
     return $first;
 }
 
+#---------------------------------------------------------
+
+sub get_pulse {
+	return shift->{ shift };
+}
+
 1;
 
 
@@ -1104,8 +1124,7 @@ package Channel;
 sub new {
 	my $inv = shift;
 	my $class = ref( $inv ) || $inv;
-	my $self = { 'key'   => shift,
-				 'name'  => shift,
+	my $self = { 'name'  => shift,
 			     'num'   => shift,
 				 'delay' => shift,
 				 'inv'   => shift,
@@ -1117,7 +1136,8 @@ sub new {
 #---------------------------------------------------------
 
 sub key {
-	return shift->{ 'key' };
+	my $self = shift;
+	return ${ $self->{ 'name' } } . ":" . $self->{ 'num' };
 }
 
 #---------------------------------------------------------
@@ -1145,16 +1165,22 @@ sub inv {
 }
 
 #---------------------------------------------------------
-# Adds a new set of pulses for a new step of the experiment
+# Adds a new set of pulses for a new step of the experiment - to reduce
+# memory usage a new pulse list is only created if the previous pulse list
+# isn't identical to the new one, otherwise a reference to the previous one
+# is used instead.
 
 sub add_pulse_list {
 
 	my ( $self, $step ) = ( shift, shift );
-	$self->{ 'plist' }{ $step } = Pulse_List->new( @_ );
+	$self->{ 'plist' }{ $step } = $self->{ 'plist' }{ $step - 1 }->comp( @_ )
+		if $step > 0;
+	$self->{ 'plist' }{ $step } = Pulse_List->new( @_ )
+		unless defined $self->{ 'plist' }{ $step };
 }
 
 #---------------------------------------------------------
-# Returns a the list of pulses for a certain step
+# Returns the list of pulses for a certain step
 
 sub get_pulse_list {
 
@@ -1162,8 +1188,8 @@ sub get_pulse_list {
 
 	fail( "Invalid pulse list index\n" ) if $step < 0;
 
-	return $self->{ 'plist' }{ $step }
-		if exists $self->{ 'plist' }{ $step };
+	return $self->{ 'plist' }{ $step }->{ 'list' }
+		if exists $self->{ 'plist' }{ $step }->{ 'list' };
 	return undef;
 }
 
@@ -1212,11 +1238,43 @@ sub first_pulse {
 package Pulse_List;
 
 sub new {
-	my $inv = shift;
+	my ( $inv, $ch ) = ( shift, shift );
+	my ( $num, $start, $len );
 	my $class = ref( $inv ) || $inv;
-	my $self = [ ];
-	push @$self, Pulse->new( shift, shift, shift ) while ( @_ );
+	my $self = { 'list'  => [ ],
+			     'start' => undef,
+			     'len'   => 0 };
+	return bless $self, $class unless @_;
+
+	$self->{ 'start' } = $_[ 1 ];
+	while ( @_ ) {
+		( $num, $start, $len ) = ( shift, shift, shift );
+		my $tag = $num . "," . $start . "," . $len;
+		$ch->{ $tag } = Pulse->new( $ch, $tag )
+			unless defined $ch->{ $tag };
+		push @{ $self->{ 'list' } }, $ch->{ $tag };
+	}
+	$self->{ 'len' } = $start + $len;
 	return bless $self, $class;
+}
+
+#---------------------------------------------------------
+#
+
+sub comp {
+	my $self = shift;
+	my $i = 0;
+
+	shift;
+	return undef if @{ $self->{ 'list' } } != @_ / 3;
+	return $self if @_ == 0 and @{ $self->{ 'list' } } == 0;
+	while ( @_ ) {
+		my ( $num, $start, $len ) = ( shift, shift, shift );
+		return undef
+			if $num . "," . $start . "," . $len 
+				ne ${ $self->{ 'list' }->[ $i++ ] };
+	}
+	return $self;
 }
 
 #---------------------------------------------------------
@@ -1224,9 +1282,7 @@ sub new {
 # length of the last pulse) or 0 if there's no pulse in the pulse list
 
 sub len {
-	my $self = shift;
-	return 0 if @$self == 0;
-	return $self->[ -1 ]->start + $self->[ -1 ]->len;
+	return shift->{ 'len' };
 }
 
 #---------------------------------------------------------
@@ -1234,44 +1290,55 @@ sub len {
 # there's no pulse in the pulse list
 
 sub start {
-	my $self = shift;
-	return undef if @$self == 0;
-	return $self->[ 0 ]->start;
+	return shift->{ 'start' };
 }
 
 1;
 
 
 #=========================================================================
-# Most basic data object: a single pulse
+# The most basic data object: a single pulse. Please note that not each
+# invocation of the 'new' method will create a new pulse object - if a
+# pulse object with identical properties already exists a reference to
+# this is returned instead to reduce memory usage.
 
 package Pulse;
 
 sub new {
-	my $inv = shift;
+	my $p;
+
+	my ( $inv, $ch, $tag ) = ( shift, shift, shift );
+
+	$p = $ch->get_pulse( $tag );
+	return $p if defined $p;
+
 	my $class = ref( $inv ) || $inv;
-	my $self = { 'num'   => shift,
-				 'start' => shift,
-				 'len'   => shift };
+	my $self = \$tag;
 	return bless $self, $class;
 }
 
 #---------------------------------------------------------
 
 sub num {
-	return shift->{ 'num' };
+	my $self = shift;
+	$$self =~ /^(\(?\d+\)?)/o;
+	return $1;
 }
 
 #---------------------------------------------------------
 
 sub start {
-	return shift->{ 'start' };
+	my $self = shift;
+	$$self =~ /,(\d+),/o;
+	return $1;
 }
 
 #---------------------------------------------------------
 
 sub len {
-	return shift->{ 'len' };
+	my $self = shift;
+	$$self =~ /,(\d+)$/o;
+	return $1;
 }
 
 1;
