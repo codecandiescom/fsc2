@@ -353,7 +353,7 @@ Var *set_field( Var *v )
 	{
 		eprint( FATAL, "%s:%ld: %s: Missing parameter in function "
 				"`set_field'.\n", Fname, Lc, DEVICE_NAME );
-		THROW( EXEPTION );
+		THROW( EXCEPTION );
 	}
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
