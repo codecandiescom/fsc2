@@ -5,6 +5,9 @@
 
 #include "fsc2.h"
 
+static PHS phs[ 2 ];
+static Cur_PHS = -1;
+
 
 /*---------------------------------------------------------------*/
 /* Function clears the complete pulser structure, that has to be */
@@ -46,6 +49,8 @@ void pulser_struct_init( void )
 	pulser_struct.get_pulse_length_change = NULL;
 	pulser_struct.get_pulse_phase_cycle = NULL;
 	pulser_struct.get_pulse_maxlen = NULL;
+
+	pulser_struct.setup_phase = NULL;
 }
 
 
@@ -737,4 +742,111 @@ Var *p_get( char *txt, int type )
 	}
 
 	return v;
+}
+
+
+/*
+  'function' is the phase function the data are to be used for (i.e. 0 means
+  PHASE_1, 1 means PHASE_2)
+  'type' means the type of phase, i.e. X, Y, -X or -Y (0 = X, 1 = Y, 2 = -X
+  and 3 = -Y)
+  'pod' means if the value is for the first or the second pod channel
+  (0: first pod channel, 1: second pod channel, -1: pick the one not set yet)
+  'val' means high or low to be set on the pod channel to set the requested
+  phase(0: low, !0: high)
+*/
+
+void p_phs_setup( int func, int type, int pod, long val )
+{
+	const char *types[ ] = { "X", "Y", "-X", "-Y" };
+
+
+	assert ( Cur_PHS != - 1 ? ( Cur_PHS == func ) : 1 );
+	assert( func == 0 || func == 1 );      /* phase funcion correct ? */
+	assert( type >= 0 && type <= 3 );      /* type (X, Y, -X, -Y) correct */
+
+	Cur_PHS = func;
+
+	if ( pod == -1 )
+	{
+		if ( phs[ func ].is_var[ type ][ 0 ] )
+			pod = 1;
+		else
+			pod = 0;
+
+		if ( phs[ func ].is_var[ type ][ pod ] )
+		{
+			eprint( FATAL, "%s:%ld: Both output states for phase %s of "
+					"function already have been defined.\n", Fname, Lc,
+					types[ type ], func == 0 ?
+					Function_Names[ PULSER_CHANNEL_PHASE_1 ] :
+					Function_Names[ PULSER_CHANNEL_PHASE_1 ] );
+			THROW( EXCEPTION );
+		}
+	}
+
+	if ( phs[ func ].is_var[ type ][ pod ] )
+	{
+		eprint( FATAL, "%s:%ld: Output state of %d. pod for phase %s of "
+				"function already has been defined.\n", Fname, Lc, pod + 1,
+				types[ type ], func == 0 ?
+				Function_Names[ PULSER_CHANNEL_PHASE_1 ] :
+				Function_Names[ PULSER_CHANNEL_PHASE_1 ] );
+		THROW( EXCEPTION );
+	}
+
+	phs[ func ].var[ type ][ pod ] = val != 0 ? 1 : 0;
+	phs[ func ].is_var[ type ][ pod ] = SET;
+}
+
+
+/*
+  Do all possible checks and tell the pulser about it
+*/
+
+void p_phs_end( int func )
+{
+	int i, j;
+	bool cons[ 4 ] = { UNSET, UNSET, UNSET, UNSET };
+
+
+	assert( Cur_PHS != -1 && Cur_PHS == func );
+
+	/* Let's check if the pulser supports the function needed before we spend
+	   much time for the correctness of the data */
+
+	is_pulser_func( pulser_struct.setup_phase,
+					"setting up phase channels" );
+
+	for ( i = 0; i < 4; i++ )
+	{
+		for ( j = 0; j < 2; j++ )
+			if ( ! phs[ func ].is_var[ i ][ j ] )
+			{
+				eprint( FATAL, "%s:%ld: Incomplete data for phase setup of "
+						"function `%s'.\n", Fname, Lc, func == 0 ?
+						Function_Names[ PULSER_CHANNEL_PHASE_1 ] :
+						Function_Names[ PULSER_CHANNEL_PHASE_1 ] );
+				THROW( EXCEPTION );
+			}
+
+		cons[ phs[ func ].var[ i ][ 0 ] + 2 * phs[ func ].var[ i ][ 1 ] ]
+			= SET;
+	}
+
+	for ( i = 0; i < 4; i++ )
+	{
+		if ( ! cons[ i ] )
+		{
+			eprint( FATAL, "%s:%ld: Inconsistent data for phase setup of "
+					"function `%s'.\n", Fname, Lc, func == 0 ?
+					Function_Names[ PULSER_CHANNEL_PHASE_1 ] :
+					Function_Names[ PULSER_CHANNEL_PHASE_1 ] );
+			THROW( EXCEPTION );
+		}
+	}
+
+	( *pulser_struct.setup_phase )( function, phs );
+
+	Cur_PHS = -1;
 }

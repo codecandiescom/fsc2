@@ -50,6 +50,8 @@ typedef struct {
 	bool ( *get_pulse_phase_cycle )( long pulse_number, int *cycle );
 	bool ( *get_pulse_maxlen )( long pulse_number, double *time );
 
+	bool ( *pulser_struct.setup_phase )( int function, int phs[ 4 ][ 2 ] );
+
 } Pulser_Struct;
 
 
@@ -64,6 +66,12 @@ enum {
 	P_MAXLEN  = ( 1 << 6 ),
 	P_REPL    = ( 1 << 7 )
 };
+
+
+typedef struct {
+	int var[ 4 ][ 2 ];
+	bool is_var[ 4 ][ 2 ];
+} PHS;
 
 
 void pulser_struct_init( void );
@@ -89,6 +97,9 @@ double is_mult_ns( double val, const char * text );
 long p_new( long pnum );
 void p_set( long pnum, int type, Var *v );
 Var *p_get( char *txt, int type );
+
+void p_phs_setup( int func, int type, int pod, long val );
+void p_phs_end( int func );
 
 
 #endif  /* ! PULSER_HEADER */
