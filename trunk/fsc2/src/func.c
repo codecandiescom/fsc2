@@ -442,7 +442,7 @@ Var *func_get( char *name, int *access )
 	   on the variable stack with a pointer to the actual function and the
 	   number of arguments. Also copy the functions name and access flag. */
 
-	for ( i = 0; i < num_func; ++i )
+	for ( i = 0; i < num_func; i++ )
 	{
 		if ( fncts[ i ].name != NULL && ! strcmp( fncts[ i ].name, name ) )
 		{
@@ -467,15 +467,36 @@ Var *func_get( char *name, int *access )
 
 Var *func_call( Var *f )
 {
-	Var *ap, *apn, *ret;
+	Var *ap;
+	Var *apn;
+	Var *ret;
 	int ac;
+	int i;
 	
 
-	/* <PARANOID> check that's really a function variable </PARANOID> */
+	/* Check that it's really a function variable - you can never be sure
+	   someone isn't trying to be using some undocumented features but didn't
+	   got ot right. */
 
-	assert( f->type == FUNC );
+	if ( f->type != FUNC )
+	{
+		eprint( FATAL, "%s:%ld: Variable passed to `func_call()' doesn't "
+				"have type `FUNC'.\n", Fname, Lc );
+		THROW( EXCEPTION );
+	}
 
-	/* if the number of function arguments isn't negative (indicating a
+	for ( i = 0; i < num_func; i++ )
+		if ( fncts[ i ].fnct == f->val.fnct )
+			break;
+	
+	if ( i == num_func )
+	{
+		eprint( FATAL, "%s:%ld: Variable passed to `func_call()' is not "
+				"a valid function.\n", Fname, Lc );
+		THROW( EXCEPTION );
+	}
+
+	/* If the number of function arguments isn't negative (indicating a
 	   variable number of arguments) count number of variables on the stack */
 
 	if ( f->dim >= 0 )
