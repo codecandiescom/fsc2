@@ -256,7 +256,7 @@ void death_mail( int signo )
 	int i;
 	char buffer[ DM_BUF_SIZE ];
 	size_t count;
-	char *vfn;
+	char vfn[ PATH_MAX + 20 ];
 	FILE *vfp;
 
 
@@ -311,7 +311,6 @@ void death_mail( int signo )
 		fputc( ( int ) '\n', mail );
 	}
 
-	vfn = get_string( strlen( libdir ) + strlen( "/version " ) );
 	strcpy( vfn, libdir );
 	if ( libdir[ strlen( libdir ) - 1 ] != '/' )
 		strcat( vfn, "/" );
@@ -320,12 +319,10 @@ void death_mail( int signo )
 	if ( ( vfp = fopen( vfn, "r" ) ) != NULL )
 	{
 		fputs( "\n\nVersion:\n\n", mail );
-		while ( ( count = fread( buffer, DM_BUF_SIZE, 1, vfp ) ) != 0 )
-			fwrite( buffer, count, 1, mail );
+		while ( ( count = fread( buffer, 1, DM_BUF_SIZE, vfp ) ) != 0 )
+			fwrite( buffer, 1, count, mail );
 		fclose( vfp );
 	}
-
-	T_free( vfn );
 
 	pclose( mail );
 #endif
