@@ -52,25 +52,25 @@
 
 
 typedef	struct {
-	double v;                /* value of the point (in interval [0,1] */
-	bool exist;              /* set if value has been set at all */
-	long xp_ref;             /* index of the associated XPoint */
+	double v;               /* value of the point (in interval [0,1] */
+	bool exist;             /* set if value has been set at all */
+	long xp_ref;            /* index of the associated XPoint */
 } Scaled_Point;
 
 
 typedef struct {
 	Scaled_Point *points;
 	XPoint *xpoints;
-	long count;            /* points in curve */
+	long count;             /* points in curve */
 
 	GC gc;
 
 	bool active;
 
-	double s2d[ 2 ];       /* scaled to display data scale factors */
-	double shift[ 2 ];     /* offsets on scaled data */
+	double s2d[ 2 ];        /* scaled to display data scale factors */
+	double shift[ 2 ];      /* offsets on scaled data */
 
-	bool up,               /* flag, set if data don't fit into canvas */
+	bool up,                /* flag, set if data don't fit into canvas */
 		 down,
 		 left,
 		 right;
@@ -97,7 +97,7 @@ typedef struct {
 	Scaled_Point *points;
 	XPoint *xpoints,
 		   *xpoints_s;
-	long count;            /* points in curve */
+	long count;             /* points in curve */
 
 	unsigned short w, h;
 
@@ -105,8 +105,8 @@ typedef struct {
 
 	bool active;
 
-	double s2d[ 3 ];       /* scaled to display data scale factors */
-	double shift[ 3 ];     /* offsets on scaled data */
+	double s2d[ 3 ];        /* scaled to display data scale factors */
+	double shift[ 3 ];      /* offsets on scaled data */
 
 	double rwc_start[ 3 ];  /* real world coordinate start values */
 	double rwc_delta[ 3 ];  /* real world coordinate increment values */
@@ -116,7 +116,7 @@ typedef struct {
 	double rw_min;          /* minimum of real world y- or z-coordinates */
 	double rw_max;          /* maximum of real world y- or z-coordinates */
 
-	bool up,               /* flag, set if data don't fit into canvas */
+	bool up,                /* flag, set if data don't fit into canvas */
 		 down,
 		 left,
 		 right;
@@ -195,7 +195,7 @@ typedef struct {
 
 	FL_COLOR colors[ MAX_CURVES ];
 
-	int cur_1,              /* the different cursors */
+	int cur_1,                    /* the different cursors */
 	    cur_2,
 	    cur_3,
 	    cur_4,
@@ -203,15 +203,15 @@ typedef struct {
 		cur_6,
 		cur_7;
 
-	XFontStruct *font;      /* font used for drawing texts */
+	XFontStruct *font;            /* font used for drawing texts */
 	int font_asc, font_desc;
 
-	int button_state,       /* usuable button states */
-		raw_button_state;   /* the real button state */
+	int button_state,             /* usuable button states */
+		raw_button_state;         /* the real button state */
 
-	int start[ 2 ];         /* start position of mouse movemnt */
+	int start[ 2 ];               /* start position of mouse movemnt */
 
-	Pixmap label_pm[ 6 ];   /* used for drawing of rotated text */
+	Pixmap label_pm[ 6 ];         /* used for drawing of rotated text */
 	unsigned int label_w[ 6 ],
 		         label_h[ 6 ];
 
