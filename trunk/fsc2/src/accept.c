@@ -555,7 +555,6 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 
 		cv->rwc_delta[ Z ] = new_rwc_delta_z;
 
-
 		/* If the data have not been scaled to [0,1] yet and the maximum
 		   value isn't identical to the minimum do the scaling now */
 
@@ -624,7 +623,7 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 	for ( i = 0; i < G.nc; i++ )
 	{
 		cv = G.curve_2d[ i ];
-		if ( cv->scale_changed && cv->is_fs )
+		if ( cv->scale_changed )
 		{
 			recalc_XPoints_of_curve_2d( cv );
 			cv->scale_changed = UNSET;
@@ -655,8 +654,7 @@ static void incr_x( long x_index, long len )
 
 		for ( sp = cv->points, j = 0; j < G.ny; j++ )
 		{
-			memcpy( ( void * ) sp, ( void * ) ( old_points + j * G.nx ),
-					G.nx * sizeof( Scaled_Point ) );
+			memcpy( sp, old_points + j * G.nx, G.nx * sizeof( Scaled_Point ) );
 			for ( sp += G.nx, k = G.nx; k < new_Gnx; sp++, k++ )
 				sp->exist = UNSET;
 		}
@@ -669,11 +667,9 @@ static void incr_x( long x_index, long len )
 								   new_Gnx * G.ny * sizeof( XPoint ) );
 
 		if ( cv->is_fs )
-		{
 			cv->s2d[ X ] = ( double ) ( G.canvas.w - 1 ) /
 			                                        ( double ) ( new_Gnx - 1 );
-			cv->scale_changed = SET;
-		}
+		cv->scale_changed = SET;
 	}
 }
 
@@ -705,10 +701,8 @@ static void incr_y( long y_index )
 				sp->exist = UNSET;
 
 		if ( cv->is_fs )
-		{
 			cv->s2d[ Y ] = ( double ) ( G.canvas.h - 1 ) / ( double ) y_index;
-			cv->scale_changed = SET;
-		}
+		cv->scale_changed = SET;
 	}
 }
 
@@ -736,8 +730,7 @@ static void incr_x_and_y( long x_index, long len, long y_index )
 
 		for ( sp = cv->points, j = 0; j < G.ny; j++ )
 		{
-			memcpy( ( void * ) sp, ( void * ) ( old_points + j * G.nx ),
-					G.nx * sizeof( Scaled_Point ) );
+			memcpy( sp, old_points + j * G.nx, G.nx * sizeof( Scaled_Point ) );
 			for ( sp += G.nx, k = G.nx; k < new_Gnx; sp++, k++ )
 				sp->exist = UNSET;
 		}
@@ -761,7 +754,8 @@ static void incr_x_and_y( long x_index, long len, long y_index )
 			cv->s2d[ X ] = ( double ) ( G.canvas.w - 1 ) /
 			                                        ( double ) ( new_Gnx - 1 );
 			cv->s2d[ Y ] = ( double ) ( G.canvas.h - 1 ) / ( double ) y_index;
-			cv->scale_changed = SET;
 		}
+
+		cv->scale_changed = SET;
 	}
 }
