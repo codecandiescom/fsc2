@@ -1,13 +1,12 @@
 /*
   $Id$
 
-  This file is a kind of interface between the parser and the real pulser to
-  make it easier to use different types of pulsers. Instead of the parser
-  calling the pulser functions directly (which might even not exist) one of
-  the following functions are called that can not only find out if the
-  corresponding pulser function exists, but can also do some preliminary error
-  checking.
-*/
+  This file is a kind of interface between the parser and the real pulser
+  functions to make it easier to use different types of pulsers. Instead of
+  the parser calling the pulser functions directly (which might even not
+  exist) one of the following functions are called that can not only find out
+  if the corresponding pulser function exists, but can also do some
+  preliminary error checking.  */
 
 
 #include "fsc2.h"
@@ -100,14 +99,14 @@ void is_pulser_driver( void )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/* This function is called to determine if a certain pulser function     */
-/* needed by the experiment is supplied by the pulser driver. The first  */
-/* argument is the functions address, the second a snippet of text to be */
-/* inserted in the error message (for convenience it is also tested if   */
-/* there's a driver at all so tha not each function has to test for this */
-/* even when the name of the pulser isn't explicitely needed).           */
-/*-----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*/
+/* This function is called to determine if a certain pulser function    */
+/* needed by the experiment is supplied by the pulser driver. The first */
+/* argument is the functions address, the second a piece of text to be  */
+/* inserted in the error message (for convenience it is also tested if  */
+/* there's a driver at all so that not each function has to test for    */
+/* this even when the name of the pulser isn't explicitely needed).     */
+/*----------------------------------------------------------------------*/
 
 void is_pulser_func( void *func, const char *text )
 {
@@ -125,8 +124,9 @@ void is_pulser_func( void *func, const char *text )
 /*---------------------------------------------------------------------------*/
 /* Function tests if the time (in seconds) it gets passed is a reasonable    */
 /* integer multiple of 1 ns and tries to reduce rounding errors. If the time */
-/* more than 10 ps off from a ns an error message is output, using the text  */
-/* snippet passed to the function as the second argument.                    */
+/* more than 10 ps off from a multiple of a nanosecond an error message is   */
+/* output, using the piece of text passed to the function as the second      */
+/* argument.                                                                 */
 /*---------------------------------------------------------------------------*/
 
 double is_mult_ns( double val, const char * text )
@@ -728,18 +728,30 @@ Var *p_get_by_num( long pnum, int type )
 /*----------------------------------------------------------------------------
   'function' is the phase function the data are to be used for (i.e. 0 means
   PHASE_1, 1 means PHASE_2, 2 means both)
-  'type' means the type of phase, see global.h (PHASE_PLUS/MINUX_X/Y
+  'type' means the type of phase, see global.h (PHASE_PLUS/MINUX_X/Y)
   'pod' means if the value is for the first or the second pod channel
   (0: first pod channel, 1: second pod channel, -1: pick the one not set yet)
   'val' means high or low to be set on the pod channel to set the requested
   phase(0: low, !0: high)
 -----------------------------------------------------------------------------*/
 
-void p_phs_setup( int func, int type, int pod, long val )
+void p_phs_setup( int func, int type, int pod, long val, long protocol )
 {
+	/* A few sanity checks before we call the pulsers handler function */
+
 	assert ( Cur_PHS != - 1 ? ( Cur_PHS == func ) : 1 );
-	assert( func >= 0 && func <= 2 );      /* phase funcion correct ? */
-	assert( type >= PHASE_PLUS_X && type <= PHASE_MINUS_Y );
+	assert( type >= PHASE_TYPES_MIN && type <= PHASE_TYPES_MAX );
+	assert( func >= 0 && func <= 2 );        /* phase function correct ? */
+
+	/* Not all phase types are valid here */
+
+	if ( type != PHASE_PLUS_X && type != PHASE_MINUS_X &&
+		 type != PHASE_PLUS_Y && type != PHASE_MINUS_Y )
+	{
+		eprint( FATAL, "%s:%ld: Phase of type %s can't be used with this "
+				"driver.", Fname, Lc, Phase_Types[ type ] );
+		THROW( EXCEPTION );
+	}
 
 	Cur_PHS = func;
 
@@ -799,7 +811,7 @@ void p_phs_end( int func )
 	assert( Cur_PHS != -1 && Cur_PHS == func );
 
 	/* Let's check if the pulser supports the function needed before we spend
-	   much time for the correctness of the data */
+	   more time for checking the correctness of the data */
 
 	is_pulser_func( pulser_struct.setup_phase,
 					"setting up phase channels" );
@@ -880,9 +892,7 @@ void p_set_psd( int func, Var *v )
 
 
 /*
-  Function for setting the phase switch delay.
-  'func' is the phase function the data are to be used for (i.e. 0 means
-  PHASE_1, 1 means PHASE_2, 2 means both)
+  Function for setting the grace period following a pulse.
 */
 
 void p_set_gp( Var *v )
