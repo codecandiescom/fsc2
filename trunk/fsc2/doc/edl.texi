@@ -1045,9 +1045,9 @@ an experiment.
 Under certain conditions one doesn't want to execute all remaining
 statements of a loop but to go back to the test of the loop condition
 immediately. Whenever the keyword @code{NEXT} is encountered in a loop
-the remaining statements are skipped and the program jumps back to the
-test of the loop condition (with the loop counter of @code{WHILE},
-@code{REPEAT} or @code{FOR} loops being set to the next value).
+all the remaining statements are skipped and the program jumps back to
+the test of the loop condition (where the loop counter of @code{WHILE},
+@code{REPEAT} or @code{FOR} loops is set to the next value).
 
 
 @anchor{BREAK statement}
