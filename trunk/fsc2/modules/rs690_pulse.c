@@ -35,13 +35,6 @@ bool rs690_new_pulse( long pnum )
 	PULSE *lp = NULL;
 
 
-	if ( rs690.num_pulses++ > MAX_PULSES )
-	{
-		print( FATAL, "Too many pulses defined, maximum is %d.\n",
-			   MAX_PULSES );
-		THROW( EXCEPTION );
-	}
-
 	while ( cp != NULL )
 	{
 		if ( cp->num == pnum )

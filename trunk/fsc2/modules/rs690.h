@@ -83,9 +83,7 @@ Var *pulser_lock_keyboard( Var *v );
 
 #define MAX_LOOP_REPETITIONS   4095
 
-#define MAX_PULSES             500
-
-#define MAX_TICKS_PER_ENTRY    491521
+#define MAX_TICKS_PER_ENTRY    491520
 
 #define START ( ( bool ) 1 )
 #define STOP  ( ( bool ) 0 )
@@ -338,6 +336,7 @@ double rs690_fixed_timebases[ NUM_FIXED_TIMEBASES ] =
 													{ 4.0e-9, 8.0e-9, 1.6e-8 };
 unsigned short rs690_default_fields[ 4 * NUM_HSM_CARDS ];
 
+
 #else
 
 extern bool rs690_is_needed;
@@ -426,8 +425,8 @@ void rs690_cleanup_fs( void );
 
 bool rs690_init( const char *name );
 bool rs690_run( bool state );
-bool rs690_set_channels( void );
 bool rs690_lock_state( bool lock );
+bool rs690_set_channels( void );
 
 
 /*

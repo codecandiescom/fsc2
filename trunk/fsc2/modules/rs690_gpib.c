@@ -26,15 +26,8 @@
 
 
 static bool rs690_field_channel_setup( void );
-static bool rs690_set_channels_4ns( void );
-static bool rs690_init_channels_4ns( void );
-static void rs690_calc_tables_4ns( void );
-static bool rs690_set_channels_8ns( void );
-static bool rs690_init_channels_8ns( void );
-static void rs690_calc_tables_8ns( void );
-static bool rs690_set_channels_16ns( void );
-static bool rs690_init_channels_16ns( void );
-static void rs690_calc_tables_16ns( void );
+static bool rs690_init_channels( void );
+static void rs690_calc_tables( void );
 static void rs690_gpib_failure( void );
 static void rs690_check( void );
 
@@ -46,6 +39,11 @@ static void rs690_check( void );
 #define gpib_init_device( a, b ) 1
 
 
+/* Multiplicator used to convert lengths of FS to output times */
+
+static long mult_array[ 3 ] = { 1, 4, 16 };
+static long mult;
+
 
 /*------------------------------*/
 /* Initialization of the device */
@@ -56,9 +54,6 @@ bool rs690_init( const char *name )
 	char cmd[ 100 ];
 	char reply[ 100 ];
 	long length = 100;
-	bool ( * update_function[ ] ) ( void ) = { rs690_set_channels_4ns,
-											   rs690_set_channels_8ns,
-											   rs690_set_channels_16ns };
 
 
 	if ( gpib_init_device( name, &rs690.device ) == FAILURE )
@@ -115,16 +110,10 @@ bool rs690_init( const char *name )
 	if ( gpib_write( rs690.device, "LEG,0!", 6 ) == FAILURE )
 		rs690_gpib_failure( );
 
-	/* Determine which function to call for a pulser update (depends on the
-	   time base mode) */
-
-	fsc2_assert( rs690.timebase_type >= 0 && rs690.timebase_type <= 2 );
-
-	rs690_set_channels = update_function[ rs690.timebase_type ];
-
 	/* Make the association between the fields bits and the output connector
 	   channels and initialize the sequence and tables. */
 
+	mult = mult_array[ rs690.timebase_type ];
 	rs690_field_channel_setup( );
 	rs690_do_update( );
 
@@ -229,7 +218,7 @@ static bool rs690_field_channel_setup( void )
 
 		for ( j = ( 4 << rs690.timebase_type ) - 1; j >= 0; j-- )
 		{
-			if ( field_list[ i ][ j ] == UNUSED_BIT )
+			if ( field_list[ i ][ j ] != UNUSED_BIT )
 				sprintf( buf + strlen( buf ), ",%c%d",
 						 ( char ) ( 'A' + field_list[ i ][ j ] / 16 ),
 						 field_list[ i ][ j ] % 16 );
@@ -261,116 +250,13 @@ static bool rs690_field_channel_setup( void )
 
 /*---------------------------------------------------------------*/
 /* Sends all commands to the device to produce the current pulse */
-/* sequence (when using a 4 ns time base) - unless this is the   */
-/* very first call the amount of data to be send is reduced by   */
-/* just sending data for table entries and loop counters that    */
-/* need to be changed. This also includes sending only data for  */
-/* fields that are really used.                                  */
+/* sequence - unless this is the very first call the amount of   */
+/* data to be send is reduced by just sending data for table     */
+/* entries and loop counters that need to be changed. This also  */
+/* includes sending only data for fields that are really used.   */
 /*---------------------------------------------------------------*/
 
-static bool rs690_set_channels_4ns( void )
-{
-	if ( rs690.old_fs == NULL )
-		return rs690_init_channels_4ns( );
-
-	rs690.old_table = rs690.new_table;
-	rs690_calc_tables_4ns( );
-
-	/* more to follow */
-
-	return OK;
-}
-
-
-/*----------------------------------------------------------------*/
-/* When no tables habe been set up yet we need to set all entries */
-/* of the table (latter we only have to send information about    */
-/* entries that need to be changed).                              */
-/*----------------------------------------------------------------*/
-
-static bool rs690_init_channels_4ns( void )
-{
-	rs690_calc_tables_4ns( );
-
-	/* more to follow */
-
-	return OK;
-}
-
-
-/*--------------------------------------------------------------*/
-/* Function calculates or a 4 ns time base function how many    */
-/* tables and loop repetition are needed to produce the current */
-/* pulse sequence.                                              */
-/*--------------------------------------------------------------*/
-
-static void rs690_calc_tables_4ns( void )
-{
-	/* more to follow */
-}
-
-
-/*----------------------------------------------------------------*/
-/* Sends all commands to the device to produce the current pulse */
-/* sequence  (when using an 8 ns time base) - unless this is the */
-/* very first call the amount of data to be send is reduced by   */
-/* just sending data for table entries and loop counters that    */
-/* need to be changed. This also includes sending only data for  */
-/* fields that are really used.                                  */
-/*----------------------------------------------------------------*/
-
-static bool rs690_set_channels_8ns( void )
-{
-	if ( rs690.old_fs == NULL )
-		return rs690_init_channels_8ns( );
-
-	rs690.old_table = rs690.new_table;
-	rs690_calc_tables_8ns( );
-
-	/* more to follow */
-
-	return OK;
-}
-
-
-/*----------------------------------------------------------------*/
-/* When no tables habe been set up yet we need to set all entries */
-/* of the table (latter we only have to send information about    */
-/* entries that need to be changed).                              */
-/*----------------------------------------------------------------*/
-
-static bool rs690_init_channels_8ns( void )
-{
-	rs690_calc_tables_8ns( );
-
-	/* more to follow */
-
-	return OK;
-}
-
-
-/*--------------------------------------------------------------*/
-/* Function calculates or a 8 ns time base function how many    */
-/* tables and loop repetition are needed to produce the current */
-/* pulse sequence.                                              */
-/*--------------------------------------------------------------*/
-
-static void rs690_calc_tables_8ns( void )
-{
-	/* more to follow */
-}
-
-
-/*---------------------------------------------------------------*/
-/* Sends all commands to the device to produce the current pulse */
-/* sequence  (when using a 16 ns time base) - unless this is the */
-/* very first call the amount of data to be send is reduced by   */
-/* just sending data for table entries and loop counters that    */
-/* need to be changed. This also includes sending only data for  */
-/* fields that are really used.                                  */
-/*---------------------------------------------------------------*/
-
-static bool rs690_set_channels_16ns( void )
+bool rs690_set_channels( void )
 {
 	char buf[ 100 ];
 	int i, k;
@@ -378,10 +264,10 @@ static bool rs690_set_channels_16ns( void )
 
 
 	if ( rs690.old_fs == NULL )
-		return rs690_init_channels_16ns( );
+		return rs690_init_channels( );
 
 	rs690.old_table = rs690.new_table;
-	rs690_calc_tables_16ns( );
+	rs690_calc_tables( );
 
 	if ( rs690.new_table.len != rs690.old_table.len )
 	{
@@ -403,20 +289,22 @@ static bool rs690_set_channels_16ns( void )
 	for ( i = 0; i <= rs690.last_used_field; i++ )
 	{
 		for ( k = 1, n = rs690.new_fs, o = rs690.old_fs;
-			  n != NULL && n->len % MAX_TICKS_PER_ENTRY != 0 &&
-			  o != NULL && o->len % MAX_TICKS_PER_ENTRY != 0 ;
-			  n = n->next, o = o->next, k++ )
+			  n != NULL; n = n->next, k++ )
 		{
-			if ( n->len != o->len || n->fields[ i ] != o->fields[ i ] )
+			if ( o == NULL ||
+				 n->len != o->len || n->fields[ i ] != o->fields[ i ] )
 			{
 				sprintf( buf, "LDT,T0,FL%d,%d,1,%X,%ldns!",
 						 i, k, n->fields[ i ],
-						 ( n->len % MAX_TICKS_PER_ENTRY ) * 16L );	
+						 ( n->len % MAX_TICKS_PER_ENTRY ) * mult );	
 
 				if ( gpib_write( rs690.device, buf, strlen( buf ) )
 					 == FAILURE )
 					rs690_gpib_failure( );
 			}
+
+			if ( o != NULL )
+				o = o->next;
 		}
 	}
 
@@ -430,14 +318,14 @@ static bool rs690_set_channels_16ns( void )
 /* entries that need to be changed).                              */
 /*----------------------------------------------------------------*/
 
-static bool rs690_init_channels_16ns( void )
+static bool rs690_init_channels( void )
 {
 	int i, j;
 	FS *n;
 	char buf[ 17000 ];
 
 
-	rs690_calc_tables_16ns( );
+	rs690_calc_tables( );
 
 	sprintf( buf, "LTD,T0,%d,T1,1,T2,1!", rs690.new_table.len );
 	if ( gpib_write( rs690.device, buf, strlen( buf ) ) == FAILURE )
@@ -456,7 +344,7 @@ static bool rs690_init_channels_16ns( void )
 		for ( n = rs690.new_fs; n != NULL && n->len % MAX_TICKS_PER_ENTRY != 0;
 			  n = n->next )
 			sprintf( buf + strlen( buf ), ",%X,%ldns", n->fields[ i ],
-					 ( n->len % MAX_TICKS_PER_ENTRY ) * 16L );
+					 ( n->len % MAX_TICKS_PER_ENTRY ) * mult );
 
 		strcat( buf, "!" );
 
@@ -466,8 +354,7 @@ static bool rs690_init_channels_16ns( void )
 		for ( j = 1; j <= 2; j++ )
 		{
 			sprintf( buf, "LDT,T%d,FL%d,1,1,%X,%ldns!", j, i,
-					 rs690_default_fields[ i ],
-					 MAX_TICKS_PER_ENTRY * 16L );
+					 rs690_default_fields[ i ], MAX_TICKS_PER_ENTRY * mult );
 			if ( gpib_write( rs690.device, buf, strlen( buf ) ) == FAILURE )
 				rs690_gpib_failure( );
 		}
@@ -477,13 +364,12 @@ static bool rs690_init_channels_16ns( void )
 }
 
 
-/*--------------------------------------------------------------*/
-/* Function calculates or a 16 ns time base function how many   */
-/* tables and loop repetition are needed to produce the current */
-/* pulse sequence.                                              */
-/*--------------------------------------------------------------*/
+/*-------------------------------------------------------------*/
+/* Function calculates how many tables and loop repetition are */
+/* needed to produce the current pulse sequence.               */
+/*-------------------------------------------------------------*/
 
-static void rs690_calc_tables_16ns( void )
+static void rs690_calc_tables( void )
 {
 	Ticks count = 0;
 
