@@ -54,8 +54,6 @@ void graphics_init( long dim, long nx, long ny, char *x_label, char *y_label )
 
 void start_graphics( void )
 {
-	fl_deactivate_object( run_form->save );
-	fl_set_object_lcol( run_form->save, FL_INACTIVE_COL );
 	fl_show_form( run_form->run, FL_PLACE_MOUSE | FL_FREE_SIZE, FL_FULLBORDER,
 				  "fsc: Run" );
 
@@ -66,11 +64,8 @@ void start_graphics( void )
 	setup_canvas( &G.y_axis, run_form->y_axis );
 	setup_canvas( &G.canvas, run_form->canvas );
 
-//	fl_set_cursor( G.canvas.id, XC_left_ptr );
-
 	redraw_canvas( &G.x_axis );
 	redraw_canvas( &G.y_axis );
-	redraw_canvas( &G.canvas );
 }
 
 
@@ -80,22 +75,23 @@ void start_graphics( void )
 
 void stop_graphics( void )
 {
-   fl_remove_canvas_handler( run_form->x_axis, Expose, canvas_handler);
-   fl_remove_canvas_handler( run_form->x_axis, ConfigureNotify,
-							 canvas_handler);
-   fl_remove_canvas_handler( run_form->y_axis, Expose, canvas_handler);
-   fl_remove_canvas_handler( run_form->y_axis, ConfigureNotify,
-							 canvas_handler);
-   fl_remove_canvas_handler( run_form->canvas, Expose, canvas_handler);
-   fl_remove_canvas_handler( run_form->canvas, ConfigureNotify,
-							 canvas_handler);
+	fl_remove_canvas_handler( run_form->x_axis, Expose, canvas_handler);
+	fl_remove_canvas_handler( run_form->x_axis, ConfigureNotify,
+							  canvas_handler);
+	fl_remove_canvas_handler( run_form->y_axis, Expose, canvas_handler);
+	fl_remove_canvas_handler( run_form->y_axis, ConfigureNotify,
+							  canvas_handler);
+	fl_remove_canvas_handler( run_form->canvas, Expose, canvas_handler);
+	fl_remove_canvas_handler( run_form->canvas, ConfigureNotify,
+							  canvas_handler);
 
 	delete_pixmap( &G.x_axis );
 	delete_pixmap( &G.y_axis );
 	delete_pixmap( &G.canvas );
 
-   if ( fl_form_is_visible( run_form->run ) )
-	   fl_hide_form( run_form->run );
+	fl_set_object_label( run_form->stop, "Stop" );
+	if ( fl_form_is_visible( run_form->run ) )
+		fl_hide_form( run_form->run );
 }
 
 

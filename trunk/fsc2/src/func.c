@@ -13,7 +13,10 @@
 static void f_wait_alarm_handler( int sig_type );
 static void formated_save( Var *v, int fid );
 static void unformated_save( Var *v, int fid );
+void print_array( Var *v, long cur_dim, long *start, int fid );
 
+
+static bool No_File_Number;
 
 
 /* When in the input an identifier is found it is always tried first if the
@@ -130,6 +133,8 @@ Func Def_Fncts[ ] =              /* List of built-in functions */
 
 bool functions_init( void )
 {
+	No_File_Number = UNSET;
+
 	/* count number of built-in functions */
 
 	for ( Num_Def_Func = 0; Def_Fncts[ Num_Def_Func ].fnct != NULL;
@@ -181,6 +186,9 @@ void functions_exit( void )
 			T_free( ( char * ) Fncts[ i ].name );
 	T_free( Fncts );
 	Fncts = NULL;
+
+	No_File_Number = UNSET;
+	close_all_files( );
 }
 
 
@@ -1337,6 +1345,21 @@ Var *f_getf( Var *var )
 	struct stat stat_buf;
 
 
+	/* If there was a call of `f_save()' without a previous call to `f_getf()'
+	   `f_save()' did call already call `f_getf()' by itself and now expects
+	   no file identifiers at all anymore - in this case `No_File_Number' is
+	   set.So, if we get a call to `f_getf()' while `No_File_Number' is set we
+	   must tell the user that he can't have it both ways, i.e. he either has
+	   to call `f_getf()' before any call to `f_save()' or never. */
+
+	if ( No_File_Number )
+	{
+		eprint( FATAL, "%s:%ld: Call of `get_filename()' after call of "
+				"`save()' without previous call of `get_filename()'.\n",
+				Fname, Lc );
+		THROW( EXCEPTION );
+	}
+
 	/* While test is running just return a dummy value */
 
 	if ( TEST_RUN )
@@ -1477,7 +1500,6 @@ Var *f_save( Var *v )
 	Var *get_file_ptr;
 	Var *file;
 	int file_num;
-	static bool no_file_number = UNSET;
 	int access;
 
 
@@ -1487,10 +1509,14 @@ Var *f_save( Var *v )
 
 	if ( File_List_Len == 0 )
 	{
-		no_file_number = SET;
+		No_File_Number = UNSET;
+
 		get_file_ptr = func_get( "get_file", &access );
 		assert( get_file_ptr != NULL );           /* again being paranoid... */
 		file = func_call( get_file_ptr );         /* get the file name */
+
+		No_File_Number = SET;
+
 		if ( file->val.lval < 0 )
 		{
 			vars_pop( file );
@@ -1499,7 +1525,7 @@ Var *f_save( Var *v )
 		vars_pop( file );
 		file_num = 0;
 	}
-	else if ( ! no_file_number )                 /* file numbers are given */
+	else if ( ! No_File_Number )                 /* file numbers are given */
 	{
 		if ( v != NULL )
 		{
@@ -1558,6 +1584,7 @@ void formated_save( Var *v, int fid )
 void unformated_save( Var *v, int fid )
 {
 	long i;
+	long start;
 
 	do
 	{
@@ -1584,10 +1611,40 @@ void unformated_save( Var *v, int fid )
 				for ( i = 0; i < v->len; i++ )
 					fprintf( File_List[ fid ], "%#g\n", v->val.dpnt[ i ] );
 				break;
+
+			case ARR_REF :
+				start = 0;
+				print_array( v->from, 0, &start, fid );
+				break;
+
+			default :
+				assert( 1 == 0 );
 		}
 
 		v = v->next;
 	} while ( v );
 
 	fflush( File_List[ fid ] );
+}
+
+
+void print_array( Var *v, long cur_dim, long *start, int fid )
+{
+	long i;
+
+	if ( cur_dim < v->dim - 1 )
+		for ( i = 0; i < v->sizes[ cur_dim ]; i++ )
+			print_array( v, cur_dim + 1, start, fid );
+	else
+	{
+		for ( i = 0; i < v->sizes[ cur_dim ]; i++ )
+		{
+			if ( v->type == INT_ARR )
+				fprintf( File_List[ fid ], "%ld\n", v->val.lpnt[ *start ] );
+			else
+				fprintf( File_List[ fid ], "%f\n", v->val.dpnt[ *start ] );
+			*start += 1;
+		}
+		fprintf( File_List[ fid ], "\n" );
+	}
 }

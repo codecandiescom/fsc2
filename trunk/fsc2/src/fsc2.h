@@ -99,6 +99,7 @@ Compilation compilation;
 Prg_Token *prg_token = NULL;
 long prg_length = 0;
 Prg_Token *cur_prg_token;
+long On_Stop_Pos = -1;
 
 Var *var_list = NULL;
 Var *Var_Stack = NULL;
@@ -137,6 +138,9 @@ KEY *Key;
 KEY *Message_Queue;
 volatile int message_queue_low, message_queue_high;
 
+FILE **File_List = NULL;
+int File_List_Len = 0;
+
 
 #else   /*  ! FSC2_MAIN */
 
@@ -147,6 +151,7 @@ extern Compilation compilation;
 extern Prg_Token *prg_token;
 extern long prg_length;
 extern Prg_Token *cur_prg_token;
+extern long On_Stop_Pos;
 
 extern Device *Device_List;
 extern Device_Name *Device_Name_List;
@@ -182,6 +187,9 @@ extern Graphics G;
 extern KEY *Key;
 extern KEY *Message_Queue;
 extern volatile int message_queue_low, message_queue_high;
+
+extern FILE **File_List;
+extern int File_List_Len;
 
 #endif
 

@@ -8,6 +8,8 @@
 #include "fsc2.h"
 #include <sys/param.h>
 
+#define SHMMNI 128
+
 
 enum {
 	C_EPRINT = 0,
@@ -28,12 +30,12 @@ enum {
 typedef struct {
 	int type;
 	union {
-		size_t len;    /* length of following string (without '\0') */
+		long len;           /* length of following string (without '\0') */
 		int int_data;
 		long long_data;
 		float float_data;
 		double double_data;
-		size_t str_len[ 4 ];
+		long str_len[ 4 ];
 	} data;
 } CS;
 

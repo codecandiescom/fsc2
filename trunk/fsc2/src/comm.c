@@ -99,6 +99,8 @@
 #include <sys/shm.h>
 #include <sys/param.h>
 
+#define SHMMNI 128
+
 /* locally used routines */
 
 static bool pipe_read( int fd, void *buf, size_t bytes_to_read );
@@ -293,9 +295,17 @@ long reader( void *ret )
 
 			/* get the string to be printed... */
 
-			str[ 0 ] = get_string( header.data.len );
-			pipe_read( pd[ READ ], str[ 0 ], header.data.len );
-			str[ 0 ][ header.data.len ] = '\0';
+			if ( header.data.str_len[ 0 ] > 0 )
+			{
+				str[ 0 ] = get_string( header.data.str_len[ 0 ] );
+				pipe_read( pd[ READ ], str[ 0 ],
+						   header.data.str_len[ 0 ] );
+				str[ 0 ][ header.data.str_len[ 0 ] ] = '\0';
+			}
+			else if ( header.data.str_len[ 0 ] == 0 )
+				str[ 0 ] = get_string_copy( "" );
+			else
+				str[ 0 ] = NULL;
 
 			/* ...and print it via eprint() */
 
@@ -303,39 +313,64 @@ long reader( void *ret )
 
 			/* get rid of the string and return */
 
-			T_free( str[ 0 ] );
+			if ( str[ 0 ] != NULL )
+				T_free( str[ 0 ] );
 			retval = 0;
 			break;
 
 		case C_SHOW_MESSAGE :
 			assert( I_am == PARENT );       /* only to be read by the parent */
 
-			str[ 0 ] = get_string( header.data.len );
-			pipe_read( pd[ READ ], str[ 0 ], header.data.len );
-			str[ 0 ] [ header.data.len ] = '\0';
+			if ( header.data.str_len[ 0 ] > 0 )
+			{
+				str[ 0 ] = get_string( header.data.str_len[ 0 ] );
+				pipe_read( pd[ READ ], str[ 0 ],
+						   header.data.str_len[ 0 ] );
+				str[ 0 ][ header.data.str_len[ 0 ] ] = '\0';
+			}
+			else if ( header.data.str_len[ 0 ] == 0 )
+				str[ 0 ] = get_string_copy( "" );
+			else
+				str[ 0 ] = NULL;
+
 			fl_show_messages( str[ 0 ] );
 
 			/* send back just one character as indicator that the message has
 			   been read by the user */
 
-			write( pd[ WRITE ], str[ 0 ], sizeof( char ) );
-			T_free( str[ 0 ] );
+			write( pd[ WRITE ], "X", sizeof( char ) );
+
+			/* get rid of the string and return */
+
+			if ( str[ 0 ] != NULL )
+				T_free( str[ 0 ] );
 			retval = 0;
 			break;
 
 		case C_SHOW_ALERT :
 			assert( I_am == PARENT );       /* only to be read by the parent */
 
-			str[ 0 ] = get_string( header.data.len );
-			pipe_read( pd[ READ ], str[ 0 ], header.data.len );
-			show_alert( str[ 0 ] );
+			if ( header.data.str_len[ 0 ] > 0 )
+			{
+				str[ 0 ] = get_string( header.data.str_len[ 0 ] );
+				pipe_read( pd[ READ ], str[ 0 ],
+						   header.data.str_len[ 0 ] );
+				str[ 0 ][ header.data.str_len[ 0 ] ] = '\0';
+			}
+			else if ( header.data.str_len[ 0 ] == 0 )
+				str[ 0 ] = get_string_copy( "" );
+			else
+				str[ 0 ] = NULL;
 
 			/* send back just one character as indicator that the alert has
-			   been read by te user */
+			   been acknowledged by the user */
 
-			write( pd[ WRITE ], str[ 0 ], sizeof( char ) );
+			write( pd[ WRITE ], "X", sizeof( char ) );
 
-			T_free( str[ 0 ] );
+			/* get rid of the string and return */
+
+			if ( str[ 0 ] != NULL )
+				T_free( str[ 0 ] );
 			retval = 0;
 			break;
 
@@ -351,15 +386,17 @@ long reader( void *ret )
 
 			for ( i = 0; i < 4; i++ )
 			{
-				if ( header.data.str_len[ i ] != 0 )
+				if ( header.data.str_len[ i ] > 0 )
 				{
 					str[ i ] = get_string( header.data.str_len[ i ] );
 					pipe_read( pd[ READ ], str[ i ],
 							   header.data.str_len[ i ] );
 					str[ i ][ header.data.str_len[ i ] ] = '\0';
 				}
-				else
+				else if ( header.data.str_len[ i ] == 0 )
 					str[ i ] = get_string_copy( "" );
+				else
+					str[ i ] = NULL;
 			}
 
 			/* show the question, get the button number and pass it back to
@@ -368,10 +405,11 @@ long reader( void *ret )
 			writer( C_INT, show_choices( str[ 0 ], n1,
 										 str[ 1 ], str[ 2 ], str[ 3 ], n2 ) );
 
-			/* get rid of the strings */
+			/* get rid of the strings and return */
 
 			for ( i = 0; i < 4; i++ )
-				T_free( str[ i ] );
+				if ( str[ i ] != NULL )
+					T_free( str[ i ] );
 			break;
 
 		case C_SHOW_FSELECTOR :
@@ -381,13 +419,15 @@ long reader( void *ret )
 
 			for ( i = 0; i < 4; i++ )
 			{
-				if ( header.data.str_len[ i ] != 0 )
+				if ( header.data.str_len[ i ] > 0 )
 				{
 					str[ i ] = get_string( header.data.str_len[ i ] );
 					pipe_read( pd[ READ ], str[ i ],
 							   header.data.str_len[ i ] );
 					str[ i ][ header.data.str_len[ i ] ] = '\0';
 				}
+				else if ( header.data.str_len[ i ] == 0 )
+					str[ i ] = get_string_copy( "" );
 				else
 					str[ i ] = NULL;
 			}
@@ -398,10 +438,11 @@ long reader( void *ret )
 			writer( C_STR, fl_show_fselector( str[ 0 ], str[ 1 ],
 											  str[ 2 ], str[ 3 ] ) );
 
-			/* get rid of parameter strings */
+			/* get rid of parameter strings and return */
 
 			for ( i = 0; i < 4; i++ )
-				T_free( str[ i ] );
+				if ( str[ i ] != NULL )
+					T_free( str[ i ] );
 			retval = 0;
 			break;
 
@@ -417,13 +458,15 @@ long reader( void *ret )
 			/* get length of both label strings from header and read them */
 
 			for ( i = 0; i < 2 ; i++ )
-				if ( header.data.str_len[ i ] != 0 )
+				if ( header.data.str_len[ i ] > 0 )
 				{
 					str[ i ] = get_string( header.data.str_len[ i ] );
 					pipe_read( pd[ READ ], str[ i ],
 							   header.data.str_len[ i ] );
 					str[ i ][ header.data.str_len[ i ] ] = '\0';
 				}
+				else if ( header.data.str_len[ i ] == 0 )
+					str[ i ] = get_string_copy( "" );
 				else
 					str[ i ] = NULL;
 
@@ -431,29 +474,41 @@ long reader( void *ret )
 
 			graphics_init( dim, nx, ny, str[ 0 ], str[ 1 ] );
 
-			/* get rid of the label strings */
+			/* get rid of the label strings and return */
 
 			for ( i = 0; i < 2 ; i++ )
 				if ( str[ i ] != NULL )
 					T_free( str[ i ] );
+			retval = 0;
 			break;
 
 		case C_STR :
 			assert( I_am == CHILD );         /* only to be read by the child */
 
-			if ( header.data.len == 0 )
+			if ( header.data.len == -1 )
 			{
-				ret = NULL;
+                if ( ret != NULL ) 
+				     *( ( char ** ) ret ) = NULL;
+				retval = 1;
 				break;
 			}
 
 			if ( retstr != NULL )
 				T_free( retstr );
+
 			retstr = get_string( header.data.len );
-			pipe_read( pd[ READ ], retstr, header.data.len );
-			retstr[ header.data.len ] = '\0';
+            if ( header.data.len > 0 )
+			{
+				pipe_read( pd[ READ ], retstr, header.data.len );
+				retstr[ header.data.len ] = '\0';
+			}
+			else
+				strcpy( retstr, "" );
+
 			if ( ret != NULL )
 				*( ( char ** ) ret ) = retstr;
+
+			retval = 1;
 			break;
 
 		case C_INT :
@@ -581,7 +636,7 @@ void writer( int type, ... )
 		do_send = UNSET;
 
 		Key->type = REQUEST;
-		kill( getppid( ), NEW_DATA );   /* tell parent to read new data */
+		kill( getppid( ), NEW_DATA );   /* tell parent to expect new data */
 	}
 
 	header.type = type;
@@ -593,18 +648,32 @@ void writer( int type, ... )
 			assert( I_am == CHILD );      /* only to be written by the child */
 
 			str[ 0 ] = va_arg( ap, char * );
-			header.data.len = strlen( str[ 0 ] );
+			if ( str[ 0 ] == NULL )
+				header.data.str_len[ 0 ] = -1;
+			else if ( *str[0 ] == '\0' )
+				header.data.str_len[ 0 ] = 0;
+			else
+				header.data.str_len[ 0 ] = strlen( str[ 0 ] );
+
 			write( pd[ WRITE ], &header, sizeof( CS ) );
-			write( pd[ WRITE ], str[ 0 ], header.data.len );
+			if ( header.data.str_len[ 0 ] > 0 )
+				write( pd[ WRITE ], str[ 0 ], header.data.len );
 			break;
 
 		case C_SHOW_MESSAGE :
 			assert( I_am == CHILD );      /* only to be written by the child */
 
 			str[ 0 ] = va_arg( ap, char * );
-			header.data.len = strlen( str[ 0 ] );
+			if ( str[ 0 ] == NULL )
+				header.data.str_len[ 0 ] = -1;
+			else if ( *str[ 0 ] == '\0' )
+				header.data.str_len[ 0 ] = 0;
+			else
+				header.data.str_len[ 0 ] = strlen( str[ 0 ] );
+
 			write( pd[ WRITE ], &header, sizeof( CS ) );
-			write( pd[ WRITE ], str[ 0 ], header.data.len );
+			if ( header.data.str_len[ 0 ] > 0 )
+				write( pd[ WRITE ], str[ 0 ], header.data.len );
 
 			/* wait for a random character to be sent back as acknowledgment */
 
@@ -615,9 +684,16 @@ void writer( int type, ... )
 			assert( I_am == CHILD );      /* only to be written by the child */
 
 			str[ 0 ] = va_arg( ap, char * );
-			header.data.len = strlen( str[ 0 ] );
+			if ( str[ 0 ] == NULL )
+				header.data.str_len[ 0 ] = -1;
+			else if ( *str[ 0 ] == '\0' )
+				header.data.str_len[ 0 ] = 0;
+			else
+				header.data.str_len[ 0 ] = strlen( str[ 0 ] );
+
 			write( pd[ WRITE ], &header, sizeof( CS ) );
-			write( pd[ WRITE ], str[ 0 ], header.data.len );
+			if ( header.data.str_len[ 0 ] > 0 )
+				write( pd[ WRITE ], str[ 0 ], header.data.len );
 
 			/* wait for a random character to be sent back as acknowledgment */
 
@@ -628,23 +704,34 @@ void writer( int type, ... )
 			assert( I_am == CHILD );      /* only to be written by the child */
 
 			str[ 0 ] = va_arg( ap, char * );
-			n1 = va_arg( ap, int );
-			for ( i = 1; i < 4; i++ )
-				str[ i ] = va_arg( ap, char * );
-			n2 = va_arg( ap, int );
+			if ( str[ 0 ] == NULL )
+				header.data.str_len[ 0 ] = -1;
+			else if ( *str[ 0 ] == '\0' )
+				header.data.str_len[ 0 ] = 0;
+			else
+				header.data.str_len[ 0 ] = strlen( str[ 0 ] );
 
-			for ( i = 0; i < 4; i++ )
-				if ( str[ i ] != NULL )
-					header.data.str_len[ i ] = strlen( str[ i ] );
-				else
+			n1 = va_arg( ap, int );
+
+			for ( i = 1; i < 4; i++ )
+			{
+				str[ i ] = va_arg( ap, char * );
+				if ( str[ i ] == NULL )
+					header.data.str_len[ i ] = -1;
+				else if ( *str[ i ] == '\0' )
 					header.data.str_len[ i ] = 0;
+				else
+					header.data.str_len[ i ] = strlen( str[ i ] );
+			}
+
+			n2 = va_arg( ap, int );
 
 			write( pd[ WRITE ], &header, sizeof( CS ) );
 			write( pd[ WRITE ], &n1, sizeof( int ) );
 			write( pd[ WRITE ], &n2, sizeof( int ) );
 
 			for ( i = 0; i < 4; i++ )
-				if ( str[ i ] != NULL && strlen( str[ i ] ) != 0 )
+				if ( header.data.str_len[ i ] > 0 )
 					write( pd[ WRITE ], str[ i ], header.data.str_len[ i ] );
 			break;
 
@@ -657,23 +744,24 @@ void writer( int type, ... )
 			for ( i = 0; i < 2; i++ )
 			{
 				str[ i ] = va_arg( ap, char * );
-				if ( str[ i ] != NULL )
-					header.data.str_len[ i ] = strlen( str[ i ] );
-				else
+				if ( str[ i ] == NULL )
+					header.data.str_len[ i ] = -1;
+				else if ( *str[ i ] == '\0' )
 					header.data.str_len[ i ] = 0;
+				else
+					header.data.str_len[ i ] = strlen( str[ i ] );
 			}
 
-			/* Send header, dimension, numbers of points  and label strings */
+			/* Send header, dimension, numbers of points and label strings */
 
 			write( pd[ WRITE ], &header, sizeof( CS ) );
 			write( pd[ WRITE ], &dim, sizeof( long ) );
 			write( pd[ WRITE ], &nx, sizeof( long ) );
 			write( pd[ WRITE ], &ny, sizeof( long ) );
 
-			if ( str[ 0 ] != NULL )
-				write( pd[ WRITE ], str[ 0 ], header.data.str_len[ 0 ] );
-			if ( str[ 1 ] != NULL )
-				write( pd[ WRITE ], str[ 1 ], header.data.str_len[ 0 ] );
+			for ( i = 0; i < 2; i++ )
+				if ( header.data.str_len[ i ] > 0 )
+					write( pd[ WRITE ], str[ i ], header.data.str_len[ i ] );
 			break;
 
 		case C_SHOW_FSELECTOR :
@@ -684,30 +772,40 @@ void writer( int type, ... )
 			for ( i = 0; i < 4; i++ )
 			{
 				str[ i ] = va_arg( ap, char * );
-				if ( str[ i ] != NULL )
-					header.data.str_len[ i ] = strlen( str[ i ] );
-				else
+				if ( str[ i ] == NULL )
+					header.data.str_len[ i ] = -1;
+				else if ( *str[ i ] == '\0' )
 					header.data.str_len[ i ] = 0;
+				else
+					header.data.str_len[ i ] = strlen( str[ i ] );
 			}
+
 			write( pd[ WRITE ], &header, sizeof( CS ) );
 
 			/* write out all four strings */
 
 			for ( i = 0; i < 4; i++ )
-				if ( str[ i ] != NULL )
+			{
+				if ( header.data.str_len[ i ] > 0 )
 					write( pd[ WRITE ], str[ i ], header.data.str_len[ i ] );
+			}
+
 			break;
 
 		case C_STR :
 			assert( I_am == PARENT );    /* only to be written by the parent */
 
 			str[ 0 ] = va_arg( ap, char * );
-			if ( str[ 0 ] != NULL )
-				header.data.len = strlen( str[ 0 ] );
-			else
+			if ( str[ 0 ] == NULL )
+				header.data.len = -1;
+			else if ( *str[ 0 ] == '\0' )
 				header.data.len = 0;
+			else 
+				header.data.len = strlen( str[ 0 ] );
+
 			write( pd[ WRITE ], &header, sizeof( CS ) );
-			if ( str[ 0 ] != NULL )
+
+			if ( header.data.len > 0 )
 				write( pd[ WRITE ], str[ 0 ], header.data.len );
 			break;
 
@@ -742,7 +840,6 @@ void writer( int type, ... )
 		default :                     /* this should never be reached... */
 			assert( 1 == 0 );
 	}
-
 
 	va_end( ap );
 }
