@@ -686,10 +686,9 @@ Var *f_obj_xable( Var *v )
 	}
 
 	v = vars_pop( v );
-
 	state = get_boolean( v );
 
-	/* The child has to get parent to change the state */
+	/* The child process has to get the parent process to change the state */
 
 	if ( Internals.I_am == CHILD )
 		return f_obj_xable_child( ID, state ? 1L : 0L );
@@ -712,19 +711,22 @@ Var *f_obj_xable( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	if ( state )
+	if ( state != io->enabled )
 	{
-		if ( io->type != FLOAT_OUTPUT && io->type != INT_OUTPUT )
-			fl_activate_object( io->self );
-		fl_set_object_lcol( io->self, FL_BLACK );
-		io->enabled = SET;
-	}
-	else
-	{
-		if ( io->type != FLOAT_OUTPUT && io->type != INT_OUTPUT )
-			fl_deactivate_object( io->self );
-		fl_set_object_lcol( io->self, FL_INACTIVE_COL );
-		io->enabled = UNSET;
+		if ( state )
+		{
+			if ( io->type != FLOAT_OUTPUT && io->type != INT_OUTPUT )
+				fl_activate_object( io->self );
+			fl_set_object_lcol( io->self, FL_BLACK );
+			io->enabled = SET;
+		}
+		else
+		{
+			if ( io->type != FLOAT_OUTPUT && io->type != INT_OUTPUT )
+				fl_deactivate_object( io->self );
+			fl_set_object_lcol( io->self, FL_INACTIVE_COL );
+			io->enabled = UNSET;
+		}
 	}
 
 	return vars_push( INT_VAR, state ? 1L : 0L );
