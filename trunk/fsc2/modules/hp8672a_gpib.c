@@ -166,9 +166,21 @@ double hp8672a_set_frequency( double freq )
 
 	fsc2_assert( freq >= MIN_FREQ && freq <= MAX_FREQ );
 
-	ifreq = lrnd( freq * 1.0e-3 );
-	if ( ifreq == 0 )
-		ifreq = 1;
+	/* Below 6.2 GHz resolution is 1 KHz, between 6.2 GHz and 12.4 GHz its
+	   2 kHz and above we have a resolution of 3 kHz. Without correcting
+	   the frequency we'ld get random rounded */
+
+	if ( freq < 6.2e9 )
+	{
+		ifreq = lrnd( freq * 1.0e-3 );
+		if ( ifreq == 0 )
+			ifreq = 1;
+	}
+	else if ( freq < 12.4e9 )
+		ifreq = 2 * lrnd( freq / 2.0e3 );
+	else
+		ifreq = 3 * lrnd( freq / 3.0e-3 );
+
 	tfreq = ifreq;
 
 	cmd[ 0 ] = 'G';
@@ -179,7 +191,7 @@ double hp8672a_set_frequency( double freq )
 	if ( gpib_write( hp8672a.device, cmd, strlen( cmd ) ) == FAILURE )
 		hp8672a_comm_failure( );
 
-	return freq * 1.0e3;
+	return ifreq * 1.0e3;
 }
 
 
