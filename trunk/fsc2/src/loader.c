@@ -192,11 +192,13 @@ bool exists_function( const char *name )
 
 static void load_functions( Device *dev )
 {
-	char *lib_name = NULL;
+	char *lib_name;
 	char *ld_path;
 	char *ld = NULL;
 	char *ldc;
 
+
+	dev->driver.handle = NULL;
 
 	/* Try to open the library for the device. We first try to find it in
 	   directories defined by the environment variable "LD_LIBRARY_PATH". */
@@ -207,10 +209,15 @@ static void load_functions( Device *dev )
 		for ( ldc = strtok( ld, ":" ); ldc != NULL; ldc = strtok( NULL, ":" ) )
 		{
 			lib_name = get_string( "%s%s%s.so", ldc, slash( ldc ), dev->name );
+
 			if ( ( dev->driver.handle = dlopen( lib_name, RTLD_LAZY ) )
 				 != NULL )
+			{
+				dev->driver.lib_name = lib_name;
 				break;
-			lib_name = CHAR_P T_free( lib_name );
+			}
+
+			T_free( lib_name );
 		}
 		T_free( ld );
 	}
@@ -231,8 +238,10 @@ static void load_functions( Device *dev )
 		else
 			lib_name = get_string( "%s.so", dev->name );
 
-		dev->driver.handle = dlopen( lib_name, RTLD_LAZY );
-		T_free( lib_name );
+		if ( ( dev->driver.handle = dlopen( lib_name, RTLD_LAZY ) ) != NULL )
+			dev->driver.lib_name = lib_name;
+		else
+			T_free( lib_name );
 	}
 
 	if ( dev->driver.handle == NULL )
@@ -846,6 +855,7 @@ void unload_device( Device *dev )
 
 	dlclose( dev->driver.handle );
 	dev->driver.handle = NULL;
+	dev->driver.lib_name = CHAR_P T_free( dev->driver.lib_name );
 }
 
 
