@@ -253,11 +253,8 @@ int new_data_callback( XEvent *a, void *b )
 			message_queue_low = ( message_queue_low + 1 ) % QUEUE_SIZE;
 			reader( NULL );
 		}
-		else
-		{
-			if ( ! accept_new_data( ) )
-				break;
-		}
+		else if ( ! accept_new_data( ) )
+			break;
 	}
 
 	return 0;

@@ -53,12 +53,12 @@ bool accept_new_data( void )
 		OTHERWISE
 		{
 			detach_shm( buf, &Message_Queue[ message_queue_low ].shm_id );
-			stop_measurement( NULL, 0 );
+			kill( child_pid, SIGKILL );
 			if ( exception_id == OUT_OF_MEMORY_EXCEPTION )
 				eprint( FATAL, "Running out of memory.\n" );
 			else
-				eprint( FATAL, "Experiment stopped due to unknown "
-						"reasons.\n" );
+				eprint( FATAL, "Experiment stopped due to an unknown "
+						"reason.\n" );
 			printf( "shit shit shit!\n" );
 			return FAIL;
 		}
