@@ -57,9 +57,9 @@ static double margin = 25.0;         /* margin (in mm) to leave on all sides */
 
 static char *pc_string = NULL;
 
-static bool get_print_file( FILE **fp, char **name );
+static bool get_print_file( FILE **fp, char **name, long data );
 static void get_print_comm( void );
-static void start_printing( FILE *fp, char *name, int dim, long what );
+static void start_printing( FILE *fp, char *name, long what );
 static void start_printing_1d( FILE *fp, char *name, long what );
 static void start_printing_2d( FILE *fp, char *name );
 static FILE *spawn_print_prog( const char *command );
@@ -77,19 +77,19 @@ static void print_markers( FILE *fp );
 
 /*-------------------------------------------------------------------------*/
 /* This function gets called as the callback routine for the print button  */
-/* in either the main display window in 1D display or in the cross section */
-/* window for 2D graphics. It shows a form that lets the user select if    */
-/* (s)he wants to "print" the resulting PostScript file (using whatever    */
-/* command the user specifies in the form) or to save it in as a file.     */
-/* Other things the user can choose in this form is the paper size (A4,    */
-/* A3, Legal, Letter or A5 or A6 as size reduced version of A4 created for */
-/* a A4 printer) and b/w or color output.                                  */
+/* It shows a form that lets the user select if (s)he wants to "print" the */
+/* resulting PostScript file (using whatever command the user specifies in */
+/* the form) or to save it in as a file. Other things the user can choose  */
+/* in this form is the paper size, either A4, A3, Legal, Letter or A5 or   */
+/* A6 (the later two as size reduced version created for an A4 printer),   */
+/* and b/w or color output.                                                */
 /* For drawing the curves from the main 1D display window the parameter    */
-/* 'data' is expected to be 1, while for cross section curves 'data' must  */
-/* be 0 for cross sections through the x-axis and -1 for the y-axis!       */
+/* 'data' is expected to be 1, for 2D display to be 2 and for cross        */
+/* section curves 'data' must be 0 for cross sections through the x-axis   */
+/* and -1 for the y-axis!                                                  */
 /*-------------------------------------------------------------------------*/
 
-void print_1d( FL_OBJECT *obj, long data )
+void print_it( FL_OBJECT *obj, long data )
 {
 	FILE *fp = NULL;
 	char *name = NULL;
@@ -97,39 +97,7 @@ void print_1d( FL_OBJECT *obj, long data )
 
 	fl_deactivate_object( obj );
 
-	/* Find out about the way to print and get a file if needed */
-
-	if ( get_print_file( &fp, &name ) )
-	{
-		get_print_comm( );
-
-		start_printing( fp, name, 1, data );
-
-		if ( fp != NULL )
-			fclose( fp );
-		name = T_free( name );
-	}
-
-	fl_activate_object( obj );
-}
-
-
-/*----------------------------------------------------------------------*/
-/* As the previous function, print_1d(), this is a callback routine for */
-/* the print button, but for the main display window for 2D graphics.   */
-/*----------------------------------------------------------------------*/
-
-void print_2d( FL_OBJECT *obj, long data )
-{
-	FILE *fp = NULL;
-	char *name = NULL;
-
-
-	data = data;
-
-	fl_deactivate_object( obj );
-
-	if ( G.active_curve == -1 )
+	if ( data == 2 && G.active_curve == -1 )
 	{
 		fl_show_alert( "Error", "Can't print - no curve is shown.", NULL, 1 );
 		fl_activate_object( obj );
@@ -138,11 +106,22 @@ void print_2d( FL_OBJECT *obj, long data )
 
 	/* Find out about the way to print and get a file if needed */
 
-	if ( get_print_file( &fp, &name ) )
+	if ( get_print_file( &fp, &name, data ) )
 	{
 		get_print_comm( );
 
-		start_printing( fp, name, 2, 0 );
+		if ( data == 2 && G.active_curve == -1 )
+		{
+			fl_show_alert( "Error", "Can't print - no curve is shown.",
+						   NULL, 1 );
+			fl_activate_object( obj );
+			return;
+		}
+
+		if ( data == 2 )
+			print_with_color = SET;
+
+		start_printing( fp, name, data );
 
 		if ( fp != NULL )
 			fclose( fp );
@@ -158,7 +137,7 @@ void print_2d( FL_OBJECT *obj, long data )
 /* and, for printing to file mode, select the file              */
 /*--------------------------------------------------------------*/
 
-static bool get_print_file( FILE **fp, char **name )
+static bool get_print_file( FILE **fp, char **name, long data )
 {
 	static FL_OBJECT *obj;
 	struct stat stat_buf;
@@ -167,6 +146,15 @@ static bool get_print_file( FILE **fp, char **name )
 	/* Create the form for print setup */
 
 	print_form = GUI.G_Funcs.create_form_print( );
+
+	/* There's no good way to draw 2D in black and white so make the b&w
+	   button invisible and activate the color button */
+
+	if ( data == 2 )
+	{
+		fl_hide_object( print_form->col_button );
+		fl_hide_object( print_form->bw_button );
+	}
 
 	/* If a printer command has already been set put it into the input object,
 	   otherwise set default command */
@@ -455,7 +443,7 @@ static void get_print_comm( void )
 /* while the main program can continue taking care of new data. */
 /*--------------------------------------------------------------*/
 
-static void start_printing( FILE *fp, char *name, int dim, long what )
+static void start_printing( FILE *fp, char *name, long what )
 {
 	pid_t pid;
 
@@ -484,10 +472,10 @@ static void start_printing( FILE *fp, char *name, int dim, long what )
 		 ( fp = spawn_print_prog( cmd ) ) == NULL )
 		_exit( EXIT_FAILURE );
 
-	if ( dim == 1 )
-		start_printing_1d( fp, name, what );
-	else
+	if ( what == 2 )
 		start_printing_2d( fp, name );
+	else
+		start_printing_1d( fp, name, what );
 
 	fclose( fp );
 	_exit( EXIT_SUCCESS );
@@ -1283,8 +1271,9 @@ static void eps_draw_surface( FILE *fp, int cn )
 }
 
 
-/*-------------------------------------------------------*/
-/*-------------------------------------------------------*/
+/*--------------------------------------------------------------------------*/
+/* A rather useless try to draw a 2D curve in gray scale, using contours... */
+/*--------------------------------------------------------------------------*/
 
 static void eps_draw_contour( FILE *fp, int cn )
 {
@@ -1296,7 +1285,6 @@ static void eps_draw_contour( FILE *fp, int cn )
 	double z;
 	long i, j, k;
 	double z1, z2, g;
-	int rgb[ 3 ];
 
 
 	s2d[ X ] = w * cv->s2d[ X ] / G.canvas.w;
@@ -1310,46 +1298,22 @@ static void eps_draw_contour( FILE *fp, int cn )
 
 	cur_p = s2d[ X ] * cv->shift[ X ];
 	if ( cur_p - dw > 0 )
-		fprintf( fp, "%s\n"
-				 "%f %f m\n"
-				 "%f 0 rl\n"
-				 "0 %f rl\n"
-				 "%f 0 rl\n"
-				 "cp f\n",
-				 print_with_color ? "0.5 0.5 0.5 srgb" : "0.5 sgr",
+		fprintf( fp, "0.5 sgr %f %f m %f 0 rl 0 %f rl %f 0 rl cp f\n",
 				 x_0, y_0, cur_p - dw, h, - ( cur_p - dw ) );
 
 	cur_p = s2d[ X ] * ( G.nx - 1 + cv->shift[ X ] );
 	if ( w > cur_p + dw )
-		fprintf( fp, "%s\n"
-				 "%f %f m\n"
-				 "0 %f rl\n"
-				 "%f 0 rl\n"
-				 "0 %f rl\n"
-				 "cp f\n",
-				 print_with_color ? "0.5 0.5 0.5 srgb" : "0.5 sgr",
-				 x_0 + cur_p + dw , y_0, h, w - ( cur_p + dw ), - h );
+		fprintf( fp, "0.5 sgr %f %f m 0 %f rl %f 0 rl 0 %f rl cp f\n",
+				 x_0 + cur_p + dw, y_0, h, w - ( cur_p + dw ), - h );
 
 	cur_p = s2d[ Y ] * cv->shift[ Y ];
 	if ( cur_p - dh > 0 )
-		fprintf( fp, "%s\n"
-				 "%f %f m\n"
-				 "%f 0 rl\n"
-				 "0 %f rl\n"
-				 "%f 0 rl\n"
-				 "cp f\n",
-				 print_with_color ? "0.5 0.5 0.5 srgb" : "0.5 sgr",
+		fprintf( fp, "0.5 sgr %f %f m %f 0 rl 0 %f rl %f 0 rl cp f\n",
 				 x_0, y_0, w, cur_p - dh, - w );
 
 	cur_p = s2d[ Y ] * ( G.ny - 1 + cv->shift[ Y ] );
 	if ( h > cur_p + dh )
-		fprintf( fp, "%s\n"
-				 "%f %f m\n"
-				 "%f 0 rl\n"
-				 "0 %f rl\n"
-				 "%f 0 rl\n"
-				 "cp f\n",
-				 print_with_color ? "0.5 0.5 0.5 srgb" : "0.5 sgr",
+		fprintf( fp, "0.5 sgr %f %f m %f 0 rl 0 %f rl %f 0 rl cp f\n",
 				 x_0, y_0 + cur_p + dh , w, h - ( cur_p + dh ), - w );
 
 	/* Now draw the data */
@@ -1360,12 +1324,8 @@ static void eps_draw_contour( FILE *fp, int cn )
 			{
 				if ( ! cv->points[ k ].exist )
 				{
-					fprintf( fp, "%s\n"
-							 "%f %f m\n"
-							 "0 %f 2 copy rl\n"
-							 "%f 0 rl\n"
-							 "neg rl cp f\n",
-							 print_with_color ? "0.5 0.5 0.5 srgb" : "0.5 sgr",
+					fprintf( fp, "0.5 sgr "
+							 "%f %f m 0 %f 2 copy rl %f 0 rl neg rl cp f\n",
 							 x_0 + s2d[ X ] * ( i + cv->shift[ X ] ) - dw,
 							 y_0 + s2d[ Y ] * ( j + cv->shift[ Y ] ) - dh,
 							 2.0 * dh, 2.0 * dw );
@@ -1380,17 +1340,8 @@ static void eps_draw_contour( FILE *fp, int cn )
 
 					if ( ( z1 >= z && z2 < z ) || ( z1 < z && z2 >= z ) )
 					{
-						if ( print_with_color )
-						{
-							i2rgb( z, rgb );
-							fprintf( fp, "%f %f %f srgb ",
-									 ( double ) rgb[ RED ]   / 255.0,
-									 ( double ) rgb[ GREEN ] / 255.0,
-									 ( double ) rgb[ BLUE ]  / 255.0 );
-						}
-						else
-							fprintf( fp, "%f sgr ", g );
-						fprintf( fp, "%f %f m 0 %f rl s\n",
+						fprintf( fp, "%f sgr %f %f m 0 %f rl s\n",
+								 g,
 								 x_0 + s2d[ X ] * ( i + cv->shift[ X ] ) + dw,
 								 y_0 + s2d[ Y ] * ( j + cv->shift[ Y ] ) - dh,
 								 2.0 * dh );
@@ -1405,17 +1356,8 @@ static void eps_draw_contour( FILE *fp, int cn )
 
 					if ( ( z1 >= z && z2 < z ) || ( z1 < z && z2 >= z ) )
 					{
-						if ( print_with_color )
-						{
-							i2rgb( z, rgb );
-							fprintf( fp, "%f %f %f srgb ",
-									 ( double ) rgb[ RED ]   / 255.0,
-									 ( double ) rgb[ GREEN ] / 255.0,
-									 ( double ) rgb[ BLUE ]  / 255.0 );
-						}
-						else
-							fprintf( fp, "%f sgr ", g );
-						fprintf( fp, "%f %f m %f 0 rl s\n",
+						fprintf( fp, "%f sgr %f %f m %f 0 rl s\n",
+								 g,
 								 x_0 + s2d[ X ] * ( i + cv->shift[ X ] ) - dw,
 								 y_0 + s2d[ Y ] * ( j + cv->shift[ Y ] ) + dh,
 								 2.0 * dw );
