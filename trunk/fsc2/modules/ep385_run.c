@@ -597,6 +597,8 @@ void ep385_full_reset( void )
 			if ( ch->num_pulses == 0 )
 				continue;
 
+			/* Force an update of the channnel */
+
 			ch->num_active_pulses = 0;
 		}
 	}
