@@ -32,9 +32,9 @@
 
 #if ! defined( NUM_SERIAL_PORTS ) || NUM_SERIAL_PORTS < 1
 
-/*-----------------------------------------------*/
-/* Just tell user about the errors of his way... */
-/*-----------------------------------------------*/
+/*-----------------------------------------------*
+ * Just tell user about the errors of his way...
+ *-----------------------------------------------*/
 
 void fsc2_request_serial_port( UNUSED_ARG int sn, const char *dev_name )
 {
@@ -44,18 +44,18 @@ void fsc2_request_serial_port( UNUSED_ARG int sn, const char *dev_name )
 }
 
 
-/*--------------------*/
-/* Nothing to be done */
-/*--------------------*/
+/*--------------------*
+ * Nothing to be done
+ *--------------------*
 
 void fsc2_serial_init( void )
 {
 }
 
 
-/*--------------------*/
-/* Nothing to be done */
-/*--------------------*/
+/*--------------------*
+ * Nothing to be done
+ *--------------------*/
 
 void fsc2_serial_exp_init( UNUSED_ARG const char *log_file_name,
 						   UNUSED_ARG int log_level )
@@ -63,37 +63,37 @@ void fsc2_serial_exp_init( UNUSED_ARG const char *log_file_name,
 }
 
 
-/*--------------------*/
-/* Nothing to be done */
-/*--------------------*/
+/*--------------------*
+ * Nothing to be done
+ *--------------------*/
 
 void fsc2_serial_end_of_exp_handling( void )
 {
 }
 
 
-/*--------------------*/
-/* Nothing to be done */
-/*--------------------*/
+/*--------------------*
+ * Nothing to be done
+ *--------------------*/
 
 void fsc2_serial_cleanup( void )
 {
 }
 
 
-/*--------------------*/
-/* Nothing to be done */
-/*--------------------*/
+/*--------------------*
+ * Nothing to be done
+ *--------------------*/
 
 void fsc2_final_serial_cleanup( void )
 {
 }
 
 
-/*-------------------------------------------------------------*/
-/* Return NULL to indicate failure, a correctly written module */
-/* would never call the function anyway.                       */
-/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*
+ * Return NULL to indicate failure, a correctly written module
+ * would never call the function anyway.
+ *-------------------------------------------------------------*/
 
 struct termios *fsc2_serial_open( UNUSED_ARG int sn,
 								  UNUSED_ARG const char *dev_name,
@@ -104,18 +104,18 @@ struct termios *fsc2_serial_open( UNUSED_ARG int sn,
 }
 
 
-/*--------------------*/
-/* Nothing to be done */
-/*--------------------*/
+/*--------------------*
+ * Nothing to be done
+ *--------------------*/
 
 void fsc2_serial_close( UNUSED_ARG int sn )
 {
 }
 
 
-/*-------------------------------*/
-/* Return -1 to indicate failure */
-/*-------------------------------*/
+/*-------------------------------*
+ * Return -1 to indicate failure
+ *-------------------------------*/
 
 ssize_t fsc2_serial_write( UNUSED_ARG int sn, UNUSED_ARG const void *buf,
 						   UNUSED_ARG size_t count, UNUSED_ARG long us_wait,
@@ -126,9 +126,9 @@ ssize_t fsc2_serial_write( UNUSED_ARG int sn, UNUSED_ARG const void *buf,
 }
 
 
-/*-------------------------------*/
-/* Return -1 to indicate failure */
-/*-------------------------------*/
+/*-------------------------------*
+ * Return -1 to indicate failure
+ *-------------------------------*/
 
 ssize_t fsc2_serial_read( UNUSED_ARG int sn, UNUSED_ARG void *buf,
 						  UNUSED_ARG size_t count, UNUSED_ARG long us_wait,
@@ -139,9 +139,9 @@ ssize_t fsc2_serial_read( UNUSED_ARG int sn, UNUSED_ARG void *buf,
 }
 
 
-/*-------------------------------*/
-/* Return -1 to indicate failure */
-/*-------------------------------*/
+/*-------------------------------*
+ * Return -1 to indicate failure
+ *-------------------------------*/
 
 int fsc2_tcgetattr( UNUSED_ARG int sn, UNUSED_ARG struct termios *termios_p )
 {
@@ -150,9 +150,9 @@ int fsc2_tcgetattr( UNUSED_ARG int sn, UNUSED_ARG struct termios *termios_p )
 }
 
 
-/*-------------------------------*/
-/* Return -1 to indicate failure */
-/*-------------------------------*/
+/*-------------------------------*
+ * Return -1 to indicate failure
+ *-------------------------------*/
 
 int fsc2_tcsetattr( UNUSED_ARG int sn, UNUSED_ARG int optional_actions,
 					UNUSED_ARG struct termios *termios_p )
@@ -162,9 +162,9 @@ int fsc2_tcsetattr( UNUSED_ARG int sn, UNUSED_ARG int optional_actions,
 }
 
 
-/*-------------------------------*/
-/* Return -1 to indicate failure */
-/*-------------------------------*/
+/*-------------------------------*
+ * Return -1 to indicate failure
+ *-------------------------------*/
 
 int fsc2_tcsendbreak( UNUSED_ARG int sn, UNUSED_ARG int duration )
 {
@@ -173,9 +173,9 @@ int fsc2_tcsendbreak( UNUSED_ARG int sn, UNUSED_ARG int duration )
 }
 
 
-/*-------------------------------*/
-/* Return -1 to indicate failure */
-/*-------------------------------*/
+/*-------------------------------*
+ * Return -1 to indicate failure
+ *-------------------------------*/
 
 int fsc2_tcdrain( UNUSED_ARG int sn )
 {
@@ -184,9 +184,9 @@ int fsc2_tcdrain( UNUSED_ARG int sn )
 }
 
 
-/*-------------------------------*/
-/* Return -1 to indicate failure */
-/*-------------------------------*/
+/*-------------------------------*
+ * Return -1 to indicate failure
+ *-------------------------------*/
 
 int fsc2_tcflush( UNUSED_ARG int sn, UNUSED_ARG int queue_selector )
 {
@@ -195,9 +195,9 @@ int fsc2_tcflush( UNUSED_ARG int sn, UNUSED_ARG int queue_selector )
 }
 
 
-/*-------------------------------*/
-/* Return -1 to indicate failure */
-/*-------------------------------*/
+/*-------------------------------*
+ * Return -1 to indicate failure
+ *-------------------------------*/
 
 int fsc2_tcflow( UNUSED_ARG int sn, UNUSED_ARG int action )
 {
@@ -205,7 +205,9 @@ int fsc2_tcflow( UNUSED_ARG int sn, UNUSED_ARG int action )
 	return -1;
 }
 
-#else
+
+#else    /* if there are serial ports we can use */
+
 
 #include <sys/timeb.h>
 
@@ -257,16 +259,16 @@ static void fsc2_serial_log_function_end( const char *function,
 static void fsc2_serial_log_message( const char *fmt, ... );
 
 
-/*-------------------------------------------------------------------*/
-/* This function must be called by device modules that need a serial */
-/* port. Here it is checked if the requested serial port is still    */
-/* available and if the user has access permissions to the serial    */
-/* ports device file. If one of these conditions isn't satisfied the */
-/* function throws an exception.                                     */
-/* -> 1. Serial port number - must be smaller than compiled in       */
-/*       constant NUM_SERIAL_PORTS                                   */
-/*    2. Name of the device the serial port is requested for         */
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * This function must be called by device modules that need a serial
+ * port. Here it is checked if the requested serial port is still
+ * available and if the user has access permissions to the serial
+ * ports device file. If one of these conditions isn't satisfied the
+ * function throws an exception.
+ * -> 1. Serial port number - must be smaller than compiled in
+ *       constant NUM_SERIAL_PORTS
+ *    2. Name of the device the serial port is requested for
+ *-------------------------------------------------------------------*/
 
 void fsc2_request_serial_port( int sn, const char *dev_name )
 {
@@ -316,15 +318,15 @@ void fsc2_request_serial_port( int sn, const char *dev_name )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/* This function is called internally (i.e. not from modules) before the */
-/* start of an experiment in order to open the log file.                 */
-/* ->                                                                    */
-/*  * Pointer to the name of log file - if the pointer is NULL or does   */
-/*    not point to a non-empty string stderr used.                       */
-/*  * log level, either LL_NONE, LL_ERR, LL_CE or LL_ALL                 */
-/*    (if log level is LL_NONE 'log_file_name' is not used at all)       */
-/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ * This function is called internally (i.e. not from modules) before the
+ * start of an experiment in order to open the log file.
+ * ->
+ *  * Pointer to the name of log file - if the pointer is NULL or does
+ *    not point to a non-empty string stderr used.
+ *  * log level, either LL_NONE, LL_ERR, LL_CE or LL_ALL
+ *    (if log level is LL_NONE 'log_file_name' is not used at all)
+ *-----------------------------------------------------------------------*/
 
 void fsc2_serial_exp_init( const char *log_file_name, int log_level )
 {
@@ -376,10 +378,10 @@ void fsc2_serial_exp_init( const char *log_file_name, int log_level )
 }
 
 
-/*----------------------------------------------------------------------*/
-/* This function is called only once at the start of fsc2 to initialise */
-/* the structure used in granting access to the serial ports.           */
-/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*
+ * This function is called only once at the start of fsc2 to initialise
+ * the structure used in granting access to the serial ports.
+ *----------------------------------------------------------------------*/
 
 void fsc2_serial_init( void )
 {
@@ -399,10 +401,10 @@ void fsc2_serial_init( void )
 }
 
 
-/*-------------------------------------------------------------------*/
-/* Function that gets called after the end of an experiment to close */
-/* the serial ports used during the experiment.                      */
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * Function that gets called after the end of an experiment to close
+ * the serial ports used during the experiment.
+ *-------------------------------------------------------------------*/
 
 void fsc2_serial_cleanup( void )
 {
@@ -424,10 +426,10 @@ void fsc2_serial_cleanup( void )
 }
 
 
-/*----------------------------------------------------------------*/
-/* This function is called when a new EDL file is loaded to reset */
-/* the structures used in granting access to the serial ports.    */
-/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * This function is called when a new EDL file is loaded to reset
+ * the structures used in granting access to the serial ports.
+ *----------------------------------------------------------------*/
 
 void fsc2_final_serial_cleanup( void )
 {
@@ -453,14 +455,14 @@ void fsc2_final_serial_cleanup( void )
 }
 
 
-/*--------------------------------------------------------------------*/
-/* This function should be called by device modules that need to open */
-/* a serial port device file. Instead of the device file name as in   */
-/* the open() function this routine expects the number of the serial  */
-/* port and the name of the device to make it possible to check if    */
-/* the device has requested this port. The third parameter is, as in  */
-/* the open() function, the flags used for opening the device file.   */
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ * This function should be called by device modules that need to open
+ * a serial port device file. Instead of the device file name as in
+ * the open() function this routine expects the number of the serial
+ * port and the name of the device to make it possible to check if
+ * the device has requested this port. The third parameter is, as in
+ * the open() function, the flags used for opening the device file.
+ *--------------------------------------------------------------------*/
 
 struct termios *fsc2_serial_open( int sn, const char *dev_name, int flags )
 {
@@ -568,9 +570,9 @@ struct termios *fsc2_serial_open( int sn, const char *dev_name, int flags )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/* Closes the device file for the serial port and removes the lock file. */
-/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ * Closes the device file for the serial port and removes the lock file.
+ *-----------------------------------------------------------------------*/
 
 void fsc2_serial_close( int sn )
 {
@@ -606,21 +608,21 @@ void fsc2_serial_close( int sn )
 }
 
 
-/*-------------------------------------------------------------------*/
-/* Function for sending data via one of the serial ports. It expects */
-/* 5 arguments, first the number of the serial port, then a buffer   */
-/* with the data and its length, a timeout in us we are supposed to  */
-/* wait for data to become writeable to the serial port and finally  */
-/* a flag that tells if the function is to return immediately if a   */
-/* signal is received before any data could be send.                 */
-/* If the timeout value in 'us_wait' is zero the function won't wait */
-/* for the serial port to become ready for writing, if it's negative */
-/* the the function potentially will wait indefinitely long.         */
-/* The function returns the number of written bytes or -1 when an    */
-/* error happened. A value of 0 is returned when no data could be    */
-/* written, possibly because a signal was received before writing    */
-/* started.                                                          */
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * Function for sending data via one of the serial ports. It expects
+ * 5 arguments, first the number of the serial port, then a buffer
+ * with the data and its length, a timeout in us we are supposed to
+ * wait for data to become writeable to the serial port and finally
+ * a flag that tells if the function is to return immediately if a
+ * signal is received before any data could be send.
+ * If the timeout value in 'us_wait' is zero the function won't wait
+ * for the serial port to become ready for writing, if it's negative
+ * the the function potentially will wait indefinitely long.
+ * The function returns the number of written bytes or -1 when an
+ * error happened. A value of 0 is returned when no data could be
+ * written, possibly because a signal was received before writing
+ * started.
+ *-------------------------------------------------------------------*/
 
 ssize_t fsc2_serial_write( int sn, const void *buf, size_t count,
 						   long us_wait, bool quit_on_signal )
@@ -745,20 +747,20 @@ ssize_t fsc2_serial_write( int sn, const void *buf, size_t count,
 }
 
 
-/*---------------------------------------------------------------------*/
-/* Function for reading data from one of the serial ports. It expects  */
-/* 5 arguments, first the number of the serial port, then a buffer and */
-/* its length for returning the read in data, a timeout in us we are   */
-/* supposed to wait for data to readable on the serial port and        */
-/* finally a flag that tells if the function is to return immediately  */
-/* if as signal is received before any data could be read.             */
-/* if the timeout value in 'us_wait' is zero the function won't wait   */
-/* for data to appear on the serial port, when it is negative the      */
-/* function waits indefinitely long for data.                          */
-/* The function returns the number of read in data or -1 when an error */
-/* happened. A value of 0 is returned when no data could be read in,   */
-/* possibly because a signal was received before reading started.      */
-/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*
+ * Function for reading data from one of the serial ports. It expects
+ * 5 arguments, first the number of the serial port, then a buffer and
+ * its length for returning the read in data, a timeout in us we are
+ * supposed to wait for data to readable on the serial port and
+ * finally a flag that tells if the function is to return immediately
+ * if as signal is received before any data could be read.
+ * if the timeout value in 'us_wait' is zero the function won't wait
+ * for data to appear on the serial port, when it is negative the
+ * function waits indefinitely long for data.
+ * The function returns the number of read in data or -1 when an error
+ * happened. A value of 0 is returned when no data could be read in,
+ * possibly because a signal was received before reading started.
+ *---------------------------------------------------------------------*/
 
 ssize_t fsc2_serial_read( int sn, void *buf, size_t count,
 						  long us_wait, bool quit_on_signal )
@@ -891,18 +893,18 @@ ssize_t fsc2_serial_read( int sn, void *buf, size_t count,
 }
 
 
-/*--------------------------------------------------------------*/
-/* Tries to create a UUCP style lock file for a serial port.    */
-/* According to version 2.2 of the Filesystem Hierachy Standard */
-/* the lock files must be stored in /var/lock following the     */
-/* naming convention that the file name starts with "LCK..",    */
-/* followed by the base name of the device file. E.g. for the   */
-/* device file '/dev/ttyS0' the lock file 'LCK..ttyS0' has to   */
-/* be created.                                                  */
-/* According to the same standard, the lockfile must contain    */
-/* the process identifier (PID) as a ten byte ASCII decimal     */
-/* number, with a trailing newline (HDB UUCP format).           */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ * Tries to create a UUCP style lock file for a serial port.
+ * According to version 2.2 of the Filesystem Hierachy Standard
+ * the lock files must be stored in /var/lock following the
+ * naming convention that the file name starts with "LCK..",
+ * followed by the base name of the device file. E.g. for the
+ * device file '/dev/ttyS0' the lock file 'LCK..ttyS0' has to
+ * be created.
+ * According to the same standard, the lockfile must contain
+ * the process identifier (PID) as a ten byte ASCII decimal
+ * number, with a trailing newline (HDB UUCP format).
+ *--------------------------------------------------------------*/
 
 #ifdef SERIAL_LOCK_DIR
 static bool get_serial_lock( int sn )
@@ -1055,9 +1057,9 @@ static bool get_serial_lock( UNUSED_ARG int sn )
 #endif
 
 
-/*-------------------------------------------------------------*/
-/* Deletes the previously created lock file for a serial port. */
-/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*
+ * Deletes the previously created lock file for a serial port.
+ *-------------------------------------------------------------*/
 
 static void remove_serial_lock( int sn )
 {
@@ -1079,9 +1081,9 @@ static void remove_serial_lock( int sn )
 }
 
 
-/*------------------------------*/
-/* Replacement for tcgetattr(3) */
-/*------------------------------*/
+/*------------------------------*
+ * Replacement for tcgetattr(3)
+ *------------------------------*/
 
 int fsc2_tcgetattr( int sn, struct termios *termios_p )
 {
@@ -1104,9 +1106,9 @@ int fsc2_tcgetattr( int sn, struct termios *termios_p )
 }
 
 
-/*------------------------------*/
-/* Replacement for tcsetattr(3) */
-/*------------------------------*/
+/*------------------------------*
+ * Replacement for tcsetattr(3)
+ *------------------------------*/
 
 int fsc2_tcsetattr( int sn, int optional_actions, struct termios *termios_p )
 {
@@ -1129,9 +1131,9 @@ int fsc2_tcsetattr( int sn, int optional_actions, struct termios *termios_p )
 }
 
 
-/*--------------------------------*/
-/* Replacement for tcsendbreak(3) */
-/*--------------------------------*/
+/*--------------------------------*
+ * Replacement for tcsendbreak(3)
+ *--------------------------------*/
 
 int fsc2_tcsendbreak( int sn, int duration )
 {
@@ -1154,9 +1156,9 @@ int fsc2_tcsendbreak( int sn, int duration )
 }
 
 
-/*----------------------------*/
-/* Replacement for tcdrain(3) */
-/*----------------------------*/
+/*----------------------------*
+ * Replacement for tcdrain(3)
+ *----------------------------*/
 
 int fsc2_tcdrain( int sn )
 {
@@ -1179,9 +1181,9 @@ int fsc2_tcdrain( int sn )
 }
 
 
-/*----------------------------*/
-/* Replacement for tcflush(3) */
-/*----------------------------*/
+/*----------------------------*
+ * Replacement for tcflush(3)
+ *----------------------------*/
 
 int fsc2_tcflush( int sn, int queue_selector )
 {
@@ -1204,9 +1206,9 @@ int fsc2_tcflush( int sn, int queue_selector )
 }
 
 
-/*---------------------------*/
-/* Replacement for tcflow(3) */
-/*---------------------------*/
+/*---------------------------*
+ * Replacement for tcflow(3)
+ *---------------------------*/
 
 int fsc2_tcflow( int sn, int action )
 {
@@ -1230,9 +1232,9 @@ int fsc2_tcflow( int sn, int action )
 
 
 
-/*---------------------------------------------------------*/
-/* fsc2_serial_log_date() writes the date to the log file. */
-/*---------------------------------------------------------*/
+/*---------------------------------------------------------*
+ * fsc2_serial_log_date() writes the date to the log file.
+ *---------------------------------------------------------*/
 
 static void fsc2_serial_log_date( void )
 {
@@ -1252,13 +1254,13 @@ static void fsc2_serial_log_date( void )
 }
 
 
-/*--------------------------------------------------------------*/
-/* fsc2_serial_log_function_start() logs the call of a function */
-/* by appending a short message to the log file.                */
-/* ->                                                           */
-/*  * name of the function                                      */
-/*  * name of the device involved                               */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ * fsc2_serial_log_function_start() logs the call of a function
+ * by appending a short message to the log file.
+ * ->
+ *  * name of the function
+ *  * name of the device involved
+ *--------------------------------------------------------------*/
 
 static void fsc2_serial_log_function_start( const char *function,
 											const char *dev_name )
@@ -1274,13 +1276,13 @@ static void fsc2_serial_log_function_start( const char *function,
 }
 
 
-/*---------------------------------------------------------*/
-/* fsc2_serial_log_function_end() logs the completion of a */
-/* function by appending a short message to the log file.  */
-/* ->                                                      */
-/*  * name of the function                                 */
-/*  * name of the device involved                          */
-/*---------------------------------------------------------*/
+/*---------------------------------------------------------*
+ * fsc2_serial_log_function_end() logs the completion of a
+ * function by appending a short message to the log file.
+ * ->
+ *  * name of the function
+ *  * name of the device involved
+ *---------------------------------------------------------*/
 
 static void fsc2_serial_log_function_end( const char *function,
 										  const char *dev_name )
@@ -1296,9 +1298,9 @@ static void fsc2_serial_log_function_end( const char *function,
 }
 
 
-/*-----------------------------------------------------*/
-/* Function for printing out a message to the log file */
-/*-----------------------------------------------------*/
+/*-----------------------------------------------------*
+ * Function for printing out a message to the log file
+ *-----------------------------------------------------*/
 
 static void fsc2_serial_log_message( const char *fmt, ... )
 {
