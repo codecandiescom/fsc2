@@ -55,7 +55,7 @@ void start_graphics( void )
 		cut_form = create_form_cut( );
 
 	/* They still need some modifications - first set the pixmaps and
-	   help texts for both the buttons */
+	   help texts for the Undo and Print buttons */
 
 	pixmap_file = get_string( strlen( auxdir ) + strlen( "/undo.xpm" ) );
 	strcpy( pixmap_file, auxdir );

@@ -200,7 +200,10 @@ static bool other_data_request( int type, void * ptr )
 	ca = ( long * ) ptr;                /* list of curve numbers */
 
 	for ( i = 0; i < count; i++ )
+	{
 		clear_curve( ca[ i ] );
+		cut_clear_curve( ca[ i ] );
+	}
 
 	return OK;
 }

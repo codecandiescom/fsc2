@@ -1095,3 +1095,21 @@ static void redraw_cut_axis( int coord )
 	XCopyArea( G.d, c->pm, FL_ObjWin( c->obj ), c->gc,
 			   0, 0, c->w, c->h, 0, 0 );
 }
+
+
+/*----------------------------------------------------------*/
+/*----------------------------------------------------------*/
+
+void cut_clear_curve( long curve )
+{
+	long i;
+	Scaled_Point *sp;
+
+
+	if ( ! G.is_cut || curve != active_curve )
+		return;
+
+	for ( sp = G.cut_curve.points, i = 0; i < CG.nx; sp++, i++ )
+		sp->exist = UNSET;
+	G.cut_curve.count = 0;
+}

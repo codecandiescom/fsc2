@@ -60,6 +60,7 @@ void cut_form_close( void );
 void cut_undo_button_callback( FL_OBJECT *a, long b );
 void cut_close_callback( FL_OBJECT *a, long b );
 void cut_fs_button_callback( FL_OBJECT *a, long b );
+void cut_clear_curve( long curve );
 
 
 #endif   /* ! GRAPH_CUT_HEADER */
