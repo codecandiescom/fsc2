@@ -155,6 +155,7 @@ Var *digitizer_lock_keyboard( Var *v );
 const char *tds520_ptime( double p_time );
 void tds520_delete_windows( void );
 void tds520_do_pre_exp_checks( void );
+long tds520_translate_channel( int dir, long channel );
 
 bool tds520_init( const char *name );
 double tds520_get_timebase( void );
