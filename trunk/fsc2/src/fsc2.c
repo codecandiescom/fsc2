@@ -721,8 +721,7 @@ void sigchld_handler( int sig_type, void *data )
 
 	data = data;
 
-	if ( sig_type != SIGCHLD )
-		return;
+	assert( sig_type == SIGCHLD );
 
 	/* Get exit status of child and display information if necessary */
 

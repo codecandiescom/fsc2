@@ -112,8 +112,8 @@ bool run( void )
 
 	/* Set the signal handlers - for NEW_DATA signals we can't use XForms
 	   signal handlers because they become blocked by when the display is busy
-	   and no SEND_DATA is send back to the child, evectively stopping it
-	   completely, so we have to use the traditional approach... for this type
+	   and no SEND_DATA is send back to the child, effectively stopping it
+	   completely, so we have to use the traditional approach for this type
 	   of signal */
 
 	signal( NEW_DATA, new_data_handler );
