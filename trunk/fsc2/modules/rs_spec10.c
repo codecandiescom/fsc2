@@ -361,6 +361,8 @@ Var *ccd_camera_get_picture( Var *v )
 	long *bin_arr, *bap;
 	long *cl;
 	uns16 *cf;
+	long *dest;
+	double divs;
 
 
 	UNUSED_ARGUMENT( v );
@@ -375,6 +377,40 @@ Var *ccd_camera_get_picture( Var *v )
 	height = l_max( ( rs_spec10->ccd.roi[ Y + 2 ]
 					  - rs_spec10->ccd.roi[ Y ] + 1 )
 					/ rs_spec10->ccd.bin[ Y ], 1 );
+
+	/* Make sure the dimensions of the ROI are not smaller than the
+	   binning area */
+
+	if ( width == 0 )
+	{
+		rs_sec10->ccd.roi[ X ] +=
+			( rs_spec10->ccd.roi[ X + 2 ] - rs_spec10->ccd.roi[ X ] + 1 
+			  - rs_spec10->ccd.bin[ X ] ) / 2;
+		rs_sec10->ccd.roi[ X + 2 ] =
+							  rs_sec10->ccd.roi[ X ] + rs_spec10->ccd.bin[ X ];
+	}
+
+	if ( height == 0 )
+	{
+		rs_sec10->ccd.roi[ Y ] +=
+			( rs_spec10->ccd.roi[ Y + 2 ] - rs_spec10->ccd.roi[ Y ] + 1 
+			  - rs_spec10->ccd.bin[ Y ] ) / 2;
+		rs_sec10->ccd.roi[ Y + 2 ] =
+							  rs_sec10->ccd.roi[ Y ] + rs_spec10->ccd.bin[ Y ];
+	}
+
+	if ( width == 0 || height == 0 )
+		print( SEVERE, "ROI had to be expanded to LLC = (%ld, %ld) and "
+			   "URC = (%ld, %ld) to fit the binning area.\n",
+			   ( long ) rs_sec10->ccd.roi[ X ],
+			   ( long ) rs_sec10->ccd.roi[ X + 2 ],
+			   ( long ) rs_sec10->ccd.roi[ Y ],
+			   ( long ) rs_sec10->ccd.roi[ Y + 2 ] );
+
+	if ( width == 0 )
+		width = 1;
+	if ( height == 0 )
+		height = 1;
 
 	if ( FSC2_MODE == EXPERIMENT )
 		frame = rs_spec10_get_pic( );
@@ -398,16 +434,19 @@ Var *ccd_camera_get_picture( Var *v )
 		RETHROW( );
 	}
 
-	if ( FSC2_MODE == TEST || rs_spec10->ccd.bin_mode == HARDWARE_BINNING )
+	if ( FSC2_MODE == TEST || rs_spec10->ccd.bin_mode == HARDWARE_BINNING ||
+		 ( rs_spec10->ccd.bin[ X ] == 1 && rs_spec10->ccd.bin[ Y ] == 1 ) )
 		for ( cf = frame, i = 0; i < height; i++ )
 		{
 			cl = nv->val.vptr[ i ]->val.lpnt;
 			for ( j = 0; j < width; j++ )
 				*cl++ = ( long ) *cf++;
 		}
-	else
+	else                         /* ...we have to do the binning ourselves */
 	{
-		w = rs_spec10->ccd.roi[ X + 2 ] - rs_spec10->ccd.roi[ X ] + 1;
+		w = width * rs_spec10->ccd.bin[ X ];
+		mw = rs_spec10->ccd.roi[ X + 2 ] - rs_spec10->ccd.roi[ X ] + 1;	   
+		divs = 1.0 / ( rs_spec10->ccd.bin[ X ] * rs_spec10->ccd.bin[ Y ] );
 
 		TRY
 		{
@@ -424,13 +463,31 @@ Var *ccd_camera_get_picture( Var *v )
 		{
 			memset( bin_arr, 0, w * sizeof *bin_arr );
 
-			for ( j = 0; j < w; j++ )
-				for ( k = 0; k < rs_spec10->ccd.bin[ Y ]; k++, cf++ )
-					bin_arr[ j ] += ( long ) *cf;
+			/* Add up all values for the current piece of the whole area
+			   in y-direction */
 
-			for ( bap = bin_arr, j = 0; j < width; j++ )
+			for ( bap = bin_arr, j = 0; j < w; j++, bap++ )
+				for ( k = 0; k < rs_spec10->ccd.bin[ Y ]; k++, cf++ )
+					*bap += ( long ) *cf;
+
+			/* Skip the values in the data that don't fall into one of
+			   the pieces (i.e. when the x-binning size isn't an integer
+			   multiple of the x-ROI size */
+
+			cf += mw - w;
+
+			/* Now do the binning in x-direction for all pieces - since with
+			   hardware binning we get the total sum devided by the number
+			   of pixels in the binning area we also have to do this
+			   division for the total result of each of the pieces. */
+
+			for ( bap = bin_arr, dest = nv->val.vptr[ i ]->val.lpnt,
+				  j = 0; j < width; j++, dest++ )
+			{
 				for ( k = 0; k < rs_spec10->ccd.bin[ X ]; k++, bap++ )
-					nv->val.vptr[ i ]->val.lpnt[ j ] += *bap;
+					*dest += *bap;
+				*dest = lrnd( *dest * divs );
+			}
 		}
 
 		T_free( bin_arr );
