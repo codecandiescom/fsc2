@@ -107,8 +107,6 @@ void cut_show( int dir, int pos )
 		fl_set_form_atclose( cut_form->cut, cut_form_close_handler, NULL );
 
 		G_init_cut_curve( );
-
-		is_shown = is_mapped = SET;
 	}
 	else if ( ! is_mapped )
 	{
@@ -117,43 +115,7 @@ void cut_show( int dir, int pos )
 		is_mapped = SET;
 	}
 
-	G.is_cut = SET;
-
 	fl_raise_form( cut_form->cut );
-
-	/* Calculate the scaling factors */
-
-	if ( scv->is_fs )
-	{
-		cv->s2d[ X ] = ( double ) ( G.cut_canvas.w - 1 ) /
-			           ( double ) ( CG.nx - 1 );
-		cv->s2d[ Y ] = ( double ) ( G.cut_canvas.h - 1 );
-		cv->shift[ X ] = 0.0;
-		cv->shift[ Y ] = 0.0;
-
-		CG.is_fs = SET;
-		fl_set_button( cut_form->cut_full_scale_button, 1 );
-		fl_set_object_helper( cut_form->cut_full_scale_button,
-							  "Switch off automatic rescaling" );
-	}
-	else
-	{
-		cv->s2d[ Y ] = scv->s2d[ Z ] / ( double ) ( G.z_axis.h - 1 )
-			           * ( double ) ( G.cut_canvas.h - 1 );
-		cv->shift[ Y ] = scv->shift[ Z ];
-
-//		if ( dir == X )
-
-		cv->s2d[ X ] = ( double ) ( G.cut_canvas.w - 1 ) /
-			           ( double ) ( CG.nx - 1 );
-		cv->shift[ X ] = 0.0;
-
-		CG.is_fs = UNSET;
-		fl_set_button( cut_form->cut_full_scale_button, 0 );
-		fl_set_object_helper( cut_form->cut_full_scale_button,
-							  "Rescale curves to fit into the window\n"
-							  "and switch on automatic rescaling" );
-	}
 
 	/* Calculate index into curve where cut is to be shown */
 
@@ -163,7 +125,47 @@ void cut_show( int dir, int pos )
 		index = lround( ( double ) ( G.canvas.h - 1 - pos ) / scv->s2d[ Y ]
 						- scv->shift[ Y ] );
 
+	/* Calculate the scaling factors if the cut window didn't exist or the
+	   cut direction changed */
+
+	if ( ! is_shown || CG.cut_dir != dir )
+	{
+		if ( scv->is_fs )
+		{
+			cv->s2d[ X ] = ( double ) ( G.cut_canvas.w - 1 ) /
+				( double ) ( CG.nx - 1 );
+			cv->s2d[ Y ] = ( double ) ( G.cut_canvas.h - 1 );
+			cv->shift[ X ] = 0.0;
+			cv->shift[ Y ] = 0.0;
+
+			CG.is_fs = SET;
+			fl_set_button( cut_form->cut_full_scale_button, 1 );
+			fl_set_object_helper( cut_form->cut_full_scale_button,
+								  "Switch off automatic rescaling" );
+		}
+		else
+		{
+			cv->s2d[ Y ] = scv->s2d[ Z ] / ( double ) ( G.z_axis.h - 1 )
+			               * ( double ) ( G.cut_canvas.h - 1 );
+			cv->shift[ Y ] = scv->shift[ Z ];
+
+			cv->s2d[ X ] = ( double ) ( G.cut_canvas.w - 1 ) /
+			               ( double ) ( CG.nx - 1 );
+			cv->shift[ X ] = 0.0;
+
+			CG.is_fs = UNSET;
+			fl_set_button( cut_form->cut_full_scale_button, 0 );
+			fl_set_object_helper( cut_form->cut_full_scale_button,
+								  "Rescale curves to fit into the window\n"
+								  "and switch on automatic rescaling" );
+		}
+	} else if ( index == CG.index )
+		return;
+
 	/* Calculate all the points of the cross section curve */
+
+	G.is_cut = SET;
+	is_shown = SET;
 
 	cut_calc_curve( dir, index );
 
@@ -183,8 +185,8 @@ static void cut_calc_curve( int dir, long index )
 	Curve_2d *scv = G.curve_2d[ G.active_curve ];
 
 
-	/* Store direction of cross section - if called unreasonable direction
-	   (i.e. not X or Y) it means keep the old direction) */
+	/* Store direction of cross section - if called with an unreasonable
+	   direction (i.e. not X or Y) keep the old direction) */
 
 	if ( dir == X || dir == Y )
 		CG.cut_dir = dir;
@@ -208,8 +210,8 @@ static void cut_calc_curve( int dir, long index )
 		CG.nx = G.nx;
 	}
 
-	/* If the index is resonable store it (if called with index less the 0
-	   that means keep the old index) */
+	/* If the index is resonable store it (if called with index smaller than
+	   zero keep the old index) */
 
 	if ( index >= 0 )
 		CG.index = index;
@@ -549,7 +551,7 @@ void G_init_cut_curve( void )
 	int i;
 
 
-	depth = fl_get_canvas_depth( G.cut_canvas.obj );
+	/* Create cursors */
 
 	cur_1 = fl_create_bitmap_cursor( cursor_1_bits, cursor_1_bits,
 									 cursor_1_width, cursor_1_height,
@@ -605,6 +607,8 @@ void G_init_cut_curve( void )
 
 	/* Create pixmaps for the out-of-range arrows (in the colors associated
 	   with the four possible curves) */
+
+	depth = fl_get_canvas_depth( G.cut_canvas.obj );
 
 	for ( i = 0; i < MAX_CURVES; i++ )
 	{
