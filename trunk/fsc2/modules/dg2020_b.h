@@ -6,7 +6,7 @@
 #include "fsc2.h"
 
 
-/* Here are all the directy exported functions (i.e. exported either implicit
+/* Here are all the directly exported functions (i.e. exported either implicit
    as a hook functions or via the Functions data base) */
 
 int dg2020_b_init_hook( void );
