@@ -313,6 +313,215 @@ double experiment_time( void )
 }
 
 
+/*--------------------------------------------------------------*/
+/* Function for opening files with the full permissions of fsc2 */
+/*--------------------------------------------------------------*/
+
+FILE *fsc2_fopen( const char *path, const char *mode )
+{
+	FILE *fp;
+
+	if ( ( fp = fopen( path, mode ) ) == NULL && errno != EACCESS )
+		return NULL;
+
+	raise_permissions( );
+	fp = fopen( path, mode );
+	lower_permissions( );
+
+	return fp;
+}
+
+
+/*---------------------------------------------------------*/
+/* Function for formated reading from a file with the full */
+/* permissions of fsc2                                     */
+/*---------------------------------------------------------*/
+
+int fsc2_fscanf( FILE *stream, const char *format, ... )
+{
+	va_list ap;
+	int num;
+
+
+	va_start( ap, format );
+	raise_permissions( );
+	num = vfscanf( stream, format, ap );
+	lower_permissions( );
+	va_end( ap );
+	return num;
+}
+
+
+/*--------------------------------------------------*/
+/* Function for unformated reading from a file with */
+/* the full permissions of fsc2                     */
+/*--------------------------------------------------*/
+
+size_t fsc2_fread( void  *ptr, size_t size, size_t nmemb, FILE *stream )
+{
+	size_t num;
+
+
+	raise_permissions( );
+	num = fread( ptr, size, nmenb, stream );
+	lower_permissions( );
+	return num;
+}
+
+
+/*-------------------------------------------------------*/
+/* Function for formated writing to a file with the full */
+/* permissions of fsc2                                   */
+/*-------------------------------------------------------*/
+
+int fsc2_fprintf( FILE *stream, const char *format, ... )
+{
+	va_list ap;
+	int num;
+
+
+	va_start( ap, format );
+	raise_permissions( );
+	num = vfprintf( stream, format, ap );
+	lower_permissions( );
+	va_end( ap );
+	return num;
+}
+
+
+/*------------------------------------------------*/
+/* Function for unformated writing to a file with */
+/* the full permissions of fsc2                   */
+/*------------------------------------------------*/
+
+size_t fsc2_fwrite( void  *ptr, size_t size, size_t nmemb, FILE *stream )
+{
+	size_t num;
+
+
+	raise_permissions( );
+	num = fwrite( ptr, size, nmenb, stream );
+	lower_permissions( );
+	return num;
+}
+
+
+/*------------------------------------------------*/
+/* Function for reading a single char from a file */
+/* with the full permissions of fsc2              */
+/*------------------------------------------------*/
+
+int fsc2_fgetc( FILE *stream )
+{
+	int num;
+
+
+	raise_permissions( );
+	num = fgetc( stream );
+	lower_permissions( );
+	return num;
+}
+	
+
+/*------------------------------------------------*/
+/* Function for reading a single char from a file */
+/* with the full permissions of fsc2              */
+/*------------------------------------------------*/
+
+int fsc2_getc( FILE *stream )
+{
+	int num;
+
+	raise_permissions( );
+	num = getc( stream );
+	lower_permissions( );
+	return num;
+}
+
+
+/*-------------------------------------------*/
+/* Function for reading a string from a file */
+/* with the full permissions of fsc2         */
+/*-------------------------------------------*/
+
+char *fsc2_fgets( char *s, int size, FILE *stream )
+{
+	char *p;
+
+
+	raise_permissions( );
+	num = fgets( s, size, stream );
+	lower_permissions( );
+	return p;
+}
+
+
+/*---------------------------------------------------*/
+/* Function for pushing back a character into a file */
+/* with the full permissions of fsc2                 */
+/*---------------------------------------------------*/
+
+int fsc2_ungetc( int c, FILE *stream )
+{
+	int num;
+
+
+	raise_permissions( );
+	num = ungetc( c, stream );
+	lower_permissions( );
+	return num;
+}
+
+
+/*---------------------------------------------*/
+/* Function for positioning in a file with the */
+/* full permissions of fsc2                    */
+/*---------------------------------------------*/
+
+int fsc2_fseek( FILE *stream, long offset, int whence )
+{
+	int num;
+
+	raise_permissions( );
+	num = fseek( stream, offset, whence );
+	lower_permissions( );
+	return num;
+}
+
+
+/*-------------------------------------------------*/
+/* Function for determining the position in a file */
+/* with the full permissions of fsc2               */
+/*-------------------------------------------------*/
+
+long fsc2_ftell( FILE *stream )
+{
+	long num;
+
+
+	raise_permissions( );
+	num = ftell( stream );
+	lower_permissions( );
+	return num;
+}
+
+
+/*---------------------------------------------------------------*/
+/* Function for closing a file with the full permissions of fsc2 */
+/*---------------------------------------------------------------*/
+
+int fsc2_fclose( FILE *stream )
+{
+	int num;
+
+
+	raise_permissions( );
+	num = fclose( stream );
+	lower_permissions( );
+	return num;
+}
+
+
 /*
  * Local variables:
  * tags-file-name: "../TAGS"

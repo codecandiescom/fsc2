@@ -40,6 +40,18 @@ bool get_boolean( Var *v );
 double is_mult_ns( double val, const char * text );
 char *translate_escape_sequences( char *str );
 double experiment_time( void );
+FILE *fsc2_fopen( const char *path, const char *mode );
+int fsc2_fscanf( FILE *stream, const char *format, ... );
+size_t fsc2_fread( void  *ptr, size_t size, size_t nmemb, FILE *stream );
+int fsc2_fprintf( FILE *stream, const char *format, ... );
+size_t fsc2_fwrite( void  *ptr, size_t size, size_t nmemb, FILE *stream );
+int fsc2_fgetc( FILE *stream );
+int fsc2_getc( FILE *stream );
+char *fsc2_fgets( char *s, int size, FILE *stream );
+int fsc2_ungetc( int c, FILE *stream );
+int fsc2_fseek( FILE *stream, long offset, int whence );
+long fsc2_ftell( FILE *stream );
+int fsc2_fclose( FILE *stream );
 
 
 #define MODULE_CALL_ESTIMATE   0.02   /* 20 ms per module function call -
