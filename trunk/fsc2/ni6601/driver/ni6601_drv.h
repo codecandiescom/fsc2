@@ -20,6 +20,11 @@
 */
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
 #include <linux/ioctl.h>
 
 
@@ -383,6 +388,11 @@ int ni6601_input_source( int source, u16 *bits );
 
 
 #endif /* defined __KERNEL__ */
+
+
+#ifdef __cplusplus
+} /* extern "C" */
+#endif
 
 
 /*

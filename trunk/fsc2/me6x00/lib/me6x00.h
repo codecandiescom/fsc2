@@ -22,6 +22,11 @@
 */
 
 
+#ifdef __cplusplus
+} /* extern "C" */
+#endif
+
+
 #include <me6x00_drv.h>
 
 
@@ -102,3 +107,8 @@ int me6x00_wraparound( int board, int dac, int size, unsigned short *buf );
 #define ME6X00_ERR_NDV_MESS "No driver loaded for board"
 
 #define ME6X00_ERR_INT_MESS "Internal library error"
+
+
+#ifdef __cplusplus
+} /* extern "C" */
+#endif

@@ -22,6 +22,11 @@
 */
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
 #include <witio_48_drv.h>
 
 
@@ -61,3 +66,8 @@ const char *witio_48_error_message( void );
 #define WITIO_48_ERR_DFM_MESS  "Device file does not exist"
 #define WITIO_48_ERR_DFP_MESS  "Unspecified error when opening device file"
 #define WITIO_48_ERR_INT_MESS  "Internal driver or library error"
+
+
+#ifdef __cplusplus
+} /* extern "C" */
+#endif

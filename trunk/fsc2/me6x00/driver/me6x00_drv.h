@@ -94,6 +94,11 @@
  */
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
 #ifdef __KERNEL__
 
 /* Define the proper debug mode */
@@ -449,6 +454,11 @@ typedef  struct {
 
 #define ME6X00_IOCTL_MINNR        _IOC_NR( ME6X00_SET_MODE )
 #define ME6X00_IOCTL_MAXNR        _IOC_NR( ME6X00_KEEP_VOLTAGE )
+
+
+#ifdef __cplusplus
+} /* extern "C" */
+#endif
 
 
 /*

@@ -22,6 +22,10 @@
 */
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 
 #include <linux/ioctl.h>
 
@@ -163,6 +167,12 @@ struct Board {
 
 
 #endif    /* __KERNEL__ */
+
+
+#ifdef __cplusplus
+} /* extern "C" */
+#endif
+
 
 /*
  * Local variables:

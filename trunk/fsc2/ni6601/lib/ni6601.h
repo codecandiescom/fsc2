@@ -22,6 +22,11 @@
 */
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
 #include <ni6601_drv.h>
 #include <math.h>
 #include <limits.h>
@@ -97,3 +102,8 @@ const char *ni6601_error_message( void );
 #define NI6601_ERR_DFM_MESS  "Device file does not exist"
 #define NI6601_ERR_DFP_MESS  "Unspecified error when opening device file"
 #define NI6601_ERR_INT_MESS  "Internal driver or library error"
+
+
+#ifdef __cplusplus
+} /* extern "C" */
+#endif
