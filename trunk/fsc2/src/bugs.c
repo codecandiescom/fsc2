@@ -35,10 +35,9 @@ extern int fail_mess_fd;               /* defined in dump.c     */
 /* additional input by the user. Finally it mails me the report.          */
 /*------------------------------------------------------------------------*/
 
-void bug_report_callback( FL_OBJECT *a, long b )
-{
 #if defined ( MAIL_ADDRESS )
-
+void bug_report_callback( FL_OBJECT *a, UNUSED_ARG long b )
+{
 	FILE *tmp;
 	int tmp_fd;
 	char filename[ ] = P_tmpdir "/fsc2.mail.XXXXXX";
@@ -53,7 +52,6 @@ void bug_report_callback( FL_OBJECT *a, long b )
 	struct sigaction sact, oact;
 
 
-	UNUSED_ARGUMENT( b );
 	notify_conn( BUSY_SIGNAL );
 
 	/* Create a temporary file for the mail */
@@ -216,21 +214,21 @@ void bug_report_callback( FL_OBJECT *a, long b )
 	close( tmp_fd );
 	sigaction( SIGCHLD, &oact, NULL );
 	notify_conn( UNBUSY_SIGNAL );
-#else
-	UNUSED_ARGUMENT( a );
-	UNUSED_ARGUMENT( b );
-#endif
 }
+#else
+void bug_report_callback( UNUSED_ARG FL_OBJECT *a, UNUSED_ARG long b )
+{
+}
+#endif
 
 
 /*-------------------------------------------------------*/
 /* This function sends an email to me when fsc2 crashes. */
 /*-------------------------------------------------------*/
 
+#if ! defined( NDEBUG ) && defined ( MAIL_ADDRESS )
 void death_mail( int signo )
 {
-#if ! defined( NDEBUG ) && defined ( MAIL_ADDRESS )
-
 #define DM_BUF_SIZE 512
 
 	FILE *mail;
@@ -324,10 +322,12 @@ void death_mail( int signo )
 	rewind( mail );
 	send_mail( "fsc2 crash", "fsc2", NULL, MAIL_ADDRESS, mail );
 	fclose( mail );
-#else
-	UNUSED_ARGUMENT( signo );
-#endif
 }
+#else
+void death_mail( UNUSED_ARG int signo )
+{
+}
+#endif
 
 
 /*

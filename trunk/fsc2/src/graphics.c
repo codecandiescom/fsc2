@@ -776,11 +776,8 @@ static void forms_adapt( void )
 /* clicking  on the "Close" button within the display window.       */
 /*------------------------------------------------------------------*/
 
-int run_form_close_handler( FL_FORM *a, void *b )
+int run_form_close_handler( UNUSED_ARG FL_FORM *a, UNUSED_ARG void *b )
 {
-	UNUSED_ARGUMENT( a );
-	UNUSED_ARGUMENT( b );
-
 	if ( Internals.child_pid == 0 )          /* if child has already exited */
 	{
 		if ( ! G.is_init || G.dim & 1 )
@@ -1851,7 +1848,7 @@ void switch_off_special_cursors( void )
 /* Undoes the last action in the 1d window as far as possible. */
 /*-------------------------------------------------------------*/
 
-void undo_button_callback_1d( FL_OBJECT *a, long b )
+void undo_button_callback_1d( UNUSED_ARG FL_OBJECT *a, UNUSED_ARG long b )
 {
 	long i;
 	bool is_undo = UNSET;
@@ -1860,9 +1857,6 @@ void undo_button_callback_1d( FL_OBJECT *a, long b )
 		   temp_shift;
 	int j;
 
-
-	UNUSED_ARGUMENT( a );
-	UNUSED_ARGUMENT( b );
 
 	for ( i = 0; i < G1.nc; i++ )
 	{
@@ -1907,7 +1901,7 @@ void undo_button_callback_1d( FL_OBJECT *a, long b )
 /* Undoes the last action in the 2d window as far as possible. */
 /*-------------------------------------------------------------*/
 
-void undo_button_callback_2d( FL_OBJECT *a, long b )
+void undo_button_callback_2d( UNUSED_ARG FL_OBJECT *a, UNUSED_ARG long b )
 {
 	Curve_2d *cv2;
 	double temp_s2d,
@@ -1915,9 +1909,6 @@ void undo_button_callback_2d( FL_OBJECT *a, long b )
 	double temp_z_factor;
 	int j;
 
-
-	UNUSED_ARGUMENT( a );
-	UNUSED_ARGUMENT( b );
 
 	if ( G2.active_curve == -1 || ! G2.curve_2d[ G2.active_curve ]->can_undo )
 		return;
@@ -1960,14 +1951,11 @@ void undo_button_callback_2d( FL_OBJECT *a, long b )
 /* Rescales the 1D display so that the canvas is completely used. */
 /*----------------------------------------------------------------*/
 
-void fs_button_callback_1d( FL_OBJECT *a, long b )
+void fs_button_callback_1d( UNUSED_ARG FL_OBJECT *a, UNUSED_ARG long b )
 {
 	int state;
 	long i;
 
-
-	UNUSED_ARGUMENT( a );
-	UNUSED_ARGUMENT( b );
 
 	/* Rescaling is useless if graphic isn't initialized */
 
@@ -2010,13 +1998,10 @@ void fs_button_callback_1d( FL_OBJECT *a, long b )
 /* Rescales the 2D display so that the canvas is completely used. */
 /*----------------------------------------------------------------*/
 
-void fs_button_callback_2d( FL_OBJECT *a, long b )
+void fs_button_callback_2d( UNUSED_ARG FL_OBJECT *a, UNUSED_ARG long b )
 {
 	int state;
 
-
-	UNUSED_ARGUMENT( a );
-	UNUSED_ARGUMENT( b );
 
 	/* Rescaling is useless if graphic isn't initialized */
 

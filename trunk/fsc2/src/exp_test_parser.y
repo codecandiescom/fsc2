@@ -271,10 +271,8 @@ void exp_test_init( void )
 /*---------------------------------------------------------*/
 /*---------------------------------------------------------*/
 
-static void exp_testerror( const char *s )
+static void exp_testerror( UNUSED_ARG const char *s )
 {
-	UNUSED_ARGUMENT( s );
-
 	if ( ! dont_print_error && ! in_cond )
 	{
 		print( FATAL, "Syntax error in EXPERIMENT section.\n" );

@@ -36,10 +36,8 @@
 /* Just tell user about the errors of his way... */
 /*-----------------------------------------------*/
 
-void fsc2_request_serial_port( int sn, const char *devname )
+void fsc2_request_serial_port( UNUSED_ARG int sn, const char *devname )
 {
-	UNUSED_ARGUMENT( sn );
-
 	eprint( FATAL, UNSET, "%s: Device needs serial port but fsc2 was "
 			"not compiled with support for serial port access.\n", devname );
 	THROW( EXCEPTION );
@@ -78,12 +76,10 @@ void fsc2_final_serial_cleanup( void )
 /* would never call the function anyway.                       */
 /*-------------------------------------------------------------*/
 
-struct termios *fsc2_serial_open( int sn, const char *devname, int flags )
+struct termios *fsc2_serial_open( UNUSED_ARG int sn,
+								  UNUSED_ARG const char *devname,
+								  UNUSED_ARG int flags )
 {
-	UNUSED_ARGUMENT( sn );
-	UNUSED_ARGUMENT( devname );
-	UNUSED_ARGUMENT( flags );
-
 	errno = EACCES;
 	return NULL;
 }
@@ -93,9 +89,8 @@ struct termios *fsc2_serial_open( int sn, const char *devname, int flags )
 /* Nothing to be done */
 /*--------------------*/
 
-void fsc2_serial_close( int sn )
+void fsc2_serial_close( UNUSED_ARG int sn )
 {
-	UNUSED_ARGUMENT( sn );
 }
 
 
@@ -103,15 +98,10 @@ void fsc2_serial_close( int sn )
 /* Return -1 to indicate failure */
 /*-------------------------------*/
 
-ssize_t fsc2_serial_write( int sn, const void *buf, size_t count,
-						   long us_wait, bool quit_on_signal )
+ssize_t fsc2_serial_write( UNUSED_ARG int sn, UNUSED_ARG const void *buf,
+						   UNUSED_ARG size_t count, UNUSED_ARG long us_wait,
+						   UNUSED_ARG bool quit_on_signal )
 {
-	UNUSED_ARGUMENT( sn );
-	UNUSED_ARGUMENT( buf );
-	UNUSED_ARGUMENT( count );
-	UNUSED_ARGUMENT( us_wait );
-	UNUSED_ARGUMENT( quit_on_signal );
-
 	errno = EBADF;
 	return -1;
 }
@@ -121,15 +111,10 @@ ssize_t fsc2_serial_write( int sn, const void *buf, size_t count,
 /* Return -1 to indicate failure */
 /*-------------------------------*/
 
-ssize_t fsc2_serial_read( int sn, void *buf, size_t count,
-						  long us_wait, bool quit_on_signal )
+ssize_t fsc2_serial_read( UNUSED_ARG int sn, UNUSED_ARG void *buf,
+						  UNUSED_ARG size_t count, UNUSED_ARG long us_wait,
+						  UNUSED_ARG bool quit_on_signal )
 {
-	UNUSED_ARGUMENT( sn );
-	UNUSED_ARGUMENT( buf );
-	UNUSED_ARGUMENT( count );
-	UNUSED_ARGUMENT( us_wait );
-	UNUSED_ARGUMENT( quit_on_signal );
-
 	errno = EBADF;
 	return -1;
 }
@@ -139,11 +124,8 @@ ssize_t fsc2_serial_read( int sn, void *buf, size_t count,
 /* Return -1 to indicate failure */
 /*-------------------------------*/
 
-int fsc2_tcgetattr( int sn, struct termios *termios_p )
+int fsc2_tcgetattr( UNUSED_ARG int sn, UNUSED_ARG struct termios *termios_p )
 {
-	UNUSED_ARGUMENT( sn );
-	UNUSED_ARGUMENT( termios_p );
-
 	errno = EBADF;
 	return -1;
 }
@@ -153,12 +135,9 @@ int fsc2_tcgetattr( int sn, struct termios *termios_p )
 /* Return -1 to indicate failure */
 /*-------------------------------*/
 
-int fsc2_tcsetattr( int sn, int optional_actions, struct termios *termios_p )
+int fsc2_tcsetattr( UNUSED_ARG int sn, UNUSED_ARG int optional_actions,
+					UNUSED_ARG struct termios *termios_p )
 {
-	UNUSED_ARGUMENT( sn );
-	UNUSED_ARGUMENT( optional_actions );
-	UNUSED_ARGUMENT( termios_p );
-
 	errno = EBADF;
 	return -1;
 }
@@ -168,11 +147,8 @@ int fsc2_tcsetattr( int sn, int optional_actions, struct termios *termios_p )
 /* Return -1 to indicate failure */
 /*-------------------------------*/
 
-int fsc2_tcsendbreak( int sn, int duration )
+int fsc2_tcsendbreak( UNUSED_ARG int sn, UNUSED_ARG int duration )
 {
-	UNUSED_ARGUMENT( sn );
-	UNUSED_ARGUMENT( duration );
-
 	errno = EBADF;
 	return -1;
 }
@@ -182,10 +158,8 @@ int fsc2_tcsendbreak( int sn, int duration )
 /* Return -1 to indicate failure */
 /*-------------------------------*/
 
-int fsc2_tcdrain( int sn )
+int fsc2_tcdrain( UNUSED_ARG int sn )
 {
-	UNUSED_ARGUMENT( sn );
-
 	errno = EBADF;
 	return -1;
 }
@@ -195,11 +169,8 @@ int fsc2_tcdrain( int sn )
 /* Return -1 to indicate failure */
 /*-------------------------------*/
 
-int fsc2_tcflush( int sn, int queue_selector )
+int fsc2_tcflush( UNUSED_ARG int sn, UNUSED_ARG int queue_selector )
 {
-	UNUSED_ARGUMENT( sn );
-	UNUSED_ARGUMENT( queue_selector );
-
 	errno = EBADF;
 	return -1;
 }
@@ -209,11 +180,8 @@ int fsc2_tcflush( int sn, int queue_selector )
 /* Return -1 to indicate failure */
 /*-------------------------------*/
 
-int fsc2_tcflow( int sn, int action )
+int fsc2_tcflow( UNUSED_ARG int sn, UNUSED_ARG int action )
 {
-	UNUSED_ARGUMENT( sn );
-	UNUSED_ARGUMENT( action );
-
 	errno = EBADF;
 	return -1;
 }
@@ -666,9 +634,9 @@ ssize_t fsc2_serial_read( int sn, void *buf, size_t count,
 /* number, with a trailing newline (HDB UUCP format).           */
 /*--------------------------------------------------------------*/
 
+#ifdef SERIAL_LOCK_DIR
 static bool get_serial_lock( int sn )
 {
-#ifdef SERIAL_LOCK_DIR
 	int fd;
 	char buf[ 128 ];
 	const char *bp;
@@ -781,11 +749,15 @@ static bool get_serial_lock( int sn )
 
 	lower_permissions( );
 	Serial_Port[ sn ].have_lock = SET;
-#else
-	UNUSED_ARGUMENT( sn );
-#endif
+
 	return OK;
 }
+#else
+static bool get_serial_lock( UNUSED_ARG int sn )
+{
+	return OK;
+}
+#endif
 
 
 /*-------------------------------------------------------------*/

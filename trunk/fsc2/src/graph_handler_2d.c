@@ -288,14 +288,12 @@ static void press_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev,
 /* Handler for events due to releasing one of the mouse buttons. */
 /*---------------------------------------------------------------*/
 
-static void release_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev,
-								Canvas *c )
+static void release_handler_2d( UNUSED_ARG FL_OBJECT *obj, Window window,
+								XEvent *ev, Canvas *c )
 {
 	unsigned int keymask;
 	bool scale_changed = UNSET;
 
-
-	UNUSED_ARGUMENT( obj );
 
 	/* If the released button didn't has a meaning just clear it from the
 	   button state pattern and then forget about it */
@@ -520,15 +518,13 @@ static void release_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev,
 /* Handler for events due to movements of the mouse. */
 /*---------------------------------------------------*/
 
-static void motion_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev,
-							   Canvas *c )
+static void motion_handler_2d( UNUSED_ARG FL_OBJECT *obj, Window window,
+							   XEvent *ev, Canvas *c )
 {
 	XEvent new_ev;
 	unsigned int keymask;
 	bool scale_changed = UNSET;
 
-
-	UNUSED_ARGUMENT( obj );
 
 	if ( G2.active_curve == -1 )
 		return;

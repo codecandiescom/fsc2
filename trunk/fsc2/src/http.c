@@ -49,12 +49,10 @@ enum {
 /* in the main form for starting and stopping the HTTP server */
 /*------------------------------------------------------------*/
 
-void server_callback( FL_OBJECT *obj, long a )
+void server_callback( FL_OBJECT *obj, UNUSED_ARG long a )
 {
 	char *www_help;
 
-
-	UNUSED_ARGUMENT( a );
 
 	if ( fl_get_button( obj ) && Internals.http_pid >= 0 )
 	{

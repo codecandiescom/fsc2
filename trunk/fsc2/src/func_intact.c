@@ -1009,10 +1009,8 @@ void recreate_Toolbox( void )
 /* the event.                                                         */
 /*--------------------------------------------------------------------*/
 
-static int toolbox_close_handler( FL_FORM *a, void *b )
+static int toolbox_close_handler( UNUSED_ARG FL_FORM *a, UNUSED_ARG void *b )
 {
-	UNUSED_ARGUMENT( a );
-	UNUSED_ARGUMENT( b );
 	return FL_IGNORE;
 }
 
@@ -1679,7 +1677,7 @@ static void menu_setup( IOBJECT *io )
 /* to be used by the functions button_state() etc.          */
 /*----------------------------------------------------------*/
 
-static void tools_callback( FL_OBJECT *obj, long data )
+static void tools_callback( FL_OBJECT *obj, UNUSED_ARG long data )
 {
 	IOBJECT *io, *oio;
 	long lval;
@@ -1689,7 +1687,6 @@ static void tools_callback( FL_OBJECT *obj, long data )
 	char obuf[ MAX_INPUT_CHARS + 1 ];
 
 
-	UNUSED_ARGUMENT( data );
 
 	/* Find out which object got changed */
 

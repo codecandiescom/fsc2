@@ -494,11 +494,8 @@ void G_init_cut_curve( void )
 /*----------------------------------------------------------------------*/
 /*----------------------------------------------------------------------*/
 
-static int cut_form_close_handler( FL_FORM *a, void *b )
+static int cut_form_close_handler( UNUSED_ARG FL_FORM *a, UNUSED_ARG void *b )
 {
-	UNUSED_ARGUMENT( a );
-	UNUSED_ARGUMENT( b );
-
 	cut_close_callback( GUI.cut_form->cut_close_button, 0 );
 	return FL_IGNORE;
 }
@@ -571,13 +568,10 @@ void cut_form_close( void )
 /* first delete and later to recreate lots of stuff).          */
 /*-------------------------------------------------------------*/
 
-void cut_close_callback( FL_OBJECT *a, long b )
+void cut_close_callback( UNUSED_ARG FL_OBJECT *a, UNUSED_ARG long b )
 {
 	int i;
 
-
-	UNUSED_ARGUMENT( a );
-	UNUSED_ARGUMENT( b );
 
 	G.coord_display &= ~ 4;
 	G.dist_display  &= ~ 4;
@@ -1496,14 +1490,12 @@ static void cut_press_handler( FL_OBJECT *obj, Window window,
 /* Handler for ButtonRelease events the cut graphic window gets */
 /*--------------------------------------------------------------*/
 
-static void cut_release_handler( FL_OBJECT *obj, Window window,
+static void cut_release_handler( UNUSED_ARG FL_OBJECT *obj, Window window,
 								 XEvent *ev, Canvas *c )
 {
 	unsigned int keymask;
 	bool scale_changed = UNSET;
 
-
-	UNUSED_ARGUMENT( obj );
 
 	/* If the released button didn't has a meaning just clear it from the
 	   button state pattern and then forget about it */
@@ -1682,7 +1674,7 @@ static void cut_release_handler( FL_OBJECT *obj, Window window,
 /* Handler for MotionNotify events the cut graphic window gets */
 /*-------------------------------------------------------------*/
 
-static void cut_motion_handler( FL_OBJECT *obj, Window window,
+static void cut_motion_handler( UNUSED_ARG FL_OBJECT *obj, Window window,
 								XEvent *ev, Canvas *c )
 {
 	XEvent new_ev;
@@ -1690,8 +1682,6 @@ static void cut_motion_handler( FL_OBJECT *obj, Window window,
 	unsigned int keymask;
 	long p_index;
 
-
-	UNUSED_ARGUMENT( obj );
 
 	/* Do event compression to avoid being flooded with motion events -
 	   instead of handling them all individually only react to the latest
@@ -1805,16 +1795,13 @@ static void cut_motion_handler( FL_OBJECT *obj, Window window,
 /* Handler for the undo button in the cut graphic window */
 /*-------------------------------------------------------*/
 
-void cut_undo_button_callback( FL_OBJECT *a, long b )
+void cut_undo_button_callback( UNUSED_ARG FL_OBJECT *a, UNUSED_ARG long b )
 {
 	double temp_s2d,
 		   temp_shift;
 	Curve_1d *cv = &G2.cut_curve;
 	int j;
 
-
-	UNUSED_ARGUMENT( a );
-	UNUSED_ARGUMENT( b );
 
 	if ( CG.curve == -1 || ! CG.can_undo[ G2.active_curve ] )
 		return;
@@ -1851,13 +1838,10 @@ void cut_undo_button_callback( FL_OBJECT *a, long b )
 /* Handler for the full scale button in the cut graphic window */
 /*-------------------------------------------------------------*/
 
-void cut_fs_button_callback( FL_OBJECT *a, long b )
+void cut_fs_button_callback( UNUSED_ARG FL_OBJECT *a, UNUSED_ARG long b )
 {
 	int state;
 
-
-	UNUSED_ARGUMENT( a );
-	UNUSED_ARGUMENT( b );
 
 	/* Rescaling is useless if no cut curve is shown */
 
@@ -2844,11 +2828,8 @@ void cut_clear_curve( long curve )
 /*----------------------------------------------------------*/
 /*----------------------------------------------------------*/
 
-void cut_next_index( FL_OBJECT *a, long b )
+void cut_next_index( UNUSED_ARG FL_OBJECT *a, long b )
 {
-	UNUSED_ARGUMENT( a );
-
-
 	delete_all_cut_markers( UNSET );
 	switch( b )
 	{
@@ -2874,7 +2855,7 @@ void cut_next_index( FL_OBJECT *a, long b )
 /*----------------------------------------------------------*/
 /*----------------------------------------------------------*/
 
-void cut_change_dir( FL_OBJECT *a, long b )
+void cut_change_dir( UNUSED_ARG FL_OBJECT *a, UNUSED_ARG long b )
 {
 	Curve_1d *cv = &G2.cut_curve;
 	Curve_2d *scv = G2.curve_2d[ G2.active_curve ];
@@ -2882,10 +2863,6 @@ void cut_change_dir( FL_OBJECT *a, long b )
 	unsigned int keymask;
 	int px, py;
 
-
-
-	UNUSED_ARGUMENT( a );
-	UNUSED_ARGUMENT( b );
 
 	if ( G.raw_button_state != 3 )
 		return;

@@ -322,10 +322,8 @@ strs:    STR_TOKEN                 { if ( ! dont_exec )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-static void varserror ( const char *s )
+static void varserror ( UNUSED_ARG const char *s )
 {
-	UNUSED_ARGUMENT( s );
-
 	if ( *varstext == '\0' )
 		print( FATAL, "Unexpected end of file in VARIABLES section.\n");
 	else

@@ -68,10 +68,8 @@ sep:     ';'
 %%
 
 
-static void deviceserror ( const char *s )
+static void deviceserror ( UNUSED_ARG const char *s )
 {
-	UNUSED_ARGUMENT( s );
-
 	if ( *devicestext == '\0' )
 		print( FATAL, "Unexpected end of file in DEVICES section.\n" );
 	else

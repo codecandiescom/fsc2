@@ -106,16 +106,14 @@ static unsigned short get_ushort( const unsigned char *p );
 
 #if defined MAIL_PROGRAM
 
-int send_mail( const char *subject, const char *from, const char* cc_to,
-				const char *to, FILE *fp )
+int send_mail( const char *subject, UNUSED_ARG const char *from,
+			   const char* cc_to, const char *to, FILE *fp )
 {
 	FILE *mail;
 	char *cmd;
 	char buf[ MAX_LINE_LENGTH ];
 	size_t len;
 
-
-	UNUSED_ARGUMENT( from );
 
 	CLOBBER_PROTECT( to );
 	CLOBBER_PROTECT( cc_to );

@@ -298,10 +298,8 @@ strs:    E_STR_TOKEN                { if ( ! dont_exec )
 /*---------------------------------------------------------*/
 /*---------------------------------------------------------*/
 
-static void conditionerror( const char *s )
+static void conditionerror( UNUSED_ARG const char *s )
 {
-	UNUSED_ARGUMENT( s );
-
 	print( FATAL, "Syntax error in loop or IF/UNLESS condition.\n" );
 	THROW( EXCEPTION );
 }

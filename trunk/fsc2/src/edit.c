@@ -34,13 +34,10 @@ static void start_editor( void );
 /* function for the Edit-button.                                       */
 /*---------------------------------------------------------------------*/
 
-void edit_file( FL_OBJECT *a, long b )
+void edit_file( UNUSED_ARG FL_OBJECT *a, UNUSED_ARG long b )
 {
 	int res;
 
-
-	UNUSED_ARGUMENT( a );
-	UNUSED_ARGUMENT( b );
 
 	/* Fork and execute editor in child process */
 

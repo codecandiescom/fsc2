@@ -270,8 +270,8 @@ static void press_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
 /* buttons in the axis areas or the camvas                */
 /*--------------------------------------------------------*/
 
-static void release_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
-								Canvas *c )
+static void release_handler_1d( UNUSED_ARG FL_OBJECT *obj, Window window,
+								XEvent *ev, Canvas *c )
 {
 	unsigned int keymask;
 	bool scale_changed = UNSET;
@@ -279,8 +279,6 @@ static void release_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
 	Curve_1d *cv;
 	bool active = UNSET;
 
-
-	UNUSED_ARGUMENT( obj );
 
 	/* If the released button didn't has a meaning just remove it from the
 	   button state pattern */
@@ -493,8 +491,8 @@ static void release_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
 /* the buttons was pressed in the axis areas or the camvas    */
 /*------------------------------------------------------------*/
 
-static void motion_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
-							   Canvas *c )
+static void motion_handler_1d( UNUSED_ARG FL_OBJECT *obj, Window window,
+							   XEvent *ev, Canvas *c )
 {
 	Curve_1d *cv;
 	XEvent new_ev;
@@ -503,8 +501,6 @@ static void motion_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
 	bool scale_changed = UNSET;
 	bool active = UNSET;
 
-
-	UNUSED_ARGUMENT( obj );
 
 	/* Do event compression to avoid being flooded with motion events -
 	   instead of handling them all individually only react to the latest

@@ -1126,7 +1126,7 @@ static void final_exit_handler( void )
 /* reload == 0: read new file, reload == 1: reload file              */
 /*-------------------------------------------------------------------*/
 
-void load_file( FL_OBJECT *a, long reload )
+void load_file( UNUSED_ARG FL_OBJECT *a, long reload )
 {
 	const char *fn;
 	static char *old_in_file;
@@ -1137,8 +1137,6 @@ void load_file( FL_OBJECT *a, long reload )
 	int tmp_fd;
 	FILE *tmp_fp;
 
-
-	UNUSED_ARGUMENT( a );
 
 	notify_conn( BUSY_SIGNAL );
 	old_in_file = NULL;
@@ -1375,7 +1373,7 @@ void load_file( FL_OBJECT *a, long reload )
 /* the currently loaded file.                          */
 /*-----------------------------------------------------*/
 
-void test_file( FL_OBJECT *a, long b )
+void test_file( FL_OBJECT *a, UNUSED_ARG long b )
 {
 	static bool running_test = UNSET;
 	static bool user_break = UNSET;
@@ -1383,7 +1381,6 @@ void test_file( FL_OBJECT *a, long b )
 	static bool in_test = UNSET;
 
 
-	UNUSED_ARGUMENT( b );
 	a->u_ldata = 0;
 
 	/* While program is being tested the test can be aborted by pressing the
@@ -1525,15 +1522,12 @@ void test_file( FL_OBJECT *a, long b )
 /* not already done) and on success starts the experiment.       */
 /*---------------------------------------------------------------*/
 
-void run_file( FL_OBJECT *a, long b )
+void run_file( UNUSED_ARG FL_OBJECT *a, UNUSED_ARG long b )
 {
 	struct stat file_stat;
 	char str1[ 128 ],
 		 str2[ 128 ];
 
-
-	UNUSED_ARGUMENT( a );
-	UNUSED_ARGUMENT( b );
 
 	notify_conn( BUSY_SIGNAL );
 

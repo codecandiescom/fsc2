@@ -34,13 +34,11 @@ static void start_help_browser( void );
 /* documentation.                                              */
 /*-------------------------------------------------------------*/
 
-void run_help( FL_OBJECT *a, long b )
+void run_help( FL_OBJECT *a, UNUSED_ARG long b )
 {
 	int res;
 	int bn;
 
-
-	UNUSED_ARGUMENT( b );
 
 	bn = fl_get_button_numb( a );
 	if ( bn != FL_SHORTCUT + 'S' && bn == FL_RIGHT_MOUSE )

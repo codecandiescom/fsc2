@@ -48,9 +48,8 @@ static long print_include( int fid, char *cp, const char *comment,
 /* so just return value indicating success.                       */
 /*----------------------------------------------------------------*/
 
-Var *f_is_file( Var *v )
+Var *f_is_file( UNUSED_ARG Var *v )
 {
-	UNUSED_ARGUMENT( v );
 	return vars_push( INT_VAR, 1L );
 }
 

@@ -3423,7 +3423,7 @@ Var *f_clearmark_1d( Var *v )
 /* Function deletes all 2D markers */
 /*---------------------------------*/
 
-Var *f_clearmark_2d( Var *v )
+Var *f_clearmark_2d( UNUSED_ARG Var *v )
 {
 	long len = 0;                    /* total length of message to send */
 	void *buf;
@@ -3433,8 +3433,6 @@ Var *f_clearmark_2d( Var *v )
 	int i;
 	long curves[ MAX_CURVES ] = { -1L, -1L, -1L, -1L };
 
-
-	UNUSED_ARGUMENT( v );
 
 	if ( Internals.cmdline_flags & NO_GUI_RUN )
 	{
@@ -3531,15 +3529,13 @@ Var *f_clearmark_2d( Var *v )
 /*-------------------------------------------------*/
 /*-------------------------------------------------*/
 
-Var *f_get_pos( Var *v )
+Var *f_get_pos( UNUSED_ARG Var *v )
 {
 	Var *nv;
 	long len = 0;                    /* total length of message to send */
 	char *buffer, *pos;
 	double *result;
 
-
-	UNUSED_ARGUMENT( v );
 
 	if ( Internals.cmdline_flags & NO_GUI_RUN )
 	{

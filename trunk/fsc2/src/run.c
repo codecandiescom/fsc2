@@ -1,3 +1,4 @@
+
 /*
   $Id$
 
@@ -447,10 +448,8 @@ static void setup_signal_handlers( void )
 /* at this early stage).                                     */
 /*-----------------------------------------------------------*/
 
-static void stop_while_exp_hook( FL_OBJECT *a, long b )
+static void stop_while_exp_hook( UNUSED_ARG FL_OBJECT *a, UNUSED_ARG long b )
 {
-	UNUSED_ARGUMENT( a );
-	UNUSED_ARGUMENT( b );
 	EDL.do_quit = EDL.react_to_do_quit = SET;
 }
 
@@ -580,12 +579,11 @@ static void check_for_further_errors( Compilation *c_old, Compilation *c_all )
 /* variable and reacts by sending the child a DO_QUIT signal.          */
 /*---------------------------------------------------------------------*/
 
-static void quitting_handler( int signo )
+static void quitting_handler( UNUSED_ARG int signo )
 {
 	int errno_saved;
 
 
-	UNUSED_ARGUMENT( signo );
 	errno_saved = errno;
 	Internals.child_is_quitting = QUITTING_RAISED;
 	errno = errno_saved;
@@ -598,12 +596,10 @@ static void quitting_handler( int signo )
 /* used for this button, see run_close_button_callback().            */
 /*-------------------------------------------------------------------*/
 
-void run_stop_button_callback( FL_OBJECT *a, long b )
+void run_stop_button_callback( FL_OBJECT *a, UNUSED_ARG long b )
 {
 	int bn;
 
-
-	UNUSED_ARGUMENT( b );
 
 	/* Activating the Stop button when the child is already dead should
 	   not be possible, but to make real sure (in case of some real
@@ -862,11 +858,8 @@ void run_sigchld_callback( FL_OBJECT *a, long b )
 /* in (one of) the display window(s) gets pressed.       */
 /*-------------------------------------------------------*/
 
-void run_close_button_callback( FL_OBJECT *a, long b )
+void run_close_button_callback( UNUSED_ARG FL_OBJECT *a, UNUSED_ARG long b )
 {
-	UNUSED_ARGUMENT( a );
-	UNUSED_ARGUMENT( b );
-
 	if ( graphics_have_been_started )
 	{
 		stop_graphics( );

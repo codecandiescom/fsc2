@@ -296,10 +296,8 @@ strs:    STR_TOKEN                { if ( ! dont_exec )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-static void prepserror ( const char *s )
+static void prepserror ( UNUSED_ARG const char *s )
 {
-	UNUSED_ARGUMENT( s );
-
 	if ( *prepstext == '\0' )
 		print( FATAL, "Unexpected end of file in PREPARATIONS section.\n" );
 	else

@@ -67,9 +67,9 @@ enum {
 /* in the Makefile.                                                      */
 /*-----------------------------------------------------------------------*/
 
+#if ! defined( NDEBUG ) && defined( ADDR2LINE ) && ! defined __STRICT_ANSI__
 void DumpStack( void *crash_address )
 {
-#if ! defined( NDEBUG ) && defined( ADDR2LINE ) && ! defined __STRICT_ANSI__
 	int *EBP;           /* assumes sizeof( int ) equals size of pointers */
 	int answer_fd[ 2 ];
 	int pipe_fd[ 4 ];
@@ -223,10 +223,12 @@ void DumpStack( void *crash_address )
 	close( answer_fd[ DUMP_ANSWER_WRITE ] );
 
 	fail_mess_fd = answer_fd[ DUMP_ANSWER_READ ];
-#else
-	UNUSED_ARGUMENT( crash_address );
-#endif
 }
+#else
+void DumpStack( UNUSED_ARG void *crash_address )
+{
+}
+#endif
 
 
 /*-----------------------------------------------------------------------*/

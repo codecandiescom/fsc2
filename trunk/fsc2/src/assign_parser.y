@@ -618,10 +618,8 @@ gp:       GP_TOKEN expr            { p_set_gp( $2 ); }
 /* Called in case of syntax errors */
 /*---------------------------------*/
 
-static void assignerror ( const char *s )
+static void assignerror ( UNUSED_ARG const char *s )
 {
-	UNUSED_ARGUMENT( s );
-
 	if ( *assigntext == '\0' )
 		print( FATAL, "Unexpected end of file in ASSIGNMENTS section.\n" );
 	else

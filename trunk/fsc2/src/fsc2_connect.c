@@ -111,18 +111,20 @@ ssize_t do_read( int fd, char *ptr );
 
 static volatile sig_atomic_t sig_type = 0;
 
-#define UNUSED_ARGUMENT( a )   ( void ) ( a )
+#if defined __GNUC__
+#define UNUSED_ARG __attribute__ ((unused))
+#else
+#define UNUSED_ARG
+#endif
 
 /*-----------------------------------------------------------*/
 /*-----------------------------------------------------------*/
 
-int main( int argc, char *argv[ ] )
+int main( UNUSED_ARG int argc, char *argv[ ] )
 {
 	char fname[ ] = P_tmpdir "/fsc2.edl.XXXXXX";
 	int sock_fd;
 
-
-	UNUSED_ARGUMENT( argc );
 
 	make_tmp_file( fname );
 	if ( ( sock_fd = open_fsc2_socket( fname ) ) == -1 )

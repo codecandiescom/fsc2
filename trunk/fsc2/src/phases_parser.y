@@ -99,10 +99,8 @@ p_list:  /* empty */
 %%
 
 
-static void phaseserror ( const char *s )
+static void phaseserror ( UNUSED_ARG const char *s )
 {
-	UNUSED_ARGUMENT( s );
-
 	if ( *phasestext == '\0' )
 		print( FATAL, "Unexpected end of file in PHASES section.\n" );
 	else

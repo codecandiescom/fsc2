@@ -38,12 +38,10 @@ static double datanh( double arg );
 /*----------------------------------------------------------------*/
 /*----------------------------------------------------------------*/
 
-Var *f_abort( Var *v )
+Var *f_abort( UNUSED_ARG Var *v )
 {
 	char *str;
 
-
-	UNUSED_ARGUMENT( v );
 
 	if ( Internals.mode != TEST )
 	{
@@ -65,9 +63,8 @@ Var *f_abort( Var *v )
 /* This is called for the end() EDL function */
 /*-------------------------------------------*/
 
-Var *f_stopsim( Var *v )
+Var *f_stopsim( UNUSED_ARG Var *v )
 {
-	UNUSED_ARGUMENT( v );
 	EDL.do_quit = SET;
 	return NULL;
 }
@@ -1990,14 +1987,13 @@ Var *f_time( Var *v )
 /* for the very first time.                                 */
 /*----------------------------------------------------------*/
 
-Var *f_dtime( Var *v )
+Var *f_dtime( UNUSED_ARG Var *v )
 {
 	double new_time;
 	static double old_time = 0.0;
 	double diff_time;
 
 
-	UNUSED_ARGUMENT( v );
 	new_time = experiment_time( );
 	diff_time = new_time - old_time;
 	old_time = new_time;
