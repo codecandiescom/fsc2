@@ -81,13 +81,13 @@ MAIL_ADDRESS     := Jens.Toerring@physik.fu-berlin.de
 # Here follow settings determining the make process - which compiler and
 # tools to use as well as their respective options. Better leave this alone
 # if you don't have a good reason for doing changes...
-# Don't use '-fomit-frame-pointer' in CFLAGS on Intel processors (except if
-# you want to keep me from getting meaningful messages about crashes...)
+# Don't use '-fomit-frame-pointer' in CFLAGS on Intel processors (unless
+# you want to keep me from getting meaningful messages about crashes).
 ##############################################################################
 
 SHELL            := /bin/sh
 CC               := gcc
-CFLAGS           := -ggdb -O3 -Wall -Wwrite-strings -Wstrict-prototypes \
+CFLAGS           := -ggdb -O2 -Wall -Wwrite-strings -Wstrict-prototypes \
 					-Wmissing-declarations -W
 				    # -DMDEBUG # for malloc debugging
 				    # -DDEBUG
