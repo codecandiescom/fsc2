@@ -372,7 +372,7 @@ export            # export all variables to sub-makes
 
 .SUFFIXES:
 .PHONY: all install-strip install uninstall version   \
-		clean distclean tags pack ZIP                 \
+		clean distclean mostly_clean tags pack ZIP    \
 		specific-pion.anorg.chemie.uni-frankfurt.de   \
 		specific-crowley.physik.fu-berlin.de          \
 		specific-door.physik.fu-berlin.de             \
@@ -463,7 +463,8 @@ version:
 
 # `clean' deletes all the files remaining from the compilation and not needed
 # for an installation while `distclean' also removes all executables, shared
-# libraries and documentation
+# libraries and documentation. `mostly_clean' is nearly identical to
+# `distclean' but does not remove the documentation files.
 
 clean:
 	$(MAKE) -C src clean
@@ -474,6 +475,13 @@ distclean:
 	$(MAKE) -C src distclean
 	$(MAKE) -C modules distclean
 	$(MAKE) -C doc distclean
+	$(MAKE) -C utils distclean
+	-$(RM) $(RMFLAGS) version.ugz $(tagsfile) makelog *~
+
+mostly_clean:
+	$(MAKE) -C src distclean
+	$(MAKE) -C modules distclean
+	$(MAKE) -C doc clean
 	$(MAKE) -C utils distclean
 	-$(RM) $(RMFLAGS) version.ugz $(tagsfile) makelog *~
 

@@ -26,6 +26,7 @@
 
 
 static void get_array_params( Var *v, size_t *len, long **ilp, double **idp );
+static double gauss_random( void );
 
 static bool grand_is_old = UNSET;
 
@@ -1149,9 +1150,82 @@ Var *f_sqrt( Var *v )
 
 Var *f_random( Var *v )
 {
-	v = v;
+	long len;
+	long i;
+	double *arr;
+	Var *new_var;
 
-	return vars_push( FLOAT_VAR, random( ) / ( double ) RAND_MAX );
+
+	if ( v == NULL )
+		return vars_push( FLOAT_VAR, random( ) / ( double ) RAND_MAX );
+
+	vars_check( v, INT_VAR | FLOAT_VAR );
+	if ( v->type == FLOAT_VAR )
+	{
+		eprint( WARN, SET, "Float number used as number of points in function "
+				"%s().\n", Cur_Func );
+	    len = lrnd( v->val.dval );
+	}
+	else
+		len = v->val.lval;
+
+	if ( len <= 0 )
+	{
+		eprint( FATAL, SET, "Zero or negative number (%ld) of points "
+				 "specified in function %s().\n", len, Cur_Func );
+		THROW( EXCEPTION )
+	}
+
+	arr = T_malloc( len * sizeof( double ) );
+	for ( i = 0; i < len; i++ )
+		*( arr + i ) = random( ) / ( double ) RAND_MAX;
+
+	new_var = vars_push( FLOAT_ARR, arr, len );
+	T_free( arr );
+
+	return new_var;
+}
+
+
+/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*/
+
+Var *f_grand( Var *v )
+{
+	long len;
+	long i;
+	double *arr;
+	Var *new_var;
+
+
+	if ( v == NULL )
+		return vars_push( FLOAT_VAR, gauss_random( ) );
+	
+	vars_check( v, INT_VAR | FLOAT_VAR );
+	if ( v->type == FLOAT_VAR )
+	{
+		eprint( WARN, SET, "Float number used as number of points in function "
+				"%s().\n", Cur_Func );
+	    len = lrnd( v->val.dval );
+	}
+	else
+		len = v->val.lval;
+
+	if ( len <= 0 )
+	{
+		eprint( FATAL, SET, "Zero or negative number (%ld) of points "
+				"specified in function %s().\n", len, Cur_Func );
+		THROW( EXCEPTION )
+	}
+
+	arr = T_malloc( len * sizeof( double ) );
+	for ( i = 0; i < len; i++ )
+		*( arr + i ) = gauss_random( );
+
+	new_var = vars_push( FLOAT_ARR, arr, len );
+	T_free( arr );
+
+	return new_var;
 }
 
 
@@ -1162,13 +1236,12 @@ Var *f_random( Var *v )
 /* University Press 1992, pp. 288-290, for all the gory details.        */
 /*----------------------------------------------------------------------*/
 
-Var *f_grand( Var *v )
+
+static double gauss_random( void )
 {
 	static double next_val;
 	double factor, radius, val_1, val_2;
 
-
-	v = v;
 
 	if ( ! grand_is_old )
 	{
@@ -1181,11 +1254,11 @@ Var *f_grand( Var *v )
 		factor = sqrt( - 2.0 * log( radius ) / radius );
 		next_val = val_1 * factor;
 		grand_is_old = SET;
-		return vars_push( FLOAT_VAR, val_2 * factor );
+		return val_2 * factor;
 	}
 
 	grand_is_old = UNSET;
-	return vars_push( FLOAT_VAR, next_val );
+	return next_val;
 }
 
 

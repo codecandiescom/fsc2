@@ -649,6 +649,12 @@ only if either it has already been called with an argument or in the
 @code{EXPERIMENT} section.
 
 
+@item digitizer_time_per_point()
+@findex digitizer_time_per_point()
+Function returns (when called within the @code{EXPERIMENT} section) the
+time difference (in seconds) between two points measured by the digitizer. 
+
+
 @item digitizer_sensitivity()
 @findex digitizer_sensitivity()
 The function queries (if called with just one argument) or sets (if
@@ -940,6 +946,7 @@ This function is nearly identical to the function
 @code{digitizer_get_curve()} with the only difference that the cursors
 are not positioned at the start and end point of the curve to be fetched.
 
+
 @item digitizer_get_amplitude()
 @findex digitizer_get_amplitude()
 The function returns the amplitude, i.e.@: the difference between the
@@ -979,6 +986,7 @@ sequence is finished before measuring the amplitude.
 
 This function can only be used in the @code{EXPERIMENT} section of an
 @acronym{EDL} file.
+
 
 @item digitizer_get_amplitude_fast()
 @findex digitizer_get_amplitude_fast()

@@ -1048,15 +1048,22 @@ the elements of an array). The argument must be a positive number.
 @anchor{random}
 @item random()
 @findex random()
-Returns a pseudo-random number in the interval @w{[0, 1]}.
+If called with no argument the function returns a pseudo-random number
+in the interval @w{[0, 1]}. If called with a non-zero, positive argument 
+it returns an array of random numbers where the argument specifies the
+size of the array. 
 
 
 @anchor{grandom}
 @item grandom()
 @findex grandom()
-Returns pseudo-randoms number with gaussian distribution, a mean of zero
-and a variance of 1. These numbers are probably better suited for
-simulating noise than the ones returned by @code{random()}.
+If called without an argument the function returns one of a set of
+pseudo-randoms number with gaussian distribution, a mean of zero and a
+variance of 1. If called with a non-zero, positive argument it returns
+an array of gaussian distributed random numbers where the argument
+specifies the size of the array. These random numbers are probably
+better suited for simulating noise than the ones returned by
+@code{random()}.
 
 
 @anchor{set_seed}
@@ -1183,7 +1190,8 @@ Returns a string with the current time in the form @code{hh:mm:ss}.
 This function (that can only be used in the @code{EXPERIMENT} section of
 the program) returns the time (in seconds) since the last call of the
 functions as a floating point value. When called for the very first time
-it returns the time since the start of the experiment. The time
+it returns the time since the start of the experiment (i.e.@: the time
+the start of the @code{EXPERIMENT} section was processed). The time
 returned by the function has micro-second resolution.
 
 
@@ -1254,20 +1262,25 @@ it will return @code{3}.
 @anchor{size}
 @item size()
 @findex size()
-The function takes two arguments, an array and one of the dimensions of the
-array, and returns the size of this dimension. I.e.@: for an array defined as
+The function normally takes two arguments, an array and one of the
+dimensions of the array, and returns the size of this dimension. I.e.@:
+for an array defined as
 @example
 @code{X[ 4, 2, 5 ]}
 @end example
 @noindent
 @code{size( X, 3 )} will return @code{5}.
+Only for one-dimensional arrays a single argument, the name of the
+array, is sufficient (i.e.@: the only possible value of @code{1} for
+the second parameter can be omitted) and the function returns the length
+of the one-dimensional array.
 
 
 @anchor{sizes}
 @item sizes()
 @findex sizes()
 This function is similar to @code{size()} but only takes an array as
-argument an returns a new one-dimensional array with the sizes of the
+argument and returns a new one-dimensional array with the sizes of the
 different dimensions.
 @example
 X[ 4, 2, 5 ]

@@ -87,6 +87,11 @@
 #include "conn.h"
 
 
+#if defined MAPATROL
+#include <mpatrol.h>
+#endif
+
+
 /* Some global functions */
 
 void clean_up( void );

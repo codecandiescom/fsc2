@@ -1456,17 +1456,17 @@ struct @{
     const char *name;
     bool needs_phase_pulses;
 
-    bool ( *assign_function )( int function, long connector );
     bool ( *assign_channel_to_function )( int function, long channel );
-    bool ( *invert_function )( int function );
-    bool ( *set_function_delay )( int function, double delay );
+    bool ( *assign_function )( int function, long connector );
     bool ( *set_function_high_level )( int function, double high_voltage );
     bool ( *set_function_low_level )( int function, double low_voltage );
+    bool ( *invert_function )( int function );
+    bool ( *set_function_delay )( int function, double delay );
 
     bool ( *set_timebase )( double timebase );
+
     bool ( *set_trigger_mode )( int mode );
     bool ( *set_repeat_time )( double rep_time );
-
     bool ( *set_trig_in_level )( double voltage );
     bool ( *set_trig_in_slope )( int slope );
     bool ( *set_trig_in_impedance )( int state );
@@ -1523,5 +1523,157 @@ switches that need their own pulses and that the module is prepared to
 create automatically. Currently, this is only the case for the Frankfurt
 S-band spectrometer.
 
+
 @subsection Pulse functions
 
+
+Now follows a list of all functions that can be defined within a pulser
+module and advertised to @acronym{fsc2} by assigning a pointer to the
+function in the pulsers structure. All functions are supposed to return
+a boolean value. You can be sure that all time values that these
+function receive are integer multiples of one nanosecond.
+
+@table @samp
+
+@item bool assign_channel_to_function( int function, long channel )
+This function is called when in the @code{ASSIGNMENTS} section in the
+description of a pulse function the @code{CHANNEL} (or @code{CH})
+keyword is found, i.e.@:
+@example
+ASSIGNMENTS:
+MW: CH = 1, ....
+@end example
+There are two types of pulsers, pulsers (like the @strong{Sony/Tektronix
+DG2020} that have some internal channels, that can be freely assigned to
+output connector, and pulsers (like the @strong{Tektronix HFS9000} that
+just have output channels. For the first type of pulsers this function
+is called to assign a pulse function to one of the internal channels
+(and @strong{not} the output connector, this is what the next function
+is for, see below), while for the second type of pulsers th function is
+for assigning a pulse function to one of the output conectors.
+
+As discussed in the chapter about pulsers (@pxref{Channel setup}) there
+are 15 different types of pulse functions. To avoid having to change
+your module in case the numbering of the functions changes you should
+only use symbolic names for functions. These symbolic names are defined
+in @file{src/global.h}:
+@example
+enum @{
+    PULSER_CHANNEL_MW = 0,
+    PULSER_CHANNEL_TWT,
+    PULSER_CHANNEL_TWT_GATE,
+    PULSER_CHANNEL_DET,
+    PULSER_CHANNEL_DET_GATE,
+    PULSER_CHANNEL_DEFENSE,
+    PULSER_CHANNEL_RF,
+    PULSER_CHANNEL_RF_GATE,
+    PULSER_CHANNEL_PULSE_SHAPE,
+    PULSER_CHANNEL_PHASE_1,
+    PULSER_CHANNEL_PHASE_2,
+    PULSER_CHANNEL_OTHER_1,
+    PULSER_CHANNEL_OTHER_2,
+    PULSER_CHANNEL_OTHER_3,
+    PULSER_CHANNEL_OTHER_4
+@};
+
+#if defined ( FSC2_MAIN )
+const char *Function_Names[ ] = @{
+    "MW", "TWT", "TWT_GATE","DETECTION", "DETECTION_GATE",
+    "DEFENSE", "RF", "RF_GATE", "PULSE_SHAPE", "PHASE_1",
+    "PHASE_2", "OTHER_1", "OTHER_2", "OTHER_3", "OTHER_4" @};
+#else
+extern const char *Function_Names[ ];
+#endif
+@end example
+Beside the definition of pulse function numbers there is also an array
+with the full names for the functions (to be used in error messages).
+
+The second argument obviously is either the number of channel (for
+pulsers of the first type) or the output connector (for pulsers of the
+second type). Please note that for pulsers of the first type several
+channels may be assigned to one function (e.g.@: when automatically
+created phase pulses are used, i.e.@: the variable
+@code{needs_phase_pulses} is set).
+
+
+@item bool assign_function( int function, long connector )
+For pulsers of the second type, i.e.@: pulsers that have internal
+channels and independent output channels this function is used to assign
+a pulse function to one of the output functions, i.e.@: if in the
+function description the @code{POD} keyword is found:
+@example
+ASSIGNEMENTS:
+MW: POD = 3, ...
+@end example
+Only one function should be assignable to an output connector.
+
+
+@item bool set_function_high_level( int function, double high_voltage );
+This function is called to set the high voltage level to be output for a
+certain pulse function, i.e.@: when the @code{V_HIGH} keyword is found
+in the function description. Obviously, @code{high_voltage} is the
+voltage to be used for the high voltage level in Volts.
+
+
+@item bool set_function_low_level( int function, double low_voltage );
+This function is called to set the low voltage level to be output for a
+certain pulse function, i.e.@: when the @code{V_LOW} keyword is found in
+the function description. To stay compatible with other pulser modules I
+would recommend not to accept low voltage levels that are actually
+higher than the high volatge level and to tell the user to use the
+function @code{invert_function()} instead.
+
+
+@item bool invert_function( int function )
+This function is called to tell the pulser module that the output for a
+certain pulse function has to be reversed polarity, i.e.@: that a high
+voltage is to be output for a pulse off state while a high voltage has
+to be output while a pulse with this function is switched on. The
+function is automatically caleed for the @code{INV} or @code{INVERT}
+keyword in the pulse function description.
+
+
+@item bool set_function_delay( int function, double delay )
+This function is called to tell the pulser to use a delay for one of the
+pulse function, i.e.@: when the @code{DELAY} keyword is found in the
+description of a function. When possible you should be prepared also
+to accept negative delays (which of course requires that the pulser is
+triggered internally).
+
+
+@item bool set_timebase( double timebase )
+This function gets called when the @code{TIMEBASE} keyword is found in
+the @code{ASSIGNMENTS} section, i.e.@:
+@example
+ASSIGNMENTS:
+TIMEBASE: 10 ns;
+@end example
+You will have to check that this is an acceptable time base value and
+you will also have to check later that all pulse positions, lengths
+etc.@: are integer multiples of this time base.
+
+
+@item bool set_trigger_mode( int mode )
+This function gets called when a trigger mode description is found in
+the assignments section, i.e.@:
+@example
+ASSIGNMENTS:
+TRIGGER_MODE: EXTERNAL;
+@end example
+There are two possible values for the trigger mode, either external or
+internal. In @file{src/global.h} an enumeration is already defined for
+the values of @code{EXTERNAL} (set to @code{1}) and @code{INTERNAL} (set
+to @code{0}) and in order to avoid problems if the values should ever
+get changed you should use these predefined values.
+
+
+@item bool set_repeat_time( double rep_time )
+
+@item bool set_trig_in_level( double voltage )
+
+@item bool set_trig_in_slope( int slope )
+
+@item bool set_trig_in_impedance( int state )
+
+
+@end table

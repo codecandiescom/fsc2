@@ -40,7 +40,7 @@ void fsc2_assert_print( const char *expression, const char *filename,
 #else
 #define fsc2_assert( expression )    \
        ( ( void ) ( ( expression ) ? \
-       0 : fsc2_assert_print( #expression, __FILE__, __LINE__) ) )
+       0 : fsc2_assert_print( #expression, __FILE__, __LINE__ ) ) )
 #endif
 
 
