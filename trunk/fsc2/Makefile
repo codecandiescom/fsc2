@@ -597,8 +597,26 @@ test:
 # Clean up everything for a distribution and create a zipped tarball
 
 pack:
-	$(MAKE) distclean
+	$(MAKE) manifest
 	cd ..; tar -c fsc2 | gzip -c -9 > fsc2.tgz
+
+
+#
+
+manifest:
+	@$(MAKE) distclean
+	@echo '# List of all (necessary) files of the package' > MANIFEST
+	@echo '#' >> MANIFEST
+	@echo '# $$Id$$' >> MANIFEST
+	@echo '#' >> MANIFEST
+
+	@for dir in . Fcntl_Lock aux config doc modules scripts src \
+		 tests utils; do \
+		echo "" >> MANIFEST; \
+		'ls' -1F $$dir | grep -v '/' | sed "s/^/$$dir\//" | \
+		sed 's/\.\///' | sed 's/\*$$//' >> MANIFEST; \
+	done;
+	cvs -Q commit -m "" MANIFEST
 
 
 # Some actions specific to the different well-known machines

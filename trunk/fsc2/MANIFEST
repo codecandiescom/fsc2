@@ -9,8 +9,6 @@ MANIFEST
 Makefile
 README
 TODO
-x
-yy
 
 Fcntl_Lock/Changes
 Fcntl_Lock/Fcntl_Lock.pm
