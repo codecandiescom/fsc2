@@ -543,8 +543,6 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 			}
 		}
 
-		cv->rwc_delta[ Z ] = new_rwc_delta_z;
-
 		/* If the data have not been scaled to [0,1] yet and the maximum
 		   value isn't identical to the minimum do the scaling now */
 
@@ -555,15 +553,17 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 				if ( sp->exist )
 					sp->v = ( sp->v - rw_min ) / new_rwc_delta_z;
 
-			cv->rwc_delta[ Z ] = new_rwc_delta_z;
 			cv->is_scale_set = SET;
 		}
+
+		need_cut_redraw |= cut_data_rescaled( curve, rw_min, rw_max );
+
+		cv->rwc_delta[ Z ] = new_rwc_delta_z;
 
 		cv->rw_min = rw_min;
 		cv->rw_max = rw_max;
 		cv->scale_changed = SET;
 
-		need_cut_redraw |= cut_data_rescaled( curve );
 	}
 
 	/* Now we're finished with rescaling and can set the new number of points

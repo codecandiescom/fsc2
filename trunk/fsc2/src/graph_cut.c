@@ -20,7 +20,7 @@
 #include "right_arrow.xbm"
 
 
-static void cut_calc_curve( int dir, long index );
+static void cut_calc_curve( int dir, long index, bool has_been_shown );
 static void cut_recalc_XPoints( void );
 static void cut_integrate_point( long index, double val );
 static void G_init_cut_curve( void );
@@ -164,11 +164,18 @@ void cut_show( int dir, int pos )
 
 	/* Calculate all the points of the cross section curve */
 
-	cut_calc_curve( dir, index );
+	cut_calc_curve( dir, index, CG.has_been_shown[ G.active_curve ] );
+
+	if ( ! CG.has_been_shown[ G.active_curve ] )
+	{
+		CG.is_fs[ G.active_curve ] = G.curve_2d[ G.active_curve ]->is_fs;
+		CG.has_been_shown[ G.active_curve ] = SET;
+	}
 
 	is_mapped = SET;
 	G.is_cut = SET;
 	is_shown = SET;
+	CG.curve = G.active_curve;
 
 	/* Draw the curve and the axes */
 
@@ -182,11 +189,12 @@ void cut_show( int dir, int pos )
 /* this curve.                                              */
 /*----------------------------------------------------------*/
 
-static void cut_calc_curve( int dir, long index )
+static void cut_calc_curve( int dir, long index, bool has_been_shown )
 {
-	long i, j;
+	long i;
 	Curve_1d *cv = &G.cut_curve;
 	Curve_2d *scv = G.curve_2d[ G.active_curve ];
+	Scaled_Point *sp, *ssp;
 
 
 	/* Store direction of cross section - if called with an unreasonable
@@ -199,54 +207,65 @@ static void cut_calc_curve( int dir, long index )
 	   scale factor if the number changed of points changed and we're in
 	   full scale mode */
 
-	CG.nx = dir == X ? G.ny : G.nx;
+	CG.nx = ( CG.cut_dir == X ) ? G.ny : G.nx;
 
-	if ( ! is_shown || ! is_mapped )
+	if ( ! is_shown || ! is_mapped || ! has_been_shown )
 	{
 		if ( scv->is_fs )
 		{
-			cv->s2d[ X ] = ( double ) ( G.cut_canvas.w - 1 ) /
-				           ( double ) ( CG.nx - 1 );
-			cv->s2d[ Y ] = ( double ) ( G.cut_canvas.h - 1 );
-			cv->shift[ X ] = cv->shift[ Y ] = 0.0;
+			CG.s2d[ G.active_curve ][ X ] = cv->s2d[ X ] = 
+				                    ( double ) ( G.cut_canvas.w - 1 ) /
+				                    ( double ) ( CG.nx - 1 );
+			CG.s2d[ G.active_curve ][ Y ] = cv->s2d[ Y ] =
+				                    ( double ) ( G.cut_canvas.h - 1 );
+			CG.shift[ G.active_curve ][ X ] = CG.shift[ G.active_curve ][ Y ]
+				                       = cv->shift[ X ] = cv->shift[ Y ] = 0.0;
 
-			CG.is_fs = SET;
+			CG.is_fs[ G.active_curve ] = SET;
 			fl_set_button( cut_form->cut_full_scale_button, 1 );
 			fl_set_object_helper( cut_form->cut_full_scale_button,
 								  "Switch off automatic rescaling" );
 		}
 		else
 		{
-			cv->s2d[ Y ] = scv->s2d[ Z ]
-						   / ( double ) ( G.z_axis.h - 1 )
-						   * ( double ) ( G.cut_canvas.h - 1 );
-			cv->shift[ Y ] = scv->shift[ Z ];
+			CG.s2d[ G.active_curve ][ Y ] = cv->s2d[ Y ] =
+				                  scv->s2d[ Z ] / ( double ) ( G.z_axis.h - 1 )
+						          * ( double ) ( G.cut_canvas.h - 1 );
+			CG.shift[ G.active_curve ][ Y ] = cv->shift[ Y ] = scv->shift[ Z ];
 
-			if ( dir == X )
+			if ( CG.cut_dir == X )
 			{
-				cv->s2d[ X ] = scv->s2d[ Y ] / ( double ) ( G.canvas.h - 1 )
-							   * ( double ) ( G.cut_canvas.w - 1 );
-				cv->shift[ X ] = scv->shift[ Y ];
+				CG.s2d[ G.active_curve ][ X ] = cv->s2d[ X ] =
+					              scv->s2d[ Y ] / ( double ) ( G.canvas.h - 1 )
+							      * ( double ) ( G.cut_canvas.w - 1 );
+				CG.shift[ G.active_curve ][ X ] = cv->shift[ X ] =
+					                                           scv->shift[ Y ];
 			}
 			else
 			{
-				cv->s2d[ X ] = scv->s2d[ X ] / ( double ) ( G.canvas.w - 1 )
-							   * ( double ) ( G.cut_canvas.w - 1 );
-				cv->shift[ X ] = scv->shift[ X ];
+				CG.s2d[ G.active_curve ][ X ] = cv->s2d[ X ] =
+					              scv->s2d[ X ] / ( double ) ( G.canvas.w - 1 )
+							      * ( double ) ( G.cut_canvas.w - 1 );
+				CG.shift[ G.active_curve ][ X ] = cv->shift[ X ] =
+					                                           scv->shift[ X ];
 			}
 
-			CG.is_fs = UNSET;
+			CG.is_fs[ G.active_curve ] = UNSET;
 			fl_set_button( cut_form->cut_full_scale_button, 0 );
 			fl_set_object_helper( cut_form->cut_full_scale_button,
 								  "Rescale curves to fit into the window\n"
 								  "and switch on automatic rescaling" );
 		}
 	}
-	else if ( CG.is_fs )
+	else if ( CG.is_fs[ G.active_curve ] )
 	{
-		cv->s2d[ X ] = ( double ) ( G.cut_canvas.w - 1 ) /
-				       ( double ) ( CG.nx - 1 );
-		cv->s2d[ Y ] = ( double ) ( G.cut_canvas.h - 1 );
+		CG.s2d[ G.active_curve ][ X ] = 
+			                   cv->s2d[ X ] = ( double ) ( G.cut_canvas.w - 1 )
+				               / ( double ) ( CG.nx - 1 );
+		CG.s2d[ G.active_curve ][ Y ] = cv->s2d[ Y ] =
+			                                 ( double ) ( G.cut_canvas.h - 1 );
+		CG.shift[ G.active_curve ][ X ] = CG.shift[ G.active_curve ][ Y ]
+				                       = cv->shift[ X ] = cv->shift[ Y ] = 0.0;
 	}
 
 	/* If the index is resonable store it (if called with index smaller than
@@ -264,23 +283,21 @@ static void cut_calc_curve( int dir, long index )
 
 	if ( CG.cut_dir == X )
 	{
-		for ( i = 0, j = CG.index; i < CG.nx; j += G.nx, i++ )
-		{
-			if ( scv->points[ j ].exist )
-				memcpy( cv->points + i, scv->points + j,
-						sizeof( Scaled_Point ) );
+		for ( i = 0, sp = cv->points, ssp = scv->points + CG.index;
+			  i < CG.nx; ssp += G.nx, sp++, i++ )
+			if ( ssp->exist )
+				memcpy( sp, ssp, sizeof( Scaled_Point ) );
 			else
-				cv->points[ i ].exist = UNSET;
-		}
+				sp->exist = UNSET;
 	}
 	else
 	{
-		for ( i = 0, j = CG.index * G.nx; i < CG.nx; j++, i++ )
-			if ( scv->points[ j ].exist )
-				memcpy( cv->points + i, scv->points + j,
-						sizeof( Scaled_Point ) );
+		for ( i = 0, sp = cv->points, ssp = scv->points + CG.index * G.nx;
+			  i < CG.nx; ssp++, sp++, i++ )
+			if ( ssp->exist )
+				memcpy( sp, ssp, sizeof( Scaled_Point ) );
 			else
-				cv->points[ i ].exist = UNSET;
+				sp->exist = UNSET;
 	}
 
 	cut_recalc_XPoints( );
@@ -332,19 +349,64 @@ static void cut_recalc_XPoints( void )
 void cut_new_curve_handler( void )
 {
 	Curve_1d *cv = &G.cut_curve;
+	int i;
 
 
 	if ( ! G.is_cut )
 		return;
 
+	/* If curve shown until now (if there was one) wasn't displayed in full
+	   scale mode store its scaling factors */
+
+	if ( CG.curve != -1 && ! CG.is_fs[ CG.curve ] )
+		for ( i = X; i <= Z; i++ )
+		{
+			CG.s2d[ CG.curve ][ i ] = cv->s2d[ i ];
+			CG.shift[ CG.curve ][ i ] = cv->shift[ i ];
+		}
+
 	if ( G.active_curve == -1 )
 	{
+		/* Remove the current curve */
+
+		CG.curve = -1;
 		cv->points = T_free( cv->points );
 		cv->xpoints = T_free( cv->xpoints );
 		cv->count = 0;
 	}
 	else
 	{
+		/* If new curve hasn't been shown yet use display mode of 2d curve
+		   for the curve */
+
+		if ( ! CG.has_been_shown[ G.active_curve ] )
+			CG.is_fs[ G.active_curve ] = G.curve_2d[ G.active_curve ]->is_fs;
+
+		if ( CG.is_fs[ G.active_curve ] )
+		{
+			fl_set_button( cut_form->cut_full_scale_button, 1 );
+			fl_set_object_helper( cut_form->cut_full_scale_button,
+								  "Switch off automatic rescaling" );
+		}
+		else
+		{
+			/* Get stored scaling factors (if there are any) */
+
+			if ( CG.has_been_shown[ G.active_curve ] )
+				for ( i = X; i <= Z; i++ )
+				{
+					cv->s2d[ i ] = CG.s2d[ G.active_curve ][ i ];
+					cv->shift[ i ] = CG.shift[ G.active_curve ][ i ];
+				}
+
+			fl_set_button( cut_form->cut_full_scale_button, 0 );
+			fl_set_object_helper( cut_form->cut_full_scale_button,
+								  "Rescale curve to fit into the window\n"
+								  "and switch on automatic rescaling" );
+		}
+
+		CG.curve = G.active_curve;
+
 		fl_set_cursor_color( CG.cur_1, FL_BLACK, G.colors[ G.active_curve ] );
 		fl_set_cursor_color( CG.cur_2, FL_BLACK, G.colors[ G.active_curve ] );
 		fl_set_cursor_color( CG.cur_3, FL_BLACK, G.colors[ G.active_curve ] );
@@ -364,7 +426,11 @@ void cut_new_curve_handler( void )
 		XSetForeground( G.d, cv->font_gc,
 						fl_get_pixel( G.colors[ G.active_curve ] ) );
 
-		cut_calc_curve( -1, -1 );
+		/* Get the data for the curve and set flag that says that everything
+		   necessary has been set */
+
+		cut_calc_curve( -1, -1, CG.has_been_shown[ G.active_curve ] );
+		CG.has_been_shown[ G.active_curve ] = SET;
 	}
 
 	redraw_all_cut_canvases( );
@@ -373,66 +439,69 @@ void cut_new_curve_handler( void )
 
 /*---------------------------------------------------------------------------*/
 /* Function is called by accept_2d_data() whenever the z-scaling has changed */
+/* and thus also the y-scaling of the cut curve                              */
 /*---------------------------------------------------------------------------*/
 
-bool cut_data_rescaled( long curve )
+bool cut_data_rescaled( long curve, double y_min, double y_max )
 {
-	long i, j;
+	long i;
 	Curve_1d *cv = &G.cut_curve;
 	Curve_2d *scv = G.curve_2d[ G.active_curve ];
+	Scaled_Point *sp, *ssp;
 
 
-	printf( "1 cut_data_rescaled\n" );
-	if ( ! G.is_cut || ! CG.is_fs || curve != G.active_curve )
+	if ( ! G.is_cut )
 		return FAIL;
-	printf( "2 cut_data_rescaled\n" );
+
+	if ( ! CG.is_fs[ curve ] )
+	{
+		/* Calculate s2d[ Y ] and shift[ Y ] to fit the new scaling */
+
+		CG.s2d[ curve ][ Y ] *=
+			           ( y_max - y_min ) / G.curve_2d[ curve ]->rwc_delta[ Z ];
+		CG.shift[ curve ][ Y ] = 
+			     ( G.curve_2d[ curve ]->rwc_delta[ Z ] * CG.shift[ curve ][ Y ]
+				   - G.curve_2d[ curve ]->rwc_start[ Z ] + y_min ) 
+				 / ( y_max - y_min );
+
+		if ( curve == G.active_curve )
+		{
+			cv->s2d[ Y ] = CG.s2d[ curve ][ Y ];
+			cv->shift[ Y ] = CG.shift[ curve ][ Y ];
+		}
+	}
+
+	if ( curve != G.active_curve )
+		return FAIL;
 
 	/* Get the rescaled data of the cut from the 2d curve */
 
 	if ( CG.cut_dir == X )
 	{
-		if ( ! CG.is_fs )
-		{
-			/* Calculate cv->s2d[ Y ] and cv->shift[ Y ] to fit the new
-			   scaling*/
-		}
-		else
-		{
-			/* Set flag that tells us that we have to redraw the y-axis */
-		}
-
-		for ( i = 0, j = CG.index; i < CG.nx; j += G.nx, i++ )
-			if ( scv->points[ j ].exist )
+		for ( i = 0, sp = cv->points, ssp = scv->points + CG.index;
+			  i < CG.nx; ssp += G.nx, sp++, i++ )
+			if ( ssp->exist )
 			{
-				cv->points[ i ].v = scv->points[ j ].v;
-				cv->xpoints[ cv->points[ i ].xp_ref ].y =
-				           ( short ) G.cut_canvas.h - 1
-				               - d2shrt( cv->s2d[ Y ] * ( cv->points[ i ].v
-														  + cv->shift[ Y ] ) );
+				sp->v = ssp->v;
+				cv->xpoints[ sp->xp_ref ].y =
+					( short ) G.cut_canvas.h - 1
+					     - d2shrt( cv->s2d[ Y ] * ( sp->v + cv->shift[ Y ] ) );
 			}
 	}
 	else
 	{
-		if ( ! CG.is_fs )
-		{
-			/* Calculate cv->s2d[ Y ] and cv->shift[ Y ] to fit the new
-			   scaling */
-		}
-		else
-		{
-			/* Set flag that tells us that we have to redraw the y-axis */
-		}
-
-		for ( i = 0, j = CG.index * G.nx; i < CG.nx; j++, i++ )
-			if ( scv->points[ j ].exist )
+		for ( i = 0, sp = cv->points, ssp = scv->points + CG.index * G.nx;
+			  i < CG.nx; ssp++, sp++, i++ )
+			if ( ssp->exist )
 			{
-				cv->points[ i ].v = scv->points[ j ].v;
-				cv->xpoints[ cv->points[ i ].xp_ref ].y =
-				           ( short ) G.cut_canvas.h - 1
-				               - d2shrt( cv->s2d[ Y ] * ( cv->points[ i ].v
-														  + cv->shift[ Y ] ) );
+				sp->v = ssp->v;
+				cv->xpoints[ sp->xp_ref ].y =
+					( short ) G.cut_canvas.h - 1
+					     - d2shrt( cv->s2d[ Y ] * ( sp->v + cv->shift[ Y ] ) );
 			}
 	}
+
+	/* Signal calling routine that redraw of cut curve is needed */
 
 	return OK;
 }
@@ -450,7 +519,7 @@ bool cut_num_points_changed( int dir, long num_points )
 	long k;
 
 
-	if ( ! G.is_cut || dir == CG.cut_dir )
+	if ( ! G.is_cut || dir == CG.cut_dir || CG.curve == -1 )
 		return FAIL;
 
 	/* Extend the arrays for the (scaled) data and the array of XPoints */
@@ -463,22 +532,23 @@ bool cut_num_points_changed( int dir, long num_points )
 	for ( k = CG.nx, sp = G.cut_curve.points + k ; k < num_points; sp++, k++ )
 		sp->exist = UNSET;
 
-	/* In full scale mode the x-axis needs to be rescaled */
+	/* In full scale mode the x-axis scale must be reset and all points need to
+	   be rescaled */
 
-	if ( CG.is_fs )
+	if ( CG.is_fs[ G.active_curve ] )
 	{
 		cv->s2d[ X ] = ( double ) ( G.cut_canvas.w - 1 ) /
 			           ( double ) ( num_points - 1 );
 		for ( sp = G.cut_curve.points, k = 0; k < CG.nx; sp++, k++ )
 			if ( sp->exist )
 				cv->xpoints[ sp->xp_ref ].x = d2shrt( cv->s2d[ X ] * k );
-
-		/* Also set flag that tells us that we need to redraw the x-axis */
 	}
 
 	CG.nx = num_points;
 
-	return CG.is_fs;
+	/* Signal calling routine that redraw of cut curve is needed */
+
+	return CG.is_fs[ G.active_curve ];
 }
 
 
@@ -520,6 +590,8 @@ bool cut_new_points( long curve, long x_index, long y_index, long len )
 		for ( index = x_index; index < x_index + len; sp++, index++ )
 			cut_integrate_point( index, sp->v );
 	}
+
+	/* Signal calling routine that redraw of cut curve is needed */
 
 	return OK;
 }
@@ -712,6 +784,9 @@ void G_init_cut_curve( void )
 										 fl_get_pixel( FL_BLACK ), depth );
 		CG.right_arrow_w = right_arrow_width;
 		CG.right_arrow_h = right_arrow_width;
+
+		CG.is_fs[ i ] = SET;
+		CG.has_been_shown[ i ] = UNSET;
 	}
 
 	/* Set the pixmaps for the out-of-range arrow to the pixmaps with the
@@ -733,7 +808,6 @@ void G_init_cut_curve( void )
 
 	cv->can_undo = UNSET;
 
-	CG.is_fs = SET;
 	CG.nx = 0;
 
 	/* The cut windows y-axis is always the same as the promary windows
@@ -957,6 +1031,9 @@ void cut_undo_button_callback( FL_OBJECT *a, long b )
 
 void cut_close_callback( FL_OBJECT *a, long b )
 {
+	int i;
+
+
 	a = a;
 	b = b;
 
@@ -964,6 +1041,8 @@ void cut_close_callback( FL_OBJECT *a, long b )
 	XUnmapSubwindows( G.d, cut_form->cut->window );
 	XUnmapWindow( G.d, cut_form->cut->window );
 	is_mapped = UNSET;
+	for ( i = 0; i < MAX_CURVES; i++ )
+		CG.has_been_shown[ i ] = UNSET;
 }
 
 
@@ -995,8 +1074,35 @@ static void cut_canvas_off( Canvas *c, FL_OBJECT *obj )
 
 void cut_fs_button_callback( FL_OBJECT *a, long b )
 {
+	int state;
+
+
 	a = a;
 	b = b;
+
+	/* Rescaling is useless if no cut curve is shown */
+
+	if ( ! G.is_cut || CG.curve == -1 )
+		return;
+
+	/* Get new state of button */
+
+	state = fl_get_button( cut_form->cut_full_scale_button );
+
+	CG.is_fs[ CG.curve ] = state;
+
+	if ( state )
+	{
+		fl_set_object_helper( cut_form->cut_full_scale_button,
+							  "Switch off automatic rescaling" );
+		
+		cut_calc_curve( -1, -1, SET );
+		redraw_all_cut_canvases( );
+	}
+	else
+		fl_set_object_helper( cut_form->cut_full_scale_button,
+							  "Rescale curves to fit into the window\n"
+							  "and switch on automatic rescaling" );
 }
 
 
@@ -1115,7 +1221,8 @@ static void redraw_cut_axis( int coord )
 					   c->w - 5 - G.label_w[ coord + 3 ], 0 );
 	}
 
-	cut_make_scale( c, coord );
+	if ( G.active_curve != -1 )
+		cut_make_scale( c, coord );
 	XCopyArea( G.d, c->pm, FL_ObjWin( c->obj ), c->gc,
 			   0, 0, c->w, c->h, 0, 0 );
 }
