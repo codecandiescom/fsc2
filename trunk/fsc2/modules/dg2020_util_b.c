@@ -193,6 +193,10 @@ int dg2020_start_compare( const void *A, const void *B )
 }
 
 
+/*---------------------------------------------------------
+  Determines the longest sequence of all pulse functions.
+-----------------------------------------------------------*/
+
 Ticks dg2020_get_max_seq_len( void )
 {
 	int i;
