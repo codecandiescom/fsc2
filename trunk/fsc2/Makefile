@@ -107,7 +107,7 @@ MAIL_ADDRESS     := Jens.Toerring@physik.fu-berlin.de
 
 #MPATROL          := YES                  # define this in order to use mpatrol
 
-OPT              := -O0
+OPT              := -O2
 
 SHELL            := /bin/sh
 CC               := gcc
