@@ -48,6 +48,8 @@
 #include <pwd.h>
 #include <sys/types.h>
 
+#include "fsc2_types.h"
+
 
 #ifndef __cplusplus
 
