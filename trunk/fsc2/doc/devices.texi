@@ -462,7 +462,6 @@ the following multiplier steps can be used: @code{1.0}, @code{1.25},
 @code{1.5}, @code{2.0}, @code{2.5}, @code{3.0}, @code{4.0}, @code{5.0},
 @code{6.0} and @code{8.0}.
 
-
 Before the @code{EXPERIMENT} section this function can't be called
 without an argument, i.e.@: in query mode.
 
