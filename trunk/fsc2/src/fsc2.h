@@ -65,6 +65,7 @@
 #include "fsc2d.h"
 #include "inline.h"
 #include "dump.h"
+#include "pulser.h"
 #include "bugs.h"
 #include "xinit.h"
 #include "comm.h"

@@ -29,7 +29,7 @@
 %{
 
 #include "fsc2.h"
-#include "pulser.h"
+
 
 void assignparser_init( void );
 
