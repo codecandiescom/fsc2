@@ -5,9 +5,10 @@ possibly also in the 'modules' sub-directorty) and apply the necessary
 changes to adapt it for the machine whenever one installs a new version.
 
 
-To avoid this, in the make and install processes the makefiles involved
-will look for files with names starting with the fully qualified hostname
-of the machine in this directory and include them if they exist.
+To avoid this, in the make and install processes the makefiles
+involved will look for files with names starting with the fully
+qualified hostname of the machine in this directory and include
+them if they exist.
 
 
 Up to three files will get included. As an example in the following
@@ -21,10 +22,10 @@ hex.unseen.edu-install
 
 
 The first file 'hex.unseen.edu' must contain just definitions as
-they are done in a makefile. It is for setting the variables from
-the start of the makefile in the main directory, overriding any 
-settings made in that makefile. Here's the list of variables that may
-be set in this file:
+you will find them in a makefile. It is for setting the variables
+from the start of the makefile in the main directory, overriding
+any settings made in that makefile. Here's the list of variables
+that may be set in this file:
 
 OWNER
 GROUP
@@ -48,17 +49,21 @@ rs_spec10_libs
 WITH_HTTP_SERVER
 DEFAULT_HTTP_PORT
 NO_MAIL
-USE_FSC2_MAIL_AGENT
+USE_FSC2_MTA
+USE_IPv6
 MAIL_ADDRESS
 
-
-The file 'hex.unseen.edu-config' is a file with commands that get
-executed before the compilation starts. It can e.g. be used to
-automatically change configuration files for devices etc. (or
-with whatever ideas you come up with).
+What they mean is explained in some detail at the top of the
+makefile in the main directory.
 
 
-The third file, 'hex.unseen.edu-install', again a makefile that
+The file 'hex.unseen.edu-config' is a file with commands that
+get executed before the compilation starts. It can e.g. be used
+to automatically change configuration files for devices etc.
+(or with whatever ideas you come up with).
+
+
+The third file, 'hex.unseen.edu-install', again is a makefile that
 gets included during installation of fsc2. It should contain two
 (phony) targets,
 
