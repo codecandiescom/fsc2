@@ -1,6 +1,6 @@
 # $Id$
 
-modules        = User_Functions.c sr510.c sr530.c sr810.c sr830.c \
+simp_modules   = User_Functions.c sr510.c sr530.c sr810.c sr830.c \
 				 aeg_s_band.c aeg_x_band.c er035m.c er035m_s.c \
 				 er035m_sa.c er035m_sas.c bh15.c egg4402.c
 dg2020_f       = dg2020_f.c dg2020_gen_f.c dg2020_pulse_f.c dg2020_init_f.c \
@@ -12,6 +12,7 @@ tds744a        = tds744a.c tds744a_gpib.c tds744a_util.c
 tds520a        = tds520a.c tds520a_gpib.c tds520a_util.c
 tds520         = tds520.c tds520_gpib.c tds520_util.c
 hp8647a        = hp8647a.c hp8647a_util.c hp8647a_gpib.c hp8647a_lexer.c
+comp_modules   = dg2020_f dg2020_b tds754a tds744a tds520a tds520 hp8647a
 
 src_headers    = $(addprefix ../src/,$(headers))
 
@@ -22,8 +23,11 @@ CFLAGS        += -I../src
 .PHONY: all clean
 
 
-all: dg2020_f.so dg2020_b.so tds754a.so tds744a.so tds520a.so tds520.so \
-	 hp8647a.so $(modules:.c=.so)
+all: $(comp_modules:=.so) $(simp_modules:.c=.so)
+
+#$(comp_modules:=.so): $(subst .c,.lo,$($(subst .so,,$@)))
+#	 $(CC) -shared -o $@ $(subst .c,.lo,$($(subst .so,,$@))) -lm $(LDFLAGS)
+#	 chmod 644 $@
 
 dg2020_f.so: ${dg2020_f:.c=.lo}
 	$(CC) -shared -o $@ ${dg2020_f:.c=.lo} -lm $(LDFLAGS)
@@ -70,7 +74,8 @@ ${hp8647a:.c=.lo}:  hp8647a.h  $(src_headers)
 
 hp8647a_lexer.c: hp8647a_lexer.flex $(src_header)
 	$(FLEX) $(FLEXFLAGS)$(patsubst %lexer.flex,%,$<) -o$@ $<
-	sed -e 's/register char \*yy_cp, \*yy_bp;/register char \*yy_cp = NULL, \*yy_bp = NULL;/' $@ > $@.x
+	sed -e 's/register char \*yy_cp, \*yy_bp;/\
+			register char \*yy_cp = NULL, \*yy_bp = NULL;/' $@ > $@.x
 	mv -f $@.x $@
 
 %.lo: %.c $(src_headers)
@@ -82,6 +87,7 @@ hp8647a_lexer.c: hp8647a_lexer.flex $(src_header)
 
 clean:
 	$(RM) $(RMFLAGS) *.o *_lexer.c *.lo *.so TAGS *~
+
 
 # don't automatically delete intermediate files created by flex
 
