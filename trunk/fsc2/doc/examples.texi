@@ -412,9 +412,9 @@ Before starting to write such a script lets collect the requirements:
       the lock-in amplifier.
 @item We would like to be able to clear the display when the old data
       aren't needed anymore.
-@item While running the test experiment the lock-in amplifiers keys
-      should still be usable to allow adjustment of phase, amplification
-      etc.
+@item While running the test experiment the lock-in amplifiers keyboard
+      should still be usable to allow adjustment of phase, sensitivity,
+      time constant etc.
 @end itemize
 
 Now here is the complete @code{EDL} script:
@@ -568,7 +568,7 @@ is rather small as you will see.
 
 The @code{DEVICES} section again is very simple, we're just loading the
 modules for the @code{Bruker} field controller and the @code{SR530}
-lock-in amplifier. Since this lock-in has to channels we will be able to
+lock-in amplifier. Since this lock-in has two channels we will be able to
 display both the @i{x}- and the @i{y}-phase signal which might help to
 set the correct phase for the real experiment.
 
@@ -583,8 +583,8 @@ discuss their meaning later.
 
 The variables defined on line 17 to 20 for the minimum and maximum field
 and field step size are not strictly necessary. We also could have
-hard-coded the values into the script but at the cost of
-readability. Also, it is going to be easier to adapt the script for
+hard-coded the values into the script (but at the cost of
+readability). It's also going to be easier to adapt the script for
 using a different field controller with a different set of limits when
 such values can be found in just one place instead of having them
 scattered all over the script.
@@ -595,9 +595,9 @@ which coordinate to draw the next measured data points.
 @code{Sweep_State} and @code{Pause_State} (line 24 and 25) are for
 remembering the current state the program is in. If @code{Sweep_State}
 is set to @code{1} the program is currently sweeping the field to higher
-values, if it is @code{0} the field sweep is stopped, and if it is
-@code{-1} we're sweeping down. If @code{Pause_State} is @code{0} we're
-supposed to measure and display new data, if it's @code{1} data
+values, if it's set to @code{0} the field sweep is stopped, and if it is
+@code{-1} we're sweeping down. If @code{Pause_State} is set to @code{0}
+we're supposed to measure and display new data, if it's @code{1} data
 acquistion is disabled.
 
 The final variables declared in the lines 27 to 29 are integer variables
@@ -611,48 +611,48 @@ the initialization of the display: we need two curves for the @i{x}- and
 We can't know in advance how many points we're going to have to display,
 so the corresponding parameter in the function call has been left out.
 Since it is rather likely that while running the script the field will
-not be swept in just one direction (and in fixed steps) but will be
-swept up and down (or even stay at the same value for longer times) in
-unpredictable ways it's not possible to draw a reasonable @i{x}-axis
+not be swept in just one direction (and in fixed-sized steps) but will
+be swept up and down (or even stay at the same value for longer times)
+in unpredictable ways it's not possible to draw a reasonable @i{x}-axis
 scale, so also the parameters for defining the scale are omitted,
-instead we just display point numbers.
+resulting in just point numbers getting displayed at the @i{x}-axis.
 
 Now we're getting to the most interesting part, the @code{EXPERIMENT}
 section. The first thing we do (line 39) is to re-enable the lock-in
-amplifiers keys. Normally, all keys of devices get disabled when the
+amplifiers keyboard. Normally, all keys of devices get disabled when an
 experiment starts, so we have to re-enable them if we want to manually
 change the settings.
 
-The second thing to be done is figure out at which field the magnet
+The second thing to be done is figuring out at which field the magnet
 currently is and store it in both the variables @code{field} and
-@code{last_field}. Because we don't have a call of the function
+@code{last_field}. Because we didn't call the function
 @code{magnet_setup()} (@pxref{magnet_setup}) in the @code{PREPARATIONS}
 section as in the previous example script the magnet will simply start
 of at the field value it has been set to manually.
 
 All the lines 43 to 58 are for setting up an additional window with
 graphical elements, i.e.@: buttons and in- and output fields. The first
-element is an output field, i.e.@: a field to just display values.  It
-is created by calling the function @code{output_create()}
+element is an output field, i.e.@: a box to just display values.  It is
+created by calling the function @code{output_create()}
 (@pxref{output_create}) with three arguments. The first is the type of
 the field where "FLOAT_OUTPUT" stands for a field for displaying
 floating point values. The second is the value to display in the field
 and the third is a label to appear below the field. Obviously, this
-first field is for displaying the current field position. The integer
+first field is for displaying the current magnetic field. The integer
 value returned by the function is later going to used when we have to
-refer to the field for updating the displayed value when the magnet is
-being swept.
+refer to the field for updating the displayed value when the magnet gets
+swept.
 
 The following 4 lines (46-49) are for creating a set of radio buttons.
 Radio buttons always appear in groups and the important property is that
-always only one of them can be switched on. That's exactly what we need
-to control if the magnet is to be swept up or down or stopped -- it can
-only be in one of these states. To create a button we need to call the
-function @code{button_create()} (@pxref{button_create}). For the first
-of group of radio buttons it takes just two arguments, the first one
-indicating the type of the button, i.e.@: @code{"RADIO_BUTTON"} (there
-are also other types of buttons as we will see soon) and a label to be
-drawn to the right of the button.
+only one of them can be switched on at a time. That's exactly what we
+need to control if the magnet is to be swept up or down or stopped -- it
+can only be in one of these states. To create a button we need to call
+the function @code{button_create()} (@pxref{button_create}). For the
+first of group of radio buttons it takes just two arguments, the first
+one indicating the type of the button, i.e.@: @code{"RADIO_BUTTON"}
+(there are also other types of buttons as we will see soon) and a label
+to be drawn to the right of the button.
 
 For the other two radio buttons belonging to the group we need an
 additional argument to state to which group they belong to. This extra
