@@ -38,8 +38,6 @@ extern char *exptext;
 int exp_runparse( void );
 int exp_runerror( const char *s );
 
-static Var *CV;
-
 %}
 
 
@@ -236,11 +234,11 @@ expr:    E_INT_TOKEN unit          { $$ = apply_unit( vars_push( INT_VAR, $1 ),
 		                                    vars_push( FLOAT_VAR, $1 ), $2 ); }
        | E_VAR_TOKEN unit          { $$ = apply_unit( $1, $2 ); }
        | E_VAR_TOKEN '['           { vars_arr_start( $1 ); }
-         list1 ']'                 { CV = vars_arr_rhs( $4 ); }
-         unit                      { $$ = apply_unit( CV, $7 ); }
+         list1 ']'                 { $$ = vars_arr_rhs( $4 ); }
+         unit                      { $$ = apply_unit( $<vptr>6, $7 ); }
        | E_FUNC_TOKEN '(' list2
-         ')'                       { CV = func_call( $1 ); }
-         unit                      { $$ = apply_unit( CV, $6 ); }
+         ')'                       { $$ = func_call( $1 ); }
+         unit                      { $$ = apply_unit( $<vptr>5, $6 ); }
        | E_VAR_REF                 { $$ = $1; }
        | E_VAR_TOKEN '('           { eprint( FATAL, SET, "`%s' isn't a "
 											 "function.\n", $1->name );

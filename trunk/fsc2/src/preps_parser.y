@@ -39,8 +39,6 @@ extern char *prepstext;
 
 void prepserror( const char *s );
 
-static Var *CV;
-
 %}
 
 
@@ -168,10 +166,10 @@ expr:    INT_TOKEN unit           { $$ = apply_unit( vars_push( INT_VAR, $1 ),
 		                                    vars_push( FLOAT_VAR, $1 ), $2 ); }
        | VAR_TOKEN unit           { $$ = apply_unit( $1, $2 ); }
        | VAR_TOKEN '['            { vars_arr_start( $1 ); }
-         list1 ']'                { CV = vars_arr_rhs( $4 ); }
-         unit                     { $$ = apply_unit( CV, $7 ); }
-       | FUNC_TOKEN '(' list2 ')' { CV = func_call( $1 ); }
-         unit                     { $$ = apply_unit( CV, $6 ); }
+         list1 ']'                { $$ = vars_arr_rhs( $4 ); }
+         unit                     { $$ = apply_unit( $<vptr>6, $7 ); }
+       | FUNC_TOKEN '(' list2 ')' { $$ = func_call( $1 ); }
+         unit                     { $$ = apply_unit( $<vptr>5, $6 ); }
        | VAR_REF                  { $$ = $1; }
        | VAR_TOKEN '('            { eprint( FATAL, SET, "`%s' isn't a "
 											"function.\n", $1->name );

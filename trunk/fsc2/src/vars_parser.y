@@ -37,8 +37,6 @@ void varserror( const char *s );
 extern char *varstext;
 
 
-static Var *CV;
-
 %}
 
 
@@ -111,10 +109,10 @@ expr:    INT_TOKEN unit            { $$ = apply_unit( vars_push( INT_VAR, $1 ),
 		                                    vars_push( FLOAT_VAR, $1 ), $2 ); }
        | VAR_TOKEN unit            { $$ = apply_unit( $1, $2 ); }
        | VAR_TOKEN '['             { vars_arr_start( $1 ); }
-         list3 ']'                 { CV = vars_arr_rhs( $4 ); }
-         unit                      { $$ = apply_unit( CV, $7 ); }
-       | FUNC_TOKEN '(' list4 ')'  { CV = func_call( $1 ); }
-         unit                      { $$ = apply_unit( CV, $6 ); }
+         list3 ']'                 { $$ = vars_arr_rhs( $4 ); }
+         unit                      { $$ = apply_unit( $<vptr>6, $7 ); }
+       | FUNC_TOKEN '(' list4 ')'  { $$ = func_call( $1 ); }
+         unit                      { $$ = apply_unit( $<vptr>5, $6 ); }
        | VAR_REF                   { $$ = $1; }
        | VAR_TOKEN '('             { eprint( FATAL, SET, "`%s' isn't a "
 											 "function.\n", $1->name );
