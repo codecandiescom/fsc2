@@ -25,7 +25,7 @@
 #include "fsc2.h"
 
 
-extern bool need_post;
+extern bool need_post;                    /* defined in run.c */
 
 static void	unpack_and_accept( void *ptr );
 static void	other_data_request( int type, void *ptr );
@@ -87,10 +87,13 @@ void accept_new_data( void )
 
 		message_queue_low = ( message_queue_low + 1 ) % QUEUE_SIZE;
 
+		/* If the semaphore hasn't been posted yet (because it was full and
+		   could hold anymore data) do it now after we removed some data */
+
 		if ( need_post )
 		{
-			need_post = UNSET;
 			sema_post( semaphore );
+			need_post = UNSET;
 		}
 
 		/* Return if all entries in the message queue are used up */

@@ -178,8 +178,8 @@ bool run( void )
 
 	if ( child_pid != -1 )           /* if fork() succeeded */
 	{
-		need_post = UNSET;
 		sema_post( semaphore );      /* we're ready to read data */
+		need_post = UNSET;
 		return OK;
 	}
 
@@ -369,8 +369,10 @@ static void new_data_handler( int signo )
 	Message_Queue[ message_queue_high ].type = Key->type;
 	message_queue_high = ( message_queue_high + 1 ) % QUEUE_SIZE;
 
-	/* If this are data tell child that it can send new data (as long as
-	   the message queue isn't full) */
+	/* If this are data tell child that it can send new data as long as
+	   the message queue isn't full, in which case we have to delay posting
+	   the semaphore until some old data have been removed - this is done
+	   in accept_new_data(). */
 
 	if ( Key->type == DATA )
 	{
