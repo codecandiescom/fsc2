@@ -239,81 +239,6 @@ bool lecroy9400_command( const char *cmd );
 void lecroy9400_gpib_failure( void );
 
 
-#ifdef LECROY9400_MAIN
-
-LECROY9400 lecroy9400;
-
-const char *LECROY9400_Channel_Names[ 9 ] = { "CH1", "CH2", "MEM_C", "MEM_D",
-											  "FUNC_E", "FUNC_F", "LINE",
-											  "EXT", "EXT10" };
-
-double sset[ 10 ] = { 5.0e-3, 1.0e-2, 2.0e-2, 5.0e-2, 1.0e-1, 2.0e-1, 5.0e-1,
-					  1.0, 2.0, 5.0 };
-
-/* List of all timebases (in s/div) - currently only timebases that can be
-   used in single shot mode are supported (i.e. neither random interleaved
-   sampling nor roll mode) */
-
-double tb[ 21 ] = {                      50.0e-9,
-					100.0e-9, 200.0e-9, 500.0e-9,
-					  1.0e-6,   2.0e-6,   5.0e-6,
-					 10.0e-9,  20.0e-9,  50.0e-9,
-					100.0e-6, 200.0e-6, 500.0e-6,
-					  1.0e-3,   2.0e-3,   5.0e-3,
-					 10.0e-3,  20.0e-3,  50.0e-3,
-					100.0e-3, 200.0e-3 };
-
-double tpp[ 21 ] = {                      10.0e-9,
-					  10.0e-9,  10.0e-9,  10.0e-9,
-					  10.0e-9,  10.0e-9,  10.0e-9,
-					  10.0e-9,  10.0e-9,  20.0e-9,
-					  40.0e-9,  80.0e-9, 200.0e-9,
-					 400.0e-9, 800.0e-9,   2.0e-6,
-					   4.0e-6,   8.0e-6,  20.0e-6,
-					  40.0e-6,  80.0e-6 };
-
-/* List of the corresponding sample rates, i.e. the time/point */
-
-double sr[ 21 ] = {						 10.0e-9,
-					 10.0e-9,  10.0e-9,  10.0e-9,
-					 10.0e-9,  10.0e-9,  10.0e-9,
-					 10.0e-9,  10.0e-9,  20.0e-9,
-					 40.0e-9,  80.0e-9, 200.0e-9,
-					400.0e-9, 800.0e-9,   2.0e-6,
-					  4.0e-6,   8.0e-6,  20.0e-6,
-					 40.0e-6,  80.0e-6 };
-
-/* List of points per division */
-
-int ppd[ 21 ] = { 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 2500,
-				  2500, 2500, 2500, 2500, 2500, 2500, 2500, 2500,
-				  2500, 2500, 2500 };
-
-/* List of number of averages that can be done using the WP01 Waveform
-   Processing option */
-
-long na[ 16 ] = { 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000,
-				  20000, 50000, 100000, 200000, 500000, 1000000 };
-
-
-/* Maximum curve lengths */
-
-long cl[ 10 ] = { 50, 125, 250, 625, 1250, 2500, 6250, 12500, 25000, 32000 };
-
-
-/* Memory limits for averaging, i.e. the maximum number of points that can be
-   averaged for the different time bases - not too surprising this is always
-   10 times the number of points per division, i.e. the number of points
-   displayed */
-
-long ml[ 21 ] = { 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000, 25000,
-				  25000, 25000, 25000, 25000, 25000, 25000, 25000, 25000,
-				  25000, 25000, 25000 };
-
-bool lecroy9400_IN_SETUP = UNSET;
-
-
-#else
 
 extern LECROY9400 lecroy9400;
 
@@ -329,8 +254,6 @@ extern long cl[ 10 ];
 extern long ml[ 21 ];
 
 extern bool lecroy9400_IN_SETUP;
-
-#endif
 
 
 enum {

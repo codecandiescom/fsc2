@@ -383,27 +383,11 @@ struct DG2020 {
 };
 
 
-/* Here the global variables of the module are declared */
-
-
-#if defined( DG2020_B_MAIN )
-
-bool dg2020_is_needed = UNSET;
-DG2020 dg2020;
-PULSE *dg2020_Pulses = NULL;
-bool dg2020_IN_SETUP = UNSET;
-PHASE_SETUP dg2020_phs[ 2 ];
-
-#else
-
 extern bool dg2020_is_needed;
 extern DG2020 dg2020;
 extern PULSE *dg2020_Pulses;
 extern bool dg2020_IN_SETUP;
 extern PHASE_SETUP dg2020_phs[ 2 ];
-
-#endif
-
 
 
 /* Here follow the functions from dg2020_gen_b.c */

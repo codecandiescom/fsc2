@@ -22,13 +22,21 @@
 */
 
 
-#define DG2020_B_MAIN
-
-
 #include "dg2020_b.h"
+
+
+/*--------------------------------*/
+/* global variables of the module */
+/*--------------------------------*/
 
 const char device_name[ ]  = DEVICE_NAME;
 const char generic_type[ ] = DEVICE_TYPE;
+
+bool dg2020_is_needed = UNSET;
+DG2020 dg2020;
+PULSE *dg2020_Pulses = NULL;
+bool dg2020_IN_SETUP = UNSET;
+PHASE_SETUP dg2020_phs[ 2 ];
 
 
 /*---------------------------------------------------------------------------

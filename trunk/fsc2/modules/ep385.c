@@ -22,13 +22,22 @@
 */
 
 
-#define EP385_MAIN
-
-
 #include "ep385.h"
+
+
+/*--------------------------------*/
+/* global variables of the module */
+/*--------------------------------*/
 
 const char device_name[ ]  = DEVICE_NAME;
 const char generic_type[ ] = DEVICE_TYPE;
+
+bool ep385_is_needed = UNSET;
+EP385 ep385;
+PULSE *ep385_Pulses = NULL;
+bool ep385_IN_SETUP = UNSET;
+PHASE_SETUP ep385_phs[ 2 ];
+
 
 static bool in_reset = UNSET;
 

@@ -22,13 +22,20 @@
 */
 
 
-#define HFS9000_MAIN
-
 #include "hfs9000.h"
+
+
+/*--------------------------------*/
+/* global variables of the module */
+/*--------------------------------*/
 
 const char device_name[ ]  = DEVICE_NAME;
 const char generic_type[ ] = DEVICE_TYPE;
 
+bool hfs9000_is_needed = UNSET;
+HFS9000 hfs9000;
+PULSE *hfs9000_Pulses = NULL;
+bool hfs9000_IN_SETUP = UNSET;
 
 
 /*----------------------------------------------------------------------

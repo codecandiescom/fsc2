@@ -334,24 +334,11 @@ struct EP385 {
 };
 
 
-#if defined( EP385_MAIN )
-
-bool ep385_is_needed = UNSET;
-EP385 ep385;
-PULSE *ep385_Pulses = NULL;
-bool ep385_IN_SETUP = UNSET;
-PHASE_SETUP ep385_phs[ 2 ];
-
-#else
-
 extern bool ep385_is_needed;
 extern EP385 ep385;
 extern PULSE *ep385_Pulses;
 extern bool ep385_IN_SETUP;
 extern PHASE_SETUP ep385_phs[ 2 ];
-
-#endif
-
 
 
 /* Here follow the functions from ep385_gen.c */

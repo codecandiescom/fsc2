@@ -258,22 +258,10 @@ struct  HFS9000 {
 };
 
 
-#if defined( HFS9000_MAIN )
-
-bool hfs9000_is_needed = UNSET;
-HFS9000 hfs9000;
-PULSE *hfs9000_Pulses = NULL;
-bool hfs9000_IN_SETUP = UNSET;
-
-#else
-
 extern bool hfs9000_is_needed;
 extern HFS9000 hfs9000;
 extern PULSE *hfs9000_Pulses;
 extern bool hfs9000_IN_SETUP;
-
-#endif
-
 
 
 /* Here follow the functions from hfs9000_gen.c */
