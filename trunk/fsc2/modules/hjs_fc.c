@@ -21,36 +21,16 @@
   Boston, MA 02111-1307, USA.
 */
 
-#include "fsc2_module.h"
-
-/* Include configuration information for the device */
-
-#include "hjs_fc.conf"
+#include "hjs_fc.h"
 
 const char device_name[ ]  = DEVICE_NAME;
 const char generic_type[ ] = DEVICE_TYPE;
 
 
-/* Exported functions */
-
-int hjs_fc_init_hook( void );
-int hjs_fc_test_hook( void );
-int hjs_fc_exp_hook( void );
-void hjs_fc_exit_hook( void );
-void hjs_fc_child_exit_hook( void );
-
-Var *magnet_name( Var *v );
-Var *magnet_setup( Var *v );
-Var *set_field( Var *v );
-Var *get_field( Var *v );
-Var *sweep_up( Var *v );
-Var *sweep_down( Var *v );
-Var *reset_field( Var *v );
-
-
 /* Local functions */
 
-static void hjs_fc_init( void );
+static void hjs_fc_init_with_measured_data( void );
+static void hjs_fc_init_with_calib_file( void );
 static double hjs_fc_set_field( double field, double error_margin );
 static double hjs_fc_sweep_to( double new_field );
 static double hjs_fc_get_field( void );
@@ -58,60 +38,7 @@ static double hjs_fc_field_check( double field );
 static void hjs_fc_set_dac( double volts );
 
 
-static struct HJS_FC {
-	double B0V;             /* Field for DAC voltage of 0 V */
-	double slope;           /* field step for 1 V DAC voltage increment */
-
-	double min_test_field;  /* minimum and maximum field during test run */
-	double max_test_field;
-
-	double B_max;           /* maximum and minimum field the magnet can */
-	double B_min;           /* produce */
-
-	double field;			/* the start field given by the user */
-	double field_step;		/* the field steps to be used for sweeps */
-
-	bool is_field;			/* flag, set if start field is defined */
-	bool is_field_step;		/* flag, set if field step size is defined */
-
-	char *dac_func;
-	char *gm_gf_func;
-	char *gm_res_func;
-
-	double dac_min_volts;
-	double dac_max_volts;
-	double dac_resolution;
-
-	double cur_volts;       /* current voltage at the DAC output */
-	double act_field;		/* used internally */
-	double target_field;
-} hjs_fc;
-
-
-/* Maximum mumber of times we retry to get a consistent reading (i.e. the
-   same value for MIN_NUM_IDENTICAL_READINGS times) from the gaussmeter */
-
-#define MAX_GET_FIELD_RETRIES          500
-
-
-/* Number of identical readings from the gaussmeter that we take to indicate
-   that the the field is stable */
-
-#define MIN_NUM_IDENTICAL_READINGS      3
-
-
-/* Time (in microseconds) that we'll wait between fetching new values
-   from the gaussmeter when trying to get a consistent reading */
-
-#define WAIT_LENGTH         100000UL    /* 100 ms */
-
-
-/* Field value that will be returned during a test run */
-
-#define HJS_FC_TEST_FIELD      3300.0      /* in Gauss */
-
-#define HJS_FC_TEST_B0V        2900.0      /* in Gauss */
-#define HJS_FC_TEST_SLOPE        50.0      /* in Gauss/V */
+struct HJS_FC hjs_fc;
 
 
 /*-------------------------------------------*/
@@ -151,6 +78,9 @@ int hjs_fc_init_hook( void )
 
 	hjs_fc.is_field = UNSET;
 	hjs_fc.is_field_step = UNSET;
+
+	hjs_fc.use_calib_file = UNSET;
+	hjs_fc.calib_file = NULL;
 
 	hjs_fc.dac_func = NULL;
 	hjs_fc.gm_gf_func = NULL;
@@ -309,25 +239,28 @@ int hjs_fc_test_hook( void )
 /* setting the field to some positions, covering the whole range */
 /* of possible values, to figure out the maximum field range and */
 /* the relationship between the DAC output voltage and the       */
-/* resulting field. We also try to get an estimate on how long   */
-/* it takes to reach a field value in the process. When we then  */
-/* know the field range we have to check that during the test    */
-/* run the field never was set to a value that can't be reached. */
-/* If the function magnet_setup() had been called during the     */
-/* PREPARATIONS section we also have to make sure that the sweep */
-/* step size isn't smaller than the minimum field step we can    */
-/* set with the DAC resolution.                                  */
+/* resulting field. When we then know the field range we have to */
+/* check that during the test run the field never was set to a   */
+/* value that can't be reached. If the function magnet_setup()   */
+/* had been called during the PREPARATIONS section we also have  */
+/* to make sure that the sweep step size isn't smaller than the  */
+/* minimum field step we can set with the DAC resolution.        */
 /*---------------------------------------------------------------*/
 
 int hjs_fc_exp_hook( void )
 {
 	/* Try to figure out what the field for the minimum and maximum DAC
 	   output voltage is and how (and how fast) the field changes with
-	   the DAC output voltage */
+	   the DAC output voltage. This is either done by ea direct measurement
+	   or, if the user told us to load a calibration file, by reading the
+	   clibration file. */
 
 	TRY
 	{
-		hjs_fc_init( );
+		if ( hjs_fc.use_calib_file )
+			hjs_fc_init_with_measured_data( );
+		else
+			hjs_fc_init_with_calib_file( );
 		TRY_SUCCESS;
 	}
 	OTHERWISE
@@ -390,6 +323,8 @@ int hjs_fc_exp_hook( void )
 
 void hjs_fc_exit_hook( void )
 {
+	if ( hjs_fc.calib_file != NULL )
+		hjs_fc.calib_file = CHAR_P T_free( hjs_fc.calib_file );
 	if ( hjs_fc.dac_func )
 		T_free( hjs_fc.dac_func );
 	if ( hjs_fc.gm_gf_func )
@@ -468,6 +403,73 @@ Var *magnet_setup( Var *v )
 
 	hjs_fc.is_field = hjs_fc.is_field_step = SET;
 	return vars_push( INT_VAR, 1L );
+}
+
+
+/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*/
+
+Var *magnet_calibration_file( Var *v )
+{
+	char *buf;
+
+
+	if ( hjs_fc.calib_file != NULL )
+	{
+		print( SEVERE, "A Calibration file has already been read, keeping as "
+			   "'%s'.\n", hjs_fc.calib_file );
+		return vars_push( STR_VAR, hjs_fc.calib_file );
+	}
+
+	if ( v == NULL )
+	{
+		hjs_fc.use_calib_file = SET;
+		return vars_push( STR_VAR, DEFAULT_CALIB_FILE );
+	}
+
+	if ( v->type != STR_VAR )
+	{
+		print( FATAL, "Argument isn't a file name.\n" );
+		THROW( EXCEPTION );
+	}
+
+	if ( *v->val.sptr == '/' )
+		hjs_fc.calib_file = T_strdup( v->val.sptr );
+	else if ( *v->val.sptr == '~' )
+		hjs_fc.calib_file = get_string( "%s%s%s", getenv( "HOME" ),
+										v->val.sptr[ 1 ] != '/' ? "/" : "",
+										*v->val.sptr + 1 );
+	else
+	{
+		buf = T_malloc( PATH_MAX );
+
+		if ( getcwd( buf, PATH_MAX ) == NULL )
+		{
+			print( FATAL, "Can't determine current working directory.\n" );
+			T_free( buf );
+			THROW( EXCEPTION );
+		}
+
+		TRY
+		{
+			hjs_fc.calib_file = get_string( "%s%s%s", buf, slash( buf ),
+											v->val.sptr );
+			TRY_SUCCESS;
+		}
+		OTHERWISE
+		{
+			T_free( buf );
+			RETHROW( );
+		}
+
+		T_free( buf );
+	}
+
+	too_many_arguments( v );
+
+	hjs_fc.use_calib_file = SET;
+
+	return vars_push( STR_VAR, hjs_fc.calib_file );
 }
 
 
@@ -595,12 +597,12 @@ Var *reset_field( Var *v )
 /*-------------------------------------------*/
 
 /*--------------------------------------------------------------------*/
-/* In the initialization process we need to figure out the field for  */
-/* an output voltage of the DAC of 0 V and how the field changes with */
-/* the DAC voltage.                                                   */
+/* In the initialization process with use of measured data we need to */
+/* figure out the field for an output voltage of the DAC of 0 V and   */
+/* how the field changes with the DAC voltage.                        */
 /*--------------------------------------------------------------------*/
 
-static void hjs_fc_init( void )
+static void hjs_fc_init_with_measured_data( void )
 {
 	size_t i;
 	double test_volts[ ] = { hjs_fc.dac_min_volts, 1.0, 2.0, 7.5,
@@ -689,6 +691,55 @@ static void hjs_fc_init( void )
 	}
 
 	hjs_fc.act_field = test_gauss[ num_test_data - 1 ];
+}
+
+
+/*-------------------------------------------------------------------*/
+/* In the initialization process using a calibration file we have to */
+/* read in the calibration file and measure the actual field.        */
+/*-------------------------------------------------------------------*/
+
+static void hjs_fc_init_with_calib_file( void )
+{
+	/* Try to read the calibration file */
+
+	hjs_fc_read_calibration( );
+
+	/* Check that we at least have a field resolution of 0.1 G with the
+	   value we got from our tests */
+
+	if ( hjs_fc.dac_resolution / hjs_fc.slope > 0.1 )
+	{
+		print( FATAL, "Minimum field resolution is higher than 0.1 G.\n" );
+		THROW( EXCEPTION );
+	}
+
+	if ( hjs_fc.slope >= 0.0 )
+	{
+		hjs_fc.B_min = hjs_fc.B0V;
+		hjs_fc.B_max = hjs_fc.B0V + hjs_fc.slope * hjs_fc.dac_max_volts;
+	}
+	else
+	{
+		hjs_fc.B_max = hjs_fc.B0V;
+		hjs_fc.B_min = hjs_fc.B0V + hjs_fc.slope * hjs_fc.dac_max_volts;
+	}
+
+	/* Finally measure the current field and check that it's not too far
+	   (5%) outside the limits specified in the calibration field */
+
+	hjs_fc.act_field = hjs_fc_get_field( );
+
+	if ( hjs_fc.act_field <
+		 	hjs_fc.B_min - 0.05 * hjs_fc.slope * hjs_fc.dac_max_volts ||
+		 hjs_fc.act_field >
+		 	hjs_fc.B_max + 0.05 * hjs_fc.slope * hjs_fc.dac_max_volts )
+	{
+		print( FATAL, "Measured field of %.2f G too far outside the range "
+			   "specified in calibration file '%s'.\n", hjs_fc.act_field,
+			   hjs_fc.calib_file );
+		THROW( EXCEPTION );
+	}
 }
 
 
