@@ -663,8 +663,9 @@ of C code to call the function would be
 @example
 Var *func_ptr;
 Var *ret_value;
+int access;
 
-func_ptr = func_get( "foo" );          /* get pointer to function */
+func_ptr = func_get( "foo", &access ); /* get pointer to function */
 if ( func_ptr == NULL )                /* test if function exists */
 @{
     /* do your error handling here */ 
@@ -673,13 +674,12 @@ else
 @{                                    
     vars_push( INT_VAR, 5 );           /* push first argument */
     vars_push( FLOAT_VAR, 3.1415 );    /* push second argument */
-    ret_value = vars_call( func_ptr ); /* call the function */
+    ret_value = func_call( func_ptr ); /* call the function */
 @}
 @end example
 
 
 There are two points that need attention:
-
 @enumerate
 @item
 After the call to @code{vars_call()} the variable with the pointer to
@@ -694,15 +694,16 @@ completely useless and even dangerous to use for any purpose whatsoever!
 If you just want to test if an @acronym{EDL} function exists at all just do
 only step 1 but after checking the pointer @strong{never} forget to call
 @code{vars_pop()} on the returned variable! I.e. do
-
 @example
 Var *func_ptr;
-func_ptr = func_get( "foo" );    /* get pointer to function */
-if ( func == NULL )              /* test if function exists */
+int access;
+
+func_ptr = func_get( "foo", &access );    /* get pointer to function */
+if ( func == NULL )                       /* test if function exists */
     /* do your error handling here */ 
 else                                  
 @{                                    
-    vars_pop( func_ptr );        /* never ever forget this ! */
+    vars_pop( func_ptr );                 /* never ever forget this ! */
     /* code depending on the existence of `foo()' goes here */
 @}
 @end example
