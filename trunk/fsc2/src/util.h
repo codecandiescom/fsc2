@@ -13,6 +13,7 @@ char *correct_line_breaks( char *str );
 const char *strip_path( const char *path );
 long get_file_length( char *name, int *len );
 void eprint( int severity, const char *fmt, ... );
+bool fsc2_locking( void );
 void i2rgb( double h, int *rgb );
 
 inline short  d2shrt( double a );
