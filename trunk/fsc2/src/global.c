@@ -36,9 +36,7 @@ Communication_T Comm;
 GUI_Stuff_T GUI;
 
 bool Need_GPIB = UNSET;          /* Flag, set if GPIB bus is needed */
-#if defined WITH_RULBUS
 bool Need_RULBUS = UNSET;        /* Flag, set if RULBUS is needed */
-#endif
 
 
 /* If you change the following always remember to also adjust the

@@ -100,9 +100,7 @@ extern PA_Seq_T PA_Seq;
 extern long Cur_Pulser;
 
 extern bool Need_GPIB;
-#if defined WITH_RULBUS
 extern bool Need_RULBUS;
-#endif
 
 extern const char *Channel_Names[ NUM_CHANNEL_NAMES ];
 extern const char *Function_Names[ PULSER_CHANNEL_NUM_FUNC ];
