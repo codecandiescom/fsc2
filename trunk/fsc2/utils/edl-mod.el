@@ -30,25 +30,23 @@
 ;; This package provides Emacs support for editing EDL files. But please note:
 ;; First, it's even pre-alpha (I'm at a very early stage of learning elisp),
 ;; and second, nearly all it does yet is taking care of highlighting EDL
-;; keywords and it's not even good at it... On the other hand, for less than
+;; keywords and it's not too good at it... On the other hand, for less than
 ;; one day of learning elisp and how to write a mode it may be good enough ;-)
 
 ;; The currently most annoying bugs are that a `"' in a commment will switch
 ;; off displaying the comment in comment-face.
 ;;
 ;; To get support for EDL mode being loaded automatically for all files with
-;; the extension ".els" add the following lines to your .emacs file:
-;;    (autoload 'edl-mode "edl-mod")
-;;    (setq auto-mode-alist (append (list (cons "\\.edl\\'" 'edl-mode))
-;;                                   auto-mode-alist))
+;; the extension ".edl" add the following lines to your .emacs file:
+;; (autoload 'edl-mode "edl-mod.elc"
+;;  "edl-mod.el -- editing EDL files with Emacs")
+;; (setq auto-mode-alist (append (list (cons "\\.edl\\'" 'edl-mode))
+;;                                auto-mode-alist))
 ;;
-
-;;; Code:
 
 
 (defconst edl-maintainer-address
-  "Jens Thoms Törring <jens@masklin.anorg.chemie.uni-frankfurt.de>"
-  "Current maintainer of the Emacs EDL package.")
+  "Jens Thoms Törring <Jens.Toerring@physik.fu-berlin.de>" )
 
 (defgroup edl nil
   "Major mode for editing EDL source files."
@@ -58,9 +56,6 @@
   "*Hook to be run when EDL mode is started."
   :type 'hook
   :group 'edl)
-
-;(setq edl-mode-syntax-table (make-syntax-table))
-;(modify-syntax-entry ?_ "w" edl-mode-syntax-table)
 
 
 (defvar edl-comments
@@ -174,7 +169,7 @@
    (cons (concat "\\<\\("
 				 (mapconcat 'identity edl-reserved-words "\\|") "\\)\\|{\\|}")
 		 'font-lock-keyword-face)
-   (cons "\\(<=\\|>=\\|==\\|!=\\|<\\|>\\|&\\|!\\|~\\)" 'font-lock-builtin-face)
+   (cons "\\(<=\\|>=\\|==\\|!=\\|<\\|>\\|&\\|!\\|~\\|?\\|:\\)" 'font-lock-builtin-face)
    (cons edl-unit-keywords 'font-lock-type-face))
   "EDL expressions to highlight." )
 
@@ -199,9 +194,6 @@
   (setq comment-start "//" )
 
   (run-hooks 'edl-mode-hook) )
-
-
-;;; provide ourself
 
 (provide 'edl-mode)
 

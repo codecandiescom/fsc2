@@ -1,6 +1,6 @@
 @c $Id$
 
-@node Acknowledgments, Copying, Reserved Words, Top
+@node Acknowledgments, Copying, EDL mode for emacs, Top
 @appendix Acknowledgments
 
 
