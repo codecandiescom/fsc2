@@ -207,7 +207,7 @@ too many and if necessary print out a warning.
 
 One word of warning: @strong{Never ever change the variables you get
 passed to your functions in any way, especially the
-@code{next}-pointer!}. Even though the variables get thrown away
+@code{next}-pointer!} Even though the variables get thrown away
 automatically when you return from the function changing something
 within the variable may break the mechanism for clearing up the
 variables and lead to all kinds of weird errors.
@@ -290,7 +290,7 @@ to get the address of the start of a string variable.
 There are some utility functions that make it even easier to evaluate
 the parameters your function receives. The first one is for the case
 that you expect an integer variable but would also be prepared to deal
-with a floating number after it has been rounded to the nearest
+with a floating point number after it has been rounded to the nearest
 integer. This is the function @code{get_long()}, defined as
 @example
 long get_long( Var *var, const char *snippet )
@@ -317,8 +317,8 @@ the following warning message will be printed:
 foo.edl:17: LECRONIX: abc(): Floating point number used as channel number.
 @end example
 
-If, on the other hand, you expect a floating point number but would also
-accept an integer, you can use the function
+If, on the other hand, you expect a floating point number but are also
+prepared to accept an integer, you can use the function
 @example
 long get_double( Var *var, const char *snippet )
 @end example
