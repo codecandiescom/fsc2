@@ -160,71 +160,70 @@ $f6_v->pack( %wp );
 $f6_l2->pack( %wp );
 
 
-my $f6a = $mw->Frame( );
-my $f6a_l1 = $f6a->Label( '-text' => 'Waiting time:',
-						  '-width' => '20',
-						  'anchor' => 'w' );
-my $f6a_v = $f6a->Entry( '-textvariable' => \$tc_fact,
-						 '-width' => '6',
-						 '-validate' => 'key',
-						 '-validatecommand' => \&is_numeric,
-						 '-relief' => 'sunken' );
-my $f6a_l2 = $f6a->Label( '-text' => '* tc',
-						  '-width' => 2 );
-
-$f6a->pack( %fp );
-$f6a_l1->pack( %wp );
-$f6a_v->pack( %wp );
-$f6a_l2->pack( %wp );
-
-
-
-my $f7 = $mw->Frame( );
-my $f7_l = $f7->Label( '-text' => 'Lock-in amplifier:',
+my $f7 = $mw->Frame( '-width' => '29' );
+my $f7_l1 = $f7->Label( '-text' => 'Waiting time:',
 						'-width' => '20',
 						'anchor' => 'w' );
-my $f7_m = $f7->Optionmenu( '-options' =>
-							[ ( 'SR510', 'SR530', 'SR810', 'SR830' ) ],
-							'-width' => 9,
-							'-variable' => \$lockin );
-$f7->pack( %fp );
-$f7_l->pack( %wp );
-$f7_m->pack( %wp );
+my $f7_v = $f7->Entry( '-textvariable' => \$tc_fact,
+					   '-width' => '7',
+					   '-validate' => 'key',
+					   '-validatecommand' => \&is_numeric,
+					   '-relief' => 'sunken' );
+my $f7_l2 = $f7->Label( '-text' => '* tc',
+						'-width' => 2 );
 
+$f7->pack( %fp );
+$f7_l1->pack( %wp );
+$f7_v->pack( %wp );
+$f7_l2->pack( %wp );
 
 
 my $f8 = $mw->Frame( );
-my $f8_l = $f8->Label( '-text' => 'Time constant:',
-					   '-width' => '20',
-					   'anchor' => 'w' );
+my $f8_l = $f8->Label( '-text' => 'Lock-in amplifier:',
+						'-width' => '20',
+						'anchor' => 'w' );
 my $f8_m = $f8->Optionmenu( '-options' =>
-                            [ ( "Don't set", '100 s', ' 30 s', ' 10 s',
-                                '  3 s', '  1 s', '300 ms', '100 ms', ' 30 ms',
-                                ' 10 ms', '  3 ms', '  1 ms' ) ],
+							[ ( 'SR510', 'SR530', 'SR810', 'SR830' ) ],
 							'-width' => 9,
-							'-variable' => \$tc );
+							'-variable' => \$lockin );
 $f8->pack( %fp );
 $f8_l->pack( %wp );
 $f8_m->pack( %wp );
 
 
+
 my $f9 = $mw->Frame( );
-my $f9_l = $f9->Label( '-text' => 'Sensitivity:',
-						'-width' => '20',
-						'anchor' => 'w' );
+my $f9_l = $f9->Label( '-text' => 'Time constant (tc):',
+					   '-width' => '20',
+					   'anchor' => 'w' );
 my $f9_m = $f9->Optionmenu( '-options' =>
-                            [ ( "Don't set", '500 mV', '200 mV', '100 mV',
-                                ' 50 mV', ' 20 mV', ' 10 mV', '  5 mv',
-                                '  2 mV', '  1 mV', '500 uV', '200 uV',
-                                '100 uV', ' 50 uV', ' 20 uV', ' 10 uV',
-                                '  5 uV', '  2 uV', '  1 uV',
-                                '500 nV', '200 nV', '100 nV', ' 50 nV',
-                                ' 10 nV', '  5 nV', '  2 nV', '  1 nV' ) ],
+                            [ ( "Don't set", '100 s', ' 30 s', ' 10 s',
+                                '  3 s', '  1 s', '300 ms', '100 ms', ' 30 ms',
+                                ' 10 ms', '  3 ms', '  1 ms' ) ],
 							'-width' => 9,
-							'-variable' => \$sens );
+							'-variable' => \$tc );
 $f9->pack( %fp );
 $f9_l->pack( %wp );
 $f9_m->pack( %wp );
+
+
+my $f10 = $mw->Frame( );
+my $f10_l = $f10->Label( '-text' => 'Sensitivity:',
+						 '-width' => '20',
+						 'anchor' => 'w' );
+my $f10_m = $f10->Optionmenu( '-options' =>
+							  [ ( "Don't set", '500 mV', '200 mV', '100 mV',
+								  ' 50 mV', ' 20 mV', ' 10 mV', '  5 mv',
+								  '  2 mV', '  1 mV', '500 uV', '200 uV',
+								  '100 uV', ' 50 uV', ' 20 uV', ' 10 uV',
+								  '  5 uV', '  2 uV', '  1 uV',
+								  '500 nV', '200 nV', '100 nV', ' 50 nV',
+								  ' 10 nV', '  5 nV', '  2 nV', '  1 nV' ) ],
+							  '-width' => 9,
+							  '-variable' => \$sens );
+$f10->pack( %fp );
+$f10_l->pack( %wp );
+$f10_m->pack( %wp );
 
 
 $mw->Optionmenu( '-options' => [ ( 'Start experiment', 'Test program',
@@ -419,19 +418,20 @@ print F ", N_points, start_field, field_step, \"Magnetic field / G\",
 print F
 "EXPERIMENT:\n
 fsave( \"% Field:\\n\"
-	   \"%	 Start:			# G\\n\"
-	   \"%	 End:			# G\\n\"
-	   \"%	 Step size:		# G\\n\"
-	   \"% Lock-In: \\n\"
-	   \"%	 Sensitivity:	# V\\n\"
-	   \"%	 Time constant: # s\\n\"
-	   \"%	 Phase:			# degree\\n\"
-	   \"% Number of runs:	#\\n\",
+	   \"%	 Start field:     # G\\n\"
+	   \"%	 End field:       # G\\n\"
+	   \"%	 Field step size: # G\\n\"
+	   \"% Lock-In:\\n\"
+	   \"%	 Sensitivity:     # V\\n\"
+	   \"%	 Time constant:   # s\\n\"
+	   \"%	 Phase:			  # degree\\n\"
+	   \"% Number of runs:	  #\\n\",
 	   start_field, start_field + ( N_points - 1 ) * field_step, field_step,
 	   lockin_sensitivity( ), lockin_time_constant( ), lockin_phase( ),
 	   N_runs );
 save_comment( \"% \" );
-save_program( \"% \" );\n\n";
+save_program( \"% \", \"Sample:  \\nMicrowave frequency:  \\n\"
+              \"Microwave power:  \\nTemperature:  \\n\" );\n\n";
 
 print F "act_field = set_field( start_field );\n"
 	if $sweep_method eq 'set_field';
@@ -453,8 +453,8 @@ if ( $sweep_method eq 'sweep' ) {
 	print F "fsave( \"# #\\n\", act_field, new_data[ I ] );";
 }
 print F "
-		display( I, ( data[ I ] + new_data[ I ] ) / float( J ), 1 );
-		display( I, new_data[ I ], 3 );
+		display( I, ( data[ I ] + new_data[ I ] ) / float( J ), 1,
+		         I, new_data[ I ], 3 );
 
 		IF ( I < N_points ) \{\n\t\t\t";
 if ( $sweep_method eq 'sweep' ) {
@@ -464,7 +464,9 @@ if ( $sweep_method eq 'sweep' ) {
 		"field_error );";
 }
 print F "
-			wait( $tc_fact * tc );
+			wait( ";
+print F "$tc_fact * " if $tc_fact != 1;
+print F "tc );
 		\}
 	\}
 
@@ -480,7 +482,9 @@ if ( $sweep_method eq 'sweep' ) {
 	print F "act_field = set_field( start_field );";
 }
 print F "
-		wait( $tc_fact * tc );
+		wait( ";
+print F "$tc_fact * " if $tc_fact != 1;
+print F "tc );
 	\}
 \}
 
@@ -511,7 +515,9 @@ if ( $sweep_method eq 'sweep' ) {
 	print F "act_field = set_field( start_field + I * field_step, field_error );";
 }
 print F "
-		wait( $tc_fact * tc );
+		wait( ";
+print F "$tc_fact * " if $tc_fact != 1;
+print F "tc );
 	\}
 \}";
 }
