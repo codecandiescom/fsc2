@@ -324,3 +324,10 @@ powersupply_voltage_limit, -1, EXP;    // set/get channel voltage limit
 powersupply_current, -1, EXP;          // set/set channeloutput current
 powersupply_current_limit, -1, EXP;	   // get/set channelcurrent limit
 powersupply_command, 1, EXP;
+
+
+/* Functions exported by DIOs (Wasco WITIO-48 card)
+
+dio_name, 0, ALL;                      // returns the device name
+dio_mode, -1, ALL;                     // sets the DIO mode
+dio_value, -1, EXP;                    // inputs or ouputs a value

@@ -2843,13 +2843,13 @@ Since in this mode there are three independent sub-DIOs, three channels,
 restricted to numbers between @code{0} and @code{255}.
 
 If the channel is @code{CH1} the bits of the value are output at the
-pins labeled @code{1PA7} to @code{1PA0} for @code{DIO1} and at the pins
-@code{2PA7} to @code{2PA0} for @code{DIO2}, where the most significant
-bit goes to the highest numbered pin 7 and the least sigificant bit to the
-pin numbered 0.  If a channel of @code{CH2} has been selected the bits
-are mapped to the pins @code{1PB7} to @code{1PB0} or @code{2PB7} to
-@code{2PB0} and for @code{CH3} to the pins @code{1PC7} to @code{1PC0} or
-@code{2PC7} to @code{2PC0}.
+pins of the connector labeled @code{1PA7} to @code{1PA0} for @code{DIO1}
+and at the pins @code{2PA7} to @code{2PA0} for @code{DIO2}, where the
+most significant bit goes to the highest numbered pin 7 and the least
+sigificant bit to the pin numbered 0.  If a channel of @code{CH2} has
+been selected the bits are mapped to the pins @code{1PB7} to @code{1PB0}
+or @code{2PB7} to @code{2PB0} and for @code{CH3} to the pins @code{1PC7}
+to @code{1PC0} or @code{2PC7} to @code{2PC0}.
 
 @item @code{"2x12"} mode
 In this mode the DIO is split into two 12-bit wide sub-DIOs, so only
