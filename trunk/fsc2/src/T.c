@@ -222,12 +222,12 @@ char *T_strdup( const char *str )
 	{
 		asm( "mov %%ebp, %0" : "=g" ( EBP ) );
 		fprintf( stderr, "(%d) strdup:  %p (%u) from %p\n",
-				 I_am == CHILD, new_str, strlen( str ) + 1,
+				 I_am == CHILD, ( void * ) new_str, strlen( str ) + 1,
 				 ( void * ) * ( EBP + 1 ) );
 	}
 	else
 		fprintf( stderr, "(%d) strdup:  %p (%u)\n",
-			 I_am == CHILD, new_str, strlen( str ) + 1 );
+			 I_am == CHILD, ( void * ) new_str, strlen( str ) + 1 );
 
 	fflush( stderr );
 #endif
