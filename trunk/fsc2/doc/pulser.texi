@@ -387,10 +387,11 @@ no obfuscated EDL contest yet;-). Besides, some of the pulser modules
 also define special functions (e.g.@: for automatically setting TWT
 pulses) that only work for some of these functions.
 
-The functions @code{PHASE_1} and @code{PHASE_2} are special in that
-they can only be used with the Frankfurt version of the driver for the
-@strong{Sony/Tektronix DG2020} and are used for controlling the phase
-switches, i.e.@: it's pulses are created automatically.
+The functions @code{PHASE_1} and @code{PHASE_2} are special in that they
+can only be used with the Frankfurt version of the driver for the
+@strong{Sony/Tektronix DG2020}, @code{dg2020_f}, and are used for
+controlling the phase switches, i.e.@: it's pulses are created
+automatically.
 
 The functions @code{OTHER_1} to @code{OTHER_4} should be used in cases
 where none of the function names seem to fit the special purpose you
