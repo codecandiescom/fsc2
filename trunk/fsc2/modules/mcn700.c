@@ -74,7 +74,6 @@ static struct {
 } mcn700;
 
 
-
 /*------------------------------------*
  * Init hook function for the module.
  *------------------------------------*/
@@ -142,11 +141,11 @@ Var *powersupply_name( Var *v )
 
 
 /*------------------------------------------------------------------*
- * Function sets or returns the voltage. If called with a non-NULL
- * argument it must be the voltage in the range between 0 V and
- * 2000 V (in 1V steps). If there isn't an argument the voltage at
- * the output gets returned (which may be smaller than voltage that
- * had been set due to the current limit).
+ * Function sets or returns the voltage.
+ * If called with a non-NULL argument it must be the voltage in the
+ * range between 0 V and 2000 V (in 1V steps). If there isn't an
+ * argument the voltage at the output gets returned (which may be
+ * smaller than voltage that had been set due to the current limit).
  * NB: when setting the voltage the program waits until the 
  * "Spannungsregelung" is activated (fixed voltage mode)
  *------------------------------------------------------------------*/
