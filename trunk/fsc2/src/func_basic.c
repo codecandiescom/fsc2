@@ -3418,6 +3418,72 @@ Var *f_lspace( Var *v )
 }
 
 
+/*------------------------------------------------------------*/
+/*------------------------------------------------------------*/
+
+Var *f_reverse( Var *v )
+{
+	Var *new_var = NULL;
+	ssize_t i;
+	long *lsrc, *ldest, ltemp;
+	double *dsrc, *ddest, dtemp;
+
+
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
+				   INT_REF | FLOAT_REF );
+
+	switch ( v->type )
+	{
+		case INT_VAR :
+			new_var = vars_push( INT_VAR, v->val.lval );
+			break;
+
+		case FLOAT_VAR :
+			new_var = vars_push( FLOAT_VAR, v->val.dval );
+			break;
+
+		case INT_ARR :
+			new_var = vars_make( INT_ARR, v );
+			for ( lsrc = v->val.lpnt, ldest = new_var->val.lpnt, i = 0;
+				  i < v->len / 2; i++, lsrc++, ldest++ )
+			{
+				ltemp = *lsrc;
+				*lsrc = *ldest;
+				*ldest = ltemp;
+			}
+			break;
+
+		case FLOAT_ARR :
+			new_var = vars_make( FLOAT_ARR, v );
+			for ( dsrc = v->val.dpnt, ddest = new_var->val.dpnt, i = 0;
+				  i < v->len / 2; i++, dsrc++, ddest++ )
+			{
+				dtemp = *dsrc;
+				*dsrc = *ddest;
+				*ddest = dtemp;
+			}
+			break;
+
+		case INT_REF : case FLOAT_REF :
+			new_var = vars_make( FLOAT_REF, v );
+			for ( i = 0; i < v->len; i++ )
+				if ( v->val.vptr[ i ] == NULL )
+					new_var->val.vptr[ i ] = NULL;
+				else
+				{
+					new_var->val.vptr[ i ] = f_reverse( v->val.vptr[ i ] );
+					new_var->val.vptr[ i ]->from = new_var;
+				}
+			break;
+
+		default :
+			fsc2_assert( 1 == 0 );
+	}
+
+	return new_var;
+}
+
+
 /*--------------------------------------------*/
 /* Function is used in the calculation of the */
 /* asinh(), acosh() and atanh() functions.    */
