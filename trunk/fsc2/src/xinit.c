@@ -41,6 +41,15 @@ static int fsc2_xio_error_handler( Display *d );
 
 FL_IOPT xcntl;
 
+static struct {
+	unsigned int WIN_MIN_WIDTH;
+	unsigned int WIN_MIN_HEIGHT;
+	int NORMAL_FONT_SIZE;
+	int SMALL_FONT_SIZE;
+	int TOOLS_FONT_SIZE;
+	double SLIDER_SIZE;
+} XI_Sizes;
+
 static char xGeoStr[ 64 ],
 			xdisplayGeoStr[ 64 ],
 			x_1d_displayGeoStr[ 64 ],
@@ -52,11 +61,7 @@ static char xGeoStr[ 64 ],
 			xsizeStr[ 64 ];
 
 static int xbrowserfs,
-		   xbuttonfs,
-		   xinputfs,
-		   xlabelfs,
-		   xchoicefs,
-		   xsliderfs,
+		   xtoolboxfs,
 		   xfileselectorfs,
 		   xhelpfs,
 		   xnocm,
@@ -76,30 +81,6 @@ FL_resource xresources[ ] = {
 		"*.browserFontSize",
 		FL_INT,
 		&xbrowserfs,
-		"0",
-		sizeof( int )
-	},
-	{                         /* font size of buttons */
-		"buttonFontSize",
-		"*.buttonFontSize",
-		FL_INT,
-		&xbuttonfs,
-		"0", 
-		sizeof( int )
-	},
-	{                         /* font size of inout fields */
-		"inputFontSize",
-		"*.inputFontSize",
-		FL_INT,
-		&xinputfs,
-		"0",
-		sizeof( int )
-	},
-	{                         /* font size of labels */
-		"labelFontSize",
-		"*.labelFontSize",
-		FL_INT,
-		&xlabelfs,
 		"0",
 		sizeof( int )
 	},
@@ -151,19 +132,11 @@ FL_resource xresources[ ] = {
 		"",
 		256
 	},
-	{                         /* font for choice objects */
-		"choiceFontSize",
-		"*.choiceFontSize",
+	{                         /* font for toolbox objects */
+		"toolboxFontSize",
+		"*.toolboxFontSize",
 		FL_INT,
-		&xchoicefs,
-		"0",
-		sizeof( int )
-	},
-	{                         /* font for sliders */
-		"sliderFontSize",
-		"*.sliderFontSize",
-		FL_INT,
-		&xsliderfs,
+		&xtoolboxfs,
 		"0",
 		sizeof( int )
 	},
@@ -220,16 +193,6 @@ FL_resource xresources[ ] = {
 
 #define N_APP_OPT  ( sizeof xresources / sizeof xresources[ 0 ] )
 
-static struct {
-	unsigned int WIN_MIN_WIDTH;
-	unsigned int WIN_MIN_HEIGHT;
-	int NORMAL_FONT_SIZE;
-	int SMALL_FONT_SIZE;
-	int TOOLS_FONT_SIZE;
-	double SLIDER_SIZE;
-} XI_sizes;
-
-
 
 /*-------------------------------------------------*/
 /* xforms_init() registers the program with XFORMS */
@@ -246,10 +209,7 @@ bool xforms_init( int *argc, char *argv[ ] )
 	unsigned int ww, wh;
 	XFontStruct *font;
 	FL_CMD_OPT app_opt[ N_APP_OPT ];
-	volatile bool needs_pos = UNSET;
-	XWindowAttributes attr;
-	Window root, parent, *children;
-	unsigned int nchilds;
+	int x, y;
 #if defined WITH_HTTP_SERVER
 	char *www_help;
 #endif
@@ -322,39 +282,39 @@ bool xforms_init( int *argc, char *argv[ ] )
 
 	if ( GUI.G_Funcs.size == LOW )
 	{
-		XI_sizes.WIN_MIN_WIDTH    = 200;
-		XI_sizes.WIN_MIN_HEIGHT   = 320;
-		XI_sizes.NORMAL_FONT_SIZE = FL_SMALL_SIZE;
-		XI_sizes.SMALL_FONT_SIZE  = FL_TINY_SIZE;
-		XI_sizes.TOOLS_FONT_SIZE  = FL_SMALL_FONT;
-		XI_sizes.SLIDER_SIZE      = 0.1;
+		XI_Sizes.WIN_MIN_WIDTH    = 200;
+		XI_Sizes.WIN_MIN_HEIGHT   = 320;
+		XI_Sizes.NORMAL_FONT_SIZE = FL_SMALL_SIZE;
+		XI_Sizes.SMALL_FONT_SIZE  = FL_TINY_SIZE;
+		XI_Sizes.TOOLS_FONT_SIZE  = FL_SMALL_FONT;
+		XI_Sizes.SLIDER_SIZE      = 0.1;
 	}
 	else
 	{
-		XI_sizes.WIN_MIN_WIDTH    = 220;
-		XI_sizes.WIN_MIN_HEIGHT   = 570;
-		XI_sizes.NORMAL_FONT_SIZE = FL_MEDIUM_SIZE;
-		XI_sizes.SMALL_FONT_SIZE  = FL_SMALL_SIZE;
-		XI_sizes.TOOLS_FONT_SIZE  = FL_MEDIUM_FONT;
-		XI_sizes.SLIDER_SIZE      = 0.075;
+		XI_Sizes.WIN_MIN_WIDTH    = 220;
+		XI_Sizes.WIN_MIN_HEIGHT   = 570;
+		XI_Sizes.NORMAL_FONT_SIZE = FL_MEDIUM_SIZE;
+		XI_Sizes.SMALL_FONT_SIZE  = FL_SMALL_SIZE;
+		XI_Sizes.TOOLS_FONT_SIZE  = FL_MEDIUM_FONT;
+		XI_Sizes.SLIDER_SIZE      = 0.075;
 	}
 
 	/* Set some properties of goodies */
 
-	fl_set_goodies_font( FL_NORMAL_STYLE, XI_sizes.NORMAL_FONT_SIZE );
-	fl_set_oneliner_font( FL_NORMAL_STYLE, XI_sizes.NORMAL_FONT_SIZE );
+	fl_set_goodies_font( FL_NORMAL_STYLE, XI_Sizes.NORMAL_FONT_SIZE );
+	fl_set_oneliner_font( FL_NORMAL_STYLE, XI_Sizes.NORMAL_FONT_SIZE );
 
 	if ( * ( ( int * ) xresources[ HELPFONTSIZE ].var ) != 0 )
 		fl_set_tooltip_font( FL_NORMAL_STYLE,
 							 * ( ( int * ) xresources[ HELPFONTSIZE ].var ) );
 	else
-		fl_set_tooltip_font( FL_NORMAL_STYLE, XI_sizes.SMALL_FONT_SIZE );
+		fl_set_tooltip_font( FL_NORMAL_STYLE, XI_Sizes.SMALL_FONT_SIZE );
 
 	if ( * ( ( int * ) xresources[ FILESELFONTSIZE ].var ) != 0 )
 		fl_set_fselector_fontsize( * ( ( int * )
 									   xresources[ FILESELFONTSIZE ].var )  );
 	else
-		fl_set_fselector_fontsize( XI_sizes.NORMAL_FONT_SIZE );
+		fl_set_fselector_fontsize( XI_Sizes.NORMAL_FONT_SIZE );
 	fl_set_tooltip_color( FL_BLACK, FL_YELLOW );
 
 	fl_disable_fselector_cache( 1 );
@@ -362,12 +322,8 @@ bool xforms_init( int *argc, char *argv[ ] )
 
 	/* Set default font sizes */
 
-	xcntl.browserFontSize = XI_sizes.NORMAL_FONT_SIZE;
-	xcntl.buttonFontSize  = XI_sizes.TOOLS_FONT_SIZE;
-	xcntl.inputFontSize   = XI_sizes.TOOLS_FONT_SIZE;
-	xcntl.labelFontSize   = XI_sizes.TOOLS_FONT_SIZE;
-	xcntl.choiceFontSize  = XI_sizes.TOOLS_FONT_SIZE;
-	xcntl.sliderFontSize  = XI_sizes.TOOLS_FONT_SIZE;
+	xcntl.browserFontSize = XI_Sizes.NORMAL_FONT_SIZE;
+	GUI.toolboxFontSize = XI_Sizes.TOOLS_FONT_SIZE;
 
 	/* Set the stop mouse button (only used in the 'Display' window) */
 
@@ -395,40 +351,12 @@ bool xforms_init( int *argc, char *argv[ ] )
 	if ( * ( ( int * ) xresources[ BROWSERFONTSIZE ].var ) != 0 )
 		xcntl.browserFontSize =
 			* ( ( int * ) xresources[ BROWSERFONTSIZE ].var );
-	fl_set_defaults( FL_PDBrowserFontSize, &xcntl );
 
-	/* Set the default font size for buttons */
+	/* Set the default font size for the toolbox */
 
-	if ( * ( ( int * ) xresources[ BUTTONFONTSIZE ].var ) != 0 )
-		xcntl.buttonFontSize =
-			* ( ( int * ) xresources[ BUTTONFONTSIZE ].var );
-	fl_set_defaults( FL_PDButtonFontSize, &xcntl );
-
-	/* Set the default font size for input objects */
-
-	if ( * ( ( int * ) xresources[ INPUTFONTSIZE ].var ) != 0 )
-		xcntl.inputFontSize = * ( ( int * ) xresources[ INPUTFONTSIZE ].var );
-	fl_set_defaults( FL_PDInputFontSize, &xcntl );
-
-	/* Set the default font size for label and texts */
-
-	if ( * ( ( int * ) xresources[ LABELFONTSIZE ].var ) != 0 )
-		xcntl.labelFontSize = * ( ( int * ) xresources[ LABELFONTSIZE ].var );
-	fl_set_defaults( FL_PDLabelFontSize, &xcntl );
-
-	/* Set the default font size for choice objects */
-
-	if ( * ( ( int * ) xresources[ CHOICEFONTSIZE ].var ) != 0 )
-		xcntl.choiceFontSize =
-			* ( ( int * ) xresources[ CHOICEFONTSIZE ].var );
-	fl_set_defaults( FL_PDChoiceFontSize, &xcntl );
-
-	/* Set the default font size for slider */
-
-	if ( * ( ( int * ) xresources[ SLIDERFONTSIZE ].var ) != 0 )
-		xcntl.sliderFontSize =
-			* ( ( int * ) xresources[ SLIDERFONTSIZE ].var );
-	fl_set_defaults( FL_PDSliderFontSize, &xcntl );
+	if ( * ( ( int * ) xresources[ TOOLBOXFONTSIZE ].var ) != 0 )
+		GUI.toolboxFontSize =
+			* ( ( int * ) xresources[ TOOLBOXFONTSIZE ].var );
 
 	/* Set the HTTP port the server is going to run on - if it has been given
 	   on the command line (or in .XDefaults etc.) we take this value,
@@ -493,11 +421,11 @@ bool xforms_init( int *argc, char *argv[ ] )
 	h = cy2 - cy1 - ch1;
 	H = ch1 + ch2 + h;
 
-	fl_set_slider_size( GUI.main_form->win_slider, XI_sizes.SLIDER_SIZE );
+	fl_set_slider_size( GUI.main_form->win_slider, XI_Sizes.SLIDER_SIZE );
 	fl_set_slider_value( GUI.main_form->win_slider,
 						 ( double ) ( ch1 + h / 2
-									  - 0.5 * H * XI_sizes.SLIDER_SIZE )
-						 / ( ( 1.0 - XI_sizes.SLIDER_SIZE ) * H ) );
+									  - 0.5 * H * XI_Sizes.SLIDER_SIZE )
+						 / ( ( 1.0 - XI_Sizes.SLIDER_SIZE ) * H ) );
 
 	/* There's no use for the bug report button if either no mail address
 	   or no mail program has been set */
@@ -523,21 +451,32 @@ bool xforms_init( int *argc, char *argv[ ] )
 								&wx, &wy, &ww, &wh );
 		if ( WidthValue & flags && HeightValue & flags )
 		{
-			if ( ww < XI_sizes.WIN_MIN_WIDTH )
-				ww = XI_sizes.WIN_MIN_WIDTH;
-			if ( wh < XI_sizes.WIN_MIN_HEIGHT )
-				wh = XI_sizes.WIN_MIN_HEIGHT;
-
-			fl_set_form_size( GUI.main_form->fsc2, ww, wh );
+			GUI.win_has_size = SET;
+			GUI.win_width= ww;
+			GUI.win_height = wh;
 		}
 
 		if ( XValue & flags && YValue & flags )
-			needs_pos = SET;
+		{
+			GUI.win_has_pos = SET;
+			GUI.win_x = wx;
+			GUI.win_y = wy;
+		}
 	}
 
-	if ( needs_pos )
+	if ( GUI.win_has_size )
 	{
-		fl_set_form_position( GUI.main_form->fsc2, wx, wy );
+		if ( GUI.win_width < XI_Sizes.WIN_MIN_WIDTH )
+			GUI.win_width = XI_Sizes.WIN_MIN_WIDTH;
+		if ( GUI.win_height < XI_Sizes.WIN_MIN_HEIGHT )
+			GUI.win_height = XI_Sizes.WIN_MIN_HEIGHT;
+
+		fl_set_form_size( GUI.main_form->fsc2, GUI.win_width, GUI.win_height );
+	}
+
+	if ( GUI.win_has_pos )
+	{
+		fl_set_form_position( GUI.main_form->fsc2, GUI.win_x, GUI.win_y );
 		fl_show_form( GUI.main_form->fsc2, FL_PLACE_POSITION,
 					  FL_FULLBORDER, "fsc2" );
 	}
@@ -554,16 +493,12 @@ bool xforms_init( int *argc, char *argv[ ] )
 	fl_deactivate_object( GUI.main_form->run );
 	fl_set_object_lcol( GUI.main_form->run, FL_INACTIVE_COL );
 
-	XQueryTree( fl_display, GUI.main_form->fsc2->window, &root,
-				&parent, &children, &nchilds );
-	XQueryTree( fl_display, parent, &root,
-				&parent, &children, &nchilds );
-	XGetWindowAttributes( fl_display, parent, &attr );
-	GUI.border_offset_x = GUI.main_form->fsc2->x - attr.x;
-	GUI.border_offset_y = GUI.main_form->fsc2->y - attr.y;
+	get_form_position( GUI.main_form->fsc2, &x, &y );
+	GUI.border_offset_x = GUI.main_form->fsc2->x - x;
+	GUI.border_offset_y = GUI.main_form->fsc2->y - y;
 
 	fl_winminsize( GUI.main_form->fsc2->window,
-				   XI_sizes.WIN_MIN_WIDTH, XI_sizes.WIN_MIN_HEIGHT );
+				   XI_Sizes.WIN_MIN_WIDTH, XI_Sizes.WIN_MIN_HEIGHT );
 
 	/* Check if axis font exists (if the user set a font) */
 
@@ -619,20 +554,10 @@ static void setup_app_options( FL_CMD_OPT app_opt[ ] )
 	app_opt[ BROWSERFONTSIZE ].argKind    = XrmoptionSepArg;
 	app_opt[ BROWSERFONTSIZE ].value      = ( caddr_t ) "0";
 
-	app_opt[ BUTTONFONTSIZE	].option      = T_strdup( "-buttonFontSize" );
-	app_opt[ BUTTONFONTSIZE	].specifier   = T_strdup( "*.buttonFontSize" );
-	app_opt[ BUTTONFONTSIZE	].argKind     = XrmoptionSepArg;
-	app_opt[ BUTTONFONTSIZE	].value       = ( caddr_t ) "0";
-
-	app_opt[ INPUTFONTSIZE ].option       = T_strdup( "-inputFontSize" );
-	app_opt[ INPUTFONTSIZE ].specifier    = T_strdup( "*.inputFontSize" );
-	app_opt[ INPUTFONTSIZE ].argKind      = XrmoptionSepArg;
-	app_opt[ INPUTFONTSIZE ].value        = ( caddr_t ) "0";
-
-	app_opt[ LABELFONTSIZE ].option       = T_strdup( "-labelFontSize" );
-	app_opt[ LABELFONTSIZE ].specifier    = T_strdup( "*.labelFontSize" );
-	app_opt[ LABELFONTSIZE ].argKind      = XrmoptionSepArg;
-	app_opt[ LABELFONTSIZE ].value        = ( caddr_t ) "0";
+	app_opt[ TOOLBOXFONTSIZE ].option     = T_strdup( "-toolboxFontSize" );
+	app_opt[ TOOLBOXFONTSIZE ].specifier  = T_strdup( "*.toolboxFontSize" );
+	app_opt[ TOOLBOXFONTSIZE ].argKind    = XrmoptionSepArg;
+	app_opt[ TOOLBOXFONTSIZE ].value      = ( caddr_t ) "0";
 
 	app_opt[ DISPLAYGEOMETRY ].option     = T_strdup( "-displayGeometry" );
 	app_opt[ DISPLAYGEOMETRY ].specifier  = T_strdup( "*.displayGeometry" );
@@ -663,16 +588,6 @@ static void setup_app_options( FL_CMD_OPT app_opt[ ] )
 	app_opt[ AXISFONT ].specifier         = T_strdup( "*.axisFont" );
 	app_opt[ AXISFONT ].argKind           = XrmoptionSepArg;
 	app_opt[ AXISFONT ].value             = ( caddr_t ) NULL;
-
-	app_opt[ CHOICEFONTSIZE ].option      = T_strdup( "-choiceFontSize" );
-	app_opt[ CHOICEFONTSIZE ].specifier   = T_strdup( "*.choiceFontSize" );
-	app_opt[ CHOICEFONTSIZE ].argKind     = XrmoptionSepArg;
-	app_opt[ CHOICEFONTSIZE ].value       = ( caddr_t ) "0";
-
-	app_opt[ SLIDERFONTSIZE ].option      = T_strdup( "-sliderFontSize" );
-	app_opt[ SLIDERFONTSIZE ].specifier   = T_strdup( "*.sliderFontSize" );
-	app_opt[ SLIDERFONTSIZE ].argKind     = XrmoptionSepArg;
-	app_opt[ SLIDERFONTSIZE ].value       = ( caddr_t ) "0";
 
 	app_opt[ FILESELFONTSIZE ].option     =
 		                                   T_strdup( "-fileselectorFontSize" );
@@ -845,9 +760,9 @@ bool dl_fsc2_rsc( void )
 
 /*-----------------------------------------------------------------*/
 /* Handler for the user clicking on the Close button of the window */
-/* decoration - this is interpreted as the as the user really      */
-/* meaning it, i.e. even when we're in batch mode and there are    */
-/* still EDL scripts to be run quit immediately.                   */
+/* decoration - this is interpreted as the user really meaning it, */
+/* i.e. even when we're in batch mode and there are still EDL      */
+/* scripts to be run quit immediately.                             */
 /*-----------------------------------------------------------------*/
 
 static int main_form_close_handler( FL_FORM *a, void *b )
@@ -878,7 +793,14 @@ static int main_form_close_handler( FL_FORM *a, void *b )
 void xforms_close( void )
 {
 	if ( fl_form_is_visible( GUI.main_form->fsc2 ) )
+	{
+		get_form_position( GUI.main_form->fsc2, &GUI.win_x, &GUI.win_y );
+		GUI.win_width = GUI.main_form->fsc2->w;
+		GUI.win_height = GUI.main_form->fsc2->h;
+
 		fl_hide_form( GUI.main_form->fsc2 );
+	}
+
 	fl_free_form( GUI.main_form->fsc2 );
 	fl_finish( );
 
@@ -912,9 +834,9 @@ void win_slider_callback( FL_OBJECT *a, long b )
 	h = cy2 - cy1 - ch1;
 	H = cy2 - cy1 + ch2;
 
-	new_h1 = ( FL_Coord ) ( ( 1.0 - XI_sizes.SLIDER_SIZE ) * H
+	new_h1 = ( FL_Coord ) ( ( 1.0 - XI_Sizes.SLIDER_SIZE ) * H
 							* fl_get_slider_value( a )
-							+ 0.5 * H * XI_sizes.SLIDER_SIZE - h / 2 );
+							+ 0.5 * H * XI_Sizes.SLIDER_SIZE - h / 2 );
 
 	fl_set_object_size( GUI.main_form->browser, cw1, new_h1 );
 	fl_set_object_geometry( GUI.main_form->error_browser, cx2,

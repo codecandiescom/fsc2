@@ -49,6 +49,7 @@ ssize_t read_line( int fd, void *vptr, size_t max_len );
 ssize_t writen( int fd, const void *vptr, size_t n );
 const char *fsc2_show_fselector( const char *message, const char *dir,
 								 const char *pattern, const char *def_name );
+void get_form_position( FL_FORM *form, int *x, int *y );
 
 
 #endif  /* ! UTIL_HEADER */

@@ -336,6 +336,8 @@ struct GUI_Stuff {
 	int toolbox_x;
 	int toolbox_y;
 	bool toolbox_has_pos;
+
+	int toolboxFontSize;
 };
 
 

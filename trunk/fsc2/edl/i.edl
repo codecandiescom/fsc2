@@ -8,6 +8,8 @@ FILE1, FILE2;
 I = 0;
 M_STATE = 1;
 S = 0;
+X[ 9 ];
+wt = 10 ms;
 
 PREPARATIONS:
 
@@ -15,35 +17,58 @@ init_1d( 4, 32, "Blödsinn [nT]", "Schwachsinn [V]" );
 
 EXPERIMENT:
 
-hide_toolbox( "ON" );
+//hide_toolbox( "ON" );
 layout( "VERTICAL" );
 //layout( "HORIZONTAL" );
 M = menu_create( "Lock-in acquisition rate", "32 Hz", "16 Hz", "8 Hz", "4 Hz",
 				 "2 Hz", "1 Hz", "1/2 Hz", "1/4 Hz", "1/8 Hz", "1/16 Hz" );
+wait( wt );
 BID1 = button_create( "NORMAL_BUTTON", "Clear curve\nund noch viel mehr\nund noch viel, viel, viiiiel mehr....",
 					  "Removes the currently\ndisplayed curve" );
+wait( wt );
 //BID1 = button_create( "NORMAL_BUTTON", "@#>>",
 //					  "Removes the currently\ndisplayed curve" );
 BID2 = button_create( "PUSH_BUTTON", "@#>>", "Help3" );//"RF On / Off" );
+wait( wt );
 BID3 = button_create( "RADIO_BUTTON", "@#>>", "Help3" );
+wait( wt );
 button_state( BID3, 1 );
+wait( wt );
 BID4 = button_create( "RADIO_BUTTON", BID3, "Bla4", "Help4" );
+wait( wt );
 SID1 = slider_create( "SLOW_NORMAL_SLIDER", 0, 1, 0.2, "@#>>", "Help3" );//"Blub1", "Hilfe1" );
+wait( wt );
 BID5 = button_create( "RADIO_BUTTON", "Sweep RF up" );
+wait( wt );
 BID6 = button_create( "RADIO_BUTTON", BID5, "Stop RF\nsweep\nasdads\ndasa\ndas\nsdasda" );
+wait( wt );
 button_state( BID6, 1 );
+wait( wt );
 BID7 = button_create( "RADIO_BUTTON", BID5, "Sweep RF down" );
+wait( wt );
 SID2 = slider_create( "VALUE_SLIDER", -100.0, -3.0, "Attenuation",
 					  "Adjusts RF attenuation" );
+wait( wt );
+//X[ 9 ] = button_create( "PUSH_BUTTON", "@#>>", "Help3" );//"RF On / Off" );
 I1   = input_create( "INT_INPUT", 17, "Na, was wohl", "Weiss auch nicht..." );
+wait( wt );
 I2   = input_create( "FLOAT_INPUT", -13, "Noch eins", "Foobar", "%15.2f" );
+wait( wt );
 I3   = output_create( "INT_OUTPUT", 17, "Dies ist ein extrem langes und dabei auch hohes Label.\nMal sehen was xforms damit anstellt.\nWahrscheinlich geht es schief, oder?\nAber man muss es ja mal ausprobieren...", "Weiss auch nicht..." );
+wait( wt );
 I4   = output_create( "FLOAT_OUTPUT", -13, "Noch eins\nakjdhasjkdhdkasjhdhasjkdkashjkahdakdhkajhdjahdkhakdhakjdhak\nahjsdaksdhasjkdhajhdjkadhajkdhjadjjdhjakdhjahdjkadhajkdhajkdhajkdhjasjkdhaksjdhdjkadhaksdhakjdhka", "", "%.5f" );
 I5   = input_create( "INT_INPUT", NX, "Points in x direction\njkshdjkadhjakdja\nksdjaldjajdajdsjaldjaldjklajdladkladj\nasjdsklajasjdkljskajdadjaskjdkldjadjalalsdkajdkjaljadjadsjadjasdjalsdjlsdjasjdla"  );
-hide_toolbox( "OFF" );
+wait( wt );
+
+
+FOR I = 1 : 8 {
+	X[ I ] = button_create( "PUSH_BUTTON", "@#>>", "Help3" );//"RF On / Off" );
+}
+
+
+//hide_toolbox( "OFF" );
 //FILE1 = get_file( "", "*.dat", "", "", "dat" );
 //FILE2 = clone_file( FILE1, "dat", "dxx" );
-
 
 FOREVER {
 
@@ -114,8 +139,6 @@ FOREVER {
 
 ON_STOP:
 
-show_message( "This\nis\nthe\nend!" );
-
 /*
 hide_toolbox( 1 );
 wait( 2 );
@@ -130,4 +153,5 @@ hide_toolbox( 1 );
 object_delete( SID1, I1, I2, I3, BID1 );
 hide_toolbox( 0 );
 
-wait( 1 );
+show_message( "This\nis\nthe\nend!" );
+

@@ -67,7 +67,7 @@ void rb_pulser_init( void )
 											RULBUS_RB8515_CLOCK_FREQ_OFF )
 																!= RULBUS_OK ||
 		 rulbus_rb8514_delay_set_raw_delay( delay_card[ ERT_DELAY ].handle,
-									 0, 1 ) != RULBUS_OK )
+											0, 1 ) != RULBUS_OK )
 		rb_pulser_failure( SET, "Failure to stop pulser" );
 
 	/* In external trigger mode set the trigger input slope of the ERT delay
@@ -78,10 +78,10 @@ void rb_pulser_init( void )
 	if ( rb_pulser.trig_in_mode == EXTERNAL )
 	{
 		if ( rulbus_rb8514_delay_set_trigger( delay_card[ ERT_DELAY ].handle,
-									   ( rb_pulser.trig_in_slope 
-										 						== POSITIVE ) ?
-									   RULBUS_RB8514_DELAY_RAISING_EDGE :
-									   RULBUS_RB8514_DELAY_FALLING_EDGE )
+									       ( rb_pulser.trig_in_slope 
+										 	 					== POSITIVE ) ?
+									         RULBUS_RB8514_DELAY_RAISING_EDGE :
+									         RULBUS_RB8514_DELAY_FALLING_EDGE )
 			 													 != RULBUS_OK )
 			rb_pulser_failure( SET, "Failure to initialize pulser" );
 	}
@@ -323,7 +323,7 @@ void rb_pulser_run( bool state )
 												RULBUS_RB8515_CLOCK_FREQ_OFF )
 			 													!= RULBUS_OK ||
 			 rulbus_rb8514_delay_set_raw_delay( delay_card[ ERT_DELAY ].handle,
-										 0, 1 ) != RULBUS_OK )
+												0, 1 ) != RULBUS_OK )
 			rb_pulser_failure( SET, "Failure to stop pulser" );
 	}
 }

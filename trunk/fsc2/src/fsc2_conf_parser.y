@@ -35,8 +35,9 @@ static void fsc2_conferror ( const char *s );
 	char   *sval;
 }
 
-%token SEPARATOR DEF_DIR
-%token <sval> TEXT
+%token SEPARATOR DEF_DIR MW_POS MW_SZ DW1_POS DW1_SZ
+%token DW2_POS DW2_SZ CW_POS CW_SZ TB_POS
+%token <sval> TEXT POS SZ
 
 %%
 
@@ -47,6 +48,40 @@ input:    /* empty */
 
 line:     DEF_DIR SEPARATOR TEXT    { Internals.def_directory =
 													   CHAR_P T_strdup( $3 ); }
+        | MW_POS SEPARATOR POS      { if ( sscanf( $3, "%d%d", &GUI.win_x,
+												   &GUI.win_y ) == 2 )
+										  GUI.win_has_pos = SET; }
+        | MW_SZ SEPARATOR SZ        { if ( sscanf( $3, "%ux%u", &GUI.win_width,
+												   &GUI.win_height ) == 2 )
+										  GUI.win_has_size = SET; }
+        | DW1_POS SEPARATOR POS     { if ( sscanf( $3, "%d%d",
+												   &GUI.display_1d_x,
+												   &GUI.display_1d_y ) == 2 )
+										  GUI.display_1d_has_pos = SET; }
+        | DW1_SZ SEPARATOR SZ       { if ( sscanf( $3, "%ux%u",
+												   &GUI.display_1d_width,
+												   &GUI.display_1d_height )
+										   == 2 )
+										  GUI.display_1d_has_size = SET; }
+        | DW2_POS SEPARATOR POS     { if ( sscanf( $3, "%d%d",
+												   &GUI.display_2d_x,
+												   &GUI.display_2d_y ) == 2 )
+										  GUI.display_2d_has_pos = SET; }
+        | DW2_SZ SEPARATOR SZ       { if ( sscanf( $3, "%ux%u",
+												   &GUI.display_2d_width,
+												   &GUI.display_2d_height )
+										   == 2 )
+										  GUI.display_2d_has_size = SET; }
+        | CW_POS SEPARATOR POS      { if ( sscanf( $3, "%d%d", &GUI.cut_win_x,
+												   &GUI.cut_win_y ) == 2 )
+										  GUI.cut_win_has_pos = SET; }
+        | CW_SZ SEPARATOR SZ        { if ( sscanf( $3, "%ux%u",
+												   &GUI.cut_win_width,
+												   &GUI.cut_win_height ) == 2 )
+										  GUI.cut_win_has_size = SET; }
+        | TB_POS SEPARATOR POS      { if ( sscanf( $3, "%d%d", &GUI.toolbox_x,
+												   &GUI.toolbox_y ) == 2 )
+										  GUI.toolbox_has_pos = SET; }
 ;
 
 %%
