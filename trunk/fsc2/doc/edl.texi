@@ -484,11 +484,11 @@ by the characters `@code{+}', `@code{-}', `@code{*}' and `@code{/}'.
 @cindex * (multiplication operator)
 @cindex / (division operator)
 They can be used with simple integer and floating point values as well
-as with 1-dimensional arrays (see also below). If one of the values is a
-floating point value the result is also a floating point number - only
-if both values are integers the result is also an integer. This also
-holds for the division -- if you divide two integers the result is
-still an integer, see below.
+as with 1-dimensional arrays (see below for more information). If one of
+the values is a floating point value the result is also a floating point
+number - only if both values are integers the result is also an
+integer. This also holds for the division -- if you divide two integers
+the result is still an integer, see below.
 
 Some care has to be taken in arithmetic with integers.
 @cindex integer overflow
