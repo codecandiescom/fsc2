@@ -27,6 +27,7 @@ A3[ 1 ] = int( a2 );
 
 a1 = float( A1 );
 a2 = float( A2 );
+a3[ 1 ] = 17.123 / sqrt( a2 );
 a3[ 2 ] = sqrt( 2.0 ) * float( A2 );
 a3[ 3 ] = -sqrt( abs( a3[ 2 ] ) );
 
