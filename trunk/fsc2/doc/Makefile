@@ -20,9 +20,10 @@
 # Boston, MA 02111-1307, USA.
 
 
-docs    = $(wildcard *.texi)
-figures = $(wildcard *.png)
-
+docs    := $(wildcard *.texi)
+pngs    := $(wildcard fsc2fig*.png)
+xbms    := $(wildcard $(adir)/*.xbm)
+figures := $(pngs) $(notdir $(patsubst %.xbm,%.png,$(xbms)))
 
 all:
 	$(MAKE) man
@@ -46,15 +47,18 @@ fsc2.info: $(docs)
 
 html: fsc2.html
 
-fsc2.html: $(docs)
+fsc2.html: $(docs) $(figures)
 	./texi2html -frames -split chapter -menu -number -sec_nav -iso fsc2.texi
 	sed -e 's/fsc2_[0-9]\+/fsc2/' fsc2_frame.html > fsc2_frame.x
 	mv fsc2_frame.x fsc2_frame.html
 
+%.png: $(adir)/%.xbm
+	convert -page `identify -format "%wx%h" $<` $< $@
 
 ps: fsc2.ps
 
-fsc2.ps: $(docs) $(patsubst %.png,%.eps,$(figures))
+fsc2.ps: $(docs) $(patsubst %.png,%.eps,$(pngs)) \
+		 $(notdir $(patsubst %.xbm,%.eps,$(xbms)))
 	@if [ "`eval tex -help 2>/dev/null`" -a         \
 		 "`eval dvips --help 2>/dev/null`" ]; then  \
 		./texi2dvi -c fsc2.texi;                    \
@@ -67,7 +71,9 @@ fsc2.ps: $(docs) $(patsubst %.png,%.eps,$(figures))
 
 ifneq ($(word 1,$(shell which convert)),which:)
 %.eps: %.png
-	convert $< $@
+	convert -page `identify -format "%wx%h" $<` $< $@
+%.eps: $(adir)/%.xbm
+	convert -page `identify -format "%wx%h" $<` $< $@
 else
 %.eps: %.png
 	pngtopnm $< | pnmtops -nocenter -noturn > $@
@@ -76,7 +82,8 @@ endif
 
 pdf: fsc2.pdf
 
-fsc2.pdf: $(docs) $(patsubst %.png,%.pdf,$(figures))
+fsc2.pdf: $(docs) $(patsubst %.png,%.pdf,$(pngs)) \
+		 $(notdir $(patsubst %.xbm,%.pdf,$(xbms)))
 	-@if [ "`eval pdftex --help 2>/dev/null`" ]; then \
 		./texi2dvi --pdf -c fsc2.texi; \
 	else \
@@ -86,12 +93,16 @@ fsc2.pdf: $(docs) $(patsubst %.png,%.pdf,$(figures))
 
 ifneq ($(word 1,$(shell which convert)),which:)
 %.pdf: %.png
-	convert -compress Zip $< $@
+	convert -compress Zip -page `identify -format "%wx%h" $<` $< $@
+%.pdf: $(adir)/%.xbm
+	convert -compress Zip -page `identify -format "%wx%h" $<` $< $@
 else
-%.pdf: %.png
+%.pdf: $(figures)
 	@echo "Can't make PDF documentation, program 'convert' not found."; \
 	exit 1;
 endif
+
+#convert -compress ZIP -page 20x20+0+0 ../aux/cursor_4.xbm cursor4.pdf
 
 
 # How to install the documentation
@@ -148,4 +159,5 @@ clean:
 
 distclean:
 	$(MAKE) clean
-	-$(RM) $(RMFLAGS) fsc2*.html fsc2_*.html *.ps *.eps *.pdf *.info* *~ *.gz
+	-$(RM) $(RMFLAGS) fsc2*.html fsc2_*.html *.ps *.eps *.pdf *.info* *~ \
+					  *.gz cursor*.png *_arrow.png
