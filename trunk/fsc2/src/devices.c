@@ -56,7 +56,8 @@ void device_add( const char *name )
 	if ( lstat( lib_name, &buf ) < 0 &&
 		 lstat( strrchr( lib_name, '/' ) + 1, &buf ) < 0 )
 	{
-		eprint( FATAL, "Can't find or access module `%s.so'.\n", dev_name );
+		eprint( FATAL, UNSET, "Can't find or access module `%s.so'.\n",
+				dev_name );
 		T_free( lib_name );
 		T_free( dev_name );
 		THROW( EXCEPTION );
@@ -78,8 +79,8 @@ void device_add( const char *name )
 					pathmax = PATH_MAX_GUESS;
 				else
 				{
-					eprint( FATAL, "%s:%d: This operating system sucks!\n",
-							__FILE__, __LINE__ );
+					eprint( FATAL, UNSET, "%s:%d: This operating system "
+							"sucks!\n", __FILE__, __LINE__ );
 					T_free( lib_name );
 					T_free( dev_name );
 					THROW( EXCEPTION );
@@ -90,7 +91,7 @@ void device_add( const char *name )
 		real_name = get_string( pathmax );
 		if ( ( length = readlink( lib_name, real_name, pathmax ) ) < 0 )
 		{
-			eprint( FATAL, "Can't follow symbolic link for `%s'.\n",
+			eprint( FATAL, UNSET, "Can't follow symbolic link for `%s'.\n",
 					lib_name );
 			T_free( lib_name );
 			T_free( dev_name );
@@ -104,8 +105,8 @@ void device_add( const char *name )
 
 		if ( strcmp( real_name + length - 3, ".so" ) )
 		{
-			eprint( FATAL, "Module `%s' used for device `%s' hasn't extension "
-					"\".so\".\n", real_name, dev_name );
+			eprint( FATAL, UNSET, "Module `%s' used for device `%s' hasn't "
+					"extension \".so\".\n", real_name, dev_name );
 			T_free( lib_name );
 			T_free( dev_name );
 			T_free( real_name );
@@ -134,8 +135,8 @@ void device_add( const char *name )
 
 	if ( dl == NULL )
 	{
-		eprint( FATAL, "%s:%ld: Device `%s' not found in device name data "
-				"base.\n", Fname, Lc, dev_name );
+		eprint( FATAL, SET, "Device `%s' not found in device name data "
+				"base.\n", dev_name );
 		T_free( real_name );
 		T_free( dev_name );
 		THROW( EXCEPTION );
@@ -179,9 +180,9 @@ void device_append_to_list( const char *dev_name )
 		for ( cd = Device_List; cd->next != NULL; cd = cd->next )
 			if ( ! strcmp( cd->name, dev_name ) )
 			{
-				eprint( FATAL, "%s:%ld: Device `%s' is already listed in the "
+				eprint( FATAL, SET, "Device `%s' is already listed in the "
 						"DEVICES section (possibly using an alternate "
-						"name).\n", Fname, Lc, dev_name );
+						"name).\n", dev_name );
 				THROW( EXCEPTION );
 			}
 

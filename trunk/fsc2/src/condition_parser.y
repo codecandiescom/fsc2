@@ -112,13 +112,11 @@ expr:    E_INT_TOKEN unit         { $$ = apply_unit( vars_push( INT_VAR, $1 ),
          ')'                      { CV = func_call( $1 ); }
          unit                     { $$ = apply_unit( CV, $6 ); }
        | E_VAR_REF                { $$ = $1; }
-       | E_VAR_TOKEN '('          { eprint( FATAL, "%s:%ld: `%s' isn't a "
-											"function.\n", Fname, Lc,
-											$1->name );
+       | E_VAR_TOKEN '('          { eprint( FATAL, SET, "`%s' isn't a "
+											"function.\n", $1->name );
 	                                 THROW( EXCEPTION ); }
-       | E_FUNC_TOKEN '['         { eprint( FATAL, "%s:%ld: `%s' is a "
-											"predefined function.\n",
-											Fname, Lc, $1->name );
+       | E_FUNC_TOKEN '['         { eprint( FATAL, SET, "`%s' is a predefined "
+                                            "function.\n", $1->name );
 	                                THROW( EXCEPTION ); }
        | E_PPOS                   { $$ = p_get_by_num( $1, P_POS ); }
        | E_PLEN                   { $$ = p_get_by_num( $1, P_LEN ); }
@@ -195,7 +193,6 @@ int conditionerror ( const char *s )
 {
 	s = s;                    /* stupid but avoids compiler warning */
 
-	eprint( FATAL, "%s:%ld: Syntax error in loop or IF condition.\n",
-			Fname, Lc  );
+	eprint( FATAL, SET, "%s:%ld: Syntax error in loop or IF condition.\n" );
 	THROW( EXCEPTION );
 }

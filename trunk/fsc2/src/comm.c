@@ -348,7 +348,7 @@ long reader( void *ret )
 
 			/* ...and print it via eprint() */
 
-			eprint( NO_ERROR, "%s", str[ 0 ] );
+			eprint( NO_ERROR, UNSET, "%s", str[ 0 ] );
 
 			/* Get rid of the string and return */
 
@@ -726,7 +726,7 @@ long reader( void *ret )
 			retval = 1;
 			break;
 
-		default :                     /* this should never be reached... */
+		default :                         /* this should never be reached... */
 			fsc2_assert( 1 == 0 );
 	}
 
@@ -843,7 +843,7 @@ void writer( int type, ... )
 	switch ( type )
 	{
 		case C_EPRINT :          
-			fsc2_assert( I_am == CHILD );      /* only to be written by the child */
+			fsc2_assert( I_am == CHILD ); /* only to be written by the child */
 
 			str[ 0 ] = va_arg( ap, char * );
 			if ( str[ 0 ] == NULL )
@@ -859,7 +859,7 @@ void writer( int type, ... )
 			break;
 
 		case C_SHOW_MESSAGE :
-			fsc2_assert( I_am == CHILD );      /* only to be written by the child */
+			fsc2_assert( I_am == CHILD ); /* only to be written by the child */
 
 			str[ 0 ] = va_arg( ap, char * );
 			if ( str[ 0 ] == NULL )
@@ -879,7 +879,7 @@ void writer( int type, ... )
 			break;
 
 		case C_SHOW_ALERT :
-			fsc2_assert( I_am == CHILD );      /* only to be written by the child */
+			fsc2_assert( I_am == CHILD ); /* only to be written by the child */
 
 			str[ 0 ] = va_arg( ap, char * );
 			if ( str[ 0 ] == NULL )
@@ -899,7 +899,7 @@ void writer( int type, ... )
 			break;
 
 		case C_SHOW_CHOICES :
-			fsc2_assert( I_am == CHILD );      /* only to be written by the child */
+			fsc2_assert( I_am == CHILD ); /* only to be written by the child */
 
 			str[ 0 ] = va_arg( ap, char * );
 			if ( str[ 0 ] == NULL )
@@ -934,7 +934,7 @@ void writer( int type, ... )
 			break;
 
 		case C_SHOW_FSELECTOR :
-			fsc2_assert( I_am == CHILD );      /* only to be written by the child */
+			fsc2_assert( I_am == CHILD ); /* only to be written by the child */
 
 			/* Set up header and write it */
 
