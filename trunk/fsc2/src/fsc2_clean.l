@@ -205,7 +205,7 @@ KEEP     [^\t" \n(\/*),;:=%\^\-\+]+
 			}
 
 [^"\\\n]+   output( "%s", yytext );
-"\\n"       output( "%s", yytext );
+"\\"        output( "%s", yytext );
 
 <<EOF>>		THROW( EOF_IN_STRING_EXCEPTION );
 
