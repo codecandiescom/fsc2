@@ -60,6 +60,7 @@ static void vars_ass_from_trans_ptr( Var *src, Var *dest );
   {
 	char *name;                         // name of the variable
 	int  type;                          // type of the variable
+	bool is_on_stack;
 	union
 	{
 		long   lval;                                // for integer values
@@ -92,11 +93,12 @@ static void vars_ass_from_trans_ptr( Var *src, Var *dest );
 
   Non-transient variables have one of the following types: They're either an
   integer or float variable (INT_VAR or FLOAT_VAR, which translates to C's
-  long and double type) or an integer or float array (INT_CONT_ARR or FLOAT_CONT_ARR) of
-  as many dimensions as the user thinks it should have. Since at the moment of
-  creation of a variable its type can not be determined there is also a
-  further type, UNDEF_VAR which is assigned to the variable until it is
-  possible to find out if the variable is just a simple variable or an array.
+  long and double type) or an integer or float array (INT_CONT_ARR or
+  FLOAT_CONT_ARR) of as many dimensions as the user thinks it should
+  have. Since at the moment of creation of a variable its type can not be
+  determined there is also a further type, UNDEF_VAR which is assigned to the
+  variable until it is possible to find out if the variable is just a simple
+  variable or an array.
 
   What kind of type a variable has, i.e. integer or float, is controlled via
   the function IF_FUNC(), defined as macro in variables.h, which gets the
@@ -166,13 +168,13 @@ static void vars_ass_from_trans_ptr( Var *src, Var *dest );
             variable_identifier [ 
 
   where `variable_identifier' is a array name. It calls vars_arr_start()
-  where, if the array is still completely new, the type of the array is set
-  to INT_CONT_ARR or FLOAT_CONT_ARR (depending on the result of the macro IF_FUNC(), see
-  above). Finally, it pushes a transient variable onto the stack of type
-  ARR_PTR with the `from' element in the variable structure pointing to the
-  original array. This transient variable serves as a kind of marker since the
-  next thing the parser is going to do is to read all indices and push them
-  onto the stack.
+  where, if the array is still completely new, the type of the array is set to
+  INT_CONT_ARR or FLOAT_CONT_ARR (depending on the result of the macro
+  IF_FUNC(), see above). Finally, it pushes a transient variable onto the
+  stack of type ARR_PTR with the `from' element in the variable structure
+  pointing to the original array. This transient variable serves as a kind of
+  marker since the next thing the parser is going to do is to read all indices
+  and push them onto the stack.
 
   The next tokens have to be numbers - either simple numbers or computed
   numbers (i.e. results of function calls or elements of arrays). These are
@@ -352,9 +354,10 @@ Var *vars_new( char *name )
 	/* Get memory for a new structure and for storing the name */
 
 	vp = T_malloc( sizeof( Var ) );
-	vp->name = NULL;
-	vp->sizes = NULL;
-	vp->name = T_strdup( name );
+	vp->name        = NULL;
+	vp->is_on_stack = UNSET;
+	vp->sizes       = NULL;
+	vp->name        = T_strdup( name );
 
 	/* Set relevant entries in the new structure and make it the very first
 	   element in the list of variables */
@@ -1136,11 +1139,12 @@ Var *vars_push( int type, ... )
 	/* Get memory for the new variable to be appended to the stack, set its
 	   type and initialize some fields */
 
-	new_stack_var = T_malloc( sizeof( Var ) );
-	new_stack_var->type = type;
-	new_stack_var->name = NULL;
-	new_stack_var->next = NULL;
-	new_stack_var->flags = 0;
+	new_stack_var              = T_malloc( sizeof( Var ) );
+	new_stack_var->is_on_stack = SET;
+	new_stack_var->type        = type;
+	new_stack_var->name        = NULL;
+	new_stack_var->next        = NULL;
+	new_stack_var->flags       = 0;
 
 	/* Get the data for the new variable */
 
@@ -1236,74 +1240,77 @@ Var *vars_push( int type, ... )
 /*-----------------------------------------------------------------*/
 /* vars_pop() checks if a variable is on the variable stack and    */
 /* if it does removes it from the linked list making up the stack  */
-/* To make runing through a list of variables easier for some      */
+/* To make running through a list of variables easier for some     */
 /* functions, this function returns a pointer to the next variable */
-/* on the stack (if the popped variable was on the stack and has a */
-/* next variable).                                                 */
+/* on the stack (if the popped variable was on the stack and had a */
+/* successor).                                                     */
 /*-----------------------------------------------------------------*/
 
 Var *vars_pop( Var *v )
 {
-	Var *stack = Var_Stack,
-		*prev = NULL,
-		*ret = NULL;
+	Var *ret = NULL;
+#ifndef NDEBUG
+	Var *stack,
+		*prev = NULL;
+#endif
 
 
-	if ( v == NULL )
+	/* Check thast this is a variable that can be popped */
+
+	if ( v == NULL || ! v->is_on_stack )
 		return NULL;
 
-	/* Figure out if 'v' is on the stack */
+#ifndef NDEBUG
+	/* Figure out if 'v' is really on the stack otherwise we have a bug */
 
-	while ( stack )
-		if ( stack == v )
-			break;
-		else
-		{
-			prev = stack;
-			stack = stack->next;
-		}
+	for ( stack = Var_Stack; stack && stack != v; stack = stack->next )
+		prev = stack;
 
-	/* If it is on the stack remove it */
-
-	if ( stack != NULL )
+	if ( stack == NULL )
 	{
-		ret = v->next;
+		eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
+				__FILE__, __LINE__ );
+		THROW( EXCEPTION );
+	}
+#endif
 
-		if ( prev != NULL )
-		{
-			prev->next = stack->next;
-			if ( stack->next != NULL )
-				stack->next->prev = prev;
-		}
-		else
-		{
-			Var_Stack = stack->next;
-			if ( stack->next != NULL )
-				stack->next->prev = NULL;
-		}
+	/* Now get rid of the variable */
 
-		switch( stack->type )
-		{
-			case STR_VAR :
-				T_free( stack->val.sptr );
-				break;
+	ret = v->next;
 
-			case FUNC :
-				T_free( stack->name );
-				break;
-
-			case INT_ARR :
-				T_free( stack->val.lpnt );
-				break;
-
-			case FLOAT_ARR :
-				T_free( stack->val.dpnt );
-				break;
-		}
-
-		T_free( stack );
+	if ( v->prev != NULL )
+	{
+		v->prev->next = v->next;
+		if ( v->next != NULL )
+			v->next->prev = v->prev;
+	}
+	else
+	{
+		Var_Stack = v->next;
+		if ( v->next != NULL )
+			v->next->prev = NULL;
 	}
 
+	switch( v->type )
+	{
+		case STR_VAR :
+			T_free( v->val.sptr );
+			break;
+			
+		case FUNC :
+			T_free( v->name );
+			break;
+	
+		case INT_ARR :
+			T_free( v->val.lpnt );
+			break;
+
+		case FLOAT_ARR :
+			T_free( v->val.dpnt );
+			break;
+	}
+
+	T_free( v );
 	return ret;
 }
 
@@ -1401,8 +1408,8 @@ void vars_check( Var *v, int type )
 
 	if ( v == NULL )
 	{
-		eprint( FATAL, UNSET, "Variable used in %s() does not exist. Please "
-				"send a bug report!\n", Cur_Func );
+		eprint( FATAL, UNSET, "Internal error: Variable used in %s() does "
+				"not exist. Please send a bug report!\n", Cur_Func );
 		THROW( EXCEPTION );
 	}
 
@@ -1465,15 +1472,12 @@ bool vars_exist( Var *v )
 	Var *lp;
 
 
-	for ( lp = var_list; lp != NULL; lp = lp->next )
+	for ( lp = v->is_on_stack ? Var_Stack : var_list; lp != NULL;
+		  lp = lp->next )
 		if ( lp == v )
 			return OK;
 
-	for ( lp = Var_Stack; lp != NULL; lp = lp->next )
-		if ( lp == v )
-			return OK;
-
-	/* If variable can't be found do the in both lists we're really fucked */
+	/* If variable can't be found in of the lists we're really fucked */
 
 	fsc2_assert( 1 == 0 );
 	return FAIL;
@@ -1974,6 +1978,7 @@ void vars_assign( Var *src, Var *dest )
 
 	if ( ! ( dest->type & ( INT_CONT_ARR | FLOAT_CONT_ARR ) ) )
 		vars_pop( dest );
+
 	vars_pop( src );
 }
 
