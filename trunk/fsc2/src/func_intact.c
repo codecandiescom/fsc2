@@ -38,7 +38,7 @@ Var *f_layout( Var *v )
 
 	if ( v == NULL )
 	{
-		eprint( FATAL, "%s:%ld: Missing parameter in call of `layout'.\n",
+		eprint( FATAL, "%s:%ld: Missing parameter in call of layout().\n",
 				Fname, Lc );
 		THROW( EXCEPTION );
 	}
@@ -62,7 +62,7 @@ Var *f_layout( Var *v )
 
 			default :
 				eprint( FATAL, "%s:%ld: Unknown layout keyword `%s' in "
-						"function `layout'.\n", Fname, Lc, v->val.sptr );
+						"function layout().\n", Fname, Lc, v->val.sptr );
 				THROW( EXCEPTION );
 		}
 
@@ -135,7 +135,7 @@ Var *f_bcreate( Var *v )
 	if ( v == NULL )
 	{
 		eprint( FATAL, "%s:%ld: Missing parameter in call of "
-				"`button_create'.\n", Fname, Lc );
+				"button_create().\n", Fname, Lc );
 		THROW( EXCEPTION );
 	}
 
@@ -151,7 +151,7 @@ Var *f_bcreate( Var *v )
 		else
 		{
 			eprint( WARN, "%s:%ld: Float variable used as button type in "
-					"`button_create'.\n", Fname, Lc );
+					"button_create().\n", Fname, Lc );
 			type = lround( v->val.dval );
 		}
 	}
@@ -166,7 +166,7 @@ Var *f_bcreate( Var *v )
 		else
 		{
 			eprint( FATAL, "%s:%ld: Unknown button type (`%s') in function "
-					"`button_create'.\n", Fname, Lc );
+					"button_create().\n", Fname, Lc );
 			THROW( EXCEPTION );
 		}
 	}
@@ -185,7 +185,7 @@ Var *f_bcreate( Var *v )
 			if ( v->type == FLOAT_VAR )
 			{
 				eprint( WARN, "%s:%ld: Float variable used as button ID in "
-						"`button_create'.\n", Fname, Lc );
+						"button_create().\n", Fname, Lc );
 				coll = lround( v->val.dval );
 			}
 			else
@@ -201,7 +201,7 @@ Var *f_bcreate( Var *v )
 				if ( ( cio = find_object_from_ID( coll ) ) == NULL )
 				{
 					eprint( FATAL, "%s:%ld: Button with ID %ld doesn't exist "
-							"in `button_create'.\n", Fname, Lc, coll );
+							"in button_create().\n", Fname, Lc, coll );
 					THROW( EXCEPTION );
 				}
 
@@ -210,7 +210,7 @@ Var *f_bcreate( Var *v )
 				if ( cio->type != RADIO_BUTTON )
 				{
 					eprint( FATAL, "%s:%ld: Button with ID %ld isn't a "
-							"RADIO_BUTTON in `button_create'.\n",
+							"RADIO_BUTTON in button_create().\n",
 							Fname, Lc, coll );
 					THROW( EXCEPTION );
 				}
@@ -245,7 +245,7 @@ Var *f_bcreate( Var *v )
 	if ( v != NULL )
 	{
 		eprint( WARN, "%s:%ld: Superfluous arguments in call of "
-				"`button_create'.\n", Fname, Lc );
+				"button_create().\n", Fname, Lc );
 		while ( ( v = vars_pop( v ) ) != NULL )
 			;
 	}
@@ -395,7 +395,7 @@ Var *f_bdelete( Var *v )
 	if ( v == NULL )
 	{
 		eprint( FATAL, "%s:%ld: Missing parameter in call of "
-				"`button_delete'.\n", Fname, Lc );
+				"button_delete().\n", Fname, Lc );
 		THROW( EXCEPTION );
 	}
 
@@ -419,7 +419,7 @@ Var *f_bdelete( Var *v )
 			if ( v->type != INT_VAR || v->val.lval < 0 )
 			{
 				eprint( FATAL, "%s:%ld: Invalid button identifier in "
-						"`button_delete'.\n", Fname, Lc );
+						"button_delete().\n", Fname, Lc );
 				THROW( EXCEPTION );
 			}
 
@@ -473,7 +473,7 @@ Var *f_bdelete( Var *v )
 			   io->type != RADIO_BUTTON ) )
 		{
 			eprint( FATAL, "%s:%ld: Invalid button identifier in "
-					"`button_delete'.\n", Fname, Lc );
+					"button_delete().\n", Fname, Lc );
 			THROW( EXCEPTION );
 		}
 
@@ -532,7 +532,7 @@ Var *f_bdelete( Var *v )
 			if ( ( v = vars_pop( v ) ) != NULL )
 			{
 				eprint( FATAL, "%s:%ld: Invalid button identifier in "
-						"`button_delete'.\n", Fname, Lc );
+						"button_delete().\n", Fname, Lc );
 				THROW( EXCEPTION );
 			}
 
@@ -572,7 +572,7 @@ Var *f_bstate( Var *v )
 	if ( v == NULL )
 	{
 		eprint( FATAL, "%s:%ld: Missing parameters in call of "
-				"`button_state'.\n", Fname, Lc );
+				"button_state().\n", Fname, Lc );
 		THROW( EXCEPTION );
 	}
 
@@ -592,7 +592,7 @@ Var *f_bstate( Var *v )
 		if ( v->type != INT_VAR || v->val.lval < 0 )
 		{
 			eprint( FATAL, "%s:%ld: Invalid button identifier in "
-					"`button_state'.\n", Fname, Lc );
+					"button_state().\n", Fname, Lc );
 			THROW( EXCEPTION );
 		}
 		ID = v->val.lval;
@@ -623,7 +623,7 @@ Var *f_bstate( Var *v )
 
 					default :
 						eprint( FATAL, "%s%ld: Invalid string `%s' in "
-								"`button_state'.\n", Fname, Lc, v->val.sptr );
+								"button_state().\n", Fname, Lc, v->val.sptr );
 						THROW( EXCEPTION );
 				}
 		}
@@ -633,7 +633,7 @@ Var *f_bstate( Var *v )
 		if ( ( v = vars_pop( v ) ) != NULL )
 		{
 			eprint( WARN, "%s:%ld: Superfluous arguments in call of "
-					"`button_state'.\n", Fname, Lc );
+					"button_state().\n", Fname, Lc );
 			while ( ( v = vars_pop( v ) ) != NULL )
 				;
 		}
@@ -694,7 +694,7 @@ Var *f_bstate( Var *v )
 		   io->type != RADIO_BUTTON ) )
 	{
 		eprint( FATAL, "%s:%ld: Invalid button identifier in "
-				"`button_state'.\n", Fname, Lc );
+				"button_state().\n", Fname, Lc );
 		THROW( EXCEPTION );
 	}
 
@@ -746,7 +746,7 @@ Var *f_bstate( Var *v )
 
 			default :
 				eprint( FATAL, "%s%ld: Invalid string `%s' in "
-						"`button_state'.\n", Fname, Lc, v->val.sptr );
+						"button_state().\n", Fname, Lc, v->val.sptr );
 				THROW( EXCEPTION );
 		}
 
@@ -775,7 +775,7 @@ Var *f_bstate( Var *v )
 	if ( ( v = vars_pop( v ) ) != NULL )
 	{
 		eprint( WARN, "%s:%ld: Superfluous arguments in call of "
-				"`button_state'.\n", Fname, Lc );
+				"button_state().\n", Fname, Lc );
 		while ( ( v = vars_pop( v ) ) != NULL )
 			;
 	}
@@ -804,7 +804,7 @@ Var *f_screate( Var *v )
 	if ( v == NULL )
 	{
 		eprint( FATAL, "%s:%ld: Missing parameters in call of "
-				"`slider_create'.\n", Fname, Lc );
+				"slider_create().\n", Fname, Lc );
 		THROW( EXCEPTION );
 	}
 
@@ -819,7 +819,7 @@ Var *f_screate( Var *v )
 		else
 		{
 			eprint( WARN, "%s:%ld: Float variable used as slider type in "
-					"`slider_create'.\n", Fname, Lc );
+					"slider_create().\n", Fname, Lc );
 			type = lround( v->val.dval );
 		}
 	}
@@ -832,7 +832,7 @@ Var *f_screate( Var *v )
 		else
 		{
 			eprint( FATAL, "%s:%ld: Unknown slider type (`%s') in function "
-					"`slider_create'.\n", Fname, Lc );
+					"slider_create().\n", Fname, Lc );
 			THROW( EXCEPTION );
 		}
 	}
@@ -842,7 +842,7 @@ Var *f_screate( Var *v )
 	if ( ( v = vars_pop( v ) ) == NULL )
 	{
 		eprint( FATAL, "%s:%ld: Missing minimum value in call of "
-				"`slider_create'.\n", Fname, Lc );
+				"slider_create().\n", Fname, Lc );
 		THROW( EXCEPTION );
 	}
 
@@ -852,7 +852,7 @@ Var *f_screate( Var *v )
 	if ( ( v = vars_pop( v ) ) == NULL )
 	{
 		eprint( FATAL, "%s:%ld: Missing maximum value in call of "
-				"`slider_create'.\n", Fname, Lc );
+				"slider_create().\n", Fname, Lc );
 		THROW( EXCEPTION );
 	}
 
@@ -864,7 +864,7 @@ Var *f_screate( Var *v )
 	if ( end_val <= start_val )
 	{
 		eprint( FATAL, "%s:%ld: Maxinmum not larger than minimum value in "
-				"call of `slider_create'.\n", Fname, Lc );
+				"call of slider_create().\n", Fname, Lc );
 		THROW( EXCEPTION );
 	}
 
@@ -885,7 +885,7 @@ Var *f_screate( Var *v )
 	if ( ( v = vars_pop( v ) ) != NULL )
 	{
 		eprint( WARN, "%s:%ld: Superfluous arguments in call of "
-				"`slider_create'.\n", Fname, Lc );
+				"slider_create().\n", Fname, Lc );
 		while ( ( v = vars_pop( v ) ) != NULL )
 			;
 	}
@@ -1033,7 +1033,7 @@ Var *f_sdelete( Var *v )
 	if ( v == NULL )
 	{
 		eprint( FATAL, "%s:%ld: Missing parameter in call of "
-				"`slider_delete'.\n", Fname, Lc );
+				"slider_delete().\n", Fname, Lc );
 		THROW( EXCEPTION );
 	}
 
@@ -1055,7 +1055,7 @@ Var *f_sdelete( Var *v )
 			if ( v->type != INT_VAR || v->val.lval < 0 )
 			{
 				eprint( FATAL, "%s:%ld: Invalid slider identifier in "
-						"`slider_delete'.\n", Fname, Lc );
+						"slider_delete().\n", Fname, Lc );
 				THROW( EXCEPTION );
 			}
 
@@ -1108,7 +1108,7 @@ Var *f_sdelete( Var *v )
 			   io->type != VALUE_SLIDER ) )
 		{
 			eprint( FATAL, "%s:%ld: Invalid slider identifier in "
-					"`slider_delete'.\n", Fname, Lc );
+					"slider_delete().\n", Fname, Lc );
 			THROW( EXCEPTION );
 		}
 
@@ -1148,7 +1148,7 @@ Var *f_sdelete( Var *v )
 			if ( ( v = vars_pop( v ) ) != NULL )
 			{
 				eprint( FATAL, "%s:%ld: Invalid slider identifier in "
-						"`slider_delete'.\n", Fname, Lc );
+						"slider_delete().\n", Fname, Lc );
 				THROW( EXCEPTION );
 			}
 
@@ -1185,7 +1185,7 @@ Var *f_svalue( Var *v )
 	if ( v == NULL )
 	{
 		eprint( FATAL, "%s:%ld: Missing parameters in call of "
-				"`slider_value'.\n", Fname, Lc );
+				"slider_value().\n", Fname, Lc );
 		THROW( EXCEPTION );
 	}
 
@@ -1207,7 +1207,7 @@ Var *f_svalue( Var *v )
 		if ( v->type != INT_VAR || v->val.lval < 0 )
 		{
 			eprint( FATAL, "%s:%ld: Invalid slider identifier in "
-					"`slider_state'.\n", Fname, Lc );
+					"slider_state().\n", Fname, Lc );
 			THROW( EXCEPTION );
 		}
 		ID = v->val.lval;
@@ -1224,7 +1224,7 @@ Var *f_svalue( Var *v )
 		if ( ( v = vars_pop( v ) ) != NULL )
 		{
 			eprint( WARN, "%s:%ld: Superfluous arguments in call of "
-					"`slider_state'.\n", Fname, Lc );
+					"slider_state().\n", Fname, Lc );
 			while ( ( v = vars_pop( v ) ) != NULL )
 				;
 		}
@@ -1293,7 +1293,7 @@ Var *f_svalue( Var *v )
 		   io->type != VALUE_SLIDER ) )
 	{
 		eprint( FATAL, "%s:%ld: Invalid slider identifier in "
-				"`slider_value'.\n", Fname, Lc );
+				"slider_value().\n", Fname, Lc );
 		THROW( EXCEPTION );
 	}
 
@@ -1313,14 +1313,14 @@ Var *f_svalue( Var *v )
 
 	if ( io->value > io->end_val )
 	{
-		eprint( SEVERE, "%s:%ld: Value too large in `slider_value'.\n",
+		eprint( SEVERE, "%s:%ld: Value too large in slider_value().\n",
 				Fname, Lc );
 		io->value = io->end_val;
 	}
 
 	if ( io->value < io->start_val )
 	{
-		eprint( SEVERE, "%s:%ld: Value too small in `slider_value'.\n",
+		eprint( SEVERE, "%s:%ld: Value too small in slider_value().\n",
 				Fname, Lc );
 		io->value = io->start_val;
 	}
@@ -1331,7 +1331,7 @@ Var *f_svalue( Var *v )
 	if ( ( v = vars_pop( v ) ) != NULL )
 	{
 		eprint( WARN, "%s:%ld: Superfluous arguments in call of "
-				"`button_state'.\n", Fname, Lc );
+				"button_state().\n", Fname, Lc );
 		while ( ( v = vars_pop( v ) ) != NULL )
 			;
 	}
