@@ -1252,37 +1252,40 @@ As an example let's assume there is an @acronym{EDL} function named
 @code{foo()} you want to call from your module, that takes two
 arguments, an integer and a floating point value. Then a typical piece
 of C code to call the function would be
-
 @example
-Var *func_ptr;
-Var *ret_value;
-int access;
-
-if ( func_exists( "foo" )                  /* test if function exists */
+Var *my_function( Var *var )
 @{
-    /* do your error handling here */ 
-@}
-else                                  
-@{                                    
-    func_ptr = func_get( "foo", &access ); /* get pointer to function */
-    vars_push( INT_VAR, 5 );               /* push first argument */
-    vars_push( FLOAT_VAR, 3.1415 );        /* push second argument */
-    ret_value = func_call( func_ptr );     /* call the function */
+    Var *func_ptr;
+    Var *ret_value;
+    int access;
+
+    if ( func_exists( "foo" )                  /* test if function exists */
+    @{
+        /* do your error handling here */ 
+    @}
+    else                                  
+    @{                                    
+        func_ptr = func_get( "foo", &access ); /* get pointer to function */
+        vars_push( INT_VAR, 5 );               /* push first argument */
+        vars_push( FLOAT_VAR, 3.1415 );        /* push second argument */
+        ret_value = func_call( func_ptr );     /* call the function */
+    @}
+
+    ...
 @}
 @end example
 
 
-There is one point that need attention:
-After the call to @code{func_call()} the variable with the pointer to
-the function returned by @code{func_get()}
+There is one point that need attention: After the call to
+@code{func_call()} the variable with the pointer to the function
+returned by @code{func_get()}
 @findex func_get()
-, @code{func_ptr}, will
-disappear automatically. Thus, when you need to call the function again
-you will have to go through this procedure, since the value
-stored in @code{func_ptr} after the call to @code{func_call()} is
-completely useless and even dangerous to use for any purpose whatsoever!
-So, don't assume that the value of @code{func_prtr} you got from
-@code{func_get()}
+, @code{func_ptr}, will disappear automatically. Thus, when you need to
+call the function again you will have to go through this procedure,
+since the value stored in @code{func_ptr} after the call to
+@code{func_call()} is completely useless and even dangerous to use for
+any purpose whatsoever!  So, don't assume that the value of
+@code{func_prtr} you got from @code{func_get()}
 @findex func_get()
 will have any meaning later on. Not only will the value be invalid but,
 even worse, there is an high probability that hard to trace bugs will
