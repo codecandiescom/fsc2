@@ -34,7 +34,8 @@ typedef struct _IOBJ_ {
 
 	volatile double value;  /* current value of slider */
 	double start_val,       /* maximum and minimum value */
-		   end_val;
+		   end_val,
+		   step;
 
 	union {
 		long lval;
@@ -91,8 +92,6 @@ typedef struct {
 #define OFFSET_X0                 20
 #define OFFSET_Y0                 20
 
-#define FONT_SIZE                 FL_MEDIUM_SIZE
-
 #else
 
 #define OBJ_HEIGHT                35
@@ -114,8 +113,6 @@ typedef struct {
 
 #define OFFSET_X0                 20
 #define OFFSET_Y0                 20
-
-#define FONT_SIZE                 FL_DEFAULT_SIZE
 
 #endif
 
