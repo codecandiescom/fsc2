@@ -20,7 +20,7 @@ GPIB_LOG       = /tmp/gpib.log
 # here you set if you want the program for a high or a low resolution screen
 # (set SIZE to either `HI_RES' or `LOW_RES')
 
-SIZE           = HI_RES
+SIZE           = LOW_RES
 
 
 # The name of the awk tool is passed to the programs via a macro
