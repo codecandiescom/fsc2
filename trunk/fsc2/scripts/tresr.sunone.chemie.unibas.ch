@@ -222,7 +222,14 @@ print F "J, K, F1, F2;
 
 PREPARATIONS:
 
-init_2d( 1, 0, 0, 0, 0, 0, 0, \"Time [us]\", \"Field [G]\" );
+init_2d( 1, 0, 0, 0, 0, ";
+if ( $no_ranges > 1 ) {
+	print F "min_field" ;
+} else {
+	print F "start_field";
+}
+print F ", field_step, \"Time [us]\", \"Field [G]\" );
+
 magnet_setup( ";
 if ( $no_ranges > 1 ) {
 	print F "min_field";
@@ -235,15 +242,7 @@ digitizer_averaging( FUNC_E, CH1, $num_averages );
 
 EXPERIMENT:
 
-change_scale( 0, 10e6 * digitizer_time_per_point( ),
-			  ";
-if ( $no_ranges > 1 ) {
-	print F "min_field" ;
-} else {
-	print F "start_field";
-}
-
-print F ", field_step );
+change_scale( 0.0, 1.0e6 * digitizer_time_per_point( ) );
 
 F1 = get_file( \"Enter data file name:\", \"*.dat\", \"\", \"\", \"dat\" );
 F2 = clone_file( F1, \"dat\", \"par\" );
