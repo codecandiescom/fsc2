@@ -14,7 +14,8 @@ html: $(docs)
 	./texi2html -frames -split=chapter -menu -number -sec_nav fsc2.texi
 
 ps: $(docs)
-	texi2dvi4a2ps -c fsc2.texi
+	texi2dvi -c fsc2.texi
+	dvips fsc2.dvi
 
 pdf: $(docs)
 	texi2dvi --pdf -c fsc2.texi
