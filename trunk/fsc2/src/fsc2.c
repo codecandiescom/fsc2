@@ -23,7 +23,6 @@ static time_t in_file_mod = 0;
 static double slider_size = 0.05;
 static bool delete_file = UNSET;
 static bool delete_old_file = UNSET;
-static volatile bool in_signal_handler = UNSET;
 
 /* Locally used functions */
 
@@ -245,6 +244,9 @@ int main( int argc, char *argv[ ] )
 	else
 		fprintf( stderr, "fsc2: Internal failure on startup.\n" );
 
+	clean_up( );
+	xforms_close( );
+
 	return EXIT_SUCCESS;
 }
 
@@ -257,10 +259,10 @@ static void final_exit_handler( void )
 	/* Stop the process that's waiting for external connections as well
 	   as the child process */
 
-	if ( conn_pid >= 0 )
+	if ( conn_pid > 0 )
 		kill( conn_pid, SIGTERM );
 
-	if ( child_pid >= 0 )
+	if ( child_pid > 0 )
 		kill( child_pid, SIGTERM );
 
 	/* Do everything necessary to end the program */
@@ -268,14 +270,6 @@ static void final_exit_handler( void )
 	if ( delete_old_file && in_file != NULL )
 		unlink( in_file );
 	unlink( FSC2_SOCKET );
-
-	if ( ! in_signal_handler )
-	{
-		clean_up( );
-		xforms_close( );
-	}
-
-	T_free( in_file );
 
 	/* Delete the lock file */
 
@@ -1155,10 +1149,10 @@ void main_sig_handler( int signo )
 			break;
 
 		default :
-			in_signal_handler = SET;
 			final_exit_handler( );
-			fprintf( stderr, "fsc2 (%d) killed by %s signal.\n",
-					 getpid( ), strsignal( signo ) );
+			if ( signo != SIGTERM )
+				fprintf( stderr, "fsc2 (%d) killed by %s signal.\n",
+						 getpid( ), strsignal( signo ) );
 			exit( -1 );
 	}
 }

@@ -720,6 +720,21 @@ static bool pipe_read( int fd, void *buf, size_t bytes_to_read )
 {
 	long bytes_read;
 	long already_read = 0;
+	sigset_t new_mask, old_mask;
+
+
+	sigemptyset( &new_mask );
+	if ( I_am == CHILD )
+	{
+		sigaddset( &new_mask, DO_SEND );
+		sigaddset( &new_mask, DO_QUIT );
+	}
+	else
+	{
+		sigaddset( &new_mask, NEW_DATA );
+		sigaddset( &new_mask, QUITTING );
+	}
+	sigprocmask( SIG_BLOCK, &new_mask, &old_mask );
 
 
 	while ( bytes_to_read > 0 )
@@ -732,8 +747,8 @@ static bool pipe_read( int fd, void *buf, size_t bytes_to_read )
 
 		   The first happens on a Linux system with kernel 2.0.36 while the
 		   latter happens on a newer system, e.g. 2.2.12. On the older system
-		   this leads to trouble: After he parent sent its data and while the
-		   child is still waiting for data or has just started to read the
+		   this leads to trouble: After the parent sent its data and while the
+		   child is still waiting for data or has just started to read, the
 		   parent also sends a DO_SEND signal. This may interrupt the child's
 		   read(), returning -1 with errno set to EINTR while nothing or not
 		   everything has been read yet. Unfortunately, ignoring the -1 and
@@ -741,23 +756,24 @@ static bool pipe_read( int fd, void *buf, size_t bytes_to_read )
 		   the first byte has been read by the child since nothing tells us
 		   how many bytes already have been read. To make sure (at least for
 		   the DO_SEND signal) that the signal is received before the read
-		   starts the parent sends the signal always before replying to a
-		   request. Quite another problem is the DO_QUIT signal - let's hope
-		   the read is atomic or it's never going to happen... The only real
-		   solution here would be to block all signals just before the read()
-		   and handle them directly afterwards. */
+		   starts the parent sends it always before replying to a request.
+		   Quite another problem is the DO_QUIT signal - let's hope the read
+		   is atomic or it's never going to happen... The only real solution
+		   here would be to block all signals just before the read() and
+		   handle them directly afterwards. */
 
 		if ( bytes_read == -1 && errno == EINTR )
 			continue;
 
-		if ( bytes_read == 0 )
-			return FAIL;
+		if ( bytes_read <= 0 )
+			break;
 
 		bytes_to_read -= bytes_read;
 		already_read += bytes_read;
 	}
 
-	return OK;
+	sigprocmask( SIG_SETMASK, &old_mask, NULL );
+	return bytes_to_read == 0 ? OK : FAIL;
 }
 
 
