@@ -3571,7 +3571,7 @@ length of the pulse, which must be at least @w{100 ns} and an integer
 multiple of @w{50 ns}.
 
 If no third argument is specified the distance between pulses will be
-identical to the pulse length (resulting in a pulse frequncey of twice
+identical to the pulse length (resulting in a pulse frequency of twice
 the value of the second argument). By specifying a third argument (with
 the same restrictions as for the second argument) the distance between
 pulses can be set.
@@ -4290,7 +4290,7 @@ argument is the length of the pulse, which must be between @w{100 ns}
 and about @w{214.748 s} and must be an integer multiple of @w{50 ns}.
 
 If no third argument is specified the distance between pulses will be
-identical to the pulse length (resulting in a pulse frequncey of twice
+identical to the pulse length (resulting in a pulse frequency of twice
 the value of the second argument). By specifying a third argument (with
 the same restrictions as for the second argument) the distance between
 pulses can be set.
