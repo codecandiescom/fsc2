@@ -115,13 +115,14 @@ int ep385_init_hook( void )
 
 	ep385.is_shape_2_defense = UNSET;
 	ep385.is_defense_2_shape = UNSET;
-	ep385.shape_2_defense_too_near = UNSET;
-	ep385.defense_2_shape_too_near = UNSET;
+	ep385.shape_2_defense_too_near = 0;
+	ep385.defense_2_shape_too_near = 0;
 	ep385.is_confirmation = UNSET;
 
 	ep385.dump_file = NULL;
 
 	ep385.auto_shape_pulses = UNSET;
+	ep385.left_warning = ep385.right_warning = 0;
 
 	for ( i = 0; i < MAX_CHANNELS; i++ )
 	{
@@ -242,18 +243,29 @@ int ep385_end_of_test_hook( void )
 	/* If in the test it was found that shape and defense pulses got too
 	   near to each other bail out */
 
-	if ( ep385.shape_2_defense_too_near )
+	if ( ep385.shape_2_defense_too_near != 0 )
 		print( FATAL, "Distance between PULSE_SHAPE and DEFENSE pulses was "
-			   "shorter than %s during the test run.\n",
+			   "%ld times shorter than %s during the test run.\n",
+			   ep385.shape_2_defense_too_near,
 			   ep385_ptime( ep385_ticks2double( ep385.shape_2_defense ) ) );
 
-	if ( ep385.defense_2_shape_too_near )
+	if ( ep385.defense_2_shape_too_near != 0 )
 		print( FATAL, "Distance between DEFENSE and PULSE_SHAPE pulses was "
-			   "shorter than %s during the test run.\n",
+			   "%ld times shorter than %s during the test run.\n",
+			   ep385.defense_2_shape_too_near,
 			   ep385_ptime( ep385_ticks2double( ep385.defense_2_shape ) ) );
 
-	if ( ep385.shape_2_defense_too_near || ep385.defense_2_shape_too_near )
+	if ( ep385.shape_2_defense_too_near != 0 ||
+		 ep385.defense_2_shape_too_near != 0 )
 		THROW( EXCEPTION );
+
+	if ( ep385.left_warning != 0 )
+		print( SEVERE, "For %ld times left padding for pulse with automatic "
+			   "shape pulse couldn't be set.\n", ep385.left_warning );
+
+	if ( ep385.right_warning != 0 )
+		print( SEVERE, "For %ld times right padding for pulse with automatic "
+			   "shape pulse couldn't be set.\n", ep385.left_warning );
 
 	return 1;
 }

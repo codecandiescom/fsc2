@@ -339,7 +339,7 @@ static void ep385_defense_shape_check( FUNCTION *shape )
 					THROW( EXCEPTION );
 				}
 
-				if ( ! ep385.shape_2_defense_too_near )
+				if ( ep385.shape_2_defense_too_near == 0 )
 				{
 					if ( shape_p->sp == NULL )
 						print( SEVERE, "Distance between PULSE_SHAPE pulse "
@@ -355,9 +355,9 @@ static void ep385_defense_shape_check( FUNCTION *shape )
 							   defense_p->num,
 							   ep385_ptime( ep385_ticks2double(
 												   ep385.shape_2_defense ) ) );
-					ep385.shape_2_defense_too_near = SET;
 				}
 
+				ep385.shape_2_defense_too_near++;
 			}
 
 			if ( defense_p->pos < shape_p->pos &&
@@ -383,7 +383,7 @@ static void ep385_defense_shape_check( FUNCTION *shape )
 					THROW( EXCEPTION );
 				}
 
-				if ( ! ep385.defense_2_shape_too_near )
+				if ( ep385.defense_2_shape_too_near == 0 )
 				{
 					if ( shape_p->sp == NULL )
 						print( SEVERE, "Distance between DEFENSE pulse #%ld "
@@ -399,8 +399,9 @@ static void ep385_defense_shape_check( FUNCTION *shape )
 							   Function_Names[ shape_p->sp->function->self ],
 							   ep385_ptime( ep385_ticks2double(
 												   ep385.defense_2_shape ) ) );
-					ep385.defense_2_shape_too_near = SET;
 				}
+
+				ep385.defense_2_shape_too_near++;
 			}
 		}
 	}
@@ -535,6 +536,7 @@ void ep385_shape_padding_check( CHANNEL *ch )
 			pp->pulse->left_warning = SET;
 		}
 
+		ep385.left_warning++;
 		pp->len += pp->pos;
 		pp->pos = 0;
 	}
@@ -558,6 +560,7 @@ void ep385_shape_padding_check( CHANNEL *ch )
 				pp->pulse->right_warning = SET;
 			}
 
+			ep385.right_warning++;
 			pp->len = MAX_PULSER_BITS - pp->pos;
 		}
 	}

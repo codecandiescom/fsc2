@@ -212,17 +212,19 @@ typedef struct {
 
 	Ticks shape_2_defense;
 	bool is_shape_2_defense;
-	bool shape_2_defense_too_near;
+	long shape_2_defense_too_near;
 
 	Ticks defense_2_shape;
 	bool is_defense_2_shape;
-	bool defense_2_shape_too_near;
+	long defense_2_shape_too_near;
 
 	bool is_confirmation;
 
 	FILE *dump_file;
 
 	bool auto_shape_pulses;
+	long left_warning;
+	long right_warning;
 
 } EP385;
 

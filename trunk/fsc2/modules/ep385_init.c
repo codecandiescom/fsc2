@@ -782,45 +782,52 @@ static void ep385_defense_shape_init_check( FUNCTION *shape )
 
 			if ( shape_p->pos < defense_p->pos &&
 				 shape_p->pos + shape_p->len + ep385.shape_2_defense >
-				 defense_p->pos &&
-				 ! ep385.shape_2_defense_too_near)
+				 defense_p->pos )
 			{
-				if ( shape_p->sp == NULL )
-					print( FATAL, "Distance between PULSE_SHAPE pulse #%ld "
-						   "and DEFENSE pulse #%ld is shorter than %s.\n",
-						   shape_p->num, defense_p->num, ep385_ptime(
-							   ep385_ticks2double( ep385.shape_2_defense ) ) );
-				else
-					print( FATAL, "Distance between shape pulse for pulse "
-						   "#%ld (function '%s') and DEFENSE pulse #%ld "
-						   "is shorter than %s.\n", shape_p->sp->num,
-						   Function_Names[ shape_p->sp->function->self ],
-						   defense_p->num, ep385_ptime( ep385_ticks2double(
+				if ( ep385.shape_2_defense_too_near == 0 )
+				{
+					if ( shape_p->sp == NULL )
+						print( FATAL, "Distance between PULSE_SHAPE pulse "
+							   "#%ld and DEFENSE pulse #%ld is shorter than "
+							   "%s.\n", shape_p->num, defense_p->num,
+							   ep385_ptime( ep385_ticks2double(
 												   ep385.shape_2_defense ) ) );
+					else
+						print( FATAL, "Distance between shape pulse for "
+							   "pulse #%ld (function '%s') and DEFENSE pulse "
+							   "#%ld is shorter than %s.\n", shape_p->sp->num,
+							   Function_Names[ shape_p->sp->function->self ],
+							   defense_p->num,
+							   ep385_ptime( ep385_ticks2double(
+												   ep385.shape_2_defense ) ) );
+				}
 
-				ep385.shape_2_defense_too_near = SET;
+				ep385.shape_2_defense_too_near++;
 			}
 
 			if ( defense_p->pos < shape_p->pos &&
 				 defense_p->pos + defense_p->len + ep385.defense_2_shape >
-				 shape_p->pos &&
-				 ! ep385.defense_2_shape_too_near )
+				 shape_p->pos )
 			{
-				if ( shape_p->sp == NULL )
-					print( FATAL, "Distance between DEFENSE pulse #%ld and "
-						   "PULSE_SHAPE pulse #%ld is shorter than %s.\n",
-						   defense_p->num, shape_p->num, ep385_ptime(
-							   ep385_ticks2double( ep385.defense_2_shape ) ) );
-				else
-					print( FATAL, "Distance between DEFENSE pulse #%ld "
-						   "and shape pulse for pulse #%ld (function "
-						   "'%s') is shorter than %s.\n", defense_p->num,
-						   shape_p->sp->num,
-						   Function_Names[ shape_p->sp->function->self ],
-						   ep385_ptime( ep385_ticks2double(
+				if ( ep385.defense_2_shape_too_near == 0 )
+				{
+					if ( shape_p->sp == NULL )
+						print( FATAL, "Distance between DEFENSE pulse #%ld "
+							   "and PULSE_SHAPE pulse #%ld is shorter than "
+							   "%s.\n", defense_p->num, shape_p->num,
+							   ep385_ptime( ep385_ticks2double(
 												   ep385.defense_2_shape ) ) );
+					else
+						print( FATAL, "Distance between DEFENSE pulse #%ld "
+							   "and shape pulse for pulse #%ld (function "
+							   "'%s') is shorter than %s.\n", defense_p->num,
+							   shape_p->sp->num,
+							   Function_Names[ shape_p->sp->function->self ],
+							   ep385_ptime( ep385_ticks2double(
+												   ep385.defense_2_shape ) ) );
+				}
 
-				ep385.defense_2_shape_too_near = SET;
+				ep385.defense_2_shape_too_near++;
 			}
 		}
 	}
