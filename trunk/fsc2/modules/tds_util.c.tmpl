@@ -294,7 +294,7 @@ static void tds_tmpl_window_check_3( WINDOW *w )
 	/* Can't do checks if timebase, record length, trigger position,
 	   window position or width is still unknown */
 
-	if ( FSC2_MODE != EXPERIMENT && 
+	if ( FSC2_MODE != EXPERIMENT &&
 		 ( ! tds_tmpl.is_timebase || ! tds_tmpl.is_rec_len ||
 		   ! tds_tmpl.is_trig_pos || ! w->is_start || ! w->is_width ) )
 		return;
@@ -427,7 +427,7 @@ static void tds_tmpl_window_check_3( WINDOW *w )
 			w->start_num = 1;
 			start = - tds_tmpl.trig_pos * window;
 			w->end_num = tds_tmpl.rec_len;
-			width = tds_tmpl.rec_len 
+			width = tds_tmpl.rec_len
 					* tds_tmpl.timebase / TDS_TMPL_POINTS_PER_DIV;
 
 			buf1 = T_strdup( tds_tmpl_ptime( w->start ) );
@@ -794,12 +794,11 @@ void tds_tmpl_state_check( double timebase, long rec_len, double trig_pos )
 		w2 = tds_tmpl_get_cursor_position( 2 );
 		tds_tmpl.cursor_pos = d_min( w1, w2 );
 	}
-}	
+}
 
 
 /* The remaining functions won't be used for older devices that can't do
    gated measurements, i.e. the TDS520. */
-
 
 #ifndef NO_GATED_MEASUREMENTS
 

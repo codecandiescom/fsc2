@@ -503,7 +503,7 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 
 	old_rw_min = cv->rw_min;
 
-	if ( ( cv->scale_changed = 
+	if ( ( cv->scale_changed =
 		   get_new_extrema( &cv->rw_max, &cv->rw_min, ptr, len, type ) ) )
 	{
 		new_rwc_delta_z = cv->rw_max - cv->rw_min;

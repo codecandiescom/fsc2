@@ -356,7 +356,7 @@ try_again:
 				print( FATAL, "Undocumented data received from device.\n" );
 				THROW( EXCEPTION );
 		}
-	} while ( *++bp ); 
+	} while ( *++bp );
 
 	/* If the gaussmeter is already locked just get the field value, other-
 	   wise try to achieve locked state */

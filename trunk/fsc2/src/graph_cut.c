@@ -429,7 +429,7 @@ void G_init_cut_curve( void )
 		CG.left_arrow_w = left_arrow_width;
 		CG.left_arrow_h = left_arrow_width;
 
-		CG.right_arrows[ i ] = 
+		CG.right_arrows[ i ] =
 			XCreatePixmapFromBitmapData( G.d, G.cut_canvas.pm,
 										 right_arrow_bits, right_arrow_width,
 										 right_arrow_height,
@@ -602,7 +602,7 @@ static void cut_calc_curve( int dir, long p_index, bool has_been_shown )
 	{
 		if ( scv->is_fs )
 		{
-			CG.s2d[ G.active_curve ][ X ] = cv->s2d[ X ] = 
+			CG.s2d[ G.active_curve ][ X ] = cv->s2d[ X ] =
 				                    ( double ) ( G.cut_canvas.w - 1 ) /
 				                    ( double ) ( CG.nx - 1 );
 			CG.s2d[ G.active_curve ][ Y ] = cv->s2d[ Y ] =
@@ -852,16 +852,16 @@ bool cut_data_rescaled( long curve, double y_min, double y_max )
 
 		CG.s2d[ curve ][ Y ] *=
 			           ( y_max - y_min ) / G.curve_2d[ curve ]->rwc_delta[ Z ];
-		CG.shift[ curve ][ Y ] = 
+		CG.shift[ curve ][ Y ] =
 			     ( G.curve_2d[ curve ]->rwc_delta[ Z ] * CG.shift[ curve ][ Y ]
-				   - G.curve_2d[ curve ]->rwc_start[ Z ] + y_min ) 
+				   - G.curve_2d[ curve ]->rwc_start[ Z ] + y_min )
 				 / ( y_max - y_min );
 
 		if ( CG.can_undo[ curve ] )
 		{
 			CG.old_s2d[ curve ][ Y ] *=
 			           ( y_max - y_min ) / G.curve_2d[ curve ]->rwc_delta[ Z ];
-			CG.old_shift[ curve ][ Y ] = 
+			CG.old_shift[ curve ][ Y ] =
 							( G.curve_2d[ curve ]->rwc_delta[ Z ]
 							  * CG.old_shift[ curve ][ Y ]
 							  - G.curve_2d[ curve ]->rwc_start[ Z ] + y_min )
@@ -1786,7 +1786,7 @@ static void redraw_cut_canvas( Canvas *c )
 
 	if ( c == &G.cut_canvas && CG.curve != -1 && cv->count > 1 )
 	{
-		XDrawLines( G.d, c->pm, cv->gc, cv->xpoints, cv->count, 
+		XDrawLines( G.d, c->pm, cv->gc, cv->xpoints, cv->count,
 					CoordModeOrigin );
 
 		if ( cv->up )
@@ -1923,7 +1923,7 @@ static void repaint_cut_canvas( Canvas *c )
 			make_label_string( buf + 5, x_pos,
 					    irnd( floor( log10( fabs(
 				        scv->rwc_delta[ r_coord ] ) / cv->s2d[ X ] ) ) - 2 ) );
-			strcat( buf, "   y = " ); 
+			strcat( buf, "   y = " );
 			make_label_string( buf + strlen( buf ), y_pos,
 							  irnd( floor( log10( fabs(
 							  scv->rwc_delta[ Z ] ) / cv->s2d[ Y ] ) ) - 2 ) );
@@ -2193,7 +2193,7 @@ static void cut_make_scale( Canvas *c, int coord )
 
 		/* Draw all the ticks and numbers */
 
-		for ( cur_p = d_start_fine; cur_p < c->w; 
+		for ( cur_p = d_start_fine; cur_p < c->w;
 			  medium++, coarse++, cur_p += d_delta_fine )
 		{
 			x = d2shrt( cur_p );
@@ -2233,7 +2233,7 @@ static void cut_make_scale( Canvas *c, int coord )
 
 		/* Draw all the ticks and numbers */
 
-		for ( cur_p = ( double ) c->h - 1.0 - d_start_fine; cur_p > -0.5; 
+		for ( cur_p = ( double ) c->h - 1.0 - d_start_fine; cur_p > - 0.5;
 			  medium++, coarse++, cur_p -= d_delta_fine )
 		{
 			y = d2shrt( cur_p );
@@ -2732,7 +2732,7 @@ void cut_change_dir( FL_OBJECT *a, long b )
 		if ( CG.cut_dir == Y )
 		{
 			CG.s2d[ G.active_curve ][ X ] = cv->s2d[ X ] =
-								 scv->s2d[ Y ] / ( double ) ( G.canvas.h - 1 ) 
+								 scv->s2d[ Y ] / ( double ) ( G.canvas.h - 1 )
 								 * ( double ) ( G.cut_canvas.w - 1 );
 			CG.shift[ G.active_curve ][ X ] = cv->shift[ X ] = scv->shift[ Y ];
 		}

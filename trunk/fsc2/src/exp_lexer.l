@@ -306,21 +306,21 @@ FUNC        {IDENT}"#"[0-9]+
 
 "=="        return E_EQ;      /* equal */
 "!="        return E_NE;      /* unequal */
-"<"         return E_LT;      /* less than */              
-"<="        return E_LE;      /* less than or equal */     
-">"         return E_GT;      /* greater than */           
-">="        return E_GE;      /* greater than or equal */  
-"="         return '=';       /* assignment operator */    
-"["         return '[';       /* start of array indices */ 
-"]"         return ']';       /* end of array indices */   
-","         return ',';       /* list separator */         
+"<"         return E_LT;      /* less than */
+"<="        return E_LE;      /* less than or equal */
+">"         return E_GT;      /* greater than */
+">="        return E_GE;      /* greater than or equal */
+"="         return '=';       /* assignment operator */
+"["         return '[';       /* start of array indices */
+"]"         return ']';       /* end of array indices */
+","         return ',';       /* list separator */
 "("         return '(';       /* start of function argument list */
 ")"         return ')';       /* end of function argument list */
-"+"         return '+';       /* addition operator */      
+"+"         return '+';       /* addition operator */
 "-"         return '-';       /* subtraction operator or unary minus */
 "*"         return '*';       /* multiplication operator */
-"/"         return '/';       /* division operator */      
-"%"         return '%';       /* modulo operator */        
+"/"         return '/';       /* division operator */
+"%"         return '%';       /* modulo operator */
 "^"         return '^';       /* exponentiation operator */
 ":"         return ':';       /* condition separator in for loops */
 "!"         return E_NOT;     /* logical negation operator */

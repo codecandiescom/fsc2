@@ -321,7 +321,7 @@ Var *get_field( Var *v )
 			dtime = cur_time - ips20_4.time_estimate;
 			ips20_4.time_estimate = cur_time;
 
-			ips20_4.act_current = 1.0e-4 * 
+			ips20_4.act_current = 1.0e-4 *
 				( double ) lrnd( 1.0e4 * ( ips20_4.act_current
 								 + experiment_time( ) * ips20_4.sweep_rate
 								 * ( ips20_4.sweep_state == SWEEPING_UP ?

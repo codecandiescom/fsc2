@@ -1841,7 +1841,7 @@ Var *vars_pow_of_float_arr( Var *v1, Var *v2 )
 		{
 			vars_pow_check( *v1_dpnt,
 							v2_lpnt ? ( double ) *v2_lpnt : *v2_dpnt );
-			dp[ i ] = pow( *v1_dpnt++, 
+			dp[ i ] = pow( *v1_dpnt++,
 						   v2_lpnt ? ( double ) *v2_lpnt : *v2_dpnt );
 		}
 		new_var = vars_push( FLOAT_ARR, dp, v1_len );

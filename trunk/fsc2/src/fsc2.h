@@ -263,7 +263,7 @@ const char *Digitizer_Channel_Names[ NUM_DIGITIZER_CHANNEL_NAMES ] =
               "EXT",
               "EXT10" };
 
-const char *Function_Names[ PULSER_CHANNEL_NUM_FUNC ] = 
+const char *Function_Names[ PULSER_CHANNEL_NUM_FUNC ] =
 			{ "MW",
               "TWT",
               "TWT_GATE",

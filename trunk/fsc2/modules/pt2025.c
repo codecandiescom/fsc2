@@ -317,12 +317,12 @@ static bool pt2025_init( const char *name )
 
 	if ( pt2025.probe_orientation != PROBE_ORIENTATION_UNDEFINED &&
 		 ( ( status & 4 &&
-			 pt2025.probe_orientation == PROBE_ORIENTATION_MINUS ) || 
+			 pt2025.probe_orientation == PROBE_ORIENTATION_MINUS ) ||
 		   ( ! ( status & 4 ) &&
 			 pt2025.probe_orientation == PROBE_ORIENTATION_PLUS ) ) &&
 		 gpib_write( pt2025.device,
 					 pt2025.probe_orientation == PROBE_ORIENTATION_PLUS ?
-					 "F1\r\n" : "F0\r\n", 4 ) == FAILURE ) 
+					 "F1\r\n" : "F0\r\n", 4 ) == FAILURE )
 		 return FAIL;
 	else
 		pt2025.probe_orientation = status & 4;
@@ -331,7 +331,7 @@ static bool pt2025_init( const char *name )
 
 	if ( pt2025.resolution == UNDEF_RESOLUTION )
 		pt2025.resolution = status & 0x80 ? LOW : HIGH;
-	else if ( ( ( pt2025.resolution == LOW && ! ( status & 0x80 ) ) || 
+	else if ( ( ( pt2025.resolution == LOW && ! ( status & 0x80 ) ) ||
 				( pt2025.resolution == HIGH && status & 0x80 ) ) &&
 			  gpib_write( pt2025.device,
 						  pt2025.resolution == LOW ? "V1\r\n" : "V0\r\n", 4 )

@@ -44,7 +44,7 @@ hp8647a       := hp8647a.c hp8647a_util.c hp8647a_gpib.c hp8647a_lexer.c
 er023m        := er023m.c  er023m_addon.c er023m_gpib.c
 lecroy9400    := lecroy9400.c  lecroy9400_gpib.c  lecroy9400_util.c
 
-src_headers   := $(addprefix $(sdir)/,$(headers)) $(sdir)/fsc2_module.h 
+src_headers   := $(addprefix $(sdir)/,$(headers)) $(sdir)/fsc2_module.h
 
 tds_list      := tds754a tds744a tds540 tds520c tds520a tds520
 

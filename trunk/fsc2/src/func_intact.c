@@ -582,7 +582,7 @@ Var *f_bcreate( Var *v )
 
 Var *f_bdelete( Var *v )
 {
-	IOBJECT *io, *nio; 
+	IOBJECT *io, *nio;
 	long new_anchor = 0;
 
 
@@ -1363,7 +1363,7 @@ Var *f_sdelete( Var *v )
 
 
 		v = vars_pop( v );
-	}	
+	}
 
 	if ( Internals.I_am == CHILD || Internals.mode == TEST || ! Tool_Box )
 		return vars_push( INT_VAR, 1 );
@@ -2544,7 +2544,7 @@ static FL_OBJECT *append_object_to_form( IOBJECT *io )
 										 io->w, io->h, io->label );
 			fl_set_slider_bounds( io->self, io->start_val, io->end_val );
 			fl_set_slider_value( io->self, io->value );
-			fl_set_slider_return( io->self, FL_RETURN_END );			
+			fl_set_slider_return( io->self, FL_RETURN_END );
 			prec = - floor( log10 ( ( io->end_val - io->start_val ) /
 									( 0.825 * io->w ) ) );
 			fl_set_slider_precision( io->self,
@@ -3048,7 +3048,7 @@ Var *f_objdel( Var *v )
 
 static void store_geometry( void )
 {
-	if ( tool_x != Tool_Box->Tools->x - 1 && 
+	if ( tool_x != Tool_Box->Tools->x - 1 &&
 		 tool_y != Tool_Box->Tools->y - 1 )
 	{
 		tool_x = Tool_Box->Tools->x;

@@ -51,7 +51,7 @@ static int dac_ports[ ]       = { 6,       6,       4,       4      };
 
 #define KEITHLEY228A_MAX_JUMP         0.1  /* maximum uncontrolled jump */
 
-#define	STANDBY  ( ( bool ) 0 )      
+#define	STANDBY  ( ( bool ) 0 )
 #define OPERATE  ( ( bool ) 1 )
 
 

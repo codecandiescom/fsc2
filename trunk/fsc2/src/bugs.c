@@ -184,7 +184,7 @@ void bug_report_callback( FL_OBJECT *a, long b )
 	{
 		/* Ask the user if he wants a carbon copy */
 
-		if ( 1 == 
+		if ( 1 ==
 			 fl_show_question( "Do you want a copy of the bug report ?", 0 ) )
 			user = ( getpwuid( getuid( ) ) )->pw_name;
 

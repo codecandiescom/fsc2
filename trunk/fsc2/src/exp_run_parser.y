@@ -124,7 +124,7 @@ input:   /* empty */
 ;
 
 eol:     ';'                       { fsc2_assert( EDL.Var_Stack == NULL );
-                                     if ( EDL.do_quit ) 
+                                     if ( EDL.do_quit )
                                          YYACCEPT; }
        | '}'                       { fsc2_assert( EDL.Var_Stack == NULL );
 	                                 YYACCEPT; }
@@ -252,7 +252,7 @@ expr:    E_INT_TOKEN unit          { $$ = apply_unit( vars_push( INT_VAR, $1 ),
        | expr E_GT expr            { $$ = vars_comp( COMP_LESS, $3, $1 ); }
        | expr E_LE expr            { $$ = vars_comp( COMP_LESS_EQUAL,
 													 $1, $3 ); }
-       | expr E_GE expr            { $$ = vars_comp( COMP_LESS_EQUAL, 
+       | expr E_GE expr            { $$ = vars_comp( COMP_LESS_EQUAL,
 													 $3, $1 ); }
        | expr '+' expr             { $$ = vars_add( $1, $3 ); }
        | expr '-' expr             { $$ = vars_sub( $1, $3 ); }

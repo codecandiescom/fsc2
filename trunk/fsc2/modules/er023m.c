@@ -81,8 +81,8 @@ int er023m_init_hook( void )
 	/* Clear the calibration list */
 
 	for ( i = 0; i <= MAX_MF_INDEX; i++ )
-		er023m.calib[ i ].is_ph[ 0 ] = 
-			er023m.calib[ i ].is_ph[ 1 ] = 
+		er023m.calib[ i ].is_ph[ 0 ] =
+			er023m.calib[ i ].is_ph[ 1 ] =
 				er023m.calib[ i ].is_ma = UNSET;
 
 	/* Set several more variables in the structure describing the device */
@@ -490,7 +490,7 @@ Var *lockin_conversion_time( Var *v )
 				no_query_possible( );
 
 			case TEST :
-				return vars_push( FLOAT_VAR, BASE_CT * 
+				return vars_push( FLOAT_VAR, BASE_CT *
 								  ( er023m.ct_mult == UNDEF_CT_MULT ?
 									ER023M_TEST_CT_MULT : er023m.ct_mult ) );
 

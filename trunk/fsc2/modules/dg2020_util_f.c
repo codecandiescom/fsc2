@@ -369,7 +369,7 @@ void dg2020_calc_padding( void )
 	   bits (i.e. MIN_BLOCK_SIZE) for the block size as well as a maximum
 	   number of repetitions of 65536 (i.e. MAX_BLOCK_REPEATS). */
 
-	block_length = Ticks_max( MIN_BLOCK_SIZE, padding / MAX_BLOCK_REPEATS + 
+	block_length = Ticks_max( MIN_BLOCK_SIZE, padding / MAX_BLOCK_REPEATS +
 							 ( ( padding % MAX_BLOCK_REPEATS > 0 ) ? 1 : 0 ) );
 	block_repeat = padding / block_length;
 	padding %= block_length;

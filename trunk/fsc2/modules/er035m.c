@@ -329,8 +329,7 @@ try_again:
 				break;
 		}
 
-	} while ( *bp++ != '\r' ); 
-
+	} while ( *bp++ != '\r' );
 
 	/* Switch the display on */
 

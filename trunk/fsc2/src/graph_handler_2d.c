@@ -1369,13 +1369,13 @@ void repaint_canvas_2d( Canvas *c )
 			make_label_string( buf + 5, x_pos,
 							   irnd( floor( log10( fabs( cv->rwc_delta[ X ] )
 												   / cv->s2d[ X ] ) ) - 2 ) );
-			strcat( buf, "   y = " ); 
+			strcat( buf, "   y = " );
 			make_label_string( buf + strlen( buf ), y_pos,
 							   irnd( floor( log10( fabs( cv->rwc_delta[ Y ] )
 												   / cv->s2d[ Y ] ) ) - 2 ) );
 			if ( a_index != -1 )
 			{
-				strcat( buf, "   z = " ); 
+				strcat( buf, "   z = " );
 				make_label_string( buf + strlen( buf ), z_pos,
 					  irnd( floor( log10( fabs( cv->rwc_delta[ Z ] )
 										  / cv->s2d[ Z ] ) ) - 2 ) );
@@ -1445,7 +1445,7 @@ void repaint_canvas_2d( Canvas *c )
 				if ( index_1 == -1 || index_2 == -1 )
 					sprintf( buf, " dx = %#g   dy = %#g ", x_pos, y_pos );
 				else
-					sprintf( buf, " dx = %#g   dy = %#g   dz = %#g ", 
+					sprintf( buf, " dx = %#g   dy = %#g   dz = %#g ",
 							 x_pos, y_pos, z_pos_1 - z_pos_2 );
 				if ( G.font != NULL )
 					XDrawImageString( G.d, pm, cv->font_gc, 5,
@@ -1682,7 +1682,7 @@ void make_scale_2d( Curve_2d *cv, Canvas *c, int coord )
 
 		/* Draw all the ticks and numbers */
 
-		for ( cur_p = d_start_fine; cur_p < c->w; 
+		for ( cur_p = d_start_fine; cur_p < c->w;
 			  medium++, coarse++, cur_p += d_delta_fine )
 		{
 			x = d2shrt( cur_p );
@@ -1724,7 +1724,7 @@ void make_scale_2d( Curve_2d *cv, Canvas *c, int coord )
 
 		/* Draw all the ticks and numbers */
 
-		for ( cur_p = ( double ) c->h - 1.0 - d_start_fine; cur_p > -0.5; 
+		for ( cur_p = ( double ) c->h - 1.0 - d_start_fine; cur_p > - 0.5;
 			  medium++, coarse++, cur_p -= d_delta_fine )
 		{
 			y = d2shrt( cur_p );

@@ -245,12 +245,12 @@ static void test_machine_type( void )
 }
 
 
-/*-------------------------------------------------------*/  
+/*-------------------------------------------------------*/
 /* Do a preliminary check of the command line arguments. */
 /* The main handling of arguments is only done after the */
 /* graphics initialisation, but some arguments have to   */
 /* be dealt with earlier.                                */
-/*-------------------------------------------------------*/  
+/*-------------------------------------------------------*/
 
 static int scan_args( int *argc, char *argv[ ], char **fname )
 {
@@ -396,11 +396,11 @@ static int scan_args( int *argc, char *argv[ ], char **fname )
 }
 
 
-/*----------------------------------------------------------*/  
+/*----------------------------------------------------------*/
 /* This function is called after either exit() is called or */
 /* it returns from main(). Here some cleanup is done that   */
 /* is necessary even oif the program crashed.               */
-/*----------------------------------------------------------*/  
+/*----------------------------------------------------------*/
 
 static void final_exit_handler( void )
 {
@@ -595,7 +595,7 @@ void load_file( FL_OBJECT *a, long reload )
 	if ( ! Internals.exit_hooks_are_run )
 		run_exit_hooks( );
 
-	EDL.compilation.error[ FATAL ] = 
+	EDL.compilation.error[ FATAL ] =
 		EDL.compilation.error[ SEVERE ] =
 		    EDL.compilation.error[ WARN ] = 0;
 
@@ -770,7 +770,7 @@ void test_file( FL_OBJECT *a, long b )
 		fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_left_ptr );
 		user_break = SET;
 		delete_devices( );                       /* run the exit hooks ! */
-		eprint( FATAL, UNSET, 
+		eprint( FATAL, UNSET,
 				"Test of program aborted, received user break.\n" );
 		notify_conn( UNBUSY_SIGNAL );
 		running_test = UNSET;
@@ -984,7 +984,7 @@ void run_file( FL_OBJECT *a, long b )
 			notify_conn( UNBUSY_SIGNAL );
 			return;
 		}
-	}		
+	}
 
 	/* Finally start the experiment */
 
@@ -1123,11 +1123,11 @@ static bool display_file( char *name, FILE *fp )
 }
 
 
-/*--------------------------------------------------------------------*/  
+/*--------------------------------------------------------------------*/
 /* Does everything that needs to be done (i.e. deallocating memory,   */
 /* unloading the device drivers, reinitializing all kinds of internal */
 /* structures etc.) before a new file can be loaded.                  */
-/*--------------------------------------------------------------------*/  
+/*--------------------------------------------------------------------*/
 
 void clean_up( void )
 {
@@ -1188,7 +1188,7 @@ void clean_up( void )
 }
 
 
-/*-------------------------------------------------------------*/  
+/*-------------------------------------------------------------*/
 /* This function is the callback function for the help button. */
 /* It forks a process that execs a browser displaying the HTML */
 /* documentation.                                              */
@@ -1208,7 +1208,7 @@ void run_help( FL_OBJECT *a, long b )
 	if ( bn != FL_SHORTCUT + 'S' && bn == FL_RIGHT_MOUSE )
 	{
 		eprint( NO_ERROR, UNSET,
-				( GUI.G_Funcs.size == LOW ) ? 
+				( GUI.G_Funcs.size == LOW ) ?
 				"@n-------------------------------------------\n" :
 				"@n-----------------------------------------------\n" );
 		eprint( NO_ERROR, UNSET,
@@ -1220,7 +1220,7 @@ void run_help( FL_OBJECT *a, long b )
 				"@n<Shift> LMB: Show cross section (2D only)\n"
 				"@nLMB + MMB + <Space>: Switch between x/y cross section\n" );
 		eprint( NO_ERROR, UNSET,
-				( GUI.G_Funcs.size == LOW ) ? 
+				( GUI.G_Funcs.size == LOW ) ?
 				"@n-------------------------------------------\n" :
 				"@n-----------------------------------------------\n" );
 		return;
@@ -1242,14 +1242,14 @@ void run_help( FL_OBJECT *a, long b )
 }
 
 
-/*--------------------------------------------------------------*/  
+/*--------------------------------------------------------------*/
 /* This function starts a browser with the HTML documantation.  */
 /* It is called after a fork(), so it may not return. Which     */
 /* browser is used depends on the environment variable BROWSER, */
 /* currently the program only knows how to deal with Netscape,  */
 /* opera, konqueror, lnyx or w3m. If BROWSER isn't set Netscape */
 /* is used.                                                     */
-/*--------------------------------------------------------------*/  
+/*--------------------------------------------------------------*/
 
 static void start_help_browser( void )
 {
@@ -1305,7 +1305,7 @@ static void start_help_browser( void )
 		else
 		{
 			av[ 1 ] = T_strdup( "-remote" );
-			av[ 2 ] = 
+			av[ 2 ] =
 				   get_string( "openURL(file:%s%s%shtml/fsc2.html,new-window)",
 							   docdir[ 0 ] != '/' ? "/" : "", docdir,
 							   slash( docdir ) );
@@ -1374,9 +1374,9 @@ static void set_main_signals( void )
 }
 
 
-/*-------------------------------------*/  
+/*-------------------------------------*/
 /* Signal handler for the main program */
-/*-------------------------------------*/  
+/*-------------------------------------*/
 
 void main_sig_handler( int signo )
 {
@@ -1453,9 +1453,9 @@ void notify_conn( int signo )
 }
 
 
-/*----------------------------------------*/  
+/*----------------------------------------*/
 /* Function prints help message and exits */
-/*----------------------------------------*/  
+/*----------------------------------------*/
 
 void usage( int return_status )
 {

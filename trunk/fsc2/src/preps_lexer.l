@@ -407,21 +407,21 @@ FUNC        {IDENT}"#"[0-9]+
 
 "=="        return EQ;        /* equal */
 "!="        return NE;        /* unequal */
-"<"         return LT;        /* less than */              
-"<="        return LE;        /* less than or equal */     
-">"         return GT;        /* greater than */           
-">="        return GE;        /* greater than or equal */  
-"="         return '=';       /* assignment operator */    
-"["         return '[';       /* start of array indices */ 
-"]"         return ']';       /* end of array indices */   
-","         return ',';       /* list separator */         
+"<"         return LT;        /* less than */
+"<="        return LE;        /* less than or equal */
+">"         return GT;        /* greater than */
+">="        return GE;        /* greater than or equal */
+"="         return '=';       /* assignment operator */
+"["         return '[';       /* start of array indices */
+"]"         return ']';       /* end of array indices */
+","         return ',';       /* list separator */
 "("         return '(';       /* start of function argument list */
 ")"         return ')';       /* end of function argument list */
-"+"         return '+';       /* addition operator */      
+"+"         return '+';       /* addition operator */
 "-"         return '-';       /* subtraction operator or unary minus */
 "*"         return '*';       /* multiplication operator */
-"/"         return '/';       /* division operator */      
-"%"         return '%';       /* modulo operator */        
+"/"         return '/';       /* division operator */
+"%"         return '%';       /* modulo operator */
 "^"         return '^';       /* exponentiation operator */
 "!"         return NOT;       /* logical negation operator */
 "&"         return AND;       /* logical and operator */

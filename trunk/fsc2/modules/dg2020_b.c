@@ -689,7 +689,7 @@ Var *pulser_next_phase( Var *v )
 		if ( FSC2_MODE == EXPERIMENT )
 			for ( j = 0; j <= PHASE_CW - PHASE_PLUS_X; j++ )
 				if ( f->phase_setup->is_set[ j ] &&
-					 ! dg2020_channel_assign( 
+					 ! dg2020_channel_assign(
 						 f->pcm[ j * f->pc_len + f->next_phase ]->self,
 						 f->phase_setup->pod[ j ]->self ) )
 					return vars_push( INT_VAR, 0 );
@@ -763,7 +763,7 @@ Var *pulser_phase_reset( Var *v )
 
 		if ( FSC2_MODE == EXPERIMENT )
 			for ( j = 0; j <= PHASE_CW - PHASE_PLUS_X; j++ )
-				if ( f->phase_setup->is_set[ j ] && 
+				if ( f->phase_setup->is_set[ j ] &&
 					 ! dg2020_channel_assign(
 						 f->pcm[ j * f->pc_len + 0 ]->self,
 						 f->phase_setup->pod[ j ]->self ) )

@@ -655,7 +655,7 @@ Var *lockin_sensitivity( Var *v )
 			print( WARN, "Can't set sensitivity to %.0lf mV, using %.0lf mV "
 				   "instead.\n",
 				   sens * 1.0e3, sens_list[ sens_index ] * 1.0e3 );
-		else if ( sens >= 1.0e-6 ) 
+		else if ( sens >= 1.0e-6 )
 			print( WARN, "Can't set sensitivity to %.0lf uV, using %.0lf uV "
 				   "instead.\n",
 				   sens * 1.0e6, sens_list[ sens_index ] * 1.0e6 );
@@ -876,7 +876,7 @@ Var *lockin_harmonic( Var *v )
 	if ( v == NULL )
 	{
 		if ( FSC2_MODE == TEST )
-			return vars_push( INT_VAR, sr830.is_harmonic ? 
+			return vars_push( INT_VAR, sr830.is_harmonic ?
 							  sr830.is_harmonic : SR830_TEST_HARMONIC );
 		else
 			return vars_push( INT_VAR, sr830_get_harmonic( ) );
@@ -2087,7 +2087,7 @@ static void sr830_auto( int flag )
 			sr830.data_fetched[ i ] = 0;
 		sr830.stored_data = 0;
 	}
-}	
+}
 
 
 /*---------------------------------------------------------------*/
@@ -2156,7 +2156,7 @@ static double sr830_get_auto_data( int type )
 			ptr++;
 
 		sr830.stored_data = T_atol( ptr );
-	} 
+	}
 
 	sprintf( cmd, "TRCA? %d,%ld,1\n",
 			 channel + 1, sr830.data_fetched[ channel ]++ );

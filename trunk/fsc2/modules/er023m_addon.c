@@ -40,7 +40,7 @@ Var *lockin_rg( Var *v )
 				no_query_possible( );
 
 			case TEST :
-				return vars_push( INT_VAR, ( long ) 
+				return vars_push( INT_VAR, ( long )
 								  ( er023m.rg_index == UNDEF_RG_INDEX ?
 									ER023M_TEST_RG_INDEX : er023m.rg_index ) );
 
@@ -82,7 +82,7 @@ Var *lockin_tc( Var *v )
 				no_query_possible( );
 
 			case TEST :
-				return vars_push( INT_VAR, ( long ) 
+				return vars_push( INT_VAR, ( long )
 								  ( er023m.tc_index == UNDEF_TC_INDEX ?
 									ER023M_TEST_TC_INDEX : er023m.tc_index ) );
 			case EXPERIMENT :

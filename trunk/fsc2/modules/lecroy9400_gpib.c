@@ -682,7 +682,7 @@ void lecroy9400_get_curve( int ch, WINDOW *w, double **array, long *length,
 	gain_fac = sset[ ( int ) lecroy9400.wv_desc[ ch ][ 4 ] - 22 ];
 	vgain_fac = 200.0 / ( ( int ) lecroy9400.wv_desc[ ch ][ 5 ] + 80 );
 	offset_shift = 0.04
-		       * ( ( double ) lecroy9400.wv_desc[ ch ][ 8 ] * 256.0 
+		       * ( ( double ) lecroy9400.wv_desc[ ch ][ 8 ] * 256.0
 				   + ( double ) lecroy9400.wv_desc[ ch ][ 9 ] - 200 );
 
 	for ( dp = data + 4, i = 0; i < *length; dp += 2, i++ )

@@ -82,8 +82,8 @@
          in the ADD command one needs quotes around the block name...)
 
      b.) DATA:PATTERN:BIT ...
-         Normally this command results in a 
-               2022,"Pattern data byte count error"         
+         Normally this command results in a
+               2022,"Pattern data byte count error"
          but works on some occasions - I was not able to figure out under what
          conditions (of course I checked and rechecked that the numbers
          given in the command were correct). Just by chance I found, that

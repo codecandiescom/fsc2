@@ -134,7 +134,7 @@ ass:     '=' expr                  { vars_assign( $2, $2->prev ); }
        | EXPA expr                 { vars_assign( vars_pow(
 										                  vars_val( $2->prev ),
 															$2 ), $2->prev ); }
-;                                     
+;
 
 prop:   /* empty */
        | prop F_TOK sep1 expr sep2  { p_set( EDL.Cur_Pulse, P_FUNC, $4 ); }
@@ -155,14 +155,14 @@ sep1:    /* empty */
 
 /* seperator between different keyword-value pairs */
 
-sep2:    /* empty */           
+sep2:    /* empty */
        | ','
 ;
 
 
 expr:    INT_TOKEN unit           { $$ = apply_unit( vars_push( INT_VAR, $1 ),
 													 $2 ); }
-       | FLOAT_TOKEN unit         { $$ = apply_unit( 
+       | FLOAT_TOKEN unit         { $$ = apply_unit(
 		                                    vars_push( FLOAT_VAR, $1 ), $2 ); }
        | VAR_TOKEN unit           { $$ = apply_unit( $1, $2 ); }
        | VAR_TOKEN '['            { vars_arr_start( $1 ); }
@@ -187,7 +187,7 @@ expr:    INT_TOKEN unit           { $$ = apply_unit( vars_push( INT_VAR, $1 ),
        | expr GT expr             { $$ = vars_comp( COMP_LESS, $3, $1 ); }
        | expr LE expr             { $$ = vars_comp( COMP_LESS_EQUAL,
 													$1, $3 ); }
-       | expr GE expr             { $$ = vars_comp( COMP_LESS_EQUAL, 
+       | expr GE expr             { $$ = vars_comp( COMP_LESS_EQUAL,
 													$3, $1 ); }
        | expr '+' expr            { $$ = vars_add( $1, $3 ); }
        | expr '-' expr            { $$ = vars_sub( $1, $3 ); }

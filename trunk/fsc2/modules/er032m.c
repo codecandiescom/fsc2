@@ -45,7 +45,7 @@ const char generic_type[ ] = DEVICE_TYPE;
 /* Defines the time before we test again if it is found that the overload
    LED is still on */
 
-#define ER032M_WAIT_TIME   100000     /* in us */ 
+#define ER032M_WAIT_TIME   100000     /* in us */
 
 /* Define the maximum number of retries before giving up if the
    overload LED is on */
@@ -210,7 +210,7 @@ Var *magnet_name( Var *v )
 
 /*--------------------------------------------------*/
 /* Function for registering the start field and the */
-/* field step size during the PREPARATIONS section. */ 
+/* field step size during the PREPARATIONS section. */
 /*--------------------------------------------------*/
 
 Var *magnet_setup( Var *v )
@@ -577,7 +577,7 @@ static void er032m_start_field( void )
 	}
 	else
 	{
-		er032m_set_sw( 0.5 * d_min( ER032M_MAX_FIELD - 
+		er032m_set_sw( 0.5 * d_min( ER032M_MAX_FIELD -
 									d_min( magnet.cf, cur_cf ),
 									d_min( magnet.cf, cur_cf )
 									- ER032M_MIN_FIELD ) );
@@ -861,7 +861,7 @@ static bool er032m_guess_sw( double field_diff )
 		swa_step /= factor;
 	}
 
-	/* If with this corrected SWA step size the field change can't be achieved 
+	/* If with this corrected SWA step size the field change can't be achieved
 	   give up */
 
 	if ( swa_step * ( SWA_RANGE / 2 - 1 ) < field_diff )
@@ -1040,7 +1040,7 @@ static double er032m_set_cf( double center_field )
 	}
 
 	return center_field;
-}	
+}
 
 
 /*-------------------------------------------------------*/

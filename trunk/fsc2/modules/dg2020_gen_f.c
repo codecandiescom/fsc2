@@ -93,7 +93,7 @@ bool dg2020_assign_function( int function, long pod )
 
 	if ( f->pod != NULL )
 	{
-		if ( f->self != PULSER_CHANNEL_PHASE_1 && 
+		if ( f->self != PULSER_CHANNEL_PHASE_1 &&
 			 f->self != PULSER_CHANNEL_PHASE_2 )
 		{
 			print( FATAL, "A pod has already been assigned to function "
@@ -765,7 +765,7 @@ bool dg2020_set_phase_switch_delay( int func, double del_time )
 	}
 
 	dg2020.function[ func ].is_psd = SET;
-	dg2020.function[ func ].psd = 
+	dg2020.function[ func ].psd =
 		                  ( Ticks ) lrnd( ceil( del_time / dg2020.timebase ) );
 
 	return OK;

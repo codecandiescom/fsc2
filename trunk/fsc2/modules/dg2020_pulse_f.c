@@ -95,7 +95,7 @@ bool dg2020_set_pulse_function( long pnum, int function )
 		THROW( EXCEPTION );
 	}
 
-	if ( function == PULSER_CHANNEL_PHASE_1 || 
+	if ( function == PULSER_CHANNEL_PHASE_1 ||
 		 function == PULSER_CHANNEL_PHASE_2 )
 	{
 		print( FATAL, "Pulses for the PHASE function can't be set, all phase "

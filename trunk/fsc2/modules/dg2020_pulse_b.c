@@ -96,7 +96,7 @@ bool dg2020_set_pulse_function( long pnum, int function )
 	PULSE *p = dg2020_get_pulse( pnum );
 
 
-	if ( function == PULSER_CHANNEL_PHASE_1 || 
+	if ( function == PULSER_CHANNEL_PHASE_1 ||
 		 function == PULSER_CHANNEL_PHASE_2 )
 	{
 		print( FATAL, "Phase functions can't be used with this driver.\n" );

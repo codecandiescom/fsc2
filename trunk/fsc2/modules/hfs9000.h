@@ -194,7 +194,7 @@ typedef struct {
 
 typedef struct _p_ {
 
-	long num;                // (positive) number of the pulse 
+	long num;                // (positive) number of the pulse
 
 	bool is_active;          // set if the pulse is really used
 	bool was_active;

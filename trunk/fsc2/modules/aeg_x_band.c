@@ -372,7 +372,7 @@ Var *set_field( Var *v )
 
 	field = aeg_x_band_field_check( field, &err_flag );
 
-	/* The second argument can be the maximum error which should be less than 
+	/* The second argument can be the maximum error which should be less than
 	   10% of the absolut requested field value */
 
 	if ( ( v = vars_pop( v ) ) != NULL )
@@ -596,7 +596,7 @@ static double aeg_x_band_field_check( double field, bool *err_flag )
 #define MAGNET_TEST_STEPS	   16	  /* number of steps to do in test */
 #define MAGNET_FAST_TEST_STEPS 4	  /* number of steps to do in fast test */
 #define MAGNET_TEST_WIDTH	   0x400  /* sweep speed setting for test */
-#define MAGNET_MAX_TRIES	   3	  /* number of retries after failure of 
+#define MAGNET_MAX_TRIES	   3	  /* number of retries after failure of
 										 magnet field convergence to target
 										 point */
 
@@ -880,7 +880,7 @@ static bool magnet_goto_field_rec( double field, double error, int rec,
 		try = 0;
 	}
 	else						  /* if we're already in the recursion */
-	{														
+	{
 		if ( fabs( field - magnet.meas_field ) > last_diff )/* got it worse? */
 		{
 			if ( ++try >= MAGNET_MAX_TRIES )
@@ -1037,7 +1037,7 @@ bool magnet_do( int command )
 
 		case SERIAL_VOLTAGE :				  /* send voltage data pattern */
 			magnet.int_step = volt = lrnd( MAGNET_ZERO_STEP - magnet.step );
-			data[ 0 ] = ( unsigned char ) 
+			data[ 0 ] = ( unsigned char )
 				( 0x40 | ( ( volt >> 8 ) & 0xF ) | ( ( volt >> 3 ) & 0x10 ) );
 			data[ 1 ] = ( unsigned char ) ( 0x80 | ( volt & 0x07F ) );
 			fsc2_serial_write( SERIAL_PORT, data, 2 );

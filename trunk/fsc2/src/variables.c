@@ -1,4 +1,4 @@
-/* 
+/*
    $Id$
 
   Copyright (C) 1999-2002 Jens Thoms Toerring
@@ -158,7 +158,7 @@ static void vars_ass_from_trans_ptr( Var *src, Var *dest );
   variables and array is allowed). The parser in turn realizes that the user
   wants an array when it finds a string of tokens of the form
 
-            variable_identifier [ 
+            variable_identifier [
 
   where `variable_identifier' is a array name. It calls vars_arr_start()
   where, if the array is still completely new, the type of the array is set to
@@ -282,7 +282,7 @@ void vars_sort( void )
 		  ptr = ptr->next, num_vars++ )
 		;
 
-	/* Get the variables into a continous block, then sort them according 
+	/* Get the variables into a continous block, then sort them according
 	   to the variable names */
 
 	new_var_list = T_malloc( num_vars * sizeof *new_var_list );
@@ -365,7 +365,7 @@ Var *vars_new( char *name )
 
 	vp->next = EDL.Var_List;         /* set pointer to it's successor */
 	if ( EDL.Var_List != NULL )      /* set previous pointer in successor */
-		EDL.Var_List->prev = vp;     /* (if this isn't the very first) */ 
+		EDL.Var_List->prev = vp;     /* (if this isn't the very first) */
     EDL.Var_List = vp;               /* make it the head of the list */
 
 	return vp;                       /* return pointer to the structure */
@@ -483,7 +483,7 @@ Var *vars_sub( Var *v1, Var *v2 )
 	/* Make sure that `v1' and `v2' exist, are integers or float values or
 	   arrays (or pointers thereto) */
 
-	vars_check( v1, INT_VAR | FLOAT_VAR | INT_CONT_ARR | FLOAT_CONT_ARR | 
+	vars_check( v1, INT_VAR | FLOAT_VAR | INT_CONT_ARR | FLOAT_CONT_ARR |
 				    INT_ARR | FLOAT_ARR | ARR_REF | ARR_PTR );
 	vars_check( v2, INT_VAR | FLOAT_VAR | ARR_REF | ARR_PTR |
 				    INT_ARR | FLOAT_ARR );
@@ -557,7 +557,7 @@ Var *vars_mult( Var *v1, Var *v2 )
 	/* Make sure that `v1' and `v2' exist, are integers or float values or
 	   arrays (or pointers thereto) */
 
-	vars_check( v1, INT_VAR | FLOAT_VAR | INT_CONT_ARR | FLOAT_CONT_ARR | 
+	vars_check( v1, INT_VAR | FLOAT_VAR | INT_CONT_ARR | FLOAT_CONT_ARR |
 				    INT_ARR | FLOAT_ARR | ARR_REF | ARR_PTR );
 	vars_check( v2, INT_VAR | FLOAT_VAR | ARR_REF | ARR_PTR |
 				    INT_ARR | FLOAT_ARR );
@@ -631,7 +631,7 @@ Var *vars_div( Var *v1, Var *v2 )
 	/* Make sure that `v1' and `v2' exist, are integers or float values or
 	   arrays (or pointers thereto) */
 
-	vars_check( v1, INT_VAR | FLOAT_VAR | INT_CONT_ARR | FLOAT_CONT_ARR | 
+	vars_check( v1, INT_VAR | FLOAT_VAR | INT_CONT_ARR | FLOAT_CONT_ARR |
 				    INT_ARR | FLOAT_ARR | ARR_REF | ARR_PTR );
 	vars_check( v2, INT_VAR | FLOAT_VAR | ARR_REF | ARR_PTR |
 				    INT_ARR | FLOAT_ARR );
@@ -705,7 +705,7 @@ Var *vars_mod( Var *v1, Var *v2 )
 	/* Make sure that `v1' and `v2' exist, are integers or float values or
 	   arrays (or pointers thereto) */
 
-	vars_check( v1, INT_VAR | FLOAT_VAR | INT_CONT_ARR | FLOAT_CONT_ARR | 
+	vars_check( v1, INT_VAR | FLOAT_VAR | INT_CONT_ARR | FLOAT_CONT_ARR |
 				    INT_ARR | FLOAT_ARR | ARR_REF | ARR_PTR );
 	vars_check( v2, INT_VAR | FLOAT_VAR | ARR_REF | ARR_PTR |
 				    INT_ARR | FLOAT_ARR );
@@ -779,7 +779,7 @@ Var *vars_pow( Var *v1, Var *v2 )
 	/* Make sure that `v1' and `v2' exist, are integers or float values or
 	   arrays (or pointers thereto) */
 
-	vars_check( v1, INT_VAR | FLOAT_VAR | INT_CONT_ARR | FLOAT_CONT_ARR | 
+	vars_check( v1, INT_VAR | FLOAT_VAR | INT_CONT_ARR | FLOAT_CONT_ARR |
 				    INT_ARR | FLOAT_ARR | ARR_REF | ARR_PTR );
 	vars_check( v2, INT_VAR | FLOAT_VAR | ARR_REF | ARR_PTR |
 				    INT_ARR | FLOAT_ARR );
@@ -1002,7 +1002,7 @@ Var *vars_comp( int comp_type, Var *v1, Var *v2 )
 			if ( v1->type == INT_VAR && v2->type == INT_VAR )
 				new_var = vars_push( INT_VAR, v1->INT != v2->INT );
 			else
-				new_var = vars_push( INT_VAR, VALUE( v1 ) != VALUE( v2 ) && 
+				new_var = vars_push( INT_VAR, VALUE( v1 ) != VALUE( v2 ) &&
 									 nextafter( VALUE( v1 ), VALUE( v2 ) )
 									 != VALUE( v2 ) );
 			break;
@@ -1077,7 +1077,7 @@ Var *vars_comp( int comp_type, Var *v1, Var *v2 )
 									 ( v1->INT != 0 && v2->INT == 0 ) ||
 									 ( v1->INT == 0 && v2->INT != 0 ) );
 			else
-				new_var = vars_push( INT_VAR, 
+				new_var = vars_push( INT_VAR,
 								( VALUE( v1 ) != 0.0 && VALUE( v2 ) == 0.0 ) ||
 								( VALUE( v1 ) == 0.0 && VALUE( v2 ) != 0.0 ) );
 			break;
@@ -1186,7 +1186,7 @@ Var *vars_push( int type, ... )
 										 new_stack_var->len
 										 * sizeof *new_stack_var->val.lpnt );
 			else
-				new_stack_var->val.lpnt = 
+				new_stack_var->val.lpnt =
 								   T_calloc( new_stack_var->len,
 											 sizeof *new_stack_var->val.lpnt );
 			break;
@@ -2157,7 +2157,7 @@ static void vars_ass_from_ptr( Var *src, Var *dest )
 	if ( dest->type & ( INT_VAR | FLOAT_VAR ) )
 	{
 		eprint( FATAL, SET, "Left hand side of assignment is a variable "
-				"while right hand side is an array (slice).\n" ); 
+				"while right hand side is an array (slice).\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -2311,7 +2311,7 @@ static void vars_ass_from_trans_ptr( Var *src, Var *dest )
 	if ( dest->type & ( INT_VAR | FLOAT_VAR ) )
 	{
 		eprint( FATAL, SET, "Left hand side of assignment is a variable "
-				"while right hand side is an array (slice).\n" ); 
+				"while right hand side is an array (slice).\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -2551,7 +2551,7 @@ void vars_arr_init( Var *v )
 /* parsing and print an error message instead.                              */
 /*--------------------------------------------------------------------------*/
 
-Var *apply_unit( Var *var, Var *unit ) 
+Var *apply_unit( Var *var, Var *unit )
 {
 	if ( var->type == UNDEF_VAR )
 	{

@@ -84,7 +84,7 @@ bool dg2020_assign_function( int function, long pod )
 
 	/* In this driver we don't have any use for phase functions */
 
-	if ( f->self == PULSER_CHANNEL_PHASE_1 || 
+	if ( f->self == PULSER_CHANNEL_PHASE_1 ||
 		 f->self == PULSER_CHANNEL_PHASE_2 )
 	{
 		print( FATAL, "Phase functions can't be used with this driver.\n" );

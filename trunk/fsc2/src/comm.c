@@ -22,7 +22,7 @@
 */
 
 
-/* 
+/*
    The main problem with the communication between the parent and the child
    process is that can be situations where the child has new data it needs
    to pass to the parent before it can continue while the parent process is
@@ -316,7 +316,7 @@ static long parent_reader( CommStruct *header )
 
 	switch ( header->type )
 	{
-		case C_EPRINT :          
+		case C_EPRINT :
 			/* Get the string to be printed... */
 
 			if ( header->data.str_len[ 0 ] > 0 )
@@ -466,7 +466,7 @@ static long parent_reader( CommStruct *header )
 			break;
 
 		case C_INPUT :
-			/* Get length of predefined content and label from header and 
+			/* Get length of predefined content and label from header and
 			   read them */
 
 			for ( i = 0; i < 2 ; i++ )
@@ -590,7 +590,7 @@ static long child_reader( void *ret, CommStruct *header )
 		case C_STR :
 			if ( header->data.len == -1 )
 			{
-                if ( ret != NULL ) 
+                if ( ret != NULL )
 				     *( ( char ** ) ret ) = NULL;
 				return 1;
 			}
@@ -760,7 +760,7 @@ void writer( int type, ... )
 
 	switch ( type )
 	{
-		case C_EPRINT :          
+		case C_EPRINT :
 			fsc2_assert( Internals.I_am == CHILD );
 
 			str[ 0 ] = va_arg( ap, char * );
@@ -970,7 +970,7 @@ void writer( int type, ... )
 				header.data.len = -1;
 			else if ( *str[ 0 ] == '\0' )
 				header.data.len = 0;
-			else 
+			else
 				header.data.len = ( ptrdiff_t ) strlen( str[ 0 ] );
 
 			/* Don't try to continue writing on EPIPE (SIGPIPE is ignored) */

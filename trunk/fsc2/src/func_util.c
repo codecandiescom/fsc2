@@ -109,7 +109,7 @@ Var *f_print( Var *v )
 	for  ( cv = v->next, on_stack = 0; cv != NULL; ++on_stack, cv = cv->next )
 		vars_check( cv, INT_VAR | FLOAT_VAR | STR_VAR );
 
-	/* Check that there are at least as many variables are on the stack 
+	/* Check that there are at least as many variables are on the stack
 	   as there specifiers in the format string */
 
 	if ( on_stack < in_format )
@@ -228,7 +228,7 @@ Var *f_print( Var *v )
 		cp = ep + 4;
 	}
 
-	if ( Internals.mode != TEST || print_anyway ) 
+	if ( Internals.mode != TEST || print_anyway )
 		eprint( NO_ERROR, UNSET, cp );
 
 	/* Finally free the copy of the format string and return number of
@@ -331,7 +331,7 @@ Var *f_wait( Var *v )
 		return 0;
 	}
 
-	/* During the test run we not really wait but just add the expected 
+	/* During the test run we not really wait but just add the expected
 	   waiting time to the global variable that is used to give the modules
 	   a very rough time estimate about the used time. */
 
@@ -489,7 +489,7 @@ Var *f_init_1d( Var *v )
 
 	if ( v->type & ( INT_VAR | FLOAT_VAR ) )
 	{
-		if ( v->next == NULL || 
+		if ( v->next == NULL ||
 			 ! ( v->next->type & ( INT_VAR | FLOAT_VAR ) ) )
 		{
 			print( FATAL, "Real word coordinate found but missing "
@@ -559,7 +559,7 @@ Var *f_init_2d( Var *v )
 	G.nx = DEFAULT_2D_X_POINTS;
 	G.ny = DEFAULT_2D_Y_POINTS;
 	G.rwc_start[ X ] = G.rwc_start[ Y ] = ( double ) ARRAY_OFFSET;
-	G.rwc_delta[ X ] = G.rwc_delta[ Y ] = 1.0; 
+	G.rwc_delta[ X ] = G.rwc_delta[ Y ] = 1.0;
 	for ( i = X; i <= Z; i++ )
 		G.label[ i ] = G.label_orig[ i ] = NULL;
 
@@ -925,7 +925,7 @@ Var *f_clabel( Var *v )
 
 	len =   4 * sizeof( long )            /* length field and label lengths */
 		  + sizeof( int );                /* type field */
-	for ( i = X; i <= Z; i++ )            
+	for ( i = X; i <= Z; i++ )
 		len += lengths[ i ];
 
 	/* Now try to get a shared memory segment */

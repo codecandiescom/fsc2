@@ -62,7 +62,7 @@ bool hfs9000_assign_channel_to_function( int function, long channel )
 	CHANNEL *c = &hfs9000.channel[ channel ];
 
 
-	if ( channel != HFS9000_TRIG_OUT && 
+	if ( channel != HFS9000_TRIG_OUT &&
 		 ( channel < MIN_CHANNEL || channel > MAX_CHANNEL ) )
 	{
 		print( FATAL, "Invalid channel, valid are CH[%d-%d] and "
@@ -108,7 +108,7 @@ bool hfs9000_assign_channel_to_function( int function, long channel )
 			print( FATAL, "TRIGGER_OUT channel is already used for function "
 				   "`%s'.\n", Function_Names[ c->function->self ] );
 		else
-			print( FATAL, "Channel %ld is already used for function `%s'.\n", 
+			print( FATAL, "Channel %ld is already used for function `%s'.\n",
 				   channel, Function_Names[ c->function->self ] );
 		THROW( EXCEPTION );
 	}

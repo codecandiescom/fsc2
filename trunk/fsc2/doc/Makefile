@@ -129,7 +129,7 @@ install:
 	-$(RM) $(RMFLAGS) $(infodir)/fsc2.info*.gz
 	$(INSTALL) -m 444 -o $(OWNER) -g $(GROUP) fsc2.info* $(infodir)
 	gzip -9 -f $(infodir)/fsc2.info*
-	-install-info -d $(infodir)/dir $(infodir)/fsc2.info 
+	-install-info -d $(infodir)/dir $(infodir)/fsc2.info
 
 
 uninstall:

@@ -104,7 +104,7 @@ int tds_tmpl_test_hook( void )
 
 int tds_tmpl_end_of_test_hook( void )
 {
-	int ch; 
+	int ch;
 	int count;
 
 
@@ -276,7 +276,7 @@ Var *digitizer_define_window( Var *v )
 	{
 		w = tds_tmpl.w;
 		while ( w->next != NULL )
-		{		
+		{
 			num_windows++;
 			w = w->next;
 		}
@@ -306,7 +306,7 @@ Var *digitizer_define_window( Var *v )
 
 
 #ifndef NO_GATED_MEASUREMENTS
-	/* If we're already running the experiment and only just now the very 
+	/* If we're already running the experiment and only just now the very
 	   first window gets defined we have to switch on gated measurements
 	   (unless the device can't do gated measurements). */
 
@@ -603,11 +603,10 @@ Var *digitizer_timebase( Var *v )
 				if ( ! tds_tmpl.is_timebase )
 					no_query_possible( );
 				return vars_push( FLOAT_VAR, tds_tmpl.timebase );
-				
 
 			case TEST :
 				return vars_push( FLOAT_VAR, tds_tmpl.is_timebase ?
-								  tds_tmpl.timebase : TDS_TMPL_TEST_TIME_BASE );
+								 tds_tmpl.timebase : TDS_TMPL_TEST_TIME_BASE );
 
 			case EXPERIMENT :
 				return vars_push( FLOAT_VAR, tds_tmpl.timebase );

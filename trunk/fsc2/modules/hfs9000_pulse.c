@@ -86,7 +86,7 @@ bool hfs9000_set_pulse_function( long pnum, int function )
 	FUNCTION *f = &hfs9000.function[ function ];
 
 
-	if ( function == PULSER_CHANNEL_PHASE_1 || 
+	if ( function == PULSER_CHANNEL_PHASE_1 ||
 		 function == PULSER_CHANNEL_PHASE_2 )
 	{
 		print( FATAL, "Phase functions can't be used with this driver.\n" );

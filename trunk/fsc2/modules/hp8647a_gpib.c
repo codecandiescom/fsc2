@@ -103,7 +103,7 @@ bool hp8647a_init( const char *name )
 
 	if ( hp8647a.mod_type_is_set )
 		hp8647a_set_mod_type( hp8647a.mod_type );
-	else 
+	else
 	{
 		if ( ( hp8647a.mod_type = hp8647a_get_mod_type( ) ) != UNDEFINED )
 			hp8647a.mod_type_is_set = SET;

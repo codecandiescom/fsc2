@@ -291,7 +291,7 @@ KEEP    [^\t" \n(\/*),;:=%\^\-\+]+
 
 <incl>{
 			/* Handling of C++ style comments */
-{REM2}      
+{REM2}
 
 {WS}        /* Dumps white space */
 
@@ -379,7 +379,7 @@ KEEP    [^\t" \n(\/*),;:=%\^\-\+]+
 					Eol = UNSET;
 				}
 				printf( "%s", yytext );
-			}				
+			}
 
 {KEEP}		{
 				if ( Eol )
@@ -388,7 +388,7 @@ KEEP    [^\t" \n(\/*),;:=%\^\-\+]+
 					Eol = UNSET;
 				}
 				printf( "%s", yytext );
-			}				
+			}
 
 <<EOF>>		include_handler( NULL );
 

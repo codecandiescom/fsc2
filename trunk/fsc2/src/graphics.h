@@ -153,7 +153,7 @@ typedef struct {
 		         h;
 
 	GC font_gc;             /* gc for font */
-} Canvas;	
+} Canvas;
 
 
 typedef struct {

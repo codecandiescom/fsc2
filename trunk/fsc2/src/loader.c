@@ -166,9 +166,8 @@ bool exists_function( const char *name )
 
 
 	for ( i = 0; i < Num_Func; i++ )
-		if ( Fncts[ i ].name != NULL &&
-			 ! strcmp( Fncts[ i ].name, name ) &&
-			 Fncts[ i ].fnct != NULL )			 
+		if ( Fncts[ i ].name != NULL && ! strcmp( Fncts[ i ].name, name ) &&
+			 Fncts[ i ].fnct != NULL )
 			return OK;
 
 	return FAIL;
@@ -217,7 +216,7 @@ static void load_functions( Device *dev )
 
 	if ( dev->driver.handle == NULL )
 	{
-		eprint( FATAL, UNSET, "Can't open module for device `%s': %s\n", 
+		eprint( FATAL, UNSET, "Can't open module for device `%s': %s\n",
 				strip_path( dev->name ), dlerror( ) );
 		T_free( lib_name );
 		THROW( EXCEPTION );
@@ -730,7 +729,7 @@ void run_exit_hooks( void )
 /* <-                                                                     */
 /*    Return value indicates success or failure (see global.h for defi-   */
 /*    nition of the the return codes). On success `symbol_ptr' contains   */
-/*    the address of the symbol.                                          */ 
+/*    the address of the symbol.                                          */
 /*------------------------------------------------------------------------*/
 
 int get_lib_symbol( const char *from, const char *symbol, void **symbol_ptr )

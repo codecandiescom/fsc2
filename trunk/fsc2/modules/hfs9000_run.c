@@ -143,7 +143,7 @@ void hfs9000_do_checks( FUNCTION *f )
 		if ( p->is_active )
 		{
 			f->max_seq_len = Ticks_max( f->max_seq_len, p->pos + p->len );
-			if ( f->delay + f->max_seq_len > 
+			if ( f->delay + f->max_seq_len >
 				( FSC2_MODE == TEST ? MAX_PULSER_BITS : hfs9000.max_seq_len ) )
 			{
 				if ( FSC2_MODE == TEST )
@@ -310,7 +310,7 @@ static PULSE *hfs9000_delete_pulse( PULSE *p )
 	   be deleted and shorten the list by one element */
 
 	if ( i != p->function->num_pulses - 1 )
-		p->function->pulses[ i ] = 
+		p->function->pulses[ i ] =
 			p->function->pulses[ p->function->num_pulses - 1 ];
 
 	/* Now delete the pulse - if the deleted pulse was the last pulse of
@@ -437,7 +437,7 @@ static void hfs9000_commit( FUNCTION *f, bool flag )
 		if ( f->channel->self == HFS9000_TRIG_OUT )
 			hfs9000_set_trig_out_pulse( );
 		else
-			while ( ( what = hfs9000_diff( f->channel->old, f->channel->new, 
+			while ( ( what = hfs9000_diff( f->channel->old, f->channel->new,
 										   &start, &len ) ) != 0 )
 				hfs9000_set_constant( f->channel->self, start, len,
 									  what == -1 ? 0 : 1 );

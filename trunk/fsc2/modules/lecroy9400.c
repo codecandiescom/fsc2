@@ -261,7 +261,7 @@ Var *digitizer_timebase( Var *v )
 				no_query_possible( );
 
 			case TEST :
-				return vars_push( FLOAT_VAR, lecroy9400.is_timebase? 
+				return vars_push( FLOAT_VAR, lecroy9400.is_timebase?
 								  lecroy9400.timebase :
 								  tb[ LECROY9400_TEST_TB_ENTRY ] );
 
@@ -386,7 +386,7 @@ Var *digitizer_sensitivity( Var *v )
 				no_query_possible( );
 
 			case TEST :
-				return vars_push( FLOAT_VAR, lecroy9400.is_sens[ channel ] ? 
+				return vars_push( FLOAT_VAR, lecroy9400.is_sens[ channel ] ?
 								             lecroy9400.sens[ channel ] :
 								             LECROY9400_TEST_SENSITIVITY );
 

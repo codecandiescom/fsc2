@@ -122,7 +122,7 @@ CFLAGS           := -ggdb $(OPT) -I/usr/X11R6/include \
 				    # -Wundef             # fails in bison/flex created files
 				    # -ansi               # fails due to inline/asm
 				    # -pedantic
-				    # -DNDEBUG            # switch off build-in debugging code 
+				    # -DNDEBUG            # switch off build-in debugging code
 LFLAGS			 := $(OPT) -shared -fpic  # needed for libraries
 
 ifeq ($(MPATROL),YES)
@@ -313,11 +313,11 @@ endif
 
 ifndef OWNER
 	OWNER = fsc2
-endif 
+endif
 
 ifndef GROUP
 	GROUP = uucp
-endif 
+endif
 
 ifdef NUM_SERIAL_PORTS
 	CFLAGS += -DNUM_SERIAL_PORTS=$(NUM_SERIAL_PORTS)

@@ -220,7 +220,7 @@ void delete_stale_shms( void )
     for ( id = 0; id <= max_id; id++ )
 	{
         shm_id = shmctl( id, SHM_STAT, &shm_seg );
-        if ( shm_id  < 0 ) 
+        if ( shm_id  < 0 )
             continue;
 
 		/* segment belongs to fsc2 ? */

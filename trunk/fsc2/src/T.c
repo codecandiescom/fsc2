@@ -336,7 +336,7 @@ double T_atod( const char *txt )
 
 	if ( errno == ERANGE )
 	{
-		eprint( FATAL, Internals.mode != TEST, 
+		eprint( FATAL, Internals.mode != TEST,
 				"Floating point number out of range: %s.\n", txt );
 		THROW( EXCEPTION );
 	}

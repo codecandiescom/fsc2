@@ -171,7 +171,7 @@ const char *slash( const char *path )
 
 /*-----------------------------------------------------------------*/
 /* get_file_length() returns the number of lines in a file as well */
-/* as the number of digits in the number of lines.                 */ 
+/* as the number of digits in the number of lines.                 */
 /* ->                                                              */
 /*   * name of file                                                */
 /*   * pointer for returning number of digits in number of lines   */
@@ -678,7 +678,7 @@ void create_colors( void )
 	for ( i = 0; i < NUM_COLORS; i++ )
 	{
 		i2rgb( ( double ) i / ( double ) ( NUM_COLORS - 1 ), rgb );
-		fl_mapcolor( i + FL_FREE_COL1 + 1, 
+		fl_mapcolor( i + FL_FREE_COL1 + 1,
 					 rgb[ RED ], rgb[ GREEN ], rgb[ BLUE ] );
 	}
 

@@ -124,7 +124,7 @@ typedef struct _F_ {
                                  // pulses
 
 	struct _P_ *pod;             // points to the pod assigned to the function
-	struct _P_ *pod2;            // points to the second pod assigned to the 
+	struct _P_ *pod2;            // points to the second pod assigned to the
 	                             // function (phase functions only)
 
 	PHS phs;                     // phase functions only: how to translate

@@ -244,7 +244,7 @@ void dg2020_set_pulses( FUNCTION *f )
 	fsc2_assert( f->self != PULSER_CHANNEL_PHASE_1 &&
 				 f->self != PULSER_CHANNEL_PHASE_2 );
 
-	/* Always set the very first bit to LOW state, see the rant about the bugs 
+	/* Always set the very first bit to LOW state, see the rant about the bugs
 	   in the pulser firmware at the start of dg2020_gpib_b.c. Then set the
 	   rest of the channels to off state. */
 
@@ -351,7 +351,7 @@ PULSE *dg2020_delete_pulse( PULSE *p )
 	   be deleted and shorten the list by one element */
 
 	if ( i != p->function->num_pulses - 1 )
-		p->function->pulses[ i ] = 
+		p->function->pulses[ i ] =
 			p->function->pulses[ p->function->num_pulses - 1 ];
 
 	/* Now delete the pulse - if the deleted pulse was the last pulse of
@@ -489,7 +489,7 @@ void dg2020_commit( FUNCTION *f, bool flag )
 		if ( f->channel[ i ]->needs_update )
 		{
 			while ( ( what = dg2020_diff( f->channel[ i ]->old,
-										  f->channel[ i ]->new, 
+										  f->channel[ i ]->new,
 										  &start, &len ) ) != 0 )
 				dg2020_set_constant( f->channel[ i ]->self, start, len,
 								   what == -1 ? type_OFF( f ) : type_ON( f ) );

@@ -281,7 +281,7 @@ getfile_retry:
 
 	TRY
 	{
-		EDL.File_List = T_realloc( EDL.File_List, 
+		EDL.File_List = T_realloc( EDL.File_List,
 							 ( EDL.File_List_Len + 1 ) * sizeof( FILE_LIST ) );
 		if ( old_File_List != NULL )
 			T_free( old_File_List );
@@ -347,7 +347,7 @@ Var *f_clonef( Var *v )
 	strcat( fn, EDL.File_List[ v->val.lval ].name );
 
 	n = fn + strlen( fn ) - strlen( v->next->val.sptr );
-	if ( n > fn + 1 && *( n - 1 ) == '.' && 
+	if ( n > fn + 1 && *( n - 1 ) == '.' &&
 		 ! strcmp( n, v->next->val.sptr ) )
 		strcpy( n, v->next->next->val.sptr );
 	else
@@ -868,7 +868,7 @@ static void ff_format_check( Var *v )
 
 		while ( *sptr == '-' || *sptr == '+' || *sptr == ' ' ||
 				*sptr == '0' || *sptr == '#' )
-		{		
+		{
 			sptr++;
 			if ( *sptr == '\0' )
 			{
@@ -1786,7 +1786,7 @@ get_repl_retry:
 
 /*-----------------------------------------------------------------*/
 /* Function replaces escape sequences in a string by the character */
-/* the stand for - all C type escape sequences are supported.      */         
+/* the stand for - all C type escape sequences are supported.      */
 /*-----------------------------------------------------------------*/
 
 static char *handle_escape( char *str )

@@ -109,7 +109,7 @@ static bool Func_is_set = UNSET;
 
 
 %token <vptr> VAR_TOKEN      /* variable */
-%token <vptr> VAR_REF		 
+%token <vptr> VAR_REF
 %token <vptr> FUNC_TOKEN     /* function */
 %token <lval> INT_TOKEN
 %token <dval> FLOAT_TOKEN
@@ -176,12 +176,12 @@ line:    func                      { Func_is_set = SET; }
        | psd apsd
        | gp agp
 	   | KAP_TOKEN                 { keep_all_pulses( ); }
-;								   
+;
 
 
 /* all the next entries are just for catching missing semicolon errors */
 
-af:      /* empty */ 
+af:      /* empty */
 	   | SECTION_LABEL             { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | TB_TOKEN                  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | TM_TOKEN                  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
@@ -310,10 +310,10 @@ ch1:    INT_TOKEN sep2             { p_assign_channel( Channel_Type,
 												  vars_push( INT_VAR, $1 ) ); }
       | ch1 INT_TOKEN sep2         { p_assign_channel( Channel_Type,
 												  vars_push( INT_VAR, $2 ) ); }
-;								  
+;
 
 del:    DEL_TOKEN sep1 expr sep2   { p_set_delay( Channel_Type, $3 ); }
-;								  
+;
 
 inv:    INV_TOKEN sep2             { p_inv( Channel_Type ); }
 ;
@@ -326,7 +326,7 @@ vl:     VL_TOKEN sep1 expr sep2    { p_set_v_low( Channel_Type, $3 ); }
 
 expr:    INT_TOKEN unit            { $$ = apply_unit( vars_push( INT_VAR, $1 ),
 													  $2 ); }
-       | FLOAT_TOKEN unit          { $$ = apply_unit( 
+       | FLOAT_TOKEN unit          { $$ = apply_unit(
 		                                    vars_push( FLOAT_VAR, $1 ), $2 ); }
        | VAR_TOKEN unit            { $$ = apply_unit( $1, $2 ); }
        | VAR_TOKEN '['             { vars_arr_start( $1 ); }
@@ -351,7 +351,7 @@ expr:    INT_TOKEN unit            { $$ = apply_unit( vars_push( INT_VAR, $1 ),
        | expr GT expr              { $$ = vars_comp( COMP_LESS, $3, $1 ); }
        | expr LE expr              { $$ = vars_comp( COMP_LESS_EQUAL,
 													 $1, $3 ); }
-       | expr GE expr              { $$ = vars_comp( COMP_LESS_EQUAL, 
+       | expr GE expr              { $$ = vars_comp( COMP_LESS_EQUAL,
 													 $3, $1 ); }
        | expr '+' expr             { $$ = vars_add( $1, $3 ); }
        | expr '-' expr             { $$ = vars_sub( $1, $3 ); }
@@ -386,14 +386,14 @@ unit:    /* empty */               { $$ = NULL; }
 list1:   /* empty */               { $$ = vars_push( UNDEF_VAR ); }
 	   | expr
        | list1 ',' expr            { $$ = $3; }
-;								   
+;
 
-/* list of function arguments */   
+/* list of function arguments */
 
-list2:   /* empty */			   
-       | exprs					   
-	   | list2 ',' exprs		   
-;								   
+list2:   /* empty */
+       | exprs
+	   | list2 ',' exprs
+;
 
 exprs:   expr                      { }
        | STR_TOKEN                 { vars_push( STR_VAR, $1 ); }
@@ -408,7 +408,7 @@ sep1:    /* empty */
 
 /* seperator between different keyword-value pairs */
 
-sep2:    /* empty */           
+sep2:    /* empty */
        | ','
 ;
 

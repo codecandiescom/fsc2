@@ -598,7 +598,7 @@ PULSE *dg2020_delete_pulse( PULSE *p )
 	   be deleted and shorten the list by one element */
 
 	if ( i != p->function->num_pulses - 1 )
-		p->function->pulses[ i ] = 
+		p->function->pulses[ i ] =
 			p->function->pulses[ p->function->num_pulses - 1 ];
 
 	/* Now delete the pulse - if the deleted pulse was the last pulse of
@@ -691,7 +691,7 @@ void dg2020_set_pulses( FUNCTION *f )
 		 f->self == PULSER_CHANNEL_PHASE_2 )
 		return;
 
-	/* Always set the very first bit to LOW state, see the rant about the bugs 
+	/* Always set the very first bit to LOW state, see the rant about the bugs
 	   in the pulser firmware at the start of dg2020_gpib.c... */
 
 	dg2020_set_constant( f->channel[ 0 ]->self, -1, 1, LOW );
@@ -741,7 +741,7 @@ void dg2020_set_pulses( FUNCTION *f )
 		p->was_active = p->is_active;
 
 	if ( f->needs_phases )
-		dg2020_set_phase_pulses( f->phase_func );		
+		dg2020_set_phase_pulses( f->phase_func );
 }
 
 

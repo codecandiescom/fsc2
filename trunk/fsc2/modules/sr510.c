@@ -346,7 +346,7 @@ Var *lockin_sensitivity( Var *v )
 			print( WARN, "Can't set sensitivity to %.0lf mV, using %.0lf V "
 				   "instead.\n",
 				   sens * 1.0e3, sens_list[ sens_index ] * 1.0e3 );
-		else if ( sens >= 1.0e-6 ) 
+		else if ( sens >= 1.0e-6 )
 			print( WARN, "Can't set sensitivity to %.0lf uV, using %.0lf uV "
 				   "instead.\n",
 				   sens * 1.0e6, sens_list[ sens_index ] * 1.0e6 );
@@ -779,7 +779,7 @@ double sr510_get_sens( void )
 	buffer[ length - 2 ] = '\0';
 	sens = sens_list[ SENS_ENTRIES - T_atol( buffer ) ];
 
-    /* Check if EXPAND is switched on - this increases the sensitivity 
+    /* Check if EXPAND is switched on - this increases the sensitivity
 	   by a factor of 10 */
 
 	length = 10;

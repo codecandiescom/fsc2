@@ -141,7 +141,7 @@ enum {
 #ifdef TDS540_MAIN
 
 	TDS540 tds540;
-	const char *Channel_Names[ MAX_CHANNELS ] = { 
+	const char *Channel_Names[ MAX_CHANNELS ] = {
 											 "CH1", "CH2", "CH3", "CH4",
 											 "MATH1", "MATH2", "MATH3", "REF1",
 											 "REF2", "REF3", "REF4",

@@ -216,7 +216,7 @@ static bool no_prog_to_run( void )
 	fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_left_ptr );
 
 	return ret;
-} 
+}
 
 
 /*--------------------------------------------------------------------------*/
@@ -347,14 +347,14 @@ static void fork_failure( int stored_errno )
 			eprint( FATAL, UNSET, "Not enough system resources left to run "
 					"the experiment.\n" );
 			fl_show_alert( "FATAL Error", "Not enough system resources",
-						   "left to run the experiment.", 1 );			
+						   "left to run the experiment.", 1 );
 			break;
 
 		case ENOMEM :
 			eprint( FATAL, UNSET, "Not enough memory left to run the "
 					"experiment.\n" );
 			fl_show_alert( "FATAL Error", "Not enough memory left",
-						   "to run the experiment.", 1 );			
+						   "to run the experiment.", 1 );
 			break;
 
 		default :
@@ -365,7 +365,7 @@ static void fork_failure( int stored_errno )
 				eprint( FATAL, SET, "Unrecognized system error (errno = %d) "
 						"when trying to start experiment.\n", errno );
 			fl_show_alert( "FATAL Error", "System error on start of "
-						   "experiment.", "", 1 );			
+						   "experiment.", "", 1 );
 			break;
 	}
 

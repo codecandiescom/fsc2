@@ -408,7 +408,7 @@ static int get_print_file( FILE **fp, char **name )
 
 	/* In send-to-printer mode try to create and open a temporary file */
 
-	if ( print_type == S2P ) 
+	if ( print_type == S2P )
 	{
 		/* Create a temporary file */
 
@@ -647,7 +647,7 @@ static void print_header( FILE *fp, char *name )
 			     "      pop exch pop exch pop gr } b\n" );
 
 	if ( print_with_color )
-		fprintf( fp, 
+		fprintf( fp,
 			     "/fsc2 { gs /Times-Roman 6 sf\n"
 			     "        (fsc2) ch sub 6 sub exch\n"
 			     "        (fsc2) cw sub 4 sub exch m\n"
@@ -655,7 +655,7 @@ static void print_header( FILE *fp, char *name )
 			     "        -0.025 0.025 rm } for\n"
 			     "        1 1 1 srgb (fsc2) show gr } b\n" );
 	else
-		fprintf( fp, 
+		fprintf( fp,
 			     "/fsc2 { gs /Times-Roman 6 sf\n"
 			     "        (fsc2) ch sub 6 sub exch\n"
 			     "        (fsc2) cw sub 4 sub exch m\n"
@@ -894,7 +894,7 @@ static void eps_make_scale( FILE *fp, void *cv, int coord, long dim )
 
 		/* Draw all the ticks and numbers */
 
-		for ( cur_p = d_start_fine; cur_p < w; 
+		for ( cur_p = d_start_fine; cur_p < w;
 			  medium++, coarse++, cur_p += d_delta_fine )
 		{
 			x = cur_p + x_0;
@@ -1171,7 +1171,7 @@ static void eps_draw_surface( FILE *fp, int cn )
 
 			i2rgb( cv->z_factor * ( cv->points[ k ].v + cv->shift[ Z ] ),
 				   rgb );
-			fprintf( fp, 
+			fprintf( fp,
 					 "%f %f %f srgb\n"
 					 "%f %f m\n"
 					 "%f 0 rl\n"
@@ -1263,7 +1263,7 @@ static void eps_draw_contour( FILE *fp, int cn )
 
 	for ( g = 1.0, z = 0.0; z <= 1.0; g -= 0.045, z += 0.05 )
 		for ( k = 0, j = 0; j < G.ny; j++ )
-			for ( i = 0; i < G.nx; i++, k++ ) 
+			for ( i = 0; i < G.nx; i++, k++ )
 			{
 				if ( ! cv->points[ k ].exist )
 				{

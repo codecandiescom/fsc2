@@ -190,7 +190,7 @@ bool xforms_init( int *argc, char *argv[ ] )
 	fl_set_oneliner_font( FL_NORMAL_STYLE, XI_sizes.NORMAL_FONT_SIZE );
 
 	if ( * ( ( int * ) xresources[ HELPFONTSIZE ].var ) != 0 )
-		fl_set_tooltip_font( FL_NORMAL_STYLE, 
+		fl_set_tooltip_font( FL_NORMAL_STYLE,
 							 * ( ( int * ) xresources[ HELPFONTSIZE ].var ) );
 	else
 		fl_set_tooltip_font( FL_NORMAL_STYLE, XI_sizes.SMALL_FONT_SIZE );
@@ -573,7 +573,7 @@ bool dl_fsc2_rsc( void )
 
 	dlerror( );           /* make sure it's NULL before we continue */
 	GUI.G_Funcs.create_pc_form =
-		         ( FD_print_comment * ( * )( void ) ) dlsym( handle, 
+		         ( FD_print_comment * ( * )( void ) ) dlsym( handle,
 											     "create_form_print_comment" );
 	if ( dlerror( ) != NULL )
 	{
@@ -620,10 +620,10 @@ void xforms_close( void )
 }
 
 
-/*------------------------------------------------------------*/  
+/*------------------------------------------------------------*/
 /* Callback function for movements of the slider that adjusts */
 /* the sizes of the program and the error/output browser      */
-/*------------------------------------------------------------*/  
+/*------------------------------------------------------------*/
 
 void win_slider_callback( FL_OBJECT *a, long b )
 {
@@ -643,7 +643,7 @@ void win_slider_callback( FL_OBJECT *a, long b )
 	h = cy2 - cy1 - ch1;
 	H = cy2 - cy1 + ch2;
 
-	new_h1 = ( FL_Coord ) ( ( 1.0 - XI_sizes.SLIDER_SIZE ) * H 
+	new_h1 = ( FL_Coord ) ( ( 1.0 - XI_sizes.SLIDER_SIZE ) * H
 							* fl_get_slider_value( a )
 							+ 0.5 * H * XI_sizes.SLIDER_SIZE - h / 2 );
 
@@ -655,8 +655,8 @@ void win_slider_callback( FL_OBJECT *a, long b )
 
 #if 0
 
-/*------------------------------------------------------------*/  
-/*------------------------------------------------------------*/  
+/*------------------------------------------------------------*/
+/*------------------------------------------------------------*/
 
 static int fsc2_x_error_handler( Display *d, XErrorEvent *err )
 {
@@ -670,8 +670,8 @@ static int fsc2_x_error_handler( Display *d, XErrorEvent *err )
 }
 
 
-/*------------------------------------------------------------*/  
-/*------------------------------------------------------------*/  
+/*------------------------------------------------------------*/
+/*------------------------------------------------------------*/
 
 static int fsc2_xio_error_handler( Display *d )
 {

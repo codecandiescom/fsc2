@@ -80,13 +80,13 @@ input:   /* empty */
        | input line ';'            { fsc2_assert( EDL.Var_Stack == NULL ); }
        | input line SECTION_LABEL  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | input SECTION_LABEL       { YYACCEPT; }
-;								  
+;
 
-line:    linet					  
-       | line ',' linet			  
+line:    linet
+       | line ',' linet
        | line linet                { THROW( MISSING_SEMICOLON_EXCEPTION ); }
 
-;								  
+;
 
 linet:   VAR_TOKEN                 { } /* no assignment to be done */
        | VAR_TOKEN '=' expr        { vars_assign( $3, $1 ); }
@@ -129,7 +129,7 @@ expr:    INT_TOKEN unit            { $$ = apply_unit( vars_push( INT_VAR, $1 ),
        | expr GT expr              { $$ = vars_comp( COMP_LESS, $3, $1 ); }
        | expr LE expr              { $$ = vars_comp( COMP_LESS_EQUAL,
 													 $1, $3 ); }
-       | expr GE expr              { $$ = vars_comp( COMP_LESS_EQUAL, 
+       | expr GE expr              { $$ = vars_comp( COMP_LESS_EQUAL,
 													 $3, $1 ); }
        | expr '+' expr             { $$ = vars_add( $1, $3 ); }
        | expr '-' expr             { $$ = vars_sub( $1, $3 ); }

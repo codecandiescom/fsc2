@@ -96,22 +96,22 @@ bool tds_tmpl_init( const char *name )
 			tds_tmpl_set_trigger_channel( tds_tmpl.trigger_channel );
 		else
 			tds_tmpl.trigger_channel = tds_tmpl_get_trigger_channel( );
-			
+
 		/* Set format of data transfer (binary, INTEL format) */
 
 		if ( gpib_write( tds_tmpl.device, "DAT:ENC SRI;WID 2\n", 18 )
 			 == FAILURE )
 			tds_tmpl_gpib_failure( );
-		
+
 		/* Set unit for cursor setting commands to seconds and cursor types
 		   to VBAR (vertical bars)*/
 
-		if ( gpib_write( tds_tmpl.device, 
+		if ( gpib_write( tds_tmpl.device,
 						 "CURS:FUNC VBA;VBA:UNITS SECO\n", 29 ) == FAILURE )
 			tds_tmpl_gpib_failure( );
 
 		/* Make sure cursor 1 is the left one */
-		
+
 		cp1 = tds_tmpl_get_cursor_position( 1 );
 		cp2 = tds_tmpl_get_cursor_position( 2 );
 
@@ -404,7 +404,7 @@ void tds_tmpl_set_num_avg( long num_avg )
 
 /*-------------------------------------------------------------------------*/
 /* Function returns the data acquisition mode. If the digitizer is neither */
-/* in average nor in sample mode, it is switched to sample mode.           */ 
+/* in average nor in sample mode, it is switched to sample mode.           */
 /*-------------------------------------------------------------------------*/
 
 int tds_tmpl_get_acq_mode( void )
@@ -822,7 +822,7 @@ double tds_tmpl_get_area( int channel, WINDOW *w, bool use_cursor )
 		if ( gpib_write( tds_tmpl.device, "BUSY?\n", 6 ) == FAILURE ||
 			 gpib_read( tds_tmpl.device, reply, &length ) == FAILURE )
 			tds_tmpl_gpib_failure( );
-	} while ( reply[ 0 ] == '1' ); 
+	} while ( reply[ 0 ] == '1' );
 
 	/* Get the the area */
 
@@ -937,7 +937,7 @@ void tds_tmpl_get_curve( int channel, WINDOW *w, double **data, long *length,
 
 	scale = 10.24 * sens / ( double ) 0xFFFF;
 
-	/* Set the data source channel (if it's not already set correctly) */ 
+	/* Set the data source channel (if it's not already set correctly) */
 
 	if ( channel != tds_tmpl.data_source )
 	{
@@ -950,7 +950,7 @@ void tds_tmpl_get_curve( int channel, WINDOW *w, double **data, long *length,
 	/* Set the cursors or set start and end point of interval */
 
 #ifdef NO_GATED_MEASUREMENTS
-	sprintf( cmd, "DAT:START %ld;STOP %ld\n", 
+	sprintf( cmd, "DAT:START %ld;STOP %ld\n",
 			 w != NULL ? w->start_num : 1,
 			 w != NULL ? w->end_num : tds_tmpl.rec_len );
 	if ( gpib_write( tds_tmpl.device, cmd, strlen( cmd ) ) == FAILURE )
@@ -960,7 +960,7 @@ void tds_tmpl_get_curve( int channel, WINDOW *w, double **data, long *length,
 		tds_tmpl_set_curve_window( w );
 	else
 	{
-		sprintf( cmd, "DAT:START %ld;STOP %ld\n", 
+		sprintf( cmd, "DAT:START %ld;STOP %ld\n",
 				 w != NULL ? w->start_num : 1,
 				 w != NULL ? w->end_num : tds_tmpl.rec_len );
 		if ( gpib_write( tds_tmpl.device, cmd, strlen( cmd ) ) == FAILURE )
@@ -979,7 +979,7 @@ void tds_tmpl_get_curve( int channel, WINDOW *w, double **data, long *length,
 		if ( gpib_write( tds_tmpl.device, "BUSY?\n", 6 ) == FAILURE ||
 			 gpib_read( tds_tmpl.device, reply, &len ) == FAILURE )
 			tds_tmpl_gpib_failure( );
-	} while ( reply[ 0 ] == '1' ); 
+	} while ( reply[ 0 ] == '1' );
 
 	/* Calculate how long the curve (with header) is going to be and allocate
        enough memory (data are 2-byte integers) */
@@ -1089,7 +1089,7 @@ double tds_tmpl_get_amplitude( int channel, WINDOW *w, bool use_cursor )
 		if ( gpib_write( tds_tmpl.device, "BUSY?\n", 6 ) == FAILURE ||
 			 gpib_read( tds_tmpl.device, reply, &length ) == FAILURE )
 			tds_tmpl_gpib_failure( );
-	} while ( reply[ 0 ] == '1' ); 
+	} while ( reply[ 0 ] == '1' );
 
 
 	/* Get the the amplitude */
@@ -1230,7 +1230,7 @@ void tds_tmpl_set_snap( bool flag )
 		sprintf( cmd, "DAT:STAR 1;STOP %ld\n", tds_tmpl.rec_len );
 		if ( gpib_write( tds_tmpl.device, cmd, strlen( cmd ) ) == FAILURE )
 			tds_tmpl_gpib_failure( );
-	}		
+	}
 }
 
 #endif

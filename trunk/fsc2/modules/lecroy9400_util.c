@@ -307,7 +307,7 @@ static void lecroy9400_window_check_3( void )
 
 		w->start_num = lrnd( ( w->start + lecroy9400.trig_pos * window )
 							 * TDS_POINTS_PER_DIV / lecroy9400.timebase ) + 1;
-		w->end_num = lrnd( ( w->start + w->width 
+		w->end_num = lrnd( ( w->start + w->width
 							 + lecroy9400.trig_pos * window )
 							 * TDS_POINTS_PER_DIV / lecroy9400.timebase ) + 1;
 

@@ -91,7 +91,7 @@ typedef union {
 #define ON_STOP_TOK    3333
 
 
-typedef struct 
+typedef struct
 {
 	int    type;              /* type of data */
 	long   lval;              /* for long integer data */

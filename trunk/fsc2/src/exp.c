@@ -629,7 +629,7 @@ static void setup_if_else( long *pos, Prg_Token *cur_wr )
 	Prg_Token *cur = EDL.prg_token + *pos;
 	long i = *pos + 1;
 	bool in_if = SET;
-	bool dont_need_close_parens = UNSET;           /* set for IF-ELSE and 
+	bool dont_need_close_parens = UNSET;           /* set for IF-ELSE and
 													  UNLESS-ELSE constructs */
 
 
@@ -1407,7 +1407,7 @@ void get_for_cond( Prg_Token *cur )
 
 	}
 	else                                        /* get for loop increment */
-	{	
+	{
 		EDL.cur_prg_token++;                    /* skip the `:' */
 		conditionparse( );                      /* get end value */
 		in_for_lex = UNSET;
@@ -1489,7 +1489,7 @@ bool test_for_cond( Prg_Token *cur )
 		if ( cur->count.forl.act->type == INT_VAR )
 				cur->count.forl.act->val.lval += cur->count.forl.incr.lval;
 		else
-			cur->count.forl.act->val.dval += 
+			cur->count.forl.act->val.dval +=
 				cur->count.forl.incr.type == INT_VAR ?
 					cur->count.forl.incr.lval : cur->count.forl.incr.dval;
 	}
@@ -1516,7 +1516,7 @@ bool test_for_cond( Prg_Token *cur )
 	else
 	{
 		if ( ! sign )     /* `incr' has positive sign */
-			return cur->count.forl.act->val.dval <= 
+			return cur->count.forl.act->val.dval <=
 					   ( cur->count.forl.end.type == INT_VAR ?
 						 cur->count.forl.end.lval : cur->count.forl.end.dval );
 		else              /* `incr' has negative sign */

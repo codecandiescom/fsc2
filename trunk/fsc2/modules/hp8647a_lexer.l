@@ -124,7 +124,7 @@ DU       {IU}|{FU}
 {TWS}       hp8647a_Lc++;
 
 			/* dump all other forms of white */
-{WS}        
+{WS}
 
 			/* count lines */
 \n			hp8647a_Lc++;
@@ -358,7 +358,7 @@ static void hp8647a_new_table_entry( int type, double val )
 
 		if ( val > MAX_FREQ || val < MIN_FREQ )
 			print( WARN, "Frequency of %g MHz in table file `%s', line %ld, "
-				   "is not within range of synthesizer (%f kHz - %f MHz).\n", 
+				   "is not within range of synthesizer (%f kHz - %f MHz).\n",
 				   val * 1.0e-6, hp8647a.table_file, hp8647a_Lc,
 				   MIN_FREQ * 1.0e-3, MAX_FREQ * 1.0e-6 );
 	    hp8647a.att_table[ hp8647a.att_table_len ].freq = val;

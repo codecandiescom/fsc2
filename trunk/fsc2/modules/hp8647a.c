@@ -521,7 +521,7 @@ Var *synthesizer_sweep_up( Var *v )
 		{
 			hp8647a.real_attenuation = att;
 			hp8647a_set_attenuation( att );
-		}			
+		}
 
 		hp8647a_set_frequency( hp8647a.freq );
 	}
@@ -675,7 +675,7 @@ Var *synthesizer_att_ref_freq( Var *v )
 
 	too_many_arguments( v );
 
-	hp8647a.att_ref_freq = freq;	
+	hp8647a.att_ref_freq = freq;
 
 	/* If a table has already been loaded calculate the attenuation at the
 	   reference frequency */

@@ -267,13 +267,13 @@ void start_graphics( void )
 	{
 		if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
 		{
-			fl_set_object_helper( GUI.run_form->curve_1_button, 
+			fl_set_object_helper( GUI.run_form->curve_1_button,
 								 "Exempt curve 1 from\nrescaling operations" );
-			fl_set_object_helper( GUI.run_form->curve_2_button, 
+			fl_set_object_helper( GUI.run_form->curve_2_button,
 								 "Exempt curve 2 from\nrescaling operations" );
-			fl_set_object_helper( GUI.run_form->curve_3_button, 
+			fl_set_object_helper( GUI.run_form->curve_3_button,
 								 "Exempt curve 3 from\nrescaling operations" );
-			fl_set_object_helper( GUI.run_form->curve_4_button, 
+			fl_set_object_helper( GUI.run_form->curve_4_button,
 								 "Exempt curve 4 from\nrescaling operations" );
 		}
 
@@ -396,7 +396,7 @@ void start_graphics( void )
 	}
 
 	fl_show_form( GUI.run_form->run, needs_pos ?
-				  FL_PLACE_POSITION : FL_PLACE_MOUSE | FL_FREE_SIZE, 
+				  FL_PLACE_POSITION : FL_PLACE_MOUSE | FL_FREE_SIZE,
 				  FL_FULLBORDER, "fsc2: Display" );
 	display_has_been_shown = SET;
 
@@ -625,7 +625,7 @@ static void G_init_curves_1d( void )
 		G.left_arrow_w = left_arrow_width;
 		G.left_arrow_h = left_arrow_width;
 
-		cv->right_arrow = 
+		cv->right_arrow =
 			XCreatePixmapFromBitmapData( G.d, G.canvas.pm, right_arrow_bits,
 										 right_arrow_width, right_arrow_height,
 										 fl_get_pixel( G.colors[ i ] ),
@@ -727,7 +727,7 @@ static void G_init_curves_2d( void )
 		G.left_arrow_w = left_arrow_width;
 		G.left_arrow_h = left_arrow_width;
 
-		cv->right_arrow = 
+		cv->right_arrow =
 			XCreatePixmapFromBitmapData( G.d, G.canvas.pm, right_arrow_bits,
 										 right_arrow_width, right_arrow_height,
 										 fl_get_pixel( G.colors[ i ] ),
@@ -822,7 +822,7 @@ void create_label_pixmap( Canvas *c, int coord, char *label )
 						fl_get_canvas_depth( c->obj ) );
 
 	XFillRectangle( G.d, pm, c->gc, 0, 0, width, height );
-	XDrawString( G.d, pm, c->font_gc, 5, height - 1 - G.font_desc, 
+	XDrawString( G.d, pm, c->font_gc, 5, height - 1 - G.font_desc,
 				 label, strlen( label ) );
 
 	/* Create the real pixmap for the label */
@@ -1151,7 +1151,7 @@ void redraw_axis( int coord )
 		{
 			width = XTextWidth( G.font, G.label[ X ], strlen( G.label[ X ] ) );
 			XDrawString( G.d, c->pm, c->font_gc, c->w - width - 5,
-						 c->h - 5 - G.font_desc, 
+						 c->h - 5 - G.font_desc,
 						 G.label[ X ], strlen( G.label[ X ] ) );
 		}
 	}
@@ -1271,7 +1271,7 @@ void switch_off_special_cursors( void )
 			if ( G.dim == 1 )
 				repaint_canvas_1d( &G.y_axis );
 			else
-				repaint_canvas_2d( &G.y_axis );			
+				repaint_canvas_2d( &G.y_axis );
 		}
 
 		if ( G.drag_canvas == 3 )         /* canvas window in 1D mode */
@@ -1465,7 +1465,7 @@ void fs_button_callback( FL_OBJECT *a, long b )
 			}
 		}
 		else                     /* full scale got switched off */
-		{	
+		{
 			if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
 				fl_set_object_helper( GUI.run_form->full_scale_button,
 									  "Rescale curves to fit into the window\n"

@@ -58,7 +58,7 @@
    the variable for the function.  */
 
 
-/* The following variables are shared with loader.c which adds further 
+/* The following variables are shared with loader.c which adds further
    functions from the loaded modules */
 
 size_t Num_Func;     /* number of built-in and listed functions */
@@ -266,7 +266,7 @@ int func_exists( const char *name )
 
 /*----------------------------------------------------------------------*/
 /* Function tries to find a function in the list of built-in and loaded */
-/* functions. If it finds it it creates a new variable on the variables */ 
+/* functions. If it finds it it creates a new variable on the variables */
 /* stack with a pointer to the function and returns a pointer to the    */
 /* variable. If the function can't be found it returns a NULL pointer.  */
 /* -> 1. Name of the function                                           */

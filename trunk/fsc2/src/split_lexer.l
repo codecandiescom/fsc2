@@ -261,11 +261,11 @@ bool section_parser( int section )
 	}
 	CATCH( SYNTAX_ERROR_EXCEPTION )
 	{
-		eprint( FATAL, SET, "Syntax error.\n" ); 
+		eprint( FATAL, SET, "Syntax error.\n" );
 		return FAIL;
 	}
 	CATCH( MISSING_SEMICOLON_EXCEPTION )
-	{		
+	{
 		eprint( FATAL, SET, "Missing semicolon before (or on) this line.\n" );
 		return FAIL;
 	}

@@ -313,7 +313,7 @@ static void release_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
 				fl_set_object_helper( GUI.run_form->full_scale_button,
 									  "Rescale curves to fit into the window\n"
 									  "and switch on automatic rescaling" );
-		}			
+		}
 
 		redraw_all_1d( );
 	}
@@ -956,7 +956,7 @@ void recalc_XPoints_of_curve_1d( Curve_1d *cv )
 			continue;
 
 		xp->x = d2shrt( cv->s2d[ X ] * ( j + cv->shift[ X ] ) );
-		xp->y = i2shrt( G.canvas.h ) - 1 - 
+		xp->y = i2shrt( G.canvas.h ) - 1 -
 			   d2shrt( cv->s2d[ Y ] * ( cv->points[ j ].v + cv->shift[ Y ] ) );
 
 		cv->left  |= ( xp->x < 0 );
@@ -1006,7 +1006,7 @@ void redraw_canvas_1d( Canvas *c )
 				if ( cv->count <= 1 )
 					continue;
 
-				XDrawLines( G.d, c->pm, cv->gc, cv->xpoints, cv->count, 
+				XDrawLines( G.d, c->pm, cv->gc, cv->xpoints, cv->count,
 							CoordModeOrigin );
 			}
 
@@ -1144,7 +1144,7 @@ void repaint_canvas_1d( Canvas *c )
 				make_label_string( buf + 5, x_pos,
 								   irnd( floor( log10( fabs( G.rwc_delta[ X ] )
 												    / cv->s2d[ X ] ) ) - 2 ) );
-				strcat( buf, "   y = " ); 
+				strcat( buf, "   y = " );
 				make_label_string( buf + strlen( buf ), y_pos,
 								 irnd( floor( log10( fabs(
 								 G.rwc_delta[ Y ] ) / cv->s2d[ Y ] ) ) - 2 ) );
@@ -1260,7 +1260,7 @@ void fs_rescale_1d( void )
 
 		for ( j = 0; j < G.nx; j++ )
 			if ( cv->points[ j ].exist )
-				cv->points[ j ].v = ( G.rwc_delta[ Y ] * cv->points[ j ].v 
+				cv->points[ j ].v = ( G.rwc_delta[ Y ] * cv->points[ j ].v
 									  + G.rw_min - rw_min ) / new_rwc_delta_y;
 
 		recalc_XPoints_of_curve_1d( cv );
@@ -1404,7 +1404,7 @@ void make_scale_1d( Curve_1d *cv, Canvas *c, int coord )
 
 		/* Draw all the ticks and numbers */
 
-		for ( cur_p = d_start_fine; cur_p < c->w; 
+		for ( cur_p = d_start_fine; cur_p < c->w;
 			  medium++, coarse++, cur_p += d_delta_fine )
 		{
 			x = d2shrt( cur_p );
@@ -1444,7 +1444,7 @@ void make_scale_1d( Curve_1d *cv, Canvas *c, int coord )
 
 		/* Draw all the ticks and numbers */
 
-		for ( cur_p = ( double ) c->h - 1.0 - d_start_fine; cur_p > -0.5; 
+		for ( cur_p = ( double ) c->h - 1.0 - d_start_fine; cur_p > - 0.5;
 			  medium++, coarse++, cur_p -= d_delta_fine )
 		{
 			y = d2shrt( cur_p );

@@ -206,11 +206,11 @@ double is_mult_ns( double val, const char *text )
 }
 
 
-/*-------------------------------------------------------------------------*/ 
+/*-------------------------------------------------------------------------*/
 /* This function is called for the assignment of a function for a pod - it */
 /* can't be called when there are no pods, in this case the assignment has */
 /* to be done via the p_assign_channel() function                          */
-/*-------------------------------------------------------------------------*/ 
+/*-------------------------------------------------------------------------*/
 
 void p_assign_pod( long func, Var *v )
 {
@@ -842,7 +842,7 @@ void p_set_max_seq_len( Var *v )
 /*------------------------------------------------------------------------*/
 /* `func' is either the phase functions number (pulser with phase switch) */
 /* or the number of the PHASE_SETUP (pulser without phase switch). `ref'  */
-/* is the function the phase stuff is meant for.                          */  
+/* is the function the phase stuff is meant for.                          */
 /*------------------------------------------------------------------------*/
 
 void p_phase_ref( int func, int ref )

@@ -472,7 +472,7 @@ static Var *get_phase_cycled_area_2( Var *v )
 				/* If the second acquisition sequence uses the same digitizer
 				   channel we don't have to measure the area again... */
 
-				if ( ( ( aseq[ 0 ]->sequence[ i ] == ACQ_PLUS_A || 
+				if ( ( ( aseq[ 0 ]->sequence[ i ] == ACQ_PLUS_A ||
 						 aseq[ 0 ]->sequence[ i ] == ACQ_MINUS_A ) &&
 					   ( aseq[ 1 ]->sequence[ i ] == ACQ_PLUS_A ||
 						 aseq[ 1 ]->sequence[ i ] == ACQ_MINUS_A ) ) ||

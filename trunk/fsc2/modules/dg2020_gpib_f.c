@@ -79,8 +79,8 @@
          in the ADD command one needs quotes around the block name...)
 
      b.) DATA:PATTERN:BIT ...
-         Normally this command results in a 
-               2022,"Pattern data byte count error"         
+         Normally this command results in a
+               2022,"Pattern data byte count error"
          but works on some occasions - I was not able to figure out under what
          conditions (of course I checked and rechecked that the numbers
          given in the command were correct). Just by chance I found, that
@@ -593,7 +593,7 @@ bool dg2020_set_constant( int channel, Ticks address, Ticks length, int state )
 
 	/* Check parameters, allocate memory and set up start of command string.
 	   Because the very first bit in a channel alway has to stay unset we
-	   have not to use address but the increment of address! */ 
+	   have not to use address but the increment of address! */
 
 	if ( ! dg2020_prep_cmd( &cmd, channel, address + 1, length ) )
 		return FAIL;

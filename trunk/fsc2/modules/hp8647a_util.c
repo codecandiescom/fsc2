@@ -43,7 +43,7 @@ FILE *hp8647a_find_table( char **name )
 
 	if ( ( *name )[ 0 ] == '~' )
 	{
-		new_name = get_string( "%s%s%s", getenv( "HOME" ), 
+		new_name = get_string( "%s%s%s", getenv( "HOME" ),
 							   ( *name )[ 1 ] != '/' ? "/" : "", *name + 1 );
 		T_free( *name );
 		*name = new_name;
@@ -163,8 +163,8 @@ double hp8647a_get_att_from_table( double freq )
 
 	i_cur = lrnd( floor( ( i_high - i_low ) *
 						 ( freq - hp8647a.att_table[ i_low ].freq ) /
-						 (   hp8647a.att_table[ i_high ].freq 
-							 - hp8647a.att_table[ i_low ].freq ) ) ) + i_low;
+						 ( hp8647a.att_table[ i_high ].freq
+						   - hp8647a.att_table[ i_low ].freq ) ) ) + i_low;
 
 	if ( freq > hp8647a.att_table[ i_cur ].freq )
 	{
