@@ -237,7 +237,6 @@ bool section_parser( int section )
 		/* Finally, we have to do all the checks that only can be done
 		   after the EDL file has been completely parsed */
 
-		post_parse_check( );
 		TRY_SUCCESS;
 		return OK;
 

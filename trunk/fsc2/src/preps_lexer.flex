@@ -401,8 +401,6 @@ int preparations_parser( FILE *in )
 		 is_restart = SET;
 
 	prepsparse( );
-	basic_pulse_check( );
-
 
 	return Preps_Next_Section;
 }
