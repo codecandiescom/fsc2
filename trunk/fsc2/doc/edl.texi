@@ -1716,7 +1716,7 @@ If the file name is enclosed in @code{<} and @code{>} a default include
 directory compiled into @code{fsc2} will prepended to the file name,
 whatever the name of the file is. If no default directory has been
 compiled into @code{fsc2} an error message is printed and interpretation
-of the script is stopped.
+of the script stops.
 
 If the included file can't be opened an error message is printed and
 interpretation of the script is abandoned.
