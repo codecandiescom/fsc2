@@ -31,8 +31,8 @@ static void lecroy9400_window_check_3( void );
 #endif
 
 
-/*-----------------------------------------------------------*/
-/*-----------------------------------------------------------*/
+/*-----------------------------------------------------------*
+ *-----------------------------------------------------------*/
 
 int lecroy9400_get_tb_index( double timebase )
 {
@@ -48,9 +48,9 @@ int lecroy9400_get_tb_index( double timebase )
 }
 
 
-/*-----------------------------------------------------------*/
-/* Returns a string with a time value with a resonable unit. */
-/*-----------------------------------------------------------*/
+/*-----------------------------------------------------------*
+ * Returns a string with a time value with a resonable unit.
+ *-----------------------------------------------------------*/
 
 const char *lecroy9400_ptime( double p_time )
 {
@@ -70,9 +70,9 @@ const char *lecroy9400_ptime( double p_time )
 }
 
 
-/*-----------------------------------------------------------------*/
-/* Deletes a window by removing it from the linked list of windows */
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ * Deletes a window by removing it from the linked list of windows
+ *-----------------------------------------------------------------*/
 
 void lecroy9400_delete_windows( LECROY9400_T *s )
 {
@@ -88,8 +88,8 @@ void lecroy9400_delete_windows( LECROY9400_T *s )
 }
 
 
-/*-----------------------------------------------------------------*/
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ *-----------------------------------------------------------------*/
 
 void lecroy9400_do_pre_exp_checks( void )
 {
@@ -171,10 +171,10 @@ void lecroy9400_do_pre_exp_checks( void )
 }
 
 #if 0
-/*---------------------------------------------------------------*/
-/* Removes unused windows and checks if for all the used windows */
-/* a width is set - this is returned to the calling function     */
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ * Removes unused windows and checks if for all the used windows
+ * a width is set - this is returned to the calling function
+ *---------------------------------------------------------------*/
 
 static void lecroy9400_window_check_1( bool *is_start, bool *is_width )
 {
@@ -194,18 +194,18 @@ static void lecroy9400_window_check_1( bool *is_start, bool *is_width )
 }
 
 
-/*---------------------------------------------------------------------*/
-/* It's not possible to set arbitrary cursor positions and distances - */
-/* they've got to be multiples of the smallest time resolution of the  */
-/* digitizer, which is the time base divided by TDS_POINTS_PER_DIV.    */
-/* Rhe function tests if the requested cursor position and distance    */
-/* fit this requirement and if not the values are readjusted. While    */
-/* settings for the position and width of the window not being exact   */
-/* multiples of the resultion are probably no serious errors a window  */
-/* width of less than the resolution is a hint for a real problem. And */
-/* while we're at it we also try to find out if all window widths are  */
-/* equal - than we can use tracking cursors.                           */
-/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*
+ * It's not possible to set arbitrary cursor positions and distances -
+ * they've got to be multiples of the smallest time resolution of the
+ * digitizer, which is the time base divided by TDS_POINTS_PER_DIV.
+ * Rhe function tests if the requested cursor position and distance
+ * fit this requirement and if not the values are readjusted. While
+ * settings for the position and width of the window not being exact
+ * multiples of the resultion are probably no serious errors a window
+ * width of less than the resolution is a hint for a real problem. And
+ * while we're at it we also try to find out if all window widths are
+ * equal - than we can use tracking cursors.
+ *---------------------------------------------------------------------*/
 
 static void lecroy9400_window_check_2( void )
 {
@@ -279,11 +279,11 @@ static void lecroy9400_window_check_2( void )
 }
 
 
-/*-------------------------------------------------------------*/
-/* This function checks if the windows fit into the digitizers */
-/* measurement window and calculate the positions of the start */
-/* and the end of the windows in units of points.              */
-/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*
+ * This function checks if the windows fit into the digitizers
+ * measurement window and calculate the positions of the start
+ * and the end of the windows in units of points.
+ *-------------------------------------------------------------*/
 
 static void lecroy9400_window_check_3( void )
 {
@@ -325,16 +325,16 @@ static void lecroy9400_window_check_3( void )
 #endif
 
 
-/*--------------------------------------------------------------*/
-/* The function is used to translate back and forth between the */
-/* channel numbers the way the user specifies them in the EDL   */
-/* program and the channel numbers as specified in the header   */
-/* file. When the channel number can't be maped correctly, the  */
-/* way the function reacts depends on the value of the third    */
-/* argument: If this is UNSET, an error message gets printed    */
-/* and an exception ios thrown. If it is SET -1 is returned to  */
-/* indicate the error.                                          */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ * The function is used to translate back and forth between the
+ * channel numbers the way the user specifies them in the EDL
+ * program and the channel numbers as specified in the header
+ * file. When the channel number can't be maped correctly, the
+ * way the function reacts depends on the value of the third
+ * argument: If this is UNSET, an error message gets printed
+ * and an exception ios thrown. If it is SET -1 is returned to
+ * indicate the error.
+ *--------------------------------------------------------------*/
 
 long lecroy9400_translate_channel( int dir, long channel, bool flag )
 {
@@ -426,8 +426,8 @@ long lecroy9400_translate_channel( int dir, long channel, bool flag )
 }
 
 
-/*-------------------------------------------------------------*/
-/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*
+ *-------------------------------------------------------------*/
 
 void lecroy9400_store_state( LECROY9400_T *dest, LECROY9400_T *src )
 {

@@ -114,9 +114,9 @@ static Var_T *get_curve( Var_T *v, bool use_cursor );
 /*   We start with the hook functions...   */
 /*******************************************/
 
-/*------------------------------------*/
-/* Init hook function for the module. */
-/*------------------------------------*/
+/*------------------------------------*
+ * Init hook function for the module.
+ *------------------------------------*/
 
 int lecroy9400_init_hook( void )
 {
@@ -163,9 +163,9 @@ int lecroy9400_init_hook( void )
 }
 
 
-/*-----------------------------------*/
-/* Test hook function for the module */
-/*-----------------------------------*/
+/*-----------------------------------*
+ * Test hook function for the module
+ *-----------------------------------*/
 
 int lecroy9400_test_hook( void )
 {
@@ -174,9 +174,9 @@ int lecroy9400_test_hook( void )
 }
 
 
-/*--------------------------------------------------*/
-/* Start of experiment hook function for the module */
-/*--------------------------------------------------*/
+/*--------------------------------------------------*
+ * Start of experiment hook function for the module
+ *--------------------------------------------------*/
 
 int lecroy9400_exp_hook( void )
 {
@@ -200,9 +200,9 @@ int lecroy9400_exp_hook( void )
 }
 
 
-/*------------------------------------------------*/
-/* End of experiment hook function for the module */
-/*------------------------------------------------*/
+/*------------------------------------------------*
+ * End of experiment hook function for the module
+ *------------------------------------------------*/
 
 int lecroy9400_end_of_exp_hook( void )
 {
@@ -211,9 +211,9 @@ int lecroy9400_end_of_exp_hook( void )
 }
 
 
-/*------------------------------------------*/
-/* For final work before module is unloaded */
-/*------------------------------------------*/
+/*------------------------------------------*
+ * For final work before module is unloaded
+ *------------------------------------------*/
 
 
 void lecroy9400_exit_hook( void )
@@ -226,8 +226,8 @@ void lecroy9400_exit_hook( void )
 
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 Var_T *digitizer_name( UNUSED_ARG Var_T *v )
 {
@@ -235,8 +235,8 @@ Var_T *digitizer_name( UNUSED_ARG Var_T *v )
 }
 
 
-/*------------------------------------------*/
-/*------------------------------------------*/
+/*------------------------------------------*
+ *------------------------------------------*/
 
 #if 0
 Var_T *digitizer_define_window( Var_T *v )
@@ -315,8 +315,8 @@ Var_T *digitizer_define_window( Var_T *v )
 #endif
 
 
-/*-----------------------------------------------------------------*/
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ *-----------------------------------------------------------------*/
 
 Var_T *digitizer_timebase( Var_T *v )
 {
@@ -414,8 +414,8 @@ Var_T *digitizer_timebase( Var_T *v )
 }
 
 
-/*-----------------------------------------------------------------*/
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ *-----------------------------------------------------------------*/
 
 Var_T *digitizer_time_per_point( UNUSED_ARG Var_T *v )
 {
@@ -423,8 +423,8 @@ Var_T *digitizer_time_per_point( UNUSED_ARG Var_T *v )
 }
 
 
-/*-----------------------------------------------------------------*/
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ *-----------------------------------------------------------------*/
 
 Var_T *digitizer_sensitivity( Var_T *v )
 {
@@ -519,18 +519,18 @@ Var_T *digitizer_sensitivity( Var_T *v )
 }
 
 
-/*------------------------------------------------------------------------*/
-/* Function for setting up averaging: 1. argument is one of the function  */
-/* channel doing the averaging, 2. argument is the source channel, either */
-/* channel 1 or 2, 3. argument is the number of averages to be done, 4.   */
-/* optional argument is either a number (as a truth value) or one of the  */
-/* strings "ON" or "OFF" to indicate if overflow rejection should be used */
-/* (defaults to off) and the 5. optional argument is the number of points */
-/* to average (defaults to a number at least as large as the maximum      */
-/* number of points that can be returned according to the time resolution */
-/* setting, if set only that many data points will be returned in acqui-  */
-/* sitions).                                                              */
-/*------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*
+ * Function for setting up averaging: 1. argument is one of the function
+ * channel doing the averaging, 2. argument is the source channel, either
+ * channel 1 or 2, 3. argument is the number of averages to be done, 4.
+ * optional argument is either a number (as a truth value) or one of the
+ * strings "ON" or "OFF" to indicate if overflow rejection should be used
+ * (defaults to off) and the 5. optional argument is the number of points
+ * to average (defaults to a number at least as large as the maximum
+ * number of points that can be returned according to the time resolution
+ * setting, if set only that many data points will be returned in acqui-
+ * sitions).
+ *------------------------------------------------------------------------*/
 
 Var_T *digitizer_averaging( Var_T *v )
 {
@@ -665,8 +665,8 @@ Var_T *digitizer_averaging( Var_T *v )
 }
 
 
-/*-----------------------------------------------------------------*/
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ *-----------------------------------------------------------------*/
 
 Var_T *digitizer_num_averages( Var_T *v )
 {
@@ -720,9 +720,9 @@ Var_T *digitizer_num_averages( Var_T *v )
 }
 
 
-/*--------------------------------------------------------------*/
-/* Function returns the current record length of the digitizer. */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ * Function returns the current record length of the digitizer.
+ *--------------------------------------------------------------*/
 
 Var_T *digitizer_record_length( Var_T *v )
 {
@@ -765,11 +765,11 @@ Var_T *digitizer_record_length( Var_T *v )
 }
 
 
-/*---------------------------------------------------------------------*/
-/* Function either sets or returns the amount of pretrigger as a value */
-/* between 0 and 1, which, when multiplied by the record length gives  */
-/* the number of points recorded before the trigger.                   */
-/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*
+ * Function either sets or returns the amount of pretrigger as a value
+ * between 0 and 1, which, when multiplied by the record length gives
+ * the number of points recorded before the trigger.
+ *---------------------------------------------------------------------*/
 
 Var_T *digitizer_trigger_position( Var_T *v )
 {
@@ -815,14 +815,14 @@ Var_T *digitizer_trigger_position( Var_T *v )
 }
 
 
-/*----------------------------------------------------------------------*/
-/* This is not a function that users should usually call but a function */
-/* that allows other functions to check if a certain number stands for  */
-/* channel that can be used in measurements. Normally, an exception     */
-/* gets thrown (and an error message gets printed) when the channel     */
-/* number isn't ok. Only when the function gets called with a second    */
-/* argument it returns with either 0 or 1, indicating false or true.    */
-/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*
+ * This is not a function that users should usually call but a function
+ * that allows other functions to check if a certain number stands for
+ * channel that can be used in measurements. Normally, an exception
+ * gets thrown (and an error message gets printed) when the channel
+ * number isn't ok. Only when the function gets called with a second
+ * argument it returns with either 0 or 1, indicating false or true.
+ *----------------------------------------------------------------------*/
 
 Var_T *digitizer_meas_channel_ok( Var_T *v )
 {
@@ -842,10 +842,10 @@ Var_T *digitizer_meas_channel_ok( Var_T *v )
 }
 
 
-/*-------------------------------------------------------------------*/
-/* digitizer_set_trigger_channel() sets the channel that is used for */
-/* triggering.                                                       */
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * digitizer_set_trigger_channel() sets the channel that is used for
+ * triggering.
+ *-------------------------------------------------------------------*/
 
 Var_T *digitizer_trigger_channel( Var_T *v )
 {
@@ -909,8 +909,8 @@ Var_T *digitizer_trigger_channel( Var_T *v )
 }
 
 
-/*-------------------------------------------------------------------*/
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ *-------------------------------------------------------------------*/
 
 Var_T *digitizer_start_acquisition( UNUSED_ARG Var_T *v )
 {
@@ -921,8 +921,8 @@ Var_T *digitizer_start_acquisition( UNUSED_ARG Var_T *v )
 }
 
 
-/*-------------------------------------------------------------------*/
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ *-------------------------------------------------------------------*/
 
 Var_T *digitizer_get_curve( Var_T *v )
 {
@@ -930,8 +930,8 @@ Var_T *digitizer_get_curve( Var_T *v )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 Var_T *digitizer_get_curve_fast( Var_T *v )
 {
@@ -939,8 +939,8 @@ Var_T *digitizer_get_curve_fast( Var_T *v )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 static Var_T *get_curve( Var_T *v, bool use_cursor )
 {
@@ -1034,8 +1034,8 @@ static Var_T *get_curve( Var_T *v, bool use_cursor )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 Var_T *digitizer_run( UNUSED_ARG Var_T *v )
 {
@@ -1046,8 +1046,8 @@ Var_T *digitizer_run( UNUSED_ARG Var_T *v )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 Var_T *digitizer_command( Var_T *v )
 {
