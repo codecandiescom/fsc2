@@ -107,8 +107,8 @@ Acquisition_Sequence ASeq[ 2 ];
 Pulse *Plist = NULL;
 Pulse *Cur_Pulse = NULL;
 
-bool TEST_RUN = 0;           /* flag, set while EXPERIMENT section is tested */
-bool need_GPIB = 0;          /* flag, set if GPIB bus is needed */
+bool TEST_RUN = UNSET;       /* flag, set while EXPERIMENT section is tested */
+bool need_GPIB = UNSET;      /* flag, set if GPIB bus is needed */
 
 volatile bool do_send = UNSET;  /* globals used with the signal handlers */
 volatile bool do_quit = UNSET;
