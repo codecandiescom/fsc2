@@ -34,21 +34,22 @@
 typedef struct Var_
 {
 	char *name;                         /* name of the variable or array */
-	int type;                           /* type of the variable - see below */
+	int  type;                          /* type of the variable - see below */
 	union
 	{
-		long lval;                          /* for integer values */
-		double dval;                        /* for float values */
-		long *lpnt;                         /* for integer arrays */
-		double *dpnt;                       /* for double arrays */
-		char *sptr;                         /* for strings */
+		long   lval;                                /* for integer values */
+		double dval;                                /* for float values */
+		long   *lpnt;                               /* for integer arrays */
+		double *dpnt;                               /* for double arrays */
+		char   *sptr;                               /* for strings */
 		struct Var_ * ( * fnct )( struct Var_ * );  /* for functions */
-		struct Var_ *vptr;                  /* for array references */
+		struct Var_ *vptr;                          /* for array references */
+		void   *gptr;                               /* generic pointer */
 	} val;
-	int dim;              /* dimension of array */
-	int *sizes;
-	long len;             /* total len of array */
-	long flags;
+	int    dim;              /* dimension of array */
+	int    *sizes;
+	long   len;              /* total len of array */
+	long   flags;
 	struct Var_ *from;
 	struct Var_ *next;
 	struct Var_ *prev;
@@ -90,6 +91,7 @@ Var *vars_arr_rhs( Var *v );
 void vars_assign( Var *src, Var *dest );
 void vars_ass_from_var( Var *src, Var *dest );
 void vars_ass_from_ptr( Var *src, Var *dest );
+void vars_ass_from_trans_ptr( Var *src, Var *dest );
 void vars_arr_init( Var *dest );
 
 
