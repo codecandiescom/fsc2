@@ -848,10 +848,11 @@ section.
 
 Here is now a somewhat shortened example of a 2 pulse Hahn-echo
 experiment. Two microwave pulses are needed, a pi-half and a pi pulse,
-plus a pulse to trigger the digitizer. The trigger pulse must move twice
-as fast as the second microwave pulse because the distance of the echo
-from the second pulse is always as large as the distance between both
-the microwave pulses.
+plus a detection pulse to trigger the digitizer. This trigger pulse must
+move twice as fast as the second microwave pulse because the distance of
+the echo from the second pulse is always as large as the distance
+between both the microwave pulses and must thus be shifted twice as fast
+as the second microwave pulse.
 @example
 DEVICES:
 
@@ -929,8 +930,9 @@ used.
 
 The next (rather simplified) example is the program for a phase cycled
 (1-dimensional) stimulated echo experiment. We need three microwave
-pulses and a detection trigger pulse. During the experiment the first
-two microwave pulses have to be phase cycled.
+pulses and a further detection pulse that triggers the digitzer at the right
+moment. During the experiment the first two microwave pulses have to be
+phase cycled.
 @example
 DEVICES:
 
