@@ -27,7 +27,11 @@ void dg2020_do_update( void )
 	/* Resort the pulses and, while in a test run, we also have to check that
 	   the new pulse settings are reasonable */
 
-	dg2020_reorganize_pulses( TEST_RUN );
+	if ( ! dg2020_reorganize_pulses( TEST_RUN ) )
+	{
+		dg2020.needs_update = UNSET;
+		return;
+	}
 
 	/* Finally commit all changes */
 
@@ -47,10 +51,11 @@ void dg2020_do_update( void )
   that the pulses don't overlap.
 ---------------------------------------------------------------------------*/
 
-void dg2020_reorganize_pulses( bool flag )
+bool dg2020_reorganize_pulses( bool flag )
 {
 	int i;
 	FUNCTION *f;
+	PULSE *p;
 
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
@@ -67,22 +72,47 @@ void dg2020_reorganize_pulses( bool flag )
 		qsort( f->pulses, f->num_pulses, sizeof( PULSE * ),
 			   dg2020_start_compare );
 
-		/* Pulse positions have only to be checked in the test run, afterwards
-		   we can assume that they are ok */
+		/* Check the pulse positions and lengths, if test fails in test run
+		   the program is stopped, while in real run all pulses are reset to
+		   their original position and length */
 
-		if ( flag )
+		TRY
+		{
+
 			dg2020_do_checks( f );
 
-		/* Reorganize the phase pulses of the phase function associated with
-		   the current function */
+			/* Reorganize the phase pulses of the phase function associated
+			   with the current function */
 
-		if ( f->needs_phases )
-			dg2020_reorganize_phases( f->phase_func, flag );
+			if ( f->needs_phases )
+				dg2020_reorganize_phases( f->phase_func, flag );
 
-		/* send all the changes to the pulser */
+			TRY_SUCCESS;
+		}
+		CATCH( EXCEPTION )
+		{
+			if ( flag )
+				THROW( EXCEPTION );
+
+			for ( p = dg2020_Pulses; p != NULL; p = p->next )
+			{
+				if ( p->is_old_pos )
+					p->pos = p->old_pos;
+				if ( p->is_old_len )
+					p->len = p->old_len;
+				p->is_active = IS_ACTIVE( p );
+				p->needs_update = UNSET;
+			}
+
+			return FAIL;
+		}
+
+		/* Send all the changes to the pulser */
 
 		dg2020_commit( f, flag );
 	}
+
+	return OK;
 }
 
 

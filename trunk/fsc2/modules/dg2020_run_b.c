@@ -43,7 +43,6 @@ bool dg2020_reorganize_pulses( bool flag )
 	int i;
 	FUNCTION *f;
 	PULSE *p;
-	int i;
 
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
@@ -75,8 +74,6 @@ bool dg2020_reorganize_pulses( bool flag )
 
 			for ( p = dg2020_Pulses; p != NULL; p = p->next )
 			{
-				p = f->pulses[ i ];
-
 				if ( p->is_old_pos )
 					p->pos = p->old_pos;
 				if ( p->is_old_len )

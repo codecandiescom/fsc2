@@ -225,7 +225,8 @@ int dg2020_f_exp_hook( void )
 
 	/* Now we have to tell the pulser about all the pulses */
 
-	dg2020_reorganize_pulses( UNSET );
+	if ( ! dg2020_reorganize_pulses( UNSET ) )
+		THROW( EXCEPTION );
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 	{
