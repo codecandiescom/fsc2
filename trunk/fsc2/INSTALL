@@ -24,8 +24,8 @@ To create the complete documentation you also need
 
 12) makeinfo
 13) tex (if missing no Postscript and PDF documentation is created)
-14) convert (from the ImageMagick package, preferred) or
-	pngtopnm, pngtops (in this case no PDF documentation can be created)
+14) convert and identify from the ImageMagick package (or no PostScript
+	and PDF documentation will be created)
 15) dvips (if missing no Postscript documentation is created)
 16) perl (version 5.0 or higher)
 17) pdftex (if missing no PDF documentation will be created)

@@ -57,7 +57,7 @@ fsc2.html: $(docs) $(figures)
 
 ps: fsc2.ps
 
-fsc2.ps: $(docs) $(patsubst %.png,%.eps,$(pngs)) \
+fsc2.ps: $(docs) $(patsubst %.png,%.eps,$(pngs))    \
 		 $(notdir $(patsubst %.xbm,%.eps,$(xbms)))
 	@if [ "`eval tex -help 2>/dev/null`" -a         \
 		 "`eval dvips --help 2>/dev/null`" ]; then  \
@@ -65,7 +65,7 @@ fsc2.ps: $(docs) $(patsubst %.png,%.eps,$(pngs)) \
 		dvips fsc2.dvi;                             \
 	else                                            \
 		echo                                        \
-		"Can't make PS documentation, programs tex and/or dvips not found."; \
+		"Can't make PostScript documentation, programs tex and/or dvips not found."; \
 	fi
 
 
@@ -83,9 +83,9 @@ endif
 
 pdf: fsc2.pdf
 
-fsc2.pdf: $(docs) $(patsubst %.png,%.pdf,$(pngs)) \
+fsc2.pdf: $(docs) $(patsubst %.png,%.pdf,$(pngs))      \
 		 $(notdir $(patsubst %.xbm,%.pdf,$(xbms)))
-	-@if [ "`eval pdftex --help 2>/dev/null`" ]; then \
+	-@if [ "`eval pdftex --help 2>/dev/null`" ]; then  \
 		./texi2dvi --pdf -c fsc2.texi; \
 	else \
 		echo "Can't make PDF documentation, program 'pdftex' not found."; \
