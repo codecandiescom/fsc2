@@ -180,7 +180,7 @@ extern gid_t EGID;
 
 extern long Lc;
 extern char *Fname;
-extern char *Cur_func;
+extern char *Cur_Func;
 extern Compilation compilation;
 extern Prg_Token *prg_token;
 extern long prg_length;
