@@ -230,7 +230,7 @@ bool dg2020_find_phase_pulse( PULSE *p, PULSE ***pl, int *num )
 	{
 		if ( pp->num < 0 && pp->for_pulse == p )
 		{
-			*pl = T_realloc( *pl, ++( *num ) * sizeof( PULSE * ) );
+			*pl = PULSE_PP T_realloc( *pl, ++( *num ) * sizeof **pl );
 			( *pl )[ *num - 1 ] = pp;
 		}
 
@@ -257,7 +257,8 @@ int dg2020_get_phase_pulse_list( FUNCTION *f, CHANNEL *channel, PULSE ***list )
 	{
 		if ( f->pulses[ i ]->channel != channel )
 			continue;
-		*list = T_realloc( *list, ( num_pulses + 1 ) * sizeof( PULSE * ) );
+		*list = PULSE_PP T_realloc( *list,
+									( num_pulses + 1 ) * sizeof **list );
 		*( *list + num_pulses++ ) = f->pulses[ i ];
 	}
 
@@ -439,7 +440,7 @@ bool dg2020_prep_cmd( char **cmd, int channel, Ticks address, Ticks length )
 
 	/* Get enough memory for the command string */
 
-	*cmd = T_malloc( length + 50L );
+	*cmd = CHAR_P T_malloc( length + 50L );
 
 	/* Set up the command string */
 

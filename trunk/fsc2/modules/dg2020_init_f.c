@@ -296,8 +296,8 @@ static void dg2020_basic_functions_check( void )
 					continue;
 
 				f->num_pulses++;
-				f->pulses = T_realloc( f->pulses,
-									   f->num_pulses * sizeof( PULSE * ) );
+				f->pulses = PULSE_PP T_realloc( f->pulses,
+										   f->num_pulses * sizeof *f->pulses );
 				f->pulses[ f->num_pulses - 1 ] = cp;
 
 				if ( cp->is_active )
@@ -505,8 +505,8 @@ static void dg2020_create_phase_pulses( FUNCTION *f )
 											j, l );
 				if ( p != NULL )
 				{
-					f->pulses = T_realloc( f->pulses, ++f->num_pulses
-										   * sizeof( PULSE * ) );
+					f->pulses = PULSE_PP T_realloc( f->pulses,
+										 ++f->num_pulses * sizeof *f->pulses );
 					f->pulses[ f->num_pulses - 1 ] = p;
 
 					if ( p->is_active )
@@ -552,7 +552,7 @@ static PULSE *dg2020_new_phase_pulse( FUNCTION *f, PULSE *p, int nth,
 	for ( cp = np = dg2020_Pulses; np != NULL; np = np->next )
 		cp = np;
 
-	np = T_malloc( sizeof( PULSE ) );
+	np = PULSE_P T_malloc( sizeof *np );
 
 	np->prev = cp;
 	cp->next = np;

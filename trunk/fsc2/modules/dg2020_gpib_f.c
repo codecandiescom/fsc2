@@ -755,7 +755,7 @@ static void dg2020_gpib_store( int channel, Ticks address, Ticks length,
 
 	if ( dst == NULL )
 	{
-		dst = cur = T_malloc( sizeof( DG2020_STORE ) );
+		dst = cur = DG2020_STORE_P T_malloc( sizeof *cur );
 		cur->prev = cur->next = NULL;
 	}
 	else
@@ -763,7 +763,7 @@ static void dg2020_gpib_store( int channel, Ticks address, Ticks length,
 		while ( cur->next != NULL )
 			cur = cur->next;
 
-		cur->next = T_malloc( sizeof( DG2020_STORE ) );
+		cur->next = DG2020_STORE_P T_malloc( sizeof *cur->next );
 		cur->next->prev = cur;
 		cur = cur->next;
 		cur->next = NULL;
@@ -920,7 +920,7 @@ static bool dg2020_gpib_do_check( DG2020_STORE *params )
 	/* Allocate enough space for the pulsers reply */
 
 	length = params->length + 30;
-	reply = T_malloc( length );
+	reply = CHAR_P T_malloc( length );
 
 	/* Assemble the command string - because of the first bit problem we have
 	   to use the increment of address, see also dg2020_set_constant() */

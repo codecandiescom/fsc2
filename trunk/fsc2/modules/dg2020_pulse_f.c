@@ -47,7 +47,7 @@ bool dg2020_new_pulse( long pnum )
 		cp = cp->next;
 	}
 
-	cp = T_malloc( sizeof( PULSE ) );
+	cp = PULSE_P T_malloc( sizeof *cp );
 
 	if ( dg2020_Pulses == NULL )
 	{

@@ -605,12 +605,13 @@ PULSE *dg2020_delete_pulse( PULSE *p )
 	   its function send a warning and mark the function as useless */
 
 	if ( p->function->num_pulses-- > 1 )
-		p->function->pulses =
+		p->function->pulses = PULSE_PP
 					  T_realloc( p->function->pulses,
-								 p->function->num_pulses * sizeof( PULSE * ) );
+								 p->function->num_pulses *
+								 sizeof *p->function->pulses );
 	else
 	{
-		p->function->pulses = T_free( p->function->pulses );
+		p->function->pulses = PULSE_PP T_free( p->function->pulses );
 
 		print( SEVERE, "Function '%s' isn't used at all because all its "
 			   "pulses are never used.\n",
@@ -629,7 +630,7 @@ PULSE *dg2020_delete_pulse( PULSE *p )
 	/* Special care has to be taken if this is the very last pulse... */
 
 	if ( p == dg2020_Pulses && p->next == NULL )
-		dg2020_Pulses = T_free( dg2020_Pulses );
+		dg2020_Pulses = PULSE_P T_free( dg2020_Pulses );
 	else
 		T_free( p );
 
@@ -808,7 +809,7 @@ void dg2020_commit( FUNCTION * f, bool flag )
 	PULSE *p;
 	int i;
 	Ticks start, len;
-	char *old, *new;
+	char *old_p, *new_p;
 	int what;
 	bool needs_changes = UNSET;
 	int ch;
@@ -849,8 +850,8 @@ void dg2020_commit( FUNCTION * f, bool flag )
 	   easier to understand and to debug, than any alternative I came up
 	   with... */
 
-	old = T_calloc( 2 * ( size_t ) dg2020.max_seq_len, 1 );
-	new = old + dg2020.max_seq_len;
+	old_p = CHAR_P T_calloc( 2 * ( size_t ) dg2020.max_seq_len, 1 );
+	new_p = old_p + dg2020.max_seq_len;
 
 	for ( i = 0; i < f->num_pulses; i++ )
 	{
@@ -865,9 +866,9 @@ void dg2020_commit( FUNCTION * f, bool flag )
 		needs_changes = SET;
 
 		if ( p->is_old_pos || p->is_old_len )
-			dg2020_set( old, p->is_old_pos ? p->old_pos : p->pos,
+			dg2020_set( old_p, p->is_old_pos ? p->old_pos : p->pos,
 						p->is_old_len ? p->old_len : p->len, f->delay );
-		dg2020_set( new, p->pos, p->len, f->delay );
+		dg2020_set( new_p, p->pos, p->len, f->delay );
 
 		p->is_old_len = p->is_old_pos = UNSET;
 		if ( p->is_active )
@@ -882,12 +883,12 @@ void dg2020_commit( FUNCTION * f, bool flag )
 	if ( needs_changes )
 	{
 		ch = f->pulses[ 0 ]->channel->self;
-		while ( ( what = dg2020_diff( old, new, &start, &len ) ) != 0 )
+		while ( ( what = dg2020_diff( old_p, new_p, &start, &len ) ) != 0 )
 			dg2020_set_constant( ch, start, len,
 								 what == -1 ? type_OFF( f ) : type_ON( f ) );
 	}
 
-	T_free( old );
+	T_free( old_p );
 }
 
 
