@@ -62,14 +62,14 @@ static long translate_channel( long channel );
 static void check_ret( int ret_val );
 
 
-typedef struct {
+struct WITIO_48 {
 	bool is_open;
 	WITIO_48_MODE mode[ NUMBER_OF_DIOS ];
 	char *reserved_by[ NUMBER_OF_DIOS ];
-} WITIO_48;
+};
 
 
-static WITIO_48 witio_48, witio_48_saved;
+static struct WITIO_48 witio_48, witio_48_saved;
 
 
 /*------------------------------------------------------*/

@@ -52,17 +52,13 @@ static double bh15_get_field( void );
 static bool bh15_command( const char *cmd );
 
 
-typedef struct BH15 BH15;
-
-struct BH15 {
+static struct BH15 {
 	int state;
 	int device;
 	const char *name;
 	double field;
 	double resolution;
-};
-
-static BH15 bh15;
+} BH15 bh15;
 
 bool is_gaussmeter = UNSET;         /* tested by magnet power supply driver */
 

@@ -46,9 +46,13 @@
 #define DEFAULT_TEST_FIELD 3100.0
 
 
-/* The structure for the device */
+/* Global variables */
 
-typedef struct BNM12 BNM12;
+const char device_name[ ]  = DEVICE_NAME;
+const char generic_type[ ] = DEVICE_TYPE;
+
+
+/* The structure for the device */
 
 struct BNM12 {
 	int resolution;
@@ -57,14 +61,8 @@ struct BNM12 {
 };
 
 
-/* Global variables */
-
-const char device_name[ ]  = DEVICE_NAME;
-const char generic_type[ ] = DEVICE_TYPE;
-
-
-static BNM12 bnm12 = { RESOLUTION_MEDIUM, { 1.0, 0.1, 0.01 }, NULL };
-static BNM12 bnm12_stored;
+static struct BNM12 bnm12 = { RESOLUTION_MEDIUM, { 1.0, 0.1, 0.01 }, NULL };
+static struct BNM12 bnm12_stored;
 
 
 /* Exported functions */

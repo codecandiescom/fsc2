@@ -81,8 +81,6 @@ static bool er035m_sa_talk( const char *cmd, char *reply, long *length );
 static void er035m_sa_failure( void );
 
 
-typedef struct NMR NMR;
-
 struct NMR {
 	int state;
 	int device;
@@ -97,7 +95,7 @@ struct NMR {
 };
 
 
-static NMR nmr, nmr_stored;
+static struct NMR nmr, nmr_stored;
 static double res_list[ 3 ] = { 0.1, 0.01, 0.001 };
 
 enum {

@@ -77,9 +77,6 @@ static bool er035m_sas_comm( int type, ... );
 static void er035m_sas_comm_fail( void );
 
 
-typedef struct NMR NMR;
-
-
 struct NMR {
 	bool is_needed;         /* is the gaussmter needed at all? */
 	int state;              /* current state of the gaussmeter */
@@ -94,7 +91,7 @@ struct NMR {
 	long lower_search_limit;
 };
 
-static NMR nmr, nmr_stored;
+static struct NMR nmr, nmr_stored;
 static const char *er035m_sas_eol = "\r\n";
 static double res_list[ 3 ] = { 0.1, 0.01, 0.001 };
 

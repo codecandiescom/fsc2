@@ -1,3 +1,4 @@
+
 /*
   $Id$
 
@@ -113,9 +114,7 @@ int first_DAC_port = 1;
 int last_DAC_port = 4;
 
 
-/* Typedefs and global variables used only in this file */
-
-typedef struct SR810 SR810;
+/* Global variables used only in this file */
 
 struct SR810 {
 	int device;
@@ -146,7 +145,7 @@ struct SR810 {
 };
 
 
-static SR810 sr810, sr810_stored;
+static struct SR810 sr810, sr810_stored;
 
 
 #define UNDEF_SENS_INDEX -1

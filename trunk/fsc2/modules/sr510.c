@@ -69,10 +69,8 @@ Var *lockin_command( Var *v );
 int first_DAC_port = 5;
 int last_DAC_port = 6;
 
-/* Typedefs and global variables used only in this file */
 
-
-typedef struct SR510 SR510;
+/* Global variables used only in this file */
 
 struct SR510 {
 	int device;
@@ -85,7 +83,7 @@ struct SR510 {
 	double dac_voltage[ 2 ];
 };
 
-static SR510 sr510, sr510_stored;
+static struct SR510 sr510, sr510_stored;
 
 
 #define UNDEF_SENS_INDEX -1

@@ -75,9 +75,7 @@ int first_DAC_port = 5;
 int last_DAC_port = 6;
 
 
-/* Typedefs and global variables used only in this file */
-
-typedef struct SR530 SR530;
+/* Global variables used only in this file */
 
 struct SR530 {
 	int device;
@@ -90,7 +88,7 @@ struct SR530 {
 };
 
 
-static SR530 sr530, sr530_stored;
+static struct SR530 sr530, sr530_stored;
 
 
 #define UNDEF_SENS_INDEX -1

@@ -141,10 +141,6 @@ extern double ma_list[ MAX_MA_INDEX + 1 ];
 											send for a ADC data point */
 
 
-typedef struct CALIB CALIB;
-typedef struct ER023M ER023M;
-
-
 struct CALIB {
 	bool is_ph[ 2 ];          /* set if phase is calibrated */
 	bool is_ma;               /* set if modulation attenuation is calibrated */
@@ -168,7 +164,7 @@ struct ER023M {
 	int ha;               /* harmonic setting */
 	int re;               /* resonator number */
 
-	CALIB calib[ MAX_MF_INDEX + 1 ];
+	struct CALIB calib[ MAX_MF_INDEX + 1 ];
 
 	int nb;               /* number of bytes send from ADC */
 	                      /* recheck whenever CT changes */
@@ -182,7 +178,7 @@ struct ER023M {
 };
 
 
-extern ER023M er023m;
+extern struct ER023M er023m;
 
 
 /* Declaration of exported functions */

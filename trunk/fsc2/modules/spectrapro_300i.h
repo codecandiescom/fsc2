@@ -32,9 +32,6 @@
 #include "spectrapro_300i.conf"
 
 
-
-typedef struct SPECTRAPRO_300I SPECTRAPRO_300I;
-
 struct SPECTRAPRO_300I {
 	bool is_needed;         /* is the monochromator needed at all? */
 	bool is_open;           /* is the device file open ? */
@@ -75,7 +72,7 @@ struct CALIB_PARAMS {
 };
 
 
-extern SPECTRAPRO_300I spectrapro_300i;
+extern struct SPECTRAPRO_300I spectrapro_300i;
 
 
 /* Default start values for calibrations */

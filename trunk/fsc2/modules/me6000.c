@@ -63,8 +63,6 @@ Var *daq_set_voltage( Var *v );
 static int me6000_channel_number( long ch );
 
 
-typedef struct ME6000 ME6000;
-
 struct ME6000 {
 	int num_dacs;
 	struct {
@@ -75,7 +73,7 @@ struct ME6000 {
 };
 
 
-ME6000 me6000, me6000_stored;
+static struct ME6000 me6000, me6000_stored;
 
 
 /*---------------------------------------------------------*/

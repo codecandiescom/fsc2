@@ -73,7 +73,7 @@ struct HJS_DAADC {
 	double volts_out;
 	bool is_volts_out;
 	int out_val;
-	bool has_dac_been_set;;
+	bool has_dac_been_set;
 
 	char *dac_reserved_by;
 	char *adc_reserved_by;

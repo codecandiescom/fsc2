@@ -21,6 +21,7 @@
   Boston, MA 02111-1307, USA.
 */
 
+
 #include "fsc2_module.h"
 
 
@@ -57,9 +58,6 @@ static double hjs_sfc_field_check( double field );
 static double hjs_sfc_set_field( double field );
 
 
-typedef struct HJS_SFC HJS_SFC;
-
-
 struct HJS_SFC {
 	double B0V;             /* Field for DAC voltage of 0 V */
 	double slope;           /* field step for 1 V DAC voltage increment */
@@ -80,7 +78,7 @@ struct HJS_SFC {
 };
 
 
-HJS_SFC hjs_sfc, hjs_sfc_stored;
+struct HJS_SFC hjs_sfc, hjs_sfc_stored;
 
 
 /*-------------------------------------------*/
