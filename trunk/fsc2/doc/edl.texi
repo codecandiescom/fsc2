@@ -78,10 +78,10 @@ EXPERIMENT:
 @end example
 
 Obviously, the very first section of the program, starting with the
-keyword @code{DEVICES:}, is for specifying the names of the devices to
-be used (everything after the double-slashes are comments). In the
-example these are the Bruker ER035M gaussmeter, the AEG X-band magnet
-and the Stanford Research lock-in amplifier SR530.
+keyword @code{DEVICES:}, specifies the names of the devices to be used
+(everything after the double-slashes are comments). In the example these
+are the Bruker ER035M gaussmeter, the AEG X-band magnet and the Stanford
+Research lock-in amplifier SR530.
 
 In the following section, started by the keyword @code{VARIABLES:}, all
 variables that are going to be used in the program are listed and, if
