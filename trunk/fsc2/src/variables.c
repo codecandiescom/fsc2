@@ -1194,9 +1194,9 @@ void vars_assign( Var *src, Var *dest )
 }
 
 
-/*------------------------------------------------------*/
-/* Assignment to a variable or the element of an array. */
-/*------------------------------------------------------*/
+/*----------------------------------------------------------*/
+/* Assignment to a variable or a single element of an array */
+/*----------------------------------------------------------*/
 
 static void vars_assign_to_1d( Var *src, Var *dest )
 {
@@ -1281,7 +1281,7 @@ static void vars_assign_to_1d( Var *src, Var *dest )
 
 
 /*-------------------------------------------------*/
-/* Assignment to a one- or more-dimensional array. */
+/* Assignment to an one- or more-dimensional array */
 /*-------------------------------------------------*/
 
 static void vars_assign_to_nd( Var *src, Var *dest )
@@ -1314,7 +1314,7 @@ static void vars_assign_to_nd( Var *src, Var *dest )
 
 
 /*------------------------------------------------------------------*/
-/* Assignment of a single value to all elements of a one- or more-  */
+/* Assignment of a single value to all elements of an one- or more- */
 /* dimensional array (a warning is printed when the array is not of */
 /* fixed size and has no defined elements yet).                     */
 /*------------------------------------------------------------------*/
@@ -1390,9 +1390,9 @@ static long vars_set_all( Var *v, long l, double d )
 }
 
 
-/*------------------------------*/
-/* Assign an array to an array. */
-/*------------------------------*/
+/*--------------------------------*/
+/* Assign of an array to an array */
+/*--------------------------------*/
 
 static void vars_assign_to_nd_from_nd( Var *src, Var *dest )
 {
