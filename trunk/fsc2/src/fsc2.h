@@ -162,7 +162,7 @@ KEY *Key;
 KEY *Message_Queue;
 volatile int message_queue_low, message_queue_high;
 
-FILE **File_List = NULL;
+FILE_LIST *File_List = NULL;
 int File_List_Len = 0;
 
 
