@@ -84,8 +84,7 @@ fsc2.html: $(docs) $(figures)
 		sed -e '1,/BODY/!d' $$i > $$i.x; \
 		cat TOC >> $$i.x; \
 		sed -e '1,/<BODY>/d;/<\/BODY/,$$d' $$i >> $$i.x; \
-		echo -e '    </div>\n  </div>\n</div>' >> $$i.x; \
-		sed -e '1,/<\/BODY>/d' $$i >> $ii.x; \
+		echo -e '    </div>\n  </div>\n</div>\n</BODY>\n</HTML>' >> $$i.x; \
 		mv $$i.x $$i; \
 	done
 	-@$(RM) TOC
