@@ -59,7 +59,7 @@ init_1d( 4, 0, 890, 0.1, "Price [µ¤]",
 EXP:
 
 
-F1 = get_file();
+F1 = get_file( );
 
 FOR K = 1 : 5 {
 	print( "\TRun \##\n", K );
