@@ -211,6 +211,9 @@ sub new {
 
 	$self->{ 'len' } = $w;
 
+	my $height = $h;
+	$height *= 0.75 while ( $height > 650 );
+
 	# Reduce window size to something reasonable if necessary
 
 	my $width = $w + 170;
@@ -233,10 +236,10 @@ sub new {
 		$self->{ 'canvas' } =
 			$f1->Scrolled( 'Canvas',
 						   '-relief' => 'sunken',
-						   '-scrollbars' => 's',
+						   '-scrollbars' => $h > $height ? 'se' : 's',
 						   '-bd' => 1,
 						   '-width' => $width,
-						   '-height' => $h,
+						   '-height' => $height,
 						   '-background' => 'black',
 						   '-scrollregion' => [ 0, 0, $w + 170, $h ] );
 		$self->{ 'top' }->bind( '<Left>' => sub {
