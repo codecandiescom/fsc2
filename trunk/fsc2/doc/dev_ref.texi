@@ -1698,11 +1698,11 @@ the @code{fsc2} package)
 @strong{Description}: Pseudo-pulser using Rulbus (Rijksuniversiteit
 Leiden BUS) - requires Linux device driver and library that are part of
 the @code{fsc2} package). This pulser isn't a stand-alone device but
-consists of a combination of (currently) 10 Rulbus delay cards and 2
-clock cards (one fixed frequency 100 MHz card and a card with adjustable
-frequency) as well as requiring the @strong{Rhode & Schwarz SML01}
-synthesizer (with SML-B3 option) in order to be able to create RF
-pulses.
+consists of a combination of (currently) 10 Rulbus RB8514 delay cards
+and 2 clock cards (one fixed frequency 100 MHz card and a RB8515 card
+with adjustable frequency) as well as requiring the @strong{Rhode &
+Schwarz SML01} synthesizer (with SML-B3 option) in order to be able to
+create RF pulses.
 
 The time base of this pulser is fixed to @w{10 ns}. Its number of
 functions is restricted to @code{MICROWAVE}, @code{RADIO_FREQUENCY} and
