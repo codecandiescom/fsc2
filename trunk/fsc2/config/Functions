@@ -105,6 +105,15 @@ lockin_ref_level, -1, EXP;      // Get/set mod. level (SR8x0 only)
 lockin_harmonic, -1, EXP;       // Get/set harmonic (SR8x0, ER023M)
 lockin_lock_keyboard, -1, EXP;  // Lock or unlock the keyboard
 
+lockin_offset, -1, ALL;         // (ER023M)
+lockin_conversion_time, -1, ALL;// (ER023M)
+lockin_resonator, -1, ALL;      // (ER023M)
+lockin_rg, -1, ALL;             // (ER023M)
+lockin_tc, -1, ALL;             // (ER023M)
+lockin_ma, -1, ALL;             // (ER023M)
+lockin_ct, -1, ALL;             // (ER023M)
+lockin_mf, -1, ALL;             // (ER023M)
+
 
 // Functions exported by the digitizer
 // (TDS520, TDS520A, TDS520C, TDS540, TDS744A, TDS754A)

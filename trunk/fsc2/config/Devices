@@ -31,9 +31,14 @@
 /***********************************************************************/
 
 
+// Pulser
+
 dg2020_f      // Sony/Tektronix data generator (Frankfurt version)
 dg2020_b      // Sony/Tektronix data generator (Berlin version)
 hfs9000       // Tektronix stimulus system     (Berlin W-band)
+
+
+// Digital oszilloscopes
 
 tds520        // Tektronix digitizing oscilloscope, model 520
 tds520a       // Tektronix digitizing oscilloscope, model 520A
@@ -42,30 +47,49 @@ tds540        // Tektronix digitizing oscilloscope, model 540
 tds744a       // Tektronix digitizing oscilloscope, model 744A
 tds754a       // Tektronix digitizing oscilloscope, model 754A
 
+
+// Lock-In amplifiers
+
 sr510         // Stanford Research lock-in amplifier, model 510
 sr530         // Stanford Research lock-in amplifier, model 530
 sr810         // Stanford Research lock-in amplifier, model 810
 sr830         // Stanford Research lock-in amplifier, model 830
-er023m        // Bruker Signal Channel, model ER 023 M (Berlin, Basel)
+er023m        // Bruker Signal Channel, model ER 023 M
+
+
+// Magnet power suplies
 
 aeg_s_band    // S-band AEG magnet power supply (Frankfurt)
 aeg_x_band    // X-band AEG magnet power supply (Berlin)
 keithley228a  // W-band magnet power supply (Berlin)
-er032m        // Bruker ER 032 M field controller (Berlin, Basel)
+er032m        // Bruker ER 032 M field controller
+
+
+// Field meter
 
 er035m        // Bruker NMR gaussmeter (connected to IEEE bus)
 er035m_s      // Bruker NMR gaussmeter (connected to serial port)
 er035m_sa     // Bruker NMR gaussmeter (connected to IEEE bus, stand alone)
 er035m_sas    // Bruker NMR gaussmeter (connected to serial port, stand alone)
-
-bh15          // Bruker field controller
-
+bh15          // Bruker Hall effect field controller
 pt2025        // Metrolab NMR teslameter
+
+
+// Synthesizers
 
 hp8647a       // HP RF synthesizer
 
+
+// Box-car integrators
+
 egg4402       // EG&G PARC box-car
 
+
+// Voltmeters
+
 kontron4060   // Kontron 4060 voltmeter
+
+
+// Temperature controllers
 
 lakeshore330  // Lake Shore 330 temperature controller
