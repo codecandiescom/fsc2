@@ -442,16 +442,17 @@ export            # export all variables to sub-makes
 # Switch off all implicit rules
 
 .SUFFIXES:
-.PHONY: all install-strip install uninstall version    \
-		test clean distclean mostlyclean tags pack ZIP \
-		pion.anorg.chemie.uni-frankfurt.de    		   \
-		crowley.physik.fu-berlin.de           		   \
-		door.physik.fu-berlin.de              		   \
-		isaak.physik.fu-berlin.de             		   \
-		moebpc3.physik.fu-berlin.de           		   \
-		tresr.physik.fu-berlin.de             		   \
-		sunone.chemie.unibas.ch               		   \
-		crowley.none                          		   \
+.PHONY: all install-strip install uninstall \
+		version test clean distclean        \
+		mostlyclean tags pack manifest ZIP  \
+		pion.anorg.chemie.uni-frankfurt.de  \
+		crowley.physik.fu-berlin.de         \
+		door.physik.fu-berlin.de            \
+		isaak.physik.fu-berlin.de           \
+		moebpc3.physik.fu-berlin.de         \
+		tresr.physik.fu-berlin.de           \
+		sunone.chemie.unibas.ch             \
+		crowley.none                        \
 		dorimare.nowhere
 
 
@@ -597,7 +598,7 @@ test:
 # Clean up everything for a distribution and create a zipped tarball
 
 pack:
-	$(MAKE) manifest
+	@$(MAKE) distclean
 	cd ..; tar -c fsc2 | gzip -c -9 > fsc2.tgz
 
 
@@ -617,7 +618,6 @@ manifest:
 		'ls' -1F $$dir | grep -v '/' | sed "s/^/$$dir\//" | \
 		sed 's/\.\///' | sed 's/\*$$//' >> MANIFEST; \
 	done;
-	cvs -Q commit -m "" MANIFEST
 
 
 # Some actions specific to the different well-known machines
