@@ -8,10 +8,12 @@ A large part of @code{fsc2} has been written while I was working in the
 groups of Prof.@: Th.@: Prisner (J.-W.-Goethe-University,
 Frankfurt/Main) and Prof.@: K.@: M@"obius (Free University Berlin). Both
 where so kind to allow me to spend quite large amounts of time on
-getting it to the state it is in now.
+getting it to the state it is in now. Prof.@: R.@: Bittl (Free
+University Berlin) supported the development by emplyoing me part-time
+to extend the program and write further device drivers.
 
 All the people using the program so far have from time to time been
-mis-used as alpha-testers. The first one accepting this unpleasant role
+(mis)used as alpha-testers. The first one accepting this unpleasant role
 has been Axel Weber in Frankfurt/Main, who already dealt with the bugs
 and shortcomings of the very first version. Then, in Berlin, Stefan
 Weber, Chris W.@: M.@: Kay, Gerriet Eilers, Andreas Kuppig, Heike
@@ -22,5 +24,5 @@ got some share of the fun. I would like to thank them not only for the
 constant stream of bug reports and proposals for improvements or new
 features (and I sometimes needed quite a lot of convincing even though
 they where right) but especially for their enduring patience. Much too
-often, when they had to do an important experiment, things didn't work
+often, when they had to do an important experiment things didn't work
 and they had to wait until I got it fixed. Lots of thanks to all of them!
