@@ -32,6 +32,7 @@ extern bool Dont_Save;
 
 
 static int get_save_file( Var **v );
+static Var *batch_mode_file_open( char *name );
 static long arr_save( long file_num, Var *v );
 static void f_format_check( Var *v );
 static void ff_format_check( Var *v );
@@ -116,6 +117,9 @@ Var *f_openf( Var *var )
 	if ( Internals.cmdline_flags & DO_CHECK )
 		goto got_file;
 
+	if ( Internals.cmdline_flags & BATCH_MODE )
+		return batch_mode_file_open( *fn == '\0' ? NULL : fn );
+
 	if ( *fn == '\0' )
 		return f_getf( var->next );
 
@@ -126,7 +130,7 @@ Var *f_openf( Var *var )
 	{
 		m = get_string( "The specified file already exists:\n%s\n"
 						"\nDo you really want to overwrite it?", fn );
-		if ( 2 == show_choices( m, 2, "Yes", "No", NULL, 2 ) )
+		if ( 2 == show_choices( m, 2, "Yes", "No", NULL, 2, SET ) )
 		{
 			T_free( m );
 			return f_getf( var->next );
@@ -275,6 +279,9 @@ Var *f_getf( Var *var )
 	if ( Internals.cmdline_flags & DO_CHECK )
 		goto got_file;
 
+	if ( Internals.cmdline_flags & BATCH_MODE )
+		return batch_mode_file_open( NULL );
+
 	/* First string is the message */
 
 	if ( s[ 0 ] == NULL || s[ 0 ][ 0 ] == '\0' || s[ 0 ][ 0 ] == '\\' )
@@ -337,7 +344,7 @@ getfile_retry:
 	if ( ( r == NULL || *r == '\0' ) &&
 		 show_choices( "Do you really want to cancel saving data?\n"
 					   "        The data will be lost!",
-					   2, "Yes", "No", NULL, 2 ) != 1 )
+					   2, "Yes", "No", NULL, 2, SET ) != 1 )
 	{
 		r = CHAR_P T_free( r );
 		goto getfile_retry;
@@ -371,7 +378,7 @@ getfile_retry:
 	{
 		m = get_string( "The selected file does already exist:\n%s\n"
 						"\nDo you really want to overwrite it?", r );
-		if ( 1 != show_choices( m, 2, "Yes", "No", NULL, 2 ) )
+		if ( 1 != show_choices( m, 2, "Yes", "No", NULL, 2, SET ) )
 		{
 			T_free( m );
 			r = CHAR_P T_free( r );
@@ -534,6 +541,132 @@ Var *f_clonef( Var *v )
 		vars_pop( arg[ i ] );
 
 	return new_v;
+}
+
+
+/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*/
+
+static Var *batch_mode_file_open( char *name )
+{
+	unsigned long cn = 0;
+	char *new_name = NULL;
+	struct stat stat_buf;
+	FILE *fp;
+	FILE_LIST *old_File_List = NULL;
+
+
+	CLOBBER_PROTECT( new_name );
+	CLOBBER_PROTECT( old_File_List );
+
+	/* If no prefered file name is given (e.g. if we came here from f_getf())
+	   we make one up from the name of the currently executed EDL script
+	   (but only the name, not the path). We do so by appending an extension
+	   of ".batch_output.%lu", where %lu stands for an integer number that
+	   gets incremented until we have a file that does not yet exist.
+	   Otherwise, when a prefered name was given we try to use it, but when
+	   it already exists we also append an additional extension in the same
+	   way. */
+
+	if ( name == NULL )
+	{
+		do
+		{
+			if ( cn % 10 == 0 )
+			{
+				if ( new_name != NULL )
+					new_name = T_free( new_name );
+				new_name = get_string( "%s.batch_output.%lu",
+									   strrchr( EDL.in_file, '/' ) + 1, cn++ );
+			}
+			else
+				new_name[ strlen( new_name ) - 1 ] += 1;
+		} while ( 0 == stat( new_name, &stat_buf ) );
+	}
+	else
+	{
+		if ( 0 == stat( name, &stat_buf ) )
+		{
+			do
+			{
+				if ( cn % 10 == 0 )
+				{
+					if ( new_name != NULL )
+						new_name = T_free( new_name );
+					new_name = get_string( "%s.batch_output.%lu", name, cn++ );
+				}
+				else
+					new_name[ strlen( new_name ) - 1 ] += 1;
+			} while ( 0 == stat( new_name, &stat_buf ) );
+		}
+		else
+			new_name = T_strdup( name );
+	}
+		
+
+	/* Now try to open the new file, if this fails we must give up */
+
+	if ( ( fp = fopen( new_name, "w+" ) ) == NULL )
+	{
+		switch( errno )
+		{
+			case EMFILE :
+				fprintf( stderr, "Sorry, you have too many open files.\n" );
+				break;
+
+			case ENFILE :
+				fprintf( stderr, "Sorry, system limit for open files "
+						 "exceeded.\n" );
+				break;
+
+			case ENOSPC :
+				fprintf( stderr, "Sorry, no space left on device for more "
+						 "file.\n" );
+				break;
+
+			default :
+				fprintf( stderr, "Sorry, can't open file for writing.\n" );
+		}
+
+		THROW( EXCEPTION );
+	}
+
+	/* The reallocation for the EDL.File_List may fail but we still need to
+	   close all files and get rid of memory for the file names, thus we save
+	   the current EDL.File_List before we try to reallocate */
+
+	if ( EDL.File_List )
+	{
+		old_File_List = FILE_LIST_P T_malloc( EDL.File_List_Len
+											  * sizeof( FILE_LIST ) );
+		memcpy( old_File_List, EDL.File_List,
+				EDL.File_List_Len * sizeof( FILE_LIST ) );
+	}
+
+	TRY
+	{
+		EDL.File_List = FILE_LIST_P T_realloc( EDL.File_List,
+							 ( EDL.File_List_Len + 1 ) * sizeof( FILE_LIST ) );
+		if ( old_File_List != NULL )
+			T_free( old_File_List );
+		TRY_SUCCESS;
+	}
+	CATCH( OUT_OF_MEMORY_EXCEPTION )
+	{
+		T_free( new_name );
+		EDL.File_List = old_File_List;
+		THROW( EXCEPTION );
+	}
+
+	EDL.File_List[ EDL.File_List_Len ].fp = fp;
+	EDL.File_List[ EDL.File_List_Len ].name = new_name;
+
+	/* Switch buffering off so we're sure everything gets written to disk
+	   immediately */
+
+	setbuf( EDL.File_List[ EDL.File_List_Len ].fp, NULL );
+
+	return vars_push( INT_VAR, EDL.File_List_Len++ + FILE_NUMBER_OFFSET );
 }
 
 
@@ -1794,7 +1927,8 @@ Var *f_save_c( Var *v )
 	/* Show the comment editor and get the returned contents (just one string
 	   with embedded newline chars) */
 
-	if ( ! ( Internals.cmdline_flags & DO_CHECK ) )
+	if ( ! ( Internals.cmdline_flags & DO_CHECK ) &&
+		 ! ( Internals.cmdline_flags & BATCH_MODE ) )
 		 r = T_strdup( show_input( c, l ) );
 
 	if ( r == NULL )
@@ -1961,7 +2095,7 @@ get_repl_retry:
 	if ( ( new_name == NULL || *new_name == '\0' ) &&
 		 1 != show_choices( "Do you really want to stop saving data?\n"
 							"     All further data will be lost!",
-							2, "Yes", "No", NULL, 2 ) )
+							2, "Yes", "No", NULL, 2, SET ) )
 	{
 		if ( new_name != NULL )
 			new_name = CHAR_P T_free( new_name );
@@ -1985,7 +2119,7 @@ get_repl_retry:
 		   old_stat.st_ino != new_stat.st_ino ) &&
 		  1 != show_choices( "The selected file does already exist!\n"
 							 " Do you really want to overwrite it?",
-							 2, "Yes", "No", NULL, 2 ) )
+							 2, "Yes", "No", NULL, 2, SET ) )
 	{
 		new_name = CHAR_P T_free( new_name );
 		goto get_repl_retry;

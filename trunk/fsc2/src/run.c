@@ -453,8 +453,8 @@ static void check_for_further_errors( Compilation *c_old, Compilation *c_all )
 	for ( i = FATAL; i < NO_ERROR; i++ )
 		diff.error[ i ] = c_all->error[ i ] - c_old->error[ i ];
 
-
-	if ( diff.error[ SEVERE ] != 0 || diff.error[ WARN ] != 0 )
+	if ( ! Internals.cmdline_flags & BATCH_MODE &&
+		 ( diff.error[ SEVERE ] != 0 || diff.error[ WARN ] != 0 ) )
 	{
 		if ( diff.error[ SEVERE ] != 0 )
 		{
@@ -633,23 +633,35 @@ void run_sigchld_callback( FL_OBJECT *a, long b )
 	if ( Internals.child_is_quitting == QUITTING_UNSET )
 									/* missing notification by the child ? */
 	{
-		if ( ! ( Internals.cmdline_flags & DO_CHECK ) )
+		if ( ! ( Internals.cmdline_flags & DO_CHECK ) && 
+			 ! ( Internals.cmdline_flags & BATCH_MODE ) )
 		{
 			Internals.state = STATE_WAITING;
 			fl_show_alert( "Fatal Error", "Experiment stopped unexpectedly.",
 						   NULL, 1 );
 		}
+
+		if ( Internals.cmdline_flags & BATCH_MODE )
+			fprintf( stderr, "Fatal Error: Experiment stopped unexpectedly: "
+					 "'%s'.\n", EDL.in_file );
+
 		mess = "Experiment stopped unexpectedly after running for";
 		state = EXIT_FAILURE;
 	}
 	else if ( ! a->u_ldata )          /* return status indicates error ? */
 	{
-		if ( ! ( Internals.cmdline_flags & DO_CHECK ) )
+		if ( ! ( Internals.cmdline_flags & DO_CHECK ) &&
+			 ! ( Internals.cmdline_flags & BATCH_MODE ) )
 		{
 			Internals.state = STATE_WAITING;
 			fl_show_alert( "Fatal Error", "Experiment had to be stopped.",
 						   NULL, 1 );
 		}
+
+		if ( Internals.cmdline_flags & BATCH_MODE )
+			fprintf( stderr, "Fatal Error: Experiment had to be stopped: "
+					 "'%s'.\n", EDL.in_file );
+
 		mess = "Experiment had to be stopped after running for";
 		state = EXIT_FAILURE;
 	}
@@ -734,7 +746,8 @@ void run_sigchld_callback( FL_OBJECT *a, long b )
 		fl_unfreeze_form( GUI.run_form_2d->run_2d );
 	}
 
-	if ( Internals.cmdline_flags & DO_CHECK )
+	if ( Internals.cmdline_flags & DO_CHECK ||
+		 Internals.cmdline_flags & BATCH_MODE )
 	{
 		run_close_button_callback( NULL, 0 );
 		Internals.check_return = state;

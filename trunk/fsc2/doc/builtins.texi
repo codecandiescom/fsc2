@@ -830,6 +830,16 @@ file and this file is used exclusively in further
 after the default file has already been opened is not allowed, call it
 either before the first save-operation or never at all!
 
+In batch mode (i.e.@: if @code{fsc2} got started with the '@code{-B}'
+option) no file select box gets shown because the script is supposed to
+be run without any user input. Instead the name of the @code{EDL} script
+is taken, any path information is stripped off (so that the output file
+always goes into the current directory) and an extension of
+"@code{.batch_output.#}" is appended, where the @code{#} stands for an
+integer number that is chosen so that the file name is unique. Numbers
+start with @code{0} and are incremented until a file name is found that
+does not exist yet. The resulting file is used as the output file.
+
 This function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
 
@@ -846,6 +856,14 @@ selecting a different file, just as the @code{get_file()}. Thus the
 arguments that the function accepts are identical to the ones of
 @code{get_file()} with the only exception that the first argument is an
 additional argument with a string for the file name.
+
+If running in batch mode (i.e.@: if @code{fsc2} got started with the
+'@code{-B}' option) and the file to be opened already exists a new file
+name is created by appending the extension "@code{.batch_output.#}" to
+the file name specified as the argument. The @code{#} stands for an
+integer number that is chosen so that the file name is unique. Numbers
+start with @code{0} and are incremented until a file name is found that
+does not exist yet. The resulting file is used as the output file.
 
 This function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
@@ -886,6 +904,15 @@ The function also takes care that no files will be overwritten
 accidentally. If the second file already exists the user is asked to
 select different file. The program enforces that the extension of the
 new file is identical to the one passed to it as the third argument.
+
+If running in batch mode (i.e.@: if @code{fsc2} got started with the
+'@code{-B}' option) and the file to be opened already exists a new file
+name is made up by appending the extension "@code{.batch_output.#}" to
+the file name that got made up by the replacement procedure described
+above. The @code{#} stands for an integer number that is chosen so that
+the file name is unique. Numbers start with @code{0} and are incremented
+until a file name is found that does not exist yet. The resulting file
+is used as the output file.
 
 This function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.

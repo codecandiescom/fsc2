@@ -35,7 +35,7 @@
 
 /* Global variables */
 
-char *prog_name;                 /* Name the program was started with */
+const char *prog_name;           /* Name the program was started with */
 
 INTERNALS Internals;
 EDL_Stuff EDL;
@@ -74,6 +74,8 @@ extern FL_resource xresources[ ];    /* from xinit.c */
 
 /* Locally used functions */
 
+static void globals_init( const char *pname );
+static bool get_edl_file( char *fname );
 static void check_run( void );
 static void test_machine_type( void );
 static int scan_args( int *argc, char *argv[ ], char **fname );
@@ -107,57 +109,9 @@ int main( int argc, char *argv[ ] )
 	mtrace( );
 #endif
 
-	/* As the very first action the effective UID and GID gets stored and
-	   then the program lowers the permissions to the ones of the real UID
-	   and GID, only switching back when creating or attaching to shared
-	   memory segments or accessing lock and log files. */
+	/* Initialization of global variables */
 
-	Internals.EUID = geteuid( );
-	Internals.EGID = getegid( );
-
-	lower_permissions( );
-
-    Internals.child_pid = 0;
-    Internals.http_pid = 0;
-
-	/* Set up a lot of global variables */
-
-	Internals.state = STATE_IDLE;
-	Internals.mode = PREPARATION;
-	Internals.in_hook = UNSET;
-	Internals.I_am = PARENT;
-	Internals.just_testing = UNSET;
-	Internals.exit_hooks_are_run = UNSET;
-	Internals.tb_wait = TB_WAIT_NOT_RUNNING;
-	Internals.http_server_died = UNSET;
-	Internals.conn_request = UNSET;
-
-	prog_name = argv[ 0 ];
-
-	EDL.Lc = 0;
-	EDL.in_file = NULL;
-	EDL.Fname = NULL;
-	EDL.Call_Stack = NULL;
-	EDL.prg_token = NULL;
-	EDL.On_Stop_Pos = -1;
-	EDL.Var_List = NULL;
-	EDL.Var_Stack = NULL;
-	EDL.do_quit = UNSET;
-	EDL.react_to_do_quit = SET;
-	EDL.File_List = NULL;
-	EDL.File_List_Len = 0;
-    EDL.Device_List = NULL;
-    EDL.Device_Name_List = NULL;
-    EDL.Num_Pulsers = 0;
-
-	Comm.data_semaphore = -1;
-	Comm.request_semaphore = -1;
-	Comm.MQ = NULL;
-	Comm.MQ_ID = -1;
-
-	GUI.is_init = UNSET;
-
-	G.color_hash = NULL;
+	globals_init( argv[ 0 ] );
 
 	/* Figure out if the machine has an INTEL type processor */
 
@@ -178,10 +132,6 @@ int main( int argc, char *argv[ ] )
 								 in_file_fp ) ) == -1 )
 		return EXIT_FAILURE;
 
-	/* Setup a structure used when dealing with serial ports */
-
-	fsc2_serial_init( );
-
 	/* Initialize xforms stuff, quit on error */
 
 	if ( ! xforms_init( &argc, argv ) )
@@ -191,7 +141,10 @@ int main( int argc, char *argv[ ] )
 		return EXIT_FAILURE;
 	}
 
-	if ( argc > 1 )
+	/* If we don't know yet about an input file and there are command
+	   line arguments left take it to be the input file */
+
+	if ( argc > 1 && fname == NULL )
 	{
 		Internals.cmdline_flags |= DO_LOAD;
 		fname = argv[ 1 ];
@@ -207,36 +160,42 @@ int main( int argc, char *argv[ ] )
 
 	if ( Internals.cmdline_flags & DO_LOAD )
 	{
-		TRY
-		{
-			/* We need the name of the file with the full path name (which
-			   needs to be passed on to fsc2_clean to allow include files
-			   in scripts be specified relative to the path of the script
-			   instead of relative to the current working directory fsc2
-			   was started from. */
-
-			if ( fname[ 0 ] == '/' )
-				EDL.in_file = T_strdup( fname );
-			else
-			{
-				size_t size;
-				char *buf;
-
-				size = pathconf( ".", _PC_PATH_MAX );
-				buf = CHAR_P T_malloc( size );
-				EDL.in_file = get_string( "%s/%s",
-										  getcwd( buf, size ), fname );
-				T_free( buf );
-			}
-			TRY_SUCCESS;
-		}
-		OTHERWISE
+		if ( ! get_edl_file( fname ) )
 			return EXIT_FAILURE;
 
 		conn_pid = Internals.conn_pid;
 		Internals.conn_pid = 0;
 		load_file( GUI.main_form->browser, 1 );
 		Internals.conn_pid = conn_pid;
+	}
+
+	/* In batch mode try to get the next file if the first input file
+	   could not be accessed until we have one. */
+
+	while ( Internals.cmdline_flags & BATCH_MODE && ! is_loaded )
+	{
+		int i;
+
+		if ( argc == 1 )
+		{
+			fprintf( stderr, "No input files found that could be read in.\n" );
+			return EXIT_FAILURE;
+		}
+
+		EDL.in_file = T_free( EDL.in_file );
+		fname = argv[ 1 ];
+
+		if ( ! get_edl_file( fname ) )
+			return EXIT_FAILURE;
+
+		conn_pid = Internals.conn_pid;
+		Internals.conn_pid = 0;
+		load_file( GUI.main_form->browser, 1 );
+		Internals.conn_pid = conn_pid;
+
+		for ( i = 1; i < argc; i++ )
+			argv[ i ] = argv[ i + 1 ];
+		argc -= 1;
 	}
 
 	/* Set handler for signal that's going to be send by the process that
@@ -271,10 +230,44 @@ int main( int argc, char *argv[ ] )
 		if ( Internals.cmdline_flags & DO_SIGNAL )
 			kill( getppid( ), SIGUSR1 );
 
-		/* And, finally, here's the main loop of the program... */
+		/* And, finally, here's the main loop of the program. In batch mode
+		   we try to get the next file from the command line and start it. */
+
+	run_next:
 
 		while ( fl_do_forms( ) != GUI.main_form->quit )
 			/* empty */ ;
+
+		if ( Internals.cmdline_flags & BATCH_MODE && argc > 1 )
+		{
+			is_loaded = UNSET;
+
+			while ( argc > 1 && ! is_loaded )
+			{
+				int i;
+
+				EDL.in_file = T_free( EDL.in_file );
+				fname = argv[ 1 ];
+
+				if ( ! get_edl_file( fname ) )
+					break;
+
+				conn_pid = Internals.conn_pid;
+				Internals.conn_pid = 0;
+				load_file( GUI.main_form->browser, 1 );
+				Internals.conn_pid = conn_pid;
+
+				for ( i = 1; i < argc; i++ )
+					argv[ i ] = argv[ i + 1 ];
+				argc -= 1;
+			}
+
+			if ( is_loaded )
+			{
+				fl_trigger_object( GUI.main_form->run );
+				goto run_next;
+			}
+		}
 	}
 	else
 		fprintf( stderr, "fsc2: Internal failure on startup.\n" );
@@ -284,6 +277,108 @@ int main( int argc, char *argv[ ] )
 	xforms_close( );
 
 	return EXIT_SUCCESS;
+}
+
+
+/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*/
+
+static void globals_init( const char *pname )
+{
+	/* As the very first action the effective UID and GID gets stored and
+	   then the program lowers the permissions to the ones of the real UID
+	   and GID, only switching back when creating or attaching to shared
+	   memory segments or accessing log files. */
+
+	Internals.EUID = geteuid( );
+	Internals.EGID = getegid( );
+
+	lower_permissions( );
+
+    Internals.child_pid = 0;
+    Internals.http_pid = 0;
+
+	/* Set up a lot of global variables */
+
+	Internals.state = STATE_IDLE;
+	Internals.mode = PREPARATION;
+	Internals.in_hook = UNSET;
+	Internals.I_am = PARENT;
+	Internals.just_testing = UNSET;
+	Internals.exit_hooks_are_run = UNSET;
+	Internals.tb_wait = TB_WAIT_NOT_RUNNING;
+	Internals.http_server_died = UNSET;
+	Internals.conn_request = UNSET;
+
+	if ( pname != NULL )
+		prog_name = pname;
+	else
+		prog_name = "fsc2";
+
+	EDL.Lc = 0;
+	EDL.in_file = NULL;
+	EDL.Fname = NULL;
+	EDL.Call_Stack = NULL;
+	EDL.prg_token = NULL;
+	EDL.On_Stop_Pos = -1;
+	EDL.Var_List = NULL;
+	EDL.Var_Stack = NULL;
+	EDL.do_quit = UNSET;
+	EDL.react_to_do_quit = SET;
+	EDL.File_List = NULL;
+	EDL.File_List_Len = 0;
+    EDL.Device_List = NULL;
+    EDL.Device_Name_List = NULL;
+    EDL.Num_Pulsers = 0;
+
+	Comm.data_semaphore = -1;
+	Comm.request_semaphore = -1;
+	Comm.MQ = NULL;
+	Comm.MQ_ID = -1;
+
+	GUI.is_init = UNSET;
+
+	G.color_hash = NULL;
+
+	/* Setup a structure used when dealing with serial ports */
+
+	fsc2_serial_init( );
+}
+
+
+/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*/
+
+static bool get_edl_file( char *fname )
+{
+	TRY
+	{
+		/* We need the name of the file with the full path name (which
+		   needs to be passed on to fsc2_clean to allow include files
+		   in scripts be specified relative to the path of the script
+		   instead of relative to the current working directory fsc2
+		   was started from. */
+
+		if ( fname[ 0 ] == '/' )
+			EDL.in_file = T_strdup( fname );
+		else
+		{
+			size_t size;
+			char *buf;
+
+			size = pathconf( ".", _PC_PATH_MAX );
+			buf = CHAR_P T_malloc( size );
+			EDL.in_file = get_string( "%s/%s",
+									  getcwd( buf, size ), fname );
+			T_free( buf );
+		}
+
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+		return FAIL;
+
+	return OK;
 }
 
 
@@ -390,12 +485,20 @@ static int scan_args( int *argc, char *argv[ ], char **fname )
 
 	while ( cur_arg < *argc )
 	{
-		if ( ! strcmp( argv[ cur_arg ], "-t" ) )
+		if ( strlen( argv[ cur_arg ] ) == 2 &&
+			 ! strcmp( argv[ cur_arg ], "-t" ) )
 		{
 			if ( flags & DO_CHECK )
 			{
 				fprintf( stderr, "fsc2: Can't have both flags '-t' and "
-						"'-X'.\n" );
+						"'-X' at once.\n" );
+				usage( EXIT_FAILURE );
+			}
+
+			if ( flags & BATCH_MODE )
+			{
+				fprintf( stderr, "fsc2: Can't have both flags '-t' and "
+						"'-B' at once.\n" );
 				usage( EXIT_FAILURE );
 			}
 
@@ -417,11 +520,13 @@ static int scan_args( int *argc, char *argv[ ], char **fname )
 				  EXIT_SUCCESS : EXIT_FAILURE );
 		}
 
-		if ( ! strcmp( argv[ cur_arg ], "-h" ) ||
+		if ( ( strlen( argv[ cur_arg ] ) == 2 &&
+			   ! strcmp( argv[ cur_arg ], "-h" ) ) ||
 			 ! strcmp( argv[ cur_arg ], "--help" ) )
 			usage( EXIT_SUCCESS );
 
-		if ( ! strcmp( argv[ cur_arg ], "-s" ) )
+		if ( strlen( argv[ cur_arg ] ) == 2 &&
+			 ! strcmp( argv[ cur_arg ], "-s" ) )
 		{
 			flags |= DO_SIGNAL;
 			for ( i = cur_arg; i < *argc; i++ )
@@ -482,6 +587,13 @@ static int scan_args( int *argc, char *argv[ ], char **fname )
 				usage( EXIT_FAILURE );
 			}
 
+			if ( flags & BATCH_MODE )
+			{
+				fprintf( stderr, "fsc2: Can't have both flags '-S' and "
+						"'-B' at once.\n" );
+				usage( EXIT_FAILURE );
+			}
+
 			if ( argv[ cur_arg ][ 2 ] == '\0' && *argc == cur_arg + 1 )
 			{
 				fprintf( stderr, "fsc2 -S: No input file.\n" );
@@ -512,14 +624,21 @@ static int scan_args( int *argc, char *argv[ ], char **fname )
 			if ( flags & DO_CHECK )
 			{
 				fprintf( stderr, "fsc2: Can't have both flags '-T' and "
-						"'-X'.\n" );
+						"'-X' at once.\n" );
 				usage( EXIT_FAILURE );
 			}
 
 			if ( flags & DO_START )
 			{
 				fprintf( stderr, "fsc2: Can't have both flags '-T' and "
-						"'-S'.\n" );
+						"'-S' at once.\n" );
+				usage( EXIT_FAILURE );
+			}
+
+			if ( flags & BATCH_MODE )
+			{
+				fprintf( stderr, "fsc2: Can't have both flags '-T' and "
+						"'-B' at once.\n" );
 				usage( EXIT_FAILURE );
 			}
 
@@ -548,26 +667,83 @@ static int scan_args( int *argc, char *argv[ ], char **fname )
 			break;
 		}
 
+		if ( strlen( argv[ cur_arg ] ) == 2 &&
+			 ! strcmp( argv[ cur_arg ], "-B" ) )
+		{
+			if ( flags & DO_CHECK )
+			{
+				fprintf( stderr, "fsc2: Can't have both flags '-B' and "
+						"'-t' at once.\n" );
+				usage( EXIT_FAILURE );
+			}
+
+			if ( flags & DO_START )
+			{
+				fprintf( stderr, "fsc2: Can't have both flags '-B' and "
+						"'-S' at once.\n" );
+				usage( EXIT_FAILURE );
+			}
+
+			if ( flags & DO_TEST )
+			{
+				fprintf( stderr, "fsc2: Can't have both flags '-B' and "
+						"'-T' at once.\n" );
+				usage( EXIT_FAILURE );
+			}
+
+			if ( argv[ cur_arg ][ 2 ] == '\0' && *argc == cur_arg + 1 )
+			{
+				fprintf( stderr, "fsc2 -B: No input files.\n" );
+				usage( EXIT_FAILURE );
+			}
+
+			if ( argv[ cur_arg ][ 2 ] != '\0' )
+			{
+				*fname = argv[ cur_arg ] + 2;
+				for ( i = cur_arg; i < *argc; i++ )
+					argv[ i ] = argv[ i + 1 ];
+				*argc -= 1;
+			}
+			else
+			{
+				*fname = argv[ cur_arg + 1 ];
+				for ( i = cur_arg; i < *argc - 1; i++ )
+					argv[ i ] = argv[ i + 2 ];
+				*argc -= 2;
+			}
+
+			flags |= DO_LOAD | BATCH_MODE | DO_START;
+
+			break;
+		}
+
 		if ( ! strncmp( argv[ cur_arg ], "-X", 2 ) )
 		{
 			if ( flags & DO_CHECK )
 			{
 				fprintf( stderr, "fsc2: Can't have both flags '-X' and "
-						"'-t'.\n" );
+						"'-t' at once.\n" );
 				usage( EXIT_FAILURE );
 			}
 
 			if ( flags & DO_START )
 			{
 				fprintf( stderr, "fsc2: Can't have both flags '-X' and "
-						"'-S'.\n" );
+						"'-S' at once.\n" );
 				usage( EXIT_FAILURE );
 			}
 
 			if ( flags & DO_TEST )
 			{
 				fprintf( stderr, "fsc2: Can't have both flags '-X' and "
-						"'-T'.\n" );
+						"'-T' at once.\n" );
+				usage( EXIT_FAILURE );
+			}
+
+			if ( flags & BATCH_MODE )
+			{
+				fprintf( stderr, "fsc2: Can't have both flags '-X' and "
+						"'-B' at once.\n" );
 				usage( EXIT_FAILURE );
 			}
 
@@ -775,7 +951,14 @@ void load_file( FL_OBJECT *a, long reload )
 	if ( access( EDL.in_file, R_OK ) == -1 )
 	{
 		if ( Internals.cmdline_flags & DO_CHECK )
-			exit ( EXIT_FAILURE );
+			exit( EXIT_FAILURE );
+
+		if ( Internals.cmdline_flags & BATCH_MODE )
+		{
+			fprintf( stderr, "Input file not found: '%s'.\n", EDL.in_file );
+			is_loaded = UNSET;
+			return;
+		}
 
 		if ( errno == ENOENT )
 			fl_show_alert( "Error", "Sorry, file not found:", EDL.in_file, 1 );
@@ -796,7 +979,16 @@ void load_file( FL_OBJECT *a, long reload )
 	if ( ( tmp_fd = mkstemp( tmp_file ) ) < 0 )
 	{
 		if ( Internals.cmdline_flags & DO_CHECK )
-			exit ( EXIT_FAILURE );
+			exit( EXIT_FAILURE );
+
+		if ( Internals.cmdline_flags & BATCH_MODE )
+		{
+			fprintf( stderr, "Can't open a temporary file, skipping input "
+					 "file '%s'.\n", EDL.in_file );
+			is_loaded = UNSET;
+			return;
+		}
+
 		fl_show_alert( "Error", "Sorry, can't open a temporary file.",
 					   NULL, 1 );
 		old_in_file = CHAR_P T_free( old_in_file );
@@ -810,7 +1002,15 @@ void load_file( FL_OBJECT *a, long reload )
 	{
 		close( tmp_fd );
 		if ( Internals.cmdline_flags & DO_CHECK )
-			exit ( EXIT_FAILURE );
+			exit( EXIT_FAILURE );
+
+		if ( Internals.cmdline_flags & BATCH_MODE )
+		{
+			fprintf( stderr, "Can't open a temporary file, skipping input "
+					 "file '%s'.\n", EDL.in_file );
+			is_loaded = UNSET;
+			return;
+		}
 
 		fl_show_alert( "Error", "Sorry, can't open a temporary file.",
 					   NULL, 1 );
@@ -823,7 +1023,14 @@ void load_file( FL_OBJECT *a, long reload )
 	{
 		fclose( tmp_fp );
 		if ( Internals.cmdline_flags & DO_CHECK )
-			exit ( EXIT_FAILURE );
+			exit( EXIT_FAILURE );
+
+		if ( Internals.cmdline_flags & BATCH_MODE )
+		{
+			fprintf( stderr, "Can't open input file: '%s'.\n", EDL.in_file );
+			is_loaded = UNSET;
+			return;
+		}
 
 		fl_show_alert( "Error", "Sorry, can't open file:", EDL.in_file, 1 );
 		old_in_file = CHAR_P T_free( old_in_file );
@@ -1235,15 +1442,29 @@ void run_file( FL_OBJECT *a, long b )
 
 	if ( ! state )               /* return if program failed the test */
 	{
-		fl_show_alert( "Error", "Sorry, but test of file failed.", NULL, 1 );
+		/* In batch mode write out an error message and trigger the "Quit"
+		   button to start dealing with the next EDL script. Otherwise
+		   show an error message. */
+
+		if ( Internals.cmdline_flags & BATCH_MODE )
+		{
+			fprintf( stderr, "Sorry, but test of file failed: '%s'.\n",
+					 EDL.in_file );
+			fl_trigger_object( GUI.main_form->quit );
+		}
+		else
+			fl_show_alert( "Error", "Sorry, but test of file failed.",
+						   NULL, 1 );
 		notify_conn( UNBUSY_SIGNAL );
 		return;
 	}
 
-	/* If there were non-fatal errors ask user if he wants to continue */
+	/* If there were non-fatal errors ask user if she wants to continue.
+	   In batch mode run even if there were non-fatal errors. */
 
-	if ( EDL.compilation.error[ SEVERE ] != 0 ||
-		 EDL.compilation.error[ WARN ] != 0 )
+	if ( ! ( Internals.cmdline_flags & BATCH_MODE ) &&
+		 ( EDL.compilation.error[ SEVERE ] != 0 ||
+		   EDL.compilation.error[ WARN ] != 0 ) )
 	{
 		if ( EDL.compilation.error[ SEVERE ] != 0 )
 		{
@@ -1788,12 +2009,12 @@ void notify_conn( int signo )
 void usage( int return_status )
 {
 	fprintf( stderr, "Usage: fsc2 [OPTIONS]... [FILE]\n"
-			 "A program for remote control of EPR spectrometers\n"
+			 "A program for remote control of spectrometers\n"
 			 "OPTIONS:\n"
 			 "  -t FILE    run syntax check on FILE and exit (no graphics)\n"
 			 "  -T FILE    run syntax check on FILE\n"
-			 "  -S FILE    start interpreting FILE (i.e. start the "
-			 "experiment)\n"
+			 "  -S FILE    start experiment interpreting FILE\n"
+			 "  -B FILE... run in batch mode\n"
 			 "  --delete   delete input file when fsc2 is done with it\n"
 			 "  -non-exclusive\n"
 			 "             run in non-exclusive mode, allowing more than\n"

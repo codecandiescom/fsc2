@@ -47,10 +47,10 @@ But sometimes it might be advantageous to pass a whole set of @code{EDL}
 scripts to @code{fsc2}, which then get executed one after another
 without the need for further user interaction and supervision.  This is
 called @strong{batch mode} and gets invoked by starting @code{fsc2} with
-the '@code{-B}' option, directly followed by the complete list of
-@code{EDL} scripts to be executed. @code{fsc2} will then try to execute
-the @code{EDL} scripts in the order they were specified on the command
-line and afterwards quit.
+the '@code{-B}' option, directly followed by the list of @code{EDL}
+scripts to be executed. @code{fsc2} will then try to execute the
+@code{EDL} scripts in the order they were specified on the command line
+and quit when done.
 
 To make @code{fsc2} run ndependent of user input it must behave
 differently from normal mode in several situations. Here's a hopefully
