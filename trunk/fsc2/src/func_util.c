@@ -1755,10 +1755,10 @@ Var *f_fsave( Var *v )
 	char *ep;
 	Var *cv;
 	char *sptr;
-	int in_format,
-		on_stack,
-		percs,
-		n = 0;
+	int in_format;
+	int on_stack;
+	int percs;
+	int n = 0;
 
 
 	/* Determine the file identifier */
