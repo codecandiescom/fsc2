@@ -264,13 +264,13 @@ Var *func_get_long( const char *name, int *access, bool flag )
 
 	if ( f->fnct == NULL )       /* function found but not loaded */
 	{
-		if ( ! flag )            /* some callers do their own error handling */
+		if ( ! flag )
 		{
 			eprint( FATAL, "%s:%ld: Function `%s' has not been "
 					"loaded.\n", Fname, Lc, f->name );
 			THROW( EXCEPTION );
 		}
-		else
+		else                     /* some callers do their own error handling */
 			return NULL;
 	}
 	
