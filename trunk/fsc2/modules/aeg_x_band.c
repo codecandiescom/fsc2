@@ -382,7 +382,8 @@ Var *set_field( Var *v )
 
 	field = aeg_x_band_field_check( VALUE( v ), &err_flag );
 
-	/* The second argument an be the maximum error */
+	/* The second argument can be the maximum error which should be less than 
+	   10% of the absolut requested field value */
 
 	if ( ( v = vars_pop( v ) ) != NULL )
 	{
@@ -392,9 +393,9 @@ Var *set_field( Var *v )
 					"precision.\n", Fname, Lc, DEVICE_NAME );
 		error = fabs( VALUE( v ) );
 
-		if ( error > 0.1 * field )
-			eprint( SEVERE, "%s:%ld: %s: Field precision larger than 10% of "
-					"field value.\n", Fname, Lc, DEVICE_NAME );
+		if ( error > 0.1 * fabs( field ) )
+			eprint( SEVERE, "%s:%ld: %s: Field precision is larger than 10% "
+					"of field value.\n", Fname, Lc, DEVICE_NAME );
 	}
 
 	if ( ( v = vars_pop( v ) ) != NULL )
