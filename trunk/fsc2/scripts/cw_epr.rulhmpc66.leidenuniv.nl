@@ -646,7 +646,7 @@ Num_Points    = $num_points;
 tc = $TC;
 kd = $kdw Hz;
 
-data[ Num_Points ];
+data[ *, * ];
 avg[ Num_Points ];
 
 I = 0, J = 0, K;
@@ -671,15 +671,7 @@ lockin_auto_setup( 1 / kd, 1 );
 
 EXPERIMENT:
 
-lockin_lock_keyboard( 0 );
-
 File = get_file( );
-fsave( File, \"% 1st row X, all following rows Y, \"
-			 \"parameters at end\\n\" );
-FOR K = 1 : Num_Points {
-	fsave( File, \"# \", field + ( K - 1 ) * step_size );
-}
-fsave( File, \"\\n\" );
 
 magnet_sweep_rate( sweep_rate );
 
@@ -695,23 +687,17 @@ print F
 
 	J += 1;
 	print( \"Starting #. run\\n\", J );
-	data = 0.0;
 
 	FOR I = 1 : Num_Points {
 
-		data[ I ] = lockin_get_data( );
-		display( I, data[ I ], 1, I, ( avg[ I ] + data[ I ] ) / J, 2 );
+		data[ J, I ] = lockin_get_data( );
+		display( I, data[ J, I ], 1, I, ( avg[ I ] + data[ J, I ] ) / J, 2 );
 	}
 
 	magnet_sweep( \"STOP\" );
 	lockin_auto_acquisition( \"OFF\" );
 
-	FOR K = 1 : Num_Points {
-		fsave( File, \"# \", data[ K ] );
-	}
-	fsave( File, \"\\n\" );
-
-	avg += data;
+	avg += data[ J ];
 	clear_curve( 1, 3 );
 	display( 1, data, 3 );
 	print( \"#. run finished, sweeping magnet to start field.\\n\", J );
@@ -726,32 +712,35 @@ IF magnet_sweep( ) {
 lockin_auto_acquisition( \"OFF\" );
 
 IF J == 1 {
+	FOR K = 1 : I - 1 {
+		fsave( File, \"#,#\", field + ( K - 1 ) * step_size,
+			   data[ 1, K ] );
+	}
+} ELSE {
 	IF I <= Num_Points {
-		Num_Points = I - 1;
-		fsave( File, \"% 1st row X, all following rows Y, \"
-					 \"parameters at end\\n\" );
-		FOR I = 1 : Num_Points {
-			fsave( File, \"# \", field + ( I - 1 ) * step_size );
-		}
-		fsave( File, \"\\n\" );
-		FOR I = 1 : Num_Points {
-				fsave( File, \"# \", data[ I ] );
+		J -= 1;
+	}
+
+	FOR I = 1 : Num_Points - 1 {
+		fsave( File, \"#\", field + ( I - 1 ) * step_size );
+		FOR K = 1 : J {
+			fsave( File, \",#\", data[ J, I ] );
 		}
 		fsave( File, \"\\n\" );
 	}
-} ELSE IF I <= Num_Points {
-	FOR I = 1 : Num_Points {
-		fsave( File, \"# \", data[ I ] );
-	}
+
 	fsave( File, \"\\n\" );
+	FOR I = 1 : Num_Points - 1 {
+		fsave( File, \"#,#\\n\", field + ( I - 1 ) * step_size, avg[ I ] );
+	}
 }
 
-fsave( File,
+fsave( File, \"\\n\"
        \"% Date:                    # #\\n\"
        \"% Magnet:\\n\"
-       \"%   Start field:         # A\\n\"
-       \"%   End field:           # A\\n\"
-       \"%   Sweep rate:            # A/min\\n\"
+       \"%   Start field:           # G\\n\"
+       \"%   End field:             # G\\n\"
+       \"%   Sweep rate:            # G/s\\n\"
        \"%   Start delay:           # s\\n\"
        \"% Lock-In:\\n\"
        \"%   Sensitivity:           # mV\\n\"
@@ -841,7 +830,7 @@ Num_Points    = $num_points;
 tc = $TC;
 kd = $kdw Hz;
 
-data[ Num_Points ];
+data[ *, * ];
 avg[ Num_Points ];
 
 I = 0, J = 0, K;
@@ -865,16 +854,7 @@ lockin_auto_setup( 1 / kd, 1 );
 
 EXPERIMENT:
 
-lockin_lock_keyboard( 0 );
-
 File = get_file( );
-
-fsave( File, \"% 1st row X, all following rows Y, \"
-			 \"parameters at end\\n\" );
-FOR K = 1 : Num_Points {
-	fsave( File, \"# \", field + ( K - 1 ) * step_size );
-}
-fsave( File, \"\\n\" );
 
 magnet_sweep_rate( sweep_rate );
 
@@ -888,24 +868,18 @@ print F
 	J += 1;
 	print( \"Starting #. run\\n\", J );
 
-	data = 0.0;
 	magnet_sweep( \"$dir\" );
 	lockin_auto_acquisition( \"ON\" );
 
 	FOR I = 1 : Num_Points {
-		data[ I ] = lockin_get_data( );
-		display( I, data[ I ], 1, I, ( avg[ I ] + data[ I ] ) / J, 2 );
+		data[ J, I ] = lockin_get_data( );
+		display( I, data[ J, I ], 1, I, ( avg[ I ] + data[ J, I ] ) / J, 2 );
 	}
 
 	magnet_sweep( \"STOP\" );
 	lockin_auto_acquisition( \"OFF\" );
 
-	FOR K = 1 : Num_Points {
-		fsave( File, \"# \", data[ K ] );
-	}
-	fsave( File, \"\\n\" );
-
-	avg += data;
+	avg += data[ J ];
 	clear_curve( 1, 3 );
 	display( 1, data, 3 );
 
@@ -917,7 +891,6 @@ print F
 	J += 1;
 	print( \"Starting #. run\\n\", J );
 
-	data = 0.0;
 ";
 if ( $dir eq "UP" ) {
 	print F "    magnet_sweep( \"DOWN\" );\n";
@@ -927,19 +900,14 @@ if ( $dir eq "UP" ) {
 print F "    lockin_auto_acquisition( \"ON\" );
 
 	FOR I = Num_Points : 1 : -1 {
-		data[ I ] = lockin_get_data( );
-		display( I, data[ I ], 1, I, ( avg[ I ] + data[ I ] ) / J, 2 );
+		data[ J, I ] = lockin_get_data( );
+		display( I, data[ J, I ], 1, I, ( avg[ I ] + data[ J, I ] ) / J, 2 );
 	}
 
 	magnet_sweep( \"STOP\" );
 	lockin_auto_acquisition( \"OFF\" );
 
-	FOR K = 1 : Num_Points {
-		fsave( File, \"# \", data[ K ] );
-	}
-	fsave( File, \"\\n\" );
-
-	avg += data;
+	avg += data[ J ];
 	clear_curve( 1, 3 );
 	display( 1, data, 3 );
 }
@@ -953,27 +921,31 @@ IF magnet_sweep( ) {
 lockin_auto_acquisition( \"OFF\" );
 
 IF J == 1 {
+	FOR K = 1 : I - 1 {
+		fsave( File, \"#,#\", field + ( K - 1 ) * step_size,
+			   data[ 1, K ] );
+	}
+} ELSE {
 	IF I <= Num_Points {
-		Num_Points = I - 1;
-		fsave( File, \"% 1st row X, all following rows Y, \"
-					 \"parameters at end\\n\" );
-		FOR I = 1 : Num_Points {
-			fsave( File, \"# \", field + ( I - 1 ) * step_size );
-		}
-		fsave( File, \"\\n\" );
-		FOR I = 1 : Num_Points {
-				fsave( File, \"# \", data[ I ] );
+		J -= 1;
+	}
+
+	FOR I = 1 : Num_Points - 1 {
+		fsave( File, \"#\", field + ( I - 1 ) * step_size );
+		FOR K = 1 : J {
+			fsave( File, \",#\", data[ J, I ] );
 		}
 		fsave( File, \"\\n\" );
 	}
-} ELSE IF ( J % 2 == 1 & I <= Num_Points ) |  ( J % 2 == 0 & I >= 1 ) {
-	FOR I = 1 : Num_Points {
-		fsave( File, \"# \", data[ I ] );
-	}
+
 	fsave( File, \"\\n\" );
+	FOR I = 1 : Num_Points - 1 {
+		fsave( File, \"#,#\\n\", field + ( I - 1 ) * step_size, avg[ I ] );
+	}
 }
 
-fsave( File,
+
+fsave( File, \"\\n\"
        \"% Date:                    # #\\n\"
        \"% Magnet (measuring during both sweep up and down):\\n\"
        \"%   Start field:           # G\\n\"
