@@ -8,6 +8,7 @@ INSTALL
 MANIFEST
 Makefile
 README
+README.mail
 TODO
 
 Fcntl_Lock/Changes
