@@ -12,7 +12,7 @@
 
 #include "fsc2.h"
 
-static PHS phs[ 2 ];
+static PHS phs[ 3 ];
 static Cur_PHS = -1;
 
 
@@ -697,7 +697,7 @@ Var *p_get_by_num( long pnum, int type )
 
 /*----------------------------------------------------------------------------
   'function' is the phase function the data are to be used for (i.e. 0 means
-  PHASE_1, 1 means PHASE_2)
+  PHASE_1, 1 means PHASE_2, 2 means both)
   'type' means the type of phase, see global.h (PHASE_PLUS/MINUX_X/Y
   'pod' means if the value is for the first or the second pod channel
   (0: first pod channel, 1: second pod channel, -1: pick the one not set yet)
@@ -708,7 +708,7 @@ Var *p_get_by_num( long pnum, int type )
 void p_phs_setup( int func, int type, int pod, long val )
 {
 	assert ( Cur_PHS != - 1 ? ( Cur_PHS == func ) : 1 );
-	assert( func == 0 || func == 1 );      /* phase funcion correct ? */
+	assert( func >= 0 && func <= 2 );      /* phase funcion correct ? */
 	assert( type >= PHASE_PLUS_X && type <= PHASE_MINUS_Y );
 
 	Cur_PHS = func;
@@ -722,22 +722,32 @@ void p_phs_setup( int func, int type, int pod, long val )
 
 		if ( phs[ func ].is_var[ type ][ pod ] )
 		{
-			eprint( FATAL, "%s:%ld: Both output states for phase %s of "
-					"function already have been defined.\n", Fname, Lc,
-					Phase_Types[ type ], func == 0 ?
-					Function_Names[ PULSER_CHANNEL_PHASE_1 ] :
-					Function_Names[ PULSER_CHANNEL_PHASE_2 ] );
+			if ( func == 2 )
+				eprint( FATAL, "%s:%ld: Both output states for phase %s of "
+						"phase functions already have been defined.\n", Fname, 
+						Lc, Phase_Types[ type ] );
+			else
+				eprint( FATAL, "%s:%ld: Both output states for phase %s of "
+						"function `%s' already have been defined.\n", Fname,
+						Lc, Phase_Types[ type ], func == 0 ?
+						Function_Names[ PULSER_CHANNEL_PHASE_1 ] :
+						Function_Names[ PULSER_CHANNEL_PHASE_2 ] );
 			THROW( EXCEPTION );
 		}
 	}
 
 	if ( phs[ func ].is_var[ type ][ pod ] )
 	{
-		eprint( FATAL, "%s:%ld: Output state of %d. pod for phase %s of "
-				"function already has been defined.\n", Fname, Lc, pod + 1,
-				Phase_Types[ type ], func == 0 ?
-				Function_Names[ PULSER_CHANNEL_PHASE_1 ] :
-				Function_Names[ PULSER_CHANNEL_PHASE_2 ] );
+		if ( func == 2 )
+			eprint( FATAL, "%s:%ld: Output state of %d. pod for phase %s of "
+					"phase functions already has been defined.\n", Fname, Lc,
+					pod + 1, Phase_Types[ type ] );
+		else
+			eprint( FATAL, "%s:%ld: Output state of %d. pod for phase %s of "
+					"function `%s' already has been defined.\n", Fname, Lc,
+					pod + 1, Phase_Types[ type ], func == 0 ?
+					Function_Names[ PULSER_CHANNEL_PHASE_1 ] :
+					Function_Names[ PULSER_CHANNEL_PHASE_2 ] );
 		THROW( EXCEPTION );
 	}
 
@@ -771,10 +781,14 @@ void p_phs_end( int func )
 		for ( j = 0; j < 2; j++ )
 			if ( ! phs[ func ].is_var[ i ][ j ] )
 			{
-				eprint( FATAL, "%s:%ld: Incomplete data for phase setup of "
-						"function `%s'.\n", Fname, Lc, func == 0 ?
-						Function_Names[ PULSER_CHANNEL_PHASE_1 ] :
-						Function_Names[ PULSER_CHANNEL_PHASE_2 ] );
+				if ( func == 2 )
+					eprint( FATAL, "%s:%ld: Incomplete data for phase setup "
+							"of phase functions.\n", Fname, Lc );
+				else
+					eprint( FATAL, "%s:%ld: Incomplete data for phase setup "
+							"of function `%s'.\n", Fname, Lc, func == 0 ?
+							Function_Names[ PULSER_CHANNEL_PHASE_1 ] :
+							Function_Names[ PULSER_CHANNEL_PHASE_2 ] );
 				THROW( EXCEPTION );
 			}
 
@@ -789,16 +803,22 @@ void p_phs_end( int func )
 	{
 		if ( ! cons[ i ] )
 		{
-			eprint( FATAL, "%s:%ld: Inconsistent data for phase setup of "
-					"function `%s'.\n", Fname, Lc, func == 0 ?
-					Function_Names[ PULSER_CHANNEL_PHASE_1 ] :
-					Function_Names[ PULSER_CHANNEL_PHASE_2 ] );
+			if ( func == 2 )
+				eprint( FATAL, "%s:%ld: Inconsistent data for phase setup of "
+						"phase functions.\n", Fname, Lc );
+			else
+				eprint( FATAL, "%s:%ld: Inconsistent data for phase setup of "
+						"function `%s'.\n", Fname, Lc, func == 0 ?
+						Function_Names[ PULSER_CHANNEL_PHASE_1 ] :
+						Function_Names[ PULSER_CHANNEL_PHASE_2 ] );
 			THROW( EXCEPTION );
 		}
 	}
 
-	( *pulser_struct.setup_phase )( func == 0 ? PULSER_CHANNEL_PHASE_1 : 
-									PULSER_CHANNEL_PHASE_2, phs[ func ] );
+	if ( func == 0 || func == 2 )
+		( *pulser_struct.setup_phase )( PULSER_CHANNEL_PHASE_1, phs[ func ] );
+	if ( func == 1 || func == 2 )
+		( *pulser_struct.setup_phase )( PULSER_CHANNEL_PHASE_2, phs[ func ] );
 
 	Cur_PHS = -1;
 }

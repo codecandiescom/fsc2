@@ -83,7 +83,8 @@ OII         O(THER)?_?2:?
 OIII        O(THER)?_?3:?
 OIV         O(THER)?_?4:?
 
-PHS1        PH(ASE)?_?(1_?)?S(ET)?(U(P)?)?:?
+PHS         PH(ASE)?_?S(ET)?(U(P)?)?:?
+PHS1        PH(ASE)?_?1_?S(ET)?(U(P)?)?:?
 PHS2        PH(ASE)?_?2_?S(ET)?(U(P)?)?:?
 
 PX			"+"?[xX]:?
@@ -198,6 +199,12 @@ WS          [\n=: ]+
 				assignlval.lval = 1;
 				return PHS_TOK;
 			}
+
+{PHS}       {
+				assignlval.lval = 2;
+				return PHS_TOK;
+			}
+
 
 {PX}		return PX_TOK;
 {PY}		return PY_TOK;
