@@ -1,7 +1,7 @@
 /*
-	$Id$
-
 	EDL program for time-resolved ENDOR on transient radicals
+
+	$Id$
 */
 	
 
@@ -46,11 +46,11 @@ mean_ground[ N_steps ];
 Rec_len;                         // number of points of trace
 trig_pos;                        // position od trigger in data set (range 0-1)
 time_base;                       // time base of digitizer (in s)
-time_res;                        // digitizer time resolution (in us)
+time_res;                        // digitizer time resolution (in ns)
 
-min_time, max_time;              // first / last point (in us)
-start_time, end_time;            // intergation window start / end pos. (in us)
-new_start_time, new_end_time;    // new values od sliders (in us)
+min_time, max_time;              // first / last point (in ns)
+start_time, end_time;            // intergation window start / end pos. (in ns)
+new_start_time, new_end_time;    // new values od sliders (in ns)
 Start_pos, End_pos, Width;
 N_base_curves;
 integ, base_int;
@@ -98,18 +98,18 @@ Rec_len = 500;
 trig_pos = 0.1;
 time_base = 100 ns;
 
-time_res  = time_base * 1.0e6 / 50.0;
+time_res  = time_base * 1.0e9 / 50.0;
 
 min_time = - trig_pos * Rec_len * time_res;
 max_time   = min_time + Rec_len * time_res;
 
 Pretrigger = int( 0.9 * trig_pos * Rec_len );
-change_scale( min_time, time_res );
+change_scale( min_time * 1.0e-3, time_res * 1.0e-3);
 
 mean_curve[ 1 ] = float_slice( Rec_len );
 base_curve = float_slice( Rec_len );
 
-/* Get a file for storing all data */
+/* Get a file for storing all data and write experiments parameter */
 
 F1 = get_file( "File for storing complete data sets:" );
 F2 = get_file( "File for storing averaged data sets:" );
@@ -120,6 +120,8 @@ fsave( F2, "% Attenuation      = # dB\n", attenuation );
 fsave( F2, "% Record length    = #\n", Rec_len );
 fsave( F2, "% Trigger position = #\n", int( trig_pos * Rec_len ) );
 fsave( F2, "% Time base        = # ns\n", time_base * 1.0e-9 );
+//fsave( F2, "%Sensitivity       = # mV\n",
+//	   1.0e3 * digitizer_sensitivity( CH1 ) );
 //fsave( F2, "% Field            = # G\n", measure_field( ) );
 save_comment( F2, "% ", "Sample: \nMicrowave frequency: \n"
 			  "Microwave power: \nTemperature: \n" );
@@ -127,15 +129,15 @@ save_comment( F2, "% ", "Sample: \nMicrowave frequency: \n"
 /* Create the sliders for setting the integration window limits */
 
 start_time = 0.0;
-S1 = slider_create( "VALUE_SLIDER", min_time * 1.0e3, max_time * 1.0e3,
+S1 = slider_create( "VALUE_SLIDER", min_time, max_time,
 	                "Integration window border 1 (ns)" );
-slider_value( S1, 1.0e3 * start_time );
+slider_value( S1, start_time );
 Start_pos = int( Rec_len * trig_pos );
 
-S2 = slider_create( "VALUE_SLIDER", min_time * 1.0e3, max_time * 1.0e3,
+S2 = slider_create( "VALUE_SLIDER", min_time, max_time,
 		            "Integration window border 2 (ns)" );
 end_time = 50.0 * time_res;
-slider_value( S2, 1.0e3 * end_time );
+slider_value( S2, end_time );
 Width = 51;
 
 
@@ -239,10 +241,8 @@ FOR J = 1 : N_runs
 			start_time = new_start_time;
 			end_time   = new_end_time;
 
-			Start_pos = round( ( start_time * 1.0e-3 - min_time )
-							   / time_res ) + 1;
-			End_pos   = round( ( end_time * 1.0e-3 - min_time )
-							   / time_res ) + 1;
+			Start_pos = round( ( start_time - min_time ) / time_res ) + 1;
+			End_pos   = round( ( end_time - min_time ) / time_res ) + 1;
 			Width = abs( End_pos - Start_pos ) + 1;
 			IF Width > Rec_len - Start_pos + 1 {
 				Width = Rec_len - Start_pos + 1 ;
@@ -318,12 +318,12 @@ B2 = button_create( "NORMAL_BUTTON", "Done" );
 
 FOREVER
 {
-	IF button_state( B2 )
+	IF button_state( B2 )           // check Done button
 	{
 		BREAK;
 	}
 
-	IF button_state( B1 )
+	IF button_state( B1 )           // check Save button
 	{
 		F3 = get_file( "File for storing integrated region:" );		
 		IF F3 >= 0
@@ -346,23 +346,22 @@ FOREVER
 				End_index = N_steps;
 			}
 
-			base_int = 1.0e3 * mean( base_curve, Start_pos, Width );
-			FOR K = 1 : End_index
-			{
-				fsave( F3, "#\n", 1.0e3 * mean( mean_curve[ K ], 
-												Start_pos, Width ) );
+			base_int = mean( base_curve, Start_pos, Width );
+			FOR K = 1 : End_index {
+				fsave( F3, "#\n", mean( mean_curve[ K ], Start_pos, Width ) );
 			}
 			fsave( F3, "\n% Integrals over preprocessed data:\n\n" );
-			FOR K = 1 : End_index
-			{
-				fsave( F3, "#\n", 1.0e3 * mean( mean_curve[ K ],
-												Start_pos, Width )
-								  - base_int - 1.0e3 * mean_ground[ K ] );
+			FOR K = 1 : End_index {
+				fsave( F3, "#\n", mean( mean_curve[ K ], Start_pos, Width )
+								  - base_int - mean_ground[ K ] );
 			}
 		}
 
 		NEXT;
 	}
+
+	/* Get new positions of sliders - if nothing changed wait for a moment
+	   and go back to start of loop */
 
 	new_start_time = slider_value( S1 );
 	new_end_time   = slider_value( S2 );
@@ -375,8 +374,11 @@ FOREVER
 	start_time = new_start_time;
 	end_time   = new_end_time;
 
-	Start_pos = round( ( start_time * 1.0e-3 - min_time ) / time_res ) + 1;
-	End_pos   = round( ( end_time * 1.0e-3   - min_time ) / time_res ) + 1;
+	/* Calculate new indices of integration windows and calculate and display
+	   the integrals */
+
+	Start_pos = round( ( start_time - min_time ) / time_res ) + 1;
+	End_pos   = round( ( end_time - min_time ) / time_res ) + 1;
 	Width = abs( End_pos - Start_pos ) + 1;
 
 	IF Width > Rec_len - Start_pos + 1 {
