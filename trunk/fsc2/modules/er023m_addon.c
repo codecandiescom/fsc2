@@ -37,10 +37,7 @@ Var *lockin_rg( Var *v )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
-				eprint( FATAL, SET, "%s: Function %s() with no argument can "
-						"only be used in the EXPERIMENT section.\n",
-						DEVICE_NAME, Cur_Func );
-				THROW( EXCEPTION )
+				no_query_possible( DEVICE_NAME );
 
 			case TEST :
 				return vars_push( INT_VAR, ( long ) 
@@ -61,14 +58,7 @@ Var *lockin_rg( Var *v )
 	else
 		rg_index = ( int ) v->val.lval;
 
-	if ( ( v = vars_pop( v ) ) != NULL )
-	{
-		eprint( WARN, SET, "%s: Superfluous argument%s in call of function "
-				"%s().\n", DEVICE_NAME, v->next != NULL ? "s" : "", Cur_Func );
-
-		while ( ( v = vars_pop( v ) ) != NULL )
-			;
-	}
+	too_many_arguments( v, DEVICE_NAME );
 
 	if ( rg_index < 0 || rg_index > RG_MAX_INDEX )
 	{
@@ -98,10 +88,7 @@ Var *lockin_tc( Var *v )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
-				eprint( FATAL, SET, "%s: Function %s() with no argument can "
-						"only be used in the EXPERIMENT section.\n",
-						DEVICE_NAME, Cur_Func );
-				THROW( EXCEPTION )
+				no_query_possible( DEVICE_NAME );
 
 			case TEST :
 				return vars_push( INT_VAR, ( long ) 
@@ -122,15 +109,6 @@ Var *lockin_tc( Var *v )
 	else
 		tc_index = ( int ) v->val.lval;
 
-	if ( ( v = vars_pop( v ) ) != NULL )
-	{
-		eprint( WARN, SET, "%s: Superfluous argument%s in call of function "
-				"%s().\n", DEVICE_NAME, v->next != NULL ? "s" : "", Cur_Func );
-
-		while ( ( v = vars_pop( v ) ) != NULL )
-			;
-	}
-	
 	if ( tc_index > 0 && tc_index < TC_MIN_INDEX )
 	{
 		eprint( SEVERE, SET, "%s: Minimum usuable time constant index is %d, "
@@ -147,6 +125,8 @@ Var *lockin_tc( Var *v )
 		THROW( EXCEPTION )
 	}
 
+	too_many_arguments( v, DEVICE_NAME );
+	
 	er023m.tc_index = tc_index;
 	if ( FSC2_MODE == EXPERIMENT )
 			er023m_set_tc( tc_index );
@@ -177,10 +157,7 @@ Var *lockin_ma( Var *v )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
-				eprint( FATAL, SET, "%s: Function %s() with no argument can "
-						"only be used in the EXPERIMENT section.\n",
-						DEVICE_NAME, Cur_Func );
-				THROW( EXCEPTION )
+				no_query_possible( DEVICE_NAME );
 
 			case TEST :
 				return vars_push( INT_VAR, ( long )
@@ -201,15 +178,6 @@ Var *lockin_ma( Var *v )
 	else
 		ma = ( int ) v->val.lval;
 
-	if ( ( v = vars_pop( v ) ) != NULL )
-	{
-		eprint( WARN, SET, "%s: Superfluous argument%s in call of function "
-				"%s().\n", DEVICE_NAME, v->next != NULL ? "s" : "", Cur_Func );
-
-		while ( ( v = vars_pop( v ) ) != NULL )
-			;
-	}
-
 	if ( ma > MAX_MA_INDEX || ma < MIN_MA_INDEX )
 	{
 		eprint( FATAL, SET, "%s: Value %d for modulation attenuation is too "
@@ -219,6 +187,8 @@ Var *lockin_ma( Var *v )
 		THROW( EXCEPTION )
 	}
 
+	too_many_arguments( v, DEVICE_NAME );
+	
 	er023m.ma_index = ma;
 	if ( FSC2_MODE == EXPERIMENT )
 		er023m_set_ma( ma );
@@ -239,10 +209,7 @@ Var *lockin_ct( Var *v )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
-				eprint( FATAL, SET, "%s: Function %s() with no argument can "
-						"only be used in the EXPERIMENT section.\n",
-						DEVICE_NAME, Cur_Func );
-				THROW( EXCEPTION )
+				no_query_possible( DEVICE_NAME );
 
 			case TEST :
 				return vars_push( INT_VAR, ( long )
@@ -264,15 +231,6 @@ Var *lockin_ct( Var *v )
 	else
 		ct_mult = ( int ) v->val.lval;
 
-	if ( ( v = vars_pop( v ) ) != NULL )
-	{
-		eprint( WARN, SET, "%s: Superfluous argument%s in call of function "
-				"%s().\n", DEVICE_NAME, v->next != NULL ? "s" : "", Cur_Func );
-
-		while ( ( v = vars_pop( v ) ) != NULL )
-			;
-	}
-	
 	if ( ct_mult < 0 )
 	{
 		eprint( FATAL, SET, "%s: Invalid negative conversion time multiplier "
@@ -296,6 +254,8 @@ Var *lockin_ct( Var *v )
 		THROW( EXCEPTION )
 	}
 
+	too_many_arguments( v, DEVICE_NAME );
+	
 	er023m.ct_mult = ct_mult;
 	if ( FSC2_MODE == EXPERIMENT )
 		er023m_set_ct( ct_mult );
@@ -317,10 +277,7 @@ Var *lockin_mf( Var *v )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
-				eprint( FATAL, SET, "%s: Function %s() with no argument can "
-						"only be used in the EXPERIMENT section.\n",
-						DEVICE_NAME, Cur_Func );
-				THROW( EXCEPTION )
+				no_query_possible( DEVICE_NAME );
 
 			case TEST :
 				return vars_push( INT_VAR, ( long )
@@ -344,15 +301,6 @@ Var *lockin_mf( Var *v )
 	else
 		mf_index = ( int ) v->val.lval;
 
-	if ( ( v = vars_pop( v ) ) != NULL )
-	{
-		eprint( WARN, SET, "%s: Superfluous argument%s in call of function "
-				"%s().\n", DEVICE_NAME, v->next != NULL ? "s" : "", Cur_Func );
-
-		while ( ( v = vars_pop( v ) ) != NULL )
-			;
-	}
-	
 	if ( mf_index < 0 )
 	{
 		eprint( FATAL, SET, "%s: Invalid negative modulation frequency index "
@@ -368,6 +316,8 @@ Var *lockin_mf( Var *v )
 		THROW( EXCEPTION )
 	}
 
+	too_many_arguments( v, DEVICE_NAME );
+	
 	er023m.mf_index = mf_index;
 	if ( FSC2_MODE == EXPERIMENT )
 		er023m_set_mf( mf_index );

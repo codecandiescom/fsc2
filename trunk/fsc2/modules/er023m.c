@@ -203,10 +203,7 @@ Var *lockin_sensitivity( Var *v )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
-				eprint( FATAL, SET, "%s: Function %s() with no argument can "
-						"only be used in the EXPERIMENT section.\n",
-						DEVICE_NAME, Cur_Func );
-				THROW( EXCEPTION )
+				no_query_possible( DEVICE_NAME );
 
 			case TEST :
 				return vars_push( FLOAT_VAR,
@@ -295,10 +292,7 @@ Var *lockin_time_constant( Var *v )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
-				eprint( FATAL, SET, "%s: Function %s() with no argument can "
-						"only be used in the EXPERIMENT section.\n",
-						DEVICE_NAME, Cur_Func );
-				THROW( EXCEPTION )
+				no_query_possible( DEVICE_NAME );
 
 			case TEST :
 				return vars_push( FLOAT_VAR,
@@ -411,10 +405,7 @@ Var *lockin_phase( Var *v )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
-				eprint( FATAL, SET, "%s: Function %s() with no argument can "
-						"only be used in the EXPERIMENT section.\n",
-						DEVICE_NAME, Cur_Func );
-				THROW( EXCEPTION )
+				no_query_possible( DEVICE_NAME );
 
 			case TEST :
 				return vars_push( FLOAT_VAR, ( double )
@@ -462,10 +453,7 @@ Var *lockin_offset( Var *v )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
-				eprint( FATAL, SET, "%s: Function %s() with no argument can "
-						"only be used in the EXPERIMENT section.\n",
-						DEVICE_NAME, Cur_Func );
-				THROW( EXCEPTION )
+				no_query_possible( DEVICE_NAME );
 
 			case TEST :
 				return vars_push( INT_VAR, ( long )
@@ -520,10 +508,7 @@ Var *lockin_conversion_time( Var *v )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
-				eprint( FATAL, SET, "%s: Function %s() with no argument can "
-						"only be used in the EXPERIMENT section.\n",
-						DEVICE_NAME, Cur_Func );
-				THROW( EXCEPTION )
+				no_query_possible( DEVICE_NAME );
 
 			case TEST :
 				return vars_push( FLOAT_VAR, BASE_CT * 
@@ -591,10 +576,7 @@ Var *lockin_ref_freq( Var *v )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
-				eprint( FATAL, SET, "%s: Function %s() with no argument can "
-						"only be used in the EXPERIMENT section.\n",
-						DEVICE_NAME, Cur_Func );
-				THROW( EXCEPTION )
+				no_query_possible( DEVICE_NAME );
 
 			case TEST :
 				return vars_push( FLOAT_VAR,
@@ -692,10 +674,7 @@ Var *lockin_ref_level( Var *v )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
-				eprint( FATAL, SET, "%s: Function %s() with no argument can "
-						"only be used in the EXPERIMENT section.\n",
-						DEVICE_NAME, Cur_Func );
-				THROW( EXCEPTION )
+				no_query_possible( DEVICE_NAME );
 
 			case TEST :
 				return vars_push( FLOAT_VAR,
@@ -772,10 +751,7 @@ Var *lockin_harmonic( Var *v )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
-				eprint( FATAL, SET, "%s: Function %s() with no argument can "
-						"only be used in the EXPERIMENT section.\n",
-						DEVICE_NAME, Cur_Func );
-				THROW( EXCEPTION )
+				no_query_possible( DEVICE_NAME );
 
 			case TEST :
 				return vars_push( INT_VAR, 1L + ( long )
@@ -829,10 +805,7 @@ Var *lockin_resonator( Var *v )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
-				eprint( FATAL, SET, "%s: Function %s() with no argument can "
-						"only be used in the EXPERIMENT section.\n",
-						DEVICE_NAME, Cur_Func );
-				THROW( EXCEPTION )
+				no_query_possible( DEVICE_NAME );
 
 			case TEST :
 				return vars_push( INT_VAR, 1L + ( long )

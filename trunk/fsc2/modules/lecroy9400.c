@@ -261,13 +261,7 @@ Var *digitizer_timebase( Var *v )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
-				if ( lecroy9400.is_timebase )
-					return vars_push( FLOAT_VAR, lecroy9400.timebase );
-
-				eprint( FATAL, SET, "%s: Function %s with no argument can "
-						"only be used in the EXPERIMENT section.\n",
-						DEVICE_NAME, Cur_Func );
-				THROW( EXCEPTION )
+				no_query_possible( DEVICE_NAME );
 
 			case TEST :
 				return vars_push( FLOAT_VAR, lecroy9400.is_timebase? 
@@ -399,13 +393,7 @@ Var *digitizer_sensitivity( Var *v )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
-				if ( lecroy9400.is_sens[ channel ] )
-					return vars_push( FLOAT_VAR, lecroy9400.sens[ channel ] );
-
-				eprint( FATAL, SET, "%s: Function %s() with no argument can "
-						"only be used in the EXPERIMENT section.\n",
-						DEVICE_NAME, Cur_Func );
-				THROW( EXCEPTION )
+				no_query_possible( DEVICE_NAME );
 
 			case TEST :
 				return vars_push( FLOAT_VAR, lecroy9400.is_sens[ channel ] ? 
@@ -795,13 +783,7 @@ Var *digitizer_trigger_position( Var *v )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
-			if ( lecroy9400.is_trig_pos )
-				return vars_push( FLOAT_VAR, lecroy9400.trig_pos );
-
-			eprint( FATAL, SET, "%s: Function %s() with no argument can "
-					"only be used in the EXPERIMENT section.\n",
-					DEVICE_NAME, Cur_Func );
-			THROW( EXCEPTION )
+				no_query_possible( DEVICE_NAME );
 
 			case TEST :
 				return vars_push( FLOAT_VAR, lecroy9400.is_trig_pos ?
@@ -873,14 +855,7 @@ Var *digitizer_trigger_channel( Var *v )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
-				if ( lecroy9400.is_trigger_channel )
-					return vars_push( INT_VAR, lecroy9400_translate_channel(
-						LECROY9400_TO_GENERAL, lecroy9400.trigger_channel ) );
-
-				eprint( FATAL, SET, "%s: Function %s() with no argument can "
-						"only be used in the EXPERIMENT section.\n",
-						DEVICE_NAME, Cur_Func );
-				THROW( EXCEPTION )
+				no_query_possible( DEVICE_NAME );
 
 			case TEST :
 				if ( lecroy9400.is_trigger_channel )

@@ -282,13 +282,7 @@ Var *digitizer_timebase( Var *v )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
-				if ( tds520.is_timebase )
-					return vars_push( FLOAT_VAR, tds520.timebase );
-
-				eprint( FATAL, SET, "%s: Function %s with no argument can "
-						"only be used in the EXPERIMENT section.\n",
-						DEVICE_NAME, Cur_Func );
-				THROW( EXCEPTION )
+				no_query_possible( DEVICE_NAME );
 
 			case TEST :
 				return vars_push( FLOAT_VAR, tds520.is_timebase ?
@@ -402,13 +396,7 @@ Var *digitizer_sensitivity( Var *v )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
-				if ( tds520.is_sens[ channel ] )
-					return vars_push( FLOAT_VAR, tds520.sens[ channel ] );
-
-				eprint( FATAL, SET, "%s: Function %s() with no argument can "
-						"only be used in the EXPERIMENT section.\n",
-						DEVICE_NAME, Cur_Func );
-				THROW( EXCEPTION )
+				no_query_possible( DEVICE_NAME );
 
 			case TEST :
 				return vars_push( FLOAT_VAR, tds520.is_sens[ channel ] ?
@@ -455,13 +443,7 @@ Var *digitizer_num_averages( Var *v )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
-				if ( tds520.is_num_avg )
-					return vars_push( INT_VAR, tds520.num_avg );
-
-				eprint( FATAL, SET, "%s: Function %s() with no argument can "
-						"only be used in the EXPERIMENT section.\n",
-						DEVICE_NAME, Cur_Func );
-				THROW( EXCEPTION )
+				no_query_possible( DEVICE_NAME );
 
 			case TEST :
 				return vars_push( INT_VAR, tds520.is_num_avg ?
@@ -524,13 +506,7 @@ Var *digitizer_record_length( Var *v )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
-				if ( tds520.is_rec_len )
-					return vars_push( INT_VAR, tds520.rec_len );
-
-				eprint( FATAL, SET, "%s: Function %s() with no argument can "
-						"only be used in the EXPERIMENT section.\n",
-						DEVICE_NAME, Cur_Func );
-				THROW( EXCEPTION )
+				no_query_possible( DEVICE_NAME );
 
 			case TEST :
 				return vars_push( INT_VAR, tds520.is_rec_len ?
@@ -608,13 +584,7 @@ Var *digitizer_trigger_position( Var *v )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
-				if ( tds520.is_trig_pos )
-					return vars_push( FLOAT_VAR, tds520.trig_pos );
-
-				eprint( FATAL, SET, "%s: Function %s() with no argument can "
-						"only be used in the EXPERIMENT section.\n",
-						DEVICE_NAME, Cur_Func );
-				THROW( EXCEPTION )
+				no_query_possible( DEVICE_NAME );
 
 			case TEST :
 				return vars_push( FLOAT_VAR, tds520.is_trig_pos ?
@@ -688,14 +658,7 @@ Var *digitizer_trigger_channel( Var *v )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
-				if ( tds520.is_trigger_channel )
-					return vars_push( INT_VAR, tds520_translate_channel(
-						         TDS520_TO_GENERAL, tds520.trigger_channel ) );
-
-				eprint( FATAL, SET, "%s: Function %s() with no argument can "
-						"only be used in the EXPERIMENT section.\n",
-						DEVICE_NAME, Cur_Func );
-				THROW( EXCEPTION )
+				no_query_possible( DEVICE_NAME );
 
 			case TEST :
 				return vars_push( INT_VAR, tds520_translate_channel(

@@ -452,7 +452,7 @@ Var *lockin_dac_voltage( Var *v )
 		THROW( EXCEPTION )
 	}
 
-	too_many_arguments( v; DEVICE_NAME );
+	too_many_arguments( v, DEVICE_NAME );
 	
 	sr830.dac_voltage[ port - 1 ] = voltage;
 
@@ -480,10 +480,7 @@ Var *lockin_sensitivity( Var *v )
 		switch( FSC2_MODE )
 		{
 			case PREPARATION :
-				eprint( FATAL, SET, "%s: Function `lockin_sensitivity' "
-						"with no argument can only be used in the EXPERIMENT "
-						"section.\n", DEVICE_NAME );
-				THROW( EXCEPTION )
+				no_query_possible( DEVICE_NAME );
 
 			case TEST :
 				return vars_push( FLOAT_VAR,
@@ -501,7 +498,7 @@ Var *lockin_sensitivity( Var *v )
 				DEVICE_NAME );
 	sens = VALUE( v );
 
-	too_many_arguments( v; DEVICE_NAME );
+	too_many_arguments( v, DEVICE_NAME );
 
 	if ( sens < 0.0 )
 	{
@@ -596,10 +593,7 @@ Var *lockin_time_constant( Var *v )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
-				eprint( FATAL, SET, "%s: Function `lockin_time_constant'"
-						" with no argument can only be used in the EXPERIMENT "
-						"section.\n", DEVICE_NAME );
-				THROW( EXCEPTION )
+				no_query_possible( DEVICE_NAME );
 
 			case TEST :
 				return vars_push( FLOAT_VAR, sr830.tc_index == UNDEF_TC_INDEX ?
@@ -616,7 +610,7 @@ Var *lockin_time_constant( Var *v )
 				DEVICE_NAME );
 	tc = VALUE( v );
 
-	too_many_arguments( v; DEVICE_NAME );
+	too_many_arguments( v, DEVICE_NAME );
 
 	if ( tc < 0.0 )
 	{
@@ -731,7 +725,7 @@ Var *lockin_phase( Var *v )
 		eprint( WARN, SET, "%s: Integer value used as phase.\n", DEVICE_NAME );
 	phase = VALUE( v );
 
-	too_many_arguments( v; DEVICE_NAME );
+	too_many_arguments( v, DEVICE_NAME );
 
 	while ( phase >= 360.0 )    /* convert to 0-359 degree range */
 		phase -= 360.0;
@@ -785,7 +779,7 @@ Var *lockin_harmonic( Var *v )
 	else
 		harm = v->val.lval;
 	
-	too_many_arguments( v; DEVICE_NAME );
+	too_many_arguments( v, DEVICE_NAME );
 
 	if ( FSC2_MODE == TEST )
 		freq = MIN_MOD_FREQ;
@@ -848,10 +842,7 @@ Var *lockin_ref_freq( Var *v )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
-				eprint( FATAL, SET, "%s: Function %s() with no argument can "
-						"only be used in the EXPERIMENT section.\n",
-						DEVICE_NAME, Cur_Func );
-				THROW( EXCEPTION )
+				no_query_possible( DEVICE_NAME );
 
 			case TEST :
 				return vars_push( FLOAT_VAR, sr830.is_mod_freq ?
@@ -867,7 +858,7 @@ Var *lockin_ref_freq( Var *v )
 				"frequency.\n", DEVICE_NAME );
 	freq = VALUE( v );
 	
-	too_many_arguments( v; DEVICE_NAME );
+	too_many_arguments( v, DEVICE_NAME );
 
 	if ( FSC2_MODE != TEST && sr830_get_mod_mode( ) != MOD_MODE_INTERNAL )
 	{
@@ -917,10 +908,7 @@ Var *lockin_ref_level( Var *v )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
-				eprint( FATAL, SET, "%s: Function %s() with no argument can "
-						"only be used in the EXPERIMENT section.\n",
-						DEVICE_NAME, Cur_Func );
-				THROW( EXCEPTION )
+				no_query_possible( DEVICE_NAME );
 
 			case TEST :
 				return vars_push( FLOAT_VAR, sr830.is_mod_level ?
@@ -936,7 +924,7 @@ Var *lockin_ref_level( Var *v )
 				DEVICE_NAME );
 	level = VALUE( v );
 	
-	too_many_arguments( v; DEVICE_NAME );
+	too_many_arguments( v, DEVICE_NAME );
 
 	if ( level < MIN_MOD_LEVEL || level > MAX_MOD_LEVEL )
 	{
@@ -989,7 +977,7 @@ Var *lockin_lock_keyboard( Var *v )
 		}
 	}
 
-	too_many_arguments( v; DEVICE_NAME );
+	too_many_arguments( v, DEVICE_NAME );
 
 	if ( FSC2_MODE == EXPERIMENT )
 		sr830_lock_state( lock );
