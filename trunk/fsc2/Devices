@@ -10,3 +10,5 @@ SR510         // Stanford Research Lock-In amplifier
 S_BAND        // S-Band magnet power supply
 
 ER035M        // Bruker NMR gaussmeter
+
+BH15          // Bruker field controller
