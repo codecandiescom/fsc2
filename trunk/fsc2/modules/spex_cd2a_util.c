@@ -119,7 +119,7 @@ bool spex_cd2a_read_state( void )
 
 	fsc2_fclose( fp );
 
-	if ( val[ 1 ] <= 0.0 )
+	if ( val[ 1 ] < 0.0 )
 	{
 		print( FATAL, "Invalid state file '%s'.\n", fn );
 		T_free( fn );

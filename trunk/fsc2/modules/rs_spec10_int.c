@@ -48,6 +48,8 @@ static void rs_spec10_temperature_init( void );
 
 void rs_spec10_init_camera( void )
 {
+#if ! defined RS_SPEC10_TEST
+
 	int16 total_cams;
 	char cam_name[ CAM_NAME_LEN ];
 	int16 i;
@@ -97,6 +99,8 @@ void rs_spec10_init_camera( void )
 
 	rs_spec10_ccd_init( );
 	rs_spec10_temperature_init( );
+
+#endif /* ! defined RS_SPEC10_TEST */
 }
 
 
@@ -428,6 +432,8 @@ static void rs_spec10_temperature_init( void )
 
 void rs_spec10_clear_cycles( uns16 cycles )
 {
+#if ! defined RS_SPEC10_TEST
+
 	long count = cycles;
 
 
@@ -438,6 +444,8 @@ void rs_spec10_clear_cycles( uns16 cycles )
 		rs_spec10_error_handling( );
 
 	rs_spec10->ccd.clear_cycles = cycles;
+
+#endif /* ! defined RS_SPEC10_TEST */
 }
 
 
@@ -486,6 +494,8 @@ uns16 *rs_spec10_get_pic( uns32 *size )
 	getcwd( cur_dir, PATH_MAX );
 	chdir( PVCAM_DATA_DIR );
 
+#if ! defined RS_SPEC10_TEST
+
 	if ( ! pl_exp_init_seq( ) )
 	{
 		chdir( cur_dir );
@@ -500,17 +510,32 @@ uns16 *rs_spec10_get_pic( uns32 *size )
 		rs_spec10_error_handling( );
 	}
 
+#else
+
+	*size =   ( ( region.s2 - region.s1 + 1 ) / region.sbin )
+			* ( ( region.p2 - region.p1 + 1 ) / region.pbin )
+			* sizeof *frame;
+
+#endif /* ! defined RS_SPEC10_TEST */
+
 #ifndef NDEBUG
 	if ( *size == 0 )
 	{
 		print( FATAL, "Internal error detected at %s:%d.\n",
 			   __FILE__, __LINE__ );
+
+#if ! defined RS_SPEC10_TEST
+
 		pl_exp_abort( rs_spec10->handle, CCS_HALT );
 		pl_exp_uninit_seq( );
+
+#endif /* ! defined RS_SPEC10_TEST */
+
 		chdir( cur_dir );
 		THROW( EXCEPTION );
 	}
 #endif
+
 
 	/* Now we need memory for storing the new picture. The manual requires
 	   this memory to be protected against swapping, thus we should mlock()
@@ -535,11 +560,18 @@ uns16 *rs_spec10_get_pic( uns32 *size )
 	OTHERWISE
 	{
 		chdir( cur_dir );
+
+#if ! defined RS_SPEC10_TEST
+
 		pl_exp_abort( rs_spec10->handle, CCS_HALT );
 		pl_exp_uninit_seq( );
+
+#endif /* ! defined RS_SPEC10_TEST */
+
 		RETHROW( );
 	}
 
+#if ! defined RS_SPEC10_TEST
 	if ( ! pl_exp_start_seq( rs_spec10->handle, frame ) )
 	{
 		chdir( cur_dir );
@@ -586,6 +618,16 @@ uns16 *rs_spec10_get_pic( uns32 *size )
     pl_exp_finish_seq( rs_spec10->handle, frame, 0 );
 	pl_exp_uninit_seq();
 
+#else
+	{
+		uns32 i;
+		unsigned long max_val = ~ ( uns16 ) 0;
+
+		for ( i = 0; i < *size / sizeof *frame; i++ )
+			frame[ i ] = random( ) & max_val;
+	}
+#endif ! defined RS_SPEC10_TEST
+
 #if defined RUNNING_WITH_ROOT_PRIVILEGES
 	munlock( frame, *size );
 #endif
@@ -606,11 +648,19 @@ double rs_spec10_get_temperature( void )
 
 	/* Get the current temperature */
 
+#if ! defined RS_SPEC10_TEST
+
 	if ( ! pl_get_param( rs_spec10->handle, PARAM_TEMP, ATTR_CURRENT,
 						 ( void_ptr ) &itemp ) )
 		rs_spec10_error_handling( );
 
 	/* Return current temperature, converted to Kelvin */
+
+#else
+
+	itemp = -70.0;
+
+#endif /* ! defined RS_SPEC10_TEST */
 
 	return rs_spec10_ic2k( itemp );
 }
@@ -632,9 +682,13 @@ double rs_spec10_set_temperature( double temp )
 	fsc2_assert( itemp <= lrnd( CCD_MAX_TEMPERATURE * 100.0 ) &&
 				 itemp >= lrnd( CCD_MIN_TEMPERATURE * 100.0 ) );
 
+#if ! defined RS_SPEC10_TEST
+
 	if ( ! pl_set_param( rs_spec10->handle, PARAM_TEMP_SETPOINT, 
 						 &itemp ) )
 		rs_spec10_error_handling( );
+
+#endif /* ! defined RS_SPEC10_TEST */
 
 	/* Return the new setpoint */
 
