@@ -36,7 +36,8 @@ void show_message( const char *str )
 {
 	if ( Internals.I_am == PARENT )
 	{
-		if ( Internals.cmdline_flags & DO_CHECK )
+		if ( Internals.cmdline_flags & DO_CHECK ||
+			 Internals.cmdline_flags & BATCH_MODE )
 			fprintf( stdout, "%s\n", str );
 		else
 		{
@@ -80,7 +81,8 @@ void show_alert( const char *str )
 		else
 			strs[ 1 ] = strs[ 2 ] = NULL;
 
-		if ( Internals.cmdline_flags & DO_CHECK )
+		if ( Internals.cmdline_flags & DO_CHECK ||
+			 Internals.cmdline_flags & BATCH_MODE )
 		{
 			for ( i = 0; i < 3 && strs[ i ] != NULL; i++ )
 				fprintf( stdout, "%s", strs[ i ] );
@@ -121,7 +123,8 @@ int show_choices( const char *text, int numb, const char *b1, const char *b2,
 
 	if ( Internals.I_am == PARENT )
 	{
-		if ( Internals.cmdline_flags & DO_CHECK )
+		if ( Internals.cmdline_flags & DO_CHECK ||
+			 Internals.cmdline_flags & BATCH_MODE )
 		{
 			fprintf( stdout, "%s\n%s %s %s\n", text, b1, b2, b3 );
 			return def != 0 ? def : 1;

@@ -418,7 +418,8 @@ int rs690_exp_hook( void )
 					 "***** Is this really what you want? *****",
 					 rs690_pticks( rs690.defense_2_shape ) );
 
-		if ( 2 != show_choices( str, 2, "Abort", "Yes", "", 1 ) )
+		if ( ! FSC2_IS_BATCH_MODE ||
+			 2 != show_choices( str, 2, "Abort", "Yes", NULL, 1 ) )
 			THROW( EXCEPTION );
 
 		rs690.is_confirmation = SET;

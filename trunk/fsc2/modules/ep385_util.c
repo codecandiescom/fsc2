@@ -26,6 +26,39 @@
 
 
 /*-----------------------------------------------------------------*/
+/* At many places a correctly set timebase is required, but it can */
+/* also be set implicitely to the default timebase of the pulser   */
+/* by simply not setting it. All functions that require a timebase */
+/* should call this function top make sure it is set correctly.    */
+/*-----------------------------------------------------------------*/
+
+void ep385_timebase_check( void )
+{
+	double tmp;
+
+
+	if ( ! ep385.is_timebase )
+	{
+		ep385.timebase = FIXED_TIMEBASE;
+		ep385.timebase_mode = INTERNAL;
+		ep385.is_timebase = SET;
+
+		tmp = SHAPE_2_DEFENSE_DEFAULT_MIN_DISTANCE / FIXED_TIMEBASE;
+		tmp = tmp - floor( tmp ) > 0.01 ? ceil( tmp ) : floor( tmp );
+		ep385.shape_2_defense = Ticksrnd( tmp );
+
+		tmp = DEFENSE_2_SHAPE_DEFAULT_MIN_DISTANCE / FIXED_TIMEBASE;
+		tmp = tmp - floor( tmp ) > 0.01 ? ceil( tmp ) : floor( tmp );
+		ep385.defense_2_shape = Ticksrnd( tmp );
+
+		tmp = MINIMUM_TWT_PULSE_DISTANCE / FIXED_TIMEBASE;
+		tmp = tmp - floor( tmp ) > 0.01 ? ceil( tmp ) : floor( tmp );
+		ep385.minimum_twt_pulse_distance = Ticksrnd( tmp );
+	}
+}
+
+
+/*-----------------------------------------------------------------*/
 /* Converts a time into the internal type of a time specification, */
 /* i.e. an integer multiple of the time base                       */
 /*-----------------------------------------------------------------*/
@@ -39,19 +72,7 @@ Ticks ep385_double2ticks( double p_time )
 	   use the built-in time base (by having *no* TIMEBASE command in the
 	   PREPARATIONS section) */
 
-	if ( ! ep385.is_timebase )
-	{
-		ep385.is_timebase = SET;
-		ep385.timebase_mode = INTERNAL;
-		ep385.timebase = FIXED_TIMEBASE;
-
-		ep385.shape_2_defense = Ticksrnd( ceil (
-					 SHAPE_2_DEFENSE_DEFAULT_MIN_DISTANCE / FIXED_TIMEBASE ) );
-		ep385.defense_2_shape = Ticksrnd( ceil (
-					 DEFENSE_2_SHAPE_DEFAULT_MIN_DISTANCE / FIXED_TIMEBASE ) );
-		ep385.minimum_twt_pulse_distance =
-			   Ticksrnd( ceil( MINIMUM_TWT_PULSE_DISTANCE / FIXED_TIMEBASE ) );
-	}
+	ep385_timebase_check( );
 
 	ticks = p_time / ep385.timebase;
 
@@ -91,19 +112,7 @@ Ticks ep385_double2ticks_simple( double p_time )
 	   use the built-in time base (by having *no* TIMEBASE command in the
 	   PREPARATIONS section) */
 
-	if ( ! ep385.is_timebase )
-	{
-		ep385.is_timebase = SET;
-		ep385.timebase_mode = INTERNAL;
-		ep385.timebase = FIXED_TIMEBASE;
-
-		ep385.shape_2_defense = Ticksrnd( ceil (
-					 SHAPE_2_DEFENSE_DEFAULT_MIN_DISTANCE / FIXED_TIMEBASE ) );
-		ep385.defense_2_shape = Ticksrnd( ceil (
-					 DEFENSE_2_SHAPE_DEFAULT_MIN_DISTANCE / FIXED_TIMEBASE ) );
-		ep385.minimum_twt_pulse_distance =
-			   Ticksrnd( ceil( MINIMUM_TWT_PULSE_DISTANCE / FIXED_TIMEBASE ) );
-	}
+	ep385_timebase_check( );
 
 	ticks = p_time / ep385.timebase;
 

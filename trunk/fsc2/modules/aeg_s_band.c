@@ -737,7 +737,7 @@ try_again:
 		if ( 1 != show_choices( "Please set sweep speed at magnet front\n"
 								"panel to maximum value of 6666 Oe/min.\n"
 								"Also make sure remote control is enabled!",
-								2, "Abort", "Done", "", 3 ) )
+								2, "Abort", "Done", NULL, 1 ) )
 			goto try_again;
 		return FAIL;
 	}

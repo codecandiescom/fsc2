@@ -192,29 +192,9 @@ int ep385_init_hook( void )
 
 int ep385_test_hook( void )
 {
-	double tmp;
-
-
 	/* Make sure that a timebase is set (shouldn't really be needed) */
 
-	if ( ! ep385.is_timebase )
-	{
-		ep385.is_timebase = SET;
-		ep385.timebase_mode = INTERNAL;
-		ep385.timebase = FIXED_TIMEBASE;
-
-		tmp = SHAPE_2_DEFENSE_DEFAULT_MIN_DISTANCE / FIXED_TIMEBASE;
-		tmp = tmp - floor( tmp ) > 0.01 ? ceil( tmp ) : floor( tmp );
-		ep385.shape_2_defense = Ticksrnd( tmp );
-
-		tmp = DEFENSE_2_SHAPE_DEFAULT_MIN_DISTANCE / FIXED_TIMEBASE;
-		tmp = tmp - floor( tmp ) > 0.01 ? ceil( tmp ) : floor( tmp );
-		ep385.defense_2_shape = Ticksrnd( tmp );
-
-		tmp = MINIMUM_TWT_PULSE_DISTANCE / FIXED_TIMEBASE;
-		tmp = tmp - floor( tmp ) > 0.01 ? ceil( tmp ) : floor( tmp );
-		ep385.minimum_twt_pulse_distance = Ticksrnd( tmp );
-	}
+	ep385_timebase_check( );
 
 	/* Check consistency of pulse settings and do everything to setup the
 	   pulser for the test run */
@@ -463,7 +443,7 @@ int ep385_exp_hook( void )
 					 "***** Is this really what you want? *****",
 					 ep385_pticks( ep385.defense_2_shape ) );
 
-		if ( 2 != show_choices( str, 2, "Abort", "Yes", "", 1 ) )
+		if ( 2 != show_choices( str, 2, "Abort", "Yes", NULL, 1 ) )
 			THROW( EXCEPTION );
 
 		ep385.is_confirmation = SET;
@@ -661,6 +641,8 @@ Var *pulser_automatic_shape_pulses( Var *v )
 		}
 		else
 		{
+			ep385_timebase_check( );
+
 			tmp = AUTO_SHAPE_RIGHT_PADDING / ep385.timebase;
 			tmp = tmp - floor( tmp ) > 0.01 ? ceil( tmp ) : floor( tmp );
 			ep385.function[ func ].right_shape_padding = Ticksrnd( tmp );
@@ -668,6 +650,8 @@ Var *pulser_automatic_shape_pulses( Var *v )
 	}
 	else
 	{
+		ep385_timebase_check( );
+
 		tmp = AUTO_SHAPE_LEFT_PADDING / ep385.timebase;
 		tmp = tmp - floor( tmp ) > 0.01 ? ceil( tmp ) : floor( tmp );
 		ep385.function[ func ].left_shape_padding = Ticksrnd( tmp );
@@ -780,6 +764,8 @@ Var *pulser_automatic_twt_pulses( Var *v )
 		}
 		else
 		{
+			ep385_timebase_check( );
+
 			tmp = AUTO_TWT_RIGHT_PADDING / ep385.timebase;
 			tmp = tmp - floor( tmp ) > 0.01 ? ceil( tmp ) : floor( tmp );
 			ep385.function[ func ].right_twt_padding = Ticksrnd( tmp );
@@ -787,6 +773,8 @@ Var *pulser_automatic_twt_pulses( Var *v )
 	}
 	else
 	{
+		ep385_timebase_check( );
+
 		tmp = AUTO_TWT_LEFT_PADDING / ep385.timebase;
 		tmp = tmp - floor( tmp ) > 0.01 ? ceil( tmp ) : floor( tmp );
 		ep385.function[ func ].left_twt_padding = Ticksrnd( tmp );
@@ -1481,8 +1469,8 @@ Var *pulser_maximum_pattern_length( Var *v )
 {
 	UNUSED_ARGUMENT( v );
 	print( WARN, "Pulser doesn't allow setting a maximum pattern length.\n" );
-	return vars_push( FLOAT_VAR, MAX_PULSER_BITS
-					  * ep385.is_timebase ? ep385.timebase : FIXED_TIMEBASE );
+	ep385_timebase_check( );
+	return vars_push( FLOAT_VAR, MAX_PULSER_BITS * ep385.timebase );
 }
 
 
