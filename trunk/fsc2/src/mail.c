@@ -139,7 +139,8 @@ static int do_send( const char *rec_host, const char *to,
 
 	/* Send the line about the sender of the mail */
 
-	if ( ( len = snprintf( line, MAX_MAIL_LINE, "MAIL FROM:<%s>\r\n", from ) )
+	if ( ( len = snprintf( line, MAX_MAIL_LINE, "MAIL FROM:<%s@%s>\r\n",
+						   from, local_host ) )
 		 > MAX_MAIL_LINE ||
 		 writen( mfd, line, len ) < len )
 	{
