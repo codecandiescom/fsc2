@@ -173,6 +173,7 @@ int main( int argc, char *argv[ ] )
 	   back when creating or attaching shared memory segments */
 
 	EUID = geteuid( );
+	EGID = getegid( );
 	seteuid( getuid( ) );
 	setegid( getgid( ) );
 

@@ -43,6 +43,8 @@ pid_t spawn_conn( bool start_state )
 
 	listen_fd = socket( AF_LOCAL, SOCK_STREAM, 0 );
 
+	seteuid( EUID );
+	setegid( EGID );
 	unlink( FSC2_SOCKET );
 	memset( &serv_addr, 0, sizeof( serv_addr ) );
 	serv_addr.sun_family = AF_LOCAL;
@@ -54,13 +56,21 @@ pid_t spawn_conn( bool start_state )
 			   sizeof( serv_addr ) ) == -1 )
 	{
 		umask( old_mask );
+		unlink( FSC2_SOCKET );
+		seteuid( getuid( ) );
+		setegid( getgid( ) );
 		return -1;
 	}
 
     umask( old_mask );
 
 	if ( listen( listen_fd, SOMAXCONN ) < 0 )
+	{
+		unlink( FSC2_SOCKET );
+		seteuid( getuid( ) );
+		setegid( getgid( ) );
 		return -1;
+	}
 
 	/* Fork a child to handle the communication */
 
@@ -76,6 +86,11 @@ pid_t spawn_conn( bool start_state )
 			usleep( 50000 );
 		conn_child_replied = UNSET;
 	}
+	else
+		unlink( FSC2_SOCKET );
+
+	seteuid( getuid( ) );
+	setegid( getgid( ) );
 
 	return new_pid;
 }

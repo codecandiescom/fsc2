@@ -122,7 +122,7 @@ void notify_conn( int signo );
 #if defined ( FSC2_MAIN )
 
 uid_t EUID;
-
+gid_t EGID;
 
 /* used in compiling the user supplied program */
 
@@ -183,6 +183,7 @@ TOOL_BOX *Tool_Box = NULL;
 #else   /*  ! FSC2_MAIN */
 
 extern uid_t EUID;
+extern gid_t EGID;
 
 extern long Lc;
 extern char *Fname;
