@@ -90,7 +90,6 @@ static int ni_daq_first_call_handler( void );
 int ni_daq_open( const char *name )
 {
 	int board;
-	int ret;
 	struct stat stat_buf;
 	NI_DAQ_MSC_ARG m;
 
@@ -104,8 +103,8 @@ int ni_daq_open( const char *name )
 	   it seems to be the lower byte of the 'st_rdev' member of the stat
 	   structure */
 
-	if ( ( ret = stat( name, &stat_buf ) ) < 0 )
-		switch ( ret )
+	if ( stat( name, &stat_buf ) < 0 )
+		switch ( errno )
 		{
 			case ENOENT : case ENOTDIR : case ELOOP :
 				return ni_daq_errno = NI_DAQ_ERR_DFM;
