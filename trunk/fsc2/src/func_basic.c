@@ -1866,20 +1866,70 @@ Var *f_setseed( Var *v )
 
 /*--------------------------------------------------------------*/
 /* Returns a string with the current time in the form hh:mm:ss. */
+/* If a string argument is passed to the function the colons    */
+/* are replaced by the first two elements of the string (or the */
+/* first if there's only one character in the string). The new  */
+/* separator characters must be printable, i.e. between (and    */
+/* including) 0x20 and 0x7E for a 7-bit ASCII character set.    */
 /*--------------------------------------------------------------*/
 
 Var *f_time( Var *v )
 {
 	time_t tp;
 	char ts[ 100 ];
+	char sep[ 3 ] = "::";
+	char *sp;
+	size_t i;
 
 
-	UNUSED_ARGUMENT( v );
+	if ( v != NULL )
+	{
+		if ( v->type != STR_VAR )
+		{
+			print( FATAL, "Argument must be a string of up to two separator "
+				   "characters.\n" );
+			THROW( EXCEPTION );
+		}
+
+		if ( *v->val.sptr == '\0' )
+			print( SEVERE, "Argument string does not contain any characters, "
+				   "using ':' as separator.\n ");
+		else
+		{
+			if ( strlen( v->val.sptr ) > 2 )
+				print ( SEVERE, "Argument string contains more than two "
+						"characters, using only the first two.\n ");
+
+			for ( sp = v->val.sptr; *sp; sp++ )
+				if ( ! isprint( *sp ) )
+				{
+					print( SEVERE, "Argument string contains non-printable "
+						   "characters, using ':' as separator.\n" );
+					break;
+				}
+
+			if ( *sp == '\0' )
+			{
+				sep[ 0 ] = *v->val.sptr;
+				if ( * ( v->val.sptr + 1 ) != '\0' )
+					sep[ 1 ] = * ( v->val.sptr + 1 );
+				else
+					sep[ 1 ] = *v->val.sptr;
+			}
+		}
+	}
+
 	time( &tp );
 	if ( strftime( ts, 100, "%H:%M:%S", localtime( &tp ) ) == 0 )
 	{
 		print( SEVERE, "Returning invalid time string.\n" );
 		strcat( ts, "(Unknown time)" );
+	}
+
+	for ( i = 0, sp = ts; i < 2; i++ )
+	{
+		sp = strchr( sp, ':' );
+		*sp = sep[ i ];
 	}
 
 	return vars_push( STR_VAR, ts );

@@ -2043,13 +2043,19 @@ can only be used in the @code{EXPERIMENT} section
 @anchor{date}
 @item date()
 @findex date()
-Returns a string with the current date in a form like @code{Sun Jun 17, 2000}.
+Returns a string with the current date in a form like @w{@code{Sun Jun
+17, 2000}}.
 
 
 @anchor{time}
 @item time()
 @findex time()
-Returns a string with the current time in the form @code{hh:mm:ss}.
+If called without an argument the function returns a string with the
+current time in the form @w{@code{hh:mm:ss}}. If it's called with a
+string containing of one or two characters the colons ('@code{:}') in
+the returned string are replaced by the characters from the argument.
+The new separator characters must be printable, i.e.@: they can't be
+control characters.
 
 
 @anchor{delta_time}
