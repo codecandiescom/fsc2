@@ -713,7 +713,7 @@ Var *digitizer_trigger_position( Var *v )
 			if ( tds540.is_trig_pos )
 				return vars_push( FLOAT_VAR, tds540.trig_pos );
 			else
-				return vars_push( FLOAT_VAR, TEST_TRIG_POS );
+				return vars_push( FLOAT_VAR, TDS540_TEST_TRIG_POS );
 		}
 		else if ( I_am == PARENT )
 		{
