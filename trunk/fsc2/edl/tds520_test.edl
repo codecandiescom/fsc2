@@ -1,5 +1,6 @@
 DEVICES:
 
+tds520;
 tds540;
 
 
@@ -22,7 +23,9 @@ digitizer_lock_keyboard( "ON" );
 
 FOR I = 1 : 200 {
 	digitizer_start_acquisition( );
+	digitizer_start_acquisition#2( );
 	curve[ 1 ] = digitizer_get_curve( CH3 );
+	curve[ 1 ] = digitizer_get_curve#2( CH3 );
     display( 1, I, curve[ 1 ], 1 );
 }
 
