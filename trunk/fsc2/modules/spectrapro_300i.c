@@ -770,7 +770,7 @@ Var *monochromator_calc_wavelength( Var *v )
 		}
 	}
 
-	if ( v->next->next != NULL )
+	if ( v->next != NULL && v->next->next != NULL )
 	{  
 		cwl = get_double( v->next->next, "center wavelength" );
 		if ( cwl < 0.0 )
