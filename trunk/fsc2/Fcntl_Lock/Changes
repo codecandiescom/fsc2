@@ -1,6 +1,11 @@
 Revision history for Perl extension Fcntl_Lock.
 
+0.02  Sat Apr 20 01:10:52 2002
+	- Added tests in test.pl
+	- Some changes in Makefile.PL thanks to Mark-Jason Dominus
+	- Module now recognizes file handles and descriptors correctly
+	- Update of documentation
+
 0.01  Thu Apr 18 14:39:19 2002
-	- original version; created by h2xs 1.21 with options
-		-A -n Fcntl_Lock
+	- original version; created by h2xs 1.21 with options -A -n Fcntl_Lock
 
