@@ -115,8 +115,8 @@ Var *digitizer_define_window( Var *v )
 
 	v = vars_pop( v );
 
-	/* Test if the window number non-negative and no window with this number
-	   already exists */
+	/* Check that the window number is non-negative and no window with this
+	   number already exists */
 
 	if ( win_num < 0 )
 	{

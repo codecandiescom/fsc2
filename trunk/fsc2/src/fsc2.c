@@ -469,7 +469,6 @@ static void start_editor( void )
 }
 
 
-
 /*-----------------------------------------------------*/
 /* test_file() does a syntax and plausibility check of */
 /* the currently loaded file.                          */

@@ -446,23 +446,24 @@ only if either it has been already called with an argument or in the
 @findex digitizer_define_window()
 The function can be used to define a time window to be used in later
 calls of the functions to measure an area, an amplituide or to fetch a
-curve from the oscilloscope. It needs up to two arguments, the starting
-point of the interval (in seconds) and, optionally, the width of the
-window (also in sconds). If no width argument is passed to the function
-the distance between the cursor pair shown on the oscilloscopes screen
-is going to be used.
+curve from the oscilloscope. It needs at least two arguments, a
+non-negative window number that must not be used before and the
+starting point of the interval (in seconds). Optionally, there can be a
+third argument with the width of the window (also in sconds). If no
+width argument is passed to the function the distance between the cursor
+pair shown on the oscilloscopes screen is going to be used.
 
-The allowed arguments of the function depend on the time base setting of
-the oscilloscope as well as on the pre-trigger setting and the current
-record length. The point in time defined by trigger event corresponds to
-an argument of zero for the starting point of the window. Times before
-the trigger are negative, times after the trigger are positive. If a
-window width is given it has to be positive and the window must fit into
-the time interval measured by the oscilloscope. The easiest way to find
-valid parameters is to position the two vertical cursors at the borders
-of the interval to be measured and directly use the values for the
-starting point and width displayed in the upper right hand corner of the
-oscilloscope.
+The allowed range of arguments for the start point and width of the
+window depends on the time base setting of the oscilloscope as well as
+the pre-trigger setting and the current record length. The time of the
+trigger event corresponds to an argument of zero for the starting point
+of the window. Times before the trigger are negative, times after the
+trigger are positive. If a window width is given it has to be positive
+and the window must fit into the time interval measured by the
+oscilloscope. The easiest way to find valid parameters is to position
+the two vertical cursors at the borders of the interval to be measured
+and directly use the values for the starting point and width displayed
+in the upper right hand corner of the oscilloscope.
 
 Because the data measured by the oscilloscope are discreet it is not
 possible to specify arbitrary values for the starting point and the
@@ -470,9 +471,6 @@ window width (they must be dividable by 1/50 of the oscilloscopes time
 base). If the specified values don't fit the requirement a warning is
 printed and the position an width are adjusted to the nearest allowed
 value.
-
-The function returns an integer window ID to be used to reference this
-window in later funtions calls.
 
 This function can only be used in the @code{PREPARATIONS} section of the
 @acronym{EDL} file.
