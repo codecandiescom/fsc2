@@ -81,7 +81,6 @@ extern const char *show_input( const char *content, const char *label );
 
 /* Global variables */
 
-extern const char *Cur_Func;
 extern Compilation compilation;
 extern Pulser_Struct pulser_struct;
 extern Phase_Sequence *PSeq;

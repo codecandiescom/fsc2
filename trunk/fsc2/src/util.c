@@ -329,6 +329,9 @@ void eprint( int severity, bool print_fl, const char *fmt, ... )
 }
 
 
+/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*/
+
 void print( int severity, const char *fmt, ... )
 {
 	char buffer[ FL_BROWSER_LINELENGTH + 1 ];

@@ -126,7 +126,6 @@ int cmdline_flags;
 long Lc = 0;                 /* line number in currently parsed file */
 char *Fname = NULL;          /* name of currently parsed file */
 Call_Stack *CS = NULL;
-const char *Cur_Func = NULL; /* name of the currently executed function */
 Compilation compilation;     /* structure with infos about compilation state */
 Prg_Token *prg_token = NULL; /* array with predigested program */
 long prg_length = -1;        /* number of array elements in predigested
@@ -209,7 +208,6 @@ extern int cmdline_flags;
 extern long Lc;
 extern char *Fname;
 extern Call_Stack *CS;
-extern const char *Cur_Func;
 extern Compilation compilation;
 extern Prg_Token *prg_token;
 extern long prg_length;

@@ -38,10 +38,9 @@ static Var *get_phase_cycled_area_1( Var *v );
 static Var *get_phase_cycled_area_2( Var *v );
 
 
-static bool get_channel_number( Var *v, const char *func_name, long *channel );
-static void pc_basic_check( const char *func_name, const char *func_1,
-							bool *is_1, const char *func_2, bool *is_2,
-							const char *str );
+static bool get_channel_number( Var *v, long *channel );
+static void pc_basic_check( const char *func_1, bool *is_1, const char *func_2,
+							bool *is_2, const char *str );
 
 
 /*-----------------------------------------------------------------*/
@@ -100,8 +99,7 @@ static Var *get_phase_cycled_area_1( Var *v )
 		aseq = ASeq + 1;
 	else
 	{
-		eprint( FATAL, SET, "%s(): No acquisition sequence has been "
-				"defined.\n", Cur_Func );
+		print( FATAL, "No acquisition sequence has been defined.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -110,8 +108,8 @@ static Var *get_phase_cycled_area_1( Var *v )
 
 	if ( first_time )
 	{
-		pc_basic_check( Cur_Func, "digitizer_get_area",
-						&is_get_area, "digitizer_get_area_fast",
+		pc_basic_check( "digitizer_get_area", &is_get_area,
+						"digitizer_get_area_fast",
 						&is_get_area_fast, "an area" );
 		first_time = UNSET;
 	}
@@ -120,7 +118,7 @@ static Var *get_phase_cycled_area_1( Var *v )
 
 	if ( V == NULL )
 	{
-		eprint( FATAL, SET, "%s(): Missing arguments.\n", Cur_Func );
+		print( FATAL, "Missing arguments.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -135,10 +133,10 @@ static Var *get_phase_cycled_area_1( Var *v )
 	/* The first parameter must always be a channel number, ask digitizer
 	   module if it really is one */
 
-	if ( ! get_channel_number( V, Cur_Func, channel ) )
+	if ( ! get_channel_number( V, channel ) )
 	{
-		eprint( FATAL, SET, "%s(): Invalid digitizer channel number: %ld.\n",
-				Cur_Func, channel[ 0 ] );
+		print( FATAL, "Invalid digitizer channel number: %ld.\n",
+			   channel[ 0 ] );
 		THROW( EXCEPTION );
 	}
 
@@ -148,18 +146,18 @@ static Var *get_phase_cycled_area_1( Var *v )
 
 	if ( ( V = vars_pop( V ) ) != NULL )
 	{
-		is_channel = get_channel_number( V , Cur_Func, channel + 1 );
+		is_channel = get_channel_number( V, channel + 1 );
 
 		if ( channels_needed == 2 && ! is_channel )
 		{
-			eprint( FATAL, SET, "%s(): Two digitizer channel nunmbers are "
-					"needed but second argument isn't one.\n", Cur_Func );
+			print( FATAL, "Two digitizer channel nunmbers are needed but "
+				   "second argument isn't one.\n" );
 			THROW( EXCEPTION );
 		}
 
 		if ( channels_needed == 1 && is_channel )
-			eprint( WARN, SET, "%s(): Superfluous digitizer channel number "
-					"found as second argument.\n", Cur_Func );
+			print( WARN, "Superfluous digitizer channel number found as "
+				   "second argument.\n" );
 
 		if ( is_channel )
 			V = vars_pop( V );
@@ -182,23 +180,8 @@ static Var *get_phase_cycled_area_1( Var *v )
 	TRY
 	{
 		if ( V != NULL )
-		{
-			for ( i = 0; i < num_windows; i++ )
-			{
-				vars_check( V, INT_VAR | FLOAT_VAR );
-
-				if ( V->type == INT_VAR )
-					win_list[ i ] = V->val.lval;
-				else
-				{
-					eprint( WARN, SET, "%s(): Floating point value used as "
-							"window number.\n", Cur_Func );
-					win_list[ i ] = lrnd( V->val.dval );
-				}
-
-				V = vars_pop( V );
-			}
-		}
+			for ( i = 0; i < num_windows; V = vars_pop( V ), i++ )
+				win_list[ i ] = get_long( V, "window number" );
 		else
 			win_list[ 0 ] = -1;              /* No window is to be used ! */
 
@@ -333,7 +316,7 @@ static Var *get_phase_cycled_area_2( Var *v )
 
 	if ( first_time )
 	{
-		pc_basic_check( Cur_Func, "digitizer_get_area", &is_get_area,
+		pc_basic_check( "digitizer_get_area", &is_get_area,
 						"digitizer_get_area_fast", &is_get_area_fast,
 						"an area" );
 		first_time = UNSET;
@@ -341,8 +324,7 @@ static Var *get_phase_cycled_area_2( Var *v )
 
 	if ( ! aseq[ 0 ]->defined || ! aseq[ 1 ]->defined )
 	{
-		eprint( FATAL, SET, "%s(): Only one acquisition sequence has "
-				"been defined.\n", Cur_Func );
+		print( FATAL, "Only one acquisition sequence has been defined.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -350,7 +332,7 @@ static Var *get_phase_cycled_area_2( Var *v )
 
 	if ( V == NULL )
 	{
-		eprint( FATAL, SET, "%s(): Missing arguments.\n", Cur_Func );
+		print( FATAL, "Missing arguments.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -374,10 +356,10 @@ static Var *get_phase_cycled_area_2( Var *v )
 	/* The first parameter must always be a channel number, ask digitizer
 	   module if it really is one */
 
-	if ( ! get_channel_number( V, Cur_Func, channel ) )
+	if ( ! get_channel_number( V, channel ) )
 	{
-		eprint( FATAL, SET, "%s(): Invalid digitizer channel number: %ld.\n",
-				Cur_Func, channel[ 0 ] );
+		print( FATAL, "Invalid digitizer channel number: %ld.\n",
+			   channel[ 0 ] );
 		THROW( EXCEPTION );
 	}
 
@@ -387,18 +369,18 @@ static Var *get_phase_cycled_area_2( Var *v )
 
 	if ( ( V = vars_pop( V ) ) != NULL )
 	{
-		is_channel = get_channel_number( V , Cur_Func, channel + 1 );
+		is_channel = get_channel_number( V, channel + 1 );
 
 		if ( channels_needed == 2 && ! is_channel )
 		{
-			eprint( FATAL, SET, "%s(): Two digitizer channel nunmbers are "
-					"needed but second argument isn't one.\n", Cur_Func );
+			print( FATAL, "Two digitizer channel nunmbers are needed but "
+				   "second argument isn't one.\n" );
 			THROW( EXCEPTION );
 		}
 
 		if ( channels_needed == 1 && is_channel )
-			eprint( WARN, SET, "%s(): Superfluous digitizer channel number "
-					"found as second argument.\n", Cur_Func );
+			print( WARN, "Superfluous digitizer channel number found as "
+				   "second argument.\n" );
 
 		if ( is_channel )
 			V = vars_pop( V );
@@ -421,24 +403,8 @@ static Var *get_phase_cycled_area_2( Var *v )
 	TRY
 	{
 		if ( V != NULL )
-		{
-			for ( i = 0; i < num_windows; i++ )
-			{
-				vars_check( V, INT_VAR | FLOAT_VAR );
-				TRY_SUCCESS;
-			}
-
-			if ( V->type == INT_VAR )
-				win_list[ i ] = V->val.lval;
-			else
-			{
-				eprint( WARN, SET, "%s(): Floating point value used as "
-						"window number.\n", Cur_Func );
-				win_list[ i ] = lrnd( V->val.dval );
-			}
-
-			V = vars_pop( V );
-		}
+			for ( i = 0; i < num_windows; V = vars_pop( V ), i++ )
+				win_list[ i ] = get_long( V, "window number" );
 		else
 			win_list[ 0 ] = -1;              /* No window is to be used ! */
 
@@ -596,7 +562,7 @@ static Var *get_phase_cycled_area_2( Var *v )
 /* If it is the value is returned in `channel'.                          */
 /*-----------------------------------------------------------------------*/
 
-static bool get_channel_number( Var *v, const char *func_name, long *channel )
+static bool get_channel_number( Var *v, long *channel )
 {
 	Var *func_ptr;
 	Var *vn;
@@ -604,22 +570,12 @@ static bool get_channel_number( Var *v, const char *func_name, long *channel )
 	int acc;
 
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
-
-	if ( v->type == INT_VAR )
-		*channel = v->val.lval;
-	else
-	{
-		eprint( WARN, SET, "%s(): Floating point number used as "
-				"argument.\n", func_name );
-		*channel = lrnd( v->val.dval );
-	}
+	*channel = get_long( v, "channel number" );
 
 	if ( ( func_ptr = func_get( "digitizer_meas_channel_ok", &acc ) )
 		 == NULL )
 	{
-		eprint( FATAL, SET, "%s(): Digitizer module does not supply needed "
-				"functions.\n", func_name );
+		print( FATAL, "Digitizer module does not supply needed functions.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -635,31 +591,30 @@ static bool get_channel_number( Var *v, const char *func_name, long *channel )
 /*-----------------------------------------------------------------------*/
 /*-----------------------------------------------------------------------*/
 
-static void pc_basic_check( const char *func_name, const char *func_1,
-							bool *is_1, const char *func_2, bool *is_2,
-							const char *str )
+static void pc_basic_check( const char *func_1, bool *is_1, const char *func_2,
+							bool *is_2, const char *str )
 {
 	/* At the very start lets figure out if there are pulser functions for
 	   phase cycling */
 
 	if ( ! func_exists( "pulser_next_phase" ) )
 	{
-		eprint( FATAL, SET, "%s(): No pulser module loaded supplying a "
-				"function to do phase cycling.\n", func_name );
+		print( FATAL, "No pulser module loaded supplying a function to do "
+			   "phase cycling.\n" );
 		THROW( EXCEPTION );
 	}
 
 	if ( ! func_exists( "pulser_phase_reset" ) )
 	{
-		eprint( FATAL, SET, "%s(): No pulser module loaded supplying a "
-				"function to do phase cycling.\n", func_name );
+		print( FATAL, "No pulser module loaded supplying a function to do "
+			   "phase cycling.\n" );
 		THROW( EXCEPTION );
 	}
 
 	if ( ! func_exists( "pulser_update" ) )
 	{
-		eprint( FATAL, SET, "%s(): No pulser module loaded supplying a "
-				"function to do phase cycling.\n", func_name );
+		print( FATAL, "No pulser module loaded supplying a function to do "
+			   "phase cycling.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -667,8 +622,8 @@ static void pc_basic_check( const char *func_name, const char *func_1,
 
 	if ( ! func_exists( "digitizer_start_acquisition" ) )
 	{
-		eprint( FATAL, SET, "%s(): No digitizer module loaded supplying a "
-				"function to do an acquisition.\n", func_name );
+		print( FATAL, "No digitizer module loaded supplying a function to do "
+			   "acquisitions.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -680,8 +635,8 @@ static void pc_basic_check( const char *func_name, const char *func_1,
 
 	if ( ! is_1 && ! *is_2 )
 	{
-		eprint( FATAL, SET, "%s(): No digitizer module loaded supplying a "
-				"function to obtain %s.\n", func_name, str );
+		print( FATAL, "No digitizer module loaded supplying a function to "
+			   "obtain %s.\n", str );
 		THROW( EXCEPTION );
 	}
 
@@ -690,15 +645,14 @@ static void pc_basic_check( const char *func_name, const char *func_1,
 
 	if ( PSeq == NULL )
 	{
-		eprint( FATAL, SET, "%s(): No phase sequence has been defined.\n",
-				func_name );
+		print( FATAL, "No phase sequence has been defined.\n" );
 		THROW( EXCEPTION );
 	}
 
 	if ( ! ASeq->defined )
 	{
-		eprint( FATAL, SET, "%s(): First acquisition sequence (A) hasn't "
-				"been defined.\n", func_name );
+		print( FATAL, "First acquisition sequence (A) hasn't been "
+			   "defined.\n" );
 		THROW( EXCEPTION );
 	}
 }

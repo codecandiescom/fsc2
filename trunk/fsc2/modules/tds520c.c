@@ -712,7 +712,7 @@ static Var *get_area( Var *v, bool use_cursor )
 {
 	WINDOW *w;
 	int ch;
-	int i;
+	int i = 0;
 
 
 	/* The first variable got to be a channel number */
@@ -842,7 +842,7 @@ static Var *get_curve( Var *v, bool use_cursor )
 
 		if ( ( w = tds520c.w ) == NULL )
 		{
-			print( FATAL, "No measurement windows have been defined.\n", );
+			print( FATAL, "No measurement windows have been defined.\n" );
 			THROW( EXCEPTION );
 		}
 
