@@ -170,6 +170,7 @@ Suported devices
 
   * Meilhaus Electronic GmbH ME-6000 and ME-6100 (Linux device driver
     comes with the package)
+  * Home-built AD and DA converter from the group of H.-J. Steinhoff
 
  Event counter cards:
 

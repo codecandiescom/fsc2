@@ -2809,9 +2809,8 @@ the AD converter, a value between @w{-10 V} and @w{+10 V}.
 Please note: If this function is called without a previous call of the
 function @code{daq_set_voltage()} (see above) the voltage at the output
 of the DA converter will switch to @w{0 V} automatically. So you should
-call @code{daq_set_voltage()} always before
-@code{@code{daq_get_voltage()} if something is connected to the DA
-output!
+call @code{daq_set_voltage()} always before @code{daq_get_voltage()} if
+something is connected to the DA output!
 
 The function can be used in the @code{EXPERIMENT} section only.
 

@@ -92,6 +92,7 @@ fsc2.html: $(docs) $(figures)
 	convert -page `identify $< 2>/dev/null | sed 's/^.*[ 	]\([0-9]\{1,\}x[0-9]\{1,\}\)[ 	].*$$/\1/'` $< $@ 2>/dev/null
 
 ps: fsc2.ps
+	gzip -9 $< 
 
 fsc2.ps: $(docs) $(eps_pics)
 	@if [ "`eval tex -help 2>/dev/null`" -a           \
