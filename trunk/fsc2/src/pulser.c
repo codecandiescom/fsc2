@@ -31,6 +31,10 @@
 
 #include "fsc2.h"
 
+static void is_pulser_func( void *func, const char *text );
+static void is_pulser_driver( void );
+
+
 static P_List *plist;
 
 
@@ -143,7 +147,7 @@ long p_num( char *txt )
 /* to avoid using a pulser function if there's no pulser driver          */
 /*-----------------------------------------------------------------------*/
 
-void is_pulser_driver( void )
+static void is_pulser_driver( void )
 {
 	if ( EDL.Num_Pulsers == 0 )
 	{
@@ -175,7 +179,7 @@ void is_pulser_driver( void )
 /* needed).                                                             */
 /*----------------------------------------------------------------------*/
 
-void is_pulser_func( void *func, const char *text )
+static void is_pulser_func( void *func, const char *text )
 {
 	is_pulser_driver( );
 

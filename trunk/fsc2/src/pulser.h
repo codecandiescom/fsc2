@@ -114,19 +114,13 @@ void p_set_trigger_impedance( Var *v );
 void p_set_rep_time( Var *v );
 void p_set_rep_freq( Var *v );
 void p_phase_ref( int function, int ref );
-
 long p_num( char *txt );
-void is_pulser_driver( void );
-void is_pulser_func( void *func, const char *text );
-
 long p_new( long pnum );
 void p_set( long pnum, int type, Var *v );
 Var *p_get( char *txt, int type );
 Var *p_get_by_num( long pnum, int type );
-
 void p_phs_setup( int func, int type, int pod, long val, bool is_pod );
 void p_phs_end( int func );
-
 void p_exists_function( int function );
 
 /* The following functions are for backward compatibility only */

@@ -45,7 +45,7 @@ Features
 
 * Device are not hard-coded into fsc2. Instead, devices are dealt with
   by modules that get loaded on demand (a single instruction in an EDL
-  script). For each type of device a set of EDL functions exists to
+  script). For each sort of devices a set of EDL functions exists to
   set up the device and fetch measured data. This allows e.g. to employ
   a different device with similar functionality by usually changing not
   more than a single line in an EDL script.
