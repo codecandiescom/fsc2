@@ -1,0 +1,56 @@
+#  
+#  $Id$
+#  
+#  Copyright (C) 2003 Jens Thoms Toerring
+#  
+#  Library for Rulbus (Rijksuniversiteit Leiden BUS)
+#  
+#  This library is free software; you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation; either version 2, or (at your option)
+#  any later version.
+#  
+#  The library is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#  
+#  You should have received a copy of the GNU General Public License
+#  along with the package; see the file COPYING.  If not, write to
+#  the Free Software Foundation, 59 Temple Place - Suite 330,
+#  Boston, MA 02111-1307, USA.
+#  
+#  To contact the author send email to
+#  Jens.Toerring@physik.fu-berlin.de  
+
+
+RULBUS_LIB {
+
+	global:
+			rulbus_open;
+			rulbus_close;
+			rulbus_perror;
+			rulbus_strerror;
+			rulbus_card_open;
+			rulbus_card_close;
+			rulbus_adc12_num_channels;
+			rulbus_adc12_set_channel;
+			rulbus_adc12_set_gain;
+			rulbus_adc12_has_external_trigger;
+			rulbus_adc12_set_trigger_mode;
+			rulbus_adc12_properties;
+			rulbus_adc12_check_convert;
+			rulbus_adc12_convert;
+			rulbus_dac12_set_voltage;
+			rulbus_dac12_properties;
+			rulbus_delay_set_delay;
+			rulbus_delay_set_trigger;
+			rulbus_delay_set_output_pulse;
+			rulbus_delay_set_output_pulse_polarity;
+			rulbus_delay_busy;
+			rulbus_delay_software_start;
+			rulbus_clock_set_frequency;
+			rulbus_errno;
+
+	local:  *;
+};

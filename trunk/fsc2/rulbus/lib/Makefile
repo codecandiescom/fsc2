@@ -24,7 +24,7 @@
 
 CFLAGS    = -ggdb -O2 -Wall -Wwrite-strings -Wstrict-prototypes \
 			-Wmissing-prototypes -Wmissing-declarations -W
-LDFLAGS   = -Wl,-E
+LDFLAGS   = -Wl,--version-script=rulbus_lib.map
 LEX       = flex
 LFLAGS    = -B -P
 YACC      = bison
@@ -42,7 +42,7 @@ lib_headers   = $(INCLUDES)/rulbus.h $(INCLUDES)/rulbus_lib.h
 
 all: librulbus.so librulbus.a
 
-librulbus.so: ${lib_sources:.c=.o} $(lib_headers)
+librulbus.so: ${lib_sources:.c=.o} $(lib_headers) rulbus_lib.map
 	$(CC) -shared -o $@ ${lib_sources:.c=.o} $(LDFLAGS)
 
 librulbus.a: ${lib_sources:.c=.o} $(lib_headers)

@@ -1307,7 +1307,7 @@ Under these conditions a linker script (i.e.@: the file ending with the
 extension @code{map}) for e.g.@: a pulser with module name @code{abcd}
 may look like this:
 @example
-VERS_1.0 @{
+ABCD @{
     global:    generic_type;
                device_name;
                abcd_*_hook;
@@ -1330,14 +1330,14 @@ set. The section for @code{local} symbols is even simpler, a simple
 otherwise would get also exported even though they aren't needed.
 
 Both these sections for global and local symbols are enclosed by curly
-braces and at the very start you have just @code{VERS_1.0}. This is no
-magic but is due to the fact that these kinds of linker scripts are
-usually used to control what symbols different versions of a library do
-export. Here we don't care at all about versions of the modules, you
-should always use the ones compiled for the version of @code{fsc2}
-you're using anyway, but we have to start of with the version command,
-so I picked @code{1.0} as being as good as any other value. But if you
-prefer to make this @code{VERS_127.3} instead it should still work.
+braces and at the very start you have just e.g.@: the name of the
+module. This is no magic but due to the fact that these kinds of linker
+scripts are usually used to control what symbols different versions of a
+library do export. Here we don't care at all about versions of the
+modules, you should always use the ones compiled for the version of
+@code{fsc2} you're using anyway, but we have to start of with the
+version command, so I picked the name of the module as the version name,
+this being as good as any other value.
 
 If you create such a linker script for a module just name it like the
 name of the module and append the @code{map} extension. Then it will be
