@@ -9,7 +9,7 @@
 
 /*-----------------------------------------------------------------*/
 /* Converts a time into the internal type of a time specification, */
-/* i.e. a integer multiple of the time base                        */
+/* i.e. an integer multiple of the time base                       */
 /*-----------------------------------------------------------------*/
 
 Ticks hfs9000_double2ticks( double time )
@@ -84,8 +84,9 @@ void hfs9000_check_pod_level_diff( double high, double low )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*-----------------------------------------------*/
+/* Returns the structure for pulse numbered pnum */
+/*-----------------------------------------------*/
 
 PULSE *hfs9000_get_pulse( long pnum )
 {
