@@ -10,7 +10,7 @@
 /*------------------------------------------------------------------------*/
 
 
-#include <gpib.h>
+#include "/usr/local/include/gpib.h"
 
 
 #if defined ( __GPIB__ )

@@ -152,13 +152,13 @@ int gpib_init( char *log_file_name, int log_level )
 
 static int gpib_init_controller( void )
 {
-	int state;
+	int state = 0;
 
     if ( gpib_init_device( CONTROLLER, &controller ) != SUCCESS )
         return FAILURE;
 
-    if( gpib_ask( controller, GPIB_ASK_IS_MASTER, &state ) != SUCCESS )
-        return FAILURE;
+    if ( gpib_ask( controller, GPIB_ASK_IS_MASTER, &state ) & GPIB_ERR )
+		return FAILURE;
 
 	return state ? SUCCESS : FAILURE;
 }
