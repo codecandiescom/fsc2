@@ -116,7 +116,7 @@ sub read_input {
 		my $i;
 
 		for ( $i = 0; $i <= $#Function_Names; $i++ ) {
-			if ( $line =~ /^(($Function_Names[ $i ]):(\d+)) (\d+)$/ ) {
+			if ( $line =~ /^(($Function_Names[ $i ]):([A-H]?\d+)) (\d+)$/ ) {
 				$Channels->add_channel( $1, $2, $3, $4 );
 				last;
 			}
