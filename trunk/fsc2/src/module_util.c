@@ -48,6 +48,17 @@ int get_check_state( void )
 }
 
 
+/*-------------------------------------------------------------*/
+/* This function is called by modules to determine if this is  */
+/* we're running in batch mode.                                */
+/*-------------------------------------------------------------*/
+
+int get_batch_state( void )
+{
+	return Internals.cmdline_flags & BATCH_MODE;
+}
+
+
 /*--------------------------------------------------------------*/
 /* Function returns true if the user has hit the "Stop" button. */
 /* It's the users resonsibility to throw a USER_BREAK_EXCEPTION */
@@ -58,8 +69,7 @@ bool check_user_request( void )
 {
 	if ( Internals.I_am == PARENT )
 		fl_check_only_forms( );
-	if ( EDL.do_quit && EDL.react_to_do_quit )
-		return 1;
+	return  EDL.do_quit && EDL.react_to_do_quit;
 }
 
 

@@ -338,7 +338,7 @@ static bool get_print_file( FILE **fp, char **name, long data )
 	if  ( 0 == stat( *name, &stat_buf ) &&
 		  1 != show_choices( "The selected file does already exist:\n"
 							 "Are you sure you want to overwrite it?",
-							 2, "Yes", "No", NULL, 2 ) )
+							 2, "Yes", "No", NULL, 2, UNSET ) )
 	{
 		*name = CHAR_P T_free( *name );
 		return FAIL;

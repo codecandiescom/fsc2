@@ -201,7 +201,10 @@ void bug_report_callback( FL_OBJECT *a, long b )
 			user = ( getpwuid( getuid( ) ) )->pw_name;
 
 		rewind( tmp );
-		send_mail( "fsc2 bug report", "fsc2", user, MAIL_ADDRESS, tmp );
+		if ( send_mail( "fsc2 bug report", "fsc2", user,
+						MAIL_ADDRESS, tmp ) != 0 )
+			fl_show_messages( "Sorry, sending the mail may\n"
+							  "   have failed to work." );
 	}
 
 	close( tmp_fd );

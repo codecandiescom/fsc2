@@ -375,7 +375,7 @@ Var *counter_timed_count( Var *v )
 			fsc2_usleep( ( unsigned long ) ( interval * 1.0e6 ), SET );
 			if ( check_user_request( ) )
 			{
-				counter_stop_counter( counter );
+				counter_stop_counter( vars_push( INT_VAR, counter ) );
 				THROW( USER_BREAK_EXCEPTION );
 			}
 		}
@@ -400,7 +400,7 @@ Var *counter_timed_count( Var *v )
 			case NI6601_ERR_ITR :
 				if ( check_user_request( ) )
 				{
-					counter_stop_counter( counter );
+					counter_stop_counter( vars_push( INT_VAR, counter ) );
 					THROW( USER_BREAK_EXCEPTION );
 				}
 				goto try_counter_again;
@@ -489,7 +489,7 @@ Var *counter_final_count( Var *v )
 			case NI6601_ERR_ITR :
 				if ( check_user_request( ) )
 				{
-					counter_stop_counter( counter );
+					counter_stop_counter( vars_push( INT_VAR, counter ) );
 					THROW( USER_BREAK_EXCEPTION );
 				}
 				goto try_counter_again;

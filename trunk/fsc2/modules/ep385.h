@@ -97,9 +97,9 @@ Var *pulser_maximum_pattern_length( Var *v );
 #define MAX_MEMORY_BLOCKS      16       /* maximum number of memory blocks */
 #define BITS_PER_MEMORY_BLOCK  2048     /* length of memory block (in Ticks) */
 
-#define MAX_REPEAT_TIMES       65535
-#define MIN_REPEAT_TIMES       10
-#define REPEAT_TICKS           12800
+#define MAX_REPEAT_TIMES       65535L
+#define MIN_REPEAT_TIMES       10L
+#define REPEAT_TICKS           12800L
 
 #define MAX_PULSES_PER_CHANNEL   59
 
@@ -384,6 +384,7 @@ void ep385_init_setup( void );
 
 /* Functions from ep385_util.c */
 
+void ep385_timebase_check( void );
 Ticks ep385_double2ticks( double p_time );
 Ticks ep385_double2ticks_simple( double p_time );
 double ep385_ticks2double( Ticks ticks );

@@ -486,7 +486,7 @@ int dg2020_b_exp_hook( void )
 					 dg2020_ptime(
 						 dg2020_ticks2double( dg2020.defense_2_shape ) ) );
 
-		if ( 2 != show_choices( str, 2, "Abort", "Yes", "", 1 ) )
+		if ( 2 != show_choices( str, 2, "Abort", "Yes", NULL, 1 ) )
 			THROW( EXCEPTION );
 
 		dg2020.is_confirmation = SET;
@@ -838,7 +838,7 @@ Var *pulser_show_pulses( Var *v )
 {
 	UNUSED_ARGUMENT( v );
 
-	if ( ! FSC2_IS_CHECK_RUN )
+	if ( ! FSC2_IS_CHECK_RUN && ! FSC2_IS_BATCH_MODE )
 		dg2020.do_show_pulses = SET;
 
 	return vars_push( INT_VAR, 1L );
@@ -852,7 +852,7 @@ Var *pulser_dump_pulses( Var *v )
 {
 	UNUSED_ARGUMENT( v );
 
-	if ( ! FSC2_IS_CHECK_RUN )
+	if ( ! FSC2_IS_CHECK_RUN && ! FSC2_IS_BATCH_MODE )
 		dg2020.do_dump_pulses = SET;
 
 	return vars_push( INT_VAR, 1L );

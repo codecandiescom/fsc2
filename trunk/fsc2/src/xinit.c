@@ -134,6 +134,8 @@ bool xforms_init( int *argc, char *argv[ ] )
 	GUI.is_init = SET;
 	GUI.d = display;
 
+	/* Set the close-on-exec flag for the connection to the display */
+
 	if ( ( flags = fcntl( ConnectionNumber( display ), F_GETFD, 0 ) ) >= 0 )
 		fcntl( ConnectionNumber( display ), F_SETFD, flags | FD_CLOEXEC );
 

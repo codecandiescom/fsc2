@@ -388,7 +388,8 @@ enum {
 	NO_MAIL        =  ( 1 << 5 ),
 	NO_BALLOON     =  ( 1 << 6 ),
 	NON_EXCLUSIVE  =  ( 1 << 7 ),
-	DO_CHECK       =  ( 1 << 8 )               /* used for check runs only */
+	BATCH_MODE     =  ( 1 << 8 ),
+	DO_CHECK       =  ( 1 << 9 )               /* used for check runs only */
 };
 
 

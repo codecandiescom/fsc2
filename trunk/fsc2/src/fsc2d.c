@@ -56,7 +56,7 @@ static int cwd_ok;
 static int connect_to_fsc2d( void );
 static int start_fsc2d( bool exclusive, FILE *in_file_fp );
 static void fsc2d_sig_handler( int signo );
-static void fsc2d( int fd, bool exclusive );
+static void fsc2d( int fd, bool exclusive, struct passwd *ui );
 static int check_instances( FSC2_INSTANCE *instances, int num_instances,
 							int is_new_connect );
 static int new_client( int fd, FSC2_INSTANCE *instances, int num_instances );
@@ -221,6 +221,7 @@ static int start_fsc2d( bool exclusive, FILE *in_file_fp )
 	struct sockaddr_un serv_addr;
 	mode_t old_mask;
 	struct sigaction sact;
+	struct passwd *ui = getpwuid( getuid( ) );
 
 
 	raise_permissions( );
@@ -280,7 +281,8 @@ static int start_fsc2d( bool exclusive, FILE *in_file_fp )
 		close( STDIN_FILENO );
 		close( STDOUT_FILENO );
 		close( STDERR_FILENO );
-		fsc2d( listen_fd, exclusive );
+		fsc2d( listen_fd, exclusive, ui );
+		_exit( 0 );
 	}
 
 	close( listen_fd );
@@ -294,7 +296,7 @@ static int start_fsc2d( bool exclusive, FILE *in_file_fp )
 	lower_permissions( );
 
 	while ( ! fsc2d_replied )
-		fsc2_usleep( 50000, SET );
+		fsc2_usleep( 20000, SET );
 
 	return 1;
 }
@@ -320,7 +322,7 @@ static void fsc2d_sig_handler( int signo )
 /* segments and also quits.                                                */
 /*-------------------------------------------------------------------------*/
 
-static void fsc2d( int fd, bool exclusive )
+static void fsc2d( int fd, bool exclusive, struct passwd *ui )
 {
 	FSC2_INSTANCE instances[ FSC2_MAX_INSTANCES + 1 ];
 	fd_set fds;
@@ -335,9 +337,10 @@ static void fsc2d( int fd, bool exclusive )
 
 	/* Set up the first entry in the list of instances */
 
+	fprintf( stderr, "Starting setup\n" );
+
 	instances[ 0 ].pid = ( unsigned long ) getppid( );
-	strncpy( instances[ 0 ].user_name, getpwuid( getuid( ) )->pw_name,
-			 MAX_LOGIN_NAME );
+	strncpy( instances[ 0 ].user_name, ui->pw_name, MAX_LOGIN_NAME );
 	instances[ 0 ].user_name[ MAX_LOGIN_NAME ] = '\0';
 	instances[ 0 ].exclusive = exclusive;
 	instances[ 0 ].with_conn = SET;
@@ -591,7 +594,7 @@ static void set_fs2d_signals( void )
 
 	for ( i = 0; sig_list[ i ] != 0; i++ )
 	{
-		sact.sa_handler = NULL;
+		sact.sa_handler = SIG_IGN;
 		sigemptyset( &sact.sa_mask );
 		sact.sa_flags = 0;
 		if ( sigaction( sig_list[ i ], &sact, NULL ) < 0 )

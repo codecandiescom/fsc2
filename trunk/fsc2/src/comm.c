@@ -523,7 +523,8 @@ static bool parent_reader( CommStruct *header )
 				   the child process (which does a read in the mean time) */
 
 				if ( ! writer( C_INT, show_choices( str[ 0 ], n1, str[ 1 ],
-												   str[ 2 ], str[ 3 ], n2 ) ) )
+													str[ 2 ], str[ 3 ], n2,
+													UNSET ) ) )
 					THROW( EXCEPTION );
 				TRY_SUCCESS;
 			}

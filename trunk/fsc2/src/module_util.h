@@ -28,6 +28,7 @@
 
 int get_mode( void );
 int get_check_state( void );
+int get_batch_state( void );
 bool check_user_request( void );
 void stop_on_user_request( void );
 void too_many_arguments( Var *v );

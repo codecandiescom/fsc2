@@ -379,7 +379,7 @@ Var *pulser_show_pulses( Var *v )
 
 	UNUSED_ARGUMENT( v );
 
-	if ( FSC2_IS_CHECK_RUN )
+	if ( FSC2_IS_CHECK_RUN || FSC2_IS_BATCH_MODE )
 		return vars_push( INT_VAR, 1L );
 
 	if ( dg2020.show_file != NULL )
@@ -454,7 +454,7 @@ Var *pulser_dump_pulses( Var *v )
 
 	UNUSED_ARGUMENT( v );
 
-	if ( FSC2_IS_CHECK_RUN )
+	if ( FSC2_IS_CHECK_RUN || FSC2_IS_BATCH_MODE )
 		return vars_push( INT_VAR, 1L );
 
 	if ( dg2020.dump_file != NULL )

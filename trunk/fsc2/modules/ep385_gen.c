@@ -244,19 +244,7 @@ bool ep385_set_repeat_time( double rep_time )
 	/* For the following we need the pulsers time base. If it hasn't been
 	   set yet we default to the built-in clock running at 125 MHz. */
 
-	if ( ! ep385.is_timebase )
-	{
-		ep385.timebase = FIXED_TIMEBASE;
-		ep385.timebase_mode = INTERNAL;
-		ep385.is_timebase = SET;
-
-		ep385.shape_2_defense = Ticksrnd( ceil (
-					 SHAPE_2_DEFENSE_DEFAULT_MIN_DISTANCE / FIXED_TIMEBASE ) );
-		ep385.defense_2_shape = Ticksrnd( ceil (
-					 DEFENSE_2_SHAPE_DEFAULT_MIN_DISTANCE / FIXED_TIMEBASE ) );
-		ep385.minimum_twt_pulse_distance =
-			   Ticksrnd( ceil( MINIMUM_TWT_PULSE_DISTANCE / FIXED_TIMEBASE ) );
-	}
+	ep385_timebase_check( );
 
 	/* Complain if a different time base already has been set */
 

@@ -38,10 +38,12 @@
 #endif
 
 
+#if ! defined MAIL_PROGRAM
 static int do_send( const char *rec_host, const char *to,
 					const char *from, const char *local_host,
 					const char *subject, FILE *fp );
 static int open_mail_socket( const char *host );
+#endif
 
 
 /*---------------------------------------------------------------*/
@@ -50,9 +52,57 @@ static int open_mail_socket( const char *host );
 /* and, if non-zero' also to 'cc_to'.                            */
 /*---------------------------------------------------------------*/
 
-void send_mail( const char *subject, const char *from, const char* cc_to,
+int send_mail( const char *subject, const char *from, const char* cc_to,
 				const char *to, FILE *fp )
 {
+#if defined MAIL_PROGRAM
+	FILE *mail;
+	char *cmd;
+	char buf[ MAX_LINE_LENGTH ];
+	size_t len;
+
+
+	UNUSED_ARGUMENT( from );
+
+	CLOBBER_PROTECT( to );
+	CLOBBER_PROTECT( cc_to );
+
+	while ( 1 )
+	{
+		TRY
+			{
+				cmd = get_string( "%s -s '%s' %s", MAIL_PROGRAM, subject, to );
+				TRY_SUCCESS;
+			}
+		OTHERWISE
+			return -1;
+
+		if ( ( mail = popen( cmd, "w" ) ) == NULL )
+			return -1;
+
+		while ( ( len = fread( buf, 1, MAX_LINE_LENGTH, fp ) ) > 0 )
+			if ( fwrite( buf, 1, len, mail ) != len )
+			{
+				pclose( mail );
+				T_free( cmd );
+				return -1;
+			}
+
+		pclose( mail );
+		T_free( cmd );
+		
+		if ( cc_to == NULL )
+			return 0;
+
+		rewind( fp );
+		to = cc_to;
+		cc_to = NULL;
+	}
+
+	return 0;
+}
+
+#else
 	struct hostent *hp;
 	char *rec_host;
 	char local_host[ MAXHOSTNAMELEN + 1 ];
@@ -71,12 +121,16 @@ void send_mail( const char *subject, const char *from, const char* cc_to,
 	else
 		rec_host++;
 
-	if ( do_send( rec_host, to, from, local_host, subject, fp ) == 0
-		 && cc_to != NULL )
+	if ( do_send( rec_host, to, from, local_host, subject, fp ) == -1 )
+		return -1;
+
+	if ( cc_to != NULL )
 	{
 		rewind( fp );
 		do_send( local_host, cc_to, from, local_host, subject, fp );
 	}
+
+	return 0;
 }
 
 
@@ -302,6 +356,8 @@ static int open_mail_socket( const char *host )
 
 	return sock_fd;
 }
+
+#endif
 
 
 /*

@@ -173,6 +173,15 @@ DEFAULT_HTTP_PORT := 8080
 # NO_MAIL = yes
 
 
+# Normally, fsc2 will use the systems 'mail' command when it needs to send
+# emails. On systems where no MTA (mail transfer agent) like sendmail is
+# installed a rudimentary mail agent built into fsc2 can be used instead.
+# If you want to use fsc2s mail agent (e.g. because sendmail can't be used
+# on your machine) uncomment the following line.
+
+# USE_FSC2_MAIL_AGENT = yes
+
+
 # This last variable controls to whom emails with bug reports and about
 # crashes will be send - if it's commented out no "Bug report" button will
 # be shown. Please change this if you change the program yourself (in which
@@ -501,15 +510,26 @@ ifdef SERIAL_LOCK_DIR
 endif
 
 
-# Define variables with the full paths of the 'addr2line' program and make
+# Define a variable with the full path of the 'addr2line' program and make
 # sure addr2line gets found by 'which', otherwise don't set the variable.
-# If NO_MAIL has been defined never send crash mails (which requir
-#  ADDR2LINE to be set).
+# If NO_MAIL has been defined never send crash mails (which requires
+# ADDR2LINE to be set).
 
 ifndef NO_MAIL
 	ADDR2LINE     := $(shell which addr2line)
 	ifneq ($(word 1,$(ADDR2LINE)),which:)
 		CONFFLAGS += -DADDR2LINE=\"$(ADDR2LINE)\"
+	endif
+endif
+
+# IF USE_FSC2_MAIL_AGENT has not been define also create a variable with
+# the full name of the 'mail' program - if it can't be found default to
+# using the built-in mail agent. 
+
+ifndef USE_FSC2_MAIL_AGENT
+	MAIL_PROGRAM  := $(shell which mail)
+	ifneq ($(word 1,$(MAIL_PROGRAM)),which:)
+		CONFFLAGS += -DMAIL_PROGRAM=\"$(MAIL_PROGRAM)\"
 	endif
 endif
 

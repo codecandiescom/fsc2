@@ -873,6 +873,13 @@ void p_set_rep_freq( Var *v )
 		THROW( EXCEPTION );
 	}
 
+	if ( 1.0 / freq * 1.0e9 > LONG_MAX )
+	{
+		print( FATAL, "Repetition frequency of %f Hz is much too low.\n",
+			   1.0 / freq );
+		THROW( EXCEPTION );
+	}
+
 	/* Make sure we get a repeat time that's a multiple of 1 ns */
 
 	rep_time = lrnd( 1.0 / freq * 1.0e9 ) * 1.0e-9;

@@ -78,12 +78,14 @@
 
 #define FSC2_MODE get_mode( )
 #define FSC2_IS_CHECK_RUN get_check_state( )
+#define FSC2_IS_BATCH_MODE get_batch_state( )
 
 
 extern void show_message( const char *str );
 extern void show_alert( const char *str );
 extern int show_choices( const char *text, int numb, const char *b1,
-						 const char *b2, const char *b3, int def );
+						 const char *b2, const char *b3, int def,
+						 bool is_batch );
 extern const char *show_input( const char *content, const char *label );
 
 
@@ -105,6 +107,10 @@ extern const char *Phase_Types[ NUM_PHASE_TYPES ];
 /* The following must be defined after the declaration of pulser_struct ! */
 
 #define pulser_struct pulser_struct[ Cur_Pulser ]
+
+
+#define show_choices( a, b, c, d, e, f ) \
+		show_choices( ( a ), ( b ), ( c ), ( d ), ( e ), ( f ), SET )
 
 
 #endif  /* ! FSC2_MODULE_HEADER */
