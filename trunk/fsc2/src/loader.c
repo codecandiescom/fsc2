@@ -133,8 +133,10 @@ void load_all_drivers( void )
 }
 
 
-/*--------------------------------------------------------*/
-/*--------------------------------------------------------*/
+/*----------------------------------------------------------*/
+/* Function for comparing two functions by there name, used */
+/* for sorting the function names by binary search.         */
+/*----------------------------------------------------------*/
 
 static int func_cmp( const void *a, const void *b )
 {
