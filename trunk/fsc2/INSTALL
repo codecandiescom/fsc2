@@ -62,14 +62,14 @@ under the GPL and can be downloaded from
   ftp://ncmir.ucsd.edu/pub/xforms/OpenSource/xforms-1.0-release.tgz
 
 
-The GPIB library consists of a library and a module to interface GPIB
+The GPIB library consists of a library and a driver to interface GPIB
 cards. You can either use the one I've written (works, as far as I know,
 with 2.0, 2.2 and 2.4 kernels), the older LLP (Linux Lab Project)
 library to be found at
 
   http://www.llp.fu-berlin.de
 
-(which, at least the last time I checked, didn't work with 2.2. and 2.4
+(which, at least the last time I checked, didn't work with 2.2 and 2.4
 kernels) or the one from National Instruments, to be downloaded from
 
   http://www.natinst.com
@@ -111,17 +111,17 @@ use the group that has read and write access for the serial port device
 files, (/dev/ttyS* where * stands for a positive number). On the Linux
 systems I have seen this group was either 'uucp' or 'dialout'. If the
 fsc2 executable file is owned by this group the program automatically has
-the permisssion to access these device files. Otherwise you will have to
-either change the modes of the files to allow access by 'other', i.e.
-make them world readable and writable, or to make all users of fsc2 belong
-to this group (probably as one of their supplementary groups).
+the necessary permisssions to access these device files. Otherwise you
+will have to either change the modes of the files to allow access by
+'other', i.e. make them world readable and writable, or to make all
+users of fsc2 belong to this group as one of their supplementary groups.
 
 
 By setting the group of the device file for the GPIB board to the group
 that fsc2 belongs to (i.e. usually 'uucp' or 'dialout') also the access
 permissions to the board's device file don't have to be set to allow
 either access by 'other' or to make all users members of the group that
-has access permissions but can be restricted to this group.
+has access permissions.
 
 
 C) Preparing for Installation
@@ -140,7 +140,7 @@ defining the variable 'prefix' in the Makefile.
 
 The next two variables, OWNER and GROUP, will be used when setting the
 owner of all the files that will be installed as well as its group. See
-the preceding section for details.
+the preceeding section for all the details.
 
 
 The variable DEF_INCL_DIR sets a default directory for EDL include files
@@ -152,15 +152,15 @@ You may set the first variable, GPIB_LIBRARY either to LLP for the old
 (Linux Lab Project) library, to NI when using the National Instruments
 library or to JTT if you're using the library I wrote. If you don't want
 GPIB support you also may set this variable to NONE. In this case fsc2
-won't be able to run experiments which need devices that are connected
+won't be able to run experiments requiring devices that are connected
 via the GPIB bus (but you still can test such EDL programs). Use this
 option only if you either want to built a test version or if all your
-devices are controlled via the serial ports.
+devices are controlled via the serial ports or are PCI or ISA cards.
 
 
 If you use the National Instruments GPIB driver you can set the location
 where fsc2 will expect the GPIB configuration file, gpib.conf. But usually
-there is no reason to change the default value (which is /etc/gpib.conf).
+there is no reason to change the default value which is /etc/gpib.conf.
 
 
 While running fsc2 may write out information about the activity on the
