@@ -119,7 +119,7 @@ PHS2        PH(ASE)?_S(ETUP)?_?2(#{INT})?:?
 
 PX			"+"?[xX]:?
 PY			"+"?[yY]:?
-PMX			"-"[yX]:?
+PMX			"-"[xX]:?
 PMY			"-"[yY]:?
 PCW         [cC][wW]
 POD1        P(OD)?_?1
