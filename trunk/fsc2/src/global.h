@@ -125,6 +125,7 @@ enum {
 	ARR_PTR         = ( 1 << 6 ),
 	INT_TRANS_ARR   = ( 1 << 7 ),
 	FLOAT_TRANS_ARR = ( 1 << 8 ),
+	ARR_REF         = ( 1 << 9 )
 };
 
 
