@@ -338,7 +338,8 @@ int sr830_end_of_exp_hook( void )
 	int i;
 
 
-	sr830_auto( 0 );
+	if ( sr830.is_auto_setup )
+		sr830_auto( 0 );
 
 	/* Switch lock-in back to local mode */
 
@@ -1332,6 +1333,7 @@ static bool sr830_init( const char *name )
 	char buffer[ 20 ];
 	long length = 20;
 	int i;
+	bool is_auto_setup;
 
 
 	if ( gpib_init_device( name, &sr830.device ) == FAILURE )
@@ -1399,7 +1401,10 @@ static bool sr830_init( const char *name )
 
 	/* Stop any still running auto-acquisition and clear the internal buffer */
 
+	is_auto_setup = sr830.is_auto_setup;
+	sr830.is_auto_setup = SET;
 	sr830_auto( 0 );
+	sr830.is_auto_setup = is_auto_setup;
 
 	if ( sr830.is_auto_setup )
 	{
@@ -1458,7 +1463,7 @@ static void sr830_get_xy_data( double *data, long *channels, int num_channels )
 	fsc2_assert( num_channels >= 2 && num_channels <= MAX_DATA_AT_ONCE );
 
 	/* Assemble the command to be send to the lock-in - if we find that
-	   one of the channel gets its data from the lock-in's internal buffer
+	   one of the channel gets its data from the lock-ins internal buffer
 	   pass everything to a different function. */
 
 	for ( i = 0; i < num_channels; i++ )
@@ -1512,7 +1517,7 @@ static void sr830_get_xy_data( double *data, long *channels, int num_channels )
 static void sr830_get_xy_auto_data( double *data, long *channels,
 									int num_channels )
 {
-	int i, j, ak, nk;
+	int i, j, ac, nc;
 	struct {
 		int pos;
 		long type;
@@ -1522,48 +1527,69 @@ static void sr830_get_xy_auto_data( double *data, long *channels,
 
 
 	/* First we've got to figure out how many of the data must be fetched from
-	   the lock-in's internal buffer and at which position in the data buffer
+	   the lock-ins internal buffer and at which position in the data buffer
 	   they have to be returned. */
 
-	for ( ak = nk = i = 0; i < num_channels; i++ )
+	for ( ac = nc = i = 0; i < num_channels; i++ )
 	{
+		bool have_auto = UNSET;
+
 		for ( j = 0; j < DISPLAY_CHANNELS; j++ )
 			if ( channels[ i ] == sr830.dsp_ch[ j ] )
 			{
-				auto_channels[ ak ].pos = i;
-				auto_channels[ ak++ ].type = channels[ i ];
+				auto_channels[ ac ].pos = i;
+				auto_channels[ ac++ ].type = channels[ i ];
+				have_auto = SET;
 				continue;
 			}
 
-		new_channels[ nk++ ] = channels[ i ];
+		if ( ! have_auto )
+			new_channels[ nc++ ] = channels[ i ];
 	}
 
 	/* First fetch the 'normal' data by calling the 'normal' function again
 	   (take care that it needs to return data for at least 2 channels). */
 
-	if ( nk > 0 )
+	if ( nc > 0 )
 	{
-		if ( nk == 1 )
+		if ( nc == 1 )
 		{
-			new_channels[ 1 ] = new_channels[ 0 ] % NUM_DIRECT_CHANNELS + 1;
-			sr830_get_xy_data( data, new_channels, nk + 1 );
+			bool cont = UNSET;
+
+			i = 0;
+			do
+			{
+				new_channels[ 1 ] =
+					new_channels[ i ] % NUM_DIRECT_CHANNELS + 1;
+				for ( j = 0; j < DISPLAY_CHANNELS; j++ )
+					if ( new_channels[ 1 ] == sr830.dsp_ch[ j ] ||
+						 new_channels[ 1 ] == new_channels[ 0 ] )
+					{
+						i = ( i + 1 ) % MAX_DATA_AT_ONCE;
+						cont = SET;
+						break;
+					}
+			} while ( cont );
+				
+
+			sr830_get_xy_data( data, new_channels, nc + 1 );
 		}
 		else
-			sr830_get_xy_data( data, new_channels, nk );
+			sr830_get_xy_data( data, new_channels, nc );
 	}
 
 	/* Now also fetch the auto-data and insert them into their correct
 	   positions in the data array */
 
-	for ( i = 0; i < ak; i++ )
+	for ( i = 0; i < ac; i++ )
 	{
 		auto_channels[ i ].data =
 							   sr830_get_auto_data( auto_channels[ i ].type  );
 
-		if ( auto_channels[ i ].pos < nk )
+		if ( auto_channels[ i ].pos < nc )
 			memmove( data + auto_channels[ i ].pos + 1,
 					 data + auto_channels[ i ].pos,
-					 ( nk - auto_channels[ i ].pos ) * sizeof *data );
+					 ( nc - auto_channels[ i ].pos ) * sizeof *data );
 		data[ auto_channels[ i ].pos ] = auto_channels[ i ].data;
 	}
 }

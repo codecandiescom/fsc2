@@ -603,7 +603,7 @@ static bool ips20_4_init( const char *name )
 	}
 
 	/* Bring both the GPIB master device (ITC 503) as well as the sweep power
-	   supply in the remote state */
+	   supply in remote state */
 
 	sprintf( cmd, "@%1dC3\n", MASTER_ISOBUS_ADDRESS );
 	length = 100;
@@ -613,6 +613,11 @@ static bool ips20_4_init( const char *name )
 
 	sprintf( cmd, "@%1dQ0\n", MASTER_ISOBUS_ADDRESS );
 	if ( gpib_write( ips20_4.device, cmd, 5 ) == FAILURE )
+		ips20_4_comm_failure( );
+
+	sprintf( cmd, "@%1d\n", IPS20_4_ISOBUS_ADDRESS );
+	length = 100;
+	if ( gpib_write( ips20_4.device, cmd, 3 ) == FAILURE )
 		ips20_4_comm_failure( );
 
 	sprintf( cmd, "@%1dC3\n", IPS20_4_ISOBUS_ADDRESS );
