@@ -570,9 +570,8 @@ static void ep385_create_phase_matrix( FUNCTION *f )
 
 	for ( j = 0; j < f->pc_len * f->num_channels; j++ )
 	{
-		f->pm[ j ] = PULSE_PP T_malloc( ( f->num_pulses + 1 )
+		f->pm[ j ] = PULSE_PP T_malloc(   ( f->num_pulses + 1 )
 										* sizeof **f->pm );
-
 		*f->pm[ j ] = NULL;         /* list is still empty */
 	}
 
@@ -616,7 +615,7 @@ static void ep385_create_phase_matrix( FUNCTION *f )
 				l = 0;
 
 			/* For each of the phase rows add the pulse to the lists
-			   of pulses of the +x-channels (i.e. the l.th row)*/
+			   of pulses of the +x-channels (i.e. the l-th row)*/
 
 			for ( k = 0; k < f->pc_len; k++ )
 			{

@@ -93,7 +93,7 @@ static bool ep385_update_pulses( bool flag )
 
 		ep385_pulse_check( f );
 
-		/* Set up and check pulses for each channel assoiciated with the
+		/* Set up and check pulses for each channel associated with the
 		   function according to the current phase. */
 
 		for ( j = 0; j < f->num_channels; j++ )
@@ -899,7 +899,9 @@ void ep385_twt_padding_check( CHANNEL *ch )
 PULSE *ep385_delete_pulse( PULSE *p, bool warn )
 {
 	PULSE *pp;
-	int i;
+	FUNCTION *f;
+	PULSE **pm_entry;
+	int i, j, k, l;
 
 
 	/* If the pulse has an associated shape pulse delete it */
@@ -928,35 +930,46 @@ PULSE *ep385_delete_pulse( PULSE *p, bool warn )
 	if ( p->is_function && p->function->num_pulses > 0 &&
 		 p->function->pulses != NULL )
 	{
-		for ( i = 0; i < p->function->num_pulses; i++ )
-			if ( p->function->pulses[ i ] == p )
+		f = p->function;
+
+		for ( i = 0; i < f->num_pulses; i++ )
+			if ( f->pulses[ i ] == p )
 				break;
 
-		fsc2_assert( i < p->function->num_pulses );             /* Paranoia */
+		fsc2_assert( i < f->num_pulses );             /* Paranoia */
 
 		/* Put the last of the functions pulses into the slot for the pulse to
 		   be deleted and shorten the list by one element */
 
-		if ( i != p->function->num_pulses - 1 )
-			p->function->pulses[ i ] =
-				p->function->pulses[ p->function->num_pulses - 1 ];
+		if ( i != f->num_pulses - 1 )
+			f->pulses[ i ] = f->pulses[ f->num_pulses - 1 ];
+
+		/* Remove the pulse from all of the functions phase lists */
+
+		for ( j = 0; j < f->pc_len; j++ )
+			for ( k = 0; k < f->num_channels; k++ )
+			{
+				pm_entry = f->pm[ j * k ];
+				for ( l = 0; l < f->num_pulses; l++ )
+					if ( pm_entry[ l ] == p )
+						memcpy( pm_entry + l, pm_entry + l + 1,
+								( f->num_pulses - l ) * sizeof *pm_entry );
+			}
 
 		/* Now delete the pulse - if the deleted pulse was the last pulse of
 		   its function send a warning and mark the function as useless */
 
-		if ( p->function->num_pulses-- > 1 )
-			p->function->pulses = PULSE_PP
-									T_realloc( p->function->pulses,
-											   p->function->num_pulses
-											   * sizeof *p->function->pulses );
+		if ( f->num_pulses-- > 1 )
+			f->pulses = PULSE_PP T_realloc( f->pulses,
+										   f->num_pulses * sizeof *f->pulses );
 		else
 		{
-			p->function->pulses = PULSE_PP T_free( p->function->pulses );
+			f->pulses = PULSE_PP T_free( f->pulses );
 
 			if ( warn )
 				print( SEVERE, "Function '%s' isn't used at all because all "
-					   "its pulses are never used.\n", p->function->name );
-			p->function->is_used = UNSET;
+					   "its pulses are never used.\n", f->name );
+			f->is_used = UNSET;
 		}
 	}
 
