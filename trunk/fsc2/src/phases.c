@@ -68,7 +68,7 @@ void acq_seq_cont( long acq_type )
 
 Phase_Sequence *phase_seq_start( long phase_seq_num )
 {
-	Phase_Sequence *cp = PSeq;
+	Phase_Sequence *cp = PSeq, *pn;
 
 
 	assert( phase_seq_num >= 0 );       /* again, let's be paranoid */
@@ -86,15 +86,20 @@ Phase_Sequence *phase_seq_start( long phase_seq_num )
 		cp = cp->next;
 	}
 
-	/* create new sequence, append it to head of list and  initialize it */
+	/* create new sequence, append it to end of list and  initialize it */
 
 	cp = T_malloc( sizeof( Phase_Sequence ) );
 
-	if ( PSeq != NULL )
-		cp->next = PSeq;
+	if ( PSeq == NULL )
+		PSeq = cp;
 	else
-		cp->next = NULL;
-	PSeq = cp;
+	{
+		pn = PSeq;
+		while ( pn->next != NULL )
+			pn = pn->next;
+		pn->next = cp;
+	}
+	cp->next = NULL;
 
 	cp->num = ( int ) phase_seq_num;
 	cp->len = 0;
@@ -214,7 +219,8 @@ void phases_end( void )
 	if ( ASeq[ 0 ].defined && ASeq[ 1 ].defined &&
 		 ASeq[ 0 ].len != ASeq[ 1 ].len )
 	{
-		eprint( FATAL, "Different lengths of acqusition sequences.\n" );
+		eprint( FATAL, "The lengths of both acqusition sequences are "
+				"different.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -224,8 +230,8 @@ void phases_end( void )
 	{
 		if ( ASeq[ 0 ].len != p->len )
 		{
-			eprint( FATAL, "Different lengths of phase sequence %d (%d) and "
-					"acquisition sequences (%d) in PHASES section.\n",
+			eprint( FATAL, "Lengths of phase sequence %d (%d) and the "
+					"acquisition sequence(s) (%d) are different.\n",
 					p->num, p->len, ASeq[0].len );
 			THROW( EXCEPTION );
 		}
