@@ -261,7 +261,7 @@ void load_file( FL_OBJECT *a, long reload )
 
 	if ( reload && fn == '\0' )
 	{
-		fl_show_alert( "Error", "Sorry, no file loaded yet.", NULL, 1 );
+		fl_show_alert( "Error", "Sorry, no file is loaded yet.", NULL, 1 );
 		return;
 	}
 
@@ -269,13 +269,17 @@ void load_file( FL_OBJECT *a, long reload )
 
 	if ( access( fn , R_OK ) == -1 )
 	{
-		fl_show_alert( "Error", "Sorry, no permission to read file:", fn, 1 );
+		if ( errno == ENOENT )
+			fl_show_alert( "Error", "Sorry, file not found:", fn, 1 );
+		else
+			fl_show_alert( "Error", "Sorry, no permission to read file:",
+						   fn, 1 );
 		return;
 	}
 
 	if ( ( fp = fopen( fn, "r" ) ) == NULL )
 	{
-		fl_show_alert( "Error", "Sorry, cannot open file:", fn, 1 );
+		fl_show_alert( "Error", "Sorry, can't open file:", fn, 1 );
 		return;
 	}
 
