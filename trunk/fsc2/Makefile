@@ -90,7 +90,7 @@ dg2020_b       = dg2020_b.c dg2020_gen_b.c dg2020_pulse_b.c dg2020_util_b.c \
 				 dg2020_init_b.c dg2020_run_b.c dg2020_gpib_b.c
 tds754a        = tds754a.c tds754a_gpib.c tds754a_util.c
 tds520a        = tds520a.c tds520a_gpib.c tds520a_util.c
-hp8647a        = hp8647a.c hp8647a_lexer.c
+hp8647a        = hp8647a.c hp8647a_util.c hp8647a_lexer.c
 
 
 

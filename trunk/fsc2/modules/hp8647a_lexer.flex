@@ -123,7 +123,7 @@ DU       {IU}|{FU}
 		/*----------------------*/
 
 
-void hp8647a_reader( FILE *fp )
+void hp8647a_read_table( FILE *fp )
 {
 	static bool is_restart = UNSET;
 	int type;

@@ -60,13 +60,32 @@ typedef struct
 
 	char *table_file;      /* name of attenuation table file */
 	bool use_table;
-	ATT_TABLE_ENTRY **att_table;
-	long num_att_table_entries;
+	ATT_TABLE_ENTRY *att_table;
+	long att_table_len;
 
 } HP8647A;
 
 
 
+#if defined( HP8647A_MAIN )
+
+HP8647A hp8647a;
+
+#else
+
+extern HP8647A hp8647a;
+
+#endif
+
+
+
+/* functions defined in "hp8647a_util.c" */
+
+void hp8647a_read_table( FILE *fp );
+FILE *hp8647a_find_table( char *name );
+FILE *hp8647a_open_table( char *name );
+
+
 /* functions defined in "hp8647a_lexer.flex" */
 
-bool hp8647a_reader( FILE *fp, const char *dev_name );
+void hp8647a_read_table( FILE *fp );
