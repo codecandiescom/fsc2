@@ -160,6 +160,8 @@ typedef struct {
 
 	bool exit_hooks_are_run;     /* Set if modules exit hooks have all already
 									been run */
+
+	void *crash_address;
 } INTERNALS;
 
 
