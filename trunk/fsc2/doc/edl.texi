@@ -1243,6 +1243,12 @@ sum of @code{9} and @code{1}, while @code{x2} will be set to @code{6} or
 @code{10}. Thus it is to be recommended to use parentheses to make sure
 that the evaluation happens as expected except in trival cases.
 
+Beside comparison operators also logical operators can be used in the
+test part of the condition operator. They are discussed in detail in the
+next section, but they work very similarly to the comparison operators
+in that they always result in a value of either @code{1} or @code{0},
+standing for true or false, respectively.
+
 Finally, the same effect as with the conditional operator can also be
 achieved by using an @code{IF-ELSE} construct (see below), but only
 within the @code{EXPERIMENT} section of an @code{EDL} script --
