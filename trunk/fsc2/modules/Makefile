@@ -23,10 +23,10 @@
 s_band_list   := s_band_magnet_narrow s_band_magnet_broad
 tds_list      := tds754a tds744a tds540 tds520c tds520a tds520
 
-simp_modules  := User_Functions.c sr510.c sr530.c sr810.c sr830.c \
-				 aeg_s_band.c aeg_x_band.c er035m.c er035m_s.c hp5340a.c \
-				 er035m_sa.c er035m_sas.c bh15.c keithley228a.c egg4402.c \
-				 kontron4060.c lakeshore330.c pt2025.c er032m.c ips20_4.c \
+simp_modules  := User_Functions.c sr510.c sr530.c sr810.c sr830.c          \
+				 aeg_s_band.c aeg_x_band.c er035m.c er035m_s.c hp5340a.c   \
+				 er035m_sa.c er035m_sas.c bh15.c keithley228a.c egg4402.c  \
+				 kontron4060.c lakeshore330.c pt2025.c er032m.c ips20_4.c  \
 				 $(addsuffix .c,$(s_band_list))
 
 ifeq ($(ME6000_SUPPORT),YES)
@@ -37,18 +37,18 @@ ifeq ($(NI6601_SUPPORT),YES)
 simp_modules  += ni6601.c
 endif
 
-comp_modules  := dg2020_f dg2020_b hfs9000 ep385 rs690 er023m lecroy9400 \
+comp_modules  := dg2020_f dg2020_b hfs9000 ep385 rs690 er023m lecroy9400  \
 				 hp8647a hp8672a $(tds_list)
 
-dg2020_f      := dg2020_f.c dg2020_gen_f.c dg2020_pulse_f.c dg2020_init_f.c \
+dg2020_f      := dg2020_f.c dg2020_gen_f.c dg2020_pulse_f.c dg2020_init_f.c  \
 				 dg2020_run_f.c dg2020_util_f.c dg2020_gpib_f.c
-dg2020_b      := dg2020_b.c dg2020_gen_b.c dg2020_pulse_b.c dg2020_util_b.c \
+dg2020_b      := dg2020_b.c dg2020_gen_b.c dg2020_pulse_b.c dg2020_util_b.c  \
 				 dg2020_init_b.c dg2020_run_b.c dg2020_gpib_b.c
-hfs9000       := hfs9000.c hfs9000_gen.c hfs9000_pulse.c hfs9000_util.c \
+hfs9000       := hfs9000.c hfs9000_gen.c hfs9000_pulse.c hfs9000_util.c  \
 				 hfs9000_init.c hfs9000_run.c hfs9000_gpib.c
-ep385         := ep385.c ep385_gen.c ep385_pulse.c ep385_util.c \
+ep385         := ep385.c ep385_gen.c ep385_pulse.c ep385_util.c  \
 				 ep385_init.c ep385_run.c ep385_gpib.c
-rs690         := rs690.c rs690_gen.c rs690_pulse.c rs690_util.c \
+rs690         := rs690.c rs690_gen.c rs690_pulse.c rs690_util.c  \
 				 rs690_init.c rs690_run.c rs690_gpib.c
 tds754a       := tds754a.c tds754a_gpib.c tds754a_util.c
 tds744a       := tds744a.c tds744a_gpib.c tds744a_util.c
@@ -95,24 +95,24 @@ export        # export all symbols to the sub-makefiles
 
 # Making the modules consisting of just one file is simple, to make the
 # more complicated modules we need to create temporary makefiles from a
-# template and then invoke them. For the Tektronix digitizers even the
+# template and then invoke them. For the Tektronix digitizers also the
 # sources are created from templates.
 
 all: $(simp_modules:.c=.so)
-	for n in $(tds_list); do \
-		o=`echo $$n | tr "a-z" "A-Z"`; \
-		for m in "" _util _gpib; do \
-			if [ ! -e $$n$$m.c -o tds$$m.c.tmpl -nt $$n$$m.c \
-				 -o $$n.h -nt $$n$$m.c ]; then \
-				sed "s/tds_tmpl/$$n/g;s/TDS_TMPL/$$o/g" \
-					tds$$m.c.tmpl > $$n$$m.c; \
+	for n in $(tds_list); do                                  \
+		o=`echo $$n | tr "a-z" "A-Z"`;                        \
+		for m in "" _util _gpib; do                           \
+			if [ ! -e $$n$$m.c -o tds$$m.c.tmpl -nt $$n$$m.c  \
+				 -o $$n.h -nt $$n$$m.c ]; then                \
+				sed "s/tds_tmpl/$$n/g;s/TDS_TMPL/$$o/g"       \
+					tds$$m.c.tmpl > $$n$$m.c;                 \
 			fi; \
 		done; \
 	done;
-	for m in $(shell echo $(comp_modules) | cut -f1- -d' '); do \
-		sed -e "s/##/$$m/g" Makefile.tmpl > $$m.make; \
-		$(MAKE) -f $$m.make; \
-		$(RM) $(RMFLAGS) $$m.make; \
+	for m in $(shell echo $(comp_modules) | cut -f1- -d' '); do  \
+		sed -e "s/##/$$m/g" Makefile.tmpl > $$m.make &&          \
+		$(MAKE) -f $$m.make;                                     \
+		$(RM) $(RMFLAGS) $$m.make;                               \
 	done;
 
 $(simp_modules:.c=.so): %.so: %.o
@@ -284,13 +284,13 @@ clean:
 
 distclean:
 	$(MAKE) clean
-	-for n in $(tds_list); do \
-		for m in "" _util _gpib; do \
-			$(RM) $(RMFLAGS) $$n$$m.c; \
-		done; \
+	-for n in $(tds_list); do           \
+		for m in "" _util _gpib; do     \
+			$(RM) $(RMFLAGS) $$n$$m.c;  \
+		done;                           \
 	done;
-	-for n in $(s_band_list); do \
-		$(RM) $(RMFLAGS) $$n.c; \
+	-for n in $(s_band_list); do  \
+		$(RM) $(RMFLAGS) $$n.c;   \
 	done;
 	-$(RM) $(RMFLAGS) *.so
 

@@ -56,18 +56,17 @@ fsc2.html: $(docs) $(figures)
 	mv fsc2_frame.x fsc2_frame.html
 
 %.png: $(adir)/%.xbm
-	convert -page `identify $< 2>/dev/null | sed -e 's/^.*[ 	]\([0-9]\{1,\}x[0-9]\{1,\}\)[ 	].*$$/\1/'` $< $@ \
-    2>/dev/null
+	convert -page `identify $< 2>/dev/null | sed -e 's/^.*[ 	]\([0-9]\{1,\}x[0-9]\{1,\}\)[ 	].*$$/\1/'` $< $@ 2>/dev/null
 
 ps: fsc2.ps
 
 fsc2.ps: $(docs) $(eps_pics)
-	@if [ "`eval tex -help 2>/dev/null`" -a         \
-		 "`eval dvips --help 2>/dev/null`" ]; then  \
-		./texi2dvi -c fsc2.texi;                    \
-		dvips fsc2.dvi -o fsc2.ps;                  \
-	else                                            \
-		echo "Can't make PostScript documentation, programs tex and/or dvips not found."; \
+	@if [ "`eval tex -help 2>/dev/null`" -a           \
+		 "`eval dvips --help 2>/dev/null`" ]; then    \
+		./texi2dvi -c fsc2.texi &&                    \
+		dvips fsc2.dvi -o fsc2.ps;                    \
+	else                                              \
+		echo "Can't make PostScript documentation, programs tex and/or dvips not found.";  \
 	fi
 
 
@@ -86,10 +85,10 @@ endif
 pdf: fsc2.pdf
 
 fsc2.pdf: $(docs) $(pdf_pics)
-	-@if [ "`eval pdftex --help 2>/dev/null`" ]; then  \
-		./texi2dvi --pdf -c fsc2.texi; \
-	else \
-		echo "Can't make PDF documentation, program 'pdftex' not found."; \
+	-@if [ "`eval pdftex --help 2>/dev/null`" ]; then                      \
+		./texi2dvi --pdf -c fsc2.texi;                                     \
+	else                                                                   \
+		echo "Can't make PDF documentation, program 'pdftex' not found.";  \
 	fi
 
 
@@ -119,11 +118,11 @@ install:
 	$(INSTALL) -m 444 -o $(OWNER) -g $(GROUP) fsc2*.html $(docdir)/html
 	$(INSTALL) -m 444 -o $(OWNER) -g $(GROUP) fsc2.css $(docdir)/html
 	$(INSTALL) -m 444 -o $(OWNER) -g $(GROUP) $(wildcard *.png) $(docdir)/html
-	if [ -f fsc2.ps ]; then \
-		$(INSTALL) -m 444 -o $(OWNER) -g $(GROUP) fsc2.ps $(docdir); \
+	if [ -f fsc2.ps ]; then                                           \
+		$(INSTALL) -m 444 -o $(OWNER) -g $(GROUP) fsc2.ps $(docdir);  \
 	fi
-	if [ -f fsc2.pdf ]; then \
-		$(INSTALL) -m 444 -o $(OWNER) -g $(GROUP) fsc2.pdf $(docdir); \
+	if [ -f fsc2.pdf ]; then                                           \
+		$(INSTALL) -m 444 -o $(OWNER) -g $(GROUP) fsc2.pdf $(docdir);  \
 	fi
 	-install-info -r $(infodir)/fsc2.info.gz $(infodir)/dir
 	-$(RM) $(RMFLAGS) $(infodir)/fsc2.info*.gz

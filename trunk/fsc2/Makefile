@@ -580,7 +580,7 @@ all: config.h
 ifdef WITH_HTTP_SERVER
 	@if [ ! -e $(ldir)/Makefile                                \
 		  -o $(ldir)/Makefile.PL -nt $(ldir)/Makefile ]; then  \
-		cd $(ldir);                                            \
+		cd $(ldir) &&                                          \
 		perl Makefile.PL;                                      \
 		cd $(fdir);                                            \
 	fi
@@ -802,7 +802,7 @@ ZIP:
 	$(MAKE) pack
 	if [    "$(machine_name)" = "crowley.none"                       \
 		 -o "$(machine_name)" = "isaak.physik.fu-berlin.de" ]; then  \
-		if ! `grep ZIP /etc/mtab > /dev/null`; then                  \
+		if [ ! `grep ZIP /etc/mtab > /dev/null` ]; then              \
 			sleep 1;                                                 \
 			mount /ZIP;                                              \
 		fi;                                                          \
