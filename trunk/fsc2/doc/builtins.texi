@@ -495,16 +495,15 @@ This function can only be used in the @code{EXPERIMENT} section of an
 @findex rescale_1d()
 In the function @code{init_1d()} the number of points in @i{x}-direction
 can be set. If, during the experiment more points are displayed then set
-in the initialization, the scaling of the axis will be changed automatically. Using the function @code{rescale()} one
-can change the number of points from within the @code{EDL} script. The
-function accepts one argument, the new number of points
-in @i{x}-direction. If this value is @code{0} the number of points is
-adjusted to the number of points currently displayed. Exceptions are
-when either the new number of points is smaller than the default number,
-in which case the default number is used, or the number is smaller than
-the number of points currently displayed which is then used as the new
-number of points. Passing the function a value of @code{-1} means that
-the number of points should remain unchanged.
+in the initialization, the scaling of the axis will be changed
+automatically. Using the function @code{rescale()} one can change the
+number of points from within the @code{EDL} script. The function accepts
+one argument, the new number of points in @i{x}-direction. A negative
+number is silently ignored. For a value of @code{0} the number of points
+is adjusted to the number of currently displayed points. A value of
+@code{1} will be increased to the lowest number of points that can be
+displayed, which is @code{2}. If the number is smaller than the number
+of currently displayed points it is automatically increased to this number.
 
 This function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
@@ -520,9 +519,14 @@ displayed then set in the initialization, the scaling of the axes in the
 @code{rescale()} one can change the number of points from within the
 @code{EDL} script. The function accepts two arguments, the first being
 the number of points to be displayed in @i{x}-direction and the second
-the number of points in @i{y}-direction. A value of @code{-1} means not
-to do any changes to the axis and @code{0} sets the number of points to
-the number of points currently displayed along this axis.
+the number of points in @i{y}-direction.
+
+ A negative number is silently ignored. For a value of @code{0} the
+number of points is adjusted to the number of currently displayed points
+in that direction. A value of @code{1} will be increased to the lowest
+number of points that can be displayed, which is @code{2}. If the number
+is smaller than the number of currently displayed points it is
+automatically increased to this number.
 
 This function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
