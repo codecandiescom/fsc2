@@ -461,8 +461,11 @@ getfile_retry:
 }
 
 
-/*---------------------------------------------------------------------*/
-/*---------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*/
+/* Function called for the 'clone_file()' EDL function to open a new */
+/* file with a name made up from the one of an already opened file   */
+/* after applying some changes according to the input arguments.     */
+/*-------------------------------------------------------------------*/
 
 Var *f_clonef( Var *v )
 {
@@ -841,8 +844,10 @@ Var *f_save( Var *v )
 }
 
 
-/*--------------------------------------------------------------------------*/
-/*--------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
+/* Function called when a one- or more-dimensional variable is passed to   */
+/* the 'save()' EDL function. It writes out the array one element per line */
+/*-------------------------------------------------------------------------*/
 
 static long arr_save( long file_num, Var *v )
 {

@@ -45,19 +45,19 @@ extern sigjmp_buf alrm_env;
 extern volatile sig_atomic_t can_jmp_alrm;
 
 
-/*------------------------------------------------------------------------
-   Prints variable number of arguments using a format string supplied as
-   the first argument. Types of arguments to be printed are integer and
-   float data and strings. To get a value printed the format string has
-   to contain the character '#'. The escape character is the backslash,
-   with a double backslash for printing one backslash. Beside the '\#'
-   combination to print a '#' some of the escape sequences from printf()
-   ('\n', '\t', and '\"') do work. If the text should even be printed while
-   the test is running the string has to start with "\T".
-
-   The function returns the number of variables it printed, not counting
-   the format string.
---------------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*/
+/* Prints variable number of arguments using a format string supplied as */
+/* the first argument. Types of arguments to be printed are integer and  */
+/* float data and strings. To get a value printed the format string has  */
+/* to contain the character '#'. The escape character is the backslash,  */
+/* with a double backslash for printing one backslash. Beside the '\#'   */
+/* combination to print a '#' some of the escape sequences from printf() */
+/* ('\n', '\t', and '\"') do work. If the text should even be printed    */
+/* while the test is running the string has to start with "\T".          */
+/*                                                                       */
+/* The function returns the number of variables it printed, not counting */
+/* the format string.                                                    */
+/*-----------------------------------------------------------------------*/
 
 Var *f_print( Var *v )
 {
@@ -243,19 +243,19 @@ Var *f_print( Var *v )
 }
 
 
-/*------------------------------------------------------------------------
-   Prints variable number of arguments using a format string supplied as
-   the first argument. Types of arguments to be printed are integer and
-   float data and strings. To get a value printed the format string has
-   to contain the character '#'. The escape character is the backslash,
-   with a double backslash for printing one backslash. Beside the '\#'
-   combination to print a '#' some of the escape sequences from printf()
-   ('\n', '\t', and '\"') do work. If the text should even be printed while
-   the test is running the string has to start with "\T".
-
-   The function returns the number of variables it printed, not counting
-   the format string.
---------------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*/
+/* Prints variable number of arguments using a format string supplied as */
+/* the first argument. Types of arguments to be printed are integer and	 */
+/* float data and strings. To get a value printed the format string has	 */
+/* to contain the character '#'. The escape character is the backslash,	 */
+/* with a double backslash for printing one backslash. Beside the '\#'	 */
+/* combination to print a '#' some of the escape sequences from printf() */
+/* ('\n', '\t', and '\"') do work. If the text should even be printed    */
+/* while the test is running the string has to start with "\T".          */
+/* 																		 */
+/* The function returns the number of variables it printed, not counting */
+/* the format string.													 */
+/*-----------------------------------------------------------------------*/
 
 Var *f_sprint( Var *v )
 {
@@ -2449,9 +2449,9 @@ static DPoint *eval_display_args( Var *v, int dim, int *nsets )
 }
 
 
-/*-------------------------------------------------*/
-/* Function makes all points of a curve invisible. */
-/*-------------------------------------------------*/
+/*----------------------------------------*/
+/* Function deletes all points of a curve */
+/*----------------------------------------*/
 
 Var *f_clearcv( Var *v )
 {
@@ -2480,9 +2480,9 @@ Var *f_clearcv( Var *v )
 }
 
 
-/*-------------------------------------------------*/
-/* Function makes all points of a curve invisible. */
-/*-------------------------------------------------*/
+/*-------------------------------------------*/
+/* Function deletes all points of a 1D curve */
+/*-------------------------------------------*/
 
 Var *f_clearcv_1d( Var *v )
 {
@@ -2618,9 +2618,9 @@ Var *f_clearcv_1d( Var *v )
 }
 
 
-/*-------------------------------------------------*/
-/* Function makes all points of a curve invisible. */
-/*-------------------------------------------------*/
+/*-------------------------------------------*/
+/* Function deletes all points of a 2D curve */
+/*-------------------------------------------*/
 
 Var *f_clearcv_2d( Var *v )
 {
