@@ -750,6 +750,8 @@ void win_slider_callback( FL_OBJECT *a, long b )
 	FL_Coord x1, y1, w1, h1, x2, y2, w2, h2;
 
 
+	b = b;
+
 	fl_freeze_form( main_form->fsc2 );
 
 	fl_get_object_geometry( main_form->browser, &x1, &y1, &w1, &h1 );
