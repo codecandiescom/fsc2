@@ -763,32 +763,14 @@ Var *f_print( Var *v )
 				*cp = '#';
 				break;
 
-			case 'a' :
-				*cp = '\a';
-				break;
-
-			case 'b' :
-				*cp = '\b';
-				break;
-
-			case 'f' :
-				*cp = '\f';
 				break;
 
 			case 'n' :
 				*cp = '\n';
 				break;
 
-			case 'r' :
-				*cp = '\r';
-				break;
-
 			case 't' :
 				*cp = '\t';
-				break;
-
-			case 'v' :
-				*cp = '\v';
 				break;
 
 			case '\\' :
