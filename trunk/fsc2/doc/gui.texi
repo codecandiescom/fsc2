@@ -19,12 +19,14 @@
 
 Whenever you start @acronym{fsc2} you will see the following window:
 
-@image{/home/jens/fsc2/doc/fsc2fig1,11cm}
+@image{fsc2fig1,11cm}
 
 The large white area in the upper halve is the browser that contains the
 text of the current @acronym{EDL} program (after you loaded it). Below
 the main browser is another browser which displays error messages as
-well as the output from the @acronym{EDL} program.
+well as the output from the @acronym{EDL} program. On the right side of
+the browsers is a slider that lets you move the border between both
+browsers.
 
 On the left side you have a set of buttons:
 @itemize @bullet
@@ -60,6 +62,8 @@ following elements:
 @item At the top the browser for displaying the @acronym{EDL} file to be run
 @item Below this another browser where error messages as well as output
 from the @acronym{EDL} program will be displayed
+@item On the right side of the browsers is a slider that lets you move
+the border between both browsers.
 @item The @code{Load} button - when you click onto it a file selector
 is shown that allows you to select a new @acronym{EDL} program
 @item The @code{Reload} button - when you have edited the currently

@@ -1,7 +1,8 @@
 # $Id$
 
 
-docs  = $(wildcard *.texi)
+docs    = $(wildcard *.texi)
+figures = $(wildcard fsc2fig*.gif)
 
 
 all:
@@ -34,7 +35,7 @@ fsc2.html: $(docs)
 
 ps: fsc2.ps
 
-fsc2.ps: $(docs)
+fsc2.ps: $(docs) $(patsubst %.gif,%.eps,$(figures))
 	if [ "`eval tex -help 2>/dev/null`" -a \
 		 "`eval dvips --help 2>/dev/null`" ]; then \
 		./texi2dvi -c fsc2.texi; \
@@ -44,16 +45,20 @@ fsc2.ps: $(docs)
 		"Can't make PS documentation, programs tex and/or dvips not found."; \
 	fi
 
+%.eps: %.gif
+	convert $< $@
 
 pdf: fsc2.pdf
 
-fsc2.pdf: $(docs)
+fsc2.pdf: $(docs) $(patsubst %.gif,%.pdf,$(figures))
 	if [ "`eval pdftex --help 2>/dev/null`" ]; then \
 		./texi2dvi --pdf -c fsc2.texi; \
 	else \
 		echo "Can't make PDF documentation, program pdftex not found."; \
 	fi
 
+%.pdf: %.gif
+	convert -compress Zip $< $@
 
 clean:
 	$(RM) $(RMFLAGS) fsc2.dvi *.log
@@ -62,6 +67,7 @@ clean:
 install:
 	$(INSTALL) -m 444 fsc2.1.gz /usr/local/man/man1
 	$(INSTALL) -m 444 -o fsc2 -g fsc2 fsc2*.html $(docdir)
+	$(INSTALL) -m 444 -o fsc2 -g fsc2 fsc2fig*.gif $(docdir)
 	$(INSTALL) -m 444 -o fsc2 -g fsc2 fsc2.css $(docdir)
 	if [ -f fsc2.ps ]; then \
 		$(INSTALL) -m 444 -o fsc2 -g fsc2 fsc2.ps $(docdir); \
