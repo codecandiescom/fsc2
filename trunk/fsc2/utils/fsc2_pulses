@@ -1071,7 +1071,7 @@ sub add_pulse_list {
 
 	fail( "Invalid input at line $..\n" ) unless defined $ch;
 
-	$ch->add_pulse_list( $step, $self, @_ );
+	$ch->add_pulse_list( $step, @_ );
 	$self->{ 'num_steps' } = $step if $step > $self->{ 'num_steps' };
 }
 
@@ -1094,7 +1094,7 @@ sub longest_sequence {
 }
 
 #---------------------------------------------------------
-# Returns the earliest postion of all the pulses of all channels
+# Returns the earliest position of all pulses of all channels
 
 sub first_pulse {
 
@@ -1111,9 +1111,15 @@ sub first_pulse {
 }
 
 #---------------------------------------------------------
+# Returns a pulse object - to reduce memory usage a new pulse object is only
+# created if there's a pulse with the same settings doesn't already exists,
+# in which case a reference to the existing pulse object is returned.
 
-sub get_pulse {
-	return shift->{ shift };
+sub new_pulse {
+	my ( $self, $tag ) = @_;
+
+	$self->{ $tag } = Pulse->new( $tag ) unless defined $self->{ $tag };
+	return $self->{ $tag };
 }
 
 1;
@@ -1131,7 +1137,7 @@ sub new {
 			     'num'   => shift,
 				 'delay' => shift,
 				 'inv'   => shift,
-			     'plist' => { } };
+			     'plist' => [ ] };
 
 	return bless $self, $class;
 }
@@ -1176,10 +1182,10 @@ sub inv {
 sub add_pulse_list {
 
 	my ( $self, $step ) = ( shift, shift );
-	$self->{ 'plist' }{ $step } = $self->{ 'plist' }{ $step - 1 }->comp( @_ )
+	$self->{ 'plist' }[ $step ] = $self->{ 'plist' }[ $step - 1 ]->comp( @_ )
 		if $step > 0;
-	$self->{ 'plist' }{ $step } = Pulse_List->new( @_ )
-		unless defined $self->{ 'plist' }{ $step };
+	$self->{ 'plist' }[ $step ] = Pulse_List->new( @_ )
+		unless defined $self->{ 'plist' }[ $step ];
 }
 
 #---------------------------------------------------------
@@ -1191,8 +1197,8 @@ sub get_pulse_list {
 
 	fail( "Invalid pulse list index\n" ) if $step < 0;
 
-	return $self->{ 'plist' }{ $step }->{ 'list' }
-		if exists $self->{ 'plist' }{ $step }->{ 'list' };
+	return $self->{ 'plist' }[ $step ]->{ 'list' }
+		if exists $self->{ 'plist' }[ $step ]->{ 'list' };
 	return undef;
 }
 
@@ -1204,8 +1210,8 @@ sub longest_sequence {
 	my $self = shift;
 	my @duration = ( 0, 0 );
 
-	for ( keys %{ $self->{ 'plist' } } ) {
-		my $len = $self->{ 'plist' }{ $_ }->len;
+	for ( @{ $self->{ 'plist' } } ) {
+		my $len = $_->len;
 		$duration[ 0 ] = $len if $duration[ 0 ] < $len;
 		$duration[ 1 ] = $len - $self->{ 'delay' } + $Delay
 			if $duration[ 1 ] < $len - $self->{ 'delay' } + $Delay;
@@ -1222,8 +1228,8 @@ sub first_pulse {
     my $self = shift;
     my $first;
 
-    for ( keys %{ $self->{ 'plist' } } ) {
-        my $e = $self->{ 'plist' }{ $_ }->start;
+    for ( @{ $self->{ 'plist' } } ) {
+        my $e = $_->start;
 		next unless defined $e;
 		$e -= $self->{ 'delay' };
 		$first = $e if ! defined $first or $first > $e;
@@ -1241,7 +1247,7 @@ sub first_pulse {
 package Pulse_List;
 
 sub new {
-	my ( $inv, $ch ) = ( shift, shift );
+	my $inv = shift;
 	my ( $num, $start, $len );
 	my $class = ref( $inv ) || $inv;
 	my $self = { 'list'  => [ ],
@@ -1253,9 +1259,7 @@ sub new {
 	while ( @_ ) {
 		( $num, $start, $len ) = ( shift, shift, shift );
 		my $tag = $num . "," . $start . "," . $len;
-		$ch->{ $tag } = Pulse->new( $ch, $tag )
-			unless defined $ch->{ $tag };
-		push @{ $self->{ 'list' } }, $ch->{ $tag };
+		push @{ $self->{ 'list' } }, $Channels->new_pulse( $tag );
 	}
 	$self->{ 'len' } = $start + $len;
 	return bless $self, $class;
@@ -1269,10 +1273,9 @@ sub new {
 sub comp {
 	my $self = shift;
 
-	shift;
 	return undef unless @{ $self->{ 'list' } } == @_ / 3;
 	for ( @{ $self->{ 'list' } } ) {
-		return undef unless shift( ) . "," . shift( ) . "," . shift( ) eq $$_;
+		return undef unless $_->comp( @_ );
 	}
 	return $self;
 }
@@ -1297,47 +1300,42 @@ sub start {
 
 
 #=========================================================================
-# The most basic data object: a single pulse. Please note that not each
-# invocation of the 'new' method will create a new pulse object - if a
-# pulse object with identical properties already exists a reference to
-# this is returned instead to reduce memory usage.
+# The most basic data object: a single pulse
 
 package Pulse;
 
 sub new {
-	my $p;
-
-	my ( $inv, $ch, $tag ) = ( shift, shift, shift );
-
-	$p = $ch->get_pulse( $tag );
-	return $p if defined $p;
-
+	my ( $inv, $tag ) = @_;
 	my $class = ref( $inv ) || $inv;
-	my $self = \$tag;
-	return bless $self, $class;
+	return bless \$tag, $class;
+}
+
+#---------------------------------------------------------
+# Function tests if the settings of a pulse object are identical to
+# the values passed to the function.
+
+sub comp {
+	return ${ shift( ) } eq shift( ) . "," . shift( ) . "," . shift( );
 }
 
 #---------------------------------------------------------
 
 sub num {
-	my $self = shift;
-	$$self =~ /^(\(?\d+\)?)/o;
+	${ shift( ) } =~ /^(\(?\d+\)?)/o;
 	return $1;
 }
 
 #---------------------------------------------------------
 
 sub start {
-	my $self = shift;
-	$$self =~ /,(\d+),/o;
+	${ shift( ) } =~ /,(\d+),/o;
 	return $1;
 }
 
 #---------------------------------------------------------
 
 sub len {
-	my $self = shift;
-	$$self =~ /,(\d+)$/o;
+	${ shift( ) } =~ /,(\d+)$/o;
 	return $1;
 }
 
