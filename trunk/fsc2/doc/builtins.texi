@@ -88,6 +88,7 @@ string} starts with this escape sequence the @code{print()} function
 will produce output already in the test run.
 @end table
 
+
 @item init_1d()
 @anchor{init_1d}
 @findex init_1d()
@@ -144,6 +145,7 @@ init_1d( )
 In error messages the start value and the increment of the data
 displayed at the @i{x}-axis are (in contrast to the point numbers)
 referred to as `real world coordinates'.
+
 
 @item init_2d()
 @anchor{init_2d}
@@ -234,7 +236,7 @@ display( n_x_point, n_y_point, data [ , n_curve [ , ... ] ] )
 @anchor{change_scale}
 @findex change_scale()
 This function allows it to change the scale settings (originally set in
-the call of @code{init_1d()} or @ocde{init_2d()} after an experiment has
+the call of @code{init_1d()} or @code{init_2d()} after an experiment has
 been started. With a one-dimensional display the function can be passed
 a maximum of two arguments, the new start value of the @i{x}-axis and
 the new @i{x}-increment. For two-dimensional display the function also
@@ -249,6 +251,7 @@ of a value a string (e.g.@ @code{"keep"}) can be passed as the argument.
 Removes one or more curves from the display. As many arguments as there
 are curves can be used. No arguments at all implies the first
 curve. Invalid arguments are discarded and an error message is printed.
+
 
 @item get_file( )
 @anchor{get_file}
@@ -286,6 +289,7 @@ from the @code{save_xxx()}-family the user is asked to select a file and
 this file is used exclusively in further @code{save_xxx()}-calls.
 I.e.@: either @code{get_file()} is called before any save-operation or
 never at all!
+
 
 @item save()
 @anchor{save}
@@ -337,6 +341,7 @@ will be printed as
 5
 6
 @end example
+
 
 @item fsave()
 @anchor{fsave}
