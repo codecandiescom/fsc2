@@ -342,8 +342,8 @@ void send_data( int type, int shm_id )
 
 	sema_wait( Comm.data_semaphore );
 
-	/* Put type of data (DATA_1D, DATA_2D or REQUEST) into type field of next
-	   free slot */
+	/* Put the type of the data (DATA_1D, DATA_2D or REQUEST) into the type
+	   field of the next free slot */
 
 	Comm.MQ->slot[ Comm.MQ->high ].type = type;
 
