@@ -147,12 +147,12 @@ void bug_report_callback( FL_OBJECT *a, long b )
 	T_free( cmd );
 
 	cmd = get_string( strlen( "cat  >> " ) + strlen( libdir )
-					  + strlen( "/version " ) + strlen( filename ) );
+					  + strlen( "/version.ubz " ) + strlen( filename ) );
 	strcpy( cmd, "cat " );
 	strcat( cmd, libdir );
 	if ( libdir[ strlen( libdir ) - 1 ] != '/' )
 		strcat( cmd, "/" );
-	strcat( cmd, "version" );
+	strcat( cmd, "version.ubz" );
 	strcat( cmd, " >> " );
 	strcat( cmd, filename );
 	system( cmd );
