@@ -67,15 +67,33 @@ int main( int argc, char *argv[ ] )
 	else
 		just_testing = UNSET;
 
-	/* Initialize xforms stuff, while doing so also check for the lock file */
+	/* Check via the lock file if there is already a process holding a lock,
+	   otherwise create one. This, as well as the followin check for stale
+	   shared memory segments has to be done with the effective user ID, i.e.
+	   the UID of fsc2.*/
 
-	if ( ! xforms_init( &argc, argv ) )
-		return EXIT_SUCCESS;
+	if ( ! fsc2_locking( ) )
+		return EXIT_FAILURE;
 
 	/* Remove orphaned shared memory segments resulting from previous
 	   crashes */
 
 	delete_stale_shms( );
+
+	/* Now we set the effective user ID to the real user ID, we only switch
+	   back when creating or attaching shared memory segments */
+
+	EUID = geteuid( );
+	seteuid( getuid( ) );
+	setegid( getgid( ) );
+
+	/* Initialize xforms stuff, quit on error */
+
+	if ( ! 	xforms_init( &argc, argv ) )
+	{
+		unlink( LOCKFILE );
+		return EXIT_FAILURE;
+	}
 
 	fl_add_signal_callback( SIGCHLD, sigchld_handler, NULL );
 
@@ -108,6 +126,8 @@ int main( int argc, char *argv[ ] )
 
 	/* Delete the lock file */
 
+	setuid( EUID );
+
 	unlink( LOCKFILE );
 
 	/* Make sure the TRY/CATCH stuff worked out right */
@@ -129,7 +149,8 @@ bool xforms_init( int *argc, char *argv[] )
 	FL_Coord x1, y1, w1, h1, x2, y2, w2, h2;
 
 
-	fl_initialize( argc, argv, "fsc2", 0, 0 );
+	if ( fl_initialize( argc, argv, "fsc2", 0, 0 ) == NULL )
+		return FAIL;
 
 	/* Set some properties of goodies */
 
@@ -137,12 +158,6 @@ bool xforms_init( int *argc, char *argv[] )
 	fl_set_fselector_fontsize( FL_LARGE_SIZE );
 	fl_set_goodies_font( FL_NORMAL_STYLE, FL_LARGE_SIZE );
 	fl_set_oneliner_font( FL_NORMAL_STYLE, FL_LARGE_SIZE );
-
-	/* Check via the lock file if there is already a process holding a lock,
-	   otherwise create one */
-
-	if ( ! fsc2_locking( ) )
-		return FAIL;
 
 	/* Create and display the main form */
 
