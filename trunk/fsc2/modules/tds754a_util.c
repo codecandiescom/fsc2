@@ -51,7 +51,6 @@ void tds754a_do_pre_exp_checks( void )
 	bool is_width = SET;
     double width, window, dcd, dtb, fac;
     long tb, cd;
-	double test_width;
 	int i;
 
 
@@ -150,23 +149,21 @@ void tds754a_do_pre_exp_checks( void )
 		if ( labs( cd ) < tb )
 		{
 			w->width = tds754a.timebase / TDS_POINTS_PER_DIV;
-			eprint( SEVERE, "%s: Width of window %ld has to be readjusted to "
+			eprint( SEVERE, "%s: Width of window %ld has been readjusted to "
 					"%s.", DEVICE_NAME, w->num, tds754a_ptime( w->width  ) );
 		}
 		else if ( cd % tb )
 		{
 			cd = ( cd / tb ) * tb;
 			dcd = cd * fac / TDS_POINTS_PER_DIV;
-			eprint( SEVERE, "%s: Width of window %ld has to be readjusted to "
+			eprint( SEVERE, "%s: Width of window %ld has been readjusted to "
 					"%s.", DEVICE_NAME, w->num, tds754a_ptime( dcd ) );
 			w->width = dcd;
 		}
 
 		/* Check if the windows have all the same length */
 
-		if ( w == tds754a.w )
-			test_width = w->width;
-		else if ( w->width != test_width )
+		if ( w != tds754a.w && w->width != tds754a.w->width )
 			tds754a.is_equal_width = UNSET;
 	}
 
