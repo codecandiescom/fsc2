@@ -392,6 +392,9 @@ sub primary_draw {
 	my $c = $self->{ 'canvas' };
 
 	$self->draw_scale;
+	my $x1 = 150;
+	my $x2 = 160 + $self->{ 'len' };
+
 	for ( my $i = 0; $i < $Channels->num_channels; $i++ ) {
 		my $ch = $Channels->find_by_num( $i );
 
@@ -399,12 +402,10 @@ sub primary_draw {
 		$c->create( 'text', 10, $y, '-anchor' => 'w', '-text' => $ch->key,
 					'-fill' => 'green' );
 
-		my $x1 = 150;
-		my $x2 = 160 + $self->{ 'len' };
 		$y -= 0.5 * $ch->{ 'inv' } * $self->{ 'hstep' };
 		$c->create( 'line', $x1, $y, $x2, $y, '-fill' => 'white' );
 	}
-	$self->redraw;
+	$self->redraw( );
 }
 
 #---------------------------------------------------------
