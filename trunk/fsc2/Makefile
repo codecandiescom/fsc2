@@ -40,7 +40,7 @@ sources        = $(bison_sources:.y=.c) $(flex_sources:.flex=.c) \
 				 ${c_sources}
 objects        = $(sources:.c=.o)
 modules        = User_Functions.c dg2020.c tds754a.c sr510.c s_band.c \
-				 er035m.c
+				 er035m.c bh15.c
 header         = ${c_sources:.c=.h} global.h
 
 # Pass GPIB_LOG, GPIB_CONF and AWK via macros to the source files (don't
