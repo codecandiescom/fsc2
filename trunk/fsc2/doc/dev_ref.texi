@@ -39,6 +39,7 @@
 * er035m_sa::     Bruker NMR Gaussmeter ER 035 M (GPIB, Stand-Alone)
 * er035m_sas::    Bruker NMR Gaussmeter ER 035 M (Serial, Stand-Alone)
 * hfs9000::       Tektronix Stimulus System HFS9000 (Berlin W-Band)
+* hp5340a::       HP Frequency Counter HP5340A
 * hp8647a::       HP RF Synthesizer HP8647A
 * ips20_4::       Oxford Magnet Sweep Power Supply IPS20-4
 * keithley228a::  Magnet Power Supply Keithley 228A (Berlin W-Band)
@@ -473,7 +474,7 @@ the range is @w{1460 G} to @w{19900 G}.
 @item @code{gaussmeter_probe_orientation()}  @tab @ref{gaussmeter_probe_orientation}
 @end multitable
 
-@node hfs9000, hp8647a, er035m_sas, Device Reference
+@node hfs9000, hp5340a, er035m_sas, Device Reference
 @iftex
 @subheading Tektronix Stimulus System HFS9000 (Berlin W-Band)
 @end iftex
@@ -514,7 +515,35 @@ can range from @w{-4.7 V} to @w{4.7 V}.
 @end multitable
 
 
-@node hp8647a, ips20_4, hfs9000, Device Reference
+@node hp5340a, hp8647a, hfs9000, Device Reference
+@iftex
+@subheading HP Frequency Counter HP5340A
+@end iftex
+@ifnottex
+@section HP Frequency Counter HP5340A
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{hp5340a}
+
+@paragraphindent 0
+@strong{Description}: Hewlett-Packard HP frequency counterHP5340A. This is
+a very old device even pre-dating the GPIB-standard. Only its capability
+to return the measured frequency can be used-
+
+
+@paragraphindent 0
+@strong{Controlled via}: GPIB bus (IEEE 488).
+
+@paragraphindent 0
+@strong{Supported functions}:
+@multitable @columnfractions .45 .45
+@item @code{freq_counter_name_name()}           @tab @ref{freq_counter_name}
+@item @code{freq_counter_measure()}             @tab @ref{freq_counter_measure}
+@end multitable
+
+
+@node hp8647a, ips20_4, hp5340a, Device Reference
 @iftex
 @subheading HP RF Synthesizer HP8647A
 @end iftex

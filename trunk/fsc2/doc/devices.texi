@@ -35,6 +35,7 @@
 * Temperature Controller Functions::
 * Voltmeter Functions::
 * Boxcar Integrator Functions::
+* Frequency Counter Functions::
 * Multi-Device Functions::
 @end menu
 @end ifinfo
@@ -1989,7 +1990,7 @@ The function switches the voltmeter to doing DC measurements.
 
 
 
-@node Boxcar Integrator Functions, Multi-Device Functions, Voltmeter Functions, Device Functions
+@node Boxcar Integrator Functions, Frequency Counter Functions, Voltmeter Functions, Device Functions
 @section Boxcar Integrator Functions
 @cindex Boxcar Integrator Functions
 Currently there is only rudimentary support for one type of boxcar
@@ -2029,18 +2030,42 @@ between @code{1} and @code{3} for memory curves.
 @end table
 
 
+@node Frequency Counter Functions, Multi-Device Functions, Boxcar Integrator Functions, Device Functions
+@section Frequency Counter Functions
+@cindex Frequency Counter Functions
+Currently only one frequency counter is supported, the HP5340A. Because
+this is a very old device (even pre-dating the GPIB-standard) only two
+functions defined for the device. All settings have to be done manually
+at the front panel.
+
+@table @samp
+
+@anchor{freq_counter_name}
+@item freq_counter_name()
+@findex freq_counter_name()
+Returns a string with the name of the frequency counter being used.
+
+@anchor{freq_counter_measure}
+@item freq_counter_measure()
+@findex freq_counter_measure()
+Returns a floating point value with the measured frequency. The function
+does not accept any parameters and can only bne used in the
+@code{EXPERIMENT} section.
 
 
-@node Multi-Device Functions, , Boxcar Integrator Functions, Device Functions
+@end table
+
+
+@node Multi-Device Functions, , Frequency Counter Functions, Device Functions
 @section Multi-Device Functions
 @cindex Multi-Device Functions
 
 There are a few convenience functions that use two or more devices. They
 use the single-device functions (and thus will print error messages if
-the modules for the required devices aren't loaded or don't if the
-modules don't support the needed functions). The module they are defined
-in is automatically loaded, so it needs no special entry in the
-@code{DEVICES} section.
+the modules for the required devices aren't loaded or if the modules
+don't support the needed functions). The module they are defined in is
+automatically loaded, so it needs no special entry in the @code{DEVICES}
+section.
 
 
 @table @samp
