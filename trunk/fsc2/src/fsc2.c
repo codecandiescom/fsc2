@@ -293,8 +293,16 @@ void load_file( FL_OBJECT *a, long reload )
 	is_loaded = display_file( in_file, fp );
 	state = FAIL;
 	is_tested = UNSET;
+
+	/* Run all the exit hooks and zero number of compilation errors */
+
 	if ( ! exit_hooks_are_run )
 		run_exit_hooks( );
+
+	compilation.error[ FATAL ] = 
+		compilation.error[ SEVERE ] =
+		    compilation.error[ WARN ] = 0;
+
 	fclose( fp );
 }
 
