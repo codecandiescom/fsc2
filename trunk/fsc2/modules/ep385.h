@@ -70,6 +70,7 @@ Var *pulser_next_phase( Var *v );
 Var *pulser_phase_reset( Var *v );
 Var *pulser_lock_keyboard( Var *v );
 Var *pulser_command( Var *v );
+Var *pulser_maximum_pattern_length( Var *v );
 
 
 /* Definitions needed for the pulser */
@@ -405,6 +406,7 @@ void ep385_dump_pulses( void );
 void ep385_dump_channels( FILE *fp );
 void ep385_duty_check( void );
 Ticks ep385_calc_max_length( FUNCTION *f );
+bool ep385_set_max_seq_len( double seq_len );
 
 
 /* Functions fron ep385_run.c */

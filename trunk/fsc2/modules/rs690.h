@@ -69,6 +69,7 @@ Var *pulser_next_phase( Var *v );
 Var *pulser_phase_reset( Var *v );
 Var *pulser_lock_keyboard( Var *v );
 Var *pulser_command( Var *v );
+Var *pulser_maximum_pattern_length( Var *v );
 
 
 /* Definitions needed for the pulser */
@@ -434,6 +435,7 @@ void rs690_dump_channels( FILE *fp );
 void rs690_duty_check( void );
 Ticks rs690_calc_max_length( FUNCTION *f );
 char *rs690_num_2_channel( int num );
+bool rs690_set_max_seq_len( double seq_len );
 
 
 /* Functions fron rs690_run.c */

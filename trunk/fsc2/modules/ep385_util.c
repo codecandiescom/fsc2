@@ -452,6 +452,19 @@ Ticks ep385_calc_max_length( FUNCTION *f )
 }
 
 
+/*-----------------------------------------------*/
+/* This is a no-op function and only implemented */
+/* because some other pulsers also have it.      */
+/*-----------------------------------------------*/
+
+bool ep385_set_max_seq_len( double seq_len )
+{
+	UNUSED_ARGUMENT( seq_len );
+	print( WARN, "Pulser doesn't allow setting a maximum pattern length.\n" );
+	return OK;
+}
+
+
 /*
  * Local variables:
  * tags-file-name: "../TAGS"

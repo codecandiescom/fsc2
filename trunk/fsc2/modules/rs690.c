@@ -96,6 +96,8 @@ int rs690_init_hook( void )
 	pulser_struct.phase_setup_prep = rs690_phase_setup_prep;
 	pulser_struct.phase_setup = rs690_phase_setup;
 
+	pulser_struct.set_max_seq_len = rs690_set_max_seq_len;
+
 	pulser_struct.keep_all_pulses = rs690_keep_all;
 
 	/* Finally, we initialize variables that store the state of the pulser */
@@ -1423,6 +1425,19 @@ Var *pulser_command( Var *v )
 	}
 
 	return vars_push( INT_VAR, 1L );
+}
+
+
+/*------------------------------------------------*/
+/* This is basically a no-op, it just returns the */
+/* largest representable number.                  */
+/*------------------------------------------------*/
+
+Var *pulser_maximum_pattern_length( Var *v )
+{
+	UNUSED_ARGUMENT( v );
+	print( WARN, "Pulser doesn't allow setting a maximum pattern length.\n" );
+	return vars_push( FLOAT_VAR, DBL_MAX );
 }
 
 

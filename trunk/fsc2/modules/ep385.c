@@ -78,7 +78,7 @@ int ep385_init_hook( void )
 	pulser_struct.set_trig_in_level = NULL;
 	pulser_struct.set_trig_in_slope = NULL;
 	pulser_struct.set_trig_in_impedance = NULL;
-	pulser_struct.set_max_seq_len = NULL;
+	pulser_struct.set_max_seq_len = ep385_set_max_seq_len;
 
 	pulser_struct.set_phase_reference = ep385_set_phase_reference;
 
@@ -1460,6 +1460,21 @@ Var *pulser_command( Var *v )
 
 	return vars_push( INT_VAR, 1L );
 }
+
+
+/*------------------------------------------------------*/
+/* This is basically a no-op, it just returns the fixed */
+/* pattern length of the pulser.                        */
+/*------------------------------------------------------*/
+
+Var *pulser_maximum_pattern_length( Var *v )
+{
+	UNUSED_ARGUMENT( v );
+	print( WARN, "Pulser doesn't allow setting a maximum pattern length.\n" );
+	return vars_push( FLOAT_VAR, MAX_PULSER_BITS
+					  * ep385.is_timebase ? ep386.timebase : FIXED_TIMEBASE );
+}
+
 
 
 /*

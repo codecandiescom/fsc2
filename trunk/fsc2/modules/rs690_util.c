@@ -418,6 +418,20 @@ char *rs690_num_2_channel( int num )
 	return name;
 }
 
+
+/*-----------------------------------------------*/
+/* This is a no-op function and only implemented */
+/* because some other pulsers also have it.      */
+/*-----------------------------------------------*/
+
+bool rs690_set_max_seq_len( double seq_len )
+{
+	UNUSED_ARGUMENT( seq_len );
+	print( WARN, "Pulser doesn't allow setting a maximum pattern length.\n" );
+	return OK;
+}
+
+
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
