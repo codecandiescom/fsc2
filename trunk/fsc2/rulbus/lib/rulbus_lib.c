@@ -87,7 +87,7 @@ static const char *rulbus_errlist[ ] = {
 
 
 char rulbus_stx_err[ ] =
-			  "Syntax error in configuration file at line xxxxx, column xxxxx";
+			"Syntax error in configuration file near line xxxxx, column xxxxx";
 
 static char rulbus_add_cfl[ ] =
 		 "Address confict for cards with addresses 0xxx and 0xxx in same rack";
@@ -106,7 +106,7 @@ static int rulbus_write_rack( unsigned char rack, unsigned char addr,
 static int rulbus_read_rack( unsigned char rack, unsigned char addr,
 							 unsigned char *data, size_t len );
 
-extern int yyparse( void );
+extern int rulbus_parse( void );
 
 
 typedef struct RULBUS_CARD_HANDLER RULBUS_CARD_HANDLER;
@@ -170,7 +170,7 @@ static const int rulbus_num_card_handlers =
 int rulbus_open( void )
 {
 	const char *config_name;
-	extern FILE *yyin;         /* fron the parser */
+	extern FILE *rulbus_in;         /* fron the parser */
 	int retval;
 	int i;
 
@@ -188,7 +188,7 @@ int rulbus_open( void )
 	if ( ( config_name = getenv( "RULBUS_CONFIG_FILE" ) ) == NULL )
 		config_name = RULBUS_DEFAULT_CONFIG_FILE;
 
-	if ( ( yyin = fopen( config_name, "r" ) ) == NULL )
+	if ( ( rulbus_in = fopen( config_name, "r" ) ) == NULL )
 		switch ( errno )
 		{
 			case ENOMEM :
@@ -206,14 +206,14 @@ int rulbus_open( void )
 
 	/* Parse the configuration file */
 
-    if ( ( retval = yyparse( ) ) != RULBUS_OK )
+    if ( ( retval = rulbus_parse( ) ) != RULBUS_OK )
 	{
-		fclose( yyin );
+		fclose( rulbus_in );
 		rulbus_cleanup( );
 		return rulbus_errno = retval;
     }
 
-    fclose( yyin );
+    fclose( rulbus_in );
 
 	/* Check that the data from the configuration file were reasonable */
 
@@ -330,9 +330,6 @@ int rulbus_perror( const char *s )
 
 const char *rulbus_strerror( void )
 {
-	if ( ! rulbus_in_use )
-		return "";
-
     return rulbus_errlist[ - rulbus_errno ];
 }
 

@@ -29,11 +29,10 @@
 
 #include "rulbus_lib.h"
 
-extern int yylex( void );
+extern int rulbus_lex( void );
 
 extern RULBUS_CARD_LIST *rulbus_card;
 extern int rulbus_num_cards;
-extern char *rulbus_dev_file;
 
 static int rack;
 static int card_no;
@@ -47,7 +46,7 @@ static int set_type( unsigned int type );
 static int set_range( unsigned int range );
 static int set_polar( const char *polar );
 static int set_rack( void );
-static void yyerror( const char *s );
+static void rulbus_error( const char *s );
 
 %}
 
@@ -137,6 +136,9 @@ sep2:     /* empty */
 
 static int set_dev_file( const char *name )
 {
+	extern char *rulbus_dev_file;
+
+
 	if ( rulbus_dev_file != NULL )
 	{
 		free( rulbus_dev_file );
@@ -326,11 +328,24 @@ static int set_rack( void )
 }
 
 
-/*-------------------------------------------------------------------*
- * flex requires this function to exist...
- *-------------------------------------------------------------------*/
+/*-------------------------------------------------------------*
+ * Function to put some use information into the error message 
+ *-------------------------------------------------------------*/
 
-static void yyerror( const char *s )
+static void rulbus_error( const char *s )
 {
+	extern int rulbus_lineno;
+	extern unsigned int rulbus_column;
+	extern char rulbus_stx_err[ ];
+	char *p;
+
 	s = s;
+	if ( ( p = strstr( rulbus_stx_err, " near line " ) ) != NULL )
+	{
+		if ( rulbus_lineno < 100000 && rulbus_column < 100000 )
+			sprintf( p, " near line %d, column %u",
+					 rulbus_lineno, rulbus_column );
+		else
+			sprintf( p, " near line ?" );
+	}
 }

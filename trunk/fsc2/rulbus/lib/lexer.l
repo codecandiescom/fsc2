@@ -29,12 +29,13 @@
 		/*     DEFINITIONS     */
 		/*---------------------*/
 
-%option noyywrap nocase-sensitive nounput never-interactive yylineno
+%option noyywrap nocase-sensitive nounput never-interactive yylineno nounput
 
 %{
 
 #include "parser.h"
 unsigned int rulbus_column = 0;
+int rulbus_lex( void );
 static void count( void );
 
 #define TAB_WIDTH 4
@@ -60,24 +61,24 @@ STRING   ["'][^"']+["']
 
 0[0-3][0-7]{0,2} {   /* octal number between 0 and 0377 */
 			   count( );
-               sscanf( yytext, "%o", &yylval.ival ); 
-               if ( yylval.ival > 255 )
+               sscanf( rulbus_text, "%o", &rulbus_lval.ival ); 
+               if ( rulbus_lval.ival > 255 )
                    return ERR_TOKEN;
                return NUM_TOKEN;
            }
 
 [0-9]|([1-9][0-9])|([1-2][0-9]{2}) {  /* decimal number between 0 and 255 */
 			   count( );
-               sscanf( yytext, "%d", &yylval.ival ); 
-               if ( yylval.ival > 255 )
+               sscanf( rulbus_text, "%d", &rulbus_lval.ival ); 
+               if ( rulbus_lval.ival > 255 )
                    return ERR_TOKEN;
                return NUM_TOKEN;
            }
 
 0x[0-9A-F]{1,2} {  /* hexadecimal number between 0x0 and 0xff */
 			   count( );
-               sscanf( yytext, "0x%x", &yylval.ival );
-               if ( yylval.ival > 255 )
+               sscanf( rulbus_text, "0x%x", &rulbus_lval.ival );
+               if ( rulbus_lval.ival > 255 )
                    return ERR_TOKEN;
                return NUM_TOKEN;
            }
@@ -88,12 +89,8 @@ STRING   ["'][^"']+["']
                char *p;
 
 			   count( );
-               yylval.sval = malloc( strlen( yytext ) );
-               strcpy( yylval.sval, yytext + 1 ); 
-               p = yylval.sval;
-		   
-               yylval.sval = p;
-               while ( *p != '"' )
+               rulbus_lval.sval = p = rulbus_text + 1;
+			   while ( *p != '"' )
                    p++;
                *p = '\0';
                return STR_TOKEN;
@@ -102,13 +99,13 @@ STRING   ["'][^"']+["']
 
 "RB"[0-9]{1,4} {
 			   count( );
-			   yylval.ival = atoi( yytext + 2 );
+			   rulbus_lval.ival = atoi( rulbus_text + 2 );
 			   return CARD_TYPE_TOKEN;
            }
 
 .          {
 			   count( );
-			   return *yytext;
+			   return *rulbus_text;
            }
 
 <<EOF>>    {
@@ -126,10 +123,10 @@ static void count( void )
 {
 	int i;
 
-	for ( i = 0; yytext[ i ] != '\0'; i++ )
-		if ( yytext[ i ] == '\n' )
+	for ( i = 0; rulbus_text[ i ] != '\0'; i++ )
+		if ( rulbus_text[ i ] == '\n' )
 			rulbus_column = 0;
-		else if ( yytext[ i ] == '\t' )
+		else if ( rulbus_text[ i ] == '\t' )
 			rulbus_column += TAB_WIDTH - ( rulbus_column % TAB_WIDTH );
 		else
 			rulbus_column++;
