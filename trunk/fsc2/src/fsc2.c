@@ -201,8 +201,9 @@ int main( int argc, char *argv[ ] )
 	/* Set handler for signal that's going to be send by the process that
 	   accepts external connections (to be spawned next) */
 
-	signal( SIGUSR1, sigusr1_handler );
-	signal( SIGUSR2, sigusr1_handler );
+	signal( SIGCHLD, main_sig_handler );
+	signal( SIGUSR1, main_sig_handler );
+	signal( SIGUSR2, main_sig_handler );
 
 	/* If starting the server for external connections succeeds we can
 	   really start the main loop */
@@ -622,6 +623,8 @@ static void start_editor( void )
 	}
 
 	execvp( final_argv[ 0 ], final_argv );
+
+	_exit( EXIT_FAILURE );
 }
 
 
@@ -1041,6 +1044,8 @@ void run_help( FL_OBJECT *a, long b )
 	a = a;
 	b = b;
 
+	notify_conn( BUSY_SIGNAL );
+
 	/* Fork and run help browser in child process */
 
 	if ( ( res = fork( ) ) == 0 )
@@ -1049,6 +1054,8 @@ void run_help( FL_OBJECT *a, long b )
 	if ( res == -1 )                                /* fork failed ? */
 		fl_show_alert( "Error", "Sorry, unable to start the help browser.",
 					   NULL, 1 );
+
+	notify_conn( UNBUSY_SIGNAL );
 }
 
 
@@ -1057,7 +1064,7 @@ void run_help( FL_OBJECT *a, long b )
 
 static void start_help_browser( void )
 {
-	char *av[ 5 ] = { NULL, NULL, NULL, NULL, NULL };
+	char *av[ 4 ] = { NULL, NULL, NULL, NULL };
 
 
 	/* If netscape isn't running start it, otherwise ask it to just open a
@@ -1075,45 +1082,55 @@ static void start_help_browser( void )
 	else
 	{
 		av[ 1 ] = get_string_copy( "-remote" );
-		av[ 2 ] = get_string( 42 + strlen( docdir ) );
-		strcpy( av[ 2 ], "'openURL(file:" );
+		av[ 2 ] = get_string( 40 + strlen( docdir ) );
+		strcpy( av[ 2 ], "openURL(file:" );
 		strcat( av[ 2 ], docdir );
-		strcat( av[ 2 ], "fsc2_frame.html,new-window)'" );
+		strcat( av[ 2 ], "fsc2_frame.html,new-window)" );
 	}
 
 	execvp( av[ 0 ], av );
+	_exit( EXIT_FAILURE );
 }
 
 
 /*------------------------------------------------------------*/  
 /*------------------------------------------------------------*/  
 
-void sigusr1_handler( int signo )
+void main_sig_handler( int signo )
 {
 	char line[ MAXLINE ];
 	int count;
 
 
-	assert( signo == SIGUSR1 || signo == SIGUSR2 );
+	signal( signo, main_sig_handler );
 
-	signal( signo, sigusr1_handler );
-
-	if ( signo == SIGUSR2 )
+	switch ( signo )
 	{
-		conn_child_replied = SET;
-		return;
+		case SIGCHLD :
+			wait( NULL );
+			break;
+
+		case SIGUSR2 :
+			conn_child_replied = SET;
+			break;
+
+		case SIGUSR1 :
+			while ( ( count = read( conn_pd[ READ ], line, MAXLINE ) ) == -1 &&
+					errno == EINTR )
+				;
+
+			line[ count - 1 ] = '\0';
+			main_form->Load->u_ldata = ( long ) line[ 0 ];
+			if ( line[ 1 ] == 'd' )
+				delete_file = SET;
+			main_form->Load->u_cdata = get_string_copy( line + 2 );
+			fl_trigger_object( main_form->Load );
+
+			break;
+
+		default :
+			assert( 1 == 0 );
 	}
-
-	while ( ( count = read( conn_pd[ READ ], line, MAXLINE ) ) == -1 &&
-			errno == EINTR )
-		;
-
-	line[ count - 1 ] = '\0';
-	main_form->Load->u_ldata = ( long ) line[ 0 ];
-	if ( line[ 1 ] == 'd' )
-		delete_file = SET;
-	main_form->Load->u_cdata = get_string_copy( line + 2 );
-	fl_trigger_object( main_form->Load );
 }
 
 

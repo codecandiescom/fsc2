@@ -15,6 +15,7 @@
 void bug_report_callback( FL_OBJECT *a, long b )
 {
 	FILE *tmp;
+	int tmp_fd;
 	char filename[ ] = P_tmpdir "/fsc2XXXXXX";
 	int lines;
 	int i;
@@ -27,13 +28,19 @@ void bug_report_callback( FL_OBJECT *a, long b )
 	a = a;
 	b = b;
 
+	notify_conn( BUSY_SIGNAL );
+
 	/* Create a temporary file for the mail */
 
-	if ( mkstemp( filename ) < 0 || ( tmp = fopen( filename, "w" ) ) == NULL )
+	if ( ( tmp_fd = mkstemp( filename ) ) < 0 ||
+		 ( tmp = fdopen( tmp_fd, "w" ) ) == NULL )
 	{
 		fl_show_messages( "Sorry can't send a bug report." );
+		notify_conn( UNBUSY_SIGNAL );
 		return;
 	}
+
+	signal( SIGCHLD, SIG_IGN );
 
 	fl_set_cursor( FL_ObjWin( a ), XC_watch );
 	XFlush( fl_get_display( ) );
@@ -225,4 +232,6 @@ void bug_report_callback( FL_OBJECT *a, long b )
 	}
 
 	unlink( filename );                /* delete the temporary file */
+	signal( SIGCHLD, main_sig_handler );
+	notify_conn( UNBUSY_SIGNAL );
 }

@@ -163,6 +163,8 @@ bool scan_main( char *file )
 	strcat( cmd, "fsc2_clean " );
 	strcat( cmd, file );
 
+	signal( SIGCHLD, SIG_IGN );
+
 	splitin = popen( cmd, "r" );
 
 	/* Now try to parse the cleaned up contents */
@@ -170,6 +172,9 @@ bool scan_main( char *file )
 	split_error = splitlex( );
 
 	pclose( splitin );
+
+	signal( SIGCHLD, main_sig_handler );
+
 	T_free( cmd );
 
 	return split_error;

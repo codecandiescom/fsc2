@@ -222,7 +222,8 @@ distclean:
 	$(MAKE) -C doc distclean
 	$(MAKE) -C utils distclean
 	$(MAKE) clean
-	$(RM) $(RMFLAGS) fsc2 fsc2_clean *.so *~
+	$(RM) $(RMFLAGS) fsc2 fsc2_clean fsc2_connect fsc2_start fsc2_test \
+					 fsc2_load *.so *~
 
 # Clean up everything for a distribution and create a zipped tarball
 

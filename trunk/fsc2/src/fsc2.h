@@ -108,7 +108,7 @@ int variables_parser( FILE *in );
 int phases_parser( FILE *in );
 int preparations_parser( FILE *in );
 int experiment_parser( FILE *in );
-void sigusr1_handler( int signo );
+void main_sig_handler( int signo );
 void notify_conn( int signo );
 
 

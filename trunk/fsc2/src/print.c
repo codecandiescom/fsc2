@@ -37,7 +37,7 @@ static void eps_make_scale( FILE *fp, void *cv, int coord );
 static void eps_draw_curve_1d( FILE *fp, int i );
 static void eps_draw_contour( FILE *fp, int cn );
 static void do_print( char *name, const char *command );
-static int start_printing( char **argv, char *name );
+static int start_printing( char **argv );
 
 
 
@@ -953,6 +953,7 @@ static void do_print( char *name, const char *command )
 	char *cmd_line = NULL;
 	char **argv = NULL;
 	int argc;
+	pid_t new_pid;
 	
 
 	/* Do a minimal sanity check of the print command */
@@ -998,18 +999,14 @@ static void do_print( char *name, const char *command )
 
 		/* Fork another process to do the printing */
 
-		switch( fork( ) )
+		if ( ( new_pid = fork( ) ) == 0 )
+			start_printing( argv );
+
+		if ( new_pid < 0 )
 		{
-			case -1 :              /* failure of fork() */
-				fl_show_alert( "Error", "Sorry, can't print results.",
-							   "Running out of resources.", 1 );
-				THROW( EXCEPTION );
-
-			case 0 :               /* the new child process */
-				_exit( start_printing( argv, name ) );
-
-			default :              /* the parent process */
-			   break;
+			fl_show_alert( "Error", "Sorry, can't print results.",
+						   "Running out of resources.", 1 );
+			THROW( EXCEPTION );
 		}
 
 		TRY_SUCCESS;
@@ -1026,35 +1023,16 @@ static void do_print( char *name, const char *command )
 /* Starts a `grand-child' process to do the actual printing. */
 /*-----------------------------------------------------------*/
 
-static int start_printing( char **argv, char *name )
+static int start_printing( char **argv )
 {
-	int status = EXIT_FAILURE;
-	char *a;
 	int i;
 
 
-	signal( SIGCHLD, SIG_IGN );  /* we don't need SIGCHLD signals */
+	execvp( argv[ 0 ], argv );
 
-	switch( fork( ) )
-	{
-		case -1 :                /* failure of fork() */
-			unlink( name );
-			break;
-
-		case 0 :                 /* the child finally execs....*/
-			if ( execvp( argv[ 0 ], argv ) < 0 )
-			{
-				fprintf( stderr, "fsc2: print command failed:" );
-				for ( i = 0, a = argv[ 0 ]; a != NULL; a = argv[ ++i ] )
-					fprintf( stderr, " %s", a );
-				fprintf( stderr, "\n" );
-				_exit( EXIT_FAILURE );
-			}
-
-		default :                /* the parent waits for the child to finish */
-			wait( &status );
-			unlink( name );
-	}
-
-	return status;
+	fprintf( stderr, "fsc2: print command failed:" );
+	for ( i = 0; argv[ i ] != NULL; i++ )
+		fprintf( stderr, " %s", argv[ i ] );
+	fprintf( stderr, "\n" );
+	_exit( EXIT_FAILURE );
 }

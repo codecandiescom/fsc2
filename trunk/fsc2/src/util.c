@@ -139,6 +139,9 @@ long get_file_length( char *name, int *len )
 
 	strcpy( pc, AWK_PROG" 'END{print NR}' " );
 	strcat( pc, name );
+
+	signal( SIGCHLD, SIG_IGN );
+
 	if ( ( pp = popen( pc, "r" ) ) == NULL )
 	{
 		T_free( pc );
@@ -147,6 +150,9 @@ long get_file_length( char *name, int *len )
 
 	fscanf( pp, "%ld", &lc );
 	pclose( pp );
+
+	signal( SIGCHLD, main_sig_handler );
+
 	T_free( pc );
 
 	/* count number of digits of number of lines */

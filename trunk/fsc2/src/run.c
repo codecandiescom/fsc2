@@ -166,9 +166,9 @@ bool run( void )
 
 	end_comm( );
 
-	signal( SIGCHLD, SIG_IGN );
-	signal( SIGUSR1, sigusr1_handler );
-	signal( SIGUSR2, sigusr1_handler );
+	signal( SIGCHLD, main_sig_handler );
+	signal( SIGUSR1, main_sig_handler );
+	signal( SIGUSR2, main_sig_handler );
 	run_end_of_exp_hooks( );
 	if ( need_GPIB )
 		gpib_shutdown( );
@@ -305,7 +305,7 @@ static void run_sigchld_handler( int sig_type )
 #endif
 
 	child_pid = 0;                          /* the child is dead... */
-	signal( SIGCHLD, SIG_IGN );
+	signal( SIGCHLD, main_sig_handler );
 
 	run_form->sigchld->u_ldata = ( long ) return_status;
 	fl_trigger_object( run_form->sigchld );
@@ -371,8 +371,8 @@ void stop_measurement( FL_OBJECT *a, long b )
 
 	fl_set_idle_callback( 0, NULL );
 
-	signal( SIGUSR1, sigusr1_handler );
-	signal( SIGUSR2, sigusr1_handler );
+	signal( SIGUSR1, main_sig_handler );
+	signal( SIGUSR2, main_sig_handler );
 
 	/* reset all the devices and finally the GPIB bus */
 

@@ -20,6 +20,154 @@ my $how        = 'Start program';
 
 my $mw = MainWindow->new( );
 
+
+my $f1 = $mw->Frame( );
+my $f1_l1 = $f1->Label( '-text' => 'Start frequency: ' );
+my $f1_v = $f1->Entry( '-textvariable' => \$start_freq,
+					   '-relief' => 'sunken' );
+my $f1_l2 = $f1->Label( '-text' => ' MHz' );
+
+$f1->pack( '-side' => 'top',
+		   '-fill' => 'x',
+		   '-padx' => '2m',
+		   '-pady' => '2m' );
+$f1_l1->pack( '-side' => 'left',
+			  '-fill' => 'x',
+			  '-padx' => '3m',
+			  '-expand' => 1 );
+$f1_v->pack( '-side' => 'left',
+			  '-fill' => 'x',
+			  '-padx' => '3m',
+			  '-expand' => 1 );
+$f1_l2->pack( '-side' => 'left' );
+
+
+my $f2 = $mw->Frame( );
+my $f2_l1 = $f2->Label( '-text' => 'End frequency: ' );
+my $f2_v = $f2->Entry( '-textvariable' => \$end_freq,
+					   '-relief' => 'sunken' );
+my $f2_l2 = $f2->Label( '-text' => ' MHz' );
+
+$f2->pack( '-side' => 'top',
+		   '-fill' => 'x',
+		   '-padx' => '2m',
+		   '-pady' => '2m' );
+$f2_l1->pack( '-side' => 'left',
+			  '-fill' => 'x',
+			  '-padx' => '3m',
+			  '-expand' => 1 );
+$f2_v->pack( '-side' => 'left',
+			  '-fill' => 'x',
+			  '-padx' => '3m',
+			  '-expand' => 1 );
+$f2_l2->pack( '-side' => 'left' );
+
+
+my $f3 = $mw->Frame( );
+my $f3_l1 = $f3->Label( '-text' => 'Step frequency: ' );
+my $f3_v = $f3->Entry( '-textvariable' => \$step_freq,
+					   '-relief' => 'sunken' );
+my $f3_l2 = $f3->Label( '-text' => ' kHz' );
+
+$f3->pack( '-side' => 'top',
+		   '-fill' => 'x',
+		   '-padx' => '2m',
+		   '-pady' => '2m' );
+$f3_l1->pack( '-side' => 'left',
+			  '-fill' => 'x',
+			  '-padx' => '3m',
+			  '-expand' => 1 );
+$f3_v->pack( '-side' => 'left',
+			  '-fill' => 'x',
+			  '-padx' => '3m',
+			  '-expand' => 1 );
+$f3_l2->pack( '-side' => 'left' );
+
+
+
+my $f4 = $mw->Frame( );
+my $f4_l1 = $f4->Label( '-text' => 'Attenuation: ' );
+my $f4_v = $f4->Entry( '-textvariable' => \$atten,
+					   '-relief' => 'sunken' );
+my $f4_l2 = $f4->Label( '-text' => ' db' );
+
+$f4->pack( '-side' => 'top',
+		   '-fill' => 'x',
+		   '-padx' => '2m',
+		   '-pady' => '2m' );
+$f4_l1->pack( '-side' => 'left',
+			  '-fill' => 'x',
+			  '-padx' => '3m',
+			  '-expand' => 1 );
+$f4_v->pack( '-side' => 'left',
+			  '-fill' => 'x',
+			  '-padx' => '3m',
+			  '-expand' => 1 );
+$f4_l2->pack( '-side' => 'left' );
+
+
+my $f5 = $mw->Frame( );
+my $f5_l1 = $f5->Label( '-text' => 'Modulation freqnuecy: ' );
+my $f5_v = $f5->Entry( '-textvariable' => \$mod_freq,
+					   '-relief' => 'sunken' );
+my $f5_l2 = $f5->Label( '-text' => ' kHz' );
+
+$f5->pack( '-side' => 'top',
+		   '-fill' => 'x',
+		   '-padx' => '2m',
+		   '-pady' => '2m' );
+$f5_l1->pack( '-side' => 'left',
+			  '-fill' => 'x',
+			  '-padx' => '3m',
+			  '-expand' => 1 );
+$f5_v->pack( '-side' => 'left',
+			  '-fill' => 'x',
+			  '-padx' => '3m',
+			  '-expand' => 1 );
+$f5_l2->pack( '-side' => 'left' );
+
+
+my $f6 = $mw->Frame( );
+my $f6_l1 = $f6->Label( '-text' => 'Modulation amplitude: ' );
+my $f6_v = $f6->Entry( '-textvariable' => \$mod_ampl,
+					   '-relief' => 'sunken' );
+my $f6_l2 = $f6->Label( '-text' => ' kHz' );
+
+$f6->pack( '-side' => 'top',
+		   '-fill' => 'x',
+		   '-padx' => '2m',
+		   '-pady' => '2m' );
+$f6_l1->pack( '-side' => 'left',
+			  '-fill' => 'x',
+			  '-padx' => '3m',
+			  '-expand' => 1 );
+$f6_v->pack( '-side' => 'left',
+			  '-fill' => 'x',
+			  '-padx' => '3m',
+			  '-expand' => 1 );
+$f6_l2->pack( '-side' => 'left' );
+
+
+
+my $f7 = $mw->Frame( );
+my $f7_l1 = $f7->Label( '-text' => 'Number of runs: ' );
+my $f7_v = $f7->Entry( '-textvariable' => \$N_runs,
+					   '-relief' => 'sunken' );
+
+$f7->pack( '-side' => 'top',
+		   '-fill' => 'x',
+		   '-padx' => '2m',
+		   '-pady' => '2m' );
+$f7_l1->pack( '-side' => 'left',
+			  '-fill' => 'x',
+			  '-padx' => '3m',
+			  '-expand' => 1 );
+$f7_v->pack( '-side' => 'left',
+			  '-fill' => 'x',
+			  '-padx' => '3m',
+			  '-expand' => 1 );
+
+
 $mw->Optionmenu( '-options' => [ ( 'sr510', 'sr530', 'sr810', 'sr830' ) ],
 				 '-text' => 'sr810',
 				 '-variable' => \$lockin
@@ -105,9 +253,24 @@ EXPERIMENT:
 File_1 = get_file( \"File for storing all runs:\" );
 File_2 = get_file( \"File for storing final result:\" );
 
-lockin_ref_freq( mod_freq );
+";
+
+# Neither the SR510 nor the SR530 can set the reference frequency nor
+# its level...
+
+if ( $lockin =~ /^sr8/ ) {
+	print F
+"lockin_ref_freq( mod_freq );
 lockin_ref_level( 1 V );
-tc = lockin_time_constant( );
+";
+} else {
+	print F
+"mod_freq = lockin_ref_freq( );
+";
+}
+
+print F
+"tc = lockin_time_constant( );
 
 synthesizer_state( 1 );
 
