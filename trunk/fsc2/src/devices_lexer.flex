@@ -157,6 +157,9 @@ WS          [\n\t ]+
 
 int devices_parser( FILE *in )
 {
+	int i;
+
+
 	/* Make sure there is only one DEVICES section and that it is the very
 	   first section */
 
