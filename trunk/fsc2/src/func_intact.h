@@ -30,20 +30,19 @@ typedef struct _IOBJ_ {
 	FL_OBJECT *group;       /* group (RADIO) button belongs to */
 	long partner;
 
-	volatile double value;
-	double start_val,       /* start and end value */
+	volatile double value;  /* current value of slider */
+	double start_val,       /* maximum and minimum value */
 		   end_val;
 
 } IOBJECT;
 
 
 typedef struct {
-	int layout;
+	int layout;             /* 0 / 1 <-> vertical / horizontal */
 	FL_FORM *Tools;
-	FL_OBJECT *background_box;
-	FL_COORD w,
+	FL_COORD w,             /* size of form */
 		     h;
-	IOBJECT *objs;
+	IOBJECT *objs;          /* linked list of objects in form */
 } TOOL_BOX;
 
 
