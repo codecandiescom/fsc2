@@ -3022,11 +3022,11 @@ Var *f_clearmark_2d( Var *v )
 
 	/* Check for a list of curve numbers */
 
-	for ( i = 0; v != NULL && i < MAX_CURVES; i++, v = vars_pop( v ) )
+	for ( i = 0; v != NULL && i < G2.nc; i++, v = vars_pop( v ) )
 	{
 		curves[ i ] = get_strict_long( v, "curve number" ) - 1;
 
-		if ( curves[ i ] < 0 || curves[ i ] > G2.nc )
+		if ( curves[ i ] < 0 || curves[ i ] >= G2.nc )
 		{
 			print( FATAL, "There is no curve numbered %ld\n",
 				   curves[ i ] + 1 );
