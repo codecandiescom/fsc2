@@ -528,30 +528,33 @@ Just be careful not to change the variables from within the condition
 
 
 The @code{fsc2_guify} conversion tool (or, to be exact, the scripts
-created by this tool) relies on an property of @code{fsc2}, i.e.@: that
-@code{fsc2} is prepared to listen to external programs that might want
-to send it @code{EDL} programs. These external programs are
+created by this tool) relies on @code{fsc2} listening to external
+programs that might want to send it @code{EDL} programs. There is a
+rather simple protocol for doing so. But you don't even have to know
+about this protocol because there are three programs that do all the
+required things for you:
 @example
 fsc2_load
 fsc2_test
 fsc2_start
 @end example
-If these programs get passed an @code{EDL} program they will contact
-(or even start) @code{fsc2} and pass it the program. From the names
-of the programs their functions should be obvious: the first one tells
-@code{fsc2} to just load the @code{EDL} program, the second one
-tells it to also test the program, and the third asks @code{fsc2}
-to even start the @code{EDL} program after a successful test.
+If these programs get passed an @code{EDL} program on their standard
+input they will contact (or, if necessary, start) @code{fsc2} and pass
+it the @code{EDL} program. From the names of the programs their
+functions should be obvious: the first one tells @code{fsc2} to just
+load the @code{EDL} program, the second one tells it to also test the
+program, and the third asks @code{fsc2} to start the @code{EDL} program
+after a successful test run.
 
 You could e.g.@: invoke these programs from the command line, type in an
 @code{EDL} program and when you're finished, you would see the program
-launch @code{fsc2} with your newly typed in program. Of course,
-that's not what these programs really are meant for. Instead they should
-allow scripts etc.@: that create @code{EDL} programs to send their
-results to @code{fsc2} without having to deal with any of the details
-about how this is done. So, they just start one of the above programs,
-pass it the @code{EDL} program and then might care to inspect the
-return value.
+launch @code{fsc2} with your newly typed in program displayed in the
+main window. Of course, that's not what these programs are really meant
+for. Instead they should allow scripts etc.@: that create @code{EDL}
+programs to send their results to @code{fsc2} without having to deal
+with any of the details about how this is done. So, such a script just
+starts one of the above programs, passes it the @code{EDL} program and
+then might care to inspect the return value.
 
 In @code{C} code you probably would do this using the @code{popen()}
 function, requesting a stream for writing (for sending the @code{EDL}
