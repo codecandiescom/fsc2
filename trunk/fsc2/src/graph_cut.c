@@ -41,6 +41,7 @@ static void redraw_cut_canvas( Canvas *c );
 static void repaint_cut_canvas( Canvas * );
 static void redraw_cut_center_canvas( Canvas *c );
 static void redraw_cut_axis( int coord );
+static void cut_make_scale( Canvas *c, int coord );
 
 
 static bool is_shown  = UNSET;  /* set on fl_show_form() */
@@ -1048,7 +1049,6 @@ static void redraw_cut_axis( int coord )
 
 	assert( coord >= X && coord <= Z );
 
-
 	/* First draw the label - for the x-axis it's just done by drawing the
 	   string while for the y- and z-axis we have to copy a pixmap since the
 	   label is a string rotated by 90 degree that has been drawn in advance */
@@ -1092,8 +1092,312 @@ static void redraw_cut_axis( int coord )
 					   c->w - 5 - G.label_w[ coord + 3 ], 0 );
 	}
 
+	cut_make_scale( c, coord );
 	XCopyArea( G.d, c->pm, FL_ObjWin( c->obj ), c->gc,
 			   0, 0, c->w, c->h, 0, 0 );
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+static void cut_make_scale( Canvas *c, int coord )
+{
+	Curve_2d *cv = G.curve_2d[ G.active_curve ];
+	double rwc_delta,          /* distance between small ticks (in rwc) */
+		   order,              /* and its order of magnitude */
+		   mag;
+	double d_delta_fine,       /* distance between small ticks (in points) */
+		   d_start_fine,       /* position of first small tick (in points) */
+		   d_start_medium,     /* position of first medium tick (in points) */
+		   d_start_coarse,     /* position of first large tick (in points) */
+		   cur_p;              /* loop variable with position */
+	int medium_factor,         /* number of small tick spaces between medium */
+		coarse_factor;         /* and large tick spaces */
+	int medium,                /* loop counters for medium and large ticks */
+		coarse;
+	double rwc_start,          /* rwc value of first point */
+		   rwc_start_fine,     /* rwc value of first small tick */
+		   rwc_start_medium,   /* rwc value of first medium tick */
+		   rwc_start_coarse;   /* rwc value of first large tick */
+	double rwc_coarse;
+	short x, y;
+	char lstr[ 128 ];
+	int width;
+	short last = -1000;
+	int r_coord;
+	double r_scale;
+	XPoint triangle[ 3 ];
+
+
+	/* The distance between the smallest ticks should be ca. `SCALE_TICK_DIST'
+	   points - calculate the corresponding delta in real word units */
+
+	if ( coord == X )
+	{
+		if ( CG.cut_dir == X )
+		{
+			r_coord = Y;
+			r_scale = ( double ) c->w / ( double ) G.y_axis.h
+				      * cv->s2d[ r_coord ];
+		}
+		else
+		{
+			r_coord = X;
+			r_scale = ( double ) c->w / ( double ) G.x_axis.w
+				      * cv->s2d[ r_coord ];
+		}
+	}
+	else if ( coord == Y )
+	{
+		r_coord = Z;
+		r_scale = ( double ) c->h / ( double ) G.z_axis.h
+			      * cv->s2d[ r_coord ];
+	}
+	else
+	{
+		if ( CG.cut_dir == X )
+		{
+			r_coord = X;
+			r_scale = ( double ) c->h / ( double ) G.x_axis.w
+				     * ( double ) ( G.canvas.w - 1 ) / ( double ) ( G.nx - 1 );
+		}
+		else
+		{
+			r_coord = Y;
+			r_scale = ( double ) c->h / ( double ) G.y_axis.h
+				     * ( double ) ( G.canvas.h - 1 ) / ( double ) ( G.ny - 1 );
+		}
+	}
+
+	rwc_delta = ( double ) SCALE_TICK_DIST * fabs( cv->rwc_delta[ r_coord ] ) /
+		                                                               r_scale;
+
+	/* Now scale this distance to the interval [ 1, 10 [ */
+
+	mag = floor( log10( rwc_delta ) );
+	order = pow( 10.0, mag );
+	modf( rwc_delta / order, &rwc_delta );
+
+	/* Get a `smooth' value for the ticks distance, i.e. either 2, 2.5, 5 or
+	   10 and convert it to real world coordinates */
+
+	if ( rwc_delta <= 2.0 )       /* in [ 1, 2 ] -> units of 2 */
+	{
+		medium_factor = 5;
+		coarse_factor = 25;
+		rwc_delta = 2.0 * order;
+	}
+	else if ( rwc_delta <= 3.0 )  /* in ] 2, 3 ] -> units of 2.5 */
+	{
+		medium_factor = 4;
+		coarse_factor = 20;
+		rwc_delta = 2.5 * order;
+	}
+	else if ( rwc_delta <= 6.0 )  /* in ] 3, 6 ] -> units of 5 */
+	{
+		medium_factor = 2;
+		coarse_factor = 10;
+		rwc_delta = 5.0 * order;
+	}
+	else                          /* in ] 6, 10 [ -> units of 10 */
+	{
+		medium_factor = 5;
+		coarse_factor = 10;
+		rwc_delta = 10.0 * order;
+	}
+
+	/* Calculate the final distance between the small ticks in points */
+
+	d_delta_fine = r_scale * rwc_delta / fabs( cv->rwc_delta[ r_coord ] );
+
+	/* `rwc_start' is the first value in the display (i.e. the smallest x or y
+	   value still shown in the canvas), `rwc_start_fine' the position of the
+	   first small tick (both in real world coordinates) and, finally,
+	   `d_start_fine' is the same position but in points */
+
+	if ( coord != Z )
+		rwc_start = cv->rwc_start[ r_coord ]
+			        - cv->shift[ r_coord ] * cv->rwc_delta[ r_coord ];
+	else
+		rwc_start = cv->rwc_start[ r_coord ];
+
+	if ( cv->rwc_delta[ r_coord ] < 0 )
+		rwc_delta *= -1.0;
+
+	modf( rwc_start / rwc_delta, &rwc_start_fine );
+	rwc_start_fine *= rwc_delta;
+
+	d_start_fine = r_scale * ( rwc_start_fine - rwc_start ) /
+		                                              cv->rwc_delta[ r_coord ];
+	if ( lround( d_start_fine ) < 0 )
+		d_start_fine += d_delta_fine;
+
+	/* Calculate start index (in small tick counts) of first medium tick */
+
+	modf( rwc_start / ( medium_factor * rwc_delta ), &rwc_start_medium );
+	rwc_start_medium *= medium_factor * rwc_delta;
+
+	d_start_medium = r_scale * ( rwc_start_medium - rwc_start ) /
+			                                          cv->rwc_delta[ r_coord ];
+	if ( lround( d_start_medium ) < 0 )
+		d_start_medium += medium_factor * d_delta_fine;
+
+	medium = lround( ( d_start_fine - d_start_medium ) / d_delta_fine );
+
+	/* Calculate start index (in small tick counts) of first large tick */
+
+	modf( rwc_start / ( coarse_factor * rwc_delta ), &rwc_start_coarse );
+	rwc_start_coarse *= coarse_factor * rwc_delta;
+
+	d_start_coarse = r_scale * ( rwc_start_coarse - rwc_start ) /
+			                                          cv->rwc_delta[ r_coord ];
+	if ( lround( d_start_coarse ) < 0 )
+	{
+		d_start_coarse += coarse_factor * d_delta_fine;
+		rwc_start_coarse += coarse_factor * rwc_delta;
+	}
+
+	coarse = lround( ( d_start_fine - d_start_coarse ) / d_delta_fine );
+
+	/* Now, finally we got everything we need to draw the axis... */
+
+	rwc_coarse = rwc_start_coarse - coarse_factor * rwc_delta;
+
+	if ( coord == X )
+	{
+		/* Draw coloured line of scale */
+
+		y = X_SCALE_OFFSET;
+		XSetForeground( G.d, cv->gc,
+						fl_get_pixel( G.colors[ G.active_curve ] ) );
+		XFillRectangle( G.d, c->pm, cv->gc, 0, y - 2, c->w, 3 );
+
+		/* Draw all the ticks and numbers */
+
+		for ( cur_p = d_start_fine; cur_p < c->w; 
+			  medium++, coarse++, cur_p += d_delta_fine )
+		{
+			x = d2shrt( cur_p );
+
+			if ( coarse % coarse_factor == 0 )         /* long line */
+			{
+				XDrawLine( G.d, c->pm, c->font_gc, x, y + 3,
+						   x, y - LONG_TICK_LEN );
+				rwc_coarse += coarse_factor * rwc_delta;
+				if ( G.font == NULL )
+					continue;
+
+				make_label_string( lstr, rwc_coarse, ( int ) mag );
+				width = XTextWidth( G.font, lstr, strlen( lstr ) );
+				if ( x - width / 2 - 10 > last )
+				{
+					XDrawString( G.d, c->pm, c->font_gc, x - width / 2,
+								 y + LABEL_DIST + G.font_asc, lstr,
+								 strlen( lstr ) );
+					last = x + width / 2;
+				}
+			}
+			else if ( medium % medium_factor == 0 )    /* medium line */
+				XDrawLine( G.d, c->pm, c->font_gc, x, y,
+						   x, y - MEDIUM_TICK_LEN );
+			else                                       /* short line */
+				XDrawLine( G.d, c->pm, c->font_gc, x, y,
+						   x, y - SHORT_TICK_LEN );
+		}
+	}
+	else if ( coord == Y )
+	{
+		/* Draw coloured line of scale */
+
+		x = c->w - Y_SCALE_OFFSET;
+		XSetForeground( G.d, cv->gc,
+						fl_get_pixel( G.colors[ G.active_curve ] ) );
+		XFillRectangle( G.d, c->pm, cv->gc, x, 0, 3, c->h );
+
+		/* Draw all the ticks and numbers */
+
+		for ( cur_p = ( double ) c->h - 1.0 - d_start_fine; cur_p >= 0; 
+			  medium++, coarse++, cur_p -= d_delta_fine )
+		{
+			y = d2shrt( cur_p );
+
+			if ( coarse % coarse_factor == 0 )         /* long line */
+			{
+				XDrawLine( G.d, c->pm, c->font_gc, x - 3, y,
+						   x + LONG_TICK_LEN, y );
+				rwc_coarse += coarse_factor * rwc_delta;
+
+				if ( G.font == NULL )
+					continue;
+
+				make_label_string( lstr, rwc_coarse, ( int ) mag );
+				width = XTextWidth( G.font, lstr, strlen( lstr ) );
+				XDrawString( G.d, c->pm, c->font_gc, x - LABEL_DIST - width,
+							 y + G.font_asc / 2, lstr, strlen( lstr ) );
+			}
+			else if ( medium % medium_factor == 0 )    /* medium line */
+				XDrawLine( G.d, c->pm, c->font_gc, x, y,
+						   x + MEDIUM_TICK_LEN, y );
+			else                                      /* short line */
+				XDrawLine( G.d, c->pm, c->font_gc, x, y,
+						   x + SHORT_TICK_LEN, y );
+		}
+	}
+	else
+	{
+		/* Draw coloured line of scale */
+
+		x = Z_SCALE_OFFSET;
+		XSetForeground( G.d, cv->gc,
+						fl_get_pixel( G.colors[ G.active_curve ] ) );
+		XFillRectangle( G.d, c->pm, cv->gc, x - 2, 0, 3, c->h );
+
+		/* Draw all the ticks and numbers */
+
+		for ( cur_p = ( double ) c->h - 1.0 - d_start_fine; cur_p >= 0; 
+			  medium++, coarse++, cur_p -= d_delta_fine )
+		{
+			y = d2shrt( cur_p );
+
+			if ( coarse % coarse_factor == 0 )         /* long line */
+			{
+				XDrawLine( G.d, c->pm, c->font_gc, x + 3, y,
+						   x - LONG_TICK_LEN, y );
+				rwc_coarse += coarse_factor * rwc_delta;
+
+				if ( G.font == NULL )
+					continue;
+
+				make_label_string( lstr, rwc_coarse, ( int ) mag );
+				width = XTextWidth( G.font, lstr, strlen( lstr ) );
+				XDrawString( G.d, c->pm, c->font_gc, x + LABEL_DIST,
+							 y + G.font_asc / 2, lstr, strlen( lstr ) );
+			}
+			else if ( medium % medium_factor == 0 )    /* medium line */
+				XDrawLine( G.d, c->pm, c->font_gc, x, y,
+						   x - MEDIUM_TICK_LEN, y );
+			else                                      /* short line */
+				XDrawLine( G.d, c->pm, c->font_gc, x, y,
+						   x - SHORT_TICK_LEN, y );
+		}
+
+		triangle[ 0 ].x = x - LONG_TICK_LEN - 3;
+		if ( CG.cut_dir == X )
+			triangle[ 0 ].y = G.cut_z_axis.h - 1
+				              - ( ( double ) CG.index / ( double ) ( G.nx - 1 )
+								  * G.cut_z_axis.h );
+		else
+			triangle[ 0 ].y = G.cut_z_axis.h - 1
+				              - ( ( double ) CG.index / ( double ) ( G.ny - 1 )
+								  * G.cut_z_axis.h );
+		triangle[ 1 ].x = - ( Z_SCALE_OFFSET - LONG_TICK_LEN - 10 );
+		triangle[ 1 ].y = - 5;
+		triangle[ 2 ].x = 0;
+		triangle[ 2 ].y = 10;
+		XFillPolygon( G.d, c->pm, c->font_gc, triangle, 3,
+					  Convex, CoordModePrevious );
+	}
 }
 
 
@@ -1106,7 +1410,7 @@ void cut_clear_curve( long curve )
 	Scaled_Point *sp;
 
 
-	if ( ! G.is_cut || curve != active_curve )
+	if ( ! G.is_cut || curve != G.active_curve )
 		return;
 
 	for ( sp = G.cut_curve.points, i = 0; i < CG.nx; sp++, i++ )
