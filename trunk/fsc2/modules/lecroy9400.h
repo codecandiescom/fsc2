@@ -207,30 +207,21 @@ long lecroy9400_translate_channel( int dir, long channel );
 bool lecroy9400_init( const char *name );
 double lecroy9400_get_timebase( void );
 bool lecroy9400_set_timebase( double timebase);
-bool lecroy9400_set_trigger_pos( double pos );
-bool lecroy9400_get_trigger_pos( double *ret );
-long lecroy9400_get_num_avg( void );
-bool lecroy9400_set_num_avg( long num_avg );
-int lecroy9400_get_acq_mode(void);
-bool lecroy9400_get_cursor_position( int cur_no, double *cp );
-bool lecroy9400_get_cursor_distance( double *cd );
-bool lecroy9400_set_trigger_channel( const char *name );
-int lecroy9400_get_trigger_channel( void );
-void lecroy9400_gpib_failure( void );
-bool lecroy9400_clear_SESR( void );
-void lecroy9400_finished( void );
-bool lecroy9400_set_cursor( int cur_num, double pos );
-bool lecroy9400_set_snap( bool flag );
-bool lecroy9400_display_channel( int channel );
-bool lecroy9400_set_sens( int channel, double val );
+int lecroy9400_get_trigger_source( void );
+bool lecroy9400_set_trigger_source( int channel );
+double lecroy9400_get_trigger_level( void );
+bool lecroy9400_set_trigger_level( double level );
 double lecroy9400_get_sens( int channel );
-bool lecroy9400_start_aquisition( void );
-double lecroy9400_get_area( int channel, WINDOW *w, bool use_cursor );
-bool lecroy9400_get_curve( int channel, WINDOW *w, double **data, long *length,
-					   bool use_cursor );
-double lecroy9400_get_amplitude( int channel, WINDOW *w, bool use_cursor );
-void lecroy9400_free_running( void );
-bool lecroy9400_lock_state( bool lock );
+bool lecroy9400_set_sens( int channel, double sens );
+double lecroy9400_get_offset( int channel );
+bool lecroy9400_set_offset( int channel, double offset );
+int lecroy9400_get_coupling( int channel );
+bool lecroy9400_set_coupling( int channel, int type );
+bool lecroy9400_is_displayed( int channel );
+bool lecroy9400_display( int channel, int on_off );
+long lecroy9400_get_num_avg( int channel );
+bool lecroy9400_get_desc( int channel );
+void lecroy9400_gpib_failure( void );
 
 
 #ifdef LECROY9400_MAIN
