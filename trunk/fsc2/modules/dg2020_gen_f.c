@@ -522,8 +522,8 @@ bool dg2020_set_phase_reference( int phase, int function )
 	if ( function == PULSER_CHANNEL_PHASE_1 ||
 		 function == PULSER_CHANNEL_PHASE_2 )
 	{
-		eprint( FATAL, "%s:%ld: A PHASE function can't be phase cycled.",
-				Fname, Lc );
+		eprint( FATAL, "%s:%ld: %s: A PHASE function can't be phase cycled.",
+				Fname, Lc, pulser_struct.name );
 		THROW( EXCEPTION );
 	}
 
