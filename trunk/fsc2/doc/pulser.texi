@@ -142,7 +142,7 @@ In the currently used configuration the time base of of the
 The statement to set the time base, i.e.@: the length of the individual
 time slices is@footnote{Instead of @code{TIMEBASE} one may also write
 @code{TB:}, @code{T_B}, @code{TBASE:}, @code{T_BASE:}, @code{TIMEB},
-@code{TIME_B:} or @code{TIME_BASE:} instead of @code{TIMEBASE:}.}:
+@code{TIME_B:} or @code{TIME_BASE:}.}:
 @example
 TIMEBASE: 5 ns;
 @end example

@@ -51,9 +51,10 @@ samp        { font-family :       Lucidatypewriter, monospace;
               font-weight :       bold;
             }
 
-td.example  { background-color : #DDDDDD;
+td.example  { background-color :  #DDDDDD;
               padding :           4px 8px 4px 8px;
-           }
+              border :            thin solid;
+            }
 
 table.navi  { background-color :  #e6e6e6;
               cellpadding :       10px;

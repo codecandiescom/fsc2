@@ -2748,7 +2748,7 @@ This function is only available for the @code{Rohde&Schwarz SML01}
 synthesizer with @code{SML-B3} option. These devices have a pulse
 modulation mode that allows th creation of RF pulses of user defined
 length and position. The function allows to query or switch on or off
-this pulse mode. If called without an argument it returns @cdeo{1} or
+this pulse mode. If called without an argument it returns @code{1} or
 @code{0} if pulse modulation mode is on or off. If called with an
 argument of @code{"ON"} or @code{1} pulse modulation mode is switched
 on, if called with an argument of @code{"OFF"} or @code{1} pulse
