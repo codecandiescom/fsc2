@@ -35,6 +35,7 @@ Var *synthesizer_sweep_up( Var *v );
 Var *synthesizer_sweep_down( Var *v );
 Var *synthesizer_reset_frequency( Var *v );
 Var *synthesizer_use_table( Var *v );
+Var *synthesizer_attenuation( Var *v );
 
 
 
@@ -63,6 +64,7 @@ typedef struct
 static HP8647A hp8647a;
 
 static bool hp8647a_init( const char *name );
+static void hp8647a_finished( void );
 static double hp8647a_set_frequency( double freq );
 static double hp8647a_get_frequency( void );
 static bool hp8647a_read_table( FILE *fp );
@@ -148,7 +150,8 @@ int hp8647a_exp_hook( void )
 
 int hp8647a_end_of_exp_hook( void )
 {
-//	hp8647a_finished( );
+	hp8647a_finished( );
+	hp8647a.device = -1;
 
 	return 1;
 }
@@ -200,7 +203,6 @@ Var *synthesizer_set_frequency( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	
 	if ( TEST_RUN )                      /* In test run of experiment */
 		hp8647a.freq = freq;
 	else if ( I_am == PARENT )           /* in PREPARATIONS section */
@@ -230,10 +232,9 @@ Var *synthesizer_set_step_frequency( Var *v )
 }
 
 
-/*
-  This function may only be called in the EXPERIMENT section!
-*/
-
+/*-------------------------------------------------------------*/
+/* This function may only be called in the EXPERIMENT section! */
+/*-------------------------------------------------------------*/
 
 Var *synthesizer_get_frequency( Var *v )
 {
@@ -242,9 +243,9 @@ Var *synthesizer_get_frequency( Var *v )
 }
 
 
-/*
-  This function may only get called in the EXPERIMENT section!
-*/
+/*-------------------------------------------------------------*/
+/* This function may only be called in the EXPERIMENT section! */
+/*-------------------------------------------------------------*/
 
 Var *synthesizer_sweep_up( Var *v )
 {
@@ -285,9 +286,9 @@ Var *synthesizer_sweep_up( Var *v )
 }
 
 
-/*
-  This function may only get called in the EXPERIMENT section!
-*/
+/*-------------------------------------------------------------*/
+/* This function may only be called in the EXPERIMENT section! */
+/*-------------------------------------------------------------*/
 
 Var *synthesizer_sweep_down( Var *v )
 {
@@ -302,9 +303,9 @@ Var *synthesizer_sweep_down( Var *v )
 }
 
 
-/*
-  This function may only get called in the EXPERIMENT section!
-*/
+/*-------------------------------------------------------------*/
+/* This function may only be called in the EXPERIMENT section! */
+/*-------------------------------------------------------------*/
 
 Var *synthesizer_reset_frequency( Var *v )
 {
@@ -394,6 +395,12 @@ static bool hp8647a_init( const char *name )
 }
 
 
+static void hp8647a_finished( void )
+{
+	gpib_local( hp8647a.device );
+}
+
+
 static double hp8647a_set_frequency( double freq )
 {
 	char cmd[ 100 ] = "FREQ:CW ";
@@ -404,8 +411,7 @@ static double hp8647a_set_frequency( double freq )
 	sprintf( cmd + strlen( cmd ), "%f", freq );
 	if ( gpib_write( hp8647a.device, cmd, strlen( cmd ) ) == FAILURE )
 	{
-		eprint( FATAL, "%s: Can't access the synthesizer.",
-				DEVICE_NAME );
+		eprint( FATAL, "%s: Can't access the synthesizer.", DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
 
@@ -421,8 +427,7 @@ static double hp8647a_get_frequency( void )
 	if ( gpib_write( hp8647a.device, "FREQ:CW?", 8 ) == FAILURE ||
 		 gpib_read( hp8647a.device, buffer, &length ) == FAILURE )
 	{
-		eprint( FATAL, "%s: Can't access the synthesizer.",
-				DEVICE_NAME );
+		eprint( FATAL, "%s: Can't access the synthesizer.", DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
 
@@ -539,6 +544,8 @@ FILE *hp8647a_open_table( char *name )
 
 static bool hp8647a_read_table( FILE *fp )
 {
+	/* Lots of stuff to come... */
+
 	fclose( fp );
 	return OK;
 }
