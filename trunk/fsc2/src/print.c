@@ -1481,6 +1481,9 @@ static char **split_into_lines( int *num_lines )
 
 
 /*-------------------------------------------------------------------*/
+/* Routine returns an string that is basically the copy of the input */
+/* string but with a backslash prepended to all parenthesis (which   */
+/* the PostScript interpreter might choke on).                       */
 /*-------------------------------------------------------------------*/
 
 static char *paren_replace( const char *str )
