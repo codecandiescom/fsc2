@@ -38,10 +38,10 @@ describes how the way the pulsers are to be used depends on the hardware
 used in the spectrometer. Currently, there are three
 pulsers/spectrometer combinations of implemented:
 @itemize @bullet
-@item Sony/Tektronix DG2020 (S-band spectrometer in Frankfurt/Main)
-@item Sony/Tektronix DG2020 (X-band spectrometer in Berlin)
-@item Tektronix HFS9003 (W-band spectrometer in Berlin)
-@item Bruker EP385 Pulse Programmer (X-band spectrometer in Berlin)
+@item Sony/Tektronix DG2020 (S-band spectrometer, Frankfurt/Main)
+@item Sony/Tektronix DG2020 (X-band spectrometer, Berlin)
+@item Tektronix HFS9003 (W-band spectrometer, Berlin)
+@item Bruker EP385 Pulse Programmer (X-band spectrometer, Berlin)
 @end itemize
 Because of the importance of the pulser for time-resolved experiments
 there are even two additional types of sections in the @code{EDL}

@@ -1491,9 +1491,10 @@ argument at all.
 
 Currently, there are three pulser/spectrometer combinations implemented:
 @itemize @bullet
-@item Sony/Tektronix DG2020 with S-band spectrometer in Frankfurt/Main
-@item Sony/Tektronix DG2020 with X-band spectrometer in Berlin
-@item Tektronix HFS9003 with W-band spectrometer in Berlin
+@item Sony/Tektronix DG2020 (S-band spectrometer, Frankfurt/Main)
+@item Sony/Tektronix DG2020 (X-band spectrometer, Berlin)
+@item Tektronix HFS9003 (W-band spectrometer, Berlin)
+@item Bruker EP385 Pulse Programmer (X-band spectrometer, Berlin)
 @end itemize
 To load the functions for one of these pulsers use in the @code{DEVICES}
 section one of the lines
@@ -1501,6 +1502,7 @@ section one of the lines
 dg2020_f;
 dg2020_b;
 hfs9003;
+ep385;
 @end example
 
 Pulsers are rather special and even the @code{EDL} syntax for dealing

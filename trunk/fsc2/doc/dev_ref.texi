@@ -32,6 +32,7 @@
 * dg2020_b::      Sony/Tektronix Data Generator DG2020 (Berlin Version)
 * dg2020_f::      Sony/Tektronix Data Generator DG2020 (Frankfurt Version)
 * egg4402::       EG&G PARC Box-Car Integrator 4402
+* ep385::         Bruker Pulse Programmer EP385
 * er023m::        Bruker Signal Channel ER 023 M
 * er032m::        Bruker Field controller ER 032 M 
 * er035m::        Bruker NMR Gaussmeter ER 035 M (GPIB)
@@ -197,7 +198,6 @@ can range from @w{-5 V} to @w{5 V}.
 @multitable @columnfractions .45 .45
 @item @code{pulser_name()}           @tab @ref{pulser_name}
 @item @code{pulser_state()}          @tab @ref{pulser_state}
-@item @code{pulser_channel_state()}  @tab @ref{pulser_channel_state}
 @item @code{pulser_update()}         @tab @ref{pulser_update}
 @item @code{pulser_cw_mode()}        @tab @ref{pulser_cw_mode}
 @item @code{pulser_shift()}          @tab @ref{pulser_shift}
@@ -240,7 +240,6 @@ range from @w{-5 V} to @w{5 V}.
 @multitable @columnfractions .45 .45
 @item @code{pulser_name()}           @tab @ref{pulser_name}
 @item @code{pulser_state()}          @tab @ref{pulser_state}
-@item @code{pulser_channel_state()}  @tab @ref{pulser_channel_state}
 @item @code{pulser_update()}         @tab @ref{pulser_update}
 @item @code{pulser_cw_mode()}        @tab @ref{pulser_cw_mode}
 @item @code{pulser_shift()}          @tab @ref{pulser_shift}
@@ -252,7 +251,7 @@ range from @w{-5 V} to @w{5 V}.
 @end multitable
 
 
-@node egg4402, er023m, dg2020_f, Device Reference
+@node egg4402, ep385, dg2020_f, Device Reference
 @iftex
 @subheading EG&G PARC Box-Car Integrator 4402
 @end iftex
@@ -279,7 +278,44 @@ already measured curves is currently supported.
 @end multitable
 
 
-@node er023m, er032m, egg4402, Device Reference
+@node ep385, er023m, egg4402, Device Reference
+@iftex
+@subheading Bruker Pulse Programmer EP385
+@end iftex
+@ifnottex
+@section Bruker Pulse Programmer EP385
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{ep385}
+
+@paragraphindent 0
+@strong{Description}: Bruker Pulse Programmer EP385, used as
+pulser for the Berlin X-band spectrometer, with 8 output channels.
+
+@paragraphindent 0
+Timebases: Internal: @w{8 ns}, External: @w{8 ns} and slower
+
+@paragraphindent 0
+@strong{Controlled via}: GPIB bus (IEEE 488).
+
+@paragraphindent 0
+@strong{Supported functions}:
+@multitable @columnfractions .45 .45
+@item @code{pulser_name()}           @tab @ref{pulser_name}
+@item @code{pulser_state()}          @tab @ref{pulser_state}
+@item @code{pulser_update()}         @tab @ref{pulser_update}
+@item @code{pulser_cw_mode()}        @tab @ref{pulser_cw_mode}
+@item @code{pulser_shift()}          @tab @ref{pulser_shift}
+@item @code{pulser_increment()}      @tab @ref{pulser_increment}
+@item @code{pulser_next_phase()}     @tab @ref{pulser_next_phase}
+@item @code{pulser_phase_reset()}    @tab @ref{pulser_phase_reset}
+@item @code{pulser_pulse_reset()}    @tab @ref{pulser_pulse_reset}
+@end multitable
+
+
+
+@node er023m, er032m, ep385, Device Reference
 @iftex
 @subheading Bruker Signal Channel ER 023 M
 @end iftex
