@@ -2926,7 +2926,7 @@ is required. The most basic element of an acquisition is a single
 conversion of an input voltage into a digital value. Since there's
 only a single ADC on the card, converting a the voltages of a set of
 channels needs to be serially, which is called a scan, consisting
-of as many comversions as there are channels to be sampled. So a single
+of as many conversions as there are channels to be sampled. So a single
 scan consists of one or more conversions, depending on the number of
 channels involved. To acquire a a curve several scans have to be done.
 
@@ -3000,6 +3000,129 @@ required that this function is called before analog input (AI) can be
 done using the card to setup the trigger mode, trigger sources and
 timings for the analog data acquisition.
 
+As already explained in the paragraph for the previous function, an AI
+data acquisition is a set of scans, which in turn consists of a set of
+conversions, one for each channel to sample. Before an acquisition can
+be started the program must be told how many scans are to be done, which
+is the first argument the function expects. The next thing to specify is
+when to start the acquisition and, during the acquisition, when scans
+are to be started. It can even be set when each individual conversion
+can be started. For this reason there are several trigger modes, and the
+second argument the function expects is one of these:
+@table @samp
+@item "TRIGGER_NONE"
+the acquisition is started immediately without requiring an external
+trigger event when the function @code{daq_ai_start_acquisition()} is
+called, the start of scans and conversions is controlled via timers on
+the card
+@item "TRIGGER_SCAN"
+the acquisition is started automatically without an external trigger
+event, each scan is started on receipt of a trigger event and
+conversions are started via the cards timers
+@item "TRIGGER_SCAN_CONV"
+the acquisition is started automatically without an external trigger
+event while both scans and each conversion during a scan are started on
+external trigger events
+@item "TRIGGER_CONV"
+the acquisition is started automatically without an external trigger
+event, scans are started via one of the cards timer, but each conversion
+is started on receipt of an external trigger
+@item "TRIGGER_START"
+the acquisition is started on receipt of an external trigger event while
+the starts of both the scans as well as the conversions are started via
+the cards timers
+@item "TRIGGER_START_SCAN"
+the acquisition and the scans are started on receipt of an external
+trigger event while the conversions are started via a card timer
+@item "TRIGGER_START_SCAN_CONV"
+the acquisition, the scans and the conversions are all started on
+receipt of external trigger events
+@item "TRIGGER_START_CONV"
+the acquisition is started on receipt of an external trigger event,
+scans are started by a card timer and the conversions making up the scan
+are started by an external trigger event.
+@end table
+
+For each of these trigger modes different further arguments are
+required. For the trigger modes where an external trigger event is used
+it must be specified what input to use for the trigger. This can be
+either one of the PFI input lines of the card, specified by the strings
+@code{"PFI0"} to @code{PFI9}, or the output of the first counter of the
+card (when used for creating pulses, see below), in which case the
+string @code{"GOUT_0"} is to be passed to the function. Optionally, the
+trigger input can be followed by another argument that tells if the
+trigger event is supposed to happen on the rasing or the falling edge of
+the input - the string argument @code{"POSITIVE"} (or abbreviated to
+@code{"POS}) switches to trigger on the a raising edge, while an
+argument of @code{"NEGATIVE"} (or @code{"NEG"}) is for triggering on the
+falling edge.
+
+A special role is played by the trigger input @code{PFI0}: while all
+other trigger inputs work only on TTL levels, this input can be switched
+to be used as an analog trigger. The function @code{daq_trigger_setup()}
+can be used to switch this input between TTL level mode and analog
+trigger mode. (To make the difference easier to spot and to stay in tune
+with the naming scheme in the documentation of the card instead of
+@code{"PFI0"} also the name @code{"TRIG1"} can be used).
+
+On the other hand, when no external timer is to be used for starting
+scans or conversions the time distance between starts of scans and
+conversions must be known. Here one has to take into account the
+specifications of the card. The minimum time distance between
+conversions is at least @w{800 ns}. Thus the time distance between scans
+must be at least @w{800 ns} times the number of channels to sample.
+But when channels are used with different ranges (or some in bipolar and
+others in uniploar mod) this minimum time distance increases to @w{2 us}
+to allow for settlings times of the internal preamplifier and thus also
+the minimum time between starts of scans is increased accordingly.
+Another point to note is that specifying the time distance between
+conversions is optional - if not given the program will pick the
+smallest pssible delay, i.e.@: either @w{800 ns} or @w{2 us}.
+
+According to the above discussion here's a list of all required and
+optional arguments to the function when used with the different trigger
+and timing modes. Optional arguments are enclosed in square braces:
+@example
+daq_ai_acq_setup( Num_Scans, "TRIGGER_NONE", t_scan [ , t_conv ] );
+
+daq_ai_acq_setup( Num_Scans, "TRIGGER_SCAN", T_scan [ , P_scan ]
+                  [ , t_conv ] );
+
+daq_ai_acq_setup( Num_Scans, "TRIGGER_SCAN_CONV", T_scan, [ P_scan , ]
+                  T_conv [ , P_conv ] );
+
+daq_ai_acq_setup( Num_Scans, "TRIGGER_CONV", t_scan,
+                  TS_conv [ , P_conv ] );
+
+daq_ai_acq_setup( Num_Scans, "TRIGGER_START", T_start, [ P_start, ]
+                   t_scan [ , t_conv ] );
+
+daq_ai_acq_setup( Num_Scans, "TRIGGER_START_SCAN", T_start,
+                  [ P_start, ] T_scan [ , P_scan ] [ , t_conv ] );
+
+daq_ai_acq_setup( Num_Scans, "TRIGGER_START_SCAN_CONV", T_start,
+                  [ P_start, ] T_scan, [ P_scan, ] T_conv
+                  [ , P_conv ] );
+
+daq_ai_acq_setup( Num_Scans, "TRIGGER_START_CONV", T_start,
+                  [ P_start, ] t_scan, T_conv [ , P_conv ] );
+@end example
+The symbol @code{Num_Scans} stands for the number of scans to be done,
+@code{T_start} for the source of the trigger starting the acquisition,
+@code{P_start} is the "polarity" (i.e.@: rasing or falling edge) of the
+trigger, @code{T_scan} and @code{P_scan} have the same meaning but for
+the start-of-scan trigger and @code{T_conv} and @code{P_conv} are for
+the start-of-conversion trigger. @code{t_scan} and @code{t_conv} are the
+time distances between starts of scans and between conversions,
+respectively.
+
+Please note that not all timings are possible, e.g.@: when very long
+times between starts of scans are required (for example @w{1 s}) while
+very short time distances between starts of conversions (for example
+@w{800 ns}) it can be realized using the cards hardware and you will
+have to fall back on using an external trigger for either the event that
+starts the scans or the conversions.
+
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
 
@@ -3019,7 +3142,13 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @anchor{daq_ai_get_curve}
 @item daq_ai_get_curve()
 @findex daq_ai_get_curve()
-This function is only available for the PCI-MIO-16E-1 card.
+This function is only available for the PCI-MIO-16E-1 card and is used
+to fetch the acquired data from the card. It expects no arguments.
+What type of variable the function returns depends on the number of
+channels that got sampled. If there was only a single channel the
+function returns an 1-dimensional array with as many elements as scans
+where done. If two or more channels where sampled a 2-dimensional array
+is returned, with a rank of number-of-channels times number-of-scans.
 
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
@@ -3028,7 +3157,56 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @anchor{daq_trigger_setup}
 @item daq_trigger_setup()
 @findex daq_trigger_setup()
-This function is only available for the PCI-MIO-16E-1 card.
+This function is only available for the PCI-MIO-16E-1 card and can be
+used to switch the first trigger input line (named @code{"PFI0"} or
+@code{"TRIG1"} when specified in the function @code{daq_ai_acq_setup()}
+between "digital" (TTL level) and analog mode.
+
+To switch to "digital mode where a TTL-level trigger signal is required
+simply call it with the string @code{"TTL"} as the only argument. In
+contrast, when switching to analog trigger mode there are several
+options for the first argument:
+@table @samp
+@item "Low_Window"
+Creates a trigger signal that raises from low to high state when the
+input voltage falls below the threshold voltage @code{V_low}, that has
+to be specified as the next argument. The trigger signal falls back to
+the low state when the input voltage again gets raised above the
+threshold voltage.
+@item "High_Window"
+This is the inverse of the previous mode: a triger signal that goes from
+low to high is created when the input voltage is raised above a
+threshold value @code{V_high} (to be specified as the next argument) and
+that again goes back to low when the input voltage drops below the
+threshold voltage.
+@item "Middle_Window"
+Here the trigger signal is raised whenever the input voltage enters an
+voltage interval between the voltages @code{V_high} and @code{V_low},
+taht have to be specified as the next two arguments, and drops to low
+again when the input voltage is raised above @code{V_high} or drops
+below @code{V_low}.
+@item "High_Hysteresis"
+In this mode the created trigger signal is raised when the input voltage
+exceeds a high thresold voltage @code{V_high} (to be specified as the
+next argument) and again falls back to low when the input voltage drops
+below a second threshold voltage @code{V_low}, to be specified as the
+final argument of the function (with @code{V_low} being lower that
+@code{V_high}).
+@item "Low_Hysteresis"
+This mode is opposite of the previous one: the trigger signal is raised
+when the input voltage drops below @code{V_low} and falls back to low
+when the input voltage exceeds @code{V_high}.
+@end table
+
+According to this the function has to be called in one of these forms:
+@example
+daq_trigger_setup( "TTL" );
+daq_trigger_setup( "Low_Window", v_low );
+daq_trigger_setup( "High_Window", v_high );
+daq_trigger_setup( "Middle_Window", v_high, v_low );
+daq_trigger_setup( "High_Hysteresis", v_high, v_low );
+daq_trigger_setup( "Low_Hysteresis", v_high, v_low );
+@end example
 
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
