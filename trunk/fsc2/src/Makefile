@@ -16,11 +16,17 @@ export headers             # export headers to the modules Makefile
 
 
 .SUFFIXES:
-.PHONY:    all clean hi_res low_res gpib_old gpib_jtt gpib_ni \
-		   pion.anorg.chemie.uni-frankfurt.de                 \
-		   moebi.physik.fu-berlin.de                          \
-		   door.physik.fu-berlin.de                           \
-		   crowley.physik.fu-berlin.de                        \
+.PHONY:    all                                \
+		   clean                              \
+		   hi_res                             \
+		   low_res                            \
+		   gpib_old                           \
+		   gpib_jtt                           \
+		   gpib_ni                            \
+		   pion.anorg.chemie.uni-frankfurt.de \
+		   moebi.physik.fu-berlin.de          \
+		   door.physik.fu-berlin.de           \
+		   crowley.physik.fu-berlin.de        \
 		   crowley.none
 
 
@@ -97,7 +103,7 @@ crowley.none:
 
 # How to create the graphical interface files - they need making if either
 # fsc2_rsc.[ch] or fsc2_rsc_[hl]r.[ch] don't exist or the file they are
-# made from are newer
+# made from is newer
 
 hi_res:
 	if [ ! -e fsc2_rsc.c -o ! -e fsc2_rsc.h          \
