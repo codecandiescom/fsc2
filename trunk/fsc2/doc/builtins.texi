@@ -1757,7 +1757,7 @@ created and a string with the new label.
 @findex object_enable()
 The function allows to temporarily enable or disable the use of an
 object. It takes two arguments, the ID of the object that was returned
-when the object was created and eitherthe string @code{"ON"} or the
+when the object was created and either the string @code{"ON"} or the
 value @code{1} to enable the object (which is the default state) or the
 string @code{"OFF"} or the value @code{0} to disable the object.
 
