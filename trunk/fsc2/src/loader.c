@@ -664,16 +664,24 @@ void run_end_of_exp_hooks( void )
 
 	CLOBBER_PROTECT( cd );
 
+	if ( EDL.Device_List == NULL )
+		return;
+
 	/* Each of the end-of-experiment hooks must be run to get all instruments
 	   back into a usable state, even if the function fails for one of them.
 	   The only exception are devices for which the exp-hook has not been
 	   run, probably because the exp-hook for a previous device in the list
-	   failed. */
+	   failed. The list of devices must be run through in reverse order so
+	   that devices depending on others berfore them in the list have their
+	   end_of_exp hooks run first! */
 
 	Cur_Pulser = -1;
 	Internals.in_hook = SET;
 
-	for ( cd = EDL.Device_List; cd != NULL; cd = cd->next )
+	for( cd = EDL.Device_List; cd->next != NULL; cd = cd->next )
+		/* empty */ ;
+
+	for ( cd = EDL.Device_List; cd != NULL; cd = cd->prev )
 	{
 		fsc2_assert( EDL.Call_Stack == NULL );
 
