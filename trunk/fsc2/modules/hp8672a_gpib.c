@@ -37,6 +37,11 @@
 
 static void hp8672a_comm_failure( void );
 
+/*
+#define gpib_write( a, b, c ) fprintf( stderr, "%s\n", ( b ) )
+#define gpib_init_device( a, b ) 1
+*/
+
 
 /*-------------------------------------------------------------*/
 /*-------------------------------------------------------------*/
@@ -65,6 +70,10 @@ bool hp8672a_init( const char *name )
 		print( FATAL, "Synthesizers isn't phase locked.\n" );
 		THROW( EXCEPTION );
 	}
+
+	/* Make sure RF output is switched off */
+
+	hp8672a_set_output_state( UNSET );
 
 	HP8672A_INIT = SET;
 
@@ -101,12 +110,14 @@ bool hp8672a_init( const char *name )
 		hp8672a_set_attenuation( att );
 	}
 
-	hp8672a_set_output_state( hp8672a.state );
-
-	/* Set amplitude for each modulation type as far as it's set */
+	/* Set modulation type and amplitude as far as it's set */
 
 	if ( hp8672a.mod_type_is_set )
 		hp8672a_set_modulation( );
+
+	/* If user want's RF output... */
+
+	hp8672a_set_output_state( hp8672a.state );
 
 	HP8672A_INIT = UNSET;
 
