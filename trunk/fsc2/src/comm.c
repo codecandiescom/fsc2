@@ -553,9 +553,9 @@ long reader( void *ret )
 
 			data = T_malloc( header.data.len );
 			pipe_read( pd[ READ ], data, header.data.len );
+			kill( child_pid, DO_SEND );
 			exp_bcreate( data, header.data.len );
 			T_free( data );
-			kill( child_pid, DO_SEND );
 			retval = 0;
 			break;
 
@@ -571,9 +571,9 @@ long reader( void *ret )
 
 			data = T_malloc( header.data.len );
 			pipe_read( pd[ READ ], data, header.data.len );
+			kill( child_pid, DO_SEND );
 			exp_bdelete( data, header.data.len );
 			T_free( data );
-			kill( child_pid, DO_SEND );
 			retval = 0;
 			break;
 
@@ -582,9 +582,9 @@ long reader( void *ret )
 
 			data = T_malloc( header.data.len );
 			pipe_read( pd[ READ ], data, header.data.len );
+			kill( child_pid, DO_SEND );
 			exp_bstate( data, header.data.len );
 			T_free( data );
-			kill( child_pid, DO_SEND );
 			retval = 0;
 			break;
 
@@ -709,6 +709,7 @@ static bool pipe_read( int fd, void *buf, size_t bytes_to_read )
 {
 	long bytes_read;
 	long already_read = 0;
+
 
 	while ( bytes_to_read > 0 )
 	{

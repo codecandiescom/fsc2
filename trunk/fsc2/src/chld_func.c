@@ -152,6 +152,7 @@ long *exp_bcreate( void *buffer, long len )
 
 		writer( C_BCREATE, len, buffer );
 		T_free( buffer );
+		result = T_malloc( 2 * sizeof( long ) );
 		reader( ( void * ) result );
 		return ( long * ) result;
 	}
