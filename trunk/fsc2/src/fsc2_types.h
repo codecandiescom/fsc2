@@ -64,6 +64,8 @@
 #define CURVE_2D_P        ( Curve_2d * )
 #define MARKER_P          ( Marker * )
 #define GRAPHICS_P        ( Graphics * )
+#define GRAPHICS_1D_P     ( Graphics_1d * )
+#define GRAPHICS_2D_P     ( Graphics_2d * )
 #define G_HASH_ENTRY_P    ( G_Hash_Entry * )
 #define PULSE_P           ( PULSE * )
 #define PULSE_PP          ( PULSE ** )
@@ -107,6 +109,8 @@
 #define CURVE_2D_P
 #define MARKER_P
 #define GRAPHICS_P
+#define GRAPHICS_1D_P
+#define GRAPHICS_2D_P
 #define G_HASH_ENTRY_P
 #define PULSE_P
 #define PULSE_PP

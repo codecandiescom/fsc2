@@ -69,17 +69,29 @@ determining the sizes of arrays etc.
 
 Before delving into the details of the functions for drawing measured
 data into the main display window a short explanation of the basic ideas
-probably is in order. You have to distinguish between 1D- and
-2D-display. In 1D-display to display a new data point you have to
-specify the @i{x}- and the @i{y}-coordinate of the point. The
-@i{x}-coordinate is always an integer number, where @code{1} indicates
-the left-most point (@i{x}-coordinates belw @code{1} aren't allowed). As
-the @i{y}-coordinate usually simply the measured value is specified. To
-be able to draw a meaningful @i{x}-axis the program needs another piece
-of information: the starting point of the @i{x}-axis and the difference
+probably is in order. There are two ways of displaying data. If only one
+parameter gets changed (e.g.@: just the magnetic field) a 1D-display
+will be all you need. But if you do measurements where two parameters
+get changed (e..g.@: if you measure time traces of your signal after
+laser excitation at different field positions) you will need a
+2D-display to view all measured data. Finally, there can be situations
+where you need both ways to display your data. Thus, @code{fsc2} allows
+you to select either 1D-display, 2D-display or even both at once at the
+same time. You just have to tell the program in the @code{PREPARATIONS}
+section by calling the functions @code{init_1d()} and @code{init_2d()}.
+If both function are invoked in the @code{PREPARATIONS} section two
+windows will be displayed, one for the 1D-data and one for the 2D-data.
+
+In 1D-display to display a new data point you have to specify the @i{x}-
+and the @i{y}-coordinate of the point. The @i{x}-coordinate is always an
+integer number, where @code{1} indicates the left-most point
+(@i{x}-coordinates belw @code{1} aren't allowed). As the
+@i{y}-coordinate usually simply the measured value is specified. To be
+able to draw a meaningful @i{x}-axis the program needs another piece of
+information: the starting point of the @i{x}-axis and the difference
 between the points drawn at the @i{x}-axis. For example, if you do an
-cw-EPR experiment, starting with a field of @w{3400 G} and a spacing
-of @w{0.5 G} between the data points you will have to tell the program
+cw-EPR experiment, starting with a field of @w{3400 G} and a spacing of
+@w{0.5 G} between the data points you will have to tell the program
 about this in the graphic initialization. If you now specify, when
 drawing a new point, an @i{x}-coordinate of @code{11} the point will
 appear at an axis position of @w{3410 G} because the point numbered
@@ -95,7 +107,7 @@ the window. The third coordinate is the measured value, which usually
 will be a floating point number. As in the case of 1D-displays also for
 2D-display the program needs additional information to be able to draw
 meaningful axis. Here not only the starting point and increment for the
-@i{x}-axis must be given but also the same information for the @i{y}-axis.
+@i{x}-axis must be given but also values for the @i{y}-axis.
 
 Finally another point: If you have not only one data point to draw but a
 whole array you can do this without having to draw each point on its
@@ -110,10 +122,10 @@ specified and from there to the right, i.e.@: always in @i{x}-direction.
 @anchor{init_1d}
 @item init_1d()
 @findex init_1d()
-This function initializes the display for one-dimensional experiments --
-without a call to this function (or @code{init_2d()}, see below) no data
-can be displayed. The function accepts up to six arguments, all of them
-being optional. These are:
+This function initializes the display for one-dimensional data
+representation -- without a call to this function (or @code{init_2d()},
+see below) no data can be displayed. The function accepts up to six
+arguments, all of them being optional. These are:
 @enumerate
 @item
 The number of curves to be displayed, the maximum is currently 4
@@ -170,8 +182,8 @@ This function can only be used in the @code{PREPARATIONS} section of an
 @anchor{init_2d}
 @item init_2d()
 @findex init_2d()
-The function initializes the display for two-dimensional
-experiments. The function accepts up to nine arguments, all of them
+The function initializes the display for two-dimensional data
+representation.  The function accepts up to nine arguments, all of them
 optional. The arguments are:
 @enumerate
 @item
@@ -219,11 +231,11 @@ This function can only be used in the @code{PREPARATIONS} section of an
 @code{EDL} program.
 
 
-@anchor{display}
-@item display( )
-@findex display()
-This function is used called to display data in 1-dimensional as well as
-in 2-dimensional experiments. It takes the following arguments:
+@anchor{display_1d}
+@item display_1d( )
+@findex display_1d()
+This function is used called to draw data in the window for 1D-data. It
+takes the following arguments:
 @enumerate
 @item
 The (@i{x}) point number (coordinate) where the data point (if only a
@@ -231,7 +243,77 @@ single number is given as the third argument) or the coordinate where
 the first data point of an data array passed as the third argument is to
 be shown.
 @item
-Only in 2D-experiments: The @i{y}-point number (coordinate) of the data
+The data point or a (one-dimensional) array of data (to be displayed
+left to right).
+@item
+Number of the curve or data set the data are to be displayed belong
+to. If missing it defaults to the first curve, 1. If there is more than
+one data set given in the @code{display()} command the curve number
+must be specified.
+@end enumerate
+These arguments can be repeated as many times as there are data to be
+displayed simultaneously (but in this case all of the arguments must be
+specified!).
+
+Formally, the function with its arguments can be written as
+@example
+display( n_x_point, data [ , n_curve [ , ... ] ] )
+@end example
+
+This function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} program.
+
+@anchor{display_2d}
+@item display_2d( )
+@findex display_2d()
+This function is used called to draw data in the window for 2D-data.
+experiments. It takes the following arguments:
+@enumerate
+@item
+The (@i{x}) point number (coordinate) where the data point (if only a
+single number is given as the third argument) or the coordinate where
+the first data point of an data array passed as the third argument is to
+be shown.
+@item
+The @i{y}-point number (coordinate) of the data point or the coordinate
+for the first data point of an data array (arrays are always drawn to
+the right from the specified coordinate, i.e.@: in @i{x}-direction).
+@item
+The data point or a (one-dimensional) array of data.
+@item
+Number of the curve or data set the data are to be displayed belong
+to. If missing it defaults to the first curve, 1. If there is more than
+one data set given in the @code{display()} command the curve number
+must be specified.
+@end enumerate
+These arguments can be repeated as many times as there are data to be
+displayed simultaneously (but in this case all of the arguments must be
+specified!).
+
+Formally, the function with its arguments can be written as
+@example
+display( n_x_point, n_y_point, data [ , n_curve [ , ... ] ] )
+@end example
+
+This function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} program.
+
+
+@anchor{display}
+@item display( )
+@findex display()
+This function can be used instead of either @code{display_1d()} or
+@code{display_2d()} if either @code{init_1d()} or @code{init_2d()} (but
+not both) were called in the @code{PREPARATIONS} section.  It takes the
+following arguments:
+@enumerate
+@item
+The (@i{x}) point number (coordinate) where the data point (if only a
+single number is given as the third argument) or the coordinate where
+the first data point of an data array passed as the third argument is to
+be shown.
+@item
+Only for 2D-display: The @i{y}-point number (coordinate) of the data
 point or the coordinate for the first data point of an data array
 (arrays are always drawn to the right from the specified coordinate,
 i.e.@: in @i{x}-direction).
@@ -247,15 +329,34 @@ These arguments can be repeated as many times as there are data to be
 displayed simultaneously (but in this case all of the arguments must be
 specified!).
 
-Formally, the function with its arguments can be written for 1D-experiments as
-@example
-display( n_x_point, data [ , n_curve [ , ... ] ] )
-@end example
-@noindent
-while for 2D-experiments it is
-@example
-display( n_x_point, n_y_point, data [ , n_curve [ , ... ] ] )
-@end example
+This function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} program.
+
+
+@anchor{change_scale_1d}
+@item change_scale_1d()
+@findex change_scale_1d()
+This function allows to change the scale settings of the 1D-data window
+(originally set in the call of @w{@code{init_1d()}}) after an experiment
+has been started. The function can be passed a maximum of two arguments,
+the new start value of the @i{x}-axis and the new @i{x}-increment.If one
+of these values should remain unchanged instead of a value a string
+(e.g.@ @code{"keep"}) can be passed as the argument.
+
+This function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} program.
+
+
+@anchor{change_scale_2d}
+@item change_scale_2d()
+@findex change_scale_2d()
+This function allows to change the scale settings of the 2D-data window
+(originally set in the call of @w{@code{init_2d()}}) after an experiment
+has been started. The function accepts up to four arguments, the new
+start value of the @i{x}-axis, the new @i{x}-increment, a new start
+value for the @i{y}-axis as well as the @i{y}-increment. If one of these
+values should remain unchanged instead of a value a string (e.g.@
+@code{"keep"}) can be passed as the argument.
 
 This function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} program.
@@ -265,30 +366,94 @@ This function can only be used in the @code{EXPERIMENT} section of an
 @item change_scale()
 @findex change_scale()
 This function allows to change the scale settings (originally set in the
-call of @w{@code{init_1d()}} or @w{@code{init_2d()}}) after an
-experiment has been started. With a one-dimensional display the function
-can be passed a maximum of two arguments, the new start value of the
-@i{x}-axis and the new @i{x}-increment. For two-dimensional display the
-function also accepts a new start value for the @i{y}-axis as well as
-the @i{y}-increment. If one of these values should remain unchanged
-instead of a value a string (e.g.@ @code{"keep"}) can be passed as the
-argument.
+call of @w{@code{init_1d()}} or @w{@code{init_2d()}}) when your using
+either a 1D-display or a 2D.display (bot not both) after the experiment
+has been started. With a one-dimensional display the function can be
+passed a maximum of two arguments, the new start value of the @i{x}-axis
+and the new @i{x}-increment. For two-dimensional display the function
+also accepts a new start value for the @i{y}-axis as well as the
+@i{y}-increment. If one of these values should remain unchanged instead
+of a value a string (e.g.@ @code{"keep"}) can be passed as the argument.
 
 This function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} program.
 
 
+@anchor{change_label_1d}
+@item change_label_1d()
+@findex change_label_1d()
+Using this function the labels at the axis of the 1D-display window can
+be changed from within as @code{EDL} program. It accepts up to two
+strings for the @i{x}- and @i{y}-axis labels. To leave a label unchanged
+pass the function an empty string, i.e.@ @code{""}. If no label should
+be drawn pass it a string that just contains one (or more) space
+characters, i.e.@: @code{" "}.
+
+This function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} program.
+
+@anchor{change_label_2d}
+@item change_label_2d()
+@findex change_label_2d()
+Using this function the labels at the axis of the 2D-display window
+(and, if shown, of the cross section window) can be changed from within
+as @code{EDL} program. It accepts up to three strings for the @i{x}-,
+@i{y}-axis and @i{z}-axis label. To leave a label unchanged pass the
+function an empty string, i.e.@ @code{""}. If no label should be drawn
+pass it a string that just contains one (or more) space characters,
+i.e.@: @code{" "}.
+
+This function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} program.
+
 @anchor{change_label}
 @item change_label()
 @findex change_label()
-Using this function the labels at the axis of the display window (and, if
-shown, of the cross section window) can be changed from within as
-@code{EDL} program. For 1D-display it accepts up to two strings for
-the @i{x}- and @i{y}-axis labels, for 2D-display up to three, the third
-for the @i{z}-axis label. To leave a label unchanged pass the function
-an empty string, i.e.@ @code{""}. If no label should be drawn pass it
-a string that just contains one (or more) space characters, i.e.@:
-@code{" "}.
+Using this function the labels at the axis of the display window (and,
+if shown, of the cross section window) can be changed from within as
+@code{EDL} program when only either the 1D- or the 2D-display window is
+used (but not both). For 1D-display it accepts up to two strings for the
+@i{x}- and @i{y}-axis labels, for 2D-display up to three, the third for
+the @i{z}-axis label. To leave a label unchanged pass the function an
+empty string, i.e.@ @code{""}. If no label should be drawn pass it a
+string that just contains one (or more) space characters, i.e.@: @code{"
+"}.
+
+This function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} program.
+
+@anchor{rescale_1d}
+@item rescale_1d()
+@findex rescale_1d()
+In the function @code{init_1d()} the number of points in @i{x}-direction
+can be set. If, during the experiment more points are displayed then set
+in the initialization, the scaling of the axis will be changed automatically. Using the function @code{rescale()} one
+can change the number of points from within the @code{EDL} program. The
+function accepts one argument, the new number of points
+in @i{x}-direction. If this value is @code{0} the number of points is
+adjusted to the number of points currently displayed. Exceptions are
+when either the new number of points is smaller than the default number,
+in which case the default number is used, or the number is smaller than
+the number of points currently displayed which is then used as the new
+number of points. Passing the function a value of @code{-1} means that
+the number of points should remain unchanged.
+
+This function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} program.
+
+@anchor{rescale_2d}
+@item rescale_2d()
+@findex rescale_2d()
+In the function @code{init_2d()} the number of points in @i{x}- and
+@i{y}- direction can be set. If, during the experiment more points are
+displayed then set in the initialization, the scaling of the axes in the
+2D-case) will be changed automatically. Using the function
+@code{rescale()} one can change the number of points from within the
+@code{EDL} program. The function accepts two arguments, the first being
+the number of points to be displayed in @i{x}-direction and the second
+the number of points in @i{y}-direction. A value of @code{-1} means not
+to do any changes to the axis and @code{0} sets the number of points to
+the number of points currently displayed along this axis.
 
 This function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} program.
@@ -296,20 +461,17 @@ This function can only be used in the @code{EXPERIMENT} section of an
 @anchor{rescale}
 @item rescale()
 @findex rescale()
-In the function @code{init_1d()} or @code{init_2d()} the number of points
-in @i{x}- (and @i{y}-) direction can be set. If, during the experiment
-more points are displayed then set in the initialization, the scaling of
-the axis (or axis in the 2D-case) will be changed automatically. Using
-the function @code{rescale()} one can change the number of points from
-within the @code{EDL} program. In the 1D-case the function accepts
-one argument, the new number of points in @i{x}-direction. If this value
-is @code{0} the number of points is adjusted to the number of points
-currently displayed. Exceptions are when either the new number of
-points is smaller than the default number, in which case the default
-number is used, or the number is smaller than the number of points
-currently displayed which is then used as the new number of
-points. Passing the function a value of @code{-1} means that the number
-of points should remain unchanged.
+This function can be called instead of @code{rescale_1d()} or
+@code{rescale_2d()} when only either a 1D- or a 2D-display is used (but
+not both at once). In the 1D-case the function accepts one argument, the
+new number of points in @i{x}-direction. If this value is @code{0} the
+number of points is adjusted to the number of points currently
+displayed. Exceptions are when either the new number of points is
+smaller than the default number, in which case the default number is
+used, or the number is smaller than the number of points currently
+displayed which is then used as the new number of points. Passing the
+function a value of @code{-1} means that the number of points should
+remain unchanged.
 
 In the 2D-case the function accepts two arguments, one for the number of
 points to be displayed in @i{x}-direction and the second for the number
@@ -320,12 +482,36 @@ number of points currently displayed along this axis.
 This function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} program.
 
+
+@anchor{clear_curve_1d}
+@item clear_curve_1d()
+@findex clear_curve_1d()
+Removes one or more curves from the 1d-display. As many curve numbers as
+there are curves displayed can be passed to the function as
+arguments. No arguments at all implies the first curve only. Invalid
+arguments are discarded and an error message is printed.
+
+This function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} program.
+
+
+@anchor{clear_curve_2d}
+@item clear_curve_2d()
+@findex clear_curve_2d()
+Removes one or more curves from the 2D-display. As many curve numbers as
+there are 2D-curves displayeed can be used. No arguments at all implies
+the first curve only. Invalid arguments are discarded and an error message is
+printed.
+
+This function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} program.
+
+
 @anchor{clear_curve}
 @item clear_curve()
 @findex clear_curve()
-Removes one or more curves from the display. As many curve numbers as
-there are curves can be used. No arguments at all implies the first
-curve. Invalid arguments are discarded and an error message is printed.
+If there is only either a 1D- or 2D-display window this function can be
+used instead of @code{clear_curve_1d()} or @code{clear_curve_2d()}.
 
 This function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} program.

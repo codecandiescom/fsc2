@@ -132,7 +132,8 @@ typedef struct {
 
 
 enum {
-	DATA,
+	DATA_1D,
+	DATA_2D,
 	REQUEST
 };
 

@@ -249,7 +249,11 @@ int new_data_callback( XEvent *a, void *b )
 		if ( Internals.child_pid > 0 && ! kill( Internals.child_pid, 0 ) )
 			kill( Internals.child_pid, DO_QUIT );
 		Internals.child_is_quitting = QUITTING_ACCEPTED;
-		fl_set_object_callback( GUI.run_form->stop, NULL, 0 );
+
+		if ( G.dim & 1 )
+			fl_set_object_callback( GUI.run_form_1d->stop_1d, NULL, 0 );
+		if ( G.dim & 2 )
+			fl_set_object_callback( GUI.run_form_2d->stop_2d, NULL, 0 );
 	}
 
 	/* Check if the child is waiting for an answer in a call of the
@@ -319,13 +323,14 @@ void send_data( int type, int shm_id )
 
 	sema_wait( Comm.data_semaphore );
 
-	/* Put type of data (DATA or REQUEST) into type field of next free slot */
+	/* Put type of data (DATA_1D, DATA_2D or REQUEST) into type field of next
+	   free slot */
 
 	Comm.MQ->slot[ Comm.MQ->high ].type = type;
 
 	/* For DATA pass parent the ID of shared memory segment with the data */
 
-	if ( type == DATA )
+	if ( type != REQUEST )
 		Comm.MQ->slot[ Comm.MQ->high ].shm_id = shm_id;
 
 	/* Increment the high mark pointer (wraps around) */

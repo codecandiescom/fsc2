@@ -40,15 +40,15 @@ static int fsc2_xio_error_handler( Display *d );
 /* Some variables needed for the X resources */
 
 #if defined WITH_HTTP_SERVER
-#define N_APP_OPT 17
+#define N_APP_OPT 19
 #else
-#define N_APP_OPT 16
+#define N_APP_OPT 18
 #endif
 
 FL_IOPT xcntl;
 
-char xGeoStr[ 64 ], xdisplayGeoStr[ 64 ],
-	 xcutGeoStr[ 64 ], xtoolGeoStr[ 64 ],
+char xGeoStr[ 64 ], xdisplayGeoStr[ 64 ], x_1d_displayGeoStr[ 64 ],
+	x_2d_displayGeoStr[ 64 ], xcutGeoStr[ 64 ], xtoolGeoStr[ 64 ],
 	 xaxisFont[ 256 ], xsmb[ 64 ], xsizeStr[ 64 ];
 
 int xbrowserfs, xbuttonfs, xinputfs, xlabelfs, xchoicefs, xsliderfs,
@@ -66,6 +66,10 @@ FL_resource xresources[ N_APP_OPT ] = {
 	  "0", sizeof( int ) },
 	{ "displayGeometry", "*.displayGeometry", FL_STRING, xdisplayGeoStr,
 	  "", 64 },
+	{ "1d-displayGeometry", "*.1d-displayGeometry", FL_STRING,
+	  x_1d_displayGeoStr, "", 64 },
+	{ "2d-displayGeometry", "*.2d-displayGeometry", FL_STRING,
+	  x_2d_displayGeoStr, "", 64 },
 	{ "cutGeometry", "*.cutGeometry", FL_STRING, xcutGeoStr, "", 64 },
 	{ "toolGeometry", "*.toolGeometry", FL_STRING, xtoolGeoStr, "", 64 },
 	{ "axisFont", "*.axisFont", FL_STRING, xaxisFont, "", 256 },
@@ -501,6 +505,16 @@ static void setup_app_options( FL_CMD_OPT app_opt[ ] )
 	app_opt[ DISPLAYGEOMETRY ].argKind    = XrmoptionSepArg;
 	app_opt[ DISPLAYGEOMETRY ].value      = ( caddr_t ) NULL;
 
+	app_opt[ DISPLAY1DGEOMETRY ].option   = T_strdup( "-1d-displayGeometry" );
+	app_opt[ DISPLAY1DGEOMETRY ].specifier= T_strdup( "*.1d-displayGeometry" );
+	app_opt[ DISPLAY1DGEOMETRY ].argKind  = XrmoptionSepArg;
+	app_opt[ DISPLAY1DGEOMETRY ].value    = ( caddr_t ) NULL;
+
+	app_opt[ DISPLAY2DGEOMETRY ].option   = T_strdup( "-2d-displayGeometry" );
+	app_opt[ DISPLAY2DGEOMETRY ].specifier= T_strdup( "*.2d-displayGeometry" );
+	app_opt[ DISPLAY2DGEOMETRY ].argKind  = XrmoptionSepArg;
+	app_opt[ DISPLAY2DGEOMETRY ].value    = ( caddr_t ) NULL;
+
 	app_opt[ CUTGEOMETRY ].option         = T_strdup( "-cutGeometry" );
 	app_opt[ CUTGEOMETRY ].specifier      = T_strdup( "*.cutGeometry" );
 	app_opt[ CUTGEOMETRY ].argKind        = XrmoptionSepArg;
@@ -621,8 +635,18 @@ bool dl_fsc2_rsc( void )
 	}
 
 	dlerror( );           /* make sure it's NULL before we continue */
-	GUI.G_Funcs.create_form_run =
-		         ( FD_run * ( * )( void ) ) dlsym( handle, "create_form_run" );
+	GUI.G_Funcs.create_form_run_1d =
+		   ( FD_run_1d * ( * )( void ) ) dlsym( handle, "create_form_run_1d" );
+	if ( dlerror( ) != NULL )
+	{
+		fprintf( stderr, "Error in graphics library '%s'\n", lib_name );
+		T_free( lib_name );
+		return FAIL;
+	}
+
+	dlerror( );           /* make sure it's NULL before we continue */
+	GUI.G_Funcs.create_form_run_2d =
+		   ( FD_run_2d * ( * )( void ) ) dlsym( handle, "create_form_run_2d" );
 	if ( dlerror( ) != NULL )
 	{
 		fprintf( stderr, "Error in graphics library '%s'\n", lib_name );

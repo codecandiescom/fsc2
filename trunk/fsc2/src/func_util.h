@@ -34,12 +34,24 @@ Var *f_wait( Var *v );
 Var *f_init_1d( Var *v );
 Var *f_init_2d( Var *v );
 Var *f_cscale( Var *v );
+Var *f_cscale_1d( Var *v );
+Var *f_cscale_2d( Var *v );
 Var *f_clabel( Var *v );
+Var *f_clabel_1d( Var *v );
+Var *f_clabel_2d( Var *v );
 Var *f_rescale( Var *v );
+Var *f_rescale_1d( Var *v );
+Var *f_rescale_2d( Var *v );
 Var *f_display( Var *v );
+Var *f_display_1d( Var *v );
+Var *f_display_2d( Var *v );
 Var *f_clearcv( Var *v );
+Var *f_clearcv_1d( Var *v );
+Var *f_clearcv_2d( Var *v );
 Var *f_setmark( Var *v );
+Var *f_setmark_1d( Var *v );
 Var *f_clearmark( Var *v );
+Var *f_clearmark_1d( Var *v );
 
 
 #endif  /* ! FUNC_UTIL_HEADER */

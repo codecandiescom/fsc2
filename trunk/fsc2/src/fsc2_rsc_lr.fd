@@ -3,7 +3,7 @@ Magic: 13000
 Internal Form Definition File
     (do not change)
 
-Number of forms: 6
+Number of forms: 7
 Unit of measure: FL_COORD_PIXEL
 SnapGrid: 5
 
@@ -11,7 +11,7 @@ SnapGrid: 5
 Name: fsc2
 Width: 620
 Height: 450
-Number of Objects: 13
+Number of Objects: 14
 
 --------------------
 class: FL_BOX
@@ -250,11 +250,256 @@ value: 0.172727
 slsize: 0.05
 return: FL_RETURN_END_CHANGED
 
+--------------------
+class: FL_BUTTON
+type: HIDDEN_BUTTON
+box: 16 741 1 1
+boxtype: FL_NO_BOX
+colors: FL_COL1 FL_COL1
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_BLACK
+label: 
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_SouthWest FL_SouthWest
+name: sigchld
+callback: run_sigchld_callback
+argument: 0
+
 =============== FORM ===============
-Name: run
+Name: run_1d
 Width: 620
 Height: 450
-Number of Objects: 14
+Number of Objects: 12
+
+--------------------
+class: FL_BOX
+type: UP_BOX
+box: 0 0 620 450
+boxtype: FL_UP_BOX
+colors: FL_COL1 FL_COL1
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_BLACK
+label: 
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: 
+callback: 
+argument: 
+
+--------------------
+class: FL_BUTTON
+type: NORMAL_BUTTON
+box: 10 405 70 35
+boxtype: FL_UP_BOX
+colors: FL_MCOL FL_GREEN
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_SMALL_SIZE
+lcol: FL_BLACK
+label: Stop
+shortcut: S
+resize: FL_RESIZE_NONE
+gravity: FL_SouthWest FL_SouthWest
+name: stop_1d
+callback:
+argument: 0
+
+--------------------
+class: FL_CANVAS
+type: NORMAL_CANVAS
+box: 65 5 95 390
+boxtype: FL_FRAME_BOX
+colors: FL_COL1 FL_COL1
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_BLACK
+label: 
+shortcut: 
+resize: FL_RESIZE_Y
+gravity: FL_NorthWest FL_SouthWest
+name: y_axis_1d
+callback: 
+argument: 
+
+--------------------
+class: FL_BUTTON
+type: PUSH_BUTTON
+box: 115 405 35 35
+boxtype: FL_UP_BOX
+colors: FL_TOP_BCOL FL_GREEN
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_SMALL_SIZE
+lcol: FL_BLACK
+label: FS
+shortcut: F
+resize: FL_RESIZE_NONE
+gravity: FL_SouthWest FL_SouthWest
+name: full_scale_button_1d
+callback: fs_button_callback_1d
+argument: 0
+value: 1
+
+--------------------
+class: FL_BUTTON
+type: PUSH_BUTTON
+box: 20 20 25 25
+boxtype: FL_UP_BOX
+colors: FL_MCOL FL_TOMATO
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_SMALL_SIZE
+lcol: FL_BLACK
+label: 1
+shortcut: 1
+resize: FL_RESIZE_NONE
+gravity: FL_NorthWest FL_NorthWest
+name: curve_1_button_1d
+callback: curve_button_callback_1d
+argument: 1
+value: 1
+
+--------------------
+class: FL_BUTTON
+type: PUSH_BUTTON
+box: 20 55 25 25
+boxtype: FL_UP_BOX
+colors: FL_MCOL FL_GREEN
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_SMALL_SIZE
+lcol: FL_BLACK
+label: 2
+shortcut: 2
+resize: FL_RESIZE_NONE
+gravity: FL_NorthWest FL_NorthWest
+name: curve_2_button_1d
+callback: curve_button_callback_1d
+argument: 2
+value: 1
+
+--------------------
+class: FL_BUTTON
+type: PUSH_BUTTON
+box: 20 90 25 25
+boxtype: FL_UP_BOX
+colors: FL_MCOL FL_YELLOW
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_SMALL_SIZE
+lcol: FL_BLACK
+label: 3
+shortcut: 3
+resize: FL_RESIZE_NONE
+gravity: FL_NorthWest FL_NorthWest
+name: curve_3_button_1d
+callback: curve_button_callback_1d
+argument: 3
+value: 1
+
+--------------------
+class: FL_BUTTON
+type: PUSH_BUTTON
+box: 20 125 25 25
+boxtype: FL_UP_BOX
+colors: FL_MCOL FL_CYAN
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_SMALL_SIZE
+lcol: FL_BLACK
+label: 4
+shortcut: 4
+resize: FL_RESIZE_NONE
+gravity: FL_NorthWest FL_NorthWest
+name: curve_4_button_1d
+callback: curve_button_callback_1d
+argument: 4
+value: 1
+
+--------------------
+class: FL_PIXMAPBUTTON
+type: NORMAL_BUTTON
+box: 10 190 45 55
+boxtype: FL_UP_BOX
+colors: FL_COL1 FL_BLACK
+alignment: FL_ALIGN_BOTTOM|FL_ALIGN_INSIDE
+style: FL_NORMAL_STYLE
+size: FL_TINY_SIZE
+lcol: FL_BLACK
+label: Undo
+shortcut: U
+resize: FL_RESIZE_NONE
+gravity: FL_NorthWest FL_NorthWest
+name: undo_button_1d
+callback: undo_button_callback_1d
+argument: 0
+
+--------------------
+class: FL_CANVAS
+type: NORMAL_CANVAS
+box: 160 5 455 390
+boxtype: FL_NO_BOX
+colors: FL_BLACK FL_BLACK
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_BLACK
+label: 
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NorthWest FL_SouthEast
+name: canvas_1d
+callback: 
+argument: 
+
+--------------------
+class: FL_CANVAS
+type: NORMAL_CANVAS
+box: 160 395 455 50
+boxtype: FL_FRAME_BOX
+colors: FL_NoColor FL_COL1
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_BLACK
+label: 
+shortcut: 
+resize: FL_RESIZE_X
+gravity: FL_SouthWest FL_SouthEast
+name: x_axis_1d
+callback: 
+argument: 
+
+--------------------
+class: FL_PIXMAPBUTTON
+type: NORMAL_BUTTON
+box: 10 275 45 55
+boxtype: FL_UP_BOX
+colors: FL_COL1 FL_BLACK
+alignment: FL_ALIGN_BOTTOM|FL_ALIGN_INSIDE
+style: FL_NORMAL_STYLE
+size: FL_TINY_SIZE
+lcol: FL_BLACK
+label: Print
+shortcut: P
+resize: FL_RESIZE_NONE
+gravity: FL_NorthWest FL_NorthWest
+name: print_button_1d
+callback: 
+argument: 
+
+=============== FORM ===============
+Name: run_2d
+Width: 620
+Height: 450
+Number of Objects: 13
 
 --------------------
 class: FL_BOX
@@ -288,7 +533,7 @@ label:
 shortcut: 
 resize: FL_RESIZE_Y
 gravity: FL_NorthEast FL_SouthEast
-name: z_axis
+name: z_axis_2d
 callback: 
 argument: 
 
@@ -306,26 +551,8 @@ label: Stop
 shortcut: S
 resize: FL_RESIZE_NONE
 gravity: FL_SouthWest FL_SouthWest
-name: stop
+name: stop_2d
 callback:
-argument: 0
-
---------------------
-class: FL_BUTTON
-type: HIDDEN_BUTTON
-box: 16 741 1 1
-boxtype: FL_NO_BOX
-colors: FL_COL1 FL_COL1
-alignment: FL_ALIGN_CENTER
-style: FL_NORMAL_STYLE
-size: FL_DEFAULT_SIZE
-lcol: FL_BLACK
-label: 
-shortcut: 
-resize: FL_RESIZE_ALL
-gravity: FL_SouthWest FL_SouthWest
-name: sigchld
-callback: run_sigchld_callback
 argument: 0
 
 --------------------
@@ -342,7 +569,7 @@ label:
 shortcut: 
 resize: FL_RESIZE_Y
 gravity: FL_NorthWest FL_SouthWest
-name: y_axis
+name: y_axis_2d
 callback: 
 argument: 
 
@@ -360,8 +587,8 @@ label: FS
 shortcut: F
 resize: FL_RESIZE_NONE
 gravity: FL_SouthWest FL_SouthWest
-name: full_scale_button
-callback: fs_button_callback
+name: full_scale_button_2d
+callback: fs_button_callback_2d
 argument: 0
 value: 1
 
@@ -379,8 +606,8 @@ label: 1
 shortcut: 1
 resize: FL_RESIZE_NONE
 gravity: FL_NorthWest FL_NorthWest
-name: curve_1_button
-callback: curve_button_callback
+name: curve_1_button_2d
+callback: curve_button_callback_2d
 argument: 1
 value: 1
 
@@ -398,8 +625,8 @@ label: 2
 shortcut: 2
 resize: FL_RESIZE_NONE
 gravity: FL_NorthWest FL_NorthWest
-name: curve_2_button
-callback: curve_button_callback
+name: curve_2_button_2d
+callback: curve_button_callback_2d
 argument: 2
 value: 1
 
@@ -417,8 +644,8 @@ label: 3
 shortcut: 3
 resize: FL_RESIZE_NONE
 gravity: FL_NorthWest FL_NorthWest
-name: curve_3_button
-callback: curve_button_callback
+name: curve_3_button_2d
+callback: curve_button_callback_2d
 argument: 3
 value: 1
 
@@ -436,8 +663,8 @@ label: 4
 shortcut: 4
 resize: FL_RESIZE_NONE
 gravity: FL_NorthWest FL_NorthWest
-name: curve_4_button
-callback: curve_button_callback
+name: curve_4_button_2d
+callback: curve_button_callback_2d
 argument: 4
 value: 1
 
@@ -455,14 +682,14 @@ label: Undo
 shortcut: U
 resize: FL_RESIZE_NONE
 gravity: FL_NorthWest FL_NorthWest
-name: undo_button
-callback: undo_button_callback
+name: undo_button_2d
+callback: undo_button_callback_2d
 argument: 0
 
 --------------------
 class: FL_CANVAS
 type: NORMAL_CANVAS
-box: 160 5 455 390
+box: 160 5 325 390
 boxtype: FL_NO_BOX
 colors: FL_BLACK FL_BLACK
 alignment: FL_ALIGN_CENTER
@@ -473,14 +700,14 @@ label:
 shortcut: 
 resize: FL_RESIZE_ALL
 gravity: FL_NorthWest FL_SouthEast
-name: canvas
+name: canvas_2d
 callback: 
 argument: 
 
 --------------------
 class: FL_CANVAS
 type: NORMAL_CANVAS
-box: 160 395 455 50
+box: 160 395 325 50
 boxtype: FL_FRAME_BOX
 colors: FL_NoColor FL_COL1
 alignment: FL_ALIGN_CENTER
@@ -491,7 +718,7 @@ label:
 shortcut: 
 resize: FL_RESIZE_X
 gravity: FL_SouthWest FL_SouthEast
-name: x_axis
+name: x_axis_2d
 callback: 
 argument: 
 
@@ -509,7 +736,7 @@ label: Print
 shortcut: P
 resize: FL_RESIZE_NONE
 gravity: FL_NorthWest FL_NorthWest
-name: print_button
+name: print_button_2d
 callback: 
 argument: 
 
@@ -1307,7 +1534,7 @@ shortcut: 1
 resize: FL_RESIZE_ALL
 gravity: FL_NoGravity FL_NoGravity
 name: 
-callback: curve_button_callback
+callback: curve_button_callback_2d
 argument: -1
 
 --------------------
@@ -1325,7 +1552,7 @@ shortcut: 2
 resize: FL_RESIZE_ALL
 gravity: FL_NoGravity FL_NoGravity
 name: 
-callback: curve_button_callback
+callback: curve_button_callback_2d
 argument: -2
 
 --------------------
@@ -1343,7 +1570,7 @@ shortcut: 3
 resize: FL_RESIZE_ALL
 gravity: FL_NoGravity FL_NoGravity
 name: 
-callback: curve_button_callback
+callback: curve_button_callback_2d
 argument: -3
 
 --------------------
@@ -1361,7 +1588,7 @@ shortcut: 4
 resize: FL_RESIZE_ALL
 gravity: FL_NoGravity FL_NoGravity
 name: 
-callback: curve_button_callback
+callback: curve_button_callback_2d
 argument: -4
 
 --------------------

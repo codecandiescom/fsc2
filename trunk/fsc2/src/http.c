@@ -220,15 +220,17 @@ void http_check( void )
 				{
 					if ( G.dim == 1 )
 						reply[ 0 ] = '1';
-					else
-						reply[ 0 ] = ( G.is_cut ? '3' : '2' );
+					else if ( G.dim == 2 )
+						reply[ 0 ] = ( G2.is_cut ? '6' : '2' );
+					else if ( G.dim == 3 )
+						reply[ 0 ] = ( G2.is_cut ? '7' : '3' );
 				}
 
 				write( Comm.http_pd[ HTTP_PARENT_WRITE ], reply, 2 );
 				break;
 
 			case 'C' :
-				reply[ 0 ] = ( char ) ( G.active_curve + 1 ) + '0';
+				reply[ 0 ] = ( char ) ( G2.active_curve + 1 ) + '0';
 				write( Comm.http_pd[ HTTP_PARENT_WRITE ], reply, 2 );
 				break;
 
@@ -242,6 +244,10 @@ void http_check( void )
 
 			case 'b' :
 				http_send_picture( Comm.http_pd[ HTTP_PARENT_WRITE ], 2 );
+				break;
+
+			case 'c' :
+				http_send_picture( Comm.http_pd[ HTTP_PARENT_WRITE ], 3 );
 				break;
 
 #if ! defined NDEBUG
@@ -303,7 +309,8 @@ static void http_send_picture( int pd, int type )
 	   to indicate that it has to send the "Not available" picture instead of
 	   the one the client is looking for. */
 
-	if ( ! G.is_init || ( type == 2 && ! G.is_cut ) )
+	if ( ! G.is_init || ( type == 1 && G.dim == 2 ) ||
+		 ( type == 2 && G.dim == 1 ) || ( type == 3 && ! G2.is_cut ) )
 	{
 		reply[ 0 ] = '0';
 		write( pd, reply, 2 );

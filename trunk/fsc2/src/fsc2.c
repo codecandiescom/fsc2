@@ -1381,8 +1381,11 @@ void clean_up( void )
 
 	/* Get rid of the last remains of graphics */
 
+	for ( i = X; i <= Y; i++ )
+		G1.label_orig[ i ] = CHAR_P T_free( G1.label_orig[ i ] );
+
 	for ( i = X; i <= Z; i++ )
-		G.label_orig[ i ] = CHAR_P T_free( G.label_orig[ i ] );
+		G2.label_orig[ i ] = CHAR_P T_free( G2.label_orig[ i ] );
 
 	G.is_init = UNSET;
 

@@ -265,7 +265,8 @@ typedef struct {
 	G_FUNCS G_Funcs;
 
 	FD_fsc2 *main_form;
-	FD_run *run_form;
+	FD_run_1d *run_form_1d;
+	FD_run_2d *run_form_2d;
 	FD_input_form *input_form;
 	FD_cut *cut_form;
 	FD_print_comment *print_comment;
@@ -287,6 +288,8 @@ EDL_Stuff EDL;
 COMMUNICATION Comm;
 GUI_Stuff GUI;
 Graphics G;
+Graphics_1d G1;
+Graphics_2d G2;
 
 char *prog_name;                 /* Name the program was started with */
 bool need_GPIB = UNSET;          /* Flag, set if GPIB bus is needed */
@@ -346,6 +349,8 @@ extern EDL_Stuff EDL;
 extern COMMUNICATION Comm;
 extern GUI_Stuff GUI;
 extern Graphics G;
+extern Graphics_1d G1;
+extern Graphics_2d G2;
 
 
 extern bool need_GPIB;

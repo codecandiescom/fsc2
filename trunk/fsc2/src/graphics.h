@@ -50,8 +50,23 @@
 
 #define MAX_LABEL_LEN     128   /* maximum length of tick label string */
 
-#define NUM_1D_COLS ( MAX_CURVES + 6 )
+#define DRAG_NONE   0
 
+#define DRAG_1D_X   1
+#define DRAG_1D_Y   2
+#define DRAG_1D_C   3
+
+#define DRAG_2D_Z   4
+#define DRAG_2D_X   5
+#define DRAG_2D_Y   6
+#define DRAG_2D_C   7
+
+#define DRAG_CUT_Z  8
+#define DRAG_CUT_X  9
+#define DRAG_CUT_Y 10
+#define DRAG_CUT_C 11
+
+#define NUM_1D_COLS ( MAX_CURVES + 6 )
 
 
 typedef	struct {
@@ -177,14 +192,99 @@ typedef G_Hash_Entry* G_Hash;
 
 
 typedef struct {
-	bool is_init;           /* has init_1d() or init2d() been run ? */
+	bool is_init;           /* has init_1d() or init_2d() been run ? */
 	bool is_fully_drawn;
 	bool is_warn;
+
+	long dim;               /* dimensionality of display, 1 for 1d only,
+							   2 for 2d only, 3 for both 1d and 2d */
+
+	Display *d;             /* pointer to display structure */
+
+	FL_COLOR colors[ MAX_CURVES ];
+
+	XFontStruct *font;            /* font used for drawing texts */
+	int font_asc, font_desc;
+
+	unsigned int up_arrow_w,      /* sizes of out of range markers */
+		         up_arrow_h,
+		         down_arrow_w,
+		         down_arrow_h,
+		         left_arrow_w,
+		         left_arrow_h,
+		         right_arrow_w,
+		         right_arrow_h;
+
+	int button_state,             /* usuable button states */
+		raw_button_state;         /* the real button state */
+
+	int start[ 2 ];               /* start position of mouse movement */
+
+	int drag_canvas;        /* canvas that currently gets the mouse events */
+
+    int scale_tick_dist;    /* mean minimum distance between ticks */
+	int short_tick_len;     /* length of short ticks */
+	int medium_tick_len;    /* length of medium ticks */
+	int long_tick_len;      /* length of long ticks */
+	int label_dist;         /* distance between label and scale line */
+	int x_scale_offset;     /* x distance between scale line and window */
+	int y_scale_offset;		/* y distance between scale line and window */
+	int z_scale_offset;		/* z distance between scale line and window */
+	int z_line_offset;		/* distance between colour scale and window */
+	int z_line_width;       /* width of colour scale */
+	int enlarge_box_width;	/* width of enlarge box */
+
+	G_Hash color_hash;
+	unsigned int color_hash_size;
+
+} Graphics;
+
+
+typedef struct {
+
 	bool is_scale_set;      /* have scaling factors been calculated ? */
 	bool scale_changed;     /* have scaling factors changed ? */
 	bool is_fs;             /* state of full scale button */
 
-	long dim;               /* dimensionality of display */
+	long nc;                /* number of curves */
+	long nx;                /* points in x-direction */
+	long ny;                /* points in y-direction */
+	double rwc_start[ 2 ];  /* real world coordinate start values */
+	double rwc_delta[ 2 ];  /* real world coordinate increment values */
+	char *label[ 2 ];       /* label for x- and y-axis */
+
+    long nx_orig;
+    long ny_orig;
+    double rwc_start_orig[ 2 ];
+    double rwc_delta_orig[ 2 ];
+    char *label_orig[ 2 ];
+
+	double rw_min;          /* minimum of real world y- or z-coordinates */
+	double rw_max;          /* maximum of real world y- or z-coordinates */
+
+	Pixmap label_pm;        /* used for drawing of rotated text of the */
+	unsigned int label_w,   /* y-axis label */
+		         label_h;
+
+	int cursor[ 7 ];        /* the different cursors */
+
+	Canvas x_axis;
+	Canvas y_axis;
+	Canvas canvas;
+
+	Curve_1d *curve[ MAX_CURVES ];
+
+	Marker *marker;         /* linked list of markers */
+
+} Graphics_1d;
+
+
+typedef struct {
+
+	bool is_scale_set;      /* have scaling factors been calculated ? */
+	bool scale_changed;     /* have scaling factors changed ? */
+	bool is_fs;             /* state of full scale button */
+
 	long nc;                /* number of curves */
 	long nx;                /* points in x-direction */
 	long ny;                /* points in y-direction */
@@ -192,16 +292,20 @@ typedef struct {
 	double rwc_delta[ 3 ];  /* real world coordinate increment values */
 	char *label[ 6 ];       /* label for x-, y- and z-axis */
 
-	long nx_orig;
-	long ny_orig;
-	double rwc_start_orig[ 3 ];
-	double rwc_delta_orig[ 3 ];
-	char *label_orig[ 3 ];
+    long nx_orig;
+    long ny_orig;
+    double rwc_start_orig[ 3 ];
+    double rwc_delta_orig[ 3 ];
+    char *label_orig[ 3 ];
 
 	double rw_min;          /* minimum of real world y- or z-coordinates */
 	double rw_max;          /* maximum of real world y- or z-coordinates */
 
-	Display *d;             /* pointer to display structure */
+	Pixmap label_pm[ 6 ];         /* used for drawing of rotated text */
+	unsigned int label_w[ 6 ],    /* for both the 2D and cut window Y */
+				 label_h[ 6 ];    /* and Z labels */
+
+	int cursor[ 7 ];              /* the different cursors */
 
 	Canvas x_axis;
 	Canvas y_axis;
@@ -213,62 +317,15 @@ typedef struct {
 	Canvas cut_z_axis;
 	Canvas cut_canvas;
 
-	int drag_canvas;        /* canvas that currently gets the mouse events */
-	int cut_drag_canvas;    /* canvas that currently gets the mouse events */
-
-	Curve_1d *curve[ MAX_CURVES ];
 	Curve_2d *curve_2d[ MAX_CURVES ];
 	Curve_1d cut_curve;
-
-	FL_COLOR colors[ MAX_CURVES ];
-
-	G_Hash color_hash;
-	unsigned int color_hash_size;
-
-	int cursor[ 7 ];              /* the different cursors */
-
-	XFontStruct *font;            /* font used for drawing texts */
-	int font_asc, font_desc;
-
-	int button_state,             /* usuable button states */
-		raw_button_state;         /* the real button state */
-
-	int start[ 2 ];               /* start position of mouse movemnt */
-
-	Pixmap label_pm[ 6 ];         /* used for drawing of rotated text */
-	unsigned int label_w[ 6 ],
-		         label_h[ 6 ];
-
-	unsigned int up_arrow_w,      /* sizes of out of range markers */
-		         up_arrow_h,
-		         down_arrow_w,
-		         down_arrow_h,
-		         left_arrow_w,
-		         left_arrow_h,
-		         right_arrow_w,
-		         right_arrow_h;
 
 	int active_curve;       /* curve shown in 2d display (or -1 if none) */
 
 	bool is_cut;            /* set when cross section window is shown */
 	int cut_select;
 
-    int scale_tick_dist;    /* mean minimum distance between ticks */
-	int short_tick_len;     /* length of short ticks */
-	int medium_tick_len;    /* length of medium ticks */
-	int long_tick_len;      /* length of long ticks */
-	int label_dist;         /* distance between label and scale line */
-	int x_scale_offset;     /* x distance between scale line and window */
-	int y_scale_offset;		/* y distance between scale line and window */
-	int z_scale_offset;		/* z distance between scale line and window */
-	int z_scale_width;
-	int z_line_offset;		/* distance between colour scale and window */
-	int z_line_width;       /* width of colour scale */
-	int enlarge_box_width;	/* width of enlarge box */
-
-	Marker *marker;         /* lined list of markers (1D only) */
-
-} Graphics;
+} Graphics_2d;
 
 
 #define SCALE_TICK_DIST   6     /* mean minimum distance between ticks */
@@ -293,13 +350,18 @@ void graphics_free( void );
 void make_label_string( char *lstr, double num, int res );
 void create_label_pixmap( Canvas *c, int coord, char *label );
 void switch_off_special_cursors( void );
-void clear_curve( long curve );
+void clear_curve_1d( long curve );
+void clear_curve_2d( long curve );
 void create_pixmap( Canvas *c );
 void delete_pixmap( Canvas *c );
-void redraw_axis( int coord );
-void change_scale( int is_set, void *ptr );
-void change_label( char **label );
-void rescale( void *new_dims );
+void redraw_axis_1d( int coord );
+void redraw_axis_2d( int coord );
+void change_scale_1d( int is_set, void *ptr );
+void change_scale_2d( int is_set, void *ptr );
+void change_label_1d( char **label );
+void change_label_2d( char **label );
+void rescale_1d( long new_nx );
+void rescale_2d( void *new_dims );
 void redraw_canvas_2d( Canvas *c );
 
 

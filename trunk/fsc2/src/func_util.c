@@ -34,7 +34,7 @@ typedef struct {
 } DPoint;
 
 
-static DPoint *eval_display_args( Var *v, int *npoints );
+static DPoint *eval_display_args( Var *v, int dim, int *npoints );
 
 extern sigjmp_buf alrm_env;
 extern volatile sig_atomic_t can_jmp_alrm;
@@ -422,14 +422,14 @@ Var *f_init_1d( Var *v )
 
 	/* Set some default values */
 
-	G.dim = 1;
+	G.dim |= 1;
 	G.is_init = SET;
-	G.nc = 1;
-	G.nx = DEFAULT_1D_X_POINTS;
-	G.rwc_start[ X ] = ( double ) ARRAY_OFFSET;
-	G.rwc_delta[ X ] = 1.0;
-	for ( i = X; i <= Z; i++ )
-		G.label[ i ] = G.label_orig[ i ] = NULL;
+	G1.nc = 1;
+	G1.nx = DEFAULT_1D_X_POINTS;
+	G1.rwc_start[ X ] = ( double ) ARRAY_OFFSET;
+	G1.rwc_delta[ X ] = 1.0;
+	for ( i = X; i <= Y; i++ )
+		G1.label[ i ] = G1.label_orig[ i ] = NULL;
 
 	/* Now evaluate the arguments */
 
@@ -439,11 +439,11 @@ Var *f_init_1d( Var *v )
 	if ( v->type == STR_VAR )
 		goto labels_1d;
 
-	G.nc = get_long( v, "number of curves" );
+	G1.nc = get_long( v, "number of curves" );
 
-	if ( G.nc < 1 || G.nc > MAX_CURVES )
+	if ( G1.nc < 1 || G1.nc > MAX_CURVES )
 	{
-		print( FATAL, "Invalid number of curves (%ld).\n", G.nc );
+		print( FATAL, "Invalid number of curves (%ld).\n", G1.nc );
 		THROW( EXCEPTION );
 	}
 
@@ -453,10 +453,10 @@ Var *f_init_1d( Var *v )
 	if ( v->type == STR_VAR )
 		goto labels_1d;
 
-	G.nx = get_long( v, "number of points" );
+	G1.nx = get_long( v, "number of points" );
 
-	if ( G.nx <= 0 )
-		G.nx = DEFAULT_1D_X_POINTS;
+	if ( G1.nx <= 0 )
+		G1.nx = DEFAULT_1D_X_POINTS;
 
 	if ( ( v = vars_pop( v ) ) == NULL )
 		goto init_1d_done;
@@ -476,18 +476,18 @@ Var *f_init_1d( Var *v )
 			THROW( EXCEPTION );
 		}
 
-		G.rwc_start[ X ] = VALUE( v );
+		G1.rwc_start[ X ] = VALUE( v );
 		v = v->next;
-		G.rwc_delta[ X ] = VALUE( v );
+		G1.rwc_delta[ X ] = VALUE( v );
 
-		if ( G.rwc_delta[ X ] == 0.0 )
+		if ( G1.rwc_delta[ X ] == 0.0 )
 		{
-			G.rwc_start[ X ] = ARRAY_OFFSET;
-			G.rwc_delta[ X ] = 1.0;
+			G1.rwc_start[ X ] = ARRAY_OFFSET;
+			G1.rwc_delta[ X ] = 1.0;
 		}
 
-		if ( G.rwc_delta[ X ] == 0.0 )
-			G.rwc_delta[ X ] = 1.0;
+		if ( G1.rwc_delta[ X ] == 0.0 )
+			G1.rwc_delta[ X ] = 1.0;
 	}
 
 	if ( ( v = vars_pop( v ) ) == NULL )
@@ -496,24 +496,24 @@ Var *f_init_1d( Var *v )
  labels_1d:
 
 	vars_check ( v, STR_VAR );
-	G.label[ X ] = T_strdup( v->val.sptr );
+	G1.label[ X ] = T_strdup( v->val.sptr );
 
 	if ( ( v = vars_pop( v ) ) != NULL )
 	{
 		vars_check ( v, STR_VAR );
-		G.label[ Y ] = T_strdup( v->val.sptr );
+		G1.label[ Y ] = T_strdup( v->val.sptr );
 	}
 
  init_1d_done:
 
-	G.nx_orig = G.nx;
-	G.rwc_start_orig[ X ] = G.rwc_start[ X ];
-	G.rwc_delta_orig[ X ] = G.rwc_delta[ X ];
+	G1.nx_orig = G1.nx;
+	G1.rwc_start_orig[ X ] = G1.rwc_start[ X ];
+	G1.rwc_delta_orig[ X ] = G1.rwc_delta[ X ];
 
 	for ( i = X; i <= Y; i++ )
 	{
-		G.label_orig[ i ] = G.label[ i ];
-		G.label[ i ] = NULL;
+		G1.label_orig[ i ] = G1.label[ i ];
+		G1.label[ i ] = NULL;
 	}
 
 	return vars_push( INT_VAR, 1 );
@@ -532,15 +532,15 @@ Var *f_init_2d( Var *v )
 
 	/* Set some default values */
 
-	G.dim = 2;
+	G.dim |= 2;
 	G.is_init = SET;
-	G.nc = 1;
-	G.nx = DEFAULT_2D_X_POINTS;
-	G.ny = DEFAULT_2D_Y_POINTS;
-	G.rwc_start[ X ] = G.rwc_start[ Y ] = ( double ) ARRAY_OFFSET;
-	G.rwc_delta[ X ] = G.rwc_delta[ Y ] = 1.0;
+	G2.nc = 1;
+	G2.nx = DEFAULT_2D_X_POINTS;
+	G2.ny = DEFAULT_2D_Y_POINTS;
+	G2.rwc_start[ X ] = G2.rwc_start[ Y ] = ( double ) ARRAY_OFFSET;
+	G2.rwc_delta[ X ] = G2.rwc_delta[ Y ] = 1.0;
 	for ( i = X; i <= Z; i++ )
-		G.label[ i ] = G.label_orig[ i ] = NULL;
+		G2.label[ i ] = G2.label_orig[ i ] = NULL;
 
 	/* Now evaluate the arguments */
 
@@ -550,11 +550,11 @@ Var *f_init_2d( Var *v )
 	if ( v->type == STR_VAR )
 		goto labels_2d;
 
-	G.nc = get_long( v, "number of curves" );
+	G2.nc = get_long( v, "number of curves" );
 
-	if ( G.nc < 1 || G.nc > MAX_CURVES )
+	if ( G2.nc < 1 || G2.nc > MAX_CURVES )
 	{
-		print( FATAL, "Invalid number of curves (%ld).\n", G.nc );
+		print( FATAL, "Invalid number of curves (%ld).\n", G2.nc );
 		THROW( EXCEPTION );
 	}
 
@@ -564,10 +564,10 @@ Var *f_init_2d( Var *v )
 	if ( v->type == STR_VAR )
 		goto labels_2d;
 
-	G.nx = get_long( v, "number of points in x-direction" );
+	G2.nx = get_long( v, "number of points in x-direction" );
 
-	if ( G.nx <= 0 )
-		G.nx = DEFAULT_2D_X_POINTS;
+	if ( G2.nx <= 0 )
+		G2.nx = DEFAULT_2D_X_POINTS;
 
 	if ( ( v = vars_pop( v ) ) == NULL )
 		goto init_2d_done;
@@ -575,10 +575,10 @@ Var *f_init_2d( Var *v )
 	if ( v->type == STR_VAR )
 		goto labels_2d;
 
-	G.ny = get_long( v, "number of points in y-direction" );
+	G2.ny = get_long( v, "number of points in y-direction" );
 
-	if ( G.ny <= 0 )
-		G.ny = DEFAULT_2D_Y_POINTS;
+	if ( G2.ny <= 0 )
+		G2.ny = DEFAULT_2D_Y_POINTS;
 
 	if ( ( v = vars_pop( v ) ) == NULL )
 		goto init_2d_done;
@@ -598,14 +598,14 @@ Var *f_init_2d( Var *v )
 			THROW( EXCEPTION );
 		}
 
-		G.rwc_start[ X ] = VALUE( v );
+		G2.rwc_start[ X ] = VALUE( v );
 		v = v->next;
-		G.rwc_delta[ X ] = VALUE( v );
+		G2.rwc_delta[ X ] = VALUE( v );
 
-		if ( G.rwc_delta[ X ] == 0.0 )
+		if ( G2.rwc_delta[ X ] == 0.0 )
 		{
-			G.rwc_start[ X ] = ( double ) ARRAY_OFFSET;
-			G.rwc_delta[ X ] = 1.0;
+			G2.rwc_start[ X ] = ( double ) ARRAY_OFFSET;
+			G2.rwc_delta[ X ] = 1.0;
 		}
 	}
 
@@ -627,14 +627,14 @@ Var *f_init_2d( Var *v )
 			THROW( EXCEPTION );
 		}
 
-		G.rwc_start[ Y ] = VALUE( v );
+		G2.rwc_start[ Y ] = VALUE( v );
 		v = v->next;
-		G.rwc_delta[ Y ] = VALUE( v );
+		G2.rwc_delta[ Y ] = VALUE( v );
 
-		if ( G.rwc_delta[ Y ] == 0.0 )
+		if ( G2.rwc_delta[ Y ] == 0.0 )
 		{
-			G.rwc_start[ Y ] = ( double ) ARRAY_OFFSET;
-			G.rwc_delta[ Y ] = 1.0;
+			G2.rwc_start[ Y ] = ( double ) ARRAY_OFFSET;
+			G2.rwc_delta[ Y ] = 1.0;
 		}
 	}
 
@@ -644,34 +644,34 @@ Var *f_init_2d( Var *v )
  labels_2d:
 
 	vars_check( v, STR_VAR );
-	G.label[ X ] = T_strdup( v->val.sptr );
+	G2.label[ X ] = T_strdup( v->val.sptr );
 
 	if ( ( v = vars_pop( v ) ) == NULL )
 		return vars_push( INT_VAR, 1 );
 
 	vars_check( v, STR_VAR );
-	G.label[ Y ] = T_strdup( v->val.sptr );
+	G2.label[ Y ] = T_strdup( v->val.sptr );
 
 	if ( ( v = vars_pop( v ) ) != NULL )
 	{
 		vars_check( v, STR_VAR );
-		G.label[ Z ] = T_strdup( v->val.sptr );
+		G2.label[ Z ] = T_strdup( v->val.sptr );
 	}
 
  init_2d_done:
 
-	G.nx_orig = G.nx;
-	G.ny_orig = G.ny;
+	G2.nx_orig = G2.nx;
+	G2.ny_orig = G2.ny;
 	for ( i = X; i <= Y; i++ )
 	{
-		G.rwc_start_orig[ i ] = G.rwc_start[ i ];
-		G.rwc_delta_orig[ i ] = G.rwc_delta[ i ];
+		G2.rwc_start_orig[ i ] = G2.rwc_start[ i ];
+		G2.rwc_delta_orig[ i ] = G2.rwc_delta[ i ];
 	}
 
 	for ( i = X; i <= Z; i++ )
 	{
-		G.label_orig[ i ] = G.label[ i ];
-		G.label[ i ] = NULL;
+		G2.label_orig[ i ] = G2.label[ i ];
+		G2.label[ i ] = NULL;
 	}
 
 	return vars_push( INT_VAR, 1 );
@@ -684,7 +684,36 @@ Var *f_init_2d( Var *v )
 
 Var *f_cscale( Var *v )
 {
-	double x_0, y_0, dx, dy;         /* new scale settings */
+	/* No rescaling without graphics... */
+
+	if ( ! G.is_init )
+	{
+		print( SEVERE, "Can't change scale, missing graphics "
+			   "initialization.\n" );
+		return vars_push( INT_VAR, 0 );
+	}
+
+	if ( G.dim == 3 )
+	{
+		print( FATAL, "Both 1D- and 2D- display are in use, use either "
+			   "function change_scale_1d() or change_scale_2d().\n" );
+		THROW( EXCEPTION );
+	}
+
+	if ( G.dim == 1 )
+		return f_cscale_1d( v );
+	else
+		return f_cscale_2d( v );
+}
+
+
+/*----------------------------------------------------*/
+/* Function to change the scale during the experiment */
+/*----------------------------------------------------*/
+
+Var *f_cscale_1d( Var *v )
+{
+	double x_0, dx;                  /* new scale settings */
 	int is_set = 0;                  /* flags, indicating what to change */
 	int shm_id;
 	long len = 0;                    /* total length of message to send */
@@ -700,6 +729,13 @@ Var *f_cscale( Var *v )
 		print( SEVERE, "Can't change scale, missing graphics "
 			   "initialization.\n" );
 		return vars_push( INT_VAR, 0 );
+	}
+
+	if ( ! ( G.dim & 1 ) )
+	{
+		print( FATAL, "No 1D display has been initialized, use function "
+			   "change_scale_2d() instead.\n" );
+		THROW( EXCEPTION );
 	}
 
 	/* Check and store the parameter */
@@ -725,20 +761,119 @@ Var *f_cscale( Var *v )
 			is_set |= 2;
 	}
 
-	if ( ( v = vars_pop( v ) ) != NULL )
-	{
-		if ( G.dim == 1 )
-		{
-			print( FATAL, "With 1D graphics only the x-scaling can be "
-				   "changed.\n" );
-			THROW( EXCEPTION );
-		}
+	too_many_arguments( v );
 
-		if ( v->type & ( INT_VAR | FLOAT_VAR ) )
-		{
-			y_0 = VALUE( v );
-			is_set |= 4;
-		}
+	/* In a test run we're already done */
+
+	if ( Internals.mode == TEST )
+		return vars_push( INT_VAR, 1 );
+
+	/* Function can only be used in experiment section */
+
+	fsc2_assert( Internals.I_am == CHILD );
+
+	len =   sizeof len + sizeof type + sizeof is_set
+		  + sizeof x_0 + sizeof dx;
+
+	/* Now try to get a shared memory segment */
+
+	if ( ( buf = get_shm( &shm_id, len ) ) == ( void * ) - 1 )
+	{
+		eprint( FATAL, UNSET, "Internal communication problem at %s:%d.\n",
+				__FILE__, __LINE__ );
+		THROW( EXCEPTION );
+	}
+
+	/* Copy the data to the segment */
+
+	ptr = CHAR_P buf;
+
+	memcpy( ptr, &len, sizeof len );                   /* total length */
+	ptr += sizeof len;
+
+	memcpy( ptr, &type, sizeof type );                 /* type indicator  */
+	ptr += sizeof type;
+
+	memcpy( ptr, &is_set, sizeof is_set );             /* flags */
+	ptr += sizeof is_set;
+
+	memcpy( ptr, &x_0, sizeof x_0 );                   /* new x-offset */
+	ptr += sizeof x_0;
+
+	memcpy( ptr, &dx, sizeof dx );                     /* new x-increment */
+	ptr += sizeof dx;
+
+	/* Detach from the segment with the data segment */
+
+	detach_shm( buf, NULL );
+
+	/* Wait for parent to become ready to accept new data, then store
+	   identifier and send signal to tell parent about the data */
+
+	send_data( DATA_1D, shm_id );
+
+	return vars_push( INT_VAR, 1 );
+}
+
+
+/*----------------------------------------------------*/
+/* Function to change the scale during the experiment */
+/*----------------------------------------------------*/
+
+Var *f_cscale_2d( Var *v )
+{
+	double x_0, y_0, dx, dy;         /* new scale settings */
+	int is_set = 0;                  /* flags, indicating what to change */
+	int shm_id;
+	long len = 0;                    /* total length of message to send */
+	void *buf;
+	char *ptr;
+	int type = D_CHANGE_SCALE;
+
+
+	/* No rescaling without graphics... */
+
+	if ( ! G.is_init )
+	{
+		print( SEVERE, "Can't change scale, missing graphics "
+			   "initialization.\n" );
+		return vars_push( INT_VAR, 0 );
+	}
+
+	if ( ! ( G.dim & 2 ) )
+	{
+		print( FATAL, "No 2D display has been initialized, use function "
+			   "change_scale_1d() instead.\n" );
+		THROW( EXCEPTION );
+	}
+
+	/* Check and store the parameter */
+
+	if ( v == NULL )
+	{
+		print( FATAL, "Missing arguments.\n" );
+		THROW( EXCEPTION );
+	}
+
+	vars_check( v, INT_VAR | FLOAT_VAR | STR_VAR );
+
+	if ( v->type & ( INT_VAR | FLOAT_VAR ) )
+	{
+		x_0 = VALUE( v );
+		is_set = 1;
+	}
+
+	if ( ( v = vars_pop( v ) ) != NULL && v->type & ( INT_VAR | FLOAT_VAR ) )
+	{
+		dx = VALUE( v );
+		if ( dx != 0.0 )
+			is_set |= 2;
+	}
+
+	if ( v->type & ( INT_VAR | FLOAT_VAR ) )
+	{
+		y_0 = VALUE( v );
+		is_set |= 4;
 	}
 
 	if ( ( v = vars_pop( v ) ) != NULL && v->type & ( INT_VAR | FLOAT_VAR ) )
@@ -747,6 +882,8 @@ Var *f_cscale( Var *v )
 		if ( dy != 0.0 )
 			is_set |= 8;
 	}
+
+	too_many_arguments( v );
 
 	/* In a test run we're already done */
 
@@ -801,7 +938,7 @@ Var *f_cscale( Var *v )
 	/* Wait for parent to become ready to accept new data, then store
 	   identifier and send signal to tell parent about the data */
 
-	send_data( DATA, shm_id );
+	send_data( DATA_2D, shm_id );
 
 	return vars_push( INT_VAR, 1 );
 }
@@ -812,6 +949,150 @@ Var *f_cscale( Var *v )
 /*------------------------------------------------------------------*/
 
 Var *f_clabel( Var *v )
+{
+	/* No changing of labels without graphics... */
+
+	if ( ! G.is_init )
+	{
+		print( SEVERE, "Can't change labels, missing graphics "
+			   "initialization.\n" );
+		return vars_push( INT_VAR, 0 );
+	}
+
+	if ( G.dim == 3 )
+	{
+		print( FATAL, "Both 1D- and 2D- display are in use, use either "
+			   "function change_label_1d() or change_label_2d().\n" );
+		THROW( EXCEPTION );
+	}
+
+	if ( G.dim == 1 )
+		return f_clabel_1d( v );
+	else
+		return f_clabel_2d( v );
+}
+
+
+/*------------------------------------------------------------------*/
+/* Function to change one or more axis labels during the experiment */
+/*------------------------------------------------------------------*/
+
+Var *f_clabel_1d( Var *v )
+{
+	char *l[ 2 ] = { NULL, NULL };
+	long lengths[ 2 ] = { 1, 1 };
+	int shm_id;
+	long len = 0;                    /* total length of message to send */
+	void *buf;
+	char *ptr;
+	int i;
+	int type = D_CHANGE_LABEL;
+
+
+	/* No changing of labels without graphics... */
+
+	if ( ! G.is_init )
+	{
+		print( SEVERE, "Can't change labels, missing graphics "
+			   "initialization.\n" );
+		return vars_push( INT_VAR, 0 );
+	}
+
+	if ( ! ( G.dim & 1 ) )
+	{
+		print( FATAL, "No 1D display has been initialized, use function "
+			   "change_label_2d() instead.\n" );
+		THROW( EXCEPTION );
+	}
+
+	/* Check and store the parameter */
+
+	if ( v == NULL )
+	{
+		print( FATAL, "Missing arguments.\n" );
+		THROW( EXCEPTION );
+	}
+
+	vars_check( v, STR_VAR );
+
+	l[ X ] = T_strdup( v->val.sptr );
+	lengths[ X ] = ( long ) strlen( l[ X ] ) + 1;
+
+	if ( ( v = vars_pop( v ) ) != NULL )
+	{
+		vars_check( v, STR_VAR );
+		l[ Y ] = T_strdup( v->val.sptr );
+		lengths[ Y ] = ( long ) strlen( l[ Y ] ) + 1;
+	}
+
+	too_many_arguments( v );
+
+	/* In a test run we're already done */
+
+	if ( Internals.mode == TEST )
+		return vars_push( INT_VAR, 1 );
+
+	/* Function can only be used in experiment section */
+
+	fsc2_assert( Internals.I_am == CHILD );
+
+	len = sizeof len + sizeof type;
+	for ( i = X; i <= Y; i++ )
+		len += sizeof lengths[ i ] + lengths[ i ];
+
+	/* Now try to get a shared memory segment */
+
+	if ( ( buf = get_shm( &shm_id, len ) ) == ( void * ) - 1 )
+	{
+		eprint( FATAL, UNSET, "Internal communication problem at %s:%d.\n",
+				__FILE__, __LINE__ );
+		T_free( l[ Y ] );
+		T_free( l[ X ] );
+		THROW( EXCEPTION );
+	}
+
+	/* Copy the data to the segment */
+
+	ptr = CHAR_P buf;
+
+	memcpy( ptr, &len, sizeof len );                   /* total length */
+	ptr += sizeof len;
+
+	memcpy( ptr, &type, sizeof type );                 /* type indicator  */
+	ptr += sizeof type;
+
+	for ( i = X; i <= Y; i++ )
+	{
+		memcpy( ptr, lengths + i, sizeof lengths[ i ] );
+		ptr += sizeof lengths[ i ];
+		if ( lengths[ i ] > 1 )
+		{
+			memcpy( ptr, l[ i ], lengths[ i ] );
+			T_free( l[ i ] );
+		}
+		else
+			* ( char * ) ptr = '\0';
+		ptr += lengths[ i ];
+	}
+
+	/* Detach from the segment with the data segment */
+
+	detach_shm( buf, NULL );
+
+	/* Wait for parent to become ready to accept new data, then store
+	   identifier and send signal to tell parent about the data */
+
+	send_data( DATA_1D, shm_id );
+
+	return vars_push( INT_VAR, 1 );
+}
+
+
+/*------------------------------------------------------------------*/
+/* Function to change one or more axis labels during the experiment */
+/*------------------------------------------------------------------*/
+
+Var *f_clabel_2d( Var *v )
 {
 	char *l[ 3 ] = { NULL, NULL, NULL };
 	long lengths[ 3 ] = { 1, 1, 1 };
@@ -830,6 +1111,13 @@ Var *f_clabel( Var *v )
 		print( SEVERE, "Can't change labels, missing graphics "
 			   "initialization.\n" );
 		return vars_push( INT_VAR, 0 );
+	}
+
+	if ( ! ( G.dim & 2 ) )
+	{
+		print( FATAL, "No 2D display has been initialized, use function "
+			   "change_label_1d() instead.\n" );
+		THROW( EXCEPTION );
 	}
 
 	/* Check and store the parameter */
@@ -853,19 +1141,13 @@ Var *f_clabel( Var *v )
 
 		if ( ( v = vars_pop( v ) ) != NULL )
 		{
-			if ( G.dim == 1 )
-			{
-				print( FATAL, "Can't change z-label in 1D-display.\n" );
-				T_free( l[ Y ] );
-				T_free( l[ X ] );
-				THROW( EXCEPTION );
-			}
-
 			vars_check( v, STR_VAR );
 			l[ Z ] = T_strdup( v->val.sptr );
 			lengths[ Z ] = ( long ) strlen( l[ Z ] ) + 1;
 		}
 	}
+
+	too_many_arguments( v );
 
 	/* In a test run we're already done */
 
@@ -923,7 +1205,7 @@ Var *f_clabel( Var *v )
 	/* Wait for parent to become ready to accept new data, then store
 	   identifier and send signal to tell parent about the data */
 
-	send_data( DATA, shm_id );
+	send_data( DATA_2D, shm_id );
 
 	return vars_push( INT_VAR, 1 );
 }
@@ -936,13 +1218,42 @@ Var *f_clabel( Var *v )
 
 Var *f_rescale( Var *v )
 {
-	long new_nx, new_ny;
+	/* No rescaling without graphics... */
+
+	if ( ! G.is_init )
+	{
+		print( SEVERE, "Can't change number of points, missing "
+			   "initialization.\n" );
+		return vars_push( INT_VAR, 0 );
+	}
+
+	if ( G.dim == 3 )
+	{
+		print( FATAL, "Both 1D- and 2D- display are in use, use either "
+			   "function rescale_1d() or rescale_2d().\n" );
+		THROW( EXCEPTION );
+	}
+
+	if ( G.dim == 1 )
+		return f_rescale_1d( v );
+	else
+		return f_rescale_2d( v );
+}
+
+
+/*---------------------------------------------------------*/
+/* Function to change the number of points to be displayed */
+/* during the experiment.                                  */
+/*---------------------------------------------------------*/
+
+Var *f_rescale_1d( Var *v )
+{
+	long new_nx;
 	int shm_id;
 	long len = 0;                    /* total length of message to send */
 	void *buf;
 	char *ptr;
 	int type = D_CHANGE_POINTS;
-
 
 
 	/* No rescaling without graphics... */
@@ -954,6 +1265,13 @@ Var *f_rescale( Var *v )
 		return vars_push( INT_VAR, 0 );
 	}
 
+	if ( ! ( G.dim & 1 ) )
+	{
+		print( FATAL, "No 1D display has been initialized, use function "
+			   "rescale_2d() instead.\n" );
+		THROW( EXCEPTION );
+	}
+
 	/* Check and store the parameter */
 
 	if ( v == NULL )
@@ -962,25 +1280,111 @@ Var *f_rescale( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	new_nx = get_long( v, G.dim == 1 ? "number of points" :
-					                   "number of points in x-direction" );
+	new_nx = get_long( v, "number of points" );
 
 	if ( new_nx < -1 )
 	{
-		print( FATAL, "Invalid negative number of points (%ld)%s.\n",
-			   new_nx, G.dim == 1 ? "" : " in x-direction" );
+		print( FATAL, "Invalid negative number of points.\n" );
+		THROW( EXCEPTION );
+	}
+
+	too_many_arguments( v );
+
+	/* In a test run we're already done */
+
+	if ( Internals.mode == TEST )
+		return vars_push( INT_VAR, 1 );
+
+	/* Function can only be used in experiment section */
+
+	fsc2_assert( Internals.I_am == CHILD );
+
+	len = sizeof len + sizeof type + sizeof new_nx;
+
+	/* Now try to get a shared memory segment */
+
+	if ( ( buf = get_shm( &shm_id, len ) ) == ( void * ) - 1 )
+	{
+		eprint( FATAL, UNSET, "Internal communication problem at %s:%d.\n",
+				__FILE__, __LINE__ );
+		THROW( EXCEPTION );
+	}
+
+	/* Copy the data to the segment */
+
+	ptr = CHAR_P buf;
+
+	memcpy( ptr, &len, sizeof len );                   /* total length */
+	ptr += sizeof len;
+
+	memcpy( ptr, &type, sizeof type );                 /* type indicator  */
+	ptr += sizeof type;
+
+	memcpy( ptr, &new_nx, sizeof new_nx );             /* new # of x points */
+	ptr += sizeof new_nx;
+
+	/* Detach from the segment with the data segment */
+
+	detach_shm( buf, NULL );
+
+	/* Wait for parent to become ready to accept new data, then store
+	   identifier and send signal to tell parent about the data */
+
+	send_data( DATA_1D, shm_id );
+
+	return vars_push( INT_VAR, 1 );
+}
+
+
+/*---------------------------------------------------------*/
+/* Function to change the number of points to be displayed */
+/* during the experiment.                                  */
+/*---------------------------------------------------------*/
+
+Var *f_rescale_2d( Var *v )
+{
+	long new_nx, new_ny;
+	int shm_id;
+	long len = 0;                    /* total length of message to send */
+	void *buf;
+	char *ptr;
+	int type = D_CHANGE_POINTS;
+
+
+	/* No rescaling without graphics... */
+
+	if ( ! G.is_init )
+	{
+		print( SEVERE, "Can't change number of points, missing "
+			   "initialization.\n" );
+		return vars_push( INT_VAR, 0 );
+	}
+
+	if ( ! ( G.dim & 2 ) )
+	{
+		print( FATAL, "No 2D display has been initialized, use function "
+			   "rescale_1d() instead.\n" );
+		THROW( EXCEPTION );
+	}
+
+	/* Check and store the parameter */
+
+	if ( v == NULL )
+	{
+		print( FATAL, "Missing arguments.\n" );
+		THROW( EXCEPTION );
+	}
+
+	new_nx = get_long( v, "number of points in x-direction" );
+
+	if ( new_nx < -1 )
+	{
+		print( FATAL, "Invalid negative number of points in x-direction.\n" );
 		THROW( EXCEPTION );
 	}
 
 	if ( ( v = vars_pop( v ) ) != NULL )
 	{
-		if ( G.dim == 1 )
-		{
-			print( FATAL, "With 1D graphics only the number of points in "
-				   "x-direction be changed.\n" );
-			THROW( EXCEPTION );
-		}
-
 		new_ny = get_long( v, "number of points in y-direction" );
 
 		if ( new_ny < -1 )
@@ -989,7 +1393,7 @@ Var *f_rescale( Var *v )
 				   "y-direction.\n", new_ny );
 			THROW( EXCEPTION );
 		}
-	} else if ( G.dim == 2 )
+	} else
 		new_ny = -1;
 
 	/* In a test run we're already done */
@@ -1035,7 +1439,7 @@ Var *f_rescale( Var *v )
 	/* Wait for parent to become ready to accept new data, then store
 	   identifier and send signal to tell parent about the data */
 
-	send_data( DATA, shm_id );
+	send_data( DATA_2D, shm_id );
 
 	return vars_push( INT_VAR, 1 );
 }
@@ -1046,6 +1450,39 @@ Var *f_rescale( Var *v )
 /*-------------------------------------------------------------*/
 
 Var *f_display( Var *v )
+{
+	/* We can't display data without a previous initialization */
+
+	if ( ! G.is_init )
+	{
+		if ( ! G.is_warn )                         /* warn only once */
+		{
+			print( WARN, "Can't display data, missing initialisation\n" );
+			G.is_warn = SET;
+		}
+
+		return vars_push( INT_VAR, 0 );
+	}
+
+	if ( G.dim == 3 )
+	{
+		print( FATAL, "Both 1D- and 2D- display are in use, use either "
+			   "function display_1d() or display_2d().\n" );
+		THROW( EXCEPTION );
+	}
+
+	if ( G.dim == 1 )
+		return f_display_1d( v );
+	else
+		return f_display_2d( v );
+}
+
+
+/*-------------------------------------------------------------*/
+/* f_display() is used to send new data to the display system. */
+/*-------------------------------------------------------------*/
+
+Var *f_display_1d( Var *v )
 {
 	DPoint *dp;
 	int shm_id;
@@ -1070,9 +1507,282 @@ Var *f_display( Var *v )
 		return vars_push( INT_VAR, 0 );
 	}
 
+	if ( ! ( G.dim & 1 ) )
+	{
+		print( FATAL, "No 1D display has been initialized, use function "
+			   "display_2d() instead.\n" );
+		THROW( EXCEPTION );
+	}
+
 	/* Check the arguments and get them into some reasonable form */
 
-	dp = eval_display_args( v, &nsets );
+	dp = eval_display_args( v, 1, &nsets );
+
+	fsc2_assert( nsets >= 1 );
+
+	if ( Internals.mode == TEST )
+	{
+		T_free( dp );
+		return vars_push( INT_VAR, 1 );
+	}
+
+	fsc2_assert( Internals.I_am == CHILD );
+
+	/* Determine the needed amount of shared memory */
+
+	len =   sizeof len                  /* length field itself */
+		  + sizeof nsets                /* number of sets to be sent */
+		  + nsets * (                   /* x-, y-index, number and data type */
+					    sizeof dp->nx + sizeof dp->nc 
+					  + sizeof dp->v->type );
+
+	for ( i = 0; i < nsets; i++ )
+	{
+		switch( dp[ i ].v->type )
+		{
+			case INT_VAR :
+				len += sizeof( long );
+				break;
+
+			case FLOAT_VAR :
+				len += sizeof( double );
+				break;
+
+			case ARR_PTR :
+				len += sizeof( long );
+				if ( dp[ i ].v->from->type == INT_CONT_ARR )
+					len += dp[ i ].v->from->sizes[ dp[ i ].v->from->dim - 1 ]
+						   * sizeof( long );
+				else
+					len += dp[ i ].v->from->sizes[ dp[ i ].v->from->dim - 1 ]
+						   * sizeof( double );
+				break;
+
+			case ARR_REF :
+				if ( dp[ i ].v->from->dim != 1 )
+				{
+					print( FATAL,"Only one-dimensional arrays or slices of "
+						   "more-dimensional arrays can be displayed.\n" );
+					T_free( dp );
+					THROW( EXCEPTION );
+				}
+
+				len += sizeof( long );
+
+				if ( dp[ i ].v->from->type == INT_CONT_ARR )
+					len += dp[ i ].v->from->sizes[ 0 ] * sizeof( long );
+				else
+					len += dp[ i ].v->from->sizes[ 0 ] * sizeof( double );
+				break;
+
+			case INT_ARR :
+				len += sizeof( long );
+				len += dp[ i ].v->len * sizeof( long );
+				break;
+
+			case FLOAT_ARR :
+				len += sizeof( long );
+				len += dp[ i ].v->len * sizeof( double );
+				break;
+
+			default :                   /* this better never happens... */
+				T_free( dp );
+				eprint( FATAL, UNSET, "Internal communication error at "
+						"%s:%d.\n", __FILE__, __LINE__ );
+				THROW( EXCEPTION );
+		}
+	}
+
+	/* Now try to get a shared memory segment */
+
+	if ( ( buf = get_shm( &shm_id, len ) ) == ( void * ) - 1 )
+	{
+		T_free( dp );
+		eprint( FATAL, UNSET, "Internal communication problem at %s:%d.\n",
+				__FILE__, __LINE__ );
+		THROW( EXCEPTION );
+	}
+
+	/* Copy the data to the segment */
+
+	ptr = CHAR_P buf;
+
+	memcpy( ptr, &len, sizeof len );                   /* total length */
+	ptr += sizeof len;
+
+	memcpy( ptr, &nsets, sizeof nsets );               /* # data sets  */
+	ptr += sizeof nsets;
+
+	for ( i = 0; i < nsets; i++ )
+	{
+		memcpy( ptr, &dp[ i ].nx, sizeof dp[ i ].nx );  /* x-index */
+		ptr += sizeof dp[ i ].nx;
+
+		memcpy( ptr, &dp[ i ].nc, sizeof dp[ i ].nc );  /* curve number */
+		ptr += sizeof dp[ i ].nc;
+
+		switch( dp[ i ].v->type )                       /* and now the data  */
+		{
+			case INT_VAR :
+				memcpy( ptr, &dp[ i ].v->type, sizeof dp[ i ].v->type );
+				ptr += sizeof dp[ i ].v->type;
+				memcpy( ptr, &dp[ i ].v->val.lval,
+						sizeof dp[ i ].v->val.lval );
+				ptr += sizeof dp[ i ].v->val.lval;
+				break;
+
+			case FLOAT_VAR :
+				memcpy( ptr, &dp[ i ].v->type, sizeof dp[ i ].v->type );
+				ptr += sizeof dp[ i ].v->type;
+				memcpy( ptr, &dp[ i ].v->val.dval,
+						sizeof dp[ i ].v->val.dval );
+				ptr += sizeof dp[ i ].v->val.dval;
+				break;
+
+			case ARR_PTR :
+				fsc2_assert( dp[ i ].v->from->type == INT_CONT_ARR ||
+							 dp[ i ].v->from->type == FLOAT_CONT_ARR );
+
+				memcpy( ptr, &dp[ i ].v->from->type,
+						sizeof dp[ i ].v->from->type );
+				ptr += sizeof dp[ i ].v->from->type;
+
+				len = dp[ i ].v->from->sizes[ dp[ i ].v->from->dim - 1 ];
+				memcpy( ptr, &len, sizeof len );
+				ptr += sizeof len;
+
+				if ( dp[ i ].v->from->type == INT_CONT_ARR )
+				{
+					memcpy( ptr, dp[ i ].v->val.gptr, len * sizeof( long ) );
+					ptr += len * sizeof( long );
+				}
+				else
+				{
+					memcpy( ptr, dp[ i ].v->val.gptr, len * sizeof( double ) );
+					ptr += len * sizeof( double );
+				}
+				break;
+
+			case ARR_REF :
+				fsc2_assert( dp[ i ].v->from->type == INT_CONT_ARR ||
+							 dp[ i ].v->from->type == FLOAT_CONT_ARR );
+
+				memcpy( ptr, &dp[ i ].v->from->type,
+						sizeof dp[ i ].v->from->type );
+				ptr += sizeof dp[ i ].v->from->type;
+
+				len = dp[ i ].v->from->sizes[ 0 ];
+				memcpy( ptr, &len, sizeof len );
+				ptr += sizeof len;
+
+				if ( dp[ i ].v->from->type == INT_CONT_ARR )
+				{
+					memcpy( ptr, dp[ i ].v->from->val.lpnt,
+							len * sizeof *dp[ i ].v->from->val.lpnt );
+					ptr += len * sizeof *dp[ i ].v->from->val.lpnt;
+				}
+				else
+				{
+					memcpy( ptr, dp[ i ].v->from->val.dpnt,
+							len * sizeof *dp[ i ].v->from->val.dpnt );
+					ptr += len * sizeof *dp[ i ].v->from->val.dpnt;
+				}
+				break;
+
+			case INT_ARR :
+				type = INT_CONT_ARR;
+				memcpy( ptr, &type, sizeof type );
+				ptr += sizeof type;
+
+				len = dp[ i ].v->len;
+				memcpy( ptr, &len, sizeof len );
+				ptr += sizeof len;
+
+				memcpy( ptr, dp[ i ].v->val.lpnt,
+						len * sizeof *dp[ i ].v->val.lpnt );
+				ptr += len * sizeof *dp[ i ].v->val.lpnt;
+				break;
+
+			case FLOAT_ARR :
+				type = FLOAT_CONT_ARR;
+				memcpy( ptr, &type, sizeof type );
+				ptr += sizeof type;
+
+				len = dp[ i ].v->len;
+				memcpy( ptr, &len, sizeof len );
+				ptr += sizeof len;
+
+				memcpy( ptr, dp[ i ].v->val.dpnt,
+						len * sizeof *dp[ i ].v->val.dpnt );
+				ptr += len * sizeof *dp[ i ].v->val.dpnt;
+				break;
+
+			default :                   /* this better never happens... */
+				T_free( dp );
+				eprint( FATAL, UNSET, "Internal communication error at "
+						"%s:%d.\n", __FILE__, __LINE__ );
+				THROW( EXCEPTION );
+		}
+	}
+
+	/* Detach from the segment with the data */
+
+	detach_shm( buf, NULL );
+
+	/* Get rid of the array of structures returned by eval_display_args() */
+
+	T_free( dp );
+
+	/* Wait for parent to become ready to accept new data, then store
+	   identifier and send signal to tell parent about the data */
+
+	send_data( DATA_1D, shm_id );
+
+	return vars_push( INT_VAR, 1 );
+}
+
+
+/*-------------------------------------------------------------*/
+/* f_display() is used to send new data to the display system. */
+/*-------------------------------------------------------------*/
+
+Var *f_display_2d( Var *v )
+{
+	DPoint *dp;
+	int shm_id;
+	long len = 0;                     /* total length of message to send */
+	void *buf;
+	char *ptr;
+	int nsets;
+	int i;
+	int type;
+
+
+	/* We can't display data without a previous initialization */
+
+	if ( ! G.is_init )
+	{
+		if ( ! G.is_warn )                         /* warn only once */
+		{
+			print( WARN, "Can't display data, missing initialisation\n" );
+			G.is_warn = SET;
+		}
+
+		return vars_push( INT_VAR, 0 );
+	}
+
+	if ( ! ( G.dim & 2 ) )
+	{
+		print( FATAL, "No 2D display has been initialized, use function "
+			   "display_1d() instead.\n" );
+		THROW( EXCEPTION );
+	}
+
+	/* Check the arguments and get them into some reasonable form */
+
+	dp = eval_display_args( v, 2, &nsets );
+
+	fsc2_assert( nsets >= 1 );
 
 	if ( Internals.mode == TEST )
 	{
@@ -1293,7 +2003,7 @@ Var *f_display( Var *v )
 	/* Wait for parent to become ready to accept new data, then store
 	   identifier and send signal to tell parent about the data */
 
-	send_data( DATA, shm_id );
+	send_data( DATA_2D, shm_id );
 
 	return vars_push( INT_VAR, 1 );
 }
@@ -1302,7 +2012,7 @@ Var *f_display( Var *v )
 /*--------------------------------------------------------*/
 /*--------------------------------------------------------*/
 
-static DPoint *eval_display_args( Var *v, int *nsets )
+static DPoint *eval_display_args( Var *v, int dim, int *nsets )
 {
 	DPoint *dp = NULL;
 
@@ -1334,7 +2044,7 @@ static DPoint *eval_display_args( Var *v, int *nsets )
 
 		/* For 2D experiments test and get y-index */
 
-		if ( G.dim == 2 )
+		if ( dim == 2 )
 		{
 			if ( ( v = v->next ) == NULL )
 			{
@@ -1390,7 +2100,8 @@ static DPoint *eval_display_args( Var *v, int *nsets )
 
 		dp[ *nsets ].nc = get_long( v, "curve number" ) - 1;
 
-		if ( dp[ *nsets ].nc < 0 || dp[ *nsets ].nc >= G.nc )
+		if ( dp[ *nsets ].nc < 0 ||
+			 dp[ *nsets ].nc >= ( dim == 1 ? G1.nc : G2.nc ) )
 		{
 			print( FATAL, "Invalid curve number (%ld).\n",
 				   dp[ *nsets ].nc + 1 );
@@ -1412,6 +2123,37 @@ static DPoint *eval_display_args( Var *v, int *nsets )
 
 Var *f_clearcv( Var *v )
 {
+	/* This function can only be called in the EXPERIMENT section and needs
+	   a previous graphics initialisation */
+
+	if ( ! G.is_init )
+	{
+		if ( Internals.mode == TEST )
+			print( WARN, "Can't clear curve, missing graphics "
+				   "initialisation.\n" );
+		return vars_push( INT_VAR, 0 );
+	}
+
+	if ( G.dim == 3 )
+	{
+		print( FATAL, "Both 1D- and 2D- display are in use, use either "
+			   "function clear_curve_1d() or clear__curve_2d().\n" );
+		THROW( EXCEPTION );
+	}
+
+	if ( G.dim == 1 )
+		return f_clearcv_1d( v );
+	else
+		return f_clearcv_2d( v );
+}
+
+
+/*-------------------------------------------------*/
+/* Function makes all points of a curve invisible. */
+/*-------------------------------------------------*/
+
+Var *f_clearcv_1d( Var *v )
+{
 	long curve;
 	long count = 0;
 	long *ca = NULL;
@@ -1431,6 +2173,13 @@ Var *f_clearcv( Var *v )
 			print( WARN, "Can't clear curve, missing graphics "
 				   "initialisation.\n" );
 		return vars_push( INT_VAR, 0 );
+	}
+
+	if ( ! ( G.dim & 1 ) )
+	{
+		print( FATAL, "No 1D display has been initialized, use function "
+			   "clear_curve_2d() instead.\n" );
+		THROW( EXCEPTION );
 	}
 
 	/* If there is no argument default to curve 1 */
@@ -1455,10 +2204,10 @@ Var *f_clearcv( Var *v )
 
 			curve = get_long( v, "curve number" );
 
-			if ( curve < 0 || curve > G.nc )
+			if ( curve < 0 || curve > G1.nc )
 			{
 				if ( Internals.mode == TEST )
-					print( SEVERE, "Can't clear curve %ld, curve "
+					print( SEVERE, "Can't clear 1D curve %ld, curve "
 						   "does not exist.\n", curve );
 				continue;
 			}
@@ -1529,7 +2278,145 @@ Var *f_clearcv( Var *v )
 	/* Wait for parent to become ready to accept new data, then store
 	   identifier and send signal to tell it about them */
 
-	send_data( DATA, shm_id );
+	send_data( DATA_1D, shm_id );
+
+	/* All the rest has now to be done by the parent process... */
+
+	return vars_push( INT_VAR, 1 );
+}
+
+
+/*-------------------------------------------------*/
+/* Function makes all points of a curve invisible. */
+/*-------------------------------------------------*/
+
+Var *f_clearcv_2d( Var *v )
+{
+	long curve;
+	long count = 0;
+	long *ca = NULL;
+	int shm_id;
+	long len = 0;                    /* total length of message to send */
+	void *buf;
+	char *ptr;
+	int type = D_CLEAR_CURVE;
+
+
+	/* This function can only be called in the EXPERIMENT section and needs
+	   a previous graphics initialisation */
+
+	if ( ! G.is_init )
+	{
+		if ( Internals.mode == TEST )
+			print( WARN, "Can't clear curve, missing graphics "
+				   "initialisation.\n" );
+		return vars_push( INT_VAR, 0 );
+	}
+
+	if ( ! ( G.dim & 2 ) )
+	{
+		print( FATAL, "No 2D display has been initialized, use function "
+			   "clear_curve_1d() instead.\n" );
+		THROW( EXCEPTION );
+	}
+
+	/* If there is no argument default to curve 1 */
+
+	if ( v == NULL )
+	{
+		if ( Internals.mode == TEST )
+			return vars_push( INT_VAR, 1 );
+
+		ca = LONG_P T_malloc( sizeof *ca );
+		*ca = 0;
+		count = 1;
+	}
+	else
+	{
+		/* Otherwise run through all arguments, treating each as a new curve
+		   number */
+
+		do
+		{
+			/* Get the curve number and make sure the curve exists */
+
+			curve = get_long( v, "curve number" );
+
+			if ( curve < 0 || curve > G2.nc )
+			{
+				if ( Internals.mode == TEST )
+					print( SEVERE, "Can't clear 2D curve %ld, curve "
+						   "does not exist.\n", curve );
+				continue;
+			}
+
+			/* Store curve number */
+
+			ca = LONG_P T_realloc( ca, ( count + 1 ) * sizeof *ca );
+			ca[ count++ ] = curve - 1;
+
+		} while ( ( v = v->next ) != NULL );
+
+		if ( ca == NULL )
+		{
+			print( SEVERE, "No valid argument found.\n" );
+			return vars_push( INT_VAR, 0 );
+		}
+	}
+
+	/* In a test run this already everything to be done */
+
+	if ( Internals.mode == TEST )
+	{
+		T_free( ca );
+		return vars_push( INT_VAR, 1 );
+	}
+
+	/* Now starts the code only to be executed by the child, i.e. while the
+	   measurement is running. */
+
+	fsc2_assert( Internals.I_am == CHILD );
+
+	/* Now try to get a shared memory segment */
+
+	len =   sizeof len + sizeof type + sizeof count
+		  + count * sizeof *ca;
+
+	if ( ( buf = get_shm( &shm_id, len ) ) == ( void * ) - 1 )
+	{
+		T_free( ca );
+		eprint( FATAL, UNSET, "Internal communication problem at %s:%d.\n",
+				__FILE__, __LINE__ );
+		THROW( EXCEPTION );
+	}
+
+	/* Copy all data into the shared memory segment */
+
+	ptr = CHAR_P buf;
+
+	memcpy( ptr, &len, sizeof len );               /* total length */
+	ptr += sizeof len;
+
+	memcpy( ptr, &type, sizeof type );             /* type indicator  */
+	ptr += sizeof type;
+
+	memcpy( ptr, &count, sizeof count );           /* curve number count */
+	ptr += sizeof count;
+
+	memcpy( ptr, ca, count * sizeof *ca );         /* array of curve numbers */
+
+	/* Detach from the segment with the data */
+
+	detach_shm( buf, NULL );
+
+	/* Get rid of the array of curve numbers */
+
+	T_free( ca );
+
+	/* Wait for parent to become ready to accept new data, then store
+	   identifier and send signal to tell it about them */
+
+	send_data( DATA_2D, shm_id );
 
 	/* All the rest has now to be done by the parent process... */
 
@@ -1542,6 +2429,16 @@ Var *f_clearcv( Var *v )
 /*---------------------------------------------------*/
 
 Var *f_setmark( Var *v )
+{
+	return f_setmark_1d( v );
+}
+
+
+/*---------------------------------------------------*/
+/* Function draws a marker (in 1D display mode only) */
+/*---------------------------------------------------*/
+
+Var *f_setmark_1d( Var *v )
 {
 	long position;
 	long color = 0;
@@ -1565,7 +2462,7 @@ Var *f_setmark( Var *v )
 		return vars_push( INT_VAR, 0 );
 	}
 
-	if ( G.dim != 1 )
+	if ( ! ( G.dim & 1 ) )
 	{
 		print( WARN, "Can't set marker, markers can only be set for "
 			   "1D display.\n" );
@@ -1655,7 +2552,7 @@ Var *f_setmark( Var *v )
 	/* Wait for parent to become ready to accept new data, then store
 	   identifier and send signal to tell it about them */
 
-	send_data( DATA, shm_id );
+	send_data( DATA_1D, shm_id );
 
 	/* All the rest has now to be done by the parent process... */
 
@@ -1668,6 +2565,16 @@ Var *f_setmark( Var *v )
 /*---------------------------------------------------*/
 
 Var *f_clearmark( Var *v )
+{
+	return f_clearmark_1d( v );
+}
+
+
+/*---------------------------------------------------*/
+/* Function deletes all markers (in 1D display only) */
+/*---------------------------------------------------*/
+
+Var *f_clearmark_1d( Var *v )
 {
 	long len = 0;                    /* total length of message to send */
 	void *buf;
@@ -1688,7 +2595,7 @@ Var *f_clearmark( Var *v )
 		return vars_push( INT_VAR, 0 );
 	}
 
-	if ( G.dim != 1 )
+	if ( ! ( G.dim & 1 ) )
 	{
 		print( WARN, "Can't clear marker, markers can only be used for "
 			   "1D display.\n" );
@@ -1732,7 +2639,7 @@ Var *f_clearmark( Var *v )
 	/* Wait for parent to become ready to accept new data, then store
 	   identifier and send signal to tell it about them */
 
-	send_data( DATA, shm_id );
+	send_data( DATA_1D, shm_id );
 
 	/* All the rest has now to be done by the parent process... */
 

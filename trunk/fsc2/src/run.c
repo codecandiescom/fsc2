@@ -295,8 +295,12 @@ static bool init_devs_and_graphics( void )
 		check_for_further_errors( &compile_test, &EDL.compilation );
 
 		start_graphics( );
-		fl_set_object_callback( GUI.run_form->stop,
-								run_stop_button_callback, 0 );
+		if ( G.dim & 1 )
+			fl_set_object_callback( GUI.run_form_1d->stop_1d,
+									run_stop_button_callback, 0 );
+		if ( G.dim & 2 )
+			fl_set_object_callback( GUI.run_form_2d->stop_2d,
+									run_stop_button_callback, 0 );
 
 		setup_comm( );
 
@@ -595,8 +599,8 @@ static void run_sigchld_handler( int signo )
 
 		EDL.do_quit = EDL.react_to_do_quit = UNSET;
 
-		GUI.run_form->sigchld->u_ldata = ( long ) return_status;
-		fl_trigger_object( GUI.run_form->sigchld );
+		GUI.main_form->sigchld->u_ldata = ( long ) return_status;
+		fl_trigger_object( GUI.main_form->sigchld );
 	}
 
 	errno = errno_saved;
@@ -701,13 +705,32 @@ void run_sigchld_callback( FL_OBJECT *a, long b )
 	   handler that's responsible for closing the window. Also change the
 	   buttons label to 'Close'. */
 
-	fl_freeze_form( GUI.run_form->run );
-	fl_set_object_label( GUI.run_form->stop, "Close" );
-	fl_set_button_shortcut( GUI.run_form->stop, "C", 1 );
-	if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
-		fl_set_object_helper( GUI.run_form->stop, "Removes this window" );
-	fl_set_object_callback( GUI.run_form->stop, run_close_button_callback, 0 );
-	fl_unfreeze_form( GUI.run_form->run );
+	if ( G.dim & 1 )
+	{
+		fl_freeze_form( GUI.run_form_1d->run_1d );
+		fl_set_object_label( GUI.run_form_1d->stop_1d,
+							 G.dim == 1 ? "Close" : "Close all" );
+		fl_set_button_shortcut( GUI.run_form_1d->stop_1d, "C", 1 );
+		if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
+			fl_set_object_helper( GUI.run_form_1d->stop_1d,
+								  "Removes this window" );
+		fl_set_object_callback( GUI.run_form_1d->stop_1d,
+								run_close_button_callback, 0 );
+		fl_unfreeze_form( GUI.run_form_1d->run_1d );
+	}
+	if ( G.dim & 2 )
+	{
+		fl_freeze_form( GUI.run_form_2d->run_2d );
+		fl_set_object_label( GUI.run_form_2d->stop_2d,
+							 G.dim == 2 ? "Close" : "Close all" );
+		fl_set_button_shortcut( GUI.run_form_2d->stop_2d, "C", 1 );
+		if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
+			fl_set_object_helper( GUI.run_form_2d->stop_2d,
+								  "Removes this window" );
+		fl_set_object_callback( GUI.run_form_2d->stop_2d,
+								run_close_button_callback, 0 );
+		fl_unfreeze_form( GUI.run_form_2d->run_2d );
+	}
 
 	if ( Internals.cmdline_flags & DO_CHECK )
 	{

@@ -33,11 +33,12 @@ static Pixmap get_cut_window( unsigned int *width, unsigned int *height );
 static void dump_as_ppm( FILE *dp, XImage *image );
 
 
-/*-----------------------------------------------------------------------*/
-/* Writes a graphic with the display (if type equals 1) or cross section */
-/* (for type == 2 ) window to the file descriptor passed to the function */
-/* - function may trow an exception (instead of returning an error code) */
-/*-----------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*/
+/* Writes a graphic with the 1D- or 2D-display (if type equals 1 or 2) or */
+/* the cross section window (for type equal to 2) to the file descriptor  */
+/* passed to the function - the function may throw an exception (instead  */
+/* of returning an error code).                                           */
+/*------------------------------------------------------------------------*/
 
 void dump_window( int type, int fd )
 {
@@ -62,18 +63,28 @@ void dump_window( int type, int fd )
 	/* Get a pixmap with the graphic we are supposed to send and convert it
 	   to an XImage */
 
-	if ( type == 1 )
+	switch ( type )
 	{
-		if ( G.dim == 1 )
+		case 1 :
+			if ( ! ( G.dim & 1 ) )
+				THROW( EXCEPTION );
 			pm = get_1d_window( &w, &h );
-		else
+			break;
+
+		case 2 :
+			if ( ! ( G.dim & 2 ) )
+				THROW( EXCEPTION );
 			pm = get_2d_window( &w, &h );
-	}
-	else
-	{
-		if ( ! G.is_cut )
+			break;
+
+		case 3 :
+			if ( ! ( G.dim & 2 ) || ! G2.is_cut )
+				THROW( EXCEPTION );
+			pm = get_cut_window( &w, &h );
+			break;
+
+		default :
 			THROW( EXCEPTION );
-		pm = get_cut_window( &w, &h );
 	}
 
 	image = XGetImage( G.d, pm, 0, 0, w, h, AllPlanes, ZPixmap );
@@ -104,12 +115,12 @@ static Pixmap get_1d_window( unsigned int *width, unsigned int *height )
 	GC gc;
 
 
-	*width  = G.y_axis.w + G.canvas.w;
-	*height = G.x_axis.h + G.canvas.h;
+	*width  = G1.y_axis.w + G1.canvas.w;
+	*height = G1.x_axis.h + G1.canvas.h;
 
-    pm = XCreatePixmap( G.d, FL_ObjWin( GUI.run_form->canvas ),
+    pm = XCreatePixmap( G.d, FL_ObjWin( GUI.run_form_1d->canvas_1d ),
 						*width, *height,
-						fl_get_canvas_depth( GUI.run_form->canvas ) );
+						fl_get_canvas_depth( GUI.run_form_1d->canvas_1d ) );
 	gc = XCreateGC( G.d, pm, 0, 0 );
 
 	/* Draw the background */
@@ -119,21 +130,22 @@ static Pixmap get_1d_window( unsigned int *width, unsigned int *height )
 
 	/* Draw the canvas and both the axis windows */
 
-	XCopyArea( G.d, G.y_axis.pm, pm, gc, 0, 0, G.y_axis.w, G.y_axis.h, 0, 0 );
-	XCopyArea( G.d, G.canvas.pm, pm, gc, 0, 0, G.canvas.w, G.canvas.h,
-			   G.y_axis.w, 0 );
-	XCopyArea( G.d, G.x_axis.pm, pm, gc, 0, 0, G.x_axis.w, G.x_axis.h,
-			   G.y_axis.w, G.canvas.h );
+	XCopyArea( G.d, G1.y_axis.pm, pm, gc, 0, 0, G1.y_axis.w, G1.y_axis.h,
+			   0, 0 );
+	XCopyArea( G.d, G1.canvas.pm, pm, gc, 0, 0, G1.canvas.w, G1.canvas.h,
+			   G1.y_axis.w, 0 );
+	XCopyArea( G.d, G1.x_axis.pm, pm, gc, 0, 0, G1.x_axis.w, G1.x_axis.h,
+			   G1.y_axis.w, G1.canvas.h );
 
 	/* And finally add a bit of 3D-effect */
 
 	XSetForeground( G.d, gc, fl_get_pixel( FL_BLACK ) );
-	XDrawLine( G.d, pm, gc, G.y_axis.w - 1, G.canvas.h,
-			   G.y_axis.w - 1, *height - 1 );
+	XDrawLine( G.d, pm, gc, G1.y_axis.w - 1, G1.canvas.h,
+			   G1.y_axis.w - 1, *height - 1 );
 
 	XSetForeground( G.d, gc, fl_get_pixel( FL_LEFT_BCOL ) );
-	XDrawLine( G.d, pm, gc, 0, G.cut_y_axis.h,
-			   G.y_axis.w - 1, G.cut_y_axis.h );
+	XDrawLine( G.d, pm, gc, 0, G1.y_axis.h,
+			   G1.y_axis.w - 1, G1.y_axis.h );
 
 	XFreeGC( G.d, gc );
 
@@ -150,12 +162,12 @@ static Pixmap get_2d_window( unsigned int *width, unsigned int *height )
 	GC gc;
 
 
-	*width  = G.y_axis.w + G.canvas.w + G.z_axis.w + 5;
-	*height = G.z_axis.h;
+	*width  = G2.y_axis.w + G2.canvas.w + G2.z_axis.w + 5;
+	*height = G2.z_axis.h;
 
-    pm = XCreatePixmap( G.d, FL_ObjWin( GUI.run_form->canvas ),
+    pm = XCreatePixmap( G.d, FL_ObjWin( GUI.run_form_2d->canvas_2d ),
 						*width, *height,
-						fl_get_canvas_depth( GUI.run_form->canvas ) );
+						fl_get_canvas_depth( GUI.run_form_2d->canvas_2d ) );
 	gc = XCreateGC( G.d, pm, 0, 0 );
 
 	/* Draw the background */
@@ -165,27 +177,28 @@ static Pixmap get_2d_window( unsigned int *width, unsigned int *height )
 
 	/* Draw the canvas and the three axis windows */
 
-	XCopyArea( G.d, G.y_axis.pm, pm, gc, 0, 0, G.y_axis.w, G.y_axis.h, 0, 0 );
-	XCopyArea( G.d, G.canvas.pm, pm, gc, 0, 0, G.canvas.w, G.canvas.h,
-			   G.y_axis.w, 0 );
-	XCopyArea( G.d, G.z_axis.pm, pm, gc, 0, 0, G.z_axis.w, G.z_axis.h,
-			   G.y_axis.w + G.canvas.w + 5, 0 );
-	XCopyArea( G.d, G.x_axis.pm, pm, gc, 0, 0, G.x_axis.w, G.x_axis.h,
-			   G.y_axis.w, G.canvas.h );
+	XCopyArea( G.d, G2.y_axis.pm, pm, gc, 0, 0, G2.y_axis.w, G2.y_axis.h,
+			   0, 0 );
+	XCopyArea( G.d, G2.canvas.pm, pm, gc, 0, 0, G2.canvas.w, G2.canvas.h,
+			   G2.y_axis.w, 0 );
+	XCopyArea( G.d, G2.z_axis.pm, pm, gc, 0, 0, G2.z_axis.w, G2.z_axis.h,
+			   G2.y_axis.w + G2.canvas.w + 5, 0 );
+	XCopyArea( G.d, G2.x_axis.pm, pm, gc, 0, 0, G2.x_axis.w, G2.x_axis.h,
+			   G2.y_axis.w, G2.canvas.h );
 
 	/* And finally add a bit of 3D-effect */
 
 	XSetForeground( G.d, gc, fl_get_pixel( FL_BLACK ) );
-	XDrawLine( G.d, pm, gc, G.y_axis.w - 1, G.canvas.h,
-			   G.y_axis.w - 1, *height - 1 );
-	XDrawLine( G.d, pm, gc, G.y_axis.w + G.canvas.w + 4, 0,
-			   G.y_axis.w + G.canvas.w + 4, *height - 1 );
+	XDrawLine( G.d, pm, gc, G2.y_axis.w - 1, G2.canvas.h,
+			   G2.y_axis.w - 1, *height - 1 );
+	XDrawLine( G.d, pm, gc, G2.y_axis.w + G2.canvas.w + 4, 0,
+			   G2.y_axis.w + G2.canvas.w + 4, *height - 1 );
 
 	XSetForeground( G.d, gc, fl_get_pixel( FL_LEFT_BCOL ) );
-	XDrawLine( G.d, pm, gc, 0, G.canvas.h,
-			   G.y_axis.w - 1, G.canvas.h );
-	XDrawLine( G.d, pm, gc, G.y_axis.w + G.canvas.w, 0,
-			   G.y_axis.w + G.canvas.w, *height - 1 );
+	XDrawLine( G.d, pm, gc, 0, G2.canvas.h,
+			   G2.y_axis.w - 1, G2.canvas.h );
+	XDrawLine( G.d, pm, gc, G2.y_axis.w + G2.canvas.w, 0,
+			   G2.y_axis.w + G2.canvas.w, *height - 1 );
 
 	XFreeGC( G.d, gc );
 
@@ -202,8 +215,8 @@ static Pixmap get_cut_window( unsigned int *width, unsigned int *height )
 	GC gc;
 
 
-	*width  = G.cut_y_axis.w + G.cut_canvas.w + G.cut_z_axis.w + 5;
-	*height = G.cut_z_axis.h;
+	*width  = G2.cut_y_axis.w + G2.cut_canvas.w + G2.cut_z_axis.w + 5;
+	*height = G2.cut_z_axis.h;
 
     pm = XCreatePixmap( G.d, FL_ObjWin( GUI.cut_form->cut_canvas ),
 						*width, *height,
@@ -217,30 +230,30 @@ static Pixmap get_cut_window( unsigned int *width, unsigned int *height )
 
 	/* Draw the canvas and the three axis windows */
 
-	XCopyArea( G.d, G.cut_y_axis.pm, pm, gc, 0, 0,
-			   G.cut_y_axis.w, G.cut_y_axis.h, 0, 0 );
-	XCopyArea( G.d, G.cut_canvas.pm, pm, gc, 0, 0,
-			   G.cut_canvas.w, G.cut_canvas.h, G.cut_y_axis.w, 0 );
-	XCopyArea( G.d, G.cut_z_axis.pm, pm, gc, 0, 0,
-			   G.cut_z_axis.w, G.cut_z_axis.h,
-			   G.cut_y_axis.w + G.cut_canvas.w + 5, 0 );
-	XCopyArea( G.d, G.cut_x_axis.pm, pm, gc, 0, 0,
-			   G.cut_x_axis.w, G.cut_x_axis.h,
-			   G.cut_y_axis.w, G.cut_canvas.h );
+	XCopyArea( G.d, G2.cut_y_axis.pm, pm, gc, 0, 0,
+			   G2.cut_y_axis.w, G2.cut_y_axis.h, 0, 0 );
+	XCopyArea( G.d, G2.cut_canvas.pm, pm, gc, 0, 0,
+			   G2.cut_canvas.w, G2.cut_canvas.h, G2.cut_y_axis.w, 0 );
+	XCopyArea( G.d, G2.cut_z_axis.pm, pm, gc, 0, 0,
+			   G2.cut_z_axis.w, G2.cut_z_axis.h,
+			   G2.cut_y_axis.w + G2.cut_canvas.w + 5, 0 );
+	XCopyArea( G.d, G2.cut_x_axis.pm, pm, gc, 0, 0,
+			   G2.cut_x_axis.w, G2.cut_x_axis.h,
+			   G2.cut_y_axis.w, G2.cut_canvas.h );
 
 	/* And finally add a bit of 3D-effect */
 
 	XSetForeground( G.d, gc, fl_get_pixel( FL_BLACK ) );
-	XDrawLine( G.d, pm, gc, G.cut_y_axis.w - 1, G.cut_canvas.h,
-			   G.cut_y_axis.w - 1, *height - 1 );
-	XDrawLine( G.d, pm, gc, G.cut_y_axis.w + G.cut_canvas.w + 4, 0,
-			   G.cut_y_axis.w + G.cut_canvas.w + 4, *height - 1 );
+	XDrawLine( G.d, pm, gc, G2.cut_y_axis.w - 1, G2.cut_canvas.h,
+			   G2.cut_y_axis.w - 1, *height - 1 );
+	XDrawLine( G.d, pm, gc, G2.cut_y_axis.w + G2.cut_canvas.w + 4, 0,
+			   G2.cut_y_axis.w + G2.cut_canvas.w + 4, *height - 1 );
 
 	XSetForeground( G.d, gc, fl_get_pixel( FL_LEFT_BCOL ) );
-	XDrawLine( G.d, pm, gc, 0, G.cut_y_axis.h,
-			   G.cut_y_axis.w - 1, G.cut_y_axis.h );
-	XDrawLine( G.d, pm, gc, G.cut_y_axis.w + G.cut_canvas.w, 0,
-			   G.cut_y_axis.w + G.cut_canvas.w, *height - 1 );
+	XDrawLine( G.d, pm, gc, 0, G2.cut_y_axis.h,
+			   G2.cut_y_axis.w - 1, G2.cut_y_axis.h );
+	XDrawLine( G.d, pm, gc, G2.cut_y_axis.w + G2.cut_canvas.w, 0,
+			   G2.cut_y_axis.w + G2.cut_canvas.w, *height - 1 );
 
 	XFreeGC( G.d, gc );
 
