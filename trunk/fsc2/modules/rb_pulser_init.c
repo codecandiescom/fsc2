@@ -77,12 +77,12 @@ static void rb_pulser_init_print( FILE *fp )
 }
 
 
-/*-------------------------------------------------------------------------*
+/*------------------------------------------------------------*
  * Function runs through all pulses and checks that at least:
  * 1. the pulse is associated with a function
  * 2. the start position is set
  * 3. the length is set
- *-------------------------------------------------------------------------*/
+ *------------------------------------------------------------*/
 
 static void rb_pulser_basic_pulse_check( void )
 {
@@ -155,11 +155,11 @@ static void rb_pulser_basic_functions_check( void )
 }
 
 
-/*------------------------------------------------------------------------*
- * Find out about the names of synthesizer related functions if RF pulses
- * could be required (because there's at least a single pulse marked as
- * belonging to the RF function)
- *------------------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ * Finds out about the names of synthesizer related functions if RF
+ * pulses could be required (i.e. there's at least a single pulse
+ * marked as belonging to the RF function)
+ *------------------------------------------------------------------*/
 
 static void rb_pulser_rf_synth_init( void )
 {

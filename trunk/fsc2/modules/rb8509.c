@@ -60,6 +60,7 @@ Var_T *daq_trigger_mode( Var_T *v );
 Var_T *daq_gain( Var_T *v );
 
 static int rb8509_translate_channel( long channel );
+static void rb8509_comm_failure( void );
 
 
 /*--------------------------------------------------------------*
@@ -73,8 +74,7 @@ int rb8509_init_hook( void )
 
 	Need_RULBUS = SET;
 
-	if ( rulbus_get_card_info( RULBUS_CARD_NAME, &card_info )
-		 != RULBUS_OK )
+	if ( rulbus_get_card_info( RULBUS_CARD_NAME, &card_info ) != RULBUS_OK )
 	{
 		print( FATAL, "Failed to get RULBUS configuration: %s.\n",
 			   rulbus_strerror( ) );
@@ -126,8 +126,8 @@ int rb8509_exp_hook( void )
 	   initialization) */
 
 	if ( rb8509.gain_is_set && rb8509.gain != RULBUS_RB8509_ADC12_GAIN_1 &&
-		 rulbus_rb8509_adc12_set_gain( rb8509.handle, rb8509.gain )
-																 != RULBUS_OK )
+		 rulbus_rb8509_adc12_set_gain( rb8509.handle,
+									   rb8509.gain ) != RULBUS_OK )
 	{
 		print( FATAL, "Initialization of card failed: %s.\n",
 			   rulbus_strerror( ) );
@@ -214,12 +214,9 @@ Var_T *daq_get_voltage( Var_T *v )
 	/* If necessary switch the current channel */
 
 	if ( channel != rb8509.channel &&
-		 rulbus_rb8509_adc12_set_channel( rb8509.handle, channel )
-																 != RULBUS_OK )
-	{
-		print( FATAL, "Communication failure: %s.\n", rulbus_strerror( ) );
-		THROW( EXCEPTION );
-	}
+		 rulbus_rb8509_adc12_set_channel( rb8509.handle,
+										  channel ) != RULBUS_OK )
+		rb8509_comm_failure( );
 
 	rb8509.channel = channel;
 
@@ -228,12 +225,9 @@ Var_T *daq_get_voltage( Var_T *v )
 
 	if ( rb8509.trig_mode == RULBUS_RB8509_ADC12_INT_TRIG )
 	{
-		if ( rulbus_rb8509_adc12_convert( rb8509.handle, &volts )
-																 != RULBUS_OK )
-		{
-			print( FATAL, "Communication failure: %s.\n", rulbus_strerror( ) );
-			THROW( EXCEPTION );
-		}
+		if ( rulbus_rb8509_adc12_convert( rb8509.handle,
+										  &volts ) != RULBUS_OK )
+			rb8509_comm_failure( );
 
 		return vars_push( FLOAT_VAR, volts );
 	}
@@ -243,12 +237,9 @@ Var_T *daq_get_voltage( Var_T *v )
 
 	while ( ! retval )
 	{
-		retval = rulbus_rb8509_adc12_check_convert( rb8509.handle, &volts );
-		if ( retval < 0 )
-		{
-			print( FATAL, "Communication failure: %s.\n", rulbus_strerror( ) );
-			THROW( EXCEPTION );
-		}
+		if ( ( retval = rulbus_rb8509_adc12_check_convert( rb8509.handle,
+														   &volts ) ) < 0 )
+			rb8509_comm_failure( );
 
 		stop_on_user_request( );
 	} 
@@ -299,10 +290,7 @@ Var_T *daq_trigger_mode( Var_T *v )
 		 rulbus_rb8509_adc12_set_trigger_mode( rb8509.handle,
 											   rb8509.trig_mode )
 																 != RULBUS_OK )
-	{
-		print( FATAL, "Communication failure: %s.\n", rulbus_strerror( ) );
-		THROW( EXCEPTION );
-	}
+		rb8509_comm_failure( );
 
 	return vars_push( INT_VAR, rb8509.trig_mode );
 }
@@ -341,12 +329,9 @@ Var_T *daq_gain( Var_T *v )
 	rb8509.gain_is_set = SET;
 
 	if ( FSC2_MODE == EXPERIMENT &&
-		 rulbus_rb8509_adc12_set_gain( rb8509.handle, rb8509.gain )
-		 														 != RULBUS_OK )
-	{
-		print( FATAL, "Communication failure: %s.\n", rulbus_strerror( ) );
-		THROW( EXCEPTION );
-	}
+		 rulbus_rb8509_adc12_set_gain( rb8509.handle,
+									   rb8509.gain ) != RULBUS_OK )
+		rb8509_comm_failure( );
 
 	return vars_push( INT_VAR, rb8509.gain );
 }
@@ -391,6 +376,17 @@ static int rb8509_translate_channel( long channel )
 	}
 
 	return -1;            /* we'll never get here */
+}
+
+
+/*---------------------------------------------------*
+ * Called on failures of communication with the card
+ *---------------------------------------------------*/
+
+static void rb8509_comm_failure( void )
+{
+	print( FATAL, "Communication failure: %s.\n", rulbus_strerror( ) );
+	THROW( EXCEPTION );
 }
 
 
