@@ -790,6 +790,19 @@ Var *pulser_next_phase( Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
+Var *pulser_reset( Var *v )
+{
+
+	vars_pop( pulser_pulse_reset( NULL ) );
+	vars_pop( pulser_pulse_reset( NULL ) );
+
+	return vars_push( INT_VAR, 1 );
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
 Var *pulser_phase_reset( Var *v )
 {
 	FUNCTION *f;
@@ -810,9 +823,9 @@ Var *pulser_phase_reset( Var *v )
 		}
 
 		if ( dg2020.function[ PULSER_CHANNEL_PHASE_1 ].is_used )
-			pulser_phase_reset( vars_push( INT_VAR, 1 ) );
+			vars_pop( pulser_phase_reset( vars_push( INT_VAR, 1 ) ) );
 		if ( dg2020.function[ PULSER_CHANNEL_PHASE_2 ].is_used )
-			pulser_phase_reset( vars_push( INT_VAR, 2 ) );
+			vars_pop( pulser_phase_reset( vars_push( INT_VAR, 2 ) ) );
 	}
 
 	for ( ; v != NULL; v = vars_pop( v ) )
@@ -875,7 +888,7 @@ Var *pulser_pulse_reset( Var *v )
 	if ( v == NULL )
 		for( p = dg2020_Pulses; p != NULL; p = p->next )
 			if ( p->num >= 0 )
-				pulser_pulse_reset( vars_push( INT_VAR, p->num ) );
+				vars_pop( pulser_pulse_reset( vars_push( INT_VAR, p->num ) ) );
 
 	/* Otherwise run through the supplied pulse list */
 
