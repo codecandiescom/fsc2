@@ -326,16 +326,15 @@ static void ep385_defense_shape_check( FUNCTION *shape )
 					if ( shape_p->sp == NULL )
 						print( FATAL, "Distance between PULSE_SHAPE pulse "
 							   "#%ld and DEFENSE pulse #%ld got shorter than "
-							   "%s.\n", shape_p->num,
-							   defense_p->num, ep385_ptime( ep385_ticks2double(
-												   ep385.shape_2_defense ) ) );
+							   "%s.\n", shape_p->num, defense_p->num,
+							   ep385_pticks( ep385.shape_2_defense ) );
 					else
 						print( FATAL, "Distance between shape pulse for pulse "
 							   "#%ld (function '%s') and DEFENSE pulse #%ld "
 							   "got shorter than %s.\n", shape_p->sp->num,
 							   Function_Names[ shape_p->sp->function->self ],
-							   defense_p->num, ep385_ptime( ep385_ticks2double(
-												   ep385.shape_2_defense ) ) );
+							   defense_p->num,
+							   ep385_pticks( ep385.shape_2_defense ) );
 					THROW( EXCEPTION );
 				}
 
@@ -345,16 +344,14 @@ static void ep385_defense_shape_check( FUNCTION *shape )
 						print( SEVERE, "Distance between PULSE_SHAPE pulse "
 							   "#%ld and DEFENSE pulse #%ld got shorter than "
 							   "%s.\n", shape_p->num, defense_p->num,
-							   ep385_ptime( ep385_ticks2double(
-												   ep385.shape_2_defense ) ) );
+							   ep385_pticks( ep385.shape_2_defense ) );
 					else
 						print( SEVERE, "Distance between shape pulse for "
 							   "pulse #%ld (function '%s') and DEFENSE pulse "
 							   "#%ld got shorter than %s.\n", shape_p->sp->num,
 							   Function_Names[ shape_p->sp->function->self ],
 							   defense_p->num,
-							   ep385_ptime( ep385_ticks2double(
-												   ep385.shape_2_defense ) ) );
+							   ep385_pticks( ep385.shape_2_defense ) );
 				}
 
 				ep385.shape_2_defense_too_near++;
@@ -370,16 +367,14 @@ static void ep385_defense_shape_check( FUNCTION *shape )
 						print( FATAL, "Distance between DEFENSE pulse #%ld "
 							   "and PULSE_SHAPE pulse #%ld got shorter than "
 							   "%s.\n", defense_p->num, shape_p->num,
-							   ep385_ptime( ep385_ticks2double(
-												   ep385.defense_2_shape ) ) );
+							   ep385_pticks( ep385.defense_2_shape ) );
 					else
 						print( FATAL, "Distance between DEFENSE pulse #%ld "
 							   "and shape pulse for pulse #%ld (function "
 							   "'%s') got shorter than %s.\n", defense_p->num,
 							   shape_p->sp->num,
 							   Function_Names[ shape_p->sp->function->self ],
-							   ep385_ptime( ep385_ticks2double(
-												   ep385.defense_2_shape ) ) );
+							   ep385_pticks( ep385.defense_2_shape ) );
 					THROW( EXCEPTION );
 				}
 
@@ -389,16 +384,14 @@ static void ep385_defense_shape_check( FUNCTION *shape )
 						print( SEVERE, "Distance between DEFENSE pulse #%ld "
 							   "and PULSE_SHAPE pulse #%ld got shorter than "
 							   "%s.\n", defense_p->num, shape_p->num,
-							   ep385_ptime( ep385_ticks2double(
-												   ep385.defense_2_shape ) ) );
+							   ep385_pticks( ep385.defense_2_shape ) );
 					else
 						print( SEVERE, "Distance between DEFENSE pulse #%ld "
 							   "and shape pulse for pulse #%ld (function "
 							   "'%s') got shorter than %s.\n", defense_p->num,
 							   shape_p->sp->num,
 							   Function_Names[ shape_p->sp->function->self ],
-							   ep385_ptime( ep385_ticks2double(
-												   ep385.defense_2_shape ) ) );
+							   ep385_pticks( ep385.defense_2_shape ) );
 				}
 
 				ep385.defense_2_shape_too_near++;
@@ -528,15 +521,18 @@ void ep385_shape_padding_check( CHANNEL *ch )
 	pp = ch->pulse_params;
 	if ( pp->pos < 0 )
 	{
-		if ( ! pp->pulse->left_warning )
+		if ( ! pp->pulse->left_shape_warning )
 		{
 			print( SEVERE, "Pulse #%ld too early to set left padding of %s.\n",
-				   pp->pulse->num, ep385_ptime( ep385_ticks2double(
-										ch->function->left_shape_padding ) ) );
-			pp->pulse->left_warning = SET;
+				   pp->pulse->num,
+				   ep385_pticks( ch->function->left_shape_padding ) );
+			pp->pulse->left_shape_warning = SET;
 		}
 
-		ep385.left_warning++;
+		ep385.left_shape_warning++;
+		pp->pulse->function->min_left_shape_padding =
+					l_min( pp->pulse->function->min_left_shape_padding,
+						   pp->pulse->function->left_shape_padding + pp->pos );
 		pp->len += pp->pos;
 		pp->pos = 0;
 	}
@@ -551,16 +547,18 @@ void ep385_shape_padding_check( CHANNEL *ch )
 
 		if ( pp->pos + pp->len > MAX_PULSER_BITS )
 		{
-			if ( ! pp->pulse->right_warning )
+			if ( ! pp->pulse->right_shape_warning )
 			{
 				print( SEVERE, "Pulse #%ld too long to set right padding of "
 					   "%s.\n", pp->pulse->num,
-					   ep385_ptime( ep385_ticks2double(
-								   ch->function->right_shape_padding ) ) );
-				pp->pulse->right_warning = SET;
+					   ep385_pticks( ch->function->right_shape_padding ) );
+				pp->pulse->right_shape_warning = SET;
 			}
 
-			ep385.right_warning++;
+			ep385.right_shape_warning++;
+			pp->pulse->function->min_right_shape_padding =
+				   l_min( pp->pulse->function->min_right_shape_padding,
+						  pp->pulse->function->right_shape_padding + pp->pos );
 			pp->len = MAX_PULSER_BITS - pp->pos;
 		}
 	}
