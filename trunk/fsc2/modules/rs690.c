@@ -1437,7 +1437,12 @@ Var *pulser_maximum_pattern_length( Var *v )
 {
 	UNUSED_ARGUMENT( v );
 	print( WARN, "Pulser doesn't allow setting a maximum pattern length.\n" );
-	return vars_push( FLOAT_VAR, DBL_MAX );
+	if ( ! rs690.is_timebase )
+	{
+		print( FATAL, "No timebase has been set yet.\n ");
+		THROW( EXCEPTION );
+	}
+	return vars_push( FLOAT_VAR, LONG_MAX * rs690.timebase );
 }
 
 
