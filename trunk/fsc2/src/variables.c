@@ -2,10 +2,25 @@
    $Id$
 
    $Log$
+   Revision 1.8  1999/07/17 12:49:21  jens
+   Diverse corrections to make lint more happy...
+
    Revision 1.7  1999/07/16 19:31:39  jens
    *** empty log message ***
 
 */
+
+/* Thinks to be careful about:
+
+   1. Currently, arrays are never pushed onto the variables stack, only
+      `normal' variables and functions (i.e. pointers to functions).
+	  But neither in vars_push() nor in  vars_pop() it is checked if the
+	  variable passed to it is not an array.
+
+   2. In vars_push_astack() we pop the array variable passed to the function
+      although this should never be a variable on the variables stack.
+*/
+
 
 #include "fsc2.h"
 
@@ -234,15 +249,12 @@ Var *vars_new( char *name )
 
 	/* Get memory for a new structure and for storing the name */
 
-	vp = ( Var * ) T_malloc(   sizeof( Var )
-							 + ( strlen( name ) + 1 ) * sizeof( char ) );
-
-	vp->name = ( char * ) ( vp + 1 );
+	vp = ( Var * ) T_malloc( sizeof( Var ) );
+	vp->name = get_string_copy( name );
 
 	/* Set relevant entries in the new structure and make it the very first
 	   element in the list of variables */
 
-	strcpy( vp->name, name );    /* set its name */
 	vp->new_flag = SET;          /* set flag to indicate it's new */
 	vp->type = UNDEF_VAR;        /* set type to still undefined */
 
@@ -349,7 +361,7 @@ Var *vars_new_assign( Var *src, Var *dest )
 Var *vars_add( Var *v1, Var *v2 )
 {
 	Var *new_var;
-	int ires;
+	long ires;
 	double dres;
 
 
@@ -404,7 +416,7 @@ Var *vars_add( Var *v1, Var *v2 )
 Var *vars_sub( Var *v1, Var *v2 )
 {
 	Var *new_var;
-	int ires;
+	long ires;
 	double dres;
 
 
@@ -459,7 +471,7 @@ Var *vars_sub( Var *v1, Var *v2 )
 Var *vars_mult( Var *v1, Var *v2 )
 {
 	Var *new_var;
-	int ires;
+	long ires;
 	double dres;
 
 
@@ -514,7 +526,7 @@ Var *vars_mult( Var *v1, Var *v2 )
 Var *vars_div( Var *v1, Var *v2 )
 {
 	Var *new_var;
-	int ires;
+	long ires;
 	double dres;
 
 
@@ -578,7 +590,7 @@ Var *vars_div( Var *v1, Var *v2 )
 Var *vars_mod( Var *v1, Var *v2 )
 {
 	Var *new_var;
-	int ires;
+	long ires;
 	double dres;
 
 
@@ -643,7 +655,7 @@ Var *vars_mod( Var *v1, Var *v2 )
 Var *vars_pow( Var *v1, Var *v2 )
 {
 	Var *new_var;
-	int ires;
+	long ires, i;
 	double dres;
 
 
@@ -669,23 +681,31 @@ Var *vars_pow( Var *v1, Var *v2 )
 
 	if ( v1->type == INT_VAR )
 	{
-		if ( v2->type == INT_VAR )
+		if ( v1->type == 0 )   /* powers of zero are always 1 */
 		{
-			if ( v2->val.lval >= 0 )
-			{
-				ires = ( long ) pow( v1->val.lval, v2->val.lval );
-				new_var = vars_push( INT_VAR, ( void * ) &ires );
-			}
-			else
-			{
-				dres = pow( v1->val.lval, v2->val.lval );
-				new_var = vars_push( FLOAT_VAR, ( void * ) &dres );
-			}
+			ires = 1;
+			new_var = vars_push( INT_VAR, ( void * ) &ires );
 		}
 		else
 		{
-			dres = pow( ( double ) v1->val.lval, v2->val.dval );
-			new_var = vars_push( FLOAT_VAR, ( void * ) &dres );
+			if ( v2->type == INT_VAR )
+			{
+				for ( ires = v1->val.lval, i = 1;
+					  i < labs( v2->val.lval ); ++i )
+					ires *= v1->val.lval;
+				if ( v2->val.lval >= 0 )
+					new_var = vars_push( INT_VAR, ( void * ) &ires );
+				else
+				{
+					dres = 1.0 / ( double ) ires;
+					new_var = vars_push( FLOAT_VAR, ( void * ) &dres );
+				}
+			}
+			else
+			{
+				dres = pow( ( double ) v1->val.lval, v2->val.dval );
+				new_var = vars_push( FLOAT_VAR, ( void * ) &dres );
+			}
 		}
 	}
 	else
@@ -779,6 +799,9 @@ Var *vars_comp( int comp_type, Var *v1, Var *v2 )
 				  ? 1 : 0;
 			new_var = vars_push( INT_VAR, ( void * ) &res );
 			break;
+
+		default:               /* this should never happen... */
+			assert( 1 == 0 );
 	}
 
 	/* pop the variables from the stack */
@@ -840,7 +863,7 @@ Var *vars_push( int type, void *data )
 	/* set its value and the `next' entry to NULL */
 
 	if ( type == INT_VAR )
-		new_stack_var->val.lval = *( ( int * ) data );
+		new_stack_var->val.lval = *( ( long * ) data );
 	if ( type == FLOAT_VAR )
 		new_stack_var->val.dval = *( ( double * ) data );
 
@@ -897,11 +920,6 @@ void vars_pop( Var *v )
 			prev->next = stack->next;
 		else
 			Var_Stack = stack->next;
-
-		if ( stack->type == INT_ARR && stack->val.lpnt != NULL )
-			free( stack->val.lpnt );
-		if ( stack->type == FLOAT_ARR && stack->val.dpnt != NULL )
-			free( stack->val.dpnt );
 		free( stack );
 	}
 }
@@ -1065,9 +1083,11 @@ void vars_arr_init( Var *a, Var *d )
 			a->len *= a->sizes[ i ];
 		
 		if ( a->type == INT_VAR )
-			a->val.lpnt = ( long * ) T_calloc( a->len, sizeof( long ) );
+			a->val.lpnt = ( long * ) T_calloc( ( size_t ) a->len,
+											   sizeof( long ) );
 		else
-			a->val.dpnt = ( double * ) T_calloc( a->len, sizeof( double ) );
+			a->val.dpnt = ( double * ) T_calloc( ( size_t ) a->len,
+												 sizeof( double ) );
 
 		a->new_flag = UNSET;
 	}
@@ -1159,7 +1179,7 @@ void vars_push_astack( Var *v )
 	Arr_Stack->act_entry = 0;
 	Arr_Stack->entries = ( long * ) T_malloc( v->dim * sizeof( long ) );
 
-	vars_pop( v );
+	vars_pop( v );    /* this isn't be needed ? */
 }
 
 
@@ -1226,10 +1246,9 @@ Var *vars_pop_astack( void )
 /*    * pointer to the transient variable with the value to be assigned  */
 /*-----------------------------------------------------------------------*/
 
-Var *vars_arr_assign( Var *a, Var *v )
+void vars_arr_assign( Var *a, Var *v )
 {
 	long i, index, len;
-	Var *ret;
 
 
 	/* allocate memory if the array has its `new_flag' still set */
@@ -1295,8 +1314,6 @@ Var *vars_arr_assign( Var *a, Var *v )
 
 	vars_del_top_astack( );
 	vars_pop( v );
-
-	return( ret );
 }
 
 
