@@ -353,7 +353,7 @@ already used for physical units as well as combinations of these with
 the characters @code{n} (nano), @code{u} (micro), @code{m} (milli),
 @code{k} (kilo) and @code{M} (mega).  Here's the complete list:
 @quotation
-@multitable {Hz} {Hertz (and @code{nHz, uHz, mHz, kHz} and @code{MHz})}
+@multitable {Hz} Decibel {(and @code{ndb, udb, mdb, kdb} and @code{Mdb})}
 @item @code{s}  @tab Seconds (and @code{ns, us, ms, ks} and @code{Ms})
 @item @code{G}  @tab Gauss (and @code{nG, uG, mG, kG} and @code{MG})
 @item @code{T}  @tab Tesla (and @code{nT, uT, mT, kT} and @code{MT})
