@@ -47,7 +47,7 @@ int dg2020_b_init_hook( void )
 
 	/* Set global variable to indicate that GPIB bus is needed */
 
-	need_GPIB = SET;
+//	need_GPIB = SET;
 
 	/* We have to set up the global structure for the pulser, especially the
 	   pointers for the functions that will get called from pulser.c */
@@ -159,6 +159,10 @@ int dg2020_b_init_hook( void )
 		f->pm = NULL;
 		f->pcm = NULL;
 		f->pc_len = 1;
+		f->num_active_pulses = 0;
+		f->old_num_active_pulses = 0;
+		f->pulse_params = NULL;
+		f->old_pulse_params = NULL;
 		f->uses_auto_shape_pulses = UNSET;
 		f->uses_auto_twt_pulses = UNSET;
 		f->has_auto_twt_pulses = UNSET;
@@ -410,34 +414,30 @@ int dg2020_b_end_of_exp_hook( void )
 
 void dg2020_b_exit_hook( void )
 {
-	PULSE *p, *np;
+	PULSE *p;
+	FUNCTION *f;
 	int i;
 
 
 	if ( ! dg2020_is_needed )
 		return;
 
-	/* free all the memory allocated within the module */
+	/* Free all memory allocated within the module */
 
-	for ( p = dg2020_Pulses; p != NULL; p = np )
-	{
-		T_free( p->channel );
-		np = p->next;
-		T_free( p );
-	}
-
-	dg2020_Pulses = NULL;
+	p = dg2020_Pulses;
+	while ( p != NULL )
+		p = dg2020_delete_pulse( p, UNSET );
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 	{
-		if ( dg2020.function[ i ].pcm != NULL )
-		{
-			T_free( dg2020.function[ i ].pcm );
-			dg2020.function[ i ].pcm = NULL;
-		}
+		f = dg2020.function + i;
 
-		if ( dg2020.function[ i ].pulses != NULL )
-			T_free( dg2020.function[ i ].pulses );
+		f->pulse_params = PULSE_PARAMS_P T_free( f->pulse_params );
+		f->old_pulse_params = PULSE_PARAMS_P T_free( f->old_pulse_params );
+
+		f->pcm = CHANNEL_PP T_free( f->pcm );
+		f->pm = BOOL_P T_free( f->pm );
+		f->pulses = PULSE_P T_free( f->pulses );
 	}
 }
 
@@ -1383,8 +1383,8 @@ Var *pulser_phase_reset( Var *v )
 			for ( j = 0; j <= PHASE_CW - PHASE_PLUS_X; j++ )
 				if ( f->phase_setup->is_set[ j ] &&
 					 ! dg2020_channel_assign(
-						 f->pcm[ j * f->pc_len + 0 ]->self,
-						 f->phase_setup->pod[ j ]->self ) )
+						 					f->pcm[ j * f->pc_len + 0 ]->self,
+											f->phase_setup->pod[ j ]->self ) )
 					return vars_push( INT_VAR, 0 );
 	}
 

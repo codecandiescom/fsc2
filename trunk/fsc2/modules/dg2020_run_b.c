@@ -53,6 +53,14 @@ bool dg2020_do_update( void )
 		 FSC2_MODE == EXPERIMENT )
 		dg2020_update_data( );
 
+	if ( FSC2_MODE == TEST )
+	{
+		if ( dg2020.dump_file != NULL )
+			dg2020_dump_channels( dg2020.dump_file );
+		if ( dg2020.show_file != NULL )
+			dg2020_dump_channels( dg2020.show_file );
+	}
+
 	dg2020.needs_update = UNSET;
 	return state;
 }
@@ -156,7 +164,9 @@ void dg2020_do_checks( FUNCTION *f )
 
 		pp = f->pulse_params + j++;
 
-		pp->pulse= p;
+		pp->pulse = p;
+		p->old_pp = p->pp;
+		p->pp = pp;
 		pp->pos = p->pos + f->delay;
 		pp->len = p->len;
 
@@ -278,7 +288,7 @@ void dg2020_shape_padding_check( FUNCTION *f )
 
 	pp = f->pulse_params + f->num_active_pulses - 1;
 
-	if ( pp->pos + pp->len>
+	if ( pp->pos + pp->len >
 				 ( FSC2_MODE == TEST ? MAX_PULSER_BITS : dg2020.max_seq_len ) )
 	{
 		if ( ! pp->pulse->right_shape_warning )
@@ -406,7 +416,7 @@ void dg2020_twt_padding_check( FUNCTION *f )
 	   automatically created pulses) */
 
 	pp = f->pulse_params + f->num_active_pulses - 1;
-	if ( pp->pos + pp->len>
+	if ( pp->pos + pp->len >
 				 ( FSC2_MODE == TEST ? MAX_PULSER_BITS : dg2020.max_seq_len ) )
 	{
 		if ( ! pp->pulse->right_twt_warning )
@@ -571,8 +581,8 @@ void dg2020_set_pulses( FUNCTION *f )
 	{
 		/* Set the area of the pulse itself */
 
-		start = p->pos + f->delay;
-		end = p->pos + p->len + f->delay;
+		start = p->pp->pos;
+		end = p->pp->pos + p->pp->len;
 
 		for ( j = 0; j < f->pc_len; j++ )
 		{
@@ -610,7 +620,7 @@ void dg2020_full_reset( void )
 		{
 			if ( p->num >=0 )
 				print( WARN, "Pulse #%ld is never used.\n", p->num );
-			p = dg2020_delete_pulse( p );
+			p = dg2020_delete_pulse( p, SET );
 			continue;
 		}
 
@@ -642,7 +652,7 @@ void dg2020_full_reset( void )
 /* to the next pulse in the pulse list.           */
 /*------------------------------------------------*/
 
-PULSE *dg2020_delete_pulse( PULSE *p )
+PULSE *dg2020_delete_pulse( PULSE *p, bool warn )
 {
 	PULSE *pp;
 	int i;
@@ -653,7 +663,10 @@ PULSE *dg2020_delete_pulse( PULSE *p )
 	if ( p->sp )
 	{
 		if ( p->sp->function->self == PULSER_CHANNEL_PULSE_SHAPE )
-			dg2020_delete_pulse( p->sp );
+		{
+			dg2020_delete_pulse( p->sp, warn );
+			p->sp = NULL;
+		}
 		else
 			p->sp->sp = NULL;
 	}
@@ -663,7 +676,10 @@ PULSE *dg2020_delete_pulse( PULSE *p )
 	if ( p->tp )
 	{
 		if ( p->tp->function->self == PULSER_CHANNEL_TWT )
-			dg2020_delete_pulse( p->tp );
+		{
+			dg2020_delete_pulse( p->tp, warn );
+			p->sp = NULL;
+		}
 		else
 			p->tp->tp = NULL;
 	}
@@ -695,8 +711,9 @@ PULSE *dg2020_delete_pulse( PULSE *p )
 	{
 		p->function->pulses = PULSE_PP T_free( p->function->pulses );
 
-		print( SEVERE, "Function '%s' isn't used at all because all its "
-			   "pulses are unused.\n", p->function->name );
+		if ( warn )
+			print( SEVERE, "Function '%s' isn't used at all because all its "
+				   "pulses are unused.\n", p->function->name );
 		p->function->is_used = UNSET;
 	}
 
@@ -793,10 +810,10 @@ void dg2020_commit( FUNCTION *f, bool flag )
 
 			if ( p->is_old_pos || ( p->is_old_len && p->old_len != 0 ) )
 				dg2020_set( p->channel[ j ]->old_d,
-							p->is_old_pos ? p->old_pos : p->pos,
-							p->is_old_len ? p->old_len : p->len, f->delay );
-			if ( p->is_pos && p->is_len && p->len != 0 )
-				dg2020_set( p->channel[ j ]->new_d, p->pos, p->len, f->delay );
+							p->is_old_pos ? p->old_pp->pos : p->pp->pos,
+							p->is_old_len ? p->old_pp->len : p->pp->len );
+			if ( p->is_pos && p->is_len && p->pp->len != 0 )
+				dg2020_set( p->channel[ j ]->new_d, p->pp->pos, p->pp->len );
 
 			p->channel[ j ]->needs_update = SET;
 		}
@@ -808,7 +825,7 @@ void dg2020_commit( FUNCTION *f, bool flag )
 	}
 
 	/* Loop over all channels belonging to the function and for each channel
-	   that needs to be changeda find all differences between the old and the
+	   that needs to be changed find all differences between the old and the
 	   new state by repeatedly calling dg2020_diff() - it returns +1 or -1 for
 	   setting or resetting plus the start and length of the different area or
 	   0 if no differences are found anymore. For each difference set the real

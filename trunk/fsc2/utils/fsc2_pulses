@@ -131,7 +131,7 @@ sub new {
 	my $self = { 'top' => MainWindow->new,
 			     'step' => 0,
 				 'mag' => 2,
-				 'hstep' => 80,
+				 'hstep' => 72,
 				 'delay' => 0 };
 	bless $self, $class;
 
