@@ -21,6 +21,8 @@ bool state = UNSET;           /* set when EDL passed the tests */
 static char *in_file = NULL;  /* used for name of input file */
 static time_t in_file_mod = 0;
 
+static double slider_size = 0.05;
+
 
 float *x;
 float *y;
@@ -196,10 +198,14 @@ static bool xforms_init( int *argc, char *argv[] )
 
 	fl_get_object_geometry( main_form->browser, &x1, &y1, &w1, &h1 );
 	fl_get_object_geometry( main_form->error_browser, &x2, &y2, &w2, &h2 );
+
 	h = y2 - y1 - h1;
 	H = h1 + h2 + h;
+
+	fl_set_slider_size( main_form->win_slider, slider_size );
 	fl_set_slider_value( main_form->win_slider,
-						 ( double ) ( h1 + h / 2 ) / H );
+						 ( double ) ( h1 + h / 2 - 0.5 * H * slider_size )
+						 / ( ( 1.0 - slider_size ) * H ) );
 
 	fl_show_form( main_form->fsc2, FL_PLACE_MOUSE | FL_FREE_SIZE,
 				  FL_FULLBORDER, "fsc2" );
@@ -832,17 +838,9 @@ void win_slider_callback( FL_OBJECT *a, long b )
 	h = y2 - y1 - h1;
 	H = y2 - y1 + h2;
 
-	new_h1 = ( FL_Coord ) ( H * fl_get_slider_value( a ) - h / 2 );
-	if ( new_h1 < 50 )
-	{
-		new_h1 = 50;
-		fl_set_slider_value( a, ( double ) ( new_h1 + h / 2 ) / H );
-	}
-	if ( new_h1 > H - h - 50 )
-	{
-		new_h1 = H - h - 50;
-		fl_set_slider_value( a, ( double ) ( new_h1 + h / 2 ) / H );
-	}
+	new_h1 = ( FL_Coord ) ( ( 1.0 - slider_size ) * H 
+							* fl_get_slider_value( a )
+							+ 0.5 * H * slider_size - h / 2 );
 
 	fl_set_object_size( main_form->browser, w1, new_h1 );
 	fl_set_object_geometry( main_form->error_browser, x2, y1 + new_h1 + h,
