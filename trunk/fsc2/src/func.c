@@ -302,7 +302,24 @@ void functions_exit( void )
 
 int func_exists( const char *name )
 {
-	return NULL != bsearch( name, Fncts, Num_Func, sizeof *Fncts, func_cmp2 );
+	char *fn;
+	char *hp;
+	void *res;
+
+
+	fn = T_strdup( name );
+
+	/* If the function name ends in "#1" strip it off */
+
+	if ( ( hp = strrchr( fn, '#' ) ) != NULL &&
+		 * ( hp + 1 ) == '1' && * ( hp + 2 ) == '\0' )
+		*hp = '\0';
+
+	res = bsearch( fn, Fncts, Num_Func, sizeof *Fncts, func_cmp2 );
+
+	T_free( fn );
+
+	return res != NULL;
 }
 
 
@@ -389,13 +406,25 @@ Var *func_get_long( const char *name, int *acc, bool flag )
 {
 	Func *f;
 	Var *ret;
+	char *fn;
+	char *hp;
 
+
+	fn = T_strdup( name );
+
+	/* If the function name ends in "#1" strip it off */
+
+	if ( ( hp = strrchr( fn, '#' ) ) != NULL &&
+		 * ( hp + 1 ) == '1' && * ( hp + 2 ) == '\0' )
+		*hp = '\0';
 
 	/* Try to find the function by its name and if found create a variable on
 	   the variable stack with a pointer to the function and the number of
 	   arguments. Also copy the functions name and access flag. */
 
-	f = FUNC_P bsearch( name, Fncts, Num_Func, sizeof *Fncts, func_cmp2 );
+	f = FUNC_P bsearch( fn, Fncts, Num_Func, sizeof *Fncts, func_cmp2 );
+
+	T_free( fn );
 
 	if ( f == NULL )             /* function not found */
 		return NULL;
