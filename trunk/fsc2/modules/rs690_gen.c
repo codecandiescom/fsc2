@@ -105,10 +105,10 @@ bool rs690_store_timebase( double timebase )
 	}
 
 	rs690.minimum_twt_pulse_distance =
-						 lrnd( ceil( MINIMUM_TWT_PULSE_DISTANCE / timebase ) );
+					 Ticksrnd( ceil( MINIMUM_TWT_PULSE_DISTANCE / timebase ) );
 
-	/* Remind the user that with the choosen time base an external clock
-	   might be needed */
+	/* Remind the user if with the choosen time base an external clock
+	   is needed */
 
 	if ( rs690.timebase_mode == EXTERNAL && ! rs690.is_timebase_level )
 		print( NO_ERROR, "Time base of %s requires external clock.\n",
