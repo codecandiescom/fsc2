@@ -34,7 +34,7 @@ argument:
 --------------------
 class: FL_BROWSER
 type: NORMAL_BROWSER
-box: 230 10 790 580
+box: 185 10 835 580
 boxtype: FL_DOWN_BOX
 colors: FL_WHITE FL_YELLOW
 alignment: FL_ALIGN_BOTTOM
@@ -52,7 +52,7 @@ argument:
 --------------------
 class: FL_BUTTON
 type: NORMAL_BUTTON
-box: 50 60 130 50
+box: 20 60 130 50
 boxtype: FL_UP_BOX
 colors: FL_MCOL FL_GREEN
 alignment: FL_ALIGN_CENTER
@@ -70,7 +70,7 @@ argument: 0
 --------------------
 class: FL_BUTTON
 type: NORMAL_BUTTON
-box: 50 150 130 50
+box: 20 150 130 50
 boxtype: FL_UP_BOX
 colors: FL_MCOL FL_GREEN
 alignment: FL_ALIGN_CENTER
@@ -88,7 +88,7 @@ argument: 1
 --------------------
 class: FL_BUTTON
 type: NORMAL_BUTTON
-box: 50 370 130 50
+box: 25 370 130 50
 boxtype: FL_UP_BOX
 colors: FL_MCOL FL_GREEN
 alignment: FL_ALIGN_CENTER
@@ -106,7 +106,7 @@ argument: 0
 --------------------
 class: FL_BUTTON
 type: NORMAL_BUTTON
-box: 50 460 130 50
+box: 25 460 130 50
 boxtype: FL_UP_BOX
 colors: FL_MCOL FL_GREEN
 alignment: FL_ALIGN_CENTER
@@ -124,7 +124,7 @@ argument: 0
 --------------------
 class: FL_BUTTON
 type: NORMAL_BUTTON
-box: 50 600 130 50
+box: 25 595 130 50
 boxtype: FL_UP_BOX
 colors: FL_MCOL FL_GREEN
 alignment: FL_ALIGN_CENTER
@@ -142,7 +142,7 @@ argument:
 --------------------
 class: FL_BROWSER
 type: NORMAL_BROWSER
-box: 230 600 790 190
+box: 185 595 835 195
 boxtype: FL_DOWN_BOX
 colors: FL_WHITE FL_YELLOW
 alignment: FL_ALIGN_BOTTOM
@@ -160,7 +160,7 @@ argument:
 --------------------
 class: FL_BUTTON
 type: NORMAL_BUTTON
-box: 50 240 130 50
+box: 25 240 130 50
 boxtype: FL_UP_BOX
 colors: FL_MCOL FL_GREEN
 alignment: FL_ALIGN_CENTER
@@ -199,7 +199,7 @@ argument: 0
 --------------------
 class: FL_BUTTON
 type: NORMAL_BUTTON
-box: 50 730 130 40
+box: 25 730 130 40
 boxtype: FL_UP_BOX
 colors: FL_MCOL FL_COL1
 alignment: FL_ALIGN_CENTER
@@ -218,7 +218,7 @@ argument: 0
 Name: run
 Width: 1030
 Height: 800
-Number of Objects: 8
+Number of Objects: 13
 
 --------------------
 class: FL_BOX
@@ -241,7 +241,7 @@ argument:
 --------------------
 class: FL_BUTTON
 type: NORMAL_BUTTON
-box: 25 730 110 45
+box: 15 740 115 45
 boxtype: FL_UP_BOX
 colors: FL_MCOL FL_GREEN
 alignment: FL_ALIGN_CENTER
@@ -249,7 +249,7 @@ style: FL_NORMAL_STYLE
 size: FL_LARGE_SIZE
 lcol: FL_BLACK
 label: Stop
-shortcut: 
+shortcut: S
 resize: FL_RESIZE_NONE
 gravity: FL_SouthWest FL_SouthWest
 name: stop
@@ -259,7 +259,7 @@ argument: 0
 --------------------
 class: FL_BUTTON
 type: NORMAL_BUTTON
-box: 500 400 1 1
+box: 26 731 1 1
 boxtype: FL_NO_BOX
 colors: FL_COL1 FL_COL1
 alignment: FL_ALIGN_CENTER
@@ -269,7 +269,7 @@ lcol: FL_BLACK
 label: 
 shortcut: 
 resize: FL_RESIZE_ALL
-gravity: FL_NoGravity FL_NoGravity
+gravity: FL_SouthWest FL_SouthWest
 name: redraw_dummy
 callback: new_data_callback
 argument: 0
@@ -277,7 +277,7 @@ argument: 0
 --------------------
 class: FL_BUTTON
 type: NORMAL_BUTTON
-box: 502 400 1 1
+box: 27 732 1 1
 boxtype: FL_NO_BOX
 colors: FL_COL1 FL_COL1
 alignment: FL_ALIGN_CENTER
@@ -287,7 +287,7 @@ lcol: FL_BLACK
 label: 
 shortcut: 
 resize: FL_RESIZE_ALL
-gravity: FL_NoGravity FL_NoGravity
+gravity: FL_SouthWest FL_SouthWest
 name: sigchld
 callback: run_sigchld_callback
 argument: 0
@@ -295,9 +295,9 @@ argument: 0
 --------------------
 class: FL_CANVAS
 type: NORMAL_CANVAS
-box: 170 10 90 700
+box: 80 10 150 715
 boxtype: FL_FRAME_BOX
-colors: FL_COL1 FL_BLACK
+colors: FL_COL1 FL_COL1
 alignment: FL_ALIGN_CENTER
 style: FL_NORMAL_STYLE
 size: FL_DEFAULT_SIZE
@@ -313,9 +313,9 @@ argument:
 --------------------
 class: FL_CANVAS
 type: NORMAL_CANVAS
-box: 260 710 760 80
+box: 230 725 790 65
 boxtype: FL_FRAME_BOX
-colors: FL_NoColor FL_BLACK
+colors: FL_NoColor FL_COL1
 alignment: FL_ALIGN_CENTER
 style: FL_NORMAL_STYLE
 size: FL_DEFAULT_SIZE
@@ -331,7 +331,7 @@ argument:
 --------------------
 class: FL_CANVAS
 type: NORMAL_CANVAS
-box: 260 10 760 700
+box: 230 10 790 715
 boxtype: FL_NO_BOX
 colors: FL_BLACK FL_BLACK
 alignment: FL_ALIGN_CENTER
@@ -348,8 +348,8 @@ argument:
 
 --------------------
 class: FL_BUTTON
-type: NORMAL_BUTTON
-box: 190 730 45 45
+type: PUSH_BUTTON
+box: 165 740 45 45
 boxtype: FL_UP_BOX
 colors: FL_TOP_BCOL FL_GREEN
 alignment: FL_ALIGN_CENTER
@@ -363,6 +363,104 @@ gravity: FL_SouthWest FL_SouthWest
 name: full_scale_button
 callback: fs_button_callback
 argument: 0
+	value: 1
+
+--------------------
+class: FL_BUTTON
+type: PUSH_BUTTON
+box: 20 20 35 35
+boxtype: FL_UP_BOX
+colors: FL_MCOL FL_TOMATO
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_LARGE_SIZE
+lcol: FL_BLACK
+label: 1
+shortcut: 1
+resize: FL_RESIZE_NONE
+gravity: FL_NorthWest FL_NorthWest
+name: curve_1_button
+callback: curve_button_callback
+argument: 1
+	value: 1
+
+--------------------
+class: FL_BUTTON
+type: PUSH_BUTTON
+box: 20 60 35 35
+boxtype: FL_UP_BOX
+colors: FL_MCOL FL_GREEN
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_LARGE_SIZE
+lcol: FL_BLACK
+label: 2
+shortcut: 2
+resize: FL_RESIZE_NONE
+gravity: FL_NorthWest FL_NorthWest
+name: curve_2_button
+callback: curve_button_callback
+argument: 2
+	value: 1
+
+--------------------
+class: FL_BUTTON
+type: PUSH_BUTTON
+box: 20 100 35 35
+boxtype: FL_UP_BOX
+colors: FL_MCOL FL_YELLOW
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_LARGE_SIZE
+lcol: FL_BLACK
+label: 3
+shortcut: 3
+resize: FL_RESIZE_NONE
+gravity: FL_NorthWest FL_NorthWest
+name: curve_3_button
+callback: curve_button_callback
+argument: 3
+	value: 1
+
+--------------------
+class: FL_BUTTON
+type: PUSH_BUTTON
+box: 20 140 35 35
+boxtype: FL_UP_BOX
+colors: FL_MCOL FL_CYAN
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_LARGE_SIZE
+lcol: FL_BLACK
+label: 4
+shortcut: 4
+resize: FL_RESIZE_NONE
+gravity: FL_NorthWest FL_NorthWest
+name: curve_4_button
+callback: curve_button_callback
+argument: 4
+	value: 1
+
+--------------------
+class: FL_BITMAPBUTTON
+type: NORMAL_BUTTON
+box: 15 190 45 70
+boxtype: FL_UP_BOX
+colors: FL_COL1 FL_BLACK
+alignment: FL_ALIGN_BOTTOM|FL_ALIGN_INSIDE
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_BLACK
+label: Undo
+shortcut: U
+resize: FL_RESIZE_NONE
+gravity: FL_NorthWest FL_NorthWest
+name: undo_button
+callback: undo_button_callback
+argument: 0
+	file: undo.xbm
+	focus_file: 
+	fullpath: 0
 
 =============== FORM ===============
 Name: input_form
