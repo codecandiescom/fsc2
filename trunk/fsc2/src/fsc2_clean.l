@@ -33,7 +33,7 @@
 /* If not defined set default directory for include files */
 
 #if ! defined DEF_INCL_DIR
-#define DEF_INCL_DIR "/usr/local/lib/fsc2"
+#define DEF_INCL_DIR libdir
 #endif
 
 
@@ -517,7 +517,8 @@ static void include_handler( char *file )
 			incl_file = T_malloc( strlen( file )
 								  + strlen( DEF_INCL_DIR ) + 2 );
 			strcpy( incl_file, DEF_INCL_DIR );
-			strcat( incl_file, "/" );
+			if ( incl_file[ strlen( incl_file ) - 1 ] != '/' )
+				strcat( incl_file, "/" );
 			strcat( incl_file, file + 1 );
 		}
 
@@ -672,7 +673,8 @@ static void unit_spec( char *text, int power )
 			 break;
 
 		default :
-			 printf( "\x03\n%s:%ld: INTERNAL ERROR.\n", Fname, Lc );
+			 fprintf( stderr, "\x03\n%s:%ld: Internal error in fsc2_clean.\n",
+					 Fname, Lc );
 			 exit( EXIT_FAILURE );
 	}
 }
