@@ -559,14 +559,14 @@ doing further checks on the command line arguments.
 
 
 When this part was successful some further checks of the remaining
-command line options are done and, if specified on the command line,
-an @code{EDL} script is loaded. Now we're already near to start the
-main loop of the program. But before this loop is entered another new
-process is spawned that opens a socket (of type @code{AF_UNIX}) to
-listen on incoming connections from external programs that want to send
-@code{EDL} scripts to @code{fsc2} for execution. The code for spawning
-this child process and the code for the child process itself is to be
-found in the @file{conn.c}.
+command line options are done and, if specified on the command line, an
+@code{EDL} script is loaded. Now we're already near to starting the main
+loop of the program. But before this loop is entered another new process
+is spawned that opens a socket (of type @code{AF_UNIX}) to listen on
+incoming connections from external programs that want to send @code{EDL}
+scripts to @code{fsc2} for execution. The code for spawning this child
+process and the code for the child process itself is to be found in the
+@file{conn.c}.
 
 
 After this stage the main loop of the program is entered. It consists of
