@@ -131,6 +131,8 @@ Var *f_bcreate( Var *v )
 		v = vars_pop( v );
 	}
 
+	/* Warn and get rid of superfluous arguments */
+
 	if ( v != NULL )
 	{
 		eprint( WARN, "%s:%ld: Superfluous arguments in call of "
@@ -339,7 +341,7 @@ Var *f_bdelete( Var *v )
 			continue;
 		}
 
-		/* Do checks on parameter */
+		/* No tool box -> no buttons -> no buttons to delete... */
 
 		if ( Tool_Box == NULL )
 		{
@@ -347,6 +349,8 @@ Var *f_bdelete( Var *v )
 					Fname, Lc );
 			THROW( EXCEPTION );
 		}
+
+		/* Do checks on parameters */
 
 		if ( v->type != INT_VAR || v->val.lval < 0 ||
 			 ( io = find_object_from_ID( v->val.lval ) ) == NULL ||
@@ -361,15 +365,12 @@ Var *f_bdelete( Var *v )
 
 		/* Remove button from the linked list */
 
-		if ( ! TEST_RUN || io->delete_after_test )
-		{
-			if ( io->next != NULL )
-				io->next->prev = io->prev;
-			if ( io->prev != NULL )
-				io->prev->next = io->next;
-			else
-				Tool_Box->objs = io->next;
-		}
+		if ( io->next != NULL )
+			io->next->prev = io->prev;
+		if ( io->prev != NULL )
+			io->prev->next = io->next;
+		else
+			Tool_Box->objs = io->next;
 
 		/* Delete the button (its not drawn in a test run!) */
 
@@ -384,8 +385,7 @@ Var *f_bdelete( Var *v )
 		   group must be made group leader and the remaining buttons must get
 		   told about it) */
 
-		if ( ( ! TEST_RUN || io->delete_after_test ) &&
-			 io->type == RADIO_BUTTON && io->partner == -1 )
+		if ( io->type == RADIO_BUTTON && io->partner == -1 )
 		{
 			for ( nio = io->next; nio != NULL; nio = nio->next )
 				if ( nio->type == RADIO_BUTTON && nio->partner == io->ID )
@@ -401,12 +401,9 @@ Var *f_bdelete( Var *v )
 						nio->partner = new_anchor;
 		}
 
-		if ( ! TEST_RUN || io->delete_after_test )
-		{
-			T_free( io->label );
-			T_free( io->help_text );
-			T_free( io );
-		}
+		T_free( io->label );
+		T_free( io->help_text );
+		T_free( io );
 
 		if ( Tool_Box->objs == NULL )
 		{
@@ -435,7 +432,7 @@ Var *f_bdelete( Var *v )
 		v = vars_pop( v );
 	}
 
-	/* The child process is already done */
+	/* The child process is already done here, and in a test run we're also */
 
 	if ( I_am == CHILD || TEST_RUN )
 		return vars_push( INT_VAR, 1 );
@@ -476,12 +473,17 @@ Var *f_bstate( Var *v )
 		THROW( EXCEPTION );
 	}
 
+	/* Again, the child doesn't know about the button, so it got to ask the
+	   parent process */
+
 	if ( I_am == CHILD )
 	{
 		long ID;
 		long state = -1;
 		void *buffer, *pos;
 
+
+		/* Basid check of button identifier - always the first parameter */
 
 		if ( v->type != INT_VAR || v->val.lval < 0 )
 		{
@@ -491,6 +493,8 @@ Var *f_bstate( Var *v )
 		}
 		ID = v->val.lval;
 		
+		/* If there's a second parameter it's the state of button to set */
+
 		if ( ( v = vars_pop( v ) ) != NULL )
 		{
 			vars_check( v, INT_VAR | FLOAT_VAR );
@@ -500,6 +504,8 @@ Var *f_bstate( Var *v )
 				state = v->val.dval != 0.0 ? 1 : 0;
 		}
 
+		/* No more parameters accepted... */
+
 		if ( ( v = vars_pop( v ) ) != NULL )
 		{
 			eprint( WARN, "%s:%ld: Superfluous arguments in call of "
@@ -508,21 +514,25 @@ Var *f_bstate( Var *v )
 				;
 		}
 
-		buffer = T_malloc( 3 * sizeof( long ) + strlen( Fname ) + 1 );
-		pos = buffer;
+		/* Make up buffer to send to parent process */
 
-		memcpy( pos, &Lc, sizeof( long ) );
+		pos = buffer = T_malloc( 3 * sizeof( long ) + strlen( Fname ) + 1 );
+
+		memcpy( pos, &Lc, sizeof( long ) );     /* current line number */
 		pos += sizeof( long );
 
-		memcpy( pos, &ID, sizeof( long ) );
+		memcpy( pos, &ID, sizeof( long ) );     /* buttons ID */
 		pos += sizeof( long );
 
-		memcpy( pos, &state, sizeof( long ) );
-		pos += sizeof( long );
+		memcpy( pos, &state, sizeof( long ) );  /* state to be set (negative */
+		pos += sizeof( long );                  /* if not to be set)         */
 
-		strcpy( pos, Fname );
+		strcpy( pos, Fname );                   /* current file name */
 		pos += strlen( ( char * ) pos ) + 1;
 		
+		/* Ask parent process to return or set the state - bomb out if it
+		   returns a negative value, indicating a severe error */
+
 		state = exp_bstate( buffer, ( long ) ( pos - buffer ) );
 
 		if ( state < 0 )
@@ -531,12 +541,16 @@ Var *f_bstate( Var *v )
 		return vars_push( INT_VAR, state );
 	}
 
+	/* No tool box -> no buttons -> no button state to set or get... */
+
 	if ( Tool_Box == NULL )
 	{
 		eprint( FATAL, "%s:%ld: No buttons have been defined yet.\n",
 				Fname, Lc );
 		THROW( EXCEPTION );
 	}
+
+	/* Check the button ID parameter */
 
 	if ( v->type != INT_VAR || v->val.lval < 0 ||
 		 ( io = find_object_from_ID( v->val.lval ) ) == NULL ||
@@ -548,6 +562,10 @@ Var *f_bstate( Var *v )
 				"`button_state'.\n", Fname, Lc );
 		THROW( EXCEPTION );
 	}
+
+	/* If there's no second parameter just return the button state - for
+	   NORMAL_BUUTONs return the number it was pressed since the last call
+	   and reset the counter to zero */
 
 	if ( ( v = vars_pop( v ) ) == NULL )
 	{
