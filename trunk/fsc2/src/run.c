@@ -577,10 +577,10 @@ static void do_measurement( void )
 
 	TEST_RUN = UNSET;
 
-	while ( cur_prg_token != NULL &&
-			cur_prg_token < prg_token + prg_length )
+	TRY
 	{
-		TRY
+		while ( cur_prg_token != NULL &&
+				cur_prg_token < prg_token + prg_length )
 		{
 			if ( do_quit && react_to_do_quit )
 			{
@@ -675,13 +675,8 @@ static void do_measurement( void )
 					exp_runparse( );               /* (re)start the parser */
 					break;
 			}
-			TRY_SUCCESS;
 		}
-		CATCH( USER_BREAK_EXCEPTION )
-		{
-			TRY_SUCCESS;
-			if ( ! do_quit )
-				THROW( EXCEPTION );
-		}
+
+		TRY_SUCCESS;
 	}
 }
