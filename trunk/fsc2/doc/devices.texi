@@ -38,6 +38,8 @@
 * Frequency Counter Functions::
 * DAC Functions::
 * Event Counter Functions::
+* CCD Camera Functions::
+* Monochromator Functions::
 * Power Supply Functions::
 * Multi-Device Functions::
 @end menu
@@ -2726,7 +2728,7 @@ The function can be used in the @code{EXPERIMENT} as well as in the
 @end table
 
 
-@node Event Counter Functions, Power Supply Functions, DAC Functions, Device Functions
+@node Event Counter Functions, CCD Camera Functions, DAC Functions, Device Functions
 @section Event Counter Functions
 @cindex Event Counter Functions
 The only currently supported event counter is the @code{National
@@ -2974,12 +2976,238 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @end table
 
 
-@node Power Supply Functions, Multi-Device Functions, Event Counter Functions, Device Functions
+@node CCD Camera Functions, Monochromator Functions, Event Counter Functions, Device Functions
+@section CCD Camera Functions
+@cindex CCD Camera Functions
+
+The only currentyl supplied CCD camera is the Roper Scientific Spec-10
+camera (without a shutter and with LN cooling). Its module is loaded by
+specifying
+@example
+rs_spec10;
+@end example
+in the @code{DEVICES} section. 
+
+The module requires the PVCAM library supplied by Roper Scientific to be
+installed. To to be able to work with the camera also the Linux device
+driver for the PCI board used for the communication with camera, also
+supplied by Roper Scientific, must be installed.
+
+@table @samp
+
+@anchor{ccd_camera_name}
+@item ccd_camera_name()
+@findex ccd_camera_name()
+Returns a string with the name of the CCD camera being used.
+
+
+@anchor{ccd_camera_roi}
+@item ccd_camera_roi()
+@findex ccd_camera_roi()
+The function is used to query or set the region of interest (ROI) of the
+CCD chip to be used when fetching spectra or images from the
+camera. When no arguments are specified, the function returns an array
+with 4 elements, where the first element is the @i{x}-coordinate of the
+lower left hand of the ROI, the second element is the @i{y}-coordinate
+of the same point and the third and fourth element are the @i{x}- and
+@i{y}-coordonate of the right hand upper corner of the ROI. The
+coorsinate of the lower left hand pixel of the CCD chip is @code{1,1},
+the coordinates of the upper right hand corner are the width and height
+of the chip.
+
+If there is an argument this must be an array with 4 elements that
+specify the ROI as explained above. Further calls of the functions
+@code{ccd_camera_get_image()} and @code{ccd_camera_get_spectrum()} will return
+pictures or spectra from the ROI specified by the command.
+
+When no ROI has been specified per default the whole area of the CCD
+chip is used as the ROI.
+
+
+@anchor ccd_camera_binning
+@item {ccd_camera_binning()}
+@findex ccd_camera_binning()
+The function allows to set or query the binning (i.e.@: the combining of
+several pixels) done by the camera. If called with no arguments the
+function returns an array with 2 elements, where the first element is
+the number of pixels that get binned in the (horizontal)
+@i{x}-direction, and the second element is the binning number in
+(vertical) @i{y}-direction.
+
+If the function is called with arguments the first argument must be an
+array with 2 elements. The first element is the number of pixels to be
+binned in @i{x}-direction, the second the number in @i{y}-direction. If
+the number is @code{0} the current setting of the binning value remains
+unchanged.
+
+If no binning has been specified no binning is used, which is identical
+to setting both binning values to 1.
+
+If the number of pixels region of interest (ROI) in one of the
+directions isn't a integer multiple of the binning size for this
+direction the ROI is automatically reduced to an multiple integer of the
+binning size (only if the ROI size in a direction is smaller than the
+binning size for this direction the ROI size is expanded to the binning
+size, resulting in a width of one of the returned image or spectrum for
+this direction).
+
+The function also accepts a second parameter, the binning method to be
+used. You can use either hardware binning, i.e.@: binning is done by the
+camera itself, or binning can be done by the software, i.e.@: the whole
+image or spectrum is fetched from the camera and the binning is only
+applied afterwards on the received data). Wile hardware binning is
+faster (mainly due to the reduced time required for the transfer) in
+some cases it might lead to artifacts when the sum of the values of all
+pixels combined in binning would be larger than 65535. In this case the
+value after binning is always 65536, leading to an effect that looks
+like saturation of the region of the chip.
+
+The binning method argument must be either @code{0} or one of the
+strings @code{"HARDWARE"} or @code{"HARD"} for use of hardware binning
+or the number @code{1} or one of the strings @code{"SOFTWARE"} or
+@code{"SOFT"} for software binning.
+
+
+@anchor ccd_camera_binning_method
+@item {ccd_camera_binning_method()}
+@findex ccd_camera_binning_method()
+This function lets you query or set the binning method to be used.
+You can use either hardware binning, i.e.@: binning is done by the
+camera itself, or binning can be done by the software, i.e.@: the whole
+image or spectrum is fetched from the camera and the binning is only
+applied afterwards on the received data). Wile hardware binning is
+faster (mainly due to the reduced time required for the transfer) in
+some cases it might lead to artifacts when the sum of the values of all
+pixels combined in binning would be larger than 65535. In this case the
+value after binning is always 65536, leading to an effect that looks
+like saturation of the region of the chip.
+
+If called with no argument the function returns the number @code{0}
+when hardware binning is used and @code{1} for software binning.
+
+To set the bonning method you must specify either @code{0} or one of the
+strings @code{"HARDWARE"} or @code{"HARD"} for use of hardware binning
+or the number @code{1} or one of the strings @code{"SOFTWARE"} or
+@code{"SOFT"} for software binning.
+
+
+@anchor ccd_camera_exposure_time
+@item {ccd_camera_exposure_time()}
+@findex ccd_camera_exposure_time()
+The function can be used to determine or set the exposure time used by
+the camera. If called without an argument the function returns the
+exposure time in seconds. If called with an argument, the exposure time
+in seconds, the exposure time is set. It must be between @w{1 us} and
+one hour.
+
+If no exposure time gets set a default value of @w{100 ms} is used.
+
+The function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} script.
+
+
+@anchor ccd_camera_clear_cycles
+@item {ccd_camera_clear_cycles()}
+@findex ccd_camera_clear_cycles()
+The function allows to determine or set the number of clear cycles of
+the CCD chip to be done before an exposure is started. If called without
+an argument the function returns the number of clear cycles. If an
+argument is passd to the function it must be a number between 0 and the
+maximum number of clear cycles (which is 7 for the Spec-10 camera). The
+default value of clear cycles is 1.
+
+The function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} script.
+
+
+@anchor ccd_camera_get_image
+@item {ccd_camera_get_image()}
+@findex ccd_camera_get_image()
+The function starts an exposure, fetches the resulting image from the
+camera and returns it to the @code{EDL} script as a 2-dimensional
+array. The size of the image depends on the setting of the region of
+interest (ROI) and the settings for binning. When no ROI or binning has
+been set the image returned is the whole area of the CCD chip.
+
+The function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} script.
+
+
+@anchor ccd_camera_get_spectrum
+@item {ccd_camera_get_spectrum()}
+@findex ccd_camera_get_spectrum()
+The function starts an exposure, fetches the result from the camera and
+returns it as an 1-dimensionl array to the @code{EDL} script. The length
+of the array depends on the width of the region of interest (ROI) and
+the binning setting for the (horizontal) @i{y}-direction. All pixels of
+the ROI in the (vertical) @i{y}-direction are binned together.
+
+The function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} script.
+
+
+@anchor ccd_camera_temperature
+@item {ccd_camera_temperature()}
+@findex ccd_camera_temperature()
+The function can be used to determine the current temperature of the CCD
+chip or to set a target temperature for the chip. If called without an
+argument the current temperature (in Kelvin) of the chip is returned.
+If called with an argument this must be a number between @w{120.66 K}
+(-152.5 degree Celsius) and @w{248.26 K} (-25 degree Celsius). Please
+note that it may take quite some time until a target temperature is
+reached.
+
+The function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} script.
+
+
+@anchor ccd_camera_pixel_size
+@item {ccd_camera_pixel_size()}
+@findex ccd_camera_pixel_size()
+The function takes no arguments and returns the width of a pixel of the
+CCD chip.
+
+
+@anchor ccd_camera_pixel_area
+@item {ccd_camera_pixel_area()}
+@findex ccd_camera_pixel_area()
+The function accepts no aguments and returns an 1-dimensional array with
+two elements, where the first argument is the number of pixels of the
+CCD chip in the (horizintal) @i{x}-direction and the second element is
+the number of pixels in the (vertical) @i{y}-direction.
+
+
+@end table
+
+
+@node Monochromator Functions, Power Supply Functions, CCD Camera Functions, Device Functions
+@section Monochromator Functions
+@cindex Monochromator Functions
+
+The only monochromator currently supported is the SpectraPro-300i
+(actually its only tested with the 308i) by the Acton Research
+Corporation. The module for the monochromator gets loaded by specifying
+@example
+spectrapro_300i;
+@end example
+in the @code{DEVICES} section. 
+
+@table @samp
+
+@anchor{monochromator_name}
+@item monochromator_name()
+@findex monochromator_name()
+Returns a string with the name of the monochromator being used.
+
+@end table
+
+
+@node Power Supply Functions, Multi-Device Functions, Monochromator Functions, Device Functions
 @section Power Supply Functions
 @cindex Power Supply Functions
 
 The only currently supplied power supply is the @strong{Thurlby &
-Thandar Power Supply} PL330DP. The module for the power supply qis loaded by specifying
+Thandar Power Supply} PL330DP. The module for the power supply is loaded by specifying
 @example
 thurlby330
 @end example

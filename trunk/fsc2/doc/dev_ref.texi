@@ -40,7 +40,6 @@
 * er035m_sa::     Bruker NMR Gaussmeter ER 035 M (GPIB, Stand-Alone)
 * er035m_sas::    Bruker NMR Gaussmeter ER 035 M (Serial, Stand-Alone)
 * hfs9000::       Tektronix Stimulus System HFS9000 (Berlin W-Band)
-* rs690::         Interface Technology RS690 Word Generator (Berlin 360 GHz)
 * hp5340a::       HP Frequency Counter HP5340A
 * hp8647a::       HP RF Synthesizer HP8647A
 * hp8648b::       HP RF Synthesizer HP8648B
@@ -53,6 +52,8 @@
 * me6000::        Meilhaus Electronic GmbH ME-6000 and ME-6100 DAC card
 * ni6601::        National Instruments 6601 GPCT card
 * pt2025::        Metrolab NMR Teslameter PT2025
+* rs_spec10::     Roper Scientific Spec-10 CCD Camera
+* rs690::         Interface Technology RS690 Word Generator (Berlin 360 GHz)
 * s_band_magnet_broad::   S-band Magnet Power Supply (broad range)
 * s_band_magnet_narrow::  S-band Magnet Power Supply (narrow range)
 * sr510::         Stanford Research Lock-In Amplifier SR510
@@ -583,7 +584,7 @@ the range is @w{1460 G} to @w{19900 G}.
 @end multitable
 
 
-@node hfs9000, rs690, er035m_sas, Device Reference
+@node hfs9000, hp5340a, er035m_sas, Device Reference
 @iftex
 @subheading Tektronix Stimulus System HFS9000 (Berlin W-Band)
 @end iftex
@@ -632,65 +633,7 @@ Fixed length of TRIGGER_OUT pulse: @w{20 ns}
 @end multitable
 
 
-@node rs690, hp5340a, hfs9000, Device Reference
-@iftex
-@subheading Interface Technology RS690 Word Generator (Berlin 360 GHz)
-@end iftex
-@ifnottex
-@section Interface Technology RS690 Word Generator (Berlin 360 GHz)
-@end ifnottex
-
-@paragraphindent 0
-@strong{Module name}: @code{rs690}
-
-@paragraphindent 0
-@strong{Description}: Interface Technology RS690 Word Generator, used as pulser
-for the Berlin 360 GHz spectrometer.
-
-@paragraphindent 0
-Time base: internal clock @w{4 ns}, @w{8 ns} and @w{16 ns}, external
-clock @w{4 ns} and longer (either via @code{TTL} or @code{ECL} level
-input connector)@*
-Trigger-in: either via @code{TTL} or @code{ECL} level input connector@*
-Number of channels: 16 (4 per output connector) with internal @w{4 ns}
-time base or external clock, 32 (8 per output connector) with internal @w{8 ns}
-time base, 64 (16 per output connector) with internal @w{16 ns} time base@*
-Maximum repetition time: 2,147,483,647 times the time base for external
-clock or @w{4 ns} internal clock (i.e.@: @w{8.5899 s}), @w{17.1799 s} for
-@w{8 ns} internal time base, @w{34.3597} for @w{16 ns} internal time base
-
-@paragraphindent 0
-When using an external clock or the internal @w{4 ns} time base under
-for certain pulse seqences the repetition time may be increases slightly
-(but never more than 3 times the time base), with an @w{8 ns} time base
-the repetition time may become larger by @w{8 ns}.
-
-@paragraphindent 0
-@strong{Controlled via}: GPIB bus (IEEE 488).
-
-@paragraphindent 0
-@strong{Supported functions}:
-@multitable @columnfractions .45 .45
-@item @code{pulser_name()}            @tab @ref{pulser_name}
-@item @code{pulser_state()}           @tab @ref{pulser_state}
-@item @code{pulser_channel_state()}   @tab @ref{pulser_channel_state}
-@item @code{pulser_update()}          @tab @ref{pulser_update}
-@item @code{pulser_shift()}           @tab @ref{pulser_shift}
-@item @code{pulser_increment()}       @tab @ref{pulser_increment}
-@item @code{pulser_reset()}           @tab @ref{pulser_reset}
-@item @code{pulser_pulse_reset()}     @tab @ref{pulser_pulse_reset}
-@item @code{pulser_lock_keyboard()}   @tab @ref{pulser_lock_keyboard}
-@item @code{pulser_shape_to_defense_minimum_distance()} @tab @ref{pulser_shape_to_defense_minimum_distance}
-@item @code{pulser_defense_to_shape_minimum_distance()} @tab @ref{pulser_defense_to_shape_minimum_distance}
-@item @code{pulser_automatic_shape_pulses()} @tab @ref{pulser_automatic_shape_pulses}
-@item @code{pulser_automatic_twt_pulses()} @tab @ref{pulser_automatic_twt_pulses}
-@item @code{pulser_minimum_twt_pulse_distance()} @tab @ref{pulser_minimum_twt_pulse_distance}
-@item @code{pulser_show_pulses()}     @tab @ref{pulser_show_pulses}
-@item @code{pulser_dump_pulses()}     @tab @ref{pulser_dump_pulses}
-@end multitable
-
-
-@node hp5340a, hp8647a, rs690, Device Reference
+@node hp5340a, hp8647a, hfs9000, Device Reference
 @iftex
 @subheading HP Frequency Counter HP5340A
 @end iftex
@@ -1088,7 +1031,7 @@ library are part of the @code{fsc2} package)
 @end multitable
 
 
-@node pt2025, s_band_magnet_broad, ni6601, Device Reference
+@node pt2025, rs_spec10, ni6601, Device Reference
 @iftex
 @subheading Metrolab NMR Teslameter PT2025
 @end iftex
@@ -1118,8 +1061,102 @@ T. Measured fields are returned in Gauss, not Tesla!
 @end multitable
 
 
+@node rs_spec10, rs690, pt2025, Device Reference
+@iftex
+@subheading Roper Scientific Spec-10 CCD Camera
+@end iftex
+@ifnottex
+@section Roper Scientific Spec-10 CCD Camera
+@end ifnottex
 
-@node s_band_magnet_broad, s_band_magnet_narrow, pt2025, Device Reference
+@paragraphindent 0
+@strong{Module name}: @code{rs_spec10}
+
+@paragraphindent 0
+@strong{Description}: Roper Scientific Spec-10 CCD camera, no shutter,
+cooling with LN.
+
+@paragraphindent 0
+@strong{Controlled via}: PCI card, requiring a Linux device driver and
+the PVCAM library (at least version 2.6.4-2) that both are available
+from Roper Scientific.
+
+@paragraphindent 0
+@strong{Supported functions}:
+@multitable @columnfractions .45 .45
+@item @code{ccd_camera_name()}            @tab @ref{ccd_camera_name}
+@item @code{ccd_camera_roi()}             @tab @ref{ccd_camera_roi}
+@item @code{ccd_camera_binning()}         @tab @ref{ccd_camera_binning}
+@item @code{ccd_camera_binning_method()}  @tab @ref{ccd_camera_binning_method}
+@item @code{ccd_camera_exposure_time()}   @tab @ref{ccd_camera_exposure_time}
+@item @code{ccd_camera_clear_cycles()}    @tab @ref{ccd_camera_clear_cycles}
+@item @code{ccd_camera_get_image()}       @tab @ref{ccd_camera_get_image}
+@item @code{ccd_camera_get_spectrum()}    @tab @ref{ccd_camera_get_spectrum}
+@item @code{ccd_camera_temperature()}     @tab @ref{ccd_camera_temperature}
+@item @code{ccd_camera_pixel_size()}      @tab @ref{ccd_camera_pixel_size}
+@item @code{ccd_camera_pixel_area()}      @tab @ref{ccd_camera_pixel_area}
+@end multitable
+
+
+@node rs690, s_band_magnet_broad, rs_spec10, Device Reference
+@iftex
+@subheading Interface Technology RS690 Word Generator (Berlin 360 GHz)
+@end iftex
+@ifnottex
+@section Interface Technology RS690 Word Generator (Berlin 360 GHz)
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{rs690}
+
+@paragraphindent 0
+@strong{Description}: Interface Technology RS690 Word Generator, used as pulser
+for the Berlin 360 GHz spectrometer.
+
+@paragraphindent 0
+Time base: internal clock @w{4 ns}, @w{8 ns} and @w{16 ns}, external
+clock @w{4 ns} and longer (either via @code{TTL} or @code{ECL} level
+input connector)@*
+Trigger-in: either via @code{TTL} or @code{ECL} level input connector@*
+Number of channels: 16 (4 per output connector) with internal @w{4 ns}
+time base or external clock, 32 (8 per output connector) with internal @w{8 ns}
+time base, 64 (16 per output connector) with internal @w{16 ns} time base@*
+Maximum repetition time: 2,147,483,647 times the time base for external
+clock or @w{4 ns} internal clock (i.e.@: @w{8.5899 s}), @w{17.1799 s} for
+@w{8 ns} internal time base, @w{34.3597} for @w{16 ns} internal time base
+
+@paragraphindent 0
+When using an external clock or the internal @w{4 ns} time base under
+for certain pulse seqences the repetition time may be increases slightly
+(but never more than 3 times the time base), with an @w{8 ns} time base
+the repetition time may become larger by @w{8 ns}.
+
+@paragraphindent 0
+@strong{Controlled via}: GPIB bus (IEEE 488).
+
+@paragraphindent 0
+@strong{Supported functions}:
+@multitable @columnfractions .45 .45
+@item @code{pulser_name()}            @tab @ref{pulser_name}
+@item @code{pulser_state()}           @tab @ref{pulser_state}
+@item @code{pulser_channel_state()}   @tab @ref{pulser_channel_state}
+@item @code{pulser_update()}          @tab @ref{pulser_update}
+@item @code{pulser_shift()}           @tab @ref{pulser_shift}
+@item @code{pulser_increment()}       @tab @ref{pulser_increment}
+@item @code{pulser_reset()}           @tab @ref{pulser_reset}
+@item @code{pulser_pulse_reset()}     @tab @ref{pulser_pulse_reset}
+@item @code{pulser_lock_keyboard()}   @tab @ref{pulser_lock_keyboard}
+@item @code{pulser_shape_to_defense_minimum_distance()} @tab @ref{pulser_shape_to_defense_minimum_distance}
+@item @code{pulser_defense_to_shape_minimum_distance()} @tab @ref{pulser_defense_to_shape_minimum_distance}
+@item @code{pulser_automatic_shape_pulses()} @tab @ref{pulser_automatic_shape_pulses}
+@item @code{pulser_automatic_twt_pulses()} @tab @ref{pulser_automatic_twt_pulses}
+@item @code{pulser_minimum_twt_pulse_distance()} @tab @ref{pulser_minimum_twt_pulse_distance}
+@item @code{pulser_show_pulses()}     @tab @ref{pulser_show_pulses}
+@item @code{pulser_dump_pulses()}     @tab @ref{pulser_dump_pulses}
+@end multitable
+
+
+@node s_band_magnet_broad, s_band_magnet_narrow, rs690, Device Reference
 @iftex
 @subheading S-band Magnet Power Supply (broad range)
 @end iftex
