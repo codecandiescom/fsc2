@@ -806,7 +806,7 @@ static bool magnet_goto_field_rec( double field, double error, int rec,
 	double max_dev;
 	int i;
 	static double last_diff;  /* field difference in last step */
-	static int try;           /* number of steps without conversion */
+	static int tries;         /* number of steps without conversion */
 	Var *v;
 	int acc;
 
@@ -875,18 +875,18 @@ static bool magnet_goto_field_rec( double field, double error, int rec,
 	if ( rec == 0 )               /* at the very first call of the routine */
 	{
 		last_diff = HUGE_VAL;
-		try = 0;
+		tries = 0;
 	}
 	else                          /* if we're already in the recursion */
 	{                                                       /* got it worse? */
 		if ( fabs( field - magnet.meas_field ) > last_diff )
 		{
-			if ( ++try >= MAGNET_MAX_TRIES )
+			if ( ++tries >= MAGNET_MAX_TRIES )
 				return FAIL;
 		}
 		else                                /* difference got smaller */
 		{
-			try = 0;
+			tries = 0;
 		    last_diff = fabs( field - magnet.meas_field );
 		}
 	}

@@ -2207,7 +2207,8 @@ static double sr830_get_auto_data( int type )
 			delta_time = new_time - sr830.auto_time;
 
 			if ( delta_time < st_list[ sr830.st_index ] )
-				fsc2_usleep( floor( ( st_list[ sr830.st_index ] - delta_time )
+				fsc2_usleep( ( unsigned long )
+							 floor( ( st_list[ sr830.st_index ] - delta_time )
 									* 1000000.0 ), UNSET );
 			new_try = UNSET;
 		}
