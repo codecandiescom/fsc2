@@ -6,13 +6,12 @@ hp8647a;
 
 VARIABLES:
 
-
 timebase = 200ns;
 
-start_freq = 7 MHz;
-end_freq = 25 MHz;
-step_freq = 200 kHz;
-atten = -13 db;
+start_freq =   5 MHz;
+end_freq   =  25 MHz;
+step_freq  = 200 kHz;
+atten      = -13 dB;
 
 
 freq = start_freq;
@@ -22,15 +21,13 @@ N_low = 1;
 data[ N_points ];
 new_data[ N_points ];
 add_atten[ N_points ];
-v_low = 1e3;
+v_low = 1000 V;
 nu_low;
 File;
-Window;
 
 
 PREPARATIONS:
 
-Window = digitizer_define_window( 0 us, 1.6 us );
 digitizer_num_averages( 20 );
 digitizer_timebase( timebase );
 
@@ -47,12 +44,11 @@ File = get_file( "Enter name of table file" );
 
 synthesizer_state( 1 );
 
-/* First run through all frequencies and record induced voltage */
-
+/* First run through all frequencies and record the induced voltage */
 
 FOR I = 1 : N_points {
     digitizer_start_acquisition( );
-	data[ I ] = digitizer_get_amplitude_fast( CH1, Window );
+	data[ I ] = digitizer_get_amplitude_fast( CH1 );
 	display( I, data[ I ], 1 );
 	IF v_low > data[ I ] {
 		v_low = data[ I ];
@@ -67,9 +63,13 @@ nu_low = ( start_freq + ( N_low - 1 ) * step_freq );
 print( "Lowest voltage of # V at # MHz (at point \# #)\n", v_low, 
 		nu_low * 1e-6, N_low );
 
-
+/* Now run a second time through the complete frequency range, figure out the
+   attenuation needed to get the same induced voltage as at the frequency
+   with the lowest voltage and write this to the table file */
 
 freq = start_freq;
+
+fsave( File, "# MHz,   # dB\n", 1.0, 0.0 );
 
 I = 1;
 FOR I = 1 : N_points {
@@ -78,7 +78,7 @@ FOR I = 1 : N_points {
 	new_data[ I ] = data[ I ];
 
 	IF I == N_low {
-		fsave( File, "# MHz,   # db\n", freq * 1e-6, add_atten[ I ] );
+		fsave( File, "# MHz,   # dB\n", freq * 1e-6, add_atten[ I ] );
 		freq += step_freq;
 		display( I, v_low, 2 );
 		NEXT;
@@ -90,39 +90,42 @@ FOR I = 1 : N_points {
 		add_atten[ I ] -= 2.0;
 		synthesizer_attenuation( atten + add_atten[ I ] );
 		digitizer_start_acquisition( );
-		new_data[ I ] = digitizer_get_amplitude_fast( CH1, Window );
+		new_data[ I ] = digitizer_get_amplitude_fast( CH1 );
 	}
 
 	WHILE new_data[ I ] < v_low {
 		add_atten[ I ] += 1.0;
 		synthesizer_attenuation( atten + add_atten[ I ] );
 		digitizer_start_acquisition( );
-		new_data[ I ] = digitizer_get_amplitude_fast( CH1, Window );
+		new_data[ I ] = digitizer_get_amplitude_fast( CH1 );
 	}
 
 	WHILE new_data[ I ] > v_low {
 		add_atten[ I ] -= 0.5;
 		synthesizer_attenuation( atten + add_atten[ I ] );
 		digitizer_start_acquisition( );
-		new_data[ I ] = digitizer_get_amplitude_fast( CH1, Window );
+		new_data[ I ] = digitizer_get_amplitude_fast( CH1 );
 	}
 
 	WHILE new_data[ I ] < v_low {
 		add_atten[ I ] += 0.1;
 		synthesizer_attenuation( atten + add_atten[ I ] );
 		digitizer_start_acquisition( );
-		new_data[ I ] = digitizer_get_amplitude_fast( CH1, Window );
+		new_data[ I ] = digitizer_get_amplitude_fast( CH1 );
 	}
 
 	display( I, new_data[ I ], 2 );
 
-	print( "f = # MHz, U = # V, add = # db\n",
+	print( "f = # MHz, U = # V, Att. = # dB\n",
 			freq * 1e-6, new_data[ I ], add_atten[ I ] );
 
-	fsave( File, "# MHz,   # db\n", freq * 1e-6, add_atten[ I ] );
+	fsave( File, "# MHz,   # dB\n", freq * 1e-6, add_atten[ I ] );
 	freq += step_freq;
 }
 
+fsave( File, "# MHz,   # dB\n", 50.0, 0.0 );
+
+/* Finally, run a third time over the frequency range to test the linearity */
 
 synthesizer_attenuation( atten );
 freq = start_freq;
@@ -132,7 +135,7 @@ I = 0;
 FOR I = 1 : N_points {
 	synthesizer_attenuation( atten + add_atten[ I ] );
     digitizer_start_acquisition( );
-	data[ I ] = digitizer_get_amplitude_fast( CH1, Window );
+	data[ I ] = digitizer_get_amplitude_fast( CH1 );
 	display( I, data[ I ], 3 );
 	IF v_low > data[ I ] {
 		v_low = data[ I ];
@@ -144,6 +147,5 @@ FOR I = 1 : N_points {
 
 
 ON_STOP:
-
 
 synthesizer_state( 0 );
