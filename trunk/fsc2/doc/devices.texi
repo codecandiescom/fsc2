@@ -2672,12 +2672,13 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @anchor{counter_stop_counter}
 @item counter_stop_counter()
 @findex counter_stop_counter()
-This function can be used to stop a counter independent of the way it
-was started. It requires on argument, the counter for which the current
-value is to be returned. It must be specified by one of the symbolic
-values between @code{CH0} and @code{CH3} (please @strong{don't} use
-numbers directly, the mapping between the symbolic values and channel
-numbers is non-trivial).
+This function can be used to stop a counter independent of the purpose
+(i.e.@: counting or pulse train creation) it was started. It requires
+one argument, the counter for which the current value is to be
+returned. It must be specified by one of the symbolic values between
+@code{CH0} and @code{CH3} (please @strong{don't} use numbers directly,
+the mapping between the symbolic values and channel numbers is
+non-trivial).
 
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
@@ -2707,10 +2708,13 @@ requested counter is already runnng the function will fail. The second
 argument is the length of the pulse, which must be between @w{100 ns}
 and about @w{214,748 s} and must be a integer multiple of @w{50 ns}.
 
-If no thrid argument is specified the distance between the pulses will
+If no third argument is specified the distance between the pulses will
 be identical to the pulse length. By specifying a third argument (with
 to the same restrictions as for the second argument) the distance
 between pulses can be set.
+
+To stop creation of pulses (and to free the counter used for other uses)
+the function @code{counter_stop_counter()} must be called.
 
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
