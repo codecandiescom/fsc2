@@ -7,6 +7,21 @@
 #include "dg2020.h"
 
 
+
+#ifdef MAX_DEBUG
+void x_dg2020_set_constant( int ch, Ticks start, Ticks len, int type );
+void x_dg2020_set_constant( int ch, Ticks start, Ticks len, int type )
+{
+	printf( "->  %2d: %8ld %8ld   %s\n", ch, start + 1, len,
+			type == 1 ? "HIGH" : "LOW" );
+	fflush( stdout );
+}
+
+#define dg2020_set_constant x_dg2020_set_constant
+
+#endif
+
+
 #define ON( f )           ( ( f )->is_inverted ? LOW : HIGH )
 #define OFF( f )          ( ( f )->is_inverted ? HIGH : LOW )
 
@@ -602,7 +617,7 @@ void dg2020_set_pulses( FUNCTION *f )
 	/* Always set the very first bit to LOW state, see the rant about the bugs 
 	   in the pulser firmware at the start of dg2020_gpib.c... */
 
-	x_dg2020_set_constant( f->channel[ 0 ]->self, 0, 1, LOW );
+	dg2020_set_constant( f->channel[ 0 ]->self, -1, 1, LOW );
 
 	/* Now simply run through all active pulses of the channel */
 
@@ -614,18 +629,18 @@ void dg2020_set_pulses( FUNCTION *f )
 		   of the current pulse (exception: for the first pulse we start
 		   at the first possible position */
 
-		start = ( pp == NULL ) ? 1 : pp->pos + pp->len + f->delay + 1;
-		end = p->pos + f->delay + 1;
+		start = ( pp == NULL ) ? 0 : pp->pos + pp->len + f->delay;
+		end = p->pos + f->delay;
 		if ( start != end )
-			x_dg2020_set_constant( p->channel->self, start, end - start,
+			dg2020_set_constant( p->channel->self, start, end - start,
 								   OFF( f ) );
 
 		/* Set the area of the pulse itself */
 
 		start = end;
-		end = p->pos + p->len + f->delay + 1;
+		end = p->pos + p->len + f->delay;
 		if ( start != end )
-			x_dg2020_set_constant( p->channel->self, start, end - start,
+			dg2020_set_constant( p->channel->self, start, end - start,
 								   ON( f ) );
 	}
 
@@ -636,14 +651,14 @@ void dg2020_set_pulses( FUNCTION *f )
 	if ( pp != NULL )
 	{
 		start = end;
-		end = dg2020.max_seq_len + 1;
+		end = dg2020.max_seq_len;
 		if ( start != end )
-			x_dg2020_set_constant( pp->channel->self, start, end - start,
+			dg2020_set_constant( pp->channel->self, start, end - start,
 								   f->is_inverted ? HIGH : LOW );
 	}
 	else
-		x_dg2020_set_constant( f->channel[ 0 ]->self, 1, dg2020.max_seq_len,
-							   OFF( f ) );
+		dg2020_set_constant( f->channel[ 0 ]->self, -1,
+							 dg2020.max_seq_len + 1, OFF( f ) );
 
 	for ( p = f->pulses[ 0 ], i = 0; i < f->num_pulses; p = f->pulses[ ++i ] )
 		p->was_active = p->is_active;
@@ -691,13 +706,15 @@ void dg2020_set_phase_pulses( FUNCTION *f )
 		else                                 /* no pulses in this channel */
 		{
 			if ( ! f->is_inverted )
-				x_dg2020_set_constant( f->channel[ i ]->self, 0,
-									   dg2020.max_seq_len + 1, OFF( f ) );
+				dg2020_set_constant( f->channel[ i ]->self,
+									 -1,
+									 dg2020.max_seq_len + 1, OFF( f ) );
 			else
 			{
-				x_dg2020_set_constant( f->channel[ i ]->self, 0, 1, LOW );
-				x_dg2020_set_constant( f->channel[ i ]->self, 1,
-									   dg2020.max_seq_len, OFF( f ) );
+				dg2020_set_constant( f->channel[ i ]->self,
+									 -1, 1, LOW );
+				dg2020_set_constant( f->channel[ i ]->self, 0,
+									 dg2020.max_seq_len, OFF( f ) );
 			}
 		}
 	}
@@ -785,7 +802,7 @@ void dg2020_commit( FUNCTION * f, bool flag )
 
 	if ( needs_changes )
 		while ( ( what = dg2020_diff( old, new, &start, &len ) ) != 0 )
-			x_dg2020_set_constant( p->channel->self, start, len,
+			dg2020_set_constant( p->channel->self, start, len,
 								   what == -1 ? OFF( f ) : ON( f ) );
 
 	T_free( old );
@@ -838,17 +855,8 @@ void dg2020_clear_padding_block( FUNCTION *f )
 		return;
 
 	for ( i = 0; i < f->num_channels; i++ )
-		x_dg2020_set_constant( f->channel[ i ]->self, dg2020.block[ 1 ].start,
-							   dg2020.mem_size - dg2020.block[ 1 ].start,
-							   OFF( f ) );
+		dg2020_set_constant( f->channel[ i ]->self,
+							 dg2020.block[ 1 ].start - 1,
+							 dg2020.mem_size - dg2020.block[ 1 ].start,
+							 OFF( f ) );
 }
-
-
-#ifdef MAX_DEBUG
-void x_dg2020_set_constant( int ch, Ticks start, Ticks len, int type )
-{
-	printf( "->  %2d: %8ld %8ld   %s\n", ch, start, len,
-			type == 1 ? "HIGH" : "LOW" );
-	fflush( stdout );
-}
-#endif

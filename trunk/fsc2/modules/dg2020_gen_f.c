@@ -156,8 +156,13 @@ bool dg2020_invert_function( int function )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-bool dg2020_set_delay_function( int function, double delay )
+bool dg2020_set_function_delay( int function, double delay )
 {
+	Ticks Delay = dg2020_double2ticks( delay );
+	int i;
+	FUNCTION *f;
+
+
 	if ( dg2020.function[ function ].is_delay )
 	{
 		eprint( FATAL, "%s:%ld: DG2020: Delay for function `%s' has already "
@@ -165,16 +170,36 @@ bool dg2020_set_delay_function( int function, double delay )
 		THROW( EXCEPTION );
 	}
 
-	/* check that the delay value is reasonable */
+	/* Check that the delay value is reasonable */
 
-	if ( delay < 0 )
+	if ( Delay < 0 )
 	{
-		eprint( FATAL, "%s:%ld: Invalid negative delay: %s\n", Fname, Lc,
-				dg2020_ptime( delay ) );
-		THROW( EXCEPTION );
-	}
+		if ( ( dg2020.is_trig_in_mode && dg2020.trig_in_mode ) ||
+			 dg2020.is_trig_in_slope || dg2020.is_trig_in_level ||
+			 dg2020.is_trig_in_impedance )
+		{
+			eprint( FATAL, "%s:%ld: Negative delays are invalid in EXTERNAL "
+					"trigger mode.\n", Fname, Lc );
+			THROW( EXCEPTION );
+		}
 
-	dg2020.function[ function ].delay = dg2020_double2ticks( delay );
+		if ( Delay < dg2020.neg_delay )
+		{
+			for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
+			{
+				f = &dg2020.function[ i ];
+				if ( ! f->is_used || i == function )
+					continue;
+				f->delay += dg2020.neg_delay - Delay;
+			}
+			dg2020.neg_delay = dg2020.function[ function ].delay = - Delay;
+		}
+		else
+			dg2020.function[ function ].delay = dg2020.neg_delay - Delay;
+	}
+	else
+		dg2020.function[ function ].delay = Delay - dg2020.neg_delay;
+		
 	dg2020.function[ function ].is_used = SET;
 
 	return OK;
@@ -274,7 +299,6 @@ bool dg2020_set_trigger_mode( int mode )
 					"a trigger impedance is incompatible.\n", Fname, Lc );
 			THROW( EXCEPTION );
 		}
-
 	}
 	else
 	{
@@ -282,6 +306,14 @@ bool dg2020_set_trigger_mode( int mode )
 		{
 			eprint( FATAL, "%s:%ld: DG2020: EXTERNAL trigger mode and setting "
 					"a repeat time or frequency is incompatible.\n",
+					Fname, Lc );
+			THROW( EXCEPTION );
+		}
+
+		if ( dg2020.is_neg_delay )
+		{
+			eprint( FATAL, "%s:%ld: DG2020: EXTERNAL trigger mode and using "
+					"negative delays for functions is incompatible.\n",
 					Fname, Lc );
 			THROW( EXCEPTION );
 		}
@@ -315,6 +347,16 @@ bool dg2020_set_trig_in_level( double voltage )
 		eprint( SEVERE, "%s:%ld: DG2020: Setting a trigger level is useless "
 				"in INTERNAL trigger mode.\n", Fname, Lc );
 		return FAIL;
+	}
+
+	if ( dg2020.is_neg_delay &&
+		 ! ( ( dg2020.is_trig_in_mode && dg2020.trig_in_mode == INTERNAL ) ||
+			 dg2020.is_repeat_time ) )
+	{
+		eprint( FATAL, "%s:%ld: DG2020: Setting a trigger level (implicitly "
+				"selecting EXTERNAL trigger mode) while using negative delays "
+				"for functions is incompatible.\n",	Fname, Lc );
+		THROW( EXCEPTION );
 	}
 
 	if ( voltage > MAX_TRIG_IN_LEVEL || voltage < MIN_TRIG_IN_LEVEL )
@@ -355,6 +397,16 @@ bool dg2020_set_trig_in_slope( int slope )
 		return FAIL;
 	}
 
+	if ( dg2020.is_neg_delay &&
+		 ! ( ( dg2020.is_trig_in_mode && dg2020.trig_in_mode == INTERNAL ) ||
+			 dg2020.is_repeat_time ) )
+	{
+		eprint( FATAL, "%s:%ld: DG2020: Setting a trigger slope (implicitly "
+				"selecting EXTERNAL trigger mode) while using negative delays "
+				"for functions is incompatible.\n",	Fname, Lc );
+		THROW( EXCEPTION );
+	}
+
 	dg2020.trig_in_slope = slope;
 	dg2020.is_trig_in_slope = SET;
 
@@ -375,11 +427,22 @@ bool dg2020_set_trig_in_impedance( int state )
 	}
 
 	if ( ( dg2020.is_trig_in_mode && dg2020.trig_in_mode == INTERNAL ) ||
-		 dg2020.is_repeat_time)
+		 dg2020.is_repeat_time )
 	{
 		eprint( SEVERE, "%s:%ld: DG2020: Setting a trigger impedance is "
 				"useless in INTERNAL trigger mode.\n", Fname, Lc );
 		return FAIL;
+	}
+
+	if ( dg2020.is_neg_delay &&
+		 ! ( ( dg2020.is_trig_in_mode && dg2020.trig_in_mode == INTERNAL ) ||
+			 dg2020.is_repeat_time ) )
+	{
+		eprint( FATAL, "%s:%ld: DG2020: Setting a trigger impedance "
+				"(implicitly selecting EXTERNAL trigger mode) while using "
+				"negative delays for functions is incompatible.\n",
+				Fname, Lc );
+		THROW( EXCEPTION );
 	}
 
 	dg2020.trig_in_impedance = state;
@@ -407,7 +470,7 @@ bool dg2020_set_repeat_time( double time )
 	if ( dg2020.is_trig_in_mode && dg2020.trig_in_mode == EXTERNAL )
 	{
 		eprint( FATAL, "%s:%ld: DG2020: Setting a repeat time/frequency and "
-				"trigger mode to internal is incompatible.\n", Fname, Lc );
+				"trigger mode to EXTERNAL is incompatible.\n", Fname, Lc );
 		THROW( EXCEPTION );
 	}
 

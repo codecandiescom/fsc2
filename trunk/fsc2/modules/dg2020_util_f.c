@@ -294,7 +294,7 @@ void dg2020_calc_padding( void )
 
 	/* Make sure sequence length has at least the minimum possible size */
 
-	dg2020.max_seq_len = Ticks_max( dg2020.max_seq_len,	MIN_BLOCK_SIZE );
+	dg2020.max_seq_len = Ticks_max( dg2020.max_seq_len, MIN_BLOCK_SIZE );
 
 	/* Make sure the sequences fit into the pulser memory */
 
@@ -480,7 +480,7 @@ int dg2020_diff( bool *old, bool *new, Ticks *start, Ticks *length )
 	   due to the pulsers firmware bug) and store if we wave to reset (-1)
 	   or to set (1) */
 
-	*start = where + 1;
+	*start = where;
 	ret = *a == SET ? -1 : 1;
 
 	/* Now figure out the length of the area we have to set or reset */

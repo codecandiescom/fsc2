@@ -570,8 +570,10 @@ bool dg2020_set_constant( int channel, Ticks address, Ticks length, int state )
 	char s = ( state ? '1' : '0' );
 
 
-	/* The following is a dirty hack to get around the 63K write limit
-	   by splitting too long transfers into several shorter ones.
+	address++;        /* because of the first unset bit */
+
+	/* The following is a dirty hack to get around the 63K write limit by
+	   splitting transfers that would be too long into several shorter ones.
 	   This should go away when the problem is finally solved !!!!!!! */
 
 	if ( length > DMA_SIZE - 50 )
