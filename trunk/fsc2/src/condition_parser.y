@@ -170,8 +170,10 @@ expr:    E_INT_TOKEN unit         { if ( ! condition_gobble )
                                         $$ = apply_unit( $<vptr>5, $6 ); }
        | E_VAR_REF                { if ( condition_gobble )
 		                                 vars_pop( $1 ); }
+/* This is needed far string comaprisons but leads to 2 reduce/reduce conflicts
        | E_STR_TOKEN              { if ( ! condition_gobble )
 		                                 $$ = vars_push( STR_VAR, $<sptr>1 ); }
+*/
        | E_VAR_TOKEN '('          { eprint( FATAL, SET, "`%s' isn't a "
 											"function.\n", $1->name );
 	                                THROW( EXCEPTION ); }

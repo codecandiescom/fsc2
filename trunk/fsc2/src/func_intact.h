@@ -76,6 +76,34 @@ typedef struct {
 } TOOL_BOX;
 
 
+typedef struct {
+	bool is_init;
+
+	int	WIN_MIN_WIDTH;
+	int	WIN_MIN_HEIGHT;
+
+	int	OBJ_HEIGHT;
+	int	OBJ_WIDTH;
+
+	int	BUTTON_HEIGHT;
+	int	BUTTON_WIDTH;
+	int	NORMAL_BUTTON_DELTA;
+
+	int	SLIDER_HEIGHT;
+	int	SLIDER_WIDTH;
+
+	int INPUT_HEIGHT;
+	int INPUT_WIDTH;
+
+	int	LABEL_VERT_OFFSET;
+	int	VERT_OFFSET;
+	int	HORI_OFFSET;
+
+	int	OFFSET_X0;
+	int	OFFSET_Y0;
+} FI_SIZES;
+
+
 #define NORMAL_BUTTON 0
 #define PUSH_BUTTON   1
 #define RADIO_BUTTON  2
@@ -98,9 +126,6 @@ typedef struct {
 
 
 Var *f_layout(  Var *v );
-Var *f_bcreate( Var *v );
-Var *f_bdelete( Var *v );
-Var *f_bstate(  Var *v );
 Var *f_screate( Var *v );
 Var *f_sdelete( Var *v );
 Var *f_svalue(  Var *v );
@@ -114,7 +139,13 @@ Var *f_mdelete( Var *v );
 Var *f_mchoice( Var *v );
 Var *f_objdel(  Var *v );
 Var *f_freeze(  Var *v );
-
+void func_intact_init( void );
+IOBJECT *find_object_from_ID( long ID );
+void recreate_Tool_Box( void );
+void convert_escapes( char *str );
+void check_label( char *str );
+bool check_format_string( char *buf );
+void store_geometry( void );
 void parent_freeze( int freeze );
 void tools_clear( void );
 

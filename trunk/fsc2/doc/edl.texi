@@ -1007,16 +1007,17 @@ IF A != 0 @{
 @end example
 
 
-All comparison operators may also be used with strings. The test
-for equality has its usual meaning (but take care, in the comparison
-lower and upper case characters are treated as different). The
-comparison for larger or smaller is based on the ASCII values of the
-characters of the string, not the lengths of the strings. For example,
-the comparison of the strings @code{"ON"} and @code{"OFF"} will result
-in @code{"ON"} being larger than @code{"OFF"} because for the first
-characters where the strings differ, @code{'N'} and @code{'F'},
-@code{'N'} has a higher ASCII value than @code{'F'}.
+@c This still leads to 2 reduce/reduce conflicts in the parsers...
 
+@c All comparison operators may also be used with strings. The test
+@c for equality has its usual meaning (but take care, in the comparison
+@c lower and upper case characters are treated as different). The
+@c comparison for larger or smaller is based on the ASCII values of the
+@c characters of the string, not the lengths of the strings. For example,
+@c the comparison of the strings @code{"ON"} and @code{"OFF"} will result
+@c in @code{"ON"} being larger than @code{"OFF"} because for the first
+@c characters where the strings differ, @code{'N'} and @code{'F'},
+@c @code{'N'} has a higher ASCII value than @code{'F'}.
 
 
 @anchor{UNTIL loops}

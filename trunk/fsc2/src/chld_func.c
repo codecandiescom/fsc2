@@ -225,7 +225,7 @@ bool exp_layout( char *buffer, ptrdiff_t len )
 
 		TRY
 		{
-			/* Get variable with address of function to create a button */
+			/* Get variable with address of function to set the layout */
 
 			Func_ptr = func_get( "layout", &acc );
 
@@ -290,7 +290,7 @@ long *exp_bcreate( char *buffer, ptrdiff_t len )
 		int acc;
 		long result[ 2 ];
 		char *pos;
-		long ID;
+		long type;
 
 
 		TRY
@@ -305,9 +305,9 @@ long *exp_bcreate( char *buffer, ptrdiff_t len )
 			memcpy( &EDL.Lc, pos, sizeof EDL.Lc );   /* current line number */
 			pos += sizeof EDL.Lc;
 
-			memcpy( &ID, pos, sizeof ID );
-			vars_push( INT_VAR, ID );
-			pos += sizeof ID;
+			memcpy( &type, pos, sizeof type );
+			vars_push( INT_VAR, type );
+			pos += sizeof type;
 
 			memcpy( &val, pos, sizeof val );         /* get colleague ID */
 			if ( val >= 0 )
@@ -373,7 +373,7 @@ bool exp_bdelete( char *buffer, ptrdiff_t len )
 
 		TRY
 		{
-			/* Get variable with address of function to create a button */
+			/* Get variable with address of function to delete a button */
 
 			Func_ptr = func_get( "button_delete", &acc );
 
@@ -443,7 +443,7 @@ long *exp_bstate( char *buffer, ptrdiff_t len )
 
 		TRY
 		{
-			/* Get variable with address of function to create a button */
+			/* Get variable with address of function to get a button state */
 
 			Func_ptr = func_get( "button_state", &acc );
 
@@ -516,14 +516,14 @@ long *exp_screate( char *buffer, ptrdiff_t len )
 		int acc;
 		long result[ 2 ];
 		char *pos;
-		long ID;
+		long type;
 		double val;
 		int i;
 
 
 		TRY
 		{
-			/* Get variable with address of function to create a button */
+			/* Get variable with address of function to create a slider */
 
 			Func_ptr = func_get( "slider_create", &acc );
 
@@ -533,9 +533,9 @@ long *exp_screate( char *buffer, ptrdiff_t len )
 			memcpy( &EDL.Lc, pos, sizeof EDL.Lc );    /* current line number */
 			pos += sizeof EDL.Lc;
 
-			memcpy( &ID, pos, sizeof ID );
-			vars_push( INT_VAR, ID );
-			pos += sizeof ID;
+			memcpy( &type, pos, sizeof type );
+			vars_push( INT_VAR, type );
+			pos += sizeof type;
 
 			for ( i = 0; i < 3; i++ )
 			{
@@ -602,7 +602,7 @@ bool exp_sdelete( char *buffer, ptrdiff_t len )
 
 		TRY
 		{
-			/* Get variable with address of function to create a button */
+			/* Get variable with address of function to delete a slider */
 
 			Func_ptr = func_get( "slider_delete", &acc );
 

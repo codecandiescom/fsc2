@@ -209,7 +209,9 @@ expr:    E_INT_TOKEN unit                             { }
        | E_VAR_TOKEN '[' list1 ']' unit               { }
        | E_FUNC_TOKEN '(' list2 ')' unit              { }
        | E_VAR_REF                                    { }
+/* This is needed far string comaprisons but leads to 2 reduce/reduce conflicts
        | E_STR_TOKEN                                  { }
+*/
        | E_FUNC_TOKEN '['         { eprint( FATAL, SET, "`%s' is a predefined "
 									        "function.\n", $1->name );
 	                                THROW( EXCEPTION ); }

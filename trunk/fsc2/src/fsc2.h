@@ -87,6 +87,10 @@
 #include "graph_cut.h"
 #include "print.h"
 #include "func_intact.h"
+#include "func_intact_b.h"
+#include "func_intact_s.h"
+#include "func_intact_o.h"
+#include "func_intact_m.h"
 #include "conn.h"
 #include "module_util.h"
 

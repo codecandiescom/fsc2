@@ -54,7 +54,7 @@ FOREVER {
 	}
 
 	IF ( button_state( BID1 ) ) {
-		button_state( BID4, 0 );
+		button_state( BID4, 1 );
 		clear_curve( );
 		I = 0;
 	}
