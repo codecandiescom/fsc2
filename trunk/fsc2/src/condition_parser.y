@@ -39,29 +39,29 @@ static Var *CV;
 %token E_FLOAT_TOKEN  262
 %token E_STR_TOKEN	  263
 %token E_EQ			  264
-%token E_LT			  265
-%token E_LE			  266
-%token E_GT			  267
-%token E_GE			  268
-%token E_NT_TOKEN	  269
-%token E_UT_TOKEN	  270
-%token E_MT_TOKEN	  271
-%token E_T_TOKEN	  272
-%token E_NU_TOKEN	  273
-%token E_UU_TOKEN	  274
-%token E_MU_TOKEN	  275
-%token E_KU_TOKEN	  276
-%token E_MEG_TOKEN	  277
-%token E_NEG		  278
-%token E_AND          279
-%token E_OR           280
-%token E_XOR          281
-%token E_NOT          282
-%token E_PPOS         283
-%token E_PLEN         284
-%token E_PDPOS        285
-%token E_PDLEN        286
-
+%token E_NE			  265
+%token E_LT			  266
+%token E_LE			  267
+%token E_GT			  268
+%token E_GE			  269
+%token E_NT_TOKEN	  270
+%token E_UT_TOKEN	  271
+%token E_MT_TOKEN	  272
+%token E_T_TOKEN	  273
+%token E_NU_TOKEN	  274
+%token E_UU_TOKEN	  275
+%token E_MU_TOKEN	  276
+%token E_KU_TOKEN	  277
+%token E_MEG_TOKEN	  278
+%token E_NEG		  279
+%token E_AND          280
+%token E_OR           281
+%token E_XOR          282
+%token E_NOT          283
+%token E_PPOS         284
+%token E_PLEN         285
+%token E_PDPOS        286
+%token E_PDLEN        287
 
 %token <vptr> E_VAR_TOKEN         /* variable name */
 %token <vptr> E_VAR_REF
@@ -69,7 +69,7 @@ static Var *CV;
 %token <lval> E_INT_TOKEN
 %token <dval> E_FLOAT_TOKEN
 %token <sptr> E_STR_TOKEN
-%token E_EQ E_LT E_LE E_GT E_GE
+%token E_EQ E_NE E_LT E_LE E_GT E_GE
 %token <lval> E_PPOS E_PLEN E_PDPOS E_PDLEN
 
 %token E_NT_TOKEN E_UT_TOKEN E_MT_TOKEN E_T_TOKEN
@@ -79,7 +79,7 @@ static Var *CV;
 
 %left E_AND E_OR E_XOR
 %left E_NOT
-%left E_EQ E_LT E_LE E_GT E_GE
+%left E_EQ E_NE E_LT E_LE E_GT E_GE
 %left '+' '-'
 %left '*' '/'
 %left '%'
@@ -122,6 +122,7 @@ expr:    E_INT_TOKEN unit         { $$ = apply_unit( vars_push( INT_VAR, $1 ),
        | expr E_XOR expr          { $$ = vars_comp( COMP_XOR, $1, $3 ); }
        | E_NOT expr               { $$ = vars_lnegate( $2 ); }
        | expr E_EQ expr           { $$ = vars_comp( COMP_EQUAL, $1, $3 ); }
+       | expr E_NE expr           { $$ = vars_comp( COMP_UNEQUAL, $1, $3 ); }
        | expr E_LT expr           { $$ = vars_comp( COMP_LESS, $1, $3 ); }
        | expr E_GT expr           { $$ = vars_comp( COMP_LESS, $3, $1 ); }
        | expr E_LE expr           { $$ = vars_comp( COMP_LESS_EQUAL,

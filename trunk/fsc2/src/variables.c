@@ -620,7 +620,8 @@ Var *vars_negate( Var *v )
 /* than the second variable (tests for greater or greater or equal can be   */
 /* done simply by switching the arguments).                                 */
 /* ->                                                                       */
-/*    * type of comparison (COMP_EQUAL, COMP_LESS or COMP_LESS_EQUAL)       */
+/*    * type of comparison (COMP_EQUAL, COMP_UNEQUAL, COMP_LESS or          */
+/*      COMP_LESS_EQUAL)                                                    */
 /*    * pointers to the two variables                                       */
 /* <-                                                                       */
 /*    * 1 (TRUE) or 0 (FALSE) depending on result of comparison             */
@@ -644,6 +645,13 @@ Var *vars_comp( int comp_type, Var *v1, Var *v2 )
 				new_var = vars_push( INT_VAR, v1->INT == v2->INT );
 			else
 				new_var = vars_push( INT_VAR, VALUE( v1 ) == VALUE( v2 ) );
+			break;
+
+		case COMP_UNEQUAL :
+			if ( v1->type == INT_VAR && v2->type == INT_VAR )
+				new_var = vars_push( INT_VAR, v1->INT != v2->INT );
+			else
+				new_var = vars_push( INT_VAR, VALUE( v1 ) != VALUE( v2 ) );
 			break;
 
 		case COMP_LESS :

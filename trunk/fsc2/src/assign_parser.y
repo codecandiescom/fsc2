@@ -92,7 +92,7 @@ int Cur_PHST;
 %token <dval> FLOAT_TOKEN
 %token <sptr> STR_TOKEN
 %token AND OR XOR NOT
-%token EQ LT LE GT GE
+%token EQ NE LT LE GT GE
 
 %token NU_TOKEN UU_TOKEN MU_TOKEN KU_TOKEN MEG_TOKEN
 %token NT_TOKEN UT_TOKEN MT_TOKEN T_TOKEN
@@ -102,7 +102,7 @@ int Cur_PHST;
 
 %left AND OR XOR
 %left NOT
-%left EQ LT LE GT GE
+%left EQ NE LT LE GT GE
 %left '+' '-'
 %left '*' '/'
 %left '%'
@@ -328,6 +328,7 @@ expr:    INT_TOKEN unit            { $$ = apply_unit( vars_push( INT_VAR, $1 ),
        | expr XOR expr       	   { $$ = vars_comp( COMP_XOR, $1, $3 ); }
        | NOT expr            	   { $$ = vars_lnegate( $2 ); }
        | expr EQ expr              { $$ = vars_comp( COMP_EQUAL, $1, $3 ); }
+       | expr NE expr              { $$ = vars_comp( COMP_UNEQUAL, $1, $3 ); }
        | expr LT expr              { $$ = vars_comp( COMP_LESS, $1, $3 ); }
        | expr GT expr              { $$ = vars_comp( COMP_LESS, $3, $1 ); }
        | expr LE expr              { $$ = vars_comp( COMP_LESS_EQUAL,

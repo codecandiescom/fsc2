@@ -62,6 +62,7 @@ typedef struct Var_
 
 enum {
 	COMP_EQUAL,
+	COMP_UNEQUAL,
 	COMP_LESS,
 	COMP_LESS_EQUAL,
 	COMP_AND,

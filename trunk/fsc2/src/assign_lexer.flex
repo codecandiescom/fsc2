@@ -393,6 +393,7 @@ WS          [\n=: ]+
 			/* stuff used with functions, arrays and math */
 
 "=="        return EQ;        /* equal */
+"!="        return NE;        /* unequal */
 "<"         return LT;        /* less than */
 "<="        return LE;        /* less than or equal */
 ">"         return GT;        /* greater than */
