@@ -119,6 +119,7 @@ bool setup_comm( void )
 	int pr;
 	int i;
 	struct shmid_ds shm_buf;
+	void *raw_key;
 
 
 	/* Open pipes for passing data between child and parent process - we need
@@ -140,7 +141,8 @@ bool setup_comm( void )
 	   further shared memory segments used to send data from the child to the
 	   parent */
 
-	Key_Area = shmget( IPC_PRIVATE, 2 * sizeof( int ), IPC_CREAT | 0600 );
+	Key_Area = shmget( IPC_PRIVATE, 4 * sizeof( char ) + 2 * sizeof( int ),
+					   IPC_CREAT | 0600 );
 
 	if ( Key_Area < 0 )
 	{
@@ -149,7 +151,7 @@ bool setup_comm( void )
 		return FAIL;
 	}
 
-	if ( ( Key = ( KEY * ) shmat( Key_Area, NULL, 0 ) ) == ( KEY * ) - 1 )
+	if ( ( raw_key = shmat( Key_Area, NULL, 0 ) ) == ( void * ) - 1 )
 	{
 		for ( i = 0; i < 4; i++ )
 			close( pd[ i ] );
@@ -171,10 +173,16 @@ bool setup_comm( void )
 		for ( i = 0; i < 4; i++ )
 			close( pd[ i ] );
 
-		shmdt( ( void * ) Key );
+		shmdt( ( void * ) raw_key );
 		shmctl( Key_Area, IPC_RMID, &shm_buf );
 		return FAIL;
 	}
+
+	/* As every other shared memory segment we start it with some magic chars
+	   (fsc2) to make sure we could identify it as ours in vcase of need */
+
+	memcpy( raw_key, "fsc2", 4 * sizeof( char ) );
+	Key = ( KEY * ) ( ( char * ) raw_key + 4 );
 
 	message_queue_low = message_queue_high = 0;
 
@@ -203,7 +211,7 @@ void end_comm( void )
 
 	/* Detach from and remove the shared memory segment */
 
-	shmdt( ( void * ) Key );
+	shmdt( ( void * ) ( ( char * ) Key - 4 ) );
 	shmctl( Key_Area, IPC_RMID, &shm_buf );
 
 	/* Close parents side of read and write pipe */
@@ -283,7 +291,7 @@ long reader( void *ret )
 	long dim;
 	int i;
 	int n1, n2;
-	long nx, ny;
+	long nc, nx, ny;
 	long retval;
 	static char *retstr = NULL;
 	double rwc_x_start, rwc_x_delta, rwc_y_start, rwc_y_delta;
@@ -459,6 +467,7 @@ long reader( void *ret )
 			   coordinate stuff */
 
 			pipe_read( pd[ READ ], &dim, sizeof( long ) );
+			pipe_read( pd[ READ ], &nc, sizeof( long ) );
 			pipe_read( pd[ READ ], &nx, sizeof( long ) );
 			pipe_read( pd[ READ ], &ny, sizeof( long ) );
 			pipe_read( pd[ READ ], &rwc_x_start, sizeof( double ) );
@@ -483,7 +492,7 @@ long reader( void *ret )
 
 			/* call the function with the parameters just read */
 
-			graphics_init( dim, nx, ny, rwc_x_start, rwc_x_delta,
+			graphics_init( dim, nc, nx, ny, rwc_x_start, rwc_x_delta,
 						   rwc_y_start, rwc_y_delta, str[ 0 ], str[ 1 ] );
 
 			/* get rid of the label strings and return */
@@ -499,6 +508,31 @@ long reader( void *ret )
 
 			send_browser( header.type == C_PROG ?
 						  main_form->browser : main_form->error_browser );
+			retval = 0;
+			break;
+
+		case C_INPUT :
+			assert( I_am == PARENT );       /* only to be read by the parent */
+
+			/* get length of predefined content and label from header and 
+			   read them */
+
+			for ( i = 0; i < 2 ; i++ )
+				if ( header.data.str_len[ i ] > 0 )
+				{
+					str[ i ] = get_string( header.data.str_len[ i ] );
+					pipe_read( pd[ READ ], str[ i ],
+							   header.data.str_len[ i ] );
+					str[ i ][ header.data.str_len[ i ] ] = '\0';
+				}
+				else if ( header.data.str_len[ i ] == 0 )
+					str[ i ] = get_string_copy( "" );
+				else
+					str[ i ] = NULL;
+
+			/* send string from input form to child */
+
+			writer( C_STR, show_input( str[ 0 ], str[ 1 ] ) );
 			retval = 0;
 			break;
 
@@ -616,8 +650,9 @@ bool pipe_read( int fd, void *buf, size_t bytes_to_read )
 /*                    number of default button (int) (parameter as in      */
 /*                    fl_show_choices())                                   */
 /* C_INIT_GRAPHICS  : dimensionality of experiment (1 or 2) (long), number */
-/*                    of points in x- and y-direction (long) and the x-    */
-/*                    and y-label strings (char *)                         */
+/*                    of curves and of points in x- and y-direction (long),*/
+/*                    4 real world cooordinates (double) and the x- and    */
+/*                    y-label strings (char *)                             */
 /* C_SHOW_FSELECTOR : 4 strings (4 char *) with identical meaning as the   */
 /*                    parameter for fl_show_fselector()                    */
 /* C_PROG, C_OUTPUT : None at all                                          */
@@ -640,7 +675,7 @@ void writer( int type, ... )
 	char *str[ 4 ];
 	long dim;
 	int n1, n2;
-	long nx, ny;
+	long nc, nx, ny;
 	int i;
 	char ack;
 	double rwc_x_start, rwc_x_delta, rwc_y_start, rwc_y_delta;
@@ -761,6 +796,7 @@ void writer( int type, ... )
 			assert( I_am == CHILD );      /* only to be written by the child */
 
 			dim = va_arg( ap, long );
+			nc =  va_arg( ap, long );
 			nx = va_arg( ap, long );
 			ny = va_arg( ap, long );
 			for ( i = 0; i < 2; i++ )
@@ -779,6 +815,7 @@ void writer( int type, ... )
 
 			write( pd[ WRITE ], &header, sizeof( CS ) );
 			write( pd[ WRITE ], &dim, sizeof( long ) );
+			write( pd[ WRITE ], &nc, sizeof( long ) );
 			write( pd[ WRITE ], &nx, sizeof( long ) );
 			write( pd[ WRITE ], &ny, sizeof( long ) );
 			write( pd[ WRITE ], &rwc_x_start, sizeof( double ) );
@@ -822,6 +859,30 @@ void writer( int type, ... )
 		case C_PROG : case C_OUTPUT :
 			assert( I_am == CHILD );      /* only to be written by the child */
 			write( pd[ WRITE ], &header, sizeof( CS ) );
+			break;
+
+		case C_INPUT :
+			assert( I_am == CHILD );      /* only to be written by the child */
+
+			/* set up the two argument strings */
+
+			for ( i = 0; i < 2; i++ )
+			{
+				str[ i ] = va_arg( ap, char * );
+				if ( str[ i ] == NULL )
+					header.data.str_len[ i ] = -1;
+				else if ( *str[ i ] == '\0' )
+					header.data.str_len[ i ] = 0;
+				else
+					header.data.str_len[ i ] = strlen( str[ i ] );
+			}
+
+			/* send header and the two strings */
+
+			write( pd[ WRITE ], &header, sizeof( CS ) );
+			for ( i = 0; i < 2; i++ )
+				if ( header.data.str_len[ i ] > 0 )
+					write( pd[ WRITE ], str[ i ], header.data.str_len[ i ] );
 			break;
 
 		case C_STR :

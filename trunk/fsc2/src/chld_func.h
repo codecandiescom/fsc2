@@ -17,7 +17,7 @@ int show_choices( const char *text, int numb, const char *b1, const char *b2,
 				  const char *b3, int def );
 const char *show_fselector( const char *message, const char *directory,
 							const char *pattern, const char *def );
-const char *show_input( const char *content, const char label );
+const char *show_input( const char *content, const char *label );
 
 
 #endif  /* ! CHLD_FUNC_HEADER */

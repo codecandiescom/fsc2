@@ -9,15 +9,26 @@
 #include <sys/shm.h>
 
 
+typedef struct {
+	long nx;
+	long ny;
+	long nc;
+	int type;
+	Var *v;
+} DPoint;
+
 
 static void f_wait_alarm_handler( int sig_type );
+DPoint *eval_display_args( Var *v, int *npoints );
 static int get_save_file( Var **v, const char *calling_function );
 static void print_array( Var *v, long cur_dim, long *start, int fid );
 static void print_slice( Var *v, int fid );
 static void print_browser( int browser, int fid, const char* comment );
 
 
-static bool No_File_Number;
+static bool No_File_Numbers;
+static bool Dont_Save;
+
 
 
 /* When in the input an identifier is found it is always tried first if the
@@ -85,6 +96,7 @@ Var *f_save( Var *v );
 Var *f_fsave( Var *v );
 Var *f_save_p( Var *v );
 Var *f_save_o( Var *v );
+Var *f_save_c( Var * );
 
 
 /* The following variables are shared with loader.c which adds further 
@@ -125,11 +137,12 @@ Func Def_Fncts[ ] =              /* List of built-in functions */
 	{ "dim",          f_dim,           1, ACCESS_ALL, 0 },
 	{ "size",         f_size,          2, ACCESS_ALL, 0 },
 	{ "sizes",        f_sizes,         1, ACCESS_ALL, 0 },
-	{ "get_file",     f_getf,         -1, ACCESS_ALL, 0 },
-	{ "save",         f_save,         -1, ACCESS_ALL, 0 },
-	{ "fsave",        f_fsave,        -1, ACCESS_ALL, 0 },
-	{ "save_program", f_save_p,       -1, ACCESS_ALL, 0 },
-	{ "save_output",  f_save_o,       -1, ACCESS_ALL, 0 },
+	{ "get_file",     f_getf,         -1, ACCESS_EXP, 0 },
+	{ "save",         f_save,         -1, ACCESS_EXP, 0 },
+	{ "fsave",        f_fsave,        -1, ACCESS_EXP, 0 },
+	{ "save_program", f_save_p,       -1, ACCESS_EXP, 0 },
+	{ "save_output",  f_save_o,       -1, ACCESS_EXP, 0 },
+	{ "save_comment", f_save_c,       -1, ACCESS_EXP, 0 },
 	{ NULL,           NULL,            0, 0,          0 }
 	                                     /* marks last entry, don't remove ! */
 };
@@ -142,7 +155,8 @@ Func Def_Fncts[ ] =              /* List of built-in functions */
 
 bool functions_init( void )
 {
-	No_File_Number = UNSET;
+	No_File_Numbers = UNSET;
+	Dont_Save = UNSET;
 
 	/* count number of built-in functions */
 
@@ -196,7 +210,8 @@ void functions_exit( void )
 	T_free( Fncts );
 	Fncts = NULL;
 
-	No_File_Number = UNSET;
+	No_File_Numbers = UNSET;
+	Dont_Save = UNSET;
 	close_all_files( );
 }
 
@@ -943,14 +958,47 @@ void f_wait_alarm_handler( int sig_type )
 /*-------------------------------------------------------------------*/
 /* f_init_1d() has to be called to initialize the display system for */
 /* 1-dimensional experiments.                                        */
+/* Arguments:                                                        */
+/* 1. Number of curves to be shown                                   */
+/* 2. Number of points (0 or negative  if unknown)                   */
+/* 3. Real world coordinate and increment (optional)                 */
+/* 4. x-axis label (optional)                                        */
 /*-------------------------------------------------------------------*/
 
 Var *f_init_1d( Var *v )
 {
+	long nc;
 	long n = -1;
 	double rwc_start = 0.0, rwc_delta = 0.0;
 	char *label;
 
+
+	if ( v == NULL )
+	{
+		eprint( FATAL, "%s:%ld: Missing number of curves in `init_1d()'.\n",
+				Fname, Lc );
+		THROW( EXCEPTION );
+	}
+	
+	vars_check( v, INT_VAR | FLOAT_VAR );              /* get # of curves */
+
+	if ( v->type == INT_VAR )
+		nc = v->val.lval;
+	else
+	{
+		eprint( WARN, "%s:%ld: Floating point value used as number of "
+				"curves in `init_1d()'.\n", Fname, Lc );
+		nc = rnd( v->val.dval );
+	}
+
+	if ( nc < 1 || nc > MAX_CURVES )
+	{
+		eprint( FATAL, "%s:%ld: Invalid number of curves (%ld) in "
+				"`init_1d()'.\n", Fname, Lc, nc );
+		THROW( EXCEPTION );
+	}
+
+	v = v->next;
 
 	if ( v == NULL )
 	{
@@ -966,20 +1014,17 @@ Var *f_init_1d( Var *v )
 	else
 	{
 		eprint( WARN, "%s:%ld: Floating point value used as number of "
-				"points.\n", Fname, Lc );
+				"points in `init_1d()'.\n", Fname, Lc );
 		n = rnd( v->val.dval );
 	}
 
 	v = v->next;
 
-	/* If next value is an integer or a float this is the real world coordinate
-	   and its increment */
-
 	if ( v != NULL )
 	{
 
 		/* If next value is an integer or a float this is the real world
-		   coordinate foolowed by the increment */
+		   coordinate followed by the increment */
 
 		if ( v->type & ( INT_VAR | FLOAT_VAR ) )
 		{
@@ -987,7 +1032,7 @@ Var *f_init_1d( Var *v )
 				 ! ( v->next->type & ( INT_VAR | FLOAT_VAR ) ) )
 			{
 				eprint( FATAL, "%s:%ld: Real word coordinate given but no "
-						"increment.\n" );
+						"increment in `init_1d()'.\n" );
 				THROW( EXCEPTION );
 			}
 
@@ -1005,7 +1050,7 @@ Var *f_init_1d( Var *v )
 			label = NULL;
 	}
 	
-	graphics_init( 1, n, 0, rwc_start, rwc_delta, 0.0, 0.0, label, NULL );
+	graphics_init( 1, nc, n, 0, rwc_start, rwc_delta, 0.0, 0.0, label, NULL );
 	return vars_push( INT_VAR, 1 );
 }
 
@@ -1017,11 +1062,43 @@ Var *f_init_1d( Var *v )
 
 Var *f_init_2d( Var *v )
 {
-	long dim;
-	long nx, ny;
-	double rwc_x_start = 0.0, rwc_x_delta = 0.0, 
-		   rwc_y_start = 0.0, rwc_y_delta = 0.0;
-	char *l1 = NULL, *l2 = NULL;
+	long nx = -1,
+		 ny = -1,
+		 nc;
+	double rwc_x_start = 0.0,
+		   rwc_x_delta = 0.0, 
+		   rwc_y_start = 0.0,
+		   rwc_y_delta = 0.0;
+	char *l1 = NULL,
+		 *l2 = NULL;
+
+
+	if ( v == NULL )
+	{
+		eprint( FATAL, "%s:%ld: Missing number of curves in `init_2d()'.\n",
+				Fname, Lc );
+		THROW( EXCEPTION );
+	}
+	
+	vars_check( v, INT_VAR | FLOAT_VAR );              /* get # of curves */
+
+	if ( v->type == INT_VAR )
+		nc = v->val.lval;
+	else
+	{
+		eprint( WARN, "%s:%ld: Floating point value used as number of "
+				"curves in `init_1d()'.\n", Fname, Lc );
+		nc = rnd( v->val.dval );
+	}
+
+	if ( nc < 1 || nc > MAX_CURVES )
+	{
+		eprint( FATAL, "%s:%ld: Invalid number of curves (%ld) in "
+				"`init_1d()'.\n", Fname, Lc, nc );
+		THROW( EXCEPTION );
+	}
+
+	v = v->next;
 
 	if ( v == NULL )
 	{
@@ -1040,7 +1117,6 @@ Var *f_init_2d( Var *v )
 				"points in x-direction.\n", Fname, Lc );
 		nx = rnd( v->val.dval );
 	}
-
 
 	v = v->next;
 
@@ -1067,7 +1143,7 @@ Var *f_init_2d( Var *v )
 	if ( v != NULL )
 	{
 		/* Now we expect either 4 real world coordinates (start and delta for
-		   x- and y-direction) or none at all, labels instead */
+		   x- and y-direction) or none at all - look for labels instead */
 
 		if ( v->type & ( INT_VAR | FLOAT_VAR ) )
 		{
@@ -1107,7 +1183,7 @@ Var *f_init_2d( Var *v )
 		}
 	}
 
-	graphics_init( dim, nx, ny, 0.0, 0.0, 0.0, 0.0, l1, l2 );
+	graphics_init( 2, nc, nx, ny, 0.0, 0.0, 0.0, 0.0, l1, l2 );
 	return vars_push( INT_VAR, 1 );
 }
 
@@ -1118,13 +1194,14 @@ Var *f_init_2d( Var *v )
 
 Var *f_display( Var *v )
 {
-	int nx, ny;
-	int overdraw_flag = 1;
+	DPoint *dp;
 	int shm_id;
 	struct shmid_ds shm_buf;
 	long len = 0;                    /* total length of message to send */
 	void *buf;
 	void *ptr;
+	int npoints;
+	int i;
 
 
 	/* We can't display data without a previous initialization */
@@ -1141,91 +1218,46 @@ Var *f_display( Var *v )
 		return vars_push( INT_VAR, 0 );
 	}
 
-	/* We begin with checking the arguments */
+	/* Check the arguments and get them into some reasonable form */
 
-	len += sizeof( long );                  /* for the length itself */
-
-	/* Get the x-index for the data */
-
-	if ( v == NULL )
-	{
-		eprint( FATAL, "%s:%ld: Missing x-index in `display()'.\n",
-				Fname, Lc );
-		THROW( EXCEPTION );
-	}
-
-	vars_check( v, INT_VAR | FLOAT_VAR );
-	
-	if ( v->type == INT_VAR )
-		nx = v->val.lval;
-	else
-		nx = rnd( v->val.dval );
-	len += sizeof( long );
-
-	v = v->next;
-
-	if ( G.dim == 2 )                       /* for 2D experiment get y-index */
-	{
-		if ( v == NULL )
-		{
-			eprint( FATAL, "%s:%ld: Missing y-index in `display()'.\n",
-					Fname, Lc );
-			THROW( EXCEPTION );
-		}
-		
-		vars_check( v, INT_VAR | FLOAT_VAR );
-	
-		if ( v->type == INT_VAR )
-			ny = v->val.lval;
-		else
-			ny = rnd( v->val.dval );
-
-		len += sizeof( long );
-
-		v = v->next;
-	}
-	else
-		ny = 0;
-
-	/* Now check type of data */
-
-	if ( v == NULL )
-	{
-		eprint( FATAL, "%s:%ld: Missing data in `display()'.\n",
-				Fname, Lc );
-		THROW( EXCEPTION );
-	}
-
-	vars_check( v, INT_VAR | FLOAT_VAR | INT_TRANS_ARR | FLOAT_TRANS_ARR );
-
-	/* Check the overdraw flag */
-
-	if ( v->next != NULL )
-		overdraw_flag = 0;
-	len += 2 * sizeof( int );                      /* for flag and data type */
+	dp = eval_display_args( v, &npoints );
 
 	if ( I_am == PARENT )      /* i.e. as long as this is only a test run... */
 		return vars_push( INT_VAR, 1 );
 
 	/* We need to determine the amount of shared memory needed */
 
-	switch( v->type )
+	len =   4 * sizeof( char )            /* identifier 'fsc2' */
+		  + sizeof( len )                 /* length field itself */
+		  + sizeof( int )                 /* number of points to be sent */
+		  + 3 * npoints * sizeof( long )  /* x-, y-index and curve */
+		  + npoints * sizeof( int );      /* data type */
+	
+	for ( i = 0; i < npoints; i++ )
 	{
-		case INT_VAR :
-			len += sizeof( long );
-			break;
+		switch( dp[ i ].v->type )
+		{
+			case INT_VAR :
+				len += sizeof( long );
+				break;
 
-		case FLOAT_VAR :
-			len += sizeof( double );
-			break;
+			case FLOAT_VAR :
+				len += sizeof( double );
+				break;
 
-		case INT_TRANS_ARR :
-			len += v->len * sizeof( long );
-			break;
+			case INT_TRANS_ARR :
+				len += ( dp[ i ].v->len + 1 ) * sizeof( long );
+				break;
 
-		case FLOAT_TRANS_ARR :
-			len += v->len * sizeof( double );
-			break;
+			case FLOAT_TRANS_ARR :
+				len += sizeof( long ) + dp[ i ].v->len * sizeof( double );
+				break;
+
+			default :                   /* this better never happens... */
+				eprint( FATAL, "Internal communication error at %s:%d.\n",
+						__FILE__, __LINE__ );
+				THROW( EXCEPTION );
+		}
 	}
 
 	while ( ! do_send )             /* wait for parent to become ready */
@@ -1246,7 +1278,7 @@ Var *f_display( Var *v )
 				usleep( 10000 );
 			else                             /* non-recoverable failure... */
 			{
-				eprint( FATAL, "Internal communication problem at %s%d.\n",
+				eprint( FATAL, "Internal communication problem at %s:%d.\n",
 						__FILE__, __LINE__ );
 				THROW( EXCEPTION );
 			}
@@ -1259,7 +1291,7 @@ Var *f_display( Var *v )
 	if ( ( buf = shmat( shm_id, NULL, 0 ) ) == ( void * ) - 1 )
 	{
 		shmctl( shm_id, IPC_RMID, &shm_buf );       /* delete the segment */
-		eprint( FATAL, "Internal communication error at %s%d.\n",
+		eprint( FATAL, "Internal communication error at %s:%d.\n",
 				__FILE__, __LINE__ );
 		THROW( EXCEPTION );
 	}
@@ -1268,55 +1300,67 @@ Var *f_display( Var *v )
 
 	ptr = buf;
 
-	memcpy( ptr, &len, sizeof( long ) );          /* length */
+	memcpy( ptr, "fsc2", 4 * sizeof( char ) );         /* magic id */
+	ptr += 4 * sizeof( char );
+
+	memcpy( ptr, &len, sizeof( long ) );               /* total length */
 	ptr += sizeof( long );
 
-	memcpy( ptr, &nx, sizeof( long ) );           /* x-index */
-	ptr += sizeof( long );
-
-	memcpy( ptr, &ny, sizeof( long ) );           /* y-index */
-	ptr += sizeof( long );
-
-	memcpy( ptr, &overdraw_flag, sizeof( int ) ); /* overdraw flag */
+	memcpy( ptr, &npoints, sizeof( int ) );            /* # data points  */
 	ptr += sizeof( int );
 
-	memcpy( ptr, &v->type, sizeof( int ) );       /* type of data... */
-	ptr += sizeof( int );
-	
-	switch( v->type )                             /* ...and now the data  */
+	for ( i = 0; i < npoints; i++ )
 	{
-		case INT_VAR :
-			memcpy( ptr, &v->val.lval, sizeof( long ) );
-			ptr += sizeof( long );
-			break;
+		memcpy( ptr, &dp[ i ].nx, sizeof( long ) );     /* x-index */
+		ptr += sizeof( long );
 
-		case FLOAT_VAR :
-			memcpy( ptr, &v->val.dval, sizeof( double ) );
-			ptr += sizeof( double );
-			break;
+		memcpy( ptr, &dp[ i ].nx, sizeof( long ) );     /* y-index */
+		ptr += sizeof( long );
 
-		case INT_TRANS_ARR :
-			memcpy( ptr, v->val.lpnt, v->len * sizeof( long ) );
-			ptr += v->len * sizeof( long );
-			break;
+		memcpy( ptr, &dp[ i ].nc, sizeof( long ) );     /* curve number */
+		ptr += sizeof( int );
+		
+		memcpy( ptr, &dp[ i ].v->type, sizeof( int ) ); /* type of data */
+		ptr += sizeof( int );
+	
+		switch( dp[ i ].v->type )                       /* and now the data  */
+		{
+			case INT_VAR :
+				memcpy( ptr, &dp[ i ].v->val.lval, sizeof( long ) );
+				ptr += sizeof( long );
+				break;
 
-		case FLOAT_TRANS_ARR :
-			memcpy( ptr, v->val.dpnt, v->len * sizeof( double ) );
-			ptr += v->len * sizeof( double );
-			break;
+			case FLOAT_VAR :
+				memcpy( ptr, &dp[ i ].v->val.dval, sizeof( double ) );
+				ptr += sizeof( double );
+				break;
 
-		default :                   /* this better never happens... */
-			shmdt( ( void * ) buf );
-			shmctl( shm_id, IPC_RMID, &shm_buf );       /* delete segment */
-			eprint( FATAL, "Internal communication error at %s%d.\n",
-					__FILE__, __LINE__ );
-			THROW( EXCEPTION );
+			case INT_TRANS_ARR :
+				memcpy( ptr, &dp[ i ].v->len, sizeof( long ) );
+				ptr += sizeof( long );
+				memcpy( ptr, dp[ i ].v->val.lpnt,
+						dp[ i ].v->len * sizeof( long ) );
+				ptr += dp[ i ].v->len * sizeof( long );
+				break;
+
+			case FLOAT_TRANS_ARR :
+				memcpy( ptr, &dp[ i ].v->len, sizeof( long ) );
+				ptr += sizeof( long );
+				memcpy( ptr, dp[ i ].v->val.dpnt,
+						dp[ i ].v->len * sizeof( double ) );
+				ptr += dp[ i ].v->len * sizeof( double );
+				break;
+		}
 	}
 
-	/* Detach the the segment with the data segment */
+	/* Detach from the segment with the data segment */
 
 	shmdt( ( void * ) buf );
 
+	/* Get rid of the array of structures returned by eval_display_args() */
+
+	T_free( dp );
+	
 	/* Finally tell parent about the identifier etc. */
 
 	Key->shm_id = shm_id;
@@ -1328,6 +1372,125 @@ Var *f_display( Var *v )
 
 	return vars_push( INT_VAR, 1 );
 }
+
+
+/*--------------------------------------------------------*/
+/*--------------------------------------------------------*/
+
+DPoint *eval_display_args( Var *v, int *npoints )
+{
+	DPoint *dp = NULL;
+
+
+	*npoints = 0;
+	if ( v == NULL )
+	{
+		eprint( FATAL, "%s:%ld: Missing x-index in `display()'.\n",
+				Fname, Lc );
+		THROW( EXCEPTION );
+	}
+
+	do
+	{
+		/* Get (more) memory for the points */
+
+		dp = T_realloc( dp, ( *npoints + 1 ) * sizeof( DPoint ) );
+
+		/* check and store the x-index */
+
+		vars_check( v, INT_VAR | FLOAT_VAR );
+	
+		if ( v->type == INT_VAR )
+			dp[ *npoints ].nx = v->val.lval - ARRAY_OFFSET;
+		else
+			dp[ *npoints ].nx = rnd( v->val.dval - ARRAY_OFFSET );
+
+		if ( dp[ *npoints ].nx < 0 )
+		{
+			eprint( FATAL, "%s:%ld: Invalid x-index (%ld) in `display()'.\n",
+					Fname, Lc, dp[ *npoints ].nx + ARRAY_OFFSET );
+			THROW( EXCEPTION );
+		}
+
+		v = v->next;
+
+		/* for 2D experiments test and get y-index */
+
+		if ( G.dim == 2 )
+		{
+			if ( v == NULL )
+			{
+				eprint( FATAL, "%s:%ld: Missing y-index in `display()'.\n",
+						Fname, Lc );
+				THROW( EXCEPTION );
+			}
+
+			vars_check( v, INT_VAR | FLOAT_VAR );
+	
+			if ( v->type == INT_VAR )
+				dp[ *npoints ].ny = v->val.lval - ARRAY_OFFSET;
+			else
+				dp[ *npoints ].ny = rnd( v->val.dval - ARRAY_OFFSET );
+
+			if ( dp[ *npoints ].nx < 0 )
+			{
+				eprint( FATAL, "%s:%ld: Invalid y-index (%ld) in "
+						"`display()'.\n",
+						Fname, Lc, dp[ *npoints ].ny + ARRAY_OFFSET );
+				THROW( EXCEPTION );
+			}
+
+			v = v->next;
+		}
+
+		/* Now test and get the data, i. e. store the pointer to the variable
+		   containing it */
+
+		if ( v == NULL )
+		{
+			eprint( FATAL, "%s:%ld: Missing data in `display()'.\n",
+					Fname, Lc );
+			THROW( EXCEPTION );
+		}
+
+		vars_check( v, INT_VAR | FLOAT_VAR | INT_TRANS_ARR | FLOAT_TRANS_ARR );
+
+		dp[ *npoints ].v = v;
+
+		v = v->next;
+
+		/* There can be several curves and we check if there's a curve number,
+		   then we test and store it */
+
+		if ( v == NULL )
+		{
+			dp[ *npoints ].nc = 0;
+			( *npoints )++;
+			return dp;
+		}
+
+		vars_check( v, INT_VAR | FLOAT_VAR );
+	
+		if ( v->type == INT_VAR )
+			dp[ *npoints ].nc = v->val.lval - 1;
+		else
+			dp[ *npoints ].nc = rnd( v->val.dval - 1 );
+
+		if ( dp[ *npoints ].nc < 0 || dp[ *npoints ].nc >= G.nc )
+		{
+			eprint( FATAL, "%s:%ld: Invalid curve number (%ld) in "
+					"`display()'.\n", Fname, Lc, dp[ *npoints ].nc + 1 );
+			THROW( EXCEPTION );
+		}
+
+		v = v->next;
+
+		( *npoints )++;
+	} while ( v != NULL );
+
+	return dp;
+}
+
 
 /*---------------------------------------------*/
 /* Function returns the dimension of an array. */
@@ -1394,11 +1557,17 @@ Var *f_sizes( Var *v )
 /* pointer returned is stored in an array of FILE pointers for each of the   */
 /* open files. The returned value is an INT_VAR with the index in the FILE   */
 /* pointer array or -1 if no file was selected.                              */
-/* (Optional) Input variables:                                               */
-/* 1. Message string                                                         */
+/* (Optional) Input variables (each will replaced by a default string if the */
+/* argument is either NULL or the empty string) :                            */
+/* 1. Message string (not allowed to start with a backslash `\'!)            */
 /* 2. Default pattern for file name                                          */
 /* 3. Default directory                                                      */
 /* 4. Default file name                                                      */
+/* Alternatively, to hardcode a file name into the EDL program only send the */
+/* file name instead of the message string, but with a backslash `\' as the  */
+/* very first character (it will be skipped and not be used as part of the   */
+/* file name). The other strings still can be set but will only be used if   */
+/* opening the file fails.                                                   */
 /*---------------------------------------------------------------------------*/
 
 Var *f_getf( Var *var )
@@ -1406,20 +1575,20 @@ Var *f_getf( Var *var )
 	Var *cur;
 	int i;
 	char *s[ 4 ] = { NULL, NULL, NULL, NULL };
-	const char *r;
 	FILE *fp;
 	long len;
 	struct stat stat_buf;
+	char *r = NULL;
 
 
 	/* If there was a call of `f_save()' without a previous call to `f_getf()'
 	   `f_save()' did call already call `f_getf()' by itself and now expects
-	   no file identifiers at all anymore - in this case `No_File_Number' is
-	   set.So, if we get a call to `f_getf()' while `No_File_Number' is set we
+	   no file identifiers at all anymore - in this case `No_File_Numbers' is
+	   set.So, if we get a call to `f_getf()' while `No_File_Numbers' is set we
 	   must tell the user that he can't have it both ways, i.e. he either has
 	   to call `f_getf()' before any call to `f_save()' or never. */
 
-	if ( No_File_Number )
+	if ( No_File_Numbers )
 	{
 		eprint( FATAL, "%s:%ld: Call of `get_filename()' after call of "
 				"`save()' without previous call of `get_filename()'.\n",
@@ -1442,7 +1611,10 @@ Var *f_getf( Var *var )
 
 	/* First string is the message */
 
-	if ( s[ 0 ] == NULL || s[ 0 ] == "" )
+	if ( s[ 0 ] != NULL && s[ 0 ][ 0 ] == '\\' )
+		r = get_string_copy( s[ 0 ] + 1 );
+
+	if ( s[ 0 ] == NULL || s[ 0 ] == "" || s[ 0 ][ 0 ] == '\\' )
 		s[ 0 ] = get_string_copy( "Please enter a file name:" );
 	else
 		s[ 0 ] = get_string_copy( s[ 0 ] );
@@ -1480,18 +1652,30 @@ Var *f_getf( Var *var )
 
 getfile_retry:
 
-	/* Try to get a filename - on 'Cancel' request confirmation */
+	/* Try to get a filename - on 'Cancel' request confirmation (unless a
+	   file name was passed to the routine and this is not a repeat call) */
 
-	r = show_fselector( s[ 0 ], s[ 2 ], s[ 1 ], s[ 3 ] );
+	if ( r == NULL )
+		r = get_string_copy( show_fselector( s[ 0 ], s[ 2 ], 
+											 s[ 1 ], s[ 3 ] ) );
 
 	if ( ( r == NULL || *r == '\0' ) &&
-		 1 != show_choices( "Do you really want to cancel selecting\n"
-							"the file name ? Data will not be saved!",
+		 1 != show_choices( "Do you really want to cancel saving data?\n"
+							"        The data will be lost!",
 							2, "Yes", "No", NULL, 2 ) )
-		 goto getfile_retry;
+	{
+		if ( r != NULL )
+		{
+			T_free( r );
+			r = NULL;
+		}
+		goto getfile_retry;
+	}
 
 	if ( r == NULL || *r == '\0' )         /* on 'Cancel' with confirmation */
 	{
+		if ( r != NULL )
+			T_free( r );
 		for ( i = 0; i < 4; i++ )
 			T_free( s[ i ] );
 		return vars_push( INT_VAR, -1 );
@@ -1504,7 +1688,11 @@ getfile_retry:
 		  1 != show_choices( "The selected file does already exist!\n"
 							 " Do you really want to overwrite it?",
 							 2, "Yes", "No", NULL, 2 ) )
+	{
+		T_free( r );
+		r = NULL;
 		goto getfile_retry;
+	}
 
 	if ( ( fp = fopen( r, "w" ) ) == NULL )
 	{
@@ -1530,6 +1718,8 @@ getfile_retry:
 							  "       Please select a different file." );
 		}
 
+		T_free( r );
+		r = NULL;
 		goto getfile_retry;
 	}
 
@@ -1537,11 +1727,18 @@ getfile_retry:
 						   ( File_List_Len + 1 ) * sizeof( FILE * ) );
 	File_List[ File_List_Len ] = fp;
 
+	T_free( r );
 	for ( i = 0; i < 4; i++ )
 		T_free( s[ i ] );
 
 	return vars_push( INT_VAR, File_List_Len++ );
 }
+
+
+/* This function is called by the functions for saving. If they didn't */
+/* get a file identifier it is assumed the user wants just one file    */
+/* that is opened at the first call of a function of the `save_xxx()'  */
+/* family of functions.     */
 
 
 int get_save_file( Var **v, const char *calling_function )
@@ -1552,28 +1749,32 @@ int get_save_file( Var **v, const char *calling_function )
 	int access;
 
 
-	/* If no file has been selected yet get a file and use it exclusively
+	/* If no file has been selected yet get a file and then use it exclusively
 	   (i.e. also expect that no file identifier is given in later calls),
 	   otherwise the first variable has to be the file identifier */
 
 	if ( File_List_Len == 0 )
 	{
-		No_File_Number = UNSET;
+		if ( Dont_Save )
+			return -1;
+
+		No_File_Numbers = UNSET;
 
 		get_file_ptr = func_get( "get_file", &access );
 		file = func_call( get_file_ptr );         /* get the file name */
 
-		No_File_Number = SET;
+		No_File_Numbers = SET;
 
 		if ( file->val.lval < 0 )
 		{
 			vars_pop( file );
+			Dont_Save = SET;
 			return -1;
 		}
 		vars_pop( file );
 		file_num = 0;
 	}
-	else if ( ! No_File_Number )                 /* file numbers are given */
+	else if ( ! No_File_Numbers )                    /* file number is given */
 	{
 		if ( *v != NULL )
 		{
@@ -1600,7 +1801,7 @@ int get_save_file( Var **v, const char *calling_function )
 
 	if ( file_num < 0 )
 	{
-		eprint( WARN, "%s:%ld: File never has been opened, skipping "
+		eprint( WARN, "%s:%ld: File has never been opened, skipping "
 				"`%s' command.\n", Fname, Lc, calling_function );
 		return -1;
 	}
@@ -2021,6 +2222,9 @@ void print_browser( int browser, int fid, const char* comment )
 
 
 	writer( browser ==  0 ? C_PROG : C_OUTPUT );
+	if ( comment == NULL )
+		comment = "";
+	fprintf( File_List[ fid ], "%s\n", comment );
 	while ( 1 )
 	{
 		reader( &line );
@@ -2029,5 +2233,90 @@ void print_browser( int browser, int fid, const char* comment )
 		else
 			break;
 	}
+	fprintf( File_List[ fid ], "%s\n", comment );
 	fflush( File_List[ fid ] );
+}
+
+
+/*---------------------------------------------------------------------*/
+/* Writes a comment into a file.                                       */
+/* Arguments:                                                          */
+/* 1. If first argument is a number it's treated as a file identifier. */
+/* 2. It follows a comment string to prepend to each line of text      */
+/* 3. A text to appear in the editor                                   */
+/* 4. The label for the editor                                         */
+/*---------------------------------------------------------------------*/
+
+Var *f_save_c( Var *v )
+{
+	int file_num;
+	const char *cc = NULL;
+	char *c = NULL,
+		 *l = NULL,
+		 *r,
+		 *cl, *nl;
+
+	/* Determine the file identifier */
+
+	if ( ( file_num = get_save_file( &v, "save_comment()" ) ) == -1 )
+		return vars_push( INT_VAR, 0 );
+
+
+	if ( TEST_RUN )
+		return vars_push( INT_VAR, 1 );
+
+	/* Try to get the comment chars to prepend to each line */
+
+	if ( v != NULL )
+	{
+		vars_check( v, STR_VAR );
+		cc = v->val.sptr;
+		v = v->next;
+	}
+
+	/* Try to get the predefined content of the editor */
+
+	if ( v != NULL )
+	{
+		vars_check( v, STR_VAR );
+		c = v->val.sptr;
+		correct_line_breaks( c );
+		v = v->next;
+	}
+
+	/* Try to get a label string for the editor */
+
+	if ( v != NULL )
+	{
+		vars_check( v, STR_VAR );
+		l = v->val.sptr;
+	}
+
+	/* Show the comment editor and get the returned contents (just one string
+	   with embedded newline chars) */
+
+	r = get_string_copy( show_input( c, l ) );
+
+	if ( r == NULL )
+		return vars_push( INT_VAR, 1 );
+
+	cl = r;
+	if ( cc == NULL )
+		cc = "";
+	fprintf( File_List[ file_num ], "%s\n", cc );
+	while ( cl != NULL )
+	{
+		nl = strchr( cl, '\n' );
+		if ( nl != NULL )
+			*nl++ = '\0';
+		fprintf( File_List[ file_num ], "%s%s\n", cc, cl );
+		cl = nl;
+	}
+	if ( cc != NULL )
+		fprintf( File_List[ file_num ], "%s\n", cc );
+	fflush( File_List[ file_num ] );
+
+	T_free( r );
+
+	return vars_push( INT_VAR, 1 );
 }

@@ -124,3 +124,27 @@ FD_run *create_form_run(void)
 }
 /*---------------------------------------*/
 
+FD_input_form *create_form_input_form(void)
+{
+  FL_OBJECT *obj;
+  FD_input_form *fdui = (FD_input_form *) fl_calloc(1, sizeof(*fdui));
+
+  fdui->input_form = fl_bgn_form(FL_NO_BOX, 665, 455);
+  obj = fl_add_box(FL_UP_BOX,0,0,665,455,"");
+  fdui->comm_input = obj = fl_add_input(FL_MULTILINE_INPUT,15,45,635,360,"Enter your comments:");
+    fl_set_object_lsize(obj,FL_MEDIUM_SIZE);
+    fl_set_object_lalign(obj,FL_ALIGN_TOP_LEFT);
+    fl_set_object_gravity(obj, FL_NorthWest, FL_SouthEast);
+  fdui->comm_done = obj = fl_add_button(FL_NORMAL_BUTTON,250,415,120,30,"Done");
+    fl_set_object_color(obj,FL_TOP_BCOL,FL_GREEN);
+    fl_set_object_lsize(obj,FL_MEDIUM_SIZE);
+    fl_set_object_gravity(obj, FL_South, FL_South);
+    fl_set_object_resize(obj, FL_RESIZE_NONE);
+  fl_end_form();
+
+  fdui->input_form->fdui = fdui;
+
+  return fdui;
+}
+/*---------------------------------------*/
+

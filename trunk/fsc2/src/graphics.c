@@ -16,7 +16,7 @@ void redraw_canvas( Canvas *c );
 void repaint_canvas( Canvas *c );
 
 
-void graphics_init( long dim, long nx, long ny,
+void graphics_init( long dim, long nc, long nx, long ny,
 					double rwc_x_start, double rwc_x_delta,
 					double rwc_y_start, double rwc_y_delta,
 					char *x_label, char *y_label )
@@ -31,7 +31,7 @@ void graphics_init( long dim, long nx, long ny,
 	}
 
 	G.dim = dim;
-
+	G.nc = nc;
 	G.nx = nx;
 	G.ny = ny;
 

@@ -124,7 +124,7 @@ bool need_Serial_Port[ NUM_SERIAL_PORTS ];
 bool just_testing;
 FD_fsc2 *main_form;
 FD_run *run_form;
-
+FD_input_form *input_form;
 
 int I_am = PARENT;
 int pd[ 4 ];                    /* pipe descriptors */
@@ -174,6 +174,7 @@ extern bool need_Serial_Port[ NUM_SERIAL_PORTS ];
 extern bool just_testing;
 extern FD_fsc2 *main_form;
 extern FD_run *run_form;
+extern FD_input_form *input_form;
 
 
 extern int I_am;

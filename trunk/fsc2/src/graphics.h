@@ -5,6 +5,8 @@
 #if ! defined GRAPHICS_HEADER
 #define GRAPHICS_HEADER
 
+#define MAX_CURVES  4
+
 
 typedef struct {
 	FL_OBJECT *obj;
@@ -26,6 +28,7 @@ typedef struct {
 	bool is_rwc_y;
 
 	long dim;               /* dimensionality of display */
+	long nc;                /* number of curves (in 1D experiments) */
 	long nx;                /* points in x-direction */
 	long ny;                /* points in y-direction */
 	double rwc_x_start;
@@ -45,7 +48,7 @@ typedef struct {
 
 #include "fsc2.h"
 
-void graphics_init( long dim, long nx, long ny,
+void graphics_init( long dim, long nc, long nx, long ny,
 					double rwc_x_start, double rwc_x_delta,
 					double rwc_y_start, double rwc_y_delta,
 					char *x_label, char *y_label );
