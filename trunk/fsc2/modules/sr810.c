@@ -839,7 +839,7 @@ Var *lockin_lock_keyboard( Var *v )
 
 
 	if ( v == NULL )
-		lock = ON;
+		lock = SET;
 	else
 	{
 		vars_check( v, INT_VAR | FLOAT_VAR );
