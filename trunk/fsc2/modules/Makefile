@@ -41,7 +41,7 @@ tds520c       := tds520c.c tds520c_gpib.c tds520c_util.c
 tds520a       := tds520a.c tds520a_gpib.c tds520a_util.c
 tds520        := tds520.c  tds520_gpib.c  tds520_util.c
 hp8647a       := hp8647a.c hp8647a_util.c hp8647a_gpib.c hp8647a_lexer.c
-er023m        := er023m.c  er023m_gpib.c
+er023m        := er023m.c  er023m_addon.c er023m_gpib.c
 
 src_headers   := $(addprefix $(sdir)/,$(headers))
 
