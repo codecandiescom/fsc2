@@ -17,10 +17,10 @@ auxdir         = $(libdir)/aux
 GPIB_CONF      = /etc/gpib.conf
 GPIB_LOG       = /tmp/gpib.log
 
-# here you set if you want the program for a high or a low resolution screen
+# here one defines if the program is for a high or a low resolution screen
 # (set SIZE to either `HI_RES' or `LOW_RES')
 
-SIZE           = LOW_RES
+SIZE           = HI_RES
 
 
 # The name of the awk tool is passed to the programs via a macro
