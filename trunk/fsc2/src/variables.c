@@ -1041,6 +1041,7 @@ Var *vars_push( int type, ... )
 
 	new_stack_var->name = NULL;
 	new_stack_var->next = NULL;
+	new_stack_var->from = NULL;
 	new_stack_var->flags = 0;
 
 	/* Get the data for the new variable */
