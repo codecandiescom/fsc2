@@ -28,6 +28,7 @@
 
 static double tds_tmpl_get_area_wo_cursor( int channel, WINDOW *w );
 static double tds_tmpl_get_amplitude_wo_cursor( int channel, WINDOW *w );
+static bool tds_tmpl_talk( const char *cmd, char *reply, long *length );
 
 static bool in_init = UNSET;
 
@@ -65,9 +66,7 @@ bool tds_tmpl_init( const char *name )
 		/* Set digitizer to short form of replies */
 
 		tds_tmpl_command( "*CLS;:VERB OFF;:HEAD OFF\n" );
-		tds_tmpl_command( "*STB?\n" );
-		if ( gpib_read( tds_tmpl.device, buffer, &len ) == FAILURE )
-			tds_tmpl_gpib_failure( );
+		tds_tmpl_talk( "*STB?\n", buffer, &len );
 
 		tds_tmpl.is_reacting = SET;
 
@@ -227,10 +226,7 @@ double tds_tmpl_get_timebase( void )
 	long length = 30;
 
 
-	tds_tmpl_command( "HOR:MAI:SCA?\n" );
-	if ( gpib_read( tds_tmpl.device, reply, &length ) == FAILURE )
-		tds_tmpl_gpib_failure( );
-
+	tds_tmpl_talk( "HOR:MAI:SCA?\n", reply, &length );
 	reply[ length - 1 ] = '\0';
 	return T_atod( reply );
 }
@@ -279,10 +275,7 @@ long tds_tmpl_get_record_length( void )
 	char *r = reply;
 
 
-	tds_tmpl_command( "HOR:RECO?\n" );
-	if ( gpib_read( tds_tmpl.device, reply, &length ) == FAILURE )
-		tds_tmpl_gpib_failure( );
-
+	tds_tmpl_talk( "HOR:RECO?\n", reply, &length );
     reply[ length - 1 ] = '\0';
 	while ( ! isdigit( *r ) && *r++ )
 		/* empty */ ;
@@ -319,10 +312,7 @@ double tds_tmpl_get_trigger_pos( void )
     long length = 30;
 
 
-	tds_tmpl_command( "HOR:TRIG:POS?\n" );
-	if ( gpib_read( tds_tmpl.device, reply, &length ) == FAILURE )
-		tds_tmpl_gpib_failure( );
-
+	tds_tmpl_talk( "HOR:TRIG:POS?\n", reply, &length );
     reply[ length - 1 ] = '\0';
     return 0.01 * T_atod( reply );
 }
@@ -340,10 +330,7 @@ long tds_tmpl_get_num_avg( void )
 
 	if ( tds_tmpl_get_acq_mode( ) == AVERAGE )
 	{
-		tds_tmpl_command( "ACQ:NUMAV?\n" );
-		if ( gpib_read( tds_tmpl.device, reply, &length) == FAILURE )
-			tds_tmpl_gpib_failure( );
-
+		tds_tmpl_talk( "ACQ:NUMAV?\n", reply, &length );
 		reply[ length - 1 ] = '\0';
 		return T_atol( reply );
 	}
@@ -394,9 +381,7 @@ int tds_tmpl_get_acq_mode( void )
 	long length = 30;
 
 
-	tds_tmpl_command( "ACQ:MOD?\n" );
-	if ( gpib_read( tds_tmpl.device, reply, &length ) == FAILURE )
-		tds_tmpl_gpib_failure( );
+	tds_tmpl_talk( "ACQ:MOD?\n", reply, &length );
 
 	if ( *reply == 'A' )		/* digitizer is in average mode */
 		return AVERAGE;
@@ -422,10 +407,7 @@ double tds_tmpl_get_cursor_position( int cur_no )
 	fsc2_assert( cur_no == 1 || cur_no == 2 );
 
 	strcat( cmd, cur_no == 1 ? "1?\n" : "2?\n" );
-	tds_tmpl_command( cmd );
-    if ( gpib_read( tds_tmpl.device, reply, &length ) == FAILURE )
-		tds_tmpl_gpib_failure( );
-
+	tds_tmpl_talk( cmd, reply, &length );
     reply[ length - 1 ] = '\0';
     return T_atod( reply );
 }
@@ -475,9 +457,7 @@ int tds_tmpl_get_trigger_channel( void )
     long length = 30;
 
 
-	tds_tmpl_command( "TRIG:MAI:EDGE:SOU?\n" );
-	if ( gpib_read( tds_tmpl.device, reply, &length ) == FAILURE )
-		tds_tmpl_gpib_failure( );
+	tds_tmpl_talk( "TRIG:MAI:EDGE:SOU?\n", reply, &length );
 
 	/* Possible replies are "CH1", "CH2", "CH3", "CH4", "AUX", or "LIN",
 	   depending on the model (some models that only have 2 normal channels
@@ -543,9 +523,7 @@ void tds_tmpl_clear_SESR( void )
     long length = 30;
 
 
-	tds_tmpl_command( "*ESR?\n" );
-	if ( gpib_read( tds_tmpl.device, reply, &length ) == FAILURE )
-		tds_tmpl_gpib_failure( );
+	tds_tmpl_talk( "*ESR?\n", reply, &length );
 }
 
 
@@ -600,10 +578,7 @@ bool tds_tmpl_display_channel_state( int channel )
 				 channel < NUM_DISPLAYABLE_CHANNELS );
 
 	sprintf( cmd, "SEL:%s?\n", Channel_Names[ channel ] );
-	tds_tmpl_command( cmd );
-    if ( gpib_read( tds_tmpl.device, reply, &length ) == FAILURE )
-		tds_tmpl_gpib_failure( );
-
+	tds_tmpl_talk( cmd, reply, &length );
 	return reply[ 0 ] != '0';
 }
 
@@ -653,9 +628,7 @@ double tds_tmpl_get_sens( int channel )
 	fsc2_assert( channel >= TDS_TMPL_CH1 && channel < NUM_NORMAL_CHANNELS );
 
 	sprintf( cmd, "%s:SCA?\n", Channel_Names[ channel ] );
-	tds_tmpl_command( cmd );
-	if ( gpib_read( tds_tmpl.device, reply, &length ) == FAILURE )
-		tds_tmpl_gpib_failure( );
+	tds_tmpl_talk( cmd, reply, &length );
 
     reply[ length - 1 ] = '\0';
 	tds_tmpl.sens[ channel ] = T_atod( reply );
@@ -686,9 +659,7 @@ void tds_tmpl_set_sens( int channel, double sens )
 	if ( sens > min_sens_50 )
 	{
 		sprintf( cmd, "CH%1d:IMP?\n", channel );
-		tds_tmpl_command( cmd );
-		if ( gpib_read( tds_tmpl.device, reply, &length ) == FAILURE )
-			tds_tmpl_gpib_failure( );
+		tds_tmpl_talk( cmd, reply, &length );
 
 		if ( strncmp( reply, "MEG", 3 ) )
 		{
@@ -794,17 +765,13 @@ double tds_tmpl_get_area( int channel, WINDOW *w, bool use_cursor )
 
 		length = 40;
 		usleep( 100000 );
-		tds_tmpl_command( "BUSY?\n" );
-		if ( gpib_read( tds_tmpl.device, reply, &length ) == FAILURE )
-			tds_tmpl_gpib_failure( );
+		tds_tmpl_talk( "BUSY?\n", reply, &length );
 	} while ( reply[ 0 ] == '1' );
 
 	/* Get the the area */
 
 	length = 40;
-	tds_tmpl_command( "*WAI;:MEASU:IMM:VAL?\n" );
-	if ( gpib_read( tds_tmpl.device, reply, &length ) == FAILURE )
-		tds_tmpl_gpib_failure( );
+	tds_tmpl_talk( "*WAI;:MEASU:IMM:VAL?\n", reply, &length );
 
 	reply[ length - 1 ] = '\0';
 	return T_atod( reply );
@@ -823,6 +790,7 @@ static double tds_tmpl_get_area_wo_cursor( int channel, WINDOW *w )
 	double *data, area;
 	long length, i;
 	double pos = 0.0;
+	char cmd[ 100 ];
 	char buf[ 100 ];
 	long len = 100;
 
@@ -839,10 +807,8 @@ static double tds_tmpl_get_area_wo_cursor( int channel, WINDOW *w )
 
 	if ( channel >= TDS_TMPL_CH1 && channel < NUM_NORMAL_CHANNELS )
 	{
-		sprintf( buf, "CH%1d:POS?\n", channel + 1 );
-		tds_tmpl_command( buf );
-		if ( gpib_read( tds_tmpl.device, buf, &len ) == FAILURE )
-			tds_tmpl_gpib_failure( );
+		sprintf( cmd, "CH%1d:POS?\n", channel + 1 );
+		tds_tmpl_talk( cmd, buf, &len );
 
 		pos = T_atod( buf );
 	}
@@ -947,9 +913,7 @@ void tds_tmpl_get_curve( int channel, WINDOW *w, double **data, long *length,
 
 		len = 10;
 		usleep( 100000 );
-		tds_tmpl_command( "BUSY?\n" );
-		if ( gpib_read( tds_tmpl.device, reply, &len ) == FAILURE )
-			tds_tmpl_gpib_failure( );
+		tds_tmpl_talk( "BUSY?\n", reply, &len );
 	} while ( reply[ 0 ] == '1' );
 
 	/* Calculate how long the curve (with header) is going to be and allocate
@@ -966,12 +930,16 @@ void tds_tmpl_get_curve( int channel, WINDOW *w, double **data, long *length,
 
 	/* Now get all the data bytes... */
 
-	if ( gpib_write( tds_tmpl.device, "CURV?\n", 6 ) == FAILURE ||
-		 gpib_read( tds_tmpl.device, buffer, &len ) == FAILURE )
+	TRY
+	{
+		tds_tmpl_talk( "CURV?\n", buffer, &len );
+		TRY_SUCCESS;
+	}
+	OTHERWISE
 	{
 		T_free( buffer );
 		T_free( *data );
-		tds_tmpl_gpib_failure( );
+		RETHROW( );
 	}
 
 	/* ....and copy them to the final destination (the data are INTEL format
@@ -1055,9 +1023,7 @@ double tds_tmpl_get_amplitude( int channel, WINDOW *w, bool use_cursor )
 
 		length = 40;
 		usleep( 100000 );
-		tds_tmpl_command( "BUSY?\n" );
-		if ( gpib_read( tds_tmpl.device, reply, &length ) == FAILURE )
-			tds_tmpl_gpib_failure( );
+		tds_tmpl_talk( "BUSY?\n", reply, &length );
 	} while ( reply[ 0 ] == '1' );
 
 
@@ -1065,9 +1031,7 @@ double tds_tmpl_get_amplitude( int channel, WINDOW *w, bool use_cursor )
 
 	length = 40;
 	tds_tmpl_command( "*WAI\n" );
-	tds_tmpl_command( "MEASU:IMM:VAL?\n" );
-	if ( gpib_read( tds_tmpl.device, reply, &length ) == FAILURE )
-		tds_tmpl_gpib_failure( );
+	tds_tmpl_talk( "MEASU:IMM:VAL?\n", reply, &length );
 
 	reply[ length - 1 ] = '\0';
 	return T_atod( reply );
@@ -1152,6 +1116,18 @@ void tds_tmpl_lock_state( bool lock )
 bool tds_tmpl_command( const char *cmd )
 {
 	if ( gpib_write( tds_tmpl.device, cmd, strlen( cmd ) ) == FAILURE )
+		tds_tmpl_gpib_failure( );
+	return OK;
+}
+
+
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+
+static bool tds_tmpl_talk( const char *cmd, char *reply, long *length )
+{
+	if ( gpib_write( tds_tmpl.device, cmd, strlen( cmd ) ) == FAILURE ||
+		 gpib_read( tds_tmpl.device, reply, length ) == FAILURE )
 		tds_tmpl_gpib_failure( );
 	return OK;
 }
