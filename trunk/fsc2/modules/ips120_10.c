@@ -470,6 +470,7 @@ Var *magnet_sweep( Var *v )
 
 
 /*----------------------------------------------------*/
+/* Function for starting an upward sweep of the field */
 /*----------------------------------------------------*/
 
 static void magnet_sweep_up( void )
@@ -505,8 +506,9 @@ static void magnet_sweep_up( void )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*-----------------------------------------------------*/
+/* Function for starting a downward sweep of the field */
+/*-----------------------------------------------------*/
 
 static void magnet_sweep_down( void )
 {
@@ -542,6 +544,7 @@ static void magnet_sweep_down( void )
 
 
 /*----------------------------------------------------*/
+/* Function for stopping a running sweep of the field */
 /*----------------------------------------------------*/
 
 static void magnet_stop_sweep( void )
@@ -565,8 +568,9 @@ static void magnet_stop_sweep( void )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*---------------------------------------------*/
+/* Function to query or set a field sweep rate */
+/*---------------------------------------------*/
 
 Var *magnet_sweep_rate( Var *v )
 {
@@ -605,8 +609,10 @@ Var *magnet_sweep_rate( Var *v )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*--------------------------------------------------------*/
+/* Function to bring the field back to its initial value, */
+/* i.e. at the very start of the experiment               */
+/*--------------------------------------------------------*/
 
 Var *reset_field( Var *v )
 {
@@ -635,8 +641,10 @@ Var *magnet_goto_field_on_end( Var *v )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*-------------------------------------------------------------*/
+/* Function to allow sending a GPIB command string directly to */
+/* the magent - only use for debugging or testing purposes!    */
+/*-------------------------------------------------------------*/
 
 Var *magnet_command( Var *v )
 {
@@ -1049,17 +1057,18 @@ static void ips120_20_get_complete_status( void )
 			THROW( EXCEPTION );
 	}
 
-	/* The polarity status bytes are always '0' according to the manual,
-	 but as usual the manual is lying, the device sends '7' or '2' and '0'.
-	 Due to lack of better documentation we simply ignore the P field...
+	/* The polarity status bytes are always '0' according to the manual, but
+	   as it's not uncommon the manual isn't telling the whole truth, the
+	   device sends '7' or '2' and '0'. Due to lack of better documentation
+	   we simply ignore the P field... */
 
+#if 0
 	if ( reply[ 13 ] != '0' || reply[ 14 ] != '0' )
 	{
 		print( FATAL, "Received invalid reply from device.\n" );
 		THROW( EXCEPTION );
 	}
-
-	*/
+#endif
 }
 
 
@@ -1382,8 +1391,8 @@ static long ips120_20_talk( const char *message, char *reply, long length )
 		ips120_20_comm_failure( );
 
 	/* Re-enable the following if you want to be extremely careful (that's
-	   what the manual recommends), but even the LabVIEW driver written by
-	   Oxford doesn't use it... */
+	   what the manual recommends, but even the LabVIEW driver written by
+	   Oxford does not use it..). */
 
 #if 0
 	do {
