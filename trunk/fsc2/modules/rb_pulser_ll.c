@@ -205,8 +205,13 @@ void rb_pulser_exit( void )
 	for ( i = 0; i < NUM_CLOCK_CARDS; i++ )
 		if ( clock_card[ i ].handle >= 0 )
 		{
+			/* Commented out according to Huibs wishes, he want's the clocks
+			   to continue to run even after the end of the experiment.
+
 			rulbus_clock_set_frequency( clock_card[ i ].handle,
 										RULBUS_CLOCK_FREQ_OFF );
+			*/
+
 			rulbus_card_close( clock_card[ i ].handle );
 			clock_card[ i ].handle = -1;
 		}
