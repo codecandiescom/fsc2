@@ -58,7 +58,7 @@ to be done to the @acronym{EDL} program considerably.
 But what if you need to use for example two lock-in amplifiers
 simultaneously? When the names of the functions for accessing both the
 lock-ins are identical how does one specify which one to use for a
-command? It's actually quite simple. In the @code{DEVICES} section the
+command? Actually, it's quite simple. In the @code{DEVICES} section the
 two lock-in amplifiers will be listed:
 @example
 sr510;         // first lock-in amplifier
@@ -79,17 +79,17 @@ lock-in amplifiers from the list of devices is meant.
 
 Of course, if there are three lock-ins, for the third one would have to
 append @code{"#3"} to the function name (assuming there's a third
-lock-in in the @code{DEVICES} section) etc. (Actually, one could also
-append the string @code{"#1"} to the name of the function for the first
-lock-in amplifier, but that's optional.)
+lock-in in the @code{DEVICES} section) etc. (Owne could also append the
+string @code{"#1"} to the name of the function for the first lock-in
+amplifier, but that's optional.)
 
 What remains problematical is when two identical devices are to be used.
 Due to limitations not only of @acronym{fsc2} but also the libraries
-used for accessing the GPIB bus there's not such simple method. I.e. you
-can't simply list the device twice in the @code{DEVICES} section and
-then use them as outlines above. Instead, two device modules with
-different names have to be created for these devices and mad known to
-the program. [Further information on how this is done still needs to be
+used for accessing the GPIB bus there's no simple method. I.e.@: you can't
+simply list the device twice in the @code{DEVICES} section and then use
+them as outlines above. Instead, two device modules with different names
+have to be created for these identical devices and made known to the 
+program. [Further information on how this is done still needs to be
 written...]
 
 
@@ -107,7 +107,7 @@ section to load the functions are
 aeg_x_band
 aeg_s_band
 @end example
-Because magnets are hardly ever changed (and if the program is set up
+Because magnets hardly ever get changed (and if the program is set up
 correctly for the experiment) one can use @code{magnet} as the module
 name instead.
 
@@ -121,7 +121,8 @@ related functions.
 If a magnet module is listed in the @code{DEVICES} section the program
 will try to calibrate the field sweep parameters at the start of the
 experiment, i.e.@: it will sweep the field up and down for some
-time. This may take some time. See below on how to reduce this time.
+time, please be patient. See below on how to reduce the amount of time
+spent with field calibration.
 
 
 @table @samp
@@ -140,7 +141,7 @@ the time used for the calibration of the field sweep at the start of the
 experiment. Unfortunately, this also reduces the precision of the field
 sweep. Whenever an experiment is restarted (i.e.@: if no new
 @acronym{EDL} file has been loaded in between) this shortened
-calibration is done anyways to check that the parameters didn't check
+calibration is done anyways to check that the parameters didn't change
 significantly since the last run.
 
 
@@ -167,22 +168,25 @@ gaussmeter is used instead. The function can only be called in the
 @findex sweep_up()
 The function can be called in the @code{EXPERIMENT} section, but only if
 the function @code{magnet_setup()} (see above) has been called
-before. It doesn't take an argument and will sweep up the magnet by
-the field step size value set in the @code{magnet_setup()} function.
+before. It doesn't take an argument and will sweep up the magnet by the
+field step size value set in the @code{magnet_setup()} function.  The
+actual size of the step will @b{not} be controlled using the gaussmeter.
 
 The precision of the field sweep depends on the step size. While the
-precision is usually quite good for step sizes of up to @w{1 G}, for much
-larger step sizes it may deteriorate quite significantly. It sometimes
-helps to add a short wait period (use function @code{wait()}) after a
-sweep step to allow the field to settle at the new point. On the other
-hand, it then might be faster (and more reliable) not to use the sweep
-function at all but @code{set_field()} instead.
+precision is usually quite good for step sizes of up to @w{1 G}, for
+much larger step sizes it may deteriorate quite significantly. It
+sometimes helps to add a short waiting time (use function @code{wait()})
+after a sweep step to allow the field to settle at the new point. On the
+other hand, it then might be faster (and more reliable) not to use the
+sweep function at all but @code{set_field()} instead.
 
 @item sweep_down()
 @findex sweep_down()
-Analog function to @code{sweep_up()} but sweeping the magnetic field
-down by the field step size defined in @code{magnet_setup()}. The
-function can only be called in the @code{EXPERIMENT} section.
+This is the exact analog to the function @code{sweep_up()} but will
+sweep the magnetic field down instead of up by the field step size
+defined in @code{magnet_setup()}. The function can only be called in the
+@code{EXPERIMENT} section.
+
 
 @item reset_field()
 @findex reset_field()
@@ -198,7 +202,7 @@ can only be used in the @code{EXPERIMENT} section.
 @cindex Gaussmeter Functions
 
 
-Currently, two types of gaussmeter are implemented, the Bruker ER035M
+Currently, two types of gaussmeters are implemented, the Bruker ER035M
 NMR gaussmeter and the Bruker BH15 hall probe field controller. The
 range of fields that can be measured with the Bruker ER035M NMR
 gaussmeter depends on the probe being used. With the F0 probe (S-band)
@@ -217,19 +221,20 @@ bh15
 @end example
 The first four modules are for the ER035M NMR gaussmeter. The first and
 third one are to be used when the device is controlled via the GPIB bus
-while the second and fourth if it's connected using the serial port of
+while the second and fourth if it is connected using the serial port of
 the computer. The third and fourth module, @code{er035m_sa} and
-@code{er035m_sas}, are special in that they don't allow field control
-(i.e@: can't be used together with a magnet module). If the program is
-correctly installed the appropriate module is loaded by specifying
-`@code{gaussmeter}' instead of one of the listed module names.
+@code{er035m_sas}, are special in that they can't be used for field
+control (i.e@: in conjunction with a magnet module) but only to measure
+the field. If the program is correctly installed the appropriate module
+is loaded by specifying `@code{gaussmeter}' instead of one of the listed
+module names.
 
-The gaussmeter are mainly used together with the magnet power supply
+The gaussmeters are mainly used together with the magnet power supply
 and have to be specified in the @code{DEVICES} section @b{before} the
 magnet module.
 
-All functions for gaussmeters can only be used in queries and in the
-@code{EXPERIMENT} section of the @acronym{EDL} program..
+All gaussmeter functions can only be used in queries in the
+@code{EXPERIMENT} section of the @acronym{EDL} program.
 
 @table @samp
 @item find_field()
@@ -262,8 +267,8 @@ section.
 @section Lock-In Functions
 @cindex Lock-In Functions
 
-There are modules for four types of lock-in amplifiers implemented. All
-of them are by Stanford Research and have the model names SR510, SR530,
+Modules for four types of lock-in amplifiers are implemented. All of
+them are by Stanford Research and have the model names SR510, SR530,
 SR810 and SR830. Not too surprisingly, the module names to be specified
 in the @code{DEVICES} section are
 @example
@@ -272,22 +277,21 @@ sr530
 sr810
 sr830
 @end example
-
 Because the models have different capabilities, some of the functions
-are either only defined for parts of the models or may use slightly
+are either only defined for parts of the models or may expect slightly
 different parameters.
 
-Several of the following functions can be called to query settings of
-the lock-in amplifier or to set a value. In the first case the function
-usually has to be called with no argument, while to set a parameter an
-argument has to be passed to the function. Because of these different
-modes of calling the functions one should carefully check the arguments
-to achieve the desired results.
+Several of the following functions can be called bth to query the
+current settings of the lock-in amplifier and to set a new value. In the
+first case the function usually has to be called with no argument, while
+to set a parameter an argument has to be passed to the function. Because
+of these different modes of calling the functions one should carefully
+check the arguments to achieve the desired results.
 
 @table @samp
 @item lockin_get_data()
 @findex lockin_get_data()
-This function only allows queries, i.e.@: to fetch the measured value
+This is function only for queries, i.e.@: to fetch measured values
 from the lock-in amplifier. The parameters that may be passed to the
 function differ according to the model:
 @table @samp
@@ -312,14 +316,15 @@ corresponding channel is returned. Possible channel numbers and their
 meaning are:
 @table @samp
 @item 1
-channel @code{1}
+Channel @code{1}
 @item 2
-channel @code{2}
+Channel @code{2}
 @item 3
-amplitude of data from channel @code{1} and @code{2} in polar coordinates
+Amplitude of data from channel @code{1} and @code{2} in polar coordinates
 @item 4
-phase of data from channel @code{1} and @code{2} in polar coordinates
+Phase of data from channel @code{1} and @code{2} in polar coordinates
 @end table
+
 Finally, up to 4 arguments can be passed to the function with the values
 given above. In this case a 1-dimensional array is returned with as many
 data as there were arguments (in the sequence corresponding to the one
@@ -327,14 +332,15 @@ of the arguments).
 @end table
 The function can only be called in the @code{EXPERIMENT} section.
 
+
 @item lockin_get_adc_data()
 @findex lockin_get_adc_data()
-The function returns the voltage at one of the ADC ports numbered at the
-back side of the lock-in amplifier. Allowed values of the required
-argument are between @code{1} and @code{4}, corresponding to the port
-numbering.
+The function returns the voltage at one of the ADC ports at the back
+side of the lock-in amplifier. Allowed values of the required argument
+are between @code{1} and @code{4}, corresponding to the port numbering.
 
 The function can only be called in the @code{EXPERIMENT} section.
+
 
 @item lockin_dac_voltage()
 @findex lockin_dac_voltage()
@@ -347,37 +353,40 @@ of DAC ports and their numbering printed on the back side. If no further
 argument is given the function returns the current voltage applied to
 the DAC port (which is automatically set to @w{0 V} at the
 initialization of the lock-in amplifier if no voltage has been set
-previous to the @code{EXPERIMENT} section). If a second argument is
-given the DAC will be set to the corresponding voltage. The function
-returns the voltage that has been set.
+previously in the @code{PREPARATIONS} section using this function). If a
+second argument is given the DAC will be set to the corresponding
+voltage. The function returns the voltage that has been set.
 
 For the models SR510 and SR530 this voltage has to be in the range
 between @w{-10.24 V} and @w{+10.24 V} while for the models SR810 and
-SR830 the allowed voltage range is @w{-10.V} to @w{+10.5 V}.
+SR830 the allowed voltage range is @w{-10.5V} to @w{+10.5 V}.
 
-Before the @code{EXPERIMENT} section this function can't be called
-without an argument, i.e as a query.
+In the @code{EXPERIMENT} section this function can only be called
+with two argument, i.e@: to set the output voltage of one of the DACs
+already in the initialisation of the device.
+
 
 @item lockin_sensitivity()
 @findex lockin_sensitivity()
-This function can be used to query or set the sensitivity setting of the
-lock-in amplifier. If no argument is passed to the function the current
+This function can be used to query or set the sensitivity of the lock-in
+amplifier. If no argument is passed to the function the current
 sensitivity is returned. For the models SR510 and SR530 a 10 times
 higher sensitivity than the sensitivity set on the front panel is
 returned when the @code{EXPAND} button is switched on.
 
 When called with a second argument the corresponding sensitivity is
-set. This value has to be positive. If there is no sensitivity fitting
-the argument the sensitivity is set to the nearest available sensitivity
-setting and a warning is printed. The function will return the
-sensitivity that has been set.
+set. This value has to be positive. If the argument does not coincide
+with one of the possible sensitivity settings the sensitivity is set to
+the nearest available sensitivity setting and a warning is printed. The
+function will return the sensitivity that has been set.
 
 For the models SR510 and SR530 a sensitivity 10 times higher than the
 maximum sensitivity can be specified, in which case the @code{EXPAND}
 button is automatically switched on.
 
 Before the @code{EXPERIMENT} section this function can't be called
-without an argument, i.e.@: as a query.
+without an argument, i.e.@: in query mode.
+
 
 @item lockin_time_constant()
 @findex lockin_time_constant()
@@ -385,15 +394,16 @@ The function queries or sets the time constant of the lock-in
 amplifier. If no argument is passed to the function the current time
 constant is returned. If there's an argument the time constant is set
 accordingly.  The argument has to be positive. If there is no time
-constant setting fitting the argument the available nearest setting is
+constant setting fitting the argument the nearest available setting is
 used and a warning is printed. The function will return the time
 constant setting that has been set.
 
-For models SR510 and SR530 also the POST time constant is set to lower
-or equal the time constant.
+For models SR510 and SR530 also the POST time constant is set to a value
+equal or lower than the time constant.
 
 Before the @code{EXPERIMENT} section this function can't be called
-as a query, i.e without an argument.
+as a query, i.e.@: without an argument.
+
 
 @item lockin_phase()
 @findex lockin_phase()
@@ -404,6 +414,7 @@ is set accordingly.
 
 Before the @code{EXPERIMENT} section this function can't be called
 without an argument, i.e.@: as a query.
+
 
 @item lockin_ref_freq()
 @findex lockin_ref_freq()
