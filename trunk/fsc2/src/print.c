@@ -104,6 +104,8 @@ void print_it( FL_OBJECT *obj, long data )
 		return;
 	}
 
+	lower_permissions( );     /* not really needed,just my usual paranoia... */
+
 	/* Find out about the way to print and get a file if needed */
 
 	if ( get_print_file( &fp, &name, data ) )
@@ -455,7 +457,7 @@ static void start_printing( FILE *fp, char *name, long what )
 		return;
 	}
 
-	if ( ( pid = fork( ) ) == -1 )
+	if ( ( pid = fork( ) ) < 0 )
 	{
 		fl_show_alert( "Error", "Sorry, can't print.",
 					   "Running out of system resources.", 1 );
@@ -465,7 +467,7 @@ static void start_printing( FILE *fp, char *name, long what )
 	/* fsc2's main process can now continue, the spawned child process
 	   takes care of all the rest */
 
-	if ( pid != 0 )
+	if ( pid > 0 )
 		return;
 
 	if ( print_type == S2P &&
@@ -516,13 +518,13 @@ static FILE *spawn_print_prog( const char *command )
 
 	unlink( filename );
 
-	if ( ( pid = fork( ) ) == -1 )
+	if ( ( pid = fork( ) ) < 0 )
 	{
 		fclose( tmp_fp );
 		return NULL;
 	}
 
-	if ( pid != 0 )
+	if ( pid > 0 )
 		return tmp_fp;
 
 	args[ 0 ] = ( char * ) "sh";

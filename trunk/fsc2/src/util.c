@@ -504,7 +504,10 @@ FILE *filter_edl( const char *name, FILE *fp )
 				   "of system resources.\n" );
 		return NULL;
 	}
-	else if ( pid == 0 )
+
+	/* Here's the childs code */
+
+	if ( pid == 0 )
 	{
 		static char *cmd = NULL;
 
@@ -561,6 +564,8 @@ FILE *filter_edl( const char *name, FILE *fp )
 		T_free( cmd );
 		_exit( EXIT_FAILURE );
 	}
+
+	/* And finally the code for the parent */
 
 	close( pd[ 1 ] );
 

@@ -150,7 +150,7 @@ bool run( void )
 	close( Comm.pd[ 3 ] );
 	Comm.pd[ READ ] = Comm.pd[ 2 ];
 
-	if ( Internals.child_pid != -1 )           /* if fork() succeeded */
+	if ( Internals.child_pid > 0 )   /* fork() did succeeded */
 	{
 		Internals.mode = PREPARATION;
 		return OK;

@@ -156,7 +156,7 @@ static void spawn_server( void )
 	close( Comm.http_pd[ HTTP_CHILD_READ  ] );
 	close( Comm.http_pd[ HTTP_CHILD_WRITE ] );
 
-	if ( Internals.http_pid == -1 )
+	if ( Internals.http_pid < 0 )
 	{
 		close( Comm.http_pd[ HTTP_PARENT_READ  ] );
 		close( Comm.http_pd[ HTTP_PARENT_WRITE ] );
