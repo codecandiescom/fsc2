@@ -83,7 +83,7 @@ void *get_shm( int *shm_id, long len )
 		return ( void * ) -1;
 	}
 
-	/* Now write 'magic string' into the start of the shared memory to make
+	/* Now write a 'magic string' into the start of the shared memory to make
 	   it easier to identify it later */
 
 	memcpy( buf, "fsc2", 4 );                         /* magic id */
