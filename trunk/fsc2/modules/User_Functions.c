@@ -15,7 +15,6 @@ static void pc_basic_check( const char *func_name, const char *func_1,
 							const char *str );
 
 
-
 /****************************************************************/
 /* Enter the definition of all needed functions below this line */
 /****************************************************************/

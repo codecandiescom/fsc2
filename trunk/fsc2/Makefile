@@ -27,11 +27,11 @@ CFLAGS         = -ggdb -Wall -Wwrite-strings -Wstrict-prototypes \
 				 # -DMDEBUG # for malloc debugging
 				 # -DDEBUG
 				 # -DMAX_DEBUG # for debugging of digitizer
+LD             = ld
 LIBS           = -L/usr/X11R6/lib -L/usr/local/lib -lforms -lX11 -lgpib \
 				 -lfl -lm -ldl
 				 # -lmcheck   # for malloc debugging
 				 # -lefence   # to run with efence
-LDFLAGS        = -Wl,-E
 BISON          = bison
 BISONFLAGS     = -d -v -t -p
 FLEX           = flex

@@ -156,26 +156,27 @@ static void load_functions( Device *dev )
 	   path. The last possibility is that the device name already contains a
 	   absolute path, probably because it's set via a link. */
 
-	dev->driver.handle = dlopen( lib_name, RTLD_LAZY );
+	dev->driver.handle = dlopen( lib_name, RTLD_NOW );
 
 	if ( dev->driver.handle == NULL )
-		dev->driver.handle = dlopen( strrchr( lib_name, '/' ) + 1, RTLD_LAZY );
+		dev->driver.handle = dlopen( strrchr( lib_name, '/' ) + 1, RTLD_NOW );
 
 	if ( dev->driver.handle == NULL )
 	{
 		strcpy( lib_name, dev->name );
 		strcat( lib_name, ".so" );
-		dev->driver.handle = dlopen( lib_name, RTLD_LAZY );
+		dev->driver.handle = dlopen( lib_name, RTLD_NOW );
 	}
 
 	if ( dev->driver.handle == NULL )
 	{
-		eprint( FATAL, "Can't open module for device `%s'.\n", 
+		eprint( FATAL, "Can't open module for device `%s': %s\n", 
 				strchr( dev->name, '/' ) == NULL ?
-				dev->name : strrchr( dev->name, '/' ) + 1 );
+				dev->name : strrchr( dev->name, '/' ) + 1, dlerror( ) );
 		T_free( lib_name );
 		THROW( EXCEPTION );
 	}
+
 	T_free( lib_name );
 
 	dev->is_loaded = SET;
@@ -621,7 +622,8 @@ int get_lib_symbol( const char *from, const char *symbol, void **symbol_ptr )
 
 void unload_device( Device *dev )
 {
-	if ( ! exit_hooks_are_run && dev->driver.is_exit_hook )
+	if ( dev->driver.handle &&
+		 ! exit_hooks_are_run && dev->driver.is_exit_hook )
 	{
 		TRY                             /* catch exceptions from the exit   */
 		{                               /* hooks, we've got to run them all */
@@ -631,4 +633,5 @@ void unload_device( Device *dev )
 	}
 	
 	dlclose( dev->driver.handle );
+	dev->driver.handle = NULL;
 }

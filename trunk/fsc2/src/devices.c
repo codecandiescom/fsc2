@@ -102,7 +102,7 @@ void device_add( const char *name )
 
 		/* Now check that module has the extension ".so" and strip it off */
 
-		if ( strcmp( real_name + length - 3, ".so" ) == NULL )
+		if ( strcmp( real_name + length - 3, ".so" ) )
 		{
 			eprint( FATAL, "Module `%s' used for device `%s' hasn't extension "
 					"\".so\".\n", real_name, dev_name );

@@ -39,7 +39,7 @@ all:
 # Make the main program from the c, flex and bison source files
 
 fsc2: $(objects)
-	$(CC) -o $@ $(objects) $(LIBS) $(LDFLAGS)
+	$(CC) -o $@ $(objects) $(LIBS) -rdynamic
 
 modules:
 	$(MAKE) -C ../modules all

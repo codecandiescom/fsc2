@@ -33,47 +33,47 @@ all: $(comp_modules:=.so) $(simp_modules:.c=.so)
 
 
 dg2020_f.so: ${dg2020_f:.c=.o}
-	$(CC) -shared -o $@ ${dg2020_f:.c=.o} -lm $(LDFLAGS)
+	$(LD) -shared -fpic -o $@ ${dg2020_f:.c=.o} -lm
 	chmod 644 $@
 
 dg2020_b.so: ${dg2020_b:.c=.o}
-	$(CC) -shared -o $@ ${dg2020_b:.c=.o} -lm $(LDFLAGS)
+	$(LD) -shared -fpic -o $@ ${dg2020_b:.c=.o} -lm
 	chmod 644 $@
 
 hfs9000.so: ${hfs9000:.c=.o}
-	$(CC) -shared -o $@ ${hfs9000:.c=.o} -lm $(LDFLAGS)
+	$(LD) -shared -fpic -o $@ ${hfs9000:.c=.o} -lm
 	chmod 644 $@
 
 tds754a.so: ${tds754a:.c=.o}
-	$(CC) -shared -o $@ ${tds754a:.c=.o} -lm $(LDFLAGS)
+	$(LD) -shared -fpic -o $@ ${tds754a:.c=.o} -lm
 	chmod 644 $@
 
 tds744a.so: ${tds744a:.c=.o}
-	$(CC) -shared -o $@ ${tds744a:.c=.o} -lm $(LDFLAGS)
+	$(LD) -shared -fpic -o $@ ${tds744a:.c=.o} -lm
 	chmod 644 $@
 
 tds540.so: ${tds540:.c=.o}
-	$(CC) -shared -o $@ ${tds540:.c=.o} -lm $(LDFLAGS)
+	$(LD) -shared -fpic -o $@ ${tds540:.c=.o} -lm
 	chmod 644 $@
 
 tds520c.so: ${tds520c:.c=.o}
-	$(CC) -shared -o $@ ${tds520c:.c=.o} -lm $(LDFLAGS)
+	$(LD) -shared -fpic -o $@ ${tds520c:.c=.o} -lm
 	chmod 644 $@
 
 tds520a.so: ${tds520a:.c=.o}
-	$(CC) -shared -o $@ ${tds520a:.c=.o} -lm $(LDFLAGS)
+	$(LD) -shared -fpic -o $@ ${tds520a:.c=.o} -lm
 	chmod 644 $@
 
 tds520.so: ${tds520:.c=.o}
-	$(CC) -shared -o $@ ${tds520:.c=.o} -lm $(LDFLAGS)
+	$(LD) -shared -fpic -o $@ ${tds520:.c=.o} -lm
 	chmod 644 $@
 
 hp8647a.so: ${hp8647a:.c=.o}
-	$(CC) -shared -o $@ ${hp8647a:.c=.o} -lm $(LDFLAGS)
+	$(LD) -shared -fpic -o $@ ${hp8647a:.c=.o} -lm
 	chmod 644 $@
 
 %.so: %.o
-	$(CC) -shared -o $@ $*.o -lm $(LDFLAGS)
+	$(LD) -shared -fpic -o $@ $*.o -lm
 	chmod 644 $@
 
 ${dg2020_f:.c=.o}: dg2020_f.h
@@ -94,7 +94,7 @@ hp8647a_lexer.c: hp8647a_lexer.l $(src_header)
 	mv -f $@.x $@
 
 %.o: %.c $(src_headers)
-	$(CC) $(CFLAGS) -c -fpic -o $@ $<
+	$(CC) $(CFLAGS) -c -shared -fpic -o $@ $<
 
 
 clean:

@@ -128,7 +128,7 @@ WS          [\n\t ]+
 			}
 
 {IDENT}     {
-				deviceslval.sptr = T_strdup( devicestext );
+				deviceslval.sptr = devicestext;
 				return DEV_TOKEN;
 			}
 
