@@ -85,12 +85,14 @@
 #define FSC2_IS_BATCH_MODE get_batch_state( )
 
 
-extern void show_message( const char *str );
-extern void show_alert( const char *str );
-extern int show_choices( const char *text, int numb, const char *b1,
-						 const char *b2, const char *b3, int def,
-						 bool is_batch );
-extern const char *show_input( const char *content, const char *label );
+extern void show_message( const char * /* str */ );
+extern void show_alert( const char * /* str */ );
+extern int show_choices( const char * /* text */, int /* numb */,
+						 const char * /* b1 */, const char * /* b2 */,
+						 const char * /* b3 */, int /* def */,
+						 bool /* is_batch */ );
+extern const char *show_input( const char * /* content */,
+							   const char * /* label */ );
 
 
 /* Global variables that must be visible for modules */

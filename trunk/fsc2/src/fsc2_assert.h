@@ -34,8 +34,8 @@ struct Fsc2_Assert {
 };
 
 
-int fsc2_assert_print( const char *expression, const char *filename,
-					   int line );
+int fsc2_assert_print( const char * /* expression */,
+					   const char * /* filename */, int /* line */ );
 
 
 #ifdef NDEBUG
