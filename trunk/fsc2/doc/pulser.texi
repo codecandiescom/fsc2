@@ -434,7 +434,7 @@ PHASE_SETUP:  MICROWAVE,
                X: POD = 1,
               +Y: POD = 2,
               -X: POD = 4,
-              -Y: 2,
+              -Y: 5,
               CW: 3;
 @end example
 In this example you obviously want to phase cycle the microwave pulses
@@ -472,7 +472,7 @@ The second thing that is needed is which voltages have to be present at
 the outputs to set a certain phase. Here's an example:
 @example
 PHASE_SETUP:   X: POD_1 = OFF, POD2 = OFF,
-              +Y: POD1 = ON, POD_2 = 0,
+              +Y: POD1  = ON,  POD_2 = 0,
               -X: 0, 1,
               -Y: 1, 1;
 @end example

@@ -67,7 +67,7 @@ typedef struct {
 	bool ( *get_pulse_phase_cycle )( long pulse_number, long *cycle );
 
 	bool ( *phase_setup_prep )( int func, int type, int pod, long val );
-	bool ( *phase_setup )( int function );
+	bool ( *phase_setup )( int func );
 	bool ( *set_phase_switch_delay )( int function, double del_time );
 	bool ( *set_grace_period )( double gp_time );
 	bool ( *keep_all_pulses )( void );

@@ -1505,7 +1505,7 @@ struct @{
     bool ( *set_grace_period )( double gp_time );
 
     bool ( *phase_setup_prep )( int func, int type, int pod, long val );
-    bool ( *phase_setup )( int function );
+    bool ( *phase_setup )( int func );
 
     bool ( *new_pulse )( long pulse_number );
     bool ( *set_pulse_function )( long pulse_number, int function );
@@ -1578,12 +1578,14 @@ MW: CH = 1, ....
 @end example
 There are two types of pulsers, pulsers (like the @strong{Sony/Tektronix
 DG2020} that have some internal channels, that can be freely assigned to
-output connector, and pulsers (like the @strong{Tektronix HFS9000} that
-just have output channels. For the first type of pulsers this function
-is called to assign a pulse function to one of the internal channels
-(and @strong{not} the output connector, this is what the next function
-is for, see below), while for the second type of pulsers th function is
-for assigning a pulse function to one of the output conectors.
+output connector (and for which the variable @code{needs_phase_pulses}
+in the pulser structure must be set), and pulsers (like the
+@strong{Tektronix HFS9000} that just have output channels. For the first
+type of pulsers this function is called to assign a pulse function to
+one of the internal channels (and @strong{not} the output connector,
+this is what the next function is for, see below), while for the second
+type of pulsers th function is for assigning a pulse function to one of
+the output conectors.
 
 As discussed in the chapter about pulsers (@pxref{Channel setup}) there
 are 15 different types of pulse functions. To avoid having to change
@@ -1641,7 +1643,7 @@ associate a pulse function to one of the output functions, i.e.@: if in
 the function description the @code{POD} keyword is found:
 @example
 ASSIGNEMENTS:
-MW: POD = 3, ...
+  MW: POD = 3, ...
 @end example
 Only one function should be assignable to an output connector.
 
@@ -1684,7 +1686,7 @@ This function gets called when the @code{TIMEBASE} keyword is found in
 the @code{ASSIGNMENTS} section, i.e.@:
 @example
 ASSIGNMENTS:
-TIMEBASE: 10 ns;
+  TIMEBASE: 10 ns;
 @end example
 You will have to check that this is an acceptable time base value and
 you will also have to check later that all pulse positions, lengths
@@ -1696,7 +1698,7 @@ This function gets called when a trigger mode description is found in
 the assignments section, i.e.@:
 @example
 ASSIGNMENTS:
-TRIGGER_MODE: EXTERNAL;
+  TRIGGER_MODE: EXTERNAL;
 @end example
 There are two possible values for the trigger mode, either external or
 internal. In @file{src/global.h} an enumeration is already defined for
@@ -1721,6 +1723,7 @@ trigger level for external trigger mode. The module should tell the user
 that setting a trigger level doesn't make sense in the case that the
 user specified internal trigger mode.
 
+
 @item bool set_trig_in_slope( int slope )
 This function is called when the @code{SLOPE} keyword is found in the
 trigger mode description in the @code{ASSIGNMENTS} section to set the
@@ -1733,6 +1736,7 @@ values should ever get changed you should use these predefined
 values. The module should tell the user that setting a trigger slope
 doesn't make sense in the case that the user specified internal trigger
 mode.
+
 
 @item bool set_trig_in_impedance( int state )
 This function gets called to set the input impedance of the trigger
@@ -1747,12 +1751,13 @@ trigger input impedances. The module should tell the user that setting a
 trigger input impedance doesn't make sense in the case that the user
 specified internal trigger mode.
 
+
 @item bool set_max_seq_len( double seq_len )
 This function is called when the @code{MAXIMUM_SEQUENCE_LENGTH} is found
 in the  @code{ASSIGNMENTS} section, i.e.@:
 @example
 ASSIGNMENTS:
-MAXIMUM_SEQUENCE_LENGTH: 10 us;
+  MAXIMUM_SEQUENCE_LENGTH: 10 us;
 @end example
 If you determine the maximum length of the pulser pattern in your module
 during the test run the value you get can be plain wrong if the
@@ -1772,6 +1777,7 @@ internal channels that are going to be used more than @w{64 kB} would
 have to be send to the pulser while in most experiments only a small
 fraction of the maximum pattern length is really needed.
 
+
 @item bool bool keep_all_pulses( void )
 This function is called when the @w{@code{KEEP_ALL_PULSES}} keyword is
 found in the @code{ASSIGNMENTS} section. If this function is called your
@@ -1785,17 +1791,50 @@ are needed, even to the point that the number of channels gets exceeded.
 Therefor, as a default, pulses that are found to be never used during
 the test run are removed (after printing out a message to the user).
 
+
 @item bool set_phase_reference( int phase, int function )
-This use of this function depends on how 
-@c XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-@c XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-@c XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+This again a function that gets called under somewhat different
+circumstances, depending on how the pulser module is supposed to work.
+If you are writing a module that has to create phase pulses
+automatically (and thus you have set the variable
+@code{needs_phase_pulses} in the pulser structure), this function will
+be called when in the definition of a phase function the function, the
+phase pulses will be used with, is set. That means if the @acronym{EDL}
+program contains a line like
+@example
+ASSIGNMENTS:
+  PHASE_2: MICROWAVE, POD = 2, 3, ....
+@end example
+Obviously, this is meant for a pulser module that automatically creates
+phase pulses (otherwise the use of a phase function would not be
+allowed) and this statement is intended to tell the module that the
+function @code{PHASE_2} (with its pulses appearing on the output
+connectors 2 and) is to be used to create phase pulses for the microwave
+pulses. To tell the module the function @code{set_phase_reference()}
+gets called with the number of the phase function (i.e.@:
+@w{@code{PULSER_CHANNEL_PHASE_1}} or @w{@code{PULSER_CHANNEL_PHASE_1}})
+as the first argument and the number of the pulse function (in the
+example the @code{MICROWAVE} phase function) as the second argument.
+
+In contrast, for modules that don't have to create phase pulses this
+function is called from within the @code{ASSIGNMENTS} section when
+lines of the form
+@example
+ASSIGNMENTS:
+  PHASE_SETUP_2:  MICROWAVE, ...
+@end example
+In this case @code{MICROWAVE} is again the function that has to be phase
+cycled and is passed to the function as the second argument. The first
+argument is either @code{0} or @code{1}, depeding on if the this for the
+first phase cycled function (i.e.@: when the command in @acronym{EDL}
+program starts with either @code{PHASE_SETUP} or @code{PASE_SETUP_1}) or
+for the second phase cycled function (i.e.@: for @code{PHASE_SETUP_2}).
 
 
 @item bool set_phase_switch_delay( int function, double del_time )
 This function is called when in the @code{ASSIGNMENTS} section a line like
 @example
-PHASE_SWITCH_DELAY: 40 ns;
+  PHASE_SWITCH_DELAY: 40 ns;
 @end example
 is found. The module must use the value of the second argument
 @code{del_time} as the time that pulses of the phase function indicated
@@ -1812,7 +1851,7 @@ default value of @w{20 ns}.
 @item bool set_grace_period( double gp_time )
 This function is called when in the @code{ASSIGNMENTS} section a line like
 @example
-GRACE_PERIOD: 20 ns;
+  GRACE_PERIOD: 20 ns;
 @end example
 is found. The module must use the value of the second argument
 @code{gp_time} as the time that pulses of the phase function indicated
@@ -1827,22 +1866,127 @@ remain a @code{NULL} pointer.
 
 
 @item bool phase_setup_prep( int func, int type, int pod, long val )
-@c XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-@c XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-@c XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+Again this function is called under slightly different circumstances,
+i.e.@: depending on if you have set the variable
+@code{needs_phase_pulses} in the pulser structure (meaning that phase
+pulses have to be created) or not. In the first case a syntax of
+@example
+PHASE_1:  MICROWAVE, POD = 2, 3;
+
+PHASE_SETUP_1:  +X: POD_1 = ON, POD2 = OFF,
+                +Y: POD1  = ON, POD_2 = 1,
+                -X: POD2 = 0, 0,
+                -Y: 1, 1;
+@end example
+is expected in the @acronym{EDL} program. The first line indictaes that
+the phase function 1 is to be used to control phase pulses for microwave
+pulses and the output pods to be used are the pods 2 and 3. The
+following lines are supposed to tell the module that in order to create
+a @code{+X} phase pulse the first output pod set in the definition of
+the first phase function (@code{PHASE_1}) (i.e.@: pod 2) must be in the
+high state, while the second pod (i.e.@: pod 3) must be low.
+
+For this kind of pahse setup the function @code{phase_setup_prep()} will
+be called exactly 8 times in a row, 2 times for each phase type (i.e.@:
+@code{+X}, @code{+Y}, @code{-X} and @code{-Y}). It will be called always
+with the first argument set to @code{0} to indicate that
+@code{PHASE_SETUP_1} is currently done (where @code{PHASE_SETUP} without
+a number is just a short form for this), in for @code{PHASE_SETUP_2} the
+first paramater would be @code{1}.
+
+The second argument is type of phase, in @file{src/global.h} an
+enumeration defining @code{PHASE_PLUS_X} for a phase of @code{+X},
+@code{PHASE_PLUS_Y} for @code{+Y}, @code{PHASE_MINUS_X} for @code{-X} and
+@code{PHASE_MINUS_Y} for @code{-Y} is defined and should be used in your
+module. There is also a @code{PHASE_CW} pseudo phase type defined in
+case your module has to supprot a special cw-mode configuration.
+
+The third argument is the output pod to use, where @code{0} stands for
+the first pod defined previously for the phase function, i.e.@: in our
+example a @code{0} would represent the pod numbered 2. In contrast, an
+argument of @code{1} indicates the second output pod, i.e.@: in our
+example the pod numbered 3. Finally, you also have to expect an argument
+of @code{-1}, meaning "the first of the two pods" if none of both the
+pods has been set yet for this phase type or "the other one" if already
+one one the two pods has been set.
+
+The fourth and final argument is the state of the output for the put
+when the pulse is output. In our example this means that it will be
+@code{1} when a @code{1} or @code{ON} is found in the @acronym{EDL}
+program and @code{0} for @code{OFF} or @code{0}.
+
+Accordingly, the @acronym{EDL} code for the phase setup given above will
+lead to the following sequence of calls of the function
+@code{phase_setup_prep()}:
+@example
+/* PHASE_SETUP_1:  +X: POD_1 = ON, POD2 = OFF, */
+
+phase_setup_prep( 0, PHASE_PLUS_X, 0, 1 );   
+phase_setup_prep( 0, PHASE_PLUS_X, 1, 0 );
+
+/* +Y: POD1  = ON, POD_2 = 1, */
+
+phase_setup_prep( 0, PHASE_PLUS_Y, 0, 1 );   
+phase_setup_prep( 0, PHASE_PLUS_Y, 1, 1 );
+
+/* -X: POD2 = 0, 0, */
+
+phase_setup_prep( 0, PHASE_MINUS_X, 1, 0 );   
+phase_setup_prep( 0, PHASE_MINUS_X, -1, 0 );
+
+/* -Y: 1, 1; */
+
+phase_setup_prep( 0, PHASE_MINUS_Y, -1, 1 );   
+phase_setup_prep( 0, PHASE_MINUS_Y, -1, 1 );
+@end example
+
+If you are writing a module that does not create phase pulses (and you
+accordingly set the variable @code{needs_phase_pulses} in the pulser
+structure to false) the phase setup command looks a bit different:
+@example
+PHASE_SETUP_1:  MICROWAVE,
+              +X: POD = 1,
+              +Y: POD = 2,
+              -X: POD = 4,
+              -Y: 5,
+              CW: 3;
+@end example
+For these @acronym{EDL} code the function @code{phase_setup_prep()} gets
+called five times in a row. Again the first and second parameter the
+function will receive is the phase setup number (i.e.@: either @code{0}
+or @code{1}, for our example it would be @code{0} because we're dealing
+with the first phase setup), and the second is the phase type (i.e.@:
+@code{PHASE_PLUS_X}, @code{PHASE_PLUS_Y}, @code{PHASE_MINUS_X},
+@code{PHASE_MINUS_Y} and @code{PHASE_CW}). The third parameter has in
+this case no meaning at all and its value should be discarded. The
+fourth and final is the output pod or channel to be used for a pulse
+with the current phase. Thus, the function would be called in the
+following sequence (wihtout any other intervening calls except possibly
+@code{set_phase_reference()}):
+@example
+phase_setup_prep( 0, PHASE_PLUS_X, (discard), 1 );   
+phase_setup_prep( 0, PHASE_PLUS_Y, (discard), 2 );
+phase_setup_prep( 0, PHASE_MINUS_X, (discard), 1 );   
+phase_setup_prep( 0, PHASE_MINUS_Y, (discard), 2 );
+phase_setup_prep( 0, PHASE_CW, (discard), 1 );   
+@end example
+Here @code{(discard)} stands for an arbitrary value that has to be discarded.
 
 
-@item bool phase_setup( int function )
-@c XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-@c XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-@c XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+@item bool phase_setup( int func )
+This function is called to tell the module that a phase setup sequence
+is finished and no further commands of @code{phase_setup_prep()} for the
+phase setup with number @code{function} (i.e.@: either @code{0} for the
+first phase setup or @code{1} for the second) should happen. The module can
+now do some sanity checks on the data it received from the previous
+@code{phase_setup_prep()} calls or whatever else it needs to do.
 
 
 @item bool new_pulse( long pulse_number )
 This function is called when a new pulse definition is found in the
 @code{PREPARATONS} section, i.e.@: for lines starting like this
 @example
-PULSE_13: ...
+  PULSE_13: ...
 @end example
 For this the function will called (with @code{13} as the
 @code{pulse_number} argument) to tell the module that there's a new
@@ -1855,7 +1999,7 @@ the module.
 This function is called when the function of a new pulse is set in the
 @code{PREPARATIONS} section, i.e.@: for
 @example
-PULSE_13:   FUNCTION = MICROWAVE, ...
+  PULSE_13:   FUNCTION = MICROWAVE, ...
 @end example
 The first argument is the pulse number (you can be sure that the
 function @code{new_pulse()} will have been called before with this pulse
@@ -1872,13 +2016,13 @@ internally generated phase pulses.
 This is the function that gets called to tell the module about the
 start position of a pulse, i.e.@: for lines like
 @example
-PULSE_13: START = 100 ns, ...
+  PULSE_13: START = 100 ns, ...
 @end example
 within the experiment section or when during the experiment the position
 of a pulse is changed directly by assigning a new start position i.e.@:
 for lines like
 @example
-P13.START = 260 ns;
+  P13.START = 260 ns;
 @end example
 If you need different handling of both situatins you can asign a new
 function pointer to the corresponding structure entry at the start of
@@ -1925,7 +2069,7 @@ This function is called to set the phase sequence to be used for phase
 cycling the pulse indexed by the first argument, i.e.@: when commands
 like
 @example
-PULSE_13: PHASE_CYCLE = PHASE_SEQUENCE_1, ...
+  PULSE_13: PHASE_CYCLE = PHASE_SEQUENCE_1, ...
 @end example
 are found in the @code{EXPERIMENT} section of the @acronym{EDL} file.
 The second argument is either the number @code{1} or @code{2},

@@ -119,7 +119,7 @@ install-pion.anorg.chemie.uni-frankfurt.de:
 	-chown $(OWNER).$(GROUP) $(libdir)/magnet.so
 	-$(LN) $(LNFLAGS) $(libdir)/bh15.so $(libdir)/gaussmeter.so
 	-chown $(OWNER).$(GROUP) $(libdir)/gaussmeter.so
-	-$(LN) $(LNFLAGS) $(libdir)/sr510.so $(libdir)/lockin.so
+	-$(LN) $(LNFLAGS) $(libdir)/sr530.so $(libdir)/lockin.so
 	-chown $(OWNER).$(GROUP) $(libdir)/lockin.so
 
 install-crowley.physik.fu-berlin.de:

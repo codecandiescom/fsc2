@@ -805,7 +805,7 @@ Var *p_get_by_num( long pnum, int type )
 /*----------------------------------------------------------------------*/
 /* 'function' is the phase function the data are to be used for (i.e. 0 */
 /*	means PHASE_1, 1 means PHASE_2, 2 means both)                       */
-/* 'type' means the type of phase, see global.h (PHASE_PLUS/MINUX_X/Y)  */
+/* 'type' means the type of phase, see global.h (PHASE_PLUS/MINUS_X/Y)  */
 /* 'pod' means if the value is for the first or the second pod channel  */
 /* (0: first pod channel, 1: second pod channel, -1: pick the one not   */
 /* set yet)                                                             */

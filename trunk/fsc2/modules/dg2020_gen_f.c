@@ -625,7 +625,7 @@ bool dg2020_phase_setup_prep( int func, int type, int pod, long val )
 {
 	/* First a sanity check... */
 
-	fsc2_assert ( Cur_PHS != - 1 ? ( Cur_PHS == func ) : 1 );
+	fsc2_assert( Cur_PHS != - 1 ? ( Cur_PHS == func ) : 1 );
 
 	/* Not all phase types are valid here */
 
