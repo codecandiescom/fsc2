@@ -103,8 +103,6 @@ Var *monochromator_install_grating( Var *v );
 Var *monochromator_groove_density( Var *v );
 Var *monochromator_calibration( Var *v );
 Var *monochromator_wavelength_axis( Var * v );
-Var *monochromator_wavelength_to_pixel( Var *v );
-Var *monochromator_pixel_to_wavelength( Var *v );
 Var *monochromator_load_calibration( Var * v );
 Var *monochromator_set_calibration( Var *v );
 
