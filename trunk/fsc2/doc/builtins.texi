@@ -500,7 +500,7 @@ more control over the format that is used by accepting a format string
 that is nearly identical to the one of the @code{C} @code{printf()} family
 of functions, missing only some elements that wouldn't make sense here.
 As in the case of the @code{save()} and @code{fsave()} function the
-first argument may be a file identifier.
+first argument can be a file identifier.
 
 The format string may contain two types of objects: ordinary characters,
 which are copied to the file, and conversion specifications, each of
@@ -523,13 +523,14 @@ modifies the specification:
       will not be removed.
 @end itemize
 
-Following the flags a number specifying the minimum field width may be
-specified. The converted argument will be printed in a field at least
-this wide, and wider if necessary. If the converted argument has fewer
-characters tahn the field width it will be padded on the left (or on the
-right, if left adjustment has been requested) to make up for the field
-with. The padding character os normally space, butis @code{0} if the
-zero padding flag is present.
+Following the flags the minimum field width as well as the precision may
+be specified. If the flags are followed by a number it is taken as the
+minimum field width. The converted argument will be printed in a field
+at least this wide, and wider if necessary. If the converted argument
+has fewer characters than the field width it will be padded on the left
+(or on the right, if left adjustment has been requested) to make up for
+the field with. The padding character os normally space, butis @code{0}
+if the zero padding flag is present.
 
 The next character can be a period, which separates the field width from
 the precision.
