@@ -685,6 +685,7 @@ static void vars_do_init( Var *src, Var *dest )
 
 			for ( i = src->len; i < dest->len; i++ )
 				dest->val.lpnt[ i ] = 0;
+
 			return;
 
 		case FLOAT_ARR :
@@ -714,8 +715,8 @@ static void vars_do_init( Var *src, Var *dest )
 		case INT_REF :
 			if ( dest->flags & IS_DYNAMIC )
 			{
-				dest->val.dpnt = DOUBLE_P T_malloc( src->len
-													* sizeof *dest->val.vptr );
+				dest->val.vptr = VAR_PP T_malloc( src->len
+												  * sizeof *dest->val.vptr );
 				for ( ; dest->len < src->len; dest->len++ )
 					dest->val.vptr[ dest->len ] = NULL;
 			}
@@ -737,6 +738,7 @@ static void vars_do_init( Var *src, Var *dest )
 					else
 						dest->val.vptr[ i ]->type = INT_ARR;
 				}
+
 				if ( src->val.vptr[ i ] != NULL )
 					vars_do_init( src->val.vptr[ i ], dest->val.vptr[ i ] );
 			}
@@ -745,8 +747,8 @@ static void vars_do_init( Var *src, Var *dest )
 		case FLOAT_REF :
 			if ( dest->flags & IS_DYNAMIC )
 			{
-				dest->val.dpnt = DOUBLE_P T_malloc( src->len
-													* sizeof *dest->val.vptr );
+				dest->val.VPTR = VAR_PP T_malloc( src->len
+												  * sizeof *dest->val.vptr );
 				for ( ; dest->len < src->len; dest->len++ )
 					dest->val.vptr[ dest->len ] = NULL;
 			}
@@ -768,6 +770,7 @@ static void vars_do_init( Var *src, Var *dest )
 					else
 						dest->val.vptr[ i ]->type = FLOAT_ARR;
 				}
+
 				if ( src->val.vptr[ i ] != NULL )
 					vars_do_init( src->val.vptr[ i ], dest->val.vptr[ i ] );
 			}
