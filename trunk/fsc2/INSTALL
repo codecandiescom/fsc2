@@ -263,7 +263,7 @@ E) Getting started
 ==================
 
 The subdirectory 'edl' contains several several EDL programs that you can
-use to get an impression of fsc2 and to get acquainted with the syntax.
+use to get an impression of fsc2 and to become acquainted with the syntax.
 Unfortunately, some of the files will not work - I didn't had time yet to
 systematically weed out the ones that are outdated. There are a few programs
 that should even work without any devices, these are
