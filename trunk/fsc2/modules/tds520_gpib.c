@@ -535,7 +535,7 @@ bool tds520_start_aquisition( void )
 
 double tds520_get_area( int channel, WINDOW *w, bool use_cursor )
 {
-	double *data, area;
+	double *data, area, window;
 	long length, i;
 
 
@@ -545,6 +545,8 @@ double tds520_get_area( int channel, WINDOW *w, bool use_cursor )
 
 	if ( use_cursor )
 	{
+		window = tds520.timebase * tds520.rec_len / TDS_POINTS_PER_DIV;
+
 		tds520_set_cursor( 1, w != NULL ?
 						   w->start : ( - tds520.trig_pos * window ) );
 		tds520_set_cursor( 2, w != NULL ?
@@ -576,7 +578,7 @@ bool tds520_get_curve( int channel, WINDOW *w, double **data, long *length,
 	long len = 10;
 	char *buffer;
 	long i;
-	double scale;
+	double scale, window;
 
 
 	assert( channel >= 0 && channel < TDS520_AUX1 );
@@ -587,6 +589,7 @@ bool tds520_get_curve( int channel, WINDOW *w, double **data, long *length,
 
 	if ( use_cursor )
 	{
+		window = tds520.timebase * tds520.rec_len / TDS_POINTS_PER_DIV;
 		tds520_set_cursor( 1, w != NULL ?
 						   w->start : ( - tds520.trig_pos * window ) );
 		tds520_set_cursor( 2, w != NULL ?
@@ -695,7 +698,7 @@ bool tds520_get_curve( int channel, WINDOW *w, double **data, long *length,
 
 double tds520_get_amplitude( int channel, WINDOW *w, bool use_cursor )
 {
-	double *data, min, max;
+	double *data, min, max, window;
 	long length, i;
 
 
@@ -705,6 +708,7 @@ double tds520_get_amplitude( int channel, WINDOW *w, bool use_cursor )
 
 	if ( use_cursor )
 	{
+		window = tds520.timebase * tds520.rec_len / TDS_POINTS_PER_DIV;
 		tds520_set_cursor( 1, w != NULL ?
 						   w->start : ( - tds520.trig_pos * window ) );
 		tds520_set_cursor( 2, w != NULL ?
@@ -712,7 +716,7 @@ double tds520_get_amplitude( int channel, WINDOW *w, bool use_cursor )
 						   ( ( 1.0 - tds520.trig_pos ) * window ));
 	}
 
-	tds520_get_curve( channel, w, &data, &length, OFF );
+	tds520_get_curve( channel, w, &data, &length, UNSET );
 
 	min = HUGE_VAL;
 	max = - HUGE_VAL;
