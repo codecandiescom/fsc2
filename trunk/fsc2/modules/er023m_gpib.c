@@ -90,6 +90,7 @@ bool er023m_init( const char *name )
 		if ( er023m.ct_mult == UNDEF_CT_MULT )
 		{
 			er023m.ct_mult = er023m_get_ct( );
+
 			if ( er023m.ct_mult < MIN_CT_MULT )
 				er023m.ct_mult = MIN_CT_MULT;
 
