@@ -764,15 +764,15 @@ would be defined as:
 ACQUISITION_SEQUENCE: +, -, -, +;
 @end example
 
-When one has a setup with a quadrature mixer one also can define in the
-acquisition sequence which of the signals from the two digitizer channels
-has to be used. The first channel is named @code{A} and the second
-@code{B}. In this case one usually also needs two acquisition sequences,
-one for the real part and one for the imaginary part of the signal. To
-distinguish between the sequences append either @code{1} or @code{2} to
-the keyword (optionally with an underscore in between. As an example
-here the phase and acquisition sequence definitions for an inversion
-recovery experiment with FID detection and phase cycling:
+When one has an experiment with a quadrature mixer one also can define
+in the acquisition sequence which of the signals from the two digitizer
+channels have to be used. The first channel is named @code{A} and the
+second @code{B}. In this case one usually also needs two acquisition
+sequences, one for the real part and one for the imaginary part of the
+signal. To distinguish between the sequences append either @code{1} or
+@code{2} to the keyword (optionally with an underscore in between. As an
+example here the phase and acquisition sequence definitions for an
+inversion recovery experiment with FID detection and phase cycling:
 @example
 PHASE_SEQUENCE_1       = +x, +x, +x, +x, -x, -x, -x, -x;
 PHASE_SEQUENCE_2       = +x, -x, +y, -y, +x, -x, +y, -y;
