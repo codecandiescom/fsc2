@@ -15,9 +15,9 @@
    boxes etc. For this we need the parent process to display them and then to
    return the result to the child process.
 
-   The communication between both processes works via a pair of pipes (it
-   could also done using a soket pair - I don't know if this would be faster,
-   so I did stick with the more conservative approach).
+   The communication between both processes works via a pair of pipes (it also
+   could be done using a socket pair - I don't know if this would be faster so
+   I opted for the more conservative approach.
 
    An important point is that the child process is supposed not to flood the
    parent process with data - thus there is the following mechanism to avoid
@@ -56,8 +56,7 @@
 		C_SHOW_ALERT
 		C_SHOW_CHOICES
 		C_SHOW_FSELECTOR
-		C_INIT_GRAPHICS
-*/
+		C_INIT_GRAPHICS */
 
 
 
