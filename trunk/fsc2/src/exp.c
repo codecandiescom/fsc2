@@ -40,6 +40,7 @@
 
 static bool in_for_lex = UNSET;   // set while handling for loop condition part
 static long token_count;
+static CB_Stack *cb_stack = NULL; // curly brace stack
 
 
 extern int exp_runparse( void );          /* from exp_run_parser.y */
@@ -61,6 +62,8 @@ extern void exprestart( FILE *expin );
 
 /* local functions */
 
+static void push_curly_brace( const char *Fname, long Lc );
+static bool pop_curly_brace( void );
 static void loop_setup( void );
 static void setup_while_or_repeat( int type, long *pos );
 static void setup_if_else( long *pos, Prg_Token *cur_wr );
@@ -97,7 +100,6 @@ void store_exp( FILE *in )
 	static bool is_restart = UNSET;
 	int ret;
 	char *cur_Fname = NULL;
-	long curly_brace_count = 0;
 	long curly_brace_in_loop_count = 0;
 	long paranthesis_count = 0;
 	long square_brace_count = 0;
@@ -123,6 +125,25 @@ void store_exp( FILE *in )
 	{
 		if ( ret == ON_STOP_TOK )
 		{
+			if ( paranthesis_count > 0 )
+			{
+				eprint( FATAL, SET, "Unbalanced parenthesis before ON_STOP "
+						"label.\n" );
+				THROW( EXCEPTION );
+			}
+			if ( square_brace_count > 0 )
+			{
+				eprint( FATAL, SET, "Unbalanced square braces before ON_STOP "
+						"label.\n" );
+				THROW( EXCEPTION );
+			}
+			if ( cb_stack != NULL )
+			{
+				eprint( FATAL, SET, "ON_STOP label found within a block "
+						"(enclosed by curly braces).\n" );
+				THROW( EXCEPTION );
+			}
+
 			On_Stop_Pos = prg_length;
 			continue;
 		}
@@ -134,6 +155,23 @@ void store_exp( FILE *in )
 								              * sizeof( Prg_Token ) );
 
 		prg_token[ prg_length ].token = ret;   /* store token */
+
+		/* If the file name changed get a copy of the new file name. Then set
+		   pointer in structure to file name and copy current line number. */
+
+		if ( cur_Fname == NULL || strcmp( Fname, cur_Fname ) )
+		{
+			cur_Fname = NULL;
+			cur_Fname = T_strdup( Fname );
+		}
+		prg_token[ prg_length ].Fname = cur_Fname;
+		prg_token[ prg_length ].Lc = Lc;
+
+		/* Initialise pointers needed for flow control and the data entries
+		   used in repeat loops */
+
+		prg_token[ prg_length ].start = prg_token[ prg_length ].end = NULL;
+		prg_token[ prg_length ].counter = 0;
 
 		/* In most cases it's enough just to copy the union with the value.
 		   But there are a few exceptions: For strings we need also a copy of
@@ -176,7 +214,7 @@ void store_exp( FILE *in )
 					THROW( EXCEPTION );
 				}
 
-				curly_brace_count++;
+				push_curly_brace( cur_Fname, Lc );
 				if ( in_loop )
 					curly_brace_in_loop_count++;
 				break;
@@ -196,7 +234,7 @@ void store_exp( FILE *in )
 					THROW( EXCEPTION );
 				}
 
-				if ( --curly_brace_count < 0 )
+				if ( ! pop_curly_brace( ) )
 				{
 					eprint( FATAL, SET, "Found '}' without matching '{'.\n" );
 					THROW( EXCEPTION );
@@ -274,22 +312,6 @@ void store_exp( FILE *in )
 						sizeof( Token_Val ) );
 		}
 
-		/* If the file name changed get a copy of the new file name. Then set
-		   pointer in structure to file name and copy current line number. */
-
-		if ( cur_Fname == NULL || strcmp( Fname, cur_Fname ) )
-		{
-			cur_Fname = NULL;
-			cur_Fname = T_strdup( Fname );
-		}
-		prg_token[ prg_length ].Fname = cur_Fname;
-		prg_token[ prg_length ].Lc = Lc;
-
-		/* Initialise pointers needed for flow control and the data entries
-		   used in repeat loops */
-
-		prg_token[ prg_length ].start = prg_token[ prg_length ].end = NULL;
-		prg_token[ prg_length ].counter = 0;
 		prg_length++;
 	}
 
@@ -302,10 +324,10 @@ void store_exp( FILE *in )
 		THROW( EXCEPTION );
 	}
 
-	if ( curly_brace_count > 0 )
+	if ( cb_stack != NULL  )
 	{
-		eprint( FATAL, UNSET, "'{' without closing '}' detected at end of "
-				"program.\n" );
+		eprint( FATAL, UNSET, "Block starting with '{' at %s:%ld has no "
+				"closing '}'.\n", cb_stack->Fname, cb_stack->Lc );
 		THROW( EXCEPTION );
 	}
 
@@ -320,6 +342,53 @@ void store_exp( FILE *in )
 
 	loop_setup( );
 }
+
+
+/*-------------------------------------------------------------------------*/
+/* Function is called for each opening curly brace found in the input file */
+/* to store the current file name and line number to be able to print more */
+/* informative error messages when there are less closing than opening     */
+/* braces.                                                                 */
+/*-------------------------------------------------------------------------*/
+
+static void push_curly_brace( const char *Fname, long Lc )
+{
+	CB_Stack *new_cb;
+
+
+	new_cb = T_malloc( sizeof( CB_Stack ) );
+	new_cb->next = cb_stack;
+	new_cb->Fname = T_strdup( Fname );
+	new_cb->Lc = Lc;
+	cb_stack = new_cb;
+}
+
+
+/*---------------------------------------------------------------------------*/
+/* Function is called when a closing curly brace is found in the inpit file  */
+/* to delete the entry on the curly brace stack for the corresponding        */
+/* opening brace. It returns OK when there was a corresponding opening brace */
+/* (i.e. the number of opening and closing braces aren't unbalanced in favor */
+/* of closing braces), otherwise FAIL is returned. This function is also     */
+/* when getting rid of the curly brace stack after an exception was thrown.  */
+/*---------------------------------------------------------------------------*/
+
+static bool pop_curly_brace( void )
+{
+	CB_Stack *old_cb;
+
+
+	if ( cb_stack == NULL )
+		return FAIL;
+
+	old_cb = cb_stack;
+	cb_stack = old_cb->next;
+	T_free( old_cb->Fname );
+	T_free( old_cb );
+
+	return OK;
+}
+
 
 /*----------------------------------------------------*/
 /* Deallocates all memory used for storing the tokens */
@@ -376,14 +445,20 @@ void forget_prg( void )
 	T_free( prg_token );
 	prg_token = NULL;
 	prg_length = 0;
+
+	/* Get rid of structures for curly braces that may have been survived
+	   when an exeptioon got thrown */
+
+	while ( pop_curly_brace( ) )
+		;
 }
 
 
-/*--------------------------------------------------------------------------*/
-/* Sets up the blocks of WHILE, REPEAT and FOR loops and IF-ELSE and UNLESS */
-/* constructs where a block is everything between a matching pair of curly  */
-/* braces.                                                                  */
-/*--------------------------------------------------------------------------*/
+/*----------------------------------------------------------------*/
+/* Sets up the blocks of WHILE, UNTIL, REPEAT and FOR loops and   */
+/* IF-ELSE and UNLESS-ELSE constructs where a block is everything */
+/* between a matching pair of curly braces.                       */
+/*----------------------------------------------------------------*/
 
 static void loop_setup( void )
 {
@@ -403,25 +478,13 @@ static void loop_setup( void )
 			case FOR_TOK   : case UNTIL_TOK :
 				cur_pos = i;
 				setup_while_or_repeat( prg_token[ i ].token, &i );
-				if ( cur_pos < On_Stop_Pos && i > On_Stop_Pos )
-				{
-					eprint( FATAL, UNSET, "ON_STOP label is located within a "
-							"loop.\n" );
-					THROW( EXCEPTION );
-				}
+				fsc2_assert( ! ( cur_pos < On_Stop_Pos && i > On_Stop_Pos ) );
 				break;
 
 			case IF_TOK : case UNLESS_TOK :
 				cur_pos = i;
 				setup_if_else( &i, NULL );
-				if ( cur_pos < On_Stop_Pos && i > On_Stop_Pos )
-				{
-					eprint( FATAL, UNSET, "ON_STOP label located within "
-							"%s-ELSE construct.\n",
-							prg_token[ cur_pos ].token == IF_TOK ?
-							"IF" : "UNLESS" );
-					THROW( EXCEPTION );
-				}
+				fsc2_assert( ! ( cur_pos < On_Stop_Pos && i > On_Stop_Pos ) );
 				break;
 		}
 	}
@@ -467,11 +530,12 @@ static void setup_while_or_repeat( int type, long *pos )
 		THROW( EXCEPTION );
 	}
 
-	/* Look for the start and end of the while, repeat or for block
-	   beginning with the first token after the while, repeat or for. Handle
-	   nested while, repeat, for or if tokens by calling the appropriate
-	   setup functions recursively. break and continue tokens store in `start'
-	   a pointer to the block header, i.e. the while, repeat or for token. */
+	/* Look for the start and end of the while, until, repeat or for block
+	   beginning with the first token after the REPEAT, WHILE, UNTIL or FOR.
+	   Handle nested WHILE, UNTIL, REPEAT, FOR, IF or UNLESS tokens by calling
+	   the appropriate setup functions recursively. BREAK and NEXT tokens store
+	   in `start' a pointer to the block header, i.e. the WHILE, UNTIL, REPEAT
+	   or FOR token. */
 
 	for ( ; i < prg_length; i++ )
 	{
@@ -541,14 +605,14 @@ static void setup_while_or_repeat( int type, long *pos )
 }
 
 
-/*---------------------------------------------------------------------*/
-/* Does the real work for setting up if-else constructs. Can be called */
-/* recursively to allow nested if's.                                   */
-/* ->                                                                  */
-/*    1. pointer to number of token                                    */
-/*    2. Pointer to program token of enclosing while, repeat or for    */
-/*       loop (needed for handling of `break' and `continue').         */
-/*---------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*/
+/* Does the real work for setting up IF-ELSE or UNLESS_ELSE constructs. */
+/* Can be called recursively to allow nested IF and UNLESS tokens.      */
+/* ->                                                                   */
+/*    1. pointer to number of token                                     */
+/*    2. Pointer to program token of enclosing while, repeat or for     */
+/*       loop (needed for handling of `break' and `continue').          */
+/*----------------------------------------------------------------------*/
 
 static void setup_if_else( long *pos, Prg_Token *cur_wr )
 {
@@ -587,22 +651,12 @@ static void setup_if_else( long *pos, Prg_Token *cur_wr )
 				break;
 
 			case CONT_TOK :
-				if ( cur_wr == NULL )
-				{
-					eprint( FATAL, UNSET, "%s:%ld: NEXT not within a loop.\n",
-							prg_token[ i ].Fname, prg_token[ i ].Lc );
-					THROW( EXCEPTION );
-				}
+				fsc2_assert( cur_wr != NULL );
 				prg_token[ i ].start = cur_wr;
 				break;
 
 			case BREAK_TOK :
-				if ( cur_wr == NULL )
-				{
-					eprint( FATAL, UNSET, "%s:%ld: BREAK not within a loop.\n",
-							prg_token[ i ].Fname, prg_token[ i ].Lc );
-					THROW( EXCEPTION );
-				}
+				fsc2_assert( cur_wr != NULL );
 				prg_token[ i ].start = cur_wr;
 				break;
 
@@ -660,7 +714,7 @@ static void setup_if_else( long *pos, Prg_Token *cur_wr )
 				if ( i + 1 == prg_length )
 				{
 					eprint( FATAL, UNSET, "%s:%ld: Unexpected end of file in "
-							"EXERIMENT section.\n",
+							"EXPERIMENT section.\n",
 							prg_token[ i ].Fname, prg_token[ i ].Lc );
 					THROW( EXCEPTION );
 				}

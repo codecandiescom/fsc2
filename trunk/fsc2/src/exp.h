@@ -121,9 +121,15 @@ typedef struct PT_ {
 } Prg_Token;
 
 
+typedef struct CB_ {
+	char *Fname;
+	long Lc;
+	struct CB_ *next;
+} CB_Stack;
+
 
 /*
-  The following remaks aren't completely in sync with the current state of
+  The following remarks aren't completely in sync with the current state of
   the program... (8.3.2001)
 
   [1] In WHILE, UNTIL and REPEAT tokens `start' points to the start of the
@@ -157,7 +163,6 @@ bool test_condition( Prg_Token *cur );
 void get_max_repeat_count( Prg_Token *cur );
 void get_for_cond( Prg_Token *cur );
 bool test_for_cond( Prg_Token *cur );
-void save_restore_variables( bool flag );
 
 
 #endif   /* ! EXP_HEADER */
