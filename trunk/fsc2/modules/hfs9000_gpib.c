@@ -206,6 +206,10 @@ bool hfs9000_init( const char *name )
 
 	hfs9000_setup_trig_in( );
 
+	/* Per default use the whole pattern length of the pulser, only when the
+	   user specified a maximum pattern length explicitely use the user
+	   supplied value. */
+
 	hfs9000_command( "VECT:STAR 0\n" );
 	if ( ! hfs9000.is_max_seq_len )
 	{
