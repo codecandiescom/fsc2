@@ -667,6 +667,7 @@ static void run_child( void )
 
 
 	I_am = CHILD;
+	FSC2_MODE = EXPERIMENT;
 
     /* Set up pipes for communication with parent process */
 

@@ -574,7 +574,7 @@ correct sequence, so it's not completely foolproof.
 @subsection Files to be included
 
 First of all, each module has to include the header file @file{fsc2.h}
---- otherwise it will not be able to use @acronym{fsc2}'s variables.
+-- otherwise it will not be able to use @acronym{fsc2}'s variables.
 
 Second, all modules that use the GPIB bus should include
 @file{gpib_if.h}, this contains all the definitions and declarations of
@@ -666,17 +666,51 @@ for unrelated devices.
 
 @subsection Global variables
 
-There are a few important global variables in @acronym{fsc2} to be used
-by modules. The first on is a flag of type @code{bool} (see below),
-called @code{TEST_RUN}. If it is set, the function in the module is
-called during a test run, thus can devices be used yet. Only if
-@code{TEST_RUN} is unset the hardware interfaces to the devices are
-initialized and devices may be used. During a test run, the module
-should try to return reasonable dummy data.  That means that the module
-functions should at least return data of the same type as it will do in
-the actual experiment. E.g., if a function will return an array during
-the experiment it should do the same during the a test run, even though
-the data in the array probably are going to be completely bogus.
+First there is a global variable, called @code{FSC2_MODE}, which tells
+you in which context your module function is called. There are three
+different contexts: First you have to distinguish between the program
+interpreting the @code{VARIABLES} or @code{PREPARATIONS} section and, on
+the other hand, when interpreting the @code{EXPERIMENT} section. During
+the handling of the @code{VARIABLES} or @code{PREPARATIONS} section the
+devices are not initialized and can't be accessed and the @acronym{EDL}
+program interpretation @code{FSC2_MODE} is set to the value
+@code{PREPARATION}.
+
+But before the real experiment is started a test run of the
+@code{EXPERIMENT} section must be done. While in this context your
+module function still can't access the devices but must try to return
+reasonable dummy data. That means that the module functions should at
+least return data of the same type as it will do in the actual
+experiment. E.g., if a function will return an array during the
+experiment it should do the same during the a test run, even though the
+data in the array probably are going to be completely bogus. During the
+the test run the variable @code{FSC2_MODE} is set to @code{TEST}.
+
+Finally the experiment gets started. Now your module can talk to the
+devices and can return 'real' values. To indicate this @code{FSC2_MODE}
+is set to the value @code{EXPERIMENT}.
+
+Thus you will probably often have constructs like the following in your
+module functions:
+@example
+switch ( FSC2_MODE )
+@{
+    case PREPARATION :
+        /* print an error message that this functionality is */
+        /* only available from within the EXPERIMENT section */
+        break;
+
+    case TEST :
+        /* return some reasonable dummy value */
+        break;
+
+    case EXPERIMENT :
+        /* do something only allowed when you can talk to the */
+        /* device, i.e. from within the EXPERIMENT section    */
+        break;
+@}
+@end example
+
 
 Another important global variable, @code{need_GPIB}, being also of type
 @code{bool}, has to be set by the init hook function if the device is
@@ -685,6 +719,7 @@ line in the init hook function similar to
 @example
 need_GPIB = SET;
 @end example
+
 
 @subsection Handling GPIB devices
 
@@ -899,7 +934,7 @@ test for the existence of other modules by calling a function called
 modules at this stage, because the other modules may still be
 uninitialized. If the initialization completes successfully, the
 function must return a non-zero value. If there are problems that don't
-make the module unusable it may return a zero value --- in this case a
+make the module unusable it may return a zero value -- in this case a
 warning message will be printed. If the initialization fails in a
 non-recoverable way, the function should throw an exception.
 
@@ -1070,7 +1105,7 @@ Call @code{func_get()}
 with the name of the function you want to call as the first argument and
 the address of an integer variable for returning the access flags (you
 may specify also @code{NULL} instead if you're not interested in the
-access flag) --- this will return a variable with a pointer to the
+access flag) -- this will return a variable with a pointer to the
 function which you have to store. If the returned pointer is @code{NULL}
 the function does not exist or isn't loaded.  The variable pointed to by
 the second argument will be set to either @code{ALL}, @code{PREP} or

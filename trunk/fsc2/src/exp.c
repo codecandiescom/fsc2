@@ -853,6 +853,7 @@ void exp_test_run( void )
 		*/
 
 		TEST_RUN = SET;
+		FSC2_MODE = TEST;
 		save_restore_variables( SET );
 		vars_pop( f_dtime( NULL ) );
 		run_test_hooks( );
@@ -1012,6 +1013,7 @@ void exp_test_run( void )
 		close_all_files( );
 			
 		TEST_RUN = UNSET;
+		FSC2_MODE = PREPARATION;
 		PASSTHROU( )
 	}
 
