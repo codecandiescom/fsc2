@@ -104,7 +104,8 @@ while ( $client = $server->accept( ) ) {
 
 
 #########################################################
-# This function handles a single new connection from the outside world
+# This function handles a single new connection from the outside world. It
+# must close the connection when done and may never return.
 
 sub serve {
 
@@ -121,15 +122,15 @@ sub serve {
 	# closes the connection
 
 	1 while defined( $txt = <$client> ) and $txt =~ /^\r*$/o;
-	return unless defined $txt;
+	exit 0 unless defined $txt;
 
 	# The "server" only handles well-formed GET requests...
 
-	return illegal_request( $1, $txt )
+	exit illegal_request( $1, $txt )
 		unless $txt =~ m|^\s*([^ \t]+)\s+([^ \t]+)\s+HTTP/\d+\.\d+\s*\r*$|io;
 
 	my ( $req, $file ) = ( $1, $2 );
-	return illegal_request( $req, $txt ) unless $req =~ /^GET$/io;
+	exit illegal_request( $req, $txt ) unless $req =~ /^GET$/io;
 
 	# Check if client accepts PNG or GIF files and skip the rest of the noise,
 	# we're done listening when we get an empty line
@@ -141,7 +142,7 @@ sub serve {
 
 	# Give up if the client bailed out in between...
 
-	return unless defined $txt;
+	exit 0 unless defined $txt;
 
 	# Ok, now it's finally our turn to send something back...
 
@@ -205,8 +206,8 @@ sub serve_main {
 		  "<HTML><HEAD>\r\n" .
 		  "<meta name=\"robots\" content=\"noindex\">\r\n";
 
-	# Send the logo (per default the gif version because some browser don't
-	# seem to deal correctly with transparency in png files) and the status
+	# Send the logo (per default the GIF version because some browser don't
+	# seem to deal correctly with transparency in PNG files) and the status
 	# information
 
 	if ( $state =~ /^[0-3]$/o ) {
@@ -233,9 +234,9 @@ sub serve_main {
 	}
 
 	# Now tell the client where to look for the graphics fsc2 currently
-	# displays (if the browser understands png files we tell it to get
-	# this version, it usually seems to be compressed better and the
-	# problem with transparency isn't an issue here).
+	# displays (if the browser understands PNG files we tell it to get
+	# this version, it usually seems to be compressed better than GIF files
+	# and the problem with transparency isn't an issue here).
 
 	if ( $state =~ /^[1-3]$/o and ( $has_png or $has_gif ) ) {
 		stdout_lock( 1 ) or exit 1;
@@ -417,6 +418,7 @@ sub illegal_request {
 	}
 
 	print "<HR>\r\n</BODY></HTML>\r\n";
+	return 0;
 }
 
 
