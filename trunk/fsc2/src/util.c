@@ -115,7 +115,7 @@ long get_file_length( char *name, int *len )
 
 	TRY
 	{
-		pc = T_malloc( 20 + strlen( AWK_PROG ) + strlen( name ) );
+		pc = T_malloc( 20 + strlen( name ) );
 		TRY_SUCCESS;
 	}
 	OTHERWISE
@@ -123,9 +123,7 @@ long get_file_length( char *name, int *len )
 
 	/* set up pipe to 'awk' (defined via AWK_PROG) and read number of lines */
 
-	strcpy( pc, AWK_PROG" 'END{print NR}' " );
-	strcat( pc, name );
-
+	sprintf( pc, "wc -l %s 2>/dev/null", name );
 	if ( ( pp = popen( pc, "r" ) ) == NULL )
 	{
 		T_free( pc );
@@ -146,10 +144,10 @@ long get_file_length( char *name, int *len )
 
 	/* count number of digits of number of lines */
 
-	for ( i = lc, *len = 1; ( i /= 10 ) > 0; ++( *len ) )
+	for ( i = lc + 1, *len = 1; ( i /= 10 ) > 0; ++( *len ) )
 		;
 
-	return lc;
+	return lc + 1;
 }
 
 

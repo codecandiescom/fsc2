@@ -15,14 +15,6 @@
 
 #define FSC2_SOCKET  "/tmp/fsc2.uds"
 
-/* AWK might be defined via compiler flags - otherwise define it here */
-
-#if defined AWK
-#define AWK_PROG AWK
-#else
-#define AWK_PROG "awk"
-#endif
-
 
 #if ! defined libdir
 #define libdir "./"

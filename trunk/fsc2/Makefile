@@ -37,7 +37,6 @@ FLEX           = flex
 FLEXFLAGS      = -B -P
 RM             = -rm
 RMFLAGS        = -f
-AWK            = /usr/bin/awk
 INSTALL        = install             # command for installing non-executables
 EXEC_INSTALL   = install             # command for installing executables
 
@@ -54,7 +53,7 @@ ifeq ($(shell hostname -f),pion.anorg.chemie.uni-frankfurt.de)
 	CFLAGS    += -DIS_STILL_LIBC1
 endif
 
-# Pass GPIB_LOG, GPIB_CONF and AWK via macros to the source files
+# Pass GPIB_LOG and GPIB_CONF via macros to the source files
 # Don't forget to escape all double quotes (`"') with backslashes.
 # For directories we make sure they end with a `/'.
 
@@ -68,12 +67,6 @@ ifdef GPIB_CONF
     CFLAGS += -DGPIB_CONF=\"$(GPIB_CONF)\"
 else
     CFLAGS += -DGPIB_CONF=\"/etc/gpib.conf\"
-endif
-
-ifdef AWK
-    CFLAGS += -DAWK=\"$(AWK)\"
-else
-	CFLAGS += -DAWK=\"awk\"
 endif
 
 ifdef bindir
