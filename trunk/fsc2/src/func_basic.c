@@ -1117,9 +1117,10 @@ Var *f_dtime( Var *v )
 {
 	struct timeval t_new;
 	static struct timeval t_old = { 0, 0 };
-	double diff;
-	long dsec, susec;
+	long dsec, dusec;
 
+
+	v = v;                          /* keep the compiler happy */
 
 	gettimeofday( &t_new, NULL );
 
