@@ -68,8 +68,9 @@ $SIG{ PIPE } = sub { close $client; exit 0 };
 $SIG{ CHLD } = sub { 1 until waitpid( -1, WNOHANG ) == -1 };
 
 
-# Check if the pnmtopng and/or ppmtojpg utility is available, otherwise we
-# can't send the display and cross section windows of fsc2
+# Check if the pnmtopng and/or ppmtojpg utility is available by trying to
+# convert a trivially simple test image, otherwise we can't send the display
+# and cross section windows of fsc2
 
 my @a = `echo -n "P6 1 1 255\n000" | pnmtopng 2>/dev/null`;
 $has_pnmtopng = defined $a[ 0 ];

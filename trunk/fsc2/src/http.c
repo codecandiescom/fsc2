@@ -24,6 +24,10 @@
 
 #include "fsc2.h"
 
+/* Sets the maximum number of lines from the end of the error browser that
+   get included into the HTTP page the server sends - avoids possibly sending
+   hundreds and hundreds of unimportant warning messages. */
+
 #define MAX_LINES_TO_SEND 30
 
 
@@ -103,14 +107,12 @@ void server_callback( FL_OBJECT *obj, long a )
 }
 
 
-/*--------------------------------------------------*/
-/* Function execs the web server as a child process */
-/* with its standard input and output redirected to */
-/* two pipes. We're going to check out read end of  */
-/* one of the pipes regularly to see if the server  */
-/* needs some data and send these back on the other */
-/* pipe.                                            */
-/*--------------------------------------------------*/
+/*--------------------------------------------------------------------*/
+/* Function execs the web server as a child process with its standard */
+/* input and output redirected to two pipes. We're going to check the */
+/* read end of one of the pipes regularly to see if the server needs  */
+/* some data and send these back on the other pipe.                   */
+/*--------------------------------------------------------------------*/
 
 static void spawn_server( void )
 {
