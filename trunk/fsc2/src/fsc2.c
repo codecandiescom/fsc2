@@ -165,6 +165,8 @@ static bool xforms_init( int *argc, char *argv[] )
 	fl_set_oneliner_font( FL_NORMAL_STYLE, FL_SMALL_SIZE );
 #endif	
 
+	fs_disable_fselector_cache( 1 );
+
 	/* Create and display the main form */
 
 	main_form = create_form_fsc2( );
