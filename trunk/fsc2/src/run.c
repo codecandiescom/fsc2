@@ -481,8 +481,13 @@ static void run_child( void )
 	   Wait for reply by parent process (i.e. a DO_SEND signal). */
 
 	kill( getppid( ), NEW_DATA );
+
+	/* Using a pause() here is tempting but there's a race condition -
+	   'do_send' may be set while the pause tests are under way. This isn't
+	   just paranoia but happens more often than I imagined... */
+
 	while ( ! do_send )
-		pause( );
+		usleep( 50000 );
 
 	do_measurement( );                     /* run the experiment */
 
@@ -497,8 +502,13 @@ static void run_child( void )
 
 	do_quit = UNSET;
 	kill( getppid( ), QUITTING );          /* tell parent that we're exiting */
+
+	/* Using a pause() here is tempting but there's a race condition -
+	   'do_send' may be set while the pause tests are under way. This isn't
+	   just paranoia but happens more often than I imagenid... */
+
 	while ( ! do_quit )                    /* wait for acceptance of signal  */
-		pause( );
+		usleep( 50000 );
 
 	_exit( return_status );                /* ...and that's it ! */
 }

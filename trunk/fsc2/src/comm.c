@@ -718,8 +718,12 @@ void writer( int type, ... )
 
 	if ( I_am == CHILD )
 	{
+		/* Using a pause() here is tempting but there's a race condition -
+		   'do_send' may be set while the pause tests are under way. This
+		   isn't just paranoia but happens more often than I imagined... */
+
 		while ( ! do_send )             /* wait for parent to become ready */
-			pause( );
+			usleep( 50000 );
 		do_send = UNSET;
 
 		Key->type = REQUEST;
