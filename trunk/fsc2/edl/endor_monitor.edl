@@ -43,8 +43,10 @@ EXPERIMENT:
 
 lockin_lock_keyboard( 0 );
 
+hide_toolbox( 1 );
 B0 = button_create( "NORMAL_BUTTON", "Clear curve" );
-I1 = input_create( "FLOAT_INPUT", freq * 1.0e-6, "RF frequency in MHz" );
+I1 = input_create( "FLOAT_INPUT", freq * 1.0e-6, "RF frequency in MHz",
+				   "", "%.3f" );
 B1 = button_create( "RADIO_BUTTON", "Sweep frequency up" );
 B2 = button_create( "RADIO_BUTTON", B1, "Stop frequency sweep" );
 B3 = button_create( "RADIO_BUTTON", B1, "Sweep frequency down" );
@@ -54,6 +56,7 @@ I2 = input_create( "FLOAT_INPUT", step_freq * 1.0e-3,
 B4 = button_create( "PUSH_BUTTON", "RF power on/off" );
 I3 = input_create( "FLOAT_INPUT", atten, "Attenuation in db" );
 B5 = button_create( "PUSH_BUTTON", "Pause" );
+hide_toolbox( 0 );
 
 FOREVER {
 
