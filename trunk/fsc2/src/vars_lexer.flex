@@ -149,32 +149,32 @@ WS          [\n \t]+
 
 			/* all needed pulse related keywords... */
 
-{P}?"."{F}  {
+{P}"."{F}   {
 				varslval.vptr = pulse_get_prop( varstext, P_FUNC );
 				return VAR_REF;
             }
 
-{P}?"."{S}  {
+{P}"."{S}   {
 				varslval.vptr = pulse_get_prop( varstext, P_POS );
 				return VAR_REF;
             }
 
-{P}?"."{L}  {
+{P}"."{L}   {
 				varslval.vptr = pulse_get_prop( varstext, P_LEN );
 				return VAR_REF;
             }
 
-{P}?"."{DS} {
+{P}"."{DS}  {
 				varslval.vptr = pulse_get_prop( varstext, P_DPOS );
 				return VAR_REF;
             }
 
-{P}?"."{DL} {
+{P}"."{DL}  {
 				varslval.vptr = pulse_get_prop( varstext, P_DLEN );
 				return VAR_REF;
             }
 
-{P}?"."{ML} {
+{P}"."{ML}  {
 				varslval.vptr = pulse_get_prop( varstext, P_MAXLEN );
 				return VAR_REF;
             }

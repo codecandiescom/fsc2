@@ -191,32 +191,32 @@ WS          [\n=: ]+
 
 			/* combinations of pulse and property, e.g. `P3.LEN' */
 
-{P}?"."{F}  {
+{P}"."{F}   {
 				assignlval.vptr = pulse_get_prop( assigntext, P_FUNC );
 				return VAR_REF;
             }
 
-{P}?"."{S}  {
+{P}"."{S}   {
 				assignlval.vptr = pulse_get_prop( assigntext, P_POS );
 				return VAR_REF;
             }
 
-{P}?"."{L}  {
+{P}"."{L}   {
 				assignlval.vptr = pulse_get_prop( assigntext, P_LEN );
 				return VAR_REF;
             }
 
-{P}?"."{DS} {
+{P}"."{DS}  {
 				assignlval.vptr = pulse_get_prop( assigntext, P_DPOS );
 				return VAR_REF;
             }
 
-{P}?"."{DL} {
+{P}"."{DL}  {
 				assignlval.vptr = pulse_get_prop( assigntext, P_DLEN );
 				return VAR_REF;
             }
 
-{P}?"."{ML} {
+{P}"."{ML}  {
 				assignlval.vptr = pulse_get_prop( assigntext, P_MAXLEN );
 				return VAR_REF;
             }
