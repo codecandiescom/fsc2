@@ -181,7 +181,7 @@ static void unpack_and_accept( char *ptr )
 
 		type = * ( int * ) ptr;
 		ptr += sizeof( int );
-			
+
 		switch ( type )
 		{
 			case INT_VAR :
@@ -720,7 +720,7 @@ static bool incr_x( long x_index, long len )
 	for ( i = 0; i < G.nc; i++ )
 	{
 		cv = G.curve_2d[ i ];
-			
+
 		old_points = cv->points;
 		sp = cv->points = T_malloc( new_num * sizeof *sp );
 
@@ -770,7 +770,7 @@ static bool incr_y( long y_index )
 	for ( i = 0; i < G.nc; i++ )
 	{
 		cv = G.curve_2d[ i ];
-			
+
 		cv->points = T_realloc( cv->points, new_num * sizeof *cv->points );
 		cv->xpoints = T_realloc( cv->xpoints, new_num * sizeof *cv->xpoints );
 		cv->xpoints_s = T_realloc( cv->xpoints_s,

@@ -316,7 +316,7 @@ Var *func_get_long( const char *name, int *acc, bool flag )
 		else                     /* some callers do their own error handling */
 			return NULL;
 	}
-	
+
 	ret = vars_push( FUNC, f );
 	ret->name = T_strdup( name );
 	ret->dim = f->nargs;
@@ -367,7 +367,7 @@ Var *func_call( Var *f )
 	for ( i = 0; i < Num_Func; i++ )
 		if ( Fncts[ i ].fnct == f->val.fnct->fnct )
 			break;
-	
+
 	if ( i >= Num_Func )
 	{
 		eprint( FATAL, UNSET, "Internal error detected at %s:%u.\n",
@@ -508,7 +508,7 @@ CALL_STACK *call_push( Func *f, const char *device_name )
 	cs->dev_name = device_name;
 
 	if ( f != NULL && f->device != NULL && f->device->generic_type != NULL &&
-		 ! strcmp( f->device->generic_type, PULSER_GENERIC_TYPE ) )
+		 ! strcasecmp( f->device->generic_type, PULSER_GENERIC_TYPE ) )
 	{
 		if ( ( t = strrchr( f->name, '#' ) ) != NULL )
 			Cur_Pulser = cs->Cur_Pulser = T_atol( t + 1 ) - 1;
@@ -522,7 +522,7 @@ CALL_STACK *call_push( Func *f, const char *device_name )
 	   an estimate time for the modules. */
 
 	if ( Internals.mode == TEST && device_name != NULL )
-		EDL.module_time += MODULE_CALL_ESTIMATE;
+		EDL.experiment_time += MODULE_CALL_ESTIMATE;
 
 	return EDL.Call_Stack = cs;
 }

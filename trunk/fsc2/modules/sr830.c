@@ -205,7 +205,7 @@ static long dsp_to_symbol[ ][ DISPLAY_CHANNELS ] =
 											  { DSP_CH_Xnoise, DSP_CH_Ynoise },
 											  { DSP_CH_AUX1, DSP_CH_AUX3 },
 											  { DSP_CH_AUX2, DSP_CH_AUX4 } };
-				
+
 #define D2S_ENTRIES ( sizeof dsp_to_symbol / sizeof dsp_to_symbol[ 0 ][ 0 ] )
 
 
@@ -575,7 +575,7 @@ Var *lockin_dac_voltage( Var *v )
 	}
 
 	too_many_arguments( v );
-	
+
 	sr830.dac_voltage[ port - 1 ] = voltage;
 	sr830.is_dac_voltage[ port - 1 ] = SET;
 
@@ -693,7 +693,7 @@ Var *lockin_sensitivity( Var *v )
 
 	if ( FSC2_MODE == EXPERIMENT )
 		sr830_set_sens( sens_index );
-	
+
 	return vars_push( FLOAT_VAR, sens_list[ sens_index ] );
 }
 
@@ -742,7 +742,7 @@ Var *lockin_time_constant( Var *v )
 	   one and, if this doesn't work, we set it to the minimum or maximum
 	   value, depending on the size of the argument. If the value does not fit
 	   within 1 percent, we utter a warning message (but only once). */
-	
+
 	for ( i = 0; i < TC_ENTRIES - 2; i++ )
 		if ( tc >= tc_list[ i ] && tc <= tc_list[ i + 1 ] )
 		{
@@ -797,7 +797,7 @@ Var *lockin_time_constant( Var *v )
 
 	if ( FSC2_MODE == EXPERIMENT )
 		sr830_set_tc( tc_index );
-	
+
 	return vars_push( FLOAT_VAR, tc_list[ tc_index ] );
 }
 
@@ -883,7 +883,7 @@ Var *lockin_harmonic( Var *v )
 	}
 
 	harm = get_long( v, "harmonic" );
-	
+
 	if ( FSC2_MODE == TEST )
 		freq = MIN_MOD_FREQ;
 	else
@@ -960,7 +960,7 @@ Var *lockin_ref_freq( Var *v )
 		}
 
 	freq = get_double( v, "modulation frequency" );
-	
+
 	if ( FSC2_MODE != TEST && sr830_get_mod_mode( ) != MOD_MODE_INTERNAL )
 	{
 		print( FATAL, "Can't set modulation frequency while modulation source "
@@ -1117,7 +1117,7 @@ Var *lockin_auto_setup( Var *v )
 		   maximum value, depending on the size of the argument. If the value
 		   does not fit within 5 percent, we utter a warning message (but only
 		   once). */
-	
+
 		for ( i = 0; i < ST_ENTRIES - 2; i++ )
 			if ( st >= st_list[ i ] && st <= st_list[ i + 1 ] )
 			{
@@ -1347,7 +1347,7 @@ static bool sr830_init( const char *name )
 		 gpib_write( sr830.device, "*CLS\n", 5 )   == FAILURE ||
 		 gpib_write( sr830.device, "OVRM 0\n", 7 ) == FAILURE )
 		return FAIL;
-	   
+
 	/* Ask lock-in to send the error status byte and test if it does */
 
 	length = 20;

@@ -82,7 +82,7 @@ void bug_report_callback( FL_OBJECT *a, long b )
 			 "\n\n\n\n\n\n\n\n\n"
 			 " Please do not change anything below this line. Thank you.\n"
 		     "***********************************************************\n" );
-	
+
 	fprintf( tmp, "Content of program browser:\n\n" );
 	lines = fl_get_browser_maxline( GUI.main_form->browser );
 	for ( i = 1; i <= lines; i++ )
@@ -161,7 +161,7 @@ void bug_report_callback( FL_OBJECT *a, long b )
 		cmd = T_malloc( 14 + strlen( ed ) + strlen( filename ) );
 		sprintf( cmd, "xterm -e %s", ed );
 	}
-	
+
 	strcat( cmd, " +6 " );         /* does this work with all editors ? */
 	strcat( cmd, filename );       /* (it does for vi, emacs and pico...) */
 

@@ -426,7 +426,7 @@ Var *lockin_sensitivity( Var *v )
 
 	if ( FSC2_MODE == EXPERIMENT )
 		sr530_set_sens( sens_index );
-	
+
 	return vars_push( FLOAT_VAR, sens_list[ sens_index ] );
 }
 
@@ -472,7 +472,7 @@ Var *lockin_time_constant( Var *v )
 	   one and, if this doesn't work, we set it to the minimum or maximum
 	   value, depending on the size of the argument. If the value does not fit
 	   within 1 percent, we utter a warning message (but only once). */
-	
+
 	for ( i = 0; i < TC_ENTRIES - 2; i++ )
 		if ( tc >= tc_list[ i ] && tc <= tc_list[ i + 1 ] )
 		{
@@ -493,7 +493,7 @@ Var *lockin_time_constant( Var *v )
 			print( WARN, "Can't set time constant to %g ms, using %.0lf ms "
 				   "instead.\n", tc * 1.0e3, tc_list[ tc_index ] * 1.0e3 );
 	}
-	
+
 	if ( tc_index == UNDEF_SENS_INDEX )                   /* not found yet ? */
 	{
 		if ( tc < tc_list[ 0 ] )
@@ -515,7 +515,7 @@ Var *lockin_time_constant( Var *v )
 
 	if ( FSC2_MODE == EXPERIMENT )
 		sr530_set_tc( tc_index );
-	
+
 	return vars_push( FLOAT_VAR, tc_list[ tc_index ] );
 }
 
@@ -767,7 +767,7 @@ double sr530_get_data( int channel )
 	fsc2_assert( channel == 1 || channel == 2 );
 
 	cmd[ 1 ] = ( char ) ( channel + '0' );
-	
+
 	if ( gpib_write( sr530.device, cmd, strlen( cmd ) ) == FAILURE ||
 		 gpib_read( sr530.device, buffer, &length ) == FAILURE )
 		sr530_failure( );
@@ -1017,7 +1017,7 @@ static double sr530_set_dac_voltage( long channel, double voltage )
 	sprintf( buffer, "X%1ld,%f\n", channel, voltage );
 	if ( gpib_write( sr530.device, buffer, strlen( buffer ) ) == FAILURE )
 		sr530_failure( );
-	
+
 	return voltage;
 }
 

@@ -265,7 +265,7 @@ Var *lockin_sensitivity( Var *v )
 	er023m.rg_index = rg_index;
 	if ( FSC2_MODE == EXPERIMENT )
 			er023m_set_rg( rg_index );
-	
+
 	return vars_push( FLOAT_VAR, rg_list[ rg_index ] );
 }
 
@@ -314,7 +314,7 @@ Var *lockin_time_constant( Var *v )
 	   one and, if this doesn't work, we set it to the minimum or maximum
 	   value, depending on the size of the argument. If the value does not fit
 	   within 6 percent, we utter a warning message */
-	
+
 	for ( i = 0; i < TC_MAX_INDEX; i++ )
 		if ( tc >= tc_list[ i ] && tc <= tc_list[ i + 1 ] )
 		{
@@ -351,7 +351,7 @@ Var *lockin_time_constant( Var *v )
 					   tc * 1.0e3, tc_list[ tc_index ] * 1.0e3 );
 		}
 	}
-	
+
 	if ( tc_index < 0 )                                  /* not found yet ? */
 	{
 		if ( tc < tc_list[ 0 ] )
@@ -367,7 +367,7 @@ Var *lockin_time_constant( Var *v )
 	er023m.tc_index = tc_index;
 	if ( FSC2_MODE == EXPERIMENT )
 			er023m_set_tc( tc_index );
-	
+
 	return vars_push( FLOAT_VAR, tc_list[ tc_index ] );
 }
 
@@ -420,7 +420,7 @@ Var *lockin_phase( Var *v )
 	er023m.phase = phase;
 	if ( FSC2_MODE == EXPERIMENT )
 		er023m_set_ph( phase );
-	
+
 	return vars_push( FLOAT_VAR, ( double ) phase );
 }
 
@@ -465,7 +465,7 @@ Var *lockin_offset( Var *v )
 	er023m.of = of;
 	if ( FSC2_MODE == EXPERIMENT )
 		er023m_set_of( of );
-	
+
 	return vars_push( INT_VAR, ( long ) of );
 }
 
@@ -549,7 +549,7 @@ Var *lockin_conversion_time( Var *v )
 	er023m.ct_mult = ct_mult;
 	if ( FSC2_MODE == EXPERIMENT )
 		er023m_set_ct( ct_mult );
-	
+
 	return vars_push( FLOAT_VAR, ct_mult * BASE_CT );
 }
 
@@ -625,7 +625,7 @@ Var *lockin_ref_freq( Var *v )
 	er023m.mf_index = mf_index;
 	if ( FSC2_MODE == EXPERIMENT )
 		er023m_set_mf( mf_index );
-	
+
 	/* Warn the user if for the new modulation frequency there's no phase
 	   or attenuation calibration while we had one for the old frequency */
 
@@ -716,7 +716,7 @@ Var *lockin_ref_level( Var *v )
 	er023m.ma_index = ma_index;
 	if ( FSC2_MODE == EXPERIMENT )
 		er023m_set_ma( ma_index );
-	
+
 	return vars_push( FLOAT_VAR, ma_list[ ma_index ] );
 }
 
@@ -761,7 +761,7 @@ Var *lockin_harmonic( Var *v )
 	er023m.ha = ha;
 	if ( FSC2_MODE == EXPERIMENT )
 		er023m_set_ha( ha );
-	
+
 	return vars_push( INT_VAR, ( long ) ( ha + 1 ) );
 }
 
@@ -807,7 +807,7 @@ Var *lockin_resonator( Var *v )
 	er023m.re = re;
 	if ( FSC2_MODE == EXPERIMENT )
 		er023m_set_re( re );
-	
+
 	return vars_push( INT_VAR, ( long ) ( re + 1 ) );
 }
 

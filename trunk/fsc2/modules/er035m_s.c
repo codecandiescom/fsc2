@@ -285,7 +285,7 @@ try_again:
 					break;
 				print( FATAL, "Wrong field probe (F0) connected.\n" );
 				THROW( EXCEPTION );
-				
+
 			case '1' :      /* Probe F1 is connected -> OK for X-band */
 				if ( exists_device( "aeg_x_band" ) )
 					break;
@@ -990,7 +990,7 @@ static bool er035m_s_comm( int type, ... )
 				len = fsc2_serial_read( SERIAL_PORT, buf, *lptr );
 			}
 			while ( len < 0 && errno == EAGAIN && read_retries-- > 0 );
-				
+
 			if ( len < 0 )
 			{
 				*lptr = 0;

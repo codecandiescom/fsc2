@@ -379,11 +379,11 @@ Var *lockin_sensitivity( Var *v )
 	}
 
 	too_many_arguments( v );
-	
+
 	sr510.sens_index = sens_index;
 	if ( FSC2_MODE == EXPERIMENT )
 		sr510_set_sens( sens_index );
-	
+
 	return vars_push( FLOAT_VAR, sens_list[ sens_index ] );
 }
 
@@ -429,7 +429,7 @@ Var *lockin_time_constant( Var *v )
 	   one and, if this doesn't work, we set it to the minimum or maximum
 	   value, depending on the size of the argument. If the value does not fit
 	   within 1 percent, we utter a warning message (but only once). */
-	
+
 	for ( i = 0; i < TC_ENTRIES - 1; i++ )
 		if ( tc >= tc_list[ i ] && tc <= tc_list[ i + 1 ] )
 		{
@@ -452,7 +452,7 @@ Var *lockin_time_constant( Var *v )
 				   "instead.\n", tc * 1.0e3, tc_list[ tc_index ] * 1.0e3 );
 		sr510.tc_warn = SET;
 	}
-	
+
 	if ( tc_index == UNDEF_TC_INDEX )                     /* not found yet ? */
 	{
 		if ( tc < tc_list[ 0 ] )
@@ -528,7 +528,7 @@ Var *lockin_phase( Var *v )
 	}
 
 	too_many_arguments( v );
-	
+
 	sr510.phase    = phase;
 	sr510.is_phase = SET;
 
@@ -711,7 +711,6 @@ bool sr510_init( const char *name )
 		sr510_set_tc( sr510.tc_index );
 	for ( i = 0; i < 2; i++ )
 		sr510_set_dac_voltage( i + first_DAC_port, sr510.dac_voltage[ i ] );
-		
 
 	return OK;
 }
@@ -978,7 +977,7 @@ static double sr510_set_dac_voltage( long channel, double voltage )
 	sprintf( buffer, "X%1ld,%f\n", channel, voltage );
 	if ( gpib_write( sr510.device, buffer, strlen( buffer ) ) == FAILURE )
 		sr510_failure( );
-	
+
 	return voltage;
 }
 

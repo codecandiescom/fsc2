@@ -407,7 +407,7 @@ static void pt2025_set_resolution( int res )
 		THROW( EXCEPTION );
 	}
 }
-		
+
 
 /*
  * Local variables:

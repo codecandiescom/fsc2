@@ -233,7 +233,7 @@ static Var *get_phase_cycled_area_1( Var *v )
 
 				if ( win_list[ 0 ] != -1 )
 					vars_push( INT_VAR, win_list[ j ] );
-				
+
 				/* Finally call the function */
 
 				vn = func_call( func_ptr );

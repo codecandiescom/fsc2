@@ -31,7 +31,7 @@
 #include "cursor5.xbm"
 #include "cursor6.xbm"
 #include "cursor7.xbm"
-		 
+
 #include "up_arrow.xbm"             /* arrow bitmaps */
 #include "down_arrow.xbm"
 #include "left_arrow.xbm"
@@ -438,7 +438,7 @@ void start_graphics( void )
 	}
 
 	/* Create the canvas axes */
-		
+
 	setup_canvas( &G.x_axis, GUI.run_form->x_axis );
 	setup_canvas( &G.y_axis, GUI.run_form->y_axis );
 	if ( G.dim == 2 )
@@ -798,7 +798,7 @@ void create_label_pixmap( Canvas *c, int coord, char *label )
 	int i, j, k;
 	int r_coord = coord;
 
-	
+
 	/* Make sure we don't do something stupid... */
 
 	fsc2_assert( ( coord == Y && c == &G.y_axis ) ||

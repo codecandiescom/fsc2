@@ -94,7 +94,7 @@ typedef struct {
 
 	double start_current;
 	bool is_start_current;
-	
+
 	double sweep_rate;
 	bool is_sweep_rate;
 
@@ -159,7 +159,7 @@ int ips20_4_init_hook( void )
 
 	ips20_4.is_start_current = UNSET;
 	ips20_4.is_sweep_rate = UNSET;
-	
+
 	ips20_4.fast_sweep_rate = FAST_SWEEP_RATE;
 
 	ips20_4.max_current = MAX_CURRENT;
@@ -194,7 +194,7 @@ int ips20_4_test_hook( void )
 	ips20_4.activity = HOLD;
 	ips20_4.sweep_state = STOPPED;
 
-	ips20_4.time_estimate = module_time( );
+	ips20_4.time_estimate = experiment_time( );
 
 	return 1;
 }
@@ -317,13 +317,13 @@ Var *get_field( Var *v )
 		{
 			double cur_time, dtime;
 
-			cur_time = module_time( );
+			cur_time = experiment_time( );
 			dtime = cur_time - ips20_4.time_estimate;
 			ips20_4.time_estimate = cur_time;
 
 			ips20_4.act_current = 1.0e-4 * 
 				( double ) lrnd( 1.0e4 * ( ips20_4.act_current
-								 + module_time( ) * ips20_4.sweep_rate
+								 + experiment_time( ) * ips20_4.sweep_rate
 								 * ( ips20_4.sweep_state == SWEEPING_UP ?
 									 1.0 : - 1.0 ) ) );
 
@@ -404,9 +404,12 @@ Var *magnet_sweep( Var *v )
 	Var *vc;
 
 
-	vc = get_field( NULL );
-	ips20_4.act_current = vc->val.dval;
-	vars_pop( vc );
+	if ( v == NULL || FSC2_MODE == TEST )
+	{
+		vc = get_field( NULL );
+		ips20_4.act_current = vc->val.dval;
+		vars_pop( vc );
+	}
 
 	if ( v == NULL )
 		switch ( ips20_4.sweep_state )
@@ -426,11 +429,17 @@ Var *magnet_sweep( Var *v )
 	if ( dir == 0 )
 		magnet_stop_sweep( );
 	else if ( dir > 0 )
+	{
+		dir = 1;
 		magnet_sweep_up( );
+	}
 	else
+	{
+		dir = -1;
 		magnet_sweep_down( );
+	}
 
-	return vars_push( FLOAT_VAR, ips20_4.act_current );
+	return vars_push( FLOAT_VAR, dir );
 }
 
 
@@ -639,7 +648,7 @@ static bool ips20_4_init( const char *name )
 	if ( gpib_write( ips20_4.device, cmd, 6 ) == FAILURE ||
 		 gpib_read( ips20_4.device, reply, &length ) == FAILURE )
 		ips20_4_comm_failure( );
-	
+
 	reply[ length - 1 ] = '\0';
 	cur_limit = T_atod( reply ) / 60.0;
 
@@ -651,7 +660,7 @@ static bool ips20_4_init( const char *name )
 	if ( gpib_write( ips20_4.device, cmd, 6 ) == FAILURE ||
 		 gpib_read( ips20_4.device, reply, &length ) == FAILURE )
 		ips20_4_comm_failure( );
-	
+
 	reply[ length - 1 ] = '\0';
 	cur_limit = T_atod( reply ) / 60.0;
 
@@ -808,12 +817,12 @@ static void ips20_4_get_complete_status( void )
 		case '8' :
 			print( FATAL, "Magnet is outside negative current limit.\n" );
 			THROW( EXCEPTION );
-			
+
 		default :
 			print( FATAL, "Recived invalid reply from device.\n" );
 			THROW( EXCEPTION );
 	}
-			
+
 	/* Check activity status */
 
 	switch ( reply[ 4 ] )
@@ -1151,7 +1160,7 @@ static double ips20_4_get_target_current( void )
 	char cmd[ 30 ];
 	char reply[ 100 ];
 	long length = 100;
-	
+
 
 	sprintf( cmd, "@%1dR5\n", IPS20_4_ISOBUS_ADDRESS );
 	if ( gpib_write( ips20_4.device, cmd, 5 ) == FAILURE ||

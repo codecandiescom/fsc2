@@ -1567,7 +1567,7 @@ static void cut_motion_handler( FL_OBJECT *obj, Window window,
 	unsigned int keymask;
 	long p_index;
 
-	
+
 	obj = obj;
 
 	/* We do event compression to avoid being flooded with motion events -
@@ -1744,7 +1744,7 @@ void cut_fs_button_callback( FL_OBJECT *a, long b )
 		if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
 			fl_set_object_helper( GUI.cut_form->cut_full_scale_button,
 								  "Switch off automatic rescaling" );
-		
+
 		cut_calc_curve( -1, -1, SET );
 		redraw_all_cut_canvases( );
 	}
@@ -1855,7 +1855,7 @@ static void repaint_cut_canvas( Canvas *c )
 
 	/* Otherwise use another level of buffering and copy the pixmap with
 	   the curves into another pixmap */
-	
+
 	pm = XCreatePixmap( G.d, FL_ObjWin( c->obj ), c->w, c->h,
 						fl_get_canvas_depth( c->obj ) );
 	XCopyArea( G.d, c->pm, pm, c->gc, 0, 0, c->w, c->h, 0, 0 );
@@ -2533,7 +2533,7 @@ static bool cut_zoom_y( Canvas *c )
 
 	py = ( ( double ) G.cut_canvas.h - 1.0 - G.start[ Y ] ) / cv->s2d[ Y ]
 		 - cv->shift[ Y ];
-		
+
 	/* If the mouse was moved to lower values zoom the display by a factor of
 	   up to 4 (if the mouse was moved over the whole length of the scale)
 	   while keeping the point the move was started at the same position. If
@@ -2614,7 +2614,7 @@ static bool cut_zoom_xy( Canvas *c )
 
 		scale_changed = SET;
 	}
-		
+
 	return scale_changed;
 }
 

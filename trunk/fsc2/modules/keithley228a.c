@@ -53,7 +53,7 @@ static int dac_ports[ ]       = { 6,       6,       4,       4      };
 
 #define	STANDBY  ( ( bool ) 0 )      
 #define OPERATE  ( ( bool ) 1 )
-	
+
 
 /* Exported functions */
 
@@ -157,7 +157,6 @@ int keithley228a_init_hook( void )
 	{
 		print( FATAL, "Module for lock-in amplifier '%s' needed by the magnet "
 			   "power supply isn't loaded.\n", keithley228a.lockin_name );
-		
 		THROW( EXCEPTION );
 	}
 #else
@@ -680,7 +679,7 @@ static double keithley228a_goto_current( double new_current )
 	int max_tries = 100;
 	bool do_test;
 
-	
+
 	fsc2_assert( fabs( new_current ) <= KEITHLEY228A_MAXMAX_CURRENT );
 
 	/* Nothing really to be done in a test run */
@@ -982,13 +981,13 @@ static void keithley228a_get_corrected_current( double c, double *psc,
 			 *dacv = - V_TO_A_FACTOR * ( c + 0.04 );
 		 }
 	 }
-	 
+
 	 /* Try to correct for non-linearities */
 
 	 for ( i = 0; i < 9; i++ )
 		 if ( c < ranges[ i ] )
 			 break;
-			
+
 	 if ( c >= 0.0 )
 		 *dacv -= V_TO_A_FACTOR * ( slopes[ i ] * c + offsets[ i ] );
 	 else

@@ -226,32 +226,31 @@ bool section_parser( int section )
 				case DEVICES_SECTION :
 					s = devices_parser( splitin );
 					break;
-	
+
 				case ASSIGNMENTS_SECTION :
 					s = assignments_parser( splitin );
 					break;
-	
+
 				case VARIABLES_SECTION :
 					s = variables_parser( splitin );
 					break;
-	
+
 				case PHASES_SECTION :
 					s = phases_parser( splitin );
 					break;
-	
+
 				case PREPARATIONS_SECTION :
 					s = preparations_parser( splitin );
 					break;
-	
+
 				case EXPERIMENT_SECTION :
 					s = experiment_parser( splitin );
 					break;
-	
+
 				default :              /* this should never happen, but ... */
 					fsc2_assert( 1 == 0 );
 					break;
 			}
-	
 		} while ( s != NO_SECTION );
 
 		/* Finally, we have to do all the checks that only can be done

@@ -52,11 +52,11 @@ html: fsc2.html
 
 fsc2.html: $(docs) $(figures)
 	./texi2html -frames -split chapter -menu -number -sec_nav -iso fsc2.texi
-	sed -e 's/fsc2_[0-9]\+/fsc2/' fsc2_frame.html > fsc2_frame.x
+	sed -e 's/fsc2_[0-9]\{1,\}/fsc2/' fsc2_frame.html > fsc2_frame.x
 	mv fsc2_frame.x fsc2_frame.html
 
 %.png: $(adir)/%.xbm
-	convert -page `identify $< 2>/dev/null | sed -e 's/^.*[ \t]\([0-9]*x[0-9]*\)[ \t].*$$/\1/'` $< $@ \
+	convert -page `identify $< 2>/dev/null | sed -e 's/^.*[ 	]\([0-9]\{1,\}x[0-9]\{1,\}\)[ 	].*$$/\1/'` $< $@ \
     2>/dev/null
 
 ps: fsc2.ps
@@ -67,8 +67,7 @@ fsc2.ps: $(docs) $(eps_pics)
 		./texi2dvi -c fsc2.texi;                    \
 		dvips fsc2.dvi -o fsc2.ps;                  \
 	else                                            \
-		echo                                        \
-		"Can't make PostScript documentation, programs tex and/or dvips not found."; \
+		echo "Can't make PostScript documentation, programs tex and/or dvips not found."; \
 	fi
 
 
@@ -97,10 +96,10 @@ fsc2.pdf: $(docs) $(pdf_pics)
 ifneq ($(word 1,$(shell which convert)),which:)
 %.pdf: $(adir)/%.xbm
 	convert -compress Zip \
-		-page `identify $< 2>/dev/null | sed -e 's/^.*[ \t]\([0-9]*x[0-9]*\)[ \t].*$$/\1/'` $< $@ 2>/dev/null
+		-page `identify $< 2>/dev/null | sed -e 's/^.*[ 	]\([0-9]\{1,\}x[0-9]\{1,\}\)[ 	].*$$/\1/'` $< $@ 2>/dev/null
 %.pdf: %.png
 	convert -compress Zip \
-		-page `identify $< 2>/dev/null | sed -e 's/^.*[ \t]\([0-9]*x[0-9]*\)[ \t].*$$/\1/'` $< $@ 2>/dev/null
+		-page `identify $< 2>/dev/null | sed -e 's/^.*[ 	]\([0-9]\{1,\}x[0-9]\{1,\}\)[ 	].*$$/\1/'` $< $@ 2>/dev/null
 else
 %.pdf: $(figures)
 	@echo "Can't make PDF documentation, program 'convert' not found."; \

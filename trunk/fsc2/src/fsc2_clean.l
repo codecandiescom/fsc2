@@ -335,14 +335,14 @@ KEEP    [^\t" \n(\/*),;:=%\^\-\+]+
 {INONE}/[^a-zA-z_]   unit_spec( yytext,  0 );
 {IKILO}/[^a-zA-z_]   unit_spec( yytext,  3 );
 {IMEGA}/[^a-zA-z_]   unit_spec( yytext,  6 );
-										
+
 {FNANO}/[^a-zA-z_]   unit_spec( yytext, -9 );
 {FMICRO}/[^a-zA-z_]  unit_spec( yytext, -6 );
 {FMILLI}/[^a-zA-z_]  unit_spec( yytext, -3 );
 {FNONE}/[^a-zA-z_]   unit_spec( yytext,  0 );
 {FKILO}/[^a-zA-z_]   unit_spec( yytext,  3 );
 {FMEGA}/[^a-zA-z_]   unit_spec( yytext,  6 );
-										
+
 {INTs}/[^a-zA-z_]    unit_spec( yytext, -5 );
 {IUT}/[^a-zA-z_]     unit_spec( yytext, -2 );
 {IMT}/[^a-zA-z_]     unit_spec( yytext,  1 );

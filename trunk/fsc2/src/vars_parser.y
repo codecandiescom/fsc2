@@ -81,13 +81,13 @@ input:   /* empty */
        | input line SECTION_LABEL  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | input SECTION_LABEL       { YYACCEPT; }
 ;								  
-								  
+
 line:    linet					  
        | line ',' linet			  
        | line linet                { THROW( MISSING_SEMICOLON_EXCEPTION ); }
 
 ;								  
-								  
+
 linet:   VAR_TOKEN                 { } /* no assignment to be done */
        | VAR_TOKEN '=' expr        { vars_assign( $3, $1 ); }
        | VAR_TOKEN '['             { vars_arr_start( $1 ); }

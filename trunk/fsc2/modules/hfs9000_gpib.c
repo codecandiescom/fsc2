@@ -226,7 +226,7 @@ bool hfs9000_init( const char *name )
 		 gpib_write( hfs9000.device, "VECT:END 65535\n", 15 ) == FAILURE ||
 		 gpib_write( hfs9000.device, "VECT:LOOP 65535\n", 16 ) == FAILURE )
 		hfs9000_gpib_failure( );
-	
+
 	return OK;
 }
 

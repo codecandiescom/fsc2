@@ -232,7 +232,7 @@ aphs:    /* empty */
        | GP_TOKEN                  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
 	   | SECTION_LABEL             { THROW( MISSING_SEMICOLON_EXCEPTION ); }
 ;
-								   
+
 
 apsd:    /* empty */
        | func                      { THROW( MISSING_SEMICOLON_EXCEPTION ); }
@@ -302,19 +302,19 @@ pm:     INT_TOKEN sep2             { p_assign_pod( Channel_Type,
       | pm INT_TOKEN sep2          { p_assign_pod( Channel_Type,
 												  vars_push( INT_VAR, $2 ) ); }
 ;
-								  
+
 chd:    CH_TOKEN sep1 ch1
 ;
-								  
+
 ch1:    INT_TOKEN sep2             { p_assign_channel( Channel_Type,
 												  vars_push( INT_VAR, $1 ) ); }
       | ch1 INT_TOKEN sep2         { p_assign_channel( Channel_Type,
 												  vars_push( INT_VAR, $2 ) ); }
 ;								  
-								  
+
 del:    DEL_TOKEN sep1 expr sep2   { p_set_delay( Channel_Type, $3 ); }
 ;								  
-								  
+
 inv:    INV_TOKEN sep2             { p_inv( Channel_Type ); }
 ;
 
@@ -387,14 +387,14 @@ list1:   /* empty */               { $$ = vars_push( UNDEF_VAR ); }
 	   | expr
        | list1 ',' expr            { $$ = $3; }
 ;								   
-								   
+
 /* list of function arguments */   
-								   
+
 list2:   /* empty */			   
        | exprs					   
 	   | list2 ',' exprs		   
 ;								   
-								   
+
 exprs:   expr                      { }
        | STR_TOKEN                 { vars_push( STR_VAR, $1 ); }
 ;

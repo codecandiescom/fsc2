@@ -428,7 +428,7 @@ static void conn_sig_handler( int signo )
 		case SIGHUP :  case SIGINT :  case SIGCHLD : case SIGCONT :
 		case SIGTTIN : case SIGTTOU : case SIGVTALRM :
 			return;
-			
+
 		/* All the remaining signals are deadly... */
 
 		default :

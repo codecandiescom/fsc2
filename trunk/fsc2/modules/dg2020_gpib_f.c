@@ -910,7 +910,7 @@ static bool dg2020_gpib_do_check( DG2020_STORE *params )
 	int got_count_digits;
 	char state_char = ( params->state ? '1' : '0' );
 	int i;
-	
+
 
 	/* Let's be paranoid */
 
@@ -961,7 +961,7 @@ static bool dg2020_gpib_do_check( DG2020_STORE *params )
 		T_free( reply );
 		return FAIL;
 	}
-		
+
 	/* The next number is the number of relevant bytes */
 
 	for ( got_count = 0, i = 0; i < got_count_digits; i++ )

@@ -89,7 +89,7 @@ static void get_array_params( Var *v, size_t *len, long **ilp, double **idp )
 			*len = v->len;
 			*ilp = v->val.lpnt;
 			break;
-			
+
 		case FLOAT_CONT_ARR :
 			if ( v->dim != 1 )
 			{
@@ -100,7 +100,7 @@ static void get_array_params( Var *v, size_t *len, long **ilp, double **idp )
 			*len = v->len;
 			*idp = v->val.dpnt;
 			break;
-			
+
 		case ARR_PTR :
 			*len = v->from->sizes[ v->from->dim - 1 ];
 			if ( v->from->type == INT_CONT_ARR )
@@ -162,7 +162,6 @@ Var *f_int( Var *v )
 	long *rlp = NULL;
 	long *ilp;
 	double *idp;
-	
 
 
 	vars_check( v, INT_VAR | FLOAT_VAR | INT_CONT_ARR | FLOAT_CONT_ARR |
@@ -216,7 +215,6 @@ Var *f_float( Var *v )
 	double *rdp = NULL;
 	long *ilp;
 	double *idp;
-	
 
 
 	vars_check( v, INT_VAR | FLOAT_VAR | INT_CONT_ARR | FLOAT_CONT_ARR |
@@ -1174,7 +1172,7 @@ Var *f_grand( Var *v )
 
 	if ( v == NULL )
 		return vars_push( FLOAT_VAR, gauss_random( ) );
-	
+
 	vars_check( v, INT_VAR | FLOAT_VAR );
 	if ( v->type == FLOAT_VAR )
 	{
@@ -1320,22 +1318,17 @@ Var *f_time( Var *v )
 
 Var *f_dtime( Var *v )
 {
-	struct timeval t_new;
-	static struct timeval t_old = { 0, 0 };
-	long dsec, dusec;
+	double new_time;
+	static double old_time = 0.0;
+	double diff_time;
 
 
 	v = v;                          /* keep the compiler happy */
 
-	gettimeofday( &t_new, NULL );
-
-	dsec = t_new.tv_sec - t_old.tv_sec;
-	dusec = t_new.tv_usec - t_old.tv_usec;
-
-	t_old.tv_sec = t_new.tv_sec;
-	t_old.tv_usec = t_new.tv_usec;
-
-	return vars_push( FLOAT_VAR, ( double ) dsec + 1.e-6 * ( double ) dusec );
+	new_time = experiment_time( );
+	diff_time = new_time - old_time;
+	old_time = new_time;
+	return vars_push( FLOAT_VAR, diff_time );
 }
 
 
@@ -1644,7 +1637,7 @@ Var *f_slice( Var *v )
 
 /*------------------------------------------------------------*/
 /*------------------------------------------------------------*/
-				 
+
 Var *f_square( Var *v )
 {
 	Var *new_var;

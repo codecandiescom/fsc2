@@ -73,7 +73,7 @@ static struct {
 	int	OFFSET_X0;
 	int	OFFSET_Y0;
 } FI_sizes = { UNSET, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-	
+
 
 
 /*------------------------------------------------------------*/
@@ -299,7 +299,7 @@ Var *f_layout( Var *v )
 
 	return vars_push( INT_VAR, ( long ) layout );
 }
-	
+
 
 /*----------------------*/
 /* Creates a new button */
@@ -801,7 +801,7 @@ Var *f_bstate( Var *v )
 			THROW( EXCEPTION );
 		}
 		ID = v->val.lval;
-		
+
 		/* If there's a second parameter it's the state of button to set */
 
 		if ( ( v = vars_pop( v ) ) != NULL )
@@ -844,7 +844,7 @@ Var *f_bstate( Var *v )
 		}
 		else
 			*pos++ = '\0';
-		
+
 		/* Ask parent process to return or set the state - bomb out if it
 		   returns a negative value, indicating a severe error */
 
@@ -1079,7 +1079,7 @@ Var *f_screate( Var *v )
 		while ( ( v = vars_pop( v ) ) != NULL )
 			;
 	}
-	
+
 	/* Again, the child process has to pass the parameter to the parent and
 	   ask it to create the slider */
 
@@ -1206,7 +1206,7 @@ Var *f_screate( Var *v )
 		                + start_val;
 	new_io->label = label;
 	new_io->help_text = help_text;
-	
+
 	/* If this isn't a test run the slider must also be drawn */
 
 	if ( Internals.mode != TEST )
@@ -1417,7 +1417,7 @@ Var *f_svalue( Var *v )
 			THROW( EXCEPTION );
 		}
 		ID = v->val.lval;
-		
+
 		/* Another arguments means that the slider value is to be set */
 
 		if ( ( v = vars_pop( v ) ) != NULL )
@@ -1463,7 +1463,7 @@ Var *f_svalue( Var *v )
 		}
 		else
 			*pos++ = '\0';
-		
+
 		/* Ask parent to set or get the slider value - it will return an array
 		   with two doubles, the first indicating if it was successful (when
 		   the value is positive) the second is the slider value */
@@ -1526,7 +1526,7 @@ Var *f_svalue( Var *v )
 		print( SEVERE, "Slider value too small.\n" );
 		io->value = io->start_val;
 	}
-	
+
 	/* If a certain step width is used set the new value to the nearest
 	   allowed value */
 
@@ -2078,7 +2078,7 @@ Var *f_ivalue( Var *v )
 			THROW( EXCEPTION );
 		}
 		ID = v->val.lval;
-		
+
 		/* Another argument means that the objects value is to be set */
 
 		if ( ( v = vars_pop( v ) ) != NULL )
@@ -2142,7 +2142,7 @@ Var *f_ivalue( Var *v )
 		}
 		else
 			*pos++ = '\0';
-		
+
 		/* Ask parent to set or get the value - it will return a pointer
 		   to an INPUT_RES structure, where the res entry indicates failure
 		   (negative value) and the type of the returned value (0 is integer,
@@ -2733,7 +2733,7 @@ static void tools_callback( FL_OBJECT *obj, long data )
 			snprintf( obuf, MAX_INPUT_CHARS + 1, "%ld", io->val.lval );
 			fl_set_input( io->self, obuf );
 			break;
-			
+
 		case FLOAT_OUTPUT :
 			snprintf( obuf, MAX_INPUT_CHARS + 1, io->form_str, io->val.dval );
 			fl_set_input( io->self, obuf );

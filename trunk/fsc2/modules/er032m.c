@@ -245,7 +245,7 @@ Var *magnet_setup( Var *v )
 			   "%f G.\n", VALUE( v ), ER032M_MIN_FIELD_STEP );
 		THROW( EXCEPTION );
 	}
-		
+
 	too_many_arguments( v );
 
 	magnet.start_field = start_field;
@@ -300,7 +300,7 @@ Var *sweep_up( Var *v )
 
 		er032m_test_leds( );
 	}
-		
+
 	magnet.act_field += magnet.field_step;
 	return vars_push( FLOAT_VAR, magnet.act_field );
 }
@@ -350,7 +350,7 @@ Var *sweep_down( Var *v )
 
 		er032m_test_leds( );
 	}
-		
+
 	magnet.act_field -= magnet.field_step;
 	return vars_push( FLOAT_VAR, magnet.act_field );
 }
@@ -652,7 +652,7 @@ static void er032m_change_field_and_set_sw( double field )
 
 	/* If this failed we have to change the center field, otherwise
 	   we use the newly calculated sweep width */
-	   
+
 	if ( ! magnet.is_sw )
 		magnet.cf = er032m_set_cf( field );
 	else

@@ -1355,6 +1355,27 @@ void print( int severity, const char *fmt, ... )
 @noindent
 
 
+@subsection Determining the time
+@cindex experiment_time()
+@findex experiment_time()
+
+To find out how much time has been spent since the start of the
+experiment the function @code{experiment_time()} may be used. It returns
+the time in seconds since the start of the experiment (to be precise
+since the start of the exp_hook functions). The time resolution should
+not be taken to be better than about @w{10 ms}.
+
+The function also can be used during the test run but in this case only
+a very rough estimate will be returned that easily could be off by more
+than an order of magnitude.
+
+The full @code{C} declaration of this function is:
+@example
+double experiment_time( void )
+@end example
+@noindent
+
+
 @subsection Exceptions
 @cindex exceptions
 

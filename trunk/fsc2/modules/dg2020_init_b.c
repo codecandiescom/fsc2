@@ -263,7 +263,7 @@ static void dg2020_basic_functions_check( void )
 			f->pulses = T_realloc( f->pulses,
 								   f->num_pulses * sizeof( PULSE * ) );
 			f->pulses[ f->num_pulses - 1 ] = cp;
-				
+
 			if ( cp->is_active )
 				f->num_active_pulses++;
 		}
@@ -283,7 +283,7 @@ static void dg2020_basic_functions_check( void )
 
 		if ( f->num_pods > 1 )
 			dg2020_phase_setup_check( f );
-		
+
 		f->num_needed_channels = dg2020_calc_channels_needed( f );
 	}
 }
@@ -321,7 +321,7 @@ static int dg2020_calc_channels_needed( FUNCTION *f )
 			else
 				f->need_constant = SET;
 		}
-			
+
 	if ( f->need_constant )            /* if we needed a constant voltage */
 		num_channels++;
 

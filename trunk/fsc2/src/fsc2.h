@@ -184,7 +184,7 @@ typedef struct {
 	long Cur_Pulse;              /* Number of the current pulse during the
 									setup of a pulse in the PREPARATIONS
 									section */
-	double module_time;
+	double experiment_time;
 } EDL_Stuff;
 
 

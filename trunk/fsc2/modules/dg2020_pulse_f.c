@@ -70,9 +70,9 @@ bool dg2020_new_pulse( long pnum )
 	cp->initial_is_pos = cp->initial_is_len = cp->initial_is_dpos
 		= cp->initial_is_dlen = UNSET;
 	cp->is_old_pos = cp->is_old_len = UNSET;
-	
+
 	cp->channel = NULL;
-	
+
 	cp->needs_update = UNSET;
 	cp->has_been_active = cp->was_active = UNSET;
 

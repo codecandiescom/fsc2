@@ -52,7 +52,7 @@ void show_message( const char *str )
 void show_alert( const char *str )
 {
 	char *strc, *strs[ 3 ];
-	
+
 
 	if ( Internals.I_am == PARENT )
 	{

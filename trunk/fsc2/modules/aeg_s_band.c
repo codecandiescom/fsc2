@@ -355,7 +355,6 @@ Var *magnet_fast_init( Var *v )
 Var *set_field( Var *v )
 {
 	double field;
-	
 	bool err_flag = UNSET;
 	double error = 0.0;
 
@@ -529,7 +528,7 @@ static double aeg_s_band_field_check( double field, bool *err_flag )
 			else
 				THROW( EXCEPTION );
 		}
-        
+
 		if ( field > AEG_S_BAND_WITH_ER035M_MAX_FIELD )
 		{
 			print( FATAL, "Field (%lf G) too high for Bruker ER035M "
@@ -560,7 +559,7 @@ static double aeg_s_band_field_check( double field, bool *err_flag )
 			else
 				THROW( EXCEPTION );
 		}
-        
+
 		if ( field > AEG_S_BAND_WITH_BH15_MAX_FIELD )
 		{
 			print( FATAL, "Field (%lf G) too high for Bruker BH15 field "
@@ -915,7 +914,7 @@ static void magnet_sweep( int dir )
 	double mini_steps;
 	double remain;
 	double over_shot;
-	
+
 
 	/* <PARANOIA> check for unreasonable input </PARANOIA> */
 

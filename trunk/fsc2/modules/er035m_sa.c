@@ -234,7 +234,6 @@ try_again:
 				print( FATAL, "Wrong field probe (F0) connected to the NMR "
 					   "gaussmeter.\n" );
 				THROW( EXCEPTION );
-				
 
 			case '1' :      /* Probe F1 is connected -> OK for X-band*/
 				if ( exists_device( "aeg_x_band" ) )

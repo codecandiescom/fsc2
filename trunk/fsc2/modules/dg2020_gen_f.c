@@ -71,7 +71,7 @@ bool dg2020_assign_function( int function, long pod )
 {
 	FUNCTION *f = &dg2020.function[ function ];
 	POD *p = &dg2020.pod[ pod ];
-	
+
 
 	if ( pod < 0 || pod > MAX_PODS )
 	{
@@ -112,7 +112,7 @@ bool dg2020_assign_function( int function, long pod )
 	}
 	else
 		f->pod = p;
-	
+
 	p->function = f;
 	return OK;
 }
@@ -213,7 +213,7 @@ bool dg2020_set_function_delay( int function, double delay )
 	}
 	else
 		dg2020.function[ function ].delay = Delay - dg2020.neg_delay;
-		
+
 	dg2020.function[ function ].is_used = SET;
 
 	return OK;
@@ -234,7 +234,7 @@ bool dg2020_set_function_high_level( int function, double voltage )
 			   MIN_POD_HIGH_VOLTAGE, MAX_POD_HIGH_VOLTAGE );
 		THROW( EXCEPTION );
 	}
-				
+
 	if ( dg2020.function[ function ].is_low_level )
 		dg2020_check_pod_level_diff( voltage,
 									 dg2020.function[ function ].low_level );
@@ -261,7 +261,7 @@ bool dg2020_set_function_low_level( int function, double voltage )
 			   MIN_POD_LOW_VOLTAGE, MAX_POD_LOW_VOLTAGE );
 		THROW( EXCEPTION );
 	}
-				
+
 	if ( dg2020.function[ function ].is_high_level )
 		dg2020_check_pod_level_diff( dg2020.function[ function ].high_level,
 									 voltage );

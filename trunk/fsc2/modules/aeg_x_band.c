@@ -530,7 +530,7 @@ static double aeg_x_band_field_check( double field, bool *err_flag )
 			else
 				THROW( EXCEPTION );
 		}
-		
+
 		if ( field > AEG_X_BAND_WITH_ER035M_MAX_FIELD )
 		{
 			print( FATAL, "Start field (%lf G) too high for Bruker ER035M "
@@ -561,7 +561,7 @@ static double aeg_x_band_field_check( double field, bool *err_flag )
 			else
 				THROW( EXCEPTION );
 		}
-		
+
 		if ( field > AEG_X_BAND_WITH_BH15_MAX_FIELD )
 		{
 			print( FATAL, "Start field (%lf G) too high for Bruker BH15 field "
@@ -791,7 +791,7 @@ static bool magnet_goto_field( double field, double error )
 
 	last_field_step = magnet.meas_field - magnet.act_field;
 	magnet.act_field = magnet.target_field = magnet.meas_field;
-	
+
 	return OK;
 }
 
@@ -916,7 +916,7 @@ static void magnet_sweep( int dir )
 	double mini_steps;
 	double remain;
 	double over_shot;
-	
+
 
 	/* <PARANOIA> check for unreasonable input </PARANOIA> */
 

@@ -428,7 +428,7 @@ Var *vars_add( Var *v1, Var *v2 )
 		case FLOAT_VAR :
 			new_var = vars_add_to_float_var( v1, v2 );
 			break;
-			
+
 		case INT_CONT_ARR : case INT_ARR :
 			vars_array_check( v1, v2 );
 			new_var = vars_add_to_int_arr( v1, v2 );
@@ -500,7 +500,7 @@ Var *vars_sub( Var *v1, Var *v2 )
 		case FLOAT_VAR :
 			new_var = vars_sub_from_float_var( v1, v2 );
 			break;
-			
+
 		case INT_CONT_ARR : case INT_ARR :
 			v1 = vars_array_check( v1, v2 );
 			new_var = vars_sub_from_int_arr( v1, v2 );
@@ -574,7 +574,7 @@ Var *vars_mult( Var *v1, Var *v2 )
 		case FLOAT_VAR :
 			new_var = vars_mult_by_float_var( v1, v2 );
 			break;
-			
+
 		case INT_CONT_ARR : case INT_ARR :
 			v1 = vars_array_check( v1, v2 );
 			new_var = vars_mult_by_int_arr( v1, v2 );
@@ -648,7 +648,7 @@ Var *vars_div( Var *v1, Var *v2 )
 		case FLOAT_VAR :
 			new_var = vars_div_of_float_var( v1, v2 );
 			break;
-			
+
 		case INT_CONT_ARR : case INT_ARR :
 			v1 = vars_array_check( v1, v2 );
 			new_var = vars_div_of_int_arr( v1, v2 );
@@ -722,7 +722,7 @@ Var *vars_mod( Var *v1, Var *v2 )
 		case FLOAT_VAR :
 			new_var = vars_mod_of_float_var( v1, v2 );
 			break;
-			
+
 		case INT_CONT_ARR : case INT_ARR :
 			v1 = vars_array_check( v1, v2 );
 			new_var = vars_mod_of_int_arr( v1, v2 );
@@ -796,7 +796,7 @@ Var *vars_pow( Var *v1, Var *v2 )
 		case FLOAT_VAR :
 			new_var = vars_pow_of_float_var( v1, v2 );
 			break;
-			
+
 		case INT_CONT_ARR : case INT_ARR :
 			v1 = vars_array_check( v1, v2 );
 			new_var = vars_pow_of_int_arr( v1, v2 );
@@ -1215,7 +1215,7 @@ Var *vars_push( int type, ... )
 	}
 
 	va_end( ap );
-	
+
 	/* Finally append the new variable to the stack */
 
 	if ( ( stack = EDL.Var_Stack ) == NULL )
@@ -1297,11 +1297,11 @@ Var *vars_pop( Var *v )
 		case STR_VAR :
 			T_free( v->val.sptr );
 			break;
-			
+
 		case FUNC :
 			T_free( v->name );
 			break;
-	
+
 		case INT_ARR :
 			T_free( v->val.lpnt );
 			break;
@@ -1401,7 +1401,7 @@ void vars_check( Var *v, int type )
 							 "FLOAT ARRAY", "FUNCTION", "ARRAY POINTER",
 							 "INTEGER ARRAY SLICE", "FLOAT ARRAY SLICE",
 	                         "ARRAY REFERENCE" };
-	
+
 
 	/* Someone might call the function with a NULL pointer - handle this
 	   gracefully, i.e. by throwing an exception and don't crash (eventhough
@@ -1429,7 +1429,7 @@ void vars_check( Var *v, int type )
 				"assigned a value.\n", v->name );
 		THROW( EXCEPTION );
 	}
-	
+
 	/* Check that the variable has the correct type */
 
 	if ( ! ( v->type & type ) )
@@ -2132,7 +2132,7 @@ static void vars_ass_from_var( Var *src, Var *dest )
 			break;
 	}
 }
- 
+
 
 /*------------------------------------------------------------------------*/
 /* The function assigns complete array slices. The source type must be    */

@@ -62,7 +62,7 @@ Var *lockin_rg( Var *v )
 	er023m.rg_index = ( int ) rg_index;
 	if ( FSC2_MODE == EXPERIMENT )
 		er023m_set_rg( er023m.rg_index );
-	
+
 	return vars_push( INT_VAR, rg_index );
 }
 
@@ -106,11 +106,11 @@ Var *lockin_tc( Var *v )
 	}
 
 	too_many_arguments( v );
-	
+
 	er023m.tc_index = ( int ) tc_index;
 	if ( FSC2_MODE == EXPERIMENT )
 		er023m_set_tc( er023m.tc_index );
-	
+
 	return vars_push( INT_VAR, tc_index );
 }
 
@@ -231,11 +231,11 @@ Var *lockin_ct( Var *v )
 	}
 
 	too_many_arguments( v );
-	
+
 	er023m.ct_mult = ( int ) ct_mult;
 	if ( FSC2_MODE == EXPERIMENT )
 		er023m_set_ct( er023m.ct_mult );
-	
+
 	return vars_push( INT_VAR, ct_mult );
 }
 
@@ -283,11 +283,11 @@ Var *lockin_mf( Var *v )
 	}
 
 	too_many_arguments( v );
-	
+
 	er023m.mf_index = ( int ) mf_index;
 	if ( FSC2_MODE == EXPERIMENT )
 		er023m_set_mf( er023m.mf_index );
-	
+
 	/* Warn the user if for the new modulation frequency there's no phase
 	   or attenuation calibration while we had one for the old frequency */
 

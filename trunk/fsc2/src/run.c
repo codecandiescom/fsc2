@@ -189,7 +189,10 @@ static bool no_prog_to_run( void )
 
 	TRY
 	{
+		experiment_time( );
+		EDL.experiment_time = 0.0;
 		vars_pop( f_dtime( NULL ) );
+
 		run_exp_hooks( );
 		ret = OK;
 		TRY_SUCCESS;
@@ -234,8 +237,6 @@ static bool init_devs_and_graphics( void )
 
 	TRY
 	{
-		vars_pop( f_dtime( NULL ) );
-
 		EDL.do_quit = UNSET;
 		EDL.react_to_do_quit = SET;
 		fl_set_object_callback( GUI.main_form->run, stop_while_exp_hook, 0 );
@@ -243,6 +244,11 @@ static bool init_devs_and_graphics( void )
 		fl_set_object_label( GUI.main_form->run, "Stop" );
 
 		Internals.mode = EXPERIMENT;
+
+		experiment_time( );
+		EDL.experiment_time = 0.0;
+		vars_pop( f_dtime( NULL ) );
+
 		run_exp_hooks( );
 
 		EDL.react_to_do_quit = UNSET;
@@ -516,11 +522,12 @@ void run_sigchld_callback( FL_OBJECT *a, long b )
 	b = b;
 
 	if ( ! child_is_quitting )   /* missing notification by the child ? */
-		fl_show_alert( "FATAL Error", "Experiment stopped prematurely.",
-					   NULL, 1 );
+		fl_show_alert( "Fatal Error", "Experiment stopped prematurely.",
+					   NULL, 2 );
 
 	if ( ! a->u_ldata )          /* return status indicates error ? */
-		fl_show_alert( "FATAL Error", "Experiment had to be stopped.", "", 1 );
+		fl_show_alert( "Fatal Error", "Experiment had to be stopped.",
+					   NULL, 3 );
 
 	stop_measurement( NULL, 1 );
 }
@@ -539,7 +546,9 @@ void run_sigchld_callback( FL_OBJECT *a, long b )
 void stop_measurement( FL_OBJECT *a, long b )
 {
 	int bn;
-	
+	int hours, mins;
+	double secs;
+
 
 	if ( b == 0 )                           /* callback from stop button ? */
 	{
@@ -582,6 +591,67 @@ void stop_measurement( FL_OBJECT *a, long b )
 	if ( need_GPIB )
 		gpib_shutdown( );
 	fsc2_serial_cleanup( );
+
+	secs = experiment_time( );
+	hours = ( int ) floor( secs / 3600.0 );
+	secs -= hours * 3600.0;
+	mins = ( int ) floor( secs / 60.0 );
+	secs -= mins * 60.0;
+
+	switch ( b )
+	{
+		case 1 :
+			if ( hours > 0 )
+				eprint( NO_ERROR, UNSET, "Experiment finished after running "
+						"for %d h, %d m and %.2f s.\n", hours, mins, secs );
+			else
+			{
+				if ( mins > 0 )
+					eprint( NO_ERROR, UNSET, "Experiment finished after "
+							"running for %d m and %.2f s.\n", mins, secs );
+				else
+					eprint( NO_ERROR, UNSET, "Experiment finished after "
+							"running for %.2f s.\n", secs );
+			}
+			break;
+
+		case 2 :
+			if ( hours > 0 )
+				eprint( NO_ERROR, UNSET, "Experiment stopped prematurely "
+						"after running for %d h, %d m and %.2f s.\n",
+						hours, mins, secs );
+			else
+			{
+				if ( mins > 0 )
+					eprint( NO_ERROR, UNSET, "Experiment stopped prematurely "
+							"after running for %d m and %.2f s.\n",
+							mins, secs );
+				else
+					eprint( NO_ERROR, UNSET, "Experiment stopped prematurely "
+							"after running for %.2f s.\n", secs );
+			}
+			break;
+
+		case 3 :
+			if ( hours > 0 )
+				eprint( NO_ERROR, UNSET, "Experiment had to be stopped after "
+						"running for %d h, %d m and %.2f s.\n",
+						hours, mins, secs );
+			else
+			{
+				if ( mins > 0 )
+					eprint( NO_ERROR, UNSET, "Experiment had to be stopped "
+							"after running for %d m and %.2f s.\n",
+							mins, secs );
+				else
+					eprint( NO_ERROR, UNSET, "Experiment had to be stopped "
+							"after running for %.2f s.\n", secs );
+			}
+			break;
+
+		default :
+			fsc2_assert( 1 == 0 );
+	}
 
 	fl_freeze_form( GUI.run_form->run );
 	fl_set_object_label( GUI.run_form->stop, "Close" );
@@ -804,7 +874,7 @@ static void child_sig_handler( int signo )
 		case SIGTTOU :
 		case SIGVTALRM :
 			break;
-			
+
 		/* All remaining signals are deadly... */
 
 		default :
@@ -829,7 +899,7 @@ static void child_sig_handler( int signo )
 			_exit( -1 );
 	}
 }
-			
+
 
 /*---------------------------------------------------------------------*/
 /* The child got to wait for the parent to tell it that it now expects */

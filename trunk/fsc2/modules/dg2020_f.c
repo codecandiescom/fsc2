@@ -489,7 +489,7 @@ Var *pulser_increment( Var *v )
 				   "%ld.\n", p->num );
 			THROW( EXCEPTION );
 		}
-	
+
 		if ( ! p->is_old_len )
 		{
 			p->old_len = p->len;
@@ -541,7 +541,7 @@ Var *pulser_next_phase( Var *v )
 			print( SEVERE, "No phase functions are in use.\n" );
 			return vars_push( INT_VAR, 0 );
 		}
-					
+
 		if ( dg2020.function[ PULSER_CHANNEL_PHASE_1 ].is_used )
 			pulser_next_phase( vars_push( INT_VAR, 1 ) );
 		if ( dg2020.function[ PULSER_CHANNEL_PHASE_2 ].is_used )
@@ -607,7 +607,7 @@ Var *pulser_phase_reset( Var *v )
 			print( SEVERE, "No phase functions are in use.\n" );
 			return vars_push( INT_VAR, 0 );
 		}
-					
+
 		if ( dg2020.function[ PULSER_CHANNEL_PHASE_1 ].is_used )
 			pulser_phase_reset( vars_push( INT_VAR, 1 ) );
 		if ( dg2020.function[ PULSER_CHANNEL_PHASE_2 ].is_used )

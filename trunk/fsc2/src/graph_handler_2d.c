@@ -830,7 +830,7 @@ static bool zoom_xy_2d( Canvas *c )
 
 			scale_changed = SET;
 	}
-	
+
 	if ( scale_changed )
 		recalc_XPoints_of_curve_2d( cv );
 
@@ -1270,7 +1270,7 @@ void repaint_canvas_2d( Canvas *c )
 
 	/* Otherwise use another level of buffering and copy the pixmap with
 	   the curves into another pixmap */
-	
+
 	pm = XCreatePixmap( G.d, FL_ObjWin( c->obj ), c->w, c->h,
 						fl_get_canvas_depth( c->obj ) );
 	XCopyArea( G.d, c->pm, pm, c->gc, 0, 0, c->w, c->h, 0, 0 );
@@ -1293,7 +1293,7 @@ void repaint_canvas_2d( Canvas *c )
 					x = c->box_x + c->box_w;
 					w = - c->box_w;
 				}
-				
+
 				if ( c->box_h > 0 )
 				{
 					y = c->box_y;

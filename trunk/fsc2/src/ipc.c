@@ -129,7 +129,7 @@ void *attach_shm( int key )
 void detach_shm( void *buf, int *key )
 {
 	raise_permissions( );
-	
+
 	shmdt( ( void * ) ( ( char * ) buf - 4 ) );
 	if ( key != NULL )
 	{

@@ -279,7 +279,7 @@ void dg2020_recalc_phase_pulse( FUNCTION *f, PULSE *phase_p,
 
 		return;
 	}
-			
+
 	/* If neither the phase pulse nor the pulse its associated with is active
 	   nothing has to be done */
 
@@ -323,7 +323,7 @@ void dg2020_recalc_phase_pulse( FUNCTION *f, PULSE *phase_p,
 	else                                 /* if its not the first pulse */
 	{
 		/* Find the position of the preceeding pulse */
-		
+
 		pp = p->function->pulses[ nth - 1 ];
 
 		/* Don't do anything if the position is already set and the pulse

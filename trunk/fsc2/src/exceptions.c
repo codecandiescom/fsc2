@@ -168,7 +168,7 @@ Exception_Types get_exception_type( const char *file, int unsigned line )
 #endif
 		exit( EXIT_FAILURE );
 	}
-		
+
 	return exception_stack[ exception_stack_pos + 1 ].exception_type;
 }
 

@@ -563,7 +563,7 @@ static void get_print_comm( void )
 
 	if ( ! print_with_comment )
 		return;
-	
+
 	if ( pc_string != NULL )
 		fl_set_input( GUI.print_comment->pc_input, pc_string );
 
@@ -1152,7 +1152,6 @@ static void eps_draw_surface( FILE *fp, int cn )
 
 	/* Print areas gray for which there are no data */
 
-	
 	fprintf( fp, "%s\n"
 			 "%f %f m\n"
 			 "0 %f rl\n"
@@ -1437,7 +1436,7 @@ static char **split_into_lines( int *num_lines )
 		{
 			while ( nl != 0 && *--cp == '\n')
 				nl--;
-			
+
 			if ( nl == 0 )
 				THROW( EXCEPTION );
 
@@ -1573,7 +1572,7 @@ static void do_print( char *name, const char *command )
 	static char **argv;
 	int argc;
 	pid_t new_pid;
-	
+
 
 	cmd_line = NULL;
 	argv = NULL;

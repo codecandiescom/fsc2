@@ -148,7 +148,7 @@ char *correct_line_breaks( char *str )
 const char *strip_path( const char *path )
 {
     char *cp;
-    
+
 
     if ( ( cp = strrchr( path, '/' ) ) == NULL )
         return path;
@@ -189,7 +189,7 @@ long get_file_length( const char *name, int *len )
 		 lines = 0;
 	bool is_char = UNSET;
 	ssize_t bytes_read;
-	
+
 
 	if ( ( fd = open( name, O_RDONLY ) ) < 0 )
 		 return -1;

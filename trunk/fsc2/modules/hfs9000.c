@@ -210,7 +210,7 @@ int hfs9000_exp_hook( void )
 		return 1;
 
 	/* Initialize the device */
-	
+
 	if ( ! hfs9000_init( DEVICE_NAME ) )
 	{
 		print( FATAL, "Failure to initialize the pulser: %s\n",
@@ -370,7 +370,7 @@ Var *pulser_channel_state( Var *v )
 			THROW( EXCEPTION );
 		}
 	}
-	
+
 	hfs9000.channel[ channel].state = state;
 
 	if ( FSC2_MODE == EXPERIMENT )
@@ -379,7 +379,7 @@ Var *pulser_channel_state( Var *v )
 	return vars_push( INT_VAR, ( long ) state );
 }
 
-	
+
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
@@ -522,7 +522,7 @@ Var *pulser_increment( Var *v )
 				   "%ld.\n", p->num );
 			THROW( EXCEPTION );
 		}
-	
+
 		if ( ! p->is_old_len )
 		{
 			p->old_len = p->len;

@@ -116,7 +116,6 @@ static void press_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
 
 	/* Find out which window gets the mouse events (all following mouse events
 	   go to this window until all buttons are released) */
-	   
 
 	if ( obj == GUI.run_form->x_axis )        /* in x-axis window */
 		G.drag_canvas = 1;
@@ -336,7 +335,7 @@ static void motion_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
 	unsigned int keymask;
 	bool scale_changed = UNSET;
 
-	
+
 	obj = obj;
 
 	/* We need to do event compression to avoid being flooded with motion
@@ -391,7 +390,7 @@ static void motion_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
 			for ( i = 0; i < G.nc; i++ )
 			{
 				cv = G.curve[ i ];
-						   
+
 				if ( ! cv->active )
 					continue;
 
@@ -744,7 +743,7 @@ static bool zoom_xy_1d( Canvas *c )
 
 			scale_changed = SET;
 		}
-		
+
 		if ( scale_changed )
 			recalc_XPoints_of_curve_1d( cv );
 	}
@@ -1106,7 +1105,7 @@ void repaint_canvas_1d( Canvas *c )
 			x = c->box_x + c->box_w;
 			w = - c->box_w;
 		}
-				
+
 		if ( c->box_h > 0 )
 		{
 			y = c->box_y;

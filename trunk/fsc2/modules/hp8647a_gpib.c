@@ -560,7 +560,6 @@ static void hp8647a_check_complete( void )
 			hp8647a_comm_failure( );
 	} while ( buffer[ 1 ] != '1' );
 }
-	
 
 
 /*

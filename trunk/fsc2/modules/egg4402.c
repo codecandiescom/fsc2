@@ -369,7 +369,7 @@ Var *boxcar_get_curve( Var *v )
 	sprintf( cmd, "CRV %ld %ld\n", curve_type, curve_number );
 	if ( gpib_write( egg4402.device, cmd, strlen( cmd ) ) == FAILURE )
 		egg4402_failure( );
-	
+
 	/* Tell the boxcar to send points */
 
 	sprintf( cmd, "DC %ld %ld\n", first, num_points );
@@ -476,7 +476,7 @@ static void egg4402_query( char *buffer, long *length )
 {
 	unsigned char stb;
 	long dummy = 1;
-	
+
 
 	do
 	{

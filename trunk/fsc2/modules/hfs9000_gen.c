@@ -187,7 +187,7 @@ bool hfs9000_set_function_delay( int function, double delay )
 	}
 	else
 		hfs9000.function[ function ].delay = Delay - hfs9000.neg_delay;
-		
+
 	hfs9000.function[ function ].is_used = SET;
 	hfs9000.function[ function ].is_delay = SET;
 
@@ -227,7 +227,7 @@ bool hfs9000_set_function_high_level( int function, double voltage )
 			   MIN_POD_HIGH_VOLTAGE, MAX_POD_HIGH_VOLTAGE );
 		THROW( EXCEPTION );
 	}
-				
+
 	if ( f->is_low_level )
 		hfs9000_check_pod_level_diff( voltage, f->low_level );
 
@@ -271,7 +271,7 @@ bool hfs9000_set_function_low_level( int function, double voltage )
 			   MIN_POD_LOW_VOLTAGE, MAX_POD_LOW_VOLTAGE );
 		THROW( EXCEPTION );
 	}
-				
+
 	if ( f->is_high_level )
 		hfs9000_check_pod_level_diff( f->high_level, voltage );
 

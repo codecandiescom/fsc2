@@ -703,7 +703,7 @@ static void start_editor( void )
 				*ep++ = '\0';
 				++argc;
 			}
-		
+
 			argv = T_malloc( ( argc + 5 ) * sizeof *argv );
 
 			argv[ 0 ] = ( char * ) "xterm";
@@ -797,7 +797,7 @@ void test_file( FL_OBJECT *a, long b )
 		in_test = UNSET;
 		return;
 	}
-		
+
     if ( is_tested )
 	{
 		fl_show_alert( "Warning", "File has already been tested.", NULL, 1 );

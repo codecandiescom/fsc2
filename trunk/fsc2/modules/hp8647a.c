@@ -690,7 +690,7 @@ Var *synthesizer_att_ref_freq( Var *v )
 				   hp8647a.att_ref_freq );
 			THROW( EXCEPTION );
 		}
-		
+
 		hp8647a.att_at_ref_freq = hp8647a_get_att_from_table( freq );
 	}
 
@@ -869,7 +869,7 @@ Var *synthesizer_mod_source( Var *v )
 							   "INT 1kHz", "INT 1 kHz", "INT 1", "1kHz",
 							   "1 kHz", "1", "INT 400Hz", "INT 400 Hz",
 							   "INT 400", "400Hz", "400 Hz", "400" };
-	
+
 
 	if ( v == NULL )
 	{

@@ -460,7 +460,7 @@ void dg2020_commit( FUNCTION *f, bool flag )
 		{
 			if ( p->channel[ j ] == NULL )        /* skip unused channels */
 				continue;
-				
+
 			if ( p->is_old_pos || ( p->is_old_len && p->old_len != 0 ) )
 				dg2020_set( p->channel[ j ]->old,
 							p->is_old_pos ? p->old_pos : p->pos,

@@ -177,7 +177,7 @@ Var *f_getf( Var *var )
 		s[ 3 ] = T_strdup( "" );
 	else
 		s[ 3 ] = T_strdup( s[ 3 ] );
-		   
+
 	if ( s[ 4 ] == NULL || s[ 4 ][ 0 ] == '\0' )
 		s[ 4 ] = NULL;
 	else
@@ -537,7 +537,7 @@ Var *f_save( Var *v )
 				for ( i = 0; i < v->len; i++ )
 					count += T_fprintf( file_num, "%ld\n", v->val.lpnt[ i ] );
 				break;
-				
+
 			case FLOAT_ARR :
 				for ( i = 0; i < v->len; i++ )
 					count += T_fprintf( file_num, "%#.9g\n",
@@ -960,7 +960,7 @@ static void ff_format_check( Var *v )
 					   "conversion specifier in format string.\n" );
 				THROW( EXCEPTION );
 			}
-				
+
 			handle_escape( vptr->val.sptr );
 			sptr++;
 			vptr = vptr->next;
@@ -981,7 +981,7 @@ static void ff_format_check( Var *v )
 					   "conversion specifier in format string.\n" );
 				THROW( EXCEPTION );
 			}
-				
+
 			sptr++;
 			vptr = vptr->next;
 			continue;
@@ -1002,7 +1002,7 @@ static void ff_format_check( Var *v )
 					   "type conversion specifier in format string.\n" );
 				THROW( EXCEPTION );
 			}
-				
+
 			sptr++;
 			vptr = vptr->next;
 			continue;
@@ -1045,7 +1045,7 @@ static long do_printf( int file_num, Var *v )
 	int need_vars;
 	int need_type;
 
-	
+
 	sptr = v->val.sptr;
 	fmt_start = fmt_end = T_malloc( strlen( sptr ) + 2 );
 	strcpy( fmt_start, sptr );

@@ -201,7 +201,7 @@ inline bool get_boolean( Var *v )
 /* header file) for each module function call.                       */
 /*-------------------------------------------------------------------*/
 
-double module_time( void )
+double experiment_time( void )
 {
 	struct timeval t_new;
 	static struct timeval t_old = { 0, 0 };
@@ -216,8 +216,9 @@ double module_time( void )
 	t_old.tv_sec = t_new.tv_sec;
 	t_old.tv_usec = t_new.tv_usec;
 
-	EDL.module_time += ( double ) dsec + 1.e-6 * ( double ) dusec;
-	return EDL.module_time;
+	EDL.experiment_time += ( double ) dsec + 1.e-6 * ( double ) dusec;
+
+	return EDL.experiment_time;
 }
 
 

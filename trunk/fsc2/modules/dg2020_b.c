@@ -235,7 +235,7 @@ int dg2020_b_exp_hook( void )
 		return 1;
 
 	/* Initialize the device */
-	
+
 	if ( ! dg2020_init( DEVICE_NAME ) )
 	{
 		print( FATAL, "Failure to initialize the pulser: %s\n",
@@ -318,7 +318,7 @@ void dg2020_b_exit_hook( void )
 			T_free( dg2020.function[ i ].pcm );
 			dg2020.function[ i ].pcm = NULL;
 		}
-		
+
 		if ( dg2020.function[ i ].pulses != NULL )
 			T_free( dg2020.function[ i ].pulses );
 	}
@@ -586,7 +586,7 @@ Var *pulser_increment( Var *v )
 				   "%ld.\n", p->num );
 			THROW( EXCEPTION );
 		}
-	
+
 		if ( ! p->is_old_len )
 		{
 			p->old_len = p->len;
@@ -648,7 +648,7 @@ Var *pulser_next_phase( Var *v )
 			print( SEVERE, "Phase cycling isn't used for any function.\n" );
 			return vars_push( INT_VAR, 0 );
 		}
-					
+
 		if ( dg2020_phs[ 0 ].function != NULL )
 			res &= pulser_next_phase( vars_push( INT_VAR, 1 ) )->val.lval;
 		if ( dg2020_phs[ 1 ].function != NULL )
@@ -731,7 +731,7 @@ Var *pulser_phase_reset( Var *v )
 			print( SEVERE, "Phase cycling isn't used for any function.\n" );
 			return vars_push( INT_VAR, 0 );
 		}
-					
+
 		if ( dg2020_phs[ 0 ].function != NULL )
 			ret &= pulser_phase_reset( vars_push( INT_VAR, 1 ) )->val.lval;
 		if ( dg2020_phs[ 1 ].function != NULL )

@@ -68,7 +68,7 @@ Var *f_print( Var *v )
 		n = 0;                   // number of variables printed
 	bool print_anyway = UNSET;
 
-	
+
 	/* A call to print() without any argument prints nothing */
 
 	if ( v == NULL )
@@ -187,7 +187,7 @@ Var *f_print( Var *v )
 				*cp = *( cp + 1 );
 				break;
 		}
-		
+
 		memmove( cp + 1, cp + 2, strlen( cp ) - 1 );
 	}
 
@@ -337,7 +337,7 @@ Var *f_wait( Var *v )
 
 	if ( Internals.mode == TEST )
 	{
-		EDL.module_time += how_long;
+		EDL.experiment_time += how_long;
 		return vars_push( INT_VAR, 1 );
 	}
 
@@ -677,7 +677,7 @@ Var *f_init_2d( Var *v )
 		G.rwc_start[ Y ] = VALUE( v );
 		v = v->next;
 		G.rwc_delta[ Y ] = VALUE( v );
-		
+
 		if ( G.rwc_delta[ Y ] == 0.0 )
 		{
 			G.rwc_start[ Y ] = ( double ) ARRAY_OFFSET;
@@ -913,7 +913,7 @@ Var *f_clabel( Var *v )
 			lengths[ Z ] = strlen( l[ Z ] ) + 1;
 		}
 	}
-			
+
 	/* In a test run we're already done */
 
 	if ( Internals.mode == TEST )
@@ -1150,7 +1150,7 @@ Var *f_display( Var *v )
 		  + sizeof( int )                 /* number of sets to be sent */
 		  + 3 * nsets * sizeof( long )    /* x-, y-index and curve number */
 		  + nsets * sizeof( int );        /* data type */
-	
+
 	for ( i = 0; i < nsets; i++ )
 	{
 		switch( dp[ i ].v->type )
@@ -1231,7 +1231,7 @@ Var *f_display( Var *v )
 	for ( i = 0; i < nsets; i++ )
 	{
 		* ( long * ) ptr = dp[ i ].nx;                  /* x-index */
-		ptr += sizeof (long );
+		ptr += sizeof ( long );
 
 		* ( long * ) ptr = dp[ i ].ny;                  /* y-index */
 		ptr += sizeof( long );
@@ -1282,7 +1282,7 @@ Var *f_display( Var *v )
 							 dp[ i ].v->from->type == FLOAT_CONT_ARR );
 				* ( int * ) ptr = dp[ i ].v->from->type;
 				ptr += sizeof( int );
-					
+
 				* ( long * ) ptr = len = dp[ i ].v->from->sizes[ 0 ];
 				ptr += sizeof( long );
 
@@ -1339,7 +1339,7 @@ Var *f_display( Var *v )
 	/* Get rid of the array of structures returned by eval_display_args() */
 
 	T_free( dp );
-	
+
 	/* Wait for parent to become ready to accept new data, then store
 	   identifier and send signal to tell parent about the data */
 
@@ -1373,7 +1373,7 @@ static DPoint *eval_display_args( Var *v, int *nsets )
 		/* check and store the x-index */
 
 		vars_check( v, INT_VAR | FLOAT_VAR );
-	
+
 		if ( v->type == INT_VAR )
 			dp[ *nsets ].nx = v->val.lval - ARRAY_OFFSET;
 		else
@@ -1401,7 +1401,7 @@ static DPoint *eval_display_args( Var *v, int *nsets )
 			}
 
 			vars_check( v, INT_VAR | FLOAT_VAR );
-	
+
 			if ( v->type == INT_VAR )
 				dp[ *nsets ].ny = v->val.lval - ARRAY_OFFSET;
 			else
@@ -1447,7 +1447,7 @@ static DPoint *eval_display_args( Var *v, int *nsets )
 		}
 
 		vars_check( v, INT_VAR | FLOAT_VAR );
-	
+
 		if ( v->type == INT_VAR )
 			dp[ *nsets ].nc = v->val.lval - 1;
 		else
@@ -1544,7 +1544,7 @@ Var *f_clearcv( Var *v )
 			ca = T_realloc( ca, ( count + 1 ) * sizeof *ca );
 			ca[ count++ ] = curve - 1;
 		} while ( ( v = v->next ) != NULL );
-		
+
 		if ( ca == NULL )
 		{
 			print( SEVERE, "No valid argument found.\n" );
@@ -1599,7 +1599,7 @@ Var *f_clearcv( Var *v )
 	/* Get rid of the array of curve numbers */
 
 	T_free( ca );
-	
+
 	/* Wait for parent to become ready to accept new data, then store
 	   identifier and send signal to tell it about them */
 

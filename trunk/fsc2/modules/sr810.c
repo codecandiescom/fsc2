@@ -193,7 +193,7 @@ static long dsp_ch_list[ ] = { DSP_CH_X, DSP_CH_R, DSP_CH_AUX1,
 
 static long dsp_to_symbol[ ] = { DSP_CH_X, DSP_CH_R, DSP_CH_Xnoise,
 								 DSP_CH_AUX1, DSP_CH_AUX2, DSP_CH_UNDEF };
-				
+
 #define D2S_ENTRIES ( sizeof dsp_to_symbol / sizeof dsp_to_symbol[ 0 ] )
 
 
@@ -399,7 +399,7 @@ Var *lockin_get_data( Var *v )
 		  i++, v = vars_pop( v ) )
 	{
 		channels[ i ] = get_long( v, "channel number" );
-		
+
 		if ( channels[ i ] ==  DSP_CH_Xnoise && ! sr810.is_auto_running )
 		{
 			print( FATAL, "X noise can only be measured while "
@@ -538,7 +538,7 @@ Var *lockin_dac_voltage( Var *v )
 	}
 
 	too_many_arguments( v );
-	
+
 	sr810.dac_voltage[ port - 1 ] = voltage;
 	sr810.is_dac_voltage[ port - 1 ] = SET;
 
@@ -579,7 +579,7 @@ Var *lockin_sensitivity( Var *v )
 								  sens_list[ sr810.sens_index ] );
 
 			case EXPERIMENT :
-			return vars_push( FLOAT_VAR, sr810_get_sens( ) );
+				return vars_push( FLOAT_VAR, sr810_get_sens( ) );
 		}
 
 	sens = get_double( v, "sensitivity" );
@@ -656,7 +656,7 @@ Var *lockin_sensitivity( Var *v )
 
 	if ( FSC2_MODE == EXPERIMENT )
 		sr810_set_sens( sens_index );
-	
+
 	return vars_push( FLOAT_VAR, sens_list[ sens_index ] );
 }
 
@@ -705,7 +705,7 @@ Var *lockin_time_constant( Var *v )
 	   one and, if this doesn't work, we set it to the minimum or maximum
 	   value, depending on the size of the argument. If the value does not fit
 	   within 1 percent, we utter a warning message (but only once). */
-	
+
 	for ( i = 0; i < TC_ENTRIES - 2; i++ )
 		if ( tc >= tc_list[ i ] && tc <= tc_list[ i + 1 ] )
 		{
@@ -760,7 +760,7 @@ Var *lockin_time_constant( Var *v )
 
 	if ( FSC2_MODE == EXPERIMENT )
 		sr810_set_tc( tc_index );
-	
+
 	return vars_push( FLOAT_VAR, tc_list[ tc_index ] );
 }
 
@@ -846,7 +846,7 @@ Var *lockin_harmonic( Var *v )
 	}
 
 	harm = get_long( v, "harmonic" );
-	
+
 	if ( FSC2_MODE == TEST )
 		freq = MIN_MOD_FREQ;
 	else
@@ -923,7 +923,7 @@ Var *lockin_ref_freq( Var *v )
 		}
 
 	freq = get_double( v, "modulation frequency" );
-	
+
 	if ( FSC2_MODE != TEST && sr810_get_mod_mode( ) != MOD_MODE_INTERNAL )
 	{
 		print( FATAL, "Can't set modulation frequency while modulation source "
@@ -1080,7 +1080,7 @@ Var *lockin_auto_setup( Var *v )
 		   maximum value, depending on the size of the argument. If the value
 		   does not fit within 5 percent, we utter a warning message (but only
 		   once). */
-	
+
 		for ( i = 0; i < ST_ENTRIES - 2; i++ )
 			if ( st >= st_list[ i ] && st <= st_list[ i + 1 ] )
 			{
@@ -1297,7 +1297,7 @@ static bool sr810_init( const char *name )
 		 gpib_write( sr810.device, "OVRM 0\n", 7 ) == FAILURE ||
 		 gpib_write( sr810.device, "*SRE 1\n", 7 ) == FAILURE )
 		return FAIL;
-	   
+
 	/* Ask lock-in to send the error status byte and test if it does */
 
 	length = 20;

@@ -411,7 +411,7 @@ Var *digitizer_change_window( Var *v )
 	}
 
 	too_many_arguments( v );
-	
+
 	/* Do all possible checks and, if necessary, readjust window position and
 	   width */
 
@@ -587,7 +587,7 @@ Var *digitizer_timebase( Var *v )
 	int TB = -1;
 	unsigned int i;
 	char *t;
-	
+
 
 	/* During the experiment if the digitizer's keyboard isn't locked we
 	   need to reread the timebase, record length and trigger position and
@@ -699,7 +699,7 @@ Var *digitizer_sensitivity( Var *v )
 {
 	long channel;
 	double sens;
-	
+
 
 	if ( v == NULL )
 	{
@@ -762,7 +762,7 @@ Var *digitizer_sensitivity( Var *v )
 Var *digitizer_num_averages( Var *v )
 {
 	long num_avg;
-	
+
 
 	/* During the experiment if the digitizer's keyboard isn't locked we
 	   need to reread the timebase, record length and trigger position and

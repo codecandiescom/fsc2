@@ -31,8 +31,9 @@
 
 /* Number of tokens to be parsed before forms are rechecked for user input -
    too small a number slows down the program quite a lot (and even moderately
-   short EDL files may produce an appreciable number of tokens), while making
-   it too large makes it difficult for the user to stop the interpreter. */
+   short EDL files may produce an appreciable number of tokens to be parsed
+   when e.g. running in loops), while making it too large makes it difficult
+   for the user to stop the interpreter. */
 
 #define CHECK_FORMS_AFTER   8192
 
@@ -256,7 +257,7 @@ void store_exp( FILE *in )
 
 				if ( in_loop && --curly_brace_in_loop_count == 0 )
 					in_loop = UNSET;
-					
+
 				break;
 
 			case '[' :
@@ -447,7 +448,7 @@ void forget_prg( void )
 			case E_STR_TOKEN :
 				T_free( EDL.prg_token[ i ].tv.sptr );
 				break;
-			
+
 			case E_FUNC_TOKEN :       /* get rid of string for function name */
 				T_free( EDL.prg_token[ i ].tv.vptr->name );
 				/* fall through */
@@ -469,8 +470,8 @@ void forget_prg( void )
 	EDL.prg_token = T_free( EDL.prg_token );
 	EDL.prg_length = 0;
 
-	/* Get rid of structures for curly braces that may have been survived
-	   when an exception got thrown */
+	/* Get rid of structures for curly braces that may have survived when an
+	   exception got thrown */
 
 	while ( pop_curly_brace( ) )
 		;
@@ -674,7 +675,6 @@ static void setup_if_else( long *pos, Prg_Token *cur_wr )
 
 			case IF_TOK : case UNLESS_TOK :
 				setup_if_else( &i, cur_wr );
-
 				if ( dont_need_close_parens )
 				{
 					if ( cur->end != NULL )
@@ -685,7 +685,6 @@ static void setup_if_else( long *pos, Prg_Token *cur_wr )
 					*pos = i;
 					return;
 				}
-
 				break;
 
 			case ELSE_TOK :
@@ -696,6 +695,7 @@ static void setup_if_else( long *pos, Prg_Token *cur_wr )
 							EDL.prg_token[ i ].Fname, EDL.prg_token[ i ].Lc );
 					THROW( EXCEPTION );
 				}
+
 				if ( EDL.prg_token[ i + 1 ].token != '{' &&
 					 EDL.prg_token[ i + 1 ].token != IF_TOK &&
 					 EDL.prg_token[ i + 1 ].token != UNLESS_TOK )
@@ -730,6 +730,7 @@ static void setup_if_else( long *pos, Prg_Token *cur_wr )
 							EDL.prg_token[ i ].Fname, EDL.prg_token[ i ].Lc );
 					THROW( EXCEPTION );
 				}
+
 				if ( in_if )
 					cur->start = EDL.prg_token + i + 1;
 				else
@@ -832,27 +833,23 @@ void exp_test_run( void )
 
 	EDL.Fname = T_free( EDL.Fname );
 
-	/* Initialize the function and the global variable which can be used by
-	   modules to get a very rough time estimate */
-
-	module_time( );
-	EDL.module_time = 0.0;
-
 	TRY
 	{
-		/* 1. Run the test run hook functions of the modules.
-		   2. Save the variables so we can reset them to their initial values
+		/* 1. Save the variables so we can reset them to their initial values
 		      when the test run is finished.
-		   3. Call the function f_dtime() to initialize the delta time
-		      counter.
-		   4. Save the relevant values from the pulse structures.
-		   5. Set up a signal handler so that it's possible to stop the test
-		      if there are e.g. infinite loops.
+		   2. Call the functions experiment_time( ) and f_dtime() to initialize
+		      the time functions.
+		   3. Run the test run hook functions of the modules.
+		   4. Do the test run.
 		*/
 
 		Internals.mode = TEST;
 		save_restore_variables( SET );
+
+		experiment_time( );
+		EDL.experiment_time = 0.0;
 		vars_pop( f_dtime( NULL ) );
+
 		run_test_hooks( );
 
 		EDL.cur_prg_token = EDL.prg_token;
@@ -1005,10 +1002,10 @@ void exp_test_run( void )
 
 		EDL.Fname = NULL;
 		save_restore_variables( UNSET );
-		
+
 		EDL.File_List_Len = old_FLL;
 		close_all_files( );
-			
+
 		Internals.mode = PREPARATION;
 		RETHROW( );
 	}
@@ -1090,7 +1087,7 @@ int exp_runlex( void )
 
 		return EDL.cur_prg_token++->token;
 	}
-	
+
 	return 0;
 }
 
@@ -1498,7 +1495,7 @@ bool test_for_cond( Prg_Token *cur )
 	}
 
 	/* Get sign of increment */
-	
+
 	if ( ( cur->count.forl.incr.type == INT_VAR &&
 		   cur->count.forl.incr.lval < 0 ) ||
 		 ( cur->count.forl.incr.type == FLOAT_VAR &&

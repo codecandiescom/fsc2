@@ -263,7 +263,6 @@ Var *temp_contr_sensor_unit( Var *v )
 			;
 	}
 
-	
 	if ( FSC2_MODE == TEST )
 		return vars_push( INT_VAR, lakeshore330.unit = unit );
 

@@ -261,7 +261,6 @@ try_again:
 					break;
 				print( FATAL, "Wrong field probe (F0) connected.\n" );
 				THROW( EXCEPTION );
-				
 
 			case '1' :      /* Probe F1 is connected -> OK for X-band*/
 				if ( exists_device( "aeg_x_band" ) )

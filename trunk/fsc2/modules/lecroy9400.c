@@ -252,7 +252,7 @@ Var *digitizer_timebase( Var *v )
 	int TB = -1;
 	unsigned int i;
 	char *t;
-	
+
 
 	if ( v == NULL )
 		switch ( FSC2_MODE )
@@ -362,7 +362,6 @@ Var *digitizer_sensitivity( Var *v )
 	double sens;
 	int coupl;
 
-	
 
 	if ( v == NULL )
 	{
@@ -510,7 +509,7 @@ Var *digitizer_averaging( Var *v )
 			   Channel_Names[ LECROY9400_CH2 ] );
 		THROW( EXCEPTION );
 	}
-	
+
 	/* Get the number of averages to use - adjust value if necessary to one
 	   of the possible numbers of averages as given by the array 'na' */
 
@@ -616,7 +615,7 @@ Var *digitizer_averaging( Var *v )
 Var *digitizer_num_averages( Var *v )
 {
 	long channel;
-	
+
 
 	if ( v == NULL )
 	{
