@@ -114,7 +114,9 @@ int aeg_x_band_init_hook( void )
 
 	/* Check if there's a field meter */
 
-	if ( ! exist_device( "er035m" ) && ! exist_device( "bh15" ) )
+	if ( ! exist_device( "er035m" ) &&
+		 ! exist_device( "er035m_s" ) &&
+		 ! exist_device( "bh15" ) )
 	{
 		eprint( FATAL, "AEG_X_BAND: Can't find a field meter." );
 		THROW( EXCEPTION );
@@ -128,6 +130,9 @@ int aeg_x_band_init_hook( void )
 
 	if ( exist_device( "er035m" ) )
 		ret = get_lib_symbol( "er035m", "is_gaussmeter",
+							  ( void ** ) &is_gaussmeter );
+	else if ( exist_device( "er035m_s" ) )
+		ret = get_lib_symbol( "er035m_s", "is_gaussmeter",
 							  ( void ** ) &is_gaussmeter );
 	else
 		ret = get_lib_symbol( "bh15", "is_gaussmeter",
