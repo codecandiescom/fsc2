@@ -908,10 +908,10 @@ static void gpib_log_date( void )
 static void gpib_log_error( const char *type )
 {
     int i;
-    static int stat[ 16 ] = { 0x8000, 0x4000, 0x2000, 0x1000,
-                              0x0800, 0x0400, 0x0200, 0x0100,
-                              0x0080, 0x0040, 0x0020, 0x0010,
-                              0x0008, 0x0004, 0x0002, 0x0001 };
+    static int stats[ 16 ] = { 0x8000, 0x4000, 0x2000, 0x1000,
+							   0x0800, 0x0400, 0x0200, 0x0100,
+							   0x0080, 0x0040, 0x0020, 0x0010,
+							   0x0008, 0x0004, 0x0002, 0x0001 };
     static char is[ 16 ][ 6 ] = {  "ERR", "TIMO", "END",  "SRQI",
                                    "RQS",   "\b",   "\b",   "CMPL",
                                    "LOK",   "REM",  "CIC",  "ATN",
@@ -928,7 +928,7 @@ static void gpib_log_error( const char *type )
     fprintf( gpib_log, "ERROR in function %s: <", type );
     for ( i = 15; i >= 0; i-- )
     {
-        if ( gpib_status & stat[ 15 - i ] )
+        if ( gpib_status & stats[ 15 - i ] )
             fprintf( gpib_log, " %s", is[ 15 - i ] );
     }
     fprintf( gpib_log, " > -> %s\n", ie[ gpib_error ] );
