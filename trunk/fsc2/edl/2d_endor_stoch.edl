@@ -273,7 +273,8 @@ FOR J = 1 : N_runs
             ground = mean( curve, 1, Pretrigger );
             mean_ground[ M ] = ( ( J - 1 ) * mean_ground[ M ] + ground ) / J;
         } ELSE {
-			ground = mean_ground[ M ] = 0;
+			ground = 0;
+			mean_ground[ M ] = 0;
 		}
 
         /* Calculate the integration window and the cleaned up curve (now
