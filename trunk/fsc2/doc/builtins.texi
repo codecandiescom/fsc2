@@ -38,8 +38,8 @@ been specified in the @code{DEVICES} section (or this section is
 missing). In principle, functions can be used in the @code{VARIABLES},
 @code{PREPARATIONS} and @code{EXPERIMENT} section of an @acronym{EDL}
 program. But please note that not all of the following functions can be
-used in all sections of an @acronym{EDL} program but some of them only
-in the @code{PREPARATIONS} or the @code{EXPERIMENT} section.
+used in all these sections of an @acronym{EDL} program but some of them
+only in the @code{PREPARATIONS} or the @code{EXPERIMENT} section.
 
 
 The built-in functions can be roughly divided into four classes. The
@@ -58,9 +58,9 @@ query and deletion of these objetcts.
 The third class of functions are mathematical functions that one would
 expect to find in most programming languages like (i.e.@: trigonometric
 functions, logarithms etc.@:). Finally, the fourth class are auxillary
-functions that can't be assigned to any of the other groups and consists
-of functions for dealing with time or date issues or for determining the
-sizes of arrays and other.
+functions that can't be assigned to one of the other classes and
+consists of functions for dealing with time or date issues or for
+determining the sizes of arrays and other.
 
 
 
@@ -95,66 +95,71 @@ But you can have not only one but as many placeholder characters in the
 characters has to match the number of variables (or data) following the
 @i{format string}. If the number of @code{#}'s and the number of
 variables to be printed doesn't fit a warning is printed. If there are
-too many @code{#}'s the superfluous ones are simply printed, if
+too many @code{#}'s the superfluous ones are simply printed aout, but if
 there are not enough only as many variables as there are @code{#}'s are
-printed, the rest is discarded.
+printed, the remaining data are discarded.
 
 You may use @code{print()} to print integer or floating point values
 (that includes the return values of functions) and variables and strings
 (i.e.@: text enclosed in double quotes, @code{"}).  Here's a longer,
 somewhat contrived example:
 @example
-print( "The # of # is: #\n", "sine", x, sin( x ) );
+print( "The # of # is #\n", "sine", x, sin( x ) );
 @end example
 @noindent
 This will print (assuming @code{x} equals @code{0.5}):
 @example
-The sine of 0.500000 is: 0.479426
+The sine of 0.500000 is 0.479426
 @end example
 
 There are special sequences allowed in the @i{format string}. They all
-start with an @i{escape character}, the backslash, @code{\}. Here's a
+start with an @i{escape character}, the backslash @code{\}. Here's a
 list of all recognized special sequences:
 @table @samp
 @cindex escape characters (in @code{print()} function)
 @item \n
 Linefeed character: Ends a line, everything following it starts on a new
 line. Thus several lines can be printed at once by one call of
-@code{print()}. @code{print()} does not automatically add a linefeed.
+@code{print()}. @code{print()} does not automatically add a linefeed by
+itself.
 @item \t
-Embed a tabulator character, tab stops are set at every eighth character.
+Embeds a tabulator character in the text, tab stops are set at every
+eighth character position.
 @item \\
 Prints a backslash, @code{\}, thus switching off the special meaning of the
 backslash as an escape character.
 @item \"
-Prints a quote - use it to embed quotes into the @i{format
+Prints a quote -- use it to embed quotes into the @i{format
 string}.
 @item \#
 Prints a @code{#}, thus switching off the special meaning of the
 @code{#} character as a placeholder for variables to be printed.
 @item \T
-While normally nothing is printed during the test tun of the
-@code{EXPERIMENT} section of an @acronym{EDL} file, if the @i{format
+While normally nothing is printed during the test run of the
+@code{EXPERIMENT} section of an @acronym{EDL} program, if the @i{format
 string} starts with this escape sequence the @code{print()} function
-will produce output already in the test run.
+will produce output already in the test run (the @code{T} is never
+printed).
 @end table
 
 
 @anchor{init_1d}
 @item init_1d()
 @findex init_1d()
-Initializes the display for one-dimensional experiments - without a call to
-this function no data will be displayed. The function takes up to six
-arguments but all of them are optional. They are:
+Initializes the display for one-dimensional experiments -- without a
+call to this function (or @code{init_2d()}, see below) no data can be
+displayed. The function takes up to six arguments, all of them being
+optional. These are:
 @enumerate
 @item
-Number of curves to be displayed, maximum is currently 4 curves. If not given
-it defaults to 1.
+The number of curves to be displayed, the maximum is currently 4
+curves. If not given it defaults to 1.
 @item
-Number of points, if missing or zero or negative it will be treated as
-unknown and default to 64 points. If the specified or the default value
-turns out to be too small it is adjusted automatically in the experiment
-so that all data fit into the display.
+Number of points, if missing, zero or negative it will be treated as
+unknown and default to 64 points. If the specified value (or the default
+value) turns out to be too small it is adjusted automatically in the
+experiment so that all data fit into the display (as long as the
+@code{FS} button is switched on).
 @item
 Start value of the @i{x}-axis. If missing (or undefined, see next point)
 point numbers are printed, starting with @code{1} (if @acronym{FORTRAN}
@@ -172,7 +177,6 @@ String variable with label to be shown at the @i{y}-axis.
 @end enumerate
 
 Formally, the function with its arguments can be written as
-
 @example
 init_1d( [ n_curves [ , n_points [ , start, increment ] ], ]
          [ x_label [ , y_label ] ] )
@@ -205,27 +209,26 @@ This function can only be used in the @code{PREPARATIONS} section of an
 @anchor{init_2d}
 @item init_2d()
 @findex init_2d()
-Initializes the display for two-dimensional experiments - without a call to
-this function no data will be displayed. The function takes up to nine
-arguments but all of them are optional. They are:
+Initializes the display for two-dimensional experiments. The function
+takes up to nine arguments, all of them being optional. The arguments
+are:
 @enumerate
 @item
 Number of data sets to be displayed, maximum is currently 4. If not
 given it defaults to 1.
 @item
-Number of points in @i{x}-direction, if missing or less than 1 it will be
-treated as unknown and default to 64. If the specified or the default value
-turns out to be too small it is adjusted automatically in the experiment
-so that all data fit into the display.
+Number of points in @i{x}-direction, if missing or less than 1 it will
+be treated as unknown and default to 64. If the specified value (or the
+default value) turns out to be too small it is adjusted automatically in
+the experiment so that all data fit into the display.
 @item
 Number of points in @i{y}-direction, if missing or less than 1 it will
 be treated as unknown and default to 32. If the specified or the default
 value turns out to be too small it is adjusted automatically in the
 experiment so that all data fit into the display.
 @item
-Start value of the @i{x}-axis. If missing (or undefined, see next entry)
-point numbers are printed, starting with @code{1} (or @code{0},
-depending on the setting for array start-offsets).
+Start value of the @i{x}-axis. If missing (or undefined, see also next
+entry) point numbers are printed, starting with @code{1}.
 @item
 Increment for data along the @i{x}-axis (thus restricting the display to
 equally spaced data). Setting it to zero implies that the start value
@@ -235,7 +238,7 @@ Start value of the @i{y}-axis. The same rules as for the @i{x}-axis apply
 for missing or undefined values.
 @item
 Increment for data along the @i{y}-axis. The same rules as for the
-@i{x}-axis apply for missing or undefined values.
+@i{x}-axis apply for missing values or when zero is specified.
 @item
 String variable with label to be shown at the @i{x}-axis.
 @item                
@@ -262,22 +265,26 @@ This function has to be called to display data in 1-dimensional as well as
 
 @enumerate
 @item
-The (@i{x}) point number of the data point (if only a single number is
-given as the third argument) or the point number of the first data point
-in the data array passed as third argument.
+The (@i{x}) point number (coordinate) where the data point (if only a
+single number is given as the third argument) or the coordinate where
+the first data point of an data array passed as third argument is to be
+shown.
 @item
-Only in 2D-experiments: The @i{y}-point number of the data point or the
-point number of the first data point in the data array.
+Only in 2D-experiments: The @i{y}-point number (coordinate) of the data
+point or the coordinate for the first data point of an data array
+(arrays are always drawn to the right from the specified coordinate,
+i.e.@: in @i{x}-direction).
 @item
-The data point or an (one-dimensional) array of data.
+The data point or a (one-dimensional) array of data.
 @item
-Number of the curve or data set the data are to be displayed in. If missing it
-defaults to the first curve, 1. If there is more than one data set given
-in the @code{display()} command the curve number @strong{can't} be left out.
+Number of the curve or data set the data are to be displayed belong
+to. If missing it defaults to the first curve, 1. If there is more than
+one data set given in the @code{display()} command the curve number
+must be specified.
 @end enumerate
 These arguments can be repeated as many times as there are data to be
-displayed simultaneously (but in this case none of the arguments may be left
-out!).
+displayed simultaneously (but in this case none of the arguments may be
+left out!).
 
 Formally, the function with its arguments can be written for 1D-experiments as
 @example
@@ -296,8 +303,8 @@ This function can only be used in the @code{EXPERIMENT} section of an
 @anchor{change_scale}
 @item change_scale()
 @findex change_scale()
-This function allows it to change the scale settings (originally set in
-the call of @w{@code{init_1d()}} or @w{@code{init_2d()}}) after an
+This function allows to change the scale settings (originally set in the
+call of @w{@code{init_1d()}} or @w{@code{init_2d()}}) after an
 experiment has been started. With a one-dimensional display the function
 can be passed a maximum of two arguments, the new start value of the
 @i{x}-axis and the new @i{x}-increment. For two-dimensional display the
@@ -355,39 +362,40 @@ This function can only be used in the @code{EXPERIMENT} section of an
 @anchor{clear_curve}
 @item clear_curve()
 @findex clear_curve()
-Removes one or more curves from the display. As many arguments as there
-are curves can be used. No arguments at all implies the first
+Removes one or more curves from the display. As many curve numbers as
+there are curves can be used. No arguments at all implies the first
 curve. Invalid arguments are discarded and an error message is printed.
 
 This function can only be used in the @code{EXPERIMENT} section of an
 @acronym{EDL} program.
+
 
 @anchor{get_file}
 @item get_file( )
 @findex get_file()
 Opens a new file and returns a unique identifier for the file that can
 be stored in an integer variable and is to be used in calls to functions
-of the @w{@code{save_xxx()}}-family. If no argument is given a file selector
-is shown and lets the user choose a file. If opening the selected file
-fails the user is asked to select a different file name. If the user
-cancels the selection of a file (s)he is asked for confirmation since
-data may get lost. If the user decided not to select a file the function
-returns an (invalid) file identifier of @code{-1}.
+of the @w{@code{save_xxx()}}-family. Usually, a file selector is shown
+that lets the user choose a file. If opening the selected file fails the
+user is asked to select a different file name. If the user cancels the
+selection of a file (s)he is asked for confirmation since data may get
+lost. If the user decided not to select a file the function returns an
+(invalid) file identifier of @code{-1}.
 
 The function accepts up to five arguments, all of them optional. The
 first one is usually the prompt string to be printed in the file
 selector. If it is missing or is the empty string (use `@code{""}' to
 create an empty string) it defaults to `@i{Please select a file
-name:}'. The second argument is a pattern for the file name, defaulting
-to `@i{*.dat}'. You may use all the usual wildcard characters you're
-used to from the shell. The third argument is the directory the search
-for the file name should start from. As the fourth argument you may pass
-a file name to the function as the default file that appears in the
-entry for the selected file. Finally, the fifth and last argument can be
-a default extension for the file. This extension will be appended
-automatically to the name of the file the user selected unless the name
-has already this extension. This way one can enforce an extension for
-the filename.
+name:}'. The second argument is a pattern for the file name, per default
+`@i{*.dat}'. You may use all the usual wildcard characters you're used
+to from the shell. The third argument is the directory the search for
+the file name should start in. As the fourth argument you may pass a
+file name to the function as the default file that appears in the entry
+for the selected file. Finally, the fifth and last argument can be a
+default extension for the file. This extension will be appended
+automatically to the name of the file the user selects unless the file
+name already has this extension. This way one can enforce an extension
+for the file name.
 
 But there's also an alternative. If the very first string (that is
 usually used for the prompt string) starts with a backslash `@code{\}'
@@ -398,11 +406,12 @@ will be used. Only if opening this file fails the remaining parameters
 will be used when asking for an alternative file (except the prompt
 string, the default will be used).
 
-If @code{get_file()} is never called, on the first call to a function
-from the @code{save_xxx()}-family the user is asked to select a file and
-this file is used exclusively in further @code{save_xxx()}-calls.
-I.e.@: either @code{get_file()} is called before any save-operation or
-never at all!
+If @code{get_file()} has never been called on the first call to a
+function from the @code{save_xxx()}-family the user is asked to select a
+file and this file is used exclusively in further
+@code{save_xxx()}-calls.  That means that calling @code{get_file()}
+after the default file has already been opened is not allowed, call it
+either before the first save-operation or never at all!
 
 This function can only be used in the @code{EXPERIMENT} section of an
 @acronym{EDL} program.
@@ -441,10 +450,11 @@ file with the name @code{experiment.list} will be opened automatically.
 The function also takes care that no files will be overwritten
 accidentally. If the second file already exists the user gets asked to
 select different file. The program enforces that the extension of the
-new file is identical to the one passed as the third argument.
+new file is identical to the one passed to it as the third argument.
 
 This function can only be used in the @code{EXPERIMENT} section of an
 @acronym{EDL} program.
+
 
 @anchor{save}
 @item save()
@@ -469,15 +479,15 @@ Floating point data
 @item
 Strings (with interpretation of escape sequences, see @code{fsave()})
 @item
-One-dimensional arrays (or slices of arrays) of integer or floating point
-type
+One-dimensional arrays (or slices of more-dimensional arrays) of integer
+or floating point type
 @item
 Complete more-dimensional arrays
 @end itemize
 
 The function saves data in an unformatted fashion, i.e.@: each data
-value is written on a new line. The only exception is more-dimensional
-arrays - here an empty line is output between the individual slices of
+value is written on a new line. The only exception are more-dimensional
+arrays -- here an empty line is output between the individual slices of
 the array. Here's an example: The array
 
 @example
@@ -497,11 +507,9 @@ will be printed as
 6
 @end example
 
-The function returns the total number of characters that have been written to
-the file.
-
-This function can only be used in the @code{EXPERIMENT} section of an
-@acronym{EDL} program.
+The function returns the total number of characters that have been
+written to the file and can only be used in the @code{EXPERIMENT}
+section of an @acronym{EDL} program.
 
 
 @anchor{fsave}

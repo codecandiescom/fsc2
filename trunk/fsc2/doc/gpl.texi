@@ -66,10 +66,10 @@ patent must be licensed for everyone's free use or not licensed at all.
 modification follow.
 
 @iftex
-@unnumberedsec TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
+@unnumberedsec Terms and Conditions for Copying, Distribution and Modification
 @end iftex
 @ifinfo
-@center TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
+@center Terms and Conditions for Copying, Distribution and Modification
 @end ifinfo
 
 @enumerate 0
@@ -291,10 +291,10 @@ of preserving the free status of all derivatives of our free software and
 of promoting the sharing and reuse of software generally.
 
 @iftex
-@heading NO WARRANTY
+@heading No Warranty
 @end iftex
 @ifinfo
-@center NO WARRANTY
+@center No Warranty
 @end ifinfo
 
 @item
@@ -321,10 +321,10 @@ POSSIBILITY OF SUCH DAMAGES.
 @end enumerate
 
 @iftex
-@heading END OF TERMS AND CONDITIONS
+@heading End of Terms and Conditions
 @end iftex
 @ifinfo
-@center END OF TERMS AND CONDITIONS
+@center End of Terms and Conditions
 @end ifinfo
 
 @page
