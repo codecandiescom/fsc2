@@ -110,9 +110,6 @@ typedef enum {
 	dac8800,
 	dac8043,
 	ad8522,
-	ad8804,
-	ad8842,
-	ad8804_debug
 } CALDAC_TYPES;
 
 
@@ -134,6 +131,10 @@ struct Board_Properties {
 	int                     ao_has_ext_ref;
 
 	unsigned int            has_analog_trig : 1;
+	CALDAC_TYPES            atrig_caldac;
+	u8	                atrig_low_ch;
+	u8	                atrig_high_ch;
+	unsigned int            atrig_bits;
 
 	unsigned int            num_mite_channels;
 
@@ -173,6 +174,7 @@ struct Board_Functions {
 	size_t ( *dma_get_available )( Board *, NI_DAQ_SUBSYSTEM );
 	void ( *dma_buf_release )( Board *, NI_DAQ_SUBSYSTEM );
 	int ( *dma_shutdown )( Board *, NI_DAQ_SUBSYSTEM );
+	void ( *set_trigger_levels )( Board *, u16 th, u16 tl );
 };
 
 

@@ -465,8 +465,9 @@ struct STC_Write_Registers {
 #define Software_Test                         (        1 <<  5 )   /* Strobe */
 #define Analog_Trigger_Drive                  (        1 <<  4 )
 #define Analog_Trigger_Enable                 (        1 <<  3 )
-#define Analog_Trigger_Mode_Field             (        7 <<  0 )
 
+
+#define Analog_Trigger_Mode_Field             (        7 <<  0 )
 #define GPFO_0_Output_Select_Shift            11
 
 #define GPFO_i_Output_Enable( i )             ( 1 << ( i ? 15 : 14 ) )

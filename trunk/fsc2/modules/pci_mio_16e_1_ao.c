@@ -60,15 +60,9 @@ Var *daq_ao_channel_setup( Var *v )
 														 "AO channel number" ),
 										  "AO channel" );
 
-		if ( ( v = vars_pop( v ) ) == NULL )
-		{
-			print( FATAL, "Missing arguments.\n" );
-			THROW( EXCEPTION );
-		}
-
 		other_count = 0;
 		while ( ( v = vars_pop( v ) ) != NULL &&
-				other_count < 2 &&
+				other_count++ < 2 &&
 				v->type == STR_VAR )
 		{
 			if ( ! strcasecmp( v->val.sptr, "BIPOLAR" ) )
@@ -124,6 +118,7 @@ Var *daq_ao_channel_setup( Var *v )
 
 		polarity[ num_channels ] = pol == -1 ? NI_DAQ_BIPOLAR : pol;
 		external_reference[ num_channels++ ] = er == -1 ? NI_DAQ_DISABLED : er;
+
 	} while ( v != NULL );
 
 	if ( FSC2_MODE == EXPERIMENT )

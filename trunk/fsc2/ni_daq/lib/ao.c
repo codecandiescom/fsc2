@@ -28,8 +28,14 @@
 #include "ni_daq_lib.h"
 
 
-/*--------------------------------------------------------------------*/
-/*--------------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+/* Function for configuration of the AO channels - it can be set */
+/* individually for each channel if an external or the internal  */
+/* reference is to be used and if the channels is to be used in  */
+/* unipolar or bipolar mode. If this function doesn't get called */
+/* all channels are per default set to use of the internal       */
+/* reference and bipolar mode.                                   */
+/*---------------------------------------------------------------*/
 
 int ni_daq_ao_channel_configuration( int board, int num_channels,
 									 int *channels,

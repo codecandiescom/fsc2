@@ -107,7 +107,7 @@ int ni_daq_gpct_start_counter( int board, int counter, NI_DAQ_INPUT source )
 		return ret;
 
 	if ( counter < 0 || counter > 1 )
-		return ni_daq_errno = NI_DAQ_ERR_NSC;
+		return ni_daq_errno = NI_DAQ_ERR_IVA;
 
 	if ( ( ret = ni_daq_gpct_check_source( source ) ) < 0 )
 		return ret;
@@ -156,7 +156,7 @@ int ni_daq_gpct_start_gated_counter( int board, int counter,
 	/* Check if the counter number is reasonable */
 
 	if ( counter < 0 || counter > 1 )
-		return ni_daq_errno = NI_DAQ_ERR_NSC;
+		return ni_daq_errno = NI_DAQ_ERR_IVA;
 
 	pulser = counter ^ 1;
 
@@ -235,7 +235,7 @@ int ni_daq_gpct_stop_counter( int board, int counter )
 		return ret;
 
 	if ( counter < 0 || counter > 1 )
-		return ni_daq_errno = NI_DAQ_ERR_NSC;
+		return ni_daq_errno = NI_DAQ_ERR_IVA;
 
 	if ( ( ret = ni_daq_gpct_state( board, counter, &state ) ) < 0 )
 		return ret;
@@ -278,7 +278,7 @@ int ni_daq_gpct_get_count( int board, int counter, int wait_for_end,
 		return ret;
 
 	if ( counter < 0 || counter > 1 )
-		return ni_daq_errno = NI_DAQ_ERR_NSC;
+		return ni_daq_errno = NI_DAQ_ERR_IVA;
 
 	if ( count == NULL )
 		return ni_daq_errno = NI_DAQ_ERR_IVA;
@@ -290,10 +290,6 @@ int ni_daq_gpct_get_count( int board, int counter, int wait_for_end,
 		   										  NI_DAQ_CONT_COUNTER_RUNNING )
 		)
 		return ni_daq_errno = NI_DAQ_ERR_WFC;
-
-	if ( state != NULL &&
-		 ( ret = ni_daq_gpct_state( board, counter, state ) ) < 0 )
-		return ret;
 
 	a.cmd = NI_DAQ_GPCT_GET_COUNT;
 	a.counter = counter;
@@ -309,7 +305,12 @@ int ni_daq_gpct_get_count( int board, int counter, int wait_for_end,
 	{
 		ni_daq_dev[ board ].gpct_state.state[ counter ] = NI_DAQ_IDLE;
 		ni_daq_dev[ board ].gpct_state.state[ counter ^ 1 ] = NI_DAQ_IDLE;
+		if ( state != NULL )
+			*state = NI_DAQ_IDLE;
 	}
+	else if ( state != NULL &&
+			  ( ret = ni_daq_gpct_state( board, counter, state ) ) < 0 )
+		return ret;
 
 	return ni_daq_errno = NI_DAQ_OK;
 }
@@ -331,7 +332,7 @@ int ni_daq_gpct_single_pulse( int board, int counter, double duration )
 		return ret;
 
 	if ( counter < 0 || counter > 1 )
-		return ni_daq_errno = NI_DAQ_ERR_NSC;
+		return ni_daq_errno = NI_DAQ_ERR_IVA;
 
 	if ( ni_daq_dev[ board ].gpct_state.state[ counter ] != NI_DAQ_IDLE )
 		return ni_daq_errno = NI_DAQ_ERR_CBS;
@@ -389,7 +390,7 @@ int ni_daq_gpct_continuous_pulses( int board, int counter,
 		return ret;
 
 	if ( counter < 0 || counter > 1 )
-		return ni_daq_errno = NI_DAQ_ERR_NSC;
+		return ni_daq_errno = NI_DAQ_ERR_IVA;
 
 	if ( ( ni_daq_gpct_time_to_ticks( board, counter, high_phase,
 									  &ht, &source ) < 0 ||
@@ -452,26 +453,14 @@ int ni_daq_gpct_stop_pulses( int board, int counter )
 }
 
 
-/*------------------------------------------------------*/
-/* Function checks if a counter source value is correct */
-/*------------------------------------------------------*/
-
-static int ni_daq_gpct_check_source( NI_DAQ_INPUT source )
-{
-    if ( source < 0 ||
-		 ( source > NI_DAQ_RTSI_6 && source != NI_DAQ_IN_TIMEBASE2 &&
-		   source != NI_DAQ_G_TC_OTHER && source != NI_DAQ_LOW ) )
-		return ni_daq_errno = NI_DAQ_ERR_IVS;
-
-	return ni_daq_errno = NI_DAQ_OK;
-}
-
-
 /*--------------------------------------------------------------------*/
 /*--------------------------------------------------------------------*/
 
-static int ni_daq_gpct_state( int board, int counter, int *state )
+int ni_daq_gpct_state( int board, int counter, int *state )
 {
+	if ( counter < 0 || counter > 1 )
+		return ni_daq_errno = NI_DAQ_ERR_IVA;
+
 	if ( state == NULL )
 		return ni_daq_errno = NI_DAQ_ERR_IVA;
 
@@ -491,6 +480,21 @@ static int ni_daq_gpct_state( int board, int counter, int *state )
     }
 
     return ni_daq_gpct_is_armed( board, counter, state );
+}
+
+
+/*------------------------------------------------------*/
+/* Function checks if a counter source value is correct */
+/*------------------------------------------------------*/
+
+static int ni_daq_gpct_check_source( NI_DAQ_INPUT source )
+{
+    if ( source < 0 ||
+		 ( source > NI_DAQ_RTSI_6 && source != NI_DAQ_IN_TIMEBASE2 &&
+		   source != NI_DAQ_G_TC_OTHER && source != NI_DAQ_LOW ) )
+		return ni_daq_errno = NI_DAQ_ERR_IVS;
+
+	return ni_daq_errno = NI_DAQ_OK;
 }
 
 

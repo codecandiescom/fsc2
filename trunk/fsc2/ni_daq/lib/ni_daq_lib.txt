@@ -26,6 +26,7 @@ A) Administrative and miscellaneous functions:
     ni_daq_msc_set_clock_speed()
     ni_daq_msc_set_clock_output()
     ni_daq_msc_get_clock_state()
+	ni_daq_msc_set_trigger()
 
 B) Functions for analog input (AI):
 
@@ -52,6 +53,7 @@ D) Counter/pulser functions (GPCT):
     ni_daq_gpct_single_pulse()
     ni_daq_gpct_continuous_pulses()
     ni_daq_gpct_stop_pulses()
+    ni_daq_gpct_state()
 
 E) DIO functions (DIO):
 
@@ -66,7 +68,6 @@ following values can be expected:
 
     NI_DAQ_OK            Success
     NI_DAQ_ERR_NSB       No such board
-    NI_DAQ_ERR_NSC       No such counter
     NI_DAQ_ERR_CBS       Counter is busy
     NI_DAQ_ERR_IVA       Invalid argument
     NI_DAQ_ERR_WFC       Can't wait for continuous counter to stop
@@ -85,6 +86,9 @@ following values can be expected:
     NI_DAQ_ERR_NAS       Missing AI acquisition setup
     NI_DAQ_ERR_NEM       Not enough memory
     NI_DAQ_ERR_NPT       Timing impossible to realize
+	NI_DAQ_ERR_NER		 External reference for AO not available
+	NI_DAQ_ERR_UAO		 Only bipolar AO available
+	NI_DAQ_ERR_NAT       No analog trigger available
 
 
 The absolute value of the error code can be used as an index into a an
@@ -279,6 +283,68 @@ On failure the function returns one of the following error codes
 
 ======================================================================
 
+int ni_daq_msc_set_trigger( int board, NI_DAQ_TRIG_TYPE trigger_type,
+							double trigger_high, double trigger_low )
+
+This function is for setting up the PFI0/TRIG1 input pin. It is used
+as a trigger input for timing the analog input (AI) and can be used
+in several modes. Please note that some boards don't allow analog
+triggering and always expect a TTL level signal. In these cases
+calling the function will return the error code 'NI_DAQ_ERR_NAT'.
+
+The 'trigger_type' argument can be set to one of the following values:
+
+	NI_DAQ_TRIG_TTL
+	NI_DAQ_TRIG_LOW_WINDOW
+	NI_DAQ_TRIG_HIGH_WINDOW
+	NI_DAQ_TRIG_MIDDLE_WINDOW
+	NI_DAQ_TRIG_HIGH_HYSTERESIS
+	NI_DAQ_TRIG_LOW_HYSTERESIS
+
+For 'NI_DAQ_TRIG_TTL' a TTL level trigger input is expected.
+
+For 'NI_DAQ_TRIG_LOW_WINDOW' a trigger input signal gets raised when
+the when the input voltage drops below the value specified as the
+fourth, final argument of the function, 'trigger_low', which has to
+be a voltage between -10 V and +10 V. The trigger input signal is
+lowered when the input voltage again increases above this value.
+
+For 'NI_DAQ_TRIG_HIGH_WINDOW' a trigger input signal gets raised when
+the when the input voltage is increased above the value specified as
+the third argument of the function, 'trigger_high', which has to be
+a voltage between -10 V and +10 V. The trigger input signal is lowered
+when the input voltage again drops below this value.
+
+For 'NI_DAQ_TRIG_MIDDLE_WINDOW' a trigger input signal gets raised
+whenever the input voltage drops below the voltage specified by
+'trigger_high', coming from above, and when the input voltage
+increases above the voltage specified by 'trigger_low', coming
+from below. It gets switched off again when dropping below
+'trigger_low' or increasing beyond 'trigger_high'. Thus, the
+trigger input signal is lowered when the input voltage leaves the
+interval defined by 'trigger_low' and 'trigger_high' and gets
+raised when the input voltage again enters this window.
+
+For 'NI_DAQ_TRIG_HIGH_HYSTERESIS' the trigger input signal gets
+raised when the input voltage starts to excced 'trigger_high'
+and and is lowered when the input voltage drops below 'trigger_low'.
+
+Finally, for 'NI_DAQ_TRIG_LOW_HYSTERESIS' the trigger input signal
+gets raised when the input voltage drops below 'trigger_low' and
+gets lowered again when the input voltage exceeds 'trigger_high'.
+
+Using these settings, together with selecting if a trigger should
+happen on the raising or falling edge of the trigger input signal
+makes it possible to realize all kinds of trigger methods.
+
+On failure the function returns one of the following error codes
+
+    NI_DAQ_ERR_NSB    NI_DAQ_ERR_BNO   NI_DAQ_ERR_IVA
+    NI_DAQ_ERR_INT    NI_DAQ_ERR_NAT
+
+
+======================================================================
+
 
 B. Functions for analog input (AI)
 ----------------------------------
@@ -286,7 +352,6 @@ B. Functions for analog input (AI)
 ======================================================================
 
 int ni_daq_ai_set_speed( int board, NI_DAQ_CLOCK_SPEED_VALUE speed )
-
 
 This function allows to set the speed of the fast clock as seen by the
 analog input (AI) subsystem. The first argument is as usual the board
@@ -308,7 +373,7 @@ On failure the function returns one of the following error codes
 int ni_daq_ai_get_speed( int board, NI_DAQ_CLOCK_SPEED_VALUE *speed )
 
 The function can be used to find out the current divider setting for
-teh fats clock as seen by the AI subsystem. The first argument is as
+the fast clock as seen by the AI subsystem. The first argument is as
 usual the board handle, while the second arguments is a pointer to
 a variable of type 'NI_DAQ_CLOCK_SPEED_VALUE'. If successful the
 value of the variable pointed to will be set to either
@@ -369,7 +434,7 @@ The 'NI_DAQ_AI_TYPE_Calibration' setting is used for calibration of the
 board and shouldn't be needed for normal programms.
 
 'NI_DAQ_AI_TYPE_Aux' is for measuring the output voltage of a onboard
-temperature sensor (+100 mV = -40 degree Celsiusm +1.25 V = 125 degree
+temperature sensor (+100 mV = -40 degree Celsius and +1.25 V = 125 degree
 Celsius). Not all boards have an onboard temerature sensor.
 
 'NI_DAQ_AI_TYPE_Ghost' is a seeting where *no* data is returned, the
@@ -486,7 +551,6 @@ It's value is only evaluated when the acquisition is to be started by an
 external trigger. In this case NI_DAQ_NORMAL stands for a trigger on the
 raising edge of the input, while NI_DAQ_INVERTED detects the trigger on
 the falling edge of the input.
-
 
 The 'scan_start', 'scan_polarity' and 'scan_duration' control how a scan
 is started. 'scan_start' can have one of the following values:
@@ -645,10 +709,11 @@ int ni_daq_ao_channel_configuration( int board, int num_channels,
 									 NI_DAQ_BU_POLARITY *polarity )
 
 
-Before analog output can be done the channels to be used have to be
-set up, which is done using this function.
+Before doing analog output the channels to be used can be set up,
+which is done using this function. (Without a setup both channels
+use the internal reference and work in bipolar mode.)
 
-Beside the board handle the function expects the four further arguments.
+Beside the board handle the function expects four further arguments.
 The first of these is the number of channels to be set up. The next is
 an array of the channel numbers identifiying the channels to set up,
 which can range between 0 and the maximum number of available AO channels
@@ -682,10 +747,7 @@ On failure the function returns one of the following error codes
 
 int ni_daq_ao( int board, int num_channels, int *channels, double *values );
 
-This function can be called to do an AO conversion for a set of channels
-(if ni_daq_ao_channel_configuration() had been called previously for these
-channels).
-
+This function can be called to do an AO conversion for a set of channels.
 It expects four arguments, first the handle for the board, then the number
 of channels and an array of channel numbers (between 0 and the maximum
 number of available AO channels minus one). The last argument is a pointer
@@ -711,6 +773,271 @@ On failure the function returns one of the following error codes
 D Counter/pulser functions (GPCT)
 ---------------------------------
 
+
+======================================================================
+
+int ni_daq_gpct_set_speed( int board, NI_DAQ_CLOCK_SPEED_VALUE speed )
+
+This function allows to set the speed of the fast clock as seen by the
+general purpose counter and timer (GPCT) subsystem. The first argument
+is as usual the board handle, while the second arguments determines the
+speed divider for the fast clock. It can have two values, either
+
+    NI_DAQ_FULL_SPEED   or   NI_DAQ_HALF_SPEED
+
+When NI_DAQ_FAST_CLOCK is used, the clock speed is set to 20 MHz, otherwise
+to 10 MHz.
+
+On failure the function returns one of the following error codes
+
+    NI_DAQ_ERR_NSB    NI_DAQ_ERR_BNO   NI_DAQ_ERR_IVA   NI_DAQ_ERR_INT
+
+
+======================================================================
+
+int ni_daq_gpct_get_speed( int board, NI_DAQ_CLOCK_SPEED_VALUE *speed )
+
+The function can be used to find out the current divider setting for
+the fast clock as seen by the GPCT subsystem. The first argument is as
+usual the board handle, while the second arguments is a pointer to
+a variable of type 'NI_DAQ_CLOCK_SPEED_VALUE'. If successful the
+value of the variable pointed to will be set to either
+
+    NI_DAQ_FULL_SPEED   or   NI_DAQ_HALF_SPEED
+
+indicating if the clock is running at either 20 MHz or 10 MHz.
+
+On failure the function returns one of the following error codes
+
+    NI_DAQ_ERR_NSB    NI_DAQ_ERR_BNO   NI_DAQ_ERR_IVA   NI_DAQ_ERR_INT
+
+
+======================================================================
+
+int ni_daq_gpct_start_counter( int board, int counter, int source )
+
+The function starts a countinuously counting counter. The counter is
+initialized to 0 at the start and counts upwards.
+
+As usually, 'board' is the board handle. The 'counter' argument is the
+number of the counter to be used, which is either 0 or 1. The 'source'
+argument, indicating what to count, must be one the following constants:
+
+    NI_DAQ_G_IN_TIMEBASE1
+	NI_DAQ_PFI0 - NI_DAQ_PFI9
+	NI_DAQ_RTSI0 - NI_DAQ_RTSI6
+	NI_DAQ_IN_TIMEBASE2
+	NI_DAQ_G_TC_OTHER
+
+'NI_DAQ_G_IN_TIMEBASE1' is the fast clock of the GPCT subsystem,
+'NI_DAQ_PFI0' to 'NI_DAQ_PFI9' are the PFI0 to PFI9 input pins,
+'NI_DAQ_RTSI0' to 'NI_DAQ_RTSI6' are the RTSI pins,
+'NI_DAQ_IN_TIMEBASE2' is the slow time base and 'NI_DAQ_G_TC_OTHER'
+is for counting TC events of the other counter.
+
+The counter will remain busy and can't be used for other purposes until
+the function ni_daq_stop_counter() has been called for the counter.
+
+On failure the function returns one of the following error codes
+
+    NI_DAQ_ERR_NSB    NI_DAQ_ERR_BNO   NI_DAQ_ERR_IVA    NI_DAQ_ERR_CBS
+
+
+======================================================================
+
+int ni_daq_gpct_start_gated_counter( int board, int counter,
+                                     double gate_length, int source )
+
+The function starts a gated counter. The counter will run only for the
+time specified by the 'gate_length' argument and then stop. The counter
+is initialized with 0 and counts upwards.
+
+The function does requires also the other counter beside the one specified
+by the 'counter' argument (which must be 0 or 1) to create the gate for
+the counter. Thus both counters must be available, i.e. not being counting
+when the function gets called.
+
+'gate_length' must be at least 100 ns and must also be an integer multiple
+of 50 ns if the fast clock can be used and then must be not longer than
+1.6777216 s. If the slow clock gets used the minimum length is 10 us or
+20 us and must be an integer of 5 us or 10 us, depending on which speed
+the slow clock is working in. The simplest way to find out if a timing is
+possible is to call the function and check if 'NI_DAQ_OK' is returned,
+indicating success, or 'NI_DAQ_ERR_NPT', indicating that the requested
+gate length isn't possible.
+
+The 'source' argument can have the same values as for calling the
+ni_daq_start_counter() function.
+
+On failure the function returns one of the following error codes
+
+    NI_DAQ_ERR_NSB    NI_DAQ_ERR_BNO    NI_DAQ_ERR_IVA    NI_DAQ_ERR_CBS
+    NI_DAQ_ERR_NCB    NI_DAQ_ERR_INT
+
+
+======================================================================
+
+int ni_daq_gpct_stop_counter( int board, int counter )
+
+The function stops a counter. If the specified counter isn't counting
+nothing happens (i.e. success is reported).
+
+On failure the function returns one of the following error codes
+
+    NI_DAQ_ERR_NSB    NI_DAQ_ERR_BNO    NI_DAQ_ERR_IVA    NI_DAQ_ERR_INT
+
+
+======================================================================
+
+int ni_daq_gpct_get_count( int board, int counter, int wait_for_end,
+					       unsigned long *count, int *state )
+
+The function returns the current value of a counter. If the
+'wait_for_end' argument has a non-zero value, the function will
+only return after the counter has stopped counting with the final
+result - because a continuous counter will never stop the function
+will return indicating an error when this ius tried with a continuously
+running counter. If a signal gets caught while waiting for the counter
+to finish the error code NI_DAQ_ERR_ITR gets returned.
+
+The counters value is returned in the variable pointed to by 'count'.
+The maximum return value is 16777216. If the counter did overflow (more
+events than this number happened) the counter did reset to 0 and the
+final result is the modulo of the real number of events and 16777216.
+
+The current state of the counter, i.e. if the counter is still counting
+or is already stopped is returned in the variable pointed to by the
+'state' argument (unless 'state' is NULL). The variable 'state' is
+pointing to will either get set to 'NI_DAQ_BUSY' or 'NI_DAQ_IDLE'.
+
+On failure the function returns one of the following error codes
+
+    NI_DAQ_ERR_NSB    NI_DAQ_ERR_BNO    NI_DAQ_ERR_IVA    NI_DAQ_ERR_INT
+    NI_DAQ_ERR_ITR
+
+
+======================================================================
+
+int ni_daq_gpct_generate_single_pulse( int board, int counter,
+                                       double duration )
+
+The function creates a single pulse of 'duration' length at the output
+connectors of the specified counter.
+
+Depending on which clock and settings can be used 'duration' must be at
+least either 100 ns, 10 us or 20 us and must also be an integer multiple
+of 50 ns, 5 us or 10 us.
+
+On failure the function returns one of the following error codes
+
+    NI_DAQ_ERR_NSB    NI_DAQ_ERR_BNO    NI_DAQ_ERR_IVA    NI_DAQ_ERR_NPT
+    NI_DAQ_ERR_CBS    NI_DAQ_ERR_INT
+
+
+======================================================================
+
+int ni_daq_gpct_generate_continuous_pulses( int board, int counter,
+									        double high_phase,
+                                            double low_phase )
+
+The function creates a continuous train of pulses at the output
+connectors of of the specified counter.
+
+The arguments 'high_phase' and 'low_phase' specify the durations of the
+pulses being in a high state and the time between pulses. Thus the repe-
+tition frequency of the created pulses is the sum of both arguments.
+
+Depending on the clock settings both 'high_phase' and 'low_phase' must be
+either at least 100 ns, 10 us or 20 us and must also be integer multiples
+of 50 ns, 5 us or 10 us.
+
+On failure the function returns one of the following error codes
+
+    NI_DAQ_ERR_NSB    NI_DAQ_ERR_BNO    NI_DAQ_ERR_IVA    NI_DAQ_ERR_NPT
+    NI_DAQ_ERR_CBS    NI_DAQ_ERR_INT
+
+
+======================================================================
+
+int ni_daq_gpct_stop_pulses( int board, int counter )
+
+The function is just an alias for the ni_daq_stop_counter() function.
+
+
+======================================================================
+
+int ni_daq_gpct_state( int board, int counter, int *state )
+
+The function checks if a counter is armed and thus can be taken to
+be counting and therefore busy.
+
+The state, either 'NI_DAQ_BUSY' or 'NI_DAQ_IDLE', will be returned
+via the variable pointed to by 'state'.
+
+On failure the function returns one of the following error codes
+
+    NI_DAQ_ERR_NSB    NI_DAQ_ERR_BNO    NI_DAQ_ERR_IVA    NI_DAQ_ERR_INT
+
+
 ======================================================================
 
 
+E DIO functions (DIO)
+---------------------
+
+======================================================================
+
+int ni_daq_dio_write( int board, unsigned char bits, unsigned char mask )
+
+The function sets a subset, selected via the 'mask' argument, of the
+8 DIO output lines of the board to the states given by the 'bits'
+argument.
+
+'mask' must be used to select a subset of the DIO lines. Setting bit 0 
+(i.e. the least sigificant bit) of 'mask' allows to set the DIO line 0,
+Setting bit 1 allows to set DIO line 1 etc. To allow setting all lines
+thus 255 (or 0xFF) has to be specified for 'mask'.
+
+'bits' specifies the state the lines specified by 'mask' are to be set
+to. Setting bit 0 ((i.e. the least sigificant bit) of 'bits' to 1 will
+set the DIO line 0 to a high voltage level, setting this bit to 0 will
+set this line to a low voltage level (of course requiring that also
+bit 0 of 'mask' is set). Setting or unsetting bit 1 of 'bits' will
+change the DIO line 1 accordingly (as long as also bit 1 of 'mask' is
+set) etc.
+
+DIO lines for which no bit is set in 'mask' can be used for input
+simultaneously.
+
+On failure the function returns one of the following error codes
+
+    NI_DAQ_ERR_NSB    NI_DAQ_ERR_BNO   NI_DAQ_ERR_NAO
+	NI_DAQ_ERR_INT
+
+======================================================================
+
+int ni_daq_dio_read( int board, unsigned char *bits, unsigned char mask )
+
+The function returns the state of a subset, selected via the 'mask'
+argument, of the 8 DIO output lines of the board.
+
+'mask' must be used to select a subset of the DIO lines. Setting bit 0 
+(i.e. the least sigificant bit) of 'mask' allows to read the state of
+DIO line 0, Setting bit 1 allows to read DIO line 1 etc. To allow
+reading all lines thus 255 (or 0xFF) has to be specified for 'mask'.
+
+In the variable pointed to by 'bits' the state of the lines selected
+by 'mask' is returned. Bit 0 (i.e. the least sigificant bit of 'bits')
+reflects the state of DIO line 0 (1 for a high voltage level, 0 for a
+low level), bit 1 the state of line 1 etc.
+
+DIO lines for which no bit is set in 'mask' can be used for output
+simultaneously.
+
+On failure the function returns one of the following error codes
+
+    NI_DAQ_ERR_NSB    NI_DAQ_ERR_BNO   NI_DAQ_ERR_NAO
+	NI_DAQ_ERR_IVA    NI_DAQ_ERR_INT
+
+
+======================================================================

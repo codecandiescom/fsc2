@@ -48,7 +48,6 @@ const char *error_message = "";
 static const char *ni_daq_errlist[ ] = {
     "Success",                                       /* NI_DAQ_OK      */
     "No such board",                                 /* NI_DAQ_ERR_NSB */
-    "No such counter",                               /* NI_DAQ_ERR_NSC */
     "Counter is busy",                               /* NI_DAQ_ERR_CBS */
     "Invalid argument",                              /* NI_DAQ_ERR_IVA */
     "Can't wait for continuous counter to stop",     /* NI_DAQ_ERR_WFC */
@@ -150,20 +149,13 @@ int ni_daq_open( const char *name )
 	m.cmd = NI_DAQ_MSC_BOARD_PROPERTIES;
 	m.properties = &ni_daq_dev[ board ].props;
 
-	if ( ( ret = ioctl( ni_daq_dev[ board ].fd, NI_DAQ_IOC_MSC, &m ) ) < 0 )
+	if ( ioctl( ni_daq_dev[ board ].fd, NI_DAQ_IOC_MSC, &m ) < 0 )
 	{
 		ni_daq_close( board );
-		switch ( ret )
-		{
-			case EACCES :
-				return ni_daq_errno = NI_DAQ_ERR_ACS;
-
-			default :
-				return ni_daq_errno = NI_DAQ_ERR_DFP;
-		}
+		return ni_daq_errno = NI_DAQ_ERR_DFP;
 	}
 
-	/* Since the board has just been opened do initialization */
+	/* Since the board has just been opened do the initialization */
 
 	if ( ni_daq_msc_init( board ) || ni_daq_ai_init( board ) ||
 		 ni_daq_ao_init( board )  || ni_daq_gpct_init( board ) )

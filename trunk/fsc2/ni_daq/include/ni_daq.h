@@ -136,29 +136,28 @@ enum {
 
 #define NI_DAQ_OK         0
 #define NI_DAQ_ERR_NSB   -1
-#define NI_DAQ_ERR_NSC   -2
-#define NI_DAQ_ERR_CBS   -3
-#define NI_DAQ_ERR_IVA   -4
-#define NI_DAQ_ERR_WFC   -5
-#define NI_DAQ_ERR_BBS   -6
-#define NI_DAQ_ERR_IVS   -7
-#define NI_DAQ_ERR_BNO   -8
-#define NI_DAQ_ERR_NDV   -9
-#define NI_DAQ_ERR_NCB  -10
-#define NI_DAQ_ERR_ITR  -11
-#define NI_DAQ_ERR_ACS  -12
-#define NI_DAQ_ERR_DFM  -13
-#define NI_DAQ_ERR_DFP  -14
-#define NI_DAQ_ERR_INT  -15
-#define NI_DAQ_ERR_NAO  -16
-#define NI_DAQ_ERR_NCS  -17
-#define NI_DAQ_ERR_NAS  -18
-#define NI_DAQ_ERR_NEM  -19
-#define NI_DAQ_ERR_NPT  -20
-#define NI_DAQ_ERR_SIG  -21
-#define NI_DAQ_ERR_NER  -22
-#define NI_DAQ_ERR_UAO  -23
-#define NI_DAQ_ERR_NAT  -24
+#define NI_DAQ_ERR_CBS   -2
+#define NI_DAQ_ERR_IVA   -3
+#define NI_DAQ_ERR_WFC   -4
+#define NI_DAQ_ERR_BBS   -5
+#define NI_DAQ_ERR_IVS   -6
+#define NI_DAQ_ERR_BNO   -7
+#define NI_DAQ_ERR_NDV   -8
+#define NI_DAQ_ERR_NCB   -9
+#define NI_DAQ_ERR_ITR  -10
+#define NI_DAQ_ERR_ACS  -11
+#define NI_DAQ_ERR_DFM  -12
+#define NI_DAQ_ERR_DFP  -13
+#define NI_DAQ_ERR_INT  -14
+#define NI_DAQ_ERR_NAO  -15
+#define NI_DAQ_ERR_NCS  -16
+#define NI_DAQ_ERR_NAS  -17
+#define NI_DAQ_ERR_NEM  -18
+#define NI_DAQ_ERR_NPT  -19
+#define NI_DAQ_ERR_SIG  -20
+#define NI_DAQ_ERR_NER  -21
+#define NI_DAQ_ERR_UAO  -22
+#define NI_DAQ_ERR_NAT  -23
 
 
 #ifdef __cplusplus
