@@ -194,11 +194,11 @@ tags:
 
 clean:
 	$(RM) $(RMFLAGS) *.o *.output *_parser.c *_parser.h \
-		*_lexer.c fsc2_clean.c *.lo *.so mem
+		*_lexer.c fsc2_clean.c *.lo mem
 
 distclean:
 	$(MAKE) clean
-	$(RM) $(RMFLAGS) fsc2 fsc2_clean TAGS
+	$(RM) $(RMFLAGS) fsc2 fsc2_clean *.so TAGS
 
 # don't delete intermediate files created by bison and flex
 
