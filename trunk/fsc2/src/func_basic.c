@@ -1324,8 +1324,10 @@ Var *f_mean( Var *v )
 			THROW( EXCEPTION );
 		}
 
-		ilp += index;
-		idp += index;
+		if ( ilp != NULL )
+			ilp += index;
+		else
+			idp += index;
 
 		if ( v->next->next != NULL )
 		{
