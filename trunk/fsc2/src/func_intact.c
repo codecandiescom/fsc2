@@ -1363,6 +1363,7 @@ Var *f_icreate( Var *v )
 	long type;
 	char *label = NULL;
 	char *help_text = NULL;
+	char *form_str = NULL;
 	IOBJECT *new_io, *ioi;
 	long ID = 0;
 	long lval = 0;
@@ -1456,13 +1457,22 @@ Var *f_icreate( Var *v )
 		v = vars_pop( v );
 	}
 
-	/* Final argument can be a help text */
+	/* Next argument can be a help text */
 
 	if ( v != NULL )
 	{
 		vars_check( v, STR_VAR );
 		help_text = T_strdup( v->val.sptr );
 		convert_escapes( help_text );
+		v = vars_pop( v );
+	}
+
+	/* Final argument can be a C format string */
+
+	if ( v != NULL )
+	{
+		vars_check( v, STR_VAR );
+		form_str = T_strdup( v->val.sptr );
 		v = vars_pop( v );
 	}
 
@@ -1503,6 +1513,10 @@ Var *f_icreate( Var *v )
 			len++;
 		if ( help_text )
 			len += strlen( help_text ) + 1;
+		else
+			len++;
+		if ( form_str )
+			len += strlen( form_str ) + 1;
 		else
 			len++;
 
@@ -1549,6 +1563,13 @@ Var *f_icreate( Var *v )
 		else
 			*( ( char * ) pos++ ) = '\0';
 
+		if ( form_str )
+		{
+			strcpy( ( char * ) pos, form_str );
+			pos += strlen( form_str ) + 1;
+		}
+		else
+			*( ( char * ) pos++ ) = '\0';
 
 		/* Pass buffer to parent and ask it to create the input or input
 		   object. It returns a buffer with two longs, the first one
@@ -1559,6 +1580,7 @@ Var *f_icreate( Var *v )
 
 		T_free( label );
 		T_free( help_text );
+		T_free( form_str );
 
 		if ( result[ 0 ] == 0 )      /* failure -> bomb out */
 		{
@@ -1608,6 +1630,7 @@ Var *f_icreate( Var *v )
 	new_io->group = NULL;
 	new_io->label = label;
 	new_io->help_text = help_text;
+	new_io->form_str = form_str;
 
 	/* If this isn't just a test run really draw the new object */
 
@@ -1732,6 +1755,7 @@ Var *f_idelete( Var *v )
 
 		T_free( io->label );
 		T_free( io->help_text );
+		T_free( io->form_str );
 		T_free( io );
 
 		if ( Tool_Box->objs == NULL )
@@ -1785,7 +1809,7 @@ Var *f_ivalue( Var *v )
 	if ( v == NULL )
 	{
 		eprint( FATAL, "%s:%ld: Missing parameters in call of "
-				"input_value().\n", Fname, Lc );
+				"%s().\n", Fname, Lc, Cur_Func );
 		THROW( EXCEPTION );
 	}
 
@@ -1808,7 +1832,7 @@ Var *f_ivalue( Var *v )
 		if ( v->type != INT_VAR || v->val.lval < 0 )
 		{
 			eprint( FATAL, "%s:%ld: Invalid input or output object identifier "
-					"in input_value().\n", Fname, Lc );
+					"in %s().\n", Fname, Lc, Cur_Func );
 			THROW( EXCEPTION );
 		}
 		ID = v->val.lval;
@@ -1834,7 +1858,7 @@ Var *f_ivalue( Var *v )
 		if ( ( v = vars_pop( v ) ) != NULL )
 		{
 			eprint( WARN, "%s:%ld: Superfluous arguments in call of "
-					"input_value().\n", Fname, Lc );
+					"%s().\n", Fname, Lc, Cur_Func );
 			while ( ( v = vars_pop( v ) ) != NULL )
 				;
 		}
@@ -1922,7 +1946,7 @@ Var *f_ivalue( Var *v )
 		   io->type != INT_OUTPUT && io->type != FLOAT_OUTPUT ) )
 	{
 		eprint( FATAL, "%s:%ld: Invalid input or output object identifier in "
-				"input_value().\n", Fname, Lc );
+				"%s().\n", Fname, Lc, Cur_Func );
 		THROW( EXCEPTION );
 	}
 
@@ -1944,7 +1968,7 @@ Var *f_ivalue( Var *v )
 		 v->type == FLOAT_VAR )
 	{
 		eprint( SEVERE, "%s:%ld: Float number used as integer input or output "
-				"object value in input_value().\n", Fname, Lc );
+				"object value in %s().\n", Fname, Lc, Cur_Func );
 		io->val.lval = lround( v->val.dval );
 	}
 	else
@@ -1971,8 +1995,8 @@ Var *f_ivalue( Var *v )
 
 	if ( ( v = vars_pop( v ) ) != NULL )
 	{
-		eprint( WARN, "%s:%ld: Superfluous arguments in call of "
-				"input_value().\n", Fname, Lc );
+		eprint( WARN, "%s:%ld: Superfluous arguments in call of %s().\n",
+				Fname, Lc, Cur_Func );
 		while ( ( v = vars_pop( v ) ) != NULL )
 			;
 	}
@@ -2133,6 +2157,7 @@ static FL_OBJECT *append_object_to_form( IOBJECT *io )
 	double prec;
 	char buf[ MAX_INPUT_CHARS + 1 ];
 	IOBJECT *nio;
+	char *bptr = buf;
 
 
 	/* Calculate the width and height of the new object */
@@ -2244,8 +2269,21 @@ static FL_OBJECT *append_object_to_form( IOBJECT *io )
 			fl_set_object_lalign( io->self, FL_ALIGN_BOTTOM );
 			fl_set_input_return( io->self, FL_RETURN_END_CHANGED );
 			fl_set_input_maxchars( io->self, MAX_INPUT_CHARS );
-			snprintf( buf, MAX_INPUT_CHARS + 1, "%ld", io->val.lval );
-			fl_set_input( io->self, buf );
+			if ( io->form_str )
+				snprintf( buf, MAX_INPUT_CHARS + 1, io->form_str,
+						  io->val.lval );
+			else
+				snprintf( buf, MAX_INPUT_CHARS + 1, "%ld", io->val.lval );
+			while ( ! ( isdigit( *bptr ) || *bptr == '+' || *bptr == '-' ) &&
+					*bptr != '\0' )
+				bptr++;
+			if ( *bptr == '\0' )
+			{
+				eprint( FATAL, "%s:%ld: Invalid format string in %s.\n",
+						Fname, Lc, Cur_Func );
+				THROW( EXCEPTION );
+			}
+			fl_set_input( io->self, bptr );
 			break;
 
 		case FLOAT_INPUT :
@@ -2256,7 +2294,19 @@ static FL_OBJECT *append_object_to_form( IOBJECT *io )
 			fl_set_object_lalign( io->self, FL_ALIGN_BOTTOM );
 			fl_set_input_return( io->self, FL_RETURN_END_CHANGED );
 			fl_set_input_maxchars( io->self, MAX_INPUT_CHARS );
-			snprintf( buf, MAX_INPUT_CHARS, "%f", io->val.dval );
+			if ( io->form_str )
+				snprintf( buf, MAX_INPUT_CHARS, io->form_str, io->val.dval );
+			else
+				snprintf( buf, MAX_INPUT_CHARS, "%g", io->val.dval );
+			while ( ! ( isdigit( *bptr ) || *bptr == '+' || *bptr == '-' ||
+						*bptr == 'e' || *btptr != 'E' ) && *bptr != '\0' )
+				bptr++;
+			if ( *bptr == '\0' )
+			{
+				eprint( FATAL, "%s:%ld: Invalid format string in %s.\n",
+						Fname, Lc, Cur_Func );
+				THROW( EXCEPTION );
+			}			
 			fl_set_input( io->self, buf );
 			break;
 
@@ -2271,7 +2321,20 @@ static FL_OBJECT *append_object_to_form( IOBJECT *io )
 			fl_set_input_maxchars( io->self, MAX_INPUT_CHARS );
 			fl_set_object_color( io->self, FL_COL1, FL_COL1 );
 			fl_set_input_color( io->self, FL_BLACK, FL_COL1 );
-			snprintf( buf, MAX_INPUT_CHARS + 1, "%ld", io->val.lval );
+			if ( io->form_str )
+				snprintf( buf, MAX_INPUT_CHARS + 1, io->form_str,
+						  io->val.lval );
+			else
+				snprintf( buf, MAX_INPUT_CHARS + 1, "%ld", io->val.lval );
+			while ( ! ( isdigit( *bptr ) || *bptr == '+' || *bptr == '-' ) &&
+					*bptr != '\0' )
+				bptr++;
+			if ( *bptr == '\0' )
+			{
+				eprint( FATAL, "%s:%ld: Invalid format string in %s.\n",
+						Fname, Lc, Cur_Func );
+				THROW( EXCEPTION );
+			}
 			fl_set_input( io->self, buf );
 			break;
 
@@ -2286,7 +2349,19 @@ static FL_OBJECT *append_object_to_form( IOBJECT *io )
 			fl_set_input_maxchars( io->self, MAX_INPUT_CHARS );
 			fl_set_object_color( io->self, FL_COL1, FL_COL1 );
 			fl_set_input_color( io->self, FL_BLACK, FL_COL1 );
-			snprintf( buf, MAX_INPUT_CHARS, "%f", io->val.dval );
+			if ( io->form_str )
+				snprintf( buf, MAX_INPUT_CHARS, io->form_str, io->val.dval );
+			else
+				snprintf( buf, MAX_INPUT_CHARS, "%g", io->val.dval );
+			while ( ! ( isdigit( *bptr ) || *bptr == '+' || *bptr == '-' ||
+						*bptr == 'e' || *btptr != 'E' ) && *bptr != '\0' )
+				bptr++;
+			if ( *bptr == '\0' )
+			{
+				eprint( FATAL, "%s:%ld: Invalid format string in %s.\n",
+						Fname, Lc, Cur_Func );
+				THROW( EXCEPTION );
+			}
 			fl_set_input( io->self, buf );
 			break;
 
@@ -2367,20 +2442,26 @@ static void tools_callback( FL_OBJECT *obj, long data )
 			else
 				sscanf( buf, "%ld", &lval );
 
-			snprintf( obuf, MAX_INPUT_CHARS + 1, "%ld", lval );
+			if ( io->form_str )
+				snprintf( obuf, MAX_INPUT_CHARS + 1, io->form_str, lval );
+			else
+				snprintf( obuf, MAX_INPUT_CHARS + 1, "%ld", lval );
+
 			if ( strcmp( buf, obuf ) )
 			{
-				snprintf( obuf, MAX_INPUT_CHARS + 1, "%ld", io->val.lval );
-				fl_set_input( io->self, obuf );
+				fl_set_input( io->self, buf );
 				break;
 			}
 
 			if ( lval != io->val.lval )
 				io->val.lval = lval;
+
+			fl_set_input( io->self, obuf );
 			break;
 
 		case FLOAT_INPUT :
 			buf = fl_get_input( obj );
+
 			if ( *buf == '\0' )
 			{
 				dval = 0;
@@ -2394,30 +2475,44 @@ static void tools_callback( FL_OBJECT *obj, long data )
 #if defined( isfinite )
 			if ( ! isfinite( dval ) )
 			{
-				snprintf( obuf, MAX_INPUT_CHARS + 1, "%g", io->val.dval );
-				fl_set_input( io->self, obuf );
+				fl_set_input( io->self, buf );
 				break;
 			}
 #elif defined( finite )
 			if ( ! finite( dval ) )
 			{
-				snprintf( obuf, MAX_INPUT_CHARS + 1, "%g", io->val.dval );
-				fl_set_input( io->self, obuf );
+				fl_set_input( io->self, buf );
 				break;
 			}
 #endif
 
+			if ( io->form_str )
+				snprintf( obuf, MAX_INPUT_CHARS + 1, io->form_str, dval );
+			else
+				snprintf( obuf, MAX_INPUT_CHARS + 1, "%g", dval );
+			fl_set_input( io->self, obuf );
+
 			if ( dval != io->val.dval )
+			{
 				io->val.dval = dval;
+			}
 			break;
 
 		case INT_OUTPUT :
-			snprintf( obuf, MAX_INPUT_CHARS + 1, "%ld", io->val.lval );
+			if ( io->form_str )
+				snprintf( obuf, MAX_INPUT_CHARS + 1, io->form_str,
+						  io->val.lval );
+			else
+				snprintf( obuf, MAX_INPUT_CHARS + 1, "%ld", io->val.lval );
 			fl_set_input( io->self, obuf );
 			break;
 			
 		case FLOAT_OUTPUT :
-			snprintf( obuf, MAX_INPUT_CHARS + 1, "%f", io->val.dval );
+			if ( io->form_str )
+				snprintf( obuf, MAX_INPUT_CHARS + 1, io->form_str,
+						  io->val.dval );
+			else
+				snprintf( obuf, MAX_INPUT_CHARS + 1, "%f", io->val.dval );
 			fl_set_input( io->self, obuf );
 			break;
 

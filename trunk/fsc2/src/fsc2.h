@@ -115,7 +115,7 @@ gid_t EGID;                  /* with (should both translate to fsc2) */
 
 long Lc = 0;                 /* line number in currently parsed file */
 char *Fname = NULL;          /* name of currently parsed file */
-char *Cur_Func;
+char *Cur_Func = NULL;       /* name of currently executed function */
 Compilation compilation;     /* structure with infos about compilation state */
 Prg_Token *prg_token = NULL; /* array with predigested program */
 long prg_length = 0;         /* number of array elements in predigested
