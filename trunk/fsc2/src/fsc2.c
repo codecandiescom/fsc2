@@ -184,10 +184,13 @@ int main( int argc, char *argv[ ] )
 		return EXIT_FAILURE;
 	}
 
-	/* If there is a file as argument try to load it */
+	/* If '-d' was given on the command line store flags that are tested to
+	   find out if the files needs to be deleted */
 
 	if ( do_delete )
 		delete_file = delete_old_file = SET;
+
+	/* If there is a file as argument try to load it */
 
 	if ( do_load )
 	{
@@ -519,9 +522,9 @@ void load_file( FL_OBJECT *a, long reload )
 
 	if ( main_form->Load->u_ldata != 0 )
 	{
-		if ( main_form->Load->u_ldata == ( long ) 's' )
+		if ( main_form->Load->u_ldata == ( long ) 'S' )
 			fl_trigger_object( main_form->run );
-		if ( main_form->Load->u_ldata == ( long ) 't' )
+		if ( main_form->Load->u_ldata == ( long ) 'T' )
 			fl_trigger_object( main_form->test_file );
 		main_form->Load->u_ldata = 0;
 	}

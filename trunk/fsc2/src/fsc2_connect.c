@@ -7,11 +7,11 @@
    in and write it into a temporary file and try to connect to fsc2 via a
    socket on which fsc2 is supposed to listen. If this succeeds it sends fsc2
    the UID, followed by a letter that depends on the name the program was
-   invocated with - if it was started as 'fsc2_start' it sends an 's', if as
-   'fsc2_test' it sends 't' and if invocated as either 'fsc2_load' or
-   'fsc2_connect' it sends an 'l', thus indicating what fsc2 is supposed to
+   invocated with - if it was started as 'fsc2_start' it sends an 'S', if as
+   'fsc2_test' it sends 'T' and if invocated as either 'fsc2_load' or
+   'fsc2_connect' it sends an 'L', thus indicating what fsc2 is supposed to
    do, i.e. either start the EDL program immediately, to test it or only to
-   load it. It also sends a second letter, 'b' to tell fsc2 to delete the
+   load it. It also sends a second letter, 'd' to tell fsc2 to delete the
    temporary file when it's done with it. Finally it sends the file name.
    fsc2 can react in different ways: It can indicate that it is either run by
    a user with a different UID, that it is busy, or that it couldn't read the
@@ -301,8 +301,8 @@ void contact_fsc2( int sock_fd, const char *pname, const char *fname )
 	if ( strcmp( line, "OK\n" ) )                /* unexpected reply */
 		clean_up( fname, sock_fd, -1 );
 
-	/* Assemble second string to send, the first character is the method ('s'
-	   for start, 't' for test or 'l' for load). The method is deduced from
+	/* Assemble second string to send, the first character is the method ('S'
+	   for start, 'T' for test or 'L' for load). The method is deduced from
 	   the name the program was called with - if a non-standard name was used
 	   this is an error. The second character is always 'd', telling fsc2 to
 	   delete the temporary files when it's done with it */
@@ -314,12 +314,12 @@ void contact_fsc2( int sock_fd, const char *pname, const char *fname )
 	strcpy( line, " d\n" );
 
 	if ( ! strcmp( prog_name, "fsc2_start" ) )
-		line[ 0 ] = 's';
+		line[ 0 ] = 'S';
 	if ( ! strcmp( prog_name, "fsc2_test" ) )
-		line[ 0 ] = 't';
+		line[ 0 ] = 'T';
 	if ( ! strcmp( prog_name, "fsc2_load" ) ||
 		 ! strcmp( prog_name, "fsc2_connect" ) )
-		line[ 0 ] = 'l';
+		line[ 0 ] = 'L';
 
 	if ( line[ 0 ] == ' ' )
 		clean_up( fname, sock_fd, -1 );

@@ -167,13 +167,13 @@ static void connect_handler( int listen_fd )
 		}
 
 		/* Read the method to use and store it in the first byte of `line',
-		   close connection if method doesn't start with either 's' (start),
-		   't' (test) or 'l' (load). The second character can be 'd' (delete)
+		   close connection if method doesn't start with either 'S' (start),
+		   'T' (test) or 'L' (load). The second character can be 'd' (delete)
 		   to tell fsc2 to delete the file after it has been used. If there
 		   is no 'd' replace the newline with a space */
 
 		if ( ( count = read_line( conn_fd, line, MAXLINE ) ) <= 0 ||
-			 ( line[ 0 ] != 's' && line[ 0 ] != 'l' && line[ 0 ] != 't' ) ||
+			 ( line[ 0 ] != 'S' && line[ 0 ] != 'T' && line[ 0 ] != 'L' ) ||
 			 ( line[ 1 ] != '\n' && line[ 1 ] != 'd' ) )
 		{
 			close( conn_fd );
