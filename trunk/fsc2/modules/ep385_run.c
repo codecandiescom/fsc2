@@ -82,6 +82,8 @@ static bool ep385_update_pulses( bool flag )
 	PULSE_PARAMS *pp;
 
 
+	ep385.needs_update = UNSET;
+
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 	{
 		f = ep385.function + i;
@@ -163,6 +165,7 @@ static bool ep385_update_pulses( bool flag )
 			}
 
 			ch->needs_update = SET;
+			ep385.needs_update = SET;
 
 			/* If the following tests fail stop immediately when doing a test
 			   run but during a real experiment instead just reset the pulses
@@ -177,8 +180,7 @@ static bool ep385_update_pulses( bool flag )
 					print( FATAL, "More than %d pulses (%d) are required on "
 						   "channel %d associated with function '%s'.\n",
 						   MAX_PULSES_PER_CHANNEL, ch->num_active_pulses,
-						   ch->self + CHANNEL_OFFSET,
-						   Function_Names[ ch->function->self ] );
+						   ch->self + CHANNEL_OFFSET, ch->function->name );
 					THROW( EXCEPTION );
 				}
 
@@ -225,7 +227,8 @@ static bool ep385_update_pulses( bool flag )
 		}
 	}
 
-	ep385_commit( flag );
+	if ( ep385.needs_update )
+		ep385_commit( flag );
 
 	return OK;
 }
@@ -267,14 +270,12 @@ static void ep385_pulse_check( FUNCTION *f )
 						print( FATAL, "Shape pulses for pulses #%ld function "
 							   "'%s') and #%ld (function '%s') start to "
 							   "overlap.\n", p1->sp->num,
-							   Function_Names[ p1->sp->function->self ],
-							   p2->sp->num,
-							   Function_Names[ p2->sp->function->self ] );
+							   p1->sp->function->name, p2->sp->num,
+							   p2->sp->function->name );
 				}
 				else
 					print( FATAL, "Pulses #%ld and #%ld of function '%s' "
-						   "start to overlap.\n", p1->num, p2->num,
-						   Function_Names[ f->self ] );
+						   "start to overlap.\n", p1->num, p2->num, f->name );
 
 				THROW( EXCEPTION );
 			}
@@ -332,8 +333,7 @@ static void ep385_defense_shape_check( FUNCTION *shape )
 						print( FATAL, "Distance between shape pulse for pulse "
 							   "#%ld (function '%s') and DEFENSE pulse #%ld "
 							   "got shorter than %s.\n", shape_p->sp->num,
-							   Function_Names[ shape_p->sp->function->self ],
-							   defense_p->num,
+							   shape_p->sp->function->name, defense_p->num,
 							   ep385_pticks( ep385.shape_2_defense ) );
 					THROW( EXCEPTION );
 				}
@@ -349,8 +349,7 @@ static void ep385_defense_shape_check( FUNCTION *shape )
 						print( SEVERE, "Distance between shape pulse for "
 							   "pulse #%ld (function '%s') and DEFENSE pulse "
 							   "#%ld got shorter than %s.\n", shape_p->sp->num,
-							   Function_Names[ shape_p->sp->function->self ],
-							   defense_p->num,
+							   shape_p->sp->function->name, defense_p->num,
 							   ep385_pticks( ep385.shape_2_defense ) );
 				}
 
@@ -372,8 +371,7 @@ static void ep385_defense_shape_check( FUNCTION *shape )
 						print( FATAL, "Distance between DEFENSE pulse #%ld "
 							   "and shape pulse for pulse #%ld (function "
 							   "'%s') got shorter than %s.\n", defense_p->num,
-							   shape_p->sp->num,
-							   Function_Names[ shape_p->sp->function->self ],
+							   shape_p->sp->num, shape_p->sp->function->name,
 							   ep385_pticks( ep385.defense_2_shape ) );
 					THROW( EXCEPTION );
 				}
@@ -389,8 +387,7 @@ static void ep385_defense_shape_check( FUNCTION *shape )
 						print( SEVERE, "Distance between DEFENSE pulse #%ld "
 							   "and shape pulse for pulse #%ld (function "
 							   "'%s') got shorter than %s.\n", defense_p->num,
-							   shape_p->sp->num,
-							   Function_Names[ shape_p->sp->function->self ],
+							   shape_p->sp->num, shape_p->sp->function->name,
 							   ep385_pticks( ep385.defense_2_shape ) );
 				}
 
@@ -609,8 +606,7 @@ static PULSE *ep385_delete_pulse( PULSE *p )
 		p->function->pulses = PULSE_PP T_free( p->function->pulses );
 
 		print( SEVERE, "Function '%s' isn't used at all because all its "
-			   "pulses are never used.\n",
-			   Function_Names[ p->function->self ] );
+			   "pulses are never used.\n", p->function->name );
 		p->function->is_used = UNSET;
 	}
 
@@ -649,6 +645,8 @@ static void ep385_commit( bool flag )
 
 	if ( ! flag )
 		ep385_set_channels( );
+	else if ( ep385.dump_file != NULL )
+		ep385_dump_channels( );
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 	{

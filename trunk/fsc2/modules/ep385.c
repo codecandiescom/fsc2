@@ -113,16 +113,16 @@ int ep385_init_hook( void )
 	ep385.is_timebase = UNSET;
 	ep385.timebase_mode = EXTERNAL;
 
+	ep385.dump_file = NULL;
+
 	ep385.is_shape_2_defense = UNSET;
 	ep385.is_defense_2_shape = UNSET;
 	ep385.shape_2_defense_too_near = 0;
 	ep385.defense_2_shape_too_near = 0;
 	ep385.is_confirmation = UNSET;
 
-	ep385.dump_file = NULL;
-
 	ep385.auto_shape_pulses = UNSET;
-	ep385.left_warning = ep385.right_warning = 0;
+	ep385.left_shape_warning = ep385.right_shape_warning = 0;
 
 	for ( i = 0; i < MAX_CHANNELS; i++ )
 	{
@@ -139,10 +139,12 @@ int ep385_init_hook( void )
 	{
 		f = ep385.function + i;
 		f->self = i;
+		f->name = Function_Names[ i ];
 		f->is_used = UNSET;
 		f->is_needed = UNSET;
 		f->num_pulses = 0;
 		f->pulses = NULL;
+		f->num_channels = 0;
 		f->pm = NULL;
 		f->delay = 0;
 		f->is_delay = UNSET;
@@ -226,6 +228,11 @@ int ep385_test_hook( void )
 
 int ep385_end_of_test_hook( void )
 {
+	int i;
+	FUNCTION *f;
+	char *min;
+
+
 	if ( ep385.dump_file != NULL )
 	{
 		fclose( ep385.dump_file );
@@ -247,25 +254,61 @@ int ep385_end_of_test_hook( void )
 		print( FATAL, "Distance between PULSE_SHAPE and DEFENSE pulses was "
 			   "%ld times shorter than %s during the test run.\n",
 			   ep385.shape_2_defense_too_near,
-			   ep385_ptime( ep385_ticks2double( ep385.shape_2_defense ) ) );
+			   ep385_pticks( ep385.shape_2_defense ) );
 
 	if ( ep385.defense_2_shape_too_near != 0 )
 		print( FATAL, "Distance between DEFENSE and PULSE_SHAPE pulses was "
 			   "%ld times shorter than %s during the test run.\n",
 			   ep385.defense_2_shape_too_near,
-			   ep385_ptime( ep385_ticks2double( ep385.defense_2_shape ) ) );
+			   ep385_pticks( ep385.defense_2_shape ) );
 
 	if ( ep385.shape_2_defense_too_near != 0 ||
 		 ep385.defense_2_shape_too_near != 0 )
 		THROW( EXCEPTION );
 
-	if ( ep385.left_warning != 0 )
-		print( SEVERE, "For %ld times left padding for pulse with automatic "
-			   "shape pulse couldn't be set.\n", ep385.left_warning );
+	if ( ep385.left_shape_warning != 0 )
+	{
+		print( SEVERE, "For %ld times left padding for a pulse with "
+			   "automatic shape pulse couldn't be set.\n",
+			   ep385.left_shape_warning );
 
-	if ( ep385.right_warning != 0 )
-		print( SEVERE, "For %ld times right padding for pulse with automatic "
-			   "shape pulse couldn't be set.\n", ep385.left_warning );
+		for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
+		{
+			f = ep385.function + i;
+
+			if ( ! f->uses_auto_shape_pulses ||
+				 f->left_shape_padding <= f->min_left_shape_padding )
+				continue;
+
+			min = T_strdup( ep385_pticks( f->min_left_shape_padding ) );
+			print( SEVERE, "Minimum left padding for function '%s' was %s "
+				   "instead of requested %s.\n", f->name,
+				   min, ep385_pticks( f->left_shape_padding ) );
+			T_free( min );
+		}
+	}
+
+	if ( ep385.right_shape_warning != 0 )
+	{
+		print( SEVERE, "For %ld times right padding for a pulse with "
+			   "automatic shape pulse couldn't be set.\n",
+			   ep385.left_shape_warning );
+
+		for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
+		{
+			f = ep385.function + i;
+
+			if ( ! f->uses_auto_shape_pulses ||
+				 f->right_shape_padding <= f->min_right_shape_padding )
+				continue;
+
+			min = T_strdup( ep385_pticks( f->min_right_shape_padding ) );
+			print( SEVERE, "Minimum right padding for function '%s' was %s "
+				   "instead of requested %s.\n",  f->name,
+				   min, ep385_pticks( f->right_shape_padding ) );
+			T_free( min );
+		}
+	}
 
 	return 1;
 }
@@ -300,25 +343,21 @@ int ep385_exp_hook( void )
 		{
 			sprintf( str, "Minimum distance between SHAPE and DEFENSE\n"
 					 "pulses has been changed to %s",
-					 ep385_ptime( 
-						 ep385_ticks2double( ep385.shape_2_defense ) ) );
+					 ep385_pticks( ep385.shape_2_defense ) );
 			sprintf( str + strlen( str ), " and %s.\n"
 					 "***** Is this really what you want? *****",
-					 ep385_ptime(
-						 ep385_ticks2double( ep385.defense_2_shape ) ) );
+					 ep385_pticks( ep385.defense_2_shape ) );
 		}
 		else if ( ep385.is_shape_2_defense )
 			sprintf( str, "Minimum distance between SHAPE and DEFENSE\n"
 					 "pulses has been changed to %s.\n"
 					 "***** Is this really what you want? *****",
-					 ep385_ptime(
-						 ep385_ticks2double( ep385.shape_2_defense ) ) );
+					 ep385_pticks( ep385.shape_2_defense ) );
 		else
 			sprintf( str, "Minimum distance between DEFENSE and SHAPE\n"
 					 "pulses has been changed to %s.\n"
 					 "***** Is this really what you want? *****",
-					 ep385_ptime(
-						 ep385_ticks2double( ep385.defense_2_shape ) ) );
+					 ep385_pticks( ep385.defense_2_shape ) );
 
 		if ( 2 != show_choices( str, 2, "Abort", "Yes", "", 1 ) )
 			THROW( EXCEPTION );
@@ -548,6 +587,11 @@ Var *pulser_automatic_shape_pulses( Var *v )
 
 	too_many_arguments( v );
 
+	ep385.function[ func ].min_left_shape_padding = 
+									 ep385.function[ func ].left_shape_padding;
+	ep385.function[ func ].min_right_shape_padding =
+									ep385.function[ func ].right_shape_padding;
+
 	return vars_push( INT_VAR, 1 );
 }
 
@@ -646,7 +690,7 @@ Var *pulser_shape_to_defense_minimum_distance( Var *v )
 	{
 		print( FATAL, "SHAPE to DEFENSE pulse minimum distance has already "
 			   "been set to %s.\n",
-			   ep385_ptime( ep385_ticks2double( ep385.shape_2_defense ) ) );
+			   ep385_pticks( ep385.shape_2_defense ) );
 		THROW( EXCEPTION );
 	}
 
@@ -676,8 +720,7 @@ Var *pulser_defense_to_shape_minimum_distance( Var *v )
 	if ( ep385.is_defense_2_shape )
 	{
 		print( FATAL, "DEFENSE to SHAPE pulse minimum distance has already "
-			   "been set to %s.\n",
-			   ep385_ptime( ep385_ticks2double( ep385.defense_2_shape ) ) );
+			   "been set to %s.\n", ep385_pticks( ep385.defense_2_shape ) );
 		THROW( EXCEPTION );
 	}
 
@@ -1136,7 +1179,7 @@ Var *pulser_next_phase( Var *v )
 		{
 			if ( FSC2_MODE == TEST )
 				print( SEVERE, "Function '%s' to be phase cycled is not "
-					   "used.\n", Function_Names[ f->self ] );
+					   "used.\n", f->name );
 			return vars_push( INT_VAR, 0 );
 		}
 
@@ -1203,7 +1246,7 @@ Var *pulser_phase_reset( Var *v )
 		{
 			if ( FSC2_MODE == TEST )
 				print( SEVERE, "Function '%s' to be phase cycled is not "
-					   "used.\n", Function_Names[ f->self ] );
+					   "used.\n", f->name );
 			return vars_push( INT_VAR, 0 );
 		}
 

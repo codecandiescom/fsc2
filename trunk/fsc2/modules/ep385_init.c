@@ -53,6 +53,25 @@ void ep385_init_setup( void )
 		ep385_basic_pulse_check( );
 		ep385_create_shape_pulses( );
 		ep385_basic_functions_check( );
+
+		if ( ep385.dump_file != NULL )
+		{
+			fprintf( ep385.dump_file, "%g\n%ld\n===\n", ep385.timebase,
+					 ep385.neg_delay );
+			for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
+			{
+				f = ep385.function + i;
+
+				if ( ! f->is_needed && f->num_channels == 0 )
+					continue;
+
+				for ( j = 0; j < f->num_channels; j++ )
+					fprintf( ep385.dump_file, "%s %d: %ld\n",
+							 f->name, f->channel[ j ]->self, f->delay );
+			}
+			fprintf( ep385.dump_file, "===\n" );
+		}
+
 		ep385_setup_channels( );
 		ep385_pulse_start_setup( );
 		TRY_SUCCESS;
@@ -84,6 +103,9 @@ void ep385_init_setup( void )
 
 		RETHROW( );
 	}
+
+	if ( ep385.dump_file != NULL )
+		ep385_dump_channels( );
 }
 
 
@@ -122,8 +144,7 @@ static void ep385_basic_pulse_check( void )
 		if ( f->self == PULSER_CHANNEL_PULSE_SHAPE && ep385.auto_shape_pulses )
 		{
 			print( FATAL, "Pulses of function '%s' can't be used with "
-				   "automatic generation of pulse shape pulses.\n",
-				   Function_Names[ f->self ] );
+				   "automatic generation of pulse shape pulses.\n", f->name );
 			THROW( EXCEPTION );
 		}
 
@@ -133,8 +154,7 @@ static void ep385_basic_pulse_check( void )
 		if ( f->num_channels == 0 )
 		{
 			print( FATAL, "No channel has been set for function '%s' used for "
-				   "pulse #%ld.\n",
-				   Function_Names[ p->function->self ], p->num );
+				   "pulse #%ld.\n", p->function->name, p->num );
 			THROW( EXCEPTION );
 		}
 
@@ -262,8 +282,8 @@ static void ep385_create_shape_pulses( void )
 			{
 				print( FATAL, "Shape pulses for pulse #%ld of function '%s' "
 					   "and pulse #%ld of function '%s' would overlap.\n",
-					   p1->sp->num, Function_Names[ p1->sp->function->self ],
-					   p2->sp->num, Function_Names[ p2->sp->function->self ] );
+					   p1->sp->num, p1->sp->function->name,
+					   p2->sp->num, p2->sp->function->name );
 				THROW( EXCEPTION );
 			}
 		}
@@ -347,8 +367,7 @@ static void ep385_basic_functions_check( void )
 						 ( p2->pos < p1->pos && p2->pos + p2->len > p1->pos ) )
 					{
 						print( FATAL, "Pulses #%ld and #%ld of function '%s' "
-							   "overlap.\n", p1->num, p2->num,
-							   Function_Names[ f->self ] );
+							   "overlap.\n", p1->num, p2->num, f->name );
 						THROW( EXCEPTION );
 					}
 				}
@@ -432,8 +451,7 @@ static void ep385_create_phase_matrix( FUNCTION *f )
 					print( FATAL, "Phase type '%s' is needed for pulse #%ld "
 						   "but it hasn't been not defined in a PHASE_SETUP "
 						   "command for its function '%s'.\n",
-						   Phase_Types[ PHASE_PLUS_X ], p->num,
-						   Function_Names[ f->self ] );
+						   Phase_Types[ PHASE_PLUS_X ], p->num, f->name );
 					THROW( EXCEPTION );
 				}
 
@@ -489,8 +507,7 @@ static void ep385_create_phase_matrix( FUNCTION *f )
 				print( FATAL, "Phase type '%s' is needed for pulse #%ld "
 					   "but it hasn't been not defined in a PHASE_SETUP "
 					   "command for its function '%s'.\n",
-					   Phase_Types[ phase_type ], p->num,
-					   Function_Names[ f->self ] );
+					   Phase_Types[ phase_type ], p->num, f->name );
 				THROW( EXCEPTION );
 			}
 
@@ -585,7 +602,7 @@ static void ep385_setup_channels( void )
 		else
 		{
 			print( WARN, "Channel %d associated with function '%s' is not "
-				   "used.\n", ch->self, Function_Names[ ch->function->self ] );
+				   "used.\n", ch->self, ch->function->name );
 			ch->pulse_params = ch->old_pulse_params = NULL;
 		}
 	}
@@ -683,8 +700,7 @@ static void ep385_channel_start_check( CHANNEL *ch )
 	{
 		print( FATAL, "More than %d pulses (%d) are required on channel %d "
 			   "associated with function '%s'.\n", MAX_PULSES_PER_CHANNEL,
-			   ch->num_active_pulses, ch->self,
-			   Function_Names[ ch->function->self ] );
+			   ch->num_active_pulses, ch->self, ch->function->name );
 		THROW( EXCEPTION );
 	}
 
@@ -729,15 +745,12 @@ static void ep385_pulse_init_check( FUNCTION *f )
 					if ( p1->function != p2->function )
 						print( FATAL, "Shape pulses for pulses #%ld function "
 							   "'%s') and #%ld (function '%s') overlap.\n",
-							   p1->sp->num,
-							   Function_Names[ p1->sp->function->self ],
-							   p2->sp->num,
-							   Function_Names[ p2->sp->function->self ] );
+							   p1->sp->num, p1->sp->function->name,
+							   p2->sp->num, p2->sp->function->name );
 				}
 				else
 					print( FATAL, "Pulses #%ld and #%ld of function '%s' "
-						   "overlap.\n", p1->num, p2->num,
-						   Function_Names[ f->self ] );
+						   "overlap.\n", p1->num, p2->num, f->name );
 
 				THROW( EXCEPTION );
 			}
@@ -796,10 +809,8 @@ static void ep385_defense_shape_init_check( FUNCTION *shape )
 						print( FATAL, "Distance between shape pulse for "
 							   "pulse #%ld (function '%s') and DEFENSE pulse "
 							   "#%ld is shorter than %s.\n", shape_p->sp->num,
-							   Function_Names[ shape_p->sp->function->self ],
-							   defense_p->num,
-							   ep385_ptime( ep385_ticks2double(
-												   ep385.shape_2_defense ) ) );
+							   shape_p->sp->function->name, defense_p->num,
+							   ep385_pticks( ep385.shape_2_defense ) );
 				}
 
 				ep385.shape_2_defense_too_near++;
@@ -821,10 +832,8 @@ static void ep385_defense_shape_init_check( FUNCTION *shape )
 						print( FATAL, "Distance between DEFENSE pulse #%ld "
 							   "and shape pulse for pulse #%ld (function "
 							   "'%s') is shorter than %s.\n", defense_p->num,
-							   shape_p->sp->num,
-							   Function_Names[ shape_p->sp->function->self ],
-							   ep385_ptime( ep385_ticks2double(
-												   ep385.defense_2_shape ) ) );
+							   shape_p->sp->num, shape_p->sp->function->name,
+							   ep385_pticks( ep385.defense_2_shape ) );
 				}
 
 				ep385.defense_2_shape_too_near++;

@@ -123,6 +123,7 @@ Var *pulser_lock_keyboard( Var *v );
 
 typedef struct _F_ {
 	int self;                  /* the functions number */
+	const char *name;          /* name of function */
 	bool is_used;              /* set if the function has been declared in
 								  the ASSIGNMENTS section */
 	bool is_needed;            /* set if the function has been assigned
@@ -147,6 +148,8 @@ typedef struct _F_ {
 	bool uses_auto_shape_pulses;
 	Ticks left_shape_padding;
 	Ticks right_shape_padding;
+	Ticks min_left_shape_padding;
+	Ticks min_right_shape_padding;
 
 } FUNCTION;
 
@@ -223,8 +226,8 @@ typedef struct {
 	FILE *dump_file;
 
 	bool auto_shape_pulses;
-	long left_warning;
-	long right_warning;
+	long left_shape_warning;
+	long right_shape_warning;
 
 } EP385;
 
@@ -275,8 +278,8 @@ typedef struct _p_ {
 	bool needs_update;       /* set if the pulses properties have been changed
 								in test run or experiment */
 
-	bool left_warning;
-	bool right_warning;
+	bool left_shape_warning;
+	bool right_shape_warning;
 	struct _p_ *sp;          /* for normal pulses reference to related shape
 								pulse (if such exist), for shape pulses
 								reference to pulse it is associated with */
@@ -352,6 +355,7 @@ PULSE *ep385_get_pulse( long pnum );
 const char *ep385_ptime( double p_time );
 const char *ep385_pticks( Ticks ticks );
 int ep385_pulse_compare( const void *A, const void *B );
+void ep385_dump_channels( void );
 
 
 /* Functions fron ep385_run.c */

@@ -154,6 +154,54 @@ int ep385_pulse_compare( const void *A, const void *B )
 }
 
 
+/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*/
+
+void ep385_dump_channels( void )
+{
+	FUNCTION *f;
+	CHANNEL *ch;
+	int i, j, k;
+
+
+	if ( ep385.dump_file == NULL )
+		return;
+
+	fprintf( ep385.dump_file, "===\n" );
+
+	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
+	{
+		f = ep385.function + i;
+
+		if ( ! f->is_needed && f->num_channels == 0 )
+			continue;
+
+		for ( j = 0; j < f->num_channels; j++ )
+		{
+			ch = f->channel[ j ];
+
+			if ( ! ch->needs_update )
+				continue;
+
+			fprintf( ep385.dump_file, "%s %d\n%d\n",
+					 f->name, ch->self, ch->num_active_pulses );
+			for ( k = 0; k < ch->num_active_pulses; k++ )
+				if ( f->self == PULSER_CHANNEL_PULSE_SHAPE &&
+					 ch->pulse_params[ k ].pulse->sp )
+					fprintf( ep385.dump_file, "(%ld) %ld %ld\n",
+							 ch->pulse_params[ k ].pulse->sp->num,
+							 ch->pulse_params[ k ].pos,
+							 ch->pulse_params[ k ].len );
+				else
+					fprintf( ep385.dump_file, "%ld %ld %ld\n",
+							 ch->pulse_params[ k ].pulse->num,
+							 ch->pulse_params[ k ].pos,
+							 ch->pulse_params[ k ].len );
+		}
+	}
+}
+
+
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
