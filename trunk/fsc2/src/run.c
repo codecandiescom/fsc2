@@ -508,14 +508,13 @@ static void run_sigchld_handler( int signo )
 }
 
 
-/*-----------------------------------------------------------------*/
-/* run_sigchld_callback() is the callback for an invisible button  */
-/* that is triggered on the death of the child. If the child died  */
-/* prematurely, i.e. without notifying the parent by a QUITTING    */
-/* signal or it signals an hardware error via its return status an */
-/* error message is output. Then the post-measurement clean-up is  */
-/* done.                                                           */
-/*-----------------------------------------------------------------*/
+/*----------------------------------------------------------------*/
+/* run_sigchld_callback() is the callback for an invisible button */
+/* that is triggered on the death of the child. If the child died */
+/* prematurely, i.e. without notifying the parent by a QUITTING   */
+/* signal or it signals an error via its return status an error   */
+/* message is output. Then the post-measurement clean-up is done. */
+/*----------------------------------------------------------------*/
 
 void run_sigchld_callback( FL_OBJECT *a, long b )
 {

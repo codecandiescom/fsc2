@@ -1491,8 +1491,9 @@ used in the @code{EXPERIMENT} section only and not after the
 @anchor{abort}
 @item abort()
 @findex abort()
-The function will abort the currently running program immediately, so it
-is a kind of an emergency exit when nothing else will do. When called it
+The function will abort the currently running program immediately
+without even running the code following the @code{ON_STOP} label, so it
+is a kind of an emergency exit when nothing better will do. When called it
 displays a message box on the screen to inform the user. This function
 can only be used in the @code{EXPERIMENT} section
 
