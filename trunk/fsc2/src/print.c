@@ -298,7 +298,13 @@ static bool get_print_file( FILE **fp, char **name, long data )
 		TRY_SUCCESS;
 	}
 	CATCH ( OUT_OF_MEMORY_EXCEPTION )
-		obj = print_form->cancel_button;
+	{
+		if ( *name )
+			*name = CHAR_P T_free( *name );
+		fl_hide_form( print_form->print );
+		fl_free_form( print_form->print );
+		return FAIL;
+	}
 
 	if ( 1 == fl_get_button( print_form->A6 ) )
 		 paper_type = A6_PAPER;
@@ -314,17 +320,6 @@ static bool get_print_file( FILE **fp, char **name, long data )
 		 paper_type = Legal_PAPER;
 
 	fl_hide_form( print_form->print );
-
-	/* If cancel button was pressed (or an error happened) return now */
-
-	if ( obj == print_form->cancel_button )
-	{
-		if ( *name )
-			*name = CHAR_P T_free( *name );
-		fl_free_form( print_form->print );
-		return FAIL;
-	}
-
 	fl_free_form( print_form->print );
 
 	/* In send-to-printer mode we're already done */
