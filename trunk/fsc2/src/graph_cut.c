@@ -1308,7 +1308,8 @@ static void cut_press_handler( FL_OBJECT *obj, Window window,
 
 	/* Middle and right or all three buttons at once don't mean a thing */
 
-	if ( G.raw_button_state >= 6 )
+	if ( G.raw_button_state >= 6  &&
+		 G.raw_button_state != 8 && G.raw_button_state != 16 )
 		return;
 
 	G.button_state |= ( 1 << ( ev->xbutton.button - 1 ) );
@@ -1426,6 +1427,17 @@ static void cut_press_handler( FL_OBJECT *obj, Window window,
 
 			repaint_cut_canvas( &G.cut_canvas );
 			break;
+
+		case 8 : case 16 :
+			if ( G.drag_canvas != 1 && G.drag_canvas != 2 )
+				break;
+
+			G.start[ X ] = c->ppos[ X ];
+			G.start[ Y ] = c->ppos[ Y ];
+
+			fl_set_cursor( window, CG.cursor[ MOVE_HAND_CURSOR ] );
+			cut_save_scale_state( );
+			break;
 	}
 }
 
@@ -1525,6 +1537,72 @@ static void cut_release_handler( FL_OBJECT *obj, Window window,
 					scale_changed = cut_zoom_xy( c );
 					break;
 			}
+			break;
+
+		case 8 :
+			if ( G.drag_canvas == 1 )
+			{
+				G.cut_x_axis.ppos[ X ] = G.start[ X ] - G.cut_x_axis.w / 10;
+
+				/* Recalculate the offsets and shift curves in the
+				   canvas */
+
+				shift_XPoints_of_cut_curve( &G.cut_x_axis );
+				scale_changed = SET;
+
+				redraw_cut_canvas( &G.cut_canvas );
+				redraw_cut_canvas( &G.cut_x_axis );
+			}
+
+			if ( G.drag_canvas == 2 )
+			{
+				G.cut_y_axis.ppos[ Y ] = G.start[ Y ] + G.cut_y_axis.h / 10;
+
+				/* Recalculate the offsets and shift curves in the
+				   canvas */
+
+				shift_XPoints_of_cut_curve( &G.cut_y_axis );
+				scale_changed = SET;
+
+				redraw_cut_canvas( &G.cut_canvas );
+				redraw_cut_canvas( &G.cut_y_axis );
+			}
+
+			if ( G.drag_canvas == 4 )
+				cut_next_index( NULL, 0 );
+			break;
+
+		case 16 :
+			if ( G.drag_canvas == 1 )
+			{
+				G.cut_x_axis.ppos[ X ] = G.start[ X ] + G.cut_x_axis.w / 10;
+
+				/* Recalculate the offsets and shift curves in the
+				   canvas */
+
+				shift_XPoints_of_cut_curve( &G.cut_x_axis );
+				scale_changed = SET;
+
+				redraw_cut_canvas( &G.cut_canvas );
+				redraw_cut_canvas( &G.cut_x_axis );
+			}
+
+			if ( G.drag_canvas == 2 )
+			{
+				G.cut_y_axis.ppos[ Y ] = G.start[ Y ] - G.cut_y_axis.h / 10;
+
+				/* Recalculate the offsets and shift curves in the
+				   canvas */
+
+				shift_XPoints_of_cut_curve( &G.cut_y_axis );
+				scale_changed = SET;
+
+				redraw_cut_canvas( &G.cut_canvas );
+				redraw_cut_canvas( &G.cut_y_axis );
+			}
+
+			if ( G.drag_canvas == 4 )
+				cut_next_index( NULL, 1 );
 			break;
 	}
 

@@ -94,9 +94,9 @@ static void press_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
 	unsigned int keymask;
 
 
-	/* In the axes areas two buttons pressed simultaneously doesn't has a
-	special meaning, so don't care about another button. Also don't react if
-	the pressed buttons have lost there meaning */
+	/* In the axis areas two buttons pressed simultaneously doesn't has a
+	   special meaning, so don't care about another button. Also don't react
+	   if the pressed buttons have lost there meaning */
 
 	if ( ( c != &G.canvas && G.raw_button_state != 0 ) ||
 		 ( G.button_state == 0 && G.raw_button_state != 0 ) )
@@ -109,7 +109,8 @@ static void press_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
 
 	/* Middle and right or all three buttons at once don't mean a thing */
 
-	if ( G.raw_button_state >= 6 )
+	if ( G.raw_button_state >= 6 &&
+		 G.raw_button_state != 8 && G.raw_button_state != 16 )
 		return;
 
 	G.button_state |= ( 1 << ( ev->xbutton.button - 1 ) );
@@ -214,6 +215,28 @@ static void press_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
 
 			repaint_canvas_1d( &G.canvas );
 			break;
+
+		case 8 : case 16 :                               /* middle button */
+			if ( G.drag_canvas != 1 && G.drag_canvas != 2 )
+				break;
+
+			fl_set_cursor( window, G.cursor[ MOVE_HAND_CURSOR ] );
+
+			G.start[ X ] = c->ppos[ X ];
+			G.start[ Y ] = c->ppos[ Y ];
+
+			/* Store data for undo operation */
+
+			for ( i = 0; i < G.nc; i++ )
+			{
+				cv = G.curve[ i ];
+
+				if ( cv->active )
+					save_scale_state_1d( cv );
+				else
+					cv->can_undo = UNSET;
+			}
+			break;
 	}
 }
 
@@ -226,6 +249,8 @@ static void release_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
 {
 	unsigned int keymask;
 	bool scale_changed = UNSET;
+	int i;
+	Curve_1d *cv;
 
 
 	obj = obj;
@@ -294,6 +319,118 @@ static void release_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
 				case 3 :                       /* in canvas window */
 					scale_changed = zoom_xy_1d( c );
 					break;
+			}
+			break;
+
+		case 8 :
+			if ( G.drag_canvas == 1 )
+			{
+				G.x_axis.ppos[ X ] = G.start[ X ] - G.x_axis.w / 10;
+				for ( i = 0; i < G.nc; i++ )
+				{
+					cv = G.curve[ i ];
+
+					if ( ! cv->active )
+						continue;
+
+					/* Recalculate the offsets and shift curves in the
+					   canvas */
+
+					shift_XPoints_of_curve_1d( &G.x_axis, cv );
+					scale_changed = SET;
+				}
+
+				/* Switch off full scale button if necessary */
+
+				if ( G.is_fs && scale_changed )
+				{
+					G.is_fs = UNSET;
+					fl_set_button( GUI.run_form->full_scale_button, 0 );
+					if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
+						fl_set_object_helper( GUI.run_form->full_scale_button,
+									  "Rescale curves to fit into the window\n"
+									  "and switch on automatic rescaling" );
+				}
+
+				redraw_canvas_1d( &G.canvas );
+				redraw_canvas_1d( &G.x_axis );
+			}
+
+			if ( G.drag_canvas == 2 )
+			{
+				G.y_axis.ppos[ Y ] = G.start[ Y ] + G.y_axis.h / 10;
+				for ( i = 0; i < G.nc; i++ )
+				{
+					cv = G.curve[ i ];
+
+					if ( ! cv->active )
+						continue;
+
+					/* Recalculate the offsets and shift curves in the
+					   canvas */
+
+					shift_XPoints_of_curve_1d( &G.y_axis, cv );
+					scale_changed = SET;
+				}
+
+				/* Switch off full scale button if necessary */
+
+				if ( G.is_fs && scale_changed )
+				{
+					G.is_fs = UNSET;
+					fl_set_button( GUI.run_form->full_scale_button, 0 );
+					if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
+						fl_set_object_helper( GUI.run_form->full_scale_button,
+									  "Rescale curves to fit into the window\n"
+									  "and switch on automatic rescaling" );
+				}
+
+				redraw_canvas_1d( &G.canvas );
+				redraw_canvas_1d( &G.y_axis );
+			}
+			break;
+
+		case 16 :
+			if ( G.drag_canvas == 1 )
+			{
+				G.x_axis.ppos[ X ] = G.start[ X ] + G.x_axis.w / 10;
+				for ( i = 0; i < G.nc; i++ )
+				{
+					cv = G.curve[ i ];
+
+					if ( ! cv->active )
+						continue;
+
+					/* Recalculate the offsets and shift curves in the
+					   canvas */
+
+					shift_XPoints_of_curve_1d( &G.x_axis, cv );
+					scale_changed = SET;
+				}
+
+				redraw_canvas_1d( &G.canvas );
+				redraw_canvas_1d( &G.x_axis );
+			}
+
+			if ( G.drag_canvas == 2 )
+			{
+				G.y_axis.ppos[ Y ] = G.start[ Y ] - G.y_axis.h / 10;
+				for ( i = 0; i < G.nc; i++ )
+				{
+					cv = G.curve[ i ];
+
+					if ( ! cv->active )
+						continue;
+
+					/* Recalculate the offsets and shift curves in the
+					   canvas */
+
+					shift_XPoints_of_curve_1d( &G.y_axis, cv );
+					scale_changed = SET;
+				}
+
+				redraw_canvas_1d( &G.canvas );
+				redraw_canvas_1d( &G.y_axis );
 			}
 			break;
 	}

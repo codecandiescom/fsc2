@@ -157,10 +157,13 @@ expr:    E_INT_TOKEN unit         { if ( ! condition_gobble )
 		                                vars_arr_start( $1 );
 	                                else
 										vars_pop( $1 ); }
-         list ']'                 { if ( ! condition_gobble )
+         list                     { if ( $4 == NULL && ! condition_gobble )
+                                        $$ = vars_push( UNDEF_VAR ); }
+		 ']'                      { if ( ! condition_gobble )
                                         $$ = vars_arr_rhs( $4 ); }
-         unit                     { if ( ! condition_gobble )
-                                        $$ = apply_unit( $<vptr>6, $7); }
+         unit                     { if ( $<vptr>7 != NULL &&
+										 ! condition_gobble )
+                                        $$ = apply_unit( $<vptr>7, $8 ); }
        | E_FUNC_TOKEN '(' list
          ')'                      { if ( ! condition_gobble )
 			                            $$ = func_call( $1 );
@@ -287,8 +290,7 @@ unit:    /* empty */              { $$ = NULL; }
 
 /* List of indices of an array element or list of function arguments */
 
-list :   /* empty */              { if ( ! condition_gobble )
-                                        $$ = vars_push( UNDEF_VAR ); }
+list :   /* empty */              { $$ = NULL; }
        | expr
        | list ',' expr            { if ( ! condition_gobble )
                                         $$ = $3; }

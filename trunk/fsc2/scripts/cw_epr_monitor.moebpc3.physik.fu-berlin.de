@@ -116,8 +116,7 @@ acq_rate = 1.0 / lockin_get_sample_time( );
 IF acq_rate >= acq_rates_list[ 1 ] {
 	acq_rate = acq_rates_list[ 1 ];
 	Cur_Acq_Rate = 1;
-}
-ELSE {
+} ELSE {
 	FOR I = 2 : size( acq_rates_list )
 	{
 		IF abs( acq_rates_list[ I ] - acq_rate ) < 0.0001 Hz
@@ -136,6 +135,7 @@ lockin_lock_keyboard( \"OFF\" );
 
 /* Finally, create the form with the buttons for sweeping etc. */
 
+hide_toolbox( \"ON\" );
 Sweep_Up   = button_create( \"RADIO_BUTTON\", \"Sweep up\" );
 Sweep_Stop = button_create( \"RADIO_BUTTON\", Sweep_Up, \"Stop sweep\" );
 Sweep_Down = button_create( \"RADIO_BUTTON\", Sweep_Up, \"Sweep Down\" );
@@ -154,6 +154,7 @@ Pause = button_create( \"PUSH_BUTTON\", \"Pause display\" );
 button_state( Pause, 1 );
 Save  = button_create( \"NORMAL_BUTTON\", \"Save data\" );
 Clear = button_create( \"NORMAL_BUTTON\", \"Clear screen\" );
+hide_toolbox( \"OFF\" );
 
 
 /* Now we're done with all preparations and can start to run the experiment

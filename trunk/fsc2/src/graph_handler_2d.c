@@ -116,7 +116,8 @@ static void press_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev,
 
 	/* Middle and right or all three buttons at once don't mean a thing */
 
-	if ( G.raw_button_state >= 6 )
+	if ( G.raw_button_state >= 6 &&
+		 G.raw_button_state != 8 && G.raw_button_state != 16 )
 		return;
 
 	G.button_state |= ( 1 << ( ev->xbutton.button - 1 ) );
@@ -250,6 +251,28 @@ static void press_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev,
 
 			repaint_canvas_2d( &G.canvas );
 			break;
+
+		case 8 : case 16 :
+			if ( G.drag_canvas == 7 )
+				break;
+
+			fl_set_cursor( window, G.cursor[ MOVE_HAND_CURSOR ] );
+
+			G.start[ X ] = c->ppos[ X ];
+			G.start[ Y ] = c->ppos[ Y ];
+
+			/* Store data for undo operation */
+
+			for ( i = 0; i < G.nc; i++ )
+			{
+				cv = G.curve_2d[ i ];
+
+				if ( cv->active )
+					save_scale_state_2d( cv );
+				else
+					cv->can_undo = UNSET;
+			}
+			break;
 	}
 }
 
@@ -361,6 +384,106 @@ static void release_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev,
 				case 7 :                       /* in canvas window */
 					scale_changed = zoom_xy_2d( c );
 					break;
+			}
+			break;
+
+		case 8 :
+			if ( G.drag_canvas == 1 )
+			{
+				G.x_axis.ppos[ X ] = G.start[ X ] - G.x_axis.w / 10;
+
+				if ( G.active_curve != -1 &&
+					 G.curve_2d[ G.active_curve ]->is_scale_set )
+				{
+					shift_XPoints_of_curve_2d( c,
+											   G.curve_2d[ G.active_curve ] );
+					scale_changed = SET;
+				}
+				
+				redraw_canvas_2d( &G.canvas );
+				redraw_canvas_2d( &G.x_axis );
+			}
+
+			if ( G.drag_canvas == 2 )
+			{
+				G.y_axis.ppos[ Y ] = G.start[ Y ] + G.y_axis.h / 10;
+
+				if ( G.active_curve != -1 &&
+					 G.curve_2d[ G.active_curve ]->is_scale_set )
+				{
+					shift_XPoints_of_curve_2d( c,
+											   G.curve_2d[ G.active_curve ] );
+					scale_changed = SET;
+				}
+				
+				redraw_canvas_2d( &G.canvas );
+				redraw_canvas_2d( &G.y_axis );
+			}
+
+			if ( G.drag_canvas == 4 )
+			{
+				G.z_axis.ppos[ Y ] = G.start[ Y ] + G.z_axis.h / 10;
+
+				if ( G.active_curve != -1 &&
+					 G.curve_2d[ G.active_curve ]->is_scale_set )
+				{
+					shift_XPoints_of_curve_2d( c,
+											   G.curve_2d[ G.active_curve ] );
+					scale_changed = SET;
+				}
+				
+				redraw_canvas_2d( &G.canvas );
+				redraw_canvas_2d( &G.z_axis );
+			}
+			break;
+
+		case 16 :
+			if ( G.drag_canvas == 1 )
+			{
+				G.x_axis.ppos[ X ] = G.start[ X ] + G.x_axis.w / 10;
+
+				if ( G.active_curve != -1 &&
+					 G.curve_2d[ G.active_curve ]->is_scale_set )
+				{
+					shift_XPoints_of_curve_2d( c,
+											   G.curve_2d[ G.active_curve ] );
+					scale_changed = SET;
+				}
+				
+				redraw_canvas_2d( &G.canvas );
+				redraw_canvas_2d( &G.x_axis );
+			}
+
+			if ( G.drag_canvas == 2 )
+			{
+				G.y_axis.ppos[ Y ] = G.start[ Y ] - G.y_axis.h / 10;
+
+				if ( G.active_curve != -1 &&
+					 G.curve_2d[ G.active_curve ]->is_scale_set )
+				{
+					shift_XPoints_of_curve_2d( c,
+											   G.curve_2d[ G.active_curve ] );
+					scale_changed = SET;
+				}
+				
+				redraw_canvas_2d( &G.canvas );
+				redraw_canvas_2d( &G.y_axis );
+			}
+
+			if ( G.drag_canvas == 4 )
+			{
+				G.z_axis.ppos[ Y ] = G.start[ Y ] - G.z_axis.h / 10;
+
+				if ( G.active_curve != -1 &&
+					 G.curve_2d[ G.active_curve ]->is_scale_set )
+				{
+					shift_XPoints_of_curve_2d( c,
+											   G.curve_2d[ G.active_curve ] );
+					scale_changed = SET;
+				}
+				
+				redraw_canvas_2d( &G.canvas );
+				redraw_canvas_2d( &G.z_axis );
 			}
 			break;
 	}

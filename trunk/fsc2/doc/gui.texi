@@ -321,6 +321,12 @@ curves will move around following the mouse. As in the case of zooming
 you can restrict movements to either the x- or y-direction by pressing
 the middle mouse button in the area of either the x- or the y-axis.
 
+Alternatively, if you have a wheel mouse and you turn the wheel within
+the x- or y-axis areas the data will be moved around on the screen in
+either the x- or the y-direction in increments of a thenth of the total
+axis length.
+
+
 Finally, there's a third method to change the scaling. Whenever you
 press the right mouse button in either the display area or the axis
 fields the cursor changes to a magnifying
@@ -416,10 +422,10 @@ own scaling.
 As long as there are no measured data for some of the points of the
 display these points will be drawn in a dark gray.
 
-In 2D-display mode the same combinations of mouse buttons can be used to
-determine the values of data points and differences between points as in
-1D-display mode with the only exception that now triples of numbers are
-shown for the x-, y- and z-value.
+In 2D-display mode the same combinations of mouse buttons (or the mouse
+wheel) can be used to determine the values of data points and
+differences between points as in 1D-display mode with the only exception
+that now triples of numbers are shown for the x-, y- and z-value.
 
 When the surface with the data set is moved out of the area of the
 display arrows will be shown at the sides of the display area where you
@@ -445,6 +451,7 @@ top of the high-field signal are too large and thus drawn in white.
 @image{fsc2fig5,11cm,}
 
 @end ifnotinfo
+
 
 @subsection Getting cross sections
 
@@ -486,10 +493,10 @@ and if you move the mouse (while keeping the left mouse button still
 pressed down) new cross sections are displayed in accordance with the
 current mouse position (and the indicator gets redrawn at the position
 of the current cross section). If you want to run through all cross
-sections sequentially you can also use the up- and down-cursor keys. To
-get to the first cross section (i.e.@: the one at the lower end of the
-z-scale) press the @code{<Page down>} key, to get to the last one press
-the @code{<Page up>} key.
+sections sequentially you can also use the up- and down-cursor keys or
+the wheel of a wheel mouse. To get to the first cross section (i.e.@:
+the one at the lower end of the z-scale) press the @code{<Page down>}
+key, to get to the last one press the @code{<Page up>} key.
 
 
 Of course, getting data values and differences between data as well as
