@@ -85,9 +85,6 @@ const int witio_48_nerr =
 
 int witio_48_close( void )
 {
-    error_message = "";
-
-
     if ( dev_info.fd < 0 )
         return witio_48_errno = WITIO_48_ERR_BNO;
 
