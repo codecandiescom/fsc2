@@ -151,6 +151,7 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 {ON_STOP}   return ON_STOP_TOK;
 
 "WHILE"     return WHILE_TOK;
+"UNTIL"     return UNTIL_TOK;
 "BREAK"     return BREAK_TOK;
 "NEXT"      return CONT_TOK;
 "IF"        return IF_TOK;

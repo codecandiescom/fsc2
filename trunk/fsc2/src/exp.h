@@ -59,6 +59,7 @@ typedef union {
 #define IF_TOK         2049
 #define ELSE_TOK       2050
 #define WHILE_TOK      2052
+#define UNTIL_TOK      2053
 #define CONT_TOK       2054
 #define BREAK_TOK      2055
 #define REPEAT_TOK     2056
