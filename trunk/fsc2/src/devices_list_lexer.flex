@@ -18,6 +18,7 @@ static char *Fname;
 static long Comm_Lc;
 static bool Eol;
 
+int devices_listlex( void );
 
 %}
 

@@ -78,20 +78,26 @@ fsc_clean.c: fsc_clean.flex $(header)
 
 
 
-mods: $(patsubst %,lib_fsc2_%, $(modules:.c=.la))
-	export LD_LIBRARY_PATH=`pwd`/.libs
+mods: $(modules:.c=.so)
+	export LD_LIBRARY_PATH=`pwd`
 
-lib_fsc2_%.la: %.c $(header)
-	libtool gcc $(CFLAGS) -c $<
-	libtool gcc -module -o $@ $*.lo -rpath /usr/local/lib -lm
+%.so: %.c $(header)
+	gcc $(CFLAGS) -c -fPIC -DPIC $< -o $*.lo
+	gcc -shared -o $@ $*.lo -Wl,-E -lc -lm
+	chmod 644 $@
+
+#mods: $(patsubst %,lib_fsc2_%, $(modules:.c=.la))
+#	export LD_LIBRARY_PATH=`pwd`/.libs
+
+#lib_fsc2_%.la: %.c $(header)
+#	libtool gcc $(CFLAGS) -c $<
+#	libtool gcc -module -o $@ $*.lo -rpath /usr/local/lib -lm
 
 
 
 clean: 
 	-rm *.o fsc_clean fsc2 *.output *_parser.c *_parser.h *_lexer.c \
-	    fsc_clean.c lib*.la *.lo TAGS
-	-rm -rf .libs
-
+	    fsc_clean.c *.lo *.so TAGS
 
 tags:
 	etags -T ${c_sources} *.flex *.y ${c_sources:.c=.h} $(header)
