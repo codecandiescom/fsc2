@@ -216,7 +216,7 @@ static int set_name( const char *name )
 
 	for ( i = 0; i < rulbus_num_cards - 1; i++ )
 		if ( rulbus_card[ i ].name &&
-			 ! strcpy( rulbus_card[ i ].name, name ) )
+			 ! strcmp( rulbus_card[ i ].name, name ) )
 			return RULBUS_NAM_DUP;
 
 	/* Check that the card hasn't already been assigned a name */

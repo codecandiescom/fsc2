@@ -46,9 +46,9 @@ static void count( void );
 %}
 
 STRING   [\"\'][^\"\']*[\"\']
-INT         [0-9]+
-EXPO        [Ee][+-]?{INT}
-FLOAT       ((([0-9]+"."[0-9]*)|([0-9]*"."[0-9]+)){EXPO}?)|({INT}{EXPO})
+INT      [0-9]+
+EXPO     [Ee][+-]?{INT}
+FLOAT    ((({INT}"."[0-9]*)|([0-9]*"."{INT})){EXPO}?)|({INT}{EXPO})
 
 		/*---------------*/
 %%		/*     RULES     */
@@ -66,6 +66,12 @@ FLOAT       ((([0-9]+"."[0-9]*)|([0-9]*"."[0-9]+)){EXPO}?)|({INT}{EXPO})
 "range"    { count(); return RANGE_TOKEN; }
 "polar"    { count(); return POLAR_TOKEN; }
 "ext_trg"  { count(); return EXTTRG_TOKEN; }
+
+{FLOAT}    {
+	           count( );
+			   rulbus_lval.dval = atof( rulbus_text );
+			   return FLOAT_TOKEN;
+		   }
 
 0[0-3][0-7]{0,2} {   /* octal number between 0 and 0377 */
 			   count( );
@@ -91,13 +97,7 @@ FLOAT       ((([0-9]+"."[0-9]*)|([0-9]*"."[0-9]+)){EXPO}?)|({INT}{EXPO})
                return NUM_TOKEN;
            }
 
-(FLOAT)    {
-	           count( );
-			   rulbus_lval.dval = atof( rulbus_text );
-			   return FLOAT_TOKEN;
-		   }
-
-[ \t\n]*   {   count( ); } /* Skip white space */
+[ \t\n]+   {   count( ); } /* Skip white space */
 
 {STRING}   {
                char *p;
