@@ -43,19 +43,34 @@
 #define LECROY9400_TEST_TRIG_CHANNEL 0
 
 
-#define MAX_CHANNELS      9         /* number of channel names */
+#define MAX_CHANNELS       9         /* number of channel names */
 
-#define LECROY9400_UNDEF -1
-#define LECROY9400_CH1    0
-#define LECROY9400_CH2    1
-#define LECROY9400_MEM_C  2
-#define LECROY9400_MEM_D  3
-#define LECROY9400_FUNC_E 4
-#define LECROY9400_FUNC_F 5
-#define LECROY9400_LIN    6         /* Line In (for triggger only) */
-#define LECROY9400_EXT    7
-#define LECROY9400_EXT10  8
+#define LECROY9400_UNDEF  -1
+#define LECROY9400_CH1     0
+#define LECROY9400_CH2     1
+#define LECROY9400_MEM_C   2
+#define LECROY9400_MEM_D   3
+#define LECROY9400_FUNC_E  4
+#define LECROY9400_FUNC_F  5
+#define LECROY9400_LIN     6         /* Line In (for triggger only) */
+#define LECROY9400_EXT     7
+#define LECROY9400_EXT10   8
 
+
+#define INVALID_COUPL     -1         /* Input coupling for data channel */
+#define AC_1_MOHM          0
+#define DC_1_MOHM          1
+#define DC_50_OHM          2
+
+
+#define MAX_OFFSET         8.0       /* Offset for data channel */
+#define MIN_OFFSET        -8.0
+
+
+#define TRG_CPL_AC         0         /* Trigger coupling */
+#define TRG_CPL_DC         1
+#define TRG_CPL_LF_REJ     2
+#define TRG_CPL_HF_REJ     3
 
 
 /* Structure for description of a `window' on the digitizer, made up from the
@@ -82,11 +97,34 @@ typedef struct
 
 	bool is_reacting;
 
+	bool is_displayed[ MAX_CHANNELS ];
+
 	double timebase;
 	bool is_timebase;
 
 	double sens[ MAX_CHANNELS ];
 	double is_sens[ MAX_CHANNELS ];
+
+	double offset[ MAX_CHANNELS ];
+	double is_offset[ MAX_CHANNELS ];
+
+	int coupling[ MAX_CHANNELS ];
+	double is_coupling[ MAX_CHANNELS ];
+
+	int trigger_channel;
+	bool is_trigger_channel;
+
+	double trigger_level;
+	bool is_trigger_level;
+
+	int trigger_slope;
+	bool is_trigger_slope;
+
+	int trigger_coupling;
+	bool is_trigger_coupling;
+
+	double trig_pos;
+	bool is_trig_pos;
 
 	long num_avg;
 	bool is_num_avg;
@@ -94,14 +132,8 @@ typedef struct
 	WINDOW *w;               /* start element of list of windows             */
 	int num_windows;
 
-	int trigger_channel;
-	bool is_trigger_channel;
-
 	long rec_len;
 	bool is_rec_len;
-
-	double trig_pos;
-	bool is_trig_pos;
 
 	double cursor_pos;     /* current position of cursor 1                   */
 
