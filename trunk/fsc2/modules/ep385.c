@@ -214,20 +214,17 @@ int ep385_end_of_test_hook( void )
 	   near to each other bail out */
 
 	if ( ep385.shape_2_defense_too_near )
-	{
 		print( FATAL, "Distance between PULSE_SHAPE and DEFENSE pulses was "
 			   "shorter than %s during the test run.\n",
 			   ep385_ptime( ep385_ticks2double( ep385.shape_2_defense ) ) );
-		THROW( EXCEPTION );
-	}
 
 	if ( ep385.defense_2_shape_too_near )
-	{
 		print( FATAL, "Distance between DEFENSE and PULSE_SHAPE pulses was "
 			   "shorter than %s during the test run.\n",
 			   ep385_ptime( ep385_ticks2double( ep385.defense_2_shape ) ) );
+
+	if ( ep385.shape_2_defense_too_near || ep385.defense_2_shape_too_near )
 		THROW( EXCEPTION );
-	}
 
 	return 1;
 }
