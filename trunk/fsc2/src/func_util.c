@@ -1711,8 +1711,9 @@ getfile_retry:
 	if ( r == NULL || *r == '\0' )         /* on 'Cancel' with confirmation */
 	{
 		T_free( r );
-		for ( i = 0; i < 4; i++ )
+		for ( i = 0; i < 5; i++ )
 			T_free( s[ i ] );
+		Dont_Save = SET;
 		return vars_push( INT_VAR, -1 );
 	}
 
@@ -1730,7 +1731,7 @@ getfile_retry:
 		T_free( r );
 		r = new_r;
 	}
-		
+
 	/* Now ask for confirmation if the file already exists and try to open
 	   it for writing */
 
@@ -1964,8 +1965,9 @@ static int get_save_file( Var **v )
 
 	if ( file_num < 0 )
 	{
-		eprint( WARN, "%s:%ld: File has never been opened, skipping "
-				"%s() command.\n", Fname, Lc, Cur_Func );
+		if ( ! Dont_Save )
+			eprint( WARN, "%s:%ld: File has never been opened, skipping "
+					"%s() command.\n", Fname, Lc, Cur_Func );
 		return -1;
 	}
 
