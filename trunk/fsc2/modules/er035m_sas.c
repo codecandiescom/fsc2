@@ -106,7 +106,6 @@ enum {
 /* The gaussmeter seems to be more cooperative if we wait for some time
    (i.e. 200 ms) after each write operation... */
 
-#define E2_US           100000    /* 100 ms, used in calls of fsc2_usleep() */
 #define ER035M_SAS_WAIT 200000    /* this means 200 ms for fsc2_usleep() */
 
 
@@ -210,13 +209,11 @@ int er035m_sas_exp_hook( void )
 
 	if ( ! er035m_sas_write( "REM" ) )
 		er035m_sas_comm_fail( );
-	fsc2_usleep( ER035M_SAS_WAIT, UNSET );
 
 	/* Switch the display on */
 
 	if ( er035m_sas_write( "ED" ) == FAIL )
 		er035m_sas_comm_fail( );
-	fsc2_usleep( ER035M_SAS_WAIT, UNSET );
 
 	/* Find out the curent resolution, and if necessary, change it to the
 	   value requested by the user */
@@ -432,7 +429,6 @@ Var *measure_field( Var *v )
 		   nmr.state == ER035M_SAS_UNKNOWN ) &&
 		 er035m_sas_write( "SD" ) == FAIL )
 		er035m_sas_comm_fail( );
-	fsc2_usleep( ER035M_SAS_WAIT, UNSET );
 
 	/* Wait for gaussmeter to go into lock state (or FAIL) */
 
@@ -639,7 +635,6 @@ Var *gaussmeter_command( Var *v )
 			er035m_sas_comm_fail( );
 		}
 
-		fsc2_usleep( ER035M_SAS_WAIT, UNSET );
 		T_free( cmd );
 	}
 
@@ -880,9 +875,6 @@ static void er035m_sas_set_resolution( int res_index )
 	sprintf( buf, "RS%1d", res_index + 1 );
 	if ( er035m_sas_write( buf ) == FAIL )
 		er035m_sas_comm_fail( );
-
-	fsc2_usleep( ER035M_SAS_WAIT, UNSET );
-
 }
 
 
@@ -978,8 +970,6 @@ static void er035m_sas_set_upper_search_limit( long ul )
 	snprintf( buf, 40, "UL%ld", ul );
 	if ( er035m_sas_write( buf ) == FAIL )
 		er035m_sas_comm_fail( );
-
-	fsc2_usleep( ER035M_SAS_WAIT, UNSET );
 }
 
 
@@ -994,8 +984,6 @@ static void er035m_sas_set_lower_search_limit( long ll )
 	snprintf( buf, 40, "LL%ld", ll );
 	if ( er035m_sas_write( buf ) == FAIL )
 		er035m_sas_comm_fail( );
-
-	fsc2_usleep( ER035M_SAS_WAIT, UNSET );
 }
 
 
@@ -1161,6 +1149,11 @@ static bool er035m_sas_comm( int type, ... )
 					stop_on_user_request( );
 				return FAIL;
 			}
+
+			/* The device gets out of sync when we're not waiting after each
+			   write... */
+
+			fsc2_usleep( ER035M_SAS_WAIT, UNSET );
 			break;
 
 		case SERIAL_READ :

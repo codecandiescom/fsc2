@@ -243,13 +243,11 @@ int er035m_s_exp_hook( void )
 
 	if ( er035m_s_write( "REM" ) == FAIL )
 		er035m_s_comm_fail( );
-	fsc2_usleep( ER035M_S_WAIT, UNSET );
 
 	/* Switch the display on */
 
 	if ( er035m_s_write( "ED" ) == FAIL )
 		er035m_s_comm_fail( );
-	fsc2_usleep( ER035M_S_WAIT, UNSET );
 
 	/* Find out the curent resolution, and if necessary, change it to the
 	   value requested by the user */
@@ -477,8 +475,6 @@ Var *find_field( Var *v )
 		 er035m_s_write( "SD" ) == FAIL )
 		er035m_s_comm_fail( );
 
-	fsc2_usleep( ER035M_S_WAIT, UNSET );
-
 	/* Wait for gaussmeter to go into lock state (or FAIL) */
 
 	while ( nmr.state != ER035M_S_LOCKED )
@@ -690,7 +686,6 @@ Var *gaussmeter_command( Var *v )
 			er035m_s_comm_fail( );
 		}
 
-		fsc2_usleep( ER035M_S_WAIT, UNSET );
 		T_free( cmd );
 	}
 
@@ -945,8 +940,6 @@ static void er035m_s_set_resolution( int res_index )
 	sprintf( buf, "RS%1d", res_index + 1 );
 	if ( er035m_s_write( buf ) == FAIL )
 		er035m_s_comm_fail( );
-
-	fsc2_usleep( ER035M_S_WAIT, UNSET );
 }
 
 
@@ -1043,8 +1036,6 @@ static void er035m_s_set_upper_search_limit( long ul )
 	snprintf( buf, 40, "UL%ld", ul );
 	if ( er035m_s_write( buf ) == FAIL )
 		er035m_s_comm_fail( );
-
-	fsc2_usleep( ER035M_S_WAIT, UNSET );
 }
 
 
@@ -1059,8 +1050,6 @@ static void er035m_s_set_lower_search_limit( long ll )
 	snprintf( buf, 40, "LL%ld", ll );
 	if ( er035m_s_write( buf ) == FAIL )
 		er035m_s_comm_fail( );
-
-	fsc2_usleep( ER035M_S_WAIT, UNSET );
 }
 
 
@@ -1230,6 +1219,10 @@ static bool er035m_s_comm( int type, ... )
 				return FAIL;
 			}
 
+			/* The device gets out of sync when we're not waiting after each
+			   write... */
+
+			fsc2_usleep( ER035M_S_WAIT, UNSET );
 			break;
 
 		case SERIAL_READ :
