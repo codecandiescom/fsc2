@@ -94,7 +94,7 @@ When you have run the script you will have to @code{cd} back to
 @acronym{fsc2}s main directory and recompile by typing @code{make}.
 After a successful run of make to compile the new device module you
 will have to install it. To do so you must become @code{root} and,
-from @acronym{fsc2}s main directory, start @w{@code{make install}}.
+from @acronym{fsc2}s main directory, run @w{@code{make install}}.
 
 If the device isn't controlled via the GPIB bus everything is already
 done. Otherwise you will have also to edit (still as @code{root} the
