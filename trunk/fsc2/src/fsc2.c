@@ -796,7 +796,7 @@ void clean_up( void )
 
 /*------------------------------------------------------------*/  
 /* Callback function for movements of the slider that adjusts */
-/* the sizes of the program and the error/output  browser     */
+/* the sizes of the program and the error/output browser      */
 /*------------------------------------------------------------*/  
 
 void win_slider_callback( FL_OBJECT *a, long b )
@@ -817,14 +817,14 @@ void win_slider_callback( FL_OBJECT *a, long b )
 	H = y2 - y1 + h2;
 
 	new_h1 = ( FL_Coord ) ( H * fl_get_slider_value( a ) - h / 2 );
-	if ( new_h1 < 30 )
+	if ( new_h1 < 50 )
 	{
-		new_h1 = 30;
+		new_h1 = 50;
 		fl_set_slider_value( a, ( double ) ( new_h1 + h / 2 ) / H );
 	}
-	if ( new_h1 > H - h - 30 )
+	if ( new_h1 > H - h - 50 )
 	{
-		new_h1 = H - h - 30;
+		new_h1 = H - h - 50;
 		fl_set_slider_value( a, ( double ) ( new_h1 + h / 2 ) / H );
 	}
 
