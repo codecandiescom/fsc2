@@ -105,7 +105,7 @@ my $f4_v = $f4->Entry( '-textvariable' => \$atten,
 					   '-validate' => 'key',
 					   '-validatecommand' => \&is_numeric,
 					   '-relief' => 'sunken' );
-my $f4_l2 = $f4->Label( '-text' => 'db',
+my $f4_l2 = $f4->Label( '-text' => 'dB',
 						'-width' => 3 );
 
 $f4->pack( %fp );
@@ -389,7 +389,7 @@ VARIABLES:
 start_freq  = $start_freq MHz;
 end_freq    = $end_freq MHz;
 step_freq   = $step_freq kHz;
-attenuation = $atten db;\n";
+attenuation = $atten dB;\n";
 
 if ( $lockin =~ /^SR8/ ) {
 	print F "mod_freq    = $mod_freq kHz;\n";
