@@ -115,10 +115,10 @@ all: fsc2 fsc2_clean mods
 
 # make the main program from the c, flex and bison source files
 
-fsc2: $(objects) $(headers)
+fsc2: $(objects)
 	$(CC) -o $@ $(objects) $(LIBS) $(LDFLAGS)
 
-%.o: %.c
+%.o: %.c $(headers)
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 %.c: %.y $(headers)
