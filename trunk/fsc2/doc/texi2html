@@ -3415,6 +3415,9 @@ INPUT_LINE: while ($_ = &next_line) {
 	    $end = '</pre>'
 	  }
 	  $in_pre = 0 if $end =~ m|</pre>|;
+	  if ( $end_tag =~ /example/ ) {      # get rid of newline before end of
+		  chomp $lines[ $#lines ];        # example table (JTT, 14-4-2003)
+	  }
 	  push(@lines, html_debug($end, __LINE__));
 	} elsif ($end_tag =~ /^(|f|v|multi)table$/) {
 	    unless (@tables) {

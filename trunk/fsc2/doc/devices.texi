@@ -56,7 +56,7 @@ The simple-minded approach to dealing with device-specific functions
 would be to have a set of functions for each individual device, all with
 different names. Then one would have a different function for e.g.@:
 fetching data from each of a series of different digitizing
-oscilloscopes. But this would become a nuisance whenever a oscilloscope
+oscilloscopes. But this would become a nuisance whenever an oscilloscope
 has to be changed in the experimental setup - one would have to
 carefully check all function calls in the @code{EDL} scripts and adjust
 the names of the functions to fit the new digitizer.
