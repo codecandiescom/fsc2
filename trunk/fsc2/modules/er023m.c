@@ -539,8 +539,8 @@ Var *lockin_conversion_time( Var *v )
 	{
 		long new_ct_mult;
 
-		if ( ( double ) BAD_LOW_CT_MULT / ( double ) CT_MULT >
-			 ( double ) CT_MULT / ( double ) BAD_HIGH_CT_MULT )
+		if ( ( double ) BAD_LOW_CT_MULT / ( double ) ct_mult >
+			 ( double ) ct_mult / ( double ) BAD_HIGH_CT_MULT )
 			new_ct_mult = BAD_LOW_CT_MULT - 1;
 		else
 			new_ct_mult = BAD_HIGH_CT_MULT + 1;

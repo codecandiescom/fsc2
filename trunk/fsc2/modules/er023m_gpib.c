@@ -82,15 +82,35 @@ bool er023m_init( const char *name )
 		}
 
 		/* Set the conversion time - if it hasn't been specified by the user
-		   get its value and set it to a value of at least MIN_CT_MULT (it
+		   get its value and set it to a value of at least MIN_CTMULT (it
 		   must be set anyway to set up some inportant values needed in the
-		   data conversion). */
+		   data conversion) and also exclude the range of CT values where data
+		   might become garbled. */
 
 		if ( er023m.ct_mult == UNDEF_CT_MULT )
 		{
 			er023m.ct_mult = er023m_get_ct( );
 			if ( er023m.ct_mult < MIN_CT_MULT )
 				er023m.ct_mult = MIN_CT_MULT;
+
+			if ( er023m.ct_mult >= BAD_LOW_CT_MULT &&
+				 er023m.ct_mult <= BAD_HIGH_CT_MULT )
+			{
+				long new_ct_mult;
+
+				if ( ( double ) BAD_LOW_CT_MULT / ( double ) er023m.ct_mult >
+					 ( double ) er023m.ct_mult / ( double ) BAD_HIGH_CT_MULT )
+					new_ct_mult = BAD_LOW_CT_MULT - 1;
+				else
+					new_ct_mult = BAD_HIGH_CT_MULT + 1;
+
+				eprint( SEVERE, UNSET, "%s: Conversion time had to be changed "
+						"from %.2f ms (CT = %ld) to %.2f ms (CT = %ld).\n",
+						DEVICE_NAME, 1.0e3 * BASE_CT * er023m.ct_mult,
+						er023m.ct_mult, 1.0e3 * BASE_CT * new_ct_mult,
+						new_ct_mult );
+
+				er023m.ct_mult = new_ct_mult;
 		}
 		er023m_set_ct( er023m.ct_mult );
 
