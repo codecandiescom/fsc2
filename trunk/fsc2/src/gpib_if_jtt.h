@@ -41,16 +41,6 @@
 #endif
 
 
-/* GPIB_LOG, GPIB_CONF and AWK might be defined via compiler flags -
-   otherwise define it here */
-
-#if defined GPIB_LOG
-#define GPIB_LOG_FILE GPIB_LOG
-#else
-#define GPIB_LOG_FILE  "/tmp/gpib.log"
-#endif
-
-
 #define DMA_SIZE 64512    /* compare this with entry in /etc/gpib.conf ! */
 
 

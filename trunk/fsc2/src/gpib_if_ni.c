@@ -106,7 +106,7 @@ int num_init_devices = 0;
 /*  * FAILURE: error, GPIB bus can't be used                               */
 /*-------------------------------------------------------------------------*/
 
-int gpib_init( char *log_file_name, int log_level )
+int gpib_init( const char *log_file_name, int log_level )
 {
 	int i;
 

@@ -99,11 +99,10 @@ GPIB_DEV *gpib_dev_list = NULL; /* list of symbolic names of devices etc. */
 /* of the log file remains unchanged!).                                    */
 /* In order to make opening the log file with write access work for all    */
 /* users it should be created previously and be given the proper access    */
-/* permissions, i.e. r and w for everyone .                                */
+/* permissions, i.e. r and w for everyone.                                 */
 /* ->                                                                      */
 /*  * Pointer to the name of log file - if the pointer is NULL or does not */
-/*    point to a non-empty string the default log file name defined by     */
-/*    GPIB_LOG_FILE will be used.                                          */
+/*    point to a non-empty string stderr used.                             */
 /*  * log level, either LL_NONE, LL_ERR, LL_CE or LL_ALL                   */
 /*    (if log level is LL_NONE 'log_file_name' is not used at all)         */
 /* <-                                                                      */
