@@ -63,3 +63,34 @@ inline void no_query_possible( const char *device_name )
 			"in the EXPERIMENT section.\n", device_name, Cur_Func );
 	THROW( EXCEPTION )
 }
+
+
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+
+inline long get_int( Var *v, const char *snippet, const char *device_name )
+{
+	vars_check( v, INT_VAR | FLOAT_VAR );
+
+	if ( v->type == FLOAT_VAR )
+		eprint( WARN, SET, "%s: Floating point number used as %s in %s().\n",
+				snippet, device_name, Cur_Func );
+
+	return v->type == INT_VAR ? v->val.lval : ( long ) v->val.dval;
+}
+
+
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+
+inline double get_double( Var *v, const char *snippet,
+						  const char *device_name )
+{
+	vars_check( v, INT_VAR | FLOAT_VAR );
+
+	if ( v->type == INT_VAR )
+		eprint( WARN, SET, "Integer value used as %s in %s().\n",
+				snippet, device_name, Cur_Func );
+
+	return VALUE( v );
+}

@@ -262,13 +262,7 @@ Var *lockin_get_adc_data( Var *v )
 	long port;
 
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
-
-	if ( v->type == FLOAT_VAR )
-		eprint( WARN, SET, "%s: Floating point number used as ADC port "
-				"number in %s().\n", DEVICE_NAME, Cur_Func );
-
-	port = v->type == INT_VAR ? v->val.lval : ( long ) v->val.dval;
+	port = get_int( v, "ADC port number", DEVICE_NAME );
 
 	if ( port < 1 || port > 4 )
 	{
@@ -315,11 +309,7 @@ Var *lockin_sensitivity( Var *v )
 				return vars_push( FLOAT_VAR, sr510_get_sens( ) );
 		}
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
-	if ( v->type == INT_VAR )
-		eprint( WARN, SET, "Integer value used as sensitivity in %s().\n",
-				DEVICE_NAME, Cur_Func );
-	sens = VALUE( v );
+	sens = get_double( v, "sensitivity", DEVICE_NAME );
 
 	too_many_arguments( v, DEVICE_NAME );
 	
@@ -427,11 +417,7 @@ Var *lockin_time_constant( Var *v )
 				return vars_push( FLOAT_VAR, sr510_get_tc( ) );
 		}
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
-	if ( v->type == INT_VAR )
-		eprint( WARN, SET, "%s: Integer value used as time constant "
-				"in %s().\n", DEVICE_NAME, Cur_Func );
-	tc = VALUE( v );
+	tc = get_double( v, "time constant", DEVICE_NAME );
 
 	too_many_arguments( v, DEVICE_NAME );
 
@@ -534,11 +520,7 @@ Var *lockin_phase( Var *v )
 
 	/* Otherwise set phase to value passed to the function */
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
-	if ( v->type == INT_VAR )
-		eprint( WARN, SET, "%s: Integer value used as phase in %s().\n",
-				DEVICE_NAME, Cur_Func );
-	phase = VALUE( v );
+	phase = get_double( v, "phase", DEVICE_NAME );
 
 	too_many_arguments( v, DEVICE_NAME );
 	
@@ -616,12 +598,7 @@ Var *lockin_dac_voltage( Var *v )
 
 	/* First argument must be the channel number (5 or 6) */
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
-	if ( v->type == FLOAT_VAR )
-		eprint( WARN, SET, "%s: Floating point number used as DAC channel "
-				"number in %s().\n", DEVICE_NAME, Cur_Func );
-
-	channel = v->type == INT_VAR ? v->val.lval : ( long ) v->val.dval;
+	channel = get_int( v, "DAC channel number", DEVICE_NAME );
 
 	if ( channel < first_DAC_port || channel > last_DAC_port )
 	{
@@ -649,12 +626,7 @@ Var *lockin_dac_voltage( Var *v )
 
 	/* Second argument must be a voltage between -10.24 V and +10.24 V */
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
-	if ( v->type == INT_VAR )
-		eprint( WARN, SET, "%s: Integer value used as DAC voltage in %s().\n",
-				DEVICE_NAME, Cur_Func );
-
-	voltage = VALUE( v );
+	voltage = get_double( v, "DAC voltage", DEVICE_NAME );
 
 	too_many_arguments( v, DEVICE_NAME );
 
