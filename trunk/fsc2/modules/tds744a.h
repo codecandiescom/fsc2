@@ -98,8 +98,11 @@ Var *digitizer_get_channel_number( Var *v );
 Var *digitizer_trigger_channel( Var *v );
 Var *digitizer_start_acquisition( Var *v );
 Var *digitizer_get_area( Var *v );
+Var *digitizer_get_area_fast( Var *v );
 Var *digitizer_get_curve( Var *v );
+Var *digitizer_get_curve_fast( Var *v );
 Var *digitizer_get_amplitude( Var *v );
+Var *digitizer_get_amplitude_fast( Var *v );
 
 
 /* declaration of internally used functions */

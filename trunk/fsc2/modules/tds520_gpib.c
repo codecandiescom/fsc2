@@ -533,13 +533,26 @@ bool tds520_start_aquisition( void )
 /*-----------------------------------------------------------------*/
 /*-----------------------------------------------------------------*/
 
-double tds520_get_area( int channel, WINDOW *w )
+double tds520_get_area( int channel, WINDOW *w, bool use_cursor )
 {
 	double *data, area;
 	long length, i;
 
 
-	tds520_get_curve( channel, w, &data, &length );
+	/* If asked to simulate using the cursors (as may be used with the newer
+	   oszilloscopes) by setting the cursors to the start and end position
+	   of the window */
+
+	if ( use_cursor )
+	{
+		tds520_set_cursor( 1, w != NULL ?
+						   w->start : ( - tds520.trig_pos * window ) );
+		tds520_set_cursor( 2, w != NULL ?
+						   w->start + w->width :
+						   ( ( 1.0 - tds520.trig_pos ) * window ));
+	}
+
+	tds520_get_curve( channel, w, &data, &length, UNSET );
 
 	for ( area = 0.0, i = 0; i < length; i++ )
 		area += data[ i ];
@@ -555,7 +568,8 @@ double tds520_get_area( int channel, WINDOW *w )
 /*-----------------------------------------------------------------*/
 /*-----------------------------------------------------------------*/
 
-bool tds520_get_curve( int channel, WINDOW *w, double **data, long *length )
+bool tds520_get_curve( int channel, WINDOW *w, double **data, long *length,
+					   bool use_cursor )
 {
 	char cmd[ 40 ];
 	char reply[ 10 ];
@@ -566,6 +580,19 @@ bool tds520_get_curve( int channel, WINDOW *w, double **data, long *length )
 
 
 	assert( channel >= 0 && channel < TDS520_AUX1 );
+
+	/* If asked to simulate using the cursors (as may be used with the newer
+	   oszilloscopes) by setting the cursors to the start and end position
+	   of the window */
+
+	if ( use_cursor )
+	{
+		tds520_set_cursor( 1, w != NULL ?
+						   w->start : ( - tds520.trig_pos * window ) );
+		tds520_set_cursor( 2, w != NULL ?
+						   w->start + w->width :
+						   ( ( 1.0 - tds520.trig_pos ) * window ));
+	}
 
 	/* Calculate the scale factor for converting the data returned by the
 	   digitizer (2-byte integers) into real voltage levels */
@@ -666,13 +693,26 @@ bool tds520_get_curve( int channel, WINDOW *w, double **data, long *length )
 /*-----------------------------------------------------------------*/
 /*-----------------------------------------------------------------*/
 
-double tds520_get_amplitude( int channel, WINDOW *w )
+double tds520_get_amplitude( int channel, WINDOW *w, bool use_cursor )
 {
 	double *data, min, max;
 	long length, i;
 
 
-	tds520_get_curve( channel, w, &data, &length );
+	/* If asked to simulate using the cursors (as may be used with the newer
+	   oszilloscopes) by setting the cursors to the start and end position
+	   of the window */
+
+	if ( use_cursor )
+	{
+		tds520_set_cursor( 1, w != NULL ?
+						   w->start : ( - tds520.trig_pos * window ) );
+		tds520_set_cursor( 2, w != NULL ?
+						   w->start + w->width :
+						   ( ( 1.0 - tds520.trig_pos ) * window ));
+	}
+
+	tds520_get_curve( channel, w, &data, &length, OFF );
 
 	min = HUGE_VAL;
 	max = - HUGE_VAL;

@@ -9,6 +9,9 @@
 #include "tds754a.h"
 
 
+static Var *get_area( Var *v, bool use_cursor );
+static Var *get_curve( Var *v, bool use_cursor );
+static Var *get_amplitude( Var *v, bool use_cursor );
 
 
 /*******************************************/
@@ -422,6 +425,16 @@ Var *digitizer_start_acquisition( Var *v )
 
 Var *digitizer_get_area( Var *v )
 {
+	return get_area( v, SET );
+}
+
+Var *digitizer_get_area_fast( Var *v )
+{
+	return get_area( v, UNSET );
+}
+
+static Var *get_area( Var *v, bool use_cursor )
+{
 	WINDOW *w;
 	int ch;
 
@@ -497,7 +510,7 @@ Var *digitizer_get_area( Var *v )
 	   value */
 
 	if ( I_am == CHILD )
-		return vars_push( FLOAT_VAR, tds754a_get_area( ch, w ) );
+		return vars_push( FLOAT_VAR, tds754a_get_area( ch, w, use_cursor ) );
 
 	return vars_push( FLOAT_VAR, 1.234e-8 );
 }
@@ -507,6 +520,16 @@ Var *digitizer_get_area( Var *v )
 /*-------------------------------------------------------------------*/
 
 Var *digitizer_get_curve( Var *v )
+{
+	return get_curve( v, SET );
+}
+
+Var *digitizer_get_curve_fast( Var *v, UNSET )
+{
+	return get_curve( v, UNSET );
+}
+
+static Var *get_curve( Var *v, bool use_cursor )
 {
 	WINDOW *w;
 	int ch, i;
@@ -586,7 +609,7 @@ Var *digitizer_get_curve( Var *v )
 
 	if ( I_am == CHILD )
 	{
-		tds754a_get_curve( ch, w, &array, &length );
+		tds754a_get_curve( ch, w, &array, &length, use_cursor );
 		nv = vars_push( FLOAT_TRANS_ARR, array, length );
 		T_free( array );
 		return nv;
@@ -606,6 +629,16 @@ Var *digitizer_get_curve( Var *v )
 /*-------------------------------------------------------------------*/
 
 Var *digitizer_get_amplitude( Var *v )
+{
+	return get_amplitude( v, SET );
+}
+
+Var *digitizer_get_amplitude_fast( Var *v )
+{
+	return get_amplitude( v, UNSET );
+}
+
+static Var *get_amplitude( Var *v, bool use_cursor )
 {
 	WINDOW *w;
 	int ch;
@@ -684,7 +717,8 @@ Var *digitizer_get_amplitude( Var *v )
 
 	if ( I_am == CHILD )
 	{
-		nv = vars_push( FLOAT_VAR, tds754a_get_amplitude( ch, w ) );
+		nv = vars_push( FLOAT_VAR,
+						tds754a_get_amplitude( ch, w, use_cursor ) );
 		return nv;
 	}
 

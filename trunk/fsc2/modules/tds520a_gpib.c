@@ -8,6 +8,10 @@
 #include "gpib_if.h"
 
 
+static double tds720a_get_area_wo_cursor( int channel, WINDOW *w );
+static double tds720a_get_amplitude_wo_cursor( int channel, WINDOW *w );
+
+
 /*-----------------------------------------------------------------*/
 /*-----------------------------------------------------------------*/
 
@@ -573,12 +577,15 @@ bool tds520a_start_aquisition( void )
 /*-----------------------------------------------------------------*/
 /*-----------------------------------------------------------------*/
 
-double tds520a_get_area( int channel, WINDOW *w )
+double tds520a_get_area( int channel, WINDOW *w, bool use_cursor )
 {
 	char cmd[ 50 ] = "MEASU:IMM:SOURCE ";
 	char reply[ 40 ];
 	long length = 40;
 
+
+	if ( ! use_cursor )
+		return tds720a_get_area_wo_cursor( channel, w );
 
 	/* Set measurement type to area */
 
@@ -630,12 +637,37 @@ double tds520a_get_area( int channel, WINDOW *w )
 }
 
 
+/*-------------------------------------------------------------------*/
+/* Measures the area without using te buit-in measurement method but */
+/* by fetching the curve in the window and integrating it 'by hand'. */
+/*-------------------------------------------------------------------*/
+
+static double tds720a_get_area_wo_cursor( int channel, WINDOW *w )
+{
+	double *data, area;
+	long length, i;
+
+
+	tds720a_get_curve( channel, w, &data, &length, UNSET );
+
+	for ( area = 0.0, i = 0; i < length; i++ )
+		area += data[ i ];
+
+	T_free( data );
+
+	/* Return the integrated area, multiplied by the the time per point */
+
+	return area * tds720a.timebase / TDS_POINTS_PER_DIV;
+}
+
+
 /*-----------------------------------------------------------------*/
 /*-----------------------------------------------------------------*/
 
-bool tds520a_get_curve( int channel, WINDOW *w, double **data, long *length )
+bool tds520a_get_curve( int channel, WINDOW *w, double **data, long *length,
+						bool use_cursor)
 {
-	char cmd[ 40 ];
+	char cmd[ 50 ];
 	char reply[ 10 ];
 	long len = 10;
 	char *buffer;
@@ -660,9 +692,18 @@ bool tds520a_get_curve( int channel, WINDOW *w, double **data, long *length )
 		tds520a.data_source = channel;
 	}
 
-	/* Set the cursors */
+	/* Set the cursors or start and end point of interval */
 
-	tds520a_set_curve_window( w );
+	if ( use_cursors )
+		tds720a_set_curve_window( w );
+	else
+	{
+		sprintf( cmd, "DAT:START %ld;:DAT:STOP %ld\n", 
+				 w != NULL ? w->start_num : 1,
+				 w != NULL ? w->end_num : tds720a.rec_len );
+		if ( gpib_write( tds720a.device, cmd ) == FAILURE )
+			tds720a_gpib_failure( );
+	}
 
 	/* Wait for measurement to finish (use polling) */
 
@@ -738,12 +779,15 @@ bool tds520a_get_curve( int channel, WINDOW *w, double **data, long *length )
 /*-----------------------------------------------------------------*/
 /*-----------------------------------------------------------------*/
 
-double tds520a_get_amplitude( int channel, WINDOW *w )
+double tds520a_get_amplitude( int channel, WINDOW *w, bool use_cursor )
 {
 	char cmd[ 50 ] = "MEASU:IMM:SOURCE ";
 	char reply[ 40 ];
 	long length = 40;
 
+
+	if ( ! use_cursor )
+		return tds720a_get_amplitude_wo_cursor( channel, w );
 
 	/* Set measurement type to area */
 
@@ -792,4 +836,33 @@ double tds520a_get_amplitude( int channel, WINDOW *w )
 
 	reply[ length - 1 ] = '\0';
 	return T_atof( reply );
+}
+
+
+/*-------------------------------------------------------------------*/
+/* Gets the amplitude without the built-in measurement method but by */
+/* fetching the curve in the window and integrating it 'by hand'.    */
+/*-------------------------------------------------------------------*/
+
+static double tds720a_get_amplitude_wo_cursor( int channel, WINDOW *w )
+{
+	double *data, min, max;
+	long length, i;
+
+
+	tds720a_get_curve( channel, w, &data, &length, UNSET );
+
+	min = HUGE_VAL;
+	max = - HUGE_VAL;
+	for ( i = 0; i < length; i++ )
+	{
+		max = d_max( data[ i ], max );
+		min = d_min( data[ i ], min );
+	}
+
+	T_free( data );
+
+	/* Return the difference between highest and lowest value */
+
+	return max - min;
 }
