@@ -110,6 +110,13 @@ bool dg2020_set_pulse_function( long pnum, int function )
 		THROW( EXCEPTION );
 	}
 
+	if ( dg2020.function[ function ].num_pods == 0 )
+	{
+		print( FATAL, "No pods have been assigned to function '%s' needed "
+			   "for pulse #%ld.\n", dg2020.function[ function ].name, pnum );
+		THROW( EXCEPTION );
+	}
+
 	if ( p->is_pos && p->pos + p->function->delay < 0 )
 	{
 		print( FATAL, "Start position for pulse #%ld is nagtive.\n", pnum );
@@ -118,7 +125,6 @@ bool dg2020_set_pulse_function( long pnum, int function )
 
 	p->function = dg2020.function + function;
 	p->is_function = SET;
-	p->function->is_needed = SET;
 
 	return OK;
 }
