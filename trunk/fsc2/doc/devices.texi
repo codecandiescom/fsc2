@@ -4485,7 +4485,7 @@ like saturation of the region of the chip.
 If called with no argument the function returns the number @code{0}
 when hardware binning is used and @code{1} for software binning.
 
-To set the bonning method you must specify either @code{0} or one of the
+To set the binning method you must specify either @code{0} or one of the
 strings @code{"HARDWARE"} or @code{"HARD"} for use of hardware binning
 or the number @code{1} or one of the strings @code{"SOFTWARE"} or
 @code{"SOFT"} for software binning.
