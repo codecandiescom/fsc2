@@ -17,6 +17,8 @@ bool tds754a_init( const char *name )
 	double cp1, cp2;
 
 
+	tds754a.meas_source = -1;
+
 	if ( gpib_init_device( name, &tds754a.device ) == FAILURE )
         return FAIL;
 
@@ -447,7 +449,7 @@ bool tds754a_set_cursor( int cur_num, double pos )
 
 bool tds754a_set_track_cursors( bool flag )
 {
-	char cmd[ 20 ] = "CURS:MODE  ";
+	char cmd[ 20 ] = "CURS:MODE ";
 
 	strcat( cmd, flag ? "TRAC" : "IND" );
     if ( gpib_write( tds754a.device, cmd, strlen( cmd ) ) == FAILURE )
@@ -602,7 +604,7 @@ double tds754a_get_area( int channel, WINDOW *w )
 
 	/* set measurement type to area */
 
-    if ( gpib_write( tds754a.device, "MEASU:IMM:TYP AREA", 18 ) == FAILURE )
+    if ( gpib_write( tds754a.device, "MEASU:IMM:TYP ARE", 17 ) == FAILURE )
 		tds754a_gpib_failure( );
 
 	assert( channel >= 0 && channel < TDS754A_AUX );

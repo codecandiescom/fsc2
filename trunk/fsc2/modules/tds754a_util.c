@@ -277,7 +277,7 @@ void tds754a_set_window( WINDOW *w )
 
 	if ( tds754a.is_equal_width )
 	{
-		if ( tds754a.cursor_pos == w->start )
+		if ( tds754a.cursor_pos != w->start )
 		{
 			tds754a_set_cursor( 1, w->start );
 			tds754a.cursor_pos = w->start;
