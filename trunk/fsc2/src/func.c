@@ -829,6 +829,10 @@ Var *f_print( Var *v )
 						strcpy( ep, "%s\x7F" );
 						eprint( NO_ERROR, cp, cv->val.sptr );
 						break;
+
+					default :
+						eprint( FATAL, "XXXXXX\n" );
+						THROW( EXCEPTION );
 				}
 
 			cv = cv->next;
