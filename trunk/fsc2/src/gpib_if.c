@@ -59,18 +59,18 @@
 /*------------------------------------------------------------------------*/
 
 
-int  gpib_init_controller( void );
-void gpib_init_log( char **log_file_name );
-void gpib_set_msg( const char *msg, int device );
-void gpib_read_end( int device, char *buffer, long received, long expected );
-void gpib_log_date( void );
-void gpib_log_error( const char *type );
-void gpib_write_start( int device, const char *buffer, long length );
-void gpib_log_function_start( const char *function, int device );
-void gpib_log_function_end( const char *function, int device );
-bool gpib_get_dev_add( int device );
-int  gpib_get_max_dev( void );
-char*gpib_get_conf_file( char *file );
+int   gpib_init_controller( void );
+void  gpib_init_log( char **log_file_name );
+void  gpib_set_msg( const char *msg, int device );
+void  gpib_read_end( int device, char *buffer, long received, long expected );
+void  gpib_log_date( void );
+void  gpib_log_error( const char *type );
+void  gpib_write_start( int device, const char *buffer, long length );
+void  gpib_log_function_start( const char *function, int device );
+void  gpib_log_function_end( const char *function, int device );
+bool  gpib_get_dev_add( int device );
+int   gpib_get_max_dev( void );
+char *gpib_get_conf_file( char *file );
 
 
 
