@@ -4414,15 +4414,24 @@ coordinate of the lower left hand pixel of the CCD chip is @code{1,1},
 the coordinates of the upper right hand corner are the width and height
 of the chip.
 
-If there is an argument this must be an array with 4 elements that
-specify the ROI as explained above. Further calls of the functions
+If there is an argument this must be either an array with 4 elements that
+specify the ROI as explained above or the string @code{"ALL"} to set the
+ROI to the complete area of the CCD chip. Further calls of the functions
 @code{ccd_camera_get_image()} and @code{ccd_camera_get_spectrum()} will
 return pictures or spectra from the ROI specified by the command. If one
 of the elements of the array specifying the ROI is @code{0} the
 corresponding setting for the ROI remains unchanged.
 
-When no ROI has been specified per default the whole area of the CCD
-chip is used as the ROI.
+If the ROI sizes do not fit the binning factors (i.e. the width or
+height in pixels of the ROI isn't an integer multiple of the
+corresponding binning factor) the upper right hand corner of the ROI
+gets adjusted automatically when an image or spectrum is fetched from
+the camera by reducing the ROI - only when the width or height would drop
+below 1 the corresponing binning factors is reduced to guarantee that
+at least a single value for the direction gets returned.
+
+The ROI setting is stored, so when a new experiment is started values
+last set for the ROI are used.
 
 
 @anchor{ccd_camera_binning}
@@ -4445,10 +4454,11 @@ to setting both binning values to 1.
 
 If the number of pixels of the region of interest (ROI) in one of the
 directions isn't a integer multiple of the corresponding binning size
-the ROI is automatically reduced to an multiple of the binning size
-(only if the ROI size in a direction is smaller than the binning size
-the ROI size is expanded to the binning size, resulting in a width of
-one of the returned image or spectrum for this direction).
+the ROI is automatically reduced to an multiple of the binning size when
+the next image or spectrum is fetched from the camera. Only if the ROI
+size in a direction is smaller than the binning size the ROI size is
+expanded to the binning size, resulting in a width of one of the
+returned image or spectrum for this direction.
 
 The function also accepts a second parameter, the binning method to be
 used. You can use either hardware binning, i.e.@: binning is done by the

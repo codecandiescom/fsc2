@@ -195,61 +195,77 @@ Var *ccd_camera_roi( Var *v )
 	if ( v == NULL )
 		return vars_push( INT_ARR, vroi, 4 );
 
-	vars_check( v, INT_ARR | FLOAT_ARR );
+	vars_check( v, INT_ARR | FLOAT_ARR | STRING_VAR );
 
-	if ( v->type == FLOAT_ARR )
-		print( WARN, "Float values used for region of interest.\n" );
-
-	if ( v->len > 4 )
-		print( WARN, "Argument array has more than the required 4 elements, "
-			   "discarding superfluous ones.\n" );
-
-	for ( i = 0; i < 4 && i < v->len; i++ )
-		if ( v->type == INT_ARR && v->val.lpnt[ i ] != 0 )
-			vroi[ i ] = v->val.lpnt[ i ];
-		else if ( v->type == FLOAT_ARR && v->val.dpnt[ i ] != 0.0 )
-			vroi[ i ] = lrnd( v->val.dpnt[ i ] );
-
-	/* For values of 0 we use the old ROI value */
-
-	for ( i = 0; i < 4; i++ )
-		if ( vroi[ i ] == 0 )
-			vroi[ i ] = rs_spec10->ccd.roi[ i ] + 1;
-
-	/* Check that the arguments are reasonable */
-
-	for ( i = 0; i < 2; i++ )
+	if ( v->type == STRING_VAR )
 	{
-		if ( vroi[ i ] < 0 )
+		if ( ! strcasecmp( v->val.sptr, "ALL" ) )
 		{
-			print( FATAL, "Negative LL%c value.\n", 'X' + i );
+			print( FATAL, "Invalid argument string '%s'.\n", v->val.sptr );
 			THROW( EXCEPTION );
 		}
 
-		if ( vroi[ i ] > ( long ) rs_spec10->ccd.max_size[ i ] )
-		{
-			print( FATAL, "LL%c larger than CCD %c-size.\n",
-				   'X' + i, 'X' + i );
-			THROW( EXCEPTION );
-		}
+		vroi[ X ] = vroi[ Y ] = 1;
+		vroi[ X + 2 ] = ( long ) rs_spec10->ccd.max_size[ X ];
+		vroi[ Y + 2 ] = ( long ) rs_spec10->ccd.max_size[ Y ];
+	}
+	else
+	{
+		if ( v->type == FLOAT_ARR )
+			print( WARN, "Float values used for region of interest.\n" );
 
-		if ( vroi[ i + 2 ] < 0 )
-		{
-			print( FATAL, "Negative UR%c value.\n", 'X' + i );
-			THROW( EXCEPTION );
-		}
+		if ( v->len > 4 )
+			print( WARN, "Argument array has more than the required 4 "
+				   "elements, discarding superfluous ones.\n" );
 
-		if ( vroi[ i + 2 ] > ( long ) rs_spec10->ccd.max_size[ i ] )
-		{
-			print( FATAL, "UR%c larger than CCD %c-size.\n",
-				   'X' + i, 'X' + i );
-			THROW( EXCEPTION );
-		}
+		for ( i = 0; i < 4 && i < v->len; i++ )
+			if ( v->type == INT_ARR && v->val.lpnt[ i ] != 0 )
+				vroi[ i ] = v->val.lpnt[ i ];
+			else if ( v->type == FLOAT_ARR && v->val.dpnt[ i ] != 0.0 )
+				vroi[ i ] = lrnd( v->val.dpnt[ i ] );
 
-		if ( vroi[ i ] > vroi[ i + 2 ] )
+		/* For values of 0 we use the old ROI value */
+
+		for ( i = 0; i < 4; i++ )
+			if ( vroi[ i ] == 0 )
+				vroi[ i ] = rs_spec10->ccd.roi[ i ] + 1;
+
+		/* Check that the arguments are reasonable */
+
+		for ( i = 0; i < 2; i++ )
 		{
-			print( FATAL, "LL%c larger than UR%c value.\n", 'X' + i, 'X' + i );
-			THROW( EXCEPTION );
+			if ( vroi[ i ] < 0 )
+			{
+				print( FATAL, "Negative LL%c value.\n", 'X' + i );
+				THROW( EXCEPTION );
+			}
+
+			if ( vroi[ i ] > ( long ) rs_spec10->ccd.max_size[ i ] )
+			{
+				print( FATAL, "LL%c larger than CCD %c-size.\n",
+					   'X' + i, 'X' + i );
+				THROW( EXCEPTION );
+			}
+
+			if ( vroi[ i + 2 ] < 0 )
+			{
+				print( FATAL, "Negative UR%c value.\n", 'X' + i );
+				THROW( EXCEPTION );
+			}
+
+			if ( vroi[ i + 2 ] > ( long ) rs_spec10->ccd.max_size[ i ] )
+			{
+				print( FATAL, "UR%c larger than CCD %c-size.\n",
+					   'X' + i, 'X' + i );
+				THROW( EXCEPTION );
+			}
+
+			if ( vroi[ i ] > vroi[ i + 2 ] )
+			{
+				print( FATAL, "LL%c larger than UR%c value.\n",
+					   'X' + i, 'X' + i );
+				THROW( EXCEPTION );
+			}
 		}
 	}
 
@@ -288,7 +304,7 @@ Var *ccd_camera_binning( Var *v )
 	vars_check( v, INT_ARR | FLOAT_ARR );
 
 	if ( v->type == FLOAT_ARR )
-		print( WARN, "Float values used for binning.\n" );
+		print( WARN, "Float values used as binning factors.\n" );
 
 	if ( v->len > 2 )
 		print( WARN, "Argument array has more than the required 2 elements, "
@@ -546,6 +562,13 @@ Var *ccd_camera_get_image( Var *v )
 				 rs_spec10->ccd.roi[ X ] + width * rs_spec10->ccd.bin[ X ] - 1;
 	rs_spec10->ccd.roi[ Y + 2 ] =
 				rs_spec10->ccd.roi[ Y ] + height * rs_spec10->ccd.bin[ Y ] - 1;
+
+	if ( rs_spec10->ccd.roi[ X + 2 ] != urc[ X ] ||
+		 rs_spec10->ccd.roi[ Y + 2 ] != urc[ Y ] )
+		print( SEVERE, "Upper right hand corner of ROI had to changed from "
+			   "(%u, %u) to (%u, %u) to fit the binning factors.\n",
+			   urc[ X ] + 1, urc[ Y ] + 1, rs_spec10->ccd.roi[ X + 2 ] + 1,
+			   rs_spec10->ccd.roi[ Y + 2 ] + 1 );
 
 	/* Now get the picture */
 

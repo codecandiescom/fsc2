@@ -250,7 +250,7 @@ static void rs_spec10_ccd_init( void )
 
 		if ( i == exp_res_count )
 		{
-			print( FATAL, "Can't determine an usuable value for the exposure "
+			print( FATAL, "Can't determine an usable value for the exposure "
 				   "time resolution.\n" );
 			THROW( EXCEPTION );
 		}
@@ -335,12 +335,7 @@ static void rs_spec10_ccd_init( void )
 		THROW( EXCEPTION );
 	}
 
-	rs_spec10->ccd.clear_cycles = CCD_DEFAULT_CLEAR_CYCLES;
 	rs_spec10_clear_cycles( rs_spec10->ccd.clear_cycles );
-
-	if ( ! pl_set_param( rs_spec10->handle, PARAM_CLEAR_CYCLES,
-						 &rs_spec10->ccd.clear_cycles ) )
-		rs_spec10_error_handling( );
 }
 
 
@@ -487,7 +482,7 @@ uns16 *rs_spec10_get_pic( uns32 *size )
 
 	fsc2_assert( region.s2 <= rs_spec10->ccd.max_size[ X ] &&
 				 region.s2 > region.s1 &&
-				 egion.p2 <= rs_spec10->ccd.max_size[ Y ] &&
+				 region.p2 <= rs_spec10->ccd.max_size[ Y ] &&
 				 region.p2 > region.p1 &&
 				 ( region.s2 - region.s1 + 1 ) % region.sbin == 0 &&
 				 ( region.p2 - region.p1 + 1 ) % region.pbin == 0 );
