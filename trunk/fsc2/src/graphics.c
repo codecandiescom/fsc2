@@ -44,17 +44,18 @@ void start_graphics( void )
 
 	run_form = create_form_run( );
 	fl_set_object_helper( run_form->stop, "Stop the running program" );
-	fl_set_object_helper( run_form->undo_button, "Undo last rescaling" );
+	fl_set_object_helper( run_form->undo_button,
+						  "Undo last rescaling operation" );
 	fl_set_object_helper( run_form->full_scale_button,
 						  "Switch off automatic rescaling" );
 	fl_set_object_helper( run_form->curve_1_button, 
-						  "Extempt curve 1 from rescaling" );
+						  "Extempt curve 1 from\nrescaling operations" );
 	fl_set_object_helper( run_form->curve_2_button, 
-						  "Extempt curve 2 from rescaling" );
+						  "Extempt curve 2 from\nrescaling operations" );
 	fl_set_object_helper( run_form->curve_3_button, 
-						  "Extempt curve 3 from rescaling" );
+						  "Extempt curve 3 from\nrescaling operations" );
 	fl_set_object_helper( run_form->curve_4_button, 
-						  "Extempt curve 4 from rescaling" );
+						  "Extempt curve 4 from\nrescaling operations" );
 
 	/* fdesign is unable to set the box type attributes for canvases... */
 
@@ -1261,7 +1262,7 @@ void fs_button_callback( FL_OBJECT *a, long b )
 		{
 			G.is_fs = UNSET;
 			fl_set_object_helper( run_form->full_scale_button,
-								  "Rescale curves to fit into window\n"
+								  "Rescale curves to fit into the window\n"
 								  "and switch on automatic rescaling" );
 		}
 	}
@@ -1307,6 +1308,16 @@ void fs_rescale_1d( void )
 				max = d_max( data, max );
 				min = d_min( data, min );
 			}
+	}
+
+	/* If there are no points yet... */
+
+	if ( min == 1.0 && max == 0.0 )
+	{
+		G.rw_y_min = HUGE_VAL;
+		G.rw_y_max = - HUGE_VAL;
+		G.is_scale_set = UNSET;
+		return;
 	}
 
 	/* Calculate new real world maximum and minimum */
@@ -1363,12 +1374,45 @@ void curve_button_callback( FL_OBJECT *obj, long data )
 	G.curve[ data - 1 ]->active ^= SET;
 
 	if ( fl_get_button( obj ) )
-		sprintf( hstr, "Extempt curve %ld from rescaling", data );
+		sprintf( hstr, "Extempt curve %ld from\nrescaling operations", data );
 	else
-		sprintf( hstr, "Apply rescaling to curve %ld", data );
+		sprintf( hstr, "Apply rescaling operations\nto curve %ld", data );
 
 	fl_set_object_helper( obj, hstr );
 
 	redraw_canvas( &G.x_axis );
 	redraw_canvas( &G.y_axis );
+}
+
+
+/*----------------------------------------------------------*/
+/*----------------------------------------------------------*/
+
+void clear_curve( long curve )
+{
+	long i;
+	Curve_1d *cv = G.curve[ curve ];
+
+
+	if ( curve >= G.nc )
+	{
+		if ( TEST_RUN )
+			eprint( WARN, "%s:%ld: Can't clear curve %ld, curve does not "
+					"exist.\n", Fname, Lc, curve );
+		return;
+	}
+
+	if ( TEST_RUN )
+		return;
+
+	if ( I_am == PARENT )
+	{
+		for ( i = 0; i < G.nx; i++ )
+			cv->points[ i ].exist = UNSET;
+		cv->count = 0;
+	}
+	else
+		writer( C_CLEAR_CURVE, curve );
+
+	redraw_canvas( &G.canvas );
 }
