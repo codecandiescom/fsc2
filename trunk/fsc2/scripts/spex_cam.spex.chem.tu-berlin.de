@@ -174,9 +174,20 @@ sub store_defs {
 	mkdir "$ENV{ HOME }/.fsc2", 0777 unless -e "$ENV{ HOME }/.fsc2";
 	open( $f, ">$ENV{ HOME }/.fsc2/spex_cam" ) or return;
 	$geom = "+0+0" unless defined $geom and $geom =~ /^[-+]\d+[-+]\d+$/;
-	print $f "# Do not edit - created automatically!\n$geom\n" .
-		     "$cc_line\n$mc_line\n$sm_line\n$sm_exp_time\n$sm_N_scans\n" .
-			 "$mm_start\n$mm_end\n$mm_overlap\n$mm_exp_time\n$mm_N_scans";
+	print $f <<EOF;
+# Do not edit - created automatically!
+$geom
+$cc_line
+$mc_line
+$sm_line
+$sm_exp_time
+$sm_N_scans
+$mm_start
+$mm_end
+$mm_overlap
+$mm_exp_time
+$mm_N_scans
+EOF
 	close $f;
 }
 
@@ -324,14 +335,16 @@ sub get_line {
 	# Create EDL script for determining the laser line (with three digits
 	# after the decimal point)
 
-	print $f "DEVICES:\n" .
-		     "spex_cd2a;\n" .
-			 "VARIABLES:\n" .
-			 "LL;\n" .
-			 "EXPERIMENT:\n" .
-			 "LL = round( 1000 * monochromator_laser_line( ) );\n" .
-			 "print( \"#.###\", LL / 1000, ( LL % 1000 ) / 100,\n" .
-			 "       ( LL % 100 ) / 10, LL % 10 );\n";
+	print $f <<EOF;
+DEVICES:
+spex_cd2a;
+VARIABLES:
+LL;
+EXPERIMENT:
+LL = round( 1000 * monochromator_laser_line( ) );
+print( "#.###", LL / 1000, ( LL % 1000 ) / 100,
+       ( LL % 100 ) / 10, LL % 10 );
+EOF
 
 	close $f;
 
@@ -369,10 +382,12 @@ sub set_line {
 
 	$f->autoflush( 1 );
 
-	print $f "DEVICES:\n" .
-			 "spex_cd2a;\n" .
-			 "EXPERIMENT:\n" .
-			 "monochromator_laser_line( $laser_line cm^-1 );\n";
+	print $f <<EOF;
+DEVICES:
+spex_cd2a;
+EXPERIMENT:
+monochromator_laser_line( $laser_line cm^-1 );
+EOF
 
 	close $f;
 	my $g;
@@ -1518,13 +1533,15 @@ sub check_pixel_diff {
 
 	# Create EDL script for determining the pixel difference
 
-	print $f "DEVICES:\n" .
-		     "spex_cd2a;\n" .
-			 "VARIABLES:\n" .
-			 "calib[ 2 ];\n" .
-			 "EXPERIMENT:\n" .
-			 "calib = monochromator_calibrate( );\n" .
-			 "print( \"#\", calib[ 2 ] * 1000 );\n";
+	print $f <<EOF;
+DEVICES:
+spex_cd2a;
+VARIABLES:
+calib[ 2 ];
+EXPERIMENT:
+calib = monochromator_calibrate( );
+print( "#", calib[ 2 ] * 1000 );
+EOF
 
 	close $f;
 
@@ -1957,6 +1974,7 @@ IF laser_line != 0.0 {
     fsave( F_all, "\\# Laser line        = # cm^-1\\n\\n", laser_line );
 } ELSE {
 	fsave( F_all, "\\n" );
+}
 
 FOR J = 1 : N_Points {
 	fsave( F_all, "# #\\n", wn[ J ], avg[ J ] / I );
@@ -2876,22 +2894,23 @@ sub get {
 	# after the decimal point), the ROI and binning settings, the offset
 	# and the wavenumber width of a single pixel of the camera
 
-	print $f "DEVICES:\n" .
-		     "rs_spec10;\n" .
-		     "spex_cd2a;\n" .
-			 "VARIABLES:\n" .
-			 "LL, ROI[ 4 ], BIN[ 2 ], calib[ 2 ], CCD_size[ 2 ];\n" .
-			 "EXPERIMENT:\n" .
-			 "LL = round( 1000 * monochromator_laser_line( ) );\n" .
-			 "ROI = ccd_camera_roi( );\n" .
-			 "CCD_size = ccd_camera_pixel_area( );\n" .
-			 "BIN = ccd_camera_binning( );\n" .
-			 "calib = monochromator_calibrate( );\n" .
-			 "print( \"#.### # # # # # # # # #\", LL / 1000,\n" .
-             "       ( LL % 1000 ) / 100, ( LL % 100 ) / 10, LL % 10,\n" .
-			 "       ROI[ 1 ], ROI[ 2 ], ROI[ 3 ], ROI[ 4 ],\n" .
-             "       BIN[ 1 ], BIN[ 2 ], calib[ 1 ], calib[ 2 ],\n" .
-			 "       CCD_size[ 1 ] );\n";
+	print $f <<EOF;
+DEVICES:
+rs_spec10;
+spex_cd2a;
+VARIABLES:
+LL, ROI[ 4 ], BIN[ 2 ], calib[ 2 ], CCD_size[ 2 ];
+EXPERIMENT:
+LL = round( 1000 * monochromator_laser_line( ) );
+ROI = ccd_camera_roi( );
+CCD_size = ccd_camera_pixel_area( );
+BIN = ccd_camera_binning( );
+calib = monochromator_calibrate( );
+print( "#.### # # # # # # # # #", LL / 1000,
+       ( LL % 1000 ) / 100, ( LL % 100 ) / 10, LL % 10, ROI[ 1 ], ROI[ 2 ],
+       ROI[ 3 ], ROI[ 4 ], BIN[ 1 ], BIN[ 2 ], calib[ 1 ], calib[ 2 ],
+       CCD_size[ 1 ] );
+EOF
 
 	close $f;
 
