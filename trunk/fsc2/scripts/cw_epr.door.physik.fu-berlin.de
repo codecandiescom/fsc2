@@ -247,6 +247,7 @@ MainLoop;
 
 
 #############################################
+#
 
 sub get_defs {
 
@@ -297,6 +298,7 @@ close F;
 
 
 #############################################
+#
 
 sub store_defs {
 	local *F;
@@ -317,6 +319,7 @@ sub store_defs {
 
 
 #############################################
+#
 
 sub is_numeric {
 
@@ -326,6 +329,7 @@ sub is_numeric {
 
 
 #############################################
+#
 
 sub is_signed_numeric {
 
@@ -335,6 +339,7 @@ sub is_signed_numeric {
 
 
 #############################################
+#
 
 sub write_out {
 
@@ -351,7 +356,11 @@ open( F, "|fsc2_" . lc $how )
 print F
 "DEVICES:\n\n";
 print F "sr510;\nkeithley228a;\n";
-print F lc $lockin, ";\n\n" unless $lockin eq "SR510";
+if ( $lockin eq "SR510" ) {
+	print F "\n";
+} else {
+	print F lc $lockin, ";\n\n";
+}
 
 print F
 "VARIABLES:\n\nI";
@@ -556,6 +565,7 @@ sub do_checks {
 
 
 #############################################
+#
 
 sub show_message {
 	my $text = shift;
