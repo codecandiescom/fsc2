@@ -143,6 +143,12 @@ Var *digitizer_define_window( Var *v )
 	{
 			vars_check( v, INT_VAR | FLOAT_VAR );
 			win_width = VALUE( v );
+			if ( win_width <= 0.0 )
+			{
+				eprint( FATAL, "%s:%ld: %s: Zero or negative width for window "
+						"%ld\n",  Fname, Lc, DEVICE_NAME, win_num );
+				THROW( EXCEPTION );
+			}
 			is_win_width = SET;
 
 			v = vars_pop( v );

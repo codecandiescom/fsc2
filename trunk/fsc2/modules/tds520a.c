@@ -93,8 +93,8 @@ Var *digitizer_define_window( Var *v )
 	if ( v == NULL || v->next == NULL )
 	{
 		eprint( FATAL, "%s:%ld: %s: Missing parameter in call of function "
-				"`digitizer_define_window', need at least two.\n",
-				Fname, Lc, DEVICE_NAME );
+				"`digitizer_define_window', need at least window number and "
+				"start position.\n", Fname, Lc, DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
 
@@ -143,6 +143,13 @@ Var *digitizer_define_window( Var *v )
 	{
 			vars_check( v, INT_VAR | FLOAT_VAR );
 			win_width = VALUE( v );
+
+			if ( win_width <= 0.0 )
+			{
+				eprint( FATAL, "%s:%ld: %s: Zero or negative width for window "
+						"%ld\n",  Fname, Lc, DEVICE_NAME, win_num );
+				THROW( EXCEPTION );
+			}
 			is_win_width = SET;
 
 			v = vars_pop( v );

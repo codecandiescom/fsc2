@@ -141,7 +141,8 @@ void tds754a_do_pre_exp_checks( void )
 		dtb = tds754a.timebase;
 		fac = 1.0;
 
-		while ( fabs( dcs ) < 1.0 || fabs( dtb ) < 1.0 )
+		while ( ( fabs( dcs ) != 0.0 && fabs( dcs ) < 1.0 ) ||
+				fabs( dtb ) < 1.0 )
 		{
 			dcs *= 1000.0;
 			dtb *= 1000.0;

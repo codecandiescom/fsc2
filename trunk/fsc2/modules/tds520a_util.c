@@ -141,7 +141,7 @@ void tds520a_do_pre_exp_checks( void )
 		dtb = tds520a.timebase;
 		fac = 1.0;
 
-		while ( ( labs( dcs ) != 0.0 && fabs( dcs ) < 1.0 ) ||
+		while ( ( fabs( dcs ) != 0.0 && fabs( dcs ) < 1.0 ) ||
 				fabs( dtb ) < 1.0 )
 		{
 			dcs *= 1000.0;
