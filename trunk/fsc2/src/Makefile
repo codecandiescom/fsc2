@@ -24,10 +24,15 @@ export headers
 
 
 .SUFFIXES:
-.PHONY: all clean distclean
+.PHONY: all clean distclean pion
 
 
-all: fsc2 fsc2_clean modules
+all:
+	if [ `hostname --fqdn` = "pion.anorg.chemie.uni-frankfurt.de" ]; then \
+		$(MAKE) pion; \
+	fi
+	$(MAKE) fsc2 fsc2_clean modules
+
 
 # make the main program from the c, flex and bison source files
 
@@ -62,6 +67,18 @@ fsc2_clean.c: fsc2_clean.flex $(headers)
 clean:
 	$(RM) $(RMFLAGS) *.o *.output *_parser.c *_parser.h *_lexer.c \
 					 fsc2_clean.c fsc2 fsc2_clean mem *~
+
+
+# unfortunately, for the pion we need a different GPIB interface...
+
+pion:
+	if [ ! -e gpib_if_new.c -a ! -e gpib_if_new.c ]; then \
+		mv gpib_if.c gpib_if_new.c; \
+		mv gpib_if.c gpib_if_new.c; \
+		mv gpib_if_old.c gpib_if.c; \
+		mv gpib_if_old.h gpib_if.h; \
+	fi
+
 
 # don't automatically delete intermediate files created by bison and flex
 

@@ -21,7 +21,7 @@
 
 
 #define SRQ      0x40    /* SRQ bit in device status register */
-#define TIMEOUT  T10s    /* GPIB timeout period set at initialisation */
+#define TIMEOUT  T10s    /* GPIB timeout period set at initialization */
 
 
 #define ON  1
@@ -31,7 +31,7 @@
 #define TEST_BUS_STATE                                               \
         if ( ! gpib_is_active )                                      \
         {                                                            \
-            strcpy( gpib_error_msg, "GPIB bus not initialised.\n" ); \
+            strcpy( gpib_error_msg, "GPIB bus not initialized.\n" ); \
             return FAILURE;                                          \
         }
 
@@ -62,7 +62,7 @@ static char *gpib_get_dev_name( int device );
 
 
 int ll;                         /* log level                              */
-int gpib_is_active = 0;         /* flag, set after initialisation of bus  */
+int gpib_is_active = 0;         /* flag, set after initialization of bus  */
 int controller;                 /* device number assigned to controller   */
 int timeout;                    /* stores actual timeout period           */
 FILE *gpib_log;                 /* file pointer of GPIB log file          */
@@ -71,7 +71,7 @@ GPIB_DEV *gpib_dev_list = NULL; /* list of symbolic names of devices etc. */
 
 
 /*-------------------------------------------------------------------------*/
-/* gpib_init() initialises the GPIB bus by starting the logging mechanism  */
+/* gpib_init() initializes the GPIB bus by starting the logging mechanism  */
 /* and determining the device descriptor of the controller board.          */
 /* *** This function has to be called before any other bus activity ! ***  */
 /* Calling this function a second time without a prior call of             */
@@ -87,7 +87,7 @@ GPIB_DEV *gpib_dev_list = NULL; /* list of symbolic names of devices etc. */
 /*  * log level, either LL_NONE, LL_ERR, LL_CE or LL_ALL                   */
 /*    (if log level is LL_NONE 'log_file_name' is not used at all)         */
 /* <-                                                                      */
-/*  * SUCCESS: bus is initialised                                          */
+/*  * SUCCESS: bus is initialized                                          */
 /*  * FAILURE: error, GPIB bus can't be used                               */
 /*-------------------------------------------------------------------------*/
 
@@ -105,11 +105,11 @@ int gpib_init( char *log_file_name, int log_level )
      if ( ll > LL_ALL )
          ll = LL_ALL;
 
-    gpib_init_log( log_file_name );             /* initialise logging */
+    gpib_init_log( log_file_name );             /* initialize logging */
 
-    if ( gpib_init_controller( ) != SUCCESS )   /* initialise the controller */
+    if ( gpib_init_controller( ) != SUCCESS )   /* initialize the controller */
     {
-        strcpy( gpib_error_msg, "Can't initialise GPIB bus !" );
+        strcpy( gpib_error_msg, "Can't initialize GPIB bus !" );
 
 		/* Get rid of the device list if it's already created */
 
@@ -121,7 +121,6 @@ int gpib_init( char *log_file_name, int log_level )
 
 			while ( 1 )
 			{
-				gpib_local( cur_dev->number );
 				T_free( cur_dev->name );
 				if ( cur_dev->prev != NULL )
 				{
@@ -143,7 +142,7 @@ int gpib_init( char *log_file_name, int log_level )
 
 
 /*-------------------------------------------------------------*/
-/* gpib_init_controller() initialises the controller by first  */
+/* gpib_init_controller() initializes the controller by first  */
 /* getting the device/board descriptor, testing, if this is    */
 /* really the controller and finally "switching on" the board, */
 /* clearing the interface and asserting the REN line.          */
@@ -188,7 +187,6 @@ int gpib_shutdown( void )
 
 	while ( 1 )
 	{
-		gpib_local( cur_dev->number );
 		T_free( cur_dev->name );
 		if ( cur_dev->prev != NULL )
 		{
@@ -222,7 +220,7 @@ int gpib_shutdown( void )
 
 
 /*-------------------------------------------------------------------------*/
-/* gpib_init_log() initialises the logging mechanism. If the logging level */
+/* gpib_init_log() initializes the logging mechanism. If the logging level */
 /* is not LL_NONE, a log file will be opened. The name to be used for the  */
 /* log file can be passed to the function, see below. If the file cannot   */
 /* be opened 'sterr' is used instead. If the log file did not exist its    */
@@ -270,14 +268,14 @@ static void gpib_init_log( char *log_file_name )
     gpib_log_date( );
 
 	seteuid( EUID );
-    fprintf( gpib_log, "GPIB bus is being initialised.\n" );
+    fprintf( gpib_log, "GPIB bus is being initialized.\n" );
     fflush( gpib_log );
 	seteuid( getuid( ) );
 }
 
 
 /*-----------------------------------------------------------------------*/
-/* gpib_init_device() initialises a device.                              */
+/* gpib_init_device() initializes a device.                              */
 /* Function has to be called before any other operations on the device ! */
 /* ->                                                                    */
 /*  * Symbolic name of the device (string, has to be identical to the    */
@@ -295,7 +293,7 @@ int gpib_init_device( const char *device_name, int *dev )
 
     if ( ! gpib_is_active && strcmp( device_name, CONTROLLER ) )
     {
-        strcpy( gpib_error_msg, "GPIB bus not initialised yet.\n" );
+        strcpy( gpib_error_msg, "GPIB bus not initialized yet.\n" );
         return FAILURE;
     }
 
@@ -332,7 +330,7 @@ int gpib_init_device( const char *device_name, int *dev )
 		else
 			gpib_dev_list = NULL;
 		T_free( cur_dev );
-        sprintf( gpib_error_msg, "Can't initialise device %s, ibsta = 0x%x",
+        sprintf( gpib_error_msg, "Can't initialize device %s, ibsta = 0x%x",
 				 device_name, ibsta );
 		return FAILURE;
 	}
@@ -363,7 +361,7 @@ int gpib_timeout( int device, int period )
 							  "30s", "100s", "300s", "1000s" };
 
 
-    TEST_BUS_STATE;              /* bus not initialised yet ? */
+    TEST_BUS_STATE;              /* bus not initialized yet ? */
 
 	if ( ( dev_name = gpib_get_dev_name( device ) ) == NULL )
 	{
@@ -425,7 +423,7 @@ int gpib_clear_device( int device )
 	char *dev_name;
 
 
-    TEST_BUS_STATE;              /* bus not initialised yet ? */
+    TEST_BUS_STATE;              /* bus not initialized yet ? */
 
 
 	if ( ( dev_name = gpib_get_dev_name( device ) ) == NULL )
@@ -454,48 +452,6 @@ int gpib_clear_device( int device )
 }
 
 
-/*-------------------------------------------------------*/
-/* gpib_local() moves a device from remote to local mode */
-/* by sending the GTO multi-line message.                */
-/* ->                                                    */
-/*  * number of device to be set into local mode         */
-/* <-                                                    */
-/*  * SUCCESS: OK, FAILURE: error                        */
-/*-------------------------------------------------------*/
-
-int gpib_local( int device )
-{
-	char *dev_name;
-
-
-    TEST_BUS_STATE;              /* bus not initialised yet ? */
-
-	if ( ( dev_name = gpib_get_dev_name( device ) ) == NULL )
-	{
-		sprintf( gpib_error_msg, "CALL of gpib_clear_device for unknown "
-				 "device (device number %d)\n", device );
-		return FAILURE;
-	}
-
-    if ( ll > LL_ERR )
-        gpib_log_function_start( "gpib_local", dev_name );
-
-/*    ibloc( device );        // does not exist in old driver */
-
-    if ( ll > LL_NONE )
-        gpib_log_function_end( "gpib_local", dev_name );
-
-    if ( ibsta & IBERR )
-    {
-        sprintf( gpib_error_msg, "Can't send 'GOTO LOCAL' message to device "
-				 "%s, ibsta = 0x%x", dev_name, ibsta );
-        return FAILURE;
-    }
-
-    return SUCCESS;
-}
-
-
 /*------------------------------------------------*/
 /* gpib_trigger() triggers a device by sending it */
 /* a Device Trigger Command.                      */
@@ -510,7 +466,7 @@ int gpib_trigger( int device )
 	char *dev_name;
 
 
-    TEST_BUS_STATE;              /* bus not initialised yet ? */
+    TEST_BUS_STATE;              /* bus not initialized yet ? */
 
 	if ( ( dev_name = gpib_get_dev_name( device ) ) == NULL )
 	{
@@ -563,7 +519,7 @@ int gpib_wait( int device, int mask, int *status )
 	char *dev_name;
 
 
-    TEST_BUS_STATE;              /* bus not initialised yet ? */
+    TEST_BUS_STATE;              /* bus not initialized yet ? */
 
 	if ( ( dev_name = gpib_get_dev_name( device ) ) == NULL )
 	{
@@ -631,9 +587,10 @@ int gpib_wait( int device, int mask, int *status )
 int gpib_write( int device, const char *buffer, long length )
 {
 	char *dev_name;
+	char *buf;
 
 
-    TEST_BUS_STATE;              /* bus not initialised yet ? */
+    TEST_BUS_STATE;              /* bus not initialized yet ? */
 
 	if ( ( dev_name = gpib_get_dev_name( device ) ) == NULL )
 	{
@@ -657,10 +614,16 @@ int gpib_write( int device, const char *buffer, long length )
         return FAILURE;
     }
 
-    if ( ll > LL_ERR )
-        gpib_write_start( dev_name, buffer, length );
+	buf = T_malloc( length );
+	buf[ --length ] = '\0';
+	strncpy( buf, buffer, length );
 
-	ibwrt( device, ( char * ) buffer, length );
+    if ( ll > LL_ERR )
+        gpib_write_start( dev_name, buf, length );
+
+	ibwrt( device, buf, length );
+
+	T_free( buf );
 
     if ( ll > LL_NONE )
         gpib_log_function_end( "gpib_write", dev_name );
@@ -723,7 +686,7 @@ int gpib_read( int device, char *buffer, long *length )
 	char *dev_name;
 
 
-    TEST_BUS_STATE;              /* bus not initialised yet ? */
+    TEST_BUS_STATE;              /* bus not initialized yet ? */
 
 	if ( ( dev_name = gpib_get_dev_name( device ) ) == NULL )
 	{
