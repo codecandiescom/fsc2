@@ -6,12 +6,12 @@
 #include "hp8647a.h"
 
 
-/*--------------------------------------------------------------------------*/
-/* If the function succeeds it returns a file pointer to the table file and */
-/* sets the table_file entry in the device structure to the name of the     */
-/* table file. Otherwise an exception is thrown. In every case the memory   */
-/* used for the file name passed to the function is deallocated.            */
-/*--------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*/
+/* If the function succeeds it returns a file pointer to the table file */
+/* and sets the table_file entry in the device structure to the name of */
+/* the table file. Otherwise an exception is thrown. In any case the    */
+/* memory used for the file name passed to the function is deallocated. */
+/*----------------------------------------------------------------------*/
 
 FILE *hp8647a_find_table( char *name )
 {
@@ -109,4 +109,77 @@ FILE *hp8647a_open_table( char *name )
 	}
 
 	return tfp;
+}
+
+
+/*-----------------------------------------------*/
+/* Calculates from the table the attenuation for */
+/* a given frequency by interpolation            */
+/*-----------------------------------------------*/
+
+double hp8647a_get_att_from_table( double freq )
+{
+	long i_low, i_high, i_cur;
+	double att;
+
+
+	/* First check that the frequency is covered by the table, if it isn't
+	   print out a warning and return attenuation for the smallest or
+	   highest frequency */
+
+	if ( freq < hp8647a.min_table_freq )
+	{
+		eprint( WARN, "%s:%ld: %s: Frequency of %f MHz not covered by table, "
+				"interpolating.\n", Fname, Lc, DEVICE_NAME, freq * 1.0e-6 );
+		return hp8647a.att_table[ 0 ].att;
+	}
+
+	if ( freq < hp8647a.min_table_freq )
+	{
+		eprint( WARN, "%s:%ld: %s: Frequency of %f MHz not covered by table, "
+				"interpolating.\n", Fname, Lc, DEVICE_NAME, freq * 1.0e-6 );
+		return hp8647a.att_table[ hp8647a.att_table_len - 1 ].att;
+	}
+
+	/* Find the indices of the two entries in the table (that has been sorted
+	   in ascending order of frequencies) between which the frequency is
+	   laying. In most cases the frequencies in the table will be equally
+	   spaced, so we use bisecting employing the mean slope of the current
+	   interval for our guesses. This is probably the fasted method for the
+	   most common case (value is found after first run through loop) but may
+	   be slow in other cases. */
+
+	i_low = 0;
+	i_high = hp8647a.att_table_len - 1;
+	i_cur = i_low;
+
+	while ( i_high - i_low > 1 )
+	{
+		i_cur = lround( (   hp8647a.att_table[ i_high ].freq 
+						  - hp8647a.att_table[ i_low ].freq )
+						/ ( freq - hp8647a.att_table[ i_low ].freq ) ) + i_low;
+		if ( freq > hp8647a.att_table[ i_cur ].freq )
+			i_low = i_cur;
+		else
+		{
+			i_high = i_cur;
+			continue;
+		}
+
+		if ( freq < hp8647a.att_table[ i_cur + 1 ].freq )
+			i_high = i_cur + 1;
+	}
+
+	/* Now do a linear interpolation for the attenuation between the bracketing
+	   frequencies we have data for */
+
+	att =  ( hp8647a.att_table[ i_high ].att - hp8647a.att_table[ i_low ].att )
+		 * ( freq - hp8647a.att_table[ i_low ].freq )
+		 / (   hp8647a.att_table[ i_high ].freq
+			 - hp8647a.att_table[ i_low ].freq )
+		 + hp8647a.att_table[ i_low ].att;
+
+	/* Reduce value to the resolution the attenuation can be set with */
+
+	return ATT_RESOLUTION * lround( att / ATT_RESOLUTION );
 }

@@ -7,13 +7,15 @@
 
 #define DEVICE_NAME "HP8647A"      /* compare entry in /etc/gpib.conf ! */
 
-#define MIN_FREQ  2.5e5            /* 250 kHz  */
-#define MAX_FREQ  1.0e9            /* 1000 MHz */
-#define MIN_ATTEN 10.0             /* +10 db   */
-#define MAX_ATTEN -136.0           /* -136 db  */
+#define MIN_FREQ        2.5e5            /* 250 kHz  */
+#define MAX_FREQ        1.0e9            /* 1000 MHz */
+#define MIN_ATTEN       10.0             /* +10 db   */
+#define MAX_ATTEN      -136.0            /* -136 db  */
+#define ATT_RESOLUTION  0.1
 
 #define DEFAULT_TABLE_FILE "hp8647a.table"     /* libdir will be prepended ! */
 
+#define DEF_ATT_REF_FREQ   1.4e7               /* 14 MHz */
 
 /* declaration of exported functions */
 
@@ -62,6 +64,10 @@ typedef struct
 	bool use_table;
 	ATT_TABLE_ENTRY *att_table;
 	long att_table_len;
+	double min_table_freq;
+	double max_table_freq;
+	double att_ref_freq;
+	double att_at_ref_freq;
 
 } HP8647A;
 
@@ -84,6 +90,7 @@ extern HP8647A hp8647a;
 void hp8647a_read_table( FILE *fp );
 FILE *hp8647a_find_table( char *name );
 FILE *hp8647a_open_table( char *name );
+double hp8647a_get_att_from_table( double freq );
 
 
 /* functions defined in "hp8647a_lexer.flex" */

@@ -16,7 +16,10 @@
 
 #define IS_FREQ 1
 #define IS_ATT  2
+#define TABLE_INIT -1
+#define TABLE_END   0
 #define TABLE_CHUNK_SIZE 128
+
 
 static int hp8647a_lex( void );
 static int hp8647a_get_unit( void );
@@ -25,7 +28,7 @@ static int hp8647a_comp( const void *a, const void *b );
 
 static long hp8647a_Lc,
 			hp8647a_Comm_Lc;
-static double unit_fac = 1;
+static double unit_fac = 1.0;
 
 static long cur_table_len;
 
@@ -123,6 +126,9 @@ DU       {IU}|{FU}
 		/*----------------------*/
 
 
+/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*/
+
 void hp8647a_read_table( FILE *fp )
 {
 	static bool is_restart = UNSET;
@@ -146,10 +152,10 @@ void hp8647a_read_table( FILE *fp )
 	hp8647a_Lc = 1;
 
 	TRY {
-		hp8647a_new_table_entry( -1, 0.0 );
+		hp8647a_new_table_entry( TABLE_INIT, 0.0 );
 		while( ( type = hp8647a_lex( ) ) != 0 )
 			hp8647a_new_table_entry( type, T_atof( hp8647a_text ) * unit_fac );
-		hp8647a_new_table_entry( 0, 0.0 );
+		hp8647a_new_table_entry( TABLE_END, 0.0 );
 		TRY_SUCCESS;
 	}
 	CATCH( EOF_IN_COMMENT_EXCEPTION )
@@ -161,8 +167,8 @@ void hp8647a_read_table( FILE *fp )
 	}
 	CATCH( DANGLING_END_OF_COMMENT )
 	{
-		eprint( FATAL, "%s: End of comment found in table file  `%s' at line "
-				"%ld.\n", DEVICE_NAME, hp8647a.table_file, hp8647a_Comm_Lc );
+		eprint( FATAL, "%s: End of comment found in table file `%s' at line "
+				"%ld.\n", DEVICE_NAME, hp8647a.table_file, hp8647a_Lc );
 		THROW( EXCEPTION );
 	}
 	CATCH( INVALID_INPUT_EXCEPTION )
@@ -173,6 +179,9 @@ void hp8647a_read_table( FILE *fp )
 	}
 }
 
+
+/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*/
 
 static int hp8647a_get_unit( void )
 {
@@ -223,6 +232,9 @@ static int hp8647a_get_unit( void )
 }
 
 
+/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*/
+
 static void hp8647a_new_table_entry( int type, double val )
 {
 	static bool is_freq = UNSET, is_att = UNSET;
@@ -230,7 +242,7 @@ static void hp8647a_new_table_entry( int type, double val )
 
 	/* Initialize everything when type is -1 */
 
-	if ( type == -1 )
+	if ( type == TABLE_INIT )
 	{
 		is_freq = is_att = UNSET;
 		hp8647a.att_table = T_malloc( TABLE_CHUNK_SIZE *
@@ -241,9 +253,12 @@ static void hp8647a_new_table_entry( int type, double val )
 
 	/* If type is 0 this is the final check after all data have been read */
 
-	if ( type == 0 )
+	if ( type == TABLE_END )
 	{
-		if ( is_freq ^ is_att )
+		/* Check that we're not expecting another attenuation or frequency
+		   while the end of the file is already reached */
+
+		if ( is_freq ^ is_att )                 // one of them is still set ?
 		{
 			eprint( FATAL, "%s: Missing final %s in table file `%s'.\n",
 					DEVICE_NAME, is_freq ? "attenuation" : "frequency",
@@ -251,17 +266,31 @@ static void hp8647a_new_table_entry( int type, double val )
 			THROW( EXCEPTION );
 		}
 
+		/* Check that there are at least two entries in the table */
+
+		if ( hp8647a.att_table_len < 2 )
+		{
+			eprint( FATAL, "%s: Table file `%s' contains less than 2 "
+					"entries.\n", DEVICE_NAME, hp8647a.table_file );
+			THROW( EXCEPTION );
+		}
+
 		/* Cut back table size to the amount of memory really needed and sort
-		   the table in ascending order with respect to the frequencies */
+		   the table in ascending order with respect to the frequencies,
+		   finally get lowest and highest frequency */
 
 		T_realloc( hp8647a.att_table,
 				   hp8647a.att_table_len * sizeof ( ATT_TABLE_ENTRY ) );
 		qsort( hp8647a.att_table, hp8647a.att_table_len,
 			    sizeof ( ATT_TABLE_ENTRY ), hp8647a_comp );
+		hp8647a.min_table_freq = hp8647a.att_table[ 0 ].freq;
+		hp8647a.max_table_freq =
+						   hp8647a.att_table[ hp8647a.att_table_len - 1 ].freq;
 		return;
 	}
 
-	/* Two frequencies or two attenuations in a row isn't allowed */
+	/* Two frequencies or two attenuations in a row aren't allowed (at least
+	   when the first entry wasn't used up) */
 
 	if ( type == IS_ATT && is_att )
 	{
@@ -280,7 +309,8 @@ static void hp8647a_new_table_entry( int type, double val )
 	}
 
 	/* If the type is indetermined either set it to the not yet set type
-	   or to frequency if none has been set yet */
+	   or to frequency if none has been set yet - thus the default, when no
+	   units are given is frequency first, then the attenuation */
 
 	if ( type == ( IS_FREQ | IS_ATT ) )
 	{
@@ -301,14 +331,39 @@ static void hp8647a_new_table_entry( int type, double val )
 
 	if ( type == IS_FREQ )
 	{
+		if ( val < 0 )
+		{
+			eprint( FATAL, "%s: Invalid negative RF frequency found in the "
+					"table file `%s' at line %ld.\n", DEVICE_NAME,
+					hp8647a.table_file, hp8647a_Lc );
+			THROW( EXCEPTION );
+		}
+
+		if ( val > MAX_FREQ || val < MIN_FREQ )
+			eprint( WARN, "%s: Frequency of %g MHz in table file `%s', line "
+					"%ld,  is not within range of synthesizer (%f kHz - "
+					"%f MHz).\n", DEVICE_NAME, val * 1.0e-6,
+					hp8647a.table_file, hp8647a_Lc, MIN_FREQ * 1.0e-3,
+					MAX_FREQ * 1.0e-6 );
 	    hp8647a.att_table[ hp8647a.att_table_len ].freq = val;
 		is_freq = SET;
 	}
-	else
+	else                // IS_ATT
 	{
+		if ( val > MIN_ATTEN - MAX_ATTEN )
+		{
+			eprint( FATAL, "%s: Attenuation of %f dB in table file `%s', "
+					"line %ld, can't be achieved, maximum dynamic range is "
+					"%f dB.\n", DEVICE_NAME, val, hp8647a.table_file,
+					hp8647a_Lc, MIN_ATTEN - MAX_ATTEN );
+			THROW( EXCEPTION );
+		}
 	    hp8647a.att_table[ hp8647a.att_table_len ].att = val;
 		is_att = SET;
 	}
+
+	/* If both frequency and attenuation have been set increment entry count
+	   and prepare for the next pair of data */
 
 	if ( is_freq && is_att )
 	{
@@ -317,6 +372,9 @@ static void hp8647a_new_table_entry( int type, double val )
 	}
 }
 
+
+/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*/
 
 static int hp8647a_comp( const void *a, const void *b )
 {

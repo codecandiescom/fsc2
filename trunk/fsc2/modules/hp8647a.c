@@ -51,6 +51,8 @@ int hp8647a_init_hook( void )
 	hp8647a.att_table = NULL;
 	hp8647a.att_table_len = 0;
 
+	hp8647a.att_ref_freq = DEF_ATT_REF_FREQ;
+
 	return 1;
 }
 
@@ -61,7 +63,30 @@ int hp8647a_init_hook( void )
 
 int hp8647a_test_hook( void )
 {
+	/* If a table has been set check that at the frequency the attenuations
+	   refer to the table is defined and if it is get the attenuation at the
+	   reference frequency */
+
+	if ( hp8647a.use_table )
+	{
+		if ( hp8647a.att_ref_freq < hp8647a.min_table_freq ||
+			 hp8647a.att_ref_freq > hp8647a.max_table_freq )
+		{
+			eprint( FATAL, "%s: Reference frequency for attenuation settings "
+					"of %g MHz is not covered by the table.\n", DEVICE_NAME,
+					hp8647a.att_ref_freq );
+			THROW( EXCEPTION );
+		}
+
+		hp8647a.att_at_ref_freq =
+			                hp8647a_get_att_from_table( hp8647a.att_ref_freq );
+	}
+
+	/* Save the current state of the device structure which has to be reset
+	   to this state after the the test run */
+
 	memcpy( &hp8647a_backup, &hp8647a, sizeof( HP8647A ) );
+
 	return 1;
 }
 
@@ -72,6 +97,8 @@ int hp8647a_test_hook( void )
 
 int hp8647a_end_of_test_hook( void )
 {
+	/* Restore device structure to the state at the start of the test run */
+
 	memcpy( &hp8647a, &hp8647a_backup, sizeof( HP8647A ) );
 	return 1;
 }
@@ -177,6 +204,7 @@ Var *synthesizer_state( Var *v )
 Var *synthesizer_frequency( Var *v )
 {
 	double freq;
+	double att;
 
 
 	if ( v == NULL )              /* i.e. return the current frequency */
@@ -216,9 +244,10 @@ Var *synthesizer_frequency( Var *v )
 
 	if ( freq < MIN_FREQ || freq > MAX_FREQ )
 	{
-		eprint( FATAL, "%s:%ld: %s: RF frequency (%f MHz) not within valid "
-				"range (%f kHz to %g Mhz).\n", Fname, Lc, DEVICE_NAME,
-				1.0e-6 * freq, 1.0e-3 * MIN_FREQ, 1.0e-6 * MAX_FREQ );
+		eprint( FATAL, "%s:%ld: %s: RF frequency (%f MHz) not within "
+				"synthesizers range (%f kHz - %g Mhz).\n", Fname, Lc,
+				DEVICE_NAME, 1.0e-6 * freq, 1.0e-3 * MIN_FREQ,
+				1.0e-6 * MAX_FREQ );
 		THROW( EXCEPTION );
 	}
 
@@ -240,29 +269,65 @@ Var *synthesizer_frequency( Var *v )
 			hp8647a.start_freq = freq;
 			hp8647a.start_freq_is_set = SET;
 		}
+
+		/* Calculate the attenuation needed to level out the non-flatness of
+		   the RF output power if a table has been set - in the test run we
+		   only do this to check that we stay within all the limits */
+
+		if ( hp8647a.use_table )
+		{
+			att =   hp8647a.attenuation - hp8647a_get_att_from_table( freq )
+				  + hp8647a.att_at_ref_freq;
+			if ( att < MAX_ATTEN )
+				eprint( SEVERE, "%s:%ld: %s: Attenuation dynamic range is  "
+						"insufficient, using %f dB instead of %f dB.\n",
+						Fname, Lc, DEVICE_NAME, MAX_ATTEN, att );
+			if ( att > MIN_ATTEN )
+				eprint( SEVERE, "%s:%ld: %s: Attenuation dynamic range is  "
+						"insufficient, using %f dB instead of %f dB.\n",
+						Fname, Lc, DEVICE_NAME, MIN_ATTEN, att );
+		}
 	}
 	else if ( I_am == PARENT )           /* in PREPARATIONS section */
 	{
-		if ( hp8647a.freq_is_set )
-		{
-			eprint( SEVERE, "%s:%ld: %s: RF frequency has already been set in "
-					"the PREPARATIONS section to %f MHz, keeping old value.\n",
-					Fname, Lc, DEVICE_NAME, 1.0e-6 * hp8647a.freq );
-			return vars_push( FLOAT_VAR, hp8647a.freq );
-		}
-
 		hp8647a.freq = hp8647a.start_freq = freq;
 		hp8647a.freq_is_set = SET;
 		hp8647a.start_freq_is_set = SET;
 	}
 	else
 	{
-		hp8647a.freq = hp8647a_set_frequency( freq );
 		if ( ! hp8647a.start_freq_is_set )
 		{
 			hp8647a.start_freq = freq;
 			hp8647a.start_freq_is_set = SET;
 		}
+
+		/* Take care of setting the correct attenuation to level out the
+		   non-flatness of the RF output power if a table has been set */
+
+		if ( hp8647a.use_table )
+		{
+			att =   hp8647a.attenuation - hp8647a_get_att_from_table( freq )
+				  + hp8647a.att_at_ref_freq;
+			if ( att < MAX_ATTEN )
+			{
+				eprint( SEVERE, "%s:%ld: %s: Attenuation dynamic range is  "
+						"insufficient, using %f dB instead of %f dB.\n",
+						Fname, Lc, DEVICE_NAME, MAX_ATTEN, att );
+				att = MAX_ATTEN;
+			}
+			if ( att > MIN_ATTEN )
+			{
+				eprint( SEVERE, "%s:%ld: %s: Attenuation dynamic range is  "
+						"insufficient, using %f dB instead of %f dB.\n",
+						Fname, Lc, DEVICE_NAME, MIN_ATTEN, att );
+				att = MIN_ATTEN;
+			}
+
+			hp8647a_set_attenuation( att );
+		}
+
+		hp8647a.freq = hp8647a_set_frequency( freq );
 	}
 
 	return vars_push( FLOAT_VAR, freq );
@@ -397,7 +462,7 @@ Var *synthesizer_step_frequency( Var *v )
 	}
 	else if ( ! hp8647a.step_freq_is_set )
 	{
-		eprint( FATAL, "%s:%ld: %s: RF step frequency has notz been set "
+		eprint( FATAL, "%s:%ld: %s: RF step frequency has not been set "
 				"yet.\n", Fname, Lc, DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
@@ -412,7 +477,8 @@ Var *synthesizer_step_frequency( Var *v )
 
 Var *synthesizer_sweep_up( Var *v )
 {
-	double new_freq;
+	double freq;
+	double att;
 
 
 	v = v;
@@ -424,9 +490,9 @@ Var *synthesizer_sweep_up( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	new_freq = hp8647a.freq + hp8647a.step_freq;
+	freq = hp8647a.freq + hp8647a.step_freq;
 
-	if ( new_freq < MIN_FREQ )
+	if ( freq < MIN_FREQ )
 	{
 		eprint( FATAL, "%s:%ld: %s: RF frequency is dropping below lower "
 				"limit of %f kHz.\n", Fname, Lc, DEVICE_NAME,
@@ -434,7 +500,7 @@ Var *synthesizer_sweep_up( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	if ( new_freq > MAX_FREQ )
+	if ( freq > MAX_FREQ )
 	{
 		eprint( FATAL, "%s:%ld: %s: RF frequency is increased above upper "
 				"limit of %f MHz.\n", Fname, Lc, DEVICE_NAME,
@@ -443,9 +509,51 @@ Var *synthesizer_sweep_up( Var *v )
 	}
 
 	if ( TEST_RUN )
-		hp8647a.freq = new_freq;
+	{
+		hp8647a.freq = freq;
+
+		if ( hp8647a.use_table )
+		{
+			att =   hp8647a.attenuation - hp8647a_get_att_from_table( freq )
+				  + hp8647a.att_at_ref_freq;
+			if ( att < MAX_ATTEN )
+			{
+				eprint( SEVERE, "%s:%ld: %s: Attenuation dynamic range is  "
+						"insufficient, using %f dB instead of %f dB.\n",
+						Fname, Lc, DEVICE_NAME, MAX_ATTEN, att );
+			if ( att > MIN_ATTEN )
+			{
+				eprint( SEVERE, "%s:%ld: %s: Attenuation dynamic range is  "
+						"insufficient, using %f dB instead of %f dB.\n",
+						Fname, Lc, DEVICE_NAME, MIN_ATTEN, att );
+		}
+	}
 	else
-		hp8647a.freq = hp8647a_set_frequency( new_freq );
+	{
+		if ( hp8647a.use_table )
+		{
+			att = hp8647a.attenuation - hp8647a_get_att_from_table( freq )
+				  + hp8647a.att_at_ref_freq;
+			if ( att < MAX_ATTEN )
+			{
+				eprint( SEVERE, "%s:%ld: %s: Attenuation dynamic range is  "
+						"insufficient, using %f dB instead of %f dB.\n",
+						Fname, Lc, DEVICE_NAME, MAX_ATTEN, att );
+				att = MAX_ATTEN;
+			}
+			if ( att > MIN_ATTEN )
+			{
+				eprint( SEVERE, "%s:%ld: %s: Attenuation dynamic range is  "
+						"insufficient, using %f dB instead of %f dB.\n",
+						Fname, Lc, DEVICE_NAME, MIN_ATTEN, att );
+				att = MIN_ATTEN;
+			}
+
+			hp8647a_set_attenuation( att );
+		}
+
+		hp8647a.freq = hp8647a_set_frequency( freq );
+	}
 
 	return vars_push( FLOAT_VAR, hp8647a.freq );
 }
@@ -497,7 +605,7 @@ Var *synthesizer_reset_frequency( Var *v )
 
 Var *synthesizer_use_table( Var *v )
 {
-	FILE *tfp;
+	FILE *tfp = NULL;
 	char *tfname;
 
 
@@ -566,9 +674,77 @@ Var *synthesizer_use_table( Var *v )
 	fclose( tfp );
 	T_free( hp8647a.table_file );
 	hp8647a.table_file = NULL;
+	hp8647a.use_table = SET;
 	return vars_push( INT_VAR, 1 );
 }
 
+
+/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*/
+
+Var *synthesizer_att_ref_freq( Var *v )
+{
+	double freq;
+
+
+	/* Without an argument just return the reference frequency setting */
+
+	if ( v == NULL )
+		return vars_push( FLOAT_VAR, hp8647a.att_ref_freq );
+
+	/* Otherwise check the supplied variable */
+
+	vars_check( v, INT_VAR | FLOAT_VAR );
+	if ( v->type == INT_VAR )
+		eprint( WARN, "%s:%ld: %s: Integer variable used as RF frequency.\n",
+				Fname, Lc, DEVICE_NAME );
+
+	freq = VALUE( v );
+
+	/* Get rid of the variables */
+
+	v = vars_pop( v );
+	if ( v != NULL )
+	{
+		eprint( WARN, "%s:%ld: %s: Superfluous arguments in call of "
+				"function `synthesizer_use_table'.\n",
+				Fname, Lc, DEVICE_NAME );
+		while ( ( v = vars_pop( v ) ) != NULL )
+			;
+	}
+
+	/* Check that the frequency is within the synthesizers range */
+
+	if ( freq > MAX_FREQ || freq < MIN_FREQ )
+	{
+		eprint( FATAL, "%s: Reference frequency for attenuation settings "
+				"of %g MHz is out of synthesizer range (%f kHz - %f MHz).\n",
+				DEVICE_NAME, hp8647a.att_ref_freq * 1.0e-6,
+				MIN_FREQ * 1.0e-3, MAX_FREQ * 1.0e-6 );
+		THROW( EXCEPTION );
+	}
+
+	hp8647a.att_ref_freq = freq;	
+
+	/* If a table has already been loaded calculate the attenuation at the
+	   reference frequency */
+
+	if ( hp8647a.use_table )
+	{
+		if ( hp8647a.att_ref_freq < hp8647a.min_table_freq ||
+			 hp8647a.att_ref_freq > hp8647a.max_table_freq )
+		{
+			eprint( FATAL, "%s: Reference frequency for attenuation settings "
+					"of %g MHz is not covered by the table.\n", DEVICE_NAME,
+					hp8647a.att_ref_freq );
+			THROW( EXCEPTION );
+		}
+		
+		hp8647a.att_at_ref_freq = hp8647a_get_att_from_table( freq );
+	}
+
+	return vars_push( FLOAT_VAR, freq );
+}
 
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
@@ -580,6 +756,9 @@ Var *synthesizer_use_table( Var *v )
 
 static bool hp8647a_init( const char *name )
 {
+	double att;
+
+
 	if ( gpib_init_device( name, &hp8647a.device ) == FAILURE )
         return FAIL;
 
@@ -592,7 +771,31 @@ static bool hp8647a_init( const char *name )
 		hp8647a.freq = hp8647a_get_frequency( );
 
 	if ( hp8647a.attenuation_is_set )
-		hp8647a_set_attenuation( hp8647a.attenuation );
+	{
+		if ( hp8647a.use_table )
+		{
+			att = hp8647a.attenuation - hp8647a_get_att_from_table( freq )
+				  + hp8647a.att_at_ref_freq;
+			if ( att < MAX_ATTEN )
+			{
+				eprint( SEVERE, "%s:%ld: %s: Attenuation dynamic range is  "
+						"insufficient, using %f dB instead of %f dB.\n",
+						Fname, Lc, DEVICE_NAME, MAX_ATTEN, att );
+				att = MAX_ATTEN;
+			}
+			if ( att > MIN_ATTEN )
+			{
+				eprint( SEVERE, "%s:%ld: %s: Attenuation dynamic range is  "
+						"insufficient, using %f dB instead of %f dB.\n",
+						Fname, Lc, DEVICE_NAME, MIN_ATTEN, att );
+				att = MIN_ATTEN;
+			}
+		}
+		else
+			att = hp8647a.attenuation;
+
+		hp8647a_set_attenuation( hp8647a.att );
+	}
 	else
 		hp8647a.attenuation = hp8647a_get_attenuation( );
 
@@ -616,6 +819,9 @@ static void hp8647a_finished( void )
 }
 
 
+/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*/
+
 static bool hp8647a_set_output_state( bool state )
 {
 	char cmd[ 100 ];
@@ -628,6 +834,9 @@ static bool hp8647a_set_output_state( bool state )
 	return state;
 }
 
+
+/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*/
 
 static bool hp8647a_get_output_state( void )
 {
