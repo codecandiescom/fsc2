@@ -28,6 +28,7 @@
 * aeg_s_band::      S-band AEG Magnet Power Supply
 * aeg_x_band::      X-band AEG Magnet Power Supply
 * bh15::            Bruker Hall Effect Field Controller BH 15
+* bnm12::           Bruker NMR Gaussmeter BNM12
 * dg2020_b::        Sony/Tektronix Data Generator DG2020 (Berlin Version)
 * dg2020_f::        Sony/Tektronix Data Generator DG2020 (Frankfurt Version)
 * egg4402::         EG&G PARC Box-Car Integrator 4402
@@ -157,7 +158,7 @@ to @w{19900 G}, with @code{bh15} range is @w{-50 G} to @w{23000 G}.
 @c #############################################################
 
 
-@node bh15, dg2020_b, aeg_x_band, Device Reference
+@node bh15, bnm12, aeg_x_band, Device Reference
 @iftex
 @subheading Bruker Hall Effect Field Controller BH 15
 @end iftex
@@ -191,7 +192,38 @@ measured is from @w{-50 G} to @w{23000 G}.
 @c #############################################################
 
 
-@node dg2020_b, dg2020_f, bh15, Device Reference
+@node bnm12, dg2020_b, bh15, Device Reference
+@iftex
+@subheading Bruker NMR Gaussmeter BNM12
+@end iftex
+@ifnottex
+@section Bruker NMR Gaussmeter BNM12
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{bnm12}
+
+@paragraphindent 0
+@strong{Description}: Bruker BNM12 NMR Gaussmeter can only be used
+to measure fields. Using it requires that the module for the
+WITIO-48 DIO card (@code{witio_48}) is loaded.
+
+@paragraphindent 0
+@strong{Controlled via}: Read only via WITIO-48 DIO card.
+
+@paragraphindent 0
+@strong{Supported functions}:
+@multitable @columnfractions .45 .45
+@item @code{gaussmeter_name()}        @tab @ref{gaussmeter_name}
+@item @code{gaussmeter_field()}       @tab @ref{gaussmeter_field}
+@item @code{gaussmeter_resolution()}  @tab @ref{gaussmeter_resolution}
+@end multitable
+
+
+@c #############################################################
+
+
+@node dg2020_b, dg2020_f, bnm12, Device Reference
 @iftex
 @subheading Sony/Tektronix Data Generator DG2020 (Berlin Version)
 @end iftex
