@@ -560,20 +560,18 @@ static bool keithley228a_init( const char *name )
 	*/
 
 	strcpy( cmd, "A0C1S0T4K2M0D0R6G5X\r\n");
-	if ( gpib_write( keithley228a.device, cmd, strlen( cmd ) ) == FAILURE )
-		keithley228a_gpib_failure( );
+	keithley228a_command( cmd );
 
 	/* Set maximum voltage to 5 V */
 
 	sprintf( cmd, "V%.2fX\r\n", KEITHLEY228A_MAX_VOLTAGE );
-	if ( gpib_write( keithley228a.device, cmd, strlen( cmd ) ) == FAILURE )
-		keithley228a_gpib_failure( );
+	keithley228a_command( cmd );
 
 	/* Get state of power supply and switch state to OPERATE */
 
 	length = 100;
-	if ( gpib_write( keithley228a.device, "U0X\r\n", 5 ) == FAILURE ||
-		 gpib_read( keithley228a.device, reply, &length ) == FAILURE )
+	keithley228a_command( "U0X\r\n" );
+	if ( gpib_read( keithley228a.device, reply, &length ) == FAILURE )
 		keithley228a_gpib_failure( );
 
 	keithley228a.state = ( reply[ 1 ] == '1')  ? OPERATE : STANDBY;
@@ -600,8 +598,7 @@ static void keithley228a_to_local( void )
 	/* Go to STANDBY state and switch off current modulation */
 
 	keithley228a_set_state( STANDBY );
-	if ( gpib_write( keithley228a.device, "C0X\r\n", 5 ) == FAILURE )
-		keithley228a_gpib_failure( );
+	keithley228a_command( "C0X\r\n" );
 	gpib_local( keithley228a.device );
 }
 
@@ -656,15 +653,13 @@ static bool keithley228a_set_state( bool new_state )
 		/* Set current to 0 A before switching power supply to OPERATE
 		   state (output terminals are still disconnected) */
 
-		if ( gpib_write( keithley228a.device, "I0.0X\r\n", 7 ) == FAILURE )
-			keithley228a_gpib_failure( );
+		keithley228a_command( "I0.0X\r\n" );
 		keithley228a.current = 0.0;
 	}
 
 	/* Set the new state */
 
-	if ( gpib_write( keithley228a.device, new_state == STANDBY ?
-					 "F0X\r\n" : "F1X\r\n", 5 ) == FAILURE )
+	keithley228a_command( new_state == STANDBY ? "F0X\r\n" : "F1X\r\n" );
 		keithley228a_gpib_failure( );
 
 	/* When switching to STANDBY the power supply needs about half a second
@@ -843,8 +838,7 @@ static double keithley228a_set_current( double new_current )
 	/* Set current on power supply */
 
 	sprintf( cmd, "I%.2fX\r\n", power_supply_current );
-	if ( gpib_write( keithley228a.device, cmd, strlen( cmd ) ) == FAILURE )
-		keithley228a_gpib_failure( );
+	keithley228a_command( cmd );
 
 	/* Set the voltage on the lock-ins DAC - the function needs two arguments,
 	   the port number and the voltage */

@@ -433,12 +433,7 @@ static double pt2025_get_field( void )
 
 static void pt2025_set_resolution( int res )
 {
-	if ( gpib_write( pt2025.device, res == LOW ? "V1\r\n" : "V0\r\n", 4 )
-		 == FAILURE )
-	{
-		print( FATAL, "Can't access the NMR gaussmeter.\n" );
-		THROW( EXCEPTION );
-	}
+	pt2025_command( res == LOW ? "V1\r\n" : "V0\r\n" );
 }
 
 
