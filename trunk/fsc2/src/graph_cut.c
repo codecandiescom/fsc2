@@ -81,6 +81,13 @@ void cut_show( int dir, int pos )
 	if ( G.active_curve == -1 )
 		return;
 
+	/* Don't do anything if we didn't end in one of the axis canvases */
+
+	if ( pos < 0 ||
+		 ( dir == X && ( unsigned int ) pos >= G.x_axis.w ) ||
+		 ( dir == Y && ( unsigned int ) pos >= G.y_axis.h ) )
+		return;
+
 	/* If the cross section window hasn't been shown before create and
 	   initialize now, otherwise, it's just unmapped, so make it visible
 	   again */
