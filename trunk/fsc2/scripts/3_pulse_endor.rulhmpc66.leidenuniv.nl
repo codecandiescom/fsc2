@@ -622,28 +622,6 @@ field = set_field( field );
    output the parameter to it */
 
 File = get_file( );
-save_comment( File, \"%\" );
-
-fsave( File,
-	   \"% Date:                   # #\\n\"
-	   \"% Script:                 3_pulse_endor\\n\"
-	   \"% Field:                  # G\\n\"
-	   \"% Start frequency:        # MHz\\n\"
-	   \"% End frequency:          # MHz\\n\"
-	   \"% Frequency step:         # MHz\\n\"
-	   \"% Attenuation:            # dB\\n\"
-	   \"% Repetition time:        # ms\\n\"
-	   \"% Length of 1st MW pulse: # ns\\n\"
-	   \"% Length of 2st MW pulse: # ns\\n\"
-	   \"% Length of 3st MW pulse: # ns\\n\"
-	   \"% P1-P2 separation:		  # ns\\n\"
-	   \"% P2-P3 separation:		  # ns\\n\"
-	   \"% RF pulse position:      # ns\\n\"
-	   \"% RF pulse length:        # ns\\n\",
-	   date( ), time( ), field, start_freq * 1.0e-6, end_freq * 1.0e-6,
-	   freq_step * 1.0e-6, att, repeat_time * 1.0e3, P1.LENGTH * 1.0e9,
-	   P2.LENGTH * 1.0e9, P3.LENGTH * 1.0e9, p1_to_p2_dist * 1.0e9,
-	   p2_to_p3_dist * 1.0e9, P4.START * 1.0e9, P4.LENGTH * 1.0e9 );
 
 synthesizer_attenuation( att );
 freq = synthesizer_frequency( start_freq );
@@ -664,6 +642,28 @@ FOR I = 1 : N_Points {
 ON_STOP:
 
 synthesizer_state( \"OFF\" );
+
+fsave( File,
+	   \"% Date:                   # #\\n\"
+	   \"% Script:                 3_pulse_endor\\n\"
+	   \"% Field:                  # G\\n\"
+	   \"% Start frequency:        # MHz\\n\"
+	   \"% End frequency:          # MHz\\n\"
+	   \"% Frequency step:         # MHz\\n\"
+	   \"% Attenuation:            # dB\\n\"
+	   \"% Repetition time:        # ms\\n\"
+	   \"% Length of 1st MW pulse: # ns\\n\"
+	   \"% Length of 2st MW pulse: # ns\\n\"
+	   \"% Length of 3st MW pulse: # ns\\n\"
+	   \"% P1-P2 separation:		  # ns\\n\"
+	   \"% P2-P3 separation:		  # ns\\n\"
+	   \"% RF pulse position:      # ns\\n\"
+	   \"% RF pulse length:        # ns\\n\",
+	   date( ), time( ), field, start_freq * 1.0e-6, freq * 1.0e-6,
+	   freq_step * 1.0e-6, att, repeat_time * 1.0e3, P1.LENGTH * 1.0e9,
+	   P2.LENGTH * 1.0e9, P3.LENGTH * 1.0e9, p1_to_p2_dist * 1.0e9,
+	   p2_to_p3_dist * 1.0e9, P4.START * 1.0e9, P4.LENGTH * 1.0e9 );
+save_comment( File, \"%\" );
 ";
     close $fh;
 

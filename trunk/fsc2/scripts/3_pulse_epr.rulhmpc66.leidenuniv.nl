@@ -499,23 +499,6 @@ field = set_field( start_field );
    output the parameter to it */
 
 File = get_file( );
-save_comment( File, \"%\" );
-
-fsave( File,
-	   \"% Date:                   # #\\n\"
-	   \"% Script:                 3_pulse_epr\\n\"
-	   \"% Start field:            # G\\n\"
-	   \"% End field:              # G\\n\"
-	   \"% Field step:             # G\\n\"
-	   \"% Repetition time:        # ms\\n\"
-	   \"% Length of 1st MW pulse: # ns\\n\"
-	   \"% Length of 2st MW pulse: # ns\\n\"
-	   \"% Length of 3st MW pulse: # ns\\n\"
-	   \"% P1-P2 separation:	      # ns\\n\"
-	   \"% P2-P3 separation:	      # ns\\n\",
-	   date( ), time( ), start_field, end_field, field_step,
-	   repeat_time * 1.0e3, P1.LENGTH * 1.0e9, P2.LENGTH * 1.0e9,
-	   P3.LENGTH * 1.0e9, p1_to_p2_dist * 1.0e9, p2_to_p3_dist * 1.0e9 );
 
 pulser_state( \"ON\" );
 
@@ -529,6 +512,26 @@ FOR I = 1 : N_Points {
 		set_field( field );
 	}
 }
+
+ON_STOP:
+
+fsave( File,
+	   \"% Date:                   # #\\n\"
+	   \"% Script:                 3_pulse_epr\\n\"
+	   \"% Start field:            # G\\n\"
+	   \"% End field:              # G\\n\"
+	   \"% Field step:             # G\\n\"
+	   \"% Repetition time:        # ms\\n\"
+	   \"% Length of 1st MW pulse: # ns\\n\"
+	   \"% Length of 2st MW pulse: # ns\\n\"
+	   \"% Length of 3st MW pulse: # ns\\n\"
+	   \"% P1-P2 separation:	      # ns\\n\"
+	   \"% P2-P3 separation:	      # ns\\n\",
+	   date( ), time( ), start_field, field, field_step,
+	   repeat_time * 1.0e3, P1.LENGTH * 1.0e9, P2.LENGTH * 1.0e9,
+	   P3.LENGTH * 1.0e9, p1_to_p2_dist * 1.0e9, p2_to_p3_dist * 1.0e9 );
+save_comment( File, \"%\" );
+
 ";
     close $fh;
 

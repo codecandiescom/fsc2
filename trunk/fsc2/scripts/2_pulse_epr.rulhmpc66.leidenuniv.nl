@@ -405,27 +405,13 @@ EXPERIMENT:
 
 field = set_field( start_field );
 
-/* Open the data file, ask user for comment to be written to it and the
-   output the parameter to it */
+/* Open the data file and start pulser */
 
 File = get_file( );
-save_comment( File, \"%\" );
-
-fsave( File,
-	   \"% Date:                   # #\\n\"
-	   \"% Script:                 2_pulse_epr\\n\"
-	   \"% Start field:            # G\\n\"
-	   \"% End field:              # G\\n\"
-	   \"% Field step:             # G\\n\"
-	   \"% Repetition time:        # ms\\n\"
-	   \"% Length of 1st MW pulse: # ns\\n\"
-	   \"% Length of 2st MW pulse: # ns\\n\"
-	   \"% Pulse distance:         # ns\\n\",
-	   date( ), time( ), start_field, end_field, field_step,
-	   repeat_time * 1.0e3, P1.LENGTH * 1.0e9, P2.LENGTH * 1.e9,
-	   p1_to_p2_dist );
 
 pulser_state( \"ON\" );
+
+/* Now start the acquisition */
 
 FOR I = 1 : N_Points {
 	wait( 1.1 * repeat_time * N_Avg );
@@ -437,6 +423,24 @@ FOR I = 1 : N_Points {
 		set_field( field );
 	}
 }
+
+ON_STOP:
+
+fsave( File,
+	   \"% Date:                   # #\\n\"
+	   \"% Script:                 2_pulse_epr\\n\"
+	   \"% Start field:            # G\\n\"
+	   \"% End field:              # G\\n\"
+	   \"% Field step:             # G\\n\"
+	   \"% Repetition time:        # ms\\n\"
+	   \"% Length of 1st MW pulse: # ns\\n\"
+	   \"% Length of 2st MW pulse: # ns\\n\"
+	   \"% Pulse distance:         # ns\\n\",
+	   date( ), time( ), start_field, field, field_step,
+	   repeat_time * 1.0e3, P1.LENGTH * 1.0e9, P2.LENGTH * 1.e9,
+	   p1_to_p2_dist );
+save_comment( File, \"%\" );
+
 ";
     close $fh;
 

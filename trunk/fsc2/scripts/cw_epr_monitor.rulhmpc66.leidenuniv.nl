@@ -39,16 +39,14 @@ sweep_rate = 1.0;
 new_sweep_rate;
 acq_rate;
 Current_Field, New_Field, Sweep_Rate, Sweep_Up, Sweep_Stop, Sweep_Down,
-Cur_Acq_Rate, Pause, Clear;
+Cur_Acq_Rate, Pause, DWS, Clear;
 Sweep_State = 0;
 Acq_Rate, New_Acq_Rate;
+Draw_While_Stopped = 0;
 Pause_State = 0;
-Old_Pause_State;
-MAX_POINTS = 8191;            // maximum number of data points
-POnS;
+TB_Changed;
 I, J;
 dt, new_dt, st = 0.0;
-Auto_Acq = 0;
 
 /* Some variables to make the program  easier to read */
 
@@ -68,9 +66,13 @@ init_1d( "Points", "EPR signal [uV]" );
 
 EXPERIMENT:
 
+/*Stop magnet if necessary */
+
 IF magnet_sweep( ) != STOPPED {
 	magnet_sweep( STOPPED );
 }
+
+/* Get current field and write it into the corresponding output field */
 
 current_field = get_field( );
 new_field = current_field;
@@ -99,6 +101,8 @@ IF acq_rate >= acq_rates_list[ 1 ] {
 	}
 }
 
+/* Initialize auto-acquisition of the lock-in */
+
 lockin_auto_setup( 1.0 / acq_rates_list[ Cur_Acq_Rate ], 1 );
 
 /* Unlock the lock-ins keyboard */
@@ -120,250 +124,257 @@ Acq_Rate   = menu_create( "Lock-in acquisition rate", "32 Hz", "16 Hz", "8 Hz",
 						   "4 Hz", "2 Hz", "1 Hz", "1/2 Hz", "1/4 Hz",
 						   "1/8 Hz", "1/16 Hz" );
 menu_choice( Acq_Rate, Cur_Acq_Rate );
-POnS       = button_create( "PUSH_BUTTON", "Pause On Stop" );
-button_state( POnS, "ON" );
+DWS = button_create( "PUSH_BUTTON", "Display while stopped" );
+button_state( DWS, Draw_While_Stopped );
 Pause = button_create( "PUSH_BUTTON", "Pause display" );
-button_state( Pause, 1 );
+button_state( Pause, Pause_State );
 Clear = button_create( "NORMAL_BUTTON", "Clear screen" );
 hide_toolbox( "OFF" );
 
 I = 0;
-
 dt = delta_time( );
 
 FOREVER {
 
-	/* If we're sweeping update the output field with the current field */
+	/* Update the output field with the current field */
 
-	IF Sweep_State != STOPPED {
-		current_field = get_field( );
-		output_value( Current_Field, current_field );
+	current_field = get_field( );
+	output_value( Current_Field, current_field );
+
+	/* Check if the magnet reached the upper or lower limit in which case
+	   a running sweep must be stopped */
+
+	IF Sweep_State != STOPPED & magnet_sweep( ) == STOPPED {
+		Sweep_State = STOPPED;
+		button_state( Sweep_Stop, "ON" );
+		draw_marker( I, "RED" );
+
+		IF ! Pause_State & ! Draw_While_Stopped {	
+			lockin_auto_acquisition( "OFF" );
+		}
 	}
 
-	/* Now test if one of the buttons or input fields has changed its state */
+	TB_Changed = toolbox_changed( );
 
-	IF  toolbox_changed( ) {
+	/* If the display is stopped and no user interaction was detected wait a
+	   short time and restart the main loop */
 
-		/* Check if the sweep up button has been pressed and we're not already
-		   sweeping up - distinguish between the start of a sweep and the
-		   reversal of the sweep direction, in the later case also stop and
-		   restart the lock-in's auto-acquisition to empty its internal data
-		   buffer. */
+	IF ( Pause_State | ( Sweep_State == STOPPED & ! Draw_While_Stopped ) )
+	   & ! TB_Changed {
+		wait( 0.1 s );
+		NEXT;
+	}
 
-		IF  Sweep_State != UP & button_state( Sweep_Up ) & I < MAX_POINTS {
-			IF Sweep_State == STOPPED {
-				magnet_sweep( UP );
-				Sweep_State = UP;
-				lockin_auto_acquisition( "ON" );
-				dt = delta_time( );
-				st = 0.0 s;
-				Auto_Acq = 1;
-			}
+	/* Calculate how much time we needed to get here */
 
-			IF Sweep_State == DOWN {
+    new_dt = delta_time( );
+    st += new_dt - dt;
+	dt = new_dt;
+
+	/* If displaying data isn't stopped get as many points as there are in
+	   the lock-ins buffer and display them. */
+
+	IF ! Pause_State & ( Sweep_State != STOPPED | Draw_While_Stopped ) {
+		WHILE st >= 1.0 / acq_rate {
+			I += 1;
+			display( I, lockin_get_data( 1 ) * 1.0e6 );
+			st -= 1.0 / acq_rate;
+		}
+	}
+
+	/* If there was no user interaction we're already done */
+
+	IF ! TB_Changed {
+		NEXT;
+	}
+
+	/* Check if "Sweep up" button has been pressed */
+
+	IF button_state( Sweep_Up ) & Sweep_State != UP {
+
+		IF ! Pause_State {
+			IF ( Sweep_State == STOPPED & Draw_While_Stopped ) |
+			   Sweep_State == DOWN {
 				lockin_auto_acquisition( "OFF" );
-				magnet_sweep( UP );
-				Sweep_State = UP;
-				lockin_auto_acquisition( "ON" );
-				dt = delta_time( );
-				st = 0.0 s;
-				Auto_Acq = 1;
 			}
 
-			draw_marker( I + 1, "YELLOW" );
-			button_state( Pause, 0 );
+			lockin_auto_acquisition( "ON" );
+			dt = delta_time( );
+			st = 0.0 s;
 		}
 
-		/* Check if the sweep down button has been pressed and we're not
-		   already sweeping down  - distinguish between the start of a sweep
-		   and the reversal of the sweep direction, in the later case also
-		   stop and restart the lock-in's auto-acquisition to empty its
-		   internal data buffer. */
+		magnet_sweep( UP );
+		Sweep_State = UP;
+		draw_marker( I + 1, "YELLOW" );
+	}
 
-		IF Sweep_State != DOWN & button_state( Sweep_Down ) & I < MAX_POINTS {
-			IF Sweep_State == STOPPED {
-				magnet_sweep( DOWN );
-				Sweep_State = DOWN;
-				lockin_auto_acquisition( "ON" );
-				dt = delta_time( );
-				st = 0.0 s;
-				Auto_Acq = 1;
-			}
+	/* Check if "Sweep Down" button has been pressed */
 
-			IF Sweep_State == UP {
+	IF button_state( Sweep_Down ) & Sweep_State != DOWN {
+
+		IF ! Pause_State {
+			IF ( Sweep_State == STOPPED & Draw_While_Stopped ) |
+			   Sweep_State == UP {
 				lockin_auto_acquisition( "OFF" );
-				magnet_sweep( DOWN );
-				Sweep_State = DOWN;
-				lockin_auto_acquisition( "ON" );
-				dt = delta_time( );
-				st = 0.0 s;
-				Auto_Acq = 1;
 			}
 
-			draw_marker( I + 1, "BLUE" );
-			button_state( Pause, 0 );
+			lockin_auto_acquisition( "ON" );
+			dt = delta_time( );
+			st = 0.0 s;
 		}
 
-		/* Check if the sweep stop button has been pressed while we're
-		   sweeping */
+		magnet_sweep( DOWN );
+		Sweep_State = DOWN;
+		draw_marker( I + 1, "BLUE" );
+	}
 
-		IF Sweep_State != STOPPED & button_state( Sweep_Stop ) {
+	/* Check if "Stop Sweep" button has been pressed */
+
+	IF Sweep_State != STOPPED & button_state( Sweep_Stop ) {
+
+		IF ! Pause_State {
 			lockin_auto_acquisition( "OFF" );
-			Auto_Acq = 0;
-			magnet_sweep( STOPPED );
-			Sweep_State = STOPPED;
-			draw_marker( I + 1, "RED" );
 
-			IF button_state( POnS ) {
-				Pause_State = 1;
-				button_state( Pause, 1 );
-			} ELSE {
+			IF Draw_While_Stopped {
 				lockin_auto_acquisition( "ON" );
 				dt = delta_time( );
 				st = 0.0 s;
-				Auto_Acq = 1;
 			}
 		}
 
-		/* Check if a new field has been set - if yes set it (which automati-
-		   cally stops a sweep) after checking that it's within the allowed
-		   limits */
+		magnet_sweep( STOPPED );
+		Sweep_State = STOPPED;
+		draw_marker( I + 1, "RED" );
+	}
+
+	/* Check if a new field value has been entered (this will automatically
+	   stop a running sweep) */
+
+	IF input_changed( New_Field ) {
 
 		new_set_field = input_value( New_Field );
-		IF abs( new_set_field - new_field ) > 0.149 G {
-			IF new_set_field > 114304 G | new_set_field < 0 G {
-				input_value( New_Field, new_field );
-			} ELSE {
+
+		IF new_set_field <= 114304 G & new_set_field <= 0 G &
+		   abs( new_set_field - new_field ) >= 0.149 G {
+
+			new_field = set_field( new_set_field );
+
+			IF Sweep_State != STOPPED {
+				IF ! Pause_State {
+					lockin_auto_acquisition( "OFF" );
+
+					IF Draw_While_Stopped {
+						lockin_auto_acquisition( "ON" );
+						dt = delta_time( );
+						st = 0.0 s;
+					}
+				}
+
 				Sweep_State = STOPPED;
-				new_field = new_set_field;
-				lockin_auto_acquisition( "OFF" );
-				Auto_Acq = 0;
 				button_state( Sweep_Stop, "ON" );
-				current_field = set_field( new_field );
 				draw_marker( I + 1, "RED" );
 			}
-			output_value( Current_Field, current_field );
 		}
 
-		/* Check if a new sweep rate has been set - if yes set the new rate
-		   after checking that it's within the allowed limits. Because any
-		   data stored in the lock-ins internal data buffer have become
-		   meaningless stop and restart auto-acquisition to clean out the
-		   buffer. */
+		input_value( New_Field, new_field );
+	}
+
+	/* Check if a new sweep rate has been set (this will automatically
+	   stop a running sweep) */
+
+	IF input_changed( Sweep_Rate ) {
 
 		new_sweep_rate = abs( input_value( Sweep_Rate ) );
-		IF abs( sweep_rate - new_sweep_rate ) > 0.01 {
-			IF new_sweep_rate <= 33.1 & new_sweep_rate >= 0.23814 {
-				sweep_rate = magnet_sweep_rate( new_sweep_rate );
-				IF Sweep_State != STOPPED {
+
+		IF abs( sweep_rate - new_sweep_rate ) >= 0.01 &
+		   new_sweep_rate <= 33.1 & new_sweep_rate >= 0.23814 {
+
+			sweep_rate = magnet_sweep_rate( new_sweep_rate );
+
+			IF Sweep_State != STOPPED {
+				IF ! Pause_State {
 					lockin_auto_acquisition( "OFF" );
-					lockin_auto_acquisition( "ON" );
-					dt = delta_time( );
-					st = 0.0 s;
-					Auto_Acq = 1;
-					draw_marker( I + 1, "GREEN" )
+
+					IF Draw_While_Stopped {
+						lockin_auto_acquisition( "ON" );
+						dt = delta_time( );
+						st = 0.0 s;
+					}
 				}
+
+				Sweep_State = STOPPED;
+				button_state( Sweep_Stop, "ON" );
+				draw_marker( I + 1, "RED" );
 			}
-			input_value( Sweep_Rate, sweep_rate );
 		}
 
-		/* Check if a new acquisition rate for the lock-in has been selected -
-		   also in this case the data in the lock-ins buffer aren't useful
-		   any more so clean them by stopping and restarting the auto-
-		   acquisition. */
+		input_value( Sweep_Rate, sweep_rate );
+	}
+
+	/* Check if a new acquisition rate for the lock-in has been selected (this
+	   will automatically stop a running sweep) */
+
+	IF menu_changed( Acq_Rate ) {
 
 		New_Acq_Rate = menu_choice( Acq_Rate );
+
 		IF New_Acq_Rate != Cur_Acq_Rate {
 			Cur_Acq_Rate = New_Acq_Rate;
 			acq_rate = acq_rates_list[ Cur_Acq_Rate ];
 			lockin_auto_setup( 1.0 / acq_rate, 1 );
+
 			IF Sweep_State != STOPPED {
-				lockin_auto_acquisition( "OFF" );
-				lockin_auto_acquisition( "ON" );
-				dt = delta_time( );
-				st = 0.0 s;
-				Auto_Acq = 1;
-			}
-		}
+				IF ! Pause_State {
+					lockin_auto_acquisition( "OFF" );
 
-		Old_Pause_State = Pause_State;
-		Pause_State = button_state( Pause );
-		IF Pause_State != Old_Pause_State {
-			lockin_auto_acquisition( ! Pause_State );
-			Old_Pause_State = Pause_State;
-			IF ! Pause_State {
-				dt = delta_time( );
-				st = 0.0 s;
-			}
-			Auto_Acq = ! Pause_State;
-		}
+					IF Draw_While_Stopped {
+						lockin_auto_acquisition( "ON" );
+						dt = delta_time( );
+						st = 0.0 s;
+					}
+				}
 
-		/* Check if the clear curve button has been pressed - if yes also clear
-		   the lock-ins internal buffer. */
-
-		IF button_state( Clear ) {
-			clear_curve( );
-			clear_marker( );
-			rescale( 64 );
-			I = 0;
-			IF Sweep_State != STOPPED {
-				lockin_auto_acquisition( "OFF" );
-				lockin_auto_acquisition( "ON" );
-				dt = delta_time( );
-				st = 0.0 s;
-				Auto_Acq = 1;
+				Sweep_State = STOPPED;
+				button_state( Sweep_Stop, "ON" );
+				new_field = new_set_field;
+				draw_marker( I + 1, "RED" );
 			}
 		}
 	}
 
-	/* If the magnet is sweeping the field get new data points, otherwise
-	   wait a short moment to keep the program from using up the complete
-	   computer time. If we already have acquired MAX_POINTS data points or the
-	   magnet sweep has been haltet because one of the field limits has been
-	   reached also stop the sweep without further user intervention. */
+	/* Check if the clear curve button has been pressed - if yes also clear
+	   the lock-ins internal buffer. */
 
-	IF ! Pause_State {
-
-		/* If the lock-in is running in auto-acquisition mode do a guess on
-		   how many points have been acquired since the last time we were
-		   here and fetch them, otherwise just get a single one. */
-
-		IF Auto_Acq {
-		    new_dt = delta_time( );
-		    st += new_dt - dt;
-			dt = new_dt;
-			WHILE st > 0.0 s {
-				I += 1;
-				display( I, lockin_get_data( 1 ) * 1.0e6 );
-				st -= 1.0 / acq_rate;
-			}
-			if st < 0.0 s {
-				st = 0 s;
-			}
-		} ELSE {
-			I += 1;
-			display( I, lockin_get_data( 1 ) * 1.0e6 );
-		}
-
-		IF ( Sweep_State != STOPPED & magnet_sweep( ) == STOPPED ) |
-			 I >= MAX_POINTS {
+	IF button_state( Clear ) {
+		clear_curve( );
+		clear_marker( );
+		rescale( 64 );
+		I = 0;
+		IF Sweep_State != STOPPED & ! Pause_State {
 			lockin_auto_acquisition( "OFF" );
-			Auto_Acq = 0;
-			magnet_sweep( STOPPED );
-			Sweep_State = STOPPED;
-			button_state( Sweep_Stop, "ON" );
-			draw_marker( I, "RED" );
-			IF button_state( POnS ) {
-				Pause_State = 1;
-			} ELSE {
-				lockin_auto_acquisition( "ON" );
-				dt = delta_time( );
-				Auto_Acq = 1;
-			}
+			lockin_auto_acquisition( "ON" );
+			dt = delta_time( );
+			st = 0.0 s;
 		}
-	} ELSE {
-		wait( 0.1 s );
 	}
+
+	/* Check if the "Pause" button got changed */
+
+	IF button_changed( Pause ) {
+		IF ! Pause_State {
+			IF Sweep_State != STOPPED | Draw_While_Stopped {
+				lockin_auto_acquisition( "OFF" );
+			}
+		} ELSE IF Sweep_State != STOPPED | Draw_While_Stopped {
+			lockin_auto_acquisition( "ON" );
+			dt = delta_time( );
+			st = 0.0 s;
+		}
+
+		Pause_State = button_state( Pause );
+	}
+
+	Draw_While_Stopped = button_state( DWS );
 }
 
 
