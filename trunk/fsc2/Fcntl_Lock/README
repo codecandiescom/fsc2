@@ -1,0 +1,56 @@
+Fcntl_Lock version 0.01
+=======================
+
+Fcntl_Lock is a module to do file locking using the fcntl(2) system call.
+This allows locks on parts of files as well of whole files and overcomes
+some known problems with flock(2), on which the Perl flock function often
+is based.
+
+Obviously, to use the module you need a system that supports the fcntl()
+system call.
+
+There currently is nothing really done by "make test", remember this
+is version 0.01 ;-)
+
+INSTALLATION
+
+To install this module type the following:
+
+   perl Makefile.PL
+   make
+   make test
+   make install
+
+DEPENDENCIES
+
+This module requires these other modules:
+
+  POSIX and Carp
+
+IMPLEMENTATION DETAILS
+
+Basically, the module isn't much more than a wrapper for the fcntl()
+function available in C. The somewhat trickier part was setting up the
+required fock structure correctly in a hopefully system-independent way.
+The concrete layout of this structure will be quite different on different
+systems/architectures. The obvious solution would be to include fcntl.h
+in the XS file and simply populate the members of the structure with the
+data passed by the user.
+
+Unfortunately, it isn't always that simple. E.g., on my system Perl has
+been built with the flags LARGEFILE_SOURCE and FILE_OFFSET_BITS=64, which
+aren't the ones used for compiling the kernel. This results in the
+declaration of the flock structure to be different when including fcntl.h
+in the XS file from the one needed to call fcntl(). Thus, before the
+XS file is compiled a C program is run (without the flags that automati-
+cally get set when compiling in the Perl context) that determines the
+real size and alignment of the flock structure and writes out an include
+file, that in turn is used to populate (or extract data from) the flock
+structure of the correct type.
+
+COPYRIGHT AND LICENCE
+
+This program is free software; you can redistribute it and/or modify it
+under the same terms as Perl itself.
+
+Copyright (C) 2002 Jens Thoms Toerring <Jens.Toerring@physik.fu-berlin.de>
