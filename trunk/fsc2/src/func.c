@@ -4,6 +4,9 @@
    $Id$
 
    $Log$
+   Revision 1.11  1999/07/27 22:09:35  jens
+   *** empty log message ***
+
    Revision 1.10  1999/07/27 21:33:34  jens
    *** empty log message ***
 
@@ -145,11 +148,11 @@ Var *func_get( char *name, int *access )
 			ret->name = get_string_copy( name );
 			ret->dim = fncts[ i ].nargs;
 			*access = fncts[ i ].access_flag;
-			return( ret );
+			return ret;
 		}
 	}
 
-	return( NULL );
+	return NULL;
 }
 
 
@@ -221,7 +224,7 @@ Var *func_call( Var *f )
 	}
 	vars_pop( f );
 
-	return( ret );
+	return ret;
 }
 
 
@@ -230,9 +233,9 @@ Var *f_int( Var *v )
 	vars_check( v, INT_VAR | FLOAT_VAR );
 
 	if ( v->type == INT_VAR )
-		return( vars_push( INT_VAR, v->val.lval ) );
+		return vars_push( INT_VAR, v->val.lval );
 	else
-		return( vars_push( INT_VAR, (long ) v->val.dval ) );
+		return vars_push( INT_VAR, (long ) v->val.dval );
 }
 
 
@@ -241,9 +244,9 @@ Var *f_float( Var *v )
 	vars_check( v, INT_VAR | FLOAT_VAR );
 
 	if ( v->type == INT_VAR )
-		return( vars_push( FLOAT_VAR, ( double ) v->val.lval ) );
+		return vars_push( FLOAT_VAR, ( double ) v->val.lval );
 	else
-		return( vars_push( FLOAT_VAR, v->val.dval ) );
+		return vars_push( FLOAT_VAR, v->val.dval );
 }
 
 
@@ -252,10 +255,10 @@ Var *f_round( Var *v )
 	vars_check( v, INT_VAR | FLOAT_VAR );
 
 	if ( v->type == INT_VAR )
-		return( vars_push( INT_VAR, v->val.lval ) );
+		return vars_push( INT_VAR, v->val.lval );
 	else
-		return( vars_push( INT_VAR,   ( long ) ( 2 * v->val.dval )
-						            - ( long ) v->val.dval ) );
+		return vars_push( INT_VAR,   ( long ) ( 2 * v->val.dval )
+                                   - ( long ) v->val.dval );
 }
 
 
@@ -264,9 +267,9 @@ Var *f_floor( Var *v )
 	vars_check( v, INT_VAR | FLOAT_VAR );
 
 	if ( v->type == INT_VAR )
-		return( vars_push( INT_VAR, v->val.lval ) );
+		return vars_push( INT_VAR, v->val.lval );
 	else
-		return( vars_push( INT_VAR, ( long ) floor( v->val.dval ) ) );
+		return vars_push( INT_VAR, ( long ) floor( v->val.dval ) );
 }
 
 
@@ -275,9 +278,9 @@ Var *f_ceil( Var *v )
 	vars_check( v, INT_VAR | FLOAT_VAR );
 
 	if ( v->type == INT_VAR )
-		return( vars_push( INT_VAR, v->val.lval ) );
+		return vars_push( INT_VAR, v->val.lval );
 	else
-		return( vars_push( INT_VAR, ( long ) ceil( v->val.dval ) ) );
+		return vars_push( INT_VAR, ( long ) ceil( v->val.dval ) );
 }
 
 
@@ -286,9 +289,9 @@ Var *f_abs( Var *v )
 	vars_check( v, INT_VAR | FLOAT_VAR );
 
 	if ( v->type == INT_VAR )
-		return( vars_push( INT_VAR, labs( v->val.lval ) ) );
+		return vars_push( INT_VAR, labs( v->val.lval ) );
 	else
-		return( vars_push( FLOAT_VAR, fabs( v->val.dval ) ) ) ;
+		return vars_push( FLOAT_VAR, fabs( v->val.dval ) );
 }
 
 
@@ -297,9 +300,9 @@ Var *f_sin( Var *v )
 	vars_check( v, INT_VAR | FLOAT_VAR );
 
 	if ( v->type == INT_VAR )
-		return( vars_push( FLOAT_VAR, sin( ( double ) v->val.lval ) ) );
+		return vars_push( FLOAT_VAR, sin( ( double ) v->val.lval ) );
 	else
-		return( vars_push( FLOAT_VAR, sin( v->val.dval ) ) );
+		return vars_push( FLOAT_VAR, sin( v->val.dval ) );
 }
 
 
@@ -308,9 +311,9 @@ Var *f_cos( Var *v )
 	vars_check( v, INT_VAR | FLOAT_VAR );
 
 	if ( v->type == INT_VAR )
-		return( vars_push( FLOAT_VAR, cos( ( double ) v->val.lval ) ) );
+		return vars_push( FLOAT_VAR, cos( ( double ) v->val.lval ) );
 	else
-		return( vars_push( FLOAT_VAR, cos( v->val.dval ) ) );
+		return vars_push( FLOAT_VAR, cos( v->val.dval ) );
 }
 
 
@@ -319,9 +322,9 @@ Var *f_tan( Var *v )
 	vars_check( v, INT_VAR | FLOAT_VAR );
 
 	if ( v->type == INT_VAR )
-		return( vars_push( FLOAT_VAR, tan( ( double ) v->val.lval ) ) );
+		return vars_push( FLOAT_VAR, tan( ( double ) v->val.lval ) );
 	else
-		return( vars_push( FLOAT_VAR, tan( v->val.dval ) ) );
+		return vars_push( FLOAT_VAR, tan( v->val.dval ) );
 }
 
 
@@ -343,7 +346,7 @@ Var *f_asin( Var *v )
 		THROW( FUNCTION_EXCEPTION );
 	}
 
-	return( vars_push( FLOAT_VAR, asin( arg ) ) );
+	return vars_push( FLOAT_VAR, asin( arg ) );
 }
 
 
@@ -365,7 +368,7 @@ Var *f_acos( Var *v )
 		THROW( FUNCTION_EXCEPTION );
 	}
 
-	return( vars_push( FLOAT_VAR, acos( arg ) ) );
+	return vars_push( FLOAT_VAR, acos( arg ) );
 }
 
 
@@ -374,9 +377,9 @@ Var *f_atan( Var *v )
 	vars_check( v, INT_VAR | FLOAT_VAR );
 
 	if ( v->type == INT_VAR )
-		return( vars_push( FLOAT_VAR, atan( ( double ) v->val.lval ) ) );
+		return vars_push( FLOAT_VAR, atan( ( double ) v->val.lval ) );
 	else
-		return( vars_push( FLOAT_VAR, atan( v->val.dval ) ) );
+		return vars_push( FLOAT_VAR, atan( v->val.dval ) );
 }
 
 
@@ -385,9 +388,9 @@ Var *f_sinh( Var *v )
 	vars_check( v, INT_VAR | FLOAT_VAR );
 
 	if ( v->type == INT_VAR )
-		return( vars_push( FLOAT_VAR, sinh( ( double ) v->val.lval ) ) );
+		return vars_push( FLOAT_VAR, sinh( ( double ) v->val.lval ) );
 	else
-		return( vars_push( FLOAT_VAR, sinh( v->val.dval ) ) );
+		return vars_push( FLOAT_VAR, sinh( v->val.dval ) );
 }
 
 
@@ -396,9 +399,9 @@ Var *f_cosh( Var *v )
 	vars_check( v, INT_VAR | FLOAT_VAR );
 
 	if ( v->type == INT_VAR )
-		return( vars_push( FLOAT_VAR, cosh( ( double ) v->val.lval ) ) );
+		return vars_push( FLOAT_VAR, cosh( ( double ) v->val.lval ) );
 	else
-		return( vars_push( FLOAT_VAR, cosh( v->val.dval ) ) );
+		return vars_push( FLOAT_VAR, cosh( v->val.dval ) );
 }
 
 
@@ -407,9 +410,9 @@ Var *f_tanh( Var *v )
 	vars_check( v, INT_VAR | FLOAT_VAR );
 
 	if ( v->type == INT_VAR )
-		return( vars_push( FLOAT_VAR, tanh( ( double ) v->val.lval ) ) );
+		return vars_push( FLOAT_VAR, tanh( ( double ) v->val.lval ) );
 	else
-		return( vars_push( FLOAT_VAR, tanh( v->val.dval ) ) );
+		return vars_push( FLOAT_VAR, tanh( v->val.dval ) );
 }
 
 
@@ -418,9 +421,9 @@ Var *f_exp( Var *v )
 	vars_check( v, INT_VAR | FLOAT_VAR );
 
 	if ( v->type == INT_VAR )
-		return( vars_push( FLOAT_VAR, exp( ( double ) v->val.lval ) ) );
+		return vars_push( FLOAT_VAR, exp( ( double ) v->val.lval ) );
 	else
-		return( vars_push( FLOAT_VAR, exp( v->val.dval ) ) );
+		return vars_push( FLOAT_VAR, exp( v->val.dval ) );
 }
 
 
@@ -441,7 +444,7 @@ Var *f_ln( Var *v )
 				"range.\n", Fname, Lc );
 		THROW( FUNCTION_EXCEPTION );
 	}
-	return( vars_push( FLOAT_VAR, log( arg ) ) );
+	return vars_push( FLOAT_VAR, log( arg ) );
 }
 
 
@@ -462,7 +465,7 @@ Var *f_log( Var *v )
 				"range.\n", Fname, Lc );
 		THROW( FUNCTION_EXCEPTION );
 	}
-	return( vars_push( FLOAT_VAR, log10( arg ) ) );
+	return vars_push( FLOAT_VAR, log10( arg ) );
 }
 
 
@@ -483,7 +486,7 @@ Var *f_sqrt( Var *v )
 				Fname, Lc );
 		THROW( FUNCTION_EXCEPTION );
 	}
-	return( vars_push( FLOAT_VAR, sqrt( arg ) ) );
+	return vars_push( FLOAT_VAR, sqrt( arg ) );
 }
 
 
@@ -505,7 +508,7 @@ Var *f_print( Var *v )
 	   unreasonable... */
 
 	if ( v == NULL )
-		return( vars_push( INT_VAR, 0 ) );
+		return vars_push( INT_VAR, 0 );
 
 	/* make sure the first argument is a string */
 
@@ -663,7 +666,7 @@ Var *f_print( Var *v )
 	free( fmt );
 	vars_pop( v );
 
-	return( vars_push( INT_VAR, in_format ) );
+	return vars_push( INT_VAR, in_format );
 }
 
 
@@ -686,5 +689,5 @@ Var *f_dummy( Var *v )
 	for ( i = 0; i < size; ++i )
 		x[ i ] = i + 1;
 
-	return( vars_push( INT_TRANS_ARR, x, size ) );
+	return vars_push( INT_TRANS_ARR, x, size );
 }

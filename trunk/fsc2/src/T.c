@@ -13,7 +13,7 @@ void *T_malloc( size_t size )
 		THROW( OUT_OF_MEMORY_EXCEPTION );
 	}
 
-	return( mem );
+	return mem;
 }
 
 
@@ -30,7 +30,7 @@ void *T_calloc( size_t nmemb, size_t size )
 		THROW( OUT_OF_MEMORY_EXCEPTION );
 	}
 
-	return( mem );
+	return mem;
 }
 
 
@@ -46,5 +46,5 @@ void *T_realloc( void *ptr, size_t size )
 		THROW( OUT_OF_MEMORY_EXCEPTION );
 	}
 
-	return( new_ptr );
+	return new_ptr;
 }

@@ -2,6 +2,9 @@
   $Id$
 
   $Log$
+  Revision 1.10  1999/07/27 22:21:11  jens
+  *** empty log message ***
+
   Revision 1.9  1999/07/27 16:23:21  jens
   *** empty log message ***
 
@@ -115,49 +118,49 @@ UNREC       [^\n \t;,\(\)\=\+\-\*\/\[\]\{\}\%\^]+
 			/* handling of ASSIGNMENTS: label */
 {ASS}		{
 				Vars_Next_Section = ASSIGNMENTS_SECTION;
-				return( SECTION_LABEL );
+				return SECTION_LABEL;
 			}
 
 			/* handling of DEFAULTS: label */
 {DEF}		{
 				Vars_Next_Section = DEFAULTS_SECTION;
-				return( SECTION_LABEL );
+				return SECTION_LABEL;
 			}
 
 			/* handling of VARIABLES: label */
 {VAR}		{
 				Vars_Next_Section = VARIABLES_SECTION;
-				return( SECTION_LABEL );
+				return SECTION_LABEL;
 			}
 
 			/* handling of PHASES: label */
 {PHAS}		{
 				Vars_Next_Section = PHASES_SECTION;
-				return( SECTION_LABEL );
+				return SECTION_LABEL;
 			}
 
 			/* handling of PREPARATIONS: label */
 {PREP}		{
 				Vars_Next_Section = PREPARATIONS_SECTION;
-				return( SECTION_LABEL );
+				return SECTION_LABEL;
 			}
 
 			/* handling of EXPERIMENT: label */
 {EXP}		{
 				Vars_Next_Section = EXPERIMENT_SECTION;
-				return( SECTION_LABEL );
+				return SECTION_LABEL;
 			}
 
 			/* handling of integer numbers */
 {INT}       {
 				variableslval.lval = atol( variablestext );
-                return( INT_TOKEN );
+                return INT_TOKEN;
             }
 
 			/* handling of floating point numbers */
 {FLOAT}     {
                 variableslval.dval = atof( variablestext );
-                return( FLOAT_TOKEN );
+                return FLOAT_TOKEN;
             }
 
             /* handling of string constants (to be used as format strings in
@@ -165,7 +168,7 @@ UNREC       [^\n \t;,\(\)\=\+\-\*\/\[\]\{\}\%\^]+
 {STR}       {
 				variablestext[ strlen( variablestext ) - 1 ] = '\0';
 				variableslval.sptr = variablestext + 1;
-				return( STR_TOKEN );
+				return STR_TOKEN;
 			}
 
 			/* handling of function, variable and array identifiers */
@@ -187,7 +190,7 @@ UNREC       [^\n \t;,\(\)\=\+\-\*\/\[\]\{\}\%\^]+
 								 Fname, Lc, variablestext );
 						THROW( SYNTAX_ERROR_EXCEPTION );
 					}
-					return( FUNC_TOKEN );
+					return FUNC_TOKEN;
 				}
 
 				/* if it's not a function it's got to be a variable */
@@ -195,33 +198,33 @@ UNREC       [^\n \t;,\(\)\=\+\-\*\/\[\]\{\}\%\^]+
 				if ( ( variableslval.vptr = vars_get( variablestext ) )
 				     == NULL )
 			         variableslval.vptr = vars_new( variablestext );
-				return( VAR_TOKEN );
+				return VAR_TOKEN;
 			}
 
 			/* stuff used with functions, arrays and math */
 
-"=="        return( EQ );        /* equal */
-"<"         return( LT );        /* less than */
-"<="        return( LE );        /* less than or equal */
-">"         return( GT );        /* greater than */
-">="        return( GE );        /* greater than or equal */
-"="         return( '=' );       /* assignment operator */
-"["         return( '[' );       /* start of array indices */
-"]"         return( ']' );       /* end of array indices */
-","         return( ',' );       /* list separator */
-"("         return( '(' );       /* start of function argument list */
-")"         return( ')' );       /* end of function argument list */
-"{"         return( '{' );       /* start of initialisation data list */
-"}"         return( '}' );       /* end of initialisation data list */
-"+"         return( '+' );       /* addition operator */
-"-"         return( '-' );       /* subtraction operator or unary minus */
-"*"         return( '*' );       /* multiplication operator */
-"/"         return( '/' );       /* division operator */
-"%"         return( '%' );       /* modulo operator */
-"^"         return( '^' );       /* exponentiation operator */
+"=="        return EQ;        /* equal */
+"<"         return LT;        /* less than */
+"<="        return LE;        /* less than or equal */
+">"         return GT;        /* greater than */
+">="        return GE;        /* greater than or equal */
+"="         return '=';       /* assignment operator */
+"["         return '[';       /* start of array indices */
+"]"         return ']';       /* end of array indices */
+","         return ',';       /* list separator */
+"("         return '(';       /* start of function argument list */
+")"         return ')';       /* end of function argument list */
+"{"         return '{';       /* start of initialisation data list */
+"}"         return '}';       /* end of initialisation data list */
+"+"         return '+';       /* addition operator */
+"-"         return '-';       /* subtraction operator or unary minus */
+"*"         return '*';       /* multiplication operator */
+"/"         return '/';       /* division operator */
+"%"         return '%';       /* modulo operator */
+"^"         return '^';       /* exponentiation operator */
 
 			/* handling of end of statement character */
-";"			return( ';' );
+";"			return ';';
 
 {WS}        /* skip white space */
 
@@ -231,7 +234,7 @@ UNREC       [^\n \t;,\(\)\=\+\-\*\/\[\]\{\}\%\^]+
 			/* handling of end of file */
 <<EOF>>	    {
 				Vars_Next_Section = NO_SECTION;
-				return( 0 );
+				return 0;
 			}
 
 
@@ -260,7 +263,7 @@ int variables_parser( FILE *in )
 	{
 		eprint( FATAL, "%s:%ld: Multiple instances of VARIABLES section "
 		        "label.\n", Fname, Lc );
-		return( FAIL );
+		return FAIL;
 	}
 	compilation.sections[ VARIABLES_SECTION ] = SET;
 
@@ -271,26 +274,26 @@ int variables_parser( FILE *in )
 	TRY
 		variablesparse( );
 	CATCH( MULTIPLE_VARIABLE_DEFINITION_EXCEPTION )
-		return( FAIL );
+		return FAIL;
 	CATCH( UNKNOWN_FUNCTION_EXCEPTION )
-		return( FAIL );
+		return FAIL;
 	CATCH( INVALID_INPUT_EXCEPTION )
 	{
 		eprint( FATAL, "%s:%ld: Invalid input in VARIABLES section: `%s'\n",
 				 Fname, Lc, variablestext );
-		return( FAIL );
+		return FAIL;
     }
 	CATCH( CLEANER_EXCEPTION )
 	{
 		eprint( FATAL, "%s", variablestext + 2 );
-		return( FAIL );
+		return FAIL;
 	}
 
 #ifdef DEBUG
 	print_all_vars( );
 #endif
 
-	return( Vars_Next_Section );
+	return Vars_Next_Section;
 }
 
 

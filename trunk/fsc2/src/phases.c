@@ -94,7 +94,7 @@ long phase_seq_start( long phase_seq_num )
 
 	PSeq[ phase_seq_num ].defined = SET;
 	PSeq[ phase_seq_num ].len = 0;
-	return( phase_seq_num );
+	return phase_seq_num;
 }
 
 
@@ -245,8 +245,8 @@ bool check_phase_setup( void )
 				"the ASSIGNMENTS section is too small for the phase sequence "
 				"length (%d) defined in the PHASES section.\n",
 				assignment[ PULSER_CHANNEL_PHASE_X ].num_channels, len );
-		return( FAIL );
+		return FAIL;
 	}
 
-	return( OK );
+	return OK;
 }

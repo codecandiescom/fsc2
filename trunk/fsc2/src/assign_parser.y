@@ -133,6 +133,6 @@ unit:   /* empty */                  { $$ = 1.0; }
 
 int assignerror ( const char *s )
 {
-	return( fprintf( stderr, "%s:%ld: %s in ASSIGNMENTS section.\n",
-					 Fname, Lc, s ) );
+	return fprintf( stderr, "%s:%ld: %s in ASSIGNMENTS section.\n",
+					Fname, Lc, s );
 }

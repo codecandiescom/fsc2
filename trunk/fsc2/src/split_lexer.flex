@@ -2,6 +2,9 @@
    $Id$
 
    $Log$
+   Revision 1.4  1999/07/27 22:20:30  jens
+   *** empty log message ***
+
    Revision 1.3  1999/07/16 22:55:39  jens
    Mostly just cosmetic changes.
 
@@ -69,60 +72,60 @@ EXP         ^[\t ]*EXP(ERIMENT)?:
 			/* handling of error messages from the cleaner */
 {ERR}		{
 				printf( "%s", splittext + 2 );
-				return( FAIL );
+				return FAIL;
 			}
 
 			/* handling of ASSIGNMENTS: label */
 {ASS}		{
 				if ( ! section_parser( ASSIGNMENTS_SECTION ) )
-					return( FAIL );
+					return FAIL;
 			}
 
 			/* handling of DEFAULTS: label */
 {DEF}		{
 				if ( ! section_parser( DEFAULTS_SECTION ) )
-					return( FAIL );
+					return FAIL;
 			}
 
 			/* handling of VARIABLES: label */
 {VAR}		{
 				if ( ! section_parser( VARIABLES_SECTION ) )
-					return( FAIL );
+					return FAIL;
 			}
 
 			/* handling of PHASES: label */
 {PHAS}      {
 				if ( ! section_parser( PHASES_SECTION ) )
-					return( FAIL );
+					return FAIL;
 			}
 
 			/* handling of PREPARATIONS: label */
 {PREP}      {
 				if ( ! section_parser( PREPARATIONS_SECTION ) )
-					return( FAIL );
+					return FAIL;
 			}
 
 			/* handling of EXPERIMENT: label */
 {EXP}       {
 				if ( ! section_parser( EXPERIMENT_SECTION ) )
-					return( FAIL );
+					return FAIL;
 			}
 
 			/* handling of unknown label */
 .+":"       {
 				eprint( FATAL, "%s:%ld: Unknown label: `%s'.\n",
 						Fname, Lc, splittext );
-				return( FAIL );
+				return FAIL;
 			}
 
 			/* handling of invalid input */
 [^ \n]+		{
 				eprint( FATAL, "%s:%ld: Invalid input: `%s'.\n",
 						Fname, Lc, splittext );
-				return( FAIL );
+				return FAIL;
 			}
 
-<<EOF>>     return( OK );
+<<EOF>>     return OK;
 
 
 		/*----------------------*/
@@ -149,7 +152,7 @@ bool split( char *file )
 	if ( file == NULL || *file == '\0' )
 	{
 		printf( "Missing input file.\n" );
-		return( FAIL );
+		return FAIL;
 	}
 
 	/* filter file through "fsc_clean" */
@@ -171,7 +174,7 @@ bool split( char *file )
 	if ( Fname != NULL )
 		free( Fname );
 
-	return( split_error );
+	return split_error;
 }
 
 
@@ -226,7 +229,7 @@ bool section_parser( int section )
 
 			default :              /* this should never happen, but ... */
 				assert( 1 == 0 );
-				return( FAIL );
+				return FAIL;
 		}
 
 		/* Now follows the handling of errors: Each lexer starts its action
@@ -246,39 +249,39 @@ bool section_parser( int section )
 		   exception stack) and failure is returned to splitlex(). */
 
 		if ( section == FAIL )                 /* error was already handled */
-		   return( FAIL );
+		   return FAIL;
 
 		if ( exception_id == NO_EXCEPTION )    /* everything worked out fine */
 	   		TRY_SUCCESS;
 		CATCH( OUT_OF_MEMORY_EXCEPTION )
 		{
 			eprint( FATAL, "%s:%ld: Running out of memory.\n", Fname, Lc );
-			return( FAIL );
+			return FAIL;
 		}
 		CATCH( SYNTAX_ERROR_EXCEPTION )
 		{
 			eprint( FATAL, "%s:%ld: Syntax error.\n", Fname, Lc ); 
-			return( FAIL );
+			return FAIL;
 		}
 		CATCH( MISSING_SEMICOLON_EXCEPTION )
 		{		
 			eprint( FATAL, "%s:%ld: Missing semicolon before (or on) this "
 					"line.\n", Fname, Lc );
-			return( FAIL );
+			return FAIL;
 		}
 		CATCH( FLOATING_POINT_EXCEPTION )
-			return( FAIL );
+			return FAIL;
 		CATCH( PRINT_SYNTAX_EXCEPTION )
-			return( FAIL );
+			return FAIL;
 		CATCH( VARIABLES_EXCEPTION )
-			return( FAIL );
+			return FAIL;
 		CATCH( FUNCTION_EXCEPTION )
-			return( FAIL );
+			return FAIL;
 
 	} while ( section != NO_SECTION );
 
 	/* Finally, we have to do all the checks on the that only can be done
 	   after the EDL file has been completely parsed */
 
-	return( post_parse_check( ) );
+	return post_parse_check( );
 }

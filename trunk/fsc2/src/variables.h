@@ -33,8 +33,8 @@
 
 typedef struct Var_
 {
-	char *name;                         /* name of the variable or array */
-	int  type;                          /* type of the variable - see below */
+	char *name;                         /* name of the variable */
+	int  type;                          /* type of the variable */
 	union
 	{
 		long   lval;                                /* for integer values */
@@ -47,12 +47,12 @@ typedef struct Var_
 		void   *gptr;                               /* generic pointer */
 	} val;
 	int    dim;              /* dimension of array */
-	int    *sizes;
+	int    *sizes;           /* array of sizes of dimensions */
 	long   len;              /* total len of array */
 	long   flags;
 	struct Var_ *from;
-	struct Var_ *next;
-	struct Var_ *prev;
+	struct Var_ *next;       /* next variable in list or stack */
+	struct Var_ *prev;       /* previous variable in list or stack */
 } Var;
 
 

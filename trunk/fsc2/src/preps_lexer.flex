@@ -2,6 +2,9 @@
   $Id$
 
   $Log$
+  Revision 1.11  1999/07/27 22:19:11  jens
+  *** empty log message ***
+
   Revision 1.10  1999/07/21 07:09:39  jens
   *** empty log message ***
 
@@ -126,41 +129,41 @@ UNREC       [^\n \t;,\(\)\=\+\-\*\/\[\]\%\^:]+
 			/* handling of ASSIGNMENTS: labels */
 {ASS}		{
 				Preps_Next_Section = ASSIGNMENTS_SECTION;
-				return( SECTION_LABEL );
+				return SECTION_LABEL;
 			}
 
 			/* handling of DEFAULTS: labels */
 {DEF}		{
 				Preps_Next_Section = DEFAULTS_SECTION;
-				return( SECTION_LABEL );
+				return SECTION_LABEL;
 			}
 
 			/* handling of VARIABLES: labels */
 {VAR}		{
 				Preps_Next_Section = VARIABLES_SECTION;
-				return( SECTION_LABEL );
+				return SECTION_LABEL;
 			}
 
 			/* handling of PHASES: labels */
 {PHAS}		{
 				Preps_Next_Section = PHASES_SECTION;
-				return( SECTION_LABEL );
+				return SECTION_LABEL;
 			}
 
 			/* handling of EXPERIMENT: labels */
 {EXP}		{
 				Preps_Next_Section = EXPERIMENT_SECTION;
-				return( SECTION_LABEL );
+				return SECTION_LABEL;
 			}
 
 {INT}       {
 				prepslval.lval = atol( prepstext );
-                return( INT_TOKEN );
+                return INT_TOKEN;
             }
 
 {FLOAT}     {
                 prepslval.dval = atof( prepstext );
-                return( FLOAT_TOKEN );
+                return FLOAT_TOKEN;
             }
 
             /* handling of string constants (to be used as format strings in
@@ -168,7 +171,7 @@ UNREC       [^\n \t;,\(\)\=\+\-\*\/\[\]\%\^:]+
 {STR}       {
 				prepstext[ prepsleng - 1 ] = '\0';
 				prepslval.sptr = prepstext + 1;
-				return( STR_TOKEN );
+				return STR_TOKEN;
 			}
 
 
@@ -183,79 +186,79 @@ UNREC       [^\n \t;,\(\)\=\+\-\*\/\[\]\%\^:]+
 					;
 
 			    Cur_Pulse = pulse_new( atoi( ++t ) );
-				return( P_TOK );
+				return P_TOK;
 			}
 
-{F}         return( F_TOK );
-{S}			return( S_TOK );
-{L}			return( L_TOK );
-{DS}        return( DS_TOK );
-{DL}        return( DL_TOK );
-{PH}        return( PH_TOK );
-{ML}        return( ML_TOK );
-{RP}        return( RP_TOK );
+{F}         return F_TOK;
+{S}			return S_TOK;
+{L}			return L_TOK;
+{DS}        return DS_TOK;
+{DL}        return DL_TOK;
+{PH}        return PH_TOK;
+{ML}        return ML_TOK;
+{RP}        return RP_TOK;
 
 			/* combinations of pulse and property, e.g. `P3.LEN' */
 
 {P}?"."{F}  {
 				prepslval.vptr = pulse_get_by_addr( fp( prepstext ), P_FUNC );
-				return( VAR_REF );
+				return VAR_REF;
             }
 
 {P}?"."{S}  {
 				prepslval.vptr = pulse_get_by_addr( fp( prepstext ), P_POS );
-				return( VAR_REF );
+				return VAR_REF;
             }
 
 {P}?"."{L}  {
 				prepslval.vptr = pulse_get_by_addr( fp( prepstext ), P_LEN );
-				return( VAR_REF );
+				return VAR_REF;
             }
 
 {P}?"."{DS} {
 				prepslval.vptr = pulse_get_by_addr( fp( prepstext ), P_DPOS );
-				return( VAR_REF );
+				return VAR_REF;
             }
 
 {P}?"."{DL} {
 				prepslval.vptr = pulse_get_by_addr( fp( prepstext ), P_DLEN );
-				return( VAR_REF );
+				return VAR_REF;
             }
 
 {P}?"."{ML} {
 				prepslval.vptr = pulse_get_by_addr( fp( prepstext ),
 													P_MAXLEN );
-				return( VAR_REF );
+				return VAR_REF;
             }
 
 
 {MW}        {
 				prepslval.vptr = vars_push( INT_VAR, PULSER_CHANNEL_MW );
-				return( VAR_REF );
+				return VAR_REF;
 			}
 {TWT}       {
 				prepslval.vptr = vars_push( INT_VAR, PULSER_CHANNEL_TWT );
-				return( VAR_REF );
+				return VAR_REF;
 			}
 {TWT_GATE}  {
 				prepslval.vptr = vars_push( INT_VAR, PULSER_CHANNEL_TWT_GATE );
-				return( VAR_REF );
+				return VAR_REF;
 			}
 {DET}       {
 				prepslval.vptr = vars_push( INT_VAR, PULSER_CHANNEL_DET );
-				return( VAR_REF );
+				return VAR_REF;
 			}
 {DET_GATE}  {
 				prepslval.vptr = vars_push( INT_VAR, PULSER_CHANNEL_DET_GATE );
-				return( VAR_REF );
+				return VAR_REF;
 			}
 {RF}        {
 				prepslval.vptr = vars_push( INT_VAR, PULSER_CHANNEL_RF );
-				return( VAR_REF );
+				return VAR_REF;
 			}
 {RF_GATE}   {
 				prepslval.vptr = vars_push( INT_VAR, PULSER_CHANNEL_RF_GATE );
-				return( VAR_REF );
+				return VAR_REF;
 			}
 
 
@@ -275,7 +278,7 @@ UNREC       [^\n \t;,\(\)\=\+\-\*\/\[\]\%\^:]+
 								 Fname, Lc, prepstext );
 						THROW( SYNTAX_ERROR_EXCEPTION );
 					}
-					return( FUNC_TOKEN );
+					return FUNC_TOKEN;
 				}
 
 				/* if it's not a function it should be a variable */
@@ -283,53 +286,53 @@ UNREC       [^\n \t;,\(\)\=\+\-\*\/\[\]\%\^:]+
 				if ( ( prepslval.vptr = vars_get( prepstext ) ) == NULL )
 					 THROW( ACCESS_NONEXISTING_VARIABLE );
 
-				return( VAR_TOKEN );
+				return VAR_TOKEN;
 			}
 
 			/* stuff used with functions, arrays and math */
 
-"=="        return( EQ );        /* equal */                  
-"<"         return( LT );        /* less than */              
-"<="        return( LE );        /* less than or equal */     
-">"         return( GT );        /* greater than */           
-">="        return( GE );        /* greater than or equal */  
-"="         return( '=' );       /* assignment operator */    
-"["         return( '[' );       /* start of array indices */ 
-"]"         return( ']' );       /* end of array indices */   
-","         return( ',' );       /* list separator */         
-"("         return( '(' );       /* start of function argument list */
-")"         return( ')' );       /* end of function argument list */
-"+"         return( '+' );       /* addition operator */      
-"-"         return( '-' );       /* subtraction operator or unary minus */
-"*"         return( '*' );       /* multiplication operator */
-"/"         return( '/' );       /* division operator */      
-"%"         return( '%' );       /* modulo operator */        
-"^"         return( '^' );       /* exponentiation operator */
+"=="        return EQ;        /* equal */
+"<"         return LT;        /* less than */              
+"<="        return LE;        /* less than or equal */     
+">"         return GT;        /* greater than */           
+">="        return GE;        /* greater than or equal */  
+"="         return '=';       /* assignment operator */    
+"["         return '[';       /* start of array indices */ 
+"]"         return ']';       /* end of array indices */   
+","         return ',';       /* list separator */         
+"("         return '(';       /* start of function argument list */
+")"         return ')';       /* end of function argument list */
+"+"         return '+';       /* addition operator */      
+"-"         return '-';       /* subtraction operator or unary minus */
+"*"         return '*';       /* multiplication operator */
+"/"         return '/';       /* division operator */      
+"%"         return '%';       /* modulo operator */        
+"^"         return '^';       /* exponentiation operator */
 
        /* quasi-assignment operator for pulse properties */
 
-":"         return( ':' );
+":"         return ':';
 
 			/* handling of end of statement character */
-";"			return( ';' );
+";"			return ';';
 
 {WS}        /* skip white space */
 
-"\x4nsec"   return( NS_TOKEN );
-"\x4usec"   return( US_TOKEN );
-"\x4msec"   return( MS_TOKEN );
-"\x4sec"    return( S_TOKEN );
+"\x4nsec"   return NS_TOKEN;
+"\x4usec"   return US_TOKEN;
+"\x4msec"   return MS_TOKEN;
+"\x4sec"    return S_TOKEN;
 
 			/* handling of invalid input */
 {UNREC}     {
 				eprint( FATAL, "%s:%ld: Invalid input in PREPARATIONS section:"
 						" `%s'\n", Fname, Lc, prepstext );
-				return( 0 );
+				return 0;
 			}
 
 <<EOF>>	    {
 				Preps_Next_Section = NO_SECTION;
-				return( 0 );
+				return 0;
 			}
 
 
@@ -344,7 +347,7 @@ int preparations_parser( FILE *in )
 	{
 		eprint( FATAL, "%s:%ld: Multiple instances of PREPARATIONS section "
 		        "label.\n", Fname, Lc );
-		return( FAIL );
+		return FAIL;
 	}
 	compilation.sections[ PREPARATIONS_SECTION ] = SET;
 
@@ -358,23 +361,23 @@ int preparations_parser( FILE *in )
 	{
 		eprint( FATAL, "%s:%ld: Invalid input in PREPARATIONS section: `%s'\n",
 				Fname, Lc, prepstext );
-		return( FAIL );
+		return FAIL;
     }
 	CATCH( CLEANER_EXCEPTION )
 	{
 		eprint( FATAL, "%s", prepstext + 2 );
-		return( FAIL );
+		return FAIL;
 	}
 	CATCH( ACCESS_NONEXISTING_VARIABLE )
 	{
 		eprint( FATAL, "%s:%ld: Variable `%s' has never been declared.\n",
 				Fname, Lc, prepstext );
-		return( FAIL );
+		return FAIL;
 	}
 	CATCH( PREPARATIONS_EXCEPTION )
-		return( FAIL );
+		return FAIL;
 
-	return( Preps_Next_Section );
+	return Preps_Next_Section;
 }
 
 
@@ -394,7 +397,7 @@ Pulse *fp( char *txt )
 
 
 	if ( *t == '.' )
-		return( Cur_Pulse );
+		return Cur_Pulse;
 
 	tp = t = get_string_copy( txt );
 	while ( *t && *t != '.' )
@@ -412,5 +415,5 @@ Pulse *fp( char *txt )
 		num = -1;          /* this should never happen... */
 
 	free( tp );
-	return( pulse_find( num ) );
+	return pulse_find( num );
 }

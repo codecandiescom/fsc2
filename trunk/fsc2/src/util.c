@@ -7,13 +7,13 @@ char *get_string_copy( char *str )
 
 	new = T_malloc( ( strlen( str ) + 1 ) * sizeof( char ) );
 	strcpy( new, str );
-	return( new );
+	return new;
 }
 
 
 char *get_string( size_t len )
 {
-	return( T_malloc( ( len + 1 ) * sizeof( char ) ) );
+	return T_malloc( ( len + 1 ) * sizeof( char ) );
 }
 
 
@@ -39,13 +39,13 @@ void eprint( int severity, const char *fmt, ... )
 /* Here some more utility functions - they are that short that declaring
    them inline seems to be a good idea... */
 
-inline long rnd( double x ) { return( ( long ) ( 2 * x ) - ( long ) x ); }
+inline long rnd( double x ) { return ( long ) ( 2 * x ) - ( long ) x; }
 
-inline int    imax( int    a, int    b ) { return( a > b ? a : b );  }
-inline int    imin( int    a, int    b ) { return( a < b ? a : b );  }
-inline long   lmax( long   a, long   b ) { return( a > b ? a : b );  }
-inline long   lmin( long   a, long   b ) { return( a < b ? a : b );  }
-inline float  fmax( float  a, float  b ) { return( a > b ? a : b );  }
-inline float  fmin( float  a, float  b ) { return( a < b ? a : b );  }
-inline double dmax( double a, double b ) { return( a > b ? a : b );  }
-inline double dmin( double a, double b ) { return( a < b ? a : b );  }
+inline int    imax( int    a, int    b ) { return a > b ? a : b ;  }
+inline int    imin( int    a, int    b ) { return a < b ? a : b ;  }
+inline long   lmax( long   a, long   b ) { return a > b ? a : b ;  }
+inline long   lmin( long   a, long   b ) { return a < b ? a : b ;  }
+inline float  fmax( float  a, float  b ) { return a > b ? a : b;  }
+inline float  fmin( float  a, float  b ) { return a < b ? a : b;  }
+inline double dmax( double a, double b ) { return a > b ? a : b;  }
+inline double dmin( double a, double b ) { return a < b ? a : b;  }

@@ -293,7 +293,7 @@ int main( int argc, char *argv[ ] )
 	if ( argc < 2 )
 	{
 		printf( "\x03\nMissing file name.\n" );
-		return( EXIT_FAILURE );
+		return EXIT_FAILURE;
 	}
 
 	/* try to open the input file */
@@ -302,7 +302,7 @@ int main( int argc, char *argv[ ] )
 	if ( yyin == NULL )
 	{
 		printf( "\x03\nCan't open input file %s.\n", argv[ 1 ] );
-		return( EXIT_FAILURE );
+		return EXIT_FAILURE;
 	}
 
 	/* set the global variables and output name of input file */
@@ -347,7 +347,7 @@ int main( int argc, char *argv[ ] )
 
 	/* we finished succesfully... */
 
-	return( EXIT_SUCCESS );
+	return EXIT_SUCCESS;
 }
 
 

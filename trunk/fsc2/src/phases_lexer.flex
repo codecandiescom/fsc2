@@ -77,43 +77,43 @@ UNREC       [^\n=,;:. ]+
 			/* handling of error messages from the cleaner */
 {ERR}		{
 				eprint( FATAL, "%s", phasestext + 2 );
-				return( 0 );
+				return 0;
 			}
 
 			/* handling of ASSIGNMENTS: label */
 {ASS}		{
 				Phases_Next_Section = ASSIGNMENTS_SECTION;
-				return( SECTION_LABEL );
+				return SECTION_LABEL;
 			}
 
 			/* handling of DEFAULTS: label */
 {DEF}		{
 				Phases_Next_Section = DEFAULTS_SECTION;
-				return( SECTION_LABEL );
+				return SECTION_LABEL;
 			}
 
 			/* handling of VARIABLES: label */
 {VAR}		{
 				Phases_Next_Section = VARIABLES_SECTION;
-				return( SECTION_LABEL );
+				return SECTION_LABEL;
 			}
 
 			/* handling of PHASES: label */
 {PHAS}		{
 				Phases_Next_Section = PHASES_SECTION;
-				return( SECTION_LABEL );
+				return SECTION_LABEL;
 			}
 
 			/* handling of PREPARATIONS: label */
 {PREP}		{
 				Phases_Next_Section = PREPARATIONS_SECTION;
-				return( SECTION_LABEL );
+				return SECTION_LABEL;
 			}
 
 			/* handling of EXPERIMENT: label */
 {EXP}		{
 				Phases_Next_Section = EXPERIMENT_SECTION;
-				return( SECTION_LABEL );
+				return SECTION_LABEL;
 			}
 
             /* handling of PHASE_SEQUENCE with (optional) sequence number
@@ -133,7 +133,7 @@ UNREC       [^\n=,;:. ]+
 						cp--;
 					phaseslval.lval = atol( ++cp ) - 1;
 				}
-				return( PS_TOKEN );
+				return PS_TOKEN;
 			}
 
 			/* handling of ACQUISITION_SEQUENCE */
@@ -149,55 +149,55 @@ UNREC       [^\n=,;:. ]+
 				if ( tolower( *cp ) == 'Y')
 					phaseslval.lval = 1;
 
-				return( AS_TOKEN );
+				return AS_TOKEN;
 			}
 
 			/* handling of phase cycle identifiers */
 "x"         {
 				phaseslval.lval = PHASE_PLUS_X;
-				return( P_TOKEN );
+				return P_TOKEN;
 			}
 "+x"        {
 				phaseslval.lval = PHASE_PLUS_X;
-				return( P_TOKEN );
+				return P_TOKEN;
 			}
 "-x"        {
 				phaseslval.lval = PHASE_MINUS_X;
-				return( P_TOKEN );
+				return P_TOKEN;
 			}
 "y"         {
 				phaseslval.lval = PHASE_PLUS_Y;
-				return( P_TOKEN );
+				return P_TOKEN;
 			}
 "+y"        {
 				phaseslval.lval = PHASE_PLUS_Y;
-				return( P_TOKEN );
+				return P_TOKEN;
 			}
 "-y"        {
 				phaseslval.lval = PHASE_MINUS_Y;
-				return( P_TOKEN );
+				return P_TOKEN;
 			}
 
 			/* handling of acquisition cycle identifiers */
 "+"        {
 				phaseslval.lval = ACQ_PLUS;
-				return( A_TOKEN );
+				return A_TOKEN;
 		   }
 "-"        {
 				phaseslval.lval = ACQ_MINUS;
-				return( A_TOKEN );
+				return A_TOKEN;
 		   }
 
 {WS}        /* skip prettifying characters */
 
-";"         return( ';' );            /* end of statement character */
+";"         return ';';              /* end of statement character */
 
 			/* handling of invalid input */
 {UNREC}     THROW( INVALID_INPUT_EXCEPTION );
 
 <<EOF>>	    {
 				Phases_Next_Section = NO_SECTION;
-				return( 0 );
+				return 0;
 			}
 
 
@@ -212,7 +212,7 @@ int phases_parser( FILE *in )
 	{
 		eprint( FATAL, "%s:%ld: Multiple instances of PHASES section label.\n",
 				Fname, Lc );
-		return( FAIL );
+		return FAIL;
 	}
 	compilation.sections[ PHASES_SECTION ] = SET;
 
@@ -227,13 +227,13 @@ int phases_parser( FILE *in )
 		phases_end( );
 	}
 	CATCH( PHASES_EXCEPTION )
-		return( FAIL );
+		return FAIL;
 	CATCH( INVALID_INPUT_EXCEPTION )
 	{
 		eprint( FATAL, "%s:%ld: Invalid input in PHASES section: `%s'\n",
 				Fname, Lc, phasestext );
-		return( FAIL );
+		return FAIL;
 	}
 
-	return( Phases_Next_Section );
+	return Phases_Next_Section;
 }

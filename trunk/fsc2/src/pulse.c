@@ -36,7 +36,7 @@ Pulse *pulse_new( int num )
 
 	Plist = p;
 
-	return( p );
+	return p;
 }
 
 
@@ -66,11 +66,11 @@ Pulse *pulse_find( int num )
 	while ( p != NULL )
 	{
 		if ( p->num == num )
-			return( p );
+			return p;
 		p = p->next;
 	}
 
-	return( NULL );
+	return NULL;
 }
 
 
@@ -171,46 +171,46 @@ Var *pulse_get_by_addr( Pulse *p, int type )
 	switch ( type )
 	{
 		case P_FUNC :
-			return( vars_push( INT_VAR, p->func ) );
+			return vars_push( INT_VAR, p->func );
 
 		case P_POS :
 			if ( p->pos % Default_Time_Base )
-				return( vars_push( FLOAT_VAR,( double ) p->pos /
-								             ( double ) Default_Time_Base ) );
+				return vars_push( FLOAT_VAR,( double ) p->pos /
+								            ( double ) Default_Time_Base );
 			else
-				return( vars_push( INT_VAR, p->pos / Default_Time_Base ) );
+				return vars_push( INT_VAR, p->pos / Default_Time_Base );
 
 		case P_LEN :
 			if ( p->len % Default_Time_Base )
-				return( vars_push( FLOAT_VAR, ( double ) p->len /
-								              ( double ) Default_Time_Base ) );
+				return vars_push( FLOAT_VAR, ( double ) p->len /
+								             ( double ) Default_Time_Base );
 			else
-				return( vars_push( INT_VAR, p->len / Default_Time_Base ) );
+				return vars_push( INT_VAR, p->len / Default_Time_Base );
 
 		case P_DPOS :
 			if ( p->dpos % Default_Time_Base )
-				return( vars_push( FLOAT_VAR, ( double ) p->dpos /
-								              ( double ) Default_Time_Base ) );
+				return vars_push( FLOAT_VAR, ( double ) p->dpos /
+								             ( double ) Default_Time_Base );
 			else
-				return( vars_push( INT_VAR, p->dpos / Default_Time_Base ) );
+				return vars_push( INT_VAR, p->dpos / Default_Time_Base );
 
 		case P_DLEN :
 			if ( p->dlen % Default_Time_Base )
-				return( vars_push( FLOAT_VAR, ( double ) p->dlen /
-								              ( double ) Default_Time_Base ) );
+				return vars_push( FLOAT_VAR, ( double ) p->dlen /
+								             ( double ) Default_Time_Base );
 			else
-				return( vars_push( INT_VAR, p->dlen / Default_Time_Base ) );
+				return vars_push( INT_VAR, p->dlen / Default_Time_Base );
 
 		case P_MAXLEN :
 			if ( p->maxlen % Default_Time_Base )
-				return( vars_push( FLOAT_VAR, ( double ) p->maxlen /
-								              ( double ) Default_Time_Base ) );
+				return vars_push( FLOAT_VAR, ( double ) p->maxlen /
+								             ( double ) Default_Time_Base );
 			else
-				return( vars_push( INT_VAR, p->maxlen / Default_Time_Base ) );
+				return vars_push( INT_VAR, p->maxlen / Default_Time_Base );
 	}
 
 	assert( 1 == 0 );      /* this should never happen... */
-	return( 0 );
+	return NULL;
 }
 
 
@@ -226,7 +226,7 @@ Var *pulse_get_by_num( int pnum, int type )
 		THROW( PREPARATIONS_EXCEPTION );
 	}
 
-	return( pulse_get_by_addr( p, type ) );
+	return pulse_get_by_addr( p, type );
 }
 
 
@@ -237,11 +237,11 @@ bool pulse_exist( Pulse *p )
 	while ( n != NULL )
 	{
 		if ( n == p )
-			return( OK );
+			return OK;
 		n = n->next;
 	}
 
-	return( FAIL );
+	return FAIL;
 }
 
 

@@ -2,10 +2,13 @@
    $Id$
 
    $Log$
+   Revision 1.27  1999/07/27 22:09:39  jens
+   *** empty log message ***
+
    Revision 1.26  1999/07/27 21:33:26  jens
    Lots of changes mostly to get rid of the array stack and to use the variable
-   stack also for definition of and assignments to arrays. Improved treatment of
-   variable sized arrays. Functions can now return arrays &c.
+   stack also for definition of and assignments to arrays. Improved treatment
+   of variable sized arrays. Functions can now return arrays &c.
 
    Revision 1.25  1999/07/27 16:19:25  jens
    *** empty log message ***
@@ -69,20 +72,13 @@
 
 */
 
-/* Thinks to be careful about:
-
-   1. Currently, arrays are never pushed onto the variables stack, only
-      `normal' variables and functions (i.e. pointers to functions).
-	  But neither in vars_push() nor in  vars_pop() it is checked if the
-	  variable passed to it is not an array.
-
-   2. In vars_push_astack() we pop the array variable passed to the function
-      although this should never be a variable on the variables stack.
-*/
 
 
 #include "fsc2.h"
 
+
+/* some typedefs needed due to the limitations of va_arg(), also see the
+   C-FAQ 15.11 on this point */
 
 typedef Var *VarretFnct( Var * );
 typedef VarretFnct *FnctPtr;
@@ -93,21 +89,26 @@ typedef VarretFnct *FnctPtr;
 
   typedef struct Var_
   {
-    char *name;                             // name of variable
-	int type;                               // type of variable
+	char *name;                         // name of the variable
+	int  type;                          // type of the variable
 	union
 	{
-		long lval;                          // for integer values
-		double dval;                        // for float values
-		long *lpnt;                         // for integer arrays
-		double *dpnt;                       // for double arrays
-		double ( *fnct )( long, double * ); // for functions
+		long   lval;                                // for integer values
+		double dval;                                // for float values
+		long   *lpnt;                               // for integer arrays
+		double *dpnt;                               // for double arrays/
+		char   *sptr;                               // for strings
+		struct Var_ * ( * fnct )( struct Var_ * );  // for functions
+		struct Var_ *vptr;                          // for array references
+		void   *gptr;                               // generic pointer
 	} val;
-	long dim;             // dimension of array / number of args of function
-	long *sizes;          // sizes of dimensions of arrays
-	long len;             // total len of array / position in function list
-	bool new_flag;        // set when variable is just created
-	struct Var_ *next;
+	int    dim;              // dimension of array
+	int    *sizes;           // array of sizes of dimensions
+	long   len;              // total len of array
+	long   flags;
+	struct Var_ *from;
+	struct Var_ *next;       // next variable in list or stack
+	struct Var_ *prev;       // previous variable in list or stack
   }
 
   For each variable and array such a structure is created and appended to
@@ -290,9 +291,9 @@ Var *vars_get( char *name )
 
 	for ( ptr = var_list; ptr != ( Var * ) NULL; ptr = ptr->next )
 		if ( ! strcmp( ptr->name, name ) )
-			return( ptr );
+			return ptr;
 
-	return( NULL );
+	return NULL;
 }
 
 
@@ -324,7 +325,7 @@ Var *vars_new( char *name )
 	vp->next = var_list;         /* set pointer to it's successor */
     var_list = vp;               /* make it the head of the list */
 
-	return( vp );                /* return pointer to the structure */
+	return vp;                   /* return pointer to the structure */
 }
 
 
@@ -371,7 +372,7 @@ Var *vars_add( Var *v1, Var *v2 )
 	vars_pop( v1 );
 	vars_pop( v2 );
 
-	return( new_var );
+	return new_var;
 }
 
 
@@ -418,7 +419,7 @@ Var *vars_sub( Var *v1, Var *v2 )
 	vars_pop( v1 );
 	vars_pop( v2 );
 
-	return( new_var );
+	return new_var;
 }
 
 
@@ -465,7 +466,7 @@ Var *vars_mult( Var *v1, Var *v2 )
 	vars_pop( v1 );
 	vars_pop( v2 );
 
-	return( new_var );
+	return new_var;
 }
 
 
@@ -521,7 +522,7 @@ Var *vars_div( Var *v1, Var *v2 )
 	vars_pop( v1 );
 	vars_pop( v2 );
 
-	return( new_var );
+	return new_var;
 }
 
 
@@ -578,7 +579,7 @@ Var *vars_mod( Var *v1, Var *v2 )
 	vars_pop( v1 );
 	vars_pop( v2 );
 
-	return( new_var );
+	return new_var;
 }
 
 
@@ -653,7 +654,7 @@ Var *vars_pow( Var *v1, Var *v2 )
 	vars_pop( v1 );
 	vars_pop( v2 );
 
-	return( new_var );
+	return new_var;
 }
 
 
@@ -678,7 +679,7 @@ Var *vars_negate( Var *v )
 	else
 		v->val.dval = - v->val.dval;
 
-	return( v );
+	return v;
 }
 
 
@@ -739,7 +740,7 @@ Var *vars_comp( int comp_type, Var *v1, Var *v2 )
 	vars_pop( v1 );
 	vars_pop( v2 );
 
-	return( new_var );
+	return new_var;
 }
 
 
@@ -775,9 +776,9 @@ Var *vars_push_copy( Var *v )
 	/* push a transient variable onto the stack with the relevant data set */
 
 	if ( v->type == INT_VAR )
-		return( vars_push( INT_VAR, v->val.lval ) );
+		return vars_push( INT_VAR, v->val.lval );
 	else
-		return( vars_push( FLOAT_VAR, v->val.dval ) );
+		return vars_push( FLOAT_VAR, v->val.dval );
 }
 
 
@@ -874,7 +875,7 @@ Var *vars_push( int type, ... )
 
 	/* return address of the new stack variable */
 
-	return( new_stack_var );
+	return new_stack_var;
 }
 
 
@@ -1047,11 +1048,11 @@ bool vars_exist( Var *v )
 
 	for ( lp = var_list; lp != NULL; lp = lp->next )
 		if ( lp == v )
-			return( OK );
+			return OK;
 
 	for ( lp = Var_Stack; lp != NULL; lp = lp->next )
 		if ( lp == v )
-			return( OK );
+			return OK;
 
 	eprint( FATAL, "fsc2: INTERNAL ERROR: Use of non-existing "
 			"variable detected at %s:%d.\n", __FILE__, __LINE__ );
@@ -1087,7 +1088,7 @@ Var *vars_arr_start( Var *v )
 	/* push variable with generic pointer to array onto the stack */
 
 	ret = vars_push( ARR_PTR, NULL, v );
-	return( ret );
+	return ret;
 }
 
 
@@ -1119,11 +1120,11 @@ Var *vars_arr_lhs( Var *v )
 	/* if the array is new we need to set it up */
 
 	if ( a->flags & NEW_VARIABLE )
-		return( vars_setup_new_array( a, dim, v ) );
+		return vars_setup_new_array( a, dim, v );
 
 	/* push a pointer to the indexed element onto the stack */
 
-	return( vars_get_lhs_pointer( a, v, dim ) );
+	return vars_get_lhs_pointer( a, v, dim );
 }
 
 
@@ -1203,7 +1204,7 @@ Var *vars_get_lhs_pointer( Var *a, Var *v, int dim )
 	if ( dim == a->dim - 1 )
 		ret->flags |= NEED_SLICE;
 
-	return( ret );
+	return ret;
 }
 
 
@@ -1288,7 +1289,7 @@ long vars_calc_index( Var *a, Var *v )
 	if ( i != a->dim )
 		index = index * a->sizes[ i ];
 
-	return( index );
+	return index;
 }
 
 
@@ -1354,7 +1355,7 @@ Var *vars_setup_new_array( Var *a, int dim, Var *v )
 				a->sizes[ i ] = 0;
 				a->flags |= NEED_ALLOC;
 				ret = vars_push( ARR_PTR, NULL, a );
-				return( ret );
+				return ret;
 			}
 
 			cur = ( int ) v->val.lval;
@@ -1397,7 +1398,7 @@ Var *vars_setup_new_array( Var *a, int dim, Var *v )
 	ret = vars_push( ARR_PTR, NULL, a );
 	ret->flags |= NEED_INIT;
 
-	return( ret );
+	return ret;
 }
 
 
@@ -1474,16 +1475,16 @@ Var *vars_arr_rhs( Var *v )
 	if ( dim == a->dim )
 	{
 		if ( a->type == INT_ARR )
-			return( vars_push( INT_VAR, *( a->val.lpnt + index ) ) );
+			return vars_push( INT_VAR, *( a->val.lpnt + index ) );
 		else
-			return( vars_push( FLOAT_VAR, *( a->val.dpnt + index ) ) );
+			return vars_push( FLOAT_VAR, *( a->val.dpnt + index ) );
 	}
 	else
 	{
 		if ( a->type == INT_ARR )
-			return( vars_push( ARR_PTR, a->val.lpnt + index, a ) );
+			return vars_push( ARR_PTR, a->val.lpnt + index, a );
 		else
-			return( vars_push( ARR_PTR, a->val.dpnt + index, a ) );
+			return vars_push( ARR_PTR, a->val.dpnt + index, a );
 	}
 
 	assert( 1 == 0 );       /* we never should end here... */
@@ -1491,6 +1492,8 @@ Var *vars_arr_rhs( Var *v )
 
 
 /*----------------------------------------------------------------------*/
+/* This is the central function for assigning new values. It allows the */
+/* assignment of simple values as well has whole slices of arrays.      */
 /*----------------------------------------------------------------------*/
 
 void vars_assign( Var *src, Var *dest )
@@ -1725,7 +1728,7 @@ void vars_ass_from_trans_ptr( Var *src, Var *dest )
 	long   *slptr;
 
 
-	/* we can't assign from an array slice to a variable */
+	/* we can't assign from a transient array to a variable */
 
 	if ( dest->type & ( INT_VAR | FLOAT_VAR ) )
 	{
@@ -1740,9 +1743,10 @@ void vars_ass_from_trans_ptr( Var *src, Var *dest )
 
 	d = dest->from;
 
-	/* Do allocation of memory (set size of missing dimension to the last one
-	   of the source array) if the destination array needs it, otherwise check
-	   that sizes of the array sizes is equal. */
+	/* Do allocation of memory (set size of missing dimension to the one of
+	   the transient array) if the destination array needs it, otherwise check
+	   that the sizes of the destinationarray size is equal to the length of
+	   the transient array. */
 
 	if ( d->flags & NEED_ALLOC )
 	{
@@ -1784,9 +1788,9 @@ void vars_ass_from_trans_ptr( Var *src, Var *dest )
 		eprint( WARN, "%s:%ld: Assignment of slice of float type to integer "
 				"array `%s'.\n", Fname, Lc, d->name );
 
-	/* Now copy the array slice */
+	/* Now copy the transient array as slice to the destination */
 
-	if ( src->type == INT_TRANS_ARR )
+	if ( src->type == INT_TRANS_ARR )          /* set auxiliary variables */
 		slptr = src->val.lpnt;
 	else
 		sdptr = src->val.dpnt;

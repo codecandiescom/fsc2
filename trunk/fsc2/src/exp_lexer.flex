@@ -87,47 +87,47 @@ UNREC       [^\n \t;,\(\)\=\+\-\*\/\[\]\{\}\%\^]+
 			/* handling of ASSIGNMENTS: labels */
 {ASS}		{
 				Prim_Exp_Next_Section = ASSIGNMENTS_SECTION;
-				return( SECTION_LABEL );
+				return SECTION_LABEL;
 			}
 
 			/* handling of DEFAULTS: labels */
 {DEF}		{
 				Prim_Exp_Next_Section = DEFAULTS_SECTION;
-				return( SECTION_LABEL );
+				return SECTION_LABEL;
 			}
 
 			/* handling of VARIABLES: labels */
 {VAR}		{
 				Prim_Exp_Next_Section = VARIABLES_SECTION;
-				return( SECTION_LABEL );
+				return SECTION_LABEL;
 			}
 
 			/* handling of PHASES: labels */
 {PHAS}		{
 				Prim_Exp_Next_Section = PHASES_SECTION;
-				return( SECTION_LABEL );
+				return SECTION_LABEL;
 			}
 
 			/* handling of PREPARATIONS: labels */
 {PREP}		{
 				Prim_Exp_Next_Section = PREPARATIONS_SECTION;
-				return( SECTION_LABEL );
+				return SECTION_LABEL;
 			}
 
 			/* handling of EXPERIMENT: labels */
 {EXP}		{
 				Prim_Exp_Next_Section = EXPERIMENT_SECTION;
-				return( SECTION_LABEL );
+				return SECTION_LABEL;
 			}
 
 {INT}       {
 				prim_explval.lval = atol( prim_exptext );
-                return( INT_TOKEN );
+                return INT_TOKEN;
             }
 
 {FLOAT}     {
                 prim_explval.dval = atof( prim_exptext );
-                return( FLOAT_TOKEN );
+                return FLOAT_TOKEN;
             }
 
 {IDENT}     {
@@ -143,34 +143,34 @@ UNREC       [^\n \t;,\(\)\=\+\-\*\/\[\]\{\}\%\^]+
 								Fname, Lc, prim_exptext );
 						THROW( SYNTAX_ERROR_EXCEPTION );
 					}
-					return( FUNC_TOKEN );
+					return FUNC_TOKEN;
 				}
 
 				if ( ( prim_explval.vptr = vars_get( prim_exptext ) )
 				     == NULL )
 					 THROW( ACCESS_NONEXISTING_VARIABLE );
 
-				return( VAR_TOKEN );
+				return VAR_TOKEN;
 			}
 
-"="         return( '=' );
-"["         return( '[' );
-"]"         return( ']' );
-","         return( ',' );
-"{"         return( '{' );
-"}"         return( '}' );
-
-"("         return( '(' );
-")"         return( ')' );
-"+"         return( '+' );
-"-"         return( '-' );
-"*"         return( '*' );
-"/"         return( '/' );
-"%"         return( '%' );
-"^"         return( '^' );
+"="         return '=';
+"["         return '[';
+"]"         return ']';
+","         return ',';
+"{"         return '{';
+"}"         return '}';
+				  	  
+"("         return '(';
+")"         return ')';
+"+"         return '+';
+"-"         return '-';
+"*"         return '*';
+"/"         return '/';
+"%"         return '%';
+"^"         return '^';
 
 			/* handling of end of statement character */
-";"			return( ';' );
+";"			return ';';
 
 {WS}        /* skip white space */
 
@@ -179,7 +179,7 @@ UNREC       [^\n \t;,\(\)\=\+\-\*\/\[\]\{\}\%\^]+
 
 <<EOF>>	    {
 				Prim_Exp_Next_Section = NO_SECTION;
-				return( 0 );
+				return 0;
 			}
 
 
@@ -194,7 +194,7 @@ int primary_experiment_parser( FILE *in )
 	{
 		eprint( FATAL, "%s:%ld: Multiple instances of EXPERIMENTS section "
 		        "label.\n", Fname, Lc );
-		return( FAIL );
+		return FAIL;
 	}
 	compilation.sections[ EXPERIMENT_SECTION ] = SET;
 
@@ -208,19 +208,19 @@ int primary_experiment_parser( FILE *in )
 	{
 		eprint( FATAL, "%s:%ld: Invalid input in EXPERIMENT section: `%s'\n",
 				Fname, Lc, prim_exptext );
-		return( FAIL );
+		return FAIL;
     }
 	CATCH( CLEANER_EXCEPTION )
 	{
 		eprint( FATAL, "%s", prim_exptext + 2 );
-		return( FAIL );
+		return FAIL;
 	}
 	CATCH( ACCESS_NONEXISTING_VARIABLE )
 	{
 		eprint( FATAL, "%s:%ld: Variable `%s' has never been declared.\n",
 				Fname, Lc, prim_exptext );
-		return( FAIL );
+		return FAIL;
 	}
 
-	return( Prim_Exp_Next_Section );
+	return Prim_Exp_Next_Section;
 }
