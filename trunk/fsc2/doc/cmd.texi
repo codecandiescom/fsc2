@@ -1,0 +1,42 @@
+@c $Id$
+
+@node Command Line Options, EDL, Overview, Top
+@chapter Command line options
+@cindex command line options
+
+@acronym{fsc2} can be invoked from the command line with the following
+syntax:
+
+@strong{@code{              fsc2 [OPTION] [FILE]}}
+
+The square brackets indicate that the options as well as the file name
+are optional. @code{FILE} is expected to be an @acronym{EDL} file. The
+available options are:
+
+@table @samp
+@item @code{-t}
+Runs a syntax check on FILE and quits. No graphic is used and all output is
+written to the controlling terminal.
+
+@item @code{-T}
+Starts @acronym{fsc2} in graphics mode and immediately does a syntax
+check on FILE.  When done with the check @acronym{fsc2} waits for further
+commands.
+
+@item @code{-S}
+Starts @acronym{fsc2} in graphics mode and immediately does a syntax
+check on FILE.  If the syntax check does not fail the experiment is
+started without needing further user input.
+
+@item @code{-d}
+Starts @acronym{fsc2} in graphics mode and loads FILE (or also tests
+and/or starts the program when used in conjunction with the @code{-T} or
+@code{-S} flags). The input file will be @strong{automatically deleted}
+when @acronym{fsc2} is done with it, i.e.@ when either @acronym{fsc2}
+exits or a new file is loaded. This flag is only useful for cases where
+the input file is a temporary file that needs to be deleted when it
+isn't needed anymore, so better be @strong{real careful}.
+
+@item @code{-h, --help}
+Displays a very short help text and exits.
+@end table
