@@ -176,8 +176,7 @@ int dg2020_f_test_hook( void )
 	if ( dg2020_Pulses == NULL )
 	{
 		dg2020_is_needed = UNSET;
-		eprint( WARN, UNSET, "%s loaded but no pulses are defined.\n",
-				pulser_struct.name );
+		print( WARN, "Driver loaded but no pulses are defined.\n" );
 		return 1;
 	}
 
@@ -245,8 +244,8 @@ int dg2020_f_exp_hook( void )
 
 	if ( ! dg2020_init( DEVICE_NAME ) )
 	{
-		eprint( FATAL, UNSET, "%s: Failure to initialize the pulser: %s\n",
-				pulser_struct.name, gpib_error_msg );
+		print( FATAL, "Failure to initialize the pulser: %s\n",
+			   gpib_error_msg );
 		THROW( EXCEPTION );
 	}
 
@@ -357,8 +356,8 @@ Var *pulser_state( Var *v )
 Var *pulser_channel_state( Var *v )
 {
 	v = v;
-	eprint( SEVERE, SET, "%s: Individual pod channels can't be switched "
-			"on or off for this device.\n", DEVICE_NAME );
+	print( SEVERE, "Individual pod channels can't be switched on or off for "
+		   "this device.\n" );
 	return vars_push( INT_VAR, 0 );
 }
 
@@ -386,8 +385,7 @@ Var *pulser_update( Var *v )
 
 	if ( FSC2_MODE == EXPERIMENT && ! dg2020_run( START ) )
 	{
-		eprint( FATAL, SET, "%s: Communication with pulser failed.\n",
-				pulser_struct.name );
+		print( FATAL, "Communication with pulser failed.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -422,17 +420,15 @@ Var *pulser_shift( Var *v )
 
 		if ( ! p->is_pos )
 		{
-			eprint( FATAL, SET, "%s: Pulse %ld has no position set, so "
-					"shifting it is impossible.\n",
-					pulser_struct.name, p->num );
+			print( FATAL, "Pulse %ld has no position set, so shifting it is "
+				   "impossible.\n", p->num );
 			THROW( EXCEPTION );
 		}
 
 		if ( ! p->is_dpos )
 		{
-			eprint( FATAL, SET, "%s: Time for position change hasn't "
-					"been defined for pulse %ld.\n",
-					pulser_struct.name, p->num );
+			print( FATAL, "Time for position change hasn't been defined for "
+				   "pulse %ld.\n", p->num );
 			THROW( EXCEPTION );
 		}
 
@@ -444,9 +440,9 @@ Var *pulser_shift( Var *v )
 
 		if ( ( p->pos += p->dpos ) < 0 )
 		{
-			eprint( FATAL, SET, "%s: Shifting the position of pulse "
-					"%ld leads to an invalid  negative position of %s.\n",
-					pulser_struct.name, p->num, dg2020_pticks( p->pos ) );
+			print( FATAL, "Shifting the position of pulse %ld leads to an "
+				   "invalid  negative position of %s.\n",
+				   p->num, dg2020_pticks( p->pos ) );
 			THROW( EXCEPTION );
 		}
 
@@ -491,17 +487,15 @@ Var *pulser_increment( Var *v )
 
 		if ( ! p->is_len )
 		{
-			eprint( FATAL, SET, "%s: Pulse %ld has no length set, so "
-					"imcrementing it is impossibe.\n",
-					pulser_struct.name, p->num );
+			print( FATAL, "Pulse %ld has no length set, so imcrementing it "
+				   "is impossibe.\n", p->num );
 			THROW( EXCEPTION );
 		}
 
 		if ( ! p->is_dlen )
 		{
-			eprint( FATAL, SET, "%s: Length change time hasn't been "
-					"defined for pulse %ld.\n",
-					pulser_struct.name, p->num );
+			print( FATAL, "Length change time hasn't been defined for pulse "
+				   "%ld.\n", p->num );
 			THROW( EXCEPTION );
 		}
 	
@@ -513,9 +507,9 @@ Var *pulser_increment( Var *v )
 
 		if ( ( p->len += p->dlen ) < 0 )
 		{
-			eprint( FATAL, SET, "%s: Incrementing the length of pulse "
-					"%ld leads to an invalid negative pulse length of %s.\n",
-					pulser_struct.name, p->num, dg2020_pticks( p->len ) );
+			print( FATAL, "Incrementing the length of pulse %ld leads to an "
+				   "invalid negative pulse length of %s.\n",
+				   p->num, dg2020_pticks( p->len ) );
 			THROW( EXCEPTION );
 		}
 
@@ -553,8 +547,7 @@ Var *pulser_next_phase( Var *v )
 			 ! dg2020.function[ PULSER_CHANNEL_PHASE_2 ].is_used &&
 			 FSC2_MODE == TEST )
 		{
-			eprint( SEVERE, SET, "%s: No phase functions are in use.\n",
-					pulser_struct.name );
+			print( SEVERE, "No phase functions are in use.\n" );
 			return vars_push( INT_VAR, 0 );
 		}
 					
@@ -570,8 +563,7 @@ Var *pulser_next_phase( Var *v )
 
 		if ( phase_number != 1 && phase_number != 2 )
 		{
-			eprint( FATAL, SET, "%s: Invalid phase number: %ld.\n",
-					pulser_struct.name, phase_number );
+			print( FATAL, "Invalid phase number: %ld.\n", phase_number );
 			THROW( EXCEPTION );
 		}
 
@@ -580,8 +572,8 @@ Var *pulser_next_phase( Var *v )
 
 		if ( ! f->is_used && FSC2_MODE == TEST )
 		{
-			eprint( SEVERE, SET, "%s: Phase function `%s' is not used.\n",
-					pulser_struct.name, Function_Names[ f->self ] );
+			print( SEVERE, "Phase function `%s' is not used.\n",
+				   Function_Names[ f->self ] );
 			return vars_push( INT_VAR, 0 );
 		}
 
@@ -621,8 +613,7 @@ Var *pulser_phase_reset( Var *v )
 			 ! dg2020.function[ PULSER_CHANNEL_PHASE_2 ].is_used &&
 			 FSC2_MODE == TEST )
 		{
-			eprint( SEVERE, SET, "%s: No phase functions are in use.\n",
-					pulser_struct.name );
+			print( SEVERE, "No phase functions are in use.\n" );
 			return vars_push( INT_VAR, 0 );
 		}
 					
@@ -638,8 +629,7 @@ Var *pulser_phase_reset( Var *v )
 
 		if ( phase_number != 1 && phase_number != 2 )
 		{
-			eprint( FATAL, SET, "%s: Invalid phase number: %ld.\n",
-					pulser_struct.name, phase_number );
+			print( FATAL, "Invalid phase number: %ld.\n", phase_number );
 			THROW( EXCEPTION );
 		}
 
@@ -648,8 +638,8 @@ Var *pulser_phase_reset( Var *v )
 
 		if ( ! f->is_used && FSC2_MODE == TEST )
 		{
-			eprint( SEVERE, SET, "%s: Phase function `%s' is not used.\n",
-					pulser_struct.name, Function_Names[ f->self ] );
+			print( SEVERE, "Phase function `%s' is not used.\n",
+				   Function_Names[ f->self ] );
 			return vars_push( INT_VAR, 0 );
 		}
 
@@ -760,8 +750,7 @@ Var *pulser_lock_keyboard( Var *v )
 				lock = SET;
 			else
 			{
-				eprint( FATAL, SET, "%s: Invalid argument in call of "
-						"`pulser_lock_keyboard'.\n", DEVICE_NAME );
+				print( FATAL, "Invalid argument.\n" );
 				THROW( EXCEPTION );
 			}
 		}
