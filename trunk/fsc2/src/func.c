@@ -510,7 +510,7 @@ Var *f_tan( Var *v )
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
 
-	res = tan( VALUE( v );
+	res = tan( VALUE( v ) );
 
 	if ( fabs( res ) == HUGE_VAL && errno == ERANGE )
 		eprint( SEVERE, "%s:%ld: Overflow in function `tan()'.", Fname, Lc );
@@ -2261,7 +2261,7 @@ Var *f_save( Var *v )
 				if ( v->from->flags && NEED_ALLOC )
 				{
 					eprint( WARN, "%s:%ld: Variable sized array `%s' is still "
-							"undefined - skipping `save()'.", 
+							"undefined - skipping'.", 
 							Fname, Lc, v->from->name );
 					break;
 				}
@@ -2348,7 +2348,7 @@ Var *f_fsave( Var *v )
 
 	if ( v == NULL )
 	{
-		eprint( WARN, "%s:%ld: Call of `fsave()' without format sting and "
+		eprint( WARN, "%s:%ld: Call of `fsave()' without format string and "
 				"data.", Fname, Lc );
 		return vars_push( INT_VAR, 0 );
 	}
