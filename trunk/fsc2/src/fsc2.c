@@ -150,12 +150,6 @@ void xforms_init( int *argc, char *argv[] )
 	fl_deactivate_object( run_form->save );
 	fl_set_object_lcol( run_form->save, FL_INACTIVE_COL );
 
-	/* Create the form for selecting devices and setting default names */
-
-	device_form = create_form_device( );
-/*
-	set_device_names( -1 );
-*/
 	/* Set some properties of goodies */
 
 	fl_set_fselector_fontsize( FL_MEDIUM_SIZE );
@@ -174,10 +168,6 @@ void xforms_close( void )
 	if ( fl_form_is_visible( run_form->run ) )
 		fl_hide_form( run_form->run );
 	fl_free_form( run_form->run );
-
-	if ( fl_form_is_visible( device_form->device ) )
-		fl_hide_form( device_form->device );
-	fl_free_form( device_form->device );
 
 	if ( fl_form_is_visible( main_form->fsc2 ) )
 		fl_hide_form( main_form->fsc2 );
@@ -469,8 +459,6 @@ void test_file( FL_OBJECT *a, long b )
 	fl_set_object_lcol( main_form->reload, FL_INACTIVE_COL );
 	fl_deactivate_object( main_form->Edit );
 	fl_set_object_lcol( main_form->Edit, FL_INACTIVE_COL );
-	fl_deactivate_object( main_form->device_button );
-	fl_set_object_lcol( main_form->device_button, FL_INACTIVE_COL );
 	fl_deactivate_object( main_form->run );
 	fl_set_object_lcol( main_form->run, FL_INACTIVE_COL );
 	fl_deactivate_object( main_form->quit );
@@ -500,8 +488,6 @@ void test_file( FL_OBJECT *a, long b )
 	fl_set_object_lcol( main_form->reload, FL_BLACK );
 	fl_activate_object( main_form->Edit );
 	fl_set_object_lcol( main_form->Edit, FL_BLACK );
-	fl_activate_object( main_form->device_button );
-	fl_set_object_lcol( main_form->device_button, FL_BLACK );
 	fl_activate_object( main_form->run );
 	fl_set_object_lcol( main_form->run, FL_BLACK );
 	fl_activate_object( main_form->quit );
@@ -616,32 +602,6 @@ bool display_file( char *name, FILE *fp )
 
 	fl_unfreeze_form( main_form->browser->form );
 	return( OK );
-}
-
-
-/*------------------------------------------------*/
-/* device_select() lets the user tell the program */
-/* which devices he is using.                     */
-/*------------------------------------------------*/
-
-void device_select( FL_OBJECT *a, long b )
-{
-	b = b;
-
-	if ( a == main_form->device_button )
-	{
-		fl_show_form( device_form->device, FL_PLACE_MOUSE, FL_FULLBORDER,
-					  "fsc2: Device Select" );
-		return;
-	}
-
-/*
-	if ( a == device_form->device_select_ok ||
-		 a == device_form->device_select_cancel )
-		set_device_names( ( int ) b );
-*/
-	if ( fl_form_is_visible( device_form->device ) )
-		fl_hide_form( device_form->device );
 }
 
 

@@ -84,104 +84,13 @@ FD_run *create_form_run(void)
   fdui->redraw_dummy = obj = fl_add_button(FL_NORMAL_BUTTON,510,330,30,30,"");
     fl_set_object_boxtype(obj,FL_NO_BOX);
     fl_set_object_callback(obj,new_data_callback,0);
-  fdui->xy_plot = obj = fl_add_xyplot(FL_NORMAL_XYPLOT,220,20,790,760,"");
-    fl_set_object_color(obj,FL_WHITE,FL_BLACK);
-    fl_set_object_lsize(obj,FL_NORMAL_SIZE);
-    fl_set_xyplot_xtics(obj, 10, 2);
-    fl_set_xyplot_ytics(obj, 10, 2);
   fdui->sigchld = obj = fl_add_button(FL_NORMAL_BUTTON,260,270,10,10,"");
     fl_set_object_boxtype(obj,FL_NO_BOX);
     fl_set_object_callback(obj,run_sigchld_callback,0);
+  fdui->canvas = obj = fl_add_canvas(FL_NORMAL_CANVAS,210,20,800,760,"");
   fl_end_form();
 
   fdui->run->fdui = fdui;
-
-  return fdui;
-}
-/*---------------------------------------*/
-
-FD_device *create_form_device(void)
-{
-  FL_OBJECT *obj;
-  FD_device *fdui = (FD_device *) fl_calloc(1, sizeof(*fdui));
-
-  fdui->device = fl_bgn_form(FL_NO_BOX, 830, 540);
-  obj = fl_add_box(FL_UP_BOX,0,0,830,540,"");
-  obj = fl_add_frame(FL_ENGRAVED_FRAME,280,90,220,180,"");
-
-  fdui->pulser_group = fl_bgn_group();
-  fdui->dg2020_button = obj = fl_add_round3dbutton(FL_RADIO_BUTTON,310,150,50,50,"  DG2020");
-    fl_set_object_color(obj,FL_LEFT_BCOL,FL_GREEN);
-    fl_set_object_lsize(obj,FL_LARGE_SIZE);
-    fl_set_button(obj, 1);
-  fl_end_group();
-
-  obj = fl_add_frame(FL_ENGRAVED_FRAME,30,90,220,180,"");
-  obj = fl_add_text(FL_NORMAL_TEXT,280,20,280,50,"Device Select");
-    fl_set_object_lsize(obj,FL_HUGE_SIZE);
-    fl_set_object_lalign(obj,FL_ALIGN_LEFT|FL_ALIGN_INSIDE);
-    fl_set_object_lstyle(obj,FL_NORMAL_STYLE+FL_SHADOW_STYLE);
-  obj = fl_add_text(FL_NORMAL_TEXT,60,110,170,40,"Digitizer");
-    fl_set_object_lsize(obj,FL_LARGE_SIZE);
-    fl_set_object_lalign(obj,FL_ALIGN_LEFT|FL_ALIGN_INSIDE);
-    fl_set_object_lstyle(obj,FL_NORMAL_STYLE+FL_SHADOW_STYLE);
-  obj = fl_add_text(FL_NORMAL_TEXT,310,110,160,40,"Pulser");
-    fl_set_object_lsize(obj,FL_LARGE_SIZE);
-    fl_set_object_lalign(obj,FL_ALIGN_LEFT|FL_ALIGN_INSIDE);
-    fl_set_object_lstyle(obj,FL_NORMAL_STYLE+FL_SHADOW_STYLE);
-  obj = fl_add_frame(FL_ENGRAVED_FRAME,530,90,220,180,"");
-  obj = fl_add_text(FL_NORMAL_TEXT,560,110,160,40,"Lock-In");
-    fl_set_object_lsize(obj,FL_LARGE_SIZE);
-    fl_set_object_lalign(obj,FL_ALIGN_LEFT|FL_ALIGN_INSIDE);
-    fl_set_object_lstyle(obj,FL_NORMAL_STYLE+FL_SHADOW_STYLE);
-  obj = fl_add_frame(FL_ENGRAVED_FRAME,30,300,220,180,"");
-  obj = fl_add_text(FL_NORMAL_TEXT,60,320,160,40,"Magnet");
-    fl_set_object_lsize(obj,FL_LARGE_SIZE);
-    fl_set_object_lalign(obj,FL_ALIGN_LEFT|FL_ALIGN_INSIDE);
-    fl_set_object_lstyle(obj,FL_NORMAL_STYLE+FL_SHADOW_STYLE);
-  obj = fl_add_frame(FL_ENGRAVED_FRAME,280,300,220,180,"");
-  obj = fl_add_text(FL_NORMAL_TEXT,310,320,160,40,"Boxcar");
-    fl_set_object_lsize(obj,FL_LARGE_SIZE);
-    fl_set_object_lalign(obj,FL_ALIGN_LEFT|FL_ALIGN_INSIDE);
-    fl_set_object_lstyle(obj,FL_NORMAL_STYLE+FL_SHADOW_STYLE);
-  fdui->device_select_ok = obj = fl_add_button(FL_NORMAL_BUTTON,590,410,130,50,"Accept");
-    fl_set_object_color(obj,FL_TOP_BCOL,FL_GREEN);
-    fl_set_object_lsize(obj,FL_LARGE_SIZE);
-    fl_set_object_callback(obj,device_select,1);
-  fdui->device_select_cancel = obj = fl_add_button(FL_NORMAL_BUTTON,590,320,130,50,"Cancel");
-    fl_set_object_color(obj,FL_TOP_BCOL,FL_GREEN);
-    fl_set_object_lsize(obj,FL_LARGE_SIZE);
-    fl_set_object_callback(obj,device_select,0);
-
-  fdui->digitizer_group = fl_bgn_group();
-  fdui->tds_754a_button = obj = fl_add_round3dbutton(FL_RADIO_BUTTON,60,190,50,50,"  TDS754A");
-    fl_set_object_color(obj,FL_TOP_BCOL,FL_GREEN);
-    fl_set_object_lsize(obj,FL_LARGE_SIZE);
-    fl_set_button(obj, 1);
-  fdui->tds_520c_button = obj = fl_add_round3dbutton(FL_RADIO_BUTTON,60,150,50,50,"  TDS520C");
-    fl_set_object_color(obj,FL_TOP_BCOL,FL_GREEN);
-    fl_set_object_lsize(obj,FL_LARGE_SIZE);
-  fl_end_group();
-
-
-  fdui->lockin_group = fl_bgn_group();
-  fdui->sr510_button = obj = fl_add_round3dbutton(FL_RADIO_BUTTON,560,150,50,50,"  SR510");
-    fl_set_object_color(obj,FL_TOP_BCOL,FL_GREEN);
-    fl_set_object_lsize(obj,FL_LARGE_SIZE);
-    fl_set_button(obj, 1);
-  fl_end_group();
-
-
-  fdui->boxcar_group = fl_bgn_group();
-  fdui->stanford_button = obj = fl_add_round3dbutton(FL_RADIO_BUTTON,310,360,50,50,"  Stanford");
-    fl_set_object_color(obj,FL_TOP_BCOL,FL_GREEN);
-    fl_set_object_lsize(obj,FL_LARGE_SIZE);
-    fl_set_button(obj, 1);
-  fl_end_group();
-
-  fl_end_form();
-
-  fdui->device->fdui = fdui;
 
   return fdui;
 }
