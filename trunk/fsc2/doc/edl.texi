@@ -245,13 +245,33 @@ All the section keywords can be abbreviated, here's the complete list of
 valid section keywords:
 @itemize @bullet
 @item @code{DEVICES}, or @code{DEV}, @code{DEVS}, @code{DEVICE}
+@cindex @code{DEVICES} section
 @item @code{VARIABLES}, or @code{VAR}, @code{VARS}, @code{VARIABLE}
+@cindex @code{VARIABLES} section
 @item @code{ASSIGNMENTS}, or @code{ASS}, @code{ASSIGNMENT}
 @item @code{PHASES}, or @code{PHA}, @code{PHAS}, @code{PHASE}
 @item @code{PREPARATIONS}, or @code{PREP}, @code{PREPS}, @code{PREPARATION}
+@cindex @code{PREPARATIONS} section
 @item @code{EXPERIMENT}, or @code{EXP}
+@cindex @code{EXPERIMENT} section
 @end itemize
 
+
+Beside these sections there is a label that looks similar to a section
+label, the
+@itemize @bullet
+@item @code{ON_STOP}
+@end itemize
+@cindex @code{ON_STOP} label
+@noindent
+label. It can only be used within the @code{EXPERIMENT} section. The
+@code{ON_STOP} label should be used to guarantee that a certain part of
+the program is going to be executed even after the user hit the
+@code{Stop} button. This part of the @code{EXPERIMENT} section will
+probably contain code that stores previously unsaved data and does other
+things that are necessary before the experiment really stops.  When
+@acronym{fsc2} executes the code following the @code{UN_STOP} label it
+can't be stopped via the the @code{Stop} button.
 
 @node Syntax, Variables, Sections, EDL
 @section Syntax
@@ -295,10 +315,6 @@ arguments have to be separated by commas.
 @node Variables, Arithmetic, Syntax, EDL
 @section Variables
 @cindex variables
-@cindex @code{VARIABLES} section
-@cindex @code{VAR} section
-@cindex @code{VARS} section
-@cindex @code{VARIABLE} section
 @cindex arrays
 
 

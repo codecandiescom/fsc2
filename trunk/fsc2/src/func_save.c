@@ -707,23 +707,27 @@ static void f_format_check( Var *v )
 			s2c = cp - v->val.sptr;
 			v->val.sptr = T_realloc( v->val.sptr, strlen( v->val.sptr ) + 2 );
 			cp = v->val.sptr + s2c;
-			memmove( cp + 1, cp, strlen( cp ) );
+			memmove( cp + 1, cp, strlen( cp ) + 1 );
 			cp++;
+			continue;
+		}
+
+		if ( *cp == '\\' )
+		{
+			int sc;
+
+			for ( sc = 0; *cp == '\\'; sc++, cp++ )
+				;
+
+			if ( sc & 1 && *cp =='#' )
+				memmove( cp - 1, cp, strlen( cp ) + 1 );
+
+			cp--;
 			continue;
 		}
 
 		if ( *cp != '#' )
 			continue;
-
-		/* "\#" is replaced by '#' */
-
-		if ( cp != v->val.sptr && *( cp - 1 ) == '\\' )
-		{
-			*( cp - 1 ) = '#';
-			memmove( cp - 1, cp, strlen( cp - 1 ) );
-			cp--;
-			continue;
-		}
 
 		if ( cv == NULL )
 		{

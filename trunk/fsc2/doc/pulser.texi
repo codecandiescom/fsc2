@@ -82,7 +82,7 @@ cycling is planned for the experinment.
 
 @anchor{ASSIGNMENTS section}
 @subsection @code{ASSIGNMENTS} section
-@cindex ASSIGNMENTS section
+@cindex @code{ASSIGNMENTS} section
 
 Within the @code{ASSIGNMENTS} section the pulsers timebase and the
 trigger mode is set. It also deals with the basic setup of the channels,
@@ -602,7 +602,7 @@ and pulses will not be deleted even if they seem to be unused.
 
 @anchor{PHASES section}
 @subsection @code{PHASES} section
-@cindex Phases section
+@cindex @code{PHASES} section
 @cindex @code{PHASE_SEQUENCE}
 @cindex @code{ACQUSISTION_SEQUENCE}
 
