@@ -38,6 +38,7 @@
 * Frequency Counter Functions::
 * DAC Functions::
 * Event Counter Functions::
+* Power Supply Functions::
 * Multi-Device Functions::
 @end menu
 @end ifinfo
@@ -2668,7 +2669,7 @@ The function can be used in the @code{EXPERIMENT} as well as in the
 @end table
 
 
-@node Event Counter Functions, Multi-Device Functions, DAC Functions, Device Functions
+@node Event Counter Functions, Power Supply Functions, DAC Functions, Device Functions
 @section Event Counter Functions
 @cindex Event Counter Functions
 The only currently supported event counter is the @code{National
@@ -2916,7 +2917,119 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @end table
 
 
-@node Multi-Device Functions, , Event Counter Functions, Device Functions
+@node Power Supply Functions, Multi-Device Functions, Event Counter Functions, Device Functions
+@section Power Supply Functions
+@cindex Power Supply Functions
+
+The only currently supplied power supply is the @strong{Thurlby &
+Thandar Power Supply} PL330DP. The module for the power supply qis loaded by specifying
+@example
+thurlby330
+@end example
+@noindent
+in the @code{DEVICES} section. 
+
+@table @samp
+
+@anchor{powersupply_name}
+@item powersupply_name()
+@findex powersuppy_name()
+Returns a string with the name of the power supply being used.
+
+@anchor{powersupply_channel_state}
+@item powersupply_channel_state()
+@findex powersupply_channel_state()
+This function alllows to switch the channels of the power supply on or
+off. It requires two arguments. The first one is the channel, which must
+be either @code{CH1} or @code{CH2} (don't try to use numbers directly!).
+The second argument is the state, @:i.e. either @code{"ON"} or
+@code{"OFF"} (or @code{1} for on and @code{0} for off).
+
+The function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} script.
+
+
+@anchor{powersupply_damping}
+@item powersupply_damping()
+@findex powersupply_damping()
+This function alllows to switch damping of the output of one of the
+channels of the power supply on or off. It requires two arguments. The
+first one is the channel, which must be either @code{CH1} or @code{CH2}
+(don't try to use numbers directly!).  The second argument is the
+damping state, @:i.e. either @code{"ON"} or @code{"OFF"} (or @code{1} for
+on and @code{0} for off).
+
+The function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} script.
+
+@anchor{powersupply_voltage}
+@item powersupply_voltage()
+@findex powersupply_voltage()
+This function allows to either set or query the output voltage of one of
+the channels. For a query only one argument is required, the channel,
+which must be specified as either @code{CH1} or @code{CH2} (don't try to
+use numbers directly!).  If there is no second argument the output
+voltage at the channel is returned.
+
+If there is a second argument, being a voltage in the range between @w{0
+V} and @w{32 V} the output voltage is set instead. Please note that this
+voltage may not appear at the outputs when the setting for the current
+limit does not allow it.
+
+The function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} script.
+
+@anchor{powersupply_voltage_limit}
+@item powersupply_voltage_limit()
+@findex powersupply_voltage_limit()
+This function allows to query the current setting of the voltage limit.
+It expects one argument, the channel, which must be specified as either
+@code{CH1} or @code{CH2} (don't try to use numbers directly!).
+
+If there is a second argument, being a voltage in the range between @w{0
+V} and @w{32 V}, this value is used as the new voltage limit. The same
+effect can be achieved by calling the function
+@code{powersupply_voltage()}.
+
+The function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} script.
+
+@anchor{powersupply_current}
+@item powersupply_current()
+@findex powersupply_current()
+This function allows to either set or query the output current of one of
+the channels. For a query only one argument is required, the channel,
+which must be specified as either @code{CH1} or @code{CH2} (don't try to
+use numbers directly!).  If there is no second argument the output
+current at the channel is returned.
+
+If there is a second argument, being a current in the range between @w{0
+A} and @w{3 A} the output current is set instead. Please note that this
+current may not appear at the outputs when the setting for the voltage
+limit does not allow it.
+
+The function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} script.
+
+@anchor{powersupply_current_limit}
+@item powersupply_current_limit()
+@findex powersupply_current_limit()
+This function allows to query the current setting of the current limit.
+It expects one argument, the channel, which must be specified as either
+@code{CH1} or @code{CH2} (don't try to use numbers directly!).
+
+If there is a second argument, being a current in the range between @w{0
+A} and @w{3 A}, this value is used as the new current limit. The same
+effect can be achieved by calling the function
+@code{powersupply_current()}.
+
+The function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} script.
+
+@end table
+
+
+@node Multi-Device Functions, , Power Supply Functions, Device Functions
 @section Multi-Device Functions
 @cindex Multi-Device Functions
 

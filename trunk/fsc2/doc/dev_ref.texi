@@ -24,7 +24,6 @@
 @node Device Reference, Reserved Words, Modules, Top
 @appendix Device Reference
 
-
 @ifinfo
 @menu
 * aeg_s_band::    S-band AEG Magnet Power Supply
