@@ -394,7 +394,7 @@ Var *f_wait( Var *v )
 
 	/* Return 1 if end of sleeping time was reached, 0 if 'EDL.do_quit' was
 	   set. In case the wait ended due to a DO_QUIT signal we have to switch
-	   off the timer because after receipt of a 'EDL.do_quit' signal the timer
+	   off the timer because after receipt of a 'DO_QUIT' signal the timer
 	   may still be running and the finally arriving signal could kill the
 	   child prematurely. */
 
