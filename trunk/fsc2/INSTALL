@@ -169,6 +169,20 @@ left-padded with spaces and with a trailing newline). In this case fsc2 will
 not try to remove stale lock files and instead print an error message to the
 terminal that the lock file has to be removed manually.
 
+WITH_ME6000 is the variable that conrols if support for ME-6000 and ME-6100
+DAC boards by Meihaus Electronic GmbH will be compiled into fsc2. Please
+note that you have to install a kernel driver and a library for accessing
+the board *before* starting to compile fsc2. The kernel module and the
+library are in the 'me6x00' subdirectory. Please cd into this subdirectory
+and thype 'INSTALL' to compile and install both.
+
+WITH_NI6601 is the variable that conrols if support for the National
+Instruments 6601 GPCT board will be compiled into fsc2. Please note that
+you have to install a kernel driver and a library for accessing the board
+*before* starting to compile fsc2. The kernel module and the library are
+in the 'ni6601' subdirectory. Please cd into this subdirectory and thype
+'INSTALL' to compile and install both.
+
 The WITH_HTTP_SERVER variable tells if support for the web server should
 be built into fsc2. Just comment out the line and the web server won't be
 available. If the web server gets included the next variable,
