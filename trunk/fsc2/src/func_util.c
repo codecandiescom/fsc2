@@ -3853,6 +3853,331 @@ Var *f_mean_part_array( Var *v )
 }
 
 
+/*------------------------------------------------------------------------*/
+/* EDL function for removing spikes from an 1-dimensional array. It works */
+/* by first calculating the derivative (one-point-differences) of the     */
+/* spectrum and the mean and standard deviation. All points where the     */
+/* derivative is larger than a certain factor of the standard deviation   */
+/* (the factor being the second argument to the function) are teken to be */
+/* potential spikes. Now the set is further restricted to pairs of such   */
+/* that are not further apart than a treshold value (the third argument   */
+/* the function takes) and that have opposite signs of the derivative.    */
+/* The region between these points are taken to be spikes and the points  */
+/* in between are replaced by a straight line connecting the points just  */
+/* outside the region of the spike.                                       */
+/*------------------------------------------------------------------------*/
+
+#define OUTLIER_DEF_NUMBER 10
+
+Var *f_spike_rem( Var *v )
+{
+	double *diffs;
+	long *lpnt;
+	double *dpnt;
+	ssize_t diffs_len, start, next, end, i, j, k;
+	double m, stdev = 0.0, mean = 0.0;
+	double r;
+	double sigmas = 5.0;
+	ssize_t *ol_indices = NULL, *old_ol_indices;
+	ssize_t ol_len = 0, ol_count = 0;
+	long max_spike_width = 3;
+	Var *nv;
+
+
+	CLOBBER_PROTECT( diffs );
+	CLOBBER_PROTECT( dpnt );
+	CLOBBER_PROTECT( i );
+	CLOBBER_PROTECT( stdev );
+	CLOBBER_PROTECT( mean );
+	CLOBBER_PROTECT( start );
+	CLOBBER_PROTECT( end );
+	CLOBBER_PROTECT( ol_indices );
+	CLOBBER_PROTECT( ol_len );
+	CLOBBER_PROTECT( ol_count );
+	CLOBBER_PROTECT( max_spike_width );
+
+	if ( v == NULL )
+	{
+		print( FATAL, "Missing argument(s).\n" );
+		THROW( EXCEPTION );
+	}
+
+	vars_check( v, INT_ARR | FLOAT_ARR );
+
+	diffs_len = v->len - 1;
+
+	if ( diffs_len < 2 )
+	{
+		print( FATAL, "Array must have at least 3 elements.\n" );
+		THROW( EXCEPTION );
+	}
+
+	/* Check if the user passed the number od standard deviations above
+	   which a difference is taken to be an outlier and the maximum spike
+	   width */
+
+	if ( v->next != NULL )
+	{
+		vars_check( v->next, INT_VAR | FLOAT_VAR );
+
+		if ( v->next->type == FLOAT_VAR )
+			sigmas = lrnd( v->next->val.dval );
+		else
+			sigmas = lrnd( v->next->val.lval );
+
+		if ( sigmas <= 0.0 )
+		{
+			print( FATAL, "Zero or negative number of standard "
+				   "deviations.\n" );
+			THROW( EXCEPTION );
+		}
+
+		if ( v->next->next != 0 )
+		{
+			vars_check( v->next->next, INT_VAR | FLOAT_VAR );
+
+			if ( v->next->next->type == FLOAT_VAR )
+			{
+				print( WARN, "Floating point number used as maximum spike "
+					   "width (must be given in points).\n" );
+				max_spike_width = lrnd( v->next->next->val.dval );
+			}
+			else
+				max_spike_width = lrnd( v->next->next->val.lval );
+
+			if ( max_spike_width <= 1 )
+			{
+				print( FATAL, "Maximum spike width must a positive "
+					   "number.\n" );
+				THROW( EXCEPTION );
+			}
+
+			if ( max_spike_width > v->len )
+			{
+				print( FATAL, "Maximum spike width is larger than the width "
+					   "of the curve.\n" );
+				THROW( EXCEPTION );
+			}
+		}
+	}
+
+	diffs = T_malloc( diffs_len * sizeof *diffs );
+
+	/* Calculate all point differences and the mean of the curve */
+
+	if ( v->type == INT_ARR )
+		for ( lpnt = v->val.lpnt, i = 0; i < diffs_len; lpnt++, i++ )
+			mean += diffs[ i ] = *( lpnt + 1 ) - *lpnt;
+	else
+		for ( dpnt = v->val.dpnt, i = 0; i < diffs_len; dpnt++, i++ )
+			mean += diffs[ i ] = *( dpnt + 1 ) - *dpnt;
+
+	mean /= diffs_len;
+
+	/* Calculate the standard deviation of the differences and multiply
+	   by the factor above which a difference is taken to be an outlier */
+
+	for ( dpnt = diffs, i = 0; i < diffs_len; dpnt++, i++ )
+	{
+		r = mean - *dpnt;
+		stdev += r * r;
+	}
+
+	stdev = sigmas * sqrt( stdev / ( diffs_len - 1 ) );
+
+	/* Find the outliers and store their indices */
+
+	for ( dpnt = diffs, i = 0; i < diffs_len; dpnt++, i++ )
+		if ( fabs( *dpnt - mean ) > stdev )
+		{
+			if ( ol_count >= ol_len )
+			{
+				old_ol_indices = ol_indices;
+				TRY
+				{
+					ol_len += OUTLIER_DEF_NUMBER;
+					ol_indices = T_realloc( ol_indices,
+											ol_len * sizeof *ol_indices );
+					TRY_SUCCESS;
+				}
+				OTHERWISE
+				{
+					if ( old_ol_indices != NULL )
+						T_free( old_ol_indices );
+					T_free( diffs );
+					RETHROW( );
+				}
+			}
+
+			ol_indices[ ol_count++ ] = i;
+		}
+
+	TRY
+	{
+		if ( v->type == INT_ARR )
+			nv = vars_push( INT_ARR, v->val.lpnt, v->len );
+		else
+			nv = vars_push( FLOAT_ARR, v->val.dpnt, v->len );
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+	{
+		T_free( diffs );
+		if ( ol_indices != NULL )
+			T_free( ol_indices );
+		RETHROW( );
+	}
+
+	/* If there are no outliers we return the unchanged array */
+
+	if ( ol_count == 0 )
+	{
+		T_free( diffs );
+		return nv;
+	}
+
+	/* Skip dealing with points with unusally large derivatives when they
+	   are less than max_spike_width apart from the fringes of the curve -
+	   the curve could start or end with a spike */
+
+	start = 0;
+	if ( ol_indices[ start ] < max_spike_width )
+		start++;
+
+	end = ol_count;
+	if ( ol_indices[ end - 1 ] >= nv->len - max_spike_width - 1 )
+		end--;
+
+	/* Identify all pairs of points that are near enough to each other and
+	   have opposite signs of the derivative. Then use linear interpolation
+	   for the region in between */
+
+	for ( i = start; i < end - 1; i++ )
+		if ( ol_indices[ i + 1 ] - ol_indices[ i ] <= max_spike_width &&
+			 ( ( diffs[ ol_indices[ i ] ] > mean &&
+				 diffs[ ol_indices[ i + 1 ] ] < mean ) ||
+			   ( diffs[ ol_indices[ i ] ] < mean &&
+				 diffs[ ol_indices[ i + 1 ] ] > mean ) ) )
+		{
+			if ( v->type == INT_ARR )
+			{
+				m = (   nv->val.lpnt[ ol_indices[ i + 1 ] + 1 ]
+					  - nv->val.lpnt[ ol_indices[ i ] ] )
+					/ ( ol_indices[ i + 1 ] - ol_indices[ i ] + 1 );
+				for ( k = 1, j = ol_indices[ i ] + 1; j <= ol_indices[ i + 1 ];
+					  j++, k++ )
+					nv->val.lpnt[ j ] = nv->val.lpnt[ ol_indices[ i ] ]
+									    + round( k * m );
+			}
+			else
+			{
+				m = (   nv->val.dpnt[ ol_indices[ i + 1 ] + 1 ]
+					  - nv->val.dpnt[ ol_indices[ i ] ] )
+					/ ( ol_indices[ i + 1 ] - ol_indices[ i ] + 1 );
+				for ( k = 1, j = ol_indices[ i ] + 1; j <= ol_indices[ i + 1 ];
+					  j++, k++ )
+					nv->val.dpnt[ j ] = nv->val.dpnt[ ol_indices[ i ] ]
+										+ k * m;
+			}
+
+			ol_indices[ i ] = ol_indices[ i + 1 ] = -1;
+			i++;
+		}
+
+	/* Deal with s spike directly at or very near to the left hand side of
+	   the curve */
+
+	if ( start != 0 )
+	{
+		start = ol_indices[ 0 ];
+
+		if ( ol_count == 1 || ol_indices[ 1 ] == -1 ||
+			 ol_indices[ 1 ] - start > max_spike_width )
+		{
+			for ( i = 0; i <= start; i++ ) 
+				if ( v->type == INT_ARR )
+					nv->val.lpnt[ i ] = nv->val.lpnt[ start + 1 ];
+				else
+					nv->val.dpnt[ i ] = nv->val.dpnt[ start + 1 ];
+			ol_indices[ 0 ] = -1;
+		}
+		else if ( ol_count > 1 &&
+				  ol_indices[ 1 ] - start <= max_spike_width &&
+				  ( ( diffs[ start ] > mean &&
+					  diffs[ ol_indices[ 1 ] ] < mean ) ||
+					( diffs[ start ] < mean &&
+					  diffs[ ol_indices[ 1 ] ] > mean ) ) )
+		{
+			next = ol_indices[ 1 ] + 1;
+			if ( v->type == INT_ARR )
+			{
+				m = ( nv->val.lpnt[ next ] - nv->val.lpnt[ start ] )
+					/ ( next - start );
+				for ( k = 1, j = start + 1; j < next; j++, k++ )
+					nv->val.lpnt[ j ] = nv->val.lpnt[ start ] + round( k * m );
+			}
+			else
+			{
+				m = ( nv->val.dpnt[ next ] - nv->val.dpnt[ start ] )
+					/ ( next - start );
+				for ( k = 1, j = start + 1; j < next; j++, k++ )
+					nv->val.dpnt[ j ] = nv->val.dpnt[ start ] + k * m;
+			}
+
+			ol_indices[ 0 ] = ol_indices[ 1 ] = -1;
+		}
+	}
+
+	/* Deal with s spike directly at or very near to the right hand side of
+	   the curve */
+
+	if ( end == ol_count - 1 )
+	{
+		end = ol_indices[ end ];
+
+		if ( ol_count == 1 || ol_indices[ ol_count - 2 ] == -1 ||
+			 end - ol_indices[ ol_count - 2 ] > max_spike_width )
+		{
+			for ( i = end + 1; i < nv->len; i++ ) 
+				if ( v->type == INT_ARR )
+					nv->val.lpnt[ i ] = nv->val.lpnt[ end  ];
+				else
+					nv->val.dpnt[ i ] = nv->val.dpnt[ end ];
+		}
+		else if ( ol_count > 1 &&
+				  end - ol_indices[ ol_count - 2 ] <= max_spike_width &&
+				  ( ( diffs[ end ] > mean &&
+					  diffs[ ol_indices[ ol_count - 2 ] ] < mean ) ||
+					( diffs[ end ] < mean &&
+					  diffs[ ol_indices[ ol_count - 2 ] ] > mean ) ) )
+		{
+			start = ol_indices[ ol_count - 2 ];
+			end++;
+			if ( v->type == INT_ARR )
+			{
+				m = ( nv->val.lpnt[ end ] - nv->val.lpnt[ start ] )
+					/ ( start - end );
+				for ( k = 1, j = start + 1; j < end;
+					  j++, k++ )
+					nv->val.lpnt[ j ] = nv->val.lpnt[ start ] + round( k * m );
+			}
+			else
+			{
+				m = ( nv->val.dpnt[ end ] - nv->val.dpnt[ start ] )
+					/ ( end - start );
+				for ( k = 1, j = start + 1; j < end; j++, k++ )
+					nv->val.dpnt[ j ] = nv->val.dpnt[ start ] + k * m;
+			}
+		}
+	}
+
+	T_free( diffs );
+	T_free( ol_indices );
+
+	return nv;
+}
+
+
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
