@@ -53,7 +53,7 @@ An @code{EDL} program is roughly structured along the way an
 experiment is done. Before you start an experiment you first have to
 select the devices to be used and set them up. So the first part of an
 @code{EDL} program simply consists of a few lines specifying the
-devices to be controlled by the program and setting their parameter,
+devices to be controlled by the program and setting their parameters,
 i.e.@: the time base of the digitizer, the sensitivity of the lock-in
 amplifier or which pulses are to be created by the pulse generator. And
 as you would now start the experiment the second part of the
