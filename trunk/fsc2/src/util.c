@@ -46,19 +46,19 @@ char *get_string( const char *fmt, ... )
 		wr = vsnprintf( c, len, fmt, ap );
 		va_end( ap );
 
-		if ( wr < 0 )       /* indicates not enough space under older glibs */
+		if ( wr < 0 )         /* indicates not enough space with older glibs */
 		{
 			len *= 2;
 			continue;
 		}
 
-		if ( wr + 1 > len ) /* newer glibs return the number of chars needed */
-		{
+		if ( wr + 1 > len )        /* newer glibs return the number of chars */
+		{                          /* needed, not counting the trailing '\0' */
 			len = wr + 1;
 			continue;
 		}
 
-		if ( wr + 1 < len )
+		if ( wr + 1 < len )        /* trim string to number of needed chars */
 			T_realloc( c, wr + 1 );
 		break;
 	}
