@@ -553,22 +553,22 @@ bool dg2020_set_phase_reference( int phs, int function )
 }
 
 
-/*----------------------------------------------------*/
+/*---------------------------------------------------------------------*/
 /* This funcion gets called for setting a phase type - pod association */
-/* in a PHASE_SETUP commmand. */
-/*----------------------------------------------------*/
+/* in a PHASE_SETUP commmand.                                          */
+/*---------------------------------------------------------------------*/
 
 bool dg2020_phase_setup_prep( int phs, int type, int pod, long val,
 							  long protocol )
 {
+	pod = pod;                        /* keep the compiler happy... */
 	assert ( Cur_PHS != - 1 ? ( Cur_PHS == phs ) : 1 );
 
 
 	Cur_PHS = phs;
 
-	pod = pod;        /* keep the compiler happy... */
-
-	/* Ceck that we don't get stuf only to be used with the Frankfurt driver */
+	/* Check that we don't get stuff only to be used with the Frankfurt
+	   pulser driver */
 
 	if ( protocol != PHASE_UNKNOWN_PROT && protocol != PHASE_BLN_PROT )
 	{
