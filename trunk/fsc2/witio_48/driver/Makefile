@@ -25,7 +25,6 @@
 # Jens.Toerring@physik.fu-berlin.de
 
 
-
 ifneq ($(WITIO_48_KERNEL_SOURCE),)
     KERNEL_INC = $(WITIO_48_KERNEL_SOURCE)
 else
@@ -55,7 +54,7 @@ all:
 	$(MAKE) $(MODULE)
 
 $(MODULE): $(SOURCES)
-	$(CC) $(CFLAGS) $(DBGFLAGS) $(INCLUDES) -c -o $@ $<
+	$(CC) $(CFLAGS) $(INCLUDES) -c -o $@ $<
 
 install:
 ifeq ($(WITIO_48_KERNEL_SOURCE),)
