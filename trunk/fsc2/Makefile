@@ -467,7 +467,7 @@ export            # export all variables to sub-makes
 
 .SUFFIXES:
 .PHONY: all install-strip install uninstall \
-		config version test clean distclean \
+		version test clean distclean        \
 		mostlyclean tags pack manifest ZIP  \
 		pion.anorg.chemie.uni-frankfurt.de  \
 		crowley.physik.fu-berlin.de         \
@@ -487,7 +487,7 @@ export            # export all variables to sub-makes
 # (the Makefile for modules is called via the Makefile in src), then
 # the documentation and some other, more or less useful stuff
 
-all:
+all: config.h
 	$(MAKE) config
 	if [ $(INSTALL_MACHINE) != "install-unknown" ]; then                 \
 		$(MAKE) $(machine_name);                                         \
@@ -511,14 +511,14 @@ endif
 	$(MAKE) -C doc all
 
 
-# Create a header file with configuration info
+# Create a header file with configuration information if either the
+# Makefile got changed or it doesn't exist
 
-config:
+config.h: Makefile
 	echo "/*--- Created automatically, dont' change ---*/" > config.h
 	@echo " $(CONFFLAGS)" | \
 	sed 's/ \-D\([A-Za-z][A-Za-z0-9_]*\)\=\{0,1\}/~\#define \1 /g' - | \
 	tr '~' '\n' | sort | uniq >> config.h
-	$(RM) $(RMFLAGS) config.h.in
 
 
 # Install the program and everything else
