@@ -43,16 +43,16 @@
 char *get_string( const char *fmt, ... )
 {
 	char *c = NULL;
-	int len = GET_STRING_TRY_LENGTH;
+	size_t len = GET_STRING_TRY_LENGTH;
 	va_list ap;
-	int wr;
+	size_t wr;
 
 
 	while ( 1 )
 	{
 		c = T_realloc( c, len );
 		va_start( ap, fmt );
-		wr = vsnprintf( c, len, fmt, ap );
+		wr = ( size_t ) vsnprintf( c, len, fmt, ap );
 		va_end( ap );
 
 		if ( wr < 0 )         /* indicates not enough space with older glibs */
