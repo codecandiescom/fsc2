@@ -49,8 +49,8 @@ struct MOD_RANGES pm_mod_ranges[ ] = { { 7.600000e6, 10.0 },
 									   { 6.052500e8, 5.00 },
 									   { 1.100000e9, 10.0 } };
 
-size_t num_fm_mod_ranges = sizeof fm_mod_ranges / sizeof fm_mod_ranges[ 0 ];
-size_t num_pm_mod_ranges = sizeof pm_mod_ranges / sizeof pm_mod_ranges[ 0 ];
+size_t num_fm_mod_ranges = sizeof fm_mod_ranges / sizeof *fm_mod_ranges;
+size_t num_pm_mod_ranges = sizeof pm_mod_ranges / sizeof *pm_mod_ranges;
 
 static RS_SML01 rs_sml01_backup;
 
@@ -1448,7 +1448,7 @@ Var *synthesizer_pulse_width( Var *v )
 	{
 		print( FATAL, "Invalid pulse width of %s, allowed range is %d ns "
 			   "to %.1f s\n", rs_sml01_pretty_print( width ),
-			   irnd( MIN_PULSE_WIDTH * 1.0e9 ), MIN_PULSE_WIDTH );
+			   irnd( MIN_PULSE_WIDTH * 1.0e9 ), MAX_PULSE_WIDTH );
 		THROW( EXCEPTION );
 	}
 

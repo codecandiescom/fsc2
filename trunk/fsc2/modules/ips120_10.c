@@ -33,6 +33,8 @@ const char device_name[ ]  = DEVICE_NAME;
 const char generic_type[ ] = DEVICE_TYPE;
 
 
+/* Values used during the test run to simulate the "real" device */
+
 #define TEST_CURRENT       63.0      /* about 9 T */
 #define TEST_SWEEP_RATE    1.0e-3    /* about 1.5 G/s */
 
@@ -290,7 +292,7 @@ Var *magnet_setup( Var *v )
 	if ( ( v = vars_pop( v ) ) != NULL )
 	{
 		sweep_rate = get_double( v, "magnet sweep speed" ) / F2C_RATIO;
-		if ( sweep_rate < 0 )
+		if ( sweep_rate < 0.0 )
 		{
 			print( FATAL, "Negative sweep rates can't be used, use argument "
 				   "to magnet_sweep() to set sweep direction.\n" );
@@ -833,8 +835,9 @@ static void ips120_20_to_local( void )
 }
 
 
-/*-----------------------------------------------------------*/
-/*-----------------------------------------------------------*/
+/*-------------------------------------------------------*/
+/* Function that asks the magnet about its current state */
+/*-------------------------------------------------------*/
 
 static void ips120_20_get_complete_status( void )
 {
@@ -1072,8 +1075,10 @@ static void ips120_20_get_complete_status( void )
 }
 
 
-/*-----------------------------------------------------------*/
-/*-----------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+/* Function for making the magnet sweep up (at least if it's not */
+/* already sweeping up or very near to the maximum current)      */
+/*---------------------------------------------------------------*/
 
 static void ips120_20_sweep_up( void )
 {
@@ -1105,8 +1110,10 @@ static void ips120_20_sweep_up( void )
 }
 
 
-/*-----------------------------------------------------------*/
-/*-----------------------------------------------------------*/
+/*-----------------------------------------------------------------*/
+/* Function for making the magnet sweep down (at least if it's not */
+/* already sweeping down or very near to the minimum current)      */
+/*-----------------------------------------------------------------*/
 
 static void ips120_20_sweep_down( void )
 {
@@ -1137,8 +1144,10 @@ static void ips120_20_sweep_down( void )
 }
 
 
-/*-----------------------------------------------------------*/
-/*-----------------------------------------------------------*/
+/*-------------------------------------------------------------*/
+/* Function that's always called before a new current value is */
+/* accepted to test if it's within the limits of the magnet    */
+/*-------------------------------------------------------------*/
 
 static double ips120_20_current_check( double current )
 {
@@ -1184,6 +1193,8 @@ static double ips120_20_current_check( double current )
 
 
 /*-----------------------------------------------------------*/
+/* Function that's always called before a sweep speed is set */
+/* to test if it's within the magnets limits.                */
 /*-----------------------------------------------------------*/
 
 static double ips120_20_sweep_rate_check( double sweep_rate )
@@ -1231,8 +1242,9 @@ static double ips120_20_sweep_rate_check( double sweep_rate )
 }
 
 
-/*-----------------------------------------------------------*/
-/*-----------------------------------------------------------*/
+/*--------------------------------------------------*/
+/* Function for asking the magnet about the current */
+/*--------------------------------------------------*/
 
 static double ips120_20_get_act_current( void )
 {
@@ -1248,6 +1260,8 @@ static double ips120_20_get_act_current( void )
 
 
 /*-----------------------------------------------------------*/
+/* Function for setting the target current, i.e. the current */
+/* the magnet is supposed to sweep to.                       */
 /*-----------------------------------------------------------*/
 
 static double ips120_20_set_target_current( double current )
@@ -1263,9 +1277,9 @@ static double ips120_20_set_target_current( double current )
 	return current;
 }
 
-
-/*-----------------------------------------------------------*/
-/*-----------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+/* Function for asking the current setting of the target current */
+/*---------------------------------------------------------------*/
 
 static double ips120_20_get_target_current( void )
 {
@@ -1279,8 +1293,9 @@ static double ips120_20_get_target_current( void )
 }
 
 
-/*-----------------------------------------------------------*/
-/*-----------------------------------------------------------*/
+/*---------------------------------------*/
+/* Function for setting a new sweep rate */
+/*---------------------------------------*/
 
 static double ips120_20_set_sweep_rate( double sweep_rate )
 {
@@ -1295,8 +1310,9 @@ static double ips120_20_set_sweep_rate( double sweep_rate )
 	return sweep_rate;
 }
 
-/*-----------------------------------------------------------*/
-/*-----------------------------------------------------------*/
+/*-------------------------------------------------------------*/
+/* Function for asking the magnet about its current sweep rate */
+/*-------------------------------------------------------------*/
 
 static double ips120_20_get_sweep_rate( void )
 {
@@ -1311,6 +1327,10 @@ static double ips120_20_get_sweep_rate( void )
 
 
 /*-----------------------------------------------------------*/
+/* Function to make the magnet to a certain currrent setting */
+/* as fast as savely possible. Can be aborted in which case  */
+/* a runing sweep will be stopped by the end-of-experiment   */
+/* handler function that's then invoked automatically.       */
 /*-----------------------------------------------------------*/
 
 static double ips120_20_goto_current( double current )
@@ -1338,8 +1358,10 @@ static double ips120_20_goto_current( double current )
 }
 
 
-/*-----------------------------------------------------------*/
-/*-----------------------------------------------------------*/
+/*-------------------------------------------------------------*/
+/* Function to either stop a sweep, make the magnet sweep to a */
+/* certain field value or make it sweep to zero.               */
+/*-------------------------------------------------------------*/
 
 static int ips120_20_set_activity( int activity )
 {
@@ -1375,8 +1397,9 @@ static int ips120_20_set_activity( int activity )
 }
 
 
-/*-----------------------------------------------------------*/
-/*-----------------------------------------------------------*/
+/*---------------------------------------------------*/
+/* Function for talking with the magnet via the GPIB */
+/*---------------------------------------------------*/
 
 static long ips120_20_talk( const char *message, char *reply, long length )
 {
@@ -1442,8 +1465,9 @@ static long ips120_20_talk( const char *message, char *reply, long length )
 }
 
 
-/*-----------------------------------------------------------*/
-/*-----------------------------------------------------------*/
+/*---------------------------------------------------*/
+/* Function called in case of communication failures */
+/*---------------------------------------------------*/
 
 static void ips120_20_comm_failure( void )
 {
