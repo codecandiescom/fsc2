@@ -14,7 +14,6 @@ const char *strip_path( const char *path );
 long get_file_length( char *name, int *len );
 void eprint( int severity, const char *fmt, ... );
 
-inline long   rnd( double x );
 inline short  d2shrt( double a );
 inline short  i2shrt( int a );
 inline int    i_max( int    a, int    b );

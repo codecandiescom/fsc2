@@ -994,7 +994,7 @@ Var *f_wait( Var *v )
 	if ( v->type == INT_VAR )
 		how_long = v->val.lval;
 	else
-		how_long = rnd( v->val.dval );
+		how_long = round( v->val.dval );
 
 	if ( how_long < 0 )
 	{
@@ -1082,7 +1082,7 @@ Var *f_init_1d( Var *v )
 		{
 			eprint( WARN, "%s:%ld: Floating point value used as number of "
 					"curves in `init_1d()'.\n", Fname, Lc );
-			G.nc = rnd( v->val.dval );
+			G.nc = round( v->val.dval );
 		}
 
 		if ( G.nc < 1 || G.nc > MAX_CURVES )
@@ -1114,7 +1114,7 @@ Var *f_init_1d( Var *v )
 		{
 			eprint( WARN, "%s:%ld: Floating point value used as number of "
 					"points in `init_1d()'.\n", Fname, Lc );
-			G.nx = rnd( v->val.dval );
+			G.nx = round( v->val.dval );
 		}
 
 		v = v->next;
@@ -1193,7 +1193,7 @@ Var *f_init_2d( Var *v )
 		{
 			eprint( WARN, "%s:%ld: Floating point value used as number of "
 					"curves in `init_1d()'.\n", Fname, Lc );
-			nc = rnd( v->val.dval );
+			nc = round( v->val.dval );
 		}
 
 		if ( nc < 1 || nc > MAX_CURVES )
@@ -1219,7 +1219,7 @@ Var *f_init_2d( Var *v )
 		{
 			eprint( WARN, "%s:%ld: Floating point value used as number of "
 					"points in x-direction.\n", Fname, Lc );
-			nx = rnd( v->val.dval );
+			nx = round( v->val.dval );
 		}
 
 		v = v->next;
@@ -1238,7 +1238,7 @@ Var *f_init_2d( Var *v )
 		{
 			eprint( WARN, "%s:%ld: Floating point value used as number of "
 					"points in y-direction.\n", Fname, Lc );
-			ny = rnd( v->val.dval );
+			ny = round( v->val.dval );
 		}
 
 		v = v->next;
@@ -1608,7 +1608,7 @@ DPoint *eval_display_args( Var *v, int *nsets )
 		if ( v->type == INT_VAR )
 			dp[ *nsets ].nx = v->val.lval - ARRAY_OFFSET;
 		else
-			dp[ *nsets ].nx = rnd( v->val.dval - ARRAY_OFFSET );
+			dp[ *nsets ].nx = round( v->val.dval - ARRAY_OFFSET );
 
 		if ( dp[ *nsets ].nx < 0 )
 		{
@@ -1635,7 +1635,7 @@ DPoint *eval_display_args( Var *v, int *nsets )
 			if ( v->type == INT_VAR )
 				dp[ *nsets ].ny = v->val.lval - ARRAY_OFFSET;
 			else
-				dp[ *nsets ].ny = rnd( v->val.dval - ARRAY_OFFSET );
+				dp[ *nsets ].ny = round( v->val.dval - ARRAY_OFFSET );
 
 			if ( dp[ *nsets ].nx < 0 )
 			{
@@ -1679,7 +1679,7 @@ DPoint *eval_display_args( Var *v, int *nsets )
 		if ( v->type == INT_VAR )
 			dp[ *nsets ].nc = v->val.lval - 1;
 		else
-			dp[ *nsets ].nc = rnd( v->val.dval - 1 );
+			dp[ *nsets ].nc = round( v->val.dval - 1 );
 
 		if ( dp[ *nsets ].nc < 0 || dp[ *nsets ].nc >= G.nc )
 		{
