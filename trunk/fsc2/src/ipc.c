@@ -227,7 +227,7 @@ void delete_stale_shms( void )
 {
 	int max_id, id, shm_id;
     struct shmid_ds shm_seg;
-	int euid = geteuid( );
+	unsigned int euid = geteuid( );
 	void *buf;
 
 
@@ -255,7 +255,7 @@ void delete_stale_shms( void )
 
 				if ( shm_seg.shm_nattch != 0 )          /* attach count != 0 */
 					fprintf( stderr, "Stale shared memory segment has attach "
-							 "count of %d.\nPossibly one of fsc2s processes "
+							 "count of %ld.\nPossibly one of fsc2s processes "
 							 "survived...\n", shm_seg.shm_nattch );
 				else
 					shmctl( shm_id, IPC_RMID, NULL );
