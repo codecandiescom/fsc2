@@ -802,12 +802,12 @@ static bool zoom_x_1d( Canvas *c )
 
 		if ( G.start[ X ] > c->ppos[ X ] )
 			cv->s2d[ X ] *= d_min( 4.0,
-					   1.0 + 3.0 * ( double ) ( G.start[ X ] - c->ppos[ X ] ) /
-								                      ( double ) G1.x_axis.w );
+						 1.0 + 3.0 * ( double ) ( G.start[ X ] - c->ppos[ X ] )
+								   / ( double ) G1.x_axis.w );
 		else
 			cv->s2d[ X ] /= d_min( 4.0,
-					   1.0 + 3.0 * ( double ) ( c->ppos[ X ] - G.start[ X ] ) /
-								                      ( double ) G1.x_axis.w );
+						 1.0 + 3.0 * ( double ) ( c->ppos[ X ] - G.start[ X ] )
+								   / ( double ) G1.x_axis.w );
 
 		cv->shift[ X ] = G.start[ X ] / cv->s2d[ X ] - px;
 
@@ -856,12 +856,12 @@ static bool zoom_y_1d( Canvas *c )
 
 		if ( G.start[ Y ] < c->ppos[ Y ] )
 			cv->s2d[ Y ] *= d_min( 4.0,
-					   1.0 + 3.0 * ( double ) ( c->ppos[ Y ] - G.start[ Y ] ) /
-								                      ( double ) G1.y_axis.h );
+						 1.0 + 3.0 * ( double ) ( c->ppos[ Y ] - G.start[ Y ] )
+								   / ( double ) G1.y_axis.h );
 		else
 			cv->s2d[ Y ] /= d_min( 4.0,
-					   1.0 + 3.0 * ( double ) ( G.start[ Y ] - c->ppos[ Y ] ) /
-								                      ( double ) G1.y_axis.h );
+						 1.0 + 3.0 * ( double ) ( G.start[ Y ] - c->ppos[ Y ] )
+								   / ( double ) G1.y_axis.h );
 
 		cv->shift[ Y ] = ( ( double ) G1.canvas.h - 1.0 - G.start[ Y ] )
 						 / cv->s2d[ Y ] - py;
@@ -903,12 +903,12 @@ static bool zoom_xy_1d( Canvas *c )
 
 			if ( G.start[ X ] > c->ppos[ X ] )
 				cv->s2d[ X ] *= d_min( 4.0,
-					   1.0 + 3.0 * ( double ) ( G.start[ X ] - c->ppos[ X ] ) /
-								                      ( double ) G1.x_axis.w );
+						 1.0 + 3.0 * ( double ) ( G.start[ X ] - c->ppos[ X ] )
+									   / ( double ) G1.x_axis.w );
 			else
 				cv->s2d[ X ] /= d_min( 4.0,
-					   1.0 + 3.0 * ( double ) ( c->ppos[ X ] - G.start[ X ] ) /
-								                      ( double ) G1.x_axis.w );
+						 1.0 + 3.0 * ( double ) ( c->ppos[ X ] - G.start[ X ] )
+									   / ( double ) G1.x_axis.w );
 
 			cv->shift[ X ] = G.start[ X ] / cv->s2d[ X ] - px;
 
@@ -924,15 +924,15 @@ static bool zoom_xy_1d( Canvas *c )
 
 			if ( G.start[ Y ] < c->ppos[ Y ] )
 				cv->s2d[ Y ] *= d_min( 4.0,
-					   1.0 + 3.0 * ( double ) ( c->ppos[ Y ] - G.start[ Y ] ) /
-								                      ( double ) G1.y_axis.h );
+						 1.0 + 3.0 * ( double ) ( c->ppos[ Y ] - G.start[ Y ] )
+									   / ( double ) G1.y_axis.h );
 			else
 				cv->s2d[ Y ] /= d_min( 4.0,
-					   1.0 + 3.0 * ( double ) ( G.start[ Y ] - c->ppos[ Y ] ) /
-								                      ( double ) G1.y_axis.h );
+						 1.0 + 3.0 * ( double ) ( G.start[ Y ] - c->ppos[ Y ] )
+									   / ( double ) G1.y_axis.h );
 
-			cv->shift[ Y ] = ( ( double ) G1.canvas.h - 1.0 - G.start[ Y ] ) /
-				                                             cv->s2d[ Y ] - py;
+			cv->shift[ Y ] = ( ( double ) G1.canvas.h - 1.0 - G.start[ Y ] )
+							 / cv->s2d[ Y ] - py;
 
 			scale_changed = SET;
 		}
@@ -1356,13 +1356,13 @@ void repaint_canvas_1d( Canvas *c )
 				x_pos = G1.rwc_start[ X ] + G1.rwc_delta[ X ]
 					        * ( c->ppos[ X ] / cv->s2d[ X ] - cv->shift[ X ] );
 				y_pos = G1.rwc_start[ Y ] + G1.rwc_delta[ Y ]
-					      * ( ( ( double ) G1.canvas.h - 1.0 - c->ppos[ Y ] ) /
-									           cv->s2d[ Y ] - cv->shift[ Y ] );
+					    * ( ( ( double ) G1.canvas.h - 1.0 - c->ppos[ Y ] )
+							/ cv->s2d[ Y ] - cv->shift[ Y ] );
 
 				strcpy( buf, " x = " );
 				make_label_string( buf + 5, x_pos,
 								  irnd( floor( log10( fabs( G1.rwc_delta[ X ] )
-												    / cv->s2d[ X ] ) ) - 2 ) );
+													/ cv->s2d[ X ] ) ) - 2 ) );
 				strcat( buf, "   y = " );
 				make_label_string( buf + strlen( buf ), y_pos,
 							irnd( floor( log10( fabs(
