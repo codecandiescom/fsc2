@@ -554,7 +554,7 @@ static void rs690_basic_functions_check( void )
 static void rs690_create_phase_matrix( FUNCTION *f )
 {
 	PULSE *p;
-	PULSE **pm_entry;
+	PULSE **pm_elem;
 	int phase_type;
 	CHANNEL *ch;
 	int i, j, k, l, m;
@@ -617,19 +617,18 @@ static void rs690_create_phase_matrix( FUNCTION *f )
 
 			for ( k = 0; k < f->pc_len; k++ )
 			{
-				pm_entry = f->pm[ k * f->num_channels + l ];
+				pm_elem = f->pm[ k * f->num_channels + l ];
 
 				/* Find the end of the current pulse list, indicated
 				   by a NULL pointer */
 
-				for ( m = 0; pm_entry[ m ] != NULL && m < f->num_pulses;
-					  m++ )
+				for ( m = 0; m < f->num_pulses && pm_elem[ m ] != NULL; m++ )
 					/* empty */ ;
 
 				fsc2_assert( m < f->num_pulses );
 
-				pm_entry[ m ] = p;
-				pm_entry[ m + 1 ] = NULL;
+				pm_elem[ m ] = p;
+				pm_elem[ m + 1 ] = NULL;
 			}
 
 			continue;
@@ -666,21 +665,20 @@ static void rs690_create_phase_matrix( FUNCTION *f )
 
 			fsc2_assert( l < f->num_channels );
 
-			pm_entry = f->pm[ k * f->num_channels + l ];
+			pm_elem = f->pm[ k * f->num_channels + l ];
 
 			/* Find the end of the current pulse list, indicated by a NULL
 			   pointer */
 
-			for ( m = 0; pm_entry[ m ] != NULL && m < f->num_pulses;
-				  m++ )
+			for ( m = 0; m < f->num_pulses && pm_elem[ m ] != NULL; m++ )
 				/* empty */ ;
 
 			fsc2_assert( m < f->num_pulses );
 
 			/* Append the pulse to the current pulse list */
 
-			pm_entry[ m ] = p;
-			pm_entry[ m + 1 ] = NULL;
+			pm_elem[ m ] = p;
+			pm_elem[ m + 1 ] = NULL;
 		}
 	}
 }
@@ -693,7 +691,7 @@ static void rs690_setup_channels( void )
 {
 	CHANNEL *ch;
 	FUNCTION *f;
-	PULSE **pm_entry;
+	PULSE **pm_elem;
 	int i, j, k, l, m;
 	int field = 0,
 		bit = 0;
@@ -720,11 +718,11 @@ static void rs690_setup_channels( void )
 		{
 			/* Get phase matrix entry for current phase */
 
-			pm_entry = f->pm[ k * f->num_channels + l ];
+			pm_elem = f->pm[ k * f->num_channels + l ];
 
 			/* Count number of pulses for current phase */
 
-			for ( m = 0; pm_entry[ m ] != NULL; m++ )
+			for ( m = 0; m < f->num_pulses && pm_elem[ m ] != NULL; m++ )
 				/* empty */ ;
 
 			ch->num_pulses = i_max( ch->num_pulses, m );
@@ -779,7 +777,7 @@ static void rs690_pulse_start_setup( void )
 {
 	FUNCTION *f;
 	CHANNEL *ch;
-	PULSE **pm_entry;
+	PULSE **pm_elem;
 	PULSE *p;
 	int i, j, m;
 	PULSE_PARAMS *pp, *opp;
@@ -814,10 +812,11 @@ static void rs690_pulse_start_setup( void )
 				continue;
 			}
 
-			pm_entry = f->pm[ f->next_phase * f->num_channels + j ];
+			pm_elem = f->pm[ f->next_phase * f->num_channels + j ];
 
 			ch->num_active_pulses = 0;
-			for ( m = 0; ( p = pm_entry[ m ] ) != NULL; m++ )
+			for ( m = 0; m < f->num_pulses && ( p = pm_elem[ m ] ) != NULL;
+				  m++ )
 			{
 				if ( ! p->is_active )
 					continue;

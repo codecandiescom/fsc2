@@ -123,7 +123,8 @@ static bool rs690_update_pulses( bool flag )
 			pm_elem = f->pm[ f->next_phase * f->num_channels + j ];
 
 			ch->num_active_pulses = 0;
-			for ( m = 0; ( p = pm_elem[ m ] ) != NULL; m++ )
+			for ( m = 0; m < f->num_pulses && ( p = pm_elem[ m ] ) != NULL;
+				  m++ )
 				if ( p->is_active )
 				{
 					pp = ch->pulse_params + ch->num_active_pulses++;

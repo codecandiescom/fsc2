@@ -116,7 +116,7 @@ static bool ep385_update_pulses( bool flag )
 			pm_elem = f->pm[ f->next_phase * f->num_channels + j ];
 
 			for ( ch->num_active_pulses = 0, m = 0;
-				  ( p = pm_elem[ m ] ) != NULL; m++ )
+				  m < f->num_pulses && ( p = pm_elem[ m ] ) != NULL; m++ )
 			{
 				if ( ! p->is_active )
 					continue;
