@@ -1084,6 +1084,160 @@ Still to be written...
 @node Time-resolved EPR script, , ESEEM script, Example EDL Scripts
 @section Time-resolved EPR script
 
+The next script is one that has already been used extensively in
+experiments, so it's not just an example but for real. The field is
+swept over a certain field range and at each field point after a laser
+flash a trace is fetched from the digitizer (or, to be precise, after a
+certain number of traces has been averaged), which is then displayed and
+written to a file.
 
-Still to be written...
+@example
+ 1 DEVICES:
+ 2
+ 3 er035m_s;
+ 4 aeg_x_band;
+ 5 TDS754A;
+ 6
+ 7
+ 8 VARIABLES:
+ 9
+10 start_field = 3300 G;
+11 end_field   = 3500 G;
+12 field_step  = 1 G;
+13 Num_avg = 10;
+14
+15 field = start_field;
+16 N = int( abs( ( end_field - start_field ) / field_step ) ) + 1;
+17 I;
+18 curve[ * ];
+19 Rec_len;
+20 trig_pos;
+21 File;
+22 Pretrigger;
+23 background = 0.0;
+24
+25
+26 PREPARATIONS:
+27
+28 init_2d( 2, 0, N, 0, 1, start_field, field_step, "Time [µs]",
+29          "Field [G]", "Signal [mV] " );
+30 magnet_setup( start_field, field_step );
+31 digitizer_num_averages( Num_avg );
+32 digitizer_trigger_channel( AUX );
+33
+34
+35 EXPERIMENT:
+36
+37 Rec_len   = digitizer_record_length( );
+38 trig_pos  = digitizer_trigger_position( 0.1 );
+39 time_res  = digitizer_time_per_point( );
+40 Pretrigger = int( 0.9 * trig_pos * Rec_len );
+41
+42 change_scale( ( - trig_pos * Rec_len * time_res ) * 1.0e6,
+43               digitizer_time_per_point( ) * 1.0e6 );
+44
+45 File = get_file( );
+46 fsave( File, "% Start field     = # G\n"
+47              "% End field       = # G\n"
+48              "% Field step size = # G\n"
+49              "% Num. averages   = #\n"
+50              "% Time resolution = # us\n"
+51              "% Trigger pos.    = #\n"
+52              "% Record length   = #\n",
+53        start_field, end_field, field_step, Num_avg,
+54        digitizer_time_per_point( ) * 1.0e6,
+55        trig_pos * Rec_len, Rec_len );
+56 save_program( File, "% " );
+57 save_comment( File, "% " );
+58
+59
+60 FOR I = 1 : N {
+61     digitizer_start_acquisition( );
+62     curve = digitizer_get_curve( CH1 );
+63
+64     background = mean( curve, 1, Pretrigger );
+65
+66     display( 1, I, curve * 1.0e3, 1,
+67              1, I, ( curve - background ) * 1.0e3, 2 );
+68
+69     fsave( File, "\n% #.: Field = # G\n\n", I, field );
+70     save( File, curve );
+71
+72     field = sweep_up( );
+73 }
+@end example
 
+There aren't too many new things in this script. In the @code{DEVICES}
+section the modules for the gauusmeter, the field controller and the
+digitizer get loaded. In the @code{VARIABLES} section first the
+variables that get often changed are listed, i.e.@: the start and end
+field, the field step and the number of laser flashes to average over at
+each field. Then several other variables used during the experiment are 
+declared.
+
+In the @code{PREPARATIONS} section the graphics get initialized, we will
+display the averaged traces at each field point, so we need a 2D
+display. We're going to display 2 curves, one with the raw data and one
+where we try to do some background subtraction by taking the some points
+before the laser flash and subtracting their mean value from the
+curve. This should take care of slow drifts of the base line.
+
+We will display the time traces along the @i{i}-axis and have the
+@i{y}-axis as the field axis. Since we don't know yet the length of a
+trace we pass the @code{init_2d()} function a @code{0} as the number of
+points in @i{x}-direction. On the other hand we already calculated how
+many field points we're going to measure, so we can specify it. Also for
+the scaling of the @i{x}-axis we still have to pass the function some
+dummy values, because we know about them only after we have talked to
+the digitizer. But since we know the start field and the field step we
+can already set up the scaling for the @i{y}-axis.
+
+The initialization of the magnet in line 30 is straight forward again.
+After this we also set up the number of averages the digitizer is going
+to do and that the digitizer is supposed to receive its trigger from
+channel @code{AUX} (the trigger comes from a diode detecting the laser
+flash).
+
+Now the experiment already gets started. We ask the digitizer for the
+length of the traces and then set it to a pretrigger of 10% of the total
+curve length. Then we ask it again for the time resolution (i.e.@: the
+time difference between two points in a trace. Finally we calculate the
+number of points of the pretrigger phase (multiplied by 0.9 to avoid
+getting too near to the point where the laser flash comes in). This
+number is later used in the background subtraction.
+
+Since we now know the exact timing we can set up the scaling for the
+@i{x}-axis. We would like to have the laser flash at time 0, so we tell
+the program that the first point is at a negative time, the time before
+the laser flash.
+
+Before we finally start the experiment alll relevant parameters of the
+experiment get written to the output file. After obtaining a file via
+the @code{get_file()} function the start and end field and the the field
+step width, the number of averages, the time resolution, the trigger
+position and the length of the traces get written into the file as well
+as the text of the @code{EDL} script itself. Calling
+@code{save_comment()} allows the user to enter some further comments,
+like the name of the sample, the temerature etc.@: into the file.
+
+And now the experiment starts for real. Everything is done in a loop
+over all field points. At each field point we ask the digitizer to start
+an acquisistion (consisting of averaging over the number of traces
+specified above in the call of @code{digitizer_num_averages()} and then
+ask it for the curve it measured on channel @code{CH1}. For the
+background subtraction we calculate in line 64 the mean value of the
+first @code{Pretrigger} points of the measured curve, i.e.@: the
+points before the laser flash.
+
+Now we only have to display and store the new curve. In line 66 we
+display both the raw curve and the curve after background subtraction
+(in both cases multiplied by @code{1.0e-3} because we want to display
+the measured voltage in units uf milli-volts). 
+
+Before each new set of data we write the current field value into the
+file in line 69.  Storing the whole set of points of the trace is done
+by a simple call of @code{fsave()}, it will write all points one after
+each other into the file.
+
+Everything left to be done is sweeping the field to the next field
+value and the loop can start with the fetching the next curve.
