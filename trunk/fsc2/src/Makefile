@@ -35,7 +35,8 @@ fsc2: test $(objects)
 	$(CC) -o $@ $(objects) $(LIBS) $(LDFLAGS)
 
 test:
-	if [ `hostname --fqdn` = "pion.anorg.chemie.uni-frankfurt.de" ]; then \
+	if [ `hostname --fqdn` = "pion.anorg.chemie.uni-frankfurt.de" \
+		 -a -e gpib_old.c -a -e gpib_old.h ]; then \
 		mv gpib.c gpib_new.c; \
 		mv gpib.h gpib_new.h; \
 		mv gpib_old.c gpib.c; \
@@ -46,7 +47,8 @@ modules:
 	$(MAKE) -C ../modules all
 
 untest:
-	if [ `hostname --fqdn` = "pion.anorg.chemie.uni-frankfurt.de" ]; then \
+	if [ `hostname --fqdn` = "pion.anorg.chemie.uni-frankfurt.de" \
+		 -a -e gpib_new.c -a -e gpib_new.h]; then \
 		mv gpib.c gpib_old.c; \
 		mv gpib.h gpib_old.h; \
 		mv gpib_new.c gpib.c; \
