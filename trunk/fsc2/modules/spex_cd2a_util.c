@@ -25,13 +25,13 @@
 #include "spex_cd2a.h"
 
 
-/*---------------------------------------------------------------------*/
-/* Function for reading in the last stored state of the monochromator. */
-/* The state consists of the calibration offset value, the wavelength  */
-/* or wavenumber (depending on the type of the monochromator) spacing  */
-/* between pixels for the connected CCD camera and, for wavenumber     */
-/* driven monochromators, the position of the laser line.              */
-/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*
+ * Function for reading in the last stored state of the monochromator.
+ * The state consists of the calibration offset value, the wavelength
+ * or wavenumber (depending on the type of the monochromator) spacing
+ * between pixels for the connected CCD camera and, for wavenumber
+ * driven monochromators, the position of the laser line.
+ *---------------------------------------------------------------------*/
 
 bool spex_cd2a_read_state( void )
 {
@@ -152,9 +152,9 @@ bool spex_cd2a_read_state( void )
 }
 
 
-/*---------------------------------------------------------------*/
-/* Function for writing the state of teh monochromator to a file */
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ * Function for writing the state of teh monochromator to a file
+ *---------------------------------------------------------------*/
 
 bool spex_cd2a_store_state( void )
 {
@@ -204,31 +204,31 @@ bool spex_cd2a_store_state( void )
 }
 
 
-/*-------------------------------------------------------------*/
-/* All the following functions are for conversions. First we   */
-/* often have to convert between wavenumbers and wavelengths   */
-/* and vice versa, second we hsve to convert between absolute  */
-/* and relative wavenumbers (often depending on a laser line   */
-/* position being set) and between wavelengths and wavenumbers */
-/* as "seen" by the user (i.e. with calibratrion offset) and   */
-/* "seen" by the monochromator.                                */
-/* All function have names like spex_cd2a_xxx2yyy() where xxx  */
-/* represents what we're converting from and yyy to what the   */
-/* function converts. If xxx or yyy start with a 'S' it stands */
-/* for a value as "seen" by the monochromator, a 'U' stands    */
-/* a value as "seen" by the user. An following 'A' stands for  */
-/* an absolute wavenumber (there's no 'A' for wavelengths      */
-/* because they always are absolute values) while a 'M' indi-  */
-/* cates that the wavenumber is either an absolute value (when */
-/* no laser line has been set) or a relative value (if the     */
-/* laser line is set). 'wl' obviously stands for a wavelength  */
-/* and 'wn' for a wavenumber.                                  */
-/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*
+ * All the following functions are for conversions. First we
+ * often have to convert between wavenumbers and wavelengths
+ * and vice versa, second we hsve to convert between absolute
+ * and relative wavenumbers (often depending on a laser line
+ * position being set) and between wavelengths and wavenumbers
+ * as "seen" by the user (i.e. with calibratrion offset) and
+ * "seen" by the monochromator.
+ * All function have names like spex_cd2a_xxx2yyy() where xxx
+ * represents what we're converting from and yyy to what the
+ * function converts. If xxx or yyy start with a 'S' it stands
+ * for a value as "seen" by the monochromator, a 'U' stands
+ * a value as "seen" by the user. An following 'A' stands for
+ * an absolute wavenumber (there's no 'A' for wavelengths
+ * because they always are absolute values) while a 'M' indi-
+ * cates that the wavenumber is either an absolute value (when
+ * no laser line has been set) or a relative value (if the
+ * laser line is set). 'wl' obviously stands for a wavelength
+ * and 'wn' for a wavenumber.
+ *-------------------------------------------------------------*/
 
 
-/*---------------------------------------------------*/
-/* Converts a wavelength into an absolute wavenumber */
-/*---------------------------------------------------*/
+/*---------------------------------------------------*
+ * Converts a wavelength into an absolute wavenumber
+ *---------------------------------------------------*/
 
 double spex_cd2a_wl2Awn( double wl )
 {
@@ -238,9 +238,9 @@ double spex_cd2a_wl2Awn( double wl )
 }
 
 
-/*---------------------------------------------------*/
-/* Converts an absolute wavenumber into a wavelength */
-/*---------------------------------------------------*/
+/*---------------------------------------------------*
+ * Converts an absolute wavenumber into a wavelength
+ *---------------------------------------------------*/
 
 double spex_cd2a_Awn2wl( double wn )
 {
@@ -250,10 +250,10 @@ double spex_cd2a_Awn2wl( double wn )
 }
 
 
-/*-----------------------------------------------------------*/
-/* Converts from absolute wavenumber to absolute or relative */
-/* wavenumber (depending on the laser line being set).       */
-/*-----------------------------------------------------------*/
+/*-----------------------------------------------------------*
+ * Converts from absolute wavenumber to absolute or relative
+ * wavenumber (depending on the laser line being set).
+ *-----------------------------------------------------------*/
 
 double spex_cd2a_Awn2Mwn( double wn )
 {
@@ -263,10 +263,10 @@ double spex_cd2a_Awn2Mwn( double wn )
 }
 
 
-/*------------------------------------------------------------*/
-/* Converts absolute or relative wavenumber (depending on the */
-/* laser line being set) to absolute wavenumber.              */
-/*------------------------------------------------------------*/
+/*------------------------------------------------------------*
+ * Converts absolute or relative wavenumber (depending on the
+ * laser line being set) to absolute wavenumber.
+ *------------------------------------------------------------*/
 
 double spex_cd2a_Mwn2Awn( double wn )
 {
@@ -276,10 +276,10 @@ double spex_cd2a_Mwn2Awn( double wn )
 }
 
 
-/*-----------------------------------------------------------*/
-/* Converts a wavelength into either an absolute or relative */
-/* wavenumber, depending on a laser line having been set.    */
-/*-----------------------------------------------------------*/
+/*-----------------------------------------------------------*
+ * Converts a wavelength into either an absolute or relative
+ * wavenumber, depending on a laser line having been set.
+ *-----------------------------------------------------------*/
 
 double spex_cd2a_wl2Mwn( double wl )
 {
@@ -289,10 +289,10 @@ double spex_cd2a_wl2Mwn( double wl )
 }
 
 
-/*--------------------------------------------------------------------*/
-/* Converts from either an absolute or relative wavenumber, depending */
-/* on a laser line having been set, to a wavelength.                  */
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ * Converts from either an absolute or relative wavenumber, depending
+ * on a laser line having been set, to a wavelength.
+ *--------------------------------------------------------------------*/
 
 double spex_cd2a_Mwn2wl( double wn )
 {
@@ -303,10 +303,10 @@ double spex_cd2a_Mwn2wl( double wn )
 }
 
 
-/*---------------------------------------------------------*/
-/* Converts from a wavelength as seen by the monochromator */
-/* to a wavelength as seen by the user                     */
-/*---------------------------------------------------------*/
+/*---------------------------------------------------------*
+ * Converts from a wavelength as seen by the monochromator
+ * to a wavelength as seen by the user.
+ *---------------------------------------------------------*/
 
 double spex_cd2a_Swl2Uwl( double wl )
 {
@@ -318,10 +318,10 @@ double spex_cd2a_Swl2Uwl( double wl )
 }
 
 
-/*------------------------------------------------*/
-/* Converts from a wavelength as seen by the user */
-/* to a wavelength as seen by the monochromator   */
-/*------------------------------------------------*/
+/*------------------------------------------------*
+ * Converts from a wavelength as seen by the user
+ * to a wavelength as seen by the monochromator.
+ *------------------------------------------------*/
 
 double spex_cd2a_Uwl2Swl( double wl )
 {
@@ -333,10 +333,10 @@ double spex_cd2a_Uwl2Swl( double wl )
 }
 
 
-/*--------------------------------------------------------------*/
-/* Converts an absolute wavenumber as seen by the monochromator */
-/* to an absolute wavenumber as seen by the user                */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ * Converts an absolute wavenumber as seen by the monochromator
+ * to an absolute wavenumber as seen by the user.
+ *--------------------------------------------------------------*/
 
 double spex_cd2a_SAwn2UAwn( double wn )
 {
@@ -348,10 +348,10 @@ double spex_cd2a_SAwn2UAwn( double wn )
 }
 
 
-/*--------------------------------------------------------*/
-/* Converts an absolute wavenumber as seen by the user to */
-/* an absolute wavenumber as seen by the monochromator    */
-/*--------------------------------------------------------*/
+/*--------------------------------------------------------*
+ * Converts an absolute wavenumber as seen by the user to
+ * an absolute wavenumber as seen by the monochromator.
+ *--------------------------------------------------------*/
 
 double spex_cd2a_UAwn2SAwn( double wn )
 {
@@ -363,11 +363,11 @@ double spex_cd2a_UAwn2SAwn( double wn )
 }
 
 
-/*--------------------------------------------------------------*/
-/* Converts an absolute wavenumber as seen by the monochromator */
-/* to an absolute or relatibe wavenumber (depending on a laser  */
-/* line having been set) and as seen by the user                */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ * Converts an absolute wavenumber as seen by the monochromator
+ * to an absolute or relatibe wavenumber (depending on a laser
+ * line having been set) and as seen by the user.
+ *--------------------------------------------------------------*/
 
 double spex_cd2a_SAwn2UMwn( double wn )
 {
@@ -381,11 +381,11 @@ double spex_cd2a_SAwn2UMwn( double wn )
 }
 
 
-/*------------------------------------------------------------*/
-/* Converts an absolute or relative wavenumber (depending on  */
-/* the laser line being set) and as seen by the monochromator */
-/* to a wavenumber as seen by the user                        */
-/*------------------------------------------------------------*/
+/*------------------------------------------------------------*
+ * Converts an absolute or relative wavenumber (depending on
+ * the laser line being set) and as seen by the monochromator
+ * to a wavenumber as seen by the user.
+ *------------------------------------------------------------*/
 
 double spex_cd2a_SMwn2UMwn( double wn )
 {
@@ -400,11 +400,11 @@ double spex_cd2a_SMwn2UMwn( double wn )
 }
 
 
-/*---------------------------------------------------------*/
-/* Converts an absolute or relative wavenumber (depending  */
-/* on the laser line being set) and as seen by the user to */
-/* a wavenumber as seen by the monochromator               */
-/*---------------------------------------------------------*/
+/*---------------------------------------------------------*
+ * Converts an absolute or relative wavenumber (depending
+ * on the laser line being set) and as seen by the user to
+ * a wavenumber as seen by the monochromator.
+ *---------------------------------------------------------*/
 
 double spex_cd2a_UMwn2SMwn( double wn )
 {
@@ -419,11 +419,11 @@ double spex_cd2a_UMwn2SMwn( double wn )
 }
 
 
-/*---------------------------------------------------------------------*/
-/* Converts a wavelength as seen by the monochromator into an absolute */
-/* or relative wavenumber (depending on the laser line being set) as   */
-/* seen by the user.                                                   */
-/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*
+ * Converts a wavelength as seen by the monochromator into an absolute
+ * or relative wavenumber (depending on the laser line being set) as
+ * seen by the user.
+ *---------------------------------------------------------------------*/
 
 
 double spex_cd2a_Swl2UMwn( double wl )
@@ -432,11 +432,11 @@ double spex_cd2a_Swl2UMwn( double wl )
 }
 
 
-/*---------------------------------------------------------------------*/
-/* Converts an absolute or relative wavenumber (depending on the laser */
-/* line being set) and as seen by the user into an absolute wavenumber */
-/* as seen by the monochromator.                                       */
-/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*
+ * Converts an absolute or relative wavenumber (depending on the laser
+ * line being set) and as seen by the user into an absolute wavenumber
+ * as seen by the monochromator.
+ *---------------------------------------------------------------------*/
 
 double spex_cd2a_UMwn2SAwn( double wn )
 {
@@ -447,11 +447,11 @@ double spex_cd2a_UMwn2SAwn( double wn )
 }
 
 
-/*---------------------------------------------------------------------*/
-/* Converts an absolute or relative wavenumber (depending on the laser */
-/* line being set) and as seen by the user into a wavelength as seen   */
-/* by the monochromator.                                               */
-/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*
+ * Converts an absolute or relative wavenumber (depending on the laser
+ * line being set) and as seen by the user into a wavelength as seen
+ * by the monochromator.
+ *---------------------------------------------------------------------*/
 
 double spex_cd2a_UMwn2S2wl( double wn )
 {
@@ -460,9 +460,9 @@ double spex_cd2a_UMwn2S2wl( double wn )
 
 
 /*---------------------------------------------------------*/
-/* Converts a wavelength as seen by the monochromator into */
-/* an absolute wavenumber as seen by the monochromator     */
-/*---------------------------------------------------------*/
+ * Converts a wavelength as seen by the monochromator into */
+ * an absolute wavenumber as seen by the monochromator     */
+ *---------------------------------------------------------*/
 
 double spex_cd2a_Swl2UAwn( double wl )
 {
@@ -470,9 +470,9 @@ double spex_cd2a_Swl2UAwn( double wl )
 }
 
 
-/*-----------------------------------------------------*/
-/* Converts an absolute wavenumber as seen by the user */
-/* into a wavelength as seen by the monochromator      */
+/*-----------------------------------------------------*
+/* Converts an absolute wavenumber as seen by the user
+/* into a wavelength as seen by the monochromator.
 /*-----------------------------------------------------*/
 
 double spex_cd2a_UAwn2Swl( double wn )
@@ -481,11 +481,11 @@ double spex_cd2a_UAwn2Swl( double wn )
 }
 
 
-/*---------------------------------------------------------------------*/
-/* Converts an absolute or relative wavenumber (depending on the laser */
-/* line having been set) and as seen by the user into a wavelength as  */
-/* seen by the monochromator.                                          */
-/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*
+ * Converts an absolute or relative wavenumber (depending on the laser
+ * line having been set) and as seen by the user into a wavelength as
+ * seen by the monochromator.
+ *---------------------------------------------------------------------*/
 
 double spex_cd2a_UMwn2Swl( double wn )
 {
@@ -493,10 +493,10 @@ double spex_cd2a_UMwn2Swl( double wn )
 }
 
 
-/*--------------------------------------------------------------*/
-/* Converts an absolute wavenumber as seen by the monochromator */
-/* into a wavelength as seen by the user.                       */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ * Converts an absolute wavenumber as seen by the monochromator
+ * into a wavelength as seen by the user.
+ *--------------------------------------------------------------*/
 
 double spex_cd2a_SAwn2Uwl( double wn )
 {
