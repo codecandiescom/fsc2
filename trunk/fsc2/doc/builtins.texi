@@ -1327,17 +1327,20 @@ all the elements of an array) .
 Expects an one-dimensional array as input and returns the mean value of
 the array elements. Optionally, it accepts up to two more integer
 arguments, the start index of the first element of the array to be
-included into the calculation and the number of elements to use. If the
-length parameter is missing all elements up to the end of the array are
-used.
+included into the calculation and the number of elements to be used. If
+the length parameter is missing all elements up to the end of the array
+are used.
 
 
 @anchor{rms}
 @item rms()
 @findex rms()
 Expects an one-dimensional array as input and returns the square root of
-the sum of the squared array elements, divided by the number of elements.
-
+the sum of the squared array elements, divided by the number of
+elements.  Optionally, it accepts up to two more integer arguments, the
+index of the first element of the array to be included into the
+calculation and the number of elements to be uses. If the length
+parameter is missing all elements up to the end of the array are used.
 
 @anchor{sqrt}
 @item sqrt()
