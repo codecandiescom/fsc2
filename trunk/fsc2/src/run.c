@@ -101,6 +101,7 @@ bool run( void )
 		if ( need_GPIB )
 			gpib_shutdown( );
 		set_buttons_for_run( 1 );
+		stop_graphics( );
 		fl_set_cursor( FL_ObjWin( main_form->run ), XC_left_ptr );
 		return FAIL;
 	}
