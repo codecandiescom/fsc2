@@ -844,7 +844,7 @@ Var *monochromator_init_adjust( Var *v )
 			return vars_push( FLOAT_VAR,
 						 spectrapro_300i.grating[ grating - 1 ].init_gadjust );
 		return vars_push( FLOAT_VAR,
-						  spectrapro_300i_get_gadjust( grating )
+						  spectrapro_300i_get_adjust( grating )
 						  / INIT_ADJUST_RANGE );
 	}
 
@@ -860,9 +860,9 @@ Var *monochromator_init_adjust( Var *v )
 	too_many_arguments( v );
 
 	if ( FSC2_MODE == EXPERIMENT )
-		spectrapro_300i_init_gadjust( grating,
-									  lrnd( gadjust * INIT_ADJUST_RANGE
-											+ INIT_ADJUST ) );
+		spectrapro_300i_set_adjust( grating,
+									lrnd( gadjust * INIT_ADJUST_RANGE
+										  + INIT_ADJUST ) );
 
 	spectrapro_300i.grating[ grating - 1 ].init_gadjust = gadjust;
 
