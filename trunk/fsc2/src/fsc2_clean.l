@@ -460,7 +460,6 @@ int main( int argc, char *argv[ ] )
 	TRY
 	{
 		yylex( );
-		fclose( yyin );
 		TRY_SUCCESS;
 	}
 	CATCH( OUT_OF_MEMORY_EXCEPTION )
