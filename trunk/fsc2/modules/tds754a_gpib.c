@@ -464,7 +464,7 @@ bool tds754a_set_track_cursors( bool flag )
 
 bool tds754a_set_gated_meas( bool flag )
 {
-	char cmd[ 20 ] = "MEAS:GAT ";
+	char cmd[ 20 ] = "MEASU:GAT ";
 
 	strcat( cmd, flag ? "ON" : "OFF" );
     if ( gpib_write( tds754a.device, cmd, strlen( cmd ) ) == FAILURE )
