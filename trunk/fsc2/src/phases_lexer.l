@@ -286,7 +286,7 @@ int phases_parser( FILE *in )
 		THROW( EXCEPTION );
 	}
 	OTHERWISE
-		PASSTHROU( );
+		PASSTHROUGH( );
 
 	return Phases_Next_Section;
 }

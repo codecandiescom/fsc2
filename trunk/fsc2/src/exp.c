@@ -794,7 +794,7 @@ static void exp_syntax_check( void )
 	OTHERWISE
 	{
 		Fname = NULL;
-		PASSTHROU( )
+		PASSTHROUGH( );
 	}
 
 	Fname = NULL;
@@ -1014,7 +1014,7 @@ void exp_test_run( void )
 			
 		TEST_RUN = UNSET;
 		FSC2_MODE = PREPARATION;
-		PASSTHROU( )
+		PASSTHROUGH( );
 	}
 
 	Fname = NULL;

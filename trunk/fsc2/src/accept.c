@@ -86,7 +86,7 @@ void accept_new_data( void )
 		OTHERWISE
 		{
 			detach_shm( buf, &Message_Queue[ message_queue_low ].shm_id );
-			PASSTHROU( )
+			PASSTHROUGH( );
 		}
 
 		/* Detach from shared memory segment and remove it */

@@ -1336,7 +1336,7 @@ static long do_printf( int file_num, Var *v )
 	OTHERWISE
 	{
 		T_free( fmt_start );
-		PASSTHROU( )
+		PASSTHROUGH( );
 	}
 
 	T_free( fmt_start );
@@ -1632,7 +1632,7 @@ static int T_fprintf( int file_num, const char *fmt, ... )
 		OTHERWISE
 		{
 			T_free( p );
-			PASSTHROU( )
+			PASSTHROUGH( );
 		}
     }
 

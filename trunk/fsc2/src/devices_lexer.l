@@ -194,7 +194,7 @@ int devices_parser( FILE *in )
 
 		eprint( FATAL, SET, "Sorry, the DEVICES section has to be the very "
 				"first section.\n" );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION );
 	}
 
 	compilation.sections[ DEVICES_SECTION ] = SET;

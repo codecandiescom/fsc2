@@ -437,12 +437,12 @@ Var *func_call( Var *f )
 				eprint( FATAL, SET, "Function %s() from module %s.so messed "
 						"up the variable stack at %s:%d.\n", cur_func->name,
 						cur_func->device->name, __FILE__, __LINE__ );
-			PASSTHROU( )
+			PASSTHROUGH( );
 		}
 #endif
 		for ( ap = f; ap != NULL; ap = vars_pop( ap ) )
 			;
-		PASSTHROU( )
+		PASSTHROUGH( );
 	}
 
 	if ( --in_call == 0 )

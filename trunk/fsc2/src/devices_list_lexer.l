@@ -177,7 +177,7 @@ bool device_list_parse( void )
 	OTHERWISE
 	{
 		fclose( devices_listin );
-		PASSTHROU( )
+		PASSTHROUGH( );
 	}
 
 	fclose( devices_listin );

@@ -1027,7 +1027,7 @@ static void do_measurement( void )
 				THROW( EXCEPTION );
 		}
 		OTHERWISE
-			PASSTHROU( );
+			PASSTHROUGH( );
 	}
 }
 

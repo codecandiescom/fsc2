@@ -1321,16 +1321,14 @@ simple. If you run into an error that can't be handled by the module
 just use something like
 @example
 if ( non_recoverable_error )
-    THROW( EXCEPTION )
+    THROW( EXCEPTION );
 @end example
 @findex THROW()
 @findex EXCEPTION
 @noindent
-and @acronym{fsc2} will take care of all error handling (please note
-that there is no semicolon following the @code{THROW( EXCEPTION )}
-because @code{THROW} is defined as a block macro). That's all you need
-to know about exceptions for nearly all cases that have to be handled
-within modules.
+and @acronym{fsc2} will take care of all error handling. That's all you
+need to know about exceptions for nearly all cases that have to be
+dealt with in modules.
 
 
 @subsubsection More on programming with exceptions
@@ -1372,8 +1370,8 @@ instead.
 Finally, if you need to do some cleaning up but can not really deal
 with the error condition you can catch the exception using either
 @code{CATCH} or @code{OTHERWISE} and then re-throw the exception by calling
-@code{PASSTHROU()}
-@findex PASSTHROU()
+@code{PASSTHROUGH()}
+@findex PASSTHROUGH()
 to pass it on to higher level routines that are supposed to take care of
 the problem. Here's some example code
 @example
@@ -1385,11 +1383,9 @@ TRY
 OTHERWISE
 @{
     do_cleanup();       /* e.g. deallocate memory */
-    PASSTHROU()
+    PASSTHROUGH();
 @}
 @end example
-Please note that also @code{PASSTHROU()} does not need to be followed by
-a semicolon because it is also a block macro.
 
 There is a caveat when using exceptions: The values of non-static
 automatic variables may differ from the values they were set to after an
@@ -1432,13 +1428,13 @@ is tested, and if set, an @code{USER_BREAK_EXCEPTION} is thrown:
 do
 @{
     if ( DO_STOP )
-        THROW( USER_BREAK_EXCEPTION )
+        THROW( USER_BREAK_EXCEPTION );
 
     length = 40;
     usleep( 100000 );
     if ( gpib_write( tds754a.device, "BUSY?\n", 6 ) == FAILURE ||
          gpib_read_w( tds754a.device, reply, &length ) == FAILURE )
-        THROW( EXCEPTION )
+        THROW( EXCEPTION );
 @} while ( reply[ 0 ] == '1' ); 
 @end example
 

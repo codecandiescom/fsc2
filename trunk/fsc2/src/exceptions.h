@@ -104,7 +104,7 @@ enum {
 #define OTHERWISE \
     else
 
-#define PASSTHROU( ) \
+#define PASSTHROUGH( ) \
     THROW( exception_id )
 
 #define THROW( e ) \

@@ -189,7 +189,7 @@ size_t func_list_parse( Func **fncts, size_t num_func )
 	OTHERWISE
 	{
 		fclose( func_listin );
-		PASSTHROU( )
+		PASSTHROUGH( );
 	}
 
 	/* If no functions were found return immediately */
@@ -229,7 +229,7 @@ size_t func_list_parse( Func **fncts, size_t num_func )
 	OTHERWISE
 	{
 		fclose( func_listin );
-		PASSTHROU( )
+		PASSTHROUGH( );
 	}
 
 	fclose( func_listin );

@@ -423,12 +423,12 @@ Var *boxcar_get_curve( Var *v )
 		if ( old_timo > 0 )
 			gpib_timeout( egg4402.device, old_timo );
 		T_free( buffer );
-		PASSTHROU( )
+		PASSTHROUGH( );
 	}
 	CATCH( EXCEPTION )
 	{
 		T_free( buffer );
-		PASSTHROU( )
+		PASSTHROUGH( );
 	}
 
 	/* Get a buffer for the data in binary form and convert the ASCII data */
