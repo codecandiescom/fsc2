@@ -342,8 +342,6 @@ static void rs690_create_twt_pulses( void )
 			 ! f->uses_auto_twt_pulses )
 			continue;
 
-		tpf->has_auto_twt_pulses = SET;
-
 		np = PULSE_P T_malloc( sizeof *np );
 
 		np->prev = cp;
@@ -466,7 +464,7 @@ static void rs690_basic_functions_check( void )
 
 	if ( rs690.neg_delay )
 	{
-		delay = LONG_MIN;
+		delay = LONG_MAX;
 
 		for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 			if ( rs690.function[ i ].is_used &&
@@ -830,7 +828,8 @@ static void rs690_channel_start_check( CHANNEL *ch )
 		   sizeof *ch->pulse_params, rs690_pulse_compare );
 
 	rs690_shape_padding_check_1( ch );
-	rs690_twt_padding_check( ch );
+	if ( ch->function->self == PULSER_CHANNEL_TWT )
+		rs690_twt_padding_check( ch );
 }
 
 

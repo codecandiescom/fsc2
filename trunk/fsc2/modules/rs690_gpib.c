@@ -31,13 +31,19 @@ static void rs690_calc_tables( void );
 static void rs690_table_set( int i, int k, FS *n );
 static void rs690_gpib_failure( void );
 static void rs690_check( void );
+static int rs690_write( int device_no, const char *s, long len );
 
 
 #define UNUSED_BIT -1
 
 
-#if 0
-#define gpib_write( a, b, c ) fprintf( stderr, "%s\n", ( b ) )
+#ifdef RS690_GPIB_DEBUG
+#warning "**********************************"
+#warning "rs690.so made for DEBUG mode only!"
+#warning "**********************************"
+
+#define gpib_write( a, b, c ) ( fprintf( stderr, "%s\n", ( b ) ), SUCCESS )
+#define gpib_read( a, b, c ) ( SUCCESS )
 #define gpib_init_device( a, b ) 1
 #endif
 
@@ -49,8 +55,12 @@ static void rs690_check( void );
 bool rs690_init( const char *name )
 {
 	char cmd[ 100 ];
+#ifndef RS690_GPIB_DEBUG
 	char reply[ 100 ];
 	long length = 100;
+#else
+	name = name;
+#endif
 
 
 	if ( gpib_init_device( name, &rs690.device ) == FAILURE )
@@ -59,7 +69,7 @@ bool rs690_init( const char *name )
 	/* Try to read the device indentification string to check if the pulser
 	   responds. */
 
-	if ( gpib_write( rs690.device, "RUI!", 4 ) == FAILURE ||
+	if ( rs690_write( rs690.device, "RUI!", 4 ) == FAILURE ||
 		 gpib_read( rs690.device, reply, &length ) == FAILURE )
 		rs690_gpib_failure( );
 
@@ -73,7 +83,7 @@ bool rs690_init( const char *name )
 	   (the number depends on the timebase) */
 
 	sprintf( cmd, "LOM0,TS,%d!", ( 4 << rs690.timebase_type ) );
-	if ( gpib_write( rs690.device, cmd, strlen( cmd ) ) == FAILURE )
+	if ( rs690_write( rs690.device, cmd, strlen( cmd ) ) == FAILURE )
 		rs690_gpib_failure( );
 
 	/* Set the clock source mode - currently we only support either internal
@@ -81,7 +91,7 @@ bool rs690_init( const char *name )
 
 	sprintf( cmd, "LCK,%c!", rs690.timebase_mode == INTERNAL ? '0' :
 			 ( rs690.timebase_level == ECL_LEVEL ? '1' : '2' ) );
-	if ( gpib_write( rs690.device, cmd, strlen( cmd ) ) == FAILURE )
+	if ( rs690_write( rs690.device, cmd, strlen( cmd ) ) == FAILURE )
 		rs690_gpib_failure( );
 
 	/* Set the trigger mode and slope */
@@ -90,23 +100,23 @@ bool rs690_init( const char *name )
 	{
 		sprintf( cmd, "LET,%c!",
 				 rs690.trig_in_level_type == ECL_LEVEL ? '0' : '1' );
-		if ( gpib_write( rs690.device, cmd, 6 ) == FAILURE )
+		if ( rs690_write( rs690.device, cmd, 6 ) == FAILURE )
 			rs690_gpib_failure( );
 
 		if( rs690.is_trig_in_slope )
 		{
 			sprintf( cmd,
 					 "LTE,%c!", rs690.trig_in_slope == POSITIVE ? '0' : '1' );
-			if ( gpib_write( rs690.device, cmd, strlen( cmd ) ) == FAILURE )
+			if ( rs690_write( rs690.device, cmd, strlen( cmd ) ) == FAILURE )
 				rs690_gpib_failure( );
 		}
 	}
-	else if ( gpib_write( rs690.device, "LET,0!", 6 ) == FAILURE )
+	else if ( rs690_write( rs690.device, "LET,0!", 6 ) == FAILURE )
 		rs690_gpib_failure( );
 
 	/* Switch off use of an external gate */
 
-	if ( gpib_write( rs690.device, "LEG,0!", 6 ) == FAILURE )
+	if ( rs690_write( rs690.device, "LEG,0!", 6 ) == FAILURE )
 		rs690_gpib_failure( );
 
 	/* Make the association between the fields bits and the output connector
@@ -127,11 +137,11 @@ bool rs690_init( const char *name )
 
 bool rs690_run( bool state )
 {
-	if ( gpib_write( rs690.device, state ? "RUN!" : "RST!" , 4 ) == FAILURE )
+	if ( rs690_write( rs690.device, state ? "RUN!" : "RST!" , 4 ) == FAILURE )
 		rs690_gpib_failure( );
 
 	if ( state && rs690.trig_in_mode == INTERNAL &&
-		 gpib_write( rs690.device, "TRG!", 4 ) == FAILURE )
+		 rs690_write( rs690.device, "TRG!", 4 ) == FAILURE )
 		rs690_gpib_failure( );
 
 	rs690.is_running = state;
@@ -146,7 +156,7 @@ bool rs690_run( bool state )
 
 bool rs690_lock_state( bool lock )
 {
-	if ( gpib_write( rs690.device, lock ? "LOC!" : "LCL!", 4 ) == FAILURE )
+	if ( rs690_write( rs690.device, lock ? "LOC!" : "LCL!", 4 ) == FAILURE )
 		rs690_gpib_failure( );
 
 	return OK;
@@ -230,7 +240,7 @@ static bool rs690_field_channel_setup( void )
 
 		strcat( buf, "!" );
 
-		if ( gpib_write( rs690.device, buf, strlen( buf ) ) == FAILURE )
+		if ( rs690_write( rs690.device, buf, strlen( buf ) ) == FAILURE )
 			rs690_gpib_failure( );
 	}
 
@@ -240,7 +250,7 @@ static bool rs690_field_channel_setup( void )
 	for ( ; i < 4 * NUM_HSM_CARDS; i++ )
 	{
 		sprintf( buf, "LFD,FL%d,OFF!", i );
-		if ( gpib_write( rs690.device, buf, strlen( buf ) ) == FAILURE )
+		if ( rs690_write( rs690.device, buf, strlen( buf ) ) == FAILURE )
 			rs690_gpib_failure( );
 	}
 
@@ -273,7 +283,7 @@ bool rs690_set_channels( void )
 	if ( rs690.new_fs_count != rs690.old_fs_count )
 	{
 		sprintf( buf, "LTD,T0,%d,T1,1,T2,1!", rs690.new_fs_count );
-		if ( gpib_write( rs690.device, buf, strlen( buf ) ) == FAILURE )
+		if ( rs690_write( rs690.device, buf, strlen( buf ) ) == FAILURE )
 			rs690_gpib_failure( );
 	}
 
@@ -288,7 +298,7 @@ bool rs690_set_channels( void )
 				 rs690.trig_in_mode == EXTERNAL ? "1" : "CONT",
 				 rs690.new_table.table_loops_1, rs690.new_table.middle_loops,
 				 rs690.new_table.table_loops_2 );
-		if ( gpib_write( rs690.device, buf, strlen( buf ) ) == FAILURE )
+		if ( rs690_write( rs690.device, buf, strlen( buf ) ) == FAILURE )
 			rs690_gpib_failure( );
 	}
 
@@ -329,7 +339,7 @@ static bool rs690_init_channels( void )
 	   (each with just one word) to make up for the repetition time */
 
 	sprintf( buf, "LTD,T0,%d,T1,1,T2,1!", rs690.new_fs_count );
-	if ( gpib_write( rs690.device, buf, strlen( buf ) ) == FAILURE )
+	if ( rs690_write( rs690.device, buf, strlen( buf ) ) == FAILURE )
 		rs690_gpib_failure( );
 
 	/* Make the sequence and set the loop counts for the tables */
@@ -338,7 +348,7 @@ static bool rs690_init_channels( void )
 			 rs690.trig_in_mode == EXTERNAL ? "1" : "CONT",
 			 rs690.new_table.table_loops_1, rs690.new_table.middle_loops,
 			 rs690.new_table.table_loops_2 );
-	if ( gpib_write( rs690.device, buf, strlen( buf ) ) == FAILURE )
+	if ( rs690_write( rs690.device, buf, strlen( buf ) ) == FAILURE )
 		rs690_gpib_failure( );
 
 	/* Now set all the tables */
@@ -362,7 +372,7 @@ static bool rs690_init_channels( void )
 					 rs690_default_fields[ i ],
 					 MAX_TICKS_PER_ENTRY * ( 4 << rs690.timebase_type ) );
 
-			if ( gpib_write( rs690.device, buf, strlen( buf ) ) == FAILURE )
+			if ( rs690_write( rs690.device, buf, strlen( buf ) ) == FAILURE )
 				rs690_gpib_failure( );
 		}
 	}
@@ -467,7 +477,7 @@ static void rs690_table_set( int i, int k, FS *n )
 			fsc2_assert( 1 == 0 );
 	}
 
-	if ( gpib_write( rs690.device, buf, strlen( buf ) ) == FAILURE )
+	if ( rs690_write( rs690.device, buf, strlen( buf ) ) == FAILURE )
 		rs690_gpib_failure( );
 }
 
@@ -490,13 +500,32 @@ static void rs690_gpib_failure( void )
 
 static void rs690_check( void )
 {
+#ifndef RS690_GPIB_DEBUG
 	char b[ 100 ];
 	long l = 100;
 
 
-	if ( gpib_write( rs690.device, "RCS!", 4 ) == FAILURE ||
-		 gpib_read( rs690.device, b, &l ) == FAILURE )
-		rs690_gpib_failure( );
+	if ( gpib_write( rs690.device, "RCS!", 4 ) != FAILURE )
+		gpib_read( rs690.device, b, &l );
+#endif
+}
+
+
+/*--------------------------------------*/
+/*--------------------------------------*/
+
+static int rs690_write( int device_no, const char *s, long len )
+{
+#ifdef RS690_GPIB_DEBUG
+	device_no = device_no;
+	len = len;
+#endif
+
+	if ( gpib_write( device_no, s, len ) == FAILURE &&
+		 gpib_status & GPIB_TIMO &&
+		 gpib_write( device_no, s, len ) == FAILURE )
+		return FAILURE;
+	return SUCCESS;
 }
 
 

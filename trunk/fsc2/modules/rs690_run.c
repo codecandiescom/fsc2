@@ -161,7 +161,8 @@ static bool rs690_update_pulses( bool flag )
 				   sizeof *ch->pulse_params, rs690_pulse_compare );
 
 			rs690_shape_padding_check_1( ch );
-			rs690_twt_padding_check( ch );
+			if ( ch->function->self == PULSER_CHANNEL_TWT )
+				rs690_twt_padding_check( ch );
 
 			/* Compare old and new state, if nothing changed, i.e. the number
 			   of active pulses is the same and all positions and lengths are
@@ -562,7 +563,8 @@ void rs690_full_reset( void )
 				   sizeof *ch->pulse_params, rs690_pulse_compare );
 
 			rs690_shape_padding_check_1( ch );
-			rs690_twt_padding_check( ch );
+			if ( ch->function->self == PULSER_CHANNEL_TWT )
+				rs690_twt_padding_check( ch );
 		}
 	}
 
@@ -699,10 +701,7 @@ void rs690_twt_padding_check( CHANNEL *ch )
 	PULSE_PARAMS *pp, *ppp;
 	int i;
 
-	if ( ch->function->self != PULSER_CHANNEL_TWT ||
-		 ! ch->function->has_auto_twt_pulses ||
-		 ch->num_active_pulses == 0 )
-		return;
+	fsc2_assert( ch->function->self == PULSER_CHANNEL_TWT );
 
 	/* Check that first TWT pulse doesn't start too early (this only can
 	   happen for automatically created pulses) */
@@ -1232,7 +1231,7 @@ void rs690_check_fs( void )
 	   combine them (this can happen if e.g. the distance between two pulses
 	   is zero). */
 
-	for ( n = rs690.new_fs; n->next != NULL; n = n->next )
+	for ( n = rs690.new_fs; n != NULL && n->next != NULL; n = n->next )
 		while ( n->next != NULL &&
 				! memcmp( n->fields, n->next->fields, sizeof n->fields ) )
 		{

@@ -28,10 +28,14 @@
 static void ep385_gpib_failure( void );
 
 
-/*
+#ifdef EP385_GPIB_DEBUG
+#warning "**********************************"
+#warning "ep385.so made for DEBUG mode only!"
+#warning "**********************************"
+
 #define gpib_write( a, b, c ) fprintf( stderr, "%s\n", ( b ) )
 #define gpib_init_device( a, b ) 1
-*/
+#endif
 
 
 /*----------------------------------------------------------------*/
@@ -41,6 +45,10 @@ bool ep385_init( const char *name )
 {
 	char cmd[ 100 ];
 
+
+#ifdef EP385_GPIB_DEBUG
+	name = name;
+#endif
 
 	if ( gpib_init_device( name, &ep385.device ) == FAILURE )
 		return FAIL;

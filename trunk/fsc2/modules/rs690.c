@@ -166,7 +166,6 @@ int rs690_init_hook( void )
 		f->next_phase = 0;
 		f->uses_auto_shape_pulses = UNSET;
 		f->uses_auto_twt_pulses = UNSET;
-		f->has_auto_twt_pulses = UNSET;
 		for ( j = 0; j <= MAX_CHANNELS; j++ )
 			f->channel[ j ] = NULL;
 		f->max_len = 0;
@@ -241,9 +240,9 @@ int rs690_test_hook( void )
 
 int rs690_end_of_test_hook( void )
 {
-	int i;
-	FUNCTION *f;
-	char *min;
+	static int i;
+	static FUNCTION *f;
+	static char *min = NULL;
 
 
 	if ( rs690.dump_file != NULL )
@@ -303,11 +302,14 @@ int rs690_end_of_test_hook( void )
 		 rs690.defense_2_shape_too_near != 0 )
 		THROW( EXCEPTION );
 
+	/* Tell the user if there had been problems with shape pulses */
+
 	if ( rs690.left_shape_warning != 0 )
 	{
-		print( SEVERE, "For %ld times left padding for a pulse with "
+		print( SEVERE, "For %ld time%s left padding for a pulse with "
 			   "automatic shape pulse couldn't be set.\n",
-			   rs690.left_shape_warning );
+			   rs690.left_shape_warning,
+			   rs690.left_shape_warning == 1 ? "" : "s" );
 
 		for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 		{
@@ -317,17 +319,34 @@ int rs690_end_of_test_hook( void )
 				 f->left_shape_padding <= f->min_left_shape_padding )
 				continue;
 
-			min = T_strdup( rs690_pticks( f->min_left_shape_padding ) );
-			print( SEVERE, "Minimum left padding for function '%s' was %s "
-				   "instead of requested %s.\n", f->name,
-				   min, rs690_pticks( f->left_shape_padding ) );
-			T_free( min );
+			TRY
+			{
+				min = T_strdup( rs690_pticks( f->min_left_shape_padding ) );
+				print( SEVERE, "Minimum left padding for function '%s' was %s "
+					   "instead of requested %s.\n", f->name,
+					   min, rs690_pticks( f->left_shape_padding ) );
+			}
+			OTHERWISE
+			{
+				min = CHAR_P T_free( min );
+				RETHROW( );
+			}
+
+			min = CHAR_P T_free( min );
 		}
 	}
 
-	if ( rs690.twt_distance_warning )
-		print( SEVERE, "Distance between TWT pulses was %ld times shorter "
+	/* Tell the user if there had been problems with TWT pulses */
+
+	if ( rs690.left_twt_warning != 0 )
+		print( SEVERE, "For %ld time%s a pulse was too early to allow correct "
+			   "setting of its TWT pulse.\n", rs690.left_twt_warning,
+			   rs690.left_twt_warning == 1 ? "" : "s" );
+
+	if ( rs690.twt_distance_warning != 0 )
+		print( SEVERE, "Distance between TWT pulses was %ld time%s shorter "
 			   "than %s.\n", rs690.twt_distance_warning,
+			   rs690.twt_distance_warning == 1 ? "" : "s",
 			   rs690_pticks( rs690.minimum_twt_pulse_distance ) );
 
 	rs690_cleanup_fs( );
@@ -518,7 +537,7 @@ Var *pulser_name( Var *v )
 Var *pulser_automatic_shape_pulses( Var *v )
 {
 	long func;
-	double dl, dr;
+	double dl, dr, tmp;
 
 
 	/* We need at least one argument, the function shape pulse are to be
@@ -603,15 +622,21 @@ Var *pulser_automatic_shape_pulses( Var *v )
 													  rs690_double2ticks( dr );
 		}
 		else
-			rs690.function[ func ].right_shape_padding =
-				 Ticksrnd( ceil( AUTO_SHAPE_RIGHT_PADDING / rs690.timebase ) );
+		{
+			tmp = AUTO_SHAPE_RIGHT_PADDING / rs690.timebase;
+			tmp = tmp - floor( tmp ) > 0.01 ? ceil( tmp ) : floor( tmp );
+			rs690.function[ func ].right_shape_padding = Ticksrnd( tmp );
+		}
 	}
 	else
 	{
-		rs690.function[ func ].left_shape_padding =
-				  Ticksrnd( ceil( AUTO_SHAPE_LEFT_PADDING / rs690.timebase ) );
-		rs690.function[ func ].right_shape_padding =
-				 Ticksrnd( ceil( AUTO_SHAPE_RIGHT_PADDING / rs690.timebase ) );
+		tmp = AUTO_SHAPE_LEFT_PADDING / rs690.timebase;
+		tmp = tmp - floor( tmp ) > 0.01 ? ceil( tmp ) : floor( tmp );
+		rs690.function[ func ].left_shape_padding = Ticksrnd( tmp );
+
+		tmp = AUTO_SHAPE_RIGHT_PADDING / rs690.timebase;
+		tmp = tmp - floor( tmp ) > 0.01 ? ceil( tmp ) : floor( tmp );
+		rs690.function[ func ].right_shape_padding = Ticksrnd( tmp );
 	}
 
 	too_many_arguments( v );
@@ -631,7 +656,7 @@ Var *pulser_automatic_shape_pulses( Var *v )
 Var *pulser_automatic_twt_pulses( Var *v )
 {
 	long func;
-	double dl, dr;
+	double dl, dr, tmp;
 
 
 	/* We need at least one argument, the function TWT pulse are to be
@@ -716,15 +741,21 @@ Var *pulser_automatic_twt_pulses( Var *v )
 													  rs690_double2ticks( dr );
 		}
 		else
-			rs690.function[ func ].right_twt_padding =
-				   Ticksrnd( ceil( AUTO_TWT_RIGHT_PADDING / rs690.timebase ) );
+		{
+			tmp = AUTO_TWT_RIGHT_PADDING / rs690.timebase;
+			tmp = tmp - floor( tmp ) > 0.01 ? ceil( tmp ) : floor( tmp );
+			rs690.function[ func ].right_twt_padding = Ticksrnd( tmp );
+		}
 	}
 	else
 	{
-		rs690.function[ func ].left_twt_padding =
-					Ticksrnd( ceil( AUTO_TWT_LEFT_PADDING / rs690.timebase ) );
-		rs690.function[ func ].right_twt_padding =
-				   Ticksrnd( ceil( AUTO_TWT_RIGHT_PADDING / rs690.timebase ) );
+		tmp = AUTO_TWT_LEFT_PADDING / rs690.timebase;
+		tmp = tmp - floor( tmp ) > 0.01 ? ceil( tmp ) : floor( tmp );
+		rs690.function[ func ].left_twt_padding = Ticksrnd( tmp );
+
+		tmp = AUTO_TWT_RIGHT_PADDING / rs690.timebase;
+		tmp = tmp - floor( tmp ) > 0.01 ? ceil( tmp ) : floor( tmp );
+		rs690.function[ func ].right_twt_padding = Ticksrnd( tmp );
 	}
 
 	too_many_arguments( v );

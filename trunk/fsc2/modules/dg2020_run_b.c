@@ -784,6 +784,9 @@ void dg2020_set_pulses( FUNCTION *f )
 
 	/* Now simply run through all active pulses of the channel */
 
+	if ( f->num_pulses == 0 )
+		return;
+
 	for ( p = f->pulses[ 0 ], i = 0; i < f->num_pulses && p->is_active;
 		  p = f->pulses[ ++i ] )
 	{

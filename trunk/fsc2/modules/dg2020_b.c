@@ -259,6 +259,11 @@ int dg2020_b_test_hook( void )
 
 int dg2020_b_end_of_test_hook( void )
 {
+	static char *min = NULL;
+	static int i;
+	static FUNCTION *f;
+
+
 	if ( ! dg2020_is_needed || dg2020.is_cw_mode )
 		return 1;
 
@@ -279,23 +284,107 @@ int dg2020_b_end_of_test_hook( void )
 
 	if ( dg2020.shape_2_defense_too_near != 0 )
 		print( FATAL, "Distance between PULSE_SHAPE and DEFENSE pulses was "
-			   "%ld times shorter than %s during the test run.\n",
+			   "%ld time%s shorter than %s during the test run.\n",
 			   dg2020.shape_2_defense_too_near,
+			   dg2020.shape_2_defense_too_near == 1 ? "" : "s",
 			   dg2020_pticks( dg2020.shape_2_defense ) );
 
 	if ( dg2020.defense_2_shape_too_near != 0 )
 		print( FATAL, "Distance between DEFENSE and PULSE_SHAPE pulses was "
-			   "%ld times shorter than %s during the test run.\n",
+			   "%ld time%s shorter than %s during the test run.\n",
 			   dg2020.defense_2_shape_too_near,
+			   dg2020.defense_2_shape_too_near == 1 ? "" : "s",
 			   dg2020_pticks( dg2020.defense_2_shape ) );
 
 	if ( dg2020.shape_2_defense_too_near != 0 ||
 		 dg2020.defense_2_shape_too_near != 0 )
 		THROW( EXCEPTION );
 
-	if ( dg2020.twt_distance_warning )
-		print( SEVERE, "Distance between TWT pulses was %ld times shorter "
+	/* Tell the user if there had been problems with shape pulses */
+
+	if ( dg2020.left_shape_warning != 0 )
+	{
+		print( SEVERE, "For %ld time%s left padding for a pulse with "
+			   "automatic shape pulse couldn't be set.\n",
+			   dg2020.left_shape_warning,
+			   dg2020.left_shape_warning == 1 ? "" : "s" );
+
+		for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
+		{
+			f = dg2020.function + i;
+
+			if ( ! f->uses_auto_shape_pulses ||
+				 f->left_shape_padding <= f->min_left_shape_padding )
+				continue;
+
+			TRY
+			{
+				min = T_strdup( dg2020_pticks( f->min_left_shape_padding ) );
+				print( SEVERE, "Minimum left padding for function '%s' was %s "
+					   "instead of requested %s.\n", f->name,
+					   min, dg2020_pticks( f->left_shape_padding ) );
+				TRY_SUCCESS;
+			}
+			OTHERWISE
+			{
+				min = CHAR_P T_free( min );
+				RETHROW( );
+			}
+
+			min = CHAR_P T_free( min );
+		}
+	}
+
+	if ( dg2020.right_shape_warning != 0 )
+	{
+		print( SEVERE, "For %ld time%s right padding for a pulse with "
+			   "automatic shape pulse couldn't be set.\n",
+			   dg2020.left_shape_warning,
+			   dg2020.left_shape_warning == 1 ? "" : "s" );
+
+		for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
+		{
+			f = dg2020.function + i;
+
+			if ( ! f->uses_auto_shape_pulses ||
+				 f->right_shape_padding <= f->min_right_shape_padding )
+				continue;
+
+			TRY
+			{
+				min = T_strdup( dg2020_pticks( f->min_right_shape_padding ) );
+				print( SEVERE, "Minimum right padding for function '%s' was "
+					   "%s instead of requested %s.\n", f->name,
+					   min, dg2020_pticks( f->right_shape_padding ) );
+				TRY_SUCCESS;
+			}
+			OTHERWISE
+			{
+				min = CHAR_P T_free( min );
+				RETHROW( );
+			}
+
+			min = CHAR_P T_free( min );
+		}
+	}
+
+	/* Tell the user if there had been problems with TWT pulses */
+
+	if ( dg2020.left_twt_warning != 0 )
+		print( SEVERE, "For %ld time%s a pulse was too early to allow correct "
+			   "setting of its TWT pulse.\n", dg2020.left_twt_warning,
+			   dg2020.left_twt_warning == 1 ? "" : "s" );
+
+	if ( dg2020.right_twt_warning != 0 )
+		print( SEVERE, "For %ld time%s a pulse was too late or too long to "
+			   "allow correct setting of its TWT pulse.\n",
+			   dg2020.right_twt_warning,
+			   dg2020.right_twt_warning == 1 ? "" : "s" );
+
+	if ( dg2020.twt_distance_warning != 0 )
+		print( SEVERE, "Distance between TWT pulses was %ld time%s shorter "
 			   "than %s.\n", dg2020.twt_distance_warning,
+			   dg2020.twt_distance_warning == 1 ? "" : "s",
 			   dg2020_pticks( dg2020.minimum_twt_pulse_distance ) );
 
 	/* Now we have to reset the internal representation back to its initial
@@ -471,7 +560,7 @@ Var *pulser_name( Var *v )
 Var *pulser_automatic_shape_pulses( Var *v )
 {
 	long func;
-	double dl, dr;
+	double dl, dr, tmp;
 
 
 	/* We need at least one argument, the function shape pulse are to be
@@ -556,15 +645,21 @@ Var *pulser_automatic_shape_pulses( Var *v )
 													 dg2020_double2ticks( dr );
 		}
 		else
-			dg2020.function[ func ].right_shape_padding =
-				Ticksrnd( ceil( AUTO_SHAPE_RIGHT_PADDING / dg2020.timebase ) );
+		{
+			tmp = AUTO_SHAPE_RIGHT_PADDING / dg2020.timebase;
+			tmp = tmp - floor( tmp ) > 0.01 ? ceil( tmp ) : floor( tmp );
+			dg2020.function[ func ].right_shape_padding = Ticksrnd( tmp );
+		}
 	}
 	else
 	{
-		dg2020.function[ func ].left_shape_padding =
-				Ticksrnd( ceil( AUTO_SHAPE_LEFT_PADDING / dg2020.timebase ) );
-		dg2020.function[ func ].right_shape_padding =
-				Ticksrnd( ceil( AUTO_SHAPE_RIGHT_PADDING / dg2020.timebase ) );
+		tmp = AUTO_SHAPE_LEFT_PADDING / dg2020.timebase;
+		tmp = tmp - floor( tmp ) > 0.01 ? ceil( tmp ) : floor( tmp );
+		dg2020.function[ func ].left_shape_padding = Ticksrnd( tmp );
+
+		tmp = AUTO_SHAPE_RIGHT_PADDING / dg2020.timebase;
+		tmp = tmp - floor( tmp ) > 0.01 ? ceil( tmp ) : floor( tmp );
+		dg2020.function[ func ].right_shape_padding = Ticksrnd( tmp );
 	}
 
 	too_many_arguments( v );
@@ -584,7 +679,7 @@ Var *pulser_automatic_shape_pulses( Var *v )
 Var *pulser_automatic_twt_pulses( Var *v )
 {
 	long func;
-	double dl, dr;
+	double dl, dr, tmp;
 
 
 	/* We need at least one argument, the function TWT pulse are to be
@@ -669,15 +764,21 @@ Var *pulser_automatic_twt_pulses( Var *v )
 													 dg2020_double2ticks( dr );
 		}
 		else
-			dg2020.function[ func ].right_twt_padding =
-				  Ticksrnd( ceil( AUTO_TWT_RIGHT_PADDING / dg2020.timebase ) );
+		{
+			tmp = AUTO_TWT_RIGHT_PADDING / dg2020.timebase;
+			tmp = tmp - floor( tmp ) > 0.01 ? ceil( tmp ) : floor( tmp );
+			dg2020.function[ func ].right_twt_padding = Ticksrnd( tmp );
+		}
 	}
 	else
 	{
-		dg2020.function[ func ].left_twt_padding =
-				   Ticksrnd( ceil( AUTO_TWT_LEFT_PADDING / dg2020.timebase ) );
-		dg2020.function[ func ].right_twt_padding =
-				  Ticksrnd( ceil( AUTO_TWT_RIGHT_PADDING / dg2020.timebase ) );
+		tmp = AUTO_TWT_LEFT_PADDING / dg2020.timebase;
+		tmp = tmp - floor( tmp ) > 0.01 ? ceil( tmp ) : floor( tmp );
+		dg2020.function[ func ].left_twt_padding = Ticksrnd( tmp );
+
+		tmp = AUTO_TWT_RIGHT_PADDING / dg2020.timebase;
+		tmp = tmp - floor( tmp ) > 0.01 ? ceil( tmp ) : floor( tmp );
+		dg2020.function[ func ].right_twt_padding = Ticksrnd( tmp );
 	}
 
 	too_many_arguments( v );
