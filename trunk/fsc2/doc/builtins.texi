@@ -196,8 +196,9 @@ This function has to be called to display data in 1-dimensional as well as
 
 @enumerate
 @item
-The (x) point number of the data point or the point number of the first data
-point in the data array.
+The (x) point number of the data point (if only a single number is given
+as the third arument) or the point number of the first data point in the
+data array passed as third argument.
 @item
 Only in 2D-experiments: The y-point number of the data point or the point
 number of the first data point in the data array.
@@ -227,18 +228,18 @@ display( n_x_point, n_y_point, data [ , n_curve ] [ , ... ] )
 @item clear_curve( )
 @findex clear_curve( )
 Removes one or more curves from the display. Use a list of curve numbers
-as arguments, no argument defaults to the first curve.
+as arguments, no argument at all defaults to the first curve.
 
 @item get_file( )
 @findex get_file()
 Opens a new file and returns a unique identifier for the file that can
 be stored in an integer variable and is to be used in calls to functions
 of the @code{save_xxx()}-family. If no argument is given a file selector
-is shown and to let the user choose a file. If an argument s given (that
+is shown and lets the user choose a file. If an argument is given (that
 has to be a string!) the file with this name is opened.  If opening the
 file fails the user is asked to select a different file name.  If the
-user cancels the selection of a file she is asked for confirmation since
-data may get lost.
+user cancels the selection of a file (s)he is asked for confirmation
+since data may get lost.
 
 If @code{get_file()} is never called, on the first call to a function
 from the @code{save_xxx()}-family the user is asked to select a file and
