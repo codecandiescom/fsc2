@@ -604,19 +604,12 @@ try_again:
 
 	if ( magnet.mini_step < 0.00074 )
 	{
-
-/*
-		if ( 1 == fl_show_choice( "Please set sweep speed on magnet front",
-								  "panel to maximum value of 6666 Oe/min.",
-								  "Also make sure remote control is enabled !",
-								  2, "Abort", "Done", "", 3 ) )
-			return FAIL;
-		else
-*/
-		show_message( "Please set sweep speed on magnet front\n"
-					  "panel to maximum value of 6666 Oe/min.\n"
-					  "Also make sure remote control is enabled !" );
-		goto try_again;
+		if ( 1 != show_choices( "Please set sweep speed on magnet front\n",
+								"panel to maximum value of 6666 Oe/min\n.",
+								"Also make sure remote control is enabled !",
+								2, "Abort", "Done", "", 3 ) )
+			goto try_again;
+		return FAIL;
 	}
 
 	/* Finally using this ratio we go to the start field */
