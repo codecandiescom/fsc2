@@ -17,10 +17,12 @@ man: fsc2.1.gz
 fsc2.1.gz: fsc2.1
 	sed 's/DOCDIR/$(subst /,\/,$(docdir))/' fsc2.1 | gzip -9 -c > fsc2.1.gz
 
+
 info: fsc2.info
 
 fsc2.info: $(docs)
 	makeinfo fsc2.texi
+
 
 html: fsc2.html
 
@@ -28,6 +30,7 @@ fsc2.html: $(docs)
 	./texi2html -frames -split chapter -menu -number -sec_nav -iso fsc2.texi
 	sed -e 's/fsc2_[0-9]\+/fsc2/' fsc2_frame.html > fsc2_frame.x
 	mv fsc2_frame.x fsc2_frame.html
+
 
 ps: fsc2.ps
 
@@ -38,6 +41,7 @@ fsc2.ps: $(docs)
 		dvips fsc2.dvi;        \
 	fi
 
+
 pdf: fsc2.pdf
 
 fsc2.pdf: $(docs)
@@ -45,8 +49,10 @@ fsc2.pdf: $(docs)
 		texi2dvi --pdf -c fsc2.texi; \
 	fi
 
+
 clean:
 	$(RM) $(RMFLAGS) fsc2.dvi *.log
+
 
 install:
 	$(INSTALL) -m 444 fsc2.1.gz /usr/local/man/man1
