@@ -1011,6 +1011,26 @@ reading the chapter about pulsers and pulses.
 Returns a string with the name of the digitizer being used.
 
 
+@item pulser_state()
+@findex pulser_state()
+This function can be either used to determine if the pulser is running
+when called without an argument, in which case either @code{1} (i.e.@:
+the pulser is running) or @code{0} (pulser is stopped) is returned. if
+called with either a numerical argument or a string of @code{"ON"} or
+@code{"OFF"} the pulser will be started or stopped (a numerical argument
+of @code{0} stops the pulser, a non-zeor argument starts it).
+
+
+@item pulser_channel_state()
+@findex pulser_channel_state()
+For the @strong{Tektronix HFS9003} this function can be used to
+determine or set the state of individual channels of the pulser. If
+called with a single integer argument between @code{1} and @code{4} the
+state of the corresponing channel is returned. If called with an
+additional numeric argument or a string of @code{"ON"} or @code{"OFF"}
+the channel can be switched on or off.
+
+
 @item pulser_lock_keyboard()
 @findex pulser_lock_keyboard()
 Usually, during an experiment the keyboard of the pulser is locked. But
