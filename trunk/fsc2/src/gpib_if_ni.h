@@ -102,7 +102,7 @@ GPIB_VARIABLE void gpib_error_setup( char *buffer, size_t buffer_length );
 
 
 GPIB_VARIABLE char gpib_error_msg[ 1024 ]; /* global for GPIB error messages */
-
+GPIB_VARIABLE int gpiblineno;
 
 #define SUCCESS   0
 #define FAILURE  -1

@@ -31,7 +31,6 @@
 
 
 extern int gpibparse( void );
-extern int gpiblineno;
 
 
 /*----------------------------------------------------------------*/
