@@ -20,6 +20,7 @@
 */
 
 
+#include "autoconf.h"
 #include "ni6601_drv.h"
 
 
@@ -179,11 +180,11 @@ void ni6601_dio_init( Board *board )
 	board->dio_mask = 0;
 	writew( board->dio_mask, board->regs.dio_control );
 
-	/* Switch the DIO pins to output (so taht they can be controlled
+	/* Switch the DIO pins to output (so that they can be controlled
 	   via the DIO Control Register, all other to input */
 
 	writel( 0x01010101, board->regs.io_config[ 0 ] );
-	writel( 0x01010101, board->regs.io_config[ 0 ] );
+	writel( 0x01010101, board->regs.io_config[ 1 ] );
 	for ( i = 2; i < 10; i++ )
 		writel( 0x0, board->regs.io_config[ i ] );
 }
@@ -191,7 +192,7 @@ void ni6601_dio_init( Board *board )
 
 /*------------------------------------------------------------------*/
 /* Enables a pin of a board for output, argument is the PFI number. */
-/* We take care not to change any other bit of the register.        */
+/* Take care not to change any other bit of the register.           */
 /*------------------------------------------------------------------*/
 
 void ni6601_enable_out( Board *board, int pfi )
@@ -209,8 +210,8 @@ void ni6601_enable_out( Board *board, int pfi )
 
 /*---------------------------------------------------------------------*/
 /* Disables a pin of a board for output (i.e. switches to input only), */
-/* argument is the PFI number. We take care not to change any other    */
-/* bit of the register.                                                */
+/* argument is the PFI number. Take care not to change any other bits  */
+/* of the register.                                                    */
 /*---------------------------------------------------------------------*/
 
 void ni6601_disable_out( Board *board, int pfi )
