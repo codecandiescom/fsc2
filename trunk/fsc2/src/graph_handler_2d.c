@@ -5,7 +5,6 @@
 
 #include "fsc2.h"
 
-static void key_release_handler( Window window );
 static void press_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev,
 							  Canvas *c );
 static void release_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev,
@@ -400,6 +399,17 @@ void motion_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
 	switch ( G.button_state )
 	{
 		case 1 :                               /* left mouse button */
+			/* If we were in cut select mode and the shift button has become
+			   released get out of this mode */
+
+			if ( ( G.cut_select == CUT_SELECT_X ||
+				   G.cut_select == CUT_SELECT_Y ) &&
+				 ! ( keymask & ShiftMask ) )
+			{
+				G.cut_select = CUT_SELECT_BREAK;
+				fl_reset_cursor( window );
+			}
+
 			if ( G.drag_canvas & 1 )           /* x-axis or canvas window */
 			{
 				c->box_w = c->ppos[ X ] - G.start[ X ];
