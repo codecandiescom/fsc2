@@ -33,10 +33,10 @@
 
 // Pulser
 
-dg2020_f      // Sony/Tektronix data generator (Frankfurt version)
-dg2020_b      // Sony/Tektronix data generator (Berlin version)
+dg2020_f      // Sony/Tektronix data generator (Frankfurt S-band)
+dg2020_b      // Sony/Tektronix data generator (Berlin X-band)
 hfs9000       // Tektronix stimulus system     (Berlin W-band)
-ep385         // Bruker Pulse Programmer       (Berlin version)
+ep385         // Bruker Pulse Programmer       (Berlin X-band)
 
 
 // Digital oszilloscopes
