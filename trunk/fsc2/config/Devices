@@ -46,11 +46,12 @@ sr510         // Stanford Research lock-in amplifier, model 510
 sr530         // Stanford Research lock-in amplifier, model 530
 sr810         // Stanford Research lock-in amplifier, model 810
 sr830         // Stanford Research lock-in amplifier, model 830
+er023m        // Bruker Signal Channel, model ER 023 M (Berlin, Basel)
 
 aeg_s_band    // S-band AEG magnet power supply (Frankfurt)
 aeg_x_band    // X-band AEG magnet power supply (Berlin)
 keithley228a  // W-band magnet power supply (Berlin)
-er032m        // Bruker ER 032 M field controller (Basel)
+er032m        // Bruker ER 032 M field controller (Berlin, Basel)
 
 er035m        // Bruker NMR gaussmeter (connected to IEEE bus)
 er035m_s      // Bruker NMR gaussmeter (connected to serial port)
