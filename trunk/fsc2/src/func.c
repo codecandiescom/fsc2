@@ -71,6 +71,10 @@ bool No_File_Numbers;
 bool Dont_Save;
 
 
+/* Take care: The number of maximum parameters havde to be changed for
+              display() and clear_curve() if the maximum number of curves
+			  (defined as MAX_CURVES in graphics.h) should be changed. */
+
 Func Def_Fncts[ ] =              /* List of built-in functions */
 {
 	{ "int",           f_int,      		 1, ACCESS_ALL,  NULL, UNSET },
