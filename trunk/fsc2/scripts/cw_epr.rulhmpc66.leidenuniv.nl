@@ -693,12 +693,13 @@ print F
 		display( I, data[ J, I ], 1, I, ( avg[ I ] + data[ J, I ] ) / J, 2 );
 	}
 
+	avg += data[ J ];
+
 	magnet_sweep( \"STOP\" );
 	lockin_auto_acquisition( \"OFF\" );
 
-	avg += data[ J ];
 	clear_curve( 1, 3 );
-	display( 1, data, 3 );
+	display( 1, data[ J ], 3 );
 	print( \"#. run finished, sweeping magnet to start field.\\n\", J );
 }
 
@@ -730,7 +731,7 @@ IF J == 1 {
 
 	fsave( File, \"\\n\" );
 	FOR I = 1 : Num_Points - 1 {
-		fsave( File, \"#,#\\n\", field + ( I - 1 ) * step_size, avg[ I ] );
+		fsave( File, \"#,#\\n\", field + ( I - 1 ) * step_size, avg[ I ] / J );
 	}
 }
 
