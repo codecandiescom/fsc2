@@ -214,6 +214,12 @@ func:    MW_TOKEN                  { if ( Cur_PHS == -1 )
                                      else
 										 p_phase_ref( Cur_PHS,
 													PULSER_CHANNEL_RF_GATE ); }
+	   | PSH_TOKEN                 { if ( Cur_PHS == -1 )
+	                                     Channel_Type = 
+											        PULSER_CHANNEL_PULSE_SHAPE;
+                                     else
+										 p_phase_ref( Cur_PHS,
+												PULSER_CHANNEL_PULSE_SHAPE ); }
        | PH1_TOKEN                 { if ( Cur_PHS == -1 )
 	                                     Channel_Type = PULSER_CHANNEL_PHASE_1;
                                      else

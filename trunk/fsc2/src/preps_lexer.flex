@@ -60,18 +60,18 @@ EXP         ^[ \t]*EXP(ERIMENT)?:
 ESTR        \x5.*\x3\n.*\n
 STR         \x5[^\x6]*\x6
 
-MW          M(ICRO)?_?W(AVE)?:?
-TWT         T(RAVELING)?_?W(AVE)?_?T(UBE)?:?
-TWT_GATE    T(RAVELING)?_?W(AVE)?_?T(UBE)?_?G(ATE)?:?
-DET         DET(ECTION)?:?
-DET_GATE    DET(ECTION)?_?G(ATE)?:?
-RF          R(ADIO)?_?F(REQ(UENCY)?)?:?
-RF_GATE     R(ADIO)?_?F(REQ(UENCY)?)?_?G(ATE)?:?
-PH_SHP      P(ULSE)?_?SH(APE)?:?
-OI          O(THER)?(_?1)?:?
-OII         O(THER)?_?2:?
-OIII        O(THER)?_?3:?
-OIV         O(THER)?_?4:?
+MW          M(ICRO)?_?W(AVE)?
+TWT         T(RAVELING)?_?W(AVE)?_?T(UBE)?
+TWT_GATE    T(RAVELING)?_?W(AVE)?_?T(UBE)?_?G(ATE)?
+DET         DET(ECTION)?
+DET_GATE    DET(ECTION)?_?G(ATE)?
+RF          R(ADIO)?_?F(REQ(UENCY)?)?
+RF_GATE     R(ADIO)?_?F(REQ(UENCY)?)?_?G(ATE)?
+PSH         P(ULSE)?_?SH(APE)?
+OI          O(THER)?(_?1)?
+OII         O(THER)?_?2
+OIII        O(THER)?_?3
+OIV         O(THER)?_?4
 
 INT         [0-9]+
 EXPO        [EDed][+-]?{INT}

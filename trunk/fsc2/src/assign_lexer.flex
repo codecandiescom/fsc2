@@ -76,6 +76,7 @@ DET         DET(ECTION)?:?
 DET_GATE    DET(ECTION)?_?G(ATE)?:?
 RF          R(ADIO)?_?F(REQ(UENCY)?)?:?
 RF_GATE     R(ADIO)?_?F(REQ(UENCY)?)?_?G(ATE)?:?
+PSH         P(ULSE)?_?SH(APE)?:?
 PH1         PH(ASE)?(_?1)?:?
 PH2         PH(ASE)?_?2:?
 OI          O(THER)?(_?1)?:?
@@ -246,6 +247,8 @@ WS          [\n=: ]+
 {RF}        return RF_TOKEN;
 
 {RF_GATE}   return RF_GATE_TOKEN;
+
+{PSH}       return PSH_TOKEN;
 
 {PH1}       return PH1_TOKEN;
 {PH2}       return PH2_TOKEN;
