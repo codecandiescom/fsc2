@@ -1,0 +1,19 @@
+VARS:
+
+N = 300;
+M = 300;
+K;
+
+
+PREP:
+
+init_2d( 1, N, M );
+
+EXP:
+
+set_seed( 23423 );
+
+
+FOR K = 1:10000 {
+	display( ceil( N * random( ) ), ceil( M * random( ) ), random( ) );
+}
