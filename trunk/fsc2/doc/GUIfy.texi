@@ -449,8 +449,8 @@ time the experiment will take when the user selected a time constant of
 three seconds. Please note that it's important not to omit any spaces
 from the string when comparing it against a menu entry - for a human
 it's obvious that @w{@code{" 3s"}} and @code{"3s"} is supposed to mean
-the same, but a computer isn't that good at getting the meaning but
-rather cares about formalities...
+the same, but computers aren't that good at getting the meaning but
+rather care about formalities...
 
 Of course, you can also compare numbers in if-elsif-else-endif
 constructs (or whatever you care to call them). The reason that we were
