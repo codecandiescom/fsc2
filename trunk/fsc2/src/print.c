@@ -550,8 +550,10 @@ void print_callback( FL_OBJECT *obj, long data )
 }
 
 
-/*------------------------------------------------------------------------*/
-/*------------------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+/* Asks the user for a comment to print into the EPS file - the  */
+/* resulting string is stored in the global variable 'pc_string' */
+/*---------------------------------------------------------------*/
 
 static void get_print_comm( void )
 {
