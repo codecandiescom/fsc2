@@ -278,7 +278,7 @@ void start_graphics( void )
 								 "Exempt curve 4 from\nrescaling operations" );
 		}
 
-		fl_set_object_callback( GUI.run_form->print_button, print_1d, 1 );
+		fl_set_object_callback( GUI.run_form->print_button, print_it, 1 );
 	}
 	else if ( G.dim == 2 )
 	{
@@ -299,7 +299,7 @@ void start_graphics( void )
 		fl_set_button( GUI.run_form->curve_3_button, 0 );
 		fl_set_button( GUI.run_form->curve_4_button, 0 );
 
-		fl_set_object_callback( GUI.run_form->print_button, print_2d, 0 );
+		fl_set_object_callback( GUI.run_form->print_button, print_it, 2 );
 
 		G.active_curve = 0;
 	}
@@ -547,12 +547,9 @@ static void G_struct_init( void )
 		create_colors( );
 
 #if defined WITH_HTTP_SERVER
-		create_1d_color_hash( );
-		G_stored->hash_1d = G.hash_1d;
-		G_stored->hash_size_1d = G.hash_size_1d;
-		create_2d_color_hash( );
-		G_stored->hash_2d = G.hash_2d;
-		G_stored->hash_size_2d = G.hash_size_2d;
+		create_color_hash( );
+		G_stored->color_hash = G.color_hash;
+		G_stored->color_hash_size = G.color_hash_size;
 #endif
 	}
 	else

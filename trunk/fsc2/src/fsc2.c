@@ -124,7 +124,7 @@ int main( int argc, char *argv[ ] )
 	Comm.MQ = NULL;
 	Comm.MQ_ID = -1;
 
-	G.hash_1d = G.hash_2d = NULL;
+	G.color_hash = NULL;
 
 	/* Figure out if the machine has an INTEL type processor */
 
@@ -593,8 +593,7 @@ static void final_exit_handler( void )
 
 	T_free( in_file );
 
-	T_free( G.hash_1d );
-	T_free( G.hash_2d );
+	T_free( G.color_hash );
 
 	/* Delete all shared memory and also semaphore (if it still exists) */
 

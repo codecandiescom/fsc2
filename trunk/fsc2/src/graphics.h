@@ -161,6 +161,7 @@ typedef struct {
 
 typedef struct MRKR_ {
 	long position;
+	long color;
 	GC gc;
 	struct MRKR_ *next;
 } Marker;
@@ -221,10 +222,8 @@ typedef struct {
 
 	FL_COLOR colors[ MAX_CURVES ];
 
-	G_Hash hash_1d;
-	int hash_size_1d;
-	G_Hash hash_2d;
-	int hash_size_2d;
+	G_Hash color_hash;
+	int color_hash_size;
 
 	int cursor[ 7 ];              /* the different cursors */
 

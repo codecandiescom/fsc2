@@ -30,8 +30,7 @@
 static Pixmap get_1d_window( unsigned int *width, unsigned int *height );
 static Pixmap get_2d_window( unsigned int *width, unsigned int *height );
 static Pixmap get_cut_window( unsigned int *width, unsigned int *height );
-static void dump_image_to_file( FILE *dp, XImage *image,
-								G_Hash hash, int hash_size );
+static void dump_as_ppm( FILE *dp, XImage *image );
 
 
 /*---------------------------------------------------------------*/
@@ -45,9 +44,10 @@ void dump_window( int type, int fd )
 	FILE *fp;
 
 
-	/* With no graphics no pictures can be send */
+	/* With no graphics or without a working hash for the colors no pictures
+	   can be send */
 
-	if ( ! G.is_init || ! G.is_fully_drawn )
+	if ( ! G.is_init || ! G.is_fully_drawn || G.color_hash == NULL )
 		THROW( EXCEPTION );
 
 	/* We need a stream because writing with write(2) is maddingly slow
@@ -83,25 +83,9 @@ void dump_window( int type, int fd )
 	}
 
 	/* Write the ppm header and the picture - the webserver is going to take
-	   care of converting it to the appropriate format. We need to distinguish
-	   between 1D and 2D pictures because they need different amounts of
-	   colors (is this really necessary?) */
+	   care of converting it to the appropriate format. */
 
-	fprintf( fp, "P6\n%d %d\n255\n", w, h );
-
-	TRY
-	{
-		if ( ( type == 1 && G.dim == 1 ) || type == 2 )
-			dump_image_to_file( fp, image, G.hash_1d, G.hash_size_1d );
-		else
-			dump_image_to_file( fp, image, G.hash_2d, G.hash_size_2d );
-		TRY_SUCCESS;
-	}
-	OTHERWISE
-	{
-		XDestroyImage( image );
-		RETHROW( );
-	}
+	dump_as_ppm( fp, image );
 
 	XDestroyImage( image );
 	fclose( fp );
@@ -273,8 +257,7 @@ static Pixmap get_cut_window( unsigned int *width, unsigned int *height )
 /* part of the pbmplus package written by Jef Poskanzer.          */
 /*----------------------------------------------------------------*/
 
-static void dump_image_to_file( FILE *fp, XImage *image,
-								G_Hash hash, int hash_size )
+static void dump_as_ppm( FILE *fp, XImage *image )
 {
 	int i, j;
 	unsigned long pixel = 0;
@@ -289,7 +272,14 @@ static void dump_image_to_file( FILE *fp, XImage *image,
 	CARD16 *sptr;
 	CARD32 *lptr;
 	char *lineptr;
+	G_Hash hash;
+	int hash_size;
 
+
+	hash = G.color_hash;
+	hash_size = G.color_hash_size;
+
+	fprintf( fp, "P6\n%d %d\n255\n", w, h );
 
 	/* Get some information about the image */
 
@@ -366,60 +356,11 @@ static void dump_image_to_file( FILE *fp, XImage *image,
 }
 
 
-/*----------------------------------------------------------------*/
-/* Creates a pixel value to rgb color hash for the colors used in */
-/* 1D graphics.                                                   */
-/*----------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*/
+/* Creates a pixel value to rgb color hash for all colors possibly used. */
+/*-----------------------------------------------------------------------*/
 
-void create_1d_color_hash( void )
-{
-	int i;
-	int r, g, b;
-	FL_COLOR colors[ NUM_1D_COLS ] = { FL_BLACK, FL_LEFT_BCOL, FL_RED,
-									   FL_WHITE, FL_INACTIVE, FL_COL1 };
-	int key = 0;
-	FL_COLOR pixel;
-	G_Hash hash;
-	int hash_size = 101;
-
-
-	for ( i = 0; i < MAX_CURVES; i++ )
-		colors[ i + ( NUM_1D_COLS - MAX_CURVES ) ] = G.colors[ i ];
-
-	hash = T_malloc( hash_size * sizeof( G_Hash_Entry ) );
-
-	for ( i = 0; i < hash_size; i++ )
-		hash[ i ].is_used = UNSET;
-
-	for ( i = 0; i < NUM_1D_COLS; i++ )
-	{
-		pixel = fl_get_pixel( colors[ i ] );
-
-		key = pixel % hash_size;
-		while ( hash[ key ].is_used )
-			key = ( key + 1 ) % hash_size;
-
-		hash[ key ].is_used = SET;
-		hash[ key ].pixel = pixel;
-
-		fl_getmcolor( colors[ i ], &r, &g, &b );
-
-		hash[ key ].rgb[ RED   ] = r;
-		hash[ key ].rgb[ GREEN ] = g;
-		hash[ key ].rgb[ BLUE  ] = b;
-	}
-
-	G.hash_1d = hash;
-	G.hash_size_1d = hash_size;
-}
-
-
-/*----------------------------------------------------------------*/
-/* Creates a pixel value to rgb color hash for the colors used in */
-/* 2D graphics.                                                   */
-/*----------------------------------------------------------------*/
-
-void create_2d_color_hash( void )
+void create_color_hash( void )
 {
 	int i;
 	FL_COLOR pixel;
@@ -429,7 +370,16 @@ void create_2d_color_hash( void )
 	G_Hash hash;
 
 
-	hash = T_malloc( hash_size * sizeof( G_Hash_Entry ) );
+	TRY
+	{
+		hash = T_malloc( hash_size * sizeof( G_Hash_Entry ) );
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+	{
+		G.color_hash = NULL;
+		return;
+	}
 
 	for ( i = 0; i < hash_size; i++ )
 		hash[ i ].is_used = UNSET;
@@ -452,8 +402,8 @@ void create_2d_color_hash( void )
 		hash[ key ].rgb[ BLUE  ] = b;
 	}
 
-	G.hash_2d = hash;
-	G.hash_size_2d = hash_size;
+	G.color_hash = hash;
+	G.color_hash_size = hash_size;
 }
 
 
