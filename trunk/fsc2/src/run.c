@@ -722,7 +722,12 @@ void child_sig_handler( int signo )
 		/* All the remaining signals are deadly... */
 
 		default :
-			if ( * ( ( int * ) xresources[ NOCRASHMAIL ].var ) == 0 &&
+			/* If this is not a SIGTERM signal and sending death mails isn't
+			   forbidden send mail with available information of reasons of
+			   the crash */
+
+			if ( sign != SIGTERM &&
+				 * ( ( int * ) xresources[ NOCRASHMAIL ].var ) == 0 &&
 				 ! ( flags & 32 ) )                  /* 32 means NO_MAIL */
 			{
 				DumpStack( );
