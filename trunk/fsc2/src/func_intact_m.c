@@ -40,15 +40,21 @@ static Var *f_mchoice_child( Var *v );
 /* Creates a new menu object */
 /*---------------------------*/
 
-Var *f_mcreate( Var *v )
+Var *f_mcreate( Var *var )
 {
+	static Var *v;
 	Var *lv;
-	long num_strs = 0;
+	static long num_strs;
 	size_t len = 0;
-	IOBJECT *new_io, *ioi;
-	long ID = 0;
+	static IOBJECT *new_io;
+	static IOBJECT *ioi;
+	static long ID;
 	long i;
 
+
+	v = var;
+	num_strs = 0;
+	ID = 0;
 
 	/* At least a label and two menu entries must be specified */
 

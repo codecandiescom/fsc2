@@ -41,16 +41,24 @@ static Var *f_svalue_child( Var *v );
 /* Creates a new slider */
 /*----------------------*/
 
-Var *f_screate( Var *v )
+Var *f_screate( Var *var )
 {
-	IOBJECT *new_io = NULL, *ioi;
-	long type;
-	double start_val, end_val;
-	double step = 0.0;
-	char *label = NULL;
-	char *help_text = NULL;
-	long ID = 0;
+	static Var *v;
+	static IOBJECT *new_io;
+	IOBJECT *ioi;
+	static long type;
+	static double start_val, end_val;
+	static double step;
+	static char *label = NULL;
+	static char *help_text = NULL;
+	static long ID;
 
+
+	v = var;
+	new_io = NULL;
+	step = 0.0;
+	label = help_text = NULL;
+	ID = 0;
 
 	/* We need at least the type of the slider and the minimum and maximum
 	   value */

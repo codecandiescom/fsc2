@@ -326,8 +326,10 @@ static bool parent_reader( CommStruct *header )
 	char *str[ 4 ] = { NULL, NULL, NULL, NULL };
 	int i;
 	int n1, n2;
-	void *data = NULL;
+	static void *data;
 
+
+	data = NULL;
 
 	switch ( header->type )
 	{

@@ -1194,7 +1194,7 @@ bool test_condition( Prg_Token *cur )
 
 	/* Make sure returned value is either integer or float */
 
-    if ( ! ( EDL.Var_Stack->type & ( INT_VAR | FLOAT_VAR ) ) )
+    if ( ! ( EDL.Var_Stack->type & ( INT_VAR | FLOAT_VAR | STR_VAR ) ) )
     {
 		eprint( FATAL, UNSET, "%s:%ld: Invalid condition for %s.\n",
 				cur->Fname, cur->Lc,
@@ -1208,7 +1208,7 @@ bool test_condition( Prg_Token *cur )
 		condition = EDL.Var_Stack->val.lval ? OK : FAIL;
 	else if ( EDL.Var_Stack->type == FLOAT_VAR )
 		condition = EDL.Var_Stack->val.dval ? OK : FAIL;
-	else if ( EDL.Var_Stack->type == STR_VAR )
+	else                            /* if ( EDL.Var_Stack->type == STR_VAR ) */
 		condition = ( EDL.Var_Stack->val.sptr[ 0 ] != '\0') ? OK : FAIL;
 
 	vars_pop( EDL.Var_Stack );

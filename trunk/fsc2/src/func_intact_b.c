@@ -40,8 +40,9 @@ static Var *f_bstate_child( Var *v );
 /* Creates a new button */
 /*----------------------*/
 
-Var *f_bcreate( Var *v )
+Var *f_bcreate( Var *var )
 {
+	static Var *v;
 	static long type;
 	static long coll;
 	static char *label;
@@ -51,6 +52,7 @@ Var *f_bcreate( Var *v )
 	static long ID = 0;
 
 
+	v = var;
 	coll = -1;
 	label = help_text = NULL;
 	new_io = NULL;

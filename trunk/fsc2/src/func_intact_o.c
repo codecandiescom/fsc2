@@ -41,17 +41,28 @@ static Var *f_ovalue_child( Var *v );
 /* Creates a new input or output object */
 /*--------------------------------------*/
 
-Var *f_ocreate( Var *v )
+Var *f_ocreate( Var *var )
 {
-	long type;
-	char *label = NULL;
-	char *help_text = NULL;
-	char *form_str = NULL;
-	IOBJECT *new_io = NULL, *ioi;
-	long ID = 0;
-	long lval = 0;
-	double dval = 0.0;
+	static Var *v;
+	static long type;
+	static char *label;
+	static char *help_text;
+	static char *form_str;
+	static IOBJECT *new_io;
+	IOBJECT *ioi;
+	static long ID;
+	static long lval;
+	static double dval;
 
+
+	v = var;
+	label = NULL;
+	help_text = NULL;
+	form_str = NULL;
+	new_io = NULL;
+	ID = 0;
+	lval = 0;
+	dval = 0.0;
 
 	/* At least the type of the input or output object must be specified */
 
