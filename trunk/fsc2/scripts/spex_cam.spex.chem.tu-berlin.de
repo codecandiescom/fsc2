@@ -1578,9 +1578,22 @@ sub run {
 	  $BIN[ 1 ], $offset, $pixel_diff, $ccd_w ) = State::get( );
 	return unless defined $laser_line;
 
+	if ( $pixel_diff <= 0.0 ) {
+		main::show_message( "Please do a CCD camera calibration first." );
+		return;
+	}
+
+	if ( $ROI[ 2 ] <= $ROI[ 0 ] or $ROI[ 3 ] <= $ROI[ 1 ] or
+		 $ROI[ 0 ] < 1 or $ROI[ 1 ] < 1 or $BIN[ 0 ] < 1 or $BIN[ 1 ] < 1 or
+		 ( $ROI[ 2 ] - $ROI[ 0 ] + 1 ) % $BIN[ 0 ] != 0 or
+		 ( $ROI[ 3 ] - $ROI[ 1 ] + 1 ) % $BIN[ 1 ] != 0 ) {
+		main::show_message( "Please set ROI and binning parameters first." );
+		return;
+	}
+
 	$wn_width = ( ( $ROI[ 2 ] - $ROI[ 0 ] ) + 1 ) * $pixel_diff;
 	$cwn_offset = 0.5 * $pixel_diff
-				  * ( $ccd_w - ( $ROI[ 2 ] + $ROI[ 0 ] + 1 ) );
+				  * ( $ccd_w - ( $ROI[ 2 ] + $ROI[ 0 ] - 1 ) );
 
 	my @f;
 	my %fp = ( -side => 'top',
@@ -1732,11 +1745,10 @@ sub run {
 
 sub cwn_valid {
 	my ( $new, $start_button ) = @_;
-    my $float_rep = '((\d+(\.(\d+)?)?)|(\.\d+))([eE][+-]?\d+)?';
+    my $float_rep = '(((\d+(\.(\d+)?)?)|(\.\d+))([eE]([+-]?\d*)?)?)';
 
-	return 0 if ( $new ne "" and
-				  ( ( $laser_line != 0.0 and $new !~ /^[+-]?$float_rep$/ ) or
-					( $laser_line == 0.0 and $new !~ /^\+?$float_rep$/ ) ) );
+	return 0 if ( ( $laser_line != 0.0 and $new !~ /^[+-]?$float_rep?$/ ) or
+				  ( $laser_line == 0.0 and $new !~ /^\+?$float_rep?$/ ) );
 
 	check_all_parms( $start_button, $new, $$exp_time, $$N_scans );
 	return 1;
@@ -1748,7 +1760,7 @@ sub cwn_valid {
 
 sub exp_time_check {
 	my ( $new, $start_button ) = @_;
-    my $float_rep = '((\d+(\.(\d+)?)?)|(\.\d+))([eE][+-]?\d+)?';
+    my $float_rep = '(((\d+(\.(\d+)?)?)|(\.\d+))([eE]([+-]?\d*)?)?)';
 
 	return 0 if $new ne "" and $new !~ /^($float_rep)?$/;
 
@@ -1762,13 +1774,14 @@ sub exp_time_check {
 
 sub check_all_parms {
 	my ( $start_button, $wn, $et, $N ) = @_;
+    my $float_rep = '((\d+(\.(\d+)?)?)|(\.\d+))([eE][+-]?\d+)?';
 
-	if ( $wn ne "" ) {
+	if ( $wn =~ /^[+-]?$float_rep$/ ) {
 		$wn = $laser_line != 0.0 ? $laser_line - $wn : $wn;
 		$wn -= $offset + $cwn_offset;
 	}
 
-	if ( $wn eq "" or $et eq "" or $N eq "" or
+	if ( $wn !~ /^$float_rep$/ or $et !~ /^$float_rep$/ or $N eq "" or
 		 $wn < 46000.0 / 3.0 or $wn > 44000 or
 		 $et < 1.0e-6 or $et > 3600 or
 		 $N == 0 ) {
@@ -1839,7 +1852,7 @@ N_Points = ( ROI[ 3 ] - ROI[ 1 ] ) / Bin[ 1 ];
 step_wn = calib[ 2 ] * Bin[ 1 ];
 
 cwn_offset = 0.5 * calib[ 2 ]
-             * ( CCD_size[ 1 ] - ( ROI[ 3 ] + ROI[ 1 ] + 1 ) );
+             * ( CCD_size[ 1 ] - ( ROI[ 3 ] + ROI[ 1 ] - 1 ) );
 
 hide_toolbox( 1 );
 I_scan = output_create( "INT_OUTPUT", 0,
@@ -2006,9 +2019,22 @@ sub run {
 	  $BIN[ 1 ], $offset, $pixel_diff, $ccd_w ) = State::get( );
 	return unless defined $laser_line;
 
+	if ( $pixel_diff <= 0.0 ) {
+		main::show_message( "Please do a CCD camera calibration first." );
+		return;
+	}
+
+	if ( $ROI[ 2 ] <= $ROI[ 0 ] or $ROI[ 3 ] <= $ROI[ 1 ] or
+		 $ROI[ 0 ] < 1 or $ROI[ 1 ] < 1 or $BIN[ 0 ] < 1 or $BIN[ 1 ] < 1 or
+		 ( $ROI[ 2 ] - $ROI[ 0 ] + 1 ) % $BIN[ 0 ] != 0 or
+		 ( $ROI[ 3 ] - $ROI[ 1 ] + 1 ) % $BIN[ 1 ] != 0 ) {
+		main::show_message( "Please set ROI and binning parameters first." );
+		return;
+	}
+
 	$wn_width = ( ( $ROI[ 2 ] - $ROI[ 0 ] ) + 1 ) * $pixel_diff;
 	$cwn_offset = 0.5 * $pixel_diff
-				  * ( $ccd_w - ( $ROI[ 2 ] + $ROI[ 0 ] + 1 ) );
+				  * ( $ccd_w - ( $ROI[ 2 ] + $ROI[ 0 ] - 1 ) );
 
 	my @f;
 	my %fp = ( -side => 'top',
@@ -2181,11 +2207,10 @@ sub run {
 
 sub start_wn_valid {
 	my ( $new, $start_button ) = @_;
-    my $float_rep = '((\d+(\.(\d+)?)?)|(\.\d+))([eE][+-]?\d+)?';
+    my $float_rep = '(((\d+(\.(\d+)?)?)|(\.\d+))([eE]([+-]?\d*)?)?)';
 
-	return 0 if ( $new ne "" and
-				  ( ( $laser_line != 0.0 and $new !~ /^[+-]?$float_rep$/ ) or
-					( $laser_line == 0.0 and $new !~ /^\+?$float_rep$/ ) ) );
+	return 0 if ( ( $laser_line != 0.0 and $new !~ /^[+-]?$float_rep?$/ ) or
+				  ( $laser_line == 0.0 and $new !~ /^\+?$float_rep?$/ ) );
 
 	check_all_parms( $start_button, $new, $$end_wn, $$overlap,
 					 $$exp_time, $$N_scans );
@@ -2200,11 +2225,10 @@ sub start_wn_valid {
 
 sub end_wn_valid {
 	my ( $new, $start_button ) = @_;
-    my $float_rep = '((\d+(\.(\d+)?)?)|(\.\d+))([eE][+-]?\d+)?';
+    my $float_rep = '(((\d+(\.(\d+)?)?)|(\.\d+))([eE]([+-]?\d*)?)?)';
 
-	return 0 if ( $new ne "" and
-				  ( ( $laser_line != 0.0 and $new !~ /^[+-]?$float_rep$/ ) or
-					( $laser_line == 0.0 and $new !~ /^\+?$float_rep$/ ) ) );
+	return 0 if ( ( $laser_line != 0.0 and $new !~ /^[+-]?$float_rep?$/ ) or
+				  ( $laser_line == 0.0 and $new !~ /^\+?$float_rep?$/ ) );
 
 	check_all_parms( $start_button, $$start_wn, $new, $$overlap,
 					 $$exp_time, $$N_scans );
@@ -2217,9 +2241,9 @@ sub end_wn_valid {
 
 sub overlap_valid {
 	my ( $new, $start_button ) = @_;
-    my $float_rep = '((\d+(\.(\d+)?)?)|(\.\d+))([eE][+-]?\d+)?';
+    my $float_rep = '(((\d+(\.(\d+)?)?)|(\.\d+))([eE]([+-]?\d*)?)?)';
 
-	return 0 if $new ne "" and $new !~ /^($float_rep)?$/;
+	return 0 if $new !~ /^($float_rep)?$/;
 
 	check_all_parms( $start_button, $$start_wn, $$end_wn, $new,
 					 $$exp_time, $$N_scans );
@@ -2232,9 +2256,9 @@ sub overlap_valid {
 
 sub exp_time_valid {
 	my ( $new, $start_button ) = @_;
-    my $float_rep = '((\d+(\.(\d+)?)?)|(\.\d+))([eE][+-]?\d+)?';
+    my $float_rep = '(((\d+(\.(\d+)?)?)|(\.\d+))([eE]([+-]?\d*)?)?)';
 
-	return 0 if $new ne "" and $new !~ /^($float_rep)?$/;
+	return 0 if $new !~ /^$float_rep?$/;
 
 	check_all_parms( $start_button, $$start_wn, $$end_wn, $$overlap,
 					 $new, $$N_scans );
@@ -2247,18 +2271,22 @@ sub exp_time_valid {
 
 sub check_all_parms {
 	my ( $start_button, $swn, $ewn, $ol, $et, $N ) = @_;
+	my $float_rep = '((\d+(\.(\d+)?)?)|(\.\d+))([eE][+-]?\d+)?';
 
-	if ( $swn ne "" ) {
+
+	if ( $swn =~ /^[+-]?$float_rep$/ ) {
 		$swn = $laser_line - $swn if $laser_line != 0.0;
 		$swn -= $offset + $cwn_offset;
 	}
 
-	if ( $ewn ne "" ) {
+	if ( $ewn =~ /^[+-]?$float_rep$/ ) {
 		$ewn = $laser_line - $ewn if $laser_line != 0.0;
 		$ewn -= $offset + $cwn_offset;
 	}
 
-	if ( $swn eq "" or $ewn eq "" or $et eq "" or $ol eq "" or $N eq "" or
+	if ( $swn !~ /^$float_rep$/ or $ewn !~ /^$float_rep$/ or
+		 $et !~ /^$float_rep$/ or $ol !~ /^$float_rep$/ or
+		 $N eq "" or
 		 $swn <= $ewn or $ewn < 46000.0 / 3.0 or $swn > 44000 or
 		 $et < 1.0e-6 or $et > 3600 or
 		 $ol > 0.5 * $wn_width or
@@ -2354,7 +2382,7 @@ Total_N_Points = ( ROI[ 3 ] - ROI[ 1 ] ) / Bin[ 1 ];
 step_wn = calib[ 2 ] * Bin[ 1 ];
 
 cwn_offset = 0.5 * calib[ 2 ]
-             * ( CCD_size[ 1 ] - ( ROI[ 3 ] + ROI[ 1 ] + 1 ) );
+             * ( CCD_size[ 1 ] - ( ROI[ 3 ] + ROI[ 1 ] - 1 ) );
 
 hide_toolbox( 1 );
 I_scan = output_create( "INT_OUTPUT", 0,
@@ -2577,7 +2605,7 @@ CCD_Points = ( ROI[ 3 ] - ROI[ 1 ] ) / Bin[ 1 ];
 step_wn = calib[ 2 ] * Bin[ 1 ];
 
 cwn_offset = 0.5 * calib[ 2 ]
-             * ( CCD_size[ 1 ] - ( ROI[ 3 ] + ROI[ 1 ] + 1 ) );
+             * ( CCD_size[ 1 ] - ( ROI[ 3 ] + ROI[ 1 ] - 1 ) );
 
 // Figure out how many single CCD spectra we need to cover the spectrum when
 // using the minimum overlap. From this calculate the overlap to use plus
