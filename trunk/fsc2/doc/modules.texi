@@ -2043,7 +2043,7 @@ of the padding needed to set a fixed repeat time for the experiment.
 
 @table @samp
 
-@item bool assign_channel_to_function( int function, long channel )
+@item bool assign_channel_to_function(int function, long channel)
 This function is called when in the @code{ASSIGNMENTS} section in the
 description of a pulse function the @code{CHANNEL} (or @code{CH})
 keyword is found, i.e.@:
@@ -2115,7 +2115,7 @@ automatically created phase pulses are used, i.e.@: the variable
 @code{needs_phase_pulses} is set).
 
 
-@item bool assign_function( int function, long connector )
+@item bool assign_function(int function, long connector)
 For pulsers of the second type, i.e.@: pulsers that have internal
 channels and independent output pods this function is used to associate
 a pulse function to one of the output functions, i.e.@: if in the
@@ -2128,14 +2128,14 @@ ASSIGNMENTS:
 Only one function should be assignable to an output connector.
 
 
-@item bool set_function_high_level( int function, double high_voltage );
+@item bool set_function_high_level(int function, double high_voltage)
 This function is called to set the high voltage level to be output for a
 certain pulse function, i.e.@: when the @code{V_HIGH} keyword is found
 in the function description. Obviously, @code{high_voltage} is the
 voltage to be used for the high voltage level in Volts.
 
 
-@item bool set_function_low_level( int function, double low_voltage );
+@item bool set_function_low_level(int function, double low_voltage)
 This function is called to set the low voltage level to be output for a
 certain pulse function, i.e.@: when the @code{V_LOW} keyword is found in
 the function description. To stay compatible with other pulser modules I
@@ -2144,7 +2144,7 @@ higher than the high voltage level and to tell the user to use the
 function @code{invert_function()} instead.
 
 
-@item bool invert_function( int function )
+@item bool invert_function(int function)
 This function is called to tell the pulser module that the output for a
 certain pulse function has to be reversed polarity, i.e.@: that a high
 voltage is to be output for a pulse off state while a high voltage has
@@ -2153,7 +2153,7 @@ function is automatically called for the @code{INV} or @code{INVERT}
 keyword in the pulse function description.
 
 
-@item bool set_function_delay( int function, double delay )
+@item bool set_function_delay(int function, double delay)
 This function is called to tell the pulser to use a delay for one of the
 pulse function, i.e.@: when the @code{DELAY} keyword is found in the
 description of a function. When possible you should be prepared also
@@ -2161,7 +2161,7 @@ to accept negative delays (which of course requires that the pulser is
 triggered internally).
 
 
-@item bool set_timebase( double timebase )
+@item bool set_timebase(double timebase)
 This function gets called when the @code{TIMEBASE} keyword is found in
 the @code{ASSIGNMENTS} section, i.e.@:
 @example
@@ -2174,7 +2174,7 @@ you will also have to check later that all pulse positions, lengths
 etc.@: are integer multiples of this time base.
 
 
-@item bool set_timebase_level( int level )
+@item bool set_timebase_level(int level)
 This function gets called when the @code{TIMEBASE} keyword is found in 
 the @code{ASSIGNMENTS} section, followed by either @code{TTL} or
 @code{ECL}, i.e.
@@ -2188,7 +2188,7 @@ either TTL or ECL levels. The argument the function gets passed is an
 integer, either @code{TTL_LEVEL} or @code{ECL_LEVEL}.
 
 
-@item bool set_trigger_mode( int mode )
+@item bool set_trigger_mode(int mode)
 This function gets called when a trigger mode description is found in
 the assignments section, i.e.@:
 @example
@@ -2203,7 +2203,7 @@ the values of @code{mode} with @code{EXTERNAL} (set to @code{1}) and
 values should ever get changed you should use these predefined values.
 
 
-@item bool set_repeat_time( double rep_time )
+@item bool set_repeat_time(double rep_time)
 The function gets called for setting the repetition time or frequency of
 an pulsed experiment, i.e.@: when either the @w{@code{REPETITION_TIME}}
 or @w{@code{REPETITION_FREQUENCY}} keyword is found in the trigger mode
@@ -2212,7 +2212,7 @@ set a repetition time or frequency the trigger mode must be internal and
 the module has to check that this is the case.
 
 
-@item bool set_trig_in_level( double voltage )
+@item bool set_trig_in_level(double voltage)
 This function is called when the @code{LEVEL} keyword is found in the
 trigger mode description in the @code{ASSIGNMENTS} section to set the
 trigger level for external trigger mode. The module should tell the user
@@ -2220,7 +2220,7 @@ that setting a trigger level doesn't make sense in the case that the
 user specified internal trigger mode.
 
 
-@item bool set_trig_in_slope( int slope )
+@item bool set_trig_in_slope(int slope)
 This function is called when the @code{SLOPE} keyword is found in the
 trigger mode description in the @code{ASSIGNMENTS} section to set the
 trigger slope for external trigger mode.  In @file{src/global.h} an
@@ -2234,7 +2234,7 @@ doesn't make sense in the case that the user specified internal trigger
 mode.
 
 
-@item bool set_trig_in_impedance( int state )
+@item bool set_trig_in_impedance(int state)
 This function gets called to set the input impedance of the trigger
 input channel when the @code{IMPEDANCE} keyword is found in the trigger
 mode description in the @code{ASSIGNMENTS} section. In
@@ -2248,7 +2248,7 @@ trigger input impedance doesn't make sense in the case that the user
 specified internal trigger mode.
 
 
-@item bool set_phase_reference( int phase, int function )
+@item bool set_phase_reference(int phase, int function)
 This again a function that gets called under somewhat different
 circumstances, depending on how the pulser module is supposed to work.
 If you are writing a module that has to create phase pulses
@@ -2289,7 +2289,7 @@ script starts with either @code{PHASE_SETUP} or @code{PASE_SETUP_1}) or
 for the second phase cycled function (i.e.@: for @code{PHASE_SETUP_2}).
 
 
-@item bool phase_setup_prep( int func, int type, int pod, long val )
+@item bool phase_setup_prep(int func, int type, int pod, long val)
 Again this function is called under slightly different circumstances,
 i.e.@: depending on if you have set the variable
 @code{needs_phase_pulses} in the pulser structure (meaning that phase
@@ -2400,7 +2400,7 @@ phase_setup_prep( 0, PHASE_CW, (discard), 1 );
 Here @code{(discard)} stands for an arbitrary value that has to be discarded.
 
 
-@item bool phase_setup( int func )
+@item bool phase_setup(int func)
 This function is called to tell the module that a phase setup sequence
 is finished and no further commands of @code{phase_setup_prep()} for the
 phase setup with number @code{function} (i.e.@: either @code{0} for the
@@ -2409,7 +2409,7 @@ now do some sanity checks on the data it received from the previous
 @code{phase_setup_prep()} calls or whatever else it needs to do.
 
 
-@item bool new_pulse( long pulse_number )
+@item bool new_pulse(long pulse_number)
 This function is called when a new pulse definition is found in the
 @code{PREPARATIONS} section, i.e.@: for lines starting like this
 @example
@@ -2423,7 +2423,7 @@ negative pulse numbers can be used for pulses generated internally by
 the module.
 
 
-@item bool set_pulse_function( long pulse_number, int function )
+@item bool set_pulse_function(long pulse_number, int function)
 This function is called when the function of a new pulse is set in the
 @code{PREPARATIONS} section, i.e.@: for
 @example
@@ -2441,7 +2441,7 @@ as pulse functions because these functions are usually reserved for
 internally generated phase pulses.
 
 
-@item bool set_pulse_position( long pulse_number, double ptime )
+@item bool set_pulse_position(long pulse_number, double ptime)
 This is the function that gets called to tell the module about the
 start position of a pulse, i.e.@: for lines like
 @example
@@ -2467,7 +2467,7 @@ still will have to check if it's not negative and also that it isn't an
 integer multiple of the pulsers time base).
 
 
-@item bool set_pulse_length( long pulse_number, double ptime )
+@item bool set_pulse_length(long pulse_number, double ptime)
 The function gets called when the length of a pulse is set in the
 @code{EDL} file, i.e.@: for lines like
 @example
@@ -2491,7 +2491,7 @@ value. If the length of the pulse is zero you must treat the pulse as
 switched off for the time being.
 
 
-@item bool set_pulse_position_change( long pulse_number, double ptime )
+@item bool set_pulse_position_change(long pulse_number, double ptime)
 This function is used to tell the module about the start position change
 of a pulse (i.e.@: when a pulse definition line containing the
 @code{DELTA_START} keyword is found in the @code{PREPARATIONS} section
@@ -2501,7 +2501,7 @@ second the start position change for the pulse (which might be
 negative).
 
 
-@item bool set_pulse_length_change( long pulse_number, double ptime )
+@item bool set_pulse_length_change(long pulse_number, double ptime)
 This function is used to tell the module about the length change of a
 pulse (i.e.@: when a pulse definition line containing the
 @code{DELTA_LENGTH} keyword is found in the @code{PREPARATIONS} section
@@ -2510,7 +2510,7 @@ during the experiment), with the first argument being the pulse number,
 the second the length change for the pulse.
 
 
-@item bool set_pulse_phase_cycle( long pulse_number, long cycle )
+@item bool set_pulse_phase_cycle(long pulse_number, long cycle)
 This function is called to set the phase sequence to be used for phase
 cycling the pulse indexed by the first argument, i.e.@: when commands
 like
@@ -2525,7 +2525,7 @@ avoid the necessity of changes of the module it is probably a good idea
 to test this value within the function.
 
 
-@item bool get_pulse_function( long pulse_number, int *function )
+@item bool get_pulse_function(long pulse_number, int *function)
 This function is called by @code{fsc2} to find out about the function of
 a pulse from the module. If a pulse with the number passed to the
 function exists (if it doesn't the module should print out an error
@@ -2535,7 +2535,7 @@ true value. If no function has been set for the pulse an error message
 should be printed out and an exception has to be thrown.
 
 
-@item bool get_pulse_position( long pulse_number, double *ptime )
+@item bool get_pulse_position(long pulse_number, double *ptime)
 This function is called by @code{fsc2} to find out about the current
 position of a pulse (@strong{not} including function delays) from the
 module. If a pulse with the number passed to the function exists
@@ -2546,7 +2546,7 @@ has been set for the pulse an error message should be printed out and an
 exception has to be thrown.
 
 
-@item bool get_pulse_length( long pulse_number, double *ptime )
+@item bool get_pulse_length(long pulse_number, double *ptime)
 This function in the module is called to determine the current length of
 a pulse. If a pulse with the number passed as the first argument exists
 the variable the second argument points to has to be set to the length
@@ -2554,7 +2554,7 @@ of the pulse (in seconds).  If no length has been set for the pulse an
 error message should be printed out and an exception has to be thrown.
 
 
-@item bool get_pulse_position_change( long pulse_number, double *ptime )
+@item bool get_pulse_position_change(long pulse_number, double *ptime)
 This function should return the current setting of the position change
 setting for the pulse indexed by the argument in the variable pointed to
 by the second argument. If no start position change vale has been set
@@ -2562,7 +2562,7 @@ for the pulse an error message should be printed out and an exception
 has to be thrown.
 
 
-@item bool get_pulse_length_change( long pulse_number, double *ptime )
+@item bool get_pulse_length_change(long pulse_number, double *ptime)
 This function should return the current setting of the length change
 setting for the pulse indexed by the argument in the variable pointed to
 by the second argument. If no length change value has been set for the
@@ -2570,7 +2570,7 @@ pulse an error message should be printed out and an exception has to be
 thrown.
 
 
-@item bool get_pulse_phase_cycle( long pulse_number, long *cycle )
+@item bool get_pulse_phase_cycle(long pulse_number, long *cycle)
 The function should return the number of the phase sequence (i.e.@:
 @code{1} or @code{2}) associated with the pulse associated with pulse
 with the number passed to the function as the first argument. If a phase
@@ -2580,7 +2580,7 @@ the number of the first argument exists) an error message has to be
 printed out and an exception should be thrown.
 
 
-@item bool set_max_seq_len( double seq_len )
+@item bool set_max_seq_len(double seq_len)
 This function is called when the @code{MAXIMUM_SEQUENCE_LENGTH} is found
 in the  @code{ASSIGNMENTS} section, i.e.@:
 @example
@@ -2619,7 +2619,7 @@ structure is only for backward compatibility.
 @end quotation
 
 
-@item bool bool keep_all_pulses( void )
+@item bool bool keep_all_pulses(void)
 This function is called when the @w{@code{KEEP_ALL_PULSES}} keyword is
 found in the @code{ASSIGNMENTS} section. If this function is called your
 module may not delete pulses that it found during the test run never to
@@ -2644,7 +2644,7 @@ structure is only for backward compatibility.
 @end quotation
 
 
-@item bool set_phase_switch_delay( int function, double del_time )
+@item bool set_phase_switch_delay(int function, double del_time)
 This function is called when in the @code{ASSIGNMENTS} section a line like
 @example
   PHASE_SWITCH_DELAY: 40 ns;
@@ -2673,7 +2673,7 @@ pulser structure is only for backward compatibility.
 @end quotation
 
 
-@item bool set_grace_period( double gp_time )
+@item bool set_grace_period(double gp_time)
 This function is called when in the @code{ASSIGNMENTS} section a line like
 @example
   GRACE_PERIOD: 20 ns;
