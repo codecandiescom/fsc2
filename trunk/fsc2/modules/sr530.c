@@ -42,7 +42,7 @@ const char generic_type[ ] = DEVICE_TYPE;
    when the lock-in can't be accessed - these values must really be
    reasonable ! */
 
-#define SR530_TEST_DAC_VOLATGE   0.0
+#define SR530_TEST_DAC_VOLTAGE   0.0
 #define SR530_TEST_SENSITIVITY   0.5
 #define SR530_TEST_TIME_CONSTANT 0.1
 #define SR530_TEST_PHASE         0.0
@@ -330,7 +330,7 @@ Var *lockin_get_adc_data( Var *v )
 	}
 
 	if ( TEST_RUN )                  /* return dummy value in test run */
-		return vars_push( FLOAT_VAR, SR530_TEST_DAC_VOLATGE );
+		return vars_push( FLOAT_VAR, SR530_TEST_DAC_VOLTAGE );
 
 	return vars_push( FLOAT_VAR, sr530_get_adc_data( port ) );
 }
