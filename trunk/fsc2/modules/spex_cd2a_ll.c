@@ -888,10 +888,10 @@ void spex_cd2a_close( void )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/* Function to handle situations where the communication with the device */
-/* failed completely.                                                    *
-/*-----------------------------------------------------------------------*/
+/*-------------------------------------------------------*/
+/* Function to handle situations where the communication */
+/* with the device failed completely.                    */
+/*-------------------------------------------------------*/
 
 static void spex_cd2a_comm_fail( void )
 {
@@ -901,10 +901,10 @@ static void spex_cd2a_comm_fail( void )
 }
 
 
-/*---------------------------------------------------------------------*/
-/* Function for situations where the device reacted but send a message */
-/* it wasn't supposed to send.                                         */
-/*---------------------------------------------------------------------*/
+/*--------------------------------------------------*/
+/* Function for situations where the device reacted */
+/* but send a message it wasn't supposed to send.   */
+/*--------------------------------------------------*/
 
 static void spex_cd2a_wrong_data( void )
 {
