@@ -38,8 +38,10 @@ my $mod_freq   = 19;
 my $mod_ampl   = 80;
 my $N_runs     = 20;
 my $tc         = "Don't set";
+my $tc_fac     = 1;
 my $sens       = "Don't set";
 my $how        = 'Start program';
+my $table      = "";
 
 
 my %fp = ( '-side' => 'top',
@@ -222,11 +224,29 @@ $f9_l->pack( %wp );
 $f9_m->pack( %wp );
 
 
-my $f10 = $mw->Frame( );
-my $f10_l = $f10->Label( '-text'         => 'Sensitivity:',
+my $f10 = $mw->Frame( '-width'             => '29' );
+my $f10_l1 = $f10->Label( '-text'           => 'Waiting time factor:',
+						  '-width'          => '20',
+						  'anchor'          => 'w' );
+my $f10_v = $f10->Entry( '-textvariable'    => \$tc_fac,
+						 '-width'           => '7',
+						 '-validate'        => 'key',
+						 '-validatecommand' => \&is_numeric,
+						 '-relief'          => 'sunken' );
+my $f10_l2 = $f10->Label( '-text'           => '* tc',
+						  '-width'          => 2 );
+
+$f10->pack( %fp );
+$f10_l1->pack( %wp );
+$f10_v->pack( %wp );
+$f10_l2->pack( %wp );
+
+
+my $f11 = $mw->Frame( );
+my $f11_l = $f11->Label( '-text'         => 'Sensitivity:',
 						 '-width'        => '20',
 						 'anchor'        => 'w' );
-my $f10_m = $f10->Optionmenu( '-options' =>
+my $f11_m = $f11->Optionmenu( '-options' =>
                             [ ( "Don't set", '500 mV', '200 mV', '100 mV',
                                 ' 50 mV', ' 20 mV', ' 10 mV', '  5 mv',
                                 '  2 mV', '  1 mV', '500 uV', '200 uV',
@@ -236,9 +256,22 @@ my $f10_m = $f10->Optionmenu( '-options' =>
                                 ' 10 nV', '  5 nV', '  2 nV', '  1 nV' ) ],
 							'-width'     => 9,
 							'-textvariable'  => \$sens );
-$f10->pack( %fp );
-$f10_l->pack( %wp );
-$f10_m->pack( %wp );
+$f11->pack( %fp );
+$f11_l->pack( %wp );
+$f11_m->pack( %wp );
+
+my $f12 = $mw->Frame( );
+my $f12_b = $f12->Button( '-text' => 'Table file',
+						  '-command' =>
+						  sub { my $fn = $mw->fsc2_filesel::show( $table );
+								$table = $fn if defined $fn; }
+						);
+my $f12_e = $f12->Entry( '-textvariable'  => \$table,
+						 '-relief'        => 'sunken' );
+
+$f12->pack( %fp );
+$f12_b->pack( %wp );
+$f12_e->pack( %wp );
 
 
 
@@ -248,16 +281,16 @@ $mw->Optionmenu( '-options'      => [ ( 'Start program', 'Test program',
 			   )->pack( '-padx'  => '3m',
 					    '-pady'  => '3m' );
 
-my $f11 = $mw->Frame( );
-my $f11_a = $mw->Button( '-text' => 'Apply',
+my $f13 = $mw->Frame( );
+my $f13_a = $mw->Button( '-text' => 'Apply',
 						 '-command' => \&write_out );
-my $f11_q = $mw->Button( '-text' => 'Quit',
+my $f13_q = $mw->Button( '-text' => 'Quit',
 						 '-command' => sub { &store_defs; $mw->destroy } );
-$f11->pack( '-side' => 'top',
+$f13->pack( '-side' => 'top',
 			'-fill' => 'x',
 			'-padx' => '4m' );
-$f11_a->pack( %wp, 'padx' => '5m', '-pady' => '3m' );
-$f11_q->pack( %wp, 'padx' => '5m', '-pady' => '3m' );
+$f13_a->pack( %wp, 'padx' => '5m', '-pady' => '3m' );
+$f13_q->pack( %wp, 'padx' => '5m', '-pady' => '3m' );
 
 
 MainLoop;
@@ -315,10 +348,23 @@ goto done_reading unless defined( $ne = <F> )
 chomp $ne;
 $tc = $ne;
 
+goto done_reading unless defined( $ne = <F> ) and $ne =~ /^\d+$/;
+chomp $ne;
+$tc_fac = $ne;
+
 goto done_reading unless defined( $ne = <F> )
 	 and $ne =~ /(^Don't set)|(([125]0{0,2}) [mun]V)$/;
 chomp $ne;
 $sens = $ne;
+
+goto done_reading unless defined( $ne = <F> );
+chomp $ne;
+$table = $ne;
+
+goto done_reading unless defined( $ne = <F> ) and
+	$ne =~ /^(Start experiment)|(Test program)|(Load into fsc2)$/;
+chomp $ne;
+$how = $ne;
 
 done_reading:
 close F;
@@ -342,7 +388,8 @@ sub store_defs {
 
 	print F "# Do not edit - created automatically!\n";
 	print F "$lockin\n$start_freq\n$end_freq\n$step_freq\n$atten\n" .
-	        "$mod_freq\n$mod_ampl\n$N_runs\n$tc\n$sens\n";
+	        "$mod_freq\n$mod_ampl\n$N_runs\n$tc\n$tc_fac\n$sens\n" .
+			"$table\n$how\n";
 
 	close F;
 }
@@ -415,7 +462,8 @@ open( F, "|fsc2_" . lc $how )
 print F
 "DEVICES:
 
-hp8647a;\n";
+hp8647a;
+er035m_sas;\n";
 
 print F lc( $lockin ), ";\n";
 print F
@@ -452,12 +500,17 @@ N_points = ceil( abs( ( end_freq - start_freq ) / step_freq ) ) + 1;
 data[ N_points ];
 mean_data[ N_points ];
 File_1, File_2;
+B1, OO1, OO2;
 
+PREPARATIONS:\n\n";
 
-PREPARATIONS:
+if ( $table =~ /^$/ ) {
+	print F "synthesizer_use_table( );\n";
+} else {
+	print F "synthesizer_use_table( \"$table\" );\n";
+}
 
-synthesizer_use_table( );
-synthesizer_attenuation( attenuation );
+print F "synthesizer_attenuation( attenuation );
 synthesizer_att_ref_freq( 14 MHz );
 synthesizer_frequency( start_freq );
 synthesizer_modulation( \"FM\", \"EXT DC\", mod_ampl );
@@ -483,7 +536,7 @@ print F "tc = lockin_time_constant( );\n" if $tc eq "Don't set";
 print F "
 
 File_1 = get_file( \"File for storing all runs:\" );
-File_2 = get_file( \"File for storing final result:\" );
+File_2 = get_file( \"File for storing final results:\" );
 fsave( File_2, \"% Start frequency = # MHz\\n\"
                \"% End frequency   = # MHz\\n\"
                \"% Step frequency  = # kHz\\n\"
@@ -491,31 +544,49 @@ fsave( File_2, \"% Start frequency = # MHz\\n\"
                \"% Time constant   = # s\\n\"
                \"% Phase           = #\\n\"
                \"% Mod. frequency  = # kHz\\n\"
-               \"% Mod. amplitude  = # kHz\\n%\\n\",
+               \"% Mod. amplitude  = # kHz\\n\"
+			   \"% Field at start  = # G\\n%\\n\",
        start_freq * 1.0e-6, end_freq * 1.0e-6, step_freq * 1.0e-3,
        lockin_sensitivity( ), tc, lockin_phase( ), mod_freq * 1.0e-3,
-       mod_ampl * 1.0e-3 );
+       mod_ampl * 1.0e-3, measure_field( ) );
 save_comment( File_2, \"% \" );
-save_program( File_2, \"% \" );\n\n";
+save_program( File_2, \"% \" );
+
+B1 = button_create( \"PUSH_BUTTON\", \"Pause before next run\" );
+OO1 = output_create( \"INT_OUTPUT\", \"Number of runs\" );
+OO2 = output_create( \"FLOAT_OUTPUT\", \"RF Frequency [MHz]\" );\n\n";
 
 print F "
 
 FOR I = 1 : N_runs
 {
+    output_value( OO1, I );
+    output_value( OO2, start_freq * 1.0e-6 );
+
+    IF button_state( B1 ) {
+        WHILE button_state( B1 ) {
+            wait( 0.5 s );
+        }
+    }
+
 	print( \"Starting #. run out of #\\n\", I, N_runs );
 
 	FOR J = 1 : N_points
 	{
 		data[ J ] = lockin_get_data( );
 		display( J, data[ J ], 1, J, ( mean_data[ J ] + data[ J ] ) / I, 2 );
-		synthesizer_frequency( start_freq + J * step_freq );
-		wait( tc );
+        IF J < N_points {
+			synthesizer_frequency( start_freq + J * step_freq );
+            output_value( OO2, ( start_freq  + J * step_freq ) * 1.0e-6 );
+        }
+		wait( $tc_fac * tc );
 	}
 
 	save( File_1, data );
 	mean_data += data;
 	K = I;
 	synthesizer_frequency( start_freq );
+    output_value( OO2, start_freq * 1.0e-6 );
 }
 
 
@@ -689,6 +760,30 @@ sub do_checks {
 		return -1;
 	}
 
+	if ( $tc_fac < 1 ) {
+		$text = "Waiting time factor too small.";
+		&show_message( $text );
+		return -1;
+	}
+
+	if ( $table !~ /^$/ and ! -e $table ) {
+		$text = "Table file \"$table\" does not exist.";
+		&show_message( $text );
+		return -1;
+	}
+
+	if ( $table !~ /^$/ and ! -r $table ) {
+		$text = "No permission to read table file \"$table\".";
+		&show_message( $text );
+		return -1;
+	}
+
+	if ( $table !~ /^$/ and ! -f $table ) {
+		$text = "\"$table\" is not a plain file.";
+		&show_message( $text );
+		return -1;
+	}
+
 	return 0;
 }
 
@@ -703,3 +798,164 @@ sub show_message {
 	                 '-title' => 'Error',
                      '-message' => $text );
 }
+
+
+################################################################
+################################################################
+
+package fsc2_filesel;
+
+use Tk;
+use strict;
+use warnings;
+
+my $cur_dir;
+my $cur_file;
+
+BEGIN {
+    $cur_dir = `pwd`;
+    chomp $cur_dir;
+}
+
+sub show {
+    my ( $top, $file ) = @_;
+
+    my $selected = undef;
+
+    if ( defined $file and $file =~ m|^((.*?)/)?([^/]+)$|o ) {
+        $cur_file = $3;
+        $cur_dir = $2 ne "" ? $2 : $1 if defined $1;
+    } else {
+        $cur_file = "";
+    }
+
+    my %fs;
+
+    $fs{ top } = $top->Toplevel( '-title' => 'File Select' );
+    $fs{ top }->grab;
+    $fs{ dir } = $fs{ top }->Entry( -textvariable => \$cur_dir,
+                                    -width => 35
+                                  )->pack( -side => 'top',
+                                           -fill => 'x',
+                                           -padx => '2m',
+                                           -pady => '1m',
+                                         );
+    $fs{ list } = $fs{ top }->Scrolled( 'Listbox',
+                                        -selectmode => 'single',
+                                        -scrollbars => 'osoe',
+                                      )->pack( -side => 'top',
+                                               -fill => 'both',
+                                               -anchor => 's',
+                                               -padx => '2m',
+                                               -pady => '1m',
+                                               -expand => 1 );
+    populate_fs( $fs{ list }, $cur_dir );
+    $fs{ file } = $fs{ top }->Entry( -textvariable => \$cur_file
+                                   )->pack( -side => 'top',
+                                            -fill => 'x',
+                                            -padx => '2m',
+                                            -pady => '1m'
+                                          );
+    $fs{ frame } = $fs{ top }->Frame( )->pack( -side => 'bottom' );
+    $fs{ frame }->Button( -text => 'Cancel',
+                          -command => sub { $selected = "" }
+                        )->pack( -side => 'left',
+                                 -padx => '2m',
+                                 -pady => '1m'
+                               );
+    $fs{ frame }->Button( -text => 'Rescan',
+                          -command => [ \&populate_fs, $fs{ list },
+                                        $cur_dir ]
+                        )->pack( -side => 'left',
+                                 -padx => '2m',
+                                 -pady => '1m'
+                                             );
+    $fs{ frame }-> Button( -text => '  Ok  ',
+                           -command => sub { $selected = $cur_file }
+                         )->pack( -side => 'right',
+                                  -padx => '2m',
+                                  -pady => '1m'
+                                );
+    $fs{ list }->bind( '<ButtonPress-1>' =>
+                       [ \&new_selection, $fs{ list }, Ev( 'y' ) ] );
+    $fs{ top }->bind( '<ButtonPress-4>' =>
+                       sub { $fs{ list }->yview( scroll => -1, 'units' ) } );
+    $fs{ top }->bind( '<Up>' =>
+                       sub { $fs{ list }->yview( scroll => -1, 'units' ) } );
+    $fs{ top }->bind( '<Prior>' =>
+                       sub { $fs{ list }->yview( scroll => -1, 'page' ) } );
+    $fs{ top }->bind( '<ButtonPress-5>' =>
+                       sub { $fs{ list }->yview( scroll => 1, 'units' ) } );
+    $fs{ top }->bind( '<Down>' =>
+                       sub { $fs{ list }->yview( scroll => 1, 'units' ) } );
+    $fs{ top }->bind( '<Next>' =>
+                       sub { $fs{ list }->yview( scroll => 1, 'page' ) } );
+    $fs{ top }->bind( '<Home>' => sub { $fs{ list }->yview( 0 ) } );
+    $fs{ top }->bind( '<End>' =>
+                      sub { $fs{ list }->yview( $fs{ list }->size - 1 ) } );
+    $fs{ top }->bind( '<Delete>' => sub { $selected = "" } );
+    $fs{ top }->bind( '<BackSpace>' => sub { $selected = "" } );
+    $fs{ top }->bind( '<Return>' => sub { $selected = $cur_file } );
+    $fs{ top }->bind( '<Tab>' =>
+                      sub { populate_fs( $fs{ list }, $cur_dir ) } );
+
+    $fs{ top }->waitVariable( \$selected );
+    $fs{ top }->destroy;
+    return undef if $selected =~ /^$/o;
+    if ( $cur_dir =~ m|^/$|o ) {
+        return "/$selected";
+    } else {
+        return "$cur_dir/$selected";
+    }
+}
+
+
+#############################################
+
+sub new_selection {
+    my ( $d, $l, $y ) = @_;
+    my $sel = $l->get( $l->nearest( $y ) );
+    if ( $sel =~ /^d (.*)$/o ) {
+        my $dir = $1;
+        $cur_file = "";
+        return if $dir =~ /^\.$/o;
+        if ( $dir =~ /^\.\.$/o ) {
+            $cur_dir =~ s|^(.*?)/[^/]+$|$1|;
+            $cur_dir = "/" if $cur_dir =~ /^$/o;
+            populate_fs( $l, $cur_dir );
+        }
+        else {
+            if ( $cur_dir =~ m|^/$|o ) {
+                $cur_dir .= "$dir";
+            } else {
+                $cur_dir .= "/$dir";
+            }
+            populate_fs( $l, $cur_dir );
+        }
+    } else {
+        $cur_file = $sel;
+        $cur_file =~ s/^[l ] (.*)$/$1/o;
+    }
+}
+
+
+#############################################
+
+sub populate_fs {
+    my ( $list, $dir ) = @_;
+
+    $list->delete( 0, 'end' );
+    my @ls = `ls -a $dir`;
+    for ( @ls ) {
+        chomp;
+        next unless -d "$dir/$_";
+        $list->insert( 'end', "d $_" );
+        undef $_;
+    }
+
+    for ( @ls ) {
+        $list->insert( 'end', "  $_" ) if defined;
+    }
+}
+
+1;
