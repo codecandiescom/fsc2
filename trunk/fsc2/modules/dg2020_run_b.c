@@ -127,9 +127,9 @@ void dg2020_do_checks( FUNCTION *f )
 							"base.\n", Fname, Lc, pulser_struct.name, 
 							Function_Names[ f->self ] );
 				else
-					eprint( SEVERE, "%s:%ld: %s: Pulse sequence for function "
+					eprint( FATAL, "%s:%ld: %s: Pulse sequence for function "
 							"`%s' is too long. You could try to set a higher "
-							"MAXIMUM_PATTER_LENGTH.\n", Fname, Lc,
+							"MAXIMUM_PATTERN_LENGTH.\n", Fname, Lc,
 							pulser_struct.name, Function_Names[ f->self ] );
 				THROW( EXCEPTION );
 			}
@@ -194,17 +194,31 @@ static void dg2020_defense_twt_check( void )
 
 			if ( twt_p->pos < defense_p->pos &&
 				 twt_p->len + twt_p->pos + twt_2_defense > defense_p->pos )
-				eprint( SEVERE, "%s:%ld: %s: TWT_GATE pulse %ld gets "
-						"dangerously near to DEFENSE pulse %ld.\n",
-						Fname, Lc, pulser_struct.name, twt_p->num,
-						defense_p->num );
+			{
+				if ( dg2020_IN_SETUP )
+					eprint( SEVERE, "%s: TWT_GATE pulse %ld gets dangerously "
+							"near to DEFENSE pulse %ld.\n", pulser_struct.name,
+							twt_p->num, defense_p->num );
+				else
+					eprint( SEVERE, "%s:%ld: %s: TWT_GATE pulse %ld gets "
+							"dangerously near to DEFENSE pulse %ld.\n",
+							Fname, Lc, pulser_struct.name, twt_p->num,
+							defense_p->num );
+			}
 
 			if ( twt_p->pos > defense_p->pos &&
 				 defense_p->pos + defense_p->len + defense_2_twt > twt_p->pos )
-				eprint( SEVERE, "%s:%ld: %s: DEFENSE pulse %ld gets "
-						"dangerously near to TWT_GATE pulse %ld.\n",
-						Fname, Lc, pulser_struct.name, defense_p->num,
-						twt_p->num );
+			{
+				if ( dg2020_IN_SETUP )
+					eprint( SEVERE, "%s: DEFENSE pulse %ld gets dangerously "
+							"near to TWT_GATE pulse %ld.\n",
+							pulser_struct.name, defense_p->num, twt_p->num );
+				else
+					eprint( SEVERE, "%s:%ld: %s: DEFENSE pulse %ld gets "
+							"dangerously near to TWT_GATE pulse %ld.\n",
+							Fname, Lc, pulser_struct.name, defense_p->num,
+							twt_p->num );
+			}
 		}
 	}
 }

@@ -149,9 +149,9 @@ void dg2020_do_checks( FUNCTION *f )
 							"base.\n", Fname, Lc, pulser_struct.name,
 							Function_Names[ f->self ] );
 				else
-					eprint( SEVERE, "%s:%ld: %s: Pulse sequence for function "
+					eprint( FATAL, "%s:%ld: %s: Pulse sequence for function "
 							"`%s' is too long. You could try to set a higher "
-							"MAXIMUM_PATTER_LENGTH.\n", Fname, Lc,
+							"MAXIMUM_PATTERN_LENGTH.\n", Fname, Lc,
 							pulser_struct.name, Function_Names[ f->self ] );
 				THROW( EXCEPTION );
 			}
