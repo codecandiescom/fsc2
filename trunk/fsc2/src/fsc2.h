@@ -141,7 +141,7 @@ char *Fname = NULL;          /* name of currently parsed file */
 const char *Cur_Func = NULL; /* name of currently executed function */
 Compilation compilation;     /* structure with infos about compilation state */
 Prg_Token *prg_token = NULL; /* array with predigested program */
-long prg_length = 0;         /* number of array elements in predigested
+long prg_length = -1;        /* number of array elements in predigested
 								program */
 Prg_Token *cur_prg_token;    /* index of currently handled element in
 								predigested program */

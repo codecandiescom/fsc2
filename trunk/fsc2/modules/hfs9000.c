@@ -27,6 +27,9 @@
 #include "hfs9000.h"
 #include "gpib_if.h"
 
+const char generic_type[ ] = "pulser";
+
+
 
 /*----------------------------------------------------------------------
   This function is called directly after all modules are loaded. It

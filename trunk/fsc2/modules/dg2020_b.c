@@ -28,6 +28,7 @@
 #include "dg2020_b.h"
 #include "gpib_if.h"
 
+const char generic_type[ ] = "pulser";
 
 
 /*---------------------------------------------------------------------------

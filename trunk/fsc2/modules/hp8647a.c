@@ -28,6 +28,9 @@
 #include "gpib_if.h"
 
 
+const char generic_type[ ] = "synthesizer";
+
+
 static HP8647A hp8647a_backup;
 
 

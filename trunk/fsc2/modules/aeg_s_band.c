@@ -34,6 +34,8 @@
 
 #include "aeg_s_band.conf"
 
+const char generic_type[ ] = "magnet";
+
 
 /* Exported functions */
 

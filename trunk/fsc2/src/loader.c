@@ -40,6 +40,7 @@ static void resolve_functions( Device *dev );
 static void add_function( int index, void *new_func, Device *new_dev,
 						  int num_new );
 static int func_cmp( const void *a, const void *b );
+static void resolve_generic_type( Device *dev );
 
 
 /*------------------------------------------------------------------------*/
@@ -214,6 +215,7 @@ static void load_functions( Device *dev )
 
 	resolve_hook_functions( dev, dev_name );
 	resolve_functions( dev );
+	resolve_generic_type( dev );
 }
 
 
@@ -470,6 +472,24 @@ static void add_function( int index, void *new_func, Device *new_dev,
 }
 
 
+/*----------------------------------------------------------------------*/
+/* In each device module a generic type string should be defined. This  */
+/* string should be the same for devices with the same function, i.e.   */
+/* for all lock-in amplifiers the string is "lockin" etc. Here we try   */
+/* to get a pointer to this string from the library. If none exists the */
+/* pointer is set to NULL.                                              */
+/*----------------------------------------------------------------------*/
+
+static void resolve_generic_type( Device *dev )
+{
+	dev->generic_type = ( const char * ) dlsym( dev->driver.handle,
+												"generic_type" );
+
+	if ( dlerror( ) != NULL )            /* symbol not found in library ? */
+		dev->generic_type = NULL;
+}
+
+
 /*-------------------------------------------------------*/
 /* Functions runs the test hook functions of all modules */
 /*-------------------------------------------------------*/
@@ -633,6 +653,54 @@ int get_lib_symbol( const char *from, const char *symbol, void **symbol_ptr )
 		return LIB_ERR_NO_SYM;
 
 	return LIB_OK;
+}
+
+
+/*------------------------------------------------------------------------*/
+/* This routine expects the name of a device and returns the the position */
+/* in the list of devices with the same function, as indicated by the     */
+/* generic type string. I.e., if you have loaded modules for three lock-  */
+/* in amplifiers and you pass this function the name of one of them it    */
+/* looks at the sequence the devices were listed in the DEVICES section   */
+/* and returns the sequence number of the device, in this case either 1,  */
+/* 2 or 3. In case of errors (or if the devices generic_type string isn't */
+/* set) the funtion returns 0.                                            */
+/*------------------------------------------------------------------------*/
+
+int get_lib_number( const char *name )
+{
+	Device *cd;
+	Device *sd = NULL;                   /* the device we're looking for */
+	int num = 1;
+
+
+	for ( cd = Device_List; cd != 0; cd = cd->next )
+		if ( cd->is_loaded && cd->generic_type != NULL &&
+			 ( ! strcmp( cd->name, name ) || 
+			   ( strchr( cd->name, '/' ) != NULL &&
+				 ! strcmp( strrchr( cd->name, '/' ) + 1, name ) ) ) )
+		{
+			sd = cd;
+			break;
+		}
+
+	if ( cd == NULL || sd == NULL )
+		return 0;
+
+	for ( cd = Device_List; cd != 0; cd = cd->next )
+	{
+		if ( ! cd->is_loaded )
+			continue;
+
+		if ( cd == sd )             /* searched for device found -> finished */
+			return num;
+
+		if ( cd->generic_type != NULL &&
+			 ! strcmp( cd->generic_type, sd->generic_type ) )
+			num++;
+	}
+
+	return 0;
 }
 
 

@@ -30,6 +30,9 @@
 
 #define DEVICE_NAME "SR810"
 
+const char generic_type[ ] = "lockin";
+
+
 #define NUM_ADC_PORTS         4
 #define NUM_DAC_PORTS         4
 #define DAC_MAX_VOLTAGE       10.5

@@ -31,6 +31,8 @@
 
 #include "egg4402.conf"
 
+const char generic_type[ ] = "boxcar";
+
 
 /* Declaration of exported functions */
 

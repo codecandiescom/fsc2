@@ -28,6 +28,9 @@
 
 #define DEVICE_NAME "LAKESHORE330"    /* compare entry in /etc/gpib.conf ! */
 
+const char generic_type[ ] = "temperature_controller";
+
+
 #define SAMPLE_CHANNEL_A       0
 #define SAMPLE_CHANNEL_B       1
 #define DEFAULT_SAMPLE_CHANNEL SAMPLE_CHANNEL_B

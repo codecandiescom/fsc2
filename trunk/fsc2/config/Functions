@@ -66,7 +66,7 @@ magnet_use_dac_port, 1, PREP;   // to set the lock-ins DAC port to be used
 
 // Functions exported by the field meter drivers (BH15, ER035M)
 
-gaussmeter_name, 0, ALL;        // returns the device name
+field_name, 0, ALL;             // returns the device name
 find_field, 0, EXP;             // return current field value
 field_resolution, 0, EXP;       // returns resolution of field meter
 field_meter_wait, 0, EXP;       // wait for field to stabilize

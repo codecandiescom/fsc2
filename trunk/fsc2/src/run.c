@@ -80,11 +80,14 @@ bool run( void )
 	struct sigaction sact;
 
 
-	/* If there are no commands we just run all the init hooks, then
-	   the exit hooks and then are already done */
+	/* If there are no commands but a EXPERIMENT section label we just run
+	   all the init hooks, then the exit hooks and then are already done.
+	   If, on the other hand, there isn't even an EXPERIMENT section label
+	   (as indicated by prg_length being negative) we just return without
+	   doing anything at all. */
 
-	if ( prg_token == NULL || prg_length == 0 )
-		return no_prog_to_be_run( );
+	if ( prg_token == NULL || prg_length <= 0 )
+		return prg_length < 0 ? OK : no_prog_to_be_run( );
 
 	/* There can't be more than one experiment - so quit if child_pid != 0 */
 
@@ -223,7 +226,7 @@ static bool no_prog_to_be_run( void )
 	fl_set_cursor( FL_ObjWin( main_form->run ), XC_watch );
 	set_buttons_for_run( 0 );
 
-	if ( need_GPIB && gpib_init( NULL, LL_ALL ) == FAILURE )
+	if ( need_GPIB && gpib_init( GPIB_LOG_FILE, GPIB_LOG_LEVEL ) == FAILURE )
 	{
 		eprint( FATAL, UNSET, "Can't initialize GPIB bus: %s\n",
 				gpib_error_msg );

@@ -24,6 +24,10 @@
 
 #include "fsc2.h"
 
+
+const char generic_type[ ] = "User_Functions";
+
+
 Var *get_phase_cycled_area( Var *v );
 Var *get_phase_cycled_area_2( Var *v );
 

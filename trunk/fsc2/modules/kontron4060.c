@@ -30,6 +30,8 @@
 
 #define DEVICE_NAME "KONTRON4060"
 
+const char generic_type[ ] = "voltmeter";
+
 
 /* Declaration of exported functions */
 

@@ -366,6 +366,7 @@ int experiment_parser( FILE *in )
 	}
 	compilation.sections[ EXPERIMENT_SECTION ] = SET;
 
+	prg_length = 0;
 	store_exp( in );
 	exp_test_run( );
 

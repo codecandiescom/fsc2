@@ -353,7 +353,10 @@ int gpib_init_device( const char *device_name, int *dev )
     if ( ll > LL_ERR )
         gpib_log_function_start( "gpib_init_device", device_name );
 
-    cur_dev->number = gpib_find( ( char * ) device_name );
+	if ( strcmp( device_name, CONTROLLER ) )
+		cur_dev->number = gpib_find( ( char * ) device_name );
+	else
+		cur_dev->number = gpib_find( NULL );
 
     if ( cur_dev->number < 0 || gpib_status & GPIB_ERR )
 	{

@@ -27,6 +27,8 @@
 
 #include "tds540.h"
 
+const char generic_type[ ] = "digitzer";
+
 
 static Var *get_area( Var *v, bool use_cursor );
 static Var *get_curve( Var *v, bool use_cursor );

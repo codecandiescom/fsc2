@@ -35,6 +35,8 @@
 
 #define DEVICE_NAME "SR530"
 
+const char generic_type[ ] = "lockin";
+
 
 /* declaration of exported functions */
 

@@ -29,6 +29,8 @@
 
 #include "bh15.conf"
 
+const char generic_type[ ] = "field";
+
 
 int bh15_init_hook( void );
 int bh15_test_hook( void );
@@ -36,8 +38,7 @@ int bh15_exp_hook( void );
 int bh15_end_of_exp_hook( void );
 void bh15_exit_hook( void );
 
-Var *gaussmeter_name( Var *v );
-Var *gaussmeter_field( Var *v );
+Var *field_name( Var *v );
 Var *find_field( Var *v );
 Var *field_resolution( Var *v );
 Var *field_meter_wait( Var *v );
@@ -245,7 +246,7 @@ void bh15_exit_hook( void )
 /*--------------------------------------------------------*/
 /*--------------------------------------------------------*/
 
-Var *gaussmeter_name( Var *v )
+Var *field_name( Var *v )
 {
 	v = v;
 	return vars_push( STR_VAR, DEVICE_NAME );

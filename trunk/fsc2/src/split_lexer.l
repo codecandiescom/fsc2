@@ -173,15 +173,22 @@ bool scan_main( char *file )
 		return FAIL;
 	}
 
-	/* Filter input through "fsc2_clean" (must be located in `libdir') */
+	/* Filter input through "fsc2_clean" (must be located in `bindir') */
 
-	cmd = get_string( strlen( libdir ) + strlen( "/fsc2_clean " )
+	cmd = get_string( strlen( bindir ) + strlen( "/fsc2_clean " )
 	                  + strlen( file ) );
-	strcpy( cmd, libdir );
-	if ( libdir[ strlen( libdir ) - 1 ] != '/' )
+	strcpy( cmd, bindir );
+	if ( bindir[ strlen( bindir ) - 1 ] != '/' )
 		strcat( cmd, "/" );
 	strcat( cmd, "fsc2_clean " );
 	strcat( cmd, file );
+
+	/* Setting the program length (i.e. the length of the pre-digested
+	   EXPERIMENT section to -1 means that no EXPERIMENT section has been
+	   found yet.
+	*/
+
+	prg_length = -1;
 
 	sact.sa_handler = SIG_IGN;
 	sigaction( SIGCHLD, &sact, &oact );
