@@ -99,7 +99,7 @@ LIBS           = -L/usr/X11R6/lib -L/usr/local/lib -lforms -lX11 \
 				 # -lefence   # to run with efence
 BISON          = bison
 BISONFLAGS     = -d -v -t -p
-AFLEX           = flex
+FLEX           = flex
 FLEXFLAGS      = -B -P
 RM             = rm
 RMFLAGS        = -f
