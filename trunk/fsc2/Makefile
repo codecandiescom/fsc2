@@ -33,7 +33,7 @@ CFLAGS         = -ggdb -Wall -Wwrite-strings -Wstrict-prototypes \
 				 # -DMAX_DEBUG # for debugging of digitizer
 
 LIBS           = -L/usr/X11R6/lib -lforms -lX11 -lgpib -lfl -lm -ldl \
-				  -lmcheck   # for malloc debugging
+				 #  -lmcheck   # for malloc debugging
 LDFLAGS        = -Wl,-E
 BISON          = bison
 BISONFLAGS     = -d -v -t -p
