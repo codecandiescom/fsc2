@@ -2176,7 +2176,7 @@ Var *f_display( Var *v )
 
 	/* Using a pause() here is tempting but there's a race condition -
 	   'do_send' may be set while the pause tests are under way. This isn't
-	   just paranoia but happens more often than I imagened... */
+	   just paranoia but happens more often than I imagined... */
 
 	while ( ! do_send )             /* wait for parent to become ready */
 		usleep( 50000 );
@@ -2557,7 +2557,7 @@ Var *f_clearcv( Var *v )
 
 	/* Using a pause() here is tempting but there's a race condition -
 	   'do_send' may be set while the pause tests are under way. This isn't
-	   just paranoia but happens more often than I imagened... */
+	   just paranoia but happens more often than I imagined... */
 
 	while ( ! do_send )             /* wait for parent to become ready */
 		usleep( 50000 );
