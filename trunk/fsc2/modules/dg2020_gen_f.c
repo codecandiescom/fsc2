@@ -663,7 +663,7 @@ bool dg2020_phase_setup( int func )
 							"setup of phase functions.", Fname, Lc,
 							pulser_struct.name );
 				else
-					eprint( FATAL, "%s:%ld: $s: Incomplete data for phase "
+					eprint( FATAL, "%s:%ld: %s: Incomplete data for phase "
 							"setup of function `%s'.", Fname, Lc,
 							pulser_struct.name, func == 0 ?
 							Function_Names[ PULSER_CHANNEL_PHASE_1 ] :

@@ -81,8 +81,8 @@ int dg2020_b_init_hook( void )
 	pulser_struct.get_pulse_length_change = dg2020_get_pulse_length_change;
 	pulser_struct.get_pulse_phase_cycle = dg2020_get_pulse_phase_cycle;
 
-	pulser_struct.phase_setup_prep = dg2020_setup_phase_prep;
-	pulser_struct.phase_setup = dg2020_setup_phase;
+	pulser_struct.phase_setup_prep = dg2020_phase_setup_prep;
+	pulser_struct.phase_setup = dg2020_phase_setup;
 
 	pulser_struct.set_phase_switch_delay = NULL;
 
