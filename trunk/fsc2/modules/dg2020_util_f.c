@@ -579,7 +579,11 @@ void dg2020_dump_channels( FILE *fp )
 				p = f->pulses[ k ];
 				if ( ! p->is_active || f->channel[ next_phase ] != p->channel )
 					continue;
-				fprintf( fp, " %ld %ld %ld", p->num, p->pos, p->len );
+				if ( p->num < 0 )
+					fprintf( fp, " %ld %ld (%ld)",
+							 p->for_pulse->num, p->pos, p->len );
+				else
+					fprintf( fp, " %ld %ld %ld", p->num, p->pos, p->len );
 			}
 			fprintf( fp, "\n" );
 
@@ -590,7 +594,11 @@ void dg2020_dump_channels( FILE *fp )
 				p = f->pulses[ k ];
 				if ( ! p->is_active || f->channel[ next_phase ] != p->channel )
 					continue;
-				fprintf( fp, " %ld %ld %ld", p->num, p->pos, p->len );
+				if ( p->num < 0 )
+					fprintf( fp, " %ld %ld (%ld)",
+							 p->for_pulse->num, p->pos, p->len );
+				else
+					fprintf( fp, " %ld %ld %ld", p->num, p->pos, p->len );
 			}
 			fprintf( fp, "\n" );
 
