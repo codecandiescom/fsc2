@@ -748,20 +748,21 @@ static bool spectrapro_300i_comm( int type, ... )
 			   non-blocking mode to avoid hanging indefinitely if the other
 			   side does not react. O_NOCTTY is set because the serial port
 			   should not become the controlling terminal, otherwise line
-			   noise read as a CTRL-C might kill the program. */
+			   noise read as CTRL-C might kill the program. */
 
 			if ( ( spectrapro_300i.tio = fsc2_serial_open( SERIAL_PORT,
 					    DEVICE_NAME,
 						O_RDWR | O_EXCL | O_NOCTTY | O_NONBLOCK ) ) == NULL )
 				return FAIL;
 
-			/* Switch off parity checking (8N1) and use of 2 stop bits and
-			   clear character size mask, set character size mask to CS8 and
-			   the flag for ignoring modem lines, enable reading and, finally,
-			   set the baud rate. */
+			/* Set transfer mode to 8 bit, no parity and 1 stop bit (8N1)
+			   and ignore control lines, don't use flow control. */
 
-			spectrapro_300i.tio->c_cflag &= ~ ( PARENB | CSTOPB | CSIZE );
-			spectrapro_300i.tio->c_cflag |= CS8 | CLOCAL | CREAD;
+			spectrapro_300i.tio->c_cflag  = 0;
+			spectrapro_300i.tio->c_cflag  = CLOCAL | CREAD | CS8;
+			spectrapro_300i.tio->c_iflags = IGNBRK;
+			spectrapro_300i.tio->c_oflags = 0;
+			spectrapro_300i.tio->c_lflags = 0;
 			cfsetispeed( spectrapro_300i.tio, SERIAL_BAUDRATE );
 			cfsetospeed( spectrapro_300i.tio, SERIAL_BAUDRATE );
 
