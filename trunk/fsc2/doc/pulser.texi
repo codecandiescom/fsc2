@@ -550,8 +550,6 @@ second one.
 @subsubsection Phase channel setup
 @cindex Phase channel setup
 @cindex @code{PHASE_SETUP}
-@cindex @code{PHASE_SWITCH_DELAY}
-@cindex @code{GRACE_PERIOD}
 
 Please note that a phase channel setup can only be done with the
 @strong{Sony/Tektronix DG2020} and the @strong{Bruker EP385} pulsers and
@@ -655,136 +653,13 @@ be done later is to create the microwave pulses and define the sequence
 of phases for the pulses. The program will automatically create the
 pulses necessary to set the phases of the microwave pulses.
 
-One further information that is needed is the time the phase switch has
-to be set to a new phase before the microwave pulses (or other phase
-cycled pulses) start (the phase switch needs some small amount of time
-to settle). This time can be set via a statement like
-@example
-PHASE_SWITCH_DELAY: 40ns;
-@end example
-@noindent
-This will lead to the phase pulse being switched at least @w{40 ns}
-before the real pulse starts. When this statement is missing a default
-value of @w{20 ns} is used. If there are two different phase functions
-(e.g.@: if two different pulse functions need phase cycling) the phase
-switch delay can be set individually for each of them by using
-@code{PHASE_SWITCH_DELAY_1} and @code{PHASE_SWITCH_DELAY_2} (setting the
-phase switch delay for the phase pulses created for phase function 1 and
-2).
+You can also specify how long phase pulses start before the pulse
+they are made for and how much longer they are supposed to last by using
+the functions @code{pulser_phase_switch_delay()} and
+@code{pulser_grace_period()} (these functions replace the deprectated
+but still supported keywords @code{PHASE_SWITCH_DELAY} and
+@code{GRACE_PERIOD} in the @code{ASSIGNMENTS} section).
 
-And, finally, one may specify how long the phase pulse should remain
-switched on after the end of a pulse. This is called the grace period
-and is set via
-@example
-GRACE_PERIOD: 20ns;
-@end example
-@noindent
-Without this statement a default grace period of @w{10 ns} will be
-used.
-
-Here's a diagram that shows the phase switch delay and the grace period
-(again assuming that the microwave pulses are to be phase-cycled):
-@example
-                   ____________________________
-                  |                            |
-Phase pulse       |                            |
-             _____|                            |_________
-                           _________________
-                          |                 |
-Microwave pulse           |                 |
-             _____________|                 |____________
-         
-                ->|       |<-             ->|  |<-
-               phase switch delay        grace period
-@end example
-
-
-When the program does its tests it will always check if the distances
-between the pulses are large enough to allow setting the phase
-pulses. If the pulse distances get very small it may drop the grace
-period but the phase switch delay will always be there (or the program
-will abort with an error message).
-
-To all of these keywords a @code{#} character plus the pulser number
-must be added when more than one pulser is used.
-
-
-@c ########################################################
-
-@anchor{Maximum pulse pattern length}
-@subsubsection Maximum pulse pattern length
-@cindex Maximum pulse pattern length
-@cindex @code{MAXIMUM_PATTERN_LENGTH}
-
-In most cases the program will be able to figure out automatically how
-long the length of the longest pulse pattern in the experiment is going
-to be when doing the test run. The longest pulse pattern length is
-needed to set up the pulser correctly. Unfortunately, there are certain
-syntax constructs that make it difficult or even impossible to find out
-this maximum pattern length. These constructs are @code{FOREVER} loops
-and sometimes cases, where changes of pulse positions or lengths are
-done within @code{IF-ELSE} or @code{UNLESS-ELSE} constructs (please also
-see the discussion of the problems introduced by @code{FOREVER} loops
-and @code{IF} and @code{ELSE} constructs, @pxref{Control structures}).
-
-Whenever there is a reason to suspect that these problems may occur one
-can set the maximum pulse pattern length manually (i.e.@: the end point
-of the last pulse when it has been set to its latest position in the
-experiment. This is done by a statement in the @code{ASSIGNMENTS} section
-starting with the @code{MAXIMUM_PATTERN_LENGTH} keyword@footnote{In
-@code{MAXIMUM_PATTERN_LENGTH} @code{MAXIMUM} can be abbreviated to
-@code{MAX}, @code{PATTERN} to @code{PATT} and @code{LENGTH} to
-@code{LEN}. The intermediate underscore characters are also optional.}:
-@example
-MAXIMUM_PATTERN_LENGTH: 1.2 us
-@end example
-@noindent
-This will tell the program to expect a maximum pattern length of 1.2
-micro-seconds. Unless in the test run a longer pattern length is found,
-this value is used. It is not a problem to specify too long a maximum
-pattern length, so a conservative guess will do. The only penalty
-incurred is are longer times needed to set up the pulser at the
-start of the experiment. On the other hand, too short a pattern length
-will lead to the experiment being stopped with an error message when the
-actual pattern length becomes larger than the one specified.
-
-For the @strong{Bruker EP385} no maximum pattern length can be
-specified, it is fixed to 32768 times the clocks oscillation period
-(i.e.@: @w{262.144 us} when using the internal clock).
-
-Because the @strong{Interface Technology RS690} uses a rather different
-concept in principle there is no maximum pattern length.
-
-When more than one pulser is used you may to append a @code{#} character
-plus the pulser number to the @code{MAXIMUM_PATTERN_LENGTH} keyword to
-indicate for which pulser it is to be used.
-
-
-@c ########################################################
-
-@anchor{Keeping unused pulses}
-@subsubsection Keeping unused pulses
-@cindex Keeping unused pulses
-@cindex @code{KEEP_ALL_PULSES}
-
-Usually pulses that in the test run are found to be unused are deleted
-and a warning message is printed indicating this. Any further reference
-to or use of these deleted pulses leads to the immediate termination of
-the experiment. But there are a few situations where it can't be
-detected in the test run that a pulse is actually needed (e.g.@: if it
-is only used in an untestable @code{IF} construct) and thus the pulse
-gets deleted even though it is needed. In this case you have to force
-the program to keep all pulses even if they seem to be unused. This is
-done by specifying the keyword @code{KEEP_ALL_PULSES} in the
-@code{ASSIGNMENTS} section, i.e.@: just write
-@example
-KEEP_ALL_PULSES;
-@end example
-@noindent
-and pulses will not be deleted even if they seem to be unused.
-
-Again, when dealing with more than one pulser an additional @code{#}
-character followed by the pulser number may be needed.
 
 
 @c ########################################################

@@ -495,6 +495,31 @@ Var *pulser_dump_pulses( Var *v )
 }
 
 
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+Var *pulser_keep_all_pulses( Var *v )
+{
+	v = v;
+	hfs9000_keep_all( );
+	return vars_push( INT_VAR, 1 );
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+Var *pulser_maximum_pattern_length( Var *v )
+{
+	double pl;
+
+	pl = get_double( v, "maximum pattern length" );
+	is_mult_ns( pl, "Maximum pattern length" );
+	hfs9000_set_max_seq_len( pl );
+	return vars_push( FLOAT_VAR, hfs9000.max_seq_len * hfs9000.timebase );
+}
+
+
 /*---------------------------------------------*/
 /* Switches the output of the pulser on or off */
 /*---------------------------------------------*/

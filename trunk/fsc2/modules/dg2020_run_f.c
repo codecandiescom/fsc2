@@ -172,12 +172,12 @@ void dg2020_do_checks( FUNCTION *f )
 					print( FATAL, "Pulse sequence for function '%s' does not "
 						   "fit into the pulsers memory. Maybe, you could try "
 						   "a longer pulser time base.\n",
-						   Function_Names[ f->self ] );
+						   f->name );
 				else
 					print( FATAL, "Pulse sequence for function '%s' is too "
-						   "long. Perhaps you should try the "
-						   "MAXIMUM_PATTERN_LENGTH command.\n",
-						   Function_Names[ f->self ] );
+						   "long. Perhaps you should try to use the "
+						   "pulser_maximum_pattern_length() function.\n",
+						   f->name );
 				THROW( EXCEPTION );
 			}
 
@@ -622,8 +622,7 @@ PULSE *dg2020_delete_pulse( PULSE *p )
 		p->function->pulses = PULSE_PP T_free( p->function->pulses );
 
 		print( SEVERE, "Function '%s' isn't used at all because all its "
-			   "pulses are never used.\n",
-				Function_Names[ p->function->self ] );
+			   "pulses are never used.\n", p->function->name );
 		p->function->is_used = UNSET;
 	}
 

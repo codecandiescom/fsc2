@@ -218,8 +218,9 @@ void dg2020_do_checks( FUNCTION *f )
 					   "into the pulsers memory.\n", f->name );
 			else
 				print( FATAL, "Pulse sequence for function '%s' is too long. "
-					   "Perhaps you should try the MAXIMUM_PATTERN_LENGTH "
-					   "command.\n", f->name );
+					   "Perhaps you should try to use the "
+					   "pulser_maximum_pattern_length() function.\n",
+					   f->name );
 			THROW( EXCEPTION );
 		}
 
@@ -368,8 +369,9 @@ static void dg2020_shape_padding_check_1( FUNCTION *f )
 			else
 			{
 				print( SEVERE, "Pulse #%ld too long to set right shape "
-					   "padding of %s. Perhaps you should try the "
-					   "MAXIMUM_PATTERN_LENGTH command.\n", pp->pulse->num,
+					   "padding of %s. Perhaps you should try to use the "
+					   "pulser_maximum_pattern_length() function.\n",
+					   pp->pulse->num,
 					   dg2020_pticks( f->right_shape_padding ) );
 				THROW( EXCEPTION );
 			}
@@ -609,8 +611,9 @@ static void dg2020_twt_padding_check( FUNCTION *f )
 			else
 			{
 				print( FATAL, "Pulse #%ld too long to set right padding of "
-					   "%s for its TWT pulse. Perhaps you should try the "
-					   "MAXIMUM_PATTERN_LENGTH command.\n", pp->pulse->tp->num,
+					   "%s for its TWT pulse. Perhaps you should try to use "
+					   "the pulser_maximum_pattern_length() function.\n",
+					   pp->pulse->tp->num,
 					   dg2020_pticks(
 								pp->pulse->tp->function->right_twt_padding ) );
 				THROW( EXCEPTION );

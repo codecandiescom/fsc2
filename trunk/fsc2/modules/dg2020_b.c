@@ -1034,6 +1034,31 @@ Var *pulser_defense_to_shape_minimum_distance( Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
+Var *pulser_keep_all_pulses( Var *v )
+{
+	v = v;
+	dg2020_keep_all( );
+	return vars_push( INT_VAR, 1 );
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+Var *pulser_maximum_pattern_length( Var *v )
+{
+	double pl;
+
+	pl = get_double( v, "maximum pattern length" );
+	is_mult_ns( pl, "Maximum pattern length" );
+	dg2020_set_max_seq_len( pl );
+	return vars_push( FLOAT_VAR, dg2020.max_seq_len * dg2020.timebase );
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
 Var *pulser_state( Var *v )
 {
 	bool state;

@@ -762,7 +762,6 @@ bool dg2020_set_phase_switch_delay( int func, double del_time )
 bool dg2020_set_grace_period( double gp_time )
 {
 	if ( gp_time < 0 )
-
 	{
 		print( FATAL, "Unreasonable value for grace period: %s.\n",
 			   dg2020_ptime( gp_time ) );

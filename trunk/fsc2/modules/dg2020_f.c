@@ -517,6 +517,73 @@ Var *pulser_dump_pulses( Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
+Var *pulser_phase_switch_delay( Var *v )
+{
+	long func;
+	double psd;
+
+
+	func = get_strict_long( v, "pulser function" );
+	if ( func != PULSER_CHANNEL_PHASE_1 ||
+		 func != PULSER_CHANNEL_PHASE_2 )
+	{
+		print( FATAL, "A phase switch delay can only be set for the two PHASE "
+			   "functions.\n" );
+		THROW( EXCEPTION );
+	}
+
+	psd = get_double( v->next, "phase switch delay" );
+	is_mult_ns( psd, "Phase switch delay" );
+
+	dg2020_set_phase_switch_delay( func, psd );
+	return vars_push( FLOAT_VAR,
+					  dg2020.function[ func ].psd * dg2020.timebase );
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+Var *pulser_grace_period( Var *v )
+{
+	double gp;
+
+	gp = get_double( v, "grace period" );
+	is_mult_ns( gp, "Grace period" );
+
+	dg2020_set_grace_period( gp );
+	return vars_push( FLOAT_VAR, dg2020.grace_period * dg2020.timebase );
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+Var *pulser_keep_all_pulses( Var *v )
+{
+	v = v;
+	dg2020_keep_all( );
+	return vars_push( INT_VAR, 1 );
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+Var *pulser_maximum_pattern_length( Var *v )
+{
+	double pl;
+
+	pl = get_double( v, "maximum pattern length" );
+	is_mult_ns( pl, "Maximum pattern length" );
+	dg2020_set_max_seq_len( pl );
+	return vars_push( FLOAT_VAR, dg2020.max_seq_len * dg2020.timebase );
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
 Var *pulser_state( Var *v )
 {
 	bool state;

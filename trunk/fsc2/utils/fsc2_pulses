@@ -252,8 +252,9 @@ sub new {
 						   $self->{ 'canvas' }->yviewScroll( 1, 'unit' ); } );
 	}
 
-	$f1->pack( '-fill' => 'x' );
-	$self->{ 'canvas' }->pack( '-side' => 'top', '-fill' => 'x' );
+	$f1->pack( '-fill' => 'both', '-expand' => 1 );
+	$self->{ 'canvas' }->pack( '-side' => 'top', '-fill' => 'both',
+							   '-expand' => 1 );
 
 	# Create a second frame with the buttons etc.
 

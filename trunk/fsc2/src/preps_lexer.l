@@ -94,6 +94,8 @@ OI          O(THER)?(_?1)?
 OII         O(THER)?_?2
 OIII        O(THER)?_?3
 OIV         O(THER)?_?4
+PH1         PH(ASE)?(_?1)?
+PH2         PH(ASE)?_?2
 
 INT         [0-9]+
 EXPO        [EDed][+-]?{INT}

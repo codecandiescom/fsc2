@@ -98,8 +98,8 @@ gaussmeter_probe_orientation, -1, ALL;
 gaussmeter_command, 1, EXP;
 
 
-/* Functions exported by the pulser drivers (DG2020, HFS9000)
-   (functions involving phases and keyboard for DG2020 only) */
+/* Functions exported by the pulser drivers (DG2020, HFS9000, EP385, RS690)
+   (functions involving phases and keyboard for DG2020 and RS690 only) */
 
 pulser_name, 0, ALL;            // returns the device name
 pulser_state, -1, ALL;          // switches pulser on/off
@@ -121,6 +121,18 @@ pulser_dump_pulses, 0, PREP;
 pulser_automatic_shape_pulses, -1, PREP;
 pulser_automatic_twt_pulses, -1, PREP;
 pulser_command, 1, EXP;
+
+
+/* Functions exported by DG2020 and HFS9000 only */
+
+pulser_keep_all_pulses, 0, PREP;
+pulser_maximum_pattern_length, 1, PREP;
+
+/* Functions exported by the Frankfurt version of DG2020 only */
+
+pulser_phase_switch_delay, 2, PREP;
+pulser_grace_period, 1, PREP;
+
 
 /* Functions exported by the lock-in amplifier drivers
    (Stanford Research 510, 530, 810, 830, and Bruker ER023M signal channel) */
