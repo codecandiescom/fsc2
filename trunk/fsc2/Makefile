@@ -277,7 +277,6 @@ CFLAGS           := $(OPTIMIZATION) \
 					-Waggregate-return \
 					-Wnested-externs \
 					-Wcast-align \
-					-DLIBC_MDEBUG       # for libc memory debugging
 				    # -DFSC2_MDEBUG       # for built-in malloc debugging
 				    # -DNDEBUG            # switch off built-in debugging code
 				    # -Wconversion
@@ -287,6 +286,13 @@ CFLAGS           := $(OPTIMIZATION) \
 				    # -Wundef             # fails in bison/flex created files
 				    # -ansi               # fails on inline/asm
 				    # -pedantic
+
+
+ifeq ($(shell ls /lib/libc.so.6 2>/dev/null),/lib/libc.so.6)
+CFLAGS           := -DLIBC_MDEBUG       # for libc memory debugging
+endif
+
+
 INCLUDES         :=	-I$(fdir) -I$(adir) -I/usr/X11R6/include \
 					-I/usr/X11R6/include/X11 -I/usr/local/include \
 
