@@ -341,10 +341,6 @@ Var *boxcar_get_curve( Var *v )
 	length = num_points * 15 + 1;
 	buffer = UCHAR_P T_malloc( length );
 
-	/* Set transfer type to ASCII float */
-
-	egg4402_command( "NT 1\n" );
-
 	/* Set the curve to use for the transfer */
 
 	sprintf( cmd, "CRV %ld %ld\n", curve_type, curve_number );
@@ -505,7 +501,6 @@ Var *boxcar_single_shot( Var *v )
 	   and the curve to the first channel */
 
 	egg4402_command( "START\n" );
-	egg4402_command( "NT 1\n" );
 	sprintf( cmd, "CRV %d %ld\n", 0, channel_1 );
 	egg4402_command( cmd );
 	
@@ -525,7 +520,7 @@ Var *boxcar_single_shot( Var *v )
 	/* When at least one point is available pause the acquisition and fetch
 	   a single point */
 
-	egg4402_command( "PAUSE\n" );
+	egg4402_command( "P\n" );
 	egg4402_command( "DC 0 1\n" );
 
 	if ( gpib_read( egg4402.device, reply, &length ) == FAILURE )

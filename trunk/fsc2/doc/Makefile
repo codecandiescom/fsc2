@@ -150,6 +150,7 @@ install:
 	$(INSTALL) -m 444 -o $(OWNER) -g $(GROUP) fsc2*.html $(docdir)/html
 	$(INSTALL) -m 444 -o $(OWNER) -g $(GROUP) fsc2.css $(docdir)/html
 	$(INSTALL) -m 444 -o $(OWNER) -g $(GROUP) $(wildcard *.png) $(docdir)/html
+	$(INSTALL) -m 444 -o $(OWNER) -g $(GROUP) $(wildcard *.gif) $(docdir)/html
 	if [ -f fsc2.ps ]; then                                           \
 		$(INSTALL) -m 444 -o $(OWNER) -g $(GROUP) fsc2.ps $(docdir);  \
 	fi
