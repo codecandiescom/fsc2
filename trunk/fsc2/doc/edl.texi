@@ -33,7 +33,7 @@ An @acronym{EDL} program is roughly structured along the way an
 experiment is done. Before you start an experiment you first have to
 select the devices to be used and set them up. So also the first part of
 an @acronym{EDL} program mainly consists of specifying the devices to be
-controlled by the program and setting their parameter, i.e@: the time
+controlled by the program and setting their parameter, i.e.@: the time
 base of the digitizer or which pulses are to be created by the pulse
 generator.  And as you would now start the experiment the second part of
 the @acronym{EDL} program describes how the experiment is to be done.
@@ -247,7 +247,7 @@ valid section keywords:
 There are a few basic rules about the syntax of @acronym{EDL} programs.
 Each program consists of one or more sections that always start with one
 of the section keywords listed in the previous section. Each keyword has
-to be followed immediately (i.e@: without any spaces, tabulator or
+to be followed immediately (i.e.@: without any spaces, tabulator or
 newline characters in between) by a colon, `@code{:}'.
 
 Each section of the program consists of statements. What a valid
@@ -349,7 +349,7 @@ Variables can be divided into two classes, variables to hold integer
 values and variables for storing floating point values.
 
 Integer variables (on machines with 32-bit processors) can hold data in
-the interval @w{[-2^31, 2^31 - 1]}, i.e. they run from @w{-2147483648}
+the interval @w{[-2^31, 2^31 - 1]}, i.e.@: they run from @w{-2147483648}
 all the way up to @w{+2147483647}. In contrast, floating point variables
 can have much larger values (up to ca.@: 10^300), the exact limits
 depending on the machine @acronym{fsc2} is running on.
@@ -365,7 +365,7 @@ variables start with a lower case character, i.e.@: a-z.
 
 Beside `normal' variables you can also use arrays of variables. The
 types of the arrays follow the same convention as with normal variables,
-i.e@: if the name starts with an upper case character it is an integer
+i.e.@: if the name starts with an upper case character it is an integer
 array, if it starts with a lower case character it is a floating point
 array. To define an array append the sizes of the dimensions of the
 array, separated by commas, in square brackets. E.g.
@@ -502,7 +502,7 @@ digits following the decimal point. Thus, typical results are
 @noindent
 To avoid this truncation convert (see the function @code{float()} below)
 at least one of the values used in the division to floating point type,
-i.e
+i.e.@:
 
 @example
 float( 7 ) / 2 = 3.5    8 / float( 3 ) = 2.666666667
@@ -566,13 +566,13 @@ assignment operators
 
 
 Usually one doesn't think about the precedence of operators. We already
-learned in primary school that multiplication and division has a higher
+learned in primary school that multiplication and division have higher
 precedence than addition or subtraction. Of course, a programming
 language should follow this rules. But sometimes there are cases where
-it is necessary to know exactly the precedence and also in which
+it is necessary to know exactly the precedence, i.e.@: the exact
 sequence an expression is evaluated.
 
-the unary `@code{+}' and '@code{-}' operators have the highest
+The unary `@code{+}' and '@code{-}' operators have the highest
 precedence, i.e.@: the operators defining the sign of a number. There is
 a further operator, to be discussed later, having the same precedence,
 the logical negation operator, `@code{!}'. The evaluation of an
@@ -594,7 +594,7 @@ expression will evaluated from the right to the left:
 
 The operator with the next lower precedence is the modulo operator,
 `@code{%}'. Expressions with more than one `@code{%}' in a row will be
-evaluated left to right, i.e.
+evaluated left to right, i.e.@:
 @example
  31 % 6 % 2    @r{will be treated as if written as}    ( 31 % 6 ) % 2
 @end example
@@ -602,7 +602,7 @@ evaluated left to right, i.e.
 
 Now the multiplication and division operators, `@code{*}' and `@code{/},
 follow. Both have exactly the same precedence and expressions involving
-more than one of these operators are evaluated left to right, i.e.
+more than one of these operators are evaluated left to right, i.e.@:
 @example
  3 * 22 / 7    @r{will be treated as if written as}    ( 3 * 22 ) / 7
 @end example
