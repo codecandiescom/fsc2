@@ -263,14 +263,14 @@ void eprint( int severity, const char *fmt, ... )
 
 
 /*------------------------------------------------------------------------*/
-/* There should be only one instance of fsc2 running (except simple test  */
+/* There can be only one instance of fsc2 running (except simple test     */
 /* runs that only do a syntax check of an EDL program). To check if there */
 /* is another instance already running a lock file is used - the file is  */
-/* created at the very start of the program and a write lock is set on    */
-/* the whole length of the file. Then the PID and user name are written   */
-/* into the lock file. Thus fsc2 can find out who is currently holding    */
-/* the lock and tell the user about it. The lock automatically expires    */
-/* when fsc2 exits (it may also delete the lock file).                    */
+/* created at the start of the program and a write lock is set on the     */
+/* whole length of the file. Then the PID and user name are written into  */
+/* the lock file. Thus fsc2 can find out who is currently holding the     */
+/* lock and tell the user about it. The lock automatically expires when   */
+/* fsc2 exits (on normal termination it will also delete the lock file).  */
 /* To make this work correctly for more then one user the lock file must  */
 /* belong to a special user (e.g. a user named `fsc2' belonging to a      */
 /* group also named `fsc2') and the program belong to this user and have  */
