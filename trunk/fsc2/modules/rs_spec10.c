@@ -607,7 +607,8 @@ Var *ccd_camera_get_spectrum( Var *v )
 		{
 			max_val = ~ ( uns16 ) 0 + 1;
 
-			frame = UNS16_P T_malloc( width * sizeof *frame );
+			size = (uns32 ) ( width * sizeof *frame );
+			frame = UNS16_P T_malloc( size );
 			for ( i = 0; i < width; i++ )
 				frame[ i ] = random( ) % max_val;
 		}
