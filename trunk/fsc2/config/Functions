@@ -97,6 +97,8 @@ measure_field, 0, EXP;          // return field value (ER035M_SA, ER035M_SAS
 								// and PT2025)
 gaussmeter_probe_orientation, -1, ALL;
 gaussmeter_command, 1, EXP;
+gaussmeter_upper_search_limit, -1, ALL;  // er035m family only
+gaussmeter_lower_search_limit, -1, ALL;  // er035m family only
 
 
 /* Functions exported by the pulser drivers (DG2020, HFS9000, EP385, RS690)

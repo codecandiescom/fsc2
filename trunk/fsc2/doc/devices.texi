@@ -559,6 +559,25 @@ direction. On queries the function returns either @code{1} or @code{0}.
 The function can only be called in the @code{EXPERIMENT} section for
 queries.
 
+
+@anchor{gaussmeter_upper_search_limit}
+@item gaussmeter_upper_search_limit()
+@findex gaussmeter_upper_search_limit()
+This function can be called to set of query the upper search limit (in
+Gauss) for the modules @code{er035m}, @code{er035m_s}, @code{er035m_sa}
+and @code{er035m_sas}. The function can only be called in the
+@code{EXPERIMENT} section for queries.
+
+
+@anchor{gaussmeter_lower_search_limit}
+@item gaussmeter_lower_search_limit()
+@findex gaussmeter_lower_search_limit()
+This function can be called to set of query the lower search limit (in
+Gauss) for the modules @code{er035m}, @code{er035m_s}, @code{er035m_sa}
+and @code{er035m_sas}. The function can only be called in the
+@code{EXPERIMENT} section for queries.
+
+
 @end table
 
 

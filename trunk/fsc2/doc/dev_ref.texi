@@ -472,6 +472,8 @@ range is @w{1460 G} to @w{19900 G}.
 @item @code{gaussmeter_resolution()}         @tab @ref{gaussmeter_resolution}
 @item @code{gaussmeter_probe_orientation()}  @tab @ref{gaussmeter_probe_orientation}
 @item @code{gaussmeter_wait()}
+@item @code{gaussmeter_upper_search_limit()} @tab @ref{gaussmeter_upper_search_limit}
+@item @code{gaussmeter_lower_search_limit()} @tab @ref{gaussmeter_lower_search_limit}
 @end multitable
 
 
@@ -505,6 +507,8 @@ range is @w{1460 G} to @w{19900 G}.
 @item @code{gaussmeter_resolution()}         @tab @ref{gaussmeter_resolution}
 @item @code{gaussmeter_probe_orientation()}  @tab @ref{gaussmeter_probe_orientation}
 @item @code{gaussmeter_wait()}
+@item @code{gaussmeter_upper_search_limit()} @tab @ref{gaussmeter_upper_search_limit}
+@item @code{gaussmeter_lower_search_limit()} @tab @ref{gaussmeter_lower_search_limit}
 @end multitable
 
 
@@ -536,6 +540,8 @@ the range is @w{1460 G} to @w{19900 G}.
 @item @code{measure_field()}                 @tab @ref{measure_field}
 @item @code{gaussmeter_resolution()}         @tab @ref{gaussmeter_resolution}
 @item @code{gaussmeter_probe_orientation()}  @tab @ref{gaussmeter_probe_orientation}
+@item @code{gaussmeter_upper_search_limit()} @tab @ref{gaussmeter_upper_search_limit}
+@item @code{gaussmeter_lower_search_limit()} @tab @ref{gaussmeter_lower_search_limit}
 @end multitable
 
 
@@ -565,6 +571,8 @@ the range is @w{1460 G} to @w{19900 G}.
 @item @code{measure_field()}                 @tab @ref{measure_field}
 @item @code{gaussmeter_resolution()}         @tab @ref{gaussmeter_resolution}
 @item @code{gaussmeter_probe_orientation()}  @tab @ref{gaussmeter_probe_orientation}
+@item @code{gaussmeter_upper_search_limit()} @tab @ref{gaussmeter_upper_search_limit}
+@item @code{gaussmeter_lower_search_limit()} @tab @ref{gaussmeter_lower_search_limit}
 @end multitable
 
 
