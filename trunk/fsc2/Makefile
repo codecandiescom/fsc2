@@ -221,9 +221,9 @@ install:
 	install -m 644 -o fsc2 -g fsc2 aux/*.xpm $(auxdir)
 	if [ `hostname --fqdn` = "pion.anorg.chemie.uni-frankfurt.de" ]; then \
         rm -rf $(libdir)/dg2020.so $(libdir)/s_band.so \
-               $(libdir)/lockin.so \ $(libdir)/gaussmeter.so \
+               $(libdir)/lockin.so $(libdir)/gaussmeter.so \
                $(libdir)/magnet.so $(libdir)/pulser.so \
-			   $(lobdir)/tds520.so $(libdir)/tds520c.so; \
+			   $(libdir)/tds520.so $(libdir)/tds520c.so; \
 		ln -s $(libdir)/dg2020_f.so $(libdir)/dg2020.so; \
 		ln -s $(libdir)/aeg_s_band.so $(libdir)/s_band.so; \
 		ln -s $(libdir)/bh15.so $(libdir)/gaussmeter.so; \
