@@ -723,7 +723,8 @@ static void pci_mio_16e_1_ai_get_trigger_args( Var *v,
 	trig->start = trig->scan_start = trig->conv_start = NI_DAQ_INTERNAL;
 	trig->start_polarity = trig->scan_polarity =
 						   trig->conv_polarity = NI_DAQ_NORMAL;
-	trig->scan_duration = trig->conv_duration = 0.0;
+	trig->scan_duration = 0.0;
+	trig->conv_duration = PCI_MIO_16E_1_MIN_CONV_TIME;
 
 	switch ( method )
 	{
