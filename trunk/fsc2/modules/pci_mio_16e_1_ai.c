@@ -52,9 +52,10 @@ static Var *pci_mio_16e_1_ai_get_S_conv( Var *v,
 										 PCI_MIO_16E_1_AI_TRIG_ARGS *trig );
 static NI_DAQ_INPUT ni_daq_ai_get_trigger( const char *tname,
 										   const char *snippet );
-static bool ni_daq_ai_get_polarity( const char *pname, NI_DAQ_POLARITY *pol );
-static void ni_daq_ai_check_T_scan( double t );
-static void ni_daq_ai_check_T_conv( double t, double t_scan );
+static bool pci_mio_16e_1_ai_get_polarity( const char *pname,
+										   NI_DAQ_POLARITY *pol );
+static void pci_mio_16e_1_ai_check_T_scan( double t );
+static void pci_mio_16e_1_ai_check_T_conv( double t, double t_scan );
 
 
 #define TRIGGER_NONE              0
