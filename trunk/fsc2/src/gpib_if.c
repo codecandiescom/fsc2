@@ -810,6 +810,27 @@ static void gpib_read_end( const char *dev_name, char *buffer, long received,
 }
 
 
+/*----------------------------------------------------------------*/
+/* Prints the date and a user supplied message into the log file. */
+/* The user can call this function in exactely the same way as    */
+/* the standard printf() function.                                */
+/*----------------------------------------------------------------*/
+
+
+void gpib_log_message( const char *fmt, ... )
+{
+	va_list ap;
+
+
+	gpib_log_date( );
+	seteuid( EUID );
+	va_start( ap, fmt );
+	vfprintf( gpib_log, fmt, ap );
+	va_end( ap );
+	seteuid( getuid( ) );
+}
+
+
 /*--------------------------------------------------*/
 /* gpib_log_date() writes the date to the log file. */
 /*--------------------------------------------------*/

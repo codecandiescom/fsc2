@@ -64,6 +64,7 @@ GPIB_VARIABLE int gpib_trigger( int device );
 GPIB_VARIABLE int gpib_wait( int device, int mask, int *status );
 GPIB_VARIABLE int gpib_write( int device, const char *buffer, long length );
 GPIB_VARIABLE int gpib_read( int device, char *buffer, long *length );
+GPIB_VARIABLE void gpib_log_message( const char *fmt, ... );
 
 
 GPIB_VARIABLE char gpib_error_msg[ 1024 ]; /* global for GPIB error messages */
