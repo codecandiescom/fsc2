@@ -1878,7 +1878,7 @@ static long sr830_get_mod_mode( void )
 	long length = 10;
 
 
-	sr830_talk( "FMOD?\n", &length );
+	sr830_talk( "FMOD?\n", buffer, &length );
 	buffer[ length - 1 ] = '\0';
 	return T_atol( buffer );
 }

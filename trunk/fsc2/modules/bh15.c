@@ -126,19 +126,11 @@ int bh15_exp_hook( void )
 
 	/* Set Mode 5 */
 
-	if ( gpib_write( bh15.device, "MO 5\r", 5 ) == FAILURE )
-	{
-		print( FATAL, "Can't access the Bruker BH15 field controller.\n" );
-		THROW( EXCEPTION );
-	}
+	bh15_command( "MO 5\r" );
 
 	/* Set it into run mode */
 
-	if ( gpib_write( bh15.device, "RU\r", 3 ) == FAILURE )
-	{
-		print( FATAL, "Can't access the Bruker BH15 field controller.\n" );
-		THROW( EXCEPTION );
-	}
+	bh15_command( "RU\r" );
 
 	sleep( 5 );                /* unfortunately, it seems to need this... */
 
@@ -148,11 +140,7 @@ int bh15_exp_hook( void )
 
 		fsc2_usleep( 100000, UNSET );
 
-		if ( gpib_write( bh15.device, "LE\r", 3 ) == FAILURE )
-		{
-			print( FATAL, "Can't access the Bruker BH15 field controller.\n" );
-			THROW( EXCEPTION );
-		}
+		bh15_command( "LE\r" );
 
 		len = 20;
 		if ( gpib_read( bh15.device, buffer, &len ) == FAILURE )
@@ -308,11 +296,7 @@ static double bh15_get_field( void )
 
 		fsc2_usleep( 100000, UNSET );
 
-		if ( gpib_write( bh15.device, "LE\r", 3 ) == FAILURE )
-		{
-			print( FATAL, "Can't access the Bruker BH15 field controller.\n" );
-			THROW( EXCEPTION );
-		}
+		bh15_command( "LE\r" );
 
 		len = 20;
 		if ( gpib_read( bh15.device, buffer, &len ) == FAILURE )
@@ -332,11 +316,7 @@ static double bh15_get_field( void )
 
 		fsc2_usleep( 100000, UNSET );
 
-		if ( gpib_write( bh15.device, "FV\r", 3 ) == FAILURE )
-		{
-			print( FATAL, "Can't access the Bruker BH15 field controller.\n" );
-			THROW( EXCEPTION );
-		}
+		bh15_command( "FV\r" );
 
 		len = 20;
 		if ( gpib_read( bh15.device, buffer, &len ) == FAILURE )
