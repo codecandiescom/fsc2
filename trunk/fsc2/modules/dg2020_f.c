@@ -160,9 +160,7 @@ int dg2020_f_test_hook( void )
 	   pulser for the test run */
 
 	dg2020_IN_SETUP = SET;
-
 	dg2020_init_setup( );
-
 	dg2020_IN_SETUP = UNSET;
 
 	/* We need some somewhat different functions for setting some of the
@@ -226,8 +224,13 @@ int dg2020_f_exp_hook( void )
 
 	/* Now we have to tell the pulser about all the pulses */
 
+	dg2020_IN_SETUP = SET;
 	if ( ! dg2020_reorganize_pulses( UNSET ) )
+	{
+		dg2020_IN_SETUP = UNSET;
 		THROW( EXCEPTION );
+	}
+	dg2020_IN_SETUP = UNSET;
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 	{

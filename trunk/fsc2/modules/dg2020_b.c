@@ -221,19 +221,24 @@ int dg2020_b_exp_hook( void )
 
 	/* Initialize the device */
 	
-	if ( ! dg2020_init( DEVICE_NAME ) )
-	{
-		eprint( FATAL, "%s: Failure to initialize the pulser: %s\n",
-				pulser_struct.name, gpib_error_msg );
-		THROW( EXCEPTION );
-	}
+//	  if ( ! dg2020_init( DEVICE_NAME ) )
+//	  {
+//		  eprint( FATAL, "%s: Failure to initialize the pulser: %s\n",
+//				  pulser_struct.name, gpib_error_msg );
+//		  THROW( EXCEPTION );
+//	  }
 
 	if ( ! dg2020.is_cw_mode )
 	{
 		/* Now we have to tell the pulser about all the pulses */
 
+		dg2020_IN_SETUP = SET;
 		if ( ! dg2020_reorganize_pulses( UNSET ) )
+		{
+			dg2020_IN_SETUP = UNSET;
 			THROW( EXCEPTION );
+		}
+		dg2020_IN_SETUP = UNSET;
 
 		for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 			if ( dg2020.function[ i ].is_used )
