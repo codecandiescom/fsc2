@@ -443,7 +443,7 @@ sub cond_check {
 
         # Disable warnings for the test call of eval
 
-        local $SIG{ __WARN__ }= sub{ };
+        local $SIG{ __WARN__ } = sub{ };
         eval $defs . $cmd;
         die "Syntax error in $type condition at line $$_{ lino }: \"$rcmd\"\n"
             if $@;
