@@ -108,8 +108,7 @@ CFLAGS         = -ggdb -Wall -Wwrite-strings -Wstrict-prototypes \
 				 # -DDEBUG
 				 # -DMAX_DEBUG # for debugging of digitizer
 LD             = ld
-LIBS           = -L/usr/X11R6/lib -L/usr/local/lib -lforms -lX11 \
-				 -lfl -lm -ldl
+LIBS           = -L/usr/X11R6/lib -L/usr/local/lib -lforms -lX11 -lm -ldl
 				 # -lmcheck   # for malloc debugging
 				 # -lefence   # to run with efence
 BISON          = bison
@@ -244,33 +243,34 @@ INSTALL_MACHINE   = install-unknown
 UNINSTALL_MACHINE = uninstall-unknown
 
 ifeq ($(machine_name),pion.anorg.chemie.uni-frankfurt.de)
-	GPIB_LIBRARY      = LLP
-	INSTALL_MACHINE   = install-$(machine_name)
-	UNINSTALL_MACHINE = uninstall-$(machine_name)
+	LIBS              += -Lfl
+	GPIB_LIBRARY       = LLP
+	INSTALL_MACHINE    = install-$(machine_name)
+	UNINSTALL_MACHINE  = uninstall-$(machine_name)
 endif
 
 ifeq ($(machine_name),moebi.physik.fu-berlin.de)
-	GPIB_LIBRARY      = JTT
-	INSTALL_MACHINE   = install-$(machine_name)
-	UNINSTALL_MACHINE = uninstall-$(machine_name)
+	GPIB_LIBRARY       = JTT
+	INSTALL_MACHINE    = install-$(machine_name)
+	UNINSTALL_MACHINE  = uninstall-$(machine_name)
 endif
 
 ifeq ($(machine_name),crowley.physik.fu-berlin.de)
-	GPIB_LIBRARY      = JTT
-	INSTALL_MACHINE   = install-$(machine_name)
-	UNINSTALL_MACHINE = uninstall-$(machine_name)
+	GPIB_LIBRARY       = JTT
+	INSTALL_MACHINE    = install-$(machine_name)
+	UNINSTALL_MACHINE  = uninstall-$(machine_name)
 endif
 
 ifeq ($(machine_name),door.physik.fu-berlin.de)
-	GPIB_LIBRARY      = JTT
-	INSTALL_MACHINE   = install-$(machine_name)
-	UNINSTALL_MACHINE = uninstall-$(machine_name)
+	GPIB_LIBRARY       = JTT
+	INSTALL_MACHINE    = install-$(machine_name)
+	UNINSTALL_MACHINE  = uninstall-$(machine_name)
 endif
 
 ifeq ($(machine_name),isaak.physik.fu-berlin.de)
-	GPIB_LIBRARY      = JTT
-	INSTALL_MACHINE   = install-$(machine_name)
-	UNINSTALL_MACHINE = uninstall-$(machine_name)
+	GPIB_LIBRARY       = JTT
+	INSTALL_MACHINE    = install-$(machine_name)
+	UNINSTALL_MACHINE  = uninstall-$(machine_name)
 endif
 
 ifeq ($(machine_name),crowley.none)
