@@ -105,16 +105,16 @@ enum {
 /* Define the different types of variables */
 
 enum {
-	UNDEF_VAR   = 0,
-	INT_VAR     = ( 1 << 0 ),
-	FLOAT_VAR   = ( 1 << 1 ),
-	STR_VAR     = ( 1 << 2 ),
-	INT_ARR     = ( 1 << 3 ),
-	FLOAT_ARR   = ( 1 << 4 ),
-	FUNC        = ( 1 << 5 ),
-	ARR_PTR     = ( 1 << 6 ),
-	INT_PTR     = ( 1 << 7 ),
-	FLOAT_PTR   = ( 1 << 8 )
+	UNDEF_VAR       = 0,
+	INT_VAR         = ( 1 << 0 ),
+	FLOAT_VAR       = ( 1 << 1 ),
+	STR_VAR         = ( 1 << 2 ),
+	INT_ARR         = ( 1 << 3 ),
+	FLOAT_ARR       = ( 1 << 4 ),
+	FUNC            = ( 1 << 5 ),
+	ARR_PTR         = ( 1 << 6 ),
+	INT_TRANS_ARR   = ( 1 << 7 ),
+	FLOAT_TRANS_ARR = ( 1 << 8 )
 };
 
 
@@ -124,7 +124,6 @@ enum {
 	NEED_SLICE         = ( 1 << 2 ),
 	NEED_INIT          = ( 1 << 3 ),
 	NEED_ALLOC         = ( 1 << 4 ),
-	IS_META            = ( 1 << 5 )
 };
 
 
