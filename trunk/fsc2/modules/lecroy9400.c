@@ -258,8 +258,8 @@ Var *digitizer_define_window( Var *v )
 
 			/* Allow window width to be zero in test run... */
 
-			if ( ( TEST_RUN && win_width < 0.0 ) ||
-				 ( ! TEST_RUN && win_width <= 0.0 ) )
+			if ( ( FSC2_MODE == TEST && win_width < 0.0 ) ||
+				 ( FSC2_MODE != TEST && win_width <= 0.0 ) )
 			{
 				eprint( FATAL, SET, "%s: Zero or negative width for "
 						"window in %s.\n", DEVICE_NAME, Cur_Func );
@@ -325,32 +325,31 @@ Var *digitizer_timebase( Var *v )
 	
 
 	if ( v == NULL )
-	{
-		if ( TEST_RUN )
+		switch ( FSC2_MODE )
 		{
-			if ( lecroy9400.is_timebase )
+			case PREPARATION :
+				if ( lecroy9400.is_timebase )
+					return vars_push( FLOAT_VAR, lecroy9400.timebase );
+
+				eprint( FATAL, SET, "%s: Function %s with no argument can "
+						"only be used in the EXPERIMENT section.\n",
+						DEVICE_NAME, Cur_Func );
+				THROW( EXCEPTION )
+
+			case TEST :
+				return vars_push( FLOAT_VAR, lecroy9400.is_timebase? 
+								  lecroy9400.timebase :
+								  tb[ LECROY9400_TEST_TB_ENTRY ] );
+
+			case EXPERIMENT :
+				lecroy9400.timebase = lecroy9400_get_timebase( );
+				lecroy9400.tb_index =
+					            lecroy9400_get_tb_index( lecroy9400.timebase );
+				lecroy9400.is_timebase = SET;
 				return vars_push( FLOAT_VAR, lecroy9400.timebase );
-			else
-				return vars_push( FLOAT_VAR, tb[ LECROY9400_TEST_TB_ENTRY ] );
-		}
-		else if ( I_am == PARENT )
-		{
-			if ( lecroy9400.is_timebase )
-				return vars_push( FLOAT_VAR, lecroy9400.timebase );
-
-			eprint( FATAL, SET, "%s: Function %s with no argument can only "
-					"be used in the EXPERIMENT section.\n",
-					DEVICE_NAME, Cur_Func );
-			THROW( EXCEPTION )
 		}
 
-		lecroy9400.timebase = lecroy9400_get_timebase( );
-		lecroy9400.tb_index = lecroy9400_get_tb_index( lecroy9400.timebase );
-		lecroy9400.is_timebase = SET;
-		return vars_push( FLOAT_VAR, lecroy9400.timebase );
-	}
-
-	if ( I_am == CHILD || TEST_RUN )
+	if ( FSC2_MODE != PREPARATION )
 	{
 		eprint( FATAL, SET, "%s: Digitizer time base can only be set before "
 				"the EXPERIMENT section starts.\n", DEVICE_NAME );
@@ -464,29 +463,27 @@ Var *digitizer_sensitivity( Var *v )
 	}
 
 	if ( ( v = vars_pop( v ) ) == NULL )
-	{
-		if ( TEST_RUN )
+		switch ( FSC2_MODE )
 		{
-			if ( lecroy9400.is_sens[ channel ] )
-				return vars_push( FLOAT_VAR, lecroy9400.sens[ channel ] );
-			else
-				return vars_push( FLOAT_VAR, LECROY9400_TEST_SENSITIVITY );
-		}
-		else if ( I_am == PARENT )
-		{
-			if ( lecroy9400.is_sens[ channel ] )
-				return vars_push( FLOAT_VAR, lecroy9400.sens[ channel ] );
+			case PREPARATION :
+				if ( lecroy9400.is_sens[ channel ] )
+					return vars_push( FLOAT_VAR, lecroy9400.sens[ channel ] );
 
-			eprint( FATAL, SET, "%s: Function %s() with no argument can "
-					"only be used in the EXPERIMENT section.\n",
-					DEVICE_NAME, Cur_Func );
-			THROW( EXCEPTION )
-		}
+				eprint( FATAL, SET, "%s: Function %s() with no argument can "
+						"only be used in the EXPERIMENT section.\n",
+						DEVICE_NAME, Cur_Func );
+				THROW( EXCEPTION )
 
-		lecroy9400.sens[ channel ] = lecroy9400_get_sens( channel );
-		lecroy9400.is_sens[ channel ] = SET;
-		return vars_push( FLOAT_VAR, lecroy9400.sens[ channel ] );
-	}
+			case TEST :
+				return vars_push( FLOAT_VAR, lecroy9400.is_sens[ channel ] ? 
+								             lecroy9400.sens[ channel ] :
+								             LECROY9400_TEST_SENSITIVITY );
+
+			case EXPERIMENT :
+				lecroy9400.sens[ channel ] = lecroy9400_get_sens( channel );
+				lecroy9400.is_sens[ channel ] = SET;
+				return vars_push( FLOAT_VAR, lecroy9400.sens[ channel ] );
+		}
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
 	sens = VALUE( v );
@@ -508,7 +505,7 @@ Var *digitizer_sensitivity( Var *v )
 		THROW( EXCEPTION )
 	}
 
-	if ( TEST_RUN )
+	if ( FSC2_MODE == TEST )
 	{
 		if ( ! lecroy9400.is_coupl[ channel ] )
 			coupl = AC_1_MOHM;
@@ -544,7 +541,7 @@ Var *digitizer_sensitivity( Var *v )
 	lecroy9400.sens[ channel ] = sens;
 	lecroy9400.is_sens[ channel ] = SET;
 
-	if ( ! TEST_RUN )
+	if ( FSC2_MODE == EXPERIMENT )
 		lecroy9400_set_sens( channel, sens );
 
 	return vars_push( FLOAT_VAR, lecroy9400.sens[ channel ] );
@@ -802,7 +799,8 @@ Var *digitizer_num_averages( Var *v )
 		THROW( EXCEPTION )
 	}
 
-	if ( TEST_RUN )
+
+	if ( FSC2_MODE == TEST )
 	{
 		if ( lecroy9400.is_num_avg[ channel ] &&
 			 lecroy9400.rec_len[ channel ] != UNDEFINED_REC_LEN )
@@ -810,7 +808,7 @@ Var *digitizer_num_averages( Var *v )
 		else
 			return vars_push( INT_VAR, LECROY9400_TEST_NUM_AVG );
 	}
-	else if ( I_am == PARENT )
+	else if ( FSC2_MODE == PREPARATION )
 	{
 		if ( lecroy9400.is_num_avg[ channel ] )
 			return vars_push( INT_VAR, lecroy9400.num_avg[ channel ] );
@@ -847,8 +845,8 @@ Var *digitizer_record_length( Var *v )
 
 	if ( v->next != NULL )
 	{
-		eprint( FATAL, SET, "%s: Function %s() can only be used for queries"
-				".\n", DEVICE_NAME, Cur_Func );
+		eprint( FATAL, SET, "%s: Function %s() can only be used for "
+				"queries.\n", DEVICE_NAME, Cur_Func );
 		THROW( EXCEPTION )
 	}
 
@@ -880,16 +878,9 @@ Var *digitizer_trigger_position( Var *v )
 
 
 	if ( v == NULL )
-	{
-		if ( TEST_RUN )
+		switch ( FSC2_MODE )
 		{
-			if ( lecroy9400.is_trig_pos )
-				return vars_push( FLOAT_VAR, lecroy9400.trig_pos );
-			else
-				return vars_push( FLOAT_VAR, LECROY9400_TEST_TRIG_POS );
-		}
-		else if ( I_am == PARENT )
-		{
+			case PREPARATION :
 			if ( lecroy9400.is_trig_pos )
 				return vars_push( FLOAT_VAR, lecroy9400.trig_pos );
 
@@ -897,12 +888,17 @@ Var *digitizer_trigger_position( Var *v )
 					"only be used in the EXPERIMENT section.\n",
 					DEVICE_NAME, Cur_Func );
 			THROW( EXCEPTION )
-		}
 
-		lecroy9400.trig_pos = lecroy9400_get_trigger_pos( );
-		lecroy9400.is_trig_pos = SET;
-		return vars_push( FLOAT_VAR, lecroy9400.trig_pos );
-	}
+			case TEST :
+				return vars_push( FLOAT_VAR, lecroy9400.is_trig_pos ?
+								             lecroy9400.trig_pos :
+								             LECROY9400_TEST_TRIG_POS );
+
+			case EXPERIMENT :
+				lecroy9400.trig_pos = lecroy9400_get_trigger_pos( );
+				lecroy9400.is_trig_pos = SET;
+				return vars_push( FLOAT_VAR, lecroy9400.trig_pos );
+		}
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
 	trig_pos = VALUE( v );
@@ -918,7 +914,8 @@ Var *digitizer_trigger_position( Var *v )
 	lecroy9400.trig_pos = trig_pos;
 	lecroy9400.is_trig_pos = SET;
 
-	if ( I_am == CHILD && ! lecroy9400_set_trigger_pos( lecroy9400.trig_pos ) )
+	if ( FSC2_MODE == EXPERIMENT &&
+		 ! lecroy9400_set_trigger_pos( lecroy9400.trig_pos ) )
 		lecroy9400_gpib_failure( );
 
 	return vars_push( FLOAT_VAR, lecroy9400.trig_pos );
@@ -958,31 +955,32 @@ Var *digitizer_trigger_channel( Var *v )
 
 
 	if ( v == NULL )
-	{
-		if ( TEST_RUN )
+		switch ( FSC2_MODE )
 		{
-			if ( lecroy9400.is_trigger_channel )
-				return vars_push( INT_VAR, lecroy9400_translate_channel(
-					     LECROY9400_TO_GENERAL, lecroy9400.trigger_channel ) );
-			else
-				return vars_push( INT_VAR, lecroy9400_translate_channel(
+			case PREPARATION :
+				if ( lecroy9400.is_trigger_channel )
+					return vars_push( INT_VAR, lecroy9400_translate_channel(
+						LECROY9400_TO_GENERAL, lecroy9400.trigger_channel ) );
+
+				eprint( FATAL, SET, "%s: Function %s() with no argument can "
+						"only be used in the EXPERIMENT section.\n",
+						DEVICE_NAME, Cur_Func );
+				THROW( EXCEPTION )
+
+			case TEST :
+				if ( lecroy9400.is_trigger_channel )
+					return vars_push( INT_VAR, lecroy9400_translate_channel(
+						LECROY9400_TO_GENERAL, lecroy9400.trigger_channel ) );
+				else
+					return vars_push( INT_VAR, lecroy9400_translate_channel(
 					   LECROY9400_TO_GENERAL, LECROY9400_TEST_TRIG_CHANNEL ) );
-		}
-		else if ( I_am == PARENT )
-		{
-			if ( lecroy9400.is_trigger_channel )
+				break;
+
+			case EXPERIMENT :
 				return vars_push( INT_VAR, lecroy9400_translate_channel(
-						 LECROY9400_TO_GENERAL, lecroy9400.trigger_channel ) );
-
-			eprint( FATAL, SET, "%s: Function %s() with no argument can "
-					"only be used in the EXPERIMENT section.\n",
-					DEVICE_NAME, Cur_Func );
-			THROW( EXCEPTION )
+					LECROY9400_TO_GENERAL,
+					lecroy9400_get_trigger_source( ) ) );
 		}
-
-		return vars_push( INT_VAR, lecroy9400_translate_channel(
-				  LECROY9400_TO_GENERAL, lecroy9400_get_trigger_source( ) ) );
-	}
 
 	vars_check( v, INT_VAR );
 	channel = lecroy9400_translate_channel( GENERAL_TO_LECROY9400,
@@ -1001,9 +999,9 @@ Var *digitizer_trigger_channel( Var *v )
         case LECROY9400_CH1 : case LECROY9400_CH2 : case LECROY9400_LIN :
 		case LECROY9400_EXT : case LECROY9400_EXT10 :
 			lecroy9400.trigger_channel = channel;
-			if ( I_am == CHILD )
+			if ( FSC2_MODE == EXPERIMENT )
 				lecroy9400_set_trigger_source( channel );
-			if ( ! TEST_RUN )
+			if ( FSC2_MDOE != TEST )
 				lecroy9400.is_trigger_channel = SET;
             break;
 
@@ -1025,8 +1023,9 @@ Var *digitizer_start_acquisition( Var *v )
 {
 	v = v;
 
-	if ( ! TEST_RUN )
+	if ( FSC2_MODE == EXPERIMENT )
 		lecroy9400_start_acquisition( );
+
 	return vars_push( INT_VAR, 1 );
 }
 
@@ -1132,7 +1131,7 @@ static Var *get_curve( Var *v, bool use_cursor )
 	/* Talk to digitizer only in the real experiment, otherwise return a dummy
 	   array */
 
-	if ( I_am == CHILD )
+	if ( FSC2_MODE == EXPERIMENT )
 	{
 		lecroy9400_get_curve( ch, w, &array, &length, use_cursor );
 		nv = vars_push( FLOAT_ARR, array, length );
@@ -1160,8 +1159,10 @@ static Var *get_curve( Var *v, bool use_cursor )
 Var *digitizer_run( Var *v )
 {
 	v = v;
-	if ( ! TEST_RUN )
+
+	if ( FSC2_MODE == EXPERIMENT )
 		lecroy9400_free_running( );
+
 	return vars_push( INT_VAR,1 );
 }
 
