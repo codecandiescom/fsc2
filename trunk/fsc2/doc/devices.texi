@@ -810,9 +810,15 @@ with one of the possible sensitivity settings the sensitivity is set to
 the nearest available sensitivity setting and a warning is printed. The
 function will return the sensitivity that has been set.
 
-For the models @strong{SR510} and @strong{SR530} a sensitivity 10 times
-higher than the maximum sensitivity can be specified, in which case the
-@code{EXPAND} button is automatically switched on.
+Valid sensitivity settings for the @strong{SR510} and @strong{SR530} are
+in the range between @w{10 nV} and @w{500 mV} in steps of about @w{3
+dB}, i.e. you can use @w{10 uV}, @w{20 uV}, @w{50 uV}, @w{100 uV} etc.
+To achieve the two highest sensitivity settings the @code{EXPAND} button
+is automatically switched on.
+
+For the @strong{SR810} and the @strong{SR810} vaid sensitivity setings
+range from @w{2 nV} up to @w{1 V}, using the same system of steps as
+the @strong{SR510} and @strong{SR530}.
 
 For the @strong{ER023M Signal Channel} the function does not set the
 sensitivity in units of the output voltage but sets the receiver
@@ -837,8 +843,15 @@ constant setting fitting the argument the nearest available setting is
 used and a warning is printed. The function will return the time
 constant setting that has been set.
 
-For models @strong{SR510} and @strong{SR530} also the POST time constant
-is set to a value equal or lower than the time constant.
+
+For the @strong{SR510} and @strong{SR530} lock-ins valid time constant
+settings are @{1 ms} and @w{100 s} with steps of about a factor of 3,
+i.e. you can use @w{10 ms}, @w{30 ms}, @w{100 ms} etc. The POST time
+constant is set to a value equal or lower than the time constant.
+
+For the @strong{SR810} and @strong{SR810} lock-ins vali time constants
+range from @w{10 us} up to @w{30,000 s}, using the same system of steps
+as the @strong{SR510} and the @strong{SR530}.
 
 For the @strong{ER023M} the following (approximate) time constant
 settings can be used: @code{2.5 ms}, @code{5 ms}, @code{10 ms}, @code{20
