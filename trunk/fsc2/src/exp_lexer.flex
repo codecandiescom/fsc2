@@ -149,6 +149,7 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 "IF"        return IF_TOK;
 "ELSE"      return ELSE_TOK;
 "REPEAT"    return REPEAT_TOK;
+"FOR"       return FOR_TOK;
 "{"         return '{';          /* block start delimiter */
 "}"         return '}';          /* block end delimiter */
 
