@@ -25,6 +25,8 @@ static void G_init_curves_1d( void );
 static void G_init_curves_2d( void );
 static void setup_canvas( Canvas *c, FL_OBJECT *obj );
 static void canvas_off( Canvas *c, FL_OBJECT *obj );
+static void rescale_1d( long new_nx );
+static void rescale_2d( long new_nx, long new_ny );
 
 
 static Graphics *G_stored;
@@ -1548,8 +1550,95 @@ void change_scale( int is_set, double *vals )
 
 void rescale( long new_nx, long new_ny )
 {
-	long i, j, k;
-	Curve_1d *cv1;
+	if ( G.dim == 1 )
+		rescale_1d( new_nx );
+	else
+		rescale_2d( new_nx, new_ny );
+}
+
+
+/*----------------------------------------------------------*/
+/*----------------------------------------------------------*/
+
+static void rescale_1d( long new_nx )
+{
+	long i, k, count;
+	Curve_1d *cv;
+	long max_x = 0;
+	Scaled_Point *sp;
+
+
+	/* Return immediately on unreasonable values */
+
+	if ( new_nx < 0 )
+		return;
+
+	/* Find the maximum x-index currently used by a point */
+
+	for ( k = 0; k < G.nc; k++ )
+	{
+		cv = G.curve[ k ];
+		count = cv->count;
+		for ( sp = cv->points, i = 0; i < G.nx && count != 0; sp++, i++ )
+			if ( sp->exist && i > max_x )
+			{
+				max_x = i;
+				count--;
+			}
+	}
+
+	if ( max_x != 0 )
+		max_x++;
+	else
+		max_x = DEFAULT_1D_X_POINTS;
+
+	/* Make sure we don't rescale to less than the current number of
+	   points (or the minumum value, if larger) */
+
+	if ( new_nx < DEFAULT_1D_X_POINTS )
+	{
+		if ( max_x < DEFAULT_1D_X_POINTS )
+			max_x = DEFAULT_1D_X_POINTS;
+	}
+	else if ( new_nx > max_x )
+		max_x = new_nx;
+
+	for ( k = 0; k < G.nc; k++ )
+	{
+		cv = G.curve[ k ];
+
+		cv->points = T_realloc( cv->points, max_x * sizeof( Scaled_Point ) );
+		cv->xpoints = T_realloc( cv->xpoints, max_x * sizeof( XPoint ) );
+
+		for ( i = G.nx, sp = G.curve[ k ]->points + i; i < max_x;
+			  sp++, i++ )
+			sp->exist = UNSET;
+	}
+
+	G.nx = max_x;
+
+	for ( k = 0; k < G.nc; k++ )
+	{
+		cv = G.curve[ k ];
+		if ( G.is_fs )
+		{
+			cv->s2d[ X ] = ( double ) ( G.canvas.w - 1 )
+				           / ( double ) ( G.nx - 1 );
+			if ( G.is_scale_set )
+				recalc_XPoints_of_curve_1d( cv );
+		}
+	}
+
+	G.nx = max_x;
+}
+
+
+/*----------------------------------------------------------*/
+/*----------------------------------------------------------*/
+
+static void rescale_2d( long new_nx, long new_ny )
+{
+	long i, j, k, l, count;
 	Curve_2d *cv;
 	long max_x = 0,
 		 max_y = 0;
@@ -1557,138 +1646,75 @@ void rescale( long new_nx, long new_ny )
 	bool need_cut_redraw = UNSET;
 
 
-	if ( G.dim == 1 )
-	{
-		/* Return immediately on unreasonable values */
-
-		if ( new_nx < 0 )
-			return;
-
-		/* Find the maximum x-index currently used by a point */
-
-		for ( k = 0; k < G.nc; k++ )
-			for ( sp = G.curve[ k ]->points, i = 0; i < G.nx; sp++, i++ )
-				if ( sp->exist && i > max_x )
-					max_x = i;
-		max_x++;
-
-		/* Make sure we don't rescale to less than the current number of
-		   points (or the minumum value, if larger) */
-
-		if ( new_nx == 0 || new_nx < DEFAULT_1D_X_POINTS )
-		{
-			if ( max_x < DEFAULT_1D_X_POINTS )
-				max_x = DEFAULT_1D_X_POINTS;
-		}
-		else if ( new_nx > max_x )
-			max_x = new_nx;
-
-		for ( k = 0; k < G.nc; k++ )
-		{
-			cv1 = G.curve[ k ];
-
-			cv1->points = T_realloc( cv1->points,
-									 max_x * sizeof( Scaled_Point ) );
-			cv1->xpoints = T_realloc( cv1->xpoints,
-									  max_x * sizeof( XPoint ) );
-
-			for ( i = G.nx, sp = G.curve[ k ]->points + i; i < max_x;
-				  sp++, i++ )
-				sp->exist = UNSET;
-		}
-
-		G.nx = max_x;
-
-		for ( k = 0; k < G.nc; k++ )
-		{
-			cv1 = G.curve[ k ];
-			if ( G.is_fs )
-			{
-				cv1->s2d[ X ] = ( double ) ( G.canvas.w - 1 )
-				               / ( double ) ( G.nx - 1 );
-				if ( G.is_scale_set )
-					recalc_XPoints_of_curve_1d( cv1 );
-			}
-		}
-
-		G.nx = max_x;
-		return;
-	}
-
-	/* Here starts handling for 2D graphics, do nothing if both values are
-	   less than 0 */
-
 	if ( new_nx < 0 && new_ny < 0 )
 		return;
 
-	/* Find the maximum x and y coordinate */
+	/* Find the maximum x and y index currently used */
 
 	for ( k = 0; k < G.nc; k++ )
-		for ( sp = G.curve_2d[ k ]->points, j = 0; j < G.ny; j++ )
-			for ( i = 0; i < G.nx; sp++, i++ )
+	{
+		cv = G.curve_2d[ k ];
+		count = cv->count;
+		for ( j = 0, sp = cv->points; j < G.ny && count != 0; j++ )
+			for ( i = 0; i < G.nx && count != 0; sp++, i++ )
 				if ( sp->exist )
 				{
 					max_y = j;
 					if ( i > max_x )
 						max_x = i;
+					count--;
 				}
-	max_x++;
-	max_y++;
-
-	/* Return immediately if both new values won't let all points displayed
-	   anymore */
-
-	if ( new_nx != 0 && new_nx <= max_x && new_ny != 0 && new_ny <= max_y )
-		return;
-
-	/* Figure out the correct new value */
-
-	if ( new_nx < 0 )               /* don't change */
-	{
-		new_nx = G.nx;
-		if ( G.nx < DEFAULT_2D_X_POINTS )
-			new_nx = DEFAULT_2D_X_POINTS;
 	}
-	else if ( new_nx == 0 )         /* keep current value (at least minimum) */
-	{
+
+
+	if ( max_x != 0 )
+		max_x++;
+	else
+		max_x = DEFAULT_2D_X_POINTS;
+	if ( max_y != 0 )
+		 max_y++;
+	else
+		max_y = DEFAULT_2D_Y_POINTS;
+
+	/* Figure out the correct new values - at least the current points must
+	   still be displayable and at least the minimum sizes must be kept */
+
+	if ( new_nx < 0 )
 		new_nx = G.nx;
-		if ( G.nx < DEFAULT_2D_X_POINTS )
-			new_nx = DEFAULT_2D_X_POINTS;
-	}
-	else if ( new_nx < max_x )      /* show at least all current points */
+	if ( new_nx < max_x )
 		new_nx = max_x;
-			
-	if ( new_ny < 0 )               /* don't change */
-	{
+
+	if ( new_ny < 0 )
 		new_ny = G.ny;
-		if ( G.ny < DEFAULT_2D_Y_POINTS )
-			new_ny = DEFAULT_2D_Y_POINTS;
-	}
-	else if ( new_ny == 0 )         /* keep current value (at least minimum) */
-	{
-		new_ny = G.nx;
-		if ( G.ny < DEFAULT_2D_Y_POINTS )
-			new_ny = DEFAULT_2D_Y_POINTS;
-	}
-	else if ( new_ny < max_y )      /* show at least all current points */
+	if ( new_ny < max_y )
 		new_ny = max_y;
 
-	/* If everything will remain unchanged return */
-
-	if ( G.nx >= new_nx && G.ny >= new_ny )
-		return;
-
-	/* Now we're really in for the fun... */
+	/* Now we're in for the real fun... */
 
 	for ( k = 0; k < G.nc; k++ )
 	{
 		cv = G.curve_2d[ k ];
 			
+		/* Reorganize the old elements to fit into the new array and clear
+		   the the new elements in the already existing rows */
+
 		old_sp = osp = cv->points;
 		sp = cv->points = T_malloc( new_nx * new_ny * sizeof( Scaled_Point ) );
 
-		for ( j = 0; j < new_ny; j++, osp += G.nx, sp +=new_nx )
-			memcpy( sp, osp, G.nx * sizeof( Scaled_Point ) );
+		for ( j = 0; j < l_min( G.ny, new_ny ); j++, osp += G.nx )
+		{
+			memcpy( sp, osp, l_min( G.nx, new_nx ) * sizeof( Scaled_Point ) );
+
+			if ( G.nx < new_nx )
+				for ( l = G.nx, sp += G.nx; l < new_nx; l++, sp++ )
+					sp->exist = UNSET;
+			else
+				sp += new_nx;
+		}
+
+		for ( ; j < new_ny; j++ )
+			for ( l = 0; l < new_nx; l++, sp++ )
+				sp->exist = UNSET;
 
 		T_free( old_sp );
 
@@ -1696,9 +1722,6 @@ void rescale( long new_nx, long new_ny )
 								 new_nx * new_ny * sizeof( XPoint ) );
 		cv->xpoints_s = T_realloc( cv->xpoints_s,
 								   new_nx * new_ny * sizeof( XPoint ) );
-
-		/* Reorganise the old elements to fit into the new array and clear
-		   the the new elements in the already existing rows */
 
 		if ( cv->is_fs )
 		{
@@ -1722,6 +1745,5 @@ void rescale( long new_nx, long new_ny )
 
 	/* Update the cut window if necessary */
 
-	if ( need_cut_redraw )
-		redraw_all_cut_canvases( );
+	redraw_all_cut_canvases( );
 }

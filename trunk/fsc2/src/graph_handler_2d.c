@@ -874,7 +874,7 @@ static bool zoom_z_2d( Canvas *c )
 
 static void shift_XPoints_of_curve_2d( Canvas *c, Curve_2d *cv )
 {
-	long i;
+	long i, count;
 	int dx = 0,
 		dy = 0,
 		dz;
@@ -914,20 +914,21 @@ static void shift_XPoints_of_curve_2d( Canvas *c, Curve_2d *cv )
 
 	cv->up = cv->down = cv->left = cv->right = ( cv->count != 0 );
 
-	for ( i = 0; i < G.nx * G.ny; sp++, xp++, xps++, i++ )
-	{
-		xp->x = i2shrt( xp->x + dx );
-		xp->y = i2shrt( xp->y + dy );
-		xps->x = xp->x - ( cv->w >> 1 );
-		xps->y = xp->y - ( cv->h >> 1 );
-
+	for ( i = 0, count = cv->count;
+		  i < G.nx * G.ny && count != 0; sp++, xp++, xps++, i++ )
 		if ( sp->exist )
 		{
+			count--;
+
+			xp->x = i2shrt( xp->x + dx );
+			xp->y = i2shrt( xp->y + dy );
+			xps->x = xp->x - ( cv->w >> 1 );
+			xps->y = xp->y - ( cv->h >> 1 );
+
 			cv->left &= ( xps->x + cv->w <= 0 );
 			cv->right &= ( xps->x >= ( int ) G.canvas.w );
 			cv->up &= ( xps->y + cv->h <= 0 );
 			cv->down &= ( xps->y >= ( int ) G.canvas.h );
-		}
 	}
 }
 
@@ -1087,7 +1088,7 @@ static void recalc_XPoints_2d( void )
 
 void recalc_XPoints_of_curve_2d( Curve_2d *cv )
 {
-	long i, j;
+	long i, j, count;
 	Scaled_Point *sp;
 	XPoint *xp  = cv->xpoints,
 		   *xps = cv->xpoints_s;
@@ -1101,23 +1102,24 @@ void recalc_XPoints_of_curve_2d( Curve_2d *cv )
 	dw = cv->w / 2;
 	dh = cv->h / 2;
 
-	for ( sp = cv->points, i = 0; i < G.ny; i++ )
-		for ( j = 0; j < G.nx; sp++, xp++, xps++, j++ )
-		{
-			xp->x = d2shrt( cv->s2d[ X ] * ( j + cv->shift[ X ] ) );
-			xp->y = ( short ) G.canvas.h - 1
-				    - d2shrt( cv->s2d[ Y ] * ( i + cv->shift[ Y ] ) );
-			xps->x = xp->x - dw;
-			xps->y = xp->y - dh;
+	for ( sp = cv->points, i = 0, count = cv->count;
+		  i < G.ny && count != 0; i++ )
+		for ( j = 0; j < G.nx && count != 0; sp++, xp++, xps++, j++ )
+			if ( sp->exist )
+			{
+				count--;
 
-			if ( ! sp->exist )
-				continue;
+				xp->x = d2shrt( cv->s2d[ X ] * ( j + cv->shift[ X ] ) );
+				xp->y = ( short ) G.canvas.h - 1
+				        - d2shrt( cv->s2d[ Y ] * ( i + cv->shift[ Y ] ) );
+				xps->x = xp->x - dw;
+				xps->y = xp->y - dh;
 
-			cv->left  &= ( xps->x + cv->w <= 0 );
-			cv->right &= ( xps->x >= ( int ) G.canvas.w );
-			cv->up    &= ( xps->y + cv->h <= 0 );
-			cv->down  &= ( xps->y >= ( int ) G.canvas.h );
-		}
+				cv->left  &= ( xps->x + cv->w <= 0 );
+				cv->right &= ( xps->x >= ( int ) G.canvas.w );
+				cv->up    &= ( xps->y + cv->h <= 0 );
+				cv->down  &= ( xps->y >= ( int ) G.canvas.h );
+			}
 }
 
 
@@ -1140,7 +1142,7 @@ void redraw_all_2d( void )
 
 static void redraw_canvas_2d( Canvas *c )
 {
-	long i;
+	long i, count;
 	Curve_2d *cv;
 	Scaled_Point *sp;
 	XPoint *xps;
@@ -1161,20 +1163,18 @@ static void redraw_canvas_2d( Canvas *c )
 		{
 			cv = G.curve_2d[ G.active_curve ];
 
-			for ( sp = cv->points, xps = cv->xpoints_s, i = 0;
-				  i < G.nx * G.ny; sp++, xps++, i++ )
-			{
+			for ( sp = cv->points, xps = cv->xpoints_s, count = cv->count,
+				  i = 0; i < G.nx * G.ny && count != 0; sp++, xps++, i++ )
 				if ( sp->exist )
+				{
+					count--;
+
 					XSetForeground( G.d, cv->gc,
 									d2color( cv->z_factor
 											 * ( sp->v + cv->shift[ Z ] ) ) );
-				else
-					XSetForeground( G.d, cv->gc,
-									fl_get_pixel( FL_INACTIVE ) );
-
-				XFillRectangle( G.d, c->pm, cv->gc,
-								xps->x, xps->y, cv->w, cv->h );
-			}
+					XFillRectangle( G.d, c->pm, cv->gc,
+									xps->x, xps->y, cv->w, cv->h );
+				}
 
 			/* Now draw the out of range arrows */
 
@@ -1453,7 +1453,7 @@ void repaint_canvas_2d( Canvas *c )
 
 void fs_rescale_2d( Curve_2d *cv )
 {
-	long i;
+	long i, count;
 	double min = 1.0,
 		   max = 0.0;
 	double rw_min,
@@ -1468,12 +1468,14 @@ void fs_rescale_2d( Curve_2d *cv )
 
 	/* Find minimum and maximum value of all scaled data */
 
-	for ( sp = cv->points, i = 0; i < G.nx * G.ny; sp++, i++ )
+	for ( sp = cv->points, count = cv->count, i = 0;
+		  i < G.nx * G.ny && count != 0; sp++, i++ )
 		if ( sp->exist )
 		{
 			data = sp->v;
 			max = d_max( data, max );
 			min = d_min( data, min );
+			count--;
 		}
 
 	/* If there are no points yet... */

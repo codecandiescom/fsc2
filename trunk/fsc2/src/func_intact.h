@@ -23,8 +23,8 @@ typedef struct _IOBJ_ {
 		     w,
 		     h;
 
-	char *label;            /* object label */
-	char *help_text;        /* objects help text */
+	const char *label;      /* object label */
+	const char *help_text;  /* objects help text */
 	char *form_str;         /* C format string for in/output objects */
 
 	volatile int state;     /* state (on/off) of press count (buttons) */

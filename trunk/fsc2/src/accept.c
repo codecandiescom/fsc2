@@ -439,7 +439,7 @@ static void accept_1d_data( long x_index, long curve, int type, void *ptr )
 static void accept_2d_data( long x_index, long y_index, long curve, int type,
 							void *ptr )
 {
-	long len = 0;
+	long len = 0, count;
 	long *l_data;
 	double *f_data;
 	double rw_max,
@@ -451,6 +451,7 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 	long i, j;
 	Scaled_Point *sp;
 	bool need_cut_redraw = UNSET;
+	bool xy_scale_changed = UNSET;
 
 
 	/* Test if the curve number is OK */
@@ -501,13 +502,17 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 
 	if ( x_index + len > G.nx )
 	{
+		xy_scale_changed = SET;
 		if ( y_index >= G.ny )
 			need_cut_redraw |= incr_x_and_y( x_index, len, y_index );
 		else
 			need_cut_redraw |= incr_x( x_index, len );
 	}
 	else if ( y_index >= G.ny )
+	{
+		xy_scale_changed = SET;
 		need_cut_redraw |= incr_y( y_index );
+	}
 
 	/* Find maximum and minimum of old and new data */
 
@@ -539,10 +544,14 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 
 		if ( cv->is_scale_set )
 		{
-			for ( sp = cv->points, j = 0; j < G.nx * G.ny; sp++, j++ )
+			for ( sp = cv->points, count = cv->count, j = 0;
+				  count != 0 && j < G.nx * G.ny; sp++, j++ )
 				if ( sp->exist )
+				{
 					sp->v = ( cv->rwc_delta[ Z ] * sp->v + cv->rw_min
 							  - rw_min ) / new_rwc_delta_z;
+					count--;
+				}
 
 			if ( ! cv->is_fs )
 			{
@@ -558,9 +567,13 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 
 		if ( ! cv->is_scale_set && rw_max != rw_min )
 		{
-			for ( sp = cv->points, j = 0; j < G.nx * G.ny; sp++, j++ )
+			for ( sp = cv->points, count = cv->count, j = 0;
+				  count != 0 && j < G.nx * G.ny; sp++, j++ )
 				if ( sp->exist )
+				{
 					sp->v = ( sp->v - rw_min ) / new_rwc_delta_z;
+					count--;
+				}
 
 			cv->is_scale_set = SET;
 		}
@@ -586,7 +599,7 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 	/* Include the new data into the scaled data */
 
 	for ( cur_ptr = ptr, i = x_index,
-		  sp = &cv->points[ y_index * G.nx + x_index ];
+		  sp = cv->points + y_index * G.nx + x_index;
 		  i < x_index + len; sp++, i++ )
 	{
 		if ( type & ( INT_VAR | INT_ARR ) )
@@ -625,11 +638,16 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 
 	cv->rwc_start[ Z ] = rw_min;
 
+	if ( cv->is_scale_set )
+	recalc_XPoints_of_curve_2d( cv );
+
 	for ( i = 0; i < G.nc; i++ )
 	{
+		if ( i == curve )
+			continue;
 		cv = G.curve_2d[ i ];
-		if ( cv->scale_changed )
-			recalc_XPoints_of_curve_2d( cv );
+		if ( xy_scale_changed && cv->is_scale_set )
+			 recalc_XPoints_of_curve_2d( cv );
 	}
 
 	/* Update the cut window if necessary */
@@ -708,7 +726,7 @@ static bool incr_y( long y_index )
 		cv->xpoints_s = T_realloc( cv->xpoints_s, G.nx * ( y_index + 1 )
 								   * sizeof( XPoint ) );
 
-		for ( sp = &cv->points[ G.ny * G.nx ], j = G.ny; j <= y_index; j++ )
+		for ( sp = cv->points +  G.ny * G.nx, j = G.ny; j <= y_index; j++ )
 			for ( k = 0; k < G.nx; sp++, k++ )
 				sp->exist = UNSET;
 

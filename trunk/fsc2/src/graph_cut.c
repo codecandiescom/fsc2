@@ -919,6 +919,8 @@ bool cut_num_points_changed( int dir, long num_points )
 	/* In full scale mode the x-axis scale must be reset and all points need to
 	   be rescaled */
 
+	CG.nx = num_points;
+
 	if ( CG.is_fs[ G.active_curve ] )
 	{
 		CG.s2d[ G.active_curve ][ X ] = cv->s2d[ X ] =
@@ -927,8 +929,6 @@ bool cut_num_points_changed( int dir, long num_points )
 			if ( sp->exist )
 				cv->xpoints[ sp->xp_ref ].x = d2shrt( cv->s2d[ X ] * k );
 	}
-
-	CG.nx = num_points;
 
 	/* Signal calling routine that redraw of cut curve is needed */
 
@@ -1708,6 +1708,9 @@ void cut_fs_button_callback( FL_OBJECT *a, long b )
 
 void redraw_all_cut_canvases( void )
 {
+	if ( ! G.is_cut )
+		return;
+
 	redraw_cut_canvas( &G.cut_canvas );
 	redraw_cut_canvas( &G.cut_x_axis );
 	redraw_cut_canvas( &G.cut_y_axis );
