@@ -38,18 +38,17 @@
 #define VAR_TYPE( a )  ( ( isupper( a[ 0 ] ) ) ? INT_VAR : FLOAT_VAR )
 
 
-/* some people prefer C-style arrays, some FORTRAN- or MATLAB-style arrays -
+/* Some people prefer C-style arrays, some FORTRAN- or MATLAB-style arrays -
    by setting the following constant the program can be easily adapted to
-   whatever style the users like (even something rather stupid...) */
+   whatever style the users like (even something rather weird...) */
 
 #define ARRAY_OFFSET 1      /* 0: C-like array indexing */
                             /* 1: FORTRAN-like array indexing */
                             /* or something else for really weird results :) */
 
 
-/* dynamically sized arrays have (as long as their dimension is still
+/* Dynamically sized arrays have (as long as their dimension is still
    undetermined) a size of 0 for the very last dimension */
-
 
 #define need_alloc( a )  ( ( a )->sizes[ ( a )->dim - 1 ] == 0 )
 
