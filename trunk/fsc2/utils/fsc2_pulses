@@ -949,7 +949,7 @@ sub get_pulse_list {
 
 	my ( $self, $step ) = ( shift, shift );
 
-#	die "Invaluid pulse list index\n" if $step < 0;
+#	die "Invalid pulse list index\n" if $step < 0;
 	exit 1 if $step < 0;
 
 	return $self->{ 'plist' }{ $step }
