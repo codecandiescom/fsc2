@@ -234,13 +234,15 @@ $(addsuffix .c,$(s_band_list)): %.c: s_band_magnet.c.tmpl
 	o=`echo $$n | tr "a-z" "A-Z"`;                                 \
 	sed "s/s_band_magnet_tmpl/s_band_magnet_$$n/g;s/S_BAND_MAGNET_TMPL/S_BAND_MAGNET_$$o/g" $^ > $@
 
+
 # How to install the modules
 
 install:
 	$(INSTALL) -d $(libdir)
 	$(EXEC_INSTALL) -m  755 -o $(OWNER) -g $(GROUP) *.fsc2_so $(libdir)
 	if [ -r $(mchdir)/$(machine_name)-install ]; then  \
-		$(MAKE) install-$(machine_name);               \
+		$(MAKE) -f $(mchdir)/$(machine_name)-install   \
+				install-$(machine_name);               \
 	fi
 
 # How to uninstall the modules
@@ -250,7 +252,8 @@ uninstall:
 		$(RM) $(RMFLAGS) $(libdir)/$$f;                \
 	done
 	if [ -r $(mchdir)/$(machine_name)-install ]; then  \
-		$(MAKE) uninstall-$(machine_name);             \
+		$(MAKE) -f $(mchdir)/$(machine_name)-install   \
+				uninstall-$(machine_name);             \
 	fi
 
 
