@@ -58,18 +58,18 @@ export        # export all symbols to the sub-makefiles
 .PHONY: all install clean distclean                     \
 		install-pion.anorg.chemie.uni-frankfurt.de      \
 		install-crowley.physik.fu-berlin.de             \
-		install-moebi.physik.fu-berlin.de               \
 		install-door.physik.fu-berlin.de                \
 		install-isaak.physik.fu-berlin.de               \
+		install-moebpc3.physik.fu-berlin.de             \
 		install-tresr.physik.fu-berlin.de               \
 		install-sunone.chemie.unibas.ch                 \
 		install-crowley.none                            \
 		install-dorimare.nowhere                        \
 		uninstall-pion.anorg.chemie.uni-frankfurt.de    \
 		uninstall-crowley.physik.fu-berlin.de           \
-		uninstall-moebi.physik.fu-berlin.de             \
 		uninstall-door.physik.fu-berlin.de              \
 		uninstall-isaak.physik.fu-berlin.de             \
+		uninstall-moebpc3.physik.fu-berlin.de           \
 		uninstall-tresr.physik.fu-berlin.de             \
 		uninstall-sunone.chemie.unibas.ch               \
 		uninstall-crowley.none                          \
@@ -119,8 +119,8 @@ install:
 # spectrometers are created. If, for example, the spectrometer always uses
 # aeg_x_band.so as the driver for the magnet power supply, creating a link
 # with the name magnet.so allows to use 'magnet' as an alternative name for
-# the power supply in EDL programs. Don't forget to delete already existing
-# links before creating new ones!
+# the power supply in EDL programs. Already existing links must be deleted
+# before creating new ones!
 
 install-pion.anorg.chemie.uni-frankfurt.de:
 	$(MAKE) $(UNINSTALL_MACHINE)
@@ -168,6 +168,8 @@ install-moebpc3.physik.fu-berlin.de:
 	$(MAKE) $(UNINSTALL_MACHINE)
 	-$(LN) $(LNFLAGS) $(libdir)/ips20_4.so $(libdir)/magnet.so
 	-chown $(OWNER).$(GROUP) $(libdir)/magnet.so
+	-$(LN) $(LNFLAGS) $(libdir)/sr830.so $(libdir)/lockin.so
+	-chown $(OWNER).$(GROUP) $(libdir)/lockin.so
 
 install-tresr.physik.fu-berlin.de:
 	$(MAKE) $(UNINSTALL_MACHINE)
@@ -178,9 +180,8 @@ install-tresr.physik.fu-berlin.de:
 
 install-sunone.chemie.unibas.ch:
 	$(MAKE) $(UNINSTALL_MACHINE)
-
-install-moebi.physik.fu-berlin.de:
-	$(MAKE) $(UNINSTALL_MACHINE)
+	-$(LN) $(LNFLAGS) $(libdir)/er032m.so $(libdir)/magnet.so
+	-chown $(OWNER).$(GROUP) $(libdir)/magnet.so
 
 install-crowley.none:
 	$(MAKE) $(UNINSTALL_MACHINE)
@@ -224,14 +225,14 @@ uninstall-isaak.physik.fu-berlin.de:
 
 uninstall-moebpc3.physik.fu-berlin.de:
 	-$(RM) $(RMFLAGS) $(libdir)/magnet.so
+	-$(RM) $(RMFLAGS) $(libdir)/lockin.so
 
 uninstall-tresr.physik.fu-berlin.de:
 	-$(RM) $(RMFLAGS) $(libdir)/magnet.so
 	-$(RM) $(RMFLAGS) $(libdir)/lockin.so
 
 uninstall-sunone.chemie.unibas.ch:
-
-uninstall-moebi.physik.fu-berlin.de:
+	-$(RM) $(RMFLAGS) $(libdir)/magnet.so
 
 uninstall-crowley.none:
 

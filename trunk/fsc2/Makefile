@@ -65,7 +65,9 @@ GPIB_LIBRARY     := JTT
 GPIB_CONF_FILE   := /etc/gpib.conf
 GPIB_LOG_FILE    := /tmp/gpib.log
 GPIB_LOG_LEVEL   := HIGH
-#GPIB_HEADER_DIR := /usr/include/gpib
+
+# GPIB_HEADER_DIR := /usr/include/gpib
+
 
 # NUM_SERIAL_PORTS defines the number of serial ports that are available on
 # the computer and defaults to 0 if not set (in which case no serial ports
@@ -187,14 +189,8 @@ ifeq ($(machine_name),pion.anorg.chemie.uni-frankfurt.de)
 	OWNER              := fsc2
 	GROUP              := uucp
 	GPIB_LIBRARY       := JTT
-	INSTALL_MACHINE    := install-$(machine_name)
-	UNINSTALL_MACHINE  := uninstall-$(machine_name)
-endif
-
-ifeq ($(machine_name),moebi.physik.fu-berlin.de)
-	OWNER              := fsc2
-	GROUP              := uucp
-	GPIB_LIBRARY       := JTT
+	NUM_SERIAL_PORTS   := 2
+	SERIAL_LOCK_DIR    := "/var/lock"
 	INSTALL_MACHINE    := install-$(machine_name)
 	UNINSTALL_MACHINE  := uninstall-$(machine_name)
 endif
@@ -203,7 +199,8 @@ ifeq ($(machine_name),crowley.physik.fu-berlin.de)
 	OWNER              := fsc2
 	GROUP              := uucp
 	GPIB_LIBRARY       := JTT
-	MACHINE            := $(machine_name)
+	NUM_SERIAL_PORTS   := 2
+	SERIAL_LOCK_DIR    := "/var/lock"
 	INSTALL_MACHINE    := install-$(machine_name)
 	UNINSTALL_MACHINE  := uninstall-$(machine_name)
 endif
@@ -212,6 +209,8 @@ ifeq ($(machine_name),door.physik.fu-berlin.de)
 	OWNER              := fsc2
 	GROUP              := uucp
 	GPIB_LIBRARY       := JTT
+	NUM_SERIAL_PORTS   := 2
+	SERIAL_LOCK_DIR    := "/var/lock"
 	INSTALL_MACHINE    := install-$(machine_name)
 	UNINSTALL_MACHINE  := uninstall-$(machine_name)
 endif
@@ -220,6 +219,8 @@ ifeq ($(machine_name),isaak.physik.fu-berlin.de)
 	OWNER              := fsc2
 	GROUP              := uucp
 	GPIB_LIBRARY       := JTT
+	NUM_SERIAL_PORTS   := 2
+	SERIAL_LOCK_DIR    := "/var/lock"
 	INSTALL_MACHINE    := install-$(machine_name)
 	UNINSTALL_MACHINE  := uninstall-$(machine_name)
 endif
@@ -228,6 +229,8 @@ ifeq ($(machine_name),moebpc3.physik.fu-berlin.de)
 	OWNER              := fsc2
 	GROUP              := uucp
 	GPIB_LIBRARY       := JTT
+	NUM_SERIAL_PORTS   := 2
+	SERIAL_LOCK_DIR    := "/var/lock"
 	INSTALL_MACHINE    := install-$(machine_name)
 	UNINSTALL_MACHINE  := uninstall-$(machine_name)
 endif
@@ -237,6 +240,8 @@ ifeq ($(machine_name),sunone.chemie.unibas.ch)
 	GROUP              := exp
 	GPIB_LIBRARY       := NI
 	INSTALL_MACHINE    := install-$(machine_name)
+	NUM_SERIAL_PORTS   := 2
+	SERIAL_LOCK_DIR    := "/var/lock"
 	UNINSTALL_MACHINE  := uninstall-$(machine_name)
 endif
 
@@ -244,6 +249,8 @@ ifeq ($(machine_name),tresr.physik.fu-berlin.de)
 	OWNER              := fsc2
 	GROUP              := uucp
 	GPIB_LIBRARY       := LLP
+	NUM_SERIAL_PORTS   := 2
+	SERIAL_LOCK_DIR    := "/var/lock"
 	INSTALL_MACHINE    := install-$(machine_name)
 	UNINSTALL_MACHINE  := uninstall-$(machine_name)
 endif
@@ -252,6 +259,8 @@ ifeq ($(machine_name),crowley.none)
 	OWNER              := fsc2
 	GROUP              := uucp
 	GPIB_LIBRARY       := JTT
+	NUM_SERIAL_PORTS   := 2
+	SERIAL_LOCK_DIR    := "/var/lock"
 	INSTALL_MACHINE    := install-$(machine_name)
 	UNINSTALL_MACHINE  := uninstall-$(machine_name)
 endif
@@ -260,9 +269,12 @@ ifeq ($(machine_name),dorimare.nowhere)
 	OWNER              := fsc2
 	GROUP              := uucp
 	GPIB_LIBRARY       := JTT
+	NUM_SERIAL_PORTS   := 1
+	SERIAL_LOCK_DIR    := "/var/lock"
 	INSTALL_MACHINE    := install-$(machine_name)
 	UNINSTALL_MACHINE  := uninstall-$(machine_name)
 endif
+
 
 # Pass lots of variables to the source files...
 # For directories make sure they end with a `/'.
@@ -390,15 +402,15 @@ export            # export all variables to sub-makes
 .SUFFIXES:
 .PHONY: all install-strip install uninstall version   \
 		clean distclean mostly_clean tags pack ZIP    \
-		specific-pion.anorg.chemie.uni-frankfurt.de   \
-		specific-crowley.physik.fu-berlin.de          \
-		specific-door.physik.fu-berlin.de             \
-		specific-isaak.physik.fu-berlin.de            \
-		specific-tresr.physik.fu-berlin.de            \
-		specific-sunone.chemie.unibas.ch              \
-		specific-moebi.physik.fu-berlin.de            \
-		specific-crowley.none                         \
-		specific-dorimare.nowhere
+		pion.anorg.chemie.uni-frankfurt.de    		  \
+		crowley.physik.fu-berlin.de           		  \
+		door.physik.fu-berlin.de              		  \
+		isaak.physik.fu-berlin.de             		  \
+		moebpc3.physik.fu-berlin.de           		  \
+		tresr.physik.fu-berlin.de             		  \
+		sunone.chemie.unibas.ch               		  \
+		crowley.none                          		  \
+		dorimare.nowhere
 
 
 # Default rule: make the main program, the primary lexer and the modules
@@ -406,7 +418,7 @@ export            # export all variables to sub-makes
 
 all:
 	if [ $(INSTALL_MACHINE) != "install-unknown" ]; then                 \
-		$(MAKE) specific-$(machine_name);                                \
+		$(MAKE) $(machine_name);                                        \
 	fi
 	-@grep '$$Id\: ' Makefile $(sdir)/Makefile $(sdir)/*.[chly]          \
 				     $(mdir)/Makefile $(mdir)/*.[chl]                    \
@@ -519,17 +531,17 @@ pack:
 
 # Some actions specific to the different well-known machines
 
-specific-pion.anorg.chemie.uni-frankfurt.de:
+pion.anorg.chemie.uni-frankfurt.de:
 
-specific-crowley.physik.fu-berlin.de:
+crowley.physik.fu-berlin.de:
 
-specific-door.physik.fu-berlin.de:
+door.physik.fu-berlin.de:
 
-specific-isaak.physik.fu-berlin.de:
+isaak.physik.fu-berlin.de:
 
-specific-moebpc3.physik.fu-berlin.de:
+moebpc3.physik.fu-berlin.de:
 
-specific-tresr.physik.fu-berlin.de:
+tresr.physik.fu-berlin.de:
 	sed -e 's/\"ER032M\"/\"Field\"/' \
 		$(cdir)/er032m.conf > $(cdir)/er032m.conf.new
 	mv $(cdir)/er032m.conf.new $(cdir)/er032m.conf
@@ -537,13 +549,11 @@ specific-tresr.physik.fu-berlin.de:
 		$(cdir)/er032m.conf > $(cdir)/er032m.conf.new
 	mv $(cdir)/er032m.conf.new $(cdir)/er032m.conf
 
-specific-sunone.chemie.unibas.ch:
+sunone.chemie.unibas.ch:
 
-specific-moebi.physik.fu-berlin.de:
+crowley.none:
 
-specific-crowley.none:
-
-specific-dorimare.nowhere:
+dorimare.nowhere:
 
 
 # Create zipped tarball and write it to the ZIP drive (at home or on isaak
