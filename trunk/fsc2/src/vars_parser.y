@@ -58,8 +58,7 @@ input:   /* empty */
 ;
 
 line:    VAR_TOKEN                 /* no assignment to be done */
-       | VAR_TOKEN '=' expr        { vars_assign( $3, $1 );
-                                     assert( Var_Stack == NULL ); }
+       | VAR_TOKEN '=' expr        { vars_assign( $3, $1 ); }
        | VAR_TOKEN '['             { vars_arr_start( $1 ); }
          list1 ']'                 { vars_arr_lhs( $4 ); }
          arhs
