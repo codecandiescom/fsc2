@@ -25,7 +25,6 @@
 #include "dg2020_b.h"
 
 
-
 /*-----------------------------------------------------------------*
  * Converts a time into the internal type of a time specification,
  * i.e. a integer multiple of the time base

@@ -57,8 +57,8 @@ const char generic_type[ ] = DEVICE_TYPE;
 
 /* The maximum field resolution: this is, according to the manual the best
    result that can be achieved when repeatedly setting the center field and
-   it doesn't seem to make sense too much sense to set a new field when the
-   difference from the current field is lower. */
+   it doesn't seem to make too much sense to set a new field when the
+   difference from the current field is below this resolution. */
 
 #define ER032M_RESOLUTION   5.0e-3
 

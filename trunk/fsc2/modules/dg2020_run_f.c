@@ -25,10 +25,8 @@
 #include "dg2020_f.h"
 
 
-
 #define type_ON( f )           ( ( f )->is_inverted ? LOW : HIGH )
 #define type_OFF( f )          ( ( f )->is_inverted ? HIGH : LOW )
-
 
 
 /*-------------------------------------------------------------------------*

@@ -41,9 +41,9 @@ double ma_list[ MAX_MA_INDEX + 1 ];
 static struct ER023M er023m_store;
 
 
-/*------------------------------------*/
-/* Init hook function for the module. */
-/*------------------------------------*/
+/*------------------------------------*
+ * Init hook function for the module.
+ *------------------------------------*/
 
 int er023m_init_hook( void )
 {
@@ -109,9 +109,9 @@ int er023m_init_hook( void )
 }
 
 
-/*------------------------------------------------*/
-/* Start of test run hook function for the module */
-/*------------------------------------------------*/
+/*------------------------------------------------*
+ * Start of test run hook function for the module
+ *------------------------------------------------*/
 
 int er023m_test_hook( void )
 {
@@ -120,9 +120,9 @@ int er023m_test_hook( void )
 }
 
 
-/*--------------------------------------------------*/
-/* Start of experiment hook function for the module */
-/*--------------------------------------------------*/
+/*--------------------------------------------------*
+ * Start of experiment hook function for the module
+ *--------------------------------------------------*/
 
 int er023m_exp_hook( void )
 {
@@ -141,9 +141,9 @@ int er023m_exp_hook( void )
 }
 
 
-/*------------------------------------------------*/
-/* End of experiment hook function for the module */
-/*------------------------------------------------*/
+/*------------------------------------------------*
+ * End of experiment hook function for the module
+ *------------------------------------------------*/
 
 int er023m_end_of_exp_hook( void )
 {
@@ -159,8 +159,8 @@ int er023m_end_of_exp_hook( void )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 Var_T *lockin_name( UNUSED_ARG Var_T *v )
 {
@@ -168,9 +168,9 @@ Var_T *lockin_name( UNUSED_ARG Var_T *v )
 }
 
 
-/*---------------------------------------*/
-/* Function returns a lock-in data value */
-/*---------------------------------------*/
+/*---------------------------------------*
+ * Function returns a lock-in data value
+ *---------------------------------------*/
 
 Var_T *lockin_get_data( Var_T *v )
 {
@@ -191,14 +191,14 @@ Var_T *lockin_get_data( Var_T *v )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/* Returns or sets sensitivity (receiver gain) of the lock-in amplifier. */
-/* If called with no argument the current receiver gain is returned,     */
-/* otherwise the receiver gain is set to the argument. Possible receiver */
-/* gain settings are in the range between 2.0e1 and 1.0e7 in steps of    */
-/* about 1, 1.25, 1.5, 2, 2.5, 3.0, 4.0, 5.0, 6.0 and 8.0 (multiplied by */
-/* a power of 10).                                                       */
-/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ * Returns or sets sensitivity (receiver gain) of the lock-in amplifier.
+ * If called with no argument the current receiver gain is returned,
+ * otherwise the receiver gain is set to the argument. Possible receiver
+ * gain settings are in the range between 2.0e1 and 1.0e7 in steps of
+ * about 1, 1.25, 1.5, 2, 2.5, 3.0, 4.0, 5.0, 6.0 and 8.0 (multiplied by
+ * a power of 10).
+ *-----------------------------------------------------------------------*/
 
 Var_T *lockin_sensitivity( Var_T *v )
 {
@@ -277,12 +277,12 @@ Var_T *lockin_sensitivity( Var_T *v )
 }
 
 
-/*------------------------------------------------------------------------*/
-/* Returns or sets the time constant of the lock-in amplifier. If called  */
-/* without an argument the time constant is returned (in secs). If called */
-/* with an argument the time constant is set to this value. The minimum   */
-/* usuable time constant is 2.56 ms.                                      */
-/*------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*
+ * Returns or sets the time constant of the lock-in amplifier. If called
+ * without an argument the time constant is returned (in secs). If called
+ * with an argument the time constant is set to this value. The minimum
+ * usuable time constant is 2.56 ms.
+ *------------------------------------------------------------------------*/
 
 Var_T *lockin_time_constant( Var_T *v )
 {
@@ -379,12 +379,12 @@ Var_T *lockin_time_constant( Var_T *v )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/* Returns or sets the phase of the lock-in amplifier. If called without */
-/* an argument the phase is returned (range 0-359). If called with an    */
-/* argument the phase is set to this value (after mapping it into the    */
-/* 0-359 range).                                                         */
-/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ * Returns or sets the phase of the lock-in amplifier. If called without
+ * an argument the phase is returned (range 0-359). If called with an
+ * argument the phase is set to this value (after mapping it into the
+ * 0-359 range).
+ *-----------------------------------------------------------------------*/
 
 Var_T *lockin_phase( Var_T *v )
 {
@@ -432,11 +432,11 @@ Var_T *lockin_phase( Var_T *v )
 }
 
 
-/*------------------------------------------------------------------------*/
-/* Returns or sets the offset of the lock-in amplifier. If called without */
-/* an argument the offset is returned (range 0-99). If called with an     */
-/* argument the offset is set to this value.                              */
-/*------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*
+ * Returns or sets the offset of the lock-in amplifier. If called without
+ * an argument the offset is returned (range 0-99). If called with an
+ * argument the offset is set to this value.
+ *------------------------------------------------------------------------*/
 
 Var_T *lockin_offset( Var_T *v )
 {
@@ -477,12 +477,12 @@ Var_T *lockin_offset( Var_T *v )
 }
 
 
-/*------------------------------------------------------------------------*/
-/* Returns or sets the conversion time. If called without an argument the */
-/* conversion time is returned (in secs). If called with an argument the  */
-/* conversion time is set to this value. The minimum usuable conversion   */
-/* time constant is 3.2 ms.                                               */
-/*------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*
+ * Returns or sets the conversion time. If called without an argument the
+ * conversion time is returned (in secs). If called with an argument the
+ * conversion time is set to this value. The minimum usuable conversion
+ * time constant is 3.2 ms.
+ *------------------------------------------------------------------------*/
 
 Var_T *lockin_conversion_time( Var_T *v )
 {
@@ -561,11 +561,11 @@ Var_T *lockin_conversion_time( Var_T *v )
 }
 
 
-/*--------------------------------------------------------------------------*/
-/* Returns or sets the modulation frequency. If called without an argument  */
-/* the modulation frequency is returned (in Hz). If called with an argument */
-/* the modulation frequency is set to this value.                           */
-/*--------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------*
+ * Returns or sets the modulation frequency. If called without an argument
+ * the modulation frequency is returned (in Hz). If called with an argument
+ * the modulation frequency is set to this value.
+ *--------------------------------------------------------------------------*/
 
 Var_T *lockin_ref_freq( Var_T *v )
 {
@@ -654,11 +654,11 @@ Var_T *lockin_ref_freq( Var_T *v )
 }
 
 
-/*--------------------------------------------------------------------------*/
-/* Returns or sets the modulation amplitude. If called without an argument  */
-/* the modulation amplitude is returned (in G). If called with an argument  */
-/* the modulation amplitude is set to this value.                           */
-/*--------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------*
+ * Returns or sets the modulation amplitude. If called without an argument
+ * the modulation amplitude is returned (in G). If called with an argument
+ * the modulation amplitude is set to this value.
+ *--------------------------------------------------------------------------*/
 
 Var_T *lockin_ref_level( Var_T *v )
 {
@@ -728,11 +728,11 @@ Var_T *lockin_ref_level( Var_T *v )
 }
 
 
-/*----------------------------------------------------------------------*/
-/* Returns or sets the harmonic to be used by the lock-in amplifier. If */
-/* called without an argument the harmonic is returned (1 or 2). If     */
-/* called with an argument the harmonic is set to this value.           */
-/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*
+ * Returns or sets the harmonic to be used by the lock-in amplifier. If
+ * called without an argument the harmonic is returned (1 or 2). If
+ * called with an argument the harmonic is set to this value.
+ *----------------------------------------------------------------------*/
 
 Var_T *lockin_harmonic( Var_T *v )
 {
@@ -773,11 +773,11 @@ Var_T *lockin_harmonic( Var_T *v )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/* Returns or sets the resonator to be used by the lock-in amplifier. If */
-/* called without an argument the resonator is returned (1 or 2). If     */
-/* called with an argument the resonator is set to this value.           */
-/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ * Returns or sets the resonator to be used by the lock-in amplifier. If
+ * called without an argument the resonator is returned (1 or 2). If
+ * called with an argument the resonator is set to this value.
+ *-----------------------------------------------------------------------*/
 
 Var_T *lockin_resonator( Var_T *v )
 {
@@ -819,10 +819,10 @@ Var_T *lockin_resonator( Var_T *v )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/* Function returns an integer variable with a value of 1 if the for the */
-/* last data fetched from the device an overload occurred, otherwise 0.  */
-/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ * Function returns an integer variable with a value of 1 if the for the
+ * last data fetched from the device an overload occurred, otherwise 0.
+ *-----------------------------------------------------------------------*/
 
 Var_T *lockin_is_overload( UNUSED_ARG Var_T *v )
 {
@@ -842,8 +842,8 @@ Var_T *lockin_is_overload( UNUSED_ARG Var_T *v )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 Var_T *lockin_command( Var_T *v )
 {

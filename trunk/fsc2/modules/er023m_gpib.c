@@ -29,9 +29,9 @@ static bool dont_print_on_error = UNSET;
 static bool er023m_talk( const char *cmd, char *reply, long *length );
 
 
-/*------------------------------------------------------------------------*/
-/* Here everything is done to bring the device into a known, useful state */
-/*------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*
+ * Here everything is done to bring the device into a known, useful state
+ *------------------------------------------------------------------------*/
 
 bool er023m_init( const char *name )
 {
@@ -176,11 +176,11 @@ bool er023m_init( const char *name )
 }
 
 
-/*----------------------------------------------------------------*/
-/* This function only works if the data fit into an unsigned int  */
-/* but has already been checked when er023m_nb() was called (when */
-/* setting the conversion time)                                   */
-/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * This function only works if the data fit into an unsigned int
+ * but has already been checked when er023m_nb() was called (when
+ * setting the conversion time)
+ *----------------------------------------------------------------*/
 
 unsigned int er023m_get_data( void )
 {
@@ -215,11 +215,11 @@ unsigned int er023m_get_data( void )
 }
 
 
-/*----------------------------------------------------------------*/
-/* Asks the device for the current receiver gain setting, a value */
-/* between 0 and 57 (corresponding to receiver gains between 2e+1 */
-/* and 1e+7) is returned.                                         */
-/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * Asks the device for the current receiver gain setting, a value
+ * between 0 and 57 (corresponding to receiver gains between 2e+1
+ * and 1e+7) is returned.
+ *----------------------------------------------------------------*/
 
 int er023m_get_rg( void )
 {
@@ -233,9 +233,9 @@ int er023m_get_rg( void )
 }
 
 
-/*---------------------------------------------------------*/
-/* Sets a receiver gain, allowed range of values is 0 - 57 */
-/*---------------------------------------------------------*/
+/*---------------------------------------------------------*
+ * Sets a receiver gain, allowed range of values is 0 - 57
+ *---------------------------------------------------------*/
 
 void er023m_set_rg( int rg_index )
 {
@@ -249,11 +249,11 @@ void er023m_set_rg( int rg_index )
 }
 
 
-/*----------------------------------------------------------------*/
-/* Asks the device for the current time constant setting, a value */
-/* between 0 and 19 is returned (corresponding to time constants  */
-/* between 10 ms and 5.24288 s)                                   */
-/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * Asks the device for the current time constant setting, a value
+ * between 0 and 19 is returned (corresponding to time constants
+ * between 10 ms and 5.24288 s)
+ *----------------------------------------------------------------*/
 
 int er023m_get_tc( void )
 {
@@ -267,11 +267,11 @@ int er023m_get_tc( void )
 }
 
 
-/*---------------------------------------------------------*/
-/* Sets a time constant, allowed range of values is 8 - 19 */
-/* (values below 8, i.e. below 2.56 ms don't make too much */
-/* sense because the minimum conversion time is 3.2 ms)    */
-/*---------------------------------------------------------*/
+/*---------------------------------------------------------*
+ * Sets a time constant, allowed range of values is 8 - 19
+ * (values below 8, i.e. below 2.56 ms don't make too much
+ * sense because the minimum conversion time is 3.2 ms)
+ *---------------------------------------------------------*/
 
 void er023m_set_tc( int tc_index )
 {
@@ -284,11 +284,11 @@ void er023m_set_tc( int tc_index )
 }
 
 
-/*------------------------------------------------------------------*/
-/* Asks the device for the current conversion time setting, a value */
-/* between 1 and 9999 is returned (corresponding to time constants  */
-/* between 320 us and 3.19968 s)                                    */
-/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ * Asks the device for the current conversion time setting, a value
+ * between 1 and 9999 is returned (corresponding to time constants
+ * between 320 us and 3.19968 s)
+ *------------------------------------------------------------------*/
 
 int er023m_get_ct( void )
 {
@@ -302,17 +302,17 @@ int er023m_get_ct( void )
 }
 
 
-/*--------------------------------------------------------------*/
-/* Sets the conversion time, input must be between 10 and 9999  */
-/* (values below 10, i.e. 3.2 ms would make it impossible to    */
-/* fetch data in single mode (SM)). Because the conversion time */
-/* determines the number of bytes returned as ADC data as well  */
-/* as how many of the bits in the returned bytes are valid we   */
-/* also have to (re)read this number of bytes and recalculate   */
-/* the scaling factor and offset according to the algorithm     */
-/* that Robert Bittl (FU Berlin) has figured out (as usual, the */
-/* manual tells nothing about how to do it...).                 */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ * Sets the conversion time, input must be between 10 and 9999
+ * (values below 10, i.e. 3.2 ms would make it impossible to
+ * fetch data in single mode (SM)). Because the conversion time
+ * determines the number of bytes returned as ADC data as well
+ * as how many of the bits in the returned bytes are valid we
+ * also have to (re)read this number of bytes and recalculate
+ * the scaling factor and offset according to the algorithm
+ * that Robert Bittl (FU Berlin) has figured out (as usual, the
+ * manual tells nothing about how to do it...).
+ *--------------------------------------------------------------*/
 
 void er023m_set_ct( int ct_mult )
 {
@@ -335,10 +335,10 @@ void er023m_set_ct( int ct_mult )
 }
 
 
-/*------------------------------------------------*/
-/* Asks the device for the current phase setting, */
-/* a value between 0 and 359 will be returned.    */
-/*------------------------------------------------*/
+/*------------------------------------------------*
+ * Asks the device for the current phase setting,
+ * a value between 0 and 359 will be returned.
+ *------------------------------------------------*/
 
 int er023m_get_ph( void )
 {
@@ -352,9 +352,9 @@ int er023m_get_ph( void )
 }
 
 
-/*------------------------------------------------------*/
-/* Sets the phase, allowed values are between 0 and 359 */
-/*------------------------------------------------------*/
+/*------------------------------------------------------*
+ * Sets the phase, allowed values are between 0 and 359
+ *------------------------------------------------------*/
 
 void er023m_set_ph( int ph_index )
 {
@@ -368,10 +368,10 @@ void er023m_set_ph( int ph_index )
 }
 
 
-/*----------------------------------------------------------------*/
-/* Asks the device for the current modulation attenation setting, */
-/* returned values are in the range between 0 and 80.             */
-/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * Asks the device for the current modulation attenation setting,
+ * returned values are in the range between 0 and 80.
+ *----------------------------------------------------------------*/
 
 int er023m_get_ma( void )
 {
@@ -385,9 +385,9 @@ int er023m_get_ma( void )
 }
 
 
-/*----------------------------------------------------------------------*/
-/* Sets the modulation attenuation, allowed values are between 0 and 80 */
-/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*
+ * Sets the modulation attenuation, allowed values are between 0 and 80
+ *----------------------------------------------------------------------*/
 
 void er023m_set_ma( int ma_index )
 {
@@ -401,12 +401,12 @@ void er023m_set_ma( int ma_index )
 }
 
 
-/*-----------------------------------------------------------------*/
-/* Asks the device for the current offset setting, returned values */
-/* are in the range between 0 and 99 (50 corresponds to a zero     */
-/* offset, smaller values to negative offsets and larger ones to a */
-/* positive offset.                                                */
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ * Asks the device for the current offset setting, returned values
+ * are in the range between 0 and 99 (50 corresponds to a zero
+ * offset, smaller values to negative offsets and larger ones to a
+ * positive offset.
+ *-----------------------------------------------------------------*/
 
 int er023m_get_of( void )
 {
@@ -420,9 +420,9 @@ int er023m_get_of( void )
 }
 
 
-/*------------------------------------------------------*/
-/* Sets the offset, allowed values are between 0 and 99 */
-/*------------------------------------------------------*/
+/*------------------------------------------------------*
+ * Sets the offset, allowed values are between 0 and 99
+ *------------------------------------------------------*/
 
 void er023m_set_of( int of )
 {
@@ -436,11 +436,11 @@ void er023m_set_of( int of )
 }
 
 
-/*----------------------------------------------------------------*/
-/* Asks the device for the current modulation frequency, returned */
-/* values are in the range between 0 and 6 (corresponding to      */
-/* modulation frequencioes between 100 kHz and 1.5625 kHz)        */
-/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * Asks the device for the current modulation frequency, returned
+ * values are in the range between 0 and 6 (corresponding to
+ * modulation frequencioes between 100 kHz and 1.5625 kHz)
+ *----------------------------------------------------------------*/
 
 int er023m_get_mf( void )
 {
@@ -454,9 +454,9 @@ int er023m_get_mf( void )
 }
 
 
-/*-------------------------------------------------------------------*/
-/* Sets the modulation frequency, allowed values are between 0 and 6 */
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * Sets the modulation frequency, allowed values are between 0 and 6
+ *-------------------------------------------------------------------*/
 
 void er023m_set_mf( int mf_index )
 {
@@ -470,9 +470,9 @@ void er023m_set_mf( int mf_index )
 }
 
 
-/*------------------------------------------------------------*/
-/* Returns the currently used harmonic, returns either 1 or 2 */
-/*------------------------------------------------------------*/
+/*------------------------------------------------------------*
+ * Returns the currently used harmonic, returns either 1 or 2
+ *------------------------------------------------------------*/
 
 int er023m_get_ha( void )
 {
@@ -486,9 +486,9 @@ int er023m_get_ha( void )
 }
 
 
-/*------------------------------------------*/
-/* Sets the harmonic, accepts either 1 or 2 */
-/*------------------------------------------*/
+/*------------------------------------------*
+ * Sets the harmonic, accepts either 1 or 2
+ *------------------------------------------*/
 
 void er023m_set_ha( int ha )
 {
@@ -502,9 +502,9 @@ void er023m_set_ha( int ha )
 }
 
 
-/*-------------------------------------------------------------*/
-/* Returns the currently used resonator, returns either 1 or 2 */
-/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*
+ * Returns the currently used resonator, returns either 1 or 2
+ *-------------------------------------------------------------*/
 
 int er023m_get_re( void )
 {
@@ -518,9 +518,9 @@ int er023m_get_re( void )
 }
 
 
-/*-------------------------------------------*/
-/* Sets the resonator, accepts either 1 or 2 */
-/*-------------------------------------------*/
+/*-------------------------------------------*
+ * Sets the resonator, accepts either 1 or 2
+ *-------------------------------------------*/
 
 void er023m_set_re( int re )
 {
@@ -534,12 +534,12 @@ void er023m_set_re( int re )
 }
 
 
-/*-----------------------------------------------------------*/
-/* Returns the number of bytes to be expected when fetching  */
-/* ADC data in single mode (SM) - again the manual is lying  */
-/* by claiming that the maximum number is 3 while in reality */
-/* it 4 (actually, only 2 or 4 can happen).                  */
-/*-----------------------------------------------------------*/
+/*-----------------------------------------------------------*
+ * Returns the number of bytes to be expected when fetching
+ * ADC data in single mode (SM) - again the manual is lying
+ * by claiming that the maximum number is 3 while in reality
+ * it 4 (actually, only 2 or 4 can happen).
+ *-----------------------------------------------------------*/
 
 int er023m_nb( void )
 {
@@ -558,9 +558,9 @@ int er023m_nb( void )
 }
 
 
-/*-------------------------------------------------------*/
-/* Switches the service request option on (1) or off (0) */
-/*-------------------------------------------------------*/
+/*-------------------------------------------------------*
+ * Switches the service request option on (1) or off (0)
+ *-------------------------------------------------------*/
 
 void er023m_srq( int on_off )
 {
@@ -574,9 +574,9 @@ void er023m_srq( int on_off )
 }
 
 
-/*---------------------------------------*/
-/* Reads the status byte from the device */
-/*---------------------------------------*/
+/*---------------------------------------*
+ * Reads the status byte from the device
+ *---------------------------------------*/
 
 unsigned char er023m_st( void )
 {
@@ -595,8 +595,8 @@ unsigned char er023m_st( void )
 }
 
 
-/*--------------------------------------------------------------*/
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *--------------------------------------------------------------*/
 
 bool er023m_command( const char *cmd )
 {
@@ -606,8 +606,8 @@ bool er023m_command( const char *cmd )
 }
 
 
-/*--------------------------------------------------------------*/
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *--------------------------------------------------------------*/
 
 static bool er023m_talk( const char *cmd, char *reply, long *length )
 {
@@ -618,9 +618,9 @@ static bool er023m_talk( const char *cmd, char *reply, long *length )
 }
 
 
-/*------------------------------------------------------------------*/
-/* Called whenever there are communication problems with the device */
-/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ * Called whenever there are communication problems with the device
+ *------------------------------------------------------------------*/
 
 void er023m_failure( void )
 {

@@ -25,9 +25,9 @@
 #include "dg2020_b.h"
 
 
-
 #define type_ON( f )   ( ( f )->is_inverted ? LOW : HIGH )
 #define type_OFF( f )  ( ( f )->is_inverted ? HIGH : LOW )
+
 
 static void dg2020_shape_padding_check_1( Function_T *f );
 static void dg2020_shape_padding_check_2( void );
