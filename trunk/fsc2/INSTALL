@@ -213,7 +213,7 @@ in the Makefile for details.
 
 
 Moreover, support for the National Instruments 6601 GPCT, the Meilhaus
-ME6000 and ME6100 DAC and the Wasco WITIO-48 DIO card requires that the
+ME6000 and ME6100 DAQ and the Wasco WITIO-48 DIO card requires that the
 drivers and libraries for the cards (which are part of fsc2) are already
 successfully install, otherwise the corresponding modules can't be built.
 For support for the Roper Scientific CCD Spec-10 camera the PVCAM library
