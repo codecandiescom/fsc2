@@ -1090,8 +1090,10 @@ Var *f_clearcv( Var *v )
 
 	len = 4 * sizeof( char ) + sizeof( int ) + count * sizeof( long );
 
+	seteuid( EUID );
 	if ( ( buf = get_shm( &shm_id, len ) ) == ( void * ) - 1 )
 	{
+		seteuid( getuid( ) );
 		T_free( ca );
 		eprint( FATAL, "Internal communication problem at %s:%d.\n",
 				__FILE__, __LINE__ );
@@ -1118,7 +1120,6 @@ Var *f_clearcv( Var *v )
 
 	/* Detach from the segment with the data */
 
-	seteuid( EUID );
 	shmdt( ( void * ) buf );
 	seteuid( getuid( ) );
 
