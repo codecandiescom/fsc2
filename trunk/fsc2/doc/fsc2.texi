@@ -6,7 +6,7 @@
 @c %**start of header
 @setfilename fsc2.info
 @settitle fsc2
-@set lastupdate August 3, 2000
+@set lastupdate February 6, 2001
 @iftex
 @afourpaper
 @end iftex
@@ -22,7 +22,7 @@
 @sp 4
 @center A program for the remote control of EPR spectrometers
 @sp 2
-@center August 2000
+@center February 2001
 @sp 10
 @center Jens Thoms T@"orring
 @sp 1
