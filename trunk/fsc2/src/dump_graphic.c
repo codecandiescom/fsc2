@@ -252,9 +252,9 @@ static Pixmap get_cut_window( unsigned int *width, unsigned int *height )
 /* file.                                                          */
 /* The part for determining the pixel values (instead of using    */
 /* XGetPixel(), which would be much slower) includes some ideas   */
-/* from the xv program (especially xvgrab.c) by John Bradley,     */
-/* which in turn seems to be based on the 'xwdtopnm.c' utility,   */
-/* part of the pbmplus package written by Jef Poskanzer.          */
+/* from the xv program (notably xvgrab.c) by John Bradley, which  */
+/* in turn seems to be based on 'xwdtopnm.c', which is part of    */
+/* the pbmplus package written by Jef Poskanzer.                  */
 /*----------------------------------------------------------------*/
 
 static void dump_as_ppm( FILE *fp, XImage *image )
