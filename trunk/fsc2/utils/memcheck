@@ -40,14 +40,13 @@ while ( <> ) {
 
 	$h = $f[ 0 ] eq "(0)" ? \%h1 : \%h2;
 
-	$$h{ $f[ 2 ] } = "$1 $f[ 2 ] (line $.) called from " .
-		             "`addr2line -e $exe $f[ 5 ]`"
+	$$h{ $f[ 2 ] } = "$1 $f[ 2 ] (line $.) at $f[ 5 ]"
 		if $f[ 1 ] =~ /^((malloc)|(calloc)|(strdup)):$/;
 
 	if ( $f[ 1 ] eq "realloc:" ) {
 		if ( $f[ 2 ] eq "(nil)" ) {
 			$$h{ $f[ 4 ] } = "$f[ 0 ]: realloc from (nil) $f[ 4 ] (line $.) " .
-				             " called from " . `addr2line -e $exe $f[ 7 ]`
+				             "at $f[ 7 ]\n";
 		} else {
 			if ( not defined $$h{ $f[ 2 ] } ) {
 				print "$f[ 0 ]: realloc error for $f[ 2 ] (line $.) called " .
@@ -56,7 +55,7 @@ while ( <> ) {
 				delete $$h{ $f[ 2 ] };
 			}
 		}
-		$$h{ $f[ 4 ] } = "realloc $f[ 4 ]";
+		$$h{ $f[ 4 ] } = "realloc $f[ 4 ] (line $.) at $f[ 7 ]";
 	}
 
 	if ( $f[ 1 ] eq "free:" ) {
@@ -71,10 +70,19 @@ while ( <> ) {
 
 if ( ( keys %h1 ) ) {
 	print "Remaing memory from parent:\n";
-	print "$h1{ $_ }\n" for ( keys %h1 );
+	for ( keys %h1 ) {
+		print $h1{ $_ };
+		my @e = split / /, $h1{ $_ };
+		print " called from `addr2line -e $exe $e[ $#e ]`";
+	}
 }
 
-if ( ( keys %h1 ) ) {
+if ( ( keys %h2 ) ) {
 	print "Remaing memory from child:\n";
-	print "$h2{ $_ }\n" for ( keys %h2 );
+	for ( keys %h2 ) {
+		print $h2{ $_ };
+		my @e = split / /, $h2{ $_ };
+		print " called from `addr2line -e $exe $e[ $#e ]`";
+	}
 }
+
