@@ -30,6 +30,8 @@
 int prepslex( void );
 extern void prepsparse( void );
 
+int extr_pnum( char *txt );
+
 
 /* locally used global variables */
 
@@ -162,12 +164,7 @@ UNREC       [^\n \t;,\(\)\=\+\-\*\/\[\]\%\^:]+
 			/* all pulse related keywords... */
 
 {P}":"?     {
-				register char *p = prepstext;
-
-				while ( ! isdigit( *++p ) )
-			        ;
-
-			    Cur_Pulse = pulse_new( atoi( p ) );
+			    Cur_Pulse = pulse_new( extr_pnum( prepstext ) );
 				return( P_TOK );
 			}
 
@@ -180,11 +177,62 @@ UNREC       [^\n \t;,\(\)\=\+\-\*\/\[\]\%\^:]+
 {ML}        return( ML_TOK );
 {RP}        return( RP_TOK );
 
-{P}?"."{S}  
-{P}?"."{L}
-{P}?"."{DS}
-{P}?"."{DL}
-{P}?"."{ML}
+			/* combinations of pulse and property, e.g. `P3.LEN' */
+
+{P}?"."{F}  {
+				if ( *prepstext == '.' )
+					prepslval.lval = pulse_get_by_addr( Cur_Pulse, P_FUNC );
+				else
+					prepslval.lval = pulse_get_by_num( extr_pnum( prepstext ),
+													   P_FUNC );
+				return( INT_TOKEN );
+            }
+
+{P}?"."{S}  {
+				if ( *prepstext == '.' )
+					prepslval.lval = pulse_get_by_addr( Cur_Pulse, P_POS );
+				else
+					prepslval.lval = pulse_get_by_num( extr_pnum( prepstext ),
+													   P_POS );
+				return( INT_TOKEN );
+            }
+
+{P}?"."{L}  {
+				if ( *prepstext == '.' )
+					prepslval.lval = pulse_get_by_addr( Cur_Pulse, P_LEN );
+				else
+					prepslval.lval = pulse_get_by_num( extr_pnum( prepstext ),
+													   P_LEN );
+				return( INT_TOKEN );
+            }
+
+{P}?"."{DS} {
+				if ( *prepstext == '.' )
+					prepslval.lval = pulse_get_by_addr( Cur_Pulse, P_DPOS );
+				else
+					prepslval.lval = pulse_get_by_num( extr_pnum( prepstext ),
+													   P_DPOS );
+				return( INT_TOKEN );
+            }
+
+{P}?"."{DL} {
+				if ( *prepstext == '.' )
+					prepslval.lval = pulse_get_by_addr( Cur_Pulse, P_DLEN );
+				else
+					prepslval.lval = pulse_get_by_num( extr_pnum( prepstext ),
+													   P_DLEN );
+				return( INT_TOKEN );
+            }
+
+{P}?"."{ML} {
+				if ( *prepstext == '.' )
+					prepslval.lval = pulse_get_by_addr( Cur_Pulse, P_MAXLEN );
+				else
+					prepslval.lval = pulse_get_by_num( extr_pnum( prepstext ),
+													   P_MAXLEN );
+				return( INT_TOKEN );
+            }
+
 
 {MW}        {
 				prepslval.lval = PULSER_CHANNEL_MW;
@@ -268,6 +316,10 @@ UNREC       [^\n \t;,\(\)\=\+\-\*\/\[\]\%\^:]+
 "%"         return( '%' );       /* modulo operator */        
 "^"         return( '^' );       /* exponentiation operator */
 
+       /* quasi-assignment operator for pulse properties */
+
+":"         return( ':' );
+
 			/* handling of end of statement character */
 ";"			return( ';' );
 
@@ -333,4 +385,39 @@ int preparations_parser( FILE *in )
 		return( FAIL );
 
 	return( Preps_Next_Section );
+}
+
+
+
+/*----------------------------------------------*/
+/* Extracts the pulse number from a pulse name. */
+/* ->                                           */
+/*    * pulse name string                       */
+/* <-                                           */
+/*    * pulse number or -1 on error             */
+/*----------------------------------------------*/
+
+int extr_pnum( char *txt )
+{
+	char *tp = get_string_copy( txt );
+	char *t = tp;
+	int ret;
+
+
+	while ( *t && *t != '.' && *t != ':' )
+		t++;
+
+	if ( *t == '.' || *t == ':' )
+	    *txt = '\0';
+
+	while( isdigit( *--t ) )
+		;
+
+	if ( isdigit( *++t ) )
+	    ret = atoi( t );
+	else
+		ret = -1;
+
+	free( tp );
+	return( ret );
 }

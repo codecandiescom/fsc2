@@ -60,7 +60,7 @@ long Billion  = 1000000000L;
 %token EQ LT LE GT GE
 
 %token NS_TOKEN US_TOKEN MS_TOKEN S_TOKEN
-
+%type <lval> func
 %type <vptr> expr line time unit
 
 
@@ -107,14 +107,26 @@ line:    P_TOK pprop               {}
 
 
 pprop:   /* empty */
-       | pprop F_TOK sep1 FUNC_TOK sep2  { pulse_set_func( Cur_Pulse, $4 ); }
-       | pprop S_TOK sep1 time sep2     { pulse_set_start( Cur_Pulse, $4 ); }
-       | pprop L_TOK sep1 time sep2     { pulse_set_len( Cur_Pulse, $4 ); }
-       | pprop DS_TOK sep1 time sep2     { pulse_set_dpos( Cur_Pulse, $4 ); }
-       | pprop DL_TOK sep1 time sep2    { pulse_set_dlen( Cur_Pulse, $4 ); }
-       | pprop ML_TOK sep1 time sep2    { pulse_set_maxlen( Cur_Pulse, $4 ); }
+       | pprop F_TOK sep1 func sep2 
+                                   { long f = $4;
+									 pulse_set( Cur_Pulse, P_FUNC,
+												vars_push( INT_VAR, &f ) ); }
+       | pprop S_TOK sep1 time sep2     
+                                   { pulse_set( Cur_Pulse, P_POS, $4 ); }
+       | pprop L_TOK sep1 time sep2 
+                                   { pulse_set( Cur_Pulse, P_LEN,$4 ); }
+       | pprop DS_TOK sep1 time sep2
+                                   { pulse_set( Cur_Pulse, P_DPOS, $4 ); }
+       | pprop DL_TOK sep1 time sep2
+                                   { pulse_set( Cur_Pulse, P_DLEN, $4 ); }
+       | pprop ML_TOK sep1 time sep2
+                                   { pulse_set( Cur_Pulse, P_MAXLEN, $4 ); }
 ;
 
+
+func:    FUNC_TOK                  { $$ = $1; }
+       | INT_TOKEN                 { $$ = $1; }
+;
 
 time:    expr unit                 { $$ = vars_mult( $1, $2 ); }
 ;
