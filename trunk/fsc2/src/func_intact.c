@@ -430,7 +430,7 @@ Var *f_bdelete( Var *v )
 	{
 		/* Since the buttons 'belong' to the parent, the child needs to ask
 		   the parent to delete the button. The ID of each button to be deleted
-		   gets passed to te parent in a buffer and the parent is asked to
+		   gets passed to the parent in a buffer and the parent is asked to
 		   delete the button */
 
 		if ( I_am == CHILD )
@@ -448,7 +448,7 @@ Var *f_bdelete( Var *v )
 				THROW( EXCEPTION );
 			}
 
-			/* Get a bufer long enough and write data */
+			/* Get a long enough buffer and write data */
 
 			len = 2 * sizeof( long );
 			if ( Fname )
@@ -489,7 +489,7 @@ Var *f_bdelete( Var *v )
 			THROW( EXCEPTION );
 		}
 
-		/* Do checks on parameters */
+		/* Check the parameters */
 
 		if ( v->type != INT_VAR || v->val.lval < 0 ||
 			 ( io = find_object_from_ID( v->val.lval ) ) == NULL ||
@@ -520,9 +520,9 @@ Var *f_bdelete( Var *v )
 		}
 
 		/* Special care has to be taken for the first radio buttons of a group
-		   (i.e. the other refer to) is deleted - the next button from the
-		   group must be made group leader and the remaining buttons must get
-		   told about it) */
+		   (i.e. the one the others refer to) is deleted - the next button
+		   from the group must be made group leader and the remaining buttons
+		   must get told about it) */
 
 		if ( io->type == RADIO_BUTTON && io->partner == -1 )
 		{
@@ -575,7 +575,7 @@ Var *f_bdelete( Var *v )
 		v = vars_pop( v );
 	}
 
-	/* The child process is already done here, and in a test run we're also */
+	/* The child process is already done here, and also a test run */
 
 	if ( I_am == CHILD || TEST_RUN || ! Tool_Box )
 		return vars_push( INT_VAR, 1 );
@@ -696,7 +696,7 @@ Var *f_bstate( Var *v )
 			pos += strlen( Fname ) + 1;
 		}
 		else
-			*( ( char * ) pos++ ) = '\0';
+			* ( char * ) pos++ = '\0';
 		
 		/* Ask parent process to return or set the state - bomb out if it
 		   returns a negative value, indicating a severe error */
@@ -1003,7 +1003,7 @@ Var *f_screate( Var *v )
 			pos += strlen( Fname ) + 1;
 		}
 		else
-			*( ( char * ) pos++ ) = '\0';
+			* ( char * ) pos++ = '\0';
 
 		if ( label )                            /* store label string */
 		{
@@ -1011,7 +1011,7 @@ Var *f_screate( Var *v )
 			pos += strlen( label ) + 1;
 		}
 		else
-			*( ( char * ) pos++ ) = '\0';
+			* ( char * ) pos++ = '\0';
 
 		if ( help_text )                        /* store help text string */
 		{
@@ -1019,7 +1019,7 @@ Var *f_screate( Var *v )
 			pos += strlen( help_text ) + 1;
 		}
 		else
-			*( ( char * ) pos++ ) = '\0';
+			* ( char * ) pos++ = '\0';
 
 		/* Ask parent to create the slider - it returns an array width two
 		   elements, the first indicating if it was successful, the second
@@ -1151,7 +1151,7 @@ Var *f_sdelete( Var *v )
 				pos += strlen( Fname ) + 1;
 			}
 			else
-				*( ( char * ) pos++ ) = '\0';
+				* ( char * ) pos++ = '\0';
 
 			v = vars_pop( v );
 
@@ -1334,7 +1334,7 @@ Var *f_svalue( Var *v )
 			pos += strlen( Fname ) + 1;
 		}
 		else
-			*( ( char * ) pos++ ) = '\0';
+			* ( char * ) pos++ = '\0';
 		
 		/* Ask parent to set or get the slider value - it will return an array
 		   with two doubles, the first indicating if it was successful (when
@@ -1628,7 +1628,7 @@ Var *f_icreate( Var *v )
 			pos += strlen( Fname ) + 1;
 		}
 		else
-			*( ( char * ) pos++ ) = '\0';
+			* ( char * ) pos++ = '\0';
 
 		if ( label )                            /* label string */
 		{
@@ -1636,13 +1636,13 @@ Var *f_icreate( Var *v )
 			pos += strlen( label ) + 1;
 		}
 		else
-			*( ( char * ) pos++ ) = '\0';
+			* ( char * ) pos++ = '\0';
 
 		if ( help_text )                        /* help text string */
 		{
 			if ( *help_text == '\0' )
 			{
-				*( ( unsigned char * ) pos ) = 0xff;
+				* ( unsigned char * ) pos = 0xff;
 				pos += 1;
 			}
 			else
@@ -1652,7 +1652,7 @@ Var *f_icreate( Var *v )
 			}
 		}
 		else
-			*( ( char * ) pos++ ) = '\0';
+			* ( char * ) pos++ = '\0';
 
 		if ( form_str )
 		{
@@ -1660,7 +1660,7 @@ Var *f_icreate( Var *v )
 			pos += strlen( form_str ) + 1;
 		}
 		else
-			*( ( char * ) pos++ ) = '\0';
+			* ( char * ) pos++ = '\0';
 
 		/* Pass buffer to parent and ask it to create the input or input
 		   object. It returns a buffer with two longs, the first one
@@ -1803,7 +1803,7 @@ Var *f_idelete( Var *v )
 				pos += strlen( Fname ) + 1;
 			}
 			else
-				*( ( char * ) pos++ ) = '\0';
+				* ( char * ) pos++ = '\0';
 
 			v = vars_pop( v );
 
@@ -2006,7 +2006,7 @@ Var *f_ivalue( Var *v )
 			pos += strlen( Fname ) + 1;
 		}
 		else
-			*( ( char * ) pos++ ) = '\0';
+			* ( char * ) pos++ = '\0';
 		
 		/* Ask parent to set or get the slider value - it will return a pointer
 		   to an INPUT_RES structure, where the res entry indicates failure
@@ -2229,7 +2229,7 @@ static void recreate_Tool_Box( void )
 		Tool_Box->Tools = fl_bgn_form( FL_UP_BOX, 1, 1 );
 
 		if ( ! tool_has_been_shown &&
-			 * ( ( char * ) xresources[ TOOLGEOMETRY ].var ) != '\0' )
+			 * ( char * ) xresources[ TOOLGEOMETRY ].var != '\0' )
 		{
 			flags = XParseGeometry( ( char * ) xresources[ TOOLGEOMETRY ].var,
 									&tool_x, &tool_y, &tool_w, &tool_h );
