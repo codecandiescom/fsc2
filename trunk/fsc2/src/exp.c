@@ -66,6 +66,7 @@ static void setup_while_or_repeat( int type, long *pos );
 static void setup_if_else( long *pos, Prg_Token *cur_wr );
 static void exp_syntax_check( void );
 static void save_restore_variables( bool flag );
+static const char *get_construct_name( int type );
 
 
 /*-----------------------------------------------------------------------------
@@ -521,7 +522,6 @@ static void setup_while_or_repeat( int type, long *pos )
 {
 	Prg_Token *cur = prg_token + *pos;
 	long i = *pos + 1;
-	const char *t = NULL;
 
 
 	/* Start of with some sanity checks */
@@ -602,23 +602,8 @@ static void setup_while_or_repeat( int type, long *pos )
 		}
 	}
 
-	if ( type == WHILE_TOK )
-		t = "WHILE";
-	if ( type == UNTIL_TOK )
-		t = "UNTIL";
-	if ( type == REPEAT_TOK )
-		t = "REPEAT";
-	if ( type == FOR_TOK )
-		t = "FOR";
-	if ( type == FOREVER_TOK )
-		t = "FOREVER";
-	
-	if ( t == NULL)
-		eprint( FATAL, UNSET, "Internal error at %s:%d.\n",
-				__FILE__, __LINE__ );
-	else
-		eprint( FATAL, UNSET, "Missing `}' for %s loop starting at %s:%ld.\n",
-				t, cur->Fname, cur->Lc );
+	eprint( FATAL, UNSET, "Missing `}' for %s loop starting at %s:%ld.\n",
+			get_construct_name( type ), cur->Fname, cur->Lc );
 	THROW( EXCEPTION );
 }
 
@@ -1196,43 +1181,10 @@ bool test_condition( Prg_Token *cur )
 
 	if ( ! ( Var_Stack->type & ( INT_VAR | FLOAT_VAR ) ) )
 	{
-		const char *t = NULL;
-
-		switch ( cur->token )
-		{
-			case WHILE_TOK :
-				t = "WHILE loop";
-				break;
-
-			case UNTIL_TOK :
-				t = "UNTIL loop";
-				break;
-
-			case REPEAT_TOK :
-				t = "REPEAT loop";
-				break;
-
-			case FOR_TOK :
-				t = "FOR loop";
-				break;
-
-			case IF_TOK :
-				t = "IF construct";
-				break;
-
-			case UNLESS_TOK :
-				t = "UNLESS construct";
-				break;
-
-			default :
-				eprint( FATAL, UNSET, "Internal error at %s:%d.\n",
-						__FILE__, __LINE__ );
-				THROW( EXCEPTION );
-		}
-
 		cur++;
 		eprint( FATAL, UNSET, "%s:%ld: Invalid condition for %s.\n",
-				cur->Fname, cur->Lc, t );
+				cur->Fname, cur->Lc,
+				get_construct_name( ( cur - 1 )->token ) );
 		THROW( EXCEPTION );
 	}
 
@@ -1243,11 +1195,8 @@ bool test_condition( Prg_Token *cur )
 	else
 		condition = Var_Stack->val.dval ? OK : FAIL;
 
-	if ( cur->token == UNLESS_TOK )
-		condition = ! condition;
-
 	vars_pop( Var_Stack );
-	return condition;
+	return cur->token == UNLESS_TOK ? condition : ! condition;
 }
 
 
@@ -1683,6 +1632,44 @@ static void save_restore_variables( bool flag )
 		var_list_copy = T_free( var_list_copy );
 		exists_copy = UNSET;
 	}
+}
+
+
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+
+static const char *get_construct_name( int type )
+{
+	switch ( type )
+	{
+		case WHILE_TOK :
+			return "WHILE loop";
+
+		case UNTIL_TOK :
+			return "UNTIL loop";
+
+		case REPEAT_TOK :
+			return "REPEAT loop";
+
+		case FOREVER_TOK :
+			return "FOREVER loop";
+
+		case FOR_TOK :
+			return "FOR loop";
+
+		case IF_TOK :
+			return "IF construct";
+
+		case UNLESS_TOK :
+			return "UNLESS construct";
+
+		default :
+			eprint( FATAL, UNSET, "Internal error at %s:%d.\n",
+					__FILE__, __LINE__ );
+			THROW( EXCEPTION );
+	}
+
+	return NULL;                  /* we'll never get here... */
 }
 
 
