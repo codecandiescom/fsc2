@@ -33,6 +33,7 @@
 Ticks ep385_double2ticks( double p_time )
 {
 	double ticks;
+	double ip, fp;
 
 
 	/* If the time base hasn't been set yet this indicates that we should
@@ -52,14 +53,22 @@ Ticks ep385_double2ticks( double p_time )
 	}
 
 	ticks = p_time / ep385.timebase;
+	fp = modf( ticks, &ip );
 
-	if ( fabs( ticks - lrnd( ticks ) ) > 1.0e-2 )
+	if ( fabs( fp ) > 1.0e-2 )
 	{
 		char *t = T_strdup( ep385_ptime( p_time ) );
 		print( FATAL, "Specified time of %s is not an integer multiple of the "
 			   "fixed pulser time base of %s.\n",
 			   t, ep385_ptime( ep385.timebase ) );
 		T_free( t );
+		THROW( EXCEPTION );
+	}
+
+	if ( ticks > TICKS_MAX )
+	{
+		print( FATAL, "Specified time is too long for time base of %s.\n",
+			   ep385_ptime( ep385.timebase ) );
 		THROW( EXCEPTION );
 	}
 

@@ -34,6 +34,7 @@
 Ticks dg2020_double2ticks( double p_time )
 {
 	double ticks;
+	double ip, fp;
 
 
 	if ( ! dg2020.is_timebase )
@@ -44,14 +45,22 @@ Ticks dg2020_double2ticks( double p_time )
 	}
 
 	ticks = p_time / dg2020.timebase;
+	fp = modf( ticks, &ip );
 
-	if ( fabs( ticks - lrnd( ticks ) ) > 1.0e-2 )
+	if ( fabs( fp ) > 1.0e-2 )
 	{
 		char *t = T_strdup( dg2020_ptime( p_time ) );
 		print( FATAL, "Specified time of %s is not an integer multiple of the "
 			   "pulser time base of %s.\n",
 			   t, dg2020_ptime( dg2020.timebase ) );
 		T_free( t );
+		THROW( EXCEPTION );
+	}
+
+	if ( ticks > TICKS_MAX )
+	{
+		print( FATAL, "Specified time is too long for time base of %s.\n",
+			   dg2020_ptime( dg2020.timebase ) );
 		THROW( EXCEPTION );
 	}
 
