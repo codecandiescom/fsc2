@@ -9,7 +9,11 @@
 
 static void dg2020_basic_pulse_check( void );
 static void dg2020_basic_functions_check( void );
+static int dg2020_calc_channels_needed( FUNCTION *f );
 static void dg2020_phase_setup_check( FUNCTION *f );
+static void dg2020_distribute_channels( void );
+static void dg2020_setup_pmatrix( FUNCTION *f );
+static void dg2020_pulse_start_setup( void );
 static Phase_Sequence *dg2020_create_dummy_phase_seq( void );
 
 
@@ -22,6 +26,8 @@ void dg2020_init_setup( void )
 {
 	dg2020_basic_pulse_check( );
 	dg2020_basic_functions_check( );
+	dg2020_distribute_channels( );
+	dg2020_pulse_start_setup( );
 }
 
 
@@ -39,7 +45,7 @@ void dg2020_init_setup( void )
 void dg2020_basic_pulse_check( void )
 {
 	PULSE *p;
-	int i;
+	int i, j;
 	int cur_type;
 
 
@@ -152,12 +158,37 @@ void dg2020_basic_pulse_check( void )
 			p->function->phase_setup->is_needed[ PHASE_PLUS_X ] = SET;
 		}
 
+		/* For functions with more than 1 pod (i.e. functions with phase
+		   cycling) we need to set up a matrix that stores for which which
+		   phase types are needed in each element of the phase cycle - this is
+		   needed for calculating the number of channels we will need */
+
+		if ( p->function->num_pods > 1 )
+		{
+			if ( p->function->pm == NULL )      /* if it doesn't exist yet */
+			{
+				p->function->pm = T_malloc( p->pc->len * 
+											( PHASE_CW - PHASE_PLUS_X + 1 ) *
+											sizeof( bool ) );
+				for ( i = 0; i <= PHASE_CW - PHASE_PLUS_X; i++ )
+					for ( j = 0; j < p->pc->len; j++ )
+						p->function->pm[ i * p->pc->len + j ] = UNSET;
+				p->function->pc_len = p->pc->len;
+			}
+
+			for ( i = 0; i < p->pc->len; i++ )
+				p->function->pm[ ( p->pc->sequence[ i ] - PHASE_PLUS_X )
+							     * p->pc->len + i ] = SET;
+		}
+
 		if ( p->is_active )
 			p->was_active = p->has_been_active = SET;
 	}
 }
 
 
+/*--------------------------------------------------------------------------
+--------------------------------------------------------------------------*/
 
 static void dg2020_basic_functions_check( void )
 {
@@ -222,11 +253,56 @@ static void dg2020_basic_functions_check( void )
 
 		if ( f->num_pods > 1 )
 			dg2020_phase_setup_check( f );
+		
+		f->num_needed_channels = dg2020_calc_channels_needed( f );
 	}
 }
 
 
+/*--------------------------------------------------------------------------
+  This function tries to figure out how many channels are going to be needed.
+  It's very simple for functions that only have one pod - here also one
+  channel will do. On the other hand, for functions with phase cycling we have
+  to consult the phase matrix (set up in dg2020_basic_pulse_check()). We need
+  one channel for each used phase type for each stage of the phase cycle and
+  (if not all phase types are used in all stages) one extra channel for the
+  constant voltage.
+--------------------------------------------------------------------------*/
 
+static int dg2020_calc_channels_needed( FUNCTION *f )
+{
+	int i, j;
+	bool is_all;
+	int num_channels;
+
+
+	if ( f->num_pods < 2 )
+		return 1;
+
+	assert( f->pm != NULL );
+
+	num_channels = 0;
+	for ( i = 0; i < f->pc_len; i++ )
+	{
+		is_all = SET;
+		for ( j = 0; j <= PHASE_CW - PHASE_PLUS_X; j++ )
+		{
+			if ( f->pm[ j * f->pc_len + i ] )
+				num_channels++;
+			else
+				is_all = UNSET;
+		}
+	}
+			
+	if ( ! is_all )            /* if we needed a constant voltage */
+		num_channels++;
+
+	return num_channels;
+}
+
+
+/*--------------------------------------------------------------------------
+--------------------------------------------------------------------------*/
 
 static void dg2020_phase_setup_check( FUNCTION *f )
 {
@@ -336,14 +412,110 @@ static void dg2020_phase_setup_check( FUNCTION *f )
 }
 
 
-/*---------------------------------------------------------------------------*/
-/* Function creates a dummy phase sequence for pulses with no phase sequence */
-/* that belong to functions that have more than one pod assigned to it. This */
-/* dummy phase sequence consists of just '+X' phases (length is one if there */
-/* are no real phase sequences or the length of the normal phase sequences   */
-/* otherwise). If such a dummy phase sequence already exists the pulse gets  */
-/* assigned this already existing dummy sequence.                            */
-/*---------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------
+  Function checks first if there are enough pulser channels and than assigns
+  channels to funcions that haven't been assigned as many as needed
+----------------------------------------------------------------------------*/
+
+static void dg2020_distribute_channels( void )
+{
+	int i;
+	FUNCTION *f;
+
+
+	dg2020.needed_channels = 0;
+	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
+	{
+		f = &dg2020.function[ i ];
+		if ( ! f->is_used )
+			continue;
+		dg2020.needed_channels += f->num_needed_channels;
+	}
+
+	/* Now we've got to check if there are at least as many channels as are
+	   needed for the experiment */
+
+	if ( dg2020.needed_channels > MAX_CHANNELS )
+	{
+		eprint( FATAL, "%s: Running the experiment would require %d pulser "
+				"channels but only %d are available.", pulser_struct.name, 
+				dg2020.needed_channels, ( int ) MAX_CHANNELS );
+		THROW( EXCEPTION );
+	}
+
+	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
+	{
+		f = &dg2020.function[ i ];
+
+		/* Don't do anything for unused functions */
+
+		if ( ! f->is_used )
+			continue;
+
+		/* If the function needs more channels than it got assigned get them
+		   now from the pool of free channels */
+
+		while ( f->num_channels < f->num_needed_channels )
+		{
+			f->channel[ f->num_channels ] = dg2020_get_next_free_channel( );
+			f->channel[ f->num_channels++ ]->function = f;
+		}
+
+		if ( f->num_pods > 1 )
+			dg2020_setup_pmatrix( f );
+	}
+}
+
+
+/*--------------------------------------------------------------------------
+--------------------------------------------------------------------------*/
+
+static void dg2020_setup_pmatrix( FUNCTION *f )
+{
+	int i, j;
+	int cur_channel;
+
+
+	assert( f->pm != NULL && f->pcm == NULL );
+
+	if ( f->num_channels < f->pc_len * ( PHASE_CW - PHASE_PLUS_X + 1 ) )
+		cur_channel = 1;
+	else
+		cur_channel = 0;
+
+	f->pcm = T_malloc( f->pc_len * ( PHASE_CW - PHASE_PLUS_X + 1 ) *
+					   sizeof( CHANNEL * ) );
+
+	for ( i = 0; i <= PHASE_CW - PHASE_PLUS_X; i++ )
+		for ( j = 0; j < f->pc_len; j++ )
+			if ( ! f->pm[ i * f->pc_len + j ] )
+				f->pcm[ i * f->pc_len + j ] = f->channel[ cur_channel ];
+			else
+				f->pcm[ i * f->pc_len + j ] = f->channel[ 0 ];
+
+	T_free( f->pm );
+}
+
+
+/*--------------------------------------------------------------------------
+--------------------------------------------------------------------------*/
+
+static void dg2020_pulse_start_setup( void )
+{
+}
+
+
+
+
+
+/*--------------------------------------------------------------------------
+  Function creates a dummy phase sequence for pulses with no phase sequence
+  and that belong to functions that have more than one pod assigned to it.
+  This dummy phase sequence consists of just '+X' phases (length is one if
+  there are no real phase sequences or the length of the normal phase
+  sequences otherwise). If such a dummy phase sequence already exists the
+  pulse gets assigned this already existing dummy sequence.
+--------------------------------------------------------------------------*/
 
 static Phase_Sequence *dg2020_create_dummy_phase_seq( void )
 {

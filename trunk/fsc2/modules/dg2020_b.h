@@ -110,6 +110,7 @@ typedef struct _F_ {
 	bool needs_phases;           // set if phase cycling is needed
 	struct _PHS_ *phase_setup;
 	int next_phase;
+	int pc_len;                  // length of the phase cycle
 
 	long max_seq_len;            // maximum length of the pulse sequence
 
@@ -124,8 +125,8 @@ typedef struct _F_ {
 	bool is_high_level;
 	bool is_low_level;
 
-	bool **pm;
-	CHANNEL **pcm;
+	bool *pm;
+	struct _C_ *pcm;
 
 } FUNCTION;
 
@@ -246,9 +247,6 @@ typedef struct _p_ {
 
 	CHANNEL *channel;        // channel the pulse belongs to - only needed
 	                         // for phase pulses
-
-	struct _p_ *for_pulse;   // only for phase cycling pulses: the pulse the
-	                         // phase cycling pulse is used for
 
 	bool needs_update;       // set if the pulses properties have been changed
                              // in test run or experiment
