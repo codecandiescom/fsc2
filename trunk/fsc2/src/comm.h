@@ -59,7 +59,8 @@ enum {
 
 
 enum {
-	D_CLEAR_CURVE = -1
+	D_CLEAR_CURVE  = -1,
+	D_CHANGE_SCALE = -2,
 };
 
 

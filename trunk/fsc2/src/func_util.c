@@ -759,8 +759,6 @@ Var *f_cscale( Var *v )
 	Key->type = DATA;
 	kill( getppid( ), NEW_DATA );
 
-	/* That's all, folks... */
-
 	return vars_push( INT_VAR, 1 );
 }
 
