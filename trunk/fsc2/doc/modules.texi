@@ -55,7 +55,7 @@ discussion will mainly concentrate on modules for new devices, writing
 other modules is even simpler.
 
 Let's start with a short summary of the things a module for a device has
-to do.  Usually, a module contains just a few functions that talk to the
+to do. Usually, a module contains just a few functions that talk to the
 device via an hardware interface, e.g.@: the GPIB bus or a serial port
 (or whatever else there might be). As an example for the following a
 lock-in amplifier will be used. Probably the most basic operation is to
@@ -97,41 +97,59 @@ function data base file called @file{Functions}
 @cindex @code{Functions} file
 . Also this file is located in the @file{config} subdirectory of the
 source tree and will usually be installed in
-@file{/usr/local/lib/fsc2}. Here one would add lines with the names of
-the exported function, i.e.@: @code{lockin_get_data}, followed by the
-number of arguments the function takes (or a negative number if the
-function takes a variable number of arguments). Optionally, you can add
-the keywords @code{ALL},
+@file{/usr/local/lib/fsc2}. Here one would add lines consisting of two
+or three entries, separated by commas and ending with a semicolon. 
+@enumerate
+@item Each line must start with the names of the exported function, i.e.@:
+      @code{lockin_get_data}.
+@item This has to be followed by the number of arguments the function takes 
+      - if the function accepts a variable number of arguments specify an
+      arbitrary negative number or just a minus sign (@code{-}).
+@item Optionally, you can add the keywords @code{ALL},
 @cindex @code{ALL} (in @code{Functions} file)
-@code{EXP}
+      @code{EXP}
 @cindex @code{EXP} (in @code{Functions} file)
-or @code{PREP},
+      or @code{PREP},
 @cindex @code{PREP} (in @code{Functions} file)
-where @code{ALL} means that the function can be used in all parts of the
-@acronym{EDL} file, while @code{EXP} tells @acronym{fsc2} to use this
-functions only during an experiment and, finally, @code{PREP} restricts
-the use of the function to the @code{PREPARATION} section of the
-@acronym{EDL} file.  Each line has to end with a semicolon and the
-entries in the line must be separated by commas.  As in the device data
-base, C and C++ style comments can be used. Here are a few lines from
-a valid @file{Functions} file with the entries for lock-in amplifier
-functions:
+      where @code{ALL} means that the function can be used in all parts of the
+      @acronym{EDL} file, while @code{EXP} tells @acronym{fsc2} to use this
+      functions only during an experiment and, finally, @code{PREP} restricts
+      the use of the function to the @code{PREPARATION} section of the
+      @acronym{EDL} file.
+@end enumerate
+As in the device data base, C and C++ style comments can be used. Here
+are a few lines from a valid @file{Functions} file with the entries for
+lock-in amplifier functions:
 @example
 /* Functions exported by the lock-in amplifier modules
    (SR510, SR530, SR810, SR830) */
 
 lockin_name,           0, ALL;  // return the device name
-lockin_get_data,      -1, EXP;  // return the lock-in voltage 
+lockin_get_data,      -6, EXP;  // return the lock-in voltage 
 lockin_get_adc_data,   1, EXP;  // return a ADC voltage
-lockin_dac_voltage,   -1, ALL;  // get/set DAC voltage
+lockin_dac_voltage,   -2, ALL;  // get/set DAC voltage
 lockin_sensitivity,   -1, ALL;  // get/set the sensitivity
 lockin_time_constant, -1, ALL;  // get/set the time constant
 lockin_phase,         -1, ALL;  // get/set the phase
-lockin_ref_freq,      -1, ALL;  // Get/set mod frequency (SR8x0 only)
+lockin_ref_freq,      -1, ALL;  // Get/set mod. frequency (SR8x0 only)
 lockin_ref_mode,       0, EXP;  // Get mod. mode (SR8x0 only)
 lockin_ref_level,     -1, EXP;  // Get/set mod. level (SR8x0 only)
 lockin_lock_keyboard, -1, EXP;  // Lock/unlock the keyboard
 @end example
+@noindent
+For example, @code{lockin_get_adc_data} (a function that alows you to
+read the voltage at one of the lock-ins ADCs) expects 1 argument (the
+number of the ADC) and can only be used in the @code{EXPERIMENT}
+section. In contrast, @code{lockin_sensitivity} can be called with a
+variable number of arguments with an upper limit of 1 argument (if
+called without an argument it returns the sensitivity seting of the
+lock-in, if called with an argument the function treats this as the new
+sensitivity to be set). This function can be used in all parts of the
+@acronym{EDL} program - but because querying the lock-in for its
+sensitivity won't work as long as the program can't talk with the
+lock-in, i.e.@: while not in the @code{EXPERIMENT} section the function
+must test for this case and emit an appropriate error message all by
+itself.
 
 
 Writing the C file(s) with these functions, compiling it to create a
@@ -230,20 +248,27 @@ them, i.e.@: the input variables are organized as a linked list:
                         NULL        no more parameters...
 @end example
 @noindent
-If you declared your function to expect two input parameters the
-function will always get exactly two. The @code{next}-pointer of the
-very last parameter will always be @code{NULL}. If the function gets
-called in the @acronym{EDL} file with more variables than you declared
-it to have a warning will be printed, the superfluous variables
-discarded automatically and are not passed to the function. If, on the
-other hand, there are not enough parameters the program will just print
-an error message and then stop (and not call your function). Having the
-parameters organized as a linked list also makes it easy to a handle
-variable number of arguments: as long as the @code{next}-pointer of an
-argument isn't @code{NULL} there is at least another one.
+If you declared your function in the functon data base file
+@file{Functions} to acept exactly two input parameters the function will
+always get exactly two. The @code{next}-pointer of the very last
+parameter will always be @code{NULL}. If the function gets called in the
+@acronym{EDL} file with more variables than you declared it to have a
+warning will be printed, the superfluous variables discarded
+automatically and not passed to the function. If, on the other hand,
+there are not enough parameters the program will just print an error
+message and then stop (and not call your function).
+
+Having the parameters organized as a linked list also makes it easy to a
+handle variable numbers of arguments: as long as the @code{next}-pointer
+of an argument isn't @code{NULL} there is at least another one. You
+probably should check in your function if there aren't too many
+arguments and if neccessary print out a warning.
+
 
 One word of warning: @strong{Never ever try to change the variables you
-get passed to your functions in any way!}
+get passed to your functions in any way, especially the
+@code{next}-pointer!}
+
 
 What @acronym{fsc2} won't do is check if the arguments it passes to your
 function have the type you expect. Let's assume that you expect two
@@ -958,7 +983,10 @@ result if you try to use it.
 @section Additional utilities provided by fsc2
 
 When writing a module some of the following information might be useful.
-The first topic, execeptions, is a well-known concept implemented for
+First a special function for printing out messages to the user is
+discussed.
+
+The second topic, execeptions, is a well-known concept implemented for
 example in @code{C++}. Unfortunately, @code{C} does not have this kind
 of mechanism, but when being a bit careful one can implement something
 very similar also in @code{C} using a few macros. 
@@ -976,6 +1004,49 @@ so there's already a @code{typedef} for this type included in
 @acronym{fsc2} that you can use. It's also documented here in order to
 avoid confusion should you accidentally try to redefine it.
 
+
+@subsection Printing out messages
+@cindex eprint()
+
+When writing a module one often has places where it is necessary to
+print out messages to inform the user e.g.@: about invalid arguments
+etc.  For this purpose there's the @code{print()} function in
+@acronym{fsc2} that helps you deal with this and prints messages to the
+lower browser in the main form. Except for the first two arguments the
+function is identical to the @code{printf()} in @code{C}, i.e.@: the
+third parameter is a format string in exactly the same format
+@code{printf()} expects, followed by as many values as there are
+conversion specifiers in the format string.
+
+The first parameter is an integer describing the severity of the problem.
+There are four levels:
+@itemize
+@item @code{NO_ERROR} Just an informational message (in black)
+@item @code{WARN} A warning message (in green)
+@item @code{SEVERE} A severe warning, which the user really should
+      think about (printed in blue)
+@item @code{FATAL} A fatal error message (printed in red) - to stay consistent
+      with the usual way this type of error message is used you should
+      now throw an exception (see next subsection) to make the program stop.
+@end itemize
+
+The second parameter is a boolean value, use
+@itemize
+@item @code{SET} This will start your error message with the name of the
+      current @acronym{EDL} file, followed by a colon and the actual
+      line number, again followed by a colon and a space character.
+@item @code{UNSET} Don't print file name and line number - use this e.g.
+      in the hook functions where the position in the @acronym{EDL} file
+      is irrelevant.
+@end itemize
+
+The full @code{C} declaration of this function is:
+@example
+void eprint( int severity, bool flag, const char *fmt, ... )
+@end example
+@noindent
+See the one of the following subsections for the definition of the
+@code{bool} type.
 
 
 @subsection Exceptions
