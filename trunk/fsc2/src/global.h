@@ -264,4 +264,15 @@ enum {
 };
 
 
+/* The following number is the start number for numbers designating digitizer
+   windows. It should be large enough to make it easy in functions to decide
+   if a number can be only a window number. The second number is the maximum
+   number of windows. Thus any number in the right context in the range
+   between WINDOW_START_NUMBER and WINDOW_START_NUMBER + MAX_NUM_OF_WINDOWS
+   has a high chance of being a window number - not a very nice hack, but... */
+
+#define WINDOW_START_NUMBER  1024
+#define MAX_NUM_OF_WINDOWS   128
+
+
 #endif FSC2_GLOBAL

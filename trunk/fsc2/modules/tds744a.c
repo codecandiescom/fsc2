@@ -93,54 +93,28 @@ Var *digitizer_define_window( Var *v )
 	WINDOW *w;
 
 
+	if ( tds744a.num_windows >= MAX_NUM_OF_WINDOWS )
+	{
+		eprint( FATAL, "%s:%ld: %s: Maximum number of digitizer windows (%ld) "
+				"exceeded.\n", Fname, Lc, DEVICE_NAME, MAX_NUM_OF_WINDOWS );
+		THROW( EXCEPTION );
+	}
+
 	if ( v == NULL || v->next == NULL )
 	{
 		eprint( FATAL, "%s:%ld: %s: Missing parameter in call of function "
-				"`digitizer_define_window', need at least two.\n",
+				"`digitizer_define_window', need at least one.\n",
 				Fname, Lc, DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
 
-	/* Get the window number */
-
-	vars_check( v, INT_VAR | FLOAT_VAR );
-	if ( v->type == INT_VAR )
-		win_num = v->val.lval;
-	else
-	{
-		eprint( WARN, "%s:%ld: %s: Floating point number used as window "
-				"number.\n", Fname, Lc, DEVICE_NAME );
-		win_num = lround( v->val.dval );
-	}
-
-	v = vars_pop( v );
-
-	/* Test if the window number non-negative and no window with this number
-	   already exists */
-
-	if ( win_num < 0 )
-	{
-		eprint( FATAL, "%s:%ld: %s: Invalid negative window number: "
-				"%ld.\n", Fname, Lc, DEVICE_NAME, win_num );
-		THROW( EXCEPTION );
-	}
-
-	for ( w = tds744a.w; w != NULL; w = w->next )
-		if ( ( long ) w->num == win_num )
-		{
-			eprint( FATAL, "%s:%ld: %s: Window %ld has already been "
-					"defined.\n", Fname, Lc, DEVICE_NAME, win_num );
-			THROW( EXCEPTION );
-		}
-
-	/* Now get the start point of the window */
+	/* Get the start point of the window */
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
 	win_start = VALUE( v );
 	v = vars_pop( v );
 
-	/* Finally, if there's another parameter take it to be the window
-	   width */
+	/* If there's a second parameter take it to be the window width */
 
 	if ( v != NULL )
 	{
@@ -183,7 +157,7 @@ Var *digitizer_define_window( Var *v )
 	}
 
 	w->next = NULL;
-	w->num = win_num;
+	w->num = tds744a.num_windows++ + WINDOW_START_NUMBER;
 	w->start = win_start;
 
 	if ( is_win_width )
@@ -195,9 +169,8 @@ Var *digitizer_define_window( Var *v )
 		w->is_width = UNSET;
 
 	w->is_used = UNSET;
-	tds744a.num_windows++;
 
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, w->num );
 }
 
 
