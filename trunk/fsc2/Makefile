@@ -193,7 +193,8 @@ ${tds520a:.c=.lo}: tds520a.h $(headers)
 	$(CC) $(CFLAGS) -c -fPIC $< -o $*.lo
 
 
-# install the program in $bindir and all the other stuff in $libdir and $auxdir
+# Install the program in $bindir and all the other stuff in $libdir and $auxdir
+# Finally, for certain sites create aliases for some devices.
 
 install:
 	install -d $(bindir)
@@ -202,13 +203,13 @@ install:
 	install -d $(auxdir)
 	install -m 755 -o fsc2 -g fsc2 -s fsc2_clean $(libdir)
 	install -m 644 -o fsc2 -g fsc2 Functions $(libdir)
+	install -m 644 -o fsc2 -g fsc2 Devices $(libdir)
+	install -m 644 -o fsc2 -g fsc2 -s *.so $(libdir)
+	install -m 644 -o fsc2 -g fsc2 aux/*.xpm $(auxdir)
 	if [ `hostname --fqdn` = "pion.anorg.chemie.uni-frankfurt.de" ]; then \
 		ln -s $libdir/dg2020_f.so $libdir/dg2020.so; \
 		ln -s $libdir/aeg_s_band.so $libdir/s_band.so; \
 	fi
-	install -m 644 -o fsc2 -g fsc2 Devices $(libdir)
-	install -m 644 -o fsc2 -g fsc2 -s *.so $(libdir)
-	install -m 644 -o fsc2 -g fsc2 aux/*.xpm $(auxdir)
 
 
 # make a tags file, needs still some changes to really work
