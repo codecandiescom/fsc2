@@ -41,6 +41,7 @@ static bool is_loaded = UNSET;       /* set when EDL file is loaded */
 static bool is_tested = UNSET;       /* set when EDL file has been tested */
 static bool state = UNSET;           /* set when EDL passed the tests */
 static char *in_file = NULL;         /* name of input file */
+static FILE *in_file_fp = NULL;
 static time_t in_file_mod = 0;
 static char *title = NULL;
 static bool delete_file = UNSET;
@@ -160,8 +161,6 @@ int main( int argc, char *argv[ ] )
 		return EXIT_FAILURE;
 	}
 
-	fl_set_idle_callback( idle_handler, NULL );
-
 	if ( argc > 1 )
 	{
 		Internals.cmdline_flags |= DO_LOAD;
@@ -194,6 +193,8 @@ int main( int argc, char *argv[ ] )
 
 	set_main_signals( );
 	atexit( final_exit_handler );
+
+	fl_set_idle_callback( idle_handler, NULL );
 
 	if ( Internals.cmdline_flags & DO_CHECK )
 		check_run( );
@@ -257,16 +258,19 @@ static void check_run( void )
 	fl_deactivate_object( GUI.main_form->test_file );
 	fl_set_object_lcol( GUI.main_form->test_file, FL_INACTIVE_COL );
 
+	if ( ( in_file_fp = fopen( in_file, "r" ) ) == NULL )
+		exit( EXIT_FAILURE );
+
 	user_break = UNSET;
 	fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_watch );
-	scan_main( in_file );
-	fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_left_ptr );
 
-	if ( user_break ||
+	if ( ! scan_main( in_file, in_file_fp ) || user_break ||
 		 EDL.compilation.error[ FATAL ]  != 0 ||
 		 EDL.compilation.error[ SEVERE ] != 0 ||
 		 EDL.compilation.error[ WARN ]   != 0 )
 		exit( EXIT_FAILURE );
+
+	fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_left_ptr );
 
 	fl_activate_object( GUI.main_form->Load );
 	fl_set_object_lcol( GUI.main_form->Load, FL_BLACK );
@@ -355,7 +359,10 @@ static int scan_args( int *argc, char *argv[ ], char **fname )
 
 			seteuid( getuid( ) );
 			setegid( getgid( ) );
-			exit( scan_main( argv[ cur_arg ] ) ? EXIT_SUCCESS : EXIT_FAILURE );
+			if ( ( in_file_fp = fopen( argv[ cur_arg ], "r" ) ) == NULL )
+				exit( EXIT_FAILURE );
+			exit( scan_main( argv[ cur_arg ], in_file_fp ) ?
+				  EXIT_SUCCESS : EXIT_FAILURE );
 		}
 
 		if ( ! strcmp( argv[ cur_arg ], "-h" ) ||
@@ -539,7 +546,10 @@ static int scan_args( int *argc, char *argv[ ], char **fname )
 
 				seteuid( getuid( ) );
 				setegid( getgid( ) );
-				exit( scan_main( *fname ) ? EXIT_SUCCESS : EXIT_FAILURE );
+				if ( ( in_file_fp = fopen( *fname, "r" ) ) == NULL )
+					exit( EXIT_FAILURE );
+				exit( scan_main( *fname, in_file_fp ) ?
+					  EXIT_SUCCESS : EXIT_FAILURE );
 			}
 
 			flags |= NO_MAIL | DO_LOAD | DO_CHECK;
@@ -573,6 +583,9 @@ static void final_exit_handler( void )
 		kill( Internals.http_pid, SIGTERM );
 
 	/* Do everything necessary to end the program */
+
+	if ( in_file_fp != NULL )
+		fclose( in_file_fp );
 
 	if ( delete_old_file && in_file != NULL )
 		unlink( in_file );
@@ -674,7 +687,7 @@ void load_file( FL_OBJECT *a, long reload )
 			GUI.main_form->Load->u_cdata = NULL;
 		}
 	}
-	else                              /* call via reload buton */
+	else                              /* call via reload button */
 	{
 		/* Quit if name of previous file is empty */
 
@@ -684,6 +697,12 @@ void load_file( FL_OBJECT *a, long reload )
 			old_in_file = T_free( old_in_file );
 			notify_conn( UNBUSY_SIGNAL );
 			return;
+		}
+
+		if ( in_file_fp != NULL )
+		{
+			fclose( in_file_fp );
+			in_file_fp = NULL;
 		}
 	}
 
@@ -728,7 +747,12 @@ void load_file( FL_OBJECT *a, long reload )
 		}
 		else      /* don't delete reloaded files - they may have been edited */
 			delete_old_file = UNSET;
+
+		if ( in_file_fp != NULL )
+			fclose( in_file_fp );
 	}
+
+	in_file_fp = fp;
 
 	delete_file = UNSET;
 	old_in_file = T_free( old_in_file );
@@ -746,7 +770,7 @@ void load_file( FL_OBJECT *a, long reload )
 
 	/* Read in and display the new file */
 
-	is_loaded = display_file( in_file, fp );
+	is_loaded = display_file( in_file, in_file_fp );
 	state = FAIL;
 	is_tested = UNSET;
 
@@ -758,17 +782,6 @@ void load_file( FL_OBJECT *a, long reload )
 	fl_set_object_lcol( GUI.main_form->test_file, FL_BLACK );
 	fl_activate_object( GUI.main_form->run );
 	fl_set_object_lcol( GUI.main_form->run, FL_BLACK );
-
-	/* Run all the exit hooks and reset number of compilation errors */
-
-	if ( ! Internals.exit_hooks_are_run )
-		run_exit_hooks( );
-
-	EDL.compilation.error[ FATAL ] =
-		EDL.compilation.error[ SEVERE ] =
-		    EDL.compilation.error[ WARN ] = 0;
-
-	fclose( fp );
 
 	if ( GUI.main_form->Load->u_ldata != 0 )
 	{
@@ -1019,14 +1032,16 @@ void test_file( FL_OBJECT *a, long b )
 	fl_set_object_label( GUI.main_form->test_file, "Stop Test" );
 	fl_set_button_shortcut( GUI.main_form->test_file, "T", 1 );
 
-	user_break = UNSET;
 	running_test = SET;
 	fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_watch );
-	state = scan_main( in_file );
+	user_break = UNSET;
+
+	scan_main( in_file, in_file_fp );
+
 	fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_left_ptr );
 	running_test = UNSET;
 
-	if ( state && ! user_break )
+	if ( ! user_break )
 	{
 		is_tested = SET;                  /* show that file has been tested */
 		a->u_ldata = 0;
@@ -1186,7 +1201,7 @@ static bool display_file( char *name, FILE *fp )
 	/* Determine number of lines (and maximum number of digits) in order to
 	   find out about proper formating of line numbers */
 
-	if ( ( lc = get_file_length( name, &len ) ) <= 0 )  /* error ? */
+	if ( ( lc = get_file_length( fp, &len ) ) <= 0 )  /* error ? */
 	{
 		switch ( ( int ) lc )
 		{
@@ -1284,6 +1299,8 @@ static bool display_file( char *name, FILE *fp )
 
 		fl_add_browser_line( GUI.main_form->browser, line );
 	}
+
+	rewind( fp );
 
 	/* Unfreeze and thus redisplay the browser */
 
