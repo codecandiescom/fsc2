@@ -207,8 +207,18 @@ bool hfs9000_init( const char *name )
 	hfs9000_setup_trig_in( );
 
 	hfs9000_command( "VECT:STAR 0\n" );
-	hfs9000_command( "VECT:END 65535\n" );
-	hfs9000_command( "VECT:LOOP 65535\n" );
+	if ( ! hfs9000.is_max_seq_len )
+	{
+		hfs9000_command( "VECT:END 65535\n" );
+		hfs9000_command( "VECT:LOOP 65535\n" );
+	}
+	else
+	{
+		sprintf( cmd, "VECT:END %ld\n", hfs9000.max_seq_len );
+		hfs9000_command( cmd );
+		sprintf( "VECT:LOOP %d\n", hfs9000.max_seq_len );
+		hfs9000_command( cmd );
+	}
 
 	return OK;
 }
