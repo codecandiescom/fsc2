@@ -114,7 +114,7 @@ $(hp8647a:.c=.o):  %.o: hp8647a.h  $(cdir)/hp8647a.conf
 
 
 %.o: %.c $(src_headers)
-	$(CC) -c $(CFLAGS) $(LFLAGS) $< -o $@
+	$(CC) $(CFLAGS) -c $(LFLAGS) $< -o $@
 
 hp8647a_lexer.c: hp8647a_lexer.l $(src_header)
 	$(FLEX) $(FLEXFLAGS)$(patsubst %lexer.l,%,$<) -o$@ $<

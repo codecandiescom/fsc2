@@ -24,10 +24,12 @@
 #include "fsc2.h"
 
 
-/*--------------------------------------------------------------*/
-/* Function gets a format string as in printf and all arguments */
-/* and returns a string into which the arguments are printed.   */
-/*--------------------------------------------------------------*/
+/*-----------------------------------------------------------------*/
+/* Function gets a format string as in printf and arguments which  */
+/* must correspond to the given format string and returns a string */
+/* of the rigt length into which the arguments are printed. The    */
+/* caller of the function is responcible for free-ing the string.  */
+/*-----------------------------------------------------------------*/
 
 char *get_string( const char *fmt, ... )
 {
