@@ -861,7 +861,7 @@ numbers with exactly the same meaning as the arguments to the function
 @code{lockin_get_data()}. This will also automatically switch the type
 of data displayed on the front side channels to the specified values.
 Not all combinations are possible, the following list shows which
-combinations are posiible:
+combinations are possible:
 @multitable @columnfractions 0.1 .35 .35
 @item @tab 1st argument @tab 2nd argument
 @item @tab @code{1} (X) @tab @code{2} (Y)
