@@ -255,7 +255,7 @@ FOREVER {
 		new_set_field = input_value( New_Field );
 
 		IF new_set_field <= 114304 G & new_set_field <= 0 G &
-		   abs( new_set_field - new_field ) >= 0.143 G {
+		   abs( new_set_field - new_field ) >= 0.14288 G {
 
 			new_field = set_field( new_set_field );
 
