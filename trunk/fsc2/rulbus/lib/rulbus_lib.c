@@ -486,7 +486,7 @@ int rulbus_card_close( int handle )
 
 
 /*---------------------------------------------------------------*
- * Function for sending a 'len' bytes to a card, expects a card
+ * Function for sending 'len' bytes to a card. Expects a card
  * handle, an offset (relative to the base address of the card),
  * a pointer to a buffer with the data to be written and the
  * number of bytes to be written. On success it returns the
@@ -512,14 +512,14 @@ int rulbus_write( int handle, unsigned char offset, unsigned char *data,
 	if ( offset >= rulbus_card[ handle ].width )
 		return rulbus_errno = RULBUS_INVALID_CARD_OFFSET;
 
-	if ( data == NULL || len == 0 )
+	if ( data == NULL || len <= 0 )
 		return rulbus_errno = RULBUS_INVALID_ARGUMENT;
 
 	retval = rulbus_write_rack( rulbus_card[ handle ].rack,
 								rulbus_card[ handle ].addr + offset,
 								data, len );
 
-	if ( retval <= 0 )
+	if ( retval != len )
 		return rulbus_errno = retval;
 
 	rulbus_errno = RULBUS_OK;
@@ -554,7 +554,7 @@ int rulbus_read( int handle, unsigned char offset, unsigned char *data,
 	if ( offset >= rulbus_card[ handle ].width )
 		return rulbus_errno = RULBUS_INVALID_CARD_OFFSET;
 
-	if ( data == NULL || len == 0 )
+	if ( data == NULL || len <= 0 )
 		return rulbus_errno = RULBUS_INVALID_ARGUMENT;
 
 	retval = rulbus_read_rack( rulbus_card[ handle ].rack,
