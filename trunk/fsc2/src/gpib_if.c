@@ -113,12 +113,12 @@ int gpib_init( char **log_file_name, int log_level )
     {
         strcpy( gpib_error_msg, "Can't initialise GPIB bus !" );
 
-		/* Get rid of the device list if it's already cretaed */
+		/* Get rid of the device list if it's already created */
 
 		if ( gpib_dev_list != NULL )
 		{
 			for ( cur_dev = gpib_dev_list; cur_dev->next != NULL;
-			  cur_dev = cur_dev->next )
+				  cur_dev = cur_dev->next )
 				;
 
 			while ( 1 )
