@@ -33,11 +33,10 @@ const char device_name[ ]  = DEVICE_NAME;
 const char generic_type[ ] = DEVICE_TYPE;
 
 
-#define SPECTRAPRO_300I_WAIT  1.0e-1   /* 100 ms */
+#define SPECTRAPRO_300I_WAIT  100000   /* 100 ms */
 
 
 int spectrapro_300i_init_hook( void );
-int spectrapro_300i_test_hook( void );
 int spectrapro_300i_exp_hook( void );
 int spectrapro_300i_end_of_exp_hook( void );
 void spectrapro_300i_exit_hook( void );
@@ -54,9 +53,9 @@ static void spectrapro_300i_comm_fail( void );
 typedef struct SPECTRAPRO_300I SPECTRAPRO_300I;
 
 struct SPECTRAPRO_300I {
-	bool is_needed;         /* is the gaussmter needed at all? */
+	bool is_needed;         /* is the monochromator needed at all?      */
     struct termios *tio;    /* serial port terminal interface structure */
-	double wavelength;
+	double wavelength;      /* current wavelength setting of grating    */
 };
 
 
@@ -82,15 +81,6 @@ int spectrapro_300i_init_hook( void )
 
 	spectrapro_300i.is_needed = SET;
 
-	return 1;
-}
-
-
-/*-----------------------------------------------------------------------*/
-/*-----------------------------------------------------------------------*/
-
-int spectrapro_300i_test_hook( void )
-{
 	return 1;
 }
 
@@ -161,7 +151,7 @@ Var *monochromator_wavelength( Var *v )
 		if ( FSC2_MODE == EXPERIMENT )
 		{
 			reply = spectrapro_300i_talk( "?NM", 100 );
-			spectrapro_300i.wavelength = T_atod( reply );
+			spectrapro_300i.wavelength = T_atod( reply ) * 1.0e-9;
 			T_free( ( char * ) reply );
 		}
 
@@ -182,7 +172,7 @@ Var *monochromator_wavelength( Var *v )
 	{
 		TRY
 		{
-			buf = get_string( "GOTO %.3f\n", wl );
+			buf = get_string( "%.3f GOTO", 1.0e9 * wl );
 			spectrapro_300i_send( buf );
 			TRY_SUCCESS;
 		}
@@ -230,9 +220,10 @@ static void spectrapro_300i_send( const char *buf )
 	char *lbuf;
 	size_t len;
 	char reply[ 5 ];
+	int repeats = 100;
 
 
-	fsc2_assert( buf != NULL && *buf == '\0' );
+	fsc2_assert( buf != NULL && *buf != '\0' );
 
 	lbuf = get_string( "%s\r", buf );
 	len = strlen( lbuf );
@@ -253,11 +244,20 @@ static void spectrapro_300i_send( const char *buf )
 
 	T_free( lbuf );
 
-	/* When the command just send has been executed " OK\r\n" gets returned */
+	/* When the command just send has been executed " ok\r\n" gets returned.
+	   This may take quite some time when e.g. the grating has to be rotated,
+	   so we retry quite a lot of times. */
 
-	len = 5;
-	if ( ! spectrapro_300i_comm( SERIAL_READ, reply, &len ) ||
-		 len < 5 || strncmp( reply, " OK\r\n", 5 ) )
+	while ( repeats-- > 0 )
+	{
+		len = 5;
+		if ( spectrapro_300i_comm( SERIAL_READ, reply, &len ) )
+			break;
+		fsc2_usleep( SPECTRAPRO_300I_WAIT, SET );
+		stop_on_user_request( );
+	}
+
+	if ( len < 5 || strncmp( reply, " ok\r\n", 5 ) )
 		spectrapro_300i_comm_fail( );
 }
 
@@ -273,12 +273,14 @@ static char *spectrapro_300i_talk( const char *buf, size_t len )
 	size_t comm_len;
 
 
+	CLOBBER_PROTECT( lbuf );
+
 	fsc2_assert( buf != NULL && *buf != '\0' && len != 0 );
 
 	lbuf = get_string( "%s\r", buf );
 	comm_len = strlen( lbuf );
 
-	if ( ! spectrapro_300i_comm( SERIAL_WRITE, buf ) )
+	if ( ! spectrapro_300i_comm( SERIAL_WRITE, lbuf ) )
 	{
 		T_free( lbuf );
 		THROW( EXCEPTION );
@@ -294,21 +296,27 @@ static char *spectrapro_300i_talk( const char *buf, size_t len )
 
 	T_free( lbuf );
 
-	/* Now we read the reply by the device, which is followed by " OK\r\n". */
+	/* Now we read the reply by the device, which is followed by " ok\r\n". */
 
 	lbuf = T_malloc( len + 6 );
 	len += 5;
 
-	if ( ! spectrapro_300i_comm( SERIAL_READ, lbuf, &len ) )
+	TRY
+	{
+		if ( ! spectrapro_300i_comm( SERIAL_READ, lbuf, &len ) )
+			THROW( EXCEPTION );
+		TRY_SUCCESS;
+	}
+	OTHERWISE
 	{
 		T_free( lbuf );
-		THROW( EXCEPTION );
+		RETHROW( );
 	}
 
-	/* Cut off the " OK\r\n" stuff and return the buffer with the reply */
+	/* Cut off the " ok\r\n" stuff and return the buffer with the reply */
 
 	lbuf[ len ] = '\0';
-	if ( strncmp( lbuf + len - 5, " OK\r\n", 5 ) )
+	if ( strncmp( lbuf + len - 5, " ok\r\n", 5 ) )
 	{
 		T_free( lbuf );
 		THROW( EXCEPTION );
@@ -333,6 +341,10 @@ static bool spectrapro_300i_comm( int type, ... )
 	long read_retries = 10;            /* number of times we try to read */
 
 
+	CLOBBER_PROTECT( buf );
+	CLOBBER_PROTECT( len );
+	CLOBBER_PROTECT( read_retries );
+
 	switch ( type )
 	{
 		case SERIAL_INIT :               /* open and initialize serial port */
@@ -344,15 +356,16 @@ static bool spectrapro_300i_comm( int type, ... )
 
 			if ( ( spectrapro_300i.tio = fsc2_serial_open( SERIAL_PORT,
 					    DEVICE_NAME,
-						O_WRONLY | O_EXCL | O_NOCTTY | O_NONBLOCK ) ) == NULL )
+						O_RDWR | O_EXCL | O_NOCTTY | O_NONBLOCK ) ) == NULL )
 				return FAIL;
 
 			/* Switch off parity checking (8N1) and use of 2 stop bits and
-			   clear character size mask, then set character size mask to CS8,
-			   allow flow control and finally set the baud rate */
+			   clear character size mask, set character size mask to CS8 and
+			   the flag for ignoring modem lines, enable reading and, finally,
+			   set the baud rate. */
 
 			spectrapro_300i.tio->c_cflag &= ~ ( PARENB | CSTOPB | CSIZE );
-			spectrapro_300i.tio->c_cflag |= CS8 | CRTSCTS;
+			spectrapro_300i.tio->c_cflag |= CS8 | CLOCAL | CREAD;
 			cfsetispeed( spectrapro_300i.tio, SERIAL_BAUDRATE );
 			cfsetospeed( spectrapro_300i.tio, SERIAL_BAUDRATE );
 
@@ -387,17 +400,25 @@ static bool spectrapro_300i_comm( int type, ... )
 			len = 1;
 			do
 			{
-				if ( len < 0 )
-					fsc2_usleep( SPECTRAPRO_300I_WAIT, UNSET );
+				TRY
+				{
+					if ( len < 0 )
+						fsc2_usleep( SPECTRAPRO_300I_WAIT, SET );
+					stop_on_user_request( );
+					TRY_SUCCESS;
+				}
+				OTHERWISE
+					RETHROW( );
 				len = fsc2_serial_read( SERIAL_PORT, buf, *lptr );
-			}
-			while ( len < 0 && errno == EAGAIN && read_retries-- > 0 );
+			} while ( len < 0 && errno == EAGAIN && read_retries-- > 0 );
 
 			if ( len < 0 )
 			{
 				*lptr = 0;
 				return FAIL;
 			}
+			else
+				*lptr = len;
 
 			break;
 
