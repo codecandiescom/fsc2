@@ -87,6 +87,7 @@ typedef struct _F_ {
 	struct _C_ *channel[ MAX_CHANNELS ];
 
 	int num_pulses;              // number of pulses assigned to the function
+	int num_active_pulses        // number of pulses currenty in use
 	struct _p_ **pulses;         // list of pulse pointers
 
 	struct _F_ *phase_func;      // for phase functions here's stored which
@@ -284,6 +285,10 @@ void distribute_channels( void );
 void pulse_start_setup( void );
 void create_phase_pulses( int func );
 PULSE *new_phase_pulse( FUNCTION *f, PULSE *p, int pos, int pod );
+
+
+/* Functions from dg2020_run.c */
+
 void do_checks( void );
 void do_update( void );
 

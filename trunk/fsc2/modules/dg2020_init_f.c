@@ -8,8 +8,10 @@
 
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*---------------------------------------------------------------------------
+  Function does everything that needs to be done for checking and completing
+  the internal representation of the pulser at the start of a test run.
+---------------------------------------------------------------------------*/
 
 void init_setup( void )
 {
@@ -574,7 +576,10 @@ void pulse_start_setup( void )
 		{
 			p = f->pulses[ j ];
 			if ( j + 1 == f->num_pulses || f->pulses[ j + 1 ]->is_a_repl )
+			{
+				f->num_active_pulses = j + 1;
 				break;
+			}
 			if ( p->len + p->pos >= f->pulses[ j + 1 ]->pos )
 			{
 				eprint( FATAL, "DG2020: Pulses %ld and %ld %s.\n",
@@ -713,7 +718,7 @@ PULSE *new_phase_pulse( FUNCTION *f, PULSE *p, int pos, int pod )
 	np->num_repl = 0;
 	np->is_a_repl = UNSET;
 
-	/* Pick the right channel it belongs to */
+	/* Set the channel it belongs to */
 
 	np->channel = T_malloc( sizeof( CHANNEL * ) );
 	np->channel[ 0 ] = f->channel[ 2 * type + pod ];
@@ -727,34 +732,4 @@ PULSE *new_phase_pulse( FUNCTION *f, PULSE *p, int pos, int pod )
 	np->for_pulse = p;
 
 	return np;
-}
-
-
-/*---------------------------------------------------------------------------
-  Function is called in test runs after pulses have been changed to check
-  if the new settings are still ok. The function also has to take care of
-  apply the resulting necessary changes to the phase cycling pulses.
-----------------------------------------------------------------------------*/
-
-void do_checks( void )
-{
-}
-
-
-/*---------------------------------------------------------------------------
-  Function is called in the experiment after pulses have been changed to
-  update the pulser accordingly. No checking has to be done because this has
-  already been done in the test run. But similar to test runs also the
-  pulses used for phase cycling have to be updated (both in memory and
-  in reality in the pulser).
-----------------------------------------------------------------------------*/
-
-void do_update( void )
-{
-
-
-
-	/* Finally commit all changes */
-
-	dg2020_update_data( );
 }
