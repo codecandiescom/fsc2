@@ -546,12 +546,14 @@ static void G_struct_init( void )
 											 cursor7_x_hot, cursor7_y_hot );
 		create_colors( );
 
+#if defined WITH_HTTP_SERVER
 		create_1d_color_hash( );
 		G_stored->hash_1d = G.hash_1d;
 		G_stored->hash_size_1d = G.hash_size_1d;
 		create_2d_color_hash( );
 		G_stored->hash_2d = G.hash_2d;
 		G_stored->hash_size_2d = G.hash_size_2d;
+#endif
 	}
 	else
 		for ( i = 0; i < 7; i++ )

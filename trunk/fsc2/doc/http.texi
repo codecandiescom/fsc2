@@ -86,7 +86,9 @@ bugs that could be exploited to gain access to data an outsider
 shouldn't be able to obtain. And because the server is written in Perl
 also buffer overflows shouldn't be an issue. All you have to worry about
 is that in principle everyone on the world can have a look at your
-measurement while the web server is running.
+measurement while the web server is running. If you are deeply concerned
+about this you can also build @acronym{fsc2} without support for the web
+server.
 
 The only other conceivable problem would be that someone really
 malicious would constantly send requests to the server which, in turn,
