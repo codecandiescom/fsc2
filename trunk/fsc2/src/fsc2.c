@@ -23,11 +23,12 @@ static time_t in_file_mod = 0;
 static double slider_size = 0.05;
 static bool delete_file = UNSET;
 static bool delete_old_file = UNSET;
-
+static volatile bool in_signal_handler = UNSET;
 
 /* Locally used functions */
 
 
+static void final_exit_handler( void );
 static bool xforms_init( int *argc, char *argv[ ] );
 static void xforms_close( void );
 static bool display_file( char *name, FILE *fp );
@@ -204,6 +205,10 @@ int main( int argc, char *argv[ ] )
 	signal( SIGCHLD, main_sig_handler );
 	signal( SIGUSR1, main_sig_handler );
 	signal( SIGUSR2, main_sig_handler );
+	signal( SIGHUP,  SIG_IGN );
+	signal( SIGINT,  SIG_IGN );
+
+	atexit( final_exit_handler );
 
 	/* If starting the server for external connections succeeds we can
 	   really start the main loop */
@@ -211,6 +216,14 @@ int main( int argc, char *argv[ ] )
 	if ( ( conn_pid = spawn_conn( ( do_test || do_start ) && is_loaded ) )
 		 != -1 )
 	{
+		signal( SIGILL,  main_sig_handler );
+		signal( SIGABRT, main_sig_handler );
+		signal( SIGFPE,  main_sig_handler );
+		signal( SIGSEGV, main_sig_handler );
+		signal( SIGPIPE, main_sig_handler );
+		signal( SIGTERM, main_sig_handler );
+		signal( SIGBUS,  main_sig_handler );
+
 		/* Trigger test or start of current EDL program if the appropriate
 		   flags were passed to the program on the command line */
 
@@ -228,33 +241,46 @@ int main( int argc, char *argv[ ] )
 			kill( getppid( ), SIGUSR1 );
 		while ( fl_do_forms( ) != main_form->quit )
 			;
-
-		/* Stop the process that's waiting for external connections */
-
-		kill( conn_pid, SIGTERM );
 	}
 	else
 		fprintf( stderr, "fsc2: Internal failure on startup.\n" );
+
+	return EXIT_SUCCESS;
+}
+
+
+/*------------------------------------------------------------*/  
+/*------------------------------------------------------------*/  
+
+static void final_exit_handler( void )
+{
+	/* Stop the process that's waiting for external connections as well
+	   as the child process */
+
+	if ( conn_pid >= 0 )
+		kill( conn_pid, SIGTERM );
+
+	if ( child_pid >= 0 )
+		kill( child_pid, SIGTERM );
 
 	/* Do everything necessary to end the program */
 
 	if ( delete_old_file && in_file != NULL )
 		unlink( in_file );
 	unlink( FSC2_SOCKET );
-	clean_up( );
-	xforms_close( );
+
+	if ( ! in_signal_handler )
+	{
+		clean_up( );
+		xforms_close( );
+	}
+
 	T_free( in_file );
 
 	/* Delete the lock file */
 
 	setuid( EUID );
 	unlink( LOCKFILE );
-
-	/* Make sure the TRY/CATCH stuff worked out right */
-
-	assert( exception_env_stack_pos == 0 );
-
-	return EXIT_SUCCESS;
 }
 
 
@@ -1129,7 +1155,11 @@ void main_sig_handler( int signo )
 			break;
 
 		default :
-			assert( 1 == 0 );
+			in_signal_handler = SET;
+			final_exit_handler( );
+			fprintf( stderr, "fsc2 killed by %s signal.\n",
+					 strsignal( signo ) );
+			exit( -1 );
 	}
 }
 
@@ -1149,7 +1179,7 @@ void notify_conn( int signo )
 	kill( conn_pid, signo );
 
 	/* Wait for reply from child but avoid waiting when it in fact already
-	 replied (as indicated by the variable) */
+	   replied (as indicated by the variable) */
 
 	while ( ! conn_child_replied )
 		pause( );

@@ -486,6 +486,15 @@ static void run_child( void )
 {
 	I_am = CHILD;
 
+
+	signal( SIGILL,  SIG_DFL );
+	signal( SIGABRT, SIG_DFL );
+	signal( SIGFPE,  SIG_DFL );
+	signal( SIGSEGV, SIG_DFL );
+	signal( SIGPIPE, SIG_DFL );
+	signal( SIGTERM, SIG_DFL );
+	signal( SIGBUS,  SIG_DFL );
+
     /* Set up pipes for communication with parent process */
 
 	close( pd[ WRITE ] );

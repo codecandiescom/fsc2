@@ -96,6 +96,13 @@ static void connect_handler( int listen_fd )
 
 	signal( BUSY_SIGNAL, comm_sig_handler );
 	signal( UNBUSY_SIGNAL, comm_sig_handler );
+	signal( SIGILL,  SIG_DFL );
+	signal( SIGABRT, SIG_DFL );
+	signal( SIGFPE,  SIG_DFL );
+	signal( SIGSEGV, SIG_DFL );
+	signal( SIGPIPE, SIG_DFL );
+	signal( SIGTERM, SIG_DFL );
+	signal( SIGBUS,  SIG_DFL );
 
 	close( conn_pd[ READ ] );
 
