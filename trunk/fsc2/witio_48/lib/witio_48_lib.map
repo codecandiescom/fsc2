@@ -32,6 +32,7 @@ WITIO_48_1.0 {
 			witio_48_close;
 			witio_48_set_mode;
 			witio_48_get_mode;
+			witio_48_dio_out;
 			witio_48_dio_in;
 			witio_48_perror;
 			witio_48_strerror;

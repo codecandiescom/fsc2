@@ -31,7 +31,7 @@ incl_dir  = $(prefix)/include
 
 CFLAGS    = -ggdb -O2 -Wall -Wwrite-strings -Wstrict-prototypes \
 			-Wmissing-prototypes -Wmissing-declarations -W
-LDFLAGS   = -Wl,-E
+LDFLAGS   = -Wl,--version-script=me6x00_lib.map
 INCLUDES  = -I../driver
 
 sources   = me6x00_lib.c
@@ -43,7 +43,7 @@ headers   = me6x00.h ../driver/me6x00_drv.h
 all: libme6x00.so libme6x00.a
 
 
-libme6x00.so: ${sources:.c=.o} $(headers)
+libme6x00.so: ${sources:.c=.o} $(headers) me6x00_lib.map
 	$(CC) -shared -o $@ ${sources:.c=.o} $(LDFLAGS)
 
 libme6x00.a: ${sources:.c=.o} $(headers)

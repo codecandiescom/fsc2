@@ -1,0 +1,60 @@
+#  
+#  $Id$
+#  
+#  Copyright (C) 2002-2003 Jens Thoms Toerring
+#  
+#  This library should simplify accessing ME6000 and ME6100 DAC boards
+#  by Meilhaus Electronic GmbH by avoiding to be forced to make ioctl()
+#  calls and use some higher level functions instead. Most functions are
+#  based on the specifications for similar functions for the Windows API
+#  supplied by Meilhaus Electronic GmbH, but there are several differences
+#  that make the functions more UNIX-like and, unfortunately, require some
+#  changes to your code should you try to port an application from a Windows.
+#  
+#  This program is free software; you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation; either version 2 of the License, or
+#  (at your option) any later version.
+#  
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#  
+#  You should have received a copy of the GNU General Public License
+#  along with this program; if not, write to the Free Software
+#  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#  
+#  To contact the author send email to:
+#  Jens.Toerring@physik.fu-berlin.de
+
+
+ME6x00_LIB_1.0 {
+
+	global:
+			me6x00_frequency_to_timer;
+			me6x00_board_type;
+			me6x00_num_dacs;
+			me6x00_serial_number;
+			me6x00_board_info;
+			me6x00_close;
+			me6x00_voltage;
+			me6x00_keep_voltage;
+			me6x00_continuous;
+			me6x00_continuous_ex;
+			me6x00_reset;
+			me6x00_reset_all;
+			me6x00_set_timer;
+			me6x00_set_trigger;
+			me6x00_single;
+			me6x00_start;
+			me6x00_stop;
+			me6x00_stop_ex;
+			me6x00_wraparound;
+			me6x00_perror;
+			me6x00_strerror;
+			me6x00_errlist;
+			int me6x00_nerr;
+
+	local:  *;
+};
