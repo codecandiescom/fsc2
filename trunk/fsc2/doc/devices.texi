@@ -3297,21 +3297,34 @@ grating has been loaded, either by calling
 @code{monochromator_set_calibration()} or
 @code{monochromator_read_calibration()} (see below). If no calibration
 has been loaded for the grating a warning is printed and the returned
-scaling values represent pixel numbers, not wavelengths (i.e.@: both are
-values are simply 1).
+scaling values represent pixel numbers relative to the center of the CCD
+chip, not wavelengths.
 
 The function is mostly meant to make it easy to obtain a wavelength
 scale to be used with the functions @code{change_scale_1d()} and
-@code{change_scale_2d()}. Please note that the wavelength difference
-between two neighboring pixels isn't really constant over the whole
-width of the CCD chip. When you use the returned values only for the
-center of the chip the results are in quite good an agreement with the
-real wavelengths, but for the edges of the chip the accuracy
-deteriorates significantly, for example for a grating with 1200 grooves
-per mm the deviation is about @w{0.5 nm} and for gratings with lower
-groove densities the deviation gets even larger, proportional to the
-inverse of the groove density. To obtain the exact wavelength for a
-certain pixel of the chip use the function
+@code{change_scale_2d()}. If binning is used in @i{x}-direction the
+elements can't be used directly as arguments for the functions but to
+the first element you will have use halve the number of pixels binned
+together multiplied by the second element and the second element needs
+to be multiplied by the number of pixels bined together. Here's an
+example on how to use the function to set a wavelength @code{x}-axis,
+assuming that @code{xbin} is the number of bits binned together in
+@i{x}-direction and @code{scale} is an array with two elements:
+@example
+scale = monochromator_wavelength_axis( );
+change_scale_1d( scale[ 1 ] + 0.5 * xbin * scale[ 2 ],
+                 xbin * scale[ 2 ] );
+@end example
+
+@strong{Please note}: the wavelength difference between two neighboring
+pixels isn't really constant over the whole width of the CCD chip. When
+you use the returned values only for the center of the chip the results
+are in quite good an agreement with the real wavelengths, but for the
+edges of the chip the accuracy deteriorates significantly. For example
+for a grating with 1200 grooves per mm the deviation is about @w{0.5 nm}
+and for gratings with lower groove densities the deviation gets even
+larger, proportional to the inverse of the groove density. To obtain the
+exact wavelength for a certain pixel on the chip use the function
 @code{monochromator_calc_wavelength()} discussed below.
 
 The function can only be used in the @code{EXPERIMENT} section of an
@@ -3396,7 +3409,7 @@ degrees), the focal length (in m) and the detector angle (in degrees).
 
 Alternatively, to clear the calibration for a grating the function can
 also be called with two arguments, the number of the grating and the
-string @code{"DELETE_CALIBRATION"}.
+string @code{"DELETE"}.
 
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
