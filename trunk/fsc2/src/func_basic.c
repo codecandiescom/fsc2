@@ -1137,32 +1137,42 @@ Var *f_random( Var *v )
 }
 
 
-/*---------------------------------------------*/
-/* Sets a seed for the random number generator */
-/*---------------------------------------------*/
-
+/*---------------------------------------------------------------------------*/
+/* Sets a seed for the random number generator. It expects either a positive */
+/* integer as argument or none, in which case the current time (in seconds   */
+/* since 00:00:00 UTC, January 1, 1970) is used.                             */
+/*---------------------------------------------------------------------------*/
 
 Var *f_setseed( Var *v )
 {
 	unsigned int arg;
 
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
-
-	if ( v->type == INT_VAR )
+	if ( v != NULL )
 	{
-		if ( v->val.lval < 0 )
-			eprint( SEVERE, "%s:%ld: set_seed() needs a positive integer "
-				"as argument, using absolute value.\n", Fname, Lc );
-		arg = ( unsigned int ) labs( v->val.lval );
+		vars_check( v, INT_VAR | FLOAT_VAR );
+
+		if ( v->type == INT_VAR )
+		{
+			if ( v->val.lval < 0 )
+				eprint( SEVERE, "%s:%ld: set_seed() needs a positive integer "
+						"as argument, using absolute value.\n", Fname, Lc );
+			arg = ( unsigned int ) labs( v->val.lval );
+		}
+		else
+		{
+			eprint( SEVERE, "%s:%ld: set_seed() needs a positive integer and "
+					"not a float variable as argument, using 1 instead.\n",
+					Fname, Lc );
+			arg = 1;
+		}
+
+		if ( v->next != NULL )
+			eprint( WARN, "%s:%ld: Superfluous argument in call of "
+					"setseed().\n", Fname, Lc );
 	}
 	else
-	{
-		eprint( SEVERE, "%s:%ld: set_seed() needs a positive integer and not "
-				"a float variable as argument, using 1 instead.\n",
-				Fname, Lc );
-		arg = 1;
-	}
+		arg = ( unsigned int ) time( NULL );
 
 	srandom( arg );
 	return vars_push( INT_VAR, 1 );

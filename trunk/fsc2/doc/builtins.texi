@@ -682,6 +682,8 @@ Returns a pseudo-random number in the interval @w{[0, 1]}.
 @findex set_seed()
 Sets a seed for the random number generator used in the function
 @code{random()} function. The argument has to be a positive integer.
+Alternatively, when no argument is given, the time in seconds since
+00:00:00 UTC, January 1, 1970 is used as the seed.
 
 
 @item sin()
