@@ -21,8 +21,6 @@
 #  the Free Software Foundation, 59 Temple Place - Suite 330,
 #  Boston, MA 02111-1307, USA.
 
-# TODO: 1. Evaluate If-fields in meta-data the browser sends
-
 
 use strict;
 use IO::Socket::INET;
@@ -39,8 +37,8 @@ my $has_ppmtojpeg;     # does the ppmtojpeg utility exist?
 # Check if we got a port number as the first command line argument...
 
 my $port = 8080;
-$port = $ARGV[ 0 ] if defined $ARGV[ 0 ] and $ARGV[ 0 ] =~ /\d+/o and
-		$ARGV[ 0 ] >= 1024 and $ARGV[ 0 ] <= 65535;
+$port = $ARGV[ 0 ] if defined $ARGV[ 0 ] and $ARGV[ 0 ] =~ /\d+/o
+					  and $ARGV[ 0 ] >= 1024 and $ARGV[ 0 ] <= 65535;
 
 
 # The second argument is supposed to be the place where to look for the
