@@ -184,15 +184,14 @@ int rs690_init_hook( void )
 
 int rs690_test_hook( void )
 {
-	if ( rs690_Pulses == NULL )
-	{
-		rs690_is_needed = UNSET;
-		print( WARN, "Driver loaded but no pulses are defined.\n" );
-		return 1;
-	}
-
 	/* Check consistency of pulse settings and do everything to setup the
 	   pulser for the test run */
+
+	if ( rs690_Pulses == NULL && ! rs690.is_repeat_time )
+	{
+		rs690.is_repeat_time = SET;
+		rs690.repeat_time = 1 << rs690.timebase_type;
+	}
 
 	TRY
 	{
@@ -227,6 +226,9 @@ int rs690_test_hook( void )
 											rs690_change_pulse_position_change;
 	pulser_struct.set_pulse_length_change = rs690_change_pulse_length_change;
 
+	if ( rs690_Pulses == NULL )
+		rs690_is_needed = UNSET;
+
 	return 1;
 }
 
@@ -252,9 +254,6 @@ int rs690_end_of_test_hook( void )
 		fclose( rs690.show_file );
 		rs690.show_file = NULL;
 	}
-
-	if ( ! rs690_is_needed )
-		return 1;
 
 	/* Reset the internal representation back to its initial state */
 
@@ -355,9 +354,6 @@ int rs690_end_of_test_hook( void )
 
 int rs690_exp_hook( void )
 {
-	if ( ! rs690_is_needed )
-		return 1;
-
 	/* Extra safety net: If the minimum distances between shape and defense
 	   pulses have been changed by calling the appropriate functions ask
 	   the user the first time the experiment gets started if (s)he is 100%
@@ -418,9 +414,6 @@ int rs690_exp_hook( void )
 
 int rs690_end_of_exp_hook( void )
 {
-	if ( ! rs690_is_needed )
-		return 1;
-
 	rs690_run( UNSET );
 	rs690_lock_state( UNSET );
 	gpib_local( rs690.device );
