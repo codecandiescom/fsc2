@@ -54,6 +54,7 @@ Var *pulser_cw_mode( Var *v );
 Var *pulser_update( Var *v );
 Var *pulser_shift( Var *v );
 Var *pulser_increment( Var *v );
+Var *pulser_reset( Var *v );
 Var *pulser_pulse_reset( Var *v );
 Var *pulser_next_phase( Var *v );
 Var *pulser_phase_reset( Var *v );
