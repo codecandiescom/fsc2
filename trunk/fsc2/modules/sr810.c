@@ -2107,6 +2107,10 @@ static double sr810_get_auto_data( int type )
 			 gpib_read( sr810.device, buffer, &length ) == FAILURE )
 			sr810_failure( );
 
+		/* Store the time where we received the last data item */
+
+		sr810.auto_time = experiment_time( );
+
 		buffer[ length - 1 ] = '\0';
 
 		ptr = buffer;
