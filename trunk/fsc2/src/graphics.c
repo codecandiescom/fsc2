@@ -716,9 +716,10 @@ void make_scale( Curve_1d *cv, Canvas *c, int coord )
 	d_delta_fine = cv->s2d[ coord ] * rwc_delta / fabs( G.rwc_delta[ coord ] );
 
 
-	/* `rwc_start' is the first value in the display, `rwc_start_fine' the
-	   position of the first small tick (both in real world coordinates)
-	   and, finally, `d_start_fine' the same position but in points */
+	/* `rwc_start' is the first value in the display (i.e. the smallest x or y
+	   value still shown in the canvas), `rwc_start_fine' the position of the
+	   first small tick (both in real world coordinates) and, finally,
+	   `d_start_fine' is the same position but in points */
 
 	rwc_start = G.rwc_start[ coord ]
 		        - cv->shift[ coord ] * G.rwc_delta[ coord ];
@@ -757,7 +758,7 @@ void make_scale( Curve_1d *cv, Canvas *c, int coord )
 	coarse = rnd( ( d_start_fine - d_start_coarse ) / d_delta_fine );
 
 
-	/* Now, finally we can draw the axis... */
+	/* Now, finally we got everything we need to draw the axis... */
 
 	rwc_coarse = rwc_start_coarse;
 
@@ -867,6 +868,13 @@ void repaint_canvas( Canvas *c )
 		XDrawRectangle( G.d, G.pm, c->box_gc, x, y, w, h );
 	}
 
+	/* If this is the canvas and the left and either the middle or the right
+	   mouse button is pressed draw the current mouse position (converted to
+	   real world coordinates) or the difference between the current position
+	   and the point the buttons were pressed at into the left hand top corner
+	   of the canvas. In the second case also draw some marker connecting the
+	   initial and the current position. */
+
 	if ( c == &G.canvas )
 	{
 		if ( G.button_state == 3 )
@@ -919,10 +927,10 @@ void repaint_canvas( Canvas *c )
 		}
 	}
 
+	/* Finally copy the buffer pixmap onto the screen */
+
 	XCopyArea( G.d, G.pm, FL_ObjWin( c->obj ), c->gc,
 			   0, 0, c->w, c->h, 0, 0 );
-
-	XFlush( G.d );
 }
 
 
