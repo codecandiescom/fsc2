@@ -74,7 +74,6 @@ static double sr510_set_phase( double phase );
 /* Init hook function for the module. */
 /*------------------------------------*/
 
-
 int sr510_init_hook( void )
 {
 	/* Set global variable to indicate that GPIB bus is needed */
