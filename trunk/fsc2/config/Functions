@@ -63,6 +63,11 @@ sweep_up, 0, EXP;               // sweep magnet up
 sweep_down, 0, EXP;             // sweep magnet down
 
 
+/* Functions only supported by the Oxford IPS20-4 sweep power supply driver */
+
+magnet_goto_current_on_end, 1, ALL; // keep sweeping after end of experiment
+
+
 /* Functions for the W_BAND power supply driver only */
 
 magnet_use_correction, 0, PREP; // if called field corrections are applied
