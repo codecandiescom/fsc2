@@ -1,0 +1,454 @@
+/*
+  $Id$
+
+  Copyright (C) 1999-2003 Jens Thoms Toerring
+
+  This file is part of fsc2.
+
+  Fsc2 is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 2, or (at your option)
+  any later version.
+
+  Fsc2 is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with fsc2; see the file COPYING.  If not, write to
+  the Free Software Foundation, 59 Temple Place - Suite 330,
+  Boston, MA 02111-1307, USA.
+*/
+
+
+#include "rs_spec10.h"
+#include <sys/mman.h>
+
+
+static void rs_spec10_ccd_init( void );
+static void rs_spec10_temperature_init( void );
+
+
+/*-----------------------------------------*/
+/*-----------------------------------------*/
+
+void rs_spec10_init_camera( void )
+{
+	int16 total_cams;
+	char cam_name[ CAM_NAME_LEN ];
+	int16 i;
+
+
+	/* Try to figure out how many cameras are attached to the system */
+
+	if ( ! pl_cam_get_total( &total_cams ) )
+		rs_spec10_error_handling( );
+
+	/* Loop over the cameras until we find the one we're looking for */
+
+	for ( i = 0; i < total_cams; i++ )
+	{
+		pl_cam_get_name( i, cam_name );
+		if ( ! strcmp( cam_name, rs_spec10->dev_file ) )
+			break;
+	}
+
+	/* Check if we found it, otherwise throw an exception */
+
+	if ( i == total_cams )
+	{
+		print( FATAL, "No camera device file '/dev/%s' found.\n",
+			   rs_spec10->dev_file );
+		THROW( EXCEPTION );
+	}
+
+	/* Try to get a handle for the camera */
+
+	if ( ! pl_cam_open( ( char * ) rs_spec10->dev_file, &rs_spec10->handle,
+						OPEN_EXCLUSIVE ) )
+		rs_spec10_error_handling( );
+
+	rs_spec10->is_open = SET;
+
+	/* Do a simple checks */
+
+	if ( ! pl_cam_check( rs_spec10->handle ) )
+		rs_spec10_error_handling( );
+
+	rs_spec10_ccd_init( );
+	rs_spec10_temperature_init( );
+}
+
+
+/*-----------------------------------------*/
+/*-----------------------------------------*/
+
+static void rs_spec10_ccd_init( void )
+{
+	uns16 ret_uns16;
+
+
+	if ( ! pl_get_param( rs_spec10->handle, PARAM_SER_SIZE, ATTR_ACCESS,
+						 ( void_ptr ) &ret_uns16 ) )
+		rs_spec10_error_handling( );
+
+	if ( ret_uns16 != ACC_READ_ONLY && ret_uns16 != ACC_READ_WRITE )
+	{
+		print( FATAL, "Can't determine number of pixels of CCD\n" );
+		THROW( EXCEPTION );
+	}
+
+	if ( ! pl_get_param( rs_spec10->handle, PARAM_PAR_SIZE, ATTR_ACCESS,
+						 ( void_ptr ) &ret_uns16 ) )
+		rs_spec10_error_handling( );
+
+	if ( ret_uns16 != ACC_READ_ONLY && ret_uns16 != ACC_READ_WRITE )
+	{
+		print( FATAL, "Can't determine number of pixels of CCD\n" );
+		THROW( EXCEPTION );
+	}
+
+	/* Now we start trying to find out about the device properties, first
+	   the number of pixels in x- and y-direction */
+
+	if ( ! pl_get_param( rs_spec10->handle, PARAM_SER_SIZE, ATTR_MAX,
+						 ( void_ptr ) &ret_uns16 ) )
+		rs_spec10_error_handling( );
+	rs_spec10->ccd.max_size[ X ] = ret_uns16;
+
+	if ( ! pl_get_param( rs_spec10->handle, PARAM_PAR_SIZE, ATTR_MAX,
+						 ( void_ptr ) &ret_uns16 ) )
+		rs_spec10_error_handling( );
+	rs_spec10->ccd.max_size[ Y ] = ret_uns16;
+
+	/* Make sure the sizes are identical to what the configuration file
+	   claims */
+
+	if ( rs_spec10->ccd.max_size[ X ] == CCD_PIXEL_WIDTH ||
+		 rs_spec10->ccd.max_size[ Y ] != CCD_PIXEL_HEIGHT )
+	{
+		print( FATAL, "Configuration file for camera has invalid CCD "
+			   "size, real size is %ldx%ld.\n",
+			   ( long ) rs_spec10->ccd.max_size[ X ],
+			   ( long ) rs_spec10->ccd.max_size[ Y ] );
+		THROW( EXCEPTION );
+	}
+}
+
+
+/*-----------------------------------------*/
+/*-----------------------------------------*/
+
+uns16 *rs_spec10_get_pic( void )
+{
+	rgn_type region;
+    uns32 size;
+	uns16 *frame;
+	int16 status;
+	uns32 dummy;
+
+
+	region.s1   = rs_spec10->ccd.roi[ 0 ];
+	region.s2   = rs_spec10->ccd.roi[ 1 ];
+	region.p1   = rs_spec10->ccd.roi[ 2 ];
+	region.p2   = rs_spec10->ccd.roi[ 3 ];
+
+	if ( rs_spec10->ccd.bin_mode == HARDWARE_BINNING )
+	{
+		region.sbin = rs_spec10->ccd.bin[ 0 ];
+		region.pbin = rs_spec10->ccd.bin[ 1 ];
+	}
+	else
+	{
+		region.sbin = 1;
+		region.pbin = 1;
+	}
+
+	if ( ! pl_exp_init_seq( ) )
+		rs_spec10_error_handling( );
+
+	if ( ! pl_exp_setup_seq( rs_spec10->handle, 1, 1, &region,
+							 TIMED_MODE, 100, &size ) )
+	{
+		pl_exp_uninit_seq( );
+		rs_spec10_error_handling( );
+	}
+
+	/* Now we need memory for storing the new picture. The manual requires
+	   this memory to be protected against swapping, thus we must mlock()
+	   it. */
+
+	TRY
+	{
+		frame = T_malloc( size );
+		if ( mlock( frame, size ) == 1 )
+		{
+			print( FATAL, "Failure to obtain properly protected memory.\n" );
+			THROW( EXCEPTION );
+		}
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+	{
+		pl_exp_abort( rs_spec10->handle, CCS_HALT );
+		pl_exp_uninit_seq( );
+		RETHROW( );
+	}
+
+	if ( ! pl_exp_start_seq( rs_spec10->handle, frame ) )
+	{
+		pl_exp_abort( rs_spec10->handle, CCS_HALT );
+		pl_exp_uninit_seq( );
+		munlock( frame, size );
+		T_free( frame );
+		rs_spec10_error_handling( );
+	}
+
+	/* Loop until data are available */
+
+	TRY
+	{
+		do
+		{
+			stop_on_user_request( );
+			if ( ! pl_exp_check_status( rs_spec10->handle, &status, &dummy ) )
+				rs_spec10_error_handling( );
+		} while ( status != READOUT_COMPLETE );
+	}
+	OTHERWISE
+	{
+		pl_exp_abort( rs_spec10->handle, CCS_HALT );
+		pl_exp_uninit_seq( );
+		munlock( frame, size );
+		T_free( frame );
+		RETHROW( );
+	}
+
+    pl_exp_finish_seq( rs_spec10->handle, frame, 0 );
+	pl_exp_uninit_seq();
+
+	munlock( frame, size );
+
+	return frame;
+}
+
+
+/*-----------------------------------------*/
+/*-----------------------------------------*/
+
+static void rs_spec10_temperature_init( void )
+{
+	uns16 ret_uns16;
+	int16 ret_int16;
+
+
+	/* Determine accessibility of temperature setpoint */
+
+	if ( ! pl_get_param( rs_spec10->handle, PARAM_TEMP_SETPOINT, ATTR_ACCESS,
+						 ( void_ptr ) &ret_uns16 ) )
+		 rs_spec10_error_handling( );
+	rs_spec10->temp.acc_setpoint = ret_uns16;
+
+	/* Get maximum and minimum temperature that can be set and determine
+	   the current temperature (since the device returns all temperatures
+	   in 1/100 degree Celsius but we use Kelvin internally we need to
+	   convert the returned value) */
+
+	if ( rs_spec10->temp.acc_setpoint == ACC_READ_ONLY ||
+		 rs_spec10->temp.acc_setpoint == ACC_READ_WRITE )
+	{
+		if ( ! pl_get_param( rs_spec10->handle, PARAM_TEMP_SETPOINT, ATTR_MAX,
+							 ( void_ptr ) &ret_int16 ) )
+			rs_spec10_error_handling( );
+		rs_spec10->temp.max = rs_spec10_ic2k( ret_int16 );
+		 
+		if ( ! pl_get_param( rs_spec10->handle, PARAM_TEMP_SETPOINT, ATTR_MIN,
+							 ( void_ptr ) &ret_int16 ) )
+			rs_spec10_error_handling( );
+		rs_spec10->temp.min = rs_spec10_ic2k( ret_int16 );
+	}
+
+	/* Check if during the test run the temperature was set to a value that
+	   isn't within the allowed range */
+
+	if ( rs_spec10_test.temp.test_min_setpoint != HUGE_VAL ||
+		 rs_spec10_test.temp.test_max_setpoint != -HUGE_VAL )
+	{
+		if ( rs_spec10->temp.acc_setpoint != ACC_READ_ONLY &&
+			 rs_spec10->temp.acc_setpoint != ACC_READ_WRITE )
+		{
+			print( FATAL, "During the test run a temperature setpoint was "
+				   "set, but camera doesn't allow to do so.\n" );
+			THROW( EXCEPTION );
+		}
+
+		if ( rs_spec10_test.temp.test_min_setpoint != HUGE_VAL &&
+			 rs_spec10_test.temp.test_min_setpoint < rs_spec10->temp.min )
+		{
+			print( FATAL, "In test run a temperature setpoint was requested "
+				   "(%.2lf K, %lf.2 C) that is too low (allowed minimum "
+				   "value is %.2lf K, %lf.2 C).\n",
+				   rs_spec10_test.temp.test_min_setpoint,
+				   rs_spec10_k2c( rs_spec10_test.temp.test_min_setpoint ),
+				   rs_spec10->temp.min, rs_spec10_k2c( rs_spec10->temp.min ) );
+			THROW( EXCEPTION );
+		}
+
+		if ( rs_spec10_test.temp.test_max_setpoint != -HUGE_VAL &&
+			 rs_spec10_test.temp.test_max_setpoint < rs_spec10->temp.max )
+		{
+			print( FATAL, "In test run a temperature setpoint was requested "
+				   "(%.2lf K, %lf.2 C) that is too high (allowed minimum "
+				   "value is %.2lf K, %lf.2 C).\n",
+				   rs_spec10_test.temp.test_max_setpoint,
+				   rs_spec10_k2c( rs_spec10_test.temp.test_max_setpoint ),
+				   rs_spec10->temp.max, rs_spec10_k2c( rs_spec10->temp.max ) );
+			THROW( EXCEPTION );
+		}
+	}
+
+	/* Check if we can read the current temperature and if yes get it */
+
+	if ( ! pl_get_param( rs_spec10->handle, PARAM_TEMP, ATTR_ACCESS,
+						 ( void_ptr ) &ret_uns16 ) )
+		 rs_spec10_error_handling( );
+	rs_spec10->temp.acc_temp = ret_uns16;
+
+	if ( rs_spec10->temp.acc_temp == ACC_READ_ONLY ||
+		 rs_spec10->temp.acc_temp == ACC_READ_WRITE )
+	{
+		if ( ! pl_get_param( rs_spec10->handle, PARAM_TEMP, ATTR_CURRENT,
+							 ( void_ptr ) &ret_int16 ) )
+			rs_spec10_error_handling( );
+		rs_spec10_get_temperature( );
+	}
+
+	/* Set a target temperature if this was requested in the PREPARATIONS
+	   section */
+
+	if ( rs_spec10->temp.is_setpoint )
+	{
+		if ( rs_spec10->temp.acc_setpoint != ACC_READ_WRITE &&
+			 rs_spec10->temp.acc_setpoint != ACC_WRITE_ONLY )
+		{
+			print( FATAL, "In the PREPARATIONS section a temperature "
+				   "setpoint was set, but camera doesn't allow to do so.\n" );
+			THROW( EXCEPTION );
+		}
+
+		if ( rs_spec10->temp.setpoint < rs_spec10->temp.min )
+		{
+			print( FATAL, "Temperature setpoint requested in PREPARATIONS "
+				   "section is too low, minimum is %.2lf K (%.2lf C).\n",
+				   rs_spec10->temp.min, rs_spec10_k2c( rs_spec10->temp.min ) );
+			THROW( EXCEPTION );
+		}
+
+		if ( rs_spec10->temp.setpoint > rs_spec10->temp.max )
+		{
+			print( FATAL, "Temperature setpoint requested in PREPARATIONS "
+				   "section is too high, maximum is %.2lf K (%.2lf C).\n",
+				   rs_spec10->temp.max, rs_spec10_k2c( rs_spec10->temp.max ) );
+			THROW( EXCEPTION );
+		}
+
+		rs_spec10_set_temperature( rs_spec10->temp.setpoint );
+	}
+}
+
+
+/*-----------------------------------------------*/
+/* Returns the current temperature of the camera */
+/*-----------------------------------------------*/
+
+double rs_spec10_get_temperature( void )
+{
+	int16 itemp;
+
+
+	/* Check that model allows query of the temperature */
+
+	if ( rs_spec10->temp.acc_setpoint != ACC_READ_ONLY &&
+		 rs_spec10->temp.acc_setpoint != ACC_READ_WRITE )
+	{
+		print( SEVERE, "Camera does not allow query of its temperature.\n" );
+		return 0.0;
+	}
+
+	/* Get the current temperature */
+
+	if ( ! pl_get_param( rs_spec10->handle, PARAM_TEMP, ATTR_CURRENT,
+						 ( void_ptr ) &itemp ) )
+		rs_spec10_error_handling( );
+
+	/* Return current temperature, converted to Kelvin */
+
+	return rs_spec10->temp.cur = rs_spec10_ic2k( itemp );
+}
+
+
+/*------------------------------------------*/
+/* Sets a target temperature for the camera */
+/*------------------------------------------*/
+
+double rs_spec10_set_temperature( double temp )
+{
+	int16 itemp;
+
+
+	/* A bit of paranoia... */
+
+	fsc2_assert( FSC2_MODE == EXPERIMENT &&
+				 temp >= rs_spec10->temp.min &&
+				 temp <= rs_spec10->temp.max );
+
+	/* Check that the model allows setting a setpoint */
+
+	if ( rs_spec10->temp.acc_setpoint != ACC_READ_WRITE &&
+		 rs_spec10->temp.acc_setpoint != ACC_WRITE_ONLY )
+	{
+		print( SEVERE, "Camera does not allow setting a temperature "
+			   "setpoint.\n" );
+		return 0.0;
+	}
+
+	/* Ok, send setpoint (but in Celsius, multiplied by 100) */
+
+	itemp = rs_spec10_k2ic( temp );
+	if ( ! pl_set_param( rs_spec10->handle, PARAM_TEMP_SETPOINT, 
+						 &itemp ) )
+		rs_spec10_error_handling( );
+
+	/* Return the new setpoint */
+
+	return rs_spec10_ic2k( itemp );
+}
+
+
+/*-----------------------------------------*/
+/*-----------------------------------------*/
+
+void rs_spec10_error_handling( void )
+{
+	char pcam_err_msg[ ERROR_MSG_LEN ];
+
+
+	pl_error_message( pl_error_code( ), pcam_err_msg );
+	print( FATAL, "%s\n", pcam_err_msg );
+
+	if ( rs_spec10->is_open )
+	{
+		pl_cam_close( rs_spec10->handle );
+		rs_spec10->is_open = UNSET;
+	}
+
+	THROW( EXCEPTION );
+}
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */
