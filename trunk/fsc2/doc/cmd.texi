@@ -249,16 +249,9 @@ this window only the position part of the geometry string is used.
 Sets the size (in pixels) of the font to be used in both browsers in the
 main window.
 
-@item @option{-buttonFontSize number}
-Sets the size (in pixels) of the font to be used for all buttons.
-
-@item @option{-sliderFontSize number}
-Sets the size (in pixels) of the font to be used for sliders and their
-labels.
-
-@item @option{-inputFontSize number}
-Sets the size (in pixels) of the font to be used for the texts and
-labels of input and output fields.
+@item @option{-toolboxFontSize number}
+Sets the size (in pixels) of the font to be used for all objects in the
+toolbox.
 
 @item @option{-helpFontSize number}
 Sets the size (in pixels) of the font to be used for the pop-up help
