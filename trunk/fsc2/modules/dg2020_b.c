@@ -182,7 +182,7 @@ int dg2020_b_test_hook( void )
 
 
 /*!!!*/
-	THROW( EXCEPTION );
+//	THROW( EXCEPTION );
 /*!!!*/
 
 	return 1;
