@@ -72,12 +72,12 @@ void load_all_drivers( void )
 
 	qsort( Fncts, Num_Func, sizeof( Func ), func_cmp );
 
-	/* This done we run the init hooks (if they exist) and warn if they don't
+	/* This done run the init hooks (if they exist) and warn if they don't
 	   return successfully (if an init hook thinks it should kill the whole
-	   program it is supposed to throw an exception). To keep the modules
-	   writers from erroneously unsetting the global variable `need_GPIB' it
-	   is stored before each init_hook() function is called and, if necessary,
-	   is restored to its previous values. */
+	   program it is supposed to throw an exception). To keep modules writers
+	   from erroneously unsetting the global variable `need_GPIB' it's stored
+	   before each init_hook() function is called and is restored to its
+	   previous values if necessary. */
 
 	for ( cd = Device_List; cd != NULL; cd = cd->next )
 	{
