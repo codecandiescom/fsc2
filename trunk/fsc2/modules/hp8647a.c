@@ -745,12 +745,12 @@ Var *synthesizer_att_ref_freq( Var *v )
 }
 
 
-/*----------------------------------------------------------------*/
-/* Function for setting some or all modlation parameters at once. */
-/* The sequence the parameters are set in don't matter. If the    */
-/* function succeeds 1 (as variable) is returned, otherwise a     */
-/* an exception is thrown.                                        */
-/*----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*/
+/* Function for setting some or all modulation parameters at once. */
+/* The sequence the parameters are set in don't matter. If the     */
+/* function succeeds 1 (as variable) is returned, otherwise a      */
+/* an exception is thrown.                                         */
+/*-----------------------------------------------------------------*/
 
 Var *synthesizer_modulation( Var *v )
 {

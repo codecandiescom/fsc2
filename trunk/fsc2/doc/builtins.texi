@@ -507,11 +507,12 @@ arguments the state of the button is returned. There is a difference
 between normal buttons and push and radio buttons. For normal buttons
 the number of times the button was pressed since the last call of the
 function is returned. For push and radio butoons the state of the
-button, i.e.@: either @code{0} for off or @code{1} fro on is returned.
+button, i.e.@: either @code{0} for off or @code{1} for on is returned.
 
 If there is a second argument the state of push and radio buttons can be
-set. This argument must be a number, where @code{0} stands for off and a
-non-zero number for on. The state of normal buttons cannot be set.
+set. This argument must be either a string (@code{"ON"} or @code{"OFF"})
+or a number with @code{0} standing for off and a non-zero number for
+on. The state of normal buttons cannot be set.
 
 
 @item slider_create()
