@@ -49,6 +49,8 @@ static void run_child( void );
 static void set_child_signals( void );
 void child_sig_handler( int signo );
 static void do_measurement( void );
+static void wait_for_confirmation( void );
+static void child_confirmation_handler( int signo );
 
 
 /* Locally used global variables used in parent, child and signal handlers */
@@ -61,6 +63,9 @@ volatile sig_atomic_t can_jmp_alrm = 0;
 static struct sigaction sigchld_oact,
 	                    new_data_oact,
 	                    quitting_oact;
+
+static int child_return_status;
+
 
 
 /*------------------------------------------------------------------*/
@@ -433,7 +438,13 @@ static void quitting_handler( int signo )
 	signo = signo;
 	errno_saved = errno;
 	child_is_quitting = SET;
-	kill( child_pid, DO_QUIT );
+	if ( kill( child_pid, DO_QUIT ) < 0 )
+	{
+		child_pid = 0;                                   /* child is dead... */
+		sigaction( SIGCHLD, &sigchld_oact, NULL );
+		fl_trigger_object( run_form->sigchld );
+		stop_measurement( NULL, 1 );
+	}
 	errno = errno_saved;
 }
 
@@ -444,7 +455,7 @@ static void quitting_handler( int signo )
 /* waiting for the return status and resetting of signal handlers)   */
 /* are done here since it's a signal handler. To get the remaining   */
 /* stuff done an invisible button is triggered which leads to a call */
-/* of its callback function run_sigchld_callback().                  */
+/* of its callback function, run_sigchld_callback().                 */
 /*-------------------------------------------------------------------*/
 
 static void run_sigchld_handler( int signo )
@@ -465,8 +476,11 @@ static void run_sigchld_handler( int signo )
 
 #if defined ( DEBUG )
 	if ( WIFSIGNALED( return_status ) )
-		fprintf( stderr, "Child process died due to signal %d\n",
-				 WTERMSIG( return_status ) );
+	{
+		fprintf( stderr, "Child process %d died due to signal %d\n",
+				 pid, WTERMSIG( return_status ) );
+		fflush( stderr );
+	}
 #endif
 
 	child_pid = 0;                                       /* child is dead... */
@@ -515,12 +529,15 @@ void run_sigchld_callback( FL_OBJECT *a, long b )
 void stop_measurement( FL_OBJECT *a, long b )
 {
 	int bn;
-
+	
 
 	if ( b == 0 )                        /* callback from stop button ? */
 	{
 		if ( child_pid != 0 )            /* child is still running */
 		{
+			/* Only send DO_QUIT signal if the mouse button has been used
+			   the user told us he/she would use... */
+
 			if ( stop_button_mask != 0 )
 			{
 				bn = fl_get_button_numb( a );
@@ -635,7 +652,9 @@ static void set_buttons_for_run( int active )
 
 static void run_child( void )
 {
-	int return_status;
+#ifndef NDEBUG
+	const char *fcd;
+#endif
 
 
 	I_am = CHILD;
@@ -648,42 +667,38 @@ static void run_child( void )
 
 	/* Set up pointers, global variables and signal handlers */
 
-	return_status = OK;
+	child_return_status = OK;
 	cur_prg_token = prg_token;
 	do_quit = UNSET;
 	set_child_signals( );
 
-#if 0                                    /* used in child process debugging */
+#ifndef NDEBUG
+	/* By stetting the environment variable FSC2_CHILD_DEBUG to something
+	   not an empty string the child will sleep here for about 10 hours or
+	   until it gets a non-deadly signal, e.g. by the debugger attaching. */
+
+	if ( ( fcd = getenv( "FSC2_CHILD_DEBUG" ) ) != NULL &&
+		 fcd[ 0 ] != '\0' )
 	{
-		bool h = SET;
-		while ( h );
+		fprintf( stderr, "Child process pid = %d\n", getpid( ) );
+		fflush( stderr );
+		sleep( 36000 );
 	}
 #endif
 
 	TRY
 	{
 		do_measurement( );               /* run the experiment */
-		return_status = OK;
+		child_return_status = OK;
 		TRY_SUCCESS;
 	}
 	OTHERWISE                            /* catch all exceptions */
-		return_status = FAIL;
+		child_return_status = FAIL;
 
 	close( pd[ READ ] );                 /* close read end of pipe */
 	close( pd[ WRITE ] );                /* close also write end of pipe */
 
-	do_quit = UNSET;
-	kill( getppid( ), QUITTING );        /* tell parent that we're exiting */
-
-	/* Wait for the acknoledgement of the QUITTING signal by the parent -
-	   using a pause() here is tempting but there exists a race condition
-	   between the determination of the value of 'do_quit' and the start of
-	   pause() - and it gets triggered (the race condition) sometimes... */
-
-	while ( ! do_quit )                  /* wait for acceptance of signal  */
-		usleep( 50000 );
-
-	_exit( return_status );              /* ...and that's it ! */
+	wait_for_confirmation( );            /* wait for license to die... */
 }
 
 
@@ -792,6 +807,52 @@ void child_sig_handler( int signo )
 	}
 }
 			
+
+/*---------------------------------------------------------------------*/
+/* The child got to wait for the parent to tell it that it now expects */
+/* the child to die (if the child dies unexpectedly the parent assumes */
+/* that something went wrong during the experiment). This functions    */
+/* sets everything up so that the parents DO_QUIT signal will be       */
+/* handled by the correct function, sends a QUITTING signal to the     */
+/* parent and then waits for the parent to allow it to exit.           */
+/*---------------------------------------------------------------------*/
+
+static void wait_for_confirmation( void )
+{
+	struct sigaction sact;
+
+
+	sact.sa_handler = child_confirmation_handler;
+	sigemptyset( &sact.sa_mask );
+	sact.sa_flags = 0;
+	if ( sigaction( DO_QUIT, &sact, NULL ) < 0 )    /* aka SIGUSR2 */
+		_exit( -1 );
+
+	sact.sa_handler = child_confirmation_handler;
+	sigemptyset( &sact.sa_mask );
+	sact.sa_flags = 0;
+	if ( sigaction( SIGALRM, &sact, NULL ) < 0 )
+		_exit( -1 );
+
+	/* Tell parent that we're done and just wait for its DO_QUIT signal */
+
+    kill( getppid( ), QUITTING );
+
+	while ( 1 )
+		pause( );
+}
+
+
+/*-----------------------------------------------------------------*/
+/* Childs handler for the DO_QUIT signal while its waiting to die. */
+/*-----------------------------------------------------------------*/
+
+static void child_confirmation_handler( int signo )
+{
+	if ( signo == DO_QUIT )
+		_exit( child_return_status );                /* ...and that's it ! */
+}
+
 
 /*-------------------------------------------------------------------*/
 /* do_measurement() runs through and executes all commands. Since it */
