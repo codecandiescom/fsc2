@@ -137,11 +137,24 @@ Var *f_bcreate( Var *v )
 		void *buffer, *pos;
 		long new_ID;
 		long *result;
+		size_t len;
 
 
-		buffer = T_malloc( 3 * sizeof( long ) + strlen( Fname )
-						   + strlen( label ) + strlen( help_text ) + 3 );
-		pos = buffer;
+		len = 3 * sizeof( long );
+		if ( Fname )
+			len += strlen( Fname ) + 1;
+		else
+			len++;
+		if ( label )
+			len += strlen( label ) + 1;
+		else
+			len++;
+		if ( help_text )
+			len += strlen( help_text ) + 1;
+		else
+			len++;
+
+		pos = buffer = T_malloc( len );
 
 		memcpy( pos, &Lc, sizeof( long ) );     /* store current line number */
 		pos += sizeof( long );
@@ -649,12 +662,24 @@ Var *f_screate( Var *v )
 		void *buffer, *pos;
 		long new_ID;
 		long *result;
+		size_t len;
 
 
-		buffer = T_malloc( 2 * sizeof( long ) + 2 * sizeof( double )
-						   + strlen( Fname ) + strlen( label )
-						   + strlen( help_text ) + 3 );
-		pos = buffer;
+		len = 2 * sizeof( long ) + 2 * sizeof( double );
+		if ( Fname )
+			len += strlen( Fname ) + 1;
+		else
+			len++;
+		if ( label )
+			len += strlen( label ) + 1;
+		else
+			len++;
+		if ( help_text )
+			len += strlen( help_text ) + 1;
+		else
+			len++;
+
+		pos = buffer = T_malloc( len );
 
 		memcpy( pos, &Lc, sizeof( long ) );     /* store current line number */
 		pos += sizeof( long );
