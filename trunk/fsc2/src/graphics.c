@@ -1341,6 +1341,7 @@ void curve_button_callback( FL_OBJECT *obj, long data )
 		}
 
 		redraw_all_2d( );
+		cut_new_curve_handler( );
 	}
 
 }

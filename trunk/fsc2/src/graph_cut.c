@@ -293,6 +293,10 @@ void cut_new_curve_handler( void )
 }
 
 
+/*---------------------------------------------------------------------------*/
+/* Function is called by accept_2d_data() whenever the z-scaling has changed */
+/*---------------------------------------------------------------------------*/
+
 bool cut_data_rescaled( long curve )
 {
 	long i, j;
@@ -307,6 +311,16 @@ bool cut_data_rescaled( long curve )
 
 	if ( CG.cut_dir == X )
 	{
+		if ( ! CG.is_fs )
+		{
+			/* Calculate cv->s2d[ Y ] and cv->shift[ Y ] to fit the new
+			   scaling*/
+		}
+		else
+		{
+			/* Set flag that tells us that we have to redraw the y-axis */
+		}
+
 		for ( i = 0, j = CG.index; i < CG.nx; j += G.nx, i++ )
 			if ( scv->points[ j ].exist )
 			{
@@ -319,6 +333,16 @@ bool cut_data_rescaled( long curve )
 	}
 	else
 	{
+		if ( ! CG.is_fs )
+		{
+			/* Calculate cv->s2d[ Y ] and cv->shift[ Y ] to fit the new
+			   scaling */
+		}
+		else
+		{
+			/* Set flag that tells us that we have to redraw the y-axis */
+		}
+
 		for ( i = 0, j = CG.index * G.nx; i < CG.nx; j++, i++ )
 			if ( scv->points[ j ].exist )
 			{
@@ -368,6 +392,8 @@ bool cut_num_points_changed( int dir, long num_points )
 		for ( sp = G.cut_curve.points, k = 0; k < CG.nx; sp++, k++ )
 			if ( sp->exist )
 				cv->xpoints[ sp->xp_ref ].x = d2shrt( cv->s2d[ X ] * k );
+
+		/* Also set flag that tells us that we need to redraw the x-axis */
 	}
 
 	CG.nx = num_points;
@@ -390,14 +416,14 @@ bool cut_new_point( long curve, long x_index, long y_index, double val )
 
 	/* Nothing to be done if either the cross section isn't drawn, the new
 	   point does not belong to the currently shown curve or if the new
-	   point isn't laying on the cross section */
+	   point isn't laying on the cross section curve */
 
 	if ( ! G.is_cut || curve != G.active_curve ||
 		 ( CG.cut_dir == X && x_index != CG.index ) ||
 		 ( CG.cut_dir == Y && y_index != CG.index ) )
 		return FAIL;
 
-	/* Calculate index of new point in data set and set the value */
+	/* Calculate index of the new point in data set and set its value */
 
 	index = CG.cut_dir == X ? y_index : x_index;
 	cv->points[ index ].v = val;
@@ -408,31 +434,31 @@ bool cut_new_point( long curve, long x_index, long y_index, double val )
 
 	if ( ! cv->points[ index ].exist )
 	{
-		cv->points[ index ].exist = SET;
-
 		/* Find next existing point to the left */
 
 		for ( i = index - 1, cvp = cv->points + i;
 			  i >= 0 && ! cvp->exist; cvp--, i-- )
 			;
 
-		if ( i == -1 )                  /* new points is first to be drawn */
+		if ( i == -1 )                     /* new points to be drawn is first*/
 		{
+			xp_index = cv->points[ index ].xp_ref = 0;
 			memmove( cv->xpoints + 1, cv->xpoints,
 					 cv->count * sizeof( XPoint ) );
-			for ( cvp = cv->points + 1, j = 1; j < cv->count + 1; cvp++, j++ )
-				cvp->xp_ref++;
-			cv->points[ index ].xp_ref = xp_index = 0;
+			for ( cvp = cv->points + 1, j = 1; j < CG.nx; cvp++, j++ )
+				if ( cvp->exist )
+					cvp->xp_ref++;
 		}
-		else if ( i == cv->count - 1 )   /* new point is last to be drawn */
-			cv->points[ index ].xp_ref = xp_index = cv->count;
-		else                             /* new point is in between */
+		else if ( cv->points[ i ].xp_ref == cv->count - 1 )    /* ...is last */
+			xp_index = cv->points[ index ].xp_ref = cv->count;
+		else                                             /* ...is in between */
 		{
-			cv->points[ index ].xp_ref = xp_index = i + 1;
+			xp_index = cv->points[ index ].xp_ref = cv->points[ i ].xp_ref + 1;
 			memmove( cv->xpoints + xp_index + 1, cv->xpoints + xp_index,
 					 ( cv->count - xp_index ) * sizeof( XPoint ) );
 			for ( j = index + 1, cvp = cv->points + j; j < CG.nx; cvp++, j++ )
-				cvp->xp_ref++;
+				if ( cvp->exist )
+					cvp->xp_ref++;
 		}
 
 		cv->points[ index ].exist = SET;
@@ -543,7 +569,7 @@ void G_init_cut_curve( void )
 	/* Create pixmaps for the out-of-range arrows (in the colors associated
 	   with the four possible curves) */
 
-	for ( i = 0; i < 4; i++ )
+	for ( i = 0; i < MAX_CURVES; i++ )
 	{
 		CG.up_arrows[ i ] =
 			XCreatePixmapFromBitmapData( G.d, G.cut_canvas.pm, up_arrow_bits,
@@ -777,7 +803,7 @@ void cut_form_close( void )
 
 		/* Deallocate the pixmaps for the out-of-range arrows */
 
-		for ( i = 0; i < 4; i++ )
+		for ( i = 0; i < MAX_CURVES; i++ )
 		{
 			XFreePixmap( G.d, CG.up_arrows[ i ] );
 			XFreePixmap( G.d, CG.down_arrows[ i ] );
