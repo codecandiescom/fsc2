@@ -48,11 +48,16 @@
 #include <pwd.h>
 #include <sys/types.h>
 
+
+#ifndef __cplusplus
+
 typedef enum
 {
 	false = 0,
 	true  = 1
 } bool;
+
+#endif
 
 
 #define UNSET   false
