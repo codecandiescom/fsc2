@@ -121,11 +121,11 @@ int s_band_init_hook( void )
 		THROW( EXCEPTION );
 	}
 
-	/* Now, we need the field meter driver called *before* the S-band driver
-	   since the field meter is needed in the initialization of the magnet.
+	/* We need the field meter driver called *before* the S-band driver since
+	   the field meter is needed in the initialization of the magnet.
 	   Probably we should implement a solution that brings the devices into
-	   the correct sequence instead of this hack, but that's not as simple
-	   as it might look... */
+	   the correct sequence instead of this hack, but that's not as simple as
+	   it might look... */
 
 	if ( exist_device( "er035m" ) )
 		ret = get_lib_symbol( "er035m", "is_gaussmeter",
@@ -209,9 +209,9 @@ int s_band_test_hook( void )
 }
 
 
-/*-----------------------------------------------------------------*/
-/* Opens connection to power supply and calibrates the field sweep */
-/*-----------------------------------------------------------------*/
+/*---------------------------------------------------------------------*/
+/* Opens connection to the power supply and calibrates the field sweep */
+/*---------------------------------------------------------------------*/
 
 int s_band_exp_hook( void )
 {
@@ -253,7 +253,7 @@ void s_band_exit_hook( void )
 
 /*****************************************************************************/
 /*                                                                           */
-/*              exported functions                                           */
+/*              exported functions, i.e. EDL functions                       */
 /*                                                                           */
 /*****************************************************************************/
 
@@ -549,7 +549,7 @@ Var *reset_field( Var *v )
 
 
 /*--------------------------------------------------------------------------*/
-/* magnet_init() first initialises the serial interface and then tries to   */
+/* magnet_init() first initializes the serial interface and then tries to   */
 /* figure out what's the current minimal step size is for the magnet - this */
 /* is necessary for every new sweep since the user can adjust the step size */
 /* by setting the sweep rate on the magnets front panel (s/he also might    */
@@ -568,7 +568,7 @@ bool magnet_init( void )
 	int test_steps;
 
 
-	/* First step: Initialisation of the serial interface */
+	/* First step: Initialization of the serial interface */
 
 	if ( ! magnet_do( SERIAL_INIT ) )
 		return FAIL;
