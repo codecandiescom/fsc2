@@ -43,6 +43,18 @@ enum {
 	C_DOUBLE,
 	C_BCREATE,
 	C_BCREATE_REPLY,
+	C_BDELETE,
+	C_BDELETE_REPLY,
+	C_BSTATE,
+	C_BSTATE_REPLY,
+	C_SCREATE,
+	C_SCREATE_REPLY,
+	C_SDELETE,
+	C_SDELETE_REPLY,
+	C_SSTATE,
+	C_SSTATE_REPLY,
+	C_LAYOUT,
+	C_LAYOUT_REPLY,
 };
 
 
@@ -83,6 +95,7 @@ int new_data_callback( XEvent *a, void *b );
 long reader( void *ret );
 void writer( int type, ... );
 long *exp_bcreate( void *buffer, long len );
+bool exp_bdelete( void *buffer, long len );
 
 
 #endif  /* ! COMM_HEADER */
