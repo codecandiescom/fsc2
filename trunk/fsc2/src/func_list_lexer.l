@@ -264,7 +264,7 @@ static int fll_count_functions( Func *fncts, int num_predef_func )
 	int ret_token;
 	int last_token = 0;
 	int num = 0;
-	Func *f;
+	Func *f = NULL;
 
 
 	Lc = 1;
