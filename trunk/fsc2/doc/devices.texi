@@ -5198,11 +5198,13 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @section Power Supply Functions
 @cindex Power Supply Functions
 
-The only currently supplied power supply is the @strong{Thurlby &
-Thandar Power Supply} PL330DP. The module for the power supply is loaded
+The currently supplied power supplies are the @strong{Thurlby&Thandar}
+PL330DP and the @string{F.u.G. Elektronik GmbH} MCN700-2000. The modules
+for these power supplies are loaded
 by specifying
 @example
 thurlby330
+mcn700_2000
 @end example
 @noindent
 in the @code{DEVICES} section. 
@@ -5218,11 +5220,12 @@ Returns a string with the name of the power supply being used.
 @anchor{powersupply_channel_state}
 @item powersupply_channel_state()
 @findex powersupply_channel_state()
-This function alllows to switch the channels of the power supply on or
-off. It requires two arguments. The first one is the channel, which must
-be either @code{CH1} or @code{CH2} (don't try use simple numbers
-instead!). The second argument is the state, i.e.@: either
-@code{"ON"} or @code{"OFF"} (or @code{1} for on and @code{0} for off).
+This function exists only for the @strong{Thurlby&Thandar} power supply and
+allows to switch the channels of the power supply on or off. It requires two
+arguments. The first one is the channel, which must be either @code{CH1} or
+@code{CH2} (don't try use simple numbers instead!). The second argument is
+the state, i.e.@: either @code{"ON"} or @code{"OFF"} (or @code{1} for on
+and @code{0} for off).
 
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
@@ -5231,21 +5234,30 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @anchor{powersupply_damping}
 @item powersupply_damping()
 @findex powersupply_damping()
-This function alllows to switch damping of the output of one of the
-channels of the power supply on or off. It requires two arguments. The
-first one is the channel, which must be either @code{CH1} or @code{CH2}
-(don't use simple numbers instead!).  The second argument is the damping
-state, i.e.@: either @code{"ON"} or @code{"OFF"} (or @code{1} for on and
-@code{0} for off).
+This function exists only for the @strong{Thurlby&Thandar} power supply and
+allows to switch damping of the output of one of the channels of the power
+supply on or off. It requires two arguments. The first one is the channel,
+which must be either @code{CH1} or @code{CH2} (don't use simple numbers
+instead!).  The second argument is the damping state, i.e.@: either
+@code{"ON"} or @code{"OFF"} (or @code{1} for on and @code{0} for off).
 
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
 
+
 @anchor{powersupply_voltage}
 @item powersupply_voltage()
 @findex powersupply_voltage()
-This function allows to either set or query the output voltage of one of
-the channels. For a query only one argument is required, the channel,
+This function allows to either set or query the output voltage.
+
+For the @strong{MCN700-2000} when called with no argument the
+output voltage is returned, when called with an argument the voltage
+is set to this value in the range between 0 and @w{2000 V} (unless the
+current limiter kicks in - the returned value is the voltage that really
+go set).
+
+For the @strong{Thurlby&Thandar} it sets the output volatge for one of
+its channels. For a query only one argument is required, the channel,
 which must be specified as either @code{CH1} or @code{CH2} (don't use
 simple numbers instead!). If there is no second argument the output
 voltage at the channel is returned.
@@ -5262,9 +5274,10 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @anchor{powersupply_voltage_limit}
 @item powersupply_voltage_limit()
 @findex powersupply_voltage_limit()
-This function allows to query the current setting of the voltage limit.
-It expects one argument, the channel, which must be specified as either
-@code{CH1} or @code{CH2} (don't use simple numbers instead!).
+This function exists only for the @strong{Thurlby&Thandar} power supply and
+allows to query the current setting of the voltage limit. It expects one
+argument, the channel, which must be specified as either @code{CH1} or
+@code{CH2} (don't use simple numbers instead!).
 
 If there is a second argument, being a voltage in the range between @w{0
 V} and @w{32 V}, this value is used as the new voltage limit. The same
@@ -5278,11 +5291,19 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @anchor{powersupply_current}
 @item powersupply_current()
 @findex powersupply_current()
-This function allows to either set or query the output current of one of
-the channels. For a query only one argument is required, the channel,
-which must be specified as either @code{CH1} or @code{CH2} (don't use
-simple numbers instead!). If there is no second argument the output
-current at the channel is returned.
+This function allows to either set or query the output current
+
+For the @strong{MCN700-2000} when called with no argument the
+output current is returned, when called with an argument the current
+is set to this value in the range between 0 and @w{300 mA} (unless the
+voltage limiter kicks in - the returned value is the current that really
+go set).
+
+For the @strong{Thurlby&Thandar} power supply the function sets or queries
+the current of one of the channels. For a query only one argument is
+required, the channel, which must be specified as either @code{CH1} or
+@code{CH2} (don't use simple numbers instead!). If there is no second
+argument the output current at the channel is returned.
 
 If there is a second argument, being a current in the range between @w{0
 A} and @w{3 A}, the output current is set instead. Please note that this
@@ -5296,9 +5317,10 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @anchor{powersupply_current_limit}
 @item powersupply_current_limit()
 @findex powersupply_current_limit()
-This function allows to query the current setting of the current limit.
-It expects one argument, the channel, which must be specified as either
-@code{CH1} or @code{CH2} (don't use simple numbers instead!).
+This function exists only for the @strong{Thurlby&Thandar} power supply and
+allows to query the current setting of the current limit. It expects one
+argument, the channel, which must be specified as either @code{CH1} or
+@code{CH2} (don't use simple numbers instead!).
 
 If there is a second argument, being a current in the range between @w{0
 A} and @w{3 A}, this value is used as the new current limit. The same
