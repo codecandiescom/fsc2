@@ -1,6 +1,6 @@
 Most of the files in this directory are configuration files for the
 supported devices. They are included as header files by the modules
-and thus have to have valid C syntax.
+and thus have to be in valid C syntax.
 
 
 Most of these files define just two macro. The first is DEVICE_NAME,
@@ -29,13 +29,19 @@ please check for the device type macros of similar devices and, if
 applicable, use the same definition. If you create a module for a
 completely new kind of device pick a descriptive name.
 
+
 Currently the following device type names are used:
 
 -  "boxcar"
+-  "ccd camera"
+-  "DA converter"
 -  "digitizer"
+-  "event counter"
 -  "gaussmeter"
 -  "lock-in amplifier"
 -  "magnet power supply"
+-  "monochromator"
+-  "power supply"
 -  "pulser"
 -  "synthesizer"
 -  "temperature controller"
@@ -44,7 +50,7 @@ Currently the following device type names are used:
 
 You may define as many other macros as you need for a new device. Usually
 you should only include things into the configuration file that you feel
-should be rather simple to find and to be changed by the users of your
+should be rather simple to be found and changed by the users of your
 module so that you don't want to hide it deep down somewhere in the module.
 As an example take the serial port a device is connected to: If this gets
 changed later it should be as simple as possible to find the place where
