@@ -625,15 +625,15 @@ static void print_header( FILE *fp, char *name )
 			     "/rm { rmoveto } b\n"
 			     "/rl { rlineto } b\n"
 			     "/slw { setlinewidth } b\n"
-			     "/srgb { setrgbcolor } b\n"
 			     "/sd { setdash } b\n"
+			     "/srgb { setrgbcolor } b\n"
+			     "/sgr { setgray } b\n"
 			     "/sw { stringwidth pop } b\n"
 				 "/sf { exch findfont exch scalefont setfont } b\n"
 			     "/np { newpath } b\n"
 			     "/cp { closepath } b\n"
 			     "/gs { gsave } b\n"
 			     "/gr { grestore } b\n"
-			     "/sgr { setgray } b\n"
 			     "/slc { setlinecap } b\n"
 			     "/ch { gs np 0 0 m\n"
 			     "      false charpath flattenpath pathbbox\n"
@@ -1186,7 +1186,7 @@ static void eps_draw_contour( FILE *fp, int cn )
 				 "%f 0 rl\n"
 				 "0 %f rl\n"
 				 "%f 0 rl\n"
-				 "cp fill\n",
+				 "cp f\n",
 				 print_with_color ? "0.5 0.5 0.5 srgb" : "0.5 sgr",
 				 x_0, y_0, cur_p - dw, h, - ( cur_p - dw ) );
 
@@ -1197,7 +1197,7 @@ static void eps_draw_contour( FILE *fp, int cn )
 				 "0 %f rl\n"
 				 "%f 0 rl\n"
 				 "0 %f rl\n"
-				 "cp fill\n",
+				 "cp f\n",
 				 print_with_color ? "0.5 0.5 0.5 srgb" : "0.5 sgr",
 				 x_0 + cur_p + dw , y_0, h, w - ( cur_p + dw ), - h );
 
@@ -1207,8 +1207,8 @@ static void eps_draw_contour( FILE *fp, int cn )
 				 "%f %f m\n"
 				 "%f 0 rl\n"
 				 "0 %f rl\n"
-				 "%f 0 rl cp\n"
-				 "fill\n",
+				 "%f 0 rl\n"
+				 "cp f\n",
 				 print_with_color ? "0.5 0.5 0.5 srgb" : "0.5 sgr",
 				 x_0, y_0, w, cur_p - dh, - w );
 
@@ -1219,7 +1219,7 @@ static void eps_draw_contour( FILE *fp, int cn )
 				 "%f 0 rl\n"
 				 "0 %f rl\n"
 				 "%f 0 rl\n"
-				 "cp fill\n",
+				 "cp f\n",
 				 print_with_color ? "0.5 0.5 0.5 srgb" : "0.5 sgr",
 				 x_0, y_0 + cur_p + dh , w, h - ( cur_p + dh ), - w );
 
@@ -1235,7 +1235,7 @@ static void eps_draw_contour( FILE *fp, int cn )
 							 "%f %f m\n"
 							 "0 %f 2 copy rl\n"
 							 "%f 0 rl\n"
-							 "neg rl cp fill\n",
+							 "neg rl cp f\n",
 							 print_with_color ? "0.5 0.5 0.5 srgb" : "0.5 sgr",
 							 x_0 + s2d[ X ] * ( i + cv->shift[ X ] ) - dw,
 							 y_0 + s2d[ Y ] * ( j + cv->shift[ Y ] ) - dh,
@@ -1325,13 +1325,13 @@ static void print_comm( FILE *fp )
 					   lines[ i ] );
 
 	fprintf( fp, "pop dup %f exch sub 0.5 mul %f add\n", w, margin );
-	fprintf( fp, "5 (X) ch 1.5 mul add gs translate dup 0 0 m newpath\n"
+	fprintf( fp, "5 (X) ch 1.5 mul add gs translate dup 0 0 m np\n"
 				 "(m) cw neg (X) ch -1.5 mul m\n"
 				 "(m) cw 2 mul add 0 rl\n"
 				 "0 (X) ch %d 2 mul 1 add mul rl\n"
 				 "(m) cw 2 mul add neg 0 rl cp\n"
-				 "gs 0.95 sgr fill gr s\n",
-			 num_lines );
+				 "gs %s f gr s\n",
+			 num_lines, print_with_color ? "0.95 dup dup srgb" : "0.95 sgr" );
 
 	fprintf( fp, "0 0 m\n"
 			     "count { dup show sw neg (X) ch 1.65 mul rm } repeat\n"
