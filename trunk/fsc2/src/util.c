@@ -82,8 +82,12 @@ long get_file_length( char *name, int *len )
 
 	/* Get some memory for the pipe command */
 
-	pc = ( char * ) malloc( 20 + strlen( AWK_PROG ) + strlen( in_file ) );
-	if ( pc  == NULL )
+	TRY
+	{
+		pc = T_malloc( 20 + strlen( AWK_PROG ) + strlen( name ) );
+		TRY_SUCCESS;
+	}
+	OTHERWISE
 		return( -1 );                        /* FATAL: no memory */
 
 	/* set up pipe to 'awk' (defined via AWK_PROG) and read number of lines */
@@ -92,13 +96,13 @@ long get_file_length( char *name, int *len )
 	strcat( pc, name );
 	if ( ( pp = popen( pc, "r" ) ) == NULL )
 	{
-		free( pc );
+		T_free( pc );
 		return( -2 );                  /* popen() failed */
 	}
 
 	fscanf( pp, "%ld", &lc );
 	pclose( pp );
-	free( pc );
+	T_free( pc );
 
 	/* count number of digits of number of lines */
 
