@@ -934,8 +934,8 @@ two microwave pulses have to be phase cycled.
 @example
 DEVICES:
 
-dg2020_b;    // Berlin X-band spectrometer pulser
-tds520c;     // digitizer
+dg2020_b;             // Berlin X-band spectrometer pulser
+tds520c;              // digitizer
 
 VARIABLES:
 
