@@ -178,8 +178,8 @@ int send_mail( const char *subject, const char *from, const char* cc_to,
 
 
 /*-----------------------------------------------------------*/
-/* Function for connecting to the mail receiving machine and */
-/* then sending the mail, see RFC 821 etc.                   */
+/* Function for connecting to the machine receiving mail for */
+/* the domain and then sending the mail, see RFC 821 etc.    */
 /*-----------------------------------------------------------*/
 
 static int do_send( const char *rec_host, const char *to,
@@ -388,9 +388,35 @@ static int open_mail_socket( const char *remote, const char *local )
 	if ( ( sock_fd = socket( AF_INET_X, SOCK_STREAM, 0 ) ) == -1 )
 		return -1;
 
-	/* We can't simply connect to the remote host but must first figure
-	   out which is the machine that takes care of mail for the domain
-	   and then send the mail to this machine (there can be several). */
+	/* If this is a local message (i.e. the domain to which th maile is to
+	   be send is identical to the lcoal host name) we try local delivery
+	   first. Without doing so it would be impossible to send local mails
+	   on machines without an internet connection. */
+
+	if ( ! strcasecmp( remote, local ) )
+	{
+		memset( &serv_addr, 0, sizeof( serv_addr ) );
+		serv_addr.sin_family = AF_INET_X;
+		serv_addr.sin_port = htons( MAIL_PORT );
+
+		if ( ( hp = gethostbyname( remote ) ) != NULL &&
+			 hp->h_addr_list != NULL )
+		{
+			memcpy( &serv_addr.sin_addr, *
+					( struct in_addr ** ) hp->h_addr_list,
+					sizeof( serv_addr.sin_addr ) );
+		
+			if ( connect( sock_fd, ( struct sockaddr * ) &serv_addr,
+						  sizeof( serv_addr ) ) == 0 )
+				return sock_fd;
+		}
+	}
+
+	/* Otherwise we can't simply connect to the remote domain but must first
+	   figure out which is the machine that takes care of mail for the domain
+	   and then try to connect to this machine (there can be several, so we
+	   repeat until we connected successfully or until there are no more
+	   machines prepared to accept mail for the domain). */
 
 	for ( host = get_mail_server( remote, local ); host != NULL;
 		  host = get_mail_server( NULL, local ) )
@@ -754,7 +780,6 @@ static int weed_out( unsigned char *buf, int len, unsigned char *ans_sec,
 			*non_local_prior = 0xFFFF;
 			rrs_left--;
 		}
-
 	}
 
 	return rrs_left;
@@ -793,6 +818,10 @@ static const char *get_host( unsigned char *buf, int len,
 
 		cur_pos += get_ushort( cur_pos - 2 );
 	}
+
+	/* Return NULL if there's no host left with a sufficient high priority,
+	   otherwise return the name of the machine and mark it as already used
+	   by lowering its priority value to the minimum. */
 
 	if ( this_one == NULL )
 		return NULL;
