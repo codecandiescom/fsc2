@@ -37,13 +37,14 @@ body       { margin :           0%;
 #level1    { position :         relative;
            	 padding:           0%;
 		   	 margin-left :      180px;
+		   	 z-level :          2;
            }
 
 #main      { position :         relative;
 		   	 margin :           0%;
 		   	 padding :          0% 0% 0% 10px;
 		   	 background :       white;
-		   	 z-level :          1;
+		   	 z-level :          3;
            }
 
 #links     { position :         fixed;
@@ -51,6 +52,7 @@ body       { margin :           0%;
            	 width :            180px;
            	 padding :          15px 0px 0px 15px;
            	 background :       transparent;
+		   	 z-level :          1;
            }
 
 code       { font-family :      monospace;
@@ -62,10 +64,7 @@ samp       { font-family :      monospace;
            }
 
 td.example { background-color : #FFFF44;
-             padding-top :      1.5mm;
-             padding-bottom :   1.5mm;
-             padding-left :     4mm;
-             padding-right :    4mm;
+             padding :          4px 8px 4px 8px;
              border :           thin solid;
            }
 
