@@ -596,7 +596,8 @@ export            # export all variables to sub-makes
 		sunone.chemie.unibas.ch                      \
 		single.physik.fu-berlin.de                   \
 		crowley.none                                 \
-		dorimare.nowhere
+		dorimare.nowhere                             \
+		me6x00 ni6601 witio_48
 
 
 ############## End of configuration section ##############
@@ -642,6 +643,18 @@ utils:
 
 docs:
 	$(MAKE) -C $(ddir) docs
+
+
+me6x00:
+	me6x00/INSTALL
+
+
+ni6601:
+	ni6601/INSTALL
+
+
+witio_48:
+	witio_48/INSTALL
 
 
 # Create a header file with configuration information from the contents of
