@@ -39,7 +39,6 @@
 #include <ctype.h>
 #include <locale.h>
 #include <math.h>
-#include <ctype.h>
 #include <errno.h>
 #include <limits.h>
 #include <time.h>

@@ -200,11 +200,11 @@ Var *monochromator_grating( Var *v )
 			return vars_push( INT_VAR, spectrapro_300i.current_grating + 1 );
 		}
 
-		if ( grating - spectrapro_301.turret * 3 < 1 ||
-			 grating - spectrapro_301.turret * 3 > 3 )
+		if ( grating - spectrapro_300i.turret * 3 < 1 ||
+			 grating - spectrapro_300i.turret * 3 > 3 )
 		{
 			print( FATAL, "Can't switch to grating #ld while turret #ld is "
-				   "in use.\n", grating, spectrapro_301.turret + 1 );
+				   "in use.\n", grating, spectrapro_300i.turret + 1 );
 			THROW( EXCEPTION );
 		}
 	}
@@ -225,6 +225,7 @@ Var *monochromator_grating( Var *v )
 /* Function for setting or quering the current turret */
 /*----------------------------------------------------*/
 
+#if 0
 Var *monochromator_turret( Var *v )
 {
 	long turret;
@@ -256,8 +257,8 @@ Var *monochromator_turret( Var *v )
 		for ( i = 0; i < 3; i++ )
 			if ( sectrapro_300i.grating[ 3 * turret + i ].is_installed )
 				break;
-
 }
+#endif
 
 /*-----------------------------------------------------------------------*/
 /*-----------------------------------------------------------------------*/
@@ -359,9 +360,9 @@ Var *monochromator_install_grating( Var *v )
 	/* Do some minimal checks on the part number */
 
 	if ( strncmp( v->val.sptr, "1-", 2 ) ||
-		 ! is_digit( v->val.sptr[ 2 ] ) ||
-		 ! is_digit( v->val.sptr[ 3 ] ) ||
-		 ! is_digit( v->val.sptr[ 4 ] ) ||
+		 ! isdigit( v->val.sptr[ 2 ] ) ||
+		 ! isdigit( v->val.sptr[ 3 ] ) ||
+		 ! isdigit( v->val.sptr[ 4 ] ) ||
 		 ! v->val.sptr[ 5 ] != '-' || 
 		 strlen( v->val.sptr ) > 10 )
 	{
@@ -654,7 +655,7 @@ static void spectrapro_300i_install_grating( char *part_no, long grating )
 
 	fsc2_assert( grating >= 1 && grating <= MAX_GRATINGS );
 
-	buf = get_string( "%s %ld INSTALL", v->val.sptr, grating );
+	buf = get_string( "%s %ld INSTALL", part_no, grating );
 
 	TRY
 	{
@@ -664,7 +665,7 @@ static void spectrapro_300i_install_grating( char *part_no, long grating )
 	}
 	OTHERWISE
 	{
-		T_free( bif );
+		T_free( buf );
 		RETHROW( );
 	}
 }
