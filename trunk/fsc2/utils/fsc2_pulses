@@ -309,6 +309,8 @@ sub new {
 									 'padx' => '4m',
 									 'pady' => '2m' );
 
+	$self->{ 'dw' } = Display_Window->new( $self->{ 'top' } );
+
 	# Lots of key bindings...
 
     $self->{ 'canvas' }->CanvasBind( '<Button-2>' => sub {
@@ -350,8 +352,6 @@ sub new {
 	$self->{ 'step_entry' }->bind( '<KP_Enter>' => sub {
 									   return if $self->{ 'step' } eq "";
 									   $self->redraw; } );
-
-	$self->{ 'dw' } = Display_Window->new( $self->{ 'top' } );
 
 	# Draw the canvas in the initial state
 
