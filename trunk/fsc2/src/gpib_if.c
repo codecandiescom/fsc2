@@ -304,7 +304,8 @@ int gpib_init_device( const char *device_name, int *dev )
 
     if ( ibsta & ERR )
     {
-        sprintf( gpib_error_msg, "Can't initialise device %s", device_name );
+        sprintf( gpib_error_msg, "Can't initialise device %s, ibsta = 0x%x",
+				 device_name, ibsta );
         return FAILURE;
     }
     else
@@ -351,7 +352,8 @@ int gpib_timeout( int period )
 
     if ( ibsta & ERR )
     {
-        strcpy( gpib_error_msg, "Can't set timeout period." );
+        sprintf( gpib_error_msg, "Can't set timeout period, ibsta = 0x%x.",
+				 ibsta );
         return FAILURE;
     }
 
@@ -391,7 +393,8 @@ int gpib_clear_device( int device )
 
     if ( ibsta & ERR )
     {
-        gpib_set_msg( "Can't clear device", device );
+        sprintf( gpib_error_msg, "Can't clear device %s, ibsta = 0x%x",
+				 gpib_dev_list[ device ].name, ibsta );
         return FAILURE;
     }
 
@@ -428,7 +431,8 @@ int gpib_local( int device )
 
     if ( ibsta & ERR )
     {
-        gpib_set_msg( "Can't send 'GOTO LOCAL' message to device", device );
+        sprintf( gpib_error_msg, "Can't send 'GOTO LOCAL' message to device "
+				 "%s, ibsta = 0x%x", gpib_dev_list[ device ].name, ibsta );
         return FAILURE;
     }
 
@@ -465,8 +469,9 @@ int gpib_lock( int device )
 
     if ( ibsta & ERR )
     {
-        gpib_set_msg( "Can't send 'LOCAL LOCK OUT' message to device",
-                      device );
+        sprintf( gpib_error_msg, "Can't send 'LOCAL LOCK OUT' message to "
+				 "device %s, ibsta = 0x%x", gpib_dev_list[ device ].name,
+				 ibsta );
         return FAILURE;
     }
 
@@ -497,7 +502,8 @@ int gpib_trigger( int device )
 
     if ( ibsta & ERR )
     {
-        gpib_set_msg( "Can't trigger device", device );
+        sprintf( gpib_error_msg, "Can't trigger device %s, ibsta = 0x%x",
+				 gpib_dev_list[ device ].name, ibsta );
         return FAILURE;
     }
 
@@ -548,8 +554,6 @@ int gpib_wait( int device, int mask, int *status )
 
     ibwait( device, mask );
 
-
-printf( "STATUS = %x, IBSTA = %x\n", status, ibsta );
     if ( status != NULL )
         *status = ibsta;
 
@@ -564,7 +568,8 @@ printf( "STATUS = %x, IBSTA = %x\n", status, ibsta );
 
     if ( ibsta & ERR )
     {
-        gpib_set_msg( "Can't wait for device", device );
+        sprintf( gpib_error_msg, "Can't wait for device %s, ibsta = 0x%x",
+				 gpib_dev_list[ device ].name, ibsta );
         return FAILURE;
     }
 
@@ -609,7 +614,8 @@ int gpib_write( int device, const char *buffer, long length )
 
     if ( ibsta & ERR )
     {
-        gpib_set_msg( "Can't send data to device", device );
+        sprintf( gpib_error_msg, "Can't send data to device %s, ibsta = 0x%x",
+				 gpib_dev_list[ device ].name, ibsta );
         return FAILURE;
     }
 
@@ -690,7 +696,8 @@ int gpib_read( int device, char *buffer, long *length )
 
     if ( ibsta & ERR )
     {
-        gpib_set_msg( "Can't read data from device", device );
+        sprintf( gpib_error_msg, "Can't read data from device %s, ibsta = "
+				 "0x%x.", gpib_dev_list[ device ].name, ibsta );
         return FAILURE;
     }
 
@@ -779,7 +786,7 @@ void gpib_log_error( const char *type )
     fprintf( gpib_log, "ERROR in function %s: <", type );
     for ( i = 15; i >= 0; i-- )
     {
-        if ( ibsta & stat[ i ] )
+        if ( ibsta & stat[ 15 - i ] )
             fprintf( gpib_log, " %s", is[ 15 - i ] );
     }
     fprintf( gpib_log, " > -> %s\n", ie[ iberr ] );

@@ -750,21 +750,23 @@ static bool sr810_init( const char *name )
 		 gpib_write( sr810.device, "OVRM 0", 6 ) == FAILURE )
 		return FAIL;
 	   
-	/* Make sure that lock-ins data buffer is empty by reading it until we
-	   get a timeout or the number of bytes is smaller than the maximum number
-	   to be read - not a nice way to do it but at least it works... */
-
-	do
-		length = 20;
-	while ( gpib_read( sr810.device, buffer, &length ) != FAILURE &&
-			length == 20 );
-
 	/* Ask lock-in to send the error status byte and test if it does */
 
 	length = 20;
 	if ( gpib_write( sr810.device, "ERRS?", 5 ) == FAILURE ||
 		 gpib_read( sr810.device, buffer, &length ) == FAILURE )
 		return FAIL;
+
+	/* If the lock-in did send more than 2 byte this means its write buffer
+	   isn't empty. We now read it until its empty for sure. */
+
+	if ( length > 2 )
+	{
+		do
+			length = 20;
+		while ( gpib_read( sr810.device, buffer, &length ) != FAILURE &&
+				length == 20 );
+	}
 
 	/* If sensitivity, time constant or phase were set in one of the
 	   preparation sections only the value was stored and we have to do the
@@ -816,15 +818,16 @@ static double sr810_get_data( void )
 
 static void sr810_get_xy_data( double data[ 2 ] )
 {
-	char buffer[ 100 ] = "SNAP?1,2";
+	char buffer[ 100 ];
 	long length = 100;
 	char *d2;
+	int x1, x2;
 
 
-	if ( gpib_write( sr810.device, buffer, 8 ) == FAILURE ||
-		 gpib_read( sr810.device, buffer, &length ) == FAILURE )
+	if ( ( x1 = gpib_write( sr810.device, "SNAP?1,2", 8 ) ) == FAILURE ||
+		 ( x2 = gpib_read( sr810.device, buffer, &length ) ) == FAILURE )
 	{
-		eprint( FATAL, "%s: Can't access the lock-in amplifier.",
+		eprint( FATAL, "%s: Can't access the lock-in amplifier, 0x%s 0x%x.",
 				DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
