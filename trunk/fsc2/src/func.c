@@ -1150,18 +1150,15 @@ Var *f_init_1d( Var *v )
 
 labels_1d:
 
-	if ( ( v = v->next ) == NULL )
-		return vars_push( INT_VAR, 1 );
-
 	vars_check ( v, STR_VAR );
 	G.label[ X ] = get_string_copy( v->val.sptr );
 
-	if ( ( v = v->next ) == NULL )
-		return vars_push( INT_VAR, 1 );
+	if ( ( v = v->next ) != NULL )
+	{
+		vars_check ( v, STR_VAR );
+		G.label[ Y ] = get_string_copy( v->val.sptr );
+	}
 
-	vars_check ( v, STR_VAR );
-	G.label[ Y ] = get_string_copy( v->val.sptr );
-	
 	return vars_push( INT_VAR, 1 );
 }
 
