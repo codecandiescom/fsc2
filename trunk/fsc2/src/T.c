@@ -216,12 +216,6 @@ char *T_strdup( const char *str )
 
 
 	if ( str == NULL )
-	{
-		eprint( FATAL, UNSET,
-				"Internal error detected at %s:%d (strdup with NULL).\n",
-				__FILE__, __LINE__ );
-		THROW( EXCEPTION );
-	}
 		return NULL;
 
 	if ( ( new_str = malloc( strlen( str ) + 1 ) ) == NULL )
