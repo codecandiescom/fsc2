@@ -922,12 +922,17 @@ evaluation can become important.
 
 The next lower precedence operators are the logical operators to be
 discussed in more detail below, i.e.@: the logical @i{and} operator,
-`@code{&}, the logical @i{or} operator, `@code{|}' and the logical
-@i{exclusive or} (xor) operator, `@code{~}'. Expressions containing more
-than one of these operators are always evaluated from the left to the
-right of the expression:
+`@code{AND}' or `@code{&}', the logical @i{or} operator, `@code{OR}' or
+`@code{|}' and the logical @i{exclusive or} (xor) operator, `@code{XOR}'
+or `@code{~}'. Expressions containing more than one of these operators
+are always evaluated from the left to the right of the expression:
 @example
- a | b & c    @r{will be treated as if written as}    ( a | b ) & c
+ a OR b AND c  @r{will be treated as if written as}    ( a OR b ) AND c
+@end example
+@noindent
+or
+@example
+ a | b & c     @r{will be treated as if written as}    ( a | b ) & c
 @end example
 @noindent
 To make your intentions more clear to human readers of your
@@ -1379,9 +1384,10 @@ non-zero and thus the condition still TRUE and repeating the loop as
 long as it is.
 
 Sometimes, you may want to check not for the truth but for the falsehood
-of an expression. In this case you have to prepend the expression with a
-exclamation mark, `@code{!}', to reverse the meaning of a test (or use
-an @code{UNTIL} loop, see below).
+of an expression. In this case you have to prepend the expression with
+an exclamation mark, `@code{!}', or the equivalent logical @i{not}
+operator, `@code{NOT}', to reverse the meaning of a test (or use an
+@code{UNTIL} loop, see below).
 
 If you want to check for combinations of expressions you can use the
 logical @code{AND}, @code{OR} or @code{XOR} (exclusive or)
@@ -1389,37 +1395,48 @@ operators. Here is a list of these operators and their meaning:
 
 @quotation
 @cindex ! (negation operator)
+@cindex NOT (negation operator)
 @cindex negation operator `!'
+@cindex negation operator `NOT'
 @cindex & (logical and operator)
+@cindex AND (logical and operator)
 @cindex and operator `&'
-@cindex logical and operator  `&'
+@cindex and operator `AND'
+@cindex logical and operator `&'
+@cindex logical and operator `AND'
 @cindex | (logical or operator)
+@cindex AND (logical or operator)
 @cindex or operator `|'
+@cindex or operator `OR'
 @cindex logical or operator `|'
+@cindex logical or operator `OR'
 @cindex ~ (logical xor operator)
+@cindex XOR (logical xor operator)
 @cindex xor operator `~'
+@cindex xor operator `XOR'
 @cindex logical xor operator `~'
-@multitable {~} {@i{exclusive or}: true if left or right hand side expressions are true but not both}
-@item @code{!} @tab @i{not}: negates truth of an expression
-@item @code{&} @tab @i{and}: true if both left and right hand side expressions are true
-@item @code{|} @tab @i{or}: true if at least one of the left and right hand side expressions is true
-@item @code{~} @tab @i{exclusive or}: true if either left or right hand side expression is true (but not both)
+@cindex logical xor operator `XOR'
+@multitable {XOR or ~} {@i{exclusive or}: true if left or right hand side expressions are true but not both}
+@item @code{NOT} or @code{!} @tab @i{not}: negates truth of an expression
+@item @code{AND} or @code{&} @tab @i{and}: true if both left and right hand side expressions are true
+@item @code{OR} or @code{|} @tab @i{or}: true if at least one of the left and right hand side expressions is true
+@item @code{XOR} or @code{~} @tab @i{exclusive or}: true if either left or right hand side expression is true (but not both)
 @end multitable
 @end quotation
 
-@b{Please note}: For both the logical @strong{or} operator ('@code{|}')
-and the logical @strong{and} operator ('@code{&}') the expressions are
-always only evaluated as far as necessary to determine the final
-result. Thus for the condition
+@b{Please note}: For both the logical @strong{or} operator (`@code{OR}'
+or `@code{|}') and the logical @strong{and} operator (`@code{AND}' or
+`@code{&}') the expressions are always only evaluated as far as
+necessary to determine the final result. Thus for the condition
 @example
-A == 0 | B != 3
+A == 0 OR B != 3
 @end example
 @noindent
 only the first part, @code{A == 0}, is tested when @code{A} is @code{0}
 because in this case the result is already known to be true and does not
 depend on the second comparison. The same holds for expressions like
 @example
-A != 0 & lockin_phase( ) > 90
+A != 0 AND lockin_phase( ) > 90
 @end example
 @noindent
 If @code{A} equals @code{0} the whole expression is already known to be
@@ -1432,7 +1449,7 @@ operator is important.}
 To make it more clear please understand that the code (please read about
 the @code{IF} and @code{ELSE} constructs below for more details)
 @example
-IF A == 0 | B != 3 @{
+IF A == 0 OR B != 3 @{
     do_something( );
 @}
 @end example
@@ -1448,7 +1465,7 @@ IF A == 0 @{
 @noindent
 In the same way
 @example
-IF A != 0 & lockin_phase( ) > 90 @{
+IF A != 0 AND lockin_phase( ) > 90 @{
     do_something( );
 @}
 @end example
