@@ -304,6 +304,8 @@ Var *get_phase_cycled_area_2( Var *v )
 	Acquisition_Sequence *aseq[ ] = { ASeq, ASeq + 1 };
 
 
+	V = v;
+
 	/* The first time we get here do some basic checks, i.e. check that all
 	   needed functions are there */
 
