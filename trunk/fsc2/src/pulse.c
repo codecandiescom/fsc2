@@ -31,9 +31,7 @@ Pulse *pulse_new( int num )
 	/* set pulse number and associate it with no function yet */
 
 	p->num = num;
-	p->func = PULSER_CHANNEL_NO_TYPE;
-	p->pos = p->len = p->dpos = p->dlen = p->maxlen = 0;
-	p->rp = NULL;
+	p->set_flags = 0;
 	p->n_rp = 0;
 
 	Plist = p;
@@ -76,36 +74,196 @@ Pulse *pulse_find( int num )
 }
 
 
-void pulse_set_func( Pulse *p, long func )
+/*------------------------------------------------------------*/
+/* This function is the main interface for setting properties */
+/* with simple interger or float numbers of a pulse.          */
+/* ->                                                         */
+/*    * pointer to pulse                                      */
+/*    * type of data to be set (cf. pulse.h for constants)    */
+/*    * pointer with variable for data                        */
+/*------------------------------------------------------------*/
+
+void pulse_set( Pulse *p, int type, Var *v )
 {
-	if ( p->func != PULSER_CHANNEL_NO_TYPE )
+	if ( ! pulse_exist( p ) )
 	{
-		eprint( FATAL, "%s:%ld: Function of pulse %d is already set.\n",
-				Fname, Lc, p->num );
+		eprint( FATAL, "%s:%ld: Pulse does not exist.\n", Fname, Lc );
 		THROW( PREPARATIONS_EXCEPTION );
 	}
 
-	if ( func < PULSER_CHANNEL_MW || func > PULSER_CHANNEL_RF_GATE )
+	vars_check( v );
+
+	switch ( type )
+	{
+		case P_FUNC :
+			pulse_set_func( p, v );
+			break;
+
+		case P_POS :
+			pulse_set_pos( p, v );
+			break;
+
+		case P_LEN :
+			pulse_set_len( p, v );
+			break;
+
+		case P_DPOS :
+			pulse_set_dpos( p, v );
+			break;
+
+		case P_DLEN :
+			pulse_set_dlen( p, v );
+			break;
+
+		case P_MAXLEN :
+			pulse_set_maxlen( p, v );
+			break;
+
+		default :                 /* this should never happen... */
+			assert( 1 == 0 );
+	}
+
+	vars_pop( v );
+}
+
+
+long pulse_get_by_addr( Pulse *p, int type )
+{
+	const char *type_strings[ ] = { "Function", "Start", "Length",
+									"Position change", "Length change",
+									"Maximum Length" };
+	int i, j;
+
+
+	/* test that the referenced pulse exists */
+
+	if ( ! pulse_exist( p ) )
+	{
+		eprint( FATAL, "%s:%ld: Pulse does not exist.\n", Fname, Lc );
+		THROW( PREPARATIONS_EXCEPTION );
+	}
+
+	/* make sure the accessed property of the pulse has been set */
+
+	if ( ! ( p->set_flags & type ) )
+	{
+		for ( j = 0, i = type; ! ( i & 1 ) && i != 0; i >>=  1 )
+			j++;
+
+		/* <PARANOIA> check for unreasonable value of type variable */
+
+		if ( i != 1 )
+		{
+			eprint( FATAL, "fsc2: INTERNAL ERROR detected at %s.\n",
+					__FILE__, __LINE__ );
+			exit( EXIT_FAILURE );
+		}
+
+		/* </PARANOIA> */
+
+		eprint( FATAL, "%s:%ld: %s of pulse %d has not been set.\n", 
+				Fname, Lc, type_strings[ j ], p->num );
+		THROW( PREPARATIONS_EXCEPTION );
+	}
+
+	/* now return the appropriate data */
+
+	switch ( type )
+	{
+		case P_FUNC :
+			return( p->func );
+
+		case P_POS :
+			return( p->pos );
+
+		case P_LEN :
+			return( p->len );
+
+		case P_DPOS :
+			return( p->dpos );
+
+		case P_DLEN :
+			return( p->dlen );
+
+		case P_MAXLEN :
+			return( p->maxlen );
+	}
+
+	assert( 1 == 0 );      /* this should never happen... */
+	return( 0 );
+}
+
+
+long pulse_get_by_num( int pnum, int type )
+{
+	Pulse *p;
+
+
+	if ( ( p = pulse_find( pnum ) ) == NULL )
+	{
+		eprint( FATAL, "%s:%l: Pulse with number %d does not exists.\n",
+				Fname, Lc, pnum );
+		THROW( PREPARATIONS_EXCEPTION );
+	}
+
+	return( pulse_get_by_addr( p, type ) );
+}
+
+
+bool pulse_exist( Pulse *p )
+{
+	Pulse *n = Plist;
+
+	while ( n != NULL )
+	{
+		if ( n == p )
+			return( OK );
+		n = n->next;
+	}
+
+	return( FAIL );
+}
+
+
+void pulse_set_func( Pulse *p, Var *v )
+{
+	if ( v->type != INT_VAR )
 	{
 		eprint( FATAL, "%s:%ld: Invalid function type for pulse %d.\n",
 				Fname, Lc, p->num );
 		THROW( PREPARATIONS_EXCEPTION );
 	}
 
-	p->func = func;
+	if ( p->set_flags & P_FUNC )
+	{
+		eprint( SEVERE, "%s:%ld: Function of pulse %d has already been set, "
+				" leaving it unchanged.\n", Fname, Lc, p->num );
+		return;
+	}
+
+
+	if ( v->val.lval < PULSER_CHANNEL_MW ||
+		 v->val.lval > PULSER_CHANNEL_RF_GATE )
+	{
+		eprint( FATAL, "%s:%ld: Invalid function type for pulse %d.\n",
+				Fname, Lc, p->num );
+		THROW( PREPARATIONS_EXCEPTION );
+	}
+
+	p->func = v->val.lval;
+	p->set_flags |= P_FUNC;
 }
 
 
-void pulse_set_start( Pulse *p, Var *v )
+void pulse_set_pos( Pulse *p, Var *v )
 {
 	long val;
 
 
-	if ( p->pos != 0 )
+	if ( p->set_flags & P_POS )
 	{
-		eprint( SEVERE, "%s:%ld: Start position of pulse %d is already set, "
-				"using previously defined value.\n", Fname, Lc, p->num );
-		vars_pop( v );
+		eprint( SEVERE, "%s:%ld: Start position of pulse %d has already been "
+				"set, leaving it unchanged.\n", Fname, Lc, p->num );
 		return;
 	}
 
@@ -127,7 +285,7 @@ void pulse_set_start( Pulse *p, Var *v )
 	}
 
 	p->pos = val;
-	vars_pop( v );
+	p->set_flags |= P_POS;
 }
 
 
@@ -136,15 +294,13 @@ void pulse_set_len( Pulse *p, Var *v )
 	long val;
 
 
-	if ( p->len != 0 )
+	if ( p->set_flags & P_LEN )
 	{
-		eprint( SEVERE, "%s:%ld: Length of pulse %d is already set, "
-				"using previously defined value.\n", Fname, Lc, p->num );
-		vars_pop( v );
+		eprint( SEVERE, "%s:%ld: Length of pulse %d has already been set, "
+				"leaving it unchanged.\n", Fname, Lc, p->num );
 		return;
 	}
 
-	vars_check( v );
 	val = v->type == INT_VAR ? v->val.lval : rnd( v->val.dval );
 
 	if ( val < 0 )
@@ -162,7 +318,7 @@ void pulse_set_len( Pulse *p, Var *v )
 	}
 
 	p->len = val;
-	vars_pop( v );
+	p->set_flags |= P_LEN;
 }
 
 
@@ -171,11 +327,10 @@ void pulse_set_dpos( Pulse *p, Var *v )
 	long val;
 
 
-	if ( p->dpos != 0 )
+	if ( p->set_flags & P_DPOS )
 	{
 		eprint( SEVERE, "%s:%ld: Position change of pulse %d is already set, "
 				"using previously defined value.\n", Fname, Lc, p->num );
-		vars_pop( v );
 		return;
 	}
 
@@ -190,7 +345,7 @@ void pulse_set_dpos( Pulse *p, Var *v )
 	}
 
 	p->dpos = val;
-	vars_pop( v );
+	p->set_flags |= P_DPOS;
 }
 
 
@@ -199,11 +354,10 @@ void pulse_set_dlen( Pulse *p, Var *v )
 	long val;
 
 
-	if ( p->dlen != 0 )
+	if ( p->set_flags & P_DLEN )
 	{
 		eprint( SEVERE, "%s:%ld: Length change of pulse %d is already set, "
 				"using previously defined value.\n", Fname, Lc, p->num );
-		vars_pop( v );
 		return;
 	}
 
@@ -218,7 +372,7 @@ void pulse_set_dlen( Pulse *p, Var *v )
 	}
 
 	p->dlen = val;
-	vars_pop( v );
+	p->set_flags |= P_DLEN;
 }
 
 
@@ -227,11 +381,10 @@ void pulse_set_maxlen( Pulse *p, Var *v )
 	long val;
 
 
-	if ( p->maxlen != 0 )
+	if ( p->set_flags & P_MAXLEN )
 	{
 		eprint( SEVERE, "%s:%ld: Maximum length of pulse %d is already set, "
 				"using previously defined value.\n", Fname, Lc, p->num );
-		vars_pop( v );
 		return;
 	}
 
@@ -246,5 +399,7 @@ void pulse_set_maxlen( Pulse *p, Var *v )
 	}
 
 	p->maxlen = val;
-	vars_pop( v );
+	p->set_flags |= P_MAXLEN;
 }
+
+
