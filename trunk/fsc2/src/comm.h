@@ -20,6 +20,7 @@ enum {
 	C_PROG,
 	C_OUTPUT,
 	C_INPUT,
+	C_CLEAR_CURVE,
 	C_STR,
 	C_INT,
 	C_LONG,
