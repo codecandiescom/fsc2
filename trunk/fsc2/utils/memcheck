@@ -1,6 +1,6 @@
 #! /usr/bin/perl -w
 #
-# $Id
+# $Id:
 #
 # Script checks if for each malloc(), calloc(), strdup() or realloc() there's
 # also a free(). To be able to use it define MDEBUG when compiling fsc2 and
