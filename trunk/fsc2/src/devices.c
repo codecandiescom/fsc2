@@ -58,12 +58,16 @@ void device_append_to_list( const char *dev_name )
 	   devices */
 
 	if ( Device_List == NULL )
+	{
 		Device_List = cd = T_malloc( sizeof( Device ) );
+		cd->prev = NULL;
+	}
 	else
 	{
 		for ( cd = Device_List; cd->next != NULL; cd = cd->next )
 			;
 		cd->next = T_malloc( sizeof( Device ) );
+		cd->next->prev = cd;
 		cd = cd->next;
 	}
 
@@ -75,16 +79,22 @@ void device_append_to_list( const char *dev_name )
 
 void delete_devices( void )
 {
-	Device *cd, *cdn;
+	Device *cd, *cdp;
 
 
 	if ( Device_List == NULL )
 		return;
 
-	for ( cd = Device_List; cd != NULL; cd = cdn )
+	/* Get last element of list */
+
+	for( cd = Device_List; cd->next != NULL; cd = cd->next )
+		;
+
+	for ( ; cd != NULL; cd = cdp )
 	{
 		/* If there is a driver run the exit hooks and unload it */
 
+		cdp = cd->prev;
 		if ( cd->is_loaded )
 		{
 			if ( cd->driver.is_exit_hook )
@@ -102,7 +112,6 @@ void delete_devices( void )
 		if ( cd->name != NULL )
 			T_free( cd->name );
 
-		cdn = cd->next;
 		T_free( cd );
 	}
 

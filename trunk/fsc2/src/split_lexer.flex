@@ -249,6 +249,8 @@ bool section_parser( int section )
 				"line.\n", Fname, Lc );
 		return FAIL;
 	}
+	OTHERWISE
+		return FAIL;
 
 	return FAIL;
 }

@@ -46,7 +46,8 @@ enum {
     exception_id = setjmp( exception_env_stack[ exception_env_stack_pos++ ] );\
     if ( exception_id == NO_EXCEPTION )
 
-#define TRY_SUCCESS   exception_env_stack_pos--
+#define TRY_SUCCESS  \
+        exception_env_stack_pos--
 
 #define CATCH( e ) \
     else if ( exception_id == ( e ) )

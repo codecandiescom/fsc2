@@ -115,9 +115,10 @@ long get_file_length( char *name, int *len )
 
 void eprint( int severity, const char *fmt, ... )
 {
-	static char buffer[ BROWSER_MAXLINE + 1 ];
+	static char buffer[ BROWSER_MAXLINE ];
 	static char *cp = buffer;
-	static int space_left = BROWSER_MAXLINE;
+	static int space_left = BROWSER_MAXLINE - 1;
+	int written;
 	va_list ap;
 
 	compilation.error[ severity ] = SET;
@@ -148,11 +149,24 @@ void eprint( int severity, const char *fmt, ... )
 			}
 		}
 
-		va_start( ap, fmt );
-		vsnprintf( cp, space_left, fmt, ap );
-		va_end( ap );
-		space_left -= strlen( cp );
-		cp = buffer + strlen( cp );
+		/* Avoid writting more than BROWSER_MAXLINE chars */
+
+		if ( space_left > 0 )
+		{
+			va_start( ap, fmt );
+			written = vsnprintf( cp, space_left, fmt, ap );
+			va_end( ap );
+
+			if ( written > 0 )
+			{
+				space_left -= written;
+				cp += written;
+			}
+			else
+				space_left = 0;
+		}
+
+		/* Output line only after newline char has been found */
 
 		if ( buffer[ strlen( buffer ) - 1 ] != '\n' )
 			return;
@@ -160,10 +174,15 @@ void eprint( int severity, const char *fmt, ... )
 		buffer[ strlen( buffer ) - 1 ] = '\0';
 		fl_freeze_form( main_form->error_browser->form );
 		fl_add_browser_line( main_form->error_browser, buffer );
+
+		fl_set_browser_topline( main_form->error_browser,
+				   fl_get_browser_maxline( main_form->error_browser )
+				 - fl_get_browser_screenlines( main_form->error_browser ) + 1);
+
 		fl_unfreeze_form( main_form->error_browser->form );
 
 		cp = buffer;
-		space_left = BROWSER_MAXLINE;
+		space_left = BROWSER_MAXLINE - 1;
 	}
 	else
 	{
@@ -175,6 +194,7 @@ void eprint( int severity, const char *fmt, ... )
 		va_end( ap );
 		fflush( stderr );
 	}
+
 }
 
 

@@ -43,7 +43,7 @@ FD_fsc2 *create_form_fsc2(void)
   fdui->error_browser = obj = fl_add_browser(FL_NORMAL_BROWSER,230,600,790,190,"");
     fl_set_object_color(obj,FL_WHITE,FL_YELLOW);
     fl_set_object_lsize(obj,FL_MEDIUM_SIZE);
-  obj = fl_add_button(FL_NORMAL_BUTTON,50,240,130,50,"Edit");
+  fdui->Edit = obj = fl_add_button(FL_NORMAL_BUTTON,50,240,130,50,"Edit");
     fl_set_button_shortcut(obj,"E",1);
     fl_set_object_color(obj,FL_MCOL,FL_COL1);
     fl_set_object_lsize(obj,FL_LARGE_SIZE);
@@ -113,30 +113,30 @@ FD_device *create_form_device(void)
   fl_end_group();
 
   obj = fl_add_frame(FL_ENGRAVED_FRAME,30,90,220,180,"");
-  obj = fl_add_text(FL_NORMAL_TEXT,310,20,170,50,"Device Select");
+  obj = fl_add_text(FL_NORMAL_TEXT,280,20,280,50,"Device Select");
     fl_set_object_lsize(obj,FL_HUGE_SIZE);
     fl_set_object_lalign(obj,FL_ALIGN_LEFT|FL_ALIGN_INSIDE);
     fl_set_object_lstyle(obj,FL_NORMAL_STYLE+FL_SHADOW_STYLE);
-  obj = fl_add_text(FL_NORMAL_TEXT,60,110,80,30,"Digitizer");
+  obj = fl_add_text(FL_NORMAL_TEXT,60,110,170,40,"Digitizer");
     fl_set_object_lsize(obj,FL_LARGE_SIZE);
     fl_set_object_lalign(obj,FL_ALIGN_LEFT|FL_ALIGN_INSIDE);
     fl_set_object_lstyle(obj,FL_NORMAL_STYLE+FL_SHADOW_STYLE);
-  obj = fl_add_text(FL_NORMAL_TEXT,310,110,80,30,"Pulser");
+  obj = fl_add_text(FL_NORMAL_TEXT,310,110,160,40,"Pulser");
     fl_set_object_lsize(obj,FL_LARGE_SIZE);
     fl_set_object_lalign(obj,FL_ALIGN_LEFT|FL_ALIGN_INSIDE);
     fl_set_object_lstyle(obj,FL_NORMAL_STYLE+FL_SHADOW_STYLE);
   obj = fl_add_frame(FL_ENGRAVED_FRAME,530,90,220,180,"");
-  obj = fl_add_text(FL_NORMAL_TEXT,560,110,80,30,"Lock-In");
+  obj = fl_add_text(FL_NORMAL_TEXT,560,110,160,40,"Lock-In");
     fl_set_object_lsize(obj,FL_LARGE_SIZE);
     fl_set_object_lalign(obj,FL_ALIGN_LEFT|FL_ALIGN_INSIDE);
     fl_set_object_lstyle(obj,FL_NORMAL_STYLE+FL_SHADOW_STYLE);
   obj = fl_add_frame(FL_ENGRAVED_FRAME,30,300,220,180,"");
-  obj = fl_add_text(FL_NORMAL_TEXT,60,320,80,30,"Magnet");
+  obj = fl_add_text(FL_NORMAL_TEXT,60,320,160,40,"Magnet");
     fl_set_object_lsize(obj,FL_LARGE_SIZE);
     fl_set_object_lalign(obj,FL_ALIGN_LEFT|FL_ALIGN_INSIDE);
     fl_set_object_lstyle(obj,FL_NORMAL_STYLE+FL_SHADOW_STYLE);
   obj = fl_add_frame(FL_ENGRAVED_FRAME,280,300,220,180,"");
-  obj = fl_add_text(FL_NORMAL_TEXT,310,320,80,30,"Boxcar");
+  obj = fl_add_text(FL_NORMAL_TEXT,310,320,160,40,"Boxcar");
     fl_set_object_lsize(obj,FL_LARGE_SIZE);
     fl_set_object_lalign(obj,FL_ALIGN_LEFT|FL_ALIGN_INSIDE);
     fl_set_object_lstyle(obj,FL_NORMAL_STYLE+FL_SHADOW_STYLE);
@@ -149,13 +149,12 @@ FD_device *create_form_device(void)
     fl_set_object_lsize(obj,FL_LARGE_SIZE);
     fl_set_object_callback(obj,device_select,0);
 
-
   fdui->digitizer_group = fl_bgn_group();
-  fdui->tds_754a_button = obj = fl_add_round3dbutton(FL_RADIO_BUTTON,60,190,50,50,"  TDS 754A");
+  fdui->tds_754a_button = obj = fl_add_round3dbutton(FL_RADIO_BUTTON,60,190,50,50,"  TDS754A");
     fl_set_object_color(obj,FL_TOP_BCOL,FL_GREEN);
     fl_set_object_lsize(obj,FL_LARGE_SIZE);
     fl_set_button(obj, 1);
-  fdui->tds_520c_button = obj = fl_add_round3dbutton(FL_RADIO_BUTTON,60,150,50,50,"  TDS 520C");
+  fdui->tds_520c_button = obj = fl_add_round3dbutton(FL_RADIO_BUTTON,60,150,50,50,"  TDS520C");
     fl_set_object_color(obj,FL_TOP_BCOL,FL_GREEN);
     fl_set_object_lsize(obj,FL_LARGE_SIZE);
   fl_end_group();
@@ -163,14 +162,6 @@ FD_device *create_form_device(void)
 
   fdui->lockin_group = fl_bgn_group();
   fdui->sr510_button = obj = fl_add_round3dbutton(FL_RADIO_BUTTON,560,150,50,50,"  SR510");
-    fl_set_object_color(obj,FL_TOP_BCOL,FL_GREEN);
-    fl_set_object_lsize(obj,FL_LARGE_SIZE);
-    fl_set_button(obj, 1);
-  fl_end_group();
-
-
-  fdui->magnet_group = fl_bgn_group();
-  fdui->s_band_button = obj = fl_add_round3dbutton(FL_RADIO_BUTTON,60,360,50,50,"  S-Band");
     fl_set_object_color(obj,FL_TOP_BCOL,FL_GREEN);
     fl_set_object_lsize(obj,FL_LARGE_SIZE);
     fl_set_button(obj, 1);

@@ -21,9 +21,8 @@ extern Token_Val conditionlval;           /* from condition_parser.y */
 
 extern char *Fname;
 extern long Lc;
-static long var_count = 0;
-
-static volatile bool Stop_Signal = UNSET;
+static Var *var_list_copy = NULL;         /* area for storing variables */
+static long var_count = 0;                /* numberof variables to save */
 
 extern void prim_exprestart( FILE *prim_expin );
 
@@ -85,7 +84,7 @@ void store_exp( FILE *in )
 
 	while ( ( ret = prim_explex( ) ) != 0 )
 	{
-		/* get or extend memory used for storing the tokens in chunks */
+		/* get or extend memory for storing the tokens in chunks */
 
 		if ( prg_length % PRG_CHUNK_SIZE == 0 )
 			prg_token = T_realloc( prg_token, ( prg_length + PRG_CHUNK_SIZE )
@@ -489,9 +488,6 @@ void prim_exp_run( void )
 	if ( prg_length == 0 )                       /* no program no test... */
 		return;
 
-	fprintf( stderr, "TRY...\n" );
-	fflush( stderr );
-
 	TRY
 	{
 		/* 1. Run the test run hook functions of the modules.
@@ -598,9 +594,8 @@ void prim_exp_run( void )
 	}
 	OTHERWISE
 	{
-		fprintf( stderr, "OTHERWISE...\n" );
-		fflush( stderr );
 		Fname = NULL;
+		save_restore_variables( UNSET );
 		TEST_RUN = UNSET;
 		PASSTHROU( );
 	}
@@ -1171,8 +1166,6 @@ void save_restore_variables( bool flag )
 	static Var *old_var_list;
 
 
-	assert( Var_Stack == NULL );
-
 	if ( flag )
 	{
 		assert( var_list_copy == NULL );          /* don't save twice ! */
@@ -1244,101 +1237,5 @@ void save_restore_variables( bool flag )
 
 		T_free( var_list_copy );
 		var_list_copy = NULL;
-	}
-}
-
-
-/*----------------------------------------------------------------------*/
-/* This takes care of deleting the copy of the stored variables when an */
-/* exception happens while the test run is underway (or even if we ran  */
-/* out of memory while we made the copy. (free_vars() will take care of */
-/* the variables themselves.)                                           */
-/*----------------------------------------------------------------------*/
-
-void delete_var_list_copy( void )
-{
-	Var *cpy;
-	long i;
-
-
-	if ( var_list_copy == NULL )
-		return;
-
-	for ( cpy = var_list_copy, i = 0; i < var_count ; i++, cpy++ )
-	{
-		if ( cpy->type == INT_ARR && ! ( cpy->flags & NEED_ALLOC ) &&
-			 cpy->val.lpnt != NULL )
-			T_free( cpy->val.lpnt );
-		if ( cpy->type == FLOAT_ARR && ! ( cpy->flags & NEED_ALLOC ) &&
-			 cpy->val.dpnt != NULL )
-			T_free( cpy->val.dpnt );
-		if ( cpy->type & ( INT_ARR | FLOAT_ARR ) && cpy->sizes != NULL )
-			T_free( cpy->sizes );
-	}
-
-	T_free( var_list_copy );
-	var_list_copy = NULL;
-}
-	
-
-/*###########################################################################*/
-
-/* Left in if necessary later on... */
-
-void loop_dbg( void );
-void loop_dbg( void )
-{
-	Prg_Token *cur = prg_token;
-
-
-	for ( ; cur < prg_token + prg_length; cur++ )
-	{
-		switch ( cur->token )
-		{
-			case WHILE_TOK :
-				printf( "%d: WHILE, start = %d, end = %d\n",
-						cur - prg_token, cur->start - prg_token,
-						cur->end - prg_token );
-				break;
-
-			case FOR_TOK :
-				printf( "%d: FOR, start = %d, end = %d\n",
-						cur - prg_token, cur->start - prg_token,
-						cur->end - prg_token );
-				break;
-
-
-			case REPEAT_TOK :
-				printf( "%d: REPEAT, start = %d, end = %d\n",
-						cur - prg_token, cur->start - prg_token,
-						cur->end - prg_token );
-				break;
-
-			case CONT_TOK :
-				printf( "%d: CONTINUE, start = %d\n",
-						cur - prg_token, cur->start - prg_token );
-				break;
-
-			case BREAK_TOK :
-				printf( "%d: CONTINUE, start = %d\n",
-						cur - prg_token, cur->start - prg_token );
-				break;
-
-			case IF_TOK :
-				printf( "%d: IF, start = %d, end = %d\n",
-						cur - prg_token, cur->start - prg_token,
-						cur->end - prg_token );
-				break;
-
-			case ELSE_TOK :
-				printf( "%d ELSE\n",
-						cur - prg_token );
-				break;
-
-			case '}' :
-				printf( "%d: `}', end = %d\n",
-						cur - prg_token, cur->end - prg_token );
-				break;
-		}
 	}
 }

@@ -13,6 +13,7 @@ typedef struct Dev_ {
 	Lib_Struct driver;
 	bool is_loaded;
 	struct Dev_ *next;
+	struct Dev_ *prev;
 } Device;
 
 

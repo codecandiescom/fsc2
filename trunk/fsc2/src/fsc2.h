@@ -31,9 +31,11 @@
 #include <errno.h>
 #include <limits.h>
 #include <signal.h>
+#include <time.h>
 #include <sys/time.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <sys/stat.h>
 #include <forms.h>
 
 
@@ -73,6 +75,8 @@ int primary_experiment_parser( FILE *in );
 #define BROWSER_MAXLINE  1024
 #define EDITOR_FAILED    123
 
+#define DO_SEND   SIGUSR1
+#define DO_QUIT   SIGUSR2
 
 
 
@@ -92,7 +96,6 @@ long prg_length = 0;
 Prg_Token *cur_prg_token;
 
 Var *var_list = NULL;
-Var *var_list_copy;
 Var *Var_Stack = NULL;
 
 Device *Device_List = NULL;
@@ -137,7 +140,6 @@ extern Device *Device_List;
 extern Device_Name *Device_Name_List;
 
 extern Var *var_list;
-extern Var *var_list_copy;
 extern Var *Var_Stack;
 
 extern ASSIGNMENTS assignment[ ];

@@ -15,9 +15,11 @@
 
 /* Locally used global variables */
 
-bool is_loaded = UNSET;       /* set when parameter file is loaded */
-bool is_tested = UNSET;       /* set when parameter file is tested */
-int state = UNSET;            /* set when parameter passed the tests */
+bool is_loaded = UNSET;       /* set when EDL file is loaded */
+bool is_tested = UNSET;       /* set when EDL file has been  tested */
+bool state = UNSET;           /* set when EDL passed the tests */
+static char *in_file = NULL;  /* used for name of input file */
+static time_t in_file_mod = 0;
 
 
 float *x;
@@ -49,8 +51,6 @@ int main( int argc, char *argv[ ] )
 		return EXIT_FAILURE;
 	}
 #endif
-
-	clean_up( );
 
 	/* With the option "-t" just test the file and output results to stderr
 	   - this can be used to test a file e.g. from emacs's "M-x compile"
@@ -89,8 +89,6 @@ int main( int argc, char *argv[ ] )
 
 		load_file( main_form->browser, 1 );
 	}
-	else
-		in_file = NULL;
 
 	/* Loop until quit button is pressed and there is no experiment running */
 
@@ -127,10 +125,10 @@ void xforms_init( int *argc, char *argv[] )
 
 	main_form = create_form_fsc2( );
 
-	fl_set_browser_fontsize( main_form->browser, FL_LARGE_SIZE );
+	fl_set_browser_fontsize( main_form->browser, FL_NORMAL_SIZE );
 	fl_set_browser_fontstyle( main_form->browser, FL_FIXED_STYLE );
 
-	fl_set_browser_fontsize( main_form->error_browser, FL_LARGE_SIZE );
+	fl_set_browser_fontsize( main_form->error_browser, FL_NORMAL_SIZE );
 	fl_set_browser_fontstyle( main_form->error_browser, FL_FIXED_STYLE );
 
 	fl_show_form( main_form->fsc2, FL_PLACE_MOUSE, FL_FULLBORDER, "fsc2" );
@@ -188,18 +186,42 @@ void load_file( FL_OBJECT *a, long reload )
 	const char *fn;
 	char *old_in_file;
 	FILE *fp;
+	struct stat file_stat;
 
+
+	a = a;
 
 	/* If new file is to be loaded get its name, otherwise use previous name */
 
 	if ( ! reload )
 	{
-		fn = fl_show_fselector( "Select input file:", NULL, "*.*", NULL );
+		fn = fl_show_fselector( "Select input file:", NULL, "*.edl", NULL );
 		if ( fn == NULL )
 			return;
 	}
 	else
 		fn = in_file;
+
+	/* If this is not a reload save name of file */
+
+	if ( ! reload )
+	{
+		old_in_file = in_file;
+
+		TRY
+		{
+			in_file = get_string_copy( fn );
+			TRY_SUCCESS;
+		}
+		OTHERWISE
+		{
+			in_file = old_in_file;
+			return;
+		}
+
+		if ( old_in_file != NULL )
+			T_free( old_in_file );
+	}
 
 	/* Quit if this is a reload but name of previous file is empty */
 
@@ -223,37 +245,16 @@ void load_file( FL_OBJECT *a, long reload )
 		return;
 	}
 
-	/* If this is not a reload save name of file otherwise clear browsers */
+	/* get modification time of file */
 
-	if ( ! reload )
-	{
-		old_in_file = in_file;
-
-		TRY
-		{
-			in_file = get_string_copy( fn );
-			TRY_SUCCESS;
-		}
-		OTHERWISE
-		{
-			fl_show_alert( "Error", "Running out of memory.", "", 1 );
-			in_file = old_in_file;
-			return;
-		}
-
-		if ( old_in_file != NULL )
-			T_free( old_in_file );
-	}
-	else
-	{
-		fl_clear_browser( main_form->browser );
-		fl_clear_browser( main_form->error_browser );
-	}
+	stat ( fn, &file_stat );
+	in_file_mod = file_stat.st_mtime;
 
 	/* Read in and display the new file */
 
 	is_loaded = display_file( in_file, fp );
-	state = is_tested = UNSET;
+	state = FAIL;
+	is_tested = UNSET;
 	fclose( fp );
 }
 
@@ -272,19 +273,17 @@ void edit_file( FL_OBJECT *a, long b )
 	int res;
 
 
-	/* Try to find content of environement variable "EDITOR" -
-	   if it does not exist use vi as standard editor */
+	a = a;
+	b = b;
+
+	/* Try to find content of environement variable "EDITOR" - if it doesn't
+	   exist use vi as standard editor */
 
 	ed = getenv( "EDITOR" );
 
 	if ( ed == NULL || *ed == '\0' )
 	{
-		TRY
-		{
-			argv = T_malloc( 5 * sizeof ( char * ) );
-			TRY_SUCCESS;
-		}
-		OTHERWISE
+		if ( ( argv = malloc( 5 * sizeof ( char * ) ) ) == NULL )
 		{
 			fl_show_alert( "Error", "Sorry, unable to start the editor.",
 						   NULL, 1 );
@@ -308,8 +307,7 @@ void edit_file( FL_OBJECT *a, long b )
 
 		if ( ! *ep )   /* no command line arguments */
 		{
-			if ( ( argv = ( char ** ) malloc( 5 * sizeof ( char * ) ) )
-				 == NULL )
+			if ( ( argv = malloc( 5 * sizeof ( char * ) ) ) == NULL )
 			{
 				fl_show_alert( "Error", "Sorry, unable to start the editor.",
 							   NULL, 1 );
@@ -334,8 +332,8 @@ void edit_file( FL_OBJECT *a, long b )
 				++argc;
 			}
 		
-			if ( ( argv = ( char ** ) malloc( ( argc + 5 ) *
-											  sizeof ( char * ) ) ) == NULL )
+			if ( ( argv = malloc( ( argc + 5 ) * sizeof ( char * ) ) )
+				 == NULL )
 			{
 				fl_show_alert( "Error", "Sorry, unable to start the editor.",
 							   NULL, 1 );
@@ -389,8 +387,7 @@ void edit_file( FL_OBJECT *a, long b )
 	if ( res == -1 )                                /* fork failed ? */
 		fl_show_alert( "Error", "Sorry, unable to start the editor.",
 					   NULL, 1 );
-
-	T_free( argv );
+	free( argv );
 }
 
 
@@ -401,6 +398,26 @@ void edit_file( FL_OBJECT *a, long b )
 
 void test_file( FL_OBJECT *a, long b )
 {
+	static bool running_test = UNSET;
+	static bool user_break = UNSET;
+	struct stat file_stat;
+
+	a = a;
+	b = b;
+
+	/* While program is being tested the test can be aborted by pressing the
+	   test button again - in this case we simply throw an exception */
+
+	if ( running_test )
+	{
+		user_break = SET;
+		delete_devices( );                       /* run the exit hooks ! */
+		eprint( FATAL, "Program test aborted, received user break.\n" );
+		THROW( EXCEPTION );
+	}
+
+	/* Here starts the real action... */
+
 	if ( ! is_loaded )
 	{
 		fl_show_alert( "Error", "Sorry, but no file is loaded.", NULL, 1 );
@@ -413,16 +430,44 @@ void test_file( FL_OBJECT *a, long b )
 		return;
 	}
 
-	/* Before scanning the file reload it since file on disk might have
-	   been changed in between - quit if file can't be read again. */
+	/* Before scanning the file reload if the file on disk has changed in
+	   between - quit if file can't be read again. */
 
-	clean_up( );
-	load_file( main_form->browser, 1 );
-	if ( ! is_loaded )
-		return;
+	stat( in_file, &file_stat );
+	if ( in_file_mod != file_stat.st_mtime )
+	{
+		load_file( main_form->browser, 1 );
+		if ( ! is_loaded )
+			return;
+	}
 
+	/* While the test is run the only accessible button is the test button
+	   which serves as a stop button for the test - so all the others got to
+	   be deactivated while the test is run */
+
+	fl_deactivate_object( main_form->Load );
+	fl_deactivate_object( main_form->reload );
+	fl_deactivate_object( main_form->Edit );
+	fl_deactivate_object( main_form->device_button );
+	fl_deactivate_object( main_form->run );
+	fl_deactivate_object( main_form->quit );
+
+	user_break = UNSET;
+	running_test = SET;
 	state = scan_main( in_file );
-	is_tested = SET;                  /* show that file is tested */
+	running_test = UNSET;
+
+	if ( ! user_break )
+		is_tested = SET;                  /* show that file has been tested */
+	else
+		user_break = UNSET;
+
+	fl_activate_object( main_form->Load );
+	fl_activate_object( main_form->reload );
+	fl_activate_object( main_form->Edit );
+	fl_activate_object( main_form->device_button );
+	fl_activate_object( main_form->run );
+	fl_activate_object( main_form->quit );
 }
 
 
@@ -433,9 +478,8 @@ void test_file( FL_OBJECT *a, long b )
 
 void run_file( FL_OBJECT *a, long b )
 {
-	long max_mem = 1, j;
-	int i;
-
+	a = a;
+	b = b;
 
 	if ( ! is_loaded )              /* check that there is a file loaded */
 	{
@@ -452,38 +496,6 @@ void run_file( FL_OBJECT *a, long b )
 		return;
 	}
 
-	/* Allocate memory for measurement - has only to be done if 
-	   there will be data to be saved */
-/*
-	if ( m.dim != -1 )
-	{
-		for ( i = 0; i < m.dim; ++i )
-			max_mem *= m.points[ i ];
-
-		m.max_points = max_mem;
-		m.act_point = 0;
-		m.act_point_drawn = 0;
-
-		if ( ( m.data = ( DataType * ) malloc( max_mem * sizeof( DataType ) ) )
-			== NULL )
-		{
-			fl_show_alert( "Error", "Sorry, not enough memory available",
-						   NULL, 1 );
-			return;
-		}
-*/
-		/*!!!!!!!!!!!!!!!!!!!*/
-/*
-		m.x = ( float * ) malloc( 2 * max_mem * sizeof( float ) );
-		m.y = m.x + max_mem;
-
-		for ( j = 0; j < max_mem; ++j )
-		{
-			m.x[ j ] = ( float ) j;
-			m.y[ j ] = 0.0 ;
-		}
-	}
-*/
 	/* Finally start the experiment */
 /*
 	run( );
@@ -519,8 +531,6 @@ bool display_file( char *name, FILE *fp )
 				return( FAIL );
 
 			case -1 :
-				fl_show_alert( "FATAL Error", "Running out of memory.",
-							   NULL, 1 );
 				return( FAIL );
 
 			case -2 :
@@ -533,6 +543,8 @@ bool display_file( char *name, FILE *fp )
 	/* Freeze browser, read consecutive lines, append to line number
 	   (after expanding tab chars) and send lines to browser */
 
+	fl_clear_browser( main_form->browser );
+	fl_clear_browser( main_form->error_browser );
 	fl_freeze_form( main_form->browser->form );
 
 	for ( i = 1; i <= lc; ++i )
@@ -573,6 +585,8 @@ bool display_file( char *name, FILE *fp )
 
 void device_select( FL_OBJECT *a, long b )
 {
+	b = b;
+
 	if ( a == main_form->device_button )
 	{
 		fl_show_form( device_form->device, FL_PLACE_MOUSE, FL_FULLBORDER,
@@ -599,6 +613,9 @@ void sigchld_handler( int sig_type, void *data )
 {
 	int status;
 
+
+	data = data;
+
 	if ( sig_type != SIGCHLD )
 		return;
 
@@ -623,6 +640,8 @@ void sigchld_handler( int sig_type, void *data )
 
 void new_data_callback( FL_OBJECT *a, long b )
 {
+	a = a;
+	b = b;
 /*
 	for ( ; m.act_point_drawn < m.act_point; ++m.act_point_drawn )
 		m.y[ m.act_point_drawn ] = ( float ) m.data[ m.act_point_drawn ];
@@ -651,7 +670,7 @@ void clean_up( void )
 		T_free( Fname );
 	Fname = NULL;
 
-	/* run exit hook functiosn and unlink modules */
+	/* run exit hook functions and unlink modules */
 
 	delete_devices( );
 
@@ -670,10 +689,6 @@ void clean_up( void )
 	/* clear up structures for phases */
 
 	phases_clear( );
-
-	/* clear up copy of variables from test run */
-
-	delete_var_list_copy( );
 
 	/* delete variables and get rid of variable stack */
 
