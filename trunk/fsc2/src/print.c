@@ -780,11 +780,11 @@ static void eps_make_scale( FILE *fp, void *cv, int coord, int dim )
 	}
 	else
 	{
-		x = x_0 + w + 15.0;
+		x = x_0 + w + 17.0;
 
 		if ( G.label[ Z ] != NULL )
 			fprintf( fp, "gs %f (%s) ch sub %f (%s) cw sub t 90 r 0 0 m (%s) "
-					 "show gr\n", x + 30.0, G.label[ Z ],
+					 "show gr\n", x + 28.0, G.label[ Z ],
 					 paper_width - margin, G.label[ Z ], G.label[ Z ] );
 
 		/* Make the color scale */
@@ -824,7 +824,7 @@ static void eps_make_scale( FILE *fp, void *cv, int coord, int dim )
 
 static void eps_color_scale( FILE *fp )
 {
-	double x = x_0 + w + 3.0;
+	double x = x_0 + w + 5.0;
 	double y = y_0;
 	double width = 6.0;
 	double h_inc, c_inc;
