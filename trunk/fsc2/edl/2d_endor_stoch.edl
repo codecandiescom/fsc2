@@ -161,7 +161,7 @@ IF window_start_2 == 0.0 {
 		print( "Second integration window starts too early.\n" );
 		abort( );
 	}
-	IF ( Start_pos_2 > Rec_len {
+	IF Start_pos_2 > Rec_len {
 		print( "Second integration window starts too late.\n" );
 		abort( );
 	}

@@ -138,7 +138,7 @@ void store_exp( FILE *in )
 		   the string since it's not persistent. Function tokens and also
 		   variable references just push their data onto the variable stack,
 		   so we have to copy them from the stack into the token structure.
-		   Beside we have to do some sanity checks on paranthesis etc. */
+		   Finally, we have to do some sanity checks on paranthesis etc. */
 
 		switch( ret )
 		{
@@ -224,9 +224,14 @@ void store_exp( FILE *in )
 		prg_length++;
 	}
 
-	/* Check that all curly braces are balanced - for the other types of
-	   paranthesis an syntax error should have been detected if they don't
-	   match up */
+	/* Check that all paranthesis and braces are balanced */
+
+	if ( paranthesis_count > 0 )
+	{
+		eprint( FATAL, UNSET, "'(' without closing ')' detected at end of "
+				"program.\n" );
+		THROW( EXCEPTION );
+	}
 
 	if ( curly_brace_count > 0 )
 	{
@@ -235,8 +240,12 @@ void store_exp( FILE *in )
 		THROW( EXCEPTION );
 	}
 
-	fsc2_assert( paranthesis_count == 0 );
-	fsc2_assert( square_brace_count == 0 );
+	if ( square_brace_count > 0 )
+	{
+		eprint( FATAL, UNSET, "'[' without closing ']' detected at end of "
+				"program.\n" );
+		THROW( EXCEPTION );
+	}
 
 	/* Check and initialise if's and loops */
 
