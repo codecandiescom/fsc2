@@ -91,6 +91,7 @@ Var *f_wait(    Var *v );
 Var *f_init_1d( Var *v );
 Var *f_init_2d( Var *v );
 Var *f_display( Var *v );
+Var *f_clearcv( Var *v );
 Var *f_dim(     Var *v );
 Var *f_size(    Var *v );
 Var *f_sizes(   Var *v );
@@ -113,40 +114,41 @@ Func *Fncts;         /* structure for list of functions */
 
 Func Def_Fncts[ ] =              /* List of built-in functions */
 {
-	{ "int",          f_int,           1, ACCESS_ALL,  0 },
-	{ "float",        f_float,         1, ACCESS_ALL,  0 },
-	{ "round",        f_round,         1, ACCESS_ALL,  0 },
-	{ "floor",        f_floor,         1, ACCESS_ALL,  0 },
-	{ "ceil",         f_ceil,          1, ACCESS_ALL,  0 },
-	{ "abs",          f_abs,           1, ACCESS_ALL,  0 },
-	{ "sin",          f_sin,           1, ACCESS_ALL,  0 },
-	{ "cos",          f_cos,           1, ACCESS_ALL,  0 },
-	{ "tan",          f_tan,           1, ACCESS_ALL,  0 },
-	{ "asin",         f_asin,          1, ACCESS_ALL,  0 },
-	{ "acos",         f_acos,          1, ACCESS_ALL,  0 },
-	{ "atan",         f_atan,          1, ACCESS_ALL,  0 },
-	{ "sinh",         f_sinh,          1, ACCESS_ALL,  0 },
-	{ "cosh",         f_cosh,          1, ACCESS_ALL,  0 },
-	{ "tanh",         f_tanh,          1, ACCESS_ALL,  0 },
-	{ "exp",          f_exp,           1, ACCESS_ALL,  0 },
-	{ "ln",           f_ln,            1, ACCESS_ALL,  0 },
-	{ "log",          f_log,           1, ACCESS_ALL,  0 },
-	{ "sqrt",         f_sqrt,          1, ACCESS_ALL,  0 },
-	{ "print",        f_print,        -1, ACCESS_ALL,  0 },
-	{ "wait",         f_wait,          1, ACCESS_ALL,  0 },
-	{ "init_1d",      f_init_1d,      -1, ACCESS_PREP, 0 },
-	{ "init_2d",      f_init_2d,      -1, ACCESS_PREP, 0 },
-	{ "display",      f_display,      -1, ACCESS_EXP,  0 },
-	{ "dim",          f_dim,           1, ACCESS_ALL,  0 },
-	{ "size",         f_size,          2, ACCESS_ALL,  0 },
-	{ "sizes",        f_sizes,         1, ACCESS_ALL,  0 },
-	{ "get_file",     f_getf,         -1, ACCESS_EXP,  0 },
-	{ "save",         f_save,         -1, ACCESS_EXP,  0 },
-	{ "fsave",        f_fsave,        -1, ACCESS_EXP,  0 },
-	{ "save_program", f_save_p,       -1, ACCESS_EXP,  0 },
-	{ "save_output",  f_save_o,       -1, ACCESS_EXP,  0 },
-	{ "save_comment", f_save_c,       -1, ACCESS_EXP,  0 },
-	{ NULL,           NULL,            0, 0,           0 }
+	{ "int",          f_int,      1, ACCESS_ALL,  0 },
+	{ "float",        f_float,    1, ACCESS_ALL,  0 },
+	{ "round",        f_round,    1, ACCESS_ALL,  0 },
+	{ "floor",        f_floor,    1, ACCESS_ALL,  0 },
+	{ "ceil",         f_ceil,     1, ACCESS_ALL,  0 },
+	{ "abs",          f_abs,      1, ACCESS_ALL,  0 },
+	{ "sin",          f_sin,      1, ACCESS_ALL,  0 },
+	{ "cos",          f_cos,      1, ACCESS_ALL,  0 },
+	{ "tan",          f_tan,      1, ACCESS_ALL,  0 },
+	{ "asin",         f_asin,     1, ACCESS_ALL,  0 },
+	{ "acos",         f_acos,     1, ACCESS_ALL,  0 },
+	{ "atan",         f_atan,     1, ACCESS_ALL,  0 },
+	{ "sinh",         f_sinh,     1, ACCESS_ALL,  0 },
+	{ "cosh",         f_cosh,     1, ACCESS_ALL,  0 },
+	{ "tanh",         f_tanh,     1, ACCESS_ALL,  0 },
+	{ "exp",          f_exp,      1, ACCESS_ALL,  0 },
+	{ "ln",           f_ln,       1, ACCESS_ALL,  0 },
+	{ "log",          f_log,      1, ACCESS_ALL,  0 },
+	{ "sqrt",         f_sqrt,     1, ACCESS_ALL,  0 },
+	{ "print",        f_print,   -1, ACCESS_ALL,  0 },
+	{ "wait",         f_wait,     1, ACCESS_ALL,  0 },
+	{ "init_1d",      f_init_1d, -1, ACCESS_PREP, 0 },
+	{ "init_2d",      f_init_2d, -1, ACCESS_PREP, 0 },
+	{ "display",      f_display, -1, ACCESS_EXP,  0 },
+	{ "clear_curve",  f_clearcv, -1, ACCESS_EXP,  0 },
+	{ "dim",          f_dim,      1, ACCESS_ALL,  0 },
+	{ "size",         f_size,     2, ACCESS_ALL,  0 },
+	{ "sizes",        f_sizes,    1, ACCESS_ALL,  0 },
+	{ "get_file",     f_getf,    -1, ACCESS_EXP,  0 },
+	{ "save",         f_save,    -1, ACCESS_EXP,  0 },
+	{ "fsave",        f_fsave,   -1, ACCESS_EXP,  0 },
+	{ "save_program", f_save_p,  -1, ACCESS_EXP,  0 },
+	{ "save_output",  f_save_o,  -1, ACCESS_EXP,  0 },
+	{ "save_comment", f_save_c,  -1, ACCESS_EXP,  0 },
+	{ NULL,           NULL,       0, 0,           0 }
 	                   /* last set marks the very last entry, don't remove ! */
 };
 
@@ -1702,6 +1704,37 @@ DPoint *eval_display_args( Var *v, int *nsets )
 	} while ( v != NULL );
 
 	return dp;
+}
+
+
+/*-------------------------------------------------*/
+/* Function makes all points of a curve invisible. */
+/*-------------------------------------------------*/
+
+Var *f_clearcv( Var *v )
+{
+	long curve;
+
+
+	while ( v )
+	{
+		vars_check( v, INT_VAR | FLOAT_VAR );         /* get number of curve */
+
+		if ( v->type == INT_VAR )
+			curve = v->val.lval;
+		else
+		{
+			eprint( WARN, "%s:%ld: Floating point value used as curve "
+					"number.\n", Fname, Lc );
+			curve = lround( v->val.dval );
+		}
+
+		clear_curve( curve - 1 );
+
+		v = v->next;
+	}
+
+	return vars_push( INT_VAR, 1 );
 }
 
 

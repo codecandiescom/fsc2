@@ -255,6 +255,10 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 "%"         return '%';       /* modulo operator */        
 "^"         return '^';       /* exponentiation operator */
 ":"         return ':';       /* condition separator in for loops */
+"!"         return E_NOT;     /* logical negation operator */
+"&"         return E_AND;     /* logical and operator */
+"|"         return E_OR;      /* logical or operator */
+"~"         return E_XOR;     /* logical exclusive or (xor) operator */
 
 			/* handling of end of statement character */
 ";"			return ';';

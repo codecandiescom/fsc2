@@ -307,6 +307,10 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 "/"         return '/';       /* division operator */      
 "%"         return '%';       /* modulo operator */        
 "^"         return '^';       /* exponentiation operator */
+"!"         return NOT;       /* logical negation operator */
+"&"         return AND;       /* logical and operator */
+"|"         return OR;        /* logical or operator */
+"~"         return XOR;       /* logical exclusive or (xor) operator */
 
             /* quasi-assignment operator for pulse properties */
 

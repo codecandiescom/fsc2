@@ -55,6 +55,7 @@ static Var *CV;
 %token <sptr> STR_TOKEN
 %token <vptr> RPP_TOK
 %token EQ LT LE GT GE
+%token AND OR XOR NOT
 
 %token NS_TOKEN US_TOKEN MS_TOKEN S_TOKEN
 %token NT_TOKEN UT_TOKEN MT_TOKEN T_TOKEN
@@ -62,6 +63,8 @@ static Var *CV;
 %type <vptr> expr unit list1
 
 
+%left AND OR XOR
+%left NOT
 %left EQ LT LE GT GE
 %left '+' '-'
 %left '*' '/'
@@ -154,6 +157,10 @@ expr:    INT_TOKEN unit           { if ( $2 == NULL )
 											"predefined function.\n",
 											Fname, Lc, $1->name );
 	                                THROW( EXCEPTION ); }
+       | expr AND expr       	  { $$ = vars_comp( COMP_AND, $1, $3 ); }
+       | expr OR expr        	  { $$ = vars_comp( COMP_OR, $1, $3 ); }
+       | expr XOR expr       	  { $$ = vars_comp( COMP_XOR, $1, $3 ); }
+       | NOT expr            	  { $$ = vars_lnegate( $2 ); }
        | expr EQ expr             { $$ = vars_comp( COMP_EQUAL, $1, $3 ); }
        | expr LT expr             { $$ = vars_comp( COMP_LESS, $1, $3 ); }
        | expr GT expr             { $$ = vars_comp( COMP_LESS, $3, $1 ); }

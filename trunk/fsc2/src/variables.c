@@ -706,7 +706,7 @@ Var *vars_comp( int comp_type, Var *v1, Var *v2 )
 /* variable, otherwise 0.                                                 */
 /*------------------------------------------------------------------------*/
 
-VAR *vars_lnegate( Var *v )
+Var *vars_lnegate( Var *v )
 {
 	Var *new_var;
 
