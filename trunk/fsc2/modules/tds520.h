@@ -62,7 +62,10 @@ typedef struct
 	bool is_trigger_channel;
 
 	long rec_len;
+	bool is_rec_len;
+
 	double trig_pos;
+	bool is_trig_pos;
 
 	double cursor_pos;     /* current position of cursor 1                   */
 
@@ -88,6 +91,8 @@ Var *digitizer_define_window( Var *v );
 Var *digitizer_timebase( Var *v );
 Var *digitizer_num_averages( Var *v );
 Var *digitizer_get_channel_number( Var *v );
+Var *digitizer_record_length( Var * );
+Var *digitizer_trigger_position( Var * );
 Var *digitizer_meas_channel_ok( Var *v );
 Var *digitizer_trigger_channel( Var *v );
 Var *digitizer_start_acquisition( Var *v );
@@ -110,6 +115,7 @@ bool tds520_init( const char *name );
 double tds520_get_timebase( void );
 bool tds520_set_timebase( double timebase);
 bool tds520_get_record_length( long *ret );
+bool tds520_set_trigger_pos( double pos );
 bool tds520_get_trigger_pos( double *ret );
 long tds520_get_num_avg( void );
 bool tds520_set_num_avg( long num_avg );
