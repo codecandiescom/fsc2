@@ -33,7 +33,7 @@ or more exactly identical devices are to be used simultaneously one or
 more extra shared libraries for these devices have to be created.
 
 Fortunately, this is such a simple process that it can be done via a
-(Perl) script. There are basically three or four steps:
+script. There are basically three or four steps:
 @enumerate
 @item @code{cd} into the @file{utils} subdirectory of @acronym{fsc2}s main
 directory
