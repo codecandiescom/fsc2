@@ -37,13 +37,20 @@ void pulser_struct_init( void )
 	pulser_struct.set_pulse_length_change = NULL;
 	pulser_struct.set_pulse_maxlen = NULL;
 	pulser_struct.set_pulse_replacements = NULL;
+	pulser_struct.get_pulse_function = NULL;
+	pulser_struct.get_pulse_position = NULL;
+	pulser_struct.get_pulse_length = NULL;
+	pulser_struct.get_pulse_position_change = NULL;
+	pulser_struct.get_pulse_length_change = NULL;
+	pulser_struct.get_pulse_maxlen = NULL;
+	pulser_struct.get_pulse_replacements = NULL;
 }
 
 
-/*--------------------------------------------------------------------------*/
-/* This function is going to be called at the start of each pulser specific */
-/* function to avoid using a pulser function if there's no pulser driver    */
-/*--------------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*/
+/* This function is called at the start of each pulser specific function */
+/* to avoid using a pulser function if there's no pulser driver          */
+/*-----------------------------------------------------------------------*/
 
 void is_pulser_driver( void )
 {
