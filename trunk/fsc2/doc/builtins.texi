@@ -226,7 +226,7 @@ display( n_x_point, n_y_point, data [ , n_curve ] [ , ... ] )
 @end example
 
 @item clear_curve( )
-@findex clear_curve( )
+@findex clear_curve()
 Removes one or more curves from the display. Use a list of curve numbers
 as arguments, no argument at all defaults to the first curve.
 
