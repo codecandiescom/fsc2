@@ -33,9 +33,11 @@ ASSIGNMENTS:
 PHASES:
 @end example
 While the first one deals with the basic setup of the pulser the second
-one is only necessary when phase cycling is used. Valid statements in
-these sections differ slightly, depending on the type of the pulser and
-the spectrometer it is supposed to work with.
+one is only necessary when phase cycling is
+used@footnote{@code{ASSIGNMENTS:} can be abbreviated to
+@code{ASSIGNMENT:} or @code{ASS:} and @code{PHASES:} to @code{PHA}.}.
+Valid statements in these sections differ slightly depending on the
+type of the pulser and the spectrometer it is supposed to work with.
 
 Beside these additional sections there are some other construct for the
 creation of pulses and their subsequent manipulation. These are
@@ -69,14 +71,14 @@ pulses (as well as all the times between pulses) have to be integer
 multiples of the length of the time slices.
 
 The statement to set the timebase, i.e.@ the length of the individual
-time slices is:
+time slices is@footnote{Instead of @code{TIMEBASE} one may also write
+@code{TB:}, @code{T_B}, @code{TBASE:}, @code{T_BASE:}, @code{TIMEB},
+@code{TIME_B:} or @code{TIME_BASE:} insetad of @code{TIMEBASE:}.}:
 @example
 TIMEBASE: 5 ns;
 @end example
-Alternatively, one may also write @code{TB:}, @code{T_B},
-@code{TBASE:}, @code{T_BASE:}, @code{TIMEB}, @code{TIME_B:} or
-@code{TIME_BASE:} insetad of @code{TIMEBASE:}. Please note that,
-whatever form you choose, it has to end with a colon.
+Please note that the keyword @code{TIMEBASE} has to be followed
+immediately by a colon.
 
 The minumum and maximum values for the timebase differ for both types of
 pulsers:
@@ -89,11 +91,17 @@ pulsers:
 @subsubsection Setting the trigger mode
 @cindex Setting the trigger mode
 
-The next statement new is for the triggering of the pulser. A pulser starts
-a new sequence of pulses either on receiving an external or it is
+The next statement new is for the triggering of the pulser. A pulser
+starts a new sequence of pulses either on receiving an external or it is
 triggered internally. Which type of triggering is to be used depends, of
 course, on the experiment. To set either to internal or external trigger
-us a statement like this:
+us a statement like this@footnote{Instead of @code{TRIGGER_MODE} also
+@code{TM:}, @code{T_M:}, @code{TRIGM:}, @code{TRIG_M:},
+@code{TRIGMODE:}, @code{TRIG_MODE:}, @code{T_MODE:}, @code{TMODE:},
+@code{TRIGGER_M:}, @code{TRIGGERM:} or @code{TRIGGERMODE:} can be
+used. And the keywords @code{INTERNAL} and @code{EXTERNAL} can be
+shortend to @code{INTERN} or @code{INT} and @code{EXTERN} or
+@code{EXT}.}:
 @example
 TRIGGER_MODE: INTERNAL;
 @end example
@@ -101,12 +109,7 @@ or
 @example
 TRIGGER_MODE: EXTERNAL;
 @end example
-Instead of @code{TRIGGER_MODE} also @code{TM:}, @code{T_M:},
-@code{TRIGM:}, @code{TRIG_M:}, @code{TRIGMODE:}, @code{TRIG_MODE:},
-@code{T_MODE:}, @code{TMODE:}, @code{TRIGGER_M:}, @code{TRIGGERM:} or
-@code{TRIGGERMODE:} can be used. And the keywords @code{INTERNAL} and
-@code{EXTERNAL} can be shortend to @code{INTERN} or @code{INT} and
-@code{EXTERN} or @code{EXT}.
+
 
 When using the internal trigger it is useful to be able to set the rate
 or the frequency the experiment is repeated. For this type of triggering
@@ -172,41 +175,51 @@ channel is to be used for the current phase.
 Currently, the following symbolic names for pulse functions are
 defined:
 @itemize @bullet
-@item @code{MICROWAVE} (or @code{MW}, @code{MICRO_WAVE}, @code{MICROW},
-      @code{MICRO_W}, @code{MWAVE}, @code{M_WAVE} or @code{M_W})
-@item @code{TRAVELING_WAVE_TUBE} (or @code{TWT} or all other combinations,
-      where any of constituting words is replaced by its initial character
-      or one or all underscore characters are missing)
-@item @code{TRAVELING_WAVE_TUBE_GATE} (or @code{TWTG} or all other
-      combinations, where any of constituting words is replaced by its
-      initial character or one or all underscore characters are missing)
+@item @code{MICROWAVE} (or @code{MW} etc.@footnote{The function
+@code{MICROWAVE} can also be abbreviated to @code{MICRO_WAVE}, @code{MICROW},
+@code{MICRO_W}, @code{MWAVE}, @code{M_WAVE} or @code{M_W}})
+@item @code{TRAVELING_WAVE_TUBE} (or @code{TWT} etc.@footnote{Instead of
+@code{TRAVELING_WAVE_TUBE} all other combinations, where any of
+constituting words is replaced by its initial character or one or all
+underscore characters are missing can be used.})
+@item @code{TRAVELING_WAVE_TUBE_GATE} (or @code{TWTG}
+etc.@footnote{@code{TRAVELING_WAVE_TUBE_GATE} may also be abbreviated by
+all combinations, where any of constituting words is replaced by its
+initial character or one or all underscore characters are missing.})
 @item @code{DETECTION} (or @code{DET})
-@item @code{DETECTION_GATE} (or @code{DETG}, @code{DET_G},
-      @code{DETECTIONGATE}, @code{DETECTION_G}, @code{DETECTIONG},
-      @code{DET_GATE} or @code{DETGATE})
+@item @code{DETECTION_GATE} (or @code{DETG}
+etc.@footnote{@code{DETECTION_GATE} can be also shortened to
+@code{DET_G}, @code{DETECTIONGATE}, @code{DETECTION_G},
+@code{DETECTIONG}, @code{DET_GATE} or @code{DETGATE}.})
 @item @code{DEFENSE} (of @code{DEF})
-@item @code{RADIO_FREQUENCY} (or @code{RF} or all combinations where
-      @code{RADIO} is replaced by @code{R} or @code{FREQUENCY} by either
-      @code{FREQ} or @code{F}. The underscore can also be left out)
-@item @code{RADIO_FREQUENCY_GATE} (or @code{RFG} or all combinations
-      where @code{RADIO} is replaced by @code{R}, @code{FREQUENCY} by either
-      @code{FREQ} or @code{F} or @code{GATE} by @code{G}. As usual, the
-      underscore characters can be omitted.)
-@item @code{PULSE_SHAPER} (or @code{PSH}, @code{PULSESH},
-      @code{PULSE_SH}, @code{PULSE_SHAPE}, @code{PULSESHAPE},
-      @code{PULSESHAPER}, @code{P_SH}, @code{P_SHAPE}, @code{PSHAPE},
-      @code{P_SHAPER}, @code{P_SHAPER})
+@item @code{RADIO_FREQUENCY} (or @code{RF} etc.@footnote{Instead
+@code{RADIO_FREQUENCY} also all combinations can be used where
+@code{RADIO} is replaced by @code{R} or @code{FREQUENCY} by either
+@code{FREQ} or @code{F}. The underscore can also be left out.})
+@item @code{RADIO_FREQUENCY_GATE} (or @code{RFG}
+etc.@footnote{For @code{RADIO_FREQUENCY_GATE} all combinations where
+@code{RADIO} is replaced by @code{R}, @code{FREQUENCY} by either
+@code{FREQ} or @code{F} or @code{GATE} by @code{G} may be used. As
+usual, the underscore characters can be omitted.})
+@item @code{PULSE_SHAPER} (or @code{PSH} etc.@footnote{You may
+abbreviate @code{PULSE_SHAPER} to @code{PULSESH}, @code{PULSE_SH},
+@code{PULSE_SHAPE}, @code{PULSESHAPE}, @code{PULSESHAPER}, @code{P_SH},
+@code{P_SHAPE}, @code{PSHAPE}, @code{P_SHAPER}, @code{P_SHAPER}.})
 @item @code{OTHER_1} (or @code{OTHER1}, @code{O_1}, @code{O1},
-      @code{OTHER}, @code{O})
-@item @code{OTHER_2} (or @code{OTHER2}, @code{O_2}, @code{O2})
-@item @code{OTHER_3} (or @code{OTHER3}, @code{O_3}, @code{O3})
-@item @code{OTHER_4} (or @code{OTHER4}, @code{O_4}, @code{O4})
+      @code{OTHER} or @code{O})
+@item @code{OTHER_2} (or @code{OTHER2}, @code{O_2} or @code{O2})
+@item @code{OTHER_3} (or @code{OTHER3}, @code{O_3} or @code{O3})
+@item @code{OTHER_4} (or @code{OTHER4}, @code{O_4} or @code{O4})
 @end itemize
 The names of the functions do not enforce what the channels that will
 become associated with them are really going to be used for, but it is
 probably a good idea not to use e.g. the @code{MICRO_WAVE} channel for
 something completely different or other people will have major problems
 understanding what your @acronym{EDL} program is supposed to do.
+
+The functions @code{OTHER_1} to @code{OTHER_4} should be used in cases
+where none of the function names does fit the special purpose you have
+in mind (instead of using an inpropriate name).
 
 Before giving an example it is important to point out that there are
 some major differences between the @strong{Sony/Tektronix DG2020} and
@@ -241,7 +254,7 @@ RF:        POD = 6;
 RF_GATE:   POD = 7;
 DETECTION: POD = 11;
 @end example
-Instaead of @code{POD} you can also simply write @code{P}.
+Instead of @code{POD} you can also simply write @code{P}.
 
 
 Optionally, for the @strong{Sony/Tektronix DG2020} you can also set
@@ -376,21 +389,50 @@ stands here for the first pod channel of the phase function,
 to indicate a high output state, @code{OFF} and @code{0} stand for a low
 state.
 
-There are two additional things that you 
+With these informations the program is able (or nearly is) to create the
+phase pulses (i.e.@ the pulses that control the phase switch) without
+the user having to care about them. So, all that needs to be done later
+is to create the microwave pulses and define the sequence of phases for
+the pulse. The program will automatically create the pulses necessary to
+set the phases of the microwave pulses.
 
+One further information that is needed is the time the phase switch has
+to be set to a new phase before the microwave pulse starts (the phase
+switch needs some small amount of time to settle). This time can be set
+via a statement like
 @example
-PHASE_SWITCH_DELAY_1: 40ns;
-GRACE_PERIOD: 10ns;
+PHASE_SWITCH_DELAY: 40ns;
+@end example
+When this statement is missing a default value of @w{20 ns} is used.
+
+And, finally, one may specify how long the phase switch should remain in
+its state after the end of a pulse. This is called the grace period and
+is set via
+@example
+GRACE_PERIOD: 20ns;
+@end example
+Without this statement a default grace period of @w{10 ns} will be
+used.
+
+Here's a diagram that shows the phase switch delay and the grace period:
+@example
+                   ____________________________
+                  |                            |
+Phase pulse       |                            |
+             _____|                            |____________
+                           _________________
+                          |                 |
+Microwave pulse           |                 |
+             _____________|                 |_______________
+
+                ->|       |<-             ->|  |<-
+              phase switch delay        grace period
 @end example
 
 
-@example
-PHASE_SETUP_1:
-PHASE_SETUP_2:
-@end example
-
-
-@strong{Frankfurt S-band spectrometer}:
-
-@strong{Berlin X-band spectrometer}:
+When the program does its tests it will always check if the distances
+between the pulses is large enough to allow setting the phase pulses. If
+the pulse distances get very small it may drop the grace period but the
+phase switch delay will always be there (or the program will abort with
+an error message).
 
