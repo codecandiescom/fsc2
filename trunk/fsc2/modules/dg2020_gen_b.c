@@ -74,15 +74,6 @@ bool dg2020_assign_function( int function, long pod )
 			THROW( EXCEPTION );
 		}
 
-		if ( f->pod2 != NULL )
-		{
-			eprint( FATAL, "%s:%ld: %s: There have already been two pods "
-					"assigned to function `%s'.", Fname, Lc,
-					pulser_struct.name, Function_Names[ f->self ] );
-			THROW( EXCEPTION );
-		}
-
-		f->pod2 = p;
 	}
 	else
 		f->pod = p;
@@ -490,63 +481,6 @@ bool dg2020_set_repeat_time( double time )
 
 	dg2020.repeat_time = dg2020_double2ticks( time );
 	dg2020.is_repeat_time = SET;
-
-	return OK;
-}
-
-
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
-
-bool dg2020_set_phase_reference( int phase, int function )
-{
-	FUNCTION *p, *f;
-
-	p = &dg2020.function[ phase ];
-	f = &dg2020.function[ function ];
-
-	if ( p->phase_func != NULL )
-	{
-		eprint( FATAL, "%s:%ld: %s: Phase function `%s' has already been "
-				"associated with function `%s'.", Fname, Lc,
-				pulser_struct.name, Function_Names[ p->self ],
-				Function_Names[ p->phase_func->self ] );
-		THROW( EXCEPTION );
-	}
-
-	if ( f->phase_func != NULL )
-	{
-		eprint( FATAL, "%s:%ld: %s: Function `%s' has already been "
-				"associated with phase function `%s'.", Fname, Lc,
-				pulser_struct.name, Function_Names[ f->self ],
-				Function_Names[ f->phase_func->self ] );
-		THROW( EXCEPTION );
-	}
-
-	p->phase_func = f;
-	f->phase_func = p;
-
-	return OK;
-}
-
-
-/*-----------------------------------------------------------------*/
-/*-----------------------------------------------------------------*/
-
-bool dg2020_setup_phase( int func, PHS phs )
-{
-	assert( func == PULSER_CHANNEL_PHASE_1 || func == PULSER_CHANNEL_PHASE_2 );
-
-	if ( dg2020.function[ func ].is_phs )
-	{
-		eprint( WARN, "%s:%ld: %s: Phase setup for function `%s' has "
-				"already been done.", Fname, Lc, pulser_struct.name,
-				Function_Names[ func ] );
-		return FAIL;
-	}
-
-	memcpy( &dg2020.function[ func].phs, &phs, sizeof( PHS ) );
-	dg2020.function[ func ].is_phs = SET;
 
 	return OK;
 }
