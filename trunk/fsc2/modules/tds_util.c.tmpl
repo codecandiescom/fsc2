@@ -973,6 +973,25 @@ void tds_tmpl_set_window( WINDOW *w )
 #endif
 
 
+/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*/
+
+WINDOW *tds_tmpl_get_window_by_number( long win_num )
+{
+	WINDOW *w;
+
+	if ( win_num >= WINDOW_START_NUMBER )
+		for ( w = tds_tmpl.w; w != NULL; w = w->next )
+			if ( w->num == win_num )
+				return w;
+
+	print( FATAL, "Argument isn't a valid window number.\n" );
+	THROW( EXCEPTION );
+
+	return NULL;
+}
+
+
 /*
  * Local variables:
  * tags-file-name: "../TAGS"

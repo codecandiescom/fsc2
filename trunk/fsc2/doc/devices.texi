@@ -1367,11 +1367,12 @@ The function can only be used in the @code{EXPERIMENT} section of the
 @anchor{digitizer_get_area}
 @item digitizer_get_area()
 @findex digitizer_get_area()
+This function is currently only implemented for the @strong{Tektronix}
+oscilloscopes.
+
 The function returns the area under one of the measured curves. It
-expects up to two arguments, the oscilloscopes channel the data are to
-be taken from and, optionally, a window ID as returned by
-@code{digitizer_define_window()} to specify the time interval the area
-is computed from. The channel that can be used depend on the model of
+expects at least one argument, the oscilloscopes channel the data are to
+be taken from. The channel that can be used depend on the model of
 the digitizer:
 @table @samp
 @item TDS520
@@ -1389,21 +1390,42 @@ the digitizer:
 @item @code{MATH1}, @code{MATH2} or @code{MATH3}
 @item @code{REF1}, @code{REF2}, @code{REF3} or @code{REF4} 
 @end itemize
-@item LECROY9400
-@itemize @bullet
-@item @code{CH1} or @code{CH2}
-@item @code{MEM_C} or @code{MEM_D}
-@item @code{FUNC_E} or @code{FUNC_F}
-@end itemize
+@c @item LECROY9400
+@c @itemize @bullet
+@c @item @code{CH1} or @code{CH2}
+@c @item @code{MEM_C} or @code{MEM_D}
+@c @item @code{FUNC_E} or @code{FUNC_F}
+@c @end itemize
 @end table
-Except for the models @code{TDS520} and @code{LECROY9400}, this function
-positions the cursors at the start and end point of the specified window
-(or the first and last point if no window as been specified) and uses
-the function built into the digitizer to compute the area. For the
-models @code{TDS520} and @code{LECROY9400}, that miss this built-in
-function, the curve in the interval is fetched which is than used to
-compute the area. To give some visual feedback also for the @code{TDS520}
-the cursors are moved to the borders of the interval.
+
+The following, optional arguments are a list of integer variables or
+1-dimensional integer arrays, where each number (or array element) is a
+window ID as returned by @code{digitizer_define_window()}, specifying
+the time interval the area is computed from.
+
+If you pass the function no argument beside the channel number the area
+of the whole curve is returned. If you pass it a single window number
+(either by passing it an integer variable or a one-dimensional array of
+length @code{1}) the function return a floating point variable with the
+area in the specified window.
+
+Finally, if you pass the function more than one window identifier
+(either by passing it more than one integer variable or or one or more
+integer arrays), it returns a flat, 1-dimensional floating point array
+with as many elements as there were window identifiers, each element
+being the area for the corresponding window.
+
+Except for the @code{TDS520}
+@c and the @code{LECROY9400}
+this function positions the cursors at the start and end point of the
+specified window (or the first and last point if no window as been
+specified) and uses the function built into the digitizer to compute the
+area. For the @code{TDS520}
+@c and @code{LECROY9400}
+, that misses this built-in function, the curve in the interval is
+fetched and then used to compute the area. To give some visual
+feedback also for the @code{TDS520} the cursors are moved to the borders
+of the interval.
 
 The function will automatically wait until a still running acquisition
 sequence is finished before measuring the area. 
@@ -1451,17 +1473,24 @@ of the digitizer:
 @item @code{MATH1}, @code{MATH2} or @code{MATH3}
 @item @code{REF1}, @code{REF2}, @code{REF3} or @code{REF4}
 @end itemize
+@item LECROY9400
+@itemize @bullet
+@item @code{CH1} or @code{CH2}
+@item @code{MEM_C} or @code{MEM_D}
+@item @code{FUNC_E} or @code{FUNC_F}
+@end itemize
 @end table
-
-The function positions the cursors at the start and end point of the
-specified window (or the first and last point if no window as been
-specified) to give a visual feedback.
 
 The function will automatically wait until a still running acquisition
 sequence is finished before returning a curve. The data will be returned
 as an array of floating point numbers and it's the users responsibility
 to supply an array for storing the data. Usually, this will be an array
 defined with an unspecified number of elements.
+
+For the @strong{Tektronix} oscilloscopes the function positions the
+cursors at the start and end point of the specified window (or the first
+and last point if no window as been specified) to give a visual
+feedback.
 
 This function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} file.
@@ -1478,12 +1507,13 @@ are not positioned at the start and end point of the curve to be fetched.
 @anchor{digitizer_get_amplitude}
 @item digitizer_get_amplitude()
 @findex digitizer_get_amplitude()
+This function is currently only implemented for the @strong{Tektronix}
+oscilloscopes.
+
 The function returns the amplitude, i.e.@: the difference between the
-maximum and minimum voltage, from the digitizer. The function takes up
-to two parameters, the channel the data are to be fetched from and, optionally,
-a window ID as returned by @code{digitizer_define_window()} to specify
-the time interval. Valid choices of the data channel depend on the model
-of the digitizer:
+maximum and minimum voltage, from the digitizer. The function takes at
+least one argument, the channel the data are to be fetched from. Valid
+choices of the data channel depend on the model of the digitizer:
 @table @samp
 @item TDS520
 @itemx TDS520A
@@ -1500,15 +1530,42 @@ of the digitizer:
 @item @code{MATH1}, @code{MATH2} or @code{MATH3}
 @item @code{REF1}, @code{REF2}, @code{REF3} or @code{REF4}
 @end itemize
+@c @item LECROY9400
+@c @itemize @bullet
+@c @item @code{CH1} or @code{CH2}
+@c @item @code{MEM_C} or @code{MEM_D}
+@c @item @code{FUNC_E} or @code{FUNC_F}
+@c @end itemize
 @end table
-Except for the model @code{TDS520}, this function positions the cursors
-at the start and end point of the specified window (or the first and
-last point if no window as been specified) and uses the function built
-into the digitizer to compute the amplitude. For the model @code{TDS520}
-that misses this built-in function the curve in the interval is fetched
-which is than used to compute the amplitude. To give some visual
-feedback also for this model the cursors are moved to the borders of the
-interval.
+
+The following, optional arguments are a list of integer variables or
+1-dimensional integer arrays, where each number (or array element) is a
+window ID as returned by @code{digitizer_define_window()}, specifying
+the time interval the amplitude is determined from.
+
+If you pass the function no argument beside the channel number the
+amplitude of the whole curve is returned. If you pass it a single window
+number (either by passing it an integer variable or a one-dimensional
+array of length @code{1}) the function returns a floating point variable
+with the amplitude in the specified window.
+
+Finally, if you pass the function more than one window identifier
+(either by passing it more than one integer variable or one or more
+integer arrays), it returns a flat, 1-dimensional floating point array
+with as many elements as there were window identifiers, each element
+being the amplitide for the corresponding window.
+
+Except for the @code{TDS520}
+@c and the @code{LeCroy9400}
+this function positions the cursors at the start and end point of the
+specified window (or the first and last point if no window as been
+specified) and uses the function built into the digitizer to compute the
+amplitude. For the @code{TDS520}
+@c and the @code{LeCroy9400}
+, that misses this built-in function the curve in the interval is
+fetched and then is used to compute the amplitude. To give some visual
+feedback also for the @code{TDS520} the cursors are moved to the borders
+of the interval.
 
 The function will automatically wait until a still running acquisition
 sequence is finished before measuring the amplitude.

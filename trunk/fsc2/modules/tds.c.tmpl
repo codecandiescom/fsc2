@@ -374,14 +374,7 @@ Var *digitizer_change_window( Var *v )
 	win_num = get_strict_long( v, "window ID" );
 	v = vars_pop( v );
 
-	for ( w = tds_tmpl.w; w->num != win_num && w != NULL; w = w->next )
-		/* empty */ ;
-
-	if ( w == NULL )
-	{
-		print( FATAL, "First argument is not a valid window ID.\n" );
-		THROW( EXCEPTION );
-	}
+	w = tds_tmpl_get_window_by_number( win_num );
 
 	/* During the experiment we also accept that there are no arguments for
 	   the position or the width and use the cursor positions instead */
@@ -445,7 +438,6 @@ Var *digitizer_change_window( Var *v )
 Var *digitizer_window_position( Var *v )
 {
 	WINDOW *w;
-	long win_num;
 
 
 	if ( tds_tmpl.w == NULL )
@@ -470,16 +462,7 @@ Var *digitizer_window_position( Var *v )
 	/* Figure out the window number and test if a window with this number
 	   exists at all */
 
-	win_num = get_strict_long( v, "window ID" );
-
-	for ( w = tds_tmpl.w; w->num != win_num && w != NULL; w = w->next )
-		/* empty */ ;
-
-	if ( w == NULL )
-	{
-		print( FATAL, "First argument is not a valid window ID.\n" );
-		THROW( EXCEPTION );
-	}
+	w = tds_tmpl_get_window_by_number( get_strict_long( v, "window ID" ) );
 
 	if ( ( v = vars_pop( v ) ) == NULL )
 		return vars_push( FLOAT_VAR, w->start );
@@ -506,7 +489,6 @@ Var *digitizer_window_position( Var *v )
 Var *digitizer_window_width( Var *v )
 {
 	WINDOW *w;
-	long win_num;
 
 
 	if ( tds_tmpl.w == NULL )
@@ -531,16 +513,7 @@ Var *digitizer_window_width( Var *v )
 	/* Figure out the window number and test if a window with this number
 	   exists at all */
 
-	win_num = get_strict_long( v, "window ID" );
-
-	for ( w = tds_tmpl.w; w->num != win_num && w != NULL; w = w->next )
-		/* empty */ ;
-
-	if ( w == NULL )
-	{
-		print( FATAL, "First argument is not a valid window ID.\n" );
-		THROW( EXCEPTION );
-	}
+	w = tds_tmpl_get_window_by_number( get_strict_long( v, "window ID" ) );
 
 	if ( ( v = vars_pop( v ) ) == NULL )
 		return vars_push( FLOAT_VAR, w->width );
@@ -1149,6 +1122,11 @@ static Var *get_area( Var *v, bool use_cursor )
 {
 	WINDOW *w;
 	int ch;
+	Var *cv;
+	Var *ret = NULL;
+	ssize_t win_count = 0;
+	ssize_t j;
+	long i;
 
 
 	/* The first variable got to be a channel number */
@@ -1170,48 +1148,130 @@ static Var *get_area( Var *v, bool use_cursor )
 
 	tds_tmpl.channels_in_use[ ch ] = SET;
 
-	/* Now check if there's a variable with a window number and check it */
+	/* Now check the variables and count how many window handles we got */
 
-	if ( ( v = vars_pop( v ) ) != NULL )
+	for ( cv = v = vars_pop( v ); cv != NULL; cv = cv->next )
 	{
-		long win_num;
+		vars_check( cv, INT_VAR | INT_ARR );
 
-		if ( tds_tmpl.w == NULL )
+		if ( cv->type == INT_VAR )
+			win_count++;
+		else
 		{
-			print( FATAL, "No measurement windows have been defined.\n" );
-			THROW( EXCEPTION );
-		}
-
-		win_num = get_strict_long( v, "window number" );
-
-		for ( w = tds_tmpl.w; w != NULL && w->num != win_num; w = w->next )
-			/* empty */ ;
-
-		if ( w == NULL )
-		{
-			print( FATAL, "Second argument is not a valid window ID.\n" );
-			THROW( EXCEPTION );
+			if ( cv->len == 0 )
+			{
+				print( FATAL, "Length of array passed as argument #%d is "
+					   "not known.\n", win_count + 1 );
+				THROW( EXCEPTION );
+			}
+			win_count += cv->len;
 		}
 	}
-	else
-		w = NULL;
 
-	too_many_arguments( v );
+	/* Complain when we got something that could be a window handler but no
+	   windows have been defined */
 
-	/* During the experiment if the digitizer's keyboard isn't locked we
-	   need to reread the timebase, record length and trigger position and
-	   update and recheck the windows */
+	if ( win_count > 0 && tds_tmpl.w == NULL )
+	{
+		print( FATAL, "No measurement windows have been defined.\n" );
+		THROW( EXCEPTION );
+	}
 
-	if ( FSC2_MODE == EXPERIMENT && ! tds_tmpl.lock_state )
-		tds_tmpl_state_check( 0.0, 0, 0.0 );
+	/* If there's more than one window handle we must return an array */
 
-	/* Talk to digitizer only during the experiment, otherwise return a dummy
-	   value */
+	if ( win_count > 1 )
+		ret = vars_push( FLOAT_ARR, NULL, ( long ) win_count );
+
+	/* When we're still in the test phase we got to return a dummy value */
 
 	if ( FSC2_MODE != EXPERIMENT )
-		return vars_push( FLOAT_VAR, 1.234e-8 );
+	{
+		if ( v == NULL )
+			return vars_push( FLOAT_VAR, 1.234e-8 );
 
-	return vars_push( FLOAT_VAR, tds_tmpl_get_area( ch, w, use_cursor ) );
+		for ( i = 0; v != NULL; v = vars_pop( v ) )
+		{
+			if ( v->type == INT_VAR )
+			{
+				w = tds_tmpl_get_window_by_number(
+									   get_strict_long( v, "window number" ) );
+
+				if ( win_count == 1 )
+					return vars_push( FLOAT_VAR, 1.234e-8 );
+
+				ret->val.dpnt[ i++ ] = 1.234e-8;
+				continue;
+			}
+
+			for ( j = 0; j < v->len; j++ )
+			{
+				w = tds_tmpl_get_window_by_number( v->val.lpnt[ j ] );
+
+				/* Take care of the hopefully rather unlikely situation that
+				   we've got an array of length 1 */
+
+				if ( win_count == 1 )
+					return vars_push( FLOAT_VAR, 1.234e-8 );
+
+				ret->val.dpnt[ i++ ] = 1.234e-8;
+			}
+		}
+
+		return ret;
+	}
+
+	/* Now comes the part that gets run in a real experiment. First we
+	   deal with the case that there's no window number in the arguments,
+	   here we return the area of the whole curve. Don't forget to reread
+	   the digitizer settings if the keyboard isn't locked. */
+
+	if ( v == NULL )
+	{
+		if ( ! tds_tmpl.lock_state )
+			tds_tmpl_state_check( 0.0, 0, 0.0 );
+		return vars_push( FLOAT_VAR,
+						  tds_tmpl_get_area( ch, NULL, use_cursor ) );
+	}
+
+	/* Otherwise loop over the window numbers and fill the array with areas
+	   for the different windows. */
+
+	for ( i = 0; v != NULL; v = vars_pop( v ) )
+	{
+		if ( v->type == INT_VAR )
+		{
+			w = tds_tmpl_get_window_by_number(
+									   get_strict_long( v, "window number" ) );
+
+			if ( ! tds_tmpl.lock_state )
+				tds_tmpl_state_check( 0.0, 0, 0.0 );
+
+			if ( win_count == 1 )
+				return vars_push( FLOAT_VAR,
+								  tds_tmpl_get_area( ch, w, use_cursor ) );
+
+			ret->val.dpnt[ i++ ] = tds_tmpl_get_area( ch, w, use_cursor );
+
+			continue;
+		}
+
+		for ( j = 0; j < v->len; j++ )
+		{
+			w = tds_tmpl_get_window_by_number( v->val.lpnt[ j ] );
+
+			if ( ! tds_tmpl.lock_state )
+				tds_tmpl_state_check( 0.0, 0, 0.0 );
+
+			if ( win_count == 1 )
+				return vars_push( FLOAT_VAR,
+								  tds_tmpl_get_area( ch, w, use_cursor ) );
+
+			ret->val.dpnt[ i++ ] = tds_tmpl_get_area( ch, w, use_cursor );
+
+		}
+	}
+
+	return ret;
 }
 
 
@@ -1350,6 +1410,11 @@ static Var *get_amplitude( Var *v, bool use_cursor )
 {
 	WINDOW *w;
 	int ch;
+	Var *cv;
+	Var *ret = NULL;
+	ssize_t win_count = 0;
+	ssize_t j;
+	long i;
 
 
 	/* The first variable got to be a channel number */
@@ -1371,48 +1436,122 @@ static Var *get_amplitude( Var *v, bool use_cursor )
 
 	tds_tmpl.channels_in_use[ ch ] = SET;
 
-	/* Now check if there's a variable with a window number and check it */
+	/* Now check the variables and count how many window handles we got */
 
-	if ( ( v = vars_pop( v ) ) != NULL )
+	for ( cv = v = vars_pop( v ); cv != NULL; cv = cv->next )
 	{
-		long win_num;
+		vars_check( cv, INT_VAR | INT_ARR );
 
-		if ( tds_tmpl.w == NULL )
+		if ( cv->type == INT_VAR )
+			win_count++;
+		else
 		{
-			print( FATAL, "No measurement windows have been defined.\n" );
-			THROW( EXCEPTION );
-		}
-
-		win_num = get_strict_long( v, "window number" );
-
-		for ( w = tds_tmpl.w; w != NULL && w->num != win_num; w = w->next )
-			/* empty */ ;
-
-		if ( w == NULL )
-		{
-			print( FATAL, "Second argument is not a valid window ID.\n" );
-			THROW( EXCEPTION );
+			if ( cv->len == 0 )
+			{
+				print( FATAL, "Length of array passed as argument #%d is "
+					   "not known.\n", win_count + 1 );
+				THROW( EXCEPTION );
+			}
+			win_count += cv->len;
 		}
 	}
-	else
-		w = NULL;
 
-	too_many_arguments( v );
+	/* Complain when we got something that could be a window handler but no
+	   windows have been defined */
 
-	/* During the experiment if the digitizer's keyboard isn't locked we
-	   need to reread the timebase, record length and trigger position and
-	   update and recheck the windows */
+	if ( win_count > 0 && tds_tmpl.w == NULL )
+	{
+		print( FATAL, "No measurement windows have been defined.\n" );
+		THROW( EXCEPTION );
+	}
 
-	if ( FSC2_MODE == EXPERIMENT && ! tds_tmpl.lock_state )
-		tds_tmpl_state_check( 0.0, 0, 0.0 );
+	/* If there's more than one window handle we must return an array */
 
-	/* Talk to digitizer only in the real experiment, otherwise return a dummy
-	   value */
+	if ( win_count > 1 )
+		ret = vars_push( FLOAT_ARR, NULL, ( long ) win_count );
+
+	/* When we're still in the test phase we got to return a dummy value */
 
 	if ( FSC2_MODE != EXPERIMENT )
-		return vars_push( FLOAT_VAR, 1.23e-7 );
+	{
+		if ( v == NULL )
+			return vars_push( FLOAT_VAR, 1.23e-7 );
 
-	return vars_push( FLOAT_VAR, tds_tmpl_get_amplitude( ch, w, use_cursor ) );
+		for ( i = 0; v != NULL; v = vars_pop( v ) )
+		{
+			if ( v->type == INT_VAR )
+			{
+				w = tds_tmpl_get_window_by_number(
+									   get_strict_long( v, "window number" ) );
+
+				if ( win_count == 1 )
+					return vars_push( FLOAT_VAR, 1.23e-7 );
+
+				ret->val.dpnt[ i++ ] = 1.23e-7;
+				continue;
+			}
+
+			for ( j = 0; j < v->len; j++ )
+			{
+				w = tds_tmpl_get_window_by_number( v->val.lpnt[ j ] );
+
+				/* Take care of the hopefully rather unlikely situation that
+				   we've got an array of length 1 */
+
+				if ( win_count == 1 )
+					return vars_push( FLOAT_VAR, 1.23e-7 );
+
+				ret->val.dpnt[ i++ ] = 1.234e-8;
+			}
+		}
+
+		return ret;
+	}
+
+	if ( v == NULL )
+	{
+		if ( ! tds_tmpl.lock_state )
+			tds_tmpl_state_check( 0.0, 0, 0.0 );
+		return vars_push( FLOAT_VAR,
+						  tds_tmpl_get_amplitude( ch, NULL, use_cursor ) );
+	}
+
+	for ( i = 0; v != NULL; v = vars_pop( v ) )
+	{
+		if ( v->type == INT_VAR )
+		{
+			w = tds_tmpl_get_window_by_number(
+									   get_strict_long( v, "window number" ) );
+
+			if ( ! tds_tmpl.lock_state )
+				tds_tmpl_state_check( 0.0, 0, 0.0 );
+
+			if ( win_count == 1 )
+				return vars_push( FLOAT_VAR,
+								 tds_tmpl_get_amplitude( ch, w, use_cursor ) );
+
+			ret->val.dpnt[ i++ ] = tds_tmpl_get_amplitude( ch, w, use_cursor );
+
+			continue;
+		}
+
+		for ( j = 0; j < v->len; j++ )
+		{
+			w = tds_tmpl_get_window_by_number( v->val.lpnt[ j ] );
+
+			if ( ! tds_tmpl.lock_state )
+				tds_tmpl_state_check( 0.0, 0, 0.0 );
+
+			if ( win_count == 1 )
+				return vars_push( FLOAT_VAR,
+								 tds_tmpl_get_amplitude( ch, w, use_cursor ) );
+
+			ret->val.dpnt[ i++ ] = tds_tmpl_get_amplitude( ch, w, use_cursor );
+
+		}
+	}
+
+	return ret;
 }
 
 
