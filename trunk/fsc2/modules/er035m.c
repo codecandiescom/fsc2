@@ -46,7 +46,7 @@ void er035m_exit_hook( void );
 
 Var *gaussmeter_name( Var *v );
 Var *find_field( Var *v );
-Var *gaussneter_resolution( Var *v );
+Var *gaussmeter_resolution( Var *v );
 Var *gaussmeter_wait( Var *v );
 
 bool is_gaussmeter = UNSET;         /* tested by magnet power supply driver */
