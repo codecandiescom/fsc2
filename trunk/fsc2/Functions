@@ -48,7 +48,8 @@ field_meter_wait, 0, EXP;       // wait a bit for field to stabilize
 measure_field, 0, EXP;          // return field value (ER035M_SA / ER035M_SAS)
 
 
-// Functions exported by the pulser drivers (DG2020)
+// Functions exported by the pulser drivers (DG2020, HFS9000)
+// (functions involving phases and keyboard for DG2020 only)
 
 pulser_state, -1, ALL;          // switches pulser on/off
 pulser_update, 0, EXP;          // commits changes
@@ -58,7 +59,7 @@ pulser_pulse_reset, -1, EXP;    // set back pulses to initial state
 pulser_next_phase, -1, EXP;     // switch to next phase in phase cycling
 pulser_phase_reset, -1, EXP;    // switch back to first phase
 pulser_lock_keyboard, -1, EXP;  // lock or unlock the keyboard
-pulser_cw_mode, 0, PREP;        // CW mode experiment (Berlin only)
+pulser_cw_mode, 0, PREP;        // CW mode experiment (DG2020/Berlin only)
 
 
 // Functions exported by the lock-in amplifier drivers

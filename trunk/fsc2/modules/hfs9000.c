@@ -216,9 +216,14 @@ int hfs9000_exp_hook( void )
 
 int hfs9000_end_of_exp_hook( void )
 {
+	char *cmd = "FPAN:MESS \"\""
+
+
 	if ( ! hfs9000_is_needed )
 		return 1;
 
+	hfs9000_run( STOP );
+	gpib_write( hfs9000.device, cmd, strlen( cmd ) );
 	gpib_local( hfs9000.device );
 
 	return 1;
