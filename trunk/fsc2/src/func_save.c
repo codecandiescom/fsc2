@@ -76,7 +76,7 @@ Var *f_openf( Var *var )
 	char *m;
 	struct stat stat_buf;
 	FILE *fp = NULL;
-	FILE_LIST *old_File_List;
+	FILE_LIST *old_File_List = NULL;
 
 
 	CLOBBER_PROTECT( fp );
