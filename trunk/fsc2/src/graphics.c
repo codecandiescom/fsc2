@@ -12,6 +12,14 @@ static GRAPHICS graph = { UNSET, 0, NULL, NULL };
 
 void graphics_init( long dim, char *x_label, char *y_label )
 {
+	/* The parent process does all the graphics stuff... */
+
+	if ( I_am == CHILD )
+	{
+		writer( C_INIT_GRAPHICS, dim, x_label, y_label );
+		return;
+	}
+
 	if ( dim < 2 || dim > 3 )
 	{
 		eprint( FATAL, "%s:%ld: Invalid display dimension (%ld), valid "

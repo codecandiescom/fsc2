@@ -1,107 +1,137 @@
 /*
-  $Id$: comm.c,v 1.3 1999/09/03 07:50:17 jens Exp jens $
+  $Id$
 */
 
 
 #include "fsc2.h"
 
 
-static void T_read( int fd, void *buf, size_t bytes_to_read );
-
+static void pipe_read( int fd, void *buf, size_t bytes_to_read );
 
 
 long reader( void *ret )
 {
 	CS header;
-	char *str;
-	char *strs[ 3 ];
+	char *str[ 4 ];
 	long dim;
+	int i;
+	int n1, n2;
 
 
-	T_read( pd[ READ ], &header, sizeof( CS ) );
+	pipe_read( pd[ READ ], &header, sizeof( CS ) );
 
 	switch ( header.type )
 	{
-		case C_EPRINT :
-			str = T_malloc( header.data.len + 1 );
-			T_read( pd[ READ ], str, header.data.len );
-			str[ header.data.len ] = '\0';
-			eprint( NO_ERROR, "%s", str );
-			T_free( str );
+		case C_EPRINT :                       /* only to be read by parent */
+			str[ 0 ] = get_string( header.data.len );
+			pipe_read( pd[ READ ], str[ 0 ], header.data.len );
+			str[ 0 ][ header.data.len ] = '\0';
+			eprint( NO_ERROR, "%s", str[ 0 ] );
+			T_free( str[ 0 ] );
 			if ( ret != NULL )
 				*( ( char ** ) ret ) = NULL;
 			return 0;
 
-		case C_SHOW_MESSAGE :
-			str = T_malloc( header.data.len + 1 );
-			T_read( pd[ READ ], str, header.data.len );
-			str[ header.data.len ] = '\0';
-			fl_show_messages( str );
-			T_free( str );
+		case C_SHOW_MESSAGE :                 /* only to be read by parent */
+			str[ 0 ] = get_string( header.data.len );
+			pipe_read( pd[ READ ], str[ 0 ], header.data.len );
+			str[ 0 ] [ header.data.len ] = '\0';
+			fl_show_messages( str[ 0 ] );
+			T_free( str[ 0 ] );
 			if ( ret != NULL )
 				*( ( char ** ) ret ) = NULL;
 			return 0;
 
-		case C_SHOW_ALERT :
-			str = T_malloc( header.data.len + 1 );
-			T_read( pd[ READ ], str, header.data.len );
-			str[ header.data.len ] = '\0';
-			strs[ 0 ] = str;
-			if ( ( strs[ 1 ] = strchr( strs[ 0 ], '\n' ) ) != NULL )
+		case C_SHOW_ALERT :                   /* only to be read by parent */
+			str[ 0 ] = get_string( header.data.len );
+			pipe_read( pd[ READ ], str[ 0 ], header.data.len );
+			show_alert( str[ 0 ] );
+			T_free( str[ 0 ] );
+			if ( ret != NULL )
+				*( ( char ** ) ret ) = NULL;
+			return 0;
+
+		case C_SHOW_CHOICES :                 /* only to be read by parent */
+			if ( I_am == CHILD )
 			{
-				*strs[ 1 ]++ = '\0';
-				if ( ( strs[ 2 ] = strchr( strs[ 1 ], '\n' ) ) != NULL )
-					*strs[ 2 ]++ = '\0';
-				else
-					strs[ 2 ] = NULL;
+				fprintf( stderr, "CHILD4: In C_SHOW_CHOICES\n" );
+				return 0;
 			}
-			else
-				strs[ 1 ] = strs[ 2 ] = NULL;
-			fl_show_alert( strs[ 0 ], strs[ 1 ], strs[ 2 ], 1 );
-			T_free( str );
+
+			/* get number of buttons and number of default button */
+
+			pipe_read( pd[ READ ], &n1, sizeof( int ) );
+			pipe_read( pd[ READ ], &n2, sizeof( int ) );
+
+			/* get message text and button labels */
+
+			for ( i = 0; i < 4; i++ )
+			{
+				if ( header.data.str_len[ i ] != 0 )
+				{
+					str[ i ] = get_string( header.data.str_len[ i ] );
+					pipe_read( pd[ READ ], str[ i ],
+							   header.data.str_len[ i ] );
+					str[ i ][ header.data.str_len[ i ] ] = '\0';
+				}
+				else
+					str[ i ] = get_string_copy( "" );
+			}
+
+			/* show the question, get the button number and pass it back to
+			   the chiold process */
+
+			writer( C_INT, show_choices( str[ 0 ], n1,
+										 str[ 1 ], str[ 2 ], str[ 3 ], n2 ) );
+
+			/* get rid of the strings */
+
+			for ( i = 0; i < 4; i++ )
+				T_free( str[ i ] );
+
 			if ( ret != NULL )
 				*( ( char ** ) ret ) = NULL;
 			return 0;
 
-		case C_INIT_GRAPHICS :
+		case C_INIT_GRAPHICS :                /* only to be read by parent */
 			/* read in the dimension */
 
-			T_read( pd[ READ ], &dim, sizeof( long ) );
+			pipe_read( pd[ READ ], &dim, sizeof( long ) );
 
 			/* get length of first label string from header and read it */
 
-			if ( header.data.init_graphics.str1_len != 0 )
+			if ( header.data.str_len[ 0 ] != 0 )
 			{
-				strs[ 0 ] = get_string( header.data.init_graphics.str1_len );
-				T_read( pd[ READ ], strs[ 0 ],
-					  header.data.init_graphics.str1_len );
-				strs[ 0 ][ header.data.init_graphics.str1_len ] = '\0';
+				str[ 0 ] = get_string( header.data.str_len[ 0 ] );
+				pipe_read( pd[ READ ], str[ 0 ],
+					  header.data.str_len[ 0 ] );
+				str[ 0 ][ header.data.str_len[ 0 ] ] = '\0';
 			}
 			else
-				strs[ 0 ] = NULL;
+				str[ 0 ] = NULL;
 
 			/* get length of second label string from header and read it */
 
-			if ( header.data.init_graphics.str2_len != 0 )
+			if ( header.data.str_len[ 1 ] != 0 )
 			{
-				strs[ 1 ] = get_string( header.data.init_graphics.str2_len );
-				T_read( pd[ READ ], strs[ 1 ],
-					  header.data.init_graphics.str2_len );
-				strs[ 1 ][ header.data.init_graphics.str2_len ] = '\0';
+				str[ 1 ] = get_string( header.data.str_len[ 1 ] );
+				pipe_read( pd[ READ ], str[ 1 ],
+					  header.data.str_len[ 1 ] );
+				str[ 1 ][ header.data.str_len[ 1 ] ] = '\0';
 			}
 			else
-				strs[ 1 ] = NULL;
+				str[ 1 ] = NULL;
 
 			/* call the function with the parameters just read */
 
-			graphics_init( dim, strs[ 0 ], strs[ 1 ] );
+			graphics_init( dim, str[ 0 ], str[ 1 ] );
 
 			/* get rid of the label strings */
 
-			if ( strs[ 0 ] != NULL )
-				T_free( strs[ 0 ] );
-			if ( strs[ 1 ] != NULL )
-				T_free( strs[ 1 ] );
+			if ( str[ 0 ] != NULL )
+				T_free( str[ 0 ] );
+			if ( str[ 1 ] != NULL )
+				T_free( str[ 1 ] );
 
 			if ( ret != NULL )
 				*( ( char ** ) ret ) = NULL;
@@ -152,7 +182,7 @@ long reader( void *ret )
 /*    3. Number of bytes to read                                */
 /*--------------------------------------------------------------*/
 
-void T_read( int fd, void *buf, size_t bytes_to_read )
+void pipe_read( int fd, void *buf, size_t bytes_to_read )
 {
 	size_t bytes_read;
 	size_t already_read = 0;
@@ -170,19 +200,21 @@ void writer( int type, ... )
 {
 	CS header;
 	va_list ap;
-	char *str;
-	char *str1, *str2;
+	char *str[ 4 ];
 	long dim;
+	int n1, n2;
+	int i;
 
 
-	/* The child first got to wait for the parent being ready to accept data
-	   and than has to tell the parent that it's now going to send new data.
-	   The other way round this isn't necessary since the child is only going
-	   to read when it actually waits for data. */
+	/* The child process first got to wait for the parent process to become
+	   ready to accept data and than has to tell it that it's now going to
+	   send new data. The other way round this isn't necessary since the
+	   child process is only reading when it actually waits for data. */
 
 	if ( I_am == CHILD )
 	{
-		while ( ! do_send )      /* wait for parent to become ready for data */
+		fprintf( stderr, "CHILD2: do_send is %s.\n", do_send ? "SET" : "UNSET" );
+		while ( ! do_send )             /* wait for parent to become ready */
 			pause( );
 		do_send = UNSET;
 
@@ -194,48 +226,70 @@ void writer( int type, ... )
 
 	switch ( type )
 	{
-		case C_EPRINT :
-			str = va_arg( ap, char * );
-			header.data.len = strlen( str );
+		case C_EPRINT :                   /* only to be written by child */
+			str[ 0 ] = va_arg( ap, char * );
+			header.data.len = strlen( str[ 0 ] );
 			write( pd[ WRITE ], &header, sizeof( CS ) );
-			write( pd[ WRITE ], str, header.data.len );
+			write( pd[ WRITE ], str[ 0 ], header.data.len );
 			break;
 
-		case C_SHOW_MESSAGE :
-			str = va_arg( ap, char * );
-			header.data.len = strlen( str );
+		case C_SHOW_MESSAGE :             /* only to be written by child */
+			str[ 0 ] = va_arg( ap, char * );
+			header.data.len = strlen( str[ 0 ] );
 			write( pd[ WRITE ], &header, sizeof( CS ) );
-			write( pd[ WRITE ], str, header.data.len );
+			write( pd[ WRITE ], str[ 0 ], header.data.len );
 			break;
 
-		case C_SHOW_ALERT :
-			str = va_arg( ap, char * );
-			header.data.len = strlen( str );
+		case C_SHOW_ALERT :               /* only to be written by child */
+			str[ 0 ] = va_arg( ap, char * );
+			header.data.len = strlen( str[ 0 ] );
 			write( pd[ WRITE ], &header, sizeof( CS ) );
-			write( pd[ WRITE ], str, header.data.len );
+			write( pd[ WRITE ], str[ 0 ], header.data.len );
 			break;
 
-		case C_INIT_GRAPHICS :
+		case C_SHOW_CHOICES :             /* only to be written by child */
+			str[ 0 ] = va_arg( ap, char * );
+			n1 = va_arg( ap, int );
+			for ( i = 1; i < 4; i++ )
+				str[ i ] = va_arg( ap, char * );
+			n2 = va_arg( ap, int );
+
+			for ( i = 0; i < 4; i++ )
+				if ( str[ i ] != NULL )
+					header.data.str_len[ i ] = strlen( str[ i ] );
+				else
+					header.data.str_len[ i ] = 0;
+
+			write( pd[ WRITE ], &header, sizeof( CS ) );
+			write( pd[ WRITE ], &n1, sizeof( int ) );
+			write( pd[ WRITE ], &n2, sizeof( int ) );
+
+			for ( i = 0; i < 4; i++ )
+				if ( str[ i ] != NULL && strlen( str[ i ] ) != 0 )
+					write( pd[ WRITE ], str[ i ], strlen( str[ i ] ) );
+			break;
+
+		case C_INIT_GRAPHICS :            /* only to be written by child */
 			dim = va_arg( ap, long );
-			str1 = va_arg( ap, char * );
-			str2 = va_arg( ap, char * );
-			if ( str1 != NULL )
-				header.data.init_graphics.str1_len = strlen( str1 );
+			str[ 0 ] = va_arg( ap, char * );
+			str[ 0 ] = va_arg( ap, char * );
+			if ( str[ 0 ] != NULL )
+				header.data.str_len[ 0 ] = strlen( str[ 0 ] );
 			else
-				header.data.init_graphics.str1_len = 0;
-			if ( str2 != NULL )
-				header.data.init_graphics.str2_len = strlen( str2 );
+				header.data.str_len[ 0 ] = 0;
+			if ( str[ 1 ] != NULL )
+				header.data.str_len[ 1 ] = strlen( str[ 1 ] );
 			else
-				header.data.init_graphics.str2_len = 0;
+				header.data.str_len[ 1 ] = 0;
 
 			/* Send header, dimension and (optionally) the label strings */
 
 			write( pd[ WRITE ], &header, sizeof( CS ) );
 			write( pd[ WRITE ], &dim, sizeof( long ) );
-			if ( str1 != NULL )
-				write( pd[ WRITE ], str1, strlen( str1 ) );
-			if ( str2 != NULL )
-				write( pd[ WRITE ], str2, strlen( str2 ) );
+			if ( str[ 0 ] != NULL )
+				write( pd[ WRITE ], str[ 0 ], strlen( str[ 0 ] ) );
+			if ( str[ 1 ] != NULL )
+				write( pd[ WRITE ], str[ 1 ], strlen( str[ 1 ] ) );
 			break;
 
 		case C_INT :

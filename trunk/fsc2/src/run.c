@@ -1,5 +1,7 @@
 #include "fsc2.h"
 #include "gpib.h"
+#include <sys/types.h>
+#include <sys/socket.h>
 
 
 extern int prim_exp_runparse( void );     /* from prim_exp__run_parser.y */
@@ -20,7 +22,7 @@ static void set_buttons( int active );
 static void run_child( void );
 static void do_send_handler( int sig_type );
 static void do_quit_handler( int sig_type );
-static bool do_measurement( void );
+static void do_measurement( void );
 
 
 /* Locally used global variables used in parent, child and signal handlers */
@@ -45,7 +47,7 @@ static volatile int quitting;
 bool run( void )
 {
 	const char *line;
-	int i;
+	int i, pr;
     char *gpib_log = ( char * ) GPIB_LOG_FILE;
 
 
@@ -100,10 +102,18 @@ bool run( void )
 				  "fsc: Run" );
 	fl_set_cursor( FL_ObjWin( main_form->run ), XC_left_ptr );
 
-	/* Open pipe for passing data between child and parent process */
+	/* Open pipes for passing data between child and parent process - we need
+	 two pipes, one for the parent process to write to the child process and
+	 another one for the other way round.*/
 
-    if ( pipe( pd ) != 0 )                 /* try to open pipe */
+    if ( ( pr = pipe( pd ) ) < 0 || pipe( pd + 2 ) < 0 )      /* open pipes */
 	{
+		if ( pr == 0 )
+		{
+			close( pd[ 0 ] );
+			close( pd[ 1 ] );
+		}
+
 		eprint( FATAL, "Not enough file handles to run experiment." );
 		run_exit_hooks( );
 		if ( need_GPIB )
@@ -138,12 +148,16 @@ bool run( void )
 
 	if ( ( child_pid = fork( ) ) == 0 )     /* start child */
 	{
-		I_am = CHILD;
 		run_child( );
 	}
 
 	if ( child_pid != -1 )                  /* return if fork() succeeded */
+	{
+		close( pd[ 0 ] );
+		close( pd[ 3 ] );
+		pd[ 0 ] = pd[ 2 ];
 		return OK;
+	}
 
 	switch ( errno )
 	{
@@ -156,6 +170,9 @@ bool run( void )
 			eprint( FATAL, "Not enough memory left to run the experiment.\n" );
 			break;
 	}
+
+	for ( i = 0; i < 4; i++ )
+		close( pd[ i ] );
 
 	fl_remove_signal_callback( SIGCHLD );
 	fl_add_signal_callback( SIGCHLD, sigchld_handler, NULL );
@@ -528,6 +545,12 @@ int return_status;
 
 void run_child( void )
 {
+	I_am = CHILD;
+
+	close( pd[ 1 ] );
+	close( pd[ 2 ] );
+	pd[ 1 ] = pd[ 3 ];
+
 	/* Set up pointers and global variables used with the signal handlers,
 	   and set handler for DO_SEND signals */
 
@@ -593,7 +616,7 @@ void do_quit_handler( int sig_type )
 /* executed by the child it's got to honour the `do_quit' flag.         */
 /*----------------------------------------------------------------------*/
 
-bool do_measurement( void )
+void do_measurement( void )
 {
 	Prg_Token *cur;
 
@@ -695,5 +718,4 @@ bool do_measurement( void )
 
 	save_restore_pulses( UNSET );
 	save_restore_variables( UNSET );
-	return FAIL;
 }

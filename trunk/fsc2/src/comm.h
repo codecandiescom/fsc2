@@ -12,6 +12,7 @@ enum {
 	C_EPRINT = 0,
 	C_SHOW_MESSAGE,
 	C_SHOW_ALERT,
+	C_SHOW_CHOICES,
 	C_INIT_GRAPHICS,
 	C_INT,
 	C_LONG,
@@ -29,10 +30,7 @@ typedef struct {
 		long long_data;
 		float float_data;
 		double double_data;
-		struct {
-			size_t str1_len;
-			size_t str2_len;
-		} init_graphics;
+		size_t str_len[ 4 ];
 	} data;
 } CS;
 
