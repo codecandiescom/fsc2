@@ -1695,6 +1695,7 @@ pulse of a function).
 @item @code{pulser_pulse_reset()}     @tab @ref{pulser_pulse_reset}
 @item @code{pulser_show_pulses()}     @tab @ref{pulser_show_pulses}
 @item @code{pulser_dump_pulses()}     @tab @ref{pulser_dump_pulses}
+@item @code{pulser_pulse_minimum_specs()}     @tab @ref{pulser_pulse_minimum_specs}
 @end multitable
 
 

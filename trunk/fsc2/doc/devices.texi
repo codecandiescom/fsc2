@@ -2349,6 +2349,21 @@ When running in batch mode this function does nothing.
 This function can only be called during the @code{PREPARATIONS} section
 of an @code{EDL} script.
 
+
+@anchor{pulser_pulse_minimum_specs}
+@item pulser_pulse_minimum_specs()
+@findex pulser_pulse_minimum_specs()
+This function is available only for the @code{rb_pulser} module, i.e.@:
+the pulser used with the 275 GHz spectrometer in Leiden. It expects a
+single argument, a pulse, e.g. @code{P1}. If it is the first pulse of
+a function (i.e.@: @code{MICROWAVE}, @code{RF} or @code{DETECTION}), the
+function returns the earliest possible position of the pulse. For all
+other pulses, the minimum distance to the end of the previous pulse is
+returned.
+
+This function can only be called during the @code{EXPERIMENT} section
+of an @code{EDL} script.
+
 @end table
 
 
