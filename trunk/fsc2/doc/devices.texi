@@ -6,14 +6,17 @@
 @ifinfo
 @menu
 * Introduction::            
-* Magnet functions::        Functions for controlling the magnet.
-* Gaussmeter functions::    Functions for meeasuring the magnetic field.
-* Lock-In functions::       Functions for accessing the lock-in amplifiers.
+* Magnet Functions::        Functions for controlling the magnet.
+* Gaussmeter Functions::    Functions for meeasuring the magnetic field.
+* Lock-In Functions::       Functions for accessing the lock-in amplifiers.
+* Digitizer Functions::     Functions for accessing the oscilloscopes.
+* Pulser Functions::
+* Synthesizer Functions::
 @end menu
 @end ifinfo
 
 
-@node IntroductionMagnet functions, Device Functions, Device Functions
+@node Introduction, Magnet Functions, Device Functions, Device Functions
 @section Introduction
 
 
@@ -59,9 +62,9 @@ reduces the amount of differences to be taken into account considerably.
 
 
 
-@node Magnet functions, Gaussmeter functions, Introduction, Device Functions
+@node Magnet Functions, Gaussmeter Functions, Introduction, Device Functions
 @section Magnet functions
-@cindex magnet functions
+@cindex Magnet functions
 
 
 All the following functions may be used to control the magnetic field of
@@ -95,8 +98,8 @@ time. This may take some time. See below on how to reduce this time.
 The function can be called to set the start field and the field step
 size used in sweeps. The function expects two floating point parameters,
 i.e.@: the start field, e.g.@: @w{0.345 T}, and the step size, e.g.@:
-@w{0.35 G}.
-
+@w{0.35 G}. The function can be called before the @code{EXPERIMENT}
+section starts.
 
 @item magnet_fast_init()
 @findex magnet_fast_init()
@@ -110,10 +113,9 @@ that the parameters didn't check significantly since the last run.
 
 @item set_field()
 @findex set_field()
-This function can be called in the @code{EXPERIMENT} section. It expects
-one floating point argument, i.e.@: the field value and will set the
-magnetic field to this value.
-
+This function expects one floating point argument for the field value
+and will set the magnetic field to this value. The function can only be
+called in the @code{EXPERIMENT} section.
 
 @item sweep_up()
 @findex sweep_up()
@@ -133,20 +135,21 @@ function at all but @code{set_field()} instead.
 @item sweep_down()
 @findex sweep_down()
 Analog to @code{sweep_up()} but sweeping the magnetic field down by the
-field step size defined in @code{magnet_setup()}.
+field step size defined in @code{magnet_setup()}. The function can only
+be called in the @code{EXPERIMENT} section.
 
 @item reset_field()
 @findex reset_field()
-This function (to be called in the @code{EXPERIMENT} section only)
-resets the magnetic field to the start field value defined in
-@code{magnet_setup()} (which has to be called before).
+This function resets the magnetic field to the start field value defined
+in @code{magnet_setup()} (which has to be called before). The function
+can only be used in the @code{EXPERIMENT} section.
 
 @end table
 
 
-@node Gaussmeter functions, Lock-In Functions, Magnet functions, , Device Functions
+@node Gaussmeter Functions, Lock-In Functions, Magnet Functions, Device Functions
 @section Gaussmeter functions
-@cindex gaussmeter functions
+@cindex Gaussmeter functions
 
 
 Currently, two types of gaussmeters are implemented, the Bruker ER035M
@@ -180,22 +183,24 @@ and have to be specified in the @code{DEVICES} section @b{before} the
 magnet module.
 
 There are only two functions for gaussmeters, both only to be used in
-queries and in the @code{EXPERIMENT} section of the EDL program.
+queries and in the @code{EXPERIMENT} section of the EDL program only.
 
 @table @samp
 @item find_field()
 @findex find_field()
 The function returns the current value of the magnetic field in Gauss.
+The function can only be called in the @code{EXPERIMENT} section.
 
 @item field_resolution()
 @findex field_resolution()
 The function returns the resolution in Gauss used in measurements of the
-magnetc field.
+magnetc field. The function can only be called in the @code{EXPERIMENT}
+section.
 
 @end table
 
 
-@node Lock-In functions, , Gaussmeter functions, Device Functions
+@node Lock-In Functions, Digitizer Functions, Gaussmeter Functions, Device Functions
 @section Lock-In functions
 @cindex Lock-In functions
 
@@ -229,31 +234,284 @@ from the lock-in amplifier. The parameters, that may be passed to the
 function differ according to the model.
 @table @samp
 @item SR510
-No argumnt is allowed - the function returns the measured value of the
+No argument is allowed - the function returns the measured value of the
 only channel as a floating point number (i.e.@: in Volts).
 
 @item SR530
-If no argument is specified the measured value at the first channel is
+If no argument is specified the measured value at channel 1 is
 returned. Alternatively, one parameter may be passed to the function
 with a value of either @code{1} or @code{2}, in which case the measure
 value from channel 1 or 2 is returned. Finally, two arguments can be
-given, with again values of @code{1} or @code{2}. In this case a
-1-dimensional array with two elements is returned, containing the
-measured values of the corresponding channels.
+given, with values of @code{1} or @code{2}. In this case a 1-dimensional
+array with two elements is returned, containing the measured values of
+the corresponding channels. The function can only be called in the
+@code{EXPERIMENT} section.
 
 @item SR810
 @item SR830
+If no argument is specified the measured value at channel 1 is returned.
+If one parameter is passed to the function the value at the
+corresponding channel is returned. Possible channel numbers and their
+meaning are:
+@table @samp
+@item 1
+channel 1
+@item 2
+channel 2
+@item 3
+amplitude of data from channel 1 and 2 in polar coordinates
+@item 3
+phase of data from channel 1 and 2 in polar coordinates
+@end table
+Finally, up to 4 arguments can be passed to the function with the
+values given above. In this case a 1-dimensional array is returned with
+as many data as there were arguments (in the sequence corresponding the
+one of the arguments).
+@end table
+The function can only be called in the @code{EXPERIMENT} section.
+
+@item lockin_get_adc_data()
+@findex lockin_get_adc_data()
+The function returns the voltage at one of the ADC ports numbered at the
+back side of the lock-in amplifier. Allowed values of the required
+argument are between 1 and 4, corresponding to the port numbering.
+
+@item lockin_dac_voltage()
+@findex lockin_dac_voltage()
+The function can be used to set or query the voltage at one of the DAC
+ports at the back side of the the lock-in amplifier. While for the
+models SR510 and SR530 the allowed values for the required arguments are
+5 or 6, for models SR810 and SR830 the values can range from 1 to 4,
+corresponding to the different numbers of DAC ports and their numbering
+printed on the back side. If no further argument is given the function
+returns the current voltage applied to the DAC port (which is
+atomatically set to @w{0 V} at the initialization of the lock-in
+amplifier if no voltage has been set previous to the @code{EXPERIMENT}
+section). If a second argument is given the DAC will be set to the
+corresponding voltage. The function returns the voltage that has been
+set.
+
+For the models SR510 and SR530 this voltage has to be in the range
+between @w{-10.24 V} and @w{+10.24 V} while for the models SR810 and
+SR830 the allowed voltage range is @w{-10.V} to @w{+10.5 V}.
+
+Before the @code{EXPERIMENT} section this function can't be called
+without an argument, i.e as a query.
+
+@item lockin_sensitivity()
+@findex lockin_sensitivity()
+This function can be used to query or set the sensitivity setting of the
+lock-in amplifier. If no argument is passed to the function the current
+sensitivity is returned. For the models SR510 and SR530 a 10 times
+higher sensitivity than the maximum adjustable sensitivity of @w{100 nV} is
+returned when the @code{EXPAND} button is switched on.
+
+When called with a second argument the corresponding sensitivity is
+set. This value has to be positive. If there is no sensitivity fitting
+the argument the lowest sensitivity is set when the argument is larger
+than the lowest sensitivity. When the argument is smaller than the
+highest sensitivity the highest sensitivity is set. When the argument is
+in between two possible sensitivity settings the nearest sensitivity
+setting is set and a warning is printed. The function will return the
+sensitivity that has been set.
+
+For the models SR510 and SR530 a sensitivity 10 times higher than the
+maximum sensitivity can be specified, in which case the @code{EXPAND}
+button is automatically swiched on.
+
+Before the @code{EXPERIMENT} section this function can't be called
+without an argument, i.e. as a query.
+
+@item lockin_time_constant()
+@findex lockin_time_constant()
+The function queries or sets the time constant of the lock-in
+amplifier. If no argument is passed to the function the current time
+constant is returned. If there's an argument the time constant is set
+accordingly.  The argument has to be positive. If the argument is larger
+than the highest time constant the maximum time constant is set and if
+its smaller than the lowest time constant the smallest possible time
+constant is set. If the value of the argument is in between two possible
+time constant settings the nearest setting is used and a warning is
+printed. The function will return the time constant setting that has
+been set.
+
+For models SR510 and SR530 also the POST time constant is set.
+
+Before the @code{EXPERIMENT} section this function can't be called
+without an argument, i.e. as a query.
+
+@item lockin_phase()
+@findex lockin_phase()
+The function queries or sets the phase of the lock-in amplifier. If
+called with no argument it will return the current phase setting in the
+interval between 0 and 360 degrees. If called with an argument the phase
+is set accordingly.
+
+Before the @code{EXPERIMENT} section this function can't be called
+without an argument, i.e. as a query.
+
+@item lockin_ref_freq()
+@findex lockin_ref_freq()
+The function can be used to query the reference frequency and, for the
+models SR810 and SR830, to set the reference frequency (both the other
+models need an external reference frequency). If called with no argument
+the current reference frequency is returned. If called with an argument
+(models SR810 and SR830 only) the reference frequency is set. If the
+frequency is not within the the admissible range an error message is
+printed and the experiment is stopped) - the admissible range depends on
+the harmonics setting, see the maual for more details.
+
+Before the @code{EXPERIMENT} section this function can't be called in
+query mode, i.e. without an argument.
+
+@item lockin_ref_level()
+@findex lockin_ref_level()
+This function can be only used with the models SR810 and SR830. It
+queries (if called with no argument) or sets (if called with an
+argument) the level of the reference frequency. The allowed levels are
+between @w{4 mV} and @w{5 V}, if the argument is not within this range
+an error message is printed and the experiment is stopped.
+
+Before the @code{EXPERIMENT} section this function can't be called in
+query mode, i.e. without an argument.
+
 @end table
 
 
+@node Digitizer Functions, Pulser Functions, Lock-In Functions, Device Functions
+@section Digitizer functions
+@cindex Digitizer functions
+
+The digitizing oscilloscopes currently implemented are the Thektronix
+TDS520, TDS520A, TDS744A and TDS754A. The corresponding module names to
+be used in the @code{DEVICES} section are
+@example
+tds520
+tds520a
+tds744a
+tds754a
+@end example
+
+@table @samp
+@item digitizer_timebase()
+@findex digitizer_timebase()
+The function queries (if called with no argument) or sets (if called
+with an argument) the time base setting of the oscilloscope. The time
+base of the oscilloscope can be only set once before the start of the
+@code{EXPERIMENT} section. The admissible range of the time base
+depends on the model, please check the manual. The function can be
+called in query mode only in the @code{EXPERIMENT} section.
+
+@item digitizer_num_averages()
+@findex digitizer_num_averages()
+The function queries (if called with no argument) or sets (if called
+with an argument) the number of averages done by the oscilliscope.  The
+function can be used in query mode only in the @code{EXPERIMENT}
+section. The argument for the number of averages must be at least 1
+(which will switch the oscilloscope into @code{SAMPLE} mode). If the
+argument is larger than the maximum number of averages the maximum
+number is used instead.
+
+@item digitizer_trigger_channel()
+@findex digitizer_trigger_channel()
+
+@item digitizer_define_window()
+@findex digitizer_define_window()
+
+@item digitizer_start_acquisition()
+@findex digitizer_start_acquisition()
+
+@item digitizer_get_area()
+@findex digitizer_get_area()
+
+@item digitizer_get_area_fast()
+@findex digitizer_get_area_fast()
+
+@item digitizer_get_curve()
+@findex digitizer_get_curve()
+
+@item digitizer_get_curve_fast()
+@findex digitizer_get_curve_fast()
+
+@item digitizer_get_amplitude()
+@findex digitizer_get_amplitude()
+
+@item digitizer_get_amplitude_fast()
+@findex digitizer_get_amplitude_fast()
+
 @end table
 
-lockin_get_data, -1, EXP;       // returns the lock-in voltage 
-lockin_get_adc_data, 1, EXP;    // returns a ADC voltage
-lockin_dac_voltage, -1, ALL;    // gets or sets DAC voltage
-lockin_sensitivity, -1, ALL;    // gets or sets the sensitivity
-lockin_time_constant, -1, ALL;  // gets or sets the time constant
-lockin_phase, -1, ALL;          // gets or sets the phase
-lockin_ref_freq, -1, ALL;       // Get or set reference frequency (SR8x0 only)
-lockin_ref_mode, 0, EXP;        // Get reference mode (SR8x0 only)
-lockin_ref_level, -1, ALL;      // Get or set reference level (SR8x0 only)
+
+@node Pulser Functions, Synthesizer Functions, Digitizer Functions, Device Functions
+@section Pulser functions
+@cindex Pulser functions
+
+@table @samp
+
+@item pulser_update()
+@findex pulser_update()
+
+@item pulser_shift()
+@findex pulser_shift()
+
+@item pulser_increment()
+@findex pulser_increment()
+
+@item pulser_pulse_reset()
+@findex pulser_pulse_reset()
+
+@item pulser_next_phase()
+@findex pulser_next_phase()
+
+@item pulser_phase_reset()
+@findex pulser_phase_reset()
+
+@end table
+
+
+
+@node Synthesizer Functions, , Pulser Functions, Device Functions
+@section Synthesizer functions
+@cindex Synthesizer functions
+
+
+@table @samp
+
+@item synthesizer_state()
+@findex synthesizer_state()
+
+@item synthesizer_frequency()
+@findex synthesizer_frequency()
+
+@item synthesizer_attenuation()
+@findex synthesizer_attenuation()
+
+@item synthesizer_step_frequency()
+@findex synthesizer_step_frequency()
+
+@item synthesizer_sweep_up()
+@findex synthesizer_sweep_up()
+
+@item synthesizer_sweep_down()
+@findex synthesizer_sweep_down()
+
+@item synthesizer_reset_frequency()
+@findex synthesizer_reset_frequency()
+
+@item synthesizer_use_table()
+@findex synthesizer_use_table()
+
+@item synthesizer_att_ref_freq()
+@findex synthesizer_att_ref_freq()
+
+@item synthesizer_modulation()
+@findex synthesizer_modulation()
+
+@item synthesizer_mod_type()
+@findex synthesizer_mod_type()
+
+@item synthesizer_mod_source()
+@findex synthesizer_mod_source()
+
+@item synthesizer_mod_ampl()
+@findex synthesizer_mod_ampl()
