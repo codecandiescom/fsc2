@@ -1,25 +1,25 @@
 /*
-  $Id$
- 
-  Driver for National Instruments 6601 boards
-
-  Copyright (C) 2002-2004 Jens Thoms Toerring
-
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2, or (at your option)
-  any later version.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program; see the file COPYING.  If not, write to
-  the Free Software Foundation, 59 Temple Place - Suite 330,
-  Boston, MA 02111-1307, USA.
-*/
+ *  $Id$
+ * 
+ *  Driver for National Instruments 6601 boards
+ * 
+ *  Copyright (C) 2002-2004 Jens Thoms Toerring
+ * 
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2, or (at your option)
+ *  any later version.
+ * 
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ * 
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; see the file COPYING.  If not, write to
+ *  the Free Software Foundation, 59 Temple Place - Suite 330,
+ *  Boston, MA 02111-1307, USA.
+ */
 
 
 #include "autoconf.h"
@@ -78,9 +78,9 @@ struct file_operations ni6601_file_ops = {
 
 
 
-/*-------------------------------------------------------*/
-/* Function that gets executed when the module is loaded */
-/*-------------------------------------------------------*/
+/*-------------------------------------------------------*
+ * Function that gets executed when the module is loaded
+ *-------------------------------------------------------*/
 
 static int __init ni6601_init( void )
 {
@@ -140,9 +140,9 @@ static int __init ni6601_init( void )
 }
 
 
-/*-----------------------------------------------------*/
-/* Function gets executed when the module gets removed */
-/*-----------------------------------------------------*/
+/*-----------------------------------------------------*
+ * Function gets executed when the module gets removed
+ *-----------------------------------------------------*/
 
 static void __exit ni6601_cleanup( void )
 {
@@ -164,9 +164,9 @@ static void __exit ni6601_cleanup( void )
 }
 
 
-/*----------------------------------*/
-/* Initialization of a single board */
-/*----------------------------------*/
+/*----------------------------------*
+ * Initialization of a single board
+ *----------------------------------*/
 
 static int __init ni6601_init_board( struct pci_dev *dev, Board *board )
 {
@@ -250,9 +250,9 @@ static int __init ni6601_init_board( struct pci_dev *dev, Board *board )
 }
 
 
-/*----------------------------------------------------------------------*/
-/* Function gets exectuted when the device file for a board gets opened */
-/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*
+ * Function gets exectuted when the device file for a board gets opened
+ *----------------------------------------------------------------------*/
 
 static int ni6601_open( struct inode *inode_p, struct file *file_p )
 {
@@ -293,9 +293,9 @@ static int ni6601_open( struct inode *inode_p, struct file *file_p )
 }
 
 
-/*---------------------------------------------------------------------*/
-/* Function gets executed when the device file for a board gets closed */
-/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*
+ * Function gets executed when the device file for a board gets closed
+ *---------------------------------------------------------------------*/
 
 static int ni6601_release( struct inode *inode_p, struct file *file_p )
 {
@@ -333,9 +333,9 @@ static int ni6601_release( struct inode *inode_p, struct file *file_p )
 }
 
 
-/*--------------------------------------------------------------*/
-/* Function for handling of ioctl() calls for one of the boards */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ * Function for handling of ioctl() calls for one of the boards
+ *--------------------------------------------------------------*/
 
 static int ni6601_ioctl( struct inode *inode_p, struct file *file_p,
 			 unsigned int cmd, unsigned long arg )
@@ -393,12 +393,12 @@ static int ni6601_ioctl( struct inode *inode_p, struct file *file_p,
 }
 
 
-/*-----------------------------------------------------------*/
-/* Function reads an 8-bit value from the DIO pins (PFI 0-7) */
-/* but only from pins for which bits are set in the mask     */
-/* (this allows having some of the bits used for input while */
-/* the others are used for output at the same time).         */
-/*-----------------------------------------------------------*/
+/*-----------------------------------------------------------*
+ * Function reads an 8-bit value from the DIO pins (PFI 0-7)
+ * but only from pins for which bits are set in the mask
+ * (this allows having some of the bits used for input while
+ * the others are used for output at the same time).
+ *-----------------------------------------------------------*/
 
 static int ni6601_dio_in( Board *board, NI6601_DIO_VALUE *arg )
 {
@@ -431,12 +431,12 @@ static int ni6601_dio_in( Board *board, NI6601_DIO_VALUE *arg )
 }
 
 
-/*-----------------------------------------------------------*/
-/* Function outputs an 8-bit value at the DIO pins (PFI 0-7) */
-/* but only at the pins for which bits are set in the mask   */
-/* (this allows having some of the bits used for output      */
-/* while the others are used for input at the same time).    */
-/*-----------------------------------------------------------*/
+/*-----------------------------------------------------------*
+ * Function outputs an 8-bit value at the DIO pins (PFI 0-7)
+ * but only at the pins for which bits are set in the mask
+ * (this allows having some of the bits used for output
+ * while the others are used for input at the same time).
+ *-----------------------------------------------------------*/
 
 static int ni6601_dio_out( Board *board, NI6601_DIO_VALUE *arg )
 {
@@ -463,9 +463,9 @@ static int ni6601_dio_out( Board *board, NI6601_DIO_VALUE *arg )
 }
 
 
-/*------------------------------------------------------------------*/
-/* Function for stopping the counter of a board, i.e. disarming it. */
-/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ * Function for stopping the counter of a board, i.e. disarming it.
+ *------------------------------------------------------------------*/
 
 static int ni6601_disarm( Board *board, NI6601_DISARM *arg )
 {
@@ -488,15 +488,15 @@ static int ni6601_disarm( Board *board, NI6601_DISARM *arg )
 }
 
 
-/*---------------------------------------------------------------------------*/
-/* Function for reading the value of a counter (from the SW save register).  */
-/* When called with the 'wait_on_end' member of the NI6601_COUNTER_VAL       */
-/* structure passed to the function being set it's assumed that the counter  */
-/* is doing a gated measurement with the neighbouring counter as the source  */
-/* of the (single) gate pulse. The function will then wait for the neigh-    */
-/* bouring counter to stop counting before disarming the counter and reading */
-/* the counter value.                                                        */
-/*---------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*
+ * Function for reading the value of a counter (from the SW save register).
+ * When called with the 'wait_on_end' member of the NI6601_COUNTER_VAL
+ * structure passed to the function being set it's assumed that the counter
+ * is doing a gated measurement with the neighbouring counter as the source
+ * of the (single) gate pulse. The function will then wait for the neigh-
+ * bouring counter to stop counting before disarming the counter and reading
+ * the counter value.
+ *---------------------------------------------------------------------------*/
 
 static int ni6601_read_count( Board *board, NI6601_COUNTER_VAL *arg )
 {
@@ -561,9 +561,9 @@ static int ni6601_read_count( Board *board, NI6601_COUNTER_VAL *arg )
 }
 
 
-/*----------------------------------------------------*/
-/* Function to start outputting pulses from a counter */
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ * Function to start outputting pulses from a counter
+ *----------------------------------------------------*/
 
 static int ni6601_start_pulses( Board *board, NI6601_PULSES *arg )
 {
@@ -654,9 +654,9 @@ static int ni6601_start_pulses( Board *board, NI6601_PULSES *arg )
 }
 
 
-/*---------------------------------------*/
-/* Function for starting event counting. */
-/*---------------------------------------*/
+/*---------------------------------------*
+ * Function for starting event counting.
+ *---------------------------------------*/
 
 static int ni6601_start_counting( Board *board, NI6601_COUNTER *arg )
 {
@@ -725,10 +725,10 @@ static int ni6601_start_counting( Board *board, NI6601_COUNTER *arg )
 }
 
 
-/*---------------------------------------------------------------*/
-/* Function checks if a counter of a board is currently counting */
-/* (i.e. if it's armed).                                         */
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ * Function checks if a counter of a board is currently counting
+ * (i.e. if it's armed).
+ *---------------------------------------------------------------*/
 
 static int ni6601_is_busy( Board *board, NI6601_IS_ARMED *arg )
 {
@@ -754,9 +754,9 @@ static int ni6601_is_busy( Board *board, NI6601_IS_ARMED *arg )
 }
 
 
-/*-----------------------------------------------------------*/
-/* Function to enable TC interrupts from one of the counters */
-/*-----------------------------------------------------------*/
+/*-----------------------------------------------------------*
+ * Function to enable TC interrupts from one of the counters
+ *-----------------------------------------------------------*/
 
 static void ni6601_irq_enable( Board *board, int counter )
 {
@@ -772,9 +772,9 @@ static void ni6601_irq_enable( Board *board, int counter )
 }
 
 
-/*------------------------------------------------------------*/
-/* Function to disable TC interrupts from one of the counters */
-/*------------------------------------------------------------*/
+/*------------------------------------------------------------*
+ * Function to disable TC interrupts from one of the counters
+ *------------------------------------------------------------*/
 
 static void ni6601_irq_disable( Board *board, int counter )
 {
@@ -790,9 +790,9 @@ static void ni6601_irq_disable( Board *board, int counter )
 }
 
 
-/*-------------------------------------------------------------------*/
-/* Interrupt handler for all boards, raising a flag on TC interrupts */
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * Interrupt handler for all boards, raising a flag on TC interrupts
+ *-------------------------------------------------------------------*/
 
 static void ni6601_irq_handler( int irq, void *data, struct pt_regs *dummy )
 {
@@ -839,6 +839,7 @@ static void mite_dump( Board *board, int channel )
 	printk( KERN_INFO "mite_WSER  = 0x%08X\n", readl( mite_WSER(  channel ) ) );
 	printk( KERN_INFO "mite_FCR   = 0x%08X\n", readl( mite_FCR(   channel ) ) );
 }
+
 
 EXPORT_NO_SYMBOLS;
 

@@ -1,29 +1,29 @@
 /*
-  $Id$
-
-  Copyright (C) 2002-2004 Jens Thoms Toerring
- 
-  This library should simplify accessing NI6601 GBCT boards by National
-  Instruments by avoiding to be forced to make ioctl() calls and use
-  higher level functions instead.
-
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2 of the License, or
-  (at your option) any later version.
- 
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
- 
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software
-  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- 
-  To contact the author send email to:
-  Jens.Toerring@physik.fu-berlin.de
-*/
+ *  $Id$
+ * 
+ *  Copyright (C) 2002-2004 Jens Thoms Toerring
+ * 
+ *  This library should simplify accessing NI6601 GBCT boards by National
+ *  Instruments by avoiding to be forced to make ioctl() calls and use
+ *  higher level functions instead.
+ * 
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ * 
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ * 
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * 
+ *  To contact the author send email to:
+ *  Jens.Toerring@physik.fu-berlin.de
+ */
 
 
 #include <stdio.h>
@@ -76,8 +76,8 @@ const int ni6601_nerr =
 				( int ) ( sizeof ni6601_errlist / sizeof ni6601_errlist[ 0 ] );
 
 
-/*-----------------------------------------------------------------*/
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------
+ *-----------------------------------------------------------------*/
 
 int ni6601_close( int board )
 {
@@ -97,10 +97,10 @@ int ni6601_close( int board )
 }
 
 
-/*-----------------------------------------------------------------*/
-/* Function starts a counter that will run until it is explicitely */
-/* stopped by a call to ni6601_stop_counter().                     */
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ * Function starts a counter that will run until it is explicitely
+ * stopped by a call to ni6601_stop_counter().
+ *-----------------------------------------------------------------*/
 
 int ni6601_start_counter( int board, int counter, int source )
 {
@@ -138,10 +138,10 @@ int ni6601_start_counter( int board, int counter, int source )
 }
 
 
-/*----------------------------------------------------------------------*/
-/* Function starts a counter that will be gated by its adjacent counter */
-/* for 'gate_length'. It stops automatically at the end of the gate.    */
-/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*
+ * Function starts a counter that will be gated by its adjacent counter
+ * for 'gate_length'. It stops automatically at the end of the gate.
+ *----------------------------------------------------------------------*/
 
 int ni6601_start_gated_counter( int board, int counter, double gate_length,
 								int source )
@@ -225,8 +225,8 @@ int ni6601_start_gated_counter( int board, int counter, double gate_length,
 }
 
 
-/*--------------------------------------------------------------------*/
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ *--------------------------------------------------------------------*/
 
 int ni6601_stop_counter( int board, int counter )
 {
@@ -266,8 +266,8 @@ int ni6601_stop_counter( int board, int counter )
 }
 
 
-/*--------------------------------------------------------------------*/
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ *--------------------------------------------------------------------*/
 
 int ni6601_get_count( int board, int counter, int wait_for_end,
 					  unsigned long *count, int *state )
@@ -316,8 +316,8 @@ int ni6601_get_count( int board, int counter, int wait_for_end,
 }
 
 
-/*--------------------------------------------------------------------*/
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ *--------------------------------------------------------------------*/
 
 int ni6601_generate_single_pulse( int board, int counter, double duration )
 {
@@ -363,8 +363,8 @@ int ni6601_generate_single_pulse( int board, int counter, double duration )
 }
 
 
-/*--------------------------------------------------------------------*/
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ *--------------------------------------------------------------------*/
 
 int ni6601_generate_continuous_pulses( int board, int counter,
 									   double high_phase, double low_phase )
@@ -409,8 +409,8 @@ int ni6601_generate_continuous_pulses( int board, int counter,
 }
 
 
-/*--------------------------------------------------------------------*/
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ *--------------------------------------------------------------------*/
 
 int ni6601_stop_pulses( int board, int counter )
 {
@@ -418,8 +418,8 @@ int ni6601_stop_pulses( int board, int counter )
 }
 
 
-/*--------------------------------------------------------------------*/
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ *--------------------------------------------------------------------*/
 
 int ni6601_dio_write( int board, unsigned char bits, unsigned char mask )
 {
@@ -440,8 +440,8 @@ int ni6601_dio_write( int board, unsigned char bits, unsigned char mask )
 }
 
 
-/*--------------------------------------------------------------------*/
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ *--------------------------------------------------------------------*/
 
 int ni6601_dio_read( int board, unsigned char *bits, unsigned char mask )
 {
@@ -465,8 +465,8 @@ int ni6601_dio_read( int board, unsigned char *bits, unsigned char mask )
 }
 
 
-/*--------------------------------------------------------------------*/
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ *--------------------------------------------------------------------*/
 
 int ni6601_is_counter_armed( int board, int counter, int *state )
 {
@@ -486,8 +486,8 @@ int ni6601_is_counter_armed( int board, int counter, int *state )
 }
 
 
-/*--------------------------------------------------------------------*/
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ *--------------------------------------------------------------------*/
 
 static int ni6601_is_armed( int board, int counter, int *state )
 {
@@ -505,8 +505,8 @@ static int ni6601_is_armed( int board, int counter, int *state )
 }
 
 
-/*--------------------------------------------------------------------*/
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ *--------------------------------------------------------------------*/
 
 static int ni6601_state( int board, int counter, int *state )
 {
@@ -527,17 +527,17 @@ static int ni6601_state( int board, int counter, int *state )
 }
 
 
-/*--------------------------------------------------------------------*/
-/* This function gets called always before a board is really accessed */
-/* to determine if the board number is valid. If the board has never  */
-/* been used before the function will try to open() the device file   */
-/* for the board.                                                     */
-/* If opening the device file fails this indicates that there's no    */
-/* board with the number passed to the function or that the board is  */
-/* already in use by some other process and the function returns the  */
-/* appropriate error number.                                          */
-/* On success the boards file descriptor is opened and 0 is returned. */
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ * This function gets called always before a board is really accessed
+ * to determine if the board number is valid. If the board has never
+ * been used before the function will try to open() the device file
+ * for the board.
+ * If opening the device file fails this indicates that there's no
+ * board with the number passed to the function or that the board is
+ * already in use by some other process and the function returns the
+ * appropriate error number.
+ * On success the boards file descriptor is opened and 0 is returned.
+ *--------------------------------------------------------------------*/
 
 static int check_board( int board )
 {
@@ -605,8 +605,8 @@ static int check_board( int board )
 }
 
 
-/*--------------------------------------------------------------------*/
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ *--------------------------------------------------------------------*/
 
 static int check_source( int source )
 {
@@ -626,8 +626,8 @@ static int check_source( int source )
 }
 
 
-/*--------------------------------------------------------------------*/
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ *--------------------------------------------------------------------*/
 
 static int ni6601_time_to_ticks( double time, unsigned long *ticks )
 {
@@ -652,14 +652,14 @@ static int ni6601_time_to_ticks( double time, unsigned long *ticks )
 }
 
 
-/*---------------------------------------------------------------*/
-/* Prints out a string to stderr, consisting of a user supplied  */
-/* string (the argument of the function), a colon, a blank and   */
-/* a short descriptive text of the error encountered in the last */
-/* invocation of one of the ni6601_xxx() functions, followed by  */
-/* a new-line. If the argument is NULL or an empty string only   */
-/* the error message is printed.                                 */
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ * Prints out a string to stderr, consisting of a user supplied
+ * string (the argument of the function), a colon, a blank and
+ * a short descriptive text of the error encountered in the last
+ * invocation of one of the ni6601_xxx() functions, followed by
+ * a new-line. If the argument is NULL or an empty string only
+ * the error message is printed.
+ *---------------------------------------------------------------*/
 
 int ni6601_perror( const char *s )
 {
@@ -671,11 +671,11 @@ int ni6601_perror( const char *s )
 }
 
 
-/*---------------------------------------------------------------*/
-/* Returns a string with a short descriptive text of the error   */
-/* encountered in the last invocation of one of the ni6601_xxx() */
-/* functions.                                                    */
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ * Returns a string with a short descriptive text of the error
+ * encountered in the last invocation of one of the ni6601_xxx()
+ * functions.
+ *---------------------------------------------------------------*/
 
 const char *ni6601_strerror( void )
 {

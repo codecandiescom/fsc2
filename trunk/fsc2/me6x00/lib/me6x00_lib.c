@@ -1,33 +1,33 @@
 /*
-  $Id$
-
-  Copyright (C) 2002-2004 Jens Thoms Toerring
- 
-  This library should simplify accessing ME6000 and ME6100 DAC boards
-  by Meilhaus Electronic GmbH by avoiding to be forced to make ioctl()
-  calls and use some higher level functions instead. Most functions are
-  based on the specifications for similar functions for the Windows API
-  supplied by Meilhaus Electronic GmbH, but there are several differences
-  that make the functions more UNIX-like and, unfortunately, require some
-  changes to your code should you try to port an application from a Windows.
-
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2 of the License, or
-  (at your option) any later version.
- 
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
- 
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software
-  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- 
-  To contact the author send email to:
-  Jens.Toerring@physik.fu-berlin.de
-*/
+ *  $Id$
+ * 
+ *  Copyright (C) 2002-2004 Jens Thoms Toerring
+ * 
+ *  This library should simplify accessing ME6000 and ME6100 DAC boards
+ *  by Meilhaus Electronic GmbH by avoiding to be forced to make ioctl()
+ *  calls and use some higher level functions instead. Most functions are
+ *  based on the specifications for similar functions for the Windows API
+ *  supplied by Meilhaus Electronic GmbH, but there are several differences
+ *  that make the functions more UNIX-like and, unfortunately, require some
+ *  changes to your code should you try to port an application from a Windows.
+ * 
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ * 
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ * 
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * 
+ *  To contact the author send email to:
+ *  Jens.Toerring@physik.fu-berlin.de
+ */
 
 
 #include <stdio.h>
@@ -96,10 +96,10 @@ const int me6x00_nerr =
 
 
 
-/*----------------------------------------------------------------*/
-/* Utility function to convert a frequency into the corresponding */
-/* number of timer clicks.                                        */
-/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * Utility function to convert a frequency into the corresponding
+ * number of timer clicks.
+ *----------------------------------------------------------------*/
 
 unsigned int me6x00_frequency_to_timer( double freq )
 {
@@ -117,9 +117,9 @@ unsigned int me6x00_frequency_to_timer( double freq )
 }
 
 
-/*------------------------------------------*/
-/* Returns the type of the addressed board. */
-/*------------------------------------------*/
+/*------------------------------------------*
+ * Returns the type of the addressed board.
+ *------------------------------------------*/
 
 int me6x00_board_type( int board, unsigned int *type )
 {
@@ -134,9 +134,9 @@ int me6x00_board_type( int board, unsigned int *type )
 }
 
 
-/*------------------------------------------*/
-/* Returns the type of the addressed board. */
-/*------------------------------------------*/
+/*------------------------------------------*
+ * Returns the type of the addressed board.
+ *------------------------------------------*/
 
 int me6x00_num_dacs( int board, unsigned int *num_dacs )
 {
@@ -151,9 +151,9 @@ int me6x00_num_dacs( int board, unsigned int *num_dacs )
 }
 
 
-/*--------------------------------------------------*/
-/* Returns the serial number of the addresses board */
-/*--------------------------------------------------*/
+/*--------------------------------------------------*
+ * Returns the serial number of the addresses board
+ *--------------------------------------------------*/
 
 int me6x00_serial_number( int board, unsigned int *serial_no )
 {
@@ -168,8 +168,8 @@ int me6x00_serial_number( int board, unsigned int *serial_no )
 }
 		
 
-/*--------------------------------------------------------------------*/
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ *--------------------------------------------------------------------*/
 
 int me6x00_board_info( int board, me6x00_dev_info **info )
 {
@@ -189,9 +189,9 @@ int me6x00_board_info( int board, me6x00_dev_info **info )
 }
 
 
-/*--------------------------------------------------------------------*/
-/* Function to be called to close a board when it's not longer needed */
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ * Function to be called to close a board when it's not longer needed
+ *--------------------------------------------------------------------*/
 
 int me6x00_close( int board )
 {
@@ -211,20 +211,20 @@ int me6x00_close( int board )
 }
 
 
-/*-----------------------------------------------------------------*/
-/* Calling this function for one of the DACs of a board, one can   */
-/* toggle between having the board switch back to a voltage of 0 V */
-/* when its file descriptor is closed (i.e. the program using the  */
-/* board ending) or having the board continue to output the last   */
-/* voltage that had been set.                                      */
-/* The default behaviour of a board is to revert back to 0 V on    */
-/* close. To make a DAC of a board keep its last voltage this      */
-/* function has to be called anew each time the board is opened!   */
-/* Arguments:                                                      */
-/*  1. number of board                                             */
-/*  2. number of DAC                                               */
-/*  3. state: 1: keep last voltage, 0: output 0 V on close         */
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ * Calling this function for one of the DACs of a board, one can
+ * toggle between having the board switch back to a voltage of 0 V
+ * when its file descriptor is closed (i.e. the program using the
+ * board ending) or having the board continue to output the last
+ * voltage that had been set.
+ * The default behaviour of a board is to revert back to 0 V on
+ * close. To make a DAC of a board keep its last voltage this
+ * function has to be called anew each time the board is opened!
+ * Arguments:
+ *  1. number of board
+ *  2. number of DAC
+ *  3. state: 1: keep last voltage, 0: output 0 V on close
+ *-----------------------------------------------------------------*/
 
 int me6x00_keep_voltage( int board, int dac, int state )
 {
@@ -252,10 +252,10 @@ int me6x00_keep_voltage( int board, int dac, int state )
 }
 
 
-/*------------------------------------------------------------------*/
-/* This is a wrapper function for me6x00_single() that allows users */
-/* to specify a voltage directly to output on a certain DAC.        */
-/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ * This is a wrapper function for me6x00_single() that allows users
+ * to specify a voltage directly to output on a certain DAC.
+ *------------------------------------------------------------------*/
 
 int me6x00_voltage( int board, int dac, double volts )
 {
@@ -324,14 +324,14 @@ int me6x00_continuous_ex( int board, int dac, int size, unsigned short *buf )
 }
 
 
-/*---------------------------------------------------------------------*/
-/* This function resets the DAC of a board. This includes stopping any */
-/* output in continuous or wrap-around mode currently in progress and  */
-/* setting the output voltage of the DAC to 0 V.                       */
-/* Arguments:                   									   */
-/*  1. number of board          									   */
-/*  2. number of DAC            									   */
-/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*
+ * This function resets the DAC of a board. This includes stopping any
+ * output in continuous or wrap-around mode currently in progress and
+ * setting the output voltage of the DAC to 0 V.
+ * Arguments:
+ *  1. number of board
+ *  2. number of DAC
+ *---------------------------------------------------------------------*/
 
 int me6x00_reset( int board, int dac )
 {
@@ -368,13 +368,13 @@ int me6x00_reset( int board, int dac )
 }
 
 
-/*--------------------------------------------------------------------*/
-/* This function resets all DACs of a board. This includes stopping   */
-/* any output in continuous or wrap-around mode currently in progress */
-/* and  setting the output voltage of all DACs of the board to 0 V.   */
-/* Arguments:                                                         */
-/*  1. number of board                                                */
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ * This function resets all DACs of a board. This includes stopping
+ * any output in continuous or wrap-around mode currently in progress
+ * and  setting the output voltage of all DACs of the board to 0 V.
+ * Arguments:
+ *  1. number of board
+ *--------------------------------------------------------------------*/
 
 int me6x00_reset_all( int board )
 {
@@ -395,8 +395,8 @@ int me6x00_reset_all( int board )
 }
 
 
-/*--------------------------------------------------------------------*/
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ *--------------------------------------------------------------------*/
 
 int me6x00_set_timer( int board, int dac, unsigned int ticks )
 {	
@@ -453,8 +453,8 @@ int me6x00_set_trigger( int board, int dac, int mode )
 }
 
 
-/*--------------------------------------------------------------------*/
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ *--------------------------------------------------------------------*/
 
 int me6x00_single( int board, int dac, unsigned short val )
 {
@@ -605,21 +605,21 @@ int me6x00_wraparound( int board, int dac, int size, unsigned short *buf )
 }
 
 
-/*--------------------------------------------------------------------*/
-/* This function gets called always before a board is really accessed */
-/* to determine if the board number is valid. If the board has not    */
-/* been used before the function will try to open() the device file   */
-/* for the board and then ask the module for informations about the   */
-/* board, i.e. vendor ID, type of board, serial number etc., and      */
-/* store it for later use.                                            */
-/* If opening the device file fails this indicates that there's no    */
-/* board with the number passed to the function or that the board is  */
-/* already in use by some other process and the function returns the  */
-/* appropriate error number.                                          */
-/* Another possibility for failure is an internal error (which, of    */
-/* course, should never happen ;-).                                   */
-/* On success the boards file descriptor is opened and 0 is returned. */
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ * This function gets called always before a board is really accessed
+ * to determine if the board number is valid. If the board has not
+ * been used before the function will try to open() the device file
+ * for the board and then ask the module for informations about the
+ * board, i.e. vendor ID, type of board, serial number etc., and
+ * store it for later use.
+ * If opening the device file fails this indicates that there's no
+ * board with the number passed to the function or that the board is
+ * already in use by some other process and the function returns the
+ * appropriate error number.
+ * Another possibility for failure is an internal error (which, of
+ * course, should never happen ;-).
+ * On success the boards file descriptor is opened and 0 is returned.
+ *--------------------------------------------------------------------*/
 
 static int check_board( int board )
 {
@@ -714,16 +714,16 @@ static int check_board( int board )
 }
 
 
-/*------------------------------------------------------------------*/
-/* Function for checking a DAC parameter passed to one of the other */
-/* functions. It relies on check_board() already having been called */
-/* before to insure that the board exists. It used the board type   */
-/* information to determine if the DAC exists for the board. For    */
-/* functions only to be used with the four lowest numbered DACs     */
-/* of a ME6100 the argument 'is_me6100_specific' must be set, in    */
-/* which case it is also checked that the board is a ME6100. Other- */
-/* wise 'is_me6100_specific' must be 0.                             */
-/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ * Function for checking a DAC parameter passed to one of the other
+ * functions. It relies on check_board() already having been called
+ * before to insure that the board exists. It used the board type
+ * information to determine if the DAC exists for the board. For
+ * functions only to be used with the four lowest numbered DACs
+ * of a ME6100 the argument 'is_me6100_specific' must be set, in
+ * which case it is also checked that the board is a ME6100. Other-
+ * wise 'is_me6100_specific' must be 0.
+ *------------------------------------------------------------------*/
 
 static int check_dac( int board, int dac, int is_me6100_specific )
 {
@@ -769,14 +769,14 @@ static int check_dac( int board, int dac, int is_me6100_specific )
 }
 
 
-/*---------------------------------------------------------------*/
-/* Prints out a string to stderr, consisting of a user supplied  */
-/* string (the argument of the function), a colon, a blank and   */
-/* a short descriptive text of the error encountered in the last */
-/* invocation of one of the me6x00_xxx() functions, followed by  */
-/* a new-line. If the argument is NULL or an empty string only   */
-/* the error message is printed.                                 */
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ * Prints out a string to stderr, consisting of a user supplied
+ * string (the argument of the function), a colon, a blank and
+ * a short descriptive text of the error encountered in the last
+ * invocation of one of the me6x00_xxx() functions, followed by
+ * a new-line. If the argument is NULL or an empty string only
+ * the error message is printed.
+ *---------------------------------------------------------------*/
 
 int me6x00_perror( const char *s )
 {
@@ -788,11 +788,11 @@ int me6x00_perror( const char *s )
 }
 
 
-/*---------------------------------------------------------------*/
-/* Returns a string with a short descriptive text of the error   */
-/* encountered in the last invocation of one of the me6x00_xxx() */
-/* functions.                                                    */
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ * Returns a string with a short descriptive text of the error
+ * encountered in the last invocation of one of the me6x00_xxx()
+ * functions.
+ *---------------------------------------------------------------*/
 
 const char *me6x00_strerror( void )
 {

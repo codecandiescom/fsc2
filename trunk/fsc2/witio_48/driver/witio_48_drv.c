@@ -1,25 +1,25 @@
 /*
-  $Id$
- 
-  Kernel (2.4 series) module for Wasco WITIO-48 DIO ISA cards
-
-  Copyright (C) 2003-2004 Jens Thoms Toerring
-
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2, or (at your option)
-  any later version.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with the program; see the file COPYING.  If not, write to
-  the Free Software Foundation, 59 Temple Place - Suite 330,
-  Boston, MA 02111-1307, USA.
-*/
+ *  $Id$
+ * 
+ *  Kernel (2.4 series) module for Wasco WITIO-48 DIO ISA cards
+ * 
+ *  Copyright (C) 2003-2004 Jens Thoms Toerring
+ * 
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2, or (at your option)
+ *  any later version.
+ * 
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ * 
+ *  You should have received a copy of the GNU General Public License
+ *  along with the program; see the file COPYING.  If not, write to
+ *  the Free Software Foundation, 59 Temple Place - Suite 330,
+ *  Boston, MA 02111-1307, USA.
+ */
 
 
 #include "autoconf.h"
@@ -69,9 +69,9 @@ static struct file_operations witio_48_file_ops = {
 };
 
 
-/*------------------------------------*/
-/* Function for module initialization */
-/*------------------------------------*/
+/*------------------------------------*
+ * Function for module initialization
+ *------------------------------------*/
 
 static int __init witio_48_init( void )
 {
@@ -153,9 +153,9 @@ static int __init witio_48_init( void )
 }
 
 
-/*---------------------------------------------------*/
-/* Function for module cleanup when it gets unloaded */
-/*---------------------------------------------------*/
+/*---------------------------------------------------*
+ * Function for module cleanup when it gets unloaded
+ *---------------------------------------------------*/
 
 static void __exit witio_48_cleanup( void )
 {
@@ -176,10 +176,10 @@ static void __exit witio_48_cleanup( void )
 }
 
 
-/*------------------------------------------------------*/
-/* Function for requesting IO-port region for the board */
-/* and setting up pointers to the boards registers      */
-/*------------------------------------------------------*/
+/*------------------------------------------------------*
+ * Function for requesting IO-port region for the board
+ * and setting up pointers to the boards registers
+ *------------------------------------------------------*/
 
 static int witio_48_get_ioport( void )
 {
@@ -231,9 +231,9 @@ static int witio_48_get_ioport( void )
 }
 
 
-/*----------------------------------------------------------*/
-/* Function executed when device file for board gets opened */
-/*----------------------------------------------------------*/
+/*----------------------------------------------------------*
+ * Function executed when device file for board gets opened
+ *----------------------------------------------------------*/
 
 static int witio_48_open( struct inode *inode_p, struct file *file_p )
 {
@@ -262,9 +262,9 @@ static int witio_48_open( struct inode *inode_p, struct file *file_p )
 }
 
 
-/*----------------------------------------------------------*/
-/* Function executed when device file for board gets closed */
-/*----------------------------------------------------------*/
+/*----------------------------------------------------------*
+ * Function executed when device file for board gets closed
+ *----------------------------------------------------------*/
 
 static int witio_48_release( struct inode *inode_p, struct file * file_p )
 {
@@ -282,9 +282,9 @@ static int witio_48_release( struct inode *inode_p, struct file * file_p )
 }
 
 
-/*-------------------------------------------------------*/
-/* Function for handling of ioctl() calls for the module */
-/*-------------------------------------------------------*/
+/*-------------------------------------------------------*
+ * Function for handling of ioctl() calls for the module
+ *-------------------------------------------------------*/
 
 static int witio_48_ioctl( struct inode *inode_p, struct file *file_p,
 			   unsigned int cmd, unsigned long arg )
@@ -355,9 +355,9 @@ static int witio_48_ioctl( struct inode *inode_p, struct file *file_p,
 }
 
 
-/*-----------------------------------------------------*/
-/* Function for copying data from user to kernel space */
-/*-----------------------------------------------------*/
+/*-----------------------------------------------------*
+ * Function for copying data from user to kernel space
+ *-----------------------------------------------------*/
 
 static int witio_48_get_from_user( unsigned long arg, void *to, size_t len )
 {
@@ -372,9 +372,9 @@ static int witio_48_get_from_user( unsigned long arg, void *to, size_t len )
 }
 
 
-/*-----------------------------------*/
-/* Function for setting the I/O-mode */
-/*-----------------------------------*/
+/*-----------------------------------*
+ * Function for setting the I/O-mode
+ *-----------------------------------*/
 
 static int witio_48_set_mode( WITIO_48_DIO_MODE *state )
 {
@@ -399,9 +399,9 @@ static int witio_48_set_mode( WITIO_48_DIO_MODE *state )
 }
 
 
-/*-------------------------------------*/
-/* Function for returning the I/O-mode */
-/*-------------------------------------*/
+/*-------------------------------------*
+ * Function for returning the I/O-mode
+ *-------------------------------------*/
 
 static int witio_48_get_mode( WITIO_48_DIO_MODE *state )
 {
@@ -418,9 +418,9 @@ static int witio_48_get_mode( WITIO_48_DIO_MODE *state )
 }
 
 
-/*------------------------------------------------------------------.*/
-/* Function for outputting values, according to the current I/O-mode */
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * Function for outputting values, according to the current I/O-mode
+ *-------------------------------------------------------------------*/
 
 static int witio_48_dio_out( WITIO_48_DATA *data )
 {
@@ -480,12 +480,12 @@ static int witio_48_dio_out( WITIO_48_DATA *data )
 }
 
 
-/*-----------------------------------------------------------------*/
-/* Function for writing out an 8-bit value to one of the ports. If */
-/* the channel argument is 0 the value is written to port A, for   */
-/* 1 to port B and when the channel argument is 2 the value is     */
-/* output at port C.                                               */
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ * Function for writing out an 8-bit value to one of the ports. If
+ * the channel argument is 0 the value is written to port A, for
+ * 1 to port B and when the channel argument is 2 the value is
+ * output at port C.
+ *-----------------------------------------------------------------*/
 
 static void witio_48_3x8_dio_out( WITIO_48_DATA *data )
 {
@@ -503,13 +503,13 @@ static void witio_48_3x8_dio_out( WITIO_48_DATA *data )
 }
 
 
-/*--------------------------------------------------------------------*/
-/* Function for outputting a 12-bit value. If the channel argument is */
-/* 0 the lower 8 bits of the value are send to port A and its upper   */
-/* 4 bits are output at the upper nibble of port C. For a channel     */
-/* argument of 1 the lower 8 bits of the value appear at port B and   */
-/* the remaining upper 4 bits at the lower nibble of port C.          */
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ * Function for outputting a 12-bit value. If the channel argument is
+ * 0 the lower 8 bits of the value are send to port A and its upper
+ * 4 bits are output at the upper nibble of port C. For a channel
+ * argument of 1 the lower 8 bits of the value appear at port B and
+ * the remaining upper 4 bits at the lower nibble of port C.
+ *--------------------------------------------------------------------*/
 
 static void witio_48_2x12_dio_out( WITIO_48_DATA *data )
 {
@@ -565,10 +565,10 @@ static void witio_48_2x12_dio_out( WITIO_48_DATA *data )
 }
 
 
-/*---------------------------------------------------------------------*/
-/* Function for writing out a 24-bit value. The highest byte is output */
-/* at port C, the middle byte at port B and the lowest byte at port A. */
-/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*
+ * Function for writing out a 24-bit value. The highest byte is output
+ * at port C, the middle byte at port B and the lowest byte at port A.
+ *---------------------------------------------------------------------*/
 
 static void witio_48_1x24_dio_out( WITIO_48_DATA *data )
 {
@@ -593,12 +593,12 @@ static void witio_48_1x24_dio_out( WITIO_48_DATA *data )
 }
 
 
-/*---------------------------------------------------------------------*/
-/* Function for writing out either a 16-bit or an 8-bit value. If the  */
-/* channel argument is 0 a 16-bit value is output, with the upper byte */
-/* appearing at port B and the lower byte at port A. For a channel     */
-/* argument an 8-bit value is written to port C.                       */
-/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*
+ * Function for writing out either a 16-bit or an 8-bit value. If the
+ * channel argument is 0 a 16-bit value is output, with the upper byte
+ * appearing at port B and the lower byte at port A. For a channel
+ * argument an 8-bit value is written to port C.
+ *---------------------------------------------------------------------*/
 
 static void witio_48_16_8_dio_out( WITIO_48_DATA *data )
 {
@@ -635,9 +635,9 @@ static void witio_48_16_8_dio_out( WITIO_48_DATA *data )
 }
 
 
-/*-------------------------------------------------------------------*/
-/* Function for reading in values, according to the current I/O-mode */
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * Function for reading in values, according to the current I/O-mode
+ *-------------------------------------------------------------------*/
 
 static int witio_48_dio_in( WITIO_48_DATA *data )
 {
@@ -697,12 +697,12 @@ static int witio_48_dio_in( WITIO_48_DATA *data )
 }
 
 
-/*-------------------------------------------------------------------*/
-/* Function for reading in an 8-bit value from of the three channels */
-/* when in 3x8 mode. If the channel argument is 0 the value comes    */
-/* from port A, for 1 the value is from port B and for the channel   */
-/* argument set to 2 the value is what gets read in from port C.     */
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * Function for reading in an 8-bit value from of the three channels
+ * when in 3x8 mode. If the channel argument is 0 the value comes
+ * from port A, for 1 the value is from port B and for the channel
+ * argument set to 2 the value is what gets read in from port C.
+ *-------------------------------------------------------------------*/
 
 static void witio_48_3x8_dio_in( WITIO_48_DATA *data )
 {
@@ -719,13 +719,13 @@ static void witio_48_3x8_dio_in( WITIO_48_DATA *data )
 }
 
 
-/*----------------------------------------------------------------*/
-/* Function for reading in a 12-bit value. When the channel is 0  */
-/* data from port A make up the lower 8 bits of the value and the */
-/* upper nibble from prot C the 4 higher bits. For channel 1 the  */
-/* lower 8 bits of the value come from port B while its higher 4  */
-/* bits are the lower nibble of port C.                           */
-/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * Function for reading in a 12-bit value. When the channel is 0
+ * data from port A make up the lower 8 bits of the value and the
+ * upper nibble from prot C the 4 higher bits. For channel 1 the
+ * lower 8 bits of the value come from port B while its higher 4
+ * bits are the lower nibble of port C.
+ *----------------------------------------------------------------*/
 
 static void witio_48_2x12_dio_in( WITIO_48_DATA *data )
 {
@@ -764,11 +764,11 @@ static void witio_48_2x12_dio_in( WITIO_48_DATA *data )
 }
 
 
-/*------------------------------------------------------------*/
-/* Function for reading in a 24-bit value. The higest byte of */
-/* the value comes from port C, the middle byte from port B   */
-/* and the lowest byte from port A.                           */
-/*------------------------------------------------------------*/
+/*------------------------------------------------------------*
+ * Function for reading in a 24-bit value. The higest byte of
+ * the value comes from port C, the middle byte from port B
+ * and the lowest byte from port A.
+ *------------------------------------------------------------*/
 
 static void witio_48_1x24_dio_in( WITIO_48_DATA *data )
 {
@@ -795,13 +795,13 @@ static void witio_48_1x24_dio_in( WITIO_48_DATA *data )
 }
 
 
-/*------------------------------------------------------------*/
-/* Function for reading in either a 16-bit or an 8-bit value. */
-/* When the channel argument is 0 a 16-bit valueis read in    */
-/* with the upper byte comming from port B and the lower byte */
-/* from port A. When channel is 1 an 8-bit value is read in   */
-/* from port C.                                               */
-/*------------------------------------------------------------*/
+/*------------------------------------------------------------*
+ * Function for reading in either a 16-bit or an 8-bit value.
+ * When the channel argument is 0 a 16-bit valueis read in
+ * with the upper byte comming from port B and the lower byte
+ * from port A. When channel is 1 an 8-bit value is read in
+ * from port C.
+ *------------------------------------------------------------*/
 
 static void witio_48_16_8_dio_in( WITIO_48_DATA *data )
 {
@@ -835,11 +835,11 @@ static void witio_48_16_8_dio_in( WITIO_48_DATA *data )
 }
 
 
-/*--------------------------------------------------------------*/
-/* Calculates the value that needs to be written to the control */
-/* register for one of the DIOs and writes it to the register   */
-/* (always with mode ("Betriebsart") 0).                        */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ * Calculates the value that needs to be written to the control
+ * register for one of the DIOs and writes it to the register
+ * (always with mode ("Betriebsart") 0).
+ *--------------------------------------------------------------*/
 
 #define READ_A        0x10
 #define READ_B        0x02
@@ -867,9 +867,9 @@ static void witio_48_set_crtl( int dio )
 }
 
 
-/*------------------------------------------------------------------*/
-/* Outputs one byte to the register addressed by the first argument */
-/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ * Outputs one byte to the register addressed by the first argument
+ *------------------------------------------------------------------*/
 
 static void witio_48_board_out( unsigned char *addr, unsigned char byte )
 {
@@ -877,9 +877,9 @@ static void witio_48_board_out( unsigned char *addr, unsigned char byte )
 }
 
 
-/*-------------------------------------------------------------*/
-/* Inputs one byte from the register addressed by the argument */
-/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*
+ * Inputs one byte from the register addressed by the argument
+ *-------------------------------------------------------------*/
 
 static unsigned char witio_48_board_in( unsigned char *addr )
 {

@@ -1,32 +1,32 @@
 /*
-  $Id$
- 
-  Copyright (C) 2002-2004 Jens Thoms Toerring
-
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2, or (at your option)
-  any later version.
-
-  Fsc2 is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with fsc2; see the file COPYING.  If not, write to
-  the Free Software Foundation, 59 Temple Place - Suite 330,
-  Boston, MA 02111-1307, USA.
-*/
+ *  $Id$
+ * 
+ *  Copyright (C) 2002-2004 Jens Thoms Toerring
+ * 
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2, or (at your option)
+ *  any later version.
+ * 
+ *  Fsc2 is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ * 
+ *  You should have received a copy of the GNU General Public License
+ *  along with fsc2; see the file COPYING.  If not, write to
+ *  the Free Software Foundation, 59 Temple Place - Suite 330,
+ *  Boston, MA 02111-1307, USA.
+ */
 
 
 #include "autoconf.h"
 #include "ni6601_drv.h"
 
 
-/*--------------------------------------------------------*/
-/* Function releases all resources allocated to the board */
-/*--------------------------------------------------------*/
+/*--------------------------------------------------------*
+ * Function releases all resources allocated to the board
+ *--------------------------------------------------------*/
 
 void ni6601_release_resources( Board *boards, int board_count )
 {
@@ -56,10 +56,10 @@ void ni6601_release_resources( Board *boards, int board_count )
 }
 
 
-/*----------------------------------------------------------*/
-/* Function for setting up the structure with the addresses */
-/* of the boards registers                                  */
-/*----------------------------------------------------------*/
+/*----------------------------------------------------------*
+ * Function for setting up the structure with the addresses
+ * of the boards registers
+ *----------------------------------------------------------*/
 
 void ni6601_register_setup( Board *board )
 {
@@ -168,10 +168,10 @@ void ni6601_register_setup( Board *board )
 }
 
 
-/*-------------------------------------------------------*/
-/* Make the DIO I/O pins (PFI 0-7) controllable via the  */
-/* STC DIO Control Register and switched to input        */
-/*-------------------------------------------------------*/
+/*-------------------------------------------------------*
+ * Make the DIO I/O pins (PFI 0-7) controllable via the
+ * STC DIO Control Register and switched to input
+ *-------------------------------------------------------*/
 
 void ni6601_dio_init( Board *board )
 {
@@ -190,10 +190,10 @@ void ni6601_dio_init( Board *board )
 }
 
 
-/*------------------------------------------------------------------*/
-/* Enables a pin of a board for output, argument is the PFI number. */
-/* Take care not to change any other bit of the register.           */
-/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ * Enables a pin of a board for output, argument is the PFI number.
+ * Take care not to change any other bit of the register.
+ *------------------------------------------------------------------*/
 
 void ni6601_enable_out( Board *board, int pfi )
 {
@@ -208,11 +208,11 @@ void ni6601_enable_out( Board *board, int pfi )
 }
 
 
-/*---------------------------------------------------------------------*/
-/* Disables a pin of a board for output (i.e. switches to input only), */
-/* argument is the PFI number. Take care not to change any other bits  */
-/* of the register.                                                    */
-/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*
+ * Disables a pin of a board for output (i.e. switches to input only),
+ * argument is the PFI number. Take care not to change any other bits
+ * of the register.
+ *---------------------------------------------------------------------*/
 
 void ni6601_disable_out( Board *board, int pfi )
 {
@@ -227,8 +227,8 @@ void ni6601_disable_out( Board *board, int pfi )
 }
 
 
-/*---------------------------------------------------------------------*/
-/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*
+ *---------------------------------------------------------------------*/
 
 int ni6601_input_gate( int gate, u16 *bits )
 {
@@ -272,8 +272,8 @@ int ni6601_input_gate( int gate, u16 *bits )
 }
 
 
-/*---------------------------------------------------------------------*/
-/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*
+ *---------------------------------------------------------------------*/
 
 int ni6601_input_source( int source, u16 *bits )
 {
