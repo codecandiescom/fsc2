@@ -353,7 +353,7 @@ static void resolve_functions( Device *dev )
 		   field) also add a function with '#' and the number. Otherwise
 		   append a new function */
 
-		if ( f->fnct == ( Var * ( * )( Var * ) ) 0 )
+		if ( f->fnct == ( Var * ( * )( Var * ) ) NULL )
 		{
 			f->fnct = ( Var * ( * )( Var * ) ) cur;
 			f->device = dev;

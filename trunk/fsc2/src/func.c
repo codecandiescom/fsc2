@@ -349,7 +349,6 @@ Var *func_call( Var *f )
 	long ac;
 	long abs_len;
 #ifndef NDEBUG
-	Func *cur_func;
 	size_t i;
 
 
@@ -374,7 +373,6 @@ Var *func_call( Var *f )
 		THROW( EXCEPTION );
 	}
 
-	cur_func = Fncts + i ;
 #endif
 
 	/* If the number of function arguments isn't INT_MIN (indicating a
@@ -433,27 +431,26 @@ Var *func_call( Var *f )
 	}
 	OTHERWISE
 	{
-		call_pop( );
-
 #ifndef NDEBUG
 		if ( ! vars_exist( f ) )
 		{
-			if ( ! cur_func->to_be_loaded )
+			if ( ! Call_Stack->f->to_be_loaded )
 				eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
 						__FILE__, __LINE__ );
 			else
 				eprint( FATAL, SET, "Function %s() from module %s.so messed "
-						"up the variable stack at %s:%d.\n", cur_func->name,
-						cur_func->device->name, __FILE__, __LINE__ );
+						"up the variable stack at %s:%d.\n",
+						Call_Stack->f->name, Call_Stack->f->device->name,
+						__FILE__, __LINE__ );
+			call_pop( );
 			PASSTHROUGH( );
 		}
 #endif
+		call_pop( );
 		for ( ap = f; ap != NULL; ap = vars_pop( ap ) )
 			;
 		PASSTHROUGH( );
 	}
-
-	call_pop( );
 
 #ifndef NDEBUG
 
@@ -462,16 +459,19 @@ Var *func_call( Var *f )
 
 	if ( ! vars_exist( f ) )
 	{
-		if ( ! cur_func->to_be_loaded )
+		if ( ! Call_Stack->f->to_be_loaded )
 			eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
 					__FILE__, __LINE__ );
 		else
 			eprint( FATAL, SET, "Function %s() from module %s.so messed "
-					"up the variable stack at %s:%d.\n", cur_func->name,
-					cur_func->device->name, __FILE__, __LINE__ );
+					"up the variable stack at %s:%d.\n",
+					Call_Stack->f->name, Call_Stack->f->device->name,
+					__FILE__, __LINE__ );
 		THROW( EXCEPTION );
 	}
 #endif
+
+	call_pop( );
 
 	/* Finally do the clean up, i.e. remove the variable with the function
 	   and all parameters that survived - just keep the return value. */
