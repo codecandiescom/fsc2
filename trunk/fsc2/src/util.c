@@ -163,9 +163,9 @@ long get_file_length( char *name, int *len )
 
 void eprint( int severity, const char *fmt, ... )
 {
-	char buffer[ FL_BROWSER_LINELENGTH ];
+	char buffer[ FL_BROWSER_LINELENGTH + 1 ];
 	char *cp = buffer;
-	int space_left = FL_BROWSER_LINELENGTH - 1;
+	int space_left = FL_BROWSER_LINELENGTH;
 	va_list ap;
 
 	if ( severity != NO_ERROR )
@@ -194,15 +194,9 @@ void eprint( int severity, const char *fmt, ... )
 			space_left -= 3;
 		}
 
-
-		/* Avoid writing more than FL_BROWSER_LINELENGTH chars */
-
-		if ( space_left > 0 )
-		{
-			va_start( ap, fmt );
-			vsnprintf( cp, space_left, fmt, ap );
-			va_end( ap );
-		}
+		va_start( ap, fmt );
+		vsnprintf( cp, space_left, fmt, ap );
+		va_end( ap );
 
 		if ( I_am == PARENT )
 		{
