@@ -352,6 +352,11 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 "&"         return AND;       /* logical and operator */
 "|"         return OR;        /* logical or operator */
 "~"         return XOR;       /* logical exclusive or (xor) operator */
+"+="        return PLSA;
+"-="        return MINA;
+"*="        return MULA;
+"/="        return DIVA;
+"%="        return MODA;
 
             /* quasi-assignment operator for pulse properties */
 

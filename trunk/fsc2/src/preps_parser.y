@@ -95,7 +95,7 @@ line:    P_TOK prop
        | VAR_TOKEN MODA expr       { vars_assign( vars_mod( $1, $3 ), $1 ); }
        | VAR_TOKEN '['             { vars_arr_start( $1 ); }
          list1 ']'                 { vars_arr_lhs( $4 ); }
-         xxx                       { assert( Var_Stack == NULL ); }
+         ass                       { assert( Var_Stack == NULL ); }
        | FUNC_TOKEN '(' list2 ')'  { vars_pop( func_call( $1 ) ); }
        | FUNC_TOKEN '['            { eprint( FATAL, "%s:%ld: `%s' is a "
 											 "predefined function.",
@@ -103,7 +103,7 @@ line:    P_TOK prop
 	                                 THROW( EXCEPTION ); }
 ;
 
-xxx:     '=' expr                  { vars_assign( $2, $2->prev ); }
+ass:     '=' expr                  { vars_assign( $2, $2->prev ); }
        | PLSA expr                 { Var **C = &( $2->prev );
 	                                 vars_assign( vars_add( vars_val( *C ),
 															$2 ), *C ); }

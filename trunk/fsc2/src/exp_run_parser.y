@@ -68,7 +68,7 @@ static Var *CV;
 %token E_MINA         289
 %token E_MULA         290
 %token E_DIVA         291
-%token E_MODA         291
+%token E_MODA         292
 
 
 %token <vptr> E_VAR_TOKEN         /* variable name */
@@ -145,8 +145,38 @@ line:    E_VAR_TOKEN '=' expr      { vars_assign( $3, $1 ); }
        | E_PPOS E_MODA expr        { p_set( $1, P_POS, vars_mod(
 		                                   p_get_by_num( $1, P_POS ), $3 ) ); }
        | E_PLEN '=' expr           { p_set( $1, P_LEN, $3 ); }
+       | E_PLEN E_PLSA expr        { p_set( $1, P_LEN, vars_add(
+		                                   p_get_by_num( $1, P_LEN ), $3 ) ); }
+       | E_PLEN E_MINA expr        { p_set( $1, P_LEN, vars_sub(
+		                                   p_get_by_num( $1, P_LEN ), $3 ) ); }
+       | E_PLEN E_MULA expr        { p_set( $1, P_LEN, vars_mult(
+		                                   p_get_by_num( $1, P_LEN ), $3 ) ); }
+       | E_PLEN E_DIVA expr        { p_set( $1, P_LEN, vars_div(
+		                                   p_get_by_num( $1, P_LEN ), $3 ) ); }
+       | E_PLEN E_MODA expr        { p_set( $1, P_LEN, vars_mod(
+		                                   p_get_by_num( $1, P_LEN ), $3 ) ); }
        | E_PDPOS '=' expr          { p_set( $1, P_DPOS, $3 ); }
+       | E_PDPOS E_PLSA expr       { p_set( $1, P_DPOS, vars_add(
+		                                  p_get_by_num( $1, P_DPOS ), $3 ) ); }
+       | E_PDPOS E_MINA expr       { p_set( $1, P_DPOS, vars_sub(
+		                                  p_get_by_num( $1, P_DPOS ), $3 ) ); }
+       | E_PDPOS E_MULA expr       { p_set( $1, P_DPOS, vars_mult(
+		                                  p_get_by_num( $1, P_DPOS ), $3 ) ); }
+       | E_PDPOS E_DIVA expr       { p_set( $1, P_DPOS, vars_div(
+		                                  p_get_by_num( $1, P_DPOS ), $3 ) ); }
+       | E_PDPOS E_MODA expr       { p_set( $1, P_DPOS, vars_mod(
+		                                  p_get_by_num( $1, P_DPOS ), $3 ) ); }
        | E_PDLEN '=' expr          { p_set( $1, P_DLEN, $3 ); }
+       | E_PDLEN E_PLSA expr       { p_set( $1, P_DLEN, vars_add(
+		                                  p_get_by_num( $1, P_DLEN ), $3 ) ); }
+       | E_PDLEN E_MINA expr       { p_set( $1, P_DLEN, vars_sub(
+		                                  p_get_by_num( $1, P_DLEN ), $3 ) ); }
+       | E_PDLEN E_MULA expr       { p_set( $1, P_DLEN, vars_mult(
+		                                  p_get_by_num( $1, P_DLEN ), $3 ) ); }
+       | E_PDLEN E_DIVA expr       { p_set( $1, P_DLEN, vars_div(
+		                                  p_get_by_num( $1, P_DLEN ), $3 ) ); }
+       | E_PDLEN E_MODA expr       { p_set( $1, P_DLEN, vars_mod(
+		                                  p_get_by_num( $1, P_DLEN ), $3 ) ); }
 ;
 
 ass:     '=' expr                  { vars_assign( $2, $2->prev ); }
