@@ -1202,17 +1202,6 @@ Var *f_init_display( Var *v )
 	long dim;
 	char *l1, *l2;
 
-	if ( ! TEST_RUN && I_am == CHILD )
-	{
-		int r;
-		r = show_choices( "Please set sweep speed on magnet front\n"
-						  "panel to maximum value of 6666 Oe/min.\n"
-						  "Also make sure remote control is enabled !",
-						  2, "Abort", "Done", "", 2 );
-		fprintf( stderr, "CHILD: Got a %d from show_choices().\n", r );
-		return vars_push( INT_VAR, 1 );
-	}
-
 	vars_check( v, INT_VAR | FLOAT_VAR );
 	if ( v->type == INT_VAR )
 		dim = v->val.lval;

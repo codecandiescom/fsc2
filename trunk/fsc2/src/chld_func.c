@@ -63,8 +63,6 @@ int show_choices( const char *text, int numb, const char *b1, const char *b2,
 		return fl_show_choices( text, numb, b1, b2, b3, def );
 	else
 	{
-		fprintf( stderr, "CHILD3: do_send is %s.\n", do_send ? "SET" : "UNSET" );
-
 		writer( C_SHOW_CHOICES, text, numb, b1, b2, b3, def );
 		reader( ( void * ) &ret );
 		return ret;
