@@ -276,8 +276,7 @@ Var *f_round( Var *v )
 			if ( v->val.dval >= LONG_MAX - 0.5 ||
 				 v->val.dval <= LONG_MIN + 0.5 )
 				print( SEVERE, "Integer argument overflow.\n" );
-			return vars_push( INT_VAR,   ( long ) ( 2 * v->val.dval )
-							           - ( long ) v->val.dval );
+			return vars_push( INT_VAR, lrnd( v->val.dval ) );
 
 		default :
 			get_array_params( v, &len, &ilp, &idp );
@@ -292,7 +291,7 @@ Var *f_round( Var *v )
 		{
 			if ( *idp >= LONG_MAX - 0.5 || *idp <= LONG_MIN + 0.5 )
 				print( SEVERE, "Integer argument overflow.\n" );
-			rlp[ i ] = ( long ) ( 2 * *idp ) - ( long ) *idp;
+			rlp[ i ] = lrnd( *idp );
 		}
 
 		new_var = vars_push( INT_ARR, rlp, len );
