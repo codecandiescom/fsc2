@@ -313,8 +313,7 @@ int func_exists( const char *name )
 	   the first device of a generic type is stored in the list of functions
 	   without it.*/
 
-	if ( ( hp = strrchr( fn, '#' ) ) != NULL &&
-		 * ( hp + 1 ) == '1' && * ( hp + 2 ) == '\0' )
+	if ( ( hp = strrchr( fn, '#' ) ) != NULL && ! strcmp( hp, "#1" ) )
 		*hp = '\0';
 
 	res = bsearch( fn, Fncts, Num_Func, sizeof *Fncts, func_cmp2 );
@@ -418,8 +417,7 @@ Var *func_get_long( const char *name, int *acc, bool flag )
 	   the first device of a generic type is stored in the list of functions
 	   without it.*/
 
-	if ( ( hp = strrchr( fn, '#' ) ) != NULL &&
-		 * ( hp + 1 ) == '1' && * ( hp + 2 ) == '\0' )
+	if ( ( hp = strrchr( fn, '#' ) ) != NULL && ! strcmp( hp, "#1" ) )
 		*hp = '\0';
 
 	/* Try to find the function by its name and if found create a variable on
