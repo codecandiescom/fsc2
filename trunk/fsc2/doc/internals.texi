@@ -1779,7 +1779,7 @@ case characters for the word.
 When I use @code{typedef}'ed types I use a similar convention like for global
 variables but append the suffix @code{_T} to the end of the name to make them
 stick out, like in @code{GUI_Stuff_T}. For @code{#define}'d constants I try
-to use all upper case, e.g.@: code{NUM_CHANNEL_NAMES} - the same holds for
+to use all upper case, e.g.@: @code{NUM_CHANNEL_NAMES} - the same holds for
 enumerated values.
 
 With a few exceptions function names are always in all lower case.
