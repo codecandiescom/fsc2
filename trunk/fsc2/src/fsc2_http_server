@@ -26,7 +26,7 @@
 use strict;
 use IO::Socket::INET;
 use POSIX;
-
+use Fcntl_Lock;
 
 # Set PATH to the minmum (we're running in taint mode)
 
@@ -38,6 +38,7 @@ my $max_reqs = 16;     # how many simultaneous requests get accepted
 my $crlf = "\r\n";     # RFC 2616 requires this as the newline
 my $has_pnmtopng;      # does the pnmtopng utility exist?
 my $has_ppmtojpeg;     # does the ppmtojpeg utility exist?
+my $fs;                # flock structure for locking of STDOUT
 my $version = 0.3;
 my $hostname = `hostname -f`;
 chomp $hostname;
@@ -612,11 +613,14 @@ sub rfc_1123_date {
 
 
 #########################################################
-# Creates (or releases) an advisory lock on STDOUT. Uses fcntl() instead of
-# flock() in a rather cryptic way (about which I am not too happy) because
-# flock() does not seem to work for locking STDOUT.
+# Creates (or releases) an advisory lock on STDOUT.
 
 sub stdout_lock {
-	return defined fcntl STDOUT, F_SETLKW,
-		pack( "sslll", shift( ) ? F_WRLCK : F_UNLCK, SEEK_SET, 0, 0, 0 );
+	if ( shift ) {
+		$fs = Fcntl_Lock->new( 'l_type' => F_WRLCK );
+	} else {
+		$fs->l_type( F_UNLCK );
+	}
+
+	return defined $fs->fcntl_lock( STDOUT_FILENO, F_SETLKW );
 }
