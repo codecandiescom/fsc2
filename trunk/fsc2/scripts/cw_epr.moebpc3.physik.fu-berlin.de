@@ -620,12 +620,15 @@ File;
 current = start_current;
 ";
 	if ( $start_current < $end_current ) {
-		print F "step_size = sweep_rate / kd;\n\n";
+		print F "step_size = sweep_rate / kd;\n";
 	} else {
-		print F "step_size = - sweep_rate / kd;\n\n";
+		print F "step_size = - sweep_rate / kd;\n";
 	}
-
 print F "
+G_min = floor( abs( step_size ) * Num_Points / ( sweep_rate * 60 ) );
+G_sec = ceil( abs( step_size ) * Num_Points / sweep_rate ) - G_min * 60;
+
+
 PREPARATIONS:
 
 init_1d( 3, Num_Points, start_current, step_size,
@@ -647,6 +650,7 @@ IF is_file( File ) {
 }
 
 magnet_sweep_rate( sweep_rate );
+print( \"Estimated time for single sweep: # min # sec\\n\", G_min, G_sec );
 
 FOREVER {
 

@@ -65,8 +65,8 @@ static volatile bool child_is_quitting;
 sigjmp_buf alrm_env;
 volatile sig_atomic_t can_jmp_alrm = 0;
 
-static struct sigaction sigchld_oact,
-	                    quitting_oact;
+static struct sigaction sigchld_old_act,
+	                    quitting_old_act;
 
 static int child_return_status;
 
@@ -323,12 +323,12 @@ static void setup_signal_handlers( void )
 	sact.sa_handler = quitting_handler;
 	sigemptyset( &sact.sa_mask );
 	sact.sa_flags = 0;
-	sigaction( QUITTING, &sact, &quitting_oact );
+	sigaction( QUITTING, &sact, &quitting_old_act );
 
 	sact.sa_handler = run_sigchld_handler;
 	sigemptyset( &sact.sa_mask );
 	sact.sa_flags = 0;
-	sigaction( SIGCHLD, &sact, &sigchld_oact );
+	sigaction( SIGCHLD, &sact, &sigchld_old_act );
 
 	fl_set_idle_callback( new_data_callback, NULL );
 }
@@ -353,8 +353,8 @@ static void stop_while_exp_hook( FL_OBJECT *a, long b )
 
 static void fork_failure( int stored_errno )
 {
-	sigaction( SIGCHLD,  &sigchld_oact,  NULL );
-	sigaction( QUITTING, &quitting_oact, NULL );
+	sigaction( SIGCHLD,  &sigchld_old_act,  NULL );
+	sigaction( QUITTING, &quitting_old_act, NULL );
 
 	switch ( stored_errno )
 	{
@@ -377,7 +377,7 @@ static void fork_failure( int stored_errno )
 				eprint( FATAL, UNSET, "System error \"%s\" when trying to "
 						"start experiment.\n", sys_errlist[ errno ] );
 			else
-				eprint( FATAL, UNSET, "Unrecognized system error (errno = %d) "
+				eprint( FATAL, UNSET, "Unknown system error (errno = %d) "
 						"when trying to start experiment.\n", errno );
 			fl_show_alert( "FATAL Error", "System error on start of "
 						   "experiment.", "", 1 );
@@ -388,12 +388,15 @@ static void fork_failure( int stored_errno )
 	end_comm( );
 
 	run_end_of_exp_hooks( );
+
 	if ( need_GPIB )
 		gpib_shutdown( );
 	fsc2_serial_cleanup( );
+
 	Internals.mode = PREPARATION;
 
 	stop_measurement( NULL, 1 );
+
 	Internals.state = STATE_IDLE;
 }
 
@@ -465,7 +468,7 @@ static void quitting_handler( int signo )
 	if ( kill( Internals.child_pid, DO_QUIT ) < 0 )
 	{
 		Internals.child_pid = 0;                         /* child is dead... */
-		sigaction( SIGCHLD, &sigchld_oact, NULL );
+		sigaction( SIGCHLD, &sigchld_old_act, NULL );
 		fl_trigger_object( GUI.run_form->sigchld );
 		stop_measurement( NULL, 1 );
 	}
@@ -490,19 +493,21 @@ static void run_sigchld_handler( int signo )
 	int errno_saved;
 
 
-	signo = signo;
+	if ( signo != SIGCHLD )
+		return;
+
 	errno_saved = errno;
 
 	if ( ( pid = wait( &return_status ) ) != Internals.child_pid )
 	{
-		if ( pid == Internals.http_pid )
+		if ( pid != 0 && pid == Internals.http_pid )
 		{
 			Internals.http_pid = -1;
 			fl_trigger_object( GUI.main_form->server );
 		}
 
 		errno_saved = errno;
-		return;                       /* if some other child process died... */
+		return;
 	}
 
 #if ! defined NDEBUG
@@ -515,7 +520,7 @@ static void run_sigchld_handler( int signo )
 #endif
 
 	Internals.child_pid = 0;                             /* child is dead... */
-	sigaction( SIGCHLD, &sigchld_oact, NULL );
+	sigaction( SIGCHLD, &sigchld_old_act, NULL );
 
 	GUI.run_form->sigchld->u_ldata = ( long ) return_status;
 	fl_trigger_object( GUI.run_form->sigchld );
@@ -599,7 +604,7 @@ void stop_measurement( FL_OBJECT *a, long b )
 
 	/* Remove the signal handlers */
 
-	sigaction( QUITTING, &quitting_oact, NULL );
+	sigaction( QUITTING, &quitting_old_act, NULL );
 
 	/* Go back to using the normal idle handler */
 
@@ -610,14 +615,15 @@ void stop_measurement( FL_OBJECT *a, long b )
 	tools_clear( );
 
 	run_end_of_exp_hooks( );
+
 	if ( need_GPIB )
 		gpib_shutdown( );
 	fsc2_serial_cleanup( );
 
-	secs = experiment_time( );
+	secs  = experiment_time( );
 	hours = ( int ) floor( secs / 3600.0 );
 	secs -= hours * 3600.0;
-	mins = ( int ) floor( secs / 60.0 );
+	mins  = ( int ) floor( secs / 60.0 );
 	secs -= mins * 60.0;
 
 	switch ( b )
