@@ -57,7 +57,7 @@ boxtype: FL_UP_BOX
 colors: FL_MCOL FL_GREEN
 alignment: FL_ALIGN_CENTER
 style: FL_NORMAL_STYLE
-size: FL_LARGE_SIZE
+size: FL_DEFAULT_SIZE
 lcol: FL_BLACK
 label: Load
 shortcut: L
@@ -75,7 +75,7 @@ boxtype: FL_UP_BOX
 colors: FL_MCOL FL_GREEN
 alignment: FL_ALIGN_CENTER
 style: FL_NORMAL_STYLE
-size: FL_LARGE_SIZE
+size: FL_DEFAULT_SIZE
 lcol: FL_BLACK
 label: Reload
 shortcut: R
@@ -93,7 +93,7 @@ boxtype: FL_UP_BOX
 colors: FL_MCOL FL_GREEN
 alignment: FL_ALIGN_CENTER
 style: FL_NORMAL_STYLE
-size: FL_LARGE_SIZE
+size: FL_DEFAULT_SIZE
 lcol: FL_BLACK
 label: Test
 shortcut: T
@@ -111,7 +111,7 @@ boxtype: FL_UP_BOX
 colors: FL_MCOL FL_GREEN
 alignment: FL_ALIGN_CENTER
 style: FL_NORMAL_STYLE
-size: FL_LARGE_SIZE
+size: FL_DEFAULT_SIZE
 lcol: FL_BLACK
 label: Start
 shortcut: S
@@ -129,7 +129,7 @@ boxtype: FL_UP_BOX
 colors: FL_MCOL FL_GREEN
 alignment: FL_ALIGN_CENTER
 style: FL_NORMAL_STYLE
-size: FL_LARGE_SIZE
+size: FL_DEFAULT_SIZE
 lcol: FL_BLACK
 label: Quit
 shortcut: Q
@@ -165,7 +165,7 @@ boxtype: FL_UP_BOX
 colors: FL_MCOL FL_GREEN
 alignment: FL_ALIGN_CENTER
 style: FL_NORMAL_STYLE
-size: FL_LARGE_SIZE
+size: FL_DEFAULT_SIZE
 lcol: FL_BLACK
 label: Edit
 shortcut: E
@@ -204,7 +204,7 @@ boxtype: FL_UP_BOX
 colors: FL_MCOL FL_COL1
 alignment: FL_ALIGN_CENTER
 style: FL_NORMAL_STYLE
-size: FL_LARGE_SIZE
+size: FL_DEFAULT_SIZE
 lcol: FL_BLACK
 label: Bug Report
 shortcut: B
@@ -222,7 +222,7 @@ boxtype: FL_UP_BOX
 colors: FL_MCOL FL_GREEN
 alignment: FL_ALIGN_CENTER
 style: FL_NORMAL_STYLE
-size: FL_LARGE_SIZE
+size: FL_DEFAULT_SIZE
 lcol: FL_BLACK
 label: Help
 shortcut: H
@@ -282,7 +282,7 @@ boxtype: FL_UP_BOX
 colors: FL_MCOL FL_GREEN
 alignment: FL_ALIGN_CENTER
 style: FL_NORMAL_STYLE
-size: FL_LARGE_SIZE
+size: FL_DEFAULT_SIZE
 lcol: FL_BLACK
 label: Stop
 shortcut: S
@@ -300,7 +300,7 @@ boxtype: FL_NO_BOX
 colors: FL_COL1 FL_COL1
 alignment: FL_ALIGN_CENTER
 style: FL_NORMAL_STYLE
-size: FL_LARGE_SIZE
+size: FL_DEFAULT_SIZE
 lcol: FL_BLACK
 label: 
 shortcut: 
@@ -336,7 +336,7 @@ boxtype: FL_UP_BOX
 colors: FL_TOP_BCOL FL_GREEN
 alignment: FL_ALIGN_CENTER
 style: FL_NORMAL_STYLE
-size: FL_LARGE_SIZE
+size: FL_DEFAULT_SIZE
 lcol: FL_BLACK
 label: FS
 shortcut: F
@@ -355,7 +355,7 @@ boxtype: FL_UP_BOX
 colors: FL_MCOL FL_TOMATO
 alignment: FL_ALIGN_CENTER
 style: FL_NORMAL_STYLE
-size: FL_LARGE_SIZE
+size: FL_DEAFULT_SIZE
 lcol: FL_BLACK
 label: 1
 shortcut: 1
@@ -374,7 +374,7 @@ boxtype: FL_UP_BOX
 colors: FL_MCOL FL_GREEN
 alignment: FL_ALIGN_CENTER
 style: FL_NORMAL_STYLE
-size: FL_LARGE_SIZE
+size: FL_DEFAULT_SIZE
 lcol: FL_BLACK
 label: 2
 shortcut: 2
@@ -393,7 +393,7 @@ boxtype: FL_UP_BOX
 colors: FL_MCOL FL_YELLOW
 alignment: FL_ALIGN_CENTER
 style: FL_NORMAL_STYLE
-size: FL_LARGE_SIZE
+size: FL_DEFAULT_SIZE
 lcol: FL_BLACK
 label: 3
 shortcut: 3
@@ -412,7 +412,7 @@ boxtype: FL_UP_BOX
 colors: FL_MCOL FL_CYAN
 alignment: FL_ALIGN_CENTER
 style: FL_NORMAL_STYLE
-size: FL_LARGE_SIZE
+size: FL_DEFAULT_SIZE
 lcol: FL_BLACK
 label: 4
 shortcut: 4
@@ -623,7 +623,7 @@ boxtype: FL_DOWN_BOX
 colors: FL_COL1 FL_MCOL
 alignment: FL_ALIGN_LEFT
 style: FL_NORMAL_STYLE
-size: FL_LARGE_SIZE
+size: FL_DEFAULT_SIZE
 lcol: FL_BLACK
 label: Print command: 
 shortcut: 
@@ -641,7 +641,7 @@ boxtype: FL_FLAT_BOX
 colors: FL_COL1 FL_MCOL
 alignment: FL_ALIGN_LEFT|FL_ALIGN_INSIDE
 style: FL_NORMAL_STYLE
-size: FL_LARGE_SIZE
+size: FL_DEFAULT_SIZE
 lcol: FL_BLACK
 label: Paper type:
 shortcut: 
@@ -659,7 +659,7 @@ boxtype: FL_UP_BOX
 colors: FL_COL1 FL_COL1
 alignment: FL_ALIGN_CENTER
 style: FL_NORMAL_STYLE
-size: FL_LARGE_SIZE
+size: FL_DEFAULT_SIZE
 lcol: FL_BLACK
 label: Cancel
 shortcut: 
@@ -677,7 +677,7 @@ boxtype: FL_UP_BOX
 colors: FL_COL1 FL_COL1
 alignment: FL_ALIGN_CENTER
 style: FL_NORMAL_STYLE
-size: FL_LARGE_SIZE
+size: FL_DEFAULT_SIZE
 lcol: FL_BLACK
 label: Print
 shortcut: 
@@ -713,7 +713,7 @@ boxtype: FL_NO_BOX
 colors: FL_COL1 FL_GREEN
 alignment: FL_ALIGN_CENTER
 style: FL_NORMAL_STYLE
-size: FL_LARGE_SIZE
+size: FL_DEFAULT_SIZE
 lcol: FL_BLACK
 label:  Send to printer
 shortcut: 
@@ -732,7 +732,7 @@ boxtype: FL_NO_BOX
 colors: FL_COL1 FL_GREEN
 alignment: FL_ALIGN_CENTER
 style: FL_NORMAL_STYLE
-size: FL_LARGE_SIZE
+size: FL_DEFAULT_SIZE
 lcol: FL_BLACK
 label:  Print to file
 shortcut: 
@@ -786,7 +786,7 @@ boxtype: FL_DOWN_BOX
 colors: FL_COL1 FL_MCOL
 alignment: FL_ALIGN_LEFT
 style: FL_NORMAL_STYLE
-size: FL_LARGE_SIZE
+size: FL_DEFAULT_SIZE
 lcol: FL_BLACK
 label: File name: 
 shortcut: 
@@ -804,7 +804,7 @@ boxtype: FL_UP_BOX
 colors: FL_COL1 FL_COL1
 alignment: FL_ALIGN_CENTER
 style: FL_NORMAL_STYLE
-size: FL_LARGE_SIZE
+size: FL_DEFAULT_SIZE
 lcol: FL_BLACK
 label: Browse...
 shortcut: 
@@ -840,7 +840,7 @@ boxtype: FL_FLAT_BOX
 colors: FL_COL1 FL_MCOL
 alignment: FL_ALIGN_LEFT|FL_ALIGN_INSIDE
 style: FL_NORMAL_STYLE
-size: FL_LARGE_SIZE
+size: FL_DEFAULT_SIZE
 lcol: FL_BLACK
 label: Printer type:
 shortcut: 
@@ -876,7 +876,7 @@ boxtype: FL_NO_BOX
 colors: FL_COL1 FL_GREEN
 alignment: FL_ALIGN_CENTER
 style: FL_NORMAL_STYLE
-size: FL_LARGE_SIZE
+size: FL_DEFAULT_SIZE
 lcol: FL_BLACK
 label: Black & White
 shortcut: 
@@ -894,7 +894,7 @@ boxtype: FL_NO_BOX
 colors: FL_COL1 FL_GREEN
 alignment: FL_ALIGN_CENTER
 style: FL_NORMAL_STYLE
-size: FL_LARGE_SIZE
+size: FL_DEFAULT_SIZE
 lcol: FL_BLACK
 label: Color
 shortcut: 
@@ -949,7 +949,7 @@ boxtype: FL_NO_BOX
 colors: FL_COL1 FL_GREEN
 alignment: FL_ALIGN_CENTER
 style: FL_NORMAL_STYLE
-size: FL_LARGE_SIZE
+size: FL_DEFAULT_SIZE
 lcol: FL_BLACK
 label: A3
 shortcut: 
@@ -967,7 +967,7 @@ boxtype: FL_NO_BOX
 colors: FL_COL1 FL_GREEN
 alignment: FL_ALIGN_CENTER
 style: FL_NORMAL_STYLE
-size: FL_LARGE_SIZE
+size: FL_DEFAULT_SIZE
 lcol: FL_BLACK
 label: Letter
 shortcut: 
@@ -985,7 +985,7 @@ boxtype: FL_NO_BOX
 colors: FL_COL1 FL_GREEN
 alignment: FL_ALIGN_CENTER
 style: FL_NORMAL_STYLE
-size: FL_LARGE_SIZE
+size: FL_DEFAULT_SIZE
 lcol: FL_BLACK
 label: Legal
 shortcut: 
@@ -1003,7 +1003,7 @@ boxtype: FL_NO_BOX
 colors: FL_COL1 FL_GREEN
 alignment: FL_ALIGN_CENTER
 style: FL_NORMAL_STYLE
-size: FL_LARGE_SIZE
+size: FL_DEFAULT_SIZE
 lcol: FL_BLACK
 label: A4
 shortcut: 
@@ -1022,7 +1022,7 @@ boxtype: FL_NO_BOX
 colors: FL_COL1 FL_GREEN
 alignment: FL_ALIGN_CENTER
 style: FL_NORMAL_STYLE
-size: FL_LARGE_SIZE
+size: FL_DEFAULT_SIZE
 lcol: FL_BLACK
 label: A5
 shortcut: 
@@ -1040,7 +1040,7 @@ boxtype: FL_NO_BOX
 colors: FL_COL1 FL_GREEN
 alignment: FL_ALIGN_CENTER
 style: FL_NORMAL_STYLE
-size: FL_LARGE_SIZE
+size: FL_DEFAULT_SIZE
 lcol: FL_BLACK
 label: A6
 shortcut: 
@@ -1190,7 +1190,7 @@ boxtype: FL_UP_BOX
 colors: FL_MCOL FL_GREEN
 alignment: FL_ALIGN_CENTER
 style: FL_NORMAL_STYLE
-size: FL_LARGE_SIZE
+size: FL_DEFAULT_SIZE
 lcol: FL_BLACK
 label: Close
 shortcut: C
@@ -1226,7 +1226,7 @@ boxtype: FL_UP_BOX
 colors: FL_TOP_BCOL FL_GREEN
 alignment: FL_ALIGN_CENTER
 style: FL_NORMAL_STYLE
-size: FL_LARGE_SIZE
+size: FL_DEFAULT_SIZE
 lcol: FL_BLACK
 label: FS
 shortcut: F
