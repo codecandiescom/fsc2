@@ -2,12 +2,23 @@
   $Id$
 */
 
+/*
+  I had some rather strange probems with this device. For example, when simply
+  just sweeping up the output frequency I nearyl never ended up with the
+  expected end frequency but a bit below eventhough all commands got send
+  correctly. Obviously, some kind of backlog of commands had built up. To get
+  rid of this (and also some spurious break-downs in the communication) I now
+  check the operation complete after each setting of the synthesizer.
+*/
+
+
 
 #include "hp8647a.h"
 #include "gpib.h"
 
 
 static void hp8647a_comm_failure( void );
+static void hp8647a_check_complete( void );
 
 
 /*-------------------------------------------------------------*/
@@ -21,6 +32,12 @@ bool hp8647a_init( const char *name )
 
 	if ( gpib_init_device( name, &hp8647a.device ) == FAILURE )
         return FAIL;
+
+	if ( gpib_write( hp8647a.device, "*RST\n" ) & GPIB_ERR )
+		return FAIL;
+
+	if ( gpib_write( hp8647a.device, "*OPC\n" ) == FAILURE )
+		return FAIL;
 
 	HP8647A_INIT = SET;
 
@@ -112,6 +129,7 @@ bool hp8647a_set_output_state( bool state )
 	sprintf( cmd, "OUTP:STAT %s\n", state ? "ON" : "OFF" );
 	if ( gpib_write( hp8647a.device, cmd ) == FAILURE )
 		hp8647a_comm_failure( );
+	hp8647a_check_complete( );
 
 	return state;
 }
@@ -144,9 +162,10 @@ double hp8647a_set_frequency( double freq )
 
 	assert( freq >= MIN_FREQ && freq <= MAX_FREQ );
 
-	sprintf( cmd, "FREQ:CW %f\n", freq );
+	sprintf( cmd, "FREQ:CW %.0f\n", freq );
 	if ( gpib_write( hp8647a.device, cmd ) == FAILURE )
 		hp8647a_comm_failure( );
+	hp8647a_check_complete( );
 
 	return freq;
 }
@@ -182,6 +201,7 @@ double hp8647a_set_attenuation( double att )
 	sprintf( cmd, "POW:AMPL %6.1f\n", att );
 	if ( gpib_write( hp8647a.device, cmd ) == FAILURE )
 		hp8647a_comm_failure( );
+	hp8647a_check_complete( );
 
 	return att;
 }
@@ -232,6 +252,7 @@ int hp8647a_set_mod_type( int type )
 	sprintf( cmd, "%s:STAT ON\n", types[ type ] );
 	if ( gpib_write( hp8647a.device, cmd ) == FAILURE )
 		hp8647a_comm_failure( );
+	hp8647a_check_complete( );
 
 	return type;
 }
@@ -338,6 +359,7 @@ int hp8647a_set_mod_source( int type, int source )
 	if ( gpib_write( hp8647a.device, cmd1 ) == FAILURE ||
 		 gpib_write( hp8647a.device, cmd2 ) == FAILURE )
 		hp8647a_comm_failure( );
+	hp8647a_check_complete( );
 
 	return source;
 }
@@ -488,6 +510,7 @@ double hp8647a_set_mod_ampl( int type, double ampl )
 
 	if ( gpib_write( hp8647a.device, cmd ) == FAILURE )
 		hp8647a_comm_failure( );
+	hp8647a_check_complete( );
 
 	return ampl;
 }
@@ -530,3 +553,21 @@ static void hp8647a_comm_failure( void )
 	eprint( FATAL, "%s: Communication with device failed.\n", DEVICE_NAME );
 	THROW( EXCEPTION );
 }
+
+
+/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*/
+
+static void hp8647a_check_complete( void )
+{
+	char buffer[ 10 ];
+	long length = 10;
+
+
+	do {
+		if ( gpib_write( hp8647a.device, "*OPC?\n" ) == FAILURE ||
+			 gpib_read( hp8647a.device, buffer, &length ) == FAILURE )
+			hp8647a_comm_failure( );
+	} while ( buffer[ 1 ] != '1' );
+}
+	
