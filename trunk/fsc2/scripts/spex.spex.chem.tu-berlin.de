@@ -803,10 +803,15 @@ sub exp_setup {
 														   $mt, $Ns ); } );
 	my $f7_q = $smw->Button( '-text' => 'Quit',
 							 '-command' =>
-							 sub { $smw->geometry( ) =~ /^\d+x\d+(.*)$/;
-								   $defs{ 'exp_geometry' } = $1;
-								   $f1->configure( '-state' => "normal" );
-								   $smw->destroy } );
+							 	sub { $smw->geometry( ) =~ /^\d+x\d+(.*)$/;
+									  $defs{ 'exp_geometry' } = $1;
+									  $defs{ 'swn' } = $swn;
+									  $defs{ 'ewn' } = $ewn;
+									  $defs{ 'sz' }  = $sz;
+									  $defs{ 'mt' }  = $mt;
+									  $defs{ 'Ns' }  = $Ns;
+									  $f1->configure( '-state' => "normal" );
+									  $smw->destroy } );
 	$f7->pack( '-side' => 'top',
 			   '-fill' => 'x',
 			   '-padx' => '4m' );
@@ -829,7 +834,7 @@ sub is_numeric {
 sub is_unsigned_numeric {
 
 	my $new_val = shift;
-	$new_val =~ /^((\d+\.?(\d+)?)|(\.(\d+)?))?$/;
+	$new_val =~ /^\s*((\d+\.?\d*)|(\.\d*))?\s*$/;
 }
 
 
@@ -850,14 +855,12 @@ sub get_defs {
 	goto done_reading unless defined( $ne = <F> ) and $ne =~ /^#/;
 
 	goto done_reading unless defined( $ne = <F> )
-		and $ne =~ /^[+-]\d+[+-]\d+$/;
-	chomp $ne;
-	$defs{ 'main_geometry' } = $ne;
+		and $ne =~ /^\s*([+-]\d+[+-]\d+)\s*$/;
+	$defs{ 'main_geometry' } = $1;
 
 	goto done_reading unless defined( $ne = <F> )
-		and $ne =~ /^[+-]\d+[+-]\d+$/;
-	chomp $ne;
-	$defs{ 'exp_geometry' } = $ne;
+		and $ne =~ /^\s*([+-]\d+[+-]\d+)\s*$/;
+	$defs{ 'exp_geometry' } = $1;
 
 	goto done_reading unless defined( $ne = <F> ) and is_numeric( $ne );
 	chomp $ne;
@@ -877,9 +880,9 @@ sub get_defs {
 	chomp $ne;
 	$defs{ 'mt' } = $ne;
 
-	goto done_reading unless defined( $ne = <F> ) and $ne =~ /^s*\d*\s*$/;
-	chomp $ne;
-	$defs{ 'Ns' } = $ne;
+	goto done_reading unless defined( $ne = <F> )
+		and $ne =~ /^\s*(\d+)\s*$/;
+	$defs{ 'Ns' } = $1;
 
   done_reading:
 	close F;
@@ -904,13 +907,12 @@ sub store_defs {
 	$defs{ 'ewn' } = 0 if ! defined $defs{ 'ewn' } or $defs{ 'ewn' } eq ".";
 	$defs{ 'sz' }  = 0 if ! defined $defs{ 'sz' }  or $defs{ 'sz' }  eq ".";
 	$defs{ 'mt' }  = 0 if ! defined $defs{ 'mt' }  or $defs{ 'mt' }  eq ".";
-	$defs{ 'Ns' }  = 1 if ! defined $defs{ 'Ns' }
-		or $defs{ 'mt' }  !~ /^\d+$/;
+	$defs{ 'Ns' }  = 1 if ! defined $defs{ 'Ns' };
 
 	print F "# Do not edit - created automatically!\n";
 	print F $defs{ 'main_geometry' } . "\n" . $defs{ 'exp_geometry' } . "\n" .
 			$defs{ 'swn' } . "\n" . $defs{ 'ewn' } . "\n" .
-			$defs{ 'sz' } . "\n" . $defs{ 'mt' } . " \n" . $defs{ 'Ns' } .
+			$defs{ 'sz' } . "\n" . $defs{ 'mt' } . "\n" . $defs{ 'Ns' } .
 			"\n";
 
 	close F;
