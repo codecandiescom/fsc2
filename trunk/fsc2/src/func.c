@@ -575,17 +575,10 @@ CALL_STACK *call_push( Func *f, Device *device, const char *device_name,
 					   int dev_count )
 {
 	const char *t;
-	static CALL_STACK *cs;
+	CALL_STACK *cs;
 
 
-	TRY
-	{
-		cs = CALL_STACK_P T_malloc( sizeof *cs );
-		TRY_SUCCESS;
-	}
-	CATCH( OUT_OF_MEMORY_EXCEPTION )
-		return NULL;
-
+	cs = CALL_STACK_P T_malloc( sizeof *cs );
 	cs->prev = EDL.Call_Stack;
 	cs->f = f;
 	if ( f != NULL )

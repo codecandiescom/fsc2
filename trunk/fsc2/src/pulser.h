@@ -30,6 +30,7 @@
 
 typedef struct {
 	const char *name;
+	Device *device;
 
 	bool needs_phase_pulses;
 	bool has_pods;

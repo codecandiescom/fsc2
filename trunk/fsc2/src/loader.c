@@ -55,10 +55,7 @@ void load_all_drivers( void )
 {
 	Device *cd;
 	bool saved_need_GPIB;
-	static CALL_STACK *cs;
 
-
-	cs = NULL;
 
 	/* Treat "User_Functions" also as a kind of device driver and append
 	   the device structure to the end of the list of devices */
@@ -111,8 +108,7 @@ void load_all_drivers( void )
 					 ! strcasecmp( cd->generic_type, PULSER_GENERIC_TYPE ) )
 					Cur_Pulser++;
 
-				if ( ( cs = call_push( NULL, cd->device_name ) ) == NULL )
-					THROW( OUT_OF_MEMORY_EXCEPTION );
+				call_push( NULL, cd, cd->device_name, cd->count );
 
 				if ( ! cd->driver.init_hook( ) )
 					eprint( WARN, UNSET, "Initialisation of module '%s.so' "
@@ -128,8 +124,7 @@ void load_all_drivers( void )
 	}
 	OTHERWISE
 	{
-		if ( cs != NULL )
-			call_pop( );
+		call_pop( );
 		Internals.in_hook = UNSET;
 		RETHROW( );
 	}
@@ -496,10 +491,8 @@ static void resolve_generic_type( Device *dev )
 void run_test_hooks( void )
 {
 	Device *cd;
-	static CALL_STACK *cs;
 
 
-	cs = NULL;
 	Cur_Pulser = -1;
 	Internals.in_hook = SET;
 
@@ -512,8 +505,7 @@ void run_test_hooks( void )
 					 ! strcasecmp( cd->generic_type, PULSER_GENERIC_TYPE ) )
 					Cur_Pulser++;
 
-				if ( ( cs = call_push( NULL, cd->device_name ) ) == NULL )
-					THROW( OUT_OF_MEMORY_EXCEPTION );
+				call_push( NULL, cd, cd->device_name, cd->count );
 
 				if ( ! cd->driver.test_hook( ) )
 					eprint( SEVERE, UNSET, "Initialisation of test run failed "
@@ -525,8 +517,7 @@ void run_test_hooks( void )
 	}
 	OTHERWISE
 	{
-		if ( cs != NULL )
-			call_pop( );
+		call_pop( );
 		Internals.in_hook = UNSET;
 		RETHROW( );
 	}
@@ -542,10 +533,8 @@ void run_test_hooks( void )
 void run_end_of_test_hooks( void )
 {
 	Device *cd;
-	static CALL_STACK *cs;
 
 
-	cs = NULL;
 	Cur_Pulser = -1;
 	Internals.in_hook = SET;
 
@@ -558,8 +547,7 @@ void run_end_of_test_hooks( void )
 					 ! strcasecmp( cd->generic_type, PULSER_GENERIC_TYPE ) )
 					Cur_Pulser++;
 
-				if ( ( cs = call_push( NULL, cd->device_name ) ) == NULL )
-					THROW( OUT_OF_MEMORY_EXCEPTION );
+				call_push( NULL, cd, cd->device_name, cd->count );
 
 				if ( ! cd->driver.end_of_test_hook( ) )
 					eprint( SEVERE, UNSET, "Final checks after test run "
@@ -571,8 +559,7 @@ void run_end_of_test_hooks( void )
 	}
 	OTHERWISE
 	{
-		if ( cs != NULL )
-			call_pop( );
+		call_pop( );
 		Internals.in_hook = UNSET;
 		RETHROW( );
 	}
@@ -588,10 +575,8 @@ void run_end_of_test_hooks( void )
 void run_exp_hooks( void )
 {
 	Device *cd;
-	static CALL_STACK *cs;
 
 
-	cs = NULL;
 	Cur_Pulser = -1;
 	Internals.in_hook = SET;
 
@@ -605,8 +590,7 @@ void run_exp_hooks( void )
 					 ! strcasecmp( cd->generic_type, PULSER_GENERIC_TYPE ) )
 					Cur_Pulser++;
 
-				if ( ( cs = call_push( NULL, cd->device_name ) ) == NULL )
-					THROW( OUT_OF_MEMORY_EXCEPTION );
+				call_push( NULL, cd, cd->device_name, cd->count );
 
 				if ( ! cd->driver.exp_hook( ) )
 					eprint( SEVERE, UNSET, "Initialisation of experiment "
@@ -630,8 +614,7 @@ void run_exp_hooks( void )
 	}
 	OTHERWISE
 	{
-		if ( cs != NULL )
-			call_pop( );
+		call_pop( );
 		Internals.in_hook = UNSET;
 		RETHROW( );
 	}
@@ -672,7 +655,12 @@ void run_end_of_exp_hooks( void )
 		if ( ! cd->is_loaded || ! cd->driver.is_end_of_exp_hook )
 			continue;
 
-		if ( call_push( NULL, cd->device_name ) == NULL )
+		TRY
+		{
+			call_push( NULL, cd, cd->device_name, cd->count );
+			TRY_SUCCESS;
+		}
+		CATCH( OUT_OF_MEMORY_EXCEPTION )
 			continue;
 
 		TRY
@@ -722,7 +710,12 @@ void run_exit_hooks( void )
 		if ( ! cd->is_loaded || ! cd->driver.is_exit_hook )
 			continue;
 
-		if ( call_push( NULL, cd->device_name ) == NULL )
+		TRY
+		{
+			call_push( NULL, cd, cd->device_name, cd->count );
+			TRY_SUCCESS;
+		}
+		CATCH( OUT_OF_MEMORY_EXCEPTION )
 			continue;
 
 		TRY

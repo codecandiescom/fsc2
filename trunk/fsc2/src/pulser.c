@@ -42,6 +42,7 @@ static P_List *plist;
 void pulser_struct_init( void )
 {
 	long i;
+	Device *cd = EDL.Device_List;
 
 
 	if ( EDL.Num_Pulsers == 0 )
@@ -53,6 +54,11 @@ void pulser_struct_init( void )
 	for ( i = 0; i < EDL.Num_Pulsers; i++ )
 	{
 		pulser_struct[ i ].name                       = NULL;
+
+		while ( ! cd->generic_type ||
+				strcasecmp( cd->generic_type, PULSER_GENERIC_TYPE ) )
+			cd = cd->next;
+		pulser_struct[ i ].device                     = cd;
 
 		pulser_struct[ i ].needs_phase_pulses         = UNSET;
 		pulser_struct[ i ].has_pods                   = UNSET;
@@ -251,8 +257,12 @@ void p_assign_pod( long func, Var *v )
 	is_pulser_func( pulser_struct[ Cur_Pulser ].assign_function,
 					"assigning function to pod" );
 
-	if ( call_push( NULL, pulser_struct[ Cur_Pulser ].name ) == NULL )
-		THROW( OUT_OF_MEMORY_EXCEPTION );
+	TRY
+	{
+		call_push( NULL, pulser_struct[ Cur_Pulser ].device,
+				   pulser_struct[ Cur_Pulser ].name, Cur_Pulser + 1 );
+		TRY_SUCCESS;
+	}
 
 	TRY
 	{
@@ -302,8 +312,12 @@ void p_assign_channel( long func, Var *v )
 
 	/* Finally call the function (if it exists...) */
 
-	if ( call_push( NULL, pulser_struct[ Cur_Pulser ].name ) == NULL )
-		THROW( OUT_OF_MEMORY_EXCEPTION );
+	TRY
+	{
+		call_push( NULL, pulser_struct[ Cur_Pulser ].device,
+				   pulser_struct[ Cur_Pulser ].name, Cur_Pulser + 1 );
+		TRY_SUCCESS;
+	}
 
 	TRY
 	{
@@ -359,8 +373,12 @@ void p_set_delay( long func, Var *v )
 	is_pulser_func( pulser_struct[ Cur_Pulser ].set_function_delay,
 					"setting a delay" );
 
-	if ( call_push( NULL, pulser_struct[ Cur_Pulser ].name ) == NULL )
-		THROW( OUT_OF_MEMORY_EXCEPTION );
+	TRY
+	{
+		call_push( NULL, pulser_struct[ Cur_Pulser ].device,
+				   pulser_struct[ Cur_Pulser ].name, Cur_Pulser + 1 );
+		TRY_SUCCESS;
+	}
 
 	TRY
 	{
@@ -390,8 +408,12 @@ void p_inv( long func )
 	is_pulser_func( pulser_struct[ Cur_Pulser ].invert_function,
 					"inverting a channel" );
 
-	if ( call_push( NULL, pulser_struct[ Cur_Pulser ].name ) == NULL )
-		THROW( OUT_OF_MEMORY_EXCEPTION );
+	TRY
+	{
+		call_push( NULL, pulser_struct[ Cur_Pulser ].device,
+				   pulser_struct[ Cur_Pulser ].name, Cur_Pulser + 1 );
+		TRY_SUCCESS;
+	}
 
 	TRY
 	{
@@ -433,8 +455,12 @@ void p_set_v_high( long func, Var *v )
 	is_pulser_func( pulser_struct[ Cur_Pulser ].set_function_high_level,
 					"setting high voltage level" );
 
-	if ( call_push( NULL, pulser_struct[ Cur_Pulser ].name ) == NULL )
-		THROW( OUT_OF_MEMORY_EXCEPTION );
+	TRY
+	{
+		call_push( NULL, pulser_struct[ Cur_Pulser ].device,
+				   pulser_struct[ Cur_Pulser ].name, Cur_Pulser + 1 );
+		TRY_SUCCESS;
+	}
 
 	TRY
 	{
@@ -476,8 +502,12 @@ void p_set_v_low( long func, Var *v )
 	is_pulser_func( pulser_struct[ Cur_Pulser ].set_function_low_level,
 					"setting low voltage level" );
 
-	if ( call_push( NULL, pulser_struct[ Cur_Pulser ].name ) == NULL )
-		THROW( OUT_OF_MEMORY_EXCEPTION );
+	TRY
+	{
+		call_push( NULL, pulser_struct[ Cur_Pulser ].device,
+				   pulser_struct[ Cur_Pulser ].name, Cur_Pulser + 1 );
+		TRY_SUCCESS;
+	}
 
 	TRY
 	{
@@ -518,8 +548,12 @@ void p_set_timebase( Var *v )
 	is_pulser_func( pulser_struct[ Cur_Pulser ].set_timebase,
 					"setting the timebase" );
 
-	if ( call_push( NULL, pulser_struct[ Cur_Pulser ].name ) == NULL )
-		THROW( OUT_OF_MEMORY_EXCEPTION );
+	TRY
+	{
+		call_push( NULL, pulser_struct[ Cur_Pulser ].device,
+				   pulser_struct[ Cur_Pulser ].name, Cur_Pulser + 1 );
+		TRY_SUCCESS;
+	}
 
 	TRY
 	{
@@ -572,8 +606,12 @@ void p_set_trigger_mode( Var *v )
 	is_pulser_func( pulser_struct[ Cur_Pulser ].set_trigger_mode,
 					"setting the trigger mode" );
 
-	if ( call_push( NULL, pulser_struct[ Cur_Pulser ].name ) == NULL )
-		THROW( OUT_OF_MEMORY_EXCEPTION );
+	TRY
+	{
+		call_push( NULL, pulser_struct[ Cur_Pulser ].device,
+				   pulser_struct[ Cur_Pulser ].name, Cur_Pulser + 1 );
+		TRY_SUCCESS;
+	}
 
 	TRY
 	{
@@ -625,8 +663,12 @@ void p_set_trigger_slope( Var *v )
 	is_pulser_func( pulser_struct[ Cur_Pulser ].set_trig_in_slope,
 					"setting the trigger slope" );
 
-	if ( call_push( NULL, pulser_struct[ Cur_Pulser ].name ) == NULL )
-		THROW( OUT_OF_MEMORY_EXCEPTION );
+	TRY
+	{
+		call_push( NULL, pulser_struct[ Cur_Pulser ].device,
+				   pulser_struct[ Cur_Pulser ].name, Cur_Pulser + 1 );
+		TRY_SUCCESS;
+	}
 
 	TRY
 	{
@@ -665,8 +707,12 @@ void p_set_trigger_level( Var *v )
 	is_pulser_func( pulser_struct[ Cur_Pulser ].set_trig_in_level,
 					"setting the trigger level" );
 
-	if ( call_push( NULL, pulser_struct[ Cur_Pulser ].name ) == NULL )
-		THROW( OUT_OF_MEMORY_EXCEPTION );
+	TRY
+	{
+		call_push( NULL, pulser_struct[ Cur_Pulser ].device,
+				   pulser_struct[ Cur_Pulser ].name, Cur_Pulser + 1 );
+		TRY_SUCCESS;
+	}
 
 	TRY
 	{
@@ -705,8 +751,12 @@ void p_set_trigger_impedance( Var *v )
 	is_pulser_func( pulser_struct[ Cur_Pulser ].set_trig_in_impedance,
 					"setting the trigger impedance" );
 
-	if ( call_push( NULL, pulser_struct[ Cur_Pulser ].name ) == NULL )
-		THROW( OUT_OF_MEMORY_EXCEPTION );
+	TRY
+	{
+		call_push( NULL, pulser_struct[ Cur_Pulser ].device,
+				   pulser_struct[ Cur_Pulser ].name, Cur_Pulser + 1 );
+		TRY_SUCCESS;
+	}
 
 	TRY
 	{
@@ -753,8 +803,12 @@ void p_set_rep_time( Var *v )
 	is_pulser_func( pulser_struct[ Cur_Pulser ].set_repeat_time,
 					"setting a repeat time" );
 
-	if ( call_push( NULL, pulser_struct[ Cur_Pulser ].name ) == NULL )
-		THROW( OUT_OF_MEMORY_EXCEPTION );
+	TRY
+	{
+		call_push( NULL, pulser_struct[ Cur_Pulser ].device,
+				   pulser_struct[ Cur_Pulser ].name, Cur_Pulser + 1 );
+		TRY_SUCCESS;
+	}
 
 	TRY
 	{
@@ -803,8 +857,12 @@ void p_set_rep_freq( Var *v )
 	is_pulser_func( pulser_struct[ Cur_Pulser ].set_repeat_time,
 					"setting a repeat frequency" );
 
-	if ( call_push( NULL, pulser_struct[ Cur_Pulser ].name ) == NULL )
-		THROW( OUT_OF_MEMORY_EXCEPTION );
+	TRY
+	{
+		call_push( NULL, pulser_struct[ Cur_Pulser ].device,
+				   pulser_struct[ Cur_Pulser ].name, Cur_Pulser + 1 );
+		TRY_SUCCESS;
+	}
 
 	TRY
 	{
@@ -848,8 +906,12 @@ void p_set_max_seq_len( Var *v )
     is_pulser_func( pulser_struct[ Cur_Pulser ].set_max_seq_len,
                     "setting a maximum pattern length" );
 
-	if ( call_push( NULL, pulser_struct[ Cur_Pulser ].name ) == NULL )
-		THROW( OUT_OF_MEMORY_EXCEPTION );
+	TRY
+	{
+		call_push( NULL, pulser_struct[ Cur_Pulser ].device,
+				   pulser_struct[ Cur_Pulser ].name, Cur_Pulser + 1 );
+		TRY_SUCCESS;
+	}
 
 	TRY
 	{
@@ -878,8 +940,12 @@ void p_phase_ref( int func, int ref )
     is_pulser_func( pulser_struct[ Cur_Pulser ].set_phase_reference,
                     "setting a function for phase cycling" );
 
-	if ( call_push( NULL, pulser_struct[ Cur_Pulser ].name ) == NULL )
-		THROW( OUT_OF_MEMORY_EXCEPTION );
+	TRY
+	{
+		call_push( NULL, pulser_struct[ Cur_Pulser ].device,
+				   pulser_struct[ Cur_Pulser ].name, Cur_Pulser + 1 );
+		TRY_SUCCESS;
+	}
 
 	TRY
 	{
@@ -970,8 +1036,12 @@ long p_new( long pnum )
 	new_plist->dev_num = Cur_Pulser;
 	plist = new_plist;
 
-	if ( call_push( NULL, pulser_struct[ Cur_Pulser ].name ) == NULL )
-		THROW( OUT_OF_MEMORY_EXCEPTION );
+	TRY
+	{
+		call_push( NULL, pulser_struct[ Cur_Pulser ].device,
+				   pulser_struct[ Cur_Pulser ].name, Cur_Pulser + 1 );
+		TRY_SUCCESS;
+	}
 
 	TRY
 	{
@@ -1001,8 +1071,12 @@ void p_set( long pnum, int type, Var *v )
 	/* Now the correct driver function is called. All switches just check that
 	   the variable has the correct type and the driver function exists. */
 
-	if ( call_push( NULL, pulser_struct[ Cur_Pulser ].name ) == NULL )
-		THROW( OUT_OF_MEMORY_EXCEPTION );
+	TRY
+	{
+		call_push( NULL, pulser_struct[ Cur_Pulser ].device,
+				   pulser_struct[ Cur_Pulser ].name, Cur_Pulser + 1 );
+		TRY_SUCCESS;
+	}
 
 	TRY
 	{
@@ -1129,8 +1203,12 @@ Var *p_get_by_num( long pnum, int type )
 		THROW( EXCEPTION );
 	}
 
-	if ( call_push( NULL, pulser_struct[ dev_num ].name ) == NULL )
-		THROW( OUT_OF_MEMORY_EXCEPTION );
+	TRY
+	{
+		call_push( NULL, pulser_struct[ Cur_Pulser ].device,
+				   pulser_struct[ dev_num ].name, Cur_Pulser + 1 );
+		TRY_SUCCESS;
+	}
 
 	TRY
 	{
@@ -1237,8 +1315,12 @@ void p_phs_setup( int func, int type, int pod, long val, bool is_pod )
 		THROW( EXCEPTION );
 	}
 
-	if ( call_push( NULL, pulser_struct[ Cur_Pulser ].name ) == NULL )
-		THROW( OUT_OF_MEMORY_EXCEPTION );
+	TRY
+	{
+		call_push( NULL, pulser_struct[ Cur_Pulser ].device,
+				   pulser_struct[ Cur_Pulser ].name, Cur_Pulser + 1 );
+		TRY_SUCCESS;
+	}
 
 	TRY
 	{
@@ -1265,8 +1347,12 @@ void p_phs_end( int func )
 
 	fsc2_assert( func == 0 || func == 1 );      /* phase function correct ? */
 
-	if ( call_push( NULL, pulser_struct[ Cur_Pulser ].name ) == NULL )
-		THROW( OUT_OF_MEMORY_EXCEPTION );
+	TRY
+	{
+		call_push( NULL, pulser_struct[ Cur_Pulser ].device,
+				   pulser_struct[ Cur_Pulser ].name, Cur_Pulser + 1 );
+		TRY_SUCCESS;
+	}
 
 	TRY
 	{
@@ -1298,8 +1384,12 @@ void p_set_psd( int func, Var *v )
 					"setting a phase switch delay" );
 
 
-	if ( call_push( NULL, pulser_struct[ Cur_Pulser ].name ) == NULL )
-		THROW( OUT_OF_MEMORY_EXCEPTION );
+	TRY
+	{
+		call_push( NULL, pulser_struct[ Cur_Pulser ].device,
+				   pulser_struct[ Cur_Pulser ].name, Cur_Pulser + 1 );
+		TRY_SUCCESS;
+	}
 
 	TRY
 	{
@@ -1330,8 +1420,12 @@ void p_set_gp( Var *v )
 	is_pulser_func( pulser_struct[ Cur_Pulser ].set_grace_period,
 					"setting a grace period" );
 
-	if ( call_push( NULL, pulser_struct[ Cur_Pulser ].name ) == NULL )
-		THROW( OUT_OF_MEMORY_EXCEPTION );
+	TRY
+	{
+		call_push( NULL, pulser_struct[ Cur_Pulser ].device,
+				   pulser_struct[ Cur_Pulser ].name, Cur_Pulser + 1 );
+		TRY_SUCCESS;
+	}
 
 	TRY
 	{
@@ -1361,8 +1455,12 @@ void keep_all_pulses( void )
 	is_pulser_func( pulser_struct[ Cur_Pulser ].keep_all_pulses,
 					"enforcing of keeping all pulses" );
 
-	if ( call_push( NULL, pulser_struct[ Cur_Pulser ].name ) == NULL )
-		THROW( OUT_OF_MEMORY_EXCEPTION );
+	TRY
+	{
+		call_push( NULL, pulser_struct[ Cur_Pulser ].device,
+				   pulser_struct[ Cur_Pulser ].name, Cur_Pulser + 1 );
+		TRY_SUCCESS;
+	}
 
 	TRY
 	{

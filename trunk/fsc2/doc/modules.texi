@@ -1218,7 +1218,7 @@ point to the place where the library can be found.
 @subsection Calling EDL functions from a modules
 
 Calling an @code{EDL} function (built-in as well as @code{EDL}
-functions defined in other modules) consists of three to four steps:
+functions defined in modules) consists of three to four steps:
 
 @enumerate
 @item
@@ -1294,6 +1294,18 @@ will have any meaning later on. Not only will the value be invalid but,
 even worse, there is a high probability that hard to trace bugs will
 result if you try to use it.
 
+
+If you should be wondering what happens if you call an @code{EDL}
+function defined in your own module from within the module you can be
+sure that you will always get the function from the this module even if
+there are other modules with the same generic type and thus supplying a
+function of the same name. I.e.@: if there are e.g.@: two lock-in
+amplifier modules loaded, both having a @code{lockin_get_data()}
+function, and within one of the lock-in modules this function is called
+it is guaranteed that the function of this name from the same module
+gets called and not the one from the other module. So you don't have to
+care about appending a @code{#} and a device number to the function name
+-- @code{fsc2} will do this automatically when necessary.
 
 
 @node Programming Utils, Pulser Modules, New Modules, Modules
