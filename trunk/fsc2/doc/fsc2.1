@@ -1,17 +1,17 @@
 . $Id$
-.TH FSC2 1 "February 2002"
+.TH FSC2 1 "March 2003"
 .SH NAME
-fsc2 \- program for remote control of EPR spectrometers
+fsc2 \- program for remote control of spectrometers
 .SH SYNOPSIS
 .B fsc2
 [\fIOPTIONS\fR] [\fIFILE\fR]
 .SH DESCRIPTION
 .B Fsc2
-is a program for the remote control of EPR spectro\%meters. It interprets
-programs written in \fBEDL\fR (\fBE\fRxperiment \fBD\fRescription
-\fBL\fRanguage) that enables the user to describe exactly how the experiment
-is to be done, which of the measured data are to be written to files and how
-these data are to be displayed.
+is a program for the remote control of spectro\%meters. It interprets programs
+written in \fBEDL\fR (\fBE\fRxperiment \fBD\fRescription \fBL\fRanguage) that
+enables the user to describe exactly how the experiment is to be done, which
+of the measured data are to be written to files and how these data are to be
+displayed.
 
 A complete description of \fBfsc2\fR and the \fBEDL\fR language is much too
 long for a manual page. Please read the Texinfo, PostScript, PDF or HTML
@@ -41,13 +41,17 @@ better be \fBreal careful\fR. This flag is only useful for cases where the
 input file is a temporary file that needs to be deleted when it isn't needed
 anymore.
 .TP
+\fB\-non\-exclusive\fR
+Run \fBfsc2\fR in non-exclusive mode, allowing more than one instance of
+\fBfsc2\fR to be run at teh same time.
+.TP
 \fB\-h\fR, \fB\-\-help\fR
 Displays a short help text and exits.
 .TP
 \fB\-size\fR \fIsize\fP
 This option specifies the sizes of the windows to be used etc. Use either
 \'Small\' for low resolution displays or \'Large\' for high resolution
-displays.  If not specified \fB\size\fR will default to \'Small\' for
+displays.  If not specified \fBsize\fR will default to \'Small\' for
 displays with a resolution of less than 1152x870, for all other to \'Large\'.
 .TP
 \fB\-geometry\fR \fIgeometry\fP
@@ -191,15 +195,17 @@ Report bugs to <Jens.Toerring@physik.fu-berlin.de>.
 Jens Thoms Toerring <Jens.Toerring@physik.fu-berlin.de>
 .SH ACKNOWLEDGMENTS
 Many thanks to the all people who helped to test the program, staying calm
-when again something didn't work as expected, proposed lots of new ideas and
+when again something did not work as expected, proposed lots of new ideas and
 constantly send in bug reports: \fBAxel Weber\fR (J.-W.-Goethe University
 Frankfurt/Main), \fBStefan Weber\fR, \fBChris W. M. Kay\fR, \fBGerriet
 Eilers\fR, \fBAndreas Kuppig\fR, \fBHeike Moegling\fR, \fBMichael Fuhs\fR,
-\fBAnton Savitsky\fR, \fBAlexander Schnegg\fR, \fBMartin Fuchs\fR and
-\fBCeline Elsaesser\fR (Free University Berlin) and Iwo Gatlik (University
+\fBAnton Savitsky\fR, \fBAlexander Schnegg\fR, \fBMartin Fuchs\fR, \fBRadek
+Kowalczyk\fR and \fBCeline Elsaesser\fR (Free University Berlin) and \fBIwo
+Gatlik\fR, \fBTomasz Motylewski\fR and \fBDaniela Hristova\fR (University
 Basel). Also thanks to \fBTh. Prisner\fR (Goethe-University Frankfurt/Main)
-and \fBK. Moebius\fR (Free University Berlin) for allowing me to spend lots
-of time on writing the program.
+and \fBK. Moebius\fR (Free University Berlin) for allowing me to spend lots of
+time on writing the program and \fBR. Bittl\fB(Free University Berlin) for
+employing me on a freelance basis to extend the program.
 .SH LICENSE
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
