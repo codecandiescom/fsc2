@@ -37,7 +37,7 @@ script (at least as long as the modules are written following the
 conventions discussed in the next chapter). There are basically
 three or four steps:
 @enumerate
-@item @code{cd} into the @file{utils} subdirectory of @code{fsc2}s main
+@item @code{cd} into the @file{utils} subdirectory of @code{fsc2}'s main
 directory.
 @item Run the script @file{clone_device}.
 @item Remake fsc2 and reinstall.
