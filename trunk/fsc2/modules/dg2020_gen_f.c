@@ -533,8 +533,7 @@ bool dg2020_set_phase_reference( int phase, int function )
 
 	f = &dg2020.function[ function ];
 
-	p = &dg2020.function[ phase == 0 ? PULSER_CHANNEL_PHASE_1 :
-						               PULSER_CHANNEL_PHASE_2 ];
+	p = &dg2020.function[ phase ];
 
 	if ( p->phase_func != NULL )
 	{

@@ -30,15 +30,16 @@
 
 enum {
 	NO_EXCEPTION = 0,               /* must be 0 ! */
-	EXCEPTION,
-	OUT_OF_MEMORY_EXCEPTION,
-	TOO_DEEPLY_NESTED_EXCEPTION,
-	EOF_IN_COMMENT_EXCEPTION,
-	EOF_IN_STRING_EXCEPTION,
-	DANGLING_END_OF_COMMENT,
-	SYNTAX_ERROR_EXCEPTION,
-	MISSING_SEMICOLON_EXCEPTION,
-	INVALID_INPUT_EXCEPTION
+	EXCEPTION =                   ( 1 << 0 ),
+	OUT_OF_MEMORY_EXCEPTION =     ( 1 << 1 ),
+	TOO_DEEPLY_NESTED_EXCEPTION = ( 1 << 2 ),
+	EOF_IN_COMMENT_EXCEPTION =    ( 1 << 3 ),
+	EOF_IN_STRING_EXCEPTION =     ( 1 << 4 ),
+	DANGLING_END_OF_COMMENT =     ( 1 << 5 ),
+	SYNTAX_ERROR_EXCEPTION =      ( 1 << 6 ),
+	MISSING_SEMICOLON_EXCEPTION = ( 1 << 7 ),
+	INVALID_INPUT_EXCEPTION =     ( 1 << 8 ),
+	ALL_EXCEPTIONS =                0xFFFF
 };
 
 
@@ -50,7 +51,7 @@ enum {
         exception_env_stack_pos--
 
 #define CATCH( e ) \
-    else if ( exception_id == ( e ) )
+    else if ( exception_id & ( e ) )
 
 #define OTHERWISE \
     else

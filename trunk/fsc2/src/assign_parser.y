@@ -121,15 +121,14 @@ input:   /* empty */
        | input line ';'            { Channel_Type = PULSER_CHANNEL_NO_TYPE;
 	                                 Cur_PHS = -1;
 	                                 Cur_PHST = -1;
-									 Cur_PROT = PHASE_UNKNOWN_PROT;
                                      assert( Var_Stack == NULL ); }
        | input SECTION_LABEL       { assert( Var_Stack == NULL );
-	                                 YYACCEPT; }
+	                                 Cur_PROT = PHASE_UNKNOWN_PROT;
+									 YYACCEPT; }
        | input error ';'           { THROW ( SYNTAX_ERROR_EXCEPTION ); }
        | input ';'                 { Channel_Type = PULSER_CHANNEL_NO_TYPE;
 	                                 Cur_PHS = -1;
 	                                 Cur_PHST = -1;
-									 Cur_PROT = PHASE_UNKNOWN_PROT;
                                      assert( Var_Stack == NULL ); }
 ;
 
@@ -272,8 +271,39 @@ pcd:    /* empty */
       | pcd inv
 	  | pcd vh
       | pcd vl
+	  | pcd func2 sep2             { Cur_PROT = PHASE_FFM_PROT; }
 ;
 
+
+func2:  MW_TOKEN                   { p_phase_ref_f( Channel_Type,
+												    PULSER_CHANNEL_MW ); }
+      | TWT_TOKEN                  { p_phase_ref_f( Channel_Type,
+													PULSER_CHANNEL_TWT ); }
+      | TWT_GATE_TOKEN             { p_phase_ref_f( Channel_Type,
+												   PULSER_CHANNEL_TWT_GATE ); }
+      | DET_TOKEN                  { p_phase_ref_f( Channel_Type,
+													PULSER_CHANNEL_DET ); }
+      | DEF_TOKEN                  { p_phase_ref_f( Channel_Type,
+													PULSER_CHANNEL_DEFENSE ); }
+      | RF_TOKEN                   { p_phase_ref_f( Channel_Type,
+													PULSER_CHANNEL_RF ); }
+      | RF_GATE_TOKEN              { p_phase_ref_f( Channel_Type,
+													PULSER_CHANNEL_RF_GATE ); }
+      | PSH_TOKEN                  { p_phase_ref_f( Channel_Type,
+												PULSER_CHANNEL_PULSE_SHAPE ); }
+      | PH1_TOKEN                  { p_phase_ref_f( Channel_Type,
+												    PULSER_CHANNEL_PHASE_1 ); }
+      | PH2_TOKEN                  { p_phase_ref_f( Channel_Type,
+												    PULSER_CHANNEL_PHASE_2 ); }
+      | OI_TOKEN                   { p_phase_ref_f( Channel_Type,
+												    PULSER_CHANNEL_OTHER_1 ); }
+      | OII_TOKEN                  { p_phase_ref_f( Channel_Type,
+												    PULSER_CHANNEL_OTHER_2 ); }
+      | OIII_TOKEN                 { p_phase_ref_f( Channel_Type,
+												    PULSER_CHANNEL_OTHER_3 ); }
+      | OIV_TOKEN                  { p_phase_ref_f( Channel_Type,
+												    PULSER_CHANNEL_OTHER_4 ); }
+;
 
 pod:    POD_TOKEN sep1
         pm
@@ -440,8 +470,7 @@ sl_val:   NEG_TOKEN                { $$ = vars_push( INT_VAR, NEGATIVE ); }
 /* Handling of PHASE_SETUP commands */
 
 phs:      PHS_TOK                  { Cur_PHS = $1;
-                                     Cur_PHST = -1;
-                                     Cur_PROT = PHASE_UNKNOWN_PROT; }
+                                     Cur_PHST = -1; }
           phsl
 ;
 

@@ -71,11 +71,6 @@ bool hp8647a_init( const char *name )
 void hp8647a_finished( void )
 {
 	gpib_local( hp8647a.device );
-	if ( hp8647a.att_table != NULL )
-	{
-		T_free( hp8647a.att_table );
-		hp8647a.att_table = NULL;
-	}
 }
 
 

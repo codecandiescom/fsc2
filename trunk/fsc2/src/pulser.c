@@ -552,6 +552,32 @@ void p_phase_ref( long func, int ref )
 }
 
 
+/*---------------------------------------------------*/
+/*---------------------------------------------------*/
+
+void p_phase_ref_f( long func, int ref )
+{
+    is_pulser_func( pulser_struct.set_phase_reference,
+                    "setting a function for phase cycling" );
+
+    if ( func != PULSER_CHANNEL_PHASE_1 && func != PULSER_CHANNEL_PHASE_2 )
+    {
+        eprint( FATAL, "%s:%ld: A reference function can only be set for the "
+                "PHASE functions.", Fname, Lc );
+        THROW( EXCEPTION );
+    }
+
+    if ( ref == PULSER_CHANNEL_PHASE_1 || ref == PULSER_CHANNEL_PHASE_2 )
+    {
+        eprint( FATAL, "%s:%ld: A PHASE function can't be phase cycled.",
+                Fname, Lc );
+        THROW( EXCEPTION );
+    }
+
+    ( *pulser_struct.set_phase_reference )( ( int ) func, ref );
+}
+
+
 /*-----------------------------------*/
 /* Function for creating a new pulse */
 /*-----------------------------------*/
