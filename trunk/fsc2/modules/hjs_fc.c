@@ -383,11 +383,9 @@ void hjs_fc_child_exit_hook( void )
 
 	if ( ( cur_volts = hjs_fc.cur_volts ) == 0.0 )
 		return;
-/*
-	mini_step = 0.1 * MAX_SWEEP_SPEED * ( DAC_MAX_VOLTAGE - DAC_MIN_VOLTAGE )
-				/ ( hjs_fc.B_max - hjs_fc.B_min );
-*/
-	mini_step = ( DAC_MAX_VOLTAGE - DAC_MIN_VOLTAGE ) / 4095.0;
+
+	mini_step = HJS_FC_FIELD_SET_MULTIPLIER *
+				( DAC_MAX_VOLTAGE - DAC_MIN_VOLTAGE ) / 4095.0;
 
 	/* If the constants for the field at a DAC voltage of 0 V and for
 	   the change of the field with the DAC voltage as measured during
@@ -405,7 +403,8 @@ void hjs_fc_child_exit_hook( void )
 		hjs_fc_set_dac( cur_volts );
 		hjs_fc.cur_volts = 0.0;
 
-		fsc2_usleep( 20000, UNSET );
+		if ( HJS_FC_FIELD_SET_TIMEOUT > 0 )
+			fsc2_usleep( HJS_FC_FIELD_SET_TIMEOUT, UNSET );
 	}
 }
 
@@ -587,11 +586,9 @@ static void hjs_fc_init( void )
 	hjs_fc.B0V = test_gauss[ 0 ] = hjs_fc_get_field( );
 
 	cur_volts = DAC_MIN_VOLTAGE;
-/*
-	mini_step = 0.05 * MAX_SWEEP_SPEED * ( DAC_MAX_VOLTAGE - DAC_MIN_VOLTAGE )
-				/ FIELD_RANGE_GUESS;
-*/
-	mini_step = ( DAC_MAX_VOLTAGE - DAC_MIN_VOLTAGE ) / 4095.0;
+
+	mini_step = HJS_FC_FIELD_SET_MULTIPLIER *
+				( DAC_MAX_VOLTAGE - DAC_MIN_VOLTAGE ) / 4095.0;
 
 	/* For the test voltages set in 'test_volts' get the magnetic field */
 
@@ -617,8 +614,11 @@ static void hjs_fc_init( void )
 
 			hjs_fc.cur_volts = cur_volts;
 
-			fsc2_usleep( 20000, SET );
-			stop_on_user_request( );
+			if ( HJS_FC_FIELD_SET_TIMEOUT > 0 )
+			{
+				fsc2_usleep( HJS_FC_FIELD_SET_TIMEOUT, SET );
+				stop_on_user_request( );
+			}
 		}
 
 		/* Get a consistent reading */
@@ -698,12 +698,9 @@ static double hjs_fc_set_field( double field, double error_margin )
 
 	if ( error_margin < 0.2 )
 		error_margin = 0.2;
-/*
-	mini_step = 0.1 * MAX_SWEEP_SPEED * ( DAC_MAX_VOLTAGE - DAC_MIN_VOLTAGE )
-				/ ( hjs_fc.B_max - hjs_fc.B_min );
-*/
 
-	mini_step = ( DAC_MAX_VOLTAGE - DAC_MIN_VOLTAGE ) / 4095.0;
+	mini_step = HJS_FC_FIELD_SET_MULTIPLIER *
+				( DAC_MAX_VOLTAGE - DAC_MIN_VOLTAGE ) / 4095.0;
 
 	/* If the constants for the field at a DAC voltage of 0 V and for
 	   the change of the field with the DAC voltage as measured during
@@ -756,8 +753,11 @@ static double hjs_fc_set_field( double field, double error_margin )
 				break;
 			}
 
-			fsc2_usleep( 20000, UNSET );
-			stop_on_user_request( );
+			if ( HJS_FC_FIELD_SET_TIMEOUT > 0 )
+			{
+				fsc2_usleep( HJS_FC_FIELD_SET_TIMEOUT, UNSET );
+				stop_on_user_request( );
+			}
 		}
 
 		cur_field = hjs_fc_get_field( );
@@ -788,14 +788,12 @@ static double hjs_fc_sweep_to( double new_field )
 	if ( FSC2_MODE == TEST )
 		return new_field;
 
-/*
-	mini_step = 0.1 * MAX_SWEEP_SPEED * ( DAC_MAX_VOLTAGE - DAC_MIN_VOLTAGE )
-				/ ( hjs_fc.B_max - hjs_fc.B_min );
-*/
+	mini_step = HJS_FC_FIELD_SET_MULTIPLIER *
+				( DAC_MAX_VOLTAGE - DAC_MIN_VOLTAGE ) / 4095.0;
 
-	mini_step = ( DAC_MAX_VOLTAGE - DAC_MIN_VOLTAGE ) / 4095.0;
-
-	/* Set the DAC voltage for the new field */
+	/* Calculate the DAC voltage for the new field. Before we then set it we
+	   check that this wouldn't require setting the DAC to a value outside
+	   its range...*/
 
 	cur_volts = hjs_fc.cur_volts;
 	v_step = cur_volts + ( new_field - hjs_fc.act_field ) / hjs_fc.slope;
@@ -815,6 +813,9 @@ static double hjs_fc_sweep_to( double new_field )
 		THROW( EXCEPTION );
 	}
 
+	/* Now set the new field by stepping into its direction in small steps
+	   to keep the gussmeter from loosing its lock on the field */
+
 	if ( v_step > cur_volts )
 		mini_step = fabs( mini_step );
 	else
@@ -832,8 +833,11 @@ static double hjs_fc_sweep_to( double new_field )
 		hjs_fc_set_dac( cur_volts );
 		hjs_fc.cur_volts = cur_volts;
 
-		fsc2_usleep( 20000, UNSET );
-		stop_on_user_request( );
+		if ( HJS_FC_FIELD_SET_TIMEOUT > 0 )
+		{
+			fsc2_usleep( HJS_FC_FIELD_SET_TIMEOUT, UNSET );
+			stop_on_user_request( );
+		}
 	}
 
 	return new_field;
