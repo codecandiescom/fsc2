@@ -41,8 +41,9 @@ RULBUS_DELAY_CARD delay_card[ NUM_DELAY_CARDS ];
 static void rb_pulser_card_setup( void );
 
 
-/*-----------------------------------------------------------*
- *-----------------------------------------------------------*/
+/*------------------------------------------------------------------------*
+ * Function that gets called immediately after the module has been loaded
+ *------------------------------------------------------------------------*/
 
 int rb_pulser_init_hook( void )
 {
@@ -163,8 +164,9 @@ int rb_pulser_init_hook( void )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------------*
+ * Function gets called just before the test run is started
+ *----------------------------------------------------------*/
 
 int rb_pulser_test_hook( void )
 {
@@ -214,8 +216,12 @@ int rb_pulser_test_hook( void )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------------------------*
+ * Function called after the end of the test run, mostly used to finish
+ * output for the functions for displaying and/or logging what pulses
+ * have been set and when and then to bring the internal representation
+ * of the pulser back to the initial state
+ *----------------------------------------------------------------------*/
 
 int rb_pulser_end_of_test_hook( void )
 {
@@ -240,8 +246,10 @@ int rb_pulser_end_of_test_hook( void )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*---------------------------------------------------------------*
+ * Function gets called at the very start of the experiment - it
+ * got to initialize the pulser and, if required, start it
+ *---------------------------------------------------------------*/
 
 int rb_pulser_exp_hook( void )
 {
@@ -262,8 +270,11 @@ int rb_pulser_exp_hook( void )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ * Function called at the end of the experiment - swicthes the pulser
+ * of and then brings the internal representation of the pulser back
+ * to the initial state so that a new experiment can be safely started
+ *---------------------------------------------------------------------*/
 
 int rb_pulser_end_of_exp_hook( void )
 {
@@ -281,8 +292,10 @@ int rb_pulser_end_of_exp_hook( void )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*---------------------------------------------------------------*
+ * Function called just before the modules gets unloaded, mainly
+ * used to get rid of memory allocated for the module
+ *---------------------------------------------------------------*/
 
 void rb_pulser_exit_hook( void )
 {
@@ -328,8 +341,9 @@ void rb_pulser_exit_hook( void )
 }
 
 
-/*----------------------------------------------------*
- *----------------------------------------------------*/
+/*-------------------------------------------*
+ * EDL function that returns the device name
+ *-------------------------------------------*/
 
 Var *pulser_name( Var *v )
 {
@@ -339,6 +353,8 @@ Var *pulser_name( Var *v )
 
 
 /*----------------------------------------------------*
+ * EDL function for getting the positions and lengths
+ * of all pulses used during the experiment displayed
  *----------------------------------------------------*/
 
 Var *pulser_show_pulses( Var *v )
@@ -352,8 +368,10 @@ Var *pulser_show_pulses( Var *v )
 }
 
 
-/*----------------------------------------------------*
- *----------------------------------------------------*/
+/*------------------------------------------------------------*
+ * Similar to the previous functions, but instead the states
+ * of all pulses during the experiment gets written to a file
+ *------------------------------------------------------------*/
 
 Var *pulser_dump_pulses( Var *v )
 {
@@ -388,8 +406,12 @@ Var *pulser_state( Var *v )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*---------------------------------------------------------*
+ * Function that must be called to commit all changes made
+ * to the pulses - without calling the function only the
+ * internal representation of the pulser is changed but
+ * not the state of the "real" pulser
+ *---------------------------------------------------------*/
 
 Var *pulser_update( Var *v )
 {
@@ -520,8 +542,9 @@ Var *pulser_increment( Var *v )
 }
 
 
-/*----------------------------------------------------*
- *----------------------------------------------------*/
+/*-------------------------------------------------------------*
+ * Function for resetting the pulser back to its initial state
+ *-------------------------------------------------------------*/
 
 Var *pulser_reset( Var *v )
 {
@@ -536,8 +559,9 @@ Var *pulser_reset( Var *v )
 }
 
 
-/*----------------------------------------------------*
- *----------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ * Function for resetting one or more pulses back to their initial state
+ *-----------------------------------------------------------------------*/
 
 Var *pulser_pulse_reset( Var *v )
 {
@@ -588,8 +612,10 @@ Var *pulser_pulse_reset( Var *v )
 }
 
 
-/*-----------------------------------------------------------*
- *-----------------------------------------------------------*/
+/*----------------------------------------------------------*
+ * Function for intialization of the stuctures representing
+ * the Rulbus cards the pulser is made of
+ *----------------------------------------------------------*/
 
 static void rb_pulser_card_setup( void )
 {
@@ -646,3 +672,10 @@ static void rb_pulser_card_setup( void )
 	delay_card[ DET_DELAY_1 ].name = DET_DELAY_CARD_1;
 	delay_card[ DET_DELAY_1 ].prev = delay_card + DET_DELAY_0;
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

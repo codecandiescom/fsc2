@@ -35,11 +35,11 @@ static int tb_index[ ] = { RULBUS_CLOCK_FREQ_100MHz, RULBUS_CLOCK_FREQ_10MHz,
 						   RULBUS_CLOCK_FREQ_100Hz };
 
 
-/*-----------------------------------------------------------------*/
-/* Function is called via the TIMEBASE command to set the timebase */
-/* used with the pulser - got to be called first because nearly    */
-/* all other functions depend on the timebase setting !            */
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ * Function is called via the TIMEBASE command to set the timebase
+ * used with the pulser - got to be called first because nearly
+ * all other functions depend on the timebase setting !
+ *-----------------------------------------------------------------*/
 
 bool rb_pulser_store_timebase( double timebase )
 {
@@ -78,10 +78,10 @@ bool rb_pulser_store_timebase( double timebase )
 }
 
 
-/*---------------------------------------------------------------*/
-/* Function for setting a delay for a function - negative delays */
-/* are only possible for INTERNAL trigger mode!                  */
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ * Function for setting a delay for a function - negative delays
+ * are only possible for INTERNAL trigger mode!
+ *---------------------------------------------------------------*
 
 bool rb_pulser_set_function_delay( int function, double delay )
 {
@@ -136,9 +136,9 @@ bool rb_pulser_set_function_delay( int function, double delay )
 }
 
 
-/*--------------------------------------------------------------------*/
-/* Function for setting the trigger mode, either INTERNAL or EXTERNAL */
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ * Function for setting the trigger mode, either INTERNAL or EXTERNAL
+ *--------------------------------------------------------------------*/
 
 bool rb_pulser_set_trigger_mode( int mode )
 {
@@ -165,8 +165,10 @@ bool rb_pulser_set_trigger_mode( int mode )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*-------------------------------------------------------*
+ * Function for setting the trigger in slope when pulser
+ * runs in external trigger mode
+ *-----------------------------------.-------------------*/
 
 bool rb_pulser_set_trig_in_slope( int slope )
 {
@@ -204,9 +206,9 @@ bool rb_pulser_set_trig_in_slope( int slope )
 }
 
 
-/*------------------------------------------------------------------*/
-/* Function for setting the repetition time for the pulse sequences */
-/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ * Function for setting the repetition time for the pulse sequences
+ *------------------------------------------------------------------*/
 
 bool rb_pulser_set_repeat_time( double rep_time )
 {
