@@ -233,7 +233,7 @@ void functions_exit( void )
 	/* Clean up the call stack */
 
 #ifndef NDEBUG
-	if ( CS != NULL )
+	if ( Call_Stack != NULL )
 	{
 		eprint( SEVERE, UNSET, "Internal error detected at %s:%d.\n",
 				__FILE__, __LINE__ );
@@ -485,56 +485,45 @@ Var *func_call( Var *f )
 /*---------------------------------------------------------------*/
 /*---------------------------------------------------------------*/
 
-Call_Stack *call_push( Func *f, const char *device_name )
+CALL_STACK *call_push( Func *f, const char *device_name )
 {
-	if ( CS == NULL )
+	if ( Call_Stack == NULL )
 	{
-		CS = T_malloc( sizeof( Call_Stack ) );
-		CS->next = CS->prev = NULL;
+		Call_Stack = T_malloc( sizeof( CALL_STACK ) );
+		Call_Stack->next = Call_Stack->prev = NULL;
 	}
 	else
 	{
-		CS->next = T_malloc( sizeof( Call_Stack ) );
-		CS->next->prev = CS;
-		CS = CS->next;
-		CS->next = NULL;
+		Call_Stack->next = T_malloc( sizeof( CALL_STACK ) );
+		Call_Stack->next->prev = Call_Stack;
+		Call_Stack = Call_Stack->next;
+		Call_Stack->next = NULL;
 	}
 
-	if ( ( CS->f = f ) != NULL )
-		Cur_Func = CS->f->name;
-	CS->dev_name = device_name;
+	Call_Stack->f = f;
+	Call_Stack->dev_name = device_name;
 
-	return CS;
+	return Call_Stack;
 }
 
 
 /*---------------------------------------------------------------*/
 /*---------------------------------------------------------------*/
 
-Call_Stack *call_pop( void )
+CALL_STACK *call_pop( void )
 {
-	if ( CS == NULL )
-	{
-		Cur_Func = NULL;
+	if ( Call_Stack == NULL )
 		return NULL;
-	}
 
-	if ( CS->prev != NULL )
+	if ( Call_Stack->prev != NULL )
 	{
-		CS = CS->prev;
-		CS->next = T_free( CS->next );
-		if ( CS->f!= NULL )
-			Cur_Func = CS->f->name;
-		else
-			Cur_Func = NULL;
+		Call_Stack = Call_Stack->prev;
+		Call_Stack->next = T_free( Call_Stack->next );
 	}
 	else
-	{
-		CS = T_free( CS );
-		Cur_Func = NULL;
-	}
+		Call_Stack = T_free( Call_Stack );
 
-	return CS;
+	return Call_Stack;
 }
 
 

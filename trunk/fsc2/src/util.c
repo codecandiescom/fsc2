@@ -375,32 +375,32 @@ void print( int severity, const char *fmt, ... )
 			cp += count;
 		}
 
-		if ( CS != NULL )
+		if ( Call_Stack != NULL )
 		{
-			if ( CS->f == NULL )
+			if ( Call_Stack->f == NULL )
 			{
-				if ( CS->dev_name != NULL )
+				if ( Call_Stack->dev_name != NULL )
 				{
 					count = snprintf( cp, ( size_t ) space_left, "%s: ",
-									  CS->dev_name );
+									  Call_Stack->dev_name );
 					space_left -= count;
 					cp += count;
 				}
 			}
 			else
 			{
-				if ( CS->f->device != NULL )
+				if ( Call_Stack->f->device != NULL )
 				{
 					count = snprintf( cp, ( size_t ) space_left, "%s: ",
-									  CS->f->device->name );
+									  Call_Stack->f->device->name );
 					space_left -= count;
 					cp += count;
 				}
 
-				if ( CS->f->name != NULL )
+				if ( Call_Stack->f->name != NULL )
 				{
 					count = snprintf( cp, ( size_t ) space_left, "%s(): ",
-									  CS->f->name );
+									  Call_Stack->f->name );
 					space_left -= count;
 					cp += count;
 				}
@@ -433,20 +433,20 @@ void print( int severity, const char *fmt, ... )
 		if ( ! IN_HOOK && Fname )
 			fprintf( stdout, "%s:%ld: ", Fname, Lc );
 
-		if ( CS != NULL )
+		if ( Call_Stack != NULL )
 		{
-			if ( CS->f == NULL )
+			if ( Call_Stack->f == NULL )
 			{
-				if ( CS->dev_name != NULL )
-					fprintf( stdout, "%s: ", CS->dev_name );
+				if ( Call_Stack->dev_name != NULL )
+					fprintf( stdout, "%s: ", Call_Stack->dev_name );
 			}
 			else
 			{
-				if ( CS->f->device != NULL )
-					fprintf( stdout, "%s: ", CS->f->device->name );
+				if ( Call_Stack->f->device != NULL )
+					fprintf( stdout, "%s: ", Call_Stack->f->device->name );
 
-				if ( CS->f->name != NULL )
-					fprintf( stdout, "%s(): ", CS->f->name );
+				if ( Call_Stack->f->name != NULL )
+					fprintf( stdout, "%s(): ", Call_Stack->f->name );
 			}
 		}
 
