@@ -61,7 +61,7 @@ volatile sig_atomic_t conn_child_replied;
 
 static bool is_loaded = UNSET;       /* set when EDL file is loaded */
 static bool is_tested = UNSET;       /* set when EDL file has been tested */
-static bool state = UNSET;           /* set when EDL passed the tests */
+static bool parse_result = UNSET;    /* set when EDL passed the tests */
 static FILE *in_file_fp = NULL;
 static time_t in_file_mod = 0;
 static bool delete_file = UNSET;
@@ -1087,7 +1087,7 @@ void load_file( FL_OBJECT *a, long reload )
 	/* Read in and display the new file */
 
 	is_loaded = display_file( EDL.in_file, in_file_fp );
-	state = FAIL;
+	parse_result = FAIL;
 	is_tested = UNSET;
 
 	fl_activate_object( GUI.main_form->reload );
@@ -1344,11 +1344,11 @@ void test_file( FL_OBJECT *a, long b )
 	XFlush( fl_get_display( ) );
 	user_break = UNSET;
 
-	/* Parse the input file and, when we're done with it, close it, everything
+	/* Parse the input file and close it when we're done with it, everything
 	   relevant is now stored in memory (unless the parsing was interrupted
 	   by the user) */
 
-	state = scan_main( EDL.in_file, in_file_fp );
+	parse_result = scan_main( EDL.in_file, in_file_fp );
 	if ( ! user_break )
 	{
 		fclose( in_file_fp );
@@ -1441,7 +1441,7 @@ void run_file( FL_OBJECT *a, long b )
 		}
 	}
 
-	if ( ! state )               /* return if program failed the test */
+	if ( ! parse_result )          /* return if program failed the test */
 	{
 		/* In batch mode write out an error message and trigger the "Quit"
 		   button to start dealing with the next EDL script. Otherwise

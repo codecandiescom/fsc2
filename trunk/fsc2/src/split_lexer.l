@@ -177,15 +177,18 @@ bool scan_main( const char *name, FILE *fp )
 	if ( ( splitin = filter_edl( name, fp ) ) == NULL )
 		return FAIL;
 
-	/* Parse the predigested EDL file, i.e. what we get back from fsc2_clean */
+	/* The next rather simple looking line is were the predigested EDL file,
+	   i.e. what we get back from fsc2_clean, is read in and tested for
+	   syntactical correctness. The code of the EXPERIMENT section is stored
+	   in memory when the splitlex() function returns successfully. */
 
 	split_error = ( bool ) splitlex( );
 
 	fclose( splitin );
 
 	/* Wait for the child process doing the filtering to die and also check
-	   its return value (unless we already found out about a failure, in
-	   which case writing out a second error message doesn't make sense) */
+	   its return value (unless we already detected a failure, in which case
+	   writing out another error message doesn't make sense) */
 
 	while ( Internals.fsc2_clean_pid != -1 )
 		fsc2_usleep( 10000, UNSET );
