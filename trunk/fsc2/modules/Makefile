@@ -46,7 +46,6 @@ er023m        := er023m.c  er023m_addon.c er023m_gpib.c
 src_headers   := $(addprefix $(sdir)/,$(headers))
 
 CFLAGS        += -I$(sdir) -I$(cdir)
-LFLAGS        := -O2 -shared -fpic
 
 
 export        # export all symbols to the sub-makefiles
@@ -84,7 +83,7 @@ all: $(simp_modules:.c=.so)
 	done;
 
 $(simp_modules:.c=.so): %.so: %.o
-	$(LD) $(LFLAGS) $^ -o $@
+	$(CC) $(LFLAGS) $^ -o $@
 	chmod 644 $@
 
 $(simp_modules:.c=.o): %.o: %.c $(cdir)/%.conf $(src_headers)

@@ -36,7 +36,6 @@ all_headers   = $(headers) $(bison_sources:.y=.h) $(resources:.fd=.h)
 
 export headers        # export list of header files to the modules Makefile
 
-SLFLAGS        = -shared -fpic
 
 
 .SUFFIXES:
@@ -62,9 +61,11 @@ all:
 
 
 # Make the main program from the c, flex and bison source files
+# When linking all symbols must be added to the dynamic symbol table,
+# the dynamically loded libraries need to see at least some of them.
 
 fsc2: $(objects)
-	$(CC) -o $@ $(objects) $(LIBS) -rdynamic
+	$(CC) -o $@ $(objects) $(LIBS) -Wl,-E
 
 modules:
 	$(MAKE) -C ../modules all
@@ -101,11 +102,11 @@ fsc2_connect: fsc2_connect.o
 # Create libraries for the graphical interface
 
 %.so: %.o
-	$(LD) $(SLFLAGS) $^ -o $@
+	$(CC) $(LFLAGS) $^ -o $@
 	chmod 644 $@
 
 $(resources:.fd=.o): %.o: %.c %.h
-	$(CC) $(CFLAGS) -c $(SLFLAGS) $< -o $@
+	$(CC) $(CFLAGS) $(LFLAGS)  -c $< -o $@
 
 %.c %.h: %.fd
 	fdesign -convert $<

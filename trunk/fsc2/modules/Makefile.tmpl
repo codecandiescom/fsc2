@@ -26,7 +26,7 @@
 
 
 ##.so: $(##:.c=.o)
-	$(LD) $(LFLAGS) $^ -o $@
+	$(CC) $(LFLAGS) $^ -o $@
 	chmod 644 $@
 
 $(##:.c=.o): %.o: %.c ##.h $(cdir)/##.conf $(src_headers)
