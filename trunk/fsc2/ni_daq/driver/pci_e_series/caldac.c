@@ -215,34 +215,41 @@ void caldac_calibrate( Board *board )
 
 static void calib_1( Board *board )
 {
-#if 0
 	u16 val;
 
 
 	val = eeprom_read( board, 424 );
 	caldac_write( board, 0, mb88341, 4,  val );
+
 	val = eeprom_read( board, 423 );
 	caldac_write( board, 0, mb88341, 1,  val );
+
 	val = eeprom_read( board, 422 );
 	caldac_write( board, 0, mb88341, 3,  val );
 	caldac_write( board, 0, mb88341, 14, val );    /* why ? */
+
 	val = eeprom_read( board, 421 );
 	caldac_write( board, 0, mb88341, 2,  val );
 
+
 	val = eeprom_read( board, 420 );
 	caldac_write( board, 0, mb88341, 5,  val );
+
+	val = eeprom_read( board, 418 );
+	caldac_write( board, 0, mb88341, 6,  val );
+
 	val = eeprom_read( board, 419 );
 	caldac_write( board, 0, mb88341, 7,  val );
 	caldac_write( board, 0, mb88341, 13, val );    /* why ? */
-	val = eeprom_read( board, 418 );
-	caldac_write( board, 0, mb88341, 6,  val );
+
 	val = eeprom_read( board, 417 );
 	caldac_write( board, 0, mb88341, 8,  val );
-	val = eeprom_read( board, 416 );
-	caldac_write( board, 0, mb88341, 10, val );
+
 	val = eeprom_read( board, 415 );
 	caldac_write( board, 0, mb88341, 9,  val );
-#endif
+
+	val = eeprom_read( board, 416 );
+	caldac_write( board, 0, mb88341, 10, val );
 }
 
 
@@ -262,19 +269,25 @@ static void calib_2( Board *board )
 
 	val = eeprom_read( board, 427 );
 	caldac_write( board, 0, dac8800, 2, val );
+
 	val = eeprom_read( board, 426 );
 	caldac_write( board, 0, dac8800, 3, val );
+
 	val = eeprom_read( board, 425 );
 	caldac_write( board, 0, dac8800, 0, val );
+
 	val = eeprom_read( board, 424 );
 	caldac_write( board, 0, dac8800, 1, val );
 
 	val = eeprom_read( board, 417 );
 	caldac_write( board, 0, dac8800, 6, val );
+
 	val = eeprom_read( board, 416 );
 	caldac_write( board, 0, dac8800, 4, val );
+
 	val = eeprom_read( board, 415 );
 	caldac_write( board, 0, dac8800, 7, val );
+
 	val = eeprom_read( board, 414 );
 	caldac_write( board, 0, dac8800, 5, val );
 }
@@ -296,17 +309,22 @@ static void calib_3( Board *board )
 
 	val = eeprom_read( board, 434 );
 	caldac_write( board, 0, dac8800, 2, val );
+
 	val = eeprom_read( board, 433 );
 	caldac_write( board, 0, dac8800, 0, val );
+
 	val = eeprom_read( board, 432 );
 	caldac_write( board, 0, dac8800, 1, val );
 
 	val = eeprom_read( board, 426 );
 	caldac_write( board, 0, dac8800, 6, val );
+
 	val = eeprom_read( board, 425 );
 	caldac_write( board, 0, dac8800, 4, val );
+
 	val = eeprom_read( board, 424 );
 	caldac_write( board, 0, dac8800, 7, val );
+
 	val = eeprom_read( board, 423 );
 	caldac_write( board, 0, dac8800, 5, val );
 }
@@ -324,10 +342,13 @@ static void calib_4( Board *board )
 
 	val = eeprom_read( board, 442 );
 	caldac_write( board, 0, mb88341, 4,  val );
+
 	val = eeprom_read( board, 441 );
 	caldac_write( board, 0, mb88341, 11, val );
+
 	val = eeprom_read( board, 440 );
 	caldac_write( board, 0, mb88341, 1,  val );
+
 	val = eeprom_read( board, 439 );
 	caldac_write( board, 0, mb88341, 2,  val );
 }
@@ -345,23 +366,31 @@ static void calib_5( Board *board )
 
 	val = eeprom_read( board, 430 );
 	caldac_write( board, 0, mb88341, 4,  val );
+
 	val = eeprom_read( board, 429 );
 	caldac_write( board, 0, mb88341, 11, val );
+
 	val = eeprom_read( board, 428 );
 	caldac_write( board, 0, mb88341, 1,  val );
+
 	val = eeprom_read( board, 427 );
 	caldac_write( board, 0, mb88341, 2,  val );
 
 	val = eeprom_read( board, 426 );
 	caldac_write( board, 0, mb88341, 5,  val );
+
 	val = eeprom_read( board, 425 );
 	caldac_write( board, 0, mb88341, 7,  val );
+
 	val = eeprom_read( board, 424 );
 	caldac_write( board, 0, mb88341, 6,  val );
+
 	val = eeprom_read( board, 423 );
 	caldac_write( board, 0, mb88341, 8,  val );
+
 	val = eeprom_read( board, 422 );
 	caldac_write( board, 0, mb88341, 10, val );
+
 	val = eeprom_read( board, 421 );
 	caldac_write( board, 0, mb88341, 9,  val );
 }
