@@ -437,7 +437,7 @@ void dg2020_b_exit_hook( void )
 
 		f->pcm = CHANNEL_PP T_free( f->pcm );
 		f->pm = BOOL_P T_free( f->pm );
-		f->pulses = PULSE_P T_free( f->pulses );
+		f->pulses = PULSE_PP T_free( f->pulses );
 	}
 }
 

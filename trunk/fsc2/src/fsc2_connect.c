@@ -70,6 +70,7 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 
+#include "fsc2_types.h"
 
 /* pion specific stuff */
 
@@ -223,8 +224,8 @@ void start_fsc2( char *pname, char *fname )
 	char flags[ 4 ][ 9 ] = { "--delete", "-s", "-S", "-T" };
 
 
-	if ( ( av[ 0 ] = malloc( ( bindir ? strlen( bindir ) + 1 : 0 ) + 6 ) )
-		 == NULL )
+	if ( NULL == ( av[ 0 ] =
+				 CHAR_P malloc( ( bindir ? strlen( bindir ) + 1 : 0 ) + 6 ) ) )
 	{
 		unlink ( fname );
 		exit( -1 );
@@ -411,7 +412,8 @@ ssize_t read_line( int fd, void *vptr, size_t max_len )
 	ssize_t n, rc;
 	char c, *ptr;
 
-	ptr = vptr;
+
+	ptr = CHAR_P vptr;
 	for ( n = 1; n < ( ssize_t ) max_len; n++ )
 	{
 		if ( ( rc = do_read( fd, &c ) ) == 1 )
@@ -477,7 +479,7 @@ ssize_t writen( int fd, const void *vptr, size_t n )
 	const char *ptr;
 
 
-	ptr = vptr;
+	ptr = CHAR_P vptr;
 	nleft = n;
 	while ( nleft > 0 )
 	{

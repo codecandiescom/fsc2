@@ -140,7 +140,8 @@ CFLAGS           := -ggdb \
 					-Waggregate-return \
 					-Wnested-externs \
 					-Wcast-align \
-				    # -DMDEBUG            # for malloc debugging
+				    # -DNDEBUG            # switch off built-in debugging code
+				    # -DMDEBUG            # for built-in malloc debugging
 				    # -Wconversion
 				    # -Wsign-compare      # missing in older gcc versions
 				    # -Wbad-function-cast # too many false positives
@@ -148,7 +149,6 @@ CFLAGS           := -ggdb \
 				    # -Wundef             # fails in bison/flex created files
 				    # -ansi               # fails on inline/asm
 				    # -pedantic
-				    # -DNDEBUG            # switch off build-in debugging code
 LFLAGS			 := $(OPT) -shared -fpic  # needed for libraries
 
 ifeq ($(MPATROL),YES)

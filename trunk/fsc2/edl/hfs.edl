@@ -53,6 +53,7 @@ init_1d( 2, 0, 0, 1, "Time [ ns ]", "Voltage [ V ]" );
 digitizer_trigger_position( 0.01 );
 digitizer_record_length( 500 );
 digitizer_num_averages( 10 );
+pulser_show_pulses( );
 
 
 EXPERIMENT:

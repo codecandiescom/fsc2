@@ -503,14 +503,14 @@ void ep385_exit_hook( void )
 		f = ep385.function + i;
 
 		if ( f->pulses != NULL )
-			f->pulses = T_free( f->pulses );
+			f->pulses = PULSE_PP T_free( f->pulses );
 
 		if ( f->pm != NULL )
 		{
 			for ( j = 0; j < f->pc_len * f->num_channels; j++ )
 				if ( f->pm[ j ] != NULL )
 					T_free( f->pm[ j ] );
-			f->pm = T_free( f->pm );
+			f->pm = PULSE_PPP T_free( f->pm );
 		}
 	}
 }
