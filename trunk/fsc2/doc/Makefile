@@ -124,11 +124,11 @@ install:
 	if [ -f fsc2.pdf ]; then \
 		$(INSTALL) -m 444 -o $(OWNER) -g $(GROUP) fsc2.pdf $(docdir); \
 	fi
-	install-info --remove fsc2 $(infodir)/dir
+	-install-info -d $(infodir)/dir -r fsc2
 	-$(RM) $(RMFLAGS) $(infodir)/fsc2.info*.gz
 	$(INSTALL) -m 444 -o $(OWNER) -g $(GROUP) fsc2.info* $(infodir)
 	gzip -9 -f $(infodir)/fsc2.info*
-	install-info $(infodir)/fsc2.info $(infodir)/dir
+	-install-info -d $(infodir)/dir $(infodir)/fsc2.info 
 
 
 uninstall:
@@ -142,7 +142,7 @@ uninstall:
 	-$(RM) $(RMFLAGS) $(docdir)/fsc2.css
 	-$(RM) $(RMFLAGS) $(docdir)/fsc2.ps
 	-$(RM) $(RMFLAGS) $(docdir)/fsc2.pdf
-	-install-info --delete fsc2 $(infodir)/dir
+	-install-info -d $(infodir)/dir -r fsc2
 	-$(RM) $(RMFLAGS) $(infodir)/fsc2.info*.gz
 	-if [ -z "`ls -A $(docdir)`" ]; then   \
 		rmdir $(docdir);                   \
