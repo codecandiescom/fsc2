@@ -8,6 +8,41 @@
 # $Id$
 
 
+=head1 NAME
+
+Fcntl_Lock - Perl extension for file locking with fcntl(2)
+
+=head1 SYNOPSIS
+
+  use Fcntl_Lock;
+
+  my $fs = Fcntl_Lock->new;
+  $fs->l_type( F_RDLCK );
+  $fs->l_whence( SEEK_CUR );
+  $fs->l_start( 100 );
+  $fs->l_len( 123 );
+
+  my $fh;
+  open( $fh, ">>file_name" ) or die "Can't open file: $!\n";
+  unless ( $fs->fcntl_lock( $fh, F_SETLK ) ) {
+      print "Locking failed: " . $fs->fcntl_error . "\n";
+  }
+
+=head1 DESCRIPTION
+
+File locking in Perl is usually done using the flock(2) function.
+Unfortunately, this only allows locks on whole files and is often implemented
+in terms of flock(2), which has some shortcomings.
+
+Using this module file locking via fcntl(2) can be done (obviously, this
+restricts the use of the module to systems that have a fcntl(2) system
+call). Before a file (or parts of a file) can be locked, an object simulating
+a flock structure must be created and its properties set. Afterwards, by
+calling the function B<fcntl_lock> a lock can be set or determined which
+process currently holds the lock.
+
+=cut
+
 package Fcntl_Lock;
 
 use 5.006;
@@ -84,10 +119,25 @@ BEGIN {
 bootstrap Fcntl_Lock $VERSION;
 
 
-# Preloaded methods go here.
-
 ###########################################################
-#
+
+=pod
+
+To create a new flock structure object simple call B<new>:
+
+  fs = Fcntl_Lock->new;
+
+You also can pass the B<new> function a set of key-value pairs to initialize
+the members of the flock structure, e.g.
+
+  $fs = Fcntl_Lock->new( 'l_type'   => F_WRLCK,
+                         'l_whence' => SEEK_SET,
+                         'l_start'  => 0,
+                         'l_len'    => 100 );
+
+if you plan to obtain a write lock for the first 100 bytes of a file.
+
+=cut
 
 sub new {
 	my $inv = shift;
@@ -115,7 +165,21 @@ sub new {
 
 
 ###########################################################
-#
+
+=pod
+
+The following functions are for setting and quering the properties of the
+object simulating the flock structure:
+
+=over 4
+
+=item B<l_type>
+
+If called without an argument returns the current setting of the lock type,
+otherwise the lock type is set to the argument, which must be either
+B<F_RDLCK>, B<F_WRLCK> or B<F_UNLCK> (for read lock, write lock or unlock).
+
+=cut
 
 sub l_type {
     my $flock_struct = shift;
@@ -131,7 +195,17 @@ sub l_type {
 
 
 ###########################################################
-#
+
+=pod
+
+=item B<l_whence>
+
+Queries or sets the B<l_whence> member of the flock structure, determining
+if the B<l_start> value is relative to the start of the file, to the current
+position in the file or to the end of the file. The corresponding values are
+B<SEEK_SET>, B<SEEK_CUR> and B<SEEK_END>. See also the man page for lseek(2);
+
+=cut
 
 sub l_whence {
     my $flock_struct = shift;
@@ -149,9 +223,16 @@ sub l_whence {
 
 
 ###########################################################
-# l_start can be both positive and negative (it only may not point to
-# something before the start of the file but that's not something we
-# can check here).
+
+=pod
+
+=item B<l_start>
+
+Queries or sets the start position (offset) of the lock in the file according
+to the mode selected by the B<l_whence> member. See also the man page for
+lseek(2).
+
+=cut
 
 sub l_start {
     my $flock_struct = shift;
@@ -162,10 +243,23 @@ sub l_start {
 
 
 ###########################################################
-# Note: Negative lengths may be allowed on some systems, e.g. on TRUE64 the
-# man page says that when l_len is positive, the lock starts at l_start and
-# ends at l_start + l_len, while for negative lengths the locked region is
-# from l_start + l_len to l_start - 1.
+
+=pod
+
+=item B<l_len>
+
+Queries or sets the length of the region (in bytes) in the file to be
+locked. A value of 0 means a lock (starting at B<l_start>) to the very end of
+the file.
+
+Because on some systems also negative values for B<l_start> are allowed
+(resulting in a lock ranging from B<l_start + l_len> to B<l_start - 1>)
+the function does not keep you from passing it negative values. On other
+systems this, unfortunately, is not allowed and will result in an error
+when you try to obtain the lock, please read the fcntl(2) man page carefully
+for details.
+
+=cut
 
 sub l_len {
     my $flock_struct = shift;
@@ -176,7 +270,18 @@ sub l_len {
 
 
 ###########################################################
-# We don't care which PID the user sets, it's useless anyway...
+
+=pod
+
+=item B<l_pid>
+
+This member of the structure queried or set by the function is only useful
+when determining the current owner of a lock, in which case the PID of the
+process holding the lock is returned in this member.
+
+=back
+
+=cut
 
 sub l_pid {
     my $flock_struct = shift;
@@ -187,38 +292,57 @@ sub l_pid {
 
 
 ###########################################################
-# Returns the errno for a failed call of fcntl_lock()
 
-sub fcntl_errno {
-    my $flock_struct = shift;
-	return $flock_struct->{ errno };
-}
+=pod
 
-
-###########################################################
-# Returns some (hopefully) useful string to the user about the reason for
-# the failed call of fcntl_lock()
-
-sub fcntl_error {
-    my $flock_struct = shift;
-	return $flock_struct->{ error };
-}
+When not initialized the flock structure entry B<l_type> is set to
+B<F_RDLCK> by default, B<l_whence> to B<SEEK_SET>, and both B<l_start>
+and B<l_len> to 0, i.e. the settings for a read lock on the whole file.
 
 
-###########################################################
-# Returns the systems error message for the a failed call of fcntl_lock()
+After having set up the flock structure object you now can determine the
+current holder of a lock or try to obtain a lock by invoking the function
+B<fcntl_lock> with two arguments, a file handle (or a file descriptor, the
+module figures out automatically what it got) and a flag indicating the
+action to be taken, i.e.
 
-sub fcntl_system_error {
-	local $!;
-	my $flock_struct = shift;
-	return $flock_struct->{ errno } ? $! = $flock_struct->{ errno } : 'undef';
-}
+  $fs->fcntl_lock( $fh, F_SETLK );
 
+There are three actions:
 
-###########################################################
-# Sould we include something here to make sure the user isn't passing
-# invalid values to fcntl(), e.g. l_start values that point to some
-# place *before* the start of the file?
+=over 4
+
+=item B<F_GETLK>
+
+For B<F_GETLK> the function determines if and who currently is holding the
+lock.  If no other process is holding the lock the B<l_type> field is set to
+F_UNLCK. Otherwise the flock structure object is set to the values that
+prevent us from obtaining a lock, with the B<l_pid> entry set to the
+PID of the process holding the lock.
+
+=item B<F_SETLK>
+
+For B<F_SETLK> the function tries to obtain the lock (when B<l_type> is set to
+either B<F_WRLCK> or B<F_RDLCK>) or releases the lock (if B<l_type> is set to
+B<F_UNLCK>). If the lock is held by someone else the function call returns
+'undef' and errno is set to B<EACCESS> or B<EAGAIN> (please see the the man
+page for fcntl(2) for the details).
+
+=item B<F_SETLKW>
+
+is similar to B<F_SETLK> but instead of returning an error if the
+lock can't be obtained immediately it blocks until the lock is obtained. If a
+signal is received while waiting for the lock the function returns 'undef' and
+errno is set to B<EINTR>.
+
+=back
+
+On success the function returns the string "0 but true". If the function fails
+(as indicated by an 'undef' return value) you can either immediately evaluate
+the error number ($!, $ERRNO or $OS_ERROR) directly or check for it at some
+later time.
+
+=cut
 
 sub fcntl_lock {
 	my ( $flock_struct, $fh, $action ) = @_;
@@ -247,142 +371,12 @@ sub fcntl_lock {
 }
 
 
-1;
-__END__
+###########################################################
 
-=head1 NAME
+=pod
 
-Fcntl_Lock - Perl extension for file locking using fcntl()
-
-=head1 SYNOPSIS
-
-  use Fcntl_Lock;
-
-  my $fs = Fcntl_Lock->new;
-  $fs->l_type( F_RDLCK );
-  $fs->l_whence( SEEK_CUR );
-  $fs->l_start( 100 );
-  $fs->l_len( 123 );
-
-  my $fh;
-  open( $fh, ">>file_name" ) or die "Can't open file: $!\n";
-  unless ( $fs->fcntl_lock( $fh, F_SETLK ) ) {
-      print "Locking failed: " . $fs->fcntl_error . "\n";
-  }
-
-=head1 DESCRIPTION
-
-File locking in Perl is usually done using the flock() function.
-Unfortunately, this only allows locks on whole files and is often implemented
-in terms of flock(2), which has some shortcomings.
-
-Using this module file locking via fcntl(2) can be done (obviously, this
-restricts the use of the module to systems that have a fcntl() system
-call). Before a file (or parts of a file) can be locked, an object simulating
-a flock structure must be created and its properties set. Afterwards, by
-calling the function fcntl_lock() a lock can be set or determined which
-process currently holds the lock.
-
-To create a new flock structure object simple call B<new>:
-
-  fs = Fcntl_Lock->new;
-
-You also can pass the B<new> function a set of key-value pairs to initialize
-the members of the flock structure, e.g.
-
-  $fs = Fcntl_Lock->new( 'l_type'   => F_WRLCK,
-                         'l_whence' => SEEK_SET,
-                         'l_start'  => 0,
-                         'l_len'    => 100 );
-
-if you plan to obtain a write lock for the first 100 bytes of a file.
-
-The following functions are for setting and quering the properties of the
-object simulating the flock structure:
-
-=over 4
-
-=item B<l_type>
-
-If called without an argument returns the current setting of the lock type,
-otherwise the lock type is set to the argument, which must be either
-B<F_RDLCK>, B<F_WRLCK> or B<F_UNLCK> (for read lock, write lock or unlock).
-
-
-=item B<l_whence>
-
-Queries or sets the B<l_whence> member of the flock structure, determining
-if the B<l_start> value is relative to the start of the file, to the current
-position in the file or to the end of the file. The corresponding values are
-B<SEEK_SET>, B<SEEK_CUR> and B<SEEK_END>. See also the man page for lseek(2);
-
-
-=item B<l_start>
-
-Queries or sets the start position (offset) of the lock in the file according
-to the mode selected by the B<l_whence> member. See also the man page for
-lseek(2).
-
-
-=item B<l_len>
-
-Queries or sets the length of the region (in bytes) in the file to be
-locked. A value of 0 means a lock (starting at B<l_start>) to the very end of
-the file. On some systems l_len is allowed to be negative, see the fcntl(2)
-man page for details.
-
-
-=item B<l_pid>
-
-This member of the structure queried or set by the function is only useful
-when determining the current owner of a lock, in which case the PID of the
-process holding the lock is returned in this member.
-
-=back
-
-
-When not initialized the flock structure entry B<l_type> is set to B<F_RDLCK>
-by default, B<l_whence> to B<SEEK_SET>, and both B<l_start> and B<l_len> to 0,
-i.e. the settings for a read lock on the whole file.
-
-
-After having set up the flock structure object you now can determine the
-current holder of a lock or try to obtain a lock by invoking the function
-fcntl_lock() with two arguments, a file handle (or a file descriptor, the
-module figures out automatically what it got) and a flag indicating the
-action to be taken, i.e.
-
-  $fs->fcntl_lock( $fh, F_SETLK );
-
-There are three actions, either B<F_GETLK>, B<F_SETLK> or B<F_SETLKW>:
-
-=over 4
-
-=item
-
-For B<F_GETLK> the function determines if and who currently is holding the
-lock.  If no other process is holding the lock the B<l_type> field is set to
-F_UNLCK. Otherwise the flock structure object is set to the values that
-prevent us from obtaining a lock, with the B<l_pid> entry set to the
-PID of the process holding the lock.
-
-For B<F_SETLK> the function tries to obtain the lock (when B<l_type> is set to
-either B<F_WRLCK> or B<F_RDLCK>) or releases the lock (if B<l_type> is set to
-B<F_UNLCK>). If the lock is held by someone else the function call returns
-'undef' and errno is set to B<EACCESS> or B<EAGAIN> (please see the the man
-page for fcntl(2) for the details).
-
-B<F_SETLKW> is similar to B<F_SETLK> but instead of returning an error if the
-lock can't be obtained immediately it blocks until the lock is obtained. If a
-signal is received while waiting for the lock the function returns 'undef' and
-errno is set to B<EINTR>.
-
-=back
-
-On success the function returns the string "0 but true". If the function fails
-(as indicated by an 'undef' return value) you can either immediately evaluate
-the error number ($!, $ERRNO or $OS_ERROR) directly or check for it at some
-later time. There exist three functions for this purpose:
+There exist three functions for obtaining information about the errors
+from a call of B<fcntl_lock> at some later time:
 
 =over 4
 
@@ -392,23 +386,62 @@ This function returns the error number from the latest call of B<fcntl_lock>
 for the flock structure object. If the last call did not result in an error
 the function returns 'undef'.
 
+=cut
+
+sub fcntl_errno {
+    my $flock_struct = shift;
+	return $flock_struct->{ errno };
+}
+
+
+###########################################################
+
+=pod
+
 =item B<fcntl_error>
 
 The function returns a short description of the error that happened during the
 latest call of B<fcntl_lock> with the flock structure object. Please take the
-messages with a grain of salt, they represent what Linux and TRUE64 tell
-what the error numbers mean, there could be differences (and additional error
-numbers) on other systems. If there was no error the function returns 'undef'.
+messages with a grain of salt, they represent what the Linux and TRUE64 man
+pages tell what the error numbers mean, there could be differences (and
+additional error numbers) on other systems. If there was no error the
+function returns 'undef'.
+
+=cut
+
+sub fcntl_error {
+    my $flock_struct = shift;
+	return $flock_struct->{ error };
+}
+
+
+###########################################################
+
+=pod
 
 =item B<fcntl_system_error>
 
 The previous function, B<fcntl_error>, tries to return a string with some
 relevance to the locking operation (i.e. "Lock is held by other processes"
-instead of "Permission denied"). If one instead wants to obtain the normal
+instead of "Permission denied"). If instead you want to obtain the normal
 system error message one gets when using $! B<fcntl_system_error> can be
 called instead. Also this function returns 'undef' if there was no error.
 
-==back
+=back
+
+=cut
+
+sub fcntl_system_error {
+	local $!;
+	my $flock_struct = shift;
+	return $flock_struct->{ errno } ? $! = $flock_struct->{ errno } : 'undef';
+}
+
+
+
+1;
+
+=pod
 
 =head2 EXPORT
 
@@ -427,6 +460,4 @@ Jens Thoms Toerring <Jens.Toerring@physik.fu-berlin.de>
 
 =head1 SEE ALSO
 
-L<perl>, L<fcntl(2)>, L<lseek(2)>.
-
-=cut
+L<perl>, L<fcntl>, L<lseek>.
