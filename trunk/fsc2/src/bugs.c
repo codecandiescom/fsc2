@@ -199,7 +199,7 @@ void bug_report_callback( FL_OBJECT *a, long b )
 
 		cmd = get_string( "%s -s \"fsc2 bug report\" %s %s %s < %s",
 						  MAIL_PROGRAM, user != NULL ? "-c" : "",
-						  user != NULL ? user : "", MAIL_ADDRESS, filename);
+						  user != NULL ? user : "", MAIL_ADDRESS, filename );
 		system( cmd );                 /* send the mail */
 		T_free( cmd );
 	}

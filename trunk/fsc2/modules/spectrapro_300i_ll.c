@@ -696,6 +696,35 @@ void spectrapro_300i_set_offset( long gn, long offset )
 				  INIT_OFFSET_RANGE /
 				  spectrapro_300i.grating[ gn ].grooves );
 
+	buf = get_string( "%ld INIT-GRATING", gn + 1 );
+
+	TRY
+	{
+		spectrapro_300i_send( buf );
+		T_free( buf );
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+	{
+		T_free( buf );
+		RETHROW( );
+	}
+
+	buf = get_string( "%.3f INIT-WAVELENGTH",
+					  1.0e9 * spectrapro_300i.wavelength );
+
+	TRY
+	{
+		spectrapro_300i_send( buf );
+		T_free( buf );
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+	{
+		T_free( buf );
+		RETHROW( );
+	}
+
 	buf = get_string( "%ld %ld INIT-SP300-OFFSET", offset, gn );
 
 	TRY
@@ -712,22 +741,6 @@ void spectrapro_300i_set_offset( long gn, long offset )
 
 	buf = spectrapro_300i_talk( "MONO-RESET", 4096 );
 	T_free( buf );
-
-	spectrapro_300i_set_grating( gn );
-
-	buf = get_string( "%.3f GOTO", 1.0e9 * spectrapro_300i.wavelength );
-
-	TRY
-	{
-		spectrapro_300i_send( buf );
-		T_free( buf );
-		TRY_SUCCESS;
-	}
-	OTHERWISE
-	{
-		T_free( buf );
-		RETHROW( );
-	}
 }
 
 
@@ -793,6 +806,35 @@ void spectrapro_300i_set_adjust( long gn, long adjust )
 	fsc2_assert( spectrapro_300i.grating[ gn ].is_installed );
 	fsc2_assert ( labs( adjust - INIT_ADJUST ) <= INIT_ADJUST_RANGE );
 
+	buf = get_string( "%ld INIT-GRATING", gn + 1 );
+
+	TRY
+	{
+		spectrapro_300i_send( buf );
+		T_free( buf );
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+	{
+		T_free( buf );
+		RETHROW( );
+	}
+
+	buf = get_string( "%.3f INIT-WAVELENGTH",
+					  1.0e9 * spectrapro_300i.wavelength );
+
+	TRY
+	{
+		spectrapro_300i_send( buf );
+		T_free( buf );
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+	{
+		T_free( buf );
+		RETHROW( );
+	}
+
 	buf = get_string( "%ld %ld INIT-SP300-GADJUST", adjust, gn );
 
 	TRY
@@ -809,22 +851,6 @@ void spectrapro_300i_set_adjust( long gn, long adjust )
 
 	buf = spectrapro_300i_talk( "MONO-RESET", 4096 );
 	T_free( buf );
-
-	spectrapro_300i_set_grating( gn );
-
-	buf = get_string( "%.3f GOTO", 1.0e9 * spectrapro_300i.wavelength );
-
-	TRY
-	{
-		spectrapro_300i_send( buf );
-		T_free( buf );
-		TRY_SUCCESS;
-	}
-	OTHERWISE
-	{
-		T_free( buf );
-		RETHROW( );
-	}
 }
 
 

@@ -43,11 +43,7 @@ extern volatile sig_atomic_t conn_child_replied;
 /* Stuff needed if we're still running an old libc */
 
 #if defined IS_STILL_LIBC1
-
-#define AF_LOCAL AF_UNIX
-
 typedef unsigned int socklen_t;
-
 #endif
 
 
@@ -74,12 +70,12 @@ pid_t spawn_conn( bool start_state, FILE *in_file_fp )
 
 	/* Create UNIX domain socket */
 
-	listen_fd = socket( AF_LOCAL, SOCK_STREAM, 0 );
+	listen_fd = socket( AF_UNIX, SOCK_STREAM, 0 );
 
 	raise_permissions( );
 	unlink( FSC2_SOCKET );
 	memset( &serv_addr, 0, sizeof( serv_addr ) );
-	serv_addr.sun_family = AF_LOCAL;
+	serv_addr.sun_family = AF_UNIX;
 	strcpy( serv_addr.sun_path, FSC2_SOCKET );
 
 	old_mask = umask( 0 );

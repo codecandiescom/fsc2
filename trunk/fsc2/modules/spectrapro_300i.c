@@ -1106,9 +1106,10 @@ Var *monochromator_zero_offset( Var *v )
 	{
 		if ( FSC2_MODE == EXPERIMENT )
 			spectrapro_300i.grating[ gn ].init_offset =
-				( ( double ) spectrapro_300i_get_offset( gn )
+				( spectrapro_300i_get_offset( gn )
 				  - ( gn % 3 ) * INIT_OFFSET )
-				* spectrapro_300i.grating[ gn ].grooves / INIT_OFFSET_RANGE;
+				* ( double ) spectrapro_300i.grating[ gn ].grooves
+				/ INIT_OFFSET_RANGE;
 		return vars_push( FLOAT_VAR,
 						  spectrapro_300i.grating[ gn ].init_offset );
 	}

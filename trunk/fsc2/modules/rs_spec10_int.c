@@ -241,7 +241,7 @@ static void rs_spec10_ccd_init( void )
 		}
 	}
 
-	rs_spec10->ccd.exp_time = lrnd(   CCD_EXPOSURE_TIME
+	rs_spec10->ccd.exp_time = lrnd( CCD_EXPOSURE_TIME
 									/ rs_spec10->ccd.exp_res ) ;
 
 	/* Now also figure out (if possible) the minimum exposure time */
@@ -358,7 +358,6 @@ static void rs_spec10_temperature_init( void )
 			THROW( EXCEPTION );
 		}
 	}
-
 
 	if ( rs_spec10->temp.is_setpoint &&
 		 rs_spec10->temp.acc_setpoint != ACC_READ_WRITE &&
@@ -583,8 +582,7 @@ double rs_spec10_set_temperature( double temp )
 
 	/* A bit of paranoia... */
 
-	fsc2_assert( FSC2_MODE == EXPERIMENT &&
-				 itemp <= lrnd( CCD_MAX_TEMPERATURE * 100.0 ) &&
+	fsc2_assert( itemp <= lrnd( CCD_MAX_TEMPERATURE * 100.0 ) &&
 				 itemp >= lrnd( CCD_MIN_TEMPERATURE * 100.0 ) );
 
 	if ( ! pl_set_param( rs_spec10->handle, PARAM_TEMP_SETPOINT, 

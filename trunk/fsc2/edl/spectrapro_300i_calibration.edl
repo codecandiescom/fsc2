@@ -83,7 +83,7 @@ VARIABLES:
 exposure_time = 0.1 s;    /* exposure time for CCD camera */
 NUM_GRATINGS = 2;         /* number of installed gratings */
 
-cc_def[ 3 ] = { 30.0, 0.3 mm, 0.0 };
+cc_def[ 3 ] = { 30.0, 0.3 m, 0.0 };
                			  /* default values for inclusion angle, focal
                			  /* length and detector angle */
 
@@ -272,11 +272,6 @@ FOREVER
 			scale = monochromator_wavelength_axis( );
 			change_scale_1d( scale[ 1 ], scale[ 2 ] );
 
-			/* Get the currently set values for offet and adjust. */
-
-			io = monochromator_zero_offset( CG );
-			ig = monochromator_grating_adjust( CG );
-
 			/* Create the next form for adjusting the zero offset. */
 
 			LP  = output_create( "FLOAT_OUTPUT", 0.0,
@@ -369,6 +364,8 @@ FOREVER
 
 		IF button_state( DO ) {
 
+			io = monochromator_zero_offset( CG );
+
 			object_enable( DO, "OFF" );
 
 			/* Try to find the current peak position (in units of pixels
@@ -418,6 +415,7 @@ FOREVER
 
 			monochromator_zero_offset( CG, io_new );
 
+			clear_marker_1d( );
 			FOR I = 1 : Num_Repeats {
 				Spec = ccd_camera_get_spectrum( );
 				display_1d( 1, Spec );
@@ -445,7 +443,6 @@ FOREVER
 
 			cp1 = mean( cp, 1, Num_Repeats );
 
-			clear_marker_1d( );
 			draw_marker_1d( round( cp1 ) );
 			output_value( LP, ( cp1 - 1 ) * scale[ 2 ] + scale[ 1 ] );
 
@@ -459,6 +456,7 @@ FOREVER
 
 			/* Get another spectrum and again find the line */
 
+			clear_marker_1d( );
 			FOR I = 1 : Num_Repeats {
 				Spec = ccd_camera_get_spectrum( );
 				display_1d( 1, Spec );
@@ -486,7 +484,6 @@ FOREVER
 
 			cp1 = mean( cp, 1, Num_Repeats );
 
-			clear_marker_1d( );
 			draw_marker_1d( round( cp1 ) );
 			output_value( LP, ( cp1 - 1 ) * scale[ 2 ] + scale[ 1 ] );
 			object_enable( DO, "ON" );
@@ -626,6 +623,8 @@ FOREVER
 				object_enable( LP, "OFF" );
 				object_enable( GO, "OFF" );
 				object_enable( DO, "OFF" );
+
+				ig = monochromator_grating_adjust( CG );
 
 				cp0 = ( input_value( LP ) - scale[ 1 ] ) / scale[ 2 ];
 
