@@ -148,8 +148,8 @@ extern Acquisition_Sequence ASeq[ ];
 extern Pulse *Plist;
 extern Pulse *Cur_Pulse;
 
-extern int TEST_RUN;
-extern int need_GPIB;
+extern bool TEST_RUN;
+extern bool need_GPIB;
 
 extern volatile bool do_send;      /* globals used with the signal handlers */
 extern volatile bool do_quit;
