@@ -523,3 +523,34 @@ bool dg2020_set_phase_switch_delay( int func, double time )
 
 	return OK;
 }
+
+
+bool dg2020_set_grace_period( double time )
+{
+	if ( time < 0 )
+
+	{
+		eprint( FATAL, "%s:%ld: DG2020: Unreasonable value for grace"
+				"period: %s.\n", Fname, Lc, dg2020_ptime( time ) );
+		THROW( EXCEPTION );
+	}
+
+	if ( dg2020.is_grace_period )
+	{
+		eprint( FATAL, "%s:%ld: DG2020: Grace period has already been set.\n",
+				Fname, Lc );
+		THROW( EXCEPTION );
+	}
+
+	if ( ! dg2020.is_timebase )
+	{
+		eprint( FATAL, "%s:%ld: DG2020: Can't set grace period because "
+				"no pulser time base has been set.\n",Fname, Lc );
+		THROW( EXCEPTION );
+	}
+
+	dg2020.is_grace_period = SET;
+	dg2020.grace_period = ( Ticks ) ceil( time / dg2020.timebase );
+
+	return OK;
+}

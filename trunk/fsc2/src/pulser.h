@@ -54,6 +54,7 @@ typedef struct {
 
 	bool ( *setup_phase )( int function, PHS phs );
 	bool ( *set_phase_switch_delay )( int function, double time );
+	bool ( *set_grace_period )( double time );
 
 } Pulser_Struct;
 

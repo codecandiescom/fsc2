@@ -466,7 +466,7 @@ phsv:     INT_TOKEN                { $$ = $1; }
 psd:      PSD_TOKEN expr           { p_set_psd( $1, $2 ); }
 ;
 
-gp:       GP_TOKEN expr            { p_set_gp( $1, $2 ); }
+gp:       GP_TOKEN expr            { p_set_gp( $2 ); }
 
 %%
 

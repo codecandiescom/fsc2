@@ -69,6 +69,19 @@ Var *pulser_pulse_reset( Var *v );
 #define START ( ( bool ) 0 )
 #define STOP  ( ( bool ) 1 )
 
+/* A pulse is acive if it has a position and a length set and if the length
+   is non-zero */
+
+#define IS_ACTIVE( p )    ( ( p )->is_pos && ( p )->is_len && ( p )->len > 0 )
+
+/* A pulse needs to be updated if either its activity state changed, its
+   position changed or its length changed */
+
+#define NEEDS_UPDATE( p ) ( ( ( p )->is_active ^ ( p )->was_active ) || \
+                            ( ( p )->is_old_pos &&                      \
+							  ( p )->old_pos != ( p )->pos ) ||         \
+                            ( ( p )->is_old_len &&                      \
+							  ( p )->old_len != ( p )->len ) )
 
 
 /* typedefs of structures needed in the module */
@@ -182,7 +195,8 @@ typedef struct
 
 	Ticks mem_size;          // size of the complete sequence, i.e. including
 	                         // the memory needed for padding
-	Ticks grace_period;      //
+	bool is_grace_period;
+	Ticks grace_period;
 
 } DG2020;
 
@@ -194,6 +208,7 @@ typedef struct _p_ {
 	                         // positive numbers
 
 	bool is_active;          // set if the pulse is really used
+	bool was_active;
 	bool has_been_active;    // used to find useless pulses
 
 	struct _p_ *next;
@@ -278,11 +293,10 @@ bool dg2020_set_trig_in_level( double voltage );
 bool dg2020_set_trig_in_slope( int slope );
 bool dg2020_set_trig_in_impedance( int state );
 bool dg2020_set_repeat_time( double time );
-
 bool dg2020_set_phase_reference( int phase, int function );
 bool dg2020_setup_phase( int func, PHS phs );
-
 bool dg2020_set_phase_switch_delay( int func, double time );
+bool dg2020_set_grace_period( double time );
 
 
 /* These are the functions from dg2020_pulse.c */
@@ -324,6 +338,8 @@ int dg2020_get_phase_pulse_list( FUNCTION *f, CHANNEL *channel,
 Ticks dg2020_get_max_seq_len( void );
 void dg2020_calc_padding( void );
 bool dg2020_prep_cmd( char **cmd, int channel, Ticks address, Ticks length );
+void dg2020_set( bool *arena, Ticks start, Ticks len, Ticks offset );
+int dg2020_diff( bool *old, bool *new, Ticks *start, Ticks *length );
 
 
 /* The functions from dg2020_init.c */
@@ -333,7 +349,7 @@ void dg2020_basic_pulse_check( void );
 void dg2020_basic_functions_check( void );
 void dg2020_distribute_channels( void );
 void dg2020_pulse_start_setup( void );
-void dg2020_create_phase_pulses( int func );
+void dg2020_create_phase_pulses( FUNCTION *f );
 PULSE *dg2020_new_phase_pulse( FUNCTION *f, PULSE *p, int nth,
 							   int pos, int pod );
 void dg2020_set_phase_pulse_pos_and_len( FUNCTION *f, PULSE *np,
@@ -355,6 +371,7 @@ void dg2020_set_pulses( FUNCTION *f );
 void dg2020_set_phase_pulses( FUNCTION *f );
 void dg2020_commit( FUNCTION * f, bool flag );
 void dg2020_commit_phases( FUNCTION * f, bool flag );
+void dg2020_clear_padding_block( FUNCTION *f );
 
 
 /* Finally the functions from dg2020_gpib.c */
