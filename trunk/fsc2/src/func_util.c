@@ -1558,6 +1558,7 @@ Var *f_clearcv( Var *v )
 /* 2. Default pattern for file name                                          */
 /* 3. Default directory                                                      */
 /* 4. Default file name                                                      */
+/* 5. Default extension to add (in case it's not already there)              */
 /* Alternatively, to hardcode a file name into the EDL program only send the */
 /* file name instead of the message string, but with a backslash `\' as the  */
 /* very first character (it will be skipped and not be used as part of the   */
@@ -1569,11 +1570,12 @@ Var *f_getf( Var *var )
 {
 	Var *cur;
 	int i;
-	char *s[ 4 ] = { NULL, NULL, NULL, NULL };
+	char *s[ 5 ] = { NULL, NULL, NULL, NULL, NULL };
 	FILE *fp;
 	long len;
 	struct stat stat_buf;
 	static char *r = NULL;
+	char *new_r, *m;
 	static FILE_LIST *old_File_List;
 
 
@@ -1602,7 +1604,7 @@ Var *f_getf( Var *var )
 
 	/* Check the arguments and supply default values if necessary */
 
-	for ( i = 0, cur = var; i < 4 && cur != NULL; i++, cur = cur->next )
+	for ( i = 0, cur = var; i < 5 && cur != NULL; i++, cur = cur->next )
 	{
 		vars_check( cur, STR_VAR );
 		s[ i ] = cur->val.sptr;
@@ -1650,6 +1652,9 @@ Var *f_getf( Var *var )
 	else
 		s[ 3 ] = T_strdup( s[ 3 ] );
 		   
+	if ( s[ 4 ] == NULL || s[ 4 ][ 0 ] == '\0' )
+		s[ 4 ] = NULL;
+
 getfile_retry:
 
 	/* Try to get a filename - on 'Cancel' request confirmation (unless a
@@ -1675,16 +1680,39 @@ getfile_retry:
 		return vars_push( INT_VAR, -1 );
 	}
 
+	/* If given append default extension to file name (but only if the user
+	   didn't added it already) */
+
+	if ( s[ 4 ] != NULL &&
+		 ( strrchr( r, '.' ) == NULL ||
+		   strcmp( strrchr( r, '.' ) + 1, s[ 4 ] ) ) )
+	{
+		new_r = get_string( strlen( r ) + strlen( s[ 4 ] ) + 1 );
+		strcpy( new_r, r );
+		strcat( new_r, "." );
+		strcat( new_r, s[ 4 ] );
+		T_free( r );
+		r = new_r;
+	}
+		
 	/* Now ask for confirmation if the file already exists and try to open
 	   it for writing */
 
-	if  ( 0 == stat( r, &stat_buf ) &&
-		  1 != show_choices( "The selected file does already exist!\n"
-							 " Do you really want to overwrite it?",
-							 2, "Yes", "No", NULL, 2 ) )
+	if  ( 0 == stat( r, &stat_buf ) )
 	{
-		r = T_free( r );
-		goto getfile_retry;
+		m = get_string(   strlen( "The selected file does already exist:\n" )
+					    + strlen( r )
+					    + strlen( "\nDo you really want to overwrite it?" ) );
+		strcpy( m, "The selected file does already exist:\n" );
+		strcat( m, r );
+		strcat( m, "\nDo you really want to overwrite it?" );
+		if ( 1 != show_choices( m, 2, "Yes", "No", NULL, 2 ) )
+		{
+			T_free( m );
+			r = T_free( r );
+			goto getfile_retry;
+		}
+		T_free( m );
 	}
 
 	if ( ( fp = fopen( r, "w+" ) ) == NULL )
@@ -1718,7 +1746,7 @@ getfile_retry:
 	for ( i = 0; i < 4; i++ )
 		T_free( s[ i ] );
 
-	/* The reallocation for the File_List may file but we still need to close
+	/* The reallocation for the File_List may fail but we still need to close
 	   all files and get rid of memory for the file names, thus we save the
 	   current File_List before we try to reallocate */
 
