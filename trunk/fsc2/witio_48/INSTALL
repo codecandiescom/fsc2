@@ -33,7 +33,7 @@ function get_reply() {
 
 
 ################################################################
-#
+# Ask the user for the module paramters
 
 function do_setup() {
 
@@ -134,7 +134,7 @@ return $?
 
 
 ################################################################
-#
+# Create the autoconf.h file
 
 function make_auto() {
 
@@ -491,7 +491,7 @@ esac
 
 
 ################################################################
-#
+# Main part of the installation script
 
 trap "rm -f /tmp/WITIO_48_reply" 0 1 2 15
 
@@ -522,7 +522,9 @@ if [ ! -e driver/autoconf.h ]; then
    do_compile 0
    do_install
 else
-    if [ ! -e driver/witio_48.o -o ! -e lib/libwitio_48.a -o ! -e lib/libwitio_48.so ]; then
+    if [ ! -e driver/witio_48.o -o \
+		 ! -e lib/libwitio_48.a -o \
+		 ! -e lib/libwitio_48.so ]; then
         pref_comp
         do_compile 0
         do_install

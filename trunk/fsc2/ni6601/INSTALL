@@ -23,7 +23,6 @@
 
 
 ################################################################
-#
 # Utility function
 
 function get_reply() {
@@ -34,7 +33,7 @@ function get_reply() {
 
 
 ################################################################
-#
+# Ask the user for the module paramters
 
 function do_setup() {
 
@@ -108,7 +107,7 @@ return $?
 
 
 ################################################################
-#
+# Create the autoconf.h file
 
 function make_auto() {
 
@@ -122,7 +121,6 @@ echo "#define NI6601_PREFIX   \"$PREFIX\"" >> driver/autoconf.h
 
 
 ################################################################
-#
 # Run setup of parameter until the user is satisfied
 
 function setup_loop() {
@@ -147,7 +145,6 @@ function setup_loop() {
 
 
 ################################################################
-#
 # Function that starts the make process after some more checks
 
 function do_compile() {
@@ -222,7 +219,6 @@ fi
 
 
 ################################################################
-#
 # Does everything needed for the installation
 
 function do_install() {
@@ -382,7 +378,6 @@ fi
 
 
 ################################################################
-#
 # Removes entries for drivers with the same major number device
 # number from /etc/modules.conf (or, if this is still used,
 # /etc/conf.modules) and adds the NI6601 driver instead. The old
@@ -416,7 +411,6 @@ echo "alias char-major-$MAJOR ni6601" >> $MODULECONF
 
 
 ################################################################
-#
 # Chooses either compiling or installing (called at the start
 # when the include/autoconf.h and driver/board exist)
 
@@ -438,7 +432,6 @@ test $MTYPE != "Setup" || setup_loop 1
 
 
 ################################################################
-#
 # Chooses between setup, compilation or installation (called at
 # the start when include/autoconf.h and driver/board as well as
 # the compiled library and driver exist)
@@ -477,7 +470,7 @@ esac
 
 
 ################################################################
-#
+# Main part of the installation script
 
 trap "rm -f /tmp/NI6601_reply" 0 1 2 15
 
