@@ -86,7 +86,8 @@ export        # export all symbols to the sub-makefiles
 
 
 .SUFFIXES:
-.PHONY: all install clean distclean                     \
+
+.PHONY: all modules install uninstall clean distclean   \
 		install-pion.anorg.chemie.uni-frankfurt.de      \
 		install-crowley.physik.fu-berlin.de             \
 		install-door.physik.fu-berlin.de                \
@@ -115,6 +116,9 @@ export        # export all symbols to the sub-makefiles
 # HP864* synthesizers also the sources are created from templates.
 
 all:
+	$(MAKE) -C .. modules
+
+modules:
 	$(MAKE) $(addsuffix .so,$(simp_modules))
 	@for n in $(tds_list); do                                      \
 		o=`echo $$n | tr "a-z" "A-Z"`;                             \

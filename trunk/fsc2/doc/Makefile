@@ -28,7 +28,12 @@ eps_pics := $(patsubst %.png,%.eps,$(figures))
 pdf_pics := $(patsubst %.png,%.pdf,$(figures))
 
 
+.PHONY:  all docs man html ps pdf info
+
 all:
+	$(MAKE) -C .. docs
+
+docs:
 	$(MAKE) man
 	$(MAKE) html
 	$(MAKE) ps

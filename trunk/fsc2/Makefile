@@ -501,8 +501,10 @@ export            # export all variables to sub-makes
 # Switch off all implicit rules
 
 .SUFFIXES:
-.PHONY: all install-strip install uninstall built docs  \
-		http_server version test clean distclean        \
+
+.PHONY: all basics src modules utils docs built         \
+		install-strip install uninstall http_server     \
+		version test clean distclean                    \
 		mostlyclean tags pack MANIFEST ZIP              \
 		pion.anorg.chemie.uni-frankfurt.de              \
 		crowley.physik.fu-berlin.de                     \
@@ -511,6 +513,7 @@ export            # export all variables to sub-makes
 		moebpc3.physik.fu-berlin.de                     \
 		tresr.physik.fu-berlin.de                       \
 		sunone.chemie.unibas.ch                         \
+		single.physik.fu-berlin.de                      \
 		crowley.none                                    \
 		dorimare.nowhere
 
@@ -518,12 +521,21 @@ export            # export all variables to sub-makes
 ############## End of configuration section ##############
 
 
-# Default rule: after some configuration stuff make the main program,
-# the primary lexer and the modules (the Makefile for modules is called
-# via the Makefile in src), then the documentation and some other, more
-# or less useful stuff
+# Default rule: after some configuration stuff make the main program and
+# some required utilities, the modules (the Makefile for modules is called
+# via the Makefile in src), the HTTP server, and then the documentation and
+# some other, more or less useful stuff
 
-all: config.h
+all:
+	$(MAKE) basics
+	$(MAKE) -C $(sdir) src
+	$(MAKE) -C $(sdir) modules
+	$(MAKE) http_server
+	$(MAKE) docs
+	$(MAKE) utils
+
+
+basics: config.h
 	@if [ $(INSTALL_MACHINE) != "install-unknown" ]; then   \
 		echo "Configuring for machine $(machine_name)...";  \
 		$(MAKE) $(machine_name);                            \
@@ -531,10 +543,24 @@ all: config.h
 	$(MAKE) -C $(sdir) gpib_setup
 	$(MAKE) built
 	$(MAKE) tags
-	$(MAKE) -C $(sdir) all
-	$(MAKE) http_server
-	$(MAKE) -C $(udir) all
-	$(MAKE) docs
+
+
+src:
+	$(MAKE) basics
+	$(MAKE) -C $(sdir) src
+
+
+modules:
+	$(MAKE) basics
+	$(MAKE) -C $(sdir) modules
+
+
+utils:
+	$(MAKE) -C $(udir) utils
+
+
+docs:
+	$(MAKE) -C $(ddir) docs
 
 
 # Create a header file with configuration information from the contents of
@@ -578,12 +604,6 @@ ifdef WITH_HTTP_SERVER
 	fi
 	$(MAKE) -C $(ldir)
 endif
-
-
-# Creates the complete documentation
-
-docs:
-	$(MAKE) -C $(ddir) all
 
 
 # Install the program and everything else

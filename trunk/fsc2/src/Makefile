@@ -44,17 +44,26 @@ export headers        # export list of header files to the modules Makefile
 
 
 .SUFFIXES:
-.PHONY:    all modules res gpib_setup clean distclean
+.PHONY:    all src res gpib_setup clean distclean
 
 
-# Default target
+# Default target which is used when make is called from within this directory
 
 all:
-	$(MAKE) fsc2_rsc_lr.so fsc2_rsc_hr.so;
+	$(MAKE) -C .. src
+
+
+# Everything not belonging to the modules
+
+src:
+	$(MAKE) fsc2_rsc_lr.so fsc2_rsc_hr.so
 	$(MAKE) fsc2
 	$(MAKE) fsc2_clean
 	$(MAKE) fsc2_connect
-	$(MAKE) modules;
+
+
+modules:
+	$(MAKE) -C ../modules modules
 
 
 # Make the main program from the c, flex and bison source files
@@ -63,9 +72,6 @@ all:
 
 fsc2: $(objects)
 	$(CC) -o $@ $(objects) $(LIBS) -Wl,-E
-
-modules:
-	$(MAKE) -C ../modules all
 
 %.o: %.c $(headers)
 	$(CC) $(CFLAGS) -c -o $@ $<
