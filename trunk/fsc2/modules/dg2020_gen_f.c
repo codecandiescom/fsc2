@@ -649,6 +649,7 @@ bool dg2020_phase_setup( int func )
 
 
 	fsc2_assert( Cur_PHS != -1 && Cur_PHS == func );
+	fsc2_assert( func == 0 || func == 1 );
 	Cur_PHS = -1;
 
 	/* Check that for all phase types data are set */

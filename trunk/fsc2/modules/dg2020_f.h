@@ -315,7 +315,7 @@ extern bool dg2020_is_needed;
 extern DG2020 dg2020;
 extern PULSE *dg2020_Pulses;
 extern bool dg2020_IN_SETUP;
-extern PHS phs[ 3 ];
+extern PHS phs[ 2 ];
 extern long phase_numbers[ 2 ];
 
 
