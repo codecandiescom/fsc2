@@ -1175,11 +1175,11 @@ Var *f_getf( Var *var )
 	old_File_List = NULL;
 
 	/* If there was a call of `f_save()' without a previous call to `f_getf()'
-	   `f_save()' did call already call `f_getf()' by itself and now don't
-	   expect file identifiers anymore - in this case `No_File_Numbers' is
-	   set. So, if we get a call to `f_getf()' while `No_File_Numbers' is set
-	   we must tell the user that he can't have it both ways, i.e. he either
-	   has to call `f_getf()' before any call to `f_save()' or never. */
+	   `f_save()' did already call `f_getf()' by itself and now don't expects
+	   file identifiers anymore - in this case `No_File_Numbers' is set. So,
+	   if we get a call to `f_getf()' while `No_File_Numbers' is set we must
+	   tell the user that he can't have it both ways, i.e. (s)he either has to
+	   call `f_getf()' before any call to `f_save()' or never. */
 
 	if ( No_File_Numbers )
 	{
@@ -1254,9 +1254,9 @@ getfile_retry:
 											 s[ 1 ], s[ 3 ] ) );
 
 	if ( ( r == NULL || *r == '\0' ) &&
-		 1 != show_choices( "Do you really want to cancel saving data?\n"
-							"        The data will be lost!",
-							2, "Yes", "No", NULL, 2 ) )
+		 show_choices( "Do you really want to cancel saving data?\n"
+					   "        The data will be lost!",
+					   2, "Yes", "No", NULL, 2 ) != 1 )
 	{
 		r = T_free( r );
 		goto getfile_retry;
