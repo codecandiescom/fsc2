@@ -199,29 +199,25 @@ Var_T *vars_get( char *name )
 
 Var_T *vars_new( char *name )
 {
+	static Var_T template = { NULL, UNDEF_VAR, { 0 }, 0, 0,
+							  NEW_VARIABLE, NULL, NULL, NULL };
 	Var_T *vp;
 
 
-	/* Get memory for a new structure and for storing the name */
+	/* Get memory for a new variable structure, initialize it (from a
+	   template variable, that might be a bit faster than setting all
+	   elements individually), and get memory for storing the name */
 
 	vp = VAR_P T_malloc( sizeof *vp );
+
+	*vp = template;
+
 	if ( name != NULL )
 		vp->name    = T_strdup( name );
-	else
-		vp->name    = NULL;
 
-	/* Set relevant entries in the new structure and make it the very first
-	   element in the list of variables */
+	/* Make the new variable the first element of the variable list */
 
-	vp->type     = UNDEF_VAR;           /* set type to still undefined */
-	vp->from     = NULL;
-	vp->flags    = NEW_VARIABLE;
-	vp->len      = 0;
-	vp->dim      = 0;
-	vp->val.vptr = NULL;
-
-	vp->prev = NULL;
-	vp->next = EDL.Var_List;         /* set pointer to it's successor */
+	vp->next = EDL.Var_List;
 	if ( EDL.Var_List != NULL )      /* set previous pointer in successor */
 		EDL.Var_List->prev = vp;     /* (if this isn't the very first) */
     EDL.Var_List = vp;               /* make it the head of the list */
@@ -558,9 +554,8 @@ Var_T *vars_push( Var_Type_T type, ... )
 	   type and initialize some fields */
 
 	nsv         = VAR_P T_malloc( sizeof *nsv );
-	nsv->type   = type;
 	nsv->name   = NULL;
-	nsv->name   = 0;
+	nsv->type   = type;
 	nsv->next   = NULL;
 	nsv->flags  = ON_STACK;
 
