@@ -129,7 +129,7 @@ low_res:
 
 # How to create the GPIB interface files - they need making if either
 # gpib_if.[ch] doesn't exit or the files they're made from are newer.
-# When using the NI driver also the parser and lexer for the GPIB
+# When using the NI library also the parser and lexer for the GPIB
 # configuration file are needed.
 
 gpib_old:
