@@ -483,8 +483,15 @@ Var *func_call( Var *f )
 }
 
 
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
+/*------------------------------------------------------------------------*/
+/* Before a function gets called a few data items have to be stored for   */
+/* utility functions like print() and for handling pulsers. print() needs */
+/* the name of the function and, for functions from modules, the name of  */
+/* the device. For pulser functions the pulser numbers that supplies the  */
+/* function must be stored as well the global variable 'Cur_Pulser' must  */
+/* be set and on return from the called function reset to to the previous */
+/* be reset to the previous value.                                        */
+/*------------------------------------------------------------------------*/
 
 CALL_STACK *call_push( Func *f, const char *device_name )
 {
@@ -525,7 +532,7 @@ CALL_STACK *call_pop( void )
 	Call_Stack = cs->prev;
 	T_free( cs );
 
-	if ( Call_Stack && Call_Stack->Cur_Pulser != -1 )
+	if ( Call_Stack != NULL && Call_Stack->Cur_Pulser != -1 )
 		Cur_Pulser = cs->prev->Cur_Pulser;
 
 	return Call_Stack;
