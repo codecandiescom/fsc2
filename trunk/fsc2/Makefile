@@ -101,7 +101,7 @@ GPIB_LOG_LEVEL    := HIGH
 # set the variable GPIB_HEADER_DIR to the absolute path of the directory
 # where the header file(s) for the library reside.
 
-# GPIB_HEADER_DIR  := /usr/include/gpib
+# GPIB_HEADER_DIR   := /usr/include/gpib
 
 
 # NUM_SERIAL_PORTS defines the number of serial ports that are available on
@@ -127,8 +127,8 @@ SERIAL_LOCK_DIR   := /var/lock
 # make sure that the library for the card is already installed if you want
 # to build fsc2 with support for the card.
 
-# WITH_NI6601     := yes
-# ni6601_libs     := libni6601.so
+# WITH_NI6601       := yes
+# ni6601_libs       := libni6601.so
 
 
 # Uncommented the next two lines if you want support for the Meilhaus
@@ -138,8 +138,8 @@ SERIAL_LOCK_DIR   := /var/lock
 # You must make sure that the library for the card is already installed if
 # you want to build fsc2 with support for the card.
 
-WITH_ME6000     := yes
-me6000_libs     := libme6x00.so
+# WITH_ME6000       := yes
+# me6000_libs       := libme6x00.so
 
 
 # The next two lines must be uncommented if you want support for the Wasco
@@ -149,8 +149,8 @@ me6000_libs     := libme6x00.so
 # that the library for the card is already installed if you want to build
 # fsc2 with support for the card.
 
-WITH_WITIO_48   := yes
-witio_48_libs   := libwitio_48.so
+# WITH_WITIO_48     := yes
+# witio_48_libs     := libwitio_48.so
 
 
 # The follwoing three lines must be uncommented when you want support for the
@@ -164,9 +164,9 @@ witio_48_libs   := libwitio_48.so
 # library for the camera is already installed if you want to build fsc2 with
 # support for the camera.
 
-# WITH_SPEC10     := yes
-# rs_spec10_incl  := /usr/local/include/pvcam
-# rs_spec10_libs  := libpvcam.so
+# WITH_SPEC10       := yes
+# rs_spec10_incl    := /usr/local/include/pvcam
+# rs_spec10_libs    := libpvcam.so
 
 
 # Comment out the next two lines if you don't want the ability to run a HTTP
@@ -181,7 +181,7 @@ DEFAULT_HTTP_PORT := 8080
 # Uncomment the following line if you don't want the program to send me an
 # email with a report when it crashes.
 
-# NO_MAIL = yes
+# NO_MAIL           := yes
 
 
 # Normally, fsc2 will use the systems 'mail' command when it needs to send
@@ -195,8 +195,8 @@ DEFAULT_HTTP_PORT := 8080
 # the USE_IPv6 variable if your machine uses the new IP address scheme with
 # 128 bit addresses instead of the traditional one with only 32 bit addresses.
 
-USE_FSC2_MTA = yes
-# USE_IPv6   = yes
+# USE_FSC2_MTA      := yes
+# USE_IPv6          := yes
 
 
 # This last variable controls to whom emails with bug reports and about
