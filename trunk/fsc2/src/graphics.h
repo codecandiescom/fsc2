@@ -75,10 +75,7 @@ typedef struct {
 
 typedef struct {
 	bool is_init;
-	bool is_drawn;
 	bool is_warn;
-	bool is_nx;
-	bool is_ny;
 	bool is_scale_set;
 	bool scale_changed;
 	bool is_fs;

@@ -1716,6 +1716,17 @@ Var *f_clearcv( Var *v )
 	long curve;
 
 
+	/* If there is no argument default to curve 1 */
+
+	if ( v == NULL )
+	{
+		clear_curve( 0 );
+		return vars_push( INT_VAR, 1 );
+	}
+
+	/* Otherwise run through all arguments, treating each as a new curve
+	   number */
+
 	while ( v )
 	{
 		vars_check( v, INT_VAR | FLOAT_VAR );         /* get number of curve */
