@@ -82,7 +82,7 @@ void sigchld_handler( int sig_type, void *data );
 
 #define TAB_LENGTH          4
 #define BROWSER_MAXLINE  1024
-#define EDITOR_FAILED    123
+#define EDITOR_FAILED     123
 
 
 
