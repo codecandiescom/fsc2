@@ -314,9 +314,10 @@ functions and may not be used as variable names.
 @end multitable
 
 
-While the following keywords can be used as variable name, they take a
-special meaning as physical units when following directly after a number
-(with only spaces or tabulator characters in between).
+While the following keywords (except @code{cm^-1}, obviously) can be
+used as variable name, they take a special meaning as physical units
+when following directly after a number (with only spaces or tabulator
+characters in between).
 @multitable { @code{mHz} } { Micro-Seconds }
 @item @code{A}                @tab Ampere
 @item @code{cm^-1}            @tab wave number, i.e.@: inverse of @code{cm}
