@@ -2983,7 +2983,7 @@ daq_ai_channel_setup( CH3, 5 V, "Differential", "BIPLOAR",
 @end example
 In this case @code{CH3} and @code{CH11} will be used together for a
 signal in the range between @w{-5 V} and @w{+5V} (i.e. in bipolar mode),
-where the sampled volatge is the difference between both channels, and
+where the sampled voltage is the difference between both channels, and
 @code{CH1} is going to be used in unipolar mode for a voltage between
 @w{0 V} and @w{500 mV} in @code{"Ground"} coupling mode and with
 dithering switched on.
