@@ -29,7 +29,7 @@
 char kernel_version[ ] = UTS_RELEASE;
 
 
-/* No symbols are exported by the module */
+/* No symbols are exported from the module */
 
 EXPORT_NO_SYMBOLS;
 
@@ -231,7 +231,7 @@ static int witio_48_open( struct inode *inode_p, struct file *file_p )
 	if ( board.in_use &&
 	     board.owner != current->uid &&
 	     board.owner != current->euid ) {
-		PDEBUG( "Board already in use by another user\n" );
+		PDEBUG( "Board already in use by another user.\n" );
 		spin_unlock( &board.spinlock );
 		return -EBUSY;
 	}
@@ -286,7 +286,7 @@ static int witio_48_ioctl( struct inode *inode_p, struct file *file_p,
 	if ( _IOC_TYPE( cmd ) != WITIO_48_MAGIC_IOC || 
 	     _IOC_NR( cmd ) < WITIO_48_MIN_NR ||
 	     _IOC_NR( cmd ) > WITIO_48_MAX_NR ) {
-		PDEBUG( "Invalid ioctl() call %d\n", cmd );
+		PDEBUG( "Invalid ioctl() call.\n", cmd );
 		return -EINVAL;
 	}
 
@@ -333,7 +333,7 @@ static int witio_48_ioctl( struct inode *inode_p, struct file *file_p,
 			break;
 
 		default :                     /* we can never end up here... */
-			PDEBUG( "Invalid ioctl() call\n" );
+			PDEBUG( "Invalid ioctl() call.\n" );
 			ret_val = -EINVAL;
 	}
 
@@ -639,7 +639,7 @@ static int witio_48_dio_in( WITIO_48_DATA *data )
 
 	/* Now write to the relevant write buffer registers and, if necessary,
 	   to the control registers if the direction changed (i.e. the port
-	   (or parts of it) had been used for input before) */
+	   (or parts of it) had been used for output before) */
 
 	switch ( board.states[ dio ].mode ) {
 		case WITIO_48_MODE_3x8 :
@@ -730,11 +730,11 @@ static void witio_48_2x12_dio_in( WITIO_48_DATA *data )
 }
 
 
-/*--------------------------------------------------------------*/
-/* Function for reading in a 24-bit value. The higest 8 bits of */
-/* the value come from port C, the middle 8 bits from port B    */
-/* and the lowest 8 bits from port A.                           */
-/*--------------------------------------------------------------*/
+/*------------------------------------------------------------*/
+/* Function for reading in a 24-bit value. The higest byte of */
+/* the value comes from port C, the middle byte from port B   */
+/* and the lowest byte from port A.                           */
+/*------------------------------------------------------------*/
 
 static void witio_48_1x24_dio_in( WITIO_48_DATA *data )
 {
