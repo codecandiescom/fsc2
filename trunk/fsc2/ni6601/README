@@ -108,4 +108,15 @@ It is possible that after installing the libraries the linker still has
 problems finding them. In this case you may have to run 'ldconfig' to
 rebuild the linkers database of libraries.
 
-    13.11.2002   Jens Thoms Törring <Jens.Toerring@physik.fu-berlin.de>
+
+IV. Documentation
+=================
+
+In the 'driver' subdirectory you will find a file named 'ni6601_drv.txt',
+describing in detail which ioctl() calls can used to deal with the card.
+
+In the 'lib' a file named 'ni6601_lib.c' describes the functionality
+supplies by the library.
+
+
+    18.11.2002   Jens Thoms Törring <Jens.Toerring@physik.fu-berlin.de>

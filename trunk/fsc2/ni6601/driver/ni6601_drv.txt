@@ -1,0 +1,345 @@
+#
+# $Id$
+#
+
+ NI6601 Device Driver Description
+ ================================
+
+The number of boards that can be used with the driver is currently
+limited to 4. But by changing 'NI6601_MAX_BOARDS' in 'ni6601_drv.h'
+this can easily be changed.
+
+
+A process that opens the device file for a board gets granted exclusive
+access to the board until it closes the device file.
+
+
+There are only three operations that can be used with the driver: Beside
+doing an open() and close()/release() on a board all dealings with a
+board are done vio ioctl() calls. The following ioctl() requests are
+currently implemented:
+
+    NI6601_IOC_DIO_IN
+    NI6601_IOC_DIO_OUT
+    NI6601_IOC_COUNTER
+    NI6601_IOC_PULSER
+    NI6601_IOC_COUNT
+    NI6601_IOC_IS_BUSY
+    NI6601_IOC_DISARM
+
+
+===================================================================
+
+  NI6601_IOC_DIO_IN
+
+This ioctl() request allows to read (a subset of) the 8 DIO lines of
+the board. The argument is a structure of type NI6601_DIO_VALUE, which
+is a typedef of
+
+	typedef struct {
+		unsigned char value;
+		unsigned char mask;
+	} NI6601_DIO_VALUE;
+
+The first member of the structure, 'value', is used to return the states
+of the DIO lines (bit 0 corresponding to line 0, bit 1 to line 1 etc.),
+while the second member, 'mask', determines for which of the DIO lines
+the state is returned. By using the mask some of the lines can be used
+for input while the remaining lines can be used for output at the same
+time.
+
+
+===================================================================
+
+  NI6601_IOC_DIO_OUT
+
+This ioctl() request allows to set (a subset of) the 8 DIO lines of
+the board. The argument is a structure of type NI6601_DIO_VALUE, which
+is a typedef of
+
+	typedef struct {
+		unsigned char value;
+		unsigned char mask;
+	} NI6601_DIO_VALUE;
+
+The first member of the structure, 'value', contains the states to which
+the DIO lines are to be set (bit 0 corresponding to line 0, bit 1 to
+line 1 etc.), while the second member, 'mask', which of the DIO lines
+the state are to be set. By using the mask some of the lines can be used
+for output while the remaining lines can be used for input at the same
+time.
+
+
+===================================================================
+
+  NI6601_IOC_COUNTER
+
+This ioctl() request initializes one of the four counters of the board
+with a value of 0 and starts an upward count. If a gate is used the count
+will stop at the end of the first gate.
+
+
+The argument is a structure of type NI6601_COUNTER, which is a typedef of
+
+    typedef struct {
+		NI6601_COUNTER_NUM counter;
+		NI6601_POLARITY source_polarity;
+		NI6601_INPUT gate;
+		NI6601_INPUT source;
+		int disable_output;
+	} NI6601_COUNTER;
+
+The first member of the structure, 'counter', is the number of the
+counter to be started, an integer between 0 and 3 (you may also use
+the symbolic names 'NI6601_COUNTER_0', 'NI6601_COUNTER_1',
+'NI6601_COUNTER_2' and 'NI6601_COUNTER_3').
+
+The second member, 'source_polarity', determines the polarity of the
+source of events to be counted. It is an integer, 0 for normal polarity
+and 1 for inverted polarity. The symbolic names 'NI6601_NORMAL' and
+'NI6601_INVERTED' can be used instead.
+
+The third member, 'gate', determines if counting is gated and which is
+the source of the gate. Valid settings for 'gate' are:
+
+	NI6601_NONE                don't use a gate
+	NI6601_LOW                 gate input is always low
+	NI6601_DEFAULT_SOURCE      gate is also default source of counter
+	NI6601_DEFAULT_GATE        gate is default gate of counter
+	NI6601_GATE_0              gate is GATE(0) input
+	NI6601_GATE_1              gate is GATE(1) input
+	NI6601_GATE_2              gate is GATE(2) input
+	NI6601_GATE_3              gate is GATE(3) input
+	NI6601_NEXT_SOURCE         gate is source of other counter in pair
+	NI6601_RTSI_0              gate is RTSI(0) input
+	NI6601_RTSI_1              gate is RTSI(0) input
+	NI6601_RTSI_2              gate is RTSI(0) input
+	NI6601_RTSI_3              gate is RTSI(0) input
+	NI6601_NEXT_OUT            gate is output of other counter in pair
+
+The fourth member, 'source', determines the source of the events to be
+counted. Valid settings for gate are:
+
+	NI6601_LOW                 source is always low
+	NI6601_DEFAULT_SOURCE      source is default source of counter
+	NI6601_SOURCE_0            source is SOURCE(0) input
+	NI6601_SOURCE_1            source is SOURCE(1) input
+	NI6601_SOURCE_2            source is SOURCE(2) input
+	NI6601_SOURCE_3            source is SOURCE(3) input
+	NI6601_NEXT_GATE           source is gate input of other counter in pair
+	NI6601_RTSI_0              source is RTSI(0) input
+	NI6601_RTSI_1              source is RTSI(1) input
+	NI6601_RTSI_2              source is RTSI(2) input
+	NI6601_RTSI_3              source is RTSI(3) input
+	NI6601_NEXT_TC             source are TC events on other counter in pair
+	NI6601_TIMEBASE_1          source is 20 MHz internal timebase
+	NI6601_TIMEBASE_2          source is 100 kHz internal timebase
+	NI6601_TIMEBASE_3          source is 20 MHz internal timebase
+
+The fifth and final member, 'disable_output', determines if the output of
+the counter is enabled (when set to 0) or disabled (when set to 1). When
+enabled the output toggles of TC events of the counter.
+
+
+===================================================================
+
+  NI6601_IOC_PULSER
+
+This ioctl() request can be used to create either a single pulse or
+a continuous train of pulses on the output of one of the four counters
+of the board. This is done by reloading counter alternatingly from
+two registers whenever the counter has counted down to 0 (TC event)
+and at the same time toggling the output line of the counter.
+
+
+The argument for the ioctl() call is a structure of type NI6601_PULSES,
+which is a typedef of
+
+	typedef struct {
+		NI6601_COUNTER_NUM counter;
+		unsigned long low_ticks;
+		unsigned long high_ticks;
+		NI6601_INPUT gate;
+		NI6601_INPUT source;
+		int continuous;
+		int disable_output;
+		NI6601_POLARITY output_polarity;
+	} NI6601_PULSES;
+
+
+The first member of the structure, 'counter', is the number of the counter
+to be used for creating the pulses, an integer between 0 and 3 (you may
+also use the symbolic names 'NI6601_COUNTER_0', 'NI6601_COUNTER_1',
+'NI6601_COUNTER_2' and 'NI6601_COUNTER_3').
+
+
+The second member, 'low_ticks', is the time between pulses, given in
+units of ticks. The smallest allowed value for 'low_ticks' is 1. The
+length of a tick depends on the input source. Usually, one of the
+internal time bases will be used. If the fast internal time base of
+20 MHz internal is used the distance td between pulses is given by
+
+         td = ( low_ticks + 1 ) * 50 ns
+
+with a minimum distance between pulses of 100 ns. If the slow time base
+of 100 kHz is used td is given by
+
+         td = ( low_ticks + 1 ) * 10 us
+
+with a minimum distance between pulses of 20 us. Otherwise the time is
+determined by the timing of the external events at the source input.
+
+
+The third member, 'high_ticks', is the length of the pulses, given in
+units of ticks.  The smallest allowed value for 'high_ticks' is 1. The
+length of a tick depends on the input source. Usually, one of the
+internal time bases will be used. If the fast internal time base of
+20 MHz internal is used the pulse length tp is given by
+
+	     tp = ( high_ticks + 1 ) * 50 ns
+
+with a minimum length of 100 ns.  If the slow time base of 100 kHz is
+used tp is given by
+
+         tp = ( high_ticks + 1 ) * 10 us
+
+with a minimum pulse length of 20 us. Otherwise the time is determined
+by the timing of the external events at the source input.
+
+
+The fourth member, 'gate', determines if creation of pulses is controlled
+by a gate and which is the source of the gate. Valid settings for 'gate' are:
+
+	NI6601_NONE                don't use a gate
+	NI6601_LOW                 gate input is always low
+	NI6601_DEFAULT_SOURCE      gate is also default source of counter
+	NI6601_DEFAULT_GATE        gate is default gate of counter
+	NI6601_GATE_0              gate is GATE(0) input
+	NI6601_GATE_1              gate is GATE(1) input
+	NI6601_GATE_2              gate is GATE(2) input
+	NI6601_GATE_3              gate is GATE(3) input
+	NI6601_NEXT_SOURCE         gate is source of other counter in pair
+	NI6601_RTSI_0              gate is RTSI(0) input
+	NI6601_RTSI_1              gate is RTSI(0) input
+	NI6601_RTSI_2              gate is RTSI(0) input
+	NI6601_RTSI_3              gate is RTSI(0) input
+	NI6601_NEXT_OUT            gate is output of other counter in pair
+
+
+The fifth member, 'source', determines the source of the events that
+decrement the counter used to create the pulses. Normally, one of the
+internal time bases will be used.
+
+	NI6601_LOW                 source is always low
+	NI6601_DEFAULT_SOURCE      source is default source of counter
+	NI6601_SOURCE_0            source is SOURCE(0) input
+	NI6601_SOURCE_1            source is SOURCE(1) input
+	NI6601_SOURCE_2            source is SOURCE(2) input
+	NI6601_SOURCE_3            source is SOURCE(3) input
+	NI6601_NEXT_GATE           source is gate input of other counter in pair
+	NI6601_RTSI_0              source is RTSI(0) input
+	NI6601_RTSI_1              source is RTSI(1) input
+	NI6601_RTSI_2              source is RTSI(2) input
+	NI6601_RTSI_3              source is RTSI(3) input
+	NI6601_NEXT_TC             source are TC events on other counter in pair
+	NI6601_TIMEBASE_1          source is 20 MHz internal timebase
+	NI6601_TIMEBASE_2          source is 100 kHz internal timebase
+	NI6601_TIMEBASE_3          source is 20 MHz internal timebase
+
+
+The sixth member, 'continuous', determines if only a single pulse is
+created (when 'continuous' is 0) or a continuous train of pulses (when
+'continuous' is 1). When 'continuous' is 0 only the 'high_ticks' member
+of the structure is used for the length of the pulses, 'low_ticks' won't
+be used.
+
+
+The seventh member, 'disable_output', can be used to disable the enable
+or disable the output of the counter. The 'disable_output' is set no
+voltages appear at the output (but the pulses still can be used e.g.
+as gate pulses for the other counter in the pair).
+
+
+The eigth and final member, 'output_polarity', determines the polarity
+of the counter. If 'output_polarity' is set to 0 ('NI6601_NORMAL') during
+pulses the output voltage is high, while for 1 ('NI6601_INVERTED') pulses
+are have a low voltage and during the time between pulses the output
+is high.
+
+
+===================================================================
+
+  NI6601_IOC_COUNT
+
+This ioctl() reuqest can be used to determine the current value of one
+of the four counters of the board. The argument for the ioctl() call is
+a structure of type NI6601_COUNTER_VAL, which is a typedef of
+
+    typedef struct {
+		NI6601_COUNTER_NUM counter;
+		int wait_for_end;
+		unsigned long count;
+	} NI6601_COUNTER_VAL;
+
+
+The first member of the structure, 'counter', is the number of the
+counter for which the current value is to be returned, an integer
+between 0 and 3 (you may also use the symbolic names 'NI6601_COUNTER_0',
+'NI6601_COUNTER_1', 'NI6601_COUNTER_2' and 'NI6601_COUNTER_3').
+
+
+The second member, 'wait_for_end', should only be set to 1 when the counter
+uses a gate created by the other counter in the pair. In this case the
+counter will stop counting automatically at the end of the first gate.
+Under these conditions and when 'wait_for_end' is set the ioctl() call
+will only return after the counter stopped counting and thus will return
+the final result. Waiting for the counter to stop is interrupted when
+a signal is received, in which case errno is set to 'EINTR'.
+
+
+The third and final member, 'count', will contain the value of the counter
+on successfull return.
+
+
+===================================================================
+
+  NI6601_IOC_IS_BUSY
+
+This ioctl() request allows to check if a counter is currently counting
+(i.e. if it is armed). The argument for the ioctl() call is a structure
+of type NI6601_IS_ARMED, which is a typedef of
+
+    typedef struct {
+		NI6601_COUNTER_NUM counter;
+		int state;
+	} NI6601_IS_ARMED;
+
+
+The first member of the structure, 'counter', is the number of the
+counter for which the information about the state of the counter is to be
+returned, an integer between 0 and 3 (you may also use the symbolic names
+'NI6601_COUNTER_0', 'NI6601_COUNTER_1', 'NI6601_COUNTER_2' and
+'NI6601_COUNTER_3').
+
+
+The second member, 'state', will be set on return to 1 if the counter is
+counting, otherwise to 0.
+
+
+===================================================================
+
+  NI6601_IOC_DISARM
+
+This iocth() request allows to stop a counter, i.e. to disarm it. The
+argument for the ioctl() call is a structure of type NI6601_DISARM,
+which is a typedef of
+
+	typedef struct {
+		NI6601_COUNTER_NUM counter;
+	} NI6601_DISARM;
+
+
+The first and only member of the structure, 'counter', is the number of
+the counter which is to be disarmed, an integer between 0 and 3 (you may
+also use the symbolic names 'NI6601_COUNTER_0', 'NI6601_COUNTER_1',
+'NI6601_COUNTER_2' and 'NI6601_COUNTER_3').
