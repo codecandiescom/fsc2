@@ -676,13 +676,13 @@ P5:  FUNCTION = DETECTION,
 
 EXPERIMENT:
 
-/* Go to the start field */
-
-field = set_field( field );
-
 /* Open the data file */
 
 File = get_file( );
+
+/* Go to the start field */
+
+field = set_field( field );
 
 synthesizer_attenuation( att );
 freq = synthesizer_frequency( start_freq );
@@ -700,13 +700,13 @@ FOREVER {
 ";
 # === if ( START_FREQ <= END_FREQ )
     if ( eval { ( $START_FREQ <= $END_FREQ ) } ) {
-        print $fh "		data[ J, I ] = daq_get_voltage( CH0 );
+        print $fh "		data[ J, I ] = - daq_get_voltage( CH0 );
 		display_1d( I, data[ J, I ], 1,
 					I, ( avg[ I ]  + data[ J, I ] ) / J, 2 );
 ";
 # === else
     } else {
-        print $fh "		data[ J, N_Points - I + 1 ] = daq_get_voltage( CH0 );
+        print $fh "		data[ J, N_Points - I + 1 ] = - daq_get_voltage( CH0 );
 		display_1d( N_Points - I + 1, data[ J, N_Points - I + 1 ], 1,
 					N_Points - I + 1, ( avg[ N_Points - I + 1 ]
 					+ data[ J, N_Points - I + 1 ] ) / J, 2 );
