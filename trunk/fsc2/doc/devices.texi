@@ -3109,7 +3109,7 @@ daq_ai_acq_setup( Num_Scans, "TRIGGER_START_CONV", T_start,
 @end example
 The symbol @code{Num_Scans} stands for the number of scans to be done,
 @code{T_start} for the source of the trigger starting the acquisition,
-@code{P_start} is the "polarity" (i.e.@: rasing or falling edge) of the
+@code{P_start} is the "polarity" (i.e.@: rasing or falling edge) of this
 trigger, @code{T_scan} and @code{P_scan} have the same meaning but for
 the start-of-scan trigger and @code{T_conv} and @code{P_conv} are for
 the start-of-conversion trigger. @code{t_scan} and @code{t_conv} are the
