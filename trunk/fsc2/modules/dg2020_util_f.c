@@ -158,6 +158,7 @@ CHANNEL *dg2020_get_next_free_channel( void )
 {
 	int i = 0;
 
+
 	while ( dg2020.channel[ i ].function != NULL )
 		i++;
 
