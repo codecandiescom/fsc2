@@ -26,8 +26,7 @@ bool tds520_init( const char *name )
 
     /* Set digitizer to short form of replies */
 
-    if ( gpib_write( tds520.device, "VERB OFF\n" ) == FAILURE ||
-         gpib_write( tds520.device, "HEAD OFF\n" ) == FAILURE )
+    if ( gpib_write( tds520.device, "VERB OFF;:HEAD OFF\n" ) == FAILURE )
 	{
 		gpib_local( tds520.device );
         return FAIL;
@@ -44,8 +43,7 @@ bool tds520_init( const char *name )
 
     /* Set format of data transfer (binary, INTEL format) */
 
-    if ( gpib_write( tds520.device, "DAT:ENC SRI\n" ) == FAILURE ||
-         gpib_write( tds520.device, "DAT:WID 2\n" )    == FAILURE )
+    if ( gpib_write( tds520.device, "DAT:ENC SRI;WID 2\n" ) == FAILURE )
 	{
 		gpib_local( tds520.device );
         return FAIL;
@@ -53,8 +51,8 @@ bool tds520_init( const char *name )
 		
     /* Set unit for cursor setting commands to seconds, cursor types to VBAR */
 
-    if ( gpib_write( tds520.device, "CURS:FUNC VBA\n" ) == FAILURE ||
-         gpib_write( tds520.device, "CURS:VBA:UNITS SECO\n" ) == FAILURE )
+    if ( gpib_write( tds520.device, "CURS:FUNC VBA;VBA:UNITS SECO\n" )
+		 == FAILURE )
     {
         gpib_local( tds520.device );
         return FAIL;
@@ -103,8 +101,8 @@ bool tds520_init( const char *name )
 
     /* Switch to running until run/stop button is pressed and start running */
 
-    if ( gpib_write( tds520.device, "ACQ:STOPA RUNST\n" ) == FAILURE ||
-         gpib_write( tds520.device, "ACQ:STATE RUN\n" ) == FAILURE )
+    if ( gpib_write( tds520.device, "ACQ:STOPA RUNST;STATE RUN\n" )
+		 == FAILURE )
     {
         gpib_local( tds520.device );
         return FAIL;
@@ -528,8 +526,7 @@ bool tds520_start_aquisition( void )
 	   3. set stop after sequence */
 
     if ( ! tds520_clear_SESR( ) ||
-		 gpib_write( tds520.device, "ACQ:STOPA SEQ\n" ) == FAILURE ||
-         gpib_write( tds520.device, "ACQ:STATE RUN\n" ) == FAILURE )
+		 gpib_write( tds520.device, "ACQ:STOPA SEQ;STATE RUN\n" ) == FAILURE )
 		tds520_gpib_failure( );
 
 
