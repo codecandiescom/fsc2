@@ -117,8 +117,8 @@ int er035m_s_init_hook( void )
 
 	if ( exist_device( "er035m" ) )
 	{
-		eprint( FATAL, "ER035M_S: Driver for ER035 gaussmeter connected to "
-				"IEEE bus is already loaded - there can only be one "
+		eprint( FATAL, "ER035M_S: Driver for ER035 gaussmeter (connected to "
+				"IEEE bus) is already loaded - there can only be one "
 				"gaussmeter." );
 		THROW( EXCEPTION );
 	}
