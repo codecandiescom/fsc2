@@ -190,7 +190,8 @@ clean:
 
 distclean:
 	$(MAKE) clean
-	-$(RM) $(RMFLAGS) fsc2 fsc2_clean fsc2_connect fsc2_rsc_[hl]r.[ch] *.so
+	-$(RM) $(RMFLAGS) fsc2 fsc2_clean fsc2_connect fsc2_rsc_[hl]r.[ch] \
+		   *.so *.bak
 
 
 # don't automatically delete intermediate files created by bison and flex

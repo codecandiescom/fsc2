@@ -1701,7 +1701,10 @@ void set_marker( long position, long color )
 	}
 
 	gcv.line_style = LineOnOffDash;
+
+	m->color = color;
 	m->gc = XCreateGC( G.d, G.canvas.pm, GCLineStyle, &gcv );
+
 	if ( color > 0 && color <= MAX_CURVES )
 		XSetForeground( G.d, m->gc, fl_get_pixel( G.colors[ color - 1 ] ) );
 	else if ( color == 0 )
