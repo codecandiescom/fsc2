@@ -170,7 +170,7 @@ install-crowley.none:
 
 uninstall:
 	-for f in *.so; do                     \
-		$(RM) $(RMFLAGS) $(libdir)/$$f;   \
+		$(RM) $(RMFLAGS) $(libdir)/$$f;    \
 	done
 	if [ "$(UNINSTALL_MACHINE)" != "uninstall-unknown" ]; then  \
 		$(MAKE) $(UNINSTALL_MACHINE);                           \
