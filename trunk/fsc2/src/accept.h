@@ -4,6 +4,6 @@
 
 #include "fsc2.h"
 
-bool accept_new_data( void );
+void accept_new_data( void );
 
 #endif   /* ! ACCEPT_HEADER */
