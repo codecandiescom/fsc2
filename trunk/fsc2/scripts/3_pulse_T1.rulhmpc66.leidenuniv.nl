@@ -470,14 +470,12 @@ daq_gain( 4 );
 
 FOREVER {
 	wait( 1.1 * repeat_time * N_Avg );
-	pulser_state( \"OFF\" );
 	data = daq_get_voltage( CH0 );
 	display( I, data );
 	fsave( File, \"#,#\\n\",
 		   ( p1_to_p2_dist + p1_to_p2_incr * ( I - 1 ) ) * 1.0e9, data );
 	pulser_shift( );
 	pulser_update( );
-	pulser_state( \"ON\" );
 	I += 1;
 }
 

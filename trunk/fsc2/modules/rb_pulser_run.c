@@ -37,11 +37,9 @@ static void rb_pulser_rf_pulse( void );
 bool rb_pulser_do_update( void )
 {
 	bool restart = UNSET;
-	bool state;
 
 
-	/* Resort the pulses, check that the new pulse settings are reasonable
-	   and finally commit all changes */
+	/* Stop the pulser while the update is done */
 
 	if ( rb_pulser.is_running )
 	{
@@ -50,17 +48,24 @@ bool rb_pulser_do_update( void )
 			rb_pulser_run( STOP );
 	}
 
-	state = rb_pulser_update_pulses( FSC2_MODE == TEST );
+	/* Recount and resort the pulses according to their positions, check
+	   that the new settings are reasonable and then commit all changes */
+
+	rb_pulser_update_pulses( FSC2_MODE == TEST );
+
+	/* Restart the pulser if necessary */
 
 	if ( restart && FSC2_MODE == EXPERIMENT )
 		rb_pulser_run( START );
 
-	return state;
+	return OK;
 }
 
 
-/*--------------------------------------------------------------------------*
- *--------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*
+ * Recounts and resort the pulses according to their positions, checks
+ * that the new settings are reasonable and then commit all changes.
+ *---------------------------------------------------------------------*/
 
 bool rb_pulser_update_pulses( bool flag )
 {
@@ -69,7 +74,7 @@ bool rb_pulser_update_pulses( bool flag )
 	rb_pulser_delay_card_setup( );
 	rb_pulser_rf_pulse( );
 
-	/* Now figure out the pulse sequence length */
+	/* Now figure out the pulse sequence length and then commit changes */
 
 	rb_pulser_seq_length_check( );
 
@@ -79,8 +84,11 @@ bool rb_pulser_update_pulses( bool flag )
 }
 
 
-/*--------------------------------------------------------------------------*
- *--------------------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ * Before the pulses can be updated we must count how many pulses
+ * there are per function after the update and sort them according
+ * to their positions.
+ *-----------------------------------------------------------------*/
 
 void rb_pulser_function_init( void )
 {
@@ -114,7 +122,6 @@ void rb_pulser_function_init( void )
  * There's a problem here: If there are no MW pulses the card is set to
  * a delay of 0 and therefor there's no GATE output and thus no detection
  * trigger. This hasn't become a problem yet but needs repair!
- *
  *----------------------------------------------------------------------*/
 
 void rb_pulser_init_delay( void )
@@ -338,8 +345,10 @@ void rb_pulser_full_reset( void )
 }
 
 
-/*------------------------------------------------*
- *------------------------------------------------*/
+/*------------------------------------------------------------------*
+ * Functions determines the length of the pulse sequence and throws
+ * an exception if that's longer than possible with the pulser.
+ *------------------------------------------------------------------*/
 
 void rb_pulser_seq_length_check( void )
 {
