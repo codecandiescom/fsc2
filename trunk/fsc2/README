@@ -147,6 +147,14 @@ Currently suported devices
 
   * EG&G PARC Box-Car Integrator 4402 (download of measured data only)
 
+ DAC cards:
+
+  * Meilhaus Electronic GmbH ME-6000 and ME-6100
+
+ Event counter cards:
+
+  * National Instruments NI6601
+
 fsc2 works with three different GPIB driver/library combinations, the
 Linux Lab Project driver (http://www.llp.fu-berlin.de), the National
 Instruments driver (http://www.natinst.com) and a driver for NI PCII
