@@ -9,6 +9,7 @@
 int bh15_init_hook( void );
 int bh15_test_hook( void );
 int bh15_exp_hook( void );
+int bh15_end_of_exp_hook( void );
 void bh15_exit_hook( void );
 
 Var *find_field( Var *v );
@@ -129,7 +130,7 @@ int bh15_exp_hook( void )
 		THROW( EXCEPTION );
 	}
 
-	sleep( 5 );
+	sleep( 5 );                /* unfortunately, it seems to need this... */
 
 	do
 	{
@@ -162,7 +163,7 @@ int bh15_exp_hook( void )
 }
 
 
-void bh15_exit_hook( void )
+int bh15_end_of_exp_hook( void )
 {
 	if ( ! bh15.is_needed )
 		return;
@@ -170,6 +171,14 @@ void bh15_exit_hook( void )
 	bh15_get_field( );
 	if ( bh15.device >= 0 )
 		gpib_local( bh15.device );
+
+	return 1;
+}
+
+
+void bh15_exit_hook( void )
+{
+	bh15_end_of_exp_hook( );
 }
 
 

@@ -25,6 +25,7 @@
 int s_band_init_hook( void );
 int s_band_test_hook( void );
 int s_band_exp_hook( void );
+int s_band_end_of_exp_hook( void );
 void s_band_exit_hook( void );
 
 Var *magnet_setup( Var *v );
@@ -245,7 +246,11 @@ int s_band_exp_hook( void )
 }
 
 
-void s_band_exit_hook( void )
+/*---------------------------------------------------------------*/
+/* Closes the connection to the power supply after an experiment */
+/*---------------------------------------------------------------*/
+
+int s_band_end_of_exp_hook( void )
 {
 	/* reset the serial port */
 
@@ -253,6 +258,18 @@ void s_band_exit_hook( void )
 		magnet_do( SERIAL_EXIT );
 
 	magnet.is_opened = UNSET;
+
+	return 1;
+}
+
+
+/*--------------------------------------------------------------------*/
+/* Just make sure the connection to the power supply is really closed */
+/*--------------------------------------------------------------------*/
+
+void s_band_exit_hook( void )
+{
+	s_band_end_of_exp_hook( );
 }
 
 
@@ -573,11 +590,9 @@ bool magnet_init( void )
 	int test_steps;
 
 
-	/* First step: Initialization of the serial interface - hasn't to be
-	   done if this has already done in a previous exp_hook() call without
-	   an intervening exit_hook() call */
+	/* First step: Initialization of the serial interface */
 
-	if ( ! magnet.is_opened && ! magnet_do( SERIAL_INIT ) )
+	if ( magnet_do( SERIAL_INIT ) )
 		return FAIL;
 
 	/* Next step: We do MAGNET_FAST_TEST_STEPS or MAGNET_TEST_STEPS steps
