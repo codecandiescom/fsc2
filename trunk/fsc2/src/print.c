@@ -73,7 +73,8 @@ static void eps_draw_contour( FILE *fp, int cn );
 static void print_comm( FILE *fp );
 static char **split_into_lines( int *num_lines );
 static char *paren_replace( const char *str );
-static void print_markers( FILE *fp );
+static void print_markers_1d( FILE *fp );
+static void print_markers_2d( FILE *fp );
 
 
 /*-------------------------------------------------------------------------*/
@@ -821,7 +822,7 @@ static void do_1d_printing( FILE *fp, long what )
 	{
 		for ( i = G1.nc - 1; i >= 0; i-- )
 			eps_draw_curve_1d( fp, G1.curve[ i ], i, 1 );
-		print_markers( fp );
+		print_markers_1d( fp );
 	}
 	else
 		eps_draw_curve_1d( fp, &G2.cut_curve, 0, what );
@@ -1373,6 +1374,8 @@ static void eps_draw_surface( FILE *fp, int cn )
 					 2.0 * dw, 2.0 * dh, - 2.0 * dw );
 		}
 
+	print_markers_2d( fp );
+
 	fprintf( fp, "gr\n" );
 }
 
@@ -1700,7 +1703,7 @@ static char *paren_replace( const char *str )
 /* Function for drawing the markers in 1D graphic mode */
 /*-----------------------------------------------------*/
 
-static void print_markers( FILE *fp )
+static void print_markers_1d( FILE *fp )
 {
 	long i;
 	Curve_1d *cv = NULL;
@@ -1761,6 +1764,75 @@ static void print_markers( FILE *fp )
 		
 		fprintf( fp, "%.2f %.2f m 0 %.2f rl s\n",
 				 x_0 + s2d * ( m->x_pos + cv->shift[ X ] ), y_0, h );
+	}
+}
+
+
+/*-----------------------------------------------------*/
+/* Function for drawing the markers in 2D graphic mode */
+/*-----------------------------------------------------*/
+
+static void print_markers_2d( FILE *fp )
+{
+	Curve_2d *cv = NULL;
+	Marker_2D *m;
+	double s2d[ 2 ];
+	double dw, dh;
+
+
+	if ( G2.active_curve == -1 )
+		return;
+
+	cv = G2.curve_2d[ G2.active_curve ];
+
+	/* Calculate x scale factor and then draw all markers */
+
+	s2d[ X ] = w * cv->s2d[ X ] / G2.canvas.w;
+	s2d[ Y ] = h * cv->s2d[ Y ] / G2.canvas.h;
+	dw = s2d[ X ] / 2 + 0.5;
+	dh = s2d[ Y ] / 2 + 0.5;
+	if ( dw < 1.0 )
+		dw = 1.0;
+	if ( dh < 1.0 )
+		dh = 1.0;
+
+	for ( m = cv->marker_2d; m != NULL; m = m->next )
+	{
+		if ( print_with_color )
+			switch ( m->color )
+			{
+				case 0 :
+					fprintf( fp, "0.8 0.8 0.8 srgb " );    /* "white" */
+					break;
+
+				case 1 :
+					fprintf( fp, "1 0 0 srgb " );          /* red */
+					break;
+
+				case 2 :
+					fprintf( fp, "0 1 0 srgb " );          /* green */
+					break;
+
+				case 3 :
+					fprintf( fp, "1 0.75 0 srgb " );       /* dark yellow */
+					break;
+
+				case 4 :
+					fprintf( fp, "0 0 1 srgb " );          /* blue */
+					break;
+
+				default :
+					fprintf( fp, "0 0 0 srgb " );          /* black */
+				break;
+			}
+		else
+			fprintf( fp, "0 sgr " );
+		
+		fprintf( fp, "1 slw %.2f %.2f m %.2f 0 rl 0 %.2f rl %.2f 0 "
+				 "rl cp s\n",
+				 x_0 + s2d[ X ] * ( m->x_pos + cv->shift[ X ] ) - dw,
+				 y_0 + s2d[ Y ] * ( m->y_pos + cv->shift[ Y ] ) - dh,
+				 2.0 * dw, 2.0 * dh, - 2.0 * dw );
 	}
 }
 
