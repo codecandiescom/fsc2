@@ -927,7 +927,7 @@ static Var *get_curve( Var *v, bool use_cursor )
 		win_num = get_strict_long( v, "window number" );
 
 		for ( w = lecroy9400.w; w != NULL && w->num != win_num; w = w->next )
-			;
+			/* empty */ ;
 
 		if ( w == NULL )
 		{

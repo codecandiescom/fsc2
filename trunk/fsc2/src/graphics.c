@@ -94,7 +94,7 @@ void start_graphics( void )
 		GI_sizes.SMALL_FONT_SIZE    = FL_TINY_SIZE;
 		GI_sizes.DEFAULT_AXISFONT_1 = "*-lucida-bold-r-normal-sans-10-*";
 		GI_sizes.DEFAULT_AXISFONT_2 = "lucidasanstypewriter-10";
-		GI_sizes.DEFAULT_AXISFONT_3 = "9x10";
+		GI_sizes.DEFAULT_AXISFONT_3 = "fixed";
 
 		G.scale_tick_dist   =  4;
 		G.short_tick_len    =  3;
@@ -116,7 +116,7 @@ void start_graphics( void )
 		GI_sizes.SMALL_FONT_SIZE    = FL_SMALL_SIZE;
 		GI_sizes.DEFAULT_AXISFONT_1 = "*-lucida-bold-r-normal-sans-14-*";
 		GI_sizes.DEFAULT_AXISFONT_2 = "lucidasanstypewriter-14";
-		GI_sizes.DEFAULT_AXISFONT_3 = "9x15";
+		GI_sizes.DEFAULT_AXISFONT_3 = "fixed";
 
 		G.scale_tick_dist   =  6;
 		G.short_tick_len    =  5;

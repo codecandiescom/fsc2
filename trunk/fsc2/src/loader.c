@@ -679,7 +679,7 @@ void run_exit_hooks( void )
 	   even if some of them fail with an exception. */
 
 	for( cd = EDL.Device_List; cd->next != NULL; cd = cd->next )
-		;
+		/* empty */ ;
 
 	Cur_Pulser = EDL.Num_Pulsers;
 	Internals.in_hook = SET;

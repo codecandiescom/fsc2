@@ -429,7 +429,7 @@ Var *lockin_get_data( Var *v )
 		print( SEVERE, "More than %d parameters, discarding superfluous "
 			   "ones.\n", MAX_DATA_AT_ONCE );
 		while ( ( v = vars_pop( v ) ) != NULL )
-			;
+			/* empty */ ;
 	}
 
 	if ( FSC2_MODE == TEST )

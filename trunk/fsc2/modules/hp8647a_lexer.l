@@ -170,7 +170,8 @@ void hp8647a_read_table( FILE *fp )
 
 	hp8647a_Lc = 1;
 
-	TRY {
+	TRY 
+	{
 		hp8647a_new_table_entry( TABLE_INIT, 0.0 );
 		while( ( type = hp8647a_lex( ) ) != 0 )
 			hp8647a_new_table_entry( type, T_atod( hp8647a_text ) * unit_fac );

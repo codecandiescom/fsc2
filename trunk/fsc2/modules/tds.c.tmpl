@@ -359,7 +359,7 @@ Var *digitizer_change_window( Var *v )
 	v = vars_pop( v );
 
 	for ( w = tds_tmpl.w; w->num != win_num && w != NULL; w = w->next )
-		;
+		/* empty */ ;
 
 	if ( w == NULL )
 	{
@@ -457,7 +457,7 @@ Var *digitizer_window_position( Var *v )
 	win_num = get_strict_long( v, "window ID" );
 
 	for ( w = tds_tmpl.w; w->num != win_num && w != NULL; w = w->next )
-		;
+		/* empty */ ;
 
 	if ( w == NULL )
 	{
@@ -518,7 +518,7 @@ Var *digitizer_window_width( Var *v )
 	win_num = get_strict_long( v, "window ID" );
 
 	for ( w = tds_tmpl.w; w->num != win_num && w != NULL; w = w->next )
-		;
+		/* empty */ ;
 
 	if ( w == NULL )
 	{
@@ -556,24 +556,35 @@ Var *digitizer_display_channel( Var *v )
 	long channel;
 
 
-	channel = tds_tmpl_translate_channel( GENERAL_TO_TDS_TMPL,
+	if ( v == NULL )
+	{
+		print( FATAL, "Missing arguments.\n" );
+		THROW( EXCEPTION );
+	}
+
+	do
+	{
+		channel = tds_tmpl_translate_channel( GENERAL_TO_TDS_TMPL,
 									  get_strict_long( v, "channel number" ) );
 
-	if( channel >= NUM_DISPLAYABLE_CHANNELS && channel < MAX_CHANNELS )
-	{
-		print( FATAL, "Channel \"%s\" can't be displayed.\n",
-			   Channel_Names[ channel ] );
-		THROW( EXCEPTION );
-	}
+		if ( channel >= MAX_CHANNELS )
+		{
+			print( FATAL, "Invalid channel number: %ld.\n",
+				   tds_tmpl_translate_channel( TDS_TMPL_TO_GENERAL,
+											   channel ) );
+			THROW( EXCEPTION );
+		}
 
-	if ( channel >= MAX_CHANNELS )
-	{
-		print( FATAL, "Invalid channel number: %ld.\n",
-			   tds_tmpl_translate_channel( TDS_TMPL_TO_GENERAL, channel ) );
-		THROW( EXCEPTION );
-	}
+		if( channel >= NUM_DISPLAYABLE_CHANNELS )
+		{
+			print( FATAL, "Channel \"%s\" can't be displayed.\n",
+				   Channel_Names[ channel ] );
+			THROW( EXCEPTION );
+		}
 
-	tds_tmpl.channels_in_use[ channel ] = SET;
+		tds_tmpl.channels_in_use[ channel ] = SET;
+	} while ( ( v = vars_pop( v ) ) != NULL );
+
 	return vars_push( INT_VAR, 1 );
 }
 
@@ -1146,7 +1157,7 @@ static Var *get_area( Var *v, bool use_cursor )
 		win_num = get_strict_long( v, "window number" );
 
 		for ( w = tds_tmpl.w; w != NULL && w->num != win_num; w = w->next )
-			;
+			/* empty */ ;
 
 		if ( w == NULL )
 		{
@@ -1240,7 +1251,7 @@ static Var *get_curve( Var *v, bool use_cursor )
 		win_num = get_strict_long( v, "window number" );
 
 		for ( w = tds_tmpl.w; w != NULL && w->num != win_num; w = w->next )
-			;
+			/* empty */ ;
 
 		if ( w == NULL )
 		{
@@ -1347,7 +1358,7 @@ static Var *get_amplitude( Var *v, bool use_cursor )
 		win_num = get_strict_long( v, "window number" );
 
 		for ( w = tds_tmpl.w; w != NULL && w->num != win_num; w = w->next )
-			;
+			/* empty */ ;
 
 		if ( w == NULL )
 		{

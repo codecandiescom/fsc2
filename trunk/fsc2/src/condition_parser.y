@@ -21,6 +21,7 @@
   Boston, MA 02111-1307, USA.
 */
 
+
 /*******************************************************************/
 /* This is the parser for conditions in if's, while's and repeat's */
 /*******************************************************************/
@@ -33,7 +34,32 @@
 /* locally used functions */
 
 int conditionparse( void );
+ static bool check_result( Var *v );
 static void conditionerror( const char *s );
+
+
+/* Special problem are expressions of the form 'expr & expr' or 'expr | expr'.
+   Here the second part (i.e. after the '&' or '|') must not be evaluated if
+   the first part already determines the final resut completely because it is
+   false (for the AND case) or true (for the OR case). In theses cases the
+   second expression must not be evaluated where it is especially important
+   not to run functions that might have side-effects. Thus when such a case is
+   detected 'condition_gobble' is set to 1 which will prevent the evaluation.
+   At the end of the expression 'condition_gobble' is decremented back to 0.
+
+   A further problem are cases like 'expr1 | ( expr2 & expr3 ) | expr4'. If,
+   e.g. expr2 is false expr3 must not evaluated but expr4 must (at least if
+   expr 1 was false). So, skipping all the rest after expr2 is not possible
+   and thus 'condition_gobble' must work as a counter, incremented on expr2
+   and again decremented at the end of expr3. Thus it's again 0 when expr4
+   is dealt with which in turn is evaluated.
+
+   'condition_gobble' must be set to zero before the parser is started to make
+   sure it's 0 even if, due to syntax errors etc., the last run of the parser
+   was interrupted with 'condition_gobble' being still non-zero. */
+
+int condition_gobble;
+
 
 %}
 
@@ -114,74 +140,158 @@ static void conditionerror( const char *s );
 %%
 
 
-input:   expr                      { YYACCEPT; }
+input:   expr                     { YYACCEPT; }
 ;
 
-expr:    E_INT_TOKEN unit         { $$ = apply_unit( vars_push( INT_VAR, $1 ),
-													 $2 ); }
-       | E_FLOAT_TOKEN unit       { $$ = apply_unit(
+expr:    E_INT_TOKEN unit         { if ( ! condition_gobble )
+                                        $$ = apply_unit( vars_push( INT_VAR,
+																  $1 ), $2 ); }
+       | E_FLOAT_TOKEN unit       { if ( ! condition_gobble )
+		                                $$ = apply_unit(
 		                                    vars_push( FLOAT_VAR, $1 ), $2 ); }
-       | E_VAR_TOKEN unit         { $$ = apply_unit( $1, $2 ); }
-       | E_VAR_TOKEN '['          { vars_arr_start( $1 ); }
-         list1 ']'                { $$ = vars_arr_rhs( $4 ); }
-         unit                     { $$ = apply_unit( $<vptr>6, $7); }
+       | E_VAR_TOKEN unit         { if ( ! condition_gobble )
+		                                $$ = apply_unit( $1, $2 );
+	                                else
+										vars_pop( $1 ); }
+       | E_VAR_TOKEN '['          { if ( ! condition_gobble )
+		                                vars_arr_start( $1 );
+	                                else
+										vars_pop( $1 ); }
+         list1 ']'                { if ( ! condition_gobble )
+                                        $$ = vars_arr_rhs( $4 ); }
+         unit                     { if ( ! condition_gobble )
+                                        $$ = apply_unit( $<vptr>6, $7); }
        | E_FUNC_TOKEN '(' list2
-         ')'                      { $$ = func_call( $1 ); }
-         unit                     { $$ = apply_unit( $<vptr>5, $6 ); }
-       | E_VAR_REF
+         ')'                      { if ( ! condition_gobble )
+			                            $$ = func_call( $1 );
+	                                else
+										vars_pop( $1 ); }
+         unit                     { if ( ! condition_gobble )
+                                        $$ = apply_unit( $<vptr>5, $6 ); }
+       | E_VAR_REF                { if ( condition_gobble )
+		                                 vars_pop( $1 ); }
+       | E_STR_TOKEN              { if ( ! condition_gobble )
+		                                 $$ = vars_push( STR_VAR, $<sptr>1 ); }
        | E_VAR_TOKEN '('          { eprint( FATAL, SET, "`%s' isn't a "
 											"function.\n", $1->name );
-	                                 THROW( EXCEPTION ); }
+	                                THROW( EXCEPTION ); }
        | E_FUNC_TOKEN '['         { eprint( FATAL, SET, "`%s' is a predefined "
                                             "function.\n", $1->name );
 	                                THROW( EXCEPTION ); }
-       | E_PPOS                   { $$ = p_get_by_num( $1, P_POS ); }
-       | E_PLEN                   { $$ = p_get_by_num( $1, P_LEN ); }
-       | E_PDPOS                  { $$ = p_get_by_num( $1, P_DPOS ); }
-       | E_PDLEN                  { $$ = p_get_by_num( $1, P_DLEN ); }
-       | expr E_AND expr          { $$ = vars_comp( COMP_AND, $1, $3 ); }
-       | expr E_OR expr           { $$ = vars_comp( COMP_OR, $1, $3 ); }
-       | expr E_XOR expr          { $$ = vars_comp( COMP_XOR, $1, $3 ); }
-       | E_NOT expr               { $$ = vars_lnegate( $2 ); }
-       | expr E_EQ expr           { $$ = vars_comp( COMP_EQUAL, $1, $3 ); }
-       | expr E_NE expr           { $$ = vars_comp( COMP_UNEQUAL, $1, $3 ); }
-       | expr E_LT expr           { $$ = vars_comp( COMP_LESS, $1, $3 ); }
-       | expr E_GT expr           { $$ = vars_comp( COMP_LESS, $3, $1 ); }
-       | expr E_LE expr           { $$ = vars_comp( COMP_LESS_EQUAL,
-													$1, $3 ); }
-       | expr E_GE expr           { $$ = vars_comp( COMP_LESS_EQUAL,
-													$3, $1 ); }
-       | expr '+' expr            { $$ = vars_add( $1, $3 ); }
-       | expr '-' expr            { $$ = vars_sub( $1, $3 ); }
-       | expr '*' expr            { $$ = vars_mult( $1, $3 ); }
-       | expr '/' expr            { $$ = vars_div( $1, $3 ); }
-       | expr '%' expr            { $$ = vars_mod( $1, $3 ); }
-       | expr '^' expr            { $$ = vars_pow( $1, $3 ); }
-       | '+' expr %prec E_NEG     { $$ = $2; }
-       | '-' expr %prec E_NEG     { $$ = vars_negate( $2 ); }
-       | '(' expr ')' unit        { $$ = apply_unit( $2, $4 ); }
+       | E_PPOS                   { if ( ! condition_gobble )
+                                        $$ = p_get_by_num( $1, P_POS ); }
+       | E_PLEN                   { if ( ! condition_gobble )
+                                        $$ = p_get_by_num( $1, P_LEN ); }
+       | E_PDPOS                  { if ( ! condition_gobble )
+                                        $$ = p_get_by_num( $1, P_DPOS ); }
+       | E_PDLEN                  { if ( ! condition_gobble )
+                                        $$ = p_get_by_num( $1, P_DLEN ); }
+	   | expr E_AND               { if ( ! condition_gobble )
+	                                {
+                                        if ( ! check_result( $1 ) )
+											condition_gobble = 1;
+									}
+									else
+										condition_gobble++;
+	                              }
+	     expr                     { if ( ! condition_gobble )
+                                        $$ = vars_comp( COMP_AND, $1, $4 );
+		                            else
+									{
+									    if ( condition_gobble == 1 )
+										     $$ = $1;
+										condition_gobble--;
+									}
+		                          }
+       | expr E_OR                { if ( ! condition_gobble )
+	                                {
+                                        if ( check_result( $1 ) )
+											condition_gobble = 1;
+									}
+									else
+										condition_gobble++;
+	                              }
+	     expr                     { if ( ! condition_gobble )
+                                        $$ = vars_comp( COMP_OR, $1, $4 );
+		                            else
+									{
+									    if ( condition_gobble == 1 )
+										     $$ = $1;
+										condition_gobble--;
+									}
+		                          }
+       | expr E_XOR expr          { if ( ! condition_gobble )
+                                        $$ = vars_comp( COMP_XOR, $1, $3 ); }
+       | E_NOT expr               { if ( ! condition_gobble )
+                                        $$ = vars_lnegate( $2 ); }
+       | expr E_EQ expr           { if ( ! condition_gobble )
+                                        $$ = vars_comp( COMP_EQUAL, $1, $3 ); }
+       | expr E_NE expr           { if ( ! condition_gobble )
+                                        $$ = vars_comp( COMP_UNEQUAL,
+														$1, $3 ); }
+       | expr E_LT expr           { if ( ! condition_gobble )
+                                        $$ = vars_comp( COMP_LESS, $1, $3 ); }
+       | expr E_GT expr           { if ( ! condition_gobble )
+                                        $$ = vars_comp( COMP_LESS, $3, $1 ); }
+       | expr E_LE expr           { if ( ! condition_gobble )
+                                        $$ = vars_comp( COMP_LESS_EQUAL,
+														$1, $3 ); }
+       | expr E_GE expr           { if ( ! condition_gobble )
+                                        $$ = vars_comp( COMP_LESS_EQUAL,
+														$3, $1 ); }
+       | expr '+' expr            { if ( ! condition_gobble )
+                                        $$ = vars_add( $1, $3 ); }
+       | expr '-' expr            { if ( ! condition_gobble )
+                                        $$ = vars_sub( $1, $3 ); }
+       | expr '*' expr            { if ( ! condition_gobble )
+                                        $$ = vars_mult( $1, $3 ); }
+       | expr '/' expr            { if ( ! condition_gobble )
+                                        $$ = vars_div( $1, $3 ); }
+       | expr '%' expr            { if ( ! condition_gobble )
+                                        $$ = vars_mod( $1, $3 ); }
+       | expr '^' expr            { if ( ! condition_gobble )
+                                        $$ = vars_pow( $1, $3 ); }
+       | '+' expr %prec E_NEG     { if ( ! condition_gobble )
+                                        $$ = $2; }
+       | '-' expr %prec E_NEG     { if ( ! condition_gobble )
+                                        $$ = vars_negate( $2 ); }
+       | '(' expr ')' unit        { if ( ! condition_gobble )
+                                        $$ = apply_unit( $2, $4 ); }
 ;
 
 unit:    /* empty */              { $$ = NULL; }
-       | E_NT_TOKEN               { $$ = vars_push( FLOAT_VAR, 1.0e-5 ); }
-       | E_UT_TOKEN               { $$ = vars_push( FLOAT_VAR, 1.0e-2 ); }
-       | E_MT_TOKEN               { $$ = vars_push( FLOAT_VAR, 10.0 ); }
-       | E_T_TOKEN                { $$ = vars_push( FLOAT_VAR, 1.0e4 ); }
-       | E_KT_TOKEN               { $$ = vars_push( FLOAT_VAR, 1.0e7 ); }
-       | E_MGT_TOKEN              { $$ = vars_push( FLOAT_VAR, 1.0e10 ); }
-       | E_NU_TOKEN               { $$ = vars_push( FLOAT_VAR, 1.0e-9 ); }
-       | E_UU_TOKEN               { $$ = vars_push( FLOAT_VAR, 1.0e-6 ); }
-       | E_MU_TOKEN               { $$ = vars_push( FLOAT_VAR, 1.0e-3 ); }
-       | E_KU_TOKEN               { $$ = vars_push( FLOAT_VAR, 1.0e3 ); }
-       | E_MEG_TOKEN              { $$ = vars_push( FLOAT_VAR, 1.0e6 ); }
+       | E_NT_TOKEN               { if ( ! condition_gobble )
+                                        $$ = vars_push( FLOAT_VAR, 1.0e-5 ); }
+       | E_UT_TOKEN               { if ( ! condition_gobble )
+                                        $$ = vars_push( FLOAT_VAR, 1.0e-2 ); }
+       | E_MT_TOKEN               { if ( ! condition_gobble )
+                                        $$ = vars_push( FLOAT_VAR, 10.0 ); }
+       | E_T_TOKEN                { if ( ! condition_gobble )
+                                        $$ = vars_push( FLOAT_VAR, 1.0e4 ); }
+       | E_KT_TOKEN               { if ( ! condition_gobble )
+                                        $$ = vars_push( FLOAT_VAR, 1.0e7 ); }
+       | E_MGT_TOKEN              { if ( ! condition_gobble )
+                                        $$ = vars_push( FLOAT_VAR, 1.0e10 ); }
+       | E_NU_TOKEN               { if ( ! condition_gobble )
+                                        $$ = vars_push( FLOAT_VAR, 1.0e-9 ); }
+       | E_UU_TOKEN               { if ( ! condition_gobble )
+                                        $$ = vars_push( FLOAT_VAR, 1.0e-6 ); }
+       | E_MU_TOKEN               { if ( ! condition_gobble )
+                                        $$ = vars_push( FLOAT_VAR, 1.0e-3 ); }
+       | E_KU_TOKEN               { if ( ! condition_gobble )
+                                        $$ = vars_push( FLOAT_VAR, 1.0e3 ); }
+       | E_MEG_TOKEN              { if ( ! condition_gobble )
+                                        $$ = vars_push( FLOAT_VAR, 1.0e6 ); }
 ;
 
 
 /* list of indices for access of an array element */
 
-list1:   /* empty */              { $$ = vars_push( UNDEF_VAR ); }
-	   | expr
-       | list1 ',' expr           { $$ = $3; }
+list1:   /* empty */              { if ( ! condition_gobble )
+                                        $$ = vars_push( UNDEF_VAR ); }
+       | expr
+       | list1 ',' expr           { if ( ! condition_gobble )
+                                        $$ = $3; }
 ;
 
 /* list of function arguments */
@@ -192,19 +302,44 @@ list2:   /* empty */
 ;
 
 exprs:   expr                     { }
-       | E_STR_TOKEN              { vars_push( STR_VAR, $1 ); }
+       | E_STR_TOKEN              { if ( ! condition_gobble )
+                                        vars_push( STR_VAR, $1 ); }
          strs
 ;
 
 strs:    /* empty */
        | strs E_STR_TOKEN         { Var *v;
-		                            v = vars_push( STR_VAR, $2 );
-	                                vars_add( v->prev, v ); }
+		                            if ( ! condition_gobble )
+									{
+                                        v = vars_push( STR_VAR, $2 );
+										vars_add( v->prev, v );
+									}
+	                              }
 ;
 
 
 %%
 
+
+/*---------------------------------------------------------*/
+/*---------------------------------------------------------*/
+
+static bool check_result( Var *v )
+{
+    if ( ! ( v->type & ( INT_VAR | FLOAT_VAR ) ) )
+		return FALSE;
+
+	/* Test the result - everything nonzero returns OK */
+
+	if ( v->type == INT_VAR )
+		return v->val.lval ? OK : FAIL;
+	else
+		return v->val.dval != 0.0 ? OK : FAIL;
+}
+
+
+/*---------------------------------------------------------*/
+/*---------------------------------------------------------*/
 
 static void conditionerror( const char *s )
 {

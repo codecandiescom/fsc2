@@ -187,7 +187,7 @@ static const char *handle_input( const char *content, const char *label )
 				  "fsc2: Comment editor" );
 
 	while ( fl_do_forms( ) != GUI.input_form->comm_done )
-		;
+		/* empty */ ;
 
 	if ( fl_form_is_visible( GUI.input_form->input_form ) )
 		fl_hide_form( GUI.input_form->input_form );

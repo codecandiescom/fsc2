@@ -874,12 +874,12 @@ static bool er032m_guess_sw( double field_diff )
 	   difference can't be adjusted anymore by setting a SWA) */
 
 	for ( i = 1; magnet.cf + 0.5 * sw / i > ER032M_MAX_FIELD; i++ )
-		;
+		/* empty */ ;
 	sw /= i;
 	swa_step /= i;
 
 	for ( i = 1; magnet.cf - 0.5 * sw / i < ER032M_MAX_FIELD; i++ )
-		;
+		/* empty */ ;
 	sw /= i;
 	swa_step /= i;
 

@@ -1,0 +1,716 @@
+#!/usr/bin/perl -w
+# -*- cperl -*-
+#
+# $Id$
+#
+# Copyright (C) 1999-2002 Jens Thoms Toerring
+#
+# This file is part of fsc2.
+#
+# Fsc2 is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2, or (at your option)
+# any later version.
+#
+# Fsc2 is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with fsc2; see the file COPYING.  If not, write to
+# the Free Software Foundation, 59 Temple Place - Suite 330,
+# Boston, MA 02111-1307, USA.
+
+
+use strict;
+use Tk;
+
+my @version = split /\./, $Tk::VERSION;
+die "Installed Perl-Tk version is $Tk::VERSION but Tk800.022 is required.\n"
+	if $version[ 0 ] + 0.001 * $version[ 1 ] < 800.022;
+
+my $lockin		       = 'SR830';
+my $start_current      = "";
+my $end_current	       = "";
+my $opt_end_cur        = $end_current;
+my $num_points         = "";
+my $tc			       = "300 ms";
+my $kd                 = "   2 Hz";
+my $how                = "Start experiment";
+my $sweep_rate         = "";
+my $tau_per_point;
+my $old_kd = $kd;
+my @tcs                = ( '100 s', ' 30 s', ' 10 s', '  3 s', '  1 s',
+						   '300 ms', '100 ms', ' 30 ms', ' 10 ms',
+						   '  3 ms', '  1 ms' );
+my @kd_times           = ( 1/512, 1/256, 1/128, 1/64, 1/32, 1/16, 1/8, 1/4,
+						   1/2, 1, 2, 4, 8, 16 );
+my @kds                = ( '512 Hz', ' 256 Hz', ' 128 Hz', '  64 Hz',
+						   '  32 Hz', '  16 Hz', '   8 Hz', '   4 Hz',
+						   '   2 Hz', '   1 Hz', ' 1/2 Hz', ' 1/4 Hz',
+						   ' 1/8 Hz', '1/16 Hz' );
+
+my %fp = ( '-side' => 'top',
+		   '-fill' => 'x',
+		   '-padx' => '2m',
+		   '-pady' => '2m' );
+
+my %wp = ( '-side' => 'left',
+		   '-fill' => 'x',
+		   '-expand' => 1 );
+
+# Create all the graphic stuff
+
+my $mw = MainWindow->new( );
+$mw->title( "cw_epr" );
+
+my $mf = $mw->Frame( '-relief' => 'ridge', '-borderwidth' => '1m' );
+
+my $f1 = $mf->Frame( );
+my $f1_l1 = $f1->Label( '-text'           => 'Start current:',
+						'-width'          => '20',
+						'anchor'          => 'w' );
+my $f1_v = $f1->Entry( '-textvariable'    => \$start_current,
+					   '-width'           => '8',
+					   '-validate'        => 'key',
+					   '-validatecommand' => \&current_check,
+					   '-relief'          => 'sunken' );
+my $f1_l2 = $f1->Label( '-text'           => 'A',
+						'-width'          => 5 );
+
+$f1->pack( %fp );
+$f1_l1->pack( %wp );
+$f1_v->pack( %wp );
+$f1_l2->pack( %wp );
+
+
+my $f2 = $mf->Frame( );
+my $f2_l1 = $f2->Label( '-text'          => 'End current:',
+						'-width'         => '20',
+						'anchor'         => 'w' );
+my $f2_v = $f2->Entry( '-textvariable'   => \$end_current,
+					   '-width'          => '8',
+					   '-validate'       => 'key',
+					   '-validatecommand'=> \&end_current_check,
+					   '-relief'         => 'sunken' );
+my $f2_l2 = $f2->Label( '-text'          => 'A',
+						'-width'         => 5 );
+
+$f2->pack( %fp );
+$f2_l1->pack( %wp );
+$f2_v->pack( %wp );
+$f2_l2->pack( %wp );
+
+
+my $f4 = $mf->Frame( );
+my $f4_l1 = $f4->Label( '-text'           => 'Number of points:',
+						'-width'          => '20',
+						'anchor'          => 'w' );
+my $f4_v = $f4->Entry( '-textvariable'    => \$num_points,
+					   '-width'           => '8',
+					   '-validate'        => 'key',
+					   '-validatecommand' => \&num_points_check,
+					   '-relief'          => 'sunken' );
+my $f4_l2 = $f4->Label( '-text'           => '',
+						'-width'          => 5 );
+
+$f4->pack( %fp );
+$f4_l1->pack( %wp );
+$f4_v->pack( %wp );
+$f4_l2->pack( %wp );
+
+
+my $f5 = $mf->Frame( );
+my $f5_l = $f5->Label( '-text'          => 'Lock-in amplifier:',
+						'-width'        => '20',
+						'anchor'        => 'w' );
+my $f5_m = $f5->Optionmenu( '-options'  => [ ( 'SR810', 'SR830' ) ],
+							'-width'        => 9,
+							'-command'      => \&lockin_check,
+							'-textvariable' => \$lockin );
+$f5->pack( %fp );
+$f5_l->pack( %wp );
+$f5_m->pack( %wp );
+
+
+my $f6 = $mf->Frame( );
+my $f6_l = $f6->Label( '-text'          => 'Time constant (tc):',
+					   '-width'         => '20',
+					   'anchor'         => 'w' );
+my $f6_m = $f6->Optionmenu( '-options'      => \@tcs,
+							'-width'        => 9,
+							'-command'      => \&tc_check,
+							'-textvariable' => \$tc );
+$f6->pack( %fp );
+$f6_l->pack( %wp );
+$f6_m->pack( %wp );
+
+
+my $f7 = $mf->Frame( );
+my $f7_l = $f7->Label( '-text'          => 'Acquisition rate (kd):',
+					   '-width'         => '20',
+					   'anchor'         => 'w' );
+my $f7_m = $f7->Optionmenu( '-options'      => \@kds,
+							'-command'      => \&tpp_set,
+							'-width'        => 9,
+							'-textvariable' => \$kd );
+$f7->pack( %fp );
+$f7_l->pack( %wp );
+$f7_m->pack( %wp );
+
+
+$mf->pack( %fp, '-pady' => '1m' );
+
+
+
+my $mf2 = $mw->Frame( '-relief' => 'ridge', '-borderwidth' => '1m' );
+
+
+my $f3 = $mf2->Frame( );
+my $f3_l1 = $f3->Label( '-text'           => 'Sweep rate:',
+						'-width'          => '20',
+						'anchor'          => 'w' );
+my $f3_v = $f3->Entry( '-textvariable'    => \$sweep_rate,
+					   '-width'           => '8',
+					   '-state'           => 'disabled',
+					   '-relief'          => 'sunken' );
+my $f3_l2 = $f3->Label( '-text'           => 'A/min',
+						'-width'          => 5 );
+
+$f3->pack( %fp );
+$f3_l1->pack( %wp );
+$f3_v->pack( %wp );
+$f3_l2->pack( %wp );
+
+
+my $f8 = $mf2->Frame( );
+my $f8_l1 = $f8->Label( '-text'           => 'tc per point:',
+						'-width'          => '20',
+						'anchor'          => 'w' );
+my $f8_v = $f8->Entry( '-textvariable'    => \$tau_per_point,
+					   '-width'           => '8',
+					   '-state'           => 'disabled',
+					   '-relief'          => 'sunken' );
+my $f8_l2 = $f8->Label( '-text'           => '',
+						'-width'          => 5 );
+
+$f8->pack( %fp );
+$f8_l1->pack( %wp );
+$f8_v->pack( %wp );
+$f8_l2->pack( %wp );
+
+my $f10 = $mf2->Button( '-text'    => 'Evaluate',
+						'-state'   => 'disabled',
+						'-command' => \&evaluate );
+$f10->pack( '-side' => 'top',
+			'-pady' => '3m' );
+$f10->bind( 'all', '<Control-e>' => \&evaluate );
+
+
+$mf2->pack( %fp, '-pady' => '1m' );
+
+
+$mw->Optionmenu( '-options' => [ ( 'Start experiment', 'Test program',
+								   'Load into fsc2' ) ],
+				 '-textvariable' => \$how,
+			   )->pack( '-padx' => '3m',
+						'-pady' => '3m' );
+
+my $f11 = $mw->Frame( );
+my $f11_a = $mw->Button( '-text'    => 'Apply',
+						 '-state'   => 'disabled',
+						 '-command' => \&write_out );
+$f11_a->bind( 'all', '<Control-a>' => \&write_out );
+
+my $f11_q = $mw->Button( '-text' => 'Quit',
+						 '-command' => sub { &store_defs; $mw->destroy } );
+$f11_q->bind( 'all', '<Control-q>' => sub { &store_defs; $mw->destroy } );
+
+$f11->pack( '-side' => 'top',
+			'-fill' => 'x',
+			'-padx' => '4m' );
+$f11_a->pack( %wp, 'padx' => '5m', '-pady' => '3m' );
+$f11_q->pack( %wp, 'padx' => '5m', '-pady' => '3m' );
+
+
+# Setup defaults
+
+&get_defs;
+tpp_set( );
+evaluate( ) if check_eval( $start_current, $end_current, $num_points);
+
+MainLoop;
+
+
+#############################################
+
+sub get_defs {
+
+	local *F;
+	my $ne;
+	my $i;
+
+	if ( $ARGV[ 0 ] ) {
+		open( F, "<$ARGV[ 0 ]" ) or return;
+	} else {
+		open( F, "<$ENV{ HOME }/.fsc2/cw_epr" ) or return;
+	}
+
+	goto done_reading unless defined( $ne = <F> ) and $ne =~ /^#/;
+
+	goto done_reading unless defined( $ne = <F> )
+		and ( is_float1( $ne ) or $ne =~ /^$/ );
+	chomp $ne;
+	$start_current = $ne;
+
+	goto done_reading unless defined( $ne = <F> )
+			  and ( is_float2( $ne ) or $ne =~ /^$/ );
+	chomp $ne;
+	$end_current = $ne;
+
+	goto done_reading unless defined( $ne = <F> )
+			  and ( is_float2( $ne ) or $ne =~ /^$/ );
+	chomp $ne;
+	$opt_end_cur = $ne;
+
+	goto done_reading unless defined( $ne = <F> )
+			  and ( is_int( $ne ) or $ne =~ /^$/ );
+	chomp $ne;
+	$num_points = $ne;
+
+	goto done_reading unless defined( $ne = <F> ) or $ne =~ /^SR8[13]0$/;
+	chomp $ne;
+	$lockin = $ne;
+
+	goto done_reading unless defined( $ne = <F> );
+	chomp $ne;
+	for ( $i = 0; $i <= $#tcs; $i++ ) {
+		last if $ne eq $tcs[ $i ];
+	}
+	goto done_reading if $i > $#tcs;
+	$tc = $ne;
+
+	goto done_reading unless defined( $ne = <F> );
+	chomp $ne;
+	for ( $i = 0; $i <= $#kds; $i++ ) {
+		last if $ne eq $kds[ $i ];
+	}
+	goto done_reading if $i > $#kds;
+	chomp $ne;
+	$kd = $ne;
+	$old_kd = $kd;
+
+	goto done_reading unless defined( $ne = <F> ) and
+		$ne =~ /^(Start experiment)|(Test program)|(Load into fsc2)$/;;
+	chomp $ne;
+	$how = $ne;
+
+  done_reading:
+	close F;
+}
+
+
+#############################################
+
+sub store_defs {
+
+	 local *F;
+
+	 mkdir "$ENV{ HOME }/.fsc2", 0777 unless -e "$ENV{ HOME }/.fsc2";
+	 open( F, ">$ENV{ HOME }/.fsc2/cw_epr" ) or return;
+
+	 $start_current = 0 if $start_current eq ".";
+	 $end_current = 0 if $end_current eq ".";
+	 $opt_end_cur = 0 if $opt_end_cur eq ".";
+
+	 print F "# Do not edit - created automatically!\n";
+	 print F "$start_current\n$end_current\n$opt_end_cur\n$num_points\n" .
+		     "$lockin\n$tc\n$kd\n$how";
+
+	 close F;
+}
+
+
+#############################################
+#
+
+sub current_check {
+	my $val = shift;
+
+	if ( $val =~ /^[+-]?\.?$/ or
+		 ( is_float1( $val ) and $val >= -7.0 and $val <= 7.0 ) ) {
+		check_eval( $val, $end_current, $num_points );
+		$f11_a->configure( '-state' => 'disabled' )
+			if $val ne $start_current;
+		return 1;
+	}
+	$f11_a->configure( '-state' => 'disabled' );
+	return 0;
+}
+
+
+#############################################
+#
+
+sub end_current_check {
+	my $val = shift;
+
+	if ( $val =~ /^[+-]?\.?$/ or
+		 ( is_float2( $val ) and $val >= -7.0 and $val <= 7.0 ) ) {
+		$opt_end_cur = $val if $opt_end_cur ne $val;
+		check_eval( $start_current, $val, $num_points );
+		$f11_a->configure( '-state' => 'disabled' )
+			if $val ne $end_current;
+		return 1;
+	}
+	$f11_a->configure( '-state' => 'disabled' );
+	return 0;
+}
+
+
+#############################################
+#
+
+sub num_points_check {
+
+	my $val = shift;
+
+	# Check that it's a number not larger than the maximum number of points
+	# we can sample with the currently selected lock-in
+
+	if ( $val =~ /^$/ or
+		 ( is_int( $val ) and
+		   $val <= ( $lockin eq "SR830" ? 16381 : 8191 ) ) ) {
+		check_eval( $start_current, $end_current, $val );
+		$f11_a->configure( '-state' => 'disabled' )
+			if $val ne $num_points;
+		return 1;
+	}
+	$f11_a->configure( '-state' => 'disabled' );
+	return 0;
+}
+
+
+#############################################
+#
+
+sub lockin_check {
+	my $l = shift;
+
+	# For the SR810 we can only sample up to 8191 points, so correct the
+	# number of points if necessary
+
+	if ( $l eq "SR810" and $num_points ne "" and $num_points > 8191 ) {
+		num_points_check( 8191 );
+		$num_points = 8191;
+	}
+}
+
+
+#############################################
+#
+
+sub tc_check {
+	my $sval = shift;
+	my $i;
+
+	# Calculate the time constant
+
+	$sval =~ /([0-9]+) (m?)s/;
+	my $val = $1 * ( $2 eq "m" ? 0.001 : 1.0 );
+
+	# Try to find an acquisition time that's not shorter than the time constant
+
+	if ( $val <= $kd_times[ 0 ] ) {
+		$kd = $kds[ 0 ];
+	} else {
+		for ( $i = 1; $i < $#kd_times; $i++ ) {
+			next if $val > $kd_times[ $i ];
+			$kd = $kds[ $i ];
+			last;
+		}
+
+		$kd = $kds[ $#kd_times ] if $i == $#kd_times;
+	}
+	tpp_set( );
+}
+
+
+#############################################
+#
+
+sub tpp_set {
+	$tc =~ /([0-9]+) (m?)s/;
+	my $tc_val = $1 * ( $2 eq "m" ? 0.001 : 1.0 );
+
+	my $kdt;
+	for ( my $i = 0; $i <= $#kds; $i++ ) {
+		if ( $kd eq $kds[ $i ] ) {
+			$kdt = $kd_times[ $i ];
+			last;
+		}
+	}
+
+	$tau_per_point = sprintf( "%.0f", $kdt / $tc_val * 1e5 ) *1e-5;
+
+	if ( $old_kd ne $kd ) {
+		$f11_a->configure( '-state' => 'disabled' );
+		$old_kd = $kd;
+	}
+}
+
+#############################################
+
+sub is_float1 {
+	my $val = shift;
+	return $val =~ /^[+-]?(([0-9]+(\.?([0-9]{1,4})?)?)|(\.[0-9]{1,4}))$/
+}
+
+
+#############################################
+
+sub is_float2 {
+	my $val = shift;
+	return $val =~ /^[+-]?(([0-9]+(\.?([0-9]+)?)?)|(\.[0-9]+))$/
+}
+
+
+#############################################
+
+sub is_int {
+	my $val = shift;
+	return $val =~ /^0*[1-9]*[0-9]{1,4}$/;
+}
+
+
+#############################################
+
+sub check_eval {
+
+	my ( $s, $e, $n ) = @_;
+	my $is_ok = ( is_float1( $s ) and is_float2( $e )
+				  and abs( $e - $s ) >= 0.0000999999
+				  and is_int( $n ) and $n > 1 ) ? 1 : 0;
+	$f10->configure( '-state' => $is_ok ? 'normal' : 'disabled' );
+	return $is_ok;
+}
+
+
+#############################################
+
+sub evaluate {
+
+	return if $f10->cget( '-state' ) eq 'disabled';
+
+	my $e = ( $opt_end_cur =~ /^$/ ) ? $end_current : $opt_end_cur;
+	my $dc = abs( $e - $start_current );
+	my $cs = $dc / ( $num_points - 1 );
+
+	my $kdt;
+	for ( my $i = 0; $i <= $#kds; $i++ ) {
+		if ( $kd eq $kds[ $i ] ) {
+			$kdt = $kd_times[ $i ];
+			last;
+		}
+	}
+
+	my $sw = $cs / $kdt * 60.0;
+	$sw = sprintf( "%.0f", $sw * 1000 ) / 1000;
+	$sw = 1.0 if $sw > 1.0;
+	$sw = 0.01 if $sw < 0.01;
+
+	if ( $e > $start_current ) {
+		$e = $start_current + ( $num_points - 1 ) * $sw * $kdt / 60.0;
+	} else {
+		$e = $start_current - ( $num_points - 1 ) * $sw * $kdt / 60.0;
+	}
+
+	$sweep_rate = $sw;
+	my $old_opt_end_cur = $opt_end_cur;
+	$end_current = $e;
+	$opt_end_cur = $old_opt_end_cur;
+	$f11_a->configure( '-state' => 'normal' );
+}
+
+
+#############################################
+
+sub write_out {
+
+	return if $f11_a->cget( '-state' ) eq 'disabled';
+
+	open( F, "|fsc2_" . lc $how )
+		or die "Can't find utility fsc2_" . lc $how . ".\n";
+
+	my $TC = $tc;
+	$TC =~ s/^\s*//g;
+
+	my $kdw;
+	for ( my $i = 0; $i <= $#kds; $i++ ) {
+		if ( $kd eq $kds[ $i ] ) {
+			$kdw = 1 / $kd_times[ $i ];
+			last;
+		}
+	}
+
+	my $dir = $end_current > $start_current ? "UP" : "DOWN";
+
+	print F
+"/***************************************************************************/
+/*      EDL program for running cw-EPR experiments with the 360 GHz        */
+/*                         spectrometer.                                   */
+/***************************************************************************/
+
+
+DEVICES:
+
+ips20_4;\n";
+	if ( $lockin eq "SR830" ) {
+		print F "sr830;\n";
+	} else {
+		print F "sr810;\n";
+	}
+print F "
+
+VARIABLES:
+
+start_current = $start_current A;
+sweep_rate    = $sweep_rate A / 60 s;
+Num_Points    = $num_points;
+
+tc = $TC;
+kd = $kdw Hz;
+
+data[ Num_Points ];
+avg[ Num_Points ];
+
+I, J = 1;
+File1, File2;
+
+
+PREPARATIONS:
+
+init_1d( 3, Num_Points, start_current, sweep_rate / kd,
+		 \"Current [A]\", \"Signal [mV]\" );
+magnet_setup( start_current, sweep_rate );
+lockin_time_constant( tc );
+lockin_auto_setup( 1 / kd, 1 );
+
+
+EXPERIMENT:
+
+File1 = get_file( \"File for averaged data:\", \"*.dat\" );
+File2 = clone_file( File1, \"dat\", \"act\" );
+
+FOREVER {
+
+	reset_field( );
+
+	print( \"Starting #. run\", J );
+
+	magnet_sweep( \"$dir\" );
+	lockin_auto_acquisition( \"ON\" );
+
+	FOR I = 1 : Num_Points {
+
+		data[ I ] = lockin_get_data( );
+		IF is_file( File2 ) {
+			fsave( File2, \" #\", data[ I ] );
+		}
+		display( I, data[ I ], 1, I, ( avg[ I ] + data[ I ] ) / J, 2 );
+	}
+
+	avg += data;
+
+	magnet_sweep( \"STOP\" );
+	lockin_auto_acquisition( \"OFF\" );
+
+	fsave( File2, \"\\n\" );
+
+	clear_curve( 1, 3 );
+	display( 1, data, 3 );
+}
+
+
+ON_STOP:
+
+IF magnet_sweep( ) {
+	magnet_sweep( \"STOP\" );
+}
+lockin_auto_acquisition( \"OFF\" );
+
+IF J == 1 {                 // if experiment was stopped during the first run
+	Num_Points = I - 1;
+	avg = data;
+} ELSE {
+	UNLESS I > Num_Points { // if experiment was stopped before end of run
+		J -= 1;
+	}
+	avg /= J;
+}
+
+IF is_file( File1 ) {
+	fsave( File1,
+		   \"% # #\\n\"
+		   \"% Magnet:\\n\"
+		   \"%    Start current:        # A\\n\"
+		   \"%	 End current:          # A\\n\"
+		   \"%	 Sweep rate:           # A/min\\n\"
+		   \"% Lock-In:\\n\"
+		   \"%	 Sensitivity:          # mV\\n\"
+		   \"%	 Time constant:        # s\\n\"
+		   \"%    Acquisition rate:     # Hz\\n\"
+		   \"%	 Phase:			       # degree\\n\"
+		   \"%    Modulation frequency: # Khz\\n\"
+		   \"%    Modulation amplitude: # V\\n\"
+		   \"% Number of runs:          #\\n\",
+		   date(), time(),
+		   start_current, start_current ";
+print F ( $dir eq "UP" ) ? "+" : "-";
+print F " ( Num_Points - 1 ) * sweep_rate / kd,
+		   sweep_rate * 60.0, lockin_sensitivity( ) * 1.0e3, tc, kd,
+		   lockin_phase( ), lockin_ref_freq( ) * 1.0e3, lockin_ref_level( ),
+		   J );
+
+	save_comment( File1, \"% \", \"Sample:  \\nTemperature:  \\n\" );
+
+	save( File1, slice( avg, 1, Num_Points ) );
+}
+";
+
+	close F;
+
+	# Notify the user if sending the program to fsc2 failed for some reasons
+
+	my $text;
+	if ( $? != 0 ) {
+		if ( $? >> 8 == -1 ) {
+			$text = "Internal error.";
+		} elsif ( $? >> 8 == 1 ) {
+			$text = "Someone else is running fsc2.";
+		} elsif ( $? >> 8 == 2 ) {
+			$text = "fsc2 is already testing or\nrunning an experiment.";
+		} elsif ( $? >> 8 == 3 ) {
+			$text = "Internal error of fsc2.";
+		} elsif ( $? >> 8 == 4 ) {
+			$text = "Could not start fsc2.";
+		} else {
+			$text = "Something strange\nis going on here.";
+		}
+
+		&show_message( $text ) if $? >> 8 != 0;
+	}
+}
+
+
+#############################################
+
+sub show_message {
+	my $text = shift;
+
+	$mw->messageBox( '-icon' => 'error',
+					 '-type' => 'Ok',
+					 '-title' => 'Error',
+					 '-message' => $text );
+}

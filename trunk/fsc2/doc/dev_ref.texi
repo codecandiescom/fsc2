@@ -86,16 +86,16 @@ with @code{bh15} range is @w{-50 G} to @w{23000 G}.
 
 @paragraphindent 0
 @strong{Supported functions}:
-@table @samp
-@item magnet_name( )
-@item magnet_setup( )
-@item magnet_fast_init( )
-@item set_field( )
-@item get_field( )
-@item sweep_up( )
-@item sweep_down( )
-@item reset_field( )
-@end table
+@multitable @columnfractions .5 .5
+@item @code{magnet_name()}            @tab @ref{magnet_name}
+@item @code{magnet_setup()}           @tab @ref{magnet_setup}
+@item @code{magnet_fast_init()}       @tab @ref{magnet_fast_init}
+@item @code{set_field()}              @tab @ref{set_field}
+@item @code{get_field()}              @tab @ref{get_field}
+@item @code{sweep_up()}               @tab @ref{sweep_up}
+@item @code{sweep_down()}             @tab @ref{sweep_down}
+@item @code{reset_field()}            @tab @ref{reset_field}
+@end multitable
 
 @node aeg_x_band, bh15, aeg_s_band, Device Reference
 @iftex
@@ -122,16 +122,16 @@ to @w{19900 G}, with @code{bh15} range is @w{-50 G} to @w{23000 G}.
 
 @paragraphindent 0
 @strong{Supported functions}:
-@table @samp
-@item magnet_name( )
-@item magnet_setup( )
-@item magnet_fast_init( )
-@item set_field( )
-@item get_field( )
-@item sweep_up( )
-@item sweep_down( )
-@item reset_field( )
-@end table
+@multitable @columnfractions .5 .5
+@item @code{magnet_name()}            @tab @ref{magnet_name}
+@item @code{magnet_setup()}           @tab @ref{magnet_setup}
+@item @code{magnet_fast_init()}       @tab @ref{magnet_fast_init}
+@item @code{set_field()}              @tab @ref{set_field}
+@item @code{get_field()}              @tab @ref{get_field}
+@item @code{sweep_up()}               @tab @ref{sweep_up}
+@item @code{sweep_down()}             @tab @ref{sweep_down}
+@item @code{reset_field()}            @tab @ref{reset_field}
+@end multitable
 
 
 @node bh15, dg2020_b, aeg_x_band, Device Reference
@@ -156,12 +156,12 @@ measured is from @w{-50 G} to @w{23000 G}.
 
 @paragraphindent 0
 @strong{Supported functions}:
-@table @samp
-@item gaussmeter_name( )
-@item find_field( )
-@item gaussmeter_resolution( )
-@item gaussmeter_wait( )
-@end table
+@multitable @columnfractions .5 .5
+@item @code{gaussmeter_name()}        @tab @ref{gaussmeter_name}
+@item @code{find_field()}             @tab @ref{find_field}
+@item @code{gaussmeter_resolution()}  @tab @ref{gaussmeter_resolution}
+@item @code{gaussmeter_wait()}
+@end multitable
 
 @node dg2020_b, dg2020_f, bh15, Device Reference
 @iftex
@@ -191,19 +191,19 @@ can range from @w{-5 V} to @w{5 V}.
 
 @paragraphindent 0
 @strong{Supported functions}:
-@table @samp
-@item pulser_name( )
-@item pulser_state( )
-@item pulser_channel_state( )
-@item pulser_update( )
-@item pulser_cw_mode( )
-@item pulser_shift( )
-@item pulser_increment( )
-@item pulser_next_phase( )
-@item pulser_phase_reset( )
-@item pulser_pulse_reset( )
-@item pulser_lock_keyboard( )
-@end table
+@multitable @columnfractions .5 .5
+@item @code{pulser_name()}           @tab @ref{pulser_name}
+@item @code{pulser_state()}          @tab @ref{pulser_state}
+@item @code{pulser_channel_state()}  @tab @ref{pulser_channel_state}
+@item @code{pulser_update()}         @tab @ref{pulser_update}
+@item @code{pulser_cw_mode()}        @tab @ref{pulser_cw_mode}
+@item @code{pulser_shift()}          @tab @ref{pulser_shift}
+@item @code{pulser_increment()}      @tab @ref{pulser_increment}
+@item @code{pulser_next_phase()}     @tab @ref{pulser_next_phase}
+@item @code{pulser_phase_reset()}    @tab @ref{pulser_phase_reset}
+@item @code{pulser_pulse_reset()}    @tab @ref{pulser_pulse_reset}
+@item @code{pulser_lock_keyboard()}  @tab @ref{pulser_lock_keyboard}
+@end multitable
 
 
 @node dg2020_f, egg4402, dg2020_b, Device Reference
@@ -234,19 +234,19 @@ range from @w{-5 V} to @w{5 V}.
 
 @paragraphindent 0
 @strong{Supported functions}:
-@table @samp
-@item pulser_name( )
-@item pulser_state( )
-@item pulser_channel_state( )
-@item pulser_update( )
-@item pulser_cw_mode( )
-@item pulser_shift( )
-@item pulser_increment( )
-@item pulser_next_phase( )
-@item pulser_phase_reset( )
-@item pulser_pulse_reset( )
-@item pulser_lock_keyboard( )
-@end table
+@multitable @columnfractions .5 .5
+@item @code{pulser_name()}           @tab @ref{pulser_name}
+@item @code{pulser_state()}          @tab @ref{pulser_state}
+@item @code{pulser_channel_state()}  @tab @ref{pulser_channel_state}
+@item @code{pulser_update()}         @tab @ref{pulser_update}
+@item @code{pulser_cw_mode()}        @tab @ref{pulser_cw_mode}
+@item @code{pulser_shift()}          @tab @ref{pulser_shift}
+@item @code{pulser_increment()}      @tab @ref{pulser_increment}
+@item @code{pulser_next_phase()}     @tab @ref{pulser_next_phase}
+@item @code{pulser_phase_reset()}    @tab @ref{pulser_phase_reset}
+@item @code{pulser_pulse_reset()}    @tab @ref{pulser_pulse_reset}
+@item @code{pulser_lock_keyboard()}  @tab @ref{pulser_lock_keyboard}
+@end multitable
 
 
 @node egg4402, er023m, dg2020_f, Device Reference
@@ -269,11 +269,11 @@ already measured curves is currently supported.
 
 @paragraphindent 0
 @strong{Supported functions}:
-@table @samp
-@item boxcar_name( )
-@item boxcar_curve_length( )
-@item boxcar_get_curve( )
-@end table
+@multitable @columnfractions .5 .5
+@item @code{boxcar_name()}          @tab @ref{boxcar_name}
+@item @code{boxcar_curve_length()}  @tab @ref{boxcar_curve_length}
+@item @code{boxcar_get_curve()}     @tab @ref{boxcar_get_curve}
+@end multitable
 
 
 @node er023m, er032m, egg4402, Device Reference
@@ -297,25 +297,25 @@ analog-to-digital converter.
 
 @paragraphindent 0
 @strong{Supported functions}:
-@table @samp
-@item lockin_name( )
-@item lockin_get_data( )
-@item lockin_sensitivity( )
-@item lockin_time_constant( )
-@item lockin_phase( )
-@item lockin_offset( )
-@item lockin_conversion_time( )
-@item lockin_ref_freq( )
-@item lockin_ref_level( )
-@item lockin_harmonic( )
-@item lockin_resonator( )
-@item lockin_is_overload( )
-@item lockin_rg( )
-@item lockin_tc( )
-@item lockin_ma( )
-@item lockin_ct( )
-@item lockin_mf( )
-@end table
+@multitable @columnfractions .5 .5
+@item @code{lockin_name()}             @tab @ref{lockin_name}
+@item @code{lockin_get_data()}         @tab @ref{lockin_get_data}
+@item @code{lockin_sensitivity()}      @tab @ref{lockin_sensitivity}
+@item @code{lockin_time_constant()}    @tab @ref{lockin_time_constant}
+@item @code{lockin_phase()}            @tab @ref{lockin_phase}
+@item @code{lockin_offset()}           @tab @c{@ref{lockin_offset}}
+@item @code{lockin_conversion_time()}  @tab @ref{lockin_conversion_time}
+@item @code{lockin_ref_freq()}         @tab @ref{lockin_ref_freq}
+@item @code{lockin_ref_level()}        @tab @ref{lockin_ref_level}
+@item @code{lockin_harmonic()}         @tab @ref{lockin_harmonic}
+@item @code{lockin_resonator()}        @tab @c{@ref{lockin_resonator}}
+@item @code{lockin_is_overload()}      @tab @c{@ref{lockin_is_overload}}
+@item @code{lockin_rg()}               @tab @c{@ref{lockin_rg}}
+@item @code{lockin_tc()}               @tab @c{@ref{lockin_tc}}
+@item @code{lockin_ma()}               @tab @c{@ref{lockin_ma}}
+@item @code{lockin_ct()}               @tab @c{@ref{lockin_ct}}
+@item @code{lockin_mf()}               @tab @c{@ref{lockin_mf}}
+@end multitable
 
 
 @node er032m, er035m, er023m, Device Reference
@@ -339,15 +339,15 @@ the field in older Bruker EPR spectrometers. Maximum field range is from
 
 @paragraphindent 0
 @strong{Supported functions}:
-@table @samp
-@item magnet_name( )
-@item magnet_setup( )
-@item set_field( )
-@item get_field( )
-@item sweep_up( )
-@item sweep_down( )
-@item reset_field( )
-@end table
+@multitable @columnfractions .5 .5
+@item @code{magnet_name()}   @tab @ref{magnet_name}
+@item @code{magnet_setup()}  @tab @ref{magnet_setup}
+@item @code{set_field()}     @tab @ref{set_field}
+@item @code{get_field()}     @tab @ref{get_field}
+@item @code{sweep_up()}      @tab @ref{sweep_up}
+@item @code{sweep_down()}    @tab @ref{sweep_down}
+@item @code{reset_field()}   @tab @ref{reset_field}
+@end multitable
 
 
 @node er035m, er035m_s, er032m, Device Reference
@@ -373,13 +373,13 @@ range is @w{1460 G} to @w{19900 G}.
 
 @paragraphindent 0
 @strong{Supported functions}:
-@table @samp
-@item gaussmeter_name( )
-@item find_field( )
-@item gaussmeter_resolution( )
-@item gaussmeter_probe_orientation( )
-@item gaussmeter_wait( )
-@end table
+@multitable @columnfractions .5 .5
+@item @code{gaussmeter_name()}               @tab @ref{gaussmeter_name}
+@item @code{find_field()}                    @tab @ref{find_field}
+@item @code{gaussmeter_resolution()}         @tab @ref{gaussmeter_resolution}
+@item @code{gaussmeter_probe_orientation()}  @tab @ref{gaussmeter_probe_orientation}
+@item @code{gaussmeter_wait()}
+@end multitable
 
 
 @node er035m_s, er035m_sa, er035m, Device Reference
@@ -405,13 +405,13 @@ range is @w{1460 G} to @w{19900 G}.
 
 @paragraphindent 0
 @strong{Supported functions}:
-@table @samp
-@item gaussmeter_name( )
-@item find_field( )
-@item gaussmeter_resolution( )
-@item gaussmeter_probe_orientation( )
-@item gaussmeter_wait( )
-@end table
+@multitable @columnfractions .5 .5
+@item @code{gaussmeter_name()}               @tab @ref{gaussmeter_name}
+@item @code{find_field()}                    @tab @ref{find_field}
+@item @code{gaussmeter_resolution()}         @tab @ref{gaussmeter_resolution}
+@item @code{gaussmeter_probe_orientation()}  @tab @ref{gaussmeter_probe_orientation}
+@item @code{gaussmeter_wait()}
+@end multitable
 
 
 @node er035m_sa, er035m_sas, er035m_s, Device Reference
@@ -436,12 +436,12 @@ the range is @w{1460 G} to @w{19900 G}.
 
 @paragraphindent 0
 @strong{Supported functions}:
-@table @samp
-@item gaussmeter_name( )
-@item measure_field( )
-@item gaussmeter_resolution( )
-@item gaussmeter_probe_orientation( )
-@end table
+@multitable @columnfractions .5 .5
+@item @code{gaussmeter_name()}               @tab @ref{gaussmeter_name}
+@item @code{measure_field()}                 @tab @ref{measure_field}
+@item @code{gaussmeter_resolution()}         @tab @ref{gaussmeter_resolution}
+@item @code{gaussmeter_probe_orientation()}  @tab @ref{gaussmeter_probe_orientation}
+@end multitable
 
 
 @node er035m_sas, hfs9000, er035m_sa, Device Reference
@@ -464,12 +464,12 @@ the range is @w{1460 G} to @w{19900 G}.
 
 @paragraphindent 0
 @strong{Supported functions}:
-@table @samp
-@item gaussmeter_name( )
-@item measure_field( )
-@item gaussmeter_resolution( )
-@item gaussmeter_probe_orientation( )
-@end table
+@multitable @columnfractions .5 .5
+@item @code{gaussmeter_name()}               @tab @ref{gaussmeter_name}
+@item @code{measure_field()}                 @tab @ref{measure_field}
+@item @code{gaussmeter_resolution()}         @tab @ref{gaussmeter_resolution}
+@item @code{gaussmeter_probe_orientation()}  @tab @ref{gaussmeter_probe_orientation}
+@end multitable
 
 @node hfs9000, hp8647a, er035m_sas, Device Reference
 @iftex
@@ -499,17 +499,17 @@ can range from @w{-4.7 V} to @w{4.7 V}.
 
 @paragraphindent 0
 @strong{Supported functions}:
-@table @samp
-@item pulser_name( )
-@item pulser_state( )
-@item pulser_channel_state( )
-@item pulser_update( )
-@item pulser_shift( )
-@item pulser_increment( )
-@item pulser_pulse_reset( )
-@item pulser_lock_keyboard( )
-@item pulser_stop_on_update( )
-@end table
+@multitable @columnfractions .5 .5
+@item @code{pulser_name()}            @tab @ref{pulser_name}
+@item @code{pulser_state()}           @tab @ref{pulser_state}
+@item @code{pulser_channel_state()}   @tab @ref{pulser_channel_state}
+@item @code{pulser_update()}          @tab @ref{pulser_update}
+@item @code{pulser_shift()}           @tab @ref{pulser_shift}
+@item @code{pulser_increment()}       @tab @ref{pulser_increment}
+@item @code{pulser_pulse_reset()}     @tab @ref{pulser_pulse_reset}
+@item @code{pulser_lock_keyboard()}   @tab @ref{pulser_lock_keyboard}
+@item @code{pulser_stop_on_update()}  @tab @ref{pulser_stop_on_update}
+@end multitable
 
 
 @node hp8647a, ips20_4, hfs9000, Device Reference
@@ -534,24 +534,24 @@ allowed -- change the configuration file to allow higher output levels.
 
 @paragraphindent 0
 @strong{Supported functions}:
-@table @samp
-@item synthesizer_name( )
-@item synthesizer_state( )
-@item synthesizer_frequency( )
-@item synthesizer_step_frequency( )
-@item synthesizer_attenuation( )
-@item synthesizer_minimum_attenuation( )
-@item synthesizer_sweep_up( )
-@item synthesizer_sweep_down( )
-@item synthesizer_reset_frequency( )
-@item synthesizer_use_table( )
-@item synthesizer_attenuation( )
-@item synthesizer_att_ref_freq( )
-@item synthesizer_modulation( )
-@item synthesizer_mod_ampl( )
-@item synthesizer_mod_type( )
-@item synthesizer_mod_source( )
-@end table
+@multitable @columnfractions .5 .5
+@item @code{synthesizer_name()}                 @tab @ref{synthesizer_name}
+@item @code{synthesizer_state()}                @tab @ref{synthesizer_state}
+@item @code{synthesizer_frequency()}            @tab @ref{synthesizer_frequency}
+@item @code{synthesizer_step_frequency()}       @tab @ref{synthesizer_step_frequency}
+@item @code{synthesizer_attenuation()}          @tab @ref{synthesizer_attenuation}
+@item @code{synthesizer_minimum_attenuation()}  @tab @ref{synthesizer_minimum_attenuation}
+@item @code{synthesizer_sweep_up()}             @tab @ref{synthesizer_sweep_up}
+@item @code{synthesizer_sweep_down()}           @tab @ref{synthesizer_sweep_down}
+@item @code{synthesizer_reset_frequency()}      @tab @ref{synthesizer_reset_frequency}
+@item @code{synthesizer_use_table()}            @tab @ref{synthesizer_use_table}
+@item @code{synthesizer_attenuation()}          @tab @ref{synthesizer_attenuation}
+@item @code{synthesizer_att_ref_freq()}         @tab @ref{synthesizer_att_ref_freq}
+@item @code{synthesizer_modulation()}           @tab @ref{synthesizer_modulation}
+@item @code{synthesizer_mod_ampl()}             @tab @ref{synthesizer_mod_ampl}
+@item @code{synthesizer_mod_type()}             @tab @ref{synthesizer_mod_type}
+@item @code{synthesizer_mod_source()}           @tab @ref{synthesizer_mod_source}
+@end multitable
 
 
 @node ips20_4, keithley228a, hp8647a, Device Reference
@@ -580,15 +580,15 @@ temperature controller transfering data between GPIB and Oxford ISOBUS.
 
 @paragraphindent 0
 @strong{Supported functions}:
-@table @samp
-@item magnet_name()
-@item magnet_setup()
-@item get_field()
-@item set_field()
-@item magnet_sweep_rate()
-@item magnet_sweep()
-@item magnet_reset()
-@end table
+@multitable @columnfractions .5 .5
+@item @code{magnet_name()}        @tab @ref{magnet_name}
+@item @code{magnet_setup()}       @tab @ref{magnet_setup}
+@item @code{get_field()}          @tab @ref{get_field}
+@item @code{set_field()}          @tab @ref{set_field}
+@item @code{magnet_sweep_rate()}  @tab @ref{magnet_sweep_rate}
+@item @code{magnet_sweep()}       @tab @ref{magnet_sweep}
+@item @code{reset_field()}        @tab @ref{reset_field}
+@end multitable
 
 
 @node keithley228a, kontron4060, ips20_4, Device Reference
@@ -621,17 +621,17 @@ the currents through the sweep coil, not in field units!
 
 @paragraphindent 0
 @strong{Supported functions}:
-@table @samp
-@item magnet_name( )
-@item magnet_setup( )
-@item magnet_use_correction( )
-@item magnet_use_dac_port( )
-@item set_field( )
-@item get_field( )
-@item sweep_up( )
-@item sweep_down( )
-@item reset_field( )
-@end table
+@multitable @columnfractions .5 .5
+@item @code{magnet_name()}            @tab @ref{magnet_name}
+@item @code{magnet_setup()}           @tab @ref{magnet_setup}
+@item @code{magnet_use_correction()}  @tab @ref{magnet_use_correction}
+@item @code{magnet_use_dac_port()}    @tab @ref{magnet_use_dac_port}
+@item @code{set_field()}              @tab @ref{set_field}
+@item @code{get_field()}              @tab @ref{get_field}
+@item @code{sweep_up()}               @tab @ref{sweep_up}
+@item @code{sweep_down()}             @tab @ref{sweep_down}
+@item @code{reset_field()}            @tab @ref{reset_field}
+@end multitable
 
 @node kontron4060, lakeshore330, keithley228a, Device Reference
 @iftex
@@ -652,12 +652,12 @@ the currents through the sweep coil, not in field units!
 
 @paragraphindent 0
 @strong{Supported functions}:
-@table @samp
-@item voltmeter_name( )
-@item voltmeter_get_data( )
-@item voltmeter_ac_measurement( )
-@item voltmeter_dc_measurement( )
-@end table
+@multitable @columnfractions .5 .5
+@item @code{voltmeter_name()}            @tab @ref{voltmeter_name}
+@item @code{voltmeter_get_data()}        @tab @ref{voltmeter_get_data}
+@item @code{voltmeter_ac_measurement()}  @tab @ref{voltmeter_ac_measurement}
+@item @code{voltmeter_dc_measurement()}  @tab @ref{voltmeter_dc_measurement}
+@end multitable
 
 
 @node lakeshore330, lecroy9400, kontron4060, Device Reference
@@ -681,13 +681,13 @@ the temperature.
 
 @paragraphindent 0
 @strong{Supported functions}:
-@table @samp
-@item temp_contr_name( )
-@item temp_contr_temperature( )
-@item temp_contr_sample_channel( )
-@item temp_contr_sensor_unit( )
-@item temp_contr_lock_keyboard( )
-@end table
+@multitable @columnfractions .5 .5
+@item @code{temp_contr_name()}            @tab @ref{temp_contr_name}
+@item @code{temp_contr_temperature()}     @tab @ref{temp_contr_temperature}
+@item @code{temp_contr_sample_channel()}  @tab @ref{temp_contr_sample_channel}
+@item @code{temp_contr_sensor_unit()}     @tab @ref{temp_contr_sensor_unit}
+@item @code{temp_contr_lock_keyboard()}   @tab @ref{temp_contr_lock_keyboard}
+@end multitable
 
 
 @node lecroy9400, pt2025, lakeshore330, Device Reference
@@ -710,23 +710,23 @@ channels, 2 function channels (needed for averaging).
 
 @paragraphindent 0
 @strong{Supported functions}:
-@table @samp
-@item digitizer_name( )
-@c @item digitizer_define_window( )
-@item digitizer_timebase( )
-@item digitizer_time_per_point( )
-@item digitizer_sensitivity( )
-@item digitizer_averaging( )
-@item digitizer_num_averages( )
-@item digitizer_record_length( )
-@c @item digitizer_trigger_position( )
-@item digitizer_meas_channel_ok( )
-@c @item digitizer_trigger_channel( )
-@item digitizer_start_acquisition( )
-@item digitizer_get_curve( )
-@c @item digitizer_get_curve_fast( )
-@c @item digitizer_run( )
-@end table
+@multitable @columnfractions .5 .5
+@item @code{digitizer_name()}                 @tab @ref{digitizer_name}
+@c @code{@item digitizer_define_window()}      @tab @ref{@item digitizer_define_window}
+@item @code{digitizer_timebase()}             @tab @ref{digitizer_timebase}
+@item @code{digitizer_time_per_point()}       @tab @ref{digitizer_time_per_point}
+@item @code{digitizer_sensitivity()}          @tab @ref{digitizer_sensitivity}
+@item @code{digitizer_averaging()}            @tab @ref{digitizer_averaging}
+@item @code{digitizer_num_averages()}         @tab @ref{digitizer_num_averages}
+@item @code{digitizer_record_length()}        @tab @ref{digitizer_record_length}
+@c @code{@item digitizer_trigger_position()}  @tab @ref{@item digitizer_trigger_position}
+@item @code{digitizer_meas_channel_ok()}      @tab for internal use only
+@c @code{@item digitizer_trigger_channel()}   @tab @ref{@item digitizer_trigger_channel}
+@item @code{digitizer_start_acquisition()}    @tab @ref{digitizer_start_acquisition}
+@item @code{digitizer_get_curve()}            @tab @ref{digitizer_get_curve}
+@c @code{@item digitizer_get_curve_fast()}    @tab @ref{@item digitizer_get_curve_fast}
+@c @code{@item digitizer_run()}               @tab @ref{@item digitizer_run}
+@end multitable
 
 
 @node pt2025, sr510, lecroy9400,  Device Reference
@@ -750,12 +750,12 @@ T. Measured fields are returned in Gauss, not Tesla!
 
 @paragraphindent 0
 @strong{Supported functions}:
-@table @samp
-@item gaussmeter_name( )
-@item measure_field( )
-@item gaussmeter_resolution( )
-@item gaussmeter_probe_orientation( )
-@end table
+@multitable @columnfractions .5 .5
+@item @code{gaussmeter_name()}               @tab @ref{gaussmeter_name}
+@item @code{measure_field()}                 @tab @ref{measure_field}
+@item @code{gaussmeter_resolution()}         @tab @ref{gaussmeter_resolution}
+@item @code{gaussmeter_probe_orientation()}  @tab @ref{gaussmeter_probe_orientation}
+@end multitable
 
 @node sr510, sr530, pt2025, Device Reference
 @iftex
@@ -777,17 +777,17 @@ channel, no internal modulation, 4 ADC and 2 DAC ports.
 
 @paragraphindent 0
 @strong{Supported functions}:
-@table @samp
-@item lockin_name( )
-@item lockin_get_data( )
-@item lockin_get_adc_data( )
-@item lockin_sensitivity( )
-@item lockin_time_constant( )
-@item lockin_phase( )
-@item lockin_ref_freq( )
-@item lockin_dac_voltage( )
-@item lockin_lock_keyboard( )
-@end table
+@multitable @columnfractions .5 .5
+@item @code{lockin_name()}           @tab @ref{lockin_name}
+@item @code{lockin_get_data()}       @tab @ref{lockin_get_data}
+@item @code{lockin_get_adc_data()}   @tab @ref{lockin_get_adc_data}
+@item @code{lockin_sensitivity()}    @tab @ref{lockin_sensitivity}
+@item @code{lockin_time_constant()}  @tab @ref{lockin_time_constant}
+@item @code{lockin_phase()}          @tab @ref{lockin_phase}
+@item @code{lockin_ref_freq()}       @tab @ref{lockin_ref_freq}
+@item @code{lockin_dac_voltage()}    @tab @ref{lockin_dac_voltage}
+@item @code{lockin_lock_keyboard()}  @tab @ref{lockin_lock_keyboard}
+@end multitable
 
 
 @node sr530, sr810, sr510, Device Reference
@@ -810,17 +810,17 @@ channels, no internal modulation, 4 ADC and 2 DAC ports.
 
 @paragraphindent 0
 @strong{Supported functions}:
-@table @samp
-@item lockin_name( )
-@item lockin_get_data( )
-@item lockin_get_adc_data( )
-@item lockin_sensitivity( )
-@item lockin_time_constant( )
-@item lockin_phase( )
-@item lockin_ref_freq( )
-@item lockin_dac_voltage( )
-@item lockin_lock_keyboard( )
-@end table
+@multitable @columnfractions .5 .5
+@item @code{lockin_name()}           @tab @ref{lockin_name}
+@item @code{lockin_get_data()}       @tab @ref{lockin_get_data}
+@item @code{lockin_get_adc_data()}   @tab @ref{lockin_get_adc_data}
+@item @code{lockin_sensitivity()}    @tab @ref{lockin_sensitivity}
+@item @code{lockin_time_constant()}  @tab @ref{lockin_time_constant}
+@item @code{lockin_phase()}          @tab @ref{lockin_phase}
+@item @code{lockin_ref_freq()}       @tab @ref{lockin_ref_freq}
+@item @code{lockin_dac_voltage()}    @tab @ref{lockin_dac_voltage}
+@item @code{lockin_lock_keyboard()}  @tab @ref{lockin_lock_keyboard}
+@end multitable
 
 
 @node sr810, sr830, sr530, Device Reference
@@ -843,22 +843,22 @@ channels, auto acquisition, internal modulation, 4 ADC and 4 DAC ports.
 
 @paragraphindent 0
 @strong{Supported functions}:
-@table @samp
-@item lockin_name( )
-@item lockin_auto_setup()
-@item lockin_auto_acquisition()
-@item lockin_get_data( )
-@item lockin_get_adc_data( )
-@item lockin_dac_voltage( )
-@item lockin_sensitivity( )
-@item lockin_time_constant( )
-@item lockin_phase( )
-@item lockin_ref_freq( )
-@item lockin_harmonic( )
-@item lockin_ref_mode( )
-@item lockin_ref_level( )
-@item lockin_lock_keyboard( )
-@end table
+@multitable @columnfractions .5 .5
+@item @code{lockin_name()}              @tab @ref{lockin_name}
+@item @code{lockin_auto_setup()}        @tab @ref{lockin_auto_setup}
+@item @code{lockin_auto_acquisition()}  @tab @ref{lockin_auto_acquisition}
+@item @code{lockin_get_data()}          @tab @ref{lockin_get_data}
+@item @code{lockin_get_adc_data()}      @tab @ref{lockin_get_adc_data}
+@item @code{lockin_dac_voltage()}       @tab @ref{lockin_dac_voltage}
+@item @code{lockin_sensitivity()}       @tab @ref{lockin_sensitivity}
+@item @code{lockin_time_constant()}     @tab @ref{lockin_time_constant}
+@item @code{lockin_phase()}             @tab @ref{lockin_phase}
+@item @code{lockin_ref_freq()}          @tab @ref{lockin_ref_freq}
+@item @code{lockin_harmonic()}          @tab @ref{lockin_harmonic}
+@item @code{lockin_ref_mode()}          @tab @ref{lockin_ref_mode}
+@item @code{lockin_ref_level()}         @tab @ref{lockin_ref_level}
+@item @code{lockin_lock_keyboard()}     @tab @ref{lockin_lock_keyboard}
+@end multitable
 
 
 @node sr830, tds520, sr810, Device Reference
@@ -881,22 +881,22 @@ channels, auto acquisition, internal modulation, 4 ADC and 4 DAC ports.
 
 @paragraphindent 0
 @strong{Supported functions}:
-@table @samp
-@item lockin_name( )
-@item lockin_auto_setup()
-@item lockin_auto_acquisition()
-@item lockin_get_data( )
-@item lockin_get_adc_data( )
-@item lockin_dac_voltage( )
-@item lockin_sensitivity( )
-@item lockin_time_constant( )
-@item lockin_phase( )
-@item lockin_ref_freq( )
-@item lockin_harmonic( )
-@item lockin_ref_mode( )
-@item lockin_ref_level( )
-@item lockin_lock_keyboard( )
-@end table
+@multitable @columnfractions .5 .5
+@item @code{lockin_name()}              @tab @ref{lockin_name}
+@item @code{lockin_auto_setup()}        @tab @ref{lockin_auto_setup}
+@item @code{lockin_auto_acquisition()}  @tab @ref{lockin_auto_acquisition}
+@item @code{lockin_get_data()}          @tab @ref{lockin_get_data}
+@item @code{lockin_get_adc_data()}      @tab @ref{lockin_get_adc_data}
+@item @code{lockin_dac_voltage()}       @tab @ref{lockin_dac_voltage}
+@item @code{lockin_sensitivity()}       @tab @ref{lockin_sensitivity}
+@item @code{lockin_time_constant()}     @tab @ref{lockin_time_constant}
+@item @code{lockin_phase()}             @tab @ref{lockin_phase}
+@item @code{lockin_ref_freq()}          @tab @ref{lockin_ref_freq}
+@item @code{lockin_harmonic()}          @tab @ref{lockin_harmonic}
+@item @code{lockin_ref_mode()}          @tab @ref{lockin_ref_mode}
+@item @code{lockin_ref_level()}         @tab @ref{lockin_ref_level}
+@item @code{lockin_lock_keyboard()}     @tab @ref{lockin_lock_keyboard}
+@end multitable
 
 
 @node tds520, tds520a, sr830, Device Reference
@@ -912,35 +912,38 @@ channels, auto acquisition, internal modulation, 4 ADC and 4 DAC ports.
 
 @paragraphindent 0
 @strong{Description}: Tektronix Digitizing Oscilloscope TDS520, 2
-measurement channels, 2 auxiliary channels (to be used as trigger inputs
-only), 3 math channels and 4 reference channels.
+measurement channels, 2 auxiliary channels, 3 math channels and 4
+reference channels.
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE).
 
 @paragraphindent 0
 @strong{Supported functions}:
-@table @samp
-@item digitizer_name( )
-@item digitizer_define_window( )
-@item digitizer_timebase( )
-@item digitizer_time_per_point( )
-@item digitizer_sensitivity( )
-@item digitizer_num_averages( )
-@item digitizer_record_length( )
-@item digitizer_trigger_position( )
-@item digitizer_meas_channel_ok( )
-@item digitizer_trigger_channel( )
-@item digitizer_start_acquisition( )
-@item digitizer_get_area( )
-@item digitizer_get_area_fast( )
-@item digitizer_get_curve( )
-@item digitizer_get_curve_fast( )
-@item digitizer_get_amplitude( )
-@item digitizer_get_amplitude_fast( )
-@item digitizer_run( )
-@item digitizer_lock_keyboard( )
-@end table
+@multitable @columnfractions .5 .5
+@item @code{digitizer_name()}                @tab @ref{digitizer_name}
+@item @code{digitizer_define_window()}       @tab @ref{digitizer_define_window}
+@item @code{digitizer_change_window()}       @tab @ref{digitizer_change_window}
+@item @code{digitizer_window_position()}     @tab @ref{digitizer_window_position}
+@item @code{digitizer_window_width()}        @tab @ref{digitizer_window_width}
+@item @code{digitizer_timebase()}            @tab @ref{digitizer_timebase}
+@item @code{digitizer_time_per_point()}      @tab @ref{digitizer_time_per_point}
+@item @code{digitizer_sensitivity()}         @tab @ref{digitizer_sensitivity}
+@item @code{digitizer_num_averages()}        @tab @ref{digitizer_num_averages}
+@item @code{digitizer_record_length()}       @tab @ref{digitizer_record_length}
+@item @code{digitizer_trigger_position()}    @tab @ref{digitizer_trigger_position}
+@item @code{digitizer_meas_channel_ok()}     @tab for internal use only
+@item @code{digitizer_trigger_channel()}     @tab @ref{digitizer_trigger_channel}
+@item @code{digitizer_start_acquisition()}   @tab @ref{digitizer_start_acquisition}
+@item @code{digitizer_get_area()}            @tab @ref{digitizer_get_area}
+@item @code{digitizer_get_area_fast()}       @tab @ref{digitizer_get_area_fast}
+@item @code{digitizer_get_curve()}           @tab @ref{digitizer_get_curve}
+@item @code{digitizer_get_curve_fast()}      @tab @ref{digitizer_get_curve_fast}
+@item @code{digitizer_get_amplitude()}       @tab @ref{digitizer_get_amplitude}
+@item @code{digitizer_get_amplitude_fast()}  @tab @ref{digitizer_get_amplitude_fast}
+@item @code{digitizer_run()}                 @tab @ref{digitizer_run}
+@item @code{digitizer_lock_keyboard()}       @tab @ref{digitizer_lock_keyboard}
+@end multitable
 
 
 @node tds520a, tds520c, tds520, Device Reference
@@ -956,35 +959,38 @@ only), 3 math channels and 4 reference channels.
 
 @paragraphindent 0
 @strong{Description}: Tektronix Digitizing Oscilloscope TDS520A, 2
-measurement channels, 2 auxiliary channels (to be used as trigger inputs
-only), 3 math channels and 4 reference channels.
+measurement channels, 2 auxiliary channels, 3 math channels and 4
+reference channels.
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE).
 
 @paragraphindent 0
 @strong{Supported functions}:
-@table @samp
-@item digitizer_name( )
-@item digitizer_define_window( )
-@item digitizer_timebase( )
-@item digitizer_time_per_point( )
-@item digitizer_sensitivity( )
-@item digitizer_num_averages( )
-@item digitizer_record_length( )
-@item digitizer_trigger_position( )
-@item digitizer_meas_channel_ok( )
-@item digitizer_trigger_channel( )
-@item digitizer_start_acquisition( )
-@item digitizer_get_area( )
-@item digitizer_get_area_fast( )
-@item digitizer_get_curve( )
-@item digitizer_get_curve_fast( )
-@item digitizer_get_amplitude( )
-@item digitizer_get_amplitude_fast( )
-@item digitizer_run( )
-@item digitizer_lock_keyboard( )
-@end table
+@multitable @columnfractions .5 .5
+@item @code{digitizer_name()}                @tab @ref{digitizer_name}
+@item @code{digitizer_define_window()}       @tab @ref{digitizer_define_window}
+@item @code{digitizer_change_window()}       @tab @ref{digitizer_change_window}
+@item @code{digitizer_window_position()}     @tab @ref{digitizer_window_position}
+@item @code{digitizer_window_width()}        @tab @ref{digitizer_window_width}
+@item @code{digitizer_timebase()}            @tab @ref{digitizer_timebase}
+@item @code{digitizer_time_per_point()}      @tab @ref{digitizer_time_per_point}
+@item @code{digitizer_sensitivity()}         @tab @ref{digitizer_sensitivity}
+@item @code{digitizer_num_averages()}        @tab @ref{digitizer_num_averages}
+@item @code{digitizer_record_length()}       @tab @ref{digitizer_record_length}
+@item @code{digitizer_trigger_position()}    @tab @ref{digitizer_trigger_position}
+@item @code{digitizer_meas_channel_ok()}     @tab for internal use only
+@item @code{digitizer_trigger_channel()}     @tab @ref{digitizer_trigger_channel}
+@item @code{digitizer_start_acquisition()}   @tab @ref{digitizer_start_acquisition}
+@item @code{digitizer_get_area()}            @tab @ref{digitizer_get_area}
+@item @code{digitizer_get_area_fast()}       @tab @ref{digitizer_get_area_fast}
+@item @code{digitizer_get_curve()}           @tab @ref{digitizer_get_curve}
+@item @code{digitizer_get_curve_fast()}      @tab @ref{digitizer_get_curve_fast}
+@item @code{digitizer_get_amplitude()}       @tab @ref{digitizer_get_amplitude}
+@item @code{digitizer_get_amplitude_fast()}  @tab @ref{digitizer_get_amplitude_fast}
+@item @code{digitizer_run()}                 @tab @ref{digitizer_run}
+@item @code{digitizer_lock_keyboard()}       @tab @ref{digitizer_lock_keyboard}
+@end multitable
 
 
 @node tds520c, tds540, tds520a, Device Reference
@@ -1000,35 +1006,38 @@ only), 3 math channels and 4 reference channels.
 
 @paragraphindent 0
 @strong{Description}: Tektronix Digitizing Oscilloscope TDS520C, 2
-measurement channels, 2 auxiliary channels (to be used as trigger inputs
-only), 3 math channels and 4 reference channels.
+measurement channels, 2 auxiliary channels, 3 math channels and 4
+reference channels.
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE).
 
 @paragraphindent 0
 @strong{Supported functions}:
-@table @samp
-@item digitizer_name( )
-@item digitizer_define_window( )
-@item digitizer_timebase( )
-@item digitizer_time_per_point( )
-@item digitizer_sensitivity( )
-@item digitizer_num_averages( )
-@item digitizer_record_length( )
-@item digitizer_trigger_position( )
-@item digitizer_meas_channel_ok( )
-@item digitizer_trigger_channel( )
-@item digitizer_start_acquisition( )
-@item digitizer_get_area( )
-@item digitizer_get_area_fast( )
-@item digitizer_get_curve( )
-@item digitizer_get_curve_fast( )
-@item digitizer_get_amplitude( )
-@item digitizer_get_amplitude_fast( )
-@item digitizer_run( )
-@item digitizer_lock_keyboard( )
-@end table
+@multitable @columnfractions .5 .5
+@item @code{digitizer_name()}                @tab @ref{digitizer_name}
+@item @code{digitizer_define_window()}       @tab @ref{digitizer_define_window}
+@item @code{digitizer_change_window()}       @tab @ref{digitizer_change_window}
+@item @code{digitizer_window_position()}     @tab @ref{digitizer_window_position}
+@item @code{digitizer_window_width()}        @tab @ref{digitizer_window_width}
+@item @code{digitizer_timebase()}            @tab @ref{digitizer_timebase}
+@item @code{digitizer_time_per_point()}      @tab @ref{digitizer_time_per_point}
+@item @code{digitizer_sensitivity()}         @tab @ref{digitizer_sensitivity}
+@item @code{digitizer_num_averages()}        @tab @ref{digitizer_num_averages}
+@item @code{digitizer_record_length()}       @tab @ref{digitizer_record_length}
+@item @code{digitizer_trigger_position()}    @tab @ref{digitizer_trigger_position}
+@item @code{digitizer_meas_channel_ok()}     @tab for internal use only
+@item @code{digitizer_trigger_channel()}     @tab @ref{digitizer_trigger_channel}
+@item @code{digitizer_start_acquisition()}   @tab @ref{digitizer_start_acquisition}
+@item @code{digitizer_get_area()}            @tab @ref{digitizer_get_area}
+@item @code{digitizer_get_area_fast()}       @tab @ref{digitizer_get_area_fast}
+@item @code{digitizer_get_curve()}           @tab @ref{digitizer_get_curve}
+@item @code{digitizer_get_curve_fast()}      @tab @ref{digitizer_get_curve_fast}
+@item @code{digitizer_get_amplitude()}       @tab @ref{digitizer_get_amplitude}
+@item @code{digitizer_get_amplitude_fast()}  @tab @ref{digitizer_get_amplitude_fast}
+@item @code{digitizer_run()}                 @tab @ref{digitizer_run}
+@item @code{digitizer_lock_keyboard()}       @tab @ref{digitizer_lock_keyboard}
+@end multitable
 
 
 @node tds540, tds744a, tds520c, Device Reference
@@ -1052,27 +1061,30 @@ only), 3 math channels and 4 reference channels.
 
 @paragraphindent 0
 @strong{Supported functions}:
-@table @samp
-@item digitizer_name( )
-@item digitizer_define_window( )
-@item digitizer_timebase( )
-@item digitizer_time_per_point( )
-@item digitizer_sensitivity( )
-@item digitizer_num_averages( )
-@item digitizer_record_length( )
-@item digitizer_trigger_position( )
-@item digitizer_meas_channel_ok( )
-@item digitizer_trigger_channel( )
-@item digitizer_start_acquisition( )
-@item digitizer_get_area( )
-@item digitizer_get_area_fast( )
-@item digitizer_get_curve( )
-@item digitizer_get_curve_fast( )
-@item digitizer_get_amplitude( )
-@item digitizer_get_amplitude_fast( )
-@item digitizer_run( )
-@item digitizer_lock_keyboard( )
-@end table
+@multitable @columnfractions .5 .5
+@item @code{digitizer_name()}                @tab @ref{digitizer_name}
+@item @code{digitizer_define_window()}       @tab @ref{digitizer_define_window}
+@item @code{digitizer_change_window()}       @tab @ref{digitizer_change_window}
+@item @code{digitizer_window_position()}     @tab @ref{digitizer_window_position}
+@item @code{digitizer_window_width()}        @tab @ref{digitizer_window_width}
+@item @code{digitizer_timebase()}            @tab @ref{digitizer_timebase}
+@item @code{digitizer_time_per_point()}      @tab @ref{digitizer_time_per_point}
+@item @code{digitizer_sensitivity()}         @tab @ref{digitizer_sensitivity}
+@item @code{digitizer_num_averages()}        @tab @ref{digitizer_num_averages}
+@item @code{digitizer_record_length()}       @tab @ref{digitizer_record_length}
+@item @code{digitizer_trigger_position()}    @tab @ref{digitizer_trigger_position}
+@item @code{digitizer_meas_channel_ok()}     @tab for internal use only
+@item @code{digitizer_trigger_channel()}     @tab @ref{digitizer_trigger_channel}
+@item @code{digitizer_start_acquisition()}   @tab @ref{digitizer_start_acquisition}
+@item @code{digitizer_get_area()}            @tab @ref{digitizer_get_area}
+@item @code{digitizer_get_area_fast()}       @tab @ref{digitizer_get_area_fast}
+@item @code{digitizer_get_curve()}           @tab @ref{digitizer_get_curve}
+@item @code{digitizer_get_curve_fast()}      @tab @ref{digitizer_get_curve_fast}
+@item @code{digitizer_get_amplitude()}       @tab @ref{digitizer_get_amplitude}
+@item @code{digitizer_get_amplitude_fast()}  @tab @ref{digitizer_get_amplitude_fast}
+@item @code{digitizer_run()}                 @tab @ref{digitizer_run}
+@item @code{digitizer_lock_keyboard()}       @tab @ref{digitizer_lock_keyboard}
+@end multitable
 
 
 @node tds744a, tds754a, tds540, Device Reference
@@ -1096,27 +1108,30 @@ only), 3 math channels and 4 reference channels.
 
 @paragraphindent 0
 @strong{Supported functions}:
-@table @samp
-@item digitizer_name( )
-@item digitizer_define_window( )
-@item digitizer_timebase( )
-@item digitizer_time_per_point( )
-@item digitizer_sensitivity( )
-@item digitizer_num_averages( )
-@item digitizer_record_length( )
-@item digitizer_trigger_position( )
-@item digitizer_meas_channel_ok( )
-@item digitizer_trigger_channel( )
-@item digitizer_start_acquisition( )
-@item digitizer_get_area( )
-@item digitizer_get_area_fast( )
-@item digitizer_get_curve( )
-@item digitizer_get_curve_fast( )
-@item digitizer_get_amplitude( )
-@item digitizer_get_amplitude_fast( )
-@item digitizer_run( )
-@item digitizer_lock_keyboard( )
-@end table
+@multitable @columnfractions .5 .5
+@item @code{digitizer_name()}                @tab @ref{digitizer_name}
+@item @code{digitizer_define_window()}       @tab @ref{digitizer_define_window}
+@item @code{digitizer_change_window()}       @tab @ref{digitizer_change_window}
+@item @code{digitizer_window_position()}     @tab @ref{digitizer_window_position}
+@item @code{digitizer_window_width()}        @tab @ref{digitizer_window_width}
+@item @code{digitizer_timebase()}            @tab @ref{digitizer_timebase}
+@item @code{digitizer_time_per_point()}      @tab @ref{digitizer_time_per_point}
+@item @code{digitizer_sensitivity()}         @tab @ref{digitizer_sensitivity}
+@item @code{digitizer_num_averages()}        @tab @ref{digitizer_num_averages}
+@item @code{digitizer_record_length()}       @tab @ref{digitizer_record_length}
+@item @code{digitizer_trigger_position()}    @tab @ref{digitizer_trigger_position}
+@item @code{digitizer_meas_channel_ok()}     @tab for internal use only
+@item @code{digitizer_trigger_channel()}     @tab @ref{digitizer_trigger_channel}
+@item @code{digitizer_start_acquisition()}   @tab @ref{digitizer_start_acquisition}
+@item @code{digitizer_get_area()}            @tab @ref{digitizer_get_area}
+@item @code{digitizer_get_area_fast()}       @tab @ref{digitizer_get_area_fast}
+@item @code{digitizer_get_curve()}           @tab @ref{digitizer_get_curve}
+@item @code{digitizer_get_curve_fast()}      @tab @ref{digitizer_get_curve_fast}
+@item @code{digitizer_get_amplitude()}       @tab @ref{digitizer_get_amplitude}
+@item @code{digitizer_get_amplitude_fast()}  @tab @ref{digitizer_get_amplitude_fast}
+@item @code{digitizer_run()}                 @tab @ref{digitizer_run}
+@item @code{digitizer_lock_keyboard()}       @tab @ref{digitizer_lock_keyboard}
+@end multitable
 
 
 @node tds754a, , tds744a, Device Reference
@@ -1140,24 +1155,27 @@ only), 3 math channels and 4 reference channels.
 
 @paragraphindent 0
 @strong{Supported functions}:
-@table @samp
-@item digitizer_name( )
-@item digitizer_define_window( )
-@item digitizer_timebase( )
-@item digitizer_time_per_point( )
-@item digitizer_sensitivity( )
-@item digitizer_num_averages( )
-@item digitizer_record_length( )
-@item digitizer_trigger_position( )
-@item digitizer_meas_channel_ok( )
-@item digitizer_trigger_channel( )
-@item digitizer_start_acquisition( )
-@item digitizer_get_area( )
-@item digitizer_get_area_fast( )
-@item digitizer_get_curve( )
-@item digitizer_get_curve_fast( )
-@item digitizer_get_amplitude( )
-@item digitizer_get_amplitude_fast( )
-@item digitizer_run( )
-@item digitizer_lock_keyboard( )
-@end table
+@multitable @columnfractions .5 .5
+@item @code{digitizer_name()}                @tab @ref{digitizer_name}
+@item @code{digitizer_define_window()}       @tab @ref{digitizer_define_window}
+@item @code{digitizer_change_window()}       @tab @ref{digitizer_change_window}
+@item @code{digitizer_window_position()}     @tab @ref{digitizer_window_position}
+@item @code{digitizer_window_width()}        @tab @ref{digitizer_window_width}
+@item @code{digitizer_timebase()}            @tab @ref{digitizer_timebase}
+@item @code{digitizer_time_per_point()}      @tab @ref{digitizer_time_per_point}
+@item @code{digitizer_sensitivity()}         @tab @ref{digitizer_sensitivity}
+@item @code{digitizer_num_averages()}        @tab @ref{digitizer_num_averages}
+@item @code{digitizer_record_length()}       @tab @ref{digitizer_record_length}
+@item @code{digitizer_trigger_position()}    @tab @ref{digitizer_trigger_position}
+@item @code{digitizer_meas_channel_ok()}     @tab for internal use only
+@item @code{digitizer_trigger_channel()}     @tab @ref{digitizer_trigger_channel}
+@item @code{digitizer_start_acquisition()}   @tab @ref{digitizer_start_acquisition}
+@item @code{digitizer_get_area()}            @tab @ref{digitizer_get_area}
+@item @code{digitizer_get_area_fast()}       @tab @ref{digitizer_get_area_fast}
+@item @code{digitizer_get_curve()}           @tab @ref{digitizer_get_curve}
+@item @code{digitizer_get_curve_fast()}      @tab @ref{digitizer_get_curve_fast}
+@item @code{digitizer_get_amplitude()}       @tab @ref{digitizer_get_amplitude}
+@item @code{digitizer_get_amplitude_fast()}  @tab @ref{digitizer_get_amplitude_fast}
+@item @code{digitizer_run()}                 @tab @ref{digitizer_run}
+@item @code{digitizer_lock_keyboard()}       @tab @ref{digitizer_lock_keyboard}
+@end multitable

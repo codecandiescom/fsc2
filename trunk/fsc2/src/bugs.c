@@ -94,7 +94,7 @@ void bug_report_callback( FL_OBJECT *a, long b )
 			if ( *( clp + 1 ) == 'n' )
 				continue;
 			while ( *clp++ != 'f' )
-				;
+				/* empty */ ;
 		}
 		fprintf( tmp, "%s\n", clp );
 	}
@@ -273,7 +273,7 @@ void death_mail( int signo )
 			if ( *( clp + 1 ) == 'n' )
 				continue;
 			while ( *clp++ != 'f' )
-				;
+				/* empty */ ;
 		}
 		fputs( clp, mail );
 		fputc( '\n', mail );

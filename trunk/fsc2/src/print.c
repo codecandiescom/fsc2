@@ -1110,7 +1110,7 @@ static void eps_draw_curve_1d( FILE *fp, Curve_1d *cv, int i, long dir )
 	/* Find the very first point and move to it */
 
 	for ( k = 0; ! cv->points[ k ].exist && k < max_points; k++ )
-		;
+		/* empty */ ;
 
 	if ( k >= max_points )                  /* is there only just one ? */
 		return;
@@ -1606,7 +1606,7 @@ static void do_print( char *name, const char *command )
 
 			*cptr = '\0';
 			while ( *++cptr == ' ' )
-				;
+				/* empty */ ;
 
 			if ( *cptr != '\0' )
 			{

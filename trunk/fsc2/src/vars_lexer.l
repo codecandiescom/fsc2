@@ -210,8 +210,7 @@ WS          [\n \t]+
                 return FLOAT_TOKEN;
             }
 
-            /* Handling of string constants (to be used as format strings in
-			   the print() function only */
+			/* Handling of string constants */
 {STR}       {
 				varstext[ strlen( varstext ) - 1 ] = '\0';
 				varslval.sptr = varstext + 1;

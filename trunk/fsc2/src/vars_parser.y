@@ -212,7 +212,13 @@ static void varserror ( const char *s )
 	if ( *varstext == '\0' )
 		eprint( FATAL, SET, "Unexpected end of file in VARIABLES section.\n");
 	else
-		eprint( FATAL, SET, "Syntax error near token `%s'.\n", varstext );
+	{
+		if ( isprint( *varstext ) )
+			eprint( FATAL, SET, "Syntax error near token `%s'.\n", varstext );
+		else
+			eprint( FATAL, SET, "Syntax error near token `\"%s\"'.\n",
+					varstext + 1);
+	}
 	THROW( EXCEPTION );
 }
 

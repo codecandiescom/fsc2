@@ -199,7 +199,7 @@ void device_append_to_list( const char *dev_name )
 	if ( EDL.Device_List != NULL )
 	{
 		for ( cd = EDL.Device_List; cd->next != NULL; cd = cd->next )
-			;
+			/* empty */ ;
 
 		cd->next = T_malloc( sizeof( Device ) );
 		cd->next->prev = cd;
@@ -234,7 +234,7 @@ void delete_devices( void )
 	/* Get last element of list - always delete last entry first */
 
 	for( cd = EDL.Device_List; cd->next != NULL; cd = cd->next )
-		;
+		/* empty */ ;
 
 	for ( ; cd != NULL; cd = cdp )
 	{

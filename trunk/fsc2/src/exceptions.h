@@ -30,10 +30,10 @@
 /*                                                                  */
 /* In order to avoid overflows of the fixed size exception frame    */
 /* stack (i.e. after MAX_NESTED_EXCEPTIONS successful TRY's) it is  */
-/* necessary manually remove an exception frame (in contrast to C++ */
-/* where this is handled automatically) by calling TRY_SUCCESS if   */
-/* the code of the TRY block finished successfully. A typical TRY   */
-/* block sequence is thus:                                          */
+/* necessary to manually remove an exception frame (in contrast to  */
+/* C++ where this is handled automatically) by calling TRY_SUCCESS  */
+/* if the code of the TRY block finished successfully. A typical    */
+/* TRY block sequence is thus:                                      */
 /*                                                                  */
 /* TRY {                                                            */
 /*     statement;                                                   */

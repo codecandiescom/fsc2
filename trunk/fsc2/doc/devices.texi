@@ -33,6 +33,8 @@
 * Pulser Functions::
 * Synthesizer Functions::
 * Temperature Controller Functions::
+* Voltmeter Functions::
+* Boxcar Integrator Functions::
 * Multi-Device Functions::
 @end menu
 @end ifinfo
@@ -204,11 +206,13 @@ port to be used, see below.
 
 
 @table @samp
+@anchor{magnet_name}
 @item magnet_name()
 @findex magnet_name()
 Returns a string with the name of the magnet that is being used.
 
 
+@anchor{magnet_setup}
 @item magnet_setup()
 @findex magnet_setup()
 The function can be called to set the start field and the field step
@@ -228,6 +232,7 @@ The function can only be called before the @code{EXPERIMENT} section
 starts.
 
 
+@anchor{magnet_fast_init}
 @item magnet_fast_init()
 @findex magnet_fast_init()
 Calling this functions in the @code{PREPARATIONS} section will shorten
@@ -239,6 +244,7 @@ loaded in between) this shortened calibration is done anyways to check
 that the parameters didn't change significantly since the last run.
 
 
+@anchor{set_field}
 @item set_field()
 @findex set_field()
 This function expects one floating point argument for the field value
@@ -264,6 +270,7 @@ For the Oxford magnet sweep power supply this function will
 automatically stop a running continuous sweep.
 
 
+@anchor{sweep_up}
 @item sweep_up()
 @findex sweep_up()
 The function can be called in the @code{EXPERIMENT} section, but only if
@@ -285,6 +292,7 @@ This function is not available for the Oxford sweep power supply, module
 @code{ips20_4}. Use the function @code{magnet_sweep} instead.
 
 
+@anchor{sweep_down}
 @item sweep_down()
 @findex sweep_down()
 This is the exact analog to the function @code{sweep_up()} but will
@@ -296,6 +304,7 @@ This function is not available for the Oxford magnet sweep power supply
 (@code{ips20_4}). Use the function @code{magnet_sweep} instead.
 
 
+@anchor{reset_field}
 @item reset_field()
 @findex reset_field()
 This function resets the magnetic field to the start field value defined
@@ -308,6 +317,7 @@ running sweep.
 The function can only be used in the @code{EXPERIMENT} section.
 
 
+@anchor{get_field}
 @item get_field()
 @findex get_field()
 For the @strong{AEG} magnets this is only a convenience function that
@@ -322,6 +332,7 @@ returned.
 
 The function can only be used in the @code{EXPERIMENT} section.
 
+@anchor{magnet_use_correction}
 @item magnet_use_correction()
 @findex magnet_use_correction()
 This function is only defined for the Keithley power supply
@@ -330,6 +341,7 @@ corrections are applied to reduce the effects of certain inaccuracies of
 the power supply.
 
 
+@anchor{magnet_use_dac_port}
 @item magnet_use_dac_port()
 @findex magnet_use_dac_port()
 This function is only defined for the Keithley power supply and tells
@@ -341,6 +353,7 @@ while for the SR810 and SR830 all values in the range between @code{1}
 and @code{4} may be used.
 
 
+@anchor{magnet_sweep}
 @item magnet_sweep()
 @findex magnet_sweep()
 This function is only available for the Oxford magnet sweep power supply
@@ -363,8 +376,9 @@ calling this function without an argument you may check if this has
 happend.
 
 
-@item magnet_swep_rate()
-@findex magnet_swep_rate()
+@anchor{magnet_sweep_rate}
+@item magnet_sweep_rate()
+@findex magnet_sweep_rate()
 This function is only available for the Oxford magnet sweep power supply
 (@code{ips20_4}) to set or query the sweep rate for continous sweeps.
 If no argument is passed to the function the currently set sweep rate is
@@ -422,11 +436,13 @@ measurements but not for direct field control.
 
 
 @table @samp
+@anchor{gaussmeter_name}
 @item gaussmeter_name()
 @findex gaussmeter_name()
 Returns a string with the name of the gaussmeter being used.
 
 
+@anchor{find_field}
 @item find_field()
 @findex find_field()
 This function is defined in the device modules @code{er035m} and
@@ -435,6 +451,7 @@ Gauss.  The function can only be called in the @code{EXPERIMENT}
 section.
 
 
+@anchor{gaussmeter_resolution}
 @item gaussmeter_resolution()
 @findex gaussmeter_resolution()
 This function is defined in the device drivers for the Bruker NMR
@@ -455,6 +472,7 @@ the low resolution has been set explicitely during the
 @code{PREPARATIONS} section.
 
 
+@anchor{measure_field}
 @item measure_field()
 @findex measure_field()
 This function is defined in the device drivers @code{er035m_sa},
@@ -462,6 +480,7 @@ This function is defined in the device drivers @code{er035m_sa},
 returns the value in Gauss. The function can only be called in the
 @code{EXPERIMENT} section.
 
+@anchor{gaussmeter_probe_orientation}
 @item gaussmeter_probe_orientation()
 @findex gaussmeter_probe_orientation()
 This function is currently implemented for the Metrolab NMR gausmeter
@@ -507,11 +526,13 @@ check the arguments to achieve the desired results.
 
 
 @table @samp
+@anchor{lockin_name}
 @item lockin_name()
 @findex lockin_name()
 Returns a string with the name of the lock-in amplifier being used.
 
 
+@anchor{lockin_get_data}
 @item lockin_get_data()
 @findex lockin_get_data()
 This is a function only to be used in queries, i.e.@: to fetch measured
@@ -584,6 +605,7 @@ No argument is allowed -- the function returns a floating point value.
 @end table
 
 
+@anchor{lockin_auto_setup}
 @item lockin_auto_setup()
 @findex lockin_auto_setup()
 This function is only available for the Stanford Research lock-in
@@ -637,10 +659,11 @@ already set manually should be used.
 This function can be used in all sections of an @acronym{EDL}
 program. If the auto-acquisition setup is changed during an already
 running auto-acquisition all data stored in the lock-in's internal
-buffer are discarded before th measurement continues using the new
+buffer are discarded before the measurement continues using the new
 settings.
 
 
+@anchor{lockin_auto_acquisition}
 @item lockin_auto_acquisition()
 @findex lockin_auto_acquisition()
 This function is only available for the Stanford Research lock-in
@@ -674,6 +697,7 @@ dictates to stop auto-acquisition, thereby automatically clearing the
 lock-in's internal buffers, whenever possible.
 
 
+@anchor{lockin_get_adc_data}
 @item lockin_get_adc_data()
 @findex lockin_get_adc_data()
 The function returns the voltage at one of the ADC ports at the back
@@ -684,6 +708,7 @@ This function can only be used with the @strong{Stanford Research}
 lock-in amplifiers and can only be called in the @code{EXPERIMENT} section.
 
 
+@anchor{lockin_dac_voltage}
 @item lockin_dac_voltage()
 @findex lockin_dac_voltage()
 The function can be used to set or query the voltage at one of the DAC
@@ -713,6 +738,7 @@ with two argument, i.e@: to set the output voltage of one of the DACs
 to be used in the initialization of the device.
 
 
+@anchor{lockin_sensitivity}
 @item lockin_sensitivity()
 @findex lockin_sensitivity()
 This function can be used to query or set the sensitivity of the lock-in
@@ -744,6 +770,7 @@ In the @code{PREPARATION} section this function can't be called in query
 mode, i.e.@: without an argument.
 
 
+@anchor{lockin_time_constant}
 @item lockin_time_constant()
 @findex lockin_time_constant()
 The function queries or sets the time constant of the lock-in
@@ -766,6 +793,7 @@ In the @code{PREPARATIONS} section this function can't be called as a
 query, i.e.@: without an argument.
 
 
+@anchor{lockin_phase}
 @item lockin_phase()
 @findex lockin_phase()
 The function queries or sets the phase of the lock-in amplifier. If
@@ -777,6 +805,7 @@ In the @code{PREPARATIONS} section this function can't be called without
 an argument, i.e.@: as a query.
 
 
+@anchor{lockin_ref_freq}
 @item lockin_ref_freq()
 @findex lockin_ref_freq()
 The function can be used to query the modulation frequency and, for the
@@ -800,6 +829,7 @@ In the @code{PREPARATIONS} section this function can't be called in
 query mode, i.e.@: without an argument.
 
 
+@anchor{lockin_ref_level}
 @item lockin_ref_level()
 @findex lockin_ref_level()
 This function can be only used with the models @strong{SR810},
@@ -817,6 +847,23 @@ In the @code{PREPARATIONS} section this function can't be called in query
 mode, i.e.@: without an argument.
 
 
+@anchor{lockin_ref_mode}
+@item lockin_ref_mode()
+@findex lockin_ref_mode()
+This function can be only used with the models @strong{SR810},
+@strong{SR830}. It returns the modulation mode, i.e.@: if the internal
+modulation or an external modulation input is used. In the first case
+the function returns an integer value of @code{1} while in the second
+case @code{0} is returned.
+
+
+@anchor{lockin_harmonic}
+@item lockin_harmonic()
+@findex lockin_harmonic()
+SR8[13]0: 1-19999
+ER023M:   1-2
+
+@anchor{lockin_lock_keyboard}
 @item lockin_lock_keyboard()
 @findex lockin_lock_keyboard()
 Usually, during an experiment the keyboard of the lock-in amplifier is
@@ -830,6 +877,7 @@ This function can only be used with the @strong{Stanford Research}
 lock-in amplifiers.
 
 
+@anchor{lockin_conversion_time}
 @item lockin_conversion_time()
 @findex lockin_conversion_time()
 This function exists for the @strong{Bruker ER023M} signal channel only
@@ -854,6 +902,7 @@ In the @code{PREPARATIONS} section this function can't be called without
 an argument, i.e.@: as a query.
 
 
+@anchor{lockin_resonator}
 @item lockin_resonator()
 @findex lockin_resonator()
 This function exists for the @strong{Bruker ER023M} signal channel only
@@ -865,6 +914,7 @@ In the @code{PREPARATIONS} section this function can't be called without
 an argument, i.e.@: as a query.
 
 
+@anchor{lockin_is_overload}
 @item lockin_is_overload()
 @findex lockin_is_overload()
 This function exists for the @strong{Bruker ER023M} signal channel only
@@ -946,30 +996,32 @@ be replaced by integer numbers:
 
 
 @table @samp
+@anchor{digitizer_name}
 @item digitizer_name()
 @findex digitizer_name()
 Returns a string with the name of the digitizer being used.
 
 
+@anchor{digitizer_timebase}
 @item digitizer_timebase()
 @findex digitizer_timebase()
 The function queries (if called with no argument) or sets (if called
-with an argument) the time base setting of the oscilloscope. The time
-base of the oscilloscope can be only set once before the start of the
-@code{EXPERIMENT} section. The admissible range of the time base depends
-on the model, please check the manual.
+with an argument) the time base setting of the oscilloscope. The
+possible time bases depend on the model, please check the manual.
 
 The function can be called in query mode (i.e.@: without an argument)
 in the @code{EXPERIMENT} section only.
 
 
+@anchor{digitizer_time_per_point}
 @item digitizer_time_per_point()
 @findex digitizer_time_per_point()
-Function returns (to be called in the @code{EXPERIMENT} section only)
-the time difference (in seconds) between two points measured by the
-digitizer.
+The function (to be called in the @code{EXPERIMENT} section only)
+returns the time difference (in seconds) between two data points
+measured by the digitizer.
 
 
+@anchor{digitizer_sensitivity}
 @item digitizer_sensitivity()
 @findex digitizer_sensitivity()
 The function queries (if called with just one argument) or sets (if
@@ -989,11 +1041,11 @@ depend on the model of the oscilloscope:
 @end table
 
 If a second argument is given this is taken to be the new sensitivity
-setting in Volts. If the sensitivity value passed to the function is not
-one of the available settings the nearest allowed value is used
-instead. Please note that for some of the oscilloscopes the range of
-admissible sensitivity settings depends on the input impedance --
-unfortunately this can only be checked for when the experiment has
+setting (in Volts per division). If the sensitivity value passed to the
+function is not one of the available settings the nearest allowed value
+is used instead. Please note that for some of the oscilloscopes the
+range of admissible sensitivity settings depends on the input impedance
+-- unfortunately this can only be checked for when the experiment has
 already been started!
 
 If no second argument is given the current sensitivity setting for the
@@ -1003,13 +1055,14 @@ The function can be called in query mode (i.e.@: without a second
 argument) only in the @code{EXPERIMENT} section.
 
 
+@anchor{digitizer_num_averages}
 @item digitizer_num_averages()
 @findex digitizer_num_averages()
 This function is intended for the @strong{Tektronix} digitizers, see at
-the end on how to use it with the @strong{LeCroy 9400}. It queries (if
-called with no argument) or sets (if called with an argument) the number
-of averages done by the oscilloscope.  If the number of averages is
-passed to the function it must be at least 1 (which will switch the
+the end on how to also use it with the @strong{LeCroy 9400}. It queries
+(if called with no argument) or sets (if called with an argument) the
+number of averages done by the oscilloscope.  If the number of averages
+is passed to the function it must be at least 1 (which will switch the
 oscilloscope into @code{SAMPLE} mode). If the argument is larger than
 the maximum number of averages the maximum available number of averages
 is used instead.
@@ -1020,34 +1073,36 @@ only in the @code{EXPERIMENT} section.
 For the @strong{LeCroy 9400} this function can only be used in query
 mode and returns the number of averages that has been set in a previous
 call of @code{digitizer_averaging()}. It needs exactly one argument, the
-number of channel used to do the averaging, i.e.@: either @code{FUNC_E}
-or @code{FUNC_F}.
+the channel used to do the averaging, i.e.@: either @code{FUNC_E} or
+@code{FUNC_F}.
 
 
+@anchor{digitizer_averaging}
 @item digitizer_averaging()
 @findex digitizer_averaging()
-This function only exists for the @strong{LeCroy 9400} and must be used to
-set up averaging. It expects at least three arguments. The first
+This function only exists for the @strong{LeCroy 9400} and must be used
+to set up averaging. It expects at least three arguments. The first
 argument is the channel to be used to do the averaging, i.e.@: either
 @code{FUNC_E} or @code{FUNC_F}. The second is the data source channel
 for the curves to be averaged, i.e.@: either @code{CH1} or
 @code{CH2}. The third required argument is the number of averages which
-as to be either @code{10}, @code{20} or @code{50} or one of these
+has to be either @code{10}, @code{20} or @code{50} or one of these
 numbers multiplied by @code{10}, @code{100}, @code{1000}, @code{10000}
-(the maximum possible number of averages that can be done is
-@code{1000000}). The next, optional argument is either an integer
-number, with a non-zero value representing truth and @code{0} falsehood,
-or a string, either @code{"ON"} or @code{"OFF"}, that determines if
-overflow rejection is switched on or off (if switched on all traces that
-overflowed the ADC range will be rejected automatically). The final
-optional argument is the number of points that get included into the
-average. Usually it doesn't make too much sense to set this value
-because the program will make sure automatically that at least as many
-points of curve as can be read from the digitizer are included into the
-averaging. If the value is set only as many points as have been set will
-be returned by a @code{digitizer_get_curve()} command.
+up to a number of @code{1000000}). The next, optional argument is either
+an integer number, with a non-zero value representing truth and @code{0}
+falsehood, or a string, either @code{"ON"} or @code{"OFF"}, that
+determines if overflow rejection is switched on or off (if switched on
+all traces that overflowed the ADC range will be rejected
+automatically). The final optional argument is the number of points that
+get included into the average. Usually it doesn't make too much sense to
+set this value because the program will make sure automatically that at
+least as many points of a curve as can be read from the digitizer are
+included into the averaging. If the value is set only as many points as
+have been set will be returned by a @code{digitizer_get_curve()}
+command.
 
 
+@anchor{digitizer_trigger_channel}
 @item digitizer_trigger_channel()
 @findex digitizer_trigger_channel()
 The function queries or sets the channel of the digitizing oscilloscope
@@ -1081,6 +1136,7 @@ only if either it has already been called with an argument or in the
 @code{EXPERIMENT} section.
 
 
+@anchor{digitizer_record_length}
 @item digitizer_record_length()
 @findex digitizer_record_length()
 The function queries (if called with no argument) or sets (if called
@@ -1094,20 +1150,23 @@ only if either it has already been called with an argument or in the
 @code{EXPERIMENT} section.
 
 
+@anchor{digitizer_trigger_position}
 @item digitizer_trigger_position()
 @findex digitizer_trigger_position()
 The function queries (if called with no argument) or sets (if called
 with an argument) the amount of pre-trigger, i.e.@: the portion of the
 trace shown with data before the trigger was detected. The function
 accepts or returns values from the interval @w{[0, 1]} (where 0 means
-that the trigger is at the very first point of the trace and 1 that it's
-at the last point).
+that the trigger is at the very first point of the trace, i.e.@: no
+pre-trigger is used, and 1 that it's at the last point, i.e.@: the
+complete curve is recorded before the trigger).
 
 The function can be called in query mode (i.e.@: without an argument)
 only if either it has already been called with an argument or in the
 @code{EXPERIMENT} section.
 
 
+@anchor{digitizer_define_window}
 @item digitizer_define_window()
 @findex digitizer_define_window()
 The function must be used to define a time window to be used in later
@@ -1116,78 +1175,87 @@ curve from the oscilloscope. Usually it is called with two arguments,
 the starting point and the width of the window (both in seconds). If it
 is called with no argument the window defined by the cursor pair on the
 oscilloscopes screen is used. If no width is specified the distance
-between the pair of cursors is used.
+between the pair of cursors is used. In both cases the smallest possible
+non-zero value for the distance is used if the cursors on the screen are
+exactly on top of each other.
 
 The function returns an integer number that can be used in later calls
-to address the window. Thus, you need to store this number in a variable
-to be able to use this window in further calls of digitizer functions.
+to address the window. Thus, you need to store this number in an integer
+variable to be able to use this window in further calls of digitizer
+functions.
 
 The allowed ranges of arguments for the start point and width of the
 window depend on the time base setting of the oscilloscope as well as
 the pre-trigger setting and the current record length. The time of the
 trigger event itself corresponds to a cursor position of exactly
-0. Times before the trigger are negative, times after the trigger are
+0. Times before the trigger are negative, times after the trigger
 positive. If a window width is given it has to be positive and the
 window must fit into the time interval measured by the oscilloscope. The
 easiest way to find valid parameters is to position the two vertical
 cursors at the borders of the interval to be measured and directly use
-the values for the starting point and width displayed in the upper right
-hand corner of the oscilloscope.
+the values displayed in the upper right hand corner of the oscilloscope
+for the starting point and width.
 
 Because the data measured by the oscilloscope are discreet it is not
-possible to specify arbitrary values for the starting point and the
-window width but they must fit with the current minimum time
-resolution. If the specified values don't fit the requirement a warning
-is printed and the position and width are adjusted to the nearest
-allowed values.
+possible to specify arbitrary values for the starting point and window
+width but they must fit with the current minimum time resolution. If the
+specified values don't fit the requirement a warning is printed and the
+position and width are adjusted to the nearest allowed values.
 
 
+@anchor{digitizer_change_window}
 @item digitizer_change_window()
 @findex digitizer_change_window()
 This function can be used to change the position and width of an already
 existing window. As the first parameter the function expects a window
 number as returned by @code{digitizer_define_window()}. The following
-parameters are the new position and width for this window. During the
-experiment neither of these arguments needs to be specified. If already
-the window position is missing the start position of the leftmost cursor
-is used. If the window with is missing the distance between the pair of
-cursors on the digitizers screen is used.
+two arguments are the new position and width for this window. During the
+experiment neither the position nor the width argument must be
+specified.  If non of them are given the positiona of the cursors
+displayed on the screen is used to define the windows new start position
+and width. If only a new start positon is given the distance between the
+cursors on the screen is used for the window width.
 
 
+@anchor{digitizer_window_position}
 @item digitizer_window_position()
 @findex digitizer_window_position()
 This function can be used to query the position or to set a new position
-for a window. It expects at least on argument, a window number as
-returned by @code{digitizer_define_window()}. If there is no further
-argument the position of the window is returned. Otherwise the second
-parameter is taken to be the new window position.
+for an already defined window. It expects at least on argument, a window
+number as returned by @code{digitizer_define_window()}. If there is no
+further argument the position of the window is returned. Otherwise the
+second parameter is taken to be the new window position.
 
 
+@anchor{digitizer_window_width}
 @item digitizer_window_width()
 @findex digitizer_window_width()
-This function can be used to query the width or to set a new width
-for a window. It expects at least on argument, a window number as
-returned by @code{digitizer_define_window()}. If there is no further
-argument the width of the window is returned. Otherwise the second
-parameter is taken to be the new window width.
+This function can be used to query the width or to set a new width for
+an already existing window. It expects at least on argument, a window
+number as returned by @code{digitizer_define_window()}. If there is no
+further argument the width of the window is returned. Otherwise the
+second parameter is taken to be the new window width.
 
 
+@anchor{digitizer_display_channel}
 @item digitizer_display_channel()
 @findex digitizer_display_channel()
 This function can be used during the @code{PREPARATIONS} section to tell
-the program that you want a certain channel to be displayed in any case.
-It expects a channel name or number as in defined above. There are only
+the program that you want a certain channel or a set of channels to be
+displayed in any case. It expects a channel name or number (or a comma
+separated list of channel specifiers) as defined above. There are only
 certain circumstances where this function is really needed. Normally,
 the program will not switch off channels. Only if in the test run it is
 found that some channels are needed for the experiment which aren't
 switched on but there are already too many other channels displayed
 which don't seem to be needed the program has to switch off some of
-them. If the program in this case switches off channels that you don't
+them. If in this case the program switches off a channel that you don't
 want to be off (or that the program erroneously assumes to be useless)
 you may have to use this function to make sure the channel stays
 switched on.
 
 
+@anchor{digitizer_start_acquisition}
 @item digitizer_start_acquisition()
 @findex digitizer_start_acquisition()
 This function starts an acquisition sequence of the
@@ -1197,6 +1265,7 @@ The function can only be used in the @code{EXPERIMENT} section of the
 @acronym{EDL} file.
 
 
+@anchor{digitizer_get_area}
 @item digitizer_get_area()
 @findex digitizer_get_area()
 The function returns the area under one of the measured curves. It
@@ -1244,6 +1313,7 @@ This function can only be used in the @code{EXPERIMENT} section of an
 @acronym{EDL} file.
 
 
+@anchor{digitizer_get_area_fast}
 @item digitizer_get_area_fast()
 @findex digitizer_get_area_fast()
 This function takes the same arguments as the function
@@ -1258,6 +1328,7 @@ This function can only be used in the @code{EXPERIMENT} section of an
 @acronym{EDL} file.
 
 
+@anchor{digitizer_get_curve}
 @item digitizer_get_curve()
 @findex digitizer_get_curve()
 The function fetches a curve from the digitizer. It expects up to two
@@ -1297,6 +1368,7 @@ This function can only be used in the @code{EXPERIMENT} section of an
 @acronym{EDL} file.
 
 
+@anchor{digitizer_get_curve_fast}
 @item digitizer_get_curve_fast()
 @findex digitizer_get_curve_fast()
 This function is nearly identical to the function
@@ -1304,6 +1376,7 @@ This function is nearly identical to the function
 are not positioned at the start and end point of the curve to be fetched.
 
 
+@anchor{digitizer_get_amplitude}
 @item digitizer_get_amplitude()
 @findex digitizer_get_amplitude()
 The function returns the amplitude, i.e.@: the difference between the
@@ -1345,6 +1418,7 @@ This function can only be used in the @code{EXPERIMENT} section of an
 @acronym{EDL} file.
 
 
+@anchor{digitizer_get_amplitude_fast}
 @item digitizer_get_amplitude_fast()
 @findex digitizer_get_amplitude_fast()
 This function is nearly identical to @code{digitizer_get_amplitude()}
@@ -1353,6 +1427,7 @@ isn't used and the cursors aren't positioned at the start and end of the
 time interval.
 
 
+@anchor{digitizer_run}
 @item digitizer_run()
 @findex digitizer_run()
 Usually, during an experiment the digitizer starts to do the
@@ -1364,6 +1439,7 @@ accepts no arguments and can only be used in the @code{EXPERIMENT}
 section.
 
 
+@anchor{digitizer_lock_keyboard}
 @item digitizer_lock_keyboard()
 @findex digitizer_lock_keyboard()
 Usually, during an experiment the keyboard of the digitizer is
@@ -1403,11 +1479,13 @@ the pulser functions will probably only become understandable after
 reading the chapter about pulsers and pulses.
 
 @table @samp
+@anchor{pulser_name}
 @item pulser_name()
 @findex pulser_name()
 Returns a string with the name of the digitizer being used.
 
 
+@anchor{pulser_state}
 @item pulser_state()
 @findex pulser_state()
 This function can be either used to determine if the pulser is running
@@ -1418,6 +1496,7 @@ called with either a numerical argument or a string of @code{"ON"} or
 of @code{0} stops the pulser, a non-zero argument starts it).
 
 
+@anchor{pulser_channel_state}
 @item pulser_channel_state()
 @findex pulser_channel_state()
 For the @strong{Tektronix HFS9003} this function can be used to
@@ -1428,6 +1507,7 @@ additional numeric argument or a string of @code{"ON"} or @code{"OFF"}
 the channel can be switched on or off.
 
 
+@anchor{pulser_lock_keyboard}
 @item pulser_lock_keyboard()
 @findex pulser_lock_keyboard()
 Usually, during an experiment the keyboard of the pulser is locked. But
@@ -1439,6 +1519,7 @@ a non-zero argument, @code{"ON"} or no argument at all. This command is
 only available for the Sony/Tektronix DG2020.
 
 
+@anchor{pulser_update}
 @item pulser_update()
 @findex pulser_update()
 This function has to be called after changes have been applied to pulses
@@ -1448,6 +1529,7 @@ done to the internal representation of the pulser, but not yet send to
 the pulser. Only by calling the function these changes are committed and
 the real pulses will change.
 
+@anchor{pulser_shift}
 @item pulser_shift()
 @findex pulser_shift()
 This function can be called with either no argument or with a list of
@@ -1457,6 +1539,7 @@ argument is given the position of all pulses which have a
 @code{DELTA_START}. If there is only one argument or a list of pulses
 only the start position of the listed pulses are changed.
 
+@anchor{pulser_increment}
 @item pulser_increment()
 @findex pulser_increment()
 This function can be called with either no argument or with a list of
@@ -1466,6 +1549,7 @@ argument is given the length of all pulses which have a
 @code{DELTA_LENGTH}. If there is only one argument or a list of pulses
 only the lengths of the listed pulses are changed.
 
+@anchor{pulser_pulse_reset}
 @item pulser_pulse_reset()
 @findex pulser_pulse_reset()
 This function can be called with either no argument or with a list of
@@ -1475,6 +1559,7 @@ the state of the pulses set in the @code{PREPARATIONS} section.  If
 called with one argument or a list of pulses only the pulses from the
 list are reset back to their initial state.
 
+@anchor{pulser_next_phase}
 @item pulser_next_phase()
 @findex pulser_next_phase()
 When the experiment starts the phases of all pulses are set to the first
@@ -1483,6 +1568,7 @@ associated with the pulses. By calling this function the phases of the
 pulses are switched to the next phase. By repeatedly calling the
 function one can run through the complete list of phases for the pulses.
 
+@anchor{pulser_phase_reset}
 @item pulser_phase_reset()
 @findex pulser_phase_reset()
 This function can be called with either no argument or with a list of
@@ -1493,6 +1579,7 @@ phase, i.e.@: the first phase of the phase sequence (defined in the
 are passed to the function the phases of only these pulses are reset.
 
 
+@anchor{pulser_stop_on_update}
 @item pulser_stop_on_update()
 @findex pulser_stop_on_update()
 This function exists for the HFS9003 only. While doing updates of the
@@ -1500,6 +1587,14 @@ pulser to set new pulse positions and length etc.@: it usually gets
 switched off. By calling this function with an argument of @code{0} you
 can tell to pulser to continue even while doing updates. If called with
 an argument of @code{1} you may switch back to the default behavior.
+
+
+@anchor{pulser_cw_mode}
+@item pulser_cw_mode()
+@findex pulser_cw_mode()
+This function exists for the Berlin X-band pulser module @code{dg2020_b}
+only. It tells the pulser to create an output suitable for cw EPR
+measurements.
 
 @end table
 
@@ -1518,11 +1613,13 @@ in the @code{DEVICES} section.
 
 
 @table @samp
+@anchor{synthesizer_name}
 @item synthesizer_name()
 @findex synthesizer_name()
 Returns a string with the name of the synthesizer being used.
 
 
+@anchor{synthesizer_state}
 @item synthesizer_state()
 @findex synthesizer_state()
 The function queries or sets the output state of the synthesizer. i.e.@:
@@ -1538,6 +1635,7 @@ returns either @code{1} or @code{0} to indicate the on/off state of the
 RF output.
 
 
+@anchor{synthesizer_frequency}
 @item synthesizer_frequency()
 @findex synthesizer_frequency()
 The function queries or sets the RF output frequency. If called to set
@@ -1552,6 +1650,7 @@ query mode, i.e.@: without an argument (unless the frequency has already
 been set by calling the function with an argument).
 
 
+@anchor{synthesizer_attenuation}
 @item synthesizer_attenuation()
 @findex synthesizer_attenuation()
 The function queries or sets the output attenuation. If called to set
@@ -1563,6 +1662,7 @@ query mode, i.e.@: without an argument (unless the attenuation has already
 been set by calling the function with an argument).
 
 
+@anchor{synthesizer_minimum_attenuation}
 @item synthesizer_minimum_attenuation()
 @findex synthesizer_minimum_attenuation()
 The function queries or sets the minimum output attenuation. If called to set
@@ -1571,6 +1671,7 @@ between @w{+10 db} and @w{-136 db}. Calling the function restricts
 setting the attenuation to ranges below the value set by this function.
 
 
+@anchor{synthesizer_step_frequency}
 @item synthesizer_step_frequency()
 @findex synthesizer_step_frequency()
 The function queries or sets the RF step frequency to be used in calls
@@ -1584,6 +1685,7 @@ Before the step frequency has been set by calling the function with an
 argument the query form of the function (i.e.@: calling it without an
 argument can't be used).
 
+@anchor{synthesizer_sweep_up}
 @item synthesizer_sweep_up()
 @findex synthesizer_sweep_up()
 If there has been set both a frequency and a step frequency the function
@@ -1591,6 +1693,7 @@ will increment the synthesizers frequency. It returns the newly set
 frequency. The function can only be called in the @code{EXPERIMENT}
 section.
 
+@anchor{synthesizer_sweep_down}
 @item synthesizer_sweep_down()
 @findex synthesizer_sweep_down()
 If there has been set both a frequency and a step frequency the function
@@ -1598,12 +1701,14 @@ will decrement the synthesizers frequency. It returns the newly set
 frequency. The function can only be called in the @code{EXPERIMENT}
 section.
 
+@anchor{synthesizer_reset_frequency}
 @item synthesizer_reset_frequency()
 @findex synthesizer_reset_frequency()
 If a frequency has been set at all the function will reset the
 synthesizers frequency to the frequency that has been set at first. The
 function can only be called in the @code{EXPERIMENT} section.
 
+@anchor{synthesizer_use_table}
 @item synthesizer_use_table()
 @findex synthesizer_use_table()
 This function tells the program to also adjust the attenuation when a
@@ -1646,6 +1751,7 @@ isn't within the range of frequencies covered by the table a warning is
 printed and the attenuation for the nearest frequency is used.
 
 
+@anchor{synthesizer_att_ref_freq}
 @item synthesizer_att_ref_freq()
 @findex synthesizer_att_ref_freq()
 When a table file is used there remains the question for which frequency
@@ -1655,6 +1761,7 @@ function @code{synthesizer_att_ref_freq()} can be used. If the function
 isn't called a frequency of @w{14 MHz} is used.
 
 
+@anchor{synthesizer_modulation}
 @item synthesizer_modulation()
 @findex synthesizer_modulation()
 This function is used to set the type, source and amplitude of the
@@ -1703,6 +1810,7 @@ to AM modulation will also restore the settings of external AC coupled
 source and @w{50 %} amplitude.
 
 
+@anchor{synthesizer_mod_type}
 @item synthesizer_mod_type()
 @findex synthesizer_mod_type()
 As an alternative the function @code{synthesizer_modulation()} the
@@ -1716,6 +1824,7 @@ If called with no argument it will return the currently active modulation
 type as an integer number.
 
 
+@anchor{synthesizer_mod_source}
 @item synthesizer_mod_source()
 @findex synthesizer_mod_source()
 If the modulation type has been set before the modulation source can be
@@ -1735,6 +1844,7 @@ modulation is switched off, trying to do so will result in aborting the
 program.
 
 
+@anchor{synthesizer_mod_ampl}
 @item synthesizer_mod_ampl()
 @findex synthesizer_mod_ampl()
 
@@ -1753,7 +1863,7 @@ switched off, trying to do so will result in aborting the program.
 
 
 
-@node Temperature Controller Functions, Multi-Device Functions, Synthesizer Functions, Device Functions
+@node Temperature Controller Functions, Voltmeter Functions, Synthesizer Functions, Device Functions
 @section Temperature Controller Functions
 @cindex Temperature Controller Functions
 The only currently implemented temperature controller is the Lake Shore 330.
@@ -1768,16 +1878,19 @@ the @acronym{EDL} program.
 
 
 @table @samp
+@anchor{temp_contr_name}
 @item temp_contr_name()
 @findex temp_contr_name()
 Returns a string with the name of the temperature controller being used.
 
 
+@anchor{temp_contr_temperature}
 @item temp_contr_temperature()
 @findex temp_contr_temperature()
 This function accepts no arguments and returns the temperature at the
 currently active sample channel.
 
+@anchor{temp_contr_sample_channel}
 @item temp_contr_sample_channel()
 @findex temp_contr_sample_channel()
 This function returns, when called with no argument, the currently
@@ -1788,6 +1901,7 @@ the strings @code{"A"} or @code{"B"}. Please take note that setting a
 sample channel takes about half a second.
 
 
+@anchor{temp_contr_sensor_unit}
 @item temp_contr_sensor_unit()
 @findex temp_contr_sensor_unit()
 Function either returns or sets the units returned by the device on
@@ -1801,6 +1915,7 @@ for Kelvin, @code{1} for degree Celsius, @code{2} for Volts, @code{3}
 for Ohms or @code{4} for Millivolts.
 
 
+@anchor{temp_contr_lock_keyboard}
 @item temp_contr_lock_keyboard()
 @findex temp_contr_lock_keyboard()
 Usually, during an experiment the keyboard of the temperature controller
@@ -1814,7 +1929,88 @@ argument at all.
 @end table
 
 
-@node Multi-Device Functions, , Temperature Controller Functions, Device Functions
+
+@node Voltmeter Functions, Boxcar Integrator Functions, Temperature Controller Functions, Device Functions
+@section Voltmeter Functions
+@cindex Voltmeter Functions
+The only currently supported digital voltmeter is the @strong{Kontron 4060}.
+Its module is loaded by specifying
+@example
+kontron4060
+@end example
+@noindent
+in the @code{DEVICES} section.
+
+@table @samp
+
+@anchor{voltmeter_name}
+@item voltmeter_name()
+@findex voltmeter_name()
+Returns a string with the name of the voltmeter being used.
+
+@anchor{voltmeter_get_data}
+@item voltmeter_get_data()
+@findex voltmeter_get_data()
+The function returns the current volatge measured by the voltmeter.
+
+
+@anchor{voltmeter_ac_measurement}
+@item voltmeter_ac_measurement()
+@findex voltmeter_ac_measurement()
+The function switches the voltmeter to doing AC measurements.
+
+@anchor{voltmeter_dc_measurement}
+@item voltmeter_dc_measurement()
+@findex voltmeter_dc_measurement()
+The function switches the voltmeter to doing DC measurements.
+
+@end table
+
+
+
+@node Boxcar Integrator Functions, Multi-Device Functions, Voltmeter Functions, Device Functions
+@section Boxcar Integrator Functions
+@cindex Boxcar Integrator Functions
+Currently there is only rudimentary support for one type of boxcar
+integrators, the @strong{EG&G PARC 4402}. Its module is loaded by specifying
+@example
+egg4402
+@end example
+@noindent
+in the @code{DEVICES} section. All functions for the boxcar integrator
+can only be used in the @code{EXPERIMENT} section of the @acronym{EDL}
+program.
+
+@table @samp
+
+@anchor{boxcar_name}
+@item boxcar_name()
+@findex boxcar_name()
+Returns a string with the name of the boxcar integrator being used.
+
+@anchor{boxcar_curve_length}
+@item boxcar_curve_length()
+@findex boxcar_curve_length()
+Returns an integer variable with the length of curves to be sent by the
+boxcar inetgrator.
+
+@anchor{boxcar_get_curve}
+@item boxcar_get_curve()
+@findex boxcar_get_curve()
+Fetches a curve from the boxcar inetgrator. Two first argument is either
+a number, either @code{0} for a live curve or @code{1} for a memory
+curve, or one of the strings @code{"LC"}, @code{"LIVECURVE"},
+@code{"LIVE_CURVE} or @code{"MC"}, @code{"MEMORYCURVE"} or
+@code{"MEMORY_CURVE"}. The second argument must be an inetger specifying
+the curve number, it must be @code{1} or @code{2} for live curves and
+between @code{1} and @code{3} for memory curves.
+
+@end table
+
+
+
+
+@node Multi-Device Functions, , Boxcar Integrator Functions, Device Functions
 @section Multi-Device Functions
 @cindex Multi-Device Functions
 
@@ -1828,6 +2024,7 @@ in is automatically loaded, so it needs no special entry in the
 
 @table @samp
 
+@anchor{get_phase_cycled_area}
 @item get_phase_cycled_area()
 @findex get_phase_cycled_area()
 This function is for doing a complete measurement sequence in a phase
@@ -1928,6 +2125,7 @@ before it starts doing the measurement.
 
 
 
+@anchor{get_phase_cycled_area_2}
 @item get_phase_cycled_area_2()
 @findex get_phase_cycled_area_2()
 

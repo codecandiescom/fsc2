@@ -429,7 +429,22 @@ Var *magnet_sweep( Var *v )
 				return vars_push( INT_VAR, -1 );
 		}
 
-	dir = get_long( v, "sweep direction" );
+	if ( v->type != STR_VAR )
+		dir = get_long( v, "sweep direction" );
+	else
+	{
+		if ( ! strcasecmp( v->val.sptr, "UP" ) )
+			dir = 1;
+		else if ( ! strcasecmp( v->val.sptr, "DOWN" ) )
+			dir = -1;
+		else if ( ! strcasecmp( v->val.sptr, "STOP" ) )
+			dir = 0;
+		else
+		{
+			print( FATAL, "Invalid sweep direction : '%s'.\n", v->val.sptr );
+			THROW( EXCEPTION );
+		}
+	}
 
 	if ( dir == 0 )
 		magnet_stop_sweep( );

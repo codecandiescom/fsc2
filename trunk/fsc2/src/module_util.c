@@ -65,7 +65,7 @@ inline void too_many_arguments( Var *v )
 		   v->next != NULL ? "s" : "" );
 
 	while ( ( v = vars_pop( v ) ) != NULL )
-		;
+		/* empty */ ;
 }
 
 

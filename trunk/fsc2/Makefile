@@ -44,20 +44,27 @@ GROUP            := uucp
 
 
 # The next variable sets the GPIB library to use, it must be set to either
-# "LLP" for the LLP library, "NI" for the National Instruments library or
-# "JTT" for the library written by me. Alternatively, if no GPIB support is
-# needed define GPIB_LIBRARY as "NONE" (which is also the default if not set).
+# 'LLP' for the LLP library, 'NI' for the National Instruments library or
+# 'JTT' for the library written by me. Alternatively, if no GPIB support is
+# needed define GPIB_LIBRARY as 'NONE' (which is also the default if not set).
 # Then the location of the GPIB configuration file is set (this is only needed
 # with the National Instruments GPIB library, if not set GPIB_CONF_FILE
 # defaults to /etc/gpib.conf).
 # Next set the file for writing logs about the activity on the GPIB bus.
 # Make sure that fsc2 or its users have write access to the directory the
-# log file will be created in. If not given logs will be written to stderr.
+# log file will be created in. Don't use a partition on which you don't have
+# at least a few megabytes to spare, depending on the type of experiments you
+# do the file can become rather long. But the file will not grow indefintely,
+# if you start a new experiment the previous contents get overwritten. If no
+# file is specified logs will be written to stderr.
 # The next variable, GPIB_LOG_LEVEL, sets the verbosity level for the GPIB
-# logs, use either HIGH, MEDIUM, LOW or OFF. If not set it defaults to LOW
-# and only errors will be logged.
+# logs, use either 'HIGH', 'MEDIUM', 'LOW' or 'OFF'. When set to 'HIGH' all
+# GPIB function calls together wih all data send to or recoved from devices
+# are stored. When set to 'MEDIUM' only GPIB function calls are logged. When
+# set to 'LOW' only errors will be wriiten to the file. If not set it defaults
+# to 'LOW'.
 # Finally, if the header files for the GPIB library aren't either in
-# /usr/include or /usr/include (i.e. if they are, for example, in
+# /usr/include or /usr/local/include (i.e. if they are, for example, in
 # /usr/include/gpib) set the last variable GPIB_HEADER_DIR to the absolute
 # path of the directory where the header file(s) for the library reside.
 
@@ -76,16 +83,16 @@ GPIB_LOG_LEVEL   := HIGH
 # lock files for the serial ports are created. This should be '/var/lock'
 # according to version 2.2 of the Filesystem Hierachy Standard. Either fsc2
 # itself or all its users must have read and write permissions for this
-# directory. See the longer discussion in section B of the INSTALL file.
+# directory. Also see the longer discussion in section B of the INSTALL file.
 
 NUM_SERIAL_PORTS := 2
-SERIAL_LOCK_DIR  := "/var/lock"
+SERIAL_LOCK_DIR  := /var/lock
 
 
-# This variable controls to whom mail with bug reports and crash messages will
-# be send - if not set no "Bug report" button will be shown. Please change
-# this only if you change the program yourself (in which case sending me bug
-# reports or mails about crashes would not make too much sense).
+# This last variable controls to whom mail with bug reports and crash messages
+# will be send - if not set no "Bug report" button will be shown. Please
+# change this only if you change the program yourself (in which case sending
+# bug reports or mails about crashes to me wouldn't make too much sense).
 
 MAIL_ADDRESS     := Jens.Toerring@physik.fu-berlin.de
 
@@ -93,7 +100,7 @@ MAIL_ADDRESS     := Jens.Toerring@physik.fu-berlin.de
 ##############################################################################
 # Here follow settings determining the make process - which compiler and
 # tools to use as well as their respective options. Better leave this alone
-# if you don't have a good reason for doing changes...
+# if you don't have a good reason to apply changes.
 # Don't use '-fomit-frame-pointer' in CFLAGS on Intel processors (unless
 # you want to keep me from getting meaningful messages about crashes).
 ##############################################################################
@@ -171,7 +178,7 @@ machine_name     := $(shell hostname -f)
 
 
 # Check that the machine has a new libc, i.e. at least version 2, otherwise
-# some problems with the older libc have to be dealt with in the program
+# some problems with the older libc have to be dealt within the program
 
 ifneq ($(shell ls /lib/libc.so.6 2>/dev/null),/lib/libc.so.6)
 	CFLAGS += -DIS_STILL_LIBC1
@@ -190,7 +197,7 @@ ifeq ($(machine_name),pion.anorg.chemie.uni-frankfurt.de)
 	GROUP              := uucp
 	GPIB_LIBRARY       := JTT
 	NUM_SERIAL_PORTS   := 2
-	SERIAL_LOCK_DIR    := "/var/lock"
+	SERIAL_LOCK_DIR    := /var/lock
 	INSTALL_MACHINE    := install-$(machine_name)
 	UNINSTALL_MACHINE  := uninstall-$(machine_name)
 endif
@@ -200,7 +207,7 @@ ifeq ($(machine_name),crowley.physik.fu-berlin.de)
 	GROUP              := uucp
 	GPIB_LIBRARY       := JTT
 	NUM_SERIAL_PORTS   := 2
-	SERIAL_LOCK_DIR    := "/var/lock"
+	SERIAL_LOCK_DIR    := /var/lock
 	INSTALL_MACHINE    := install-$(machine_name)
 	UNINSTALL_MACHINE  := uninstall-$(machine_name)
 endif
@@ -210,7 +217,7 @@ ifeq ($(machine_name),door.physik.fu-berlin.de)
 	GROUP              := uucp
 	GPIB_LIBRARY       := JTT
 	NUM_SERIAL_PORTS   := 2
-	SERIAL_LOCK_DIR    := "/var/lock"
+	SERIAL_LOCK_DIR    := /var/lock
 	INSTALL_MACHINE    := install-$(machine_name)
 	UNINSTALL_MACHINE  := uninstall-$(machine_name)
 endif
@@ -220,7 +227,7 @@ ifeq ($(machine_name),isaak.physik.fu-berlin.de)
 	GROUP              := uucp
 	GPIB_LIBRARY       := JTT
 	NUM_SERIAL_PORTS   := 2
-	SERIAL_LOCK_DIR    := "/var/lock"
+	SERIAL_LOCK_DIR    := /var/lock
 	INSTALL_MACHINE    := install-$(machine_name)
 	UNINSTALL_MACHINE  := uninstall-$(machine_name)
 endif
@@ -231,7 +238,7 @@ ifeq ($(machine_name),moebpc3.physik.fu-berlin.de)
 	GPIB_LIBRARY       := JTT
 	GPIB_LOG_FILE      := /scratch/tmp/gpib.log
 	NUM_SERIAL_PORTS   := 2
-	SERIAL_LOCK_DIR    := "/var/lock"
+	SERIAL_LOCK_DIR    := /var/lock
 	INSTALL_MACHINE    := install-$(machine_name)
 	UNINSTALL_MACHINE  := uninstall-$(machine_name)
 endif
@@ -242,7 +249,7 @@ ifeq ($(machine_name),sunone.chemie.unibas.ch)
 	GPIB_LIBRARY       := NI
 	INSTALL_MACHINE    := install-$(machine_name)
 	NUM_SERIAL_PORTS   := 2
-	SERIAL_LOCK_DIR    := "/var/lock"
+	SERIAL_LOCK_DIR    := /var/lock
 	UNINSTALL_MACHINE  := uninstall-$(machine_name)
 endif
 
@@ -251,7 +258,7 @@ ifeq ($(machine_name),tresr.physik.fu-berlin.de)
 	GROUP              := uucp
 	GPIB_LIBRARY       := LLP
 	NUM_SERIAL_PORTS   := 2
-	SERIAL_LOCK_DIR    := "/var/lock"
+	SERIAL_LOCK_DIR    := /var/lock
 	INSTALL_MACHINE    := install-$(machine_name)
 	UNINSTALL_MACHINE  := uninstall-$(machine_name)
 endif
@@ -261,7 +268,7 @@ ifeq ($(machine_name),crowley.none)
 	GROUP              := uucp
 	GPIB_LIBRARY       := JTT
 	NUM_SERIAL_PORTS   := 2
-	SERIAL_LOCK_DIR    := "/var/lock"
+	SERIAL_LOCK_DIR    := /var/lock
 	INSTALL_MACHINE    := install-$(machine_name)
 	UNINSTALL_MACHINE  := uninstall-$(machine_name)
 endif
@@ -271,7 +278,7 @@ ifeq ($(machine_name),dorimare.nowhere)
 	GROUP              := uucp
 	GPIB_LIBRARY       := JTT
 	NUM_SERIAL_PORTS   := 1
-	SERIAL_LOCK_DIR    := "/var/lock"
+	SERIAL_LOCK_DIR    := /var/lock
 	INSTALL_MACHINE    := install-$(machine_name)
 	UNINSTALL_MACHINE  := uninstall-$(machine_name)
 endif
@@ -367,35 +374,35 @@ ifneq ($(word 1,$(ADDR2LINE)),which:)
 endif
 
 
-# Finally the definition of further variables needed
+# Finally take care the variables for GPIB support are set correctly
 
 ifeq ($(GPIB_LIBRARY),LLP)
-	GPIB_LIBRARY         := old
+	GPIB_LIBRARY         := llp
 	CFLAGS               += -I/usr/local/include/gpib
-	LIBS                 += -lgpib -lfl
+	LIBS                 += -lfl
 else
 	ifeq ($(GPIB_LIBRARY),NI)
 		GPIB_LIBRARY     := ni
-		LIBS             += -lgpib
-		ifdef GPIB_CONF_FILE
-			CFLAGS       += -DGPIB_CONF_FILE=\"$(GPIB_CONF_FILE)\"
-		else
-			CFLAGS       += -DGPIB_CONF_FILE=\"/etc/gpib.conf\"
-		endif
 	else
 		ifeq ($(GPIB_LIBRARY),JTT)
 			GPIB_LIBRARY := jtt
-			LIBS         += -lgpib
 		else
 			GPIB_LIBRARY := none
 		endif
 	endif
 endif
 
+ifneq ($(GPIB_LIBRARY),none)
+	ifdef GPIB_CONF_FILE
+		CFLAGS           += -DGPIB_CONF_FILE=\"$(GPIB_CONF_FILE)\"
+	else
+		CFLAGS           += -I/usr/local/include/gpib
+	endif
+	LIBS                 += -lgpib
+endif
+
+
 export            # export all variables to sub-makes
-
-
-############## End of configuration section ##############
 
 
 # Switch off all implicit rules
@@ -414,12 +421,15 @@ export            # export all variables to sub-makes
 		dorimare.nowhere
 
 
+############## End of configuration section ##############
+
+
 # Default rule: make the main program, the primary lexer and the modules
 # (the Makefile for modules is called via the Makefile in src)
 
 all:
 	if [ $(INSTALL_MACHINE) != "install-unknown" ]; then                 \
-		$(MAKE) $(machine_name);                                        \
+		$(MAKE) $(machine_name);                                         \
 	fi
 	-@grep '$$Id\: ' Makefile $(sdir)/Makefile $(sdir)/*.[chly]          \
 				     $(mdir)/Makefile $(mdir)/*.[chl]                    \
@@ -454,7 +464,6 @@ install:
 	$(MAKE) -C utils install
 	$(MAKE) -C scripts install
 	$(MAKE) -C doc install
-
 
 
 # How to get rid of everything that got installed - requires that the Makefile

@@ -595,7 +595,7 @@ Var *f_bcreate( Var *v )
 	else
 	{
 		for ( ioi = Tool_Box->objs; ioi->next != NULL; ioi = ioi->next )
-			;
+			/* empty */ ;
 		ID = ioi->ID + 1;
 		ioi->next = new_io;
 		new_io->prev = ioi;
@@ -1275,7 +1275,7 @@ Var *f_screate( Var *v )
 	else
 	{
 		for ( ioi = Tool_Box->objs; ioi->next != NULL; ioi = ioi->next )
-			;
+			/* empty */ ;
 		ID = ioi->ID + 1;
 		ioi->next = new_io;
 		new_io->prev = ioi;
@@ -1987,7 +1987,7 @@ Var *f_icreate( Var *v )
 	else
 	{
 		for ( ioi = Tool_Box->objs; ioi->next != NULL; ioi = ioi->next )
-			;
+			/* empty */ ;
 		ID = ioi->ID + 1;
 		ioi->next = new_io;
 		new_io->prev = ioi;
@@ -2502,7 +2502,7 @@ Var *f_mcreate( Var *v )
 		else
 		{
 			for ( ioi = Tool_Box->objs; ioi->next != NULL; ioi = ioi->next )
-				;
+				/* empty */ ;
 			ID = ioi->ID + 1;
 			ioi->next = new_io;
 			new_io->prev = ioi;

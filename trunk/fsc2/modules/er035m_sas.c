@@ -677,7 +677,7 @@ static double er035m_sas_get_field( void )
 
 	*( state_flag - 1 ) = '\0';
 	for ( vs = buffer; ! isdigit( *vs ); vs++ )
-		;
+		/* empty */ ;
 	sscanf( vs, "%lf", &nmr.field );
 
 	return nmr.field;
@@ -838,7 +838,7 @@ static bool er035m_sas_read( char *buf, long *len )
 	/* Remove leading prompt characters if there are any */
 
 	for ( ptr = buf; *ptr == nmr.prompt; ptr++ )
-		;
+		/* empty */ ;
 	*len -= ( long ) ( ptr - buf );
 
 	if ( *len == 0 )          /* if nothing (except the prompt) was received */

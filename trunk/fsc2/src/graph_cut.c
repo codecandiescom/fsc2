@@ -1039,7 +1039,7 @@ static void cut_integrate_point( long p_index, double val )
 
 		for ( i = p_index - 1, cvp = cv->points + i; i >= 0 && ! cvp->exist;
 			  cvp--, i-- )
-			;
+			/* empty */ ;
 
 		if ( i == -1 )                    /* new points to be drawn is first */
 		{
@@ -1606,7 +1606,7 @@ static void cut_motion_handler( FL_OBJECT *obj, Window window,
 
 			if ( G.drag_canvas & 2 )           /* y-axis or canvas window */
 			{
-				c->box_h = c->ppos[ Y ] - G.start[ Y ] ;
+				c->box_h = c->ppos[ Y ] - G.start[ Y ];
 
 				if ( c->box_y + c->box_h >= ( int ) c->h )
 					c->box_h = c->h - c->box_y - 1;
@@ -1617,7 +1617,7 @@ static void cut_motion_handler( FL_OBJECT *obj, Window window,
 
 			if ( G.drag_canvas == 4 )           /* z-axis window */
 			{
-				c->box_h = c->ppos[ Y ] - G.start[ Y ] ;
+				c->box_h = c->ppos[ Y ] - G.start[ Y ];
 
 				if ( c->box_y + c->box_h >= ( int ) c->h )
 					c->box_h = c->h - c->box_y - 1;

@@ -26,16 +26,16 @@
 
 
 @multitable { @code{MAXIMUM_PATTERN_LENGTH} } { Starts the @code{PREPARATIONS} section and lots more of text... }
-@item @code{#EXIT}            @tab Miscellaneous (@pxref{#EXIT statement})
-@item @code{#INCLUDE}         @tab Miscellaneous (@pxref{#INCLUDE statement})
-@item @code{#QUIT}            @tab Miscellaneous (@pxref{#QUIT statement})
+@item @code{#EXIT}            @tab Miscellaneous (@ref{#EXIT statement})
+@item @code{#INCLUDE}         @tab Miscellaneous (@ref{#INCLUDE statement})
+@item @code{#QUIT}            @tab Miscellaneous (@ref{#QUIT statement})
 @item                         @tab
 @item @code{A}                @tab Unit, Ampere
-@item @code{abort}            @tab Built-in function (@pxref{abort})
-@item @code{abs}              @tab Built-in function (@pxref{abs})
-@item @code{acos}             @tab Built-in function (@pxref{acos})
-@item @code{asin}             @tab Built-in function (@pxref{asin})
-@item @code{atan}             @tab Built-in function (@pxref{atan})
+@item @code{abort}            @tab Built-in function (@ref{abort})
+@item @code{abs}              @tab Built-in function (@ref{abs})
+@item @code{acos}             @tab Built-in function (@ref{acos})
+@item @code{asin}             @tab Built-in function (@ref{asin})
+@item @code{atan}             @tab Built-in function (@ref{atan})
 @item @code{ASS:}             @tab Starts the @code{ASSIGNMENTS} section
 @item @code{ASSIGNMENT:}      @tab Starts the @code{ASSIGNMENTS} section
 @item @code{ASSIGNMENTS:}     @tab Starts the @code{ASSIGNMENTS} section
@@ -43,24 +43,24 @@
 @item @code{AUX1}             @tab Digitizer channel name
 @item @code{AUX2}             @tab Digitizer channel name
 @item                         @tab
-@item @code{BREAK}            @tab Loop control statement (@pxref{BREAK statement})
-@item @code{button_create}    @tab Built-in function (@pxref{button_create})
-@item @code{button_delete}    @tab Built-in function (@pxref{button_delete})
-@item @code{button_state}     @tab Built-in function (@pxref{button_state})
+@item @code{BREAK}            @tab Loop control statement (@ref{BREAK statement})
+@item @code{button_create}    @tab Built-in function (@ref{button_create})
+@item @code{button_delete}    @tab Built-in function (@ref{button_delete})
+@item @code{button_state}     @tab Built-in function (@ref{button_state})
 @item                         @tab
-@item @code{ceil}             @tab Built-in function (@pxref{ceil})
+@item @code{ceil}             @tab Built-in function (@ref{ceil})
 @item @code{CH}               @tab
 @item @code{CH1}              @tab Digitizer channel name
 @item @code{CH2}              @tab Digitizer channel name
 @item @code{CH3}              @tab Digitizer channel name
 @item @code{CH4}              @tab Digitizer channel name
 @item @code{CHANNEL}          @tab
-@item @code{clear_curve}      @tab Built-in function (@pxref{clear_curve})
-@item @code{clone_file}       @tab Built-in function (@pxref{clone_file})
-@item @code{cos}              @tab Built-in function (@pxref{cos})
-@item @code{cosh}             @tab Built-in function (@pxref{cosh})
+@item @code{clear_curve}      @tab Built-in function (@ref{clear_curve})
+@item @code{clone_file}       @tab Built-in function (@ref{clone_file})
+@item @code{cos}              @tab Built-in function (@ref{cos})
+@item @code{cosh}             @tab Built-in function (@ref{cosh})
 @item                         @tab
-@item @code{date}             @tab Built-in function (@pxref{date})
+@item @code{date}             @tab Built-in function (@ref{date})
 @item @code{dB}               @tab Unit, Decibel
 @item @code{db}               @tab Unit, Decibel
 @item @code{DEL}              @tab @code{DELAY} keyword
@@ -87,8 +87,8 @@
 @item @code{DEVS:}            @tab Starts the @code{DEVICES} section
 @item @code{DEVICE:}          @tab Starts the @code{DEVICES} section
 @item @code{DEVICES:}         @tab Starts the @code{DEVICES} section
-@item @code{dim}              @tab Built-in function (@pxref{dim})
-@item @code{display}          @tab Built-in function (@pxref{display})
+@item @code{dim}              @tab Built-in function (@ref{dim})
+@item @code{display}          @tab Built-in function (@ref{display})
 @item @code{DL}               @tab Pulse @code{DELTA_LENGTH} keyword
 @item @code{D_L}              @tab Pulse @code{DELTA_LENGTH} keyword
 @item @code{DLEN}             @tab Pulse @code{DELTA_LENGTH} keyword
@@ -100,7 +100,7 @@
 @item @code{DSTART}           @tab Pulse @code{DELTA_START} keyword
 @item @code{D_START}          @tab Pulse @code{DELTA_START} keyword
 @item                         @tab
-@item @code{ELSE}             @tab Part of @code{IF-ELSE} constructs (@pxref{IF-ELSE constructs})
+@item @code{ELSE}             @tab Part of @code{IF-ELSE} constructs (@ref{IF-ELSE constructs})
 @item @code{EXP:}             @tab Starts the @code{EXPERIMENT} section
 @item @code{EXPERIMENT:}      @tab Starts the @code{EXPERIMENT} section
 @item @code{EXT}              @tab @code{EXTERNAL} keyword / Digitizer trigger channel name
@@ -109,12 +109,12 @@
 @item @code{EXTERNAL}         @tab @code{EXTERNAL} keyword
 @item                         @tab
 @item @code{F}                @tab
-@item @code{float}            @tab Built-in function (@pxref{float})
-@item @code{floor}            @tab Built-in function (@pxref{floor})
-@item @code{FOR}              @tab Keyword for @code{FOR} loops (@pxref{FOR loops})
-@item @code{FOREVER}          @tab Keyword for @code{FOREVER} loops (@pxref{FOREVER loops})
-@item @code{fsave}            @tab Built-in function (@pxref{fsave})
-@item @code{ffsave}           @tab Built-in function (@pxref{ffsave})
+@item @code{float}            @tab Built-in function (@ref{float})
+@item @code{floor}            @tab Built-in function (@ref{floor})
+@item @code{FOR}              @tab Keyword for @code{FOR} loops (@ref{FOR loops})
+@item @code{FOREVER}          @tab Keyword for @code{FOREVER} loops (@ref{FOREVER loops})
+@item @code{fsave}            @tab Built-in function (@ref{fsave})
+@item @code{ffsave}           @tab Built-in function (@ref{ffsave})
 @item @code{FUNC}             @tab
 @item @code{FUNC_E}           @tab Digitizer channel name
 @item @code{FUNC_F}           @tab Digitizer channel name
@@ -123,20 +123,20 @@
 @item @code{FUNCTION}         @tab
 @item                         @tab
 @item @code{G}                @tab Unit, Gauss
-@item @code{get_file}         @tab Built-in function (@pxref{get_file})
+@item @code{get_file}         @tab Built-in function (@ref{get_file})
 @item                         @tab
 @item @code{H}                @tab @code{HIGH} keyword
-@item @code{hide_toolbox}     @tab Built-in function (@pxref{hide_toolbox})
+@item @code{hide_toolbox}     @tab Built-in function (@ref{hide_toolbox})
 @item @code{HIGH}             @tab @code{HIGH} keyword
 @item @code{Hz}               @tab Unit, Hertz
 @item                         @tab
-@item @code{IF}               @tab Part of @code{IF-ELSE} constructs (@pxref{IF-ELSE constructs})
-@item @code{init_1d}          @tab Built-in function (@pxref{init_1d})
-@item @code{init_2d}          @tab Built-in function (@pxref{init_2d})
-@item @code{input_create}     @tab Built-in function (@pxref{input_create})
-@item @code{input_delete}     @tab Built-in function (@pxref{input_delete})
-@item @code{input_value}      @tab Built-in function (@pxref{input_value})
-@item @code{int}              @tab Built-in function (@pxref{int})
+@item @code{IF}               @tab Part of @code{IF-ELSE} constructs (@ref{IF-ELSE constructs})
+@item @code{init_1d}          @tab Built-in function (@ref{init_1d})
+@item @code{init_2d}          @tab Built-in function (@ref{init_2d})
+@item @code{input_create}     @tab Built-in function (@ref{input_create})
+@item @code{input_delete}     @tab Built-in function (@ref{input_delete})
+@item @code{input_value}      @tab Built-in function (@ref{input_value})
+@item @code{int}              @tab Built-in function (@ref{int})
 @item @code{INT}              @tab @code{INTERNAL} keyword
 @item @code{INTERN}           @tab @code{INTERNAL} keyword
 @item @code{INTERNAL}         @tab @code{INTERNAL} keyword
@@ -145,7 +145,7 @@
 @item @code{INVERTED}         @tab @code{INVERTED} keyword
 @item @code{IMP}              @tab @code{IMPEDANCE} keyword
 @item @code{IMPEDANCE}        @tab @code{IMPEDANCE} keyword
-@item @code{is_file}          @tab Built-in function (@pxref{is_file})
+@item @code{is_file}          @tab Built-in function (@ref{is_file})
 @item                         @tab
 @item @code{kA}               @tab Unit, Kilo-Ampere
 @item @code{kdB}              @tab Unit, Kilo-Dezibel
@@ -156,7 +156,7 @@
 @item @code{kV}               @tab Unit, Kilo-Volt
 @item                         @tab
 @item @code{L}                @tab @code{LOW} keyword / Pulse @code{LENGTH} keyword
-@item @code{layout}           @tab Built-in function (@pxref{layout})
+@item @code{layout}           @tab Built-in function (@ref{layout})
 @item @code{LEN}              @tab Pulse @code{LENGTH} keyword
 @item @code{LENGTH}           @tab Pulse @code{LENGTH} keyword
 @item @code{LEV}              @tab Pulser channel @code{LEVEL} keyword
@@ -171,7 +171,7 @@
 @item @code{MATH1}            @tab Digitizer channel name
 @item @code{MATH2}            @tab Digitizer channel name
 @item @code{MATH3}            @tab Digitizer channel name
-@item @code{mean}             @tab Built-in function (@pxref{mean})
+@item @code{mean}             @tab Built-in function (@ref{mean})
 @item @code{MEM_C}            @tab Digitizer channel name
 @item @code{MEM_D}            @tab Digitizer channel name
 @item @code{MEMC}             @tab Digitizer channel name
@@ -195,18 +195,18 @@
 @item @code{ndb}              @tab Unit, Nano-Dezibel
 @item @code{NEG}              @tab
 @item @code{NEGATIVE}         @tab
-@item @code{NEXT}             @tab Loop control statement (@pxref{NEXT statement})
+@item @code{NEXT}             @tab Loop control statement (@ref{NEXT statement})
 @item @code{nG}               @tab Unit, Nano-Gauss
 @item @code{nHz}              @tab Unit, Nano-Hertz
 @item @code{ns}               @tab Unit, Nano-Seconds
 @item @code{nT}               @tab Unit, Nano-Tesla
 @item @code{nV}               @tab Unit, Nano-Volt
 @item                         @tab
-@item @code{object_delete}    @tab Built-in function (@pxref{object_delete})
+@item @code{object_delete}    @tab Built-in function (@ref{object_delete})
 @item @code{ON_STOP:}         @tab Label in @code{EXPERIMENT} section
-@item @code{output_create}    @tab Built-in function (@pxref{output_create})
-@item @code{output_delete}    @tab Built-in function (@pxref{output_delete})
-@item @code{output_value}     @tab Built-in function (@pxref{output_value})
+@item @code{output_create}    @tab Built-in function (@ref{output_create})
+@item @code{output_delete}    @tab Built-in function (@ref{output_delete})
+@item @code{output_value}     @tab Built-in function (@ref{output_value})
 @item                         @tab
 @item @code{P}                @tab
 @item @code{P@i{[0-9]+}}      @tab
@@ -222,11 +222,11 @@
 @item @code{PREPS:}           @tab Starts the @code{PREPARATIONS} section
 @item @code{PREPARATION:}     @tab Starts the @code{PREPARATIONS} section
 @item @code{PREPARATIONS:}    @tab Starts the @code{PREPARATIONS} section
-@item @code{print}            @tab Built-in function (@pxref{print})
+@item @code{print}            @tab Built-in function (@ref{print})
 @item @code{PULSE@i{[0-9]+}}  @tab
 @item @code{PULSE_@i{[0-9]+}} @tab
 @item                         @tab
-@item @code{REPEAT}           @tab Keyword for @code{REPEAT} loops (@pxref{REPEAT loops})
+@item @code{REPEAT}           @tab Keyword for @code{REPEAT} loops (@ref{REPEAT loops})
 @item @code{REPF}             @tab Pulser @code{REPETITION_FREQUENCY} keyword
 @item @code{REP_F}            @tab Pulser @code{REPETITION_FREQUENCY} keyword
 @item @code{REPEATF}          @tab Pulser @code{REPETITION_FREQUENCY} keyword
@@ -247,42 +247,42 @@
 @item @code{REP_T}            @tab Pulser @code{REPETITION_TIME} keyword
 @item @code{REPTIME}          @tab Pulser @code{REPETITION_TIME} keyword
 @item @code{REP_TIME}         @tab Pulser @code{REPETITION_TIME} keyword
-@item @code{random}           @tab Built-in function (@pxref{random})
+@item @code{random}           @tab Built-in function (@ref{random})
 @item @code{REF1}             @tab Digitizer channel name
 @item @code{REF2}             @tab Digitizer channel name
 @item @code{REF3}             @tab Digitizer channel name
 @item @code{REF4}             @tab Digitizer channel name
-@item @code{rms}              @tab Built-in function (@pxref{rms})
-@item @code{round}            @tab Built-in function (@pxref{round})
+@item @code{rms}              @tab Built-in function (@ref{rms})
+@item @code{round}            @tab Built-in function (@ref{round})
 @item                         @tab
 @item @code{S}                @tab
 @item @code{s}                @tab Unit, Seconds
-@item @code{save}             @tab Built-in function (@pxref{save})
-@item @code{save_comment}     @tab Built-in function (@pxref{save_comment})
-@item @code{save_output}      @tab Built-in function (@pxref{save_output})
-@item @code{save_program}     @tab Built-in function (@pxref{save_program})
-@item @code{set_seed}         @tab Built-in function (@pxref{set_seed})
-@item @code{sin}              @tab Built-in function (@pxref{sin})
-@item @code{sinh}             @tab Built-in function (@pxref{sinh})
-@item @code{size}             @tab Built-in function (@pxref{size})
-@item @code{sizes}            @tab Built-in function (@pxref{sizes})
+@item @code{save}             @tab Built-in function (@ref{save})
+@item @code{save_comment}     @tab Built-in function (@ref{save_comment})
+@item @code{save_output}      @tab Built-in function (@ref{save_output})
+@item @code{save_program}     @tab Built-in function (@ref{save_program})
+@item @code{set_seed}         @tab Built-in function (@ref{set_seed})
+@item @code{sin}              @tab Built-in function (@ref{sin})
+@item @code{sinh}             @tab Built-in function (@ref{sinh})
+@item @code{size}             @tab Built-in function (@ref{size})
+@item @code{sizes}            @tab Built-in function (@ref{sizes})
 @item @code{SL}               @tab
-@item @code{slice}            @tab Built-in function (@pxref{slice})
-@item @code{slider_create}    @tab Built-in function (@pxref{slider_create})
-@item @code{slider_delete}    @tab Built-in function (@pxref{slider_delete})
-@item @code{slider_value}     @tab Built-in function (@pxref{slider_value})
+@item @code{slice}            @tab Built-in function (@ref{slice})
+@item @code{slider_create}    @tab Built-in function (@ref{slider_create})
+@item @code{slider_delete}    @tab Built-in function (@ref{slider_delete})
+@item @code{slider_value}     @tab Built-in function (@ref{slider_value})
 @item @code{SLOPE}            @tab Pulser @code{SLOPE} keyword
-@item @code{sqrt}             @tab Built-in function (@pxref{sqrt})
+@item @code{sqrt}             @tab Built-in function (@ref{sqrt})
 @item @code{START}            @tab
 @item                         @tab
 @item @code{T}                @tab Unit, Tesla
-@item @code{tan}              @tab Built-in function (@pxref{tan})
-@item @code{tanh}             @tab Built-in function (@pxref{tanh})
+@item @code{tan}              @tab Built-in function (@ref{tan})
+@item @code{tanh}             @tab Built-in function (@ref{tanh})
 @item @code{TB}               @tab Pulser @code{TIME_BASE} keyword
 @item @code{T_B}              @tab Pulser @code{TIME_BASE} keyword
 @item @code{TBASE}            @tab Pulser @code{TIME_BASE} keyword
 @item @code{T_BASE}           @tab Pulser @code{TIME_BASE} keyword
-@item @code{time}             @tab Built-in function (@pxref{time})
+@item @code{time}             @tab Built-in function (@ref{time})
 @item @code{TIMEB}            @tab Pulser @code{TIME_BASE} keyword
 @item @code{TIME_B}           @tab Pulser @code{TIME_BASE} keyword
 @item @code{TIMEBASE}         @tab Pulser @code{TIME_BASE} keyword
@@ -294,7 +294,7 @@
 @item @code{uG}               @tab Unit, Micro-Gauss
 @item @code{uHz}              @tab Unit, Micro-Hertz
 @item @code{us}               @tab Unit, Micro-Seconds
-@item @code{UNTIL}            @tab Keyword for @code{UNTIL} loops (@pxref{UNTIL loops})
+@item @code{UNTIL}            @tab Keyword for @code{UNTIL} loops (@ref{UNTIL loops})
 @item @code{uT}               @tab Unit, Micro-Tesla
 @item @code{uV}               @tab Unit, Micro-Volt
 @item                         @tab
@@ -312,6 +312,6 @@
 @item @code{VLOW}             @tab
 @item @code{V_LOW}            @tab
 @item                         @tab
-@item @code{wait}             @tab Built-in function (@pxref{wait})
-@item @code{WHILE}            @tab Keyword for @code{WHILE} loops (@pxref{WHILE loops})
+@item @code{wait}             @tab Built-in function (@ref{wait})
+@item @code{WHILE}            @tab Keyword for @code{WHILE} loops (@ref{WHILE loops})
 @end multitable

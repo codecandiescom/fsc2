@@ -174,7 +174,7 @@ bool functions_init( void )
 	/* Count number of built-in functions */
 
 	for ( Num_Func = 0; Def_Fncts[ Num_Func ].fnct != NULL; Num_Func++ )
-		;
+		/* empty */ ;
 
 	/*
 	   1. Get new memory for the functions structures and copy the built-in
@@ -243,11 +243,11 @@ void functions_exit( void )
 		eprint( SEVERE, UNSET, "Internal error detected at %s:%u.\n",
 				__FILE__, __LINE__ );
 		while ( call_pop( ) )
-			;
+			/* empty */ ;
 	}
 #else
 	while ( call_pop( ) )
-		;
+		/* empty */ ;
 #endif
 
 	No_File_Numbers = UNSET;
@@ -391,7 +391,7 @@ Var *func_call( Var *f )
 		/* Count number of arguments on the stack */
 
 		for ( ac = 0, ap = f->next; ap != NULL; ++ac, ap = ap->next )
-			;
+			/* empty */ ;
 
 		/* If there are too many arguments utter a warning and remove the
 		   superfluous ones (distinuguish between functions with a fixed
@@ -404,9 +404,9 @@ Var *func_call( Var *f )
 					"superfluous arguments.\n", f->name );
 
 			for ( ac = 0, ap = f->next; ac < abs_len; ++ac, ap = ap->next )
-				;
+				/* empty */ ;
 			while ( ( ap = vars_pop( ap ) ) != NULL )
-				;
+				/* empty */ ;
 		}
 
 		/* For functions with a fixed number of arguments (a positive number
@@ -454,7 +454,7 @@ Var *func_call( Var *f )
 #endif
 		call_pop( );
 		for ( ap = f; ap != NULL; ap = vars_pop( ap ) )
-			;
+			/* empty */ ;
 		RETHROW( );
 	}
 
@@ -483,7 +483,7 @@ Var *func_call( Var *f )
 	   and all parameters that survived - just keep the return value. */
 
 	for ( ap = f; ap != ret; ap = vars_pop( ap ) )
-		;
+		/* empty */ ;
 
 	return ret;
 }

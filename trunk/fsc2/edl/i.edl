@@ -65,7 +65,9 @@ FOREVER {
 		input_value( I3, I );
 	}
 
-	IF input_value( I2 ) > 100.0 {
+	IF ( ( M | menu_choice( M ) == 1 ) |
+	     ( input_value( I2 ) > 100.0 & button_state( BID7 ) ) ) &
+	   print( "\TBlabla = #\n", I ) {
 		input_value( I4, 0.1 * I^2 );
 	}
 

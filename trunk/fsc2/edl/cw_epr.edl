@@ -1,0 +1,120 @@
+#!/usr/local/bin/fsc2 -T
+
+/***************************************************************************/
+/*                                                                         */
+/*      EDL program for running cw-EPR experiments with the 360 GHz        */
+/*                         spectrometer.                                   */
+/*                                                                         */
+/*      $Id$                                                               *
+/*                                                                         */
+/***************************************************************************/
+
+
+DEVICES:
+
+ips20_4;
+sr830;
+
+
+VARIABLES:
+
+start_current = 0.0 A;
+sweep_rate    = 0.3 A / 60 s;
+Num_Points    = 512;
+
+tc = 300 ms;
+kd = 2 Hz;
+
+data[ Num_Points ];
+avg[ Num_Points ];
+
+I, J = 1;
+File1, File2;
+
+
+PREPARATIONS:
+
+init_1d( 3, Num_Points, start_current, sweep_rate / kd,
+		 "Current [A]", "Signal [mV]" );
+magnet_setup( start_current, sweep_rate );
+lockin_time_constant( tc );
+lockin_auto_setup( 1 / kd, 1 );
+
+
+EXPERIMENT:
+
+File1 = get_file( "File for averaged data:", "*.dat" );
+File2 = clone_file( File1, "dat", "act" );
+
+FOREVER {
+
+	reset_field( );
+
+	print( "Starting #. run", J );
+
+	magnet_sweep( "UP" );
+	lockin_auto_acquisition( "ON" );
+
+	FOR I = 1 : Num_Points {
+
+		data[ I ] = lockin_get_data( );
+		IF is_file( File2 ) {
+			fsave( File2, " #", data[ I ] );
+		}
+		display( I, data[ I ], 1, I, ( avg[ I ] + data[ I ] ) / J, 2 );
+	}
+
+	avg += data;
+
+	magnet_sweep( "STOP" );
+	lockin_auto_acquisition( "OFF" );
+
+	fsave( File2, "\n" );
+
+	clear_curve( 1, 3 );
+	display( 1, data, 3 );
+}
+
+
+ON_STOP:
+
+IF magnet_sweep( ) {
+	magnet_sweep( "STOP" );
+}
+lockin_auto_acquisition( "OFF" );
+
+IF J == 1 {                 // if experiment was stopped during the first run
+	Num_Points = I - 1;
+	avg = data;
+} ELSE {
+	UNLESS I > Num_Points { // if experiment was stopped before end of run
+		J -= 1;
+	}
+	avg /= J;
+}
+
+IF is_file( File1 ) {
+	fsave( File1,
+		   "% # #\n"
+		   "% Magnet:\n"
+		   "%    Start current:        # A\n"
+		   "%	 End current:          # A\n"
+		   "%	 Sweep rate:           # A/min\n"
+		   "% Lock-In:\n"
+		   "%	 Sensitivity:          # mV\n"
+		   "%	 Time constant:        # s\n"
+		   "%    Acquisition rate:     # Hz\n"
+		   "%	 Phase:			       # degree\n"
+		   "%    Modulation frequency: # Khz\n"
+		   "%    Modulation amplitude: # V \n"
+		   "% Number of runs:          #\n",
+		   date(), time(),
+		   start_current, start_current + ( Num_Points - 1 ) * sweep_rate / kd,
+		   sweep_rate * 60.0, lockin_sensitivity( ) * 1.0e3, tc, kd,
+		   lockin_phase( ), lockin_ref_freq( ) * 1.0e3, lockin_ref_level( ),
+		   J );
+
+	save_comment( File1, "% ", "Sample:  \nTemperature:  \n" );
+
+	save( File1, slice( avg, 1, Num_Points ) );
+}

@@ -990,13 +990,11 @@ static void do_measurement( void )
 		}
 		CATCH( USER_BREAK_EXCEPTION )
 		{
-			TRY_SUCCESS;
-
 			/* Clean up the variable stack, it may have become messed up */
 
 			vars_del_stack( );
 
-			/* If the exception arrives while we're already dealing with the
+			/* If the exception arrived while we're already dealing with the
 			   ON_STOP part this probably is a sign that there is some
 			   severe hardware problem and we better stop even though the
 			   ON_STOP part isn't been finished yet. */

@@ -79,8 +79,6 @@ acq_rates_list[ 10 ] = { 32 Hz, 16 Hz, 8 Hz, 4 Hz, 2 Hz, 1 Hz, 500 mHz,
 STOPPED = 0;
 UP = 1;
 DOWN = -1;
-SWITCH_ON = 1;
-SWITCH_OFF = 0;
 
 
 PREPARATIONS:
@@ -95,7 +93,8 @@ EXPERIMENT:
 /* We start with asking the magnet for the current and the sweep rate after
    having made sure that the magnet isn't sweeping */
 
-IF ( magnet_sweep( ) != STOPPED ) {
+IF ( magnet_sweep( ) != STOPPED )
+{
 	magnet_sweep( STOPPED );
 }
 current = get_field( );
@@ -134,14 +133,13 @@ lockin_auto_setup( 1.0 / acq_rates_list[ Cur_Acq_Rate ], 1 );
 
 /* Unlock the lock-ins keyboard */
 
-lockin_lock_keyboard( SWITCH_OFF );
-
+lockin_lock_keyboard( \"OFF\" );
 /* Finally, create the form with the buttons for sweeping etc. */
 
 Sweep_Up   = button_create( \"RADIO_BUTTON\", \"Sweep up\" );
 Sweep_Stop = button_create( \"RADIO_BUTTON\", Sweep_Up, \"Stop sweep\" );
 Sweep_Down = button_create( \"RADIO_BUTTON\", Sweep_Up, \"Sweep Down\" );
-button_state( Sweep_Stop, SWITCH_ON );
+button_state( Sweep_Stop, \"ON\" );
 
 Current    = input_create( \"FLOAT_INPUT\", current, \"Set new current (in A)\" );
 Sweep_Rate = input_create( \"FLOAT_INPUT\", sweep_rate * 60.0,
@@ -167,21 +165,21 @@ FOREVER
 	   of the sweep direction, in the later case also stop and restart the
 	   lock-in's auto-acquisition to empty its internal data buffer. */
 
-	IF button_state( Sweep_Up ) & Sweep_State != UP & I < MAX_POINTS
+	IF Sweep_State != UP & button_state( Sweep_Up ) & I < MAX_POINTS
 	{
 		IF Sweep_State == STOPPED
 		{
 			magnet_sweep( UP );
 			Sweep_State = UP;
-			lockin_auto_acquisition( SWITCH_ON );
+			lockin_auto_acquisition( \"ON\" );
 		}
 
 		IF Sweep_State == DOWN
 		{
-			lockin_auto_acquisition( SWITCH_OFF );
+			lockin_auto_acquisition( \"OFF\" );
 			magnet_sweep( UP );
 			Sweep_State = UP;
-			lockin_auto_acquisition( SWITCH_ON );
+			lockin_auto_acquisition( \"ON\" );
 		}
 	}
 
@@ -190,30 +188,30 @@ FOREVER
 	   reversal of the sweep direction, in the later case also stop and restart
 	   the lock-in's auto-acquisition to empty its internal data buffer. */
 
-	IF button_state( Sweep_Down ) & Sweep_State != DOWN & I < MAX_POINTS
+	IF Sweep_State != DOWN & button_state( Sweep_Down ) & I < MAX_POINTS
 	{
 
 		IF Sweep_State == STOPPED
 		{
 			magnet_sweep( DOWN );
 			Sweep_State = DOWN;
-			lockin_auto_acquisition( SWITCH_ON );
+			lockin_auto_acquisition( \"ON\" );
 		}
 
 		IF Sweep_State == UP
 		{
-			lockin_auto_acquisition( SWITCH_OFF );
+			lockin_auto_acquisition( \"OFF\" );
 			magnet_sweep( DOWN );
 			Sweep_State = DOWN;
-			lockin_auto_acquisition( SWITCH_ON );
+			lockin_auto_acquisition( \"ON\" );
 		}
 	}
 
 	/* Check if the sweep stop button has been pressed while we're sweeping */
 
-	IF button_state( Sweep_Stop ) & Sweep_State != STOPPED
+	IF Sweep_State != STOPPED & button_state( Sweep_Stop )
 	{
-		lockin_auto_acquisition( SWITCH_OFF );
+		lockin_auto_acquisition( \"OFF\" );
 		magnet_sweep( STOPPED );
 		Sweep_State = STOPPED;
 	}
@@ -231,8 +229,8 @@ FOREVER
 		}
 		ELSE
 		{
-			lockin_auto_acquisition( SWITCH_OFF );
-			button_state( Sweep_Stop, SWITCH_ON );
+			lockin_auto_acquisition( \"OFF\" );
+			button_state( Sweep_Stop, \"ON\" );
 			current = set_field( new_current );
 			Sweep_State = STOPPED;
 		}
@@ -255,8 +253,8 @@ FOREVER
 			sweep_rate = magnet_sweep_rate( new_sweep_rate / 60.0 );
 			IF Sweep_State != STOPPED
 			{
-				lockin_auto_acquisition( SWITCH_OFF );
-				lockin_auto_acquisition( SWITCH_ON );
+				lockin_auto_acquisition( \"OFF\" );
+				lockin_auto_acquisition( \"ON\" );
 			}
 		}
 
@@ -275,8 +273,8 @@ FOREVER
 		lockin_auto_setup( 1.0 / acq_rate, 1 );
 		IF Sweep_State != STOPPED
 		{
-			lockin_auto_acquisition( SWITCH_OFF );
-			lockin_auto_acquisition( SWITCH_ON );
+			lockin_auto_acquisition( \"OFF\" );
+			lockin_auto_acquisition( \"ON\" );
 		}
 	}
 
@@ -298,12 +296,12 @@ FOREVER
 	IF button_state( Clear )
 	{
 		clear_curve( );
-		rescale( 32 );
+		rescale( 64 );
 		I = 0;
 		IF Sweep_State != STOPPED
 		{
-			lockin_auto_acquisition( SWITCH_OFF );
-			lockin_auto_acquisition( SWITCH_ON );
+			lockin_auto_acquisition( \"OFF\" );
+			lockin_auto_acquisition( \"ON\" );
 		}
 	}
 
@@ -319,12 +317,12 @@ FOREVER
 		data[ I ] = lockin_get_data( 1 );
 		display( I, data[ I ] * 1.0e3 );
 
-		IF I >= MAX_POINTS | magnet_sweep( ) == STOPPED
+		IF magnet_sweep( ) == STOPPED | I >= MAX_POINTS
 		{
-			lockin_auto_acquisition( SWITCH_OFF );
+			lockin_auto_acquisition( \"OFF\" );
 			magnet_sweep( STOPPED );
 			Sweep_State = STOPPED;
-			button_state( Sweep_Stop, SWITCH_ON );
+			button_state( Sweep_Stop, \"ON\" );
 		}
 	}
 	ELSE
@@ -342,11 +340,11 @@ ON_STOP:
 IF Sweep_State != STOPPED
 {
 	magnet_sweep( STOPPED );
-	lockin_auto_acquisition( SWITCH_OFF );
+	lockin_auto_acquisition( \"OFF\" );
 }
 ";
 
-
+close F;
 
 # Notify the user if sending the program to fsc2 failed for some reasons
 
@@ -356,13 +354,13 @@ if ( $? != 0 ) {
     } elsif ( $? >> 8 == 1 ) {
         $text = "Someone else is running fsc2.";
     } elsif ( $? >> 8 == 2 ) {
-        $text = "fsc2 is currently busy.";
+        $text = "fsc2 is already testing or\nrunning an experiment.";
     } elsif ( $? >> 8 == 3 ) {
         $text = "Internal error of fsc2.";
     } elsif ( $? >> 8 == 4 ) {
         $text = "Could not start fsc2.";
     } else {
-        $text = "Something strange is going on here.";
+        $text = "Something strange\nis going on here.";
     }
 
     &show_message( $text ) if $? >> 8 != 0;

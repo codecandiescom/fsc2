@@ -35,6 +35,7 @@ static size_t num_vars = 0;
 
 static int comp_vars_1( const void *a, const void *b );
 static int comp_vars_2( const void *a, const void *b );
+static Var *vars_str_comp( int comp_type, Var *v1, Var *v2 );
 static void free_vars( void );
 static void vars_warn_new( Var *v );
 static Var *vars_get_lhs_pointer( Var *v, int dim );
@@ -280,7 +281,7 @@ void vars_sort( void )
 
 	for ( num_vars = 0, ptr = EDL.Var_List; ptr != NULL;
 		  ptr = ptr->next, num_vars++ )
-		;
+		/* empty */ ;
 
 	/* Get the variables into a continous block, then sort them according
 	   to the variable names */
@@ -967,8 +968,8 @@ Var *vars_negate( Var *v )
 /* the numbers when the last significant bit is changed (if there's a       */
 /* function in libc that allow us to do this...).                           */
 /* ->                                                                       */
-/*    * type of comparison (COMP_EQUAL, COMP_UNEQUAL, COMP_LESS or          */
-/*      COMP_LESS_EQUAL)                                                    */
+/*    * type of comparison (COMP_EQUAL, COMP_UNEQUAL, COMP_LESS,            */
+/*      COMP_LESS_EQUAL, COMP_AND, COMP_OR or COMP_XOR)                     */
 /*    * pointers to the two variables                                       */
 /* <-                                                                       */
 /*    * integer variable with value of 1 (true) or 0 (false) depending on   */
@@ -979,6 +980,11 @@ Var *vars_comp( int comp_type, Var *v1, Var *v2 )
 {
 	Var *new_var = NULL;
 
+
+	/* If both variables are strings we can also do some kind of comparisons */
+
+	if ( v1 && v1->type == STR_VAR && v2 && v2->type == STR_VAR )
+		return vars_str_comp( comp_type, v1, v2 );
 
 	/* Make sure that `v1' and `v2' exist, are integers or float values
 	   and have an value assigned to it */
@@ -1081,6 +1087,58 @@ Var *vars_comp( int comp_type, Var *v1, Var *v2 )
 								( VALUE( v1 ) != 0.0 && VALUE( v2 ) == 0.0 ) ||
 								( VALUE( v1 ) == 0.0 && VALUE( v2 ) != 0.0 ) );
 			break;
+
+		default:               /* this should never happen... */
+			fsc2_assert( 1 == 0 );
+			break;
+	}
+
+	/* Pop the variables from the stack */
+
+	vars_pop( v1 );
+	vars_pop( v2 );
+
+	return new_var;
+}
+
+
+/*--------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------*/
+
+static Var *vars_str_comp( int comp_type, Var *v1, Var *v2 )
+{
+	Var *new_var = NULL;
+
+
+	vars_check( v1, STR_VAR );
+	vars_check( v2, STR_VAR );
+
+	switch ( comp_type )
+	{
+		case COMP_EQUAL :
+			vars_push( INT_VAR, strcmp( v1->val.sptr, v2->val.sptr ) ? 0 : 1 );
+			break;
+			
+		case COMP_UNEQUAL :
+			vars_push( INT_VAR, strcmp( v1->val.sptr, v2->val.sptr ) ? 1 : 0 );
+			break;
+
+		case COMP_LESS :
+			vars_push( INT_VAR,
+					   strcmp( v1->val.sptr, v2->val.sptr ) < 0 ? 1 : 0 );
+			break;
+
+		case COMP_LESS_EQUAL :
+			vars_push( INT_VAR,
+					   strcmp( v1->val.sptr, v2->val.sptr ) <= 0 ? 1 : 0 );
+			break;
+
+		case COMP_AND :
+		case COMP_OR  :
+		case COMP_XOR :
+			eprint( FATAL, SET, "Logical and, or and xor operators can't be "
+					"used on with string variables.\n" );
+			THROW( EXCEPTION );
 
 		default:               /* this should never happen... */
 			fsc2_assert( 1 == 0 );
@@ -1323,7 +1381,7 @@ Var *vars_pop( Var *v )
 void vars_del_stack( void )
 {
 	while ( vars_pop( EDL.Var_Stack ) )
-		;
+		/* empty */ ;
 }
 
 
@@ -1476,7 +1534,7 @@ bool vars_exist( Var *v )
 
 	if ( v->is_on_stack )
 		for ( lp = EDL.Var_Stack; lp != NULL && lp != v; lp = lp->next )
-			;
+			/* empty */ ;
 	else
 	{
 		if ( is_sorted )
@@ -1484,7 +1542,7 @@ bool vars_exist( Var *v )
 						  sizeof *EDL.Var_List, comp_vars_2 );
 		else
 			for ( lp = EDL.Var_List; lp != NULL && lp != v; lp = lp->next )
-				;
+				/* empty */ ;
 	}
 
 	/* If the variable can't be found in the lists we've got a problem... */
@@ -2564,6 +2622,8 @@ Var *apply_unit( Var *var, Var *unit )
 
 	if ( unit == NULL )
 	{
+		if ( var->type == STR_VAR )
+			return var;
 		if ( var->type & ( INT_VAR | FLOAT_VAR ) )
 			return vars_mult( var, vars_push( INT_VAR, 1 ) );
 		if ( var->type & ( INT_CONT_ARR | FLOAT_CONT_ARR ) )

@@ -57,6 +57,7 @@ extern void exprestart( FILE *fp );
 extern Token_Val exp_runlval;             /* from exp_run_parser.y */
 extern Token_Val exp_testlval;            /* from exp_test_parser.y */
 extern Token_Val conditionlval;           /* from condition_parser.y */
+extern int condition_gobble;              /* from condition_parser.y */
 
 /* local functions */
 
@@ -78,8 +79,8 @@ static const char *get_construct_name( int type );
   it would be rather difficult to run through the loops since we would have to
   re-read and re-tokenise the input file again and again, which not only would
   be painfully slow but also difficult since what we read is not the real EDL
-  file(s) but a pipe that contains what remains from the input files (there
-  could be more than one when the #include directive has been used) after
+  file(s) but a pipe that passes to us what remains from the input files (there
+  could even be more than one when #include directives had been used) after
   filtering through the program `fsc2_clean'. Second, we will have to run
   through the experiment section at least three times, first for syntax and
   sanity checks, then for the test run and finally for really doing the
@@ -94,12 +95,12 @@ static const char *get_construct_name( int type );
      lexer) in the array of program tokens, prg_token.
   2. While doing so it also does a few preliminay tests - it checks that
      opening and closing parentheses and braces match, BREAK and NEXT
-	 statements only appear in loops and that THE ON_STOP statement isn't
-	 in a block or within parentheses or braces.
+	 statements only appear in within loops and that THE ON_STOP statement
+	 isn't in a block or within parentheses or braces.
   3. When done with storing the program it does everything needed to set up
      loops, if-else and unless-else constructs.
   4. Finally, a syntax check of the program is run. In this check the whole
-     program is feed to a parser to test if any syntactic errors are found.
+     program is feed to a parser to test if syntactic errors are found.
 -----------------------------------------------------------------------------*/
 
 void store_exp( FILE *in )
@@ -359,10 +360,10 @@ void store_exp( FILE *in )
 
 	loop_setup( );
 
-	/* Now we have to do a syntax check - some syntax errors might not be
-	   found even when running the test because some IF or UNLESS conditions
-	   never get triggered. It has also the advantage that syntax erors
-	   will be found immediately instead after a long test run. */
+	/* Now we have to do a syntax check - some syntax errors can not be found
+	   when running the test because some IF or UNLESS conditions might never
+	   get triggered. It has also the advantage that syntax erors will be
+	   found immediately instead after a long test run. */
 
 	exp_syntax_check( );
 }
@@ -474,7 +475,7 @@ void forget_prg( void )
 	   exception got thrown */
 
 	while ( pop_curly_brace( ) )
-		;
+		/* empty */ ;
 }
 
 
@@ -1184,6 +1185,7 @@ bool test_condition( Prg_Token *cur )
 
 
 	EDL.cur_prg_token++;                        /* skip the WHILE or IF etc. */
+	condition_gobble = 0;
 	conditionparse( );                          /* get the value */
 	fsc2_assert( EDL.Var_Stack->next == NULL ); /* Paranoia as usual... */
 	fsc2_assert( EDL.cur_prg_token->token == '{' );
@@ -1202,8 +1204,10 @@ bool test_condition( Prg_Token *cur )
 
 	if ( EDL.Var_Stack->type == INT_VAR )
 		condition = EDL.Var_Stack->val.lval ? OK : FAIL;
-	else
+	else if ( EDL.Var_Stack->type == FLOAT_VAR )
 		condition = EDL.Var_Stack->val.dval ? OK : FAIL;
+	else if ( EDL.Var_Stack->type == STR_VAR )
+		condition = ( EDL.Var_Stack->val.sptr[ 0 ] != '\0') ? OK : FAIL;
 
 	vars_pop( EDL.Var_Stack );
 	return ( cur->token != UNLESS_TOK ) ? condition : ! condition;
@@ -1570,7 +1574,7 @@ static void save_restore_variables( bool flag )
 
 		for ( var_count = 0, src = EDL.Var_List; src != NULL;
 			  var_count++, src = src->next )
-			;
+			/* empty */ ;
 
 		var_list_copy = T_malloc( var_count * sizeof( Var ) );
 

@@ -30,10 +30,10 @@
 /*                                                                  */
 /* In order to avoid overflows of the fixed size exception frame    */
 /* stack (i.e. after MAX_NESTED_EXCEPTIONS successful TRY's) it is  */
-/* necessary manually remove an exception frame (in contrast to C++ */
-/* where this is handled automatically) by calling TRY_SUCCESS if   */
-/* the code of the TRY block finished successfully. A typical TRY   */
-/* block sequence is thus:                                          */
+/* necessary too manually remove an exception frame (in contrast to */
+/* C++ where this is handled automatically) by calling TRY_SUCCESS  */
+/* if the code of the TRY block finished successfully. A typical    */
+/* TRY block sequence is thus:                                      */
 /*                                                                  */
 /* TRY {                                                            */
 /*     statement;                                                   */
@@ -162,6 +162,17 @@ Exception_Types get_exception_type( const char *file, int unsigned line )
 	{
 	    syslog( LOG_ERR, "%s: Request for type of exception that never got "
 				"thrown at %s:%u.\n", prog_name, file, line );
+#ifdef FSC2_HEADER
+		if ( Internals.I_am == CHILD )
+			_exit( FAIL );
+#endif
+		exit( EXIT_FAILURE );
+	}
+
+	if ( exception_stack_pos < -1 )
+	{
+	    syslog( LOG_ERR, "%s: Exception stack is empty at %s:%u.\n",
+				prog_name, file, line );
 #ifdef FSC2_HEADER
 		if ( Internals.I_am == CHILD )
 			_exit( FAIL );

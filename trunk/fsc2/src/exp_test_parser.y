@@ -209,6 +209,7 @@ expr:    E_INT_TOKEN unit                             { }
        | E_VAR_TOKEN '[' list1 ']' unit               { }
        | E_FUNC_TOKEN '(' list2 ')' unit              { }
        | E_VAR_REF                                    { }
+       | E_STR_TOKEN                                  { }
        | E_FUNC_TOKEN '['         { eprint( FATAL, SET, "`%s' is a predefined "
 									        "function.\n", $1->name );
 	                                THROW( EXCEPTION ); }

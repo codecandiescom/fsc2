@@ -225,7 +225,7 @@ long get_file_length( const char *name, int *len )
 	/* Count number of digits of number of lines */
 
 	for ( i = lines, *len = 1; ( i /= 10 ) > 0; ++( *len ) )
-		;
+		/* empty */ ;
 
 	return lines;
 }

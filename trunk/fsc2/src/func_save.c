@@ -707,7 +707,7 @@ static void f_format_check( Var *v )
 			int sc;
 
 			for ( sc = 0; *cp == '\\'; sc++, cp++ )
-				;
+				/* empty */ ;
 
 			if ( sc & 1 && *cp =='#' )
 				memmove( cp - 1, cp, strlen( cp ) + 1 );
@@ -773,7 +773,7 @@ static void f_format_check( Var *v )
 		print( SEVERE, "More data than format descriptors in format "
 			   "string.\n" );
 		while ( ( cv = vars_pop( cv ) ) != NULL )
-			;
+			/* empty */ ;
 	}
 
 	/* Finally replace the escpe sequences in the format string */
@@ -850,7 +850,7 @@ static void ff_format_check( Var *v )
 		/* Skip over everything that's not a conversion specifier */
 
 		for ( ; *sptr != '\0' && *sptr != '%'; sptr++ )
-			;
+			/* empty */ ;
 
 		if ( *sptr++ == '\0' )
 			break;
@@ -896,7 +896,7 @@ static void ff_format_check( Var *v )
 		}
 		else if ( isdigit( *sptr ) )
 			while ( isdigit( *++sptr ) )
-				;
+				/* empty */ ;
 
 		if ( *sptr == '\0' )
 		{
@@ -930,7 +930,7 @@ static void ff_format_check( Var *v )
 			}
 			else if ( isdigit( *sptr ) )
 				while ( isdigit( *++sptr ) )
-					;
+					/* empty */ ;
 
 			if ( *sptr == '\0' )
 			{
@@ -1021,7 +1021,7 @@ static void ff_format_check( Var *v )
 		print( SEVERE, "More arguments than conversion specifiers found in "
 			   "format.\n" );
 		while ( ( vptr = vars_pop( vptr ) ) != NULL )
-			;
+			/* empty */ ;
 	}
 }
 
@@ -1114,7 +1114,7 @@ static long do_printf( int file_num, Var *v )
 			}
 			else if ( isdigit( *fmt_end ) )
 				while ( isdigit( *++fmt_end ) )
-					;
+					/* empty */ ;
 
 			if ( *fmt_end == '.' )
 			{
@@ -1125,7 +1125,7 @@ static long do_printf( int file_num, Var *v )
 				}
 				else if ( isdigit( *fmt_end ) )
 					while ( isdigit( *++fmt_end ) )
-						;
+						/* empty */ ;
 			}
 
 			/* Find out about the type of the argument to be printed */
@@ -1420,12 +1420,12 @@ static int print_browser( int browser, int fid, const char* comment )
 		{
 			if ( browser == 0 )
 				while ( *lp++ != ':' )
-					;
+					/* empty */ ;
 			else if ( *line == '@' )
 			{
 				lp++;
 				while ( *lp++ != 'f' )
-					;
+					/* empty */ ;
 			}
 
 			count += T_fprintf( fid, "%s%s\n", comment, lp );

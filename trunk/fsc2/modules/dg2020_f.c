@@ -298,7 +298,7 @@ void dg2020_f_exit_hook( void )
 	/* free all the memory allocated within the module */
 
 	for ( p = dg2020_Pulses; p != NULL; np = p->next, T_free( p ), p = np )
-		;
+		/* empty */ ;
 	dg2020_Pulses = NULL;
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )

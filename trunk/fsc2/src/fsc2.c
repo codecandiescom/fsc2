@@ -210,7 +210,7 @@ int main( int argc, char *argv[ ] )
 		/* And, finally, here's the main loop of the program... */
 
 		while ( fl_do_forms( ) != GUI.main_form->quit )
-			;
+			/* empty */ ;
 	}
 	else
 		fprintf( stderr, "fsc2: Internal failure on startup.\n" );
@@ -712,7 +712,7 @@ static void start_editor( void )
 			{
 				argv[ i ] = ep;
 				while ( *ep++ )
-					;
+					/* empty */ ;
 			}
 
 			argv[ i ] = in_file;
@@ -733,7 +733,7 @@ static void start_editor( void )
 	if ( ! strcmp( strip_path( argv[ 2 ] ), "emacs" ) )
 	{
 		for ( i = 3; argv[ i ] && strcmp( argv[ i ], "-nw" ); ++i )
-			;
+			/* empty */ ;
 		if ( argv[ i ] == NULL )                    /* no '-nw' flag */
 			final_argv = argv + 2;
 	}
@@ -1060,7 +1060,7 @@ static bool display_file( char *name, FILE *fp )
 					*lp++ = ' ';
 				while ( cc++ % TAB_LENGTH &&
 						cc < FL_BROWSER_LINELENGTH - len - 3 )
-					;
+					/* empty */ ;
 				cc--;
 			}
 		}
@@ -1334,7 +1334,7 @@ void conn_callback( FL_OBJECT *a, long b )
 
 	while ( ( count = read( Comm.conn_pd[ READ ], line, MAXLINE ) ) == -1 &&
 			errno == EINTR )
-		;
+		/* empty */ ;
 	line[ count - 1 ] = '\0';
 	GUI.main_form->Load->u_ldata = ( long ) line[ 0 ];
 	if ( line[ 1 ] == 'd' )

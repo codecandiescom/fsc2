@@ -260,7 +260,7 @@ Var *temp_contr_sensor_unit( Var *v )
 			   "arguments.\n" );
 
 		while ( ( v = vars_pop( v ) ) != NULL )
-			;
+			/* empty */ ;
 	}
 
 	if ( FSC2_MODE == TEST )

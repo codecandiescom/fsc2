@@ -51,7 +51,7 @@ print( "# # #\n", d[ 1 ], d[ 2 ], d[ 3 ]);
 print( "The # of # is: #\n", "sine", x, sin( x ) );
 
 
-init_1d( 4, 0, 890, 0.1, "Magnetic field [G]",
+init_1d( 4, 0, 890, 0.1, "Price [µ¤]",
 		 "EPR signal (1st derivative)" );
 
 
@@ -78,11 +78,13 @@ FOR K = 1 : 5 {
 
 		IF I == N / 2 {
 			change_scale( -10.0, 2.5 );
+			change_label( "Magnetic field [G]" );
 		}
 	}
 
 	IF K != 5 {
 		change_scale( 890, 0.1 );
+		change_label( "Price [¤]" );
 	}
 }
 

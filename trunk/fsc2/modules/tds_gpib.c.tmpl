@@ -209,6 +209,8 @@ bool tds_tmpl_init( const char *name )
 		if ( ! tds_tmpl.lock_state &&
 			 gpib_write( tds_tmpl.device, "LOC NON\n", 8 ) == FAILURE )
 			tds_tmpl_gpib_failure( );
+
+		TRY_SUCCESS;
 	}
 	OTHERWISE
 	{
@@ -293,7 +295,7 @@ long tds_tmpl_get_record_length( void )
 
     reply[ length - 1 ] = '\0';
 	while ( ! isdigit( *r ) && *r++ )
-		;
+		/* empty */ ;
 
     return T_atol( r );
 }

@@ -25,7 +25,8 @@ c_sources     = fsc2.c xinit.c pulser.c util.c exceptions.c variables.c   \
                 func_intact.c T.c phases.c exp.c devices.c run.c comm.c   \
                 accept.c gpib_if.c chld_func.c loader.c conn.c ipc.c      \
 				print.c graphics.c graph_handler_1d.c graph_handler_2d.c  \
-				graph_cut.c bugs.c fsc2_assert.c dump.c serial.c module_util.c
+				graph_cut.c bugs.c fsc2_assert.c dump.c serial.c          \
+				module_util.c
 bison_sources = $(wildcard *_parser.y)
 flex_sources  = $(wildcard *_lexer.l)
 sources       = $(bison_sources:.y=.c) $(flex_sources:.l=.c) $(c_sources)
@@ -35,7 +36,6 @@ headers       = ${c_sources:.c=.h} global.h
 all_headers   = $(headers) $(bison_sources:.y=.h) $(resources:.fd=.h)
 
 export headers        # export list of header files to the modules Makefile
-
 
 
 .SUFFIXES:
@@ -71,9 +71,9 @@ modules:
 
 
 # The replacement of 'ECHO' by 'FLEX_ECHO' in the files created by flex is
-# done because 'ECHO' (that is #defined in these files) is already defined
-# in termios.h. The second replacement is for avoiding compiler warnings
-# about unitialized variables in these files.
+# done because 'ECHO' (that is #defined in these files) is already also
+# defined in termios.h. The second replacement is for avoiding other compiler
+# warnings about unitialized variables in the flex created files.
 
 %.c: %.l $(headers)
 	$(FLEX) $(FLEXFLAGS)$(patsubst %_lexer.l,%,$<) -o$@ $<
@@ -118,7 +118,7 @@ $(resources:.fd=.o): %.o: %.c %.h
 
 gpib_setup:
 	@if [ -n "$(GPIB_LIBRARY)"                                       \
-		  -a \(    "$(GPIB_LIBRARY)" = "old"                         \
+		  -a \(    "$(GPIB_LIBRARY)" = "llp"                         \
 			    -o "$(GPIB_LIBRARY)" = "ni"                          \
 			    -o "$(GPIB_LIBRARY)" = "jtt"                         \
 			    -o "$(GPIB_LIBRARY)" = "none" \) ]; then             \
@@ -159,7 +159,7 @@ install:
 	$(EXEC_INSTALL) -m  755 -o $(OWNER) -g $(GROUP) fsc2_connect $(bindir)
 	$(EXEC_INSTALL) -m  644 -o $(OWNER) -g $(GROUP) *.so $(libdir)
 
-	-$(RM) $(RMFLAGS) $(bindir)/fsc2_start $(bindir)/fsc2_test \
+	-$(RM) $(RMFLAGS) $(bindir)/fsc2_start $(bindir)/fsc2_test     \
 					  $(bindir)/fsc2_load
 	-$(LN) $(LNFLAGS) $(bindir)/fsc2_connect $(bindir)/fsc2_start
 	-$(LN) $(LNFLAGS) $(bindir)/fsc2_connect $(bindir)/fsc2_test
@@ -170,8 +170,8 @@ uninstall:
 	-$(RM) $(RMFLAGS) $(bindir)/fsc2 $(bindir)/fsc2_clean          \
 					  $(bindir)/fsc2_connect $(bindir)/fsc2_start  \
 					  $(bindir)/fsc2_test $(bindir)/fsc2_load
-	-for f in *.so; do                   \
-		$(RM) $(RMFLAGS) $(libdir)/$$f;  \
+	-for f in *.so; do                                             \
+		$(RM) $(RMFLAGS) $(libdir)/$$f;                            \
 	done
 
 
@@ -179,7 +179,7 @@ uninstall:
 
 clean:
 	-$(RM) $(RMFLAGS) *.o *.output *_parser.[ch] *_lexer.c fsc2_clean.c  \
-					  gpib_if.[ch] gpib_parser.y gpib_lexer.l mem cscope.out *~
+		   gpib_if.[ch] gpib_parser.y gpib_lexer.l mem cscope.out *~
 
 distclean:
 	$(MAKE) clean
