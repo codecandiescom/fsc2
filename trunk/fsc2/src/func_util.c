@@ -3287,7 +3287,7 @@ Var *f_get_pos( Var *v )
 
 	UNUSED_ARGUMENT( v );
 
-	nv = vars_push( FLOAT_ARR, NULL, 2 * MAX_CURVES + 1 );
+	nv = vars_push( FLOAT_ARR, NULL, 2 * MAX_CURVES + 2 );
 
 	/* This function can only be called in the EXPERIMENT section and needs
 	   a previous graphics initialisation */
@@ -3331,8 +3331,8 @@ Var *f_get_pos( Var *v )
 
 	result = exp_getpos( buffer, pos - buffer );
 
-	memcpy( nv->val.dpnt, result, ( 2 * MAX_CURVES + 1 ) * sizeof *result );
-	T_free( result );           /* free result buffer */
+	memcpy( nv->val.dpnt, result, ( 2 * MAX_CURVES + 2 ) * sizeof *result );
+	T_free( result );        /* free result buffer */
 
 	return nv;
 }

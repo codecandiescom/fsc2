@@ -1403,15 +1403,13 @@ int get_mouse_pos_1d( double *pa, unsigned int *keymask )
 	int ppos[ 2 ];
 
 
-	if ( G.coord_display != 1 || ! G1.is_scale_set )
-		return 0;
-
 	fl_get_win_mouse( FL_ObjWin( G1.canvas.obj ),
 					  ppos + X, ppos + Y, keymask );
 
-	if ( ppos[ X ] < 0 || ppos[ X ] > ( int ) G1.canvas.w - 1 ||
+	if ( G.coord_display != 1 || ! G1.is_scale_set ||
+		 ppos[ X ] < 0 || ppos[ X ] > ( int ) G1.canvas.w - 1 ||
 		 ppos[ Y ] < 0 || ppos[ Y ] > ( int ) G1.canvas.h - 1 )
-		return -1;
+		return 0;
 
 	for ( i = 0; i < G1.nc; i++ )
 	{
