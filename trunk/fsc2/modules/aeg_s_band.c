@@ -10,7 +10,7 @@
 #include <fcntl.h>
 
 
-/* definitions for serial port access - apply changes here */
+/* Definitions for serial port access - apply changes here */
 
 #define SERIAL_BAUDRATE B1200        /* baud rate of field controller */
 #define SERIAL_PORT     1            /* serial port number (i.e. COM2) */
@@ -18,7 +18,7 @@
                                      /* set to 50 ms and not to be changed ! */
 
 
-/* exported functions */
+/* Exported functions */
 
 int s_band_init_hook( void );
 int s_band_test_hook( void );
@@ -35,7 +35,7 @@ Var *reset_field( Var *v );
 
 
 
-/* locally used functions */
+/* Locally used functions */
 
 static bool magnet_init( void );
 static bool magnet_goto_field( double field );
@@ -45,7 +45,10 @@ static bool magnet_do( int command );
 
 
 
-/* maximum and minimum field settings (also depending on field meter) */
+/* Maximum and minimum field settings (also depending on field meter)
+   In principle it would be better if this could be asked from the gaussmeter
+   but some of them (at least the ER035M) know about it only after the
+   the exp_hook function has been run... */
 
 #define S_BAND_MIN_FIELD_STEP              1.5e-3
 #define S_BAND_WITH_ER035M_MIN_FIELD       460
@@ -642,7 +645,7 @@ try_again:
 
 	/* calculate the smallest possible step width (in field units) */
 
-	magnet.mini_step = fabs( magnet.meas_field - start_field ) /
+	magnet.mini_step = ( magnet.meas_field - start_field ) /
 		                         ( double ) ( MAGNET_TEST_WIDTH * test_steps );
 
 	/* Now lets do the same, just in the opposite direction to increase
@@ -672,7 +675,7 @@ try_again:
 	   to the maximum, i.e. 6666 Oe/min - otherwise ask user to change the
 	   setting and try again */
 
-	if ( magnet.mini_step < 0.00074 )
+	if ( fabs( magnet.mini_step ) < 0.0148 * SERIAL_TIME / 1.0e6 )
 	{
 		if ( 1 != show_choices( "Please set sweep speed on magnet front\n"
 								"panel to maximum value of 6666 Oe/min\n."

@@ -10,16 +10,16 @@
 #include <fcntl.h>
 
 
-/* definitions for serial port access */
+/* Definitions for serial port access - apply changes here */
 
-#define DEVICE_NAME "AEG_X_BAND"     /* name of device */
 #define SERIAL_BAUDRATE B1200        /* baud rate of field controller */
-#define SERIAL_PORT     0            /* serial port device file */
-#define SERIAL_TIME     50000        /* time in us set at magnet front panel */
-                                     /* set to 50 ms and not to be changed ! */
+#define SERIAL_PORT     0            /* serial port number (i.e. COM1) */
+#define SERIAL_TIME     50000        /* time in us set at timer box front
+										panel - currently set to 50 ms and
+										probably not to be changed ! */
 
 
-/* exported functions */
+/* Exported functions */
 
 int aeg_x_band_init_hook( void );
 int aeg_x_band_test_hook( void );
@@ -36,7 +36,7 @@ Var *reset_field( Var *v );
 
 
 
-/* locally used functions */
+/* Locally used functions */
 
 static bool magnet_init( void );
 static bool magnet_goto_field( double field );
@@ -45,8 +45,10 @@ static void magnet_sweep( int dir );
 static bool magnet_do( int command );
 
 
-
-/* maximum and minimum field settings (also depending on field meter) */
+/* Maximum and minimum field settings (also depending on field meter)
+   In principle it would be better if this could be asked from the gaussmeter
+   but some of them (at least the ER035M) know about it only after the
+   the exp_hook function has been run... */
 
 #define AEG_X_BAND_MIN_FIELD_STEP              1.1e-3
 #define AEG_X_BAND_WITH_ER035M_MIN_FIELD       1460
@@ -54,6 +56,8 @@ static bool magnet_do( int command );
 #define AEG_X_BAND_WITH_BH15_MIN_FIELD         -50
 #define AEG_X_BAND_WITH_BH15_MAX_FIELD         23000
 
+
+#define DEVICE_NAME "AEG_X_BAND"     /* name of device */
 
 typedef struct
 {
@@ -70,7 +74,7 @@ typedef struct
 
 	double meas_field;      /* result of last field measurement */
 	double max_deviation;   /* maximum acceptable deviation between measured */
-	                        /* and required field */
+	                        /* and requested field */
 	double step;            /* the current step width (in bits) */
 	int int_step;           /* used internally */
 
@@ -119,7 +123,8 @@ int aeg_x_band_init_hook( void )
 		 ! exist_device( "er035m_s" ) &&
 		 ! exist_device( "bh15" ) )
 	{
-		eprint( FATAL, "%s: Can't find a field meter.", DEVICE_NAME );
+		eprint( FATAL, "%s: Can't find a gaussmeter - must be listed before "
+				"the magnet driver.", DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
 
@@ -667,7 +672,7 @@ try_again:
 	   to the maximum, i.e. 5000 Oe/min - otherwise ask user to change the
 	   setting and try again */
 
-	if ( fabs( magnet.mini_step ) < 0.00060 )
+	if ( fabs( magnet.mini_step ) < 0.012 * SERIAL_TIME / 1.0e6 )
 	{
 		if ( 1 != show_choices( "Please set sweep speed on magnet front\n"
 								"panel to maximum value of 5000 Oe/min\n."
