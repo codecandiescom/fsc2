@@ -203,7 +203,7 @@ int dg2020_exp_hook( void )
 
 	/* Initialize the device */
 
-#idndef MAX_DEBU
+#idndef MAX_DEBUG
 	if ( ! dg2020_init( DEVICE_NAME ) )
 	{
 		eprint( FATAL, "DG2020: Failure to initialize the pulser.\n" );
