@@ -19,6 +19,7 @@ Var *f_print(   Var *v );
 Var *f_wait(    Var *v );
 Var *f_init_1d( Var *v );
 Var *f_init_2d( Var *v );
+Var *f_cscale(  Var *v );
 Var *f_display( Var *v );
 Var *f_clearcv( Var *v );
 Var *f_getf(    Var *v );
