@@ -32,10 +32,10 @@ typedef union {
 #define	E_US_TOKEN	    270
 #define	E_MS_TOKEN	    271
 #define	E_S_TOKEN	    272
-#define	E_NS_TOKEN	    273
-#define	E_US_TOKEN	    274
-#define	E_MS_TOKEN	    275
-#define	E_S_TOKEN	    276
+#define	E_NV_TOKEN	    273
+#define	E_UV_TOKEN	    274
+#define	E_MV_TOKEN	    275
+#define	E_V_TOKEN	    276
 #define	E_NEG	        277
 
 #define IF_TOK         2049

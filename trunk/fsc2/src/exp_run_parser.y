@@ -157,10 +157,10 @@ unit:    /* empty */              { $$ = vars_push( INT_VAR, 1L ); }
        | E_US_TOKEN               { $$ = vars_push( INT_VAR, 1000L ); }
        | E_MS_TOKEN               { $$ = vars_push( INT_VAR, 1000000L ); }
        | E_S_TOKEN                { $$ = vars_push( INT_VAR, 1000000000L ); }
-       | NV_TOKEN                 { $$ = vars_push( FLOAT_VAR, 1.0e-9 ); }
-       | UV_TOKEN                 { $$ = vars_push( FLOAT_VAR, 1.0e-6 ); }
-       | MV_TOKEN                 { $$ = vars_push( FLOAT_VAR, 1.0e-3 ); }
-       | V_TOKEN                  { $$ = vars_push( FLOAT_VAR, 1.0 ); }
+       | E_NV_TOKEN               { $$ = vars_push( FLOAT_VAR, 1.0e-9 ); }
+       | E_UV_TOKEN               { $$ = vars_push( FLOAT_VAR, 1.0e-6 ); }
+       | E_MV_TOKEN               { $$ = vars_push( FLOAT_VAR, 1.0e-3 ); }
+       | E_V_TOKEN                { $$ = vars_push( FLOAT_VAR, 1.0 ); }
 ;
 
 
