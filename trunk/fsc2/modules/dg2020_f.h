@@ -38,7 +38,7 @@ Var *pulser_lock_keyboard( Var *v );
 
 /* name of device as given in GPIB configuration file /etc/gpib.conf */
 
-#define DEVICE_NAME "DG2020"
+#define DEVICE_NAME "DG2020_F"
 
 
 #define MIN_TIMEBASE            5.0e-9     // minimum pulser time base: 5 ns
