@@ -276,7 +276,7 @@ Var *vars_add( Var *v1, Var *v2 )
 	   arrays (or pointers thereto) */
 
 	vars_check( v1, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR | 
-				    INT_TRANS_ARR | FLOAT_TRANS_ARR | ARR_REF );
+				    INT_TRANS_ARR | FLOAT_TRANS_ARR | ARR_REF | ARR_PTR );
 	vars_check( v2, INT_VAR | FLOAT_VAR | ARR_REF | ARR_PTR |
 				    INT_TRANS_ARR | FLOAT_TRANS_ARR );
 
@@ -306,7 +306,7 @@ Var *vars_add( Var *v1, Var *v2 )
 			new_var = vars_add_to_float_arr( v1, v2 );
 			break;
 
-		case ARR_REF :
+		case ARR_REF : case ARR_PTR :
 			if ( v1->from->type == INT_ARR )
 				new_var = vars_add_to_int_arr( v1->from, v2 );
 			else
@@ -344,7 +344,7 @@ Var *vars_sub( Var *v1, Var *v2 )
 	   arrays (or pointers thereto) */
 
 	vars_check( v1, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR | 
-				    INT_TRANS_ARR | FLOAT_TRANS_ARR | ARR_REF );
+				    INT_TRANS_ARR | FLOAT_TRANS_ARR | ARR_REF | ARR_PTR );
 	vars_check( v2, INT_VAR | FLOAT_VAR | ARR_REF | ARR_PTR |
 				    INT_TRANS_ARR | FLOAT_TRANS_ARR );
 
@@ -371,7 +371,7 @@ Var *vars_sub( Var *v1, Var *v2 )
 			new_var = vars_sub_from_float_arr( v1, v2 );
 			break;
 
-		case ARR_REF :
+		case ARR_REF : case ARR_PTR :
 			v1 = vars_array_check( v1, v2 );
 			if ( v1->from->type == INT_ARR )
 				new_var = vars_sub_from_int_arr( v1->from, v2 );
@@ -410,7 +410,7 @@ Var *vars_mult( Var *v1, Var *v2 )
 	   arrays (or pointers thereto) */
 
 	vars_check( v1, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR | 
-				    INT_TRANS_ARR | FLOAT_TRANS_ARR | ARR_REF );
+				    INT_TRANS_ARR | FLOAT_TRANS_ARR | ARR_REF | ARR_PTR );
 	vars_check( v2, INT_VAR | FLOAT_VAR | ARR_REF | ARR_PTR |
 				    INT_TRANS_ARR | FLOAT_TRANS_ARR );
 
@@ -437,7 +437,7 @@ Var *vars_mult( Var *v1, Var *v2 )
 			new_var = vars_mult_by_float_arr( v1, v2 );
 			break;
 
-		case ARR_REF :
+		case ARR_REF : case ARR_PTR :
 			v1 = vars_array_check( v1, v2 );
 			if ( v1->from->type == INT_ARR )
 				new_var = vars_mult_by_int_arr( v1->from, v2 );
@@ -476,7 +476,7 @@ Var *vars_div( Var *v1, Var *v2 )
 	   arrays (or pointers thereto) */
 
 	vars_check( v1, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR | 
-				    INT_TRANS_ARR | FLOAT_TRANS_ARR | ARR_REF );
+				    INT_TRANS_ARR | FLOAT_TRANS_ARR | ARR_REF | ARR_PTR );
 	vars_check( v2, INT_VAR | FLOAT_VAR | ARR_REF | ARR_PTR |
 				    INT_TRANS_ARR | FLOAT_TRANS_ARR );
 
@@ -503,7 +503,7 @@ Var *vars_div( Var *v1, Var *v2 )
 			new_var = vars_div_of_float_arr( v1, v2 );
 			break;
 
-		case ARR_REF :
+		case ARR_REF : case ARR_PTR :
 			v1 = vars_array_check( v1, v2 );
 			if ( v1->from->type == INT_ARR )
 				new_var = vars_div_of_int_arr( v1->from, v2 );
@@ -542,7 +542,7 @@ Var *vars_mod( Var *v1, Var *v2 )
 	   arrays (or pointers thereto) */
 
 	vars_check( v1, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR | 
-				    INT_TRANS_ARR | FLOAT_TRANS_ARR | ARR_REF );
+				    INT_TRANS_ARR | FLOAT_TRANS_ARR | ARR_REF | ARR_PTR );
 	vars_check( v2, INT_VAR | FLOAT_VAR | ARR_REF | ARR_PTR |
 				    INT_TRANS_ARR | FLOAT_TRANS_ARR );
 
@@ -569,7 +569,7 @@ Var *vars_mod( Var *v1, Var *v2 )
 			new_var = vars_mod_of_float_arr( v1, v2 );
 			break;
 
-		case ARR_REF :
+		case ARR_REF : case ARR_PTR :
 			v1 = vars_array_check( v1, v2 );
 			if ( v1->from->type == INT_ARR )
 				new_var = vars_mod_of_int_arr( v1->from, v2 );
@@ -608,7 +608,7 @@ Var *vars_pow( Var *v1, Var *v2 )
 	   arrays (or pointers thereto) */
 
 	vars_check( v1, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR | 
-				    INT_TRANS_ARR | FLOAT_TRANS_ARR | ARR_REF );
+				    INT_TRANS_ARR | FLOAT_TRANS_ARR | ARR_REF | ARR_PTR );
 	vars_check( v2, INT_VAR | FLOAT_VAR | ARR_REF | ARR_PTR |
 				    INT_TRANS_ARR | FLOAT_TRANS_ARR );
 
@@ -635,7 +635,7 @@ Var *vars_pow( Var *v1, Var *v2 )
 			new_var = vars_pow_of_float_arr( v1, v2 );
 			break;
 
-		case ARR_REF :
+		case ARR_REF : case ARR_PTR :
 			v1 = vars_array_check( v1, v2 );
 			if ( v1->from->type == INT_ARR )
 				new_var = vars_pow_of_int_arr( v1->from, v2 );
@@ -1657,13 +1657,13 @@ Var *vars_arr_rhs( Var *v )
 
 	a = v->from;                      /* Get array the pointer refers to */
 
-	/* If the right hand side array is still variable sizes it never has been
+	/* If the right hand side array is still variable sized it never has been
        assigned values to it and it makes no sense to use its elements */
 
 	if ( a->flags & NEED_ALLOC )
 	{
 		eprint( FATAL, "%s:%ld: Array `%s' is dynamically sized and its size "
-				"isn't unknown yet.\n", Fname, Lc, a->name );
+				"still unknown.\n", Fname, Lc, a->name );
 		THROW( EXCEPTION );
 	}
 
@@ -1734,7 +1734,7 @@ void vars_assign( Var *src, Var *dest )
 			vars_ass_from_var( src, dest );
 		   break;
 
-		case ARR_PTR :                               /* array slice */
+		case ARR_PTR : case ARR_REF :                /* array slice */
 			vars_ass_from_ptr( src, dest );
 			break;
 
@@ -1871,49 +1871,90 @@ void vars_ass_from_ptr( Var *src, Var *dest )
 		THROW( EXCEPTION );
 	}
 
+	if ( src->type == ARR_REF )
+	{
+		if ( src->from->type == INT_ARR )
+			src->val.gptr = src->from->val.lpnt;
+		else if ( src->from->type == FLOAT_ARR )
+			src->val.gptr = src->from->val.dpnt;
+		else
+			assert( 1 == 0 );
+	}
+
 	/* Again being paranoid... */
 
-	assert( dest->flags & NEED_SLICE );
-
-	d = dest->from;
-	s = src->from;
-
-	/* Allocate memory (set size of missing dimension to the last one of the
-	   source array) if the destination array needs it, otherwise check that
-	   size of both the arrays is equal. */
-
-	if ( d->flags & NEED_ALLOC )
+	if ( dest->type == ARR_PTR )
 	{
-		d->sizes[ d->dim - 1 ] = s->sizes[ s->dim - 1 ];
+		assert( dest->flags & NEED_SLICE );
 
-		d->len *= d->sizes[ d->dim - 1 ];
+		d = dest->from;
+		s = src->from;
 
-		if ( d->type == INT_ARR )
+		/* Allocate memory (set size of missing dimension to the last one of
+		   the source array) if the destination array needs it, otherwise
+		   check that size of both the arrays is equal. */
+
+		if ( d->flags & NEED_ALLOC )
 		{
-			d->val.lpnt = T_calloc( d->len,  sizeof( long ) );
-			dest->val.lpnt = d->val.lpnt + dest->len * d->sizes[ d->dim - 1 ];
+			d->sizes[ d->dim - 1 ] = s->sizes[ s->dim - 1 ];
+
+			d->len *= d->sizes[ d->dim - 1 ];
+
+			if ( d->type == INT_ARR )
+			{
+				d->val.lpnt = T_calloc( d->len, sizeof( long ) );
+				dest->val.lpnt = d->val.lpnt
+					             + dest->len * d->sizes[ d->dim - 1 ];
+			}
+			else
+			{
+				d->val.dpnt = T_calloc( d->len, sizeof( double ) );
+				dest->val.dpnt = d->val.dpnt
+					             + dest->len * d->sizes[ d->dim - 1 ];
+			}
+
+			d->flags &= ~NEED_ALLOC;
 		}
 		else
 		{
-			d->val.dpnt = T_calloc( d->len, sizeof( double ) );
-			dest->val.dpnt = d->val.dpnt + dest->len * d->sizes[ d->dim - 1 ];
-		}
+			if ( d->sizes[ d->dim - 1 ] != s->sizes[ s->dim - 1 ] )
+			{
+				eprint( FATAL, "%s:%ld: Arrays (or slices of) `%s' and `%s' "
+						"have different sizes.\n", Fname, Lc, d->name,
+						s->name );
+				THROW( EXCEPTION );
+			}
 
-		d->flags &= ~NEED_ALLOC;
+			if ( d->type == INT_ARR )
+				dest->val.lpnt = ( long * ) dest->val.gptr;
+			else
+				dest->val.dpnt = ( double * ) dest->val.gptr;
+		}
 	}
 	else
 	{
-		if ( d->sizes[ d->dim - 1 ] != s->sizes[ s->dim - 1 ] )
+		assert( dest->type & ( INT_ARR | FLOAT_ARR ) );
+
+		d = dest;
+		s = src->from;
+
+		if ( dest->flags & NEED_ALLOC )
 		{
-			eprint( FATAL, "%s:%ld: Arrays (or slices of) `%s' and `%s' have "
-					"different sizes.\n", Fname, Lc, d->name, s->name );
+			d->len = d->sizes[ 0 ] = s->sizes[ s->dim - 1 ];
+			if ( d->type == INT_ARR )
+				d->val.lpnt = T_calloc( d->len, sizeof( long ) );
+			else
+				d->val.dpnt = T_calloc( d->len, sizeof( double ) );
+
+			d->flags &= ~ NEED_ALLOC;
+		}
+		else if ( d->len != s->sizes[ s->dim - 1 ] )
+		{
+			eprint( FATAL, "%s:%ld: Arrays (or slices of) `%s' and `%s' "
+					"have different sizes.\n", Fname, Lc, d->name,
+					s->name );
 			THROW( EXCEPTION );
 		}
-
-		if ( d->type == INT_ARR )
-			dest->val.lpnt = ( long * ) dest->val.gptr;
-		else
-			dest->val.dpnt = ( double * ) dest->val.gptr;
 	}
 
 	/* Warn on float to integer assignment */
