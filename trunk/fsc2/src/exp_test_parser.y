@@ -195,6 +195,7 @@ ass:     '=' expr
 expr:    E_INT_TOKEN                  { }
        | E_FLOAT_TOKEN                { }
        | E_VAR_TOKEN                  { }
+       | strs
        | E_VAR_REF                    { }
        | E_VAR_TOKEN '[' list1 ']'    { }
        | E_VAR_TOKEN '('              { print( FATAL, "'%s' is a variable, "
@@ -246,12 +247,8 @@ list2:   /* empty */
        | l2e
 ;
 
-l2e:     exprs
-       | l2e ',' exprs
-;
-
-exprs:   expr
-       | strs
+l2e:     expr
+       | l2e ',' expr
 ;
 
 strs:    E_STR_TOKEN

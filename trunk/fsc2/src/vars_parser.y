@@ -145,6 +145,7 @@ expr:    INT_TOKEN                 { if ( ! dont_exec )
        | FUNC_TOKEN                { print( FATAL, "'%s()' is a predefind "
 											"function.\n", $1->name );
 	                                 THROW( EXCEPTION ); }
+       | strs
        | VAR_REF
        | VAR_TOKEN '('             { dont_exec = 0;
 	                                 print( FATAL, "'%s' isn't a function.\n",
@@ -200,23 +201,7 @@ expr:    INT_TOKEN                 { if ( ! dont_exec )
        | expr GE expr              { if ( ! dont_exec )
 	                                     $$ = vars_comp( COMP_LESS_EQUAL,
 														 $3, $1 ); }
-       | strs EQ strs              { if ( ! dont_exec )
-                                        $$ = vars_comp( COMP_EQUAL, $1, $3 ); }
-       | strs NE strs              { if ( ! dont_exec )
-                                      $$ = vars_comp( COMP_UNEQUAL, $1, $3 ); }
-       | strs LT strs              { if ( ! dont_exec )
-	                                     $$ = vars_comp( COMP_LESS, $1, $3 ); }
-       | strs GT strs              { if ( ! dont_exec )
-	                                     $$ = vars_comp( COMP_LESS, $3, $1 ); }
-       | strs LE strs              { if ( ! dont_exec )
-	                                     $$ = vars_comp( COMP_LESS_EQUAL,
-														 $1, $3 ); }
-       | strs GE strs              { if ( ! dont_exec )
-	                                     $$ = vars_comp( COMP_LESS_EQUAL,
-														 $3, $1 ); }
        | expr '+' expr             { if ( ! dont_exec )
-	                                     $$ = vars_add( $1, $3 ); }
-       | strs '+' strs             { if ( ! dont_exec )
 	                                     $$ = vars_add( $1, $3 ); }
        | expr '-' expr             { if ( ! dont_exec )
 	                                     $$ = vars_sub( $1, $3 ); }
@@ -317,12 +302,8 @@ list4:   /* empty */
        | l4e
 ;
 
-l4e:      exprs
-        | l4e ',' exprs
-;
-
-exprs:   expr                      { }
-       | strs                      { }
+l4e:      expr
+        | l4e ',' expr
 ;
 
 strs:    STR_TOKEN                 { if ( ! dont_exec )

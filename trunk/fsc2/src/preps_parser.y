@@ -161,6 +161,7 @@ expr:    INT_TOKEN                { if ( ! dont_exec )
        | FUNC_TOKEN               { print( FATAL, "'%s' is a predefined "
 										   "function.\n", $1->name );
 	                                THROW( EXCEPTION ); }
+       | strs
        | VAR_REF
        | VAR_TOKEN '('            { print( FATAL, "'%s' isn't a function.\n",
 										   $1->name );
@@ -215,23 +216,7 @@ expr:    INT_TOKEN                { if ( ! dont_exec )
        | expr GE expr             { if ( ! dont_exec )
 		                                $$ = vars_comp( COMP_LESS_EQUAL,
 														$3, $1 ); }
-       | strs EQ strs             { if ( ! dont_exec )
-                                        $$ = vars_comp( COMP_EQUAL, $1, $3 ); }
-       | strs NE strs             { if ( ! dont_exec )
-                                      $$ = vars_comp( COMP_UNEQUAL, $1, $3 ); }
-       | strs LT strs             { if ( ! dont_exec )
-	                                    $$ = vars_comp( COMP_LESS, $1, $3 ); }
-       | strs GT strs             { if ( ! dont_exec )
-	                                    $$ = vars_comp( COMP_LESS, $3, $1 ); }
-       | strs LE strs             { if ( ! dont_exec )
-	                                    $$ = vars_comp( COMP_LESS_EQUAL,
-														$1, $3 ); }
-       | strs GE strs             { if ( ! dont_exec )
-	                                     $$ = vars_comp( COMP_LESS_EQUAL,
-														 $3, $1 ); }
        | expr '+' expr            { if ( ! dont_exec )
-		                                $$ = vars_add( $1, $3 ); }
-       | strs '+' strs            { if ( ! dont_exec )
 		                                $$ = vars_add( $1, $3 ); }
        | expr '-' expr            { if ( ! dont_exec )
 		                                $$ = vars_sub( $1, $3 ); }
@@ -258,7 +243,7 @@ expr:    INT_TOKEN                { if ( ! dont_exec )
 	                                else
 										dont_exec +=2;
 	                              }
-		 expr ':'                 { if ( ! dont_exec )
+         expr ':'                 { if ( ! dont_exec )
 										dont_exec++;
 		 							else
 										dont_exec--;
@@ -290,12 +275,8 @@ list2:   /* empty */
        | l2e
 ;
 
-l2e:     exprs
-       | l2e ',' exprs
-;
-
-exprs:   expr                     { }
-       | strs                     { }
+l2e:     expr
+       | l2e ',' expr
 ;
 
 strs:    STR_TOKEN                { if ( ! dont_exec )

@@ -181,6 +181,7 @@ expr:    E_INT_TOKEN               { if ( ! dont_exec )
        | E_FUNC_TOKEN              { print( FATAL, "'%s' is a predefined "
 											"function.\n", $1->name );
 	                                 THROW( EXCEPTION ); }
+       | strs
        | E_VAR_REF                 { if ( dont_exec )
 										 vars_pop( $1 ); }
        | E_VAR_TOKEN '('           { print( FATAL, "'%s' isn't a function.\n", 
@@ -244,23 +245,7 @@ expr:    E_INT_TOKEN               { if ( ! dont_exec )
        | expr E_GE expr            { if ( ! dont_exec )
 		                                  $$ = vars_comp( COMP_LESS_EQUAL,
 														  $3, $1 ); }
-       | strs E_EQ strs           { if ( ! dont_exec )
-                                        $$ = vars_comp( COMP_EQUAL, $1, $3 ); }
-       | strs E_NE strs           { if ( ! dont_exec )
-                                      $$ = vars_comp( COMP_UNEQUAL, $1, $3 ); }
-       | strs E_LT strs           { if ( ! dont_exec )
-	                                    $$ = vars_comp( COMP_LESS, $1, $3 ); }
-       | strs E_GT strs           { if ( ! dont_exec )
-	                                    $$ = vars_comp( COMP_LESS, $3, $1 ); }
-       | strs E_LE strs           { if ( ! dont_exec )
-	                                    $$ = vars_comp( COMP_LESS_EQUAL,
-														$1, $3 ); }
-       | strs E_GE strs           { if ( ! dont_exec )
-	                                     $$ = vars_comp( COMP_LESS_EQUAL,
-														 $3, $1 ); }
        | expr '+' expr             { if ( ! dont_exec )
-		                                 $$ = vars_add( $1, $3 ); }
-       | strs '+' strs             { if ( ! dont_exec )
 		                                 $$ = vars_add( $1, $3 ); }
        | expr '-' expr             { if ( ! dont_exec )
 		                                 $$ = vars_sub( $1, $3 ); }
@@ -287,18 +272,17 @@ expr:    E_INT_TOKEN               { if ( ! dont_exec )
 	                                 else
 										 dont_exec +=2;
 	                               }
-		 expr ':'                  { if ( ! dont_exec )
+    	 expr ':'                  { if ( ! dont_exec )
 										 dont_exec++;
 		 							 else
 										 dont_exec--;
 	                               }
 		 expr                      { if ( ! dont_exec )
-										 $$ = $7;
+										 $$ = $4;
 		                             else if ( ! --dont_exec )
-									     $$ = $4;
+									     $$ = $1;
                                    }
 ;
-
 
 /* list of indices for access of an array element */
 
@@ -319,12 +303,8 @@ list2:   /* empty */
        | l2e
 ;
 
-l2e:     exprs
-       | l2e ',' exprs
-;
-
-exprs:   expr                      { }
-       | strs                      { }
+l2e:     expr
+       | l2e ',' expr
 ;
 
 strs:    E_STR_TOKEN               { if ( ! dont_exec )

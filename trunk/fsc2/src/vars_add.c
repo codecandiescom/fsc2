@@ -45,19 +45,12 @@ Var *vars_add( Var *v1, Var *v2 )
 	vars_check( v1, STR_VAR | RHS_TYPES | REF_PTR | INT_PTR | FLOAT_PTR );
 	vars_check( v2, STR_VAR | RHS_TYPES );
 
-	switch ( v1->type )
+	if ( ( v1->type == STR_VAR && v2->type != STR_VAR ) ||
+		 ( v1->type != STR_VAR && v2->type == STR_VAR ) )
 	{
-		case REF_PTR :
-			v1 = v1->from;
-			break;
-
-		case INT_PTR :
-			v1 = vars_push( INT_VAR, *v1->val.lpnt );
-			break;
-
-		case FLOAT_PTR :
-			v1 = vars_push( FLOAT_VAR, *v1->val.dpnt );
-			break;
+		print( FATAL, "Variable of type STRING can't be used in this "
+			   "context.\n" );
+		THROW( EXCEPTION );
 	}
 
 	switch ( v1->type )
@@ -86,6 +79,18 @@ Var *vars_add( Var *v1, Var *v2 )
 			new_var = vars_ref_add( v1, v2 );
 			break;
 
+		case REF_PTR :
+			v1 = v1->from;
+			break;
+
+		case INT_PTR :
+			v1 = vars_push( INT_VAR, *v1->val.lpnt );
+			break;
+
+		case FLOAT_PTR :
+			v1 = vars_push( FLOAT_VAR, *v1->val.dpnt );
+			break;
+
 #ifndef NDEBUG
 			default :
 				eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
@@ -107,12 +112,6 @@ static Var *vars_str_var_add( Var *v1, Var *v2 )
 	Var *new_var = NULL;
 	char *new_str;
 
-
-	if ( v2->type != STR_VAR )
-	{
-		print( FATAL, "Can't add a string and a number.\n" );
-		THROW( EXCEPTION );
-	}
 
 	new_str = get_string( "%s%s", v1->val.sptr, v2->val.sptr );
 	new_var = vars_push( STR_VAR, new_str );
@@ -426,6 +425,10 @@ static Var *vars_float_arr_add( Var *v1, Var *v2 )
 
 	switch ( v2->type )
 	{
+		case STR_VAR :
+			print( FATAL, "Can't add a string to an array.\n" );
+			THROW( EXCEPTION );
+
 		case INT_VAR :
 			new_var = vars_add( v2, v1 );
 			break;
@@ -505,6 +508,11 @@ static Var *vars_ref_add( Var *v1, Var *v2 )
 
 	switch ( v2->type )
 	{
+		case STR_VAR :
+			print( FATAL, "Can't add a string to a multidimensional "
+				   "array.\n" );
+			THROW( EXCEPTION );
+
 		case INT_VAR :
 			new_var = vars_add( v2, v1 );
 			break;
