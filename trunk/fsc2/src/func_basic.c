@@ -2497,6 +2497,11 @@ Var *f_slice( Var *v )
 					   "exceeds length of array.\n" );
 				THROW( EXCEPTION );
 			}
+
+			if ( v->next->next->next != NULL )
+				print( WARN, "Too many arguments, discarding superfluous "
+					   "arguments.\n",
+					   v->->next->next->nextnext != NULL ? "s" : "" );
 		}
 		else
 			len = v->len - start;
