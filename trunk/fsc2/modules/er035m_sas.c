@@ -34,13 +34,13 @@
 
 /* definitions for serial port access */
 
-#define SERIAL_PORT     0            /* serial port number (i.e. COM1) */
-#define SERIAL_BAUDRATE B9600        /* baud rate of field controller */
+#define SERIAL_PORT     0           /* serial port number (i.e. COM1) */
+#define SERIAL_BAUDRATE B9600       /* baud rate of field controller */
 
 
-#define DEVICE_NAME "ER035M_SAS"       /* name of device */
+#define DEVICE_NAME "ER035M_SAS"    /* name of device */
 
-#define TEST_FIELD 2000.0        /* returned as current fireld in test run */
+#define TEST_FIELD 2000.0           /* returned as current field in test run */
 
 /* exported functions and symbols */
 
@@ -97,11 +97,12 @@ enum {
 #define ER035M_SAS_WAIT 200000    /* this means 200 ms for usleep() */
 
 
-/* If the field is unstable the gausmeter might never get to the state where
-   the field value is valid with the requested resolution eventhough the look
-   state is achieved. `ER035M_SAS_MAX_RETRIES' tells how many times we retry in
-   this case. With a value of 100 and the current setting of `ER035M_SAS_WAIT'
-   of 200 ms it will take at least 20 s before this will happen.
+/* If the field is too unstable the gausmeter might never get to the state
+   where the field value is valid with the requested resolution eventhough
+   the look state is achieved. `ER035M_SAS_MAX_RETRIES' determines the
+   maximum number of retries before we give up. With a value of 100 and the
+   current setting for `ER035M_SAS_WAIT' of 200 ms it will take at least
+   20 s before this will happen.
 
    Take care: This does not mean that we stop trying to get the field while
    the gaussmeter is still actively searching but only in the case that a
