@@ -21,11 +21,11 @@
 
 /* Exported functions */
 
-int s_band_init_hook( void );
-int s_band_test_hook( void );
-int s_band_exp_hook( void );
-int s_band_end_of_exp_hook( void );
-void s_band_exit_hook( void );
+int aeg_s_band_init_hook( void );
+int aeg_s_band_test_hook( void );
+int aeg_s_band_exp_hook( void );
+int aeg_s_band_end_of_exp_hook( void );
+void aeg_s_band_exit_hook( void );
 
 Var *magnet_setup( Var *v );
 Var *magnet_fast_init( Var *v );
@@ -51,14 +51,14 @@ static bool magnet_do( int command );
    but some of them (at least the ER035M) know about it only after the
    the exp_hook function has been run... */
 
-#define S_BAND_MIN_FIELD_STEP              1.5e-3
-#define S_BAND_WITH_ER035M_MIN_FIELD       460
-#define S_BAND_WITH_ER035M_MAX_FIELD       2390
-#define S_BAND_WITH_BH15_MIN_FIELD         -50
-#define S_BAND_WITH_BH15_MAX_FIELD         23000
+#define AEG_S_BAND_MIN_FIELD_STEP              1.5e-3
+#define AEG_S_BAND_WITH_ER035M_MIN_FIELD       460
+#define AEG_S_BAND_WITH_ER035M_MAX_FIELD       2390
+#define AEG_S_BAND_WITH_BH15_MIN_FIELD         -50
+#define AEG_S_BAND_WITH_BH15_MAX_FIELD         23000
 
 
-#define DEVICE_NAME "S_BAND"         /* name of device */
+#define DEVICE_NAME "AEG_S_BAND"         /* name of device */
 
 typedef struct
 {
@@ -112,7 +112,7 @@ enum {
 /* test if this driver will be loaded before the magnet driver.   */
 /*----------------------------------------------------------------*/
 
-int s_band_init_hook( void )
+int aeg_s_band_init_hook( void )
 {
 	bool *is_gaussmeter;
 	int ret;
@@ -213,7 +213,7 @@ int s_band_init_hook( void )
 }
 
 
-int s_band_test_hook( void )
+int aeg_s_band_test_hook( void )
 {
 	return 1;
 }
@@ -223,7 +223,7 @@ int s_band_test_hook( void )
 /* Opens connection to the power supply and calibrates the field sweep */
 /*---------------------------------------------------------------------*/
 
-int s_band_exp_hook( void )
+int aeg_s_band_exp_hook( void )
 {
 	Var *v;
 	int acc;
@@ -260,7 +260,7 @@ int s_band_exp_hook( void )
 /* Closes the connection to the power supply after an experiment */
 /*---------------------------------------------------------------*/
 
-int s_band_end_of_exp_hook( void )
+int aeg_s_band_end_of_exp_hook( void )
 {
 	/* reset the serial port */
 
@@ -277,9 +277,9 @@ int s_band_end_of_exp_hook( void )
 /* Just make sure the connection to the power supply is really closed */
 /*--------------------------------------------------------------------*/
 
-void s_band_exit_hook( void )
+void aeg_s_band_exit_hook( void )
 {
-	s_band_end_of_exp_hook( );
+	aeg_s_band_end_of_exp_hook( );
 }
 
 
@@ -303,51 +303,51 @@ Var *magnet_setup( Var *v )
 
 	if ( exist_device( "er035m" ) )
 	{
-		if ( VALUE( v ) < S_BAND_WITH_ER035M_MIN_FIELD )
+		if ( VALUE( v ) < AEG_S_BAND_WITH_ER035M_MIN_FIELD )
 		{
 			eprint( FATAL, "%s:%ld: %s: Start field (%lf G) too low for "
 					"Bruker ER035M gaussmeter, minimum is %d G.",
 					Fname, Lc, DEVICE_NAME, VALUE( v ),
-					( int ) S_BAND_WITH_ER035M_MIN_FIELD );
+					( int ) AEG_S_BAND_WITH_ER035M_MIN_FIELD );
 			THROW( EXCEPTION );
 		}
         
-		if ( VALUE( v ) > S_BAND_WITH_ER035M_MAX_FIELD )
+		if ( VALUE( v ) > AEG_S_BAND_WITH_ER035M_MAX_FIELD )
 		{
 			eprint( FATAL, "%s:%ld: %s: Start field (%lf G) too high for "
 					"Bruker ER035M gaussmeter, maximum is %d G.",
 					Fname, Lc, DEVICE_NAME, VALUE( v ),
-					( int ) S_BAND_WITH_ER035M_MAX_FIELD );
+					( int ) AEG_S_BAND_WITH_ER035M_MAX_FIELD );
 			THROW( EXCEPTION );
 		}
 	}
 
 	if ( exist_device( "bh15" ) )
 	{
-		if ( VALUE( v ) < S_BAND_WITH_BH15_MIN_FIELD )
+		if ( VALUE( v ) < AEG_S_BAND_WITH_BH15_MIN_FIELD )
 		{
 			eprint( FATAL, "%s:%ld: %s: Start field (%lf G) too low for "
 					"Bruker BH15 field controller, minimum is %d G.",
 					Fname, Lc, DEVICE_NAME, VALUE( v ),
-					( int ) S_BAND_WITH_BH15_MIN_FIELD );
+					( int ) AEG_S_BAND_WITH_BH15_MIN_FIELD );
 			THROW( EXCEPTION );
 		}
         
-		if ( VALUE( v ) > S_BAND_WITH_BH15_MAX_FIELD )
+		if ( VALUE( v ) > AEG_S_BAND_WITH_BH15_MAX_FIELD )
 		{
 			eprint( FATAL, "%s:%ld: %s: Start field (%lf G) too high for "
 					"Bruker BH15 field controller, maximum is %d G.",
 					Fname, Lc, DEVICE_NAME, VALUE( v ),
-					( int ) S_BAND_WITH_BH15_MAX_FIELD );
+					( int ) AEG_S_BAND_WITH_BH15_MAX_FIELD );
 			THROW( EXCEPTION );
 		}
 	}
 
-	if ( VALUE( v->next ) < S_BAND_MIN_FIELD_STEP )
+	if ( VALUE( v->next ) < AEG_S_BAND_MIN_FIELD_STEP )
 	{
 		eprint( FATAL, "%s:%ld: %s: Field sweep step size (%lf G) too "
 				"small, minimum is %f G.", Fname, Lc, DEVICE_NAME,
-				VALUE( v->next ), ( double ) S_BAND_MIN_FIELD_STEP );
+				VALUE( v->next ), ( double ) AEG_S_BAND_MIN_FIELD_STEP );
 		THROW( EXCEPTION );
 	}
 		
@@ -381,42 +381,42 @@ Var *set_field( Var *v )
 
 	if ( exist_device( "er035m" ) )
 	{
-		if ( VALUE( v ) < S_BAND_WITH_ER035M_MIN_FIELD )
+		if ( VALUE( v ) < AEG_S_BAND_WITH_ER035M_MIN_FIELD )
 		{
 			eprint( FATAL, "%s:%ld: %s: Field (%lf G) too low for Bruker "
 					"ER035M gaussmeter, minimum is %d G.",
 					Fname, Lc, DEVICE_NAME, VALUE( v ),
-					( int ) S_BAND_WITH_ER035M_MIN_FIELD );
+					( int ) AEG_S_BAND_WITH_ER035M_MIN_FIELD );
 			THROW( EXCEPTION );
 		}
         
-		if ( magnet.field > S_BAND_WITH_ER035M_MAX_FIELD )
+		if ( magnet.field > AEG_S_BAND_WITH_ER035M_MAX_FIELD )
 		{
 			eprint( FATAL, "%s:%ld: %s: Field (%lf G) too high for Bruker "
 					"ER035M gaussmeter, maximum is %d G.",
 					Fname, Lc, DEVICE_NAME, VALUE( v ),
-					( int ) S_BAND_WITH_ER035M_MAX_FIELD );
+					( int ) AEG_S_BAND_WITH_ER035M_MAX_FIELD );
 			THROW( EXCEPTION );
 		}
 	}
 
 	if ( exist_device( "bh15" ) )
 	{
-		if ( VALUE( v ) < S_BAND_WITH_BH15_MIN_FIELD )
+		if ( VALUE( v ) < AEG_S_BAND_WITH_BH15_MIN_FIELD )
 		{
 			eprint( FATAL, "%s:%ld: %s: Field (%lf G) too low for Bruker "
 					"BH15 field controller, minimum is %d G.",
 					Fname, Lc, DEVICE_NAME, VALUE( v ),
-					( int ) S_BAND_WITH_BH15_MIN_FIELD );
+					( int ) AEG_S_BAND_WITH_BH15_MIN_FIELD );
 			THROW( EXCEPTION );
 		}
         
-		if ( magnet.field > S_BAND_WITH_BH15_MAX_FIELD )
+		if ( magnet.field > AEG_S_BAND_WITH_BH15_MAX_FIELD )
 		{
 			eprint( FATAL, "%s:%ld: %s: Field (%lf G) too high for Bruker "
 					"BH15 field controller, maximum is %d G.",
 					Fname, Lc, DEVICE_NAME, VALUE( v ),
-					( int ) S_BAND_WITH_BH15_MAX_FIELD );
+					( int ) AEG_S_BAND_WITH_BH15_MAX_FIELD );
 			THROW( EXCEPTION );
 		}
 	}
