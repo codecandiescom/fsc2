@@ -21,12 +21,12 @@
 
 
 @node GUI-fying, Cloning Devices, Command Line Options, Top
-@chapter GUI-fying EDL programs
+@chapter GUI-fying EDL scripts
 
 @ifinfo
 @menu
-* fsc2_guify::            Creating a GUI for an @code{EDL} program
-* Interfacing::           Sending EDL programs to fsc2
+* fsc2_guify::            Creating a GUI for an @code{EDL} script
+* Interfacing::           Sending EDL scripts to fsc2
 @end menu
 @end ifinfo
 
@@ -42,15 +42,15 @@ Often there is a small set of standard experiments, each with a few
 parameters that need to be changed all of the time. For example in a cw
 EPR experiment the start and end field and the sweep speed typically are
 such parameters. After some time it can become rather tedious to always
-edit the corresponding @code{EDL} file to set the parameters. Beside,
-for someone not used to @code{fsc2} and its syntax and who just wants to
-do a simple experiment it may be too daunting a task to safely apply the
-necessary changes to an existing @code{EDL} program.
+edit the corresponding @code{EDL} file to set the parameters. Besides,
+for someone not familiar with @code{fsc2}'s syntax who just wants to do
+a simple experiment it may be too daunting a task to safely apply the
+necessary changes to an existing @code{EDL} script.
 
-Fortunately, once you have written an @code{EDL} program it usually is
-rather simple to create a script from this @code{EDL} program that
+Fortunately, once you have written an @code{EDL} script it usually is
+rather simple to create a script from this @code{EDL} script that
 allows to set the relevant parameters using a graphical user interface
-and which then automatically creates the modified @code{EDL} program and
+and which then automatically creates the modified @code{EDL} script and
 sends it to @code{fsc2} for execution. That's what the @code{fsc2_guify}
 conversion tool that comes with @code{fsc2} is good for.
 
@@ -129,7 +129,7 @@ EXPERIMENT:
 
 Before explaining the exact meaning of the extra lines let's see what
 the conversion tool will make from this. To invoke the conversion tool
-on the "enhanced" @code{EDL} program (which for now is assumed to be
+on the "enhanced" @code{EDL} script (which for now is assumed to be
 named @file{simple_cw.Edl}) just type
 
 @kbd{fsc2_guify simple_cw.Edl simple_cw}
@@ -145,7 +145,7 @@ will show up:
 
 
 As you see there are three fields for editing the parameters according
-to the three lines we added to the @code{EDL} program. On the left
+to the three lines we added to the @code{EDL} script. On the left
 side at the bottom there's another button labeled @code{Apply}. This
 button is usable only when the values you enter into the three fields
 are reasonable, i.e.@: they are numbers and are in the correct range
@@ -157,16 +157,16 @@ for the parameter will be shown.
 
 If, after adjusting the parameters, you click onto the @code{Apply}
 button the script will automatically generate the @code{EDL}
-program. Then it will, all by itself, start @code{fsc2} (if it isn't
-already running) and send it the @code{EDL} program. If
+script. Then it will, all by itself, start @code{fsc2} (if it isn't
+already running) and send it the @code{EDL} script. If
 @code{fsc2} will now immediately start the experiment, just test the
-program or only load it depends on what you selected with the popup-menu
+script or only load it depends on what you selected with the popup-menu
 button just above the @code{Apply} and @code{Quit} button (which in this
 example is set to @code{Test program}, so @code{fsc2} will load and
-test the @code{EDL} program but not yet try to start the experiment).
+test the @code{EDL} script but not yet try to start the experiment).
 
 Now that you have seen what you will get let's have a closer look at the
-first of the new lines in the "enhanced" @code{EDL} program:
+first of the new lines in the "enhanced" @code{EDL} script:
 @example
 === START_FIELD float [ 2000 : 5000 ] [ 3360 ] "Start field:" "G"
 @end example
@@ -177,7 +177,7 @@ list of items, separated by spaces. The first item on such a line is the
 name of a variable, which may consist of all normal characters, digits
 and the underscore character. But you must make sure that its name does
 not coincide with the name of a variable already used in the
-@code{EDL} program. The next required item is the type of the
+@code{EDL} script. The next required item is the type of the
 variable, which can be either @code{int}, @code{float}, @code{menu} or
 @code{file} (all four in lower case characters).
 
@@ -221,7 +221,7 @@ only enter integer numbers.
 
 But there's also a third type of variables, @code{menu}. These are for
 cases where you want to have one value selected from a list of
-values. To demonstrate this let's improve the @code{EDL} program a
+values. To demonstrate this let's improve the @code{EDL} script a
 bit. For examples sake we assume that you have to switch between
 different lock-in amplifiers quite often because some colleague of yours
 tends to borrow your favorite one. In this case it would be rather
@@ -252,7 +252,7 @@ strings to be shown to the left and right of the popup-menu.
 
 @ifnotinfo
 
-If we now again convert our improved and enhanced @code{EDL} program
+If we now again convert our improved and enhanced @code{EDL} script
 and start the resulting script, we will get the following graphical
 interface:
 
@@ -265,7 +265,7 @@ amplifier to be used in the experiment.
 
 
 Finally, there are @code{file} variables. These are for cases where you
-want to put a file name into an @code{EDL} program. The syntax is even
+want to put a file name into an @code{EDL} script. The syntax is even
 easier, you just need a line like this:
 @example
 === FILENAME file "Data file:"
@@ -281,12 +281,12 @@ start a file selector.
 
 But that's not all you can do. Sometimes it's necessary to change the
 @code{EDL} code depending on what the user selected. For an useful
-example let's further improve the @code{EDL} program to include
+example let's further improve the @code{EDL} script to include
 setting the lock-in's time constant. To do so, you normally would
 include a line for defining the time constant in the @code{VARIABLES}
 section and a line, somewhere at the start of the @code{EXPERIMENT}
 section to set the lock-in's time constant. The "enhanced" @code{EDL}
-program now would look like this:
+script now would look like this:
 @example
 DEVICES:
   er035m_s;              // gaussmeter module
@@ -354,7 +354,7 @@ line with three equal signs (and a space) or it wouldn't know what to do
 with it).
 
 But the more important point is how to deal with the first menu entry,
-where we promise that the program won't set the time constant but
+where we promise that the script won't set the time constant but
 instead will use the one already set at the lock-in. The first
 occurrence is at the line
 @example
@@ -444,7 +444,7 @@ This means you can also use constructs like
 === endif
 @end example
 @noindent
-in which case the program would output a sentence grumbling about the
+in which case the script would output a sentence grumbling about the
 time the experiment will take when the user selected a time constant of
 three seconds. Please note that it's important not to omit any spaces
 from the string when comparing it against a menu entry - for a human
@@ -464,7 +464,7 @@ are: @code{==} for equality, @code{!=} for inequality, and, finally,
 or equal then, larger then and larger or equal then.
 
 One example, where this would come handy, is to check if the start field
-is lower than the end field (otherwise the above program wouldn't do
+is lower than the end field (otherwise the above script wouldn't do
 anything useful) and, if necessary, to reverse them. To make sure the
 lower field value is always the start field you could write in the
 @code{VARIABLES} section
@@ -479,7 +479,7 @@ end_field   = START_FIELD G;
 @end example
 @noindent
 Of course, this still leaves a possible hole in our @code{EDL}
-program in case the start and end field the user entered are equal.
+script in case the start and end field the user entered are equal.
 So we could improve the code by checking also for this case and force
 the end field to be at least one field step larger than the start field:
 @example
@@ -500,7 +500,7 @@ example is that you can use the field step variable @code{FIELD_STEP}
 even before it appears in the code. The place where a variable for the
 conversion tool gets declared is completely irrelevant, you also could
 move all of them to the very end of the "enhanced" @code{EDL}
-program. The only thing of importance is the sequence in which they are
+script. The only thing of importance is the sequence in which they are
 declared, because this determines the sequence they are shown in the
 graphical user interface.
 
@@ -508,7 +508,7 @@ Actually, you can even do a lot more in the comparisons, you may e.g.@:
 use arithmetics within the comparison. The secret behind this is that
 the comparison is done via a call of the Perl @code{eval()} function
 after a @code{$} has been prepended to the variables (to make them
-proper variables of the script generating the @code{EDL} program).
+proper variables of the script generating the @code{EDL} script).
 I.e.@: a comparison like @w{@code{START_FIELD < END_FIELD}} is evaluated
 by the Perl machinery as
 @example
@@ -524,12 +524,12 @@ Just be careful not to change the variables from within the condition
 
 
 @node Interfacing, , fsc2_guify, GUI-fying
-@section Sending @code{EDL} programs to @code{fsc2}
+@section Sending @code{EDL} scripts to @code{fsc2}
 
 
 The @code{fsc2_guify} conversion tool (or, to be exact, the scripts
 created by this tool) relies on @code{fsc2} listening to external
-programs that might want to send it @code{EDL} programs. There is a
+programs that might want to send it @code{EDL} scripts. There is a
 rather simple protocol for doing so. But you don't even have to know
 about this protocol because there are three programs that do all the
 required things for you:
@@ -538,27 +538,27 @@ fsc2_load
 fsc2_test
 fsc2_start
 @end example
-If these programs get passed an @code{EDL} program on their standard
+If these programs get passed an @code{EDL} script on their standard
 input they will contact (or, if necessary, start) @code{fsc2} and pass
-it the @code{EDL} program. From the names of the programs their
+it the @code{EDL} script. From the names of the programs their
 functions should be obvious: the first one tells @code{fsc2} to just
-load the @code{EDL} program, the second one tells it to also test the
-program, and the third asks @code{fsc2} to start the @code{EDL} program
+load the @code{EDL} script, the second one tells it to also test the
+script, and the third asks @code{fsc2} to start the @code{EDL} script
 after a successful test run.
 
 You could e.g.@: invoke these programs from the command line, type in an
-@code{EDL} program and when you're finished, you would see the program
-launch @code{fsc2} with your newly typed in program displayed in the
+@code{EDL} script and when you're finished, you would see the program
+launch @code{fsc2} with your newly typed in script displayed in the
 main window. Of course, that's not what these programs are really meant
 for. Instead they should allow scripts etc.@: that create @code{EDL}
-programs to send their results to @code{fsc2} without having to deal
+scripts to send their results to @code{fsc2} without having to deal
 with any of the details about how this is done. So, such a script just
-starts one of the above programs, passes it the @code{EDL} program and
+starts one of the above programs, passes it the @code{EDL} script and
 then might care to inspect the return value.
 
 In @code{C} code you probably would do this using the @code{popen()}
 function, requesting a stream for writing (for sending the @code{EDL}
-program), while in e.g.@: Perl you would open a new pipe to write to as
+script), while in e.g.@: Perl you would open a new pipe to write to as
 in
 @example
 open( F, "|fsc2_test" ) or die "Can't run fsc2_test: $!\n";
@@ -585,7 +585,7 @@ Internal error in @code{fsc2} detected (please send a bug report).
 not found).
 @end table
 
-Using these programs you are able to send @code{EDL} programs to
+Using these programs you are able to send @code{EDL} scripts to
 @code{fsc2}, created with whichever method or programming language you
 prefer. A few example scripts written in Perl can be found in the
 @code{scripts} subdirectory of the main directory of the package. You

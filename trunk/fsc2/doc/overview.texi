@@ -29,7 +29,7 @@
 currently still with a strong bias toward cw- and pulsed EPR
 spectrometers. But the design of @code{fsc2} should make it also easy to
 use it to a broad range of experiments not releated to EPR. Its central
-component is an interpreter that executes a program describing the
+component is an interpreter that executes a script describing the
 experiment in a language which in the following will be called
 @code{EDL}
 @cindex @code{EDL}
@@ -56,9 +56,9 @@ be rewritten from scratch.
 with a certain set of experiments in mind but is intended to make it as
 easy as possible to do all kinds of experiments. Of course, this comes
 with a small price: one has to specify clearly how the experiment is to
-be done by writing a (usually rather short) program. @code{fsc2} will
-interpret this program and do the experiment accordingly. Writing a
-program may sound difficult, but the @code{EDL} language that is used to
+be done by writing a (usually rather short) script. @code{fsc2} will
+interpret this script and do the experiment accordingly. Writing a
+script may sound difficult, but the @code{EDL} language that is used to
 define an experiment isn't very hard to learn. And when this hurdle has
 been taken you will have complete control over the way the experiment is
 done. Just to give a few trivial examples: sometimes signals are
@@ -68,7 +68,7 @@ programs won't allow this and one has to either record also the
 uninteresting field regions (thus losing lots of time) or to manually
 restart the experiments for each of the regions of interest. In
 contrast, with @code{fsc2} it shouldn't take more than a few minutes to
-write an @code{EDL} program consisting of just a few lines of code that
+write an @code{EDL} script consisting of just a few lines of code that
 can not only skip these regions but also repeat the experiment as often
 as needed, and if necessary do different numbers of accumulations of the
 different parts (if, for example, the signals are huge in some of the
@@ -76,21 +76,21 @@ regions while in others they are hardly detectable above the noise
 floor) or with automatically changing the lock-in amplifiers sensitivity
 or time constant in between.
 
-But one does not have to write a new program for every experiment one is
-going to do -- for the standard experiments, once such a program has
+But one does not have to write a new script for every experiment one is
+going to do -- for the standard experiments, once such a script has
 been written, only the relevant parameters have to be changed. And
-because one can use variables in the program it's easy to have a block
-for defining the parameters somewhere at the start of the program and
+because one can use variables in the script it's easy to have a block
+for defining the parameters somewhere at the start of the script and
 change only these if necessary. If this is still too much hassle it is
 even possible to automatically create from the (slightly modified)
-@code{EDL} program a script which allows to set the parameters via a
+@code{EDL} script a script which allows to set the parameters via a
 graphical user interface and then have the script generate the
-@code{EDL} program which in turn is passed directly to @code{fsc2}
+@code{EDL} script which in turn is passed directly to @code{fsc2}
 without any further user interaction. Of course, you don't have to use
 the conversion tools but also can write such scripts yourself using
-@code{fsc2} built-in interface to accept @code{EDL} programs from
+@code{fsc2} built-in interface to accept @code{EDL} scripts from
 external sources. Once such a script has been created the users don't
-even have to learn how to write @code{EDL} programs and have all the
+even have to learn how to write @code{EDL} scripts and have all the
 convenience of the traditional type of programs without sacrificing the
 flexibility of @code{fsc2}.
 
@@ -100,9 +100,9 @@ set of devices is hard-coded into the program and changing just one
 device requires a major rewrite. In contrast, @code{fsc2} has a strictly
 modular approach to the handling of devices. For each device a separate
 module exists that only gets loaded if it is listed explicitely in the
-@code{EDL} program. Thus changing the experiment to work with e.g.@: a
+@code{EDL} script. Thus changing the experiment to work with e.g.@: a
 different lock-in amplifier or digitizer usually does not require more
-than changing one line of the @code{EDL} program (at least as long as
+than changing one line of the @code{EDL} script (at least as long as
 the devices aren't too different in their capabilities). Moreover, this
 is also a major advantage when a new device has to be integrated.
 Instead of changing the whole program that controls the experiment only
@@ -122,13 +122,13 @@ cycling.
 
 The manual is organized along the following lines: the next chapter
 (@pxref{GUI}) explains in detail the graphical user interface used for
-starting an @code{EDL} program and displaying the measured data. The
+starting an @code{EDL} script and displaying the measured data. The
 following chapter (@pxref{EDL}) explains how to monitor @code{fsc2}'s
 progress via the internet, using a browser. Then follows a chapter
 (@pxref{EDL}) that explains all about the @code{EDL} language. To
-give you an expression how easy writing an @code{EDL} program is you
+give you an expression how easy writing an @code{EDL} script is you
 may have a look at the first example (@pxref{Basics}) which discusses a
-program for doing a simple cw-detected EPR-experiment.
+script for doing a simple cw-detected EPR-experiment.
 
 The next chapter (@pxref{Built-in Functions}) lists all functions that
 are already built into @code{fsc2}. These include functions for
