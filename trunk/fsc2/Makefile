@@ -47,10 +47,10 @@ OWNER             := fsc2
 GROUP             := uucp
 
 
-# The next variable sets the GPIB library to use, it must be set to either
+# The next variable defines the GPIB library to use, it must be set to either
 # 'LLP' for the LLP library, 'NI' for the National Instruments library or
 # 'JTT' for the library written by me. Alternatively, if no GPIB support is
-# needed define GPIB_LIBRARY as 'NONE' (which is also the default if not set).
+# needed, define GPIB_LIBRARY as 'NONE' (which is also the default if not set).
 # Then the location of the GPIB configuration file is set (this is only needed
 # with the National Instruments GPIB library, if not set GPIB_CONF_FILE
 # defaults to /etc/gpib.conf).
@@ -68,7 +68,7 @@ GROUP             := uucp
 # set to 'LOW' only errors will be wriiten to the file. If not set it defaults
 # to 'LOW'.
 # Finally, if the header files for the GPIB library aren't in either
-# /usr/include or /usr/local/include (i.e. if they are, for example, in
+# /usr/include or /usr/local/include (for example if they are in
 # /usr/include/gpib) set the last variable GPIB_HEADER_DIR to the absolute
 # path of the directory where the header file(s) for the library reside.
 
@@ -122,12 +122,13 @@ MAIL_ADDRESS      := Jens.Toerring@physik.fu-berlin.de
 
 #MPATROL          := YES                  # define this in order to use mpatrol
 
-OPT              := -O2
+OPTIMIZATION     := -O2
 
 SHELL            := /bin/sh
 CC               := gcc
-CFLAGS           := -ggdb $(OPT) -I/usr/X11R6/include \
-					-I/usr/X11R6/include/X11 \
+CFLAGS           := -ggdb \
+					$(OPTIMIZATION) \
+					-I/usr/X11R6/include -I/usr/X11R6/include/X11 \
 					-Wall \
 					-Wwrite-strings \
 					-Wstrict-prototypes \
@@ -145,7 +146,7 @@ CFLAGS           := -ggdb $(OPT) -I/usr/X11R6/include \
 				    # -Wbad-function-cast # too many false positives
 				    # -Wcast-qual         # too many false positives
 				    # -Wundef             # fails in bison/flex created files
-				    # -ansi               # fails due to inline/asm
+				    # -ansi               # fails on inline/asm
 				    # -pedantic
 				    # -DNDEBUG            # switch off build-in debugging code
 LFLAGS			 := $(OPT) -shared -fpic  # needed for libraries
@@ -205,8 +206,8 @@ endif
 # machines that are known well enough - for these machines one doesn't has
 # to edit the Makefile all the time...
 
-INSTALL_MACHINE   := install-unknown
-UNINSTALL_MACHINE := uninstall-unknown
+INSTALL_MACHINE        := install-unknown
+UNINSTALL_MACHINE      := uninstall-unknown
 
 ifeq ($(machine_name),pion.anorg.chemie.uni-frankfurt.de)
 	OWNER              := fsc2
