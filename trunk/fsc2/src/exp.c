@@ -714,13 +714,13 @@ void exp_test_run( void )
 }
 
 
-/*-------------------------------------------------------------------*/
-/* Routine works as a kind of virtual lexer by simply passing the    */
-/* parser the tokens we stored while running store_exp(). The only   */
-/* exception are tokens dealing with flow control - for most of them */
-/* the parser gets signaled an end of file, only the `}' is handled  */
-/* by the parser itself (but also as an EOF).                        */
-/*-------------------------------------------------------------------*/
+/*-----------------------------------------------------------------*/
+/* Routine works as a kind of virtual lexer by simply passing the  */
+/* parser the tokens we stored while running store_exp(). The only */
+/* exception are tokens dealing with flow control - for most of    */
+/* them the parser gets signaled an end of file, only the `}' is   */
+/* handled by the parser itself (but also as an EOF).              */
+/*-----------------------------------------------------------------*/
 
 int exp_runlex( void )
 {
