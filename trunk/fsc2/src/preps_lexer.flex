@@ -158,7 +158,7 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
             }
 
             /* handling of string constants (to be used as format strings in
-			   the print() function only */
+			   the print() function */
 {STR}       {
 				prepstext[ prepsleng - 1 ] = '\0';
 				prepslval.sptr = prepstext + 1;
@@ -168,14 +168,19 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 			/* all pulse related keywords... */
 
 {P}":"?     {
-				char *t = prepstext + prepsleng - 1;
+				char *t = prepstext;
+				long num;
 
-				if ( *t == ':' )
-				    *t = '\0';
-				while ( isdigit( *--t ) )
-					;
-
-			    Cur_Pulse = pulse_new( atoi( ++t ) );
+				while ( ! isdigit( *t ) )
+					t++; 
+				num = strtol( t, NULL, 10 );
+				if ( errno == ERANGE || num > INT_MAX )
+				{
+					eprint( FATAL, "%s:%ld: Pulse number out of range.\n",
+								   Fname, Lc );
+					THROW( EXCEPTION );
+				}
+			    Cur_Pulse = pulse_new( ( int ) num );
 				return P_TOK;
 			}
 

@@ -20,6 +20,15 @@ typedef struct Pulse_ {
 	long maxlen;              /* maximum length in ns */
 
 	int set_flags;
+	bool is_active;           /* set while pulse is in use */
+
+	struct {                  /* structure for storing starting values */
+		long pos;
+		long len;
+		long dpos;
+		long dlen;
+		bool is_active;
+	} store;
 
 	Phase_Sequence *phase;    /* phase sequence for pulse */
 
@@ -56,6 +65,7 @@ void   pulse_set_len( Pulse *p, Var *v );
 void   pulse_set_dpos( Pulse *p, Var *v );
 void   pulse_set_dlen( Pulse *p, Var *v );
 void   pulse_set_maxlen( Pulse *p, Var *v );
+void save_restore_pulses( bool flag );
 void   delete_pulses( void );
 
 

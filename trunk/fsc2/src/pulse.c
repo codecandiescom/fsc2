@@ -16,30 +16,24 @@
 
 Pulse *n2p( char *txt )
 {
-	char *tp, *t;
-	int num;
+	long num;
 
 
 	if ( *txt == '.' )
 		return Cur_Pulse;
 
-	tp = t = get_string_copy( txt );
-	while ( *t && *t != '.' )
-		t++;
+	while ( ! isdigit( *txt ) )
+		txt++;
 
-	if ( *t == '.' )
-	    *txt = '\0';
+	num = strtol( txt, NULL, 10 );
+	if ( errno == ERANGE || num > INT_MAX )
+	{
+		eprint( FATAL, "%s:%ld: Pulse number out of range (0-%d).\n",
+				Fname, Lc,  MAX_PULSE_NUM - 1 );
+		THROW( EXCEPTION );
+	}
 
-	while( isdigit( *--t ) )
-		;
-
-	if ( isdigit( *++t ) )
-	    num = atoi( t );
-	else
-		num = -1;          /* this should never happen... */
-
-	T_free( tp );
-	return pulse_find( num );
+	return pulse_find( ( int ) num );
 }
 
 
@@ -101,7 +95,7 @@ Pulse *pulse_find( int num )
 
 	if ( num < 0 || num >= MAX_PULSE_NUM )
 	{
-		eprint( FATAL, "%s:%ld: Pulse number %d out of range (0-%d).\n",
+		eprint( FATAL, "%s:%ld: Pulse number (%d) out of range (0-%d).\n",
 				Fname, Lc, num, MAX_PULSE_NUM - 1 );
 		THROW( EXCEPTION );
 	}
@@ -271,7 +265,9 @@ bool pulse_exist( Pulse *p )
 
 void pulse_set_func( Pulse *p, Var *v )
 {
-	if ( v->type != INT_VAR )
+	if ( v->type != INT_VAR ||
+		 v->val.lval < PULSER_CHANNEL_MW ||
+		 v->val.lval > PULSER_CHANNEL_RF_GATE )
 	{
 		eprint( FATAL, "%s:%ld: Invalid function type for pulse %d.\n",
 				Fname, Lc, p->num );
@@ -283,15 +279,6 @@ void pulse_set_func( Pulse *p, Var *v )
 		eprint( SEVERE, "%s:%ld: Function of pulse %d has already been set, "
 				" leaving it unchanged.\n", Fname, Lc, p->num );
 		return;
-	}
-
-
-	if ( v->val.lval < PULSER_CHANNEL_MW ||
-		 v->val.lval > PULSER_CHANNEL_RF_GATE )
-	{
-		eprint( FATAL, "%s:%ld: Invalid function type for pulse %d.\n",
-				Fname, Lc, p->num );
-		THROW( EXCEPTION );
 	}
 
 	p->func = v->val.lval;
@@ -312,7 +299,7 @@ void pulse_set_pos( Pulse *p, Var *v )
 	}
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
-	val = v->type == INT_VAR ? v->val.lval : rnd( v->val.dval );
+	val = ( v->type == INT_VAR ) ? v->val.lval : rnd( v->val.dval );
 
 	if ( val < 0 )
 	{
@@ -345,7 +332,7 @@ void pulse_set_len( Pulse *p, Var *v )
 		return;
 	}
 
-	val = v->type == INT_VAR ? v->val.lval : rnd( v->val.dval );
+	val = ( v->type == INT_VAR ) ? v->val.lval : rnd( v->val.dval );
 
 	if ( val < 0 )
 	{
@@ -373,13 +360,13 @@ void pulse_set_dpos( Pulse *p, Var *v )
 
 	if ( p->set_flags & P_DPOS )
 	{
-		eprint( SEVERE, "%s:%ld: Position change of pulse %d is already set, "
-				"using previously defined value.\n", Fname, Lc, p->num );
+		eprint( SEVERE, "%s:%ld: Position increment of pulse %d is already "
+				"set, using previously defined value.\n", Fname, Lc, p->num );
 		return;
 	}
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
-	val = v->type == INT_VAR ? v->val.lval : rnd( v->val.dval );
+	val = ( v->type == INT_VAR ) ? v->val.lval : rnd( v->val.dval );
 
 	if ( val > LONG_MAX || val < LONG_MIN)
 	{
@@ -400,13 +387,13 @@ void pulse_set_dlen( Pulse *p, Var *v )
 
 	if ( p->set_flags & P_DLEN )
 	{
-		eprint( SEVERE, "%s:%ld: Length change of pulse %d is already set, "
+		eprint( SEVERE, "%s:%ld: Length increment of pulse %d is already set, "
 				"using previously defined value.\n", Fname, Lc, p->num );
 		return;
 	}
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
-	val = v->type == INT_VAR ? v->val.lval : rnd( v->val.dval );
+	val = ( v->type == INT_VAR ) ? v->val.lval : rnd( v->val.dval );
 
 	if ( val > LONG_MAX || val < LONG_MIN)
 	{
@@ -433,7 +420,7 @@ void pulse_set_maxlen( Pulse *p, Var *v )
 	}
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
-	val = v->type == INT_VAR ? v->val.lval : rnd( v->val.dval );
+	val = ( v->type == INT_VAR ) ? v->val.lval : rnd( v->val.dval );
 
 	if ( val > LONG_MAX || val < LONG_MIN)
 	{
@@ -445,6 +432,35 @@ void pulse_set_maxlen( Pulse *p, Var *v )
 	p->maxlen = val;
 	p->set_flags |= P_MAXLEN;
 }
+
+
+void save_restore_pulses( bool flag )
+{
+	Pulse *cp;
+
+	if ( flag )
+	{
+		for ( cp = Pulse; cp != NULL; cp = cp->next )
+		{
+			cp->store.pos       = cp->pos;
+			cp->store.len       = cp->len;
+			cp->store.dpos      = cp->dpos;
+			cp->store.dlen      = cp->dlen;
+			cp->store.is_active = cp->is_active;
+		}
+		else
+		for ( cp = Pulse; cp != NULL; cp = cp->next )
+		{
+			cp->pos       = cp->store.pos;
+			cp->len       = cp->store.len;
+			cp->dpos      = cp->store.dpos;
+			cp->dlen      = cp->store.dlen;
+			cp->is_active = cp->store.is_active;
+		}
+	}
+}
+
+
 
 
 void delete_pulses( void )
