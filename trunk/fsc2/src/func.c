@@ -22,6 +22,7 @@
 */
 
 
+#include <dlfcn.h>
 #include "fsc2.h"
 
 
@@ -288,6 +289,38 @@ int func_exists( const char *name )
 
 Var *func_get( const char *name, int *acc )
 {
+	const char *appendix;
+	char *sec_name;
+	Var *func_ptr;
+
+
+	/* We have to help the writers of modules a bit: If she or he wants a
+	   pointer to a function within the same module s/he does not know if
+	   there are other modules with the same generic type and thus have no
+	   chance to figure out if they need to append a '#' plus the number of
+	   the device to the function name to get the correct functon within the
+	   same module.
+	   Thus we check if the last call came from a device function that has
+	   a '#' appended to its name. If this is the case we try to figure out
+	   if a function with the name passed to us by the user exists in this
+	   module and then automatically append the same '#' plus dvice number,
+	   thus restricting the search for functions within the module. */
+
+	if ( EDL.Call_Stack != NULL && EDL.Call_Stack->f->to_be_loaded &&
+		 strrchr( name, '#' ) == NULL &&
+		 ( appendix =  strrchr( EDL.Call_Stack->f->name, '#' ) ) != NULL )
+	{
+		dlerror( );
+		dlsym( EDL.Call_Stack->f->device->driver.handle, name );
+		if ( dlerror( ) == NULL )
+		{
+			sec_name = get_string( "%s%s", name, appendix );
+			func_ptr = func_get_long( sec_name, acc, SET );
+			T_free( sec_name );
+			return func_ptr;
+		}
+	}
+
 	return func_get_long( name, acc, SET );
 }
 
