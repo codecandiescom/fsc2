@@ -198,6 +198,7 @@ struct termios *fsc2_serial_open( int sn, const char *devname, int flags )
 {
 #if defined( NUM_SERIAL_PORTS ) && NUM_SERIAL_PORTS > 0
 	int fd;
+	int flags;
 
 
 	/* Check that the serial prot number is within the allowed range */
@@ -247,6 +248,13 @@ struct termios *fsc2_serial_open( int sn, const char *devname, int flags )
 		return NULL;
 	}
 
+	/* Set the close-on-exec flag for the file descriptor */
+
+	if ( ( flags = fcntl( fd, F_GETFD, 0 ) ) < 0 )
+		flags = 0;
+
+	fcntl( fd, F_SETFD, flags | FD_CLOEXEC );
+
 	/* Get the the current terminal settings and copy them to a structure
 	   that gets passed back to the caller */
 
@@ -263,7 +271,6 @@ struct termios *fsc2_serial_open( int sn, const char *devname, int flags )
 	UNUSED_ARGUMENT( sn );
 	UNUSED_ARGUMENT( devname );
 	UNUSED_ARGUMENT( flags );
-
 
 	errno = EACCES;
 	return NULL;
