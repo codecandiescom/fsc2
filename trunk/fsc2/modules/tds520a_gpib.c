@@ -356,6 +356,7 @@ int tds520a_get_trigger_channel( void )
 {
     char reply[ 30 ];
     long length = 30;
+	int val;
 
 
     if ( gpib_write( tds520a.device, "TRIG:MAI:EDGE:SOU?", 18 ) == FAILURE ||
@@ -364,15 +365,18 @@ int tds520a_get_trigger_channel( void )
 
     reply[3] = '\0';
 
-	/* Possible replies are "CH1", "CH2", "CH3", "CH4", "AUX" or "LIN" */
-
-    if ( ! strcmp( reply, "AUX" ) )
-        return TDS520A_AUX;
+	/* Possible replies are "CH1", "CH2", "CH3", "CH4", or "LIN", where
+	   "CH3" or "CH4" really mean "AUX1" or "AUX2", respectively */
 
     if ( ! strcmp( reply, "LIN" ) )
         return TDS520A_LIN;
 
-    return ( int ) ( reply[ 2 ] - '1' );
+    val = ( int ) ( reply[ 2 ] - '1' );
+
+	if ( val >= 2 )
+		val = TDS520A_AUX1 + val - 2;
+
+	return val;
 }
 
 
@@ -513,7 +517,7 @@ bool tds520a_display_channel( int channel )
     long length = 10;
 
 
-	assert( channel >= 0 && channel < TDS520A_AUX );
+	assert( channel >= 0 && channel < TDS520A_AUX1 );
 
 	/* Get the channels sensitivity */
 
@@ -553,7 +557,7 @@ double tds520a_get_sens( int channel )
     long length = 30;
 
 
-	assert( channel >= 0 && channel < TDS520A_AUX );
+	assert( channel >= 0 && channel < TDS520A_AUX1 );
 
 	strcpy( cmd, Channel_Names[ channel ] );
 	strcat( cmd, ":SCA?" );
@@ -607,7 +611,7 @@ double tds520a_get_area( int channel, WINDOW *w )
     if ( gpib_write( tds520a.device, "MEASU:IMM:TYP ARE", 17 ) == FAILURE )
 		tds520a_gpib_failure( );
 
-	assert( channel >= 0 && channel < TDS520A_AUX );
+	assert( channel >= 0 && channel < TDS520A_AUX1 );
 
 	/* set channel (if the channel is not already set) */
 
@@ -648,7 +652,7 @@ bool tds520a_get_curve( int channel, WINDOW *w, double **data, long *length )
 	double scale;
 
 
-	assert( channel >= 0 && channel < TDS520A_AUX );
+	assert( channel >= 0 && channel < TDS520A_AUX1 );
 
 	/* Calculate the scale factor for converting the data returned by the
 	   digitizer (2-byte integers) into real voltage levels */
