@@ -126,7 +126,7 @@ MAIL_ADDRESS      := Jens.Toerring@physik.fu-berlin.de
 OPTIMIZATION     := -O2
 
 SHELL            := /bin/sh
-CC               := icc
+CC               := gcc
 CFLAGS           := $(OPTIMIZATION) \
 					-ggdb \
 					-I/usr/X11R6/include -I/usr/X11R6/include/X11 \
