@@ -211,7 +211,7 @@ sequences to be used in the experiment as well as the way the resulting
 echos will be added up. Because this is a rather extensive subject (and
 because of the different ways the pulser is integrated into the
 supported spectrometers, an in-depth explanation of both these sections
-is part of a whole chapter.
+is part of a whole chapter (@pxref{Using Pulsers}).
 
 As you already have seen the @code{PREPARATIONS} section is for setting
 up the other devices and the graphics. But this is also the section
@@ -234,8 +234,8 @@ valid section keywords:
 
 @itemize @bullet
 @item @code{DEVICES}, @code{DEV}, @code{DEVS}, @code{DEVICE}
-@item @code{ASSIGNMENTS}, @code{ASS}, @code{ASSIGNMENT}
 @item @code{VARIABLES}, @code{VAR}, @code{VARS}, @code{VARIABLE}
+@item @code{ASSIGNMENTS}, @code{ASS}, @code{ASSIGNMENT}
 @item @code{PHASES}, @code{PHA}, @code{PHAS}, @code{PHASE}
 @item @code{PREPARATIONS}, @code{PREP}, @code{PREPS}, @code{PREPARATION}
 @item @code{EXPERIMENT}, @code{EXP}
@@ -754,8 +754,9 @@ array when arithmetic with arrays is used.
 
 Within the @code{EXPERIMENT} section flow control structures can be
 used. These are @code{REPEAT}, @code{WHILE}, @code{UNTIL}, @code{FOR} and
-@code{FOREVER} loops and @code{IF}-@code{ELSE} constructs. (Please note:
-all of these keywords have to be spelt in capital letters!).
+@code{FOREVER} loops and @code{IF-ELSE} and @code{UNLESS-ELSE}
+constructs. (Please note: all of these keywords have to be spelt in
+capital letters!).
 
 
 Most flow control construct keywords are followed by a condition and all
@@ -972,19 +973,28 @@ is only tested once so the experiment can start much faster. For obvious
 resons, a @code{FOREVER} loop doesn't expect a loop condition but the
 statements of loop immediately following the @code{FOREVER} keyword.
 
-But there's also a disadvantage: Because the @code{EXPERIMENT} section
-isn't thoroughly tested it can't be guaranteed that the experiment will
-run without errors. Thus the use of @code{FOREVER} loops should be
-restricted to test runs where one wants to figure out the optimum
-parameter for an experiment.
+@quotation
+@cartouche
+There is a disadvantage of using a @code{FOREVER} loop: Because
+@acronym{fsc2} can't determine in advance when the @code{FOREVER} loop
+is going to be terminated it is not possible to test these kinds of
+loops thoroughly in the test run, i.e.@ before the experiment is
+started. Instead, in the test run a @code{FOREVER} loop is only run
+once to do a plausibility check, but further tests are not
+feasible. Thus, it can not be guaranteed that the experiment will run
+without errors. Therefor the use of @code{FOREVER} loops should be
+restricted to preliminary experiments where one for example tries to
+figure out the optimum parameter for an experiment.
+@end cartouche
+@end quotation
 
 
 @anchor{NEXT statement}
 @subsection NEXT statement
 @cindex NEXT
 
-Under certain conditions one doesn't want to execute all statements of a
-loop but to go back to the test of the loop condition
+Under certain conditions one doesn't want to execute all remaining
+statements of a loop but to go back to the test of the loop condition
 immediately. Whenever the keyword @code{NEXT} appears as the next
 statement to be executed in a loop the remaining statements are skipped
 and the program jumps back to the test of the loop condition (with the
@@ -1056,6 +1066,36 @@ IF x > 1.0 @{
 @end example
 @noindent
 
+
+@anchor{UNLESS-ELSE constructs}
+@subsection UNLESS-ELSE constructs
+@cindex UNLESS
+@cindex ELSE 
+@cindex UNLESS-ELSE
+
+@code{UNLESS} is identical to @code{IF} with the only exception that the
+condition is not tested for truth but for falsehood, i.e.@ while in an
+@code{IF} construct the following block of statements is executed when
+the condition tests true, in the @code{UNLESS} constructs the block is
+only executed when the condition tests false. Of course, also with the
+@code{UNLESS} an alternative can be specified with an @code{ELSE} block
+(but in contrast to @code{IF} more than one @code{ELSE} doesn't make too
+much sense).
+
+
+@quotation
+@cartouche
+As @code{FOREVER} loops also @code{IF-ELSE} and @code{UNLESS-ELSE}
+constructs introduce some problems with the testing of an @acronym{EDL}
+program before the experiment is done. This happens when the condition
+to be tested depends either on user input (e.g.@ tests, if the user
+pressed a button etc.) or on the results of a measurement itself. In
+these cases the flow of control of the program can not be known in
+advance and thus a thorough test is impossible. Therefor it can occur
+that the test run of the experiment succeeds but the actual experiment
+stops with an error that had not been anticipated.
+@end cartouche
+@end quotation
 
 @node Miscellaneous, , Control structures, EDL
 @section Miscellaneous
