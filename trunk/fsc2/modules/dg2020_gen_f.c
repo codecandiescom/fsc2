@@ -513,6 +513,36 @@ bool dg2020_set_repeat_time( double time )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
+bool dg2020_set_min_seq_len( double seq_len )
+{
+	if ( dg2020.is_max_seq_len &&
+		 dg2020.max_seq_len != dg2020_double2ticks( seq_len ) )
+	{
+		eprint( FATAL, "%s:%ld: %s: A differrent minimum pattern length of %s "
+				"has already been set.\n", Fname, Lc, pulser_struct.name,
+				dg2020_pticks( dg2020.max_seq_len ) );
+		THROW( EXCEPTION );
+	}
+
+	/* Check that the value is reasonable */
+
+	if ( seq_len <= 0 )
+	{
+		eprint( FATAL, "%s:%ls: %s: Zero or negative minimum pattern "
+				"length.\n", Fname, Lc, pulser_struct.name );
+		THROW( EXCEPTION );
+	}
+
+	dg2020.max_seq_len = dg2020_double2ticks( seq_len );
+	dg2020.is_max_seq_len = SET;
+
+	return OK;
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
 bool dg2020_set_phase_reference( int phase, int function )
 {
 	FUNCTION *p, *f;

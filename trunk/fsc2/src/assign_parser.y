@@ -67,6 +67,7 @@ static bool Func_is_set = UNSET;
 
 %token TB_TOKEN              /* TIMEBASE */
 %token TM_TOKEN              /* TRIGGERMODE */
+%token MPL_TOKEN             /* MINIMUM_PATTERN_LENGTH */
 
 %token INTERN_TOKEN          /* INTERNAL */
 %token EXTERN_TOKEN          /* EXTERNAL */
@@ -148,6 +149,7 @@ line:    func                      { Func_is_set = SET; }
          pcd af
        | tb atb
        | tm atm
+       | mpl ampl
        | phs aphs                  { p_phs_end( Cur_PHS ); }
        | psd apsd
        | gp agp
@@ -160,6 +162,7 @@ af:      /* empty */
 	   | SECTION_LABEL             { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | TB_TOKEN                  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | TM_TOKEN                  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | MPL_TOKEN                 { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | PHS_TOK                   { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | PSD_TOKEN                 { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | GP_TOKEN                  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
@@ -169,6 +172,7 @@ af:      /* empty */
 atb:     /* empty */
        | func                      { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | TM_TOKEN                  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | MPL_TOKEN                 { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | PHS_TOK                   { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | PSD_TOKEN                 { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | GP_TOKEN                  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
@@ -179,6 +183,17 @@ atb:     /* empty */
 atm:     /* empty */
        | func                      { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | TB_TOKEN                  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | MPL_TOKEN                 { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | PHS_TOK                   { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | PSD_TOKEN                 { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | GP_TOKEN                  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+	   | SECTION_LABEL             { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+;
+
+ampl:    /*empty */
+       | func                      { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | TB_TOKEN                  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | TM_TOKEN                  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | PHS_TOK                   { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | PSD_TOKEN                 { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | GP_TOKEN                  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
@@ -189,6 +204,7 @@ atm:     /* empty */
 aphs:    /* empty */
        | TB_TOKEN                  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | TM_TOKEN                  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | MPL_TOKEN                 { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | PSD_TOKEN                 { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | GP_TOKEN                  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
 	   | SECTION_LABEL             { THROW( MISSING_SEMICOLON_EXCEPTION ); }
@@ -199,6 +215,7 @@ apsd:    /* empty */
        | func                      { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | TB_TOKEN                  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | TM_TOKEN                  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | MPL_TOKEN                 { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | PHS_TOK                   { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | GP_TOKEN                  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
 	   | SECTION_LABEL             { THROW( MISSING_SEMICOLON_EXCEPTION ); }
@@ -209,6 +226,7 @@ agp:     /* empty */
        | gp	func                   { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | gp	TB_TOKEN               { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | gp	TM_TOKEN               { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | MPL_TOKEN                 { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | gp	PHS_TOK                { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | gp	PSD_TOKEN              { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | gp	GP_TOKEN               { THROW( MISSING_SEMICOLON_EXCEPTION ); }
@@ -414,6 +432,11 @@ sl_val:   NEG_TOKEN                { $$ = vars_push( INT_VAR, NEGATIVE ); }
 		| '+'                      { $$ = vars_push( INT_VAR, POSITIVE ); }
 ;
 
+
+/* handling of TIME_BASE commands */
+
+mpl:      MPL_TOKEN expr           { p_set_min_seq_len( $2 ); }
+;
 
 /* Handling of PHASE_SETUP commands */
 

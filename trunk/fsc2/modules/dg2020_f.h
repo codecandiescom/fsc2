@@ -193,6 +193,7 @@ typedef struct
 	bool is_neg_delay;       // if any of the functions has a negative delay
 
 	long max_seq_len;        // maximum length of all pulse sequences
+	bool is_max_seq_len;
 
 	FUNCTION function[ PULSER_CHANNEL_NUM_FUNC ];
 	POD pod[ MAX_PODS ];

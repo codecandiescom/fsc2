@@ -219,6 +219,9 @@ Ticks dg2020_get_max_seq_len( void )
 		max = Ticks_max( max, f->max_seq_len + f->delay );
 	}
 
+	if ( dg2020.is_max_seq_len )
+		max = Ticks_max( max, dg2020.max_seq_len );
+
 	return max;
 }
 

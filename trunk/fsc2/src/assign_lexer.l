@@ -107,6 +107,7 @@ VL          V_?L(OW)?
 
 TB          T(IME)?_?B(ASE)?:?
 TM          T(RIG(GER)?)?_?M(ODE)?:?
+MPL         MIN(IMUM)?_?PATT(ERN)?_LEN(GTH)?
 
 INTERN      INT(ERN(AL)?)?
 EXTERN      EXT(ERN(AL)?)?
@@ -280,6 +281,7 @@ WS          [\n=: ]+
 
 {TB}        return TB_TOKEN;
 {TM}        return TM_TOKEN;
+{MPL}       return MPL_TOKEN;
 {INTERN}    return INTERN_TOKEN;
 {EXTERN}    return EXTERN_TOKEN;
 {SL}        return SLOPE_TOKEN;
