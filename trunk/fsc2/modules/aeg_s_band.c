@@ -324,6 +324,11 @@ Var *magnet_setup( Var *v )
 }
 
 
+/*--------------------------------------------------------------------*/
+/* If called the function reduces the time needed for calibrating the */
+/* magnet sweep, alas also reducing the accuracy.                     */
+/*--------------------------------------------------------------------*/
+
 Var *magnet_fast_init( Var *v )
 {
 	v = v;
