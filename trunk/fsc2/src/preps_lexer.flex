@@ -262,7 +262,7 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 				return VAR_REF;
 			}
 {DEF}       {
-				prepslval.vptr = vars_push( INT_VAR, PULSER_CHANNEL_DEFENCE );
+				prepslval.vptr = vars_push( INT_VAR, PULSER_CHANNEL_DEFENSE );
 				return VAR_REF;
 			}
 {RF}        {
