@@ -23,15 +23,15 @@ F1, F2;
 
 PREPARATIONS:
 
-init_2d( 1, 0, 0, 0, 0, start_field[ 1 ], field_step, "Time axis",
-		 "Field [G]" );
-
+init_2d( 1, 0, 0, 0, 0, 0, 0, "Time axis", "Field [G]" );
 magnet_setup( start_field[ 1 ], field_step );
 digitizer_averaging( FUNC_E, CH1, 50 );
 
 
 EXPERIMENT:
 
+change_scale( 0, 10e6 * digitizer_time_per_point( ),
+			  start_field[ 1 ], field_step );
 
 F1 = get_file( "Enter data file name:", "*.dat", "", "", "dat" );
 F2 = clone_file( F1, "dat", "par" );
