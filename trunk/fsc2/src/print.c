@@ -961,8 +961,9 @@ void eps_draw_contour( FILE *fp, int cn )
    command the user asked us to use). The first forked process waits until the
    printing process finishes and removes the temporary file before it exits.
    This double level of forking insures that the temporary file is really
-   going to be deleted - otherwise we would have to know the correct flags for
-   the print command to make it delete this file by itself.  */
+   going to be deleted, even if the parent processes dies in the mean time -
+   otherwise we would have to know the correct flags for the print command to
+   make it delete this file by itself. */
 
 
 void do_print( char *name, const char *command )
