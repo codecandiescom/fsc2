@@ -48,10 +48,10 @@ static Var *CV;
 %token E_US_TOKEN	  270
 %token E_MS_TOKEN	  271
 %token E_S_TOKEN	  272
-%token E_NS_TOKEN	  273
-%token E_US_TOKEN	  274
-%token E_MS_TOKEN	  275
-%token E_S_TOKEN	  276
+%token E_NV_TOKEN	  273
+%token E_UV_TOKEN	  274
+%token E_MV_TOKEN	  275
+%token E_V_TOKEN	  276
 %token E_NEG	      277
 
 
