@@ -28,8 +28,8 @@
 static void dg2020_defense_twt_check( void );
 
 
-#define type_ON( f )           ( ( f )->is_inverted ? LOW : HIGH )
-#define type_OFF( f )          ( ( f )->is_inverted ? HIGH : LOW )
+#define type_ON( f )   ( ( f )->is_inverted ? LOW : HIGH )
+#define type_OFF( f )  ( ( f )->is_inverted ? HIGH : LOW )
 
 
 /*-------------------------------------------------------------------------*/
