@@ -689,11 +689,11 @@ void spectrapro_300i_set_offset( long gn, long offset )
 
 	fsc2_assert( gn >= 0 && gn < MAX_GRATINGS );
 	fsc2_assert( spectrapro_300i.grating[ gn ].is_installed );
+	fsc2_assert ( labs( offset ) <= lrnd( ( double ) INIT_OFFSET_RANGE /
+				  						  spectrapro_300i.grating[ gn ].grooves
+										  + ( gn % 3 ) * INIT_OFFSET ) );
 
-	/* Make sure the new offset isn't completely wrong (taking into account
-	   possible rounding errors, that's why we don't compare to 1.0) */
-
-	fsc2_assert ( 1.0000001 >= labs( offset - ( gn % 3 ) * INIT_OFFSET ) 
+1.0000001 >= labs( offset - ( gn % 3 ) * INIT_OFFSET ) 
 				  			   * spectrapro_300i.grating[ gn ].grooves
 							   / INIT_OFFSET_RANGE );
 
