@@ -246,7 +246,8 @@ FUNC        {IDENT}"#"[0-9]+
 				long val = 0;
 				char *cp = prepstext + prepsleng - 1;
 
-				/* determine number of phase sequence (0 to ...)*/
+				/* determine number of phase sequence (currently only 1 or 2
+				   but could be extended to allow a range from 0 to ...) */
 
 				if ( isdigit( *cp ) )
 				{
