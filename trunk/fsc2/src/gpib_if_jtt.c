@@ -121,10 +121,10 @@ int gpib_init( const char *log_file_name, int log_level )
 	if ( ll > LL_ALL )
 		ll = LL_ALL;
 
+	raise_permissions( );
+
     gpib_init_log( log_file_name );             /* initialise logging */
 	gpib_error_setup( gpib_error_buffer, 1024 );
-
-	raise_permissions( );
 
     if ( gpib_init_controller( ) != SUCCESS )   /* initialise the controller */
     {
@@ -270,7 +270,6 @@ static void gpib_init_log( const char *log_file_name )
     if ( ll == LL_NONE )
         return;
 
-	raise_permissions( );
     if ( log_file_name == NULL || *log_file_name == '\0' )
 	{
         gpib_log = stderr;
@@ -301,7 +300,6 @@ static void gpib_init_log( const char *log_file_name )
 
     fprintf( gpib_log, "GPIB bus is being initialised.\n" );
     fflush( gpib_log );
-	lower_permissions( );
 }
 
 
