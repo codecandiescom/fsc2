@@ -22,8 +22,7 @@
 #  Boston, MA 02111-1307, USA.
 
 # TODO: 1. Also send number of curently displayed curve for 2D display
-#       2. Evaluate If-fields in meta data the browser sends
-#       3. Support JPEG?
+#       2. Evaluate If-fields in meta-data the browser sends
 
 
 use strict;
@@ -185,7 +184,7 @@ sub serve_main {
 
 	my $f = shift;
 
-	my @st1 = ( "IDLE", "RUNNING" , "WAITING", "DONE" );
+	my @st1 = ( "IDLE", "RUNNING" , "WAITING", "FINISHED" );
 	my @st2 = ( "Idle",
 				"Experiment running",
 				"<FONT COLOR=#FF0000>Waiting for user input</FONT>",
