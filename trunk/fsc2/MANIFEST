@@ -3,6 +3,7 @@
 # $Id$
 #
 
+0.000000
 COPYING
 Changes
 INSTALL
@@ -300,6 +301,8 @@ src/fsc2_module.h
 src/fsc2_rsc_hr.fd
 src/fsc2_rsc_lr.fd
 src/fsc2_types.h
+src/fsc2d.c
+src/fsc2d.h
 src/func.c
 src/func.h
 src/func_basic.c
