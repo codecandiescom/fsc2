@@ -113,6 +113,7 @@ LWS      ^[\t ]+
 WS       [\t ]+
 TWS      [\t ]+\n
 
+SHEBANG ^#!.*$
 INCL    ^[ \t]*#INCLUDE[\t ]*
 IFN     \"[^"\n]*\"[\t ]*\n?|<[^>\n]*>[\t ]*\n?
 IFNE    [^"<\t \n]*\n?
@@ -161,6 +162,16 @@ KEEP    [^\t" \n(\/*),;:=%\^\-\+]+
 <<EOF>>		THROW( EOF_IN_STRING_EXCEPTION );
 
 } /* end of <str> */
+
+{SHEBANG}   {
+                if ( Lc == 1 )
+				{
+                    Lc++;
+					Eol = SET;
+				}
+				else
+				    THROW( MISPLACED_SHEBANG );
+			}
 
             /* handling of C++ style comment spanning a whole line */
 {REM1}		{
@@ -425,6 +436,12 @@ int main( int argc, char *argv[ ] )
 	CATCH( DANGLING_END_OF_COMMENT )
 	{
 		printf( "\x03\n%s: End of comment found in program text at "
+				"line %ld.\n", Fname, Lc );
+		exit( EXIT_FAILURE );
+	}
+	CATCH( MISPLACED SHEBANG )
+	{
+		printf( "\x03\n%s: `#!' must appear on first line instead of "
 				"line %ld.\n", Fname, Lc );
 		exit( EXIT_FAILURE );
 	}

@@ -134,6 +134,8 @@ bool scan_main( char *file )
 {
 	char *cmd;
 	bool split_error;
+	struct sigaction sact;
+	struct sigaction oact;
 
 
 	/* Forget everything about previous tests */
@@ -163,7 +165,8 @@ bool scan_main( char *file )
 	strcat( cmd, "fsc2_clean " );
 	strcat( cmd, file );
 
-	signal( SIGCHLD, SIG_IGN );
+	sact.sa_handler = SIG_IGN;
+	sigaction( SIGCHLD, &sact, &oact );
 
 	splitin = popen( cmd, "r" );
 
@@ -173,7 +176,7 @@ bool scan_main( char *file )
 
 	pclose( splitin );
 
-	signal( SIGCHLD, main_sig_handler );
+	sigaction( SIGCHLD, &oact, NULL );
 
 	T_free( cmd );
 
