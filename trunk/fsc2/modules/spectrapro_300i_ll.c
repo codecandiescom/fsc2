@@ -1150,10 +1150,10 @@ char *spectrapro_300i_talk( const char *buf, size_t len )
 }
 
 
-/*----------------------------------------------------------------------*/
-/* Most low level function for the communication with the monochromator */
-/* via the serial port.                                                 */
-/*----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------*/
+/* Low level function for the communication with the monochromator */
+/* via the serial port.                                            */
+/*-----------------------------------------------------------------*/
 
 static bool spectrapro_300i_comm( int type, ... )
 {
@@ -1227,6 +1227,28 @@ static bool spectrapro_300i_comm( int type, ... )
 	}
 
 	return OK;
+}
+
+
+/*-----------------------------------------*/
+/* Converts a wavelength into a wavenumber */
+/*-----------------------------------------*/
+
+double spectrapro_300i_wl2wn( double wl )
+{
+	fsc2_assert( wl > 0 );
+	return 0.01 / wl;
+}
+
+
+/*-----------------------------------------*/
+/* Converts a wavenumber into a wavelength */
+/*-----------------------------------------*/
+
+double spectrapro_300i_wn2wl( double wn )
+{
+	fsc2_assert( wn > 0 );
+	return 0.01 / wn;
 }
 
 

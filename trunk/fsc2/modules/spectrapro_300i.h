@@ -37,6 +37,7 @@ struct SPECTRAPRO_300I {
 	bool is_open;           /* is the device file open ? */
     struct termios *tio;    /* serial port terminal interface structure */
 	double wavelength;      /* current wavelength */
+	bool is_wavelength;     /* if wavelength got set in PREPARATIONS section */
 	long tn;                /* current turret number, range 0-2 */
 	long current_gn;        /* current grating number, range 0-8 */
 	bool use_calib;         /* can calibration info be used ? */

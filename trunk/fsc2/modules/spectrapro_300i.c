@@ -73,6 +73,7 @@ int spectrapro_300i_init_hook( void )
 	spectrapro_300i.tn = 0;
 	spectrapro_300i.current_gn = 0;
 	spectrapro_300i.wavelength = 5.0e-7;
+	spectrapro_300i.is_wavelength = UNSET;
 	spectrapro_300i.use_calib = 0;
 
 	return 1;
@@ -97,7 +98,7 @@ int spectrapro_300i_exp_hook( void )
 
 	spectrapro_300i_open( );
 
-	/* Check that gratings used in the test run where installed (or at least
+	/* Check that gratings used in the test run is installed (or at least
 	   the function for installing the grating was called) */
 
 	for ( i = 0; i < MAX_GRATINGS; i++ )
@@ -105,10 +106,15 @@ int spectrapro_300i_exp_hook( void )
 			 ! spectrapro_300i.grating[ i ].is_installed  &&
 			 ! spectrapro_300i.grating[ i ].installed_in_test )
 		{
-			print( FATAL, "Found during test run that non installed "
-				   "grating #%ld is used.\n", i + 1 );
+			print( FATAL, "Found during test run that grating #%ld is used "
+				   "which isn't installed.\n", i + 1 );
 			THROW( EXCEPTION );
 		}
+
+	/* If a wavelength was set during the PREPARATIONS section set it now */
+
+	if ( spectrapro_300i.is_wavelength )
+		spectrapro_300i_set_wavelength( spectrapro_300i.wavelength );
 
 	/* No calibration file has been read yet */
 
@@ -297,11 +303,11 @@ Var *monochromator_turret( Var *v )
 }
 
 
-/*--------------------------------------------------------------------*/
-/* Function returns either the current set wavelength (if called with */
-/* no arguments) or moves the grating to a new center wavelength as   */
-/* specified (in meters) by the only argument.                        */
-/*--------------------------------------------------------------------*/
+/*-----------------------------------------------------------------*/
+/* Function either returns the currently set wavelength (if called */
+/* with no arguments) or moves the grating to a new center wave-   */
+/* length as specified (in meters) by the only argument.           */
+/*-----------------------------------------------------------------*/
 
 Var *monochromator_wavelength( Var *v )
 {
@@ -358,6 +364,59 @@ Var *monochromator_wavelength( Var *v )
 		spectrapro_300i_set_wavelength( wl );
 
 	spectrapro_300i.wavelength = wl;
+	if ( FSC2_MODE == PREPARATIONS )
+		spectrapro_300i.is_wavelength = UNSET;
+
+	return vars_push( FLOAT_VAR, spectrapro_300i.wavelength );
+}
+
+
+/*-----------------------------------------------------------------*/
+/* Function either returns the currently set wavenumber (if called */
+/* with no arguments) or moves the grating to a new center wave-   */
+/* number as specified (in cm^-1) by the only argument.            */
+/*-----------------------------------------------------------------*/
+
+Var *monochromator_wavenumber( Var *v )
+{
+	double wl, wn;
+
+
+	CLOBBER_PROTECT( wl );
+
+	if ( v == NULL )
+	{
+		if ( FSC2_MODE == EXPERIMENT )
+			spectrapro_300i.wavelength = spectrapro_300i_get_wavelength( );
+		return vars_push( FLOAT_VAR,
+						  spectrapro_300_wl2wn( spectrapro_300i.wavelength ) );
+	}
+
+	wn = get_double( v, "wavenumber" );
+
+	if ( wn <= 0.0 )
+	{
+		if ( FSC2_MODE == TEST )
+		{
+			print( FATAL, "Invalid zero or negative wavenumber.\n" );
+			THROW( EXCEPTION );
+		}
+
+		print( SEVERE, "Invalid zero or negative wavenumber, using %lf cm^-1 "
+			   "instead.\n", spectrapro_300i_wl2wn( MAX_WAVELENGTH ) );
+		wl = MAX_WAVELENGTH;
+	}
+	else
+		wl = spectrapro_300i_wn2wl( wn );
+
+	too_many_arguments( v );
+
+	if ( FSC2_MODE == EXPERIMENT )
+		spectrapro_300i_set_wavelength( wl );
+
+	spectrapro_300i.wavelength = wl;
+	if ( FSC2_MODE == PREPARATIONS )
+		spectrapro_300i.is_wavelength = UNSET;
 
 	return vars_push( FLOAT_VAR, spectrapro_300i.wavelength );
 }

@@ -311,7 +311,8 @@ ccd_camera_pixel_area, 0, ALL;
 monochromator_name, 0, ALL;		          // returns the device name
 monochromator_turret, -1, EXP;            // set/query current turret
 monochromator_grating, -1, EXP;           // set/query current grating
-monochromator_wavelength, -1, EXP;        // set/query wavelength
+monochromator_wavelength, -1, ALL;        // set/query wavelength
+monochromator_wavenumber, -1, ALL;        // set/query wavenumber
 monochromator_install_grating, 2, EXP;    // install new grating
 monochromator_groove_density, -1, EXP;    // get groove density of grating
 monochromator_wavelength_axis, -1, EXP;   // caclulate wavelength axis
@@ -322,7 +323,6 @@ monochromator_zero_offset, -1, EXP;
 monochromator_grating_adjust, -1, EXP;
 monochromator_calibrate, -1, EXP;
 monochromator_scan_setup, -1, ALL;
-monochromator_wavenumber, -1, ALL;
 monochromator_start_scan, 0, EXP;
 monochromator_scan_step, 0, EXP;
 monochromator_laser_line, -1, ALL;
