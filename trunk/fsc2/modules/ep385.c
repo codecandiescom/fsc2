@@ -134,6 +134,9 @@ int ep385_init_hook( void )
 	ep385.auto_twt_pulses = UNSET;
 	ep385.left_twt_warning = ep385.right_twt_warning = 0;
 
+	ep385.do_show_pulses = UNSET;
+	ep385.do_dump_pulses = UNSET;
+
 	for ( i = 0; i < MAX_CHANNELS; i++ )
 	{
 		ch = ep385.channel + i;
@@ -207,6 +210,11 @@ int ep385_test_hook( void )
 
 	TRY
 	{
+		if ( ep385.do_show_pulses )
+			ep385_show_pulses( );
+		if ( ep385.do_dump_pulses )
+			ep385_dump_pulses( );
+
 		ep385_IN_SETUP = SET;
 		ep385_init_setup( );
 		ep385_IN_SETUP = UNSET;
@@ -780,69 +788,10 @@ Var *pulser_automatic_twt_pulses( Var *v )
 
 Var *pulser_show_pulses( Var *v )
 {
-	int pd[ 2 ];
-	pid_t pid;
-
-
 	UNUSED_ARGUMENT( v );
 
-	if ( FSC2_IS_CHECK_RUN )
-		return vars_push( INT_VAR, 1 );
-
-	if ( ep385.show_file != NULL )
-		return vars_push( INT_VAR, 1 );
-
-	if ( pipe( pd ) == -1 )
-	{
-		if ( errno == EMFILE || errno == ENFILE )
-			print( FATAL, "Failure, running out of system resources.\n" );
-		return vars_push( INT_VAR, 0 );
-	}
-
-	if ( ( pid =  fork( ) ) < 0 )
-	{
-		if ( errno == ENOMEM || errno == EAGAIN )
-			print( FATAL, "Failure, running out of system resources.\n" );
-		return vars_push( INT_VAR, 0 );
-	}
-
-	/* Here's the childs code */
-
-	if ( pid == 0 )
-	{
-		static char *cmd = NULL;
-
-
-		close( pd[ 1 ] );
-
-		if ( dup2( pd[ 0 ], STDIN_FILENO ) == -1 )
-		{
-			goto filter_failure;
-			close( pd[ 0 ] );
-		}
-
-		close( pd[ 0 ] );
-
-		TRY
-		{
-			cmd = get_string( "%s%sfsc2_pulses", bindir, slash( bindir ) );
-			TRY_SUCCESS;
-		}
-		OTHERWISE
-			goto filter_failure;
-
-		execl( cmd, "fsc2_pulses", NULL );
-
-	filter_failure:
-
-		T_free( cmd );
-		_exit( EXIT_FAILURE );
-	}
-
-	/* And finally the code for the parent */
-
-	close( pd[ 0 ] );
-	ep385.show_file = fdopen( pd[ 1 ], "w" );
+	if ( ! FSC2_IS_CHECK_RUN )
+		ep385.do_show_pulses = SET;
 
 	return vars_push( INT_VAR, 1 );
 }
@@ -853,78 +802,10 @@ Var *pulser_show_pulses( Var *v )
 
 Var *pulser_dump_pulses( Var *v )
 {
-	char *name;
-	char *m;
-	struct stat stat_buf;
-
-
 	UNUSED_ARGUMENT( v );
 
-	if ( FSC2_IS_CHECK_RUN )
-		return vars_push( INT_VAR, 1 );
-
-	if ( ep385.dump_file != NULL )
-	{
-		print( WARN, "Pulse dumping is already switched on.\n" );
-		return vars_push( INT_VAR, 1 );
-	}
-
-	do
-	{
-		name = T_strdup( fl_show_fselector( "File for dumping pulses:", "./",
-											"*.pls", NULL ) );
-		if ( name == NULL || *name == '\0' )
-		{
-			T_free( name );
-			return vars_push( INT_VAR, 0 );
-		}
-
-		if  ( 0 == stat( name, &stat_buf ) )
-		{
-			m = get_string( "The selected file does already exist:\n%s\n"
-							"\nDo you really want to overwrite it?", name );
-			if ( 1 != show_choices( m, 2, "Yes", "No", NULL, 2 ) )
-			{
-				T_free( m );
-				name = CHAR_P T_free( name );
-				continue;
-			}
-			T_free( m );
-		}
-
-		if ( ( ep385.dump_file = fopen( name, "w+" ) ) == NULL )
-		{
-			switch( errno )
-			{
-				case EMFILE :
-					show_message( "Sorry, you have too many open files!\n"
-								  "Please close at least one and retry." );
-					break;
-
-				case ENFILE :
-					show_message( "Sorry, system limit for open files "
-								  "exceeded!\n Please try to close some "
-								  "files and retry." );
-				break;
-
-				case ENOSPC :
-					show_message( "Sorry, no space left on device for more "
-								  "file!\n    Please delete some files and "
-								  "retry." );
-					break;
-
-				default :
-					show_message( "Sorry, can't open selected file for "
-								  "writing!\n       Please select a "
-								  "different file." );
-			}
-
-			name = CHAR_P T_free( name );
-			continue;
-		}
-	} while ( ep385.dump_file == NULL );
-
-	T_free( name );
+	if ( ! FSC2_IS_CHECK_RUN )
+		ep385.do_dump_pulses = SET;
 
 	return vars_push( INT_VAR, 1 );
 }

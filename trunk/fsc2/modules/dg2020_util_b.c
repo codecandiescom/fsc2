@@ -613,8 +613,15 @@ void dg2020_dump_pulses( void )
 
 	do
 	{
-		name = T_strdup( fl_show_fselector( "File for dumping pulses:", "./",
-											"*.pls", NULL ) );
+		TRY
+		{
+			name = T_strdup( fl_show_fselector( "File for dumping pulses:",
+												"./", "*.pls", NULL ) );
+			TRY_SUCCESS;
+		}
+		OTHERWISE
+			return;
+
 		if ( name == NULL || *name == '\0' )
 		{
 			T_free( name );

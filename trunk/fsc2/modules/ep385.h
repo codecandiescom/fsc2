@@ -257,6 +257,9 @@ typedef struct {
 	Ticks minimum_twt_pulse_distance;
 	long twt_distance_warning;
 
+	bool do_show_pulses;
+	bool do_dump_pulses;
+
 } EP385;
 
 
@@ -389,6 +392,8 @@ PULSE *ep385_get_pulse( long pnum );
 const char *ep385_ptime( double p_time );
 const char *ep385_pticks( Ticks ticks );
 int ep385_pulse_compare( const void *A, const void *B );
+void ep385_show_pulses( void );
+void ep385_dump_pulses( void );
 void ep385_dump_channels( FILE *fp );
 void ep385_duty_check( void );
 Ticks ep385_calc_max_length( FUNCTION *f );
