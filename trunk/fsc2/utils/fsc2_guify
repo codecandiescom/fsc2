@@ -22,11 +22,10 @@
 #  the Free Software Foundation, 59 Temple Place - Suite 330,
 #  Boston, MA 02111-1307, USA.
 #
-#
 #  This script tries to GUI-fy a suitably adapted EDL script, i.e. it takes
 #  an "enhanced" EDL script and creates from it a Perl script which, in turn,
-#  allows the user to set parameters via a GUI, creates an EDL sript from
-#  these parameters and sends it to fsc2 for execution.
+#  when run allows the user to set parameters via a GUI and then creates an
+#  EDL script from these parameters and sends it to fsc2 for execution.
 
 
 use strict;
@@ -513,6 +512,7 @@ EOT
     for ( @vars ) {
         print <<"EOT";
 # $$_{ line }
+
 my \%$$_{ name };
 \$$$_{ name }\{ tk_frame \} = \$fsc2_main_frame->Frame( );
 \$$$_{ name }\{ tk_label \} = \$$$_{ name }\{ tk_frame \}->Label( -text => $$_{ label },
