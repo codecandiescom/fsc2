@@ -249,7 +249,6 @@ Var *func_call( Var *f )
 	Var *ret;
 	int ac;
 	int i;
-	bool user_exception;
 	
 
 	/* Check (and double-check) that it's really a function variable - one
@@ -322,7 +321,6 @@ Var *func_call( Var *f )
 	CATCH( USER_BREAK_EXCEPTION )
 	{
 		TRY_SUCCESS;
-		user_exception = SET;
 	}
 
 	/* Finally do a clean up, i.e. remove the variable with the function and
@@ -338,13 +336,6 @@ Var *func_call( Var *f )
 
 	for ( ap = f; ap != NULL; ap = ap == ret ? ap->next : vars_pop( ap ) )
 		;
-
-	if ( user_exception )
-	{
-		printf( "Got Exception %d\n", exception_id );
-		vars_pop( ret );
-//		THROW( EXCEPTION );
-	}
 
 	return ret;
 }
