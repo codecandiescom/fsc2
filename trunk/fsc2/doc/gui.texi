@@ -51,8 +51,8 @@ shift the border between both browsers.
 
 On the left side you have a set of buttons:
 @itemize @bullet
-@item The @code{Load} button opens a file selector that allows you to
-select a new @acronym{EDL} program.
+@item The @code{Load} button opens a file selector, allowing you to
+load a dirfferent @acronym{EDL} program.
 @item The @code{Reload} button lets you reload the current @acronym{EDL}
 program which is needed when you have edited it. 
 @item The @code{Edit} button opens an editor with the currently loaded
@@ -66,10 +66,9 @@ test finished succesfully the label is set back to @code{Test} and the
 button becomes inactive until a new program is loaded (or the current
 program is reloaded).
 @item Using the @code{Start} button you start the execution of the
-@acronym{EDL} program. During a short time after the start the start of
-the program (while some device initialization is done and the display
-window (see below) is not shown yet) the button label is changed to
-@code{Stop} to let you abort the running experiment. When the
+@acronym{EDL} program. During a short time after the start of the
+program (while device initialization is done) the button label is
+changed to @code{Stop} to let you abort the experiment. When the
 initialization is finished the label reverts back to @code{Start} and
 the button remains inactive during the experiment.
 @item The @code{Quit} button is used to end @acronym{fsc2}. It can't be
@@ -77,14 +76,15 @@ used while an experiment is running.
 @item Pressing the @code{Help} button will try to start a browser with
 the HTML documentation for @acronym{fsc2}. You can select the browser to
 be used by setting the environment variable @code{BROWSER} to the name
-of your favourite browser (at least opera, netscape, konqueror, lynx and
-w3m should work without problems). The default browser is Netscape.
+of your favourite browser (at least @code{opera}, @code{netscape},
+@code{konqueror}, @code{lynx} and @code{w3m} should work without
+problems). The default browser is @code{netscape}.
 @item The @code{Bug report} button will open an editor window
 where you can compose a mail with a bug report. The editor that will be
 used for writing the mail depends on the environment variable
 @code{EDITOR}, if it isn't set @code{vi} is used as the default. When
 you're finished writing the mail @acronym{fsc2} will let you decide if
-you really want to send in the bug report.
+you really want to send the bug report.
 @end itemize
 
 @end ifnotinfo
@@ -101,7 +101,7 @@ from the @acronym{EDL} program will be displayed.
 @item On the right side of the browsers is a slider that lets you move
 the border between both browsers.
 @item The @code{Load} button - when you click onto it a file selector
-is shown that allows you to select a new @acronym{EDL} program.
+is shown, allowing you to load a different @acronym{EDL} program.
 @item The @code{Reload} button - when you have edited the currently
 loaded @acronym{EDL} program you have to click onto this button to
 make @acronym{fsc2} load the changed file.
@@ -138,24 +138,18 @@ pressing the key for this letter each button can be triggered via the
 keyboard - but note that, if the underlined letter is an uppercase
 character, you have to enter the uppercase character from the keyboard!
 
-While a test of a @acronym{EDL} program is running most of the buttons
-can not be used (indicated by their labels becoming grayed out). The
-label of the @code{Test} button will become @code{Stop Test} - so if you
-want to stop the test press the @code{Test} button again. Once the test
-has been run on the @acronym{EDL} program the @code{Test} button will
-remain grayed out until a new program is loaded.
-
 During the test @acronym{fsc2} may detect problems with the
 @acronym{EDL} program or even errors. It then will print messages in the
-lower browser. There are three categories of messages: Warnings,
-messages for severe problems and fatal error messages. Warnings are
+lower browser. There are four categories of messages: normal messages,
+warnings, warnings for severe problems and fatal error messages. Normal
+messages, not indicating a problem, are printed in black. Warnings are
 printed in green, messages for severe problems in blue and messages for
 fatal errors in red (in the latter case the test is also aborted
-immediately). Messages not indicating a problem are printed in black.
+immediately).
 
 To start the experiment click onto the @code{Start} button. If the
 program hasn't been tested a test will be run now and, if the test
-succeeded, the experiment is started. While the devices are initialized
+succeeds, the experiment is started. While the devices are initialized
 the text in the @code{Star} button changes to @code{Stop} and clicking
 on the button lets you interrupt the device initialization stage. When
 the device intialization is finished a new window opens up for
@@ -180,12 +174,12 @@ output browser.
 When an experiment is started another window will pop up. It is up to
 the writer of the @acronym{EDL} program to choose if the window will be
 used for displaying just curves or color-coded surfaces, see the
-functions @code{init_1d()} and @code{init_2d()} in the later sections.
-The first type of display is well suited for showing the results of
-typical cw-measured EPR data or traces fetched from digitizers, while
-the second type is for visualizing real 2d-experiments, i.e.@: all
-experiments where not just one parameter is changed during the
-experiment but two or more.
+functions @code{init_1d()} and @code{init_2d()} in one of the later
+chapters. The first type of display is well suited for showing the
+results of typical cw-measured EPR data or traces fetched from
+digitizers, while the second type is for useful for visualizing
+2-dimensional experiments, i.e.@: all experiments where more than one
+parameter is changed during the experiment.
 
 
 @anchor{1D-Display}
@@ -193,7 +187,7 @@ experiment but two or more.
 @cindex 1D-Display
 
 @ifnotinfo
-Here's a typical example of the kind of display you will get while doing
+Here's a typical example of the kind of display you may get while doing
 an experiment:
 
 @image{fsc2fig3,11cm,}
@@ -206,9 +200,7 @@ the lock-in's phase setting isn't optimal yet.
 
 Below and to the left of this main display area are two areas showing
 the x- and y-scales. The fact that the lines in both the axis areas are
-drawn in red indicate that the scales are valid for the first (red) curve
-(in this case the scales are also correct for the second (green) curve
-because no rescaling has been done).
+drawn in red indicate that the scales are valid for the first (red) curve.
 
 @end ifnotinfo
 @ifnothtml
@@ -265,9 +257,9 @@ each of the curves are shown (in the color of the curve they belong to)
 if more than one curve is displayed.
 
 Beside finding out the exact values of your measured data you also may
-determine differences between data points, e.g.@: to be able to measure
-line widths. If you press both the left and the right mouse button
-simultaneously the cursor changes to an encircled crosshair
+determine differences between data points, e.g.@: to measure line widths
+or signal intensities. If you press both the left and the right mouse
+button simultaneously the cursor changes to an encircled crosshair
 @ifnotinfo
 cursor, @image{cursor5,5mm,},
 @end ifnotinfo
