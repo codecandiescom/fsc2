@@ -394,7 +394,7 @@ When the function gets called all previously displayed data will be
 cleared from the screen as well as all markers possibly shown. The
 scaling in @i{y}-directions remains unchanged.
 
-This fucntion can be used in both the @code{PREPARATIONS} as well as the
+This function can be used in both the @code{PREPARATIONS} as well as the
 @code{EXPERIMENT} section of an @code{EDL} script.
 
 
