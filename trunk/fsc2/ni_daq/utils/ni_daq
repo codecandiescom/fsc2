@@ -77,16 +77,16 @@ case "$1" in
 				exit 1
 			fi
 			nboards=0
-			nboards=$(($nboards+`lspci -n | grep '1093:1180' | wc -l`))
-			nboards=$(($nboards+`lspci -n | grep '1093:1190' | wc -l`))
-			nboards=$(($nboards+`lspci -n | grep '1093:0162' | wc -l`))
-			nboards=$(($nboards+`lspci -n | grep '1093:2a60' | wc -l`))
-			nboards=$(($nboards+`lspci -n | grep '1093:2a70' | wc -l`))
-			nboards=$(($nboards+`lspci -n | grep '1093:1330' | wc -l`))
-			nboards=$(($nboards+`lspci -n | grep '1093:1270' | wc -l`))
-			nboards=$(($nboards+`lspci -n | grep '1093:1340' | wc -l`))
-			nboards=$(($nboards+`lspci -n | grep '1093:18b0' | wc -l`))
-			nboards=$(($nboards+`lspci -n | grep '1093:1350' | wc -l`))
+			nboards=$(($nboards+`lspci -n | grep -i '1093:1180' | wc -l`))
+			nboards=$(($nboards+`lspci -n | grep -i '1093:1190' | wc -l`))
+			nboards=$(($nboards+`lspci -n | grep -i '1093:0162' | wc -l`))
+			nboards=$(($nboards+`lspci -n | grep -i '1093:2a60' | wc -l`))
+			nboards=$(($nboards+`lspci -n | grep -i '1093:2a70' | wc -l`))
+			nboards=$(($nboards+`lspci -n | grep -i '1093:1330' | wc -l`))
+			nboards=$(($nboards+`lspci -n | grep -i '1093:1270' | wc -l`))
+			nboards=$(($nboards+`lspci -n | grep -i '1093:1340' | wc -l`))
+			nboards=$(($nboards+`lspci -n | grep -i '1093:18b0' | wc -l`))
+			nboards=$(($nboards+`lspci -n | grep -i '1093:1350' | wc -l`))
 			i=0;
 			while [ $i -lt $nboards -a $i -lt 4 ]; do
 				mknod /dev/pci_e_series_$i c $major $i

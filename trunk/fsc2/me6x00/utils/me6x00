@@ -76,7 +76,7 @@ case "$1" in
 				log_failure_msg "Can't determine major device number for ME6X00 cards."
 				exit 1
 			fi
-			nboards=`grep '1402:6[01][013][48f]' /proc/pci | wc -l`
+			nboards=`lspci -n | grep -i '1402:6[01][013][48f]' | wc -l`
 			i=0;
 			while [ $i -lt $nboards ]; do
 				mknod /dev/me6x00_$i c $major $i
