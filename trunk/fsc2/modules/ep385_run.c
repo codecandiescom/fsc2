@@ -115,44 +115,49 @@ static bool ep385_update_pulses( bool flag )
 
 			pm_entry = f->pm[ f->next_phase * f->num_channels + j ];
 
-			ch->num_active_pulses = 0;
-			for ( m = 0; ( p = pm_entry[ m ] ) != NULL; m++ )
-				if ( p->is_active )
+			for ( ch->num_active_pulses = 0, m = 0;
+				  ( p = pm_entry[ m ] ) != NULL; m++ )
+			{
+				if ( ! p->is_active )
+					continue;
+
+				pp = ch->pulse_params + ch->num_active_pulses++;
+
+				pp->pos = p->pos + f->delay;
+				pp->len = p->len;
+				pp->pulse = p;
+
+				/* Extend pulses for which a shape pulse has been defined
+				   a bit */
+
+				if ( p->function->self != PULSER_CHANNEL_PULSE_SHAPE &&
+					 p->sp != NULL )
 				{
-					pp = ch->pulse_params + ch->num_active_pulses++;
+					pp->pos -= p->function->left_shape_padding;
+					pp->len +=   p->function->left_shape_padding
+							   + p->function->right_shape_padding;
+				}
 
-					pp->pos = p->pos + f->delay;
-					pp->len = p->len;
-					pp->pulse = p;
+				/* Extend TWT pulses that were automatically created */
 
-					/* Extend pulses for which a shape pulse has been defined
-					   a bit */
+				if ( p->function->self == PULSER_CHANNEL_TWT &&
+					 p->tp != NULL )
+				{
+					pp->pos -= p->tp->function->left_twt_padding;
+					pp->len +=   p->tp->function->left_twt_padding
+							   + p->tp->function->right_twt_padding;
+				}
+			}			
 
-					if ( p->function->self != PULSER_CHANNEL_PULSE_SHAPE &&
-						 p->sp != NULL )
-					{
-						pp->pos -= p->function->left_shape_padding;
-						pp->len +=   p->function->left_shape_padding
-								   + p->function->right_shape_padding;
-					}
+			if ( ch->num_active_pulses > 0 )
+			{
+				qsort( ch->pulse_params, ch->num_active_pulses,
+					   sizeof *ch->pulse_params, ep385_pulse_compare );
 
-					/* Extend TWT pulses that were automatically created */
-
-					if ( p->function->self == PULSER_CHANNEL_TWT &&
-						 p->tp != NULL )
-					{
-						pp->pos -= p->tp->function->left_twt_padding;
-						pp->len +=   p->tp->function->left_twt_padding
-								   + p->tp->function->right_twt_padding;
-					}
-				}			
-
-			qsort( ch->pulse_params, ch->num_active_pulses,
-				   sizeof *ch->pulse_params, ep385_pulse_compare );
-
-			ep385_shape_padding_check_1( ch );
-			if ( ch->function->self == PULSER_CHANNEL_TWT )
-				ep385_twt_padding_check( ch );
+				ep385_shape_padding_check_1( ch );
+				if ( ch->function->self == PULSER_CHANNEL_TWT )
+					ep385_twt_padding_check( ch );
+			}
 
 			/* Compare old and new state, if nothing changed, i.e. the number
 			   of active pulses is the same and all positions and lengths are
@@ -531,13 +536,13 @@ static void ep385_defense_shape_check( FUNCTION *shape )
 
 void ep385_full_reset( void )
 {
-	int i, j, m;
+	int i, j;
 	PULSE *p = ep385_Pulses;
 	FUNCTION *f;
 	CHANNEL *ch;
-	PULSE **pm_entry;
-	PULSE_PARAMS *pp;
 
+
+	/* Reset all pulses */
 
 	while ( p != NULL )
 	{
@@ -573,6 +578,8 @@ void ep385_full_reset( void )
 
 	ep385.is_running = ep385.has_been_running;
 
+	/* Reset all functions and their channels */
+
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 	{
 		f = ep385.function + i;
@@ -590,60 +597,9 @@ void ep385_full_reset( void )
 			if ( ch->num_pulses == 0 )
 				continue;
 
-			/* Copy the old pulse list for the channel so the new state can
-			   be compared to the old state and an update is done only when
-			   needed. */
-
-			memcpy( ch->old_pulse_params, ch->pulse_params,
-					ch->num_active_pulses * sizeof *ch->pulse_params );
-			ch->old_num_active_pulses = ch->num_active_pulses;
-
-			pm_entry = f->pm[ f->next_phase * f->num_channels + j ];
-
-			for ( ch->num_active_pulses = 0, m = 0;
-				  ( p = pm_entry[ m ] ) != NULL; m++ )
-			{
-				if ( ! p->is_active )
-					continue;
-
-				pp = ch->pulse_params + ch->num_active_pulses++;
-
-				pp->pos = p->pos + f->delay;
-				pp->len = p->len;
-				pp->pulse = p;
-
-				/* Automatically extend pulses for which a shape pulse has
-				   been created a bit */
-
-				if ( p->function->self != PULSER_CHANNEL_PULSE_SHAPE &&
-					 p->sp != NULL )
-				{
-					pp->pos -= p->function->left_shape_padding;
-					pp->len +=   p->function->left_shape_padding
-							   + p->function->right_shape_padding;
-				}
-
-				/* Extend TWT pulses that were automatically created */
-
-				if ( p->function->self == PULSER_CHANNEL_TWT &&
-					 p->tp != NULL )
-				{
-					pp->pos -= p->tp->function->left_twt_padding;
-					pp->len +=   p->tp->function->left_twt_padding
-							   + p->tp->function->right_twt_padding;
-				}
-			}
-
-			qsort( ch->pulse_params, ch->num_active_pulses,
-				   sizeof *ch->pulse_params, ep385_pulse_compare );
-
-			ep385_shape_padding_check_1( ch );
-			if ( ch->function->self == PULSER_CHANNEL_TWT )
-				ep385_twt_padding_check( ch );
+			ch->num_active_pulses = 0;
 		}
 	}
-
-	ep385_shape_padding_check_2( );
 }
 
 
