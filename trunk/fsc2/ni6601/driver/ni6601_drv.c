@@ -491,19 +491,19 @@ static int ni6601_read_count( Board *board, NI6601_COUNTER_VAL *arg )
 	}
 
 	/* If required wait for counting to stop (by waiting for the
-	   neighboring counter creating the gate pulse to stop) and then
-	   reset both counters. */
+	   neighboring counter creating the gate pulse to stop) and
+	   then reset both counters. */
 
 	if ( cs.wait_for_end ) {
 
-		int oc = ( cs.counter & ~1 ) | ( ( cs.counter & 1 ) ^ 1 );
+		int oc = cs.counter + ( cs.counter & 1 ) ? -1 : 1;
 
 		ni6601_irq_enable( board, oc );
 
-		if ( ! ( readw( board->regs.joint_status[ oc ] ) &
-			 Gi_COUNTING( oc ) ) )
-		     wait_event_interruptible( board->waitqueue,
-					       board->TC_irq_raised[ oc ] );
+		if ( readw( board->regs.joint_status[ oc ] ) &
+		     Gi_COUNTING( oc ) )
+			wait_event_interruptible( board->waitqueue,
+						  board->TC_irq_raised[ oc ] );
 
 		ni6601_irq_disable( board, oc );
 
