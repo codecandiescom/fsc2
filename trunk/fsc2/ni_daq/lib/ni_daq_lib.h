@@ -71,6 +71,7 @@ struct NI_DAQ_AO_STATE {
 
 struct NI_DAQ_GPCT_STATE {
 	int state[ 2 ];
+	int not_started[ 2 ];
 	NI_DAQ_CLOCK_SPEED_VALUE speed;
 };
 

@@ -54,6 +54,7 @@ these structures:
   
       unsigned long low_ticks;
       unsigned long high_ticks;
+	  unsigned long delay_ticks;
   
       NI_DAQ_INPUT gate;
       NI_DAQ_INPUT source;
@@ -63,6 +64,7 @@ these structures:
       NI_DAQ_POLARITY gate_polarity;
   
       int continuous;
+	  int delay_start;
       int wait_for_end;
       unsigned long count;
   
@@ -727,6 +729,11 @@ directly translate into times by multiplying with the inverse of current
 frequency of the respective timebase. Both 'low_ticks' and 'high_ticks'
 must be between 2 and 16777216.
 
+The 'delay_ticks' element can be used to delay the start of the creation
+of pulses (useful when one want's to start both pulsers at once but with
+a well-defined time spacing between them). All the rules for selecting
+the values for 'low_ticks' and 'high_ticks' also apply to 'delay_ticks'.
+
 The 'output_polarity' element of the structure has to be set to
 NI_DAQ_NORMAL to have the a high output voltage when the counter output
 is in logic high state and a low output voltage while the counter
@@ -734,17 +741,35 @@ output is in its logic low state. When set the NI_DAQ_INVERTED the
 output voltage is low while the counter output is in logic high
 state and high while the counter is in logic low state.
 
-Finally, the 'continuous' element must be set to 0 if only a single
-pulse is to be output, otherwise a continuos train of pulses is output
-until the counter creating the pulses is stopped.
+The 'continuous' element must be set to 0 if only a single pulse is to
+be output, otherwise a continuous train of pulses is output until the
+counter creating the pulses is stopped.
+
+Finally, when 'delay_start' is set the pulser isn't started but only
+by a subsequent ioctl() call for the GPCT system with the 'cmd' element
+of the structure being set to NI_DAQ_GPCT_ARM (which can be useful
+when both pulsers have to be started at exactly the same time).
 
 
-3.6 NI_DAQ_GPCT_GET_COUNT
+3.6 NI_DAQ_GPCT_ARM
+-------------------
+
+To start one or both counters (usually after having set them up to
+create pulses with previous ioctl() calls for the GPCT subsystem
+with the 'cmd' element of the NI_DAQ_GPCT_ARG structure being set
+to NI_DAQ_GPCT_START_PULSER) make an ioctl() call for the GPCT
+subsystem with the 'cmd' element of the NI_DAQ_GPCT_ARG structure
+being set to NI_DAQ_GPCT_ARM. In this case the 'counter' element
+of the structure must be set to the number of the counter (0 or 1)
+to be started or to 2 if both counters are to be started together.
+
+
+3.7 NI_DAQ_GPCT_GET_COUNT
 -------------------------
 
 To fetch a value from a counter make an ioctl() call for the GPCT
 subsystem with the 'cmd' element of the NI_DAQ_GPCT_ARG structure
-being set to NI_DAQ_GPCT_GPCT_GET_COUNT. In this case the 'counter'
+being set to NI_DAQ_GPCT_GET_COUNT. In this case the 'counter'
 element of the structure must be set to the number of the counter
 (0 or 1) from which the value is to be fetched.
 
@@ -766,17 +791,18 @@ returned is 16777215, if the counter received more events the returned
 value will be the modulus of the real number of counts and 16777216.
 
 
-3.7 NI_DAQ_GPCT_DISARM_COUNTER
+3.8 NI_DAQ_GPCT_DISARM_COUNTER
 ------------------------------
 
 To stop a running counter (it doesn't matter if it's just counting or
 also creating pulses) make an ioctl() call with the 'cmd' element of
 the NI_DAQ_GPCT_ARG structure being set to NI_DAQ_GPCT_GPCT_DISARM_COUNTER.
 In this case the 'counter' element of the structure must be set to the
-number of the counter (0 or 1) to be stopped.
+number of the counter (0 or 1) to be stopped or to 2 to stop both
+counters at once.
 
 
-3.8 NI_DAQ_GPCT_IS_BUSY
+3.9 NI_DAQ_GPCT_IS_BUSY
 -----------------------
 
 To find out if a counter is currently busy counting or idle make an ioctl()

@@ -67,9 +67,10 @@ static const char *ni_daq_errlist[ ] = {
 	"Not enough memory",                             /* NI_DAQ_ERR_NEM */
 	"Timing impossible to realize",                  /* NI_DAQ_ERR_NPT */
 	"Interrupted by signal",                         /* NI_DAQ_ERR_SIG */
-	"External reference for AO not available"        /* NI_DAQ_ERR_NER */
-	"Only bipolar AO available"                      /* NI_DAQ_ERR_UAO */
-	"No analog trigger available"                    /* NI_DAQ_ERR_NAT */
+	"External reference for AO not available",       /* NI_DAQ_ERR_NER */
+	"Only bipolar AO available",                     /* NI_DAQ_ERR_UAO */
+	"No analog trigger available",                   /* NI_DAQ_ERR_NAT */
+	"Pulser to be started not initialized"           /* NI_DAQ_ERR_PNI */
 };
 
 const int ni_daq_nerr =

@@ -427,6 +427,7 @@ Var *daq_single_pulse( Var *v )
 {
 	int counter;
 	double duration;
+	double dummy = 0.0;
 
 
 	counter = pci_mio_16e_1_channel_number( get_strict_long( v,
@@ -437,7 +438,7 @@ Var *daq_single_pulse( Var *v )
 
 	if ( FSC2_MODE == EXPERIMENT )
 		switch ( ni_daq_gpct_single_pulse( pci_mio_16e_1.board, counter,
-										   duration ) )
+										   duration, &dummy, 0 ) )
 		{
 			case NI_DAQ_OK :
 				break;
@@ -470,6 +471,7 @@ Var *daq_continuous_pulses( Var *v )
 {
 	int counter;
 	double len_hi, len_low;
+	double dummy = 0.0;
 
 
 	if ( v == NULL )
@@ -507,7 +509,7 @@ Var *daq_continuous_pulses( Var *v )
 
 	if ( FSC2_MODE == EXPERIMENT )
 		switch ( ni_daq_gpct_continuous_pulses( pci_mio_16e_1.board, counter,
-												len_hi, len_low ) )
+												len_hi, len_low, &dummy, 0 ) )
 		{
 			case NI_DAQ_OK :
 				break;
@@ -562,6 +564,120 @@ static NI_DAQ_INPUT pci_mio_16e_1_gpct_source( const char *tname,
 
 	return -1;
 }
+
+
+/*---------------------------------------------------------------*
+ *---------------------------------------------------------------*/
+
+void ni_daq_two_channel_pulses( double delay, double scan_duration )
+{
+	double len_hi_0, len_hi_1,
+		   len_low,
+		   len_del = 0.0;
+
+
+	len_hi_1 = pci_mio_16e_1_check_time( PCI_MIO_16E_1_TRIGGER_LENGTH,
+										 "trigger length" );
+
+	if ( FSC2_MODE == TEST )
+	{
+		if ( pci_mio_16e_1.gpct_state.states[ 0 ] == COUNTER_IS_BUSY ||
+			 pci_mio_16e_1.gpct_state.states[ 1 ] == COUNTER_IS_BUSY )
+		{
+			print( FATAL, "Required counter is already in use.\n" );
+			THROW( EXCEPTION );
+		}
+
+		return;
+	}
+
+	len_hi_0 = 4.0e-7;
+	len_low = scan_duration - len_hi_0;
+
+	if ( delay >= 0.0 )
+	{
+		switch ( ni_daq_gpct_continuous_pulses( pci_mio_16e_1.board, 0,
+												len_hi_0, len_low,
+												&len_del, 1 ) )
+		{
+			case NI_DAQ_OK :
+				break;
+
+			case NI_DAQ_ERR_CBS :
+				print( FATAL, "Required counter is already in use.\n" );
+				THROW( EXCEPTION );
+
+			default :
+				print( NO_ERROR, "len_hi_0 = %f, len_low = %f, len_del = %f\n",
+					   len_hi_0*1e6, len_low*1e6, len_del*1e6 );
+				print( FATAL, "Can't create output trigger.%s\n",
+					   ni_daq_strerror() );
+				THROW( EXCEPTION );
+		}
+
+		len_del += delay;
+
+		switch ( ni_daq_gpct_single_pulse( pci_mio_16e_1.board, 1,
+										   len_hi_1, &len_del, 1 ) )
+		{
+			case NI_DAQ_OK :
+				break;
+
+			case NI_DAQ_ERR_CBS :
+				print( FATAL, "Required counter is already in use.\n" );
+				THROW( EXCEPTION );
+
+			default :
+				print( NO_ERROR, "len_hi_1 = %f, len_del = %f\n",
+					   len_hi_1*1e6, len_del*1e6 );
+				print( FATAL, "Can't create output trigger.%s\n",
+					   ni_daq_strerror());
+				THROW( EXCEPTION );
+		}
+	}
+	else
+	{
+		switch ( ni_daq_gpct_single_pulse( pci_mio_16e_1.board, 1,
+										   len_hi_1, &len_del, 1 ) )
+		{
+			case NI_DAQ_OK :
+				break;
+
+			case NI_DAQ_ERR_CBS :
+				print( FATAL, "Required counter is already in use.\n" );
+				THROW( EXCEPTION );
+
+			default :
+				print( NO_ERROR, "len_hi_1 = %f, len_del = %f\n",
+					   len_hi_1*1e6, len_del*1e6 );
+				print( FATAL, "Can't create output trigger.%s\n",
+					   ni_daq_strerror() );
+				THROW( EXCEPTION );
+		}
+
+		len_del = fabs( delay + len_del );
+
+		switch ( ni_daq_gpct_continuous_pulses( pci_mio_16e_1.board, 0,
+												len_hi_0, len_low,
+												&len_del, 1 ) )
+		{
+			case NI_DAQ_OK :
+				break;
+
+			case NI_DAQ_ERR_CBS :
+				print( FATAL, "Required counter is already in use.\n" );
+				THROW( EXCEPTION );
+
+			default :
+				print( NO_ERROR, "len_hi_0 = %f, len_low = %f, len_del = %f\n",
+					   len_hi_0*1e6, len_low*1e6, len_del*1e6 );
+				print( FATAL, "Can't create output trigger.%s\n",
+					   ni_daq_strerror() );
+				THROW( EXCEPTION );
+		}
+	}
+}
+
 
 
 /*

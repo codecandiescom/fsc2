@@ -229,6 +229,10 @@ const char *Channel_Names[ NUM_CHANNEL_NAMES ] =
 		"H14",
 		"H15",
 		"TRIG_OUT",
+		"M1",
+		"M2",
+		"M3",
+		"M4"
 	};
 
 

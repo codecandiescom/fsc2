@@ -163,6 +163,7 @@ typedef enum {
 	NI_DAQ_GPCT_COUNTER_OUTPUT_STATE,
 	NI_DAQ_GPCT_START_COUNTER,
 	NI_DAQ_GPCT_START_PULSER,
+	NI_DAQ_GPCT_ARM,
 	NI_DAQ_GPCT_GET_COUNT,
 	NI_DAQ_GPCT_DISARM_COUNTER,
 	NI_DAQ_GPCT_IS_BUSY
@@ -177,6 +178,7 @@ typedef struct {
 
 	unsigned long low_ticks;
 	unsigned long high_ticks;
+	unsigned long delay_ticks;
 
 	NI_DAQ_INPUT gate;
 	NI_DAQ_INPUT source;
@@ -186,6 +188,7 @@ typedef struct {
 	NI_DAQ_POLARITY gate_polarity;
 
 	int continuous;
+	int delay_start;
 	int wait_for_end;
 	unsigned long count;
 

@@ -27,8 +27,7 @@
 
 #include "ni_daq_board.h"
 
-#define GPCT_is_valid_counter( x ) \
-	( ( counter ) < 2 )
+#define GPCT_is_valid_counter( x )  ( ( x ) < 2 )
 
 
 static int GPCT_clock_speed( Board *board, NI_DAQ_CLOCK_SPEED_VALUE speed );
@@ -43,9 +42,12 @@ static int GPCT_start_pulses( Board *board, unsigned int counter,
 			      NI_DAQ_INPUT source, NI_DAQ_INPUT gate,
 			      unsigned long low_ticks,
 			      unsigned long high_ticks,
+			      unsigned long delay_ticks,
 			      NI_DAQ_POLARITY output_polarity,
 			      NI_DAQ_POLARITY source_polarity,
-			      NI_DAQ_POLARITY gate_polarity, int continuous );
+			      NI_DAQ_POLARITY gate_polarity,
+			      int continuous, int delay_start );
+static int GPCT_arm( Board *board, unsigned int counter );
 static int GPCT_start_counting( Board *board, unsigned counter,
 				NI_DAQ_INPUT source, NI_DAQ_INPUT gate,
 				NI_DAQ_POLARITY source_polarity,
@@ -199,10 +201,15 @@ int GPCT_ioctl_handler( Board *board, NI_DAQ_GPCT_ARG *arg )
 			return GPCT_start_pulses( board, a.counter,
 						  a.source, a.gate,
 						  a.low_ticks, a.high_ticks,
+						  a.delay_ticks,
 						  a.output_polarity,
 						  a.source_polarity,
 						  a.gate_polarity,
-						  a.continuous );
+						  a.continuous,
+						  a.delay_start );
+
+		case NI_DAQ_GPCT_ARM :
+			return GPCT_arm( board, a.counter );
 
 		case NI_DAQ_GPCT_GET_COUNT :
 			ret = GPCT_get_count( board, a.counter,
@@ -257,7 +264,7 @@ static int GPCT_clock_speed( Board *board, NI_DAQ_CLOCK_SPEED_VALUE speed )
 static int GPCT_counter_output_state( Board *board, unsigned int counter,
 				      NI_DAQ_STATE output_state )
 {
-	if ( ! GPCT_is_valid_counter( board ) ) {
+	if ( ! GPCT_is_valid_counter( counter ) ) {
 		PDEBUG( "Invalid counter number %d\n", counter );
 		return -EINVAL;
 	}
@@ -276,25 +283,33 @@ static int GPCT_counter_output_state( Board *board, unsigned int counter,
 }
 
 
-/*------------------------------------------------------------------*/
-/* Function for stopping the counter of a board, i.e. disarming it. */
-/*------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*/
+/* Function for stopping the counter(s) of a board, i.e. disarming it. */
+/*---------------------------------------------------------------------*/
 
 static int GPCT_counter_disarm( Board *board, unsigned counter )
 {
-	if ( ! GPCT_is_valid_counter( board ) ) {
-		PDEBUG( "Invalid counter number %d\n", counter );
-		return -EINVAL;
+	switch ( counter )
+	{
+		case 0 : case 1 :
+			board->stc.Joint_Reset |= Gi_Reset( counter );
+			board->func->stc_writew( board, STC_Joint_Reset,
+						 board->stc.Joint_Reset );
+			board->stc.Joint_Reset &= ~ Gi_Reset( counter );
+			return 0;
+
+		case 2 :
+			board->stc.Joint_Reset |=
+						 Gi_Reset( 0 ) | Gi_Reset( 1 );
+			board->func->stc_writew( board, STC_Joint_Reset,
+						 board->stc.Joint_Reset );
+			board->stc.Joint_Reset &=
+					   ~ ( Gi_Reset( 0 ) | Gi_Reset( 1 ) );
+			return 0;
 	}
 
-	/* Stop and clear the counter */
-
-	board->stc.Joint_Reset |= Gi_Reset( counter );
-	board->func->stc_writew( board, STC_Joint_Reset,
-				 board->stc.Joint_Reset );
-	board->stc.Joint_Reset &= ~ Gi_Reset( counter );
-
-	return 0;
+	PDEBUG( "Invalid counter number %d\n", counter );
+	return -EINVAL;
 }
 
 
@@ -315,7 +330,7 @@ static int GPCT_get_count( Board *board, unsigned int counter,
 	u32 next_val;
 
 
-	if ( ! GPCT_is_valid_counter( board ) ) {
+	if ( ! GPCT_is_valid_counter( counter ) ) {
 		PDEBUG( "Invalid counter number %d\n", counter );
 		return -EINVAL;
 	}
@@ -405,19 +420,21 @@ static int GPCT_start_pulses( Board *board, unsigned int counter,
 			      NI_DAQ_INPUT source, NI_DAQ_INPUT gate,
 			      unsigned long low_ticks,
 			      unsigned long high_ticks,
+			      unsigned long delay_ticks,
 			      NI_DAQ_POLARITY output_polarity,
 			      NI_DAQ_POLARITY source_polarity,
-			      NI_DAQ_POLARITY gate_polarity, int continuous )
+			      NI_DAQ_POLARITY gate_polarity,
+			      int continuous, int delay_start )
 {
 	int use_gate;
 	u16 input = 0;
 	u16 mode = 0;
-	u16 cmd = Gi_Arm;
+	u16 cmd = delay_start ? 0 : Gi_Arm;
 
 
 	/* Check that the specified counter is valid */
 
-	if ( ! GPCT_is_valid_counter( board ) ) {
+	if ( ! GPCT_is_valid_counter( counter ) ) {
 		PDEBUG( "Invalid counter number %d\n", counter );
 		return -EINVAL;
 	}
@@ -437,12 +454,16 @@ static int GPCT_start_pulses( Board *board, unsigned int counter,
 		return -EINVAL;
 	}
 
-	/* Check the times for the 'low' and 'high' period of the pulses */
+	/* Check the times for the 'low' and 'high' period as well as the
+	   intial delay of the pulses */
 
-	if ( low_ticks == 0 || high_ticks == 0 ) {
+	if ( low_ticks < 2 || high_ticks < 2 ) {
 		PDEBUG( "Invalid low or high ticks\n" );
 		return -EINVAL;
 	}
+
+	if ( delay_ticks < 2 )
+		delay_ticks = 2;
 
 	if ( low_ticks > 0xFFFFFF ) {
 		PDEBUG( "Low period too long\n" );
@@ -451,6 +472,11 @@ static int GPCT_start_pulses( Board *board, unsigned int counter,
 
 	if ( high_ticks > 0xFFFFFF ) {
 		PDEBUG( "High period too long\n" );
+		return -EINVAL;
+	}
+
+	if ( delay_ticks > 0xFFFFFF ) {
+		PDEBUG( "Delay period too long\n" );
 		return -EINVAL;
 	}
 
@@ -465,12 +491,11 @@ static int GPCT_start_pulses( Board *board, unsigned int counter,
 	board->func->stc_writew( board, STC_Gi_Input_Select( counter ),
 				 input );
 
-	/* Load the smallest possible value into the counter so that the
-	   first pulse starts nearly immediately after arming it because the
-	   first counter TC event then happens nearly immediately, toggling
-	   the output */
+	/* Load the delay into the counter so that the first pulse starts after
+	   the first TC event that happens when the delay is over */
 
-	board->func->stc_writel( board, STC_Gi_Load_A( counter ), 1 );
+	board->func->stc_writel( board, STC_Gi_Load_A( counter ),
+				 delay_ticks - 1 );
 	board->func->stc_writew( board, STC_Gi_Command( counter ),
 				 board->stc.Gi_Command[ counter ] | Gi_Load );
 	board->stc.Gi_Command[ counter ] &= ~ Gi_Load;
@@ -511,14 +536,52 @@ static int GPCT_start_pulses( Board *board, unsigned int counter,
 
 	board->func->stc_writew( board, STC_Gi_Mode( counter ), mode );
 
-	/* Finally set counter to count downward and arm it to start
-	   outputting the pulses */
+	/* Finally set counter to count downward and possibly arm it */
 
 	board->func->stc_writew( board, STC_Gi_Command( counter ), cmd );
-	board->stc.Gi_Command[ counter ] &= ~ Gi_Arm;
+
+	if ( ! delay_start )
+		board->stc.Gi_Command[ counter ] &= ~ Gi_Arm;
 
 	return 0;
 }
+
+
+/*--------------------------------------------------------------*/
+/* Function to start outputting pulses from one or both counter */
+/* (it or they must have been set up by an ioctl() call with    */
+/* NI_DAQ_GPCT_START_PULSER in delayed start mode)              */
+/*--------------------------------------------------------------*/
+
+static int GPCT_arm( Board *board, unsigned int counter )
+{
+	u16 cmd = Gi_Arm;
+
+
+	switch ( counter )
+	{
+		case 0 : case 1 :
+			cmd = board->stc.Gi_Command[ counter ] | Gi_Arm;
+			board->func->stc_writew( board,
+						 STC_Gi_Command( counter ),
+						 cmd );
+			board->stc.Gi_Command[ counter ] &= ~ Gi_Arm;
+			return 0;
+
+		case 2 :                      /* both counters at once! */
+			cmd = board->stc.Gi_Command[ 0 ] |
+			      Gi_Arm | Gi_Arm_Copy;
+			board->func->stc_writew( board, STC_Gi_Command( 0 ),
+						 cmd );
+			board->stc.Gi_Command[ 0 ] &=
+						    ~ ( Gi_Arm | Gi_Arm_Copy );
+			return 0;
+	}
+
+	PDEBUG( "Invalid counter number %d\n", counter );
+	return -EINVAL;
+}
+
 
 
 /*---------------------------------------*/
@@ -536,7 +599,7 @@ static int GPCT_start_counting( Board *board, unsigned int counter,
 	u16 cmd;
 
 
-	if ( ! GPCT_is_valid_counter( board ) ) {
+	if ( ! GPCT_is_valid_counter( counter ) ) {
 		PDEBUG( "Invalid counter number %d\n", counter );
 		return -EINVAL;
 	}
@@ -602,7 +665,7 @@ static int GPCT_start_counting( Board *board, unsigned int counter,
 
 static int GPCT_is_busy( Board *board, unsigned counter, int *is_armed )
 {
-	if ( ! GPCT_is_valid_counter( board ) ) {
+	if ( ! GPCT_is_valid_counter( counter ) ) {
 		PDEBUG( "Invalid counter number %d\n", counter );
 		return -EINVAL;
 	}

@@ -3012,36 +3012,41 @@ can be started. For this reason there are several trigger modes, and the
 second argument the function expects is one of these:
 @table @samp
 @item "TRIGGER_NONE"
-the acquisition is started immediately without requiring an external
+The acquisition is started immediately without requiring an external
 trigger event when the function @code{daq_ai_start_acquisition()} is
 called, the start of scans and conversions is controlled via timers on
-the card
+the card.
 @item "TRIGGER_SCAN"
-the acquisition is started automatically without an external trigger
+The acquisition is started automatically without an external trigger
 event, each scan is started on receipt of a trigger event and
-conversions are started via the cards timers
+conversions are started via the cards timers.
 @item "TRIGGER_SCAN_CONV"
-the acquisition is started automatically without an external trigger
+The acquisition is started automatically without an external trigger
 event while both scans and each conversion during a scan are started on
-external trigger events
+external trigger events.
 @item "TRIGGER_CONV"
-the acquisition is started automatically without an external trigger
+The acquisition is started automatically without an external trigger
 event, scans are started via one of the cards timer, but each conversion
-is started on receipt of an external trigger
+is started on receipt of an external trigger.
 @item "TRIGGER_START"
-the acquisition is started on receipt of an external trigger event while
+The acquisition is started on receipt of an external trigger event while
 the starts of both the scans as well as the conversions are started via
-the cards timers
+the cards timers.
 @item "TRIGGER_START_SCAN"
-the acquisition and the scans are started on receipt of an external
-trigger event while the conversions are started via a card timer
+The acquisition and the scans are started on receipt of an external
+trigger event while the conversions are started via a card timer.
 @item "TRIGGER_START_SCAN_CONV"
-the acquisition, the scans and the conversions are all started on
-receipt of external trigger events
+The acquisition, the scans and the conversions are all started on
+receipt of external trigger events.
 @item "TRIGGER_START_CONV"
-the acquisition is started on receipt of an external trigger event,
+The acquisition is started on receipt of an external trigger event,
 scans are started by a card timer and the conversions making up the scan
 are started by an external trigger event.
+@item "TRIGGER_OUT"
+In this mode the triggering of the acquisition is done via the counters
+on the card (which then can't be used at the same time) and allows to
+output a trigger signal at a well-defined time before or after the
+start of the acquisition.
 @end table
 
 For each of these trigger modes different further arguments are
@@ -3080,6 +3085,16 @@ Another point to note is that specifying the time distance between
 conversions is optional - if not given the program will pick the
 smallest pssible delay, i.e.@: either @w{800 ns} or @w{2 us}.
 
+The @code{TRIGGER_OUT} mode is a poor mans pre-trigger mode, which can
+be used as long as it is possible to use the DAQ board as the contolling
+clock of the experiment. At a well-defined time before or after (or
+exactly at) the start of the acquisition a trigger is output at the
+@code{GPCTR1_OUT} pin of the board. This mode can be used e.g.@: to
+start an acqisition and only afterwards trigger e.g.@: a laser. The
+length of the trigger being output is an compile time option and can
+be changed in the configuration file for the device, the default is
+@w{100 ns}.
+
 According to the above discussion here's a list of all required and
 optional arguments to the function when used with the different trigger
 and timing modes. Optional arguments are enclosed in square braces:
@@ -3087,36 +3102,43 @@ and timing modes. Optional arguments are enclosed in square braces:
 daq_ai_acq_setup( Num_Scans, "TRIGGER_NONE", t_scan
                   [ , t_conv ] );
 
-daq_ai_acq_setup( Num_Scans, "TRIGGER_SCAN", T_scan
+daq_ai_acq_setup( Num_Scans, "TRIGGER_SCAN", S_scan
                   [ , P_scan ] [ , t_conv ] );
 
 daq_ai_acq_setup( Num_Scans, "TRIGGER_SCAN_CONV", T_scan,
                   [ P_scan , ] T_conv [ , P_conv ] );
 
 daq_ai_acq_setup( Num_Scans, "TRIGGER_CONV", t_scan,
-                  TS_conv [ , P_conv ] );
+                  S_conv [ , P_conv ] );
 
-daq_ai_acq_setup( Num_Scans, "TRIGGER_START", T_start,
+daq_ai_acq_setup( Num_Scans, "TRIGGER_START", S_start,
                   [ P_start, ] t_scan [ , t_conv ] );
 
-daq_ai_acq_setup( Num_Scans, "TRIGGER_START_SCAN", T_start,
-                  [ P_start, ] T_scan [ , P_scan ] [ , t_conv ] );
+daq_ai_acq_setup( Num_Scans, "TRIGGER_START_SCAN", S_start,
+                  [ P_start, ] S_scan [ , P_scan ] [ , t_conv ] );
 
-daq_ai_acq_setup( Num_Scans, "TRIGGER_START_SCAN_CONV", T_start,
-                  [ P_start, ] T_scan, [ P_scan, ] T_conv
+daq_ai_acq_setup( Num_Scans, "TRIGGER_START_SCAN_CONV", S_start,
+                  [ P_start, ] S_scan, [ P_scan, ] S_conv
                   [ , P_conv ] );
 
-daq_ai_acq_setup( Num_Scans, "TRIGGER_START_CONV", T_start,
-                  [ P_start, ] t_scan, T_conv [ , P_conv ] );
+daq_ai_acq_setup( Num_Scans, "TRIGGER_START_CONV", S_start,
+                  [ P_start, ] t_scan, S_conv [ , P_conv ] );
+
+daq_ai_acq_setup( Num_Scans, "TRIGGER_OUT", t_delay,
+                  t_scan [ , t_conv ] );
+                  
 @end example
 The symbol @code{Num_Scans} stands for the number of scans to be done,
-@code{T_start} for the source of the trigger starting the acquisition,
+@code{S_start} for the source of the trigger starting the acquisition,
 @code{P_start} is the "polarity" (i.e.@: rasing or falling edge) of this
-trigger, @code{T_scan} and @code{P_scan} have the same meaning but for
-the start-of-scan trigger and @code{T_conv} and @code{P_conv} are for
+trigger, @code{S_scan} and @code{P_scan} have the same meaning but for
+the start-of-scan trigger and @code{S_conv} and @code{P_conv} are for
 the start-of-conversion trigger. @code{t_scan} and @code{t_conv} are the
 time distances between starts of scans and between conversions,
-respectively.
+respectively. Finally, @code{t_delay} is the time between the start of
+the aquisition and the trigger output appearing on the @code{GPCTR1_OUT}
+pin of the card. It can be both positive and negative (a positive value
+leads to the trigger being output after the start of the acquisition).
 
 Please note that not all timings are possible, e.g.@: when very long
 times between starts of scans are required (for example @w{1 s}) while
@@ -5233,8 +5255,8 @@ If, in contrast, there are two acquisition sequences an array of twice
 the number of windows is returned. The first value in the array is the
 result for the first acquistion sequence for the first window, the
 second the result for the second acquistion sequence and the first
-window, then follow the results of both acquisition sequences for
-the second window, etc.
+window, then follow the results of both acquisition sequences fort
+he second window, etc.
 
 As an example here parts of an @code{EDL} script for a 1-dimensional
 stimulated echo experiment with phase cycling. The parts with the

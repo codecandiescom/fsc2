@@ -133,6 +133,8 @@ Var *daq_stop_counter( Var *v );
 Var *daq_single_pulse( Var *c );
 Var *daq_continuous_pulses( Var *v );
 
+void ni_daq_two_channel_pulses( double delay, double scan_duration );
+
 /* Functions from pci_mio_16e_1_dio.c */
 
 Var *daq_reserve_dio( Var *v );

@@ -95,27 +95,30 @@ int pci_mio_16e_1_channel_number( long ch, const char *snippet )
 
 double pci_mio_16e_1_check_time( double t, const char *snippet )
 {
-	double nt = lrnd( t / PCI_MIO_16E_1_TIME_RESOLUTION )
+	int sign = t >= 0.0 ? 1 : -1;
+	double at = fabs( t );
+	double nt = lrnd( at / PCI_MIO_16E_1_TIME_RESOLUTION )
 				* PCI_MIO_16E_1_TIME_RESOLUTION;
 
-	if ( fabs( t - nt ) > 0.01 * t )
+
+	if ( fabs( at - nt ) > 0.01 * at )
 	{
-		if ( t < 1.0e-6 )
+		if ( at < 1.0e-6 )
 			print( SEVERE, "Requested %s had to be changed from %ld ns to "
 				   "%ld ns.\n", snippet, lrnd( t * 1.0e9 ),
-				   lrnd( nt * 1.0e9 ) );
-		else if ( t < 1.0e-3 )
+				   sign * lrnd( nt * 1.0e9 ) );
+		else if ( at < 1.0e-3 )
 			print( SEVERE, "Requested %s had to be changed from %.3f us to "
-				   ".3%f us.\n", snippet, t * 1.0e6, nt * 1.0e6 );
-		else if ( t < 1.0 )
+				   ".3%f us.\n", snippet, t * 1.0e6, sign * nt * 1.0e6 );
+		else if ( at < 1.0 )
 			print( SEVERE, "Requested %s had to be changed from %.6f ms to "
-				   "%.6f ms.\n", snippet, t * 1.0e3, nt * 1.0e3 );
+				   "%.6f ms.\n", snippet, t * 1.0e3, sign * nt * 1.0e3 );
 		else
 			print( SEVERE, "Requested %s had to be changed from %.9f s to "
-				   "%.9f s.\n", snippet, t, nt );
+				   "%.9f s.\n", snippet, t, sign * nt );
 	}
 
-	return nt;
+	return sign * nt;
 }
 
 

@@ -26,6 +26,7 @@
 
 
 typedef struct {
+	int type;
 	NI_DAQ_INPUT start;
 	NI_DAQ_POLARITY start_polarity;
 	NI_DAQ_INPUT scan_start;
@@ -34,22 +35,18 @@ typedef struct {
 	NI_DAQ_INPUT conv_start;
 	NI_DAQ_POLARITY conv_polarity;
 	double conv_duration;
+	double delay_duration;
 } PCI_MIO_16E_1_AI_TRIG_ARGS;
 
 
-static void pci_mio_16e_1_ai_get_trigger_args( Var *v,
-											PCI_MIO_16E_1_AI_TRIG_ARGS *trig );
+static void pci_mio_16e_1_ai_get_trigger_args( Var *v );
 static int pci_mio_16e_1_ai_get_trigger_method( Var *v );
-static Var *pci_mio_16e_1_ai_get_S_start( Var *v,
-										  PCI_MIO_16E_1_AI_TRIG_ARGS *trig );
-static Var *pci_mio_16e_1_ai_get_T_scan( Var *v,
-										 PCI_MIO_16E_1_AI_TRIG_ARGS *trig );
-static Var *pci_mio_16e_1_ai_get_S_scan( Var *v,
-										 PCI_MIO_16E_1_AI_TRIG_ARGS *trig );
-static Var *pci_mio_16e_1_ai_get_T_conv( Var *v,
-										 PCI_MIO_16E_1_AI_TRIG_ARGS *trig );
-static Var *pci_mio_16e_1_ai_get_S_conv( Var *v,
-										 PCI_MIO_16E_1_AI_TRIG_ARGS *trig );
+static Var *pci_mio_16e_1_ai_get_S_start( Var *v );
+static Var *pci_mio_16e_1_ai_get_T_scan( Var *v );
+static Var *pci_mio_16e_1_ai_get_S_scan( Var *v );
+static Var *pci_mio_16e_1_ai_get_T_conv( Var *v );
+static Var *pci_mio_16e_1_ai_get_S_conv( Var *v );
+static Var *pci_mio_16e_1_ai_get_T_delay( Var *v );
 static NI_DAQ_INPUT pci_mio_16e_1_ai_get_trigger( const char *tname,
 												  const char *snippet );
 static bool pci_mio_16e_1_ai_get_polarity( const char *pname,
@@ -57,15 +54,18 @@ static bool pci_mio_16e_1_ai_get_polarity( const char *pname,
 static void pci_mio_16e_1_ai_check_T_scan( double t );
 static void pci_mio_16e_1_ai_check_T_conv( double t, double t_scan );
 
+static PCI_MIO_16E_1_AI_TRIG_ARGS trig;
+
 
 #define TRIGGER_NONE              0
 #define TRIGGER_CONV              1
 #define TRIGGER_SCAN              2
 #define TRIGGER_SCAN_CONV         3
-#define TRIGGER_START             4
-#define TRIGGER_START_CONV        5
-#define TRIGGER_START_SCAN        6
-#define TRIGGER_START_SCAN_CONV   7
+#define TRIGGER_OUT               4
+#define TRIGGER_START             5
+#define TRIGGER_START_CONV        6
+#define TRIGGER_START_SCAN        7
+#define TRIGGER_START_SCAN_CONV   8
 
 
 /*---------------------------------------------------------------------*
@@ -461,7 +461,6 @@ Var *daq_ai_channel_setup( Var *v )
 Var *daq_ai_acq_setup( Var *v )
 {
 	long num_scans;
-	PCI_MIO_16E_1_AI_TRIG_ARGS trig;
 	int ret;
 
 
@@ -499,34 +498,52 @@ Var *daq_ai_acq_setup( Var *v )
 		
 	v = vars_pop( v );
 
-	pci_mio_16e_1_ai_get_trigger_args( v, &trig );
+	pci_mio_16e_1_ai_get_trigger_args( v );
 
 	pci_mio_16e_1.ai_state.is_acq_setup = UNSET;
 
-	if ( FSC2_MODE == EXPERIMENT &&
-		 ( ret = ni_daq_ai_acq_setup( pci_mio_16e_1.board, trig.start,
-									  trig.start_polarity,
-									  trig.scan_start, trig.scan_polarity,
-									  trig.scan_duration, trig.conv_start,
-									  trig.conv_polarity, trig.conv_duration,
-									  num_scans ) ) != NI_DAQ_OK )
+	/* Now we finally can call the function for setting up the acquisition */
+
+	if ( FSC2_MODE == EXPERIMENT )
 	{
-		switch ( ret )
+		/* For TRIG_OUT triger type (i.e. with the scans started by a signal
+		   from channel 0 of the GPCT pulser and a trigger being output after
+		   the delay delay time on channel 1) we have to setup the
+		   counters. */
+
+		if ( trig.type == TRIGGER_OUT )
+			ni_daq_two_channel_pulses( trig.delay_duration,
+									   trig.scan_duration );
+
+		if ( ( ret = ni_daq_ai_acq_setup( pci_mio_16e_1.board, trig.start,
+										  trig.start_polarity,
+										  trig.scan_start, trig.scan_polarity,
+										  trig.scan_duration, trig.conv_start,
+										  trig.conv_polarity,
+										  trig.conv_duration,
+										  num_scans ) ) != NI_DAQ_OK )
 		{
-			case NI_DAQ_ERR_NPT :
-				print( FATAL, "Impossible to use the requested timings.\n" );
-				break;
+			switch ( ret )
+			{
+				case NI_DAQ_ERR_NPT :
+					print( FATAL, "Impossible to use the requested "
+						   "timings.\n" );
+					break;
 
-			case NI_DAQ_ERR_NEM :
-				print( FATAL, "Running out of memory.\n" );
-				break;
+				case NI_DAQ_ERR_NEM :
+					print( FATAL, "Running out of memory.\n" );
+					break;
 
-			default :
-				print( FATAL, "AI acquisition setup failed: %s.\n",
-					   ni_daq_strerror( ));
+				default :
+					print( FATAL, "AI acquisition setup failed: %s.\n",
+						   ni_daq_strerror( ));
+			}
+
+			THROW( EXCEPTION );
 		}
 
-		THROW( EXCEPTION );
+		if ( trig.type == TRIGGER_OUT )
+			ni_daq_gpct_stop_pulses( pci_mio_16e_1.board, 2 );
 	}
 
 	pci_mio_16e_1.ai_state.is_acq_setup = SET;
@@ -559,14 +576,30 @@ Var *daq_ai_start_acquisition( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	if ( FSC2_MODE == EXPERIMENT &&
-		 ( ret = ni_daq_ai_start_acq( pci_mio_16e_1.board ) ) != NI_DAQ_OK )
+	if ( FSC2_MODE == EXPERIMENT )
 	{
-		if ( ret == NI_DAQ_ERR_NEM )
-			print( FATAL, "Running out if memmory\n" );
-		else
-			print( FATAL, "Starting AI acquisition failed: %s\n" );
-		THROW( EXCEPTION );
+		if ( trig.type == TRIGGER_OUT )
+			 ni_daq_two_channel_pulses( trig.delay_duration,
+										trig.scan_duration );
+
+		if ( ( ret = ni_daq_ai_start_acq( pci_mio_16e_1.board ) )
+			 													 != NI_DAQ_OK )
+		{
+			if ( ret == NI_DAQ_ERR_NEM )
+				print( FATAL, "Running out if memory\n" );
+			else
+				print( FATAL, "Starting AI acquisition failed: %s\n",
+					   ni_daq_strerror( ) );
+			THROW( EXCEPTION );
+		}
+
+		if ( trig.type == TRIGGER_OUT &&
+			 ni_daq_gpct_start_pulses( pci_mio_16e_1.board, 2 ) != NI_DAQ_OK )
+		{
+			print( FATAL, "Starting AI acquisition failed: %s\n",
+				   ni_daq_strerror( ) );
+			THROW( EXCEPTION );
+		}
 	}
 
 	pci_mio_16e_1.ai_state.is_acq_running = SET;
@@ -583,14 +616,12 @@ Var *daq_ai_get_curve( Var * v )
 	Var *nv = NULL;
 	double **volts = NULL;
 	ssize_t received_data;
-	size_t offset;
 	size_t to_be_fetched = 0;
 
 
 	UNUSED_ARGUMENT( v );
 	CLOBBER_PROTECT( volts );
 	CLOBBER_PROTECT( nv );
-	CLOBBER_PROTECT( offset );
 	CLOBBER_PROTECT( to_be_fetched );
 
 	if ( ! pci_mio_16e_1.ai_state.is_acq_running )
@@ -630,47 +661,37 @@ Var *daq_ai_get_curve( Var * v )
 
 	if ( FSC2_MODE == EXPERIMENT )
 	{
-		offset = 0;
 		to_be_fetched = pci_mio_16e_1.ai_state.data_per_channel;
 
-		do
+		received_data = ni_daq_ai_get_acq_data( pci_mio_16e_1.board, volts,
+												0, to_be_fetched, 1 );
+
+		if ( received_data < ( ssize_t ) to_be_fetched )
 		{
-			received_data = ni_daq_ai_get_acq_data( pci_mio_16e_1.board, volts,
-													offset, to_be_fetched, 0 );
-			if ( received_data < 0 )
+			vars_pop( nv );
+			T_free( volts );
+
+			switch ( received_data )
 			{
-				switch ( received_data )
-				{
-					case NI_DAQ_ERR_NEM :
-						print( FATAL, "Running out of memory.\n" );
-						break;
+				case NI_DAQ_ERR_SIG :
+					stop_on_user_request( );
 
-					default :
-						print( FATAL, "Failed to get AI data: %s.\n",
-							   ni_daq_strerror( ) );
-				}
+				case NI_DAQ_ERR_NEM :
+					print( FATAL, "Running out of memory.\n" );
+					break;
 
-				vars_pop( nv );
-				T_free( volts );
-				THROW( EXCEPTION );
+				default :
+					print( FATAL, "Failed to get AI data: %s.\n",
+						   ni_daq_strerror( ) );
 			}
 
-			offset += received_data;
-			to_be_fetched -= received_data;
+			THROW( EXCEPTION );
+		}
 
-			TRY
-			{
-				stop_on_user_request( );
-				TRY_SUCCESS;
-			}
-			OTHERWISE
-			{
-				vars_pop( nv );
-				T_free( volts );
-				RETHROW( );
-			}
+		/* If a trigger is output stop the counters creating the triggers */
 
-		} while ( to_be_fetched > 0 );
+		if ( trig.type == TRIGGER_OUT )
+			ni_daq_gpct_stop_pulses( pci_mio_16e_1.board, 2 );
 	}
 	else
 	{
@@ -695,6 +716,7 @@ Var *daq_ai_get_curve( Var * v )
 	}
 
 	T_free( volts );
+
 	return nv;
 }
 
@@ -702,8 +724,7 @@ Var *daq_ai_get_curve( Var * v )
 /*---------------------------------------------------------------*
  *---------------------------------------------------------------*/
 
-static void pci_mio_16e_1_ai_get_trigger_args( Var *v,
-											 PCI_MIO_16E_1_AI_TRIG_ARGS *trig )
+static void pci_mio_16e_1_ai_get_trigger_args( Var *v )
 {
 	int method;
 
@@ -721,62 +742,72 @@ static void pci_mio_16e_1_ai_get_trigger_args( Var *v,
 		THROW( EXCEPTION );
 	}
 
-	trig->start = trig->scan_start = trig->conv_start = NI_DAQ_INTERNAL;
-	trig->start_polarity = trig->scan_polarity =
-						   trig->conv_polarity = NI_DAQ_NORMAL;
-	trig->scan_duration = trig->conv_duration = - HUGE_VAL;
+	trig.start = trig.scan_start = trig.conv_start = NI_DAQ_INTERNAL;
+	trig.start_polarity = trig.scan_polarity =
+						   trig.conv_polarity = NI_DAQ_NORMAL;
+	trig.scan_duration = trig.conv_duration = - HUGE_VAL;
 
 	switch ( method )
 	{
 		case TRIGGER_NONE :
-			v = pci_mio_16e_1_ai_get_T_scan( v, trig );
-			v = pci_mio_16e_1_ai_get_T_conv( v, trig );
+			v = pci_mio_16e_1_ai_get_T_scan( v );
+			v = pci_mio_16e_1_ai_get_T_conv( v );
 			break;
 
 		case TRIGGER_CONV :
-			v = pci_mio_16e_1_ai_get_T_scan( v, trig );
-			v = pci_mio_16e_1_ai_get_S_conv( v, trig );
+			v = pci_mio_16e_1_ai_get_T_scan( v );
+			v = pci_mio_16e_1_ai_get_S_conv( v );
 			break;
 
 		case TRIGGER_SCAN :
-			v = pci_mio_16e_1_ai_get_S_scan( v, trig );
-			v = pci_mio_16e_1_ai_get_T_conv( v, trig );
+			v = pci_mio_16e_1_ai_get_S_scan( v );
+			v = pci_mio_16e_1_ai_get_T_conv( v );
 			break;
 
 		case TRIGGER_SCAN_CONV :
-			v = pci_mio_16e_1_ai_get_S_scan( v, trig );
-			v = pci_mio_16e_1_ai_get_S_conv( v, trig );
+			v = pci_mio_16e_1_ai_get_S_scan( v );
+			v = pci_mio_16e_1_ai_get_S_conv( v );
 			break;
 
 		case TRIGGER_START :
-			v = pci_mio_16e_1_ai_get_S_start( v, trig );
-			v = pci_mio_16e_1_ai_get_T_scan( v, trig );
-			v = pci_mio_16e_1_ai_get_T_conv( v, trig );
+			v = pci_mio_16e_1_ai_get_S_start( v );
+			v = pci_mio_16e_1_ai_get_T_scan( v );
+			v = pci_mio_16e_1_ai_get_T_conv( v );
 			break;
 
 		case TRIGGER_START_CONV :
-			v = pci_mio_16e_1_ai_get_S_start( v, trig );
-			v = pci_mio_16e_1_ai_get_T_scan( v, trig );
-			v = pci_mio_16e_1_ai_get_S_conv( v, trig );
+			v = pci_mio_16e_1_ai_get_S_start( v );
+			v = pci_mio_16e_1_ai_get_T_scan( v );
+			v = pci_mio_16e_1_ai_get_S_conv( v );
 			break;
 
 		case TRIGGER_START_SCAN :
-			v = pci_mio_16e_1_ai_get_S_start( v, trig );
-			v = pci_mio_16e_1_ai_get_S_scan( v, trig );
-			v = pci_mio_16e_1_ai_get_T_conv( v, trig );
+			v = pci_mio_16e_1_ai_get_S_start( v );
+			v = pci_mio_16e_1_ai_get_S_scan( v );
+			v = pci_mio_16e_1_ai_get_T_conv( v );
 			break;
 
 		case TRIGGER_START_SCAN_CONV :
-			v = pci_mio_16e_1_ai_get_S_start( v, trig );
-			v = pci_mio_16e_1_ai_get_S_scan( v, trig );
-			v = pci_mio_16e_1_ai_get_S_conv( v, trig );
+			v = pci_mio_16e_1_ai_get_S_start( v );
+			v = pci_mio_16e_1_ai_get_S_scan( v );
+			v = pci_mio_16e_1_ai_get_S_conv( v );
 			break;
+
+		case TRIGGER_OUT :
+			trig.scan_start = NI_DAQ_GOUT_0;
+			v = pci_mio_16e_1_ai_get_T_delay( v );
+			v = pci_mio_16e_1_ai_get_T_scan( v );
+			v = pci_mio_16e_1_ai_get_T_conv( v );
+			break;
+			
 
 		default :
 			fsc2_assert( 1 == 0 );
 	}
 
 	too_many_arguments( v );
+
+	trig.type = method;
 }
 
 
@@ -789,6 +820,7 @@ static int pci_mio_16e_1_ai_get_trigger_method( Var *v )
 							   "TRIGGER_CONV", "TRIG_CONV",
 							   "TRIGGER_SCAN", "TRIG_SCAN",
 							   "TRIGGER_SCAN_CONV", "TRIG_SCAN_CONV",
+							   "TRIGGER_OUT", "TRIG_OUT",
 							   "TRIGGER_START", "TRIG_START",
 							   "TRIGGER_START_CONV", "TRIG_START_CONV",
 							   "TRIGGER_START_SCAN", "TRIG_START_SCAN",
@@ -819,8 +851,7 @@ static int pci_mio_16e_1_ai_get_trigger_method( Var *v )
 /*---------------------------------------------------------------*
  *---------------------------------------------------------------*/
 
-static Var *pci_mio_16e_1_ai_get_S_start( Var *v,
-										  PCI_MIO_16E_1_AI_TRIG_ARGS *trig )
+static Var *pci_mio_16e_1_ai_get_S_start( Var *v )
 {
 	NI_DAQ_POLARITY pol;
 
@@ -837,13 +868,13 @@ static Var *pci_mio_16e_1_ai_get_S_start( Var *v,
 		THROW( EXCEPTION );
 	}
 
-	trig->start = pci_mio_16e_1_ai_get_trigger( v->val.sptr, "start trigger" );
+	trig.start = pci_mio_16e_1_ai_get_trigger( v->val.sptr, "start trigger" );
 	v = vars_pop( v );
 
 	if ( v && v->type == STR_VAR &&
 		 pci_mio_16e_1_ai_get_polarity( v->val.sptr, &pol ) )
 	{
-		trig->start_polarity = pol;
+		trig.start_polarity = pol;
 		v = vars_pop( v );
 	}
 
@@ -854,8 +885,7 @@ static Var *pci_mio_16e_1_ai_get_S_start( Var *v,
 /*---------------------------------------------------------------*
  *---------------------------------------------------------------*/
 
-static Var *pci_mio_16e_1_ai_get_T_scan( Var *v,
-										 PCI_MIO_16E_1_AI_TRIG_ARGS *trig )
+static Var *pci_mio_16e_1_ai_get_T_scan( Var *v )
 {
 	double t;
 
@@ -868,7 +898,7 @@ static Var *pci_mio_16e_1_ai_get_T_scan( Var *v,
 	t = get_double( v, "scan time" );
 	t = pci_mio_16e_1_check_time( t, "scan time" );
 	pci_mio_16e_1_ai_check_T_scan( t );
-	trig->scan_duration = t;
+	trig.scan_duration = t;
 
 	return 	vars_pop( v );
 }
@@ -877,8 +907,7 @@ static Var *pci_mio_16e_1_ai_get_T_scan( Var *v,
 /*---------------------------------------------------------------*
  *---------------------------------------------------------------*/
 
-static Var *pci_mio_16e_1_ai_get_S_scan( Var *v,
-										 PCI_MIO_16E_1_AI_TRIG_ARGS *trig )
+static Var *pci_mio_16e_1_ai_get_S_scan( Var *v )
 {
 	NI_DAQ_POLARITY pol;
 
@@ -895,14 +924,14 @@ static Var *pci_mio_16e_1_ai_get_S_scan( Var *v,
 		THROW( EXCEPTION );
 	}
 
-	trig->scan_start = pci_mio_16e_1_ai_get_trigger( v->val.sptr,
-													 "scan trigger" );
+	trig.scan_start = pci_mio_16e_1_ai_get_trigger( v->val.sptr,
+													"scan trigger" );
 	v = vars_pop( v );
 
 	if ( v && v->type == STR_VAR &&
 		 pci_mio_16e_1_ai_get_polarity( v->val.sptr, &pol ) )
 	{
-		trig->scan_polarity = pol;
+		trig.scan_polarity = pol;
 		v = vars_pop( v );
 	}
 
@@ -913,8 +942,7 @@ static Var *pci_mio_16e_1_ai_get_S_scan( Var *v,
 /*---------------------------------------------------------------*
  *---------------------------------------------------------------*/
 
-static Var *pci_mio_16e_1_ai_get_T_conv( Var *v,
-										 PCI_MIO_16E_1_AI_TRIG_ARGS *trig )
+static Var *pci_mio_16e_1_ai_get_T_conv( Var *v )
 {
 	double t;
 
@@ -922,12 +950,12 @@ static Var *pci_mio_16e_1_ai_get_T_conv( Var *v,
 	{
 		t = get_double( v, "conversion time" );
 		t = pci_mio_16e_1_check_time( t, "conversion time" );
-		pci_mio_16e_1_ai_check_T_conv( t, trig->scan_duration );
-		trig->conv_duration = t;
+		pci_mio_16e_1_ai_check_T_conv( t, trig.scan_duration );
+		trig.conv_duration = t;
 		return vars_pop( v );
 	}
 
-	trig->conv_duration = pci_mio_16e_1.ai_state.ampl_switch_needed ?
+	trig.conv_duration = pci_mio_16e_1.ai_state.ampl_switch_needed ?
 			   PCI_MIO_16E_1_AMPL_SWITCHING_TIME : PCI_MIO_16E_1_MIN_CONV_TIME;
 	return NULL;
 }
@@ -936,8 +964,7 @@ static Var *pci_mio_16e_1_ai_get_T_conv( Var *v,
 /*---------------------------------------------------------------*
  *---------------------------------------------------------------*/
 
-static Var *pci_mio_16e_1_ai_get_S_conv( Var *v,
-										 PCI_MIO_16E_1_AI_TRIG_ARGS *trig )
+static Var *pci_mio_16e_1_ai_get_S_conv( Var *v )
 {
 	NI_DAQ_POLARITY pol;
 
@@ -954,18 +981,39 @@ static Var *pci_mio_16e_1_ai_get_S_conv( Var *v,
 		THROW( EXCEPTION );
 	}
 
-	trig->conv_start = pci_mio_16e_1_ai_get_trigger( v->val.sptr,
+	trig.conv_start = pci_mio_16e_1_ai_get_trigger( v->val.sptr,
 													 "conversion trigger" );
 	v = vars_pop( v );
 
 	if ( v && v->type == STR_VAR
 		 && pci_mio_16e_1_ai_get_polarity( v->val.sptr, &pol ) )
 	{
-		trig->conv_polarity = pol;
+		trig.conv_polarity = pol;
 		v = vars_pop( v );
 	}
 
 	return v;
+}
+
+
+/*---------------------------------------------------------------*
+ *---------------------------------------------------------------*/
+
+static Var *pci_mio_16e_1_ai_get_T_delay( Var *v )
+{
+	double t;
+
+	if ( v == NULL )
+	{
+		print( FATAL, "Missing arguments\n" );
+		THROW( EXCEPTION );
+	}
+
+	t = get_double( v, "delay time" );
+	t = pci_mio_16e_1_check_time( t, "delay time" );
+	trig.delay_duration = t;
+
+	return 	vars_pop( v );
 }
 
 

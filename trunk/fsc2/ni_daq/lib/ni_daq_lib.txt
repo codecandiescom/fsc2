@@ -89,7 +89,7 @@ following values can be expected:
 	NI_DAQ_ERR_NER		 External reference for AO not available
 	NI_DAQ_ERR_UAO		 Only bipolar AO available
 	NI_DAQ_ERR_NAT       No analog trigger available
-
+	NI_DAQ_ERR_INT       Pulser to be started not initialized
 
 The absolute value of the error code can be used as an index into a an
 array of short descriptions of the error encountered, which is defined as
@@ -878,7 +878,9 @@ On failure the function returns one of the following error codes
 
 int ni_daq_gpct_stop_counter( int board, int counter )
 
-The function stops a counter. If the specified counter isn't counting
+The function stops one counter or both counters (to stop both counters
+the 'counter argument must be set to 2 instead of the 0 or 1, as it is
+required for a single counter). If the specified counter isn't counting
 nothing happens (i.e. success is reported).
 
 On failure the function returns one of the following error codes
@@ -918,14 +920,29 @@ On failure the function returns one of the following error codes
 ======================================================================
 
 int ni_daq_gpct_generate_single_pulse( int board, int counter,
-                                       double duration )
+                                       double duration, double *delay,
+									   int dont_start )
 
 The function creates a single pulse of 'duration' length at the output
 connectors of the specified counter.
 
 Depending on which clock and settings can be used 'duration' must be at
 least either 100 ns, 10 us or 20 us and must also be an integer multiple
-of 50 ns, 5 us or 10 us.
+of 50 ns, 5 us or 10 us. What 'delay' points to is the time the creation
+of the pulse is delayed and its value has to follow the same rules as
+the value for 'duration' except that when set to zero or a negative
+value the shortest possible start delay is used. When its content was
+zero or negative on return it is changed to reflect the real delay
+(there is always a short delay of 2 ticks of the clock getting used).
+
+If the flag 'dont_start' is non-zero the pulse will not be created
+immediately but only when the function ni_daq_gpct_start_pulses()
+is called. This allows to initialize the settings for the pulse
+but start it only later together with pulses from the other counter.
+But even when start of the counter creating the pulse is delayed in
+this way ni_daq_gpct_state() will still report the counter as busy
+and you have to either start the counter or call the function
+ni_daq_gpct_stop_pulses() in order to reset this condition.
 
 On failure the function returns one of the following error codes
 
@@ -937,7 +954,8 @@ On failure the function returns one of the following error codes
 
 int ni_daq_gpct_generate_continuous_pulses( int board, int counter,
 									        double high_phase,
-                                            double low_phase )
+                                            double low_phase, double *delay,
+											int dont_start )
 
 The function creates a continuous train of pulses at the output
 connectors of of the specified counter.
@@ -948,12 +966,49 @@ tition frequency of the created pulses is the sum of both arguments.
 
 Depending on the clock settings both 'high_phase' and 'low_phase' must be
 either at least 100 ns, 10 us or 20 us and must also be integer multiples
-of 50 ns, 5 us or 10 us.
+of 50 ns, 5 us or 10 us. What 'delay' points to is the time the creation
+of the pulse is delayed and its value has to follow the same rules as the
+values for 'high_phase' and 'low_phase' except that when set to zero or a
+negative value the shortest possible start delay is used. When its content
+was zero or negative on return it is changed to reflect the real delay
+(there is always a short delay of 2 ticks of the clock getting used).
+
+If the flag 'dont_start' is non-zero the pulses will not be created
+immediately but only when the function ni_daq_gpct_start_pulses()
+is called. This allows to initialize the settings for the pulses
+but start them only later together with pulses from the other counter.
+But even when start of the counter creating the pulses is delayed in
+this way ni_daq_gpct_state() will still report the counter as busy
+and you have call ni_daq_gpct_stop_pulses() in order to reset
+this condition.
 
 On failure the function returns one of the following error codes
 
     NI_DAQ_ERR_NSB    NI_DAQ_ERR_BNO    NI_DAQ_ERR_IVA    NI_DAQ_ERR_NPT
     NI_DAQ_ERR_CBS    NI_DAQ_ERR_INT
+
+
+======================================================================
+
+ni_daq_gpct_start_pulses( int board, int counter )
+
+This function needs only to be called when either the function
+ni_daq_gpct_generate_single_pulse() or the function
+ni_daq_gpct_generate_continuous_pulses() had been called with
+the 'dont_start' flag being set. In this case the corresponding
+counter has only been initialized but no pulses are created yet.
+Otherwise calling the function will result in an error code
+being returned (NI_DAQ_ERR_PNI).
+
+Beside the usual 'board' argument the function expects the number
+of the counter creating the pulses, i.e either 0 or 1. But to start
+both pulsers absolutely synchronously also the number 2 can be
+passed to the function.
+
+On failure the function returns one of the following error codes
+
+    NI_DAQ_ERR_NSB    NI_DAQ_ERR_BNO    NI_DAQ_ERR_IVA    NI_DAQ_ERR_PNI
+	NI_DAQ_ERR_INT
 
 
 ======================================================================

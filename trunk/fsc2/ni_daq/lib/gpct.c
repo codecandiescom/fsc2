@@ -201,13 +201,15 @@ int ni_daq_gpct_start_gated_counter( int board, int counter,
 	a.cmd = NI_DAQ_GPCT_START_PULSER;
 	a.counter = pulser;
 	a.continuous = 0;
-	a.low_ticks = 1;
+	a.low_ticks = 2;
 	a.high_ticks = len;
+	a.delay_ticks = 2;
 	a.source = gate_source;
 	a.gate = NI_DAQ_NONE;
 	a.output_polarity = NI_DAQ_NORMAL;
 	a.source_polarity = NI_DAQ_NORMAL;
 	a.gate_polarity = NI_DAQ_NORMAL;
+	a.delay_start = 0;
 
 	if ( ioctl( ni_daq_dev[ board ].fd, NI_DAQ_IOC_GPCT, &a ) < 0 )
 	{
@@ -228,22 +230,53 @@ int ni_daq_gpct_start_gated_counter( int board, int counter,
 int ni_daq_gpct_stop_counter( int board, int counter )
 {
 	int ret;
-	int state;
+	int states[ 2 ];
 	int pulser;
+	int i;
 	NI_DAQ_GPCT_ARG a;
+	int both_counters = 0;
 
 
 	if ( ( ret = ni_daq_basic_check( board ) ) < 0 )
 		return ret;
 
-	if ( counter < 0 || counter > 1 )
-		return ni_daq_errno = NI_DAQ_ERR_IVA;
+	switch ( counter )
+	{
+		case 0 : case 1:
+			if ( ( ret = ni_daq_gpct_state( board, counter,
+											states + counter ) ) < 0 )
+				return ret;
 
-	if ( ( ret = ni_daq_gpct_state( board, counter, &state ) ) < 0 )
-		return ret;
+			if ( states[ counter ] == NI_DAQ_IDLE )
+				return ni_daq_errno = NI_DAQ_OK;
+			break;
 
-	if ( state == NI_DAQ_IDLE )
-		return ni_daq_errno = NI_DAQ_OK;
+		case 2 :
+			if ( ( ret = ni_daq_gpct_state( board, 0, states ) ) < 0 ||
+				 ( ret = ni_daq_gpct_state( board, 1, states + 1 ) ) < 0 )
+				return ret;
+
+			if ( states[ 0 ] == NI_DAQ_IDLE && states[ 1 ]== NI_DAQ_IDLE )
+			{
+				for ( i = 0; i < 2; i++ )
+				{
+					ni_daq_dev[ board ].gpct_state.state[ i ] = NI_DAQ_IDLE;
+					ni_daq_dev[ board ].gpct_state.not_started[ i ] = 0;
+				}
+
+				return ni_daq_errno = NI_DAQ_OK;
+			}
+
+			if ( states[ 0 ] == NI_DAQ_IDLE )
+				counter = 1;
+			else if ( states[ 1 ] == NI_DAQ_IDLE )
+				counter = 0;
+			both_counters = 1;
+			break;
+
+		default :
+			return ni_daq_errno = NI_DAQ_ERR_IVA;
+	}
 
 	a.cmd = NI_DAQ_GPCT_DISARM_COUNTER;
 	a.counter = counter;
@@ -251,16 +284,71 @@ int ni_daq_gpct_stop_counter( int board, int counter )
 	if ( ioctl( ni_daq_dev[ board ].fd, NI_DAQ_IOC_GPCT, &a ) < 0 )
 		return ni_daq_errno = NI_DAQ_ERR_INT;
 
-	if ( ni_daq_dev[ board ].gpct_state.state[ counter ] ==
-		 											   NI_DAQ_COUNTER_RUNNING )
+	if ( ! both_counters )
 	{
-		pulser = counter ^ 1;
-		if ( ni_daq_dev[ board ].gpct_state.state[ pulser ] ==
+		if ( ni_daq_dev[ board ].gpct_state.state[ counter ] ==
+		 											   NI_DAQ_COUNTER_RUNNING )
+		{
+			pulser = counter ^ 1;
+			if ( ni_daq_dev[ board ].gpct_state.state[ pulser ] ==
 			 											NI_DAQ_PULSER_RUNNING )
-			ni_daq_gpct_stop_pulses( board, pulser );
+				ni_daq_gpct_stop_pulses( board, pulser );
+		}
+
+		ni_daq_dev[ board ].gpct_state.state[ counter ] = NI_DAQ_IDLE;
+		ni_daq_dev[ board ].gpct_state.not_started[ counter ] = 0;
+	}
+	else
+		for ( i = 0; i < 2; i++ )
+		{
+			ni_daq_dev[ board ].gpct_state.state[ i ] = NI_DAQ_IDLE;
+			ni_daq_dev[ board ].gpct_state.not_started[ i ] = 0;
+		}
+
+	return ni_daq_errno = NI_DAQ_OK;
+}
+
+
+/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*/
+
+int ni_daq_gpct_start_pulses( int board, int counter )
+{
+	int ret;
+	NI_DAQ_GPCT_ARG a;
+
+
+	if ( ( ret = ni_daq_basic_check( board ) ) < 0 )
+		return ret;
+
+	switch ( counter )
+	{
+		case 0 : case 1 :
+			if ( ! ni_daq_dev[ board ].gpct_state.not_started[ counter ] )
+				return ni_daq_errno = NI_DAQ_ERR_PNI;
+			break;
+
+		case 2 :
+			if ( ! ni_daq_dev[ board ].gpct_state.not_started[ 0 ] &&
+				 ! ni_daq_dev[ board ].gpct_state.not_started[ 1 ] )
+				return ni_daq_errno = NI_DAQ_ERR_PNI;
+			break;
+
+		default :
+			return ni_daq_errno = NI_DAQ_ERR_IVA;
 	}
 
-	ni_daq_dev[ board ].gpct_state.state[ counter ] = NI_DAQ_IDLE;
+	a.cmd = NI_DAQ_GPCT_ARM;
+	a.counter = counter;
+
+	if ( ioctl( ni_daq_dev[ board ].fd, NI_DAQ_IOC_GPCT, &a ) < 0 )
+		return ni_daq_errno = NI_DAQ_ERR_INT;
+
+	if ( counter != 2 )
+		ni_daq_dev[ board ].gpct_state.not_started[ counter ] = 0;
+	else
+		ni_daq_dev[ board ].gpct_state.not_started[ 0 ] =
+			ni_daq_dev[ board ].gpct_state.not_started[ 1 ] = 0;
 
 	return ni_daq_errno = NI_DAQ_OK;
 }
@@ -321,11 +409,13 @@ int ni_daq_gpct_get_count( int board, int counter, int wait_for_end,
 /*--------------------------------------------------------------------*/
 /*--------------------------------------------------------------------*/
 
-int ni_daq_gpct_single_pulse( int board, int counter, double duration )
+int ni_daq_gpct_single_pulse( int board, int counter, double duration,
+							  double *delay, int dont_start )
 {
 	int ret;
 	NI_DAQ_GPCT_ARG a;
 	unsigned long len;
+	unsigned long del;
 	int state;
 	NI_DAQ_INPUT source = NI_DAQ_INVALID_INPUT;
 
@@ -339,9 +429,28 @@ int ni_daq_gpct_single_pulse( int board, int counter, double duration )
 	if ( ni_daq_dev[ board ].gpct_state.state[ counter ] != NI_DAQ_IDLE )
 		return ni_daq_errno = NI_DAQ_ERR_CBS;
 
-	if ( ni_daq_gpct_time_to_ticks( board, counter, duration,
-									&len, &source ) < 0 )
+	if ( *delay <= 0.0 )
+	{
+		if ( ni_daq_gpct_time_to_ticks( board, counter, duration,
+										&len, &source ) < 0 )
+			return ni_daq_errno = NI_DAQ_ERR_NPT;
+
+		del = 2;
+		*delay = del * ( duration / len );
+	}
+	else
+	{
+		if ( ( ni_daq_gpct_time_to_ticks( board, counter, duration,
+									  &len, &source ) < 0 ||
+		   ni_daq_gpct_time_to_ticks( board, counter, *delay,
+									  &del, &source ) < 0 ) &&
+		 ( source = NI_DAQ_INVALID_INPUT,
+		   ni_daq_gpct_time_to_ticks( board, counter, *delay,
+									  &del, &source ) < 0 ||
+		   ni_daq_gpct_time_to_ticks( board, counter, duration,
+									  &len, &source ) < 0 ) )
 		return ni_daq_errno = NI_DAQ_ERR_NPT;
+	}
 
 	if ( ( ret = ni_daq_gpct_state( board, counter, &state ) ) < 0 )
 		return ret;
@@ -359,18 +468,22 @@ int ni_daq_gpct_single_pulse( int board, int counter, double duration )
 	a.cmd = NI_DAQ_GPCT_START_PULSER;
 	a.counter = counter;
 	a.continuous = 0;
-	a.low_ticks = 1;
+	a.low_ticks = 2;
 	a.high_ticks = len;
+	a.delay_ticks = del;
 	a.source = source;
 	a.gate = NI_DAQ_NONE;
 	a.output_polarity = NI_DAQ_NORMAL;
 	a.source_polarity = NI_DAQ_NORMAL;
 	a.gate_polarity = NI_DAQ_NORMAL;
+	a.delay_start = dont_start;
 
 	if ( ioctl( ni_daq_dev[ board ].fd, NI_DAQ_IOC_GPCT, &a ) < 0 )
 		return ni_daq_errno = NI_DAQ_ERR_INT;
 
 	ni_daq_dev[ board ].gpct_state.state[ counter ] = NI_DAQ_PULSER_RUNNING;
+	if ( dont_start )
+		ni_daq_dev[ board ].gpct_state.not_started[ counter ] = 1;
 
 	return ni_daq_errno = NI_DAQ_OK;
 }
@@ -380,12 +493,13 @@ int ni_daq_gpct_single_pulse( int board, int counter, double duration )
 /*--------------------------------------------------------------------*/
 
 int ni_daq_gpct_continuous_pulses( int board, int counter,
-								   double high_phase, double low_phase )
+								   double high_phase, double low_phase,
+								   double *delay, int dont_start )
 {
 	int ret;
 	int state;
 	NI_DAQ_GPCT_ARG a;
-	unsigned long ht, lt;
+	unsigned long ht, lt, dt;
 	NI_DAQ_INPUT source = NI_DAQ_INVALID_INPUT;
 
 
@@ -395,16 +509,70 @@ int ni_daq_gpct_continuous_pulses( int board, int counter,
 	if ( counter < 0 || counter > 1 )
 		return ni_daq_errno = NI_DAQ_ERR_IVA;
 
-	if ( ( ni_daq_gpct_time_to_ticks( board, counter, high_phase,
-									  &ht, &source ) < 0 ||
-		   ni_daq_gpct_time_to_ticks( board, counter, low_phase,
-									  &lt, &source ) < 0 ) &&
-		 ( source = NI_DAQ_INVALID_INPUT,
-		   ni_daq_gpct_time_to_ticks( board, counter, low_phase,
-									  &lt, &source ) < 0 ||
-		   ni_daq_gpct_time_to_ticks( board, counter, high_phase,
-									  &ht, &source ) < 0 ) )
-		return ni_daq_errno = NI_DAQ_ERR_NPT;
+	/* To figure out if the different timings can be reaslized we have to
+	   try with all possible permutations... */
+
+	if ( *delay <= 0.0 )
+	{
+		if ( ( ni_daq_gpct_time_to_ticks( board, counter, high_phase,
+										  &ht, &source ) < 0 ||
+			   ni_daq_gpct_time_to_ticks( board, counter, low_phase,
+										  &lt, &source ) < 0 ) &&
+			 ( source = NI_DAQ_INVALID_INPUT,
+			   ni_daq_gpct_time_to_ticks( board, counter, low_phase,
+										  &lt, &source ) < 0 ||
+			   ni_daq_gpct_time_to_ticks( board, counter, high_phase,
+										  &ht, &source ) < 0 ) )
+			return ni_daq_errno = NI_DAQ_ERR_NPT;
+
+		dt = 2;
+		*delay = dt * ( high_phase / ht );
+	}
+	else
+	{
+		if ( ( ni_daq_gpct_time_to_ticks( board, counter, high_phase,
+										  &ht, &source ) < 0 ||
+			   ni_daq_gpct_time_to_ticks( board, counter, low_phase,
+										  &lt, &source ) < 0 ||
+			   ni_daq_gpct_time_to_ticks( board, counter, *delay,
+										  &dt, &source ) < 0 ) &&
+			 ( source = NI_DAQ_INVALID_INPUT,
+			   ni_daq_gpct_time_to_ticks( board, counter, low_phase,
+										  &lt, &source ) < 0 ||
+			   ni_daq_gpct_time_to_ticks( board, counter, high_phase,
+										  &ht, &source ) < 0 ||
+			   ni_daq_gpct_time_to_ticks( board, counter, *delay,
+										  &dt, &source ) < 0 ) &&
+			 ( source = NI_DAQ_INVALID_INPUT,
+			   ni_daq_gpct_time_to_ticks( board, counter, high_phase,
+										  &ht, &source ) < 0 ||
+			   ni_daq_gpct_time_to_ticks( board, counter, *delay,
+										  &dt, &source ) < 0 ||
+			   ni_daq_gpct_time_to_ticks( board, counter, low_phase,
+										  &lt, &source ) < 0 ) &&
+			 ( source = NI_DAQ_INVALID_INPUT,
+			   ni_daq_gpct_time_to_ticks( board, counter, low_phase,
+										  &lt, &source ) < 0 ||
+			   ni_daq_gpct_time_to_ticks( board, counter, *delay,
+										  &dt, &source ) < 0 ||
+			   ni_daq_gpct_time_to_ticks( board, counter, high_phase,
+										  &ht, &source ) < 0 ) &&
+			 ( source = NI_DAQ_INVALID_INPUT,
+			   ni_daq_gpct_time_to_ticks( board, counter, *delay,
+										  &dt, &source ) < 0 ||
+			   ni_daq_gpct_time_to_ticks( board, counter, high_phase,
+										  &ht, &source ) < 0 ||
+			   ni_daq_gpct_time_to_ticks( board, counter, low_phase,
+										  &lt, &source ) < 0 ) &&
+			 ( source = NI_DAQ_INVALID_INPUT,
+			   ni_daq_gpct_time_to_ticks( board, counter, *delay,
+										  &dt, &source ) < 0 ||
+			   ni_daq_gpct_time_to_ticks( board, counter, low_phase,
+										  &lt, &source ) < 0 ||
+			   ni_daq_gpct_time_to_ticks( board, counter, high_phase,
+										  &ht, &source ) < 0 ) )
+			return ni_daq_errno = NI_DAQ_ERR_NPT;
+	}
 
 	if ( ( ret = ni_daq_gpct_state( board, counter, &state ) ) < 0 )
 		return ret;
@@ -426,17 +594,21 @@ int ni_daq_gpct_continuous_pulses( int board, int counter,
 	a.continuous = 1;
 	a.low_ticks = lt;
 	a.high_ticks = ht;
+	a.delay_ticks = dt;
 	a.source = source;
 	a.gate = NI_DAQ_NONE;
 	a.output_polarity = NI_DAQ_NORMAL;
 	a.source_polarity = NI_DAQ_NORMAL;
 	a.gate_polarity = NI_DAQ_NORMAL;
+	a.delay_start = dont_start;
 
 	if ( ioctl( ni_daq_dev[ board ].fd, NI_DAQ_IOC_GPCT, &a ) < 0 )
 		return ni_daq_errno = NI_DAQ_ERR_INT;
 
 	ni_daq_dev[ board ].gpct_state.state[ counter ] =
 													NI_DAQ_CONT_PULSER_RUNNING;
+	if ( dont_start )
+		ni_daq_dev[ board ].gpct_state.not_started[ counter ] = 1;
 
 	return ni_daq_errno = NI_DAQ_OK;
 }
@@ -545,6 +717,9 @@ int ni_daq_gpct_init( int board )
 	ni_daq_dev[ board ].gpct_state.state[ 0 ] =
 		ni_daq_dev[ board ].gpct_state.state[ 1 ] = NI_DAQ_IDLE;
 
+	ni_daq_dev[ board ].gpct_state.not_started[ 0 ] =
+		ni_daq_dev[ board ].gpct_state.not_started[ 1 ] = 0;
+
 	return 0;
 }
 
@@ -598,8 +773,8 @@ static int ni_daq_gpct_time_to_ticks( int board, int counter,
 	if ( poss_clock == 0 )        /* impossible to set length */
 		return -1;
 
-	/* We must realize the duration with the setting for source if it's set to
-	   something non-negative */
+	/* We must realize the duration with the setting for source if it's set
+	   to something non-negative */
 
 	cfc = ni_daq_dev[ board ].gpct_state.speed == NI_DAQ_FULL_SPEED ? 0 : 1;
 
@@ -652,8 +827,6 @@ static int ni_daq_gpct_time_to_ticks( int board, int counter,
 		 											   NI_DAQ_PULSER_RUNNING &&
 		   state == NI_DAQ_BUSY ) )
 		return -1;
-
-	/* Finally check if we can realize it after switching the fast clock */
 
 	if ( ! cfc && poss_clock & 2 )
 	{

@@ -112,9 +112,12 @@ int ni_daq_gpct_start_gated_counter( int board, int counter,
 int ni_daq_gpct_stop_counter( int board, int counter );
 int ni_daq_gpct_get_count( int board, int counter, int wait_for_end,
 					  unsigned long *count, int *state );
-int ni_daq_gpct_single_pulse( int board, int counter, double duration );
+int ni_daq_gpct_single_pulse( int board, int counter, double duration,
+			      double *delay, int dont_start );
 int ni_daq_gpct_continuous_pulses( int board, int counter,
-				   double high_phase, double low_phase );
+				   double high_phase, double low_phase,
+				   double *delay, int dont_start );
+int ni_daq_gpct_start_pulses( int board, int counter );
 int ni_daq_gpct_stop_pulses( int board, int counter );
 
 
@@ -158,6 +161,7 @@ enum {
 #define NI_DAQ_ERR_NER  -21
 #define NI_DAQ_ERR_UAO  -22
 #define NI_DAQ_ERR_NAT  -23
+#define NI_DAQ_ERR_PNI  -24
 
 
 #ifdef __cplusplus
