@@ -688,6 +688,14 @@ long *exp_icreate( void *buffer, long len )
 		pos += strlen( ( char * ) pos ) + 1;
 
 		if ( *( ( char * ) pos ) != '\0' )       /* get help text */
+		{
+			vars_push( STR_VAR, ( char * ) pos );
+			pos += strlen( ( char * ) pos ) + 1;
+		}
+		else
+			pos++;
+
+		if ( *( ( char * ) pos ) != '\0' )       /* get C format string */
 			vars_push( STR_VAR, ( char * ) pos );
 
 		/* Call the function */
