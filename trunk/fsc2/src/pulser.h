@@ -81,8 +81,7 @@ void p_set_trigger_level( Var *v );
 void p_set_trigger_impedance( Var *v );
 void p_set_rep_time( Var *v );
 void p_set_rep_freq( Var *v );
-void p_phase_ref( long function, int ref );
-void p_phase_ref_f( long func, int ref );
+void p_phase_ref( long prot, long function, int ref );
 
 long p_num( char *txt );
 void is_pulser_driver( void );
