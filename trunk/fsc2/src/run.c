@@ -881,7 +881,7 @@ static void do_measurement( void )
 					cur_prg_token = cur_prg_token->start->end;
 					break;
 
-				case CONT_TOK :
+				case NEXT_TOK :
 					cur_prg_token = cur_prg_token->start;
 					break;
 

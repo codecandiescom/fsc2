@@ -23,7 +23,6 @@
 
 
 #include "fsc2.h"
-#include <signal.h>
 
 
 /* Number of program token structures to be allocated as a chunk */
@@ -86,7 +85,7 @@ static void save_restore_variables( bool flag );
   need routines that later passes the stored tokens to the parsers,
   exp_testlex() and exp_runlex().
 
-  The following function does the following:
+  The function does the following:
   1. It stores each token (with its semantic values which it receives from
      the lexer) in the array of program tokens, prg_token.
   2. While doing so it also does a few preliminay tests - it checks that
@@ -135,16 +134,17 @@ void store_exp( FILE *in )
 						"label.\n" );
 				THROW( EXCEPTION );
 			}
+
 			if ( square_brace_count > 0 )
 			{
 				eprint( FATAL, SET, "Unbalanced square braces before ON_STOP "
 						"label.\n" );
 				THROW( EXCEPTION );
 			}
+
 			if ( cb_stack != NULL )
 			{
-				eprint( FATAL, SET, "ON_STOP label found within a block "
-						"(enclosed by curly braces).\n" );
+				eprint( FATAL, SET, "ON_STOP label found within a block.\n" );
 				THROW( EXCEPTION );
 			}
 
@@ -152,7 +152,7 @@ void store_exp( FILE *in )
 			continue;
 		}
 
-		/* Get or extend memory for storing the tokens in chunks */
+		/* Get or extend memory for storing the tokens if necessary */
 
 		if ( prg_length % PRG_CHUNK_SIZE == 0 )
 			prg_token = T_realloc( prg_token, ( prg_length + PRG_CHUNK_SIZE )
@@ -161,13 +161,18 @@ void store_exp( FILE *in )
 		prg_token[ prg_length ].token = ret;   /* store token */
 
 		/* If the file name changed get a copy of the new file name. Then set
-		   pointer in structure to file name and copy current line number. */
+		   the pointer in the program token structure to the file name and
+		   copy the current line number. Don't free the name of the previous
+		   file - all the program token structures from the previous file
+		   point to the string, and it may only be free()ed when the program
+		   token structures get free()ed. */
 
 		if ( cur_Fname == NULL || strcmp( Fname, cur_Fname ) )
 		{
 			cur_Fname = NULL;
 			cur_Fname = T_strdup( Fname );
 		}
+
 		prg_token[ prg_length ].Fname = cur_Fname;
 		prg_token[ prg_length ].Lc = Lc;
 
@@ -303,7 +308,7 @@ void store_exp( FILE *in )
 				}
 				break;
 
-			case BREAK_TOK : case CONT_TOK :
+			case BREAK_TOK : case NEXT_TOK :
 				if ( ! in_loop )
 				{
 					eprint( FATAL, SET, "%s statement not within a loop.\n",
@@ -380,9 +385,9 @@ static void push_curly_brace( const char *Fname, long Lc )
 /* Function is called when a closing curly brace is found in the input file  */
 /* to remove the entry on the curly brace stack for the corresponding        */
 /* opening brace. It returns OK when there was a corresponding opening brace */
-/* (i.e. opening and closing braces aren't unbalanced in favour of closing), */
-/* otherwise FAIL is returned. This function is also used when getting rid   */
-/* of the curly brace stack after an exception was thrown.                   */
+/* (i.e. opening and closing braces aren't unbalanced in favour of closing   */
+/* braces), otherwise FAIL is returned. This function is also used when      */
+/* getting rid of the curly brace stack after an exception was thrown.       */
 /*---------------------------------------------------------------------------*/
 
 static bool pop_curly_brace( void )
@@ -423,8 +428,9 @@ void forget_prg( void )
 		return;
 	}
 
-	/* Get the address in the first token where the file names is stored and
-	   free the string */
+	/* Get the address in the first token where the file name is stored and
+	   free the string, then free memory allocated in the program token
+	   structures. */
 
 	cur_Fname = prg_token[ 0 ].Fname;
 	T_free( cur_Fname );
@@ -439,7 +445,8 @@ void forget_prg( void )
 			
 			case E_FUNC_TOKEN :       /* get rid of string for function name */
 				T_free( prg_token[ i ].tv.vptr->name );
-				                                             /* NO break ! */
+				/* fall through */
+
 			case E_VAR_REF :          /* get rid of copy of stack variable */
 				T_free( prg_token[ i ].tv.vptr );
 				break;
@@ -508,7 +515,7 @@ static void loop_setup( void )
 /* Can be called recursively to allow nested loops.               */
 /* ->                                                             */
 /*  1. Type of loop (WHILE_TOK, UNTIL_TOK, REPEAT_TOK or FOR_TOK) */
-/*  2. pointer to number of token                                 */
+/*  2. Pointer to number of token                                 */
 /*----------------------------------------------------------------*/
 
 static void setup_while_or_repeat( int type, long *pos )
@@ -537,17 +544,17 @@ static void setup_while_or_repeat( int type, long *pos )
 
 	if ( type == FOREVER_TOK && prg_token[ i ].token != '{' )
 	{
-		eprint( FATAL, UNSET, "%s:%ld: No condition can be used for FOREVER "
+		eprint( FATAL, UNSET, "%s:%ld: No condition can be used for a FOREVER "
 				"loop.\n", prg_token[ i ].Fname, prg_token[ i ].Lc );
 		THROW( EXCEPTION );
 	}
 
-	/* Look for the start and end of the while, until, repeat or for block
-	   beginning with the first token after the REPEAT, WHILE, UNTIL or FOR.
-	   Handle nested WHILE, UNTIL, REPEAT, FOR, IF or UNLESS tokens by calling
-	   the appropriate setup functions recursively. BREAK and NEXT tokens store
-	   in `start' a pointer to the block header, i.e. the WHILE, UNTIL, REPEAT
-	   or FOR token. */
+	/* Look for the start and end of the WHILE, UNTIL, REPEAT, FOR or FOREVER
+	   block beginning with the first token after the keyword. Handle nested
+	   WHILE, UNTIL, REPEAT, FOR, FOREVER, IF or UNLESS tokens by calling the
+	   appropriate setup functions recursively. BREAK and NEXT tokens store
+	   in `start' a pointer to the block header, i.e. the WHILE, UNTIL, REPEAT,
+	   FOR or FOREVER token. */
 
 	for ( ; i < prg_length; i++ )
 	{
@@ -559,7 +566,7 @@ static void setup_while_or_repeat( int type, long *pos )
 				setup_while_or_repeat( prg_token[ i ].token, &i );
 				break;
 
-			case CONT_TOK :
+			case NEXT_TOK :
 				prg_token[ i ].start = cur;
 				break;
 
@@ -663,11 +670,11 @@ static void setup_if_else( long *pos, Prg_Token *cur_wr )
 				setup_while_or_repeat( prg_token[ i ].token, &i );
 				break;
 
-			case CONT_TOK : case BREAK_TOK :
+			case NEXT_TOK : case BREAK_TOK :
 				if ( cur_wr == NULL )
 				{
 					eprint( FATAL, UNSET, "%s:%ld: %s statement not within "
-							"a loop.\n", prg_token[ i ].token == CONT_TOK ?
+							"a loop.\n", prg_token[ i ].token == NEXT_TOK ?
 							"NEXT" : "BREAK",
 							prg_token[ i ].Fname, prg_token[ i ].Lc );
 					THROW( EXCEPTION );
@@ -951,7 +958,7 @@ void exp_test_run( void )
 					cur_prg_token = cur_prg_token->start->end;
 					break;
 
-				case CONT_TOK :
+				case NEXT_TOK :
 					cur_prg_token = cur_prg_token->start;
 					break;
 
@@ -1024,7 +1031,7 @@ int exp_runlex( void )
 		switch( cur_prg_token->token )
 		{
 			case WHILE_TOK : case REPEAT_TOK : case BREAK_TOK :
-			case CONT_TOK : case FOR_TOK : case FOREVER_TOK :
+			case NEXT_TOK : case FOR_TOK : case FOREVER_TOK :
 			case UNTIL_TOK : case IF_TOK : case UNLESS_TOK : case ELSE_TOK :
 				return 0;
 

@@ -172,7 +172,7 @@ FUNC        {IDENT}"#"[0-9]+
 "WHILE"     return WHILE_TOK;
 "UNTIL"     return UNTIL_TOK;
 "BREAK"     return BREAK_TOK;
-"NEXT"      return CONT_TOK;
+"NEXT"      return NEXT_TOK;
 "IF"        return IF_TOK;
 "ELSE"      return ELSE_TOK;
 "UNLESS"    return UNLESS_TOK;

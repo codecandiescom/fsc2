@@ -83,7 +83,7 @@ typedef union {
 #define UNLESS_TOK     2051
 #define WHILE_TOK      2052
 #define UNTIL_TOK      2053
-#define CONT_TOK       2054
+#define NEXT_TOK       2054
 #define BREAK_TOK      2055
 #define REPEAT_TOK     2056
 #define FOR_TOK        2057

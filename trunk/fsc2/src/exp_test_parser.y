@@ -94,7 +94,7 @@ static int exp_testerror( const char *s );
 %token UNLESS_TOK     2051
 %token WHILE_TOK      2052
 %token UNTIL_TOK      2053
-%token CONT_TOK       2054
+%token NEXT_TOK       2054
 %token BREAK_TOK      2055
 %token REPEAT_TOK     2056
 %token FOR_TOK        2057
@@ -150,7 +150,7 @@ fc :     FOR_TOK E_VAR_TOKEN '=' expr ':' expr fi '{'
        | UNLESS_TOK expr '{'
        | ELSE_TOK et
        | BREAK_TOK eol
-       | CONT_TOK eol
+       | NEXT_TOK eol
 ;
 
 fi:      /* empty */
