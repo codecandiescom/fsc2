@@ -31,9 +31,9 @@
 
 
 /* Uncomment the next line for debugging of data sent via GPIB bus */
-
+/*
 #define RS690_GPIB_DEBUG 1
-
+*/
 
 /* Here are all the directly exported functions (i.e. exported either implicit
    as a hook functions or via the Functions data base) */

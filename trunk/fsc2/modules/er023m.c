@@ -853,7 +853,7 @@ Var *lockin_command( Var *v )
 		TRY
 		{
 			cmd = translate_escape_sequences( T_strdup( v->val.sptr ) );
-			er023_command( cmd );
+			er023m_command( cmd );
 			T_free( cmd );
 			TRY_SUCCESS;
 		}

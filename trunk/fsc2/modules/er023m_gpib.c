@@ -644,7 +644,7 @@ unsigned char er023m_st( void )
 bool er023m_command( const char *cmd )
 {
 	if ( gpib_write( er023m.device, cmd, strlen( cmd ) ) == FAILURE )
-		er023m_gpib_failure( );
+		er023m_failure( );
 	return OK;
 }
 

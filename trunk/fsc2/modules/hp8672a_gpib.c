@@ -301,7 +301,7 @@ int hp8672a_set_modulation( void )
 bool hp8672a_command( const char *cmd )
 {
 	if ( gpib_write( hp8672a.device, cmd, strlen( cmd ) ) == FAILURE )
-		hp8672a_gpib_failure( );
+		hp8672a_comm_failure( );
 	return OK;
 }
 
