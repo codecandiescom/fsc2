@@ -81,7 +81,7 @@ enum {
 	FATAL = 0,
 	SEVERE,
 	WARN,
-	NO_ERROR,
+	NO_ERROR
 };
 
 /* Enumeration for command line flags */
@@ -109,21 +109,21 @@ enum {
 
 enum {
 	LOW,
-	HIGH,
+	HIGH
 };
 
 /* Definitions for slopes (e.g. trigger slopes etc.) */
 
 enum {
 	NEGATIVE = 0,
-	POSITIVE,
+	POSITIVE
 };
 
 /* Definition for trigger modes etc. */
 
 enum {
 	INTERNAL = 0,
-	EXTERNAL,
+	EXTERNAL
 };
 
 
@@ -132,14 +132,14 @@ enum {
 enum {
 	X = 0,
 	Y,
-	Z,
+	Z
 };
 
 
 enum {
 	RED = 0,
 	GREEN,
-	BLUE,
+	BLUE
 };
 
 
@@ -152,7 +152,7 @@ enum {
 	VARIABLES_SECTION,
 	PHASES_SECTION,
 	PREPARATIONS_SECTION,
-	EXPERIMENT_SECTION,
+	EXPERIMENT_SECTION
 };
 
 
@@ -175,7 +175,7 @@ enum {
 	PULSER_CHANNEL_OTHER_1,
 	PULSER_CHANNEL_OTHER_2,
 	PULSER_CHANNEL_OTHER_3,
-	PULSER_CHANNEL_OTHER_4,
+	PULSER_CHANNEL_OTHER_4
 };
 
 
@@ -233,7 +233,7 @@ enum {
 	ACQ_PLUS_A,
 	ACQ_MINUS_A,
 	ACQ_PLUS_B,
-	ACQ_MINUS_B,
+	ACQ_MINUS_B
 };
 
 
@@ -244,7 +244,7 @@ enum {
 enum {
 	PHASE_UNKNOWN_PROT,
 	PHASE_FFM_PROT,
-	PHASE_BLN_PROT,
+	PHASE_BLN_PROT
 };
 
 
@@ -268,13 +268,13 @@ typedef struct
 
 enum {
 	READ = 0,
-	WRITE,
+	WRITE
 };
 
 
 enum {
 	PARENT = 0,
-	CHILD  = 1,
+	CHILD  = 1
 };
 
 enum {
@@ -306,7 +306,7 @@ enum {
 enum {
 	LIB_OK          =  0,        // everything fine
 	LIB_ERR_NO_LIB  = -1,        // library not found
-	LIB_ERR_NO_SYM  = -2,        // symbol not found in library
+	LIB_ERR_NO_SYM  = -2         // symbol not found in library
 };
 
 
@@ -321,4 +321,4 @@ enum {
 #define MAX_NUM_OF_WINDOWS   128
 
 
-#endif FSC2_GLOBAL
+#endif /* ! FSC2_GLOBAL */

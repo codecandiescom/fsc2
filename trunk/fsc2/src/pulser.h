@@ -84,7 +84,7 @@ enum {
 	P_LEN     = ( 1 << 2 ),
 	P_DPOS    = ( 1 << 3 ),
 	P_DLEN    = ( 1 << 4 ),
-	P_PHASE   = ( 1 << 5 ),
+	P_PHASE   = ( 1 << 5 )
 };
 
 

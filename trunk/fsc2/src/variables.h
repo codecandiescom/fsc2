@@ -93,7 +93,7 @@ enum {
 	ARR_PTR         = ( 1 << 6 ),      /*   64 */
 	INT_ARR         = ( 1 << 7 ),      /*  128 */
 	FLOAT_ARR       = ( 1 << 8 ),      /*  256 */
-	ARR_REF         = ( 1 << 9 ),      /*  512 */
+	ARR_REF         = ( 1 << 9 )       /*  512 */
 };
 
 
@@ -103,7 +103,7 @@ enum {
 	NEED_SLICE         = ( 1 << 2 ),   /*    4 */
 	NEED_INIT          = ( 1 << 3 ),   /*    8 */
 	NEED_ALLOC         = ( 1 << 4 ),   /*   16 */
-	IS_DYNAMIC         = ( 1 << 5 ),   /*   32 */
+	IS_DYNAMIC         = ( 1 << 5 )    /*   32 */
 };
 
 

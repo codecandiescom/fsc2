@@ -81,7 +81,7 @@ enum {
 	C_ISTATE,
 	C_ISTATE_REPLY,
 	C_ODELETE,
-	C_ODELETE_REPLY,
+	C_ODELETE_REPLY
 };
 
 
@@ -89,7 +89,7 @@ enum {
 	D_CLEAR_CURVE   = -1,
 	D_CHANGE_SCALE  = -2,
 	D_CHANGE_LABEL  = -3,
-	D_CHANGE_POINTS = -4,
+	D_CHANGE_POINTS = -4
 };
 
 
