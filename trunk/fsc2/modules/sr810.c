@@ -185,7 +185,7 @@ int sr810_end_of_exp_hook( void )
 
 void sr810_exit_hook( void )
 {
-	sr810_end_of_exp_hook( );
+//	sr810_end_of_exp_hook( );
 }
 
 
@@ -750,8 +750,18 @@ static bool sr810_init( const char *name )
 		 gpib_write( sr810.device, "OVRM 0", 6 ) == FAILURE )
 		return FAIL;
 	   
+	/* Make sure that lock-ins data buffer is empty by reading it until we
+	   get a timeout or the number of bytes is smaller than the maximum number
+	   to be read - not a nice way to do it but at least it works... */
+
+	do
+		length = 20;
+	while ( gpib_read( sr810.device, buffer, &length ) != FAILURE &&
+			length == 20 );
+
 	/* Ask lock-in to send the error status byte and test if it does */
 
+	length = 20;
 	if ( gpib_write( sr810.device, "ERRS?", 5 ) == FAILURE ||
 		 gpib_read( sr810.device, buffer, &length ) == FAILURE )
 		return FAIL;
