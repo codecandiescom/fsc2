@@ -1321,16 +1321,18 @@ avoid confusion should you accidentally try to redefine it.
 
 @subsection Printing out messages
 @cindex print()
+@findex print()
 
-When writing a module one often has places where it is necessary to
-print out messages to inform the user e.g.@: about invalid arguments
-etc.  For this purpose there's the @code{print()} function in
-@acronym{fsc2} that helps you deal with this and prints messages to the
-lower browser in the main form. Except for the first argument the
-function is identical to the @code{printf()} function in @code{C},
-i.e.@: the second parameter is a format string of exactly the same
-format as @code{printf()} expects, followed by as many values as there
-are conversion specifiers in the format string.
+When writing a module one often has to print out messages to inform the
+user e.g.@: about invalid arguments etc.  For this purpose there's the
+@code{print()} function in @acronym{fsc2} (not to be mistaken for the
+built-in @acronym{EDL} function with the same name) that helps to deal
+with this and prints messages to the lower browser in the main
+form. Except for the first argument the function is identical to the
+@code{printf()} function in @code{C}, i.e.@: the second parameter is a
+format string of exactly the same format as @code{printf()} expects,
+followed by as many values as there are conversion specifiers in the
+format string.
 
 The first parameter is an integer describing the severity of the problem.
 There are four levels:
@@ -1344,7 +1346,7 @@ There are four levels:
       now throw an exception (see next subsection) to make the program stop.
 @end itemize
 
-To the output the @acronym{EDL} file name andline number (if
+To the output the @acronym{EDL} file name and line number (if
 appropriate) as well as the device and function name is prepended.
 
 The full @code{C} declaration of this function is:
