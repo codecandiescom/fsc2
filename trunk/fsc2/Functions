@@ -27,6 +27,7 @@ filename, -1, ALL;              // asks user for a file name
 // Functions exported by the magnet power supply drivers
 
 magnet_setup, 2, ALL;           // set start field and sweep step size
+magnet_fast_init, 0, ALL;       // shortens magnet setup time
 set_field, 1, EXP;              // goto to a field value
 sweep_up, 0, EXP;               // sweep magnet up
 sweep_down, 0, EXP;             // sweep magnet down

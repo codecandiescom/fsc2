@@ -50,8 +50,8 @@ static bool magnet_do( int command );
 #define S_BAND_MIN_FIELD_STEP              1.5e-3
 #define S_BAND_WITH_ER035M_MIN_FIELD       460
 #define S_BAND_WITH_ER035M_MAX_FIELD       2390
-#define S_BAND_WITH_BH15_MIN_FIELD         0          /* ???? !!!!!!!!!!!*/
-#define S_BAND_WITH_BH15_MAX_FIELD         9000       /* ???? !!!!!!!!!!!*/
+#define S_BAND_WITH_BH15_MIN_FIELD         -50
+#define S_BAND_WITH_BH15_MAX_FIELD         23000
 
 
 typedef struct
@@ -77,11 +77,13 @@ typedef struct
     int fd;                 /* file descriptor for serial port */
     struct termios old_tio, /* serial port terminal interface structures */
                    new_tio;
+
+	bool fast_init;         /* if set do a fast initialization */
 } Magnet;
 
 
 static Magnet magnet;
-static char serial_port[ ] = "/dev/ttySx";
+static char serial_port[ ] = "/dev/ttyS*";
 
 enum {
 	   SERIAL_INIT,
@@ -182,18 +184,19 @@ int s_band_init_hook( void )
 
 	if ( need_Serial_Port[ SERIAL_PORT ] )
 	{
-		eprint( FATAL, "s_band: Serial port %d (i.e. /dev/ttyS%d) has already "
-				"been claimed by another device.\n",
+		eprint( FATAL, "s_band: Serial port %d (i.e. /dev/ttyS%d) is already "
+				"in use by another device.\n",
 				SERIAL_PORT, SERIAL_PORT );
 		THROW( EXCEPTION );
 	}
 
 	need_Serial_Port[ SERIAL_PORT ] = SET;
-	serial_port[ 9 ] = SERIAL_PORT + '0';
+	*strrchr( serial_port, '*' ) = ( char ) ( SERIAL_PORT + '0' );
 
 	magnet.is_field = UNSET;
 	magnet.is_field_step = UNSET;
 	magnet.is_opened = UNSET;
+	magnet.fast_init = UNSET;
 
 	return 1;
 }
@@ -205,9 +208,9 @@ int s_band_test_hook( void )
 }
 
 
-/*----------------------------------------------------------------*/
-/* Opens connection to ower supply and calibrates the field sweep */
-/*----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*/
+/* Opens connection to power supply and calibrates the field sweep */
+/*-----------------------------------------------------------------*/
 
 int s_band_exp_hook( void )
 {
@@ -258,6 +261,13 @@ void s_band_exit_hook( void )
 /* Function for registering the start field and the field step size. */
 /*-------------------------------------------------------------------*/
 
+
+Var *magnet_fast_init( Var *v )
+{
+	v = v;
+	magnet.fast_init = SET;
+	return vars_push( INT_VAR, 1 );
+}
 
 Var *magnet_setup( Var *v )
 {
@@ -482,12 +492,13 @@ Var *reset_field( Var *v )
 #define MAGNET_ZERO_STEP  ( 0x800 - 0.5 )  /* data for zero sweep speed */
 #define MAGNET_MAX_STEP   ( 0x7FF + 0.5 )  /* maximum sweep speed setting */
 
-//#define MAGNET_TEST_STEPS 0x10   /* number of steps to do in test */
 
-#define MAGNET_TEST_STEPS 0x10   /* number of steps to do in test */
-#define MAGNET_TEST_WIDTH 0x400  /* sweep speed setting for test */
-#define MAGNET_MAX_TRIES  3      /* number of retries after failure of magnet
-                                    field convergence to target point */
+#define MAGNET_TEST_STEPS      16     /* number of steps to do in test */
+#define MAGNET_FAST_TEST_STEPS 4      /* number of steps to do in test */
+#define MAGNET_TEST_WIDTH      0x400  /* sweep speed setting for test */
+#define MAGNET_MAX_TRIES       3      /* number of retries after failure of 
+										 magnet field convergence to target
+										 point */
 
 
 
@@ -548,6 +559,7 @@ bool magnet_init( void )
 	int i;
 	Var *v;
 	int acc;
+	int test_steps;
 
 
 	/* First step: Initialisation of the serial interface */
@@ -555,9 +567,14 @@ bool magnet_init( void )
 	if ( ! magnet_do( SERIAL_INIT ) )
 		return FAIL;
 
-	/* Next step: We do MAGNET_TEST_STEPS steps with a step width of
-	   MAGNET_TEST_WIDTH. Then we measure the field to determine the
-	   current/field ratio */
+	/* Next step: We do MAGNET_FAST_TEST_STEPS or MAGNET_TEST_STEPS steps
+	   with a step width of MAGNET_TEST_WIDTH. Then we measure the field to
+	   determine the current/field ratio */
+
+	if ( magnet.fast_init )
+		test_steps = MAGNET_FAST_TEST_STEPS;
+	else
+		test_steps = MAGNET_TEST_STEPS;
 
 try_again:
 
@@ -571,7 +588,7 @@ try_again:
 	magnet.step = MAGNET_TEST_WIDTH;
 	magnet_do( SERIAL_VOLTAGE );
 
-	for ( i = 0; i < MAGNET_TEST_STEPS; ++i )
+	for ( i = 0; i < test_steps; ++i )
 	{
 		magnet_do( SERIAL_TRIGGER );
 		vars_pop( func_call( func_get( "field_meter_wait", &acc ) ) );
@@ -586,7 +603,7 @@ try_again:
 	/* calculate the smallest possible step width (in field units) */
 
 	magnet.mini_step = fabs( magnet.meas_field - start_field ) /
-		                  ( double ) ( MAGNET_TEST_WIDTH * MAGNET_TEST_STEPS );
+		                         ( double ) ( MAGNET_TEST_WIDTH * test_steps );
 
 	/* Now lets do the same, just in the opposite direction to increase
 	   accuracy */
@@ -595,7 +612,7 @@ try_again:
 	magnet.step = - MAGNET_TEST_WIDTH;
 	magnet_do( SERIAL_VOLTAGE );
 
-	for ( i = 0; i < MAGNET_TEST_STEPS; ++i )
+	for ( i = 0; i < test_steps; ++i )
 	{
 		magnet_do( SERIAL_TRIGGER );
 		vars_pop( func_call( func_get( "field_meter_wait", &acc ) ) );
@@ -608,7 +625,7 @@ try_again:
 	vars_pop( v );
 
 	magnet.mini_step -= ( magnet.meas_field - start_field ) /
-		                  ( double ) ( MAGNET_TEST_WIDTH * MAGNET_TEST_STEPS );
+		                         ( double ) ( MAGNET_TEST_WIDTH * test_steps );
 	magnet.mini_step *= 0.5;
 
 	/* Check that the sweep speed selector on the magnets front panel is set
