@@ -236,6 +236,11 @@ int s_band_exp_hook( void )
 	}
 
 	magnet.is_opened = SET;
+
+	/* When same EDL file is run again always use fast initialization mode */
+
+	magnet.fast_init = SET;
+
 	return 1;
 }
 
@@ -568,9 +573,11 @@ bool magnet_init( void )
 	int test_steps;
 
 
-	/* First step: Initialisation of the serial interface */
+	/* First step: Initialization of the serial interface - hasn't to be
+	   done if this has already done in a previous exp_hook() call without
+	   an intervening exit_hook() call */
 
-	if ( ! magnet_do( SERIAL_INIT ) )
+	if ( ! magnet.is_opened && ! magnet_do( SERIAL_INIT ) )
 		return FAIL;
 
 	/* Next step: We do MAGNET_FAST_TEST_STEPS or MAGNET_TEST_STEPS steps
