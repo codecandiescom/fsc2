@@ -1224,6 +1224,21 @@ will return an array with 4 elements containing the data
 @end example
 
 
+@anchor{ int_slice }
+@item int_slice()
+@findex int_slice()
+Creates an integer array of the size of the first and only argument
+with every element set to @code{0} that can be assigned to an integer
+array of variable length.
+
+@anchor{ float_slice }
+@item float_slice()
+@findex float_slice()
+Creates an float array of the size of the first and only argument with
+every element set to @code{0.0} that can be assigned to an float array
+of variable length.
+
+
 @anchor{dim}
 @item dim()
 @findex dim()
