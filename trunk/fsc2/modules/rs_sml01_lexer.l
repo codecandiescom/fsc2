@@ -401,10 +401,10 @@ static void rs_sml01_new_table_entry( int type, double val )
 }
 
 
-/*---------------------------------------------------------------*/
-/* Comparison function sorting of the table entries in ascending */
-/* order of frequencies.                                         */
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ * Comparison function sorting of the table entries in ascending
+ * order of frequencies.
+ *---------------------------------------------------------------*/
 
 static int rs_sml01_comp( const void *a, const void *b )
 {
