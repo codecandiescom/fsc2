@@ -692,12 +692,9 @@ use parenthesis -- this won't slow down the program significantly.
 @cindex Arithmetic with arrays
 
 Beside the usual arithmetic with numbers it is also possible to use
-arithmetic with (one-dimensional) arrays. Also all built-in functions
-(as far as this makes any sense) can be applied to one-dimensional
-arrays.
-
-As long as the sizes of two arrays are identical they can be added or
-subtracted. If the arrays @code{a} and @code{b} are defined as
+arithmetic with (one-dimensional) arrays. As long as the sizes of two
+arrays are identical they can be added or subtracted. If the arrays
+@code{a} and @code{b} are defined as
 @example
   a[ 3 ] = @{ 0.5,  1.0,  2.0 @};
   b[ 3 ] = @{ 1.0, -2.0, -3.0 @};
@@ -713,7 +710,7 @@ resulting in
 Of course, you can also invert the sign of all the elements of an array
 by simply prepending a minus sign
 @example
-  - a        ->   @{ -0.5, -1.0, -2.0 @};
+  -a         ->   @{ -0.5, -1.0, -2.0 @};
 @end example
 
 But it's also possible to add or subtract a number from each element of
@@ -725,9 +722,10 @@ an array:
 
 Also multiplication and division is possible with arrays. Again, this
 operations are implemented in a element-by-element way, i.e.@:
-multiplying to arrays is not a dot product but results again in an
-array. The same holds for the division. With the arrays @code{a} and
-@code{b} defined above the results are:
+multiplying two arrays is not a dot product but results again in an
+array of the same size as both the original arrays. The same holds for
+the division. With the arrays @code{a} and @code{b} defined above the
+results are:
 @example
   a * b      ->   @{ 0.5, -2.0, -6.0 @}
   a / b      ->   @{ 0.5, -0.5, -0.666667 @}
@@ -761,12 +759,12 @@ arrays and simple numbers, also resulting in arrays:
   2 ^ a      ->   @{ 1.414215, 2.0, 4.0 @}
 @end example
 
-All the built-in arithmetic functions can be applied to arrays. In every
-case the function is applied to each element of the array, thus the
-result is another array with its elements being the results of applying
-the function to each of the input array elements. For example, again
-using the array @code{a} defined above, applying the @code{sqrt()}
-function results in:
+Also the built-in arithmetic functions can (as far as this makes any
+sense) be applied to arrays. In every case the function is applied to
+each element of the array, thus the result is another array with its
+elements being the results of applying the function to each of the input
+array elements. For example, again using the array @code{a} defined
+above, applying the @code{sqrt()} function results in:
 @example
   sqrt( a )  ->   @{ 0.7071068, 1.0, 1.1414215 @}
 @end example
