@@ -535,9 +535,7 @@ void load_file( FL_OBJECT *a, long reload )
 	/* Set a new window title */
 
 	T_free( title );
-	title = get_string( 6 + strlen( in_file ) );
-	strcpy( title, "fsc2: " );
-	strcat( title, in_file );
+	title = get_init_string( "fsc2: %s", in_file );
 	fl_set_form_title( main_form->fsc2, title );
 
 	/* Read in and display the new file */
