@@ -44,14 +44,17 @@ static DPoint *eval_display_args( Var *v, int *npoints );
 static int get_save_file( Var **v );
 static bool print_array( Var *v, long cur_dim, long *start, int fid );
 static bool print_slice( Var *v, int fid );
+static void format_check( Var *v );
+static long do_printf( int file_num, Var *v );
 static bool print_browser( int browser, int fid, const char* comment );
-static void T_fprintf( int file_num, const char *fmt, ... );
+static int T_fprintf( int file_num, const char *fmt, ... );
 
 extern void child_sig_handler( int signo );
 
 extern sigjmp_buf alrm_env;
 extern volatile sig_atomic_t can_jmp_alrm;
 extern volatile bool is_alrm;
+
 
 /*------------------------------------------------------------------------
    Prints variable number of arguments using a format string supplied as
@@ -2355,6 +2358,925 @@ Var *f_fsave( Var *v )
 
 
 /*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
+
+Var *f_printf( Var *v )
+{
+	int file_num;
+
+
+	/* Determine the file identifier */
+
+	if ( ( file_num = get_save_file( &v ) ) == -1 )
+		return vars_push( INT_VAR, 0 );
+
+	if ( v == NULL )
+	{
+		eprint( WARN, SET, "Call of %s() without data.\n", Cur_Func );
+		return vars_push( INT_VAR, 0 );
+	}
+
+	if ( v->type != STR_VAR )
+	{
+		eprint( FATAL, SET, "Missing format string in call of %s()\n",
+				Cur_Func );
+		THROW( EXCEPTION );
+	}
+
+	/* Check that format string and arguments are ok */
+
+	format_check( v );
+
+	return vars_push( INT_VAR, do_printf( file_num, v ) );
+}
+
+
+/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
+
+static void format_check( Var *v )
+{
+	const char *sptr = v->val.sptr;
+	Var *vptr = v->next;
+
+
+	/* Loop over the format string to figure out if there are enough arguments
+	   for the format string and that the argument types are the ones expected
+	   by the conversion modifiers. */
+
+	while ( 1 )
+	{
+		for ( ; *sptr != '\0' && *sptr != '%'; sptr++ )
+			;
+
+		if ( *sptr++ == '\0' )
+			break;
+
+		if ( *sptr == '\0' )
+		{
+			eprint( FATAL, SET, "'%%' found at end of format string in call "
+					"of %s().\n", Cur_Func );
+			THROW( EXCEPTION );
+		}
+
+		if ( *sptr == '%' )
+			continue;
+
+		if ( *sptr == '-' || *sptr == '+' || *sptr == ' ' )
+			sptr++;
+
+		if ( *sptr == 'o' && *( sptr + 1 ) != '\0' && *( sptr + 1 ) == 'o' )
+			sptr++;
+
+		if ( *sptr == '\0' )
+		{
+			eprint( FATAL, SET, "End of format string within conversion "
+					"specifier in call of %s().\n", Cur_Func );
+			THROW( EXCEPTION );
+		}
+
+		if ( *sptr == '*' )
+		{
+			if ( vptr->type != INT_VAR )
+			{
+				eprint( FATAL, SET, "Non-integer variable used as field "
+						"length in format string in %s().\n", Cur_Func );
+				THROW( EXCEPTION );
+			}
+
+			sptr++;
+			vptr = vptr->next;
+		}
+		else if ( isdigit( *sptr ) )
+			while ( isdigit( *++sptr ) )
+				;
+
+		if ( *sptr == '\0' )
+		{
+			eprint( FATAL, SET, "End of format string within conversion "
+					"specifier in call of %s().\n", Cur_Func );
+			THROW( EXCEPTION );
+		}
+
+		if ( *sptr == '.' )
+		{
+			sptr++;
+
+			if ( *sptr == '*' )
+			{
+				if ( vptr == NULL )
+				{
+					eprint( FATAL, SET, "Not enough arguments for format "
+							"string in %s().\n", Cur_Func );
+					THROW( EXCEPTION );
+				}
+
+				if ( vptr->type != INT_VAR )
+				{
+					eprint( FATAL, SET, "Non-integer variable used as field "
+							"length in format string in %s().\n", Cur_Func );
+					THROW( EXCEPTION );
+				}
+
+				sptr++;
+				vptr = vptr->next;
+			}
+			else if ( isdigit( *sptr ) )
+				while ( isdigit( *++sptr ) )
+					;
+			if ( *sptr == '\0' )
+			{
+				eprint( FATAL, SET, "End of format string within conversion "
+						"specifier in call of %s().\n", Cur_Func );
+				THROW( EXCEPTION );
+			}
+		}
+
+		if ( *sptr == 'h' || *sptr == 'l' || *sptr == 'L' )
+		{
+			if ( *sptr != 'l' )
+				eprint( SEVERE, SET, "To use length modifiers 'h' and 'L' is "
+						"dangerous in a format string in %s().\n", Cur_Func );
+
+			sptr++;
+			if ( *sptr == '\0' )
+			{
+				eprint( FATAL, SET, "End of format string within conversion "
+						"specifier in call of %s().\n", Cur_Func );
+				THROW( EXCEPTION );
+			}
+		}
+
+		if ( *sptr == 'c' )
+		{
+			eprint( SEVERE, SET, "To use char specifier 'c' is completele"
+					"useless in a format string in %s().\n", Cur_Func );
+
+			if ( vptr == NULL )
+			{
+				eprint( FATAL, SET, "Not enough arguments for format "
+						"string in %s().\n", Cur_Func );
+				THROW( EXCEPTION );
+			}
+
+			if ( vptr->type != STR_VAR )
+			{
+				eprint( FATAL, SET, "Non-string variable found for character "
+						"type conversion specifier in format string in "
+						"%s().\n", Cur_Func );
+				THROW( EXCEPTION );
+			}
+				
+			sptr++;
+			vptr = vptr->next;
+			continue;
+		}
+
+		if ( *sptr == 's' )
+		{
+			if ( vptr == NULL )
+			{
+				eprint( FATAL, SET, "Not enough arguments for format "
+						"string in %s().\n", Cur_Func );
+				THROW( EXCEPTION );
+			}
+
+			if ( vptr->type != STR_VAR )
+			{
+				eprint( FATAL, SET, "Non-string variable found for string "
+						"type conversion specifier in format string in "
+						"%s().\n", Cur_Func );
+				THROW( EXCEPTION );
+			}
+				
+			sptr++;
+			vptr = vptr->next;
+			continue;
+		}
+
+		if ( *sptr == 'd' || *sptr == 'i' || *sptr == 'o' ||
+			 *sptr == 'x' || *sptr == 'X' || *sptr == 'u' )
+		{
+			if ( *( sptr - 1 ) != 'l' )
+				eprint( SEVERE, SET, "All integers are longs, but no 'l' "
+						"modifier in format string in %s().\n", Cur_Func );
+
+			if ( *sptr == 'o' || *sptr == 'x' ||
+				 *sptr == 'X' || *sptr == 'u' )
+				eprint( SEVERE, SET, "All integers are signed, but format "
+						"specifier for unsigned quantity in format string "
+						"in %s().\n", Cur_Func );
+
+			if ( vptr == NULL )
+			{
+				eprint( FATAL, SET, "Not enough arguments for format "
+						"string in %s().\n", Cur_Func );
+				THROW( EXCEPTION );
+			}
+
+			if ( vptr->type != INT_VAR )
+			{
+				eprint( FATAL, SET, "Non-integer variable found for integer "
+						"type conversion specifier in format string in "
+						"%s().\n", Cur_Func );
+				THROW( EXCEPTION );
+			}
+				
+			sptr++;
+			vptr = vptr->next;
+			continue;
+		}
+
+		if ( *sptr == 'f' || *sptr == 'e' || *sptr == 'g' ||
+			 *sptr == 'E' || *sptr == 'G' )
+		{
+			if ( vptr == NULL )
+			{
+				eprint( FATAL, SET, "Not enough arguments for format "
+						"string in %s().\n", Cur_Func );
+				THROW( EXCEPTION );
+			}
+
+			if ( vptr->type != FLOAT_VAR )
+			{
+				eprint( FATAL, SET, "Non-floating point variable found for "
+						"float type conversion specifier in format string "
+						"in %s().\n", Cur_Func );
+				THROW( EXCEPTION );
+			}
+				
+			sptr++;
+			vptr = vptr->next;
+			continue;
+		}
+
+		if ( *sptr == 'p' )
+		{
+			if ( vptr == NULL )
+			{
+				eprint( FATAL, SET, "Not enough arguments for format "
+						"string in %s().\n", Cur_Func );
+				THROW( EXCEPTION );
+			}
+
+			eprint( SEVERE, SET, "Using 'p' format specifier is rather "
+					"useless in format string in %s().\n", Cur_Func );
+
+			sptr++;
+			vptr = vptr->next;
+			continue;
+		}
+
+		if ( *sptr == 'n' )
+		{
+			sptr++;
+			continue;
+		}
+
+		eprint( FATAL, SET, "Unknown conversion specifier '%c' found in "
+				"format string in %s().\n", *sptr, Cur_Func );
+		THROW( EXCEPTION );
+	}
+
+	if ( vptr != NULL )
+	{
+		eprint( SEVERE, SET, "More arguments than conversion specifiers found "
+				"in format string in %&s().\n", Cur_Func );
+		while ( ( vptr = vars_pop( vptr ) ) != NULL )
+			;
+	}
+}
+
+
+/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
+
+static long do_printf( int file_num, Var *v )
+{
+	static char *fmt_start,
+		        *fmt_end,
+		        *sptr;
+	static Var *cv;
+	static int count;
+	char store;
+	int need_vars;
+	int need_type;
+	int esc_len;
+
+	
+	sptr = fmt_start = fmt_end = T_strdup( v->val.sptr );
+	cv = v->next;
+	count = 0;
+
+	TRY
+	{
+
+		/* Print everything up to the first conversion specifier */
+
+		while ( *fmt_end != '\0' )
+		{
+			if ( *fmt_end == '%' )
+			{
+				if ( *( fmt_end + 1 ) == '%' )
+				{
+					fmt_end += 2;
+					continue;
+				}
+				else
+					break;
+			}
+			else if ( *fmt_end == '\\' )
+			{
+				switch ( *( fmt_end + 1 ) )
+				{
+					case 'a' :
+						*fmt_end = '\a';
+						memmove( fmt_end + 1, fmt_end + 2,
+								 strlen( fmt_end + 1 ) );
+						break;
+
+					case 'b' :
+						*fmt_end = '\b';
+						memmove( fmt_end + 1, fmt_end + 2,
+								 strlen( fmt_end + 1) );
+						break;
+
+					case 'f' :
+						*fmt_end = '\f';
+						memmove( fmt_end + 1, fmt_end + 2,
+								 strlen( fmt_end + 1 ) );
+						break;
+
+					case 'n' :
+						*fmt_end = '\n';
+						memmove( fmt_end + 1, fmt_end + 2,
+								 strlen( fmt_end + 1 ) );
+						break;
+
+					case 'r' :
+						*fmt_end = '\r';
+						memmove( fmt_end + 1, fmt_end + 2,
+								 strlen( fmt_end + 1 ) );
+						break;
+
+					case 't' :
+						*fmt_end = '\t';
+						memmove( fmt_end + 1, fmt_end + 2,
+								 strlen( fmt_end + 1 ) );
+						break;
+
+					case 'v' :
+						*fmt_end = '\v';
+						memmove( fmt_end + 1, fmt_end + 2,
+								 strlen( fmt_end + 1 ) );
+						break;
+
+					case '\\' :
+						*fmt_end = '\\';
+						memmove( fmt_end + 1, fmt_end + 2,
+								 strlen( fmt_end + 1 ) );
+						break;
+
+					case '\?' :
+						*fmt_end = '\?';
+						memmove( fmt_end + 1, fmt_end + 2,
+								 strlen( fmt_end + 1 ) );
+						break;
+
+					case '\'' :
+						*fmt_end = '\'';
+						memmove( fmt_end + 1, fmt_end + 2,
+								 strlen( fmt_end + 1 ) );
+						break;
+
+					case '\"' :
+						*fmt_end = '\"';
+						memmove( fmt_end + 1, fmt_end + 2,
+								 strlen( fmt_end + 1 ) );
+						break;
+
+					case 'x' :
+						if ( ! isdigit( *( fmt_end + 2 ) ) &&
+							 toupper( *( fmt_end + 2 ) ) < 'A' &&
+							 toupper( *( fmt_end + 2 ) ) > 'F' )
+						{
+							eprint( FATAL, SET, "'\\x' escape sequence "
+									"without hex number in format string in "
+									"%s().\n", Cur_Func );
+							THROW( EXCEPTION );
+						}
+						esc_len = 1;
+						*fmt_end = isdigit( *fmt_end + 2 ) ?
+							       *fmt_end - '0' : *fmt_end - 'A' + 10;
+
+						if ( isdigit( *( fmt_end + 3 ) ) ||
+							 toupper( *( fmt_end + 3 ) ) >= 'A' ||
+							 toupper( *( fmt_end + 3 ) ) <= 'F' )
+						{
+							esc_len++;
+						    *fmt_end = *fmt_end * 16 + 
+                                       + isdigit( *fmt_end + 2 ) ?
+							             *fmt_end - '0' : *fmt_end - 'A' + 10;
+						}
+
+						if ( isdigit( *( fmt_end + 4 ) ) ||
+							 toupper( *( fmt_end + 4 ) ) >= 'A' ||
+							 toupper( *( fmt_end + 4 ) ) <= 'F' )
+						{
+							eprint( FATAL, SET, "'\\x' escape sequence out of "
+									"range in format string in %s().\n",
+									Cur_Func );
+							THROW( EXCEPTION );
+						}
+
+						memmove( fmt_end + 1, fmt_end + 2 + esc_len,
+								 strlen( fmt_end + 1 + esc_len ) );
+						break;
+
+					default :
+						if ( *( fmt_end + 1 ) < '0' || *( fmt_end + 1 ) > '7' )
+						{
+							eprint( FATAL, SET, "Invalid escape sequence in "
+									"format string in %s().\n", Cur_Func );
+							THROW( EXCEPTION );
+						}
+
+						*fmt_end = *( fmt_end + 1 ) - '0';
+						esc_len = 1;
+
+						if ( *( fmt_end + 2 ) >= '0' &&
+							 *( fmt_end + 2 ) <= '0' )
+						{
+							*fmt_end = *fmt_end * 8 + *( fmt_end + 1 ) - '0';
+							esc_len = 2;
+						}
+
+						if ( *( fmt_end + 3 ) >= '0' &&
+							 *( fmt_end + 3 ) <= '7' )
+						{
+							if ( *( fmt_end + 3 ) > '3' )
+							{
+								eprint( FATAL, SET, "'Escape sequence out of "
+										"range in format string in %s().\n",
+										Cur_Func );
+							}
+
+							*fmt_end = *fmt_end * 8 + *( fmt_end + 1 ) - '0';
+							esc_len = 3;
+						}
+
+						memmove( fmt_end + 1, fmt_end + 1 + esc_len,
+								 strlen( fmt_end + esc_len ) );
+						break;
+				}
+			}
+
+			fmt_end++;
+		}
+
+		store = *fmt_end;
+		*fmt_end = '\0';
+
+		if ( fmt_start != fmt_end )
+			count += T_fprintf( file_num, fmt_start );
+
+		if ( ( *fmt_end = store ) == '\0' )              /* already at end ? */
+		{
+			TRY_SUCCESS;
+			T_free( sptr );
+			return ( long ) count;
+		}
+
+		fmt_start = fmt_end++;
+
+		while ( 1 )
+		{
+			need_vars = 0;
+			need_type = -1;
+
+			if ( *fmt_end == '-' || *fmt_end == '+' || *fmt_end == ' ' )
+				fmt_end++;
+
+			if ( *fmt_end == 'o' && *( fmt_end + 1 ) != '\0' &&
+				 *( fmt_end + 1 ) == 'o' )
+				fmt_end++;
+
+			if ( *fmt_end == '*' )
+			{
+				need_vars++;
+				fmt_end++;
+			}
+			else if ( isdigit( *fmt_end ) )
+				while ( isdigit( *++fmt_end ) )
+					;
+
+			if ( *fmt_end == '.' )
+			{
+				if ( *++fmt_end == '*' )
+				{
+					need_vars++;
+					fmt_end++;
+				}
+				else if ( isdigit( *fmt_end ) )
+					while ( isdigit( *++fmt_end ) )
+						;
+			}
+
+			if ( *fmt_end == 'h' || *fmt_end == 'l' || *fmt_end == 'L' )
+				fmt_end++;
+
+			if ( *fmt_end == 's' )
+			{
+				need_type = 0;       /* string */
+				need_vars++;
+			}
+
+			if ( *fmt_end == 'c' )
+			{
+				need_type = 1;       /* char */
+				need_vars++;
+			}
+
+			if ( *fmt_end == 'd' || *fmt_end == 'i' || *fmt_end == 'o' ||
+				 *fmt_end == 'x' || *fmt_end == 'X' || *fmt_end == 'u' )
+			{
+				need_type = 2;       /* integer */
+				need_vars++;
+			}
+
+			if ( *fmt_end == 'f' || *fmt_end == 'e' || *fmt_end == 'g' ||
+				 *fmt_end == 'E' || *fmt_end == 'G' )
+			{
+				need_type = 3;       /* float */
+				need_vars++;
+			}
+
+			if ( *fmt_end == 'p' )
+			{
+				need_type = 4;       /* pointer */
+				need_vars++;
+			}
+
+			if ( *fmt_end == 'n' )
+			{
+				*fmt_end = 'd';
+				need_type = 5;       /* count */
+			}
+
+			while ( *fmt_end != '\0' )
+			{
+				fprintf( stderr, "*->%s\n", fmt_end );
+
+				if ( *fmt_end == '%' )
+				{
+					if ( *( fmt_end + 1 ) == '%' )
+					{
+						fmt_end += 2;
+						continue;
+					}
+					else
+						break;
+				}
+				else if ( *fmt_end == '\\' )
+				{
+					fprintf( stderr, "->%s\n", fmt_end );
+
+					switch ( *( fmt_end + 1 ) )
+					{
+						case 'a' :
+							*fmt_end = '\a';
+							memmove( fmt_end + 1, fmt_end + 2,
+									 strlen( fmt_end + 1 ) );
+							break;
+
+						case 'b' :
+							*fmt_end = '\b';
+							memmove( fmt_end + 1, fmt_end + 2,
+									 strlen( fmt_end + 1 ) );
+							break;
+
+						case 'f' :
+							*fmt_end = '\f';
+							memmove( fmt_end + 1, fmt_end + 2,
+									 strlen( fmt_end + 1 ) );
+							break;
+
+						case 'n' :
+							*fmt_end = '\n';
+							memmove( fmt_end + 1, fmt_end + 2,
+									 strlen( fmt_end + 1 ) );
+							break;
+
+						case 'r' :
+							*fmt_end = '\r';
+							memmove( fmt_end + 1, fmt_end + 2,
+									 strlen( fmt_end + 1) );
+							break;
+
+						case 't' :
+							*fmt_end = '\t';
+							memmove( fmt_end + 1, fmt_end + 2,
+									 strlen( fmt_end + 1 ) );
+							break;
+
+						case 'v' :
+							*fmt_end = '\v';
+							memmove( fmt_end + 1, fmt_end + 2,
+									 strlen( fmt_end + 1 ) );
+							break;
+
+						case '\\' :
+							*fmt_end = '\\';
+							memmove( fmt_end + 1, fmt_end + 2,
+									 strlen( fmt_end + 1 ) );
+							break;
+
+						case '\?' :
+							*fmt_end = '\?';
+							memmove( fmt_end + 1, fmt_end + 2,
+									 strlen( fmt_end + 1 ) );
+							break;
+
+						case '\'' :
+							*fmt_end = '\'';
+							memmove( fmt_end + 1, fmt_end + 2,
+									 strlen( fmt_end + 1) );
+							break;
+
+						case '\"' :
+							*fmt_end = '\"';
+							memmove( fmt_end + 1, fmt_end + 2,
+									 strlen( fmt_end + 1 ) );
+							break;
+
+						case 'x' :
+							if ( ! isdigit( *( fmt_end + 2 ) ) &&
+								 toupper( *( fmt_end + 2 ) ) < 'A' &&
+								 toupper( *( fmt_end + 2 ) ) > 'F' )
+							{
+								eprint( FATAL, SET, "'\\x' escape sequence "
+										"without hex number in format string "
+										"in %s().\n", Cur_Func );
+								THROW( EXCEPTION );
+							}
+							esc_len = 1;
+							*fmt_end = isdigit( *fmt_end + 2 ) ?
+								       *fmt_end - '0' : *fmt_end - 'A' + 10;
+
+							if ( isdigit( *( fmt_end + 3 ) ) ||
+								 toupper( *( fmt_end + 3 ) ) >= 'A' ||
+								 toupper( *( fmt_end + 3 ) ) <= 'F' )
+							{
+								esc_len++;
+								*fmt_end = *fmt_end * 16 + 
+									      + isdigit( *fmt_end + 2 ) ?
+							              *fmt_end - '0' : *fmt_end - 'A' + 10;
+							}
+
+							if ( isdigit( *( fmt_end + 4 ) ) ||
+								 toupper( *( fmt_end + 4 ) ) >= 'A' ||
+								 toupper( *( fmt_end + 4 ) ) <= 'F' )
+							{
+								eprint( FATAL, SET, "'\\x' escape sequence "
+										"out of range in format string in "
+										"%s().\n", Cur_Func );
+								THROW( EXCEPTION );
+							}
+
+							memmove( fmt_end + 1, fmt_end + 2 + esc_len,
+									 strlen( fmt_end + 1 + esc_len ) );
+							break;
+
+						default :
+							if ( *( fmt_end + 1 ) < '0' ||
+								 *( fmt_end + 1 ) > '7' )
+							{
+								eprint( FATAL, SET, "Invalid escape sequence "
+										"in format string in %s().\n",
+										Cur_Func );
+								THROW( EXCEPTION );
+							}
+
+							*fmt_end = *( fmt_end + 1 ) - '0';
+							esc_len = 1;
+
+							if ( *( fmt_end + 2 ) >= '0' &&
+								 *( fmt_end + 2 ) <= '0' )
+							{
+								*fmt_end = *fmt_end * 8
+									       + *( fmt_end + 1 ) - '0';
+								esc_len = 2;
+							}
+
+							if ( *( fmt_end + 3 ) >= '0' &&
+								 *( fmt_end + 3 ) <= '7' )
+							{
+								if ( *( fmt_end + 3 ) > '3' )
+								{
+									eprint( FATAL, SET, "'Escape sequence out "
+											"of range in format string in "
+											"%s().\n", Cur_Func );
+								}
+
+								*fmt_end = *fmt_end * 8
+                                           + *( fmt_end + 1 ) - '0';
+								esc_len = 3;
+							}
+
+							memmove( fmt_end + 1, fmt_end + 1 + esc_len,
+									 strlen( fmt_end + esc_len ) );
+							break;
+					}
+				}
+
+				fmt_end++;
+			}
+
+			store = *fmt_end;
+			*fmt_end = '\0';
+
+			fprintf( stderr, "%s\n", fmt_start );
+
+			switch ( need_vars )
+			{
+				case 0 :
+					fsc2_assert( need_type == 5 );          /* must be count */
+					fprintf( stderr, "count\n" );
+					count += T_fprintf( file_num, fmt_start, count );
+					break;
+
+				case 1 :
+					switch ( need_type )
+					{
+						case 0 :
+							fprintf( stderr, "string\n" );
+							count += T_fprintf( file_num, fmt_start,
+												cv->val.sptr );
+							break;
+
+						case 1 :
+							fprintf( stderr, "char\n" );
+							count += T_fprintf( file_num, fmt_start,
+												cv->val.sptr[ 0 ] );
+							break;
+
+						case 2 :
+							fprintf( stderr, "int\n" );
+							count += T_fprintf( file_num, fmt_start,
+												cv->val.lval );
+							break;
+
+						case 3 :
+							fprintf( stderr, "double\n" );
+							count += T_fprintf( file_num, fmt_start,
+												cv->val.dval );
+							break;
+
+						case 4 :
+							fprintf( stderr, "pointer\n" );
+							count += T_fprintf( file_num, fmt_start,
+												( void * ) cv );
+							break;
+
+						case 5 :
+							fprintf( stderr, "num count\n" );
+							count += T_fprintf( file_num, fmt_start,
+												( int )cv->val.lval, count );
+							break;
+
+						default :
+							fsc2_assert( 1 == 0 );
+					}
+
+					cv = cv->next;
+					break;
+
+				case 2 :
+					switch ( need_type )
+					{
+						case 0 :
+							fprintf( stderr, "num string\n" );
+							count += T_fprintf( file_num, fmt_start,
+												( int ) cv->val.lval,
+												cv->next->val.sptr );
+							break;
+
+						case 1 :
+							fprintf( stderr, "num char\n" );
+							count += T_fprintf( file_num, fmt_start,
+												( int ) cv->val.lval,
+												cv->next->val.sptr[ 0 ] );
+							break;
+
+						case 2 :
+							fprintf( stderr, "num int\n" );
+							count += T_fprintf( file_num, fmt_start,
+												( int ) cv->val.lval,
+												cv->next->val.lval );
+							break;
+
+						case 3 :
+							fprintf( stderr, "num double\n" );
+							count += T_fprintf( file_num, fmt_start,
+												( int ) cv->val.lval,
+												cv->next->val.dval );
+							break;
+
+						case 4 :
+							fprintf( stderr, "num pointer\n" );
+							count += T_fprintf( file_num, fmt_start,
+												( int ) cv->val.lval,
+												( void * ) cv->next );
+							break;
+
+						case 5 :
+							fprintf( stderr, "num num count\n" );
+							count += T_fprintf( file_num, fmt_start,
+												( int ) cv->val.lval,
+												( int ) cv->next->val.lval,
+												count );
+							break;
+
+						default :
+							fsc2_assert( 1 == 0 );
+					}
+
+					cv = cv->next->next;
+					break;
+
+				case 3 :
+					switch ( need_type )
+					{
+						case 0 :
+							fprintf( stderr, "num num string\n" );
+							count += T_fprintf( file_num, fmt_start,
+												( int ) cv->val.lval,
+												( int ) cv->next->val.lval,
+												cv->next->next->val.sptr );
+							break;
+
+						case 1 :
+							fprintf( stderr, "num num char\n" );
+							count += T_fprintf( file_num, fmt_start,
+											   ( int ) cv->val.lval,
+											   ( int ) cv->next->val.lval,
+											   cv->next->next->val.sptr[ 0 ] );
+							break;
+
+						case 2 :
+							fprintf( stderr, "num num int\n" );
+							count += T_fprintf( file_num, fmt_start,
+												( int ) cv->val.lval,
+												( int ) cv->next->val.lval,
+												cv->next->next->val.lval );
+							break;
+
+						case 3 :
+							fprintf( stderr, "num num double\n" );
+							count += T_fprintf( file_num, fmt_start,
+												( int ) cv->val.lval,
+												( int ) cv->next->val.lval,
+												cv->next->next->val.dval );
+							break;
+
+						case 4 :
+							fprintf( stderr, "num num pointer\n" );
+							count += T_fprintf( file_num, fmt_start,
+												( int ) cv->val.lval,
+												( int ) cv->next->val.lval,
+												( void * ) cv->next->next );
+							break;
+
+						default :
+							fsc2_assert( 1 == 0 );
+					}
+
+					cv = cv->next->next->next;
+					break;
+
+				default :
+					fsc2_assert( 1 == 0 );
+			}
+
+			if ( ( *fmt_end = store ) == '\0' )             /* end reached ? */
+				break;
+			fmt_start = fmt_end++;
+		}
+
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+	{
+		T_free( sptr );
+		PASSTHROU( );
+	}
+
+	T_free( sptr );
+	return ( long ) count;
+}
+
+
+/*-------------------------------------------------------------------------*/
 /* Saves the EDL program to a file. If `get_file()' hasn't been called yet */
 /* it will be called now - in this case the file opened this way is the    */
 /* only file to be used and no file identifier is allowed as first argu-   */
@@ -2559,11 +3481,11 @@ Var *f_save_c( Var *v )
 /*---------------------------------------------------------------------*/
 /*---------------------------------------------------------------------*/
 
-static void T_fprintf( int file_num, const char *fmt, ... )
+static int T_fprintf( int file_num, const char *fmt, ... )
 {
 	int n;                      /* number of bytes we need to write */
 	static int size;            /* guess for number of characters needed */
-	char *p;
+	static char *p;
 	va_list ap;
 	char *new_name;
 	FILE *new_fp;
@@ -2571,20 +3493,24 @@ static void T_fprintf( int file_num, const char *fmt, ... )
 	char *buffer[ 1024 ];
 	int rw;
 	char *mess;
+	int count;
 
 
 	/* If the file has been closed because of insufficient place and no
        replacement file has been given just don't print */
 
-	if ( file_num < 0 || file_num >= File_List_Len )
+	if ( ! TEST_RUN )
 	{
-		eprint( FATAL, SET, "Invalid file handle used in call of "
-				"function %s().\n", Cur_Func );
-		THROW( EXCEPTION );
-	}
+		if ( file_num < 0 || file_num >= File_List_Len )
+		{
+			eprint( FATAL, SET, "Invalid file handle used in call of "
+					"function %s().\n", Cur_Func );
+			THROW( EXCEPTION );
+		}
 
-	if ( File_List[ file_num ].fp == NULL )
-		return;
+		if ( File_List[ file_num ].fp == NULL )
+			return 0;
+	}
 
 	size = 1024;
 
@@ -2621,15 +3547,30 @@ static void T_fprintf( int file_num, const char *fmt, ... )
             }
         }
 
-		p = T_realloc( p, size );
+		TRY
+		{
+			p = T_realloc( p, size );
+			TRY_SUCCESS;
+		}
+		OTHERWISE
+		{
+			T_free( p );
+			PASSTHROU( );
+		}
     }
+
+	if ( TEST_RUN )
+	{
+		T_free( p );
+		return n;
+	}
 
     /* Now we try to write the string to the file */
 
-    if ( fprintf( File_List[ file_num ].fp, "%s", p ) == n )
+    if ( ( count = fprintf( File_List[ file_num ].fp, "%s", p ) ) == n )
     {
         T_free( p );
-        return;
+        return n;
 	}
 
     /* Couldn't write as many bytes as needed - disk seems to be full */
@@ -2668,7 +3609,7 @@ get_repl_retry:
 		File_List[ file_num ].name = NULL;
 		fclose( File_List[ file_num ].fp );
 		File_List[ file_num ].fp = NULL;
-		return;
+		return count;
 	}
 
 	stat( File_List[ file_num ].name, &old_stat );
@@ -2721,7 +3662,7 @@ get_repl_retry:
 	if ( new_fp != NULL )
 		setbuf( new_fp, NULL );
 
-	/* Check if the new and the old file are identical. If they are we simpy
+	/* Check if the new and the old file are identical. If they are we simply
 	   continue to write to the old file, otherwise we first have to copy
 	   everything from the old to the new file and get rid of it */
 
@@ -2770,7 +3711,7 @@ get_repl_retry:
 	if ( fprintf( File_List[ file_num ].fp, "%s", p ) == n )
 	{
 		T_free( p );
-		return;
+		return n;
 	}
 
 	/* Ooops, also failed to write to new file */
