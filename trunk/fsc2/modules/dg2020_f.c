@@ -153,7 +153,7 @@ static bool set_timebase( double timebase )
 	{
 		char *min = get_string_copy( ptime( ( double ) MIN_TIMEBASE ) );
 		char *max = get_string_copy( ptime( ( double ) MAX_TIMEBASE ) );
-		eprint( FATAL, "%s:%ld: DG2020: Invalid time base %s, valid range  "
+		eprint( FATAL, "%s:%ld: DG2020: Invalid time base of %s, valid range "
 				"is %s to %s.\n", Fname, Lc, ptime( timebase ), min, max );
 		T_free( min );
 		T_free( max );

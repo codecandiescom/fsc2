@@ -338,15 +338,6 @@ void p_set_timebase( Var *v )
 	timebase = ( v->type == INT_VAR ) ? ( double ) v->val.lval : v->val.dval;
 	vars_pop( v );
 
-	/* check that the timebase has a reasonable value */
-
-	if ( timebase < 9.9e-10 )
-	{
-		eprint( FATAL, "%s:%ld: Invalid timebase: %g s\n", Fname, Lc,
-				timebase );
-		THROW( EXCEPTION );
-	}
-
 	timebase = is_mult_ns( timebase, "Time base"  );
 
 	/* finally call the function (if it exists...) */

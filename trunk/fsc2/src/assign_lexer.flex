@@ -52,7 +52,7 @@ PHAS        ^[ \t]*PHA(SE)?S?:
 PREP        ^[ \t]*PREP(ARATION)?S?:
 EXP         ^[ \t]*EXP(ERIMENT)?:
 
-P           P(ULSE)?_?[0-9]+
+P           P(ULSE)?_?{INT}
 
 F           F(UNC(TION)?)?
 S           S(TART)?
@@ -66,9 +66,9 @@ ESTR        \x5.*\x3\n.*\n
 
 IDENT       [A-Za-z]+[A-Za-z0-9_]*
 
-INT         [+-]?[0-9]+
-EXPO        [EDed]{INT}
-FLOAT       ([+-]?((([0-9]+"."[0-9]*)|([0-9]*"."[0-9]+)){EXPO}?))|({INT}{EXPO})
+INT         [0-9]+
+EXPO        [EDed][+-]?{INT}
+FLOAT       ((([0-9]+"."[0-9]*)|([0-9]*"."[0-9]+)){EXPO}?)|({INT}{EXPO})
 
 MW          M(ICRO)?_?W(AVE)?:?
 TWT         T(RAVELING)?_?W(AVE)?_?T(UBE)?:?
