@@ -469,8 +469,7 @@ print F "\n\nEXPERIMENT:
 
 synthesizer_state( \"ON\" );\n";
 
-# Neither the SR510 nor the SR530 can set the reference frequency nor
-# its level...
+# Neither the SR510 nor the SR530 can set a modulation frequency nor level...
 
 if ( $lockin =~ /^SR8/ ) {
 	print F "lockin_mod_freq( mod_freq );
