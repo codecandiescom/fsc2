@@ -152,7 +152,6 @@ static bool dg2020_set_trigger_in_impedance( int state );
 static void dg2020_gpib_failure( void );
 
 
-
 /*------------------------------------------------------*/
 /* dg2020_init() initializes the Sony/Tektronix DG2020. */
 /* ->                                                   */

@@ -47,7 +47,7 @@ int dg2020_b_init_hook( void )
 
 	/* Set global variable to indicate that GPIB bus is needed */
 
-//	need_GPIB = SET;
+	need_GPIB = SET;
 
 	/* We have to set up the global structure for the pulser, especially the
 	   pointers for the functions that will get called from pulser.c */

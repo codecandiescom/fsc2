@@ -132,6 +132,16 @@ bool ep385_set_pulse_function( long pnum, int function )
 		THROW( EXCEPTION );
 	}
 
+	/* If the pulses position has already been set check that it isn't
+	   negative when the delay is added */
+
+	if ( p->is_pos && p->pos + p->function->delay < 0 )
+	{
+		print( FATAL, "Invalid (negative) start position for pulse #%ld.\n",
+			   pnum );
+		THROW( EXCEPTION );
+	}
+
 	/* Set function of the pulse */
 
 	p->function = f;
@@ -159,14 +169,18 @@ bool ep385_set_pulse_position( long pnum, double p_time )
 		THROW( EXCEPTION );
 	}
 
-	if ( p_time < 0 )
+	p->pos = ep385_double2ticks( p_time );
+
+	/* If the pulses function is already set check that the position,
+	   including the delay, isn't negative */
+
+	if ( p->is_function && p->pos + p->function->delay < 0 )
 	{
 		print( FATAL, "Invalid (negative) start position for pulse #%ld: "
 			   "%s.\n", pnum, ep385_ptime( p_time ) );
 		THROW( EXCEPTION );
 	}
 
-	p->pos = ep385_double2ticks( p_time );
 	p->is_pos = SET;
 
 	if ( ! p->initial_is_pos && FSC2_MODE == PREPARATION )
@@ -478,7 +492,7 @@ bool ep385_change_pulse_position( long pnum, double p_time )
 	static Ticks new_pos = 0;
 
 
-	if ( p_time < 0 )
+	if ( p_time + p->function->delay < 0 )
 	{
 		print( FATAL, "Invalid (negative) start position for pulse #%ld: "
 			   "%s.\n", pnum, ep385_ptime( p_time ) );

@@ -167,6 +167,9 @@ typedef struct _F_ {
 
 	PULSE_PARAMS *pulse_params;
 
+	int old_num_active_pulses;
+	PULSE_PARAMS *old_pulse_params;
+
 	bool uses_auto_shape_pulses;
 	Ticks left_shape_padding;
 	Ticks right_shape_padding;
@@ -286,10 +289,9 @@ typedef struct {
 
 typedef struct _p_ {
 
-	long num;                /* number of the pulse (pulses used to realize
-								phase cycling have negative, normal pulses
+	long num;                /* number of the pulse (automatically created
+								pulses have negative, normal pulses
 								positive numbers */
-
 	bool is_active;          /* set if the pulse is really used */
 	bool was_active;
 	bool has_been_active;    /* used to find useless pulses */
@@ -345,6 +347,9 @@ typedef struct _p_ {
 	struct _p_ *tp;          /* for normal pulses reference to related TWT
 								pulse (if such exists), for TWT pulses
 								reference to pulse it is associated with */
+	PULSE_PARAMS *pp;
+	PULSE_PARAMS *old_pp;
+
 } PULSE;
 
 
@@ -429,7 +434,7 @@ bool dg2020_find_phase_pulse( PULSE *p, PULSE ***pl, int *num );
 Ticks dg2020_get_max_seq_len( void );
 void dg2020_calc_padding( void );
 bool dg2020_prep_cmd( char **cmd, int channel, Ticks address, Ticks length );
-void dg2020_set( char *arena, Ticks start, Ticks len, Ticks offset );
+void dg2020_set( char *arena, Ticks start, Ticks len );
 int dg2020_diff( char *old_p, char *new_p, Ticks *start, Ticks *length );
 void dg2020_dump_channels( FILE *fp );
 
@@ -447,7 +452,7 @@ void dg2020_shape_padding_check( FUNCTION *f );
 void dg2020_twt_padding_check( FUNCTION *f );
 void dg2020_do_checks( FUNCTION *f );
 void dg2020_full_reset( void );
-PULSE *dg2020_delete_pulse( PULSE *p );
+PULSE *dg2020_delete_pulse( PULSE *p, bool warn );
 void dg2020_reorganize_phases( FUNCTION *f, bool flag );
 void dg2020_recalc_phase_pulse( FUNCTION *f, PULSE *phase_p,
 								PULSE *p, int nth, bool flag );
@@ -457,6 +462,7 @@ void dg2020_set_phase_pulses( FUNCTION *f );
 void dg2020_commit( FUNCTION * f, bool flag );
 void dg2020_commit_phases( FUNCTION * f, bool flag );
 void dg2020_cw_setup( void );
+void dg2020_defense_shape_check( FUNCTION *shape );
 
 
 /* Finally the functions from dg2020_gpib_b.c */

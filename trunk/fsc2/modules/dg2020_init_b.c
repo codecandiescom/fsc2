@@ -49,10 +49,10 @@ void dg2020_init_setup( void )
 {
 	if ( ! dg2020.is_cw_mode )
 	{
-		dg2020_basic_pulse_check( );
-		dg2020_basic_functions_check( );
 		dg2020_create_shape_pulses( );
 		dg2020_create_twt_pulses( );
+		dg2020_basic_pulse_check( );
+		dg2020_basic_functions_check( );
 		dg2020_distribute_channels( );
 
 		dg2020_init_print( dg2020.dump_file );
@@ -62,6 +62,11 @@ void dg2020_init_setup( void )
 	}
 	else
 		dg2020_cw_init( );
+
+	if ( dg2020.dump_file != NULL )
+		dg2020_dump_channels( dg2020.dump_file );
+	if ( dg2020.show_file != NULL )
+		dg2020_dump_channels( dg2020.show_file );
 }
 
 
@@ -84,12 +89,12 @@ static void dg2020_init_print( FILE *fp )
 	{
 		f = dg2020.function + i;
 
-		if ( ! f->is_needed && f->num_channels == 0 )
+		if ( ! f->is_needed && f->num_pods == 0 )
 			continue;
 
-		for ( j = 0; j < f->num_channels; j++ )
+		for ( j = 0; j < f->num_pods; j++ )
 			fprintf( fp, "%s:%d %ld\n",
-					 f->name, f->channel[ j ]->self, f->delay );
+					 f->name, f->pod[ j ]->self, f->delay );
 	}
 }
 
@@ -138,26 +143,6 @@ void dg2020_basic_pulse_check( void )
 		if ( ! p->is_pos || ! p->is_len || p->len == 0 )
 			p->is_active = UNSET;
 
-		/* Check that the pulse fits into the pulsers memory
-		   (If you check the following line real carefully, you will find that
-		   one less than the number of bits in the pulser channel is allowed -
-		   this is due to a bug in the pulsers firmware: if the very first bit
-		   in any of the channels is set to high the pulser outputs a pulse of
-		   250 us length before starting to output the real data in the
-		   channel, thus the first bit has always to be set to low, i.e. must
-		   be unused. But this is only the 'best' case when the pulser is used
-		   in repeat mode, in single mode setting the first bit of a channel
-		   leads to an obviously endless high pulse, while not setting the
-		   first bit keeps the pulser from working at all...) */
-
-		if ( p->is_pos && p->is_len && p->len != 0 &&
-			 p->pos + p->len + p->function->delay >= MAX_PULSER_BITS )
-		{
-			print( FATAL, "Pulse #%ld does not fit into the pulsers memory. "
-				   "You could try a longer pulser time base.\n", p->num );
-			THROW( EXCEPTION );
-		}
-
 		/* We need to know which phase types will be needed for this pulse. */
 
 		if ( p->pc )
@@ -181,13 +166,9 @@ void dg2020_basic_pulse_check( void )
 			for ( i = 0; i < p->pc->len; i++ )
 			{
 				cur_type = p->pc->sequence[ i ];
-				if  ( cur_type < PHASE_PLUS_X || cur_type > PHASE_CW )
-				{
-					print( FATAL, "Pulse #%ld needs phase type '%s' but this "
-						   "type isn't possible with this driver.\n",
-						   p->num, Phase_Types[ cur_type ] );
-					THROW( EXCEPTION );
-				}
+
+				fsc2_assert( cur_type >= PHASE_PLUS_X ||
+							 cur_type <= PHASE_CW );     /* Paranoia... */
 
 				cur_type -= PHASE_PLUS_X;
 				p->function->phase_setup->is_needed[ cur_type ] = SET;
@@ -553,8 +534,8 @@ static void dg2020_setup_phase_matrix( FUNCTION *f )
 
 	cur_channel = f->need_constant ? 1 : 0;
 
-	f->pcm = CHANNEL_PP T_malloc( f->pc_len * ( PHASE_CW - PHASE_PLUS_X + 1 ) *
-								  sizeof *f->pcm );
+	f->pcm = CHANNEL_PP T_malloc( f->pc_len * ( PHASE_CW - PHASE_PLUS_X + 1 )
+								  * sizeof *f->pcm );
 
 	for ( i = 0; i <= PHASE_CW - PHASE_PLUS_X; i++ )
 		for ( j = 0; j < f->pc_len; j++ )
@@ -788,6 +769,8 @@ static void dg2020_create_shape_pulses( void )
 		rp->sp = np;
 		np->sp = rp;
 
+		np->tp = NULL;
+
 		/* The remaining properties are just exact copies of the
 		   pulse the shape pulse has to be used with */
 
@@ -915,6 +898,8 @@ static void dg2020_create_twt_pulses( void )
 
 		rp->tp = np;
 		np->tp = rp;
+
+		np->sp = NULL;
 
 		/* The remaining properties are just exact copies of the
 		   pulse the shape pulse has to be used with */

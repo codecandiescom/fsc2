@@ -233,7 +233,8 @@ Ticks dg2020_get_max_seq_len( void )
 			 f->self == PULSER_CHANNEL_PHASE_2 )
 			continue;
 
-		max = Ticks_max( max, f->max_seq_len + f->delay );
+		max = Ticks_max( max, f->max_seq_len ); 
+//+ f->delay );
 	}
 
 	if ( dg2020.is_max_seq_len )
@@ -400,11 +401,11 @@ bool dg2020_prep_cmd( char **cmd, int channel, Ticks address, Ticks length )
 /*----------------------------------------------------------*/
 /*----------------------------------------------------------*/
 
-void dg2020_set( char *arena, Ticks start, Ticks len, Ticks offset )
+void dg2020_set( char *arena, Ticks start, Ticks len )
 {
-	fsc2_assert( start + len + offset <= dg2020.max_seq_len );
+	fsc2_assert( start + len <= dg2020.max_seq_len );
 
-	memset( arena + offset + start, SET, len );
+	memset( arena + start, SET, len );
 }
 
 
@@ -479,7 +480,8 @@ int dg2020_diff( char *old_p, char *new_p, Ticks *start, Ticks *length )
 void dg2020_dump_channels( FILE *fp )
 {
 	FUNCTION *f;
-	CHANNEL *ch;
+	POD *pod;
+	PULSE_PARAMS *pp;
 	int i, j, k;
 
 
@@ -492,35 +494,32 @@ void dg2020_dump_channels( FILE *fp )
 	{
 		f = dg2020.function + i;
 
-		if ( ! f->is_needed && f->num_channels == 0 )
+		if ( ! f->is_needed || f->num_channels == 0 )
 			continue;
 
-		for ( j = 0; j < f->num_channels; j++ )
+		for ( j = 0; j < f->num_pods; j++ )
 		{
-			ch = f->channel[ j ];
+			pod = f->pod[ j ];
 
-			if ( ! ch->needs_update )
-				continue;
-
-			fprintf( fp, "%s:%d", f->name, ch->self );
+			fprintf( fp, "%s:%d", f->name, pod->self );
 			for ( k = 0; k < f->num_active_pulses; k++ )
+			{
+				pp = f->pulse_params + k;
 				if ( f->self == PULSER_CHANNEL_PULSE_SHAPE &&
-					 f->pulse_params[ k ].pulse->sp != NULL )
+					 pp->pulse->sp != NULL )
 					fprintf( fp, " (%ld) %ld %ld",
-							 f->pulse_params[ k ].pulse->sp->num,
-							 f->pulse_params[ k ].pos,
-							 f->pulse_params[ k ].len );
+							 pp->pulse->sp->num, pp->pos, pp->len );
 				else if ( f->self == PULSER_CHANNEL_TWT &&
-						  f->pulse_params[ k ].pulse->tp != NULL )
+						  pp->pulse->tp != NULL )
 					fprintf( fp, " (%ld) %ld %ld",
-							 f->pulse_params[ k ].pulse->tp->num,
-							 f->pulse_params[ k ].pos,
-							 f->pulse_params[ k ].len );
-				else
+							 pp->pulse->tp->num, pp->pos, pp->len );
+				else if ( pp->pulse->pc == NULL ||
+						  f->phase_setup->pod[ 
+							  pp->pulse->pc->sequence[ f->next_phase ]
+							  - PHASE_PLUS_X ] == pod )
 					fprintf( fp, " %ld %ld %ld",
-							 f->pulse_params[ k ].pulse->num,
-							 f->pulse_params[ k ].pos,
-							 f->pulse_params[ k ].len );
+							 pp->pulse->num, pp->pos, pp->len );
+			}
 			fprintf( fp, "\n" );
 		}
 	}
