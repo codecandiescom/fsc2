@@ -35,6 +35,9 @@ void x_dg2020_set_constant( int ch, Ticks start, Ticks len, int type )
 
 void dg2020_do_update( void )
 {
+	if ( ! dg2020_is_needed )
+		return;
+
 	/* Resort the pulses and, while in a test run, we also have to check that
 	   the new pulse settings are reasonable */
 
