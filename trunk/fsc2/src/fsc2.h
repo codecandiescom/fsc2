@@ -38,15 +38,21 @@
 
 
 
-typedef struct PT_ {
-	int token;
-	union {
+
+typedef union {
 		long   lval;
 		double dval;
 		char   *sptr;
 		Var    *vptr;
-	} type;
-	struct PT_ *gto;
+} Token_Val;
+
+
+typedef struct {
+	int token;              /* type of current token */
+	Token_Val tv;           /* token's value as needed by the parser */
+	char *Fname;            /* name of file the token came from */
+	long Lc;                /* number of line number the token came from */
+	long gto;               /* used in branches */
 } Prg_Token;
 
 

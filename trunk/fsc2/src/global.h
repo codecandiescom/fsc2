@@ -31,6 +31,9 @@ typedef  unsigned char  bool;
 
 
 
+#define PRG_CHUNK_SIZE 128
+
+
 /* Define some useful abbreviations - never ever change these ! */
 
 #define	FAIL  ( ( bool ) 0 )      

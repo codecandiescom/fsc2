@@ -48,6 +48,9 @@ FILE        \x1\n.+\n
 LNUM        \x2\n[0-9]+\n
 ERR         \x3\n.+\n
 
+ESTR        \x5.*\x3\n.*\n
+STR         \x5[^\x6]*\x6
+
 ASS         ^[ \t]*ASS(IGNMENT)?S?:
 DEF         ^[ \t]*DEF(AULT)?S?:
 VAR         ^[ \t]*VAR(IABLE)?S?:
@@ -59,11 +62,22 @@ INT         [0-9]+
 EXPO        [EDed][+-]?{INT}
 FLOAT       ((([0-9]+"."[0-9]*)|([0-9]*"."[0-9]+)){EXPO}?)|({INT}{EXPO})
 
+P           P(ULSE)?_?{INT}
+
+F           F(UNC(TION)?)?
+S           S(TART)?
+L			L(EN(GTH)?)?
+DS          D(EL(TA)?)?_?S(TART)?
+DL          D(EL(TA)?)?_?L(EN(GTH)?)?
+PH          PH(ASE(SEQ(UENCE)?)?)?_?{INT}?
+ML          M(AX(IMUM)?)?_?L(EN(GTH)?)?
+RP          R(EPL(ACEMENT)?)?_?P((ULSE)?S?)?
+
 WS          [\n \t]+
 
 IDENT       [A-Za-z]+[A-Za-z0-9_]*
 
-UNREC       [^\n \t;,\(\)\=\+\-\*\/\[\]\{\}\%\^]+
+
 
 
 		/*---------------*/
@@ -134,6 +148,44 @@ UNREC       [^\n \t;,\(\)\=\+\-\*\/\[\]\{\}\%\^]+
                 return FLOAT_TOKEN;
             }
 
+			/* combinations of pulse and property, e.g. `P3.LEN' */
+
+{P}?"."{F}  {
+				prim_explval.vptr = pulse_get_by_addr( n2p( prim_exptext ),
+													   P_FUNC );
+				return VAR_REF;
+            }
+
+{P}?"."{S}  {
+				prim_explval.vptr = pulse_get_by_addr( n2p( prim_exptext ),
+													   P_POS );
+				return VAR_REF;
+            }
+
+{P}?"."{L}  {
+				prim_explval.vptr = pulse_get_by_addr( n2p( prim_exptext ),
+													   P_LEN );
+				return VAR_REF;
+            }
+
+{P}?"."{DS} {
+				prim_explval.vptr = pulse_get_by_addr( n2p( prim_exptext ),
+													   P_DPOS );
+				return VAR_REF;
+            }
+
+{P}?"."{DL} {
+				prim_explval.vptr = pulse_get_by_addr( n2p( prim_exptext ),
+													   P_DLEN );
+				return VAR_REF;
+            }
+
+{P}?"."{ML} {
+				prim_explval.vptr = pulse_get_by_addr( n2p( prim_exptext ),
+													   P_MAXLEN );
+				return VAR_REF;
+            }
+
 {IDENT}     {
 				int acc;
 
@@ -161,9 +213,6 @@ UNREC       [^\n \t;,\(\)\=\+\-\*\/\[\]\{\}\%\^]+
 "["         return '[';
 "]"         return ']';
 ","         return ',';
-"{"         return '{';
-"}"         return '}';
-				  	  
 "("         return '(';
 ")"         return ')';
 "+"         return '+';
@@ -173,13 +222,16 @@ UNREC       [^\n \t;,\(\)\=\+\-\*\/\[\]\{\}\%\^]+
 "%"         return '%';
 "^"         return '^';
 
+"{"         return '{';
+"}"         return '}';
+
 			/* handling of end of statement character */
 ";"			return ';';
 
 {WS}        /* skip white space */
 
 			/* handling of invalid input */
-{UNREC}     THROW( INVALID_INPUT_EXCEPTION );
+.           THROW( INVALID_INPUT_EXCEPTION );
 
 <<EOF>>	    {
 				Prim_Exp_Next_Section = NO_SECTION;
