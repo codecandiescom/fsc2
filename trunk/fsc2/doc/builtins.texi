@@ -1349,10 +1349,10 @@ the elements of an array). The argument must be a positive number.
 @anchor{random}
 @item random()
 @findex random()
-If called with no argument the function returns a pseudo-random number
-in the interval @w{[0, 1]}. If called with a non-zero, positive argument 
-it returns an array of random numbers where the argument specifies the
-size of the array. 
+If called with no argument the function returns a single pseudo-random
+number in the interval @w{[0, 1]}. If called with a non-zero, positive
+argument it returns an array of random numbers where the argument
+specifies the size of the array.
 
 
 @anchor{grandom}
