@@ -278,7 +278,7 @@ int sema_create( void )
 	sema_arg.val = 0;
 	if ( ( semctl( sema_id, 0, SETVAL, sema_arg ) ) < 0 )
 	{
-		semctl( sema_id, 0, IPC_RMID );
+		semctl( sema_id, 0, IPC_RMID, sema_arg );
 		if ( must_reset )
 			seteuid( getuid( ) );
 		return -1;
@@ -298,6 +298,7 @@ int sema_create( void )
 int sema_destroy( int sema_id )
 {
 	bool must_reset = UNSET;
+	union semun sema_arg;
 
 
 	if ( geteuid( ) != EUID )
@@ -306,7 +307,7 @@ int sema_destroy( int sema_id )
 		must_reset = SET;
 	}
 
-	if ( semctl( sema_id, 0, IPC_RMID ) < 0 )
+	if ( semctl( sema_id, 0, IPC_RMID, sema_arg ) < 0 )
 	{
 		if ( must_reset )
 			seteuid( getuid( ) );

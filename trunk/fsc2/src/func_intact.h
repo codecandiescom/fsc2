@@ -64,7 +64,7 @@ typedef struct {
 #define HORI          1
 
 
-#define MAX_INPUT_CHARS 100
+#define MAX_INPUT_CHARS 25
 
 #if ( SIZE == HI_RES )
 

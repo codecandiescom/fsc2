@@ -1426,7 +1426,7 @@ Var *f_icreate( Var *v )
 			eprint( SEVERE, "%s:%ld: Float value used as initial value for "
 					"new integer input object in function input_create().\n",
 					Fname, Lc );
-			lval = round( v->val.dval );
+			lval = lround( v->val.dval );
 		}
 		else
 		{
@@ -1768,7 +1768,7 @@ Var *f_idelete( Var *v )
 Var *f_ivalue( Var *v )
 {
 	IOBJECT *io;
-	char buf[ MAX_INPUT_CHARS + 1 ];
+	char buf[ MAX_INPUT_CHARS ];
 
 
 	/* We need at least the input objects ID */
@@ -1935,7 +1935,7 @@ Var *f_ivalue( Var *v )
 	{
 		eprint( SEVERE, "%s:%ld: Float number used as integer input object "
 				"value in input_value().\n", Fname, Lc );
-		io->val.lval = round( v->val.dval );
+		io->val.lval = lround( v->val.dval );
 	}
 	else
 	{
@@ -1949,12 +1949,12 @@ Var *f_ivalue( Var *v )
 	{
 		if ( io->type == INT_INPUT )
 		{
-			sprintf( buf, "%ld", io->val.lval );
+			snprintf( buf, MAX_INPUT_CHARS, "%ld", io->val.lval );
 			fl_set_input( io->self, buf );
 		}
 		else
 		{
-			sprintf( buf, "%f", io->val.dval );
+			snprintf( buf, MAX_INPUT_CHARS, "%f", io->val.dval );
 			fl_set_input( io->self, buf );
 		}
 	}
@@ -2121,7 +2121,7 @@ static void recreate_Tool_Box( void )
 static FL_OBJECT *append_object_to_form( IOBJECT *io )
 {
 	double prec;
-	char buf[ MAX_INPUT_CHARS + 1 ];
+	char buf[ MAX_INPUT_CHARS ];
 	IOBJECT *nio;
 
 
@@ -2232,7 +2232,7 @@ static FL_OBJECT *append_object_to_form( IOBJECT *io )
 			fl_set_object_lalign( io->self, FL_ALIGN_BOTTOM );
 			fl_set_input_return( io->self, FL_RETURN_END_CHANGED );
 			fl_set_input_maxchars( io->self, MAX_INPUT_CHARS );
-			sprintf( buf, "%ld", io->val.lval );
+			snprintf( buf, MAX_INPUT_CHARS, "%ld", io->val.lval );
 			fl_set_input( io->self, buf );
 			break;
 
@@ -2244,7 +2244,7 @@ static FL_OBJECT *append_object_to_form( IOBJECT *io )
 			fl_set_object_lalign( io->self, FL_ALIGN_BOTTOM );
 			fl_set_input_return( io->self, FL_RETURN_END_CHANGED );
 			fl_set_input_maxchars( io->self, MAX_INPUT_CHARS );
-			sprintf( buf, "%f", io->val.dval );
+			snprintf( buf, MAX_INPUT_CHARS, "%f", io->val.dval );
 			fl_set_input( io->self, buf );
 			break;
 
