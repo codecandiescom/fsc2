@@ -271,7 +271,7 @@ bool dg2020_set_function_low_level( int function, double voltage )
 
 bool dg2020_set_trigger_mode( int mode )
 {
-	assert( mode == INTERNAL || mode == EXTERNAL );
+	fsc2_assert( mode == INTERNAL || mode == EXTERNAL );
 
 	if ( dg2020.is_trig_in_mode && dg2020.trig_in_mode != mode )
 	{
@@ -387,7 +387,7 @@ bool dg2020_set_trig_in_level( double voltage )
 
 bool dg2020_set_trig_in_slope( int slope )
 {
-	assert( slope == POSITIVE || slope == NEGATIVE );
+	fsc2_assert( slope == POSITIVE || slope == NEGATIVE );
 
 	if ( dg2020.is_trig_in_slope && dg2020.trig_in_slope != slope )
 	{
@@ -428,7 +428,7 @@ bool dg2020_set_trig_in_slope( int slope )
 
 bool dg2020_set_trig_in_impedance( int state )
 {
-	assert( state == LOW || state == HIGH );
+	fsc2_assert( state == LOW || state == HIGH );
 
 	if ( dg2020.is_trig_in_impedance && dg2020.trig_in_impedance != state )
 	{
@@ -689,7 +689,7 @@ bool dg2020_phase_setup( int func )
 	bool ret;
 
 
-	assert( Cur_PHS != -1 && Cur_PHS == func );
+	fsc2_assert( Cur_PHS != -1 && Cur_PHS == func );
 
 	/* Check that for all phase types data are set */
 
@@ -746,7 +746,7 @@ bool dg2020_phase_setup( int func )
 
 bool dg2020_phase_setup_finalize( int func, PHS phs )
 {
-	assert( func == PULSER_CHANNEL_PHASE_1 || func == PULSER_CHANNEL_PHASE_2 );
+	fsc2_assert( func == PULSER_CHANNEL_PHASE_1 || func == PULSER_CHANNEL_PHASE_2 );
 
 	if ( dg2020.function[ func ].is_phs )
 	{
@@ -768,7 +768,8 @@ bool dg2020_phase_setup_finalize( int func, PHS phs )
 
 bool dg2020_set_phase_switch_delay( int func, double time )
 {
-	assert( func == PULSER_CHANNEL_PHASE_1 || func == PULSER_CHANNEL_PHASE_2 );
+	fsc2_assert( func == PULSER_CHANNEL_PHASE_1 ||
+				 func == PULSER_CHANNEL_PHASE_2 );
 
 	if ( time < 0 )
 	{

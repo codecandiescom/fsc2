@@ -116,7 +116,7 @@ int bh15_exp_hook( void )
 	if ( ! bh15.is_needed )
 		return 1;
 
-	assert( bh15.device < 0 );
+	fsc2_assert( bh15.device < 0 );
 
 	if ( gpib_init_device( bh15.name, &bh15.device ) == FAILURE )
 	{

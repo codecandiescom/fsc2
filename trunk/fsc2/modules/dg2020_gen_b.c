@@ -262,7 +262,7 @@ bool dg2020_set_function_low_level( int function, double voltage )
 
 bool dg2020_set_trigger_mode( int mode )
 {
-	assert( mode == INTERNAL || mode == EXTERNAL );
+	fsc2_assert( mode == INTERNAL || mode == EXTERNAL );
 
 	if ( dg2020.is_trig_in_mode && dg2020.trig_in_mode != mode )
 	{
@@ -378,7 +378,7 @@ bool dg2020_set_trig_in_level( double voltage )
 
 bool dg2020_set_trig_in_slope( int slope )
 {
-	assert( slope == POSITIVE || slope == NEGATIVE );
+	fsc2_assert( slope == POSITIVE || slope == NEGATIVE );
 
 	if ( dg2020.is_trig_in_slope && dg2020.trig_in_slope != slope )
 	{
@@ -419,7 +419,7 @@ bool dg2020_set_trig_in_slope( int slope )
 
 bool dg2020_set_trig_in_impedance( int state )
 {
-	assert( state == LOW || state == HIGH );
+	fsc2_assert( state == LOW || state == HIGH );
 
 	if ( dg2020.is_trig_in_impedance && dg2020.trig_in_impedance != state )
 	{
@@ -622,7 +622,7 @@ bool dg2020_phase_setup_prep( int phs, int type, int pod, long val,
 
 	if ( dg2020_phs[ phs ].is_set[ type ] )
 	{
-		assert( dg2020_phs[ phs ].pod[ type ] != NULL );
+		fsc2_assert( dg2020_phs[ phs ].pod[ type ] != NULL );
 
 		eprint( SEVERE, "%s:%ld: %s: Pod for controlling phase type `%s' has "
 				"already been set to %d.\n", Fname, Lc, pulser_struct.name,
@@ -657,7 +657,7 @@ bool dg2020_phase_setup( int phs )
 	int i;
 
 
-	assert( Cur_PHS != -1 && Cur_PHS == phs );
+	fsc2_assert( Cur_PHS != -1 && Cur_PHS == phs );
 
 	if ( dg2020_phs[ phs ].function == NULL )
 	{

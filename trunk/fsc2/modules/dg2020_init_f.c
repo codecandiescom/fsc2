@@ -312,7 +312,7 @@ static void dg2020_basic_functions_check( void )
 				f->phase_func = NULL;
 			}
 
-			assert( f->num_pulses > 0 );    /* paranoia ? */
+			fsc2_assert( f->num_pulses > 0 );    /* paranoia ? */
 		}
 		else
 		{

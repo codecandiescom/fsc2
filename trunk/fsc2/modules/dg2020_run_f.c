@@ -192,9 +192,8 @@ void dg2020_reorganize_phases( FUNCTION *f, bool flag )
 	bool need_update = UNSET;
 
 
-	assert( ( f->self == PULSER_CHANNEL_PHASE_1 ||
-			  f->self == PULSER_CHANNEL_PHASE_2 ) &&
-			f->is_used );
+	fsc2_assert( ( f->self == PULSER_CHANNEL_PHASE_1 ||
+				   f->self == PULSER_CHANNEL_PHASE_2 ) && f->is_used );
 
 	/* First check if any of the phase pulses needs to be updated */
 
@@ -583,7 +582,7 @@ PULSE *dg2020_delete_pulse( PULSE *p )
 		if ( p->function->pulses[ i ] == p )
 			break;
 
-	assert( i < p->function->num_pulses );  /* Paranoia */
+	fsc2_assert( i < p->function->num_pulses );  /* Paranoia */
 
 	/* Put the last of the functions pulses into the slot for the pulse to
 	   be deleted and shorten the list by one element */
@@ -633,7 +632,8 @@ void dg2020_finalize_phase_pulses( int func )
 	PULSE *p;
 
 
-	assert( func == PULSER_CHANNEL_PHASE_1 || func == PULSER_CHANNEL_PHASE_2 );
+	fsc2_assert( func == PULSER_CHANNEL_PHASE_1 ||
+				 func == PULSER_CHANNEL_PHASE_2 );
 
 	f = &dg2020.function[ func ];
 	if ( ! f->is_used )

@@ -145,7 +145,7 @@ int aeg_s_band_init_hook( void )
 		ret = get_lib_symbol( "bh15", "is_gaussmeter",
 							  ( void ** ) &is_gaussmeter );
 
-	assert( ret != LIB_ERR_NO_LIB );      /* this can't happen....*/
+	fsc2_assert( ret != LIB_ERR_NO_LIB );      /* this can't happen....*/
 
 	if ( ret == LIB_ERR_NO_SYM )
 	{
@@ -947,7 +947,7 @@ static void magnet_sweep( int dir )
 
 	/* <PARANOIA> check for unreasonable input </PARANOIA> */
 
-	assert( dir == 1 || dir == -1 );
+	fsc2_assert( dir == 1 || dir == -1 );
 
 	/* Problem: while there can be arbitrary sweep steps requested by the
 	   user, the real sweep steps are discreet. This might sum up to a

@@ -221,8 +221,8 @@ void dg2020_set_pulses( FUNCTION *f )
 	int i, j;
 
 
-	assert( f->self != PULSER_CHANNEL_PHASE_1 &&
-			f->self != PULSER_CHANNEL_PHASE_2 );
+	fsc2_assert( f->self != PULSER_CHANNEL_PHASE_1 &&
+				 f->self != PULSER_CHANNEL_PHASE_2 );
 
 	/* Always set the very first bit to LOW state, see the rant about the bugs 
 	   in the pulser firmware at the start of dg2020_gpib.c. Then set the rest
@@ -325,7 +325,7 @@ PULSE *dg2020_delete_pulse( PULSE *p )
 		if ( p->function->pulses[ i ] == p )
 			break;
 
-	assert( i < p->function->num_pulses );  /* Paranoia */
+	fsc2_assert( i < p->function->num_pulses );  /* Paranoia */
 
 	/* Put the last of the functions pulses into the slot for the pulse to
 	   be deleted and shorten the list by one element */

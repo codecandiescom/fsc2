@@ -199,9 +199,10 @@ static void dg2020_basic_functions_check( void )
 
 		/* Phase functions not supported in this driver... */
 
-		assert( ! f->is_used || ( f->is_used &&
-								  i != PULSER_CHANNEL_PHASE_1 &&
-								  i != PULSER_CHANNEL_PHASE_2    ) );
+		fsc2_assert( ! f->is_used ||
+					 ( f->is_used &&
+					   i != PULSER_CHANNEL_PHASE_1 &&
+					   i != PULSER_CHANNEL_PHASE_2 ) );
 
 		/* Don't do anything if the function has never been mentioned */
 
@@ -294,7 +295,7 @@ static int dg2020_calc_channels_needed( FUNCTION *f )
 	if ( f->num_pods < 2 )
 		return 1;
 
-	assert( f->pm != NULL );
+	fsc2_assert( f->pm != NULL );
 
 	num_channels = 0;
 	f->need_constant = UNSET;
@@ -496,7 +497,7 @@ static void dg2020_setup_phase_matrix( FUNCTION *f )
 	int cur_channel;
 
 
-	assert( f->pm != NULL && f->pcm == NULL );
+	fsc2_assert( f->pm != NULL && f->pcm == NULL );
 
 	/* If the function needs constant voltage channel we keep the channel with
 	   the lowest number for it */
