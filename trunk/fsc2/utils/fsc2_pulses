@@ -535,7 +535,7 @@ sub longest_sequence {
 		$duration = $l if $duration < $l;
 	}
 
-	return $duration;
+	return $duration - $Delay;
 }
 
 1;
@@ -594,7 +594,7 @@ sub longest_sequence {
 	my $duration = 0;
 
 	for ( keys %{ $self->{ 'plist' } } ) {
-		my $len = $self->{ 'plist' }{ $_ }->len + $self->{ 'delay' };
+		my $len = $self->{ 'plist' }{ $_ }->len;
 		$duration = $len if $duration < $len;
 	}
 

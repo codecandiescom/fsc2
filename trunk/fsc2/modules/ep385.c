@@ -124,6 +124,9 @@ int ep385_init_hook( void )
 	ep385.auto_shape_pulses = UNSET;
 	ep385.left_shape_warning = ep385.right_shape_warning = 0;
 
+	ep385.auto_twt_pulses = UNSET;
+	ep385.left_twt_warning = ep385.right_twt_warning = 0;
+
 	for ( i = 0; i < MAX_CHANNELS; i++ )
 	{
 		ch = ep385.channel + i;
@@ -150,6 +153,8 @@ int ep385_init_hook( void )
 		f->is_delay = UNSET;
 		f->next_phase = 0;
 		f->uses_auto_shape_pulses = UNSET;
+		f->uses_auto_twt_pulses = UNSET;
+		f->has_auto_twt_pulses = UNSET;
 		for ( j = 0; j <= MAX_CHANNELS; j++ )
 			f->channel[ j ] = NULL;
 	}
@@ -516,6 +521,8 @@ Var *pulser_automatic_shape_pulses( Var *v )
 	}
 
 	if ( func == PULSER_CHANNEL_PULSE_SHAPE ||
+		 func == PULSER_CHANNEL_TWT ||
+		 func == PULSER_CHANNEL_TWT_GATE ||
 		 func == PULSER_CHANNEL_PHASE_1 ||
 		 func == PULSER_CHANNEL_PHASE_2 )
 	{
@@ -591,6 +598,119 @@ Var *pulser_automatic_shape_pulses( Var *v )
 									 ep385.function[ func ].left_shape_padding;
 	ep385.function[ func ].min_right_shape_padding =
 									ep385.function[ func ].right_shape_padding;
+
+	return vars_push( INT_VAR, 1 );
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+Var *pulser_automatic_twt_pulses( Var *v )
+{
+	long func;
+	double dl, dr;
+
+
+	/* We need at least one argument, the function TWT pulse are to be
+	   created for. */
+
+	if ( v == NULL )
+	{
+		print( FATAL, "Missing parameter.\n" );
+		THROW( EXCEPTION );
+	}
+
+	/* Determine the function number */
+
+	func = get_strict_long( v, "pulser function" );
+
+	/* Check that the function argument is reasonable */
+
+	if ( func < 0 || func >= PULSER_CHANNEL_NUM_FUNC )
+	{
+		print( FATAL, "Invalid pulser function (%ld).\n", func );
+		THROW( EXCEPTION );
+	}
+
+	if ( func == PULSER_CHANNEL_TWT ||
+		 func == PULSER_CHANNEL_TWT_GATE ||
+		 func == PULSER_CHANNEL_PULSE_SHAPE ||
+		 func == PULSER_CHANNEL_PHASE_1 ||
+		 func == PULSER_CHANNEL_PHASE_2 )
+	{
+		print( FATAL, "TWT pulses can't be set for function '%s'.\n",
+			   Function_Names[ func ] );
+		THROW( EXCEPTION );
+	}
+
+	/* Check that a channel has been set for TWT pulses */
+
+	if ( ep385.function[ PULSER_CHANNEL_TWT ].num_channels == 0 )
+	{
+		print( FATAL, "No channel has been set for function '%s' needed for "
+			   "creating TWT pulses.\n",
+			   Function_Names[ PULSER_CHANNEL_TWT ] );
+		THROW( EXCEPTION );
+	}
+
+	/* Complain if automatic TWT pulses have already been switched on for
+	   the function */
+
+	if ( ep385.function[ func ].uses_auto_twt_pulses )
+	{
+		print( FATAL, "Use of automatic TWT pulses for function '%s' has "
+			   "already been switched on.\n", Function_Names[ func ] );
+		THROW( EXCEPTION );
+	}
+
+	ep385.auto_twt_pulses = SET;
+	ep385.function[ func ].uses_auto_twt_pulses = SET;
+
+	/* Look for left and right side padding arguments for the functions
+	   pulses */
+
+	if ( ( v = vars_pop( v ) ) != NULL )
+	{
+		dl = get_double( v, "left side TWT pulse padding" );
+		if ( dl < 0 )
+		{
+			print( FATAL, "Can't use negative left side TWT pulse "
+				   "padding.\n" );
+			THROW( EXCEPTION );
+		}
+		ep385.function[ func ].left_twt_padding = ep385_double2ticks( dl );
+
+		if ( ( v = vars_pop( v ) ) != NULL )
+		{
+			dr = get_double( v, "right side TWT pulse padding" );
+			if ( dr < 0 )
+			{
+				print( FATAL, "Can't use negative right side TWT pulse "
+					   "padding.\n" );
+				THROW( EXCEPTION );
+			}
+			ep385.function[ func ].right_twt_padding =
+													  ep385_double2ticks( dr );
+		}
+		else
+			ep385.function[ func ].right_twt_padding =
+					   lrnd( ceil( AUTO_TWT_RIGHT_PADDING / ep385.timebase ) );
+	}
+	else
+	{
+		ep385.function[ func ].left_twt_padding =
+						lrnd( ceil( AUTO_TWT_LEFT_PADDING / ep385.timebase ) );
+		ep385.function[ func ].right_twt_padding =
+					   lrnd( ceil( AUTO_TWT_RIGHT_PADDING / ep385.timebase ) );
+	}
+
+	too_many_arguments( v );
+
+	ep385.function[ func ].min_left_twt_padding = 
+									   ep385.function[ func ].left_twt_padding;
+	ep385.function[ func ].min_right_twt_padding =
+									  ep385.function[ func ].right_twt_padding;
 
 	return vars_push( INT_VAR, 1 );
 }
@@ -914,9 +1034,9 @@ Var *pulser_shift( Var *v )
 		p->has_been_active |= ( p->is_active = IS_ACTIVE( p ) );
 		p->needs_update = NEEDS_UPDATE( p );
 
-		/* Also shift shape pulses associated with the pulse */
+		/* Also shift shape and TWT pulses associated with the pulse */
 
-		if ( p->sp )
+		if ( p->sp != NULL )
 		{
 			p->sp->pos = p->pos;
 			p->sp->old_pos = p->old_pos;
@@ -925,7 +1045,17 @@ Var *pulser_shift( Var *v )
 			p->sp->has_been_active |= ( p->sp->is_active = p->is_active );
 			p->sp->needs_update = p->needs_update;
 		}
-			
+
+		if ( p->tp != NULL )
+		{
+			p->tp->pos = p->pos;
+			p->tp->old_pos = p->old_pos;
+			p->tp->is_old_pos = p->is_old_pos;
+
+			p->tp->has_been_active |= ( p->tp->is_active = p->is_active );
+			p->tp->needs_update = p->needs_update;
+		}
+
 		if ( p->needs_update )
 			ep385.needs_update = SET;
 	}
@@ -1004,9 +1134,9 @@ Var *pulser_increment( Var *v )
 		p->has_been_active |= ( p->is_active = IS_ACTIVE( p ) );
 		p->needs_update = NEEDS_UPDATE( p );
 
-		/* Also reset shape pulses associated with the pulse */
+		/* Also lengthen shape and TWT pulses associated with the pulse */
 
-		if ( p->sp )
+		if ( p->sp != NULL )
 		{
 			p->sp->len = p->len;
 			p->sp->old_len = p->old_len;
@@ -1015,7 +1145,17 @@ Var *pulser_increment( Var *v )
 			p->sp->has_been_active |= ( p->sp->is_active = p->is_active );
 			p->sp->needs_update = p->needs_update;
 		}
-			
+
+		if ( p->tp != NULL )
+		{
+			p->tp->len = p->len;
+			p->tp->old_len = p->old_len;
+			p->tp->is_old_len = p->is_old_len;
+
+			p->tp->has_been_active |= ( p->tp->is_active = p->is_active );
+			p->tp->needs_update = p->needs_update;
+		}
+
 		/* If the pulse was or is active we've got to update the pulser */
 
 		if ( p->needs_update )
@@ -1092,9 +1232,9 @@ Var *pulser_pulse_reset( Var *v )
 		p->has_been_active |= ( p->is_active = IS_ACTIVE( p ) );
 		p->needs_update = NEEDS_UPDATE( p );
 
-		/* Also lengthen shape pulses associated with the pulse */
+		/* Also reset shape and TWT pulses associated with the pulse */
 
-		if ( p->sp )
+		if ( p->sp != NULL )
 		{
 			p->sp->pos = p->pos;
 			p->sp->old_pos = p->old_pos;
@@ -1107,7 +1247,20 @@ Var *pulser_pulse_reset( Var *v )
 			p->sp->has_been_active |= ( p->sp->is_active = p->is_active );
 			p->sp->needs_update = p->needs_update;
 		}
-			
+
+		if ( p->tp != NULL )
+		{
+			p->tp->pos = p->pos;
+			p->tp->old_pos = p->old_pos;
+			p->tp->is_old_pos = p->is_old_pos;
+
+			p->tp->len = p->len;
+			p->tp->old_len = p->old_len;
+			p->tp->is_old_len = p->is_old_len;
+
+			p->tp->has_been_active |= ( p->tp->is_active = p->is_active );
+			p->tp->needs_update = p->needs_update;
+		}
 
 		if ( p->needs_update )
 			ep385.needs_update = SET;

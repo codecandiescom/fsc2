@@ -129,6 +129,9 @@ static bool ep385_update_pulses( bool flag )
 					pp->len = p->len;
 					pp->pulse = p;
 
+					/* Extend pulses for which a shape pulse has been defined
+					   a bit */
+
 					if ( p->function->self != PULSER_CHANNEL_PULSE_SHAPE &&
 						 p->sp != NULL )
 					{
@@ -136,12 +139,23 @@ static bool ep385_update_pulses( bool flag )
 						pp->len +=   p->function->left_shape_padding
 								   + p->function->right_shape_padding;
 					}
+
+					/* Extend TWT pulses that were automatically created */
+
+					if ( p->function->self == PULSER_CHANNEL_TWT &&
+						 p->tp != NULL )
+					{
+						pp->pos -= p->tp->function->left_twt_padding;
+						pp->len +=   p->tp->function->left_twt_padding
+								   + p->tp->function->right_twt_padding;
+					}
 				}			
 
 			qsort( ch->pulse_params, ch->num_active_pulses,
 				   sizeof *ch->pulse_params, ep385_pulse_compare );
 
 			ep385_shape_padding_check( ch );
+			ep385_twt_padding_check( ch );
 
 			/* Compare old and new state, if nothing changed, i.e. the number
 			   of active pulses is the same and all positions and lengths are
@@ -247,31 +261,69 @@ static void ep385_pulse_check( FUNCTION *f )
 	if ( f->num_pulses < 2 )
 		return;
 
+	/* Loop over all active pulses of the function and check that they don't
+	   overlap. A few things have to be taken into account:
+	   1. Automatically created shape pulses for pulses of the same function
+	      should not be reported - they can only clash if also the pulses they
+		  were created for do clash. Thus for automatically created shape
+		  pulses we only need to check for overlap if the pulses they belong
+		  to are from different functions.
+	   2. We do have to check for overlaps between automatically generated
+	      shape pulses and user defined shape pulses.
+	   3. Automatically created TWT pulses can't overlap - if they do we
+	      will automatically reduce their lengths to avoid overlaps.
+	   4. Also user defined TWT pulses and automatically created ones can't
+	      overlap. Again, the automatically generated ones will shrink if
+		  necessary.
+	   5. User defined TWT pulses can overlap and thus must be tested.
+	*/
+
 	for ( i = 0; i < f->num_pulses - 1; i++ )
 	{
 		p1 = f->pulses[ i ];
-		if ( ! p1->is_active )
+
+		/* Skip checks for inactive pulses and automatically generated
+		   TWT pulses */
+
+		if ( ! p1->is_active ||
+			 ( f->self == PULSER_CHANNEL_TWT && p1->tp != NULL ) )
 			continue;
 
 		for ( j = i + 1; j < f->num_pulses; j++ )
 		{
 			p2 = f->pulses[ j ];
-			if ( ! p2->is_active )
+
+			/* Skip checks for inactive pulses and automatically generated
+			   TWT pulses */
+
+			if ( ! p2->is_active ||
+				( f->self == PULSER_CHANNEL_TWT && p2->tp != NULL ) )
 				continue;
 
-			if ( ( p1->pos == p2->pos ) ||
+			if ( p1->pos == p2->pos ||
 				 ( p1->pos < p2->pos && p1->pos + p1->len > p2->pos ) ||
 				 ( p2->pos < p1->pos && p2->pos + p2->len > p1->pos ) )
 			{
 				if ( ep385.auto_shape_pulses &&
-					 p1->function->self == PULSER_CHANNEL_PULSE_SHAPE )
+					 f->self == PULSER_CHANNEL_PULSE_SHAPE )
 				{
-					if ( p1->function != p2->function )
+					if ( p1->sp != NULL && p2->sp != NULL &&
+						 p1->sp->function != p2->sp->function )
 						print( FATAL, "Shape pulses for pulses #%ld function "
 							   "'%s') and #%ld (function '%s') start to "
 							   "overlap.\n", p1->sp->num,
 							   p1->sp->function->name, p2->sp->num,
 							   p2->sp->function->name );
+					if ( p1->sp != NULL && p2->sp == NULL )
+						print( FATAL, "Automatically created shape pulse for "
+							   "pulse #%ld (function '%s') and SHAPE pulse "
+							   "#%ld start to overlap.\n", p1->sp->num,
+							   p1->sp->function->name, p2->num );
+					else if ( p1->sp == NULL && p2->sp != NULL )
+						print( FATAL, "Automatically created shape pulse for "
+							   "pulse #%ld (function '%s') and SHAPE pulse "
+							   "#%ld start to overlap.\n", p2->sp->num,
+							   p2->sp->function->name, p1->num );
 				}
 				else
 					print( FATAL, "Pulses #%ld and #%ld of function '%s' "
@@ -475,27 +527,43 @@ void ep385_full_reset( void )
 
 			ch->num_active_pulses = 0;
 			for ( m = 0; ( p = pm_entry[ m ] ) != NULL; m++ )
+			{
 				if ( p->is_active )
+					continue;
+
+				pp = ch->pulse_params + ch->num_active_pulses++;
+
+				pp->pos = p->pos + f->delay;
+				pp->len = p->len;
+				pp->pulse = p;
+
+				/* Extend pulses for which a shape pulse has been created
+				   automatically a bit */
+
+				if ( p->function->self != PULSER_CHANNEL_PULSE_SHAPE &&
+					 p->sp != NULL )
 				{
-					pp = ch->pulse_params + ch->num_active_pulses++;
-
-					pp->pos = p->pos + f->delay;
-					pp->len = p->len;
-					pp->pulse = p;
-
-					if ( p->function->self != PULSER_CHANNEL_PULSE_SHAPE &&
-						 p->sp != NULL )
-					{
-						pp->pos -= p->function->left_shape_padding;
-						pp->len +=   p->function->left_shape_padding
-								   + p->function->right_shape_padding;
-					}
+					pp->pos -= p->function->left_shape_padding;
+					pp->len +=   p->function->left_shape_padding
+							   + p->function->right_shape_padding;
 				}
+
+				/* Extend TWT pulses that were automatically created */
+
+				if ( p->function->self == PULSER_CHANNEL_TWT &&
+					 p->tp != NULL )
+				{
+					pp->pos -= p->tp->function->left_twt_padding;
+					pp->len +=   p->tp->function->left_twt_padding
+							   + p->tp->function->right_twt_padding;
+				}
+			}
 
 			qsort( ch->pulse_params, ch->num_active_pulses,
 				   sizeof *ch->pulse_params, ep385_pulse_compare );
 
 			ep385_shape_padding_check( ch );
+			ep385_twt_padding_check( ch );
 		}
 	}
 }
@@ -515,13 +583,15 @@ void ep385_shape_padding_check( CHANNEL *ch )
 		 ch->num_active_pulses == 0 )
 		return;
 
+	/* Check that first pulse don't starts to early */
+
 	pp = ch->pulse_params;
 	if ( pp->pos < 0 )
 	{
 		if ( ! pp->pulse->left_shape_warning )
 		{
-			print( SEVERE, "Pulse #%ld too early to set left padding of %s.\n",
-				   pp->pulse->num,
+			print( SEVERE, "Pulse #%ld too early to set left shape padding "
+				   "of %s.\n", pp->pulse->num,
 				   ep385_pticks( ch->function->left_shape_padding ) );
 			pp->pulse->left_shape_warning = SET;
 		}
@@ -534,6 +604,8 @@ void ep385_shape_padding_check( CHANNEL *ch )
 		pp->pos = 0;
 	}
 
+	/* Shorten intermediate pulses if they would overlap */
+
 	for ( i = 1; i < ch->num_active_pulses; i++ )
 	{
 		ppp = pp;
@@ -541,23 +613,136 @@ void ep385_shape_padding_check( CHANNEL *ch )
 
 		if ( ppp->pos + ppp->len > pp->pos )
 			ppp->len -= ppp->pos + ppp->len - pp->pos;
+	}
 
-		if ( pp->pos + pp->len > MAX_PULSER_BITS )
+	/* Check that last pulse isn't too long */
+
+	pp = ch->pulse_params + ch->num_active_pulses - 1;
+	if ( pp->pos + pp->len > MAX_PULSER_BITS )
+	{
+		if ( ! pp->pulse->right_shape_warning )
 		{
-			if ( ! pp->pulse->right_shape_warning )
+			print( SEVERE, "Pulse #%ld too long to set right shape padding "
+				   "of %s.\n", pp->pulse->num,
+				   ep385_pticks( ch->function->right_shape_padding ) );
+			pp->pulse->right_shape_warning = SET;
+		}
+
+		ep385.right_shape_warning++;
+		pp->pulse->function->min_right_shape_padding =
+			l_min( pp->pulse->function->min_right_shape_padding,
+				   pp->pulse->function->right_shape_padding + pp->pos );
+		pp->len = MAX_PULSER_BITS - pp->pos;
+	}
+}
+
+
+/*------------------------------------------------*/
+/*------------------------------------------------*/
+
+void ep385_twt_padding_check( CHANNEL *ch )
+{
+	PULSE_PARAMS *pp, *ppp;
+	int i;
+
+	if ( ch->function->self != PULSER_CHANNEL_TWT ||
+		 ! ch->function->has_auto_twt_pulses ||
+		 ch->num_active_pulses == 0 )
+		return;
+
+	/* Check that first TWT pulse doesn't start too early (this only can
+	   happen for automatically created pulses) */
+
+	pp = ch->pulse_params;
+	if ( pp->pulse->tp != NULL && pp->pos < 0 )
+	{
+		if ( ! pp->pulse->left_twt_warning )
+		{
+			print( SEVERE, "Pulse #%ld too early to set left padding of "
+				   "%s for its TWT pulse.\n",
+				   pp->pulse->tp->num,
+				   ep385_pticks( pp->pulse->tp->function->left_twt_padding ) );
+			pp->pulse->left_twt_warning = SET;
+		}
+
+		ep385.left_twt_warning++;
+		pp->pulse->function->min_left_twt_padding =
+					  l_min( pp->pulse->function->min_left_twt_padding,
+							 pp->pulse->function->left_twt_padding + pp->pos );
+		pp->len += pp->pos;
+		pp->pos = 0;
+	}
+
+	/* Shorten intermediate pulses so they don't overlap - if necessary even
+	   remove pulses if a pulse is completely within the area of its
+	   predecessor */
+
+	for ( i = 1; i < ch->num_active_pulses; i++ )
+	{
+		ppp = pp;
+		pp = pp + 1;
+
+		if ( pp->pos < 0 )
+		{
+			if ( ! pp->pulse->left_twt_warning )
 			{
-				print( SEVERE, "Pulse #%ld too long to set right padding of "
-					   "%s.\n", pp->pulse->num,
-					   ep385_pticks( ch->function->right_shape_padding ) );
-				pp->pulse->right_shape_warning = SET;
+				print( SEVERE, "Pulse #%ld too early to set left padding of "
+					   "%s for its TWT pulse.\n",
+					   pp->pulse->tp->num, ep385_pticks(
+								 pp->pulse->tp->function->left_twt_padding ) );
+				pp->pulse->left_twt_warning = SET;
 			}
 
-			ep385.right_shape_warning++;
-			pp->pulse->function->min_right_shape_padding =
-				   l_min( pp->pulse->function->min_right_shape_padding,
-						  pp->pulse->function->right_shape_padding + pp->pos );
-			pp->len = MAX_PULSER_BITS - pp->pos;
+			ep385.left_twt_warning++;
+			pp->pulse->function->min_left_twt_padding =
+					  l_min( pp->pulse->function->min_left_twt_padding,
+							 pp->pulse->function->left_twt_padding + pp->pos );
+			pp->len += pp->pos;
+			pp->pos = 0;
 		}
+
+		if ( ppp->pos == pp->pos )
+		{
+			if ( ppp->len <= pp->len )
+				memmove( ppp, pp,
+						 ( ch->num_active_pulses-- - i-- ) * sizeof *pp );
+			else
+				memmove( pp, pp + 1,
+						 ( ch->num_active_pulses-- - --i ) * sizeof *pp );
+			continue;
+		}
+
+		if ( ppp->pos + ppp->len > pp->pos )
+		{
+			if ( ppp->pos + ppp->len >= pp->pos + pp->len )
+			{
+				memmove( pp, pp + 1,
+					  ( --ch->num_active_pulses - --i ) * sizeof *pp );
+			}
+			else
+				ppp->len -= ppp->pos + ppp->len - pp->pos;
+		}
+	}
+
+	/* Check that the last TWT pulse isn't too long (can only happen for
+	   automatically created pulses) */
+
+	pp = ch->pulse_params + ch->num_active_pulses - 1;
+	if ( pp->pos + pp->len > MAX_PULSER_BITS )
+	{
+		if ( ! pp->pulse->right_twt_warning )
+		{
+			print( SEVERE, "Pulse #%ld too long to set right padding "
+				   "of %s.\n", pp->pulse->tp->num, ep385_pticks(
+								pp->pulse->tp->function->right_twt_padding ) );
+			pp->pulse->right_twt_warning = SET;
+		}
+
+		ep385.right_twt_warning++;
+		pp->pulse->function->min_right_twt_padding =
+			l_min( pp->pulse->function->min_right_twt_padding,
+				   pp->pulse->function->right_twt_padding + pp->pos );
+		pp->len = MAX_PULSER_BITS - pp->pos;
 	}
 }
 
@@ -577,6 +762,11 @@ static PULSE *ep385_delete_pulse( PULSE *p )
 
 	if ( p->sp && p->sp->function->self == PULSER_CHANNEL_PULSE_SHAPE )
 		ep385_delete_pulse( p->sp );
+
+	/* If the pulse has an associated TWT pulse also delete it */
+
+	if ( p->tp && p->sp->function->self == PULSER_CHANNEL_TWT )
+		ep385_delete_pulse( p->tp );
 
 	/* First we've got to remove the pulse from its functions pulse list */
 

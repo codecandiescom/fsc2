@@ -75,9 +75,13 @@ bool ep385_new_pulse( long pnum )
 	cp->needs_update = UNSET;
 	cp->has_been_active = cp->was_active = UNSET;
 
-	cp->left_warning = UNSET;
-	cp->right_warning = UNSET;
+	cp->left_shape_warning = UNSET;
+	cp->right_shape_warning = UNSET;
 	cp->sp = NULL;
+
+	cp->left_twt_warning = UNSET;
+	cp->right_twt_warning = UNSET;
+	cp->tp = NULL;
 
 	return OK;
 }
@@ -105,7 +109,7 @@ bool ep385_set_pulse_function( long pnum, int function )
 	if ( p->is_function )
 	{
 		print( FATAL, "Function of pulse #%ld has already been set to '%s'.\n",
-			   pnum, Function_Names[ p->function->self ] );
+			   pnum, p->function->name );
 		THROW( EXCEPTION );
 	}
 
@@ -114,8 +118,7 @@ bool ep385_set_pulse_function( long pnum, int function )
 	if ( ! f->is_used )
 	{
 		print( FATAL, "The function '%s' of pulse #%ld hasn't been "
-			   "declared in the ASSIGNMENTS section.\n",
-			   Function_Names[ f->self ], p->num );
+			   "declared in the ASSIGNMENTS section.\n", f->name, p->num );
 		THROW( EXCEPTION );
 	}
 
@@ -125,7 +128,7 @@ bool ep385_set_pulse_function( long pnum, int function )
 	if ( f->channel[ 0 ] == NULL )
 	{
 		print( FATAL, "No channel has been assigned to function '%s'.\n",
-			   Function_Names[ ep385.function[ function ].self ] );
+			   ep385.function[ function ].name );
 		THROW( EXCEPTION );
 	}
 
@@ -317,8 +320,7 @@ bool ep385_set_pulse_phase_cycle( long pnum, long cycle )
 	if ( p->function->phase_setup == NULL )
 	{
 		print( FATAL, "Function %s of pulse #%ld has not not been set up for "
-			   "for phase cycling\n", Function_Names[ p->function->self ],
-			   pnum );
+			   "for phase cycling\n", p->function->name, pnum );
 		THROW( EXCEPTION );
 	}
 

@@ -186,9 +186,15 @@ void ep385_dump_channels( void )
 			fprintf( ep385.dump_file, "%s:%d", f->name, ch->self );
 			for ( k = 0; k < ch->num_active_pulses; k++ )
 				if ( f->self == PULSER_CHANNEL_PULSE_SHAPE &&
-					 ch->pulse_params[ k ].pulse->sp )
+					 ch->pulse_params[ k ].pulse->sp != NULL )
 					fprintf( ep385.dump_file, " (%ld) %ld %ld",
 							 ch->pulse_params[ k ].pulse->sp->num,
+							 ch->pulse_params[ k ].pos,
+							 ch->pulse_params[ k ].len );
+				else if ( f->self == PULSER_CHANNEL_TWT &&
+						  ch->pulse_params[ k ].pulse->tp != NULL )
+					fprintf( ep385.dump_file, " (%ld) %ld %ld",
+							 ch->pulse_params[ k ].pulse->tp->num,
 							 ch->pulse_params[ k ].pos,
 							 ch->pulse_params[ k ].len );
 				else

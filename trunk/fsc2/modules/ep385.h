@@ -43,6 +43,7 @@ void ep385_exit_hook( void );
 
 Var *pulser_name( Var *v );
 Var *pulser_automatic_shape_pulses( Var *v );
+Var *pulser_automatic_twt_pulses( Var *v );
 Var *pulser_dump_pulses( Var *v );
 Var *pulser_shape_to_defense_minimum_distance( Var *v );
 Var *pulser_defense_to_shape_minimum_distance( Var *v );
@@ -151,6 +152,13 @@ typedef struct _F_ {
 	Ticks min_left_shape_padding;
 	Ticks min_right_shape_padding;
 
+	bool uses_auto_twt_pulses;
+	bool has_auto_twt_pulses;
+	Ticks left_twt_padding;
+	Ticks right_twt_padding;
+	Ticks min_left_twt_padding;
+	Ticks min_right_twt_padding;
+
 } FUNCTION;
 
 
@@ -229,6 +237,10 @@ typedef struct {
 	long left_shape_warning;
 	long right_shape_warning;
 
+	bool auto_twt_pulses;
+	long left_twt_warning;
+	long right_twt_warning;
+
 } EP385;
 
 
@@ -278,10 +290,16 @@ typedef struct _p_ {
 	bool needs_update;       /* set if the pulses properties have been changed
 								in test run or experiment */
 
-	bool left_shape_warning;
-	bool right_shape_warning;
+	bool left_shape_warning; /* stores if for pulse the left or right shape */
+	bool right_shape_warning;/* padding couldn't be set correctly */
 	struct _p_ *sp;          /* for normal pulses reference to related shape
-								pulse (if such exist), for shape pulses
+								pulse (if such exists), for shape pulses
+								reference to pulse it is associated with */
+
+	bool left_twt_warning;   /* stores if for pulse the left or right TWT */
+	bool right_twt_warning;  /* padding couldn't be set correctly */
+	struct _p_ *tp;          /* for normal pulses reference to related TWT
+								pulse (if such exists), for TWT pulses
 								reference to pulse it is associated with */
 } PULSE;
 
@@ -365,6 +383,7 @@ void ep385_do_checks( FUNCTION *f );
 void ep385_set_pulses( FUNCTION *f );
 void ep385_full_reset( void );
 void ep385_shape_padding_check( CHANNEL *ch );
+void ep385_twt_padding_check( CHANNEL *ch );
 
 
 /* Functions from ep385_gpib.c */

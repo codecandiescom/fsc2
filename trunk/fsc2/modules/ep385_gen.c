@@ -110,21 +110,23 @@ bool ep385_assign_channel_to_function( int function, long channel )
 		if ( c->function->self == function )
 		{
 			print( SEVERE, "Channel %ld gets assigned more than once to "
-				   "function '%s'.\n", channel,
-				   Function_Names[ c->function->self ] );
+				   "function '%s'.\n", channel, c->function->name );
 			return FAIL;
 		}
 
 		print( FATAL, "Channel %ld is already used for function '%s'.\n",
-			   channel, Function_Names[ c->function->self ] );
+			   channel, c->function->name );
 		THROW( EXCEPTION );
 	}
 
-	/* The PULSE_SHAPE function can only have one channel assigned to it */
+	/* The PULSE_SHAPE and TWT function can only have one channel assigned
+	   to it */
 
-	if ( function == PULSER_CHANNEL_PULSE_SHAPE && f->num_channels > 0 )
+	if ( ( function == PULSER_CHANNEL_PULSE_SHAPE ||
+		   function == PULSER_CHANNEL_TWT ) &&
+		 f->num_channels > 0 )
 	{
-		print( FATAL, "Only one channel may be assigned to function '%s'.\n",
+		print( FATAL, "Only one channel can be assigned to function '%s'.\n",
 			   Function_Names[ function ] );
 		THROW( EXCEPTION );
 	}
@@ -343,9 +345,10 @@ bool ep385_set_phase_reference( int phs, int function )
 		THROW( EXCEPTION );
 	}
 
-	/* The PULSE_SHAPE function can't be phase-cycled */
+	/* The PULSE_SHAPE and TWT functions can't be phase-cycled */
 
-	if ( function == PULSER_CHANNEL_PULSE_SHAPE )
+	if ( function == PULSER_CHANNEL_PULSE_SHAPE ||
+		 function == PULSER_CHANNEL_TWT )
 	{
 		print( FATAL, "Function '%s' can't be phase-cycled.\n",
 			   Function_Names[ PULSER_CHANNEL_PULSE_SHAPE ] );
@@ -358,7 +361,7 @@ bool ep385_set_phase_reference( int phs, int function )
 	{
 		print( FATAL, "PHASE_SETUP_%d has already been assoiated with "
 			   "function %s.\n",
-			   phs, Function_Names[ ep385_phs[ phs ].function->self ] );
+			   phs, ep385_phs[ phs ].function->name );
 		THROW( EXCEPTION );
 	}
 
@@ -369,7 +372,7 @@ bool ep385_set_phase_reference( int phs, int function )
 	if ( f->phase_setup != NULL )
 	{
 		print( SEVERE, "Phase setup for function %s has already been done.\n",
-			   Function_Names[ f->self ] );
+			   f->name );
 		return FAIL;
 	}
 
@@ -474,7 +477,7 @@ bool ep385_phase_setup( int phs )
 			print( FATAL, "Channel %d needed for phase '%s' is not reserved "
 				   "for function '%s'.\n",
 				   ep385_phs[ phs ].channels[ i ]->self,
-				   Phase_Types[ i ], Function_Names[ f->self ] );
+				   Phase_Types[ i ], f->name );
 			THROW( EXCEPTION );
 		}
 
