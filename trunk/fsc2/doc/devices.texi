@@ -12,6 +12,7 @@
 * Digitizer Functions::     Functions for accessing the oscilloscopes.
 * Pulser Functions::
 * Synthesizer Functions::
+* Temperature Controller Functions::
 * Multi-Device Functions::
 @end menu
 @end ifinfo
@@ -806,7 +807,7 @@ only available for the Sony/Tektronix DG2020.
 
 
 
-@node Synthesizer Functions, Multi-Device Functions, Pulser Functions, Device Functions
+@node Synthesizer Functions, Temperature Controller Functions, Pulser Functions, Device Functions
 @section Synthesizer functions
 @cindex Synthesizer functions
 The only implemented synthesizer so far is the HP8647A. Its module is
@@ -1046,11 +1047,55 @@ setting for the currently active modulation type. You can neither set
 nor obtain the modulation amplitude as long as the modulation is
 switched off, trying to do so will result in aborting the program.
 
+@end table
 
+
+
+@node Temperature Controller Functions, Multi-Device Functions, Synthesizer Functions, Device Functions
+@section Temperature Controller Functions
+@cindex Temperature Controller Functions
+The only currently implemented temperature controller is the Lake Shore 330.
+Its module is loaded by specifying
+@example
+lakeshore330
+@end example
+@noindent
+in the @code{DEVICES} section. All functions for the temperature
+controller can only be used in the @code{EXPERIMENT} section of
+the @acronym{EDL} program.
+
+
+@table @samp
+
+@item temp_contr_temperature()
+@findex temp_contr_temperature()
+This function accepts no arguments and returns the temperature at the
+currently active sample channel.
+
+@item temp_contr_sample_channel()
+@findex temp_contr_sample_channel()
+This function returns, when called with no argument, the currently
+selected sample channel. It returns @code{1} for channel @code{A} and
+@code{2} for channel @code{B}. These values can also passed to the
+function to set a new sample channel. Alternatively, one may also use
+the strings @code{"A"} or @code{"B"}. Please take note that setting a
+sample channel takes about half a second.
+
+
+@item temp_contr_lock_keyboard()
+@findex temp_contr_lock_keyboard()
+Usually, during an experiment the keyboard of the temperature controller
+is locked. But for situations where it would be useful to be able to
+control the device also via its keyboard it can be unlocked (and also
+re-locked) from within the program. To unlock the keyboard call this
+function with an argument of @code{0} or @code{"OFF"}, to re-lock the
+keyboard call it again with a non-zero argument, @code{"ON"} or no
+argument at all.
 
 @end table
 
-@node Multi-Device Functions, , Synthesizer Functions, Device Functions
+
+@node Multi-Device Functions, , Temperature Controller Functions, Device Functions
 @section Multi-Device functions
 @cindex Multi-Device functions
 
