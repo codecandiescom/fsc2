@@ -65,6 +65,15 @@ typedef struct Func_
 } Func;
 
 
+typedef struct Call_Stack_
+{
+	Func *f;
+	const char *dev_name;
+	struct Call_Stack_ *next;
+	struct Call_Stack_ *prev;
+} Call_Stack;
+
+
 bool functions_init( void );
 void functions_exit( void );
 int func_exists( const char *name );
@@ -72,6 +81,8 @@ Var *func_get( const char *name, int *acc );
 Var *func_get_long( const char *name, int *acc, bool flag );
 Var *func_call( Var *f );
 void close_all_files( void );
+Call_Stack *call_push( Func *f, const char *device_name );
+Call_Stack *call_pop( void );
 
 /* from func_list_lexer.flex */
 

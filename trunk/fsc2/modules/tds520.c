@@ -807,7 +807,7 @@ static Var *get_curve( Var *v, bool use_cursor )
 	double *array;
 	long length;
 	Var *nv;
-	in j = 0;
+	int j = 0;
 
 
 	/* The first variable got to be a channel number */

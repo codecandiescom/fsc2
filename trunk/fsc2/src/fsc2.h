@@ -125,8 +125,8 @@ int cmdline_flags;
 
 long Lc = 0;                 /* line number in currently parsed file */
 char *Fname = NULL;          /* name of currently parsed file */
+Call_Stack *CS = NULL;
 const char *Cur_Func = NULL; /* name of the currently executed function */
-const Device *Cur_Dev = NULL;/* device ot the  currently executed function */
 Compilation compilation;     /* structure with infos about compilation state */
 Prg_Token *prg_token = NULL; /* array with predigested program */
 long prg_length = -1;        /* number of array elements in predigested
@@ -168,6 +168,7 @@ FL_FORM *cut_main_form;
 
 int I_am = PARENT;
 int FSC2_MODE = PREPARATION;
+bool IN_HOOK = UNSET;
 
 int pd[ 4 ];                    /* pipe descriptors */
 int conn_pd[ 2 ];
@@ -207,8 +208,8 @@ extern int cmdline_flags;
 
 extern long Lc;
 extern char *Fname;
+extern Call_Stack *CS;
 extern const char *Cur_Func;
-extern const Device *Cur_Dev;
 extern Compilation compilation;
 extern Prg_Token *prg_token;
 extern long prg_length;
@@ -242,6 +243,7 @@ extern FD_cut *cut_form;
 
 extern int I_am;
 extern int FSC2_MODE;
+extern bool IN_HOOK;
 
 extern int pd[ ];                  /* pipe descriptors */
 extern int conn_pd[ ];

@@ -47,9 +47,8 @@ int dg2020_f_init_hook( void )
 
 	if ( pulser_struct.name != NULL )
 	{
-		eprint( FATAL, UNSET, "While loading driver for DG2020_F found that "
-				"driver for pulser %s is already loaded.\n",
-				pulser_struct.name );
+		print( FATAL, "While loading the driver found that a driver for "
+			   "pulser %s is already loaded.\n", pulser_struct.name );
 		THROW( EXCEPTION );
 	}
 

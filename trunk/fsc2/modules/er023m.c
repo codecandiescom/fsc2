@@ -801,7 +801,7 @@ Var *lockin_resonator( Var *v )
 
 	if ( re < MIN_RESONATOR || re > MAX_RESONATOR )
 	{
-		print( FATAL, SET, "Invalid value %d used as resonator number, valid "
+		print( FATAL, "Invalid value %d used as resonator number, valid "
 			   "values are %d and %d.\n",
 			   re + 1, MIN_RESONATOR + 1, MAX_RESONATOR + 1 );
 		THROW( EXCEPTION );
