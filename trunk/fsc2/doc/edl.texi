@@ -11,7 +11,9 @@ This chapter describes the @b{EDL} language (@b{E}xperiment
 @menu
 * Basics::                  Basic principles.
 * Sections::                The sections of an EDL program.
+* Devices::
 * Variables::               Using variables and arrays.
+* Arithmetic::
 * Control structures::      Flow control in an EDL program
 @end menu
 @end ifinfo
@@ -38,7 +40,7 @@ in the various sections. These are explained in the next sections.
 
 
 
-@node Sections, Variables, Basics, EDL
+@node Sections, Devices, Basics, EDL
 @section Sections
 @cindex section
 
@@ -103,7 +105,7 @@ accepted section keywords:
 @end itemize
 
 
-@node Devices, Variables, Basics, EDL
+@node Devices, Variables, Sections, EDL
 @section Devices
 @cindex devices
 
@@ -119,7 +121,7 @@ write the device names with lower or upper case letters, they will
 automatically be converted to all lower case.
 
 
-@node Variables, Control structures, Sections, EDL
+@node Variables, Arithmetic, Devices, EDL
 @section Variables
 @cindex variables
 @cindex arrays
@@ -194,7 +196,7 @@ lower case character, i.e.@: a-z.}
 
 
 
-@node Arithmetic, , Control structures, EDL
+@node Arithmetic, Control structures, Variables, EDL
 @section Arithmetic
 @cindex arithmetic
 
@@ -282,7 +284,7 @@ As usual, non-integer exponents can only be used with non-negative bases!
 
 
 
-@node Control structures, , Variables, EDL
+@node Control structures, , Arithmetic, EDL
 @section Control structures
 @cindex control structures
 @cindex flow control

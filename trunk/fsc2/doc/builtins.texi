@@ -366,7 +366,7 @@ top of the editor - it defaults to "Please enter a comment:".
 @end table
 
 
-@node Mathematical functions, Auxliary functions, Output Functions, Functions
+@node Mathematical functions, Auxiliary functions, Output functions, Functions
 @section Mathematical functions
 @cindex mathematical functions
 
