@@ -589,6 +589,7 @@ buttons of the main form. (Should you worry what the lines like
 notify_conn( BUSY_SIGNAL );
 @end example
 @noindent
+and
 @example
 notify_conn( UNBUSY_SIGNAL );
 @end example
