@@ -59,19 +59,23 @@
 /******************************************************************/
 
 
-/* make bool synonymous to unsigned char */
+/* create a bool type */
 
-typedef  unsigned char  bool;
+typedef enum
+{
+	false = 0,
+	true  = 1
+} bool;
+
+#define FAIL    false
+#define UNSET   false
+#define FALSE   false
+#define OK      true
+#define SET     true
+#define TRUE    true
 
 
 /* Define some useful abbreviations - never ever change these ! */
-
-#define	FAIL  ( ( bool ) 0 )      
-#define UNSET ( ( bool ) 0 )
-#define FALSE ( ( bool ) 0 )
-#define OK    ( ( bool ) 1 )
-#define SET   ( ( bool ) 1 )
-#define TRUE  ( ( bool ) 1 )
 
 #define UNDEFINED -1
 
