@@ -269,6 +269,7 @@ display( n_x_point, data [ , n_curve [ , ... ] ] )
 This function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} program.
 
+
 @anchor{display_2d}
 @item display_2d( )
 @findex display_2d()
@@ -445,6 +446,7 @@ i.e.@: @code{" "}.
 This function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} program.
 
+
 @anchor{change_label}
 @item change_label()
 @findex change_label()
@@ -460,6 +462,7 @@ string that just contains one (or more) space characters, i.e.@: @code{"
 
 This function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} program.
+
 
 @anchor{rescale_1d}
 @item rescale_1d()
@@ -480,6 +483,7 @@ the number of points should remain unchanged.
 This function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} program.
 
+
 @anchor{rescale_2d}
 @item rescale_2d()
 @findex rescale_2d()
@@ -496,6 +500,7 @@ the number of points currently displayed along this axis.
 
 This function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} program.
+
 
 @anchor{rescale}
 @item rescale()
@@ -979,6 +984,7 @@ the file.
 This function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} program.
 
+
 @anchor{ffsave}
 @item ffsave()
 @findex ffsave()
@@ -1076,6 +1082,7 @@ the file.
 
 This function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} program.
+
 
 @anchor{save_program}
 @item save_program()
@@ -1257,6 +1264,7 @@ vertical or horizontal layout.
 Of course this function has to be called @b{before} a function to create
 an object (button, slider or in- or output field) has been invoked.
 
+
 @anchor{toolbox_changed}
 @item toolbox_changed()
 @findex toolbox_changed()
@@ -1278,6 +1286,7 @@ also will report a change until the new state of the object has been
 determined by an appropriate function call. I.e.@: it will repeatedly
 report e.g.@: a new slider value until you have called
 @code{slider_value()} for the object.
+
 
 @anchor{toolbox_wait}
 @item toolbox_wait()
@@ -1720,20 +1729,21 @@ Returns the absolute value of an integer or floating point number (or
 all the elements of an one-dimensional array) .
 
 
-@anchor{max}
-@item max()
-@findex max()
+@anchor{max_of}
+@item max_of()
+@findex max_of()
 Returns the largest value of all arguments. Arguments can be any number
 of numbers or (one-dimensional) arrays. If all arguments are integer
 numbers an integer number is returned, otherwise a floating point value.
 
 
-@anchor{min}
-@item min()
-@findex min()
+@anchor{min_of}
+@item min_of()
+@findex min_of()
 Returns the smallest value of all arguments. Arguments can be any number
 of numbers or (one-dimensional) arrays. If all arguments are integer
 numbers an integer number is returned, otherwise a floating point value.
+
 
 @anchor{mean}
 @item mean()
@@ -1755,6 +1765,7 @@ elements.  Optionally, it accepts up to two more integer arguments, the
 index of the first element of the array to be included into the
 calculation and the number of elements to be used. If the length
 parameter is missing all elements up to the end of the array are used.
+
 
 @anchor{sqrt}
 @item sqrt()
