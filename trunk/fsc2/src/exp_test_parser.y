@@ -32,6 +32,8 @@
 
 extern int exp_testlex( void );
 
+extern char *exptext;
+
 /* locally used functions */
 
 int exp_testparse( void );
