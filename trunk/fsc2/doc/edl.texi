@@ -164,7 +164,7 @@ experiment will not abort due to a faulty @acronym{EDL} program after it
 has run for 2 hours and you have to start all over again.
 
 As you can already see form the example most of an @acronym{EDL} program
-consists of function calls. Functions can be devided into two
+consists of function calls. Functions can be divided into two
 categories, built-in functions and device functions. Built-in functions
 (like @code{init_1d()}, @code{display()}, @code{save()} and
 @code{wait()}) are always available, even when there is no
@@ -387,7 +387,7 @@ the first character of the variables name is important: if the name
 starts with an upper case letter, i.e.@: A-Z, it's an integer variable
 while a lower case character, i.e.@: a-z, indicates a floating point
 variable. (Actually, changing just one line of the program allows to set
-a completely different behaviour.)
+a completely different behavior.)
 
 
 @subsection Arrays
@@ -423,7 +423,7 @@ list. In the second line there are less initializers than the array
 @code{d} has elements, thus only the first two elements are set, i.e.@:
 @code{d[ 1 ]} and @code{d[ 2 ]}, while the remaining elements are
 automatically set to zero. Besides, you can see that function calls,
-arithmetic etc.@: can be used in the intialization. The third example
+arithmetic etc.@: can be used in the initialization. The third example
 shows the initialization of a multidimensional array, the elements of
 the array @code{E} being set starting with the first row and continuing
 with the next rows until all initializers are used up. Thus the array
@@ -1017,7 +1017,7 @@ realized by using i.e.@: a @code{REPEAT} loop with a huge number of
 repeats, this would take extremely long to test the program before the
 @code{EXPERIMENT} is started. In these cases a @code{FOREVER} loop is
 more convenient because the content of the loop is only tested once so
-the experiment can start much faster. For obvious resons, a
+the experiment can start much faster. For obvious reasons, a
 @code{FOREVER} loop doesn't expect a loop condition but the loop block
 immediately following the @code{FOREVER} keyword.
 
@@ -1084,9 +1084,9 @@ is negative, i.e.@: it's basically just a calculation of the absolute
 value of @code{x} (there's also the built-in function @code{abs()} for
 doing this which is probably a lot faster).
 
-By using the @code{ELSE} statment you can specify an alternative with
+By using the @code{ELSE} statement you can specify an alternative with
 statements to be executed if the @code{IF} condition is not being met.
-Again the block of alternative staments must be enclosed in curly
+Again the block of alternative statements must be enclosed in curly
 braces:
 @example
   IF x >= 0 @{

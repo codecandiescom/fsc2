@@ -26,21 +26,21 @@
 
 
 @acronym{fsc2} is a program for the remote control of cw- and pulsed EPR
-spectrometers. It is basically an interpreter that executes a program
-written by the experimentator to describe the experiment in a language
-which in the following will be called @acronym{EDL}
+spectrometers. It is basically an interpreter that executes a program to
+describe the experiment in a language which in the following will be
+called @acronym{EDL}
 @cindex @acronym{EDL}
 (@b{E}xperiment @b{D}escription @b{L}anguage). Making the execution of
-the experiment completely controllable by the experimentator is rather
-different from the usual programs for remote spectrometer control that
-tend to have a graphical user interface where the experimental
-parameters are set and then one of a set of predefined experiment is
-started.
+the experiment completely controllable by the person doing the
+experiment is rather different from the usual programs for remote
+spectrometer control that tend to have a graphical user interface where
+the experimental parameters are set and then one of a set of predefined
+experiment is started.
 
 The drawback with this traditional approach is that there is always only
 a fixed set of experiments that can be done using the program. The
 problems start when one needs to do a new experiment for which the
-program was not written for. One eiter has to find some ways to trick
+program was not written for. One either has to find some ways to trick
 the program into doing something it isn't intended for or, if this
 fails, to change the program. This not only tends to take a lot of time,
 especially when the person that wrote the program isn't around anymore,
@@ -58,22 +58,21 @@ by writing a (usually rather small) program. @acronym{fsc2} will
 interpret this program and do the experiment accordingly. Writing a
 program may sound difficult, but the @acronym{EDL} language that is used
 to define an experiment isn't very hard to learn (it's much simpler
-than, for example, @code{C}). And when this hurdle is taken the
-experimentator has nearly complete control over the way the experiment
-will be done. Just to give a few very simple examples: sometimes signals
-are distributed over a large field range with nothing of interest in
-between, so it would be nice to just skip these regions. Most normal
-programs won't allow this and one has to either record also the
-uninteresting field regions (thus loosing lots of time) or to restart
-the experiments for each of the regions of interest manually. In
-contrast, with @acronym{fsc2} it shouldn't take more than a few minutes
-to write an @code{EDL} program consisting of just a few lines of code
-that can not only skip these regions but also repeat the experiment as
-often as needed, and if necessary do different numbers of accumulations
-of the different parts (if, for example, some of the signals are huge
-while others are hardly detectable above the noise floor) or with
-automatically changing the lock-in amplifiers sensitivity or time
-constant in between.
+than, for example, @code{C}). And when this hurdle is taken you will
+have complete control over the way the experiment will be done. Just to
+give a few very simple examples: sometimes signals are distributed over
+a large field range with nothing of interest in between, so it would be
+nice to just skip these regions. Most normal programs won't allow this
+and one has to either record also the uninteresting field regions (thus
+loosing lots of time) or to restart the experiments for each of the
+regions of interest manually. In contrast, with @acronym{fsc2} it
+shouldn't take more than a few minutes to write an @code{EDL} program
+consisting of just a few lines of code that can not only skip these
+regions but also repeat the experiment as often as needed, and if
+necessary do different numbers of accumulations of the different parts
+(if, for example, some of the signals are huge while others are hardly
+detectable above the noise floor) or with automatically changing the
+lock-in amplifiers sensitivity or time constant in between.
 
 But one does not have to write new program for every experiment one is
 going to do - for the standard experiments once such a program has been
@@ -92,7 +91,7 @@ Another common problem with the traditional type of programs is the use
 of different devices or the integration of new ones. Usually, the
 devices are hard-coded into the program and just changing one device
 requires a major rewrite. In contrast, @acronym{fsc2} has a strictly
-modular approach to the handling of devices. For each device a seperate
+modular approach to the handling of devices. For each device a separate
 module exists that only gets loaded if it is listed explicitely in the
 @acronym{EDL} program as required. Thus changing the experiment to work
 with e.g.@: a different lock-in amplifier or digitizer usually does not
@@ -135,7 +134,7 @@ modules are already exist (at the time of writing this there are 29
 different modules to choose from).
 
 Experiments with pulsed microwave or RF excitation play an ever
-encreasing r@^ole in modern EPR and @acronym{fsc2} has an extensive set
+increasing r@^ole in modern EPR and @acronym{fsc2} has an extensive set
 of commands and functions for dealing with pulses and pulse generators.
 These are explained in the chapter following the functions for other
 devices (@pxref{Using Pulsers}).

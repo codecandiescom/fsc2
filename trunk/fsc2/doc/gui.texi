@@ -52,7 +52,7 @@ shift the border between both browsers.
 On the left side you have a set of buttons:
 @itemize @bullet
 @item The @code{Load} button opens a file selector, allowing you to
-load a dirfferent @acronym{EDL} program.
+load a different @acronym{EDL} program.
 @item The @code{Reload} button lets you reload the current @acronym{EDL}
 program which is needed when you have edited it. 
 @item The @code{Edit} button opens an editor with the currently loaded
@@ -62,7 +62,7 @@ the default.
 @item The @code{Test} button lets you check an @acronym{EDL} program 
 after it has been loaded. While the test is running the buttons label is
 changed to @code{Stop Test} and can be used to abort the test. After the
-test finished succesfully the label is set back to @code{Test} and the
+test finished successfully the label is set back to @code{Test} and the
 button becomes inactive until a new program is loaded (or the current
 program is reloaded).
 @item Using the @code{Start} button you start the execution of the
@@ -76,7 +76,7 @@ used while an experiment is running.
 @item Pressing the @code{Help} button will try to start a browser with
 the HTML documentation for @acronym{fsc2}. You can select the browser to
 be used by setting the environment variable @code{BROWSER} to the name
-of your favourite browser (at least @code{opera}, @code{netscape},
+of your favorite browser (at least @code{opera}, @code{netscape},
 @code{konqueror}, @code{lynx} and @code{w3m} should work without
 problems). The default browser is @code{netscape}.
 @item The @code{Bug report} button will open an editor window
@@ -106,13 +106,13 @@ is shown, allowing you to load a different @acronym{EDL} program.
 loaded @acronym{EDL} program you have to click onto this button to
 make @acronym{fsc2} load the changed file.
 @item The @code{Edit} button - when you click onto it an editor will
-open up with the curently loaded @acronym{EDL} program. Which
+open up with the currently loaded @acronym{EDL} program. Which
 editor will be used depends on the environment variable @code{EDITOR},
 if it isn't set @code{vi} is used as the default editor.
 @item The @code{Test} button lets you check an @acronym{EDL} program 
 after it has been loaded. While the test is running the buttons label is
 changed to @code{Stop Test} and can be used to abort the test. After the
-test finished succesfully the button becomes inactive until a new
+test finished successfully the button becomes inactive until a new
 program is loaded (or the current program is reloaded).
 @item Using the @code{Start} button you start execution of the
 @acronym{EDL} program, i.e.@: you start the measurement.
@@ -120,7 +120,7 @@ program is loaded (or the current program is reloaded).
 @item Pressing the @code{Help} button will start try to start a browser
 with the HTML documentation for @acronym{fsc2}. You can select the browser to
 use by setting the environment variable @code{BROWSER} to the name of
-your favourite browser (at least opera, netscape, konqueror, lynx and
+your favorite browser (at least opera, netscape, konqueror, lynx and
 w3m should work without problems). The default browser is Netscape.
 @item Finally, the @code{Bug report} button will open an editor window
 where you can compose a bug report. When you're finished writing the
@@ -152,7 +152,7 @@ program hasn't been tested a test will be run now and, if the test
 succeeds, the experiment is started. While the devices are initialized
 the text in the @code{Star} button changes to @code{Stop} and clicking
 on the button lets you interrupt the device initialization stage. When
-the device intialization is finished a new window opens up for
+the device initialization is finished a new window opens up for
 displaying the measured data that will be described in the next section.
 
 
@@ -193,7 +193,7 @@ an experiment:
 @image{fsc2fig3,11cm,}
 
 The most prominent feature is the area for displaying the measured
-data. In this case two different curves are displayed simultanuously
+data. In this case two different curves are displayed simultaneously
 (but you can have up to four). They show data from the x- and y-channel
 of a lock-in amplifier while recording a cw-EPR experiment - obviously
 the lock-in's phase setting isn't optimal yet.
@@ -240,7 +240,7 @@ during the experiment you have to move the mouse into the display area
 onto the point you're interested in. Now press both the left and the
 right mouse button simultaneously (or first the left one, then the
 middle one while keeping the left button pressed down). The cursor
-changes to a crosshair
+changes to a cross-hair
 @ifnotinfo
 cursor, @image{cursor4,5mm,},
 @end ifnotinfo
@@ -259,7 +259,7 @@ if more than one curve is displayed.
 Beside finding out the exact values of your measured data you also may
 determine differences between data points, e.g.@: to measure line widths
 or signal intensities. If you press both the left and the right mouse
-button simultaneously the cursor changes to an encircled crosshair
+button simultaneously the cursor changes to an encircled cross-hair
 @ifnotinfo
 cursor, @image{cursor5,5mm,},
 @end ifnotinfo
@@ -300,7 +300,7 @@ display is rescaled so that the area of this box is magnified to fill
 the whole display area.
 
 You can also use this method in the areas of the axis. Also here a small
-box is shown, indicating the section that will be magnified. If yo do so
+box is shown, indicating the section that will be magnified. If you do so
 in the area of the x-axis only the x-scaling is changed, while when done
 in the y-axis area only a magnification in y-direction happens.
 
@@ -321,7 +321,7 @@ the middle mouse button in the area of either the x- or the y-axis.
 
 Finally, there's a third method to change the scaling. Whenever you
 press the right mouse button in either the display area or the axis
-fields the cursor changes to a magnifiying
+fields the cursor changes to a magnifying
 @ifnotinfo
 glass, @image{cursor3,5mm,}.
 @end ifnotinfo
@@ -351,7 +351,7 @@ curves are to be used for. Rescaling or moving will only apply to curves
 for which the corresponding button is active, i.e.@: pressed down (if
 not activated the buttons are drawn with a grey background instead of
 the color of the curve they are associated with). By de-activating one
-or more of the buttons you can extempt the corresponding curves from
+or more of the buttons you can exempt the corresponding curves from
 being rescaled or shifted.
 
 This leads to a minor problem: If you de-activate some of the buttons
@@ -377,11 +377,11 @@ Whenever you rescale curves or move them around the "Full Scale" button,
 labeled @code{FS}, will become in-active (its color changes from green
 to gray). When you want to get back to the full scale display you simply
 have to click onto it and all curves (even the ones that currently are
-extempted from rescaling because their buttons is in-active) are
+exempted from rescaling because their buttons is in-active) are
 rescaled so that all data will fit again into the display. A side effect
 of having the @code{FS} button active is that the display will be
 rescaled automatically when new data are measured that wouldn't fit into
-the display area. To switch this behaviour off simply deactivate the
+the display area. To switch this behavior off simply deactivate the
 @code{FS} button.
 
 
@@ -464,7 +464,7 @@ arrow.
 @end ifnottex
 @end ifnothtml
 
-Eventhough the new window with the cross section through the data set
+Even though the new window with the cross section through the data set
 only shows an 1D-curve it also has a z-axis. On this axis a red
 indicator shows the value for which the cross section either x- or
 y-direction was taken.
@@ -511,7 +511,7 @@ is running, especially if one is trying to determine the optimum
 parameters for an experiment. Therefor it is possible to write an
 @code{EDL} program that creates several different kinds of objects
 allowing user input during the experiment. All these elements appear in
-a seperate window, the tool box.
+a separate window, the tool box.
 @ifnotinfo
 The next figure shows all types of objects that can be created.
 
