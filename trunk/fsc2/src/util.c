@@ -636,7 +636,7 @@ inline short d2shrt( double a )
 		return SHRT_MAX_HALF;
 	if ( a < SHRT_MIN_HALF )
 		return SHRT_MIN_HALF;
-	return ( short ) lrnd( a );
+	return ( short ) a;                         /* Leads to compiler warning */
 }
 
 
@@ -656,7 +656,7 @@ inline unsigned short d2ushrt( double a )
 		return USHRT_MAX;
 	if ( a < 0 )
 		return 0;
-	return ( unsigned short ) lrnd( a );
+	return ( unsigned short ) a;                /* Leads to compiler warning */
 }
 
 
@@ -685,7 +685,7 @@ inline long lrnd( double x )
 		return LONG_MAX;
 	if ( x < LONG_MIN )
 		return LONG_MIN;
-	return ( long ) rint( x );
+	return ( long ) rint( x );                  /* Leads to compiler warning */
 }
 
 
@@ -695,5 +695,5 @@ inline int irnd( double x )
 		return INT_MAX;
 	if ( x < INT_MIN )
 		return INT_MIN;
-	return ( int ) rint( x );
+	return ( int ) rint( x );                   /* Leads to compiler warning */
 }
