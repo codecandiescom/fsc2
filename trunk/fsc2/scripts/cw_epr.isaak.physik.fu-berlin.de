@@ -43,7 +43,8 @@ my $tc_fact  	       = 1;
 my $tc			       = "Don't set";
 my $sens		       = "Don't set";
 my $how			       = 'Start experiment';
-my $bridge		       = 'cw';
+my $two_phases         = 'X only';
+my $phase_options      = [ 'X only', 'X and Y' ];
 
 
 my %fp = ( '-side' => 'top',
@@ -66,33 +67,39 @@ my $mw = MainWindow->new( );
 $mw->title( "cw_epr" );
 my $balloon = $mw->Balloon( );
 
+
 my $f0 = $mw->Frame( );
-my $f0_l1 = $f0->Label( '-text'             => 'Bridge:',
-						'-width'            => '20',
-						'anchor'            => 'w' );
-my $f0_m = $f0->Optionmenu( '-options'      => [ ( 'cw', 'pulsed' ) ],
-							'-width'        => 9,
-							'-textvariable' => \$bridge );
-$balloon->attach( $f0_m, '-balloonmsg' => "Selects either cw bridge or\n" .
-                                           "bridge for pulsed experiments" );
-$f0->pack( %fp );
-$f0_l1->pack( %wp );
-$f0_m->pack( %wp );
-
-
-my $f1 = $mw->Frame( );
-my $f1_l1 = $f1->Label( '-text'           => 'Start field:',
+my $f0_l1 = $f0->Label( '-text'           => 'Start field:',
 						'-width'          => '20',
 						'anchor'          => 'w' );
-my $f1_v = $f1->Entry( '-textvariable'    => \$start_field,
+my $f0_v = $f0->Entry( '-textvariable'    => \$start_field,
 					   '-width'           => '8',
 					   '-validate'        => 'key',
 					   '-validatecommand' => \&is_numeric,
 					   '-relief'          => 'sunken' );
-$balloon->attach( $f1_v, '-balloonmsg'    =>
+$balloon->attach( $f0_v, '-balloonmsg'    =>
 				         "Enter the start field (in Gauss)" );
-my $f1_l2 = $f1->Label( '-text'           => 'G',
+my $f0_l2 = $f0->Label( '-text'           => 'G',
 						'-width'          => 1 );
+
+$f0->pack( %fp );
+$f0_l1->pack( %wp );
+$f0_v->pack( %wp );
+$f0_l2->pack( %wp );
+
+
+my $f1 = $mw->Frame( );
+my $f1_l1 = $f1->Label( '-text'          => 'End field:',
+						'-width'         => '20',
+						'anchor'         => 'w' );
+my $f1_v = $f1->Entry( '-textvariable'   => \$end_field,
+					   '-width'          => '8',
+					   '-validate'       => 'key',
+					   '-validatecommand'=> \&is_numeric,
+					   '-relief'         => 'sunken' );
+$balloon->attach( $f1_v, '-balloonmsg'   => "Enter the end field (in Gauss)" );
+my $f1_l2 = $f1->Label( '-text'          => 'G',
+						'-width'         => 1 );
 
 $f1->pack( %fp );
 $f1_l1->pack( %wp );
@@ -101,17 +108,18 @@ $f1_l2->pack( %wp );
 
 
 my $f2 = $mw->Frame( );
-my $f2_l1 = $f2->Label( '-text'          => 'End field:',
-						'-width'         => '20',
-						'anchor'         => 'w' );
-my $f2_v = $f2->Entry( '-textvariable'   => \$end_field,
-					   '-width'          => '8',
-					   '-validate'       => 'key',
-					   '-validatecommand'=> \&is_numeric,
-					   '-relief'         => 'sunken' );
-$balloon->attach( $f2_v, '-balloonmsg'   => "Enter the end field (in Gauss)" );
-my $f2_l2 = $f2->Label( '-text'          => 'G',
-						'-width'         => 1 );
+my $f2_l1 = $f2->Label( '-text'           => 'Field step size:',
+						'-width'          => '20',
+						'anchor'          => 'w' );
+my $f2_v = $f2->Entry( '-textvariable'    => \$field_step,
+					   '-width'           => '8',
+					   '-validate'        => 'key',
+					   '-validatecommand' => \&is_numeric,
+					   '-relief'          => 'sunken' );
+$balloon->attach( $f2_v, '-balloonmsg'    =>
+				         "Enter the size of the field steps (in Gauss)" );
+my $f2_l2 = $f2->Label( '-text'           => 'G',
+						'-width'          => 1 );
 
 $f2->pack( %fp );
 $f2_l1->pack( %wp );
@@ -120,41 +128,21 @@ $f2_l2->pack( %wp );
 
 
 my $f3 = $mw->Frame( );
-my $f3_l1 = $f3->Label( '-text'           => 'Field step size:',
-						'-width'          => '20',
-						'anchor'          => 'w' );
-my $f3_v = $f3->Entry( '-textvariable'    => \$field_step,
-					   '-width'           => '8',
-					   '-validate'        => 'key',
-					   '-validatecommand' => \&is_numeric,
-					   '-relief'          => 'sunken' );
-$balloon->attach( $f3_v, '-balloonmsg'    =>
-				         "Enter the size of the field steps (in Gauss)" );
-my $f3_l2 = $f3->Label( '-text'           => 'G',
-						'-width'          => 1 );
-
-$f3->pack( %fp );
-$f3_l1->pack( %wp );
-$f3_v->pack( %wp );
-$f3_l2->pack( %wp );
-
-
-my $f5 = $mw->Frame( );
-my $f5_l1 = $f5->Label( '-text'          => 'Maximum field error:',
+my $f3_l1 = $f3->Label( '-text'          => 'Maximum field error:',
 						'-width'         => '20',
 						'anchor'         => 'w' );
-my $f5_v = $f5->Entry( '-textvariable'   => \$field_error,
+my $f3_v = $f3->Entry( '-textvariable'   => \$field_error,
 					   '-width'          => '8',
 					   '-validate'       => 'key',
 					   '-validatecommand'=> \&is_numeric,
 					   '-relief'         => 'sunken',
 					   'state'           => $sweep_method eq 'simple' ?
 					                            'disabled' : 'normal' );
-$balloon->attach( $f5_v, '-balloonmsg'   => "Sets maximum acceptable field\n" .
+$balloon->attach( $f3_v, '-balloonmsg'   => "Sets maximum acceptable field\n" .
 				                            "deviation in tested sweep\n" .
 			                                "(in Gauss, not larger than\n" .
 				                            "10% of field step size)" );
-my $f5_l2 = $f5->Label( '-text'          => 'G',
+my $f3_l2 = $f3->Label( '-text'          => 'G',
 						'-width'         => 1 );
 
 
@@ -175,65 +163,85 @@ $f4_l->pack( %wp );
 $f4_m->pack( %wp );
 
 
+$f3->pack( %fp );
+$f3_l1->pack( %wp );
+$f3_v->pack( %wp );
+$f3_l2->pack( %wp );
+
+
+
+my $f5 = $mw->Frame( );
+my $f5_l1 = $f5->Label( '-text'           => 'Number of runs:',
+						'-width'          => '20',
+						'anchor'          => 'w' );
+my $f5_v = $f5->Entry( '-textvariable'    => \$num_runs,
+					   '-width'           => '8',
+					   '-validate'        => 'key',
+					   '-validatecommand' => sub { $_[ 0 ] =~ /^\s*\d*\s*$/ },
+					   '-relief'          => 'sunken' );
+my $f5_l2 = $f5->Label( '-text'           => ' ',
+						'-width'          => 1 );
+$balloon->attach( $f5_v, '-balloonmsg'    => "Sets how many times the\n" .
+                                             "experiment will be repeated" );
 $f5->pack( %fp );
 $f5_l1->pack( %wp );
 $f5_v->pack( %wp );
 $f5_l2->pack( %wp );
 
 
-
-my $f6 = $mw->Frame( );
-my $f6_l1 = $f6->Label( '-text'           => 'Number of runs:',
+my $f6 = $mw->Frame( '-width'             => '29' );
+my $f6_l1 = $f6->Label( '-text'           => 'Waiting time:',
 						'-width'          => '20',
 						'anchor'          => 'w' );
-my $f6_v = $f6->Entry( '-textvariable'    => \$num_runs,
-					   '-width'           => '8',
+my $f6_v = $f6->Entry( '-textvariable'    => \$tc_fact,
+					   '-width'           => '7',
 					   '-validate'        => 'key',
-					   '-validatecommand' => sub { $_[ 0 ] =~ /^\s*\d*\s*$/ },
+					   '-validatecommand' => \&is_numeric,
 					   '-relief'          => 'sunken' );
-my $f6_l2 = $f6->Label( '-text'           => ' ',
-						'-width'          => 1 );
-$balloon->attach( $f6_v, '-balloonmsg'    => "Sets how many times the\n" .
-                                             "experiment will be repeated" );
+my $f6_l2 = $f6->Label( '-text'           => '* tc',
+						'-width'          => 2 );
+$balloon->attach( $f6_v, '-balloonmsg' =>
+				         "Enter the number of lock-in time constants\n" .
+				         "waited before a new data point is recorded" );
+
 $f6->pack( %fp );
 $f6_l1->pack( %wp );
 $f6_v->pack( %wp );
 $f6_l2->pack( %wp );
 
 
-my $f7 = $mw->Frame( '-width'             => '29' );
-my $f7_l1 = $f7->Label( '-text'           => 'Waiting time:',
-						'-width'          => '20',
-						'anchor'          => 'w' );
-my $f7_v = $f7->Entry( '-textvariable'    => \$tc_fact,
-					   '-width'           => '7',
-					   '-validate'        => 'key',
-					   '-validatecommand' => \&is_numeric,
-					   '-relief'          => 'sunken' );
-my $f7_l2 = $f7->Label( '-text'           => '* tc',
-						'-width'          => 2 );
-$balloon->attach( $f7_v, '-balloonmsg' =>
-				         "Enter the number of lock-in time constants\n" .
-				         "waited before a new data point is recorded" );
-
+my $f7 = $mw->Frame( );
+my $f7_l = $f7->Label( '-text'          => 'Lock-in amplifier:',
+						'-width'        => '20',
+						'anchor'        => 'w' );
+my $f7_m = $f7->Optionmenu( '-options'  =>
+							[ ( 'SR510', 'SR530', 'SR810', 'SR830' ) ],
+							'-width'    => 9,
+							'-command' => \&lockin_check,
+							'-textvariable' => \$lockin );
 $f7->pack( %fp );
-$f7_l1->pack( %wp );
-$f7_v->pack( %wp );
-$f7_l2->pack( %wp );
+$f7_l->pack( %wp );
+$f7_m->pack( %wp );
 
 
 my $f8 = $mw->Frame( );
-my $f8_l = $f8->Label( '-text'          => 'Lock-in amplifier:',
-						'-width'        => '20',
-						'anchor'        => 'w' );
-my $f8_m = $f8->Optionmenu( '-options'  =>
-							[ ( 'SR510', 'SR530', 'SR810', 'SR830' ) ],
+my $f8_l = $f8->Label( '-text'          => 'Phases:',
+					   '-width'        => '20',
+					   'anchor'        => 'w' );
+my $f8_m = $f8->Optionmenu( '-options'  => [ 'X only', 'X and Y' ],
 							'-width'    => 9,
-							'-textvariable' => \$lockin );
+							'-textvariable' => \$two_phases );
+$balloon->attach( $f8_m, '-balloonmsg'   => "Select measurement of  X phase\n"
+				                             . "only or both X and Y phase" );
+
+if ( $lockin =~ /^SR[85]10$/ ) {
+	$two_phases = 'X only' if $two_phases =~ /^Y and Y$/;
+	$f8_m->configure( 'state' => 'disabled' );
+}
+
 $f8->pack( %fp );
 $f8_l->pack( %wp );
 $f8_m->pack( %wp );
-
 
 
 my $f9 = $mw->Frame( );
@@ -294,17 +302,28 @@ MainLoop;
 
 sub set_sweep_method {
 	if ( $sweep_method eq 'simple' ) {
-		$f5_v->configure( 'state' => 'disabled' );
+		$f3_v->configure( 'state' => 'disabled' );
 		$hidden_field_error = $field_error;
 		$field_error = "";
 	} else {
-		$f5_v->configure( 'state' => 'normal' );
+		$f3_v->configure( 'state' => 'normal' );
 		$field_error = $hidden_field_error;
 	}
 }
 
 
-#############################################
+##############################################
+
+sub lockin_check {
+	if ( $lockin =~ /^SR[85]10$/ ) {
+		$two_phases = 'X only';
+		$f8_m->configure( 'state' => 'disabled' );
+	} else {
+		$f8_m->configure( 'state' => 'normal' );
+	}
+}
+
+##############################################
 
 sub get_defs {
 
@@ -318,10 +337,6 @@ if ( $ARGV[ 0 ] ) {
 }
 
 goto done_reading unless defined( $ne = <F> ) and $ne =~ /^#/;
-
-goto done_reading unless defined( $ne = <F> ) and $ne =~ /^(cw)|(pulsed)$/;
-chomp $ne;
-$bridge = $ne;
 
 goto done_reading unless defined( $ne = <F> ) and is_numeric( $ne );
 chomp $ne;
@@ -355,6 +370,11 @@ chomp $ne;
 $lockin = $ne;
 
 goto done_reading unless defined( $ne = <F> )
+	and $ne =~ /^X ((only)|(and Y))$/;
+chomp $ne;
+$two_phases = $ne;
+
+goto done_reading unless defined( $ne = <F> )
 	and $ne =~ /(^Don't set)|([13]0{0,2} m?s)$/;
 chomp $ne;
 $tc = $ne;
@@ -384,8 +404,9 @@ sub store_defs {
 
 	print F "# Do not edit - created automatically!\n";
 
-	print F "$bridge\n$start_field\n$end_field\n$field_step\n$sweep_method\n" .
-	        "$hidden_field_error\n$num_runs\n$lockin\n$tc\n$sens\n";
+	print F "$start_field\n$end_field\n$field_step\n$sweep_method\n" .
+	        "$hidden_field_error\n$num_runs\n$lockin\n$two_phases\n" .
+			"$tc\n$sens\n";
 
 	close F;
 }
@@ -414,14 +435,13 @@ open( F, "|fsc2_" . lc $how )
 
 print F
 "DEVICES:\n\n";
-print F "dg2020_b;\n" if $bridge =~ /pulsed/;
 print F lc( $lockin ), ";\n";
 print F "er035m_s;
 aeg_x_band;\n\n\n";
 
 print F
 "VARIABLES:\n\nI";
-print F ", J" if $num_runs != 1;
+print F ", J, K" if $num_runs != 1;
 print F ";
 start_field = $start_field G;
 end_field = $end_field G;
@@ -432,11 +452,19 @@ print F "act_field;\nfield_error = $field_error G;\n"
 	if $sweep_method eq 'tested';
 print F
 "N_points = ceil( abs( end_field - start_field ) / abs( field_step ) ) + 1;
-data[ N_points ];
-N_runs = $num_runs;\n";
-
-if ( $num_runs != 1 ) {
+";
+if ( $two_phases =~ /X only/ ) {
 	print F "new_data[ N_points ];\n";
+} else {
+	print F "new_data[ N_points, 2 ];\n";
+}
+print F "N_runs = $num_runs;\n";
+if ( $num_runs != 1 ) {
+	if ( $two_phases =~ /X only/ ) {
+		print F "data[ N_points ];\n";
+	} else {
+		print F "data[ 2, N_points ];\n";
+}
 }
 
 if ( $tc eq "Don't set" ) {
@@ -445,21 +473,25 @@ if ( $tc eq "Don't set" ) {
 	print F "tc = $tc;\n";
 }
 
-print F
-"\n\nASSIGNMENTS:\n
-TIMEBASE:	  5 ns;
-MICROWAVE:	  POD = 1, 2, 3, 4, 5, V_HIGH = 5 V, V_LOW = 0 V, INVERTED;
-PHASE_SETUP:  MICROWAVE, CW: 5;\n" if $bridge =~ /pulsed/;
-
-
 print F "\n\nPREPARATIONS:\n\n";
-print F "pulser_cw_mode( );\n" if $bridge =~ /pulsed/;
 print F "magnet_setup( start_field, field_step );\n"
 	if $sweep_method eq 'simple';
 print F "lockin_time_constant( tc );\n" if $tc ne "Don't set";
 print F "lockin_sensitivity( $sens );\n" if $sens ne "Don't set";
 print F "init_1d( ";
-print F $num_runs == 1 ? "1" : "3";
+if ( $num_runs == 1 ) {
+	if ( $two_phases =~ /'X only'/ ) {
+		print F "1";
+	} else {
+		print F "2";
+	}
+} else {
+	if ( $two_phases =~ /'X only'/ ) {
+		print F "3";
+	} else {
+		print F "4";
+	}
+}
 print F ", N_points, start_field, field_step, \"Magnetic field / G\",
 		 \"Signal / V\" );\n\n\n";
 
@@ -492,47 +524,82 @@ if ( $num_runs != 1 ) {
 
 	FOR I = 1 : N_points \{
 
-		new_data[ I ] = lockin_get_data( );\n\n\t\t";
+";
+	if ( $two_phases =~ /^X only$/ ) {
+		print F "\t\tnew_data[ I ] = lockin_get_data( );\n";
+	} else {
+		print F "\t\tnew_data[ I ] = lockin_get_data( 1, 2 );\n";
+	}
 
-if ( $sweep_method eq 'simple' ) {
-	print F "fsave( \"# #\\n\", start_field + ( I - 1 ) * field_step, " .
-		    "new_data[ I ] );";
-} else {
-	print F "fsave( \"# #\\n\", act_field, new_data[ I ] );";
-}
-print F "
-		display( I, ( data[ I ] + new_data[ I ] ) / float( J ), 1,
-		         I, new_data[ I ], 3 );
+	if ( $sweep_method eq 'simple' ) {
+		if ( $two_phases =~ /^X only$/ ) {
+			print F "\t\tfsave( \"# #\\n\", start_field + ( I - 1 ) * "
+				. "field_step, new_data[ I ] );";
+		} else {
+			print F "\t\tfsave( \"# # # \\n\", start_field + ( I - 1 ) * "
+				. "field_step, new_data[ I, 1 ], new_data[ I, 2 ] );";
+		}
+	} else {
+		if ( $two_phases =~ /^X only$/ ) {
+			print F "\t\tfsave( \"# #\\n\", act_field, new_data[ I ] );";
+		} else {
+			print F "\t\tfsave( \"# # #\\n\", act_field, new_data[ I, 1 ], "
+				. "new_data[ I, 2 ] );";
+		}
+	}
 
+	if ( $two_phases =~ /^X only$/ ) {
+		print F "\n\t\tdisplay( I, ( data[ I ] + new_data[ I ] ) " .
+			"/ float( J ), 1, I, new_data[ I ], 3 );\n";
+	} else {
+		print F "\n\t\tdisplay( I, ( data[ 1, I ] + new_data[ I, 1 ] ) / " .
+			"float( J ), 1,\n		         I, ( data[ 2, I ] + " .
+				"new_data[ I, 2 ] ) / float( J ), 2,
+		         I, new_data[ I, 1 ], 3, I, new_data[ I, 2 ], 4 );\n";
+	}
+	print F "
 		IF ( I < N_points ) \{\n\t\t\t";
-if ( $sweep_method eq 'simple' ) {
-	print F "sweep_up( );";
-} else {
-	print F "act_field = set_field( start_field + I * field_step, " .
-		"field_error );";
-}
-print F "
+	if ( $sweep_method eq 'simple' ) {
+		print F "sweep_up( );";
+	} else {
+		print F "act_field = set_field( start_field + I * field_step, " .
+			"field_error );";
+	}
+	print F "
 			wait( ";
-print F "$tc_fact * " if $tc_fact != 1;
-print F "tc );
+	print F "$tc_fact * " if $tc_fact != 1;
+	print F "tc );
 		\}
 	\}
+";
 
+	if ( $two_phases =~ /^X only$/ ) {
+		print F "
 	data += new_data;
 	clear_curve( 1, 3 );
-	display( 1, data / float( J ), 2 );
+	display( 1, data / float( J ), 2 );\n";
+	} else {
+		print F "
+	FOR K = 1 : N_points {
+		data[ 1, K ] += new_data[ K, 1 ];
+		data[ 2, K ] += new_data[ K, 2 ];
+	}
+	clear_curve( 3, 4 );
+	display( 1, data[ 1 ] / float( J ), 1, 1, data[ 2 ] / float( J ), 2 );\n";
+	}
 
+	print F "
 	fsave( \"\\n\" );
 	IF ( J < N_runs ) \{\n\t\t";
-if ( $sweep_method eq 'simple' ) {
-	print F	"reset_field( );";
-} else {
-	print F "act_field = set_field( start_field );";
-}
-print F "
+	if ( $sweep_method eq 'simple' ) {
+		print F	"reset_field( );";
+	} else {
+		print F "act_field = set_field( start_field );";
+	}
+	print F "
 		wait( ";
-print F "$tc_fact * " if $tc_fact != 1;
-print F "tc );
+	print F "$tc_fact * " if $tc_fact != 1;
+	print F "tc );
 	\}
 \}
 
@@ -541,22 +608,41 @@ ON_STOP:
 
 fsave( \"\\n\" );
 FOR I = 1 : N_points \{
-	fsave( \"# #\\n\", start_field + ( I - 1 ) * field_step, data[ I ] );
-\}
 ";
+	if ( $two_phases =~ /^X only$/ ) {
+		print F "\tfsave( \"# #\\n\", start_field + ( I - 1 ) * " .
+			"field_step, data[ I ] );\n\}";
+	} else {
+		print F "\tfsave( \"# # #\\n\", start_field + ( I - 1 ) * " .
+			"field_step, data[ 1, I ], data[ 2, I ] );\n\}";
+	}
 } else {
-	print F
-"FOR I = 1 : N_points \{
-	data[ I ] = lockin_get_data( );\n\t";
-if ( $sweep_method eq 'simple' ) {
-	print F "fsave( \"# #\\n\", " .
-		"start_field + ( I - 1 ) * field_step, data[ I ] );";
+	print F "\nFOR I = 1 : N_points \{\n";
+	if ( $two_phases =~ /^X only$/ ) {
+		print F "\t\tnew_data[ I ] = lockin_get_data( );\n\t";
+	} else {
+		print F "\t\tnew_data[ I ] = lockin_get_data( 1, 2);\n\t";
+	}
+if ( $two_phases =~ /^X only$/ ) {
+	if ( $sweep_method eq 'simple' ) {
+		print F "fsave( \"# #\\n\", " .
+			"start_field + ( I - 1 ) * field_step, new_data[ I ] );\n";
+	} else {
+		print F "fsave( \"# #\\n\", act_field, new_data[ I ] );\n";
+	}
+	print F "\tdisplay( I, new_data[ I ] );\n";
 } else {
-	print F "fsave( \"# #\\n\", act_field, data[ I ] );";
+	if ( $sweep_method eq 'simple' ) {
+		print F "fsave( \"# # #\\n\", " .
+			"start_field + ( I - 1 ) * field_step, new_data[ I, 1 ], " .
+				"new_data[ I, 2 ] );\n";
+	} else {
+		print F "fsave( \"# # #\\n\", act_field, new_data[ I, 1 ], " .
+			"new_data[ I, 2 ] );\n";
+	}
+	print F "\tdisplay( I, new_data[ I, 1 ], 1, I, new_data[ I, 2 ], 2 );\n";
 }
-print F "
-	display( I, data[ I ] );
-	IF ( I < N_points ) \{\n\t\t";
+print F "\tIF ( I < N_points ) \{\n\t\t";
 if ( $sweep_method eq 'simple' ) {
 	print F "sweep_up( );";
 } else {
