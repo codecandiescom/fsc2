@@ -1164,7 +1164,7 @@ void check_label( char *str )
 	const char *sym[ ] = { "->", "<-", ">", "<", ">>", "<<", "<->", "->|",
 						   ">|", "|>", "-->", "=", "arrow", "returnarrow",
 						   "square", "circle", "line", "plus", "UpLine",
-						   "DnLine", "UpArrrow", "DnArrow" };
+						   "DnLine", "UpArrow", "DnArrow" };
 	char *p = str;
 	unsigned int i;
 	bool is_ar = UNSET;
