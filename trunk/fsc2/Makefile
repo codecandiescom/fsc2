@@ -30,11 +30,11 @@
 #  'machines' subdirectory. You simply can copy the 'template.nowhere'  #
 #  file in this directory to a file with the fully qualified hostname   #
 #  of your machine (that's what 'hostname -f' returns when you enter    #
-#  at the command line) and then edit this file. Then, whenever you     #
+#  it at the command line) and then edit this file. Then, whenever you  #
 #  want to install a new version of fsc2 you only have to copy this     #
 #  file instead of editing the Makefile each time. Please also note     #
 #  that when such a configuration file for your machine exists its      #
-#  contents will override everything you set here!                      #
+#  content will override everything you set here!                       #
 #                                                                       #
 #########################################################################
 
