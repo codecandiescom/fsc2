@@ -173,7 +173,7 @@ typedef struct {
 
 	double timebase;         /* time base of the digitizer */
 	bool is_timebase;
-	bool timebase_mode;      /* INTERNAL (default) or external */
+	bool timebase_mode;      /* INTERNAL (default) or EXTERNAL */
 
 	int trig_in_mode;        /* EXTERNAL or INTERNAL */
 	bool is_trig_in_mode;
