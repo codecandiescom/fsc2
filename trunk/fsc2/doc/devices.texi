@@ -2630,6 +2630,9 @@ of time and only then returns with the masured count. In every other
 respect, e.g.@: the required arguments etc.@: it is identical to the
 previous function.
 
+The largest value that can be returned is @w{2147483647}, i.e. @w{2^31 -
+1}.
+
 @anchor{counter_intermediate_count}
 @item counter_intermediate_count()
 @findex counter_intermediate_count()
