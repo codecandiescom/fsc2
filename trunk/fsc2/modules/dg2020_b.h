@@ -56,19 +56,19 @@ Var *pulser_lock_keyboard( Var *v );
 
 /* Definitions needed for the pulser */
 
-#define Ticks long              // for times in units of the pulsers time base
+#define Ticks long              /* times in units of the pulsers time base */
 #define Ticks_max l_max
 #define Ticks_min l_min
 
 
-#define MIN_TIMEBASE            5.0e-9     // minimum pulser time base: 5 ns
-#define MAX_TIMEBASE            0.1        // maximum pulser time base: 0.1 s
+#define MIN_TIMEBASE            5.0e-9   /* minimum pulser time base: 5 ns */
+#define MAX_TIMEBASE            0.1      /* maximum pulser time base: 0.1 s */
 
-#define MAX_PODS                12         // number of pods
-#define MAX_CHANNELS            36         // number of channels
+#define MAX_PODS                12       /* number of pods */
+#define MAX_CHANNELS            36       /* number of channels */
 
 
-# define MIN_POD_HIGH_VOLTAGE  -2.0     // data for P3420 (Variable Output Pod)
+# define MIN_POD_HIGH_VOLTAGE  -2.0     /* for P3420 (Variable Output Pod) */
 # define MAX_POD_HIGH_VOLTAGE   7.0
 
 # define MIN_POD_LOW_VOLTAGE   -3.0
@@ -83,9 +83,9 @@ Var *pulser_lock_keyboard( Var *v );
 #define MIN_TRIG_IN_LEVEL      -5.0
 
 
-#define MIN_BLOCK_SIZE     64     // minimum length of a block
-#define MAX_BLOCK_REPEATS  65536  // maximum of repeats of block in sequence
-#define MAX_PULSER_BITS    65536  // maximum number of bits in channel
+#define MIN_BLOCK_SIZE     64     /* minimum length of a block */
+#define MAX_BLOCK_REPEATS  65536  /* maximum of repeats of block in sequence */
+#define MAX_PULSER_BITS    65536  /* maximum number of bits in channel */
 
 
 #define START ( ( bool ) 1 )
@@ -112,51 +112,51 @@ Var *pulser_lock_keyboard( Var *v );
 /* typedefs of structures needed in the module */
 
 typedef struct _F_ {
-	int self;                    // the functions number
-	bool is_used;                // set if the function has been declared in
-	                             // the ASSIGNMENTS section
-	bool is_needed;              // set if the function has been assigned
-                                 // pulses
+	int self;                   /* the functions number */
+	bool is_used;               /* set if the function has been declared in
+								   the ASSIGNMENTS section */
+	bool is_needed;             /* set if the function has been assigned
+								   pulses */
 
-	struct _P_ *pod[ MAX_PODS_PER_FUNC ];   // pods assigned to the function
+	struct _P_ *pod[ MAX_PODS_PER_FUNC ];   /* pods assigned to the function */
 	int num_pods;
 
-	int num_channels;            // number of channels assigned to function
-	int num_needed_channels;     // number of channels really needed
+	int num_channels;           /* number of channels assigned to function */
+	int num_needed_channels;    /* number of channels really needed */
 	struct _C_ *channel[ MAX_CHANNELS ];
 
 	bool need_constant;
 
-	int num_pulses;              // number of pulses assigned to the function
-	int num_active_pulses;       // number of pulses currenty in use
-	struct _p_ **pulses;         // list of pulse pointers
+	int num_pulses;             /* number of pulses assigned to the function */
+	int num_active_pulses;      /* number of pulses currenty in use */
+	struct _p_ **pulses;        /* list of pulse pointers */
 
 	struct _PHS_ *phase_setup;
 	int next_phase;
-	int pc_len;                  // length of the phase cycle
+	int pc_len;                 /* length of the phase cycle */
 
-	long max_seq_len;            // maximum length of the pulse sequence
+	long max_seq_len;           /* maximum length of the pulse sequence */
 
-	bool is_inverted;            // if set polarity is inverted
+	bool is_inverted;           /* if set polarity is inverted */
 
-	Ticks delay;                 // delay for the function/pod combination
+	Ticks delay;                /* delay for the function/pod combination */
 	bool is_delay;
 
-	double high_level;           // high and low voltage levels for the pod(s)
-	double low_level;            // associated with the fucntion
+	double high_level;          /* high and low voltage levels of the pod(s) */
+	double low_level;           /* associated with the function */
 
 	bool is_high_level;
 	bool is_low_level;
 
 	char *pm;
-	struct _C_ **pcm;            // phase matrix
+	struct _C_ **pcm;           /* phase matrix */
 
 } FUNCTION;
 
 
 typedef struct _P_ {
-	int self;                    // pod number
-	FUNCTION *function;          // the function the pod is assigned to
+	int self;                   /* pod number */
+	FUNCTION *function;         /* the function the pod is assigned to */
 } POD;
 
 
@@ -187,20 +187,20 @@ typedef struct _PHS_ {
 
 
 typedef struct {
-	int device;              // GPIB number of the device
+	int device;              /* GPIB number of the device */
 
-	double timebase;         // time base of the digitizer
+	double timebase;         /* time base of the digitizer */
 	bool is_timebase;
 
-	int trig_in_mode;        //	EXTERNAL or INTERNAL
-	int trig_in_slope;       //	only in EXTERNAL mode
-	double trig_in_level;    //	only in EXTERNAL mode
-	int trig_in_impedance;   //	only in EXTERNAL mode
-	Ticks repeat_time;       //	only in INTERNAL mode
+	int trig_in_mode;        /* EXTERNAL or INTERNAL */
+	int trig_in_slope;       /* only in EXTERNAL mode */
+	double trig_in_level;    /* only in EXTERNAL mode */
+	int trig_in_impedance;   /* only in EXTERNAL mode */
+	Ticks repeat_time;       /* only in INTERNAL mode */
 
-	bool keep_all;           // keep even unused pulses ?
+	bool keep_all;           /* keep even unused pulses ? */
 
-	bool is_cw_mode;         // set for cw mode
+	bool is_cw_mode;         /* set for cw mode */
 
 	bool is_trig_in_mode;
 	bool is_trig_in_slope;
@@ -209,78 +209,78 @@ typedef struct {
 	bool is_repeat_time;
 
 	Ticks neg_delay;
-	bool is_neg_delay;       // if any of the functions has a negative delay
+	bool is_neg_delay;       /* if any of the functions has a negative delay */
 
-	long max_seq_len;        // maximum length of all pulse sequences
+	long max_seq_len;        /* maximum length of all pulse sequences */
 	bool is_max_seq_len;
 
 	FUNCTION function[ PULSER_CHANNEL_NUM_FUNC ];
 	POD pod[ MAX_PODS ];
 	CHANNEL channel[ MAX_CHANNELS ];
 
-	int needed_channels;     // number of channels that are going to be needed
-	                         // in the experiment
+	int needed_channels;     /* number of channels that are going to be needed
+								in the experiment */
 
-	bool needs_update;       // set if pulse properties have been changed in
-                             // test run or experiment
-	bool is_running;         // set if the pulser is in run mode
+	bool needs_update;       /* set if pulse properties have been changed in
+								test run or experiment */
+	bool is_running;         /* set if the pulser is in run mode */
 
-	BLOCK block[ 2 ];        // blocks needed for padding
+	BLOCK block[ 2 ];        /* blocks needed for padding */
 
-	Ticks mem_size;          // size of the complete sequence, i.e. including
-	                         // the memory needed for padding
+	Ticks mem_size;          /* size of the complete sequence, i.e. including
+								the memory needed for padding */
 } DG2020;
 
 
 typedef struct _p_ {
 
-	long num;                // number of the pulse (pulses used to realize
-                             // phase cycling have negative, normal pulses
-	                         // positive numbers
+	long num;                /* number of the pulse (pulses used to realize
+								phase cycling have negative, normal pulses
+								positive numbers */
 
-	bool is_active;          // set if the pulse is really used
+	bool is_active;          /* set if the pulse is really used */
 	bool was_active;
-	bool has_been_active;    // used to find useless pulses
+	bool has_been_active;    /* used to find useless pulses */
 
 	struct _p_ *next;
 	struct _p_ *prev;
 
-	FUNCTION *function;      // function the pulse is associated with
+	FUNCTION *function;      /* function the pulse is associated with */
 
-	Ticks pos;               // current position, length, position change and
-	Ticks len;               // length change of pulse (in units of the pulsers
-	Ticks dpos;              // time base)
+	Ticks pos;               /* current position, length, position change */
+	Ticks len;               /* and length change of pulse (in units of the */
+	Ticks dpos;              /* pulsers time base) */
 	Ticks dlen;
 
-	Phase_Sequence *pc;      // the pulse sequence to be used for the pulse
-	                         // (or NULL if none is to be used)
+	Phase_Sequence *pc;      /* the pulse sequence to be used for the pulse
+								(or NULL if none is to be used) */
 
-	bool is_function;        // flags that are set when the corresponding
-	bool is_pos;             // property has been set
+	bool is_function;        /* flags that are set when the corresponding */
+	bool is_pos;             /* property has been set */
 	bool is_len;
 	bool is_dpos;
 	bool is_dlen;
 
-	Ticks initial_pos;       // position, length, position change and length
-	Ticks initial_len;       // change at the start of the experiment
+	Ticks initial_pos;       /* position, length, position change and length */
+	Ticks initial_len;       /* change at the start of the experiment */
 	Ticks initial_dpos;
 	Ticks initial_dlen;
 
-	bool initial_is_pos;     // property has initially been set
+	bool initial_is_pos;     /* property has initially been set */
 	bool initial_is_len;
 	bool initial_is_dpos;
 	bool initial_is_dlen;
 
-	Ticks old_pos;           // position and length of pulse before a change
-	Ticks old_len;           // is applied
+	Ticks old_pos;           /* position and length of pulse before a change */
+	Ticks old_len;           /* is applied */
 
 	bool is_old_pos;
 	bool is_old_len;
 
 	CHANNEL **channel;
 
-	bool needs_update;       // set if the pulses properties have been changed
-                             // in test run or experiment
+	bool needs_update;       /* set if the pulses properties have been
+								changed in test run or experiment */
 } PULSE;
 
 
