@@ -73,7 +73,7 @@ kernels) or the one from National Instruments, to be downloaded from
   http://www.natinst.com
 
 (which is supposed to work with 2.2 and 2,4 kernels). Unfortunately, only
-the LLP library supports cards from other companies than National
+the LLP library supports cards from companies other than National
 Instruments. You may also compile fsc2 without having a GPIB library, but
 then devices controlled via the GPIB bus can't be used for obvious reasons.
 
