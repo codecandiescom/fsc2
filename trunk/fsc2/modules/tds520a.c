@@ -204,6 +204,9 @@ Var *digitizer_timebase( Var *v )
 		}
 		else if ( I_am == PARENT )
 		{
+			if ( tds520a.is_timebase )
+				return vars_push( FLOAT_VAR, tds520a.timebase );
+
 			eprint( FATAL, "%s:%ld: %s: Function `digitizer_timebase' with no "
 					"argument can only be used in the EXPERIMENT section.\n",
 					Fname, Lc, DEVICE_NAME );
@@ -266,6 +269,9 @@ Var *digitizer_num_averages( Var *v )
 		}
 		else if ( I_am == PARENT )
 		{
+			if ( tds520a.is_num_avg )
+				return vars_push( INT_VAR, tds520a.num_avg );
+
 			eprint( FATAL, "%s:%ld: %s: Function `digitizer_num_averages' "
 					"with no argument can only be used in the EXPERIMENT "
 					"section.\n", Fname, Lc, DEVICE_NAME );
@@ -506,6 +512,9 @@ Var *digitizer_trigger_channel( Var *v )
 		}
 		else if ( I_am == PARENT )
 		{
+			if ( tds520a.is_trigger_channel )
+				return vars_push( INT_VAR, tds520a.trigger_channel );
+
 			eprint( FATAL, "%s:%ld: %s: Function `digitizer_trigger_channel' "
 					"with no argument can only be used in the EXPERIMENT "
 					"section.\n", Fname, Lc, DEVICE_NAME );

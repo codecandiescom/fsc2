@@ -435,6 +435,7 @@ The function can be called in query mode (i.e.@: without an argument)
 only if either it has been already called with an argument or in the
 @code{EXPERIMENT} section.
 
+
 @item digitizer_num_averages()
 @findex digitizer_num_averages()
 The function queries (if called with no argument) or sets (if called
@@ -448,6 +449,7 @@ number is used instead.
 The function can be called in query mode (i.e.@: without an argument)
 only if either it has been already called with an argument or in the
 @code{EXPERIMENT} section.
+
 
 @item digitizer_trigger_channel()
 @findex digitizer_trigger_channel()
@@ -473,6 +475,33 @@ depending on the type of the oscilloscope:
 The function can be called in query mode (i.e.@: without an argument)
 only if either it has been already called with an argument or in the
 @code{EXPERIMENT} section.
+
+
+@item digitizer_record_length()
+@findex digitizer_record_length()
+The function queries (if called with no argument) or sets (if called
+with an argument) the the length of the traces measured by the
+digitizer. Because the digitizer only allows certain record lengths
+a value passed to the function will be rounded up to the next
+allowed value if necessary.
+
+The function can be called in query mode (i.e.@: without an argument)
+only if either it has been already called with an argument or in the
+@code{EXPERIMENT} section.
+
+
+@item digitizer_trigger_position()
+@findex digitizer_trigger_position()
+The function queries (if called with no argument) or sets (if called
+with an argument) the amount of pre-trigger, i.e.@ the portion of the
+trace shown with data before the trigger was detected. The function
+accepts or returns values from the interval between (and including)
+0 and 1.
+
+The function can be called in query mode (i.e.@: without an argument)
+only if either it has been already called with an argument or in the
+@code{EXPERIMENT} section.
+
 
 @item digitizer_define_window()
 @findex digitizer_define_window()
@@ -517,6 +546,7 @@ oscilloscope. Previously measured curves are discarded and new data
 are sampled until the requested number of averages has been reached.
 The function can only be used in the @code{EXPERIMENT} section of the
 @acronym{EDL} file.
+
 
 @item digitizer_get_area()
 @findex digitizer_get_area()
@@ -577,6 +607,7 @@ there is no visual feedback).
 This function can only be used in the @code{EXPERIMENT} section of an
 @acronym{EDL} file.
 
+
 @item digitizer_get_curve()
 @findex digitizer_get_curve()
 The function fetches a curve from the digitizer. It expects up to two
@@ -620,6 +651,7 @@ defined with an unspecified number of elements.
 
 This function can only be used in the @code{EXPERIMENT} section of an
 @acronym{EDL} file.
+
 
 @item digitizer_get_curve_fast()
 @findex digitizer_get_curve_fast()
