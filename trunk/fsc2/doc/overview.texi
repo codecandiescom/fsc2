@@ -21,7 +21,7 @@ usually have to be rewritten or at least severely changed if either a
 new kind of experiment is to be done or the hardware devices used in the
 experiments are changed. In contrast, with @acronym{fsc2} doing a
 completely new type of experiment is straight forward - all that's
-needed is to write a new acronym{EDL} program and one immediately can
+needed is to write a new @acronym{EDL} program and one immediately can
 start doing the new experiment. Also changing or adding new devices is
 relatively simple, all that needs to be done is to write a new module
 @cindex modules
