@@ -29,14 +29,17 @@
 /*------------------------------------------------------------------------*/
 
 
-#include <gpib/ib.h>
+/* If ib.h can't be found set the variable GPIB_HEADER_FILE in the top level
+   Makefile to the full path of the directory where this header file resides */
+
+#include <ib.h>
+
 
 #define GPIB_OLD
 
-
-/* In older versions of the GPIB driver ERR was defined but this clashes
-   with newer kernel versions. So, if you still use an old GPIB driver
-   the following line is needed... */
+/* In older versions of the GPIB driver ERR is defined but this clashes
+   with newer kernel versions. So, an old GPIB driver is still used the
+   following line will tell the user about this potential problem... */
 
 #if ! defined( IBERR )
 #warning "**************************************************"
