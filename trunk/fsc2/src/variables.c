@@ -2,6 +2,9 @@
    $Id$
 
    $Log$
+   Revision 1.28  1999/07/28 08:22:40  jens
+   Started to update the comments.
+
    Revision 1.27  1999/07/27 22:09:39  jens
    *** empty log message ***
 
@@ -85,7 +88,7 @@ typedef VarretFnct *FnctPtr;
 
 
 /*
-  Each variable and array (and also each function) is described by a structure
+  Variables and arrays (and also functions) are described by a structure
 
   typedef struct Var_
   {
@@ -121,30 +124,29 @@ typedef VarretFnct *FnctPtr;
   followed by as many characters, numbers and underscores as the user wants
   it to have.
 
-  Each variable has a certain type: It's either an integer or float variable
-  (INT_VAR or FLOAT_VAR, which translates to C's long and double type) or it
-  is an integer or float array (INT_ARR or FLOAT_ARR) of as many dimensions
-  as the user thinks it should have. Functions are just a funny kind of
-  variables of type FUNC, with the value being the result of the calculation
-  of the function value (plus possible other side effects). While a variable
-  still hasn't assigned a value to it it's type remains undefined, i.e.
-  UNDEF_VAR.
+  Non-transient variables have one of thefollowing types: They're either an
+  integer or float variable (INT_VAR or FLOAT_VAR, which translates to C's
+  long and double type) or an integer or float array (INT_ARR or FLOAT_ARR) of
+  as many dimensions as the user thinks it should have. Since at the moment of
+  creation of a variable its type can not be determined there is also a
+  further type, UNDEF_VAR, which the variable has until finds out if the
+  variable is just a simple variable or an array.
 
-  What kind of type a variable has is controlled via the function IF_FUNC(),
-  defined as macro in variables.h, which just gets to know about the very
-  first character of the variable's name - if the function returns TRUE the
-  variable is an integer (or the array is an integer array) otherwise its
-  type is FLOAT. So, changing IF_FUNC() and recompiling will change the
-  behaviour of the program in this respect. Currently, as agreed with Axel
-  and Thomas, IF_FUNC returns TRUE for variables starting with a capital
-  letters, thus making the variable an integer. But this is easily
+  What kind of type a variable has, i.e. integer or float, is controlled via
+  the function IF_FUNC(), defined as macro in variables.h, which just gets to
+  know about the very first character of the variable's name - if the function
+  returns TRUE the variable is an integer (or the array is an integer array)
+  otherwise its type is FLOAT. So, changing IF_FUNC() and recompiling will
+  change the behaviour of the program in this respect. Currently, as agreed
+  with Axel and Thomas, IF_FUNC returns TRUE for variables starting with a
+  capital letters, thus making the variable an integer. But this is easily
   changed...
 
-  When the input file is read in, lines like
+  Now, when the input file is read in, lines like
 
            A = B + 3.25;
 
-  are found. While this is rather convenient for a human a reverse polish
+  are found. While this form is rather convenient for a human a reverse polish
   notation (RPN) for the right hand side of the assignment of the form
 
            B 3.25 +
@@ -155,32 +157,30 @@ typedef VarretFnct *FnctPtr;
   So, if the lexer finds an identifier like `A', it first tries to get a
   pointer to the variable named `A' in the variables list by calling
   vars_get(). If this fails (and we're just parsing the VARIABLES section of
-  an EDL file, otherwise it would utter an error message) a new variable is
+  the EDL file, otherwise it would utter an error message) a new variable is
   created instead by a call to vars_new(). The resulting pointer is passed
   to the parser.
 
   Now, the parser sees the `=' bit of text and realizes it has to do an
   assignment and thus branches to evaluate the right hand side of the
-  expression. In this branch, the parser sees the `B' and pushes a pointer
-  to a copy of the variable `B' onto the variables stack. It then finds the
-  `+' and branches recursively to evaluate the expression to the right of
-  the `+'. Here, the parser sees just the numerical value `3.25' and pushes
-  it onto the variables stack, thus creating another transient variable on
-  the stack with the value 3.25. It returns from the branch with the pointer
-  to this transient variable. Now the (transient) copy of `B' and the
-  transient variable with the value of 3.25 are on the variables stack and
-  the parser can continue by adding the values of both these variables. It
-  does so by calling vars_add(), creating another transient variable on the
-  stack for the result and removing both the variables used as arguments. It
-  finally returns to the state it started from, the place where it found the
-  `A =' bit, with a pointer to the transient variable with the result of the
-  evaluation of the right hand side. All left to be done now is to call
-  vars_new_assign() or vars_assign(), depending if we're still in the
-  VARIABLES section, which assigns the value of the transient variable to
-  the variable `A'. The transient variable is than removed from the
-  variables stack. If we're a bit paranoid we can make sure everything
-  worked out fine by checking that the variabe stack is now empty. Quite
-  simple, isn't it?
+  expression. In this branch, the parser sees the `B' and pushes a copy of the
+  variable `B' onto the variables stack, containing just the necessary
+  information, i.e. its type and value. It then finds the `+' and branches
+  recursively to evaluate the expression to the right of the `+'. Here, the
+  parser sees just the numerical value `3.25' and pushes it onto the variables
+  stack, thus creating another transient variable on the stack with the value
+  3.25 (and type FLOAT_VAL). Now the (transient) copy of `B' and the transient
+  variable with the value of 3.25 are on the variables stack and the parser
+  can continue by adding the values of both these variables. It does so by
+  calling vars_add(), creating another transient variable on the stack for the
+  result and removing both the variables used as arguments. It finally returns
+  to the state it started from, the place where it found the `A =' bit, with a
+  the transient variable with the result of the evaluation of the right hand
+  side. All left to be done now is to call vars_assign() which assigns the
+  value of the transient variable to the variable `A'. The transient variable
+  is than removed from the variables stack. If we're a bit paranoid we can
+  make sure everything worked out fine by checking that the variabe stack is
+  now empty. Quite simple, isn't it?
   
   What looks like a lot of complicated work to do something rather simple
   has the advantage that, due to its recursive nature, it can be used
@@ -191,22 +191,69 @@ typedef VarretFnct *FnctPtr;
   Also, `B' could be a more complicated expression instead which would be
   handled in the same way.
 
-  Now, what about arrays? Again, if the lexer finds an identifier (it
-  doesn't know about the difference between variables and arrays) it
-  searches the variables list and if it doesn't find an entry with the same
-  name it creates a new one (again, as long as we're in the VARIABLES
-  section where defining new variables and array is allowed). The parser in
-  turn realizes that the user wants an array when it finds a string of
-  tokens of the form
+  Now, what about arrays? If the lexer finds an identifier (it doesn't know
+  about the difference between variables and arrays) it searches the variables
+  list and if it doesn't find an entry with the same name it creates a new one
+  (again, as long as we're in the VARIABLES section where defining new
+  variables and array is allowed). The parser in turn realizes that the user
+  wants an array when it finds a string of tokens of the form
 
             variable_identifier [ 
 
   where `variable_identifier' is a variable or array name. It calls
-  vars_arr_start() where the type of the array is set to INT_ARR or
-  FLOAT_ARR (depending on the result of the macro IF_FUNC(), see above) and
-  its dimension is set to zero.
+  vars_arr_start() where, if the variable is still completetly new, the type
+  of the array is set to INT_ARR or FLOAT_ARR (depending on the result of the
+  macro IF_FUNC(), see above). Finally, it pushes a transient variable onto
+  the stack of type ARR_PTR with the `from' element in the variable structure
+  pointing to the original array. This transient variable serves as a kind of
+  marker since next the parser is going to read all the indices and also push
+  them onto the stack.
 
-  The next token has to be an expression (see below for an exception). By a
+  The next tokens have to be expressions - either simple numbers or computed
+  numbers (i.e. either results of function calls or elements of arrays). They
+  are the indices of the array. We've reached the end of the list of indices
+  when the the closing bracket `]' is found in the input. Now the stack may
+  look like this:
+
+               last index ->    number
+                                number
+                                number
+               first index ->   number
+                                ARR_PTR
+
+  i.e. on the top we've the indices followed by the pointer to the array.  The
+  next step depends if this is an access to an array element (i.e. its found
+  on the right hand side of an assignment) or if an array element is to be set
+  (i.e. its on thre left hand side). In the first case the function
+  vars_arr_rhs() is called.
+
+  Basically, what vars_arr_rhs() does is to take the indices and the pointer
+  to the array from the stake, determine the value of the accessed array
+  element and push this value as a transient variable onto the stack.
+
+  If, on the other hand, the array is found on the left hand side of an
+  assignment, vars_arr_lhs() is called. Again, from the indices the element of
+  the array to be set is calculated, but, since the the right and side of the
+  assignment is not known yet, again an ARR_PTR transient variable is pushed
+  onto the stack with the generic pointer `gptr' in the union in the variables
+  structure pointing to the accessed element and the `from' field pointing to
+  the array. After the calculation of the right hand side, i.e. the value to
+  be assigned to the array element, vars_assign() is called with both the
+  calculated value and the ARR_PTR on the top of the stack. All vars_assign()
+  has to do is to stuff the value into the location of the accessed element
+  stored in the ARR_PTR and remove both transient variables from the stack.
+
+  Things get a bit more complicated if the array on the left hand side is
+  completely new (and we're still in the VARIABLES section where defining new
+  variables and arrays is allowed). In this case, the indices aren't supposed
+  to mean a certain element but are the sizes of the dimensions of the array.
+  So, if the array is new, instead of vars_arr_lhs() vars_setup_new_array() is
+  called. 
+
+
+
+
+  (see below for an exception). By a
   call to vars_arr_extend() the dimension of the array is set to one and the
   list of sizes for the dimensions is updated to reflect the value of the
   expression, i.e. the size for the very first dimension of the
@@ -323,6 +370,8 @@ Var *vars_new( char *name )
 	vp->type = UNDEF_VAR;        /* set type to still undefined */
 
 	vp->next = var_list;         /* set pointer to it's successor */
+	if ( var_list != NULL )      /* set previous pointer in successor */
+		var_list->prev = vp;
     var_list = vp;               /* make it the head of the list */
 
 	return vp;                   /* return pointer to the structure */
@@ -1424,7 +1473,7 @@ Var *vars_arr_rhs( Var *v )
 	while ( v->type != ARR_PTR )
 		v = v->prev;
 
-	a = v->from;                      /* get array ther pointer points to */
+	a = v->from;                      /* get array the pointer points to */
 
 	/* If the right hand side array is still variable sizes it never has been
        assigned values to it and it makes no sense to use its elements */
