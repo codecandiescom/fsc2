@@ -356,6 +356,8 @@ if ( $ARGV[ 0 ] ) {
 	open( F, "<$ENV{ HOME }/.fsc2/trepr" ) or return;
 }
 
+goto done_reading unless defined( $ne = <F> ) and $ne =~ /^#/;
+
 goto done_reading unless defined( $ne = <F> ) and is_numeric( $ne );
 chomp $ne;
 $start_field = $ne;
@@ -399,6 +401,7 @@ sub store_defs {
 	$field_step = 0 if $field_step eq ".";
 	$field_error = 0 if $field_error eq ".";
 
+	print F "# Do not edit - created automatically!\n";
 	print F "$start_field\n$end_field\n$field_step\n$sweep_method\n" .
 	    "$field_error\n$num_runs\n$digitizer\n";
 

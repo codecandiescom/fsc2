@@ -243,8 +243,10 @@ my $ne;
 if ( $ARGV[ 0 ] ) {
 	open( F, "<$ARGV[ 0 ]" ) or return;
 } else {
-	open( F, "<$ENV{ HOME }/.fsc2/.endor" ) or return;
+	open( F, "<$ENV{ HOME }/.fsc2/cw_endor" ) or return;
 }
+
+goto done_reading unless defined( $ne = <F> ) and $ne =~ /^#/;
 
 goto done_reading unless defined( $ne = <F> )
 	and $ne =~ /^SR(5|8)(1|3)0$/;
@@ -300,7 +302,7 @@ sub store_defs {
 	local *F;
 
 	mkdir "$ENV{ HOME }/.fsc2", 0777 unless -e "$ENV{ HOME }/.fsc2";
-	open( F, ">$ENV{ HOME }/.fsc2/.endor" ) or return;
+	open( F, ">$ENV{ HOME }/.fsc2/cw_endor" ) or return;
 
 	$start_freq = 0 if $start_freq eq ".";
 	$end_freq = 0 if $end_freq eq ".";
@@ -309,6 +311,7 @@ sub store_defs {
 	$mod_freq = 0 if $mod_freq eq ".";
 	$mod_ampl = 0 if $mod_ampl eq ".";
 
+	print F "# Do not edit - created automatically!\n";
 	print F "$lockin\n$start_freq\n$end_freq\n$step_freq\n$atten\n" .
 	    "$mod_freq\n$mod_ampl\nN_runs\n$tc\n$sens\n";
 

@@ -214,6 +214,8 @@ if ( $ARGV[ 0 ] ) {
 	open( F, "<$ENV{ HOME }/.fsc2/cw_epr" ) or return;
 }
 
+goto done_reading unless defined( $ne = <F> ) and $ne =~ /^#/;
+
 goto done_reading unless defined( $ne = <F> ) and is_signed_numeric( $ne );
 chomp $ne;
 $start_cur = $ne;
@@ -257,6 +259,7 @@ sub store_defs {
 	$end_cur = 0 if $end_cur eq ".";
 	$cur_step = 0 if $cur_step eq ".";
 
+	print F "# Do not edit - created automatically!\n";
 	print F "$start_cur\n$end_cur\n$cur_step\n$num_runs\n$tc\n$sens\n";
 
 	close F;
