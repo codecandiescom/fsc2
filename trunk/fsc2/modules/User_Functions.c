@@ -33,7 +33,9 @@ const char generic_type[ ] = DEVICE_TYPE;
 
 
 Var *get_phase_cycled_area( Var *v );
-Var *get_phase_cycled_area_2( Var *v );
+
+static Var *get_phase_cycled_area_1( Var *v );
+static Var *get_phase_cycled_area_2( Var *v );
 
 
 static bool get_channel_number( Var *v, const char *func_name, long *channel );
@@ -42,12 +44,21 @@ static void pc_basic_check( const char *func_name, const char *func_1,
 							const char *str );
 
 
-/****************************************************************/
-/* Enter the definition of all needed functions below this line */
-/****************************************************************/
+/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*/
+
+Var *get_phase_cycled_area( Var *v )
+{
+	if ( ASeq[ 0 ].defined && ASeq[ 1 ].defined )
+		return get_phase_cycled_area_2( v );
+	else
+		return get_phase_cycled_area_1( v );
+}
+
 
 /*-----------------------------------------------------------------*/
-/* This function always uses the first acquisition sequence.       */
+/* This function is called in cases where there is only one        */
+/* acquisition sequence.                                           */
 /* Expected arguments:                                             */
 /* 1. 1 or 2 digitizer channel numbers (if the second argument is  */
 /*    a digitizer channel or a window number can be seen from the  */
@@ -62,7 +73,7 @@ static void pc_basic_check( const char *func_name, const char *func_1,
 /*    phase cycled area for each window                            */
 /*-----------------------------------------------------------------*/
 
-Var *get_phase_cycled_area( Var *v )
+static Var *get_phase_cycled_area_1( Var *v )
 {
 	static Var *V;
 	Var *func_ptr;
@@ -78,10 +89,15 @@ Var *get_phase_cycled_area( Var *v )
 	int access;
 	double *data;
 	int channels_needed = 1;
-	Acquisition_Sequence *aseq = ASeq;      /* first acquisition sequence */
+	Acquisition_Sequence *aseq;
 
 
 	V = v;
+
+	if ( ASeq[ 0 ].defined )
+		aseq = ASeq;
+	else
+		aseq = ASeq + 1;
 
 	/* The first time we get here we need to do some basic checks, i.e. find
 	   out if all needed functions can be used */
@@ -110,7 +126,7 @@ Var *get_phase_cycled_area( Var *v )
 			 aseq->sequence[ i ] == ACQ_MINUS_B )
 			channels_needed = 2;
 
-	/* The first parameter must be a channel number in any case, ask digitizer
+	/* The first parameter must always be a channel number, ask digitizer
 	   module if it really is one */
 
 	if ( ! get_channel_number( V, Cur_Func, channel ) )
@@ -284,7 +300,7 @@ Var *get_phase_cycled_area( Var *v )
 /*    phase cycled area for each window                            */
 /*-----------------------------------------------------------------*/
 
-Var *get_phase_cycled_area_2( Var *v )
+static Var *get_phase_cycled_area_2( Var *v )
 {
 	static Var *V;
 	Var *func_ptr;
@@ -346,9 +362,10 @@ Var *get_phase_cycled_area_2( Var *v )
 				 aseq[ j ]->sequence[ i ] == ACQ_MINUS_B )
 				need_B = SET;
 		}
-	channels_needed = ( need_A && need_B ) ? 1 : 2;
 
-	/* The first parameter must be a channel number in any case, ask digitizer
+	channels_needed = ( need_A && need_B ) ? 2 : 1;
+
+	/* The first parameter must always be a channel number, ask digitizer
 	   module if it really is one */
 
 	if ( ! get_channel_number( V, Cur_Func, channel ) )
