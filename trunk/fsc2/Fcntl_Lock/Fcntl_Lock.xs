@@ -94,8 +94,8 @@ C_fcntl_lock( fd, function, flock_hash, int_err )
 
 		/* Now comes the great moment: fcntl() is finally called - if we want
 		   the lock immediately but some other process is holding it we return
-		   'undef' (people can find out about it by checking errno...). The
-		   same happens if we wait for the lock but receive a signal. */
+		   'undef' (people can find out about the reasons by checking errno).
+		   The same happens if we wait for the lock but receive a signal. */
 
 		if ( fcntl( fd, function, flock_struct ) != 0 )
 			XSRETURN_UNDEF;
