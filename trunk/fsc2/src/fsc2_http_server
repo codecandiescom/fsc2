@@ -1,0 +1,328 @@
+#!/usr/bin/perl
+#
+#  $Id$
+#
+#  Copyright (C) 1999-2002 Jens Thoms Toerring
+#
+#  This file is part of fsc2.
+#
+#  Fsc2 is free software; you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation; either version 2, or (at your option)
+#  any later version.
+#
+#  Fsc2 is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with fsc2; see the file COPYING.  If not, write to
+#  the Free Software Foundation, 59 Temple Place - Suite 330,
+#  Boston, MA 02111-1307, USA.
+
+
+use strict;
+use IO::Socket::INET;
+use POSIX;
+use Fcntl qw( :DEFAULT :flock );
+use Errno;
+
+my $client;
+
+
+# Check if we got an port as the first argument
+
+my $port = 8080;
+$port = $ARGV[ 0 ] if
+	defined $ARGV[ 0 ] and $ARGV[ 0 ] =~ /\d+/o and
+	$ARGV[ 0 ] >= 1024 and $ARGV[ 0 ] <= 65535;
+
+# The second argument is supposed to be the place where to look for the
+# files with the fsc2 logo
+
+my $auxdir = "../aux/";
+$auxdir = $ARGV[ 1 ] if defined $ARGV[ 1 ];
+
+
+# Un-buffer the (write) connection to fsc2 or it may never see what we're
+# sending its way
+
+autoflush STDOUT 1;
+
+
+# SIGPIPE signals shoud only come from a spawned server while it's writing,
+# thus indicating that its client died (or got too bored waiting for a reply).
+# All we can do then is to close the connection and let the serving process
+# die silently.
+
+$SIG{ PIPE } = sub { close $client; exit 0 };
+
+
+# The main process might expect lots of dead children, so it better
+# acknowledges them (we better don't eat up the whole process table, do we?)
+
+$SIG{ CHLD } = sub { 1 until waitpid( -1, WNOHANG ) == -1 };
+
+
+# Ok, fire up the server - isn't OOP + helpful modules a nice thing? ;-)
+
+my $server = IO::Socket::INET->new( LocalPort => $port,
+									Type      => SOCK_STREAM,
+									Reuse     => 1,
+									Listen    => 10 )
+	or exit 1;
+
+
+# Now wait for the unwashed masses to hammer on our little server - at least
+# 10 requests will get served simultaneously. This requires the children to
+# look out for locks on STDOUT, i.e. the write-connection to fsc2 (or, to be
+# more precise, each single server has to get a lock on STDOUT before writing
+# to it and must release the lock only after reading the complete reply).
+
+while ( $client = $server->accept( ) ) {
+	if ( fork( ) == 0 ) {
+		serve( );
+		close $client;
+		exit 0;
+	}
+	close $client;
+}
+
+
+#########################################################
+#
+
+sub serve {
+
+	my ( $file, $req, $txt );
+	my ( $has_png, $has_gif ) = ( 0, 0 );
+
+	# Skip leading blank lines from the client, give up when the client closes
+	# the connection
+
+	1 while defined( $txt = <$client> ) and $txt =~ /^\r*$/o;
+	return unless defined $txt;
+
+	$txt =~ s/\r*\n$//;
+
+	# The "server" only handles wellformed GET requests...
+
+	return illegal_request( $1, $txt )
+		unless $txt =~ m|^\s*([^ \t]+)\s+([^ \t]+)\s+HTTP/\d+\.\d+\s*|io;
+
+	( $req, $file ) = ( $1, $2 );
+	return illegal_request( $req, $txt ) unless $req =~ /^GET$/io;
+
+
+	# Check if client accepts png or gif files, we're done with listening
+	# when we get an empty line
+
+	while ( defined( $txt = <$client> ) and $txt !~ /^\r*\n$/o ) {
+		$has_png = 1 if $txt =~ m|^\s*Accept:.*\s+image/png[^a-zA-Z0-9]|io;
+		$has_gif = 1 if $txt =~ m|^\s*Accept:.*\s*image/gif[^a-zA-Z0-9]|io;
+		$txt =~ s/\r*\n$//o;
+	}
+
+	# Give up when th client bailed out...
+
+	return unless defined $txt;
+
+
+	# Ok, now it's our turn...
+
+	if ( $file eq "/" or $file eq "/index.html" ) {
+		serve_main( $has_png, $has_gif );
+	} elsif ( $file =~ m+^/(fsc2\.(png|gif))+o ) {
+		serve_logo( $1, $2 );
+	} else {                         # more's coming here real soon....
+		not_found( $file );
+	}
+}
+
+
+#########################################################
+#
+
+sub serve_main {
+
+	my ( $has_png, $has_gif ) = @_;
+
+	my @st1 = ( "IDLE", "RUNNING" , "WAITING", "DONE" );
+	my @st2 = ( "Idle",
+				"Experiment running",
+				"<FONT COLOR=#FF0000>Waiting for user input</FONT>",
+				"Experiment finished" );
+	my $state;
+	my $txt;
+	my $date = rfc_1123_date( );
+
+
+	# Ask the parent for its current state - and don't forget to set a lock on
+	# STDOUT (and later also to release it) or other processes might interfere
+
+	flock( STDIN, LOCK_EX );
+	print 'S';
+	1 while ( $state = <STDIN> ) =~ /^$/o;
+	flock( STDIN, LOCK_UN );
+
+	print $client "HTTP/1.0 200 OK\r\n" .
+			"Date: $date\r\n" .
+			"Server: fsc2/0.1\r\n" .
+			"Allow: GET\r\n" .
+			"Content-Type: text/html; charset=iso-8859-1\r\n" .
+			"Connection: close\r\n" .
+			"Expires: $date\r\n\r\n";
+
+	print $client
+	    "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\">\r\n" .
+		"<HTML><HEAD>\r\n" .
+		"<meta name=\"robots\" content=\"noindex\">\r\n";
+
+	if ( $state =~ /^[0-3]$/ ) {
+		print $client "<TITLE>fsc2: $st1[ $state ]</TITLE></HEAD>\r\n";
+
+		if ( $has_png or $has_gif ) {
+			print $client
+				"<P><CENTER><IMG SRC=\"fsc2." . ( $has_gif ? "gif" : "png" ) .
+				"\" ALT=\"fsc2\"></CENTER></P>\r\n";
+		}
+
+		print $client
+			"<P><CENTER><H1>Status:  $st2[ $state ]</H1></CENTER>\r\n" .
+			"<CENTER>(" . strftime( "%a", localtime ) . ", "  .
+			strftime( "%d %b %G %T %Z", localtime ) . ")</CENTER></P>\r\n";
+	} else {
+		print $client "<TITLE>fsc2: WEIRD</TITLE></HEAD>\r\n";
+
+		if ( $has_png or $has_gif ) {
+			print $client
+				"<P><CENTER><IMG SRC=\"fsc2." . ( $has_gif ? "gif" : "png" ) .
+				"\" ALT=\"fsc2\"></CENTER></P>\r\n";
+		}
+
+		print $client
+			"<P><CENTER><H1>Status:  Something weird is happening here" .
+			"</H1></CENTER>\r\n" .
+			"<P>Sorry, you seem to have found a bug. Please tell nobody ;-) " .
+			"</P>\r\n</BODY></HTML>\r\n";
+		return;
+	}
+
+	# Ask fsc2 for the content of the error browser and, when we got it, pass
+	# it on to the client in appropriate form
+
+	flock( STDIN, LOCK_EX );
+	print 'E';
+	while ( <STDIN> ) {
+		last if /^$/;
+		chomp;
+		$txt .= $_ . "\r\n";
+	}
+	flock( STDIN, LOCK_UN );
+
+	print $client "<H2>Output browser:</H2>\r\n" .
+		"<P><PRE>$txt</PRE></P>\r\n</BODY></HTML>\r\n";
+}
+
+
+#########################################################
+#
+
+sub serve_logo {
+
+	my ( $file, $type ) = @_;
+	my $date = rfc_1123_date( );
+	my $edate = rfc_1123_date( 1 );
+	local *F;
+
+
+	open( F, $auxdir . $file ) or return not_found( $file );
+
+	print $client <F> if print $client
+				"HTTP/1.0 200 OK\r\n" .
+				"Date: $date\r\n" .
+				 "Server: fsc2/0.1\r\n" .
+				 "Allow: GET\r\n" .
+				 "Accept-Ranges: none\r\n" .
+				 "Connection: close\r\n" .
+				 "Expires: $edate\r\n" .
+				 "Content-Type: image/$type\r\n" .
+				 "Content-Length: " . ( stat( $auxdir . $file ) )[ 7 ] .
+				 "\r\n\r\n";
+
+	close F;
+}
+
+
+#########################################################
+#
+
+sub not_found {
+	my $file = shift;
+
+	print $client
+		"HTTP/1.1 404 Not Found\r\n" .
+		"Date: ". rfc_1123_date( ) . "\r\n" .
+		"Server: fsc2/0.1\r\n" .
+		"Connection: close\r\n" .
+		"Content-Type: text/html; charset=iso-8859-1\r\n\r\n" .
+	    "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\r\n" .
+		"<HTML><HEAD>\r\n" .
+		"<TITLE>404 Not Found</TITLE>\r\n" .
+		"</HEAD><BODY>\r\n" .
+		"<HR>\r\n" .
+		"<H1>Not Found</H1>\r\n" .
+		"<P>The requested URL /$file was not found on this server.</P>\r\n" .
+		"<HR>\r\n" .
+		"</BODY></HTML>\r\n";
+}
+
+
+#########################################################
+#
+
+sub illegal_request {
+	my ( $type, $string ) = @_;
+
+	my $date = rfc_1123_date( );
+	print $client
+		"HTTP/1.0 400 Bad Request\r\n" .
+		"Date: " . rfc_1123_date( ) . "\r\n" .
+		"Server: fsc2/0.1\r\n" .
+		"Connection: close\r\n" .
+		"Content-Type: text/html; charset=iso-8859-1\r\n\r\n" .
+		"<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\r\n" .
+		"<HTML><HEAD>\r\n" .
+		"<TITLE>400 Bad Request</TITLE>\r\n" .
+		"</HEAD><BODY>\r\n" .
+		"<HR>\r\n" .
+		"<H1>Bad Request</H1>\r\n";
+
+	if ( $type !~ /^GET$/ ) {
+		print $client
+			"<P>This server only supports GET requests.</P>\r\n";
+	} else {
+		print $client
+			"<P>Malformed request: <SAMP>$string</SAMP>.</P>\r\n";
+	}
+
+	print $client "<HR>\r\n</BODY></HTML>\r\n";
+}
+
+
+#########################################################
+# If called without an argument the fucntion returns the current (GMT) date
+# in RFC 1123 format, otherwise the date in one years time (to be used as
+# the 'infinite' expiry date, according to RFC 2616)
+
+sub rfc_1123_date {
+	if ( @_ == 0 ) {
+		return strftime( "%a", gmtime ) . ", "  .
+			strftime( "%d %b %G %T", gmtime ) . " GMT";
+	} else {
+		return strftime( "%a", gmtime( time + 3600 ) ) . ", "  .
+			strftime( "%d %b %G %T", gmtime( time + 31557600 ) ) .
+				" GMT";
+	}
+}
