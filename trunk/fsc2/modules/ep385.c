@@ -1472,7 +1472,7 @@ Var *pulser_maximum_pattern_length( Var *v )
 	UNUSED_ARGUMENT( v );
 	print( WARN, "Pulser doesn't allow setting a maximum pattern length.\n" );
 	return vars_push( FLOAT_VAR, MAX_PULSER_BITS
-					  * ep385.is_timebase ? ep386.timebase : FIXED_TIMEBASE );
+					  * ep385.is_timebase ? ep356.timebase : FIXED_TIMEBASE );
 }
 
 
