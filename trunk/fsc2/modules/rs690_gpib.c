@@ -519,15 +519,13 @@ static int rs690_write( int device_no, const char *s, long len )
 #ifdef RS690_GPIB_DEBUG
 	UNUSED_ARGUMENT( device_no );
 	UNUSED_ARGUMENT( len );
-	return SUCCESS;
-#else
+#endif
 
 	if ( gpib_write( device_no, s, len ) == FAILURE &&
 		 GPIB_IS_TIMEOUT &&
 		 gpib_write( device_no, s, len ) == FAILURE )
 		return FAILURE;
 	return SUCCESS;
-#endif
 }
 
 
