@@ -27,6 +27,7 @@
 @item @code{CH4}              @tab Digitizer channel name
 @item @code{CHANNEL}          @tab
 @item @code{clear_curve}      @tab Built-in function (@pxref{clear_curve})
+@item @code{CONTINUE}         @tab Loop control statement
 @item @code{cos}              @tab Built-in function (@pxref{cos})
 @item @code{cosh}             @tab Built-in function (@pxref{cosh})
 @item                         @tab
@@ -137,6 +138,7 @@
 @item @code{nA}               @tab Unit, Nano-Ampere
 @item @code{NEG}              @tab
 @item @code{NEGATIVE}         @tab
+@item @code{NEXT}             @tab Loop control statement
 @item @code{nG}               @tab Unit, Nano-Gauss
 @item @code{nHz}              @tab Unit, Nano-Hertz
 @item @code{ns}               @tab Unit, Nano-Seconds
