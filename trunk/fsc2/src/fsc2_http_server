@@ -124,7 +124,7 @@ while ( $client = $server->accept( ) ) {
 	} elsif ( $! == EAGAIN ) {      # (hopefully) recoverable fork problem
 		sleep 1;
 		redo FORK;
-	} else {                        # fork failed badly
+	} else {                        # fork failed too badly
 		shutdown( $server, 2 );
 		exit 1;
 	}
