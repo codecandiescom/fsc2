@@ -509,7 +509,8 @@ my $fsc2_how_to_run = "Test program";
 my @fsc2_how_to_run = ( "Start experiment",
                         "Test program",
                         "Load into fsc2" );
-my $fsc2_main_window = MainWindow->new( );
+my $fsc2_main_window = MainWindow->new( -title =>
+							   ( split /\./, ( split /\//, $0 )[ -1 ] )[ 0 ] );
 my $fsc2_main_frame = $fsc2_main_window->Frame( -relief => "ridge",
                                                 -borderwidth => "1m" );
 my $fsc2_balloon = $fsc2_main_frame->Balloon( );
