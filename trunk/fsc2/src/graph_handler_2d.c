@@ -5,6 +5,7 @@
 
 #include "fsc2.h"
 
+static void key_release_handler( Window window );
 static void press_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev,
 							  Canvas *c );
 static void release_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev,
@@ -338,6 +339,7 @@ void release_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
 	G.button_state = 0;
 	G.raw_button_state &= ~ ( 1 << ( ev->xbutton.button - 1 ) );
 
+	G.cut_select = NO_CUT_SELECT;
 	fl_reset_cursor( window );
 
 	if ( scale_changed )

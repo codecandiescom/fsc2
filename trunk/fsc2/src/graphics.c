@@ -724,7 +724,6 @@ static void canvas_off( Canvas *c, FL_OBJECT *obj )
 			fl_remove_canvas_handler( obj, ConfigureNotify, ch );
 			fl_remove_canvas_handler( obj, ButtonPress, ch );
 			fl_remove_canvas_handler( obj, ButtonRelease, ch );
-			fl_remove_canvas_handler( obj, KeyRelease, ch );
 			fl_remove_canvas_handler( obj, MotionNotify, ch );
 		}
 
@@ -773,7 +772,6 @@ static void setup_canvas( Canvas *c, FL_OBJECT *obj )
 		fl_add_canvas_handler( c->obj, ConfigureNotify, ch, ( void * ) c );
 		fl_add_canvas_handler( c->obj, ButtonPress, ch, ( void * ) c );
 		fl_add_canvas_handler( c->obj, ButtonRelease, ch, ( void * ) c );
-		fl_add_canvas_handler( c->obj, KeyRelease, ch, ( void * ) c );
 		fl_add_canvas_handler( c->obj, MotionNotify, ch, ( void * ) c );
 
 		c->font_gc = XCreateGC( G.d, FL_ObjWin( obj ), 0, 0 );
