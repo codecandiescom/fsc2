@@ -1028,7 +1028,7 @@ set up the digitizer. Calling the function
 @code{digitizer_num_averages()} (@pxref{digitizer_num_averages}) we set
 the digitizer to always accumulate the results of 100 repetitions of the
 pulse sequence. @code{digitizer_trigger_channel()}
-(@pxref{digitizer_trigger_chhannel}) tells the digitizer to expect the
+(@pxref{digitizer_trigger_channel}) tells the digitizer to expect the
 trigger signal on its @code{AUX} channel. The next call of
 @code{digitizer_trigger_position()} (@pxref{digitizer_trigger_position})
 sets the position within the trace it records. By setting it to 0.2 the
