@@ -18,7 +18,7 @@ pid_t spawn_conn( bool start_state )
 	int listen_fd, conn_fd;
 	struct sockaddr_un cli_addr, serv_addr;
 	mode_t old_mask;
-	pid_t child_pid;
+	pid_t new_pid;
 	socklen_t cli_len;
 
 
@@ -44,7 +44,7 @@ pid_t spawn_conn( bool start_state )
 
 	/* Fork a child to handle the communication */
 
-	if ( ( child_pid = fork( ) ) == 0 )
+	if ( ( new_pid = fork( ) ) == 0 )
 	{
 		signal( BUSY_SIGNAL, comm_sig_handler );
 		signal( UNBUSY_SIGNAL, comm_sig_handler );
@@ -59,7 +59,7 @@ pid_t spawn_conn( bool start_state )
 		}
 	}
 
-	return child_pid == -1;
+	return new_pid;
 }
 
 
@@ -69,10 +69,12 @@ static void comm_sig_handler( int signo )
 	{
 		case BUSY_SIGNAL :
 			is_busy = SET;
+			signal( BUSY_SIGNAL, comm_sig_handler );
 			break;
 
 		case UNBUSY_SIGNAL :
 			is_busy = UNSET;
+			signal( UNBUSY_SIGNAL, comm_sig_handler );
 			break;
 	}
 }

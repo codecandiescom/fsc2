@@ -195,8 +195,8 @@ int main( int argc, char *argv[ ] )
 		load_file( main_form->browser, 1 );
 	}
 
-	/* Test or start current EDL program if the appropriate flags were passed
-	   to to the program */
+	/* Trigger test or start of current EDL program if the appropriate flags
+	   were passed to the program */
 
 	if ( do_test && is_loaded )
 		fl_trigger_object( main_form->test_file );
@@ -206,8 +206,8 @@ int main( int argc, char *argv[ ] )
 	if ( ( conn_pid = spawn_conn( ( do_test || do_start ) && is_loaded ) )
 		 != -1 )
 	{
-		/* Loop until quit button is pressed and there is no experiment
-		   running */
+		/* If required send signal to parent process, then loop until quit
+		   button is pressed */
 
 		if ( do_signal )
 			kill( getppid( ), SIGUSR1 );
