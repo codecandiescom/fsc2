@@ -173,7 +173,6 @@ function setup_loop() {
 
 	  test $? -eq 0 || exit 0
 	  fi
-
 }
 
 
