@@ -4,6 +4,7 @@
 
 OWNER              := fsc2
 GROUP              := uucp
+EDITOR             := emacs
 GPIB_LIBRARY       := JTT
 NUM_SERIAL_PORTS   := 2
 SERIAL_LOCK_DIR    := /var/lock
@@ -22,4 +23,4 @@ WITH_RULBUS        := yes
 rulbus_incl_path   := /usr/local/include
 rulbus_lib_path    := /usr/local/lib
 MAIL_ADDRESS       := jens
-BROWSER            := /home/jens/firefox/firefox
+BROWSER            := /home/jens/firefox/firefox 

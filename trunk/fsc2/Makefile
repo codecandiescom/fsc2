@@ -461,20 +461,28 @@ CONFFLAGS += -Ddocdir=\"$(docdir:/=)/\"
 
 # Make sure settings for GPIB bus are reasonable
 
+ifdef GPIB_LIBRARY
+	GPIB_LIBRARY := $(patsubst % ,%,$(GPIB_LIBRARY))
+endif
+
+ifdef GPIB_LOG_LEVEL
+	GPIB_LOG_FILE := $(patsubst % ,%,$(GPIB_LOG_LEVEL))
+endif
+
 ifneq ($(GPIB_LIBRARY),NONE)
 	ifdef GPIB_HEADER_DIR
 		INCLUDES         += -I$(GPIB_HEADER_DIR)
 	endif
 
 	ifdef GPIB_CONF_FILE
-		CONFFLAGS        += -DGPIB_CONF_FILE=\"$(GPIB_CONF_FILE)\"
+		CONFFLAGS        += -DGPIB_CONF_FILE=\"$(patsubst % ,%,$(GPIB_CONF_FILE))\"
 	else
 		CONFFLAGS        += -DGPIB_CONF_FILE=\"/etc/gpib.conf\"
 	endif
 endif
 
 ifdef GPIB_LOG_FILE
-	CONFFLAGS            += -DGPIB_LOG_FILE=\"$(GPIB_LOG_FILE)\"
+	CONFFLAGS            += -DGPIB_LOG_FILE=\"$(patsubst % ,%,$(GPIB_LOG_FILE))\"
 else
 	CONFFLAGS            += -DGPIB_LOG_FILE=\"/tmp/gpib.log\"
 endif
@@ -517,19 +525,23 @@ LIBS                     += -lgpib
 # Make sure settings for serial port are reasonable
 
 ifdef NUM_SERIAL_PORTS
-	CONFFLAGS += -DNUM_SERIAL_PORTS=$(NUM_SERIAL_PORTS)
+	CONFFLAGS += -DNUM_SERIAL_PORTS=$(patsubst % ,%,$(NUM_SERIAL_PORTS))
 else
 	CONFFLAGS += -DNUM_SERIAL_PORTS=0
 endif
 
 ifdef SERIAL_LOCK_DIR
-	CONFFLAGS += -DSERIAL_LOCK_DIR=\"$(SERIAL_LOCK_DIR)\"
+	CONFFLAGS += -DSERIAL_LOCK_DIR=\"$(patsubst % ,%,$(SERIAL_LOCK_DIR))\"
 endif
 
 ifdef SERIAL_LOG_FILE
-	CONFFLAGS += -DSERIAL_LOG_FILE=\"$(SERIAL_LOG_FILE)\"
+	CONFFLAGS += -DSERIAL_LOG_FILE=\"$(patsubst % ,%,$(SERIAL_LOG_FILE))\"
 else
 	CONFFLAGS += -DSERIAL_LOG_FILE=\"/tmp/serial.log\"
+endif
+
+ifdef SERIAL_LOG_LEVEL
+	SERIAL_LOG_FILE = $(patsubst % ,%,$(SERIAL_LOG_LEVEL))
 endif
 
 ifeq ($(SERIAL_LOG_LEVEL),HIGH)
@@ -572,28 +584,28 @@ endif
 
 
 ifdef EDITOR
-	CONFFLAGS += -DEDITOR=\"$(EDITOR)\"
+	CONFFLAGS += -DEDITOR=\"$(patsubst % ,%,$(EDITOR))\"
 endif
 
 
 ifdef BROWSER
-	CONFFLAGS += -DBROWSER=\"$(BROWSER)\"
+	CONFFLAGS += -DBROWSER=\"$(patsubst % ,%,$(BROWSER))\"
 endif
 
 
 ifdef DEF_INCL_DIR
-	CONFFLAGS += -DDEF_INCL_DIR=\"$(DEF_INCL_DIR)\"
+	CONFFLAGS += -DDEF_INCL_DIR=\"$(patsubst % ,%,$(DEF_INCL_DIR))\"
 endif
 
 
 # Make sure some owner and group for the program are set
 
 ifndef OWNER
-	OWNER = fsc2
+	OWNER := fsc2
 endif
 
 ifndef GROUP
-	GROUP = uucp
+	GROUP := uucp
 endif
 
 
@@ -615,7 +627,7 @@ endif
 # for the built-in mail transport agent.
 
 ifdef MAIL_ADDRESS
-	CONFFLAGS         += -DMAIL_ADDRESS=\"$(MAIL_ADDRESS)\"
+	CONFFLAGS         += -DMAIL_ADDRESS=\"$(patsubst % ,%,$(MAIL_ADDRESS))\"
 	ifndef USE_FSC2_MTA
 		MAIL_PROGRAM  := $(shell which mail)
 		ifneq ($(word 1,$(MAIL_PROGRAM)),which:)
