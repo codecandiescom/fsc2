@@ -57,9 +57,7 @@ html: fsc2.html
 
 fsc2.html: $(docs) $(figures)
 	./texi2html -split chapter -menu -number -sec_nav -iso fsc2.texi
-	@echo '<div id="lftBar">' > TOC
-	@echo '  <img src="fsc2.gif" alt="fsc2 logo">' >> TOC
-	@echo '  <br><br>' >> TOC
+	@echo -e '<div id="links">\n  <img src="fsc2.gif" alt="fsc2 logo">\n  <br><br>' >> TOC
 	@for i in fsc2.html fsc2_[1-9].html; do \
 		if [ -z "`grep -h '^<TITLE>fsc2: Index:' $$i`" ]; then \
 			echo -n '  <a href="'$$i'">' >> TOC; \
