@@ -16,8 +16,6 @@ extern int prepslex( void );
 
 extern char *prepstext;
 
-extern Var *vars_val( Var *v );
-
 /* locally used functions */
 
 void prepserror( const char *s );
