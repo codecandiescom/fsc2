@@ -1099,8 +1099,8 @@ void recalc_XPoints_of_curve_2d( Curve_2d *cv )
 		for ( j = 0; j < G.nx; sp++, xp++, xps++, j++ )
 		{
 			xp->x = d2shrt( cv->s2d[ X ] * ( j + cv->shift[ X ] ) );
-			xp->y = ( short ) G.canvas.h - 1 -
-			                   d2shrt( cv->s2d[ Y ] * ( i + cv->shift[ Y ] ) );
+			xp->y = ( short ) G.canvas.h - 1
+				    - d2shrt( cv->s2d[ Y ] * ( i + cv->shift[ Y ] ) );
 			xps->x = xp->x - dw;
 			xps->y = xp->y - dh;
 

@@ -309,10 +309,12 @@ static void cut_calc_curve( int dir, long index, bool has_been_shown )
 }
 
 
-/*----------------------------------------------------------*/
-/* The function calculates the points to be displayed (XPoints) */
-/* from the scaled points  */
-/*----------------------------------------------------------*/
+/*-------------------------------------------------------*/
+/* The function calculates the points as to be displayed */
+/* from the scaled points. As a side effect it also sets */
+/* the flags that indicate if out of range arrows have   */
+/* be shown.                                             */
+/*--------------------------------------------------------*/
 
 static void cut_recalc_XPoints( void )
 {
@@ -330,18 +332,14 @@ static void cut_recalc_XPoints( void )
 			continue;
 
 		xp->x = d2shrt( cv->s2d[ X ] * ( j + cv->shift[ X ] ) );
-		xp->y = d2shrt( ( double ) G.cut_canvas.h - 1.0 - cv->s2d[ Y ]
-						* ( cv->points[ j ].v + cv->shift[ Y ] ) );
+		xp->y = ( short ) G.cut_canvas.h - 1 -
+			   d2shrt( cv->s2d[ Y ] * ( cv->points[ j ].v + cv->shift[ Y ] ) );
 		sp->xp_ref = k;
 
-		if ( xp->x < 0 )
-			cv->left = SET;
-		if ( xp->x >= ( int ) G.cut_canvas.w )
-			cv->right = SET;
-		if ( xp->y < 0 )
-			cv->up = SET;
-		if ( xp->y >= ( int ) G.cut_canvas.h )
-			cv->down = SET;
+		cv->left  = ( xp->x < 0 );
+		cv->right = ( xp->x >= ( int ) G.cut_canvas.w );
+		cv->up    = ( xp->y < 0 );
+		cv->down  = ( xp->y >= ( int ) G.cut_canvas.h );
 
 		xp++;
 		k++;
