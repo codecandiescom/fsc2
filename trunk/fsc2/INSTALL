@@ -72,10 +72,63 @@ kernels) or the one from National Instruments, to be downloaded from
 
   http://www.natinst.com
 
-(which is supposed to work with 2.2 and 2,4 kernels). Unfortunately, only
-the LLP library supports cards from companies other than National
-Instruments. You may also compile fsc2 without having a GPIB library, but
-then devices controlled via the GPIB bus can't be used for obvious reasons.
+(which is supposed to work with 2.2 and 2,4 kernels). From the documentations
+of the LLP library and the one I have written it is already clear that a
+GPIB configuration file (typically '/etc/gpib.conf') is required, in which
+all devices to be used with are listed with their respetive properties. But
+also for the NI library fsc2 expects such a configuration file (instead of
+using the configuration method native to the GPIB library). A typical
+entry in this file looks like the following
+
+device {
+        name        = "TDS744A"
+        pad         = 26
+        timeout     = 3s
+        eos         = '\n'
+        set-reos      no
+        set-xeos      no
+        set-bin       no
+        set-eot       yes
+}
+
+It specifies a symbolic name for the device, the primary GPIB address (you
+may also specify a secondary GPIB address, following the keyword 'sad'),
+the timeout to be used for communication with the device and a few more
+settings controlling the determination of the end of messages send to and
+read from the device. 'eos' is the character to be used as the end of trans-
+mission (EOS) character (none has to be set when no such character is to be
+used). When 'set-reos' is set he driver stops reading from a device whenever
+the EOS character is encountered in the message, even when the EOI line did
+not get raised while receiving the EOS character. When 'set-xeos' is set
+the EOI line is automatically raised when the EOS character is found in a
+message send to the device (even when there are more characters in the
+message). Setting 'set-bin' will make the driver check all 8 bits of each
+character for identity with the EOS character, while, when unset, only the
+lower 7 bits are tested (the top-most bit is excluded from the comparision).
+Finally, setting 'set-eot' makes the driver raise the EOI line automatically 
+with the last byte of a message send to a device (which is also the default),
+while unsetting it will keep the driver from doing so.
+
+Beside the entries for the devices another one for the GPIB board itself
+is required:
+
+device {
+        name        = "gpib"
+        pad         = 0
+        sad         = 0
+        master
+        file        = "/dev/gpib"
+}
+
+Here a symbolic name and the primary and secondary GPIB address are set
+for the board. The 'master' flag tells the driver that the board is the
+device controlling the GPIB bus and 'file' sets the name of the device
+file used for the board.
+
+Unfortunately, only the LLP library supports cards from companies other than
+National Instruments. You may also compile fsc2 without having a GPIB library,
+but then devices controlled via the GPIB bus can't be used for obvious
+reasons.
 
 
 There is also an updated version of the LLP library, working with 2.4 kernels
@@ -383,7 +436,7 @@ Just start by typing 'fsc2 edl/qq.edl' or 'fsc2 edl/z.edl' (assuming you're
 still in fsc2's main directory) and click on the "Start" button to get an
 idea about how fsc2 displays 1- and 2-dimensional data sets.
 
-                     January 24, 2004         Much luck, Jens
+                        March 13, 2004         Much luck, Jens
 --
        _  _____  _____
       | ||_   _||_   _|         Jens.Toerring@physik.fu-berlin.de
