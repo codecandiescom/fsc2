@@ -84,6 +84,20 @@ OII         O(THER)?_?2:?
 OIII        O(THER)?_?3:?
 OIV         O(THER)?_?4:?
 
+TB          T(IME)?_?B(ASE)?:?
+TM          T(RIG(GER)?)?_?M(ODE)?:?
+
+MODE        M(ODE)?
+INTERN      I(NT(ERN(AL)?)?)?
+EXTERN      E(XT(ERN(AL)?)?)?
+SL          S(L(OPE)?)?
+NEG         N(EG(ATIVE)?)?
+POS         P(OS(ITIVE)?)?
+THRESH      L(EV(EL)?)?
+REPT        REP(EAT)?_?T(IME)?
+REPF        REP(EAT)?_?F(REQ(UENCY)?)?
+
+
 DEL         ((D)|(DEL)|(DELAY)):?
 POD         P(OD)?
 CH          C(H(ANNEL)?)?
@@ -194,13 +208,31 @@ WS          [\n=: ]+
 
 {INV}       return INV_TOKEN;
 
+            /* keywords related to time base and trigger mode */
+
+{TB}        return TB_TOKEN;
+{TM}        return TM_TOKEN;
+{MODE}      return MODE_TOKEN;
+{INTERN}    return INTERN_TOKEN;
+{EXTERN}    return EXTERN_TOKEN;
+{SL}        return SLOPE_TOKEN;
+{NEG}       return NEG_TOKEN;
+{POS}       return POS_TOKEN;
+{THRESH}    return THRESH_TOKEN;
+{REPT}      return REPT_TOKEN;
+{REPF}      return REPF_TOKEN;
+
 "\x4nunit"   return NU_TOKEN;
 "\x4uunit"   return UU_TOKEN;
 "\x4mvolt"   return MU_TOKEN;
 "\x4kunit"   return KU_TOKEN;
 "\x4megunit" return MEG_TOKEN;
+"\x4ntesla"  return NT_TOKEN;
+"\x4utesla"  return UT_TOKEN;
+"\x4mtesla"  return MT_TOKEN;
+"\x4tesla"   return T_TOKEN;
 
-			/* all needed pulse related keywords... */
+			/* all pulse related keywords... */
 
 			/* combinations of pulse and property, e.g. `P3.LEN' */
 
