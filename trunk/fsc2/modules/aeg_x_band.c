@@ -781,7 +781,7 @@ try_again:
 	if ( fabs( magnet.mini_step ) < 0.012 * SERIAL_TIME / 1.0e6 )
 	{
 		if ( 1 != show_choices( "Please set sweep speed on magnet front\n"
-								"panel to maximum value of 5000 Oe/min\n."
+								"panel to maximum value of 5000 Oe/min.\n"
 								"Also make sure remote control is enabled!",
 								2, "Abort", "Done", "", 3 ) )
 			goto try_again;

@@ -179,7 +179,7 @@ static void dg2020_basic_functions_check( void )
 			if ( f->is_used && ! f->is_needed )
 			{
 				eprint( WARN, "%s: No pulses have been assigned to function "
-						"`%s'.\n.", pulser_struct.name, Function_Names[ i ] );
+						"`%s'.\n", pulser_struct.name, Function_Names[ i ] );
 				f->is_used = UNSET;
 
 				for ( j = 0; j < f->num_channels; j++ )

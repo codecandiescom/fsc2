@@ -413,19 +413,19 @@ int main( int argc, char *argv[ ] )
 	CATCH( EOF_IN_COMMENT_EXCEPTION )
 	{
 		printf( "\x03\n%s: End of file in comment starting "
-				"at line %ld\n.", Fname, Comm_Lc );
+				"at line %ld.\n", Fname, Comm_Lc );
 		exit( EXIT_FAILURE );
 	}
 	CATCH( EOF_IN_STRING_EXCEPTION )
 	{
 		printf( "\x03\n%s: End of line in string constant starting at "
-				"line %ld\n.", Fname, Str_Lc );
+				"line %ld.\n", Fname, Str_Lc );
 		exit( EXIT_FAILURE );
 	}
 	CATCH( DANGLING_END_OF_COMMENT )
 	{
 		printf( "\x03\n%s: End of comment found in program text at "
-				"line %ld\n.", Fname, Lc );
+				"line %ld.\n", Fname, Lc );
 		exit( EXIT_FAILURE );
 	}
 

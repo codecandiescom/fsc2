@@ -246,7 +246,7 @@ print ( "\Tk = #, b = #\n", k, b );
 k = b + k + 2;
 
 print( "\T=> k = #\n", k );
-print( "\T=> P1.Start = #\n\n\n", P1.Start );
+print( "\T=> P1.Start = #\n\n\n", P1.START );
 
 I = 1;
 N = 1;
