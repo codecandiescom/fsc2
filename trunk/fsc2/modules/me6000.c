@@ -53,8 +53,8 @@ int me6000_exp_hook( void );
 int me6000_end_of_exp_hook( void );
 void me6000_exit_hook( void );
 
-Var *dac_name( Var *v );
-Var *dac_voltage( Var *v );
+Var *daq_name( Var *v );
+Var *daq_voltage( Var *v );
 
 
 /* Locally used functions */
@@ -216,7 +216,7 @@ void me6000_exit_hook( void )
 /*---------------------------------------------------------------*/
 /*---------------------------------------------------------------*/
 
-Var *dac_name( Var *v )
+Var *daq_name( Var *v )
 {
 	UNUSED_ARGUMENT( v );
 	return vars_push( STR_VAR, DEVICE_NAME );
@@ -226,7 +226,7 @@ Var *dac_name( Var *v )
 /*---------------------------------------------------------------*/
 /*---------------------------------------------------------------*/
 
-Var *dac_voltage( Var *v )
+Var *daq_voltage( Var *v )
 {
 	long channel;
 	int dac;
