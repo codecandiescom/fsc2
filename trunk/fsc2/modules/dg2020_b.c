@@ -701,5 +701,5 @@ Var *pulser_lock_keyboard( Var *v )
 	if ( ! TEST_RUN )
 		dg2020_lock_state( lock );
 
-	return vars_push( INT_VAR, lock ? 1 : 0);
+	return vars_push( INT_VAR, lock ? 1 : 0 );
 }

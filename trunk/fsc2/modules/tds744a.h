@@ -104,6 +104,7 @@ Var *digitizer_get_curve( Var *v );
 Var *digitizer_get_curve_fast( Var *v );
 Var *digitizer_get_amplitude( Var *v );
 Var *digitizer_get_amplitude_fast( Var *v );
+Var *digitizer_lock_keyboard( Var *v );
 
 
 /* declaration of internally used functions */
@@ -141,6 +142,7 @@ double tds744a_get_area( int channel, WINDOW *w, bool use_cursors );
 bool tds744a_get_curve( int channel, WINDOW *w, double **data, long *length,
 						bool use_cursor );
 double tds744a_get_amplitude( int channel, WINDOW *w, bool use_cursors );
+bool tds744a_lock_state( bool lock );
 
 
 

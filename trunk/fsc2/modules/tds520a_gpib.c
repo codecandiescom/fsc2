@@ -852,3 +852,18 @@ static double tds520a_get_amplitude_wo_cursor( int channel, WINDOW *w )
 
 	return max - min;
 }
+
+
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+
+bool tds520a_lock_state( bool lock )
+{
+	char cmd[ 100 ];
+
+	sprintf( cmd, "LOC %s\n", lock ? "ALL" | "NON" );
+	if ( gpib_write( tds520a.device, cmd ) == FAILURE )
+		tds520a_gpib_failure( );
+
+	return OK;
+}

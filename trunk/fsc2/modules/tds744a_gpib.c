@@ -865,3 +865,18 @@ int gpib_read_w( int device, char *buffer, long *length )
 	usleep( 2000 );
 	return gpib_read( device, buffer, length );
 }
+
+
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+
+bool tds744a_lock_state( bool lock )
+{
+	char cmd[ 100 ];
+
+	sprintf( cmd, "LOC %s\n", lock ? "ALL" | "NON" );
+	if ( gpib_write( tds744a.device, cmd ) == FAILURE )
+		tds744a_gpib_failure( );
+
+	return OK;
+}

@@ -728,3 +728,18 @@ void tds520_gpib_failure( void )
 	eprint( FATAL, "%s: Communication with device failed.\n", DEVICE_NAME );
 	THROW( EXCEPTION );
 }
+
+
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+
+bool tds520_lock_state( bool lock )
+{
+	char cmd[ 100 ];
+
+	sprintf( cmd, "LOC %s\n", lock ? "ALL" | "NON" );
+	if ( gpib_write( tds520.device, cmd ) == FAILURE )
+		tds520_gpib_failure( );
+
+	return OK;
+}
