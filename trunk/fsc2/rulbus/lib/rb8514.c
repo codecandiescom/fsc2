@@ -37,10 +37,10 @@ struct RULBUS_DELAY_CARD {
 };
 
 
+#define DATA_MSBYTE   0
+#define DATA_LSBYTE   2
 #define STATUS_ADDR   3
 #define CONTROL_ADDR  3
-#define DATA_LSBYTE   2
-#define DATA_MSBYTE   0
 
 
 /* Bits in the control byte */
@@ -108,7 +108,7 @@ void rulbus_delay_exit( void )
 int rulbus_delay_card_init( int handle )
 {
 	RULBUS_DELAY_CARD *tmp;
-	unsigned cahr addr;
+	unsigned char i;
 	unsigned char byte;
 	int retval;
 
@@ -128,14 +128,15 @@ int rulbus_delay_card_init( int handle )
 
 	/* Set a few defaults: output neither start nor end pulses, dsiable
 	   interrupts, triggger of rasing edge and output polarity of start
-	   and end pulses is positive, the set the delay to 0. */
+	   and end pulses is positive, then set the delay to 0. */
 
 	if ( ( retval = rulbus_write( handle, CONTROL_ADDR, &tmp->ctrl, 1 ) )
 																 != RULBUS_OK )
 		return retval;
-
-	for ( byte = 0, addr = DATA_LSBYTE; addr >= DATA_MSBYTE, addr-- )
-		if ( ( retval = rulbus_write( handle, addr, &byte, 1 ) ) < 0 )
+	
+	for ( byte = 0, i = 0; i <= DATA_LSBYTE; i++ )
+		if ( ( retval = rulbus_write( handle, DATA_LSBYTE - i,
+									  &byte, 1 ) ) < 0 )
 			 return retval;
 
 	return RULBUS_OK;
@@ -182,7 +183,7 @@ int rulbus_delay_set_delay( int handle, unsigned long delay, int force )
 {
 	RULBUS_DELAY_CARD *card;
 	unsigned char byte;
-	unsigned char addr;
+	unsigned char i;
 	int retval;
 
 
@@ -208,10 +209,11 @@ int rulbus_delay_set_delay( int handle, unsigned long delay, int force )
 
 	card->delay = delay;
 
-	for ( addr = DATA_LSBYTE; addr >= DATA_MSBYTE; delay >>= 8, addr-- )
+	for ( i = 0; i <= DATA_LSBYTE; delay >>= 8, i++ )
 	{
 		byte = ( unsigned char ) ( delay & 0xFF );
-		if ( ( retval = rulbus_write( handle, addr, &byte, 1 ) ) < 0 )
+		if ( ( retval = rulbus_write( handle, DATA_LSBYTE - i,
+									  &byte, 1 ) ) < 0 )
 			 return retval;
 	}
 
