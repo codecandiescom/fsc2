@@ -62,6 +62,7 @@
 * rs_sml01::        Rohde & Schwarz SML01 Signal Generator
 * rs_spec10::       Roper Scientific Spec-10 CCD Camera
 * rb8509::          Rulbus 12-bit ADC Card
+* rb8510::          Rulbus 12-bit DAC Card
 * rb_pulser::       Rulbus Pulser
 * rs690::           Interface Technology RS690 Word Generator (Berlin 360 GHz)
 * s_band_magnet_broad::   S-band Magnet Power Supply (broad range)
@@ -1584,7 +1585,7 @@ from Roper Scientific.
 @c #############################################################
 
 
-@node rb8509, rb_pulser, rs_spec10, Device Reference
+@node rb8509, rb8510, rs_spec10, Device Reference
 @iftex
 @subheading Rulbus 12-bit ADC Card
 @end iftex
@@ -1593,7 +1594,7 @@ from Roper Scientific.
 @end ifnottex
 
 @paragraphindent 0
-@strong{Module name}: @code{rb8508}
+@strong{Module name}: @code{rb8509}
 
 @paragraphindent 0
 @strong{Description}: 12-bit ADC card for Rulbus (Rijksuniversiteit
@@ -1617,7 +1618,38 @@ the @code{fsc2} package)
 @c #############################################################
 
 
-@node rb_pulser, rs690, rb8509, Device Reference
+@node rb8510, rb_pulser, rb_pulser, Device Reference
+@iftex
+@subheading Rulbus 12-bit DAC Card
+@end iftex
+@ifnottex
+@section Rulbus 12-bit DAC Card
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{rb8510}
+
+@paragraphindent 0
+@strong{Description}: 12-bit DAC card for Rulbus (Rijksuniversiteit
+Leiden BUS) - requires Linux device driver and library are part of
+the @code{fsc2} package)
+
+@paragraphindent 0
+@strong{Controlled via}: Rulbus
+
+
+@paragraphindent 0
+@strong{Supported functions}:
+@multitable @columnfractions .45 .45
+@item @code{daq_name()}            @tab @ref{daq_name}
+@item @code{daq_set_voltage()}     @tab @ref{daq_get_voltage}
+@end multitable
+
+
+@c #############################################################
+
+
+@node rb_pulser, rs690, rb8510, Device Reference
 @iftex
 @subheading Rulbus Pulser
 @end iftex

@@ -107,7 +107,7 @@ int rb8509_exp_hook( void )
 	if ( ( rb8509.handle = rulbus_card_open( RULBUS_CARD_NAME ) )
 		 														 != RULBUS_OK )
 	{
-		print( FATAL, "Initialization of card faled: %s.\n",
+		print( FATAL, "Initialization of card failed: %s.\n",
 			   rulbus_strerror( ) );
 		THROW( EXCEPTION );
 	}
@@ -116,7 +116,7 @@ int rb8509_exp_hook( void )
 
 	if ( ( rb8509.nchan = rulbus_adc12_num_channels( rb8509.handle ) ) < 0 )
 	{
-		print( FATAL, "Initialization of card faled: %s.\n",
+		print( FATAL, "Initialization of card failed: %s.\n",
 			   rulbus_strerror( ) );
 		THROW( EXCEPTION );
 	}
@@ -136,7 +136,7 @@ int rb8509_exp_hook( void )
 	if ( ( has_ext_trig =
 					 rulbus_adc12_has_external_trigger( rb8509.handle ) ) < 0 )
 	{
-		print( FATAL, "Initialization of card faled: %s.\n",
+		print( FATAL, "Initialization of card failed: %s.\n",
 			   rulbus_strerror( ) );
 		THROW( EXCEPTION );
 	}
@@ -154,7 +154,7 @@ int rb8509_exp_hook( void )
 	if ( rb8509.gain_is_set && rb8509.gain != RULBUS_ADC12_GAIN_1 &&
 		 rulbus_adc12_set_gain( rb8509.handle, rb8509.gain ) != RULBUS_OK )
 	{
-		print( FATAL, "Initialization of card faled: %s.\n",
+		print( FATAL, "Initialization of card failed: %s.\n",
 			   rulbus_strerror( ) );
 		THROW( EXCEPTION );
 	}
@@ -167,7 +167,7 @@ int rb8509_exp_hook( void )
 		 rulbus_adc12_set_gain( rb8509.handle, rb8509.trig_mode ) 
 		 														 != RULBUS_OK )
 	{
-		print( FATAL, "Initialization of card faled: %s.\n",
+		print( FATAL, "Initialization of card failed: %s.\n",
 			   rulbus_strerror( ) );
 		THROW( EXCEPTION );
 	}
