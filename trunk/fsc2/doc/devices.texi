@@ -430,6 +430,9 @@ in the range between @w{-10.24 V} and @w{+10.24 V} while for the models
 @strong{SR810} and @strong{SR830} the allowed voltage range is
 @w{-10.5V} to @w{+10.5 V}.
 
+This function can only be used with the @strong{Stanford Research}
+lock-in amplifiers. 
+
 In the @code{EXPERIMENT} section this function can only be called
 with two argument, i.e@: to set the output voltage of one of the DACs
 already in the initialisation of the device.
@@ -556,6 +559,9 @@ the lock-in also via its keyboard it can be unlocked (and also re-locked)
 from within the program. To unlock the keyboard call this function with
 an argument of @code{0} or @code{"OFF"}, to re-lock the keyboard call it
 again with a non-zero argument, @code{"ON"} or no argument at all.
+
+This function can only be used with the @strong{Stanford Research}
+lock-in amplifiers.
 
 @end table
 
