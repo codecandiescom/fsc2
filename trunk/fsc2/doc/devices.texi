@@ -4715,7 +4715,7 @@ and in a new measurement the line should seem to appear at the expected
 position.
 
 Please note that the offset can @strong{only} be set for wavenumber
-swept monochromators while using absolute wavenumbers, i.e.@: while no
+driven monochromators while using absolute wavenumbers, i.e.@: while no
 laser line position is set! If you want to determine and set a new
 offset first store the current laser line position, switch off use of a
 laser line position by calling @code{monochromator_laser_line()} with a
