@@ -112,7 +112,9 @@ bool run( void )
 
 	memcpy( &compile_test, &compilation, sizeof( Compilation ) );
 
-	/* Run all the experiment hooks and initialize the graphics */
+	/* Set zero point for the dtime() function, run the experiment hooks,
+	   initialize the graphics, and create two pipes for two-way communication
+	   between the parent and child process. */
 
 	TRY
 	{
@@ -120,6 +122,7 @@ bool run( void )
 		run_exp_hooks( );
 		check_for_further_errors( &compile_test, &compilation );
 		start_graphics( );
+		setup_comm( );
 		TRY_SUCCESS;
 	}
 	OTHERWISE
@@ -128,22 +131,6 @@ bool run( void )
 		if ( need_GPIB )
 			gpib_shutdown( );
 		set_buttons_for_run( 1 );
-		stop_graphics( );
-		fl_set_cursor( FL_ObjWin( main_form->run ), XC_left_ptr );
-		return FAIL;
-	}
-
-	/* Open pipes for passing data between child and parent process - we need
-	 two pipes, one for the parent process to write to the child process and
-	 another one for the other way round.*/
-
-	if ( ! setup_comm( ) )
-	{
-		eprint( FATAL, UNSET, "Can't set up internal communication "
-				"channels.\n" );
-		run_end_of_exp_hooks( );
-		if ( need_GPIB )
-			gpib_shutdown( );
 		stop_graphics( );
 		fl_set_cursor( FL_ObjWin( main_form->run ), XC_left_ptr );
 		return FAIL;
@@ -172,14 +159,14 @@ bool run( void )
 
 	fl_set_cursor( FL_ObjWin( main_form->run ), XC_left_ptr );
 
-	/* Here the experiment starts - a child process for doing it is forked. */
+	/* Here the experiment starts - child process for doing it is forked */
 
-	if ( ( child_pid = fork( ) ) == 0 )     /* fork the child */
+	if ( ( child_pid = fork( ) ) == 0 )
 		run_child( );
 
 	close_all_files( );              /* only child is going to write to them */
 
-	close( pd[ READ ] );
+	close( pd[ READ ] );             /* close unused ends of pipes */
 	close( pd[ 3 ] );
 	pd[ READ ] = pd[ 2 ];
 
@@ -190,7 +177,7 @@ bool run( void )
 		return OK;
 	}
 
-	/* If forking the child failed we'll end up here... */
+	/* If forking the child failed we end up here */
 
 	sigaction( SIGCHLD,  &sigchld_oact,  NULL );
 	sigaction( NEW_DATA, &new_data_oact, NULL );
@@ -264,10 +251,11 @@ static bool no_prog_to_be_run( void )
 	return ret;
 } 
 
+
 /*-------------------------------------------------------------------*/
 /* Checks if new errors etc. were found while running the exp_hooks. */
 /* If so ask the user if she wants to continue - unless an exception */
-/* is thrown.                                                        */
+/* was thrown.                                                       */
 /*-------------------------------------------------------------------*/
 
 static void check_for_further_errors( Compilation *c_old, Compilation *c_all )
@@ -337,13 +325,13 @@ static void check_for_further_errors( Compilation *c_old, Compilation *c_all )
 /* messages queue is full a global variable is set, thus indicating  */
 /* to the function removing the data from the message queue to post  */
 /* the semaphore when it is done with the data.                      */
-/* In contrast on messages of type REQUEST come from functions where */
+/* In contrast, messages of type REQUEST come from functions where   */
 /* the child sends data not via shared mmory segments but a pipe.    */
 /* In this case the child is waiting to write data to a pipe. It     */
 /* starts writing only when the semaphore gets posted. On the other  */
 /* side, the parent has to deal with all the earlier messages in the */
 /* message queue before it starts reading the pipe. So, for this     */
-/* kind if messages the semaphore isn't posted yet but only when the */
+/* kind of messages the semaphore isn't posted yet but only when the */
 /* parent is ready for reading on the pipe.                          */
 /*-------------------------------------------------------------------*/
 
@@ -359,8 +347,8 @@ static void new_data_handler( int signo )
 	Message_Queue[ message_queue_high ].type = Key->type;
 	message_queue_high = ( message_queue_high + 1 ) % QUEUE_SIZE;
 
-	/* If this were data tell child that it can send new data (as long as the
-	   message queue isn't full) */
+	/* If this are data tell child that it can send new data (as long as
+	   the message queue isn't full) */
 
 	if ( Key->type == DATA )
 	{
@@ -424,7 +412,7 @@ static void run_sigchld_handler( int signo )
 				 WTERMSIG( return_status ) );
 #endif
 
-	child_pid = 0;                                   /* the child is dead... */
+	child_pid = 0;                                       /* child is dead... */
 	sigaction( SIGCHLD, &sigchld_oact, NULL );
 
 	run_form->sigchld->u_ldata = ( long ) return_status;
@@ -439,7 +427,7 @@ static void run_sigchld_handler( int signo )
 /* that is triggered on the death of the child. If the child died  */
 /* prematurely, i.e. without notifying the parent by a QUITTING    */
 /* signal, or it signals a hardware error via its return status an */
-/* error message is output. Than the post-measurement clean-up is  */
+/* error message is output. Then the post-measurement clean-up is  */
 /* done.                                                           */
 /*-----------------------------------------------------------------*/
 
@@ -474,8 +462,7 @@ void stop_measurement( FL_OBJECT *a, long b )
 
 	if ( b == 0 )                        /* callback from stop button ? */
 	{
-
-		if ( child_pid != 0 )            /* child is still kicking... */
+		if ( child_pid != 0 )            /* child is still running */
 		{
 			if ( stop_button_mask != 0 )
 			{
