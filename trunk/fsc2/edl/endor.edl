@@ -57,8 +57,8 @@ FOR I = 1 : N_runs {
     FOR J = 1 : N_points { 
 
         data[ I, J ] = lockin_get_data( );
-	display( J, data[ I, J ], 1, J,
-		 ( dat_mean[ J ] + data[ I, J ] ) / I, 2 );
+		display( J, data[ I, J ], 1, J,
+		 		 ( dat_mean[ J ] + data[ I, J ] ) / I, 2 );
         IF J < N_points {
             synthesizer_frequency( start_freq + J * step_freq );
         }

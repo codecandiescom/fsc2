@@ -19,7 +19,35 @@
 
 Whenever you start @acronym{fsc2} you will see the following window:
 
-@image{fsc2fig1,11cm}
+@image{/home/jens/fsc2/doc/fsc2fig1,11cm}
+
+The large white area in the upper halve is the browser that contains the
+text of the current @acronym{EDL} program (after you loaded it). Below
+the main browser is another browser which displays error messages as
+well as the output from the @acronym{EDL} program.
+
+On the left side you have a set of buttons:
+@itemize @bullet
+@item The @code{Load} button - when you click onto it a file selector
+is shown that allows you to select a new @acronym{EDL} program
+@item The @code{Reload} button - when you have edited the currently
+loaded @acronym{EDL} program you have to click onto this button to
+make @acronym{fsc2} load the changed file
+@item The @code{Edit} button - when you click onto it an editor will
+open up with the curently loaded @acronym{EDL} program. Which
+editor to use depends on the environment variable @code{EDITOR},
+when it isn't set @code{vi} is used as the default editor.
+@item The @code{Test} button lets you check an @acronym{EDL} program 
+after it has been loaded.
+@item Using the @code{Start} button you start execution of the
+@acronym{EDL} program, i.e.@ you start the measurement.
+@item The @code{Quit} button is for leaving @acronym{fsc2}.
+@item Pressing the @code{Help} button will start Netscape with the
+documentation for @acronym{fsc2}.
+@item Finally, the @code{Bug report} button will open an editor window
+where you can compose a bug report. When you're finished the program
+will allow you to mail me the bug report.
+@end itemize
 
 @end ifnotinfo
 
@@ -31,16 +59,26 @@ following elements:
 @itemize @bullet
 @item At the top the browser for displaying the @acronym{EDL} file to be run
 @item Below this another browser where error messages as well as output
-      from the @acronym{EDL} program will be displayed
+from the @acronym{EDL} program will be displayed
 @item The @code{Load} button - when you click onto it a file selector
-      is shown that allows you to select a new @acronym{EDL} program
+is shown that allows you to select a new @acronym{EDL} program
 @item The @code{Reload} button - when you have edited the currently
-      loaded @acronym{EDL} program you have to click onto this button to
-      make @acronym{fsc2} load the changed file
+loaded @acronym{EDL} program you have to click onto this button to
+make @acronym{fsc2} load the changed file
 @item The @code{Edit} button - when you click onto it an editor will
-      open up with the curently loaded @acronym{EDL} program. Which
-      editor to use depends on the environment variable @code{EDITOR},
-      when it isn't set @code{vi} is used as the default editor.
+open up with the curently loaded @acronym{EDL} program. Which
+editor to use depends on the environment variable @code{EDITOR},
+when it isn't set @code{vi} is used as the default editor.
+@item The @code{Test} button lets you check an @acronym{EDL} program 
+after it has been loaded.
+@item Using the @code{Start} button you start execution of the
+@acronym{EDL} program, i.e.@ you start the measurement.
+@item The @code{Quit} button is for leaving @acronym{fsc2}.
+@item Pressing the @code{Help} button will start Netscape with the
+documentation for @acronym{fsc2}.
+@item Finally, the @code{Bug report} button will open an editor window
+where you can compose a bug report. When you're finished the program
+will allow you to mail me the bug report.
 @end itemize
 
 @end ifnothtml

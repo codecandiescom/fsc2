@@ -1,0 +1,21 @@
+DEVICES:
+
+kontron4060;
+
+VARIABLES:
+
+I = 1;
+
+
+PREPARATIONS:
+
+init_1d( );
+
+
+EXPERIMENT:
+
+FOREVER {
+	wait( 0.5 s );
+	display( I, voltmeter_get_data( ) );
+	I += 1;
+}

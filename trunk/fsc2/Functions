@@ -132,3 +132,10 @@ synthesizer_mod_ampl, -1, EXP;
 
 boxcar_curve_length, -1, EXP;
 boxcar_get_curve, -1, EXP;
+
+
+// Functions exported by the voltmeter (Kontron 4060)
+
+voltmeter_get_data, 0, EXP;
+voltmeter_ac_measurement, 0, EXP;
+voltmeter_dc_measurement, 0, EXP;

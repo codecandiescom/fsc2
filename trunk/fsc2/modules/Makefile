@@ -2,7 +2,8 @@
 
 simp_modules   = User_Functions.c sr510.c sr530.c sr810.c sr830.c \
 				 aeg_s_band.c aeg_x_band.c er035m.c er035m_s.c \
-				 er035m_sa.c er035m_sas.c bh15.c keithley228a.c egg4402.c
+				 er035m_sa.c er035m_sas.c bh15.c keithley228a.c egg4402.c \
+				 kontron4060.c
 dg2020_f       = dg2020_f.c dg2020_gen_f.c dg2020_pulse_f.c dg2020_init_f.c \
 				 dg2020_run_f.c dg2020_util_f.c dg2020_gpib_f.c
 dg2020_b       = dg2020_b.c dg2020_gen_b.c dg2020_pulse_b.c dg2020_util_b.c \

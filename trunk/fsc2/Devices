@@ -42,3 +42,5 @@ bh15          // Bruker field controller
 hp8647a       // HP RF synthesizer
 
 egg4402       // EG&G PARC box-car
+
+kontron4060;  // Kontron 4060 voltmeter
