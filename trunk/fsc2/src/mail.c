@@ -752,7 +752,7 @@ static int weed_out( unsigned char *buf, int len, unsigned char *ans_sec,
 			return -1;
 
 		if ( rpq > prior_level ||
-			 ( rpc == prior_level && strcmp( host, local ) ) )
+			 ( rpq == prior_level && strcmp( host, local ) ) )
 		{
 			*non_local_prior = 0xFFFF;
 			rrs_left--;

@@ -21,7 +21,8 @@ run fsc2:
 
 Optionally, you should have
 
- 9) mail
+ 9) mail and sendmail (or similar) installed, or, if you want to use the
+    built-in mail agent, the libresolv.so library is required.
 10) addr2line
 11) perl (version 5.0 or higher)
 12) pnmtopng
@@ -362,7 +363,7 @@ Just start by typing 'fsc2 edl/qq.edl' or 'fsc2 edl/z.edl' (assuming you're
 still in fsc2's main directory) and click on the "Start" button to get an
 idea about how fsc2 displays 1- and 2-dimensional data sets.
 
-                March 29, 2003             Much luck, Jens
+                  April 15, 2003             Much luck, Jens
 --
        _  _____  _____
       | ||_   _||_   _|         Jens.Toerring@physik.fu-berlin.de
