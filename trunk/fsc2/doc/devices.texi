@@ -4389,7 +4389,12 @@ supplied by Roper Scientific, must be installed.
 @strong{Please note}: At the start of the experiment the target
 temperature for the camera is set to the lowest possible value unless a
 target temperature is explicitely set using the function
-@code{ccd_camera_temerature()} (see below).
+@code{ccd_camera_temperature()} (see below).
+
+The values for the region of interest, the binning values, the binning
+mode and the number of clear cycles are stored internally between
+experiments, so at the start of an experiment these values are set
+automatically to the ones they had in the previously run experiment.
 
 
 @table @samp
@@ -4430,8 +4435,9 @@ the camera by reducing the ROI - only when the width or height would drop
 below 1 the corresponing binning factors is reduced to guarantee that
 at least a single value for the direction gets returned.
 
-The ROI setting is stored, so when a new experiment is started values
-last set for the ROI are used.
+The ROI setting is stored between experiments, so when a new experiment
+is started the ROI setting is identical to the one it had in a
+previously run experiment.
 
 
 @anchor{ccd_camera_binning}
@@ -4444,13 +4450,12 @@ number of pixels that get binned in the (horizontal) @i{x}-direction,
 the second element is the binning factor in (vertical) @i{y}-direction.
 
 If the function is called with arguments the first argument must be an
-array with 2 elements. The first element is the number of pixels to be
-binned in @i{x}-direction, the second the number in @i{y}-direction. If
-the number is @code{0} the current setting of the binning value remains
-unchanged.
-
-If no binning has been specified no binning is used, which is identical
-to setting both binning values to 1.
+either an array with 2 elements or a string. If the argument is an array
+its first element is the number of pixels to be binned in
+@i{x}-direction, the second the number in @i{y}-direction. If the number
+is @code{0} the current setting of the binning value remains unchanged.
+Alternatively, if the first argument is a string it can be only the
+string @code{"NONE"} which tells the function to switch binning off.
 
 If the number of pixels of the region of interest (ROI) in one of the
 directions isn't a integer multiple of the corresponding binning size
@@ -4475,6 +4480,10 @@ strings @code{"HARDWARE"} or @code{"HARD"} for use of hardware binning
 or the number @code{1} or one of the strings @code{"SOFTWARE"} or
 @code{"SOFT"} for software binning.
 
+The binning factors and method are stored between experiments, so when a
+new experiment is started the settings for the binnoing are identical to
+the one they had in a previously run experiment.
+
 
 @anchor{ccd_camera_binning_method}
 @item ccd_camera_binning_method()
@@ -4497,6 +4506,10 @@ To set the binning method you must specify either @code{0} or one of the
 strings @code{"HARDWARE"} or @code{"HARD"} for use of hardware binning
 or the number @code{1} or one of the strings @code{"SOFTWARE"} or
 @code{"SOFT"} for software binning.
+
+The binning binning method is stored between experiments, so when a new
+experiment is started its settingis identical to the it had in a
+previously run experiment.
 
 
 @anchor{ccd_camera_exposure_time}
@@ -4523,6 +4536,11 @@ an argument the function returns the number of clear cycles. If an
 argument is passd to the function it must be a number between 0 and the
 maximum number of clear cycles (which is 7 for the Spec-10 camera). The
 default value of clear cycles is 1.
+
+The number of clear cycles is stored between experiments, so when a new
+experiment is started its setting is identical to the it had in a
+previously run experiment.
+
 
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
