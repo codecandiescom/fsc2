@@ -17,7 +17,7 @@
 /*----------------------------------------------------------------*/
 
 
-#define CONTROLLER  "gpib0"      /* symbolic name of the controller */
+#define CONTROLLER  "gpib"      /* symbolic name of the controller */
 
 
 #define SRQ      0x40    /* SRQ bit in device status register */
