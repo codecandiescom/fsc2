@@ -61,8 +61,8 @@ static bool do_print_message = UNSET;
 
 void spex_cd2a_init( void )
 {
-	/* First calculate the length of position length messages, so we don't
-	   have to recalculate it all of the time. */
+	/* First calculate the length of position messages, so we don't have to
+	   recalculate it all of the time. */
 
 	pos_mess_len = spex_cd2a_pos_mess_len( );
 
