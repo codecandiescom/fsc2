@@ -1332,7 +1332,7 @@ static double ips120_10_get_sweep_rate( void )
 /*-----------------------------------------------------------*/
 /* Function to make the magnet to a certain currrent setting */
 /* as fast as savely possible. Can be aborted in which case  */
-/* a runing sweep will be stopped by the end-of-experiment   */
+/* a running sweep will be stopped by the end-of-experiment  */
 /* handler function that's then invoked automatically.       */
 /*-----------------------------------------------------------*/
 
