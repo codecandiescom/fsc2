@@ -268,7 +268,7 @@ int gpib_init_device( const char *device_name, int *dev )
 
 	if ( gpib_dev_list == NULL )
 	{
-		cur_dev = T_malloc( sizeof( GPIB_DEV ) );
+		gpib_dev_list = cur_dev = T_malloc( sizeof( GPIB_DEV ) );
 		cur_dev->prev = NULL;
 	}
 	else
@@ -282,7 +282,7 @@ int gpib_init_device( const char *device_name, int *dev )
 	}
 
 	cur_dev->name = get_string_copy( device_name );
-	gpib_dev_list->next = NULL;
+	cur_dev->next = NULL;
 
     if ( ll > LL_ERR )
         gpib_log_function_start( "gpib_init_device", device_name );
