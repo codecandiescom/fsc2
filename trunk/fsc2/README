@@ -88,8 +88,8 @@ Currently suported devices
 * Sony/Tektronix Data Generator DG2020
 * Tektronix Stimulus System HFS9003
 * Bruker EP385 Pulse Programmer
+* Interface Technology RS690 Digital Word Generator
 * Stanford Research Lock-In Amplifier SR510, SR530, SR810, SR830
-* AEG Magnet Power Supply (home-build computer control, S-, X-Band)
 * Bruker Field controller ER032M
 * Keithley 228A (used as superconducting magnet power supply)
 * Oxford Magnet Sweep Power Supply IPS20-4
@@ -103,6 +103,7 @@ Currently suported devices
 * LakeShore 330 Temperature Controller
 * Kontron 4060 Voltmeter
 * EG&G PARC Box-Car Integrator 4402 (download of measured data only)
+* AEG Magnet Power Supply (home-build computer control, S-, X-Band)
 
 fsc2 works with three different GPIB driver/library combinations, the
 Linux Lab Project driver (http://www.llp.fu-berlin.de), the National
