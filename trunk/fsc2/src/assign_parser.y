@@ -261,7 +261,8 @@ func:    MW_TOKEN                  { if ( Cur_PHS == -1 )
 /* Pod and channel assignments consists of the POD and CHANNEL keyword,
    followed by the pod or channel number(s), and, optionally, a DELAY keyword
    followed by the delay time and the INVERTED keyword. The sequence of the
-   keywords is arbitrary. */
+   keywords is arbitrary. The last entry is for the Franfurt version of
+   the pulser driver only. */
 
 
 pcd:    /* empty */
@@ -274,6 +275,8 @@ pcd:    /* empty */
 	  | pcd func2 sep2             { Cur_PROT = PHASE_FFM_PROT; }
 ;
 
+
+/* These are needed for the Frankfurt version of the driver only */
 
 func2:  MW_TOKEN                   { p_phase_ref_f( Channel_Type,
 												    PULSER_CHANNEL_MW ); }
