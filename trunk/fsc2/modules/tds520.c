@@ -124,7 +124,7 @@ Var *digitizer_define_window( Var *v )
 			{
 				eprint( FATAL, "%s:%ld: %s: Zero or negative width for "
 						"window in `digitizer_define_window'.\n",
-						Fname, Lc, DEVICE_NAME, win_num );
+						Fname, Lc, DEVICE_NAME );
 				THROW( EXCEPTION );
 			}
 			is_win_width = SET;
