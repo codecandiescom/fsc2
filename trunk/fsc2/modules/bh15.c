@@ -53,7 +53,7 @@ enum {
 
 int bh15_init_hook( void )
 {
-	/* Set global flag to tell magnet poswer supply driver that the
+	/* Set global flag to tell magnet power supply driver that the
 	   field controller has already been loaded */
 
 	is_gaussmeter = SET;
@@ -61,7 +61,7 @@ int bh15_init_hook( void )
 	if ( exist_device( "er035m" ) )
 	{
 		eprint( FATAL, "bh15: Driver for Bruker ER035M gaussmeter is already "
-				"loaded - there can only be one gaussmter.\n" );
+				"loaded - there can only be one gaussmeter.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -153,7 +153,7 @@ int bh15_exp_hook( void )
 
 	bh15.state = BH15_FAR_OFF;
 
-	/* We are always going to achieve a resolution of 50mG ... */
+	/* We are always going to achieve a resolution of 50 mG ... */
 
 	bh15.resolution = 0.05;
 	bh15_get_field( );
@@ -330,7 +330,7 @@ double bh15_get_field( void )
 		THROW( EXCEPTION );
 	}
 
-	/* Cnvert the string and check for errors */
+	/* Convert the string and check for errors */
 
 	bh15.field = strtod( val, &endptr );
 	if ( endptr == val || errno == ERANGE )

@@ -87,7 +87,7 @@ void accept_new_data( void )
 
 		/* If the new entry is a REQUEST but the following a DATA set exchange
 		   the entries and accept the data - this way the drawing of all data
-		   is done before REQUESTs are honored */
+		   is done before REQUESTs are honoured */
 
   		mq_next = ( message_queue_low + 1 ) % QUEUE_SIZE;
 
@@ -118,7 +118,7 @@ void accept_new_data( void )
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
-bool unpack_and_accept( void *ptr )
+static bool unpack_and_accept( void *ptr )
 {
 	int i;
 	int nsets;
@@ -192,7 +192,7 @@ bool unpack_and_accept( void *ptr )
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
-bool other_data_request( int type, void * ptr )
+static bool other_data_request( int type, void * ptr )
 {
 	long i;
 	long count;
@@ -217,7 +217,7 @@ bool other_data_request( int type, void * ptr )
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
-void accept_1d_data( long x_index, long curve, int type, void *ptr )
+static void accept_1d_data( long x_index, long curve, int type, void *ptr )
 {
 	long len;
 	long *l_data;
@@ -231,7 +231,7 @@ void accept_1d_data( long x_index, long curve, int type, void *ptr )
 	long i, j;
 
 
-	/* Test if the curve number is ok */
+	/* Test if the curve number is OK */
 
 	if ( curve >= G.nc )
 	{
@@ -424,8 +424,8 @@ void accept_1d_data( long x_index, long curve, int type, void *ptr )
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
-void accept_2d_data( long x_index, long y_index, long curve, int type,
-					 void *ptr )
+static void accept_2d_data( long x_index, long y_index, long curve, int type,
+							void *ptr )
 {
 	long len;
 	long *l_data;
@@ -439,7 +439,7 @@ void accept_2d_data( long x_index, long y_index, long curve, int type,
 	long i, j;
 	Scaled_Point *sp;
 
-	/* Test if the curve number is ok */
+	/* Test if the curve number is OK */
 
 	if ( curve >= G.nc )
 	{
@@ -619,7 +619,7 @@ void accept_2d_data( long x_index, long y_index, long curve, int type,
 /* Increments the number of data in x-direction */
 /*----------------------------------------------*/
 
-void incr_x( long x_index, long len )
+static void incr_x( long x_index, long len )
 {
 	long i, j, k;
 	Curve_2d *cv;
@@ -662,7 +662,7 @@ void incr_x( long x_index, long len )
 /* Increments the number of data in y-direction */
 /*----------------------------------------------*/
 
-void incr_y( long y_index )
+static void incr_y( long y_index )
 {
 	long i, j, k;
 	Curve_2d *cv;
@@ -695,7 +695,7 @@ void incr_y( long y_index )
 /* Increments the number of data in both x- and y-direction */
 /*----------------------------------------------------------*/
 
-void incr_x_and_y( long x_index, long len, long y_index )
+static void incr_x_and_y( long x_index, long len, long y_index )
 {
 	long i, j, k;
 	Curve_2d *cv;
@@ -731,7 +731,7 @@ void incr_x_and_y( long x_index, long len, long y_index )
 		cv->xpoints_s = T_realloc( cv->xpoints_s, new_Gnx * ( y_index + 1 )
 								                  * sizeof( XPoint ) );
 
-		/* Reorganize the old elements to fit into the new array and clear
+		/* Reorganise the old elements to fit into the new array and clear
 		   the the new elements in the already existing rows */
 
 

@@ -908,7 +908,7 @@ Var *f_print( Var *v )
 		if ( *cp != '\\' && *cp != '#' )
 			continue;
 
-		/* convert format descriptor (unescaped `#') to 4 \x01 */
+		/* convert format descriptor (un-escaped `#') to 4 \x01 */
 
 		if ( *cp == '#' )
 		{
@@ -1013,7 +1013,7 @@ Var *f_print( Var *v )
 		eprint( NO_ERROR, cp );
 
 	/* finally free the copy of the format string and return number of
-	   printed varaibles */
+	   printed variables */
 
 	T_free( fmt );
 	return vars_push( INT_VAR, in_format );
@@ -1070,7 +1070,7 @@ Var *f_wait( Var *v )
 	} while ( ! do_quit &&
 			  ( sleepy.it_value.tv_sec > 0 || sleepy.it_value.tv_usec > 0 ) );
 
-	/* Return 1 if end of sleping time was reached, 0 if do_quit was set.
+	/* Return 1 if end of cleping time was reached, 0 if do_quit was set.
 	   Do not reset the alarm signal handler, because after receipt of a
 	   'do_quit' signal the timer may still be running and send a signal
 	   that could kill the child prematurely ! */
@@ -1095,7 +1095,7 @@ static void f_wait_alarm_handler( int sig_type )
 
 
 /*-------------------------------------------------------------------*/
-/* f_init_1d() has to be called to initialize the display system for */
+/* f_init_1d() has to be called to initialise the display system for */
 /* 1-dimensional experiments.                                        */
 /* Arguments:                                                        */
 /* 1. Number of curves to be shown (optional, defaults to 1)         */
@@ -1211,7 +1211,7 @@ labels_1d:
 
 
 /*-------------------------------------------------------------------*/
-/* f_init_2d() has to be called to initialize the display system for */
+/* f_init_2d() has to be called to initialise the display system for */
 /* 2-dimensional experiments.                                        */
 /*-------------------------------------------------------------------*/
 
@@ -1392,14 +1392,14 @@ Var *f_display( Var *v )
 	int i;
 
 
-	/* We can't display data without a previous initialization */
+	/* We can't display data without a previous initialisation */
 
 	if ( ! G.is_init )
 	{
 		if ( ! G.is_warn )                         /* warn only once */
 		{
 			eprint( WARN, "%s:%ld: Can't display data, missing "
-					"initialization.\n", Fname, Lc );
+					"initialisation.\n", Fname, Lc );
 			G.is_warn = SET;
 		}
 
@@ -2189,9 +2189,9 @@ void close_all_files( void )
 /* Saves data to a file. If `get_file()' hasn't been called yet it will be  */
 /* called now - in this case the file opened this way is the only file to   */
 /* be used and no file identifier is allowed as first argument to `save()'. */
-/* This version of save writes the data in an unformated way, i.e. each     */
-/* on its own line wih the only exception of arrays of more than one        */
-/* dimension where a edmpty line is put between the slices.                 */
+/* This version of save writes the data in an unformatted way, i.e. each    */
+/* on its own line with the only exception of arrays of more than one       */
+/* dimension where a empty line is put between the slices.                  */
 /*--------------------------------------------------------------------------*/
 
 Var *f_save( Var *v )
@@ -2402,7 +2402,7 @@ Var *f_fsave( Var *v )
 		if ( *cp != '\\' && *cp != '#' )
 			continue;
 
-		/* Convert format descriptor (unescaped `#') to 5 \x01 */
+		/* Convert format descriptor (un-escaped `#') to 5 \x01 */
 
 		if ( *cp == '#' )
 		{
@@ -2562,13 +2562,13 @@ Var *f_save_o( Var *v )
 }
 
 
-/*---------------------------------------------------------------------------*/
-/* Writes either the contnt of the program or the error browser into a file. */
-/* Input parameter:                                                          */
-/* 1. 0: writes program browser, 1: error browser                            */
-/* 2. File identifier                                                        */
-/* 3. Comment string to prepend to each line                                 */
-/*---------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*/
+/* Writes the content of the program or the error browser into a file. */
+/* Input parameter:                                                    */
+/* 1. 0: writes program browser, 1: error browser                      */
+/* 2. File identifier                                                  */
+/* 3. Comment string to prepend to each line                           */
+/*---------------------------------------------------------------------*/
 
 static void print_browser( int browser, int fid, const char* comment )
 {
