@@ -2440,7 +2440,9 @@ static void vars_ass_from_trans_ptr( Var *src, Var *dest )
 		if ( d->sizes[ d->dim - 1 ] != src->len )
 		{
 			eprint( FATAL, SET, "Array slice assigned to array '%s' does "
-					"not fit its length.\n", d->name );
+					"not fit its length, its size is %ld while the slice has "
+					"%ld elements.\n",
+					d->name, d->sizes[ d->dim - 1 ], src->len );
 			THROW( EXCEPTION );
 		}
 
@@ -2453,8 +2455,8 @@ static void vars_ass_from_trans_ptr( Var *src, Var *dest )
 	/* Warn on float to integer assignment */
 
 	if ( d->type == INT_CONT_ARR && src->type == FLOAT_ARR )
-		eprint( WARN, SET, "Assignment of float array (or slice) to "
-				"integer array '%s'.\n", d->name );
+		eprint( WARN, SET, "Assigning float array (or slice) to integer "
+				"array '%s'.\n", d->name );
 
 	/* Now copy the transient array as slice to the destination - if both
 	   variable types fit a fast memcpy() will do the job while in the other
