@@ -135,7 +135,7 @@ IDENT    [A-Za-z][A-Za-z_0-9]*
 				Eol = SET;
 			}
 
-{WS}        /* dum (other) white space */
+{WS}        /* dump (other) white space */
 
 			/* writes out EOL character */
 \n			{
