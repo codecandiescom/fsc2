@@ -4,6 +4,9 @@
    $Id$
 
    $Log$
+   Revision 1.10  1999/07/27 21:33:34  jens
+   *** empty log message ***
+
    Revision 1.9  1999/07/27 16:19:13  jens
    *** empty log message ***
 
@@ -38,15 +41,26 @@
    of arguments is specified and no checking can be done.
 
    As the next step the function is called. The function gets passed a pointer
-   to the first argument on the stack. It has to check by itself if the
+   to the first argument on the stack. It has to check by itself that the
    variables have the correct type and are reasonable. Each function has to
-   push its result onto the stack (the print() function returns the number of
-   variables it printed, not counting the format string).
+   push its result onto the stack. This can be either a simple integer or
+   float variable (i.e. of type INT_VAR or FLOAT_VAR) or a transient array.
+   In the later case the function has to allocate memory for the array, set
+   its elements and push a variable of either INT_TRANS_ARR or FLOAT_TRANS_ARR
+   onto the variable stack with the pointer to the array and its length (as a
+   long!) as additional arguments.
 
    On return func_call() will remove all arguments from the stack as well as
    the variable for the function. Again, for functions with a variable number
    of arguments removing the arguments is impossible - the function has to do
    it by itself. Finally the result of the function is pushed onto the stack.
+
+   To add a new function append its declaration to the declarations just below
+   this text and its properties (i.e. name as used in the EDL file, its name
+   as declared here, its number of arguments and finally its accessibility) as
+   another element to the `fncts' structure (don't change the very last entry
+   marking the end of the structure's entries!). And, of course, define it
+   somewhere here in this file...
 */
 
 
@@ -70,6 +84,7 @@ Var *f_ln( Var *v  );
 Var *f_log( Var *v  );
 Var *f_sqrt( Var *v  );
 Var *f_print( Var *v  );
+Var *f_dummy( Var *v );
 
 
 
@@ -106,7 +121,8 @@ Func fncts[ ] = { { "int",   f_int,    1, ACCESS_ALL_SECTIONS	},
   				  { "log",   f_log,    1, ACCESS_ALL_SECTIONS	},
 				  { "sqrt",  f_sqrt,   1, ACCESS_ALL_SECTIONS	},
                   { "print", f_print, -1, ACCESS_ALL_SECTIONS	},
-				  { "",      NULL,     0, 0 } /* marks last entry! */
+                  { "dummy", f_dummy,  1, ACCESS_ALL_SECTIONS	},
+				  { "",      NULL,     0, 0 }          /* marks last entry! */
                 };
 
 
@@ -471,6 +487,12 @@ Var *f_sqrt( Var *v )
 }
 
 
+
+/*------------------------------------------------------------------*/
+/* The print() function returns the number of variables it printed, */
+/* not counting the format string.                                  */
+/*------------------------------------------------------------------*/
+
 Var *f_print( Var *v )
 {
 	char *fmt;
@@ -642,4 +664,27 @@ Var *f_print( Var *v )
 	vars_pop( v );
 
 	return( vars_push( INT_VAR, in_format ) );
+}
+
+
+Var *f_dummy( Var *v )
+{
+	long *x;
+	long size;
+	long i;
+
+
+	vars_check( v, INT_VAR | FLOAT_VAR );
+
+	if ( v->type == INT_VAR )
+		size = v->val.lval;
+	else
+		size = ( long ) v->val.dval;
+
+	x = T_calloc( size, sizeof( long ) );
+
+	for ( i = 0; i < size; ++i )
+		x[ i ] = i + 1;
+
+	return( vars_push( INT_TRANS_ARR, x, size ) );
 }
