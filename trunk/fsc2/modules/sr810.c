@@ -1402,7 +1402,7 @@ static double sr810_set_ref_level( double level )
 
 void sr810_lock_state( bool lock )
 {
-	cmd[ 100 ];
+	char cmd[ 100 ];
 
 
 	sprintf( cmd, "OVRM %c\n", lock ? '0' : '1' );
