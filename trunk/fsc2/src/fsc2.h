@@ -12,6 +12,8 @@
 /* define my email address for bug and crash reports */
 
 #define MAIL_ADDRESS "Jens.Toerring@physik.fu-berlin.de"
+#define MAIL_PROGRAM "/usr/bin/mail"
+
 
 #define FSC2_SOCKET  "/tmp/fsc2.uds"
 

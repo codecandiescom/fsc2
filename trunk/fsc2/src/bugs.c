@@ -276,59 +276,54 @@ void bug_report_callback( FL_OBJECT *a, long b )
 
 void death_mail( int signo )
 {
-	FILE *tmp;
-	int tmp_fd;
-	char filename[ ] = P_tmpdir "/fsc2XXXXXX";
+	FILE *mail;
 	char cur_line[ FL_BROWSER_LINELENGTH ];
 	char *clp;
 	int lines;
 	int i;
-	char *cmd;
 
 
-	if ( ( tmp_fd = mkstemp( filename ) ) < 0 ||
-		 ( tmp = fdopen( tmp_fd, "w" ) ) == NULL )
+	if ( ( mail = popen( MAIL_PROGRAM " -s 'fsc2 crash' " MAIL_ADDRESS, "w" ) )
+		 == NULL )
 		return;
 
-	fprintf( tmp, "fsc2 (%d, %s) killed by %s signal.\n\n", getpid( ),
+	fprintf( mail, "fsc2 (%d, %s) killed by %s signal.\n\n", getpid( ),
 			 I_am == CHILD ? "CHILD" : "PARENT", strsignal( signo ) );
 
 #ifndef NDEBUG
 	if ( signo == SIGABRT )
-		fprintf( tmp, "%s:%u: failed assertion: %s\n\n",
+		fprintf( mail, "%s:%u: failed assertion: %s\n\n",
 				 Assert_struct.filename, Assert_struct.line,
 				 Assert_struct.expression );
 #endif
-	fprintf( tmp, "Fname = %s, Lc = %ld\n\n", Fname, Lc );
 
-	fprintf( tmp, "Content of program browser:\n\n" );
+	fprintf( mail, "Fname = %s, Lc = %ld\n\n", Fname, Lc );
+
+	fputs( "Content of program browser:\n\n"
+		   "--------------------------------------------------\n\n", mail );
+
 	lines = fl_get_browser_maxline( main_form->browser );
-	for ( i = 1; i <= lines; i++ )
+	for ( i = 0; i < lines; )
 	{
-		strcpy( cur_line, fl_get_browser_line( main_form->browser, i ) );
+		strcpy( cur_line, fl_get_browser_line( main_form->browser, ++i ) );
 		clp = cur_line;
 		if ( *clp == '@' )
 			while ( *clp++ != 'f' )
 				;
-		fprintf( tmp, "%s\n", clp );
+		fputs( clp, mail );
+		fputc( '\n', mail );
 	}
-	fprintf( tmp, "--------------------------------------------------\n\n" );
 
-	fprintf( tmp, "Content of output browser:\n\n" );
+	fputs( "--------------------------------------------------\n\n"
+		   "Content of output browser:\n"
+		   "--------------------------------------------------\n", mail );
+
 	lines = fl_get_browser_maxline( main_form->error_browser );
-	for ( i = 1; i <= lines; i++ )
-		fprintf( tmp, "%s\n",
-				 fl_get_browser_line( main_form->error_browser, i ) );
-	fprintf( tmp, "--------------------------------------------------\n\n" );
+	for ( i = 0; i < lines; )
+	{
+		fputs( fl_get_browser_line( main_form->error_browser, ++i ), mail );
+		fputc( ( int ) '\n', mail );
+	}
 
-	cmd = get_string( strlen( "mail -s \"fsc2 crash\" " ) +
-					  + strlen( MAIL_ADDRESS ) + strlen( filename ) + 3 );
-	strcpy( cmd, "mail -s \"fsc2 crash\" " );
-	strcat( cmd, MAIL_ADDRESS );
-	strcat( cmd, " < " );
-	strcat( cmd, filename );
-
-	system( cmd );                 /* send the mail */
-	T_free( cmd );
-	unlink( filename );                /* delete the temporary file */
+	pclose( mail );
 }
