@@ -55,7 +55,8 @@ static Board_Functions func = {
 	dma_buf_setup:              pci_dma_buf_setup,
 	dma_buf_get:                pci_dma_buf_get,
 	dma_get_available:          pci_dma_get_available,
-	dma_shutdown:               pci_dma_shutdown
+	dma_shutdown:               pci_dma_shutdown,
+	set_trigger_levels:         pci_set_trigger_levels
 };
 
 

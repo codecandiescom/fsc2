@@ -45,6 +45,12 @@
 #define MAX_NUM_SCANS               16777216L
 
 
+#define PCI_MIO_16E_1_TEST_CLOCK    NI_DAQ_FAST_CLOCK
+#define PCI_MIO_16E_1_TEST_SPEED    NI_DAQ_FULL_SPEED
+#define PCI_MIO_16E_1_TEST_STATE    NI_DAQ_ENABLED
+#define PCI_MIO_16E_1_TEST_DIVIDER  1
+
+
 struct PCI_MIO_16E_1 {
 	int board;
 
@@ -61,8 +67,21 @@ struct PCI_MIO_16E_1 {
 	} ai_state;
 
 	struct {
+		NI_DAQ_STATE external_reference[ 2 ];
+		NI_DAQ_BU_POLARITY polarity[ 2 ];
+	} ao_state;
+
+	struct {
 		int states[ 2 ];
 	} gpct_state;
+
+	struct {
+		NI_DAQ_CLOCK_TYPE daq_clock;
+		NI_DAQ_STATE on_off;
+		NI_DAQ_CLOCK_SPEED_VALUE speed;
+		int divider;
+	} msc_state;
+
 } PCI_MIO_16E_1;
 
 
@@ -89,6 +108,10 @@ Var *daq_ai_get_curve( Var * v );
 
 /* Functions from pci_mio_16e_1_ao.c */
 
+Var *daq_ao_channel_setup( Var *v );
+Var *daq_set_voltage( Var *v );
+
+
 /* Functions from pci_mio_16e_1_gpct.c */
 
 Var *daq_start_continuous_counter( Var *v );
@@ -104,6 +127,13 @@ Var *daq_continuous_pulses( Var *v );
 
 Var *daq_dio_read( Var *v );
 Var *daq_dio_write( Var *v );
+
+
+/* Functions from pci_mio_16e_1_msc.c */
+
+Var *daq_freq_out( Var *v );
+Var *daq_trigger_setup( Var *v );
+
 
 /* Functions from pci_mio_16e_1_util.c */
 

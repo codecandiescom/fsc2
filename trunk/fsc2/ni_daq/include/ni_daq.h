@@ -65,6 +65,8 @@ int ni_daq_msc_get_clock_state( int board, NI_DAQ_CLOCK_TYPE *daq_clock,
 				NI_DAQ_STATE *on_off,
 				NI_DAQ_CLOCK_SPEED_VALUE *speed,
 				int *divider );
+int ni_daq_msc_set_trigger( int board, NI_DAQ_TRIG_TYPE trigger_type,
+			    double trigger_high, double trigger_low );
 
 
 /* Functions for the AI subsystem */
@@ -154,6 +156,10 @@ enum {
 #define NI_DAQ_ERR_NEM  -19
 #define NI_DAQ_ERR_NPT  -20
 #define NI_DAQ_ERR_SIG  -21
+#define NI_DAQ_ERR_NER  -22
+#define NI_DAQ_ERR_UAO  -23
+#define NI_DAQ_ERR_NAT  -24
+
 
 #ifdef __cplusplus
 } /* extern "C" */

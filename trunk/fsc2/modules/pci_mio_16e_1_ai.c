@@ -983,6 +983,9 @@ static NI_DAQ_INPUT pci_mio_16e_1_ai_get_trigger( const char *tname,
 		if ( ! strncasecmp( "PFI", tname, 3 ) && tname[ 3 ] == '0' + i  )
 			return pfi + i;
 
+	if ( ! strcasecmp( "TRIG1", tname ) )
+		return NI_DAQ_PFI0;
+
 	if ( ! strcasecmp( "GOUT_0", tname ) )
 		return NI_DAQ_GOUT_0;
 

@@ -63,11 +63,11 @@ int ni_daq_ao_channel_configuration( int board, int num_channels,
 
 		if ( external_reference[ i ] == NI_DAQ_ENABLED &&
 			 ! ni_daq_dev[ board ].props.ao_has_ext_ref )
-			return ni_daq_errno = NI_DAQ_ERR_IVA;
+			return ni_daq_errno = NI_DAQ_ERR_NER;
 
 		if ( polarity[ i ] == NI_DAQ_UNIPOLAR &&
 			 ! ni_daq_dev[ board ].props.has_unipolar_ao )
-			return ni_daq_errno = NI_DAQ_ERR_IVA;
+			return ni_daq_errno = NI_DAQ_ERR_UAO;
 	}
 
 	ao.cmd = NI_DAQ_AO_CHANNEL_SETUP;
@@ -105,10 +105,8 @@ int ni_daq_ao_channel_configuration( int board, int num_channels,
 			 external_reference[ i ] == NI_DAQ_ENABLED )
 			ni_daq_dev[ board ].ao_state.volts[ i ] *= 0.1;
 			 
-
 		ni_daq_dev[ board ].ao_state.polarity[ ch ] = polarity[ i ];
 		ni_daq_dev[ board ].ao_state.ext_ref[ ch ] = external_reference[ i ];
-		ni_daq_dev[ board ].ao_state.is_channel_setup[ ch ] = 1;
 	}
 
 	return ni_daq_errno = NI_DAQ_OK;
@@ -142,10 +140,6 @@ int ni_daq_ao( int board, int num_channels, int *channels, double *values )
 		if ( ch < 0 || ch >= ni_daq_dev[ board ].props.num_ao_channels )
 			return ni_daq_errno = NI_DAQ_ERR_IVA;
 
-		if ( ! ni_daq_dev[ board ].ao_state.is_channel_setup[ i ] )
-			return ni_daq_errno = NI_DAQ_ERR_NCS;
-
-
 		if ( ni_daq_dev[ board ].ao_state.ext_ref[ ch ] == NI_DAQ_DISABLED )
 		{
 			if ( values[ i ] > 10.00001 ||
@@ -175,10 +169,10 @@ int ni_daq_ao( int board, int num_channels, int *channels, double *values )
 		if ( ni_daq_dev[ board ].ao_state.ext_ref[ ch ] == NI_DAQ_DISABLED )
 			dval *= 0.1;
 
-		ao.value = ( int ) floor( dval * 65535 + 0.5 );
+		ao.value = ( int ) floor( dval * 0xFFFF + 0.5 );
 
 		if ( ni_daq_dev[ board ].ao_state.polarity[ ch ] == NI_DAQ_BIPOLAR )
-			ao.value -= 32768;
+			ao.value /= 2;
 
 		ao.value >>= 16 - ni_daq_dev[ board ].props.num_ao_bits;
 
@@ -191,15 +185,36 @@ int ni_daq_ao( int board, int num_channels, int *channels, double *values )
 }
 
 
-/*--------------------------------------------------------------------*/
-/*--------------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+/* Function for intializing the AO channels to the default state */
+/*---------------------------------------------------------------*/
 
 int ni_daq_ao_init( int board )
 {
-	int ch;
+	NI_DAQ_AO_ARG ao;
+	NI_DAQ_AO_CHANNEL_ARGS arg;
+	int i;
 
 
-	for ( ch = 0; ch < 2; ch++ )
-		ni_daq_dev[ board ].ao_state.is_channel_setup[ ch ] = 0;
+	if ( ni_daq_dev[ board ].props.num_ao_channels == 0 )
+		return 0;
+
+	/* Switch all AO channels to bipolar mode and to use the internal reference
+	   voltage */
+
+	ao.cmd = NI_DAQ_AO_CHANNEL_SETUP;
+	ao.channel_args = &arg;
+	arg.ground_ref   = NI_DAQ_DISABLED;
+	arg.external_ref = NI_DAQ_DISABLED;
+	arg.reglitch     = NI_DAQ_DISABLED;
+	arg.polarity     = NI_DAQ_BIPOLAR;
+
+	for ( i = 0; i < ni_daq_dev[ board ].props.num_ao_channels; i++ )
+	{
+		ao.channel = i;	
+		if ( ioctl( ni_daq_dev[ board ].fd, NI_DAQ_IOC_AO, &ao ) < 0 )
+			return 1;
+	}
+
 	return 0;
 }

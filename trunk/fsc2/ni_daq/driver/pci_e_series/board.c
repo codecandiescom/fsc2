@@ -269,6 +269,14 @@ void pci_board_irq_handling_setup( Board *board )
 
 void pci_board_reset_all( Board *board )
 {
+	/* Set uo the DACs of the board with teh values stored in the EEPROM */
+
+	caldac_calibrate( board );
+
+	/* Select PFI0/TRIG1 input as trigger source */
+
+	writeb( 0x00, board->regs->Misc_Command );
+
 	/* Reset all subsystems */
 
 	MSC_reset_all( board );        /* should allways come first ! */
@@ -561,7 +569,6 @@ static void pci_irq_B_handler( Board *board, u16 status )
 		}
 	}
 }
-
 
 
 /*

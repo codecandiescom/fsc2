@@ -217,16 +217,20 @@ typedef struct {
 	int num_ao_bits;
 	int has_unipolar_ao;
 	int ao_has_ext_ref;
+
+	int has_analog_trig;
+	int atrig_bits;
 } NI_DAQ_BOARD_PROPERTIES;
 
 
 typedef enum {
-	NI_DAQ_MSC_TRIG_LOW_WINDOW = 0,
-	NI_DAQ_MSC_TRIG_HIGH_WINDOW = 1,
-	NI_DAQ_MSC_TRIG_MIDDLE_WINDOW = 2,
-	NI_DAQ_MSC_TRIG_HIGH_HYSTERESIS = 4,
-	NI_DAQ_MSC_TRIG_LOW_HYSTERESIS = 6
-} NI_DAQ_MSC_TRIG_MODE;
+	NI_DAQ_TRIG_LOW_WINDOW = 0,
+	NI_DAQ_TRIG_HIGH_WINDOW = 1,
+	NI_DAQ_TRIG_MIDDLE_WINDOW = 2,
+	NI_DAQ_TRIG_HIGH_HYSTERESIS = 4,
+	NI_DAQ_TRIG_LOW_HYSTERESIS = 6,
+	NI_DAQ_TRIG_TTL = 8
+} NI_DAQ_TRIG_TYPE;
 
 
 typedef struct {
@@ -235,9 +239,9 @@ typedef struct {
 	NI_DAQ_STATE output_state;
 	NI_DAQ_CLOCK_SPEED_VALUE speed;
 	unsigned int divider;
-	NI_DAQ_MSC_TRIG_MODE trigger_mode;
-	NI_DAQ_STATE trigger_state;
-	NI_DAQ_STATE trigger_output_state;
+	NI_DAQ_TRIG_TYPE trigger_type;
+	int trigger_low;
+	int trigger_high;
 	NI_DAQ_BOARD_PROPERTIES *properties;
 } NI_DAQ_MSC_ARG;
 

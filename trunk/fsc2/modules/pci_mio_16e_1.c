@@ -50,6 +50,11 @@ int pci_mio_16e_1_init_hook( void )
 	for ( i = 0; i < 2; i++ )
 		pci_mio_16e_1.gpct_state.states[ i ] = 0;
 
+	pci_mio_16e_1.msc_state.daq_clock = PCI_MIO_16E_1_TEST_CLOCK;
+	pci_mio_16e_1.msc_state.on_off = PCI_MIO_16E_1_TEST_STATE;
+	pci_mio_16e_1.msc_state.speed = PCI_MIO_16E_1_TEST_SPEED;
+	pci_mio_16e_1.msc_state.divider = PCI_MIO_16E_1_TEST_DIVIDER;
+
 	return 1;
 }
 

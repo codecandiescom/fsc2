@@ -67,7 +67,10 @@ static const char *ni_daq_errlist[ ] = {
 	"Missing AI acquisition setup",                  /* NI_DAQ_ERR_NAS */
 	"Not enough memory",                             /* NI_DAQ_ERR_NEM */
 	"Timing impossible to realize",                  /* NI_DAQ_ERR_NPT */
-	"Interrupted by signal"                          /* NI_DAQ_ERR_SIG */
+	"Interrupted by signal",                         /* NI_DAQ_ERR_SIG */
+	"External reference for AO not available"        /* NI_DAQ_ERR_NER */
+	"Only bipolar AO available"                      /* NI_DAQ_ERR_UAO */
+	"No analog trigger available"                    /* NI_DAQ_ERR_NAT */
 };
 
 const int ni_daq_nerr =
@@ -141,16 +144,6 @@ int ni_daq_open( const char *name )
 
 	fcntl( ni_daq_dev[ board ].fd, F_SETFD, FD_CLOEXEC );
 
-	/* Since the board has just been opened do initialization */
-
-	if ( ni_daq_msc_init( board ) || ni_daq_ai_init( board ) ||
-		 ni_daq_ao_init( board )  || ni_daq_gpct_init( board ) )
-	{
-		close( ni_daq_dev[ board ].fd );
-		ni_daq_dev[ board ].fd = -1;
-		return ni_daq_errno = NI_DAQ_ERR_INT;
-	}
-	
 	/* Find out about the board properties by asking the driver to fill in
 	   the corresponding structure */
 
@@ -170,6 +163,16 @@ int ni_daq_open( const char *name )
 		}
 	}
 
+	/* Since the board has just been opened do initialization */
+
+	if ( ni_daq_msc_init( board ) || ni_daq_ai_init( board ) ||
+		 ni_daq_ao_init( board )  || ni_daq_gpct_init( board ) )
+	{
+		close( ni_daq_dev[ board ].fd );
+		ni_daq_dev[ board ].fd = -1;
+		return ni_daq_errno = NI_DAQ_ERR_INT;
+	}
+	
 	return board;
 }
 

@@ -128,6 +128,54 @@ int ni_daq_msc_get_clock_state( int board, NI_DAQ_CLOCK_TYPE *daq_clock,
 
 
 /*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*/
+
+int ni_daq_msc_set_trigger( int board, NI_DAQ_TRIG_TYPE trigger_type,
+							double trigger_high, double trigger_low )
+{
+	NI_DAQ_MSC_ARG a;
+	int ret;
+
+
+	if ( ( ret = ni_daq_basic_check( board ) ) < 0 )
+		return ret;
+
+	if ( trigger_type != NI_DAQ_TRIG_TTL )
+	{
+		unsigned int max_trig;
+
+		if ( ! ni_daq_dev[ board ].props.has_analog_trig )
+			return ni_daq_errno = NI_DAQ_ERR_NAT;
+
+		if ( trigger_type == NI_DAQ_TRIG_LOW_WINDOW )
+			trigger_high = 10.0;
+		else if ( trigger_type == NI_DAQ_TRIG_HIGH_WINDOW )
+			trigger_low = -10.0;
+
+		if ( trigger_low >= trigger_high ||
+			 trigger_high >= 10.001 ||
+			 trigger_low <= -10.001 )
+			return ni_daq_errno = NI_DAQ_ERR_IVA;
+
+		max_trig = 1 << ni_daq_dev[ board ].props.atrig_bits;
+		
+		a.trigger_low = ( int ) floor( 0.05 * ( trigger_low + 10.0 )
+									   * max_trig  + 0.5 ) - max_trig / 2;
+		a.trigger_high = ( int ) floor( 0.05 * ( trigger_high + 10.0 )
+										* max_trig + 0.5 ) - max_trig / 2 - 1;
+	}
+
+	a.cmd = NI_DAQ_MSC_TRIGGER_STATE;
+	a.trigger_type = trigger_type;
+
+	if ( ioctl( ni_daq_dev[ board ].fd, NI_DAQ_IOC_MSC, &a ) < 0 )
+		return ni_daq_errno = NI_DAQ_ERR_INT;
+
+	return ni_daq_errno = NI_DAQ_OK;
+}
+
+
+/*--------------------------------------------------------------------*/
 /* Function is used only internally: when the board is opened it gets */
 /* called to find out the current clock settings of the board         */
 /*--------------------------------------------------------------------*/
@@ -141,6 +189,13 @@ int ni_daq_msc_init( int board )
 
 	if ( ( ret == ioctl( ni_daq_dev[ board ].fd, NI_DAQ_IOC_MSC, &msc ) ) < 0 )
 		return 1;
+
+	msc.cmd = NI_DAQ_MSC_TRIGGER_STATE;
+	msc.trigger_type = NI_DAQ_TRIG_TTL;
+
+	if ( ( ret == ioctl( ni_daq_dev[ board ].fd, NI_DAQ_IOC_MSC, &msc ) ) < 0 )
+		return 1;
+
 
 	ni_daq_dev[ board ].msc_state.clock = msc.clock;
 	ni_daq_dev[ board ].msc_state.output_state = msc.output_state;

@@ -150,7 +150,6 @@ void AO_reset_all( Board *board )
 int AO_ioctl_handler( Board *board, NI_DAQ_AO_ARG *arg )
 {
 	NI_DAQ_AO_ARG a;
-	int ret;
 
 
 	if ( board->type->ao_num_channels == 0 ) {
@@ -165,25 +164,15 @@ int AO_ioctl_handler( Board *board, NI_DAQ_AO_ARG *arg )
 
 	switch ( a.cmd ) {
 		case NI_DAQ_AO_CHANNEL_SETUP :
-			ret = AO_channel_setup( board, a.channel,
-						a.channel_args );
-			break;
+			return AO_channel_setup( board, a.channel,
+						 a.channel_args );
 
 		case NI_DAQ_AO_DIRECT_OUTPUT :
-			ret = AO_direct_output( board, a.channel, a.value );
-			break;
-
-		default :
-			PDEBUG( "Invalid AO command %d\n", a.cmd );
-			return -EINVAL;
+			return AO_direct_output( board, a.channel, a.value );
 	}
 
-	if ( ret == 0 && copy_to_user( arg, &a, sizeof *arg ) ) {
-		PDEBUG( "Can't write to user space\n" );
-		return -EACCES;
-	}
-
-	return ret;
+	PDEBUG( "Invalid AO command %d\n", a.cmd );
+	return -EINVAL;
 }
 
 
@@ -209,12 +198,13 @@ static int AO_channel_setup( Board *board, unsigned int channel,
 
 	/* Some boards don't allow an external reference */
 
-	if ( a.external_ref != 0 && ! board->type->ao_has_ext_ref )
+	if ( a.external_ref != NI_DAQ_DISABLED &&
+	     ! board->type->ao_has_ext_ref )
 		return -EINVAL;
 
 	/* Some boards don't allow setting the ground reference bit */
 
-	if ( a.ground_ref == 0 &&
+	if ( a.ground_ref == NI_DAQ_DISABLED &&
 	     ( ! strcmp( board->type->name, "pci-mio-16xe-50" ) ||
 	       ! strcmp( board->type->name, "pci-mio-16xe-10" ) ||
 	       ! strcmp( board->type->name, "pci-6031e" ) ) )

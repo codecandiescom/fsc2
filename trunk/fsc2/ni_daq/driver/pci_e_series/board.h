@@ -94,10 +94,17 @@ struct Register_Addresses {
 #define SerData                  (    1 <<  1 )
 #define SerClk                   (    1 <<  0 )
 
+#define SerDacLd_Shift           3
+
 
 /* Misc_Command */
 
 #define Int_Ext_Trig             (    1 <<  7 )
+
+
+/* Status */
+
+#define PROMOUT                  (    1 <<  0 )
 
 
 /* Configuration_Memory_Low */
@@ -194,7 +201,7 @@ int pci_dac_direct_data( Board *board, unsigned int channel, int value );
 void pci_board_irq_handler( int irq, void *data, struct pt_regs *dummy );
 
 
-/* Functions from mite.c that must be visible globally (and thus don't
+/* Functions from mite.c that must be globally visible (and thus don't
    contain direct references to the MITE, i.e. the underlying hardware) */
 
 int pci_dma_setup( Board *board, NI_DAQ_SUBSYSTEM sub_system );
@@ -205,6 +212,12 @@ int pci_dma_buf_get( Board *board, NI_DAQ_SUBSYSTEM sys, void *dest,
 size_t pci_dma_get_available( Board *board, NI_DAQ_SUBSYSTEM sys );
 void pci_dma_buf_release( Board *board, NI_DAQ_SUBSYSTEM sys );
 int pci_dma_shutdown( Board *board, NI_DAQ_SUBSYSTEM sys );
+
+
+/* Functions from caldac.c that must be globally visible */
+
+void pci_set_trigger_levels( Board *board, u16 high, u16 low );
+void caldac_calibrate( Board *board );
 
 
 #endif /* PCI_E_SERIES_BOARD_H */

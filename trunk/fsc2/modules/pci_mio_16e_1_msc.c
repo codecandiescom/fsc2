@@ -209,9 +209,8 @@ Var *daq_freq_out( Var *v )
 Var *daq_trigger_setup( Var *v )
 {
 	NI_DAQ_TRIG_TYPE trigger_type;
-	const char *tt[ ] = { "Digital", "Low_Window", "High_Window",
-						  "Middle_Window", "High_Hysteresis",
-						  "Low_Hysteresis" };
+	const char *tt[ ] = { "TTL", "Low_Window", "High_Window", "Middle_Window",
+						  "High_Hysteresis", "Low_Hysteresis" };
 	double level;
 	double tl = -10.0;
 	double th = 10.0;
@@ -236,34 +235,29 @@ Var *daq_trigger_setup( Var *v )
 		if ( ! strcasecmp( v->val.sptr, tt[ i ] ) )
 			break;
 
-	if ( i == sizeof tt / sizeof tt[ 0 ] )
-	{
-
-	}
-
 	switch ( i )
 	{
 		case 0 :
-			trigger_type = NI_DAQ_TRIG_DIGITAL;
+			trigger_type = NI_DAQ_TRIG_TTL;
 			break;
 
-		case 2 :
+		case 1 :
 			trigger_type = NI_DAQ_TRIG_LOW_WINDOW;
 			break;
 
-		case 3 :
+		case 2 :
 			trigger_type = NI_DAQ_TRIG_HIGH_WINDOW;
 			break;
 
-		case 4 :
+		case 3 :
 			trigger_type = NI_DAQ_TRIG_MIDDLE_WINDOW;
 			break;
 			
-		case 5 :
+		case 4 :
 			trigger_type = NI_DAQ_TRIG_HIGH_HYSTERESIS;
 			break;
 
-		case 6 :
+		case 5 :
 			trigger_type = NI_DAQ_TRIG_LOW_HYSTERESIS;
 			break;
 
@@ -275,7 +269,7 @@ Var *daq_trigger_setup( Var *v )
 	/* All trigger types except "Digital" require at least one triger level
 	   argument */
 
-	if ( trigger_type != NI_DAQ_TRIG_DIGITAL )
+	if ( trigger_type != NI_DAQ_TRIG_TTL )
 	{
 		if ( ( v = vars_pop( v ) ) == NULL )
 		{
@@ -311,13 +305,14 @@ Var *daq_trigger_setup( Var *v )
 		}
 		else
 		{
-			if ( level > 10.001 )
+			if ( level >= 10.001 )
 			{
 				print( FATAL, "High trigger level is above 10 V.\n" );
 				THROW( EXCEPTION );
 			}
 
 			th = level;
+
 			if ( ( v = vars_pop( v ) ) == NULL )
 			{
 				print( FATAL, "Missing second trigger level argument.\n" );
@@ -326,7 +321,7 @@ Var *daq_trigger_setup( Var *v )
 
 			tl = get_double( v, "trigger level" );
 
-			if ( tl < -10.001 )
+			if ( tl <= -10.001 )
 			{
 				print( FATAL, "Low trigger level is below -10 V.\n" );
 				THROW( EXCEPTION );

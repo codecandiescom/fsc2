@@ -54,6 +54,11 @@ static Board_Properties pci_e_series_boards[ ]= {
 	ao_fifo_depth:      2048,
 	ao_unipolar:        1,
         ao_has_ext_ref:     1,
+	has_analog_trig:    1,
+	atrig_caldac:       mb88341,
+	atrig_low_ch:       11,
+	atrig_high_ch:      12,
+	atrig_bits:         8,
 	num_mite_channels:  4,
 	caldac:             { mb88341 }
 },
@@ -77,8 +82,12 @@ static Board_Properties pci_e_series_boards[ ]= {
 	ao_fifo_depth:      512,
 	ao_unipolar:        1,
         ao_has_ext_ref:     1,
+	has_analog_trig:    1,
+	atrig_caldac:       mb88341,
+	atrig_low_ch:       11,
+	atrig_high_ch:      12,
+	atrig_bits:         8,
 	num_mite_channels:  4,
-//	caldac:             { ad8804_debug }   /* doc says mb88341 */
 	caldac:             { mb88341 }
 },
 
@@ -101,6 +110,11 @@ static Board_Properties pci_e_series_boards[ ]= {
 	ao_fifo_depth:      2048,
 	ao_unipolar:        1,
 	ao_has_ext_ref:     0,
+	has_analog_trig:    1,
+	atrig_caldac:       ad8522,
+	atrig_low_ch:       0,
+	atrig_high_ch:      1,
+	atrig_bits:         12,
 	num_mite_channels:  4,
 	caldac:             { dac8800, dac8043, ad8522 }
 },
@@ -122,9 +136,13 @@ static Board_Properties pci_e_series_boards[ ]= {
 	ao_num_bits:        12,
 	ao_fifo_depth:      0,
 	ao_unipolar:        0,
+	has_analog_trig:    0,
 	num_mite_channels:  4,
 	caldac:             { dac8800, dac8043 }
 },
+
+/* PCI-6023E */
+
 {
 	id:                 0x2a60,
 	name:               "pci-6023e",
@@ -140,8 +158,9 @@ static Board_Properties pci_e_series_boards[ ]= {
 	ao_num_bits:        0,
 	ao_unipolar:        0,
 	ao_has_ext_ref:     0,
+	has_analog_trig:    0,
 	num_mite_channels:  4,
-	caldac:             { ad8804 }       /* manual says mb 88341 */
+	caldac:             { mb88341 }
 },
 
 /* PCI-6024E */
@@ -162,8 +181,13 @@ static Board_Properties pci_e_series_boards[ ]= {
 	ao_fifo_depth:      0,
 	ao_unipolar:        0,
 	ao_has_ext_ref:     0,
+	has_analog_trig:    1,
+	atrig_caldac:       mb88341,
+	atrig_low_ch:       11,
+	atrig_high_ch:      12,
+	atrig_bits:         8,
 	num_mite_channels:  4,
-	caldac:             { ad8804 }      /* manual says mb88341 */
+	caldac:             { mb88341 }
 },
 
 /* PCI-6031E */
@@ -185,6 +209,11 @@ static Board_Properties pci_e_series_boards[ ]= {
 	ao_fifo_depth:      2048,
 	ao_unipolar:        1,
 	ao_has_ext_ref:     0,
+	has_analog_trig:    1,
+	atrig_caldac:       ad8522,
+	atrig_low_ch:       0,
+	atrig_high_ch:      1,
+	atrig_bits:         12,
 	num_mite_channels:  4,
 	caldac:             { dac8800, dac8043, ad8522 }
 },
@@ -208,6 +237,11 @@ static Board_Properties pci_e_series_boards[ ]= {
 	ao_fifo_depth:      0,
 	ao_unipolar:        1,
 	ao_has_ext_ref:     0,
+	has_analog_trig:    1,
+	atrig_caldac:       ad8522,
+	atrig_low_ch:       0,
+	atrig_high_ch:      1,
+	atrig_bits:         12,
 	num_mite_channels:  4,
 	caldac:             { dac8800, dac8043, ad8522 }
 },
@@ -231,51 +265,13 @@ static Board_Properties pci_e_series_boards[ ]= {
 	ao_fifo_depth:      0,
 	ao_unipolar:        1,
 	ao_has_ext_ref:     0,
+	has_analog_trig:    1,
+	atrig_caldac:       ad8522,
+	atrig_low_ch:       0,
+	atrig_high_ch:      1,
+	atrig_bits:         12,
 	num_mite_channels:  4,
 	caldac:             { dac8800, dac8043, ad8522 }
-},
-
-/* PCI-6034E */
-
-{
-	id:                 0x2ca0,
-	name:               "pci-6034e",
-	ai_num_channels:    16,
-	ai_num_bits:        16,
-	ai_fifo_depth:      512,
-	ai_always_dither:   1,
-	ai_gains:           { NI_DAQ_GAIN_0_5, NI_DAQ_GAIN_1,
-			      NI_DAQ_GAIN_10, NI_DAQ_GAIN_100,
-			      NI_DAQ_GAIN_NOT_AVAIL },
-	ai_speed:           5000,
-	ao_num_channels:    0,
-	ao_num_bits:        0,
-	ao_fifo_depth:      0,
-	ao_unipolar:        0,
-	num_mite_channels:  4,
-	caldac:             { mb88341 }
-},
-
-/* PCI-6035E */
-
-{
-	id:                 0x2c80,
-	name:               "pci-6035e",
-	ai_num_channels:    16,
-	ai_num_bits:        16,
-	ai_fifo_depth:      512,
-	ai_always_dither:   1,
-	ai_gains:           { NI_DAQ_GAIN_0_5, NI_DAQ_GAIN_1,
-			      NI_DAQ_GAIN_10, NI_DAQ_GAIN_100,
-			      NI_DAQ_GAIN_NOT_AVAIL },
-	ai_speed:           5000,
-	ao_num_channels:    2,
-	ao_num_bits:        12,
-	ao_fifo_depth:      0,
-	ao_unipolar:        1,
-	ao_has_ext_ref:     1,
-	num_mite_channels:  4,
-	caldac:             { ad8804_debug }
 },
 
 /* PCI-6052E */
@@ -297,9 +293,13 @@ static Board_Properties pci_e_series_boards[ ]= {
 	ao_unipolar:        1,
 	ao_fifo_depth:      2048,
 	ao_has_ext_ref:     0,
+	has_analog_trig:    1,
+	atrig_caldac:       ad8522,
+	atrig_low_ch:       0,
+	atrig_high_ch:      1,
+	atrig_bits:         12,
 	num_mite_channels:  4,
-	caldac:             { ad8804, mb88341, ad8522 }
-//	caldac:             { mb88341, mb88341, ad8522 } /* manual*/
+	caldac:             { mb88341, ad8522 }
 },
 
 /* PCI-6071E */
@@ -321,6 +321,11 @@ static Board_Properties pci_e_series_boards[ ]= {
 	ao_fifo_depth:      2048,
 	ao_unipolar:        1,
 	ao_has_ext_ref:     1,
+	has_analog_trig:    1,
+	atrig_caldac:       mb88341,
+	atrig_low_ch:       11,
+	atrig_high_ch:      12,
+	atrig_bits:         8,
 	num_mite_channels:  4,
 	caldac:             { mb88341 }
 },

@@ -31,9 +31,8 @@ static int MSC_set_speed( Board *board, unsigned int divider,
 			  NI_DAQ_CLOCK_SPEED_VALUE speed );
 static int MSC_clock_output( Board *board, NI_DAQ_CLOCK_TYPE clock,
 			     NI_DAQ_STATE output_state );
-static int  MSC_trigger_setup( Board *board, NI_DAQ_MSC_TRIG_MODE trigger_mode,
-			       NI_DAQ_STATE trigger_state,
-			       NI_DAQ_STATE trigger_output_state );
+static int  MSC_trigger_setup( Board *board, NI_DAQ_TRIG_TYPE trigger_type,
+			       int trigger_high, int trigger_low );
 static int MSC_board_properties( Board *board, NI_DAQ_BOARD_PROPERTIES *arg );
 
 
@@ -109,10 +108,12 @@ void MSC_reset_all( Board *board )
 	board->func->stc_writew( board, STC_Clock_and_FOUT,
 				 board->stc.Clock_and_FOUT );
 
-	/* Disable the trigger circuitry */
+	/* Disable the analog trigger circuitry and make the PFI0/TRIG1
+	   input a digital trigger */
 
-	board->stc.Analog_Trigger_Etc &=
-			    ~ ( Analog_Trigger_Enable | Analog_Trigger_Drive );
+	board->stc.Analog_Trigger_Etc &= ~ Analog_Trigger_Enable;
+	board->stc.Analog_Trigger_Etc |= Analog_Trigger_Drive;
+
 	board->func->stc_writew( board, STC_Analog_Trigger_Etc,
 				 board->stc.Analog_Trigger_Etc );
 
@@ -402,9 +403,9 @@ int MSC_ioctl_handler( Board *board, NI_DAQ_MSC_ARG *arg )
 						 a.output_state );
 
 		case NI_DAQ_MSC_TRIGGER_STATE :
-			return MSC_trigger_setup( board, a.trigger_mode,
-						  a.trigger_state,
-						  a.trigger_output_state );
+			return MSC_trigger_setup( board, a.trigger_type,
+						  a.trigger_high,
+						  a.trigger_low );
 
 		case NI_DAQ_MSC_BOARD_PROPERTIES :
 			return MSC_board_properties( board, a.properties );
@@ -514,29 +515,62 @@ static int MSC_clock_output( Board *board, NI_DAQ_CLOCK_TYPE clock,
 /*-----------------------------------------------------------*/
 /*-----------------------------------------------------------*/
 
-static int  MSC_trigger_setup( Board *board, NI_DAQ_MSC_TRIG_MODE trigger_mode,
-			       NI_DAQ_STATE trigger_state,
-			       NI_DAQ_STATE trigger_output_state )
+static int MSC_trigger_setup( Board *board, NI_DAQ_TRIG_TYPE trigger_type,
+			      int trigger_high, int trigger_low )
 {
-	u16 ate = board->stc.Analog_Trigger_Etc;
+	u16 ate = board->stc.Analog_Trigger_Etc &
+		  ~ ( Analog_Trigger_Mode_Field | Analog_Trigger_Drive |
+		      Analog_Trigger_Enable );
+	u16 max_trig;
+	u16 th = 0;
+	u16 tl = 0;
 
 
-	ate &= ~ Analog_Trigger_Mode_Field;
-	ate |= trigger_mode | Analog_Trigger_Mode_Field;
+	if ( trigger_type != NI_DAQ_TRIG_TTL ) {
+		if ( ! board->type->has_analog_trig ) {
+			PDEBUG( "Board has no analog trigger capability\n" );
+			return -EINVAL;
+		}
 
-	ate &= ~ Analog_Trigger_Drive;
+		max_trig = 1 << board->type->atrig_bits;
 
-	/* Only allow switching on the trigger output when also the trigger
-	   circuitry gets enabled */
+		switch ( trigger_type )
+		{
+			case NI_DAQ_TRIG_LOW_WINDOW :
+				tl = max_trig / 2 - 1 - trigger_low;
+				th = 0;
+				trigger_high = max_trig / 2 - 1;
+				break;
 
-	if ( trigger_state == NI_DAQ_ENABLED ) {
-		ate |= Analog_Trigger_Enable;
-		if ( trigger_output_state == NI_DAQ_ENABLED )
-			ate |= Analog_Trigger_Drive;
+			case NI_DAQ_TRIG_HIGH_WINDOW :
+				th = max_trig / 2 - 1 - trigger_high;
+				tl = max_trig;
+				trigger_low = - max_trig / 2;
+				break;
+
+			default :
+				th = max_trig / 2 - 1 - trigger_high;
+				tl = max_trig / 2 - trigger_low;
+				break;
+		}
+
+		if ( trigger_low > trigger_high ||
+		     trigger_low < - max_trig / 2 ||
+		     trigger_high > max_trig / 2 - 1 ) {
+			PDEBUG( "Invalid trigger level\n" );
+			return -EINVAL;
+		}
+
+		ate |= ( trigger_type & Analog_Trigger_Mode_Field ) |
+		       Analog_Trigger_Enable;
+
 	} else
-		ate &= ~ Analog_Trigger_Enable;
+		ate |= Analog_Trigger_Drive;
 
 	board->func->stc_writew( board, STC_Analog_Trigger_Etc, ate );
+
+	if ( trigger_type != NI_DAQ_TRIG_TTL )
+		board->func->set_trigger_levels( board, th, tl );
 
 	return 0;
 }
@@ -687,6 +721,8 @@ int MSC_board_properties( Board *board, NI_DAQ_BOARD_PROPERTIES *arg )
 	p.num_ao_bits     = board->type->ao_num_bits;
 	p.has_unipolar_ao = board->type->ao_unipolar;
 	p.ao_has_ext_ref  = board->type->ao_has_ext_ref;
+	p.has_analog_trig = board->type->has_analog_trig;
+	p.atrig_bits      = board->type->atrig_bits;
 
 	if ( copy_to_user( arg, &p, sizeof *arg ) ) {
 		PDEBUG( "Can't write to user space\n" );
