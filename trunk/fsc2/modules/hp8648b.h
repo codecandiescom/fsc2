@@ -32,7 +32,7 @@
 
 #define MIN_FREQ        1.0e4            /* 10 kHz  */
 #define MAX_FREQ        2.0e9            /* 2000 MHz */
-#define MIN_MIN_ATTEN   3.0              /* really the minimum attenuation */
+#define MIN_MIN_ATTEN  14.5              /* really the minimum attenuation */
 #define MAX_ATTEN      -136.0            /* -136 db  */
 #define ATT_RESOLUTION  0.1
 
