@@ -35,7 +35,7 @@ extern char *devicestext;
 
 /* locally used functions */
 
-void deviceserror( const char *s );
+static void deviceserror( const char *s );
 
 
 %}
