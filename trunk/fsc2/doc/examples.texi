@@ -94,8 +94,8 @@ the field range:
 37       wait( tc );
 38       data = lockin_get_data( );
 39       mean_data[ J ] += data;
-40       display( J, 1.0e6 * data, 1,
-41                J, 1.0e6 * mean_data[ J ] / I, 2 );
+40       display_1d( J, 1.0e6 * data, 1,
+41                   J, 1.0e6 * mean_data[ J ] / I, 2 );
 42       fsave( File_1, "# #\n", field, data );
 43       field = sweep_up( );
 44     @}
@@ -182,14 +182,14 @@ to the appropriate element of the array of mean values.
 
 In line 40/41 the new data value and the new mean value both are
 displayed on the screen. The first three arguments of the call of the
-function @code{display()} (@pxref{display}) are the @i{x}-coordinate,
-which is just the loop counter variable, the @i{y}-coordinate, the new
-data value but multiplied by @code{1.0e6} because the value returned by
-the lock-in amplifiers is always in Volts and we want to display the
-value in code micro-Volts, and the number of the curve, @code{1}. The
-next three arguments are for the new mean value, we only have to take
-care to divide the @code{mean_data} array element by @code{I}, the
-number of runs done so far.
+function @code{display_1d()} (@pxref{display_1d}) are the
+@i{x}-coordinate, which is just the loop counter variable, the
+@i{y}-coordinate, the new data value but multiplied by @code{1.0e6}
+because the value returned by the lock-in amplifiers is always in Volts
+and we want to display the value in code micro-Volts, and the number of
+the curve, @code{1}. The next three arguments are for the new mean
+value, we only have to take care to divide the @code{mean_data} array
+element by @code{I}, the number of runs done so far.
 
 If you should have any trouble understanding that the @i{x}-coordinate
 is given as an integer numbers but on the screen the scale is to be
@@ -305,8 +305,8 @@ All that is needed is to add and change a few lines.:
 47       wait( tc );
 48       data = lockin_get_data( );
 49       mean_data[ J ] += data;
-50       display( J, 1.0e6 * data, 1,
-51                J, 1.0e6 * mean_data[ J ] / I, 2 );
+50       display_1d( J, 1.0e6 * data, 1,
+51                   J, 1.0e6 * mean_data[ J ] / I, 2 );
 52       fsave( File_1, "# #\n", field, data );
 53       field = sweep_up( );
 54     @}
@@ -487,8 +487,8 @@ Now here is the complete @code{EDL} script:
  66   IF Pause_State == 0
  67   @{
  68     data = lockin_get_data( 1, 2 );
- 69     display( I, data[ 1 ] * 1.0e6, 1,
- 70              I, data[ 2 ] * 1.0e6, 2 );
+ 69     display_1d( I, data[ 1 ] * 1.0e6, 1,
+ 70                 I, data[ 2 ] * 1.0e6, 2 );
  71     I += 1;
  72   @} 
  73 
@@ -925,7 +925,7 @@ digitizer instead of a lock-in amplifier to do the detection:
 71     digitizer_start_acquisition( );
 72     area[ 1 ] = digitizer_get_area( CH1, W[ 1 ] );
 73     area[ 2 ] = digitizer_get_area( CH1, W[ 2 ] );
-74     display( I, ( area[ 1 ] - area[ 2 ] ) * 1.0e12 );
+74     display_1d( I, ( area[ 1 ] - area[ 2 ] ) * 1.0e12 );
 75     I += 1;
 76     fsave( "# # # #\n", field, area[ 1 ], area[ 2 ],
 77                         area[ 1 ] - area[ 2 ] );
