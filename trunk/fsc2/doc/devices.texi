@@ -3106,10 +3106,10 @@ done to setup the properties of the input channels.
 
 In order to understand what this function (as well as the next few do)
 a short explanation of the way analog input (AI) is done with the card
-is required. The most basic element of an acquisition is a single
+is required: the most basic element of an acquisition is a single
 conversion of an input voltage into a digital value. Since there's
-only a single ADC on the card, converting a the voltages of a set of
-channels needs to be serially, which is called a scan, consisting
+only a single ADC on the card, converting the voltages of a set of
+channels needs to be done serially. This is called a scan, consisting
 of as many conversions as there are channels to be sampled. So a single
 scan consists of one or more conversions, depending on the number of
 channels involved. To acquire a a curve several scans have to be done.
