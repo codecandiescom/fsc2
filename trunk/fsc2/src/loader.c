@@ -37,8 +37,8 @@ extern Func Def_Fncts[ ];   /* structures for list of built-in functions */
 static void resolve_hook_functions( Device *dev, char *dev_name );
 static void load_functions( Device *dev );
 static void resolve_functions( Device *dev );
-static int add_function( int index, void *new_func, Device *new_dev,
-						 int num_new );
+static void add_function( int index, void *new_func, Device *new_dev,
+						  int num_new );
 static int func_cmp( const void *a, const void *b );
 
 
@@ -368,7 +368,7 @@ static void resolve_functions( Device *dev )
 			}
 		}
 		else
-			num_new_funcs += add_function( num, cur, dev, num_new_funcs );
+			add_function( num, cur, dev, num_new_funcs++ );
 	}
 
 	Num_Func += num_new_funcs;
@@ -384,8 +384,8 @@ static void resolve_functions( Device *dev )
 /* current device.                                                      */
 /*----------------------------------------------------------------------*/
 
-static int add_function( int index, void *new_func, Device *new_dev,
-						 int num_new )
+static void add_function( int index, void *new_func, Device *new_dev,
+						  int num_new )
 {
 	int i;
 	char *new_func_name;
@@ -394,17 +394,6 @@ static int add_function( int index, void *new_func, Device *new_dev,
 	char *temp;
 	Func *f;
 
-
-	/* Because when adding a multiple defined function it is appended to
-	   the function list, the function just added will be found when running
-	   through the list in resolve_functions(). This can be easily recognized
-	   because the 'new' function is from the current library, which can
-	   never happen (or the linker would complain about multiple defined
-	   functions). So, if the function has already been defined in the
-	   current library we just return. */
-
-	if ( Fncts[ index ].device == new_dev )
-		return 0;
 
 	/* Find out the correct device number - this is the next number after
 	   the highest device number of all devices that had twins in the current
@@ -478,8 +467,6 @@ static int add_function( int index, void *new_func, Device *new_dev,
 		strncpy( ( char * ) f->name, Fncts[ index ].name, len );
 		strcpy( ( char * ) f->name + len, buf );
 	}
-
-	return 1;
 }
 
 
