@@ -60,6 +60,11 @@ MX          "-"[xX]
 PY          "+"?[yY]
 MY          "-"[yY]
 
+PA          ("+"[aA]?)|[aA])
+MA          "-"[aA]?
+PB			"+"?[bB]
+MB			"-"[bB]
+
 WS          [\n=,:. ]+
 
 
@@ -176,14 +181,24 @@ WS          [\n=,:. ]+
 			}
 
 			/* handling of acquisition cycle identifiers */
-"+"        {
-				phaseslval.lval = ACQ_PLUS;
+{PA}       {
+				phaseslval.lval = ACQ_PLUS_A;
 				return A_TOKEN;
 		   }
-"-"        {
-				phaseslval.lval = ACQ_MINUS;
+{MA}       {
+				phaseslval.lval = ACQ_MINUS_A;
 				return A_TOKEN;
 		   }
+
+{BA}       {
+				phaseslval.lval = ACQ_PLUS_B;
+				return B_TOKEN;
+		   }
+{MB}       {
+				phaseslval.lval = ACQ_MINUS_B;
+				return B_TOKEN;
+		   }
+
 
 {WS}        /* skip prettifying characters */
 

@@ -40,7 +40,7 @@ void acq_seq_start( long acq_num, long acq_type )
 /*-------------------------------------------------------------------------*/
 /* Called for each element in a list of signs for an acquisition sequence. */
 /* ->                                                                      */
-/*    * either ACQ_PLUS or ACQ_MINUS                                       */
+/*    * either ACQ_PLUS_A, ACQ_MINUS_A, ACQ_PLUS_B or ACQ_MINUS_B          */
 /*-------------------------------------------------------------------------*/
 
 void acq_seq_cont( long acq_type )
@@ -49,7 +49,7 @@ void acq_seq_cont( long acq_type )
 
 	/* Make real sure the acquisition type is reasonable */
 
-	assert( acq_type == ACQ_PLUS || acq_type == ACQ_MINUS );
+	assert( acq_type >= ACQ_PLUS_A && acq_type <= ACQ_MINUS_B );
 
 	/* add the new acquisition type */
 
