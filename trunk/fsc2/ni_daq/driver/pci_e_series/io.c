@@ -269,10 +269,10 @@ inline u32 pci_stc_readl( Board *board, u16 offset )
 }
 
 
-/*------------------------------------------------------------------*/
-/* Initialization of the data structure used in protection of parts */
-/* of code that may not become interrupted by IRQs.                 */
-/*------------------------------------------------------------------*/
+/*------------------------------------------------------------*/
+/* Initialization of the data structure used in protection of */
+/* parts of code that may not become interrupted.             */
+/*------------------------------------------------------------*/
 
 void pci_init_critical_section_handling( Board *board )
 {
@@ -281,11 +281,12 @@ void pci_init_critical_section_handling( Board *board )
 }
 
 
-/*------------------------------------------------------------------------*/
-/* Function to protect parts of code that may not be interrupted by IRQs. */
-/* The inverse function must be called as many times as this function has */
-/* been to give up the spinlock and re-enable interrupts.                 */
-/*------------------------------------------------------------------------*/
+/*----------------------------------------------------------------*/
+/* Function to protect parts of code that may not be interrupted. */
+/* The inverse function must be called as many times as this      */
+/* function has been to give up the spinlock and re-enable        */
+/* interrupts.                                                    */
+/*----------------------------------------------------------------*/
 
 inline void pci_start_critical_section( Board *board )
 {

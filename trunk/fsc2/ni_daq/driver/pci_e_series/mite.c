@@ -42,11 +42,11 @@ static Subsystem_Data sys_data[ 4 ];
 static void pci_dma_stop( Board *board, NI_DAQ_SUBSYSTEM sys );
 
 
-/*-------------------------------------------------------------------*/
-/* Function for initializing the MITE, bringing it in a well-defined */
-/* quit state and the assigning the different MITE DMA channels to   */
-/* different subsystems of the board.                                */
-/*-------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*/
+/* Function for initializing the MITE, bringing it into a well-defined */
+/* quiet state and the assigning the different MITE DMA channels to    */
+/* different subsystems of the board.                                  */
+/*---------------------------------------------------------------------*/
 
 void pci_mite_init( Board *board )
 {
@@ -78,10 +78,10 @@ void pci_mite_init( Board *board )
 }
 
 
-/*------------------------------------------------------------*/
-/* Function gets called when the module gets unloaded to stop */
-/* all MITE activities and freeing DMA kernel buffers.        */
-/*------------------------------------------------------------*/
+/*----------------------------------------------------------*/
+/* Function gets called when the module is unloaded to stop */
+/* all MITE activities and freeing DMA kernel buffers.      */
+/*----------------------------------------------------------*/
 
 void pci_mite_close( Board *board )
 {
@@ -103,8 +103,8 @@ void pci_mite_close( Board *board )
 /* The default size of the buffers can be set by the DMA_BUFFER_SIZE    */
 /* macro, but this value is increased to a power of the PAGE size if    */
 /* necessary. Setting this to too large a value may lead to allocation  */
-/* failures because a continuous buffer may not be available, too small */
-/* a value may require too many buffers.                                */
+/* failures because a continuous buffer may not be available, while too */
+/* small a buffer size may require too many buffers.                    */
 /*----------------------------------------------------------------------*/
 
 #define DMA_BUFFER_SIZE  16384   /* 16 kByte */
@@ -455,10 +455,10 @@ void pci_dma_buf_release( Board *board, NI_DAQ_SUBSYSTEM sys )
 }
 
 
-/*--------------------------------------------------------------------*/
-/* Function enables DMA for a subsystem. Requires that DMA memory has */
-/* already been allocated.                                            */
-/*--------------------------------------------------------------------*/
+/*----------------------------------------------------------------*/
+/* Function enables DMA for a subsystem. Requires that DMA memory */
+/* has already been allocated.                                    */
+/*----------------------------------------------------------------*/
 
 int pci_dma_setup( Board *board, NI_DAQ_SUBSYSTEM sys )
 {

@@ -164,19 +164,20 @@ static unsigned int ni_daq_poll( struct file *filep,
 
 		/* As long as the acquisition hasn't ended (in which case
 		   the SC TC interrupt would have been raised) and there are
-		   no new data in the DMA buffer enable the STOP
-		   interrupt (indicating that new data are available) and
-		   let poll_wait() do whatever it needs to do. When the STOP
-		   interrupts finally arrived disable it again, otherwise we
-		   would get flooded with these interrupts... */
+		   no new data in the DMA buffer enable the STOP interrupt
+		   (indicating that new data are available) and let
+		   poll_wait() do whatever it needs to do. When the STOP
+		   interrupts finally arrives disable it again, otherwise
+		   we would get flooded with these interrupts... */
 
 		if ( board->func->dma_get_available( board,
-						   NI_DAQ_AI_SUBSYSTEM ) )
+						     NI_DAQ_AI_SUBSYSTEM ) )
 			mask |= POLLIN | POLLRDNORM;
 		else if ( ! board->irq_hand[ IRQ_AI_SC_TC ].raised ) {
 			daq_irq_enable( board, IRQ_AI_STOP, AI_irq_handler );
 			poll_wait( filep, &board->AI.waitqueue, pt );
 			daq_irq_disable( board, IRQ_AI_STOP );
+
 			if ( board->func->dma_get_available( board,
 							NI_DAQ_AI_SUBSYSTEM ) )
 				mask |= POLLIN | POLLRDNORM;
@@ -196,13 +197,13 @@ static unsigned int ni_daq_poll( struct file *filep,
 /*----------------------------------------------------------------------*/
 /* Function for reading from the device file associated with the board. */
 /* Reading the device file only works for data from the AI subsystem.   */
-/* 1. if no acquisition set up has been done, return EOF                */
-/* 2. if there's an acquisition set up but the acquisition hasn't been  */
+/* 1. If no valid acquisition set up has been done return -EINVAL       */
+/* 2. If there's an acquisition set up but the acquisition hasn't been  */
 /*    started, trying to read from the file automatically starts it     */
-/* 3. if the file wasn't opened in non-blocking mode wait until data    */
+/* 3. If the file wasn't opened in non-blocking mode wait until data    */
 /*    are available                                                     */
-/* 4. return as many data as are available (or as many as requested)    */
-/* 5. if the acquisition is finished and all data to be expected are    */
+/* 4. Return as many data as are available (or as many as requested)    */
+/* 5. If the acquisition is finished and all data to be expected are    */
 /*    getting passed on to the user a reset of the AI subsystem is      */
 /*    done, i.e. DMA is automatically disabled, buffers are deallocated */
 /*    and trigger input lines are released back into the pool           */
@@ -225,7 +226,8 @@ static ssize_t ni_daq_read( struct file *filep, char *buff, size_t count,
 
 	board = boards + minor;
 
-	/* If there can't be any data return a value indicating end of file */
+	/* If there can't be any data because no valid acquisition setup has
+	   been done that's an error */
 
 	if ( ! board->AI.is_acq_setup ) {
 		PDEBUG( "Missing acquisition setup\n" );
@@ -296,8 +298,10 @@ static ssize_t ni_daq_read( struct file *filep, char *buff, size_t count,
 	return count;
 }
 
-/*--------------------------------------------------------------*/
-/*--------------------------------------------------------------*/
+
+/*--------------------------------------------------------*/
+/* Not implemented yet (to be used with the AO subsystem) */
+/*--------------------------------------------------------*/
 
 static ssize_t ni_daq_write( struct file *filep, const char *buff,
 			     size_t count, loff_t *offp )
@@ -354,6 +358,8 @@ static int ni_daq_ioctl( struct inode *inode_p, struct file *file_p,
 						  ( NI_DAQ_DIO_ARG * ) arg );
 
 	}
+
+	/* We never should end up here... */
 
 	return -EINVAL;
 }

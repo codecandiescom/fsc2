@@ -236,7 +236,7 @@ int GPCT_ioctl_handler( Board *board, NI_DAQ_GPCT_ARG *arg )
 
 /*----------------------------------------------------------------------*/
 /* Function for setting the G_IN_TIMEBASE1 - it can be switched between */
-/* 20 MHz and 10 MHz (Please note that the time base for IN_TIMEBASE2   */
+/* 20 MHz and 10 MHz (please note that the time base for IN_TIMEBASE2   */
 /* is controlled by the general setting of the MSC subsystem!).         */
 /*----------------------------------------------------------------------*/
 
@@ -412,9 +412,9 @@ static void G1_TC_handler( Board *board )
 }
 
 
-/*----------------------------------------------------*/
-/* Function to start outputting pulses from a counter */
-/*----------------------------------------------------*/
+/*---------------------------------------------------*/
+/* Function to start output of pulses from a counter */
+/*---------------------------------------------------*/
 
 static int GPCT_start_pulses( Board *board, unsigned int counter,
 			      NI_DAQ_INPUT source, NI_DAQ_INPUT gate,
@@ -491,8 +491,8 @@ static int GPCT_start_pulses( Board *board, unsigned int counter,
 	board->func->stc_writew( board, STC_Gi_Input_Select( counter ),
 				 input );
 
-	/* Load the delay into the counter so that the first pulse starts after
-	   the first TC event that happens when the delay is over */
+	/* Load the delay into the counter so that the first pulse starts
+	   after the first TC event that happens when the delay is over */
 
 	board->func->stc_writel( board, STC_Gi_Load_A( counter ),
 				 delay_ticks - 1 );
@@ -508,8 +508,8 @@ static int GPCT_start_pulses( Board *board, unsigned int counter,
 	board->func->stc_writel( board, STC_Gi_Load_B( counter ),
 				 low_ticks - 1 );
 
-	/* Assemble value to be written into the mode register: load
-	   on counter TC, toggling between load registers A and B, toggle
+	/* Assemble value to be written into the mode register: load on
+	   counter TC, toggling between load registers A and B, toggle
 	   output on TC condition and set register A as the first register
 	   to load from. */
 
@@ -547,11 +547,11 @@ static int GPCT_start_pulses( Board *board, unsigned int counter,
 }
 
 
-/*--------------------------------------------------------------*/
-/* Function to start outputting pulses from one or both counter */
-/* (it or they must have been set up by an ioctl() call with    */
-/* NI_DAQ_GPCT_START_PULSER in delayed start mode)              */
-/*--------------------------------------------------------------*/
+/*-------------------------------------------------------------*/
+/* Function to start output of pulses from one or both counter */
+/* (it or they must have been set up by an ioctl() call with   */
+/* NI_DAQ_GPCT_START_PULSER in delayed start mode)             */
+/*-------------------------------------------------------------*/
 
 static int GPCT_arm( Board *board, unsigned int counter )
 {
@@ -584,9 +584,9 @@ static int GPCT_arm( Board *board, unsigned int counter )
 
 
 
-/*---------------------------------------*/
-/* Function for starting event counting. */
-/*---------------------------------------*/
+/*--------------------------------------*/
+/* Function for starting event counting */
+/*--------------------------------------*/
 
 static int GPCT_start_counting( Board *board, unsigned int counter,
 				NI_DAQ_INPUT source, NI_DAQ_INPUT gate,
