@@ -78,10 +78,10 @@ used while an experiment is running.
 @item The @code{WWW Server} button lets you start (and stop) a little web
 server that allows you to monitor the current state of the experiment
 via a browser from a different computer over the net. Per default, the
-web server listens for incoming connections on port 8080, so the URL
-you have to enter in the browser is
-@uref{http://name.of.experiment.computer:8080}. A different port can
-be selected via a command line option.
+web server listens for incoming connections on port 8080, so the URL you
+have to enter in the browser is @code{http://HOST:8080}, where
+@code{HOST} is the name of the computer @acronym{fsc2} is running on. A
+different port instead of 8080 can be selected via a command line option.
 @item Pressing the @code{Help} button will try to start a browser with
 the HTML documentation for @acronym{fsc2}. You can select the browser to
 be used by setting the environment variable @code{BROWSER} to the name
@@ -680,5 +680,10 @@ when it crashes. Set this to @code{True} and no mails are send.
 This options can be used to switch off the display of help texts when
 the mouse is hovering over a button for some time. If you're fed up with
 this texts popping up simply set it to @code{True}.
+
+@item httpPort
+This option tells @acronym{fsc2}s webserver on which port to listen for
+incoming connections. Per default it is 8080 but using this option a
+different port (in the range between 1024 and 65535) can be set.
 
 @end table

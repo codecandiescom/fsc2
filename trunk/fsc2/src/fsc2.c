@@ -92,7 +92,9 @@ int main( int argc, char *argv[ ] )
 	lower_permissions( );
 
     Internals.child_pid = 0;
+    Internals.http_pid = 0;
 
+	Internals.state = STATE_IDLE;
 	Internals.mode = PREPARATION;
 	Internals.in_hook = UNSET;
 	Internals.I_am = PARENT;
@@ -120,6 +122,8 @@ int main( int argc, char *argv[ ] )
 	Comm.request_semaphore = -1;
 	Comm.MQ = NULL;
 	Comm.MQ_ID = -1;
+
+	G.hash_1d = G.hash_2d = NULL;
 
 	/* Figure out if the machine has an INTEL type processor */
 
@@ -153,6 +157,8 @@ int main( int argc, char *argv[ ] )
 		unlink( FSC2_LOCKFILE );
 		return EXIT_FAILURE;
 	}
+
+	fl_set_idle_callback( idle_handler, NULL );
 
 	if ( argc > 1 )
 	{
@@ -561,6 +567,9 @@ static void final_exit_handler( void )
 	if ( Internals.child_pid > 0 )
 		kill( Internals.child_pid, SIGTERM );
 
+	if ( Internals.http_pid > 0 )
+		kill( Internals.http_pid, SIGTERM );
+
 	/* Do everything necessary to end the program */
 
 	if ( delete_old_file && in_file != NULL )
@@ -568,6 +577,9 @@ static void final_exit_handler( void )
 	unlink( FSC2_SOCKET );
 
 	T_free( in_file );
+
+	T_free( G.hash_1d );
+	T_free( G.hash_2d );
 
 	/* Delete all shared memory and also semaphore (if it still exists) */
 
@@ -1383,7 +1395,6 @@ void run_help( FL_OBJECT *a, long b )
 
 	notify_conn( BUSY_SIGNAL );
 
-
 	/* Fork and run help browser in child process */
 
 	if ( ( res = fork( ) ) == 0 )
@@ -1543,7 +1554,11 @@ void main_sig_handler( int signo )
 	{
 		case SIGCHLD :
 			errno_saved = errno;
-			wait( NULL );
+			if ( Internals.http_pid == wait( NULL ) )
+			{
+				Internals.http_pid = -1;
+				fl_trigger_object( GUI.main_form->server );
+			}
 			errno = errno_saved;
 			return;
 
@@ -1659,6 +1674,8 @@ void usage( int return_status )
 			 "display window\n"
 			 "  -noCrashMail\n"
 			 "             don't send email when fsc2 crashes\n"
+			 "  -httpPort\n"
+			 "             selects HTTP port to be used by web server\n"
 			 "  -h, --help\n"
 			 "             display this help text and exit\n\n"
 			 "For a complete documentation see either %s%sfsc2.ps,\n"
@@ -1666,6 +1683,18 @@ void usage( int return_status )
              "or type \"info fsc2\".\n", docdir, slash( docdir ),
 			 docdir, slash( docdir ), docdir, slash( docdir ) );
 	exit( return_status );
+}
+
+
+int idle_handler( XEvent *a, void *b )
+{
+	a = a;
+	b = b;
+
+	if ( Internals.http_pid > 0 )
+		http_check( );
+
+	return 0;
 }
 
 
