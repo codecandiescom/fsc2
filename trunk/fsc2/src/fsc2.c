@@ -198,7 +198,7 @@ int main( int argc, char *argv[ ] )
 	}
 
 	/* Trigger test or start of current EDL program if the appropriate flags
-	   were passed to the program */
+	   were passed to the program on the command line */
 
 	if ( do_test && is_loaded )
 		fl_trigger_object( main_form->test_file );
@@ -207,7 +207,13 @@ int main( int argc, char *argv[ ] )
 	if ( do_delete )
 		delete_file = SET;
 
+	/* Set handler for signal that's going to be send by the process that
+	   accepts external connections (to be spawned next) */
+
 	signal( SIGUSR1, sigusr1_handler );
+
+	/* If starting the server for external connections succeeds we can
+	   really start the main loop */
 
 	if ( ( conn_pid = spawn_conn( ( do_test || do_start ) && is_loaded ) )
 		 != -1 )
@@ -219,6 +225,9 @@ int main( int argc, char *argv[ ] )
 			kill( getppid( ), SIGUSR1 );
 		while ( fl_do_forms( ) != main_form->quit )
 			;
+
+		/* Stop the process that's waiting for external connections */
+
 		kill( conn_pid, SIGTERM );
 	}
 	else
