@@ -30,7 +30,7 @@
 /* SUSv3 does not require that the semun union is defined and newer
    Linux versions don't do so, but some older versions defined it... */
 
-#if defined ( _SEM_SEMUN_UNDEFINED ) && ( _SEM_SEMUN_UNDEFINED == 1 )
+#if defined ( _SEM_SEMUN_UNDEFINED )
 union semun {
 	  int val;                    /* value for SETVAL */
 	  struct semid_ds *buf;       /* buffer for IPC_STAT, IPC_SET */
