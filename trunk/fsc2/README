@@ -1,3 +1,6 @@
+About fsc2
+----------
+
 fsc2 is a program for controlling spectrometers.
 
 Programs for controlling spectrometers are usually home-written and
@@ -6,16 +9,34 @@ fixed hardware base. In contrast, fsc2 is much more flexible because,
 on the one hand, it interprets a rather simple but powerful scripting
 language EDL (Experiment Description Language) and, on the other hand,
 has a strictly modular approach to the handling of devices. This allows
-setting up a completely new experiment (or changing an already existing
-experiment description) fast and easily without requiring any detailed
+setting up a completely new experiment or changing an already existing
+experiment description fast and easily without requiring any detailed
 knowledge of the internals of fsc2 or on how exactly the devices have
 to be controlled.
+
+Download
+--------
+
+You can download the sources for the program and the device modules or
+the documentation from
+
+       http://www.physik.fu-berlin/~toerring/fsc2.tar.gz
+
+	   http://www.physik.fu-berlin/~toerring/fsc2/fsc2.ps.gz
+	   http://www.physik.fu-berlin/~toerring/fsc2/fsc2/fsc2.pdf
+
+or just read the HTTP version of the documentation at
+
+       http://www.physik.fu-berlin/~toerring/fsc2
+
+Features
+--------
 
 * The EDL language is similar to other medium to high level languages,
   borrowing from e.g. MathLab, Fortran, C and Perl etc. Moreover, it
   comes with a lot of functions for displaying and saving measured
   data in completely user defined ways. Thus writing a description
-  for a new experiment (or adapting an already existing EDL script)
+  for a new experiment or adapting an already existing EDL script
   won't be difficult for anyone remotely acquainted with one of the
   above mentioned programming languages.
 
@@ -29,7 +50,7 @@ to be controlled.
   Thus one may write scripts for standard experiments that in turn
   automatically create EDL scripts from user input, for example via
   a graphical user interface. fsc2 even comes with a tool that will
-  automatically generate such scripts from (slightly modified) EDL
+  automatically generate such scripts from slightly modified EDL
   programs. Once such a script has been created, "normal" users don't
   have to know how to write or change EDL programs, thus retaining all
   the convenience of the traditional type of programs but without
@@ -48,8 +69,8 @@ to be controlled.
   are already part of the package and can be used as a starting point
   for the development of new ones.
 
-* fsc2 is well-documented, an 150+ page documentation (in HTML, info,
-  PostScript and PDF format), covering all aspects of fsc2, i.e the
+* fsc2 is well-documented, an 150+ page documentation in HTML, info,
+  PostScript and PDF format, covering all aspects of fsc2, i.e the
   graphical interface, the EDL language, device functions and writing of
   new device modules, is part of the package.
 
@@ -60,7 +81,8 @@ to be controlled.
 * The complete sources for the program and all device modules are available
   under the GPL, so it can be adapted or extended to fit special needs.
 
-Devices for which functional drivers already exist are:
+Currently suported devices
+--------------------------
 
 * Tektronix Digitizing Oscilloscopes TDS 520, 520A, 520C, 540, 744A, 754A
 * LeCroy Digitizing Oscilloscope 9400
@@ -84,22 +106,15 @@ fsc2 works with three different GPIB driver/library combinations, the
 Linux Lab Project driver (http://www.llp.fu-berlin.de), the National
 Instruments driver (http://www.natinst.com) and a driver for NI PCII
 and AT-GPIB/TNT (ISA) cards I wrote an which can be downloaded from
-the same URL as fsc2, see below.
+the same URL as fsc2, see above.
 
-Of course, there are some limitations: due to my professional background
-fsc2 has been written with the different types of EPR (Electron Paramagnetic
-Resonance) experiments in mind. On the other hand, fsc2's basic concepts
-should make it easy to use it also for a wide range of other types of
-spectrometers.
+Limitations
+-----------
 
-You can download the sources for the program and the existing modules or
-just the documentation (in PostScript or PDF format) from
-
-       http://www.physik.fu-berlin/~toerring/
-
-or read the HTTP version of the documentation at
-
-       http://www.physik.fu-berlin/~toerring/fsc2
+Due to my professional background fsc2 has been written with the different
+types of EPR (Electron Paramagnetic Resonance) experiments in mind. On the
+other hand, fsc2's basic concepts should make it easy to use it also for a
+wide range of other types of spectrometers.
 
                                         Regards, Jens Thoms Toerring
 
