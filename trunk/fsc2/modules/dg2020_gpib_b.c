@@ -163,12 +163,12 @@ bool dg2020_init( const char *name )
 
 	/* Delete all blocks */
 
-	if ( gpib_write( dg2020.device, ":DATA:BLOC:DEL:ALL", 18 ) == FAILURE )
+	if ( gpib_write( dg2020.device, "DATA:BLOC:DEL:ALL", 17 ) == FAILURE )
 		dg2020_gpib_failure( );
 
 	/* Remove all sequence definitions */
 
-	if ( gpib_write( dg2020.device, ":DATA:SEQ:DEL:ALL", 17 ) == FAILURE )
+	if ( gpib_write( dg2020.device, "DATA:SEQ:DEL:ALL", 16 ) == FAILURE )
 		dg2020_gpib_failure( );
 
 	/* Switch to manual update mode */
@@ -373,7 +373,7 @@ bool dg2020_channel_assign( int channel, int pod )
 
 bool dg2020_update_data( void )
 {
-	if ( gpib_write( dg2020.device, ":DATA:UPD", 9 ) == FAILURE )
+	if ( gpib_write( dg2020.device, "DATA:UPD", 8 ) == FAILURE )
 		dg2020_gpib_failure( );
 
 	return OK;
@@ -396,46 +396,9 @@ bool dg2020_make_blocks( int num_blocks, BLOCK *block )
 	long l;
 	int i;
 
-/*  According to the manual this should do the job - but it doesn't...
 
-	for ( i = 0; i < num_blocks; ++i )
-	{
-		sprintf( cmd + strlen( cmd ), "%ld,%s\n",
-				 block[ i ].start, block[ i ].blk_name );
-	}
-
-	l = strlen( cmd ) - 1;
-	sprintf( dummy, "%ld", l );
-	sprintf( cmd, "DATA:BLOC:DEF #%ld%s", ( long ) strlen( dummy ), dummy );
-
-	for ( i = 0; i < num_blocks; ++i )
-	{
-		sprintf( cmd + strlen( cmd ), "%ld,%s\n",
-				 block[ i ].start, block[ i ].blk_name );
-	}
-	cmd[ strlen( cmd ) - 1 ] = '\0';
-
-	if ( gpib_write( dg2020.device, cmd, strlen( cmd ) ) == FAILURE )
-		dg2020_gpib_failure( );
-
-	if ( gpib_write( dg2020.device, "*ESR?", 5 ) == FAILUE )
-		dg2020_gpib_failure( );
-	l = 100;
-	if ( gpib_read( dg2020.device, dummy, &l ) == FAILURE )
-		dg2020_gpib_failure( );
-	if ( dummy[ 0 ] != '0' || l != 2 )
-	{
-		gpib_write( dg2020.device, "ALLE?", 5 );
-		l = 1000;
-		if ( gpib_read( dg2020.device, dummy, &l ) == FAILURE )
-			dg2020_gpib_failure( );
-	}
-*/
-
-	/* ...so we try it this way - at least it does work.
-	   Notice also the nice irregularity in the DEF and ADD command:
-	   for DEF we need the block name without quotes while in ADD
-	   we need quotes...*/
+	/* Notice the nice irregularity in the DEF and ADD command: for DEF we
+	   need the block name without quotes while in ADD we need quotes...*/
 
 	sprintf( dummy, "%ld,%s", block[ 0 ].start, block[ 0 ].blk_name );
 	l = strlen( dummy );
@@ -475,27 +438,28 @@ bool dg2020_make_blocks( int num_blocks, BLOCK *block )
 bool dg2020_make_seq( int num_blocks, BLOCK *block )
 {
 	char cmd[ 1024 ] = "",
-		 dummy[ 10 ];
+		 dummy[ 1024 ];
 	long l;
 	int i;
 
 
-	for ( i = 0; i < num_blocks; ++i )
-		sprintf( cmd + strlen( cmd ), "%s,%ld,0,0,0,0\n",
-				 block[ i ].blk_name, block[ i ].repeat );
-
-	l = strlen( cmd );
-	sprintf( dummy, "%ld", l - 1 );
+	l = 10 + strlen( block[ 0 ].blk_name );
+	sprintf( dummy, "%ld", l );
 	l = strlen( dummy );
-	sprintf( cmd, ":DATA:SEQ:DEF #%ld%s", l, dummy );
-
-	for ( i = 0; i < num_blocks; ++i )
-		sprintf( cmd + strlen( cmd ), "%s,%ld,0,0,0,0\n",
-				 block[ i ].blk_name, block[ i ].repeat );
-	cmd[ strlen( cmd ) - 1 ] = '\0';
+	sprintf( cmd, ":DATA:SEQ:DEF #%ld%s%s,1,0,0,0,0",
+			 l, dummy, block[ 0 ].blk_name );
 
 	if ( gpib_write( dg2020.device, cmd, strlen( cmd ) ) == FAILURE )
 		dg2020_gpib_failure( );
+
+	for ( i = 1; i < num_blocks; i++ )
+	{
+		sprintf( cmd, ":DATA:SEQ:ADD %d,\"%s\",%ld,0,0,0,0",
+				 i, block[ i ].blk_name, block[ i ].repeat );
+
+		if ( gpib_write( dg2020.device, cmd, strlen( cmd ) ) == FAILURE )
+			dg2020_gpib_failure( );
+	}
 
 	/* For external trigger mode set trigger wait for first (and only) block */
 
@@ -598,8 +562,7 @@ bool dg2020_set_constant( int channel, Ticks address, Ticks length, int state )
 
 	for ( k = 0, cptr = cmd + strlen( cmd ); k < length; *cptr++ = s, ++k )
 		;
-	*cptr++ = '\n';
-	*cptr = '\0';
+	*cptr++ = '\0';
 
 	/* Send the command string to the pulser */
 
