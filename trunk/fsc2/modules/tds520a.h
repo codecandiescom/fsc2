@@ -155,7 +155,7 @@ Var *digitizer_lock_keyboard( Var *v );
 
 /* declaration of internally used functions */
 
-const char *tds520a_ptime( double time );
+const char *tds520a_ptime( double p_time );
 void tds520a_delete_windows( void );
 void tds520a_do_pre_exp_checks( void );
 void tds520a_set_meas_window( WINDOW *w );

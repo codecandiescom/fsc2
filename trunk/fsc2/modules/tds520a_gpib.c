@@ -880,8 +880,8 @@ bool tds520a_get_curve( int channel, WINDOW *w, double **data, long *length,
 
 	*length = w != NULL ? w->end_num - w->start_num : tds520a.rec_len;
 	len = 2 * *length;
-	len2 = 1 + ( long ) floor( log10( len ) );
-	len1 = 1 + ( long ) floor( log10( len2 ) );
+	len2 = 1 + lrnd( floor( log10( len ) ) );
+	len1 = 1 + lrnd( floor( log10( len2 ) ) );
 	len += len1 + len2 + 2;
 
 	*data = T_malloc( *length * sizeof( double ) );

@@ -690,9 +690,9 @@ inline long lrnd( double x )
 
 inline int irnd( double x )
 {
-	if ( x > LONG_MAX )
-		return LONG_MAX;
-	if ( x < LONG_MIN )
-		return LONG_MIN;
-	return ( long ) rint( x );
+	if ( x > INT_MAX )
+		return INT_MAX;
+	if ( x < INT_MIN )
+		return INT_MIN;
+	return ( int ) rint( x );
 }

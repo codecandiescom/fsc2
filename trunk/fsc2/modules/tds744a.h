@@ -158,7 +158,7 @@ Var *digitizer_lock_keyboard( Var *v );
 
 /* declaration of internally used functions */
 
-const char *tds744a_ptime( double time );
+const char *tds744a_ptime( double p_time );
 void tds744a_delete_windows( void );
 void tds744a_do_pre_exp_checks( void );
 void tds744a_set_meas_window( WINDOW *w );

@@ -31,7 +31,7 @@
 /* i.e. an integer multiple of the time base                       */
 /*-----------------------------------------------------------------*/
 
-Ticks hfs9000_double2ticks( double time )
+Ticks hfs9000_double2ticks( double p_time )
 {
 	double ticks;
 
@@ -43,11 +43,11 @@ Ticks hfs9000_double2ticks( double time )
 		THROW( EXCEPTION )
 	}
 
-	ticks = time / hfs9000.timebase;
+	ticks = p_time / hfs9000.timebase;
 
 	if ( fabs( ticks - lrnd( ticks ) ) > 1.0e-2 )
 	{
-		char *t = T_strdup( hfs9000_ptime( time ) );
+		char *t = T_strdup( hfs9000_ptime( p_time ) );
 		eprint( FATAL, SET, "%s: Specified time of %s is not an integer "
 				"multiple of the pulser time base of %s.\n",
 				pulser_struct.name, t, hfs9000_ptime( hfs9000.timebase ) );
@@ -140,18 +140,18 @@ PULSE *hfs9000_get_pulse( long pnum )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-const char *hfs9000_ptime( double time )
+const char *hfs9000_ptime( double p_time )
 {
 	static char buffer[ 128 ];
 
-	if ( fabs( time ) >= 1.0 )
-		sprintf( buffer, "%g s", time );
-	else if ( fabs( time ) >= 1.e-3 )
-		sprintf( buffer, "%g ms", 1.e3 * time );
-	else if ( fabs( time ) >= 1.e-6 )
-		sprintf( buffer, "%g us", 1.e6 * time );
+	if ( fabs( p_time ) >= 1.0 )
+		sprintf( buffer, "%g s", p_time );
+	else if ( fabs( p_time ) >= 1.e-3 )
+		sprintf( buffer, "%g ms", 1.e3 * p_time );
+	else if ( fabs( p_time ) >= 1.e-6 )
+		sprintf( buffer, "%g us", 1.e6 * p_time );
 	else
-		sprintf( buffer, "%g ns", 1.e9 * time );
+		sprintf( buffer, "%g ns", 1.e9 * p_time );
 
 	return buffer;
 }

@@ -198,10 +198,10 @@ static void dg2020_defense_twt_check( void )
 	long i, j;
 
 
-	defense_2_twt = ( Ticks ) ceil( DEFENSE_2_TWT_MIN_DISTANCE /
-									dg2020.timebase );
-	twt_2_defense = ( Ticks ) ceil( TWT_2_DEFENSE_MIN_DISTANCE /
-									dg2020.timebase );
+	defense_2_twt = ( Ticks ) lrnd( ceil( DEFENSE_2_TWT_MIN_DISTANCE /
+										  dg2020.timebase ) );
+	twt_2_defense = ( Ticks ) lrnd( ceil( TWT_2_DEFENSE_MIN_DISTANCE /
+										  dg2020.timebase ) );
 
 	for ( i = 0; i < defense->num_pulses; i++ )
 	{

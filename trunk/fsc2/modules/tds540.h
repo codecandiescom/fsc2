@@ -157,7 +157,7 @@ Var *digitizer_lock_keyboard( Var *v );
 
 /* declaration of internally used functions */
 
-const char *tds540_ptime( double time );
+const char *tds540_ptime( double p_time );
 void tds540_delete_windows( void );
 void tds540_do_pre_exp_checks( void );
 void tds540_set_meas_window( WINDOW *w );

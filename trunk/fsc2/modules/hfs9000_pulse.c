@@ -165,7 +165,7 @@ bool hfs9000_set_pulse_function( long pnum, int function )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-bool hfs9000_set_pulse_position( long pnum, double time )
+bool hfs9000_set_pulse_position( long pnum, double p_time )
 {
 	PULSE *p = hfs9000_get_pulse( pnum );
 
@@ -178,15 +178,15 @@ bool hfs9000_set_pulse_position( long pnum, double time )
 		THROW( EXCEPTION )
 	}
 
-	if ( time < 0 )
+	if ( p_time < 0 )
 	{
 		eprint( FATAL, SET, "%s: Invalid (negative) start position for "
 				"pulse %ld: %s.\n", pulser_struct.name, pnum,
-				hfs9000_ptime( time ) );
+				hfs9000_ptime( p_time ) );
 		THROW( EXCEPTION )
 	}
 
-	p->pos = hfs9000_double2ticks( time );
+	p->pos = hfs9000_double2ticks( p_time );
 	p->is_pos = SET;
 
 	if ( ! p->initial_is_pos && ! TEST_RUN && I_am == PARENT )
@@ -207,7 +207,7 @@ bool hfs9000_set_pulse_position( long pnum, double time )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-bool hfs9000_set_pulse_length( long pnum, double time )
+bool hfs9000_set_pulse_length( long pnum, double p_time )
 {
 	PULSE *p = hfs9000_get_pulse( pnum );
 
@@ -220,10 +220,10 @@ bool hfs9000_set_pulse_length( long pnum, double time )
 		THROW( EXCEPTION )
 	}
 
-	if ( time < 0.0 )
+	if ( p_time < 0.0 )
 	{
 		eprint( FATAL, SET, "%s: Invalid negative length set for pulse %ld: "
-				"%s.\n", pulser_struct.name, pnum, hfs9000_ptime( time ) );
+				"%s.\n", pulser_struct.name, pnum, hfs9000_ptime( p_time ) );
 		THROW( EXCEPTION )
 	}
 
@@ -235,12 +235,12 @@ bool hfs9000_set_pulse_length( long pnum, double time )
 				"to 20 ns\n", pulser_struct.name, pnum );
 	}
 	else
-		p->len = hfs9000_double2ticks( time );
+		p->len = hfs9000_double2ticks( p_time );
 	p->is_len = SET;
 
 	if ( ! p->initial_is_len && ! TEST_RUN && I_am == PARENT )
 	{
-		p->initial_len = hfs9000_double2ticks( time );
+		p->initial_len = hfs9000_double2ticks( p_time );
 		p->initial_is_len = SET;
 	}
 	else if ( ! p->is_old_len )
@@ -256,7 +256,7 @@ bool hfs9000_set_pulse_length( long pnum, double time )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-bool hfs9000_set_pulse_position_change( long pnum, double time )
+bool hfs9000_set_pulse_position_change( long pnum, double p_time )
 {
 	PULSE *p = hfs9000_get_pulse( pnum );
 
@@ -269,19 +269,19 @@ bool hfs9000_set_pulse_position_change( long pnum, double time )
 		THROW( EXCEPTION )
 	}
 
-	if ( hfs9000_double2ticks( time ) == 0 )
+	if ( hfs9000_double2ticks( p_time ) == 0 )
 	{
 		eprint( SEVERE, SET, "%s: Zero position change set for pulse %ld.\n",
 				pulser_struct.name, pnum );
 		return FAIL;
 	}
 
-	p->dpos = hfs9000_double2ticks( time );
+	p->dpos = hfs9000_double2ticks( p_time );
 	p->is_dpos = SET;
 
 	if ( ! p->initial_is_dpos && ! TEST_RUN && I_am == PARENT )
 	{
-		p->initial_dpos = hfs9000_double2ticks( time );
+		p->initial_dpos = hfs9000_double2ticks( p_time );
 		p->initial_is_dpos = SET;
 	}
 
@@ -292,7 +292,7 @@ bool hfs9000_set_pulse_position_change( long pnum, double time )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-bool hfs9000_set_pulse_length_change( long pnum, double time )
+bool hfs9000_set_pulse_length_change( long pnum, double p_time )
 {
 	PULSE *p = hfs9000_get_pulse( pnum );
 
@@ -305,7 +305,7 @@ bool hfs9000_set_pulse_length_change( long pnum, double time )
 		THROW( EXCEPTION )
 	}
 
-	if ( hfs9000_double2ticks( time ) == 0 )
+	if ( hfs9000_double2ticks( p_time ) == 0 )
 	{
 		eprint( SEVERE, SET, "%s: Zero length change set for pulse "
 				"%ld.\n", pulser_struct.name, pnum );
@@ -320,12 +320,12 @@ bool hfs9000_set_pulse_length_change( long pnum, double time )
 		THROW( EXCEPTION )
 	}
 
-	p->dlen = hfs9000_double2ticks( time );
+	p->dlen = hfs9000_double2ticks( p_time );
 	p->is_dlen = SET;
 
 	if ( ! p->initial_is_dlen && ! TEST_RUN && I_am == PARENT )
 	{
-		p->initial_dlen = hfs9000_double2ticks( time );
+		p->initial_dlen = hfs9000_double2ticks( p_time );
 		p->initial_is_dlen = SET;
 	}
 
@@ -356,7 +356,7 @@ bool hfs9000_get_pulse_function( long pnum, int *function )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-bool hfs9000_get_pulse_position( long pnum, double *time )
+bool hfs9000_get_pulse_position( long pnum, double *p_time )
 {
 	PULSE *p = hfs9000_get_pulse( pnum );
 
@@ -368,7 +368,7 @@ bool hfs9000_get_pulse_position( long pnum, double *time )
 		THROW( EXCEPTION )
 	}
 
-	*time = hfs9000_ticks2double( p->pos );
+	*p_time = hfs9000_ticks2double( p->pos );
 	return OK;
 }
 
@@ -376,7 +376,7 @@ bool hfs9000_get_pulse_position( long pnum, double *time )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-bool hfs9000_get_pulse_length( long pnum, double *time )
+bool hfs9000_get_pulse_length( long pnum, double *p_time )
 {
 	PULSE *p = hfs9000_get_pulse( pnum );
 
@@ -396,7 +396,7 @@ bool hfs9000_get_pulse_length( long pnum, double *time )
 		THROW( EXCEPTION )
 	}
 
-	*time = hfs9000_ticks2double( p->len );
+	*p_time = hfs9000_ticks2double( p->len );
 	return OK;
 }
 
@@ -404,7 +404,7 @@ bool hfs9000_get_pulse_length( long pnum, double *time )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-bool hfs9000_get_pulse_position_change( long pnum, double *time )
+bool hfs9000_get_pulse_position_change( long pnum, double *p_time )
 {
 	PULSE *p = hfs9000_get_pulse( pnum );
 
@@ -416,7 +416,7 @@ bool hfs9000_get_pulse_position_change( long pnum, double *time )
 		THROW( EXCEPTION )
 	}
 
-	*time = hfs9000_ticks2double( p->dpos );
+	*p_time = hfs9000_ticks2double( p->dpos );
 	return OK;
 }
 
@@ -424,7 +424,7 @@ bool hfs9000_get_pulse_position_change( long pnum, double *time )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-bool hfs9000_get_pulse_length_change( long pnum, double *time )
+bool hfs9000_get_pulse_length_change( long pnum, double *p_time )
 {
 	PULSE *p = hfs9000_get_pulse( pnum );
 
@@ -436,7 +436,7 @@ bool hfs9000_get_pulse_length_change( long pnum, double *time )
 		THROW( EXCEPTION )
 	}
 
-	*time = hfs9000_ticks2double( p->dlen );
+	*p_time = hfs9000_ticks2double( p->dlen );
 	return OK;
 }
 
@@ -445,20 +445,20 @@ bool hfs9000_get_pulse_length_change( long pnum, double *time )
 /* Function for changing the pulse position while the experiment is run. */
 /*-----------------------------------------------------------------------*/
 
-bool hfs9000_change_pulse_position( long pnum, double time )
+bool hfs9000_change_pulse_position( long pnum, double p_time )
 {
 	PULSE *p = hfs9000_get_pulse( pnum );
 
 
-	if ( time < 0 )
+	if ( p_time < 0 )
 	{
 		eprint( FATAL, SET, "%s: Invalid (negative) start position for "
 				"pulse %ld: %s.\n", pulser_struct.name, pnum,
-				hfs9000_ptime( time ) );
+				hfs9000_ptime( p_time ) );
 		THROW( EXCEPTION )
 	}
 
-	if ( p->is_pos && hfs9000_double2ticks( time ) == p->pos )
+	if ( p->is_pos && hfs9000_double2ticks( p_time ) == p->pos )
 	{
 		eprint( WARN, SET, "%s: Old and new position of pulse %ld are "
 				"identical.\n", pulser_struct.name, pnum );
@@ -471,7 +471,7 @@ bool hfs9000_change_pulse_position( long pnum, double time )
 		p->is_old_pos = SET;
 	}
 
-	p->pos = hfs9000_double2ticks( time );
+	p->pos = hfs9000_double2ticks( p_time );
 	p->is_pos = SET;
 
 	p->has_been_active |= ( p->is_active = IS_ACTIVE( p ) );
@@ -488,15 +488,15 @@ bool hfs9000_change_pulse_position( long pnum, double time )
 /* Function for changing the pulse length while the experiment is run. */
 /*---------------------------------------------------------------------*/
 
-bool hfs9000_change_pulse_length( long pnum, double time )
+bool hfs9000_change_pulse_length( long pnum, double p_time )
 {
 	PULSE *p = hfs9000_get_pulse( pnum );
 
 
-	if ( time < 0 )
+	if ( p_time < 0 )
 	{
 		eprint( FATAL, SET, "%s: Invalid (negative) length for pulse %ld: "
-				"%s.\n", pulser_struct.name, pnum, hfs9000_ptime( time ) );
+				"%s.\n", pulser_struct.name, pnum, hfs9000_ptime( p_time ) );
 		THROW( EXCEPTION )
 	}
 
@@ -509,7 +509,7 @@ bool hfs9000_change_pulse_length( long pnum, double time )
 			THROW( EXCEPTION )
 		}
 
-		if ( p->len == hfs9000_double2ticks( time ) )
+		if ( p->len == hfs9000_double2ticks( p_time ) )
 		{
 			eprint( WARN, SET, "%s: Old and new length of pulse %ld are "
 					"identical.\n", pulser_struct.name, pnum );
@@ -523,7 +523,7 @@ bool hfs9000_change_pulse_length( long pnum, double time )
 		p->is_old_len = SET;
 	}
 
-	p->len = hfs9000_double2ticks( time );
+	p->len = hfs9000_double2ticks( p_time );
 	p->is_len = SET;
 
 	p->has_been_active |= ( p->is_active = IS_ACTIVE( p ) );
@@ -539,19 +539,19 @@ bool hfs9000_change_pulse_length( long pnum, double time )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-bool hfs9000_change_pulse_position_change( long pnum, double time )
+bool hfs9000_change_pulse_position_change( long pnum, double p_time )
 {
 	PULSE *p = hfs9000_get_pulse( pnum );
 
 
-	if ( hfs9000_double2ticks( time ) == 0 && TEST_RUN )
+	if ( hfs9000_double2ticks( p_time ) == 0 && TEST_RUN )
 	{
 		eprint( SEVERE, SET, "%s: Zero position change value for pulse "
 				"%ld.\n", pulser_struct.name, pnum );
 		return FAIL;
 	}
 
-	p->dpos = hfs9000_double2ticks( time );
+	p->dpos = hfs9000_double2ticks( p_time );
 	p->is_dpos = SET;
 
 	return OK;
@@ -561,7 +561,7 @@ bool hfs9000_change_pulse_position_change( long pnum, double time )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-bool hfs9000_change_pulse_length_change( long pnum, double time )
+bool hfs9000_change_pulse_length_change( long pnum, double p_time )
 {
 	PULSE *p = hfs9000_get_pulse( pnum );
 
@@ -574,14 +574,14 @@ bool hfs9000_change_pulse_length_change( long pnum, double time )
 		THROW( EXCEPTION )
 	}
 
-	if ( hfs9000_double2ticks( time ) == 0 && TEST_RUN )
+	if ( hfs9000_double2ticks( p_time ) == 0 && TEST_RUN )
 	{
 		eprint( SEVERE, SET, "%s: Zero length change value for pulse "
 				"%ld.\n", pulser_struct.name, pnum );
 		return FAIL;
 	}
 
-	p->dlen = hfs9000_double2ticks( time );
+	p->dlen = hfs9000_double2ticks( p_time );
 	p->is_dlen = SET;
 
 	return OK;

@@ -33,18 +33,19 @@ static void tds754a_window_check_3( void );
 /*-----------------------------------------------------------------*/
 /*-----------------------------------------------------------------*/
 
-const char *tds754a_ptime( double time )
+const char *tds754a_ptime( double p_time )
 {
 	static char buffer[ 128 ];
 
-	if ( fabs( time ) >= 1.0 )
-		sprintf( buffer, "%g s", time );
-	else if ( fabs( time ) >= 1.e-3 )
-		sprintf( buffer, "%g ms", 1.e3 * time );
-	else if ( fabs( time ) >= 1.e-6 )
-		sprintf( buffer, "%g us", 1.e6 * time );
+
+	if ( fabs( p_time ) >= 1.0 )
+		sprintf( buffer, "%g s", p_time );
+	else if ( fabs( p_time ) >= 1.e-3 )
+		sprintf( buffer, "%g ms", 1.e3 * p_time );
+	else if ( fabs( p_time ) >= 1.e-6 )
+		sprintf( buffer, "%g us", 1.e6 * p_time );
 	else
-		sprintf( buffer, "%g ns", 1.e9 * time );
+		sprintf( buffer, "%g ns", 1.e9 * p_time );
 
 	return buffer;
 }
