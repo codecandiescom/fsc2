@@ -119,15 +119,15 @@ void press_handler( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
 				case 1 :                       /* in x-axis window */
 					c->box_x = c->ppos[ X ];
 					c->box_w = 0;
-					c->box_y = c->h / 2 - 1;
-					c->box_h = 2;
+					c->box_y = 21;
+					c->box_h = 5;
 					c->is_box = SET;
 					break;
 
 				case 2 :                       /* in y-axis window */
-					c->box_x = c->w / 2 - 1;
+					c->box_x = c->w - 27;
 					c->box_y = c->ppos[ Y ];
-					c->box_w = 2;
+					c->box_w = 5;
 					c->box_h = 0;
 					c->is_box = SET;
 					break;
