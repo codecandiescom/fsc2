@@ -198,7 +198,7 @@ void prim_loop_setup( void )
 				break;
 
 			case IF_TOK :
-				setup_if_else( prg_token[ i ].token, &i, NULL );
+				setup_if_else( &i, NULL );
 				break;
 		}
 	}
@@ -248,7 +248,7 @@ void setup_while_or_repeat( int type, long *pos )
 				break;
 
 			case IF_TOK :
-				setup_if_else( prg_token[ i ].token, &i, cur );
+				setup_if_else( &i, cur );
 				break;
 
 			case ELSE_TOK :
@@ -287,7 +287,7 @@ void setup_while_or_repeat( int type, long *pos )
 }
 
 
-void setup_if_else( int type, long *pos, Prg_Token *cur_wr )
+void setup_if_else( long *pos, Prg_Token *cur_wr )
 {
 	Prg_Token *cur = prg_token + *pos;
 	long i = *pos + 1;
@@ -338,7 +338,7 @@ void setup_if_else( int type, long *pos, Prg_Token *cur_wr )
 				break;
 
 			case IF_TOK :
-				setup_if_else( prg_token[ i ].token, &i, cur_wr );
+				setup_if_else( &i, cur_wr );
 
 				if ( dont_need_close_paran )
 				{
