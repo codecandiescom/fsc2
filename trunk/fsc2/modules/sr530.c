@@ -23,7 +23,7 @@
 
 
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-/* This device needs '\n' (0x0A) as EOS - set this correctly in `gpib.conf' */
+/* This device needs '\n' (0x0A) as EOS - set this correctly in 'gpib.conf' */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
 

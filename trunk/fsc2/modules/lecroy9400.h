@@ -85,7 +85,7 @@
 #define MAX_DESC_LEN       160       /* amount of memory that needs to be
 										allocated for a curve descriptor */
 
-/* Structure for description of a `window' on the digitizer, made up from the
+/* Structure for description of a 'window' on the digitizer, made up from the
    area between the pair of cursors */
 
 typedef struct W_ {

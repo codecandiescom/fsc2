@@ -67,7 +67,7 @@
 #define TDS540_POINTS_PER_DIV 50
 
 
-/* Structure for description of a `window' on the digitizer, made up from the
+/* Structure for description of a 'window' on the digitizer, made up from the
    area between a pair of cursors */
 
 typedef struct _W {

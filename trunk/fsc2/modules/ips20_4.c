@@ -944,7 +944,7 @@ static void ips20_4_get_complete_status( void )
 		default :
 			/* The manual claims that the above are the only values we should
 			   expect, but as usual the manual is shamelessly lying. At least
-			   for the current magnet the character 'C` seems to be returned.
+			   for the current magnet the character 'C' seems to be returned.
 			   Because we don't have any better documentation we simply accept
 			   whatever the device tells us...
 

@@ -1,4 +1,4 @@
-/*
+/*
   $Id$
 
   Copyright (C) 1999-2002 Jens Thoms Toerring
@@ -68,7 +68,7 @@
 #define TDS754A_TEST_TRIG_CHANNEL TDS754A_CH1
 
 
-/* Structure for description of a `window' on the digitizer, made up from the
+/* Structure for description of a 'window' on the digitizer, made up from the
    area between the pair of cursors */
 
 typedef struct W_ {

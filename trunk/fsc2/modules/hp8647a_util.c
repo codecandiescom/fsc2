@@ -62,7 +62,7 @@ FILE *hp8647a_find_table( char **name )
 
 	if ( strchr( *name, '/' ) != NULL )
 	{
-		print( FATAL, "Table file `%s' not found.\n", *name );
+		print( FATAL, "Table file '%s' not found.\n", *name );
 		THROW( EXCEPTION );
 	}
 
@@ -74,8 +74,8 @@ FILE *hp8647a_find_table( char **name )
 
 	if ( ( tfp = hp8647a_open_table( *name ) ) == NULL )
 	{
-		print( FATAL, "Table file `%s' not found, neither in the current "
-			   "directory nor in `%s'.\n", strip_path( *name ), libdir );
+		print( FATAL, "Table file '%s' not found, neither in the current "
+			   "directory nor in '%s'.\n", strip_path( *name ), libdir );
 		THROW( EXCEPTION );
 	}
 
@@ -102,14 +102,14 @@ FILE *hp8647a_open_table( char *name )
 		if ( errno == ENOENT )       /* file not found */
 			return NULL;
 
-		print( FATAL, "No read permission for table file `%s'.\n", name );
+		print( FATAL, "No read permission for table file '%s'.\n", name );
 		T_free( name );
 		THROW( EXCEPTION );
 	}
 
 	if ( ( tfp = fopen( name, "r" ) ) == NULL )
 	{
-		print( FATAL, "Can't open table file `%s'.\n", name );
+		print( FATAL, "Can't open table file '%s'.\n", name );
 		T_free( name );
 		THROW( EXCEPTION );
 	}

@@ -403,7 +403,7 @@ static int hp8647a_comp( const void *a, const void *b )
 
 	if ( A->freq == B->freq )
 	{
-		print( FATAL, "Frequency %s Hz appears twice in table file '%s'\n",
+		print( FATAL, "Frequency of %s Hz appears twice in table file '%s'\n",
 			   A->freq, hp8647a.table_file );
 		THROW( EXCEPTION );
 	}

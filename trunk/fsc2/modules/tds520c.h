@@ -68,7 +68,7 @@
 #define TDS520C_TEST_TRIG_CHANNEL 0
 
 
-/* Structure for description of a `window' on the digitizer, made up from the
+/* Structure for description of a 'window' on the digitizer, made up from the
    area between the pair of cursors */
 
 typedef struct W_ {
