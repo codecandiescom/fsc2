@@ -100,16 +100,16 @@ typedef struct PT_ {
 
 
 /*
-  [1] In WHILE, UNTIL  and REPEAT tokens `start' points to the start of the
+  [1] In WHILE, UNTIL and REPEAT tokens `start' points to the start of the
       executable block, in NEXT tokens it points to the corresponding while or
 	  repeat. In IF tokens it points to the first executable block (the on to
 	  be executed if the condition is met).
-  [2] In WHILE and REPEAT tokens `end' points to the statement following the
-      block. In BREAK tokens it points also the statement following the
-      loop. In IF tokens it points to the else (if there is one). For `}'
-      tokens of a WHILE or REPEAT token it points to the WHILE or REPEAT. In
-      IF-ELSE blocks it points to the statement directly following the if-else
-      construct.
+  [2] In WHILE, UNTIL and REPEAT tokens `end' points to the statement
+      following the block. In BREAK tokens it points also the statement
+	  following the loop. In IF tokens it points to the else (if there is
+	  one). For `}' tokens of a WHILE, UNTIL or REPEAT token it points to
+	  the WHILE, UNTIL or REPEAT. In IF-ELSE blocks it points to the statement
+	  directly following the IF-ELSE construct.
 */
 
 

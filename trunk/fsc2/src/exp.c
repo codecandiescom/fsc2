@@ -249,7 +249,7 @@ static void loop_setup( void )
 				/* fall through */
 
 			case WHILE_TOK : case REPEAT_TOK :
-			case FOR_TOK : 
+			case FOR_TOK   : case UNTIL_TOK :
 				cur_pos = i;
 				setup_while_or_repeat( prg_token[ i ].token, &i );
 				if ( cur_pos < On_Stop_Pos && i > On_Stop_Pos )
@@ -279,8 +279,8 @@ static void loop_setup( void )
 /* Does the real work for setting up while, repeat and for loops. */
 /* Can be called recursively to allow nested loops.               */
 /* ->                                                             */
-/*    1. Type of loop (WHILE_TOK, REPEAT_TOK or FOR_TOK)          */
-/*    2. pointer to number of token                               */
+/*  1. Type of loop (WHILE_TOK, UNTIL_TOK, REPEAT_TOK or FOR_TOK) */
+/*  2. pointer to number of token                                 */
 /*----------------------------------------------------------------*/
 
 static void setup_while_or_repeat( int type, long *pos )
@@ -326,6 +326,7 @@ static void setup_while_or_repeat( int type, long *pos )
 		{
 			case WHILE_TOK : case REPEAT_TOK :
 			case FOR_TOK : case FOREVER_TOK :
+			case UNTIL_TOK :
 				setup_while_or_repeat( prg_token[ i ].token, &i );
 				break;
 
@@ -367,6 +368,8 @@ static void setup_while_or_repeat( int type, long *pos )
 
 	if ( type == WHILE_TOK )
 		t = "WHILE";
+	if ( type == UNTIL_TOK )
+		t = "UNTIL";
 	if ( type == REPEAT_TOK )
 		t = "REPEAT";
 	if ( type == FOR_TOK )
@@ -424,15 +427,15 @@ static void setup_if_else( long *pos, Prg_Token *cur_wr )
 		{
 			case WHILE_TOK : case REPEAT_TOK :
 			case FOR_TOK : case FOREVER_TOK :
+			case UNTIL_TOK :
 				setup_while_or_repeat( prg_token[ i ].token, &i );
 				break;
 
 			case CONT_TOK :
 				if ( cur_wr == NULL )
 				{
-					eprint( FATAL, "%s:%ld: NEXT not within WHILE, REPEAT "
-							"or FOR loop.\n", prg_token[ i ].Fname,
-							prg_token[ i ].Lc );
+					eprint( FATAL, "%s:%ld: NEXT not within a loop.\n",
+							prg_token[ i ].Fname, prg_token[ i ].Lc );
 					THROW( EXCEPTION );
 				}
 				prg_token[ i ].start = cur_wr;
@@ -441,9 +444,8 @@ static void setup_if_else( long *pos, Prg_Token *cur_wr )
 			case BREAK_TOK :
 				if ( cur_wr == NULL )
 				{
-					eprint( FATAL, "%s:%ld: BREAK not within WHILE, REPEAT "
-							"or FOR loop.\n", prg_token[ i ].Fname,
-							prg_token[ i ].Lc );
+					eprint( FATAL, "%s:%ld: BREAK not within a loop.\n",
+							prg_token[ i ].Fname, prg_token[ i ].Lc );
 					THROW( EXCEPTION );
 				}
 				prg_token[ i ].start = cur_wr;
@@ -488,7 +490,6 @@ static void setup_if_else( long *pos, Prg_Token *cur_wr )
 							cur->Fname, cur->Lc );
 					THROW( EXCEPTION );
 				}
-
 
 				if(  prg_token[ i + 1 ].token == IF_TOK )
 				{
@@ -590,6 +591,20 @@ void exp_test_run( void )
 				case WHILE_TOK :
 					cur = cur_prg_token;
 					if ( test_condition( cur ) )
+					{
+						cur->counter++;
+						cur_prg_token = cur->start;
+					}
+					else
+					{
+						cur->counter = 0;
+						cur_prg_token = cur->end;
+					}
+					break;
+
+				case UNTIL_TOK :
+					cur = cur_prg_token;
+					if ( ! test_condition( cur ) )
 					{
 						cur->counter++;
 						cur_prg_token = cur->start;
@@ -725,7 +740,7 @@ int exp_runlex( void )
 		{
 			case WHILE_TOK : case REPEAT_TOK : case BREAK_TOK :
 			case CONT_TOK : case FOR_TOK : case FOREVER_TOK :
-			case IF_TOK : case ELSE_TOK :
+			case UNTIL_TOK : case IF_TOK : case ELSE_TOK :
 				return 0;
 
 			case '}' :
@@ -878,6 +893,8 @@ bool test_condition( Prg_Token *cur )
 
 		if ( cur->token == WHILE_TOK )
 			t = "WHILE loop";
+		if ( cur->token == UNTIL_TOK )
+			t = "UNTIL loop";
 		if ( cur->token == REPEAT_TOK )
 			t = "REPEAT loop";
 		if ( cur->token == FOR_TOK )
