@@ -24,18 +24,19 @@
 
 body       { margin :           0%;
            	 padding :          0%;
-			 background :       white;
            }
 
 #links     { position :         fixed;
-           	 width :            195px;
+           	 width :            170px;
 			 height :           100%;
 			 padding :          10px 10px;
 		   	 background :       white url(background.gif) repeat-y;
+			 font-familiy :     Helvetica;
+			 font-size :        12pt;
            }
 
 #main      { position :         absolute;
-			 left :             195px;
+			 left :             170px;
 			 right :            10px;
 			 padding :          0 10px;
 			 background :       white;
