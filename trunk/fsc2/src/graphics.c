@@ -36,11 +36,6 @@ static int cur_1,
 	       cur_5,
 	       cur_6,
 	       cur_7;
-static int cut_cur_1,
-	       cut_cur_2,
-	       cut_cur_3,
-	       cut_cur_4,
-	       cut_cur_5;
 
 
 /*----------------------------------------------------------------------*/
@@ -333,21 +328,6 @@ static void G_struct_init( void )
 		cur_7 = fl_create_bitmap_cursor( cursor_7_bits, cursor_7_bits,
 										 cursor_7_width, cursor_7_height,
 										 cursor_7_x_hot, cursor_7_y_hot );
-		cut_cur_1 = fl_create_bitmap_cursor( cursor_1_bits, cursor_1_bits,
-											 cursor_1_width, cursor_1_height,
-											 cursor_1_x_hot, cursor_1_y_hot );
-		cut_cur_2 = fl_create_bitmap_cursor( cursor_2_bits, cursor_2_bits,
-											 cursor_2_width, cursor_2_height,
-											 cursor_2_x_hot, cursor_2_y_hot );
-		cut_cur_3 = fl_create_bitmap_cursor( cursor_3_bits, cursor_3_bits,
-											 cursor_3_width, cursor_3_height,
-											 cursor_3_x_hot, cursor_3_y_hot );
-		cut_cur_4 = fl_create_bitmap_cursor( cursor_4_bits, cursor_4_bits,
-											 cursor_4_width, cursor_4_height,
-											 cursor_4_x_hot, cursor_4_y_hot );
-		cut_cur_5 = fl_create_bitmap_cursor( cursor_5_bits, cursor_5_bits,
-											 cursor_5_width, cursor_5_height,
-											 cursor_5_x_hot, cursor_5_y_hot );
 	}
 
 	G.cur_1 = cur_1;
@@ -357,12 +337,6 @@ static void G_struct_init( void )
 	G.cur_5 = cur_5;
 	G.cur_6 = cur_6;
 	G.cur_7 = cur_7;
-
-	G.cut_cur_1 = cut_cur_1;
-	G.cut_cur_2 = cut_cur_2;
-	G.cut_cur_3 = cut_cur_3;
-	G.cut_cur_4 = cut_cur_4;
-	G.cut_cur_5 = cut_cur_5;
 
 	/* On the first call also create the colours needed for 2D displays */
 
@@ -516,12 +490,6 @@ static void G_init_curves_2d( void )
 	fl_set_cursor_color( G.cur_5, FL_BLACK, FL_WHITE );
 	fl_set_cursor_color( G.cur_6, FL_BLACK, FL_WHITE );
 	fl_set_cursor_color( G.cur_7, FL_BLACK, FL_WHITE );
-
-	fl_set_cursor_color( G.cut_cur_1, FL_BLACK, FL_RED );
-	fl_set_cursor_color( G.cut_cur_2, FL_BLACK, FL_RED );
-	fl_set_cursor_color( G.cut_cur_3, FL_BLACK, FL_RED );
-	fl_set_cursor_color( G.cut_cur_4, FL_BLACK, FL_RED );
-	fl_set_cursor_color( G.cut_cur_5, FL_BLACK, FL_RED );
 
 	for ( i = 0; i < G.nc; i++ )
 	{

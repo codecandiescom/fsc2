@@ -186,6 +186,7 @@ typedef struct {
 
 	Curve_1d *curve[ MAX_CURVES ];
 	Curve_2d *curve_2d[ MAX_CURVES ];
+	Curve_1d cut_curve;
 
 	FL_COLOR colors[ MAX_CURVES ];
 
@@ -196,11 +197,6 @@ typedef struct {
 	    cur_5,
 		cur_6,
 		cur_7;
-	int cut_cur_1,
-		cut_cur_2,
-		cut_cur_3,
-		cut_cur_4,
-		cut_cur_5;
 
 	XFontStruct *font;      /* font used for drawing texts */
 	int font_asc, font_desc;
@@ -225,6 +221,7 @@ typedef struct {
 
 	int active_curve;       /* curve shown in 2d display (or -1 if none) */
 
+	bool is_cut;            /* set when cross section window is shown */
 	int cut_select;
 } Graphics;
 

@@ -1095,7 +1095,7 @@ argument: 0
 --------------------
 class: FL_CANVAS
 type: NORMAL_CANVAS
-box: 245 10 615 715
+box: 245 10 610 715
 boxtype: FL_NO_BOX
 colors: FL_BLACK FL_BLACK
 alignment: FL_ALIGN_CENTER
@@ -1149,7 +1149,7 @@ argument: 0
 --------------------
 class: FL_CANVAS
 type: NORMAL_CANVAS
-box: 245 725 615 65
+box: 245 725 610 65
 boxtype: FL_FRAME_BOX
 colors: FL_NoColor FL_COL1
 alignment: FL_ALIGN_CENTER

@@ -7,11 +7,14 @@
 
 
 typedef struct {
-	int cut_dir;            /* direction of cut (i.e. X, Y) */
+	int cut_dir;             /* direction of cut (i.e. X, Y) */
+	int cut_for_curve;       /* number of the curve the cut comes from */
 
-	bool is_scale_set;      /* have scaling factors been calculated ? */
-	bool scale_changed;     /* have scaling factors changed ? */
-	bool is_fs;             /* state of full scale button */
+	unsigned long cut_index;
+
+	bool is_scale_set;       /* have scaling factors been calculated ? */
+	bool scale_changed;      /* have scaling factors changed ? */
+	bool is_fs;              /* state of full scale button */
 
 	int cur_1,
 		cur_2,
@@ -22,9 +25,17 @@ typedef struct {
 		cur_7,
 	    cur_8;
 
-	Pixmap label_pm[ 3 ];   /* used for drawing of rotated text */
+	Pixmap label_pm[ 3 ];    /* used for drawing of rotated text */
+	                         /* the second pixmap (text at y axis) is always
+								identical to the third label pixmap (z axis)
+								of the main display window, so don't free! */
 
-	unsigned int up_arrow_w,      /* sizes of out of range markers */
+	Pixmap up_arrows[ 4 ],
+		   down_arrows[ 4 ],
+		   left_arrows[ 4 ],
+		   right_arrows[ 4 ];
+
+	unsigned int up_arrow_w,    /* sizes of out of range markers */
 		         up_arrow_h,
 		         down_arrow_w,
 		         down_arrow_h,

@@ -1,4 +1,4 @@
-/** Header file generated with fdesign on Wed Nov  8 19:39:50 2000.**/
+/** Header file generated with fdesign on Thu Nov  9 03:00:55 2000.**/
 
 #ifndef FD_fsc2_h_
 #define FD_fsc2_h_

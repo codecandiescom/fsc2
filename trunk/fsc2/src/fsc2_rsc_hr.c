@@ -318,7 +318,7 @@ FD_cut *create_form_cut(void)
     fl_set_object_lalign(obj,FL_ALIGN_BOTTOM|FL_ALIGN_INSIDE);
     fl_set_object_gravity(obj, FL_NorthWest, FL_NorthWest);
     fl_set_object_callback(obj,cut_undo_button_callback,0);
-  fdui->cut_canvas = obj = fl_add_canvas(FL_NORMAL_CANVAS,245,10,615,715,"");
+  fdui->cut_canvas = obj = fl_add_canvas(FL_NORMAL_CANVAS,245,10,610,715,"");
     fl_set_object_gravity(obj, FL_NorthWest, FL_SouthEast);
   fdui->cut_print_button = obj = fl_add_pixmapbutton(FL_NORMAL_BUTTON,15,300,60,70,"Print");
     fl_set_button_shortcut(obj,"P",1);
@@ -331,7 +331,7 @@ FD_cut *create_form_cut(void)
     fl_set_object_lsize(obj,FL_LARGE_SIZE);
     fl_set_object_gravity(obj, FL_SouthWest, FL_SouthWest);
     fl_set_object_callback(obj,cut_close_callback,0);
-  fdui->cut_x_axis = obj = fl_add_canvas(FL_NORMAL_CANVAS,245,725,615,65,"");
+  fdui->cut_x_axis = obj = fl_add_canvas(FL_NORMAL_CANVAS,245,725,610,65,"");
     fl_set_object_gravity(obj, FL_SouthWest, FL_SouthEast);
     fl_set_object_resize(obj, FL_RESIZE_X);
   fdui->cut_full_scale_button = obj = fl_add_button(FL_PUSH_BUTTON,175,740,45,45,"FS");
