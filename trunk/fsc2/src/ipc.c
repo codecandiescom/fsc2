@@ -196,9 +196,10 @@ void delete_stale_shms( void )
 {
 	int max_id, id, shm_id;
     struct shmid_ds shm_seg;
-	unsigned int euid = geteuid( );
 	void *buf;
 
+
+	raise_permissions( );
 
 	/* Get the current maximum shared memory segment id */
 
@@ -213,7 +214,7 @@ void delete_stale_shms( void )
         if ( shm_id  < 0 ) 
             continue;
 
-		if ( shm_seg.shm_perm.uid == euid )     /* segment belongs to fsc2 ? */
+		if ( shm_seg.shm_perm.uid == EUID )     /* segment belongs to fsc2 ? */
 		{
 			if ( ( buf = shmat( shm_id, NULL, 0 ) ) == ( void * ) - 1 )
 				continue;                          /* can't attach... */
@@ -233,6 +234,8 @@ void delete_stale_shms( void )
 				shmdt( buf );
 		}
 	}
+
+	lower_permissions( );
 }
 
 

@@ -22,12 +22,12 @@
 
 
    This program expects an EDL program on standard input. It will then read it
-   in and write it into a temporary file and try to connect to fsc2 via a
-   socket on which fsc2 is supposed to listen. If this succeeds it sends fsc2
-   the UID, followed by a letter that depends on the name the program was
-   invocated with - if it was started as 'fsc2_start' it sends an 'S', if as
-   'fsc2_test' it sends 'T' and if invocated as either 'fsc2_load' or
-   'fsc2_connect' it sends an 'L', thus indicating what fsc2 is supposed to
+   in, write it to a temporary file and try to connect to fsc2 via a socket on
+   which fsc2 is supposed to listen. If this succeeds it sends fsc2 the
+   invoking users UID, followed by a letter that depends on the name the
+   program was invocated with - if it was started as 'fsc2_start' it sends an
+   'S', if as 'fsc2_test' it sends 'T' and if invocated as either 'fsc2_load'
+   or 'fsc2_connect' it sends an 'L', thus indicating what fsc2 is supposed to
    do, i.e. either start the EDL program immediately, to test it or only to
    load it. It also sends a second letter, 'd' to tell fsc2 to delete the
    temporary file when it's done with it. Finally it sends the file name.
