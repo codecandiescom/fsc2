@@ -126,7 +126,9 @@ typedef struct {
 
 	double offset;                   /* in m or cm^-1, depending on mode */
 
-	double laser_wavenumber;         /* in cm^-1 */
+	double pixel_diff;               /* in m or cm^-1, depending on mode */
+
+	double laser_wavenumber;         /* in cm^-1 (wavenumber mode only) */
 
 	double scan_start;               /* in m */
 	double scan_step;                /* in m or cm^-1, depending on mode */

@@ -1052,7 +1052,7 @@ bool spex_cd2a_read_state( void )
 	const char *dn;
 	FILE *fp;
 	int c;
-	double val[ 2 ];
+	double val[ 3 ];
 	int i = 0;
 	bool in_comment = UNSET;
 	bool found_end = UNSET;
@@ -1092,7 +1092,7 @@ bool spex_cd2a_read_state( void )
 
 				fsc2_fseek( fp, -1, SEEK_CUR );
 
-				if ( ( i > 0 && spex_cd2a.mode & WL ) || i > 1 ||
+				if ( ( i > 1 && spex_cd2a.mode & WL ) || i > 2 ||
 					 fsc2_fscanf( fp, "%lf", val + i++ ) != 1 )
 				{
 					print( FATAL, "Invalid state file '%s'.\n", fn );
@@ -1136,7 +1136,7 @@ bool spex_cd2a_read_state( void )
 	if ( spex_cd2a.mode & WN_MODES )
 	{
 		spex_cd2a.offset = val[ 0 ];
-		spex_cd2a.laser_wavenumber = val[ 1 ];
+		spex_cd2a.laser_wavenumber = val[ 2 ];
 	}
 	else
 		spex_cd2a.offset = 1.0e-9 * val[ 0 ];
@@ -1174,16 +1174,20 @@ bool spex_cd2a_store_state( void )
 				  "monochromator and\n"
 				  "#    subtracted from wavenumbers or -lengths send to the "
 				  "device.\n"
-				  "# 2. For wavenumber driven monochromators only: the "
+				  "# 2. The wavelength or wavenumber difference between two "
+				  "pixels of the\n#    connected CCD camera\n"
+				  "# 3. For wavenumber driven monochromators only: the "
 				  "current setting of\n"
 				  "#    the position of the laser line (as set at the "
 				  "SPEX CD2A).\n\n" );
 
 	if ( spex_cd2a.mode & WN_MODES )
-		fsc2_fprintf( fp, "%.4f cm^-1\n%.4f cm^-1\n",
-					  spex_cd2a.offset, spex_cd2a.laser_wavenumber );
+		fsc2_fprintf( fp, "%.4f cm^-1\n%.8f cm^-1\n%.4f cm^-1\n",
+					  spex_cd2a.offset, spex_cd2a.pixel_diff,
+					  spex_cd2a.laser_wavenumber );
 	else
-		fsc2_fprintf( fp, "%.5 nm\n", 10.9 * spex_cd2a.offset );
+		fsc2_fprintf( fp, "%.5f nm\n%.9f nm\n", 1.0e9 * spex_cd2a.offset,
+					  1.0e9 * spex_cd2a.pixel_diff );
 
 	fsc2_fclose( fp );
 
