@@ -204,14 +204,14 @@ int ep385_test_hook( void )
 
 	TRY
 	{
-		ep385_in_SETUP = SET;
+		ep385_IN_SETUP = SET;
 		ep385_init_setup( );
-		ep385_in_SETUP = UNSET;
+		ep385_IN_SETUP = UNSET;
 		TRY_SUCCESS;
 	}
 	OTHERWISE
 	{
-		ep385_in_SETUP = UNSET;
+		ep385_IN_SETUP = UNSET;
 		if ( ep385.dump_file )
 		{
 			fclose( ep385.dump_file );
