@@ -35,7 +35,7 @@
 void *T_malloc( size_t size )
 {
 	void *mem;
-#if defined( MDEBUG ) && defined( IS_I386 )
+#if defined( MDEBUG )
 	int *EBP;           /* assumes sizeof( int ) equals size of pointers */
 #endif
 
@@ -48,13 +48,15 @@ void *T_malloc( size_t size )
 	}
 
 #if defined MDEBUG
-#if defined IS_I386
-	asm( "mov %%ebp, %0" : "=g" ( EBP ) );
-	fprintf( stderr, "(%d) malloc:  %p (%u) from %p\n",
-			 I_am == CHILD, mem, size, ( int * ) * ( EBP + 1 ) );
-#else
-	fprintf( stderr, "(%d) malloc:  %p (%u)\n", I_am == CHILD, mem, size );
-#endif
+	if ( is_386 )
+	{
+		asm( "mov %%ebp, %0" : "=g" ( EBP ) );
+		fprintf( stderr, "(%d) malloc:  %p (%u) from %p\n",
+				 I_am == CHILD, mem, size, ( int * ) * ( EBP + 1 ) );
+	}
+	else
+		fprintf( stderr, "(%d) malloc:  %p (%u)\n", I_am == CHILD, mem, size );
+
 	fflush( stderr );
 #endif
 
@@ -68,7 +70,7 @@ void *T_malloc( size_t size )
 void *T_calloc( size_t nmemb, size_t size )
 {
 	void *mem;
-#if defined( MDEBUG ) && defined( IS_I386 )
+#if defined( MDEBUG )
 	int *EBP;           /* assumes sizeof( int ) equals size of pointers */
 #endif
 
@@ -82,14 +84,16 @@ void *T_calloc( size_t nmemb, size_t size )
 	}
 
 #if defined MDEBUG
-#if defined IS_I386
-	asm( "mov %%ebp, %0" : "=g" ( EBP ) );
-	fprintf( stderr, "(%d) calloc:  %p (%u) from %p\n",
-			 I_am == CHILD, mem, nmemb * size, ( int * ) * ( EBP + 1 ) );
-#else
-	fprintf( stderr, "(%d) calloc:  %p (%u)\n",
-			 I_am == CHILD, mem, nmemb * size );
-#endif
+	if ( is_386 )
+	{
+		asm( "mov %%ebp, %0" : "=g" ( EBP ) );
+		fprintf( stderr, "(%d) calloc:  %p (%u) from %p\n",
+				 I_am == CHILD, mem, nmemb * size, ( int * ) * ( EBP + 1 ) );
+	}
+	else
+		fprintf( stderr, "(%d) calloc:  %p (%u)\n",
+				 I_am == CHILD, mem, nmemb * size );
+
 	fflush( stderr );
 #endif
 
@@ -103,7 +107,7 @@ void *T_calloc( size_t nmemb, size_t size )
 void *T_realloc( void *ptr, size_t size )
 {
 	void *new_ptr;
-#if defined( MDEBUG ) && defined( IS_I386 )
+#if defined( MDEBUG )
 	int *EBP;           /* assumes sizeof( int ) equals size of pointers */
 #endif
 
@@ -116,14 +120,16 @@ void *T_realloc( void *ptr, size_t size )
 	}
 
 #if defined MDEBUG
-#if defined IS_I386
-	asm( "mov %%ebp, %0" : "=g" ( EBP ) );
-	fprintf( stderr, "(%d) realloc: %p -> %p (%u) from %p\n",
-			 I_am == CHILD, ptr, new_ptr, size, ( int * ) * ( EBP + 1 ) );
-#else
-	fprintf( stderr, "(%d) realloc: %p -> %p (%u)\n",
-			 I_am == CHILD, ptr, new_ptr, size );
-#endif
+	if ( is_386 )
+	{
+		asm( "mov %%ebp, %0" : "=g" ( EBP ) );
+		fprintf( stderr, "(%d) realloc: %p -> %p (%u) from %p\n",
+				 I_am == CHILD, ptr, new_ptr, size, ( int * ) * ( EBP + 1 ) );
+	}
+	else
+		fprintf( stderr, "(%d) realloc: %p -> %p (%u)\n",
+				 I_am == CHILD, ptr, new_ptr, size );
+
 	fflush( stderr );
 #endif
 
@@ -136,7 +142,7 @@ void *T_realloc( void *ptr, size_t size )
 
 void *T_free( void *ptr )
 {
-#if defined( MDEBUG ) && defined( IS_I386 )
+#if defined( MDEBUG )
 	int *EBP;           /* assumes sizeof( int ) equals size of pointers */
 #endif
 
@@ -144,13 +150,15 @@ void *T_free( void *ptr )
 		return NULL;
 
 #if defined MDEBUG
-#if defined IS_I386
-	asm( "mov %%ebp, %0" : "=g" ( EBP ) );
-	fprintf( stderr, "(%d) free:    %p from %p\n",
-		     I_am == CHILD, ptr, ( int * ) * ( EBP + 1 ) );
-#else
-	fprintf( stderr, "(%d) free:    %p\n", I_am == CHILD, ptr );
-#endif
+	if ( is_386 )
+	{
+		asm( "mov %%ebp, %0" : "=g" ( EBP ) );
+		fprintf( stderr, "(%d) free:    %p from %p\n",
+				 I_am == CHILD, ptr, ( int * ) * ( EBP + 1 ) );
+	}
+	else
+		fprintf( stderr, "(%d) free:    %p\n", I_am == CHILD, ptr );
+
 	fflush( stderr );
 	fsc2_assert( mprobe( ptr ) == MCHECK_OK );
 #endif
@@ -166,7 +174,7 @@ void *T_free( void *ptr )
 char *T_strdup( const char *str )
 {
 	char *new_str;
-#if defined( MDEBUG ) && defined( IS_I386 )
+#if defined( MDEBUG )
 	int *EBP;           /* assumes sizeof( int ) equals size of pointers */
 #endif
 
@@ -181,15 +189,17 @@ char *T_strdup( const char *str )
 	}
 
 #if defined MDEBUG
-#if defined IS_I386
-	asm( "mov %%ebp, %0" : "=g" ( EBP ) );
-	fprintf( stderr, "(%d) strdup:  %p (%u) from %p\n",
-			 I_am == CHILD, new_str, strlen( str ) + 1,
-			 ( int * ) * ( EBP + 1 ) );
-#else
-	fprintf( stderr, "(%d) strdup:  %p (%u)\n",
+	if ( is_386 )
+	{
+		asm( "mov %%ebp, %0" : "=g" ( EBP ) );
+		fprintf( stderr, "(%d) strdup:  %p (%u) from %p\n",
+				 I_am == CHILD, new_str, strlen( str ) + 1,
+				 ( int * ) * ( EBP + 1 ) );
+	}
+	else
+		fprintf( stderr, "(%d) strdup:  %p (%u)\n",
 			 I_am == CHILD, new_str, strlen( str ) + 1 );
-#endif
+
 	fflush( stderr );
 #endif
 

@@ -75,17 +75,6 @@ GROUP            = fsc2
 NUM_SERIAL_PORTS = 2
 
 
-# Only leave the next line in if your machine does have a i386 type processor,
-# i.e. a i386, i486, Pentium (Pro, II, III or 4) or something compatible like
-# a K6, K7, Celeron, Duron, Athlon etc., otherwise comment it out or delete it.
-# (Some stuff that helps me with debugging the program uses a bit of assembler,
-# so it only works on processors with an Intel type architecture. Removing the
-# following line doesn't influence the basic functionality, it just makes it a
-# little bit harder to trace bugs...)
-
-IS_I386          = 1
-
-
 # This variable controls to whom mail with bug reports and crash messages will
 # be send - if not set no "Bug report" button will be shown. Please change
 # this only if you apply changes to the program yourself in which case sending
@@ -212,10 +201,6 @@ ifdef NUM_SERIAL_PORTS
 	CFLAGS += -DNUM_SERIAL_PORTS=$(NUM_SERIAL_PORTS)
 else
 	CFLAGS += -DNUM_SERIAL_PORTS=0
-endif
-
-ifdef IS_I386
-	CFLAGS += -DIS_I386
 endif
 
 

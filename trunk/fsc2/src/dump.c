@@ -40,9 +40,8 @@ enum {
 
 /*-----------------------------------------------------------------------*/
 /* This function is highly hardware depended, i.e. it will only work on  */
-/* i386 type processors, so it checks for the IS_I386 macro, which       */
-/* should have been defined in the Makefile.                             */
-/*                                                                       */
+/* i386 type processors, so it returns immediately if the machine is not */
+/* a i386.                                                               */
 /* This function is called from the signal handler for 'deadly' signals, */
 /* e.g. SIGSEGV etc. It tries to figure out where this signal happend    */
 /* and creating a backtrace by running through the stackframes and       */
@@ -63,7 +62,7 @@ enum {
 
 void DumpStack( void )
 {
-#if defined( ADDR2LINE ) && defined( IS_I386 )
+#if defined( ADDR2LINE )
 
 	int *EBP;           /* assumes sizeof( int ) equals size of pointers */
 	int answer_fd[ 2 ];
@@ -74,6 +73,9 @@ void DumpStack( void )
 	char c;
 	struct sigaction sact;
 
+
+	if ( ! is_386 )
+		return;
 
 	/* Childs death signal isn't needed */
 
@@ -189,5 +191,5 @@ void DumpStack( void )
 
 	fail_mess_fd = answer_fd[ DUMP_ANSWER_READ ];
 
-#endif  /* ! ADDR2LINE && IS_I386 */
+#endif  /* ! ADDR2LINE */
 }

@@ -30,6 +30,7 @@
 #include <mcheck.h>
 #endif
 
+#include <sys/utsname.h>
 #include "serial.h"
 
 
@@ -78,6 +79,7 @@ int flags;
 int main( int argc, char *argv[ ] )
 {
 	char *fname;
+	struct utsname utsbuf;
 
 
 #if defined MDEBUG
@@ -87,6 +89,11 @@ int main( int argc, char *argv[ ] )
 		return EXIT_FAILURE;
 	}
 #endif
+
+	/* Figure out the machine type from the value returned by uname() */
+
+	if ( uname( &utsbuf ) == 0 && ! strncmp( utsbuf.machine, "i386", 4 ) )
+		is_386 = SET;
 
 	/* First we have to test for command line arguments */
 

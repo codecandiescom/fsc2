@@ -134,6 +134,8 @@ void usage( void );
 uid_t EUID;                  /* user and group ID the program was called */
 gid_t EGID;                  /* with (should both translate to fsc2) */
 
+bool is_i386 = UNSET;
+
 /* used in compiling and executing the user supplied program */
 
 long Lc = 0;                 /* line number in currently parsed file */
@@ -211,6 +213,8 @@ TOOL_BOX *Tool_Box = NULL;
 
 extern uid_t EUID;
 extern gid_t EGID;
+
+extern bool is_i386;
 
 extern long Lc;
 extern char *Fname;
