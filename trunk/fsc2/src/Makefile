@@ -5,13 +5,12 @@ c_sources      = fsc2.c pulser.c util.c exceptions.c variables.c vars_util.c \
 				 exp.c devices.c run.c gpib_if.c comm.c chld_func.c          \
 				 graphics.c accept.c graph_handler_1d.c graph_handler_2d.c   \
 				 graph_cut.c loader.c bugs.c print.c conn.c ipc.c
-bison_sources  = $(wildcard *_parser.y)
-flex_sources   = $(wildcard *_lexer.l)
-sources        = $(bison_sources:.y=.c) $(flex_sources:.l=.c) \
-				 ${c_sources}
-objects        = $(sources:.c=.o)
-headers        = ${c_sources:.c=.h} global.h
 
+# On door we need the parser and lexer for the GPIB configuration file
+
+ifeq ($(shell hostname -f),door.physik.fu-berlin.de)
+	c_source  += gpib_lexer.c gpib_parser.c
+endif
 
 # On moebi a version with low-resolution is needed - add the appropriate
 # graphics files to the c files and set the SIZE flag correctly
@@ -26,15 +25,20 @@ else
 	CFLAGS    += -DSIZE=1
 endif
 
+bison_sources  = $(wildcard *_parser.y)
+flex_sources   = $(wildcard *_lexer.l)
+sources        = $(bison_sources:.y=.c) $(flex_sources:.l=.c) \
+				 ${c_sources}
+objects        = $(sources:.c=.o)
+headers        = ${c_sources:.c=.h} global.h
+
+
+# pion still uses the old libc...
+
 ifeq ($(shell hostname -f),pion.chemie.uni-frankfurt.de)
 	CFLAGS    += -DIS_STILL_LIBC1
 endif
 
-# On door we need the parser and lexer for the GPIB configuration file */
-
-ifeq ($(shell hostname -f),pion.chemie.uni-frankfurt.de)
-	c_source  += gpib_lexer.c gpib_parser.c
-endif
 
 
 export headers
@@ -110,10 +114,15 @@ door:
 	if [ ! -e gpib_if_new.c -a ! -e gpib_if_new.h ]; then \
 		mv gpib_if.c gpib_if_new.c; \
 		mv gpib_if.h gpib_if_new.h; \
-		mv gpib_if_ni.c gpib_if.c; \
-		mv gpib_if_ni.h gpib_if.h; \
+		mv gpib_if_ni.c gpib_if.c;  \
+		mv gpib_if_ni.h gpib_if.h;  \
+	fi \
+	if [ ! -e gpib_parser.y ]; then     \
+		cp gpib_parser.yy gpib_parser.y \
+	fi \
+	if [ ! -e gpib_lexer.l ]; then      \
+		cp gpib_parser.ll gpib_parser.l \
 	fi
-
 
 # don't automatically delete intermediate files created by bison and flex
 
