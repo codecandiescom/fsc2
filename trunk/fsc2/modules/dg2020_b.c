@@ -221,12 +221,12 @@ int dg2020_b_exp_hook( void )
 
 	/* Initialize the device */
 	
-//	  if ( ! dg2020_init( DEVICE_NAME ) )
-//	  {
-//		  eprint( FATAL, "%s: Failure to initialize the pulser: %s\n",
-//				  pulser_struct.name, gpib_error_msg );
-//		  THROW( EXCEPTION );
-//	  }
+	if ( ! dg2020_init( DEVICE_NAME ) )
+	{
+		eprint( FATAL, "%s: Failure to initialize the pulser: %s\n",
+				pulser_struct.name, gpib_error_msg );
+		THROW( EXCEPTION );
+	}
 
 	if ( ! dg2020.is_cw_mode )
 	{

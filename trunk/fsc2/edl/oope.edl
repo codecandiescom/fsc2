@@ -1,0 +1,120 @@
+DEVICES:
+
+dg2020_b;
+tds520a;
+
+
+VARIABLES:
+
+timebase  =   5 ns;
+delta_t   =  10 ns;
+dead_time = 600 ns;
+t0        = 250 ns;
+pi_len    =  30 ns;
+Num_avg   =  10;
+
+Repeats   = 512;
+
+I;
+W1, W2;
+x1, x2, y1, y2;
+
+
+ASSIGNMENTS:
+
+TIME_BASE:      timebase;
+TRIGGER_MODE:   EXTERNAL;
+MAX_PATT_LEN:   50 us;  
+
+
+MICROWAVE:      POD =  1, 2, 3, 4, 5,
+                V_HIGH = 5 V, V_LOW = 0 V,
+                INVERTED;
+
+PULSE_SHAPE:    POD = 6,
+                V_HIGH = 5 V, V_LOW = 0 V,
+                INVERTED;
+
+TWT_GATE:       POD = 11,
+                V_HIGH = 5 V, V_LOW = 0 V;
+
+DEFENSE:        POD = 7,
+                V_HIGH = 5 V, V_LOW = 0 V,
+                INVERTED;
+
+DETECTION:      POD = 0
+                V_HIGH = 5 V, V_LOW = 0 V;   
+
+PHASE_SETUP_1:  MW,
+                 X: POD = 1,
+                +Y: POD = 2,
+                -X: POD = 3,
+                -Y: POD = 4,
+                CW: POD = 5;
+
+
+PREPARATIONS:
+
+P0:   FUNCTION     = MICROWAVE,
+      START        = dead_time - 10 ns,
+      LENGTH       = pi_len / 2 + 30 ns;
+
+P1:   FUNCTION     = P0.FUNC,
+      START        = P0.START + t0,
+      DELTA_START  = delta_t,
+      LENGTH       = pi_len + 30 ns;
+
+P30:  FUNCTION     = PULSE_SHAPE,
+      START        = P0.START + 10 ns,
+      LEN          = P0.LENGTH - 20 ns;
+
+P31:  FUNCTION     = PULSE_SHAPE,
+      START        = P1.START + 10 ns,
+      DELTA_START  = delta_t,
+      LEN          = P1.LENGTH - 20 ns;
+
+P4:   FUNCTION     = TWT_GATE,
+      START        = 0 ns,
+      LENGTH       = P31.START + P31.LENGTH - 290 ns,
+      DELTA_LENGTH = delta_t;
+
+P10:  FUNCTION     = DEFENSE,
+      START        = P31.START + P31.LENGTH + 130 ns,
+      DELTA_START  = 2 * delta_t,
+      LENGTH       = 1 us;
+
+P20:  FUNCTION     = DETECTION,
+      START        = P31.START + P31.LENGTH + t0 - 200 ns,
+      DELTA_START  = 2 * delta_t,
+      LENGTH       = 10 ns;
+
+
+init_1d( 2 );
+
+digitizer_num_averages( Num_avg );
+digitizer_trigger_channel( AUX2 );
+
+W1 = digitizer_define_window( 300ns, 10ns );
+W2 = digitizer_define_window( 500ns, 10ns );
+
+
+EXPERIMENT:
+
+
+FOR I = 1 : Repeats {
+
+    pulser_update( );
+
+    digitizer_start_acquisition( );
+    x1 = digitizer_get_area_fast( CH1, W1 );
+    x2 = digitizer_get_area_fast( CH1, W2 );
+    y1 = digitizer_get_area_fast( CH2, W1 );
+    y2 = digitizer_get_area_fast( CH2, W2 );
+
+    display( I, x1 - x2, 1, I, y1 - y2, 2 );
+
+    fsave( "# # # #\n", x1, x2, y1, y2 );
+
+    pulser_shift( );
+    pulser_increment( );
+}

@@ -225,10 +225,11 @@ static void dg2020_defense_twt_check( void )
 	}
 }
 
-/*---------------------------------------------------------------------------*/
-/* Function creates all active pulses in the channels of the pulser assigned */
-/* to the function passed as argument.                                       */
-/*---------------------------------------------------------------------------*/
+
+/*-----------------------------------------------------------*/
+/* Function creates all active pulses in the channels of the */
+/* pulser assigned to the function passed as argument.       */
+/*-----------------------------------------------------------*/
 
 void dg2020_set_pulses( FUNCTION *f )
 {
@@ -279,7 +280,7 @@ void dg2020_set_pulses( FUNCTION *f )
 
 /*------------------------------------------------------------------*/
 /* Function is called after the test run to reset all the variables */
-/* describing the state of the pulser to their initial values       */
+/* describing the state of the pulser to their initial values.      */
 /*------------------------------------------------------------------*/
 
 void dg2020_full_reset( void )
@@ -324,10 +325,10 @@ void dg2020_full_reset( void )
 }
 
 
-/*-------------------------------------------------------*/
-/* Function deletes a pulse and returns a pointer to the */
-/* next pulse in the pulse list.                         */
-/*-------------------------------------------------------*/
+/*------------------------------------------------*/
+/* Function deletes a pulse and returns a pointer */
+/* to the next pulse in the pulse list.           */
+/*------------------------------------------------*/
 
 PULSE *dg2020_delete_pulse( PULSE *p )
 {
