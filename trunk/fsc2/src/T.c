@@ -78,7 +78,6 @@ void *T_realloc( void *ptr, size_t size )
 
 	if ( new_ptr == NULL )
 	{
-		T_free( ptr );
 		if ( Fname == NULL )
 			eprint( FATAL, "Running out of memory.\n" );
 		else
