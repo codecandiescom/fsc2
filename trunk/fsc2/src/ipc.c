@@ -40,14 +40,14 @@ union semun {
 #endif
 
 
-/*--------------------------------------------------------------------*/
-/* Routine tries to get a shared memory segment - if this fails and   */
-/* the reason is that no segments or no memory for segments are left  */
-/* it waits for some time hoping for the parent process to remove     */
-/* other segments in the mean time. On success it writes the 'magic   */
-/* string' "fsc2" into the start of the segment and returns a pointer */
-/* to the following memory. If it fails completely it returns -1.     */
-/*--------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*/
+/* Routine tries to get a shared memory segment - if this fails and  */
+/* the reason is that no segments or no memory for segments are left */
+/* it waits for some time hoping for the parent process to remove    */
+/* other segments in the mean time. On success it writes the "magic" */
+/* string "fsc2" into the start of the segment and returns a pointer */
+/* to the following memory. If it fails completely it returns -1.    */
+/*-------------------------------------------------------------------*/
 
 void *get_shm( int *shm_id, long len )
 {
@@ -96,7 +96,7 @@ void *get_shm( int *shm_id, long len )
 /*---------------------------------------------------------------*/
 /* Function tries to attach to the shared memory associated with */
 /* 'key'. On success it returns a pointer to the memory region   */
-/* (skipping the 'magic string' "fsc2"), on error it returns -1. */
+/* (skipping the "magic" string "fsc2"), on error it returns -1. */
 /*---------------------------------------------------------------*/
 
 void *attach_shm( int key )
@@ -184,11 +184,11 @@ void delete_all_shm( void )
 /*------------------------------------------------------------------------*/
 /* If fsc2 crashes while running an experiment shared memory segments may */
 /* remain undeleted. To get rid of them we now check all shared segments  */
-/* for the ones that belong to the user 'fsc2' and start with the magic   */
-/* 'fsc2'. They are obviously debris from a crash and have to be deleted  */
-/* to avoid using up all segments after some time. Since the segments     */
-/* belong to the user 'fsc2' this routine must be run with the effective  */
-/* UID and GID of fsc2.                                                   */
+/* for the ones that belong to the user 'fsc2' and start with the "magic" */
+/* string "fsc2". They are obviously debris from a crash and have to be   */
+/* deleted to avoid using up all segments after some time. Since the      */
+/* segments belong to the user 'fsc2' this routine must be run with the   */
+/* effective UID and GID of fsc2.                                         */
 /* This routine is more or less a copy of the code from the ipcs utility, */
 /* hopefully it will continue to work with newer versions of Linux (it    */
 /* seems to work with 2.0, 2.2 and 2.4 kernels)                           */
@@ -217,7 +217,7 @@ void delete_stale_shms( void )
     max_id = shmctl( 0, SHM_INFO, &shm_seg );
 
 	/* Run through all of the possible IDs. If they belong to fsc2 and start
-	   with the magic 'fsc2' they are deleted. */
+	   with the "magic" string "fsc2" they are deleted. */
 
     for ( id = 0; id <= max_id; id++ )
 	{
