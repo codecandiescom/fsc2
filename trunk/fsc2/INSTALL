@@ -3,7 +3,7 @@ A) Requirements
 
 The following tools and libraries are needed to compile, install and run fsc2:
 
- 1) gmake
+ 1) gmake (i.e. the GNU version of 'make')
  2) gcc
  3) flex
  4) bison
