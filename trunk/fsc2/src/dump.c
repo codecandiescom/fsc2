@@ -26,6 +26,8 @@
 
 int fail_mess_fd = -1;
 
+static void write_dump( int *pipe_fd, int *answer_fd, int k, void * addr );
+
 enum {
 	DUMP_PARENT_READ = 0,
 	DUMP_CHILD_WRITE,
@@ -72,8 +74,8 @@ void DumpStack( void )
 	pid_t pid;
 	int i, k = 1;
 	char buf[ 40 ];
-	char c;
 	struct sigaction sact;
+	Device *cd;
 
 
 	/* Don't do anything on a machine with a non-Intel processor */
@@ -146,6 +148,13 @@ void DumpStack( void )
 	close( pipe_fd[ DUMP_CHILD_READ  ] );
 	close( pipe_fd[ DUMP_CHILD_WRITE ] );
 
+	/* The program counter where the crash happened has (hopefully) been
+	   written into 'Internals.crash_address' by the signal handler from
+	   which we were called. We now feed it to ADDR2LINE to get the
+	   function name, source file and line number. */
+
+	write_dump( pipe_fd, answer_fd, k++, Internals.crash_address );
+
 	/* Load content of ebp register into EBP - ebp always points to the stack
 	   address before the return address of the current subroutine, and the
 	   stack address it points to contains the value the epb register had while
@@ -153,11 +162,12 @@ void DumpStack( void )
 
 	asm( "mov %%ebp, %0" : "=g" ( EBP ) );
 
-	/* Loop over all stackframes, starting with the current one and working
+	/* Loop over all stackframes, starting with the second next and working
 	   up the way to the top - the topmost stackframe would be reached when
 	   the content of ebp is zero, but this is already _libc_start_main(),
 	   so stop one frame earlier */
 
+	EBP = ( int * ) * ( int * ) * EBP;
 	while ( * ( int * ) * EBP != 0 )
 	{
 		/* Get return address of current subroutine and ask the process
@@ -169,21 +179,8 @@ void DumpStack( void )
 		   library, which we then can later check with addr2line. */
 
 		sprintf( buf, "%p\n", ( void * ) * ( EBP + 1 ) );
-		write( pipe_fd[ DUMP_PARENT_WRITE ], buf, strlen( buf ) );
 
-		sprintf( buf, "#%-3d %-10p  ", k++, ( void * ) * ( EBP + 1 ) );
-		write( answer_fd[ DUMP_ANSWER_WRITE ], buf, strlen( buf ) );
-
-		/* Copy ADDR2LINE's reply to the answer pipe */
-
-		while ( read( pipe_fd[ DUMP_PARENT_READ ], &c, 1 ) == 1 && c != '\n' )
-			write( answer_fd[ DUMP_ANSWER_WRITE ], &c, 1 );
-
-		write( answer_fd[ DUMP_ANSWER_WRITE ], "() in ", 6 );
-
-		while ( read( pipe_fd[ DUMP_PARENT_READ ], &c, 1 ) == 1 && c != '\n' )
-			write( answer_fd[ DUMP_ANSWER_WRITE ], &c, 1 );
-		write( answer_fd[ DUMP_ANSWER_WRITE ], "\n", 1 );
+		write_dump( pipe_fd, answer_fd, k++, ( void * ) * ( EBP + 1 ) );
 
 		/* Get value of ebp register for the next higher level stackframe */
 
@@ -194,11 +191,75 @@ void DumpStack( void )
 
 	close( pipe_fd[ DUMP_PARENT_READ ] );
 	close( pipe_fd[ DUMP_PARENT_WRITE ] );
+
+	if ( EDL.Device_List != NULL )
+	{
+		write( answer_fd[ DUMP_ANSWER_WRITE ], "\nDevice handles:\n", 17 );
+
+		for ( cd = EDL.Device_List; cd != NULL; cd = cd->next )
+		{
+			if ( ! cd->is_loaded )
+				continue;
+			sprintf( buf, "%s.so: %p\n",
+					 cd->name, ( void * ) * ( int * ) cd->driver.handle );
+			write( answer_fd[ DUMP_ANSWER_WRITE ], buf, strlen( buf ) );
+		}
+	}
+
 	close( answer_fd[ DUMP_ANSWER_WRITE ] );
 
 	fail_mess_fd = answer_fd[ DUMP_ANSWER_READ ];
 
 #endif  /* ! ADDR2LINE */
+}
+
+
+/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*/
+
+static void write_dump( int *pipe_fd, int *answer_fd, int k, void * addr )
+{
+	char buf[ 128 ];
+	char c;
+	Device *cd;
+
+
+	/* Since addr2line is only translating addresses from fsc2 itself we
+	   also check if the current address is in one of the device modules
+	   (assuming that these are located at the highest addresses) and, if
+	   the address seems to be from one of them we print out enough
+	   infomation to make it possible to figure out the exact location of
+	   the error by manually using addr2line on the library. */
+
+	for ( cd = EDL.Device_List; cd != NULL; cd = cd->next )
+	{
+		if ( ! cd->is_loaded ||
+			 ( int ) addr < * ( int * ) cd->driver.handle )
+			continue;
+
+		sprintf( buf, "#%-3d %-10p  %p in %s.so\n", k, addr,
+				 ( void * ) ( ( int ) addr - * ( int * ) cd->driver.handle ),
+				 cd->name );
+		write( answer_fd[ DUMP_ANSWER_WRITE ], buf, strlen( buf ) );
+		return;
+	}
+
+	sprintf( buf, "%p\n", addr );
+	write( pipe_fd[ DUMP_PARENT_WRITE ], buf, strlen( buf ) );
+
+	sprintf( buf, "#%-3d %-10p  ", k, addr );
+	write( answer_fd[ DUMP_ANSWER_WRITE ], buf, strlen( buf ) );
+
+	/* Copy ADDR2LINE's reply to the answer pipe */
+
+	while ( read( pipe_fd[ DUMP_PARENT_READ ], &c, 1 ) == 1 && c != '\n' )
+		write( answer_fd[ DUMP_ANSWER_WRITE ], &c, 1 );
+
+	write( answer_fd[ DUMP_ANSWER_WRITE ], "() in ", 6 );
+
+	while ( read( pipe_fd[ DUMP_PARENT_READ ], &c, 1 ) == 1 && c != '\n' )
+		write( answer_fd[ DUMP_ANSWER_WRITE ], &c, 1 );
+	write( answer_fd[ DUMP_ANSWER_WRITE ], "\n", 1 );
 }
 
 
