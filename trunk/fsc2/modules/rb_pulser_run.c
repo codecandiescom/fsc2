@@ -110,6 +110,11 @@ void rb_pulser_function_init( void )
  * Function sets the delay for the very first delay card, i.e. the card
  * controlling the delay of the first microwave pulse. If there's no MW
  * pulse the delay for this card is set to the shortest possible time.
+ *
+ * There's a problem here: If there are no MW pulses the card is set to
+ * a delay of 0 and therefor there's no GATE output and thus no detection
+ * trigger. This hasn't become a problem yet but needs repair!
+ *
  *----------------------------------------------------------------------*/
 
 void rb_pulser_init_delay( void )
@@ -117,12 +122,11 @@ void rb_pulser_init_delay( void )
 	Function_T *f = rb_pulser.function + PULSER_CHANNEL_MW;
 	Pulse_T *p;
 	double pos, shift;
-	Ticks delay;
 	Rulbus_Delay_Card_T *card = rb_pulser.delay_card + INIT_DELAY;
 
 
 	card->was_active = card->is_active;
-	card->is_active = card->needs_update = UNSET;
+	card->is_active = SET;
 
 	/* If there's no active MW pulse the initial delay card always gets
 	   set to the shortest possible delay, otherwise to the delay required
@@ -130,8 +134,6 @@ void rb_pulser_init_delay( void )
 
 	if ( f->num_active_pulses == 0 )
 	{
-		if ( card->delay != 0 || ! card->was_active )
-			card->needs_update = SET;
 		card->delay = 0;
 		return;
 	}
@@ -160,18 +162,15 @@ void rb_pulser_init_delay( void )
 		pos += shift;
 	}
 
-	delay = Ticks_rnd( pos / rb_pulser.timebase );
-
-	if( card->delay != delay || ! card->was_active )
-		card->needs_update = SET;
-
-	card->delay = delay;
-	card->is_active = SET;
+	card->delay = Ticks_rnd( pos / rb_pulser.timebase );
 }
 
 
-/*--------------------------------------------------------------------------*
- *--------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*
+ * Function for setting all the other delay cards, both the cards for the
+ * lengths of the pulses as well as the cards creating the delays between
+ * the pulses.
+ *------------------------------------------------------------------------*/
 
 void rb_pulser_delay_card_setup( void )
 {
@@ -195,7 +194,7 @@ void rb_pulser_delay_card_setup( void )
 		for ( card = f->delay_card; card != NULL; card = card->next )
 		{
 			card->was_active = card->is_active;
-			card->needs_update = card->is_active = UNSET;
+			card->is_active = UNSET;
 		}
 
 		/* Loop over all active pulses of the function (which are already
@@ -219,8 +218,8 @@ void rb_pulser_delay_card_setup( void )
 			}
 
 			/* All except the first MW pulse have a previous delay card which
-			   isn't the delay card for the initial delay and which must be set
-			   to make the pulse start at the correct moment */
+			   isn't the delay card for the initial delay and which must be
+			   set to get the pulse to start at the correct moment */
 
 			if ( f->self != PULSER_CHANNEL_MW ||
 				 ( f->self == PULSER_CHANNEL_MW && j != 0 ) )
@@ -265,8 +264,6 @@ void rb_pulser_delay_card_setup( void )
 						   "not possible, must shift it by %s.\n", p->num,
 						   f->name, rb_pulser_ptime( shift ) );
 
-				if ( card->delay != dT || ! card->was_active )
-					card->needs_update = SET;
 				card->delay = dT;
 				card->is_active = SET;
 				
@@ -284,11 +281,9 @@ void rb_pulser_delay_card_setup( void )
 			else
 				start += card->intr_delay;
 
-			if ( card->delay != p->len || ! card->was_active )
-				card->needs_update = SET;
 			card->delay = p->len;
 			start += card->delay * rb_pulser.timebase;
-			card->is_active = SET;
+			card->is_active = card->delay != 0;
 			card = card->next;
 		}
 	}
@@ -303,6 +298,8 @@ void rb_pulser_delay_card_setup( void )
 void rb_pulser_full_reset( void )
 {
 	Pulse_T *p = rb_pulser.pulses;
+	Rulbus_Delay_Card_T *card;
+	size_t i;
 
 
 	while ( p != NULL )
@@ -319,6 +316,18 @@ void rb_pulser_full_reset( void )
 		p->is_active = IS_ACTIVE( p );
 
 		p = p->next;
+	}
+
+	/* Make sure all cards (except the ERT card) are inactive (i.e. have a
+	   delay of 0 and don't output trigger pulses) */
+
+	for ( i = INIT_DELAY, card = rb_pulser.delay_card + i;
+		  i < NUM_DELAY_CARDS; card++, i++ )
+	{
+		card->is_active =
+		card->was_active = UNSET;
+		card->delay = card->old_delay = 0;
+		rb_pulser_delay_card_state( card->handle, STOP );
 	}
 }
 
@@ -378,7 +387,7 @@ void rb_pulser_seq_length_check( void )
 static void rb_pulser_commit( bool flag )
 {
 	Rulbus_Delay_Card_T *card;
-	int i;
+	size_t i;
 
 
 	if ( flag )
@@ -393,19 +402,20 @@ static void rb_pulser_commit( bool flag )
 	for ( i = INIT_DELAY, card = rb_pulser.delay_card + i;
 		  i < NUM_DELAY_CARDS; card++, i++ )
 	{
-/*
-		if ( ! card->needs_update )
-			continue;
-*/
-		if ( ! card->is_active )
+		if ( card->was_active && ! card->is_active )
 		{
 			rb_pulser_delay_card_state( card->handle, STOP );
+			card->delay = card->old_delay = 0;
 			continue;
 		}
 
-		rb_pulser_delay_card_delay( card->handle, card->delay );
+		if ( card->old_delay != card->delay )
+		{
+			rb_pulser_delay_card_delay( card->handle, card->delay );
+			card->old_delay = card->delay;
+		}
 
-//		if ( ! card->was_active )
+		if ( ! card->was_active && card->is_active )
 			rb_pulser_delay_card_state( card->handle, START );
 	}
 }

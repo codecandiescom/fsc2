@@ -761,8 +761,9 @@ static void rb_pulser_card_setup( void )
 	for ( i = 0; i < NUM_DELAY_CARDS; i++ )
 	{
 		rb_pulser.delay_card[ i ].handle = -1;
-		rb_pulser.delay_card[ i ].needs_update = UNSET;
 		rb_pulser.delay_card[ i ].is_active = UNSET;
+		rb_pulser.delay_card[ i ].delay =
+		rb_pulser.delay_card[ i ].old_delay = 0;
 		if ( rulbus_get_card_info( rb_pulser.delay_card[ i ].name, &card_info )
 			 													 != RULBUS_OK )
 		{
