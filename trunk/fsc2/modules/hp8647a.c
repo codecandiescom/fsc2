@@ -154,10 +154,10 @@ int hp8647a_end_of_exp_hook( void )
 void hp8647a_exit_hook( void )
 {
 	if ( hp8647a.table_file != NULL )
-		hp8647a.table_file = T_free( hp8647a.table_file );
+		hp8647a.table_file = CHAR_P T_free( hp8647a.table_file );
 
 	if ( hp8647a.use_table && hp8647a.att_table != NULL )
-		hp8647a.att_table = T_free( hp8647a.att_table );
+		hp8647a.att_table = ATT_TABLE_ENTRY_P T_free( hp8647a.att_table );
 
 	hp8647a.device = -1;
 }
@@ -596,7 +596,7 @@ Var *synthesizer_use_table( Var *v )
 		{
 			print( FATAL, "Default table file '%s' not found.\n",
 				   hp8647a.table_file );
-			hp8647a.table_file = T_free( hp8647a.table_file );
+			hp8647a.table_file = CHAR_P T_free( hp8647a.table_file );
 			THROW( EXCEPTION );
 		}
 	}
@@ -631,12 +631,12 @@ Var *synthesizer_use_table( Var *v )
 	CATCH( EXCEPTION )
 	{
 		fclose( tfp );
-		hp8647a.table_file = T_free( hp8647a.table_file );
+		hp8647a.table_file = CHAR_P T_free( hp8647a.table_file );
 		RETHROW( );
 	}
 
 	fclose( tfp );
-	hp8647a.table_file = T_free( hp8647a.table_file );
+	hp8647a.table_file = CHAR_P T_free( hp8647a.table_file );
 	hp8647a.use_table = SET;
 
 	return vars_push( INT_VAR, 1 );

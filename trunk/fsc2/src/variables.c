@@ -1752,7 +1752,7 @@ static long vars_calc_index( Var *a, Var *v )
 		{
 			print( WARN, "Float variable used as index #%d for array '%s'.\n",
 				   i + 1, a->name );
-			cur = v->val.dval - ARRAY_OFFSET;
+			cur = lrnd( v->val.dval ) - ARRAY_OFFSET;
 		}
 
 		/* Check that the index is a number and not a '*' */
