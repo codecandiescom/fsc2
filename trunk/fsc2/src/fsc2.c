@@ -68,7 +68,7 @@ int main( int argc, char *argv[ ] )
 		just_testing = UNSET;
 
 	/* Check via the lock file if there is already a process holding a lock,
-	   otherwise create one. This, as well as the followin check for stale
+	   otherwise create one. This, as well as the following check for stale
 	   shared memory segments has to be done with the effective user ID, i.e.
 	   the UID of fsc2.*/
 
@@ -314,7 +314,7 @@ void edit_file( FL_OBJECT *a, long b )
 	a = a;
 	b = b;
 
-	/* Try to find content of environement variable "EDITOR" - if it doesn't
+	/* Try to find content of environment variable "EDITOR" - if it doesn't
 	   exist use vi as standard editor */
 
 	ed = getenv( "EDITOR" );
@@ -477,7 +477,7 @@ void test_file( FL_OBJECT *a, long b )
 	stat( in_file, &file_stat );
 	if ( in_file_mod != file_stat.st_mtime )
 	{
-		if ( 1 == fl_show_choice( "EDL file on diskis newer than loaded.",
+		if ( 1 == fl_show_choice( "EDL file on disk is newer than loaded.",
 								  "file. Reload the file from disk?",
 								  "",
 								  2, "No", "Yes", "", 1 ) )
