@@ -23,7 +23,6 @@ static int run_form_close_handler( FL_FORM *a, void *b );
 static void G_struct_init( void );
 static void G_init_curves_1d( void );
 static void G_init_curves_2d( void );
-static void create_label_pixmap( int coord );
 static void setup_canvas( Canvas *c, FL_OBJECT *obj );
 static void canvas_off( Canvas *c, FL_OBJECT *obj );
 
@@ -364,10 +363,10 @@ static void G_struct_init( void )
 		G_init_curves_2d( );
 
 	if ( G.label[ Y ] != NULL && G.font != NULL )
-		create_label_pixmap( Y );
+		create_label_pixmap( &G.y_axis, Y, G.label[ Y ] );
 
 	if ( G.dim == 2 && G.label[ Z ] != NULL && G.font != NULL )
-		create_label_pixmap( Z );
+		create_label_pixmap( &G.z_axis, Z, G.label[ Z ] );
 
 	first_time = UNSET;
 }
@@ -594,25 +593,28 @@ static void G_init_curves_2d( void )
 /* pixmap and then rotate this pixmap 'by hand'.                        */
 /*----------------------------------------------------------------------*/
 
-static void create_label_pixmap( int coord )
+void create_label_pixmap( Canvas *c, int coord, char *label )
 {
 	Pixmap pm;
 	int width, height;
-	Canvas *c;
 	int i, j, k;
+	int r_coord = coord;
 
 	
-	assert( coord == Y || coord == Z );
+	/* Make sure we don't do something stupid... */
 
-	if ( coord == Y )
-		c = &G.y_axis;
-	else
-		c = &G.z_axis;
+	assert( ( coord == Y && c == &G.y_axis ) ||
+			( coord == Z && ( c == &G.z_axis || c == &G.cut_z_axis ) ) );
+
+	/* Distinguish between labels for the primary window and the cut window
+	   (this function is never called for the cut windows y-axis) */
+
+	if ( c == &G.cut_z_axis )
+		r_coord += 3;
 
 	/* Get size for intermediate pixmap */
 
-	width = XTextWidth( G.font, G.label[ coord ],
-						strlen( G.label[ coord ] ) ) + 10;
+	width = XTextWidth( G.font, label, strlen( label ) ) + 10;
 	height = G.font_asc + G.font_desc + 5;
 
 	/* Create the intermediate pixmap, fill with colour of the axis canvas and
@@ -623,21 +625,23 @@ static void create_label_pixmap( int coord )
 
 	XFillRectangle( G.d, pm, c->gc, 0, 0, width, height );
 	XDrawString( G.d, pm, c->font_gc, 5, height - 1 - G.font_desc, 
-				 G.label[ coord ], strlen( G.label[ coord ] ) );
+				 label, strlen( label ) );
 
 	/* Create the real pixmap for the label */
 
-    G.label_pm[ coord ] = XCreatePixmap( G.d, FL_ObjWin( c->obj ), height,
-										width, fl_get_canvas_depth( c->obj ) );
-	G.label_w[ coord ] = ( unsigned int ) height;
-	G.label_h[ coord ] = ( unsigned int ) width;
+    G.label_pm[ r_coord ] = XCreatePixmap( G.d, FL_ObjWin( c->obj ), height,
+										   width,
+										   fl_get_canvas_depth( c->obj ) );
+	G.label_w[ r_coord ] = ( unsigned int ) height;
+	G.label_h[ r_coord ] = ( unsigned int ) width;
 
 	/* Now copy the contents of the intermediate pixmap to the final pixmap
 	   but rotated by 90 degree ccw */
 
 	for ( i = 0, k = width - 1; i < width; k--, i++ )
 		for ( j = 0; j < height; j++ )
-			XCopyArea( G.d, pm, G.label_pm[ coord ], c->gc, i, j, 1, 1, j, k );
+			XCopyArea( G.d, pm, G.label_pm[ r_coord ], c->gc,
+					   i, j, 1, 1, j, k );
 
 	XFreePixmap( G.d, pm );
 }

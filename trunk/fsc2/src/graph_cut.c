@@ -125,15 +125,47 @@ void cut_show( int dir, int pos )
 		index = lround( ( double ) ( G.canvas.h - 1 - pos ) / scv->s2d[ Y ]
 						- scv->shift[ Y ] );
 
-	/* Calculate the scaling factors if the cut window didn't exist or the
-	   cut direction changed */
+	/* Set up the labels and calculate the scaling factors if the cut window
+	   didn't exist or the cut direction changed */
 
 	if ( ! is_shown || CG.cut_dir != dir )
 	{
+		if ( is_shown )
+		{
+			if ( CG.cut_dir == X )                /* new direction is Y ! */
+			{
+				if( G.label[ X ] != NULL && G.font != NULL )
+					XFreePixmap( G.d, G.label_pm[ Z + 3 ] );
+				if ( G.label[ Y ] != NULL && G.font != NULL )
+				{
+					G.label_pm[ Z + 3 ] = G.label_pm[ Y ];
+					G.label_w[ Z + 3 ] = G.label_w[ Y ];
+					G.label_h[ Z + 3 ] = G.label_h[ Y ];
+				}
+			}
+			else                                  /* new direction is X ! */
+				if ( G.label[ X ] != NULL && G.font != NULL )
+					create_label_pixmap( &G.cut_z_axis, Z, G.label[ X ] );
+		}
+		else
+		{
+			if ( dir == X )
+			{
+				if ( G.label[ X ] != NULL && G.font != NULL )
+					create_label_pixmap( &G.cut_z_axis, Z, G.label[ X ] );
+			}
+			else if ( G.label[ Y ] != NULL && G.font != NULL )
+			{
+				G.label_pm[ Z + 3 ] = G.label_pm[ Y ];
+				G.label_w[ Z + 3 ] = G.label_w[ Y ];
+				G.label_h[ Z + 3 ] = G.label_h[ Y ];
+			}
+		}
+
 		if ( scv->is_fs )
 		{
 			cv->s2d[ X ] = ( double ) ( G.cut_canvas.w - 1 ) /
-				( double ) ( CG.nx - 1 );
+						   ( double ) ( CG.nx - 1 );
 			cv->s2d[ Y ] = ( double ) ( G.cut_canvas.h - 1 );
 			cv->shift[ X ] = 0.0;
 			cv->shift[ Y ] = 0.0;
@@ -670,7 +702,16 @@ void G_init_cut_curve( void )
 
 	CG.is_fs = SET;
 	CG.nx = 0;
-	CG.label_pm[ Y ] = G.label_pm[ Z ];
+
+	/* The cut windows y-axis is always the same as the promary windows
+	   z-axis, so we can re-use the label */
+
+	if ( G.label[ Z ] != NULL && G.font != NULL )
+	{
+		G.label_pm[ Y + 3 ] = G.label_pm[ Z ];
+		G.label_w[ Y + 3 ] = G.label_w[ Z ];
+		G.label_h[ Y + 3 ] = G.label_h[ Z ];
+	}
 }
 
 
@@ -855,6 +896,11 @@ void cut_form_close( void )
 			XFreePixmap( G.d, CG.right_arrows[ i ] );
 		}
 
+		/* Get rid of pixmap for label */
+
+		if ( CG.cut_dir == X && G.label[ X ] != NULL && G.font != NULL )
+			XFreePixmap( G.d, G.label_pm[ Z + 3 ] );
+
 		/* Get rid of GCs and memory allocated for the curve */
 
 		XFreeGC( G.d, cv->font_gc );
@@ -935,10 +981,12 @@ void cut_fs_button_callback( FL_OBJECT *a, long b )
 
 static void redraw_all_cut_canvases( void )
 {
+	int coord;
+
+
 	redraw_cut_canvas( &G.cut_canvas );
-	redraw_cut_canvas( &G.cut_x_axis );
-	redraw_cut_canvas( &G.cut_y_axis );
-	redraw_cut_canvas( &G.cut_z_axis );
+	for ( coord = X; coord <= Z; coord++ )
+		redraw_cut_axis( coord );
 }
 
 
@@ -993,4 +1041,57 @@ static void redraw_cut_center_canvas( Canvas *c )
 
 static void redraw_cut_axis( int coord )
 {
+	Canvas *c;
+	int width;
+	int r_coord;
+
+
+	assert( coord >= X && coord <= Z );
+
+
+	/* First draw the label - for the x-axis it's just done by drawing the
+	   string while for the y- and z-axis we have to copy a pixmap since the
+	   label is a string rotated by 90 degree that has been drawn in advance */
+
+	if ( coord == X )
+	{
+		c = &G.cut_x_axis;
+		XFillRectangle( G.d, c->pm, c->gc, 0, 0, c->w, c->h );
+
+		if ( CG.cut_dir == X )
+			r_coord = Y;
+		else
+			r_coord = X;
+
+		if ( G.label[ r_coord ] != NULL && G.font != NULL )
+		{
+			width = XTextWidth( G.font, G.label[ r_coord ],
+								strlen( G.label[ r_coord ] ) );
+			XDrawString( G.d, c->pm, c->font_gc, c->w - width - 5,
+						 c->h - 5 - G.font_desc, G.label[ r_coord ],
+						 strlen( G.label[ r_coord ] ) );
+		}
+	}
+	else if ( coord == Y )
+	{
+		c = &G.cut_y_axis;
+		XFillRectangle( G.d, c->pm, c->gc, 0, 0, c->w, c->h );
+
+		if ( G.label[ Z ] != NULL && G.font != NULL )
+			XCopyArea( G.d, G.label_pm[ Y + 3 ], c->pm, c->gc, 0, 0,
+					   G.label_w[ Y + 3 ], G.label_h[ Y + 3 ], 0, 0 );
+	}
+	else
+	{
+		c = &G.cut_z_axis;
+		XFillRectangle( G.d, c->pm, c->gc, 0, 0, c->w, c->h );
+
+		if ( G.label[ coord ] != NULL && G.font != NULL )
+			XCopyArea( G.d, G.label_pm[ coord + 3 ], c->pm, c->gc, 0, 0,
+					   G.label_w[ coord + 3 ], G.label_h[ coord + 3 ],
+					   c->w - 5 - G.label_w[ coord + 3 ], 0 );
+	}
+
+	XCopyArea( G.d, c->pm, FL_ObjWin( c->obj ), c->gc,
+			   0, 0, c->w, c->h, 0, 0 );
 }

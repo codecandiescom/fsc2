@@ -165,7 +165,7 @@ typedef struct {
 	long ny;                /* points in y-direction */
 	double rwc_start[ 3 ];  /* real world coordinate start values */
 	double rwc_delta[ 3 ];  /* real world coordinate increment values */
-	char *label[ 3 ];       /* label for x-, y- and z-axis */
+	char *label[ 6 ];       /* label for x-, y- and z-axis */
 
 	double rw_min;          /* minimum of real world y- or z-coordinates */
 	double rw_max;          /* maximum of real world y- or z-coordinates */
@@ -207,9 +207,9 @@ typedef struct {
 
 	int start[ 2 ];         /* start position of mouse movemnt */
 
-	Pixmap label_pm[ 3 ];   /* used for drawing of rotated text */
-	unsigned int label_w[ 3 ],
-		         label_h[ 3 ];
+	Pixmap label_pm[ 6 ];   /* used for drawing of rotated text */
+	unsigned int label_w[ 6 ],
+		         label_h[ 6 ];
 
 	unsigned int up_arrow_w,      /* sizes of out of range markers */
 		         up_arrow_h,
@@ -236,6 +236,7 @@ void stop_graphics( void );
 void graphics_free( void );
 void free_graphics( void );
 void make_label_string( char *lstr, double num, int res );
+void create_label_pixmap( Canvas *c, int coord, char *label );
 void switch_off_special_cursors( void );
 void clear_curve( long curve );
 void create_pixmap( Canvas *c );
