@@ -514,8 +514,12 @@ static int scan_args( int *argc, char *argv[ ], char **fname )
 
 			seteuid( getuid( ) );
 			setegid( getgid( ) );
+
 			if ( ( in_file_fp = fopen( argv[ cur_arg ], "r" ) ) == NULL )
 				exit( EXIT_FAILURE );
+
+			set_main_signals( );
+
 			exit( scan_main( argv[ cur_arg ], in_file_fp ) ?
 				  EXIT_SUCCESS : EXIT_FAILURE );
 		}
