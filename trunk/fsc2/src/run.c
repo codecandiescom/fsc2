@@ -120,13 +120,12 @@ bool run( void )
 	fl_add_signal_callback( SIGCHLD, run_sigchld_handler, NULL );
 
 	if ( ( child_pid = fork( ) ) == 0 )     /* start child */
-	{
 		run_child( );
-	}
 
-	if ( child_pid != -1 )                  /* return if fork() succeeded */
+	close_all_files( );              /* only child is going to write to them */
+
+	if ( child_pid != -1 )           /* if fork() succeeded */
 	{
-		close_all_files( );
 		close( pd[ 0 ] );
 		close( pd[ 3 ] );
 		pd[ 0 ] = pd[ 2 ];
@@ -146,10 +145,8 @@ bool run( void )
 			break;
 	}
 
-
 	child_pid = 0;
 
-	close_all_files( );
 	close( pd[ 0 ] );
 	close( pd[ 3 ] );
 	pd[ 0 ] = pd[ 2 ];
@@ -246,7 +243,7 @@ void run_sigchld_handler( int sig_type, void *data )
 
 #if defined ( DEBUG )
 	if ( WIFSIGNALED( return_status ) )
-		fprintf( stderr, "Child process died due to signal type %d\n",
+		fprintf( stderr, "Child process died due to signal %d\n",
 				 WTERMSIG( return_status ) );
 #endif
 
@@ -423,8 +420,6 @@ void run_child( void )
 
 	close( pd[ READ ] );                   /* close read end of pipe */
 	close( pd[ WRITE ] );                  /* close also write end of pipe */
-
-	close_all_files( );
 
 	do_quit = UNSET;
 	kill( getppid( ), QUITTING );          /* tell parent that we're exiting */
