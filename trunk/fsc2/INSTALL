@@ -30,7 +30,7 @@ Optionally, you should have
 
 but if it is missing the basic functionality is still there (without mail
 and addr2line no automatic bug reports can be sent and without Perl
-and the next two utilities e.g. the built-in web server won't work)
+and the next two utilities the built-in web server won't work)
 
 
 To create the complete documentation beside Perl you also need
