@@ -41,27 +41,30 @@ of the device, which will also be the name of the module. If the lock-in
 amplifier is a @i{Stanford Research 510} model a useful name might be SR510.
 
 The new device has now to be included into the device name data base
-called @file{Devices}, which is a simple ASCII file consisting of the
-names of all the supported devices. The entries are case-insensitive, so
-one might add `SR510', `sr510' or `Sr510' etc. Within the file C and C++
-style comments can be used.  By adding the device name to this file you
-tell @acronym{fsc2} that there is now a module called `sr510' (take care
-- all modules are spelled with @strong{lower} case
-characters!). Actually, the file compiled from the C file defining the
-functions has to be @file{sr510.so} - that means it's a shareable
-library file, how to create it from the C file is described later.
+called @file{Devices}
+@cindex @code{Devices} file
+, which is a simple ASCII file consisting of the names of all the
+supported devices. The entries are case-insensitive, so one might add
+`SR510', `sr510' or `Sr510' etc. Within the file C and C++ style
+comments can be used.  By adding the device name to this file you tell
+@acronym{fsc2} that there is now a module called `sr510' (take care -
+all modules are spelled with @strong{lower} case characters!). Actually,
+the file compiled from the C file defining the functions has to be
+@file{sr510.so} - that means it's a shareable library file, how to
+create it from the C file is described later.
 
 The next thing is to append the function(s) exported by the module to
-the function data base called @file{Functions}. Here one would add a
-line with the name of the exported function,
+the function data base called @file{Functions}
+@cindex @code{Functions} file
+. Here one would add a line with the name of the exported function,
 i.e. @code{lockin_get_data()}, followed by the number of arguments the
 function takes (or a negative number if the function takes a variable
 number of arguments). Optionally, you can add the keywords @code{ALL},
-@cindex @code{ALL}
+@cindex @code{ALL} (in @code{Functions} file)
 @code{EXP}
-@cindex @code{EXP}
+@cindex @code{EXP} (in @code{Functions} file)
 or @code{PREP},
-@cindex @code{PREP}
+@cindex @code{PREP} (in @code{Functions} file)
 where @code{ALL} means that the function can be used in any part of the
 @acronym{EDL} file, while @code{EXP} tells @acronym{fsc2} to use this
 functions only during an experiment and, finally, @code{PREP} restricts
