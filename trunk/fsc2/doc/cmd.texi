@@ -292,8 +292,8 @@ option.
 @item @option{-noBalloons}
 Normally, whenever the mouse hoovers over a button for some time a
 little help message is shown, explaining what the button is supposed to
-do. If you get annoyed with this you can switch off the display of the
-help balloons.
+do. If you get annoyed with this you can use this option to switch off
+the display of the help balloons.
 
 @item @option{-httpPort}
 This option tells @code{fsc2}'s web server on which port to listen for
