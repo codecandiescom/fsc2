@@ -3,7 +3,6 @@
 */
 
 
-
 #include "dg2020_b.h"
 
 
@@ -412,10 +411,10 @@ static void dg2020_phase_setup_check( FUNCTION *f )
 }
 
 
-/*---------------------------------------------------------------------------
+/*----------------------------------------------------------------------------
   Function checks first if there are enough pulser channels and than assigns
-  channels to funcions that haven't been assigned as many as needed
-----------------------------------------------------------------------------*/
+  channels to funcions that haven't been assigned as many channels as needed.
+-----------------------------------------------------------------------------*/
 
 static void dg2020_distribute_channels( void )
 {
@@ -498,6 +497,7 @@ static void dg2020_setup_pmatrix( FUNCTION *f )
 				f->pcm[ i * f->pc_len + j ] = f->channel[ 0 ];
 
 	T_free( f->pm );
+	f->pm = NULL;
 }
 
 
