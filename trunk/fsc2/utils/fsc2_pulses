@@ -1,0 +1,670 @@
+#!/usr/bin/perl
+# -*- cperl -*-
+#
+# $Id$
+#
+# Copyright (C) 1999-2002 Jens Thoms Toerring
+#
+# This file is part of fsc2.
+#
+# Fsc2 is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2, or (at your option)
+# any later version.
+#
+# Fsc2 is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with fsc2; see the file COPYING.  If not, write to
+# the Free Software Foundation, 59 Temple Place - Suite 330,
+# Boston, MA 02111-1307, USA.
+
+
+use warnings;
+use strict;
+use Tk;
+
+my @version = split /\./, $Tk::VERSION;
+die "Installed Perl-Tk version is $Tk::VERSION but Tk800.022 is required.\n"
+    if $version[ 0 ] + 0.001 * $version[ 1 ] < 800.022;
+
+
+
+my ( $line, $time_base, $Delay, $Channels );
+my $if = *STDIN;
+$Channels = Channels->new;
+
+read_input( );
+Pulse_Window->new;
+MainLoop;
+
+
+#---------------------------------------------------------
+
+sub read_input {
+
+	my @Function_Names = qw( MW PULSE_SHAPE PHASE_1 PHASE_2 TWT TWT_GATE
+							 DEFENSE DETECTION DETECTION_GATE RF RF_GATE
+							 OTHER_1 OTHER_2 OTHER_3 OTHER_4 );
+
+	if ( $ARGV[ 0 ] ) {
+		usage( ) if $ARGV[ 0 ] =~ /^-h$/ or $ARGV[ 0 ] =~ /^--h(elp)?$/;
+		open( $if, "<" . $ARGV[ 0 ] )
+			or die "Can't open input file " . $ARGV[ 0 ] . ": $!\n";
+	}
+
+	# Read the time base
+
+	defined( $line = <$if> ) or die "Premature end of input at line $..\n";
+	$line =~ /^TB: (\d+(\.\d+)?([eE][+-]?\d+)?)$/
+		or die "Invalid input at line $..\n";
+	$time_base = $1;
+
+	# Read the total negative delay
+
+	defined( $line = <$if> ) or die "Premature end of input at line $..\n";
+	$line =~ /^D: (\d+)?$/ or die "Invalid input at line $..\n";
+	$Delay = $1;
+
+	defined( $line = <$if> ) or die "Premature end of input at line $..\n";
+	$line =~ /^===$/ or die "Invalid input at line $..\n";
+
+	# Read in the function/channel information
+
+	while( 1 ) {
+		defined ( $line = <$if> )
+			or die "Premature end of input at line $..\n";
+		last if $line =~ /^===$/;
+
+		my $i;
+
+		for ( $i = 0; $i <= $#Function_Names; $i++ ) {
+			if ( $line =~ /^(($Function_Names[ $i ]):(\d+)) (\d+)$/ ) {
+				$Channels->add_channel( $1, $2, $3, $4 );
+				last;
+			}
+		}
+		die "Invalid input at line $..\n"
+			unless $i <= $#Function_Names;
+	}
+
+	# Read the all the pulse settings
+
+	my $num = 0;
+	while( 1 ) {
+		last unless defined ( $line = <$if> );
+		if ( $line =~ /^===$/ ) {
+			$num++;
+			next;
+		}
+
+		my @bits = split /\s+/, $line;
+		die "Invalid input at line $..\n" unless $#bits % 3 == 0;
+		$Channels->add_pulse_list( $num, @bits );
+	}
+
+	die "No pulses patterns defined in input.\n" unless
+		$Channels->num_channels > 0 and $Channels->num_steps >= 0;
+}
+
+
+#=========================================================================
+
+package Pulse_Window;
+
+sub new {
+	my $inv = shift;
+	my $class = ref( $inv ) || $inv;
+	my $self = { 'top' => MainWindow->new,
+			     'step' => 0,
+				 'mag' => 2,
+				 'hstep' => 80,
+				 'delay' => 1 };
+	bless $self, $class;
+
+	my $w = $self->{ 'mag' } * ( $Channels->longest_sequence + $Delay );
+	while ( $w < 400 ) {
+		$w *= 2;
+		$self->{ 'mag' } *= 2;
+	}
+	my $h = $Channels->num_channels * $self->{ 'hstep' } + 80;
+	$self->{ 'len' } = $w;
+
+	$self->{ 'frame1' } = $self->{ 'top' }->Frame;
+	my $width = $w + 170;
+	my @maxsize = $self->{ 'top' }->maxsize;
+	$width = 0.75 * $maxsize[ 0 ] if $width > 0.75 * $maxsize[ 0 ];
+
+	if ( $width >= $w + 170 ) {
+		$self->{ 'canvas' } =
+			$self->{ 'frame1' }->Canvas( '-relief' => 'sunken',
+										 '-bd' => 1,
+										 '-width' => $width,
+										 '-height' => $h,
+										 '-background' => 'black' );
+	} else {
+		$self->{ 'canvas' } =
+			$self->{ 'frame1' }->Scrolled( 'Canvas',
+										   '-relief' => 'sunken',
+										   '-scrollbars' => 's',
+										   '-bd' => 1,
+										   '-width' => $width,
+										   '-height' => $h,
+										   '-background' => 'black',
+										   '-scrollregion' =>
+										   [ 0, 0, $w + 170, $h ] );
+		$self->{ 'top' }->bind( '<Left>' => sub {
+						   $self->{ 'canvas' }->xviewScroll( -1, 'unit' ); } );
+		$self->{ 'top' }->bind( '<Right>' => sub {
+						   $self->{ 'canvas' }->xviewScroll( 1, 'unit' ); } );
+
+	}
+
+	$self->{ 'frame1' }->pack( '-fill' => 'x' );
+	$self->{ 'canvas' }->pack( '-side' => 'top', '-fill' => 'x' );
+
+	$self->{ 'frame2' } = $self->{ 'top' }->Frame;
+	$self->{ 'delay_button' } =
+		$self->{ 'frame2' }->Checkbutton( '-state' => 'active',
+										  '-text' => 'Show delays',
+										  '-variable' => \$self->{ 'delay' },
+										  '-command' => sub {
+											  $self->draw_scale;
+											  $self->full_redraw } );
+	$self->{ 'frame3' } = $self->{ 'frame2' }->Frame;
+	$self->{ 'step_label' } =
+		$self->{ 'frame3' }->Label( '-text' => 'Step:' );
+	$self->{ 'step_ffb' } =
+		$self->{ 'frame3' }->Button( '-text' => '<<',
+									 '-width' => '1',
+									 '-command' => sub {
+										 $self->{ 'step' } = 0;
+										 $self->full_redraw } );
+	$self->{ 'step_fb' } =
+		$self->{ 'frame3' }->Button( '-text' => '<',
+									 '-width' => '1',
+									 '-command' => sub {
+										 if ( $self->{ 'step' } > 0 ) {
+											 $self->{ 'step' }--;
+											 $self->full_redraw } } );
+	$self->{ 'step_entry' } =
+		$self->{ 'frame3' }->Entry( '-textvariable' => \$self->{ 'step' },
+									'-width' => 6,
+									'-validate' => 'key',
+									'-validatecommand' =>
+										sub { my $n = shift;
+											  return 1 if $n eq "";
+											  return 0 unless $n =~ /^\d+$/;
+											  return ( $n >= 0 and
+												 $n <= $Channels->num_steps ) }
+									);
+	$self->{ 'step_fw' } =
+		$self->{ 'frame3' }->Button( '-text' => '>',
+									 '-width' => '1',
+									 '-command' => sub {
+										 if ( $self->{ 'step' } < 
+											  $Channels->num_steps ) {
+											 $self->{ 'step' }++;
+											 $self->full_redraw } } );
+	$self->{ 'step_ffw' } =
+		$self->{ 'frame3' }->Button( '-text' => '>>',
+									 '-width' => '1',
+									 '-command' => sub {
+										 $self->{ 'step' } =
+											 $Channels->num_steps;
+										 $self->full_redraw } );
+	$self->{ 'close_button' } =
+		$self->{ 'frame2' }->Button( '-text' => 'Close',
+									 'command' =>
+									 [ destroy => $self->{ 'top' } ] );
+
+	$self->{ 'frame2' }->pack( '-side' => 'left' );
+	$self->{ 'delay_button' }->pack( 'side' => 'left',
+									 'padx' => '4m',
+									 'pady' => '2m' );
+	$self->{ 'frame3' }->pack( '-side' => 'left',
+							   'padx' => '10m',
+							   'pady' => '2m' );
+	$self->{ 'step_label' }->pack( 'side' => 'left',
+								   'padx' => '3m' );
+	$self->{ 'step_ffb' }->pack( 'side' => 'left' );
+	$self->{ 'step_fb' }->pack( 'side' => 'left' );
+	$self->{ 'step_entry' }->pack( 'side' => 'left',
+								   'padx' => '2m' );
+	$self->{ 'step_fw' }->pack( 'side' => 'left' );
+	$self->{ 'step_ffw' }->pack( 'side' => 'left' );
+	$self->{ 'close_button' }->pack( 'side' => 'left',
+									 'padx' => '4m',
+									 'pady' => '2m' );
+
+	$self->primary_draw;
+
+    $self->{ 'canvas' }->CanvasBind( '<Button-2>' => sub {
+						 return if $self->{ 'step' } eq "";
+						 if ( $self->{ 'step' } < $Channels->num_steps ) {
+							 $self->{ 'step' }++;
+							 $self->full_redraw; } } );
+    $self->{ 'canvas' }->CanvasBind( '<Button-4>' => sub {
+						 return if $self->{ 'step' } eq "";
+						 if ( $self->{ 'step' } < $Channels->num_steps ) {
+							 $self->{ 'step' }++;
+							 $self->full_redraw; } } );
+    $self->{ 'top' }->bind( '<Up>' => sub {
+						 return if $self->{ 'step' } eq "";
+						 if ( $self->{ 'step' } < $Channels->num_steps ) {
+							 $self->{ 'step' }++;
+							 $self->full_redraw; } } );
+    $self->{ 'top' }->bind( '<Shift-Up>' => sub {
+						 return if $self->{ 'step' } eq "";
+						 if ( $self->{ 'step' } < $Channels->num_steps - 9 ) {
+							 $self->{ 'step' } += 10;
+						 } else {
+							 $self->{ 'step' } = $Channels->num_steps;
+						 }
+						 $self->full_redraw; } );
+
+    $self->{ 'canvas' }->CanvasBind( '<Button-3>' => sub {
+										 return if $self->{ 'step' } eq "";
+										 if ( $self->{ 'step' } > 0 ) {
+											 $self->{ 'step' }--;
+											 $self->full_redraw; } } );
+    $self->{ 'canvas' }->CanvasBind( '<Button-5>' => sub {
+										 return if $self->{ 'step' } eq "";
+										 if ( $self->{ 'step' } > 0 ) {
+											 $self->{ 'step' }--;
+											 $self->full_redraw; } } );
+    $self->{ 'top' }->bind( '<Down>' => sub {
+										 return if $self->{ 'step' } eq "";
+										 if ( $self->{ 'step' } > 0 ) {
+											 $self->{ 'step' }--;
+											 $self->full_redraw; } } );
+    $self->{ 'top' }->bind( '<Shift-Down>' => sub {
+										 return if $self->{ 'step' } eq "";
+										 if ( $self->{ 'step' } >= 10 ) {
+											 $self->{ 'step' } -= 10;
+										 } else {
+											 $self->{ 'step' } = 0;
+										 }
+										 $self->full_redraw; } );
+	$self->{ 'top' }->bind( '<End>' => sub {
+										 $self->{ 'step' } = 0;
+										 $self->full_redraw; } );
+	$self->{ 'top' }->bind( '<Home>' => sub {
+										 $self->{ 'step' } =
+											 $Channels->num_steps;
+										 $self->full_redraw; } );
+	$self->{ 'top' }->bind( '<Prior>' => sub {
+										 return if $self->{ 'step' } eq "";
+										 $self->{ 'step' } +=
+											 int( 0.1 * $Channels->num_steps );
+										 $self->{ 'step' } =
+											 $Channels->num_steps
+												 if $self->{ 'step' } >
+													 $Channels->num_steps;
+										 $self->full_redraw; } );
+	$self->{ 'top' }->bind( '<Next>' => sub {
+										 return if $self->{ 'step' } eq "";
+										 $self->{ 'step' } -=
+											 int( 0.1 * $Channels->num_steps );
+										 $self->{ 'step' } = 0
+												 if $self->{ 'step' } < 0;
+										 $self->full_redraw; } );
+	$self->{ 'top' }->bind( '<Control-d>' => sub {
+								              $self->{ 'delay' } ^= 1;
+											  $self->draw_scale;
+											  $self->full_redraw } );
+	$self->{ 'top' }->bind( '<Control-q>' => [ destroy => $self->{ 'top' } ] );
+	$self->{ 'step_entry' }->bind( '<Return>' => sub {
+									   return if $self->{ 'step' } eq "";
+									   $self->full_redraw; } );
+	$self->{ 'step_entry' }->bind( '<KP_Enter>' => sub {
+									   return if $self->{ 'step' } eq "";
+									   $self->full_redraw; } );
+
+	return $self;
+}
+
+#---------------------------------------------------------
+
+sub primary_draw {
+
+	my $self = shift;
+	my $c = $self->{ 'canvas' };
+
+	$self->draw_scale;
+	for ( my $i = 0; $i < $Channels->num_channels; $i++ ) {
+		my $ch = $Channels->find_by_num( $i );
+
+		my $y = 10 + ( $i + 0.5 ) * $self->{ 'hstep' };
+		$c->create( 'text', 10, $y, '-anchor' => 'w', '-text' => $ch->key,
+					'-fill' => 'white' );
+
+		my $x1 = 150;
+		my $x2 = 160 + $self->{ 'len' };
+		$c->create( 'line', $x1, $y, $x2, $y, '-fill' => 'white' );
+	}
+	$self->full_redraw;
+}
+
+#---------------------------------------------------------
+
+sub draw_scale {
+
+	my $self = shift;
+	my $c = $self->{ 'canvas' };
+	my $factor;
+	my $unit;
+
+
+	$self->{ 'canvas' }->delete( 'scale' );
+
+	my $x1 = 150;
+	my $x2 = 160 + $self->{ 'len' };
+	my $y1 = 10 + ( $Channels->num_channels + 0.2 ) * $self->{ 'hstep' };
+
+	$c->create( 'line', $x1, $y1, $x2, $y1, '-fill' => 'yellow',
+				'-tags' => 'scale' );
+
+	$y1 += 10;
+	my $y2 = 10;
+
+	if ( $time_base <= 5e-9 ) {
+		$factor = 1e9;
+		$unit = "ns";
+	} elsif ( $time_base < 5e-6 ) {
+		$factor = 1e6;
+		$unit = "us";
+	} else {
+		$factor = 1e3;
+		$unit = "ms";
+	}
+
+	my $delay = 0;
+	$delay = $Delay if $self->{ 'delay' };
+
+	my $cx = 0;
+	my $x = 150 + $self->{ 'mag' } * $delay;
+	while ( $x < $x2 ) {
+		$c->create( 'line', $x, $y1, $x, $y2, '-fill' => 'yellow',
+					'-tags' => 'scale');
+		$c->create( 'text', $x, $y1 + 10,
+					'-text' => $cx * $time_base * $factor . $unit,
+					'-fill' => 'white', '-tags' => 'scale' );
+		$x += $self->{ 'mag' } * 25;
+		$cx += 25;
+	}
+
+	$cx = -25;
+	$x = 150 + $self->{ 'mag' } * ( $delay - 25 );
+	while ( $x > $x1 ) {
+		$c->create( 'line', $x, $y1, $x, $y2, '-fill' => 'yellow',
+					'-tags' => 'scale' );
+		$c->create( 'text', $x, $y1 + 10,
+					'-text' => $cx * $time_base * $factor . $unit,
+					'-fill' => 'white', '-tags' => 'scale' );
+		$x -= $self->{ 'mag' } * 25;
+		$cx -= 25;
+	}
+
+}
+
+#---------------------------------------------------------
+
+sub full_redraw {
+
+	my ( $self ) = shift;
+	my $c = $self->{ 'canvas' };
+	my $step = $self->{ 'step' };
+
+	for ( my $i = 0; $i < $Channels->num_channels; $i++ ) {
+		my $ch = $Channels->find_by_num( $i );
+		my $j = $step;
+		$j-- while $j >= 0 and ! defined $ch->get_pulse_list( $j );
+
+		$c->delete( $ch->key );
+		my $pl = $ch->get_pulse_list( $j );
+
+		my $y1 = 10 + ( $i + 0.5 ) * $self->{ 'hstep' };
+		my $y2 = 10 + $i * $self->{ 'hstep' };
+		my $yt = 10 + ( $i + 0.75 ) * $self->{ 'hstep' };
+
+		for my $cp ( @$pl ) {
+			my $x1 = $cp->start
+				- ( $self->{ delay } ? 0 : $ch->{ 'delay' } );
+			my $x2 = $cp->start + $cp->len
+				- ( $self->{ delay } ? 0 : $ch->{ 'delay' } );
+			$x1 = 150 + $self->{ mag } * $x1;
+			$x2 = 150 + $self->{ mag } * $x2;
+			$c->create( 'rectangle', $x1, $y2, $x2, $y1,
+						'-tags' => $ch->key,
+						'-outline' => 'white', '-fill' => 'red' );
+			$c->create( 'text', 0.5 * ( $x1 + $x2 ), $yt,
+						'-text' => $cp->num,
+						'-tags' => $ch->key,
+						'-fill' => 'white' );
+		}
+	}
+}
+
+1;
+
+#=========================================================================
+
+package Channels;
+
+sub new {
+	my $inv = shift;
+	my $class = ref( $inv ) || $inv;
+	my $self = { 'num_channels' => 0,
+				 'num_steps'    => -1,
+				 'channels'     => [ ] };
+	return bless $self, $class;
+}
+
+#---------------------------------------------------------
+
+sub add_channel {
+
+	my $self = shift;
+	$self->{ 'num_channels' }++;
+	push @{ $self->{ 'channels' } }, Channel->new( @_ );
+}
+
+#---------------------------------------------------------
+
+sub find_by_num {
+
+	my ( $self, $num ) = ( shift, shift );
+	return undef if $num > $self->num_channels;
+	return $self->{ 'channels' }[ $num ];
+}
+
+#---------------------------------------------------------
+
+sub find_by_key {
+
+	my ( $self, $key ) = ( shift, shift );
+
+	for ( @{ $self->{ 'channels' } } ) {
+		return $_ if $_->key eq $key;
+	}
+
+	return undef;
+}
+
+#---------------------------------------------------------
+
+sub num_channels {
+	my $self = shift;
+	return $self->{ 'num_channels' }
+}
+
+#---------------------------------------------------------
+
+sub num_steps {
+	my $self = shift;
+	return $self->{ 'num_steps' }
+}
+
+#---------------------------------------------------------
+
+sub add_pulse_list {
+
+	my ( $self, $step, $key ) = ( shift, shift, shift );
+
+	my $ch = $self->find_by_key( $key );
+
+	die "Invalid imput at line $..\n" unless defined $ch;
+
+	$ch->add_pulse_list( $step, @_ );
+	$self->{ 'num_steps' } = $step if $step > $self->{ 'num_steps' };
+}
+
+#---------------------------------------------------------
+
+sub longest_sequence {
+
+	my $self = shift;
+	my $duration = 0;
+
+	for ( @{ $self->{ channels } } ) {
+		my $l = $_->longest_sequence;
+		$duration = $l if $duration < $l;
+	}
+
+	return $duration;
+}
+
+1;
+
+
+#=========================================================================
+
+package Channel;
+
+sub new {
+	my $inv = shift;
+	my $class = ref( $inv ) || $inv;
+	my $self = { 'key' => shift,
+				 'name' => shift,
+			     'num'  => shift,
+				 'delay' => shift,
+			     'plist' => { } };
+
+	return bless $self, $class;
+}
+
+#---------------------------------------------------------
+
+sub key {
+
+	my $self = shift;
+	return $self->{ 'key' };
+}
+
+#---------------------------------------------------------
+
+sub add_pulse_list {
+
+	my ( $self, $step ) = ( shift, shift );
+	$self->{ 'plist' }{ $step } = Pulse_List->new( @_ );
+}
+
+#---------------------------------------------------------
+
+sub get_pulse_list {
+
+	my ( $self, $step ) = ( shift, shift );
+
+	die "Invaluid pulse list index\n" if $step < 0;
+
+	return $self->{ 'plist' }{ $step }
+		if exists $self->{ 'plist' }{ $step };
+	return undef;
+}
+
+#---------------------------------------------------------
+
+sub longest_sequence {
+
+	my $self = shift;
+	my $duration = 0;
+
+	for ( keys %{ $self->{ 'plist' } } ) {
+		my $len = $self->{ 'plist' }{ $_ }->len + $self->{ 'delay' };
+		$duration = $len if $duration < $len;
+	}
+
+	return $duration;
+}
+
+1;
+
+#=========================================================================
+
+package Pulse_List;
+
+sub new {
+	my $inv = shift;
+	my $class = ref( $inv ) || $inv;
+	my $self = [ ];
+	push @$self, Pulse->new( shift, shift, shift ) while ( @_ );
+	return bless $self, $class;
+}
+
+#---------------------------------------------------------
+
+sub len {
+
+	my $self = shift;
+	my $duration = 0;
+
+	for ( @$self ) {
+		my $l = $_->start + $_->len;
+		$duration = $l if $duration < $l;
+	}
+
+	return $duration;
+}
+
+1;
+
+
+#=========================================================================
+
+package Pulse;
+
+sub new {
+	my $inv = shift;
+	my $class = ref( $inv ) || $inv;
+	my $self = { 'num' => shift,
+				 'start' => shift,
+				 'len' => shift };
+	return bless $self, $class;
+}
+
+#---------------------------------------------------------
+
+sub num {
+	my $self = shift;
+	return $self->{ 'num' };
+}
+
+#---------------------------------------------------------
+
+sub start {
+	my $self = shift;
+	return $self->{ 'start' };
+}
+
+#---------------------------------------------------------
+
+sub len {
+	my $self = shift;
+	return $self->{ 'len' };
+}
+
+1;
