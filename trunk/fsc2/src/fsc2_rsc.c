@@ -77,14 +77,10 @@ FD_run *create_form_run(void)
     fl_set_object_color(obj,FL_MCOL,FL_GREEN);
     fl_set_object_lsize(obj,FL_LARGE_SIZE);
     fl_set_object_callback(obj,stop_measurement,0);
-  fdui->save = obj = fl_add_button(FL_NORMAL_BUTTON,25,590,130,50,"Save");
-    fl_set_object_color(obj,FL_MCOL,FL_GREEN);
-    fl_set_object_lsize(obj,FL_LARGE_SIZE);
-    fl_set_object_callback(obj,save_data,0);
-  fdui->redraw_dummy = obj = fl_add_button(FL_NORMAL_BUTTON,510,330,30,30,"");
+  fdui->redraw_dummy = obj = fl_add_button(FL_NORMAL_BUTTON,500,400,1,1,"");
     fl_set_object_boxtype(obj,FL_NO_BOX);
     fl_set_object_callback(obj,new_data_callback,0);
-  fdui->sigchld = obj = fl_add_button(FL_NORMAL_BUTTON,260,270,10,10,"");
+  fdui->sigchld = obj = fl_add_button(FL_NORMAL_BUTTON,502,400,1,1,"");
     fl_set_object_boxtype(obj,FL_NO_BOX);
     fl_set_object_callback(obj,run_sigchld_callback,0);
   obj = fl_add_frame(FL_UP_FRAME,180,10,840,780,"");

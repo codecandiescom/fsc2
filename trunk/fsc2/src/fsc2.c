@@ -154,9 +154,6 @@ void xforms_init( int *argc, char *argv[] )
 	fl_set_object_boxtype( run_form->y_axis, FL_NO_BOX );
 	fl_set_object_boxtype( run_form->canvas, FL_FRAME_BOX );
 
-	fl_deactivate_object( run_form->save );
-	fl_set_object_lcol( run_form->save, FL_INACTIVE_COL );
-
 	/* Set some properties of goodies */
 
 	fl_set_fselector_fontsize( FL_MEDIUM_SIZE );
