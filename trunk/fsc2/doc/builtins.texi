@@ -706,8 +706,8 @@ argument the value the output field is set to is returned. If there's a
 second value the output field is set to this value. Obviously, the value
 must be number.
 
-
 @end table
+
 
 
 @node Mathematical functions, Auxiliary functions, Interaction functions, Built-in Functions
