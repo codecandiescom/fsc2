@@ -44,7 +44,7 @@ inline void lower_permissions( void );
 inline unsigned long d2color( double a );
 
 inline short  d2shrt( double a );
-inline unsigned short d2ushrt( double a )
+inline unsigned short d2ushrt( double a );
 inline short  i2shrt( int a );
 
 inline int    i_max( int    a, int    b );
