@@ -420,8 +420,8 @@ Again, an example:
     Fact = 1;
 
     WHILE I <= 6 @{
-        I = I + 1;
         Fact = Fact * I;
+        I = I + 1;
     @}
 @end example
 
