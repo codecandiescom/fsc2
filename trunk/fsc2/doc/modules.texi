@@ -552,7 +552,7 @@ via the serial port. Because you probably won't know which serial port
 the user is going to use you shouldn't hide this information somewhere
 deep in the innard of your module but put it in a prominent place where
 it's easy to find. Thus this is one of the items that should go into the
-configuration file (and should be well commented).
+configuration file.
 
 All configuration files are in the @file{config} directory. For obvious
 reasons the names of the configuration files should make it clear for
