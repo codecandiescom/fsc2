@@ -279,8 +279,13 @@ char *T_strdup( const char *str )
 }
 
 
-/*---------------------------------------------------------------------*/
-/*---------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*/
+/* Replacement for atol() and strtol(), throwing an EXCEPTION if the  */
+/* string passed as argument can't be converted to a long. If NDEBUG  */
+/* isn't defined the string pointer is also tested for being not NULL */
+/* or just pointing to an empty string, which indicates a serious bug */
+/* in the calling function.                                           */
+/*--------------------------------------------------------------------*/
 
 long T_atol( const char *txt )
 {
@@ -315,8 +320,13 @@ long T_atol( const char *txt )
 }
 
 
-/*---------------------------------------------------------------------*/
-/*---------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*/
+/* Replacement for atoi(), throwing an EXCEPTION if the string passed */
+/* as argument can't be converted to an int. If NDEBUG isn't defined  */
+/* the string pointer is also tested for being not NULL or pointing   */
+/* to an empty string, which indicates a serious bug in the calling   */
+/* function.                                                          */
+/*--------------------------------------------------------------------*/
 
 int T_atoi( const char *txt )
 {
@@ -351,8 +361,13 @@ int T_atoi( const char *txt )
 }
 
 
-/*---------------------------------------------------------------------*/
-/*---------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*/
+/* Replacement for atof() and strtod(), throwing an EXCEPTION if the  */
+/* string passed as the argument can't be converted to a double. If   */
+/* NDEBUG isn't defined the string pointer is also tested for being   */
+/* not NULL or pointing to an empty string, which indicates a serious */
+/* bug in the calling function.                                       */
+/*--------------------------------------------------------------------*/
 
 double T_atod( const char *txt )
 {
