@@ -89,7 +89,7 @@ case "$1" in
 		;;
 
 	 stop)
-		for f in /dev/ni6601_*
+		for f in /dev/ni6601_*; do
 			rm -f $f
 			if [ $? != 0 ]; then
 				log_failure_msg "Deleting device files for NI6601 cards failed."

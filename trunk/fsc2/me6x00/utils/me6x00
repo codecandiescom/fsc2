@@ -89,7 +89,7 @@ case "$1" in
 		;;
 
 	 stop)
-		for f in /dev/me6x00_*
+		for f in /dev/me6x00_*; do
 			rm -f $f
 			if [ $? != 0 ]; then
 				log_failure_msg "Deleting device files for ME6X00 cards failed."
