@@ -33,7 +33,9 @@
 const char device_name[ ]  = DEVICE_NAME;
 const char generic_type[ ] = DEVICE_TYPE;
 
+
 #define TEST_VOLTS 3.578
+
 
 static struct {
 	int handle;
@@ -43,6 +45,7 @@ static struct {
 	bool gain_is_set;
 	int trig_mode;
 	bool trig_mode_is_set;
+	bool ext_trig_used;
 } rb8509, rb8509_stored;
 
 
@@ -73,6 +76,7 @@ int rb8509_init_hook( void )
 	rb8509.gain_is_set = SET;
 	rb8509.trig_mode = RULBUS_ADC12_INT_TRIG;
 	rb8509.trig_mode_is_set = SET;
+	rb8509.ext_trig_used = UNSET;
 
 	return 1;
 }
@@ -92,9 +96,11 @@ int rb8509_test_hook( void )
 
 int rb8509_exp_hook( void )
 {
+	int has_ext_trig;
+
+
 	rb8509 = rb8509_stored;
 	rb8509.channel = 0;
-
 
 	/* Open the card */
 
@@ -121,6 +127,24 @@ int rb8509_exp_hook( void )
 	{
 		print( FATAL, "During the test run CH%d was used but the card has "
 			   "only %d channels.\n", rb8509_stored.nchan, rb8509.nchan );
+		THROW( EXCEPTION );
+	}
+
+	/* Check if during the test run an external trigger was used but the
+	   card does not support external triggers */
+
+	if ( ( has_ext_trig =
+					 rulbus_adc12_has_external_trigger( rb8509.handle ) ) < 0 )
+	{
+		print( FATAL, "Initialization of card faled: %s.\n",
+			   rulbus_strerror( ) );
+		THROW( EXCEPTION );
+	}
+
+	if ( ! has_ext_trig && rb8509.ext_trig_used )
+	{
+		print( FATAL, "During the test run an external trigger was used but "
+			   "the card can't use external triggers.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -285,6 +309,8 @@ Var *daq_trigger_mode( Var *v )
 		THROW( EXCEPTION );
 	}
 
+	rb8509.ext_trig_used = SET;
+
 	return vars_push( INT_VAR, rb8509.trig_mode );
 }
 
@@ -357,30 +383,6 @@ static int rb8509_translate_channel( long channel )
 
 		case CHANNEL_CH7 :
 			return 7;
-
-		case CHANNEL_CH8 :
-			return 8;
-
-		case CHANNEL_CH9 :
-			return 9;
-
-		case CHANNEL_CH10 :
-			return 10;
-
-		case CHANNEL_CH11 :
-			return 11;
-
-		case CHANNEL_CH12 :
-			return 12;
-
-		case CHANNEL_CH13 :
-			return 13;
-
-		case CHANNEL_CH14 :
-			return 14;
-
-		case CHANNEL_CH15 :
-			return 15;
 
 		default :
 			print( FATAL, "Invalid channel number.\n" );
