@@ -235,11 +235,11 @@ void quitting_handler( int sig_type, void *data )
 
 /*-------------------------------------------------------------------*/
 /* run_sigchld_handler() is the handler for SIGCHLD signals received */
-/* while a measurement is running. It checks if the child doing the  */
-/* measurement died - if either it died prematurely, i.e. without    */
-/* notifying the parent by a QUITTING signal, or it signals a hard-  */
-/* ware error via its return status an error message is output. If   */
-/* the child died the post-measurement clean-up is done.             */
+/* while a measurement is running. Only the most basic things (i.e   */
+/* waiting for the return status and resetting of signal handlers)   */
+/* are done here since it's a signal handler. To get the remaining   */
+/* stuff done an invisible button is triggered whioch leads to a     */
+/* call of its callback function run_sigchld_callback().             */
 /*-------------------------------------------------------------------*/
 
 void run_sigchld_handler( int sig_type, void *data )
@@ -258,16 +258,33 @@ void run_sigchld_handler( int sig_type, void *data )
 	fl_remove_signal_callback( SIGCHLD );
 	fl_add_signal_callback( SIGCHLD, sigchld_handler, NULL );
 
+	run_form->sigchld->u_ldata = ( long ) return_status;
+	fl_trigger_object( run_form->sigchld );
+}
+
+
+/*-----------------------------------------------------------------*/
+/* run_sigchld_callback() is the callback for an invisible button  */
+/* that is triggered on the death of the child. If the child died  */
+/* prematurely, i.e. without notifying the parent by a QUITTING    */
+/* signal, or it signals a hardware error via its return status an */
+/* error message is output. Than the post-measurement clean-up is  */
+/* done.                                                           */
+/*-----------------------------------------------------------------*/
+
+void run_sigchld_callback( FL_OBJECT *a, long b )
+{
+	b = b;
+
 	if ( ! quitting )            /* missing notification by the child ? */
 		fl_show_alert( "FATAL Error", "Experiment stopped prematurely.",
 					   NULL, 1 );
 
-	if ( ! return_status )       /* return status indicates hardware error ? */
-		fl_show_alert( "FATAL Error", "Experiment was stopped due to",
-					   "some kind of hardware problem.", 1 );
+	if ( ! a->u_ldata )          /* return status indicates error ? */
+		fl_show_alert( "FATAL Error", "Experiment had to be stopped.", "", 1 );
 
 	stop_measurement( NULL, 1 );
-	child_pid = 0;                   /* experiment is completely finished */
+	child_pid = 0;               /* experiment is completely finished */
 }
 
 
@@ -547,11 +564,13 @@ void run_child( void )
 {
 	I_am = CHILD;
 
+    /* Set up pipes for communication with parent process */
+
 	close( pd[ 1 ] );
 	close( pd[ 2 ] );
 	pd[ 1 ] = pd[ 3 ];
 
-	/* Set up pointers and global variables used with the signal handlers,
+	/* Set up pointers and global variables used with the signal handlers
 	   and set handler for DO_SEND signals */
 
 	return_status = OK;
@@ -560,23 +579,30 @@ void run_child( void )
 	signal( DO_SEND, do_send_handler );
 	signal( DO_QUIT, do_quit_handler );
 
-	kill( getppid( ), NEW_DATA );           /* tell parent we're ready */
-	while ( ! do_send )                     /* wait for parents reply */
+	/* Send parent process a NEW_DATA signal thus indicationg that the child
+	   process is done with all preparations and ready to start the
+	   experiment. Wait for reply by parent process (i.e. a DO_SEND signal). */
+
+	kill( getppid( ), NEW_DATA );
+	while ( ! do_send )
 		pause( );
 
-	do_measurement( );
+	do_measurement( );                      /* run the experiment */
 
-	if ( cur_prg_token != prg_token + prg_length && ! do_quit )
-		return_status = FAIL;               /* hardware failure ? */
+	if ( cur_prg_token != prg_token + prg_length && ! do_quit ) /* failure ? */
+		return_status = FAIL;
 
 	close( pd[ READ ] );                    /* close read end of pipe */
 	close( pd[ WRITE ] );                   /* close also write end of pipe */
+
 	signal( DO_QUIT, do_quit_handler );     /* set signal handler */
 	do_quit = UNSET;
+
 	kill( getppid( ), QUITTING );    /* signal parent that child is exiting */
 	while ( ! do_quit )              /* wait for acceptance of this signal  */
 		pause( );
-	_exit( return_status );          /* ...and that's the end of it all */
+
+	_exit( return_status );          /* ...and that's the end of it */
 }
 
 

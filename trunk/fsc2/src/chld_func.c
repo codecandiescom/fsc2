@@ -68,3 +68,19 @@ int show_choices( const char *text, int numb, const char *b1, const char *b2,
 		return ret;
 	}
 }
+
+
+const char *how_fselector( const char *message, const char *directory,
+						   const char *pattern, const char *def )
+{
+	char *ret;
+
+	if ( I_am == PARENT )
+		return fl_show_fselector( message, directory, pattern, def );
+	else
+	{
+		writer( C_SHOW_FSELECTOR, message, directory, pattern, def );
+		reader( ( void * ) &ret );
+		return ret;
+	}
+}
