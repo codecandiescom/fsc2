@@ -913,7 +913,7 @@ bool magnet_do( int command )
 			break;
 
 		default :
-			eprint( FATAL, "fsc2: INTERNAL ERROR detected at %s:%d.",
+			eprint( FATAL, "AEG_X_BAND: INTERNAL ERROR detected at %s:%d.",
 					__FILE__, __LINE__ );
 			THROW( EXCEPTION );
 	}
