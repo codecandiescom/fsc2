@@ -1,663 +1,670 @@
 /*
   $Id$
-*/
-
-
-#include "fsc2.h"
-
-static PHS phs[ 2 ];
-static Cur_PHS = -1;
-
-
-/*---------------------------------------------------------------*/
-/* Function clears the complete pulser structure, that has to be */
-/* set up by the init_hook( ) function of the pulser driver      */
-/*---------------------------------------------------------------*/
-
-void pulser_struct_init( void )
-{
-	if ( pulser_struct.name != NULL )
-	{
-		T_free( pulser_struct.name );
-		pulser_struct.name = 0;
-	}
-
-	pulser_struct.assign_function = NULL;
-	pulser_struct.assign_channel_to_function = NULL;
-	pulser_struct.invert_function = NULL;
-	pulser_struct.set_delay_function = NULL;
-	pulser_struct.set_function_high_level = NULL;
-	pulser_struct.set_function_low_level = NULL;
-	pulser_struct.set_timebase = NULL;
-	pulser_struct.set_trigger_mode = NULL;
-	pulser_struct.set_repeat_time = NULL;
-	pulser_struct.set_trig_in_level = NULL;
-	pulser_struct.set_trig_in_slope = NULL;
-	pulser_struct.set_phase_reference = NULL;
-	pulser_struct.set_pulse_function = NULL;
-	pulser_struct.set_pulse_position = NULL;
-	pulser_struct.set_pulse_length = NULL;
-	pulser_struct.set_pulse_position_change = NULL;
-	pulser_struct.set_pulse_length_change = NULL;
-	pulser_struct.set_pulse_phase_cycle = NULL;
-	pulser_struct.get_pulse_function = NULL;
-	pulser_struct.get_pulse_position = NULL;
-	pulser_struct.get_pulse_length = NULL;
-	pulser_struct.get_pulse_position_change = NULL;
-	pulser_struct.get_pulse_length_change = NULL;
-	pulser_struct.get_pulse_phase_cycle = NULL;
-
-	pulser_struct.setup_phase = NULL;
-	pulser_struct.set_phase_switch_delay = NULL;
-}
-
-
-/*------------------------------------------------------------------------*/
-/* Extracts the pulse number from a pulse name, i.e. a string of the form */
-/* /^P(ULSE)?_?[0-9]+$/i (in Perl speak)                                  */
-/*------------------------------------------------------------------------*/
-
-long p_num( char *txt )
-{
-	long num;
-
-
-	while ( txt != NULL && ! isdigit( *txt ) )
-		txt++;
-
-	assert( txt != NULL );          /* Paranoia ? */
-
-	num = strtol( txt, NULL, 10 );
-	if ( errno == ERANGE )
-	{
-		eprint( FATAL, "%s:%ld: Pulse number (%s) out of range.\n",
-				Fname, Lc, txt );
-		THROW( EXCEPTION );
-	}
-
-	return num;
-}
-
-
-/*-----------------------------------------------------------------------*/
-/* This function is called at the start of each pulser specific function */
-/* to avoid using a pulser function if there's no pulser driver          */
-/*-----------------------------------------------------------------------*/
-
-void is_pulser_driver( void )
-{
-	if ( pulser_struct.name == NULL )
-	{
-		eprint( FATAL, "%s:%ld: No pulser driver has been loaded - can't use "
-				"pulser-specific functions.\n", Fname, Lc );
-		THROW( EXCEPTION );
-	}
-}
-
-
-/*-----------------------------------------------------------------------*/
-/* This function is called to determine if a certain pulser function     */
-/* needed by the experiment is supplied by the pulser driver. The first  */
-/* argument is the functions address, the second a snippet of text to be */
-/* inserted in the error message (for convenience it is also tested if   */
-/* there's a driver at all so tha not each function has to test for this */
-/* even when the name of the pulser isn't explicitely needed).           */
-/*-----------------------------------------------------------------------*/
 
-void is_pulser_func( void *func, const char *text )
-{
-	is_pulser_driver( );
+  This file is a kind of interface between the parser and the real pulser to
+  make it easier to use different types of pulsers. Instead of the parser
+  calling the pulser functions directly (which might even not exist) one of
+  the following functions are called that can not only find out if the
+  corresponding pulser function exists, but can also do some preliminary error
+  checking.
+// */
+
+
+// #include "fsc2.h"
+
+// static PHS phs[ 2 ];
+// static Cur_PHS = -1;
+
+
+// /*---------------------------------------------------------------*/
+// /* Function clears the complete pulser structure, that has to be */
+// /* set up by the init_hook( ) function of the pulser driver      */
+// /*---------------------------------------------------------------*/
+
+// void pulser_struct_init( void )
+// {
+// 	if ( pulser_struct.name != NULL )
+// 	{
+// 		T_free( pulser_struct.name );
+// 		pulser_struct.name = 0;
+// 	}
+
+// 	pulser_struct.assign_function = NULL;
+// 	pulser_struct.assign_channel_to_function = NULL;
+// 	pulser_struct.invert_function = NULL;
+// 	pulser_struct.set_delay_function = NULL;
+// 	pulser_struct.set_function_high_level = NULL;
+// 	pulser_struct.set_function_low_level = NULL;
+// 	pulser_struct.set_timebase = NULL;
+// 	pulser_struct.set_trigger_mode = NULL;
+// 	pulser_struct.set_repeat_time = NULL;
+// 	pulser_struct.set_trig_in_level = NULL;
+// 	pulser_struct.set_trig_in_slope = NULL;
+// 	pulser_struct.set_phase_reference = NULL;
+// 	pulser_struct.set_pulse_function = NULL;
+// 	pulser_struct.set_pulse_position = NULL;
+// 	pulser_struct.set_pulse_length = NULL;
+// 	pulser_struct.set_pulse_position_change = NULL;
+// 	pulser_struct.set_pulse_length_change = NULL;
+// 	pulser_struct.set_pulse_phase_cycle = NULL;
+// 	pulser_struct.get_pulse_function = NULL;
+// 	pulser_struct.get_pulse_position = NULL;
+// 	pulser_struct.get_pulse_length = NULL;
+// 	pulser_struct.get_pulse_position_change = NULL;
+// 	pulser_struct.get_pulse_length_change = NULL;
+// 	pulser_struct.get_pulse_phase_cycle = NULL;
+
+// 	pulser_struct.setup_phase = NULL;
+// 	pulser_struct.set_phase_switch_delay = NULL;
+// }
+
+
+// /*------------------------------------------------------------------------*/
+// /* Extracts the pulse number from a pulse name, i.e. a string of the form */
+// /* /^P(ULSE)?_?[0-9]+$/i (in Perl speak)                                  */
+// /*------------------------------------------------------------------------*/
+
+// long p_num( char *txt )
+// {
+// 	long num;
+
+
+// 	while ( txt != NULL && ! isdigit( *txt ) )
+// 		txt++;
+
+// 	assert( txt != NULL );          /* Paranoia ? */
+
+// 	num = strtol( txt, NULL, 10 );
+// 	if ( errno == ERANGE )
+// 	{
+// 		eprint( FATAL, "%s:%ld: Pulse number (%s) out of range.\n",
+// 				Fname, Lc, txt );
+// 		THROW( EXCEPTION );
+// 	}
+
+// 	return num;
+// }
+
+
+// /*-----------------------------------------------------------------------*/
+// /* This function is called at the start of each pulser specific function */
+// /* to avoid using a pulser function if there's no pulser driver          */
+// /*-----------------------------------------------------------------------*/
+
+// void is_pulser_driver( void )
+// {
+// 	if ( pulser_struct.name == NULL )
+// 	{
+// 		eprint( FATAL, "%s:%ld: No pulser driver has been loaded - can't use "
+// 				"pulser-specific functions.\n", Fname, Lc );
+// 		THROW( EXCEPTION );
+// 	}
+// }
+
 
-	if ( func == NULL )
-	{
-		eprint( FATAL, "%s:%ld: Function for %s is missing in driver "
-				"for pulser %s.\n", Fname, Lc, text, pulser_struct.name );
-		THROW( EXCEPTION );
-	}
-}
-
+// /*-----------------------------------------------------------------------*/
+// /* This function is called to determine if a certain pulser function     */
+// /* needed by the experiment is supplied by the pulser driver. The first  */
+// /* argument is the functions address, the second a snippet of text to be */
+// /* inserted in the error message (for convenience it is also tested if   */
+// /* there's a driver at all so tha not each function has to test for this */
+// /* even when the name of the pulser isn't explicitely needed).           */
+// /*-----------------------------------------------------------------------*/
 
-/*---------------------------------------------------------------------------*/
-/* Function tests if the time (in seconds) it gets passed is a reasonable    */
-/* integer multiple of 1 ns and tries to reduce rounding errors. If the time */
-/* more than 10 ps off from a ns an error message is output, using the text  */
-/* snippet passed to the function as the second argument.                    */
-/*---------------------------------------------------------------------------*/
+// void is_pulser_func( void *func, const char *text )
+// {
+// 	is_pulser_driver( );
 
-double is_mult_ns( double val, const char * text )
-{
-	val *= 1.e9;
-	if ( fabs( val - lround( val ) ) > 1.e-2 )
-	{
-		eprint( FATAL, "%s:%ld: %s has to be an integer multiple of 1 ns\n",
-				Fname, Lc, text );
-		THROW( EXCEPTION );
-	}
-
-	return lround( val ) * 1.e-9;
-}
-
-
-/*-------------------------------------------------------------------------*/ 
-/* This function is called for the assignment of a function for a pod - it */
-/* can't be called when there are no pods, in this case the assignment has */
-/* to be done via the p_assign_channel() function                          */
-/*-------------------------------------------------------------------------*/ 
-
-void p_assign_pod( long func, Var *v )
-{
-	long pod;
+// 	if ( func == NULL )
+// 	{
+// 		eprint( FATAL, "%s:%ld: Function for %s is missing in driver "
+// 				"for pulser %s.\n", Fname, Lc, text, pulser_struct.name );
+// 		THROW( EXCEPTION );
+// 	}
+// }
+
 
+// /*---------------------------------------------------------------------------*/
+// /* Function tests if the time (in seconds) it gets passed is a reasonable    */
+// /* integer multiple of 1 ns and tries to reduce rounding errors. If the time */
+// /* more than 10 ps off from a ns an error message is output, using the text  */
+// /* snippet passed to the function as the second argument.                    */
+// /*---------------------------------------------------------------------------*/
 
-	is_pulser_driver( );
+// double is_mult_ns( double val, const char * text )
+// {
+// 	val *= 1.e9;
+// 	if ( fabs( val - lround( val ) ) > 1.e-2 )
+// 	{
+// 		eprint( FATAL, "%s:%ld: %s has to be an integer multiple of 1 ns\n",
+// 				Fname, Lc, text );
+// 		THROW( EXCEPTION );
+// 	}
+
+// 	return lround( val ) * 1.e-9;
+// }
+
+
+// /*-------------------------------------------------------------------------*/ 
+// /* This function is called for the assignment of a function for a pod - it */
+// /* can't be called when there are no pods, in this case the assignment has */
+// /* to be done via the p_assign_channel() function                          */
+// /*-------------------------------------------------------------------------*/ 
+
+// void p_assign_pod( long func, Var *v )
+// {
+// 	long pod;
 
-	assert( func >= PULSER_CHANNEL_FUNC_MIN &&
-			func <= PULSER_CHANNEL_FUNC_MAX );
 
-	/* Test if there's a function for assigning channels to pods - otherwise
-	   the pulser doesn't have pods and we have to quit */
+// 	is_pulser_driver( );
 
-	if ( pulser_struct.assign_channel_to_function == NULL )
-	{
-		eprint( FATAL, "%s:%ld: Sorry, pulser %s has no pods.\n",
-				Fname, Lc, pulser_struct.name );
-		THROW( EXCEPTION );
-	}
+// 	assert( func >= PULSER_CHANNEL_FUNC_MIN &&
+// 			func <= PULSER_CHANNEL_FUNC_MAX );
 
-	/* check the variable and get its value */
+// 	/* Test if there's a function for assigning channels to pods - otherwise
+// 	   the pulser doesn't have pods and we have to quit */
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
+// 	if ( pulser_struct.assign_channel_to_function == NULL )
+// 	{
+// 		eprint( FATAL, "%s:%ld: Sorry, pulser %s has no pods.\n",
+// 				Fname, Lc, pulser_struct.name );
+// 		THROW( EXCEPTION );
+// 	}
 
-	if ( v->type == INT_VAR )
-		pod = v->val.lval;
-	else
-	{
-		eprint( WARN, "%s:%ld: Float variable used as pod number.\n",
-				Fname, Lc );
-		pod = ( long ) v->val.dval;
-	}
+// 	/* check the variable and get its value */
 
-	vars_pop( v );
+// 	vars_check( v, INT_VAR | FLOAT_VAR );
 
-	/* finally call the function (if it exists...) */
+// 	if ( v->type == INT_VAR )
+// 		pod = v->val.lval;
+// 	else
+// 	{
+// 		eprint( WARN, "%s:%ld: Float variable used as pod number.\n",
+// 				Fname, Lc );
+// 		pod = ( long ) v->val.dval;
+// 	}
 
-	is_pulser_func( pulser_struct.assign_function,
-					"assigning function to pod" );
-	( *pulser_struct.assign_function )( func, pod );
-}
+// 	vars_pop( v );
 
+// 	/* finally call the function (if it exists...) */
 
-/*------------------------------------------------------------------------*/
-/* This function has a double purpose: For pulsers that have pods and     */
-/* channels, the pod to channel assignment is done via this function. For */
-/* pulsers, that have just channels, the assignment of a function to a    */
-/* channel is done here (instead of p_assign_pod() as for the other type  */
-/* of pulsers)                                                            */
-/*------------------------------------------------------------------------*/
+// 	is_pulser_func( pulser_struct.assign_function,
+// 					"assigning function to pod" );
+// 	( *pulser_struct.assign_function )( func, pod );
+// }
 
-void p_assign_channel( long func, Var *v )
-{
-	long channel;
 
+// /*------------------------------------------------------------------------*/
+// /* This function has a double purpose: For pulsers that have pods and     */
+// /* channels, the pod to channel assignment is done via this function. For */
+// /* pulsers, that have just channels, the assignment of a function to a    */
+// /* channel is done here (instead of p_assign_pod() as for the other type  */
+// /* of pulsers)                                                            */
+// /*------------------------------------------------------------------------*/
 
-	assert( func >= PULSER_CHANNEL_FUNC_MIN &&
-			func <= PULSER_CHANNEL_FUNC_MAX );
+// void p_assign_channel( long func, Var *v )
+// {
+// 	long channel;
 
-	/* check the variable and get its value */
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
+// 	assert( func >= PULSER_CHANNEL_FUNC_MIN &&
+// 			func <= PULSER_CHANNEL_FUNC_MAX );
 
-	if ( v->type == INT_VAR )
-		channel = v->val.lval;
-	else
-	{
-		eprint( WARN, "%s:%ld: Float variable used as channel number.\n",
-				Fname, Lc );
-		channel = ( long ) v->val.dval;
-	}
+// 	/* check the variable and get its value */
 
-	vars_pop( v );
+// 	vars_check( v, INT_VAR | FLOAT_VAR );
 
-	/* finally call the function (if it exists...) */
+// 	if ( v->type == INT_VAR )
+// 		channel = v->val.lval;
+// 	else
+// 	{
+// 		eprint( WARN, "%s:%ld: Float variable used as channel number.\n",
+// 				Fname, Lc );
+// 		channel = ( long ) v->val.dval;
+// 	}
 
-	if ( pulser_struct.assign_channel_to_function == NULL )
-	{
-		is_pulser_func( pulser_struct.assign_function,
-						"assigning function to pod" );
-		( *pulser_struct.assign_function )( func, channel );
-	}
-	else
-	{
-		is_pulser_func( pulser_struct.assign_channel_to_function,
-						"assigning function to channel" );
-		( *pulser_struct.assign_channel_to_function )( func, channel );
-	}
-}
+// 	vars_pop( v );
 
+// 	/* finally call the function (if it exists...) */
 
-/*-------------------------------------------------------------------*/
-/* Function for setting a delay (in seconds) for an output connector */
-/*-------------------------------------------------------------------*/
+// 	if ( pulser_struct.assign_channel_to_function == NULL )
+// 	{
+// 		is_pulser_func( pulser_struct.assign_function,
+// 						"assigning function to pod" );
+// 		( *pulser_struct.assign_function )( func, channel );
+// 	}
+// 	else
+// 	{
+// 		is_pulser_func( pulser_struct.assign_channel_to_function,
+// 						"assigning function to channel" );
+// 		( *pulser_struct.assign_channel_to_function )( func, channel );
+// 	}
+// }
 
-void p_set_delay( long func, Var *v )
-{
-	double delay;
 
+// /*-------------------------------------------------------------------*/
+// /* Function for setting a delay (in seconds) for an output connector */
+// /*-------------------------------------------------------------------*/
 
-	assert( func >= PULSER_CHANNEL_FUNC_MIN &&
-			func <= PULSER_CHANNEL_FUNC_MAX );
+// void p_set_delay( long func, Var *v )
+// {
+// 	double delay;
 
-	/* check the variable and get its value */
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
-	delay = ( ( v->type == INT_VAR ) ? ( double ) v->val.lval : v->val.dval );
-	vars_pop( v );
+// 	assert( func >= PULSER_CHANNEL_FUNC_MIN &&
+// 			func <= PULSER_CHANNEL_FUNC_MAX );
 
-	delay = is_mult_ns( delay, "Delay" );
+// 	/* check the variable and get its value */
 
-	/* finally call the function (if it exists...) */
+// 	vars_check( v, INT_VAR | FLOAT_VAR );
+// 	delay = ( ( v->type == INT_VAR ) ? ( double ) v->val.lval : v->val.dval );
+// 	vars_pop( v );
 
-	is_pulser_func( pulser_struct.set_delay_function, "setting a delay" );
-	( *pulser_struct.set_delay_function )( func, delay );
-}
+// 	delay = is_mult_ns( delay, "Delay" );
 
+// 	/* finally call the function (if it exists...) */
 
-/*-------------------------------------------------------------*/
-/* Function for inverting the polarity for an output connector */
-/*-------------------------------------------------------------*/
+// 	is_pulser_func( pulser_struct.set_delay_function, "setting a delay" );
+// 	( *pulser_struct.set_delay_function )( func, delay );
+// }
 
-void p_inv( long func )
-{
-	assert( func >= PULSER_CHANNEL_FUNC_MIN &&
-			func <= PULSER_CHANNEL_FUNC_MAX );
 
-	is_pulser_func( pulser_struct.invert_function, "inverting a channel" );
-	( *pulser_struct.invert_function )( func );
-}
+// /*-------------------------------------------------------------*/
+// /* Function for inverting the polarity for an output connector */
+// /*-------------------------------------------------------------*/
 
+// void p_inv( long func )
+// {
+// 	assert( func >= PULSER_CHANNEL_FUNC_MIN &&
+// 			func <= PULSER_CHANNEL_FUNC_MAX );
 
-/*-----------------------------------------------------*/
-/* Function for setting the high voltage trigger level */
-/* for one of the output connector                     */
-/*-----------------------------------------------------*/
+// 	is_pulser_func( pulser_struct.invert_function, "inverting a channel" );
+// 	( *pulser_struct.invert_function )( func );
+// }
 
-void p_set_v_high( long func, Var *v )
-{
-	double voltage;
 
+// /*-----------------------------------------------------*/
+// /* Function for setting the high voltage trigger level */
+// /* for one of the output connector                     */
+// /*-----------------------------------------------------*/
 
-	assert( func >= PULSER_CHANNEL_FUNC_MIN &&
-			func <= PULSER_CHANNEL_FUNC_MAX );
+// void p_set_v_high( long func, Var *v )
+// {
+// 	double voltage;
 
-	/* check the variable and get its value */
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
-	voltage = ( v->type == INT_VAR ) ? ( double ) v->val.lval : v->val.dval;
-	vars_pop( v );
+// 	assert( func >= PULSER_CHANNEL_FUNC_MIN &&
+// 			func <= PULSER_CHANNEL_FUNC_MAX );
 
-	/* finally call the function (if it exists...) */
+// 	/* check the variable and get its value */
 
-	is_pulser_func( pulser_struct.set_function_high_level,
-					"setting high voltage level" );
-	( *pulser_struct.set_function_high_level )( func, voltage );
-}
+// 	vars_check( v, INT_VAR | FLOAT_VAR );
+// 	voltage = ( v->type == INT_VAR ) ? ( double ) v->val.lval : v->val.dval;
+// 	vars_pop( v );
 
+// 	/* finally call the function (if it exists...) */
 
-/*----------------------------------------------------*/
-/* Function for setting the low voltage trigger level */
-/* for one of the output connectors                   */
-/*----------------------------------------------------*/
+// 	is_pulser_func( pulser_struct.set_function_high_level,
+// 					"setting high voltage level" );
+// 	( *pulser_struct.set_function_high_level )( func, voltage );
+// }
 
-void p_set_v_low( long func, Var *v )
-{
-	double voltage;
 
+// /*----------------------------------------------------*/
+// /* Function for setting the low voltage trigger level */
+// /* for one of the output connectors                   */
+// /*----------------------------------------------------*/
 
-	assert( func >= PULSER_CHANNEL_FUNC_MIN &&
-			func <= PULSER_CHANNEL_FUNC_MAX );
+// void p_set_v_low( long func, Var *v )
+// {
+// 	double voltage;
 
-	/* check the variable and get its value */
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
-	voltage = ( v->type == INT_VAR ) ? ( double ) v->val.lval : v->val.dval;
-	vars_pop( v );
+// 	assert( func >= PULSER_CHANNEL_FUNC_MIN &&
+// 			func <= PULSER_CHANNEL_FUNC_MAX );
 
-	/* finally call the function (if it exists...) */
+// 	/* check the variable and get its value */
 
-	is_pulser_func( pulser_struct.set_function_low_level,
-					"setting low voltage level" );
-	( *pulser_struct.set_function_low_level )( func, voltage );
-}
+// 	vars_check( v, INT_VAR | FLOAT_VAR );
+// 	voltage = ( v->type == INT_VAR ) ? ( double ) v->val.lval : v->val.dval;
+// 	vars_pop( v );
 
+// 	/* finally call the function (if it exists...) */
 
-/*-------------------------------------------------*/
-/* Function for setting the timebase of the pulser */
-/*-------------------------------------------------*/
+// 	is_pulser_func( pulser_struct.set_function_low_level,
+// 					"setting low voltage level" );
+// 	( *pulser_struct.set_function_low_level )( func, voltage );
+// }
 
-void p_set_timebase( Var *v )
-{
-	double timebase;
 
-	/* check the variable and get its value */
+// /*-------------------------------------------------*/
+// /* Function for setting the timebase of the pulser */
+// /*-------------------------------------------------*/
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
-	timebase = ( v->type == INT_VAR ) ? ( double ) v->val.lval : v->val.dval;
-	vars_pop( v );
+// void p_set_timebase( Var *v )
+// {
+// 	double timebase;
 
-	timebase = is_mult_ns( timebase, "Time base"  );
+// 	/* check the variable and get its value */
 
-	/* finally call the function (if it exists...) */
+// 	vars_check( v, INT_VAR | FLOAT_VAR );
+// 	timebase = ( v->type == INT_VAR ) ? ( double ) v->val.lval : v->val.dval;
+// 	vars_pop( v );
 
-	is_pulser_func( pulser_struct.set_timebase,"setting the timebase" );
-	( *pulser_struct.set_timebase )( timebase );
-}
+// 	timebase = is_mult_ns( timebase, "Time base"  );
 
+// 	/* finally call the function (if it exists...) */
 
-/*-----------------------------------------------------------------*/
-/* Function for setting the trigger in mode (EXTERNAL or INTERNAL) */
-/*-----------------------------------------------------------------*/
+// 	is_pulser_func( pulser_struct.set_timebase,"setting the timebase" );
+// 	( *pulser_struct.set_timebase )( timebase );
+// }
 
-void p_set_trigger_mode( Var *v )
-{
-	int mode;
 
-	/* check the variable and get its value */
+// /*-----------------------------------------------------------------*/
+// /* Function for setting the trigger in mode (EXTERNAL or INTERNAL) */
+// /*-----------------------------------------------------------------*/
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
+// void p_set_trigger_mode( Var *v )
+// {
+// 	int mode;
 
-	if ( v->type == INT_VAR )
-	    mode = ( int ) v->val.lval;
-	else
-	{
-		eprint( WARN, "%s:%ld: Float variable used as trigger mode.\n",
-				Fname, Lc );
-		mode = ( int ) v->val.dval;
-	}
+// 	/* check the variable and get its value */
 
-	vars_pop( v );
+// 	vars_check( v, INT_VAR | FLOAT_VAR );
 
-	if ( mode != INTERNAL && mode != EXTERNAL )
-	{
-		eprint( FATAL, "%s:%ld: Invalid trigger mode specification.\n",
-				Fname, Lc );
-		THROW( EXCEPTION );
-	}
+// 	if ( v->type == INT_VAR )
+// 	    mode = ( int ) v->val.lval;
+// 	else
+// 	{
+// 		eprint( WARN, "%s:%ld: Float variable used as trigger mode.\n",
+// 				Fname, Lc );
+// 		mode = ( int ) v->val.dval;
+// 	}
 
-	/* finally call the function (if it exists...) */
+// 	vars_pop( v );
 
-	is_pulser_func( pulser_struct.set_trigger_mode,
-					"setting the trigger mode" );
-	( *pulser_struct.set_trigger_mode )( mode );
-}
+// 	if ( mode != INTERNAL && mode != EXTERNAL )
+// 	{
+// 		eprint( FATAL, "%s:%ld: Invalid trigger mode specification.\n",
+// 				Fname, Lc );
+// 		THROW( EXCEPTION );
+// 	}
 
-/*------------------------------------------------------------------*/
-/* Function for setting the trigger in slope (POSITIVE or NEGATIVE) */
-/*------------------------------------------------------------------*/
+// 	/* finally call the function (if it exists...) */
 
-void p_set_trigger_slope( Var *v )
-{
-	int slope;
+// 	is_pulser_func( pulser_struct.set_trigger_mode,
+// 					"setting the trigger mode" );
+// 	( *pulser_struct.set_trigger_mode )( mode );
+// }
 
-	/* check the variable and get its value */
+// /*------------------------------------------------------------------*/
+// /* Function for setting the trigger in slope (POSITIVE or NEGATIVE) */
+// /*------------------------------------------------------------------*/
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
+// void p_set_trigger_slope( Var *v )
+// {
+// 	int slope;
 
-	if ( v->type == INT_VAR )
-	    slope = ( int ) v->val.lval;
-	else
-	{
-		eprint( WARN, "%s:%ld: Float variable used as trigger slope.\n",
-				Fname, Lc );
-		slope = ( int ) v->val.dval;
-	}
+// 	/* check the variable and get its value */
 
-	vars_pop( v );
+// 	vars_check( v, INT_VAR | FLOAT_VAR );
 
-	if ( slope != POSITIVE && slope != NEGATIVE )
-	{
-		eprint( FATAL, "%s:%ld: Invalid trigger slope specification.\n", 
-				Fname, Lc );
-		THROW( EXCEPTION );
-	}
+// 	if ( v->type == INT_VAR )
+// 	    slope = ( int ) v->val.lval;
+// 	else
+// 	{
+// 		eprint( WARN, "%s:%ld: Float variable used as trigger slope.\n",
+// 				Fname, Lc );
+// 		slope = ( int ) v->val.dval;
+// 	}
 
-	/* finally call the function (if it exists...) */
+// 	vars_pop( v );
 
-	is_pulser_func( pulser_struct.set_trig_in_slope,
-					"setting the trigger slope" );
-	( *pulser_struct.set_trig_in_slope )( slope );
-}
+// 	if ( slope != POSITIVE && slope != NEGATIVE )
+// 	{
+// 		eprint( FATAL, "%s:%ld: Invalid trigger slope specification.\n", 
+// 				Fname, Lc );
+// 		THROW( EXCEPTION );
+// 	}
 
+// 	/* finally call the function (if it exists...) */
 
-/*---------------------------------------------------*/
-/* Function for setting the trigger in level voltage */
-/*---------------------------------------------------*/
+// 	is_pulser_func( pulser_struct.set_trig_in_slope,
+// 					"setting the trigger slope" );
+// 	( *pulser_struct.set_trig_in_slope )( slope );
+// }
 
-void p_set_trigger_level( Var *v )
-{
-	double level;
 
+// /*---------------------------------------------------*/
+// /* Function for setting the trigger in level voltage */
+// /*---------------------------------------------------*/
 
-	/* check the variable and get its value */
+// void p_set_trigger_level( Var *v )
+// {
+// 	double level;
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
-	level = ( v->type == INT_VAR ) ? ( double ) v->val.lval : v->val.dval;
-	vars_pop( v );
 
-	/* finally call the function (if it exists...) */
+// 	/* check the variable and get its value */
 
-	is_pulser_func( pulser_struct.set_trig_in_level,
-					"setting the trigger level" );
-	( *pulser_struct.set_trig_in_level )( level );
-}
+// 	vars_check( v, INT_VAR | FLOAT_VAR );
+// 	level = ( v->type == INT_VAR ) ? ( double ) v->val.lval : v->val.dval;
+// 	vars_pop( v );
 
+// 	/* finally call the function (if it exists...) */
 
-/*-------------------------------------------------------------------*/
-/* Function for setting the (minimum) repeat time for the experiment */
-/*-------------------------------------------------------------------*/
+// 	is_pulser_func( pulser_struct.set_trig_in_level,
+// 					"setting the trigger level" );
+// 	( *pulser_struct.set_trig_in_level )( level );
+// }
 
-void p_set_rep_time( Var *v )
-{
-	double time;
 
+// /*-------------------------------------------------------------------*/
+// /* Function for setting the (minimum) repeat time for the experiment */
+// /*-------------------------------------------------------------------*/
 
-	/* check the variable and get its value */
+// void p_set_rep_time( Var *v )
+// {
+// 	double time;
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
-	time = ( v->type == INT_VAR ) ? ( double ) v->val.lval :  v->val.dval;
-	vars_pop( v );
 
-	if ( time < 9.9e-10 )
-	{
-		eprint( FATAL, "%s:%ld: Invalid repeat time: %g s\n",
-				Fname, Lc, time );
-		THROW( EXCEPTION );
-	}
+// 	/* check the variable and get its value */
 
-	time = is_mult_ns( time, "Repeat time" );
+// 	vars_check( v, INT_VAR | FLOAT_VAR );
+// 	time = ( v->type == INT_VAR ) ? ( double ) v->val.lval :  v->val.dval;
+// 	vars_pop( v );
 
-	/* finally call the function (if it exists...) */
+// 	if ( time < 9.9e-10 )
+// 	{
+// 		eprint( FATAL, "%s:%ld: Invalid repeat time: %g s\n",
+// 				Fname, Lc, time );
+// 		THROW( EXCEPTION );
+// 	}
 
-	is_pulser_func( pulser_struct.set_repeat_time, "setting a repeat time" );
-	( *pulser_struct.set_repeat_time )( time );
-}
+// 	time = is_mult_ns( time, "Repeat time" );
 
+// 	/* finally call the function (if it exists...) */
 
-/*------------------------------------------------------------------------*/
-/* Function for setting the (maximum) repeat frequency for the experiment */
-/*------------------------------------------------------------------------*/
+// 	is_pulser_func( pulser_struct.set_repeat_time, "setting a repeat time" );
+// 	( *pulser_struct.set_repeat_time )( time );
+// }
 
-void p_set_rep_freq( Var *v )
-{
-	double freq, time;
 
+// /*------------------------------------------------------------------------*/
+// /* Function for setting the (maximum) repeat frequency for the experiment */
+// /*------------------------------------------------------------------------*/
 
-	/* check the variable and get its value */
+// void p_set_rep_freq( Var *v )
+// {
+// 	double freq, time;
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
-	freq = ( v->type == INT_VAR ) ? ( double ) v->val.lval :  v->val.dval;
-	vars_pop( v );
 
-	if ( freq > 1.01e9 || freq <= 0.0 )
-	{
-		eprint( FATAL, "%s:%ld: Invalid repeat frequency: %g s\n",
-				Fname, Lc, freq );
-		THROW( EXCEPTION );
-	}
+// 	/* check the variable and get its value */
 
-	/* make sure we get a repeat time that's a multiple of 1 ns */
+// 	vars_check( v, INT_VAR | FLOAT_VAR );
+// 	freq = ( v->type == INT_VAR ) ? ( double ) v->val.lval :  v->val.dval;
+// 	vars_pop( v );
 
-	time = 1.0 / freq;
-	time = lround( time * 1.e9 ) * 1.e-9;
+// 	if ( freq > 1.01e9 || freq <= 0.0 )
+// 	{
+// 		eprint( FATAL, "%s:%ld: Invalid repeat frequency: %g s\n",
+// 				Fname, Lc, freq );
+// 		THROW( EXCEPTION );
+// 	}
 
-	/* finally call the function (if it exists...) */
+// 	/* make sure we get a repeat time that's a multiple of 1 ns */
 
-	is_pulser_func( pulser_struct.set_repeat_time,
-					"setting a repeat frequency" );
-	( *pulser_struct.set_repeat_time )( time );
-}
+// 	time = 1.0 / freq;
+// 	time = lround( time * 1.e9 ) * 1.e-9;
 
+// 	/* finally call the function (if it exists...) */
 
-/*---------------------------------------------------*/
-/* Function for setting the trigger in level voltage */
-/*---------------------------------------------------*/
+// 	is_pulser_func( pulser_struct.set_repeat_time,
+// 					"setting a repeat frequency" );
+// 	( *pulser_struct.set_repeat_time )( time );
+// }
 
-void p_phase_ref( long func, int ref )
-{
-	is_pulser_func( pulser_struct.set_phase_reference,
-					"setting a function for phase cycling" );
 
-	if ( func != PULSER_CHANNEL_PHASE_1 && func != PULSER_CHANNEL_PHASE_2 )
-	{
-		eprint( FATAL, "%s:%ld: A reference function can only be set for the "
-				"PHASE functions.\n", Fname, Lc );
-		THROW( EXCEPTION );
-	}
+// /*---------------------------------------------------*/
+// /* Function for setting the trigger in level voltage */
+// /*---------------------------------------------------*/
 
-	if ( ref == PULSER_CHANNEL_PHASE_1 || ref == PULSER_CHANNEL_PHASE_2 )
-	{
-		eprint( FATAL, "%s:%ld: A PHASE function can't be phase cycled.\n",
-				Fname, Lc );
-		THROW( EXCEPTION );
-	}
+// void p_phase_ref( long func, int ref )
+// {
+// 	is_pulser_func( pulser_struct.set_phase_reference,
+// 					"setting a function for phase cycling" );
 
-	( *pulser_struct.set_phase_reference )( ( int ) func, ref );
-}
+// 	if ( func != PULSER_CHANNEL_PHASE_1 && func != PULSER_CHANNEL_PHASE_2 )
+// 	{
+// 		eprint( FATAL, "%s:%ld: A reference function can only be set for the "
+// 				"PHASE functions.\n", Fname, Lc );
+// 		THROW( EXCEPTION );
+// 	}
 
+// 	if ( ref == PULSER_CHANNEL_PHASE_1 || ref == PULSER_CHANNEL_PHASE_2 )
+// 	{
+// 		eprint( FATAL, "%s:%ld: A PHASE function can't be phase cycled.\n",
+// 				Fname, Lc );
+// 		THROW( EXCEPTION );
+// 	}
 
-/*-----------------------------------*/
-/* Function for creating a new pulse */
-/*-----------------------------------*/
+// 	( *pulser_struct.set_phase_reference )( ( int ) func, ref );
+// }
 
-long p_new( long pnum )
-{
-	is_pulser_func( pulser_struct.new_pulse, "creating a new pulse" );
-	( *pulser_struct.new_pulse )( pnum );
-	return pnum;
-}
 
+// /*-----------------------------------*/
+// /* Function for creating a new pulse */
+// /*-----------------------------------*/
 
-/*-------------------------------------------------------*/
-/* Function for setting one of the properties of a pulse */
-/*-------------------------------------------------------*/
+// long p_new( long pnum )
+// {
+// 	is_pulser_func( pulser_struct.new_pulse, "creating a new pulse" );
+// 	( *pulser_struct.new_pulse )( pnum );
+// 	return pnum;
+// }
 
-void p_set( long pnum, int type, Var *v )
-{
-	/* Now the correct driver function is called. All switches just check that
-	   the variable has the correct type and that the driver function
-	   exists. */
 
-	switch ( type )
-	{
-		case P_FUNC :
-			if ( v->type != INT_VAR ||
-				 v->val.lval < PULSER_CHANNEL_FUNC_MIN ||
-				 v->val.lval > PULSER_CHANNEL_FUNC_MAX )
-			{
-				eprint( FATAL, "%s:%ld: Invalid function.\n", Fname, Lc );
-				THROW( EXCEPTION );
-			}
-			is_pulser_func( pulser_struct.set_pulse_function,
-							"setting a pulse function" );
-			( *pulser_struct.set_pulse_function )( pnum, ( int ) v->val.lval );
-			vars_pop( v );
-			break;
+// /*-------------------------------------------------------*/
+// /* Function for setting one of the properties of a pulse */
+// /*-------------------------------------------------------*/
 
-		case P_POS :
-			vars_check( v, INT_VAR | FLOAT_VAR );
-			is_pulser_func( pulser_struct.set_pulse_position,
-							"setting a pulse position" );
-			( *pulser_struct.set_pulse_position )( pnum, VALUE( v ) );
-			vars_pop( v );
-			break;
+// void p_set( long pnum, int type, Var *v )
+// {
+// 	/* Now the correct driver function is called. All switches just check that
+// 	   the variable has the correct type and that the driver function
+// 	   exists. */
 
-		case P_LEN :
-			vars_check( v, INT_VAR | FLOAT_VAR );
-			is_pulser_func( pulser_struct.set_pulse_length,
-							"setting a pulse length" );
-			( *pulser_struct.set_pulse_length )( pnum, VALUE( v ) );
-			vars_pop( v );
-			break;
+// 	switch ( type )
+// 	{
+// 		case P_FUNC :
+// 			if ( v->type != INT_VAR ||
+// 				 v->val.lval < PULSER_CHANNEL_FUNC_MIN ||
+// 				 v->val.lval > PULSER_CHANNEL_FUNC_MAX )
+// 			{
+// 				eprint( FATAL, "%s:%ld: Invalid function.\n", Fname, Lc );
+// 				THROW( EXCEPTION );
+// 			}
+// 			is_pulser_func( pulser_struct.set_pulse_function,
+// 							"setting a pulse function" );
+// 			( *pulser_struct.set_pulse_function )( pnum, ( int ) v->val.lval );
+// 			vars_pop( v );
+// 			break;
 
-		case P_DPOS :
-			vars_check( v, INT_VAR | FLOAT_VAR );
-			is_pulser_func( pulser_struct.set_pulse_position_change,
-							"setting a pulse position change" );
-			( *pulser_struct.set_pulse_position_change )( pnum, VALUE( v ) );
-			vars_pop( v );
-			break;
+// 		case P_POS :
+// 			vars_check( v, INT_VAR | FLOAT_VAR );
+// 			is_pulser_func( pulser_struct.set_pulse_position,
+// 							"setting a pulse position" );
+// 			( *pulser_struct.set_pulse_position )( pnum, VALUE( v ) );
+// 			vars_pop( v );
+// 			break;
 
-		case P_DLEN :
-			vars_check( v, INT_VAR | FLOAT_VAR );
-			is_pulser_func( pulser_struct.set_pulse_length_change,
-							"setting a pulse length change" );
-			( *pulser_struct.set_pulse_length_change )( pnum, VALUE( v ) );
-			vars_pop( v );
-			break;
+// 		case P_LEN :
+// 			vars_check( v, INT_VAR | FLOAT_VAR );
+// 			is_pulser_func( pulser_struct.set_pulse_length,
+// 							"setting a pulse length" );
+// 			( *pulser_struct.set_pulse_length )( pnum, VALUE( v ) );
+// 			vars_pop( v );
+// 			break;
 
-		case P_PHASE :
-			vars_check( v, INT_VAR );
-			is_pulser_func( pulser_struct.set_pulse_phase_cycle,
-							"setting a pulse phase cycle" );
-			( *pulser_struct.set_pulse_phase_cycle )( pnum, 
-													  ( int ) v->val.lval );
-			vars_pop( v );
-			break;
+// 		case P_DPOS :
+// 			vars_check( v, INT_VAR | FLOAT_VAR );
+// 			is_pulser_func( pulser_struct.set_pulse_position_change,
+// 							"setting a pulse position change" );
+// 			( *pulser_struct.set_pulse_position_change )( pnum, VALUE( v ) );
+// 			vars_pop( v );
+// 			break;
 
-		default:
-			assert( 1 == 0 );
-	}
-}
+// 		case P_DLEN :
+// 			vars_check( v, INT_VAR | FLOAT_VAR );
+// 			is_pulser_func( pulser_struct.set_pulse_length_change,
+// 							"setting a pulse length change" );
+// 			( *pulser_struct.set_pulse_length_change )( pnum, VALUE( v ) );
+// 			vars_pop( v );
+// 			break;
 
+// 		case P_PHASE :
+// 			vars_check( v, INT_VAR );
+// 			is_pulser_func( pulser_struct.set_pulse_phase_cycle,
+// 							"setting a pulse phase cycle" );
+// 			( *pulser_struct.set_pulse_phase_cycle )( pnum, 
+// 													  ( int ) v->val.lval );
+// 			vars_pop( v );
+// 			break;
 
-/*-----------------------------------------------------------------------*/
-/* Function for asking the pulser driver about the properties of a pulse */
-/*-----------------------------------------------------------------------*/
+// 		default:
+// 			assert( 1 == 0 );
+// 	}
+// }
 
-Var *p_get( char *txt, int type )
-{
-	return p_get_by_num( p_num( txt ), type );
-}
 
+// /*-----------------------------------------------------------------------*/
+// /* Function for asking the pulser driver about the properties of a pulse */
+// /*-----------------------------------------------------------------------*/
 
-Var *p_get_by_num( long pnum, int type )
-{
-	int function;
-	double time;
-	int cycle;
-	Var *v;
+// Var *p_get( char *txt, int type )
+// {
+// 	return p_get_by_num( p_num( txt ), type );
+// }
 
 
-	switch ( type )
-	{
-		case P_FUNC :
-			is_pulser_func( pulser_struct.get_pulse_function,
-							"returning a pulses function" );
-			( *pulser_struct.get_pulse_function )( pnum, &function );
-			v = vars_push( INT_VAR, ( long ) function );
-			break;
+// Var *p_get_by_num( long pnum, int type )
+// {
+// 	int function;
+// 	double time;
+// 	int cycle;
+// 	Var *v;
 
-		case P_POS :
-			is_pulser_func( pulser_struct.get_pulse_position,
+
+// 	switch ( type )
+// 	{
+// 		case P_FUNC :
+// 			is_pulser_func( pulser_struct.get_pulse_function,
+// 							"returning a pulses function" );
+// 			( *pulser_struct.get_pulse_function )( pnum, &function );
+// 			v = vars_push( INT_VAR, ( long ) function );
+// 			break;
+
+// 		case P_POS :
+// 			is_pulser_func( pulser_struct.get_pulse_position,
 							"returning a pulses position" );
 			( *pulser_struct.get_pulse_position )( pnum, &time );
 			v = vars_push( FLOAT_VAR, time );
@@ -818,11 +825,12 @@ void p_set_psd( int func, Var *v )
 {
 	assert( func == 0 || func == 1 );
 
-	vars_check( v, INT_VAR );
+	vars_check( v, INT_VAR | FLOAT_VAR );
 	is_pulser_func( pulser_struct.set_phase_switch_delay,
 					"setting a phase switch delay" );
-	( *pulser_struct.phase_switch_delay )( func == 0 ? PULSER_CHANNEL_PHASE_1 :
-										   PULSER_CHANNEL_PHASE_2,
-										   VALUE( v->val.dval ) );
+	( *pulser_struct.set_phase_switch_delay )( func == 0 ?
+											   PULSER_CHANNEL_PHASE_1 :
+											   PULSER_CHANNEL_PHASE_2,
+											   VALUE( v ) );
 	vars_pop( v );
 }
