@@ -54,7 +54,7 @@ typedef struct _gd_
 } GPIB_DEV;
 
 
-GPIB_VARIABLE int gpib_init( char **log_file_name, int log_level );
+GPIB_VARIABLE int gpib_init( char *log_file_name, int log_level );
 GPIB_VARIABLE int gpib_shutdown( void );
 GPIB_VARIABLE int gpib_init_device( const char *device_name, int *dev );
 GPIB_VARIABLE int gpib_timeout( int device, int period );

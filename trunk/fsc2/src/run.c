@@ -46,9 +46,7 @@ static volatile bool child_is_quitting;
 
 bool run( void )
 {
-    char *gpib_log = ( char * ) GPIB_LOG_FILE;
 	Compilation compile_test;
-
 
 
 	/* If there are no commands we're already done */
@@ -69,7 +67,7 @@ bool run( void )
 
 	/* If the devices need the GPIB bus initialism it now */
 
-	if ( need_GPIB && gpib_init( &gpib_log, LL_ALL ) == FAILURE )
+	if ( need_GPIB && gpib_init( NULL, LL_ALL ) == FAILURE )
 	{
 		eprint( FATAL, "Can't initialize GPIB bus.\n" );
 		set_buttons_for_run( 1 );
