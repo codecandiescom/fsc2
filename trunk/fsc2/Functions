@@ -26,6 +26,7 @@ square, 1, ALL;                 // returns the square of a value
 int_slice, 1, ALL;              // creates an integer array slice
 float_slice, 1, ALL;            // creates an float array slice
 get_phase_cycled_area_1d, -1, EXP;
+get_phase_cycled_area_2d, -1, EXP;
 
 // Functions exported by the magnet power supply drivers (S_BAND)
 
