@@ -10,6 +10,8 @@
 volatile bool need_post;
 
 extern int exp_runparse( void );              /* from exp_run_parser.y */
+extern FL_resource xresources[ ];             /* from xinit.c */
+
 
 /* Routines of the main process exclusively used in this file */
 

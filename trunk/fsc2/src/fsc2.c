@@ -34,7 +34,7 @@ enum {
 
 static volatile int fsc2_death = 0;
 
-extern FL_resource xresources[ ];
+extern FL_resource xresources[ ];             /* from xinit.c */
 
 
 /* Locally used functions */
