@@ -963,12 +963,22 @@ Var *f_init_display( Var *v )
 }
 
 
+/*---------------------------------------------*/
+/* Function returns the dimension of an array. */
+/*---------------------------------------------*/
 
 Var *f_dim( Var *v )
 {
 	vars_check( v, ARR_REF );
 	return vars_push( INT_VAR, ( long ) v->from->dim );
 }
+
+
+/*---------------------------------------------------------------------*/
+/* Function returns the size of the dimension passed to the function,  */
+/* i.e. the function takes two arguments, first the array and then the */
+/* the dimension the size is needed for.                               */
+/*---------------------------------------------------------------------*/
 
 Var *f_size( Var *v )
 {
@@ -998,6 +1008,11 @@ Var *f_size( Var *v )
 	return vars_push( INT_VAR, ( long ) v->from->sizes[ size ] );
 }
 
+
+/*--------------------------------------------------------*/
+/* Function returns the sizes of the different dimension  */
+/* of an array as an 1-dimensional array.                 */
+/*--------------------------------------------------------*/
 
 Var *f_sizes( Var *v )
 {
