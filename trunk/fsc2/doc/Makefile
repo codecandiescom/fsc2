@@ -32,13 +32,18 @@ fsc2.html: $(docs)
 ps: fsc2.ps
 
 fsc2.ps: $(docs)
-	texi2dvi -c fsc2.texi
-	dvips fsc2.dvi
+	if [ "`eval texi2dvi --help 2>/dev/null`" -a   \
+		 "`eval dvips --help 2>/dev/null`" ]; then \
+		texi2dvi -c fsc2.texi; \
+		dvips fsc2.dvi;        \
+	fi
 
 pdf: fsc2.pdf
 
 fsc2.pdf: $(docs)
-	texi2dvi --pdf -c fsc2.texi
+	if [ "`eval texi2dvi --help 2>/dev/null`" ]; then \
+		texi2dvi --pdf -c fsc2.texi; \
+	fi
 
 clean:
 	$(RM) $(RMFLAGS) fsc2.dvi *.log
@@ -46,8 +51,12 @@ clean:
 install:
 	$(INSTALL) -m 444 fsc2.1.gz /usr/local/man/man1
 	$(INSTALL) -m 444 -o fsc2 -g fsc2 fsc2*.html $(docdir)
-	$(INSTALL) -m 444 -o fsc2 -g fsc2 fsc2.ps $(docdir)
-	$(INSTALL) -m 444 -o fsc2 -g fsc2 fsc2.pdf $(docdir)
+	if [ -f fsc2.ps ]; then \
+		$(INSTALL) -m 444 -o fsc2 -g fsc2 fsc2.ps $(docdir); \
+	fi
+	if [ -f fsc2.pdf ]; then \
+		$(INSTALL) -m 444 -o fsc2 -g fsc2 fsc2.pdf $(docdir); \
+	fi
 	grep -v fsc2 /usr/info/dir > /usr/info/dir.xyz
 	mv /usr/info/dir.xyz /usr/info/dir
 	install-info --delete fsc2 /usr/info/dir
@@ -55,7 +64,8 @@ install:
 	$(INSTALL) -m 444 -o fsc2 -g fsc2 fsc2.info* $(docdir)
 	gzip -9 -f $(docdir)/fsc2.info*
 	install-info $(docdir)/fsc2.info /usr/info/dir
-	sed 's/(fsc2)/($(subst /,\/,$(docdir))\/fsc2)/' /usr/info/dir > /usr/info/dir.xyz
+	sed 's/(fsc2)/($(subst /,\/,$(docdir))\/fsc2)/' \
+		/usr/info/dir > /usr/info/dir.xyz
 	mv /usr/info/dir.xyz /usr/info/dir
 
 
