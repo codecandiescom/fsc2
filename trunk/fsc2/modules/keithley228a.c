@@ -132,16 +132,15 @@ int keithley228a_init_hook( void )
 
 	if ( keithley228a.lockin_name == NULL )
 	{
-		eprint( FATAL, "%s: Can't find a driver for a lock-in amplifier with "
-				"a DAC.\n", DEVICE_NAME );
+		eprint( FATAL, UNSET, "%s: Can't find a driver for a lock-in "
+				"amplifier with a DAC.\n", DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
 
 	if ( ( func_ptr = func_get( "lockin_dac_voltage", &access ) ) == NULL )
 	{
-		eprint( FATAL, "%s: No lock-in amplifier module loaded supplying a "
-				"function for setting a DAC.\n",
-				Fname, Lc, DEVICE_NAME );
+		eprint( FATAL, SET, "%s: No lock-in amplifier module loaded "
+				"supplying a function for setting a DAC.\n", DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
 	vars_pop( func_ptr );
@@ -207,27 +206,27 @@ Var *magnet_setup( Var *v )
 
 	if ( v->next == NULL )
 	{
-		eprint( FATAL, "%s:%ld: %s: Missing parameter in call of function "
-				"%s().\n", Fname, Lc, DEVICE_NAME, Cur_Func );
+		eprint( FATAL, SET, "%s: Missing parameter in call of function "
+				"%s().\n", DEVICE_NAME, Cur_Func );
 		THROW( EXCEPTION );
 	}
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
 	if ( v->type == INT_VAR )
-		eprint( WARN, "%s:%ld: %s: Integer value used for magnet current in "
-				"%s().\n", Fname, Lc, DEVICE_NAME, Cur_Func );
+		eprint( WARN, SET, "%s: Integer value used for magnet current in "
+				"%s().\n", DEVICE_NAME, Cur_Func );
 
 	if ( v->next == NULL )
 	{
-		eprint( FATAL, "%s:%ld: %s: Missing magnet current step size in call "
-				"of %s().\n", Fname, Lc, DEVICE_NAME, Cur_Func );
+		eprint( FATAL, SET, "%s: Missing magnet current step size in call "
+				"of %s().\n", DEVICE_NAME, Cur_Func );
 		THROW( EXCEPTION );
 	}
 
 	vars_check( v->next, INT_VAR | FLOAT_VAR );
 	if ( v->next->type == INT_VAR )
-		eprint( WARN, "%s:%ld: %s: Integer value used for magnet current "
-				"step width in %s().\n", Fname, Lc, DEVICE_NAME, Cur_Func );
+		eprint( WARN, SET, "%s: Integer value used for magnet current "
+				"step width in %s().\n", DEVICE_NAME, Cur_Func );
 
 	/* Check that new field value is still within bounds */
 
@@ -248,8 +247,8 @@ Var *magnet_use_correction( Var *v )
 {
 	if ( v != NULL )
 	{
-		eprint( WARN, "%s:%ld: %s: Superfluous parameter in call of %s().\n",
-				Fname, Lc, DEVICE_NAME, Cur_Func );
+		eprint( WARN, SET, "%s: Superfluous parameter in call of %s().\n",
+				DEVICE_NAME, Cur_Func );
 
 		while ( ( v = vars_pop( v ) ) )
 			;
@@ -273,8 +272,8 @@ Var *magnet_use_dac_port( Var *v )
 	vars_check( v, INT_VAR | FLOAT_VAR );
 	if ( v->type == FLOAT_VAR )
 	{
-		eprint( WARN, "%s:%ld: %s: Integer value used for DAC port in %s().\n",
-				Fname, Lc, DEVICE_NAME, Cur_Func );
+		eprint( WARN, SET, "%s: Integer value used for DAC port in %s().\n",
+				DEVICE_NAME, Cur_Func );
 		port = ( int ) lround( v->val.dval );
 	}
 	else
@@ -285,16 +284,16 @@ Var *magnet_use_dac_port( Var *v )
 		 get_lib_symbol( keithley228a.lockin_name, "last_DAC_port",
 						 ( void ** ) &last_DAC_port ) != LIB_OK )
 	{
-		eprint( FATAL, "%s:%ld: %s: Can't find necessary symbols in library "
+		eprint( FATAL, SET, "%s: Can't find necessary symbols in library "
 				"for lock-in amplifier '%s' in function %s().\n",
-				Fname, Lc, DEVICE_NAME, keithley228a.lockin_name, Cur_Func );
+				DEVICE_NAME, keithley228a.lockin_name, Cur_Func );
 		THROW( EXCEPTION );
 	}
 
 	if ( port < *first_DAC_port || port > *last_DAC_port )
 	{
-		eprint( FATAL, "%s:%ld: %s: Invalid DAC port number %d, valid range "
-				"for lock-in '%s' is %d to %d\n", Fname, Lc, DEVICE_NAME, port,
+		eprint( FATAL, SET, "%s: Invalid DAC port number %d, valid range "
+				"for lock-in '%s' is %d to %d\n", DEVICE_NAME, port,
 				keithley228a.lockin_name, *first_DAC_port, *last_DAC_port );
 		THROW( EXCEPTION );
 	}
@@ -314,15 +313,15 @@ Var *set_field( Var *v )
 
 	if ( v == NULL )
 	{
-		eprint( FATAL, "%s:%ld: %s: Missing parameter in function %s().\n",
-				Fname, Lc, DEVICE_NAME, Cur_Func );
+		eprint( FATAL, SET, "%s: Missing parameter in function %s().\n",
+				DEVICE_NAME, Cur_Func );
 		THROW( EXCEPTION );
 	}
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
 	if ( v->type == INT_VAR )
-		eprint( WARN, "%s:%ld: %s: Integer value used for magnet field "
-				"current in %s().\n", Fname, Lc, DEVICE_NAME, Cur_Func );
+		eprint( WARN, SET, "%s: Integer value used for magnet field "
+				"current in %s().\n", DEVICE_NAME, Cur_Func );
 
 	/* Check the new current value and reduce it if necessary */
 
@@ -330,8 +329,8 @@ Var *set_field( Var *v )
 
 	if ( ( v = vars_pop( v ) ) != NULL )
 	{
-		eprint( WARN, "%s:%ld: %s: Superfluous parameter in call of "
-				"function %s().\n", Fname, Lc, DEVICE_NAME, Cur_Func );
+		eprint( WARN, SET, "%s: Superfluous parameter in call of "
+				"function %s().\n", DEVICE_NAME, Cur_Func );
 		while ( ( v = vars_pop( v ) ) != NULL )
 			;
 	}
@@ -353,8 +352,8 @@ Var *sweep_up( Var *v )
 
 	if ( ! keithley228a.is_current_step )
 	{
-		eprint( FATAL, "%s:%ld: %s: Current step size has not been defined in "
-				"%s().\n", Fname, Lc, DEVICE_NAME, Cur_Func );
+		eprint( FATAL, SET, "%s: Current step size has not been defined in "
+				"%s().\n", DEVICE_NAME, Cur_Func );
 		THROW( EXCEPTION );
 	}
 
@@ -380,8 +379,8 @@ Var *sweep_down( Var *v )
 
 	if ( ! keithley228a.is_current_step )
 	{
-		eprint( FATAL, "%s:%ld: %s: Current step size has not been defined in "
-				"%s().\n", Fname, Lc, DEVICE_NAME, Cur_Func );
+		eprint( FATAL, SET, "%s: Current step size has not been defined in "
+				"%s().\n", DEVICE_NAME, Cur_Func );
 		THROW( EXCEPTION );
 	}
 
@@ -402,16 +401,16 @@ Var *reset_field( Var *v )
 {
 	if ( v != NULL )
 	{
-		eprint( WARN, "%s:%ld: %s: Superfluous parameter in call of function "
-				"%s().\n", Fname, Lc, DEVICE_NAME, Cur_Func );
+		eprint( WARN, SET, "%s: Superfluous parameter in call of function "
+				"%s().\n", DEVICE_NAME, Cur_Func );
 		while ( ( v = vars_pop( v ) ) )
 			;
 	}
 
 	if ( ! keithley228a.is_req_current )
 	{
-		eprint( FATAL, "%s:%ld: %s: Start current has not been defined in "
-				"%s().\n", Fname, Lc, DEVICE_NAME, Cur_Func );
+		eprint( FATAL, SET, "Start current has not been defined in "
+				"%s().\n", DEVICE_NAME, Cur_Func );
 		THROW( EXCEPTION );
 	}
 
@@ -663,7 +662,7 @@ static double keithley228a_goto_current( double new_current )
 
 		if ( max_tries < 0 )
 		{
-			eprint( FATAL, "%s: Can't set requested current in %s().\n",
+			eprint( FATAL, UNSET, "%s: Can't set requested current in %s().\n",
 					DEVICE_NAME, Cur_Func );
 			THROW( EXCEPTION );
 		}
@@ -761,7 +760,8 @@ static double keithley228a_set_current( double new_current )
 
 static void keithley228a_gpib_failure( void )
 {
-	eprint( FATAL, "%s: Communication with device failed.\n", DEVICE_NAME );
+	eprint( FATAL, UNSET, "%s: Communication with device failed.\n",
+			DEVICE_NAME );
 	THROW( EXCEPTION );
 }
 
@@ -776,13 +776,13 @@ static double keithley228a_current_check( double current )
 	{
 		if ( ! TEST_RUN )
 		{
-			eprint( FATAL, "%s:%ld: %s: Magnet current of %.2f A out of range "
-					"in %s().\n", Fname, Lc, DEVICE_NAME, current, Cur_Func );
+			eprint( FATAL, SET, "%s: Magnet current of %.2f A out of range "
+					"in %s().\n", DEVICE_NAME, current, Cur_Func );
 			return current > 0.0 ? 10.0 : -10.0;
 		}
 
-		eprint( FATAL, "%s: Magnet current of %.2f A out of range in %s().\n",
-				DEVICE_NAME, current, Cur_Func );
+		eprint( FATAL, UNSET, "%s: Magnet current of %.2f A out of range "
+				"in %s().\n", DEVICE_NAME, current, Cur_Func );
 		THROW( EXCEPTION );
 	}
 

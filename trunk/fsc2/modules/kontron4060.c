@@ -78,7 +78,7 @@ int kontron4060_exp_hook( void )
 
 	if ( ! kontron4060_init( DEVICE_NAME ) )
 	{
-		eprint( FATAL, "%s: Initialization of device failed: %s\n",
+		eprint( FATAL, UNSET, "%s: Initialization of device failed: %s\n",
 				DEVICE_NAME, gpib_error_msg );
 		THROW( EXCEPTION );
 	}
@@ -220,6 +220,7 @@ static bool kontron4060_init( const char *name )
 
 static void kontron4060_failure( void )
 {
-	eprint( FATAL, "%s: Communication with voltmeter failed.\n", DEVICE_NAME );
+	eprint( FATAL, UNSET, "%s: Communication with voltmeter failed.\n",
+			DEVICE_NAME );
 	THROW( EXCEPTION );
 }

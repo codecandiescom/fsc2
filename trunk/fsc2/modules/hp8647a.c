@@ -74,9 +74,9 @@ int hp8647a_test_hook( void )
 		if ( hp8647a.att_ref_freq < hp8647a.min_table_freq ||
 			 hp8647a.att_ref_freq > hp8647a.max_table_freq )
 		{
-			eprint( FATAL, "%s: Reference frequency for attenuation settings "
-					"of %g MHz is not covered by the table.\n", DEVICE_NAME,
-					hp8647a.att_ref_freq );
+			eprint( FATAL, UNSET, "%s: Reference frequency for attenuation "
+					"settings of %g MHz is not covered by the table.\n",
+					DEVICE_NAME, hp8647a.att_ref_freq );
 			THROW( EXCEPTION );
 		}
 
@@ -114,7 +114,7 @@ int hp8647a_exp_hook( void )
 {
 	if ( ! hp8647a_init( DEVICE_NAME ) )
 	{
-		eprint( FATAL, "%s: Initialization of device failed: %s\n",
+		eprint( FATAL, UNSET, "%s: Initialization of device failed: %s\n",
 				DEVICE_NAME, gpib_error_msg );
 		THROW( EXCEPTION );
 	}
@@ -185,9 +185,9 @@ Var *synthesizer_state( Var *v )
 			return vars_push( INT_VAR, ( long ) hp8647a.state );
 		else if ( I_am == PARENT )
 		{
-			eprint( FATAL, "%s:%ld: %s: Function `synthesizer_state' with no "
+			eprint( FATAL, SET, "%s: Function `synthesizer_state' with no "
 					"argument can only be used in the EXPERIMENT section.\n",
-					Fname, Lc, DEVICE_NAME );
+					DEVICE_NAME );
 			THROW( EXCEPTION );
 		}
 		else
@@ -200,8 +200,8 @@ Var *synthesizer_state( Var *v )
 
 	if ( v->type == FLOAT_VAR )
 	{
-		eprint( WARN, "%s:%ld: %s: Float variable used for synthesizer "
-				"state.\n", Fname, Lc, DEVICE_NAME );
+		eprint( WARN, SET, "%s: Float variable used for synthesizer "
+				"state.\n", DEVICE_NAME );
 		state = ( v->val.dval != 0.0 );
 	}
 	else if ( v->type == INT_VAR )
@@ -210,8 +210,8 @@ Var *synthesizer_state( Var *v )
 	{
 		if ( ( res = is_in( v->val.sptr, on_off_str, 2 ) ) == -1 )
 		{
-			eprint( FATAL, "%s:%ld: Invalid parameter \"s\" in call of "
-					"function `synthesizer_state'.\n", Fname, Lc, DEVICE_NAME,
+			eprint( FATAL, SET, "Invalid parameter \"s\" in call of "
+					"function `synthesizer_state'.\n", DEVICE_NAME,
 					v->val.sptr );
 			THROW( EXCEPTION );
 		}
@@ -221,8 +221,8 @@ Var *synthesizer_state( Var *v )
 
 	if ( ( v = vars_pop( v ) ) != NULL )
 	{
-		eprint( WARN, "%s:%ld: %s: Superfluous arguments in call of "
-				"function `synthesizer_state'.\n", Fname, Lc, DEVICE_NAME );
+		eprint( WARN, SET, "%s: Superfluous arguments in call of "
+				"function `synthesizer_state'.\n", DEVICE_NAME );
 		while ( ( v = vars_pop( v ) ) != NULL )
 			;
 	}
@@ -258,8 +258,8 @@ Var *synthesizer_frequency( Var *v )
 		{
 			if ( ! hp8647a.freq_is_set )
 			{
-				eprint( FATAL, "%s:%ld: %s: RF frequency hasn't been set "
-						"yet.\n", Fname, Lc, DEVICE_NAME );
+				eprint( FATAL, SET, "%s: RF frequency hasn't been set "
+						"yet.\n", DEVICE_NAME );
 				THROW( EXCEPTION );
 			}
 			else
@@ -275,23 +275,22 @@ Var *synthesizer_frequency( Var *v )
 	vars_check( v, INT_VAR | FLOAT_VAR );
 
 	if ( v->type == INT_VAR )
-		eprint( WARN, "%s:%ld: %s: Integer value used as RF frequency.\n",
-				Fname, Lc, DEVICE_NAME );
+		eprint( WARN, SET, "%s: Integer value used as RF frequency.\n",
+				DEVICE_NAME );
 
 	freq = VALUE( v );
 
 	if ( freq < 0 )
 	{
-		eprint( FATAL, "%s:%ld: %s: Invalid negative RF frequency.\n",
-				Fname, Lc, DEVICE_NAME );
+		eprint( FATAL, SET, "%s: Invalid negative RF frequency.\n",
+				DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
 
 	if ( ( v = vars_pop( v ) ) != NULL )
 	{
-		eprint( WARN, "%s:%ld: %s: Superfluous arguments in call of "
-				"function `synthesizer_frequency'.\n", Fname, Lc,
-				DEVICE_NAME );
+		eprint( WARN, SET, "%s: Superfluous arguments in call of "
+				"function `synthesizer_frequency'.\n", DEVICE_NAME );
 		while ( ( v = vars_pop( v ) ) != NULL )
 			;
 	}
@@ -301,8 +300,8 @@ Var *synthesizer_frequency( Var *v )
 
 	if ( freq < MIN_FREQ || freq > MAX_FREQ )
 	{
-		eprint( FATAL, "%s:%ld: %s: RF frequency (%f MHz) not within "
-				"synthesizers range (%f kHz - %g Mhz).\n", Fname, Lc,
+		eprint( FATAL, SET, "%s: RF frequency (%f MHz) not within "
+				"synthesizers range (%f kHz - %g Mhz).\n",
 				DEVICE_NAME, 1.0e-6 * freq, 1.0e-3 * MIN_FREQ,
 				1.0e-6 * MAX_FREQ );
 		if ( ! TEST_RUN && I_am == CHILD )
@@ -380,8 +379,8 @@ Var *synthesizer_attenuation( Var *v )
 		{
 			if ( ! hp8647a.attenuation_is_set )
 			{
-				eprint( FATAL, "%s:%ld: %s: RF attenuation has not been set "
-						"yet.\n", Fname, Lc, DEVICE_NAME );
+				eprint( FATAL, SET, "%s: RF attenuation has not been set "
+						"yet.\n", DEVICE_NAME );
 				THROW( EXCEPTION );
 			}
 			else
@@ -397,16 +396,15 @@ Var *synthesizer_attenuation( Var *v )
 	vars_check( v, INT_VAR | FLOAT_VAR );
 
 	if ( v->type == INT_VAR )
-		eprint( WARN, "%s:%ld: %s: Integer variable used as RF attenuation.\n",
-				Fname, Lc, DEVICE_NAME );
+		eprint( WARN, SET, "%s: Integer variable used as RF attenuation.\n",
+				DEVICE_NAME );
 
 	att = VALUE( v );
 
 	if ( ( v = vars_pop( v ) ) != NULL )
 	{
-		eprint( WARN, "%s:%ld: %s: Superfluous arguments in call of "
-				"function `synthesizer_attenuation'.\n",
-				Fname, Lc, DEVICE_NAME );
+		eprint( WARN, SET, "%s: Superfluous arguments in call of "
+				"function `synthesizer_attenuation'.\n", DEVICE_NAME );
 		while ( ( v = vars_pop( v ) ) != NULL )
 			;
 	}
@@ -416,8 +414,8 @@ Var *synthesizer_attenuation( Var *v )
 
 	if ( att > hp8647a.min_attenuation || att < MAX_ATTEN )
 	{
-		eprint( FATAL, "%s:%ld: %s: RF attenuation (%g db) not within valid "
-				"range (%g db to %g db).\n", Fname, Lc, DEVICE_NAME, att,
+		eprint( FATAL, SET, "%s: RF attenuation (%g db) not within valid "
+				"range (%g db to %g db).\n", DEVICE_NAME, att,
 				MAX_ATTEN, hp8647a.min_attenuation );
 		if ( ! TEST_RUN && I_am == CHILD )
 			return vars_push( FLOAT_VAR, hp8647a.attenuation );
@@ -434,9 +432,9 @@ Var *synthesizer_attenuation( Var *v )
 	{
 		if ( hp8647a.attenuation_is_set )
 		{
-			eprint( SEVERE, "%s:%ld: %s: RF attenuation has already been set "
+			eprint( SEVERE, SET, "%s: RF attenuation has already been set "
 					"in the PREPARATIONS section to %g db, keeping old "
-					"value.\n", Fname, Lc, DEVICE_NAME, hp8647a.attenuation );
+					"value.\n", DEVICE_NAME, hp8647a.attenuation );
 			return vars_push( FLOAT_VAR, hp8647a.attenuation );
 		}
 
@@ -467,16 +465,15 @@ Var *synthesizer_minimum_attenuation( Var *v )
 	vars_check( v, INT_VAR | FLOAT_VAR );
 
 	if ( v->type == INT_VAR )
-		eprint( WARN, "%s:%ld: %s: Integer variable used as minumum RF "
-				"attenuation.\n", Fname, Lc, DEVICE_NAME );
+		eprint( WARN, SET, "%s: Integer variable used as minumum RF "
+				"attenuation.\n", DEVICE_NAME );
 
 	min_atten = VALUE( v );
 
 	if ( ( v = vars_pop( v ) ) != NULL )
 	{
-		eprint( WARN, "%s:%ld: %s: Superfluous arguments in call of "
-				"function `synthesizer_minimum_attenuation'.\n",
-				Fname, Lc, DEVICE_NAME );
+		eprint( WARN, SET, "%s: Superfluous arguments in call of "
+				"function `synthesizer_minimum_attenuation'.\n", DEVICE_NAME );
 		while ( ( v = vars_pop( v ) ) != NULL )
 			;
 	}
@@ -484,15 +481,15 @@ Var *synthesizer_minimum_attenuation( Var *v )
 
 	if ( min_atten > MIN_MIN_ATTEN )
 	{
-		eprint( FATAL, "%s:%ld: %s: Minimum attenuation must be below "
-				"%g dB.\n", Fname, Lc, DEVICE_NAME, MIN_MIN_ATTEN );
+		eprint( FATAL, SET, "%s: Minimum attenuation must be below "
+				"%g dB.\n", DEVICE_NAME, MIN_MIN_ATTEN );
 		THROW( EXCEPTION );
 	}
 
 	if ( min_atten < MAX_ATTEN )
 	{
-		eprint( FATAL, "%s:%ld: %s: Minimum attenuation must be more than "
-				"%g dB.\n", Fname, Lc, DEVICE_NAME, MAX_ATTEN );
+		eprint( FATAL, SET, "%s: Minimum attenuation must be more than "
+				"%g dB.\n", DEVICE_NAME, MAX_ATTEN );
 		THROW( EXCEPTION );
 	}
 
@@ -517,26 +514,24 @@ Var *synthesizer_step_frequency( Var *v )
 
 		if ( ! TEST_RUN && I_am == PARENT && hp8647a.step_freq_is_set )
 		{
-			eprint( SEVERE, "%s:%ld: %s: RF step frequency has already been "
+			eprint( SEVERE, SET, "%s: RF step frequency has already been "
 					"set in the PREPARATIONS section to %f MHz, keeping old "
-					"value.\n", Fname, Lc, DEVICE_NAME,
-					1.0e-6 * hp8647a.step_freq );
+					"value.\n", DEVICE_NAME, 1.0e-6 * hp8647a.step_freq );
 			while ( ( v = vars_pop( v ) ) != NULL )
 				;
 			return vars_push( FLOAT_VAR, hp8647a.step_freq );
 		}
 
 		if ( v->type == INT_VAR )
-			eprint( WARN, "%s:%ld: %s: Integer variable used as RF step "
-					"frequency.\n", Fname, Lc, DEVICE_NAME );
+			eprint( WARN, SET, "%s: Integer variable used as RF step "
+					"frequency.\n", DEVICE_NAME );
 
 		hp8647a.step_freq = VALUE( v );
 
 		if ( ( v = vars_pop( v ) ) != NULL )
 		{
-			eprint( WARN, "%s:%ld: %s: Superfluous arguments in call of "
-					"function `synthesizer_step_frequency'.\n", Fname,
-					Lc, DEVICE_NAME );
+			eprint( WARN, SET, "%s: Superfluous arguments in call of "
+					"function `synthesizer_step_frequency'.\n", DEVICE_NAME );
 			while ( ( v = vars_pop( v ) ) != NULL )
 				;
 		}
@@ -545,8 +540,8 @@ Var *synthesizer_step_frequency( Var *v )
 	}
 	else if ( ! hp8647a.step_freq_is_set )
 	{
-		eprint( FATAL, "%s:%ld: %s: RF step frequency has not been set "
-				"yet.\n", Fname, Lc, DEVICE_NAME );
+		eprint( FATAL, SET, "%s: RF step frequency has not been set "
+				"yet.\n", DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
 
@@ -567,8 +562,8 @@ Var *synthesizer_sweep_up( Var *v )
 
 	if ( ! hp8647a.step_freq_is_set )
 	{
-		eprint( FATAL, "%s:%ld: %s: RF step frequency hasn't been set.\n",
-				Fname, Lc, DEVICE_NAME );
+		eprint( FATAL, SET, "%s: RF step frequency hasn't been set.\n",
+				DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
 
@@ -578,9 +573,8 @@ Var *synthesizer_sweep_up( Var *v )
 
 	if ( hp8647a.freq < MIN_FREQ )
 	{
-		eprint( FATAL, "%s:%ld: %s: RF frequency is dropping below lower "
-				"limit of %f kHz.\n", Fname, Lc, DEVICE_NAME,
-				1.0e-3 * MIN_FREQ );
+		eprint( FATAL, SET, "%s: RF frequency is dropping below lower "
+				"limit of %f kHz.\n", DEVICE_NAME, 1.0e-3 * MIN_FREQ );
 		if ( ! TEST_RUN && I_am == CHILD )
 			return vars_push( FLOAT_VAR, hp8647a.freq );
 		else
@@ -589,9 +583,8 @@ Var *synthesizer_sweep_up( Var *v )
 
 	if ( hp8647a.freq > MAX_FREQ )
 	{
-		eprint( FATAL, "%s:%ld: %s: RF frequency is increased above upper "
-				"limit of %f MHz.\n", Fname, Lc, DEVICE_NAME,
-				1.0e-6 * MAX_FREQ );
+		eprint( FATAL, SET, "%s: RF frequency is increased above upper "
+				"limit of %f MHz.\n", DEVICE_NAME, 1.0e-6 * MAX_FREQ );
 		if ( ! TEST_RUN && I_am == CHILD )
 			return vars_push( FLOAT_VAR, hp8647a.freq );
 		else
@@ -643,8 +636,8 @@ Var *synthesizer_reset_frequency( Var *v )
 
 	if ( ! hp8647a.start_freq_is_set )
 	{
-		eprint( FATAL, "%s:%ld: %s: No RF frequency has been set yet, so "
-				"can't do a frequency reset.\n", Fname, Lc, DEVICE_NAME );
+		eprint( FATAL, SET, "%s: No RF frequency has been set yet, so "
+				"can't do a frequency reset.\n", DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
 
@@ -680,8 +673,8 @@ Var *synthesizer_use_table( Var *v )
 
 		if ( ( tfp = hp8647a_open_table( hp8647a.table_file ) ) == NULL )
 		{
-			eprint( FATAL, "%s:%ld: %s: Default table file `%s' not found.\n",
-					Fname, Lc, DEVICE_NAME, hp8647a.table_file );
+			eprint( FATAL, SET, "%s: Default table file `%s' not found.\n",
+					DEVICE_NAME, hp8647a.table_file );
 			T_free( hp8647a.table_file );
 			hp8647a.table_file = NULL;
 			THROW( EXCEPTION );
@@ -695,9 +688,8 @@ Var *synthesizer_use_table( Var *v )
 
 		if ( ( v = vars_pop( v ) ) != NULL )
 		{
-			eprint( WARN, "%s:%ld: %s: Superfluous arguments in call of "
-					"function `synthesizer_use_table'.\n",
-					Fname, Lc, DEVICE_NAME );
+			eprint( WARN, SET, "%s: Superfluous arguments in call of "
+					"function `synthesizer_use_table'.\n", DEVICE_NAME );
 			while ( ( v = vars_pop( v ) ) != NULL )
 				;
 		}
@@ -754,8 +746,8 @@ Var *synthesizer_att_ref_freq( Var *v )
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
 	if ( v->type == INT_VAR )
-		eprint( WARN, "%s:%ld: %s: Integer variable used as RF frequency.\n",
-				Fname, Lc, DEVICE_NAME );
+		eprint( WARN, SET, "%s: Integer variable used as RF frequency.\n",
+				DEVICE_NAME );
 
 	freq = VALUE( v );
 
@@ -763,9 +755,8 @@ Var *synthesizer_att_ref_freq( Var *v )
 
 	if ( ( v = vars_pop( v ) ) != NULL )
 	{
-		eprint( WARN, "%s:%ld: %s: Superfluous arguments in call of "
-				"function `synthesizer_use_table'.\n",
-				Fname, Lc, DEVICE_NAME );
+		eprint( WARN, SET, "%s: Superfluous arguments in call of "
+				"function `synthesizer_use_table'.\n", DEVICE_NAME );
 		while ( ( v = vars_pop( v ) ) != NULL )
 			;
 	}
@@ -774,9 +765,9 @@ Var *synthesizer_att_ref_freq( Var *v )
 
 	if ( freq > MAX_FREQ || freq < MIN_FREQ )
 	{
-		eprint( FATAL, "%s: Reference frequency for attenuation settings "
-				"of %g MHz is out of synthesizer range (%f kHz - %f MHz).\n",
-				DEVICE_NAME, hp8647a.att_ref_freq * 1.0e-6,
+		eprint( FATAL, UNSET, "%s: Reference frequency for attenuation "
+				"settings of %g MHz is out of synthesizer range (%f kHz - "
+				"%f MHz).\n", DEVICE_NAME, hp8647a.att_ref_freq * 1.0e-6,
 				MIN_FREQ * 1.0e-3, MAX_FREQ * 1.0e-6 );
 		if ( ! TEST_RUN && I_am == CHILD )
 			return vars_push( FLOAT_VAR, hp8647a.freq );
@@ -794,9 +785,9 @@ Var *synthesizer_att_ref_freq( Var *v )
 		if ( hp8647a.att_ref_freq < hp8647a.min_table_freq ||
 			 hp8647a.att_ref_freq > hp8647a.max_table_freq )
 		{
-			eprint( FATAL, "%s: Reference frequency for attenuation settings "
-					"of %g MHz is not covered by the table.\n", DEVICE_NAME,
-					hp8647a.att_ref_freq );
+			eprint( FATAL, UNSET, "%s: Reference frequency for attenuation "
+					"settings of %g MHz is not covered by the table.\n",
+					DEVICE_NAME, hp8647a.att_ref_freq );
 			THROW( EXCEPTION );
 		}
 		
@@ -827,9 +818,9 @@ Var *synthesizer_modulation( Var *v )
 
 	if ( v == NULL )
 	{
-		eprint( FATAL, "%s:%ld: %s: Use functions "
+		eprint( FATAL, UNSET, "%s: Use functions "
 				"`synthesizer_mod_(type|source|ampl)' to determine modulation "
-				"settings.\n", Fname, Lc, DEVICE_NAME );
+				"settings.\n", DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
 
@@ -837,9 +828,9 @@ Var *synthesizer_modulation( Var *v )
 	{
 		if ( ( 1 << ( ( res = hp8647a_set_mod_param( v, &ampl, &what ) )
 					  - 1 ) ) & set )
-			eprint( SEVERE, "%s:%ld: %s: Parameter for modulation %s set more "
+			eprint( SEVERE, SET, "%s: Parameter for modulation %s set more "
 					"than once in call of `synthesizer_modulation'.\n",
-					Fname, Lc, DEVICE_NAME, str[ res ] );
+					DEVICE_NAME, str[ res ] );
 		else
 		{
 			switch ( res )
@@ -889,17 +880,15 @@ Var *synthesizer_modulation( Var *v )
 	{
 		if ( source != UNDEFINED )
 		{
-			eprint( FATAL, "%s:%ld: %s: Can't set modulation source as long "
-					"as modulation type hasn't been set.\n",
-					Fname, Lc, DEVICE_NAME );
+			eprint( FATAL, SET, "%s: Can't set modulation source as long "
+					"as modulation type hasn't been set.\n", DEVICE_NAME );
 			THROW( EXCEPTION );
 		}
 
 		if ( ampl >= 0.0 )
 		{
-			eprint( FATAL, "%s:%ld: %s: Can't set modulation amplitude as "
-					"long as modulation type hasn't been set.\n",
-					Fname, Lc, DEVICE_NAME );
+			eprint( FATAL, SET, "%s: Can't set modulation amplitude as long "
+					"as modulation type hasn't been set.\n", DEVICE_NAME );
 			THROW( EXCEPTION );
 		}
 	}
@@ -944,8 +933,8 @@ Var *synthesizer_mod_type( Var *v )
 
 		if ( res < 0 || res >= NUM_MOD_TYPES )
 		{
-			eprint( FATAL, "%s:%ld: %s: Invalid modulation type %d.\n",
-					Fname, Lc, DEVICE_NAME, res );
+			eprint( FATAL, SET, "%s: Invalid modulation type %d.\n",
+					DEVICE_NAME, res );
 			THROW( EXCEPTION );
 		}
 	}
@@ -953,16 +942,16 @@ Var *synthesizer_mod_type( Var *v )
 	{
 		if ( ( res = is_in( v->val.sptr, mod_types, 4 ) ) == UNDEFINED )
 		{
-			eprint( FATAL, "%s:%ld: %s: Invalid modulation type `%s'.\n",
-					Fname, Lc, DEVICE_NAME, v->val.sptr );
+			eprint( FATAL, SET, "%s: Invalid modulation type `%s'.\n",
+					DEVICE_NAME, v->val.sptr );
 			THROW( EXCEPTION );
 		}
 	}
 
 	if ( ( v = vars_pop( v ) ) != NULL )
 	{
-		eprint( WARN, "%s:%ld: %s: Superfluous arguments in call of "
-				"`synthesizer_mod_type'.\n", Fname, Lc, DEVICE_NAME );
+		eprint( WARN, SET, "%s: Superfluous arguments in call of "
+				"`synthesizer_mod_type'.\n", DEVICE_NAME );
 		while ( ( v = vars_pop( v ) ) != NULL )
 			;
 	}
@@ -990,16 +979,15 @@ Var *synthesizer_mod_source( Var *v )
 	{
 		if ( ! hp8647a.mod_type_is_set )
 		{
-			eprint( FATAL, "%s:%ld: %s: Can't determine modulation source as "
-					"long as modulation type isn't set.\n",  Fname, Lc,
-					DEVICE_NAME );
+			eprint( FATAL, SET, "%s: Can't determine modulation source as "
+					"long as modulation type isn't set.\n", DEVICE_NAME );
 			THROW( EXCEPTION );
 		}
 
 		if ( hp8647a.mod_type == MOD_TYPE_OFF )
 		{
-			eprint( FATAL, "%s:%ld: %s: Can't determine modulation source "
-					"when modulation is off.\n", Fname, Lc, DEVICE_NAME );
+			eprint( FATAL, SET, "%s: Can't determine modulation source "
+					"when modulation is off.\n", DEVICE_NAME );
 			THROW( EXCEPTION );
 		}
 
@@ -1013,8 +1001,8 @@ Var *synthesizer_mod_source( Var *v )
 
 	if ( ! hp8647a.mod_type_is_set )
 	{
-		eprint( FATAL, "%s:%ld: %s: Can't set modulation source as long as "
-				"modulation type isn't set.\n",  Fname, Lc, DEVICE_NAME );
+		eprint( FATAL, SET, "%s: Can't set modulation source as long as "
+				"modulation type isn't set.\n", DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
 
@@ -1022,8 +1010,8 @@ Var *synthesizer_mod_source( Var *v )
 
 	if ( ( v = vars_pop( v ) ) != NULL )
 	{
-		eprint( WARN, "%s:%ld: %s: Superfluous arguments in call of "
-				"`synthesizer_mod_source'.\n", Fname, Lc, DEVICE_NAME );
+		eprint( WARN, SET, "%s: Superfluous arguments in call of "
+				"`synthesizer_mod_source'.\n", DEVICE_NAME );
 		while ( ( v = vars_pop( v ) ) != NULL )
 			;
 	}
@@ -1033,8 +1021,8 @@ Var *synthesizer_mod_source( Var *v )
 		source = ( int ) v->val.lval;
 		if ( source < 0 || source >= NUM_MOD_SOURCES )
 		{
-			eprint( FATAL, "%s:%ld: %s: Invalid modulation source "
-					"parameter %d.\n", Fname, Lc, DEVICE_NAME, source );
+			eprint( FATAL, SET, "%s: Invalid modulation source "
+					"parameter %d.\n", DEVICE_NAME, source );
 			THROW( EXCEPTION );
 		}
 	}
@@ -1059,16 +1047,16 @@ Var *synthesizer_mod_source( Var *v )
 				break;
 
 			default :
-				eprint( FATAL, "%s:%ld: %s: Invalid modulation source `%s'.\n",
-						Fname, Lc, DEVICE_NAME, v->val.sptr );
+				eprint( FATAL, SET, "%s: Invalid modulation source `%s'.\n",
+						DEVICE_NAME, v->val.sptr );
 				THROW( EXCEPTION );
 		}
 	}
 
 	if ( hp8647a.mod_type == MOD_TYPE_OFF )
 	{
-		eprint( FATAL, "%s:%ld: %s: Can't set modulation source while "
-				"modulation is off.\n", Fname, Lc, DEVICE_NAME );
+		eprint( FATAL, SET, "%s: Can't set modulation source while "
+				"modulation is off.\n", DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
 
@@ -1092,16 +1080,15 @@ Var *synthesizer_mod_ampl( Var *v )
 	{
 		if ( ! hp8647a.mod_type_is_set )
 		{
-			eprint( FATAL, "%s:%ld: %s: Can't determine modulation amplitude "
-					"as long as modulation type isn't set.\n",  Fname, Lc,
-					DEVICE_NAME );
+			eprint( FATAL, SET, "%s: Can't determine modulation amplitude "
+					"as long as modulation type isn't set.\n", DEVICE_NAME );
 			THROW( EXCEPTION );
 		}
 
 		if ( hp8647a.mod_type == MOD_TYPE_OFF )
 		{
-			eprint( FATAL, "%s:%ld: %s: Can't determine modulation amplitude "
-					"when modulation is off.\n",  Fname, Lc, DEVICE_NAME );
+			eprint( FATAL, SET, "%s: Can't determine modulation amplitude "
+					"when modulation is off.\n", DEVICE_NAME );
 			THROW( EXCEPTION );
 		}
 
@@ -1115,31 +1102,31 @@ Var *synthesizer_mod_ampl( Var *v )
 
 	if ( ! hp8647a.mod_type_is_set )
 	{
-		eprint( FATAL, "%s:%ld: %s: Can't set modulation amplitude as long as "
-				"modulation type isn't set.\n",  Fname, Lc, DEVICE_NAME );
+		eprint( FATAL, SET, "%s: Can't set modulation amplitude as long as "
+				"modulation type isn't set.\n", DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
 
 	if ( v->type == INT_VAR )
-		eprint( WARN, "%s:%ld: %s: Integer value used as modulation "
-				"amplitude.\n", Fname, Lc, DEVICE_NAME );
+		eprint( WARN, SET, "%s: Integer value used as modulation "
+				"amplitude.\n", DEVICE_NAME );
 
 	ampl = VALUE( v );
 
 	if ( ( v = vars_pop( v ) ) != NULL )
 	{
-		eprint( WARN, "%s:%ld: %s: Superfluous arguments in call of "
-				"function `synthesizer_mod_ampl'.\n", Fname, Lc, DEVICE_NAME );
+		eprint( WARN, SET, "%s: Superfluous arguments in call of "
+				"function `synthesizer_mod_ampl'.\n", DEVICE_NAME );
 		while ( ( v = vars_pop( v ) ) != NULL )
 			;
 	}
 
 	if ( hp8647a.mod_type == MOD_TYPE_OFF )
 	{
-		eprint( FATAL, "%s:%ld: %s: Can't set modulation amplitude while "
-				"modulation is off.\n", Fname, Lc, DEVICE_NAME );
+		eprint( FATAL, SET, "%s: Can't set modulation amplitude while "
+				"modulation is off.\n", DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
 

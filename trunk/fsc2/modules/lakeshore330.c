@@ -96,7 +96,8 @@ int lakeshore330_exp_hook( void )
 	Cur_Func = "lakeshore330_exp_hook";
 	if ( ! lakeshore330_init( DEVICE_NAME ) )
 	{
-		eprint( FATAL, "%s: Initialization of device failed.\n", DEVICE_NAME );
+		eprint( FATAL, UNSET, "%s: Initialization of device failed.\n",
+				DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
 	Cur_Func = NULL;
@@ -169,15 +170,15 @@ Var *temp_contr_sample_channel( Var *v )
 			channel = v->val.lval - 1;
 		else
 		{
-			eprint( WARN, "%s:%ld: %s: Float value used as channel channel "
-					"number in %s().\n", Fname, Lc, DEVICE_NAME, Cur_Func );
+			eprint( WARN, SET, "%s: Float value used as channel channel "
+					"number in %s().\n", DEVICE_NAME, Cur_Func );
 			channel = lround( v->val.dval ) - 1;
 		}
 
 		if ( channel != SAMPLE_CHANNEL_A && channel != SAMPLE_CHANNEL_B )
 		{
-			eprint( FATAL, "%s:%ld: %s: Invalid sample channel number (%ld) "
-					"in %s().\n", Fname, Lc, DEVICE_NAME, channel, Cur_Func );
+			eprint( FATAL, SET, "%s: Invalid sample channel number (%ld) "
+					"in %s().\n", DEVICE_NAME, channel, Cur_Func );
 			THROW( EXCEPTION );
 		}
 	}
@@ -186,8 +187,8 @@ Var *temp_contr_sample_channel( Var *v )
 		if ( ( *v->val.sptr != 'A' && *v->val.sptr != 'B' ) ||
 			 strlen( v->val.sptr ) != 1 )
 		{
-			eprint( FATAL, "%s:%ld: %s: Invalid sample channel (\"%s\") in "
-					"%s().\n", Fname, Lc, DEVICE_NAME, v->val.sptr, Cur_Func );
+			eprint( FATAL, SET, "%s: Invalid sample channel (\"%s\") in "
+					"%s().\n", DEVICE_NAME, v->val.sptr, Cur_Func );
 			THROW( EXCEPTION );
 		}
 		channel = ( long ) ( *v->val.sptr - 'A' );
@@ -227,15 +228,15 @@ Var *temp_contr_sensor_unit( Var *v )
 			unit = v->val.lval;
 		else
 		{
-			eprint( WARN, "%s:%ld: %s: Float value used as unit number in "
-					"%s().\n", Fname, Lc, DEVICE_NAME, Cur_Func );
+			eprint( WARN, SET, "%s: Float value used as unit number in "
+					"%s().\n", DEVICE_NAME, Cur_Func );
 			unit = lround( v->val.dval );
 		}
 
 		if ( unit < UNIT_KELVIN || unit > UNIT_SENSOR )
 		{
-			eprint( FATAL, "%s:%ld: %s: Invalid unit number (%d) in %s().\n",
-					Fname, Lc, DEVICE_NAME, unit, Cur_Func );
+			eprint( FATAL, SET, "%s: Invalid unit number (%d) in %s().\n",
+					DEVICE_NAME, unit, Cur_Func );
 			THROW( EXCEPTION );
 		}
 	}
@@ -250,8 +251,8 @@ Var *temp_contr_sensor_unit( Var *v )
 
 		if ( strlen( v->val.sptr ) != 1 || i > UNIT_SENSOR )
 		{
-			eprint( FATAL, "%s:%ld: %s: Invalid unit (\"%s\") in %s().\n",
-					Fname, Lc, DEVICE_NAME, v->val.sptr, Cur_Func );
+			eprint( FATAL, SET, "%s: Invalid unit (\"%s\") in %s().\n",
+					DEVICE_NAME, v->val.sptr, Cur_Func );
 			THROW( EXCEPTION );
 		}
 	}
@@ -259,8 +260,8 @@ Var *temp_contr_sensor_unit( Var *v )
 
 	if ( ( v = vars_pop( v ) ) != NULL )
 	{
-		eprint( WARN, "%s:%ld: %s: Superfluous arguments in call of %s().\n",
-				Fname, Lc, Cur_Func );
+		eprint( WARN, SET, "%s: Superfluous arguments in call of %s().\n",
+				Cur_Func );
 
 		while ( ( v = vars_pop( v ) ) != NULL )
 			;
@@ -305,8 +306,8 @@ Var *temp_contr_lock_keyboard( Var *v )
 				lock = LOCK_STATE_REMOTE_LLO;
 			else
 			{
-				eprint( FATAL, "%s:%d: %s: Invalid argument in call of "
-						"function %s().\n", Fname, Lc, DEVICE_NAME, Cur_Func );
+				eprint( FATAL, SET, "%s: Invalid argument in call of "
+						"function %s().\n", DEVICE_NAME, Cur_Func );
 				THROW( EXCEPTION );
 			}
 		}
@@ -385,8 +386,8 @@ static double lakeshore330_sens_data( void )
 
 	if ( *buf != '-' && *buf != '+' && ! isdigit( *buf ) )
 	{
-		eprint( FATAL, "%s:%ld: %s: Error reading temperature in %s().\n",
-				Fname, Lc, DEVICE_NAME, Cur_Func );
+		eprint( FATAL, SET, "%s: Error reading temperature in %s().\n",
+				DEVICE_NAME, Cur_Func );
 		THROW( EXCEPTION );
 	}
 
@@ -431,8 +432,8 @@ static long lakeshore330_get_unit( void )
 		if ( *buf == out_units[ i ] )
 			return lakeshore330.unit = i;
 
-	eprint( FATAL, "%s:%ld: %s: Device returned invalid unit \"%s\" in "
-			"%s().\n", Fname, Lc, DEVICE_NAME, *buf, Cur_Func );
+	eprint( FATAL, SET, "%s: Device returned invalid unit \"%s\" in "
+			"%s().\n", DEVICE_NAME, *buf, Cur_Func );
 	THROW( EXCEPTION );
 
 	return -1;
@@ -481,6 +482,7 @@ static void lakeshore330_lock( int state )
 
 static void lakeshore330_gpib_failure( void )
 {
-	eprint( FATAL, "%s: Communication with device failed.\n", DEVICE_NAME );
+	eprint( FATAL, UNSET, "%s: Communication with device failed.\n",
+			DEVICE_NAME );
 	THROW( EXCEPTION );
 }

@@ -47,8 +47,8 @@ FILE *hp8647a_find_table( char **name )
 
 	if ( strchr( *name, '/' ) != NULL )
 	{
-		eprint( FATAL, "%s:%ld: %s: Table file `%s' not found.\n",
-				Fname, Lc, DEVICE_NAME, *name );
+		eprint( FATAL, UNSET, "%s: Table file `%s' not found.\n",
+				DEVICE_NAME, *name );
 		THROW( EXCEPTION );
 	}
 
@@ -64,8 +64,8 @@ FILE *hp8647a_find_table( char **name )
 
 	if ( ( tfp = hp8647a_open_table( *name ) ) == NULL )
 	{
-		eprint( FATAL, "%s:%ld: %s: Table file `%s' not found, neither in the "
-				"current dirctory nor in `%s'.\n", Fname, Lc, DEVICE_NAME,
+		eprint( FATAL, UNSET, "%s: Table file `%s' not found, neither in the "
+				"current dirctory nor in `%s'.\n", DEVICE_NAME,
 				strrchr( *name, '/' ) + 1, libdir );
 		THROW( EXCEPTION );
 	}
@@ -93,15 +93,15 @@ FILE *hp8647a_open_table( char *name )
 		if ( errno == ENOENT )       /* file not found */
 			return NULL;
 
-		eprint( FATAL, "%s:%ld: %s: No read permission for table file "
-					"`%s'.\n", Fname, Lc, DEVICE_NAME, name );
+		eprint( FATAL, UNSET, "%s: No read permission for table file `%s'.\n",
+				DEVICE_NAME, name );
 		T_free( name );
 		THROW( EXCEPTION )
 	}
 
 	if ( ( tfp = fopen( name, "r" ) ) == NULL )
 	{
-		eprint( FATAL, "%s:%ld: %s: Can't open table file `%s'.\n", Fname, Lc,
+		eprint( FATAL, UNSET, "%s: Can't open table file `%s'.\n",
 				DEVICE_NAME, name );
 		T_free( name );
 		THROW( EXCEPTION );
@@ -128,15 +128,15 @@ double hp8647a_get_att_from_table( double freq )
 
 	if ( freq < hp8647a.min_table_freq )
 	{
-		eprint( WARN, "%s:%ld: %s: Frequency of %f MHz not covered by table, "
-				"interpolating.\n", Fname, Lc, DEVICE_NAME, freq * 1.0e-6 );
+		eprint( WARN, SET, "%s: Frequency of %f MHz not covered by table, "
+				"interpolating.\n", DEVICE_NAME, freq * 1.0e-6 );
 		return hp8647a.att_table[ 0 ].att;
 	}
 
 	if ( freq > hp8647a.max_table_freq )
 	{
-		eprint( WARN, "%s:%ld: %s: Frequency of %f MHz not covered by table, "
-				"interpolating.\n", Fname, Lc, DEVICE_NAME, freq * 1.0e-6 );
+		eprint( WARN, SET, "%s: Frequency of %f MHz not covered by table, "
+				"interpolating.\n", DEVICE_NAME, freq * 1.0e-6 );
 		return hp8647a.att_table[ hp8647a.att_table_len - 1 ].att;
 	}
 
@@ -208,26 +208,26 @@ double hp8647a_get_att( double freq )
 	if ( att < MAX_ATTEN )
 	{
 		if ( ! TEST_RUN && I_am == PARENT )
-			eprint( SEVERE, "%s: Attenuation dynamic range is insufficient "
-					"(f = %g MHz), using %f db instead of %f db.\n",
-					DEVICE_NAME, freq * 1.0e-6, MAX_ATTEN, att );
+			eprint( SEVERE, UNSET, "%s: Attenuation dynamic range is "
+					"insufficient (f = %g MHz), using %f db instead of %f "
+					"db.\n", DEVICE_NAME, freq * 1.0e-6, MAX_ATTEN, att );
 		else
-			eprint( SEVERE, "%s:%ld: %s: Attenuation dynamic range is "
+			eprint( SEVERE, SET, "%s: Attenuation dynamic range is "
 					"insufficient (f = %g MHz) , using %f db instead of "
-					"%f db.\n", Fname, Lc, DEVICE_NAME, freq * 1.0e-6,
-					MAX_ATTEN, att );
+					"%f db.\n", DEVICE_NAME, freq * 1.0e-6, MAX_ATTEN, att );
 		att = MAX_ATTEN;
 	}
 	if ( att > hp8647a.min_attenuation )
 	{
 		if ( ! TEST_RUN && I_am == PARENT )
-			eprint( SEVERE, "%s: Attenuation dynamic range is insufficient "
-					"(f = %g MHz), using %f db instead of %f db.\n",
-					DEVICE_NAME, freq * 1.0e-6, hp8647a.min_attenuation, att );
+			eprint( SEVERE, UNSET, "%s: Attenuation dynamic range is "
+					"insufficient (f = %g MHz), using %f db instead of %f "
+					"db.\n", DEVICE_NAME, freq * 1.0e-6,
+					hp8647a.min_attenuation, att );
 		else
-			eprint( SEVERE, "%s:%ld: %s: Attenuation dynamic range is "
+			eprint( SEVERE, SET, "%s: Attenuation dynamic range is "
 					"insufficient (f = %g MHz) , using %f db instead of "
-					"%f db.\n", Fname, Lc, DEVICE_NAME, freq * 1.0e-6,
+					"%f db.\n", DEVICE_NAME, freq * 1.0e-6,
 					hp8647a.min_attenuation, att );
 		att = hp8647a.min_attenuation;
 	}
@@ -254,8 +254,8 @@ int hp8647a_set_mod_param( Var *v, double *dres, int *ires )
 	if ( v->type & ( INT_VAR | FLOAT_VAR ) )
 	{
 		if ( v->type == INT_VAR )
-			eprint( WARN, "%s:%ld: %s: Integer value used as modulation "
-					"amplitude.\n", Fname, Lc, DEVICE_NAME );
+			eprint( WARN, SET, "%s: Integer value used as modulation "
+					"amplitude.\n", DEVICE_NAME );
 		*dres = VALUE( v );
 		return 1;
 	}
@@ -302,9 +302,8 @@ int hp8647a_set_mod_param( Var *v, double *dres, int *ires )
 			return 3;
 	}
 
-	eprint( FATAL, "%s:%ld: %s: Invalid parameter \"%s\" in call of "
-			"function `synthesizer_modulation'.\n", Fname, Lc, DEVICE_NAME,
-			v->val.sptr );
+	eprint( FATAL, SET, "%s: Invalid parameter \"%s\" in call of "
+			"function `synthesizer_modulation'.\n", DEVICE_NAME, v->val.sptr );
 	THROW( EXCEPTION );
 
 	return -1;               /* we're never going to get here... */

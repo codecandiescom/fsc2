@@ -60,8 +60,8 @@ int pt2025_exp_hook( void )
 {
 	if ( ! pt2025_init( DEVICE_NAME ) )
 	{
-		eprint( FATAL, "%s:%ld: %s: Failed to initialize device.\n",
-				Fname, Lc, DEVICE_NAME );
+		eprint( FATAL, UNSET, "%s: Failed to initialize device.\n",
+				DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
 
@@ -171,7 +171,7 @@ static double pt2025_get_field( void )
 		len = 50;
 		if ( gpib_read( pt2025.device, buf, &len ) == FAILURE )
 		{
-			eprint( FATAL, "%s: Can't access the NMR gaussmeter.\n",
+			eprint( FATAL, UNSET, "%s: Can't access the NMR gaussmeter.\n",
 					DEVICE_NAME );
 			THROW( EXCEPTION );
 		}
@@ -192,8 +192,8 @@ static double pt2025_get_field( void )
 
 	if ( count == 0 )
 	{
-		eprint( FATAL, "%s:%ld: %s: NMR gaussmeter can't lock on the current "
-				"field in %s().\n", Fname, Lc, DEVICE_NAME, Cur_Func );
+		eprint( FATAL, SET, "%s: NMR gaussmeter can't lock on the current "
+				"field in %s().\n", DEVICE_NAME, Cur_Func );
 		THROW( EXCEPTION );
 	}
 

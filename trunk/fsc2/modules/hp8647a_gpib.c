@@ -58,15 +58,15 @@ bool hp8647a_init( const char *name )
 				  - hp8647a.att_at_ref_freq;
 			if ( att < MAX_ATTEN )
 			{
-				eprint( SEVERE, "%s: Attenuation range is insufficient, using "
-						"%f db instead of %f db.\n",
+				eprint( SEVERE, UNSET, "%s: Attenuation range is insufficient,"
+						" using %f db instead of %f db.\n",
 						DEVICE_NAME, MAX_ATTEN, att );
 				att = MAX_ATTEN;
 			}
 			if ( att > hp8647a.min_attenuation )
 			{
-				eprint( SEVERE, "%s: Attenuation range is insufficient, using "
-						"%f db instead of %f db.\n",
+				eprint( SEVERE, UNSET, "%s: Attenuation range is insufficient,"
+						" using %f db instead of %f db.\n",
 						DEVICE_NAME, hp8647a.min_attenuation, att );
 				att = hp8647a.min_attenuation;
 			}
@@ -319,13 +319,13 @@ int hp8647a_set_mod_source( int type, int source )
 	if ( type != MOD_TYPE_FM && source == MOD_SOURCE_DC )
 	{
 		if ( I_am == PARENT && HP8647A_INIT )
-			eprint( SEVERE, "%s: Modulation source \"%s\" can't be used for "
-					"%s modulation, using \"AC\" instead.\n", DEVICE_NAME,
-					mod_sources[ source ], mod_types[ type ] );
-		else
-			eprint( SEVERE, "%s:%ld: %s: Modulation source \"%s\" can't be "
+			eprint( SEVERE, UNSET, "%s: Modulation source \"%s\" can't be "
 					"used for %s modulation, using \"AC\" instead.\n",
-					Fname, Lc, DEVICE_NAME,
+					DEVICE_NAME, mod_sources[ source ], mod_types[ type ] );
+		else
+			eprint( SEVERE, SET, "%s: Modulation source \"%s\" can't be "
+					"used for %s modulation, using \"AC\" instead.\n",
+					DEVICE_NAME,
 					mod_sources[ source ], mod_types[ type ] );
 		source = MOD_SOURCE_AC;
 	}
@@ -437,14 +437,14 @@ double hp8647a_set_mod_ampl( int type, double ampl )
 	if ( ampl < 0.0 )
 	{
 		if ( I_am == PARENT && HP8647A_INIT )
-			eprint( FATAL, "%s: Invalid negative %s modulation amplitude of "
-					"%g %s.\n", DEVICE_NAME,
+			eprint( FATAL, UNSET, "%s: Invalid negative %s modulation "
+					"amplitude of %g %s.\n", DEVICE_NAME,
 					type != MOD_TYPE_PHASE ? types[ type ] : "phase",
 					type == MOD_TYPE_FM ? "kHz" :
 					( type == MOD_TYPE_AM ? "%%" : "rad" ) );
 		else
-			eprint( FATAL, "%s:%ld: %s: Invalid negative %s modulation "
-					"amplitude of %g %s.\n", Fname, Lc, DEVICE_NAME,
+			eprint( FATAL, SET, "%s: Invalid negative %s modulation "
+					"amplitude of %g %s.\n", DEVICE_NAME,
 					type != MOD_TYPE_PHASE ? types[ type ] : "phase",
 					type == MOD_TYPE_FM ? "kHz" :
 					( type == MOD_TYPE_AM ? "%%" : "rad" ) );
@@ -457,13 +457,14 @@ double hp8647a_set_mod_ampl( int type, double ampl )
 			if ( ampl > MAX_FM_AMPL )
 			{
 				if ( I_am == PARENT && HP8647A_INIT )
-					eprint( FATAL, "%s: FM modulation amplitude of %.1f kHz "
-							"is too large, valid range is 0 - %.1f kHz.\n",
-							DEVICE_NAME, ampl * 1.0e-3, MAX_FM_AMPL * 1.0e-3 );
+					eprint( FATAL, UNSET, "%s: FM modulation amplitude of "
+							"%.1f kHz is too large, valid range is 0 - %.1f "
+							"kHz.\n", DEVICE_NAME, ampl * 1.0e-3,
+							MAX_FM_AMPL * 1.0e-3 );
 				else
-					eprint( FATAL, "%s:%ld: %s: FM modulation amplitude of "
+					eprint( FATAL, SET, "%s: FM modulation amplitude of "
 							"%.1f kHz is too large, valid range is "
-							"0 - %.1f kHz.\n", Fname, Lc, DEVICE_NAME,
+							"0 - %.1f kHz.\n", DEVICE_NAME,
 							ampl * 1.0e-3, MAX_FM_AMPL * 1.0e-3 );
 				THROW( EXCEPTION );
 			}
@@ -474,13 +475,14 @@ double hp8647a_set_mod_ampl( int type, double ampl )
 			if ( ampl > MAX_AM_AMPL )
 			{
 				if ( I_am == PARENT && HP8647A_INIT )
-					eprint( FATAL, "%s: AM modulation amplitude of %.1f %% is "
-							"too large, valid range is 0 - %.1f %%.\n",
-							DEVICE_NAME, ampl, ( double ) MAX_AM_AMPL );
+					eprint( FATAL, UNSET, "%s: AM modulation amplitude of "
+							"%.1f %% is too large, valid range is 0 - %.1f "
+							"%%.\n", DEVICE_NAME, ampl,
+							( double ) MAX_AM_AMPL );
 				else
-					eprint( FATAL, "%s:%ld: %s: AM modulation amplitude of "
+					eprint( FATAL, SET, "%s: AM modulation amplitude of "
 							"%.1f %% is too large, valid range is "
-							"0 - %.1f %%.\n", Fname, Lc, DEVICE_NAME,
+							"0 - %.1f %%.\n", DEVICE_NAME,
 							ampl, ( double ) MAX_AM_AMPL );
 				THROW( EXCEPTION );
 			}
@@ -491,14 +493,14 @@ double hp8647a_set_mod_ampl( int type, double ampl )
 			if ( ampl > MAX_PHASE_AMPL )
 			{
 				if ( I_am == PARENT && HP8647A_INIT )
-					eprint( FATAL, "%s: Phase modulation amplitude of "
+					eprint( FATAL, UNSET, "%s: Phase modulation amplitude of "
 							"%.1f rad is too large, valid range is "
 							"0 - %.1f rad.\n", DEVICE_NAME, ampl,
 							( double ) MAX_PHASE_AMPL );
 				else
-					eprint( FATAL, "%s:%ld: %s: Phase modulation amplitude of "
+					eprint( FATAL, SET, "%s: Phase modulation amplitude of "
 							"%.1f rad is too large, valid range is "
-							"0 - %.1f rad.\n", Fname, Lc, DEVICE_NAME, ampl,
+							"0 - %.1f rad.\n", DEVICE_NAME, ampl,
 							( double ) MAX_PHASE_AMPL );
 				THROW( EXCEPTION );
 			}
@@ -555,7 +557,8 @@ double hp8647a_get_mod_ampl( int type )
 
 static void hp8647a_comm_failure( void )
 {
-	eprint( FATAL, "%s: Communication with device failed.\n", DEVICE_NAME );
+	eprint( FATAL, UNSET, "%s: Communication with device failed.\n",
+			DEVICE_NAME );
 	THROW( EXCEPTION );
 }
 

@@ -140,8 +140,8 @@ void hp8647a_read_table( FILE *fp )
 
 	if ( ( hp8647a_in = fp ) == NULL )
 	{
-		eprint( FATAL, "%s: Internal error while reading attenuation table.\n",
-				DEVICE_NAME );
+		eprint( FATAL, UNSET, "%s: Internal error while reading attenuation "
+                "table.\n", DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
 
@@ -163,21 +163,22 @@ void hp8647a_read_table( FILE *fp )
 	}
 	CATCH( EOF_IN_COMMENT_EXCEPTION )
 	{
-		eprint( FATAL, "%s: Unexpected end of table file `%s' in comment "
-				"starting at line %ld.\n", DEVICE_NAME, hp8647a.table_file,
-				hp8647a_Comm_Lc );
+		eprint( FATAL, UNSET, "%s: Unexpected end of table file `%s' in "
+                "comment starting at line %ld.\n", DEVICE_NAME,
+                hp8647a.table_file, hp8647a_Comm_Lc );
 		THROW( EXCEPTION );
 	}
 	CATCH( DANGLING_END_OF_COMMENT )
 	{
-		eprint( FATAL, "%s: End of comment found in table file `%s' at line "
-				"%ld.\n", DEVICE_NAME, hp8647a.table_file, hp8647a_Lc );
+		eprint( FATAL, UNSET, "%s: End of comment found in table file `%s' "
+                "at line %ld.\n",
+                DEVICE_NAME, hp8647a.table_file, hp8647a_Lc );
 		THROW( EXCEPTION );
 	}
 	CATCH( INVALID_INPUT_EXCEPTION )
 	{
-		eprint( FATAL, "%s: Invalid entry in table file  `%s' at line %ld.\n",
-				DEVICE_NAME, hp8647a.table_file, hp8647a_Lc );
+		eprint( FATAL, UNSET, "%s: Invalid entry in table file  `%s' at line "
+                "%ld.\n", DEVICE_NAME, hp8647a.table_file, hp8647a_Lc );
 		THROW( EXCEPTION );
 	}
 }
@@ -263,7 +264,7 @@ static void hp8647a_new_table_entry( int type, double val )
 
 		if ( is_freq ^ is_att )                 // one of them is still set ?
 		{
-			eprint( FATAL, "%s: Missing final %s in table file `%s'.\n",
+			eprint( FATAL, UNSET, "%s: Missing final %s in table file `%s'.\n",
 					DEVICE_NAME, is_freq ? "attenuation" : "frequency",
 					hp8647a.table_file );
 			THROW( EXCEPTION );
@@ -273,7 +274,7 @@ static void hp8647a_new_table_entry( int type, double val )
 
 		if ( hp8647a.att_table_len < 2 )
 		{
-			eprint( FATAL, "%s: Table file `%s' contains less than 2 "
+			eprint( FATAL, UNSET, "%s: Table file `%s' contains less than 2 "
 					"entries.\n", DEVICE_NAME, hp8647a.table_file );
 			THROW( EXCEPTION );
 		}
@@ -297,7 +298,7 @@ static void hp8647a_new_table_entry( int type, double val )
 
 	if ( type == IS_ATT && is_att )
 	{
-		eprint( FATAL, "%s: Error while reading table file `%s': Two "
+		eprint( FATAL, UNSET, "%s: Error while reading table file `%s': Two "
 				"attenuation values in a row at line %ld.\n", DEVICE_NAME,	 
 				hp8647a.table_file, hp8647a_Lc );
 		THROW( EXCEPTION );
@@ -305,7 +306,7 @@ static void hp8647a_new_table_entry( int type, double val )
 
 	if ( type == IS_FREQ && is_freq )
 	{
-		eprint( FATAL, "%s: Error while reading table file `%s': Two "
+		eprint( FATAL, UNSET, "%s: Error while reading table file `%s': Two "
 				"frequency values in a row at line %ld.\n", DEVICE_NAME,	 
 				hp8647a.table_file, hp8647a_Lc );
 		THROW( EXCEPTION );
@@ -336,16 +337,16 @@ static void hp8647a_new_table_entry( int type, double val )
 	{
 		if ( val < 0 )
 		{
-			eprint( FATAL, "%s: Invalid negative RF frequency found in the "
-					"table file `%s' at line %ld.\n", DEVICE_NAME,
+			eprint( FATAL, UNSET, "%s: Invalid negative RF frequency found "
+					"in the table file `%s' at line %ld.\n", DEVICE_NAME,
 					hp8647a.table_file, hp8647a_Lc );
 			THROW( EXCEPTION );
 		}
 
 		if ( val > MAX_FREQ || val < MIN_FREQ )
-			eprint( WARN, "%s: Frequency of %g MHz in table file `%s', line "
-					"%ld,  is not within range of synthesizer (%f kHz - "
-					"%f MHz).\n", DEVICE_NAME, val * 1.0e-6,
+			eprint( WARN, UNSET, "%s: Frequency of %g MHz in table file "
+					"`%s', line %ld,  is not within range of synthesizer "
+					"(%f kHz - %f MHz).\n", DEVICE_NAME, val * 1.0e-6,
 					hp8647a.table_file, hp8647a_Lc, MIN_FREQ * 1.0e-3,
 					MAX_FREQ * 1.0e-6 );
 	    hp8647a.att_table[ hp8647a.att_table_len ].freq = val;
@@ -355,9 +356,10 @@ static void hp8647a_new_table_entry( int type, double val )
 	{
 		if ( val > hp8647a.min_attenuation - MAX_ATTEN )
 		{
-			eprint( FATAL, "%s: Attenuation of %.1f dB in table file `%s', "
-					"line %ld, can't be achieved, maximum dynamic range is "
-					"%.1f dB.\n", DEVICE_NAME, val, hp8647a.table_file,
+			eprint( FATAL, UNSET, "%s: Attenuation of %.1f dB in table file "
+					"`%s', line %ld, can't be achieved, maximum dynamic "
+					"range is %.1f dB.\n", DEVICE_NAME, val,
+					hp8647a.table_file,
 					hp8647a_Lc, hp8647a.min_attenuation - MAX_ATTEN );
 			THROW( EXCEPTION );
 		}
@@ -389,8 +391,8 @@ static int hp8647a_comp( const void *a, const void *b )
 
 	if ( A->freq == B->freq )
 	{
-		eprint( FATAL, "%s: Frequency %s Hz appears twice in table file "
-				"`%s'\n", DEVICE_NAME, A->freq, hp8647a.table_file );
+		eprint( FATAL, UNSET, "%s: Frequency %s Hz appears twice in table "
+				"file `%s'\n", DEVICE_NAME, A->freq, hp8647a.table_file );
 		THROW( EXCEPTION );
 	}
 
