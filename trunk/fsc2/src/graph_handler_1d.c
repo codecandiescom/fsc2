@@ -607,6 +607,8 @@ static void motion_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
 
 
 /*----------------------------------------------------------*/
+/* Saves the current state of scaling before changes to the */
+/* scaling are applied - needed for the UNDO button.        */
 /*----------------------------------------------------------*/
 
 void save_scale_state_1d( Curve_1d *cv )
