@@ -160,12 +160,12 @@ void bug_report_callback( FL_OBJECT *a, long b )
 	ed = getenv( "EDITOR" );
 	if ( ed == NULL || *ed == '\0' )
 	{
-		cmd = T_malloc( 16 + strlen( filename ) );
+		cmd = CHAR_P T_malloc( 16 + strlen( filename ) );
 		strcpy( cmd, "xterm -e vi" );
 	}
 	else
 	{
-		cmd = T_malloc( 14 + strlen( ed ) + strlen( filename ) );
+		cmd = CHAR_P T_malloc( 14 + strlen( ed ) + strlen( filename ) );
 		sprintf( cmd, "xterm -e %s", ed );
 	}
 

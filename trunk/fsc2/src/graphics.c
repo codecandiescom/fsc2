@@ -262,7 +262,7 @@ void start_graphics( void )
 	/* Store the current state of the Graphics structure - to be restored
 	   after the experiment */
 
-	G_stored = get_memcpy( &G, sizeof G );
+	G_stored = GRAPHICS_P get_memcpy( &G, sizeof G );
 
 	if ( G.dim == 1 )
 	{
@@ -600,7 +600,7 @@ static void G_init_curves_1d( void )
 	{
 		/* Allocate memory for the curve and its data */
 
-		cv = G.curve[ i ] = T_malloc( sizeof *cv );
+		cv = G.curve[ i ] = CURVE_1D_P T_malloc( sizeof *cv );
 
 		cv->points = NULL;
 		cv->xpoints = NULL;
@@ -668,12 +668,12 @@ static void G_init_curves_1d( void )
 
 		/* Finally get memory for the data */
 
-		cv->points = T_malloc( G.nx * sizeof *cv->points );
+		cv->points = SCALED_POINT_P T_malloc( G.nx * sizeof *cv->points );
 
 		for ( j = 0; j < G.nx; j++ )           /* no points are known in yet */
 			cv->points[ j ].exist = UNSET;
 
-		cv->xpoints = T_malloc( G.nx * sizeof *cv->xpoints );
+		cv->xpoints = XPOINT_P T_malloc( G.nx * sizeof *cv->xpoints );
 	}
 }
 
@@ -701,7 +701,7 @@ static void G_init_curves_2d( void )
 	{
 		/* Allocate memory for the curve */
 
-		cv = G.curve_2d[ i ] = T_malloc( sizeof *cv );
+		cv = G.curve_2d[ i ] = CURVE_2D_P T_malloc( sizeof *cv );
 
 		cv->points = NULL;
 		cv->xpoints = NULL;
@@ -785,13 +785,15 @@ static void G_init_curves_2d( void )
 
 		/* Now get also memory for the data */
 
-		cv->points = T_malloc( G.nx * G.ny * sizeof *cv->points );
+		cv->points = SCALED_POINT_P T_malloc( G.nx * G.ny
+											  * sizeof *cv->points );
 
 		for ( sp = cv->points, j = 0; j < G.nx * G.ny; sp++, j++ )
 			sp->exist = UNSET;
 
-		cv->xpoints = T_malloc( G.nx * G.ny * sizeof *cv->xpoints );
-		cv->xpoints_s = T_malloc( G.nx * G.ny * sizeof *cv->xpoints_s );
+		cv->xpoints = XPOINT_P T_malloc( G.nx * G.ny * sizeof *cv->xpoints );
+		cv->xpoints_s = XPOINT_P T_malloc( G.nx * G.ny
+										   * sizeof *cv->xpoints_s );
 
 	}
 }
@@ -875,7 +877,7 @@ void stop_graphics( void )
 		graphics_free( );
 
 		for ( i = X; i <= ( G.dim == 1 ? Y : Z ); i++ )
-			G.label[ i ] = T_free( G.label[ i ] );
+			G.label[ i ] = CHAR_P T_free( G.label[ i ] );
 
 		if ( G.font )
 			XFreeFont( G.d, G.font );
@@ -926,7 +928,7 @@ void stop_graphics( void )
 	{
 		XFreeGC( G.d, m->gc );
 		mn = m->next;
-		m = T_free( m );
+		m = MARKER_P T_free( m );
 	}
 
 	if ( GUI.run_form )
@@ -938,7 +940,7 @@ void stop_graphics( void )
 	if ( G_stored )
 	{
 		memcpy( &G, G_stored, sizeof G );
-		G_stored = T_free( G_stored );
+		G_stored = GRAPHICS_P T_free( G_stored );
 		for ( i = X; i <= Z; i++ )
 			G.label[ i ] = NULL;
 	}
@@ -977,7 +979,7 @@ void graphics_free( void )
 
 			T_free( cv->points );
 			T_free( cv->xpoints );
-			cv = T_free( cv );
+			cv = CURVE_1D_P T_free( cv );
 		}
 	else
 		for ( i = 0; i < G.nc; i++ )
@@ -995,7 +997,7 @@ void graphics_free( void )
 			T_free( cv2->points );
 			T_free( cv2->xpoints );
 			T_free( cv2->xpoints_s );
-			cv2 = T_free( cv2 );
+			cv2 = CURVE_2D_P T_free( cv2 );
 		}
 
 	if ( G.font )
@@ -1738,7 +1740,7 @@ static void change_label_1d( char **label )
 	{
 		if ( G.label[ Y ] != NULL )
 		{
-			G.label[ Y ] = T_free( G.label[ Y ] );
+			G.label[ Y ] = CHAR_P T_free( G.label[ Y ] );
 			if ( G.font != NULL )
 				XFreePixmap( G.d, G.label_pm[ Y ] );
 		}
@@ -1906,9 +1908,9 @@ static void rescale_1d( long new_nx )
 
 	for ( k = 0; k < G.nc; k++ )
 	{
-		G.curve[ k ]->points = T_realloc( G.curve[ k ]->points,
+		G.curve[ k ]->points = SCALED_POINT_P T_realloc( G.curve[ k ]->points,
 										max_x * sizeof *G.curve[ k ]->points );
-		G.curve[ k ]->xpoints = T_realloc( G.curve[ k ]->xpoints,
+		G.curve[ k ]->xpoints = XPOINT_P T_realloc( G.curve[ k ]->xpoints,
 									   max_x * sizeof *G.curve[ k ]->xpoints );
 
 		for ( i = G.nx, sp = G.curve[ k ]->points + i; i < max_x;
@@ -1990,8 +1992,8 @@ static void rescale_2d( long new_nx, long new_ny )
 		   the the new elements in the already existing rows */
 
 		old_sp = osp = G.curve_2d[ k ]->points;
-		sp = G.curve_2d[ k ]->points = T_malloc( new_nx * new_ny
-												 * sizeof *sp );
+		sp = G.curve_2d[ k ]->points = SCALED_POINT_P
+			                          T_malloc( new_nx * new_ny * sizeof *sp );
 
 		for ( j = 0; j < l_min( G.ny, new_ny ); j++, osp += G.nx )
 		{
@@ -2009,9 +2011,11 @@ static void rescale_2d( long new_nx, long new_ny )
 
 		T_free( old_sp );
 
-		G.curve_2d[ k ]->xpoints = T_realloc( G.curve_2d[ k ]->xpoints,
+		G.curve_2d[ k ]->xpoints = XPOINT_P
+			 T_realloc( G.curve_2d[ k ]->xpoints,
 						new_nx * new_ny * sizeof *G.curve_2d[ k ]->xpoints );
-		G.curve_2d[ k ]->xpoints_s = T_realloc( G.curve_2d[ k ]->xpoints_s,
+		G.curve_2d[ k ]->xpoints_s = XPOINT_P
+			 T_realloc( G.curve_2d[ k ]->xpoints_s,
 						new_nx * new_ny * sizeof *G.curve_2d[ k ]->xpoints_s );
 
 		if ( G.curve_2d[ k ]->is_fs )
