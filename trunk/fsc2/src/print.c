@@ -1410,7 +1410,7 @@ static char **split_into_lines( int *num_lines )
 
 	TRY
 	{
-		lines = T_malloc( cur_size * sizeof( char * ) );
+		lines = T_malloc( cur_size * sizeof *lines );
 		TRY_SUCCESS;
 	}
 	OTHERWISE
@@ -1427,7 +1427,7 @@ static char **split_into_lines( int *num_lines )
 				if ( nl++ == cur_size )
 				{
 					cur_size += GUESS_NUM_LINES;
-					lines = T_realloc( lines, cur_size * sizeof( char * ) );
+					lines = T_realloc( lines, cur_size * sizeof *lines );
 				}
 
 				lines[ nl ] = cp + 1;
@@ -1441,12 +1441,12 @@ static char **split_into_lines( int *num_lines )
 			if ( nl == 0 )
 				THROW( EXCEPTION );
 
-			lines = T_realloc( lines, ( nl + 1 ) * sizeof( char * ) );
+			lines = T_realloc( lines, ( nl + 1 ) * sizeof *lines );
 		}
 		else
 		{
 			if ( nl++ >= cur_size )
-				lines = T_realloc( lines, ( nl + 1 ) * sizeof( char * ) );
+				lines = T_realloc( lines, ( nl + 1 ) * sizeof *lines );
 
 			lines[ nl ] = cp + 2;
 		}
@@ -1593,7 +1593,7 @@ static void do_print( char *name, const char *command )
 	{
 		cmd_line = T_strdup( command );
 
-		argv = T_malloc( 3 * sizeof( char * ) );
+		argv = T_malloc( 3 * sizeof *argv );
 		argv[ 0 ] = cptr = cmd_line;
 		argc = 1;
 
@@ -1611,7 +1611,7 @@ static void do_print( char *name, const char *command )
 
 			if ( *cptr != '\0' )
 			{
-				argv = T_realloc( argv, ( argc + 3 ) * sizeof( char * ) );
+				argv = T_realloc( argv, ( argc + 3 ) * sizeof *argv );
 				argv[ argc++ ] = cptr;
 			}
 		};
