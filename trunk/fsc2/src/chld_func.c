@@ -1953,21 +1953,21 @@ double *exp_getpos( char *buffer, ptrdiff_t len )
 
 		result[ 2 * MAX_CURVES + 1 ] = 0;
 		if ( keys & ShiftMask )
-			result[ 2 * MAX_CURVES + 1 ] += 1;
+			result[ 2 * MAX_CURVES + 1 ] += ( 1 << 0 );
 		if ( keys & LockMask )
-			result[ 2 * MAX_CURVES + 1 ] += 2;
+			result[ 2 * MAX_CURVES + 1 ] += ( 1 << 1 );
 		if ( keys & ControlMask )
-			result[ 2 * MAX_CURVES + 1 ] += 4;
+			result[ 2 * MAX_CURVES + 1 ] += ( 1 << 2 );
 		if ( keys & Mod1Mask )
-			result[ 2 * MAX_CURVES + 1 ] += 8;
+			result[ 2 * MAX_CURVES + 1 ] += ( 1 << 3 );
 		if ( keys & Mod2Mask )
-			result[ 2 * MAX_CURVES + 1 ] += 16;
+			result[ 2 * MAX_CURVES + 1 ] += ( 1 << 4 );
 		if ( keys & Mod3Mask )
-			result[ 2 * MAX_CURVES + 1 ] += 32;
+			result[ 2 * MAX_CURVES + 1 ] += ( 1 << 5 );
 		if ( keys & Mod4Mask )
-			result[ 2 * MAX_CURVES + 1 ] += 64;
+			result[ 2 * MAX_CURVES + 1 ] += ( 1 << 6 );
 		if ( keys & Mod5Mask )
-			result[ 2 * MAX_CURVES + 1 ] += 128;
+			result[ 2 * MAX_CURVES + 1 ] += ( 1 << 7 );
 
 		writer( C_GETPOS_REPLY, sizeof result, result );
 
