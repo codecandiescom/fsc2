@@ -39,57 +39,186 @@ static int fsc2_xio_error_handler( Display *d );
 
 /* Some variables needed for the X resources */
 
-#if defined WITH_HTTP_SERVER
-#define N_APP_OPT 19
-#else
-#define N_APP_OPT 18
-#endif
-
-GUI_Stuff GUI;
-
 FL_IOPT xcntl;
 
-char xGeoStr[ 64 ], xdisplayGeoStr[ 64 ], x_1d_displayGeoStr[ 64 ],
-	x_2d_displayGeoStr[ 64 ], xcutGeoStr[ 64 ], xtoolGeoStr[ 64 ],
-	 xaxisFont[ 256 ], xsmb[ 64 ], xsizeStr[ 64 ];
+static char xGeoStr[ 64 ],
+			xdisplayGeoStr[ 64 ],
+			x_1d_displayGeoStr[ 64 ],
+			x_2d_displayGeoStr[ 64 ],
+			xcutGeoStr[ 64 ],
+			xtoolGeoStr[ 64 ],
+			xaxisFont[ 256 ],
+			xsmb[ 64 ],
+			xsizeStr[ 64 ];
 
-int xbrowserfs, xbuttonfs, xinputfs, xlabelfs, xchoicefs, xsliderfs,
-	xfileselectorfs, xhelpfs, xnocm, xnob, xport;
+static int xbrowserfs,
+		   xbuttonfs,
+		   xinputfs,
+		   xlabelfs,
+		   xchoicefs,
+		   xsliderfs,
+		   xfileselectorfs,
+		   xhelpfs,
+		   xnocm,
+		   xport;
 
-FL_resource xresources[ N_APP_OPT ] = {
-	{ "geometry", "*.geometry", FL_STRING, xGeoStr, "", 64 },
-	{ "browserFontSize", "*.browserFontSize", FL_INT, &xbrowserfs,
-	  "0", sizeof( int ) },
-	{ "buttonFontSize", "*.buttonFontSize", FL_INT, &xbuttonfs,
-	  "0", sizeof( int ) },
-	{ "inputFontSize", "*.inputFontSize", FL_INT, &xinputfs,
-	  "0", sizeof( int ) },
-	{ "labelFontSize", "*.labelFontSize", FL_INT, &xlabelfs,
-	  "0", sizeof( int ) },
-	{ "displayGeometry", "*.displayGeometry", FL_STRING, xdisplayGeoStr,
-	  "", 64 },
-	{ "display1dGeometry", "*.display1dGeometry", FL_STRING,
-	  x_1d_displayGeoStr, "", 64 },
-	{ "display2dGeometry", "*.display2dGeometry", FL_STRING,
-	  x_2d_displayGeoStr, "", 64 },
-	{ "cutGeometry", "*.cutGeometry", FL_STRING, xcutGeoStr, "", 64 },
-	{ "toolGeometry", "*.toolGeometry", FL_STRING, xtoolGeoStr, "", 64 },
-	{ "axisFont", "*.axisFont", FL_STRING, xaxisFont, "", 256 },
-	{ "choiceFontSize", "*.choiceFontSize", FL_INT, &xchoicefs,
-	  "0", sizeof( int ) },
-	{ "sliderFontSize", "*.sliderFontSize", FL_INT, &xsliderfs,
-	  "0", sizeof( int ) },
-	{ "filselectorFontSize", "*.fileselectorFontSize", FL_INT,
-	  &xfileselectorfs, "0", sizeof( int ) },
-	{ "helpFontSize", "*.helpFontSize", FL_INT, &xhelpfs, "0", sizeof( int ) },
-	{ "stopMouseButton", "*.stopMouseButton", FL_STRING, &xsmb, "", 64 },
-	{ "noCrashMail", "*.noCrashMail", FL_BOOL, &xnocm, "0", sizeof( int ) },
-	{ "size", "*.size", FL_STRING, xsizeStr, "", 64 },
+FL_resource xresources[ ] = {
+	{                         /* geometry of main window */
+		"geometry",
+		"*.geometry",
+		FL_STRING,
+		xGeoStr,
+		"",
+		64
+	},
+	{                         /* font size of the browsers in main window */
+		"browserFontSize",
+		"*.browserFontSize",
+		FL_INT,
+		&xbrowserfs,
+		"0",
+		sizeof( int )
+	},
+	{                         /* font size of buttons */
+		"buttonFontSize",
+		"*.buttonFontSize",
+		FL_INT,
+		&xbuttonfs,
+		"0", 
+		sizeof( int )
+	},
+	{                         /* font size of inout fields */
+		"inputFontSize",
+		"*.inputFontSize",
+		FL_INT,
+		&xinputfs,
+		"0",
+		sizeof( int )
+	},
+	{                         /* font size of labels */
+		"labelFontSize",
+		"*.labelFontSize",
+		FL_INT,
+		&xlabelfs,
+		"0",
+		sizeof( int )
+	},
+	{                         /* geometry of the display window */
+		"displayGeometry",
+		"*.displayGeometry",
+		FL_STRING,
+		xdisplayGeoStr,
+		"",
+		64
+	},
+	{                         /* geometry of the 1D display window */
+		"display1dGeometry",
+		"*.display1dGeometry",
+		FL_STRING,
+		x_1d_displayGeoStr,
+		"",
+		64
+	},
+	{                         /* geometry of the 2D display window */
+		"display2dGeometry",
+		"*.display2dGeometry",
+		FL_STRING,
+		x_2d_displayGeoStr,
+		"",
+		64
+	},
+	{                         /* geometry of the cross section window */
+		"cutGeometry",
+		"*.cutGeometry",
+		FL_STRING,
+		xcutGeoStr,
+		"",
+		64
+	},
+	{                         /* geometry of the tool box window */
+		"toolGeometry",
+		"*.toolGeometry",
+		FL_STRING,
+		xtoolGeoStr,
+		"",
+		64
+	},
+	{                         /* font for axes in the display windows */
+		"axisFont",
+		"*.axisFont",
+		FL_STRING,
+		xaxisFont,
+		"",
+		256
+	},
+	{                         /* font for choice objects */
+		"choiceFontSize",
+		"*.choiceFontSize",
+		FL_INT,
+		&xchoicefs,
+		"0",
+		sizeof( int )
+	},
+	{                         /* font for sliders */
+		"sliderFontSize",
+		"*.sliderFontSize",
+		FL_INT,
+		&xsliderfs,
+		"0",
+		sizeof( int )
+	},
+	{                         /* font for the file selector */
+		"filselectorFontSize",
+		"*.fileselectorFontSize",
+		FL_INT,
+		&xfileselectorfs,
+		"0",
+		sizeof( int )
+	},
+	{                         /* font for the help texts */
+		"helpFontSize",
+		"*.helpFontSize",
+		FL_INT,
+		&xhelpfs,
+		"0",
+		sizeof( int )
+	},
+	{                         /* mouse button to use to stop an experiment  */
+		"stopMouseButton",
+		"*.stopMouseButton",
+		FL_STRING,
+		&xsmb,
+		"",
+		64
+	},
+	{                         /* switch off crash mails */
+		"noCrashMail",
+		"*.noCrashMail",
+		FL_BOOL,
+		&xnocm,
+		"0",
+		sizeof( int )
+	},
+	{                         /* selection of small or large version */
+		"size",
+		"*.size",
+		FL_STRING,
+		xsizeStr,
+		"",
+		64 },
 #if defined WITH_HTTP_SERVER
-    { "httpPort", "*.httpPort", FL_INT, &xport, "0", sizeof( int ) }
+    {                         /* number of port the HTTP server listens on */
+		"httpPort",
+		"*.httpPort",
+		FL_INT,
+		&xport,
+		"0",
+		sizeof( int )
+	},
 #endif
 };
 
+#define N_APP_OPT  ( sizeof xresources / sizeof xresources[ 0 ] )
 
 static struct {
 	unsigned int WIN_MIN_WIDTH;
@@ -112,7 +241,7 @@ bool xforms_init( int *argc, char *argv[ ] )
 	Display *display;
 	FL_Coord h, H;
 	FL_Coord cx1, cy1, cw1, ch1, cx2, cy2, cw2, ch2;
-	int i;
+	unsigned int i;
 	int flags, wx, wy;
 	unsigned int ww, wh;
 	XFontStruct *font;
