@@ -1528,7 +1528,7 @@ Var *f_display_1d( Var *v )
 
 	fsc2_assert( Internals.I_am == CHILD );
 
-	/* Determine the needed amount of shared memory */
+	/* Determine the required amount of shared memory */
 
 	len =   sizeof len                  /* length field itself */
 		  + sizeof nsets                /* number of sets to be sent */
@@ -1792,7 +1792,7 @@ Var *f_display_2d( Var *v )
 
 	fsc2_assert( Internals.I_am == CHILD );
 
-	/* Determine the needed amount of shared memory */
+	/* Determine the required amount of shared memory */
 
 	len =   sizeof len                  /* length field itself */
 		  + sizeof nsets                /* number of sets to be sent */
