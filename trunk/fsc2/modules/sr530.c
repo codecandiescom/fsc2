@@ -258,9 +258,7 @@ Var *lockin_get_data( Var *v )
 
 	val[ 1 ] = get_single_channel_data( v );
 
-	if ( ( v = vars_pop( v ) ) != NULL )
-		eprint( WARN, SET, "%s: Superfluous paramter%s in call of %s().\n",
-				DEVICE_NAME, v->next != NULL ? "s" : "", Cur_Func );
+	too_many_arguments( v );
 
 	return vars_push( FLOAT_ARR, val, 2 );
 }
@@ -379,9 +377,7 @@ Var *lockin_sensitivity( Var *v )
 				DEVICE_NAME, Cur_Func );
 	sens = VALUE( v );
 
-	if ( ( v = vars_pop( v ) ) != NULL )
-		eprint( WARN, SET, "%s: Superfluous argument%s in call of function "
-				"%s().\n", DEVICE_NAME, v->next != NULL ? "s" : "", Cur_Func );
+	too_many_arguments( v );
 
 	if ( sens < 0.0 )
 	{
@@ -498,9 +494,7 @@ Var *lockin_time_constant( Var *v )
 				DEVICE_NAME, Cur_Func );
 	tc = VALUE( v );
 
-	if ( ( v = vars_pop( v ) ) != NULL )
-		eprint( WARN, SET, "%s: Superfluous argument%s in call of function "
-				"%s().\n", DEVICE_NAME, v->next != NULL ? "s" : "", Cur_Func );
+	too_many_arguments( v );
 
 	if ( tc < 0.0 )
 	{
@@ -604,9 +598,7 @@ Var *lockin_phase( Var *v )
 				DEVICE_NAME, Cur_Func );
 	phase = VALUE( v );
 
-	if ( ( v = vars_pop( v ) ) != NULL )
-		eprint( WARN, SET, "%s: Superfluous argument%s in call of function "
-				"%s().\n", DEVICE_NAME, v->next != NULL ? "s" : "", Cur_Func );
+	too_many_arguments( v );
 
 	while ( phase >= 360.0 )    /* convert to 0-359 degree range */
 		phase -= 360.0;
@@ -722,9 +714,7 @@ Var *lockin_dac_voltage( Var *v )
 
 	voltage = VALUE( v );
 
-	if ( ( v = vars_pop( v ) ) != NULL )
-		eprint( WARN, SET, "%s: Superfluous arguments in call of function "
-				"%s().\n", DEVICE_NAME, Cur_Func );
+	too_many_arguments( v );
 
 	if ( fabs( voltage ) > 10.24 )
 	{
@@ -775,9 +765,7 @@ Var *lockin_lock_keyboard( Var *v )
 		}
 	}
 
-	if ( ( v = vars_pop( v ) ) != NULL )
-		eprint( WARN, SET, "%s: Superfluous argument%s in call of function "
-				"%s().\n", DEVICE_NAME, v->next != NULL ? "s" : "", Cur_Func );
+	too_many_arguments( v );
 
 	if ( FSC2_MODE == EXPERIMENT )
 		sr530_lock_state( lock );
