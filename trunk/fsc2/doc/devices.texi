@@ -2625,10 +2625,10 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @findex counter_timed_count()
 This function is very similar to the previous function,
 @code{counter_start_timed_counter()}, i.e.@: it runs a counter for a
-specified of time, but it only returns when the requested duration of
-time is over and then returns the masured count. In every other respect,
-i.e.@: the required arguments etc.@: it is identical to the previous
-function.
+specified of time, but in contrast it waits for the requested duration
+of time and only then returns with the masured count. In every other
+respect, e.g.@: the required arguments etc.@: it is identical to the
+previous function.
 
 @anchor{counter_intermediate_count}
 @item counter_intermediate_count()

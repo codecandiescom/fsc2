@@ -40,7 +40,7 @@
 * er035m_sa::     Bruker NMR Gaussmeter ER 035 M (GPIB, Stand-Alone)
 * er035m_sas::    Bruker NMR Gaussmeter ER 035 M (Serial, Stand-Alone)
 * hfs9000::       Tektronix Stimulus System HFS9000 (Berlin W-Band)
-* rs690::         Interface Technology RS690 Word Generator (Berlin 369 GHz)
+* rs690::         Interface Technology RS690 Word Generator (Berlin 360 GHz)
 * hp5340a::       HP Frequency Counter HP5340A
 * hp8647a::       HP RF Synthesizer HP8647A
 * hp8672a::       HP RF Synthesizer HP8672A
@@ -49,7 +49,7 @@
 * kontron4060::   Kontron 4060 Voltmeter
 * lakeshore330::  Lake Shore 330 Temperature Controller
 * lecroy9400::    LeCroy Digitizing Oscilloscope 9400
-* me6000::        Meilhaus ME-6000 and ME-6100 DAC card
+* me6000::        Meilhaus Electronic GmbH ME-6000 and ME-6100 DAC card
 * ni6601::        National Instruments 6601 GPCT card
 * pt2025::        Metrolab NMR Teslameter PT2025
 * s_band_magnet_broad::   S-band Magnet Power Supply (broad range)
@@ -1008,19 +1008,14 @@ with @code{fsc2} to be installed)
 @multitable @columnfractions .45 .45
 @item @code{counter_name()}                   @tab @ref{counter_name}
 @item @code{counter_start_continuous_counter} @tab @ref{counter_start_continuous_counter}
-@item @code{counter_start_timed_counter}      @tab
-@ref{counter_start_timed_counter}
+@item @code{counter_start_timed_counter}      @tab @ref{counter_start_timed_counter}
 @item @code{counter_timed_count}              @tab @ref{counter_timed_count}
 @item @code{counter_intermediate_count}       @tab @ref{counter_intermediate_count}
 @item @code{counter_final_count}              @tab @ref{counter_final_count}
-@item @code{counter_stop_counter}             @tab
-@ref{counter_stop_counter}
-@item @code{counter_single_pulse}             @tab
-@ref{counter_single_pulse}
-@item @code{counter_continuous_pulses}        @tab
-@ref{counter_continuous_pulses}
-@item @code{counter_dio_read}                 @tab
-@ref{counter_dio_read}
+@item @code{counter_stop_counter}             @tab @ref{counter_stop_counter}
+@item @code{counter_single_pulse}             @tab @ref{counter_single_pulse}
+@item @code{counter_continuous_pulses}        @tab @ref{counter_continuous_pulses}
+@item @code{counter_dio_read}                 @tab @ref{counter_dio_read}
 @item @code{counter_dio_write}                @tab @ref{counter_dio_write}
 @end multitable
 
