@@ -539,7 +539,7 @@ ssize_t fsc2_serial_write( int sn, const void *buf, size_t count,
 				{
 					gettimeofday( &after, NULL );
 					us_wait -=   ( after.tv_sec  * 1000000 + after.tv_usec  )
-							   - ( before.tv_sec * 1000000 - before.tv_usec );
+							   - ( before.tv_sec * 1000000 + before.tv_usec );
 					if ( us_wait > 0 )
 						goto write_retry;
 				}
@@ -628,7 +628,7 @@ ssize_t fsc2_serial_read( int sn, void *buf, size_t count,
 				{
 					gettimeofday( &after, NULL );
 					us_wait -=   ( after.tv_sec  * 1000000 + after.tv_usec  )
-							   - ( before.tv_sec * 1000000 - before.tv_usec );
+							   - ( before.tv_sec * 1000000 + before.tv_usec );
 					if ( us_wait > 0 )
 						goto read_retry;
 				}
