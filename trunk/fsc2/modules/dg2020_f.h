@@ -304,8 +304,8 @@ void dg2020_pulse_start_setup( void );
 void dg2020_create_phase_pulses( int func );
 PULSE *dg2020_new_phase_pulse( FUNCTION *f, PULSE *p, int nth,
 							   int pos, int pod );
-void dg2020_calc_new_phase_pulse_pos_and_len( FUNCTION *f, PULSE *np,
-											  PULSE *p, int nth );
+void dg2020_set_phase_pulse_pos_and_len( FUNCTION *f, PULSE *np,
+										 PULSE *p, int nth );
 
 
 /* Functions from dg2020_run.c */

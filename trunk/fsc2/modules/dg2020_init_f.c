@@ -544,7 +544,7 @@ PULSE *dg2020_new_phase_pulse( FUNCTION *f, PULSE *p, int nth, int pos,
 	/* Calculate its position and length if possible */
 
 	if ( np->is_active )
-		dg2020_calc_new_phase_pulse_pos_and_len( f, np, p, nth );
+		dg2020_set_phase_pulse_pos_and_len( f, np, p, nth );
 
 	np->is_dpos = p->is_dpos == UNSET;
 	np->is_dlen = p->is_dlen == UNSET;
@@ -573,8 +573,8 @@ PULSE *dg2020_new_phase_pulse( FUNCTION *f, PULSE *p, int nth, int pos,
 /*---------------------------------------------------------------------------
 ---------------------------------------------------------------------------*/
 
-void dg2020_calc_new_phase_pulse_pos_and_len( FUNCTION *f, PULSE *np,
-											  PULSE *p, int nth )
+void dg2020_set_phase_pulse_pos_and_len( FUNCTION *f, PULSE *np,
+										 PULSE *p, int nth )
 {
 	PULSE **pppl;                 // list of phase pulses for previous pulse
 	int ppp_num;                  // and the length of this list
@@ -603,12 +603,14 @@ void dg2020_calc_new_phase_pulse_pos_and_len( FUNCTION *f, PULSE *np,
 			pp = p->function->pulses[ nth - 1 ];
 
 			/* If the phase switch delay does not fit between the pulse it
-			   gets associated with and its predecessor we have to complain */
+			   gets associated with and its predecessor we have to complain
+			   (except when both pulses use the same phase sequence or none
+			   at all) */
 
-			if ( p->pos - pp->pos - pp->len < p->function->psd )
+			if ( p->pos - ( pp->pos + pp->len ) < f->psd && p->pc != pp->pc )
 			{
 				eprint( FATAL, "DG2020: Distance between pulses %ld and %ld "
-						"is too small to allow the setting of phase pulses.\n",
+						"is too small to allow setting of phase pulses.\n",
 						pp->num, p->num );
 				THROW( EXCEPTION );
 			}
@@ -620,12 +622,16 @@ void dg2020_calc_new_phase_pulse_pos_and_len( FUNCTION *f, PULSE *np,
 
 			/* If this isn't early enough we start the phase pulse at the
 			   minimum time (i.e. the phase switch delay) before the pulse.
-			   But that also means that we have to shorten all the phase pulses
-			   associated with the previous pulse (if there are any...) */
+			   But that also means that we have to shorten all the phase
+			   pulses associated with the previous pulse (if there are
+			   any). Again, there's the exception for the case that the pulse
+			   and its predecessor use the same phase sequence and thus both
+			   their phase pulses get merged into one pulse. */
 
-			if ( p->pos - np->pos < p->function->psd )
+			if ( p->pos - np->pos < p->function->psd &&
+				 p->pc != pp->pc )
 			{
-				np->pos = np->initial_pos = p->pos - p->function->psd;
+				np->pos = np->initial_pos = p->pos - f->psd;
 				if ( dg2020_find_phase_pulse( pp, &pppl, &ppp_num ) )
 				{
 					for ( i = 0; i < ppp_num; i++ )
@@ -647,19 +653,11 @@ void dg2020_calc_new_phase_pulse_pos_and_len( FUNCTION *f, PULSE *np,
 
 		if ( nth == p->function->num_active_pulses - 1 ) // last active pulse ?
 			np->len = np->initial_len = -1;
-		else if ( nth == 0 )                    // first (but not last) pulse ?
+		else
 		{
-			pn = p->function->pulses[ 1 ];
-			np->len = np->initial_len =
-				( p->pos + p->len + pn->pos ) / 2 - np->pos;
-			
-		}
-		else                                         // some pulse in between ?
-		{
-			pp = p->function->pulses[ nth - 1 ];
 			pn = p->function->pulses[ nth + 1 ];
 			np->len = np->initial_len =
-				( p->len + pn->pos - pp->pos - pp->len ) / 2;
+				( p->pos + p->len + pn->pos ) / 2 - np->pos;
 		}
 	}
 }
