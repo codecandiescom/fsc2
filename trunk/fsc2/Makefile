@@ -46,7 +46,7 @@
 # The following variable determines under which directory the program and
 # its auxiliary files will be installed (defaults to /usr/local)
 
-prefix            := /usr/local
+prefix             := /usr/local
 
 
 # Next the owner and the group of fsc2 all files that will be installed has
@@ -56,8 +56,8 @@ prefix            := /usr/local
 # allows access to the device files. See the longer discussion in section B
 # of the INSTALL file.
 
-OWNER             := fsc2
-GROUP             := uucp
+OWNER              := fsc2
+GROUP              := uucp
 
 
 # Now set the system wide path for files to be included by EDL files when
@@ -67,7 +67,7 @@ GROUP             := uucp
 # always to write out the full path. If no such repository exists its saver
 # to leave this variable undefined.
 
-# DEF_INCL_DIR      := /scratch/EDL/includes
+# DEF_INCL_DIR       := /scratch/EDL/includes
 
 
 # The next variable defines the GPIB library to use, it must be set to either
@@ -75,14 +75,14 @@ GROUP             := uucp
 # 'JTT' for the library written by me. Alternatively, if no GPIB support is
 # needed, define GPIB_LIBRARY as 'NONE' (which is the default if not set).
 
-GPIB_LIBRARY      := JTT
+GPIB_LIBRARY       := JTT
 
 
 # Here the location of the GPIB configuration file is set (this usually is
 # needed for the National Instruments GPIB library only, if not set
 # GPIB_CONF_FILE defaults to /etc/gpib.conf).
 
-GPIB_CONF_FILE    := /etc/gpib.conf
+GPIB_CONF_FILE     := /etc/gpib.conf
 
 
 # Next set the file for writing logs about the activity on the GPIB bus.
@@ -93,7 +93,7 @@ GPIB_CONF_FILE    := /etc/gpib.conf
 # indefintely, if you start a new experiment its previous contents get
 # overwritten. If no file is specified logs will be written to stderr.
 
-GPIB_LOG_FILE     := /tmp/gpib.log
+GPIB_LOG_FILE      := /tmp/gpib.log
 
 
 # The next variable, GPIB_LOG_LEVEL, sets the verbosity level for the GPIB
@@ -103,7 +103,7 @@ GPIB_LOG_FILE     := /tmp/gpib.log
 # set to 'LOW' only errors messages will be written to the log file. If not
 # set it defaults to 'LOW'.
 
-GPIB_LOG_LEVEL    := HIGH
+GPIB_LOG_LEVEL     := HIGH
 
 
 # Finally, if the header files for the GPIB library aren't in either
@@ -111,14 +111,14 @@ GPIB_LOG_LEVEL    := HIGH
 # set the variable GPIB_HEADER_DIR to the absolute path of the directory
 # where the header file(s) for the library reside.
 
-# GPIB_HEADER_DIR   := /usr/include/gpib
+# GPIB_HEADER_DIR    := /usr/include/gpib
 
 
 # NUM_SERIAL_PORTS defines the number of serial ports that are available on
 # the computer (or how many you want to allow fsc2 to use) and defaults to 0
 # if not set (in which case no serial ports can be used).
 
-NUM_SERIAL_PORTS  := 2
+NUM_SERIAL_PORTS   := 2
 
 
 # The second variable, SERIAL_LOCK_DIR, is the directory where UUCP style
@@ -127,7 +127,7 @@ NUM_SERIAL_PORTS  := 2
 # itself or all its users must have read and write permissions for this
 # directory. Also see the longer discussion in section C of the INSTALL file.
 
-SERIAL_LOCK_DIR   := /var/lock
+SERIAL_LOCK_DIR    := /var/lock
 
 
 # The next two lines must be uncommented if you want support for the National
@@ -138,8 +138,8 @@ SERIAL_LOCK_DIR   := /var/lock
 # library for the card is already properly installed if you want to build
 # fsc2 with support for the card.
 
-# WITH_NI6601       := yes
-# ni6601_libs       := libni6601.so
+# WITH_NI6601        := yes
+# ni6601_libs        := libni6601.so
 
 
 # Uncommented the next two lines if you want support for the Meilhaus
@@ -150,8 +150,8 @@ SERIAL_LOCK_DIR   := /var/lock
 # library for the card is already properly installed if you want to build
 # fsc2 with support for the card.
 
-# WITH_ME6000       := yes
-# me6000_libs       := libme6x00.so
+# WITH_ME6000        := yes
+# me6000_libs        := libme6x00.so
 
 
 # The next two lines must be uncommented if you want support for the Wasco
@@ -162,8 +162,8 @@ SERIAL_LOCK_DIR   := /var/lock
 # the card is already properly installed if you want to build fsc2 with
 # support for the card.
 
-# WITH_WITIO_48     := yes
-# witio_48_libs     := libwitio_48.so
+# WITH_WITIO_48      := yes
+# witio_48_libs      := libwitio_48.so
 
 
 # The following three lines must be uncommented when you want support for the
@@ -178,9 +178,9 @@ SERIAL_LOCK_DIR   := /var/lock
 # and the library for the camera are already properly installed if you want
 # to build fsc2 with support for the camera.
 
-# WITH_SPEC10       := yes
-# rs_spec10_incl    := /usr/local/include/pvcam
-# rs_spec10_libs    := libpvcam.so
+# WITH_SPEC10        := yes
+# rs_spec10_incl     := /usr/local/include/pvcam
+# rs_spec10_libs     := libpvcam.so
 
 
 # The next two lines must be uncommented if you want support for the National
@@ -191,8 +191,8 @@ SERIAL_LOCK_DIR   := /var/lock
 # library for the card is already properly installed if you want to build
 # fsc2 with support for the card.
 
-# WITH_NI_DAQ       := yes
-# ni_daq_libs       := libni_daq.so
+# WITH_PCI_MIO_16E_1 := yes
+# pci_mio_16e_1_libs := libni_daq.so
 
 
 # Comment out the next two lines if you don't want the ability to run a HTTP
@@ -200,14 +200,14 @@ SERIAL_LOCK_DIR   := /var/lock
 # default port number the HTTP server will listen on can be set by the second
 # variable, DEFAULT_HTTP_PORT, which must be a  number between 1024 and 65535.
 
-WITH_HTTP_SERVER  := yes
-DEFAULT_HTTP_PORT := 8080
+WITH_HTTP_SERVER   := yes
+DEFAULT_HTTP_PORT  := 8080
 
 
 # Uncomment the following line if you don't want the program to send me an
 # email with a report when it crashes.
 
-# NO_MAIL           := yes
+# NO_MAIL            := yes
 
 
 # Normally, fsc2 will use the systems 'mail' command when it needs to send
@@ -221,8 +221,8 @@ DEFAULT_HTTP_PORT := 8080
 # the USE_IPv6 variable if your machine uses the new IP address scheme with
 # 128 bit addresses instead of the traditional one with only 32 bit addresses.
 
-# USE_FSC2_MTA      := yes
-# USE_IPv6          := yes
+# USE_FSC2_MTA       := yes
+# USE_IPv6           := yes
 
 
 # This last variable controls to whom emails with bug reports and about
@@ -231,7 +231,7 @@ DEFAULT_HTTP_PORT := 8080
 # case sending bug reports or emails about crashes to me wouldn't make too
 # much sense).
 
-MAIL_ADDRESS      := Jens.Toerring@physik.fu-berlin.de
+MAIL_ADDRESS       := Jens.Toerring@physik.fu-berlin.de
 
 
 ##############################################################################

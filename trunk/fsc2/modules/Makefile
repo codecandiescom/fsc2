@@ -68,6 +68,9 @@ hjs_attenuator  := hjs_attenuator.c hjs_attenuator_lexer.c
 hjs_sfc         := hjs_sfc.c hjs_sfc_lexer.c
 hjs_fc          := hjs_fc.c hjs_fc_lexer.c
 spex_cd2a       := spex_cd2a.c spex_cd2a_ll.c
+pci_mio_16e_1   := pci_mio_16e_1.c pci_mio_16e_1_ai.c pci_mio_16e_1_ao.c \
+				   pci_mio_16e_1_dio.c pci_mio_16e_1_gpct.c \
+				   pci_mio_16e_1_util.c
 
 
 # List of all "complicated" modules that are to be made from more than a
@@ -96,6 +99,10 @@ endif
 
 ifdef WITH_SPEC10
 comp_modules    += rs_spec10
+endif
+
+ifdef WITH_PCI_MIO_16E_1
+comp_modules    += pci_mio_16e_1
 endif
 
 src_headers     := $(addprefix $(sdir)/,$(headers)) $(sdir)/fsc2_module.h

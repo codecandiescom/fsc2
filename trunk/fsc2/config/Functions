@@ -276,6 +276,20 @@ daq_get_voltage, -1, ALL;
 daq_dac_parameter, -1, ALL;
 
 
+daq_ai_channel_setup, -1, EXP;
+daq_ai_acq_setup, -1, EXP;
+daq_ai_start_acquisition, 0, EXP;
+daq_ai_get_curve, 0, EXP;
+
+daq_start_continuous_counter, -1, EXP;
+daq_start_timed_counter, -1, EXP;
+daq_timed_count, -1, EXP;
+daq_intermediate_count, 1, EXP;
+daq_final_count, 1, EXP;
+daq_stop_counter, 1, EXP;
+daq_single_pulse, 2, EXP;
+daq_continuous_pulses, -1, EXP;
+
 /* Functions exported by event counters (NatInst 6601) */
 
 counter_name, 0, ALL;
