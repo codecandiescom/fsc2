@@ -474,8 +474,8 @@ static int open_mail_socket( const char *remote, const char *local )
 /* query a DNS server and interpret the reply according to RFC 1035 and   */
 /* RFC 974 (and take into account that RFC 1123 tells that, in contrast   */
 /* to what's written in RFC 974, we're not supposed to check for the WKS  */
-/* record for the machine anymore but instead simply try to connect to it */
-/* and test what happens).                                                */
+/* records for the machine anymore but instead simply try to connect to   */
+/* it and test if it works).                                              */
 /* The function might be called several times in a row to get another     */
 /* mail-receiving machine each time round if no connection could be made  */
 /* to the machine that was returned the last time round. The first time   */
