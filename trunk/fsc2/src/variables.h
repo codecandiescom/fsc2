@@ -97,6 +97,7 @@ void vars_check2( Var *v, int type );
 void vars_check( Var *v );
 void vars_warn_new( Var *v );
 Var *vars_assign( Var *src, Var *dest );
+bool vars_exist( Var *v );
 
 
 #endif  /* ! VARIABLES_HEADER */

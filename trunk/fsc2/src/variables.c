@@ -2,6 +2,9 @@
    $Id$
 
    $Log$
+   Revision 1.19  1999/07/21 15:26:32  jens
+   *** empty log message ***
+
    Revision 1.18  1999/07/21 07:32:24  jens
    *** empty log message ***
 
@@ -1477,15 +1480,31 @@ void free_vars( void )
 
 void vars_check2( Var *v, int type )
 {
-	/* we should never end here with an undefined variable... */
+	/* being paranoid we first check that the variable exists at all -
+	   probably this can be left out later. */
+
+	vars_exist( v );
+
+	/* check that the variable has a value assigned to it */
 
 	if ( v->type == UNDEF_VAR )
 	{
-		eprint( FATAL, "fsc2: INTERNAL ERROR detected at %s:%d.\n",
-				__FILE__, __LINE__ );
-		exit( EXIT_FAILURE );
+		if ( v->name != NULL )
+		{
+			eprint( FATAL, "%s:%ld: The accessed variable `%s' has never been "
+					"assigned a value.\n", Fname, Lc );
+			THROW( VARIABLES_EXCEPTION );
+		}
+		else
+		{
+			eprint( FATAL, "fsc2: INTERNAL ERROR detected at %s:%d.\n",
+					__FILE__, __LINE__ );
+			exit( EXIT_FAILURE );
+		}
 	}
 	
+	/* check that the variable has the correct type */
+
 	if ( ! ( v->type & type ) )
 	{
 		eprint( FATAL, "%s:%ld: Wrong type of variable.\n",
@@ -1610,3 +1629,23 @@ Var *vars_assign( Var *src, Var *dest )
 	vars_pop( src );
 	return( dest );
 }
+
+
+bool vars_exist( Var *v )
+{
+	Var *lp;
+
+
+	for ( lp = var_list; lp != NULL; lp = lp->next )
+		if ( lp == v )
+			return( OK );
+
+	for ( lp = Var_Stack; lp != NULL; lp = lp->next )
+		if ( lp == v )
+			return( OK );
+
+	eprint( FATAL, "fsc2: INTERNAL ERROR: Use of non-existing "
+			"variable detected at %s:%d.\n", __FILE__, __LINE__ );
+	THROW( VARIABLES_EXCEPTION );
+}
+
