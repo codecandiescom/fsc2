@@ -140,61 +140,78 @@ void start_graphics( void )
 
 	run_form = G_Funcs.create_form_run( );
 
+	G.font = NULL;
 	CG.is_shown = UNSET;
 	if ( G.dim == 2 )
 		cut_form = G_Funcs.create_form_cut( );
 
-	/* The forms still need some modifications - first set the pixmaps
-	   and help texts for the Undo and Print buttons */
-
-	pixmap_file = get_string( strlen( auxdir ) + strlen( "/undo.xpm" ) );
-	strcpy( pixmap_file, auxdir );
-	if ( auxdir[ strlen( auxdir ) - 1 ] != '/' )
-		strcat( pixmap_file, "/" );
-	strcat( pixmap_file, "undo.xpm" );
-
-	G.font = NULL;
-
-	if ( access( pixmap_file, R_OK ) == 0 )
+	if ( ! G.is_init )
 	{
-		fl_set_pixmapbutton_file( run_form->undo_button, pixmap_file );
-		fl_set_object_lsize( run_form->undo_button, GI_sizes.SMALL_FONT_SIZE );
-		fl_set_object_helper( run_form->undo_button,
-							  "Undo last rescaling operation" );
+		fl_hide_object( run_form->curve_1_button );
+		fl_hide_object( run_form->curve_2_button );
+		fl_hide_object( run_form->curve_3_button );
+		fl_hide_object( run_form->curve_4_button );
 
-		if ( G.dim == 2 )
+		fl_hide_object( run_form->undo_button );
+		fl_hide_object( run_form->print_button );
+		fl_hide_object( run_form->full_scale_button );
+	}
+	else
+	{
+		pixmap_file = get_string( strlen( auxdir ) + strlen( "/undo.xpm" ) );
+		strcpy( pixmap_file, auxdir );
+		if ( auxdir[ strlen( auxdir ) - 1 ] != '/' )
+			strcat( pixmap_file, "/" );
+		strcat( pixmap_file, "undo.xpm" );
+
+		if ( access( pixmap_file, R_OK ) == 0 )
 		{
-			fl_set_pixmapbutton_file( cut_form->cut_undo_button, pixmap_file );
-			fl_set_object_lsize( cut_form->cut_undo_button,
+			fl_set_pixmapbutton_file( run_form->undo_button, pixmap_file );
+			fl_set_object_lsize( run_form->undo_button,
 								 GI_sizes.SMALL_FONT_SIZE );
-			fl_set_object_helper( cut_form->cut_undo_button,
+			fl_set_object_helper( run_form->undo_button,
 								  "Undo last rescaling operation" );
+
+			if ( G.dim == 2 )
+			{
+				fl_set_pixmapbutton_file( cut_form->cut_undo_button,
+										  pixmap_file );
+				fl_set_object_lsize( cut_form->cut_undo_button,
+									 GI_sizes.SMALL_FONT_SIZE );
+				fl_set_object_helper( cut_form->cut_undo_button,
+									  "Undo last rescaling operation" );
+			}
 		}
-	}
-	T_free( pixmap_file );
+		T_free( pixmap_file );
 
-	pixmap_file = get_string( strlen( auxdir ) + strlen( "/printer.xpm" ) );
-	strcpy( pixmap_file, auxdir );
-	if ( auxdir[ strlen( auxdir ) - 1 ] != '/' )
-		strcat( pixmap_file, "/" );
-	strcat( pixmap_file, "printer.xpm" );
-	if ( access( pixmap_file, R_OK ) == 0 )
-	{
-		fl_set_pixmapbutton_file( run_form->print_button, pixmap_file );
-		fl_set_object_lsize( run_form->print_button,
-							 GI_sizes.SMALL_FONT_SIZE );
-		fl_set_object_helper( run_form->print_button, "Print window" );
-
-		if ( G.dim == 2 )
+		pixmap_file = get_string(   strlen( auxdir )
+								  + strlen( "/printer.xpm" ) );
+		strcpy( pixmap_file, auxdir );
+		if ( auxdir[ strlen( auxdir ) - 1 ] != '/' )
+			strcat( pixmap_file, "/" );
+		strcat( pixmap_file, "printer.xpm" );
+		if ( access( pixmap_file, R_OK ) == 0 )
 		{
-			fl_set_pixmapbutton_file( cut_form->cut_print_button,
-									  pixmap_file );
-			fl_set_object_lsize( cut_form->cut_print_button,
+			fl_set_pixmapbutton_file( run_form->print_button, pixmap_file );
+			fl_set_object_lsize( run_form->print_button,
 								 GI_sizes.SMALL_FONT_SIZE );
-			fl_set_object_helper( cut_form->cut_print_button, "Print window" );
+			fl_set_object_helper( run_form->print_button, "Print window" );
+
+			if ( G.dim == 2 )
+			{
+				fl_set_pixmapbutton_file( cut_form->cut_print_button,
+										  pixmap_file );
+				fl_set_object_lsize( cut_form->cut_print_button,
+									 GI_sizes.SMALL_FONT_SIZE );
+				fl_set_object_helper( cut_form->cut_print_button,
+									  "Print window" );
+			}
 		}
+		T_free( pixmap_file );
+
+		fl_set_object_helper( run_form->full_scale_button,
+							  "Switch off automatic rescaling" );
 	}
-	T_free( pixmap_file );
 
 	if ( stop_button_mask == 0 )
 		fl_set_object_helper( run_form->stop, "Stop the experiment" );
@@ -207,8 +224,6 @@ void start_graphics( void )
 	else if ( stop_button_mask == FL_RIGHT_MOUSE )
 		fl_set_object_helper( run_form->stop, "Stop the experiment\n"
 			                                  "Use right mouse button" );
-	fl_set_object_helper( run_form->full_scale_button,
-						  "Switch off automatic rescaling" );
 	if ( G.dim == 2 )
 	{
 		fl_set_object_helper( cut_form->cut_close_button,
@@ -235,7 +250,7 @@ void start_graphics( void )
 
 		fl_set_object_callback( run_form->print_button, print_1d, 1 );
 	}
-	else
+	else if ( G.dim == 2 )
 	{
 		fl_set_object_helper( run_form->curve_1_button, "Hide curve 1" );
 		fl_set_object_helper( run_form->curve_2_button, "Show curve 2" );
@@ -258,9 +273,9 @@ void start_graphics( void )
 	fl_set_canvas_decoration( run_form->y_axis, FL_FRAME_BOX );
 	fl_set_canvas_decoration( run_form->canvas, FL_NO_FRAME );
 
-	if ( G.dim == 1 )
+	if ( G.dim == 1 || ! G.is_init )
 		fl_delete_object( run_form->z_axis );
-	else if ( G.dim == 2 )
+	else
 	{
 		fl_set_canvas_decoration( run_form->z_axis, FL_FRAME_BOX );
 		fl_set_canvas_decoration( cut_form->cut_x_axis, FL_FRAME_BOX );
@@ -292,17 +307,6 @@ void start_graphics( void )
 								- run_form->z_axis->w - 5,
 								run_form->x_axis->h );
 		}
-	}
-	else                                 /* no graphics initialisation */
-	{
-		fl_hide_object( run_form->curve_1_button );
-		fl_hide_object( run_form->curve_2_button );
-		fl_hide_object( run_form->curve_3_button );
-		fl_hide_object( run_form->curve_4_button );
-
-		fl_hide_object( run_form->print_button );
-		fl_hide_object( run_form->full_scale_button );
-		fl_hide_object( run_form->undo_button );
 	}
 
 	/* Finally draw the form */
@@ -364,7 +368,7 @@ void start_graphics( void )
 
 	/* Set minimum size for display window and switch on full scale button */
 
-	if ( G.dim == 1 )
+	if ( G.dim == 1 || ! G.is_init )
 		fl_winminsize( run_form->run->window,
 					   GI_sizes.WIN_MIN_1D_WIDTH, GI_sizes.WIN_MIN_HEIGHT );
 	else
@@ -395,17 +399,18 @@ void start_graphics( void )
 			XTextExtents( G.font, "Xp", 2, &dummy, &G.font_asc, &G.font_desc,
 						  &font_prop );
 
-		/* Create the canvas axes */
-		
-		setup_canvas( &G.x_axis, run_form->x_axis );
-		setup_canvas( &G.y_axis, run_form->y_axis );
-		if ( G.dim == 2 )
-			setup_canvas( &G.z_axis, run_form->z_axis );
-
-		/* Create the canvas itself */
-
-		setup_canvas( &G.canvas, run_form->canvas );
 	}
+
+	/* Create the canvas axes */
+		
+	setup_canvas( &G.x_axis, run_form->x_axis );
+	setup_canvas( &G.y_axis, run_form->y_axis );
+	if ( G.dim == 2 )
+		setup_canvas( &G.z_axis, run_form->z_axis );
+
+	/* Create the canvas itself */
+
+	setup_canvas( &G.canvas, run_form->canvas );
 
 	if ( G.is_init )
 	{
@@ -413,11 +418,10 @@ void start_graphics( void )
 		G_struct_init( );
 	}
 
-	if ( G.dim == 1 )
+	if ( G.dim == 1 || ! G.is_init )
 		redraw_all_1d( );
 
 	fl_raise_form( run_form->run );
-	XFlush( G.d );
 }
 
 
@@ -994,7 +998,7 @@ static void setup_canvas( Canvas *c, FL_OBJECT *obj )
 	FL_HANDLE_CANVAS ch;
 
 
-	if ( G.dim == 1 )
+	if ( G.dim == 1 || ! G.is_init )
 		ch = canvas_handler_1d;
 	else
 		ch = canvas_handler_2d;
@@ -1017,16 +1021,17 @@ static void setup_canvas( Canvas *c, FL_OBJECT *obj )
 
 	fl_add_canvas_handler( c->obj, Expose, ch, ( void * ) c );
 
+	attributes.backing_store = NotUseful;
+	attributes.background_pixmap = None;
+	XChangeWindowAttributes( G.d, FL_ObjWin( c->obj ),
+							 CWBackingStore | CWBackPixmap,
+							 &attributes );
+	c->is_box = UNSET;
+
+	fl_add_canvas_handler( c->obj, ConfigureNotify, ch, ( void * ) c );
+
 	if ( G.is_init )
 	{
-		attributes.backing_store = NotUseful;
-		attributes.background_pixmap = None;
-		XChangeWindowAttributes( G.d, FL_ObjWin( c->obj ),
-								 CWBackingStore | CWBackPixmap,
-								 &attributes );
-		c->is_box = UNSET;
-
-		fl_add_canvas_handler( c->obj, ConfigureNotify, ch, ( void * ) c );
 		fl_add_canvas_handler( c->obj, ButtonPress, ch, ( void * ) c );
 		fl_add_canvas_handler( c->obj, ButtonRelease, ch, ( void * ) c );
 		fl_add_canvas_handler( c->obj, MotionNotify, ch, ( void * ) c );
@@ -1036,7 +1041,7 @@ static void setup_canvas( Canvas *c, FL_OBJECT *obj )
 
 		fl_remove_selected_xevent( FL_ObjWin( obj ),
 								   PointerMotionMask | PointerMotionHintMask |
-			                       ButtonMotionMask );
+								   ButtonMotionMask );
 		fl_add_selected_xevent( FL_ObjWin( obj ),
 								Button1MotionMask | Button2MotionMask );
 

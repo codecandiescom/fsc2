@@ -831,7 +831,7 @@ static void reconfigure_window_1d( Canvas *c, int w, int h )
 
 	/* Calculate the new scale factors */
 
-	if ( c == &G.canvas )
+	if ( c == &G.canvas && G.is_init )
 	{
 		if ( G.is_scale_set )
 		{
@@ -868,10 +868,9 @@ static void reconfigure_window_1d( Canvas *c, int w, int h )
 	}
 
 	/* We can't know the sequence the different canvases are reconfigured
-	   but, on the other hand, redrawing an axis canvases is useless before
-	   the new scaling factors are set. Thus we need in the call for the
-	   canvas window to redraw also axis windows which got reconfigured
-	   before. */
+	   but redrawing an axis canvases is useless before the new scaling
+	   factors are set. Thus we need in the call for the canvas window to
+	   redraw also axis windows which got reconfigured before. */
 
 	delete_pixmap( c );
 	create_pixmap( c );
