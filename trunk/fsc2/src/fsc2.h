@@ -129,7 +129,8 @@ CALL_STACK *Call_Stack = NULL;
 Compilation compilation;     /* structure with infos about compilation state */
 Prg_Token *prg_token = NULL; /* array with predigested program */
 long prg_length = -1;        /* number of array elements in predigested
-								program */
+								program (negative value indicates that there's
+								no EXPERIMENT section) */
 Prg_Token *cur_prg_token;    /* index of currently handled element in
 								predigested program */
 long On_Stop_Pos = -1;       /* index of the ON_STOP command in the array with
