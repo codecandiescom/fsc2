@@ -1076,8 +1076,82 @@ continue or if the end field has already been reached.
 @node ESEEM script, Time-resolved EPR script, Hahn-echo detected EPR script, Example EDL Scripts
 @section ESEEM script
 
+The following script is for a 3-pulse ESEEM experiment.
 
-Still to be written...
+@example
+ 1DEVICES:
+ 2
+ 3 ips120_10;
+ 4 rb8509;
+ 5 rb_pulser;
+ 6
+ 7 VARIABLES:
+ 8
+ 9 repeat_time = 50 ms;
+10 p1_to_p2_dist = 400 ns;
+11 p2_to_p3_dist = 400 ns;
+12 p2_to_p3_incr = 20 ns;
+13 p1_len = 100 ns;
+14 p2_len = 200 ns;
+15 p3_len = 200 ns;
+16 field = 90000 G;
+17 N_Avg  = 10;
+18 I;
+19 data;
+20 File;
+21 
+22 ASSIGNMENTS:
+23 
+24 TRIGGER_MODE: INTERNAL, REPEAT_TIME = repeat_time;
+25 
+26 PREPARATIONS:
+27 
+28 P1:  FUNCTION    = MICROWAVE,
+29      START       = 120 ns,
+30      LENGTH      = p1_len;
+31 
+32 P2:  FUNCTION    = MICROWAVE,
+33      START       = P1.START + p1_to_p2_dist + 0.5 * ( P1.LENGTH - p2_len ),
+34      LENGTH      = p2_len;
+35 
+36 P3:  FUNCTION    = MICROWAVE,
+37      START       = P2.START + p2_to_p3_dist + 0.5 * ( P2.LENGTH - p3_len ),
+38      DELTA_START = p2_to_p3_incr,
+39      LENGTH      = p3_len;
+40 
+41 P4:  FUNCTION    = DETECTION,
+42      START       = P3.START + p1_to_p2_dist + 0.5 * P3.LENGTH,
+43      DELTA_START = p2_to_p3_incr,
+44      LENGTH      = 100 ns;
+45 
+46 init_1d( 1, 0, p2_to_p3_dist * 1.0e9, p2_to_p3_incr * 1.0e9,
+47          "Pulse separation [ns]", "Echo amplitude [a.u.]" );
+48 
+49 EXPERIMENT:
+50 
+51 set_field( field );
+52 
+53 File = get_file( );
+54 
+55 I = 1;
+56 pulser_state( "ON" );
+57 daq_gain( 4 );
+58 
+59 FOREVER {
+60     wait( 1.1 * repeat_time * N_Avg );
+61     data = daq_get_voltage( CH0 );
+62     display( I, data );
+63     fsave( File, "#,#\n",
+64            ( p2_to_p3_dist + p2_to_p3_incr * ( I - 1 ) ) * 1.0e9, data );
+65     pulser_shift( );
+66     pulser_update( );	
+67     I += 1;
+68 }
+69 
+70 ON_STOP:
+71 
+72 save_comment( File, "%" );
+@end example
 
 
 
