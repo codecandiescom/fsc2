@@ -1947,11 +1947,11 @@ static void repaint_cut_canvas( Canvas *c )
 					* ( ( ( double ) G.cut_canvas.h - 1.0 - c->ppos[ Y ] )
 						/ cv->s2d[ Y ] - cv->shift[ Y ] );
 
-			strcpy( buf, " " );
-			make_label_string( buf + 1, x_pos,
+			strcpy( buf, " x = " );
+			make_label_string( buf + 5, x_pos,
 					    irnd( floor( log10( fabs(
 				        scv->rwc_delta[ r_coord ] ) / cv->s2d[ X ] ) ) - 2 ) );
-			strcat( buf, "   " ); 
+			strcat( buf, "   y = " ); 
 			make_label_string( buf + strlen( buf ), y_pos,
 							  irnd( floor( log10( fabs(
 							  scv->rwc_delta[ Z ] ) / cv->s2d[ Y ] ) ) - 2 ) );
@@ -1971,7 +1971,7 @@ static void repaint_cut_canvas( Canvas *c )
 			y_pos = scv->rwc_delta[ Z ]
 					* ( G.start[ Y ] - c->ppos[ Y ] ) / cv->s2d[ Y ];
 
-			sprintf( buf, " %#g   %#g ", x_pos, y_pos );
+			sprintf( buf, " dx = %#g   dy = %#g ", x_pos, y_pos );
 			if ( G.font != NULL )
 				XDrawImageString( G.d, pm, cv->font_gc, 5,
 								  G.font_asc + 5, buf, strlen( buf ) );
