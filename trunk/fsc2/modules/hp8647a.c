@@ -3,8 +3,8 @@
 */
 
 
-#include "../fsc2.h"
-#include "../gpib.h"
+#include "fsc2.h"
+#include "gpib.h"
 
 
 #define DEVICE_NAME "HP8647A"      /* compare entry in /etc/gpib.conf ! */

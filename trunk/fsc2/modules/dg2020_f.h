@@ -4,7 +4,7 @@
 
 
 
-#include "../fsc2.h"
+#include "fsc2.h"
 
 
 /* Here are all the directy exported functions (i.e. exported either implicit

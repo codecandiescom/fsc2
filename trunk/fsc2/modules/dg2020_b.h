@@ -3,7 +3,7 @@
 */
 
 
-#include "../fsc2.h"
+#include "fsc2.h"
 
 
 /* Here are all the directly exported functions (i.e. exported either implicit

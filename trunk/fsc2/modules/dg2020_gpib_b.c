@@ -119,7 +119,7 @@
 
 
 #include "dg2020_b.h"
-#include "../gpib.h"
+#include "gpib.h"
 
 
 /* Functions that re used only locally... */
