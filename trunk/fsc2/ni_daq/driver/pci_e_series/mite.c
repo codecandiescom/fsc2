@@ -406,8 +406,8 @@ size_t pci_dma_get_available( Board *board, NI_DAQ_SUBSYSTEM sys )
 	/* Please note: It seems to be important to read from the MITE DAR
 	   register first and only then from the FCR register - otherwise
 	   sometimes the very last data point read later on was garbage when
-	   during the reading the data there was heavy disk I/O using DMA
-	   going on. That's also why the the next two lines aren't written
+	   during the reading the data there was heavy disk I/O (also using
+	   DMA going on. That's also why the the next two lines aren't written
 	   as a single line, I found by looking at disassembled module that
 	   the compiler rearranged the reads to read the FCR first and the
 	   DAR only afterwards when it was written as a single line. */
