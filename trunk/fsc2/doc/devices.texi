@@ -825,7 +825,7 @@ member of an entry must be the frequency, the second the attenuation.
 The entries in the file don't have to be sorted in any way, and
 the frequencies don't have to spaced equally.
 
-The items in the table file can be separated by spaces, commata,
+The items in the table file can be separated by spaces, commas,
 semicolons, colons, tabs or newlines or any combination of these
 characters (a unit will also work as a separator) and the entries don't
 have to be separated by a newline. Thus all the following entries would
