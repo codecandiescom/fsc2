@@ -53,9 +53,12 @@ void accept_new_data( void )
 	int mq_next;
 	int type;
 	int dim = 0;
+	struct timeval start_time, cur_time;
 
 
 	CLOBBER_PROTECT( dim );
+
+	gettimeofday( &start_time, NULL );
 
 	while ( 1 )
 	{
@@ -113,6 +116,17 @@ void accept_new_data( void )
 
 		if ( Comm.MQ->low == Comm.MQ->high )
 			break;
+
+		/* Do a redraw at least about every second */
+
+		gettimeofday( &cur_time, NULL );
+
+		if ( cur_time.tv_sec > start_time.tv_sec &&
+			 cur_time.tv_usec >= start_time.tv_usec )
+		{
+			fprintf( stderr, "hit timeout\n" );
+			break;
+		}
 
 		/* Accept next data set if next slot in message queue contains DATA */
 

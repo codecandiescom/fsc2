@@ -327,7 +327,10 @@ static void release_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev,
 			{
 				case DRAG_2D_X :                       /* x-axis window */
 					if ( G2.cut_select == NO_CUT_SELECT )
-						scale_changed = change_x_range_2d( c );
+					{
+						if ( ( scale_changed = change_x_range_2d( c ) ) )
+							redraw_canvas_2d( &G2.x_axis );
+					}
 					else if ( G2.cut_select == CUT_SELECT_X &&
 							  keymask & ShiftMask )
 						cut_show( X, lrnd(
@@ -338,7 +341,10 @@ static void release_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev,
 
 				case DRAG_2D_Y :                       /* in y-axis window */
 					if ( G2.cut_select == NO_CUT_SELECT )
-						scale_changed = change_y_range_2d( c );
+					{
+						if ( ( scale_changed = change_y_range_2d( c ) ) )
+							redraw_canvas_2d( &G2.y_axis );
+					}
 					else if ( G2.cut_select == CUT_SELECT_Y &&
 							  keymask & ShiftMask )
 						cut_show( Y, lrnd(
@@ -348,11 +354,16 @@ static void release_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev,
 					break;
 
 				case DRAG_2D_Z :                       /* in z-axis window */
-					scale_changed = change_z_range_2d( c );
+					if ( ( scale_changed = change_z_range_2d( c ) ) )
+						redraw_canvas_2d( &G2.z_axis );
 					break;
 
 				case DRAG_2D_C :                       /* in canvas window */
-					scale_changed = change_xy_range_2d( c );
+					if ( ( scale_changed = change_xy_range_2d( c ) ) )
+					{
+						redraw_canvas_2d( &G2.x_axis );
+						redraw_canvas_2d( &G2.y_axis );
+					}
 					break;
 			}
 			c->is_box = UNSET;
@@ -374,19 +385,26 @@ static void release_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev,
 			switch ( G.drag_canvas )
 			{
 				case DRAG_2D_X :                       /* in x-axis window */
-					scale_changed = zoom_x_2d( c );
+					if ( ( scale_changed = zoom_x_2d( c ) ) )
+						 redraw_canvas_2d( &G2.x_axis );
 					break;
 
 				case DRAG_2D_Y :                       /* in y-axis window */
-					scale_changed = zoom_y_2d( c );
+				if ( ( scale_changed = zoom_y_2d( c ) ) )
+					redraw_canvas_2d( &G2.y_axis );
 					break;
 
 				case DRAG_2D_Z :                       /* in z-axis window */
-					scale_changed = zoom_z_2d( c );
+					if ( ( scale_changed = zoom_z_2d( c ) ) )
+						redraw_canvas_2d( &G2.z_axis );
 					break;
 
 				case DRAG_2D_C :                       /* in canvas window */
-					scale_changed = zoom_xy_2d( c );
+					if ( ( scale_changed = zoom_xy_2d( c ) ) )
+					{
+						redraw_canvas_2d( &G2.x_axis );
+						redraw_canvas_2d( &G2.y_axis );
+					}
 					break;
 			}
 			break;
@@ -397,12 +415,11 @@ static void release_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev,
 				G2.x_axis.ppos[ X ] = G.start[ X ] - G2.x_axis.w / 10;
 
 				if ( G2.active_curve != -1 &&
-					 G2.curve_2d[ G2.active_curve ]->is_scale_set )
-					scale_changed = shift_XPoints_of_curve_2d( c,
-											  G2.curve_2d[ G2.active_curve ] );
-				
-				redraw_canvas_2d( &G2.canvas );
-				redraw_canvas_2d( &G2.x_axis );
+					 G2.curve_2d[ G2.active_curve ]->is_scale_set &&
+					( scale_changed =
+						   shift_XPoints_of_curve_2d( c,
+										   G2.curve_2d[ G2.active_curve ] ) ) )
+						redraw_canvas_2d( &G2.x_axis );
 			}
 
 			if ( G.drag_canvas == DRAG_2D_Y )
@@ -410,12 +427,10 @@ static void release_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev,
 				G2.y_axis.ppos[ Y ] = G.start[ Y ] + G2.y_axis.h / 10;
 
 				if ( G2.active_curve != -1 &&
-					 G2.curve_2d[ G2.active_curve ]->is_scale_set )
-					scale_changed = shift_XPoints_of_curve_2d( c,
-											  G2.curve_2d[ G2.active_curve ] );
-				
-				redraw_canvas_2d( &G2.canvas );
-				redraw_canvas_2d( &G2.y_axis );
+					 G2.curve_2d[ G2.active_curve ]->is_scale_set &&
+					 ( scale_changed = shift_XPoints_of_curve_2d( c,
+										   G2.curve_2d[ G2.active_curve ] ) ) )
+					redraw_canvas_2d( &G2.y_axis );
 			}
 
 			if ( G.drag_canvas == DRAG_2D_Z )
@@ -423,12 +438,10 @@ static void release_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev,
 				G2.z_axis.ppos[ Y ] = G.start[ Y ] + G2.z_axis.h / 10;
 
 				if ( G2.active_curve != -1 &&
-					 G2.curve_2d[ G2.active_curve ]->is_scale_set )
-					scale_changed = shift_XPoints_of_curve_2d( c,
-											  G2.curve_2d[ G2.active_curve ] );
-				
-				redraw_canvas_2d( &G2.canvas );
-				redraw_canvas_2d( &G2.z_axis );
+					 G2.curve_2d[ G2.active_curve ]->is_scale_set &&
+					 ( scale_changed = shift_XPoints_of_curve_2d( c,
+										   G2.curve_2d[ G2.active_curve ] ) ) )
+					redraw_canvas_2d( &G2.z_axis );
 			}
 			break;
 
@@ -438,12 +451,10 @@ static void release_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev,
 				G2.x_axis.ppos[ X ] = G.start[ X ] + G2.x_axis.w / 10;
 
 				if ( G2.active_curve != -1 &&
-					 G2.curve_2d[ G2.active_curve ]->is_scale_set )
-					scale_changed = shift_XPoints_of_curve_2d( c,
-											  G2.curve_2d[ G2.active_curve ] );
-				
-				redraw_canvas_2d( &G2.canvas );
-				redraw_canvas_2d( &G2.x_axis );
+					 G2.curve_2d[ G2.active_curve ]->is_scale_set &&
+					 ( scale_changed = shift_XPoints_of_curve_2d( c,
+										   G2.curve_2d[ G2.active_curve ] ) ) )
+					redraw_canvas_2d( &G2.x_axis );
 			}
 
 			if ( G.drag_canvas == DRAG_2D_Y )
@@ -451,11 +462,9 @@ static void release_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev,
 				G2.y_axis.ppos[ Y ] = G.start[ Y ] - G2.y_axis.h / 10;
 
 				if ( G2.active_curve != -1 &&
-					 G2.curve_2d[ G2.active_curve ]->is_scale_set )
-					scale_changed = shift_XPoints_of_curve_2d( c,
-											  G2.curve_2d[ G2.active_curve ] );
-				
-				redraw_canvas_2d( &G2.canvas );
+					 G2.curve_2d[ G2.active_curve ]->is_scale_set &&
+					 ( scale_changed = shift_XPoints_of_curve_2d( c,
+										   G2.curve_2d[ G2.active_curve ] ) ) )
 				redraw_canvas_2d( &G2.y_axis );
 			}
 
@@ -464,12 +473,10 @@ static void release_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev,
 				G2.z_axis.ppos[ Y ] = G.start[ Y ] - G2.z_axis.h / 10;
 
 				if ( G2.active_curve != -1 &&
-					 G2.curve_2d[ G2.active_curve ]->is_scale_set )
-					scale_changed = shift_XPoints_of_curve_2d( c,
-											  G2.curve_2d[ G2.active_curve ] );
-				
-				redraw_canvas_2d( &G2.canvas );
-				redraw_canvas_2d( &G2.z_axis );
+					 G2.curve_2d[ G2.active_curve ]->is_scale_set &&
+					 ( scale_changed = shift_XPoints_of_curve_2d( c,
+										   G2.curve_2d[ G2.active_curve ] ) ) )
+					redraw_canvas_2d( &G2.z_axis );
 			}
 			break;
 	}
@@ -493,7 +500,7 @@ static void release_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev,
 									  "and switch on automatic rescaling" );
 		}
 
-		redraw_all_2d( );
+		redraw_canvas_2d( &G2.canvas );
 	}
 
 	if ( ! scale_changed || c != &G2.canvas )

@@ -1576,9 +1576,6 @@ static void cut_release_handler( FL_OBJECT *obj, Window window,
 
 				shift_XPoints_of_cut_curve( &G2.cut_x_axis );
 				scale_changed = SET;
-
-				redraw_cut_canvas( &G2.cut_canvas );
-				redraw_cut_canvas( &G2.cut_x_axis );
 			}
 
 			if ( G.drag_canvas == DRAG_CUT_Y )
@@ -1590,9 +1587,6 @@ static void cut_release_handler( FL_OBJECT *obj, Window window,
 
 				shift_XPoints_of_cut_curve( &G2.cut_y_axis );
 				scale_changed = SET;
-
-				redraw_cut_canvas( &G2.cut_canvas );
-				redraw_cut_canvas( &G2.cut_y_axis );
 			}
 
 			if ( G.drag_canvas == DRAG_CUT_Z )
@@ -1610,9 +1604,6 @@ static void cut_release_handler( FL_OBJECT *obj, Window window,
 
 				shift_XPoints_of_cut_curve( &G2.cut_x_axis );
 				scale_changed = SET;
-
-				redraw_cut_canvas( &G2.cut_canvas );
-				redraw_cut_canvas( &G2.cut_x_axis );
 			}
 
 			if ( G.drag_canvas == DRAG_CUT_Y )
@@ -1624,9 +1615,6 @@ static void cut_release_handler( FL_OBJECT *obj, Window window,
 
 				shift_XPoints_of_cut_curve( &G2.cut_y_axis );
 				scale_changed = SET;
-
-				redraw_cut_canvas( &G2.cut_canvas );
-				redraw_cut_canvas( &G2.cut_y_axis );
 			}
 
 			if ( G.drag_canvas == DRAG_CUT_Z )

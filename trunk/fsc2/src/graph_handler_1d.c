@@ -308,15 +308,21 @@ static void release_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
 			switch ( G.drag_canvas )
 			{
 				case DRAG_1D_X :                       /* x-axis window */
-					scale_changed = change_x_range_1d( c );
+					if ( ( scale_changed = change_x_range_1d( c ) ) )
+						redraw_canvas_1d( &G1.x_axis );
 					break;
 
 				case DRAG_1D_Y :                       /* in y-axis window */
-					scale_changed = change_y_range_1d( c );
+					if ( ( scale_changed = change_y_range_1d( c ) ) )
+						redraw_canvas_1d( &G1.y_axis );
 					break;
 
 				case DRAG_1D_C :                       /* in canvas window */
-					scale_changed = change_xy_range_1d( c );
+					if ( ( scale_changed = change_xy_range_1d( c ) ) )
+					{
+						redraw_canvas_1d( &G1.x_axis );
+						redraw_canvas_1d( &G1.y_axis );
+					}
 					break;
 			}
 			c->is_box = UNSET;
@@ -339,15 +345,21 @@ static void release_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
 			switch ( G.drag_canvas )
 			{
 				case DRAG_1D_X :                       /* in x-axis window */
-					scale_changed = zoom_x_1d( c );
+					if ( ( scale_changed = zoom_x_1d( c ) ) )
+						redraw_canvas_1d( &G1.x_axis );
 					break;
 
 				case DRAG_1D_Y :                       /* in y-axis window */
-					scale_changed = zoom_y_1d( c );
+					if ( ( scale_changed = zoom_y_1d( c ) ) )
+						redraw_canvas_1d( &G1.y_axis );
 					break;
 
 				case DRAG_1D_C :                       /* in canvas window */
-					scale_changed = zoom_xy_1d( c );
+					if ( ( scale_changed = zoom_xy_1d( c ) ) )
+					{
+						redraw_canvas_1d( &G1.x_axis );
+						redraw_canvas_1d( &G1.y_axis );
+					}
 					break;
 			}
 			break;
@@ -369,25 +381,10 @@ static void release_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
 					/* Recalculate the offsets and shift curves in the
 					   canvas */
 
-					scale_changed =
-								   shift_XPoints_of_curve_1d( &G1.x_axis, cv );
+					if ( ( scale_changed =
+								shift_XPoints_of_curve_1d( &G1.x_axis, cv ) ) )
+						redraw_canvas_1d( &G1.x_axis );
 				}
-
-				/* Switch off full scale button if necessary */
-
-				if ( G1.is_fs && scale_changed )
-				{
-					G1.is_fs = UNSET;
-					fl_set_button( GUI.run_form_1d->full_scale_button_1d, 0 );
-					if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
-						fl_set_object_helper(
-									  GUI.run_form_1d->full_scale_button_1d,
-									  "Rescale curves to fit into the window\n"
-									  "and switch on automatic rescaling" );
-				}
-
-				redraw_canvas_1d( &G1.canvas );
-				redraw_canvas_1d( &G1.x_axis );
 			}
 
 			if ( G.drag_canvas == DRAG_1D_Y )
@@ -403,25 +400,10 @@ static void release_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
 					/* Recalculate the offsets and shift curves in the
 					   canvas */
 
-					scale_changed =
-								   shift_XPoints_of_curve_1d( &G1.y_axis, cv );
+					if ( ( scale_changed =
+								shift_XPoints_of_curve_1d( &G1.y_axis, cv ) ) )
+						redraw_canvas_1d( &G1.y_axis );
 				}
-
-				/* Switch off full scale button if necessary */
-
-				if ( G1.is_fs && scale_changed )
-				{
-					G1.is_fs = UNSET;
-					fl_set_button( GUI.run_form_1d->full_scale_button_1d, 0 );
-					if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
-						fl_set_object_helper(
-									  GUI.run_form_1d->full_scale_button_1d,
-									  "Rescale curves to fit into the window\n"
-									  "and switch on automatic rescaling" );
-				}
-
-				redraw_canvas_1d( &G1.canvas );
-				redraw_canvas_1d( &G1.y_axis );
 			}
 			break;
 
@@ -442,12 +424,10 @@ static void release_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
 					/* Recalculate the offsets and shift curves in the
 					   canvas */
 
-					scale_changed =
-								   shift_XPoints_of_curve_1d( &G1.x_axis, cv );
+					if ( ( scale_changed =
+								shift_XPoints_of_curve_1d( &G1.x_axis, cv ) ) )
+						redraw_canvas_1d( &G1.x_axis );
 				}
-
-				redraw_canvas_1d( &G1.canvas );
-				redraw_canvas_1d( &G1.x_axis );
 			}
 
 			if ( G.drag_canvas == DRAG_1D_Y )
@@ -463,12 +443,10 @@ static void release_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
 					/* Recalculate the offsets and shift curves in the
 					   canvas */
 
-					scale_changed =
-								   shift_XPoints_of_curve_1d( &G1.y_axis, cv );
+					if ( ( scale_changed =
+								shift_XPoints_of_curve_1d( &G1.y_axis, cv ) ) )
+						redraw_canvas_1d( &G1.y_axis );
 				}
-
-				redraw_canvas_1d( &G1.canvas );
-				redraw_canvas_1d( &G1.y_axis );
 			}
 			break;
 	}
@@ -491,7 +469,7 @@ static void release_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
 									  "and switch on automatic rescaling" );
 		}
 
-		redraw_all_1d( );
+		redraw_canvas_1d( &G1.canvas );
 	}
 
 	if ( ! scale_changed || c != &G1.canvas )
