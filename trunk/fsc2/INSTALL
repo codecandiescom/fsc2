@@ -17,11 +17,12 @@ The following tools and libraries are needed to compile and install fsc2:
 To create the complete documentation you will also need
 
 11) makeinfo
-12) tex
-13) convert (from the ImageMagick package)
-14) dvips
+12) tex (if missing no Postscript and PDF documentation is created)
+13) convert (from the ImageMagick package, preferred) or
+	pngtopnm, pngtops (in this case no PDF documentation will be created)
+14) dvips (if missing no Postscript documentation is created)
 15) perl (version 5.0 or higher)
-16) pdftex
+16) pdftex (if missing no PDF documentation will be created)
 17) gzip
 
 

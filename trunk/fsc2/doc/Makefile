@@ -64,8 +64,15 @@ fsc2.ps: $(docs) $(patsubst %.png,%.eps,$(figures))
 		"Can't make PS documentation, programs tex and/or dvips not found."; \
 	fi
 
+
+ifneq ($(word 1,$(shell which conver)),which:)
 %.eps: %.png
 	convert $< $@
+else
+%.eps: %.png
+	pngtopnm $< | pnmtops -nocenter -noturn > $@
+endif
+
 
 pdf: fsc2.pdf
 
@@ -73,11 +80,19 @@ fsc2.pdf: $(docs) $(patsubst %.png,%.pdf,$(figures))
 	@if [ "`eval pdftex --help 2>/dev/null`" ]; then \
 		./texi2dvi --pdf -c fsc2.texi; \
 	else \
-		echo "Can't make PDF documentation, program pdftex not found."; \
+		echo "Can't make PDF documentation, program 'pdftex' not found."; \
 	fi
 
+
+ifneq ($(word 1,$(shell which conver)),which:)
 %.pdf: %.png
 	convert -compress Zip $< $@
+else
+%.pdf: %.png
+	@echo "Can't make PDF documentation, program 'convert' not found."; \
+	exit 1;
+endif
+
 
 clean:
 	-$(RM) $(RMFLAGS) fsc2.dvi *.log fsc2fig*.eps fsc2fig*.pdf
