@@ -271,7 +271,7 @@ void eprint( int severity, bool print_fl, const char *fmt, ... )
 	if ( severity != NO_ERROR )
 		EDL.compilation.error[ severity ] += 1;
 
-	if ( ! ( Internals.cmdline_flags & ( TEST_ONLY | NO_GUI_RUN ) ) )
+	if ( ! ( Fsc2_Internals.cmdline_flags & ( TEST_ONLY | NO_GUI_RUN ) ) )
 	{
 		if ( severity == FATAL )
 		{
@@ -306,7 +306,7 @@ void eprint( int severity, bool print_fl, const char *fmt, ... )
 		vsnprintf( cp, ( size_t ) space_left, fmt, ap );
 		va_end( ap );
 
-		if ( Internals.I_am == PARENT )
+		if ( Fsc2_Internals.I_am == PARENT )
 		{
 			fl_freeze_form( GUI.main_form->error_browser->form );
 			fl_addto_browser_chars( GUI.main_form->error_browser, buffer );
@@ -318,7 +318,7 @@ void eprint( int severity, bool print_fl, const char *fmt, ... )
 
 			fl_unfreeze_form( GUI.main_form->error_browser->form );
 
-			if ( Internals.cmdline_flags & DO_CHECK )
+			if ( Fsc2_Internals.cmdline_flags & DO_CHECK )
 				fprintf( severity == NO_ERROR ? stdout : stderr,
 						 "%s", buffer );
 		}
@@ -363,7 +363,7 @@ void print( int severity, const char *fmt, ... )
 	if ( severity != NO_ERROR )
 		EDL.compilation.error[ severity ] += 1;
 
-	if ( ! ( Internals.cmdline_flags & ( TEST_ONLY | NO_GUI_RUN ) ) )
+	if ( ! ( Fsc2_Internals.cmdline_flags & ( TEST_ONLY | NO_GUI_RUN ) ) )
 	{
 		if ( severity == FATAL )
 		{
@@ -389,7 +389,7 @@ void print( int severity, const char *fmt, ... )
 		/* Print EDL file name and line number unless we're running a hook
 		   function */
 
-		if ( ! Internals.in_hook && EDL.Fname )
+		if ( ! Fsc2_Internals.in_hook && EDL.Fname )
 		{
 			count = snprintf( cp, ( size_t ) space_left, "%s:%ld: ",
 							  EDL.Fname, EDL.Lc );
@@ -433,7 +433,7 @@ void print( int severity, const char *fmt, ... )
 		vsnprintf( cp, ( size_t ) space_left, fmt, ap );
 		va_end( ap );
 
-		if ( Internals.I_am == PARENT )
+		if ( Fsc2_Internals.I_am == PARENT )
 		{
 			fl_freeze_form( GUI.main_form->error_browser->form );
 			fl_addto_browser_chars( GUI.main_form->error_browser, buffer );
@@ -445,7 +445,7 @@ void print( int severity, const char *fmt, ... )
 
 			fl_unfreeze_form( GUI.main_form->error_browser->form );
 
-			if ( Internals.cmdline_flags & DO_CHECK )
+			if ( Fsc2_Internals.cmdline_flags & DO_CHECK )
 				fprintf( severity == NO_ERROR ? stdout : stderr,
 						 "%s", buffer );
 		}
@@ -457,7 +457,7 @@ void print( int severity, const char *fmt, ... )
 		if ( severity != NO_ERROR )
 			fprintf( stderr, "%c ", severity[ "FSW" ] );      /* Hehe... */
 
-		if ( ! Internals.in_hook && EDL.Fname )
+		if ( ! Fsc2_Internals.in_hook && EDL.Fname )
 			fprintf( severity == NO_ERROR ? stdout : stderr,
 					 "%s:%ld: ", EDL.Fname, EDL.Lc );
 
@@ -500,8 +500,8 @@ void print( int severity, const char *fmt, ... )
 
 void raise_permissions( void )
 {
-	seteuid( Internals.EUID );
-	setegid( Internals.EGID );
+	seteuid( Fsc2_Internals.EUID );
+	setegid( Fsc2_Internals.EGID );
 }
 
 
@@ -704,7 +704,7 @@ FILE *filter_edl( const char *name, FILE *fp )
 		return NULL;
 	}
 
-	if ( ( Internals.fsc2_clean_pid = fork( ) ) < 0 )
+	if ( ( Fsc2_Internals.fsc2_clean_pid = fork( ) ) < 0 )
 	{
 		close( pd[ 0 ] );
 		close( pd[ 1 ] );
@@ -718,7 +718,7 @@ FILE *filter_edl( const char *name, FILE *fp )
 
 	/* Here's the childs code */
 
-	if ( Internals.fsc2_clean_pid == 0 )
+	if ( Fsc2_Internals.fsc2_clean_pid == 0 )
 	{
 		char *cmd = NULL;
 
@@ -764,7 +764,7 @@ FILE *filter_edl( const char *name, FILE *fp )
 
 		TRY
 		{
-			if ( Internals.cmdline_flags & DO_CHECK )
+			if ( Fsc2_Internals.cmdline_flags & DO_CHECK )
 				cmd = get_string( "%s%sfsc2_clean", srcdir, slash( srcdir ) );
 			else
 				cmd = get_string( "%s%sfsc2_clean", bindir, slash( bindir ) );
@@ -1388,15 +1388,16 @@ const char *fsc2_show_fselector( const char *message, const char *dir,
 	/* If no directory is specified and this is the first invocation use
 	   the directory from the user specific configuration file */
 
-	if ( ( dir == NULL || *dir == '\0' ) && Internals.use_def_directory )
-		dir = Internals.def_directory;
+	if ( ( dir == NULL || *dir == '\0' ) && Fsc2_Internals.use_def_directory )
+		dir = Fsc2_Internals.def_directory;
 
-	Internals.use_def_directory = UNSET;
+	Fsc2_Internals.use_def_directory = UNSET;
 
 	ret = fl_show_fselector( message, dir, pattern, def_name );
 
-	if ( Internals.def_directory != NULL )
-		Internals.def_directory = CHAR_P T_free( Internals.def_directory );
+	if ( Fsc2_Internals.def_directory != NULL )
+		Fsc2_Internals.def_directory =
+								 CHAR_P T_free( Fsc2_Internals.def_directory );
 
 	return ret;
 }

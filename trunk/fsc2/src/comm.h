@@ -112,12 +112,12 @@ enum {
 };
 
 
-typedef struct CommStruct CommStruct;
-typedef struct SLOT SLOT;
-typedef struct MESSAGE_QUEUE MESSAGE_QUEUE;
+typedef struct Comm_Struct Comm_Struct_T;
+typedef struct Slot Slot_T;
+typedef struct Message_Queue Message_Queue_T;
 
 
-struct CommStruct {
+struct Comm_Struct {
 	int type;
 	union {
 		ptrdiff_t len;
@@ -130,16 +130,16 @@ struct CommStruct {
 };
 
 
-struct SLOT {
+struct Slot {
 	int type;
 	int shm_id;
 };
 
 
-struct MESSAGE_QUEUE {
+struct Message_Queue {
 	int low;
 	int high;
-	SLOT slot[ QUEUE_SIZE ];
+	Slot_T slot[ QUEUE_SIZE ];
 };
 
 

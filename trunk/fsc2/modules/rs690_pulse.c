@@ -314,7 +314,7 @@ bool rs690_set_pulse_length_change( long pnum, double p_time )
 bool rs690_set_pulse_phase_cycle( long pnum, long cycle )
 {
 	Pulse_T *p = rs690_get_pulse( pnum );
-	Phs_Seq_T *pc = Phs_Seq;
+	Phs_Seq_T *pc = PA_Seq.phs_seq;
 
 
 	/* Check that no phase cycle has been asigned to the pulse yet */

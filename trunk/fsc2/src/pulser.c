@@ -187,7 +187,7 @@ static void is_pulser_func( void *func, const char *text )
 
 	if ( func == NULL )
 	{
-		if ( Internals.mode == PREPARATION )
+		if ( Fsc2_Internals.mode == PREPARATION )
 			print( FATAL, "%s: Function for %s doesn't exist or can't be used "
 				   "during the experiment.\n",
 				   Pulser_Struct[ Cur_Pulser ].name, text );

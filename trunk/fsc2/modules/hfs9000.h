@@ -30,34 +30,6 @@
 #include "hfs9000.conf"
 
 
-/* Here are all the directly exported functions (i.e. exported either implicit
-   as a hook functions or via the Functions data base) */
-
-int hfs9000_init_hook( void );
-int hfs9000_test_hook( void );
-int hfs9000_end_of_test_hook( void );
-int hfs9000_exp_hook( void );
-int hfs9000_end_of_exp_hook( void );
-void hfs9000_exit_hook( void );
-
-
-Var_T *pulser_name( Var_T *v );
-Var_T *pulser_show_pulses( Var_T *v );
-Var_T *pulser_dump_pulses( Var_T *v );
-Var_T *pulser_keep_all_pulses( Var_T *v );
-Var_T *pulser_maximum_pattern_length( Var_T *v );
-Var_T *pulser_state( Var_T *v );
-Var_T *pulser_channel_state( Var_T *v );
-Var_T *pulser_update( Var_T *v );
-Var_T *pulser_shift( Var_T *v );
-Var_T *pulser_increment( Var_T *v );
-Var_T *pulser_reset( Var_T *v );
-Var_T *pulser_pulse_reset( Var_T *v );
-Var_T *pulser_lock_keyboard( Var_T *v );
-Var_T *pulser_stop_on_update( Var_T *v );
-Var_T *pulser_command( Var_T *v );
-
-
 /* Definitions needed for the pulser */
 
 #define Ticks long              /* times in units of the pulsers time base */
@@ -140,10 +112,10 @@ Var_T *pulser_command( Var_T *v );
 /* typedefs of structures needed in the module */
 
 
+typedef struct HFS9000 HFS9000_T;
 typedef struct Function Function_T;
 typedef struct Channel Channel_T;
 typedef struct Pulse Pulse_T;
-typedef struct HFS9000 HFS9000;
 
 
 struct Function {
@@ -231,8 +203,13 @@ struct Pulse {
 };
 
 
-struct  HFS9000 {
+struct HFS9000 {
 	int device;              /* GPIB number of the device */
+
+	bool is_needed;
+	bool in_setup;
+
+	Pulse_T *pulses;
 
 	double timebase;         /* time base of the digitizer */
 	bool is_timebase;
@@ -274,10 +251,35 @@ struct  HFS9000 {
 };
 
 
-extern bool hfs9000_is_needed;
-extern HFS9000 hfs9000;
-extern Pulse_T *hfs9000_Pulses;
-extern bool hfs9000_IN_SETUP;
+extern HFS9000_T hfs9000;
+
+
+/* Here are all the directly exported functions (i.e. exported either implicit
+   as a hook functions or via the Functions data base) */
+
+int hfs9000_init_hook( void );
+int hfs9000_test_hook( void );
+int hfs9000_end_of_test_hook( void );
+int hfs9000_exp_hook( void );
+int hfs9000_end_of_exp_hook( void );
+void hfs9000_exit_hook( void );
+
+
+Var_T *pulser_name( Var_T *v );
+Var_T *pulser_show_pulses( Var_T *v );
+Var_T *pulser_dump_pulses( Var_T *v );
+Var_T *pulser_keep_all_pulses( Var_T *v );
+Var_T *pulser_maximum_pattern_length( Var_T *v );
+Var_T *pulser_state( Var_T *v );
+Var_T *pulser_channel_state( Var_T *v );
+Var_T *pulser_update( Var_T *v );
+Var_T *pulser_shift( Var_T *v );
+Var_T *pulser_increment( Var_T *v );
+Var_T *pulser_reset( Var_T *v );
+Var_T *pulser_pulse_reset( Var_T *v );
+Var_T *pulser_lock_keyboard( Var_T *v );
+Var_T *pulser_stop_on_update( Var_T *v );
+Var_T *pulser_command( Var_T *v );
 
 
 /* Here follow the functions from hfs9000_gen.c */

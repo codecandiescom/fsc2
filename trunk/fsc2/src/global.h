@@ -499,7 +499,7 @@ enum {
 
 /* Define a structure used in analyzing the input program */
 
-typedef struct Compilation Compilation;
+typedef struct Compilation Compilation_T;
 
 struct Compilation {
 	/* Number of errors detected during compilation (FATAL, SEVERE and WARN) */
@@ -637,6 +637,11 @@ enum {
 #endif
 
 #define UNUSED_ARGUMENT( a )   ( ( void ) ( a ) )
+
+
+
+#define NUM_ELEMS( arr ) ( sizeof( arr ) / sizeof *( arr ) )
+
 
 #endif /* ! FSC2_GLOBAL */
 

@@ -100,38 +100,38 @@ void start_graphics( void )
 	G.coord_display = 0;
 	G.dist_display  = 0;
 
-	CG.is_shown = UNSET;
-	CG.curve = -1;
-	CG.index = 0;
+	G_cut.is_shown = UNSET;
+	G_cut.curve = -1;
+	G_cut.index = 0;
 
 	if ( G.dim & 1 )
 	{
-		G1.nx = G1.nx_orig;
-		G1.rwc_start[ X ] = G1.rwc_start_orig[ X ];
-		G1.rwc_delta[ X ] = G1.rwc_delta_orig[ X ];
+		G_1d.nx = G_1d.nx_orig;
+		G_1d.rwc_start[ X ] = G_1d.rwc_start_orig[ X ];
+		G_1d.rwc_delta[ X ] = G_1d.rwc_delta_orig[ X ];
 
 		for ( i = X; i <= Y; i++ )
-			G1.label[ i ] = T_strdup( G1.label_orig[ i ] );
+			G_1d.label[ i ] = T_strdup( G_1d.label_orig[ i ] );
 
-		G1.marker_1d = NULL;
+		G_1d.marker_1d = NULL;
 	}
 
 	if ( G.dim & 2 )
 	{
-		for ( i = 0; i < G2.nc; i++ )
-			G2.curve_2d[ i ] = NULL;
+		for ( i = 0; i < G_2d.nc; i++ )
+			G_2d.curve_2d[ i ] = NULL;
 
-		G2.nx = G2.nx_orig;
-		G2.ny = G2.ny_orig;
+		G_2d.nx = G_2d.nx_orig;
+		G_2d.ny = G_2d.ny_orig;
 
 		for ( i = X; i <= Y; i++ )
 		{
-			G2.rwc_start[ i ] = G2.rwc_start_orig[ i ];
-			G2.rwc_delta[ i ] = G2.rwc_delta_orig[ i ];
+			G_2d.rwc_start[ i ] = G_2d.rwc_start_orig[ i ];
+			G_2d.rwc_delta[ i ] = G_2d.rwc_delta_orig[ i ];
 		}
 
 		for ( i = X; i <= Z; i++ )
-			G2.label[ i ] = T_strdup( G2.label_orig[ i ] );
+			G_2d.label[ i ] = T_strdup( G_2d.label_orig[ i ] );
 
 		cut_init( );
 	}
@@ -154,10 +154,10 @@ void start_graphics( void )
 	   after the experiment */
 
 	G_stored = GRAPHICS_P get_memcpy( &G, sizeof G );
-	G_1d_stored = GRAPHICS_1D_P get_memcpy( &G1, sizeof G1 );
-	G_2d_stored = GRAPHICS_2D_P get_memcpy( &G2, sizeof G2 );
+	G_1d_stored = GRAPHICS_1D_P get_memcpy( &G_1d, sizeof G_1d );
+	G_2d_stored = GRAPHICS_2D_P get_memcpy( &G_2d, sizeof G_2d );
 
-	G2.active_curve = 0;
+	G_2d.active_curve = 0;
 
 	/* Finally draw the form */
 
@@ -187,19 +187,19 @@ void start_graphics( void )
 
 	if ( G.dim & 1 || ! G.is_init )
 	{
-		if ( ! G.is_init || G1.nc == 1 )
+		if ( ! G.is_init || G_1d.nc == 1 )
 			diff = MAX_CURVES * GI.CURVE_BUTTON_HEIGHT;
 		else
-			diff = ( MAX_CURVES - G1.nc ) * GI.CURVE_BUTTON_HEIGHT;
+			diff = ( MAX_CURVES - G_1d.nc ) * GI.CURVE_BUTTON_HEIGHT;
 		fl_winminsize( GUI.run_form_1d->run_1d->window,
 					   GI.WIN_MIN_1D_WIDTH, GI.WIN_MIN_HEIGHT - diff );
 	}
 	if ( G.dim & 2 )
 	{
-		if ( G2.nc == 1 )
+		if ( G_2d.nc == 1 )
 			diff = MAX_CURVES * GI.CURVE_BUTTON_HEIGHT;
 		else
-			diff = ( MAX_CURVES - G2.nc ) * GI.CURVE_BUTTON_HEIGHT;
+			diff = ( MAX_CURVES - G_2d.nc ) * GI.CURVE_BUTTON_HEIGHT;
 		fl_winminsize( GUI.run_form_2d->run_2d->window,
 					   GI.WIN_MIN_2D_WIDTH, GI.WIN_MIN_HEIGHT - diff );
 	}
@@ -217,17 +217,17 @@ void start_graphics( void )
 
 	if ( ! G.is_init || G.dim & 1 )
 	{
-		setup_canvas( &G1.x_axis, GUI.run_form_1d->x_axis_1d );
-		setup_canvas( &G1.y_axis, GUI.run_form_1d->y_axis_1d );
-		setup_canvas( &G1.canvas, GUI.run_form_1d->canvas_1d );
+		setup_canvas( &G_1d.x_axis, GUI.run_form_1d->x_axis_1d );
+		setup_canvas( &G_1d.y_axis, GUI.run_form_1d->y_axis_1d );
+		setup_canvas( &G_1d.canvas, GUI.run_form_1d->canvas_1d );
 	}
 
 	if ( G.dim & 2 )
 	{
-		setup_canvas( &G2.x_axis, GUI.run_form_2d->x_axis_2d );
-		setup_canvas( &G2.y_axis, GUI.run_form_2d->y_axis_2d );
-		setup_canvas( &G2.z_axis, GUI.run_form_2d->z_axis_2d );
-		setup_canvas( &G2.canvas, GUI.run_form_2d->canvas_2d );
+		setup_canvas( &G_2d.x_axis, GUI.run_form_2d->x_axis_2d );
+		setup_canvas( &G_2d.y_axis, GUI.run_form_2d->y_axis_2d );
+		setup_canvas( &G_2d.z_axis, GUI.run_form_2d->z_axis_2d );
+		setup_canvas( &G_2d.canvas, GUI.run_form_2d->canvas_2d );
 	}
 
 	if ( ! G.is_init || G.dim & 1 )
@@ -387,10 +387,10 @@ static void set_default_sizes( void )
 
 	if ( has_size || GUI.display_1d_has_size )
 	{
-		if ( ! G.is_init || G1.nc == 1 )
+		if ( ! G.is_init || G_1d.nc == 1 )
 			diff = MAX_CURVES * GI.CURVE_BUTTON_HEIGHT;
 		else
-			diff = ( MAX_CURVES - G1.nc ) * GI.CURVE_BUTTON_HEIGHT;
+			diff = ( MAX_CURVES - G_1d.nc ) * GI.CURVE_BUTTON_HEIGHT;
 
 		if ( has_size )
 			GUI.display_1d_width = GI.display_w;
@@ -404,10 +404,10 @@ static void set_default_sizes( void )
 
 	if ( has_size || GUI.display_2d_has_size )
 	{
-		if ( ! G.is_init || G2.nc == 1 )
+		if ( ! G.is_init || G_2d.nc == 1 )
 			diff = MAX_CURVES * GI.CURVE_BUTTON_HEIGHT;
 		else
-			diff = ( MAX_CURVES - G2.nc ) * GI.CURVE_BUTTON_HEIGHT;
+			diff = ( MAX_CURVES - G_2d.nc ) * GI.CURVE_BUTTON_HEIGHT;
 
 		if ( has_size )
 			GUI.display_2d_width = GI.display_w;
@@ -542,7 +542,7 @@ static void forms_adapt( void )
 				fl_set_object_lsize( GUI.run_form_2d->undo_button_2d,
 									 GI.SMALL_FONT_SIZE );
 
-			if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
+			if ( ! ( Fsc2_Internals.cmdline_flags & NO_BALLOON ) )
 			{
 				if ( G.dim & 1 )
 					fl_set_object_helper( GUI.run_form_1d->undo_button_1d,
@@ -558,7 +558,7 @@ static void forms_adapt( void )
 										  pixmap_file );
 				fl_set_object_lsize( GUI.cut_form->cut_undo_button,
 									 GI.SMALL_FONT_SIZE );
-				if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
+				if ( ! ( Fsc2_Internals.cmdline_flags & NO_BALLOON ) )
 					fl_set_object_helper( GUI.cut_form->cut_undo_button,
 										  "Undo last rescaling operation" );
 			}
@@ -583,7 +583,7 @@ static void forms_adapt( void )
 				fl_set_object_lsize( GUI.run_form_2d->print_button_2d,
 									 GI.SMALL_FONT_SIZE );
 
-			if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
+			if ( ! ( Fsc2_Internals.cmdline_flags & NO_BALLOON ) )
 			{
 				if ( G.dim & 1 )
 					fl_set_object_helper( GUI.run_form_1d->print_button_1d,
@@ -599,7 +599,7 @@ static void forms_adapt( void )
 										  pixmap_file );
 				fl_set_object_lsize( GUI.cut_form->cut_print_button,
 									 GI.SMALL_FONT_SIZE );
-				if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
+				if ( ! ( Fsc2_Internals.cmdline_flags & NO_BALLOON ) )
 					fl_set_object_helper( GUI.cut_form->cut_print_button,
 										  "Print window" );
 			}
@@ -607,7 +607,7 @@ static void forms_adapt( void )
 
 		T_free( pixmap_file );
 
-		if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
+		if ( ! ( Fsc2_Internals.cmdline_flags & NO_BALLOON ) )
 		{
 			if ( G.dim & 1 )
 				fl_set_object_helper( GUI.run_form_1d->full_scale_button_1d,
@@ -618,7 +618,7 @@ static void forms_adapt( void )
 		}
 	}
 
-	if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
+	if ( ! ( Fsc2_Internals.cmdline_flags & NO_BALLOON ) )
 	{
 		if ( GUI.stop_button_mask == 0 )
 		{
@@ -664,7 +664,7 @@ static void forms_adapt( void )
 		}
 	}
 
-	if ( G.dim == 2 && ! ( Internals.cmdline_flags & NO_BALLOON ) )
+	if ( G.dim == 2 && ! ( Fsc2_Internals.cmdline_flags & NO_BALLOON ) )
 	{
 		fl_set_object_helper( GUI.cut_form->cut_close_button,
 							  "Close the window" );
@@ -674,7 +674,7 @@ static void forms_adapt( void )
 
 	if ( G.dim & 1 )
 	{
-		if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
+		if ( ! ( Fsc2_Internals.cmdline_flags & NO_BALLOON ) )
 		{
 			fl_set_object_helper( GUI.run_form_1d->curve_1_button_1d,
 								 "Exempt curve 1 from\nrescaling operations" );
@@ -692,7 +692,7 @@ static void forms_adapt( void )
 
 	if ( G.dim & 2 )
 	{
-		if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
+		if ( ! ( Fsc2_Internals.cmdline_flags & NO_BALLOON ) )
 		{
 			fl_set_object_helper( GUI.run_form_2d->curve_1_button_2d,
                                   "Hide curve 1" );
@@ -741,11 +741,11 @@ static void forms_adapt( void )
 	{
 		if ( G.dim & 1 )
 		{
-			if ( G1.nc < 4 )
+			if ( G_1d.nc < 4 )
 				fl_hide_object( GUI.run_form_1d->curve_4_button_1d );
-			if ( G1.nc < 3 )
+			if ( G_1d.nc < 3 )
 				fl_hide_object( GUI.run_form_1d->curve_3_button_1d );
-			if ( G1.nc < 2 )
+			if ( G_1d.nc < 2 )
 			{
 				fl_hide_object( GUI.run_form_1d->curve_2_button_1d );
 				fl_hide_object( GUI.run_form_1d->curve_1_button_1d );
@@ -754,11 +754,11 @@ static void forms_adapt( void )
 
 		if ( G.dim & 2 )
 		{
-			if ( G2.nc < 4 )
+			if ( G_2d.nc < 4 )
 				fl_hide_object( GUI.run_form_2d->curve_4_button_2d );
-			if ( G2.nc < 3 )
+			if ( G_2d.nc < 3 )
 				fl_hide_object( GUI.run_form_2d->curve_3_button_2d );
-			if ( G2.nc < 2 )
+			if ( G_2d.nc < 2 )
 			{
 				fl_hide_object( GUI.run_form_2d->curve_2_button_2d );
 				fl_hide_object( GUI.run_form_2d->curve_1_button_2d );
@@ -778,7 +778,7 @@ static void forms_adapt( void )
 
 int run_form_close_handler( UNUSED_ARG FL_FORM *a, UNUSED_ARG void *b )
 {
-	if ( Internals.child_pid == 0 )          /* if child has already exited */
+	if ( Fsc2_Internals.child_pid == 0 )      /* if child has already exited */
 	{
 		if ( ! G.is_init || G.dim & 1 )
 			run_close_button_callback( GUI.run_form_1d->stop_1d, 0 );
@@ -831,60 +831,60 @@ static void G_struct_init( void )
 
 	if ( first_time )
 	{
-		cursor_1d[ ZOOM_BOX_CURSOR ] = G1.cursor[ ZOOM_BOX_CURSOR ] =
+		cursor_1d[ ZOOM_BOX_CURSOR ] = G_1d.cursor[ ZOOM_BOX_CURSOR ] =
 					fl_create_bitmap_cursor( cursor1_bits, cursor1_bits,
 											 cursor1_width, cursor1_height,
 						   					 cursor1_x_hot, cursor1_y_hot );
-		cursor_1d[ MOVE_HAND_CURSOR ] = G1.cursor[ MOVE_HAND_CURSOR ] =
+		cursor_1d[ MOVE_HAND_CURSOR ] = G_1d.cursor[ MOVE_HAND_CURSOR ] =
 					fl_create_bitmap_cursor( cursor2_bits, cursor2_bits,
 											 cursor2_width, cursor2_height,
 											 cursor2_x_hot, cursor2_y_hot );
-		cursor_1d[ ZOOM_LENS_CURSOR ] = G1.cursor[ ZOOM_LENS_CURSOR ] =
+		cursor_1d[ ZOOM_LENS_CURSOR ] = G_1d.cursor[ ZOOM_LENS_CURSOR ] =
 					fl_create_bitmap_cursor( cursor3_bits, cursor3_bits,
 											 cursor3_width, cursor3_height,
 											 cursor3_x_hot, cursor3_y_hot );
-		cursor_1d[ CROSSHAIR_CURSOR ] = G1.cursor[ CROSSHAIR_CURSOR ] =
+		cursor_1d[ CROSSHAIR_CURSOR ] = G_1d.cursor[ CROSSHAIR_CURSOR ] =
 					fl_create_bitmap_cursor( cursor4_bits, cursor4_bits,
 											 cursor4_width, cursor4_height,
 											 cursor4_x_hot, cursor4_y_hot );
-		cursor_1d[ TARGET_CURSOR ] = G1.cursor[ TARGET_CURSOR ] =
+		cursor_1d[ TARGET_CURSOR ] = G_1d.cursor[ TARGET_CURSOR ] =
 					fl_create_bitmap_cursor( cursor5_bits, cursor5_bits,
 											 cursor5_width, cursor5_height,
 											 cursor5_x_hot, cursor5_y_hot );
-		cursor_1d[ ARROW_UP_CURSOR ] = G1.cursor[ ARROW_UP_CURSOR ] =
+		cursor_1d[ ARROW_UP_CURSOR ] = G_1d.cursor[ ARROW_UP_CURSOR ] =
 					fl_create_bitmap_cursor( cursor6_bits, cursor6_bits,
 											 cursor6_width, cursor6_height,
 											 cursor6_x_hot, cursor6_y_hot );
-		cursor_1d[ ARROW_RIGHT_CURSOR ] = G1.cursor[ ARROW_RIGHT_CURSOR ] =
+		cursor_1d[ ARROW_RIGHT_CURSOR ] = G_1d.cursor[ ARROW_RIGHT_CURSOR ] =
 					fl_create_bitmap_cursor( cursor7_bits, cursor7_bits,
 											 cursor7_width, cursor7_height,
 											 cursor7_x_hot, cursor7_y_hot );
 
-		cursor_2d[ ZOOM_BOX_CURSOR ] = G2.cursor[ ZOOM_BOX_CURSOR ] =
+		cursor_2d[ ZOOM_BOX_CURSOR ] = G_2d.cursor[ ZOOM_BOX_CURSOR ] =
 					fl_create_bitmap_cursor( cursor1_bits, cursor1_bits,
 											 cursor1_width, cursor1_height,
 						   					 cursor1_x_hot, cursor1_y_hot );
-		cursor_2d[ MOVE_HAND_CURSOR ] = G2.cursor[ MOVE_HAND_CURSOR ] =
+		cursor_2d[ MOVE_HAND_CURSOR ] = G_2d.cursor[ MOVE_HAND_CURSOR ] =
 					fl_create_bitmap_cursor( cursor2_bits, cursor2_bits,
 											 cursor2_width, cursor2_height,
 											 cursor2_x_hot, cursor2_y_hot );
-		cursor_2d[ ZOOM_LENS_CURSOR ] = G2.cursor[ ZOOM_LENS_CURSOR ] =
+		cursor_2d[ ZOOM_LENS_CURSOR ] = G_2d.cursor[ ZOOM_LENS_CURSOR ] =
 					fl_create_bitmap_cursor( cursor3_bits, cursor3_bits,
 											 cursor3_width, cursor3_height,
 											 cursor3_x_hot, cursor3_y_hot );
-		cursor_2d[ CROSSHAIR_CURSOR ] = G2.cursor[ CROSSHAIR_CURSOR ] =
+		cursor_2d[ CROSSHAIR_CURSOR ] = G_2d.cursor[ CROSSHAIR_CURSOR ] =
 					fl_create_bitmap_cursor( cursor4_bits, cursor4_bits,
 											 cursor4_width, cursor4_height,
 											 cursor4_x_hot, cursor4_y_hot );
-		cursor_2d[ TARGET_CURSOR ] = G2.cursor[ TARGET_CURSOR ] =
+		cursor_2d[ TARGET_CURSOR ] = G_2d.cursor[ TARGET_CURSOR ] =
 					fl_create_bitmap_cursor( cursor5_bits, cursor5_bits,
 											 cursor5_width, cursor5_height,
 											 cursor5_x_hot, cursor5_y_hot );
-		cursor_2d[ ARROW_UP_CURSOR ] = G2.cursor[ ARROW_UP_CURSOR ] =
+		cursor_2d[ ARROW_UP_CURSOR ] = G_2d.cursor[ ARROW_UP_CURSOR ] =
 					fl_create_bitmap_cursor( cursor6_bits, cursor6_bits,
 											 cursor6_width, cursor6_height,
 											 cursor6_x_hot, cursor6_y_hot );
-		cursor_2d[ ARROW_RIGHT_CURSOR ] = G2.cursor[ ARROW_RIGHT_CURSOR ] =
+		cursor_2d[ ARROW_RIGHT_CURSOR ] = G_2d.cursor[ ARROW_RIGHT_CURSOR ] =
 					fl_create_bitmap_cursor( cursor7_bits, cursor7_bits,
 											 cursor7_width, cursor7_height,
 											 cursor7_x_hot, cursor7_y_hot );
@@ -900,29 +900,29 @@ static void G_struct_init( void )
 	else
 		for ( i = 0; i < 7; i++ )
 		{
-			G1.cursor[ i ] = cursor_1d[ i ];
-			G2.cursor[ i ] = cursor_2d[ i ];
+			G_1d.cursor[ i ] = cursor_1d[ i ];
+			G_2d.cursor[ i ] = cursor_2d[ i ];
 		}
 
-	G1.is_fs = SET;
-	G2.is_fs = SET;
+	G_1d.is_fs = SET;
+	G_2d.is_fs = SET;
 
-	G1.rw_min = HUGE_VAL;
-	G1.rw_max = - HUGE_VAL;
-	G1.is_scale_set = UNSET;
+	G_1d.rw_min = HUGE_VAL;
+	G_1d.rw_max = - HUGE_VAL;
+	G_1d.is_scale_set = UNSET;
 
-	G2.rw_min = HUGE_VAL;
-	G2.rw_max = - HUGE_VAL;
-	G2.is_scale_set = UNSET;
+	G_2d.rw_min = HUGE_VAL;
+	G_2d.rw_max = - HUGE_VAL;
+	G_2d.is_scale_set = UNSET;
 
-	if ( G.dim & 1 && G1.label[ Y ] != NULL && G.font != NULL )
-		create_label_pixmap( &G1.y_axis, Y, G1.label[ Y ] );
+	if ( G.dim & 1 && G_1d.label[ Y ] != NULL && G.font != NULL )
+		create_label_pixmap( &G_1d.y_axis, Y, G_1d.label[ Y ] );
 
-	if ( G.dim & 2 && G2.label[ Y ] != NULL && G.font != NULL )
-		create_label_pixmap( &G2.y_axis, Y, G2.label[ Y ] );
+	if ( G.dim & 2 && G_2d.label[ Y ] != NULL && G.font != NULL )
+		create_label_pixmap( &G_2d.y_axis, Y, G_2d.label[ Y ] );
 
-	if ( G.dim & 2 && G2.label[ Z ] != NULL && G.font != NULL )
-		create_label_pixmap( &G2.z_axis, Z, G2.label[ Z ] );
+	if ( G.dim & 2 && G_2d.label[ Z ] != NULL && G.font != NULL )
+		create_label_pixmap( &G_2d.z_axis, Z, G_2d.label[ Z ] );
 
 	if ( G.dim & 1 )
 		G_init_curves_1d( );
@@ -945,32 +945,32 @@ static void G_init_curves_1d( void )
 	unsigned int depth;
 
 
-	for ( i = 0; i < G1.nc; i++ )
-		G1.curve[ i ] = NULL;
+	for ( i = 0; i < G_1d.nc; i++ )
+		G_1d.curve[ i ] = NULL;
 
-	depth = fl_get_canvas_depth( G1.canvas.obj );
+	depth = fl_get_canvas_depth( G_1d.canvas.obj );
 
 	for ( i = 0; i < 5; i++ )
-		fl_set_cursor_color( G1.cursor[ i ], FL_RED, FL_WHITE );
+		fl_set_cursor_color( G_1d.cursor[ i ], FL_RED, FL_WHITE );
 
-	for ( i = 0; i < G1.nc; i++ )
+	for ( i = 0; i < G_1d.nc; i++ )
 	{
 		/* Allocate memory for the curve and its data */
 
-		cv = G1.curve[ i ] = CURVE_1D_P T_malloc( sizeof *cv );
+		cv = G_1d.curve[ i ] = CURVE_1D_P T_malloc( sizeof *cv );
 
 		cv->points = NULL;
 		cv->xpoints = NULL;
 
 		/* Create a GC for drawing the curve and set its color */
 
-		cv->gc = XCreateGC( G.d, G1.canvas.pm, 0, 0 );
+		cv->gc = XCreateGC( G.d, G_1d.canvas.pm, 0, 0 );
 		XSetForeground( G.d, cv->gc, fl_get_pixel( G.colors[ i ] ) );
 
 		/* Create pixmaps for the out-of-display arrows */
 
 		cv->up_arrow =
-			XCreatePixmapFromBitmapData( G.d, G1.canvas.pm, up_arrow_bits,
+			XCreatePixmapFromBitmapData( G.d, G_1d.canvas.pm, up_arrow_bits,
 										 up_arrow_width, up_arrow_height,
 										 fl_get_pixel( G.colors[ i ] ),
 										 fl_get_pixel( FL_BLACK ), depth );
@@ -978,7 +978,7 @@ static void G_init_curves_1d( void )
 		G.up_arrow_h = up_arrow_width;
 
 		cv->down_arrow =
-			XCreatePixmapFromBitmapData( G.d, G1.canvas.pm, down_arrow_bits,
+			XCreatePixmapFromBitmapData( G.d, G_1d.canvas.pm, down_arrow_bits,
 										 down_arrow_width, down_arrow_height,
 										 fl_get_pixel( G.colors[ i ] ),
 										 fl_get_pixel( FL_BLACK ), depth );
@@ -987,7 +987,7 @@ static void G_init_curves_1d( void )
 		G.down_arrow_h = down_arrow_width;
 
 		cv->left_arrow =
-			XCreatePixmapFromBitmapData( G.d, G1.canvas.pm, left_arrow_bits,
+			XCreatePixmapFromBitmapData( G.d, G_1d.canvas.pm, left_arrow_bits,
 										 left_arrow_width, left_arrow_height,
 										 fl_get_pixel( G.colors[ i ] ),
 										 fl_get_pixel( FL_BLACK ), depth );
@@ -996,7 +996,7 @@ static void G_init_curves_1d( void )
 		G.left_arrow_h = left_arrow_width;
 
 		cv->right_arrow =
-			XCreatePixmapFromBitmapData( G.d, G1.canvas.pm, right_arrow_bits,
+			XCreatePixmapFromBitmapData( G.d, G_1d.canvas.pm, right_arrow_bits,
 										 right_arrow_width, right_arrow_height,
 										 fl_get_pixel( G.colors[ i ] ),
 										 fl_get_pixel( FL_BLACK ), depth );
@@ -1006,7 +1006,7 @@ static void G_init_curves_1d( void )
 
 		/* Create a GC for the font and set the appropriate color */
 
-		cv->font_gc = XCreateGC( G.d, FL_ObjWin( G1.canvas.obj ), 0, 0 );
+		cv->font_gc = XCreateGC( G.d, FL_ObjWin( G_1d.canvas.obj ), 0, 0 );
 		if ( G.font != NULL )
 			XSetFont( G.d, cv->font_gc, G.font->fid );
 		XSetForeground( G.d, cv->font_gc, fl_get_pixel( G.colors[ i ] ) );
@@ -1014,9 +1014,9 @@ static void G_init_curves_1d( void )
 
 		/* Set the scaling factors for the curve */
 
-		cv->s2d[ X ] = ( double ) ( G1.canvas.w - 1 )
-					   / ( double ) ( G1.nx - 1 );
-		cv->s2d[ Y ] = ( double ) ( G1.canvas.h - 1 );
+		cv->s2d[ X ] = ( double ) ( G_1d.canvas.w - 1 )
+					   / ( double ) ( G_1d.nx - 1 );
+		cv->s2d[ Y ] = ( double ) ( G_1d.canvas.h - 1 );
 
 		cv->shift[ X ] = cv->shift[ Y ] = 0.0;
 
@@ -1026,12 +1026,12 @@ static void G_init_curves_1d( void )
 
 		/* Finally get memory for the data */
 
-		cv->points = SCALED_POINT_P T_malloc( G1.nx * sizeof *cv->points );
+		cv->points = SCALED_POINT_P T_malloc( G_1d.nx * sizeof *cv->points );
 
-		for ( j = 0; j < G1.nx; j++ )          /* no points are known in yet */
+		for ( j = 0; j < G_1d.nx; j++ )        /* no points are known in yet */
 			cv->points[ j ].exist = UNSET;
 
-		cv->xpoints = XPOINT_P T_malloc( G1.nx * sizeof *cv->xpoints );
+		cv->xpoints = XPOINT_P T_malloc( G_1d.nx * sizeof *cv->xpoints );
 	}
 }
 
@@ -1048,27 +1048,27 @@ static void G_init_curves_2d( void )
 	unsigned int depth;
 
 
-	for ( i = 0; i < G2.nc; i++ )
-		G2.curve_2d[ i ] = NULL;
+	for ( i = 0; i < G_2d.nc; i++ )
+		G_2d.curve_2d[ i ] = NULL;
 
-	depth = fl_get_canvas_depth( G2.canvas.obj );
+	depth = fl_get_canvas_depth( G_2d.canvas.obj );
 
 	for ( i = 0; i < NUM_COLORS + 2; i++ )
 	{
-		G2.gcs[ i ] = XCreateGC( G.d, G2.canvas.pm, 0, 0 );
-		XSetForeground( G.d, G2.gcs[ i ], fl_get_pixel( FL_FREE_COL1 + i ) );
-		XSetLineAttributes( G.d, G2.gcs[ i ], 0, LineSolid, CapButt,
+		G_2d.gcs[ i ] = XCreateGC( G.d, G_2d.canvas.pm, 0, 0 );
+		XSetForeground( G.d, G_2d.gcs[ i ], fl_get_pixel( FL_FREE_COL1 + i ) );
+		XSetLineAttributes( G.d, G_2d.gcs[ i ], 0, LineSolid, CapButt,
 							JoinBevel );
 	}
 
 	for ( i = 0; i < 7; i++ )
-		fl_set_cursor_color( G2.cursor[ i ], FL_BLACK, FL_WHITE );
+		fl_set_cursor_color( G_2d.cursor[ i ], FL_BLACK, FL_WHITE );
 
-	for ( i = 0; i < G2.nc; i++ )
+	for ( i = 0; i < G_2d.nc; i++ )
 	{
 		/* Allocate memory for the curve */
 
-		cv = G2.curve_2d[ i ] = CURVE_2D_P T_malloc( sizeof *cv );
+		cv = G_2d.curve_2d[ i ] = CURVE_2D_P T_malloc( sizeof *cv );
 
 		cv->points = NULL;
 		cv->xpoints = NULL;
@@ -1081,13 +1081,13 @@ static void G_init_curves_2d( void )
 
 		/* Create a GC for drawing the curve and set its color */
 
-		cv->gc = XCreateGC( G.d, G2.canvas.pm, 0, 0 );
+		cv->gc = XCreateGC( G.d, G_2d.canvas.pm, 0, 0 );
 		XSetForeground( G.d, cv->gc, fl_get_pixel( G.colors[ i ] ) );
 
 		/* Create pixmaps for the out-of-display arrows */
 
 		cv->up_arrow =
-			XCreatePixmapFromBitmapData( G.d, G2.canvas.pm, up_arrow_bits,
+			XCreatePixmapFromBitmapData( G.d, G_2d.canvas.pm, up_arrow_bits,
 										 up_arrow_width, up_arrow_height,
 										 fl_get_pixel( G.colors[ i ] ),
 										 fl_get_pixel( FL_INACTIVE ), depth );
@@ -1095,7 +1095,7 @@ static void G_init_curves_2d( void )
 		G.up_arrow_h = up_arrow_width;
 
 		cv->down_arrow =
-			XCreatePixmapFromBitmapData( G.d, G2.canvas.pm, down_arrow_bits,
+			XCreatePixmapFromBitmapData( G.d, G_2d.canvas.pm, down_arrow_bits,
 										 down_arrow_width, down_arrow_height,
 										 fl_get_pixel( G.colors[ i ] ),
 										 fl_get_pixel( FL_INACTIVE ), depth );
@@ -1104,7 +1104,7 @@ static void G_init_curves_2d( void )
 		G.down_arrow_h = down_arrow_width;
 
 		cv->left_arrow =
-			XCreatePixmapFromBitmapData( G.d, G2.canvas.pm, left_arrow_bits,
+			XCreatePixmapFromBitmapData( G.d, G_2d.canvas.pm, left_arrow_bits,
 										 left_arrow_width, left_arrow_height,
 										 fl_get_pixel( G.colors[ i ] ),
 										 fl_get_pixel( FL_INACTIVE ), depth );
@@ -1113,7 +1113,7 @@ static void G_init_curves_2d( void )
 		G.left_arrow_h = left_arrow_width;
 
 		cv->right_arrow =
-			XCreatePixmapFromBitmapData( G.d, G2.canvas.pm, right_arrow_bits,
+			XCreatePixmapFromBitmapData( G.d, G_2d.canvas.pm, right_arrow_bits,
 										 right_arrow_width, right_arrow_height,
 										 fl_get_pixel( G.colors[ i ] ),
 										 fl_get_pixel( FL_INACTIVE ), depth );
@@ -1123,7 +1123,7 @@ static void G_init_curves_2d( void )
 
 		/* Create a GC for the font and set the appropriate color */
 
-		cv->font_gc = XCreateGC( G.d, FL_ObjWin( G2.canvas.obj ), 0, 0 );
+		cv->font_gc = XCreateGC( G.d, FL_ObjWin( G_2d.canvas.obj ), 0, 0 );
 		if ( G.font != NULL )
 			XSetFont( G.d, cv->font_gc, G.font->fid );
 		XSetForeground( G.d, cv->font_gc, fl_get_pixel( FL_WHITE ) );
@@ -1131,20 +1131,20 @@ static void G_init_curves_2d( void )
 
 		/* Set the scaling factors for the curve */
 
-		cv->s2d[ X ] = ( double ) ( G2.canvas.w - 1 )
-					   / ( double ) ( G2.nx - 1 );
-		cv->s2d[ Y ] = ( double ) ( G2.canvas.h - 1 )
-					   / ( double ) ( G2.ny - 1 );
-		cv->s2d[ Z ] = ( double ) ( G2.z_axis.h - 1 );
+		cv->s2d[ X ] = ( double ) ( G_2d.canvas.w - 1 )
+					   / ( double ) ( G_2d.nx - 1 );
+		cv->s2d[ Y ] = ( double ) ( G_2d.canvas.h - 1 )
+					   / ( double ) ( G_2d.ny - 1 );
+		cv->s2d[ Z ] = ( double ) ( G_2d.z_axis.h - 1 );
 
 		cv->shift[ X ] = cv->shift[ Y ] = cv->shift[ Z ] = 0.0;
 
 		cv->z_factor = 1.0;
 
-		cv->rwc_start[ X ] = G2.rwc_start[ X ];
-		cv->rwc_start[ Y ] = G2.rwc_start[ Y ];
-		cv->rwc_delta[ X ] = G2.rwc_delta[ X ];
-		cv->rwc_delta[ Y ] = G2.rwc_delta[ Y ];
+		cv->rwc_start[ X ] = G_2d.rwc_start[ X ];
+		cv->rwc_start[ Y ] = G_2d.rwc_start[ Y ];
+		cv->rwc_delta[ X ] = G_2d.rwc_delta[ X ];
+		cv->rwc_delta[ Y ] = G_2d.rwc_delta[ Y ];
 
 		cv->count = 0;
 		cv->active = i == 0;
@@ -1158,13 +1158,14 @@ static void G_init_curves_2d( void )
 
 		/* Now get also memory for the data */
 
-		cv->points = SCALED_POINT_P T_malloc( G2.nx * G2.ny
+		cv->points = SCALED_POINT_P T_malloc( G_2d.nx * G_2d.ny
 											  * sizeof *cv->points );
 
-		for ( sp = cv->points, j = 0; j < G2.nx * G2.ny; sp++, j++ )
+		for ( sp = cv->points, j = 0; j < G_2d.nx * G_2d.ny; sp++, j++ )
 			sp->exist = UNSET;
 
-		cv->xpoints = XPOINT_P T_malloc( G2.nx * G2.ny * sizeof *cv->xpoints );
+		cv->xpoints = XPOINT_P T_malloc( G_2d.nx * G_2d.ny
+										 * sizeof *cv->xpoints );
 	}
 }
 
@@ -1185,14 +1186,15 @@ void create_label_pixmap( Canvas_T *c, int coord, char *label )
 
 	/* Make sure we don't do something stupid... */
 
-	fsc2_assert( ( coord == Y && ( c == &G1.y_axis || c == &G2.y_axis ) ) ||
+	fsc2_assert( ( coord == Y &&
+				   ( c == &G_1d.y_axis || c == &G_2d.y_axis ) ) ||
 				 ( coord == Z &&
-				   ( c == &G2.z_axis || c == &G2.cut_z_axis ) ) );
+				   ( c == &G_2d.z_axis || c == &G_2d.cut_z_axis ) ) );
 
 	/* Distinguish between labels for the primary window and the cut window
 	   (this function is never called for the cut windows y-axis) */
 
-	if ( c == &G2.cut_z_axis )
+	if ( c == &G_2d.cut_z_axis )
 		r_coord += 3;
 
 	/* Get size for intermediate pixmap */
@@ -1212,33 +1214,34 @@ void create_label_pixmap( Canvas_T *c, int coord, char *label )
 
 	/* Create the real pixmap for the label */
 
-	if ( c == &G1.y_axis )
+	if ( c == &G_1d.y_axis )
 	{
-		G1.label_pm = XCreatePixmap( G.d, FL_ObjWin( c->obj ), height, width,
-									 fl_get_canvas_depth( c->obj ) );
-		G1.label_w = i2ushrt( height );
-		G1.label_h = i2ushrt( width );
+		G_1d.label_pm = XCreatePixmap( G.d, FL_ObjWin( c->obj ), height, width,
+									   fl_get_canvas_depth( c->obj ) );
+		G_1d.label_w = i2ushrt( height );
+		G_1d.label_h = i2ushrt( width );
 	}
 	else
 	{
-		G2.label_pm[ r_coord ] = XCreatePixmap( G.d, FL_ObjWin( c->obj ),
+		G_2d.label_pm[ r_coord ] =
+								XCreatePixmap( G.d, FL_ObjWin( c->obj ),
 											   height, width,
 											   fl_get_canvas_depth( c->obj ) );
-		G2.label_w[ r_coord ] = i2ushrt( height );
-		G2.label_h[ r_coord ] = i2ushrt( width );
+		G_2d.label_w[ r_coord ] = i2ushrt( height );
+		G_2d.label_h[ r_coord ] = i2ushrt( width );
 	}
 
 	/* Now copy the contents of the intermediate pixmap to the final pixmap
 	   but rotated by 90 degree ccw */
 
-	if ( c == &G1.y_axis )
+	if ( c == &G_1d.y_axis )
 		for ( i = 0, k = width - 1; i < width; k--, i++ )
 			for ( j = 0; j < height; j++ )
-				XCopyArea( G.d, pm, G1.label_pm, c->gc, i, j, 1, 1, j, k );
+				XCopyArea( G.d, pm, G_1d.label_pm, c->gc, i, j, 1, 1, j, k );
 	else
 		for ( i = 0, k = width - 1; i < width; k--, i++ )
 			for ( j = 0; j < height; j++ )
-				XCopyArea( G.d, pm, G2.label_pm[ r_coord ], c->gc,
+				XCopyArea( G.d, pm, G_2d.label_pm[ r_coord ], c->gc,
 						   i, j, 1, 1, j, k );
 
 	XFreePixmap( G.d, pm );
@@ -1263,55 +1266,55 @@ void stop_graphics( void )
 
 		if ( G.dim & 1 )
 			for ( i = X; i <= Y; i++ )
-				G1.label[ i ] = CHAR_P T_free( G1.label[ i ] );
+				G_1d.label[ i ] = CHAR_P T_free( G_1d.label[ i ] );
 		if ( G.dim & 2 )
 			for ( i = X; i <= Z; i++ )
-				G2.label[ i ] = CHAR_P T_free( G2.label[ i ] );
+				G_2d.label[ i ] = CHAR_P T_free( G_2d.label[ i ] );
 
 		if ( G.font )
 			XFreeFont( G.d, G.font );
 
 		if ( GUI.run_form_1d )
 		{
-			if ( G1.x_axis.obj )
+			if ( G_1d.x_axis.obj )
 			{
-				canvas_off( &G1.x_axis, GUI.run_form_1d->x_axis_1d );
-				G1.x_axis.obj = NULL;
+				canvas_off( &G_1d.x_axis, GUI.run_form_1d->x_axis_1d );
+				G_1d.x_axis.obj = NULL;
 			}
-			if ( G1.y_axis.obj )
+			if ( G_1d.y_axis.obj )
 			{
-				canvas_off( &G1.y_axis, GUI.run_form_1d->y_axis_1d );
-				G1.y_axis.obj = NULL;
+				canvas_off( &G_1d.y_axis, GUI.run_form_1d->y_axis_1d );
+				G_1d.y_axis.obj = NULL;
 			}
-			if ( G1.canvas.obj )
+			if ( G_1d.canvas.obj )
 			{
-				canvas_off( &G1.canvas, GUI.run_form_1d->canvas_1d );
-				G1.canvas.obj = NULL;
+				canvas_off( &G_1d.canvas, GUI.run_form_1d->canvas_1d );
+				G_1d.canvas.obj = NULL;
 			}
 		}
 
 		if ( GUI.run_form_2d )
 		{
-			if ( G2.x_axis.obj )
+			if ( G_2d.x_axis.obj )
 			{
-				canvas_off( &G2.x_axis, GUI.run_form_2d->x_axis_2d );
-				G2.x_axis.obj = NULL;
+				canvas_off( &G_2d.x_axis, GUI.run_form_2d->x_axis_2d );
+				G_2d.x_axis.obj = NULL;
 			}
-			if ( G2.y_axis.obj )
+			if ( G_2d.y_axis.obj )
 			{
-				canvas_off( &G2.y_axis, GUI.run_form_2d->y_axis_2d );
-				G2.y_axis.obj = NULL;
+				canvas_off( &G_2d.y_axis, GUI.run_form_2d->y_axis_2d );
+				G_2d.y_axis.obj = NULL;
 			}
-			if ( G2.canvas.obj )
+			if ( G_2d.canvas.obj )
 			{
-				canvas_off( &G2.canvas, GUI.run_form_2d->canvas_2d );
-				G2.canvas.obj = NULL;
+				canvas_off( &G_2d.canvas, GUI.run_form_2d->canvas_2d );
+				G_2d.canvas.obj = NULL;
 			}
 
-			if ( G2.z_axis.obj )
+			if ( G_2d.z_axis.obj )
 			{
-				canvas_off( &G2.z_axis, GUI.run_form_2d->z_axis_2d );
-				G2.z_axis.obj = NULL;
+				canvas_off( &G_2d.z_axis, GUI.run_form_2d->z_axis_2d );
+				G_2d.z_axis.obj = NULL;
 			}
 
 			cut_form_close( );
@@ -1358,7 +1361,7 @@ void stop_graphics( void )
 		GUI.run_form_2d = NULL;
 	}
 
-	for ( m = G1.marker_1d; m != NULL; m = mn )
+	for ( m = G_1d.marker_1d; m != NULL; m = mn )
 	{
 		XFreeGC( G.d, m->gc );
 		mn = m->next;
@@ -1373,20 +1376,20 @@ void stop_graphics( void )
 
 	if ( G_1d_stored )
 	{
-		memcpy( &G1, G_1d_stored, sizeof G1 );
+		memcpy( &G_1d, G_1d_stored, sizeof G_1d );
 		G_1d_stored = GRAPHICS_1D_P T_free( G_1d_stored );
 
 		for ( i = X; i <= Y; i++ )
-			G1.label[ i ] = NULL;
+			G_1d.label[ i ] = NULL;
 	}
 
 	if ( G_2d_stored )
 	{
-		memcpy( &G2, G_2d_stored, sizeof G2 );
+		memcpy( &G_2d, G_2d_stored, sizeof G_2d );
 		G_2d_stored = GRAPHICS_2D_P T_free( G_2d_stored );
 
 		for ( i = X; i <= Z; i++ )
-			G2.label[ i ] = NULL;
+			G_2d.label[ i ] = NULL;
 	}
 }
 
@@ -1410,9 +1413,9 @@ static void graphics_free( void )
 	   for the data is allocated. */
 
 	if ( G.dim & 1 )
-		for ( i = 0; i < G1.nc; i++ )
+		for ( i = 0; i < G_1d.nc; i++ )
 		{
-			if ( ( cv = G1.curve[ i ] ) == NULL )
+			if ( ( cv = G_1d.curve[ i ] ) == NULL )
 				 break;
 
 			XFreeGC( G.d, cv->gc );
@@ -1430,11 +1433,11 @@ static void graphics_free( void )
 	if ( G.dim & 2 )
 	{
 		for ( i = 0; i < NUM_COLORS + 2; i++ )
-			XFreeGC( G.d, G2.gcs[ i ] );
+			XFreeGC( G.d, G_2d.gcs[ i ] );
 
-		for ( i = 0; i < G2.nc; i++ )
+		for ( i = 0; i < G_2d.nc; i++ )
 		{
-			if ( ( cv2 = G2.curve_2d[ i ] ) == NULL )
+			if ( ( cv2 = G_2d.curve_2d[ i ] ) == NULL )
 				break;
 
 			XFreeGC( G.d, cv2->gc );
@@ -1460,12 +1463,12 @@ static void graphics_free( void )
 	if ( G.font )
 	{
 		if ( G.dim & 1 )
-			if ( G1.label[ Y ] )
-				XFreePixmap( G.d, G1.label_pm );
+			if ( G_1d.label[ Y ] )
+				XFreePixmap( G.d, G_1d.label_pm );
 		if ( G.dim & 2 )
 		for ( coord = Y; coord <= Z; coord++ )
-			if ( G2.label[ coord ] )
-				XFreePixmap( G.d, G2.label_pm[ coord ] );
+			if ( G_2d.label[ coord ] )
+				XFreePixmap( G.d, G_2d.label_pm[ coord ] );
 	}
 }
 
@@ -1478,7 +1481,7 @@ static void canvas_off( Canvas_T *c, FL_OBJECT *obj )
 	FL_HANDLE_CANVAS ch;
 
 
-	if ( c == &G1.x_axis || c == &G1.y_axis || c == &G1.canvas )
+	if ( c == &G_1d.x_axis || c == &G_1d.y_axis || c == &G_1d.canvas )
 		ch = canvas_handler_1d;
 	else
 		ch = canvas_handler_2d;
@@ -1511,7 +1514,7 @@ static void setup_canvas( Canvas_T *c, FL_OBJECT *obj )
 	FL_HANDLE_CANVAS ch;
 
 
-	if ( c == &G1.x_axis || c == &G1.y_axis || c == &G1.canvas )
+	if ( c == &G_1d.x_axis || c == &G_1d.y_axis || c == &G_1d.canvas )
 		ch = canvas_handler_1d;
 	else
 		ch = canvas_handler_2d;
@@ -1578,9 +1581,9 @@ void create_pixmap( Canvas_T *c )
     c->pm = XCreatePixmap( G.d, FL_ObjWin( c->obj ), c->w, c->h,
 						   fl_get_canvas_depth( c->obj ) );
 
-	if ( c == &G1.canvas || c == &G2.canvas )
+	if ( c == &G_1d.canvas || c == &G_2d.canvas )
 	{
-		if ( G.is_init && c == &G1.canvas )
+		if ( G.is_init && c == &G_1d.canvas )
 			XSetForeground( G.d, c->gc, fl_get_pixel( FL_BLACK ) );
 		else
 			XSetForeground( G.d, c->gc, fl_get_pixel( FL_INACTIVE ) );
@@ -1592,7 +1595,7 @@ void create_pixmap( Canvas_T *c )
 	{
 		c->box_gc = XCreateGC( G.d, FL_ObjWin( c->obj ), 0, 0 );
 
-		if ( c == &G1.canvas || c == &G1.x_axis || c == &G1.y_axis )
+		if ( c == &G_1d.canvas || c == &G_1d.x_axis || c == &G_1d.y_axis )
 			XSetForeground( G.d, c->box_gc, fl_get_pixel( FL_RED ) );
 		else
 			XSetForeground( G.d, c->box_gc, fl_get_pixel( FL_BLACK ) );
@@ -1637,37 +1640,37 @@ void redraw_axis_1d( int coord )
 
 	if ( coord == X )
 	{
-		c = &G1.x_axis;
-		if ( G1.label[ X ] != NULL && G.font != NULL )
+		c = &G_1d.x_axis;
+		if ( G_1d.label[ X ] != NULL && G.font != NULL )
 		{
-			width = XTextWidth( G.font, G1.label[ X ],
-								strlen( G1.label[ X ] ) );
+			width = XTextWidth( G.font, G_1d.label[ X ],
+								strlen( G_1d.label[ X ] ) );
 			XDrawString( G.d, c->pm, c->font_gc, c->w - width - 5,
 						 c->h - 5 - G.font_desc,
-						 G1.label[ X ], strlen( G1.label[ X ] ) );
+						 G_1d.label[ X ], strlen( G_1d.label[ X ] ) );
 		}
 	}
 	else
 	{
-		c = &G1.y_axis;
-		if ( G1.label[ coord ] != NULL && G.font != NULL )
-			XCopyArea( G.d, G1.label_pm, c->pm, c->gc, 0, 0,
-					   G1.label_w, G1.label_h, 0, 0 );
+		c = &G_1d.y_axis;
+		if ( G_1d.label[ coord ] != NULL && G.font != NULL )
+			XCopyArea( G.d, G_1d.label_pm, c->pm, c->gc, 0, 0,
+					   G_1d.label_w, G_1d.label_h, 0, 0 );
 	}
 
-	if ( ! G1.is_scale_set )
+	if ( ! G_1d.is_scale_set )
 		return;
 
 	/* Find out the active curve for the axis */
 
-	for ( i = 0; i < G1.nc; i++ )
+	for ( i = 0; i < G_1d.nc; i++ )
 	{
-		cv = G1.curve[ i ];
+		cv = G_1d.curve[ i ];
 		if ( cv->active )
 			break;
 	}
 
-	if ( i == G1.nc )                         /* no active curve -> no scale */
+	if ( i == G_1d.nc )                       /* no active curve -> no scale */
 		return;
 
 	make_scale_1d( cv, c, coord );
@@ -1692,40 +1695,40 @@ void redraw_axis_2d( int coord )
 
 	if ( coord == X )
 	{
-		c = &G2.x_axis;
-		if ( G2.label[ X ] != NULL && G.font != NULL )
+		c = &G_2d.x_axis;
+		if ( G_2d.label[ X ] != NULL && G.font != NULL )
 		{
-			width = XTextWidth( G.font, G2.label[ X ],
-								strlen( G2.label[ X ] ) );
+			width = XTextWidth( G.font, G_2d.label[ X ],
+								strlen( G_2d.label[ X ] ) );
 			XDrawString( G.d, c->pm, c->font_gc, c->w - width - 5,
 						 c->h - 5 - G.font_desc,
-						 G2.label[ X ], strlen( G2.label[ X ] ) );
+						 G_2d.label[ X ], strlen( G_2d.label[ X ] ) );
 		}
 	}
 	else if ( coord == Y )
 	{
-		c = &G2.y_axis;
-		if ( G2.label[ coord ] != NULL && G.font != NULL )
-			XCopyArea( G.d, G2.label_pm[ coord ], c->pm, c->gc, 0, 0,
-					   G2.label_w[ coord ], G2.label_h[ coord ], 0, 0 );
+		c = &G_2d.y_axis;
+		if ( G_2d.label[ coord ] != NULL && G.font != NULL )
+			XCopyArea( G.d, G_2d.label_pm[ coord ], c->pm, c->gc, 0, 0,
+					   G_2d.label_w[ coord ], G_2d.label_h[ coord ], 0, 0 );
 	}
 	else
 	{
-		c = &G2.z_axis;
-		if ( G2.label[ coord ] != NULL && G.font != NULL )
-			XCopyArea( G.d, G2.label_pm[ coord ], c->pm, c->gc, 0, 0,
-					   G2.label_w[ coord ], G2.label_h[ coord ],
-					   c->w - 5 - G2.label_w[ coord ], 0 );
+		c = &G_2d.z_axis;
+		if ( G_2d.label[ coord ] != NULL && G.font != NULL )
+			XCopyArea( G.d, G_2d.label_pm[ coord ], c->pm, c->gc, 0, 0,
+					   G_2d.label_w[ coord ], G_2d.label_h[ coord ],
+					   c->w - 5 - G_2d.label_w[ coord ], 0 );
 	}
 
-	if ( G2.active_curve == -1 ||
-		 ! G2.curve_2d[ G2.active_curve ]->is_scale_set )
+	if ( G_2d.active_curve == -1 ||
+		 ! G_2d.curve_2d[ G_2d.active_curve ]->is_scale_set )
 		return;
 
 	/* Find out the active curve for the axis */
 
-	if ( G2.active_curve != -1 )
-		make_scale_2d( G2.curve_2d[ G2.active_curve ], c, coord );
+	if ( G_2d.active_curve != -1 )
+		make_scale_2d( G_2d.curve_2d[ G_2d.active_curve ], c, coord );
 }
 
 
@@ -1794,51 +1797,51 @@ void switch_off_special_cursors( void )
 
 		if ( G.drag_canvas == DRAG_1D_X )         /* 1D x-axis window */
 		{
-			fl_reset_cursor( FL_ObjWin( G1.x_axis.obj ) );
-			G1.x_axis.is_box = UNSET;
-			repaint_canvas_1d( &G1.x_axis );
+			fl_reset_cursor( FL_ObjWin( G_1d.x_axis.obj ) );
+			G_1d.x_axis.is_box = UNSET;
+			repaint_canvas_1d( &G_1d.x_axis );
 		}
 
 		if ( G.drag_canvas == DRAG_1D_Y )         /* 1D y-axis window */
 		{
-			fl_reset_cursor( FL_ObjWin( G1.y_axis.obj ) );
-			G1.y_axis.is_box = UNSET;
-			repaint_canvas_1d( &G1.y_axis );
+			fl_reset_cursor( FL_ObjWin( G_1d.y_axis.obj ) );
+			G_1d.y_axis.is_box = UNSET;
+			repaint_canvas_1d( &G_1d.y_axis );
 		}
 
 		if ( G.drag_canvas == DRAG_1D_C )         /* 1D canvas window */
 		{
-			fl_reset_cursor( FL_ObjWin( G1.canvas.obj ) );
-			G1.canvas.is_box = UNSET;
-			repaint_canvas_1d( &G1.canvas );
+			fl_reset_cursor( FL_ObjWin( G_1d.canvas.obj ) );
+			G_1d.canvas.is_box = UNSET;
+			repaint_canvas_1d( &G_1d.canvas );
 		}
 
 		if ( G.drag_canvas == DRAG_2D_X )         /* 2D x-axis window */
 		{
-			fl_reset_cursor( FL_ObjWin( G2.x_axis.obj ) );
-			G2.x_axis.is_box = UNSET;
-			repaint_canvas_2d( &G2.x_axis );
+			fl_reset_cursor( FL_ObjWin( G_2d.x_axis.obj ) );
+			G_2d.x_axis.is_box = UNSET;
+			repaint_canvas_2d( &G_2d.x_axis );
 		}
 
 		if ( G.drag_canvas == DRAG_2D_Y )         /* 2D y-axis window */
 		{
-			fl_reset_cursor( FL_ObjWin( G2.y_axis.obj ) );
-			G2.y_axis.is_box = UNSET;
-			repaint_canvas_2d( &G1.y_axis );
+			fl_reset_cursor( FL_ObjWin( G_2d.y_axis.obj ) );
+			G_2d.y_axis.is_box = UNSET;
+			repaint_canvas_2d( &G_1d.y_axis );
 		}
 
 		if ( G.drag_canvas == DRAG_2D_Z )         /* 2D z-axis window */
 		{
-			fl_reset_cursor( FL_ObjWin( G2.z_axis.obj ) );
-			G2.z_axis.is_box = UNSET;
-			repaint_canvas_2d( &G2.z_axis );
+			fl_reset_cursor( FL_ObjWin( G_2d.z_axis.obj ) );
+			G_2d.z_axis.is_box = UNSET;
+			repaint_canvas_2d( &G_2d.z_axis );
 		}
 
 		if ( G.drag_canvas == DRAG_2D_C )         /* 2D canvas window */
 		{
-			fl_reset_cursor( FL_ObjWin( G2.canvas.obj ) );
-			G2.canvas.is_box = UNSET;
-			repaint_canvas_2d( &G2.canvas );
+			fl_reset_cursor( FL_ObjWin( G_2d.canvas.obj ) );
+			G_2d.canvas.is_box = UNSET;
+			repaint_canvas_2d( &G_2d.canvas );
 		}
 	}
 }
@@ -1858,9 +1861,9 @@ void undo_button_callback_1d( UNUSED_ARG FL_OBJECT *a, UNUSED_ARG long b )
 	int j;
 
 
-	for ( i = 0; i < G1.nc; i++ )
+	for ( i = 0; i < G_1d.nc; i++ )
 	{
-		cv = G1.curve[ i ];
+		cv = G_1d.curve[ i ];
 
 		if ( ! cv->can_undo )
 			continue;
@@ -1882,11 +1885,11 @@ void undo_button_callback_1d( UNUSED_ARG FL_OBJECT *a, UNUSED_ARG long b )
 		recalc_XPoints_of_curve_1d( cv );
 	}
 
-	if ( is_undo && G1.is_fs )
+	if ( is_undo && G_1d.is_fs )
 	{
-		G1.is_fs = UNSET;
+		G_1d.is_fs = UNSET;
 		fl_set_button( GUI.run_form_1d->full_scale_button_1d, 0 );
-		if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
+		if ( ! ( Fsc2_Internals.cmdline_flags & NO_BALLOON ) )
 			fl_set_object_helper( GUI.run_form_1d->full_scale_button_1d,
 								  "Rescale curves to fit into the window\n"
 								  "and switch on automatic rescaling" );
@@ -1910,10 +1913,11 @@ void undo_button_callback_2d( UNUSED_ARG FL_OBJECT *a, UNUSED_ARG long b )
 	int j;
 
 
-	if ( G2.active_curve == -1 || ! G2.curve_2d[ G2.active_curve ]->can_undo )
+	if ( G_2d.active_curve == -1 ||
+		 ! G_2d.curve_2d[ G_2d.active_curve ]->can_undo )
 		return;
 
-	cv2 = G2.curve_2d[ G2.active_curve ];
+	cv2 = G_2d.curve_2d[ G_2d.active_curve ];
 
 	for ( j = 0; j <= Z; j++ )
 	{
@@ -1936,7 +1940,7 @@ void undo_button_callback_2d( UNUSED_ARG FL_OBJECT *a, UNUSED_ARG long b )
 	{
 		cv2->is_fs = UNSET;
 		fl_set_button( GUI.run_form_2d->full_scale_button_2d, 0 );
-		if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
+		if ( ! ( Fsc2_Internals.cmdline_flags & NO_BALLOON ) )
 			fl_set_object_helper( GUI.run_form_2d->full_scale_button_2d,
 								  "Rescale curves to fit into the window\n"
 								  "and switch on automatic rescaling" );
@@ -1968,25 +1972,25 @@ void fs_button_callback_1d( UNUSED_ARG FL_OBJECT *a, UNUSED_ARG long b )
 
 	if ( state == 1 )        /* full scale got switched on */
 	{
-		G1.is_fs = SET;
+		G_1d.is_fs = SET;
 
 		/* Store data of previous state... */
 
-		for ( i = 0; i < G1.nc; i++ )
-			save_scale_state_1d( G1.curve[ i ] );
+		for ( i = 0; i < G_1d.nc; i++ )
+			save_scale_state_1d( G_1d.curve[ i ] );
 
 		/* ... and rescale to full scale */
 
 		fs_rescale_1d( );
 		redraw_all_1d( );
-		if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
+		if ( ! ( Fsc2_Internals.cmdline_flags & NO_BALLOON ) )
 			fl_set_object_helper( GUI.run_form_1d->full_scale_button_1d,
 								  "Switch off automatic rescaling" );
 	}
 	else        /* full scale got switched off */
 	{
-		G1.is_fs = UNSET;
-		if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
+		G_1d.is_fs = UNSET;
+		if ( ! ( Fsc2_Internals.cmdline_flags & NO_BALLOON ) )
 			fl_set_object_helper( GUI.run_form_1d->full_scale_button_1d,
 								  "Rescale curves to fit into the window\n"
 								  "and switch on automatic rescaling" );
@@ -2014,26 +2018,26 @@ void fs_button_callback_2d( UNUSED_ARG FL_OBJECT *a, UNUSED_ARG long b )
 
 	if ( state == 1 )        /* full scale got switched on */
 	{
-		if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
+		if ( ! ( Fsc2_Internals.cmdline_flags & NO_BALLOON ) )
 			fl_set_object_helper( GUI.run_form_2d->full_scale_button_2d,
 								  "Switch off automatic rescaling" );
 
-		if ( G2.active_curve != -1 )
+		if ( G_2d.active_curve != -1 )
 		{
-			save_scale_state_2d( G2.curve_2d[ G2.active_curve ] );
-			G2.curve_2d[ G2.active_curve ]->is_fs = SET;
-			fs_rescale_2d( G2.curve_2d[ G2.active_curve ] );
+			save_scale_state_2d( G_2d.curve_2d[ G_2d.active_curve ] );
+			G_2d.curve_2d[ G_2d.active_curve ]->is_fs = SET;
+			fs_rescale_2d( G_2d.curve_2d[ G_2d.active_curve ] );
 			redraw_all_2d( );
 		}
 	}
 	else                     /* full scale got switched off */
 	{
-		if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
+		if ( ! ( Fsc2_Internals.cmdline_flags & NO_BALLOON ) )
 			fl_set_object_helper( GUI.run_form_2d->full_scale_button_2d,
 								  "Rescale curves to fit into the window\n"
 								  "and switch on automatic rescaling" );
-		if ( G2.active_curve != -1 )
-			G2.curve_2d[ G2.active_curve ]->is_fs = UNSET;
+		if ( G_2d.active_curve != -1 )
+			G_2d.curve_2d[ G_2d.active_curve ]->is_fs = UNSET;
 	}
 }
 
@@ -2049,21 +2053,21 @@ void curve_button_callback_1d( FL_OBJECT *obj, long data )
 
 	/* Change the help string for the button */
 
-	if ( ( G1.curve[ data - 1 ]->active = fl_get_button( obj ) ) )
+	if ( ( G_1d.curve[ data - 1 ]->active = fl_get_button( obj ) ) )
 		sprintf( hstr, "Exempt curve %ld from\nrescaling operations", data );
 	else
 		sprintf( hstr, "Include curve %ld into\nrescaling operations", data );
 
-	if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
+	if ( ! ( Fsc2_Internals.cmdline_flags & NO_BALLOON ) )
 		fl_set_object_helper( obj, hstr );
 
 	/* Redraw both axis to make sure the axis for the first active button
 	   is shown. If markers are shown also redraw the canvas. */
 
-	redraw_canvas_1d( &G1.x_axis );
-	redraw_canvas_1d( &G1.y_axis );
-	if ( G1.marker_1d != NULL )
-		redraw_canvas_1d( &G1.canvas );
+	redraw_canvas_1d( &G_1d.x_axis );
+	redraw_canvas_1d( &G_1d.y_axis );
+	if ( G_1d.marker_1d != NULL )
+		redraw_canvas_1d( &G_1d.canvas );
 }
 
 
@@ -2085,96 +2089,96 @@ void curve_button_callback_2d( FL_OBJECT *obj, long data )
 	{
 		data = - data;
 
-		if ( data > G2.nc )    /* button for non-existing curve triggered */
+		if ( data > G_2d.nc )  /* button for non-existing curve triggered */
 			return;            /* via the keyboard */
 
 		switch( data )
 		{
 			case 1:
 				obj = GUI.run_form_2d->curve_1_button_2d;
-				fl_set_button( obj, G2.active_curve == 0 ? 0 : 1 );
+				fl_set_button( obj, G_2d.active_curve == 0 ? 0 : 1 );
 				break;
 
 			case 2:
 				obj = GUI.run_form_2d->curve_2_button_2d;
-				fl_set_button( obj, G2.active_curve == 1 ? 0 : 1 );
+				fl_set_button( obj, G_2d.active_curve == 1 ? 0 : 1 );
 				break;
 
 			case 3:
 				obj = GUI.run_form_2d->curve_3_button_2d;
-				fl_set_button( obj, G2.active_curve == 2 ? 0 : 1 );
+				fl_set_button( obj, G_2d.active_curve == 2 ? 0 : 1 );
 				break;
 
 			case 4:
 				obj = GUI.run_form_2d->curve_4_button_2d;
-				fl_set_button( obj, G2.active_curve == 3 ? 0 : 1 );
+				fl_set_button( obj, G_2d.active_curve == 3 ? 0 : 1 );
 				break;
 		}
 	}
 	else
 	{
 		bstate = fl_get_button( obj );
-		if ( ( bstate && data - 1 == G2.active_curve ) ||
-			 ( ! bstate && G2.active_curve == -1 ) )
+		if ( ( bstate && data - 1 == G_2d.active_curve ) ||
+			 ( ! bstate && G_2d.active_curve == -1 ) )
 			return;
 	}
 
 	/* Make buttons work like radio buttons but also allow switching off
 	   all of them */
 
-	if ( data - 1 == G2.active_curve )     /* shown curve is switched off */
+	if ( data - 1 == G_2d.active_curve )     /* shown curve is switched off */
 	{
-		G2.curve_2d[ G2.active_curve ]->active = UNSET;
-		G2.active_curve = -1;
+		G_2d.curve_2d[ G_2d.active_curve ]->active = UNSET;
+		G_2d.active_curve = -1;
 		sprintf( hstr, "Show curve %ld", data );
-		if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
+		if ( ! ( Fsc2_Internals.cmdline_flags & NO_BALLOON ) )
 			fl_set_object_helper( obj, hstr );
 	}
 	else
 	{
-		if ( G2.active_curve != -1 )
-			G2.curve_2d[ G2.active_curve ]->active = UNSET;
+		if ( G_2d.active_curve != -1 )
+			G_2d.curve_2d[ G_2d.active_curve ]->active = UNSET;
 
-		switch ( G2.active_curve )
+		switch ( G_2d.active_curve )
 		{
 			case 0 :
 				fl_set_button( GUI.run_form_2d->curve_1_button_2d, 0 );
-				if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
+				if ( ! ( Fsc2_Internals.cmdline_flags & NO_BALLOON ) )
 					fl_set_object_helper( GUI.run_form_2d->curve_1_button_2d,
 										  "Show curve 1" );
 				break;
 
 			case 1 :
 				fl_set_button( GUI.run_form_2d->curve_2_button_2d, 0 );
-				if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
+				if ( ! ( Fsc2_Internals.cmdline_flags & NO_BALLOON ) )
 					fl_set_object_helper( GUI.run_form_2d->curve_2_button_2d,
 										  "Show curve 2" );
 				break;
 
 			case 2 :
 				fl_set_button( GUI.run_form_2d->curve_3_button_2d, 0 );
-				if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
+				if ( ! ( Fsc2_Internals.cmdline_flags & NO_BALLOON ) )
 					fl_set_object_helper( GUI.run_form_2d->curve_3_button_2d,
 										  "Show curve 3" );
 				break;
 
 			case 3 :
 				fl_set_button( GUI.run_form_2d->curve_4_button_2d, 0 );
-				if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
+				if ( ! ( Fsc2_Internals.cmdline_flags & NO_BALLOON ) )
 					fl_set_object_helper( GUI.run_form_2d->curve_4_button_2d,
 										  "Show curve 4" );
 				break;
 		}
 
 		sprintf( hstr, "Hide curve %ld", data );
-		if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
+		if ( ! ( Fsc2_Internals.cmdline_flags & NO_BALLOON ) )
 			fl_set_object_helper( obj, hstr );
 
-		G2.active_curve = ( int ) ( data - 1 );
-		G2.curve_2d[ G2.active_curve ]->active = SET;
+		G_2d.active_curve = ( int ) ( data - 1 );
+		G_2d.curve_2d[ G_2d.active_curve ]->active = SET;
 
 		fl_set_button( GUI.run_form_2d->full_scale_button_2d,
-					   G2.curve_2d[ G2.active_curve ]->is_fs );
+					   G_2d.curve_2d[ G_2d.active_curve ]->is_fs );
 	}
 
 	redraw_all_2d( );
@@ -2192,9 +2196,9 @@ void clear_curve_1d( long curve )
 	Scaled_Point_T *sp;
 
 
-	for ( sp = G1.curve[ curve ]->points, i = 0; i < G1.nx; sp++, i++ )
+	for ( sp = G_1d.curve[ curve ]->points, i = 0; i < G_1d.nx; sp++, i++ )
 		sp->exist = UNSET;
-	G1.curve[ curve ]->count = 0;
+	G_1d.curve[ curve ]->count = 0;
 }
 
 
@@ -2208,10 +2212,10 @@ void clear_curve_2d( long curve )
 	Scaled_Point_T *sp;
 
 
-	for ( sp = G2.curve_2d[ curve ]->points, i = 0; i < G2.nx * G2.ny;
+	for ( sp = G_2d.curve_2d[ curve ]->points, i = 0; i < G_2d.nx * G_2d.ny;
 		  sp++, i++ )
 		sp->exist = UNSET;
-	G2.curve_2d[ curve ]->count = 0;
+	G_2d.curve_2d[ curve ]->count = 0;
 }
 
 
@@ -2227,9 +2231,9 @@ void change_scale_1d( int is_set, void *ptr )
 	memcpy( vals, ptr, sizeof vals );
 
 	if ( is_set & 1 )
-		G1.rwc_start[ X ] = vals[ 0 ];
+		G_1d.rwc_start[ X ] = vals[ 0 ];
 	if ( is_set & 2 )
-		G1.rwc_delta[ X ] = vals[ 1 ];
+		G_1d.rwc_delta[ X ] = vals[ 1 ];
 }
 
 
@@ -2247,30 +2251,30 @@ void change_scale_2d( int is_set, void *ptr )
 
 	if ( is_set & 1 )
 	{
-		G2.rwc_start[ X ] = vals[ 0 ];
-		for ( i = 0; i < G2.nc; i++ )
-			G2.curve_2d[ i ]->rwc_start[ X ] = vals[ 0 ];
+		G_2d.rwc_start[ X ] = vals[ 0 ];
+		for ( i = 0; i < G_2d.nc; i++ )
+			G_2d.curve_2d[ i ]->rwc_start[ X ] = vals[ 0 ];
 	}
 
 	if ( is_set & 2 )
 	{
-		G2.rwc_delta[ X ] = vals[ 1 ];
-		for ( i = 0; i < G2.nc; i++ )
-			G2.curve_2d[ i ]->rwc_delta[ X ] = vals[ 1 ];
+		G_2d.rwc_delta[ X ] = vals[ 1 ];
+		for ( i = 0; i < G_2d.nc; i++ )
+			G_2d.curve_2d[ i ]->rwc_delta[ X ] = vals[ 1 ];
 	}
 
 	if ( is_set & 4 )
 	{
-		G2.rwc_start[ Y ] = vals[ 2 ];
-		for ( i = 0; i < G2.nc; i++ )
-			G2.curve_2d[ i ]->rwc_start[ Y ] = vals[ 2 ];
+		G_2d.rwc_start[ Y ] = vals[ 2 ];
+		for ( i = 0; i < G_2d.nc; i++ )
+			G_2d.curve_2d[ i ]->rwc_start[ Y ] = vals[ 2 ];
 	}
 
 	if ( is_set & 8 )
 	{
-		G2.rwc_delta[ Y ] = vals[ 3 ];
-		for ( i = 0; i < G2.nc; i++ )
-			G2.curve_2d[ i ]->rwc_delta[ Y ] = vals[ 3 ];
+		G_2d.rwc_delta[ Y ] = vals[ 3 ];
+		for ( i = 0; i < G_2d.nc; i++ )
+			G_2d.curve_2d[ i ]->rwc_delta[ Y ] = vals[ 3 ];
 	}
 }
 
@@ -2283,25 +2287,25 @@ void change_label_1d( char **label )
 {
 	if ( *label[ X ] != '\0' )
 	{
-		T_free( G1.label[ X ] );
-		G1.label[ X ] = T_strdup( label[ X ] );
-		redraw_canvas_1d( &G1.x_axis );
+		T_free( G_1d.label[ X ] );
+		G_1d.label[ X ] = T_strdup( label[ X ] );
+		redraw_canvas_1d( &G_1d.x_axis );
 	}
 
 	if ( *label[ Y ] != '\0' )
 	{
-		if ( G1.label[ Y ] != NULL )
+		if ( G_1d.label[ Y ] != NULL )
 		{
-			G1.label[ Y ] = CHAR_P T_free( G1.label[ Y ] );
+			G_1d.label[ Y ] = CHAR_P T_free( G_1d.label[ Y ] );
 			if ( G.font != NULL )
-				XFreePixmap( G.d, G1.label_pm );
+				XFreePixmap( G.d, G_1d.label_pm );
 		}
 
-		G1.label[ Y ] = T_strdup( label[ Y ] );
+		G_1d.label[ Y ] = T_strdup( label[ Y ] );
 		if ( G.font != NULL )
 		{
-			create_label_pixmap( &G1.y_axis, Y, G1.label[ Y ] );
-			redraw_canvas_1d( &G1.y_axis );
+			create_label_pixmap( &G_1d.y_axis, Y, G_1d.label[ Y ] );
+			redraw_canvas_1d( &G_1d.y_axis );
 		}
 	}
 }
@@ -2318,22 +2322,23 @@ void change_label_2d( char **label )
 
 	if ( *label[ X ] != '\0' )
 	{
-		if ( G2.label[ X ] != NULL )
+		if ( G_2d.label[ X ] != NULL )
 		{
-			G2.label[ X ] = CHAR_P T_free( G2.label[ X ] );
-			if ( CG.is_shown && CG.cut_dir == X )
-				XFreePixmap( G.d, G2.label_pm[ Z + 3 ] );
+			G_2d.label[ X ] = CHAR_P T_free( G_2d.label[ X ] );
+			if ( G_cut.is_shown && G_cut.cut_dir == X )
+				XFreePixmap( G.d, G_2d.label_pm[ Z + 3 ] );
 		}
-		G2.label[ X ] = T_strdup( label[ X ] );
+		G_2d.label[ X ] = T_strdup( label[ X ] );
 
-		redraw_canvas_2d( &G2.x_axis );
+		redraw_canvas_2d( &G_2d.x_axis );
 
-		if ( CG.is_shown )
+		if ( G_cut.is_shown )
 		{
-			if ( CG.cut_dir == X )
+			if ( G_cut.cut_dir == X )
 			{
-				if ( G2.label[ X ] != NULL && G.font != NULL )
-					create_label_pixmap( &G2.cut_z_axis, Z, G2.label[ X ] );
+				if ( G_2d.label[ X ] != NULL && G.font != NULL )
+					create_label_pixmap( &G_2d.cut_z_axis, Z,
+										 G_2d.label[ X ] );
 				redraw_cut_axis( Z );
 			}
 			else
@@ -2344,30 +2349,30 @@ void change_label_2d( char **label )
 	for ( coord = Y; coord <= Z; coord++ )
 		if ( *label[ coord ] != '\0' )
 		{
-			if ( G2.label[ coord ] != NULL )
+			if ( G_2d.label[ coord ] != NULL )
 			{
-				T_free( G2.label[ coord ] );
+				T_free( G_2d.label[ coord ] );
 				if ( G.font != NULL )
-					XFreePixmap( G.d, G2.label_pm[ coord ] );
+					XFreePixmap( G.d, G_2d.label_pm[ coord ] );
 			}
-			G2.label[ coord ] = T_strdup( label[ coord ] );
+			G_2d.label[ coord ] = T_strdup( label[ coord ] );
 
 			if ( G.font != NULL )
-				create_label_pixmap( coord == Y ? &G2.y_axis : &G2.z_axis,
-									 coord, G2.label[ coord ] );
-			redraw_canvas_2d( coord == Y ? &G2.y_axis : &G2.z_axis );
+				create_label_pixmap( coord == Y ? &G_2d.y_axis : &G_2d.z_axis,
+									 coord, G_2d.label[ coord ] );
+			redraw_canvas_2d( coord == Y ? &G_2d.y_axis : &G_2d.z_axis );
 
-			if ( CG.is_shown )
+			if ( G_cut.is_shown )
 			{
 				if ( coord == Y )
 				{
-					if ( CG.cut_dir == Y )
+					if ( G_cut.cut_dir == Y )
 					{
-						if ( G2.label[ Y ] != NULL && G.font != NULL )
+						if ( G_2d.label[ Y ] != NULL && G.font != NULL )
 						{
-							G2.label_pm[ Z + 3 ] = G2.label_pm[ Y ];
-							G2.label_w[ Z + 3 ]  = G2.label_w[ Y ];
-							G2.label_h[ Z + 3 ]   = G2.label_h[ Y ];
+							G_2d.label_pm[ Z + 3 ] = G_2d.label_pm[ Y ];
+							G_2d.label_w[ Z + 3 ]  = G_2d.label_w[ Y ];
+							G_2d.label_h[ Z + 3 ]   = G_2d.label_h[ Y ];
 						}
 						redraw_cut_axis( Z );
 					}
@@ -2377,11 +2382,11 @@ void change_label_2d( char **label )
 
 				if ( coord == Z )
 				{
-					if ( G2.label[ Z ] != NULL && G.font != NULL )
+					if ( G_2d.label[ Z ] != NULL && G.font != NULL )
 					{
-						G2.label_pm[ Y + 3 ] = G2.label_pm[ Z ];
-						G2.label_w[ Y + 3 ]  = G2.label_w[ Z ];
-						G2.label_h[ Y + 3 ]  = G2.label_h[ Z ];
+						G_2d.label_pm[ Y + 3 ] = G_2d.label_pm[ Z ];
+						G_2d.label_w[ Y + 3 ]  = G_2d.label_w[ Z ];
+						G_2d.label_h[ Y + 3 ]  = G_2d.label_h[ Z ];
 					}
 					redraw_cut_axis( Y );
 				}
@@ -2409,9 +2414,9 @@ void rescale_1d( long new_nx )
 
 	/* Find the maximum x-index currently used by a point or a marker */
 
-	for ( k = 0; k < G1.nc; k++ )
-		for ( count = G1.curve[ k ]->count, sp = G1.curve[ k ]->points, i = 0;
-			  count > 0; sp++, i++ )
+	for ( k = 0; k < G_1d.nc; k++ )
+		for ( count = G_1d.curve[ k ]->count, sp = G_1d.curve[ k ]->points,
+			  i = 0; count > 0; sp++, i++ )
 			if ( sp->exist )
 			{
 				if( i > max_x )
@@ -2419,7 +2424,7 @@ void rescale_1d( long new_nx )
 				count--;
 			}
 
-	for ( m = G1.marker_1d; m != NULL; m = m->next )
+	for ( m = G_1d.marker_1d; m != NULL; m = m->next )
 		if ( m->x_pos > max_x )
 			max_x = m->x_pos;
 
@@ -2439,30 +2444,30 @@ void rescale_1d( long new_nx )
 	else if ( new_nx > max_x )
 		max_x = new_nx;
 
-	for ( k = 0; k < G1.nc; k++ )
+	for ( k = 0; k < G_1d.nc; k++ )
 	{
-		G1.curve[ k ]->points = SCALED_POINT_P
-			T_realloc( G1.curve[ k ]->points,
-					   max_x * sizeof *G1.curve[ k ]->points );
-		G1.curve[ k ]->xpoints = XPOINT_P
-			T_realloc( G1.curve[ k ]->xpoints,
-					   max_x * sizeof *G1.curve[ k ]->xpoints );
+		G_1d.curve[ k ]->points =
+			SCALED_POINT_P T_realloc( G_1d.curve[ k ]->points,
+									 max_x * sizeof *G_1d.curve[ k ]->points );
+		G_1d.curve[ k ]->xpoints =
+				XPOINT_P T_realloc( G_1d.curve[ k ]->xpoints,
+									max_x * sizeof *G_1d.curve[ k ]->xpoints );
 
-		for ( i = G1.nx, sp = G1.curve[ k ]->points + i; i < max_x;
+		for ( i = G_1d.nx, sp = G_1d.curve[ k ]->points + i; i < max_x;
 			  sp++, i++ )
 			sp->exist = UNSET;
 	}
 
-	G1.nx = max_x;
+	G_1d.nx = max_x;
 
-	for ( k = 0; k < G1.nc; k++ )
+	for ( k = 0; k < G_1d.nc; k++ )
 	{
-		if ( G1.is_fs )
+		if ( G_1d.is_fs )
 		{
-			G1.curve[ k ]->s2d[ X ] = ( double ) ( G1.canvas.w - 1 )
-									  / ( double ) ( G1.nx - 1 );
-			if ( G1.is_scale_set )
-				recalc_XPoints_of_curve_1d( G1.curve[ k ] );
+			G_1d.curve[ k ]->s2d[ X ] = ( double ) ( G_1d.canvas.w - 1 )
+										/ ( double ) ( G_1d.nx - 1 );
+			if ( G_1d.is_scale_set )
+				recalc_XPoints_of_curve_1d( G_1d.curve[ k ] );
 		}
 	}
 }
@@ -2490,10 +2495,10 @@ void rescale_2d( long *new_dims )
 
 	/* Find the maximum x and y index used until now */
 
-	for ( k = 0; k < G2.nc; k++ )
-		for ( j = 0, count = G2.curve_2d[ k ]->count,
-			  sp = G2.curve_2d[ k ]->points; count > 0; j++ )
-			for ( i = 0; i < G2.nx && count > 0; sp++, i++ )
+	for ( k = 0; k < G_2d.nc; k++ )
+		for ( j = 0, count = G_2d.curve_2d[ k ]->count,
+			  sp = G_2d.curve_2d[ k ]->points; count > 0; j++ )
+			for ( i = 0; i < G_2d.nx && count > 0; sp++, i++ )
 				if ( sp->exist )
 				{
 					max_y = j;
@@ -2515,31 +2520,31 @@ void rescale_2d( long *new_dims )
 	   still be displayable and at least the minimum sizes must be kept */
 
 	if ( new_nx < 0 )
-		new_nx = G2.nx;
+		new_nx = G_2d.nx;
 	if ( new_nx < max_x )
 		new_nx = max_x;
 
 	if ( new_ny < 0 )
-		new_ny = G2.ny;
+		new_ny = G_2d.ny;
 	if ( new_ny < max_y )
 		new_ny = max_y;
 
 	/* Now we're in for the real fun... */
 
-	for ( k = 0; k < G2.nc; k++ )
+	for ( k = 0; k < G_2d.nc; k++ )
 	{
 		/* Reorganize the old elements to fit into the new array and clear
 		   the the new elements in the already existing rows */
 
-		old_sp = osp = G2.curve_2d[ k ]->points;
-		sp = G2.curve_2d[ k ]->points = SCALED_POINT_P
+		old_sp = osp = G_2d.curve_2d[ k ]->points;
+		sp = G_2d.curve_2d[ k ]->points = SCALED_POINT_P
 			                          T_malloc( new_nx * new_ny * sizeof *sp );
 
-		for ( j = 0; j < l_min( G2.ny, new_ny ); j++, osp += G2.nx )
+		for ( j = 0; j < l_min( G_2d.ny, new_ny ); j++, osp += G_2d.nx )
 		{
-			memcpy( sp, osp, l_min( G2.nx, new_nx ) * sizeof *sp );
-			if ( G2.nx < new_nx )
-				for ( l = G2.nx, sp += G2.nx; l < new_nx; l++, sp++ )
+			memcpy( sp, osp, l_min( G_2d.nx, new_nx ) * sizeof *sp );
+			if ( G_2d.nx < new_nx )
+				for ( l = G_2d.nx, sp += G_2d.nx; l < new_nx; l++, sp++ )
 					sp->exist = UNSET;
 			else
 				sp += new_nx;
@@ -2551,29 +2556,30 @@ void rescale_2d( long *new_dims )
 
 		T_free( old_sp );
 
-		G2.curve_2d[ k ]->xpoints = XPOINT_P
-			 T_realloc( G2.curve_2d[ k ]->xpoints,
-						new_nx * new_ny * sizeof *G2.curve_2d[ k ]->xpoints );
+		G_2d.curve_2d[ k ]->xpoints = XPOINT_P
+			 T_realloc( G_2d.curve_2d[ k ]->xpoints,
+						new_nx * new_ny
+						* sizeof *G_2d.curve_2d[ k ]->xpoints );
 
-		if ( G2.curve_2d[ k ]->is_fs )
+		if ( G_2d.curve_2d[ k ]->is_fs )
 		{
-			G2.curve_2d[ k ]->s2d[ X ] = ( double ) ( G2.canvas.w - 1 )
-										 / ( double ) ( new_nx - 1 );
-			G2.curve_2d[ k ]->s2d[ Y ] = ( double ) ( G2.canvas.h - 1 )
-										 / ( double ) ( new_ny - 1 );
+			G_2d.curve_2d[ k ]->s2d[ X ] = ( double ) ( G_2d.canvas.w - 1 )
+										   / ( double ) ( new_nx - 1 );
+			G_2d.curve_2d[ k ]->s2d[ Y ] = ( double ) ( G_2d.canvas.h - 1 )
+										   / ( double ) ( new_ny - 1 );
 		}
 	}
 
-	if ( G2.nx != new_nx )
+	if ( G_2d.nx != new_nx )
 		 need_cut_redraw = cut_num_points_changed( X, new_nx );
-	if ( G2.ny != new_ny )
+	if ( G_2d.ny != new_ny )
 		need_cut_redraw |= cut_num_points_changed( Y, new_ny );
 
-	G2.nx = new_nx;
-	G2.ny = new_ny;
+	G_2d.nx = new_nx;
+	G_2d.ny = new_ny;
 
-	for ( k = 0; k < G2.nc; k++ )
-		recalc_XPoints_of_curve_2d( G2.curve_2d[ k ] );
+	for ( k = 0; k < G_2d.nc; k++ )
+		recalc_XPoints_of_curve_2d( G_2d.curve_2d[ k ] );
 
 	/* Update the cut window if necessary */
 
@@ -2603,11 +2609,11 @@ void change_mode( long mode, long width )
 
 	/* Clear all curves and markers */
 
-	for ( curves = 0; curves < G1.nc; curves++ )
+	for ( curves = 0; curves < G_1d.nc; curves++ )
 	{
-		cv = G1.curve[ curves ];
+		cv = G_1d.curve[ curves ];
 
-		if ( width != G1.nx )
+		if ( width != G_1d.nx )
 		{
 			cv->points = SCALED_POINT_P T_realloc( cv->points,
 												  width * sizeof *cv->points );
@@ -2621,21 +2627,21 @@ void change_mode( long mode, long width )
 		cv->can_undo = UNSET;
 		cv->shift[ X ] = 0.0;
 		cv->count = 0;
-		cv->s2d[ X ] = ( double ) ( G1.canvas.w - 1 )
+		cv->s2d[ X ] = ( double ) ( G_1d.canvas.w - 1 )
 					   / ( double ) ( width - 1 );
 	}
 
-	for ( m = G1.marker_1d; m != NULL; m = mn )
+	for ( m = G_1d.marker_1d; m != NULL; m = mn )
 	{
 		XFreeGC( G.d, m->gc );
 		mn = m->next;
 		m = MARKER_1D_P T_free( m );
 	}
 
-	G1.marker_1d = NULL;
+	G_1d.marker_1d = NULL;
 
 	G.mode = mode;
-	G1.nx = width;
+	G_1d.nx = width;
 
 	fl_set_form_title( GUI.run_form_1d->run_1d, mode == NORMAL_DISPLAY ?
 					   "fsc2: 1D-Display" : 

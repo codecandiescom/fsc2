@@ -38,13 +38,13 @@
 #define CHECK_FORMS_AFTER   8192
 
 
-Token_Val exp_val;                        /* also used by exp_lexer.l */
+Token_Val_T exp_val;                      /* also used by exp_lexer.l */
 static bool in_for_lex = UNSET;           /* set while handling for loop
 											 condition part */
 static int in_cond = 0;                   /* counts conditional construts in
 											 conditionals */
 static long token_count;
-static CB_Stack_T *cb_stack = NULL;       /* curly brace stack */
+static CB_Stack_T *Cb_stack = NULL;       /* curly brace stack */
 
 extern int exp_testparse( void );         /* from exp_parser.y */
 extern void exp_test_init( void );
@@ -59,12 +59,14 @@ extern FILE *expin;                       /* from exp_lexer.flex */
 
 extern void exprestart( FILE *fp );
 
-extern Token_Val exp_runlval;             /* from exp_run_parser.y */
-extern Token_Val exp_testlval;            /* from exp_test_parser.y */
-extern Token_Val conditionlval;           /* from condition_parser.y */
+extern Token_Val_T exp_runlval;           /* from exp_run_parser.y */
+extern Token_Val_T exp_testlval;          /* from exp_test_parser.y */
+extern Token_Val_T conditionlval;         /* from condition_parser.y */
 
 /* local functions */
 
+static void get_and_store_tokens( long *parenthesis_count, 
+								  long *square_brace_count );
 static void push_curly_brace( const char *fname, long lc );
 static bool pop_curly_brace( void );
 static void loop_setup( void );
@@ -116,12 +118,8 @@ static const char *get_construct_name( int type );
 void store_exp( FILE *in )
 {
 	static bool is_restart = UNSET;
-	int ret;
-	char *cur_Fname = NULL;
-	long curly_brace_in_loop_count = 0;
 	long parenthesis_count = 0;
 	long square_brace_count = 0;
-	bool in_loop = UNSET;
 
 
 	/* Set input file */
@@ -139,214 +137,7 @@ void store_exp( FILE *in )
 
 	/* Get and store all tokens */
 
-	while ( ( ret = explex( ) ) != 0 )
-	{
-		if ( ret == ON_STOP_TOK )
-		{
-			if ( parenthesis_count > 0 )
-			{
-				print( FATAL, "Unbalanced parentheses before ON_STOP "
-					   "label.\n" );
-				THROW( EXCEPTION );
-			}
-
-			if ( square_brace_count > 0 )
-			{
-				print( FATAL, "Unbalanced square braces before ON_STOP "
-						"label.\n" );
-				THROW( EXCEPTION );
-			}
-
-			if ( cb_stack != NULL )
-			{
-				print( FATAL, "ON_STOP label found within a block.\n" );
-				THROW( EXCEPTION );
-			}
-
-			EDL.On_Stop_Pos = EDL.prg_length;
-			continue;
-		}
-
-		/* Get or extend memory for storing the tokens if necessary, then
-		   store the token */
-
-		if ( EDL.prg_length % PRG_CHUNK_SIZE == 0 )
-			EDL.prg_token = 
-					 PRG_TOKEN_P T_realloc( EDL.prg_token,
-											( EDL.prg_length + PRG_CHUNK_SIZE )
-									        * sizeof *EDL.prg_token );
-
-		EDL.prg_token[ EDL.prg_length ].token = ret;
-
-		/* If the file name changed get a copy of the new file name. Then set
-		   the pointer in the program token structure to the file name and
-		   copy the current line number. Don't free the name of the previous
-		   file - all the program token structures from the previous file
-		   point to the string, and it may only be free()ed when the program
-		   token structures get free()ed. */
-
-		if ( cur_Fname == NULL || strcmp( EDL.Fname, cur_Fname ) )
-		{
-			cur_Fname = NULL;
-			cur_Fname = T_strdup( EDL.Fname );
-		}
-
-		EDL.prg_token[ EDL.prg_length ].Fname = cur_Fname;
-		EDL.prg_token[ EDL.prg_length ].Lc = EDL.Lc;
-
-		/* Initialize pointers needed for flow control and the data entries
-		   used in repeat loops */
-
-		EDL.prg_token[ EDL.prg_length ].start =
-			EDL.prg_token[ EDL.prg_length ].end = NULL;
-		EDL.prg_token[ EDL.prg_length ].counter = 0;
-
-		/* In most cases it's enough just to copy the union with the value.
-		   But there are a few exceptions: for strings we need also a copy of
-		   the string since it's not persistent. Function tokens and also
-		   variable references just push their data onto the variable stack,
-		   so we have to copy them from the stack into the token structure.
-		   Finally, we have to do some sanity checks on parentheses etc. */
-
-		switch( ret )
-		{
-			case FOR_TOK : case WHILE_TOK : case UNLESS_TOK :
-			case REPEAT_TOK : case FOREVER_TOK :
-				in_loop = SET;
-				break;
-
-			case '(' :
-				parenthesis_count++;
-				break;
-
-			case ')' :
-				if ( --parenthesis_count < 0 )
-				{
-					print( FATAL, "Found ')' without matching '('.\n" );
-					THROW( EXCEPTION );
-				}
-				break;
-
-			case '{' :
-				if ( parenthesis_count != 0 )
-				{
-					print( FATAL, "More '(' than ')' found before a '{'.\n" );
-					THROW( EXCEPTION );
-				}
-
-				if ( square_brace_count != 0 )
-				{
-					print( FATAL, "More '[' than ']' found before a '{'.\n" );
-					THROW( EXCEPTION );
-				}
-
-				push_curly_brace( cur_Fname, EDL.Lc );
-				if ( in_loop )
-					curly_brace_in_loop_count++;
-				break;
-
-			case '}' :
-				if ( parenthesis_count != 0 )
-				{
-					print( FATAL, "More '(' than ')' found before a '}'.\n" );
-					THROW( EXCEPTION );
-				}
-
-				if ( square_brace_count != 0 )
-				{
-					print( FATAL, "More '[' than ']' found before a '}'.\n" );
-					THROW( EXCEPTION );
-				}
-
-				if ( ! pop_curly_brace( ) )
-				{
-					print( FATAL, "Found '}' without matching '{'.\n" );
-					THROW( EXCEPTION );
-				}
-
-				if ( in_loop && --curly_brace_in_loop_count == 0 )
-					in_loop = UNSET;
-
-				break;
-
-			case '[' :
-				square_brace_count++;
-				break;
-
-			case ']' :
-				if ( --square_brace_count < 0 )
-				{
-					print( FATAL, "Found ']' without matching '['.\n" );
-					THROW( EXCEPTION );
-				}
-				break;
-
-			case E_STR_TOKEN :
-				EDL.prg_token[ EDL.prg_length ].tv.sptr = NULL;
-				EDL.prg_token[ EDL.prg_length ].tv.sptr =
-													  T_strdup( exp_val.sptr );
-				break;
-
-			case E_FUNC_TOKEN :
-				EDL.prg_token[ EDL.prg_length ].tv.vptr = NULL;
-				EDL.prg_token[ EDL.prg_length ].tv.vptr =
-											 VAR_P T_malloc( sizeof( Var_T ) );
-				memcpy( EDL.prg_token[ EDL.prg_length ].tv.vptr, EDL.Var_Stack,
-						sizeof *EDL.Var_Stack );
-				EDL.prg_token[ EDL.prg_length ].tv.vptr->name = NULL;
-				EDL.prg_token[ EDL.prg_length ].tv.vptr->name =
-					                           T_strdup( EDL.Var_Stack->name );
-				vars_pop( EDL.Var_Stack );
-				break;
-
-			case E_VAR_REF :
-				EDL.prg_token[ EDL.prg_length ].tv.vptr = NULL;
-				EDL.prg_token[ EDL.prg_length ].tv.vptr =
-											 VAR_P T_malloc( sizeof( Var_T ) );
-				memcpy( EDL.prg_token[ EDL.prg_length ].tv.vptr, EDL.Var_Stack,
-						sizeof *EDL.Var_Stack );
-				vars_pop( EDL.Var_Stack );
-				break;
-
-			case ';' :
-				if ( parenthesis_count != 0 )
-				{
-					print( FATAL, "More '(' than ')' found at end of "
-							"statement.\n" );
-					THROW( EXCEPTION );
-				}
-
-				if ( square_brace_count != 0 )
-				{
-					print( FATAL, "More '[' than ']' found at end of of "
-						   "statement.\n" );
-					THROW( EXCEPTION );
-				}
-				break;
-
-			case BREAK_TOK :
-				if ( ! in_loop )
-				{
-					print( FATAL, "BREAK statement not within a loop.\n" );
-					THROW( EXCEPTION );
-				}
-				break;
-
-			case NEXT_TOK :
-				if ( ! in_loop )
-				{
-					print( FATAL, "NEXT statement not within a loop.\n" );
-					THROW( EXCEPTION );
-				}
-				break;
-
-			default :
-				memcpy( &EDL.prg_token[ EDL.prg_length ].tv, &exp_val,
-						sizeof( Token_Val ) );
-		}
-
-		EDL.prg_length++;
-	}
+	get_and_store_tokens( &parenthesis_count, &square_brace_count );
 
 	/* Now that we know how many tokens there are cut back the length of the
        array for tokens to the required length (if there are no program
@@ -371,10 +162,10 @@ void store_exp( FILE *in )
 		THROW( EXCEPTION );
 	}
 
-	if ( cb_stack != NULL  )
+	if ( Cb_stack != NULL  )
 	{
 		eprint( FATAL, UNSET, "Block starting with '{' at %s:%ld has no "
-				"closing '}'.\n", cb_stack->Fname, cb_stack->Lc );
+				"closing '}'.\n", Cb_stack->Fname, Cb_stack->Lc );
 		THROW( EXCEPTION );
 	}
 
@@ -398,6 +189,229 @@ void store_exp( FILE *in )
 }
 
 
+/*---------------------------------------------------------------------*/
+/* The function stores all token it receives from the lexer (together  */
+/* with the semantic value) in the array of program tokens, prg_token. */
+/* While doing so it also performs some preliminary checks on the      */
+/* balancedness of braces and parentheses.                             */
+/*---------------------------------------------------------------------*/
+
+static void get_and_store_tokens( long *parenthesis_count, 
+								  long *square_brace_count )
+{
+	int token;
+	Prg_Token_T *cur;
+	char *cur_Fname = NULL;
+	long curly_brace_in_loop_count = 0;
+	bool in_loop = UNSET;
+
+
+	while ( ( token = explex( ) ) != 0 )
+	{
+		if ( token == ON_STOP_TOK )
+		{
+			if ( *parenthesis_count > 0 )
+			{
+				print( FATAL, "Unbalanced parentheses before ON_STOP "
+					   "label.\n" );
+				THROW( EXCEPTION );
+			}
+
+			if ( *square_brace_count > 0 )
+			{
+				print( FATAL, "Unbalanced square braces before ON_STOP "
+						"label.\n" );
+				THROW( EXCEPTION );
+			}
+
+			if ( Cb_stack != NULL )
+			{
+				print( FATAL, "ON_STOP label found within a block.\n" );
+				THROW( EXCEPTION );
+			}
+
+			EDL.On_Stop_Pos = EDL.prg_length;
+			continue;
+		}
+
+		/* If necessary get or extend memory for storing the tokens, then
+		   store the token */
+
+		if ( EDL.prg_length % PRG_CHUNK_SIZE == 0 )
+			EDL.prg_token = 
+					 PRG_TOKEN_P T_realloc( EDL.prg_token,
+											( EDL.prg_length + PRG_CHUNK_SIZE )
+									        * sizeof *EDL.prg_token );
+
+		cur = EDL.prg_token + EDL.prg_length;
+		cur->token = token;
+
+		/* If the file name changed get a copy of the new file name. Then set
+		   the pointer in the program token structure to the file name and
+		   copy the current line number. Don't free the name of the previous
+		   file - all the program token structures from the previous file
+		   point to the string, and it may only be free()ed when the program
+		   token structures get free()ed. */
+
+		if ( cur_Fname == NULL || strcmp( EDL.Fname, cur_Fname ) )
+		{
+			cur_Fname = NULL;
+			cur_Fname = T_strdup( EDL.Fname );
+		}
+
+		cur->Fname = cur_Fname;
+		cur->Lc = EDL.Lc;
+
+		/* Initialize pointers needed for flow control and the data entries
+		   used in repeat loops */
+
+		cur->start = cur->end = NULL;
+		cur->counter = 0;
+
+		/* In most cases it's enough just to copy the union with the value.
+		   But there are a few exceptions: for strings we need also a copy of
+		   the string since it's not persistent. Function tokens and also
+		   variable references just push their data onto the variable stack,
+		   so we have to copy them from the stack into the token structure.
+		   Finally, we have to do some sanity checks on parentheses etc. */
+
+		switch( cur->token )
+		{
+			case FOR_TOK : case WHILE_TOK : case UNLESS_TOK :
+			case REPEAT_TOK : case FOREVER_TOK :
+				in_loop = SET;
+				break;
+
+			case '(' :
+				*parenthesis_count += 1;
+				break;
+
+			case ')' :
+				*parenthesis_count -= 1;
+				if ( *parenthesis_count < 0 )
+				{
+					print( FATAL, "Found ')' without matching '('.\n" );
+					THROW( EXCEPTION );
+				}
+				break;
+
+			case '{' :
+				if ( *parenthesis_count != 0 )
+				{
+					print( FATAL, "More '(' than ')' found before a '{'.\n" );
+					THROW( EXCEPTION );
+				}
+
+				if ( *square_brace_count != 0 )
+				{
+					print( FATAL, "More '[' than ']' found before a '{'.\n" );
+					THROW( EXCEPTION );
+				}
+
+				push_curly_brace( cur_Fname, EDL.Lc );
+				if ( in_loop )
+					curly_brace_in_loop_count++;
+				break;
+
+			case '}' :
+				if ( *parenthesis_count != 0 )
+				{
+					print( FATAL, "More '(' than ')' found before a '}'.\n" );
+					THROW( EXCEPTION );
+				}
+
+				if ( *square_brace_count != 0 )
+				{
+					print( FATAL, "More '[' than ']' found before a '}'.\n" );
+					THROW( EXCEPTION );
+				}
+
+				if ( ! pop_curly_brace( ) )
+				{
+					print( FATAL, "Found '}' without matching '{'.\n" );
+					THROW( EXCEPTION );
+				}
+
+				if ( in_loop && --curly_brace_in_loop_count == 0 )
+					in_loop = UNSET;
+
+				break;
+
+			case '[' :
+				*square_brace_count += 1;
+				break;
+
+			case ']' :
+				*square_brace_count -= 1;
+				if ( *square_brace_count < 0 )
+				{
+					print( FATAL, "Found ']' without matching '['.\n" );
+					THROW( EXCEPTION );
+				}
+				break;
+
+			case E_STR_TOKEN :
+				cur->tv.sptr = NULL;
+				cur->tv.sptr = T_strdup( exp_val.sptr );
+				break;
+
+			case E_FUNC_TOKEN :
+				cur->tv.vptr = NULL;
+				cur->tv.vptr = VAR_P T_malloc( sizeof *cur->tv.vptr );
+				memcpy( cur->tv.vptr, EDL.Var_Stack, sizeof *EDL.Var_Stack );
+				cur->tv.vptr->name = NULL;
+				cur->tv.vptr->name = T_strdup( EDL.Var_Stack->name );
+				vars_pop( EDL.Var_Stack );
+				break;
+
+			case E_VAR_REF :
+				cur->tv.vptr = NULL;
+				cur->tv.vptr = VAR_P T_malloc( sizeof *cur->tv.vptr );
+				memcpy( cur->tv.vptr, EDL.Var_Stack, sizeof *EDL.Var_Stack );
+				vars_pop( EDL.Var_Stack );
+				break;
+
+			case ';' :
+				if ( *parenthesis_count != 0 )
+				{
+					print( FATAL, "More '(' than ')' found at end of "
+							"statement.\n" );
+					THROW( EXCEPTION );
+				}
+
+				if ( *square_brace_count != 0 )
+				{
+					print( FATAL, "More '[' than ']' found at end of of "
+						   "statement.\n" );
+					THROW( EXCEPTION );
+				}
+				break;
+
+			case BREAK_TOK :
+				if ( ! in_loop )
+				{
+					print( FATAL, "BREAK statement not within a loop.\n" );
+					THROW( EXCEPTION );
+				}
+				break;
+
+			case NEXT_TOK :
+				if ( ! in_loop )
+				{
+					print( FATAL, "NEXT statement not within a loop.\n" );
+					THROW( EXCEPTION );
+				}
+				break;
+
+			default :
+				memcpy( &cur->tv, &exp_val, sizeof cur->tv );
+		}
+
+		EDL.prg_length++;
+	}
+}
+
+
 /*-------------------------------------------------------------------------*/
 /* Function is called for each opening curly brace found in the input file */
 /* to store the current file name and line number and thus to be able to   */
@@ -410,10 +424,10 @@ static void push_curly_brace( const char *fname, long lc )
 
 
 	new_cb = CB_STACK_P T_malloc( sizeof *new_cb );
-	new_cb->next = cb_stack;
+	new_cb->next = Cb_stack;
 	new_cb->Fname = T_strdup( fname );
 	new_cb->Lc = lc;
-	cb_stack = new_cb;
+	Cb_stack = new_cb;
 }
 
 
@@ -431,11 +445,11 @@ static bool pop_curly_brace( void )
 	CB_Stack_T *old_cb;
 
 
-	if ( cb_stack == NULL )
+	if ( Cb_stack == NULL )
 		return FAIL;
 
-	old_cb = cb_stack;
-	cb_stack = old_cb->next;
+	old_cb = Cb_stack;
+	Cb_stack = old_cb->next;
 	T_free( old_cb->Fname );
 	T_free( old_cb );
 
@@ -1156,7 +1170,7 @@ int exp_runlex( void )
 
 			default :
 				memcpy( &exp_runlval, &EDL.cur_prg_token->tv,
-						sizeof( Token_Val ) );
+						sizeof exp_runlval );
 				break;
 		}
 
@@ -1247,7 +1261,7 @@ int conditionlex( void )
 
 			default :
 				memcpy( &conditionlval, &EDL.cur_prg_token->tv,
-						sizeof( Token_Val ) );
+						sizeof conditionlval );
 				token = EDL.cur_prg_token->token;
 				EDL.cur_prg_token++;
 				return token;

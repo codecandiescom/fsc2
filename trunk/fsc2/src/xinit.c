@@ -74,7 +74,7 @@ FL_resource xresources[ ] = {
 		FL_STRING,
 		xGeoStr,
 		"",
-		64
+		sizeof xGeoStr
 	},
 	{                         /* font size of the browsers in main window */
 		"browserFontSize",
@@ -82,7 +82,7 @@ FL_resource xresources[ ] = {
 		FL_INT,
 		&xbrowserfs,
 		"0",
-		sizeof( int )
+		sizeof xbrowserfs
 	},
 	{                         /* geometry of the display window */
 		"displayGeometry",
@@ -90,7 +90,7 @@ FL_resource xresources[ ] = {
 		FL_STRING,
 		xdisplayGeoStr,
 		"",
-		64
+		sizeof xdisplayGeoStr
 	},
 	{                         /* geometry of the 1D display window */
 		"display1dGeometry",
@@ -98,7 +98,7 @@ FL_resource xresources[ ] = {
 		FL_STRING,
 		x_1d_displayGeoStr,
 		"",
-		64
+		sizeof x_1d_displayGeoStr
 	},
 	{                         /* geometry of the 2D display window */
 		"display2dGeometry",
@@ -106,7 +106,7 @@ FL_resource xresources[ ] = {
 		FL_STRING,
 		x_2d_displayGeoStr,
 		"",
-		64
+		sizeof x_2d_displayGeoStr
 	},
 	{                         /* geometry of the cross section window */
 		"cutGeometry",
@@ -114,7 +114,7 @@ FL_resource xresources[ ] = {
 		FL_STRING,
 		xcutGeoStr,
 		"",
-		64
+		sizeof xcutGeoStr
 	},
 	{                         /* geometry of the tool box window */
 		"toolGeometry",
@@ -122,7 +122,7 @@ FL_resource xresources[ ] = {
 		FL_STRING,
 		xtoolGeoStr,
 		"",
-		64
+		sizeof xtoolGeoStr
 	},
 	{                         /* font for axes in the display windows */
 		"axisFont",
@@ -130,7 +130,7 @@ FL_resource xresources[ ] = {
 		FL_STRING,
 		xaxisFont,
 		"",
-		256
+		sizeof xaxisFont
 	},
 	{                         /* font for toolbox objects */
 		"toolboxFontSize",
@@ -138,7 +138,7 @@ FL_resource xresources[ ] = {
 		FL_INT,
 		&xtoolboxfs,
 		"0",
-		sizeof( int )
+		sizeof xtoolboxfs
 	},
 	{                         /* font for the file selector */
 		"filselectorFontSize",
@@ -146,7 +146,7 @@ FL_resource xresources[ ] = {
 		FL_INT,
 		&xfileselectorfs,
 		"0",
-		sizeof( int )
+		sizeof xfileselectorfs
 	},
 	{                         /* font for the help texts */
 		"helpFontSize",
@@ -154,15 +154,15 @@ FL_resource xresources[ ] = {
 		FL_INT,
 		&xhelpfs,
 		"0",
-		sizeof( int )
+		sizeof xhelpfs
 	},
 	{                         /* mouse button to use to stop an experiment  */
 		"stopMouseButton",
 		"*.stopMouseButton",
 		FL_STRING,
-		&xsmb,
+		xsmb,
 		"",
-		64
+		sizeof xsmb
 	},
 	{                         /* switch off crash mails */
 		"noCrashMail",
@@ -170,7 +170,7 @@ FL_resource xresources[ ] = {
 		FL_BOOL,
 		&xnocm,
 		"0",
-		sizeof( int )
+		sizeof xnocm
 	},
 	{                         /* selection of small or large version */
 		"size",
@@ -178,7 +178,8 @@ FL_resource xresources[ ] = {
 		FL_STRING,
 		xsizeStr,
 		"",
-		64 },
+		sizeof xsizeStr
+	},
 #if defined WITH_HTTP_SERVER
     {                         /* number of port the HTTP server listens on */
 		"httpPort",
@@ -186,7 +187,7 @@ FL_resource xresources[ ] = {
 		FL_INT,
 		&xport,
 		"0",
-		sizeof( int )
+		sizeof xport
 	},
 #endif
 };
@@ -204,11 +205,11 @@ bool xforms_init( int *argc, char *argv[ ] )
 	Display *display;
 	FL_Coord h, H;
 	FL_Coord cx1, cy1, cw1, ch1, cx2, cy2, cw2, ch2;
-	unsigned int i;
+	size_t i;
 	int flags, wx, wy;
 	unsigned int ww, wh;
 	XFontStruct *font;
-	FL_CMD_OPT app_opt[ N_APP_OPT ];
+	FL_CMD_OPT app_opt[ NUM_ELEMS( xresources ) ];
 	int x, y;
 #if defined WITH_HTTP_SERVER
 	char *www_help;
@@ -222,8 +223,8 @@ bool xforms_init( int *argc, char *argv[ ] )
 
 	setenv( "LANG", "C", 1 );
 
-	if ( ( display = fl_initialize( argc, argv, "Fsc2", app_opt, N_APP_OPT ) )
-		 == NULL )
+	if ( ( display = fl_initialize( argc, argv, "Fsc2", app_opt,
+									NUM_ELEMS( xresources ) ) ) == NULL )
 		return FAIL;
 
 	GUI.is_init = SET;
@@ -247,9 +248,9 @@ bool xforms_init( int *argc, char *argv[ ] )
 		usage( EXIT_FAILURE );
 	}
 
-	fl_get_app_resources( xresources, N_APP_OPT );
+	fl_get_app_resources( xresources, NUM_ELEMS( xresources ) );
 
-	for ( i = 0; i < N_APP_OPT; i++ )
+	for ( i = 0; i < NUM_ELEMS( xresources ); i++ )
 	{
 		T_free( app_opt[ i ].option );
 		T_free( app_opt[ i ].specifier );
@@ -364,14 +365,14 @@ bool xforms_init( int *argc, char *argv[ ] )
 	   (or is also not within the range of non-privileged ports), we default
 	   to the alternate HTTP port of 8080. */
 
-	Internals.http_port = 8080;
+	Fsc2_Internals.http_port = 8080;
 
 #if defined DEFAULT_HTTP_PORT
 	if ( * ( ( int * ) xresources[ HTTPPORT ].var ) >= 1024 &&
 		 * ( ( int * ) xresources[ HTTPPORT ].var ) <= 65535 )
-		Internals.http_port = * ( ( int * ) xresources[ HTTPPORT ].var );
+		Fsc2_Internals.http_port = * ( ( int * ) xresources[ HTTPPORT ].var );
 	else if ( DEFAULT_HTTP_PORT >= 1024 && DEFAULT_HTTP_PORT <= 65535 )
-		Internals.http_port = DEFAULT_HTTP_PORT;
+		Fsc2_Internals.http_port = DEFAULT_HTTP_PORT;
 #endif
 
 	/* Load the library dealing for creating the graphics resources and
@@ -390,7 +391,7 @@ bool xforms_init( int *argc, char *argv[ ] )
 
 	GUI.main_form = GUI.G_Funcs.create_form_fsc2( );
 
-	if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
+	if ( ! ( Fsc2_Internals.cmdline_flags & NO_BALLOON ) )
 	{
 		fl_set_object_helper( GUI.main_form->Load, "Load new EDL program" );
 		fl_set_object_helper( GUI.main_form->Edit, "Edit loaded EDL program" );
@@ -405,7 +406,7 @@ bool xforms_init( int *argc, char *argv[ ] )
 		www_help = get_string( "Run a HTTP server (on port %d)\n"
 							   "that allows to view fsc2's current\n"
 							   "state via the internet.",
-							   Internals.http_port );
+							   Fsc2_Internals.http_port );
 		fl_set_object_helper( GUI.main_form->server, www_help );
 		T_free( www_help );
 #endif
@@ -477,7 +478,7 @@ bool xforms_init( int *argc, char *argv[ ] )
 	if ( GUI.win_has_pos )
 		fl_set_form_position( GUI.main_form->fsc2, GUI.win_x, GUI.win_y );
 
-	if ( ! ( Internals.cmdline_flags & ICONIFIED_RUN ) )
+	if ( ! ( Fsc2_Internals.cmdline_flags & ICONIFIED_RUN ) )
 	{
 		if ( GUI.win_has_pos )
 			fl_show_form( GUI.main_form->fsc2, FL_PLACE_POSITION,
@@ -649,20 +650,20 @@ bool dl_fsc2_rsc( void )
 	   variable "LD_LIBRARY_PATH". If this fails (and this is not part of the
 	   testing procedure) we also try the compiled-in path to the libraries. */
 
-	Internals.rsc_handle = NULL;
+	Fsc2_Internals.rsc_handle = NULL;
 
-	Internals.rsc_handle = dlopen( lib_name, RTLD_NOW );
+	Fsc2_Internals.rsc_handle = dlopen( lib_name, RTLD_NOW );
 
-	if ( Internals.rsc_handle == NULL &&
-		 ! ( Internals.cmdline_flags & DO_CHECK ) )
+	if ( Fsc2_Internals.rsc_handle == NULL &&
+		 ! ( Fsc2_Internals.cmdline_flags & DO_CHECK ) )
 	{
 		alt_lib_name = get_string( "%s%s%s", libdir, slash( libdir ),
 								   lib_name );
-		Internals.rsc_handle = dlopen( alt_lib_name, RTLD_NOW );
+		Fsc2_Internals.rsc_handle = dlopen( alt_lib_name, RTLD_NOW );
 		T_free( alt_lib_name );
 	}
 
-	if ( Internals.rsc_handle == NULL )
+	if ( Fsc2_Internals.rsc_handle == NULL )
 	{
 		fprintf( stderr, "Can't open graphics library '%s'.\n", lib_name );
 		return FAIL;
@@ -672,7 +673,7 @@ bool dl_fsc2_rsc( void )
 
 	dlerror( );           /* make sure it's NULL before we continue */
 	GUI.G_Funcs.create_form_fsc2 = ( FD_fsc2 * ( * )( void ) )
-							 dlsym( Internals.rsc_handle, "create_form_fsc2" );
+						dlsym( Fsc2_Internals.rsc_handle, "create_form_fsc2" );
 	if ( dlerror( ) != NULL )
 	{
 		fprintf( stderr, "Error in graphics library '%s'\n", lib_name );
@@ -683,12 +684,12 @@ bool dl_fsc2_rsc( void )
 
 	dlerror( );           /* make sure it's NULL before we continue */
 	GUI.G_Funcs.create_form_run_1d = ( FD_run_1d * ( * )( void ) )
-						   dlsym( Internals.rsc_handle, "create_form_run_1d" );
+					  dlsym( Fsc2_Internals.rsc_handle, "create_form_run_1d" );
 	if ( dlerror( ) != NULL )
 	{
 		fprintf( stderr, "Error in graphics library '%s'\n", lib_name );
-		dlclose( Internals.rsc_handle );
-		Internals.rsc_handle = NULL;
+		dlclose( Fsc2_Internals.rsc_handle );
+		Fsc2_Internals.rsc_handle = NULL;
 		return FAIL;
 	}
 
@@ -696,12 +697,12 @@ bool dl_fsc2_rsc( void )
 
 	dlerror( );           /* make sure it's NULL before we continue */
 	GUI.G_Funcs.create_form_run_2d = ( FD_run_2d * ( * )( void ) )
-						   dlsym( Internals.rsc_handle, "create_form_run_2d" );
+					  dlsym( Fsc2_Internals.rsc_handle, "create_form_run_2d" );
 	if ( dlerror( ) != NULL )
 	{
 		fprintf( stderr, "Error in graphics library '%s'\n", lib_name );
-		dlclose( Internals.rsc_handle );
-		Internals.rsc_handle = NULL;
+		dlclose( Fsc2_Internals.rsc_handle );
+		Fsc2_Internals.rsc_handle = NULL;
 		return FAIL;
 	}
 
@@ -710,12 +711,12 @@ bool dl_fsc2_rsc( void )
 
 	dlerror( );           /* make sure it's NULL before we continue */
 	GUI.G_Funcs.create_form_input_form = ( FD_input_form * ( * )( void ) )
-                       dlsym( Internals.rsc_handle, "create_form_input_form" );
+                  dlsym( Fsc2_Internals.rsc_handle, "create_form_input_form" );
 	if ( dlerror( ) != NULL )
 	{
 		fprintf( stderr, "Error in graphics library '%s'\n", lib_name );
-		dlclose( Internals.rsc_handle );
-		Internals.rsc_handle = NULL;
+		dlclose( Fsc2_Internals.rsc_handle );
+		Fsc2_Internals.rsc_handle = NULL;
 		return FAIL;
 	}
 
@@ -724,12 +725,12 @@ bool dl_fsc2_rsc( void )
 
 	dlerror( );           /* make sure it's NULL before we continue */
 	GUI.G_Funcs.create_form_print = ( FD_print * ( * )( void ) )
-							dlsym( Internals.rsc_handle, "create_form_print" );
+					   dlsym( Fsc2_Internals.rsc_handle, "create_form_print" );
 	if ( dlerror( ) != NULL )
 	{
 		fprintf( stderr, "Error in graphics library '%s'\n", lib_name );
-		dlclose( Internals.rsc_handle );
-		Internals.rsc_handle = NULL;
+		dlclose( Fsc2_Internals.rsc_handle );
+		Fsc2_Internals.rsc_handle = NULL;
 		return FAIL;
 	}
 
@@ -737,12 +738,12 @@ bool dl_fsc2_rsc( void )
 
 	dlerror( );           /* make sure it's NULL before we continue */
 	GUI.G_Funcs.create_form_cut = ( FD_cut * ( * )( void ) )
-							  dlsym( Internals.rsc_handle, "create_form_cut" );
+						 dlsym( Fsc2_Internals.rsc_handle, "create_form_cut" );
 	if ( dlerror( ) != NULL )
 	{
 		fprintf( stderr, "Error in graphics library '%s'\n", lib_name );
-		dlclose( Internals.rsc_handle );
-		Internals.rsc_handle = NULL;
+		dlclose( Fsc2_Internals.rsc_handle );
+		Fsc2_Internals.rsc_handle = NULL;
 		return FAIL;
 	}
 
@@ -751,12 +752,12 @@ bool dl_fsc2_rsc( void )
 
 	dlerror( );           /* make sure it's NULL before we continue */
 	GUI.G_Funcs.create_pc_form = ( FD_print_comment * ( * )( void ) )
-					dlsym( Internals.rsc_handle, "create_form_print_comment" );
+			   dlsym( Fsc2_Internals.rsc_handle, "create_form_print_comment" );
 	if ( dlerror( ) != NULL )
 	{
 		fprintf( stderr, "Error in graphics library '%s'\n", lib_name );
-		dlclose( Internals.rsc_handle );
-		Internals.rsc_handle = NULL;
+		dlclose( Fsc2_Internals.rsc_handle );
+		Fsc2_Internals.rsc_handle = NULL;
 		return FAIL;
 	}
 
@@ -779,7 +780,7 @@ static int main_form_close_handler( UNUSED_ARG FL_FORM *a, UNUSED_ARG void *b )
 	/* Do the same as if the "Quit" button has been hit (but quit immediately
 	   in batch mode and don't load the next EDL script) */
 
-	T_free( Internals.title );
+	T_free( Fsc2_Internals.title );
 	clean_up( );
 	xforms_close( );
 
@@ -809,8 +810,8 @@ void xforms_close( void )
 
 	/* Close the library for the graphics resources */
 
-	if ( Internals.rsc_handle )
-		dlclose( Internals.rsc_handle );
+	if ( Fsc2_Internals.rsc_handle )
+		dlclose( Fsc2_Internals.rsc_handle );
 }
 
 

@@ -97,13 +97,13 @@ static void hfs9000_basic_pulse_check( void )
 
 
 
-	if ( hfs9000_Pulses == NULL )
+	if ( hfs9000.pulses == NULL )
 	{
 		print( SEVERE, "No pulses have been defined.\n" );
 		return;
 	}
 
-	for ( p = hfs9000_Pulses; p != NULL; p = p->next )
+	for ( p = hfs9000.pulses; p != NULL; p = p->next )
 	{
 		p->is_active = SET;
 

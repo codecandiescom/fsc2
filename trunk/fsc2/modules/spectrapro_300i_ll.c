@@ -181,14 +181,12 @@ double spectrapro_300i_min( double *x, void *par )
 	double inclusion_angle_2;                 /* half of inclusion angle */
 	double focal_length;
 	double detector_angle;
-	CALIB_PARAMS *c;
 	double grating_angle;
 	double sum = 0.0;
 	double a, b;
 	size_t i;
+	Calib_Params_T *c = ( Calib_Params_T * ) par;
 
-
-	c = ( CALIB_PARAMS * ) par;
 
 	if ( c->opt == 0 )
 	{

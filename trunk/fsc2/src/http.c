@@ -54,9 +54,9 @@ void server_callback( FL_OBJECT *obj, UNUSED_ARG long a )
 	char *www_help;
 
 
-	if ( fl_get_button( obj ) && Internals.http_pid >= 0 )
+	if ( fl_get_button( obj ) && Fsc2_Internals.http_pid >= 0 )
 	{
-		if ( Internals.http_pid != 0 )
+		if ( Fsc2_Internals.http_pid != 0 )
 			return;
 
 		TRY
@@ -74,7 +74,7 @@ void server_callback( FL_OBJECT *obj, UNUSED_ARG long a )
 		www_help = get_string( "Kill the HTTP server (on port %d)\n"
 							   "that allows to view fsc2's current\n"
 							   "state via the internet.",
-							   Internals.http_port );
+							   Fsc2_Internals.http_port );
 		fl_set_object_helper( obj, www_help );
 		T_free( www_help );
 	}
@@ -84,12 +84,12 @@ void server_callback( FL_OBJECT *obj, UNUSED_ARG long a )
 		   off and then again (with the pid set to -1) when the signal handler
 		   for SIGCHLD gets triggered. */
 
-		if ( ! fl_get_button( obj ) && Internals.http_pid > 0 &&
-			 ! kill( Internals.http_pid, 0 ) )
-			kill( Internals.http_pid, SIGTERM );
+		if ( ! fl_get_button( obj ) && Fsc2_Internals.http_pid > 0 &&
+			 ! kill( Fsc2_Internals.http_pid, 0 ) )
+			kill( Fsc2_Internals.http_pid, SIGTERM );
 		else
 		{
-			Internals.http_pid = 0;
+			Fsc2_Internals.http_pid = 0;
 			close( Comm.http_pd[ HTTP_PARENT_READ ] );
 			close( Comm.http_pd[ HTTP_PARENT_WRITE ] );
 
@@ -97,7 +97,7 @@ void server_callback( FL_OBJECT *obj, UNUSED_ARG long a )
 			www_help = get_string( "Run a HTTP server (on port %d)\n"
 								   "that allows to view fsc2's current\n"
 								   "state via the internet.",
-								   Internals.http_port );
+								   Fsc2_Internals.http_port );
 			fl_set_object_helper( obj, www_help );
 			T_free( www_help );
 		}
@@ -131,18 +131,18 @@ static void spawn_server( void )
 		THROW( EXCEPTION );
 	}
 
-	if ( Internals.cmdline_flags & DO_CHECK )
+	if ( Fsc2_Internals.cmdline_flags & DO_CHECK )
 		a[ 0 ] = get_string( "%s%sfsc2_http_server", srcdir, slash( srcdir ) );
 	else
 		a[ 0 ] = get_string( "%s%sfsc2_http_server", bindir, slash( bindir ) );
 
-	a[ 1 ] = get_string( "%d", Internals.http_port );
+	a[ 1 ] = get_string( "%d", Fsc2_Internals.http_port );
 	a[ 2 ] = T_strdup( auxdir );
 	a[ 3 ] = NULL;
 
 	/* Start the HTTP server with its standard input and output redirected */
 
-	if ( ( Internals.http_pid = fork( ) ) == 0 )
+	if ( ( Fsc2_Internals.http_pid = fork( ) ) == 0 )
 	{
 		close( Comm.http_pd[ HTTP_PARENT_READ ] );
 		close( Comm.http_pd[ HTTP_PARENT_WRITE ] );
@@ -164,12 +164,12 @@ static void spawn_server( void )
 	close( Comm.http_pd[ HTTP_CHILD_READ  ] );
 	close( Comm.http_pd[ HTTP_CHILD_WRITE ] );
 
-	if ( Internals.http_pid < 0 )
+	if ( Fsc2_Internals.http_pid < 0 )
 	{
 		close( Comm.http_pd[ HTTP_PARENT_READ  ] );
 		close( Comm.http_pd[ HTTP_PARENT_WRITE ] );
 
-		Internals.http_pid = 0;
+		Fsc2_Internals.http_pid = 0;
 
 		THROW( EXCEPTION );
 	}
@@ -207,7 +207,7 @@ void http_check( void )
 		switch ( query )
 		{
 			case 'S' :                             /* state of the program ? */
-				reply[ 0 ]  = ( char ) Internals.state + '0';
+				reply[ 0 ]  = ( char ) Fsc2_Internals.state + '0';
 				write( Comm.http_pd[ HTTP_PARENT_WRITE ], reply, 2 );
 				break;
 
@@ -219,16 +219,16 @@ void http_check( void )
 					if ( G.dim == 1 )
 						reply[ 0 ] = '1';
 					else if ( G.dim == 2 )
-						reply[ 0 ] = ( G2.is_cut ? '6' : '2' );
+						reply[ 0 ] = ( G_2d.is_cut ? '6' : '2' );
 					else if ( G.dim == 3 )
-						reply[ 0 ] = ( G2.is_cut ? '7' : '3' );
+						reply[ 0 ] = ( G_2d.is_cut ? '7' : '3' );
 				}
 
 				write( Comm.http_pd[ HTTP_PARENT_WRITE ], reply, 2 );
 				break;
 
 			case 'C' :            /* which 2D curve is currently displayed ? */
-				reply[ 0 ] = ( char ) ( G2.active_curve + 1 ) + '0';
+				reply[ 0 ] = ( char ) ( G_2d.active_curve + 1 ) + '0';
 				write( Comm.http_pd[ HTTP_PARENT_WRITE ], reply, 2 );
 				break;
 
@@ -310,7 +310,7 @@ static void http_send_picture( int pd, int type )
 	   the one the client is looking for. */
 
 	if ( ! G.is_init || ( type == 1 && G.dim == 2 ) ||
-		 ( type == 2 && G.dim == 1 ) || ( type == 3 && ! G2.is_cut ) )
+		 ( type == 2 && G.dim == 1 ) || ( type == 3 && ! G_2d.is_cut ) )
 	{
 		reply[ 0 ] = '0';
 		write( pd, reply, 2 );

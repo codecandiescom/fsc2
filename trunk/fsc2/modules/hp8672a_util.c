@@ -25,7 +25,6 @@
 #include "hp8672a.h"
 
 
-
 /*----------------------------------------------------------------------*/
 /* If the function succeeds it returns a file pointer to the table file */
 /* and sets the table_file entry in the device structure to the name of */

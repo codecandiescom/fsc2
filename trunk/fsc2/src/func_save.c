@@ -99,7 +99,7 @@ Var_T *f_openf( Var_T *var )
 	/* During test run just do a plausibilty check of the variables and
 	   return a dummy value */
 
-	if ( Internals.mode == TEST )
+	if ( Fsc2_Internals.mode == TEST )
 	{
 		for ( i = 0, cur = var; i < 6 && cur != NULL; i++, cur = cur->next )
 			vars_check( cur, STR_VAR );
@@ -113,10 +113,10 @@ Var_T *f_openf( Var_T *var )
 
 	fn = var->val.sptr;
 
-	if ( Internals.cmdline_flags & DO_CHECK )
+	if ( Fsc2_Internals.cmdline_flags & DO_CHECK )
 		goto got_file;
 
-	if ( Internals.cmdline_flags & BATCH_MODE )
+	if ( Fsc2_Internals.cmdline_flags & BATCH_MODE )
 		return batch_mode_file_open( *fn == '\0' ? NULL : fn );
 
 	if ( *fn == '\0' )
@@ -193,7 +193,7 @@ Var_T *f_openf( Var_T *var )
 		THROW( EXCEPTION );
 	}
 
-	if ( Internals.cmdline_flags & DO_CHECK )
+	if ( Fsc2_Internals.cmdline_flags & DO_CHECK )
 		EDL.File_List[ EDL.File_List_Len ].fp = stdout;
 	else
 		EDL.File_List[ EDL.File_List_Len ].fp = fp;
@@ -257,7 +257,7 @@ Var_T *f_getf( Var_T *var )
 	/* During test run just do a plausibilty check of the variables and
 	   return a dummy value */
 
-	if ( Internals.mode == TEST )
+	if ( Fsc2_Internals.mode == TEST )
 	{
 		for ( i = 0, cur = var; i < 5 && cur != NULL; i++, cur = cur->next )
 			vars_check( cur, STR_VAR );
@@ -275,10 +275,10 @@ Var_T *f_getf( Var_T *var )
 		s[ i ] = cur->val.sptr;
 	}
 
-	if ( Internals.cmdline_flags & DO_CHECK )
+	if ( Fsc2_Internals.cmdline_flags & DO_CHECK )
 		goto got_file;
 
-	if ( Internals.cmdline_flags & BATCH_MODE )
+	if ( Fsc2_Internals.cmdline_flags & BATCH_MODE )
 		return batch_mode_file_open( NULL );
 
 	/* First string is the message */
@@ -429,7 +429,7 @@ getfile_retry:
 		THROW( EXCEPTION );
 	}
 
-	if ( Internals.cmdline_flags & DO_CHECK )
+	if ( Fsc2_Internals.cmdline_flags & DO_CHECK )
 		EDL.File_List[ EDL.File_List_Len ].fp = stdout;
 	else
 		EDL.File_List[ EDL.File_List_Len ].fp = fp;
@@ -491,7 +491,7 @@ Var_T *f_clonef( Var_T *v )
 		THROW( EXCEPTION );
 	}
 
-	if ( Internals.mode == TEST )
+	if ( Fsc2_Internals.mode == TEST )
 		return vars_push( INT_VAR, EDL.File_List_Len++ + FILE_NUMBER_OFFSET );
 
 	fn = CHAR_P T_malloc(   strlen( EDL.File_List[ file_num ].name )
@@ -1585,7 +1585,7 @@ Var_T *f_save_p( Var_T *v )
 	if ( v != NULL )
 		vars_check( v, STR_VAR );
 
-	if ( Internals.mode == TEST )
+	if ( Fsc2_Internals.mode == TEST )
 		return vars_push( INT_VAR, 1L );
 
 	if ( ! print_browser( 0, file_num, v != NULL ? v->val.sptr : "" ) )
@@ -1617,7 +1617,7 @@ Var_T *f_save_o( Var_T *v )
 	if ( v != NULL )
 		vars_check( v, STR_VAR );
 
-	if ( Internals.mode == TEST )
+	if ( Fsc2_Internals.mode == TEST )
 		return vars_push( INT_VAR, 1L );
 
 	if ( ! print_browser( 1, file_num, v != NULL ? v->val.sptr : "" ) )
@@ -1887,7 +1887,7 @@ Var_T *f_save_c( Var_T *v )
 	if ( ( file_num = get_save_file( &v ) ) == FILE_NUMBER_NOT_OPEN )
 		return vars_push( INT_VAR, 0L );
 
-	if ( Internals.mode == TEST )
+	if ( Fsc2_Internals.mode == TEST )
 		return vars_push( INT_VAR, 1L );
 
 	/* Try to get the comment chars to prepend to each line */
@@ -1920,8 +1920,8 @@ Var_T *f_save_c( Var_T *v )
 	/* Show the comment editor and get the returned contents (just one string
 	   with embedded newline chars) */
 
-	if ( ! ( Internals.cmdline_flags & DO_CHECK ) &&
-		 ! ( Internals.cmdline_flags & BATCH_MODE ) )
+	if ( ! ( Fsc2_Internals.cmdline_flags & DO_CHECK ) &&
+		 ! ( Fsc2_Internals.cmdline_flags & BATCH_MODE ) )
 		 r = T_strdup( show_input( c, l ) );
 
 	if ( r == NULL )
@@ -1990,7 +1990,7 @@ static long T_fprintf( long fn, const char *fmt, ... )
 	/* If the file has been closed because of insufficient space and no
        replacement file has been given just don't print */
 
-	if ( Internals.mode != TEST )
+	if ( Fsc2_Internals.mode != TEST )
 	{
 		if ( file_num == FILE_NUMBER_NOT_OPEN )
 			return 0;
@@ -2053,7 +2053,7 @@ static long T_fprintf( long fn, const char *fmt, ... )
 		}
     }
 
-	if ( Internals.mode == TEST )
+	if ( Fsc2_Internals.mode == TEST )
 	{
 		T_free( p );
 		return n;

@@ -160,14 +160,11 @@ static double sens_list[ ] = { 2.0e-9, 5.0e-9, 1.0e-8, 2.0e-8, 5.0e-8, 1.0e-7,
 							   2.0e-3, 5.0e-3, 1.0e-2, 2.0e-2, 5.0e-2, 1.0e-1,
 							   2.0e-1, 5.0e-1, 1.0 };
 
-#define SENS_ENTRIES ( sizeof sens_list / sizeof sens_list[ 0 ] )
-
 /* List of all available time constants */
 
 static double tc_list[ ] = { 1.0e-5, 3.0e-5, 1.0e-4, 3.0e-4, 1.0e-3, 3.0e-3,
 							 1.0e-2, 3.0e-2, 1.0e-1, 3.0e-1, 1.0, 3.0, 1.0e1,
 							 3.0e1, 1.0e2, 3.0e2, 1.0e3, 3.0e3, 1.0e4, 3.0e4 };
-#define TC_ENTRIES ( sizeof tc_list / sizeof tc_list[ 0 ] )
 
 
 /* List of sample times that can be used in auto-acquisition. Shortest time
@@ -193,8 +190,6 @@ static long dsp_ch_list[ ] = { DSP_CH_X, DSP_CH_R, DSP_CH_AUX1,
 
 static long dsp_to_symbol[ ] = { DSP_CH_X, DSP_CH_R, DSP_CH_Xnoise,
 								 DSP_CH_AUX1, DSP_CH_AUX2, DSP_CH_UNDEF };
-
-#define D2S_ENTRIES ( sizeof dsp_to_symbol / sizeof dsp_to_symbol[ 0 ] )
 
 
 /* Declaration of all functions used only within this file */
@@ -588,7 +583,7 @@ Var_T *lockin_sensitivity( Var_T *v )
 	   depending on the size of the argument. If the value does not fit within
 	   1 percent, utter a warning message (but only once). */
 
-	for ( i = 0; i < SENS_ENTRIES - 1; i++ )
+	for ( i = 0; i < NUM_ELEMS( sens_list ) - 1; i++ )
 		if ( sens >= sens_list[ i ] && sens <= sens_list[ i + 1 ] )
 		{
 			sens_index = i +
@@ -598,9 +593,9 @@ Var_T *lockin_sensitivity( Var_T *v )
 		}
 
 	if ( sens_index == UNDEF_SENS_INDEX &&
-		 sens > sens_list[ SENS_ENTRIES - 1 ] &&
-		 sens < sens_list[ SENS_ENTRIES - 1 ] * 1.01 )
-		sens_index = SENS_ENTRIES - 1;
+		 sens > sens_list[ NUM_ELEMS( sens_list ) - 1 ] &&
+		 sens < sens_list[ NUM_ELEMS( sens_list ) - 1 ] * 1.01 )
+		sens_index = NUM_ELEMS( sens_list ) - 1;
 
 	if ( sens_index >= 0 &&                                 /* value found ? */
 		 fabs( sens - sens_list[ sens_index ] ) > sens * 1.0e-2 &&
@@ -627,7 +622,7 @@ Var_T *lockin_sensitivity( Var_T *v )
 		if ( sens < sens_list[ 0 ] )
 			sens_index = 0;
 		else
-		    sens_index = SENS_ENTRIES - 1;
+		    sens_index = NUM_ELEMS( sens_list ) - 1;
 
 		if ( ! sr810.sens_warn )                      /* no warn message yet */
 		{
@@ -699,7 +694,7 @@ Var_T *lockin_time_constant( Var_T *v )
 	   value, depending on the size of the argument. If the value does not fit
 	   within 1 percent, we utter a warning message (but only once). */
 
-	for ( i = 0; i < TC_ENTRIES - 1; i++ )
+	for ( i = 0; i < NUM_ELEMS( tc_list ) - 1; i++ )
 		if ( tc >= tc_list[ i ] && tc <= tc_list[ i + 1 ] )
 		{
 			tc_index = i + ( ( tc / tc_list[ i ] <
@@ -731,7 +726,7 @@ Var_T *lockin_time_constant( Var_T *v )
 		if ( tc < tc_list[ 0 ] )
 			tc_index = 0;
 		else
-			tc_index = TC_ENTRIES - 1;
+			tc_index = NUM_ELEMS( tc_list ) - 1;
 
 		if ( ! sr810.tc_warn )                      /* no warn message yet ? */
 		{
@@ -1953,7 +1948,7 @@ static long sr810_get_display_channel( void )
 	}
 
 	*sptr = '\0';
-	if ( ( type = T_atol( buffer ) ) >= ( int ) D2S_ENTRIES )
+	if ( ( type = T_atol( buffer ) ) >= ( long ) NUM_ELEMS( dsp_to_symbol ) )
 	{
 		print( FATAL, "Received invalid reply from device.\n" );
 		THROW( EXCEPTION );

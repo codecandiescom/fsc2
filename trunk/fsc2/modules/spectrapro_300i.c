@@ -1349,7 +1349,7 @@ Var_T *monochromator_grating_adjust( Var_T *v )
 
 Var_T *monochromator_calibrate( Var_T *v )
 {
-	CALIB_PARAMS c;
+	Calib_Params_T c;
 	Var_T *cv;
 	int acc;
 	long grating;

@@ -113,7 +113,7 @@ Var_T *f_bcreate( Var_T *var )
 			/* Checking that the referenced group leader button exists
 			   and is also a RADIO_BUTTON can only be done by the parent */
 
-			if ( Internals.I_am == PARENT )
+			if ( Fsc2_Internals.I_am == PARENT )
 			{
 				/* Check that other group member exists at all */
 
@@ -141,7 +141,7 @@ Var_T *f_bcreate( Var_T *var )
 	/* Since the child process can't use graphics it has to pass the parameter
 	   to the parent process and ask it to to create the button */
 
-	if ( Internals.I_am == CHILD )
+	if ( Fsc2_Internals.I_am == CHILD )
 		return f_bcreate_child( v, type, coll );
 
 	/* Next argument got to be the label string */
@@ -379,7 +379,7 @@ Var_T *f_bdelete( Var_T *v )
 
 	do
 	{
-		if ( Internals.I_am == CHILD )
+		if ( Fsc2_Internals.I_am == CHILD )
 			f_bdelete_child( v );
 		else
 			f_bdelete_parent( v );
@@ -388,7 +388,9 @@ Var_T *f_bdelete( Var_T *v )
 	/* The child process is already done here and also a test run (or when the
 	   tool box is already deleted) */
 
-	if ( Internals.I_am == CHILD || Internals.mode == TEST || ! Toolbox )
+	if ( Fsc2_Internals.I_am == CHILD ||
+		 Fsc2_Internals.mode == TEST  ||
+		 ! Toolbox )
 		return vars_push( INT_VAR, 1L );
 
 	/* Redraw the form without the deleted buttons */
@@ -494,7 +496,7 @@ static void f_bdelete_parent( Var_T *v )
 
 	/* Delete the button (it's not drawn in a test run!) */
 
-	if ( Internals.mode != TEST )
+	if ( Fsc2_Internals.mode != TEST )
 	{
 		fl_delete_object( io->self );
 		fl_free_object( io->self );
@@ -562,7 +564,7 @@ Var_T *f_bstate( Var_T *v )
 	/* Again, the child doesn't know about the button, so it got to ask the
 	   parent process */
 
-	if ( Internals.I_am == CHILD )
+	if ( Fsc2_Internals.I_am == CHILD )
 		return f_bstate_child( v );
 
 	/* No tool box -> no buttons -> no button state to set or get... */
@@ -624,7 +626,7 @@ Var_T *f_bstate( Var_T *v )
 
 	/* If this isn't a test run set the button state */
 
-	if ( Internals.mode != TEST )
+	if ( Fsc2_Internals.mode != TEST )
 		fl_set_button( io->self, io->state );
 
 	/* If one of the radio buttons is set all the other buttons belonging
@@ -639,7 +641,7 @@ Var_T *f_bstate( Var_T *v )
 				continue;
 
 			oio->state = 0;
-			if ( Internals.mode != TEST )
+			if ( Fsc2_Internals.mode != TEST )
 				fl_set_button( oio->self, oio->state );
 		}
 	}
@@ -752,7 +754,7 @@ Var_T *f_bchanged( Var_T *v )
 	/* Again, the child doesn't know about the button, so it got to ask the
 	   parent process */
 
-	if ( Internals.I_am == CHILD )
+	if ( Fsc2_Internals.I_am == CHILD )
 		return f_bchanged_child( v );
 
 	/* No tool box -> no buttons -> no button state change possible... */

@@ -99,7 +99,7 @@ void load_all_drivers( void )
 	   before each init_hook() function is called and is restored to its
 	   previous values if necessary. */
 
-	Internals.in_hook = SET;
+	Fsc2_Internals.in_hook = SET;
 
 	TRY
 	{
@@ -162,12 +162,12 @@ void load_all_drivers( void )
 	}
 	OTHERWISE
 	{
-		Internals.in_hook = UNSET;
+		Fsc2_Internals.in_hook = UNSET;
 		delete_devices( );
 		RETHROW( );
 	}
 
-	Internals.in_hook = UNSET;
+	Fsc2_Internals.in_hook = UNSET;
 }
 
 
@@ -273,7 +273,7 @@ static void load_functions( Device_T *dev )
 	   we want... */
 
 	if ( dev->driver.handle == NULL &&
-		 ! ( Internals.cmdline_flags & DO_CHECK ) &&
+		 ! ( Fsc2_Internals.cmdline_flags & DO_CHECK ) &&
 		 dev->name[ 0 ] != '/' )
 	{
 		lib_name = get_string( "%s%s%s.fsc2_so", libdir, slash( libdir ),
@@ -379,7 +379,7 @@ static void resolve_hook_functions( Device_T *dev )
 	if ( dlerror( ) == NULL )
 		dev->driver.is_exit_hook = SET;
 
-	Internals.exit_hooks_are_run = UNSET;
+	Fsc2_Internals.exit_hooks_are_run = UNSET;
 
 	/* Finally check if there's also an exit hook function for the child */
 
@@ -549,7 +549,7 @@ void run_test_hooks( void )
 
 
 	Cur_Pulser = -1;
-	Internals.in_hook = SET;
+	Fsc2_Internals.in_hook = SET;
 
 	TRY
 	{
@@ -580,11 +580,11 @@ void run_test_hooks( void )
 	{
 		call_pop( );
 		vars_del_stack( );
-		Internals.in_hook = UNSET;
+		Fsc2_Internals.in_hook = UNSET;
 		RETHROW( );
 	}
 
-	Internals.in_hook = UNSET;
+	Fsc2_Internals.in_hook = UNSET;
 }
 
 
@@ -598,7 +598,7 @@ void run_end_of_test_hooks( void )
 
 
 	Cur_Pulser = -1;
-	Internals.in_hook = SET;
+	Fsc2_Internals.in_hook = SET;
 
 	TRY
 	{
@@ -628,11 +628,11 @@ void run_end_of_test_hooks( void )
 	{
 		call_pop( );
 		vars_del_stack( );
-		Internals.in_hook = UNSET;
+		Fsc2_Internals.in_hook = UNSET;
 		RETHROW( );
 	}
 
-	Internals.in_hook = UNSET;
+	Fsc2_Internals.in_hook = UNSET;
 }
 
 
@@ -646,7 +646,7 @@ void run_exp_hooks( void )
 
 
 	Cur_Pulser = -1;
-	Internals.in_hook = SET;
+	Fsc2_Internals.in_hook = SET;
 
 	TRY
 	{
@@ -676,7 +676,7 @@ void run_exp_hooks( void )
 
 			/* Give user a chance to stop while running the experiment hooks */
 
-			if ( ! ( Internals.cmdline_flags & NO_GUI_RUN ) )
+			if ( ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) )
 			{
 				fl_check_only_forms( );
 				if ( EDL.do_quit && EDL.react_to_do_quit )
@@ -690,11 +690,11 @@ void run_exp_hooks( void )
 	{
 		call_pop( );
 		vars_del_stack( );
-		Internals.in_hook = UNSET;
+		Fsc2_Internals.in_hook = UNSET;
 		RETHROW( );
 	}
 
-	Internals.in_hook = UNSET;
+	Fsc2_Internals.in_hook = UNSET;
 }
 
 
@@ -721,7 +721,7 @@ void run_end_of_exp_hooks( void )
 	   end_of_exp hooks run first! */
 
 	Cur_Pulser = -1;
-	Internals.in_hook = SET;
+	Fsc2_Internals.in_hook = SET;
 
 	for( cd = EDL.Device_List; cd->next != NULL; cd = cd->next )
 		/* empty */ ;
@@ -759,7 +759,7 @@ void run_end_of_exp_hooks( void )
 		}
 	}
 
-	Internals.in_hook = UNSET;
+	Fsc2_Internals.in_hook = UNSET;
 }
 
 
@@ -784,7 +784,7 @@ void run_exit_hooks( void )
 	for( cd = EDL.Device_List; cd->next != NULL; cd = cd->next )
 		/* empty */ ;
 
-	Internals.in_hook = SET;
+	Fsc2_Internals.in_hook = SET;
 
 	for ( ; cd != NULL; cd = cd->prev )
 	{
@@ -816,11 +816,11 @@ void run_exit_hooks( void )
 			EDL.Num_Pulsers--;
 	}
 
-	Internals.in_hook = UNSET;
+	Fsc2_Internals.in_hook = UNSET;
 
 	/* Set global variable to show that exit hooks already have been run */
 
-	Internals.exit_hooks_are_run = SET;
+	Fsc2_Internals.exit_hooks_are_run = SET;
 }
 
 
@@ -845,7 +845,7 @@ void run_child_exit_hooks( void )
 	for( cd = EDL.Device_List; cd->next != NULL; cd = cd->next )
 		/* empty */ ;
 
-	Internals.in_hook = SET;
+	Fsc2_Internals.in_hook = SET;
 
 	for ( ; cd != NULL; cd = cd->prev )
 	{
@@ -877,7 +877,7 @@ void run_child_exit_hooks( void )
 			EDL.Num_Pulsers--;
 	}
 
-	Internals.in_hook = UNSET;
+	Fsc2_Internals.in_hook = UNSET;
 }
 
 
@@ -938,7 +938,7 @@ void unload_device( Device_T *dev )
 	fsc2_assert( EDL.Call_Stack == NULL );
 
 	if ( dev->driver.handle &&
-		 ! Internals.exit_hooks_are_run && 
+		 ! Fsc2_Internals.exit_hooks_are_run && 
 		 dev->driver.init_hook_is_run &&
 		 dev->driver.is_exit_hook )
 	{
@@ -946,7 +946,7 @@ void unload_device( Device_T *dev )
 			 ! strcasecmp( dev->generic_type, PULSER_GENERIC_TYPE ) )
 			Cur_Pulser = EDL.Num_Pulsers - 1;
 
-		Internals.in_hook = SET;
+		Fsc2_Internals.in_hook = SET;
 		TRY
 		{
 			call_push( NULL, dev, dev->device_name, dev->count );
@@ -964,7 +964,7 @@ void unload_device( Device_T *dev )
 		if ( dev->generic_type != NULL &&
 			 ! strcasecmp( dev->generic_type, PULSER_GENERIC_TYPE ) )
 			EDL.Num_Pulsers--;
-		Internals.in_hook = UNSET;
+		Fsc2_Internals.in_hook = UNSET;
 	}
 
 	dlclose( dev->driver.handle );

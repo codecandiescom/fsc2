@@ -133,7 +133,7 @@ Var_T *f_ocreate( Var_T *var )
 	   parameter into a buffer, pass it to the parent process and ask the
 	   parent to create the button */
 
-	if ( Internals.I_am == CHILD )
+	if ( Fsc2_Internals.I_am == CHILD )
 		return f_ocreate_child( v, type, lval, dval );
 
 	/* Next argument is the label string */
@@ -460,7 +460,7 @@ Var_T *f_odelete( Var_T *v )
 
 	do
 	{
-		if ( Internals.I_am == CHILD )
+		if ( Fsc2_Internals.I_am == CHILD )
 			f_odelete_child( v );
 		else
 			f_odelete_parent( v );
@@ -468,7 +468,9 @@ Var_T *f_odelete( Var_T *v )
 
 	/* The child process is already done here, and in a test run we're also */
 
-	if ( Internals.I_am == CHILD || Internals.mode == TEST || ! Toolbox )
+	if ( Fsc2_Internals.I_am == CHILD ||
+		 Fsc2_Internals.mode == TEST  ||
+		 ! Toolbox )
 		return vars_push( INT_VAR, 1L );
 
 	/* Redraw the form without the deleted objects */
@@ -576,7 +578,7 @@ static void f_odelete_parent( Var_T *v )
 
 	/* Delete the object (its not drawn in a test run!) */
 
-	if ( Internals.mode != TEST )
+	if ( Fsc2_Internals.mode != TEST )
 	{
 		fl_delete_object( io->self );
 		fl_free_object( io->self );
@@ -623,7 +625,7 @@ Var_T *f_ovalue( Var_T *v )
 	/* Again, the child has to pass the arguments to the parent and ask it
 	   to set or return the objects value */
 
-	if ( Internals.I_am == CHILD )
+	if ( Fsc2_Internals.I_am == CHILD )
 		return f_ovalue_child( v );
 
 	/* No tool box -> no input or output objects... */
@@ -677,7 +679,7 @@ Var_T *f_ovalue( Var_T *v )
 			io->val.dval = VALUE( v );
 	}
 
-	if ( Internals.mode != TEST )
+	if ( Fsc2_Internals.mode != TEST )
 	{
 		if ( io->type == INT_INPUT || io->type == INT_OUTPUT )
 		{
@@ -835,7 +837,7 @@ Var_T *f_ochanged( Var_T *v )
 	/* Again, the child has to pass the arguments to the parent and ask it
 	   to return if the objects got changed */
 
-	if ( Internals.I_am == CHILD )
+	if ( Fsc2_Internals.I_am == CHILD )
 		return f_ochanged_child( v );
 
 	/* No tool box -> no input or output objects... */

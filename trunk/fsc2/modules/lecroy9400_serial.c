@@ -81,10 +81,10 @@ bool lecroy9400_init( void )
 			print( SEVERE, "Timebase too fast, changing to %s.\n",
 				   lecroy9400_ptime( lecroy9400.timebase ) );
 		}
-		else if ( lecroy9400.timebase > tb[ TB_ENTRIES - 1 ] )
+		else if ( lecroy9400.timebase > tb[ NUM_ELEMS( tb ) - 1 ] )
 		{
 			lecroy9400_set_timebase( lecroy9400.timebase
-									 = tb[ TB_ENTRIES - 1 ] );
+									 = tb[ NUM_ELEMS( tb ) - 1 ] );
 			print( SEVERE, "Timebase too slow, changing to %s.\n",
 				   lecroy9400_ptime( lecroy9400.timebase ) );
 		}
@@ -508,7 +508,7 @@ void lecroy9400_set_up_averaging( long channel, long source, long num_avg,
 								  bool reject, long rec_len )
 {
 	char cmd[ 100 ];
-	unsigned int i;
+	size_t i;
 
 
 	fsc2_assert( channel >= LECROY9400_FUNC_E &&
@@ -552,7 +552,7 @@ void lecroy9400_set_up_averaging( long channel, long source, long num_avg,
 	   screen, so we pick one of the list of allowed values that's at least
 	   as large as the number of points we're going to fetch. */
 
-	for ( i = 0; i < CL_ENTRIES && rec_len > cl[ i ]; i++ )
+	for ( i = 0; i < NUM_ELEMS( cl ) && rec_len > cl[ i ]; i++ )
 		/* empty */ ;
 	rec_len = cl[ i ];
 

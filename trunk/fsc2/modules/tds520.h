@@ -82,7 +82,8 @@
    area between the pair of cursors */
 
 typedef struct Window Window_T;
-typedef struct TDS520 TDS520;
+typedef struct TDS520 TDS520_T;
+
 
 struct Window {
 	long num;                   /* number of window                          */
@@ -100,7 +101,7 @@ struct Window {
 
 /* Structure that describes the internal state of the digitizer */
 
-struct  TDS520 {
+struct TDS520 {
 	int device;                          /* device number for GPIB transfers */
 
 	bool is_reacting;
@@ -153,7 +154,7 @@ enum {
 
 #ifdef TDS520_MAIN
 
-TDS520 tds520;
+TDS520_T tds520;
 const char *TDS520_Channel_Names[ MAX_CHANNELS ] = {
 								 			"CH1", "CH2", "CH3", "CH4",
 								 			"MATH1", "MATH2", "MATH3",
@@ -185,17 +186,15 @@ static double tb[ ] = {                     500.0e-12,
 						  1.0,      2.0,      5.0,
 						 10.0 };
 
-#define TB_ENTRIES ( sizeof tb / sizeof tb[ 0 ] )
-
 /* Maximum and minimum sensitivity settings (in V) of the measurement
    channels */
 
 static double max_sens = 1e-3,
-	   min_sens = 10.0;
+	   min_sens        = 10.0;
 
 #else
 
-extern TDS520 tds520;
+extern TDS520_T tds520;
 extern const char *TDS520_Channel_Names[ MAX_CHANNELS ];
 extern const char *User_Channel_Names[ MAX_CHANNELS ];
 
@@ -242,11 +241,11 @@ Var_T *digitizer_command( Var_T *v );
 /* Declaration of internally used functions */
 
 const char *tds520_ptime( double p_time );
-void tds520_delete_windows( TDS520 *s );
+void tds520_delete_windows( TDS520_T *s );
 void tds520_do_pre_exp_checks( void );
 void tds520_window_checks( Window_T *w );
 long tds520_translate_channel( int dir, long channel, bool flag );
-void tds520_store_state( TDS520 *dest, TDS520 *src );
+void tds520_store_state( TDS520_T *dest, TDS520_T *src );
 void tds520_state_check( double timebase, long rec_len, double trig_pos );
 Window_T *tds520_get_window_by_number( long win_number );
 

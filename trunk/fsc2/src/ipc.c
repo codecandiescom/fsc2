@@ -227,7 +227,7 @@ void delete_stale_shms( void )
 
 		/* Does the segment belong to fsc2 ? */
 
-		if ( shm_seg.shm_perm.uid == Internals.EUID )
+		if ( shm_seg.shm_perm.uid == Fsc2_Internals.EUID )
 		{
 			if ( ( buf = shmat( shm_id, NULL, 0 ) ) == ( void * ) - 1 )
 				continue;                          /* can't attach... */
@@ -331,7 +331,7 @@ int sema_wait( int sema_id )
 	/* In the child process check that it hasn't become a zombie before doing
 	   the wait on the semaphore and commit controlled suicide if it is. */
 
-	if ( Internals.I_am == CHILD && getppid( ) == 1 )
+	if ( Fsc2_Internals.I_am == CHILD && getppid( ) == 1 )
 		kill( getpid( ), SIGTERM );
 
 	raise_permissions( );

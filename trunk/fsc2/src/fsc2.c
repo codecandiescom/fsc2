@@ -97,7 +97,7 @@ int main( int argc, char *argv[ ] )
 
 	/* Run a first test of the command line arguments */
 
-	Internals.cmdline_flags = scan_args( &argc, argv, &fname );
+	Fsc2_Internals.cmdline_flags = scan_args( &argc, argv, &fname );
 
 	/* Check if other instances of fsc2 are already running. If there are
 	   and the current instance of fsc2 wasn't started with the non-exclusive
@@ -105,15 +105,15 @@ int main( int argc, char *argv[ ] )
 	   spawn a process that deals with further instances of fsc2 and takes
 	   care of shared memory segments. */
 
-	if ( ( Internals.conn_pid =
-				   	 ( pid_t ) check_spawn_fsc2d( ! ( Internals.cmdline_flags &
-													  NON_EXCLUSIVE ),
-												  in_file_fp ) ) == -1 )
+	if ( ( Fsc2_Internals.conn_pid =
+			   	( pid_t ) check_spawn_fsc2d( ! ( Fsc2_Internals.cmdline_flags &
+												 NON_EXCLUSIVE ),
+											 in_file_fp ) ) == -1 )
 		return EXIT_FAILURE;
 
 	/* Initialize xforms stuff, quit on error */
 
-	else if ( ! ( Internals.cmdline_flags & NO_GUI_RUN ) &&
+	else if ( ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) &&
 			  ! xforms_init( &argc, argv ) )
 	{
 		raise_permissions( );
@@ -126,33 +126,33 @@ int main( int argc, char *argv[ ] )
 
 	if ( argc > 1 && fname == NULL )
 	{
-		Internals.cmdline_flags |= DO_LOAD;
+		Fsc2_Internals.cmdline_flags |= DO_LOAD;
 		fname = argv[ 1 ];
 	}
 
 	/* If '--delete' was given on the command line set flags that says that
 	   the input files needs to be deleted */
 
-	if ( fname != NULL && Internals.cmdline_flags & DO_DELETE )
+	if ( fname != NULL && Fsc2_Internals.cmdline_flags & DO_DELETE )
 		delete_file = delete_old_file = SET;
 
 	/* If there is a file argument try to load it */
 
-	if ( Internals.cmdline_flags & DO_LOAD )
+	if ( Fsc2_Internals.cmdline_flags & DO_LOAD )
 	{
 		if ( ! get_edl_file( fname ) )
 			return EXIT_FAILURE;
 
-		conn_pid = Internals.conn_pid;
-		Internals.conn_pid = 0;
+		conn_pid = Fsc2_Internals.conn_pid;
+		Fsc2_Internals.conn_pid = 0;
 		load_file( GUI.main_form->browser, 1 );
-		Internals.conn_pid = conn_pid;
+		Fsc2_Internals.conn_pid = conn_pid;
 	}
 
 	/* In batch mode try to get the next file if the first input file
 	   could not be accessed until we have one. */
 
-	while ( Internals.cmdline_flags & BATCH_MODE && ! is_loaded )
+	while ( Fsc2_Internals.cmdline_flags & BATCH_MODE && ! is_loaded )
 	{
 		int i;
 
@@ -168,10 +168,10 @@ int main( int argc, char *argv[ ] )
 		if ( ! get_edl_file( fname ) )
 			return EXIT_FAILURE;
 
-		conn_pid = Internals.conn_pid;
-		Internals.conn_pid = 0;
+		conn_pid = Fsc2_Internals.conn_pid;
+		Fsc2_Internals.conn_pid = 0;
 		load_file( GUI.main_form->browser, 1 );
-		Internals.conn_pid = conn_pid;
+		Fsc2_Internals.conn_pid = conn_pid;
 
 		for ( i = 1; i < argc; i++ )
 			argv[ i ] = argv[ i + 1 ];
@@ -187,31 +187,31 @@ int main( int argc, char *argv[ ] )
 	/* If the program was started in test mode call the appropriate function
 	   (which never returns) */
 
-	if ( Internals.cmdline_flags & DO_CHECK )
+	if ( Fsc2_Internals.cmdline_flags & DO_CHECK )
 		check_run( );
 
-	if ( Internals.cmdline_flags & NO_GUI_RUN )
+	if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
 		no_gui_run( );
 
 	/* Only if starting the server for external connections succeeds really
 	   start the main loop */
 
-	if ( Internals.conn_pid == 0 ||
-		 ( Internals.conn_pid =
-			   spawn_conn( Internals.cmdline_flags &
+	if ( Fsc2_Internals.conn_pid == 0 ||
+		 ( Fsc2_Internals.conn_pid =
+			   spawn_conn( Fsc2_Internals.cmdline_flags &
 			   	   ( DO_TEST | DO_START ) && is_loaded, in_file_fp ) ) != -1 )
 	{
 		/* Trigger test or start of current EDL program if the appropriate
 		   flags were passed to the program on the command line */
 
-		if ( Internals.cmdline_flags & DO_TEST && is_loaded )
+		if ( Fsc2_Internals.cmdline_flags & DO_TEST && is_loaded )
 			fl_trigger_object( GUI.main_form->test_file );
-		if ( Internals.cmdline_flags & DO_START && is_loaded )
+		if ( Fsc2_Internals.cmdline_flags & DO_START && is_loaded )
 			fl_trigger_object( GUI.main_form->run );
 
 		/* If required send signal to the invoking process */
 
-		if ( Internals.cmdline_flags & DO_SIGNAL )
+		if ( Fsc2_Internals.cmdline_flags & DO_SIGNAL )
 			kill( getppid( ), SIGUSR1 );
 
 		/* And, finally, here's the main loop of the program - it first checks
@@ -226,12 +226,12 @@ int main( int argc, char *argv[ ] )
 	run_next:
 
 		while ( fl_check_forms( ) != GUI.main_form->quit )
-			if ( Internals.child_pid == 0 )
+			if ( Fsc2_Internals.child_pid == 0 )
 				idle_handler( );
 			else
 				new_data_handler( );
 
-		if ( Internals.cmdline_flags & BATCH_MODE && argc > 1 )
+		if ( Fsc2_Internals.cmdline_flags & BATCH_MODE && argc > 1 )
 		{
 			is_loaded = UNSET;
 
@@ -245,10 +245,10 @@ int main( int argc, char *argv[ ] )
 				if ( ! get_edl_file( fname ) )
 					break;
 
-				conn_pid = Internals.conn_pid;
-				Internals.conn_pid = 0;
+				conn_pid = Fsc2_Internals.conn_pid;
+				Fsc2_Internals.conn_pid = 0;
 				load_file( GUI.main_form->browser, 1 );
-				Internals.conn_pid = conn_pid;
+				Fsc2_Internals.conn_pid = conn_pid;
 
 				for ( i = 1; i < argc; i++ )
 					argv[ i ] = argv[ i + 1 ];
@@ -265,7 +265,7 @@ int main( int argc, char *argv[ ] )
 	else
 		fprintf( stderr, "fsc2: Internal failure on startup.\n" );
 
-	T_free( Internals.title );
+	T_free( Fsc2_Internals.title );
 	clean_up( );
 	xforms_close( );
 
@@ -283,29 +283,29 @@ static void globals_init( const char *pname )
 	   and GID, only switching back when creating or attaching to shared
 	   memory segments or accessing log files. */
 
-	Internals.EUID = geteuid( );
-	Internals.EGID = getegid( );
+	Fsc2_Internals.EUID = geteuid( );
+	Fsc2_Internals.EGID = getegid( );
 
 	lower_permissions( );
 
-    Internals.child_pid = 0;
-	Internals.fsc2_clean_pid = 0;
-	Internals.fsc2_clean_died = SET;
-    Internals.http_pid = 0;
-	Internals.state = STATE_IDLE;
-	Internals.mode = PREPARATION;
-	Internals.cmdline_flags = 0;
-	Internals.in_hook = UNSET;
-	Internals.I_am = PARENT;
-	Internals.exit_hooks_are_run = UNSET;
-	Internals.tb_wait = TB_WAIT_NOT_RUNNING;
-	Internals.rsc_handle = NULL;
-	Internals.http_server_died = UNSET;
-	Internals.conn_request = UNSET;
-	Internals.is_linux_i386 = UNSET;
-	Internals.conn_child_replied = UNSET;
-	Internals.title = NULL;
-	Internals.child_is_quitting = QUITTING_UNSET;
+    Fsc2_Internals.child_pid = 0;
+	Fsc2_Internals.fsc2_clean_pid = 0;
+	Fsc2_Internals.fsc2_clean_died = SET;
+    Fsc2_Internals.http_pid = 0;
+	Fsc2_Internals.state = STATE_IDLE;
+	Fsc2_Internals.mode = PREPARATION;
+	Fsc2_Internals.cmdline_flags = 0;
+	Fsc2_Internals.in_hook = UNSET;
+	Fsc2_Internals.I_am = PARENT;
+	Fsc2_Internals.exit_hooks_are_run = UNSET;
+	Fsc2_Internals.tb_wait = TB_WAIT_NOT_RUNNING;
+	Fsc2_Internals.rsc_handle = NULL;
+	Fsc2_Internals.http_server_died = UNSET;
+	Fsc2_Internals.conn_request = UNSET;
+	Fsc2_Internals.is_linux_i386 = UNSET;
+	Fsc2_Internals.conn_child_replied = UNSET;
+	Fsc2_Internals.title = NULL;
+	Fsc2_Internals.child_is_quitting = QUITTING_UNSET;
 
 	GUI.win_has_pos = UNSET;
 	GUI.win_has_size = UNSET;
@@ -371,8 +371,8 @@ static void fsc2_get_conf( void )
 	struct stat buf;
 
 
-	Internals.use_def_directory = UNSET;
-	Internals.def_directory = NULL;
+	Fsc2_Internals.use_def_directory = UNSET;
+	Fsc2_Internals.def_directory = NULL;
 
 	if ( ( ue = getpwuid( getuid( ) ) ) == NULL ||
 		 ue->pw_dir == NULL || *ue->pw_dir == '\0' )
@@ -401,12 +401,13 @@ static void fsc2_get_conf( void )
 	}
 	OTHERWISE
 	{
-		if ( Internals.def_directory != NULL )
-			Internals.def_directory = CHAR_P T_free( Internals.def_directory );
+		if ( Fsc2_Internals.def_directory != NULL )
+			Fsc2_Internals.def_directory =
+								 CHAR_P T_free( Fsc2_Internals.def_directory );
 		return;
 	}
 
-	if ( Internals.def_directory == NULL )
+	if ( Fsc2_Internals.def_directory == NULL )
 		return;
 	
 	/* Don't use the name when it's either obviously unvalid (i.e. just an
@@ -418,16 +419,17 @@ static void fsc2_get_conf( void )
 	   directory is going to be used for reading only or also writing, so
 	   we only check for the lowest hurdle). */
 
-	if ( *Internals.def_directory == '\0' ||
-		 stat( Internals.def_directory, &buf ) < 0 ||
+	if ( *Fsc2_Internals.def_directory == '\0' ||
+		 stat( Fsc2_Internals.def_directory, &buf ) < 0 ||
 		 ( ! S_ISDIR( buf.st_mode ) && ! S_ISLNK( buf.st_mode ) ) ||
 		 ! ( buf.st_mode & ( S_IRUSR | S_IRGRP | S_IROTH ) ) )
 	{
-		Internals.def_directory = CHAR_P T_free( Internals.def_directory );
+		Fsc2_Internals.def_directory =
+								 CHAR_P T_free( Fsc2_Internals.def_directory );
 		return;
 	}
 
-	Internals.use_def_directory = SET;
+	Fsc2_Internals.use_def_directory = SET;
 
 	return;
 }
@@ -447,9 +449,9 @@ static void fsc2_save_conf( void )
 	if ( ( ue = getpwuid( getuid( ) ) ) == NULL ||
 		 ue->pw_dir == NULL || *ue->pw_dir == '\0' )
 	{
-		 if ( Internals.def_directory != NULL )
-			 Internals.def_directory =
-				 					  CHAR_P T_free( Internals.def_directory );
+		 if ( Fsc2_Internals.def_directory != NULL )
+			 Fsc2_Internals.def_directory =
+				 				 CHAR_P T_free( Fsc2_Internals.def_directory );
 		 return;
 	}
 
@@ -464,9 +466,9 @@ static void fsc2_save_conf( void )
 	if ( ( fp = fopen( fname, "w" ) ) == NULL )
 	{
 		T_free( fname );
-		 if ( Internals.def_directory != NULL )
-			 Internals.def_directory =
-				 					  CHAR_P T_free( Internals.def_directory );
+		 if ( Fsc2_Internals.def_directory != NULL )
+			 Fsc2_Internals.def_directory =
+				 				 CHAR_P T_free( Fsc2_Internals.def_directory );
 		return;
 	}
 
@@ -475,13 +477,15 @@ static void fsc2_save_conf( void )
 	fprintf( fp, "# Don't edit this file - it gets overwritten "
 			 "automatically\n\n" );
 
-	if ( Internals.use_def_directory && Internals.def_directory != NULL )
-		fprintf( fp, "DEFAULT_DIRECTORY: %s\n", Internals.def_directory );
+	if ( Fsc2_Internals.use_def_directory &&
+		 Fsc2_Internals.def_directory != NULL )
+		fprintf( fp, "DEFAULT_DIRECTORY: %s\n", Fsc2_Internals.def_directory );
 	else
 		fprintf( fp, "DEFAULT_DIRECTORY: %s\n", fl_get_directory( ) );
-	if ( Internals.def_directory != NULL )
-			 Internals.def_directory =
-				 					  CHAR_P T_free( Internals.def_directory );
+
+	if ( Fsc2_Internals.def_directory != NULL )
+			 Fsc2_Internals.def_directory =
+				 				 CHAR_P T_free( Fsc2_Internals.def_directory );
 
 	fprintf( fp, "MAIN_WINDOW_POSITION: %d%+d\n", GUI.win_x, GUI.win_y );
 
@@ -571,12 +575,12 @@ static void no_gui_run( void )
 	if ( ! run( ) )
 		exit( EXIT_FAILURE );
 
-	while ( Internals.child_is_quitting == QUITTING_UNSET )
+	while ( Fsc2_Internals.child_is_quitting == QUITTING_UNSET )
 		pause( );
 
-	run_sigchld_callback( NULL, Internals.check_return );
+	run_sigchld_callback( NULL, Fsc2_Internals.check_return );
 
-	exit( Internals.check_return );
+	exit( Fsc2_Internals.check_return );
 }
 
 
@@ -629,19 +633,19 @@ static void check_run( void )
 	fl_activate_object( GUI.main_form->quit );
 	fl_set_object_lcol( GUI.main_form->quit, FL_BLACK );
 
-	for ( i = 0; i < Internals.num_test_runs; i++ )
+	for ( i = 0; i < Fsc2_Internals.num_test_runs; i++ )
 	{
 		if ( ! run( ) )
 			exit( EXIT_FAILURE );
 
 		while ( fl_check_forms( ) != GUI.main_form->quit )
-			if ( Internals.child_pid == 0 )
+			if ( Fsc2_Internals.child_pid == 0 )
 				idle_handler( );
 			else
 				new_data_handler( );
 
-		if ( Internals.check_return != EXIT_SUCCESS )
-			exit( Internals.check_return );
+		if ( Fsc2_Internals.check_return != EXIT_SUCCESS )
+			exit( Fsc2_Internals.check_return );
 	}
 
 	exit( EXIT_SUCCESS );
@@ -668,7 +672,7 @@ static void test_machine_type( void )
 		 utsbuf.machine[ 1 ] >= '3' && utsbuf.machine[ 1 ] <= '6' &&
 		 ! strncmp( utsbuf.machine + 2, "86", 2 ) &&
 		 ! strcasecmp( utsbuf.sysname, "linux" ) )
-		Internals.is_linux_i386 = SET;
+		Fsc2_Internals.is_linux_i386 = SET;
 }
 
 
@@ -723,7 +727,7 @@ static int scan_args( int *argc, char *argv[ ], char **fname )
 				exit( EXIT_FAILURE );
 			}
 
-			Internals.cmdline_flags |= TEST_ONLY;
+			Fsc2_Internals.cmdline_flags |= TEST_ONLY;
 
 			seteuid( getuid( ) );
 			setegid( getgid( ) );
@@ -1089,13 +1093,14 @@ static int scan_args( int *argc, char *argv[ ], char **fname )
 			}
 
 			if ( argv[ cur_arg ][ 2 ] == '\0' )
-				Internals.num_test_runs = 1;
+				Fsc2_Internals.num_test_runs = 1;
 			else
-				for ( Internals.num_test_runs = 0, i = 2;
+				for ( Fsc2_Internals.num_test_runs = 0, i = 2;
 					  argv[ cur_arg ][ i ] != '\0'; i++ )
 					if ( isdigit( argv[ cur_arg ][ i ] ) )
-						Internals.num_test_runs = Internals.num_test_runs * 10 
-							+ ( argv[ cur_arg ][ i ] - '0' );
+						Fsc2_Internals.num_test_runs =
+											 Fsc2_Internals.num_test_runs * 10 
+										   + ( argv[ cur_arg ][ i ] - '0' );
 					else
 					{
 						fprintf( stderr, "Flag '-X' needs a numerical "
@@ -1117,9 +1122,9 @@ static int scan_args( int *argc, char *argv[ ], char **fname )
 				*argc -= 2;
 			}
 
-			if ( Internals.num_test_runs == 0 )
+			if ( Fsc2_Internals.num_test_runs == 0 )
 			{
-				Internals.cmdline_flags |= TEST_ONLY | NO_MAIL;
+				Fsc2_Internals.cmdline_flags |= TEST_ONLY | NO_MAIL;
 
 				seteuid( getuid( ) );
 				setegid( getgid( ) );
@@ -1150,14 +1155,14 @@ static void final_exit_handler( void )
 	/* Stop the process that is waiting for external connections as well
 	   as the child process and the HTTP server */
 
-	if ( Internals.conn_pid > 0 )
-		kill( Internals.conn_pid, SIGTERM );
+	if ( Fsc2_Internals.conn_pid > 0 )
+		kill( Fsc2_Internals.conn_pid, SIGTERM );
 
-	if ( Internals.child_pid > 0 )
-		kill( Internals.child_pid, SIGTERM );
+	if ( Fsc2_Internals.child_pid > 0 )
+		kill( Fsc2_Internals.child_pid, SIGTERM );
 
-	if ( Internals.http_pid > 0 )
-		kill( Internals.http_pid, SIGTERM );
+	if ( Fsc2_Internals.http_pid > 0 )
+		kill( Fsc2_Internals.http_pid, SIGTERM );
 
 	fsc2_save_conf( );
 
@@ -1187,7 +1192,7 @@ static void final_exit_handler( void )
 	if ( fsc2_death != 0 && fsc2_death != SIGTERM )
 	{
 		if ( * ( ( int * ) xresources[ NOCRASHMAIL ].var ) == 0 &&
-			  ! ( Internals.cmdline_flags & NO_MAIL ) )
+			  ! ( Fsc2_Internals.cmdline_flags & NO_MAIL ) )
 		{
 			death_mail( fsc2_death );
 			fprintf( stderr, "A crash report has been sent to %s\n",
@@ -1288,10 +1293,10 @@ void load_file( UNUSED_ARG FL_OBJECT *a, long reload )
 
 	if ( access( EDL.in_file, R_OK ) == -1 )
 	{
-		if ( Internals.cmdline_flags & DO_CHECK )
+		if ( Fsc2_Internals.cmdline_flags & DO_CHECK )
 			exit( EXIT_FAILURE );
 
-		if ( Internals.cmdline_flags & BATCH_MODE )
+		if ( Fsc2_Internals.cmdline_flags & BATCH_MODE )
 		{
 			fprintf( stderr, "Input file not found: '%s'.\n", EDL.in_file );
 			is_loaded = UNSET;
@@ -1316,10 +1321,10 @@ void load_file( UNUSED_ARG FL_OBJECT *a, long reload )
 
 	if ( ( tmp_fd = mkstemp( tmp_file ) ) < 0 )
 	{
-		if ( Internals.cmdline_flags & DO_CHECK )
+		if ( Fsc2_Internals.cmdline_flags & DO_CHECK )
 			exit( EXIT_FAILURE );
 
-		if ( Internals.cmdline_flags & BATCH_MODE )
+		if ( Fsc2_Internals.cmdline_flags & BATCH_MODE )
 		{
 			fprintf( stderr, "Can't open a temporary file, skipping input "
 					 "file '%s'.\n", EDL.in_file );
@@ -1339,10 +1344,10 @@ void load_file( UNUSED_ARG FL_OBJECT *a, long reload )
 	if ( ( tmp_fp = fdopen( tmp_fd, "w+" ) ) == 0 )
 	{
 		close( tmp_fd );
-		if ( Internals.cmdline_flags & DO_CHECK )
+		if ( Fsc2_Internals.cmdline_flags & DO_CHECK )
 			exit( EXIT_FAILURE );
 
-		if ( Internals.cmdline_flags & BATCH_MODE )
+		if ( Fsc2_Internals.cmdline_flags & BATCH_MODE )
 		{
 			fprintf( stderr, "Can't open a temporary file, skipping input "
 					 "file '%s'.\n", EDL.in_file );
@@ -1360,10 +1365,10 @@ void load_file( UNUSED_ARG FL_OBJECT *a, long reload )
 	if ( ( fp = fopen( EDL.in_file, "r" ) ) == NULL )
 	{
 		fclose( tmp_fp );
-		if ( Internals.cmdline_flags & DO_CHECK )
+		if ( Fsc2_Internals.cmdline_flags & DO_CHECK )
 			exit( EXIT_FAILURE );
 
-		if ( Internals.cmdline_flags & BATCH_MODE )
+		if ( Fsc2_Internals.cmdline_flags & BATCH_MODE )
 		{
 			fprintf( stderr, "Can't open input file: '%s'.\n", EDL.in_file );
 			is_loaded = UNSET;
@@ -1417,10 +1422,10 @@ void load_file( UNUSED_ARG FL_OBJECT *a, long reload )
 
 	/* Set a new window title */
 
-	if ( Internals.title )
-		Internals.title = CHAR_P T_free( Internals.title );
-	Internals.title = get_string( "fsc2: %s", EDL.in_file );
-	fl_set_form_title( GUI.main_form->fsc2, Internals.title );
+	if ( Fsc2_Internals.title )
+		Fsc2_Internals.title = CHAR_P T_free( Fsc2_Internals.title );
+	Fsc2_Internals.title = get_string( "fsc2: %s", EDL.in_file );
+	fl_set_form_title( GUI.main_form->fsc2, Fsc2_Internals.title );
 
 	/* Read in and display the new file */
 
@@ -1656,7 +1661,7 @@ void run_file( UNUSED_ARG FL_OBJECT *a, UNUSED_ARG long b )
 		   button to start dealing with the next EDL script. Otherwise
 		   show an error message. */
 
-		if ( Internals.cmdline_flags & BATCH_MODE )
+		if ( Fsc2_Internals.cmdline_flags & BATCH_MODE )
 		{
 			fprintf( stderr, "Sorry, but test of file failed: '%s'.\n",
 					 EDL.in_file );
@@ -1672,7 +1677,7 @@ void run_file( UNUSED_ARG FL_OBJECT *a, UNUSED_ARG long b )
 	/* If there were non-fatal errors ask user if she wants to continue.
 	   In batch mode run even if there were non-fatal errors. */
 
-	if ( ! ( Internals.cmdline_flags & BATCH_MODE ) &&
+	if ( ! ( Fsc2_Internals.cmdline_flags & BATCH_MODE ) &&
 		 ( EDL.compilation.error[ SEVERE ] != 0 ||
 		   EDL.compilation.error[ WARN ] != 0 ) )
 	{
@@ -1860,10 +1865,10 @@ void clean_up( void )
 	/* Get rid of the last remains of graphics */
 
 	for ( i = X; i <= Y; i++ )
-		G1.label_orig[ i ] = CHAR_P T_free( G1.label_orig[ i ] );
+		G_1d.label_orig[ i ] = CHAR_P T_free( G_1d.label_orig[ i ] );
 
 	for ( i = X; i <= Z; i++ )
-		G2.label_orig[ i ] = CHAR_P T_free( G2.label_orig[ i ] );
+		G_2d.label_orig[ i ] = CHAR_P T_free( G_2d.label_orig[ i ] );
 
 	G.is_init = UNSET;
 	G.dim = 0;
@@ -1957,7 +1962,7 @@ static void set_main_signals( void )
 	size_t i;
 
 
-	for ( i = 0; i < sizeof sig_list / sizeof *sig_list; i++ )
+	for ( i = 0; i < NUM_ELEMS( sig_list ); i++ )
 	{
 		sact.sa_handler = main_sig_handler;
 		sigemptyset( &sact.sa_mask );
@@ -1994,37 +1999,37 @@ void main_sig_handler( int signo )
 				/* Remember when the HTTP server should have died, we need
 				   then to reset the button for it */
 
-				if ( pid == Internals.http_pid )
+				if ( pid == Fsc2_Internals.http_pid )
 				{
-					Internals.http_pid = -1;
-					Internals.http_server_died = SET;
+					Fsc2_Internals.http_pid = -1;
+					Fsc2_Internals.http_server_died = SET;
 				}
 
 				/* Also store the return status of the child process running
 				   'fsc2_clean', it's used to check if everything went fine */
 
-				if ( ! Internals.fsc2_clean_died &&
-					 pid == Internals.fsc2_clean_pid )
+				if ( ! Fsc2_Internals.fsc2_clean_died &&
+					 pid == Fsc2_Internals.fsc2_clean_pid )
 				{
-					Internals.fsc2_clean_pid = 0;
-					Internals.fsc2_clean_died = SET;
-					Internals.fsc2_clean_status_ok = WIFEXITED( status );
+					Fsc2_Internals.fsc2_clean_pid = 0;
+					Fsc2_Internals.fsc2_clean_died = SET;
+					Fsc2_Internals.fsc2_clean_status_ok = WIFEXITED( status );
 				}
 			}
 			errno = errno_saved;
 			return;
 
 		case SIGUSR1 :
-			Internals.conn_request = SET;
+			Fsc2_Internals.conn_request = SET;
 			return;
 
 		case SIGUSR2 :
-			Internals.conn_child_replied = SET;
+			Fsc2_Internals.conn_child_replied = SET;
 			return;
 
 		case SIGALRM :
-			if ( Internals.tb_wait == TB_WAIT_TIMER_RUNNING )
-				Internals.tb_wait = TB_WAIT_TIMER_EXPIRED;
+			if ( Fsc2_Internals.tb_wait == TB_WAIT_TIMER_RUNNING )
+				Fsc2_Internals.tb_wait = TB_WAIT_TIMER_EXPIRED;
 			return;
 
 		/* Ignored signals : */
@@ -2045,7 +2050,7 @@ void main_sig_handler( int signo )
 		default :
 			fsc2_death = signo;
 
-			if ( ! ( Internals.cmdline_flags & NO_MAIL ) )
+			if ( ! ( Fsc2_Internals.cmdline_flags & NO_MAIL ) )
 			{
 
 #if ! defined( NDEBUG ) && defined( ADDR2LINE ) && ! defined __STRICT_ANSI__
@@ -2053,7 +2058,7 @@ void main_sig_handler( int signo )
 				/* Of course, we're now deep in UB-land, so we can only hope
 				   that it won't make nasal daemons come out of our nose... */
 
-				if ( Internals.is_linux_i386 )
+				if ( Fsc2_Internals.is_linux_i386 )
 				{
 					asm( "mov %%ebp, %0" : "=g" ( EBP ) );
 					DumpStack( ( void * ) * ( EBP + CRASH_ADDRESS_OFFSET ) );
@@ -2080,18 +2085,18 @@ void notify_conn( int signo )
        experiment is running - in this case fsc2 is busy anyway and the
        connection process has already been informed about this. */
 
-	if ( Internals.conn_pid <= 0 || Internals.child_pid > 0 ||
-		 Internals.cmdline_flags & DO_CHECK )
+	if ( Fsc2_Internals.conn_pid <= 0 || Fsc2_Internals.child_pid > 0 ||
+		 Fsc2_Internals.cmdline_flags & DO_CHECK )
 		return;
 
-	kill( Internals.conn_pid, signo );
+	kill( Fsc2_Internals.conn_pid, signo );
 
 	/* Wait for reply from child but avoid waiting when it in fact already
 	   did reply (as indicated by the variable). */
 
-	while ( ! Internals.conn_child_replied )
+	while ( ! Fsc2_Internals.conn_child_replied )
 		fsc2_usleep( 50000, SET );
-	Internals.conn_child_replied = UNSET;
+	Fsc2_Internals.conn_child_replied = UNSET;
 }
 
 
@@ -2174,20 +2179,20 @@ int idle_handler( void )
 	/* Check if a request from the child for external conections has
 	   come in */
 
-	if ( Internals.conn_request )
+	if ( Fsc2_Internals.conn_request )
 	{
-		Internals.conn_request = UNSET;
+		Fsc2_Internals.conn_request = UNSET;
 		conn_request_handler( );
 	}
 
 	/* Check for request by the HTTP server and its death */
 
 #if defined WITH_HTTP_SERVER
-	if ( Internals.http_pid > 0 )
+	if ( Fsc2_Internals.http_pid > 0 )
 		http_check( );
-	else if ( Internals.http_server_died )
+	else if ( Fsc2_Internals.http_server_died )
 	{
-		Internals.http_server_died = UNSET;
+		Fsc2_Internals.http_server_died = UNSET;
 		fl_call_object_callback( GUI.main_form->server );
 	}
 #endif

@@ -27,7 +27,7 @@
 
 static double timebases[ ] = { 1.0e-8, 1.0e-7, 1.0e-6, 1.0e-5,
 							   1.0e-4, 1.0e-3, 1.0e-2 };
-static int num_timebases = sizeof timebases / sizeof *timebases;
+static int num_timebases = NUM_ELEMS( timebases );
 
 static int tb_index[ ] = { RULBUS_RB8515_CLOCK_FREQ_100MHz,
 						   RULBUS_RB8515_CLOCK_FREQ_10MHz,

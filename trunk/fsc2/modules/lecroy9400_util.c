@@ -35,9 +35,10 @@ static void lecroy9400_window_check_3( void );
 
 int lecroy9400_get_tb_index( double timebase )
 {
-	unsigned int i;
+	size_t i;
 
-	for ( i = 0; i < TB_ENTRIES - 1; i++ )
+
+	for ( i = 0; i < NUM_ELEMS( tb ) - 1; i++ )
 		if ( timebase >= tb[ i ] && timebase <= tb[ i + 1 ] )
 			return i + ( ( tb[ i ] / timebase > timebase / tb[ i + 1 ] ) ?
 						 0 : 1 );
@@ -72,7 +73,7 @@ const char *lecroy9400_ptime( double p_time )
 /* Deletes a window by removing it from the linked list of windows */
 /*-----------------------------------------------------------------*/
 
-void lecroy9400_delete_windows( LECROY9400 *s )
+void lecroy9400_delete_windows( LECROY9400_T *s )
 {
 	Window_T *w;
 
@@ -427,7 +428,7 @@ long lecroy9400_translate_channel( int dir, long channel, bool flag )
 /*-------------------------------------------------------------*/
 /*-------------------------------------------------------------*/
 
-void lecroy9400_store_state( LECROY9400 *dest, LECROY9400 *src )
+void lecroy9400_store_state( LECROY9400_T *dest, LECROY9400_T *src )
 {
 	Window_T *w;
 	int i;

@@ -25,7 +25,7 @@
 #include "fsc2.h"
 
 
-extern Fsc2_Assert Assert_struct;      /* defined fsc2_assert.c */
+extern Fsc2_Assert_T Assert_struct;    /* defined fsc2_assert.c */
 extern int fail_mess_fd;               /* defined in dump.c     */
 
 
@@ -247,11 +247,11 @@ void death_mail( int signo )
 
 #if defined _GNU_SOURCE
 	fprintf( mail, "fsc2 (%d, %s) killed by %s signal.\n\n", getpid( ),
-			 Internals.I_am == CHILD ? "CHILD" : "PARENT",
+			 Fsc2_Internals.I_am == CHILD ? "CHILD" : "PARENT",
 			 strsignal( signo ) );
 #else
 	fprintf( mail, "fsc2 (%d, %s) killed by signal %d.\n\n", getpid( ),
-			 Internals.I_am == CHILD ? "CHILD" : "PARENT", signo );
+			 Fsc2_Internals.I_am == CHILD ? "CHILD" : "PARENT", signo );
 #endif
 
 #ifndef NDEBUG
@@ -273,7 +273,7 @@ void death_mail( int signo )
 		fprintf( mail, "In EDL program %s at line = %ld\n\n",
 				 EDL.Fname, EDL.Lc );
 
-	if ( ! ( Internals.cmdline_flags & NO_GUI_RUN ) )
+	if ( ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) )
 	{
 		fputs( "Content of program browser:\n\n"
 			   "--------------------------------------------------\n\n",

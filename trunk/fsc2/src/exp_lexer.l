@@ -55,7 +55,7 @@
 
 int explex( void );
 
-extern Token_Val exp_val;
+extern Token_Val_T exp_val;
 
 
 /* Locally used global variables */

@@ -113,9 +113,9 @@ pid_t spawn_conn( bool start_state, FILE *in_file_fp )
 	if ( new_pid >= 0 )
 	{
 		close( Comm.conn_pd[ WRITE ] );
-		while ( ! Internals.conn_child_replied )
+		while ( ! Fsc2_Internals.conn_child_replied )
 			fsc2_usleep( 50000, SET );
-		Internals.conn_child_replied = UNSET;
+		Fsc2_Internals.conn_child_replied = UNSET;
 	}
 	else
 		unlink( FSC2_SOCKET );

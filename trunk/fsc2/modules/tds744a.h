@@ -78,7 +78,7 @@
    area between the pair of cursors */
 
 typedef struct Window Window_T;
-typedef struct TDS744A TDS744A;
+typedef struct TDS744A TDS744A_T;
 
 
 struct Window {
@@ -151,7 +151,7 @@ enum {
 
 #ifdef TDS744A_MAIN
 
-TDS744A tds744a;
+TDS744A_T tds744a;
 
 /* This array must be set to the available record lengths of the digitizer
    and must always end with a 0 */
@@ -173,18 +173,15 @@ static double tb[ ] = {                     500.0e-12,
 						  1.0,      2.0,      5.0,
 						 10.0 };
 
-#define TB_ENTRIES ( sizeof tb / sizeof tb[ 0 ] )
-
-
 /* Maximum and minimum sensitivity settings (in V) of the measurement
    channels
    Take care: The minimum sensitivity of 10 V only works with 1 M Ohm input
    impedance, while for 50 Ohm the minimum sensitivity is only 1V.
    Unfortunately, this can only be tested after the digitizer is online. */
 
-double max_sens = 1e-3,
+double max_sens    = 1e-3,
 	   min_sens_50 = 1.0,
-	   min_sens = 10.0;
+	   min_sens    = 10.0;
 
 const char *TDS744A_Channel_Names[ MAX_CHANNELS  ] = {
 											"CH1", "CH2", "CH3", "CH4",
@@ -193,7 +190,7 @@ const char *TDS744A_Channel_Names[ MAX_CHANNELS  ] = {
 								 			"AUX", "LINE" };
 #else
 
-extern TDS744A tds744a;
+extern TDS744A_T tds744a;
 extern const char *TDS744A_Channel_Names[ MAX_CHANNELS ];
 extern double max_sens, min_sens_50, min_sens;
 
@@ -242,7 +239,7 @@ Var_T *digitizer_command( Var_T *v );
 /* Declaration of internally used functions */
 
 const char *tds744a_ptime( double p_time );
-void tds744a_delete_windows( TDS744A *s );
+void tds744a_delete_windows( TDS744A_T *s );
 void tds744a_do_pre_exp_checks( void );
 void tds744a_window_checks( Window_T *w );
 void tds744a_set_tracking( Window_T *w );
@@ -250,7 +247,7 @@ void tds744a_set_meas_window( Window_T *w );
 void tds744a_set_curve_window( Window_T *w );
 void tds744a_set_window( Window_T *w );
 long tds744a_translate_channel( int dir, long channel, bool flag );
-void tds744a_store_state( TDS744A *dest, TDS744A *src );
+void tds744a_store_state( TDS744A_T *dest, TDS744A_T *src );
 void tds744a_state_check( double timebase, long rec_len, double trig_pos );
 Window_T *tds744a_get_window_by_number( long win_number );
 

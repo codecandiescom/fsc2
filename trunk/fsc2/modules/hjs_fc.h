@@ -56,28 +56,6 @@
 #define HJS_FC_TEST_SLOPE        50.0      /* in Gauss/V */
 
 
-/* Exported functions */
-
-int hjs_fc_init_hook( void );
-int hjs_fc_test_hook( void );
-int hjs_fc_exp_hook( void );
-void hjs_fc_exit_hook( void );
-void hjs_fc_child_exit_hook( void );
-
-Var_T *magnet_calibration_file( Var_T *v );
-Var_T *magnet_name( Var_T *v );
-Var_T *magnet_setup( Var_T *v );
-Var_T *set_field( Var_T *v );
-Var_T *get_field( Var_T *v );
-Var_T *sweep_up( Var_T *v );
-Var_T *sweep_down( Var_T *v );
-Var_T *reset_field( Var_T *v );
-Var_T *magnet_B0( Var_T *v );
-Var_T *magnet_slope( Var_T *v );
-
-void hjs_fc_read_calibration( void );
-
-
 struct HJS_FC {
 	double B0V;             /* Field for DAC voltage of 0 V */
 	double slope;           /* field step for 1 V DAC voltage increment */
@@ -112,6 +90,28 @@ struct HJS_FC {
 
 
 extern struct HJS_FC hjs_fc;
+
+
+/* Exported functions */
+
+int hjs_fc_init_hook( void );
+int hjs_fc_test_hook( void );
+int hjs_fc_exp_hook( void );
+void hjs_fc_exit_hook( void );
+void hjs_fc_child_exit_hook( void );
+
+Var_T *magnet_calibration_file( Var_T *v );
+Var_T *magnet_name( Var_T *v );
+Var_T *magnet_setup( Var_T *v );
+Var_T *set_field( Var_T *v );
+Var_T *get_field( Var_T *v );
+Var_T *sweep_up( Var_T *v );
+Var_T *sweep_down( Var_T *v );
+Var_T *reset_field( Var_T *v );
+Var_T *magnet_B0( Var_T *v );
+Var_T *magnet_slope( Var_T *v );
+
+void hjs_fc_read_calibration( void );
 
 
 /*

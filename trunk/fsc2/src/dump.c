@@ -94,7 +94,7 @@ void DumpStack( void *crash_address )
 
 	/* Don't do anything on a machine with a non-Intel processor */
 
-	if ( ! Internals.is_linux_i386 )
+	if ( ! Fsc2_Internals.is_linux_i386 )
 		return;
 
 	/* Childs death signal isn't needed anymore */
@@ -143,7 +143,7 @@ void DumpStack( void *crash_address )
 		close( pipe_fd[ DUMP_CHILD_READ ] );
 		close( pipe_fd[ DUMP_CHILD_WRITE ] );
 
-		if ( Internals.cmdline_flags & DO_CHECK )
+		if ( Fsc2_Internals.cmdline_flags & DO_CHECK )
 			execl( ADDR2LINE, ADDR2LINE, "-C", "-f", "-e", srcdir "fsc2",
 				   NULL );
 		else

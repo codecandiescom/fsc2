@@ -32,7 +32,7 @@
 const char device_name[ ]  = DEVICE_NAME;
 const char generic_type[ ] = DEVICE_TYPE;
 
-LECROY9400 lecroy9400;
+LECROY9400_T lecroy9400;
 
 const char *LECROY9400_Channel_Names[ 9 ] = { "CH1", "CH2", "MEM_C", "MEM_D",
 											  "FUNC_E", "FUNC_F", "LINE",
@@ -104,7 +104,7 @@ long ml[ 21 ] = { 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000, 25000,
 bool lecroy9400_IN_SETUP = UNSET;
 
 
-static LECROY9400 lecroy9400_stored;
+static LECROY9400_T lecroy9400_stored;
 
 static Var_T *get_curve( Var_T *v, bool use_cursor );
 
@@ -322,7 +322,7 @@ Var_T *digitizer_timebase( Var_T *v )
 {
 	double timebase;
 	int TB = -1;
-	unsigned int i;
+	size_t i;
 	char *t;
 
 
@@ -369,7 +369,7 @@ Var_T *digitizer_timebase( Var_T *v )
 
 	/* Pick the allowed timebase nearest to the user supplied value */
 
-	for ( i = 0; i < TB_ENTRIES - 1; i++ )
+	for ( i = 0; i < NUM_ELEMS( tb ) - 1; i++ )
 		if ( timebase >= tb[ i ] && timebase <= tb[ i + 1 ] )
 		{
 			TB = i +
@@ -398,7 +398,7 @@ Var_T *digitizer_timebase( Var_T *v )
 		}
 		else
 		{
-		    TB = TB_ENTRIES - 1;
+		    TB = NUM_ELEMS( tb ) - 1;
 			print( WARN, "Timebase of %s is too large, using %s instead.\n",
 				   t, lecroy9400_ptime( tb[ TB ] ) );
 		}
@@ -602,7 +602,7 @@ Var_T *digitizer_averaging( Var_T *v )
 	i = 0;
 	while ( 1 )
 	{
-		if ( i >= ( int ) NA_ENTRIES )
+		if ( i >= ( int ) NUM_ELEMS( na ) )
 		{
 			print( FATAL, "Number of averages (%ld) too large.\n", num_avg );
 			THROW( EXCEPTION );
@@ -646,7 +646,8 @@ Var_T *digitizer_averaging( Var_T *v )
 				THROW( EXCEPTION );
 			}
 
-			if ( FSC2_MODE != EXPERIMENT && rec_len > ml[  ML_ENTRIES - 1 ] )
+			if ( FSC2_MODE != EXPERIMENT &&
+				 rec_len > ml[ NUM_ELEMS( ml ) - 1 ] )
 			{
 				print( FATAL, "Record length %ld too long.\n",
 					   rec_len );

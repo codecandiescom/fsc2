@@ -95,8 +95,8 @@ static int controller;                 /* device number assigned to
 										  controller                      */
 static int timeout;                    /* stores actual timeout period    */
 static FILE *gpib_log;                 /* file pointer of GPIB log file   */
-static GPIB_DEV *gpib_dev_list = NULL; /* list of symbolic names of
-										  devices etc.                    */
+static GPIB_Dev_T *gpib_dev_list = NULL; /* list of symbolic names of
+										    devices etc.                  */
 
 
 /*-------------------------------------------------------------------------*/
@@ -121,7 +121,7 @@ static GPIB_DEV *gpib_dev_list = NULL; /* list of symbolic names of
 
 int gpib_init( const char *log_file_name, int log_level )
 {
-	GPIB_DEV *cur_dev;
+	GPIB_Dev_T *cur_dev;
 
 
 	if ( gpib_is_active )
@@ -238,7 +238,7 @@ static int gpib_init_controller( void )
 
 int gpib_shutdown( void )
 {
-	GPIB_DEV *cur_dev;
+	GPIB_Dev_T *cur_dev;
 
 
     TEST_BUS_STATE;
@@ -346,7 +346,7 @@ static void gpib_init_log( const char *log_file_name )
 
 int gpib_init_device( const char *device_name, int *dev )
 {
-	GPIB_DEV *cur_dev;
+	GPIB_Dev_T *cur_dev;
 
 
     if ( ! gpib_is_active && strcmp( device_name, CONTROLLER ) )
@@ -359,7 +359,7 @@ int gpib_init_device( const char *device_name, int *dev )
 
 	if ( gpib_dev_list == NULL )
 	{
-		gpib_dev_list = cur_dev = GPIB_DEV_P T_malloc( sizeof( GPIB_DEV ) );
+		gpib_dev_list = cur_dev = GPIB_DEV_P T_malloc( sizeof *cur_dev );
 		cur_dev->prev = NULL;
 	}
 	else
@@ -368,7 +368,7 @@ int gpib_init_device( const char *device_name, int *dev )
 			  cur_dev = cur_dev->next )
 			/* empty */ ;
 
-		cur_dev->next = GPIB_DEV_P T_malloc( sizeof( GPIB_DEV ) );
+		cur_dev->next = GPIB_DEV_P T_malloc( sizeof *cur_dev->next );
 		cur_dev->next->prev = cur_dev;
 		cur_dev = cur_dev->next;
 	}
@@ -1007,7 +1007,7 @@ static void gpib_log_function_end( const char *function,
 
 static char *gpib_get_dev_name( int device )
 {
-	GPIB_DEV *cur_dev = gpib_dev_list;
+	GPIB_Dev_T *cur_dev = gpib_dev_list;
 
 
 	while ( cur_dev != NULL && cur_dev->number != device )

@@ -32,10 +32,8 @@
 const char device_name[ ]  = DEVICE_NAME;
 const char generic_type[ ] = DEVICE_TYPE;
 
-bool hfs9000_is_needed = UNSET;
-HFS9000 hfs9000;
-Pulse_T *hfs9000_Pulses = NULL;
-bool hfs9000_IN_SETUP = UNSET;
+
+HFS9000_T hfs9000;
 
 
 /*----------------------------------------------------------------------
@@ -58,10 +56,13 @@ int hfs9000_init_hook( void )
 	/* We have to set up the global structure for the pulser, especially the
 	   pointers for the functions that will get called from pulser.c */
 
+	hfs9000.is_needed      = UNSET;
+	hfs9000.in_setup       = UNSET;
 	hfs9000.needs_update   = UNSET;
 	hfs9000.is_running     = SET;
 	hfs9000.keep_all       = UNSET;
 	hfs9000.stop_on_update = SET;
+	hfs9000.pulses         = NULL;
 
 	Pulser_Struct.set_timebase = hfs9000_store_timebase;
 
@@ -151,7 +152,7 @@ int hfs9000_init_hook( void )
 		hfs9000.function[ i ].is_low_level = UNSET;
 	}
 
-	hfs9000_is_needed = SET;
+	hfs9000.is_needed = SET;
 
 	return 1;
 }
@@ -162,9 +163,9 @@ int hfs9000_init_hook( void )
 
 int hfs9000_test_hook( void )
 {
-	if ( hfs9000_Pulses == NULL )
+	if ( hfs9000.pulses == NULL )
 	{
-		hfs9000_is_needed = UNSET;
+		hfs9000.is_needed = UNSET;
 		print( WARN, "Driver loaded but no pulses are defined.\n" );
 		return 1;
 	}
@@ -174,9 +175,9 @@ int hfs9000_test_hook( void )
 
 	TRY
 	{
-		hfs9000_IN_SETUP = SET;
+		hfs9000.in_setup = SET;
 		hfs9000_init_setup( );
-		hfs9000_IN_SETUP = UNSET;
+		hfs9000.in_setup = UNSET;
 		TRY_SUCCESS;
 	}
 	OTHERWISE
@@ -193,7 +194,7 @@ int hfs9000_test_hook( void )
 			hfs9000.show_file = NULL;
 		}
 
-		hfs9000_IN_SETUP = UNSET;
+		hfs9000.in_setup = UNSET;
 		RETHROW( );
 	}
 
@@ -230,7 +231,7 @@ int hfs9000_end_of_test_hook( void )
 		hfs9000.show_file = NULL;
 	}
 
-	if ( ! hfs9000_is_needed )
+	if ( ! hfs9000.is_needed )
 		return 1;
 
 	/* First we have to reset the internal representation back to its initial
@@ -254,7 +255,7 @@ int hfs9000_exp_hook( void )
 	int i;
 
 
-	if ( ! hfs9000_is_needed )
+	if ( ! hfs9000.is_needed )
 		return 1;
 
 	/* Initialize the device */
@@ -299,7 +300,7 @@ int hfs9000_end_of_exp_hook( void )
 	const char *cmd = "FPAN:MESS \"\"\n";
 
 
-	if ( ! hfs9000_is_needed )
+	if ( ! hfs9000.is_needed )
 		return 1;
 
 	gpib_write( hfs9000.device, cmd, strlen( cmd ) );
@@ -319,18 +320,18 @@ void hfs9000_exit_hook( void )
 	int i;
 
 
-	if ( ! hfs9000_is_needed )
+	if ( ! hfs9000.is_needed )
 		return;
 
 	/* Free all the memory allocated within the module */
 
-	for ( p = hfs9000_Pulses; p != NULL; p = np )
+	for ( p = hfs9000.pulses; p != NULL; p = np )
 	{
 		np = p->next;
 		T_free( p );
 	}
 
-	hfs9000_Pulses = NULL;
+	hfs9000.pulses = NULL;
 
 	for ( i = 0; i <= MAX_CHANNEL; i++ )
 		if ( hfs9000.channel[ i ].function != NULL &&
@@ -607,7 +608,7 @@ Var_T *pulser_channel_state( Var_T *v )
 
 Var_T *pulser_update( UNUSED_ARG Var_T *v )
 {
-	if ( ! hfs9000_is_needed )
+	if ( ! hfs9000.is_needed )
 		return vars_push( INT_VAR, 1L );
 
 	/* Send all changes to the pulser */
@@ -632,14 +633,14 @@ Var_T *pulser_shift( Var_T *v )
 	Pulse_T *p;
 
 
-	if ( ! hfs9000_is_needed )
+	if ( ! hfs9000.is_needed )
 		return vars_push( INT_VAR, 1L );
 
 	/* An empty pulse list means that we have to shift all active pulses that
 	   have a position change time value set */
 
 	if ( v == NULL )
-		for ( p = hfs9000_Pulses; p != NULL; p = p->next )
+		for ( p = hfs9000.pulses; p != NULL; p = p->next )
 			if ( p->num >= 0 && p->is_active && p->is_dpos )
 				pulser_shift( vars_push( INT_VAR, p->num ) );
 
@@ -704,14 +705,14 @@ Var_T *pulser_increment( Var_T *v )
 	Pulse_T *p;
 
 
-	if ( ! hfs9000_is_needed )
+	if ( ! hfs9000.is_needed )
 		return vars_push( INT_VAR, 1L );
 
 	/* An empty pulse list means that we have to increment all active pulses
 	   that have a length change time value set */
 
 	if ( v == NULL )
-		for ( p = hfs9000_Pulses; p != NULL; p = p->next )
+		for ( p = hfs9000.pulses; p != NULL; p = p->next )
 			if ( p->num >= 0 && p->is_active && p->is_dlen )
 				pulser_increment( vars_push( INT_VAR, p->num ) );
 
@@ -790,7 +791,7 @@ Var_T *pulser_pulse_reset( Var_T *v )
 	Pulse_T *p;
 
 
-	if ( ! hfs9000_is_needed )
+	if ( ! hfs9000.is_needed )
 		return vars_push( INT_VAR, 1L );
 
 	/* An empty pulse list means that we have to reset all pulses (even the
@@ -798,7 +799,7 @@ Var_T *pulser_pulse_reset( Var_T *v )
 
 	if ( v == NULL )
 	{
-		for ( p = hfs9000_Pulses; p != NULL; p = p->next )
+		for ( p = hfs9000.pulses; p != NULL; p = p->next )
 			if ( p->num >= 0 )
 				pulser_pulse_reset( vars_push( INT_VAR, p->num ) );
 	}

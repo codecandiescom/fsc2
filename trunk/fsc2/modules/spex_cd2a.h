@@ -112,7 +112,7 @@
    far as applicable) in monochromator units, i.e. without correction
    according to the offset value also stored in the structure */
 
-typedef struct {
+struct Spex_CD2A {
 	bool is_needed;
 	bool is_open;
 	int method;
@@ -157,9 +157,9 @@ typedef struct {
 
     bool fatal_error;                /* set on exceptions etc. */
 
-} SPEX_CD2A;
+} ;
 
-extern SPEX_CD2A spex_cd2a;
+extern struct Spex_CD2A spex_cd2a;
 
 
 /* Functions from spex_cd2a.c */

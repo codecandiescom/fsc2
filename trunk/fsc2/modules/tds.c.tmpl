@@ -584,7 +584,7 @@ Var_T *digitizer_timebase( Var_T *v )
 {
 	double timebase;
 	int TB = -1;
-	unsigned int i;
+	size_t i;
 	char *t;
 
 
@@ -622,7 +622,7 @@ Var_T *digitizer_timebase( Var_T *v )
 
 	/* Pick the allowed timebase nearest to the user supplied value */
 
-	for ( i = 0; i < TB_ENTRIES - 1; i++ )
+	for ( i = 0; i < NUM_ELEMS( tb ) - 1; i++ )
 		if ( timebase >= tb[ i ] && timebase <= tb[ i + 1 ] )
 		{
 			TB = i +
@@ -651,7 +651,7 @@ Var_T *digitizer_timebase( Var_T *v )
 		}
 		else
 		{
-		    TB = TB_ENTRIES - 1;
+		    TB = NUM_ELEMS( tb ) - 1;
 			print( WARN, "Timebase of %s is too large, using %s instead.\n",
 				   t, tds_tmpl_ptime( tb[ TB ] ) );
 		}

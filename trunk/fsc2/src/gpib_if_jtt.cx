@@ -90,7 +90,7 @@ static int gpib_is_active = 0;      /* flag, set after initialisation of bus */
 static int controller;              /* device number assigned to controller  */
 static int timeout;                 /* stores actual timeout period          */
 static FILE *gpib_log;              /* file pointer of GPIB log file         */
-static GPIB_DEV *gpib_dev_list = NULL;
+static GPIB_Dev_T *gpib_dev_list = NULL;
                                    /* list of symbolic names of devices etc. */
 static char gpib_error_buffer[ GPIB_ERROR_BUFFER_LENGTH ];
 
@@ -117,7 +117,7 @@ static char gpib_error_buffer[ GPIB_ERROR_BUFFER_LENGTH ];
 
 int gpib_init( const char *log_file_name, int log_level )
 {
-	GPIB_DEV *cur_dev;
+	GPIB_Dev_T *cur_dev;
 
 
 	if ( gpib_is_active )
@@ -221,7 +221,7 @@ static int gpib_init_controller( void )
 
 int gpib_shutdown( void )
 {
-	GPIB_DEV *cur_dev;
+	GPIB_Dev_T *cur_dev;
 
 
     TEST_BUS_STATE;
@@ -328,7 +328,7 @@ static void gpib_init_log( const char *log_file_name )
 
 int gpib_init_device( const char *device_name, int *dev )
 {
-	GPIB_DEV *cur_dev;
+	GPIB_Dev_T *cur_dev;
 
 
     if ( ! gpib_is_active && strcmp( device_name, CONTROLLER ) )
@@ -341,7 +341,7 @@ int gpib_init_device( const char *device_name, int *dev )
 
 	if ( gpib_dev_list == NULL )
 	{
-		gpib_dev_list = cur_dev = GPIB_DEV_P T_malloc( sizeof( GPIB_DEV ) );
+		gpib_dev_list = cur_dev = GPIB_DEV_P T_malloc( sizeof *cur_dev );
 		cur_dev->prev = NULL;
 	}
 	else
@@ -350,7 +350,7 @@ int gpib_init_device( const char *device_name, int *dev )
 			  cur_dev = cur_dev->next )
 			/* empty */ ;
 
-		cur_dev->next = GPIB_DEV_P T_malloc( sizeof( GPIB_DEV ) );
+		cur_dev->next = GPIB_DEV_P T_malloc( sizeof *cur_dev->next );
 		cur_dev->next->prev = cur_dev;
 		cur_dev = cur_dev->next;
 	}
@@ -628,7 +628,7 @@ int gpib_wait( int device, int mask, int *status )
 	if ( ll > LL_ERR )
 	{
 		gpib_log_function_start( "gpib_wait", dev_name );
-		seteuid( Internals.EUID );
+		seteuid( Fsc2_Internals.EUID );
 		fprintf( gpib_log, "wait mask = 0x0%X\n", mask );
 		if ( mask & ~( GPIB_TIMO | GPIB_END | GPIB_RQS | GPIB_CMPL ) )
 			fprintf( gpib_log, "=> Setting mask to 0x%X <=\n",
@@ -651,7 +651,7 @@ int gpib_wait( int device, int mask, int *status )
 
 	if ( ll > LL_ERR )
 	{
-		seteuid( Internals.EUID );
+		seteuid( Fsc2_Internals.EUID );
 		fprintf( gpib_log, "wait return status = 0x0%X\n", gpib_status );
 		seteuid( getuid( ) );
 	}
@@ -1027,7 +1027,7 @@ static void gpib_log_function_end( const char *function,
 
 static char *gpib_get_dev_name( int device )
 {
-	GPIB_DEV *cur_dev = gpib_dev_list;
+	GPIB_Dev_T *cur_dev = gpib_dev_list;
 
 
 	while ( cur_dev != NULL && cur_dev->number != device )

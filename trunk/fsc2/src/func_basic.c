@@ -43,7 +43,7 @@ Var_T *f_abort( UNUSED_ARG Var_T *v )
 	char *str;
 
 
-	if ( Internals.mode != TEST )
+	if ( Fsc2_Internals.mode != TEST )
 	{
 		str = get_string( "Exit due to call of abort() in\n"
 						  "%s at line %ld.", EDL.Fname, EDL.Lc );

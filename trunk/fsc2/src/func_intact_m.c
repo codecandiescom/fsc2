@@ -76,7 +76,7 @@ Var_T *f_mcreate( Var_T *var )
 		len += strlen( lv->val.sptr ) + 1;
 	}
 
-	if ( Internals.I_am == CHILD )
+	if ( Fsc2_Internals.I_am == CHILD )
 		return f_mcreate_child( v, len, num_strs );
 
 	/* Now that we're done with checking the parameters we can create the new
@@ -247,13 +247,15 @@ Var_T *f_mdelete( Var_T *v )
 
 	do
 	{
-		if ( Internals.I_am == CHILD )
+		if ( Fsc2_Internals.I_am == CHILD )
 			f_mdelete_child( v );
 		else
 			f_mdelete_parent( v );
 	} while ( ( v = vars_pop( v ) ) != NULL );
 
-	if ( Internals.I_am == CHILD || Internals.mode == TEST || ! Toolbox )
+	if ( Fsc2_Internals.I_am == CHILD ||
+		 Fsc2_Internals.mode == TEST  ||
+		 ! Toolbox )
 		return vars_push( INT_VAR, 1L );
 
 	/* Redraw the tool box without the menu */
@@ -357,7 +359,7 @@ static void f_mdelete_parent( Var_T *v )
 
 	/* Delete the menu object if its drawn */
 
-	if ( Internals.mode != TEST && io->self )
+	if ( Fsc2_Internals.mode != TEST && io->self )
 	{
 		fl_delete_object( io->self );
 		fl_free_object( io->self );
@@ -405,7 +407,7 @@ Var_T *f_mchoice( Var_T *v )
 	/* Again, the child doesn't know about the menu, so it got to ask the
 	   parent process */
 
-	if ( Internals.I_am == CHILD )
+	if ( Fsc2_Internals.I_am == CHILD )
 		return f_mchoice_child( v );
 
 	/* No tool box -> no menus -> no menu item to set or get... */
@@ -453,7 +455,7 @@ Var_T *f_mchoice( Var_T *v )
 
 	if ( select_item > io->num_items )
 	{
-		if ( Internals.mode == TEST )
+		if ( Fsc2_Internals.mode == TEST )
 		{
 			print( FATAL, "Invalid menu item number %ld, there are only %ld "
 				   "items.\n", io->num_items );
@@ -468,7 +470,7 @@ Var_T *f_mchoice( Var_T *v )
 	/* If this isn't a test run set the new menu item */
 
 	io->state = select_item;
-	if ( Internals.mode != TEST )
+	if ( Fsc2_Internals.mode != TEST )
 		fl_set_choice( io->self, select_item );
 
 	too_many_arguments( v );
@@ -590,7 +592,7 @@ Var_T *f_mchanged( Var_T *v )
 	/* Again, the child doesn't know about the menu, so it got to ask the
 	   parent process */
 
-	if ( Internals.I_am == CHILD )
+	if ( Fsc2_Internals.I_am == CHILD )
 		return f_mchanged_child( v );
 
 	/* No tool box -> no menus -> no menu item to set or get... */

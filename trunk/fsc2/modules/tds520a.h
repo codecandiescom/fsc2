@@ -74,7 +74,7 @@
    area between the pair of cursors */
 
 typedef struct Window Window_T;
-typedef struct TDS520A TDS520A;
+typedef struct TDS520A TDS520A_T;
 
 
 struct Window {
@@ -148,7 +148,7 @@ enum {
 
 #ifdef TDS520A_MAIN
 
-TDS520A tds520a;
+TDS520A_T tds520a;
 const char *TDS520A_Channel_Names[ MAX_CHANNELS ] = {
 											 "CH1", "CH2", "CH3", "CH4",
 											 "MATH1", "MATH2", "MATH3",
@@ -180,8 +180,6 @@ static double tb[ ] = {                     500.0e-12,
 						  1.0,      2.0,      5.0,
 						 10.0 };
 
-#define TB_ENTRIES ( sizeof tb / sizeof tb[ 0 ] )
-
 /* Maximum and minimum sensitivity settings (in V) of the measurement
    channels */
 
@@ -190,7 +188,7 @@ static double max_sens = 1e-3,
 
 #else
 
-extern TDS520A tds520a;
+extern TDS520A_T tds520a;
 extern const char *TDS520A_Channel_Names[ MAX_CHANNELS ];
 extern const char *User_Channel_Names[ MAX_CHANNELS ];
 
@@ -237,7 +235,7 @@ Var_T *digitizer_command( Var_T *v );
 /* Declaration of internally used functions */
 
 const char *tds520a_ptime( double p_time );
-void tds520a_delete_windows( TDS520A *s );
+void tds520a_delete_windows( TDS520A_T *s );
 void tds520a_do_pre_exp_checks( void );
 void tds520a_window_checks( Window_T *w );
 void tds520a_set_tracking( Window_T *w );
@@ -245,7 +243,7 @@ void tds520a_set_meas_window( Window_T *w );
 void tds520a_set_curve_window( Window_T *w );
 void tds520a_set_window( Window_T *w );
 long tds520a_translate_channel( int dir, long channel, bool flag );
-void tds520a_store_state( TDS520A *dest, TDS520A *src );
+void tds520a_store_state( TDS520A_T *dest, TDS520A_T *src );
 void tds520a_state_check( double timebase, long rec_len, double trig_pos );
 Window_T *tds520a_get_window_by_number( long win_number );
 

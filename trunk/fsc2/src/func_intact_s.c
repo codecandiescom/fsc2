@@ -154,7 +154,7 @@ Var_T *f_screate( Var_T *var )
 	/* The child process has to pass the parameter to the parent and ask it to
 	   create the slider */
 
-	if ( Internals.I_am == CHILD )
+	if ( Fsc2_Internals.I_am == CHILD )
 		return f_screate_child( v, type, start_val, end_val, step );
 
 	if ( ( v = vars_pop( v ) ) != NULL )
@@ -384,13 +384,15 @@ Var_T *f_sdelete( Var_T *v )
 
 	do
 	{
-		if ( Internals.I_am == CHILD )
+		if ( Fsc2_Internals.I_am == CHILD )
 			f_sdelete_child( v );
 		else
 			f_sdelete_parent( v );
 	} while ( ( v = vars_pop( v ) ) != NULL );
 
-	if ( Internals.I_am == CHILD || Internals.mode == TEST || ! Toolbox )
+	if ( Fsc2_Internals.I_am == CHILD ||
+		 Fsc2_Internals.mode == TEST  ||
+		 ! Toolbox )
 		return vars_push( INT_VAR, 1L );
 
 	/* Redraw the tool box without the slider */
@@ -492,7 +494,7 @@ static void f_sdelete_parent( Var_T *v )
 
 	/* Delete the slider object if its drawn */
 
-	if ( Internals.mode != TEST && io->self )
+	if ( Fsc2_Internals.mode != TEST && io->self )
 	{
 		fl_delete_object( io->self );
 		fl_free_object( io->self );
@@ -537,7 +539,7 @@ Var_T *f_svalue( Var_T *v )
 	/* Again, the child has to pass the arguments to the parent and ask it
 	   to set or return the slider value */
 
-	if ( Internals.I_am == CHILD )
+	if ( Fsc2_Internals.I_am == CHILD )
 		return f_svalue_child( v );
 
 	/* No tool box -> no sliders... */
@@ -592,7 +594,7 @@ Var_T *f_svalue( Var_T *v )
 		io->value = lrnd( ( io->value - io->start_val ) / io->step )
 			        * io->step + io->start_val;
 
-	if ( Internals.mode != TEST )
+	if ( Fsc2_Internals.mode != TEST )
 		fl_set_slider_value( io->self, io->value );
 
 	too_many_arguments( v );
@@ -707,7 +709,7 @@ Var_T *f_schanged( Var_T *v )
 	/* Again, the child has to pass the arguments to the parent and ask it
 	   if the slider value did change */
 
-	if ( Internals.I_am == CHILD )
+	if ( Fsc2_Internals.I_am == CHILD )
 		return f_schanged_child( v );
 
 	/* No tool box -> no sliders... */

@@ -24,7 +24,7 @@
 #if ! defined FSC2_ASSERT_HEADER
 #define FSC2_ASSERT_HEADER
 
-typedef struct Fsc2_Assert Fsc2_Assert;
+typedef struct Fsc2_Assert Fsc2_Assert_T;
 
 struct Fsc2_Assert {
 	const char *expression;

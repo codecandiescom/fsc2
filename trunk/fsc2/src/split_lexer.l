@@ -174,10 +174,10 @@ bool scan_main( const char *name, FILE *fp )
 
 	/* Make the lexer read its input from the output of fsc2_clean */
 
-	Internals.fsc2_clean_died = UNSET;
+	Fsc2_Internals.fsc2_clean_died = UNSET;
 	if ( ( splitin = filter_edl( name, fp ) ) == NULL )
 	{
-		Internals.fsc2_clean_died = SET;
+		Fsc2_Internals.fsc2_clean_died = SET;
 		return FAIL;
 	}
 
@@ -190,10 +190,10 @@ bool scan_main( const char *name, FILE *fp )
 
 	fclose( splitin );
 
-	while ( ! Internals.fsc2_clean_died )
+	while ( ! Fsc2_Internals.fsc2_clean_died )
 		fsc2_usleep( 10000, UNSET );
 
-	if ( split_error == OK && ! Internals.fsc2_clean_status_ok )
+	if ( split_error == OK && ! Fsc2_Internals.fsc2_clean_status_ok )
 	{
 		print( FATAL, "Parsing the EDL script '%s' failed due to some "
 			   "internal problems.\n", name );
@@ -205,9 +205,9 @@ bool scan_main( const char *name, FILE *fp )
 
 	YY_FLUSH_BUFFER;
 
-	if ( split_error != OK && Internals.cmdline_flags & ICONIFIED_RUN )
+	if ( split_error != OK && Fsc2_Internals.cmdline_flags & ICONIFIED_RUN )
 	{
-		Internals.cmdline_flags &= ~ ICONIFIED_RUN;
+		Fsc2_Internals.cmdline_flags &= ~ ICONIFIED_RUN;
 		fl_raise_form( GUI.main_form->fsc2 );
 		XMapWindow( fl_get_display( ), GUI.main_form->fsc2->window );
 	}

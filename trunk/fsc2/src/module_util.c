@@ -33,7 +33,7 @@
 
 int get_mode( void )
 {
-	return Internals.mode;
+	return Fsc2_Internals.mode;
 }
 
 
@@ -44,7 +44,8 @@ int get_mode( void )
 
 int get_check_state( void )
 {
-	return Internals.cmdline_flags & ( DO_CHECK | TEST_ONLY | NO_GUI_RUN );
+	return Fsc2_Internals.cmdline_flags &
+		   ( DO_CHECK | TEST_ONLY | NO_GUI_RUN );
 }
 
 
@@ -55,7 +56,7 @@ int get_check_state( void )
 
 int get_batch_state( void )
 {
-	return Internals.cmdline_flags & BATCH_MODE;
+	return Fsc2_Internals.cmdline_flags & BATCH_MODE;
 }
 
 
@@ -67,7 +68,7 @@ int get_batch_state( void )
 
 bool check_user_request( void )
 {
-	if ( Internals.I_am == PARENT )
+	if ( Fsc2_Internals.I_am == PARENT )
 		fl_check_only_forms( );
 	return  EDL.do_quit && EDL.react_to_do_quit;
 }
@@ -80,7 +81,7 @@ bool check_user_request( void )
 
 void stop_on_user_request( void )
 {
-	if ( Internals.I_am == PARENT )
+	if ( Fsc2_Internals.I_am == PARENT )
 		fl_check_only_forms( );
 	if ( EDL.do_quit && EDL.react_to_do_quit )
 		THROW( USER_BREAK_EXCEPTION );
@@ -166,7 +167,7 @@ long get_strict_long( Var_T *v, const char *snippet )
 
 	if ( v->type == FLOAT_VAR )
 	{
-		if ( Internals.mode == EXPERIMENT )
+		if ( Fsc2_Internals.mode == EXPERIMENT )
 		{
 			if ( snippet != NULL )
 				print( SEVERE, "Floating point number used as %s, "
@@ -208,7 +209,7 @@ bool get_boolean( Var_T *v )
 
 	if ( v->type == FLOAT_VAR )
 	{
-		if ( Internals.mode != EXPERIMENT )
+		if ( Fsc2_Internals.mode != EXPERIMENT )
 		{
 			print( FATAL, "Floating point number found where boolean value "
 				   "was expected.\n" );
@@ -635,7 +636,7 @@ int fsc2_fclose( FILE *stream )
 
 const char *fsc2_config_dir( void )
 {
-	return ( Internals.cmdline_flags & DO_CHECK ) ? "../config" : libdir;
+	return ( Fsc2_Internals.cmdline_flags & DO_CHECK ) ? "../config" : libdir;
 }
 
 

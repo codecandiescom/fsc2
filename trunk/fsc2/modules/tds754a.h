@@ -171,8 +171,6 @@ static double tb[ ] = {                     500.0e-12,
 						  1.0,      2.0,      5.0,
 						 10.0 };
 
-#define TB_ENTRIES ( sizeof tb / sizeof tb[ 0 ] )
-
 /* Maximum and minimum sensitivity settings (in V) for the measurement
    channels.
    Take care: The minimum sensitivity of 10 V only works with 1 M Ohm input

@@ -34,17 +34,17 @@ static const char *handle_input( const char *content, const char *label );
 
 void show_message( const char *str )
 {
-	if ( Internals.I_am == PARENT )
+	if ( Fsc2_Internals.I_am == PARENT )
 	{
-		if ( Internals.cmdline_flags & DO_CHECK ||
-			 Internals.cmdline_flags & BATCH_MODE )
+		if ( Fsc2_Internals.cmdline_flags & DO_CHECK ||
+			 Fsc2_Internals.cmdline_flags & BATCH_MODE )
 			fprintf( stdout, "%s\n", str );
 		else
 		{
 			switch_off_special_cursors( );
-			Internals.state = STATE_WAITING;
+			Fsc2_Internals.state = STATE_WAITING;
 			fl_show_messages( str );
-			Internals.state = STATE_RUNNING;
+			Fsc2_Internals.state = STATE_RUNNING;
 		}
 	}
 	else
@@ -66,7 +66,7 @@ void show_alert( const char *str )
 	int i;
 
 
-	if ( Internals.I_am == PARENT )
+	if ( Fsc2_Internals.I_am == PARENT )
 	{
 		strc = T_strdup( str );
 		strs[ 0 ] = strc;
@@ -81,8 +81,8 @@ void show_alert( const char *str )
 		else
 			strs[ 1 ] = strs[ 2 ] = NULL;
 
-		if ( Internals.cmdline_flags & DO_CHECK ||
-			 Internals.cmdline_flags & BATCH_MODE )
+		if ( Fsc2_Internals.cmdline_flags & DO_CHECK ||
+			 Fsc2_Internals.cmdline_flags & BATCH_MODE )
 		{
 			for ( i = 0; i < 3 && strs[ i ] != NULL; i++ )
 				fprintf( stdout, "%s", strs[ i ] );
@@ -91,9 +91,9 @@ void show_alert( const char *str )
 		else
 		{
 			switch_off_special_cursors( );
-			Internals.state = STATE_WAITING;
+			Fsc2_Internals.state = STATE_WAITING;
 			fl_show_alert( strs[ 0 ], strs[ 1 ], strs[ 2 ], 1 );
-			Internals.state = STATE_RUNNING;
+			Fsc2_Internals.state = STATE_RUNNING;
 		}
 
 		T_free( strc );
@@ -121,10 +121,10 @@ int show_choices( const char *text, int numb, const char *b1, const char *b2,
 {
 	int ret;
 
-	if ( Internals.I_am == PARENT )
+	if ( Fsc2_Internals.I_am == PARENT )
 	{
-		if ( Internals.cmdline_flags & DO_CHECK ||
-			 ( Internals.cmdline_flags & BATCH_MODE && is_batch ) )
+		if ( Fsc2_Internals.cmdline_flags & DO_CHECK ||
+			 ( Fsc2_Internals.cmdline_flags & BATCH_MODE && is_batch ) )
 		{
 			fprintf( stdout, "%s\n%s %s %s\n", text, b1, b2, b3 );
 			return def != 0 ? def : 1;
@@ -132,9 +132,9 @@ int show_choices( const char *text, int numb, const char *b1, const char *b2,
 		else
 		{
 			switch_off_special_cursors( );
-			Internals.state = STATE_WAITING;
+			Fsc2_Internals.state = STATE_WAITING;
 			ret = fl_show_choices( text, numb, b1, b2, b3, def );
-			Internals.state = STATE_RUNNING;
+			Fsc2_Internals.state = STATE_RUNNING;
 			return ret;
 		}
 	}
@@ -165,12 +165,12 @@ const char *show_fselector( const char *message, const char *directory,
 	const char *ret = NULL;
 
 
-	if ( Internals.I_am == PARENT )
+	if ( Fsc2_Internals.I_am == PARENT )
 	{
 		switch_off_special_cursors( );
-		Internals.state = STATE_WAITING;
+		Fsc2_Internals.state = STATE_WAITING;
 		ret = fsc2_show_fselector( message, directory, pattern, def );
-		Internals.state = STATE_RUNNING;
+		Fsc2_Internals.state = STATE_RUNNING;
 		return ret;
 	}
 	else
@@ -190,7 +190,7 @@ const char *show_input( const char *content, const char *label )
 {
 	char *ret = NULL;
 
-	if ( Internals.I_am == PARENT )
+	if ( Fsc2_Internals.I_am == PARENT )
 	{
 		switch_off_special_cursors( );
 		return handle_input( content, label );
@@ -222,12 +222,12 @@ static const char *handle_input( const char *content, const char *label )
 				  FL_PLACE_MOUSE | FL_FREE_SIZE, FL_FULLBORDER,
 				  "fsc2: Comment editor" );
 
-	Internals.state = STATE_WAITING;
+	Fsc2_Internals.state = STATE_WAITING;
 
 	while ( fl_do_forms( ) != GUI.input_form->comm_done )
 		/* empty */ ;
 
-	Internals.state = STATE_RUNNING;
+	Fsc2_Internals.state = STATE_RUNNING;
 
 	if ( fl_form_is_visible( GUI.input_form->input_form ) )
 		fl_hide_form( GUI.input_form->input_form );
@@ -243,7 +243,7 @@ static const char *handle_input( const char *content, const char *label )
 
 bool exp_layout( char *buffer, ptrdiff_t len )
 {
-	if ( Internals.I_am == CHILD )
+	if ( Fsc2_Internals.I_am == CHILD )
 	{
 		if ( ! writer( C_LAYOUT, len, buffer ) )
 		{
@@ -304,7 +304,7 @@ bool exp_layout( char *buffer, ptrdiff_t len )
 
 long *exp_bcreate( char *buffer, ptrdiff_t len )
 {
-	if ( Internals.I_am == CHILD )
+	if ( Fsc2_Internals.I_am == CHILD )
 	{
 		long *result;
 
@@ -391,7 +391,7 @@ long *exp_bcreate( char *buffer, ptrdiff_t len )
 
 bool exp_bdelete( char *buffer, ptrdiff_t len )
 {
-	if ( Internals.I_am == CHILD )
+	if ( Fsc2_Internals.I_am == CHILD )
 	{
 		if ( ! writer( C_BDELETE, len, buffer ) )
 		{
@@ -452,7 +452,7 @@ bool exp_bdelete( char *buffer, ptrdiff_t len )
 
 long *exp_bstate( char *buffer, ptrdiff_t len )
 {
-	if ( Internals.I_am == CHILD )
+	if ( Fsc2_Internals.I_am == CHILD )
 	{
 		long *result;
 
@@ -531,7 +531,7 @@ long *exp_bstate( char *buffer, ptrdiff_t len )
 
 long *exp_bchanged( char *buffer, ptrdiff_t len )
 {
-	if ( Internals.I_am == CHILD )
+	if ( Fsc2_Internals.I_am == CHILD )
 	{
 		long *result;
 
@@ -605,7 +605,7 @@ long *exp_bchanged( char *buffer, ptrdiff_t len )
 
 long *exp_screate( char *buffer, ptrdiff_t len )
 {
-	if ( Internals.I_am == CHILD )
+	if ( Fsc2_Internals.I_am == CHILD )
 	{
 		long *result;
 
@@ -694,7 +694,7 @@ long *exp_screate( char *buffer, ptrdiff_t len )
 
 bool exp_sdelete( char *buffer, ptrdiff_t len )
 {
-	if ( Internals.I_am == CHILD )
+	if ( Fsc2_Internals.I_am == CHILD )
 	{
 		if ( ! writer( C_SDELETE, len, buffer ) )
 		{
@@ -755,7 +755,7 @@ bool exp_sdelete( char *buffer, ptrdiff_t len )
 
 double *exp_sstate( char *buffer, ptrdiff_t len )
 {
-	if ( Internals.I_am == CHILD )
+	if ( Fsc2_Internals.I_am == CHILD )
 	{
 		double *result;
 
@@ -841,7 +841,7 @@ double *exp_sstate( char *buffer, ptrdiff_t len )
 
 long *exp_schanged( char *buffer, ptrdiff_t len )
 {
-	if ( Internals.I_am == CHILD )
+	if ( Fsc2_Internals.I_am == CHILD )
 	{
 		long *result;
 
@@ -915,7 +915,7 @@ long *exp_schanged( char *buffer, ptrdiff_t len )
 
 long *exp_icreate( char *buffer, ptrdiff_t len )
 {
-	if ( Internals.I_am == CHILD )
+	if ( Fsc2_Internals.I_am == CHILD )
 	{
 		long *result;
 
@@ -1028,7 +1028,7 @@ long *exp_icreate( char *buffer, ptrdiff_t len )
 
 bool exp_idelete( char *buffer, ptrdiff_t len )
 {
-	if ( Internals.I_am == CHILD )
+	if ( Fsc2_Internals.I_am == CHILD )
 	{
 		if ( ! writer( C_IDELETE, len, buffer ) )
 		{
@@ -1089,7 +1089,7 @@ bool exp_idelete( char *buffer, ptrdiff_t len )
 
 Input_Res_T *exp_istate( char *buffer, ptrdiff_t len )
 {
-	if ( Internals.I_am == CHILD )
+	if ( Fsc2_Internals.I_am == CHILD )
 	{
 		Input_Res_T *input_res;
 
@@ -1191,7 +1191,7 @@ Input_Res_T *exp_istate( char *buffer, ptrdiff_t len )
 
 long *exp_ichanged( char *buffer, ptrdiff_t len )
 {
-	if ( Internals.I_am == CHILD )
+	if ( Fsc2_Internals.I_am == CHILD )
 	{
 		long *res;
 
@@ -1264,7 +1264,7 @@ long *exp_ichanged( char *buffer, ptrdiff_t len )
 
 long *exp_mcreate( char *buffer, ptrdiff_t len )
 {
-	if ( Internals.I_am == CHILD )
+	if ( Fsc2_Internals.I_am == CHILD )
 	{
 		long *result;
 
@@ -1340,7 +1340,7 @@ long *exp_mcreate( char *buffer, ptrdiff_t len )
 
 bool exp_mdelete( char *buffer, ptrdiff_t len )
 {
-	if ( Internals.I_am == CHILD )
+	if ( Fsc2_Internals.I_am == CHILD )
 	{
 		if ( ! writer( C_MDELETE, len, buffer ) )
 		{
@@ -1399,7 +1399,7 @@ bool exp_mdelete( char *buffer, ptrdiff_t len )
 
 long *exp_mchoice( char *buffer, ptrdiff_t len )
 {
-	if ( Internals.I_am == CHILD )
+	if ( Fsc2_Internals.I_am == CHILD )
 	{
 		long *result;
 
@@ -1476,7 +1476,7 @@ long *exp_mchoice( char *buffer, ptrdiff_t len )
 
 long *exp_mchanged( char *buffer, ptrdiff_t len )
 {
-	if ( Internals.I_am == CHILD )
+	if ( Fsc2_Internals.I_am == CHILD )
 	{
 		long *result;
 
@@ -1547,7 +1547,7 @@ long *exp_mchanged( char *buffer, ptrdiff_t len )
 
 long *exp_tbchanged( char *buffer, ptrdiff_t len )
 {
-	if ( Internals.I_am == CHILD )
+	if ( Fsc2_Internals.I_am == CHILD )
 	{
 		long *result;
 
@@ -1625,7 +1625,7 @@ long *exp_tbchanged( char *buffer, ptrdiff_t len )
 
 long *exp_tbwait( char *buffer, ptrdiff_t len )
 {
-	if ( Internals.I_am == CHILD )
+	if ( Fsc2_Internals.I_am == CHILD )
 	{
 		long *result;
 
@@ -1713,7 +1713,7 @@ long *exp_tbwait( char *buffer, ptrdiff_t len )
 
 bool exp_objdel( char *buffer, ptrdiff_t len )
 {
-	if ( Internals.I_am == CHILD )
+	if ( Fsc2_Internals.I_am == CHILD )
 	{
 		if ( ! writer( C_ODELETE, len, buffer ) )
 		{
@@ -1774,7 +1774,7 @@ bool exp_objdel( char *buffer, ptrdiff_t len )
 
 bool exp_clabel( char *buffer, ptrdiff_t len )
 {
-	if ( Internals.I_am == CHILD )
+	if ( Fsc2_Internals.I_am == CHILD )
 	{
 		if ( ! writer( C_CLABEL, len, buffer ) )
 		{
@@ -1838,7 +1838,7 @@ bool exp_clabel( char *buffer, ptrdiff_t len )
 
 bool exp_xable( char *buffer, ptrdiff_t len )
 {
-	if ( Internals.I_am == CHILD )
+	if ( Fsc2_Internals.I_am == CHILD )
 	{
 		if ( ! writer( C_XABLE, len, buffer ) )
 		{
@@ -1902,7 +1902,7 @@ bool exp_xable( char *buffer, ptrdiff_t len )
 
 double *exp_getpos( char *buffer, ptrdiff_t len )
 {
-	if ( Internals.I_am == CHILD )
+	if ( Fsc2_Internals.I_am == CHILD )
 	{
 		double *result;
 

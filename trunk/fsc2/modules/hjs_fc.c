@@ -644,7 +644,7 @@ static void hjs_fc_init_with_measured_data( void )
 	size_t i;
 	double test_volts[ ] = { hjs_fc.dac_min_volts, 1.0, 2.0, 7.5,
 							 hjs_fc.dac_max_volts };
-	size_t num_test_data = 	sizeof test_volts / sizeof test_volts[ 0 ];
+	size_t num_test_data = NUM_ELEMS( test_volts );
 	double test_gauss[ num_test_data + 1 ];
 	double cur_volts;
 	double mini_step;

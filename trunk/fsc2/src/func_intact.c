@@ -91,7 +91,7 @@ void toolbox_create( long layout )
 	int h = 10;
 	int dummy;
 
-	if ( Internals.cmdline_flags & NO_GUI_RUN )
+	if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
 	{
 		print( FATAL, "Toolbox can't be used without a GUI.\n" );
 		THROW( EXCEPTION );
@@ -108,7 +108,7 @@ void toolbox_create( long layout )
 
 	if ( GUI.G_Funcs.size == LOW )
 	{
-		if ( ! ( Internals.cmdline_flags & TEST_ONLY ) )
+		if ( ! ( Fsc2_Internals.cmdline_flags & TEST_ONLY ) )
 			fl_get_string_dimension( FL_NORMAL_STYLE, GUI.toolboxFontSize,
 									 "1", 1, &dummy, &h );
 		h += 8;
@@ -139,7 +139,7 @@ void toolbox_create( long layout )
 	}
 	else
 	{
-		if ( ! ( Internals.cmdline_flags & TEST_ONLY ) )
+		if ( ! ( Fsc2_Internals.cmdline_flags & TEST_ONLY ) )
 			fl_get_string_dimension( FL_NORMAL_STYLE, GUI.toolboxFontSize,
 									 "1", 1, &dummy, &h );
 		h += 8;
@@ -177,7 +177,7 @@ void toolbox_create( long layout )
 
 void toolbox_delete( void )
 {
-	if ( Internals.mode != TEST && Toolbox && Toolbox->Tools )
+	if ( Fsc2_Internals.mode != TEST && Toolbox && Toolbox->Tools )
 	{
 		if ( fl_form_is_visible( Toolbox->Tools ) )
 		{
@@ -203,7 +203,7 @@ Var_T *f_freeze( Var_T *v )
 
 	is_now_frozen = get_boolean( v );
 
-	if ( Internals.I_am == CHILD &&
+	if ( Fsc2_Internals.I_am == CHILD &&
 		 ! writer( C_FREEZE, ( int ) is_now_frozen ) )
 		THROW( EXCEPTION );
 
@@ -292,13 +292,13 @@ Var_T *f_layout( Var_T *v )
 	const char *str[ ] = { "VERT", "VERTICAL", "HORI", "HORIZONTAL" };
 
 
-	if ( Internals.cmdline_flags & NO_GUI_RUN )
+	if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
 	{
 		print( FATAL, "Function can't be used without a GUI.\n" );
 		THROW( EXCEPTION );
 	}
 
-	if ( Internals.I_am == PARENT && Toolbox != NULL )
+	if ( Fsc2_Internals.I_am == PARENT && Toolbox != NULL )
 	{
 		print( FATAL, "Layout of tool box must be set before any buttons or "
 			   "sliders are created.\n" );
@@ -329,7 +329,7 @@ Var_T *f_layout( Var_T *v )
 				break;
 
 			default :
-				if ( Internals.I_am == PARENT )
+				if ( Fsc2_Internals.I_am == PARENT )
 				{
 					print( FATAL, "Unknown layout keyword '%s'.\n",
 						   v->val.sptr );
@@ -346,7 +346,7 @@ Var_T *f_layout( Var_T *v )
 	/* The child has no control over the graphical stuff, it has to pass all
 	   requests to the parent... */
 
-	if ( Internals.I_am == CHILD )
+	if ( Fsc2_Internals.I_am == CHILD )
 		return f_layout_child( layout );
 
 	/* Set up structure for tool box */
@@ -405,7 +405,7 @@ static Var_T *f_layout_child( long layout )
 
 Var_T *f_objdel( Var_T *v )
 {
-	if ( Internals.cmdline_flags & NO_GUI_RUN )
+	if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
 	{
 		print( FATAL, "Function can't be used without a GUI.\n" );
 		THROW( EXCEPTION );
@@ -426,7 +426,7 @@ Var_T *f_objdel( Var_T *v )
 
 	do
 	{
-		if ( Internals.I_am == CHILD )
+		if ( Fsc2_Internals.I_am == CHILD )
 			f_objdel_child( v );
 		else
 			f_objdel_parent( v );
@@ -500,7 +500,7 @@ static void f_objdel_parent( Var_T *v )
 	Iobject_T *io = NULL;
 
 
-	if ( Internals.cmdline_flags & NO_GUI_RUN )
+	if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
 	{
 		print( FATAL, "Function can't be used without a GUI.\n" );
 		THROW( EXCEPTION );
@@ -568,7 +568,7 @@ Var_T *f_obj_clabel( Var_T *v )
 	CLOBBER_PROTECT( v );
 	CLOBBER_PROTECT( label );
 
-	if ( Internals.cmdline_flags & NO_GUI_RUN )
+	if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
 	{
 		print( FATAL, "Function can't be used without a GUI.\n" );
 		THROW( EXCEPTION );
@@ -576,7 +576,7 @@ Var_T *f_obj_clabel( Var_T *v )
 
 	/* We first need the ID of the button */
 
-	if ( Internals.mode != TEST )
+	if ( Fsc2_Internals.mode != TEST )
 	{
 		ID = get_strict_long( v, "object ID" );
 
@@ -595,12 +595,12 @@ Var_T *f_obj_clabel( Var_T *v )
 		THROW( EXCEPTION );
 	}
 
-	if ( Internals.mode == TEST )
+	if ( Fsc2_Internals.mode == TEST )
 		return vars_push( INT_VAR, 1 );
 
 	/* The child has to get parent to change the label */
 
-	if ( Internals.I_am == CHILD )
+	if ( Fsc2_Internals.I_am == CHILD )
 		return f_obj_clabel_child( ID, v->val.sptr );
 
 	/* No tool box -> no objects -> no object label change possible... */
@@ -704,13 +704,13 @@ Var_T *f_obj_xable( Var_T *v )
 	bool state;
 
 
-	if ( Internals.cmdline_flags & NO_GUI_RUN )
+	if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
 	{
 		print( FATAL, "Function can't be used without a GUI.\n" );
 		THROW( EXCEPTION );
 	}
 
-	if ( Internals.mode == TEST )
+	if ( Fsc2_Internals.mode == TEST )
 		return vars_push( INT_VAR, get_boolean( v->next ) ? 1L : 0L );
 
 	/* We first need the ID of the button */
@@ -728,7 +728,7 @@ Var_T *f_obj_xable( Var_T *v )
 
 	/* The child process has to get the parent process to change the state */
 
-	if ( Internals.I_am == CHILD )
+	if ( Fsc2_Internals.I_am == CHILD )
 		return f_obj_xable_child( ID, state ? 1L : 0L );
 
 	/* No tool box -> no objects -> no object state change possible... */
@@ -912,7 +912,7 @@ void recreate_Toolbox( void )
 	int tool_x, tool_y;
 
 
-	if ( Internals.mode == TEST )        /* no drawing in test mode */
+	if ( Fsc2_Internals.mode == TEST )        /* no drawing in test mode */
 		return;
 
 	/* If the tool box already exists we've got to find out its position
@@ -1995,7 +1995,7 @@ void check_label( char *str )
 	/* The remaining must be one of the allowed strings as defined by the
 	   aray 'sym'. */
 
-	for ( i = 0; i < sizeof sym / sizeof sym[ 0 ]; i++ )
+	for ( i = 0; i < NUM_ELEMS( sym ); i++ )
 		if ( ! strcmp( p, sym[ i ] ) )
 			return;
 
@@ -2036,7 +2036,7 @@ Var_T *f_tb_changed( Var_T *v )
 
 	/* The child process has it's own way of dealing with this */
 
-	if ( Internals.I_am == CHILD )
+	if ( Fsc2_Internals.I_am == CHILD )
 		return f_tb_changed_child( v );
 
 	/* No toolbox -> no objects -> no object can have changed */
@@ -2177,7 +2177,7 @@ Var_T *f_tb_wait( Var_T *v )
 
 	/* The child process has it's own way of dealing with this */
 
-	if ( Internals.I_am == CHILD )
+	if ( Fsc2_Internals.I_am == CHILD )
 		return f_tb_wait_child( v );
 
 	/* No tool box -> no objects -> no object state changes we could wait
@@ -2197,10 +2197,10 @@ Var_T *f_tb_wait( Var_T *v )
 	else
 		duration = -1.0;
 
-	if ( Internals.mode == TEST )
+	if ( Fsc2_Internals.mode == TEST )
 		return vars_push( INT_VAR, 0L );
 
-	Internals.tb_wait = 0;
+	Fsc2_Internals.tb_wait = 0;
 
 	/* First check if there's already an object with its state being marked
 	   as changed. If there is one the ID of the first one we find is returned
@@ -2290,11 +2290,11 @@ Var_T *f_tb_wait( Var_T *v )
 		sleepy.it_interval.tv_sec = sleepy.it_interval.tv_usec = 0;
 		sleepy.it_value.tv_usec = lrnd( modf( duration, &secs ) * 1.0e6 );
 		sleepy.it_value.tv_sec = lrnd( secs );
-		Internals.tb_wait = TB_WAIT_TIMER_RUNNING;
+		Fsc2_Internals.tb_wait = TB_WAIT_TIMER_RUNNING;
 		setitimer( ITIMER_REAL, &sleepy, NULL );
 	}
 	else
-		Internals.tb_wait = TB_WAIT_RUNNING_WITH_NO_TIMER;
+		Fsc2_Internals.tb_wait = TB_WAIT_RUNNING_WITH_NO_TIMER;
 
 	return vars_push( INT_VAR, 0L );
 }
@@ -2408,12 +2408,12 @@ void tb_wait_handler( long ID )
 	   callback for an object or the callback for the 'STOP' button (in
 	   which case we're called with an argument of -1). */
 
-	if ( Internals.tb_wait == TB_WAIT_TIMER_EXPIRED && ID != 0 )
+	if ( Fsc2_Internals.tb_wait == TB_WAIT_TIMER_EXPIRED && ID != 0 )
 		return;
 
 	/* If the timer hasn't expired yet stop it */
 
-	if ( Internals.tb_wait == TB_WAIT_TIMER_RUNNING )
+	if ( Fsc2_Internals.tb_wait == TB_WAIT_TIMER_RUNNING )
 	{
 		sleepy.it_value.tv_usec = sleepy.it_value.tv_sec = 0;
 		setitimer( ITIMER_REAL, &sleepy, NULL );
@@ -2425,7 +2425,7 @@ void tb_wait_handler( long ID )
 	for ( io = Toolbox->objs; io != NULL; io = io->next )
 		io->report_change = UNSET;
 
-	Internals.tb_wait = TB_WAIT_NOT_RUNNING;
+	Fsc2_Internals.tb_wait = TB_WAIT_NOT_RUNNING;
 
 	writer( C_TBWAIT_REPLY, sizeof result, result );
 }

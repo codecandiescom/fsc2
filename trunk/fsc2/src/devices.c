@@ -83,7 +83,7 @@ void device_add( const char *name )
 		T_free( ld );
 	}
 
-	if ( lib_name == NULL && ! ( Internals.cmdline_flags & DO_CHECK ) )
+	if ( lib_name == NULL && ! ( Fsc2_Internals.cmdline_flags & DO_CHECK ) )
 	{
 		lib_name = get_string( "%s%s%s.fsc2_so",
 							   libdir, slash( libdir ), dev_name );

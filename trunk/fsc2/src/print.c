@@ -95,7 +95,7 @@ void print_it( FL_OBJECT *obj, long data )
 	char *name = NULL;
 
 
-	if ( data == 2 && G2.active_curve == -1 )
+	if ( data == 2 && G_2d.active_curve == -1 )
 	{
 		fl_show_alert( "Error", "Can't print - no curve is shown.", NULL, 1 );
 		fl_activate_object( obj );
@@ -774,22 +774,22 @@ static void do_1d_printing( FILE *fp, long what )
 	{
 		/* Draw the scale for the active curve (if there is an active curve) */
 
-		for ( i = 0; i < G1.nc; i++ )
+		for ( i = 0; i < G_1d.nc; i++ )
 		{
-			if ( G1.curve[ i ]->active )
+			if ( G_1d.curve[ i ]->active )
 				break;
 		}
 
-		if ( i != G1.nc )
+		if ( i != G_1d.nc )
 		{
-			eps_make_scale( fp, ( void * ) G1.curve[ i ], X, 1 );
-			eps_make_scale( fp, ( void * ) G1.curve[ i ], Y, 1 );
+			eps_make_scale( fp, ( void * ) G_1d.curve[ i ], X, 1 );
+			eps_make_scale( fp, ( void * ) G_1d.curve[ i ], Y, 1 );
 		}
 	}
 	else                /* when printing a cross section */
 	{
-		eps_make_scale( fp, ( void * ) &G2.cut_curve, X, what );
-		eps_make_scale( fp, ( void * ) &G2.cut_curve, Y, what );
+		eps_make_scale( fp, ( void * ) &G_2d.cut_curve, X, what );
+		eps_make_scale( fp, ( void * ) &G_2d.cut_curve, Y, what );
 	}
 
 	/* Restrict further drawings to the frame of the scales */
@@ -799,12 +799,12 @@ static void do_1d_printing( FILE *fp, long what )
 
 	if ( what == 1 )
 	{
-		for ( i = G1.nc - 1; i >= 0; i-- )
-			eps_draw_curve_1d( fp, G1.curve[ i ], i, 1 );
+		for ( i = G_1d.nc - 1; i >= 0; i-- )
+			eps_draw_curve_1d( fp, G_1d.curve[ i ], i, 1 );
 		print_markers_1d( fp );
 	}
 	else
-		eps_draw_curve_1d( fp, &G2.cut_curve, 0, what );
+		eps_draw_curve_1d( fp, &G_2d.cut_curve, 0, what );
 }
 
 
@@ -820,7 +820,7 @@ static void do_2d_printing( FILE *fp )
 	/* If the active curve has been switched off in the mean time nothing
 	   remains to be printed... */
 
-	if ( G2.active_curve == -1 )
+	if ( G_2d.active_curve == -1 )
 		return;
 
 	/* Set the area for the graph, leave a margin on all sides and,
@@ -846,11 +846,11 @@ static void do_2d_printing( FILE *fp )
 	fprintf( fp, "%.2f %.2f m\n0 %.2f rl\n%.2f 0 rl\n0 %.2f rl cp s\n",
 			 x_0 - 0.5, y_0 - 0.5, h + 1.0, w + 1.0, - ( h + 1.0 ) );
 
-	eps_make_scale( fp, G2.curve_2d[ G2.active_curve ], X, 2 );
-	eps_make_scale( fp, G2.curve_2d[ G2.active_curve ], Y, 2 );
+	eps_make_scale( fp, G_2d.curve_2d[ G_2d.active_curve ], X, 2 );
+	eps_make_scale( fp, G_2d.curve_2d[ G_2d.active_curve ], Y, 2 );
 
 	if ( print_with_color )
-		eps_make_scale( fp, G2.curve_2d[ G2.active_curve ], Z, 2 );
+		eps_make_scale( fp, G_2d.curve_2d[ G_2d.active_curve ], Z, 2 );
 
 	/* Restrict further drawings to the frame of the scales */
 
@@ -862,9 +862,9 @@ static void do_2d_printing( FILE *fp )
 	   I didn't come up with a good way to draw it...) */
 
 	if ( print_with_color )
-		eps_draw_surface( fp, G2.active_curve );
+		eps_draw_surface( fp, G_2d.active_curve );
 	else
-		eps_draw_contour( fp, G2.active_curve );
+		eps_draw_contour( fp, G_2d.active_curve );
 }
 
 
@@ -913,33 +913,33 @@ static void eps_make_scale( FILE *fp, void *cv, int coord, long dim )
 
 	if ( dim == 1 )
 	{
-		s2d[ X ] = w * ( ( Curve_1d_T * ) cv )->s2d[ X ] / G1.canvas.w;
-		s2d[ Y ] = h * ( ( Curve_1d_T * ) cv )->s2d[ Y ] / G1.canvas.h;
+		s2d[ X ] = w * ( ( Curve_1d_T * ) cv )->s2d[ X ] / G_1d.canvas.w;
+		s2d[ Y ] = h * ( ( Curve_1d_T * ) cv )->s2d[ Y ] / G_1d.canvas.h;
 
-		rwcs = G1.rwc_start[ coord ];
-		rwcd = G1.rwc_delta[ coord ];
+		rwcs = G_1d.rwc_start[ coord ];
+		rwcd = G_1d.rwc_delta[ coord ];
 	}
 	else if ( dim == 2 )
 	{
-		s2d[ X ] = w * ( ( Curve_2d_T * ) cv )->s2d[ X ] / G2.canvas.w;
-		s2d[ Y ] = h * ( ( Curve_2d_T * ) cv )->s2d[ Y ] / G2.canvas.h;
-		s2d[ Z ] = h * ( ( Curve_2d_T * ) cv )->s2d[ Z ] / G2.z_axis.h;
+		s2d[ X ] = w * ( ( Curve_2d_T * ) cv )->s2d[ X ] / G_2d.canvas.w;
+		s2d[ Y ] = h * ( ( Curve_2d_T * ) cv )->s2d[ Y ] / G_2d.canvas.h;
+		s2d[ Z ] = h * ( ( Curve_2d_T * ) cv )->s2d[ Z ] / G_2d.z_axis.h;
 
 		rwcs = ( ( Curve_2d_T * ) cv )->rwc_start[ coord ];
 		rwcd = ( ( Curve_2d_T * ) cv )->rwc_delta[ coord ];
 	}
 	else
 	{
-		s2d[ X ] = w * ( ( Curve_1d_T * ) cv )->s2d[ X ] / G2.cut_canvas.w;
-		s2d[ Y ] = h * ( ( Curve_1d_T * ) cv )->s2d[ Y ] / G2.cut_canvas.h;
+		s2d[ X ] = w * ( ( Curve_1d_T * ) cv )->s2d[ X ] / G_2d.cut_canvas.w;
+		s2d[ Y ] = h * ( ( Curve_1d_T * ) cv )->s2d[ Y ] / G_2d.cut_canvas.h;
 
 		if ( coord == X )
 			r_coord = ( dim < 0 ? X : Y );
 		else
 			r_coord = Z;
 
-		rwcs = G2.curve_2d[ G2.active_curve ]->rwc_start[ r_coord ];
-		rwcd = G2.curve_2d[ G2.active_curve ]->rwc_delta[ r_coord ];
+		rwcs = G_2d.curve_2d[ G_2d.active_curve ]->rwc_start[ r_coord ];
+		rwcd = G_2d.curve_2d[ G_2d.active_curve ]->rwc_delta[ r_coord ];
 	}
 
 	/* The distance between the smallest ticks should be about 6 points -
@@ -1044,11 +1044,11 @@ static void eps_make_scale( FILE *fp, void *cv, int coord, long dim )
 		TRY
 		{
 			if ( dim == 1 )
-				label = paren_replace( G1.label[ X ] );
+				label = paren_replace( G_1d.label[ X ] );
 			else if ( dim == 2 )
-				label = paren_replace( G2.label[ X ] );
+				label = paren_replace( G_2d.label[ X ] );
 			else
-				label = paren_replace( G2.label[ dim < 0 ? X : Y ] );
+				label = paren_replace( G_2d.label[ dim < 0 ? X : Y ] );
 
 			if ( label != NULL )
 			{
@@ -1100,11 +1100,11 @@ static void eps_make_scale( FILE *fp, void *cv, int coord, long dim )
 		TRY
 		{
 			if ( dim == 1 )
-				label = paren_replace( G1.label[ Y ] );
+				label = paren_replace( G_1d.label[ Y ] );
 			else if ( dim == 2 )
-				label = paren_replace( G2.label[ Y ] );
+				label = paren_replace( G_2d.label[ Y ] );
 			else
-				label = paren_replace( G2.label[ Z ] );
+				label = paren_replace( G_2d.label[ Z ] );
 
 			if ( label != NULL )
 				fprintf( fp, "gs (%s) dup dup ch %.2f add exch cw %.2f exch "
@@ -1144,11 +1144,11 @@ static void eps_make_scale( FILE *fp, void *cv, int coord, long dim )
 	{
 		x = x_0 + w + 17.0;
 
-		if ( G2.label[ Z ] != NULL )
+		if ( G_2d.label[ Z ] != NULL )
 		{
 			TRY
 			{
-				label = paren_replace( G2.label[ Z ] );
+				label = paren_replace( G_2d.label[ Z ] );
 
 				if ( label != NULL )
 				{
@@ -1243,21 +1243,21 @@ static void eps_draw_curve_1d( FILE *fp, Curve_1d_T *cv, int i, long dir )
 
 	if ( dir == 1 )
 	{
-		max_points = G1.nx;
-		s2d[ X ] = w * cv->s2d[ X ] / G1.canvas.w;
-		s2d[ Y ] = h * cv->s2d[ Y ] / G1.canvas.h;
+		max_points = G_1d.nx;
+		s2d[ X ] = w * cv->s2d[ X ] / G_1d.canvas.w;
+		s2d[ Y ] = h * cv->s2d[ Y ] / G_1d.canvas.h;
 	}
 	else if ( dir == 0 )
 	{
-		max_points = G2.ny;
-        s2d[ X ] = w * cv->s2d[ X ] / G2.cut_canvas.w;
-        s2d[ Y ] = h * cv->s2d[ Y ] / G2.cut_canvas.h;
+		max_points = G_2d.ny;
+        s2d[ X ] = w * cv->s2d[ X ] / G_2d.cut_canvas.w;
+        s2d[ Y ] = h * cv->s2d[ Y ] / G_2d.cut_canvas.h;
 	}
 	else
 	{
-		max_points = G2.nx;
-        s2d[ X ] = w * cv->s2d[ X ] / G2.cut_canvas.w;
-        s2d[ Y ] = h * cv->s2d[ Y ] / G2.cut_canvas.h;
+		max_points = G_2d.nx;
+        s2d[ X ] = w * cv->s2d[ X ] / G_2d.cut_canvas.w;
+        s2d[ Y ] = h * cv->s2d[ Y ] / G_2d.cut_canvas.h;
 	}
 
 	fprintf( fp, "gs 0.2 slw 1 slc\n" );
@@ -1322,7 +1322,7 @@ static void eps_draw_curve_1d( FILE *fp, Curve_1d_T *cv, int i, long dir )
 
 static void eps_draw_surface( FILE *fp, int cn )
 {
-	Curve_2d_T *cv = G2.curve_2d[ cn ];
+	Curve_2d_T *cv = G_2d.curve_2d[ cn ];
 	double s2d[ 2 ];
 	double dw,
 		   dh;
@@ -1330,8 +1330,8 @@ static void eps_draw_surface( FILE *fp, int cn )
 	int rgb[ 3 ];
 
 
-	s2d[ X ] = w * cv->s2d[ X ] / G2.canvas.w;
-	s2d[ Y ] = h * cv->s2d[ Y ] / G2.canvas.h;
+	s2d[ X ] = w * cv->s2d[ X ] / G_2d.canvas.w;
+	s2d[ Y ] = h * cv->s2d[ Y ] / G_2d.canvas.h;
 	dw = s2d[ X ] / 2;
 	dh = s2d[ Y ] / 2;
 
@@ -1346,8 +1346,8 @@ static void eps_draw_surface( FILE *fp, int cn )
 
 	/* Now draw points for which we have data */
 
-	for ( k = 0, j = 0; j < G2.ny; j++ )
-		for ( i = 0; i < G2.nx; k++, i++ )
+	for ( k = 0, j = 0; j < G_2d.ny; j++ )
+		for ( i = 0; i < G_2d.nx; k++, i++ )
 		{
 			if ( ! cv->points[ k ].exist )
 				continue;
@@ -1377,7 +1377,7 @@ static void eps_draw_surface( FILE *fp, int cn )
 
 static void eps_draw_contour( FILE *fp, int cn )
 {
-	Curve_2d_T *cv = G2.curve_2d[ cn ];
+	Curve_2d_T *cv = G_2d.curve_2d[ cn ];
 	double s2d[ 2 ];
 	double dw,
 		   dh;
@@ -1387,8 +1387,8 @@ static void eps_draw_contour( FILE *fp, int cn )
 	double z1, z2, g;
 
 
-	s2d[ X ] = w * cv->s2d[ X ] / G2.canvas.w;
-	s2d[ Y ] = h * cv->s2d[ Y ] / G2.canvas.h;
+	s2d[ X ] = w * cv->s2d[ X ] / G_2d.canvas.w;
+	s2d[ Y ] = h * cv->s2d[ Y ] / G_2d.canvas.h;
 	dw = s2d[ X ] / 2;
 	dh = s2d[ Y ] / 2;
 
@@ -1402,7 +1402,7 @@ static void eps_draw_contour( FILE *fp, int cn )
 				 "0.5 sgr %.2f %.2f m %.2f 0 rl 0 %.2f rl %.2f 0 rl cp f\n",
 				 x_0, y_0, cur_p - dw, h, - ( cur_p - dw ) );
 
-	cur_p = s2d[ X ] * ( G2.nx - 1 + cv->shift[ X ] );
+	cur_p = s2d[ X ] * ( G_2d.nx - 1 + cv->shift[ X ] );
 	if ( w > cur_p + dw )
 		fprintf( fp,
 				 "0.5 sgr %.2f %.2f m 0 %.2f rl %.2f 0 rl 0 %.2f rl cp f\n",
@@ -1414,7 +1414,7 @@ static void eps_draw_contour( FILE *fp, int cn )
 				 "0.5 sgr %.2f %.2f m %.2f 0 rl 0 %.2f rl %.2f 0 rl cp f\n",
 				 x_0, y_0, w, cur_p - dh, - w );
 
-	cur_p = s2d[ Y ] * ( G2.ny - 1 + cv->shift[ Y ] );
+	cur_p = s2d[ Y ] * ( G_2d.ny - 1 + cv->shift[ Y ] );
 	if ( h > cur_p + dh )
 		fprintf( fp,
 				 "0.5 sgr %.2f %.2f m %.2f 0 rl 0 %.2f rl %.2f 0 rl cp f\n",
@@ -1423,8 +1423,8 @@ static void eps_draw_contour( FILE *fp, int cn )
 	/* Now draw the data */
 
 	for ( g = 1.0, z = 0.0; z <= 1.0; g -= 0.045, z += 0.05 )
-		for ( k = 0, j = 0; j < G2.ny; j++ )
-			for ( i = 0; i < G2.nx; i++, k++ )
+		for ( k = 0, j = 0; j < G_2d.ny; j++ )
+			for ( i = 0; i < G_2d.nx; i++, k++ )
 			{
 				if ( ! cv->points[ k ].exist )
 				{
@@ -1436,7 +1436,7 @@ static void eps_draw_contour( FILE *fp, int cn )
 					continue;
 				}
 
-				if ( i < G2.nx - 1 && cv->points[ k + 1 ].exist )
+				if ( i < G_2d.nx - 1 && cv->points[ k + 1 ].exist )
 				{
 					z1 = cv->z_factor * ( cv->points[ k ].v + cv->shift[ Z ] );
 					z2 = cv->z_factor
@@ -1452,11 +1452,12 @@ static void eps_draw_contour( FILE *fp, int cn )
 					}
 				}
 
-				if ( j < G2.ny - 1 &&
-					 cv->points[ ( j + 1 ) * G2.nx + i ].exist )
+				if ( j < G_2d.ny - 1 &&
+					 cv->points[ ( j + 1 ) * G_2d.nx + i ].exist )
 				{
 					z1 = cv->z_factor * ( cv->points[ k ].v + cv->shift[ Z ] );
-					z2 = cv->z_factor * ( cv->points[ ( j + 1 ) * G2.nx + i ].v
+					z2 = cv->z_factor * ( cv->points[ ( j + 1 )
+													  * G_2d.nx + i ].v
 										  + cv->shift[ Z ] );
 
 					if ( ( z1 >= z && z2 < z ) || ( z1 < z && z2 >= z ) )
@@ -1708,10 +1709,10 @@ static void print_markers_1d( FILE *fp )
 	/* Find out the currently active curve (needed for scaling), return
 	   immediately if there isn't one */
 
-	for ( i = 0; i < G1.nc; i++ )
-		if ( G1.curve[ i ]->active )
+	for ( i = 0; i < G_1d.nc; i++ )
+		if ( G_1d.curve[ i ]->active )
 		{
-			cv = G1.curve[ i ];
+			cv = G_1d.curve[ i ];
 			break;
 		}
 
@@ -1720,9 +1721,9 @@ static void print_markers_1d( FILE *fp )
 
 	/* Calculate x scale factor and then draw all markers */
 
-	s2d = w * cv->s2d[ X ] / G1.canvas.w;
+	s2d = w * cv->s2d[ X ] / G_1d.canvas.w;
 
-	for ( m = G1.marker_1d; m != NULL; m = m->next )
+	for ( m = G_1d.marker_1d; m != NULL; m = m->next )
 	{
 		if ( print_with_color )
 			switch ( m->color )
@@ -1774,15 +1775,15 @@ static void print_markers_2d( FILE *fp )
 	double dw, dh;
 
 
-	if ( G2.active_curve == -1 )
+	if ( G_2d.active_curve == -1 )
 		return;
 
-	cv = G2.curve_2d[ G2.active_curve ];
+	cv = G_2d.curve_2d[ G_2d.active_curve ];
 
 	/* Calculate x scale factor and then draw all markers */
 
-	s2d[ X ] = w * cv->s2d[ X ] / G2.canvas.w;
-	s2d[ Y ] = h * cv->s2d[ Y ] / G2.canvas.h;
+	s2d[ X ] = w * cv->s2d[ X ] / G_2d.canvas.w;
+	s2d[ Y ] = h * cv->s2d[ Y ] / G_2d.canvas.h;
 	dw = s2d[ X ] / 2 + 0.5;
 	dh = s2d[ Y ] / 2 + 0.5;
 	if ( dw < 1.0 )

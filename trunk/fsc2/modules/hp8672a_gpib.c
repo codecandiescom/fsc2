@@ -70,8 +70,6 @@ bool hp8672a_init( const char *name )
 
 	hp8672a_set_output_state( UNSET );
 
-	HP8672A_INIT = SET;
-
 	/* If frequency and attenuation need to be set do it now, otherwise get
 	   frequency and attenuation set at the synthesizer and store it */
 
@@ -113,8 +111,6 @@ bool hp8672a_init( const char *name )
 	/* If user want's RF output... */
 
 	hp8672a_set_output_state( hp8672a.state );
-
-	HP8672A_INIT = UNSET;
 
 	return OK;
 }

@@ -109,9 +109,6 @@ static double tc_list[ ] = { 1.0e-3, 3.0e-3, 1.0e-2, 3.0e-2, 1.0e-1, 3.0e-1,
 							 1.0, 3.0, 10.0, 30.0, 100.0 };
 
 
-#define SENS_ENTRIES ( sizeof sens_list / sizeof sens_list[ 0 ] )
-#define TC_ENTRIES ( sizeof tc_list / sizeof tc_list[ 0 ] )
-
 /* Declaration of all functions used only in this file */
 
 static double get_single_channel_data( Var_T *v );
@@ -353,7 +350,7 @@ Var_T *lockin_sensitivity( Var_T *v )
 	   value, depending on the size of the argument. If the value does not fit
 	   within 1 percent, we utter a warning message (but only once). */
 
-	for ( i = 0; i < SENS_ENTRIES - 1; i++ )
+	for ( i = 0; i < NUM_ELEMS( sens_list ) - 1; i++ )
 		if ( sens <= sens_list[ i ] && sens >= sens_list[ i + 1 ] )
 		{
 			if ( sens_list[ i ] / sens < sens / sens_list[ i + 1 ] )
@@ -364,9 +361,9 @@ Var_T *lockin_sensitivity( Var_T *v )
 		}
 
 	if ( sens_index == UNDEF_SENS_INDEX &&
-		 sens >= sens_list[ SENS_ENTRIES - 1 ] / 1.01 &&
-		 sens < sens_list[ SENS_ENTRIES - 1 ] )
-		sens_index = SENS_ENTRIES - 1;
+		 sens >= sens_list[ NUM_ELEMS( sens_list ) - 1 ] / 1.01 &&
+		 sens < sens_list[ NUM_ELEMS( sens_list ) - 1 ] )
+		sens_index = NUM_ELEMS( sens_list ) - 1;
 
 	if ( sens_index >= 0 &&                         /* value found ? */
 		 fabs( sens - sens_list[ sens_index ] ) > sens * 1.0e-2 &&
@@ -393,7 +390,7 @@ Var_T *lockin_sensitivity( Var_T *v )
 		if ( sens > sens_list[ 0 ] )
 			sens_index = 0;
 		else
-		    sens_index = SENS_ENTRIES - 1;
+		    sens_index = NUM_ELEMS( sens_list ) - 1;
 
 		if ( ! sr530.sens_warn )                      /* no warn message yet */
 		{
@@ -462,7 +459,7 @@ Var_T *lockin_time_constant( Var_T *v )
 	   value, depending on the size of the argument. If the value does not fit
 	   within 1 percent, we utter a warning message (but only once). */
 
-	for ( i = 0; i < TC_ENTRIES - 1; i++ )
+	for ( i = 0; i < NUM_ELEMS( tc_list ) - 1; i++ )
 		if ( tc >= tc_list[ i ] && tc <= tc_list[ i + 1 ] )
 		{
 			if ( tc / tc_list[ i ] < tc_list[ i + 1 ] / tc )
@@ -488,7 +485,7 @@ Var_T *lockin_time_constant( Var_T *v )
 		if ( tc < tc_list[ 0 ] )
 			tc_index = 0;
 		else
-			tc_index = TC_ENTRIES - 1;
+			tc_index = NUM_ELEMS( tc_list ) - 1;
 
 		if ( tc >= 1.0 )
 			print( WARN, "Time constant of %0.lf s is too large, using "
@@ -831,7 +828,7 @@ double sr530_get_sens( void )
 
 	sr530_talk( "G\n", buffer, &length );
 	buffer[ length - 2 ] = '\0';
-	sens = sens_list[ SENS_ENTRIES - T_atol( buffer ) ];
+	sens = sens_list[ NUM_ELEMS( sens_list ) - T_atol( buffer ) ];
 
     /* Check if EXPAND is switched on - this increases the sensitivity
 	   by a factor of 10 */
@@ -862,7 +859,7 @@ void sr530_set_sens( int sens_index )
 	   in the list of sensitivities 'sens_list', i.e. 1 stands for the
 	   highest sensitivity (10nV) and 24 for the lowest (500mV) */
 
-	sens_index = SENS_ENTRIES - sens_index;
+	sens_index = NUM_ELEMS( sens_list ) - sens_index;
 
 	/* For sensitivities lower than 100 nV EXPAND has to be switched on
 	   (for both channels) otherwise it got to be switched off */

@@ -1033,7 +1033,8 @@ static bool get_serial_lock( int sn )
     }
 
 	umask( mask );
-    chown( Serial_Port[ sn ].lock_file, Internals.EUID, Internals.EGID );
+    chown( Serial_Port[ sn ].lock_file, Fsc2_Internals.EUID,
+		   Fsc2_Internals.EGID );
     snprintf( buf, sizeof( buf ), "%10d\n", ( int ) getpid( ) );
     write( fd, buf, strlen( buf ) );
     close( fd );

@@ -30,7 +30,7 @@
 
 const char *prog_name;           /* Name the program was started with */
 
-Internals_T Internals;
+Internals_T Fsc2_Internals;
 EDL_Stuff_T EDL;
 Communication_T Comm;
 GUI_Stuff_T GUI;

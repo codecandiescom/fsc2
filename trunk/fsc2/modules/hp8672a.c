@@ -30,8 +30,13 @@ const char device_name[ ]  = DEVICE_NAME;
 const char generic_type[ ] = DEVICE_TYPE;
 
 
-static HP8672A hp8672a_backup;
+HP8672A_T hp8672a;
+double fm_ampl[ ] = { 3.0e4, 1.0e5, 3.0e5, 1.0e6, 3.0e6, 1.0e7 };
 
+
+static const char *mod_types[ ] =   { "FM", "AM", "OFF" };
+static double am_ampl[ ] = { 30.0, 100.0 };
+static HP8672A_T hp8672a_backup;
 
 
 /*------------------------------------*/
@@ -136,9 +141,7 @@ int hp8672a_exp_hook( void )
 
 int hp8672a_end_of_exp_hook( void )
 {
-	HP8672A_INIT = UNSET;
 	hp8672a_finished( );
-
 	hp8672a = hp8672a_backup;
 
 	return 1;
@@ -152,8 +155,6 @@ int hp8672a_end_of_exp_hook( void )
 
 void hp8672a_exit_hook( void )
 {
-	HP8672A_INIT = UNSET;
-
 	if ( hp8672a.table_file != NULL )
 		hp8672a.table_file = CHAR_P T_free( hp8672a.table_file );
 

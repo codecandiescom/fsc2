@@ -704,7 +704,7 @@ Call_Stack_T *call_push( Func_T *f, Device_T *device, const char *device_name,
 	   function for the call to the global variable that is used to keep
 	   an estimate time for the modules. */
 
-	if ( Internals.mode == TEST && device_name != NULL )
+	if ( Fsc2_Internals.mode == TEST && device_name != NULL )
 		EDL.experiment_time += MODULE_CALL_ESTIMATE;
 
 	return EDL.Call_Stack = cs;

@@ -42,7 +42,7 @@ bool hfs9000_do_update( void )
 	bool state;
 
 
-	if ( ! hfs9000_is_needed )
+	if ( ! hfs9000.is_needed )
 		return OK;
 
 	/* Resort the pulses, check that the new pulse settings are reasonable
@@ -115,7 +115,7 @@ static bool hfs9000_update_pulses( bool flag )
 			if ( flag )
 				THROW( EXCEPTION );
 
-			for ( p = hfs9000_Pulses; p != NULL; p = p->next )
+			for ( p = hfs9000.pulses; p != NULL; p = p->next )
 			{
 				if ( p->is_old_pos )
 					p->pos = p->old_pos;
@@ -191,7 +191,7 @@ void hfs9000_do_checks( Function_T *f )
 		{
 			if ( p->pos + p->len > f->pulses[ i + 1 ]->pos )
 			{
-				if ( hfs9000_IN_SETUP )
+				if ( hfs9000.in_setup )
 					print( FATAL, "Pulses %ld and %ld overlap.\n", p->num,
 						   f->pulses[ i + 1 ]->num );
 				else
@@ -201,7 +201,7 @@ void hfs9000_do_checks( Function_T *f )
 			}
 			else if ( p->pos + p->len == f->pulses[ i + 1 ]->pos )
 			{
-				if ( hfs9000_IN_SETUP )
+				if ( hfs9000.in_setup )
 					print( SEVERE, "Distance between pulses %ld and %ld is "
 						   "zero.\n", p->num, f->pulses[ i + 1 ]->num );
 				else
@@ -270,7 +270,7 @@ void hfs9000_set_pulses( Function_T *f )
 
 void hfs9000_full_reset( void )
 {
-	Pulse_T *p = hfs9000_Pulses;
+	Pulse_T *p = hfs9000.pulses;
 
 
 	while ( p != NULL )
@@ -363,8 +363,8 @@ static Pulse_T *hfs9000_delete_pulse( Pulse_T *p )
 
 	/* Special care has to be taken if this is the very last pulse... */
 
-	if ( p == hfs9000_Pulses && p->next == NULL )
-		hfs9000_Pulses = PULSE_P T_free( hfs9000_Pulses );
+	if ( p == hfs9000.pulses && p->next == NULL )
+		hfs9000.pulses = PULSE_P T_free( hfs9000.pulses );
 	else
 		T_free( p );
 

@@ -234,7 +234,7 @@ struct EDL_Stuff {
 	Call_Stack_T *Call_Stack;    /* stack for storing some kind of frame
 									information during nested EDL function
 									calls */
-	Compilation compilation;     /* structure with infos about compilation
+	Compilation_T compilation;   /* structure with infos about compilation
 									states and errors (see also global.h) */
 	Prg_Token_T *prg_token;      /* array of predigested program tokens */
 
@@ -279,7 +279,7 @@ struct Communication {
 
 	int mq_semaphore;            /* semaphore for message queue */
 
-	MESSAGE_QUEUE *MQ;           /* the message queue for data send from the
+	Message_Queue_T *MQ;         /* the message queue for data send from the
 									child to the parent process */
 	int MQ_ID;                   /* shared memory segment ID of the message
 									queue */

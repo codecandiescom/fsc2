@@ -115,7 +115,7 @@ void hfs9000_check_pod_level_diff( double high, double low )
 
 Pulse_T *hfs9000_get_pulse( long pnum )
 {
-	Pulse_T *cp = hfs9000_Pulses;
+	Pulse_T *cp = hfs9000.pulses;
 
 
 	if ( pnum < 0 )

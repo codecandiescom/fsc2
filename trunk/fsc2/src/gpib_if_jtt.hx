@@ -40,13 +40,13 @@
 #define DMA_SIZE 64512    /* compare this with entry in /etc/gpib.conf ! */
 
 
-typedef struct GPIB_DEV GPIB_DEV;
+typedef struct GPIB_Dev GPIB_Dev_T;
 
-struct GPIB_DEV {
+struct GPIB_Dev {
 	int number;               /* device number */
     char *name;               /* symbolic name of device */
-	GPIB_DEV *next;           /* pointer to next GPIB_DEV structure */
-	GPIB_DEV *prev;           /* pointer to previous GPIB_DEV structure */
+	GPIB_Dev_T *next;         /* pointer to next GPIB_Dev structure */
+	GPIB_Dev_T *prev;         /* pointer to previous GPIB_Dev structure */
 };
 
 
@@ -72,7 +72,7 @@ extern char gpib_error_msg[ 1024 ]; /* global for GPIB error messages */
 
 
 #ifdef __cplusplus
-#define GPIB_DEV_P ( GPIB_DEV * )
+#define GPIB_DEV_P ( GPIB_Dev_T * )
 #else
 #define GPIB_DEV_P
 #endif

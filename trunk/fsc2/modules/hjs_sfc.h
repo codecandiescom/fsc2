@@ -30,28 +30,6 @@
 #include "hjs_sfc.conf"
 
 
-/* Exported functions */
-
-int hjs_sfc_init_hook( void );
-int hjs_sfc_test_hook( void );
-int hjs_sfc_exp_hook( void );
-int hjs_sfc_end_of_exp_hook( void );
-void hjs_sfc_exit_hook( void );
-
-Var_T *magnet_name( Var_T *v );
-Var_T *magnet_setup( Var_T *v );
-Var_T *set_field( Var_T *v );
-Var_T *get_field( Var_T *v );
-Var_T *sweep_up( Var_T *v );
-Var_T *sweep_down( Var_T *v );
-Var_T *reset_field( Var_T *v );
-Var_T *magnet_B0( Var_T *v );
-Var_T *magnet_slope( Var_T *v );
-Var_T *magnet_calibration_file( Var_T *v );
-
-void hjs_sfc_read_calibration( void );
-
-
 struct HJS_SFC {
 	double B0V;             /* Field for DAC voltage of 0 V */
 	double slope;           /* field step for 1 V DAC voltage increment */
@@ -76,6 +54,28 @@ struct HJS_SFC {
 
 
 extern struct HJS_SFC hjs_sfc;
+
+
+/* Exported functions */
+
+int hjs_sfc_init_hook( void );
+int hjs_sfc_test_hook( void );
+int hjs_sfc_exp_hook( void );
+int hjs_sfc_end_of_exp_hook( void );
+void hjs_sfc_exit_hook( void );
+
+Var_T *magnet_name( Var_T *v );
+Var_T *magnet_setup( Var_T *v );
+Var_T *set_field( Var_T *v );
+Var_T *get_field( Var_T *v );
+Var_T *sweep_up( Var_T *v );
+Var_T *sweep_down( Var_T *v );
+Var_T *reset_field( Var_T *v );
+Var_T *magnet_B0( Var_T *v );
+Var_T *magnet_slope( Var_T *v );
+Var_T *magnet_calibration_file( Var_T *v );
+
+void hjs_sfc_read_calibration( void );
 
 
 /*

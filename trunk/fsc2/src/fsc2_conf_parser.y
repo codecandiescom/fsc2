@@ -46,7 +46,7 @@ input:    /* empty */
         | error                     { THROW( EXCEPTION ); }
 ;
 
-line:     DEF_DIR SEPARATOR TEXT    { Internals.def_directory =
+line:     DEF_DIR SEPARATOR TEXT    { Fsc2_Internals.def_directory =
 													   CHAR_P T_strdup( $3 ); }
         | MW_POS SEPARATOR POS      { if ( sscanf( $3, "%d%d", &GUI.win_x,
 												   &GUI.win_y ) == 2 )

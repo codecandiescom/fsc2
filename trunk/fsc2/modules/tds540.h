@@ -76,7 +76,7 @@
    area between a pair of cursors */
 
 typedef struct Window Window_T;
-typedef struct TDS540 TDS540;
+typedef struct TDS540 TDS540_T;
 
 
 struct Window {
@@ -150,7 +150,7 @@ enum {
 
 #ifdef TDS540_MAIN
 
-TDS540 tds540;
+TDS540_T tds540;
 const char *TDS540_Channel_Names[ MAX_CHANNELS ] = {
 											 "CH1", "CH2", "CH3", "CH4",
 											 "MATH1", "MATH2", "MATH3", "REF1",
@@ -177,9 +177,6 @@ static double tb[ ] = {                     500.0e-12,
 						  1.0,      2.0,      5.0,
 						 10.0 };
 
-#define TB_ENTRIES ( sizeof tb / sizeof tb[ 0 ] )
-
-
 /* Maximum and minimum sensitivity settings (in V) of the measurement
    channels*/
 
@@ -188,7 +185,7 @@ static double max_sens = 1e-3,
 
 #else
 
-extern TDS540 tds540;
+extern TDS540_T tds540;
 extern const char *TDS540_Channel_Names[ ];
 
 #endif
@@ -236,7 +233,7 @@ Var_T *digitizer_command( Var_T *v );
 /* Declaration of internally used functions */
 
 const char *tds540_ptime( double p_time );
-void tds540_delete_windows( TDS540 *s );
+void tds540_delete_windows( TDS540_T *s );
 void tds540_do_pre_exp_checks( void );
 void tds540_window_checks( Window_T *w );
 void tds540_set_tracking( Window_T *w );
@@ -244,7 +241,7 @@ void tds540_set_meas_window( Window_T *w );
 void tds540_set_curve_window( Window_T *w );
 void tds540_set_window( Window_T *w );
 long tds540_translate_channel( int dir, long channel, bool flag );
-void tds540_store_state( TDS540 *dest, TDS540 *src );
+void tds540_store_state( TDS540_T *dest, TDS540_T *src );
 void tds540_state_check( double timebase, long rec_len, double trig_pos );
 Window_T *tds540_get_window_by_number( long win_number );
 

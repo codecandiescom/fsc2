@@ -46,7 +46,8 @@ static bool init_devs_and_graphics( void );
 static void stop_while_exp_hook( FL_OBJECT *a, long b );
 static void setup_signal_handlers( void );
 static void fork_failure( int stored_errno );
-static void check_for_further_errors( Compilation *c_old, Compilation *c_all );
+static void check_for_further_errors( Compilation_T *c_old,
+									  Compilation_T *c_all );
 static void quitting_handler( int signo	);
 static void run_sigchld_handler( int signo );
 static void set_buttons_for_run( int run_state );
@@ -97,7 +98,7 @@ bool run( void )
 
 	/* We can't run more than one experiment - so quit if child_pid != 0 */
 
-	if ( Internals.child_pid != 0 )
+	if ( Fsc2_Internals.child_pid != 0 )
 		return FAIL;
 
 	/* If there's no EXPERIMENT section at all (indicated by 'prg_length'
@@ -105,11 +106,11 @@ bool run( void )
 
 	if ( EDL.prg_length < 0 )
 	{
-		if ( Internals.cmdline_flags & DO_CHECK ||
-			 Internals.cmdline_flags & BATCH_MODE )
+		if ( Fsc2_Internals.cmdline_flags & DO_CHECK ||
+			 Fsc2_Internals.cmdline_flags & BATCH_MODE )
 			fl_trigger_object( GUI.main_form->quit );
 
-		if ( Internals.cmdline_flags & ICONIFIED_RUN )
+		if ( Fsc2_Internals.cmdline_flags & ICONIFIED_RUN )
 			error_while_iconified( );
 
 		return FAIL;
@@ -117,11 +118,11 @@ bool run( void )
 
 	/* Start the GPIB bus (and do some changes to the graphics) */
 
-	Internals.state = STATE_RUNNING;
+	Fsc2_Internals.state = STATE_RUNNING;
 
 	if ( ! start_gpib_and_rulbus( ) )
 	{
-		if ( Internals.cmdline_flags & ICONIFIED_RUN )
+		if ( Fsc2_Internals.cmdline_flags & ICONIFIED_RUN )
 			error_while_iconified( );
 
 		return FAIL;
@@ -132,7 +133,7 @@ bool run( void )
 
 	if ( EDL.prg_token == NULL )
 	{
-		if ( Internals.cmdline_flags & ICONIFIED_RUN )
+		if ( Fsc2_Internals.cmdline_flags & ICONIFIED_RUN )
 			error_while_iconified( );
 
 		return no_prog_to_run( );
@@ -142,7 +143,7 @@ bool run( void )
 
 	if ( ! init_devs_and_graphics( ) )
 	{
-		if ( Internals.cmdline_flags & ICONIFIED_RUN )
+		if ( Fsc2_Internals.cmdline_flags & ICONIFIED_RUN )
 			error_while_iconified( );
 
 		return FAIL;
@@ -154,7 +155,7 @@ bool run( void )
 
 	setup_signal_handlers( );
 
-	if ( ! ( Internals.cmdline_flags & NO_GUI_RUN ) )
+	if ( ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) )
 		fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_left_ptr );
 
 	/* We have to be careful: When the child process gets forked it may
@@ -171,7 +172,7 @@ bool run( void )
 
 	/* Here the experiment starts - the child process is forked */
 
-	if ( ( Internals.child_pid = fork( ) ) == 0 )
+	if ( ( Fsc2_Internals.child_pid = fork( ) ) == 0 )
 	{
 		sigprocmask( SIG_SETMASK, &old_mask, NULL );
 		if ( GUI.is_init )
@@ -186,10 +187,10 @@ bool run( void )
 	close( Comm.pd[ 3 ] );
 	Comm.pd[ READ ] = Comm.pd[ 2 ];
 
-	if ( Internals.child_pid > 0 )   /* fork() did succeeded */
+	if ( Fsc2_Internals.child_pid > 0 )   /* fork() did succeeded */
 	{
 		sigprocmask( SIG_SETMASK, &old_mask, NULL );
-		Internals.mode = PREPARATION;
+		Fsc2_Internals.mode = PREPARATION;
 		return OK;
 	}
 
@@ -209,7 +210,7 @@ bool run( void )
 
 static void error_while_iconified( void )
 {
-	Internals.cmdline_flags &= ~ ICONIFIED_RUN;
+	Fsc2_Internals.cmdline_flags &= ~ ICONIFIED_RUN;
 	fl_raise_form( GUI.main_form->fsc2 );
 	XMapWindow( fl_get_display( ), GUI.main_form->fsc2->window );
 }
@@ -238,14 +239,14 @@ static bool start_gpib_and_rulbus( void )
 		eprint( FATAL, UNSET, "Can't initialize GPIB bus: %s\n",
 				gpib_error_msg );
 
-		if ( ! ( Internals.cmdline_flags & NO_GUI_RUN ) )
+		if ( ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) )
 		{
 			set_buttons_for_run( 0 );
 			fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_left_ptr );
 			XFlush( fl_get_display( ) );
 		}
 
-		Internals.state = STATE_IDLE;
+		Fsc2_Internals.state = STATE_IDLE;
 		return FAIL;
 	}
 
@@ -260,14 +261,14 @@ static bool start_gpib_and_rulbus( void )
 		if ( Need_GPIB )
 			gpib_shutdown( );
 
-		if ( ! ( Internals.cmdline_flags & NO_GUI_RUN ) )
+		if ( ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) )
 		{
 			set_buttons_for_run( 0 );
 			fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_left_ptr );
 			XFlush( fl_get_display( ) );
 		}
 
-		Internals.state = STATE_IDLE;
+		Fsc2_Internals.state = STATE_IDLE;
 		return FAIL;
 	}
 #endif
@@ -294,7 +295,7 @@ static bool no_prog_to_run( void )
 		EDL.do_quit = UNSET;
 		EDL.react_to_do_quit = SET;
 
-		if ( ! ( Internals.cmdline_flags & NO_GUI_RUN ) )
+		if ( ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) )
 		{
 			fl_set_object_callback( GUI.main_form->run,
 									stop_while_exp_hook, 0 );
@@ -302,7 +303,7 @@ static bool no_prog_to_run( void )
 			XFlush( fl_get_display( ) );
 		}
 
-		Internals.mode = EXPERIMENT;
+		Fsc2_Internals.mode = EXPERIMENT;
 
 		experiment_time( );
 		EDL.experiment_time = 0.0;
@@ -332,9 +333,9 @@ static bool no_prog_to_run( void )
 
 	fsc2_serial_cleanup( );
 
-	Internals.mode = PREPARATION;
+	Fsc2_Internals.mode = PREPARATION;
 
-	if ( ! ( Internals.cmdline_flags & NO_GUI_RUN ) )
+	if ( ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) )
 	{
 		fl_set_object_label( GUI.main_form->run, "Start" );
 		fl_set_object_callback( GUI.main_form->run, run_file, 0 );
@@ -343,7 +344,7 @@ static bool no_prog_to_run( void )
 		XFlush( fl_get_display( ) );
 	}
 
-	Internals.state = STATE_IDLE;
+	Fsc2_Internals.state = STATE_IDLE;
 
 	return ret;
 }
@@ -358,7 +359,7 @@ static bool no_prog_to_run( void )
 
 static bool init_devs_and_graphics( void )
 {
-	Compilation compile_test;
+	Compilation_T compile_test;
 
 
 	/* Make a copy of the errors found while compiling the program */
@@ -371,7 +372,7 @@ static bool init_devs_and_graphics( void )
 		EDL.do_quit = UNSET;
 		EDL.react_to_do_quit = SET;
 
-		if ( ! ( Internals.cmdline_flags & NO_GUI_RUN ) )
+		if ( ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) )
 		{
 			fl_set_object_callback( GUI.main_form->run,
 									stop_while_exp_hook, 0 );
@@ -379,7 +380,7 @@ static bool init_devs_and_graphics( void )
 			XFlush( fl_get_display( ) );
 		}
 
-		Internals.mode = EXPERIMENT;
+		Fsc2_Internals.mode = EXPERIMENT;
 
 		experiment_time( );
 		EDL.experiment_time = 0.0;
@@ -389,7 +390,7 @@ static bool init_devs_and_graphics( void )
 
 		EDL.react_to_do_quit = UNSET;
 
-		if ( ! ( Internals.cmdline_flags & NO_GUI_RUN ) )
+		if ( ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) )
 		{
 			fl_deactivate_object( GUI.main_form->run );
 			fl_set_object_label( GUI.main_form->run, "Start" );
@@ -400,7 +401,7 @@ static bool init_devs_and_graphics( void )
 
 		check_for_further_errors( &compile_test, &EDL.compilation );
 
-		if ( ! ( Internals.cmdline_flags & NO_GUI_RUN ) )
+		if ( ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) )
 		{
 			start_graphics( );
 			Graphics_have_been_started = SET;
@@ -436,9 +437,9 @@ static bool init_devs_and_graphics( void )
 
 		fsc2_serial_cleanup( );
 
-		Internals.mode = PREPARATION;
+		Fsc2_Internals.mode = PREPARATION;
 
-		if ( ! ( Internals.cmdline_flags & NO_GUI_RUN ) )
+		if ( ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) )
 		{
 			run_close_button_callback( NULL, 0 );
 
@@ -453,10 +454,10 @@ static bool init_devs_and_graphics( void )
 		return FAIL;
 	}
 
-	if ( ! ( Internals.cmdline_flags & NO_GUI_RUN ) )
+	if ( ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) )
 		fl_set_object_callback( GUI.main_form->run, run_file, 0 );
 
-	Internals.child_is_quitting = QUITTING_UNSET;
+	Fsc2_Internals.child_is_quitting = QUITTING_UNSET;
 
 	return OK;
 }
@@ -507,7 +508,7 @@ static void fork_failure( int stored_errno )
 	sigaction( SIGCHLD,  &Sigchld_old_act,  NULL );
 	sigaction( QUITTING, &Quitting_old_act, NULL );
 
-	if ( Internals.cmdline_flags & ICONIFIED_RUN )
+	if ( Fsc2_Internals.cmdline_flags & ICONIFIED_RUN )
 		error_while_iconified( );
 
 	switch ( stored_errno )
@@ -515,7 +516,7 @@ static void fork_failure( int stored_errno )
 		case EAGAIN :
 			eprint( FATAL, UNSET, "Not enough system resources left to run "
 					"the experiment.\n" );
-			if ( Internals.cmdline_flags & NO_GUI_RUN )
+			if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
 				exit( EXIT_FAILURE );
 			fl_show_alert( "FATAL Error", "Not enough system resources",
 						   "left to run the experiment.", 1 );
@@ -524,7 +525,7 @@ static void fork_failure( int stored_errno )
 		case ENOMEM :
 			eprint( FATAL, UNSET, "Not enough memory left to run the "
 					"experiment.\n" );
-			if ( Internals.cmdline_flags & NO_GUI_RUN )
+			if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
 				exit( EXIT_FAILURE );
 			fl_show_alert( "FATAL Error", "Not enough memory left",
 						   "to run the experiment.", 1 );
@@ -533,14 +534,14 @@ static void fork_failure( int stored_errno )
 		default :
 			eprint( FATAL, UNSET, "System error \"%s\" when trying to "
 					"start experiment.\n", strerror( stored_errno ) );
-			if ( Internals.cmdline_flags & NO_GUI_RUN )
+			if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
 				exit( EXIT_FAILURE );
 			fl_show_alert( "FATAL Error", "System error on start of "
 						   "experiment.", NULL, 1 );
 			break;
 	}
 
-	Internals.child_pid = 0;
+	Fsc2_Internals.child_pid = 0;
 	EDL.do_quit = EDL.react_to_do_quit = UNSET;
 
 	end_comm( );
@@ -557,9 +558,9 @@ static void fork_failure( int stored_errno )
 
 	fsc2_serial_cleanup( );
 
-	Internals.mode = PREPARATION;
+	Fsc2_Internals.mode = PREPARATION;
 
-	if ( ! ( Internals.cmdline_flags & NO_GUI_RUN ) )
+	if ( ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) )
 	{
 		run_close_button_callback( NULL, 0 );
 		fl_set_object_lcol( GUI.main_form->run, FL_BLACK );
@@ -574,9 +575,10 @@ static void fork_failure( int stored_errno )
 /* exception was thrown.                                             */
 /*-------------------------------------------------------------------*/
 
-static void check_for_further_errors( Compilation *c_old, Compilation *c_all )
+static void check_for_further_errors( Compilation_T *c_old,
+									  Compilation_T *c_all )
 {
-	Compilation diff;
+	Compilation_T diff;
 	char str1[ 128 ],
 		 str2[ 128 ];
 	const char *mess = "During start of the experiment there where";
@@ -586,11 +588,11 @@ static void check_for_further_errors( Compilation *c_old, Compilation *c_all )
 	for ( i = FATAL; i < NO_ERROR; i++ )
 		diff.error[ i ] = c_all->error[ i ] - c_old->error[ i ];
 
-	if ( Internals.cmdline_flags & NO_GUI_RUN &&
+	if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN &&
 		 ( diff.error[ SEVERE ] != 0 || diff.error[ WARN ] != 0 ) )
 		THROW( EXCEPTION );
 
-	if ( ! ( Internals.cmdline_flags & BATCH_MODE ) &&
+	if ( ! ( Fsc2_Internals.cmdline_flags & BATCH_MODE ) &&
 		 ( diff.error[ SEVERE ] != 0 || diff.error[ WARN ] != 0 ) )
 	{
 		if ( diff.error[ SEVERE ] != 0 )
@@ -632,7 +634,7 @@ static void quitting_handler( UNUSED_ARG int signo )
 
 
 	errno_saved = errno;
-	Internals.child_is_quitting = QUITTING_RAISED;
+	Fsc2_Internals.child_is_quitting = QUITTING_RAISED;
 	errno = errno_saved;
 }
 
@@ -653,7 +655,8 @@ void run_stop_button_callback( FL_OBJECT *a, UNUSED_ARG long b )
 	   subtle timing problems) we better make sure it doesn't has any
 	   effects. */
 
-	if ( Internals.child_pid == 0 || kill( Internals.child_pid, 0 ) == -1 )
+	if ( Fsc2_Internals.child_pid == 0 ||
+		 kill( Fsc2_Internals.child_pid, 0 ) == -1 )
 	{
 		fl_set_object_callback( a, NULL, 0 );
 		return;
@@ -669,7 +672,7 @@ void run_stop_button_callback( FL_OBJECT *a, UNUSED_ARG long b )
 			return;
 	}
 
-	kill( Internals.child_pid, DO_QUIT );
+	kill( Fsc2_Internals.child_pid, DO_QUIT );
 
 	/* Disable the stop button for the time until the child has died */
 
@@ -680,7 +683,7 @@ void run_stop_button_callback( FL_OBJECT *a, UNUSED_ARG long b )
 	   it's still trying to read a reply from the parent. So we've got to
 	   give it this reply to let it die. */
 
-	if ( Internals.tb_wait != TB_WAIT_NOT_RUNNING )
+	if ( Fsc2_Internals.tb_wait != TB_WAIT_NOT_RUNNING )
 		tb_wait_handler( -1 );
 }
 
@@ -708,14 +711,14 @@ static void run_sigchld_handler( int signo )
 
 	while ( ( pid = waitpid( -1, &return_status, WNOHANG ) ) > 0 )
 	{
-		if ( pid == Internals.http_pid )
+		if ( pid == Fsc2_Internals.http_pid )
 		{
-			Internals.http_pid = -1;
-			Internals.http_server_died = SET;
+			Fsc2_Internals.http_pid = -1;
+			Fsc2_Internals.http_server_died = SET;
 			continue;
 		}
 
-		if ( pid != Internals.child_pid )
+		if ( pid != Fsc2_Internals.child_pid )
 			continue;
 
 #if ! defined NDEBUG
@@ -724,21 +727,21 @@ static void run_sigchld_handler( int signo )
 					 pid, WTERMSIG( return_status ) );
 #endif
 
-		Internals.child_pid = 0;                         /* child is dead... */
+		Fsc2_Internals.child_pid = 0;                    /* child is dead... */
 		sigaction( SIGCHLD, &Sigchld_old_act, NULL );
 
 		/* Disable use of the 'Stop' button */
 
 		EDL.do_quit = EDL.react_to_do_quit = UNSET;
 
-		if ( ! ( Internals.cmdline_flags & NO_GUI_RUN ) )
+		if ( ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) )
 		{
 			GUI.main_form->sigchld->u_ldata =
 										 ( long ) ! WIFEXITED( return_status );
 			fl_trigger_object( GUI.main_form->sigchld );
 		}
 		else
-			Internals.check_return = ! WIFEXITED( return_status );
+			Fsc2_Internals.check_return = ! WIFEXITED( return_status );
 	}
 
 	errno = errno_saved;
@@ -765,38 +768,39 @@ void run_sigchld_callback( FL_OBJECT *a, long b )
 	int state = EXIT_SUCCESS;
 
 
-	if ( Internals.child_is_quitting == QUITTING_UNSET )
+	if ( Fsc2_Internals.child_is_quitting == QUITTING_UNSET )
 									/* missing notification by the child ? */
 	{
-		if ( ! ( Internals.cmdline_flags & DO_CHECK ) && 
-			 ! ( Internals.cmdline_flags & BATCH_MODE ) &&
-			 ! ( Internals.cmdline_flags & NO_GUI_RUN ) )
+		if ( ! ( Fsc2_Internals.cmdline_flags & DO_CHECK ) && 
+			 ! ( Fsc2_Internals.cmdline_flags & BATCH_MODE ) &&
+			 ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) )
 		{
-			Internals.state = STATE_WAITING;
+			Fsc2_Internals.state = STATE_WAITING;
 			fl_show_alert( "Fatal Error", "Experiment stopped unexpectedly.",
 						   NULL, 1 );
 		}
 
-		if ( Internals.cmdline_flags & ( BATCH_MODE | NO_GUI_RUN ) )
+		if ( Fsc2_Internals.cmdline_flags & ( BATCH_MODE | NO_GUI_RUN ) )
 			fprintf( stderr, "Fatal Error: Experiment stopped unexpectedly: "
 					 "'%s'.\n", EDL.in_file );
 
 		mess = "Experiment stopped unexpectedly after running for";
 		state = EXIT_FAILURE;
 	}
-	else if ( ( Internals.cmdline_flags & NO_GUI_RUN && b ) ||
-			  ( ! ( Internals.cmdline_flags & NO_GUI_RUN ) && a->u_ldata ) )
+	else if ( ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN && b ) ||
+			  ( ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) &&
+				a->u_ldata ) )
 	{
-		if ( ! ( Internals.cmdline_flags & DO_CHECK ) &&
-			 ! ( Internals.cmdline_flags & BATCH_MODE ) &&
-			 ! ( Internals.cmdline_flags & NO_GUI_RUN ) )
+		if ( ! ( Fsc2_Internals.cmdline_flags & DO_CHECK ) &&
+			 ! ( Fsc2_Internals.cmdline_flags & BATCH_MODE ) &&
+			 ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) )
 		{
-			Internals.state = STATE_WAITING;
+			Fsc2_Internals.state = STATE_WAITING;
 			fl_show_alert( "Fatal Error", "Experiment had to be stopped.",
 						   NULL, 1 );
 		}
 
-		if ( Internals.cmdline_flags & ( BATCH_MODE | NO_GUI_RUN ) )
+		if ( Fsc2_Internals.cmdline_flags & ( BATCH_MODE | NO_GUI_RUN ) )
 			fprintf( stderr, "Fatal Error: Experiment had to be stopped: "
 					 "'%s'.\n", EDL.in_file );
 
@@ -806,7 +810,7 @@ void run_sigchld_callback( FL_OBJECT *a, long b )
 	else                              /* normal death of child */
 		mess = "Experiment finished after running for";
 
-	Internals.state = STATE_FINISHED;
+	Fsc2_Internals.state = STATE_FINISHED;
 
 	/* Get and display all remaining data the child sent before it died,
 	   then close the communication channels */
@@ -836,7 +840,7 @@ void run_sigchld_callback( FL_OBJECT *a, long b )
 
 	fsc2_serial_cleanup( );
 
-	if ( Internals.cmdline_flags & NO_GUI_RUN )
+	if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
 		return;
 
 	/* Print out for how long the experiment has been running */
@@ -868,7 +872,7 @@ void run_sigchld_callback( FL_OBJECT *a, long b )
 		fl_set_object_label( GUI.run_form_1d->stop_1d,
 							 G.dim == 1 ? "Close" : "Close all" );
 		fl_set_button_shortcut( GUI.run_form_1d->stop_1d, "C", 1 );
-		if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
+		if ( ! ( Fsc2_Internals.cmdline_flags & NO_BALLOON ) )
 			fl_set_object_helper( GUI.run_form_1d->stop_1d,
 								  "Removes all display windows" );
 		fl_set_object_callback( GUI.run_form_1d->stop_1d,
@@ -882,7 +886,7 @@ void run_sigchld_callback( FL_OBJECT *a, long b )
 		fl_set_object_label( GUI.run_form_2d->stop_2d,
 							 G.dim == 2 ? "Close" : "Close all" );
 		fl_set_button_shortcut( GUI.run_form_2d->stop_2d, "C", 1 );
-		if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
+		if ( ! ( Fsc2_Internals.cmdline_flags & NO_BALLOON ) )
 			fl_set_object_helper( GUI.run_form_2d->stop_2d,
 								  "Removes all display windows" );
 		fl_set_object_callback( GUI.run_form_2d->stop_2d,
@@ -890,11 +894,11 @@ void run_sigchld_callback( FL_OBJECT *a, long b )
 		fl_unfreeze_form( GUI.run_form_2d->run_2d );
 	}
 
-	if ( Internals.cmdline_flags & DO_CHECK ||
-		 Internals.cmdline_flags & BATCH_MODE )
+	if ( Fsc2_Internals.cmdline_flags & DO_CHECK ||
+		 Fsc2_Internals.cmdline_flags & BATCH_MODE )
 	{
 		run_close_button_callback( NULL, 0 );
-		Internals.check_return = state;
+		Fsc2_Internals.check_return = state;
 		fl_trigger_object( GUI.main_form->quit );
 	}
 }
@@ -914,9 +918,9 @@ void run_close_button_callback( UNUSED_ARG FL_OBJECT *a, UNUSED_ARG long b )
 	}
 
 	set_buttons_for_run( 0 );
-	Internals.state = STATE_IDLE;
+	Fsc2_Internals.state = STATE_IDLE;
 
-	if ( Internals.cmdline_flags & ICONIFIED_RUN )
+	if ( Fsc2_Internals.cmdline_flags & ICONIFIED_RUN )
 		switch( is_iconic( fl_get_display( ), GUI.main_form->fsc2->window ) )
 		{
 			case 1 :
@@ -924,7 +928,7 @@ void run_close_button_callback( UNUSED_ARG FL_OBJECT *a, UNUSED_ARG long b )
 				break;
 
 			case 0 :
-				Internals.cmdline_flags &= ~ ICONIFIED_RUN;
+				Fsc2_Internals.cmdline_flags &= ~ ICONIFIED_RUN;
 				break;
 
 			case -1 :
@@ -943,7 +947,7 @@ void run_close_button_callback( UNUSED_ARG FL_OBJECT *a, UNUSED_ARG long b )
 
 static void set_buttons_for_run( int run_state )
 {
-	if ( Internals.cmdline_flags & NO_GUI_RUN )
+	if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
 		return;
 
 	fl_freeze_form( GUI.main_form->fsc2 );
@@ -1017,7 +1021,7 @@ static void run_child( void )
 #endif
 
 
-	Internals.I_am = CHILD;
+	Fsc2_Internals.I_am = CHILD;
 
     /* Set up pipes for communication with parent process */
 
@@ -1095,7 +1099,7 @@ static void setup_child_signals( void )
 	size_t i;
 
 
-	for ( i = 0; i < sizeof sig_list / sizeof *sig_list; i++ )
+	for ( i = 0; i < NUM_ELEMS( sig_list ); i++ )
 	{
 		sact.sa_handler = child_sig_handler;
 		sigemptyset( &sact.sa_mask );
@@ -1168,16 +1172,16 @@ static void child_sig_handler( int signo )
 			return;
 
 		case SIGPIPE:
-			if ( Internals.cmdline_flags & ( TEST_ONLY | NO_GUI_RUN ) )
+			if ( Fsc2_Internals.cmdline_flags & ( TEST_ONLY | NO_GUI_RUN ) )
 				return;
 	}
 
 	/* All remaining signals are deadly... */
 
-	if ( signo != SIGTERM && ! ( Internals.cmdline_flags & NO_MAIL ) )
+	if ( signo != SIGTERM && ! ( Fsc2_Internals.cmdline_flags & NO_MAIL ) )
 	{
 #if ! defined( NDEBUG ) && defined( ADDR2LINE ) && ! defined __STRICT_ANSI__
-		if ( Internals.is_linux_i386 )
+		if ( Fsc2_Internals.is_linux_i386 )
 		{
 			asm( "mov %%ebp, %0" : "=g" ( EBP ) );
 			DumpStack( ( void * ) * ( EBP + CRASH_ADDRESS_OFFSET ) );
@@ -1193,8 +1197,8 @@ static void child_sig_handler( int signo )
 
 	if ( getppid( ) == 1 )
 	{
-		if ( Internals.conn_pid > 0 )
-			kill( Internals.conn_pid, SIGTERM );
+		if ( Fsc2_Internals.conn_pid > 0 )
+			kill( Fsc2_Internals.conn_pid, SIGTERM );
 		delete_all_shm( );
 		sema_destroy( Comm.mq_semaphore );
 	}

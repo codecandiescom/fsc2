@@ -84,44 +84,8 @@ extern size_t num_fm_mod_ranges, num_pm_mod_ranges;
 #define MAX_INT_MOD_FREQ     1.0e6  /* 1 MHz */
 
 
-/* declaration of exported functions */
-
-int rs_sml01_init_hook( void );
-int rs_sml01_test_hook( void );
-int rs_sml01_exp_hook( void );
-int rs_sml01_end_of_exp_hook( void );
-void rs_sml01_exit_hook( void );
-
-
-Var_T *synthesizer_name( Var_T *v );
-Var_T *synthesizer_state( Var_T *v );
-Var_T *synthesizer_frequency( Var_T *v );
-Var_T *synthesizer_step_frequency( Var_T *v );
-Var_T *synthesizer_attenuation( Var_T *v );
-Var_T *synthesizer_minimum_attenuation( Var_T *v );
-Var_T *synthesizer_sweep_up( Var_T *v );
-Var_T *synthesizer_sweep_down( Var_T *v );
-Var_T *synthesizer_reset_frequency( Var_T *v );
-Var_T *synthesizer_use_table( Var_T *v );
-Var_T *synthesizer_attenuation( Var_T *v );
-Var_T *synthesizer_att_ref_freq( Var_T *v );
-Var_T *synthesizer_modulation( Var_T *v );
-Var_T *synthesizer_mod_freq( Var_T *v );
-Var_T *synthesizer_mod_ampl( Var_T *v );
-Var_T *synthesizer_mod_type( Var_T *v );
-Var_T *synthesizer_mod_source( Var_T *v );
-Var_T *synthesizer_command( Var_T *v );
-
-#if defined WITH_PULSE_MODULATION
-Var_T *synthesizer_pulse_state( Var_T *v );
-Var_T *synthesizer_pulse_trigger_slope( Var_T *v );
-Var_T *synthesizer_pulse_width( Var_T *v );
-Var_T *synthesizer_pulse_delay( Var_T *v );
-#endif /* WITH_PULSE_MODULATION */
-
-
 typedef struct Att_Table_Entry Att_Table_Entry_T;
-typedef struct RS_SML01 RS_SML01;
+typedef struct RS_SML01 RS_SML01_T;
 
 
 struct Att_Table_Entry {
@@ -175,9 +139,43 @@ struct RS_SML01 {
 };
 
 
-extern RS_SML01 rs_sml01;
-extern const char *mod_types[ ];
-extern const char *mod_sources[ ];
+extern RS_SML01_T rs_sml01;
+
+
+/* declaration of exported functions */
+
+int rs_sml01_init_hook( void );
+int rs_sml01_test_hook( void );
+int rs_sml01_exp_hook( void );
+int rs_sml01_end_of_exp_hook( void );
+void rs_sml01_exit_hook( void );
+
+
+Var_T *synthesizer_name( Var_T *v );
+Var_T *synthesizer_state( Var_T *v );
+Var_T *synthesizer_frequency( Var_T *v );
+Var_T *synthesizer_step_frequency( Var_T *v );
+Var_T *synthesizer_attenuation( Var_T *v );
+Var_T *synthesizer_minimum_attenuation( Var_T *v );
+Var_T *synthesizer_sweep_up( Var_T *v );
+Var_T *synthesizer_sweep_down( Var_T *v );
+Var_T *synthesizer_reset_frequency( Var_T *v );
+Var_T *synthesizer_use_table( Var_T *v );
+Var_T *synthesizer_attenuation( Var_T *v );
+Var_T *synthesizer_att_ref_freq( Var_T *v );
+Var_T *synthesizer_modulation( Var_T *v );
+Var_T *synthesizer_mod_freq( Var_T *v );
+Var_T *synthesizer_mod_ampl( Var_T *v );
+Var_T *synthesizer_mod_type( Var_T *v );
+Var_T *synthesizer_mod_source( Var_T *v );
+Var_T *synthesizer_command( Var_T *v );
+
+#if defined WITH_PULSE_MODULATION
+Var_T *synthesizer_pulse_state( Var_T *v );
+Var_T *synthesizer_pulse_trigger_slope( Var_T *v );
+Var_T *synthesizer_pulse_width( Var_T *v );
+Var_T *synthesizer_pulse_delay( Var_T *v );
+#endif /* WITH_PULSE_MODULATION */
 
 
 /* functions defined in "rs_sml01_util.c" */

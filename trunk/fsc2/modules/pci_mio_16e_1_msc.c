@@ -316,7 +316,7 @@ Var_T *daq_trigger_setup( Var_T *v )
 
 	/* Determine the trigger type */
 
-	for ( i = 0; i < sizeof tt / sizeof tt[ 0 ]; i++ )
+	for ( i = 0; i < NUM_ELEMS( tt ); i++ )
 		if ( ! strcasecmp( v->val.sptr, tt[ i ] ) )
 			break;
 

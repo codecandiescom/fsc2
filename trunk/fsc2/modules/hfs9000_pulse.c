@@ -30,7 +30,7 @@
 
 bool hfs9000_new_pulse( long pnum )
 {
-	Pulse_T *cp = hfs9000_Pulses;
+	Pulse_T *cp = hfs9000.pulses;
 	Pulse_T *lp = NULL;
 
 
@@ -47,9 +47,9 @@ bool hfs9000_new_pulse( long pnum )
 
 	cp = PULSE_P T_malloc( sizeof *cp );
 
-	if ( hfs9000_Pulses == NULL )
+	if ( hfs9000.pulses == NULL )
 	{
-		hfs9000_Pulses = cp;
+		hfs9000.pulses = cp;
 		cp->prev = NULL;
 	}
 	else
@@ -82,7 +82,7 @@ bool hfs9000_new_pulse( long pnum )
 bool hfs9000_set_pulse_function( long pnum, int function )
 {
 	Pulse_T *p = hfs9000_get_pulse( pnum );
-	Pulse_T *pl = hfs9000_Pulses;
+	Pulse_T *pl = hfs9000.pulses;
 	Function_T *f = hfs9000.function + function;
 
 

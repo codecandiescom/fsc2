@@ -92,8 +92,8 @@
 
 /* locally used routines */
 
-static bool	parent_reader( CommStruct *header );
-static bool	child_reader( void *ret, CommStruct *header );
+static bool	parent_reader( Comm_Struct_T *header );
+static bool	child_reader( void *ret, Comm_Struct_T *header );
 static void pipe_read( char *buf, size_t bytes_to_read );
 static bool pipe_write( char *buf, size_t bytes_to_write );
 static bool send_browser( FL_OBJECT *browser );
@@ -133,8 +133,8 @@ void setup_comm( void )
 	   in shared memory where the child deposits the keys for further shared
 	   memory buffers with the data the parent is supposed to display. */
 
-	if ( ( Comm.MQ = ( MESSAGE_QUEUE * ) get_shm( &Comm.MQ_ID,
-                                                  sizeof *Comm.MQ ) ) == NULL )
+	if ( ( Comm.MQ = ( Message_Queue_T * ) get_shm( &Comm.MQ_ID,
+												  sizeof *Comm.MQ ) ) == NULL )
 	{
 		Comm.MQ_ID = -1;
 		for ( i = 0; i < 4; i++ )
@@ -224,13 +224,14 @@ int new_data_handler( void )
 	   send it a DO_QUIT signal (but only if it's still alive) and remove
 	   the callback for the 'STOP' button */
 
-	if ( Internals.child_is_quitting == QUITTING_RAISED )
+	if ( Fsc2_Internals.child_is_quitting == QUITTING_RAISED )
 	{
-		if ( Internals.child_pid > 0 && ! kill( Internals.child_pid, 0 ) )
-			kill( Internals.child_pid, DO_QUIT );
-		Internals.child_is_quitting = QUITTING_ACCEPTED;
+		if ( Fsc2_Internals.child_pid > 0 &&
+			 ! kill( Fsc2_Internals.child_pid, 0 ) )
+			kill( Fsc2_Internals.child_pid, DO_QUIT );
+		Fsc2_Internals.child_is_quitting = QUITTING_ACCEPTED;
 
-		if ( ! ( Internals.cmdline_flags & NO_GUI_RUN ) )
+		if ( ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) )
 		{
 			if ( G.dim & 1 || ! G.is_init )
 				fl_set_object_callback( GUI.run_form_1d->stop_1d, NULL, 0 );
@@ -242,7 +243,7 @@ int new_data_handler( void )
 	/* Check if the child is waiting for an answer in a call of the
 	   toolbox_wait() function and the timer expired. */
 
-	if ( Internals.tb_wait == TB_WAIT_TIMER_EXPIRED )
+	if ( Fsc2_Internals.tb_wait == TB_WAIT_TIMER_EXPIRED )
 		tb_wait_handler( 0 );
 
 	/* Now handle new data send by the child, first look for new data and, if
@@ -253,7 +254,7 @@ int new_data_handler( void )
 		TRY
 		{
 			if ( Comm.MQ->slot[ Comm.MQ->low ].type != REQUEST )
-				accept_new_data( Internals.child_is_quitting
+				accept_new_data( Fsc2_Internals.child_is_quitting
 								 != QUITTING_UNSET );
 
 			if ( Comm.MQ->low != Comm.MQ->high &&
@@ -276,8 +277,9 @@ int new_data_handler( void )
 			   the SIGCHLD handlers in run.c, so no need to worry about it
 			   here. */
 
-			if ( Internals.child_pid > 0 && ! kill( Internals.child_pid, 0 ) )
-				kill( Internals.child_pid, SIGTERM );
+			if ( Fsc2_Internals.child_pid > 0 &&
+				 ! kill( Fsc2_Internals.child_pid, 0 ) )
+				kill( Fsc2_Internals.child_pid, SIGTERM );
 
 			Comm.MQ->low = Comm.MQ->high;
 		}
@@ -290,14 +292,14 @@ int new_data_handler( void )
 	   to slow down the experiment by serving pages when the process is
 	   already struggling to keep up with data the child sends). */
 
-	if ( ! ( Internals.cmdline_flags & NO_GUI_RUN ) &&
+	if ( ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) &&
 		 Comm.MQ->low == Comm.MQ->high )
 	{
-		if ( Internals.http_pid > 0 )
+		if ( Fsc2_Internals.http_pid > 0 )
 			http_check( );
-		else if ( Internals.http_server_died )
+		else if ( Fsc2_Internals.http_server_died )
 		{
-			Internals.http_server_died = UNSET;
+			Fsc2_Internals.http_server_died = UNSET;
 			fl_call_object_callback( GUI.main_form->server );
 		}
 	}
@@ -305,9 +307,10 @@ int new_data_handler( void )
 
 	/* Check if a request from the child for external conections came in */
 
-	if ( ! ( Internals.cmdline_flags & NO_GUI_RUN ) && Internals.conn_request )
+	if ( ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) &&
+		 Fsc2_Internals.conn_request )
 	{
-		Internals.conn_request = UNSET;
+		Fsc2_Internals.conn_request = UNSET;
 		conn_request_handler( );
 	}
 
@@ -349,7 +352,7 @@ void send_data( int type, int shm_id )
 
 bool reader( void *ret )
 {
-	CommStruct header;
+	Comm_Struct_T header;
 
 	/* Get the header - failure indicates that the child is dead */
 
@@ -361,7 +364,7 @@ bool reader( void *ret )
 	OTHERWISE
 		return FAIL;
 
-	return Internals.I_am == PARENT ?
+	return Fsc2_Internals.I_am == PARENT ?
 		   parent_reader( &header ) : child_reader( ret, &header );
 }
 
@@ -369,7 +372,7 @@ bool reader( void *ret )
 /*--------------------------------------------------------------*/
 /*--------------------------------------------------------------*/
 
-static bool parent_reader( CommStruct *header )
+static bool parent_reader( Comm_Struct_T *header )
 {
 	char *str[ 4 ] = { NULL, NULL, NULL, NULL };
 	int i;
@@ -538,7 +541,7 @@ static bool parent_reader( CommStruct *header )
 				/* Call fsc2_show_fselector() and send the result back to the
 				   child process (which is waiting to read in the mean time) */
 
-				Internals.state = STATE_WAITING;
+				Fsc2_Internals.state = STATE_WAITING;
 				if ( ! writer( C_STR, fsc2_show_fselector( str[ 0 ], str[ 1 ],
 														   str[ 2 ],
 														   str[ 3 ] ) ) )
@@ -549,13 +552,13 @@ static bool parent_reader( CommStruct *header )
 			{
 				for ( i = 0; i < 4 && str[ i ] != NULL; i++ )
 					T_free( str[ i ] );
-				Internals.state = STATE_RUNNING;
+				Fsc2_Internals.state = STATE_RUNNING;
 				return FAIL;
 			}
 
 			for ( i = 0; i < 4; i++ )
 				str[ i ] = CHAR_P T_free( str[ i ] );
-			Internals.state = STATE_RUNNING;
+			Fsc2_Internals.state = STATE_RUNNING;
 			break;
 
 		case C_PROG : case C_OUTPUT :
@@ -973,7 +976,7 @@ static bool parent_reader( CommStruct *header )
 /*--------------------------------------------------------------*/
 /*--------------------------------------------------------------*/
 
-static bool child_reader( void *ret, CommStruct *header )
+static bool child_reader( void *ret, Comm_Struct_T *header )
 {
 	char *retstr = NULL;
 
@@ -1072,7 +1075,7 @@ static bool child_reader( void *ret, CommStruct *header )
 
 bool writer( int type, ... )
 {
-	CommStruct header;
+	Comm_Struct_T header;
 	va_list ap;
 	char *str[ 4 ];
 	int n1, n2;
@@ -1085,13 +1088,13 @@ bool writer( int type, ... )
 	   necessary since the child process is only reading when it actually
 	   waits for data. */
 
-	if ( Internals.I_am == CHILD )
+	if ( Fsc2_Internals.I_am == CHILD )
 		send_data( REQUEST, -1 );
 
 	header.type = type;
 	va_start( ap, type );
 
-	if ( Internals.I_am == CHILD )
+	if ( Fsc2_Internals.I_am == CHILD )
 		switch ( type )
 		{
 			case C_EPRINT :
@@ -1407,7 +1410,7 @@ static void pipe_read( char *buf, size_t bytes_to_read )
 	   it right in both cases. */
 
 	sigemptyset( &new_mask );
-	if ( Internals.I_am == CHILD )
+	if ( Fsc2_Internals.I_am == CHILD )
 		sigaddset( &new_mask, DO_QUIT );
 	else
 		sigaddset( &new_mask, QUITTING );
@@ -1455,7 +1458,7 @@ static bool pipe_write( char *buf, size_t bytes_to_write )
 
 
 	sigemptyset( &new_mask );
-	if ( Internals.I_am == CHILD )
+	if ( Fsc2_Internals.I_am == CHILD )
 		sigaddset( &new_mask, DO_QUIT );
 	else
 		sigaddset( &new_mask, QUITTING );

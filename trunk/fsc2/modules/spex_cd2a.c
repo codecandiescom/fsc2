@@ -32,7 +32,8 @@
 const char device_name[ ]  = DEVICE_NAME;
 const char generic_type[ ] = DEVICE_TYPE;
 
-SPEX_CD2A spex_cd2a, spex_cd2a_stored;
+
+struct Spex_CD2A spex_cd2a, spex_cd2a_stored;
 
 
 

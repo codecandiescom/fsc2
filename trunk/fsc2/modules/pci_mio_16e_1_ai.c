@@ -207,8 +207,7 @@ Var_T *daq_ai_channel_setup( Var_T *v )
 
 			if ( type < 0 )
 			{
-				for ( i = 0; i < sizeof types_list / sizeof types_list[ 0 ];
-					  i++ )
+				for ( i = 0; i < NUM_ELEMS( types_list ); i++ )
 					if ( ! strcasecmp( v->val.sptr, types_list[ i ] ) )
 					{
 						switch ( i )
@@ -228,35 +227,33 @@ Var_T *daq_ai_channel_setup( Var_T *v )
 						break;
 					}
 
-				if ( i < sizeof types_list / sizeof types_list[ 0 ] )
+				if ( i < NUM_ELEMS( types_list ) )
 					continue;
 			}
 
 			if ( pol < 0 )
 			{
-				for ( i = 0; i < sizeof pol_list / sizeof pol_list[ 0 ];
-					  i++ )
+				for ( i = 0; i < NUM_ELEMS( pol_list ); i++ )
 					if ( ! strcasecmp( v->val.sptr, pol_list[ i ] ) )
 					{
 						pol = i;
 						break;
 					}
 
-				if ( i < sizeof pol_list / sizeof pol_list[ 0 ] )
+				if ( i < NUM_ELEMS( pol_list ) )
 					continue;
 			}
 
 			if ( dither_enable < 0 )
 			{
-				for ( i = 0; i < sizeof enable_list / sizeof enable_list[ 0 ];
-					  i++ )
+				for ( i = 0; i < NUM_ELEMS( enable_list ); i++ )
 					if ( ! strcasecmp( v->val.sptr, enable_list[ i ] ) )
 					{
 						dither_enable = i;
 						break;
 					}
 
-				if ( i < sizeof enable_list / sizeof enable_list[ 0 ] )
+				if ( i < NUM_ELEMS( enable_list ) )
 					continue;
 			}
 
@@ -280,12 +277,12 @@ Var_T *daq_ai_channel_setup( Var_T *v )
 		if ( pol <= 0 )
 		{
 			r_list = bpr_list;
-			r_list_len = sizeof bpr_list / sizeof bpr_list[ 0 ];
+			r_list_len = NUM_ELEMS( bpr_list );
 		}
 		else
 		{
 			r_list = upr_list;
-			r_list_len = sizeof upr_list / sizeof upr_list[ 0 ];
+			r_list_len = NUM_ELEMS( upr_list );
 		}
 
 		for ( range_index = -1, i = 0; i < r_list_len - 1; i++ )
@@ -835,11 +832,11 @@ static int pci_mio_16e_1_ai_get_trigger_method( Var_T *v )
 	size_t i;
 
 
-	for ( i = 0; i < sizeof methods / sizeof methods[ 0 ]; i++ )
+	for ( i = 0; i < NUM_ELEMS( methods ); i++ )
 		if ( ! strcasecmp( v->val.sptr, methods[ i ] ) )
 			break;
 
-	if ( i == sizeof methods / sizeof methods[ 0 ] )
+	if ( i == NUM_ELEMS( methods ) )
 	{
 		print( FATAL, "Invalid trigger method argument.\n" );
 		THROW( EXCEPTION );
@@ -1059,7 +1056,7 @@ static bool pci_mio_16e_1_ai_get_polarity( const char *pname,
 	size_t i;
 
 
-	for ( i = 0; i < sizeof p / sizeof p[ 0 ]; i++ )
+	for ( i = 0; i < NUM_ELEMS( p ); i++ )
 		if ( ! strcasecmp( p[ i ], pname ) )
 		{
 			*pol = i < 2 ? NI_DAQ_NORMAL : NI_DAQ_INVERTED;

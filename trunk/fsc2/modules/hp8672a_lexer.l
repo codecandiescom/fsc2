@@ -303,7 +303,7 @@ static void hp8672a_new_table_entry( int type, double val )
 						   hp8672a.att_table_len * sizeof *hp8672a.att_table );
 		cur_table_len = hp8672a.att_table_len;
 		qsort( hp8672a.att_table, hp8672a.att_table_len,
-			   sizeof ( ATT_TABLE_ENTRY ), hp8672a_comp );
+			   sizeof ( Att_Table_Entry_T ), hp8672a_comp );
 		hp8672a.min_table_freq = hp8672a.att_table[ 0 ].freq;
 		hp8672a.max_table_freq =
 						   hp8672a.att_table[ hp8672a.att_table_len - 1 ].freq;
@@ -400,8 +400,8 @@ static void hp8672a_new_table_entry( int type, double val )
 
 static int hp8672a_comp( const void *a, const void *b )
 {
-	ATT_TABLE_ENTRY *A = ( ATT_TABLE_ENTRY * ) a,
-					*B = ( ATT_TABLE_ENTRY * ) b;
+	Att_Table_Entry_T *A = ( Att_Table_Entry_T * ) a,
+					  *B = ( Att_Table_Entry_T * ) b;
 
 
 	if ( A->freq == B->freq )

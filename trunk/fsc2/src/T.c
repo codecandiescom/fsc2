@@ -64,16 +64,16 @@ void *T_malloc( size_t size )
 	}
 
 #if defined FSC2_MDEBUG && ! defined __STRICT_ANSI__
-	if ( Internals.is_linux_i386 )
+	if ( Fsc2_Internals.is_linux_i386 )
 	{
 		asm( "mov %%ebp, %0" : "=g" ( EBP ) );
 		fprintf( stderr, "(%d) malloc:  %p (%u) from %p\n",
-				 Internals.I_am == CHILD, mem, size,
+				 Fsc2_Internals.I_am == CHILD, mem, size,
 				 ( void * ) * ( EBP + 1 ) );
 	}
 	else
 		fprintf( stderr, "(%d) malloc:  %p (%u)\n",
-				 Internals.I_am == CHILD, mem, size );
+				 Fsc2_Internals.I_am == CHILD, mem, size );
 #endif
 
 	return mem;
@@ -124,16 +124,16 @@ void *T_calloc( size_t nmemb, size_t size )
 	}
 
 #if defined FSC2_MDEBUG && ! defined __STRICT_ANSI__
-	if ( Internals.is_linux_i386 )
+	if ( Fsc2_Internals.is_linux_i386 )
 	{
 		asm( "mov %%ebp, %0" : "=g" ( EBP ) );
 		fprintf( stderr, "(%d) calloc:  %p (%u) from %p\n",
-				 Internals.I_am == CHILD, mem, nmemb * size,
+				 Fsc2_Internals.I_am == CHILD, mem, nmemb * size,
 				 ( void * ) * ( EBP + 1 ) );
 	}
 	else
 		fprintf( stderr, "(%d) calloc:  %p (%u)\n",
-				 Internals.I_am == CHILD, mem, nmemb * size );
+				 Fsc2_Internals.I_am == CHILD, mem, nmemb * size );
 #endif
 
 	return mem;
@@ -175,16 +175,16 @@ void *T_realloc( void *ptr, size_t size )
 	}
 
 #if defined FSC2_MDEBUG && ! defined __STRICT_ANSI__
-	if ( Internals.is_linux_i386 )
+	if ( Fsc2_Internals.is_linux_i386 )
 	{
 		asm( "mov %%ebp, %0" : "=g" ( EBP ) );
 		fprintf( stderr, "(%d) realloc: %p -> %p (%u) from %p\n",
-				 Internals.I_am == CHILD, ptr, new_ptr, size,
+				 Fsc2_Internals.I_am == CHILD, ptr, new_ptr, size,
 				 ( void * ) * ( EBP + 1 ) );
 	}
 	else
 		fprintf( stderr, "(%d) realloc: %p -> %p (%u)\n",
-				 Internals.I_am == CHILD, ptr, new_ptr, size );
+				 Fsc2_Internals.I_am == CHILD, ptr, new_ptr, size );
 #endif
 
 	return new_ptr;
@@ -208,14 +208,15 @@ void *T_free( void *ptr )
 		return NULL;
 
 #if defined FSC2_MDEBUG && ! defined __STRICT_ANSI__
-	if ( Internals.is_linux_i386 )
+	if ( Fsc2_Internals.is_linux_i386 )
 	{
 		asm( "mov %%ebp, %0" : "=g" ( EBP ) );
 		fprintf( stderr, "(%d) free:    %p from %p\n",
-				 Internals.I_am == CHILD, ptr, ( void * ) * ( EBP + 1 ) );
+				 Fsc2_Internals.I_am == CHILD, ptr, ( void * ) * ( EBP + 1 ) );
 	}
 	else
-		fprintf( stderr, "(%d) free:    %p\n", Internals.I_am == CHILD, ptr );
+		fprintf( stderr, "(%d) free:    %p\n",
+				 Fsc2_Internals.I_am == CHILD, ptr );
 
 	fsc2_assert( mprobe( ptr ) == MCHECK_OK );
 #endif
@@ -257,16 +258,16 @@ char *T_strdup( const char *str )
 	strcpy( new_str, str );
 
 #if defined FSC2_MDEBUG && ! defined __STRICT_ANSI__
-	if ( Internals.is_linux_i386 )
+	if ( Fsc2_Internals.is_linux_i386 )
 	{
 		asm( "mov %%ebp, %0" : "=g" ( EBP ) );
 		fprintf( stderr, "(%d) strdup:  %p (%u) from %p\n",
-				 Internals.I_am == CHILD, ( void * ) new_str, len + 1,
+				 Fsc2_Internals.I_am == CHILD, ( void * ) new_str, len + 1,
 				 ( void * ) * ( EBP + 1 ) );
 	}
 	else
 		fprintf( stderr, "(%d) strdup:  %p (%u)\n",
-			 Internals.I_am == CHILD, ( void * ) new_str, len + 1 );
+			 Fsc2_Internals.I_am == CHILD, ( void * ) new_str, len + 1 );
 #endif
 
 	return new_str;

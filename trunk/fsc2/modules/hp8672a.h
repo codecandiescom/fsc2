@@ -59,6 +59,53 @@
 #define HP8672A_10dbm_OVERRANGE       0x01
 
 
+typedef struct Att_Table_Entry Att_Table_Entry_T;
+typedef struct HP8672A HP8672A_T;
+
+
+struct Att_Table_Entry {
+	double freq;
+	double att;
+};
+
+
+struct HP8672A {
+	int device;
+
+	double freq;
+	bool freq_is_set;
+	double step_freq;
+	bool step_freq_is_set;
+	double start_freq;
+	bool start_freq_is_set;
+	double attenuation;
+	bool attenuation_is_set;
+
+	bool state;                     /* RF is on or off */
+	bool is_10db;                   /* 10 db extra output option */
+
+	char *table_file;               /* name of attenuation table file */
+	bool use_table;
+	Att_Table_Entry_T *att_table;
+	long att_table_len;
+	double min_table_freq;
+	double max_table_freq;
+	double min_attenuation;
+	double att_ref_freq;
+	double att_at_ref_freq;
+	double real_attenuation;        /* might differ from attenuation due to
+									   use of table */
+	int mod_type;
+	bool mod_type_is_set;
+	int mod_ampl[ NUM_MOD_TYPES ];
+	bool mod_ampl_is_set[ NUM_MOD_TYPES ];
+};
+
+
+extern HP8672A_T hp8672a;
+extern double fm_ampl[ ];
+
+
 /* Declaration of exported functions */
 
 int hp8672a_init_hook( void );
@@ -85,70 +132,6 @@ Var_T *synthesizer_mod_ampl( Var_T *v );
 Var_T *synthesizer_mod_type( Var_T *v );
 Var_T *synthesizer_mod_source( Var_T *v );
 Var_T *synthesizer_command( Var_T *v );
-
-
-typedef struct ATT_TABLE_ENTRY ATT_TABLE_ENTRY;
-typedef struct HP8672A HP8672A;
-
-
-struct ATT_TABLE_ENTRY {
-	double freq;
-	double att;
-};
-
-
-struct HP8672A {
-	int device;
-
-	double freq;
-	bool freq_is_set;
-	double step_freq;
-	bool step_freq_is_set;
-	double start_freq;
-	bool start_freq_is_set;
-	double attenuation;
-	bool attenuation_is_set;
-
-	bool state;                     /* RF is on or off */
-	bool is_10db;                   /* 10 db extra output option */
-
-	char *table_file;               /* name of attenuation table file */
-	bool use_table;
-	ATT_TABLE_ENTRY *att_table;
-	long att_table_len;
-	double min_table_freq;
-	double max_table_freq;
-	double min_attenuation;
-	double att_ref_freq;
-	double att_at_ref_freq;
-	double real_attenuation;        /* might differ from attenuation due to
-									   use of table */
-	int mod_type;
-	bool mod_type_is_set;
-	int mod_ampl[ NUM_MOD_TYPES ];
-	bool mod_ampl_is_set[ NUM_MOD_TYPES ];
-};
-
-
-
-#if defined( HP8672A_MAIN )
-
-HP8672A hp8672a;
-bool HP8672A_INIT = UNSET;
-const char *mod_types[ ] =   { "FM", "AM", "OFF" };
-double fm_ampl[ ] = { 3.0e4, 1.0e5, 3.0e5, 1.0e6, 3.0e6, 1.0e7 };
-double am_ampl[ ] = { 30.0, 100.0 };
-
-#else
-
-extern HP8672A hp8672a;
-extern bool HP8672A_INIT;
-extern const char *mod_types[ ];
-extern double fm_ampl[ ];
-extern double am_ampl[ ];
-
-#endif
-
 
 
 /* functions defined in "hp8672a_util.c" */

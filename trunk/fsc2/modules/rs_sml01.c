@@ -32,27 +32,27 @@
 const char device_name[ ]  = DEVICE_NAME;
 const char generic_type[ ] = DEVICE_TYPE;
 
-RS_SML01 rs_sml01;
-const char *mod_types[ ] =   { "FM", "AM", "PHASE", "OFF" };
-const char *mod_sources[ ] = { "EXT AC", "EXT DC", "INT" };
+RS_SML01_T rs_sml01;
+
+static const char *mod_types[ ] =   { "FM", "AM", "PHASE", "OFF" };
 
 
-struct MOD_RANGES fm_mod_ranges[ ] = { { 7.600000e6, 1.00e6 },
-									   { 1.513125e8, 1.25e5 },
-									   { 3.026250e8, 2.50e6 },
-									   { 6.052500e8, 5.00e6 },
-									   { 1.100000e9, 1.00e6 } };
+static struct MOD_RANGES fm_mod_ranges[ ] = { { 7.600000e6, 1.00e6 },
+											{ 1.513125e8, 1.25e5 },
+											{ 3.026250e8, 2.50e6 },
+											{ 6.052500e8, 5.00e6 },
+											{ 1.100000e9, 1.00e6 } };
 
-struct MOD_RANGES pm_mod_ranges[ ] = { { 7.600000e6, 10.0 },
-									   { 1.513125e8, 1.25 },
-									   { 3.026250e8, 2.50 },
-									   { 6.052500e8, 5.00 },
-									   { 1.100000e9, 10.0 } };
+static struct MOD_RANGES pm_mod_ranges[ ] = { { 7.600000e6, 10.0 },
+											{ 1.513125e8, 1.25 },
+											{ 3.026250e8, 2.50 },
+											{ 6.052500e8, 5.00 },
+											{ 1.100000e9, 10.0 } };
 
-size_t num_fm_mod_ranges = sizeof fm_mod_ranges / sizeof *fm_mod_ranges;
-size_t num_pm_mod_ranges = sizeof pm_mod_ranges / sizeof *pm_mod_ranges;
+static size_t num_fm_mod_ranges = NUM_ELEMS( fm_mod_ranges );
+static size_t num_pm_mod_ranges = NUM_ELEMS( pm_mod_ranges );
 
-static RS_SML01 rs_sml01_backup;
+static RS_SML01_T rs_sml01_backup;
 
 
 /*------------------------------------*/
@@ -1018,8 +1018,7 @@ Var_T *synthesizer_mod_source( Var_T *v )
 	}
 	else
 	{
-		switch ( is_in( v->val.sptr, sources,
-						sizeof sources / sizeof sources[ 0 ] ) )
+		switch ( is_in( v->val.sptr, sources, NUM_ELEMS( sources ) ) )
 		{
 			case 0 : case 1 :
 				source = MOD_SOURCE_AC;

@@ -99,7 +99,7 @@ jmp_buf *push_exception_frame( const char *file, int line )
 	    syslog( LOG_ERR, "%s: Too many nested exceptions at %s:%d.\n",
 				prog_name, file, line );
 #ifdef FSC2_HEADER
-		if ( Internals.I_am == CHILD )
+		if ( Fsc2_Internals.I_am == CHILD )
 			_exit( FAIL );
 #endif
 		exit( EXIT_FAILURE );
@@ -129,7 +129,7 @@ void pop_exception_frame( const char *file, int line )
 		syslog( LOG_ERR, "%s: Exception stack empty at %s:%d.\n",
 				prog_name, file, line );
 #ifdef FSC2_HEADER
-		if ( Internals.I_am == CHILD )
+		if ( Fsc2_Internals.I_am == CHILD )
 			_exit( FAIL );
 #endif
 		exit( EXIT_FAILURE );
@@ -155,7 +155,7 @@ jmp_buf *throw_exception( Exception_Types exception_type )
 	if ( exception_stack_pos < 0 )
 	{
 #ifdef FSC2_HEADER
-		if ( Internals.I_am == CHILD )
+		if ( Fsc2_Internals.I_am == CHILD )
 			_exit( FAIL );
 #endif
 		exit( EXIT_FAILURE );
@@ -186,7 +186,7 @@ Exception_Types get_exception_type( const char *file, int line )
 	    syslog( LOG_ERR, "%s: Request for type of exception that never got "
 				"thrown at %s:%d.\n", prog_name, file, line );
 #ifdef FSC2_HEADER
-		if ( Internals.I_am == CHILD )
+		if ( Fsc2_Internals.I_am == CHILD )
 			_exit( FAIL );
 #endif
 		exit( EXIT_FAILURE );
@@ -199,7 +199,7 @@ Exception_Types get_exception_type( const char *file, int line )
 	    syslog( LOG_ERR, "%s: Exception stack is empty at %s:%d.\n",
 				prog_name, file, line );
 #ifdef FSC2_HEADER
-		if ( Internals.I_am == CHILD )
+		if ( Fsc2_Internals.I_am == CHILD )
 			_exit( FAIL );
 #endif
 		exit( EXIT_FAILURE );

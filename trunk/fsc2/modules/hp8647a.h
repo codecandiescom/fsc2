@@ -53,36 +53,8 @@
 #define MAX_PHASE_AMPL  10.0
 
 
-/* declaration of exported functions */
-
-int hp8647a_init_hook( void );
-int hp8647a_test_hook( void );
-int hp8647a_exp_hook( void );
-int hp8647a_end_of_exp_hook( void );
-void hp8647a_exit_hook( void );
-
-
-Var_T *synthesizer_name( Var_T *v );
-Var_T *synthesizer_state( Var_T *v );
-Var_T *synthesizer_frequency( Var_T *v );
-Var_T *synthesizer_step_frequency( Var_T *v );
-Var_T *synthesizer_attenuation( Var_T *v );
-Var_T *synthesizer_minimum_attenuation( Var_T *v );
-Var_T *synthesizer_sweep_up( Var_T *v );
-Var_T *synthesizer_sweep_down( Var_T *v );
-Var_T *synthesizer_reset_frequency( Var_T *v );
-Var_T *synthesizer_use_table( Var_T *v );
-Var_T *synthesizer_attenuation( Var_T *v );
-Var_T *synthesizer_att_ref_freq( Var_T *v );
-Var_T *synthesizer_modulation( Var_T *v );
-Var_T *synthesizer_mod_ampl( Var_T *v );
-Var_T *synthesizer_mod_type( Var_T *v );
-Var_T *synthesizer_mod_source( Var_T *v );
-Var_T *synthesizer_command( Var_T *v );
-
-
 typedef struct Att_Table_Entry Att_Table_Entry_T;
-typedef struct HP8647A HP8647A;
+typedef struct HP8647A HP8647A_T;
 
 
 struct Att_Table_Entry {
@@ -125,12 +97,40 @@ struct HP8647A {
 };
 
 
-extern HP8647A hp8647a;
+extern HP8647A_T hp8647a;
 extern const char *mod_types[ ];
 extern const char *mod_sources[ ];
 
 
-/* functions defined in "hp8647a_util.c" */
+/* Declaration of exported functions */
+
+int hp8647a_init_hook( void );
+int hp8647a_test_hook( void );
+int hp8647a_exp_hook( void );
+int hp8647a_end_of_exp_hook( void );
+void hp8647a_exit_hook( void );
+
+
+Var_T *synthesizer_name( Var_T *v );
+Var_T *synthesizer_state( Var_T *v );
+Var_T *synthesizer_frequency( Var_T *v );
+Var_T *synthesizer_step_frequency( Var_T *v );
+Var_T *synthesizer_attenuation( Var_T *v );
+Var_T *synthesizer_minimum_attenuation( Var_T *v );
+Var_T *synthesizer_sweep_up( Var_T *v );
+Var_T *synthesizer_sweep_down( Var_T *v );
+Var_T *synthesizer_reset_frequency( Var_T *v );
+Var_T *synthesizer_use_table( Var_T *v );
+Var_T *synthesizer_attenuation( Var_T *v );
+Var_T *synthesizer_att_ref_freq( Var_T *v );
+Var_T *synthesizer_modulation( Var_T *v );
+Var_T *synthesizer_mod_ampl( Var_T *v );
+Var_T *synthesizer_mod_type( Var_T *v );
+Var_T *synthesizer_mod_source( Var_T *v );
+Var_T *synthesizer_command( Var_T *v );
+
+
+/* Functions defined in "hp8647a_util.c" */
 
 void hp8647a_read_table( FILE *fp );
 FILE *hp8647a_find_table( char **name );
@@ -140,12 +140,12 @@ double hp8647a_get_att( double freq );
 int hp8647a_set_mod_param( Var_T *v, double *dres, int *ires );
 
 
-/* functions defined in "hp8647a_lexer.l" */
+/* Functions defined in "hp8647a_lexer.l" */
 
 void hp8647a_read_table( FILE *fp );
 
 
-/* functions defined in "hp8647a_gpib.c" */
+/* Functions defined in "hp8647a_gpib.c" */
 
 bool hp8647a_init( const char *name );
 void hp8647a_finished( void );

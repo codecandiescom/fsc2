@@ -56,9 +56,9 @@ struct SPECTRAPRO_300I {
 	} grating[ MAX_GRATINGS ];
 };
 
-typedef struct CALIB_PARAMS CALIB_PARAMS;
+typedef struct Calib_Params Calib_Params_T;
 
-struct CALIB_PARAMS {
+struct Calib_Params {
 	double d;                    /* grating grooves per millimeter */
 	double pixel_width;          /* width of a pixel of the CCD */
 	size_t num_values;           /* number of values */

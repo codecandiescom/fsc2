@@ -257,7 +257,7 @@ static void dg2020_basic_functions_check( void )
 
 			/* No phase sequences have been defined ? */
 
-			if ( Phs_Seq == NULL )
+			if ( PA_Seq.phs_seq == NULL )
 			{
 				print( WARN, "Phase functions '%s' isn't needed, because no "
 					   "phase sequences have been defined.\n", f->name );
@@ -371,7 +371,7 @@ static void dg2020_basic_functions_check( void )
 		else
 		{
 			f->needs_phases = UNSET;
-			f->num_needed_channels = 2 * Phs_Seq->len;
+			f->num_needed_channels = 2 * PA_Seq.phs_seq->len;
 		}
 
 		/* Put channels not needed back into the pool */
@@ -538,7 +538,7 @@ static void dg2020_create_phase_pulses( Function_T *f )
 	{
 		f->num_active_pulses = 0;
 
-		for ( j = 0; j < Phs_Seq->len; j++ )
+		for ( j = 0; j < PA_Seq.phs_seq->len; j++ )
 			for ( l = 0; l < 2; l++ )
 			{
 				p = dg2020_new_phase_pulse( f, f->phase_func->pulses[ i ], i,

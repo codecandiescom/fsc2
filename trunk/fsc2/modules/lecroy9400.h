@@ -89,7 +89,7 @@
    area between the pair of cursors */
 
 typedef struct Window Window_T;
-typedef struct LECROY9400 LECROY9400;
+typedef struct LECROY9400 LECROY9400_T;
 
 
 struct Window {
@@ -173,6 +173,28 @@ struct LECROY9400 {
 
 
 
+extern LECROY9400_T lecroy9400;
+
+extern const char *LECROY9400_Channel_Names[ 9 ];
+
+extern double sset[ 10 ];
+extern double tb[ 21 ];
+extern double tpp[ 21 ];
+extern double sr[ 21 ];
+extern int ppd[ 21 ];
+extern long na[ 16 ];
+extern long cl[ 10 ];
+extern long ml[ 21 ];
+
+extern bool lecroy9400_IN_SETUP;
+
+
+enum {
+	SAMPLE,
+	AVERAGE
+};
+
+
 /* declaration of exported functions */
 
 int lecroy9400_init_hook( void );
@@ -204,10 +226,10 @@ Var_T *digitizer_command( Var_T *v );
 
 int lecroy9400_get_tb_index( double timebase );
 const char *lecroy9400_ptime( double p_time );
-void lecroy9400_delete_windows( LECROY9400 *s );
+void lecroy9400_delete_windows( LECROY9400_T *s );
 void lecroy9400_do_pre_exp_checks( void );
 long lecroy9400_translate_channel( int dir, long channel, bool flag );
-void lecroy9400_store_state( LECROY9400 *src, LECROY9400 *dest );
+void lecroy9400_store_state( LECROY9400_T *src, LECROY9400_T *dest );
 
 bool lecroy9400_init( const char *name );
 double lecroy9400_get_timebase( void );
@@ -237,35 +259,6 @@ void lecroy9400_get_curve( int ch, Window_T *w, double **array, long *length,
 void lecroy9400_free_running( void );
 bool lecroy9400_command( const char *cmd );
 void lecroy9400_gpib_failure( void );
-
-
-
-extern LECROY9400 lecroy9400;
-
-extern const char *LECROY9400_Channel_Names[ 9 ];
-
-extern double sset[ 10 ];
-extern double tb[ 21 ];
-extern double tpp[ 21 ];
-extern double sr[ 21 ];
-extern int ppd[ 21 ];
-extern long na[ 16 ];
-extern long cl[ 10 ];
-extern long ml[ 21 ];
-
-extern bool lecroy9400_IN_SETUP;
-
-
-enum {
-	SAMPLE,
-	AVERAGE
-};
-
-
-#define TB_ENTRIES ( sizeof tb / sizeof tb[ 0 ] )
-#define NA_ENTRIES ( sizeof na / sizeof na[ 0 ] )
-#define CL_ENTRIES ( sizeof cl / sizeof cl[ 0 ] )
-#define ML_ENTRIES ( sizeof ml / sizeof ml[ 0 ] )
 
 
 /*

@@ -77,7 +77,7 @@
    area between the pair of cursors */
 
 typedef struct Window Window_T;
-typedef struct TDS520C TDS520C;
+typedef struct TDS520C TDS520C_T;
 
 
 struct Window {
@@ -151,7 +151,7 @@ enum {
 
 #ifdef TDS520C_MAIN
 
-TDS520C tds520c;
+TDS520C_T tds520c;
 const char *TDS520C_Channel_Names[ MAX_CHANNELS ] = {
 											 "CH1", "CH2", "CH3", "CH4",
 											 "MATH1", "MATH2", "MATH3",
@@ -183,21 +183,19 @@ static double tb[ ] = {                     500.0e-12,
 						  1.0,      2.0,      5.0,
 						 10.0 };
 
-#define TB_ENTRIES ( sizeof tb / sizeof tb[ 0 ] )
-
 /* Maximum and minimum sensitivity settings (in V) of the measurement
    channels.
    Take care: The minimum sensitivity of 10 V only works with 1 M Ohm input
    impedance, while for 50 Ohm the minimum sensitivity is only 1V.
    Unfortunately, this can only be tested after the digitizer is online. */
 
-double max_sens = 1e-3,
+double max_sens    = 1e-3,
 	   min_sens_50 = 1.0,
-	   min_sens = 10.0;
+	   min_sens    = 10.0;
 
 #else
 
-extern TDS520C tds520c;
+extern TDS520C_T tds520c;
 extern const char *TDS520C_Channel_Names[ MAX_CHANNELS ];
 extern const char *User_Channel_Names[ MAX_CHANNELS ];
 extern double max_sens, min_sens_50, min_sens;
@@ -245,7 +243,7 @@ Var_T *digitizer_command( Var_T *v );
 /* Declaration of internally used functions */
 
 const char *tds520c_ptime( double p_time );
-void tds520c_delete_windows( TDS520C *s );
+void tds520c_delete_windows( TDS520C_T *s );
 void tds520c_do_pre_exp_checks( void );
 void tds520c_window_checks( Window_T *w );
 void tds520c_set_tracking( Window_T *w );
@@ -253,7 +251,7 @@ void tds520c_set_meas_window( Window_T *w );
 void tds520c_set_curve_window( Window_T *w );
 void tds520c_set_window( Window_T *w );
 long tds520c_translate_channel( int dir, long channel, bool flag );
-void tds520c_store_state( TDS520C *dest, TDS520C *src );
+void tds520c_store_state( TDS520C_T *dest, TDS520C_T *src );
 void tds520c_state_check( double timebase, long rec_len, double trig_pos );
 Window_T *tds520c_get_window_by_number( long win_number );
 

@@ -28,12 +28,14 @@
 /* This typedef MUST be identical to the YYSTYPE union defined in
    `exp_run_parser.h' which in turn results from `exp_run_parser.y' !! */
 
-typedef union {
+typedef union Token_Val Token_Val_T;
+
+union Token_Val {
 		long   lval;
 		double dval;
 		char   *sptr;
 		Var_T  *vptr;
-} Token_Val;
+};
 
 
 #define	E_VAR_TOKEN	    258
@@ -94,7 +96,7 @@ struct Simp_Var {
 
 struct Prg_Token {
 	int       token;          /* type of current token */
-	Token_Val tv;             /* tokens value as needed by the parser */
+	Token_Val_T tv;           /* tokens value as needed by the parser */
 	Prg_Token_T *start;       /* used in IF, WHILE etc. [1] */
 	Prg_Token_T *end;         /* used in WHILE, IF etc. [2] */
 	union {

@@ -87,7 +87,6 @@
 
 /* typedefs of structures needed in the module */
 
-
 typedef struct RS690 RS690_T;
 typedef struct Function Function_T;
 typedef struct Channel Channel_T;
