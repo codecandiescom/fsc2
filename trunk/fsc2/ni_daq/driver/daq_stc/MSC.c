@@ -216,9 +216,9 @@ void daq_irq_enable( Board *board, int irq, void ( * handler )( Board * ) )
 	}
 }
 
-/*----------------------------------------------------------------*/
-/* Function for disabling of one of the interrupts of the DAQ-STC */
-/*----------------------------------------------------------------*/
+/*-------------------------------------------------------------*/
+/* Function for disabling one of the interrupts of the DAQ-STC */
+/*-------------------------------------------------------------*/
 
 void daq_irq_disable( Board *board, int irq )
 {

@@ -206,7 +206,7 @@ static void AI_daq_reset( Board *board )
 	board->stc.AI_Trigger_Select    = 0;
 
 	/* The AI_Start_Stop and Reserved_One bits in AI_Mode_1_Register
-	   should normally be set and also the AI_Trigger_Once (unlesss
+	   should normally be set and also the AI_Trigger_Once (unless
 	   continuous acquisition is used) */
 
 	data = AI_Start_Stop | Reserved_One | AI_Trigger_Once;
@@ -296,7 +296,7 @@ int AI_ioctl_handler( Board *board, NI_DAQ_AI_ARG *arg )
 
 /*---------------------------------------------------------------*/
 /* Function for setting the AI_IN_TIMEBASE1 - it can be switched */
-/* between 20 MHz and 10 MHz (Please note that the timebase for  */
+/* between 20 MHz and 10 MHz (please note that the time base for */
 /* IN_TIMEBASE2 is controlled by the general setting of the MSC  */
 /* subsystem!).                                                  */
 /*---------------------------------------------------------------*/
@@ -401,7 +401,7 @@ static int AI_channel_setup( Board *board, unsigned int num_channels,
 	/* Check that the channel associated with a channel with differential
 	   coupling is not used - channels with differential coupling can only
 	   be in the ranges i = 0..7,16..23,32..29,48..55 and the channel
-	   asssociated to it has to have the number (i + 8) */
+	   associated to it has to have the number (i + 8) */
 
 	for ( i = 0; i < board->type->ai_num_channels; i++ ) {
 		if ( ch_types[ i ] == NI_DAQ_AI_TYPE_UNASSIGNED )
@@ -493,7 +493,7 @@ static int AI_acq_setup( Board *board, NI_DAQ_ACQ_SETUP *acq_args )
 
 /*------------------------------------------------------------*/
 /* Function for setting the number of scans to be done during */
-/* an acquistion.                                             */
+/* an acquisition.                                            */
 /*------------------------------------------------------------*/
 
 static int AI_SC_setup( Board *board, NI_DAQ_ACQ_SETUP *a )
@@ -606,7 +606,7 @@ static int AI_SI_setup( Board *board, NI_DAQ_ACQ_SETUP *a )
 	}
 
 	/* Check that when the SI counter is fed from one of the internal
-	   timebases the spacing between the resulting START pulses isn't
+	   time bases the spacing between the resulting START pulses isn't
 	   too fast for the board */
 
 	if ( a->SI_source == NI_DAQ_AI_IN_TIMEBASE1 ||
@@ -778,12 +778,12 @@ static int AI_SI2_setup( Board *board, NI_DAQ_ACQ_SETUP *a )
 	}
 
 	/* What the SI2 counter counts is either the same as the SI
-	   counter or the AI subsystems (fast) timebase */
+	   counter or the AI subsystems (fast) time base */
 
 	if ( a->SI2_source != NI_DAQ_SAME_AS_SI )
 		acq_setup.mode_3 |= AI_SI2_Source_Select;
 
-	/* The start delay hets loaded into the SI2_Load_A Register and the
+	/* The start delay gets loaded into the SI2_Load_A Register and the
 	   spacing between CONVERT signals into SI2_Load_B (as usual after
 	   subtracting 1) */
 
@@ -810,7 +810,7 @@ static void AI_acq_register_setup( Board *board )
 	acq_setup.trig       |= board->stc.AI_Trigger_Select;
 
 	/* First of all disable the START1 signal for the time being - it
-	   will be enabled again when an acqusistion is to be started */
+	   will be enabled again when an acquisition is to be started */
 
 	board->func->stc_writew( board, STC_AI_Command_2,
 				 board->stc.AI_Command_2 | AI_START1_Disable );
@@ -958,7 +958,7 @@ int AI_start_acq( Board *board )
 					     NI_DAQ_AI_SUBSYSTEM ) ) < 0 )
 		return ret;
 		       
-	/* Set up all regsiters, then arm the required counters */
+	/* Set up all registers, then arm the required counters */
 
 	board->func->start_critical_section( board );
 	data = board->stc.Joint_Reset | AI_Configuration_Start;

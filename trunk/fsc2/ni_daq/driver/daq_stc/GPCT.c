@@ -152,7 +152,7 @@ void GPCT_reset_all( Board *board )
 	board->func->dma_shutdown( board, NI_DAQ_GPCT0_SUBSYSTEM );
 	board->func->dma_shutdown( board, NI_DAQ_GPCT1_SUBSYSTEM );
 
-	/* Zero out the autoincrement values */
+	/* Zero out the auto-increment values */
 
 	for ( i = 0; i < 2; i++ )
 		board->func->stc_writew( board, STC_Gi_Autoincrement( i ), 0 );
@@ -236,8 +236,8 @@ int GPCT_ioctl_handler( Board *board, NI_DAQ_GPCT_ARG *arg )
 
 /*----------------------------------------------------------------------*/
 /* Function for setting the G_IN_TIMEBASE1 - it can be switched between */
-/* 20 MHz and 10 MHz (Please note that the timebase for IN_TIMEBASE2 is */
-/* controlled by the general setting of the MSC subsystem!).            */
+/* 20 MHz and 10 MHz (Please note that the time base for IN_TIMEBASE2   */
+/* is controlled by the general setting of the MSC subsystem!).         */
 /*----------------------------------------------------------------------*/
 
 static int GPCT_clock_speed( Board *board, NI_DAQ_CLOCK_SPEED_VALUE speed )
@@ -313,15 +313,15 @@ static int GPCT_counter_disarm( Board *board, unsigned counter )
 }
 
 
-/*---------------------------------------------------------------------------*/
-/* Function for reading the value of a counter (via the save registers).     */
-/* When called with the 'wait_on_end' member of the NI_DAQ_COUNTER_VAL       */
-/* structure passed to the function being set it's assumed that the counter  */
-/* is doing a gated measurement with the neighbouring counter as the source  */
-/* of the (single) gate pulse. The function will then wait for the neigh-    */
-/* bouring counter to stop counting before disarming the counter and reading */
-/* the counter value.                                                        */
-/*---------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------*/
+/* Function for reading the value of a counter (via the save registers).    */
+/* When called with the 'wait_on_end' member of the NI_DAQ_COUNTER_VAL      */
+/* structure passed to the function being set it's assumed that the counter */
+/* is doing a gated measurement with the neighboring counter as the source  */
+/* of the (single) gate pulse. The function will then wait for the neigh-   */
+/* boring counter to stop counting before disarming the counter and reading */
+/* the counter value.                                                       */
+/*--------------------------------------------------------------------------*/
 
 static int GPCT_get_count( Board *board, unsigned int counter,
 			   int wait_for_end, unsigned long *count )
@@ -455,7 +455,7 @@ static int GPCT_start_pulses( Board *board, unsigned int counter,
 	}
 
 	/* Check the times for the 'low' and 'high' period as well as the
-	   intial delay of the pulses */
+	   initial delay of the pulses */
 
 	if ( low_ticks < 2 || high_ticks < 2 ) {
 		PDEBUG( "Invalid low or high ticks\n" );

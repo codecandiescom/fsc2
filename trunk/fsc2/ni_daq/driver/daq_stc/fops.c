@@ -51,9 +51,9 @@ struct file_operations ni_daq_file_ops = {
 };
 
 
-/*----------------------------------------------------------------------*/
-/* Function gets exectuted when the device file for a board gets opened */
-/*----------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*/
+/* Function gets executed when the device file for a board gets opened */
+/*---------------------------------------------------------------------*/
 
 static int ni_daq_open( struct inode *inode_p, struct file *file_p )
 {
@@ -166,9 +166,9 @@ static unsigned int ni_daq_poll( struct file *filep,
 		   the SC TC interrupt would have been raised) and there are
 		   no new data in the DMA buffer enable the STOP
 		   interrupt (indicating that new data are available) and
-		   let poll_wait() do whatever it needs to do. Afterwards
-		   disable STOP interrupts, otherwise we would get flooded
-		   with interrupts... */
+		   let poll_wait() do whatever it needs to do. When the STOP
+		   interrupts finally arrived disable it again, otherwise we
+		   would get flooded with these interrupts... */
 
 		if ( board->func->dma_get_available( board,
 						   NI_DAQ_AI_SUBSYSTEM ) )
