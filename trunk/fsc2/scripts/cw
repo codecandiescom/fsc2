@@ -12,7 +12,7 @@ my $field_step  = '';
 my $num_runs    = 1;
 my $tc          = "Don't set";
 my $sens        = "Don't set";
-my $how         = 'Start program';
+my $how         = 'Start experiment';
 
 
 my %fp = ( '-side' => 'top',
@@ -152,7 +152,7 @@ $f7_l->pack( %wp );
 $f7_m->pack( %wp );
 
 
-$mw->Optionmenu( '-options' => [ ( 'Start program', 'Test program',
+$mw->Optionmenu( '-options' => [ ( 'Start experiment', 'Test program',
 								   'Load into fsc2' ) ],
 				 '-variable' => \$how,
 				 '-command' => \&write_out
