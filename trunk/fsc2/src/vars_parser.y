@@ -18,7 +18,6 @@ void variableserror( const char *s );
 extern char *variablestext;
 
 
-static Var *P_Var;
 static Var *CV;
 
 %}

@@ -29,6 +29,7 @@
 #include "util.h"
 #include "variables.h"
 #include "func.h"
+#include "devices.h"
 #include "assign.h"
 #include "phases.h"
 #include "pulse.h"
@@ -39,6 +40,7 @@
 /* The diverse lexers */
 
 bool split( char *file );
+int devices_parser( FILE *in );
 int assignments_parser( FILE *in );
 int variables_parser( FILE *in );
 int phases_parser( FILE *in );
@@ -64,6 +66,8 @@ Var *var_list = NULL;
 Var *var_list_copy;
 Var *Var_Stack = NULL;
 
+Device *Dev_List = NULL;
+
 ASSIGNMENTS assignment[ PULSER_CHANNEL_PHASE_Y + 1 ];
 
 Phase_Sequence PSeq[ MAX_PHASE_SEQ_LEN ];
@@ -83,8 +87,7 @@ extern Prg_Token *prg_token;
 extern long prg_length;
 extern Prg_Token *cur_prg_token;
 
-extern long Time_Unit;
-extern long Time_Base;
+extern Device *Dev_List;
 
 extern Var *var_list;
 extern Var *var_list_copy;

@@ -50,6 +50,7 @@ ERR         \x3\n.+\n
 ESTR        \x5.*\x3\n.*\n
 STR         \x5[^\x6]*\x6
 
+DEV         ^[ \t]*DEV(ICE)?S?:
 ASS         ^[ \t]*ASS(IGNMENT)?S?:
 VAR         ^[ \t]*VAR(IABLE)?S?:
 PHAS        ^[ \t]*PHA(SE)?S?:
@@ -101,9 +102,16 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 
 			/* handling of error messages from the cleaner */
 {ERR}		THROW( CLEANER_EXCEPTION );
+
 {ESTR}		{
 				prim_exptext = strchr( prim_exptext, '\x03' );
 				THROW( CLEANER_EXCEPTION );
+			}
+
+			/* handling of DEVICES: labels */
+{DEV}		{
+				Prim_Exp_Next_Section = DEVICES_SECTION;
+				return 0;
 			}
 
 			/* handling of ASSIGNMENTS: labels */
@@ -205,19 +213,10 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 
 				prim_exp_val.vptr = func_get( prim_exptext, &acc );
 				if ( prim_exp_val.vptr != NULL )
-				{
-					if ( acc != ACCESS_ALL_SECTIONS )
-					{
-						eprint( FATAL, "%s:%ld: Function `%s' can't be used "
-								"in EXPERIMENT section.\n",
-								Fname, Lc, prim_exptext );
-						THROW( SYNTAX_ERROR_EXCEPTION );
-					}
 					return E_FUNC_TOKEN;
-				}
 
-				if ( ( prim_exp_val.vptr = vars_get( prim_exptext ) )
-				     == NULL )
+				prim_exp_val.vptr = vars_get( prim_exptext );
+				if ( prim_exp_val.vptr == NULL )
 					 THROW( ACCESS_NONEXISTING_VARIABLE );
 
 				return E_VAR_TOKEN;
@@ -301,6 +300,8 @@ int primary_experiment_parser( FILE *in )
 		return FAIL;
 	}
 	CATCH( EXPERIMENT_EXCEPTION )
+		return FAIL;
+	CATCH( FUNCTION_EXCEPTION )
 		return FAIL;
 
 	if ( Prim_Exp_Next_Section != NO_SECTION )

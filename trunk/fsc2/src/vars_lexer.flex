@@ -52,6 +52,7 @@ FILE        \x1\n.+\n
 LNUM        \x2\n[0-9]+\n
 ERR         \x3\n.+\n
 
+DEV         ^[ \t]*DEV(ICE)?S?:
 ASS         ^[ \t]*ASS(IGNMENT)?S?:
 VAR         ^[ \t]*VAR(IABLE)?S?:
 PHAS        ^[ \t]*PHA(SE)?S?:
@@ -104,6 +105,12 @@ WS          [\n \t]+
 {ESTR}		{
 				variablestext = strchr( variablestext, '\x03' );
 				THROW( CLEANER_EXCEPTION );
+			}
+
+			/* handling of DEVICES: labels */
+{DEV}		{
+				Vars_Next_Section = DEVICES_SECTION;
+				return SECTION_LABEL;
 			}
 
 			/* handling of ASSIGNMENTS: label */

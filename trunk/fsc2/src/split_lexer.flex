@@ -35,6 +35,7 @@ FILE        \x1\n.+\n
 LNUM        \x2\n[0-9]+\n
 ERR         \x3\n.+\n
 
+DEV         ^[ \t]*DEV(ICE)?S?:
 ASS         ^[\t ]*ASS(IGNMENT)?S?:
 VAR         ^[\t ]*VAR(IABLE)?S?:
 PHAS        ^[\t ]*PHA(SES)?:
@@ -64,6 +65,12 @@ EXP         ^[\t ]*EXP(ERIMENT)?:
 {ERR}		{
 				printf( "%s", splittext + 2 );
 				return FAIL;
+			}
+
+			/* handling of DEVICES: label */
+{DEV}		{
+				if ( ! section_parser( DEVICES_SECTION ) )
+					return FAIL;
 			}
 
 			/* handling of ASSIGNMENTS: label */
@@ -132,6 +139,9 @@ bool split( char *file )
 	for ( i = ASSIGNMENTS_SECTION; i <= EXPERIMENT_SECTION; ++i )
 		compilation.sections[ i ] = UNSET;
 
+	if ( ! functions_init_hook( ) )
+		return FAIL;
+
 	/* check that the file name is reasonable */
 
 	if ( file == NULL || *file == '\0' )
@@ -158,6 +168,8 @@ bool split( char *file )
 
 	if ( Fname != NULL )
 		free( Fname );
+
+	functions_exit_hook( );
 
 	return split_error;
 }
@@ -188,6 +200,10 @@ bool section_parser( int section )
 
 		switch ( section )
 		{
+			case DEVICES_SECTION :
+				section = devices_parser( splitin );
+				break;
+
 			case ASSIGNMENTS_SECTION :
 				section = assignments_parser( splitin );
 				break;

@@ -46,67 +46,113 @@
 */
 
 
-Var *f_int( Var *v  );
-Var *f_float( Var *v  );
-Var *f_round( Var *v  );
-Var *f_floor( Var *v  );
-Var *f_ceil( Var *v  );
-Var *f_abs( Var *v );
-Var *f_sin( Var *v  );
-Var *f_cos( Var *v  );
-Var *f_tan( Var *v  );
-Var *f_asin( Var *v  );
-Var *f_acos( Var *v  );
-Var *f_atan( Var *v  );
-Var *f_sinh( Var *v  );
-Var *f_cosh( Var *v  );
-Var *f_tanh( Var *v  );
-Var *f_exp( Var *v  );
-Var *f_ln( Var *v  );
-Var *f_log( Var *v  );
-Var *f_sqrt( Var *v  );
-Var *f_print( Var *v  );
-Var *f_dummy( Var *v );
+static Var *f_int( Var *v  );
+static Var *f_float( Var *v  );
+static Var *f_round( Var *v  );
+static Var *f_floor( Var *v  );
+static Var *f_ceil( Var *v  );
+static Var *f_abs( Var *v );
+static Var *f_sin( Var *v  );
+static Var *f_cos( Var *v  );
+static Var *f_tan( Var *v  );
+static Var *f_asin( Var *v  );
+static Var *f_acos( Var *v  );
+static Var *f_atan( Var *v  );
+static Var *f_sinh( Var *v  );
+static Var *f_cosh( Var *v  );
+static Var *f_tanh( Var *v  );
+static Var *f_exp( Var *v  );
+static Var *f_ln( Var *v  );
+static Var *f_log( Var *v  );
+static Var *f_sqrt( Var *v  );
+static Var *f_print( Var *v  );
+static Var *f_islice( Var *v );
+static Var *f_fslice( Var *v );
 
 
-
-typedef struct
-{
-	const char *name;                    /* name of the function */
-    Var * ( * fnct )( Var * );           /* pointer to the function */
-	long nargs;                          /* number of arguments */
-    int access_flag;                     /* asscessibility flag */
-} Func;
 
 
 /* extend this list to your heart's content but make sure the function
    to be called is defined and the following list still ends with two
    NULL's and two zeros...*/
 
-Func fncts[ ] = { { "int",   f_int,    1, ACCESS_ALL_SECTIONS	},
-				  { "float", f_float,  1, ACCESS_ALL_SECTIONS	},
-				  { "round", f_round,  1, ACCESS_ALL_SECTIONS	},
-				  { "floor", f_floor,  1, ACCESS_ALL_SECTIONS	},
-				  { "ceil",  f_ceil,   1, ACCESS_ALL_SECTIONS	},
-				  { "abs",   f_abs,    1, ACCESS_ALL_SECTIONS	},
-				  { "sin",   f_sin,    1, ACCESS_ALL_SECTIONS	},
-				  { "cos",   f_cos,    1, ACCESS_ALL_SECTIONS	},
-  				  { "tan",   f_tan,    1, ACCESS_ALL_SECTIONS	},
-				  { "asin",  f_asin,   1, ACCESS_ALL_SECTIONS	},
-				  { "acos",  f_acos,   1, ACCESS_ALL_SECTIONS	},
-  				  { "atan",  f_atan,   1, ACCESS_ALL_SECTIONS	},
-				  { "sinh",  f_sinh,   1, ACCESS_ALL_SECTIONS	},
-				  { "cosh",  f_cosh,   1, ACCESS_ALL_SECTIONS	},
-  				  { "tanh",  f_tanh,   1, ACCESS_ALL_SECTIONS	},
-				  { "exp",   f_exp,    1, ACCESS_ALL_SECTIONS	},
-				  { "ln",    f_ln,     1, ACCESS_ALL_SECTIONS	},
-  				  { "log",   f_log,    1, ACCESS_ALL_SECTIONS	},
-				  { "sqrt",  f_sqrt,   1, ACCESS_ALL_SECTIONS	},
-                  { "print", f_print, -1, ACCESS_ALL_SECTIONS	},
-                  { "dummy", f_dummy,  1, ACCESS_ALL_SECTIONS	},
-				  { "",      NULL,     0, 0 }          /* marks last entry! */
-                };
+static Func def_fncts[ ] =
+{
+	{ "int",    f_int,     1, ACCESS_ALL_SECTIONS	},
+	{ "float",  f_float,   1, ACCESS_ALL_SECTIONS	},
+	{ "round",  f_round,   1, ACCESS_ALL_SECTIONS	},
+	{ "floor",  f_floor,   1, ACCESS_ALL_SECTIONS	},
+	{ "ceil",   f_ceil,    1, ACCESS_ALL_SECTIONS	},
+	{ "abs",    f_abs,     1, ACCESS_ALL_SECTIONS	},
+	{ "sin",    f_sin,     1, ACCESS_ALL_SECTIONS	},
+	{ "cos",    f_cos,     1, ACCESS_ALL_SECTIONS	},
+	{ "tan",    f_tan,     1, ACCESS_ALL_SECTIONS	},
+	{ "asin",   f_asin,    1, ACCESS_ALL_SECTIONS	},
+	{ "acos",   f_acos,    1, ACCESS_ALL_SECTIONS	},
+	{ "atan",   f_atan,    1, ACCESS_ALL_SECTIONS	},
+	{ "sinh",   f_sinh,    1, ACCESS_ALL_SECTIONS	},
+	{ "cosh",   f_cosh,    1, ACCESS_ALL_SECTIONS	},
+	{ "tanh",   f_tanh,    1, ACCESS_ALL_SECTIONS	},
+	{ "exp",    f_exp,     1, ACCESS_ALL_SECTIONS	},
+	{ "ln",     f_ln,      1, ACCESS_ALL_SECTIONS	},
+	{ "log",    f_log,     1, ACCESS_ALL_SECTIONS	},
+	{ "sqrt",   f_sqrt,    1, ACCESS_ALL_SECTIONS	},
+	{ "print",  f_print,  -1, ACCESS_ALL_SECTIONS	},
+	{ "islice", f_islice,  1, ACCESS_ALL_SECTIONS	},
+	{ "fslice", f_fslice,  1, ACCESS_ALL_SECTIONS	},
+	{ NULL,     NULL,      0, 0 }        /* marks last entry, don't remove ! */
+};
 
+static int num_def_func;
+static int num_func;
+static Func *fncts;
+
+
+bool functions_init_hook( void )
+{
+	for ( num_def_func = 0; def_fncts[ num_def_func ].fnct != NULL;
+		  num_def_func++ )
+		;
+
+	num_func = num_def_func;
+
+	TRY
+	{
+		fncts = T_malloc( ( num_def_func + 1 ) * sizeof( Func ) );
+		memcpy( fncts, def_fncts, ( num_def_func + 1 ) * sizeof( Func ) );
+		func_list_parse( &fncts, num_def_func, &num_func );
+	}
+	if ( exception_id == NO_EXCEPTION )    /* everything worked out fine */
+   		TRY_SUCCESS;
+	CATCH( OUT_OF_MEMORY_EXCEPTION )
+	{
+		functions_exit_hook( );
+		return FAIL;
+	}
+	CATCH( FUNCTION_EXCEPTION )
+	{
+		functions_exit_hook( );
+		return FAIL;
+	}
+
+	/* load diverse user defined functions */
+
+	load_user_functions( fncts, num_def_func, num_func );
+
+	return OK;
+}
+
+
+void functions_exit_hook( void )
+{
+	int i;
+
+
+	for ( i = num_def_func; i < num_func; i++ )
+		if ( fncts[ i ].name != NULL )
+			free( ( char * ) fncts[ i ].name );
+	free( fncts );
+}
 
 
 Var *func_get( char *name, int *access )
@@ -119,10 +165,17 @@ Var *func_get( char *name, int *access )
 	   on the variable stack with a pointer to the actual function and the
 	   number of arguments. Also copy the functions name and access flag. */
 
-	for ( i = 0; *fncts[ i ].name != '\0'; ++i )
+	for ( i = 0; i < num_func; ++i )
 	{
-		if ( ! strcmp( fncts[ i ].name, name ) )
+		if ( fncts[ i ].name != NULL && ! strcmp( fncts[ i ].name, name ) )
 		{
+			if ( fncts[ i ].fnct == NULL )
+			{
+				eprint( FATAL, "%s:%ld: Function `%s' has not been loaded.\n",
+						Fname, Lc, fncts[ i ].name );
+				THROW( FUNCTION_EXCEPTION );
+			}
+						
 			ret = vars_push( FUNC, fncts[ i ].fnct );
 			ret->name = get_string_copy( name );
 			ret->dim = fncts[ i ].nargs;
@@ -650,11 +703,10 @@ Var *f_print( Var *v )
 }
 
 
-Var *f_dummy( Var *v )
+Var *f_islice( Var *v )
 {
 	long *x;
 	long size;
-	long i;
 
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
@@ -665,9 +717,23 @@ Var *f_dummy( Var *v )
 		size = ( long ) v->val.dval;
 
 	x = T_calloc( size, sizeof( long ) );
-
-	for ( i = 0; i < size; ++i )
-		x[ i ] = i + 1;
-
 	return vars_push( INT_TRANS_ARR, x, size );
+}
+
+
+Var *f_fslice( Var *v )
+{
+	long *x;
+	long size;
+
+
+	vars_check( v, INT_VAR | FLOAT_VAR );
+
+	if ( v->type == INT_VAR )
+		size = v->val.lval;
+	else
+		size = ( long ) v->val.dval;
+
+	x = T_calloc( size, sizeof( double ) );
+	return vars_push( FLOAT_TRANS_ARR, x, size );
 }

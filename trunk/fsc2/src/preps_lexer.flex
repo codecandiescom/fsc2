@@ -48,6 +48,7 @@ FILE        \x1\n.+\n
 LNUM        \x2\n[0-9]+\n
 ERR         \x3\n.+\n
 
+DEV         ^[ \t]*DEV(ICE)?S?:
 ASS         ^[ \t]*ASS(IGNMENT)?S?:
 VAR         ^[ \t]*VAR(IABLE)?S?:
 PHAS        ^[ \t]*PHA(SE)?S?:
@@ -106,9 +107,16 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 
 			/* handling of error messages from the cleaner */
 {ERR}		THROW( CLEANER_EXCEPTION );
+
 {ESTR}		{
 				prepstext = strchr( prepstext, '\x03' );
 				THROW( CLEANER_EXCEPTION );
+			}
+
+			/* handling of DEVICES: labels */
+{DEV}		{
+				Preps_Next_Section = DEVICES_SECTION;
+				return SECTION_LABEL;
 			}
 
 			/* handling of ASSIGNMENTS: labels */

@@ -45,6 +45,7 @@ FILE        \x1\n.+\n
 LNUM        \x2\n[0-9]+\n
 ERR         \x3\n.+\n
 
+DEV         ^[ \t]*DEV(ICE)?S?:
 ASS         ^[ \t]*ASS(IGNMENT)?S?:
 VAR         ^[ \t]*VAR(IABLE)?S?:
 PHAS        ^[ \t]*PHA(SE)?S?:
@@ -80,6 +81,12 @@ WS          [\n=,:. ]+
 {ERR}		{
 				eprint( FATAL, "%s", phasestext + 2 );
 				return 0;
+			}
+
+			/* handling of DEVICES: labels */
+{DEV}		{
+				Phases_Next_Section = DEVICES_SECTION;
+				return SECTION_LABEL;
 			}
 
 			/* handling of ASSIGNMENTS: label */
