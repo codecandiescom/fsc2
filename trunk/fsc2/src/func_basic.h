@@ -38,6 +38,7 @@ Var *f_dim(     Var *v );
 Var *f_size(    Var *v );
 Var *f_sizes(   Var *v );
 Var *f_mean(    Var *v );
+Var *f_rms(     Var *v );
 Var *f_slice(   Var *v );
 
 

@@ -1297,7 +1297,39 @@ Var *f_mean( Var *v )
 
 
 /*------------------------------------------------------------------*/
-/* Calculates the mean of the elements of an one dimensional array. */
+/*------------------------------------------------------------------*/
+
+Var *f_rms( Var *v )
+{
+	long i;
+	long len;
+	long *ilp;
+	double *idp;
+	double val = 0.0;
+
+
+	vars_check( v, INT_ARR | FLOAT_ARR | ARR_REF | ARR_PTR |
+				   INT_TRANS_ARR | FLOAT_TRANS_ARR );
+
+	get_array_params( v, "rms", &len, &ilp, &idp );
+
+	for ( i = 0; i < len; i++ )
+		if ( ilp != NULL )
+		{
+			val += ( double ) *ilp * ( double ) *ilp;
+			ilp++;
+		}
+		else
+		{
+			val += *idp * idp;
+			idp++;
+		}
+
+	return vars_push( FLOAT_VAR, sqrt( val ) / ( double ) len );
+}
+
+
+/*------------------------------------------------------------------*/
 /*------------------------------------------------------------------*/
 
 Var *f_slice( Var *v )
