@@ -481,10 +481,10 @@ bool dg2020_set_trig_in_impedance( int state )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-bool dg2020_set_repeat_time( double time )
+bool dg2020_set_repeat_time( double rep_time )
 {
 	if ( dg2020.is_repeat_time &&
-		 dg2020.repeat_time != dg2020_double2ticks( time ) )
+		 dg2020.repeat_time != dg2020_double2ticks( rep_time ) )
 	{
 		eprint( FATAL, SET, "%s: A different repeat time/frequency of %s/"
 				"%g Hz has already been set.\n", pulser_struct.name,
@@ -509,15 +509,15 @@ bool dg2020_set_repeat_time( double time )
 		THROW( EXCEPTION )
 	}
 
-	if ( time <= 0 )
+	if ( rep_time <= 0 )
 	{
 		eprint( FATAL, SET, "%s: Invalid repeat time %s.\n",
-				pulser_struct.name, dg2020_ptime( time ) );
+				pulser_struct.name, dg2020_ptime( rep_time ) );
 		THROW( EXCEPTION )
 	}
 
 
-	dg2020.repeat_time = dg2020_double2ticks( time );
+	dg2020.repeat_time = dg2020_double2ticks( rep_time );
 	dg2020.is_repeat_time = SET;
 
 	return OK;
@@ -779,16 +779,16 @@ bool dg2020_phase_setup_finalize( int func, PHS phs )
 /*-----------------------------------------------------------------*/
 /*-----------------------------------------------------------------*/
 
-bool dg2020_set_phase_switch_delay( int func, double time )
+bool dg2020_set_phase_switch_delay( int func, double del_time )
 {
 	fsc2_assert( func == PULSER_CHANNEL_PHASE_1 ||
 				 func == PULSER_CHANNEL_PHASE_2 );
 
-	if ( time < 0 )
+	if ( del_time < 0 )
 	{
 		eprint( FATAL, SET, "%s: Unreasonable (negative) value for "
 				"phase switch delay: %s.\n", pulser_struct.name,
-				dg2020_ptime( time ) );
+				dg2020_ptime( del_time ) );
 		THROW( EXCEPTION )
 	}
 
@@ -808,7 +808,7 @@ bool dg2020_set_phase_switch_delay( int func, double time )
 	}
 
 	dg2020.function[ func ].is_psd = SET;
-	dg2020.function[ func ].psd = ( Ticks ) ceil( time / dg2020.timebase );
+	dg2020.function[ func ].psd = ( Ticks ) ceil( del_time / dg2020.timebase );
 
 	return OK;
 }
@@ -817,13 +817,13 @@ bool dg2020_set_phase_switch_delay( int func, double time )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-bool dg2020_set_grace_period( double time )
+bool dg2020_set_grace_period( double gp_time )
 {
-	if ( time < 0 )
+	if ( gp_time < 0 )
 
 	{
 		eprint( FATAL, SET, "%s: Unreasonable value for grace period: "
-				"%s.\n", pulser_struct.name, dg2020_ptime( time ) );
+				"%s.\n", pulser_struct.name, dg2020_ptime( gp_time ) );
 		THROW( EXCEPTION )
 	}
 
@@ -842,7 +842,7 @@ bool dg2020_set_grace_period( double time )
 	}
 
 	dg2020.is_grace_period = SET;
-	dg2020.grace_period = ( Ticks ) ceil( time / dg2020.timebase );
+	dg2020.grace_period = ( Ticks ) ceil( gp_time / dg2020.timebase );
 
 	return OK;
 }
