@@ -81,15 +81,17 @@ been written, only the relevant parameters have to be changed. And
 because one can use variables in the program it's easy to have a block
 for defining the parameters somewhere at the start of the program and
 change only these if necessary. If this is still too much hassle it is
-even possible to write a script (not an @code{EDL} program but, for
-example, a Perl script or whatever your preferred scripting language is)
-which allows to set the parameters via a graphical user interface and
-then have the script generate the @code{EDL} program which in turn is
-passed directly to @code{fsc2} without any further user
-interaction. If such a utility already exists one doesn't even have to
-learn how to write @code{EDL} programs and you have all the
-convenience of the traditional type of programs without having to
-sacrifice the flexibility of @code{fsc2}.
+even possible to automatically create from the (slightly modified)
+@code{EDL} program a script which allows to set the parameters via a
+graphical user interface and then have the script generate the
+@code{EDL} program which in turn is passed directly to @code{fsc2}
+without any further user interaction. Of course, you don't have to use
+the conversion tools but also can write such scripts yourself using
+@code{fsc2} built-in interface to accept @code{EDL} programs from
+external sources. Once such a script has been created the users don't
+even have to learn how to write @code{EDL} programs and have all the
+convenience of the traditional type of programs without sacrificing the
+flexibility of @code{fsc2}.
 
 Another common problem with the traditional type of programs is the use
 of different devices or the integration of new ones. Usually, the
@@ -145,8 +147,11 @@ These are explained in the chapter following the functions for other
 devices (@pxref{Using Pulsers}).
 
 The next chapter (@pxref{Command Line Options}) lists all the command
-line options that can be passed to @code{fsc2}, the following
-chapters (@pxref{Cloning Devices}, @pxref{Modules}) explain in detail
-everything there is to know about writing new modules. Another chapter
-(@pxref{Internals}) give a short overview about how @code{fsc2} works
-internally, which may also be helpful when writing a new module.
+line options that can be passed to @code{fsc2} and the following chapter
+(@pxref{GUI-fying}) explains in detail how to convert an @code{EDL} into
+a script with a graphical user interface for editing the relevant
+paramters. The remaining chapters (@pxref{Cloning Devices},
+@pxref{Internals}, @pxref{Modules}) explain in detail everything there
+is to know about writing new modules, including a short overview about
+how @code{fsc2} works internally, which may also be helpful when writing
+a new module.
