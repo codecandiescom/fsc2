@@ -3017,6 +3017,18 @@ want to be able to read in the voltage at the ADC.
 The function can be used in the @code{EXPERIMENT} section only.
 
 
+@anchor{daq_dac_parameter}
+@item daq_dac_parameter()
+@findex daq_dac_parameter()
+The function can be used to determine the current parameter of a DAC
+(channel). It returns an array of three floating point values. The first
+element of the array is the minimum voltage that can be output by the
+DAC, the second is the maximum output voltage and the third is the
+voltage resolution. If the device has more than one DAC channel, the
+function expects a channel as the only argument (which can be omitted
+if settings for alll channels must be identical).
+
+
 @end table
 
 
