@@ -955,20 +955,20 @@ char *gpib_get_conf_file( char *file )
 		switch ( errno )
 		{
 			case ENOENT :
-				eprint( FATAL, "gpib: GPIB configuration file '%s' does not "
+				eprint( FATAL, "gpib: GPIB configuration file `%s' does not "
 						"exist.\n", file );
 				strcpy( file, "" );
 				break;
 
 			case EACCES :
 				eprint( FATAL, "gpib: No permission to access GPIB "
-						"configuration file '%s'.\n", file );
+						"configuration file `%s'.\n", file );
 				strcpy( file, "" );
 				break;
 
 			default :
 				eprint( FATAL, "gpib: Can't read GPIB configuration file "
-						"'%s'.\n", file );
+						"`%s'.\n", file );
 				strcpy( file, "" );
 				break;
 		}

@@ -143,7 +143,7 @@ void eprint( int severity, const char *fmt, ... )
 
 			if ( severity == WARN )
 			{
-				strcpy( cp, "@C2" );
+				strcpy( cp, "@C4" );
 				cp += 3;
 				space_left -= 3;
 			}
