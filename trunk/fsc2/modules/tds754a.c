@@ -36,7 +36,6 @@ const char generic_type[ ] = DEVICE_TYPE;
 static long record_lengths[ ] = { 500, 1000, 2500, 5000, 15000, 50000, 0 };
 
 /* List of all possible time base values (in seconds) */
-/* Still needs checking!!! */
 
 static double tb[ 32 ] = {                     500.0e-12,
 						     1.0e-9,   2.0e-9,   5.0e-9,

@@ -29,7 +29,7 @@
 
 #include "User_Functions.conf"
 
-const char generic_type[ ] = "User_Functions";
+const char generic_type[ ] = DEVICE_TYPE;
 
 
 Var *get_phase_cycled_area( Var *v );
