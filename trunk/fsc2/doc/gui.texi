@@ -43,45 +43,48 @@ following window:
 
 @image{fsc2fig1,11cm,}
 
-The large white area is a browser for displaying the text of the current
-@acronym{EDL} program. Below this main browser is another browser for
-error messages as well as output from the @acronym{EDL} program. On the
-right side of the browsers is a slider that lets you shift the border
-between both browsers.
+The large white area at the top is a browser for displaying the text of
+the current @acronym{EDL} program. Below this main browser is another
+browser for error messages as well as output from the @acronym{EDL}
+program. On the right side of the browsers is a slider that lets you
+shift the border between both browsers.
 
 On the left side you have a set of buttons:
 @itemize @bullet
 @item The @code{Load} button opens a file selector that allows you to
 select a new @acronym{EDL} program.
-@item The @code{Reload} button - when you have edited the currently
-loaded @acronym{EDL} program you have to click onto this button to
-make @acronym{fsc2} load the changed file.
+@item The @code{Reload} button lets you reload the current @acronym{EDL}
+program which is needed when you have edited it. 
 @item The @code{Edit} button opens an editor with the currently loaded
- @acronym{EDL} program. Which editor will be used depends on the
+@acronym{EDL} program. Which editor will be used depends on the
 environment variable @code{EDITOR}, if it isn't set @code{vi} is used as
 the default.
 @item The @code{Test} button lets you check an @acronym{EDL} program 
 after it has been loaded. While the test is running the buttons label is
 changed to @code{Stop Test} and can be used to abort the test. After the
-test finished succesfully the button becomes inactive until a new
-program is loaded (or the current program is reloaded).
+test finished succesfully the label is set back to @code{Test} and the
+button becomes inactive until a new program is loaded (or the current
+program is reloaded).
 @item Using the @code{Start} button you start the execution of the
-@acronym{EDL} program, i.e.@: you start the experiment. For a short time
-after the start the start of the program (while the display window (see
-below) is not shown) the button label changes to @code{Stop} to let you
-abort the running experiment.
-@item The @code{Quit} button is used to end @acronym{fsc2}.
+@acronym{EDL} program. During a short time after the start the start of
+the program (while some device initialization is done and the display
+window (see below) is not shown yet) the button label is changed to
+@code{Stop} to let you abort the running experiment. When the
+initialization is finished the label reverts back to @code{Start} and
+the button remains inactive during the experiment.
+@item The @code{Quit} button is used to end @acronym{fsc2}. It can't be
+used while an experiment is running.
 @item Pressing the @code{Help} button will try to start a browser with
 the HTML documentation for @acronym{fsc2}. You can select the browser to
-use by setting the environment variable @code{BROWSER} to the name of
-your favourite browser (at least opera, netscape, konqueror, lynx and
+be used by setting the environment variable @code{BROWSER} to the name
+of your favourite browser (at least opera, netscape, konqueror, lynx and
 w3m should work without problems). The default browser is Netscape.
 @item The @code{Bug report} button will open an editor window
-where you can compose a bug report. The editor that will be used for
-writing the mail depends on the environment variable @code{EDITOR}, if
-it isn't set @code{vi} is used as the default. When you're finished
-writing the mail @acronym{fsc2} will let you decide if you really want
-to mail the bug report.
+where you can compose a mail with a bug report. The editor that will be
+used for writing the mail depends on the environment variable
+@code{EDITOR}, if it isn't set @code{vi} is used as the default. When
+you're finished writing the mail @acronym{fsc2} will let you decide if
+you really want to send in the bug report.
 @end itemize
 
 @end ifnotinfo
@@ -138,7 +141,7 @@ character, you have to enter the uppercase character from the keyboard!
 While a test of a @acronym{EDL} program is running most of the buttons
 can not be used (indicated by their labels becoming grayed out). The
 label of the @code{Test} button will become @code{Stop Test} - so if you
-want to stop the test press the @code{Test} button again. After a test
+want to stop the test press the @code{Test} button again. Once the test
 has been run on the @acronym{EDL} program the @code{Test} button will
 remain grayed out until a new program is loaded.
 
@@ -148,15 +151,15 @@ lower browser. There are three categories of messages: Warnings,
 messages for severe problems and fatal error messages. Warnings are
 printed in green, messages for severe problems in blue and messages for
 fatal errors in red (in the latter case the test is also aborted
-immediately).
+immediately). Messages not indicating a problem are printed in black.
 
 To start the experiment click onto the @code{Start} button. If the
-program hasn't been tested a test will be run now. When the test succeeds
-the experiment is started. While he devices are initialized the text in
-the @code{Star} button changes to @code{Stop} and clicking on the button
-lets you interrupt the device initialization stage. When the device
-intialization is finished a new window opens up for displaying the
-measured data that will be described in the next section.
+program hasn't been tested a test will be run now and, if the test
+succeeded, the experiment is started. While the devices are initialized
+the text in the @code{Star} button changes to @code{Stop} and clicking
+on the button lets you interrupt the device initialization stage. When
+the device intialization is finished a new window opens up for
+displaying the measured data that will be described in the next section.
 
 
 @ifnotinfo
@@ -182,7 +185,7 @@ The first type of display is well suited for showing the results of
 typical cw-measured EPR data or traces fetched from digitizers, while
 the second type is for visualizing real 2d-experiments, i.e.@: all
 experiments where not just one parameter is changed during the
-experiment but two.
+experiment but two or more.
 
 
 @anchor{1D-Display}
@@ -207,8 +210,23 @@ drawn in red indicate that the scales are valid for the first (red) curve
 (in this case the scales are also correct for the second (green) curve
 because no rescaling has been done).
 
-The topmost buttons on the left side (which both are switched on) let
-you decide which of the curves will be included in rescaling operations
+@end ifnotinfo
+@ifnothtml
+@ifnottex
+The most prominent feature of the new window that gets opened when the
+experiment is started is an area for displaying the measured data. In
+this area you may display up to four different curves simultaneously.
+The display area is surrounded by two areas with the x- and the
+y-scale. The color of the scale is identical to the color of one the
+curves, indicating for which of the curves the scale is valid.
+@end ifnottex
+@end ifnothtml
+
+The topmost buttons on the left side
+@ifnotinfo
+(which both are switched on)
+@end ifnotinfo
+let you decide which of the curves will be included in rescaling operations
 - this way you can rescale curves individually to account for e.g.@:
 different sensitivity settings.
 
@@ -222,7 +240,6 @@ when the experiment is finished its label changes to
 button. While this button is active the display is resized automatically
 so that all data fit into the display area.
 
-@end ifnotinfo
 
 @subsubsection Examining data
 
