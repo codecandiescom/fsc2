@@ -83,7 +83,7 @@ static void dg2020_basic_pulse_check( void )
 			{
 				eprint( WARN, "%s: Length of detection pulse %ld is being set "
 						"to %s", pulser_struct.name, p->num,
-						dg2020_ptime( 1 ) );
+						dg2020_pticks( 1 ) );
 				p->len = 1;
 				p->is_len = SET;
 			}
