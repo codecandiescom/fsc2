@@ -108,6 +108,10 @@ accepted section keywords:
 @node Devices, Variables, Sections, EDL
 @section Devices
 @cindex devices
+@cindex @code{DEVICES} section
+@cindex @code{DEV} section
+@cindex @code{DEVS} section
+@cindex @code{DEVICE} section
 
 
 The @code{DEVICES} section has a very simple syntax, after a line with just
@@ -134,6 +138,10 @@ tds520a;            // digitizer
 @node Variables, Arithmetic, Devices, EDL
 @section Variables
 @cindex variables
+@cindex @code{VARIABLES} section
+@cindex @code{VAR} section
+@cindex @code{VARS} section
+@cindex @code{VARIABLE} section
 @cindex arrays
 
 
@@ -379,16 +387,16 @@ As usual, non-integer exponents can only be used with non-negative bases!
 
 @subsection Assignment operators
 @cindex assignment operators
-@cindex =
-@cindex +=
-@cindex -=
-@cindex *=
-@cindex /=
-@cindex %=
-@cindex ^=
+@cindex @code{=} (assignment)
+@cindex @code{+=} (add and assign)
+@cindex @code{-=} (subtract and assign)
+@cindex @code{*=} (multiply and assign)
+@cindex @code{/=} (divide and assign)
+@cindex @code{%=} (modulo and assign)
+@cindex @code{^=} (exponentiation and assign)
 
-When assigning to a variable usually the `@code{=}' operator is
-used. But there are many cases where e.g.@: just a number is added to a
+When assigning to a variable usually the assignment operator `@code{=}'
+is used. But there are many cases where just a number is added to a
 variable and one would have to write
 @example
 I = I + 1;
