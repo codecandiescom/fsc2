@@ -721,6 +721,7 @@ Var *f_bdelete( Var *v )
 						store_geometry( );
 						fl_hide_form( Tool_Box->Tools );
 					}
+
 					fl_free_form( Tool_Box->Tools );
 				}
 				else
@@ -1383,6 +1384,7 @@ Var *f_sdelete( Var *v )
 						store_geometry( );
 						fl_hide_form( Tool_Box->Tools );
 					}
+
 					fl_free_form( Tool_Box->Tools );
 				}
 				else
@@ -2031,6 +2033,7 @@ Var *f_idelete( Var *v )
 						store_geometry( );
 						fl_hide_form( Tool_Box->Tools );
 					}
+
 					fl_free_form( Tool_Box->Tools );
 				}
 				else
