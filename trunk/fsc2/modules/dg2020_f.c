@@ -195,7 +195,6 @@ int dg2020_end_of_exp_hook( void )
 
 void dg2020_exit_hook( void )
 {
-	FUNCTION *f;
 	PULSE *p, *np;
 	int i;
 
@@ -205,22 +204,12 @@ void dg2020_exit_hook( void )
 
 	/* free all the memory allocated within the module */
 
-	for ( p = Pulses; p != NULL; p = np )
-	{
-		if ( p->channel != NULL )
-			T_free( p->channel );
-		
-		np = p->next;
-		T_free( p );
-	}
+	for ( p = Pulses; p != NULL; np = p->next, T_free( p ), p = np )
+		;
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
-	{
-		f = &dg2020.function[ i ];
-
-		if ( f->pulses != NULL )
-			T_free( f->pulses );
-	}
+		if ( dg2020.function[ i ].pulses != NULL )
+			T_free( dg2020.function[ i ].pulses );
 }
 
 
