@@ -1,17 +1,16 @@
 About fsc2
 ----------
 
-fsc2 is a program for controlling spectrometers.
-
-Programs for controlling spectrometers are usually home-written and
-often restricted to doing a certain set of experiments and a fixed
-set of devices. In contrast, fsc2 is much more flexible because it
-interprets a rather simple but powerful scripting language (EDL,
-Experiment Description Language) and has a strictly modular approach
-to handling of devices. This allows setting up a completely new
-experiment or changing an already existing one fast and easily
-without requiring any detailed knowledge of the internals of fsc2
-or how exactly devices are to be controlled by the computer.
+fsc2 is a program for controlling spectrometers. Most often, such
+programs are home-written and tend to be restricted to doing a certain
+set of experiments and a fixed set of devices. In contrast, fsc2 is
+much more flexible because it interprets a rather simple but powerful
+scripting language (EDL, Experiment Description Language) and has a
+strictly modular approach to handling of devices. This allows setting
+up a completely new experiment or changing an already existing one
+fast and easily without requiring any detailed knowledge of the
+internals of fsc2 or how exactly devices are to be controlled by the
+computer.
 
 
 Download
@@ -23,8 +22,8 @@ You can download the sources for the program and the device modules from:
 
 The documentation in Postscript or PDF format can be downloaded from:
 
-	   http://www.physik.fu-berlin.de/~toerring/fsc2/fsc2.ps.gz
-	   http://www.physik.fu-berlin.de/~toerring/fsc2/fsc2/fsc2.pdf
+       http://www.physik.fu-berlin.de/~toerring/fsc2/fsc2.ps.gz
+       http://www.physik.fu-berlin.de/~toerring/fsc2/fsc2/fsc2.pdf
 
 You also will find an online version of the documentation at:
 
@@ -44,9 +43,9 @@ Features
 
 * Device are not hard-coded into fsc2. Instead, devices are dealt with
   by modules that get loaded on demand (a single instruction in an EDL
-  script). For each kind of devices a unique set of EDL functions exists
-  to set up the device and fetch measured data. This allows e.g. to employ
-  a different device with similar functionality by usually changing not
+  script). For each kind of devices a set of EDL functions exists to set
+  up the device and fetch measured data. This allows e.g. to employ a
+  different device with similar functionality by usually changing not
   more than a single line in an EDL script.
 
 * fsc2 allows other programs to send it EDL scripts for execution.
@@ -68,9 +67,9 @@ Features
 
 * Writing new device modules (or adapting existing ones for a new device)
   shouldn't be too difficult for anyone having some experience with
-  writing programs in C. About 30 modules for quite a range of devices
-  are already part of the package and can be used as a starting point
-  for developing drivers for new devices.
+  writing programs in C. Modules for more than 30 devices are already
+  part of the package and can be used as a starting point for developing
+  drivers for new devices.
 
 * fsc2 is well-documented, an 200+ page documentation in HTML, info,
   PostScript and PDF format is part of the package, covering all aspects
@@ -83,11 +82,11 @@ Features
 
 * The complete sources for the program and all device modules are available
   under the GNU Public License, so they can be adapted or extended to fit
-  all special requirements.
+  special requirements.
 
 
-Currently suported devices
---------------------------
+Suported devices
+----------------
 
  Digitizing oscilloscopes:
 
@@ -117,7 +116,7 @@ Currently suported devices
  Magnet power supplies:
 
   * Bruker Field controller ER032M
-  * Keithley 228A (used as superconducting magnet power supply)
+  * Keithley 228A (used as W-band superconducting magnet power supply)
   * Oxford Magnet Sweep Power Supply IPS20-4
   * AEG Magnet Power Supply (home-build computer control, S-, X-Band)
 
@@ -151,11 +150,18 @@ Currently suported devices
 
  DAC cards:
 
-  * Meilhaus Electronic GmbH ME-6000 and ME-6100
+  * Meilhaus Electronic GmbH ME-6000 and ME-6100 (Linux device driver
+    comes with the package)
 
  Event counter cards:
 
-  * National Instruments NI6601
+  * National Instruments NI6601 (Linux device driver comes with the
+    package)
+
+ Power supplies:
+
+  * Thurlby & Thandar PL330DP
+
 
 fsc2 works with three different GPIB driver/library combinations, the
 Linux Lab Project driver (http://www.llp.fu-berlin.de), the National
@@ -168,9 +174,9 @@ Support
 -------
 
 While I am prepared to help for free as far as my time allows, you also
-can hire me for e.g. writing drivers for not currently supported devices,
-creating scripts for experiments, installation support, instructing users
-etc. Please send me an email to discuss conditions.
+can hire me for e.g. writing drivers for ubsupported devices, creating
+scripts for experiments, installation support, instructing users etc.
+Please send me an email to discuss conditions.
 
 
 Limitations
