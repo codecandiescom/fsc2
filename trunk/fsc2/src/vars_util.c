@@ -1579,8 +1579,13 @@ static void vars_pow_check( double v1, double v2 )
 }
 
 
-/*---------------------------------------------------------------------*/
-/*---------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*/
+/* When doing arithmetic with an array it can happen that the left hand */
+/* side array has a still undefined size. In this case the its size has */
+/* to be automatically adjusted to the size of the right hand side      */
+/* array (or an exception must be thrown if the right hand side array   */
+/* also has an undefined size).                                         */
+/*----------------------------------------------------------------------*/
 
 Var *vars_array_check( Var *v1, Var *v2 )
 {
@@ -1588,7 +1593,25 @@ Var *vars_array_check( Var *v1, Var *v2 )
 	long length;
 
 
-	/* If size of array is already known nothing is to be done */
+	if ( v1->type == ARR_REF )
+	{
+		if ( v1->from->dim != 1 )
+		{
+			eprint( FATAL, "%s:%ld: Arithmetic can be only done "
+					"on array slices.\n", Fname, Lc );
+			THROW( EXCEPTION );
+		}
+
+		if ( ! ( v1->from->flags & NEED_ALLOC ) )
+			return v1;
+	}
+	else
+	{
+		if ( ! ( v1->flags & NEED_ALLOC ) )
+			return v1;
+	}
+
+	/* Make sure the right hand side is an array with a defined size */
 
 	if ( ! ( v2->type &
 			 ( ARR_REF | ARR_PTR | INT_TRANS_ARR | FLOAT_TRANS_ARR ) )
@@ -1601,6 +1624,8 @@ Var *vars_array_check( Var *v1, Var *v2 )
 				Fname, Lc );
 		THROW( EXCEPTION );
 	}
+
+	/* Find out the size of the right hand side array */
 
 	switch ( v2->type )
 	{
@@ -1631,26 +1656,14 @@ Var *vars_array_check( Var *v1, Var *v2 )
 	switch ( v1->type )
 	{
 		case INT_ARR : case INT_TRANS_ARR :
-			if ( ! ( v1->flags & NEED_ALLOC ) )
-				return v1;
 			v = vars_push( INT_TRANS_ARR, NULL, length );
 			break;
 
 		case FLOAT_ARR : case FLOAT_TRANS_ARR :
-			if ( ! ( v1->flags & NEED_ALLOC ) )
-				return v1;
 			v = vars_push( FLOAT_TRANS_ARR, NULL, length );
 			break;
 
 		case ARR_REF :
-			if ( v1->from->dim != 1 )
-			{
-				eprint( FATAL, "%s:%ld: Arithmetic can be only done "
-						"on array slices.\n", Fname, Lc );
-				THROW( EXCEPTION );
-			}
-			if ( ! ( v1->from->flags & NEED_ALLOC ) )
-				return v1;
 			if ( v1->from->type == INT_ARR )
 				v = vars_push( INT_TRANS_ARR, NULL, length );
 			else

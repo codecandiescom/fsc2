@@ -283,6 +283,10 @@ Var *vars_add( Var *v1, Var *v2 )
 
 	/* Add the values while taking care to get the type right */
 
+	if ( v1->type & ( INT_ARR | FLOAT_ARR | INT_TRANS_ARR |
+					  FLOAT_TRANS_ARR | ARR_REF ) )
+		v1 = vars_array_check( v1, v2 );
+
 	switch ( v1->type )
 	{
 		case INT_VAR :
@@ -294,12 +298,7 @@ Var *vars_add( Var *v1, Var *v2 )
 			break;
 			
 		case INT_ARR : case INT_TRANS_ARR :
-			if ( v1->flags && NEED_ALLOC )
-			{
-				v1->sizes[ 0 ] = v2->len;
-				v1->len = v2->len;
-				v1->val.lpnt = T_malloc( v1->len * sizeof( long ) );
-			}
+			vars_array_check( v1, v2 );
 			new_var = vars_add_to_int_arr( v1, v2 );
 			break;
 
@@ -308,19 +307,6 @@ Var *vars_add( Var *v1, Var *v2 )
 			break;
 
 		case ARR_REF :
-			if ( v1->from->dim != 1 )
-			{
-				eprint( FATAL, "%s:%ld: Arithmetic can be only done "
-						"on array slices.\n", Fname, Lc );
-				THROW( EXCEPTION );
-			}
-			if ( v1->flags && NEED_ALLOC )
-			{
-				v1->sizes[ 0 ] = v2->from->len;
-				v1->len = v2->from->len;
-				v1->val.lpnt = T_malloc( v1->len * sizeof( long ) );
-			}
-
 			if ( v1->from->type == INT_ARR )
 				new_var = vars_add_to_int_arr( v1->from, v2 );
 			else
@@ -376,20 +362,17 @@ Var *vars_sub( Var *v1, Var *v2 )
 			break;
 			
 		case INT_ARR : case INT_TRANS_ARR :
+			v1 = vars_array_check( v1, v2 );
 			new_var = vars_sub_from_int_arr( v1, v2 );
 			break;
 
 		case FLOAT_ARR : case FLOAT_TRANS_ARR :
+			v1 = vars_array_check( v1, v2 );
 			new_var = vars_sub_from_float_arr( v1, v2 );
 			break;
 
 		case ARR_REF :
-			if ( v1->from->dim != 1 )
-			{
-				eprint( FATAL, "%s:%ld: Arithmetic can be only done "
-						"on array slices.\n", Fname, Lc );
-				THROW( EXCEPTION );
-			}
+			v1 = vars_array_check( v1, v2 );
 			if ( v1->from->type == INT_ARR )
 				new_var = vars_sub_from_int_arr( v1->from, v2 );
 			else
@@ -445,20 +428,17 @@ Var *vars_mult( Var *v1, Var *v2 )
 			break;
 			
 		case INT_ARR : case INT_TRANS_ARR :
+			v1 = vars_array_check( v1, v2 );
 			new_var = vars_mult_by_int_arr( v1, v2 );
 			break;
 
 		case FLOAT_ARR : case FLOAT_TRANS_ARR :
+			v1 = vars_array_check( v1, v2 );
 			new_var = vars_mult_by_float_arr( v1, v2 );
 			break;
 
 		case ARR_REF :
-			if ( v1->from->dim != 1 )
-			{
-				eprint( FATAL, "%s:%ld: Arithmetic can be only done "
-						"on array slices.\n", Fname, Lc );
-				THROW( EXCEPTION );
-			}
+			v1 = vars_array_check( v1, v2 );
 			if ( v1->from->type == INT_ARR )
 				new_var = vars_mult_by_int_arr( v1->from, v2 );
 			else
@@ -514,20 +494,17 @@ Var *vars_div( Var *v1, Var *v2 )
 			break;
 			
 		case INT_ARR : case INT_TRANS_ARR :
+			v1 = vars_array_check( v1, v2 );
 			new_var = vars_div_of_int_arr( v1, v2 );
 			break;
 
 		case FLOAT_ARR : case FLOAT_TRANS_ARR :
+			v1 = vars_array_check( v1, v2 );
 			new_var = vars_div_of_float_arr( v1, v2 );
 			break;
 
 		case ARR_REF :
-			if ( v1->from->dim != 1 )
-			{
-				eprint( FATAL, "%s:%ld: Arithmetic can be only done "
-						"on array slices.\n", Fname, Lc );
-				THROW( EXCEPTION );
-			}
+			v1 = vars_array_check( v1, v2 );
 			if ( v1->from->type == INT_ARR )
 				new_var = vars_div_of_int_arr( v1->from, v2 );
 			else
@@ -583,20 +560,17 @@ Var *vars_mod( Var *v1, Var *v2 )
 			break;
 			
 		case INT_ARR : case INT_TRANS_ARR :
+			v1 = vars_array_check( v1, v2 );
 			new_var = vars_mod_of_int_arr( v1, v2 );
 			break;
 
 		case FLOAT_ARR : case FLOAT_TRANS_ARR :
+			v1 = vars_array_check( v1, v2 );
 			new_var = vars_mod_of_float_arr( v1, v2 );
 			break;
 
 		case ARR_REF :
-			if ( v1->from->dim != 1 )
-			{
-				eprint( FATAL, "%s:%ld: Arithmetic can be only done "
-						"on array slices.\n", Fname, Lc );
-				THROW( EXCEPTION );
-			}
+			v1 = vars_array_check( v1, v2 );
 			if ( v1->from->type == INT_ARR )
 				new_var = vars_mod_of_int_arr( v1->from, v2 );
 			else
@@ -652,20 +626,17 @@ Var *vars_pow( Var *v1, Var *v2 )
 			break;
 			
 		case INT_ARR : case INT_TRANS_ARR :
+			v1 = vars_array_check( v1, v2 );
 			new_var = vars_pow_of_int_arr( v1, v2 );
 			break;
 
 		case FLOAT_ARR : case FLOAT_TRANS_ARR :
+			v1 = vars_array_check( v1, v2 );
 			new_var = vars_pow_of_float_arr( v1, v2 );
 			break;
 
 		case ARR_REF :
-			if ( v1->from->dim != 1 )
-			{
-				eprint( FATAL, "%s:%ld: Arithmetic can be only done "
-						"on array slices.\n", Fname, Lc );
-				THROW( EXCEPTION );
-			}
+			v1 = vars_array_check( v1, v2 );
 			if ( v1->from->type == INT_ARR )
 				new_var = vars_pow_of_int_arr( v1->from, v2 );
 			else
@@ -982,17 +953,25 @@ Var *vars_push( int type, ... )
 		case INT_TRANS_ARR :
 			new_stack_var->val.lpnt = va_arg( ap, long * );
 			new_stack_var->len = va_arg( ap, long );
-			new_stack_var->val.lpnt =
-				get_memcpy( new_stack_var->val.lpnt,
-							new_stack_var->len * sizeof( long ) );
+			if ( new_stack_var->val.lpnt != NULL )
+				new_stack_var->val.lpnt =
+					get_memcpy( new_stack_var->val.lpnt,
+								new_stack_var->len * sizeof( long ) );
+			else
+				new_stack_var->val.lpnt = T_calloc( new_stack_var->len,
+													sizeof( long ) );
 			break;
 
 		case FLOAT_TRANS_ARR :
 			new_stack_var->val.dpnt = va_arg( ap, double * );
 			new_stack_var->len = va_arg( ap, long );
-			new_stack_var->val.dpnt =
-				get_memcpy( new_stack_var->val.dpnt,
-							new_stack_var->len * sizeof( double ) );
+			if ( new_stack_var->val.dpnt != NULL )
+				new_stack_var->val.dpnt =
+					get_memcpy( new_stack_var->val.dpnt,
+								new_stack_var->len * sizeof( double ) );
+			else
+				new_stack_var->val.dpnt = T_calloc( new_stack_var->len,
+													sizeof( double ) );
 			break;
 
 		case ARR_REF :
@@ -1519,7 +1498,7 @@ long vars_calc_index( Var *a, Var *v )
 
 	/* For slices we need another update of the index */
 
-	if ( i != a->dim )
+	if ( i != a->dim && ! ( a->flags & NEED_ALLOC ) )
 		index = index * a->sizes[ i ];
 
 	return index;
@@ -1672,8 +1651,8 @@ Var *vars_arr_rhs( Var *v )
 
 	if ( a->flags & NEED_ALLOC )
 	{
-		eprint( FATAL, "%s:%ld: The array `%s' is dynamically sized and has "
-				"not been assigned data yet.\n", Fname, Lc, a->name );
+		eprint( FATAL, "%s:%ld: Array `%s' is dynamically sized and its size "
+				"isn't unknown yet.\n", Fname, Lc, a->name );
 		THROW( EXCEPTION );
 	}
 
@@ -1901,12 +1880,12 @@ void vars_ass_from_ptr( Var *src, Var *dest )
 		if ( d->type == INT_ARR )
 		{
 			d->val.lpnt = T_calloc( d->len,  sizeof( long ) );
-			dest->val.lpnt = d->val.lpnt + dest->len;
+			dest->val.lpnt = d->val.lpnt + dest->len * d->sizes[ d->dim - 1 ];
 		}
 		else
 		{
 			d->val.dpnt = T_calloc( d->len, sizeof( double ) );
-			dest->val.dpnt = d->val.dpnt + dest->len;
+			dest->val.dpnt = d->val.dpnt + dest->len * d->sizes[ d->dim - 1 ];
 		}
 
 		d->flags &= ~NEED_ALLOC;
@@ -2035,12 +2014,12 @@ void vars_ass_from_trans_ptr( Var *src, Var *dest )
 		if ( d->type == INT_ARR )
 		{
 			d->val.lpnt = T_calloc( d->len,  sizeof( long ) );
-			dest->val.lpnt = d->val.lpnt + dest->len;
+			dest->val.lpnt = d->val.lpnt + dest->len * d->sizes[ d->dim - 1 ];
 		}
 		else
 		{
 			d->val.dpnt = T_calloc( d->len, sizeof( double ) );
-			dest->val.dpnt = d->val.dpnt + dest->len;
+			dest->val.dpnt = d->val.dpnt + dest->len * d->sizes[ d->dim - 1 ];
 		}
 
 		d->flags &= ~NEED_ALLOC;
@@ -2251,18 +2230,32 @@ Var *apply_unit( Var *var, Var *unit )
 
 Var *vars_val( Var *v )
 {
-	vars_check( v, ARR_PTR );
+	Var *vn;
 
+
+	vars_check( v, ARR_PTR );
 
 	if ( v->flags & NEED_SLICE )
 	{
 		vars_check( v->from, INT_ARR | FLOAT_ARR );
-		if ( v->from->type == INT_ARR )
-			return vars_push( INT_TRANS_ARR, v->val.vptr,
-							  v->from->sizes[ v->from->dim - 1 ] );
+		if ( ! ( v->from->flags & NEED_ALLOC ) )
+		{
+			if ( v->from->type == INT_ARR )
+				return vars_push( INT_TRANS_ARR, v->val.vptr,
+								  v->from->sizes[ v->from->dim - 1 ] );
+			else
+				return vars_push( FLOAT_TRANS_ARR, v->val.vptr,
+								  v->from->sizes[ v->from->dim - 1 ] );
+		}
 		else
-			return vars_push( FLOAT_TRANS_ARR, v->val.vptr,
-							  v->from->sizes[ v->from->dim - 1 ] );
+		{
+			if ( v->from->type == INT_ARR )
+				vn = vars_push( INT_TRANS_ARR, NULL, 0 );
+			else
+				vn = vars_push( FLOAT_TRANS_ARR, NULL, 0 );
+			vn->flags |= NEED_ALLOC;
+			return vn;
+		}
 	}
 
 	if ( v->from->type == INT_ARR )
