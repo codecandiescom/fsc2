@@ -53,6 +53,14 @@ the experiment is run. When an experiment is restarted (without
 reloading the @code{EDL} file) only this third step is repeated.
 
 
+In the following what happens during the three steps of the execution
+of an @code{EDL} script will be explained in some more details. Then
+follows a real long section that tour de force through the sources of
+the porgram. This is hopefully going to be helpful for people that try
+eliminate bugs or even extend @code{fsc2}.
+
+
+
 @ifinfo
 @menu
 * First stage of interpretation::
@@ -415,40 +423,46 @@ a pair of pipes between the processes.
 @section Reading the sources
 
 
-The following is supposed to give you an introduction on where to
-look when you are search for something in the source code of
-@code{fsc2}. This is yet far from complete but work in progress.
+The following is supposed to give you an introduction on where to look
+when you are searching for something in the source code of
+@code{fsc2}. Of course, the program has gotten too complex to be
+described easily (and with less space then required for the program
+itself). Thus all I can try is showing you the red line through the
+jungle of code along what's about to happen when @code{fsc2} is started,
+an @code{EDL} script gets loaded, tested and finally executed. This is
+yet far from complete but work in progress at best.
 
 
 Lets start with what to do when you want to debug @code{fsc2}. It's
 probably obvious that when you want to run the main (parent) process of
-@code{fsc2} under a debugger you just start it in the debugger. To keep
-the debugger from getting stopped each time an internally used signal is
-received you probably should start with telling the debugger to ignore
-the two signals @code{SIGUSR1} and @code{SIGUSR2}. Under @code{gdb} you
-do this by entering
+@code{fsc2} under a debugger you just start it within the debugger. To
+keep the debugger from getting stopped each time an internally used
+signal is received you probably should start with telling the debugger
+to ignore the two signals @code{SIGUSR1} and @code{SIGUSR2}. Under
+@code{gdb} you do this by entering
 @example
 (gdb) handle SIGUSR1 nostop noprint
 (gdb) handle SIGUSR2 nostop noprint
 @end example
 
 
-Debugging the child process, running the experiment, requires the
+Debugging the child process that runs the experiment requires the
 debugger to attach to the newly created child process. To be able to do
 so without the child process already starting to execute while you're
-still trying to attach it you should set the environment variable
-@code{FSC2_CHILD_DEBUG}, e.g.@:
+still in the process of attaching to it you should set the environment
+variable @code{FSC2_CHILD_DEBUG}, e.g.@:
 @example
-> export FSC2_CHILD_DEBUG=1
+jens@@crowley:~/Lab/fsc2> export FSC2_CHILD_DEBUG=1
 @end example
 @noindent
-When this environment variable is defined the child process will sleep
-for about ten hour before it starts, which should be more than enough
-for you to attach to it. Moreover, when this environment variable is set
-a line telling you the PID of the child process is printed out when the
-child process gets started. All you have to do is to start the debugger
-with the PID to attach to. Here's an example of a typical session
-when I start try to debug the child process using @code{gdb}:
+When this environment variable is defined (what you set it to doesn't
+matter) the child process will sleep for about ten hour before it
+starts, which should be more than enough for you to attach to
+it. Moreover, when @code{FSC2_CHILD_DEBUG} is set a line telling you the
+PID of the child process is printed out when the child process gets
+started. All you have to do is to start the debugger with the PID to
+attach to. Here's an example of a typical session where I start to debug
+the child process using @code{gdb}:
 @example
 jens@@crowley:~/Lab/fsc2 > export FSC2_CHILD_DEBUG=1
 jens@@crowley:~/Lab/fsc2 > src/fsc2 &
@@ -493,34 +507,43 @@ Loaded symbols for /usr/local/lib/fsc2/fsc2_rsc_lr.so
 Reading symbols from /usr/local/lib/fsc2/User_Functions.so...done.
 Loaded symbols for /usr/local/lib/fsc2/User_Functions.so
 0x40698951 in __libc_nanosleep () from /lib/libc.so.6
+(gdb) handle SIGUSR1 nostop noprint
+(gdb) handle SIGUSR2 nostop noprint
 (gdb)
 @end example
 @noindent
-Now the child process will be waiting at the very start of its code
-in the function @code{run_child()} in the file @file{run.c}.
+(There may be even more lines starting with "@code{Reading symbols for}"
+and "@code{Loading symbols from}" if your @code{EDL} script lists some
+modules in the @code{DEVICES} section.) Now the child process will be
+waiting at the very start of its code in the function @code{run_child()}
+in the file @file{run.c}.
+
 
 Please note that because @code{fsc2} is normally running as a setuid-ed
 process you must not try to debug the already installed and setuid-ed
-version (that's not allowed for security reason) but only a version for
+version (that's not allowed for security reason) but only a version
 which belongs to you and for which you have unlimited execution
 permissions. This might require that you temporarily change the
-permissions to allow access by all users for all device files (for the
-GPIB board, the serial ports and, possibly, cards installed in the
-computer and used by @code{fsc2}) for devices that are controlled by the
+permissions to allow access by all users for all the device files (for
+the GPIB board, the serial ports and, possibly, cards installed in the
+computer and used by @code{fsc2}) of devices that are controlled by the
 @code{EDL} script you use during debugging. Don't forget to reset the
 permissions when you're done.
 
 
-This point out of the way I'll start a tour de force through the
-sources. When @code{fsc2} is invoked it starts at the code in
+This point out of the way I'll now want to start a tour de force through
+the sources. When @code{fsc2} is invoked it starts at the code in
 @code{main()} in the file @file{fsc2.c}. After setting up lots of global
 variables and checking the command line options it tries to connect to a
-kind of daemon process or start it if it's not already running.  This
-daemon is taking care of situation where @code{fsc2} is running in
-non-exclusive mode, i.e.@: more than instance of @code{fsc2} is to
-be run at the same time, and it will tell new instances about what they
-are allowed to do and what not to avoid more than one instance trying to
-access the same devices at the same time.
+kind of daemon process or starts it if it's not already running.  This
+daemon is taking care of situations where @code{fsc2} is running in
+non-exclusive mode, i.e.@: more than instance of @code{fsc2} is to be
+run at the same time, and it will tell new instances about what they are
+allowed to do and what not to avoid more than one instance trying to
+access the same devices at the same time. It also is supposed to remove
+things like lock files, shared memory segments etc.@: should it ever
+happen that @code{fsc2} crashes that badly that it isn't able to do it
+itself.
 
 
 When this hurdle has been taken the initialization of the graphics is
@@ -599,6 +622,7 @@ connections that @code{fsc2} is at the moment too busy to accept new
 @code{EDL} scripts and then that it's again prepared to load such a
 script.)
 
+
 The real fun starts at the line
 @example
 state = scan_main( EDL.in_file, in_file_fp );
@@ -611,14 +635,476 @@ happening here.
 
 The function @code{scan_main()} is located in the file
 @file{split_lexer.l}. This obviously isn't a normall @code{C} file but a
-file from which the @code{flex} utility creates a @code{C}
-file. @code{flex} is a tool that generates programs that perfom
-pattern-matching on input text. That means that a program created by
-@code{flex} will dissect an input text into the tokens according to the
-rules of how these tokens are supposed to look like defined in the
-@code{.l} file. And that's exactly what needs to be done with an
-@code{EDL} script before it can later be digested by @code{fsc2} (with
-the help of another tool, @code{bison}).
+file from which the @code{flex} utility creates a @code{C} file. If you
+don't know yet, @code{flex} is a tool that generates programs that
+perfom pattern-matching on input text. That means that a program created
+by @code{flex} will dissect an input text into the tokens according to
+the rules of how these tokens are supposed to look like (as regular
+expressions), defined in the @code{.l} file. And that's exactly what
+needs to be done with an @code{EDL} script before it can later be
+digested by @code{fsc2} (with the help of another tool, @code{bison}).
 
 
-That's it for the moment, the sequel is coming soon, please stay tuned ;-)
+Before @code{scan_main()} starts tokenizing the input it does some
+initalization of things that may be needed later on. This consists first
+of setting up an internal list of built-in @code{EDL} functions and
+@code{EDL} functions that might be spplied by modules by calling
+@code{functions_init()} in the file @file{func.c}. Built-in functions
+are all listed at the top of @file{func.c} and the list built from it
+contains information about the names of the functions, the @code{C}
+function that are to be called for the @code{EDL} functions, the number
+of arguments, and in which sections of the program the functions are
+allowed to be called. When @code{fsc2} is done with it's built-in
+functions it appends to the list also the functions supplied by modules.
+These are found in the @file{Functions} file in the @file{config}
+subdirectory. To do so another @code{flex} tokenizer is invoked on this
+file, which is generated by the code in @file{func_list_lexer.l}.
+
+
+After assembling the list of functions @code{fsc2} also creates a list
+of the registered modules. This is done by invoking the tokenizer
+created from the file @file{devices_list_lexer.l} on the list of
+all devices, @file{Devices} also in the @file{config} subdirectory.
+
+
+When this succeeded @code{fsc2} is ready to start interpreting the input
+@code{EDL} file. But there's a twist: it does not work directly with the
+@code{EDL} file, but with a somewhat cleaned up version as has already
+ben mentioned above. This cleaning up is done by invoking an external
+utility, @code{fsc2_clean}, again a @code{flex} generated program from
+the file @code{fsc2_clean.l}. This is done in the function
+@code{filter_edl()} in @file{util.c}. The @code{fsc2_clean} utility is
+started with its @code{stdin} redirected to the @code{EDL} input file
+and its @code{stdout} redirected to a pipe, from which @code{fsc2} in
+the following is reading the cleaned up version of the @code{EDL} file.
+
+
+The tokenizer (or "lexer") created from @file{split_lexer.l} is rather
+simple in that it just reads in the @code{EDL} code until it finds the
+first section keyword (and this should be the first line the lexer gets
+from @code{fsc2_clean}, which already removed all comments etc.). On
+finding the first section keyword control is transfered immediately to
+another lexer, that is specifically written for dealing with the syntax
+of this section. And that's why there are that many further files to
+generate @code{flex} scanners, i.e.@: files with names ending in
+@code{.l}, for each section there's a different tokenizer. These are
+in the sequence the resulting lexers usually get invoked:
+@example
+devices_lexer.l        DEVICES section
+vars_lexer.l           VARIABLES section
+assign_lexer.l         ASSIGNMENTS section
+phases_lexer.l         PHASES section
+preps_lexer.l          PREPARATIONS section
+exp_lexer.l            EXPERIMENT section
+@end example
+@noindent
+Each of these lexers only returns to the one from @file{split_lexer.l}
+when it finds a new section label (or when an error is detected).
+
+
+In a typical @code{EDL} script the first lexer getting involved is the
+one for the @code{DEVICES} section, generated from
+@file{devices_lexer.l}. This lexer is very simple because all the
+@code{DEVICES} section may consist of is a list of device names,
+separated by semicolons. The only thing of interest is that when the end
+of the @code{DEVICES} section is reached it invokes the function
+@code{load_all_drivers()} from the file @code{loader.c}, which is
+central to the plugin-like architecture of device handling in
+@code{fsc2}.
+
+
+The first part of @code{load_all_drivers()} consists of loading the
+libraries for the devices listed in the @code{DEVICES} section (plus
+another one called @code{User_Functions.so}) and then trying to find the
+(non-builtin) functions in the libraries that are listed in the
+@file{Functions} file in the @file{config} subdirectory, which already
+has been read in. This is done in the @code{load_functions} subroutine.
+Here first a library gets loaded (using @code{dlopen(3)}), and if this
+succeeds, the function tries to determine the addresses of the hook
+functions (see the next chapter about writing modules for what the hook
+functions are good for in detail, it should suffice to say that these
+are (optional) functions in the modules that get executed at certain
+points during the execution of the @code{EDL} script, i.e.@: after the
+library has been loaded, before and after the test run, before and after
+the start of the experiment and, finally, just before the modules gets
+unloaded). Then @code{fsc2} runs through its list of non-builtin
+functions and checks if some of them can be found in the library.
+
+
+This last step is getting a bit more complicated by the fact that it is
+possible to load two or more modules with the same type (e.g.@: two
+modules for lock-in amplifiers), which both will supply functions of the
+same names. This is handled by each library defining a global variable,
+a string, with the device type. When @code{fsc2} finds that there are
+two or more devices with the same type (according to this global
+variable), it will accept functions of the same name more than one time
+and make the names unique by appending a hash ("@code{#}") and a number
+for the device. So, if there are the modules for two lock-in amplifiers
+listed in the devices section, both supplying a function
+@code{lockin_get_data()}, it will create two entries in its internal
+list of non-builtin functions, one named @code{lockin_get_data#1()} and
+associated with the first lock-in amplifier in the @code{DEVICES}
+section and one named @code{lockin_get_data#2()} for the second
+lock-in. The first, addressing the first lock-in, can then be called as
+either @code{lockin_get_data#1()} (or also without the "@code{#1}"),
+while for @code{lockin_get_data#2()} the function from the library for
+the second lock-in amplifier is used.
+
+
+After all device libraries have been loaded successfully the functions
+@code{init_hook()} in all modules that have such a function are invoked,
+always in the same sequence as they were listed in the @code{DEVICES}
+section. The modules can use thos hook function to initialize
+themselves.
+
+
+After this the work for of the @code{load_all_drivers()} and also the
+lexer for the @code{DEVICES} section is done and control returns to the
+lexer generated by @file{split_lexer.l} to the function
+@code{section_parser()}. The last thing the lexer for the @code{DEVICES}
+section did was setting a variable that tells this function what is the
+next section in the @code{EDL} code. All the function now does is
+transfer control to the lexer for that section.
+
+
+Normally, the next section will be the @code{VARIABLES} section and the
+lexer generated from @code{vars_lexer.l} takes over. This one is a bit
+more interesting because the syntax of the @code{VARIABLES} section is
+quite a bit more complicated than that of the @code{DEVICES} section.
+This also makes it necessary not only to use a lexer but also a parser,
+generated by the @code{bison} tool from the @file{vars_parser.y}. Both
+the lexer and the parser work hand in hand to make sense from the
+@code{EDL} code, the lexer spliting up the input into single tokens and
+passing them on to the parser one by one, which in turn figures out if
+the tokens make sense in th sequence they are coming in and then
+executing some @code{C} code associated with. If you don't know yet how
+lexers like @code{flex} and @code{lex} and parsers like @code{bison} and
+@code{yacc} work and how they can be combined to interpret input you
+should start trying to find out, @code{fsc2} strongly relies on them and
+you probably will have lots of problems unerstanding much of the
+following without at least some basic knowledge about them.
+
+
+@code{fsc2} maintains a linked list of all variables and these list is
+assembled from the code in the @code{VARIABLES} section. So this may be
+a good place to give an introduction about how variables look like. All
+variables are structures of type @code{Var}, which is declared (and
+typedef-ed) in the file @file{variables.h} (you may prefer to look it up
+now). It contains a string pointer for the variable name, a member for
+the type of the variable, an union for the value of the variable (since
+there are several types of variables they can have values of quit a
+range of types). Further, there are some data to keep track of array
+variables (1- or multi-dimensional) and a member for certain
+flags. Finally, there are pointers to mae the variable structure fit
+into a (doubly) linked list.
+
+Before going into more details here's a list of the possible variable
+types:
+@example
+UNDEF_VAR
+STR_VAR
+INT_VAR
+FLOAT_VAR
+INT_ARR
+FLOAT_ARR
+INT_REF
+FLOAT_REF
+INT_PTR
+FLOAT_PTR
+REF_PTR
+FUNC
+@end example
+@noindent
+Each variable begins its life with type @code{UNDEF_VAR}. But usually it
+should become promoted to something more usful shortly afterwards, so
+you will find it only in rare cases (it's sometimes used for temporary
+variables, we're going to discuss temporary variables sometime later). A
+@code{STR_VAR} is a variable holding a string, and also this type of
+variables only wil be found in temporary variables. What an
+@code{INT_VAR} and @code{FLOAT_VAR} is will probably be quite obvious,
+these types of variables can hold a single (long) integer or floating
+point (double) value, which are stored in the @code{lval} and
+@code{dval} members of the @code{val} union of the @code{Var} structure.
+
+
+Variables of type @code{INT_ARR} and @code{FLOAT_ARR} are for holding
+one-dimensional arrays of integer and floating point values.  For
+variables of thess types the @code{len} field of the @code{Var}
+structure will contain the (current) length of the array and the
+@code{lpnt} and @code{dpnt} members of the @code{val} union are pointers
+to the array with its values.
+
+Variables of type @code{INT_REF} and @code{FLOAT_REF} are for
+multidimensional arrays. These are a bit different because they don't
+store any elements of the array directly but instead pointers to lower
+dimensional arrays. These might again be multdimensional array variables
+(but with one dimension less) or @code{INT_ARR} or @code{FLOAT_ARR}
+variables, that then contain the data of an one-dimensional array. To
+make clearer what I mean lets assume that you define a 3-dimensional
+array called @code{A} in the @code{VARIABLES} section:
+@example
+A[ 4, 2, 7 ];
+@end example
+@noindent
+This will result in the creation of 9 variables. The top-most one (and
+only one that can be accessed directly from the @code{EDL} script
+because it's the only one having a name) is of type @code{INT_REF} and
+contains an array of 4 pointers to 2x7-dimensional arrays, stored in the
+@code{vprtr} member of the @code{val} union of the @code{Var}
+structure. It's @code{dim} member is set to 3 since it's a 3-dimensional
+variable and the @code{len} member gets set to 4 because the
+@code{val.vptr} field is an array of 4 @code{Var} pointers.  Each of the
+4 @code{Var} pointers stored in the @code{val.vptr} field point to a
+different variable, of which each is a again of type @code{INT_REF}.
+But these variables pointed to will have a dimension of 2 only, so the
+@code{dim} memberis set to 2 and since each is of dimension @w{@code{[2,
+7]}}, their @code{len} members are set to 2. And each of this
+lower-dimension variables again will have the @code{val.vptr} array
+consist of (2) pointers pointing to one.dimensional arrays, this time of
+type @code{INT_ARR}. These @code{INT_ARR} variables, two levels below
+the original variable named @code{A} will each contain an array of 7
+integer values, pointed to by @code{val.lpnt}.
+
+
+When you count the variables actually created according to the scheme
+above you will find that it are 9, one for the variable named @code{A}
+itself, which in turn points to 4 newly created variables, of which each
+again points to 2 further variables (which finally contain all the data
+as one-dimensional arrays).
+
+
+The remaining variable types @code{INT_PTR}, @code{FLOAT_PTR},
+@code{REF_PTR} and @code{FUNC} are again only used with temporary
+variables and will be discussed below.
+
+
+The variables declared in the @code{VARIABLES} section are all elements
+of a doubly linked list. The pointer to the top element is a member of
+the global @code{EDL} variable. It's a structure of type
+@code{EDL_Stuff} declared in @file{fsc2.h} and countaining data relevant
+for the @code{EDL} script currently under execution. To find the first
+element of the list of variables see the @code{EDL.Var_List} member.
+Directly beneath it you will find that there's also a second variable
+named @code{EDL.Var_Stack}. This variable is also doubly linked list of
+variables, but in contrast this list is for temporary variables, which
+get created and deleted all of the time during the interpretation of an
+@code{EDL} script and is in the following often referred to as the
+"stack". In this list also the types of variables that were only
+mentioned en passant above can be found, which I will shortly summarize
+here.
+
+
+A variable of type @code{STR_VAR} gets created whenever in the text of
+the @code{EDL} script a string is found or when an @code{EDL} function
+returns a string. Since strings are always used shortly after their
+creation (always within the statement they appear in) they are always
+temporary variables. Variable of type @code{INT_PTR} and
+@code{FLOAT_PTR} are variables in which the @code{val.lpnt} and
+@code{val.dpnt} members point to arrays belonging to some other
+variable, but never to the variable itself. Variables of type
+@code{REF_PTR} are variables in which the @code{from} member (which
+hadn't been mentioned yet) pointing to the variable it's pointing to.
+Finally, variables of type @code{FUNC} have the @code{val.fcnt} member
+pointing to address to one of the @code{C} functions that get called
+for @code{EDL} functions.
+
+
+After this short detour about variables back to what happens in the
+@code{VARIABLES} section. In the most simple case the @code{VARIABLES}
+section isn't much more than a list of variable names, which need to be
+created. When the lexer finds something which looks like a variable name
+(i.e.@: a word starting with a letter, followed by more letters, digits
+or underscore characters), it will first check if a variable by this
+name already exists by calling the function @code{vars_get()} from
+@file{variables.h} with the name it found. It either receives a pointer
+to the variable or @code{NULL} if the variable does not exist yet. In
+the latter it will create a new variable by calling @code{vars_new()}
+(which returns a pointer to the new variable). It then passes the
+variables address to the parser. Assuming the variable has been newly
+created it will still be of type @code{UNDEF_VAR} and it's not clear yet
+if it's a simple variable or going to be an array. Thus the parser asks
+the lexer for the next token. If this is a comma or a semicolon it can
+conclude that the variable is a simple variable and can set its type to
+either @code{INT_VAR} or @code{FLOAT_VAR} (depending on its name
+starting with a lower or upper case character) and is done with it. But
+if the next token is a "@code{[}" the parser can only notice that this
+is going an array and must ask the lexer for more tokens, which should
+be a list of numbers, separated by commas and ending in a "@code{]}"
+(but there are even more complicated cases). When all these have been
+read in the parser calls some @code{C} code that sets up the new array
+according to the list of sizes the parser received. More complicated
+cases may include that instead of a number an asterisk ("@code{*}") is
+found, in which case the array has to be initialized in a way to
+indicate that the array hasn't been fully specified yet (this is done by
+setting the @code{len} field of the variable structure for the array to
+0 and setting the @code{IS_DYNAMIC} flag in the @code{flags} member).
+
+
+Other complications may include that a size if an array isn't given as a
+number but as an arithmetic expression, possibly involving already
+defined (and initialized) variables, arithmetic operators or even
+function calls. In the hope not to bore you to death by getting too
+detailed I want to describe shortly how the parser evaluates such an
+epression because it's more or less the same all over the complete
+program, not restricted to the @code{VARIABLES} section. Let's discuss
+things using the following example
+@example
+abs( R + 5 * ( 2 - 7 ) )
+@end example
+@noindent
+Here the lexer will first extract the "@code{abs}" token. Now I have to
+admit a white lie I made above: I said that the lexer will check first
+for tokens like this if it's an already existing variable. But it
+actually first checks if it's an @code{EDL} function name, only if it
+isn't it will check if it's a variable. And here it will find that
+@code{abs} is a function by calling the function @code{func_get()} in
+@file{func.c}. This function will return the address of a new temporary
+variable on the stack (pointed to by @code{EDL.Var_Stack}) of type
+@code{FUNC} with the @code{val.fcnt} holding the address of the function
+to be executed for the @code{abs()} @code{EDL} function (which is
+@code{f_abs()} in @file{func_basic.c}). The lexer now passes the address
+of the variable on to the parser.
+
+
+The parser knows that functions always have to be followed by an opening
+parenthesis and thus will ask the lexwer for the next token. If this
+isn't a "@code{(}" the parser will give up, complaining about a syntax
+error. Otherwise the parser has to look out for the function
+argument(s), asking the lexer for more tokens. The next one it gets is a
+pointer to the (hopefully already defined and initialized) variable
+"@code{R}". But it doesn't know yet if this is already the end of the
+(first) argument, so it requests another token, which is the "@code{+}".
+From this the parser concludes that it obviously hasn't seen the end of
+it yet and gets itself another token, the "@code{5}". A stupid parser
+might now add the 5 to the value of @code{R}, but since the parser knows
+the precedence od operators it has to defer this operation at least
+until it has seen the next token. When the next token would be a comma
+(indicating that a new function argument starts) or a closing
+parenthesis it would now do the addition. But since the next token is a 
+"@code{*}" it has to wait and first evaluate the "@code{( 2 - 7 )}"
+part and multiply the result with 5 before again checking if it's prudent
+to add the result to the value of @code{R}. Since the next token the
+parser receives from the lexer is the "@code{)}, indicating the end of
+the function arguments, it can go on, adding the result of
+@w{"@code{5 * ( 2 - 7 )}"} to the value of @code{R}. In this process
+the temporary variable holding the pointer to the variable @code{R} gets
+popped from the stack and a new variable with the result of the
+operation is pushed onto the stack (i.e.@: is added to the end of the
+linked list of variables making up the stack). Now the stack still
+contains two variables, the variable pointing to the @code{f_abs()}
+function and the variable with the function argument. And since the
+parser has seen from the "@code{)}" that no more arguments are to be
+expected for the function it will invoke the @code{f_abs()} function
+with a pointer to the variable with the function argument.
+
+
+If you cared to look it up you will have found that the @code{f_abs()}
+function is declared as
+@example
+Var *f_abs( Var *v );
+@end example
+@noindent
+This is typical for all functions that are invoked on behalf of
+@code{EDL} functions: they always expect a single argument, a pointer to
+a @code{Var} structure and always return a pointer to such a structure.
+The pointer these functions receive is always pointing to the first
+argument of the function. If the function requires more than one
+argument it has to look for the @code{next} member of the variable,
+and if this isn't @code{NULL} it points to the next argument. Of course,
+zthis can be repeated until in the last argument the @code{next} field
+is @code{NULL}. The function now has to check if the types of the
+variables are what is required (it e.g.@: wouldn't make sense for the
+@code{f_abs()} function if the argument would be a variable of type
+@code{STR_VAR}) and if there are enough arguments (at least if the
+function allows a variable number of arguments, if the function is
+declared to accept only a fixed number of arguments these cases will be
+dealt with before the function is ever called, see below).
+
+
+The function now has to do it's work and, when it's done, creates
+another temporary variable on the stack with the result (this is done by
+a call of the function @code{vars_push()} in @file{variables.c}). In the
+process it may remove the function arguments from the stack (using
+@code{vars_pop()} also in @file{variables.c}), if it doesn't do so it
+will be done automatically when the function returns. Note that there's
+a restriction in that a function never can return more than a pointer to
+a single variable, i.e. the variable pointed to must have its
+@code{next} member set to @code{NULL}, being the last variable on the
+stack. A function may also chose to return @code{NULL}, but it's good
+practice to always return a value, if there isn't really anything to be
+returned, i.e.@: the function always get invoked for its side effects
+only, it should simply return an integer variable with a value of 1 to
+indicate that it succeeded.
+
+
+Again I have to admit that I wasn't completely honest when I wrote above
+that "the parser invokes the @code{f_abs()} function". The parser does
+not call the @code{f_abs()} function directly, but instead calls
+@code{func_call()} in @file{func.c} instead with a pointer to the
+variable of type @code{FUNC} pointing to the @code{f_abs()} function
+(please remember that the function argument(s) are coming directly after
+this variable on the stack). Before @code{func_call()} really calls
+@code{f_abs()} it will first do several checks. The first one is to see
+if the variable it got is really pointing to a function. Then it checks
+how many arguments there are and compares it to the number of arguments
+the function to be called is prepared to accept. If there are too many
+it will strip of the superfluous one (and print out a warning), if there
+aren't enough it will print out an error message and stop the
+interpretation of the @code{EDL} script. If these tests show that the
+function can be called without problems @code{func_call()} still has to
+create an entry on another stack (the "call stack") that keeps track of
+situations where during the execution of a function another function is
+called etc., which is e.g.@: needed for emitting reasonable error
+messages. Only then the @code{f_abs()} is called. When @code{f_abs()}
+returns, the @code{func_call()} first pops the last element from the
+"call stack", automatically removes what's left of the function
+arguments and the variable with the pointer to the @code{f_abs()}
+function (always checking that the called function hasn't messed up
+stack in unrecoverable ways) before it returns the pointer with the
+result of the call of @code{f_abs()} to the parser.
+
+
+Now the parser will at last know what's the result of 
+@example
+abs( R + 5 * ( 2 - 7 ) )
+@end example
+@noindent
+and can use it e.g.@: as the length of a new array.
+
+
+Of course, beside being defined new variables they can also become
+intialized in the @code{VARIABLES} section. The values used in the
+initialization can, of course, also be the results of complicated
+expressions. But these will be treated in exactly the same way as
+already described above, the only new thing is the assignment part. The
+parser knows that a variable is getting initialized when it sees the
+"@code{=}" operator after the definition of a variable. It then parses
+and interprets the right hand side of the equation and finally assigns
+the result to the newly defined variable on the left hand side. To do so
+which it calls the function @code{vars_assign()} from @file{variables.c}
+(if it's an initialization of an array also some other functions get
+involved in between).
+
+
+The creation and initialization of one- and more-dimensional arrays
+makes up a good deal of the code in @file{variables.c}. Unfortunately,
+so many things have to be taken care of that it can be quite a bit of
+work understanding what's going on and I have to admit that it usually
+also takes me some time to figure out what (and why) I have written
+there, so don't worry in case you have problems understanding everything
+at the first glance...
+
+
+But after all these detours let's get back to the red line and continue
+with what happes during the interpretation of an @code{EDL} script. I
+guess most of what can be said about the @code{VARIABLES} section has
+been said and we should assume that we reached the end of this section.
+The lexer generated from @file{vars_lexer.l} will then retransfer
+control to the lexer created from @file{split_lexer.l}, returning a
+number indicating what is the type of the next section.
+
+
+
+
+
+That's how far I got yet, a sequel is coming soon, stay tuned ;-)
