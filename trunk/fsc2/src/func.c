@@ -154,8 +154,9 @@ Func Def_Fncts[ ] =              /* List of built-in functions */
 
 static int func_cmp1( const void *a, const void *b );
 static int func_cmp2( const void *a, const void *b );
+static Call_Stack *call_push( Func *f );
+static Call_Stack *call_pop( void );
 
-static long in_call = 0;
 
 
 
@@ -233,7 +234,20 @@ void functions_exit( void )
 
 	Fncts = T_free( Fncts );
 
-	in_call = 0;
+	/* Clean up the call stack */
+
+#ifndef NDEBUG
+	if ( CS != NULL )
+	{
+		eprint( SEVERE, UNSET, "Internal error detected at %s:%d.\n",
+				__FILE__, __LINE__ );
+		while ( call_pop( ) )
+			;
+	}
+#else
+	while ( call_pop( ) )
+		;
+#endif
 
 	No_File_Numbers = UNSET;
 	Dont_Save = UNSET;
@@ -297,7 +311,7 @@ Var *func_get_long( const char *name, int *acc, bool flag )
 	{
 		if ( flag )
 		{
-			eprint( FATAL, SET, "Function `%s' has not been loaded.\n",
+			eprint( FATAL, SET, "%s(): Function has not been loaded.\n",
 					f->name );
 			THROW( EXCEPTION );
 		}
@@ -387,8 +401,8 @@ Var *func_call( Var *f )
 
 		if ( ac > abs_len )
 		{
-			eprint( WARN, SET, "Too many arguments for function `%s', "
-					"discarding superfluous arguments.\n", f->name );
+			eprint( WARN, SET, "%s(): Too many arguments, discarding "
+					"superfluous arguments.\n", f->name );
 
 			for ( ac = 0, ap = f->next; ac < abs_len; ++ac, ap = ap->next )
 				;
@@ -403,23 +417,17 @@ Var *func_call( Var *f )
 
 		if ( f->dim >= 0 && ac < f->dim )
 		{
-			eprint( FATAL, SET, "Function `%s' expects %d argument%s but only "
-					"%d where found.\n", f->name, f->dim,
+			eprint( FATAL, SET, "%s(): Function expects %d argument%s but "
+					"only %d where found.\n", f->name, f->dim,
 					f->dim == 1 ? "" : "s", ac );
 			THROW( EXCEPTION );
 		}
 	}
 
-	/* Now call the function - but first set the global variable 'Cur_Func'
-	   to the functions name which is usually used in error messages (the
-	   only exception is when from an EDL function another EDL is called,
-	   in which case the name of the 'topmost' function is kept). */
+	/* Now call the function after storing some information about the
+	   function on the call stack */
 
-	if ( in_call++ == 0 )
-	{
-		Cur_Dev  = f->val.fnct->device;
-		Cur_Func = f->name;
-	}
+	call_push( f->val.fnct );
 
 	TRY
 	{
@@ -428,11 +436,7 @@ Var *func_call( Var *f )
 	}
 	OTHERWISE
 	{
-		if ( --in_call == 0 )
-		{
-			Cur_Dev  = NULL;
-			Cur_Func = NULL;
-		}
+		call_pop( );
 
 #ifndef NDEBUG
 		if ( ! vars_exist( f ) )
@@ -452,11 +456,7 @@ Var *func_call( Var *f )
 		PASSTHROUGH( );
 	}
 
-	if ( --in_call == 0 )
-	{
-		Cur_Dev  = NULL;
-		Cur_Func = NULL;
-	}
+	call_pop( );
 
 #ifndef NDEBUG
 	/* Before starting to delete the now defunct variables do another sanity
@@ -482,6 +482,63 @@ Var *func_call( Var *f )
 		;
 
 	return ret;
+}
+
+
+/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+
+static Call_Stack *call_push( Func *f )
+{
+	if ( CS == NULL )
+	{
+		CS = T_malloc( sizeof( Call_Stack ) );
+		CS->next = CS->prev = NULL;
+	}
+	else
+	{
+		CS->next = T_malloc( sizeof( Call_Stack ) );
+		CS->next->prev = CS;
+		CS = CS->next;
+		CS->next = NULL;
+	}
+
+	CS->f = f;
+
+	Cur_Dev  = CS->f->device;
+	Cur_Func = CS->f->name;
+
+	return CS;
+}
+
+
+/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+
+static Call_Stack *call_pop( void )
+{
+	if ( CS == NULL )
+	{
+		Cur_Dev  = NULL;
+		Cur_Func = NULL;
+		return NULL;
+	}
+
+	if ( CS->prev != NULL )
+	{
+		CS = CS->prev;
+		CS->next = T_free( CS->next );
+		Cur_Dev  = CS->f->device;
+		Cur_Func = CS->f->name;
+	}
+	else
+	{
+		CS = T_free( CS );
+		Cur_Dev  = NULL;
+		Cur_Func = NULL;
+	}
+
+	return CS;
 }
 
 

@@ -764,7 +764,7 @@ Var *f_sinh( Var *v )
 	{
 		res = sinh( VALUE ( v ) );
 		if ( fabs( res ) == HUGE_VAL && errno == ERANGE )
-			print( SEVERE, SET, "Result overflow.\n" );
+			print( SEVERE, "Result overflow.\n" );
 		return vars_push( FLOAT_VAR, res );
 	}
 
