@@ -102,6 +102,12 @@ WITH_HTTP_SERVER  := yes
 DEFAULT_HTTP_PORT := 8080
 
 
+# Uncomment the following line if you don't want the program to send an
+# emails with a bug report on crashes.
+
+# NO_MAIL = yes
+
+
 # This last variable controls to whom mail with bug reports and crash messages
 # will be send - if not set no "Bug report" button will be shown. Please
 # change this only if you change the program yourself (in which case sending
@@ -396,17 +402,19 @@ endif
 
 # Define variables with full paths for the 'mail' and 'addr2line' programs
 # and make sure the mail program and addr2line got found by 'which',
-# otherwise don't set the variables
+# otherwise don't set the variables, If NO_MAIL has been defined never
+# send crash mails (which require ADDR2LINE being set).
 
 MAIL_PROGRAM  := $(shell which mail)
-ADDR2LINE     := $(shell which addr2line)
-
 ifneq ($(word 1,$(MAIL_PROGRAM)),which:)
 	CFLAGS += -DMAIL_PROGRAM=\"$(MAIL_PROGRAM)\"
 endif
 
-ifneq ($(word 1,$(ADDR2LINE)),which:)
-	CFLAGS += -DADDR2LINE=\"$(ADDR2LINE)\"
+ifndef NO_MAIL
+	ADDR2LINE     := $(shell which addr2line)
+	ifneq ($(word 1,$(ADDR2LINE)),which:)
+		CFLAGS += -DADDR2LINE=\"$(ADDR2LINE)\"
+	endif
 endif
 
 
