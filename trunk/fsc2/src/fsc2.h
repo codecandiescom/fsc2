@@ -68,7 +68,6 @@ long Time_Base = DEFAULT_TIME_UNIT;
 
 Var *var_list = NULL;
 Var *Var_Stack = NULL;
-Var *Cur_Arr = NULL;
 
 ASSIGNMENTS assignment[ PULSER_CHANNEL_PHASE_Y + 1 ];
 
@@ -94,7 +93,6 @@ extern long Time_Base;
 
 extern Var *var_list;
 extern Var *Var_Stack;
-extern Var *Cur_Arr;
 
 extern ASSIGNMENTS assignment[ ];
 
