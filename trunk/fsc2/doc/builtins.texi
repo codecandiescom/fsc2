@@ -636,7 +636,7 @@ the elements of an array) .
 @anchor{mean}
 @findex mean()
 Expects an one-dimensional array as in input and returns the mean value
-of all elements of the array.
+of the arrays elements.
 
 @item sqrt()
 @anchor{sqrt}
