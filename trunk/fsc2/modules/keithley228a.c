@@ -892,7 +892,7 @@ static void keithley228a_get_corrected_current( double c, double *psc,
 			 i++;
 
 		 c -= pos_jumps[ i - 1 ];
-		 if ( i & 1 )							/* i ungerade ? */
+		 if ( i & 1 )
 			 del = 0.14;
 		 else
 			 c = fmod( lround( 1.0e6 * c ) * 1.0e-6, del = 0.13 );
@@ -908,7 +908,7 @@ static void keithley228a_get_corrected_current( double c, double *psc,
 				  lround( 1.0e6 * c ) > lround( 1.0e6 * neg_jumps[ i + 1 ] ) )
 			 {
 				 c -= neg_jumps[ i ];
-				 if ( i & 1 )					/* i ungerade ? */
+				 if ( i & 1 )
 					 c = fmod( 1.0e-6 * lround( 1.0e6 * c ), del = 0.13 );
 				 else
 					 del = 0.12;
