@@ -74,11 +74,13 @@ fsc2.html: $(docs) $(figures)
 			sed -e 's/^<TITLE>fsc2: \([^<]*\)<\/TITLE>$$/\1<\/a><br>/' >> TOC; \
 		fi; \
 	done
-	@echo '  <br>' >> TOC
+	@echo -n '  <a href="fsc2_toc.html">' >> TOC;
+	@grep -h '^<TITLE>fsc2: [^<]*</TITLE>$$' fsc2_toc.html | \
+	sed -e 's/^<TITLE>fsc2: \([^<]*\)<\/TITLE>$$/\1<\/a><br><br>/' >> TOC;
 	@echo '  <a href="http://www.physik.fu-berlin.de/~toerring/fsc2.html">Download</a><br>' >> TOC
 	@echo '  <a href="mailto:Jens.Toerring@physik.fu-berlin.de">Contact</a>' >> TOC
 	@echo -e '</div>\n<div id="level0">\n  <div id="level1">\n    <div id="main">' >> TOC
-	@for i in fsc2.html fsc2_[0-9]*.html; do \
+	@for i in *.html; do \
 		sed -e '1,/BODY/!d' $$i > $$i.x; \
 		cat TOC >> $$i.x; \
 		sed -e '1,/<BODY>/d;/<\/BODY/,$$d' $$i >> $$i.x; \

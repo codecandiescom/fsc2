@@ -338,7 +338,7 @@ of the script can be executed, which effectively would stop the
 experiment for this time even though nothing really relevant happens. By
 having one task for the actual execution of the experiment and one for
 the user interaction this problem vanishes because the task for the
-experiment can continue while only the other task, responcible for the
+experiment can continue while only the other task, responsible for the
 user interaction, is blocked. This, of course, also applies to all other
 actions the user may initiate, e.g.@: resizing of windows, magnification
 of data etc.
