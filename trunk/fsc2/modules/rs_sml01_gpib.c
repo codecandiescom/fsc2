@@ -27,7 +27,6 @@
 
 static void rs_sml01_initial_mod_setup( void );
 #if defined WITH_PULSE_MODULATION
-static void rs_sml01_initial_pulse_setup( void );
 static bool rs_sml01_get_pulse_state( void );
 static bool rs_sml01_get_pulse_trig_slope( void );
 static double rs_sml01_get_pulse_width( void );
@@ -54,14 +53,18 @@ bool rs_sml01_init( const char *name )
 
 	/* Set up default settings */
 
-	rs_sml01_command( "CORR:STAT OFF\n" );
-	rs_sml01_command( "FREQ:MODE CW\n" );
-	rs_sml01_command( "FREQ:ERAN OFF\n" );
-	rs_sml01_command( "FREQ:OFFS 0\n" );
-	rs_sml01_command( "POW:MODE CW\n" );
-	rs_sml01_command( "POW:OFFS 0\n" );
-	rs_sml01_command( "POW:ALC ON\n" );
-	rs_sml01_command( "OUTP:AMOD AUTO\n" );
+	rs_sml01_command( "CORR:STAT OFF" );
+	rs_sml01_command( "FREQ:MODE CW" );
+	rs_sml01_command( "FREQ:ERAN OFF" );
+	rs_sml01_command( "FREQ:OFFS 0" );
+	rs_sml01_command( "POW:MODE CW" );
+	rs_sml01_command( "POW:OFFS 0" );
+	rs_sml01_command( "POW:ALC ON" );
+	rs_sml01_command( "OUTP:AMOD AUTO" );
+#if defined WITH_PULSE_MODULATION
+	rs_sml01_command( ":SOUR:PULM:SOUR EXT" );
+	rs_sml01_command( ":SOUR:PULS:DOUB OFF" );
+#endif
 
 	/* Figure out the current frequency if it's not going to be set */
 
@@ -135,10 +138,6 @@ bool rs_sml01_init( const char *name )
 
 	rs_sml01_set_frequency( rs_sml01.freq );
 
-#if defined WITH_PULSE_MODULATION
-	rs_sml01_initial_pulse_setup( );
-#endif
-
 	rs_sml01_set_output_state( rs_sml01.state );
 
 	return OK;
@@ -166,7 +165,7 @@ static void rs_sml01_initial_mod_setup( void )
 	for ( i = 0; i < NUM_MOD_TYPES - 1; i++ )
 	{
 		length = 100;
-		sprintf( cmd, "%s:STAT?\n", types[ i ] );
+		sprintf( cmd, "%s:STAT?", types[ i ] );
 		rs_sml01_talk( cmd, buffer, &length );
 
 		if ( buffer[ 0 ] == '1' )
@@ -213,59 +212,11 @@ static void rs_sml01_initial_mod_setup( void )
 	{
 		if ( i == MOD_TYPE_AM )
 			continue;
-		sprintf( buffer, "%s:BAND STAN\n", types[ i ] );
+		sprintf( buffer, "%s:BAND STAN", types[ i ] );
 		rs_sml01_command( buffer );
 	}
 }
 
-
-/*-------------------------------------------------------------*/
-/*-------------------------------------------------------------*/
-
-#if defined WITH_PULSE_MODULATION
-
-static void rs_sml01_initial_pulse_setup( void )
-{
-	/* Always switch pulse source to external and polarity to normal
-	   (i.e. pulses are only created when when a trigger is received).
-	   Also switch off double pulses. */
-
-	rs_sml01_command( ":SOUR:PULM:SOUR EXT; POL NORM\n" );
-	rs_sml01_command( ":SOUR:PULS:DOUB OFF\n\n" );
-
-	if ( rs_sml01.pulse_width_is_set )
-		rs_sml01_set_pulse_width( rs_sml01.pulse_width );
-	else
-	{
-		rs_sml01.pulse_width = rs_sml01_get_pulse_width( );
-		rs_sml01.pulse_width_is_set = SET;
-	}
-		
-	if ( rs_sml01.pulse_delay_is_set )
-		rs_sml01_set_pulse_delay( rs_sml01.pulse_delay );
-	else
-	{
-		rs_sml01.pulse_delay = rs_sml01_get_pulse_delay( );
-		rs_sml01.pulse_delay_is_set = SET;
-	}
-
-	if ( rs_sml01.pulse_trig_slope_is_set )
-		rs_sml01_set_pulse_trig_slope( rs_sml01.pulse_trig_slope );
-	else
-	{
-		rs_sml01.pulse_trig_slope = rs_sml01_get_pulse_trig_slope( );
-		rs_sml01.pulse_trig_slope_is_set = SET;
-	}
-
-	if ( rs_sml01.pulse_mode_state_is_set )
-		rs_sml01_set_pulse_state( rs_sml01.pulse_mode_state );
-	else
-	{
-		rs_sml01.pulse_mode_state = rs_sml01_get_pulse_state( );
-		rs_sml01.pulse_mode_state_is_set = SET;
-	}
-}
-#endif
 
 /*-------------------------------------------------------------*/
 /*-------------------------------------------------------------*/
@@ -284,7 +235,7 @@ bool rs_sml01_set_output_state( bool state )
 	char cmd[ 100 ];
 
 
-	sprintf( cmd, "OUTP %s\n", state ? "ON" : "OFF" );
+	sprintf( cmd, "OUTP %s", state ? "ON" : "OFF" );
 	rs_sml01_command( cmd );
 	rs_sml01_check_complete( );
 
@@ -301,7 +252,7 @@ bool rs_sml01_get_output_state( void )
 	long length = 10;
 
 
-	rs_sml01_talk( "OUTP?\n", buffer, &length );
+	rs_sml01_talk( "OUTP?", buffer, &length );
 	return buffer[ 0 ] == '1';
 }
 
@@ -316,7 +267,7 @@ double rs_sml01_set_frequency( double freq )
 
 	fsc2_assert( freq >= MIN_FREQ && freq <= MAX_FREQ );
 
-	sprintf( cmd, "FREQ:CW %.0f\n", freq );
+	sprintf( cmd, "FREQ:CW %.0f", freq );
 	rs_sml01_command( cmd );
 	rs_sml01_check_complete( );
 
@@ -333,7 +284,7 @@ double rs_sml01_get_frequency( void )
 	long length = 100;
 
 
-	rs_sml01_talk( "FREQ:CW?\n", buffer, &length );
+	rs_sml01_talk( "FREQ:CW?", buffer, &length );
 	buffer[ length - 1 ] = '\0';
 	return T_atod( buffer );
 }
@@ -349,7 +300,7 @@ double rs_sml01_set_attenuation( double att )
 
 	fsc2_assert( att >= MAX_ATTEN && att <= rs_sml01.min_attenuation );
 
-	sprintf( cmd, "POW %6.1f\n", att );
+	sprintf( cmd, "POW %6.1f", att );
 	rs_sml01_command( cmd );
 	rs_sml01_check_complete( );
 
@@ -365,7 +316,7 @@ double rs_sml01_get_attenuation( void )
 	char buffer[ 100 ];
 	long length = 100;
 
-	rs_sml01_talk( "POW?\n", buffer, &length );
+	rs_sml01_talk( "POW?", buffer, &length );
 	buffer[ length - 1 ] = '\0';
 	return T_atod( buffer );
 }
@@ -379,19 +330,19 @@ int rs_sml01_set_mod_type( int type )
 	switch ( type )
 	{
 		case MOD_TYPE_FM :
-			rs_sml01_command( "AM:STAT OFF;PM:STAT OFF;FM:STAT ON\n" );
+			rs_sml01_command( "AM:STAT OFF;PM:STAT OFF;FM:STAT ON" );
 			break;
 			
 		case MOD_TYPE_AM :
-			rs_sml01_command( "FM:STAT OFF;PM:STAT OFF;AM:STAT ON\n" );
+			rs_sml01_command( "FM:STAT OFF;PM:STAT OFF;AM:STAT ON" );
 			break;
 
 		case MOD_TYPE_PM :
-			rs_sml01_command( "AM:STAT OFF;FM:STAT OFF;PM STAT ON\n" );
+			rs_sml01_command( "AM:STAT OFF;FM:STAT OFF;PM STAT ON" );
 			break;
 
 		case MOD_TYPE_OFF :
-			rs_sml01_command( "AM:STAT OFF;FM:STAT OFF;PM STAT OFF\n" );
+			rs_sml01_command( "AM:STAT OFF;FM:STAT OFF;PM STAT OFF" );
 			break;
 
 		default :                         /* should never happen... */
@@ -420,7 +371,7 @@ int rs_sml01_get_mod_type( void )
 	for ( i = 0; i < NUM_MOD_TYPES - 1; i++ )
 	{
 		length = 100;
-		sprintf( cmd, "%s:STAT?\n", types[ i ] );
+		sprintf( cmd, "%s:STAT?", types[ i ] );
 		rs_sml01_talk( cmd, buffer, &length );
 
 		if ( buffer[ 0 ] == '1' )
@@ -446,15 +397,15 @@ int rs_sml01_set_mod_source( int type, int source, double freq )
 	switch( source )
 	{
 		case MOD_SOURCE_AC :
-			sprintf( cmd, "%s:SOUR EXT;COUP AC\n", types[ type ] );
+			sprintf( cmd, "%s:SOUR EXT;COUP AC", types[ type ] );
 			break;
 
 		case MOD_SOURCE_DC :
-			sprintf( cmd, "%s:SOUR EXT;COUP DC\n", types[ type ] );
+			sprintf( cmd, "%s:SOUR EXT;COUP DC", types[ type ] );
 			break;
 
 		case MOD_SOURCE_INT :
-			sprintf( cmd, "%s:SOUR INT;FREQ %f\n", types[ type ], freq );
+			sprintf( cmd, "%s:SOUR INT;FREQ %f", types[ type ], freq );
 			break;
 
 		default :                         /* this can never happen... */
@@ -482,7 +433,7 @@ int rs_sml01_get_mod_source( int type, double *freq )
 
 	fsc2_assert( type >= 0 && type < NUM_MOD_TYPES );
 
-	sprintf( cmd, "%s:SOUR?\n", types[ type ] );
+	sprintf( cmd, "%s:SOUR?", types[ type ] );
 	length = 100;
 	rs_sml01_talk( cmd, buffer, &length );
 
@@ -490,14 +441,14 @@ int rs_sml01_get_mod_source( int type, double *freq )
 	if ( ! strncmp( buffer, "INT", 3 ) )
 	{
 		source = MOD_SOURCE_INT;
-		sprintf( cmd, "%s:INT:FREQ?\n", types[ type ] );
+		sprintf( cmd, "%s:INT:FREQ?", types[ type ] );
 		rs_sml01_talk( cmd, buffer, &length );
 		buffer[ length - 1 ] = '\0';
 		*freq = T_atod( buffer );
 	}
 	else if ( ! strncmp( buffer, "EXT", 3 ) )
 	{
-		sprintf( cmd, "%s:EXT:COUP?\n", types[ type ] );
+		sprintf( cmd, "%s:EXT:COUP?", types[ type ] );
 		rs_sml01_talk( cmd, buffer, &length );
 		source = buffer[ 0 ] == 'A' ? MOD_SOURCE_AC : MOD_SOURCE_DC;
 	}
@@ -524,15 +475,15 @@ double rs_sml01_set_mod_ampl( int type, double ampl )
 	switch ( rs_sml01.mod_type )
 	{
 		case MOD_TYPE_FM :
-			sprintf( cmd, "FM %fHz\n", ampl );
+			sprintf( cmd, "FM %fHz", ampl );
 			break;
 
 		case MOD_TYPE_AM :
-			sprintf( cmd, "AM %fPCT\n", ampl );
+			sprintf( cmd, "AM %fPCT", ampl );
 			break;
 
 		case MOD_TYPE_PM :
-			sprintf( cmd, "PM %fRAD\n", ampl );
+			sprintf( cmd, "PM %fRAD", ampl );
 			break;
 
 		default :                         /* this can never happen... */
@@ -551,7 +502,7 @@ double rs_sml01_set_mod_ampl( int type, double ampl )
 
 double rs_sml01_get_mod_ampl( int type )
 {
-	const char *cmds[ ] = { "FM?\n", "AM?\n", "PM?\n" };
+	const char *cmds[ ] = { "FM?", "AM?", "PM?" };
 	char buffer[ 100 ];
 	long length = 100;
 
@@ -574,9 +525,9 @@ void rs_sml01_set_pulse_state( bool state )
 	char cmd[ 100 ] = "PULM:STAT ";
 
 	if ( state )
-		strcat( cmd, "ON\n" );
+		strcat( cmd, "ON" );
 	else
-		strcat( cmd, "OFF\n" );
+		strcat( cmd, "OFF" );
 
 	rs_sml01_command( cmd );
 	rs_sml01_check_complete( );
@@ -606,9 +557,9 @@ void rs_sml01_set_pulse_trig_slope( bool state )
 
 
 	if ( state == SLOPE_RAISE )
-		strcat( cmd, "POS\n" );
+		strcat( cmd, "POS" );
 	else
-		strcat( cmd, "NEG\n" );
+		strcat( cmd, "NEG" );
 
 	rs_sml01_command( cmd );
 	rs_sml01_check_complete( );
@@ -637,7 +588,7 @@ void rs_sml01_set_pulse_width( double width )
 	char cmd[ 100 ];
 
 
-	sprintf( cmd, "PULS:WIDT %s\n", rs_sml01_pretty_print( width ) );
+	sprintf( cmd, "PULS:WIDT %s", rs_sml01_pretty_print( width ) );
 	rs_sml01_command( cmd );
 	rs_sml01_check_complete( );
 }
@@ -652,7 +603,7 @@ static double rs_sml01_get_pulse_width( void )
 	long length = 100;
 
 
-	rs_sml01_talk( "PULS:WIDT?\n", buffer, &length );
+	rs_sml01_talk( "PULS:WIDT?", buffer, &length );
 	buffer[ length - 1 ] = '\0';
 	return T_atod( buffer );
 }
@@ -666,7 +617,7 @@ void rs_sml01_set_pulse_delay( double delay )
 	char cmd[ 100 ];
 
 
-	sprintf( cmd, "PULS:DEL %s\n", rs_sml01_pretty_print( delay ) );
+	sprintf( cmd, "PULS:DEL %s", rs_sml01_pretty_print( delay ) );
 	rs_sml01_command( cmd );
 	rs_sml01_check_complete( );
 }
@@ -681,7 +632,7 @@ static double rs_sml01_get_pulse_delay( void )
 	long length = 100;
 
 
-	rs_sml01_talk( "PULS:DEL?\n", buffer, &length );
+	rs_sml01_talk( "PULS:DEL?", buffer, &length );
 	buffer[ length - 1 ] = '\0';
 	return T_atod( buffer );
 }
@@ -709,7 +660,7 @@ static void rs_sml01_check_complete( void )
 
 
 	do {
-		rs_sml01_talk( "*OPC?\n", buffer, &length );
+		rs_sml01_talk( "*OPC?", buffer, &length );
 	} while ( buffer[ 1 ] != '1' );
 }
 
