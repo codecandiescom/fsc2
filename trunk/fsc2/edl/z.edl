@@ -15,8 +15,6 @@ PREP:
 
 init_2d( 4, N, M, 350, 20, 3325, 2.0, "Pulse separation [ns]",
 		 "Magnetic field [G]", "Echo intensity (arbitrary units)" );
-//init_2d( 4, N, M, 350, 20, 3325, 0.34, "Pulse separation [ns]",
-//		 "Magnetic field [G]", "Echo intensity (arbitrary units)" );
 
 EXP:
 
@@ -39,19 +37,9 @@ FOR K = 1 : M
 		j[ 1, I ] = float( K + I - 2 ) / float( M + N - 2 );
 		j[ 2, I ] = a + b;
 		j[ 3, I ] = a * ( 0.9 + 0.1 * cos( 0.2 * ( I - 20 ) ) ) - b;
-//		j[ 4, I ] = j[ 2, I ] + 0.0003 * ( random( ) - 0.5 );
 		j[ 4, I ] = j[ 2, I ] + 0.00005 * grandom( );
-//		fsave( "# # # # # #\n", a, b, j[ 1, I ], j[ 2, I ],
-//									  j[ 3, I ], j[ 4, I ] );
 	}
 
-//	FOR L = 1 : N {
-//		display( K, L, j[ 1, L ], 1 );
-//	}
-
-//	IF K == 20 {
-//		change_scale( -13.4, 0.2, -521, 27 );
-//	}
 
 	display( 1, K, j[ 1 ], 1, 
 			 1, K, j[ 2 ], 2,

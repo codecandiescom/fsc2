@@ -27,12 +27,13 @@
 
 @menu
 * Main Window::        The program's main window
+* Experiment Window::   The window to display experimental data
 @end menu
 
 @end ifinfo
 
 
-@node Main Window, , GUI, GUI
+@node Main Window, Experiment Window, GUI, GUI
 @section Main Window
 
 @ifnotinfo
@@ -142,3 +143,64 @@ printed in green, messages for severe problems in blue and messages for
 fatal errors in red (in the latter case the test is also aborted
 immediately).
 
+
+@ifnotinfo
+The next figure shows you the main window of @acronym{fsc2} with an
+@acronym{EDL} program loaded (the name of the loaded program is shown in
+the widow title) and the test already been done. The program has written
+out some text already during the test, thus some lines are shown in the
+output browser.  @image{fsc2fig2,11cm}
+@end ifnotinfo
+
+
+@node Experiment Window, , Main Window, GUI
+@section Experiment Window
+
+When an experiment is started another window will pop up. It is up to
+the writer of the @acronym{EDL} program to choose if the window will be
+used for displaying just curves or color-coded surfaces, see the
+functions @code{init_1d()} and @code{init_2d()} in the later sections.
+The first type of display is well suited for showing the results of
+typical cw-measured EPR data or traces fetched from digitizers, while
+the second type is for visualizing real 2d-experiments, i.e.@ all
+experiments where not just one parameter is changed during the
+experiment but two.
+
+
+@anchor{1D-Display}
+@subsection 1D-Display
+@cindex 1D-Display
+
+@ifnotinfo
+Here's a typical example of the kind of display you get while doing an
+experiment:
+@image{fsc2fig3,11cm}
+
+The most prominent feature is the area displaying the measured data. In
+this case two different curves are displayed simultanuously (but you can
+have up to four). In this case these are data from the x- and y-channel
+of a lock-in amplifier while recording a cw-EPR experiment - obviously
+the lock-in's phase setting isn't optimal yet.
+
+Below and two the left of the main display area are two areas showing
+the x- and y-axis. The fact that the lines in both the axis areas are
+drawn in red indicate that the scales are valid for the first red curve
+(in this case the scales are also correct for the second green curve
+because no rescaling has been done).
+
+The topmost buttons on the left side (which both are switched on) let
+you decide which of the curves will be included in rescaling operations
+- this way you can rescale curves individually to account for e.g.@
+different sensitivity settings.
+
+The two buttons below, labeled @code{Undo} and @code{Print} allow you to
+undo the last rescaling operation or to send a snapshot of the current
+results to a printer (or, alternatively, write them to a file).
+
+The @code{Stop} button lets you abort the currently running experiment -
+when the experiment is finished its label changes to
+@code{Close}. Finally, the button labeled @code{FS} is the @code{Full
+scale} button. While this button is active the display is resized
+automatically so that all data fit into the display area.
+
+@end ifnotinfo

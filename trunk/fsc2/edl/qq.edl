@@ -1,0 +1,24 @@
+DEVICES:
+
+VARIABLES:
+
+f, df = 0.1, sf = 3400, ef = 3500;
+I;
+N = int ( ( ef - sf ) / df ) + 1;
+r1, r2;
+
+PREPARATIONS:
+
+init_1d( 2, N, sf, df, "Field [ G ]", "Signal [uV]" );
+
+EXPERIMENT:
+
+
+FOR I = 1 : N {
+	r1 = grandom( ) - 23.0 *
+	     ( I - N / 2 ) * exp( - ( I - N / 2 )^2 / 55.0^2 ) / 55.0;
+	r2 = grandom( ) + 3.0 *
+	     ( I - N / 2 ) * exp( - ( I - N / 2 )^2 / 55.0^2 ) / 55.0;;
+	display( I, r1, 1, I, r2, 2 );
+	wait( 0.01 );
+}

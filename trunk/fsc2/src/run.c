@@ -424,7 +424,7 @@ static void run_sigchld_handler( int signo )
 				 WTERMSIG( return_status ) );
 #endif
 
-	child_pid = 0;                          /* the child is dead... */
+	child_pid = 0;                                   /* the child is dead... */
 	sigaction( SIGCHLD, &sigchld_oact, NULL );
 
 	run_form->sigchld->u_ldata = ( long ) return_status;
@@ -516,7 +516,6 @@ void stop_measurement( FL_OBJECT *a, long b )
 	fl_set_button_shortcut( run_form->stop, "C", 1 );
 	fl_set_object_helper( run_form->stop, "Remove this window" );
 	fl_unfreeze_form( run_form->run );
-	fl_redraw_form( run_form->run );
 }
 
 
