@@ -153,11 +153,11 @@ install:
 	$(INSTALL) -m 444 -o $(OWNER) -g $(GROUP) fsc2.css $(docdir)/html
 	$(INSTALL) -m 444 -o $(OWNER) -g $(GROUP) $(wildcard *.png) $(docdir)/html
 	$(INSTALL) -m 444 -o $(OWNER) -g $(GROUP) $(wildcard *.gif) $(docdir)/html
-	if [ -f fsc2.ps ]; then                                           \
-		$(INSTALL) -m 444 -o $(OWNER) -g $(GROUP) fsc2.ps $(docdir);  \
+	if [ -f fsc2.ps.gz ]; then                                           \
+		$(INSTALL) -m 444 -o $(OWNER) -g $(GROUP) fsc2.ps.gz $(docdir);  \
 	fi
-	if [ -f fsc2.pdf ]; then                                           \
-		$(INSTALL) -m 444 -o $(OWNER) -g $(GROUP) fsc2.pdf $(docdir);  \
+	if [ -f fsc2.pdf ]; then                                             \
+		$(INSTALL) -m 444 -o $(OWNER) -g $(GROUP) fsc2.pdf $(docdir);    \
 	fi
 	-install-info --remove --info-dir=$(infodir) $(infodir)/fsc2.info.gz
 	-$(RM) $(RMFLAGS) $(infodir)/fsc2.info*.gz
