@@ -42,13 +42,19 @@ static Var *f_bstate_child( Var *v );
 
 Var *f_bcreate( Var *v )
 {
-	long type;
-	long coll = -1;
-	char *label = NULL;
-	char *help_text = NULL;
-	IOBJECT *new_io = NULL, *ioi, *cio;
-	long ID = 0;
+	static long type;
+	static long coll;
+	static char *label;
+	static char *help_text;
+	static IOBJECT *new_io;
+	IOBJECT *ioi, *cio;
+	static long ID = 0;
 
+
+	coll = -1;
+	label = help_text = NULL;
+	new_io = NULL;
+	ID = 0;
 
 	/* At least the type of the button must be specified */
 
