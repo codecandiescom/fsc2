@@ -3,6 +3,21 @@
 */
 
 #include "fsc2.h"
+#include <termios.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
+
+/* definitions for serial port access */
+
+#define SERIAL_BAUDRATE B1200        /* baud rate of field controller */
+#define SERIAL_PORT     "/dev/ttyS1" /* serial port device file */
+#define SERIAL_TIME     50000        /* time in us set at magnet front panel */
+                                     /* set to 50 ms and not to be changed ! */
+
+
 
 
 /* exported functions */
@@ -13,19 +28,365 @@ int s_band_exp_hook( void );
 void s_band_exit_hook( void );
 
 Var *magnet_setup( Var *v );
-Var *goto_field( Var *v )
-Var *sweep_up( void );
-Var *sweep_down( void );
+Var *goto_field( Var *v );
+Var *sweep_up( Var *v );
+Var *sweep_down( Var *v );
 
 
 
 /* locally used functions */
 
-static bool magnet_init( void )
-static bool magnet_goto_field( void );
-static bool magnet_goto_field_rec( int rec );
-static bool magnet_sweep( int dir );
+static bool magnet_init( void );
+static bool magnet_goto_field( double field );
+static bool magnet_goto_field_rec( double field, int rec );
+static void magnet_sweep( int dir );
 static bool magnet_do( int command );
+
+
+
+/* maximum and minimum field settings (also depending on field meter) */
+
+#define S_BAND_MIN_FIELD_STEP              1.5e-3
+#define S_BAND_WITH_ER035M_MIN_FIELD       460
+#define S_BAND_WITH_ER035M_MAX_FIELD       2390
+#define S_BAND_WITH_XXXXXX_MIN_FIELD       0          /* ???? !!!!!!!!!!!*/
+#define S_BAND_WITH_XXXXXX_MAX_FIELD       9000       /* ???? !!!!!!!!!!!*/
+
+
+typedef struct
+{
+	double field;           /* the start field given by the user */
+	double field_step;      /* the field steps to be used */
+
+	bool is_field;          /* flag, set if start field is defined */
+	bool is_field_step;     /* flag, set if field step size is defined */
+
+	double mini_step;       /* the smallest possible field step */
+
+	double target_field;    /* used internally */
+	double act_field;       /* used internally */
+
+	double meas_field;      /* result of last field measurement */
+	double max_deviation;   /* maximum acceptable deviation between measured */
+	                        /* and required field */
+	double step;            /* the current step width (in bits) */
+	int int_step;           /* used internally */
+
+	bool is_opened;
+    int fd;                 /* file descriptor for serial port */
+    struct termios old_tio, /* serial port terminal interface structures */
+                   new_tio;
+} Magnet;
+
+
+static Magnet magnet;
+
+enum {
+	   SERIAL_INIT,
+	   SERIAL_TRIGGER,
+	   SERIAL_VOLTAGE,
+	   SERIAL_EXIT
+};
+
+
+
+/*****************************************************************************/
+/*                                                                           */
+/*                  hook functions                                           */
+/*                                                                           */
+/*****************************************************************************/
+
+
+/*----------------------------------------------------------------*/
+/* Here we check if also a driver for a field meter is loaded and */
+/* test if this driver will be loaded before the S-band driver.   */
+/*----------------------------------------------------------------*/
+
+int s_band_init_hook( void )
+{
+	bool *is_init;
+	int ret;
+
+
+	/* Check if there's a field meter */
+
+	if ( ! exist_device( "er035m" ) && ! exist_device( "xxxxxx" ) ) /*!!!!!*/
+	{
+		eprint( FATAL, "s_band: Can't find a field meter.\n" );
+		THROW( EXCEPTION );
+	}
+
+	/* Now, we need the field meter driver called *before* the S-band driver
+	   since the field meter is needed in the initialization of the magnet.
+	   Probably we should implement a solution that brings the devices into
+	   the correct sequence instead of this hack, but that's not as simple
+	   as it might look... */
+
+	if ( exist_device( "er035m" ) )
+		ret = get_lib_symbol( "er035m", "is_init", ( void ** ) &is_init );
+	else
+		ret = get_lib_symbol( "xxxxxx", "is_init", ( void ** ) &is_init );
+                              /*!!!!!!!! */
+
+	assert( ret != LIB_ERR_NO_LIB );      /* this can't happen....*/
+
+	if ( ret == LIB_ERR_NO_SYM )
+	{
+		eprint( FATAL, "fsc2: INTERNAL ERROR detected at %s:%d.\n",
+				__FILE__, __LINE__ );
+		THROW( EXCEPTION );
+	}
+
+	if ( ! *is_init )
+	{
+		eprint( FATAL, "s_band: Problem in DEVICES section - driver for "
+				"field meter must be listed before S-band driver.\n" );
+		THROW( EXCEPTION );
+	}
+
+	/* Check that the functions exported by the field meter driver(s) can be
+	   accessed (so we don't have to do it later again and again) */
+
+	if ( ! exist_function( "find_field" ) )
+	{
+		eprint( FATAL, "s_band: Can't find function to do field "
+				"measurements.\n" );
+		THROW( EXCEPTION );
+	}
+
+	if ( ! exist_function( "field_meter_wait" ) )
+	{
+		eprint( FATAL, "s_band: Can't find function needed for field "
+				"measurements.\n" );
+		THROW( EXCEPTION );
+	}
+
+	if ( ! exist_function( "field_resolution" ) )
+	{
+		eprint( FATAL, "s_band: Can't find function to determine field "
+				"measurement resolution.\n" );
+		THROW( EXCEPTION );
+	}
+
+	magnet.is_field = UNSET;
+	magnet.is_field_step = UNSET;
+	magnet.is_opened = UNSET;
+
+	return 1;
+}
+
+
+int s_band_test_hook( void )
+{
+	return 1;
+}
+
+
+/*----------------------------------------------------------------*/
+/* Opens connection to ower supply and calibrates the field sweep */
+/*----------------------------------------------------------------*/
+
+int s_band_exp_hook( void )
+{
+	Var *v;
+	int acc;
+
+
+	/* Get the maximum deviation from requested field depending on the
+	   resolution of the field meter */
+
+	v = func_call( func_get( "field_resolution", &acc ) );
+	magnet.max_deviation = VALUE( v );
+	vars_pop( v );
+
+	/* Try to initialize the magnet power supply controller */
+
+	if ( ! magnet_init( ) )
+	{
+		eprint( FATAL, "s_band: Can't access the S-band magnet power "
+				"supply.\n" );
+		THROW( EXCEPTION );
+	}
+
+	magnet.is_opened = SET;
+	return 1;
+}
+
+
+void s_band_exit_hook( void )
+{
+	/* reset the serial port */
+
+	if ( magnet.is_opened )
+		magnet_do( SERIAL_EXIT );
+
+	magnet.is_opened = UNSET;
+}
+
+
+/*****************************************************************************/
+/*                                                                           */
+/*              exported functions                                           */
+/*                                                                           */
+/*****************************************************************************/
+
+
+/*-------------------------------------------------------------------*/
+/* Function for registering the start field and the field step size. */
+/*-------------------------------------------------------------------*/
+
+
+Var *magnet_setup( Var *v )
+{
+	/* check that both variables are reasonable */
+
+	vars_check( v, INT_VAR | FLOAT_VAR );
+	vars_check( v->next, INT_VAR | FLOAT_VAR );
+
+	if ( exist_device( "er035m" ) )
+	{
+		if ( VALUE( v ) < S_BAND_WITH_ER035M_MIN_FIELD )
+		{
+			eprint( FATAL, "%s:%ld: Start field (%lf G) too low for Bruker "
+					"ER035M gaussmeter, minimum is %d G.\n", Fname, Lc,
+					( double ) VALUE( v ),
+					( int ) S_BAND_WITH_ER035M_MIN_FIELD );
+			THROW( EXCEPTION );
+		}
+        
+		if ( VALUE( v ) > S_BAND_WITH_ER035M_MAX_FIELD )
+		{
+			eprint( FATAL, "%s:%ld: Start field (%lf G) too high for Bruker "
+					"ER035M gaussmeter, maximum is %d G.\n", Fname, Lc,
+					( double ) VALUE( v ),
+					( int ) S_BAND_WITH_ER035M_MAX_FIELD );
+			THROW( EXCEPTION );
+		}
+	}
+
+	/* What about the other field measurement device ? */
+
+	if ( VALUE( v->next ) < S_BAND_MIN_FIELD_STEP )
+	{
+		eprint( FATAL, "%s:%ld: Field sweep step size (%lf G) too small, "
+				"minimum is %f G.\n", Fname, Lc, ( double ) VALUE( v->next ),
+				( int ) S_BAND_MIN_FIELD_STEP );
+		THROW( EXCEPTION );
+	}
+		
+	magnet.field = VALUE( v );
+	magnet.is_field_step = VALUE( v->next );
+	magnet.is_field = magnet.is_field_step = SET;
+
+	return vars_push( INT_VAR, 1 );
+}
+
+
+/*-----------------------------------------------------*/
+/*-----------------------------------------------------*/
+
+Var *goto_field( Var *v )
+{
+	vars_check( v, INT_VAR | FLOAT_VAR );
+
+	if ( exist_device( "er035m" ) )
+	{
+		if ( VALUE( v ) < S_BAND_WITH_ER035M_MIN_FIELD )
+		{
+			eprint( FATAL, "%s:%ld: Field (%lf G) too low for Bruker ER035M "
+					"gaussmeter, minimum is %d G.\n", Fname, Lc,
+					( double ) VALUE( v ),
+					( int ) S_BAND_WITH_ER035M_MIN_FIELD );
+			THROW( EXCEPTION );
+		}
+        
+		if ( magnet.field > S_BAND_WITH_ER035M_MAX_FIELD )
+		{
+			eprint( FATAL, "%s:%ld: Field (%lf G) too high for Bruker ER035M "
+					"gaussmeter, maximum is %d G.\n", Fname, Lc,
+					( double ) VALUE( v ),
+					( int ) S_BAND_WITH_ER035M_MAX_FIELD );
+			THROW( EXCEPTION );
+		}
+	}
+
+	/* What about the other field measurement device ? !!!!!!!!!!!!!*/
+
+	if ( TEST_RUN )
+		return vars_push( FLOAT_VAR, VALUE( v ) );
+	else
+	{
+		if ( ! magnet_goto_field( VALUE( v ) ) )
+		{
+			eprint( FATAL, "%s:%ld: Can't reach requested field of %lf G.\n",
+					Fname, Lc, ( double ) VALUE( v ) );
+			THROW( EXCEPTION );
+		}
+		return vars_push( FLOAT_VAR, magnet.act_field );
+	}
+}
+
+
+/*-----------------------------------------------------*/
+/*-----------------------------------------------------*/
+
+Var *sweep_up( Var *v )
+{
+	v = v;
+
+	if ( ! magnet.is_field_step )
+	{
+		eprint( FATAL, "%s:%ld: Sweep step size has not been defined.\n",
+				Fname, Lc );
+		THROW( EXCEPTION );
+	}
+
+	if ( ! TEST_RUN )
+	{
+		magnet_sweep( 1 );
+		return vars_push( FLOAT_VAR, magnet.act_field );
+	}
+	else
+	{
+		magnet.target_field += magnet.field_step;
+		return vars_push( FLOAT_VAR, magnet.target_field );
+	}
+}
+
+
+/*-----------------------------------------------------*/
+/*-----------------------------------------------------*/
+
+Var *sweep_down( Var *v )
+{
+	v = v;
+
+
+	if ( ! magnet.is_field_step )
+	{
+		eprint( FATAL, "%s:%ld: Sweep step size has not been defined.\n",
+				Fname, Lc );
+		THROW( EXCEPTION );
+	}
+
+	if ( ! TEST_RUN )
+	{
+		magnet_sweep( -1 );
+		return vars_push( FLOAT_VAR, magnet.act_field );
+	}
+	else
+	{
+		magnet.target_field -= magnet.field_step;
+		return vars_push( FLOAT_VAR, magnet.target_field );
+	}
+}
+
+
+/*****************************************************************************/
+/*                                                                           */
+/*            internally used functions                                      */
+/*                                                                           */
+/*****************************************************************************/
 
 
 
@@ -45,226 +406,9 @@ static bool magnet_do( int command );
 #define MAGNET_MAX_TRIES  3      /* number of retries after failure of magnet
                                     field convergence to target point */
 
-/* definitions used for serial port access */
-
-#define SERIAL_BAUDRATE B1200        /* baud rate of field controller */
-#define SERIAL_PORT     "/dev/ttyS1" /* serial port device file */
-#define SERIAL_TIME     50000        /* 50 ms */
 
 
-#define S_BAND_MIN_FIELD_STEP              1.5e-3
-#define S_BAND_WITH_ER035M_MIN_FIELD       460
-#define S_BAND_WITH_ER035M_MAX_FIELD       2390
-#define S_BAND_WITH_XXXXXX_MIN_FIELD       0
-#define S_BAND_WITH_XXXXXX_MAX_FIELD       9000
-
-
-typedef struct
-{
-	double field;          /* the start field given by the user */
-	double field_step;     /* the field steps to be used */
-
-	bool is_field;
-	bool is_field_step;
-
-	double mini_step;      /* the smallest possible field step */
-
-	double target_field;
-	double act_field;
-
-	double meas_field;
-
-	double step;           /* the current step width (in bits) */
-	int int_step;
-	int flags;
-
-    int fd;                           
-    struct termios old_tio,
-                   new_tio;
-} Magnet;
-
-
-
-static Magnet magnet = { 0.0, 0.0, 0, 0, 0.0, 0.0, 0.0,
-						 0.0, 0.0, 0, 0, -1, NULL, NULL };
-enum {
-	   SERIAL_INIT,
-	   SERIAL_TRIGGER,
-	   SERIAL_VOLTAGE,
-	   SERIAL_EXIT,
-};
-
-
-
-int s_band_init_hook( void )
-{
-	magnet.is_field = UNSET;
-	magnet.is_field_step = UNSET;
-
-	return 1;
-}
-
-
-int s_band_test_hook( void )
-{
-	return 1;
-}
-
-
-int s_band_exp_hook( void )
-{
-	Var *func;
-
-
-	/* Check that the functions exported by the field meter driver(s) can be
-	   accessed (so w don't have to do it later on again and again) */
-
-	if ( ( func = func_get( "find_field" ) ) == NULL )
-	{
-		eprint( FATAL, "Can't find functions for field measurements.\n" );
-		THROW( EXCEPTION );
-	}
-	vars_pop( func );
-
-	if ( ( func = func_get( "field_meter_wait" ) ) == NULL )
-	{
-		eprint( FATAL, "Can't find functions for field measurements.\n" );
-		THROW( EXCEPTION );
-	}
-	vars_pop( func );
-
-	/* Try to initialize the magnet power supply controller */
-
-	if ( ! magnet_init( ) )
-	{
-		eprint( FATAL, "Can't access the S-band magnet power supply.\n" );
-		THROW( EXCEPTION );
-	}
-
-	return 1;
-}
-
-
-void s_band_exit_hook( void )
-{
-	if ( magnet.fd >= 0 )
-		magnet_do( SERIAL_EXIT ) 
-
-	magnet.fd = -1;
-}
-
-
-/-----------------------------------------------------*/
-/-----------------------------------------------------*/
-
-
-Var *magnet_setup( Var *v )
-{
-	/* check that both variables are reasonable */
-
-	vars_check( v, INT_VAR | FLOAT_VAR );
-	vars_check( v->next, INT_VAR | FLOAT_VAR );
-
-	if ( exist_device( "er035m" ) )
-	{
-		if ( VAL( v ) < S_BAND_WITH_ER035M_MIN_FIELD )
-		{
-			eprint( FATAL, "%s:%ld: Start field (%lf G) too low for Bruker "
-					"ER035M gaussmeter, minimum is %d G.\n", Fname, Lc,
-					( double ) VAL( v ),
-					( int ) S_BAND_WITH_ER035M_MIN_FIELD );
-			THROW( EXCEPTION );
-		}
-        
-		if ( magnet.field > S_BAND_WITH_ER035M_MAX_FIELD )
-		{
-			eprint( FATAL, "%s:%ld: Start field (%lf G) too high for Bruker "
-					"ER035M gaussmeter, maximum is %d G.\n", Fname, Lc,
-					( double ) VAL( v ),
-					( int ) S_BAND_WITH_ER035M_MAX_FIELD );
-			THROW( EXCEPTION );
-		}
-	}
-
-	/* What about the other field measurement device ? */
-
-	magnet.field = VAL( v );
-
-	if ( VAL( v->next ) < S_BAND_MIN_FIELD_STEP )
-	{
-		eprint( FATAL, "%s:%ld: Field sweep step size (%lg G) too small, "
-				"minimum is %f G.\n", Fname, Lc, ( double ) VAL( v->next ),
-				( int ) S_BAND_MIN_FIELD_STEP );
-		THROW( EXCEPTION );
-	}
-		
-	magnet.is_field_step = VAL( v->next );
-
-	magnet.is_field = magnet.is_field_step = SET;
-	return vars_push( INT_VAR, 1 );
-}
-
-/-----------------------------------------------------*/
-/-----------------------------------------------------*/
-
-Var *goto_field( Var *v )
-{
-	vars_check( v, INT_VAR | FLOAT_VAR );
-
-	if ( exist_device( "er035m" ) )
-	{
-		if ( VAL( v ) < S_BAND_WITH_ER035M_MIN_FIELD )
-		{
-			eprint( FATAL, "%s:%ld: Field (%lf G) too low for Bruker ER035M "
-					"gaussmeter, minimum is %d G.\n", Fname, Lc,
-					( double ) VAL( v ),
-					( int ) S_BAND_WITH_ER035M_MIN_FIELD );
-			THROW( EXCEPTION );
-		}
-        
-		if ( magnet.field > S_BAND_WITH_ER035M_MAX_FIELD )
-		{
-			eprint( FATAL, "%s:%ld: Field (%lf G) too high for Bruker ER035M "
-					"gaussmeter, maximum is %d G.\n", Fname, Lc,
-					( double ) VAL( v ),
-					( int ) S_BAND_WITH_ER035M_MAX_FIELD );
-			THROW( EXCEPTION );
-		}
-	}
-
-	/* What about the other field measurement device ? */
-
-	if ( TEST_RUN )
-		return vars_push( FLOAT_VAR, VAL( v ) );
-}
-
-
-/-----------------------------------------------------*/
-/-----------------------------------------------------*/
-
-Var *sweep_up( void )
-{
-	return vars_push( INT_VAR, 1 );
-}
-
-
-/-----------------------------------------------------*/
-/-----------------------------------------------------*/
-
-Var *sweep_down( void )
-{
-	if ( ! magnet.is_field_step )
-	{
-		eprint( FATAL, "
-
-	if ( ! TEST_RUN )
-		
-
-	return vars_push( INT_VAR, 1 );
-}
-
-
-/* The sweep of the magnet is done by setting a voltage for a certain time
+/* The sweep of the magnet is done by applying a voltage for a certain time
    (to be adjusted manually on the front panel but which should be left at
    the current setting of 50 ms) to the internal sweep circuit.  There are
    two types of data to be sent to the home build interface card: First, the
@@ -315,17 +459,18 @@ Var *sweep_down( void )
 /* to the start field.                                                      */
 /*--------------------------------------------------------------------------*/
 
-static bool magnet_init( void )
+bool magnet_init( void )
 {
 	double start_field;
 	int i;
 	Var *v;
+	int acc;
 
 
 	/* First step: Initialisation of the serial interface */
 
 	if ( ! magnet_do( SERIAL_INIT ) )
-		return( FAIL );
+		return FAIL;
 
 	/* Next step: We do MAGNET_TEST_STEPS steps with a step width of
 	   MAGNET_TEST_WIDTH. Then we measure the field to determine the
@@ -333,9 +478,9 @@ static bool magnet_init( void )
 
 try_again:
 
-	vars_call( func_get( "field_meter_wait" ) );
+	vars_pop( func_call( func_get( "field_meter_wait", &acc ) ) );
 
-	v = vars_call( func_get( "find_field" ) );
+	v = func_call( func_get( "find_field", &acc ) );
 	magnet.meas_field = v->val.dval;
 	vars_pop( v );
 
@@ -346,12 +491,12 @@ try_again:
 	for ( i = 0; i < MAGNET_TEST_STEPS; ++i )
 	{
 		magnet_do( SERIAL_TRIGGER );
-		vars_call( func_get( "field_meter_wait" ) );
+		vars_pop( func_call( func_get( "field_meter_wait", &acc ) ) );
 	}
 
-	vars_call( func_get( "field_meter_wait" ) );
+	vars_pop( func_call( func_get( "field_meter_wait", &acc ) ) );
 
-	v = vars_call( func_get( "find_field" ) );
+	v = func_call( func_get( "find_field", &acc ) );
 	magnet.meas_field = v->val.dval;
 	vars_pop( v );
 
@@ -370,12 +515,12 @@ try_again:
 	for ( i = 0; i < MAGNET_TEST_STEPS; ++i )
 	{
 		magnet_do( SERIAL_TRIGGER );
-		vars_call( func_get( "field_meter_wait" ) );
+		vars_pop( func_call( func_get( "field_meter_wait", &acc ) ) );
 	}
 
-	vars_call( func_get( "field_meter_wait" ) );
+	vars_pop( func_call( func_get( "field_meter_wait", &acc ) ) );
 
-	v = vars_call( func_get( "find_field" ) );
+	v = func_call( func_get( "find_field", &acc ) );
 	magnet.meas_field = v->val.dval;
 	vars_pop( v );
 
@@ -389,18 +534,23 @@ try_again:
 
 	if ( magnet.mini_step < 0.00074 )
 	{
+/* We still have to include the XFORMS stuff !!!!!!!!!!!!!!!!!!!
 		if ( 1 == fl_show_choice( "Please set sweep speed on magnet front",
 								  "panel to maximum value of 6666 Oe/min.",
 								  "Also make sure remote control is enabled !",
 								  2, "Abort", "Done", "", 3 ) )
-			return( FAIL );
+			return FAIL;
 		else
+*/
 			goto try_again;
 	}
 
 	/* Finally using this ratio we go to the start field */
 
-	return( magnet_goto_field( ) );
+	if ( magnet.is_field )
+		return magnet_goto_field( magnet.field );
+	else
+		return OK;
 
 }
 
@@ -409,17 +559,17 @@ try_again:
 /* This just a wrapper to hide the recursiveness of magnet_goto_field_rec() */
 /*--------------------------------------------------------------------------*/
 
-static bool magnet_goto_field( void )
+bool magnet_goto_field( double field )
 {
-	if ( ! magnet_goto_field_rec( 0 ) )
-		return( FAIL );
+	if ( ! magnet_goto_field_rec( field, 0 ) )
+		return FAIL;
 
-	magnet.act_field = magnet.target_field = magnet.field;
-	return( OK );
+	magnet.act_field = magnet.target_field = magnet.meas_field;
+	return OK;
 }
 
 
-static bool magnet_goto_field_rec( int rec )
+bool magnet_goto_field_rec( double field, int rec )
 {
 	double mini_steps;
 	int steps;
@@ -427,21 +577,22 @@ static bool magnet_goto_field_rec( int rec )
 	int i;
 	static double last_diff;  /* field difference in last step */
 	static int try;           /* number of steps without conversion */
-	Var *v
+	Var *v;
+	int acc;
 
 
 	/* determine the field between the target field and the current field */
 
-	v = vars_call( func_get( "find_field" ) );
+	v = func_call( func_get( "find_field", &acc ) );
 	magnet.meas_field = v->val.dval;
 	vars_pop( v );
 
 	/* calculate the number of steps we need using the smallest possible
 	   field increment (i.e. 1 bit) */
 
-	mini_steps = ( magnet.field - magnet.meas_field ) / magnet.mini_step;
+	mini_steps = ( field - magnet.meas_field ) / magnet.mini_step;
 
-	/* how many steps need we using the maximum step size and how many
+	/* how many steps do we need using the maximum step size and how many
 	   steps with the minimum step size remain ? */
 
 	steps = ( int ) floor( fabs( mini_steps ) / MAGNET_MAX_STEP );
@@ -472,9 +623,9 @@ static bool magnet_goto_field_rec( int rec )
 	   we have to assume that something has gone wrong (maybe some luser
 	   switched the magnet from remote control state? ) */
 
-	vars_call( func_get( "field_meter_wait" ) );
+	vars_pop( func_call( func_get( "field_meter_wait", &acc ) ) );
 
-	v = vars_call( func_get( "find_field" ) );
+	v = func_call( func_get( "find_field", &acc ) );
 	magnet.meas_field = v->val.dval;
 	vars_pop( v );
 
@@ -485,31 +636,33 @@ static bool magnet_goto_field_rec( int rec )
 	}
 	else                          /* if we're already in the recursion */
 	{                                                       /* got it worse? */
-		if ( fabs( magnet.field - magnet.meas_field ) > last_diff )
+		if ( fabs( field - magnet.meas_field ) > last_diff )
 		{
 			if ( ++try >= MAGNET_MAX_TRIES )
-				return( FAIL );
+				return FAIL;
 		}
 		else                                /* difference got smaller */
 		{
 			try = 0;
-		    last_diff = fabs( magnet.field - magnet.meas_field );
+		    last_diff = fabs( field - magnet.meas_field );
 		}
 	}
 
-	/* Deviation from target field has to be no more than 1 mG otherwise
-	   try another (hopefully smaller) step */
+	/* Deviation from target field has to be no more than `max_deviation'
+	   otherwise try another (hopefully smaller) step */
 
-	if ( fabs( magnet.field - magnet.meas_field ) >= 0.001 &&
-		 ! magnet_goto_field_rec( magnet, 1 ) )
-		return( FAIL );
+	if ( fabs( field - magnet.meas_field ) > magnet.max_deviation &&
+		 ! magnet_goto_field_rec( field, 1 ) )
+		return FAIL;
 
-	return( OK );
+	return OK;
 }
 
 
+/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*/
 
-static bool magnet_sweep( int dir )
+void magnet_sweep( int dir )
 {
 	int steps, i;
 	double mini_steps;
@@ -517,10 +670,9 @@ static bool magnet_sweep( int dir )
 	double over_shot;
 	
 
-	/* check for unreasonable input */
+	/* <PARANOIA> check for unreasonable input </PARANOIA> */
 
-	if ( abs( dir ) != 1 )
-		return( FAIL );
+	assert( dir != 1 && dir != -1 );
 
 	/* Problem: while there can be arbitrary sweep steps requested by the
 	   user, the real sweep steps are discreet. This might sum up to a
@@ -549,7 +701,7 @@ static bool magnet_sweep( int dir )
 		magnet.act_field += ( MAGNET_ZERO_STEP - magnet.int_step )
 			                                               * magnet.mini_step;
 		magnet.target_field += ( double ) dir * magnet.field_step;
-		return( OK );
+		return;
 	}
 
 	/* ...otherwise we need several steps with in MAGNET_MAX_STEP chunks
@@ -584,8 +736,6 @@ static bool magnet_sweep( int dir )
 	magnet.act_field += ( MAGNET_ZERO_STEP - magnet.int_step )
 			                                               * magnet.mini_step;
 	magnet.target_field += ( double ) dir * magnet.field_step;
-
-	return( OK );
 }
 
 
@@ -597,7 +747,7 @@ static bool magnet_sweep( int dir )
 /* face.                                                                     */
 /*---------------------------------------------------------------------------*/
 
-static bool magnet_do( int command )
+bool magnet_do( int command )
 {
 	unsigned char data[ 2 ];
 	int volt;
@@ -608,7 +758,7 @@ static bool magnet_do( int command )
 		case SERIAL_INIT :               /* open and initialize serial port */
 			if ( ( magnet.fd =
 				  open( SERIAL_PORT, O_WRONLY | O_NOCTTY | O_NONBLOCK ) ) < 0 )
-				return( FAIL );
+				return FAIL;
 
 			tcgetattr( magnet.fd, &magnet.old_tio );
 			memcpy( ( void * ) &magnet.new_tio, ( void * ) &magnet.old_tio,
@@ -638,8 +788,10 @@ static bool magnet_do( int command )
 			break;
 
 		default :
-		    return( FAIL );
+			eprint( FATAL, "fsc2: INTERNAL ERROR detected at %s:%d.\n",
+					__FILE__, __LINE__ );
+			THROW( EXCEPTION );
 	}
 
-	return( OK );
+	return OK;
 }

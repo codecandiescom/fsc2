@@ -4,17 +4,26 @@
 
 
 #include "fsc2.h"
+#include "gpib.h"
 
 
-/* exported functions */
+/* exported functions and symbols */
 
 int er035m_init_hook( void );
 int er035m_test_hook( void );
 int er035m_exp_hook( void );
 void er035m_exit_hook( void );
 
-Var *find_field( void );
-void field_meter_wait( void );
+Var *find_field( Var *v );
+Var *field_resolution( Var *v );
+Var *field_meter_wait( Var *v );
+
+bool is_init = UNSET;         /* tested by magnet power supply driver */
+
+
+/* internally used functions */
+
+static double er035m_get_field( void );
 
 
 
@@ -22,16 +31,14 @@ typedef struct
 {
 	int state;
 	int device;
-	char *name;
+	bool is_needed;
+	const char *name;
 	double field;
 	int resolution;
 } NMR;
 
 
-static er035m_get_field( void );
-
-static bool er035m_is_needed;
-static NMR mmr;
+static NMR nmr;
 
 
 
@@ -39,7 +46,7 @@ static NMR mmr;
    (i.e. 200 ms) after each write operation... */
 
 #define E2_US       100000    /* 100 ms, used in calls of usleep() */
-#define ER036M_WAIT 200000    /* this means 200 ms for usleep() */
+#define ER035M_WAIT 200000    /* this means 200 ms for usleep() */
 
 enum {
 	   ER035M_UNKNOWN = -1,
@@ -68,21 +75,22 @@ enum {
 
 int er035m_init_hook( void )
 {
+	/* Set global flag to tell magnet poswer supply driver that the
+	   gaussmeter has already been loaded */
+
+	is_init = SET;
+
 	/* what's missing: check that not the other field controller is loaded */
 
 	if ( ! exist_device( "s_band" ) && ! exist_device( "x_band" ) )
-	{
 		eprint( WARN, "Driver for Bruker ER035M gaussmeter is loaded but no "
-				"magnet driver.\n" );
-		er035m_is_needed = UNSET;
-		nmr.device = -1;
-	}
-	else
-	{
-		er035m_is_needed = SET;
-		nmr.name = "ER035M";
-		nmr.state = UNKNOWN;
-	}
+				"magnet power supply driver.\n" );
+		nmr.is_needed = UNSET;
+
+	need_GPIB = SET;
+	nmr.is_needed = SET;
+	nmr.name = "ER035M";
+	nmr.state = ER035M_UNKNOWN;
 
 	return 1;
 }
@@ -99,29 +107,28 @@ int er035m_exp_hook( void )
 	char buffer[ 21 ], *bp;
 	long length = 20;
 	int try_count = 0;
-	Var *v
+	Var *v;
 
 
-	if ( ! er035m_is_needed )
+	if ( ! nmr.is_needed )
 		return 1;
-
 
 	if ( gpib_init_device( nmr.name, &nmr.device ) == FAILURE )
 	{
 		eprint( FATAL, "Can't access the Bruker ER035M NMR gaussmeter.\n" );
 		THROW( EXCEPTION );
 	}
-	usleep( ER036M_WAIT );
+	usleep( ER035M_WAIT );
 
 	/* Send a "Selected Device Clear" - otherwise the gaussmeter does not
 	   work ... */
 
 	gpib_clear_device( nmr.device );
-	usleep( ER036M_WAIT );
+	usleep( ER035M_WAIT );
 
 	/* Ask gaussmeter to send status byte and test if it does */
 
-	nmr.state = ER036M_UNKNOWN;
+	nmr.state = ER035M_UNKNOWN;
 
 try_again:
 
@@ -130,7 +137,7 @@ try_again:
 		eprint( FATAL, "Can't access the Bruker ER035M NMR gaussmeter.\n" );
 		THROW( EXCEPTION );
 	}
-	usleep( ER036M_WAIT );
+	usleep( ER035M_WAIT );
 
 	length = 20;
 	if ( gpib_read( nmr.device, buffer, &length ) == FAILURE )
@@ -198,35 +205,35 @@ try_again:
 				break;
 
 			case '8' :      /* MOD NEG -> ok (should never happen */
-				break;                     /* because of intialization) */ 
+				break;      /* because of intialization) */ 
 
 			case '9' :      /* System in lock -> very good... */
-				nmr.state = ER036M_LOCKED;
+				nmr.state = ER035M_LOCKED;
 				break;
 
 			case 'A' :      /* FIELD ? -> error (doesn't seem to work) */
-				eprint( FATAL, "Bruker ER035M NMR gaussmeter has "
+				eprint( FATAL, "Bruker ER035M NMR gaussmeter has an "
 						"unidentifiable problem.\n" );
 				THROW( EXCEPTION );
 
 			case 'B' :      /* SU active -> ok */
-				nmr.state = ER036M_SU_ACTIVE;
+				nmr.state = ER035M_SU_ACTIVE;
 				break;
 
 			case 'C' :      /* SD active -> ok */
-				nmr.state = ER036M_SD_ACTIVE;
+				nmr.state = ER035M_SD_ACTIVE;
 				break;
 
 			case 'D' :      /* OU active -> ok */
-				nmr.state = ER036M_OU_ACTIVE;
+				nmr.state = ER035M_OU_ACTIVE;
 				break;
 
 			case 'E' :      /* OD active -> ok */
-				nmr.state = ER036M_OD_ACTIVE;
+				nmr.state = ER035M_OD_ACTIVE;
 				break;
 
 			case 'F' :      /* Search active but just at search limit -> ok */
-				nmr.state = ER036M_SEARCH_AT_LIMIT;
+				nmr.state = ER035M_SEARCH_AT_LIMIT;
 				break;
 		}
 
@@ -240,7 +247,7 @@ try_again:
 		eprint( FATAL, "Can't access the Bruker ER035M NMR gaussmeter.\n" );
 		THROW( EXCEPTION );
 	}
-	usleep( ER036M_WAIT );
+	usleep( ER035M_WAIT );
 
 	/* Find out the resolution and set it to at least 2 digits */
 
@@ -249,7 +256,7 @@ try_again:
 		eprint( FATAL, "Can't access the Bruker ER035M NMR gaussmeter.\n" );
 		THROW( EXCEPTION );
 	}
-	usleep( ER036M_WAIT );
+	usleep( ER035M_WAIT );
 
 	length = 20;
 	if ( gpib_read( nmr.device, buffer, &length ) == FAILURE )
@@ -267,7 +274,8 @@ try_again:
 						"gaussmeter.\n" );
 				THROW( EXCEPTION );
 			}
-			usleep( ER036M_WAIT );
+			usleep( ER035M_WAIT );
+			/* drop through */
 
 		case '2' :
 			nmr.resolution = LOW;
@@ -288,9 +296,9 @@ try_again:
 	/* If the gaussmeter is already locked just get the field value, other-
 	   wise try to achieve locked state */
 
-	if ( nmr.state != ER036M_LOCKED )
+	if ( nmr.state != ER035M_LOCKED )
 	{
-		v = find_field( );
+		v = find_field( NULL );
 		nmr.field = v->val.dval;
 		vars_pop( v );
 	}
@@ -303,7 +311,7 @@ try_again:
 
 void er035m_exit_hook( void )
 {
-	if ( ! er035m_is_needed )
+	if ( ! nmr.is_needed )
 		return;
 
 	if ( nmr.device != -1 )
@@ -320,16 +328,17 @@ void er035m_exit_hook( void )
 
 /*----------------------------------------------------------------*/
 /* find_field() tries to get the gaussmeter into the locked state */
-/* and returns the current field alue in a variable.              */
+/* and returns the current field value in a variable.             */
 /*----------------------------------------------------------------*/
 
-Var *find_field( void )
+Var *find_field( Var *v )
 {
 	char buffer[ 21 ];
 	char *bp;
 	long length;
 
 
+	v = v;
 	if ( TEST_RUN )
 		return vars_push( FLOAT_VAR, 0.0 );
 
@@ -339,18 +348,18 @@ Var *find_field( void )
 	   Starting with searching down is just as probable the wrong decision
 	   as searching up... */
 
-	if ( ( nmr.state == NMR_OU_ACTIVE || nmr.state == NMR_OD_ACTIVE ||
-		   nmr.state == NMR_UNKNOWN ) &&
+	if ( ( nmr.state == ER035M_OU_ACTIVE || nmr.state == ER035M_OD_ACTIVE ||
+		   nmr.state == ER035M_UNKNOWN ) &&
 		 gpib_write( nmr.device, "SD", 2 ) == FAILURE )
 	{
 		eprint( FATAL, "Can't access the Bruker ER035M NMR gaussmeter.\n" );
 		THROW( EXCEPTION );
 	}
-	usleep( NMR_WAIT );
+	usleep( ER035M_WAIT );
 
 	/* wait for gaussmeter to go into lock state (or FAILURE) */
 
-	while ( nmr.state != NMR_LOCKED )
+	while ( nmr.state != ER035M_LOCKED )
 	{
 		/* Get status byte and check if lock was achieved */
 
@@ -360,7 +369,7 @@ Var *find_field( void )
 					"gaussmeter.\n" );
 			THROW( EXCEPTION );
 		}
-		usleep( NMR_WAIT );
+		usleep( ER035M_WAIT );
 
 		length = 20;
 		if ( gpib_read( nmr.device, buffer, &length ) == FAILURE )
@@ -383,7 +392,7 @@ Var *find_field( void )
 					break;
 
 				case '9' :      /* System in lock -> very good... */
-					nmr.state = NMR_LOCKED;
+					nmr.state = ER035M_LOCKED;
 					break;
 
 				case 'A' :      /* FIELD ? -> error */
@@ -392,27 +401,27 @@ Var *find_field( void )
 					THROW( EXCEPTION );
 
 				case 'B' :      /* SU active -> ok */
-					nmr.state = NMR_SU_ACTIVE;
+					nmr.state = ER035M_SU_ACTIVE;
 					break;
 
 				case 'C' :      /* SD active */
-					nmr.state = NMR_SD_ACTIVE;
+					nmr.state = ER035M_SD_ACTIVE;
 					break;
 
 				case 'D' :      /* OU active -> error (should never happen) */
-					nmr.state = NMR_OU_ACTIVE;
+					nmr.state = ER035M_OU_ACTIVE;
 					eprint( FATAL, "Bruker ER035M NMR gaussmeter has "
 							"unidentifiable problem.\n" );
 					THROW( EXCEPTION );
 
 				case 'E' :      /* OD active -> error (should never happen) */
-					nmr.state = NMR_OD_ACTIVE;
+					nmr.state = ER035M_OD_ACTIVE;
 					eprint( FATAL, "Bruker ER035M NMR gaussmeter has "
 							"unidentifiable problem.\n" );
 					THROW( EXCEPTION );
 
 				case 'F' :      /* Search active but at a search limit -> ok*/
-					nmr.state = NMR_SEARCH_AT_LIMIT;
+					nmr.state = ER035M_SEARCH_AT_LIMIT;
 					break;
 			}
 
@@ -425,10 +434,26 @@ Var *find_field( void )
 }
 
 
-void field_meter_wait( void )
+/*-------------------------------------------------------*/
+/*-------------------------------------------------------*/
+
+Var *field_resolution( Var *v )
 {
-	if ( er035m_is_needed )
+	v = v;
+	return vars_push( FLOAT_VAR, nmr.resolution == LOW ? 0.01 : 0.001 );
+}
+
+
+/*-------------------------------------------------------*/
+/*-------------------------------------------------------*/
+
+Var *field_meter_wait( Var *v )
+{
+	v = v;
+
+	if ( nmr.is_needed )
 		usleep( ( nmr.resolution == LOW ? 10 : 20 ) * E2_US );
+	return vars_push( INT_VAR, 1 );
 }
 
 
@@ -466,7 +491,7 @@ double er035m_get_field( void )
 					"gaussmeter.\n" );
 			THROW( EXCEPTION );
 		}
-		usleep( NMR_WAIT );
+		usleep( ER035M_WAIT );
 
 		length = 20;
 		if ( gpib_read( nmr.device, buffer, &length ) == FAILURE )
