@@ -841,8 +841,9 @@ MANIFEST:
 	@echo '#' >> MANIFEST
 
 	@for dir in . $(ldir) $(adir) $(cdir) $(ddir) $(mdir) scripts $(sdir) \
-		tests $(udir) me6x00 me6x00/driver me6x00/lib me6x00/utils \
-		ni6601 ni6601/driver ni6601/lib ni6601/utils; do \
+		tests $(udir) me6x00 me6x00/driver me6x00/lib me6x00/utils ni6601 \
+		ni6601/driver ni6601/lib ni6601/utils witio_48 witio_48/driver    \
+		witio_48/lib witio_48/utils; do \
 		echo "" >> MANIFEST; \
 		'ls' -1F $$dir | grep -v '/$$' | sed "s|^|$$dir/|" | \
 		sed "s|^$$fdir/||" | sed 's|\./||' | sed 's|\*$$||' >> MANIFEST; \
