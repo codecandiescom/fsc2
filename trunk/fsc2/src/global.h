@@ -38,7 +38,8 @@ typedef  unsigned char  bool;
 #define DEFAULT_TIME_UNIT 1
 
 
-/* Define number of colors to be used in 2D graphics */
+/* Define number of colors to be used in 2D graphics (must be less than
+   FL_MAX_COLORS - FL_FREE_COL1 + 3, i.e. not more than about 1005 */
 
 #define NUM_COLORS 256
 
