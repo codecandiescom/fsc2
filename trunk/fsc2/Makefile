@@ -112,8 +112,8 @@ SERIAL_LOCK_DIR   := /var/lock
 
 # The next variable controls if support for the ME-6000 DAC card by
 # Meilhaus Electronic GmbH is included. This requires that the kernel
-# module as well as a library, both available from my web page, are
-# installed. Please uncomment this line only if you have such a card
+# module as well as a library, both included into the fsc2 distribution,
+# are installed. Please uncomment this line only if you have such a card
 # and already successfully installed the kernel module and the library.
 
 # WITH_ME6000       := yes
@@ -121,8 +121,8 @@ SERIAL_LOCK_DIR   := /var/lock
 
 # The next variable controls if support for the 6601 GPCT card by
 # National Instruments is included. This requires that the kernel
-# module as well as a library, both available from my web page, are
-# installed. Please uncomment this line only if you have such a card
+# module as well as a library, both included into the fsc2 disreibution,
+# are installed. Please uncomment this line only if you have such a card
 # and already successfully installed the kernel module and the library.
 
 # WITH_NI6601       := yes
@@ -372,7 +372,7 @@ ifeq ($(machine_name),crowley.none)
 	NUM_SERIAL_PORTS   := 2
 	SERIAL_LOCK_DIR    := /var/lock
 	ME6000_SUPPORT     := YES
-	NI6601_SUPPORT     := NO
+	NI6601_SUPPORT     := YES
 	INSTALL_MACHINE    := install-$(machine_name)
 	UNINSTALL_MACHINE  := uninstall-$(machine_name)
 endif
@@ -383,7 +383,7 @@ ifeq ($(machine_name),dorimare.nowhere)
 	GPIB_LIBRARY       := JTT
 	NUM_SERIAL_PORTS   := 2
 	ME6000_SUPPORT     := YES
-	NI6601_SUPPORT     := NO
+	NI6601_SUPPORT     := YES
 	SERIAL_LOCK_DIR    := /var/lock
 	INSTALL_MACHINE    := install-$(machine_name)
 	UNINSTALL_MACHINE  := uninstall-$(machine_name)
@@ -678,18 +678,22 @@ clean:
 	$(MAKE) -C $(sdir) clean
 	$(MAKE) -C $(mdir) clean
 	$(MAKE) -C $(ddir) clean
+	$(MAKE) -C me6x00 clean
+	$(MAKE) -C ni6601 clean
 
 distclean:
 	$(MAKE) -C $(sdir) distclean
 	$(MAKE) -C $(mdir) distclean
 	$(MAKE) -C $(ddir) distclean
 ifdef WITH_HTTP_SERVER
-	if [ -e $(ldir)/Makefile ]; then      \
+	if [ -e $(ldir)/Makefile ]; then   \
 		$(MAKE) -C $(ldir) distclean;  \
 	fi
 endif
 	$(MAKE) -C $(udir) distclean
 	-$(RM) $(RMFLAGS) version.ugz $(tagsfile) makelog config.h *~
+	$(MAKE) -C me6x00 clean
+	$(MAKE) -C ni6601 clean
 
 mostlyclean:
 	$(MAKE) -C $(sdir) distclean
@@ -715,7 +719,7 @@ test:
 
 pack:
 	@$(MAKE) distclean
-	cd ..; tar -c fsc2 | gzip -c -9 > fsc2.tgz
+	cd ..; tar -c fsc2 | gzip -c -9 > fsc2.tar.gz
 
 
 # Creates the MANIFEST file with the list of relevant files
@@ -781,8 +785,8 @@ ZIP:
 			sleep 1;                                                 \
 			mount /ZIP;                                              \
 		fi;                                                          \
-		cp ../fsc2.tgz /ZIP;                                         \
+		cp ../fsc2.tar.gz /ZIP;                                      \
 		umount /ZIP;                                                 \
 	else                                                             \
-		scp ../fsc2.tgz isaak.physik.fu-berlin.de:/ZIP;              \
+		scp ../fsc2.tar.gz isaak.physik.fu-berlin.de:/ZIP;           \
 	fi

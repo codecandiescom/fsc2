@@ -1,0 +1,69 @@
+\input texinfo   @c -*-texinfo-*-
+
+@c $Id$
+@c
+@c Copyright (C) 1999-2002 Jens Thoms Toerring
+@c
+@c This program is free software; you can redistribute it and/or modify
+@c it under the terms of the GNU General Public License as published by
+@c the Free Software Foundation; either version 2, or (at your option)
+@c any later version.
+@c
+@c This program is distributed in the hope that it will be useful,
+@c but WITHOUT ANY WARRANTY; without even the implied warranty of
+@c MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+@c GNU General Public License for more details.
+@c
+@c You should have received a copy of the GNU General Public License
+@c along with fsc2; see the file COPYING.  If not, write to
+@c the Free Software Foundation, 59 Temple Place - Suite 330,
+@c Boston, MA 02111-1307, USA.
+@c
+@c To contact the author send email to:
+@c Jens.Toerring@physik.fu-berlin.de
+
+@c %**start of header
+
+@setfilename me6x00.info
+@settitle me6x00
+@set lastupdate October 30, 2002
+@iftex
+@afourpaper
+@end iftex
+
+@c %**end of header
+
+
+@syncodeindex fn cp
+
+
+@titlepage
+@sp 4
+@center @titlefont{me6x00}
+@sp 4
+@center A Driver and Library for Meilhaus ME6x00 DAC Cards
+@sp 2
+@center October 2002
+@sp 10
+@center Jens Thoms T@"orring
+@sp 1
+@center @email{Jens.Toerring@@physik.fu-berlin.de}
+@sp 16
+@center Copyright @copyright{} 2002 Jens Thoms T@"orring
+@end titlepage
+
+@contents
+
+
+This package consists of two parts. One is a kernel module that gets
+loaded into the kernel and deals with the Meilhaus ME6x00 DAC cards
+on the lowest level. It is based on the module distributed by Meilhaus
+together with the card, written by G@"unter Gebhardt.
+
+The other part is a library that can be linked into your programs and
+which then supplies an API for your program to
+
+In the following it is assumed that you already installed the kernel
+module as well as the library successfully. Please see the README file
+in the main directory of the package for installation instructions.
+

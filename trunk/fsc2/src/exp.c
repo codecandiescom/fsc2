@@ -301,7 +301,7 @@ void store_exp( FILE *in )
 			case ';' :
 				if ( parenthesis_count != 0 )
 				{
-					print( FATAL, "More '(' than ')' found at end of"
+					print( FATAL, "More '(' than ')' found at end of "
 							"statement.\n" );
 					THROW( EXCEPTION );
 				}

@@ -83,6 +83,7 @@ ON_STOP		^[ \t]*ON_STOP:
 
 
 INT         [0-9]+
+HEX         0[xX][0-9A-Fa-f]+
 EXPO        [EDed][+-]?{INT}
 FLOAT       ((([0-9]+"."[0-9]*)|([0-9]*"."[0-9]+)){EXPO}?)|({INT}{EXPO})
 
@@ -187,6 +188,11 @@ FUNC        {IDENT}"#"[0-9]+
 
 {INT}       {
 				exp_val.lval = T_atol( exptext );
+                return E_INT_TOKEN;
+            }
+
+{HEX}       {
+				exp_val.lval = T_htol( exptext );
                 return E_INT_TOKEN;
             }
 

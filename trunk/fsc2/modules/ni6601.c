@@ -51,10 +51,13 @@ void ni6601_exit_hook( void );
 Var *counter_start_continuous_counter( Var *v );
 Var *counter_start_timed_counter( Var *v );
 Var *counter_intermediate_count( Var *v );
+Var *counter_timed_count( Var *v );
 Var *counter_final_count( Var *v );
 Var *counter_stop_counter( Var *v );
 Var *counter_single_pulse( Var *c );
 Var *counter_continuous_pulses( Var *v );
+Var *counter_dio_read( Var *v );
+Var *counter_dio_write( Var *v );
 
 
 static int ni6601_counter_number( long ch );
@@ -66,6 +69,7 @@ static double ni6601_time_check( double duration, const char *text );
 #define COUNTER_IS_BUSY 1
 
 static int states[ 4 ];
+
 
 /*---------------------------------------------------------*/
 /*---------------------------------------------------------*/
@@ -159,6 +163,12 @@ Var *counter_start_continuous_counter( Var *v )
 	int	source;
 
 
+	if ( v == NULL )
+	{
+		print( FATAL, "Missing arguments.\n" );
+		THROW( EXCEPTION );
+	}
+
 	counter = ni6601_counter_number( get_strict_long( v, "counter channel" ) );
 
 	if ( ( v = vars_pop( v ) ) == NULL )
@@ -208,6 +218,12 @@ Var *counter_start_timed_counter( Var *v )
 	double interval;
 
 
+	if ( v == NULL )
+	{
+		print( FATAL, "Missing arguments.\n" );
+		THROW( EXCEPTION );
+	}
+
 	counter = ni6601_counter_number( get_strict_long( v, "counter channel" ) );
 
 	if ( ( v = vars_pop( v ) ) == NULL )
@@ -229,8 +245,8 @@ Var *counter_start_timed_counter( Var *v )
 	}
 
 	if ( FSC2_MODE == EXPERIMENT )
-		switch ( ni6601_start_gated_counter( BOARD_NUMBER, counter, source,
-											 interval ) )
+		switch ( ni6601_start_gated_counter( BOARD_NUMBER, counter, interval,
+											 source ) )
 		{
 			case 0 :
 				break;
@@ -259,8 +275,123 @@ Var *counter_start_timed_counter( Var *v )
 }
 
 
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
+/*-----------------------------------------------------------------*/
+/* This function is a combination of counter_start_timed_counter() */
+/* and counter_final_count() - it starts a timed count and waits   */
+/* for the count interval finish and then fetches the count.       */
+/*-----------------------------------------------------------------*/
+
+Var *counter_timed_count( Var *v )
+{
+	int counter;
+	int source;
+	double interval;
+	unsigned long count;
+	int state;
+	static long dummy_count = 0;
+
+
+	if ( v == NULL )
+	{
+		print( FATAL, "Missing arguments.\n" );
+		THROW( EXCEPTION );
+	}
+
+	counter = ni6601_counter_number( get_strict_long( v, "counter channel" ) );
+
+	if ( ( v = vars_pop( v ) ) == NULL )
+	{
+		print( FATAL, "Missing time interval for counting.\n" );
+		THROW( EXCEPTION );
+	}
+
+	interval = ni6601_time_check( get_double( v, "counting time interval" ),
+								  "counting time interval" );
+
+	if ( ( v = vars_pop( v ) ) == NULL )
+		source = NI6601_DEFAULT_SOURCE;
+	else
+	{
+		source = ni6601_source_number( get_strict_long( v,
+														"source channel" ) );
+		too_many_arguments( v );
+	}
+
+	if ( FSC2_MODE == EXPERIMENT )
+		switch ( ni6601_start_gated_counter( BOARD_NUMBER, counter, interval,
+											 source ) )
+		{
+			case 0 :
+				break;
+
+			case NI6601_ERR_CBS :
+				print( FATAL, "Counter CH%d is already running.\n", counter );
+				THROW( EXCEPTION );
+
+			case NI6601_ERR_NCB :
+				print( FATAL, "Required neighbouring counter CH%d is already "
+					   "running.\n", counter & 1 ? counter - 1 : counter + 1 );
+				THROW( EXCEPTION );
+
+			default :
+				print( FATAL, "Can't start counter.\n" );
+				THROW( EXCEPTION );
+		}
+	else if ( FSC2_MODE == TEST &&
+			  states[ counter ] == COUNTER_IS_BUSY )
+	{
+		print( FATAL, "Counter CH%d is already running.\n", counter );
+		THROW( EXCEPTION );
+	}
+
+	if ( FSC2_MODE == EXPERIMENT )
+	{
+		/* For longer intervals (i.e. longer than the typical time resolution
+		   of the machine) sleep instead of waiting in the kernel for the
+		   count interval to finish */
+
+		if ( ( interval -= 0.01 ) > 0.0 )
+		{
+			fsc2_usleep( ( unsigned long ) ( interval * 1.0e6 ), SET );
+			stop_on_user_request( );
+		}
+
+	try_counter_again:
+
+		switch ( ni6601_get_count( BOARD_NUMBER, counter, 1, &count, &state ) )
+		{
+			case 0 :
+				if ( count > LONG_MAX )
+				{
+					print( SEVERE, "Counter value too large.\n" );
+					count = LONG_MAX;
+				}
+				break;
+
+			case NI6601_ERR_WFC :
+				print( FATAL, "Can't get final count, counter CH%d is "
+					   "running in continuous mode.\n", counter );
+				THROW( EXCEPTION );
+
+			case NI6601_ERR_ITR :
+				stop_on_user_request( );
+				goto try_counter_again;
+
+			default :
+				print( FATAL, "Can't get counter value.\n" );
+				THROW( EXCEPTION );
+		}
+	}
+	else
+		count = ++dummy_count;
+
+	return vars_push( INT_VAR, ( long ) count );
+}
+
+
+/*----------------------------------------------------*/
+/* Gest a count, even if the counter is still running */
+/*----------------------------------------------------*/
 
 Var *counter_intermediate_count( Var *v )
 {
@@ -293,8 +424,9 @@ Var *counter_intermediate_count( Var *v )
 }
 
 
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
+/*-------------------------------------------------------------*/
+/* Get a count, waiting until the counter is finished counting */
+/*-------------------------------------------------------------*/
 
 Var *counter_final_count( Var *v )
 {
@@ -307,6 +439,10 @@ Var *counter_final_count( Var *v )
 	counter = ni6601_counter_number( get_strict_long( v, "counter channel" ) );
 
 	if ( FSC2_MODE == EXPERIMENT )
+	{
+
+	try_counter_again:
+
 		switch ( ni6601_get_count( BOARD_NUMBER, counter, 1, &count, &state ) )
 		{
 			case 0 :
@@ -318,18 +454,23 @@ Var *counter_final_count( Var *v )
 				break;
 
 			case NI6601_ERR_WFC :
-				print( FATAL, "Counter CH%d is running in continuous mode.\n",
-					   counter );
+				print( FATAL, "Can't get final count, counter CH%d is "
+					   "running in continuous mode.\n", counter );
 				THROW( EXCEPTION );
+
+			case NI6601_ERR_ITR :
+				stop_on_user_request( );
+				goto try_counter_again;
 
 			default :
 				print( FATAL, "Can't get counter value.\n" );
 				THROW( EXCEPTION );
 		}
+	}
 	else
 		count = ++dummy_count;
 
-	return vars_push( INT_VAR, count );
+	return vars_push( INT_VAR, ( long ) count );
 }
 
 
@@ -405,6 +546,12 @@ Var *counter_continuous_pulses( Var *v )
 	double len_hi, len_low;
 
 
+	if ( v == NULL )
+	{
+		print( FATAL, "Missing arguments.\n" );
+		THROW( EXCEPTION );
+	}
+
 	counter = ni6601_counter_number( get_strict_long( v, "counter channel" ) );
 
 	if ( ( v = vars_pop( v ) ) == NULL )
@@ -457,6 +604,101 @@ Var *counter_continuous_pulses( Var *v )
 	return vars_push( INT_VAR, 1 );
 }
 
+
+/*---------------------------------------------------------*/
+/*---------------------------------------------------------*/
+
+Var *counter_dio_read( Var *v )
+{
+	int counter;
+	long mask;
+	unsigned char bits = 0;
+
+
+	if ( v == NULL )
+	{
+		print( FATAL, "Missing arguments.\n" );
+		THROW( EXCEPTION );
+	}
+
+	counter = ni6601_counter_number( get_strict_long( v, "counter channel" ) );
+
+	if ( ( v = vars_pop( v ) ) == NULL )
+		mask = 0xFF;
+	else
+	{
+		mask = get_strict_long( v, "DIO bit mask" );
+		if ( mask < 0 || mask > 0xFF )
+		{
+			print( FATAL, "Invalid mask of 0x%X, valif range is [0-255].\n",
+				   mask );
+			THROW( EXCEPTION );
+		}
+
+		too_many_arguments( v );
+	}
+
+	if ( FSC2_MODE == EXPERIMENT &&
+		 ni6601_dio_read( BOARD_NUMBER, &bits,
+						  ( unsigned char ) ( mask & 0xFF ) ) < 0 )
+		{
+			print( FATAL, "Can't read data from DIO.\n" );
+			THROW( EXCEPTION );
+		}
+
+	return vars_push( INT_VAR, ( long ) bits );
+}
+
+
+/*---------------------------------------------------------*/
+/*---------------------------------------------------------*/
+
+Var *counter_dio_write( Var *v )
+{
+	long bits;
+	long mask;
+
+
+	if ( v == NULL )
+	{
+		print( FATAL, "Missing arguments.\n" );
+		THROW( EXCEPTION );
+	}
+
+	bits = get_strict_long( v, "DIO value" );
+
+	if ( bits < 0 || bits > 0xFF )
+	{
+		print( FATAL, "Invalid value of %ld, valid range is [0-255].\n",
+			   bits );
+		THROW( EXCEPTION );
+	}
+
+	if ( ( v = vars_pop( v ) ) == NULL )
+		mask = 0xFF;
+	else
+	{
+		mask = get_strict_long( v, "DIO bit mask" );
+		if ( mask < 0 || mask > 0xFF )
+		{
+			print( FATAL, "Invalid mask of 0x%X, valif range is [0-255].\n",
+				   mask );
+			THROW( EXCEPTION );
+		}
+
+		too_many_arguments( v );
+	}
+
+	if ( FSC2_MODE == EXPERIMENT &&
+		 ni6601_dio_write( BOARD_NUMBER, ( unsigned char ) ( bits & 0xFF ),
+						   ( unsigned char ) ( mask & 0xFF ) ) < 0 )
+	{
+		print( FATAL, "Can't write value to DIO.\n" );
+		THROW( EXCEPTION );
+	}
+
+	return vars_push( INT_VAR, 1 );
+}
 
 
 /*---------------------------------------------------------------*/
@@ -580,7 +822,7 @@ static double ni6601_time_check( double duration, const char *text )
 		TRY
 		{
 			mint = T_strdup( ni6601_ptime( 2 * NI6601_TIME_RESOLUTION ) );
-			maxt = T_strdup( ni6601_ptime( ( ULONG_MAX + 1 )
+			maxt = T_strdup( ni6601_ptime( ( ULONG_MAX + 1.0 )
 										   * NI6601_TIME_RESOLUTION ) );
 			TRY_SUCCESS;
 		}

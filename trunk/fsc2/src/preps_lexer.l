@@ -98,6 +98,7 @@ PH1         PH(ASE)?(_?1)?
 PH2         PH(ASE)?_?2
 
 INT         [0-9]+
+HEX         0[xX][0-9A-Fa-f]+
 EXPO        [EDed][+-]?{INT}
 FLOAT       ((([0-9]+"."[0-9]*)|([0-9]*"."[0-9]+)){EXPO}?)|({INT}{EXPO})
 
@@ -184,6 +185,11 @@ FUNC        {IDENT}"#"[0-9]+
 
 {INT}       {
 				prepslval.lval = T_atol( prepstext );
+                return INT_TOKEN;
+            }
+
+{HEX}       {
+				prepslval.lval = T_htol( prepstext );
                 return INT_TOKEN;
             }
 

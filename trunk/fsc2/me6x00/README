@@ -1,0 +1,47 @@
+This a preliminary version of a driver and library for ME6000 and ME6100
+DAC cards (Meilhaus Electronic GmbH).
+
+The driver is based on the driver (version 1.0.0) by Meilhaus (author is
+Guenter Gebhardt), distributed with the card.
+
+Currently, support for continuous and wrap-around mode for ME6100 cards
+is restricted to the driver and can only be used via ioctl()-calls, see
+the example programs that came with the original driver you got with the
+card. Also this driver support is completely untested because I don't
+have such a card and only tried to clean up the code a bit.
+
+It is also untested if it still compiles and installs correctly with
+pre-2.4 kernels.
+
+There is  now one option that can be set when the module is loaded
+by calling insmod(8). Using the option 'major' the major device
+number can be set, it defaults to 0, i.e. without specifying
+this option the module gets assigned a free major device number
+automatically.
+
+When the module gets installed no device files are created yet. You
+will have to create them under /dev. If you're using the library and
+don't change the defined constant ME6x00_DEVICE_NAME in me6x00_lib.c
+these device files have to be named me6000_x, where x is a number
+between 0 (for the first board) and 3 (4 is the maximum number of
+boards that can currently be used at once) and must be indentical to
+the minor device number. To find out the required minor device number
+use 'lspci' and look for ME6000 and ME6100 cards. You can e.g. use
+the command
+
+lspci | grep "Meilhaus Electronic GmbH" | grep 6[01][013][48f]
+
+to get a list of all ME6000 and ME6100 cards. The first card in the
+list should be the one with minor device number 0, the next one 1 etc.
+The boards are character oriented devices, i.e. to create a device
+file you need a command like
+
+mknod /dev/me6000_x c major x
+
+with the x in the file name and at the end replaced by the same board
+number, and major being set to the major device number which you
+either have set when calling insmod(8), or when using an automatically
+assigned major device number, can be determined from /proc/devices.
+
+
+         Jens Thoms Toerring  <Jens.Toerring@physik.fu-berlin.de>

@@ -256,3 +256,17 @@ freq_counter_command, 1, EXP;
 /* Functions exported by DA converters (ME-6000) */
 
 dac_voltage, -1, ALL;
+
+
+/* Functions exported by event counters (NatInst 6601) */
+
+counter_start_continuous_counter, -1, EXP;
+counter_start_timed_counter, -1, EXP;
+counter_timed_count, -1, EXP;
+counter_intermediate_count, 1, EXP;
+counter_final_count, 1, EXP;
+counter_stop_counter, 1, EXP;
+counter_single_pulse, 2, EXP;
+counter_continuous_pulses, -1, EXP;
+counter_dio_read, -1, EXP;
+counter_dio_write1, -1, EXP;

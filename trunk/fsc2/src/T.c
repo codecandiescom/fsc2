@@ -282,6 +282,41 @@ long T_atol( const char *txt )
 /*---------------------------------------------------------------------*/
 /*---------------------------------------------------------------------*/
 
+long T_htol( const char *txt )
+{
+	long ret;
+	char *end_p;
+
+
+	if ( txt == NULL || *txt == '\0' ||
+		 ( *txt != '0' && tolower( txt[ 1 ] ) != 'x' ) )
+	{
+		eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
+				__FILE__, __LINE__ );
+		THROW( EXCEPTION );
+	}
+
+	ret = strtol( txt + 2, &end_p, 16 );
+
+	if ( errno == ERANGE )
+	{
+		print( FATAL, "Long integer number out of range: %s.\n", txt );
+		THROW( EXCEPTION );
+	}
+
+	if ( end_p == ( char * ) ( txt + 2 ) )
+	{
+		print( FATAL, "Not an integer number: %s.\n", txt );
+		THROW( EXCEPTION );
+	}
+
+	return ret;
+}
+
+
+/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*/
+
 int T_atoi( const char *txt )
 {
 	long ret;
