@@ -915,8 +915,8 @@ Var *vars_pop( Var *v )
 
 void vars_del_stack( void )
 {
-	while ( Var_Stack != NULL )
-		vars_pop( Var_Stack );
+	while ( vars_pop( Var_Stack ) )
+		;
 }
 
 
@@ -1246,23 +1246,18 @@ Var *vars_get_lhs_pointer( Var *v, int n )
 
 long vars_calc_index( Var *a, Var *v )
 {
-	Var  *vn;
 	int  i, cur;
 	long index;
 
 
 	/* Run through all the indices on the variable stack */
 
-	for ( i = 0, index = 0; v != NULL; i++, v = vn )
+	for ( i = 0, index = 0; v != NULL; i++, v = vars_pop( v ) )
 	{
 		/* We can't use an undefined variable as an index...*/
 
 		if ( v->type == UNDEF_VAR )
-		{
-			vn = v->next;
-			vars_pop( v );
 			break;
-		}
 
 		/* Check the variable with the size */
 
@@ -1311,14 +1306,9 @@ long vars_calc_index( Var *a, Var *v )
 		/* Update the index */
 
 		index = index * a->sizes[ i ] + cur;
-
-		/* Pop the variable with the index */
-
-		vn = v->next;
-		vars_pop( v );
 	}
 
-	if ( vn != NULL )                      /* i.e. UNDEF_VAR as an index */
+	if ( v != NULL )                       /* i.e. UNDEF_VAR as an index */
 	{
 		eprint( FATAL, "%s:%ld: Missing array index for array `%s'.\n",
 				Fname, Lc, a->name );
@@ -1346,8 +1336,7 @@ Var *vars_setup_new_array( Var *v, int dim )
 {
 	int i,
 		cur;
-	Var *vn,
-		*ret,
+	Var *ret,
 		*a = v->from;
 
 
@@ -1369,11 +1358,7 @@ Var *vars_setup_new_array( Var *v, int dim )
 	/* Run through the variables with the sizes after popping the variable
        with the array pointer */
 
-	vn = v->next;
-	vars_pop( v );
-	v = vn;
-
-	for ( i = 0; v != NULL; i++ )
+	for ( v = vars_pop( v ), i = 0; v != NULL; i++, v = vars_pop( v ) )
 	{
 		/* Check the variable with the size */
 
@@ -1428,12 +1413,6 @@ Var *vars_setup_new_array( Var *v, int dim )
 
 		a->sizes[ i ] = cur;
 		a->len *= cur;
-
-		/* Pop the variable with the size */
-
-		vn = v->next;
-		vars_pop( v );
-		v = vn;
 	}
 
 	/* Allocate memory */
