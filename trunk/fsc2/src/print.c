@@ -697,6 +697,7 @@ static void print_header( FILE *fp, char *name )
 				 "%%%%Title: %s\n"
 				 "%%%%For: %s (%s)\n"
 			     "%%%%Orientation: Landscape\n"
+			 	 "%%%%DocumentData: Clean8Bit\n"
 				 "%%%%DocumentNeededResources: font Times-Roman\n"
 			     "%%%%EndComments\n",
 			 irnd( 72.0 * paper_width / INCH ),
@@ -705,10 +706,11 @@ static void print_header( FILE *fp, char *name )
 			 getpwuid( getuid( ) )->pw_name,
 			 getpwuid( getuid( ) )->pw_gecos );
 
-	/* Create a dictonary with the commands used in the following */
+	/* Create a dictonary with the commands used in all the following */
 
 	fprintf( fp, "%%%%BeginProlog\n"
-			     "/fsc2Dict 23 dict def\n"
+			 	 "%%%%BeginResource: procset fsc2Dict\n"
+			     "/fsc2Dict 23 dict dup begin\n"
 			     "fsc2Dict begin\n"
 			     "/b { bind def } bind def\n"
 			     "/s { stroke } b\n"
@@ -757,7 +759,8 @@ static void print_header( FILE *fp, char *name )
 	/* End of dictonary, open it for all the following (must be closed at end
 	   of file !) */
 
-	fprintf( fp, "end %% fsc2Dict\n"
+	fprintf( fp, "end readonly def %% fsc2Dict\n"
+			 	 "%%%%EndResource
 			     "%%%%EndProlog\n"
 			 	 "%%%%BeginSetup\n"
 			     "fsc2Dict begin\n"
@@ -1070,7 +1073,7 @@ static void eps_make_scale( FILE *fp, void *cv, int coord, long dim )
 				label = paren_replace( G.label[ Z ] );
 
 				fprintf( fp, "gs (%s) dup dup ch %.2f exch sub exch cw %.2f "
-						 	 "exch subt 90 r 0 0 m show gr\n",
+						 	 "exch sub t 90 r 0 0 m show gr\n",
 						 label, x + 28.0, paper_width - margin );
 
 				T_free( label );
@@ -1550,7 +1553,10 @@ static char **split_into_lines( int *num_lines )
 /*------------------------------------------------------------------*/
 /* Routine returns a string that is basically the copy of the input */
 /* string but with a backslash prepended to all parenthesis (which  */
-/* the PostScript interpreter might otherwise choke on).            */
+/* the PostScript interpreter might otherwise choke on). At the     */
+/* same time all characters that aren't Clean8Bit (i.e. all charac- */
+/* ters below 0x1B (except TAB, LF and CR) and 0x7F) are replaced   */
+/* by a space character.                                            */
 /*------------------------------------------------------------------*/
 
 static char *paren_replace( const char *str )
@@ -1564,8 +1570,17 @@ static char *paren_replace( const char *str )
 		return NULL;
 
 	for ( p_count = 0, len = 1, sp = ( char * ) str; *sp != '\0'; sp++, len++ )
+	{
+		if ( *sp < 0x1B || *sp == 0x7F )
+		{
+			if ( *sp == 0x7F ||
+				 ( *sp != 0x09 && *sp != 0x0A && *sp != 0x0D ) )
+				*sp = ' ';
+		}
+
 		if ( *sp == '(' || *sp == ')' )
 			p_count++;
+	}
 
 	if ( p_count == 0 )
 		return T_strdup( str );
