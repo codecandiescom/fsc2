@@ -36,7 +36,7 @@ $ENV{ PATH } = '/bin:/usr/bin:/usr/local/bin:/usr/X11R6/bin';
 
 my $client;            # The Most Important Entity ;-)
 my $max_reqs = 16;     # how many simultaneous requests get accepted
-my $crlf = "\r\n";     # RFC 2616 requires this as the newline
+my $crlf = "\r\n";     # RFC 2616 requires this as the newline character
 my $has_pnmtopng;      # does the pnmtopng utility exist?
 my $has_ppmtojpeg;     # does the ppmtojpeg utility exist?
 my $fs;                # flock structure for locking of STDOUT
