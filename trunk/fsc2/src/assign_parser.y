@@ -75,7 +75,9 @@ int Cur_PHST;
 %token REPT_TOKEN            /* REPEAT TIME */
 %token REPF_TOKEN            /* REPEAT FREQUENCY */
 
-%token <lval> PHS_TOK
+%token PSD_TOKEN             /* PHASE SWITCH DELAY */
+
+%token <lval> PHS_TOK PSD_TOKEN
 %token PX_TOK PY_TOK PMX_TOK PMY_TOK POD1_TOK POD2_TOK ON_TOK OFF_TOK
 
 
@@ -131,19 +133,27 @@ line:    func pcd                  { }
        | func pcd TB_TOKEN         { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | func pcd TM_TOKEN         { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | func pcd PHS_TOK          { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | func pcd PSD_TOKEN        { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | tb                        { }
        | tb func                   { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | tb TM_TOKEN               { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | tb PHS_TOK                { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | tb PSD_TOKEN              { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | tm                        { }
        | tm func                   { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | tm TB_TOKEN               { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | tm PHS_TOK                { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | tm PDS_TOKEN              { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | phs                       { p_phs_end( Cur_PHS ); }
        | phs func                  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | phs TB_TOKEN              { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | phs TM_TOKEN              { THROW( MISSING_SEMICOLON_EXCEPTION ); }
-
+       | phs PDS_TOKEN             { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | psd                       { }
+       | psd func                  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | psd TB_TOKEN              { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | psd TM_TOKEN              { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | psd PHS_TOK               { THROW( MISSING_SEMICOLON_EXCEPTION ); }
 ;								   
 								   
 								   
@@ -432,6 +442,11 @@ phsvl:    /* empty */
 phsv:     INT_TOKEN                { $$ = $1; }
         | ON_TOK                   { $$ = 1; }
         | OFF_TOK                  { $$ = 0; }
+;
+
+psd:      PDS_TOKEN expr           { p_set_pds( $1, $2 ); }
+;
+
 %%
 
 

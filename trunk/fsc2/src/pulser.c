@@ -48,6 +48,7 @@ void pulser_struct_init( void )
 	pulser_struct.get_pulse_phase_cycle = NULL;
 
 	pulser_struct.setup_phase = NULL;
+	pulser_struct.set_phase_switch_delay = NULL;
 }
 
 
@@ -698,7 +699,7 @@ Var *p_get_by_num( long pnum, int type )
 }
 
 
-/*
+/*----------------------------------------------------------------------------
   'function' is the phase function the data are to be used for (i.e. 0 means
   PHASE_1, 1 means PHASE_2)
   'type' means the type of phase, see global.h (PHASE_PLUS/MINUX_X/Y
@@ -706,7 +707,7 @@ Var *p_get_by_num( long pnum, int type )
   (0: first pod channel, 1: second pod channel, -1: pick the one not set yet)
   'val' means high or low to be set on the pod channel to set the requested
   phase(0: low, !0: high)
-*/
+-----------------------------------------------------------------------------*/
 
 void p_phs_setup( int func, int type, int pod, long val )
 {
@@ -804,4 +805,24 @@ void p_phs_end( int func )
 									PULSER_CHANNEL_PHASE_2, phs[ func ] );
 
 	Cur_PHS = -1;
+}
+
+
+/*
+  Function for setting the phase switch delay.
+  'func' is the phase function the data are to be used for (i.e. 0 means
+  PHASE_1, 1 means PHASE_2)
+*/
+
+void p_set_psd( int func, double time )
+{
+	assert( func == 0 || func == 1 );
+
+	vars_check( v, INT_VAR );
+	is_pulser_func( pulser_struct.set_phase_switch_delay,
+					"setting a phase switch delay" );
+	( *pulser_struct.phase_switch_delay )( func == 0 ? PULSER_CHANNEL_PHASE_1 :
+										   PULSER_CHANNEL_PHASE_2,
+										   VALUE( v->val.dval ) );
+	vars_pop( v );
 }

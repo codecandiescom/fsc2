@@ -115,6 +115,8 @@ THRESH      LEV(EL)?
 REPT        REP(EAT)?_?T(IME)?
 REPF        REP(EAT)?_?F(REQ(UENCY)?)?
 
+PSD1        PH(ASE)?_?S(W(ITCH)?)?_?D(EL(AY)?)?(_?1)?:?
+PSD2        PH(ASE)?_?S(W(ITCH)?)?_?D(EL(AY)?)?_?1:?
 
 WS          [\n=: ]+
 
@@ -298,6 +300,16 @@ WS          [\n=: ]+
 				assignlval.vptr = p_get( assigntext, P_DLEN );
 				return VAR_REF;
             }
+
+{PSD1}		{
+				assignlval.lval	= 0;
+				return PSD_TOKEN;
+			}
+
+{PSD2}		{
+				assignlval.lval	= 1;
+				return PSD_TOKEN;
+			}
 
 {INT}       {
             	assignlval.lval = atol( assigntext );

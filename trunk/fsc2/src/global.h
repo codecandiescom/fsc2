@@ -17,9 +17,9 @@
 #define NUM_SERIAL_PORTS 2
 
 
-/* Define the maximum length of phase sequences */
+/* Define the default delay for phase pulses needed for phase switching */
 
-#define MAX_PHASE_SEQ_LEN  12    
+#define DEFAULT_PHASE_SWITCH_DELAY 2e-8    /* 20 ns */
 
 
 /* Define number of colors to be used in 2D graphics - must be less than

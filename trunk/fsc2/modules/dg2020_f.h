@@ -11,6 +11,7 @@
 
 int dg2020_init_hook( void );
 int dg2020_test_hook( void );
+int dg2020_end_of_test_hook( void );
 int dg2020_exp_hook( void );
 int dg2020_end_of_exp_hook( void );
 void dg2020_exit_hook( void );
@@ -93,10 +94,14 @@ typedef struct _F_ {
 	int num_active_pulses;       // number of pulses currenty in use
 	struct _p_ **pulses;         // list of pulse pointers
 
+	bool needs_phases;           // set if phase cycling is needed
+
 	struct _F_ *phase_func;      // for phase functions here's stored which
 	                             // function it's going to take care of while
 	                             // for normal functions it's a pointer to the
 	                             // phase function responsible for it.
+
+	long max_seq_len;            // maximum length of the pulse sequence
 
 	bool is_inverted;            // if set polarity is inverted
 
@@ -139,9 +144,14 @@ typedef struct
 	bool is_trig_in_level;
 	bool is_repeat_time;
 
+	long max_seq_len;        // maximum length of all pulse sequences
+
 	FUNCTION function[ PULSER_CHANNEL_NUM_FUNC ];
 	POD pod[ MAX_PODS ];
 	CHANNEL channel[ MAX_CHANNELS ];
+
+	Ticks pds;               // delay due to phase switches (only needed for
+	bool is_pds;             // the phase functions
 
 	int needed_channels;     // number of channels that are going to be needed
 	                         // for the experiment
@@ -197,7 +207,8 @@ typedef struct _p_ {
 	bool is_old_pos;
 	bool is_old_len;
 
-	CHANNEL *channel;        // channels the pulse belongs to
+	CHANNEL *channel;        // channel the pulse belongs to - only needed
+	                         // for phase pulses
 
 	struct _p_ *for_pulse;   // only for phase cycling pulses: the pulse the
 	                         // phase cycling pulse is used for
@@ -215,13 +226,13 @@ typedef struct _p_ {
 
 bool dg2020_is_needed = UNSET;
 DG2020 dg2020;
-PULSE *Pulses = NULL;
+PULSE *dg2020_Pulses = NULL;
 
 #else
 
 extern bool dg2020_is_needed;
 extern DG2020 dg2020;
-extern PULSE *Pulses;
+extern PULSE *dg2020_Pulses;
 
 #endif
 
@@ -229,72 +240,78 @@ extern PULSE *Pulses;
 
 /* Here follow the functions from dg2020_gen.c */
 
-bool set_timebase( double timebase );
-bool assign_function( int function, long pod );
-bool assign_channel_to_function( int function, long channel );
-bool invert_function( int function );
-bool set_delay_function( int function, double delay );
-bool set_function_high_level( int function, double voltage );
-bool set_function_low_level( int function, double voltage );
-bool set_trigger_mode( int mode );
-bool set_trig_in_level( double voltage );
-bool set_trig_in_slope( int slope );
-bool set_repeat_time( double time );
+bool dg2020_store_timebase( double timebase );
+bool dg2020_assign_function( int function, long pod );
+bool dg2020_assign_channel_to_function( int function, long channel );
+bool dg2020_invert_function( int function );
+bool dg2020_set_delay_function( int function, double delay );
+bool dg2020_set_function_high_level( int function, double voltage );
+bool dg2020_set_function_low_level( int function, double voltage );
+bool dg2020_set_trigger_mode( int mode );
+bool dg2020_set_trig_in_level( double voltage );
+bool dg2020_set_trig_in_slope( int slope );
+bool dg2020_set_repeat_time( double time );
 
-bool set_phase_reference( int phase, int function );
-bool setup_phase( int func, PHS phs );
+bool dg2020_set_phase_reference( int phase, int function );
+bool dg2020_setup_phase( int func, PHS phs );
+
+bool set_phase_switch_delay( int func, double time );
 
 
 /* These are the functions from dg2020_pulse.c */
 
-bool new_pulse( long pnum );
-bool set_pulse_function( long pnum, int function );
-bool set_pulse_position( long pnum, double time );
-bool set_pulse_length( long pnum, double time );
-bool set_pulse_position_change( long pnum, double time );
-bool set_pulse_length_change( long pnum, double time );
-bool set_pulse_phase_cycle( long pnum, int cycle );
+bool dg2020_new_pulse( long pnum );
+bool dg2020_set_pulse_function( long pnum, int function );
+bool dg2020_set_pulse_position( long pnum, double time );
+bool dg2020_set_pulse_length( long pnum, double time );
+bool dg2020_set_pulse_position_change( long pnum, double time );
+bool dg2020_set_pulse_length_change( long pnum, double time );
+bool dg2020_set_pulse_phase_cycle( long pnum, int cycle );
 
-bool get_pulse_function( long pnum, int *function );
-bool get_pulse_position( long pnum, double *time );
-bool get_pulse_length( long pnum, double *time );
-bool get_pulse_position_change( long pnum, double *time );
-bool get_pulse_length_change( long pnum, double *time );
-bool get_pulse_phase_cycle( long pnum, int *cycle );
+bool dg2020_get_pulse_function( long pnum, int *function );
+bool dg2020_get_pulse_position( long pnum, double *time );
+bool dg2020_get_pulse_length( long pnum, double *time );
+bool dg2020_get_pulse_position_change( long pnum, double *time );
+bool dg2020_get_pulse_length_change( long pnum, double *time );
+bool dg2020_get_pulse_phase_cycle( long pnum, int *cycle );
 
-bool change_pulse_position( long pnum, double time );
-bool change_pulse_length( long pnum, double time );
-bool change_pulse_position_change( long pnum, double time );
-bool change_pulse_length_change( long pnum, double time );
+bool dg2020_change_pulse_position( long pnum, double time );
+bool dg2020_change_pulse_length( long pnum, double time );
+bool dg2020_change_pulse_position_change( long pnum, double time );
+bool dg2020_change_pulse_length_change( long pnum, double time );
 
 
 /* Here come the functions from dg2020_util.c */
 
-Ticks double2ticks( double time );
-double ticks2double( Ticks ticks );
-void check_pod_level_diff( double high, double low );
-PULSE *get_pulse( long pnum );
-const char *ptime( double time );
-const char *pticks( Ticks ticks );
-CHANNEL *get_next_free_channel( void );
-int start_compare( const void *A, const void *B );
+Ticks dg2020_double2ticks( double time );
+double dg2020_ticks2double( Ticks ticks );
+void dg2020_check_pod_level_diff( double high, double low );
+PULSE *dg2020_get_pulse( long pnum );
+const char *dg2020_ptime( double time );
+const char *dg2020_pticks( Ticks ticks );
+CHANNEL *dg2020_get_next_free_channel( void );
+int dg2020_start_compare( const void *A, const void *B );
 
 
 /* The functions from dg2020_init.c */
 
-void init_setup( void );
-void basic_pulse_check( void );
-void basic_functions_check( void );
-void distribute_channels( void );
-void pulse_start_setup( void );
-void create_phase_pulses( int func );
-PULSE *new_phase_pulse( FUNCTION *f, PULSE *p, int pos, int pod );
+void dg2020_init_setup( void );
+void dg2020_basic_pulse_check( void );
+void dg2020_basic_functions_check( void );
+void dg2020_distribute_channels( void );
+void dg2020_pulse_start_setup( void );
+void dg2020_create_phase_pulses( int func );
+PULSE *dg2020_new_phase_pulse( FUNCTION *f, PULSE *p, int pos, int pod );
 
 
 /* Functions from dg2020_run.c */
 
-void do_checks( void );
-void do_update( void );
+void dg2020_do_update( void );
+void dg2020_reorganize_pulses( bool flag );
+bool dg2020_do_checks( FUNCTION *f );
+void dg2020_full_reset( void );
+PULSE *dg2020_delete_pulse( PULSE *p );
+void dg2020_reorganize_phases( bool flag );
 
 
 /* Finally the functions from dg2020_gpib.c */

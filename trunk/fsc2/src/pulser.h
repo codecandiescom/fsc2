@@ -52,6 +52,7 @@ typedef struct {
 	bool ( *get_pulse_phase_cycle )( long pulse_number, int *cycle );
 
 	bool ( *setup_phase )( int function, PHS phs );
+	bool ( *set_phase_switch_delay )( int function, double time );
 
 } Pulser_Struct;
 
@@ -94,6 +95,8 @@ Var *p_get_by_num( long p_num, int type );
 
 void p_phs_setup( int func, int type, int pod, long val );
 void p_phs_end( int func );
+
+void p_set_psd( int func, double time );
 
 
 #endif  /* ! PULSER_HEADER */
