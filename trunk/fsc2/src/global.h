@@ -69,7 +69,7 @@
 
 
 /* Create a bool type - this is stolen from gcc's stdbool.h ;-)
-   When compiling with a C++ compiler this must not be defined ! */
+   When compiling with a C++ compiler this must not be defined! */
 
 #ifndef __cplusplus
 
@@ -109,6 +109,7 @@ enum {
 	STATE_FINISHED
 };
 
+
 /* Define error severity types */
 
 enum {
@@ -117,6 +118,7 @@ enum {
 	WARN,
 	NO_ERROR
 };
+
 
 /* Enumeration for command line flags */
 
@@ -140,12 +142,14 @@ enum {
 	HTTPPORT
 };
 
+
 /* Definition for HIGH/LOW states */
 
 enum {
-	LOW,
+	LOW = 0,
 	HIGH
 };
+
 
 /* Definitions for slopes (e.g. trigger slopes etc.) */
 
@@ -154,6 +158,7 @@ enum {
 	POSITIVE
 };
 
+
 /* Definition for trigger modes etc. */
 
 enum {
@@ -161,12 +166,14 @@ enum {
 	EXTERNAL
 };
 
+
 /* Definition for level types */
 
 enum {
-	TTL_LEVEL,
+	TTL_LEVEL = 0,
 	ECL_LEVEL
 };
+
 
 /* Some definitions used in graphic */
 
@@ -321,20 +328,34 @@ enum {
 	CHILD  = 1
 };
 
+
+/* Flags set according to the command line arguments */
+
 enum {
-	DO_LOAD    =   1,
-	DO_TEST    =   2,
-	DO_START   =   4,
-	DO_SIGNAL  =   8,
-	DO_DELETE  =  16,
-	NO_MAIL    =  32,
-	NO_BALLOON =  64,
-	DO_CHECK   = 128                  /* used for check runs on new versions */
+	DO_LOAD    =   ( 1 << 0 ),
+	DO_TEST    =   ( 1 << 1 ),
+	DO_START   =   ( 1 << 2 ),
+	DO_SIGNAL  =   ( 1 << 3 ),
+	DO_DELETE  =   ( 1 << 4 ),
+	NO_MAIL    =   ( 1 << 5 ),
+	NO_BALLOON =   ( 1 << 6 ),
+	DO_CHECK   =   ( 1 << 7 )                 /* used for check runs only */
 };
+
+
+/* States the program can be in when the main child process raised the
+   QUITTING signal */
+
+enum {
+	QUITTING_UNSET,
+	QUITTING_RAISED,
+	QUITTING_ACCEPTED
+};
+
 
 /* Convenience macros for accessing the value of simple variables
    (but be careful with the VALUE macro: the returned value is always
-   a double !) */
+   a double!) */
 
 #define INT          val.lval
 #define FLOAT        val.dval
@@ -367,11 +388,6 @@ enum {
 #define FILE_NUMBER_NOT_OPEN  ( FILE_NUMBER_OFFSET - 1 )
 
 
-/* This constant is the start number for the IDs of objects in the toolbox */
-
-#define ID_OFFSET             328102
-
-
 /* This constants are used in converting integer and double numbers to short
    integers as expected by the X library routines as point coordinates */
 
@@ -388,18 +404,13 @@ enum {
 #define CRASH_ADDRESS_OFFSET 0x11
 
 
-/* States we can be in when the main child process raised the QUITTING
-   signal */
+/* This constant is the start number for the IDs of objects in the toolbox */
 
-enum {
-	QUITTING_UNSET,
-	QUITTING_RAISED,
-	QUITTING_ACCEPTED
-};
+#define ID_OFFSET             328102
 
 
-/* The following are the states the function for waiting for an
-   event from the toolbox can be in */
+/* The following defines the states the function for waiting for an user
+   event from the toolbox can be in. */
 
 enum {
 	TB_WAIT_NOT_RUNNING,
@@ -409,7 +420,15 @@ enum {
 };
 
 
-#define UNUSED_ARGUMENT( a )   ( void ) ( a )
+/* Having a line like "UNUSED_ADRGUMENT( a );" for arguments of a function
+   that aren't needed will shut up the compiler complaining about unused
+   arguments and makes it easier to see that the argument isn't used on
+   purpose. The statement will be optimized away by the compiler anyway,
+   so there's no runtime penalty for using the construct. The only arguments
+   for which this can't be used are const variables. */
+
+#define UNUSED_ARGUMENT( a )   ( a ) = ( a )
+
 
 #endif /* ! FSC2_GLOBAL */
 
