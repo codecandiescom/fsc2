@@ -242,8 +242,13 @@ void release_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
 
 	if ( c->ppos[ Y ] < 0 )
 		c->ppos[ Y ] = 0;
-	if ( c->ppos[ Y ] >= ( int ) G.canvas.h )
-		c->ppos[ Y ] = G.canvas.h - 1;
+	if ( c != &G.z_axis )
+	{
+		if ( c->ppos[ Y ] >= ( int ) G.canvas.h )
+			c->ppos[ Y ] = G.canvas.h - 1;
+	}
+	else if ( c->ppos[ Y ] >= ( int ) c->h )         /* in z-axis window */
+		c->ppos[ Y ] = c->h - 1;
 
 	switch ( G.button_state )
 	{

@@ -783,11 +783,14 @@ void create_colors( void )
 					 rgb[ RED ], rgb[ GREEN ], rgb[ BLUE ] );
 	}
 
-	/* Create a creamy kind of white and a dark violet for values too large
-	   or too small */
+	/* Finally create colors for values too large and values too small */
 
-	fl_mapcolor( NUM_COLORS + FL_FREE_COL1 + 1, 255, 248, 220 );
-	fl_mapcolor( NUM_COLORS + FL_FREE_COL1 + 2, 96, 0, 96 );
+	i2rgb( 2.0, rgb );
+	fl_mapcolor( NUM_COLORS + FL_FREE_COL1 + 1,
+				 rgb[ RED ], rgb[ GREEN ], rgb[ BLUE ] );
+	i2rgb( -1.0, rgb );
+	fl_mapcolor( NUM_COLORS + FL_FREE_COL1 + 2,
+				 rgb[ RED ], rgb[ GREEN ], rgb[ BLUE ] );
 }
 
 
