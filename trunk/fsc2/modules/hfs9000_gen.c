@@ -41,31 +41,62 @@ bool hfs9000_store_timebase( double timebase )
 bool hfs9000_assign_channel_to_function( int function, long channel )
 {
 	FUNCTION *f = &hfs9000.function[ function ];
-	CHANNEL *c = &hfs9000.channel[ channel - 1 ];
+	CHANNEL *c = &hfs9000.channel[ channel ];
 
 
-	channel -= 1;
 	if ( channel < 0 || channel >= MAX_CHANNELS )
 	{
 		eprint( FATAL, "%s:%ld: %s: Invalid channel number: %ld, valid range "
-				"is 1-%d.\n", Fname, Lc, pulser_struct.name, channel + 1,
+				"is 1-%d.\n", Fname, Lc, pulser_struct.name, channel,
 				( int ) MAX_CHANNELS );
 		THROW( EXCEPTION );
+	}
+
+	if ( channel == HFS9000_TRIG_OUT )
+	{
+		if ( f->is_inverted )
+		{
+			eprint( FATAL, "%s:%ld: %s: Function `%s' has been set to use "
+					"inverted logic. This can't be done with TRIGER_OUT "
+					"channel.\n", Fname, Lc, pulser_struct.name,
+					Function_Names[ function ] );
+			THROW( EXCEPTION );
+		}
+
+		if ( f->is_high_level || f->is_low_level )
+		{
+			eprint( FATAL, "%s:%d: %s: For function `%s' a voltage level has "
+					"been set. This can't be done with TRIGER_OUT channel.\n",
+					Fname, Lc, pulser_struct.name,
+					Function_Names[ function ] );
+			THROW( EXCEPTION );
+		}
 	}
 
 	if ( c->function != NULL )
 	{
 		if ( c->function->self == function )
 		{
-			eprint( SEVERE, "%s:%ld: %s: Channel %ld is assigned twice to "
-					"function `%s'.\n", Fname, Lc, pulser_struct.name,
-					channel + 1, Function_Names[ c->function->self ] );
+			if ( channel == HFS9000_TRIG_OUT )
+				eprint( SEVERE, "%s:%ld: %s: TRIGGER_OUT channel is assigned "
+						"twice to function `%s'.\n", Fname, Lc,
+						pulser_struct.name,
+						Function_Names[ c->function->self ] );
+			else
+				eprint( SEVERE, "%s:%ld: %s: Channel %ld is assigned twice to "
+						"function `%s'.\n", Fname, Lc, pulser_struct.name,
+						channel, Function_Names[ c->function->self ] );
 			return FAIL;
 		}
 
-		eprint( FATAL, "%s:%ld: %s: Channel %ld is already used for function "
-				"`%s'.\n", Fname, Lc, pulser_struct.name, channel + 1,
-				Function_Names[ c->function->self ] );
+		if ( channel == HFS9000_TRIG_OUT )
+			eprint( FATAL, "%s:%ld: %s: TRIGGER_OUT channel is already used "
+					"for function `%s'.\n", Fname, Lc, pulser_struct.name,
+					Function_Names[ c->function->self ] );
+		else
+			eprint( FATAL, "%s:%ld: %s: Channel %ld is already used for "
+					"function `%s'.\n", Fname, Lc, pulser_struct.name, channel,
+					Function_Names[ c->function->self ] );
 		THROW( EXCEPTION );
 	}
 
@@ -83,7 +114,17 @@ bool hfs9000_assign_channel_to_function( int function, long channel )
 
 bool hfs9000_invert_function( int function )
 {
+	if ( hfs9000.function[ function ].channel != NULL &&
+		 hfs9000.function[ function ].channel->self == HFS9000_TRIG_OUT )
+	{
+		eprint( FATAL, "%s:%ld: %s: Function `%s' is associated with "
+				"TRIGGER_OUT channel whose polarity can't be inverted.\n",
+				Fname, Lc, pulser_struct.name, Function_Names[ function ] );
+		THROW( EXCEPTION );
+	}
+
 	hfs9000.function[ function ].is_inverted = SET;
+	hfs9000.function[ function ].is_used = SET;
 	return OK;
 }
 
@@ -147,6 +188,15 @@ bool hfs9000_set_function_delay( int function, double delay )
 
 bool hfs9000_set_function_high_level( int function, double voltage )
 {
+	if ( hfs9000.function[ function ].channel != NULL &&
+		 hfs9000.function[ function ].channel->self == HFS9000_TRIG_OUT )
+	{
+		eprint( FATAL, "%s:%ld: %s: Function `%s' is associated with "
+				"TRIGGER_OUT channel that doesn't allow setting of levels.\n",
+				Fname, Lc, pulser_struct.name, Function_Names[ function ] );
+		THROW( EXCEPTION );
+	}
+
 	voltage = VOLTAGE_RESOLUTION * lround( voltage / VOLTAGE_RESOLUTION );
 
 	if ( voltage < MIN_POD_HIGH_VOLTAGE || voltage > MAX_POD_HIGH_VOLTAGE )
@@ -175,6 +225,15 @@ bool hfs9000_set_function_high_level( int function, double voltage )
 
 bool hfs9000_set_function_low_level( int function, double voltage )
 {
+	if ( hfs9000.function[ function ].channel != NULL &&
+		 hfs9000.function[ function ].channel->self == HFS9000_TRIG_OUT )
+	{
+		eprint( FATAL, "%s:%ld: %s: Function `%s' is associated with "
+				"TRIGGER_OUT channel that doesn't allow setting of levels.\n",
+				Fname, Lc, pulser_struct.name, Function_Names[ function ] );
+		THROW( EXCEPTION );
+	}
+
 	voltage = VOLTAGE_RESOLUTION * lround( voltage / VOLTAGE_RESOLUTION );
 
 	if ( voltage < MIN_POD_LOW_VOLTAGE || voltage > MAX_POD_LOW_VOLTAGE )

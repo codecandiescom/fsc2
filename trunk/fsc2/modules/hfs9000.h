@@ -257,7 +257,8 @@ bool hfs9000_change_pulse_length_change( long pnum, double time );
 
 /* Functions from hfs9000_init.c */
 
-void dg2020_init_setup( void );
+void hfs9000_init_setup( void );
+void hfs9000_set_pulses( FUNCTION *f );
 
 
 /* Functions from hfs9000_util.c */
@@ -273,6 +274,11 @@ Ticks hfs9000_get_max_seq_len( void );
 void hfs9000_calc_padding( void );
 void hfs9000_set( bool *arena, Ticks start, Ticks len, Ticks offset );
 int hfs9000_diff( bool *old, bool *new, Ticks *start, Ticks *length );
+
+
+/* Functions fron hfs9000_run.c */
+
+void hfs9000_do_checks( FUNCTION *f );
 
 
 /* Functions from hfs9000_gpib.c */

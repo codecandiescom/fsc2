@@ -9,11 +9,10 @@
 #include "gpib_if.h"
 
 
-
-/*---------------------------------------------------------------------------
-  This function is called directly after all modules are loaded. Its function
-  is to initialize all global variables that are needed in the module.
----------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------
+  This function is called directly after all modules are loaded. It
+  initializes all global variables that are needed in the module.
+----------------------------------------------------------------------*/
 
 int hfs9000_init_hook( void )
 {
@@ -95,7 +94,7 @@ int hfs9000_init_hook( void )
 	hfs9000.is_neg_delay = UNSET;
 	hfs9000.neg_delay = 0;
 
-	for ( i = 0; i < MAX_CHANNELS; i++ )
+	for ( i = 0; i <= MAX_CHANNELS; i++ )
 	{
 		hfs9000.channel[ i ].self = i;
 		hfs9000.channel[ i ].function = NULL;
@@ -108,7 +107,9 @@ int hfs9000_init_hook( void )
 		hfs9000.function[ i ].is_needed = UNSET;
 		hfs9000.function[ i ].channel = NULL;
 		hfs9000.function[ i ].num_pulses = 0;
+		hfs9000.function[ i ].num_active_pulses = 0;
 		hfs9000.function[ i ].pulses = NULL;
+		hfs9000.function[ i ].max_seq_len = 0;
 		hfs9000.function[ i ].is_inverted = UNSET;
 		hfs9000.function[ i ].delay = 0;
 		hfs9000.function[ i ].is_delay = UNSET;
@@ -120,3 +121,161 @@ int hfs9000_init_hook( void )
 
 	return 1;
 }
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+int hfs9000_test_hook( void )
+{
+	if ( hfs9000_Pulses == NULL )
+	{
+		hfs9000_is_needed = UNSET;
+		eprint( WARN, "%s loaded but no pulses are defined.\n",
+				pulser_struct.name );
+		return 1;
+	}
+
+	/* Check consistency of pulse settings and do everything to setup the
+	   pulser for the test run */
+
+	hfs9000_IN_SETUP = SET;
+	hfs9000_init_setup( );
+	hfs9000_IN_SETUP = UNSET;
+
+	/* We need some somewhat different functions for setting some of the
+	   pulser properties */
+
+	pulser_struct.set_pulse_position = hfs9000_change_pulse_position;
+	pulser_struct.set_pulse_length = hfs9000_change_pulse_length;
+	pulser_struct.set_pulse_position_change =
+		hfs9000_change_pulse_position_change;
+	pulser_struct.set_pulse_length_change = hfs9000_change_pulse_length_change;
+
+	return 1;
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+int hfs9000_end_of_test_hook( void )
+{
+	if ( ! hfs9000_is_needed )
+		return 1;
+
+	/* First we have to reset the internal representation back to its initial
+	   state */
+
+	hfs9000_full_reset( );
+
+	/* Now we've got to find out about the maximum sequence length and set
+	   up padding to achieve the requested repeat time */
+
+	hfs9000.max_seq_len = hfs9000_get_max_seq_len( );
+	hfs9000_calc_padding( );
+
+	return 1;
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+int hfs9000_exp_hook( void )
+{
+	int i;
+
+
+	if ( ! hfs9000_is_needed )
+		return 1;
+
+	/* Initialize the device */
+	
+	if ( ! hfs9000_init( DEVICE_NAME ) )
+	{
+		eprint( FATAL, "%s: Failure to initialize the pulser.\n",
+				pulser_struct.name );
+		THROW( EXCEPTION );
+	}
+
+	/* Now we have to tell the pulser about all the pulses */
+
+	for ( i = 0; i <= MAX_CHANNELS; i++ )
+		if ( hfs9000.channel[ i ].function->is_used )
+			hfs9000_set_pulses( hfs9000.channel[ i ].function );
+
+	hfs9000_run( START );
+
+	return 1;
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+int hfs9000_end_of_exp_hook( void )
+{
+	if ( ! hfs9000_is_needed )
+		return 1;
+
+	gpib_local( hfs9000.device );
+
+	return 1;
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+void hfs9000_exit_hook( void )
+{
+	PULSE *p, *np;
+	int i;
+
+
+	if ( ! hfs9000_is_needed )
+		return;
+
+	/* Free all the memory allocated within the module */
+
+	for ( p = hfs9000_Pulses; p != NULL; p = np )
+	{
+		np = p->next;
+		T_free( p );
+	}
+
+	hfs9000_Pulses = NULL;
+
+	for ( i = 0; i <= MAX_CHANNELS; i++ )
+		if ( hfs9000.channel[ i ].function != NULL &&
+			 hfs9000.channel[ i ].function->pulses != NULL )
+			T_free( hfs9000.channel[ i ].function->pulses );
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+Var *pulser_update( Var *v )
+{
+	v = v;
+
+
+	if ( ! hfs9000_is_needed )
+		return vars_push( INT_VAR, 1 );
+
+	/* Send all changes to the pulser */
+
+	if ( hfs9000.needs_update )
+		hfs9000_do_update( );
+
+	/* If we're doing a real experiment also tell the pulser to start */
+
+	if ( ! TEST_RUN )
+		hfs9000_run( START );
+
+	return vars_push( INT_VAR, 1 );
+}
+
+
