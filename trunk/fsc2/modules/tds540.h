@@ -64,6 +64,9 @@
 #define TDS540_LIN   12         /* Line In (for triggger only) */
 
 
+#define GENERAL_TO_TDS540 0
+#define TDS540_TO_GENERAL 1
+
 
 /* Structure for description of a `window' on the digitizer, made up from the
    area between the pair of cursors */
@@ -139,7 +142,6 @@ Var *digitizer_define_window( Var *v );
 Var *digitizer_timebase( Var *v );
 Var *digitizer_sensitivity( Var *v );
 Var *digitizer_num_averages( Var *v );
-Var *digitizer_get_channel_number( Var *v );
 Var *digitizer_record_length( Var *v );
 Var *digitizer_trigger_position( Var *v );
 Var *digitizer_meas_channel_ok( Var *v );
@@ -163,6 +165,7 @@ void tds540_do_pre_exp_checks( void );
 void tds540_set_meas_window( WINDOW *w );
 void tds540_set_curve_window( WINDOW *w );
 void tds540_set_window( WINDOW *w );
+long tds540_translate_channel( int dir, long channel );
 
 bool tds540_init( const char *name );
 double tds540_get_timebase( void );

@@ -427,3 +427,125 @@ void tds744a_set_window( WINDOW *w )
 		tds744a_set_cursor( 2, w->start + w->width );
 	}
 }
+
+
+/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*/
+
+long tds744a_translate_channel( int dir, long channel )
+{
+	if ( dir == GENERAL_TO_TDS744A )
+	{
+		switch ( channel )
+		{
+			case DIGITIZER_CHANNEL_CH1 :
+				return TDS744A_CH1;
+
+			case DIGITIZER_CHANNEL_CH2 :
+				return TDS744A_CH2;
+
+			case DIGITIZER_CHANNEL_CH3 :
+				return TDS744A_CH3;
+
+			case DIGITIZER_CHANNEL_CH4 :
+				return TDS744A_CH4;
+
+			case DIGITIZER_CHANNEL_MATH1 :
+				return TDS744A_MATH1;
+
+			case DIGITIZER_CHANNEL_MATH2 :
+				return TDS744A_MATH2;
+
+			case DIGITIZER_CHANNEL_MATH3 :
+				return TDS744A_MATH3;
+
+			case DIGITIZER_CHANNEL_REF1 :
+				return TDS744A_REF1;
+
+			case DIGITIZER_CHANNEL_REF2 :
+				return TDS744A_REF2;
+
+			case DIGITIZER_CHANNEL_REF3 :
+				return TDS744A_REF3;
+
+			case DIGITIZER_CHANNEL_REF4 :
+				return TDS744A_REF4;
+
+			case DIGITIZER_CHANNEL_AUX :
+				return TDS744A_AUX;
+
+			case DIGITIZER_CHANNEL_LINE :
+				return TDS744A_LIN;
+
+			case DIGITIZER_CHANNEL_AUX1   :
+			case DIGITIZER_CHANNEL_AUX2   :
+			case DIGITIZER_CHANNEL_MEM_C  :
+			case DIGITIZER_CHANNEL_MEM_D  :
+			case DIGITIZER_CHANNEL_FUNC_E :
+			case DIGITIZER_CHANNEL_FUNC_F :
+			case DIGITIZER_CHANNEL_EXT    :
+			case DIGITIZER_CHANNEL_EXT10  :
+				eprint( FATAL, SET, "%s: Digitizer has no %s channel used in "
+						"%s().\n", DEVICE_NAME,
+						Digitizer_Channel_Names[ channel ], Cur_Func );
+				THROW( EXCEPTION )
+
+			default :
+				eprint( FATAL, SET, "%s: Invalid channel number %ld used in "
+						"%s().\n", DEVICE_NAME, channel, Cur_Func );
+				THROW( EXCEPTION )
+		}
+	}
+	else
+	{
+		switch ( channel )
+		{
+			case TDS744A_CH1 :
+				return DIGITIZER_CHANNEL_CH1;
+
+			case TDS744A_CH2 :
+				return DIGITIZER_CHANNEL_CH2;
+
+			case TDS744A_CH3 :
+				return DIGITIZER_CHANNEL_CH3;
+
+			case TDS744A_CH4 :
+				return DIGITIZER_CHANNEL_CH4;
+
+			case TDS744A_MATH1 :
+				return DIGITIZER_CHANNEL_MATH1;
+
+			case TDS744A_MATH2 :
+				return DIGITIZER_CHANNEL_MATH2;
+
+			case TDS744A_MATH3 :
+				return DIGITIZER_CHANNEL_MATH3;
+
+			case TDS744A_REF1 :
+				return DIGITIZER_CHANNEL_REF1;
+
+			case TDS744A_REF2 :
+				return DIGITIZER_CHANNEL_REF2;
+
+			case TDS744A_REF3 :
+				return DIGITIZER_CHANNEL_REF3;
+
+			case TDS744A_REF4 :
+				return DIGITIZER_CHANNEL_REF4;
+
+			case TDS744A_AUX :
+				return DIGITIZER_CHANNEL_AUX;
+
+			case TDS744A_LIN :
+				return DIGITIZER_CHANNEL_LINE;
+
+			default :
+				eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
+						__FILE__, __LINE__ );
+				THROW( EXCEPTION )
+		}
+	}
+
+	fsc2_assert( 1 == 0 );
+	return -1;
+}

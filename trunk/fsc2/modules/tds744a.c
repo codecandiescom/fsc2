@@ -468,15 +468,15 @@ Var *digitizer_sensitivity( Var *v )
 	}
 
 	vars_check( v, INT_VAR );
+	channel = tds744a_translate_channel( GENERAL_TO_TDS744A, v->val.lval );
 
-	if ( v->val.lval < TDS744A_CH1 || v->val.lval > TDS744A_CH4 )
+	if ( channel > TDS744A_CH4 )
 	{
-		eprint( FATAL, SET, "%s: Can't set or obtain sensitivity for "
-				"specified channel in %s().\n", DEVICE_NAME, Cur_Func );
+		eprint( FATAL, SET, "%s: Can't set or obtain sensitivity for channel "
+				"%s in %s().\n", DEVICE_NAME, Channel_Names[ channel ],
+				Cur_Func );
 		THROW( EXCEPTION )
 	}
-
-	channel = v->val.lval;
 
 	if ( ( v = vars_pop( v ) ) == NULL )
 	{
@@ -592,26 +592,6 @@ Var *digitizer_num_averages( Var *v )
 		tds744a.is_num_avg = SET;
 
 	return vars_push( INT_VAR, tds744a.num_avg );
-}
-
-
-/*-----------------------------------------------------------------------*/
-/* This is not a function that users should usually call but a function  */
-/* that allows the parser to convert symbolic channel names into numbers */
-/*-----------------------------------------------------------------------*/
-
-Var *digitizer_get_channel_number( Var *v )
-{
-	int i;
-
-
-	vars_check( v, STR_VAR );
-
-	for ( i = 0; i < MAX_CHANNELS; i++ )
-		if ( ! strcmp( v->val.sptr, Channel_Names[ i ] ) )
-			return vars_push( INT_VAR, i );
-
-	return NULL;
 }
 
 
@@ -768,9 +748,13 @@ Var *digitizer_trigger_position( Var *v )
 
 Var *digitizer_meas_channel_ok( Var *v )
 {
-	vars_check( v, INT_VAR );
+	long channel;
 
-	if ( v->val.lval < TDS744A_CH1 || v->val.lval > TDS744A_REF4 )
+
+	vars_check( v, INT_VAR );
+	channel = tds744a_translate_channel( GENERAL_TO_TDS744A, v->val.lval );
+
+	if ( channel > TDS744A_REF4 )
 		return vars_push( INT_VAR, 0 );
 	else
 		return vars_push( INT_VAR, 1 );
@@ -784,19 +768,25 @@ Var *digitizer_meas_channel_ok( Var *v )
 
 Var *digitizer_trigger_channel( Var *v )
 {
+	long channel;
+
+
 	if ( v == NULL )
 	{
 		if ( TEST_RUN )
 		{
 			if ( tds744a.is_trigger_channel )
-				return vars_push( INT_VAR, tds744a.trigger_channel );
+				return vars_push( INT_VAR, tds744a_translate_channel(
+							   TDS744A_TO_GENERAL, tds744a.trigger_channel ) );
 			else
-				return vars_push( INT_VAR, TDS744A_TEST_TRIG_CHANNEL );
+				return vars_push( INT_VAR, tds744a_translate_channel(
+							 TDS744A_TO_GENERAL, TDS744A_TEST_TRIG_CHANNEL ) );
 		}
 		else if ( I_am == PARENT )
 		{
 			if ( tds744a.is_trigger_channel )
-				return vars_push( INT_VAR, tds744a.trigger_channel );
+				return vars_push( INT_VAR, tds744a_translate_channel(
+							   TDS744A_TO_GENERAL, tds744a.trigger_channel ) );
 
 			eprint( FATAL, SET, "%s: Function %s() with no argument can "
 					"only be used in the EXPERIMENT section.\n",
@@ -804,25 +794,21 @@ Var *digitizer_trigger_channel( Var *v )
 			THROW( EXCEPTION )
 		}
 
-		return vars_push( tds744a_get_trigger_channel( ) );
+		return vars_push( INT_VAR, tds744a_translate_channel(
+						TDS744A_TO_GENERAL, tds744a_get_trigger_channel( ) ) );
 	}
 
 	vars_check( v, INT_VAR );
+	channel = tds744a_translate_channel( GENERAL_TO_TDS744A, v->val.lval );
+	vars_pop( v );
 
-	if ( v->val.lval < 0 || v->val.lval >= MAX_CHANNELS )
-	{
-		eprint( FATAL, SET, "%s: Invalid trigger channel name in %s().\n",
-				DEVICE_NAME, Cur_Func );
-		THROW( EXCEPTION )
-	}
-
-    switch ( v->val.lval )
+    switch ( channel )
     {
         case TDS744A_CH1 : case TDS744A_CH2 : case TDS744A_CH3 :
 		case TDS744A_CH4 : case TDS744A_AUX : case TDS744A_LIN :
-			tds744a.trigger_channel = v->val.lval;
+			tds744a.trigger_channel = channel;
 			if ( I_am == CHILD )
-				tds744a_set_trigger_channel( Channel_Names[ v->val.lval ] );
+				tds744a_set_trigger_channel( Channel_Names[ channel ] );
 			if ( ! TEST_RUN )
 				tds744a.is_trigger_channel = SET;
             break;
@@ -830,11 +816,10 @@ Var *digitizer_trigger_channel( Var *v )
 		default :
 			eprint( FATAL, SET, "%s: Channel %s can't be used as "
 					"trigger channel in %s().\n", DEVICE_NAME,
-					Channel_Names[ v->val.lval ], Cur_Func );
+					Channel_Names[ channel ], Cur_Func );
 			THROW( EXCEPTION )
     }
 
-	vars_pop( v );
 	return vars_push( INT_VAR, 1 );
 }
 
@@ -889,20 +874,17 @@ static Var *get_area( Var *v, bool use_cursor )
 	}
 
 	vars_check( v, INT_VAR );
-	for ( ch = 0; ch <= TDS744A_REF4; ch++ )
-		if ( ch == ( int ) v->val.lval )
-			break;
+	ch = ( int ) tds744a_translate_channel( GENERAL_TO_TDS744A, v->val.lval );
+	vars_pop( v );
 
 	if ( ch > TDS744A_REF4 )
 	{
-		eprint( FATAL, SET, "%s: Invalid channel specification in %s().\n",
-				DEVICE_NAME, Cur_Func );
+		eprint( FATAL, SET, "%s: Invalid channel %s used in %s().\n",
+				DEVICE_NAME, Channel_Names[ ch ], Cur_Func );
 		THROW( EXCEPTION )
 	}
 
 	tds744a.channels_in_use[ ch ] = SET;
-
-	v = vars_pop( v );
 
 	/* Now check if there's a variable with a window number and check it */
 
@@ -996,20 +978,17 @@ static Var *get_curve( Var *v, bool use_cursor )
 	}
 
 	vars_check( v, INT_VAR );
-	for ( ch = 0; ch <= TDS744A_REF4; ch++ )
-		if ( ch == ( int ) v->val.lval )
-			break;
+	ch = ( int ) tds744a_translate_channel( GENERAL_TO_TDS744A, v->val.lval );
+	vars_pop( v );
 
 	if ( ch > TDS744A_REF4 )
 	{
-		eprint( FATAL, SET, "%s: Invalid channel specification in %s().\n",
-				DEVICE_NAME, Cur_Func );
+		eprint( FATAL, SET, "%s: Invalid channel %s used in %s().\n",
+				DEVICE_NAME, Channel_Names[ ch ], Cur_Func );
 		THROW( EXCEPTION )
 	}
 
 	tds744a.channels_in_use[ ch ] = SET;
-
-	v = vars_pop( v );
 
 	/* Now check if there's a variable with a window number and check it */
 
@@ -1115,20 +1094,17 @@ static Var *get_amplitude( Var *v, bool use_cursor )
 	}
 
 	vars_check( v, INT_VAR );
-	for ( ch = 0; ch <= TDS744A_REF4; ch++ )
-		if ( ch == ( int ) v->val.lval )
-			break;
+	ch = ( int ) tds744a_translate_channel( GENERAL_TO_TDS744A, v->val.lval );
+	vars_pop( v );
 
 	if ( ch > TDS744A_REF4 )
 	{
-		eprint( FATAL, SET, "%s: Invalid channel specification in %s().\n",
-				DEVICE_NAME, Cur_Func );
+		eprint( FATAL, SET, "%s: Invalid channel %s used in %s().\n",
+				DEVICE_NAME, Channel_Names[ ch ], Cur_Func );
 		THROW( EXCEPTION )
 	}
 
 	tds744a.channels_in_use[ ch ] = SET;
-
-	v = vars_pop( v );
 
 	/* Now check if there's a variable with a window number and check it */
 

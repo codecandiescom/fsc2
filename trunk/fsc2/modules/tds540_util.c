@@ -428,3 +428,125 @@ void tds540_set_window( WINDOW *w )
 		tds540_set_cursor( 2, w->start + w->width );
 	}
 }
+
+
+/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*/
+
+long tds540_translate_channel( int dir, long channel )
+{
+	if ( dir == GENERAL_TO_TDS540 )
+	{
+		switch ( channel )
+		{
+			case DIGITIZER_CHANNEL_CH1 :
+				return TDS540_CH1;
+
+			case DIGITIZER_CHANNEL_CH2 :
+				return TDS540_CH2;
+
+			case DIGITIZER_CHANNEL_CH3 :
+				return TDS540_CH3;
+
+			case DIGITIZER_CHANNEL_CH4 :
+				return TDS540_CH4;
+
+			case DIGITIZER_CHANNEL_MATH1 :
+				return TDS540_MATH1;
+
+			case DIGITIZER_CHANNEL_MATH2 :
+				return TDS540_MATH2;
+
+			case DIGITIZER_CHANNEL_MATH3 :
+				return TDS540_MATH3;
+
+			case DIGITIZER_CHANNEL_REF1 :
+				return TDS540_REF1;
+
+			case DIGITIZER_CHANNEL_REF2 :
+				return TDS540_REF2;
+
+			case DIGITIZER_CHANNEL_REF3 :
+				return TDS540_REF3;
+
+			case DIGITIZER_CHANNEL_REF4 :
+				return TDS540_REF4;
+
+			case DIGITIZER_CHANNEL_AUX :
+				return TDS540_AUX;
+
+			case DIGITIZER_CHANNEL_LINE :
+				return TDS540_LIN;
+
+			case DIGITIZER_CHANNEL_AUX1   :
+			case DIGITIZER_CHANNEL_AUX2   :
+			case DIGITIZER_CHANNEL_MEM_C  :
+			case DIGITIZER_CHANNEL_MEM_D  :
+			case DIGITIZER_CHANNEL_FUNC_E :
+			case DIGITIZER_CHANNEL_FUNC_F :
+			case DIGITIZER_CHANNEL_EXT    :
+			case DIGITIZER_CHANNEL_EXT10  :
+				eprint( FATAL, SET, "%s: Digitizer has no %s channel used in "
+						"%s().\n", DEVICE_NAME,
+						Digitizer_Channel_Names[ channel ], Cur_Func );
+				THROW( EXCEPTION )
+
+			default :
+				eprint( FATAL, SET, "%s: Invalid channel number %ld used in "
+						"%s().\n", DEVICE_NAME, channel, Cur_Func );
+				THROW( EXCEPTION )
+		}
+	}
+	else
+	{
+		switch ( channel )
+		{
+			case TDS540_CH1 :
+				return DIGITIZER_CHANNEL_CH1;
+
+			case TDS540_CH2 :
+				return DIGITIZER_CHANNEL_CH2;
+
+			case TDS540_CH3 :
+				return DIGITIZER_CHANNEL_CH3;
+
+			case TDS540_CH4 :
+				return DIGITIZER_CHANNEL_CH4;
+
+			case TDS540_MATH1 :
+				return DIGITIZER_CHANNEL_MATH1;
+
+			case TDS540_MATH2 :
+				return DIGITIZER_CHANNEL_MATH2;
+
+			case TDS540_MATH3 :
+				return DIGITIZER_CHANNEL_MATH3;
+
+			case TDS540_REF1 :
+				return DIGITIZER_CHANNEL_REF1;
+
+			case TDS540_REF2 :
+				return DIGITIZER_CHANNEL_REF2;
+
+			case TDS540_REF3 :
+				return DIGITIZER_CHANNEL_REF3;
+
+			case TDS540_REF4 :
+				return DIGITIZER_CHANNEL_REF4;
+
+			case TDS540_AUX :
+				return DIGITIZER_CHANNEL_AUX;
+
+			case TDS540_LIN :
+				return DIGITIZER_CHANNEL_LINE;
+
+			default :
+				eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
+						__FILE__, __LINE__ );
+				THROW( EXCEPTION )
+		}
+	}
+
+	fsc2_assert( 1 == 0 );
+	return -1;
+}
