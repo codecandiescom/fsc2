@@ -1093,10 +1093,10 @@ callback:
 argument: 
 
 --------------------
-class: FL_CANVAS
-type: NORMAL_CANVAS
-box: 65 5 95 390
-boxtype: FL_FRAME_BOX
+class: FL_BUTTON
+type: HIDDEN_BUTTON
+box: 110 110 20 20
+boxtype: FL_UP_BOX
 colors: FL_COL1 FL_COL1
 alignment: FL_ALIGN_CENTER
 style: FL_NORMAL_STYLE
@@ -1104,18 +1104,18 @@ size: FL_DEFAULT_SIZE
 lcol: FL_BLACK
 label: 
 shortcut: 
-resize: FL_RESIZE_Y
-gravity: FL_NorthWest FL_SouthWest
-name: cut_y_axis
-callback: 
-argument: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: bottom_button
+callback: cut_next_index
+argument: 3
 
 --------------------
-class: FL_CANVAS
-type: NORMAL_CANVAS
-box: 160 5 350 390
-boxtype: FL_NO_BOX
-colors: FL_BLACK FL_BLACK
+class: FL_BUTTON
+type: HIDDEN_BUTTON
+box: 110 80 20 20
+boxtype: FL_UP_BOX
+colors: FL_COL1 FL_COL1
 alignment: FL_ALIGN_CENTER
 style: FL_NORMAL_STYLE
 size: FL_DEFAULT_SIZE
@@ -1123,10 +1123,10 @@ lcol: FL_BLACK
 label: 
 shortcut: 
 resize: FL_RESIZE_ALL
-gravity: FL_NorthWest FL_SouthEast
-name: cut_canvas
-callback: 
-argument: 
+gravity: FL_NoGravity FL_NoGravity
+name: top_button
+callback: cut_next_index
+argument: 2
 
 --------------------
 class: FL_PIXMAPBUTTON
@@ -1145,6 +1145,24 @@ gravity: FL_NorthWest FL_NorthWest
 name: cut_undo_button
 callback: cut_undo_button_callback
 argument: 0
+
+--------------------
+class: FL_CANVAS
+type: NORMAL_CANVAS
+box: 160 5 350 390
+boxtype: FL_NO_BOX
+colors: FL_BLACK FL_BLACK
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_BLACK
+label: 
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NorthWest FL_SouthEast
+name: cut_canvas
+callback: 
+argument: 
 
 --------------------
 class: FL_PIXMAPBUTTON
@@ -1183,6 +1201,24 @@ callback: cut_close_callback
 argument: 0
 
 --------------------
+class: FL_CANVAS
+type: NORMAL_CANVAS
+box: 160 395 350 50
+boxtype: FL_FRAME_BOX
+colors: FL_NoColor FL_COL1
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_BLACK
+label: 
+shortcut: 
+resize: FL_RESIZE_X
+gravity: FL_SouthWest FL_SouthEast
+name: cut_x_axis
+callback: 
+argument: 
+
+--------------------
 class: FL_BUTTON
 type: PUSH_BUTTON
 box: 115 405 35 35
@@ -1200,24 +1236,6 @@ name: cut_full_scale_button
 callback: cut_fs_button_callback
 argument: 0
 value: 1
-
---------------------
-class: FL_CANVAS
-type: NORMAL_CANVAS
-box: 160 395 350 50
-boxtype: FL_FRAME_BOX
-colors: FL_NoColor FL_COL1
-alignment: FL_ALIGN_CENTER
-style: FL_NORMAL_STYLE
-size: FL_DEFAULT_SIZE
-lcol: FL_BLACK
-label: 
-shortcut: 
-resize: FL_RESIZE_X
-gravity: FL_SouthWest FL_SouthEast
-name: cut_x_axis
-callback: 
-argument: 
 
 --------------------
 class: FL_CANVAS
@@ -1364,10 +1382,10 @@ callback: cut_change_dir
 argument: 1
 
 --------------------
-class: FL_BUTTON
-type: HIDDEN_BUTTON
-box: 110 80 20 20
-boxtype: FL_UP_BOX
+class: FL_CANVAS
+type: NORMAL_CANVAS
+box: 65 5 95 390
+boxtype: FL_FRAME_BOX
 colors: FL_COL1 FL_COL1
 alignment: FL_ALIGN_CENTER
 style: FL_NORMAL_STYLE
@@ -1375,29 +1393,11 @@ size: FL_DEFAULT_SIZE
 lcol: FL_BLACK
 label: 
 shortcut: 
-resize: FL_RESIZE_ALL
-gravity: FL_NoGravity FL_NoGravity
-name: top_button
-callback: cut_next_index
-argument: 2
-
---------------------
-class: FL_BUTTON
-type: HIDDEN_BUTTON
-box: 110 110 20 20
-boxtype: FL_UP_BOX
-colors: FL_COL1 FL_COL1
-alignment: FL_ALIGN_CENTER
-style: FL_NORMAL_STYLE
-size: FL_DEFAULT_SIZE
-lcol: FL_BLACK
-label: 
-shortcut: 
-resize: FL_RESIZE_ALL
-gravity: FL_NoGravity FL_NoGravity
-name: bottom_button
-callback: cut_next_index
-argument: 3
+resize: FL_RESIZE_Y
+gravity: FL_NorthWest FL_SouthWest
+name: cut_y_axis
+callback: 
+argument: 
 
 ==============================
 create_the_forms
