@@ -1877,7 +1877,7 @@ Var *f_time( Var *v )
 {
 	time_t tp;
 	char ts[ 100 ];
-	char sep[ 3 ] = "::";
+	char sep[ 2 ] = { ':', ':' };
 	char *sp;
 	char *str = NULL;
 	size_t i;
@@ -1887,7 +1887,7 @@ Var *f_time( Var *v )
 	{
 		if ( v->type != STR_VAR )
 		{
-			print( FATAL, "Argument must be a string of up to two separator "
+			print( FATAL, "Argument must be a string of one or two separator "
 				   "characters.\n" );
 			THROW( EXCEPTION );
 		}
@@ -1963,19 +1963,109 @@ Var *f_dtime( Var *v )
 }
 
 
-/*--------------------------------------------------------------------------*/
-/* Returns a string with the current date in a form like "Sat Jun 17, 2000" */
-/*--------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
+/* When called without an argument the function returns a string with the  */
+/* current date in a form like "Sat Jun 17, 2000". Alternatively, it may   */
+/* be called with a format string acceptable to the strftime(3) function   */
+/* as the only argument to force the function to return a string with the  */
+/* date in a user specified way (with a maximum length of 255 characters). */
+/*-------------------------------------------------------------------------*/
+
+#define DEFAULT_DATE_FORMAT          "%a %b %d, %Y"
+#define DATE_FLAGS                   "aAbBcCdDeFGghHIjklmMnPrRsStTuUVWxXyYzZ+%"
+#define DATE_FLAGS_WITH_E_MODIFIER   "cCxXyY"
+#define DATE_FLAGS_WITH_O_MODIFIER   "deHImMSuUVwWy"
 
 Var *f_date( Var *v )
 {
 	time_t tp;
-	char ts[ 100 ];
+	char ts[ 256 ];
+	char *str = ( char * ) DEFAULT_DATE_FORMAT;
+	char *sp;
 
 
-	UNUSED_ARGUMENT( v );
+	if ( v != NULL )
+	{
+		if ( v->type != STR_VAR )
+		{
+			print( FATAL, "Argument must be a format string acceptable to "
+				   "the strftime(3) function.\n" );
+			THROW( EXCEPTION );
+		}
+
+		str = handle_escape( v->val.sptr );
+
+		if ( *str == '\0' )
+		{
+			print( SEVERE, "Argument string is empty, using default date "
+				   "format (\"%s\").\n", DEFAULT_DATE_FORMAT );
+			str = ( char * ) DEFAULT_DATE_FORMAT;
+		}
+
+		for ( sp = str; *sp; sp++ )
+		{
+			if ( *sp != '%' )
+			{
+				if ( ! isprint( *sp ) )
+				{
+					print( FATAL, "Format string contains non-printable "
+						   "characters.\n" );
+					THROW( EXCEPTION );
+				}
+
+				continue;
+			}
+
+			if ( ! *++sp )
+			{
+				print( FATAL, "Missing conversion specifier after '%%'.\n" );
+				THROW( EXCEPTION );
+			}
+
+			if ( strchr( DATE_FLAGS, *sp ) != NULL )
+				continue;
+
+			if ( *sp == 'E' )
+			{
+				if ( ! *++sp )
+				{
+					print( FATAL, "Missing conversion specifier after "
+						   "\"%%E\".\n" );
+					THROW( EXCEPTION );
+				}
+
+				if ( strchr( DATE_FLAGS_WITH_E_MODIFIER, *sp ) )
+					 continue;
+
+				print( FATAL, "Invalid conversion specifier '%c' after "
+					   "\"%%E\".\n", *sp );
+				THROW( EXCEPTION );
+			}
+
+			if ( *sp == 'O' )
+			{
+				if ( ! *++sp )
+				{
+					print( FATAL, "Missing conversion specifier after "
+						   "\"%%O\".\n" );
+					THROW( EXCEPTION );
+				}
+
+				if ( strchr( DATE_FLAGS_WITH_O_MODIFIER, *sp ) )
+					 continue;
+
+				print( FATAL, "Invalid conversion specifier '%c' after "
+					   "\"%%O\".\n", *sp );
+				THROW( EXCEPTION );
+			}
+
+			print( FATAL, "Invalid conversion specifier '%c'.\n", *sp );
+			THROW( EXCEPTION );
+		}
+	}
+
 	time( &tp );
-	if ( strftime( ts, 100, "%a %b %d, %Y", localtime( &tp ) ) == 0 )
+	if ( strftime( ts, 256, str, localtime( &tp ) ) == 0 )
 	{
 		print( SEVERE, "Returning invalid date string.\n" );
 		strcat( ts, "(Unknown date)" );

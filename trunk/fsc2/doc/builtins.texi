@@ -2043,8 +2043,13 @@ can only be used in the @code{EXPERIMENT} section
 @anchor{date}
 @item date()
 @findex date()
-Returns a string with the current date in a form like @w{@code{Sun Jun
-17, 2000}}.
+When called without an argzument the function returns a string with the
+current date in a form like @w{@code{Sun Jun 17, 2000}}. Alternatively,
+it may be called with a single argument, a string representing a format
+string acceptable to the @code{strftime(3)} function, please read the
+manual page for this function (type @w{@code{man 3 strftime}} at the
+command prompt to read it) to find out how such a format string must
+look like.
 
 
 @anchor{time}
