@@ -1,0 +1,69 @@
+# Style sheet for EDL
+# Copyright (c) 2001 Jens Thome Toerring
+# $Id$
+#
+#
+# This file is not part of a2ps (yet ;-).
+# 
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+# To contact the author send email to:
+# Jens.Toerring@physik.fu-berlin.de
+#
+
+# 1.1 Jens Thoms Toerring
+# Created it, based on c.ssh by Miguel Santana and Akim Demaille
+
+style EDL is
+requires a2ps 4.10
+
+written by "Jens Thoms Toerring <Jens.Toerring@physik.fu-berlin.de>"
+version is 1.1
+documentation is
+   "a2ps style sheet for EDL files."
+   "It's jsut a quick hack and is directly derived from the C style"
+   "sheet by Miguel Santana and Akim Demaille (as distributed with a2ps)."
+end documentation
+
+alphabets are
+   "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz{}"
+case sensitive
+
+keywords in Keyword are
+   s, ns, us, ms, ks, Ms, G, nG, uG, mG, kG, MG, T, nT, uT, mT, kT, MT,
+   V, nV, uV, mV, kV, MV, A, nA, uA, mA, kA, MA, Hz, nHz, uHz, mHz, kHz, MHz,
+   dB, ndB, udB, mdB, kdB, MdB,
+end keywords
+
+keywords in Keyword_strong are
+   IF, ELSE, FOR, WHILE, UNTIL, REPEAT, FOREVER, NEXT, LAST, BREAK,
+   #exit, #quit, #include,
+   DEVICES:, DEV:, DEVS:, DEVICE:,
+   ASSIGNMENTS:, ASS:, ASSIGNMENT:,
+   VARIABLES:, VAR:, VARS:, VARIABLE:,
+   PHASES:, PHA:, PHAS:, PHASE:,
+   PREPARATIONS:, PREP:, PREPS:, PREPARATION:,
+   EXPERIMENT:, EXP:, ON_STOP:,
+   {, }
+end keywords
+
+
+sequences are
+    "/*" Comment "*/",
+    "//" Comment,
+    "\"" Comment "\""
+end sequences
+
+end style
