@@ -2438,4 +2438,58 @@ argument and ending with the value of the second and with the difference
 between adjacent points being identical.
 
 
+@anchor{spike_remove}
+@item spike_remove()
+@findex spike_remove()
+The function tries to remove spikes from 1-dimensional arrays. Before going
+on to describing the arguments an explanation how it works. That's required
+because a fit-it-all function for detecting and removing spikes is impossible
+and when this function is used it must be done with all the restrictions in
+mind.
+
+The function calculates numerically the first derivative of the 1-dimensional
+arrays by computing the differences between neighbouring points of the array.
+It then goes on the calculate the mean and the standard deviation of the
+derivatives and picks the points where the derivative deviates by more than
+a certain factor (to be specified as one of the arguments to the function)
+of the standard deviation from the mean value. These "outliers" are further
+investigated.
+
+In the next step all points are discarded where no other "outlier" with the
+opposite derivative is within its vincinity (another argument to be passed
+to the function). Only the remaining points are taken to be spikes.
+
+To summarize: a structure in the spectrum to be recognized as a spike must
+satisfy two conditions. First, there must be an usually large derivative and,
+at the same time, another unusually large derivative, but with opposite sign,
+must exist in the near vincinity (and there's some special treatment for
+spikes at the very fringes of the spectrum). The algorithm fails rather
+miserably when e.g. a "positive" spike is directly followed by a "negative"
+spike.
+
+When a spike has been identified the points of the spike are replaced by the
+a straight line starting from the point on the left to the point to the right
+of the spike.
+
+The arguments the function takes are the 1-dimensional-array and,
+optionally, the factor by which the standard deviation is multiplied to
+determine what should be taken to be "outliers" (which defaults to code{5})
+and the maximum width a spike can have (in number of points, defaulting to
+@code{3}). What to pick as the second and third argument depends a lot on
+the circumstances. When the spikes don't have a large amplitude (compared
+to the signal) or there are lots of spikes a factor lower than the default
+value must be taken, otherwise most of the spikes will make it through the
+filter. The maximum spike width can only be determined from experience and
+must always be lower than the width of any significant feature of the
+spectrum.
+
+@strong{Please note}: Never, ever use this function on data you intend to
+store as results of an experiment. It is only meant for situations where
+one wants to display data during the experiment to get a first impression
+of what's happening (e.g. to get rid of the nasty spikes one sometimes
+gets in spectra from a CCD camera when cosmic radiation hits the detector).
+It is no replacement at all for a careful analysis of a spectrum where
+one uses lots of prior knowledge to determine what are spikes and what
+not!
+
 @end table
