@@ -143,13 +143,15 @@ FOR J = 1 : N_runs
 		   and already start the next masurement, so we're not loosing time 
 		   doing all the graphics */
 
-		IF I != N_steps {
+		IF I != N_steps
+		{
 	        freq += step_freq;
 		}
 
 		/* Save the new date to file */
 
-		IF is_file( F1 ) {
+		IF is_file( F1 )
+		{
 			fsave( F1, "% #.run, frequency = # MHz\n\n", J, freq * 1.0e-6 );
 			save( F1, curve );
 		}
@@ -162,14 +164,16 @@ FOR J = 1 : N_runs
 		/* Calculate the mean of the data before the trigger used to get rid
 		   of changes of the 'zero level' */
 
-		IF Pretrigger != 0 {
+		IF Pretrigger != 0
+		{
 	    	ground = mean( curve, 1, Pretrigger );
 			mean_ground[ I ] = ( ( J - 1 ) * mean_ground[ I ] + ground ) / J;
 		}
 
 		/* At the start of a run add up curves to be used as baseline */
 
-		IF I <= N_max_base_curves {
+		IF I <= N_max_base_curves
+		{
 			N_base_curves = ( J - 1 ) * N_max_base_curves + I;
 	    	base_curve = ( 1.0 - 1.0 / N_base_curves ) * base_curve
 	    	             + ( curve - ground ) / N_base_curves;
@@ -201,16 +205,23 @@ FOR J = 1 : N_runs
 			Start_pos = round( ( start_time - min_time ) / time_res ) + 1;
 			End_pos   = round( ( end_time - min_time ) / time_res ) + 1;
 			Width = abs( End_pos - Start_pos ) + 1;
-			IF Width > Rec_len - Start_pos + 1 {
+
+			IF Width > Rec_len - Start_pos + 1
+			{
 				Width = Rec_len - Start_pos + 1 ;
 			}
-			IF Start_pos > End_pos {
+
+			IF Start_pos > End_pos
+			{
 				Start_pos = End_pos;
 			}
 
-			IF ( J == 1 ) {
+			IF J == 1
+			{
 				End_index = I;
-			} ELSE {
+			}
+			ELSE
+			{
 				End_index = N_steps;
 			}
 
@@ -232,32 +243,42 @@ ON_STOP:
 
 /* Save the averaged data if a file has been selected */
 
-IF ! Is_stored {           // Check if data of last trace were stored
+IF ! Is_stored            // Check if data of last trace were stored
+{
 	I -= 1;
 	freq = start_freq + I * step_freq;
 }
 
-IF is_file( F2 ) {
-	IF J < N_runs {
+IF is_file( F2 )
+{
+	IF J < N_runs
+	{
 		fsave( F2, "% Number of runs: #\n", J );
-	} ELSE {
+	}
+	ELSE
+	{
 		fsave( F2, "% Number of runs: #\n", N_runs );
 	}
 
-	IF I < N_steps {
+	IF I < N_steps
+	{
 		fsave( F2, "% Last run not finished, end frequency was # MHz\n",
  			   freq * 1.0e-6 );
 	}
 	save_program( F2, "% " );
 
-	IF J == 1 & I < N_steps {
+	IF J == 1 & I < N_steps
+	{
 		End_index = I;
-	} ELSE {
+	}
+	ELSE
+	{
 		End_index = N_steps;
 	}
 
 	freq = start_freq;
-	FOR I = 1 : End_index {
+	FOR I = 1 : End_index
+	{
 		fsave( F2, "\n% Frequency: # MHz\n\n", freq * 1.0e-6 );
 		freq += step_freq;
 		save( F2, mean_curve[ I ] );
@@ -280,30 +301,38 @@ FOREVER
 	{
 		F3 = get_file( "File for storing integrated region:" );		
 		IF is_file( F3 ) {
-			IF start_time < end_time {
+			IF start_time < end_time
+			{
 				fsave( F3, "% Integration window from # ns to # ns\n"
 						   "% (times relative to trigger)\n\n"
 						   "% Integral over raw data\n\n",
 					   start_time, end_time );
-			} ELSE {
+			}
+			ELSE
+			{
 				fsave( F3, "% Integration window from # ns to # ns\n"
 						   "% (times relative to trigger)\n"
 						   "% Integrals over raw data:\n\n",
 					   end_time, start_time );
 			}
 
-			IF J == 1 & I < N_steps {
+			IF J == 1 & I < N_steps
+			{
 				End_index = I;
-			} ELSE {
+			}
+			ELSE
+			{
 				End_index = N_steps;
 			}
 
 			base_int = mean( base_curve, Start_pos, Width );
-			FOR K = 1 : End_index {
+			FOR K = 1 : End_index
+			{
 				fsave( F3, "#\n", mean( mean_curve[ K ], Start_pos, Width ) );
 			}
 			fsave( F3, "\n% Integrals over preprocessed data:\n\n" );
-			FOR K = 1 : End_index {
+			FOR K = 1 : End_index
+			{
 				fsave( F3, "#\n", mean( mean_curve[ K ], Start_pos, Width )
 								  - base_int - mean_ground[ K ] );
 			}
@@ -333,16 +362,22 @@ FOREVER
 	End_pos   = round( ( end_time - min_time ) / time_res ) + 1;
 	Width = abs( End_pos - Start_pos ) + 1;
 
-	IF Width > Rec_len - Start_pos + 1 {
+	IF Width > Rec_len - Start_pos + 1
+	{
 		Width = Rec_len - Start_pos + 1;
 	}
-	IF Start_pos > End_pos {
+
+	IF Start_pos > End_pos
+	{
 		Start_pos = End_pos;
 	}
 
-	IF ( J == 1 ) {
+	IF ( J == 1 )
+	{
 		End_index = I;
-	} ELSE {
+	}
+	ELSE
+	{
 		End_index = N_steps;
 	}
 
