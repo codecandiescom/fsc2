@@ -37,9 +37,9 @@ static Var *f_bstate_child( Var *v );
 static Var *f_bchanged_child( Var *v );
 
 
-/*----------------------*/
-/* Creates a new button */
-/*----------------------*/
+/*----------------------------------------------------*/
+/* Function for appending a new button to the toolbox */
+/*----------------------------------------------------*/
 
 Var *f_bcreate( Var *var )
 {
@@ -247,8 +247,11 @@ Var *f_bcreate( Var *var )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*-----------------------------------------------------------------*/
+/* Part of the f_bcreate() function run by the child process only, */
+/* indirectly invoking the f_bcreate() function in the parent via  */
+/* the message passing mechanism.                                  */
+/*-----------------------------------------------------------------*/
 
 static Var *f_bcreate_child( Var *v, long type, long coll )
 {
@@ -395,8 +398,11 @@ Var *f_bdelete( Var *v )
 }
 
 
-/*------------------------------------------------------------*/
-/*------------------------------------------------------------*/
+/*-----------------------------------------------------------------*/
+/* Part of the f_bdelete() function run by the child process only, */
+/* indirectly invoking the f_bdelete() function in the parent via  */
+/* the message passing mechanism.                                  */
+/*-----------------------------------------------------------------*/
 
 static void f_bdelete_child( Var *v )
 {
@@ -447,8 +453,10 @@ static void f_bdelete_child( Var *v )
 }
 
 
-/*------------------------------------------------------------*/
-/*------------------------------------------------------------*/
+/*----------------------------------------------------------*/
+/* Part of the f_bedelete() function only run by the parent */
+/* process, which actually removes the button.              */
+/*----------------------------------------------------------*/
 
 static void f_bdelete_parent( Var *v )
 {
@@ -640,8 +648,11 @@ Var *f_bstate( Var *v )
 }
 
 
-/*------------------------------------------------------------*/
-/*------------------------------------------------------------*/
+/*----------------------------------------------------------------*/
+/* Part of the f_bstate() function run by the child process only, */
+/* indirectly invoking the f_bstate() function in the parent via  */
+/* the message passing mechanism.                                 */
+/*----------------------------------------------------------------*/
 
 static Var *f_bstate_child( Var *v )
 {
@@ -719,9 +730,9 @@ static Var *f_bstate_child( Var *v )
 }
 
 
-/*---------------------------------------*/
-/* Sets or returns the state of a button */
-/*---------------------------------------*/
+/*-------------------------------------------------------*/
+/* Function for testing if the state of a button changed */
+/*-------------------------------------------------------*/
 
 Var *f_bchanged( Var *v )
 {
@@ -764,8 +775,11 @@ Var *f_bchanged( Var *v )
 }
 
 
-/*------------------------------------------------------------*/
-/*------------------------------------------------------------*/
+/*------------------------------------------------------------------*/
+/* Part of the f_bchanged() function run by the child process only, */
+/* indirectly invoking the f_bchanged() function in the parent via  */
+/* the message passing mechanism.                                   */
+/*------------------------------------------------------------------*/
 
 static Var *f_bchanged_child( Var *v )
 {

@@ -317,8 +317,8 @@ Var *f_layout( Var *v )
 
 /*----------------------------------------------------------------*/
 /* Part of the f_layout() function run by the child process only, */
-/* indirectly invoking f_layout() function in the parent via the  */
-/* message passing mechanism.                                     */
+/* indirectly invoking the f_layout() function in the parent via  */
+/* the message passing mechanism.                                 */
 /*----------------------------------------------------------------*/
 
 static Var *f_layout_child( long layout )
@@ -391,8 +391,8 @@ Var *f_objdel( Var *v )
 
 /*--------------------------------------------------------*/
 /* Part of the f_objdel() function run by the child only, */
-/* indirectly invoking f_objdel() function in the parent  */
-/* via the message passing mechanism.                     */
+/* indirectly invoking the f_objdel() function in the     */
+/* parent via the message passing mechanism.              */
 /*--------------------------------------------------------*/
 
 static void f_objdel_child( Var *v )
@@ -586,8 +586,8 @@ Var *f_obj_clabel( Var *v )
 
 /*-----------------------------------------------------------*/
 /* Part of the f_ob_clabel() function run by the child only, */
-/* indirectly invoking f_obj_clabel() function in the parent */
-/* via the message passing mechanism.                        */
+/* indirectly invoking the f_obj_clabel() function in the    */
+/* parent via the message passing mechanism.                 */
 /*-----------------------------------------------------------*/
 
 static Var *f_obj_clabel_child( long ID, char *label )
@@ -704,8 +704,8 @@ Var *f_obj_xable( Var *v )
 
 /*----------------------------------------------------------*/
 /* Part of the f_ob_xable() function run by the child only, */
-/* indirectly invoking f_obj_xable() function in the parent */
-/* via the message passing mechanism.                       */
+/* indirectly invoking the f_obj_xable() function in the    */
+/* parent via the message passing mechanism.                */
 /*----------------------------------------------------------*/
 
 static Var *f_obj_xable_child( long ID, long state )
