@@ -8,7 +8,7 @@
 
 /* Number of program token structures to be allocated as a chunk */
 
-#define PRG_CHUNK_SIZE 128
+#define PRG_CHUNK_SIZE 16384
 
 /* Number of tokens to be parsed before forms are rechecked for user input -
    too low a number slows down the program quite a lot and even relatively
