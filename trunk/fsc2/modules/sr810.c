@@ -295,7 +295,7 @@ Var *lockin_dac_voltage( Var *v )
 	if ( port < 1 || port > NUM_DAC_PORTS )
 	{
 		eprint( FATAL, "%s:%ld: %s: Invalid DAC channel number (%ld) in "
-				"call of 'lockin_set_dac_data', valid channel are in the "
+				"call of 'lockin_dac_voltage', valid channel are in the "
 				"range 1-%d.", Fname, Lc, DEVICE_NAME, port, NUM_DAC_PORTS );
 		THROW( EXCEPTION );
 	}
@@ -310,7 +310,7 @@ Var *lockin_dac_voltage( Var *v )
 	if ( voltage < DAC_MIN_VOLTAGE || voltage > DAC_MIN_VOLTAGE )
 	{
 		eprint( FATAL, "%s:%ld: %s: Invalid DAC voltage (%f V) in call of "
-				"'lockin_set_dac_data', valid range is between %f V and %f V.",
+				"'lockin_dac_voltage', valid range is between %f V and %f V.",
 				Fname, Lc, DEVICE_NAME, DAC_MIN_VOLTAGE, DAC_MAX_VOLTAGE );
 		THROW( EXCEPTION );
 	}
@@ -318,7 +318,7 @@ Var *lockin_dac_voltage( Var *v )
 	if ( ( v = vars_pop( v ) ) != NULL )
 	{
 		eprint( WARN, "%s:%ld: %s: Superfluous arguments in call of function "
-				"`lockin_set_dac`.", Fname, Lc, DEVICE_NAME );
+				"`lockin_dac_voltage'.", Fname, Lc, DEVICE_NAME );
 
 		while ( ( v = vars_pop( v ) ) != NULL )
 			;

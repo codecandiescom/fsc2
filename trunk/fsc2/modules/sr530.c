@@ -29,7 +29,7 @@ Var *lockin_get_adc_data( Var *v );
 Var *lockin_sensitivity( Var *v );
 Var *lockin_time_constant( Var *v );
 Var *lockin_phase( Var *v );
-Var *lockin_set_dac( Var *v );
+Var *lockin_dac_voltage( Var *v );
 
 
 /* typedefs and global variables used only in this file */
@@ -507,7 +507,7 @@ Var *lockin_phase( Var *v )
 /* voltage is returned (which is initially set to 0 V).      */
 /*-----------------------------------------------------------*/
 
-Var *lockin_set_dac( Var *v )
+Var *lockin_dac_voltage( Var *v )
 {
 	long channel;
 	double voltage;
@@ -516,7 +516,7 @@ Var *lockin_set_dac( Var *v )
 	if ( v == NULL )
 	{
 		eprint( FATAL, "%s:%ld: %s: Missing arguments in call of function "
-				"`lockin_set_dac'.", Fname, Lc, DEVICE_NAME );
+				"`lockin_dac_voltage'.", Fname, Lc, DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
 
@@ -554,7 +554,7 @@ Var *lockin_set_dac( Var *v )
 	if ( ( v = vars_pop( v ) ) != NULL )
 	{
 		eprint( WARN, "%s:%ld: %s: Superfluous arguments in call of function "
-				"`lockin_set_dac'.", Fname, Lc, DEVICE_NAME );
+				"`lockin_dac_voltage'.", Fname, Lc, DEVICE_NAME );
 		while ( ( v = vars_pop( v ) ) != NULL ) 
 				;
 	}
