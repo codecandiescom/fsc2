@@ -24,7 +24,7 @@
 
 #include "fsc2.h"
 
-/* This file only exists to hold the definitions of all global variables
+/* This file only exists to hold the definitions of several global variables
    in a single, easy to find place */
 
 
@@ -39,6 +39,10 @@ bool Need_GPIB = UNSET;          /* Flag, set if GPIB bus is needed */
 #if defined WITH_RULBUS
 bool Need_RULBUS = UNSET;        /* Flag, set if RULBUS is needed */
 #endif
+
+
+/* If you change the following always remember to also adjust the
+   enum for channel numbers in global.h accordingly! */
 
 const char *Channel_Names[ NUM_CHANNEL_NAMES ] =
 {
@@ -242,6 +246,9 @@ const char *Channel_Names[ NUM_CHANNEL_NAMES ] =
 Pulser_Struct_T *Pulser_Struct = NULL;
 long Cur_Pulser = -1;
 
+/* If you change the following always remember to also adjust the
+   enum for pulser function  numbers in global.h accordingly! */
+
 const char *Function_Names[ PULSER_CHANNEL_NUM_FUNC ] =
 {
 	"MW",
@@ -260,6 +267,10 @@ const char *Function_Names[ PULSER_CHANNEL_NUM_FUNC ] =
 	"OTHER_3",
 	"OTHER_4",
 };
+
+
+/* If you change the following always remember to also adjust the
+   enum for phase type numbers in global.h accordingly! */
 
 const char *Phase_Types[ NUM_PHASE_TYPES ] =
 {

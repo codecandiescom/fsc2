@@ -47,7 +47,7 @@ static volatile sig_atomic_t fsc2_death = 0;
 
 /* Imported global variables */
 
-extern FL_resource xresources[ ];    /* from xinit.c */
+extern FL_resource Xresources[ ];    /* from xinit.c */
 extern const char *prog_name;
 extern FILE *fsc2_confin;            /* from fsc2_conf_lexer.l */
 extern int fsc2_confparse( void );   /* from fsc2_conf_parser.y */
@@ -1191,7 +1191,7 @@ static void final_exit_handler( void )
 
 	if ( fsc2_death != 0 && fsc2_death != SIGTERM )
 	{
-		if ( * ( ( int * ) xresources[ NOCRASHMAIL ].var ) == 0 &&
+		if ( * ( ( int * ) Xresources[ NOCRASHMAIL ].var ) == 0 &&
 			  ! ( Fsc2_Internals.cmdline_flags & NO_MAIL ) )
 		{
 			death_mail( fsc2_death );

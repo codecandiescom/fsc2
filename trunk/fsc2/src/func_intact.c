@@ -54,7 +54,7 @@ struct {
 } FI_sizes;
 
 
-extern FL_resource xresources[ ];
+extern FL_resource Xresources[ ];
 extern FL_IOPT xcntl;
 static bool is_frozen = UNSET;
 static bool has_been_shown = UNSET;
@@ -946,9 +946,9 @@ void recreate_Toolbox( void )
 		Toolbox->Tools = fl_bgn_form( FL_UP_BOX, 1, 1 );
 
 		if ( ! has_been_shown &&
-			 * ( char * ) xresources[ TOOLGEOMETRY ].var != '\0' )
+			 * ( char * ) Xresources[ TOOLGEOMETRY ].var != '\0' )
 		{
-			flags = XParseGeometry( ( char * ) xresources[ TOOLGEOMETRY ].var,
+			flags = XParseGeometry( ( char * ) Xresources[ TOOLGEOMETRY ].var,
 									&tool_x, &tool_y, &dummy, &dummy );
 
 			if ( XValue & flags && YValue & flags )

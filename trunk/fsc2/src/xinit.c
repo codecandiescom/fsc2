@@ -67,7 +67,7 @@ static int xbrowserfs,
 		   xnocm,
 		   xport;
 
-FL_resource xresources[ ] = {
+FL_resource Xresources[ ] = {
 	{                         /* geometry of main window */
 		"geometry",
 		"*.geometry",
@@ -192,8 +192,6 @@ FL_resource xresources[ ] = {
 #endif
 };
 
-#define N_APP_OPT  ( sizeof xresources / sizeof xresources[ 0 ] )
-
 
 /*-------------------------------------------------*/
 /* xforms_init() registers the program with XFORMS */
@@ -209,7 +207,7 @@ bool xforms_init( int *argc, char *argv[ ] )
 	int flags, wx, wy;
 	unsigned int ww, wh;
 	XFontStruct *font;
-	FL_CMD_OPT app_opt[ NUM_ELEMS( xresources ) ];
+	FL_CMD_OPT app_opt[ NUM_ELEMS( Xresources ) ];
 	int x, y;
 #if defined WITH_HTTP_SERVER
 	char *www_help;
@@ -218,13 +216,13 @@ bool xforms_init( int *argc, char *argv[ ] )
 	setup_app_options( app_opt );
 
 	/* Overwrite the shells LANG environment variable - some versions of
-	   XForms use that and then mess around with the locale settings in
-	   unpleasant ways... */
+	   XForms use that variable and then mess around with the locale
+	   settings in unpleasant ways... */
 
 	setenv( "LANG", "C", 1 );
 
 	if ( ( display = fl_initialize( argc, argv, "Fsc2", app_opt,
-									NUM_ELEMS( xresources ) ) ) == NULL )
+									NUM_ELEMS( Xresources ) ) ) == NULL )
 		return FAIL;
 
 	GUI.is_init = SET;
@@ -248,9 +246,9 @@ bool xforms_init( int *argc, char *argv[ ] )
 		usage( EXIT_FAILURE );
 	}
 
-	fl_get_app_resources( xresources, NUM_ELEMS( xresources ) );
+	fl_get_app_resources( Xresources, NUM_ELEMS( Xresources ) );
 
-	for ( i = 0; i < NUM_ELEMS( xresources ); i++ )
+	for ( i = 0; i < NUM_ELEMS( Xresources ); i++ )
 	{
 		T_free( app_opt[ i ].option );
 		T_free( app_opt[ i ].specifier );
@@ -271,13 +269,13 @@ bool xforms_init( int *argc, char *argv[ ] )
 	else
 		GUI.G_Funcs.size = ( bool ) LOW;
 
-	if ( * ( ( char * ) xresources[ RESOLUTION ].var ) != '\0' )
+	if ( * ( ( char * ) Xresources[ RESOLUTION ].var ) != '\0' )
 	{
-		if ( ! strcasecmp( ( char * ) xresources[ RESOLUTION ].var, "s" ) ||
-			 ! strcasecmp( ( char * ) xresources[ RESOLUTION ].var, "small" ) )
+		if ( ! strcasecmp( ( char * ) Xresources[ RESOLUTION ].var, "s" ) ||
+			 ! strcasecmp( ( char * ) Xresources[ RESOLUTION ].var, "small" ) )
 			GUI.G_Funcs.size = ( bool ) LOW;
-		if ( ! strcasecmp( ( char * ) xresources[ RESOLUTION ].var, "l" ) ||
-			 ! strcasecmp( ( char * ) xresources[ RESOLUTION ].var, "large" ) )
+		if ( ! strcasecmp( ( char * ) Xresources[ RESOLUTION ].var, "l" ) ||
+			 ! strcasecmp( ( char * ) Xresources[ RESOLUTION ].var, "large" ) )
 			GUI.G_Funcs.size = ( bool ) HIGH;
 	}
 
@@ -305,15 +303,15 @@ bool xforms_init( int *argc, char *argv[ ] )
 	fl_set_goodies_font( FL_NORMAL_STYLE, XI_Sizes.NORMAL_FONT_SIZE );
 	fl_set_oneliner_font( FL_NORMAL_STYLE, XI_Sizes.NORMAL_FONT_SIZE );
 
-	if ( * ( ( int * ) xresources[ HELPFONTSIZE ].var ) != 0 )
+	if ( * ( ( int * ) Xresources[ HELPFONTSIZE ].var ) != 0 )
 		fl_set_tooltip_font( FL_NORMAL_STYLE,
-							 * ( ( int * ) xresources[ HELPFONTSIZE ].var ) );
+							 * ( ( int * ) Xresources[ HELPFONTSIZE ].var ) );
 	else
 		fl_set_tooltip_font( FL_NORMAL_STYLE, XI_Sizes.SMALL_FONT_SIZE );
 
-	if ( * ( ( int * ) xresources[ FILESELFONTSIZE ].var ) != 0 )
+	if ( * ( ( int * ) Xresources[ FILESELFONTSIZE ].var ) != 0 )
 		fl_set_fselector_fontsize( * ( ( int * )
-									   xresources[ FILESELFONTSIZE ].var )  );
+									   Xresources[ FILESELFONTSIZE ].var )  );
 	else
 		fl_set_fselector_fontsize( XI_Sizes.NORMAL_FONT_SIZE );
 	fl_set_tooltip_color( FL_BLACK, FL_YELLOW );
@@ -329,35 +327,35 @@ bool xforms_init( int *argc, char *argv[ ] )
 	/* Set the stop mouse button (only used in the 'Display' window) */
 
 	GUI.stop_button_mask = 0;
-	if ( * ( char * ) xresources[ STOPMOUSEBUTTON ].var != '\0' )
+	if ( * ( char * ) Xresources[ STOPMOUSEBUTTON ].var != '\0' )
 	{
-		if ( ! strcmp( ( char * ) xresources[ STOPMOUSEBUTTON ].var, "1" )
-			 || ! strcasecmp( ( char * ) xresources[ STOPMOUSEBUTTON ].var,
+		if ( ! strcmp( ( char * ) Xresources[ STOPMOUSEBUTTON ].var, "1" )
+			 || ! strcasecmp( ( char * ) Xresources[ STOPMOUSEBUTTON ].var,
 							  "left" ) )
 			GUI.stop_button_mask = FL_LEFT_MOUSE;
-		else if ( ! strcmp( ( char * ) xresources[ STOPMOUSEBUTTON ].var,
+		else if ( ! strcmp( ( char * ) Xresources[ STOPMOUSEBUTTON ].var,
 							"2" ) ||
-				  ! strcasecmp( ( char * ) xresources[ STOPMOUSEBUTTON ].var,
+				  ! strcasecmp( ( char * ) Xresources[ STOPMOUSEBUTTON ].var,
 								"middle" ) )
 			GUI.stop_button_mask = FL_MIDDLE_MOUSE;
-		else if ( ! strcmp( ( char * ) xresources[ STOPMOUSEBUTTON ].var,
+		else if ( ! strcmp( ( char * ) Xresources[ STOPMOUSEBUTTON ].var,
 							"3" ) ||
-				  ! strcasecmp( ( char * ) xresources[ STOPMOUSEBUTTON ].var,
+				  ! strcasecmp( ( char * ) Xresources[ STOPMOUSEBUTTON ].var,
 								"right" ) )
 			GUI.stop_button_mask = FL_RIGHT_MOUSE;
 	}
 
 	/* Set the default font size for browsers */
 
-	if ( * ( ( int * ) xresources[ BROWSERFONTSIZE ].var ) != 0 )
+	if ( * ( ( int * ) Xresources[ BROWSERFONTSIZE ].var ) != 0 )
 		xcntl.browserFontSize =
-			* ( ( int * ) xresources[ BROWSERFONTSIZE ].var );
+			* ( ( int * ) Xresources[ BROWSERFONTSIZE ].var );
 
 	/* Set the default font size for the toolbox */
 
-	if ( * ( ( int * ) xresources[ TOOLBOXFONTSIZE ].var ) != 0 )
+	if ( * ( ( int * ) Xresources[ TOOLBOXFONTSIZE ].var ) != 0 )
 		GUI.toolboxFontSize =
-			* ( ( int * ) xresources[ TOOLBOXFONTSIZE ].var );
+			* ( ( int * ) Xresources[ TOOLBOXFONTSIZE ].var );
 
 	/* Set the HTTP port the server is going to run on - if it has been given
 	   on the command line (or in .XDefaults etc.) we take this value,
@@ -368,9 +366,9 @@ bool xforms_init( int *argc, char *argv[ ] )
 	Fsc2_Internals.http_port = 8080;
 
 #if defined DEFAULT_HTTP_PORT
-	if ( * ( ( int * ) xresources[ HTTPPORT ].var ) >= 1024 &&
-		 * ( ( int * ) xresources[ HTTPPORT ].var ) <= 65535 )
-		Fsc2_Internals.http_port = * ( ( int * ) xresources[ HTTPPORT ].var );
+	if ( * ( ( int * ) Xresources[ HTTPPORT ].var ) >= 1024 &&
+		 * ( ( int * ) Xresources[ HTTPPORT ].var ) <= 65535 )
+		Fsc2_Internals.http_port = * ( ( int * ) Xresources[ HTTPPORT ].var );
 	else if ( DEFAULT_HTTP_PORT >= 1024 && DEFAULT_HTTP_PORT <= 65535 )
 		Fsc2_Internals.http_port = DEFAULT_HTTP_PORT;
 #endif
@@ -446,9 +444,9 @@ bool xforms_init( int *argc, char *argv[ ] )
 
 	/* Now show the form, taking user wishes about the geometry into account */
 
-	if ( * ( ( char * ) xresources[ GEOMETRY ].var ) != '\0' )
+	if ( * ( ( char * ) Xresources[ GEOMETRY ].var ) != '\0' )
 	{
-		flags = XParseGeometry( ( char * ) xresources[ GEOMETRY ].var,
+		flags = XParseGeometry( ( char * ) Xresources[ GEOMETRY ].var,
 								&wx, &wy, &ww, &wh );
 		if ( WidthValue & flags && HeightValue & flags )
 		{
@@ -509,13 +507,13 @@ bool xforms_init( int *argc, char *argv[ ] )
 
 	/* Check if axis font exists (if the user set a font) */
 
-	if ( * ( ( char * ) xresources[ AXISFONT ].var ) != '\0' )
+	if ( * ( ( char * ) Xresources[ AXISFONT ].var ) != '\0' )
 	{
 		if ( ( font = XLoadQueryFont( display,
-									  ( char * ) xresources[ AXISFONT ].var ) )
+									  ( char * ) Xresources[ AXISFONT ].var ) )
 			 == NULL )
 			fprintf( stderr, "Error: Font '%s' not found.\n",
-					 ( char * ) xresources[ AXISFONT ].var );
+					 ( char * ) Xresources[ AXISFONT ].var );
 		else
 			XFreeFont( display, font );
 	}
