@@ -30,8 +30,8 @@ long Phase_Seq;
 
 
 %token SECTION_LABEL        /* new section label */
-%token AS_TOKEN             /* AQUISITION_SEQENCE */
-%token <lval> PS_TOKEN      /* PHASE_SEQUENCE with value 0 or 1 */
+%token <lval> AS_TOKEN      /* AQUISITION_SEQUENCE with value 0 or 1 */
+%token <lval> PS_TOKEN      /* PHASE_SEQUENCE with value 0 to ... */
 %token <lval> P_TOKEN       /* phase types */
 %token <lval> A_TOKEN       /* acquisition signs */
 
@@ -54,7 +54,7 @@ line:    acq ';'
        | phase SECTION_LABEL          { THROW( MISSING_SEMICOLON_EXCEPTION ); }
 ;
 
-acq:     AS_TOKEN A_TOKEN             { acq_seq_start( $2 ); }
+acq:     AS_TOKEN A_TOKEN             { acq_seq_start( $1, $2 ); }
          a_list
        | AS_TOKEN ';'                 { acq_miss_list( ); }
 ;

@@ -49,7 +49,7 @@ PREP        ^[ \t]*PREP(ARATION)?S?:
 EXP         ^[ \t]*EXP(ERIMENT)?:
 
 PS          ^[ \t]*P(HASE)?_?S(EQ(UENCE)?)?_?[0-9]{0,2}
-AS          ^[ \t]*A(CQ(UISITION)?)?_?S(EQ(UENCE)?)?
+AS          ^[ \t]*A(CQ(UISITION)?)?_?S(EQ(UENCE)?)?_?[XY]?
 
 WS          [\n=,:. ]+
 UNREC       [^\n=,;:. ]+
@@ -124,9 +124,9 @@ UNREC       [^\n=,;:. ]+
 				if ( *cp == '_' )
 				    THROW( INVALID_INPUT_EXCEPTION );
 
-				/* determine number of phase sequence */
+				/* determine number of phase sequence (0 to ...)*/
 
-				phaseslval.lval = 1;
+				phaseslval.lval = 0;
 				if ( isdigit( *cp ) )
 				{
 					while ( isdigit( *cp ) )
@@ -137,7 +137,20 @@ UNREC       [^\n=,;:. ]+
 			}
 
 			/* handling of ACQUISITION_SEQUENCE */
-{AS}        return( AS_TOKEN );
+{AS}        {
+				char *cp = phasestext + phasesleng - 1;
+
+				if ( *cp == '_' )
+				    THROW( INVALID_INPUT_EXCEPTION );
+
+				/* determine type of acquisition sequence (X or Y) */
+
+				phaseslval.lval = 0;
+				if ( tolower( *cp ) == 'Y')
+					phaseslval.lval = 1;
+
+				return( AS_TOKEN );
+			}
 
 			/* handling of phase cycle identifiers */
 "x"         {
