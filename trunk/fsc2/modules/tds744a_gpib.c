@@ -724,21 +724,20 @@ bool tds744a_get_curve( int channel, WINDOW *w, double **data, long *length,
 	/* Calculate how long the curve (with header) is going to be and allocate
        enough memory (data are 2-byte integers) */
 
-	num_points =   ( w != NULL ? w->end_num : tds744a.rec_len )
-		         - ( w != NULL ? w->start_num : 1 );
-	*length = 2 * num_points;
-	len2 = 1 + ( long ) floor( log10( *length ) );
+	*length =   ( w != NULL ? w->end_num : tds744a.rec_len )
+		      - ( w != NULL ? w->start_num : 1 ) + 1;
+	len = 2 * *length;
+	len2 = 1 + ( long ) floor( log10( len ) );
 	len1 = 1 + ( long ) floor( log10( len2 ) );
-	*length += len1 + len2 + 2;
+	len += len1 + len2 + 2;
 
-	*data = T_malloc( num_points * sizeof( double ) );
-	buffer = T_malloc( *length );
-	b = buffer + len1 + len2;
+	*data = T_malloc( *length * sizeof( double ) );
+	buffer = T_malloc( len );
 
 	/* Now get all the data bytes... */
 
 	if ( gpib_write( tds744a.device, "CURV?\n" ) == FAILURE ||
-		 gpib_read( tds744a.device, buffer, length ) == FAILURE )
+		 gpib_read( tds744a.device, buffer, &len ) == FAILURE )
 	{
 		T_free( buffer );
 		T_free( *data );
@@ -753,11 +752,12 @@ bool tds744a_get_curve( int channel, WINDOW *w, double **data, long *length,
 
 	assert( sizeof( short ) == 2 );
 
-	for ( i = 0; i < num_points; i++ )
+	b = buffer + len1 + len2 + 1;
+
+	for ( i = 0; i < *length; i++ )
 		*( *data + i ) = scale * ( double ) *( ( short * ) b + i );
 
 	T_free( buffer );
-
 	return OK;
 }
 
