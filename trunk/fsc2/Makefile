@@ -420,6 +420,15 @@ endif
 
 # Finally take care the variables for GPIB support are set correctly
 
+ifneq ($(GPIB_LIBRARY),NONE)
+	ifdef GPIB_CONF_FILE
+		CFLAGS           += -DGPIB_CONF_FILE=\"$(GPIB_CONF_FILE)\"
+	else
+		CFLAGS           += -I/usr/local/include/gpib
+	endif
+	LIBS                 += -lgpib
+endif
+
 ifeq ($(GPIB_LIBRARY),LLP)
 	GPIB_LIBRARY         := llp
 	CFLAGS               += -I/usr/local/include/gpib
@@ -434,15 +443,6 @@ else
 			GPIB_LIBRARY := none
 		endif
 	endif
-endif
-
-ifneq ($(GPIB_LIBRARY),none)
-	ifdef GPIB_CONF_FILE
-		CFLAGS           += -DGPIB_CONF_FILE=\"$(GPIB_CONF_FILE)\"
-	else
-		CFLAGS           += -I/usr/local/include/gpib
-	endif
-	LIBS                 += -lgpib
 endif
 
 

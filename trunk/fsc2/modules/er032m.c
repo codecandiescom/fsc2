@@ -1058,7 +1058,7 @@ static double er032m_set_cf( double center_field )
 
 
 	center_field = ER032M_CF_RESOLUTION
-							   * lround( center_field / ER032M_CF_RESOLUTION );
+							 	 * lrnd( center_field / ER032M_CF_RESOLUTION );
 
 	fsc2_assert( center_field >= ER032M_MIN_FIELD &&
 				 center_field <= ER032M_MAX_FIELD );
