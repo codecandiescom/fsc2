@@ -11,6 +11,10 @@
 #include "c1.xbm"
 #include "c2.xbm"
 #include "c3.xbm"
+#include "ua.xbm"
+#include "da.xbm"
+#include "la.xbm"
+#include "ra.xbm"
 
 
 void setup_canvas( Canvas *c, FL_OBJECT *obj );
@@ -18,12 +22,11 @@ void create_pixmap( Canvas *c );
 void delete_pixmap( Canvas *c );
 int canvas_handler( FL_OBJECT *obj, Window window, int w, int h, XEvent *ev,
 					void *udata );
-void button_release_handler( Window win, int x_start, int y_start,
-							 int button );
+void button_release_handler( Window win, int x_start, int y_start );
 void reconfigure_window( Canvas *c, int w, int h );
 void redraw_canvas( Canvas *c );
 void recalc_XPoints( void );
-void recalc_XPoints_of_curve( Curve_1d *c );
+void recalc_XPoints_of_curve( Curve_1d *cv );
 void repaint_canvas( Canvas *c );
 void fs_rescale_1d( void );
 void fs_rescale_2d( void );
@@ -33,9 +36,13 @@ void accept_2d_data( long x_index, long y_index, long curve, int type,
 
 
 
+FL_COLOR colors[ MAX_CURVES ] = { FL_RED, FL_GREEN, FL_YELLOW, FL_CYAN };
 int cursor_1,
 	cursor_2,
 	cursor_3;
+XFontStruct *font;
+int button_state;
+
 
 
 void graphics_init( long dim, long nc, long nx, long ny,
@@ -43,7 +50,7 @@ void graphics_init( long dim, long nc, long nx, long ny,
 					double rwc_y_start, double rwc_y_delta,
 					char *x_label, char *y_label )
 {
-	long i; long j;
+	long i;
 
 
 	/* The parent process does all the graphics stuff... */
@@ -134,62 +141,57 @@ void graphics_init( long dim, long nc, long nx, long ny,
 			T_free( G.y_label );
 		G.y_label = get_string_copy( y_label );
 	}
-
-
-	/* Get memory for the structures for storing the data and displaying the
-	   curves (2D curves are not yet implemented) */
-
-	if ( dim == 1 )
-	{
-		for ( i = G.nc - 1 ; i >= 0 ; i-- )
-		{
-			G.curve[ i ] = T_malloc( sizeof( Curve_1d ) );
-			G.curve[ i ]->points = NULL;
-			G.curve[ i ]->points = T_malloc( G.nx * sizeof( Scaled_Point ) );
-			for ( j = 0; j < G.nx; j++ )
-				G.curve[ i ]->points->exist = UNSET;
-			G.curve[ i ]->xpoints = NULL;
-			G.curve[ i ]->xpoints = T_malloc( G.nx * sizeof( XPoint ) );
-		}
-	}
 }
 
 
 void graphics_free( void )
 {
 	long i;
+	Curve_1d *cv;
 
 
 	if ( G.is_init == UNSET )
 		return;
 
-	/* Deallocate memory for label strings */
+	if ( G.dim == 1 )
+	{
+		/* Deallocate memory for storing scaled data and XPoints */
 
+		for ( i = 0; i < G.nc; i++ )
+		{
+			cv = G.curve[ i ];
+
+			XFreeGC( G.d, cv->gc );
+
+			XFreePixmap( G.d, cv->up_arr );
+			XFreePixmap( G.d, cv->down_arr );
+			XFreePixmap( G.d, cv->left_arr );
+			XFreePixmap( G.d, cv->right_arr );
+
+			XFreeGC( G.d, cv->font_gc );
+
+			if ( cv != NULL )
+			{
+				if ( cv->points != NULL )
+					T_free( cv->points );
+
+				if ( cv->xpoints != NULL )
+					T_free( cv->xpoints );
+
+				T_free( cv );
+			}
+		}
+	}
+}
+
+
+void free_graphics( void )
+{
+	G.is_init = UNSET;
 	if ( G.x_label != NULL )
 		T_free( G.x_label );
 	if ( G.y_label != NULL )
 		T_free( G.y_label );
-
-	if ( G.dim == 1 )
-	{
-		/* Deallocate memory ofr storing scaled data and XPoints */
-
-		for ( i = G.nc - 1 ; i >= 0 ; i-- )
-		{
-			if ( G.curve[ i ] != NULL )
-			{
-				if ( G.curve[ i ]->points != NULL )
-					T_free( G.curve[ i ]->points );
-
-				if ( G.curve[ i ]->xpoints != NULL )
-					T_free( G.curve[ i ]->xpoints );
-
-				T_free( G.curve[ i ] );
-			}
-		}
-	}
-
-	G.is_init = UNSET;
 }
 
 
@@ -199,9 +201,7 @@ void graphics_free( void )
 
 void start_graphics( void )
 {
-	int i, j;
-	FL_COLOR colors[ MAX_CURVES ] = { FL_RED, FL_GREEN, FL_YELLOW, FL_BLUE };
-
+	button_state = 0;
 
 	/* Create the form for running experiments */
 
@@ -264,10 +264,6 @@ void start_graphics( void )
 
 	G.d = FL_FormDisplay( run_form->run );
 
-	setup_canvas( &G.x_axis, run_form->x_axis );
-	setup_canvas( &G.y_axis, run_form->y_axis );
-	setup_canvas( &G.canvas, run_form->canvas );
-
 	cursor_1 = fl_create_bitmap_cursor( c1_bits, c1_bits, c1_width, c1_height,
 										c1_x_hot, c1_y_hot );
 	fl_set_cursor_color( cursor_1, FL_RED, FL_WHITE );
@@ -280,9 +276,19 @@ void start_graphics( void )
 										c3_x_hot, c3_y_hot );
 	fl_set_cursor_color( cursor_3, FL_RED, FL_WHITE );
 
+	setup_canvas( &G.x_axis, run_form->x_axis );
+	setup_canvas( &G.y_axis, run_form->y_axis );
+	setup_canvas( &G.canvas, run_form->canvas );
+
+	font = XLoadQueryFont( G.d, "9x15" );
 
 	if ( G.is_init )
 	{
+		long i, j;
+		unsigned int depth = fl_get_canvas_depth( G.canvas.obj );
+		Curve_1d *cv;
+
+
 		G.scale_changed =  SET;
 
 		G.rw_y_min = HUGE_VAL;
@@ -292,21 +298,53 @@ void start_graphics( void )
 
 		for ( i = 0; i < G.nc; i++ )
 		{
-			G.curve[ i ]->gc = XCreateGC( G.d, G.canvas.pm, 0, 0 );
-			XSetForeground( G.d, G.curve[ i ]->gc,
-							fl_get_pixel( colors[ i ] ) );
+			cv = G.curve[ i ] = T_malloc( sizeof( Curve_1d ) );
+
+			cv->points = NULL;
+			cv->points = T_malloc( G.nx * sizeof( Scaled_Point ) );
 
 			for ( j = 0; j < G.nx; j++ )
-				G.curve[ i ]->points[ j ].exist = UNSET;
+				cv->points->exist = UNSET;
 
-			G.curve[ i ]->count = 0;
+			cv->xpoints = NULL;
+			cv->xpoints = T_malloc( G.nx * sizeof( XPoint ) );
 
-			G.curve[ i ]->s2d_x = ( double ) ( G.canvas.w - 1 ) /
-				                                       ( double ) ( G.nx - 1 );
-			G.curve[ i ]->s2d_y = ( double ) ( G.canvas.h - 1 );
-			G.curve[ i ]->x_shift = G.curve[ i ]->y_shift = 0.0;
+			cv->gc = XCreateGC( G.d, G.canvas.pm, 0, 0 );
+			XSetForeground( G.d, cv->gc, fl_get_pixel( colors[ i ] ) );
 
-			G.curve[ i ]->active = SET;
+			cv->up_arr =
+				XCreatePixmapFromBitmapData( G.d, G.canvas.pm, ua_bits,
+											 ua_width, ua_height,
+											 fl_get_pixel( colors[ i ] ),
+											 fl_get_pixel( FL_BLACK ), depth );
+			cv->down_arr =
+				XCreatePixmapFromBitmapData( G.d, G.canvas.pm, da_bits,
+											 da_width, da_height,
+											 fl_get_pixel( colors[ i ] ),
+											 fl_get_pixel( FL_BLACK ), depth );
+			cv->left_arr =
+				XCreatePixmapFromBitmapData( G.d, G.canvas.pm, la_bits,
+											 la_width, la_height,
+											 fl_get_pixel( colors[ i ] ),
+											 fl_get_pixel( FL_BLACK ), depth );
+			cv->right_arr = 
+				XCreatePixmapFromBitmapData( G.d, G.canvas.pm, ra_bits,
+											 ra_width, ra_height,
+											 fl_get_pixel( colors[ i ] ),
+											 fl_get_pixel( FL_BLACK ), depth );
+
+			cv->font_gc = XCreateGC( G.d, FL_ObjWin( G.canvas.obj ), 0, 0 );
+			XSetFont( G.d, cv->font_gc, font->fid );
+			XSetForeground( G.d, cv->font_gc, fl_get_pixel( colors[ i ] ) );
+
+			cv->s2d_x =
+				       ( double ) ( G.canvas.w - 1 ) / ( double ) ( G.nx - 1 );
+			cv->s2d_y = ( double ) ( G.canvas.h - 1 );
+			cv->x_shift = cv->y_shift = 0.0;
+
+			cv->count = 0;
+			cv->active = SET;
+			cv->can_undo = UNSET;
 		}
 	}
 
@@ -325,9 +363,6 @@ void start_graphics( void )
 
 void stop_graphics( void )
 {
-	long i;
-
-
 	fl_remove_canvas_handler( run_form->x_axis, Expose, canvas_handler);
 	fl_remove_canvas_handler( run_form->x_axis, ConfigureNotify,
 							  canvas_handler);
@@ -338,15 +373,13 @@ void stop_graphics( void )
 	fl_remove_canvas_handler( run_form->canvas, ConfigureNotify,
 							  canvas_handler);
 
+	graphics_free( );
+
+	XFreeFont( G.d, font );
+
 	delete_pixmap( &G.x_axis );
 	delete_pixmap( &G.y_axis );
 	delete_pixmap( &G.canvas );
-
-	if ( G.is_init )
-	{
-		for ( i = G.nc - 1; i >= 0; i-- )
-			XFreeGC( G.d, G.curve[ i ]->gc );
-	}
 
 	if ( fl_form_is_visible( run_form->run ) )
 		fl_hide_form( run_form->run );
@@ -392,7 +425,7 @@ void create_pixmap( Canvas *c )
 
     XGetGeometry( G.d, FL_ObjWin( c->obj ), &root, &x, &y, &w, &h, &bw, &d );
     c->pm = XCreatePixmap( G.d, FL_ObjWin( c->obj ), c->w, c->h, d );
-    c->gc = XCreateGC( G.d, FL_ObjWin( c->obj ), 0, 0);
+    c->gc = XCreateGC( G.d, FL_ObjWin( c->obj ), 0, 0 );
 
 	c->box_gc = XCreateGC( G.d, FL_ObjWin( c->obj ), 0, 0 );
 	XSetForeground( G.d, c->box_gc, fl_get_pixel( FL_RED ) );
@@ -400,7 +433,11 @@ void create_pixmap( Canvas *c )
 	if ( c == &G.canvas )
 	{
 		if ( G.is_init )
+		{
+			c->pm_sec = XCreatePixmap( G.d, FL_ObjWin( c->obj ), c->w,
+									   c->h, d );
 			XSetForeground( G.d, c->gc, fl_get_pixel( FL_BLACK ) );
+		}
 		else
 			XSetForeground( G.d, c->gc, fl_get_pixel( FL_INACTIVE ) );
 	}
@@ -415,9 +452,14 @@ void create_pixmap( Canvas *c )
 
 void delete_pixmap( Canvas *c )
 {
-	XFreeGC( G.d, c->box_gc );
-    XFreeGC( G.d, c->gc );
-    XFreePixmap( G.d, c->pm );
+	if ( G.is_init )
+	{
+		XFreeGC( G.d, c->box_gc );
+		XFreeGC( G.d, c->gc );
+		XFreePixmap( G.d, c->pm );
+		if ( c == &G.canvas )
+			XFreePixmap( G.d, c->pm_sec );
+	}
 }
 
 
@@ -430,12 +472,12 @@ int canvas_handler( FL_OBJECT *obj, Window window, int w, int h, XEvent *ev,
 {
 	Canvas *c = ( Canvas * ) udata;
 	static int x_start,
-		       y_start,
-		       button = 0;
+		       y_start;
 	long i;
 	int x_cur,
 		y_cur,
 		dummy;
+	Curve_1d *cv;
 
 
 	switch ( ev->type )
@@ -444,7 +486,7 @@ int canvas_handler( FL_OBJECT *obj, Window window, int w, int h, XEvent *ev,
 			repaint_canvas( c );
             break;
 
-		case ConfigureNotify :                   /* window was reconfigure  */
+		case ConfigureNotify :                   /* window was reconfigured */
             if ( ( int ) c->w == w && ( int ) c->h == h )
 				break;
             reconfigure_window( c, w, h );
@@ -452,28 +494,65 @@ int canvas_handler( FL_OBJECT *obj, Window window, int w, int h, XEvent *ev,
 
 		case ButtonPress :
 			fl_get_win_mouse( window, &x_start, &y_start, &dummy );
-			button |= ( 1 << ( ev->xbutton.button - 1 ) );
+			button_state |= ( 1 << ( ev->xbutton.button - 1 ) );
 
-			if ( button == 1 )                    /* left mouse button */
+			if ( button_state == 1 )                  /* left mouse button */
 				fl_set_cursor( FL_ObjWin( obj ), cursor_1 );
 
-			if ( button == 2 )                    /* middle mouse button */
+			if ( button_state == 2 )                  /* middle mouse button */
+			{
 				fl_set_cursor( FL_ObjWin( obj ), cursor_2 );
 
-			if ( button == 4 )                    /* right mouse button */
+				for ( i = 0; i < G.nc; i++ )
+				{
+					cv = G.curve[ i ];
+
+					if ( ! cv->active )
+					{
+						cv->can_undo = UNSET;
+						continue;
+					}
+					else
+					{
+						cv->old_s2d_x = cv->s2d_x;
+						cv->old_s2d_y = cv->s2d_y;
+						cv->old_x_shift = cv->x_shift;
+						cv->old_y_shift = cv->y_shift;
+
+						cv->can_undo = SET;
+					}
+				}
+			}
+/*
+			if ( button_state == 3 )
+			{
+				if ( c == &G.x_axis || c == &G.y_axis )
+					button_state = 1;
+				else
+				{
+					fl_reset_cursor( FL_ObjWin( G.x_axis.obj ) );
+					fl_reset_cursor( FL_ObjWin( G.y_axis.obj ) );
+					fl_set_cursor( FL_ObjWin( G.canvas.obj ), XC_tcross );
+					fl_set_cursor_color( XC_tcross, FL_RED, FL_BLACK );
+					G.canvas.is_box = UNSET;
+				}
+			}
+*/
+			if ( button_state == 4 )              /* right mouse button */
 				fl_set_cursor( FL_ObjWin( obj ), cursor_3 );
 
 			if ( obj == run_form->x_axis )        /* in x-axis window */
 			{
-				G.drag_c = 1;
+				G.drag_canvas = 1;
 
-				if ( button == 1 )                /* left mouse button */
+				if ( button_state == 1 )           /* left mouse button */
 				{
 					c->box_x = x_start;
 					c->box_w = 0;
 					c->box_y = c->h / 2 - 1;
 					c->box_h = 2;
 					c->is_box = SET;
+					repaint_canvas( &G.x_axis );
 				}
 
 				fl_add_canvas_handler( obj, MotionNotify, canvas_handler,
@@ -482,15 +561,16 @@ int canvas_handler( FL_OBJECT *obj, Window window, int w, int h, XEvent *ev,
 
 			if ( obj == run_form->y_axis )        /* in y-axis window */
 			{
-				G.drag_c = 2;
+				G.drag_canvas = 2;
 
-				if ( button == 1 )                /* left mouse button */
+				if ( button_state == 1 )          /* left mouse button */
 				{
 					c->box_x = c->w / 2 - 1;
 					c->box_w = 2;
 					c->box_y = y_start;
 					c->box_h = 0;
 					c->is_box = SET;
+					repaint_canvas( &G.y_axis );
 				}
 
 				fl_add_canvas_handler( obj, MotionNotify, canvas_handler,
@@ -499,14 +579,15 @@ int canvas_handler( FL_OBJECT *obj, Window window, int w, int h, XEvent *ev,
 
 			if ( obj == run_form->canvas )        /* in canvas window */
 			{
-				G.drag_c = 3;
+				G.drag_canvas = 3;
 
-				if ( button == 1 )                /* left mouse button */
+				if ( button_state == 1 )          /* left mouse button */
 				{
 					c->box_x = x_start;
 					c->box_y = y_start;
 					c->box_w = c->box_h = 0;
 					c->is_box = SET;
+					repaint_canvas( &G.canvas );
 				}
 
 				fl_add_canvas_handler( obj, MotionNotify, canvas_handler,
@@ -516,17 +597,17 @@ int canvas_handler( FL_OBJECT *obj, Window window, int w, int h, XEvent *ev,
 			break;
 
 		case ButtonRelease :
-			button_release_handler( window, x_start, y_start, button );
-			button &= ~ ( 1 << ( ev->xbutton.button - 1 ) );
+			button_release_handler( window, x_start, y_start );
+			button_state &= ~ ( 1 << ( ev->xbutton.button - 1 ) );
 
 			break;
 
 		case MotionNotify :
 			fl_get_win_mouse( window, &x_cur, &y_cur, &dummy );
 
-			if ( button == 1 )
+			if ( button_state == 1 )
 			{
-				if ( G.drag_c == 1 )
+				if ( G.drag_canvas == 1 )
 				{
 					c->box_w = x_cur - x_start;
 
@@ -536,10 +617,10 @@ int canvas_handler( FL_OBJECT *obj, Window window, int w, int h, XEvent *ev,
 					if ( c->box_x + c->box_w < 0 )
 						c->box_w = - c->box_x;
 
-					redraw_canvas( &G.x_axis );
+					repaint_canvas( &G.x_axis );
 				}
 
-				if ( G.drag_c == 2 )
+				if ( G.drag_canvas == 2 )
 				{
 					c->box_h = y_cur - y_start ;
 
@@ -549,10 +630,10 @@ int canvas_handler( FL_OBJECT *obj, Window window, int w, int h, XEvent *ev,
 					if ( c->box_y + c->box_h < 0 )
 						c->box_h = - c->box_y;
 
-					redraw_canvas( &G.y_axis );
+					repaint_canvas( &G.y_axis );
 				}
 
-				if ( G.drag_c == 3 )
+				if ( G.drag_canvas == 3 )
 				{
 					c->box_w = x_cur - x_start;
 
@@ -570,25 +651,25 @@ int canvas_handler( FL_OBJECT *obj, Window window, int w, int h, XEvent *ev,
 					if ( c->box_y + c->box_h < 0 )
 						c->box_h = - c->box_y;
 
-					redraw_canvas( &G.canvas );
+					repaint_canvas( &G.canvas );
 				}
 			}
 
-			if ( button == 2 )
+			if ( button_state == 2 )
 			{
-				for ( i = G.nc - 1 ; i >= 0; i-- )
+				for ( i = 0; i < G.nc; i++ )
 				{
-					if ( ! G.curve[ i ]->active )
+					cv = G.curve[ i ];
+						   
+					if ( ! cv->active )
 						continue;
 
-					if ( G.drag_c & 1 )
-						G.curve[ i ]->x_shift += ( x_cur - x_start ) /
-						                                   G.curve[ i ]->s2d_x;
-					if ( G.drag_c & 2 )
-						G.curve[ i ]->y_shift -= ( y_cur - y_start ) /
-						                                   G.curve[ i ]->s2d_y;
+					if ( G.drag_canvas & 1 )
+						cv->x_shift += ( x_cur - x_start ) / cv->s2d_x;
+					if ( G.drag_canvas & 2 )
+						cv->y_shift -= ( y_cur - y_start ) / cv->s2d_y;
 
-					recalc_XPoints_of_curve( G.curve[ i ] );
+					recalc_XPoints_of_curve( cv );
 				}
 
 				x_start = x_cur;
@@ -603,6 +684,9 @@ int canvas_handler( FL_OBJECT *obj, Window window, int w, int h, XEvent *ev,
 				redraw_canvas( &G.canvas );
 			}
 
+			if ( button_state == 3 )
+				repaint_canvas( &G.canvas );
+
 			break;
 	}
 
@@ -611,7 +695,7 @@ int canvas_handler( FL_OBJECT *obj, Window window, int w, int h, XEvent *ev,
 
 
 
-void button_release_handler( Window win, int x_start, int y_start, int button )
+void button_release_handler( Window win, int x_start, int y_start )
 {
 	double px, py,
 		   x1, x2,
@@ -621,7 +705,10 @@ void button_release_handler( Window win, int x_start, int y_start, int button )
 		dummy;
 	long i;
 	bool scale_changed = UNSET;
+	Curve_1d *cv;
 
+
+	/* Get mouse posiion and restrict it to the canvas */
 
 	fl_get_win_mouse( win, &x_cur, &y_cur, &dummy );
 
@@ -635,28 +722,42 @@ void button_release_handler( Window win, int x_start, int y_start, int button )
 	if ( y_cur >= ( int ) G.canvas.h )
 		y_cur = G.canvas.h - 1;
 
-	if ( G.drag_c == 1 )                 /* in x-axis window */
+	/* Distinguish between the three different areas and the type of the
+	   current action */
+
+	if ( G.drag_canvas == 1 )                 /* in x-axis window */
 	{
 		fl_remove_canvas_handler( G.x_axis.obj, MotionNotify, canvas_handler );
 		fl_reset_cursor( FL_ObjWin( G.x_axis.obj ) );
 
-		if ( button == 1 )               /* left mouse button */
+		if ( button_state == 1 )               /* left mouse button */
 		{
+			/* Expand (with rubber box) along the x direction */
+
 			if ( abs( x_start - x_cur ) > 4 )
 			{
-				for ( i = G.nc - 1; i >= 0; i-- )
+				for ( i = 0; i < G.nc; i++ )
 				{
-					if ( ! G.curve[ i ]->active )
+					cv = G.curve[ i ];
+
+					if ( ! cv->active )
 						continue;
 
-					x1 = x_start / G.curve[ i ]->s2d_x - G.curve[ i ]->x_shift;
-					x2 = x_cur / G.curve[ i ]->s2d_x - G.curve[ i ]->x_shift;
+					cv->old_s2d_x = cv->s2d_x;
+					cv->old_s2d_y = cv->s2d_y;
+					cv->old_x_shift = cv->x_shift;
+					cv->old_y_shift = cv->y_shift;
 
-					G.curve[ i ]->x_shift = - d_min( x1, x2 );
-					G.curve[ i ]->s2d_x = ( double ) ( G.canvas.w - 1 ) /
+					cv->can_undo = SET;
+
+					x1 = x_start / cv->s2d_x - cv->x_shift;
+					x2 = x_cur / cv->s2d_x - cv->x_shift;
+
+					cv->x_shift = - d_min( x1, x2 );
+					cv->s2d_x = ( double ) ( G.canvas.w - 1 ) /
 						                                       fabs( x1 - x2 );
 
-					recalc_XPoints_of_curve( G.curve[ i ] );
+					recalc_XPoints_of_curve( cv );
 					scale_changed = SET;
 				}
 			}
@@ -665,55 +766,76 @@ void button_release_handler( Window win, int x_start, int y_start, int button )
 			redraw_canvas( &G.x_axis );
 		}
 
-		if ( button == 4 && abs( x_start - x_cur ) > 4 )    /* right button */
+		if ( button_state == 4 && abs( x_start - x_cur ) > 4 )
+                                                       /* right mouse button */
 		{
-			for ( i = G.nc - 1; i >= 0; i-- )
-			{
-				if ( ! G.curve[ i ]->active )
-					continue;
+			/* Zoom in x direction */
 
-				px = x_start / G.curve[ i ]->s2d_x - G.curve[ i ]->x_shift;
+			for ( i = 0; i < G.nc; i++ )
+			{
+				cv = G.curve[ i ];
+
+				if ( ! cv->active )
+					continue;
+				
+				cv->old_s2d_x = cv->s2d_x;
+				cv->old_s2d_y = cv->s2d_y;
+				cv->old_x_shift = cv->x_shift;
+				cv->old_y_shift = cv->y_shift;
+
+				cv->can_undo = SET;
+
+				px = x_start / cv->s2d_x - cv->x_shift;
 				if ( x_start > x_cur )
-					G.curve[ i ]->s2d_x *= d_min( 4.0,
+					cv->s2d_x *= d_min( 4.0,
 							       1.0 + 3.0 * ( double ) ( x_start - x_cur ) /
 								                       ( double ) G.x_axis.w );
 				else
-					G.curve[ i ]->s2d_x /= d_min( 4.0,
+					cv->s2d_x /= d_min( 4.0,
 								   1.0 + 3.0 * ( double ) ( x_cur - x_start ) /
 								                       ( double ) G.x_axis.w );
 
-				G.curve[ i ]->x_shift = x_start / G.curve[ i ]->s2d_x - px;
+				cv->x_shift = x_start / cv->s2d_x - px;
 
-				recalc_XPoints_of_curve( G.curve[ i ] );
+				recalc_XPoints_of_curve( cv );
 				scale_changed = SET;
 			}
 		}
 	}
 
-	if ( G.drag_c == 2 )                 /* in y-axis window */
+	if ( G.drag_canvas == 2 )                 /* in y-axis window */
 	{
 		fl_remove_canvas_handler( G.x_axis.obj, MotionNotify, canvas_handler );
 		fl_reset_cursor( FL_ObjWin( G.y_axis.obj ) );
 
-		if ( button == 1 )               /* left mouse button */
+		if ( button_state == 1 )               /* left mouse button */
 		{
+			/* Expand (with rubber box) along the y direction */
+
 			if ( abs( y_start - y_cur ) > 4 )
 			{
-				for ( i = G.nc - 1; i >= 0; i-- )
+				for ( i = 0; i < G.nc; i++ )
 				{
-					if ( ! G.curve[ i ]->active )
+					cv = G.curve[ i ];
+
+					if ( ! cv->active )
 						continue;
 
-					y1 = 1.0 - y_start / G.curve[ i ]->s2d_y
-						 - G.curve[ i ]->y_shift;
-					y2 = 1.0 - y_cur / G.curve[ i ]->s2d_y
-						 - G.curve[ i ]->y_shift;
+					cv->old_s2d_x = cv->s2d_x;
+					cv->old_s2d_y = cv->s2d_y;
+					cv->old_x_shift = cv->x_shift;
+					cv->old_y_shift = cv->y_shift;
 
-					G.curve[ i ]->y_shift = 1.0 - d_max( y1, y2 );
-					G.curve[ i ]->s2d_y = ( double ) ( G.canvas.h - 1 ) /
-						                                       fabs( y1 - y2 );
+					cv->can_undo = SET;
 
-					recalc_XPoints_of_curve( G.curve[ i ] );
+					y1 = 1.0 - y_start / cv->s2d_y - cv->y_shift;
+					y2 = 1.0 - y_cur / cv->s2d_y - cv->y_shift;
+
+					cv->y_shift = 1.0 - d_max( y1, y2 );
+					cv->s2d_y = ( double ) ( G.canvas.h - 1 )
+						                                     / fabs( y1 - y2 );
+
+					recalc_XPoints_of_curve( cv );
 					scale_changed = SET;
 				}
 			}
@@ -722,52 +844,73 @@ void button_release_handler( Window win, int x_start, int y_start, int button )
 			redraw_canvas( &G.y_axis );
 		}
 			
-		if ( button == 4 && abs( y_start - y_cur ) > 4 )     /* right button */
+		if ( button_state == 4 && abs( y_start - y_cur ) > 4 )
+			                                          /* right mouse button */
 		{
-			for ( i = G.nc - 1; i >= 0; i-- )
+			/* Zoom in y directrion */
+
+			for ( i = 0; i < G.nc; i++ )
 			{
-				if ( ! G.curve[ i ]->active )
+				cv = G.curve[ i ];
+
+				if ( ! cv->active )
 					continue;
 
-				py = 1.0 - y_start / G.curve[ i ]->s2d_y
-					 - G.curve[ i ]->y_shift;
+				cv->old_s2d_x = cv->s2d_x;
+				cv->old_s2d_y = cv->s2d_y;
+				cv->old_x_shift = cv->x_shift;
+				cv->old_y_shift = cv->y_shift;
+
+				cv->can_undo = SET;
+
+				py = 1.0 - y_start / cv->s2d_y - cv->y_shift;
 				if ( y_start < y_cur )
-					G.curve[ i ]->s2d_y *= d_min( 4.0,
+					cv->s2d_y *= d_min( 4.0,
 								   1.0 + 3.0 * ( double ) ( y_cur - y_start ) /
 								                       ( double ) G.y_axis.h );
 				else
-					G.curve[ i ]->s2d_y /= d_min( 4.0,
+					cv->s2d_y /= d_min( 4.0,
 								   1.0 + 3.0 * ( double ) ( y_start - y_cur ) /
 								                       ( double ) G.y_axis.h );
 
-				G.curve[ i ]->y_shift = 1.0 - y_start / G.curve[ i ]->s2d_y
-					                    - py;
+				cv->y_shift = 1.0 - y_start / cv->s2d_y - py;
 
-				recalc_XPoints_of_curve( G.curve[ i ] );
+				recalc_XPoints_of_curve( cv );
 				scale_changed = SET;
 			}
 		}
 	}
 
-	if ( G.drag_c == 3 )                 /* in canvas window */
+	if ( G.drag_canvas == 3 )                 /* in canvas window */
 	{
 		fl_remove_canvas_handler( G.canvas.obj, MotionNotify, canvas_handler );
 		fl_reset_cursor( FL_ObjWin( G.canvas.obj ) );
 
-		if ( button == 1 )               /* left mouse button */
+		if ( button_state == 1 )               /* left mouse button */
 		{
-			for ( i = G.nc - 1; i >= 0; i-- )
+			/* Expand (with rubber box) in both directions */
+
+			for ( i = 0; i < G.nc; i++ )
 			{
-				if ( ! G.curve[ i ]->active )
+				cv = G.curve[ i ];
+
+				if ( ! cv->active )
 					continue;
+
+				cv->old_s2d_x = cv->s2d_x;
+				cv->old_s2d_y = cv->s2d_y;
+				cv->old_x_shift = cv->x_shift;
+				cv->old_y_shift = cv->y_shift;
 
 				if ( abs( x_start - x_cur ) > 4 )
 				{
-					x1 = x_start / G.curve[ i ]->s2d_x - G.curve[ i ]->x_shift;
-					x2 = x_cur / G.curve[ i ]->s2d_x - G.curve[ i ]->x_shift;
+					cv->can_undo = SET;
 
-					G.curve[ i ]->x_shift = - d_min( x1, x2 );
-					G.curve[ i ]->s2d_x = ( double ) ( G.canvas.w - 1 ) /
+					x1 = x_start / cv->s2d_x - cv->x_shift;
+					x2 = x_cur / cv->s2d_x - cv->x_shift;
+
+					cv->x_shift = - d_min( x1, x2 );
+					cv->s2d_x = ( double ) ( G.canvas.w - 1 ) /
 						                                       fabs( x1 - x2 );
 
 					scale_changed = SET;
@@ -775,20 +918,20 @@ void button_release_handler( Window win, int x_start, int y_start, int button )
 
 				if ( abs( y_start - y_cur ) > 4 )
 				{
-					y1 = 1.0 - y_start / G.curve[ i ]->s2d_y
-						 - G.curve[ i ]->y_shift;
-					y2 = 1.0 - y_cur / G.curve[ i ]->s2d_y
-						 - G.curve[ i ]->y_shift;
+					cv->can_undo = SET;
 
-					G.curve[ i ]->y_shift = 1.0 - d_max( y1, y2 );
-					G.curve[ i ]->s2d_y = ( double ) ( G.canvas.h - 1 ) /
+					y1 = 1.0 - y_start / cv->s2d_y - cv->y_shift;
+					y2 = 1.0 - y_cur / cv->s2d_y - cv->y_shift;
+
+					cv->y_shift = 1.0 - d_max( y1, y2 );
+					cv->s2d_y = ( double ) ( G.canvas.h - 1 ) /
 						                                       fabs( y1 - y2 );
 
 					scale_changed = SET;
 				}
 
 				if ( scale_changed )
-					recalc_XPoints_of_curve( G.curve[ i ] );
+					recalc_XPoints_of_curve( cv );
 
 				G.canvas.is_box = UNSET;
 				if ( ! scale_changed )
@@ -796,52 +939,63 @@ void button_release_handler( Window win, int x_start, int y_start, int button )
 			}
 		}
 
-		if ( button == 4 )               /* right mouse button */
+		if ( button_state == 4 )               /* right mouse button */
 		{
-			for ( i = G.nc - 1; i >= 0; i-- )
+			/* Zoom in x and y direction */
+
+			for ( i = 0; i < G.nc; i++ )
 			{
-				if ( ! G.curve[ i ]->active )
+				cv = G.curve[ i ];
+
+				if ( ! cv->active )
 					continue;
+
+				cv->old_s2d_x = cv->s2d_x;
+				cv->old_s2d_y = cv->s2d_y;
+				cv->old_x_shift = cv->x_shift;
+				cv->old_y_shift = cv->y_shift;
 
 				if ( abs( x_start - x_cur ) > 4 )
 				{
-					px = x_start / G.curve[ i ]->s2d_x - G.curve[ i ]->x_shift;
+					cv->can_undo = SET;
+
+					px = x_start / cv->s2d_x - cv->x_shift;
 
 					if ( x_start > x_cur )
-						G.curve[ i ]->s2d_x *= d_min( 4.0,
+						cv->s2d_x *= d_min( 4.0,
 								   1.0 + 3.0 * ( double ) ( x_start - x_cur ) /
 								                       ( double ) G.x_axis.w );
 					else
-						G.curve[ i ]->s2d_x /= d_min( 4.0,
+						cv->s2d_x /= d_min( 4.0,
 								   1.0 + 3.0 * ( double ) ( x_cur - x_start ) /
 								                       ( double ) G.x_axis.w );
 
-					G.curve[ i ]->x_shift = x_start / G.curve[ i ]->s2d_x - px;
+					cv->x_shift = x_start / cv->s2d_x - px;
 
 					scale_changed = SET;
 				}
 
 				if ( abs( y_start - y_cur ) > 4 )
 				{
-					py = 1.0 - y_start / G.curve[ i ]->s2d_y 
-						 - G.curve[ i ]->y_shift;
+					cv->can_undo = SET;
+
+					py = 1.0 - y_start / cv->s2d_y - cv->y_shift;
 					if ( y_start < y_cur )
-						G.curve[ i ]->s2d_y *= d_min( 4.0,
+						cv->s2d_y *= d_min( 4.0,
 								   1.0 + 3.0 * ( double ) ( y_cur - y_start ) /
 								                       ( double ) G.y_axis.h );
 					else
-						G.curve[ i ]->s2d_y /= d_min( 4.0,
+						cv->s2d_y /= d_min( 4.0,
 								   1.0 + 3.0 * ( double ) ( y_start - y_cur ) /
 								                       ( double ) G.y_axis.h );
 
-					G.curve[ i ]->y_shift = 1.0 - y_start / 
-						                              G.curve[ i ]->s2d_y - py;
+					cv->y_shift = 1.0 - y_start / cv->s2d_y - py;
 
 					scale_changed = SET;
 				}
 
 				if ( scale_changed )
-					recalc_XPoints_of_curve( G.curve[ i ] );
+					recalc_XPoints_of_curve( cv );
 			}
 		}
 	}
@@ -866,31 +1020,44 @@ void button_release_handler( Window win, int x_start, int y_start, int button )
 void reconfigure_window( Canvas *c, int w, int h )
 {
 	long i;
+	Curve_1d *cv;
 
 
-	if ( c == &G.canvas && G.is_scale_set && c->w > 0 && c->h > 0 )
+	/* Calculate the new scale factors */
+
+	if ( c == &G.canvas && G.is_scale_set )
 	{
-		for ( i = G.nc - 1; i >= 0; i-- )
+		for ( i = 0; i < G.nc; i++ )
 		{
-			G.curve[ i ]->s2d_x *= 
-				                ( double ) ( w - 1 ) / ( double ) ( c->w - 1 );
-			G.curve[ i ]->s2d_y *=
-				                ( double ) ( h - 1 ) / ( double ) ( c->h - 1 );
-		}
+			cv = G.curve[ i ];
 
-		if ( G.is_scale_set )
-			recalc_XPoints( );
+			cv->s2d_x *= ( double ) ( w - 1 ) / ( double ) ( c->w - 1 );
+			cv->s2d_y *= ( double ) ( h - 1 ) / ( double ) ( c->h - 1 );
+
+			if ( cv->can_undo )
+			{
+				cv->old_s2d_x *=
+					            ( double ) ( w - 1 ) / ( double ) ( c->w - 1 );
+				cv->old_s2d_y *=
+					            ( double ) ( h - 1 ) / ( double ) ( c->h - 1 );
+			}
+		}
 	}
+
+	/* Set the new canvas sizes */
 
 	c->w = ( unsigned int ) w;
 	c->h = ( unsigned int ) h;
 
-	if ( c->w > 0 && c->h > 0 )
-	{
-		delete_pixmap( c );
-		create_pixmap( c );
-		redraw_canvas( c );
-	}
+	/* Recalculate data for drawing (has to be done after setting of canvas
+	   sizes since they are needed in the recalculation) */
+
+	if ( c == &G.canvas && G.is_scale_set )
+		recalc_XPoints( );
+
+	delete_pixmap( c );
+	create_pixmap( c );
+	redraw_canvas( c );
 }
 
 
@@ -901,18 +1068,93 @@ void reconfigure_window( Canvas *c, int w, int h )
 void redraw_canvas( Canvas *c )
 {
 	long i;
-	int x, y;
-	unsigned int w, h;
+	Curve_1d *cv;
 
 
 	XFillRectangle( G.d, c->pm, c->gc, 0, 0, c->w, c->h );
 
 	if ( c == &G.canvas && G.is_scale_set )
 		for ( i = G.nc - 1 ; i >= 0; i-- )
-			if ( G.curve[ i ]->count > 1 )
-				XDrawLines( G.d, c->pm, G.curve[ i ]->gc,
-							G.curve[ i ]->xpoints, G.curve[ i ]->count,
-							CoordModeOrigin );
+		{
+			cv = G.curve[ i ];
+
+			if ( cv->count <= 1 )
+				continue;
+
+			if ( cv->up )
+				XCopyArea( G.d, cv->up_arr, c->pm, c->gc,
+						   0, 0, ua_width, ua_height,
+						   G.canvas.w / 2 - 32 + 16 * i, 5 );
+
+			if ( cv->down )
+				XCopyArea( G.d, cv->down_arr, c->pm, c->gc,
+						   0, 0, da_width, da_height,
+						   G.canvas.w / 2 - 32 + 16 * i,
+						   G.canvas.h - 5 - da_height);
+
+			if ( cv->left )
+				XCopyArea( G.d, cv->left_arr, c->pm, c->gc,
+						   0, 0, la_width, la_height,
+						   5, G.canvas.h / 2 -32 + 16 * i );
+
+			if ( cv->right )
+				XCopyArea( G.d, cv->right_arr, c->pm, c->gc,
+						   0, 0, ra_width, ra_height,
+						   G.canvas.w - 5- ra_width,
+						   G.canvas.h / 2 - 32 + 16 * i );
+
+			XDrawLines( G.d, c->pm, cv->gc,
+						cv->xpoints, cv->count,
+						CoordModeOrigin );
+		}
+
+	repaint_canvas( c );
+}
+
+
+/*-----------------------------------------------*/
+/* Copies the background pixmap onto the canvas. */
+/*-----------------------------------------------*/
+
+void repaint_canvas( Canvas *c )
+{
+	static int i;
+	char buf[ 70 ];
+	int x, y, dummy;
+	unsigned int w, h;
+	Curve_1d *cv;
+	double x_pos, y_pos;
+
+
+	if ( c != &G.canvas || ! c->is_box )
+	{
+		XCopyArea( G.d, c->pm, FL_ObjWin( c->obj ), c->gc,
+				   0, 0, c->w, c->h, 0, 0 );
+		return;
+	}
+
+	XCopyArea( G.d, c->pm, c->pm_sec, c->gc, 0, 0, c->w, c->h, 0, 0 );
+
+	if ( c == &G.canvas && button_state == 3 )
+	{
+		fl_get_win_mouse( FL_ObjWin( c->obj ), &x, &y, &dummy );
+
+		for ( i = G.nc - 1; i >= 0; i-- )
+		{
+			cv = G.curve[ i ];
+
+			x_pos = x / cv->s2d_x - cv->x_shift;
+			if ( G.is_rwc_x )
+				x_pos = G.rwc_x_start + G.rwc_x_delta * x_pos;
+			else
+				x_pos += ARRAY_OFFSET;
+			y_pos = ( 1.0 - y / cv->s2d_y - cv->y_shift ) / G.rw2s;
+
+			sprintf( buf, "%#g, %#g", x_pos, y_pos );
+			XDrawString( G.d, c->pm_sec, cv->font_gc, 20,
+						 20 * ( i + 1 ), buf, strlen( buf ) );
+		}
+	}
 
 	if ( c->is_box )
 	{
@@ -938,12 +1180,12 @@ void redraw_canvas( Canvas *c )
 			h = - c->box_h;
 		}
 
-		XDrawRectangle( G.d, c->pm, c->box_gc, x, y, w, h );
+		XDrawRectangle( G.d, c->pm_sec, c->box_gc, x, y, w, h );
 	}
 
-	repaint_canvas( c );
+	XCopyArea( G.d, c->pm_sec, FL_ObjWin( c->obj ), c->gc,
+			   0, 0, c->w, c->h, 0, 0 );
 }
-
 
 
 void recalc_XPoints( void )
@@ -951,40 +1193,84 @@ void recalc_XPoints( void )
 	long i;
 
 
-	for ( i = G.nc - 1; i >= 0; i-- )
+	for ( i = 0; i < G.nc; i++ )
 		recalc_XPoints_of_curve( G.curve[ i ] );
 }
 
 
-void recalc_XPoints_of_curve( Curve_1d *c )
+void recalc_XPoints_of_curve( Curve_1d *cv )
 {
 	long j, k;
 
+
+	cv->up = cv->down = cv->left = cv->right = UNSET;
+
 	for ( k = 0, j = 0; j < G.nx; j++ )
-		if ( c->points[ j ].exist )
+	{
+		if ( cv->points[ j ].exist )
 		{
-			c->xpoints[ k ].x = shrt( c->s2d_x * ( j + c->x_shift ) );
-			c->xpoints[ k++ ].y =
-				shrt( c->s2d_y * ( 1.0 - ( c->points[ j ].y + c->y_shift ) ) );
+			cv->xpoints[ k ].x = shrt( cv->s2d_x * ( j + cv->x_shift ) );
+			cv->xpoints[ k ].y = shrt( cv->s2d_y
+						   * ( 1.0 - ( cv->points[ j ].y + cv->y_shift ) ) );
+
+			if ( cv->xpoints[ k ].x < 0 )
+				cv->left = SET;
+			if ( cv->xpoints[ k ].x >= ( int ) G.canvas.w )
+				cv->right = SET;
+			if ( cv->xpoints[ k ].y < 0 )
+				cv->up = SET;
+			if ( cv->xpoints[ k++ ].y >= ( int ) G.canvas.h )
+				cv->down = SET;
 		}
+	}
 }
 
 
-
-/*-----------------------------------------------*/
-/* Copies the background pixmap onto the canvas. */
-/*-----------------------------------------------*/
-
-void repaint_canvas( Canvas *c )
+void undo_button_callback( FL_OBJECT *a, long b )
 {
-	XCopyArea( G.d, c->pm, FL_ObjWin( c->obj ), c->gc,
-			   0, 0, c->w, c->h, 0, 0 );
+	long i;
+	bool is_undo = UNSET;
+	Curve_1d *cv;
+
+
+	a = a;
+	b = b;
+
+
+	for ( i = 0; i < G.nc; i++ )
+	{
+		cv = G.curve[ i ];
+
+		if ( ! cv->can_undo )
+			continue;
+
+		cv->s2d_x = cv->old_s2d_x;
+		cv->s2d_y = cv->old_s2d_y;
+		cv->x_shift = cv->old_x_shift;
+		cv->y_shift = cv->old_y_shift;
+
+		cv->can_undo = UNSET;
+		is_undo = SET;
+
+		recalc_XPoints_of_curve( cv );
+	}
+
+	if ( is_undo && G.is_fs )
+	{
+		G.is_fs = UNSET;
+		fl_set_button( run_form->full_scale_button, 0 );
+	}
+
+	if ( is_undo )
+		redraw_canvas( &G.canvas );
 }
 
 
 void fs_button_callback( FL_OBJECT *a, long b )
 {
 	int state;
+	int i;
+	Curve_1d *cv;
 
 
 	a = a;
@@ -995,16 +1281,34 @@ void fs_button_callback( FL_OBJECT *a, long b )
 	if ( ! G.is_init )
 		return;
 
+	/* Get new state of button */
+
 	state = fl_get_button( run_form->full_scale_button );
 
 	if ( G.dim == 1 )
 	{
-		if ( state == 1 )
+		if ( state == 1 )        /* if button got switched on */
 		{
+			/* Store data of previous state... */
+
+			for ( i = 0; i < G.nc; i++ )
+			{
+				cv = G.curve[ i ];
+
+				cv->old_s2d_x = cv->s2d_x;
+				cv->old_s2d_y = cv->s2d_y;
+				cv->old_x_shift = cv->x_shift;
+				cv->old_y_shift = cv->y_shift;
+
+				cv->can_undo = SET;
+			}
+
+			/* ... and rescale to full scale */
+
 			G.is_fs = SET;
 			fs_rescale_1d( );
 		}
-		else
+		else                     /* if button got switched off */
 			G.is_fs = UNSET;
 	}
 	else
@@ -1025,6 +1329,7 @@ void fs_rescale_1d( void )
 		   rw_y_max;
 	double data;
 	double new_y_scale;
+	Curve_1d *cv;
 
 
 	if ( ! G.is_scale_set )
@@ -1032,14 +1337,18 @@ void fs_rescale_1d( void )
 
 	/* Find minimum and maximum value of all scaled data */
 
-	for ( i = G.nc - 1; i >= 0; i-- )
+	for ( i = 0; i < G.nc; i++ )
+	{
+		cv = G.curve[ i ];
+
 		for ( j = 0; j < G.nx; j++ )
-			if ( G.curve[ i ]->points[ j ].exist )
+			if ( cv->points[ j ].exist )
 			{
-				data = G.curve[ i ]->points[ j ].y;
+				data = cv->points[ j ].y;
 				max = d_max( data, max );
 				min = d_min( data, min );
 			}
+	}
 
 	/* Calculate new real world maximum and minimum */
 
@@ -1051,25 +1360,22 @@ void fs_rescale_1d( void )
 
 	new_y_scale = 1.0 / ( rw_y_max - rw_y_min );
 
-	for ( i = G.nc - 1; i >= 0; i-- )
+	for ( i = 0; i < G.nc; i++ )
 	{
-		G.curve[ i ]->x_shift = G.curve[ i ]->y_shift = 0.0;
-		G.curve[ i ]->s2d_x =
-		               ( double ) ( G.canvas.w - 1 ) / ( double ) ( G.nx - 1 );
-		G.curve[ i ]->s2d_y = ( double ) ( G.canvas.h - 1 );
+		cv = G.curve[ i ];
+
+		cv->x_shift = cv->y_shift = 0.0;
+		cv->s2d_x = ( double ) ( G.canvas.w - 1 ) / ( double ) ( G.nx - 1 );
+		cv->s2d_y = ( double ) ( G.canvas.h - 1 );
+
+		cv->up = cv->down = cv->left = cv->right = UNSET;
 
 		for ( k = 0, j = 0; j < G.nx; j++ )
-			if ( G.curve[ i ]->points[ j ].exist )
-			{
-				G.curve[ i ]->points[ j ].y = new_y_scale *
-					( G.curve[ i ]->points[ j ].y / G.rw2s 
-					  + G.rw_y_min - rw_y_min );
+			if ( cv->points[ j ].exist )
+				cv->points[ j ].y = new_y_scale * ( cv->points[ j ].y /
+											  G.rw2s + G.rw_y_min - rw_y_min );
 
-				G.curve[ i ]->xpoints[ k ].x =
-					                shrt( G.curve[ i ]->s2d_x * ( double ) j );
-				G.curve[ i ]->xpoints[ k++ ].y = shrt( G.curve[ i ]->s2d_y
-						             * ( 1.0 - G.curve[ i ]->points[ j ].y ) );
-			}
+		recalc_XPoints_of_curve( cv );
 	}
 
 	/* Store new minimum and maximum and the new scale factor */
@@ -1242,8 +1548,8 @@ void accept_1d_data( long x_index, long curve, int type, void *ptr )
 	void *cur_ptr;
 	double data;
 	double new_y_scale;
-
-	long i, j, k;
+	Curve_1d *cv;
+	long i, j;
 
 
 	/* Check that the curve number is ok */
@@ -1295,13 +1601,15 @@ void accept_1d_data( long x_index, long curve, int type, void *ptr )
 			G.is_nx = UNSET;
 		}
 
-		for ( i = G.nc - 1; i >= 0; i-- )
+		for ( i = 0; i < G.nc; i++ )
 		{
-			G.curve[ i ]->points = T_realloc( G.curve[ i ]->points,
+			cv = G.curve[ i ];
+
+			cv->points = T_realloc( cv->points,
 								  ( x_index + len ) * sizeof( Scaled_Point ) );
-			G.curve[ i ]->xpoints = T_realloc( G.curve[ i ]->xpoints,
+			cv->xpoints = T_realloc( cv->xpoints,
 										( x_index + len ) * sizeof( XPoint ) );
-			G.curve[ i ]->s2d_x = ( double ) ( G.canvas.w - 1 ) / 
+			cv->s2d_x = ( double ) ( G.canvas.w - 1 ) / 
 				                                       ( double ) ( G.nx - 1 );
 		}
 
@@ -1338,23 +1646,23 @@ void accept_1d_data( long x_index, long curve, int type, void *ptr )
 		{
 			new_y_scale = 1.0 / ( rw_y_max - rw_y_min );
 
-			for ( i = G.nc - 1; i >= 0; i-- )
+			for ( i = 0; i < G.nc; i++ )
 			{
+				cv = G.curve[ i ];
 				for ( j = 0; j < G.nx; j++ )
 				{
-					if ( G.curve[ i ]->points[ j ].exist )
-						G.curve[ i ]->points[ j ].y = new_y_scale *
-							( G.curve[ i ]->points[ j ].y / G.rw2s
-							  + G.rw_y_min - rw_y_min );
+					if ( cv->points[ j ].exist )
+						cv->points[ j ].y = new_y_scale
+							* ( cv->points[ j ].y / G.rw2s
+								+ G.rw_y_min - rw_y_min );
 				}
 
 				if ( ! G.is_fs )
 				{
-					G.curve[ i ]->s2d_y *= G.rw2s / new_y_scale;
-					G.curve[ i ]->y_shift *= new_y_scale / G.rw2s;
+					cv->s2d_y *= G.rw2s / new_y_scale;
+					cv->y_shift *= new_y_scale / G.rw2s;
 					if ( rw_y_max > G.rw_y_max )
-						G.curve[ i ]->y_shift +=
-							( rw_y_max - G.rw_y_max ) * new_y_scale;
+						cv->y_shift += ( rw_y_max - G.rw_y_max ) * new_y_scale;
 				}
 			}
 
@@ -1365,11 +1673,14 @@ void accept_1d_data( long x_index, long curve, int type, void *ptr )
 		{
 			new_y_scale = 1.0 / ( rw_y_max - rw_y_min );
 
-			for ( i = G.nc - 1; i >= 0; i-- )
+			for ( i = 0; i < G.nc; i++ )
+			{
+				cv = G.curve[ i ];
 				for ( j = 0; j < G.nx; j++ )
-					if ( G.curve[ i ]->points[ j ].exist )
-						G.curve[ i ]->points[ j ].y = new_y_scale *
-							( G.curve[ i ]->points[ j ].y - rw_y_min );
+					if ( cv->points[ j ].exist )
+						cv->points[ j ].y = new_y_scale
+							                * ( cv->points[ j ].y - rw_y_min );
+			}
 
 			G.rw2s = new_y_scale;
 			G.is_scale_set = SET;
@@ -1414,21 +1725,11 @@ void accept_1d_data( long x_index, long curve, int type, void *ptr )
 	if ( ! G.is_scale_set )
 		return;
 
-	for ( i = G.nc - 1; i >= 0; i-- )
+	for ( i = 0; i < G.nc; i++ )
 	{
 		if ( ! G.scale_changed && i != curve )
 			continue;
-		for ( k = 0, j = 0; j < G.nx; j++ )
-		{
-			if ( G.curve[ i ]->points[ j ].exist )
-			{
-				G.curve[ i ]->xpoints[ k ].x = shrt( G.curve[ i ]->s2d_x
-									         * ( j + G.curve[ i ]->x_shift ) );
-				G.curve[ i ]->xpoints[ k++ ].y = shrt( G.curve[ i ]->s2d_y *
-										  ( 1.0 - ( G.curve[ i ]->points[ j ].y
-											     + G.curve[ i ]->y_shift ) ) );
-			}
-		}
+		recalc_XPoints_of_curve( G.curve[ i ] );
 	}
 
 	G.scale_changed = UNSET;

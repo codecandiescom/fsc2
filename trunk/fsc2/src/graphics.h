@@ -20,23 +20,43 @@ typedef	struct {
 typedef struct {
 	Scaled_Point *points;
 	XPoint *xpoints;
-	bool active;
-	long count;
+	long count;            /* points in curve */
 
 	GC gc;
 
-	double s2d_x;          /* scaled to window data x scale factors */
-	double s2d_y;          /* scaled to window data y scale factors */
+	bool active;
 
-	double x_shift;
-	double y_shift;
+	double s2d_x;          /* scaled to display data x scale factors */
+	double s2d_y;          /* scaled to display data y scale factors */
 
+	double x_shift;        /* offset on scaled x data */
+	double y_shift;        /* offset on scaled y data */
+
+	bool up,               /* flag, set if data don't fit into canvas */
+		 down,
+		 left,
+		 right;
+
+	Pixmap up_arr,
+		   down_arr,
+		   left_arr,
+		   right_arr;
+
+	bool can_undo;
+
+	double old_s2d_x;
+	double old_s2d_y;
+	double old_x_shift;
+	double old_y_shift;
+
+	GC font_gc;             /* gc for font */
 } Curve_1d;
 
 
 typedef struct {
 	FL_OBJECT *obj;
 	Pixmap pm;
+	Pixmap pm_sec;
 	GC gc;                  /* gc for pixmap */
 
 	bool is_box;
@@ -85,7 +105,7 @@ typedef struct {
 	Canvas y_axis;
 	Canvas canvas;
 
-	int drag_c;
+	int drag_canvas;
 
 	Curve_1d *curve[ MAX_CURVES ];
 
@@ -100,6 +120,7 @@ void graphics_init( long dim, long nc, long nx, long ny,
 					double rwc_y_start, double rwc_y_delta,
 					char *x_label, char *y_label );
 void graphics_free( void );
+void free_graphics( void );
 void start_graphics( void );
 void stop_graphics( void );
 void accept_new_data( void );
