@@ -59,14 +59,16 @@
 
 extern char *prog_name;
 
-static struct {
+struct EXCEPTION_STRUCT {
 	const char      *file;
 	unsigned int    line;
 	Exception_Types exception_type;
 	unsigned char   is_thrown;
 	jmp_buf         env;
-} exception_stack[ MAX_NESTED_EXCEPTION ];
+};
 
+static struct EXCEPTION_STRUCT exception_stack[ MAX_NESTED_EXCEPTION ],
+							   stored_exceptions[ MAX_NESTED_EXCEPTION ];
 static int exception_stack_pos = -1;
 
 
@@ -93,7 +95,10 @@ jmp_buf *push_exception_frame( const char *file, int line )
 		exit( EXIT_FAILURE );
 	}
 
-	exception_stack[ ++exception_stack_pos ].file = file;
+	++exception_stack_pos;
+	stored_exceptions[ exception_stack_pos ] =
+										exception_stack[ exception_stack_pos ];
+	exception_stack[ exception_stack_pos ].file = file;
 	exception_stack[ exception_stack_pos ].line = line;
 	exception_stack[ exception_stack_pos ].is_thrown = 0;
 	return &exception_stack[ exception_stack_pos ].env;
@@ -120,6 +125,8 @@ void pop_exception_frame( const char *file, int line )
 		exit( EXIT_FAILURE );
 	}
 
+	exception_stack[ exception_stack_pos ] =
+									  stored_exceptions[ exception_stack_pos ];
 	exception_stack_pos--;
 }
 
