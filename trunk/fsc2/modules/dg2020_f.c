@@ -4,12 +4,19 @@
 
 
 #include "dg2020.h"
+#include "gpib.h"
+
+
+/* name of device as given in GPIB configuration file /etc/gpib.conf */
+
+#define DEVICE_NAME "DG2020"
 
 
 
 static bool dg2020_is_needed;
 static DG2020 dg2020;
-static PULSE *Pulses;
+static PULSE *Pulses = NULL;
+
 
 
 /*----------------------------------------------------*/
@@ -19,6 +26,9 @@ int dg2020_init_hook( void )
 {
 	int i;
 
+
+	dg2020.need_update = UNSET;
+	dg2020.is_running = UNSET;
 
 	/* First we test that the name entry in the pulser structure is NULL,
 	   otherwise we've got to assume, that another pulser driver has already
@@ -34,8 +44,12 @@ int dg2020_init_hook( void )
 
 	pulser_struct.name = get_string_copy( "DG2020" );
 
-	/* Than we have to do in the init_hook is to set up the global structure
-	   for pulsers. */
+	/* Than we have to set up the global structure for the pulser, especially
+	   we have to set the pointers for the functions that will get called from
+	   pulser.c */
+
+	dg2020.need_update = UNSET;
+	dg2020.is_running = UNSET;
 
 	pulser_struct.set_timebase = set_timebase;
 
@@ -122,11 +136,22 @@ int dg2020_test_hook( void )
 	if ( Pulses == NULL )
 	{
 		dg2020_is_needed = UNSET;
-		eprint( WARN, "DG2020 loaded but no pulses defined.\n" );
+		eprint( WARN, "DG2020 loaded but no pulses are defined.\n" );
 		return 1;
 	}
 
+	/* Check consistency of pulser settings and do everything to setup the
+	   pulser for the test run */
+
 	check_consistency( );
+
+	/* We need some somewhat different functions for setting some of the
+	   pulser properties */
+
+	pulser_struct.set_pulse_position = change_pulse_position;
+	pulser_struct.set_pulse_length = change_pulse_length;
+	pulser_struct.set_pulse_position_change = change_pulse_position_change;
+	pulser_struct.set_pulse_length_change = change_pulse_length_change;
 
 	return 1;
 }
@@ -140,6 +165,39 @@ int dg2020_exp_hook( void )
 	if ( ! dg2020_is_needed )
 		return 1;
 
+	/* Initialize the device */
+
+	if ( ! dg2020_init( DEVICE_NAME ) )
+	{
+		eprint( FATAL, "DG2020: Failure to initialize the pulser.\n" );
+		THROW( EXCEPTION );
+	}
+
+	/* Now we have to really setup the pulser */
+
+
+
+	/* Finally we start the pulser */
+
+	if ( ! dg2020_run( 1 ) )
+	{
+		eprint( FATAL, "%s:%ld: DG2020: Communication with pulser "
+				"failed.\n", Fname, Lc );
+		THROW( EXCEPTION );
+	}
+
+	return 1;
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+int dg2020_end_of_exp_hook( void )
+{
+	if ( ! dg2020_is_needed )
+		return 1;
+
 	return 1;
 }
 
@@ -149,8 +207,35 @@ int dg2020_exp_hook( void )
 
 void dg2020_exit_hook( void )
 {
+	FUNCTION *f;
+	PULSE *p, *np;
+	int i;
+
+
 	if ( ! dg2020_is_needed )
 		return;
+
+	/* free all the memory allocated within the module */
+
+	for ( p = Pulses; p != NULL; p = np )
+	{
+		if ( p->channel != NULL )
+			T_free( p->channel );
+		
+		if ( p->num_repl != 0 )
+			T_free( p->repl_list );
+
+		np = p->next;
+		T_free( p );
+	}
+
+	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
+	{
+		f = &dg2020.function[ i ];
+
+		if ( f->pulses != NULL )
+			T_free( f->pulses );
+	}
 }
 
 
@@ -623,6 +708,8 @@ static bool new_pulse( long pnum )
 	cp->is_maxlen = UNSET;
 	cp->num_repl = 0;
 	cp->is_a_repl = UNSET;
+	cp->channel = NULL;
+	cp->need_update = UNSET;
 
 	return OK;
 }
@@ -1485,13 +1572,14 @@ static void basic_functions_check( void )
 				THROW( EXCEPTION );
 			}
 
-			/* No phase setup has been done for the function */
+			/* No phase setup has been done for this phase function */
 
 			if ( ! f->is_phs )
 			{
 				eprint( FATAL, "DG2020: Missing data on how to convert the "
-						"pulse phases into pod outputs for function `%s'.\n",
-						Function_Names[ i ] );
+						"pulse phases into pod outputs for function `%s'. "
+						"Add a %s_SETUP command in the ASSIGNMENTS section.\n",
+						Function_Names[ i ], Function_Names[ i ] );
 				THROW( EXCEPTION );
 			}
 		}
@@ -1753,9 +1841,50 @@ static void pulse_start_setup( void )
 				THROW( EXCEPTION );
 			}
 		}
+
+		/* Assign the pulses to channels - if the function has pulses that
+		   need replacement pulses, the normal pulses, that doesn't need
+		   replacement are assigned to both channels, the pulses, that need
+		   replacement only to the first, and the replacement pulses to
+		   the second channel */
+
+		for ( j = 0; j < f->num_pulses; j++ )
+		{
+			p = f->pulses[ j ];
+			if ( p->num_repl == 0 && ! p->is_a_repl )
+				p->channel = T_malloc( 2 * sizeof( CHANNEL * ) );
+			else
+				p->channel = T_malloc( sizeof( CHANNEL * ) );
+
+			if ( p->num_repl == 0 && ! p->is_a_repl )
+			{
+				p->channel[ 0 ] = f->channel[ 0 ];
+				p->channel[ 1 ] = f->channel[ 1 ];
+			}
+			else
+			{
+				if ( p->num_repl != 0 )
+					p->channel[ 0 ] = f->channel[ 0 ];
+				if ( p->is_a_repl )
+					p->channel[ 1 ] = f->channel[ 1 ];
+			}
+		}
 	}
+
+	/* Now all the normal pulses are setup and we can calculate the the pulses
+	   needed for phase cycling */
+
+	create_phase_pulses( PULSER_CHANNEL_PHASE_1 );
+	create_phase_pulses( PULSER_CHANNEL_PHASE_2 );
 }
 
+
+/*---------------------------------------------------------------------------
+  Comparison function for two pulses: returns 0 if both pulses are replace-
+  ment pulses, -1 if only the second pulse is a replacement pulse or starts
+  at a late time and 1 if only the first pulse is a replacement pulse or the
+  second pulse starts earlier.
+---------------------------------------------------------------------------*/
 
 static int start_compare( const void *A, const void *B )
 {
@@ -1774,4 +1903,390 @@ static int start_compare( const void *A, const void *B )
 		return -1;
 
 	return 1;
+}
+
+
+/*-----------------------------------------------------------------------------
+  In this function the additional pulses needed for phase cycling in one of
+  the phase functions are created.
+-----------------------------------------------------------------------------*/
+
+
+void create_phase_pulses( int func )
+{
+	FUNCTION *f = &dg2020.function[ func ];
+	int i, j, l;
+	PULSE *p;
+
+	if ( ! f->is_used )
+		return;
+
+	for ( i = 0; i < f->phase_func->num_pulses; i++ )
+		for ( j = 0; j < ASeq[ 0 ].len; j++ )
+			for ( l = 0; l < 2; l++ )
+			{
+				p = new_phase_pulse( f, f->phase_func->pulses[ i ], j, l );
+				if ( p != NULL )
+				{
+					f->num_pulses++;
+					f->pulses = T_realloc( f->pulses, f->num_pulses
+										   * sizeof( PULSE * ) );
+					f->pulses[ f->num_pulses - 1 ] = p;
+				}
+			}
+}
+
+
+/*---------------------------------------------------------------------------
+  ---------------------------------------------------------------------------*/
+
+
+PULSE *new_phase_pulse( FUNCTION *f, PULSE *p, int pos, int pod )
+{
+	PULSE *np, *cp = Pulses;
+	int type;
+
+
+	/* Figure out the phase type - its stored in the Phase_Sequence the
+	   entry in the referenced pulses points to */
+
+	type = p->pc->sequence[ pos ];
+
+	/* No pulse needs creating if for the current phase type / pod combintion
+	   no voltage is needed */
+
+	if ( f->phs.var[ type ][ pod ] == 0 )
+		return NULL;
+
+	/* Get memory for a new pulse and append it to the list of pulses */
+
+	for ( np = Pulses; np != NULL; np = np->next )
+		cp = np;
+
+	np = T_malloc( sizeof( PULSE ) );
+
+	np->prev = cp;
+	cp->next = np;
+
+	np->next = NULL;
+	np->pc = NULL;
+
+	/* These artifical pulses get negative numbers */
+
+	np->num = ( np->prev->num >= 0 ) ? -1 : np->prev->num - 1;
+
+	/* Its function is the phase function it belongs to */
+
+	np->is_function = SET;
+	np->function = f;
+
+	/* Position and length and the changes are tentatively set to the
+	   properties of the pulse it is assigned to */
+
+	np->is_pos = SET;
+	np->pos = np->initial_pos = p->pos;
+	np->is_len = SET;
+	np->len = np->initial_len = p->len;
+	if ( ( np->is_dpos = p->is_dpos ) == SET )
+		np->dpos = np->initial_dpos = p->dpos;
+	if ( ( np->is_dlen = p->is_dlen ) == SET )
+		np->dlen = np->initial_dlen = p->dlen;
+
+	/* It's neither a replacement pulse nor needs it replacement */
+
+	np->num_repl = 0;
+	np->is_a_repl = UNSET;
+
+	/* Pick the right channel it belongs to */
+
+	np->channel = T_malloc( sizeof( CHANNEL * ) );
+	np->channel[ 0 ] = f->channel[ 2 * type + pod ];
+
+	/* it doesn't needs updates yet */
+
+	np->need_update = UNSET;
+
+	/* Finally set the pulse it's assigned to */
+
+	np->for_pulse = p;
+
+	return np;
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+static bool change_pulse_position( long pnum, double time )
+{
+	PULSE *p = get_pulse( pnum );
+
+
+	if ( time < 0 )
+	{
+		eprint( FATAL, "%s:%ld: DG2020: Invalid (negative) start position "
+				"for pulse %ld: %s.\n", Fname, Lc, pnum, ptime( time ) );
+		THROW( EXCEPTION );
+	}
+
+	p->old_pos = p->pos;
+	p->pos = double2ticks( time );
+
+	p->need_update = SET;
+	dg2020.need_update = SET;
+
+	/* stop the pulser */
+	
+	if ( ! TEST_RUN && ! dg2020_run( 0 ) )
+	{
+		eprint( FATAL, "%s:%ld: DG2020: Communication with pulser "
+				"failed.\n", Fname, Lc );
+		THROW( EXCEPTION );
+	}
+
+	return OK;
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+static bool change_pulse_length( long pnum, double time )
+{
+	PULSE *p = get_pulse( pnum );
+
+
+	if ( time < 0 )
+	{
+		eprint( FATAL, "%s:%ld: DG2020: Invalid (negative) length "
+				"for pulse %ld: %s.\n", Fname, Lc, pnum, ptime( time ) );
+		THROW( EXCEPTION );
+	}
+
+	p->old_len = p->len;
+	p->len = double2ticks( time );
+
+	p->need_update = SET;
+	dg2020.need_update = SET;
+
+	/* stop the pulser */
+	
+	if ( ! TEST_RUN && ! dg2020_run( 0 ) )
+	{
+		eprint( FATAL, "%s:%ld: DG2020: Communication with pulser "
+				"failed.\n", Fname, Lc );
+		THROW( EXCEPTION );
+	}
+
+	return OK;
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+static bool change_pulse_position_change( long pnum, double time )
+{
+	PULSE *p = get_pulse( pnum );
+
+
+	p->dpos = double2ticks( time );
+	p->is_dpos = SET;
+
+	return OK;
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+static bool change_pulse_length_change( long pnum, double time )
+{
+	PULSE *p = get_pulse( pnum );
+
+
+	p->dlen = double2ticks( time );
+	p->is_dlen = SET;
+
+	return OK;
+}
+
+
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+Var *pulser_start( Var *v )
+{
+	v = v;
+
+	if ( dg2020.need_update )
+	{
+		if ( TEST_RUN )
+			do_checks( );
+		else
+			do_update( );
+	}
+
+	if ( ! TEST_RUN )
+	{
+		if ( ! dg2020_run( 1 ) )
+		{
+			eprint( FATAL, "%s:%ld: DG2020: Communication with pulser "
+					"failed.\n", Fname, Lc );
+			THROW( EXCEPTION );
+		}
+	}
+
+	return vars_push( INT_VAR, 1 );
+}
+
+
+/*---------------------------------------------------------------------------
+  Function is called in test runs after pulses have been changed to check
+  if the new settings are still ok. The function also has to take care of
+  apply the resulting necessary changes to the phase cycling pulses.
+----------------------------------------------------------------------------*/
+
+static void do_checks( void )
+{
+}
+
+
+/*---------------------------------------------------------------------------
+  Function is called in the experiment after pulses have been changed to
+  update the pulser accordingly. No checking has to be done because this has
+  already been done in the test run. But similar to test runs also the
+  pulses used for phase cycling have to be updated (both in memory and
+  in reality in the pulser).
+----------------------------------------------------------------------------*/
+
+static void do_update( void )
+{
+
+	/* Finally commit all changes */
+
+	dg2020_update_data( );
+}
+
+
+/*------------------------------------------------------*/
+/* dg2020_init() initializes the Sony/Tektronix DG2020. */
+/* ->                                                   */
+/*  * symbolic name of the device (cf gpib.conf)        */
+/* <-                                                   */
+/*  * 1: ok, 0: error                                   */
+/*------------------------------------------------------*/
+
+static bool dg2020_init( const char *name )
+{
+	if ( gpib_init_device( name, &dg2020.device ) == FAILURE )
+        return FAIL;
+
+    /* Set pulser to short form of replies */
+
+    if ( gpib_write( dg2020.device, "VERB OFF", 8 ) == FAILURE ||
+         gpib_write( dg2020.device, "HEAD OFF", 8 ) == FAILURE )
+        return FAIL;
+
+	if ( gpib_write( dg2020.device, "STOP", 4 ) == FAILURE )
+		return FAIL;
+	dg2020.is_running = 0;
+
+	/* switch off remote command debugging function */
+
+	gpib_write( dg2020.device, "DEB:SNO:STAT OFF", 16 );
+
+	/* switch on phase lock for internal oscillator */
+
+	if ( gpib_write( dg2020.device, "SOUR:OSC:INT:PLL ON", 19 ) == FAILURE )
+		return FAIL;
+
+	/* delete all blocks */
+
+	if ( gpib_write( dg2020.device, "DATA:BLOC:DEL:ALL", 17 ) == FAILURE )
+		return FAIL;
+
+	/* remove all sequence definitions */
+
+	if ( gpib_write( dg2020.device, "DATA:SEQ:DEL:ALL", 16 ) == FAILURE )
+		return FAIL;
+
+	/* switch to manual update mode */
+
+	if ( gpib_write( dg2020.device, "MODE:UPD MAN", 12 ) == FAILURE )
+		return FAIL;
+
+	/* switch to repetition mode */
+
+	if ( gpib_write( dg2020.device, "MODE:STAT REP", 13 ) == FAILURE )
+		return FAIL;
+
+	/* set the time base */
+
+	dg2020_set_timebase( );
+
+    return OK;
+}
+
+/*-----------------------------------------------------------------*/
+/* dg2020_run() sets the run mode - either running or stopped - of */
+/* the the pulser after waiting for previous commands to finish.   */
+/* ->                                                              */
+/*  * state to be set - 1: START, 0: STOP                          */
+/* <-                                                              */
+/*  * 1: ok, 0: error                                              */
+/*-----------------------------------------------------------------*/
+
+static bool dg2020_run( bool flag )
+{
+	if ( flag == dg2020.is_running )
+		return OK;
+
+	if ( gpib_write( dg2020.device, flag ? "*WAI;STAR": "*WAI;STOP", 9 )
+		 == FAILURE )
+		return FAIL;
+	dg2020.is_running = flag;
+	return OK;
+}
+
+
+/*-------------------------------------------------------------*/
+/* dg2020_set_timebase() sets the internal clock oscillator    */
+/* of the pulser to the specified period. There might be small */
+/* deviations (in the order of a promille) between the speci-  */
+/* fied period and the actual period.                          */
+/* <-                                                          */
+/*  * 1: ok, 0: error                                          */
+/*-------------------------------------------------------------*/
+
+static bool dg2020_set_timebase( void )
+{
+	char cmd[ 30 ] = "SOUR:OSC:INT:FREQ ";
+
+
+	if ( dg2020.timebase < 4.999e-9 || dg2020.timebase > 10.001 )
+		return FAIL;
+
+	gcvt( 1.0 / dg2020.timebase, 4, cmd + strlen( cmd ) );
+	return gpib_write( dg2020.device, cmd, strlen( cmd ) ) == SUCCESS;
+}
+
+
+/*------------------------------------------------------*/
+/* dg2020_update_data() tells the pulser to update all  */
+/* channels according to the data send before - this is */
+/* necessary because we use the pulser in manual update */
+/* mode since this is faster than automatic update.     */
+/* ->                                                   */
+/*  * device number                                     */
+/* <-                                                   */
+/*  * 1: ok, 0: error                                   */
+/*------------------------------------------------------*/
+
+static bool dg2020_update_data( void )
+{
+	return gpib_write( dg2020.device, "DATA:UPD", 8 ) == SUCCESS;
 }

@@ -75,7 +75,6 @@ bool run( void )
 
 	/* Run all the experiment hooks - on failure reset GPIB bus */
 
-	exit_hooks_are_run = UNSET;
 	TRY
 	{
 		run_exp_hooks( );
@@ -83,7 +82,7 @@ bool run( void )
 	}
 	OTHERWISE
 	{
-		run_exit_hooks( );
+		run_end_of_exp_hooks( );
 		gpib_shutdown( );
 		set_buttons_for_run( 1 );
 		fl_set_cursor( FL_ObjWin( main_form->run ), XC_left_ptr );
@@ -97,7 +96,7 @@ bool run( void )
 	if ( ! setup_comm( ) )
 	{
 		eprint( FATAL, "Can't set up internal communication channels.\n" );
-		run_exit_hooks( );
+		run_end_of_exp_hooks( );
 		if ( need_GPIB )
 			gpib_shutdown( );
 		fl_set_cursor( FL_ObjWin( main_form->run ), XC_left_ptr );
@@ -162,7 +161,7 @@ bool run( void )
 	end_comm( );
 
 	fl_add_signal_callback( SIGCHLD, sigchld_handler, NULL );
-	run_exit_hooks( );
+	run_end_of_exp_hooks( );
 	if ( need_GPIB )
 		gpib_shutdown( );
 	stop_measurement( NULL, 1 );
@@ -317,7 +316,7 @@ void stop_measurement( FL_OBJECT *a, long b )
 
 	/* reset all the devices and finally the GPIB bus */
 
-	run_exit_hooks( );
+	run_end_of_exp_hooks( );
 	if ( need_GPIB )
 		gpib_shutdown( );
 
