@@ -26,9 +26,9 @@ CFLAGS    = -ggdb -O2 -Wall -Wwrite-strings -Wstrict-prototypes \
 			-Wmissing-prototypes -Wmissing-declarations -W
 LDFLAGS   = -Wl,-E
 LEX       = flex
-LFLAGS    = -B
+LFLAGS    = -B -P
 YACC      = bison
-YFLAGS    = -d -t
+YFLAGS    = -d -v -t -p
 INCLUDES  = ../include
 
 lib_sources   = rulbus_lib.c parser.c lexer.c rb8509.c rb8510.c \
@@ -52,20 +52,20 @@ librulbus.a: ${lib_sources:.c=.o} $(lib_headers)
 	$(CC) $(CFLAGS) -I$(INCLUDES) -c -o $@ $<
 
 %.c %.h: %.y $(lib_headers)
-	$(YACC) $(YFLAGS) -o $*.c $<
+	$(YACC) $(YFLAGS) rulbus_ -o $*.c $<
 
 %.c: %.l $(lib_headers) parser.h
-	$(LEX) $(LFLAGS) -o$@ $<
+	$(LEX) $(LFLAGS)rulbus_ -o$@ $<
 	sed -e 's/register char \*yy_cp, \*yy_bp;/register char \*yy_cp = NULL, \*yy_bp = NULL;/' $@ > $@.x
 	mv -f $@.x $@
 
 
 install:
-	install -d $(libdir)
-	install -d $(incdir)
-	install -m 644 librulbus.so $(libdir)
-	install -m 644 librulbus.a $(libdir)
-	install -m 644 rulbus.h $(incdir)
+	install -d $(lib_dir)
+	install -d $(incl_dir)
+	install -m 644 librulbus.so $(lib_dir)
+	install -m 644 librulbus.a $(lib_dir)
+	install -m 644 ../include/rulbus.h $(incl_dir)
 
 
 clean:

@@ -1,0 +1,133 @@
+#! /bin/sh
+#
+# $Id$
+#
+# Copyright (C) 2002-2003 Jens Thoms Toerring
+#
+# This init script tries to be conformant to LSB (Linux Standard Base
+# Specification), version 1.1.0. 
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+# To contact the author send email to:
+# Jens.Toerring@physik.fu-berlin.de
+
+### BEGIN INIT INFO
+# Provides:          rulbus_EPP
+# Required-Start:    $localfs $remote_fs $syslog
+# Required-Stop:     $localfs $remote_fs $syslog
+# Default-Start:     2 3 5
+# Default-Stop:      0 1 6
+# Short-Description: Loads rulbus_epp module and creates device files
+# Description:       The script tries to load or unload the module for the
+#                    Rulbus (Rijksuniversiteit Leiden BUS) paralled port
+#                    (EPP) interface. The module must already have been
+#                    installed successfully for the currently running kernel.
+#                    Beside loading or unloading the module also a device file
+#                    for the interface is created on start and deleted on stop.
+#					 Please note: Using this init script only makes sense when
+#					 a dynamically assigned major device number is used for the
+#					 module, otherwise demand-loading (via /etc/modules.conf)
+#					 should be used.
+### END INIT INFO
+
+. /lib/lsb/init-functions
+
+
+# Uncomment the following 5 lines if you're using SuSE and want to make
+# starting the Rulbus EPP module and creating device files dependent on an
+# entry like "START_RULBUS_EPP=yes" or "START_RULBUS_EPP=no" in /etc/rc.config
+
+# . /etc/rc.config
+# base=${0##*/}
+# link=${base#*[SK][0-9][0-9]}
+# test $link = $base && START_RULBUS_EPP=yes
+# test "$START_RULBUS_EPP" = yes || exit 0
+
+
+if [ -z $1 ]; then
+	log_failure_msg "Missing argument."
+	exit 2;
+fi
+
+case "$1" in
+    start)
+		lsmod | grep 'parport' > /dev/null 2>&1
+		if [ $? != 0 ]; then
+			modprobe -k parport > /dev/null 2>&1
+			if [ $? != 0 ]; then
+				log_failure_msg "Loading Rulbus EPP module failed because parport module can't be loaded."
+				exit 1
+			fi
+		fi
+		modprobe -k rulbus_epp > /dev/null 2>&1
+		if [ $? != 0 ]; then
+			log_failure_msg "Loading Rulbus EPP module failed."
+			exit 1
+		fi
+		grep 'devfs=only' /proc/cmdline > /dev/null 2>&1
+		if [ $? != 0 ]; then
+			major=`grep rulbus_epp /proc/devices | awk '{print $1}'`
+			if [ -z $major ]; then
+				log_failure_msg "Can't determine major device number for Rulbus EPP interface."
+				exit 1
+			fi
+			mknod /dev/rulbus_epp c $major 0
+			if [ $? != 0 ]; then
+				log_failure_msg "Creating device files for Rulbus EPP interface failed."
+				exit 1
+			fi
+			chmod 666 /dev/rulbus_epp
+		fi
+		test "$2" = "restart" || log_success_msg "Rulbus EPP support."
+		;;
+
+	 stop)
+		grep 'devfs=only' /proc/cmdline > /dev/null 2>&1
+		if [ $? != 0 ]; then
+			rm -f /dev/rulbus_epp
+			if [ $? != 0 ]; then
+				log_failure_msg "Deleting device files for Rulbus EPP interface failed."
+				exit 1
+			fi
+		fi
+		rmmod rulbus_epp > /dev/null 2>&1
+		if [ $? != 0 ]; then
+			log_failure_msg "Unloading Rulbus EPP module failed."
+			exit 1
+		fi
+		test "$2" = "restart" || log_success_msg "Stopping Rulbus EPP support."
+		;;
+
+	 restart|reload|force-reload)        # no reason here to differentiate...
+		$0 stop restart
+		$0 start restart && log_success_msg "Rulbus EPP support restarted."
+		;;
+
+	 status)
+		grep ni_daq /proc/devices
+		if [ $? = 0 ]; then
+			log_success_msg "Rulbus EPP support is up and running."
+			exit 0
+		else
+			log_failure_msg "Rulbus EPP support is not available."
+			exit 3
+		fi
+		;;
+    *)
+		echo "Usage: $0 {start|stop|restart|force-reload|reload|status}"
+		exit 1
+	;;
+esac

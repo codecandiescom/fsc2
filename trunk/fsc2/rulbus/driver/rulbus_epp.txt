@@ -1,0 +1,69 @@
+#
+# $Id$
+#
+
+Rulbus EPP Device Driver Description
+====================================
+
+The driver supports the parallel port EPP interface for the Rulbus
+(Rijksuniversiteit Leiden BUS). The driver supports the open(),
+close() and ioctl() system calls.
+
+All ioctl() data are passed via the following structure
+
+typedef struct {
+    unsigned char rack;
+    unsigned char offset;
+    unsigned char byte;
+    unsigned char *data;
+    size_t len;
+} RULBUS_EPP_IOCTL_ARGS;
+
+There are only two possible ioctl() requests, RULBUS_EPP_IOC_READ to read
+one or more bytes from a card and RULBUS_EPP_IOC_WRITE to write on or
+more bytes.
+
+
+RULBUS_EPP_IOC_READ
+-------------------
+
+When called with this request value, the 'rack' member of the structure
+must be set to the racks Rulbus rack number (between 0 and 15) and the
+'offset' member to the Rulbus address offset of the card to be read from,
+a number between 1 and 0xFE. The 'len' member must be set to the number
+of bytes to be read from the address, which must be at least 1. If 'len'
+is 1 the byte that has been read is returned in the 'byte' member of the
+structure, if 'len' is larger than 1 the bytes read are copied to the
+user supplied buffer pointed to by the 'data' member.
+
+On failure the ioctl() function returns -1 and 'errno' is set to a value
+indicating the reasons for the failure. If the device isn't open errno is
+set to ENODEV. If the 'rack' member is larger than 15, 'offset' not between
+1 and 0xFE or 'len' less than 1, or 'len' is larger than 1 and 'data' is
+NULL errno is set to EINVAL. If not enough memory can be allocated for
+internal buffers errno is set to ENOMEM. If the communication with the
+interface fails (usually due to a timeout) errno is set to EIO. On failure
+to copy the read data to the user supplied buffer errno is set to EACCES.
+
+
+RULBUS_EPP_IOC_WRITE
+--------------------
+
+When called with this request value, the 'rack' member of the structure
+must be set to the racks Rulbus rack number (between 0 and 15) and the
+'offset' member to the Rulbus address offset of the card to be read from,
+a number between 1 and 0xFE. The 'len' member must be set to the number
+of bytes to be written to the address, which must be at least 1. If 'len'
+is 1 the byte that will be written is expected to be stored in the 'byte'
+member of the structure, if 'len' is larger than 1 the bytes to be written
+are copied from the user supplied buffer pointed to by the 'data' member.
+
+On failure the ioctl() function returns -1 and 'errno' is set to a value
+indicating the reasons for the failure. If the device isn't open errno is
+set to ENODEV. If the 'rack' member is larger than 15, 'offset' not between
+1 and 0xFE or 'len' less than 1, or 'len' is larger than 1 and 'data' is
+NULL errno is set to EINVAL. If not enough memory can be allocated for
+internal buffers errno is set to ENOMEM. On failure to copy the data to
+be written from the user supplied buffer errno is set to EACCES. If the
+communication with the interface fails (usually due to a timeout) errno
+is set to EIO.

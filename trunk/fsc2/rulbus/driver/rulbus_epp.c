@@ -364,7 +364,7 @@ static int rulbus_ioctl( struct inode *inode_p, struct file *file_p,
 
 	if ( rulbus.dev == NULL || ! rulbus.is_claimed ) {
 		PDEBUG( "Device has been closed\n" );
-		return -EIO;
+		return -ENODEV;
 	}
 
 	if ( copy_from_user( &rulbus_arg, ( RULBUS_EPP_IOCTL_ARGS * ) arg,
@@ -415,6 +415,11 @@ static int rulbus_read( RULBUS_EPP_IOCTL_ARGS *rulbus_arg )
 		return -EINVAL;
 	}
 
+	if ( rulbus_arg->offset < 1 || rulbus_arg->offset > 0xFE ) {
+		PDEBUG( "Invalid address offset.\n" );
+		return -EINVAL;
+	}
+
 	if ( rulbus_arg->len < 1 ) {
 		PDEBUG( "Invalid number of bytes to be read.\n" );
 		return -EINVAL;
@@ -438,13 +443,6 @@ static int rulbus_read( RULBUS_EPP_IOCTL_ARGS *rulbus_arg )
 		{
 			PDEBUG( "Not enough memory for reading.\n" );
 			return -ENOMEM;
-		}
-
-		if ( copy_from_user( data, rulbus_arg->data,
-				     rulbus_arg->len ) ) {
-			kfree( data );
-			PDEBUG( "Can't read from user space\n" );
-			return -EACCES;
 		}
 	}
 
@@ -507,6 +505,11 @@ static int rulbus_write( RULBUS_EPP_IOCTL_ARGS *rulbus_arg )
 
 	if ( rulbus_arg->rack & 0xF0 ) {
 		PDEBUG( "Invalid rack number.\n" );
+		return -EINVAL;
+	}
+
+	if ( rulbus_arg->offset < 1 || rulbus_arg->offset > 0xFE ) {
+		PDEBUG( "Invalid address offset.\n" );
 		return -EINVAL;
 	}
 

@@ -140,6 +140,10 @@ a configuration file for the Rulbus. listing which devices are sitting
 in which racks. Please see the rulbus_lib.txt file in the 'lib' sub-
 directory for more information.
 
+Please note: For the parallel port (EPP) driver to function it is required
+that the parallel port of your computer the interface is connected to is
+able to use the EPP protocol. You may have to enable this in the BIOS.
+
 
 IV. Documentation
 =================

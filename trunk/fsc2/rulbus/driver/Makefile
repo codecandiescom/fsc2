@@ -68,8 +68,6 @@ ifeq ($(RULBUS_EPP_KERNEL_SOURCE),)
 		$(INSTALL) -m 644 $(MODULE) /lib/modules/misc;             \
 	fi
 endif
-	$(INSTALL) -d $(incl_dir)
-	$(INSTALL) -m 644 rulbus_epp.h $(incl_dir)
 
 clean:
 	$(RM) $(RMFLAGS) *.o *~

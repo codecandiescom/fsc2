@@ -39,7 +39,9 @@ extern "C" {
 typedef struct {
 	unsigned char rack;
 	unsigned char offset;
-	unsigned char data;
+	unsigned char byte;
+	unsigned char *data;
+	size_t len;
 } RULBUS_EPP_IOCTL_ARGS;
 
 
