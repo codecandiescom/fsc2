@@ -601,7 +601,7 @@ pack:
 	cd ..; tar -c fsc2 | gzip -c -9 > fsc2.tgz
 
 
-#
+# Creates the MANIFEST file with the list of relevant files
 
 manifest:
 	@$(MAKE) distclean
