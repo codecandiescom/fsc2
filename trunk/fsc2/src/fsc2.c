@@ -225,7 +225,7 @@ static int scan_args( int *argc, char *argv[ ], char **fname )
 
 			if ( argv[ cur_arg ][ 2 ] == '\0' && *argc == cur_arg + 1 )
 			{
-				fprintf( stder, "fsc2 -S: No input file.\n" );
+				fprintf( stderr, "fsc2 -S: No input file.\n" );
 				usage( );
 			}
 
@@ -305,14 +305,18 @@ static int scan_args( int *argc, char *argv[ ], char **fname )
 				*argc -= 2;
 			}
 
-			if ( ! isdigit( *bn ) || *( bn + 1 ) != '\0' ||
-				 *bn > '7' || *bn < '0')
+			if ( *( bn + 1 ) != '\0' || *bn < '1' || *bn > '3' )
 			{
 				fprintf( stderr, "fsc2 -sb %s: Invalid button number\n", bn );
 				usage( );
 			}
 
-			stop_button_mask = *bn - '0'
+			if ( *bn == '1' )
+				stop_button_mask = FL_LEFT_MOUSE;
+			if ( *bn == '2' )
+				stop_button_mask = FL_MIDDLE_MOUSE;
+			if ( *bn == '3' )
+				stop_button_mask = FL_RIGHT_MOUSE;
 		}
 
 		if ( argv[ cur_arg ][ 0 ] != '-' && *argc == cur_arg + 1 )

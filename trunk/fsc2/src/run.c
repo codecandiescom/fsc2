@@ -408,12 +408,23 @@ void run_sigchld_callback( FL_OBJECT *a, long b )
 
 void stop_measurement( FL_OBJECT *a, long b )
 {
-	a = a;                               /* keeps the compiler happy */
+	int bn;
+
 
 	if ( b == 0 )                        /* callback from stop button ? */
 	{
+
 		if ( child_pid != 0 )            /* child is still kicking... */
+		{
+			if ( stop_button_mask != 0 )
+			{
+				bn = fl_get_button_numb( a );
+				if ( bn != FL_SHORTCUT + 'S' && bn != stop_button_mask )
+					return;
+			}
+
 			kill( child_pid, DO_QUIT );
+		}
 		else                             /* child has already exited */
 		{
 			stop_graphics( );
