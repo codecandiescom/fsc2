@@ -43,7 +43,10 @@ struct IOBJECT {
 	FL_COORD x,               /* position and dimensions of object */
 		     y,
 		     w,
-		     h;
+			 h;
+
+	int wt;                   /* width and heigth of the bounding box */
+	int ht;                   /* of the object */
 
 	char *label;              /* object label */
 	char *help_text;          /* objects help text */

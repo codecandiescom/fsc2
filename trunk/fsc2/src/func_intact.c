@@ -31,26 +31,30 @@ struct {
 	int	WIN_MIN_WIDTH;
 	int	WIN_MIN_HEIGHT;
 
-	int	OBJ_HEIGHT;
-	int	OBJ_WIDTH;
+	int NORMAL_BUTTON_ADD_X;
+	int NORMAL_BUTTON_ADD_Y;
 
-	int	BUTTON_HEIGHT;
-	int	BUTTON_WIDTH;
-	int	NORMAL_BUTTON_DELTA;
+	int MENUE_ADD_X;
+	int MENUE_ADD_Y;
+
+	int PUSH_BUTTON_WIDTH;
+	int PUSH_BUTTON_HEIGHT;
+
+	int RADIO_BUTTON_WIDTH;
+	int RADIO_BUTTON_HEIGHT;
+
+	int IN_OUT_WIDTH;
+	int IN_OUT_HEIGHT;
+
+	int MENUE_MIN_WIDTH;
 
 	int	SLIDER_HEIGHT;
 	int	SLIDER_WIDTH;
 
-	int INPUT_HEIGHT;
-	int INPUT_WIDTH;
-
-	int	LABEL_VERT_OFFSET;
 	int	VERT_OFFSET;
 	int	HORI_OFFSET;
 
-	int	OFFSET_X0;
-	int	OFFSET_Y0;
-} FI_sizes = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+} FI_sizes;
 
 
 extern FL_resource xresources[ ];
@@ -66,15 +70,15 @@ static void f_objdel_parent( Var *v );
 static Var *f_obj_clabel_child( long ID, char *label );
 static Var *f_obj_xable_child( long ID, long state );
 static int tool_box_close_handler( FL_FORM *a, void *b );
-static FL_OBJECT *append_object_to_form( IOBJECT *io );
+static FL_OBJECT *append_object_to_form( IOBJECT *io, int *w, int *h );
 static void tools_callback( FL_OBJECT *ob, long data );
 static Var *f_tb_changed_child( Var *v );
 static Var *f_tb_wait_child( Var *v );
 
 
-
-/*------------------------------------------------------------*/
-/*------------------------------------------------------------*/
+/*---------------------------------------*/
+/* Function for initializing the toolbox */
+/*---------------------------------------*/
 
 void tool_box_create( long layout )
 {
@@ -90,59 +94,66 @@ void tool_box_create( long layout )
 
 	if ( GUI.G_Funcs.size == LOW )
 	{
+		FI_sizes.NORMAL_BUTTON_ADD_X = 15;
+		FI_sizes.NORMAL_BUTTON_ADD_Y = 15;
+
+		FI_sizes.MENUE_ADD_X         = 30;
+		FI_sizes.MENUE_ADD_Y         = 20;
+
+		FI_sizes.PUSH_BUTTON_WIDTH   = 30;
+		FI_sizes.PUSH_BUTTON_HEIGHT  = 30;
+
+		FI_sizes.RADIO_BUTTON_WIDTH  = 30;
+		FI_sizes.RADIO_BUTTON_HEIGHT = 30;
+
 		FI_sizes.WIN_MIN_WIDTH       = 30;
 		FI_sizes.WIN_MIN_HEIGHT      = 30;
 
-		FI_sizes.OBJ_HEIGHT          = 35;
-		FI_sizes.OBJ_WIDTH           = 140;
+		FI_sizes.IN_OUT_HEIGHT       = 25;
+		FI_sizes.IN_OUT_WIDTH        = 150;
 
-		FI_sizes.BUTTON_HEIGHT       = 35;
-		FI_sizes.BUTTON_WIDTH        = 150;
-		FI_sizes.NORMAL_BUTTON_DELTA = 5;
+		FI_sizes.MENUE_MIN_WIDTH     = 150;
 
 		FI_sizes.SLIDER_HEIGHT       = 25;
 		FI_sizes.SLIDER_WIDTH        = 150;
 
-		FI_sizes.INPUT_HEIGHT        = 25;
-		FI_sizes.INPUT_WIDTH         = 150;
-
-		FI_sizes.LABEL_VERT_OFFSET   = 15;
 		FI_sizes.VERT_OFFSET         = 10;
 		FI_sizes.HORI_OFFSET         = 10;
-
-		FI_sizes.OFFSET_X0           = 20;
-		FI_sizes.OFFSET_Y0           = 20;
 	}
 	else
 	{
+		FI_sizes.NORMAL_BUTTON_ADD_X = 20;
+		FI_sizes.NORMAL_BUTTON_ADD_Y = 20;
+
+		FI_sizes.MENUE_ADD_X         = 40;
+		FI_sizes.MENUE_ADD_Y         = 30;
+
+		FI_sizes.PUSH_BUTTON_WIDTH   = 40;
+		FI_sizes.PUSH_BUTTON_HEIGHT  = 40;
+
+		FI_sizes.RADIO_BUTTON_WIDTH  = 40;
+		FI_sizes.RADIO_BUTTON_HEIGHT = 40;
+
+		FI_sizes.IN_OUT_HEIGHT       = 25;
+		FI_sizes.IN_OUT_WIDTH        = 210;
+
+		FI_sizes.MENUE_MIN_WIDTH     = 210;
+
 		FI_sizes.WIN_MIN_WIDTH       = 50;
 		FI_sizes.WIN_MIN_HEIGHT      = 50;
 
-		FI_sizes.OBJ_HEIGHT          = 50;
-		FI_sizes.OBJ_WIDTH           = 210;
-
-		FI_sizes.BUTTON_HEIGHT       = 50;
-		FI_sizes.BUTTON_WIDTH        = 210;
-		FI_sizes.NORMAL_BUTTON_DELTA = 10;
-
-		FI_sizes.SLIDER_HEIGHT       = 35;
+		FI_sizes.SLIDER_HEIGHT       = 25;
 		FI_sizes.SLIDER_WIDTH        = 210;
 
-		FI_sizes.INPUT_HEIGHT        = 35;
-		FI_sizes.INPUT_WIDTH         = 210;
-
-		FI_sizes.LABEL_VERT_OFFSET   = 15;
-		FI_sizes.VERT_OFFSET         = 15;
+		FI_sizes.VERT_OFFSET         = 30;
 		FI_sizes.HORI_OFFSET         = 20;
-
-		FI_sizes.OFFSET_X0           = 20;
-		FI_sizes.OFFSET_Y0           = 20;
 	}
 }
 
 
-/*------------------------------------------------------------*/
-/*------------------------------------------------------------*/
+/*-------------------------------------------*/
+/* Function for finally deleting the toolbox */
+/*-------------------------------------------*/
 
 void tool_box_delete( void )
 {
@@ -180,8 +191,10 @@ Var *f_freeze( Var *v )
 }
 
 
-/*------------------------------------------------------------*/
-/*------------------------------------------------------------*/
+/*-------------------------------------------------------------*/
+/* Function that gets called via the message passing mechanism */
+/* when the child executes f_freeze().                         */
+/*-------------------------------------------------------------*/
 
 void parent_freeze( int freeze )
 {
@@ -304,8 +317,11 @@ Var *f_layout( Var *v )
 }
 
 
-/*------------------------------------------------------------*/
-/*------------------------------------------------------------*/
+/*----------------------------------------------------------------*/
+/* Part of the f_layout() function run by the child process only, */
+/* indirectly invoking f_layout() function in the parent via the  */
+/* message passing mechanism.                                     */
+/*----------------------------------------------------------------*/
 
 static Var *f_layout_child( long layout )
 {
@@ -375,8 +391,11 @@ Var *f_objdel( Var *v )
 }
 
 
-/*----------------------------------------------------------------------*/
-/*----------------------------------------------------------------------*/
+/*--------------------------------------------------------*/
+/* Part of the f_objdel() function run by the child only, */
+/* indirectly invoking f_objdel() function in the parent  */
+/* via the message passing mechanism.                     */
+/*--------------------------------------------------------*/
 
 static void f_objdel_child( Var *v )
 {
@@ -427,8 +446,9 @@ static void f_objdel_child( Var *v )
 }
 
 
-/*----------------------------------------------------------------------*/
-/*----------------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+/* Part of the f_objdel() function run by the parent exclusively */
+/*---------------------------------------------------------------*/
 
 static void f_objdel_parent( Var *v )
 {
@@ -483,8 +503,9 @@ static void f_objdel_parent( Var *v )
 }
 
 
-/*----------------------------------------------------------------------*/
-/*----------------------------------------------------------------------*/
+/*----------------------------------------------*/
+/* Function for changing the label of an object */
+/*----------------------------------------------*/
 
 Var *f_obj_clabel( Var *v )
 {
@@ -565,8 +586,11 @@ Var *f_obj_clabel( Var *v )
 }
 
 
-/*----------------------------------------------------------------------*/
-/*----------------------------------------------------------------------*/
+/*-----------------------------------------------------------*/
+/* Part of the f_ob_clabel() function run by the child only, */
+/* indirectly invoking f_obj_clabel() function in the parent */
+/* via the message passing mechanism.                        */
+/*-----------------------------------------------------------*/
 
 static Var *f_obj_clabel_child( long ID, char *label )
 {
@@ -612,8 +636,9 @@ static Var *f_obj_clabel_child( long ID, char *label )
 }
 
 
-/*----------------------------------------------------------------------*/
-/*----------------------------------------------------------------------*/
+/*----------------------------------------------*/
+/* Function for enabling or disabling an object */
+/*----------------------------------------------*/
 
 Var *f_obj_xable( Var *v )
 {
@@ -679,8 +704,11 @@ Var *f_obj_xable( Var *v )
 }
 
 
-/*----------------------------------------------------------------------*/
-/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------*/
+/* Part of the f_ob_xable() function run by the child only, */
+/* indirectly invoking f_obj_xable() function in the parent */
+/* via the message passing mechanism.                       */
+/*----------------------------------------------------------*/
 
 static Var *f_obj_xable_child( long ID, long state )
 {
@@ -809,8 +837,9 @@ void tools_clear( void )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*--------------------------------------------------------------------*/
+/* Function for redrawing the toolbox after changes have been applied */
+/*--------------------------------------------------------------------*/
 
 void recreate_Tool_Box( void )
 {
@@ -873,19 +902,16 @@ void recreate_Tool_Box( void )
 	if ( Tool_Box->has_been_shown )
 		needs_pos = SET;
 
+	Tool_Box->w = 2 * FI_sizes.VERT_OFFSET;
+	Tool_Box->h = 2 * FI_sizes.HORI_OFFSET;
+
 	for ( io = Tool_Box->objs; io != NULL; io = io->next )
 	{
-		append_object_to_form( io );
+		append_object_to_form( io, &Tool_Box->w, &Tool_Box->h );
 		last_io = io;
 	}
 
 	fl_end_form( );
-
-	Tool_Box->w = last_io->x + FI_sizes.OBJ_WIDTH + FI_sizes.OFFSET_X0;
-	Tool_Box->h = last_io->y + FI_sizes.OBJ_HEIGHT + FI_sizes.OFFSET_Y0;
-
-	if ( last_io->type == MENU )
-		Tool_Box->h += 10;
 
 	fl_set_form_size( Tool_Box->Tools, Tool_Box->w, Tool_Box->h );
 	fl_adjust_form_size( Tool_Box->Tools );
@@ -953,74 +979,91 @@ static int tool_box_close_handler( FL_FORM *a, void *b )
 /* to the right of the other objects.                                  */
 /*---------------------------------------------------------------------*/
 
-static FL_OBJECT *append_object_to_form( IOBJECT *io )
+static FL_OBJECT *append_object_to_form( IOBJECT *io, int *w, int *h )
 {
 	double prec;
 	char buf[ MAX_INPUT_CHARS + 1 ];
 	IOBJECT *nio;
 	long i;
+	int x, y, wt, ht;
 
 
-	/* Calculate the width and height of the new object */
+	/* Calculate the x- and y-position of the new object */
 
 	if ( io->prev == NULL )
 	{
-		io->x = FI_sizes.OFFSET_X0 + ( io->type == NORMAL_BUTTON ?
-									   FI_sizes.NORMAL_BUTTON_DELTA : 0 );
-		io->y = FI_sizes.OFFSET_Y0;
+		io->x = FI_sizes.VERT_OFFSET;
+		io->y = FI_sizes.HORI_OFFSET;
 	}
 	else
 	{
 		if ( Tool_Box->layout == VERT )
 		{
-			io->x = FI_sizes.OFFSET_X0 + ( io->type == NORMAL_BUTTON ?
-										   FI_sizes.NORMAL_BUTTON_DELTA : 0 );
-			io->y = io->prev->y + io->prev->h + FI_sizes.VERT_OFFSET +
-				( io->prev->type == NORMAL_SLIDER      ||
-				  io->prev->type == VALUE_SLIDER       ||
-				  io->prev->type == SLOW_NORMAL_SLIDER ||
-				  io->prev->type == SLOW_VALUE_SLIDER  ||
-				  io->prev->type == INT_INPUT          ||
-				  io->prev->type == FLOAT_INPUT        ||
-				  io->prev->type == INT_OUTPUT         ||
-				  io->prev->type == FLOAT_OUTPUT       ||
-				  io->prev->type == MENU ? 
-				  FI_sizes.LABEL_VERT_OFFSET : 0 );
+			io->x = FI_sizes.VERT_OFFSET;
+			io->y = io->prev->y + io->prev->ht;
+			if ( (  io->prev->type == NORMAL_BUTTON ||
+					io->prev->type == PUSH_BUTTON   ||
+					io->prev->type == RADIO_BUTTON     ) &&
+				 ( io->type == NORMAL_BUTTON ||
+				   io->type == PUSH_BUTTON   ||
+				   io->type == RADIO_BUTTON ) )
+				 io->y += FI_sizes.HORI_OFFSET / 2;
+			else
+				 io->y += FI_sizes.HORI_OFFSET;
 		}
 		else
 		{
-			io->x = io->prev->x + io->prev->w + FI_sizes.HORI_OFFSET
-				- ( io->type == NORMAL_BUTTON ?
-					FI_sizes.NORMAL_BUTTON_DELTA : 0 )
-				- ( io->prev->type == NORMAL_BUTTON ?
-					FI_sizes.NORMAL_BUTTON_DELTA : 0 );
-			io->y = FI_sizes.OFFSET_Y0;
+			io->x = io->prev->x + io->prev->wt + FI_sizes.VERT_OFFSET;;
+			io->y = FI_sizes.HORI_OFFSET;
 		}
 	}
 
 	switch ( io->type )
 	{
 		case NORMAL_BUTTON :
-			io->w = FI_sizes.BUTTON_WIDTH - 2 * FI_sizes.NORMAL_BUTTON_DELTA;
-			io->h = FI_sizes.BUTTON_HEIGHT;
+			if ( io->label != NULL )
+				fl_get_string_dimension( FL_NORMAL_STYLE, xcntl.buttonFontSize,
+										 io->label, strlen( io->label ),
+										 &io->w, &io->h );
+			else
+				io->w = io->h = 0;
+			io->wt = io->w += FI_sizes.NORMAL_BUTTON_ADD_X;
+			io->ht = io->h += FI_sizes.NORMAL_BUTTON_ADD_Y;
+
 			io->self = fl_add_button( FL_NORMAL_BUTTON, io->x, io->y,
 									  io->w, io->h, io->label );
 			fl_set_object_color( io->self, FL_MCOL, FL_GREEN );
 			break;
 
 		case PUSH_BUTTON :
-			io->w = FI_sizes.BUTTON_WIDTH;
-			io->h = FI_sizes.BUTTON_HEIGHT;
+			io->w = FI_sizes.PUSH_BUTTON_WIDTH;
+			io->h = FI_sizes.PUSH_BUTTON_HEIGHT;
 			io->self = fl_add_checkbutton( FL_PUSH_BUTTON, io->x, io->y,
 										   io->w, io->h, io->label );
+			if ( io->label != NULL )
+			{
+				fl_get_string_dimension( FL_NORMAL_STYLE, xcntl.buttonFontSize,
+										 io->label, strlen( io->label ),
+										 &io->wt, &io->ht );
+				io->wt += io->w + FI_sizes.PUSH_BUTTON_WIDTH;
+				if ( io->ht < io->h )
+					io->ht = io->h;
+			}
+			else
+			{
+				io->wt = io->w;
+				io->ht = io->h;
+			}
+
+			if ( io->ht > io->h )
+				fl_set_object_position( io->self, io->x,
+										io->y + ( io->ht - io->h ) / 2 );
+
 			fl_set_object_color( io->self, FL_MCOL, FL_YELLOW );
 			fl_set_button( io->self, io->state ? 1 : 0 );
 			break;
 
 		case RADIO_BUTTON :
-			io->w = FI_sizes.BUTTON_WIDTH;
-			io->h = FI_sizes.BUTTON_HEIGHT;
-
 			if ( io->group != NULL )
 				fl_addto_group( io->group );
 			else
@@ -1031,8 +1074,31 @@ static FL_OBJECT *append_object_to_form( IOBJECT *io )
 						nio->group = io->group;
 			}
 
+			io->w = FI_sizes.RADIO_BUTTON_WIDTH;
+			io->h = FI_sizes.RADIO_BUTTON_HEIGHT;
+
 			io->self = fl_add_round3dbutton( FL_RADIO_BUTTON, io->x, io->y,
 											 io->w, io->h, io->label );
+
+			if ( io->label != NULL )
+			{
+				fl_get_string_dimension( FL_NORMAL_STYLE, xcntl.buttonFontSize,
+										 io->label, strlen( io->label ),
+										 &io->wt, &io->ht );
+				io->wt += io->w + FI_sizes.RADIO_BUTTON_WIDTH;
+				if ( io->ht < io->h )
+					io->ht = io->h;
+			}
+			else
+			{
+				io->wt = io->w;
+				io->ht = io->h;
+			}
+
+			if ( io->ht > io->h )
+				fl_set_object_position( io->self, io->x,
+										io->y + ( io->ht - io->h ) / 2 );
+
 			fl_end_group( );
 
 			fl_set_object_color( io->self, FL_MCOL, FL_RED );
@@ -1044,6 +1110,27 @@ static FL_OBJECT *append_object_to_form( IOBJECT *io )
 			io->h = FI_sizes.SLIDER_HEIGHT;
 			io->self = fl_add_slider( FL_HOR_BROWSER_SLIDER, io->x, io->y,
 									  io->w, io->h, io->label );
+
+			if ( io->label != NULL )
+			{
+				fl_get_string_dimension( FL_NORMAL_STYLE, xcntl.labelFontSize,
+										 io->label, strlen( io->label ),
+										 &io->wt, &io->ht );
+				if ( io->wt < io->w )
+					io->wt = io->w;
+				io->ht += io->h;
+			}
+			else
+			{
+				io->wt = io->w;
+				io->ht = io->h;
+			}
+
+			if ( io->wt > io->w )
+				fl_set_object_position( io->self,
+										io->x + ( io->wt - io->w ) / 2,
+										io->y );
+
 			fl_set_slider_bounds( io->self, io->start_val, io->end_val );
 			fl_set_slider_value( io->self, io->value );
 			fl_set_slider_return( io->self, io->type == NORMAL_SLIDER ?
@@ -1061,6 +1148,27 @@ static FL_OBJECT *append_object_to_form( IOBJECT *io )
 			io->h = FI_sizes.SLIDER_HEIGHT;
 			io->self = fl_add_valslider( FL_HOR_BROWSER_SLIDER, io->x, io->y,
 										 io->w, io->h, io->label );
+
+			if ( io->label != NULL )
+			{
+				fl_get_string_dimension( FL_NORMAL_STYLE, xcntl.labelFontSize,
+										 io->label, strlen( io->label ),
+										 &io->wt, &io->ht );
+				if ( io->wt < io->w )
+					io->wt = io->w;
+				io->ht += io->h;
+			}
+			else
+			{
+				io->wt = io->w;
+				io->ht = io->h;
+			}
+
+			if ( io->wt > io->w )
+				fl_set_object_position( io->self,
+										io->x + ( io->wt - io->w ) / 2,
+										io->y );
+
 			fl_set_slider_bounds( io->self, io->start_val, io->end_val );
 			fl_set_slider_value( io->self, io->value );
 			fl_set_object_lsize( io->self, xcntl.sliderFontSize );
@@ -1079,10 +1187,31 @@ static FL_OBJECT *append_object_to_form( IOBJECT *io )
 			break;
 
 		case INT_INPUT :
-			io->w = FI_sizes.INPUT_WIDTH;
-			io->h = FI_sizes.INPUT_HEIGHT;
-			io->self = fl_add_input( FL_INT_INPUT, io->x, io->y, io->w, io->h,
-									 NULL );
+			io->w = FI_sizes.IN_OUT_WIDTH;
+			io->h = FI_sizes.IN_OUT_HEIGHT;
+			io->self = fl_add_input( FL_INT_INPUT, io->x, io->y,
+									 io->w, io->h, io->label );
+
+			if ( io->label != NULL )
+			{
+				fl_get_string_dimension( FL_NORMAL_STYLE, xcntl.labelFontSize,
+										 io->label, strlen( io->label ),
+										 &io->wt, &io->ht );
+				if ( io->wt < io->w )
+					io->wt = io->w;
+				io->ht += io->h;
+			}
+			else
+			{
+				io->wt = io->w;
+				io->ht = io->h;
+			}
+
+			if ( io->wt > io->w )
+				fl_set_object_position( io->self,
+										io->x + ( io->wt - io->w ) / 2,
+										io->y );
+
 			fl_set_object_lalign( io->self, FL_ALIGN_BOTTOM );
 			fl_set_input_return( io->self, FL_RETURN_END_CHANGED );
 			fl_set_input_maxchars( io->self, MAX_INPUT_CHARS );
@@ -1091,10 +1220,31 @@ static FL_OBJECT *append_object_to_form( IOBJECT *io )
 			break;
 
 		case FLOAT_INPUT :
-			io->w = FI_sizes.INPUT_WIDTH;
-			io->h = FI_sizes.INPUT_HEIGHT;
+			io->w = FI_sizes.IN_OUT_WIDTH;
+			io->h = FI_sizes.IN_OUT_HEIGHT;
 			io->self = fl_add_input( FL_FLOAT_INPUT, io->x, io->y,
-									 io->w, io->h, NULL );
+									 io->w, io->h, io->label );
+
+			if ( io->label != NULL )
+			{
+				fl_get_string_dimension( FL_NORMAL_STYLE, xcntl.labelFontSize,
+										 io->label, strlen( io->label ),
+										 &io->wt, &io->ht );
+				if ( io->wt < io->w )
+					io->w = io->w;
+				io->ht += io->h;
+			}
+			else
+			{
+				io->wt = io->w;
+				io->ht = io->h;
+			}
+
+			if ( io->wt > io->w )
+				fl_set_object_position( io->self,
+										io->x + ( io->wt - io->w ) / 2,
+										io->y );
+
 			fl_set_object_lalign( io->self, FL_ALIGN_BOTTOM );
 			fl_set_input_return( io->self, FL_RETURN_END_CHANGED );
 			fl_set_input_maxchars( io->self, MAX_INPUT_CHARS );
@@ -1103,10 +1253,31 @@ static FL_OBJECT *append_object_to_form( IOBJECT *io )
 			break;
 
 		case INT_OUTPUT :
-			io->w = FI_sizes.INPUT_WIDTH;
-			io->h = FI_sizes.INPUT_HEIGHT;
-			io->self = fl_add_input( FL_INT_INPUT, io->x, io->y, io->w, io->h,
-									 NULL );
+			io->w = FI_sizes.IN_OUT_WIDTH;
+			io->h = FI_sizes.IN_OUT_HEIGHT;
+			io->self = fl_add_input( FL_INT_INPUT, io->x, io->y,
+									 io->w, io->h, io->label );
+
+			if ( io->label != NULL )
+			{
+				fl_get_string_dimension( FL_NORMAL_STYLE, xcntl.labelFontSize,
+										 io->label, strlen( io->label ),
+										 &io->wt, &io->ht );
+				if ( io->wt < io->w )
+					io->wt = io->w;
+				io->ht += io->h;
+			}
+			else
+			{
+				io->wt = io->w;
+				io->ht = io->h;
+			}
+
+			if ( io->wt > io->w )
+				fl_set_object_position( io->self,
+										io->x + ( io->wt - io->w ) / 2,
+										io->y );
+
 			fl_set_object_boxtype( io->self, FL_EMBOSSED_BOX );
 			fl_set_object_lalign( io->self, FL_ALIGN_BOTTOM );
 			fl_set_input_return( io->self, FL_RETURN_ALWAYS );
@@ -1119,10 +1290,31 @@ static FL_OBJECT *append_object_to_form( IOBJECT *io )
 			break;
 
 		case FLOAT_OUTPUT :
-			io->w = FI_sizes.INPUT_WIDTH;
-			io->h = FI_sizes.INPUT_HEIGHT;
+			io->w = FI_sizes.IN_OUT_WIDTH;
+			io->h = FI_sizes.IN_OUT_HEIGHT;
 			io->self = fl_add_input( FL_FLOAT_INPUT, io->x, io->y,
-									 io->w, io->h, NULL );
+									 io->w, io->h, io->label );
+
+			if ( io->label != NULL )
+			{
+				fl_get_string_dimension( FL_NORMAL_STYLE, xcntl.labelFontSize,
+										 io->label, strlen( io->label ),
+										 &io->wt, &io->ht );
+				if ( io->wt < io->w )
+					io->wt = io->w;
+				io->ht += io->h;
+			}
+			else
+			{
+				io->wt = io->w;
+				io->ht = io->h;
+			}
+
+			if ( io->wt > io->w )
+				fl_set_object_position( io->self,
+										io->x + ( io->wt - io->w ) / 2,
+										io->y );
+
 			fl_set_object_boxtype( io->self, FL_EMBOSSED_BOX );
 			fl_set_object_lalign( io->self, FL_ALIGN_BOTTOM );
 			fl_set_input_return( io->self, FL_RETURN_ALWAYS );
@@ -1135,10 +1327,45 @@ static FL_OBJECT *append_object_to_form( IOBJECT *io )
 			break;
 
 		case MENU :
-			io->w = FI_sizes.INPUT_WIDTH;
-			io->h = FI_sizes.BUTTON_HEIGHT;
+			io->w = io->h = 0;
+			for ( i = 0; i < io->num_items; i++ )
+			{
+				fl_get_string_dimension( FL_NORMAL_STYLE, xcntl.choiceFontSize,
+										 io->menu_items[ i ],
+										 strlen( io->menu_items[ i ] ),
+										 &wt, &ht );
+				io->w = i_max( wt, io->w );
+				io->h = i_max( ht, io->h );
+			}
+
+			io->w += FI_sizes.MENUE_ADD_X;
+			if ( io->w < FI_sizes.MENUE_MIN_WIDTH )
+				io->w = FI_sizes.MENUE_MIN_WIDTH;
+			io->h += FI_sizes.MENUE_ADD_Y;
+
 			io->self = fl_add_choice( FL_NORMAL_CHOICE2, io->x, io->y,
 									  io->w, io->h, io->label );
+
+			if ( io->label != NULL )
+			{
+				fl_get_string_dimension( FL_NORMAL_STYLE, xcntl.labelFontSize,
+										 io->label, strlen( io->label ),
+										 &io->wt, &io->ht );
+				if ( io->wt < io->w )
+					io->wt = io->w;
+				io->ht += io->h;
+			}
+			else
+			{
+				io->wt = io->w;
+				io->ht = io->h;
+			}
+
+			if ( io->wt > io->w )
+				fl_set_object_position( io->self,
+										io->x + ( io->wt - io->w ) / 2,
+										io->y );
+
 			fl_set_object_lalign( io->self, FL_ALIGN_BOTTOM );
 			for ( i = 0; i < io->num_items; i++ )
 				fl_addto_choice( io->self, io->menu_items[ i ] );
@@ -1155,6 +1382,9 @@ static FL_OBJECT *append_object_to_form( IOBJECT *io )
 	fl_set_object_callback( io->self, tools_callback, 0 );
 	if ( io->help_text != NULL && *io->help_text != '\0' )
 		fl_set_object_helper( io->self, io->help_text );
+
+	*w = i_max( *w, io->x + io->wt + FI_sizes.VERT_OFFSET );
+	*h = i_max( *h, io->y + io->ht + FI_sizes.HORI_OFFSET );
 
 	return io->self;
 }
