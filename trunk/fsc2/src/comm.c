@@ -88,9 +88,20 @@
 
    The only problem still unaddressed is data sets exceeding the maximum
    size of a shared memory segment. But this limit seems to be rather high
-   (32768 kB !), so I hope this never going to happen...  If it should ever
+   (32768 kB!), so I hope this never going to happen...  If it should ever
    hapen this will result in the measurement getting stopped with an
    `internal communication error'.
+
+   A final problem that can't be handled by the program is what happens if the
+   program crashes without releasing the shared memory segments. In this case
+   these memory segments will remain intact since the system won't remove
+   them. To make it simpler to find and then remove orphaned shared memory
+   segments, i.e. segments that no process is interested in anymore, each
+   memory segment allocated by fsc2 is labeled by the four byte magic number
+   'fsc2' at its very start. This makes it easier to write a utility that
+   checks all shared memory segments of the system and deletes only the ones
+   which were created by fsc2.
+
 */
 
 
@@ -178,8 +189,8 @@ bool setup_comm( void )
 		return FAIL;
 	}
 
-	/* As every other shared memory segment we start it with some magic chars
-	   (fsc2) to make sure we could identify it as ours in vcase of need */
+	/* As every other shared memory segment we start it with the magic number
+	   'fsc2' so we can identify it later */
 
 	memcpy( raw_key, "fsc2", 4 * sizeof( char ) );
 	Key = ( KEY * ) ( ( char * ) raw_key + 4 );
@@ -197,9 +208,6 @@ bool setup_comm( void )
 
 void end_comm( void )
 {
-	struct shmid_ds shm_buf;
-
-
 	/* Handle remaining messages */
 
 	if ( message_queue_low != message_queue_high )
@@ -212,7 +220,7 @@ void end_comm( void )
 	/* Detach from and remove the shared memory segment */
 
 	shmdt( ( void * ) ( ( char * ) Key - 4 ) );
-	shmctl( Key_Area, IPC_RMID, &shm_buf );
+	shmctl( Key_Area, IPC_RMID, NULL );
 
 	/* Close parents side of read and write pipe */
 
@@ -235,27 +243,20 @@ void end_comm( void )
 
 void new_data_callback( FL_OBJECT *a, long b )
 {
-	struct shmid_ds shm_buf;
-
 	a = a;
 	b = b;
 
 	while ( message_queue_low != message_queue_high )
 	{
 		if ( Message_Queue[ message_queue_low ].type == REQUEST )
-			reader( NULL );
-		else
 		{
-			/* Lots of other stuff still to come... */
+			reader( NULL );
 
-			/* Finally remove the shared memory segment, we're done with it */
-
-			shmctl( Message_Queue[ message_queue_low ].shm_id,
-					IPC_RMID, &shm_buf );
+			message_queue_low++;
+			message_queue_low %= QUEUE_SIZE;
 		}
-
-		message_queue_low++;
-		message_queue_low %= QUEUE_SIZE;
+		else
+			accept_new_data( );
 	}
 }
 

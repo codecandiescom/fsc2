@@ -77,14 +77,14 @@ IMICRO   {INT}[\t \r]*"u"{UNIT}
 IMILLI   {INT}[\t \r]*"m"{UNIT}
 INONE    {INT}[\t \r]*{UNIT}
 IKILO    {INT}[\t \r]*"k"{UNIT}
-IMEGA    {INT}[\t \r]*"M"LUNIT}
+IMEGA    {INT}[\t \r]*"M"{UNIT}
 
 FNANO    {FLOAT}[\t \r]*"n"{UNIT}
 FMICRO   {FLOAT}[\t \r]*"u"{UNIT}
 FMILLI   {FLOAT}[\t \r]*"m"{UNIT}
 FNONE    {FLOAT}[\t \r]*{UNIT}
 FKILO    {FLOAT}[\t \r]*"k"{UNIT}
-FMEGA    {FLOAT}[\t \r]*"M"LUNIT}
+FMEGA    {FLOAT}[\t \r]*"M"{UNIT}
 
 INTs     {INT}[\t \r]*"nT"
 IUT      {INT}[\t \r]*"uT"
@@ -300,6 +300,8 @@ KEEP    [^\t" \n(\/*),;:=%\^\-\+]+
 {INONE}        unit_spec( yytext, 0, 0 );
 {IKILO}/(;|,)  unit_spec( yytext, 0, 3 );
 {IKILO}        unit_spec( yytext, 0, 3 );
+{IMEGA}/(;|,)  unit_spec( yytext, 0, 6 );
+{IMEGA}        unit_spec( yytext, 0, 6 );
 
 {FNANO}/(;|,)  unit_spec( yytext, 1, -9 );
 {FNANO}        unit_spec( yytext, 1, -9 );
@@ -311,6 +313,8 @@ KEEP    [^\t" \n(\/*),;:=%\^\-\+]+
 {FNONE}        unit_spec( yytext, 1, 0 );
 {FKILO}/(;|,)  unit_spec( yytext, 1, 3 );
 {FKILO}        unit_spec( yytext, 1, 3 );
+{FMEGA}/(;|,)  unit_spec( yytext, 1, 6 );
+{FMEGA}        unit_spec( yytext, 1, 6 );
 
 {INTs}/(;|,) unit_spec( yytext, 0, -5 );
 {INTs}       unit_spec( yytext, 0, -5 );
@@ -344,21 +348,21 @@ KEEP    [^\t" \n(\/*),;:=%\^\-\+]+
 "uT"        printf( "\x4utesla" );
 "mT"/(;|,)  printf( "\x4mtesla" );
 "mT"        printf( "\x4mtesla" );
-"T"/(;|,)
-"T"
+"T"/(;|,)   printf( "\x4tesla" );
+"T"         printf( "\x4tesla" );
 
-"n"{UNIT}(,|;) printf( "\x4nunit" );
-"n"{UNIT}      printf( "\x4nunit" );
-"u"{UNIT}(,|;) printf( "\x4uunit" );
-"u"{UNIT}      printf( "\x4uunit" );
-"m"{UNIT}(,|;) printf( "\x4munit" );
-"m"{UNIT}      printf( "\x4munit" );
-{UNIT}(,|;)
+"n"{UNIT}/(,|;) printf( "\x4nunit" );
+"n"{UNIT}       printf( "\x4nunit" );
+"u"{UNIT}/(,|;) printf( "\x4uunit" );
+"u"{UNIT}       printf( "\x4uunit" );
+"m"{UNIT}/(,|;) printf( "\x4munit" );
+"m"{UNIT}       printf( "\x4munit" );
+{UNIT}/(,|;)
 {UNIT}
-"k"{UNIT}(,|;) printf( "\x4kunit" );
-"k"{UNIT}      printf( "\x4kunit" );
-"M"{UNIT}(,|;) printf( "\x4megunit" );
-"M"{UNIT}      printf( "\x4megunit" );
+"k"{UNIT}/(,|;) printf( "\x4kunit" );
+"k"{UNIT}       printf( "\x4kunit" );
+"M"{UNIT}/(,|;) printf( "\x4megunit" );
+"M"{UNIT}       printf( "\x4megunit" );
 
 			/* all the rest is simply copied to the output */
 

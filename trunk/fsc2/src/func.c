@@ -1825,11 +1825,12 @@ getfile_retry:
 }
 
 
+/*---------------------------------------------------------------------*/
 /* This function is called by the functions for saving. If they didn't */
 /* get a file identifier it is assumed the user wants just one file    */
 /* that is opened at the first call of a function of the `save_xxx()'  */
-/* family of functions.     */
-
+/* family of functions.                                                */
+/*---------------------------------------------------------------------*/
 
 int get_save_file( Var **v, const char *calling_function )
 {
