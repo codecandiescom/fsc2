@@ -712,8 +712,6 @@ Var_T *vars_make( Var_Type_T type, Var_T *src )
 	ssize_t i;
 
 
-	CLOBBER_PROTECT( nv );
-
 	if ( src->flags & ON_STACK )
 	{
 		nv        = VAR_P T_malloc( sizeof *nv );
