@@ -66,6 +66,7 @@ void load_all_drivers( void )
 	   function list */
 
 	Max_Devices_of_a_Kind = 1;
+	Num_Pulsers = 0;
 
 	num_func = Num_Func;
 	for ( cd = Device_List; cd != NULL; cd = cd->next )
@@ -331,37 +332,36 @@ static void resolve_functions( Device *dev )
 {
 	size_t num;
 	void *cur;
-	Func *f = Fncts;
 
 
-	for ( num = 0; num < num_func; f++, num++ )
+	for ( num = 0; num < num_func; num++ )
 	{
 		/* Don't try to load functions that are not listed in `Functions' */
 
-		if ( ! f->to_be_loaded )
+		if ( ! Fncts[ num ].to_be_loaded )
 			continue;
 
 		dlerror( );                /* make sure it's NULL before we continue */
-		cur = dlsym( dev->driver.handle, f->name );
+		cur = dlsym( dev->driver.handle, Fncts[ num ].name );
 
-		if ( dlerror( ) != NULL )
+		if ( cur == NULL || dlerror( ) != NULL )
 			continue;
 
 		/* If the function is completely new just set the pointer to the
-		   place the function is to be found in the library and. If it's
-		   not the first device of the same kind (i.e. same generic_type
-		   field) also add a function with '#' and the number. Otherwise
-		   append a new function */
+		   place the function is to be found in the library. If it's not
+		   the first device of the same kind (i.e. same generic_type field)
+		   also add a function with '#' and the number. Otherwise append a
+		   new function */
 
-		if ( f->fnct == ( Var * ( * )( Var * ) ) NULL )
+		if ( Fncts[ num ].fnct == ( Var * ( * )( Var * ) ) 0 )
 		{
-			f->fnct = ( Var * ( * )( Var * ) ) cur;
-			f->device = dev;
+			Fncts[ num ].fnct = ( Var * ( * )( Var * ) ) cur;
+			Fncts[ num ].device = dev;
 			if ( dev->count != 1 )
 			{
 				eprint( NO_ERROR, UNSET, "Functions %s() and %s#%d() are both "
-						"defined by module `%s'.\n", f->name, f->name,
-						dev->count, dev->name );
+						"defined by module `%s'.\n", Fncts[ num ].name,
+						Fncts[ num ].name, dev->count, dev->name );
 				add_function( num, cur, dev );
 			}
 		}
@@ -460,6 +460,9 @@ static void resolve_generic_type( Device *dev )
 			dev->count++;
 
 	Max_Devices_of_a_Kind = i_max( Max_Devices_of_a_Kind, dev->count );
+
+	if ( ! strcmp( dev->generic_type, "pulser" ) )
+		Num_Pulsers++;
 }
 
 
