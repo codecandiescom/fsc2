@@ -186,7 +186,7 @@ $(addsuffix .so,$(simp_modules)): %.so: %.o
 # name and followed by the string "_incl" with "-I" and pass this to the
 # compiler.
 
-$(addsuffix .o$(simp_modules)): %.o: %.c $(cdir)/%.conf $(src_headers)
+$(addsuffix .o,$(simp_modules)): %.o: %.c $(cdir)/%.conf $(src_headers)
 	@incl="$(foreach i,$($(patsubst %.o,%_incl,$@)),-I$(i))";      \
 	echo "$(CC) $$incl $(CFLAGS) -c $(LFLAGS) $< -o $@";           \
 	$(CC) $$incl $(CFLAGS) -c $(LFLAGS) $< -o $@

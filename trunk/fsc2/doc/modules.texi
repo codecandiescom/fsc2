@@ -1147,22 +1147,24 @@ In both cases all you have to do is to edit the @file{Makefile} in the
 @code{simp_modules}, defined near the start of the file. The line
 defining this variable is at the moment (while I'm writing this):
 @example
-simp_modules  := User_Functions.c sr510.c sr530.c sr810.c sr830.c \
-                 aeg_s_band.c aeg_x_band.c er035m.c er035m_s.c \
-                 er035m_sa.c er035m_sas.c bh15.c keithley228a.c egg4402.c \
-                 kontron4060.c lakeshore330.c pt2025.c
+simp_modules  := User_Functions sr510 sr530 sr810 sr830 aeg_s_band        \
+				 aeg_x_band er035m er035m_s hp5340a er035m_sa er035m_sas  \
+				 bh15 keithley228a egg4402 kontron4060 lakeshore330       \
+				 pt2025 er032m ips20_4 $(s_band_list) ni6601 me6000       \
+				 thurlby330
 @end example
 @noindent
 (The @code{\} characters at the ends of the lines tell make that the
 line continues on the next line.) All you've got to do to include your
 new module is to append the name of the single @code{C} file you have
-written to this list, i.e.@: if it is called @file{abc.c} just change
-the last line to
+written to this list but without the @code{.c} extension, i.e.@: if it
+is called @file{abc.c} just change the last line to
 @example
-simp_modules  := User_Functions.c sr510.c sr530.c sr810.c sr830.c \
-                 aeg_s_band.c aeg_x_band.c er035m.c er035m_s.c \
-                 er035m_sa.c er035m_sas.c bh15.c keithley228a.c egg4402.c \
-                 kontron4060.c lakeshore330.c pt2025.c abc.c
+simp_modules  := User_Functions sr510 sr530 sr810 sr830 aeg_s_band        \
+				 aeg_x_band er035m er035m_s hp5340a er035m_sa er035m_sas  \
+				 bh15 keithley228a egg4402 kontron4060 lakeshore330       \
+				 pt2025 er032m ips20_4 $(s_band_list) ni6601 me6000       \
+				 thurlby330 abc
 @end example
 @noindent
 If you now re-compile it will also be compiled, a shareable library will
