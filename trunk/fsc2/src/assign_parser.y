@@ -46,6 +46,7 @@ static long Cur_PROT = PHASE_UNKNOWN_PROT;
 %token DET_GATE_TOKEN        /* DETECTION_GATE */
 %token RF_TOKEN              /* RADIO_FREQUENCY */
 %token RF_GATE_TOKEN         /* RADIO_FREQUENCY_GATE */
+%token PSH_TOKEN             /* PULSE_SHAPE */
 %token PH1_TOKEN             /* PHASE_1 */
 %token PH2_TOKEN             /* PHASE_2 */
 %token OI_TOKEN              /* OTHER_1 */
