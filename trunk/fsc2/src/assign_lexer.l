@@ -81,6 +81,10 @@ PHAS        ^[ \t]*PHA(SE)?S?:
 PREP        ^[ \t]*PREP(ARATION)?S?:
 EXP         ^[ \t]*EXP(ERIMENT)?:
 
+INT         [0-9]+
+EXPO        [EDed][+-]?{INT}
+FLOAT       ((([0-9]+"."[0-9]*)|([0-9]*"."[0-9]+)){EXPO}?)|({INT}{EXPO})
+
 P           P(ULSE)?_?{INT}
 
 F           F(UNC(TION)?)?
@@ -93,10 +97,6 @@ STR         \x5[^\x6]*\x6
 ESTR        \x5.*\x3\n.*\n
 
 IDENT       [A-Za-z]+[A-Za-z0-9_]*
-
-INT         [0-9]+
-EXPO        [EDed][+-]?{INT}
-FLOAT       ((([0-9]+"."[0-9]*)|([0-9]*"."[0-9]+)){EXPO}?)|({INT}{EXPO})
 
 MW          M(ICRO)?_?W(AVE)?(#{INT})?:?
 TWT         T(RAVELING)?_?W(AVE)?_?T(UBE)?(#{INT})?:?
@@ -122,18 +122,18 @@ PY			"+"?[yY]:?
 PMX			"-"[xX]:?
 PMY			"-"[yY]:?
 PCW         [cC][wW]
-POD1        P(OD)?_?1
-POD2        P(OD)?_?2
 ON          ON
 OFF         OFF
 
 DEL         ((DEL)|(DELAY)):?
 POD         P(OD)?
+POD1        {POD}_?1
+POD2        {POD}_?2
 CH          CH(ANNEL)?
 INV         INV(ERT(ED)?)?
 VH          V_?H(IGH)?
 VL          V_?L(OW)?
-CHN         [A-H][0-9]|(1[0-5])
+CHN         [A-H]([0-9]|(1[0-5]))
 
 
 TB          T(IME)?_?B(ASE)?(#{INT})?:?
