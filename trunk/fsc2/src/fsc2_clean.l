@@ -42,6 +42,8 @@
 #include <assert.h>
 #include <limits.h>
 #include <math.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #include "exceptions.h"
 #include "errno.h"
@@ -62,13 +64,14 @@ typedef unsigned char bool;
 
 int yylex( void );
 
-void include_handler( char *file );
-void xclose( YY_BUFFER_STATE primary_buf, YY_BUFFER_STATE *buf_state,
-			 FILE *primary_fp, FILE **fp, int *incl_depth );
-void unit_spec( char *text, int power );
-char *T_strdup( const char *string );
-void *T_malloc( size_t size );
-void *T_free( void *ptr );
+static void include_handler( char *file );
+static void xclose( YY_BUFFER_STATE primary_buf, YY_BUFFER_STATE *buf_state,
+					FILE *primary_fp, FILE **fp, int *incl_depth );
+static void unit_spec( char *text, int power );
+static char *T_strdup( const char *string );
+static void *T_malloc( size_t size );
+static void *T_free( void *ptr );
+static void lower_permissions( void );
 
 
 long Lc,
@@ -396,6 +399,8 @@ int main( int argc, char *argv[ ] )
 	mcheck( NULL );
 #endif
 
+	lower_permissions( );
+
 	/* Use stdin if no file name was passed to the program */
 
 	if ( argc < 2 )
@@ -475,7 +480,7 @@ int main( int argc, char *argv[ ] )
 /*-------------------------------------------------------*/
 /*-------------------------------------------------------*/
 
-void include_handler( char *file )
+static void include_handler( char *file )
 {
 	static YY_BUFFER_STATE primary_buf;
 	static YY_BUFFER_STATE buf_state[ MAX_INCLUDE_DEPTH ];
@@ -581,8 +586,8 @@ void include_handler( char *file )
 /*-------------------------------------------------------*/
 /*-------------------------------------------------------*/
 
-void xclose( YY_BUFFER_STATE primary_buf, YY_BUFFER_STATE *buf_state,
-			 FILE *primary_fp, FILE **fp, int *incl_depth )
+static void xclose( YY_BUFFER_STATE primary_buf, YY_BUFFER_STATE *buf_state,
+			 		FILE *primary_fp, FILE **fp, int *incl_depth )
 {
 	if ( *incl_depth > 0 )
 	{
@@ -607,7 +612,7 @@ void xclose( YY_BUFFER_STATE primary_buf, YY_BUFFER_STATE *buf_state,
 /* Takes combinations like "100ns" apart and writes them out as "100 nsec" */
 /*-------------------------------------------------------------------------*/
 
-void unit_spec( char *text, int power )
+static void unit_spec( char *text, int power )
 {
 	double dval;
 
@@ -676,7 +681,7 @@ void unit_spec( char *text, int power )
 /*-------------------------------------------------------*/
 /*-------------------------------------------------------*/
 
-void *T_malloc( size_t size )
+static void *T_malloc( size_t size )
 {
 	void *mem;
 
@@ -695,7 +700,7 @@ void *T_malloc( size_t size )
 /*-------------------------------------------------------*/
 /*-------------------------------------------------------*/
 
-void *T_free( void *ptr )
+static void *T_free( void *ptr )
 {
 #if defined MDEBUG
 	fprintf( stderr, "free:    %p\n", ptr );
@@ -711,7 +716,7 @@ void *T_free( void *ptr )
 /*-------------------------------------------------------*/
 /*-------------------------------------------------------*/
 
-char *T_strdup( const char *string )
+static char *T_strdup( const char *string )
 {
 	char *new;
 
@@ -726,4 +731,14 @@ char *T_strdup( const char *string )
 #endif
 
 	return new;
+}
+
+
+/*-------------------------------------------------------*/
+/*-------------------------------------------------------*/
+
+static void lower_permissions( void )
+{
+	seteuid( getuid( ) );
+	setegid( getgid( ) );
 }
