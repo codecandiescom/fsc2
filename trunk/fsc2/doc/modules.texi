@@ -1970,7 +1970,7 @@ etc.@: are integer multiples of this time base.
 
 
 @item bool set_timebase_level( int level )
-This function gets called when the @code{TIMEBASE} keyword is foundin 
+This function gets called when the @code{TIMEBASE} keyword is found in 
 the @code{ASSIGNMENTS} section, followed by either @code{TTL} or
 @code{ECL}, i.e.
 @example
