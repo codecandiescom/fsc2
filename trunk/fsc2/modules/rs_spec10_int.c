@@ -483,13 +483,23 @@ uns16 *rs_spec10_get_pic( uns32 *size )
 		region.pbin = 1;
 	}
 
-	/* The PVCAM library needs to load some additional data files.
-	   Unfortunately, these are looked for only in a single directory,
-	   the current working directory and, moreover, the library crashes
-	   the program when these data files are not found. Thus we must make
-	   sure they can get loaded by temporarily switching to the directory
-	   where the files reside. Hopefully, this problem will go away in
-	   the future versions of the library (but don't hold your breath). */
+	/* Last chance for plausibility checks... */
+
+	fsc2_assert( region.s2 <= rs_spec10->ccd.max_size[ X ] &&
+				 region.s2 > region.s1 &&
+				 egion.p2 <= rs_spec10->ccd.max_size[ Y ] &&
+				 region.p2 > region.p1 &&
+				 ( region.s2 - region.s1 + 1 ) % region.sbin == 0 &&
+				 ( region.p2 - region.p1 + 1 ) % region.pbin == 0 );
+
+	/* The PVCAM library needs to load some additional data files. Unfortuna-
+	   tely, these are looked for only in the current working directory and,
+	   moreover, the library crashes the program when these data files are not
+	   found. Thus we must make sure they can get loaded by temporarily
+	   switching to the directory where the files reside.  Hopefully, this
+	   problem will go away in the future versions of the library (but don't
+	   hold your breath, since the bug report I send more than one year ago
+	   nothing seems to have changed...) */
 
 	getcwd( cur_dir, PATH_MAX );
 	chdir( PVCAM_DATA_DIR );
@@ -536,11 +546,11 @@ uns16 *rs_spec10_get_pic( uns32 *size )
 	}
 #endif
 
-
 	/* Now we need memory for storing the new picture. The manual requires
 	   this memory to be protected against swapping, thus we should mlock()
-	   it - but since we would need root permissions to do so it's commented
-	   out for the time being. */
+	   it - but since this would need root permissions it's commented out
+	   for the time being - the example programs from Roper also don't mlock()
+	   the memory region... */
 
 	TRY
 	{
@@ -595,7 +605,8 @@ uns16 *rs_spec10_get_pic( uns32 *size )
 		do
 		{
 			stop_on_user_request( );
-			if ( ! pl_exp_check_status( rs_spec10->handle, &status, &dummy ) )
+			if ( ! pl_exp_check_status( rs_spec10->handle, &status, &dummy ) ||
+				 status == READOUT_NOT_ACTIVE || status == READOUT_FAILED )
 				rs_spec10_error_handling( );
 		} while ( status != READOUT_COMPLETE );
 
@@ -615,10 +626,15 @@ uns16 *rs_spec10_get_pic( uns32 *size )
 		RETHROW( );
 	}
 
+	/* According to the manual calling pl_exp_finish_seq( ) isn't necessary
+	   since were doing a single region, single exposure. */
+#if 0
     pl_exp_finish_seq( rs_spec10->handle, frame, 0 );
-	pl_exp_uninit_seq();
+#endif
 
-#else
+	pl_exp_uninit_seq( );
+
+#else /* if defined RS_SPEC10_TEST */
 	{
 		uns32 i;
 		unsigned long max_val = ~ ( uns16 ) 0;

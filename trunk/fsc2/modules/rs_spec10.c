@@ -77,8 +77,9 @@ int rs_spec10_init_hook( void )
 }
 
 
-/*--------------------------------------------------*/
-/*--------------------------------------------------*/
+/*-------------------------------------------*/
+/* Start of test hook function of the module */
+/*-------------------------------------------*/
 
 int rs_spec10_test_hook( void )
 {
@@ -95,9 +96,9 @@ int rs_spec10_test_hook( void )
 }
 
 
-/*--------------------------------------------------*/
-/* Start of experiment hook function for the module */
-/*--------------------------------------------------*/
+/*-------------------------------------------------*/
+/* Start of experiment hook function of the module */
+/*-------------------------------------------------*/
 
 int rs_spec10_exp_hook( void )
 {
@@ -109,9 +110,9 @@ int rs_spec10_exp_hook( void )
 }
 
 
-/*------------------------------------------------*/
-/* End of experiment hook function for the module */
-/*------------------------------------------------*/
+/*-----------------------------------------------*/
+/* End of experiment hook function of the module */
+/*-----------------------------------------------*/
 
 int rs_spec10_end_of_exp_hook( void )
 {
@@ -247,15 +248,15 @@ Var *ccd_camera_roi( Var *v )
 }
 
 
-/*----------------------------------------------------------------*/
-/* Function for setting the binning used with the next picture or */
-/* spectrum to be returned by the camera. The function expects to */
-/* get an array with 2 elements for the vertical and horizontal   */
-/* binning. A value of 0 indicates that the current binning value */
-/* should remain unchanged. Optionally, the function can get      */
-/* passed a second argument, a number or string for the type of   */
-/* binning (i.e. in hardware or software) to be used.             */
-/*----------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*/
+/* Function for setting the binning used with the next image or spectrum */
+/* to be returned by the camera. The function expects to get an array of */
+/* 2 elements, the vertical and horizontal binning factors. A value of 0 */
+/* indicates that the current binning value should remain unchanged.     */
+/* Optionally, the function can get passed a second argument, a number   */
+/* or string for the type of binning (i.e. in hardware or software) to   */
+/* be used.                                                              */
+/*-----------------------------------------------------------------------*/
 
 Var *ccd_camera_binning( Var *v )
 {
@@ -391,9 +392,9 @@ Var *ccd_camera_exposure_time( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	/* Requiring a maximum exposure time of one hour is a bit arbitrary,
-	   but it's hard to imagine that anyone will ever need such a long
-	   exposure time... ("640 kB will be enough for everyone" ;-) */
+	/* Accepting a maximum exposure time of "only" one hour is a bit arbitrary,
+	   but it's hard to imagine that anyone will ever need such a long exposure
+	   time... ("640 kB will be enough for everyone" ;-) */
 
 	if ( et > 3600.0 )
 	{
@@ -537,7 +538,7 @@ Var *ccd_camera_get_image( Var *v )
 			frame = rs_spec10_get_pic( &size );
 
 			/* There is a bug in the PVCAM library: For some hardware binning
-			   sizes the library needs more bytes than really required to hold
+			   sizes the library needs more bytes than are required to hold
 			   all points. In these cases the first element(s) of the returned
 			   array contains bogus values and the real data start only at
 			   some later elements. */
@@ -685,7 +686,7 @@ Var *ccd_camera_get_spectrum( Var *v )
 			frame = rs_spec10_get_pic( &size );
 
 			/* There is a bug in the PVCAM library: For some hardware binning
-			   sizes the library needs more bytes than really required to hold
+			   sizes the library needs more bytes than are required to hold
 			   all points. In these cases the first element(s) of the returned
 			   array contains bogus values and the real data start only at
 			   some later elements. */
