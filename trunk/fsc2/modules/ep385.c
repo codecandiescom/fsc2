@@ -426,7 +426,6 @@ Var *pulser_cw_mode( Var *v )
 		THROW( EXCEPTION );
 	}
 
-/*	ep385.mem_size = 128;*/
 	ep385.is_cw_mode = SET;
 	ep385.trig_in_mode = INTERNAL;
 	ep385.is_trig_in_mode = SET;
@@ -736,6 +735,7 @@ Var *pulser_next_phase( Var *v )
 
 		if ( ++f->next_phase >= f->pc_len )
 			f->next_phase = 0;
+		f->needs_update = SET;
 /*
 		if ( FSC2_MODE == EXPERIMENT )
 			for ( j = 0; j <= PHASE_CW - PHASE_PLUS_X; j++ )
@@ -757,9 +757,6 @@ Var *pulser_next_phase( Var *v )
 
 Var *pulser_phase_reset( Var *v )
 {
-/*
-	int j;
-*/
 	FUNCTION *f;
 	long phase_number;
 
@@ -814,6 +811,7 @@ Var *pulser_phase_reset( Var *v )
 		}
 
 		f->next_phase = 0;
+		f->needs_update = SET;
 /*
 		if ( FSC2_MODE == EXPERIMENT )
 			for ( j = 0; j <= PHASE_CW - PHASE_PLUS_X; j++ )

@@ -1726,7 +1726,8 @@ static Var *vars_get_lhs_pointer( Var *v, int n )
 
 static long vars_calc_index( Var *a, Var *v )
 {
-	int i, cur;
+	int i;
+	long cur;
 	long a_index;
 
 
@@ -1751,7 +1752,7 @@ static long vars_calc_index( Var *a, Var *v )
 		{
 			print( WARN, "Float variable used as index #%d for array '%s'.\n",
 				   i + 1, a->name );
-			cur = ( int ) v->val.dval - ARRAY_OFFSET;
+			cur = v->val.dval - ARRAY_OFFSET;
 		}
 
 		/* Check that the index is a number and not a '*' */
@@ -1767,8 +1768,8 @@ static long vars_calc_index( Var *a, Var *v )
 
 		if ( cur < 0 )
 		{
-			print( FATAL, "Invalid array index #%d (value=%d) for array '%s', "
-				   "minimum is %d.\n",
+			print( FATAL, "Invalid array index #%d (value=%ld) for array "
+				   "'%s', minimum is %d.\n",
 				   i + 1, cur + ARRAY_OFFSET, a->name, ARRAY_OFFSET );
 			THROW( EXCEPTION );
 		}
@@ -1781,12 +1782,12 @@ static long vars_calc_index( Var *a, Var *v )
 		   and readjust it to the currenty possible maximum value hoping that
 		   everthing will work out well in the experiment. */
 
-		if ( cur >= ( int ) a->sizes[ i ] )
+		if ( cur >= ( long ) a->sizes[ i ] )
 		{
 			if ( ! ( ( a->flags & IS_DYNAMIC ) && Internals.mode == TEST )
 				 || v->next != NULL || i != a->dim - 1 )
 			{
-				print( FATAL, "Invalid array index #%d (value=%d) for array "
+				print( FATAL, "Invalid array index #%d (value=%ld) for array "
 					   "'%s', maximum is %d.\n", i + 1, cur + ARRAY_OFFSET,
 					   a->name, a->sizes[ i ] - 1 + ARRAY_OFFSET );
 				THROW( EXCEPTION );
