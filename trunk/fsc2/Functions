@@ -68,7 +68,7 @@ lockin_ref_mode, 0, EXP;        // Get reference mode (SR8x0 only)
 lockin_ref_level, -1, ALL;      // Get or set reference level (SR8x0 only)
 
 
-// functions exported by the digitizer (TDS754A)
+// functions exported by the digitizer (TDS520, TDS520A, TDS744A, TDS754A)
 
 digitizer_define_window, -1, PREP;      // defines a cursor window
 digitizer_timebase, -1, PREP;           // set or get the time base
@@ -83,6 +83,7 @@ digitizer_get_amplitude, -1, EXP;
 digitizer_get_amplitude_fast, -1, EXP;
 
 digitizer_get_channel_number, 1, ALL;   // only for internal use !
+digitizer_meas_channel_ok, 1, ALL;      // only for internal use !
 
 
 // functions exported by the rf synthesizer (HP8647A)

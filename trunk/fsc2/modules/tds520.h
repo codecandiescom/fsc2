@@ -88,6 +88,7 @@ Var *digitizer_define_window( Var *v );
 Var *digitizer_timebase( Var *v );
 Var *digitizer_num_averages( Var *v );
 Var *digitizer_get_channel_number( Var *v );
+Var *digitizer_meas_channel_ok( Var *v );
 Var *digitizer_trigger_channel( Var *v );
 Var *digitizer_start_acquisition( Var *v );
 Var *digitizer_get_area( Var *v );
