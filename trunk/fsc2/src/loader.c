@@ -148,42 +148,6 @@ static int func_cmp( const void *a, const void *b )
 }
 
 
-/*--------------------------------------------*/
-/* Function tests if the device driver passed */
-/* to the function by name is loaded.         */
-/*--------------------------------------------*/
-
-bool exists_device( const char *name )
-{
-	Device *cd;
-
-	for ( cd = EDL.Device_List; cd != NULL; cd = cd->next )
-		if ( cd->is_loaded &&
-			 ! strcasecmp( strip_path( cd->name ), name ) )
-			return OK;
-
-	return FAIL;
-}
-
-
-/*-------------------------------------------------------------------*/
-/* Routine tests if a function passed to the routine by name exists. */
-/*-------------------------------------------------------------------*/
-
-bool exists_function( const char *name )
-{
-	size_t i;
-
-
-	for ( i = 0; i < Num_Func; i++ )
-		if ( Fncts[ i ].name != NULL && ! strcmp( Fncts[ i ].name, name ) &&
-			 Fncts[ i ].fnct != NULL )
-			return OK;
-
-	return FAIL;
-}
-
-
 /*-------------------------------------------------------------------*/
 /* Function links a library file with the name passed to it (after   */
 /* adding the extension '.so') and then tries to find all references */
@@ -268,11 +232,11 @@ static void resolve_hook_functions( Device *dev )
 
 
 	/* If there is function with the name of the library file and the
-	   appended string "_init_hook" store it and set corresponding flag
+	   appended string "_init_hook" store it and set the corresponding flag
 	   (the string will be reused for the other hook functions, so make
 	   it long enough that the longest name will fit into it). Strip any
-	   path before the device name - it may set via a symbolic link to some
-	   other directory than the normal module directory. */
+	   path before the device name - it may be set via a symbolic link to
+	   some other directory than the normal module directory. */
 
 	hook_func_name = T_malloc( strlen( strip_path( dev->name ) ) + 18 );
 	strcpy( hook_func_name, strip_path( dev->name ) );
@@ -285,7 +249,7 @@ static void resolve_hook_functions( Device *dev )
 	if ( dlerror( ) == NULL )
 		dev->driver.is_init_hook = SET;
 
-	/* Get test hook function if available */
+	/* Get the test hook function if available */
 
 	strcpy( app, "_test_hook" );
 	dlerror( );
@@ -294,7 +258,7 @@ static void resolve_hook_functions( Device *dev )
 	if ( dlerror( ) == NULL )
 		dev->driver.is_test_hook = SET;
 
-	/* Get end-of-test hook function if available */
+	/* Get the end-of-test hook function if available */
 
 	strcpy( app, "_end_of_test_hook" );
 	dlerror( );
@@ -303,7 +267,7 @@ static void resolve_hook_functions( Device *dev )
 	if ( dlerror( ) == NULL )
 		dev->driver.is_end_of_test_hook = SET;
 
-	/* Get pre-experiment hook function if available */
+	/* Get the pre-experiment hook function if available */
 
 	strcpy( app, "_exp_hook" );
 	dlerror( );
@@ -312,7 +276,7 @@ static void resolve_hook_functions( Device *dev )
 	if ( dlerror( ) == NULL )
 		dev->driver.is_exp_hook = SET;
 
-	/* Get end-of-experiment hook function if available */
+	/* Get the end-of-experiment hook function if available */
 
 	strcpy( app, "_end_of_exp_hook" );
 	dlerror( );
