@@ -1307,13 +1307,13 @@ Under these conditions a linker script (i.e.@: the file ending with the
 extension @code{map}) for e.g.@: a pulser with module name @code{abcd}
 may look like this:
 @example
-VERS_1.0 {
+VERS_1.0 @{
     global:    generic_type;
                device_name;
                abcd_*_hook;
                pulser_*;
     local:     *;
-};
+@};
 @end example
 
 All the interesting things are enclosed in curly braces. You have two
