@@ -1010,8 +1010,6 @@ sub longest_sequence {
 			if $duration[ 1 ] < $len - $self->{ 'delay' };
 	}
 
-	print STDOUT $self->{ 'name' } . ": " . $duration[ 0 ] . ", " . $duration[ 1 ] . "\n";
-
 	return @duration;
 }
 
