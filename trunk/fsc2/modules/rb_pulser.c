@@ -39,6 +39,7 @@ RULBUS_CLOCK_CARD clock_card[ NUM_CLOCK_CARDS ];
 RULBUS_DELAY_CARD delay_card[ NUM_DELAY_CARDS ];
 
 static void rb_pulser_card_setup( void );
+static bool is_running_at_start;
 
 
 /*------------------------------------------------------------------------*
@@ -112,6 +113,8 @@ int rb_pulser_init_hook( void )
 	rb_pulser.is_timebase = SET;
 #endif
 
+	rb_pulser.is_running = UNSET;
+
 	rb_pulser.is_trig_in_mode = UNSET;
 	rb_pulser.is_trig_in_slope = UNSET;
 	rb_pulser.is_rep_time = UNSET;
@@ -175,6 +178,7 @@ int rb_pulser_test_hook( void )
 
 	TRY
 	{
+		is_running_at_start = rb.pulser.is_running;
 		if ( rb_pulser.do_show_pulses )
 			rb_pulser_show_pulses( );
 		if ( rb_pulser.do_dump_pulses )
@@ -219,8 +223,7 @@ int rb_pulser_test_hook( void )
 /*----------------------------------------------------------------------*
  * Function called after the end of the test run, mostly used to finish
  * output for the functions for displaying and/or logging what pulses
- * have been set and when and then to bring the internal representation
- * of the pulser back to the initial state
+ * have been set to during the experiment
  *----------------------------------------------------------------------*/
 
 int rb_pulser_end_of_test_hook( void )
@@ -240,8 +243,6 @@ int rb_pulser_end_of_test_hook( void )
 		rb_pulser.show_file = NULL;
 	}
 
-	rb_pulser_full_reset( );
-
 	return 1;
 }
 
@@ -255,6 +256,9 @@ int rb_pulser_exp_hook( void )
 {
 	if ( ! rb_pulser.is_needed )
 		return 1;
+
+	rb.pulser.is_running = is_running_at_start;
+	rb_pulser_full_reset( );
 
 	/* Initialize the device */
 
@@ -270,11 +274,9 @@ int rb_pulser_exp_hook( void )
 }
 
 
-/*--------------------------------------------------------------------*
- * Function called at the end of the experiment - swicthes the pulser
- * of and then brings the internal representation of the pulser back
- * to the initial state so that a new experiment can be safely started
- *---------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*
+ * Function called at the end of the experiment - switches the pulser off 
+ *------------------------------------------------------------------------*/
 
 int rb_pulser_end_of_exp_hook( void )
 {
@@ -282,11 +284,6 @@ int rb_pulser_end_of_exp_hook( void )
 		return 1;
 
 	rb_pulser_exit( );
-
-	/* Finally reset the internal representation back to its initial state
-	   in case another experiment is started */
-
-	rb_pulser_full_reset( );
 
 	return 1;
 }
@@ -394,7 +391,7 @@ Var *pulser_state( Var *v )
 
 
 	if ( v == NULL )
-		return vars_push( INT_VAR, 1L );
+		return vars_push( INT_VAR, ( long ) rb_pulser.is_running );
 
 	state = get_boolean( v );
 

@@ -81,7 +81,7 @@ bool rb_pulser_store_timebase( double timebase )
 /*---------------------------------------------------------------*
  * Function for setting a delay for a function - negative delays
  * are only possible for INTERNAL trigger mode!
- *---------------------------------------------------------------*
+ *---------------------------------------------------------------*/
 
 bool rb_pulser_set_function_delay( int function, double delay )
 {
