@@ -1218,7 +1218,7 @@ void make_label_string( char *lstr, double num, int res )
 
    res++;
 
-	mag = ( int ) floor( log10( fabs( num ) ) );
+	mag = irnd( floor( log10( fabs( num ) ) ) );
 	if ( mag >= 0 )
 		mag++;
 

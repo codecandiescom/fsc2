@@ -562,7 +562,7 @@ Var *digitizer_num_averages( Var *v )
 	{
 		eprint( WARN, SET, "%s: Floating point number used as number "
 				"of averages in %s().\n", DEVICE_NAME, Cur_Func );
-		num_avg = lround( v->val.dval );
+		num_avg = lrnd( v->val.dval );
 	}
 	vars_pop( v );
 
@@ -656,7 +656,7 @@ Var *digitizer_record_length( Var *v )
 	{
 		eprint( WARN, SET, "%s: Floating point value used as record "
 				"length in %s().\n", DEVICE_NAME, Cur_Func );
-		rec_len = lround( v->val.dval );
+		rec_len = lrnd( v->val.dval );
 	}
 	else
 		rec_len = v->val.lval;

@@ -281,7 +281,7 @@ static double get_single_channel_data( Var *v )
 		{
 			eprint( WARN, SET, "%s: Floating point value used as channel "
 					"number in call of %s().\n", DEVICE_NAME, Cur_Func );
-			channel = lround( v->val.dval );
+			channel = lrnd( v->val.dval );
 		}
 	}
 

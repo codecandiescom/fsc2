@@ -305,7 +305,7 @@ static void release_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev,
 						scale_changed = change_x_range_2d( c );
 					else if ( G.cut_select == CUT_SELECT_X &&
 							  keymask & ShiftMask )
-						cut_show( X, lround(
+						cut_show( X, lrnd(
 							( double ) ( c->box_x + c->box_w )
 							/ G.curve_2d[ G.active_curve ]->s2d[ X ]
 							- G.curve_2d[ G.active_curve ]->shift[ X ] ) );
@@ -316,7 +316,7 @@ static void release_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev,
 						scale_changed = change_y_range_2d( c );
 					else if ( G.cut_select == CUT_SELECT_Y &&
 							  keymask & ShiftMask )
-						cut_show( Y, lround( ( double )
+						cut_show( Y, lrnd( ( double )
 							     ( G.y_axis.h - 1 - ( c->box_y + c->box_h ) )
 							     / G.curve_2d[ G.active_curve]->s2d[ Y ]
 						         - G.curve_2d[ G.active_curve]->shift[ Y ] ) );
@@ -1348,8 +1348,8 @@ void repaint_canvas_2d( Canvas *c )
 				a_index = -1;
 			else
 			{
-				a_index = G.nx * lround( floor( y_pos ) )
-					     + lround( floor( x_pos ) );
+				a_index = G.nx * lrnd( floor( y_pos ) )
+					     + lrnd( floor( x_pos ) );
 
 				if ( cv->points[ a_index ].exist )
 					z_pos = cv->rwc_start[ Z ] + cv->rwc_delta[ Z ]
@@ -1365,17 +1365,19 @@ void repaint_canvas_2d( Canvas *c )
 						/ cv->s2d[ Y ] - cv->shift[ Y ] );
 
 			strcpy( buf, " " );
-			make_label_string( buf + 1, x_pos, ( int ) floor( log10( fabs(
-				cv->rwc_delta[ X ] ) / cv->s2d[ X ] ) ) - 2 );
+			make_label_string( buf + 1, x_pos,
+							   ( int ) lrnd( floor( log10( fabs(
+							   cv->rwc_delta[ X ] ) / cv->s2d[ X ] ) ) - 2 ) );
 			strcat( buf, "   " ); 
 			make_label_string( buf + strlen( buf ), y_pos,
-							   ( int ) floor( log10( fabs( cv->rwc_delta[ Y ] )
-													 / cv->s2d[ Y ] ) ) - 2 );
+							   ( int ) lrnd( floor( log10(
+								       fabs( cv->rwc_delta[ Y ] )
+								       / cv->s2d[ Y ] ) ) - 2 ) );
 			if ( a_index != -1 )
 			{
 				strcat( buf, "   " ); 
 				make_label_string( buf + strlen( buf ), z_pos,
-					  ( int ) lround( floor( log10( fabs( cv->rwc_delta[ Z ] )
+					  ( int ) lrnd( floor( log10( fabs( cv->rwc_delta[ Z ] )
 													/ cv->s2d[ Z ] ) ) - 2 ) );
 			}
 			strcat( buf, " " );
@@ -1403,8 +1405,8 @@ void repaint_canvas_2d( Canvas *c )
 					index_1 = -1;
 				else
 				{
-					index_1 = G.nx * lround( floor( y_pos ) )
-						      + lrund( floor( x_pos ) );
+					index_1 = G.nx * lrnd( floor( y_pos ) )
+						      + lrnd( floor( x_pos ) );
 
 					if ( cv->points[ index_1 ].exist )
 						z_pos_1 = cv->rwc_start[ Z ] + cv->rwc_delta[ Z ]
@@ -1424,8 +1426,8 @@ void repaint_canvas_2d( Canvas *c )
 					index_2 = -1;
 				else
 				{
-					index_2 = G.nx * lround( floor( y_pos ) )
-						      + lround( floor( x_pos ) );
+					index_2 = G.nx * lrnd( floor( y_pos ) )
+						      + lrnd( floor( x_pos ) );
 
 					if ( cv->points[ index_2 ].exist )
 						z_pos_2 = cv->rwc_start[ Z ] + cv->rwc_delta[ Z ]
@@ -1635,7 +1637,7 @@ void make_scale_2d( Curve_2d *cv, Canvas *c, int coord )
 
 	d_start_fine = cv->s2d[ coord ] * ( rwc_start_fine - rwc_start ) /
 		                                                cv->rwc_delta[ coord ];
-	if ( lround( d_start_fine ) < 0 )
+	if ( lrnd( d_start_fine ) < 0 )
 		d_start_fine += d_delta_fine;
 
 	/* Calculate start index (in small tick counts) of first medium tick */
@@ -1645,10 +1647,10 @@ void make_scale_2d( Curve_2d *cv, Canvas *c, int coord )
 
 	d_start_medium = cv->s2d[ coord ] * ( rwc_start_medium - rwc_start ) /
 			                                            cv->rwc_delta[ coord ];
-	if ( lround( d_start_medium ) < 0 )
+	if ( lrnd( d_start_medium ) < 0 )
 		d_start_medium += medium_factor * d_delta_fine;
 
-	medium = lround( ( d_start_fine - d_start_medium ) / d_delta_fine );
+	medium = lrnd( ( d_start_fine - d_start_medium ) / d_delta_fine );
 
 	/* Calculate start index (in small tick counts) of first large tick */
 
@@ -1657,13 +1659,13 @@ void make_scale_2d( Curve_2d *cv, Canvas *c, int coord )
 
 	d_start_coarse = cv->s2d[ coord ] * ( rwc_start_coarse - rwc_start ) /
 			                                            cv->rwc_delta[ coord ];
-	if ( lround( d_start_coarse ) < 0 )
+	if ( lrnd( d_start_coarse ) < 0 )
 	{
 		d_start_coarse += coarse_factor * d_delta_fine;
 		rwc_start_coarse += coarse_factor * rwc_delta;
 	}
 
-	coarse = lround( ( d_start_fine - d_start_coarse ) / d_delta_fine );
+	coarse = lrnd( ( d_start_fine - d_start_coarse ) / d_delta_fine );
 
 	/* Now, finally we got everything we need to draw the axis... */
 

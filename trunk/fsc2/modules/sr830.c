@@ -294,7 +294,7 @@ Var *lockin_get_data( Var *v )
 			eprint( WARN, SET, "%s: Floating point value (parameter #%d) used "
 					"as channel number in call of `lockin_get_data'.\n",
 					DEVICE_NAME, i + 1 );
-			channels[ i ] = lround( v->val.dval );
+			channels[ i ] = lrnd( v->val.dval );
 		}
 
 		if ( channels[ i ] < 1 || channels[ i ] > NUM_CHANNELS )

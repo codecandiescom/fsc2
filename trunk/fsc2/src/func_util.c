@@ -278,8 +278,7 @@ Var *f_wait( Var *v )
 		THROW( EXCEPTION )
 	}
 
-	if ( lround( modf( how_long, &secs ) * 1.0e6 ) == 0 &&
-		 lround( secs ) == 0.0 )
+	if ( lrnd( modf( how_long, &secs ) * 1.0e6 ) == 0 && lrnd( secs ) == 0 )
 	{
 		eprint( WARN, SET, "Argument is less than 1 ms in function %s().\n",
 				Cur_Func );
@@ -292,8 +291,8 @@ Var *f_wait( Var *v )
 	/* Set everything up for sleeping */
 
     sleepy.it_interval.tv_sec = sleepy.it_interval.tv_usec = 0;
-	sleepy.it_value.tv_usec = lround( modf( how_long, &secs ) * 1.0e6 );
-	sleepy.it_value.tv_sec = ( long ) secs;
+	sleepy.it_value.tv_usec = lrnd( modf( how_long, &secs ) * 1.0e6 );
+	sleepy.it_value.tv_sec = lrnd( secs );
 
 	/* Now here comes the tricky part: We have to wait for either the SIGALRM
 	   or the DO_QUIT signal but must be immune to DO_SEND signals. A naive
@@ -398,7 +397,7 @@ Var *f_init_1d( Var *v )
 	{
 		eprint( WARN, SET, "Floating point value used as number of "
 				      "curves in %s().\n", Cur_Func );
-		G.nc = lround( v->val.dval );
+		G.nc = lrnd( v->val.dval );
 	}
 
 	if ( G.nc < 1 || G.nc > MAX_CURVES )
@@ -422,7 +421,7 @@ Var *f_init_1d( Var *v )
 	{
 		eprint( WARN, SET, "Floating point value used as number of "
 				      "points in %s().\n", Cur_Func );
-		G.nx = lround( v->val.dval );
+		G.nx = lrnd( v->val.dval );
 	}
 
 	if ( G.nx <= 0 )
@@ -529,7 +528,7 @@ Var *f_init_2d( Var *v )
 	{
 		eprint( WARN, SET, "Floating point value used as number of "
 				      "curves in %s().\n", Cur_Func );
-		G.nc = lround( v->val.dval );
+		G.nc = lrnd( v->val.dval );
 	}
 
 	if ( G.nc < 1 || G.nc > MAX_CURVES )
@@ -553,7 +552,7 @@ Var *f_init_2d( Var *v )
 	{
 		eprint( WARN, SET, "Floating point value used as number of points "
 				"in x-direction in %s().\n", Cur_Func );
-		G.nx = lround( v->val.dval );
+		G.nx = lrnd( v->val.dval );
 	}
 
 	if ( G.nx <= 0 )
@@ -573,7 +572,7 @@ Var *f_init_2d( Var *v )
 	{
 		eprint( WARN, SET, "Floating point value used as number of points "
 				"in y-direction in %s().\n", Cur_Func );
-		G.ny = lround( v->val.dval );
+		G.ny = lrnd( v->val.dval );
 	}
 
 	if ( G.ny <= 0 )
@@ -981,7 +980,7 @@ Var *f_rescale( Var *v )
 	{
 		eprint( WARN, SET, "Float number used as new number of points in "
 				"%s().\n", Cur_Func );
-		new_nx = lround( v->val.dval );
+		new_nx = lrnd( v->val.dval );
 	}
 
 	if ( new_nx < -1 )
@@ -1008,7 +1007,7 @@ Var *f_rescale( Var *v )
 		{
 			eprint( WARN, SET, "Float number used as new number of points "
 					"in %s().\n", Cur_Func );
-			new_ny = lround( v->val.dval );
+			new_ny = lrnd( v->val.dval );
 		}
 
 		if ( new_ny < -1 )
@@ -1354,7 +1353,7 @@ static DPoint *eval_display_args( Var *v, int *nsets )
 		if ( v->type == INT_VAR )
 			dp[ *nsets ].nx = v->val.lval - ARRAY_OFFSET;
 		else
-			dp[ *nsets ].nx = lround( v->val.dval - ARRAY_OFFSET );
+			dp[ *nsets ].nx = lrnd( v->val.dval - ARRAY_OFFSET );
 
 		if ( dp[ *nsets ].nx < 0 )
 		{
@@ -1382,7 +1381,7 @@ static DPoint *eval_display_args( Var *v, int *nsets )
 			if ( v->type == INT_VAR )
 				dp[ *nsets ].ny = v->val.lval - ARRAY_OFFSET;
 			else
-				dp[ *nsets ].ny = lround( v->val.dval - ARRAY_OFFSET );
+				dp[ *nsets ].ny = lrnd( v->val.dval - ARRAY_OFFSET );
 
 			if ( dp[ *nsets ].ny < 0 )
 			{
@@ -1428,7 +1427,7 @@ static DPoint *eval_display_args( Var *v, int *nsets )
 		if ( v->type == INT_VAR )
 			dp[ *nsets ].nc = v->val.lval - 1;
 		else
-			dp[ *nsets ].nc = lround( v->val.dval - 1 );
+			dp[ *nsets ].nc = lrnd( v->val.dval - 1 );
 
 		if ( dp[ *nsets ].nc < 0 || dp[ *nsets ].nc >= G.nc )
 		{
@@ -1503,7 +1502,7 @@ Var *f_clearcv( Var *v )
 				if ( TEST_RUN )
 					eprint( WARN, SET, "Floating point value used as curve "
 							"number in function %s().\n", Cur_Func );
-				curve = lround( v->val.dval );
+				curve = lrnd( v->val.dval );
 			}
 
 			/* Make sure the curve exists */

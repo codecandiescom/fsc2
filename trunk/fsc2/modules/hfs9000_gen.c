@@ -227,7 +227,7 @@ bool hfs9000_set_function_high_level( int function, double voltage )
 		THROW( EXCEPTION )
 	}
 
-	voltage = VOLTAGE_RESOLUTION * lround( voltage / VOLTAGE_RESOLUTION );
+	voltage = VOLTAGE_RESOLUTION * lrnd( voltage / VOLTAGE_RESOLUTION );
 
 	if ( voltage < MIN_POD_HIGH_VOLTAGE || voltage > MAX_POD_HIGH_VOLTAGE )
 	{
@@ -273,7 +273,7 @@ bool hfs9000_set_function_low_level( int function, double voltage )
 		THROW( EXCEPTION )
 	}
 
-	voltage = VOLTAGE_RESOLUTION * lround( voltage / VOLTAGE_RESOLUTION );
+	voltage = VOLTAGE_RESOLUTION * lrnd( voltage / VOLTAGE_RESOLUTION );
 
 	if ( voltage < MIN_POD_LOW_VOLTAGE || voltage > MAX_POD_LOW_VOLTAGE )
 	{
@@ -349,7 +349,7 @@ bool hfs9000_set_trigger_mode( int mode )
 
 bool hfs9000_set_trig_in_level( double voltage )
 {
-	voltage = VOLTAGE_RESOLUTION * lround( voltage / VOLTAGE_RESOLUTION );
+	voltage = VOLTAGE_RESOLUTION * lrnd( voltage / VOLTAGE_RESOLUTION );
 
 	if ( hfs9000.is_trig_in_level && hfs9000.trig_in_level != voltage )
 	{

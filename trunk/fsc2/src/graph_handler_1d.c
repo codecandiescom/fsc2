@@ -1143,11 +1143,11 @@ void repaint_canvas_1d( Canvas *c )
 
 				strcpy( buf, " " );
 				make_label_string( buf + 1, x_pos,
-					  ( int ) lround( floor( log10( fabs( G.rwc_delta[ X ] )
+								   irnd( floor( log10( fabs( G.rwc_delta[ X ] )
 												    / cv->s2d[ X ] ) ) - 2 ) );
 				strcat( buf, "   " ); 
 				make_label_string( buf + strlen( buf ), y_pos,
-								 ( int ) lround( floor( log10( fabs(
+								 irnd( floor( log10( fabs(
 								 G.rwc_delta[ Y ] ) / cv->s2d[ Y ] ) ) - 2 ) );
 				strcat( buf, " " );
 
@@ -1362,7 +1362,7 @@ void make_scale_1d( Curve_1d *cv, Canvas *c, int coord )
 
 	d_start_fine = cv->s2d[ coord ]
 		           * ( rwc_start_fine - rwc_start ) / G.rwc_delta[ coord ];
-	if ( lround( d_start_fine ) < 0 )
+	if ( lrnd( d_start_fine ) < 0 )
 		d_start_fine += d_delta_fine;
 
 	/* Calculate start index (in small tick counts) of first medium tick */
@@ -1372,10 +1372,10 @@ void make_scale_1d( Curve_1d *cv, Canvas *c, int coord )
 
 	d_start_medium = cv->s2d[ coord ]
 		             * ( rwc_start_medium - rwc_start ) / G.rwc_delta[ coord ];
-	if ( lround( d_start_medium ) < 0 )
+	if ( lrnd( d_start_medium ) < 0 )
 		d_start_medium += medium_factor * d_delta_fine;
 
-	medium = lround( ( d_start_fine - d_start_medium ) / d_delta_fine );
+	medium = lrnd( ( d_start_fine - d_start_medium ) / d_delta_fine );
 
 	/* Calculate start index (in small tick counts) of first large tick */
 
@@ -1384,13 +1384,13 @@ void make_scale_1d( Curve_1d *cv, Canvas *c, int coord )
 
 	d_start_coarse = cv->s2d[ coord ]
 		             * ( rwc_start_coarse - rwc_start ) / G.rwc_delta[ coord ];
-	if ( lround( d_start_coarse ) < 0 )
+	if ( lrnd( d_start_coarse ) < 0 )
 	{
 		d_start_coarse += coarse_factor * d_delta_fine;
 		rwc_start_coarse += coarse_factor * rwc_delta;
 	}
 
-	coarse = lround( ( d_start_fine - d_start_coarse ) / d_delta_fine );
+	coarse = lrnd( ( d_start_fine - d_start_coarse ) / d_delta_fine );
 
 	/* Now, finally we got everything we need to draw the axis... */
 

@@ -1684,6 +1684,17 @@ Var *f_islice( Var *v )
 		size = lrnd( v->val.dval );
 	}
 
+	if ( size <= 0 )
+	{
+		if ( v->type == INT_VAR )
+			eprint( FATAL, SET, "Negative value (%d) used as array size in "
+					"function %s().\n", v->val.lval, Cur_Func );
+		else
+			eprint( FATAL, SET, "Negative value (%f) used as array size in "
+					"function %s().\n", v->val.dval, Cur_Func );
+		THROW( EXCEPTION )
+	}
+
 	array = T_calloc( size, sizeof( long ) );
 	ret = vars_push( INT_ARR, array, size );
 	T_free( array );

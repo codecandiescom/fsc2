@@ -199,7 +199,7 @@ double hp8647a_get_att_from_table( double freq )
 
 	/* Reduce value to the resolution the attenuation can be set with */
 
-	return ATT_RESOLUTION * lround( att / ATT_RESOLUTION );
+	return ATT_RESOLUTION * lrnd( att / ATT_RESOLUTION );
 }
 
 

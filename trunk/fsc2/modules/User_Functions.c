@@ -187,7 +187,7 @@ static Var *get_phase_cycled_area_1( Var *v )
 				{
 					eprint( WARN, SET, "%s(): Floating point value used as "
 							"window number.\n", Cur_Func );
-					win_list[ i ] = lround( V->val.dval );
+					win_list[ i ] = lrnd( V->val.dval );
 				}
 
 				V = vars_pop( V );
@@ -428,7 +428,7 @@ static Var *get_phase_cycled_area_2( Var *v )
 			{
 				eprint( WARN, SET, "%s(): Floating point value used as "
 						"window number.\n", Cur_Func );
-				win_list[ i ] = lround( V->val.dval );
+				win_list[ i ] = lrnd( V->val.dval );
 			}
 
 			V = vars_pop( V );
@@ -606,7 +606,7 @@ static bool get_channel_number( Var *v, const char *func_name, long *channel )
 	{
 		eprint( WARN, SET, "%s(): Floating point number used as "
 				"argument.\n", func_name );
-		*channel = lround( v->val.dval );
+		*channel = lrnd( v->val.dval );
 	}
 
 	if ( ( func_ptr = func_get( "digitizer_meas_channel_ok", &acc ) )

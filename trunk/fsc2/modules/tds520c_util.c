@@ -242,8 +242,8 @@ static void tds520c_window_check_2( void )
 			dtb *= 1000.0;
 			fac *= 0.001;
 		}
-		cs = lround( TDS_POINTS_PER_DIV * dcs );
-		tb = lround( dtb );
+		cs = lrnd( TDS_POINTS_PER_DIV * dcs );
+		tb = lrnd( dtb );
 
 		if ( cs % tb )        /* window start not multiple of a point ? */
 		{
@@ -267,8 +267,8 @@ static void tds520c_window_check_2( void )
 			dtb *= 1000.0;
 			fac *= 0.001;
 		}
-		cd = lround( TDS_POINTS_PER_DIV * dcd );
-		tb = lround( dtb );
+		cd = lrnd( TDS_POINTS_PER_DIV * dcd );
+		tb = lrnd( dtb );
 
 		if ( labs( cd ) < tb )     /* window smaller than one point ? */
 		{
@@ -328,11 +328,11 @@ static void tds520c_window_check_3( void )
 
 		/* Take care: Numbers start from 1 ! */
 
-		w->start_num = lround( ( w->start + tds520c.trig_pos * window )
-							   * TDS_POINTS_PER_DIV / tds520c.timebase ) + 1;
-		w->end_num = lround( ( w->start + w->width
-							   + tds520c.trig_pos * window )
+		w->start_num = lrnd( ( w->start + tds520c.trig_pos * window )
 							 * TDS_POINTS_PER_DIV / tds520c.timebase ) + 1;
+		w->end_num = lrnd( ( w->start + w->width
+							 + tds520c.trig_pos * window )
+						   * TDS_POINTS_PER_DIV / tds520c.timebase ) + 1;
 
 		if ( w->end_num - w->start_num <= 0 )
         {

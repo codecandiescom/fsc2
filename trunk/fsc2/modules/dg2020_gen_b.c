@@ -223,7 +223,7 @@ bool dg2020_set_function_delay( int function, double delay )
 
 bool dg2020_set_function_high_level( int function, double voltage )
 {
-	voltage = VOLTAGE_RESOLUTION * lround( voltage / VOLTAGE_RESOLUTION );
+	voltage = VOLTAGE_RESOLUTION * lrnd( voltage / VOLTAGE_RESOLUTION );
 
 	if ( voltage < MIN_POD_HIGH_VOLTAGE || voltage > MAX_POD_HIGH_VOLTAGE )
 	{
@@ -251,7 +251,7 @@ bool dg2020_set_function_high_level( int function, double voltage )
 
 bool dg2020_set_function_low_level( int function, double voltage )
 {
-	voltage = VOLTAGE_RESOLUTION * lround( voltage / VOLTAGE_RESOLUTION );
+	voltage = VOLTAGE_RESOLUTION * lrnd( voltage / VOLTAGE_RESOLUTION );
 
 	if ( voltage < MIN_POD_LOW_VOLTAGE || voltage > MAX_POD_LOW_VOLTAGE )
 	{
@@ -344,7 +344,7 @@ bool dg2020_set_trigger_mode( int mode )
 
 bool dg2020_set_trig_in_level( double voltage )
 {
-	voltage = VOLTAGE_RESOLUTION * lround( voltage / VOLTAGE_RESOLUTION );
+	voltage = VOLTAGE_RESOLUTION * lrnd( voltage / VOLTAGE_RESOLUTION );
 
 	if ( dg2020.is_trig_in_level && dg2020.trig_in_level != voltage )
 	{

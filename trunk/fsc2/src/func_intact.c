@@ -272,7 +272,7 @@ Var *f_bcreate( Var *v )
 		{
 			eprint( WARN, SET, "Float variable used as button type in %s().\n",
 					Cur_Func );
-			type = lround( v->val.dval );
+			type = lrnd( v->val.dval );
 		}
 
 		if ( type != NORMAL_BUTTON &&
@@ -315,7 +315,7 @@ Var *f_bcreate( Var *v )
 			{
 				eprint( WARN, SET, "Float variable used as button ID in "
 						"%s().\n", Cur_Func );
-				coll = lround( v->val.dval );
+				coll = lrnd( v->val.dval );
 			}
 			else
 				coll = v->val.lval;
@@ -964,7 +964,7 @@ Var *f_screate( Var *v )
 		{
 			eprint( WARN, SET, "Float variable used as slider type in %s().\n",
 					Cur_Func );
-			type = lround( v->val.dval );
+			type = lrnd( v->val.dval );
 		}
 
 		if ( type != NORMAL_SLIDER && type != VALUE_SLIDER )
@@ -1187,7 +1187,7 @@ Var *f_screate( Var *v )
 	new_io->step = step;
 	new_io->value = 0.5 * ( end_val + start_val );
 	if ( step != 0.0 )
-		new_io->value = lround( ( new_io->value - start_val ) / step ) * step
+		new_io->value = lrnd( ( new_io->value - start_val ) / step ) * step
 		                + start_val;
 	new_io->label = label;
 	new_io->help_text = help_text;
@@ -1517,7 +1517,7 @@ Var *f_svalue( Var *v )
 	   allowed value */
 
 	if ( io->step != 0.0 )
-		io->value = lround( ( io->value - io->start_val ) / io->step )
+		io->value = lrnd( ( io->value - io->start_val ) / io->step )
 			        * io->step + io->start_val;
 
 	if ( ! TEST_RUN )
@@ -1575,7 +1575,7 @@ Var *f_icreate( Var *v )
 		{
 			eprint( WARN, SET, "Float variable used as in- or output "
 					"object type in function %s().\n", Cur_Func );
-			type = lround( v->val.dval );
+			type = lrnd( v->val.dval );
 		}
 
 		if ( type != INT_INPUT && type != FLOAT_INPUT &&
@@ -1617,7 +1617,7 @@ Var *f_icreate( Var *v )
 			eprint( SEVERE, SET, "Float value used as initial value for "
 					"new integer in- or output object in function %s().\n",
 					Cur_Func );
-			lval = lround( v->val.dval );
+			lval = lrnd( v->val.dval );
 		}
 		else
 		{
@@ -2196,7 +2196,7 @@ Var *f_ivalue( Var *v )
 	{
 		eprint( SEVERE, SET, "Float number used as integer in- or output "
 				"object value in %s().\n", Cur_Func );
-		io->val.lval = lround( v->val.dval );
+		io->val.lval = lrnd( v->val.dval );
 	}
 	else
 	{
@@ -2525,7 +2525,7 @@ static FL_OBJECT *append_object_to_form( IOBJECT *io )
 			prec = - floor( log10 ( ( io->end_val - io->start_val ) /
 									( 0.825 * io->w ) ) );
 			fl_set_slider_precision( io->self,
-									prec <= 0.0 ? 0 : ( int ) lround( prec ) );
+									 prec <= 0.0 ? 0 : ( int ) lrnd( prec ) );
 			if ( io->step != 0.0 )
 				fl_set_slider_step( io->self, io->step );
 			else

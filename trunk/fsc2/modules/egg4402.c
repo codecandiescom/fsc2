@@ -176,7 +176,7 @@ Var *boxcar_curve_length( Var *v )
 	{
 		eprint( WARN, SET, "%s: Floating point number used as numer of "
 				"points in function %s().\n", DEVICE_NAME, Cur_Func );
-		num_points = lround( v->val.dval );
+		num_points = lrnd( v->val.dval );
 	}
 
 	if ( ( v = vars_pop( v ) ) != NULL )
@@ -264,7 +264,7 @@ Var *boxcar_get_curve( Var *v )
 		{
 			eprint( WARN, SET, "%s: Floating point number used as curve "
 					"type in function %s().\n", DEVICE_NAME, Cur_Func );
-			curve_type = lround( v->val.dval );
+			curve_type = lrnd( v->val.dval );
 		}
 
 		if ( ( v = vars_pop( v ) ) == NULL )
@@ -361,7 +361,7 @@ Var *boxcar_get_curve( Var *v )
 		{
 			eprint( WARN, SET, "%s: Floating point number used as first "
 				"point in function %s().\n", DEVICE_NAME, Cur_Func );
-			first = lround( v->val.dval ) - 1;
+			first = lrnd( v->val.dval ) - 1;
 		}
 
 		if ( first < 0 || first >= max_points )
@@ -385,7 +385,7 @@ Var *boxcar_get_curve( Var *v )
 			{
 				eprint( WARN, SET, "%s: Floating point number used as last "
 						"point in function %s().\n", DEVICE_NAME, Cur_Func );
-				last = lround( v->val.dval ) - 1;
+				last = lrnd( v->val.dval ) - 1;
 			}
 
 			if ( last < 0 || last >= max_points )

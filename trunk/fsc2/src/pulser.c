@@ -141,14 +141,14 @@ void is_pulser_func( void *func, const char *text )
 double is_mult_ns( double val, const char *text )
 {
 	val *= 1.e9;
-	if ( fabs( val - lround( val ) ) > 1.e-2 )
+	if ( fabs( val - lrnd( val ) ) > 1.e-2 )
 	{
 		eprint( FATAL, SET, "%s has to be an integer multiple of 1 ns.\n",
 				text );
 		THROW( EXCEPTION )
 	}
 
-	return lround( val ) * 1.e-9;
+	return lrnd( val ) * 1.e-9;
 }
 
 
@@ -535,7 +535,7 @@ void p_set_rep_freq( Var *v )
 
 	/* Make sure we get a repeat time that's a multiple of 1 ns */
 
-	rep_time = lround( 1.0 / freq * 1.0e9 ) * 1.0e-9;
+	rep_time = lrnd( 1.0 / freq * 1.0e9 ) * 1.0e-9;
 
 	/* Finally call the function (if it exists) */
 

@@ -192,7 +192,7 @@ Var *temp_contr_sample_channel( Var *v )
 		{
 			eprint( WARN, SET, "%s: Float value used as channel channel "
 					"number in %s().\n", DEVICE_NAME, Cur_Func );
-			channel = lround( v->val.dval ) - 1;
+			channel = lrnd( v->val.dval ) - 1;
 		}
 
 		if ( channel != SAMPLE_CHANNEL_A && channel != SAMPLE_CHANNEL_B )
@@ -251,7 +251,7 @@ Var *temp_contr_sensor_unit( Var *v )
 		{
 			eprint( WARN, SET, "%s: Float value used as unit number in "
 					"%s().\n", DEVICE_NAME, Cur_Func );
-			unit = lround( v->val.dval );
+			unit = lrnd( v->val.dval );
 		}
 
 		if ( unit < UNIT_KELVIN || unit > UNIT_SENSOR )

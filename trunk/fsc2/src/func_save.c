@@ -1213,7 +1213,7 @@ static long do_printf( int file_num, Var *v )
 													cv->val.lval );
 							else
 								count += T_fprintf( file_num, fmt_start,
-													lround( cv->val.dval ) );
+													lrnd( cv->val.dval ) );
 
 							break;
 
@@ -1250,7 +1250,7 @@ static long do_printf( int file_num, Var *v )
 							else
 								count += T_fprintf( file_num, fmt_start,
 													( int ) cv->val.lval,
-													lround(
+													lrnd(
 														cv->next->val.dval ) );
 							break;
 
@@ -1293,7 +1293,7 @@ static long do_printf( int file_num, Var *v )
 								count += T_fprintf( file_num, fmt_start,
 													( int ) cv->val.lval,
 													( int ) cv->next->val.lval,
-													lround(
+													lrnd(
 													cv->next->next->val.dval )
 									               );
 							break;

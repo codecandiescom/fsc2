@@ -1514,7 +1514,7 @@ static void cut_release_handler( FL_OBJECT *obj, Window window,
 
 				case 4 :                       /* in z-axis window */
 					cut_show( CG.cut_dir,
-							  lround( ( double ) ( c->h - 1 - c->ppos[ Y ] )
+							  lrnd( ( double ) ( c->h - 1 - c->ppos[ Y ] )
 								    * ( ( CG.cut_dir == X ? G.nx : G.ny ) - 1 )
 									/ c->h ) );
 					break;
@@ -1650,9 +1650,9 @@ static void cut_motion_handler( FL_OBJECT *obj, Window window,
 
 				if ( c->box_y + c->box_h < 0 )
 					c->box_h = - c->box_y;
-				p_index = lround( ( double ) ( c->h - 1 - c->ppos[ Y ] )
-								  * ( ( CG.cut_dir == X ? G.nx : G.ny ) - 1 )
-								  / c->h );
+				p_index = lrnd( ( double ) ( c->h - 1 - c->ppos[ Y ] )
+								* ( ( CG.cut_dir == X ? G.nx : G.ny ) - 1 )
+								/ c->h );
 				if ( p_index != CG.index )
 				{
 					cut_show( CG.cut_dir, p_index );
@@ -1947,11 +1947,11 @@ static void repaint_cut_canvas( Canvas *c )
 
 			strcpy( buf, " " );
 			make_label_string( buf + 1, x_pos,
-					    ( int ) lround( floor( log10( fabs(
+					    irnd( floor( log10( fabs(
 				        scv->rwc_delta[ r_coord ] ) / cv->s2d[ X ] ) ) - 2 ) );
 			strcat( buf, "   " ); 
 			make_label_string( buf + strlen( buf ), y_pos,
-							  ( int ) lround( floor( log10( fabs(
+							  irnd( floor( log10( fabs(
 							  scv->rwc_delta[ Z ] ) / cv->s2d[ Y ] ) ) - 2 ) );
 			strcat( buf, " " );
 
@@ -2176,7 +2176,7 @@ static void cut_make_scale( Canvas *c, int coord )
 
 	d_start_fine = r_scale * ( rwc_start_fine - rwc_start )
 		           / cv2->rwc_delta[ r_coord ];
-	if ( lround( d_start_fine ) < 0 )
+	if ( lrnd( d_start_fine ) < 0 )
 		d_start_fine += d_delta_fine;
 
 	/* Calculate start index (in small tick counts) of first medium tick */
@@ -2186,10 +2186,10 @@ static void cut_make_scale( Canvas *c, int coord )
 
 	d_start_medium = r_scale * ( rwc_start_medium - rwc_start )
 			                 / cv2->rwc_delta[ r_coord ];
-	if ( lround( d_start_medium ) < 0 )
+	if ( lrnd( d_start_medium ) < 0 )
 		d_start_medium += medium_factor * d_delta_fine;
 
-	medium = lround( ( d_start_fine - d_start_medium ) / d_delta_fine );
+	medium = lrnd( ( d_start_fine - d_start_medium ) / d_delta_fine );
 
 	/* Calculate start index (in small tick counts) of first large tick */
 
@@ -2198,13 +2198,13 @@ static void cut_make_scale( Canvas *c, int coord )
 
 	d_start_coarse = r_scale * ( rwc_start_coarse - rwc_start )
 			                 / cv2->rwc_delta[ r_coord ];
-	if ( lround( d_start_coarse ) < 0 )
+	if ( lrnd( d_start_coarse ) < 0 )
 	{
 		d_start_coarse += coarse_factor * d_delta_fine;
 		rwc_start_coarse += coarse_factor * rwc_delta;
 	}
 
-	coarse = lround( ( d_start_fine - d_start_coarse ) / d_delta_fine );
+	coarse = lrnd( ( d_start_fine - d_start_coarse ) / d_delta_fine );
 
 	/* Now, finally we got everything we need to draw the axis... */
 
@@ -2739,7 +2739,7 @@ void cut_change_dir( FL_OBJECT *a, long b )
 	if ( px < 0 || px > cut_form->cut_canvas->w )
 		return;
 
-	p_index = lround( px / cv->s2d[ X ] - cv->shift[ X ] );
+	p_index = lrnd( px / cv->s2d[ X ] - cv->shift[ X ] );
 
 	if ( CG.cut_dir == X )
 	{

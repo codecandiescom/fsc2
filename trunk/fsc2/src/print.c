@@ -747,7 +747,7 @@ static void eps_make_scale( FILE *fp, void *cv, int coord, long dim )
 
 	d_start_fine = s2d[ coord ] * ( rwc_start_fine - rwc_start ) / rwcd;
 
-	if ( lround( d_start_fine ) < 0 )
+	if ( lrnd( d_start_fine ) < 0 )
 		d_start_fine += d_delta_fine;
 
 	/* Calculate start index (in small tick counts) of first medium tick */
@@ -757,10 +757,10 @@ static void eps_make_scale( FILE *fp, void *cv, int coord, long dim )
 
 	d_start_medium = s2d[ coord ] * ( rwc_start_medium - rwc_start ) / rwcd;
 
-	if ( lround( d_start_medium ) < 0 )
+	if ( lrnd( d_start_medium ) < 0 )
 		d_start_medium += medium_factor * d_delta_fine;
 
-	medium = lround( ( d_start_fine - d_start_medium ) / d_delta_fine );
+	medium = lrnd( ( d_start_fine - d_start_medium ) / d_delta_fine );
 
 	/* Calculate start index (in small tick counts) of first large tick */
 
@@ -769,13 +769,13 @@ static void eps_make_scale( FILE *fp, void *cv, int coord, long dim )
 
 	d_start_coarse = s2d[ coord ] * ( rwc_start_coarse - rwc_start ) / rwcd;
 
-	if ( lround( d_start_coarse ) < 0 )
+	if ( lrnd( d_start_coarse ) < 0 )
 	{
 		d_start_coarse += coarse_factor * d_delta_fine;
 		rwc_start_coarse += coarse_factor * rwc_delta;
 	}
 
-	coarse = lround( ( d_start_fine - d_start_coarse ) / d_delta_fine );
+	coarse = lrnd( ( d_start_fine - d_start_coarse ) / d_delta_fine );
 
 	/* Now, finally we got everything we need to draw the axis... */
 

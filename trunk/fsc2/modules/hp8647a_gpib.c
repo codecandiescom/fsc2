@@ -426,7 +426,7 @@ int hp8647a_get_mod_source( int type )
 		if ( gpib_write( hp8647a.device, cmd, strlen( cmd ) ) == FAILURE ||
 			 gpib_read( hp8647a.device, buffer, &length ) == FAILURE )
 			hp8647a_comm_failure( );
-		freq = lround( T_atof ( buffer ) );
+		freq = lrnd( T_atof ( buffer ) );
 		source = freq == 400 ? MOD_SOURCE_1k : MOD_SOURCE_400;
 	}
 	else
@@ -487,7 +487,7 @@ double hp8647a_set_mod_ampl( int type, double ampl )
 							ampl * 1.0e-3, MAX_FM_AMPL * 1.0e-3 );
 				THROW( EXCEPTION )
 			}
-			sprintf( cmd, "FM:DEV %ld HZ\n", 10 * lround( 0.1 * ampl ) );
+			sprintf( cmd, "FM:DEV %ld HZ\n", 10 * lrnd( 0.1 * ampl ) );
 			break;
 
 		case MOD_TYPE_AM :

@@ -371,7 +371,7 @@ Var *magnet_use_dac_port( Var *v )
 	{
 		eprint( WARN, SET, "%s: Integer value used for DAC port in %s().\n",
 				DEVICE_NAME, Cur_Func );
-		port = ( int ) lround( v->val.dval );
+		port = irnd( v->val.dval );
 	}
 	else
 		port = ( int ) v->val.lval;
@@ -1033,14 +1033,14 @@ static void keithley228a_get_corrected_current( double c, double *psc,
 	 if ( c >= 0.0 )
 	 {
 		 i = 1;
-		 while ( lround( 1.0e6 * c ) >= lround( 1.0e6 * pos_jumps[ i ] ) )
+		 while ( lrnd( 1.0e6 * c ) >= lrnd( 1.0e6 * pos_jumps[ i ] ) )
 			 i++;
 
 		 c -= pos_jumps[ i - 1 ];
 		 if ( i & 1 )
 			 del = 0.14;
 		 else
-			 c = fmod( lround( 1.0e6 * c ) * 1.0e-6, del = 0.13 );
+			 c = fmod( lrnd( 1.0e6 * c ) * 1.0e-6, del = 0.13 );
 		 *dacv += V_TO_A_FACTOR * 0.0030 * ( c / del - 0.5 );
 		 *dacv -= V_TO_A_FACTOR * 0.004;
 	 }
@@ -1049,12 +1049,12 @@ static void keithley228a_get_corrected_current( double c, double *psc,
 		 i = 0;
 		 do
 		 {
-			 if ( lround( 1.0e6 * c ) <= lround( 1.0e6 * neg_jumps[ i ] ) &&
-				  lround( 1.0e6 * c ) > lround( 1.0e6 * neg_jumps[ i + 1 ] ) )
+			 if ( lrnd( 1.0e6 * c ) <= lrnd( 1.0e6 * neg_jumps[ i ] ) &&
+				  lrnd( 1.0e6 * c ) > lrnd( 1.0e6 * neg_jumps[ i + 1 ] ) )
 			 {
 				 c -= neg_jumps[ i ];
 				 if ( i & 1 )
-					 c = fmod( 1.0e-6 * lround( 1.0e6 * c ), del = 0.13 );
+					 c = fmod( 1.0e-6 * lrnd( 1.0e6 * c ), del = 0.13 );
 				 else
 					 del = 0.12;
 				 break;

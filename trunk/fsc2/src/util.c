@@ -606,7 +606,7 @@ inline unsigned long d2color( double a )
 	long c_index;
 
 
-	c_index = lround( a * ( NUM_COLORS - 1 ) );
+	c_index = lrnd( a * ( NUM_COLORS - 1 ) );
 
 	if ( c_index < 0 )
 		return fl_get_pixel( NUM_COLORS + FL_FREE_COL1 + 1 );
@@ -636,7 +636,7 @@ inline short d2shrt( double a )
 		return SHRT_MAX_HALF;
 	if ( a < SHRT_MIN_HALF )
 		return SHRT_MIN_HALF;
-	return ( short ) lround( a );
+	return ( short ) lrnd( a );
 }
 
 
@@ -646,7 +646,7 @@ inline unsigned short d2ushrt( double a )
 		return USHRT_MAX;
 	if ( a < 0 )
 		return 0;
-	return ( unsigned short ) lround( a );
+	return ( unsigned short ) lrnd( a );
 }
 
 
@@ -678,11 +678,21 @@ inline double d_max( double a, double b ) { return a > b ? a : b; }
 inline double d_min( double a, double b ) { return a < b ? a : b; }
 
 
-inline long lround( double x )
+inline long lrnd( double x )
 {
 	if ( x > LONG_MAX )
 		return LONG_MAX;
 	if ( x < LONG_MIN )
 		return LONG_MIN;
-	return ( long ) ( 2 * x ) - ( long ) x;
+	return ( long ) rint( c );
+}
+
+
+inline long irnd( double x )
+{
+	if ( x > LONG_MAX )
+		return LONG_MAX;
+	if ( x < LONG_MIN )
+		return LONG_MIN;
+	return ( long ) rint( c );
 }

@@ -854,7 +854,7 @@ static bool magnet_goto_field_rec( double field, double error, int rec,
 	/* How many steps do we need using the maximum step size and how many
 	   steps with the minimum step size remain ? */
 
-	steps = ( int ) lround( floor( fabs( mini_steps ) / MAGNET_MAX_STEP ) );
+	steps = ilrnd( floor( fabs( mini_steps ) / MAGNET_MAX_STEP ) );
 	remain = mini_steps - sign( mini_steps ) * steps * MAGNET_MAX_STEP;
 
 	/* Now do all the steps to reach the target field */
@@ -978,7 +978,7 @@ static void magnet_sweep( int dir )
 	   First calculate how many steps we need we using the maximum step size
 	   and how large a step for the rest. */
 
-	steps = ( int ) lround( floor( fabs( mini_steps ) / MAGNET_MAX_STEP ) );
+	steps = ilrnd( floor( fabs( mini_steps ) / MAGNET_MAX_STEP ) );
 	remain = mini_steps - sign( mini_steps ) * steps * MAGNET_MAX_STEP;
 
 	/* Now do all the steps to reach the target field */
@@ -1063,7 +1063,7 @@ bool magnet_do( int command )
 			break;
 
 		case SERIAL_VOLTAGE :                 /* send voltage data pattern */
-			magnet.int_step = volt = lround( MAGNET_ZERO_STEP - magnet.step );
+			magnet.int_step = volt = lrnd( MAGNET_ZERO_STEP - magnet.step );
 		    data[ 0 ] = ( unsigned char ) 
 				( 0x40 | ( ( volt >> 8 ) & 0xF ) | ( ( volt >> 3 ) & 0x10 ) );
 			data[ 1 ] = ( unsigned char ) ( 0x80 | ( volt & 0x07F ) );
