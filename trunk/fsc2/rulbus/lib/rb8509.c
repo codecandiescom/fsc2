@@ -67,12 +67,12 @@ struct RULBUS_ADC12_CARD {
 #define STATUS_EXT_TRIGGER             (    1 << 7 )
 
 
-#define VOLTAGE_SPAN                   20.47
+#define VOLTAGE_SPAN                   20.47         /* 20.47 V */
 #define ADC12_RANGE                    0x0FFF
 #define ADC12_BIT_OFFSET               ( 1 << 11 )
 
 
-#define ADC12_DELAY                    18   /* 18 us */
+#define ADC12_DELAY                    18            /* 18 us */
 
 
 static RULBUS_ADC12_CARD *rulbus_adc12_card;
