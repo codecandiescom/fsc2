@@ -95,7 +95,12 @@ bool run( void )
 	   being negative) we're already done */
 
 	if ( EDL.prg_length < 0 )
+	{
+		if ( Internals.cmdline_flags & DO_CHECK ||
+			 Internals.cmdline_flags & BATCH_MODE )
+			fl_trigger_object( GUI.main_form->quit );
 		return FAIL;
+	}
 
 	/* Start the GPIB bus (and do some changes to the graphics) */
 
@@ -765,6 +770,7 @@ void run_close_button_callback( FL_OBJECT *a, long b )
 {
 	UNUSED_ARGUMENT( a );
 	UNUSED_ARGUMENT( b );
+
 	if ( graphics_have_been_started )
 	{
 		stop_graphics( );

@@ -218,7 +218,7 @@ int main( int argc, char *argv[ ] )
 	run_next:
 
 		while ( fl_check_forms( ) != GUI.main_form->quit )
-			if ( ! Internals.child_pid )
+			if ( Internals.child_pid == 0 )
 				idle_handler( );
 			else
 				new_data_handler( );
@@ -429,8 +429,13 @@ static void check_run( void )
 	{
 		if ( ! run( ) )
 			exit( EXIT_FAILURE );
-		while ( fl_do_forms( ) != GUI.main_form->quit )
-			/* empty */ ;
+
+		while ( fl_check_forms( ) != GUI.main_form->quit )
+			if ( Internals.child_pid == 0 )
+				idle_handler( );
+			else
+				new_data_handler( );
+
 		if ( Internals.check_return != EXIT_SUCCESS )
 			exit( Internals.check_return );
 	}

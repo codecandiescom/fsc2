@@ -286,7 +286,7 @@ int new_data_handler( void )
 	/* Finally check for requests from the HTTP server and handle death
 	   of the HTTP server (but only if the queue is empty, we don't want
 	   to slow down the experiment by serving pages when the process is
-	   struggling with keeping up with data the child sends). */
+	   already struggling to keep up with data the child sends). */
 
 	if ( Comm.MQ->low == Comm.MQ->high )
 	{
@@ -300,8 +300,7 @@ int new_data_handler( void )
 	}
 #endif
 
-	/* Check if a request from the child for external conections has
-	   come in */
+	/* Check if a request from the child for external conections came in */
 
 	if ( Internals.conn_request )
 	{
