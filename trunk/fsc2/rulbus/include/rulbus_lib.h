@@ -77,26 +77,47 @@ typedef enum
 #define RULBUS_BIPOLAR        1
 
 
-#define RULBUS_MAX_CARDS           165    /* maximum total number of cards */
-#define RULBUS_MAX_RACK_NO        0x0f    /* maximum number of racks */
+#define RULBUS_MAX_CARDS           154    /* maximum total number of cards */
+#define RULBUS_MAX_RACK_ADDR      0x0E    /* maximum number of racks */
+#define RULBUS_DEF_RACK_ADDR      0x0F
+#define RULBUS_INV_RACK_ADDR      0xFF
 #define RULBUS_MAX_CARDS_IN_RACK    11    /* maximum number of cards in rack */
 #define RULBUS_MIN_CARD_ADDR      0x01
 #define RULBUS_MAX_CARD_ADDR      0xfe
-#define RULBUS_INVALID_ADDR       0xff
+#define RULBUS_INV_CARD_ADDR      0xff
 
 
-#define RB8509   8509       /* 12-bit ADC card */
-#define RB8510   8510       /* 12-bit DAC card */
-#define RB8514   8514       /* Delay card */
-#define RB8515   8515       /* Clock card */
+#define RB_GENERIC  0          /* card of unspecified type */
+#define RB8509      8509       /* 12-bit ADC card */
+#define RB8510      8510       /* 12-bit DAC card */
+#define RB8514      8514       /* Delay card */
+#define RB8515      8515       /* Clock card */
+#define RB8506      8506       /* unsupported */
+#define RB8506      8506       /* unsupported */
+#define RB8506      8506       /* unsupported */
+#define RB8513      8513       /* unsupported */
+#define RB8905      8905       /* unsupported */
+#define RB9005      9005       /* unsupported */
+#define RB9603      9603       /* unsupported */
 
-#define RB8509_WIDTH 2
-#define RB8510_WIDTH 2
-#define RB8514_WIDTH 4
-#define RB8515_WIDTH 1
+#define RULBUS_RB8509_DEF_ADDR           0xC0
+#define RULBUS_RB8509_WIDTH              2
+#define RULBUS_RB8509_DEF_BIPOLAR        1
+#define RULBUS_RB8509_DEF_VPB            5.0e-3
+#define RULBUS_RB8509_DEF_NUM_CHANNELS   8
+#define RULBUS_RB8509_MAX_CHANNELS       8
 
+#define RULBUS_RB8510_DEF_ADDR           0xD0
+#define RULBUS_RB8510_WIDTH              2
+#define RULBUS_RB8510_DEF_BIPOLAR        1
+#define RULBUS_RB8510_DEF_VPB            5.0e-3
 
-#define RULBUS_ADC12_MAX_CHANNELS   8    /* there are also some with only 4 */
+#define RULBUS_RB8514_DEF_ADDR          0xC4
+#define RULBUS_RB8514_WIDTH             4
+#define RULBUS_RB8514_DEF_INTR_DELAY    6.0e-8
+
+#define RULBUS_RB8515_DEF_ADDR          0xC4
+#define RULBUS_RB8515_WIDTH             1
 
 
 typedef struct RULBUS_CARD_LIST RULBUS_CARD_LIST;
@@ -109,10 +130,10 @@ struct RULBUS_CARD_LIST {
 	unsigned char width;
 	struct RULBUS_CARD_HANDLER *handler;
 	bool in_use;
-	int nchan;
-	double range;
-	int polar;
-	int exttrg;
+	int num_channels;
+	double vpb;
+	int bipolar;
+	double intr_delay;
 };
 
 extern RULBUS_CARD_LIST *rulbus_card;
@@ -150,6 +171,13 @@ int rulbus_dac12_init( void );
 void rulbus_dac12_exit( void );
 int rulbus_dac12_card_init( int handle );
 void rulbus_dac12_card_exit( int handle );
+
+/* Internal functions for generic cards (RB_GENERIC) */
+
+int rulbus_generic_init( void );
+void rulbus_generic_exit( void );
+int rulbus_generic_card_init( int handle );
+void rulbus_generic_card_exit( int handle );
 
 
 #ifdef __cplusplus

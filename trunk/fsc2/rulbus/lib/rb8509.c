@@ -32,12 +32,11 @@ typedef struct RULBUS_ADC12_CARD RULBUS_ADC12_CARD;
 
 struct RULBUS_ADC12_CARD {
 	int handle;
-	int nchan;
+	int num_channels;
 	double gain;
 	double Vmax;
 	double Vmin;
 	double dV;
-	int exttrg;
 	int trig_mode;
 	int data;
 	unsigned char ctrl;
@@ -123,59 +122,32 @@ int rulbus_adc12_card_init( int handle )
 	RULBUS_ADC12_CARD *tmp;
 	int retval = RULBUS_OK;
 	unsigned char dummy;
-	double Vmin;
-	double dV;
 
-
-	/* Check if the number of channels of the card has been set and is
-	   reasonable */
-
-	if ( rulbus_card[ handle ].nchan < 0 )
-		return RULBUS_MIS_CHN;
-	else if ( rulbus_card[ handle ].nchan > RULBUS_ADC12_MAX_CHANNELS )
-		return RULBUS_CHN_INV;
-		
-	/* Check that the polarity is specified */
-
-	if ( rulbus_card[ handle ].polar == -1 )
-		return RULBUS_NO_POL;
-
-	/* Check the range setting and calculate the minumum voltage and
-	   resolution (it looks as if the cards where built to allow outputting
-	   an exact voltage of 0 V */
-
-	if ( rulbus_card[ handle ].range <= 0.0 )
-		return RULBUS_NO_RNG;
-
-	if ( rulbus_card[ handle ].polar == RULBUS_UNIPOLAR )
-	{
-		dV = rulbus_card[ handle ].range / ADC12_RANGE;
-		Vmin = 0.0;
-	}
-	else
-	{
-		dV = rulbus_card[ handle ].range / ( ADC12_RANGE >> 1 );
-		Vmin = -rulbus_card[ handle ].range - dV;
-	}
-
-	if ( rulbus_card[ handle ].exttrg < 0 )
-		return RULBUS_EXT_NO;
 
 	tmp = realloc( rulbus_adc12_card,
 				   ( rulbus_num_adc12_cards + 1 ) * sizeof *tmp );
 
 	if ( tmp == NULL )
-		return RULBUS_NO_MEM;
+		return RULBUS_NO_MEMORY;
 
 	rulbus_adc12_card = tmp;
 	tmp += rulbus_num_adc12_cards++;
 
 	tmp->handle = handle;
-	tmp->nchan = rulbus_card[ handle ].nchan;
-	tmp->Vmax = rulbus_card[ handle ].range;
-	tmp->Vmin = Vmin;
-	tmp->dV = dV;
-	tmp->exttrg = rulbus_card[ handle ].exttrg;
+	tmp->num_channels = rulbus_card[ handle ].num_channels;
+	tmp->dV = rulbus_card[ handle ].vpb;
+
+	if ( rulbus_card[ handle ].bipolar )
+	{
+		tmp->Vmax = tmp->dV * ( ADC12_RANGE >> 1 );
+		tmp->Vmin = tmp->Vmax - tmp->dV * ADC12_RANGE;
+	}
+	else
+	{
+		tmp->Vmax = tmp->dV * ADC12_RANGE;
+		tmp->Vmin = 0.0;
+	}
+
 	tmp->gain = 1.0;
 	tmp->trig_mode = RULBUS_ADC12_INT_TRIG;
 	tmp->ctrl = 0;
@@ -189,7 +161,7 @@ int rulbus_adc12_card_init( int handle )
 		tmp = realloc( rulbus_adc12_card,
 					   --rulbus_num_adc12_cards * sizeof *tmp );
 		if ( tmp == NULL )
-			return RULBUS_NO_MEM;
+			return RULBUS_NO_MEMORY;
 		rulbus_adc12_card = tmp;
 		return retval;
 	}
@@ -203,13 +175,13 @@ int rulbus_adc12_card_init( int handle )
 		tmp = realloc( rulbus_adc12_card,
 					   --rulbus_num_adc12_cards * sizeof *tmp );
 		if ( tmp == NULL )
-			return RULBUS_NO_MEM;
+			return RULBUS_NO_MEMORY;
 		rulbus_adc12_card = tmp;
 	}
 
 	return retval;
 }
-	
+
 
 /*----------------------------------------------------------------*
  * Function for deactivating a card (gets invoked automatically
@@ -253,25 +225,9 @@ int rulbus_adc12_num_channels( int handle )
 
 
 	if ( ( card = rulbus_adc12_card_find( handle ) ) == NULL )
-		return RULBUS_INV_HND;
+		return RULBUS_INVALID_CARD_HANDLE;
 
-	return card->nchan;
-}
-
-
-/*-----------------------------------------------------*
- * Function returns the number of channels of the card
- *-----------------------------------------------------*/
-
-int rulbus_adc12_has_external_trigger( int handle )
-{
-	RULBUS_ADC12_CARD *card;
-
-
-	if ( ( card = rulbus_adc12_card_find( handle ) ) == NULL )
-		return RULBUS_INV_HND;
-
-	return card->exttrg;
+	return card->num_channels;
 }
 
 
@@ -288,10 +244,10 @@ int rulbus_adc12_set_channel( int handle, int channel )
 
 
 	if ( ( card = rulbus_adc12_card_find( handle ) ) == NULL )
-		return RULBUS_INV_HND;
+		return RULBUS_INVALID_CARD_HANDLE;
 
-	if ( channel < 0 || channel >= card->nchan )
-		return RULBUS_INV_ARG;
+	if ( channel < 0 || channel >= card->num_channels )
+		return RULBUS_INVALID_ARGUMENT;
 
 	ctrl = ( card->ctrl & ~ CTRL_CHANNEL_MASK ) | channel;
 
@@ -326,10 +282,10 @@ int rulbus_adc12_set_gain( int handle, int gain )
 
 
 	if ( ( card = rulbus_adc12_card_find( handle ) ) == NULL )
-		return RULBUS_INV_HND;
+		return RULBUS_INVALID_CARD_HANDLE;
 
 	if ( gain != 1 && gain != 2 && gain != 4 && gain != 8 )
-		return RULBUS_INV_ARG;
+		return RULBUS_INVALID_ARGUMENT;
 
 	card->gain = ( double ) gain;
 
@@ -374,15 +330,12 @@ int rulbus_adc12_set_trigger_mode( int handle, int mode )
 
 
 	if ( ( card = rulbus_adc12_card_find( handle ) ) == NULL )
-		return RULBUS_INV_HND;
+		return RULBUS_INVALID_CARD_HANDLE;
 
 	if ( mode != RULBUS_ADC12_INT_TRIG && mode != RULBUS_ADC12_EXT_TRIG )
-		return RULBUS_INV_ARG;
+		return RULBUS_INVALID_ARGUMENT;
 
 	/* Some cards can't be triggered externally */
-
-	if ( mode != RULBUS_ADC12_INT_TRIG && ! card->exttrg )
-		return RULBUS_NO_EXT;
 
 	if ( mode == RULBUS_ADC12_INT_TRIG )
 		ctrl = card->ctrl & ~ CTRL_EXT_TRIGGER_ENABLE;
@@ -421,7 +374,7 @@ int rulbus_adc12_properties( int handle, double *Vmax, double *Vmin,
 
 
 	if ( ( card = rulbus_adc12_card_find( handle ) ) == NULL )
-		return RULBUS_INV_HND;
+		return RULBUS_INVALID_CARD_HANDLE;
 
 	if ( Vmax != NULL )
 		*Vmax = card->Vmax;
@@ -452,13 +405,12 @@ int rulbus_adc12_check_convert( int handle, double *volts )
 
 
 	if ( volts == NULL )
-		return RULBUS_INV_ARG;
+		return RULBUS_INVALID_ARGUMENT;
 
 	if ( ( card = rulbus_adc12_card_find( handle ) ) == NULL )
-		return RULBUS_INV_HND;
+		return RULBUS_INVALID_CARD_HANDLE;
 
-	/* Return immediately if we're in internal trigger mode (or if this is
-	   a card that can't be triggered externally) */
+	/* Return immediately if we're in internal trigger mode */
 
 	if ( card->trig_mode == RULBUS_ADC12_INT_TRIG )
 		return 0;
@@ -499,10 +451,10 @@ int rulbus_adc12_convert( int handle, double *volts )
 
 
 	if ( volts == NULL )
-		return RULBUS_INV_ARG;
+		return RULBUS_INVALID_ARGUMENT;
 
 	if ( ( card = rulbus_adc12_card_find( handle ) ) == NULL )
-		return RULBUS_INV_HND;
+		return RULBUS_INVALID_CARD_HANDLE;
 
 	/* If we're in internal trigger mode trigger a conversion (after making
 	   sure EOC is reset). The value we write to the trigger register is of

@@ -41,64 +41,89 @@ int rulbus_errno = RULBUS_OK;
 
 
 static const char *rulbus_errlist[ ] = {
-	"Success",                                         /* RULBUS_OK      */
-	"No permission to open configurarion file",        /* RULBUS_CFG_ACC */
-	"Invalid name of configuration file (or missing)", /* RULBUS_INV_CFG */
-    "Can't open configuration file",                   /* RULBUS_OPN_CFG */
-	"Not permission to open device file",              /* RULBUS_DVF_ACC */
-	"Invalid name for device file",                    /* RULBUS_DVF_CFG */
-	"Can't open device file",                          /* RULBUS_DVF_OPN */
-	NULL,					 				           /* RULBUS_STX_ERR */
-	"Running out of memory",                           /* RULBUS_NO_MEM  */
-	"Too many racks listed in configuration file",     /* RULBUS_RCK_CNT */
-	"Duplicate rack address in configuration file",    /* RULBUS_RCK_DUP */
-	"Missing rack address in configuration file",      /* RULBUS_NO_RCK  */
-	"Invalid rack address in configuration file",      /* RULBUS_INV_RCK */
-	"More than one device file in configuration file", /* RULBUS_DVF_CNT */
-	"Too many cards in configuration file",            /* RULBUS_MAX_CRD */
-	"Invalid card address in configuration file",      /* RULBUS_CRD_ADD */
-	"Duplicate card name in configuration file",       /* RULBUS_NAM_DUP */
-	"More than one name for a card",                   /* RULBUS_DUP_NAM */
-	"More than one address for a card",                /* RULBUS_ADD_DUP */
-	"More than one type for a card",                   /* RULBUS_TYP_DUP */
-	"More than one number of channel setting",         /* RULBUS_CHN_DUP */
-	"Invalid number of channels for ADC12 card",       /* RULBUS_CHN_INV */
-    "Missing number of channels for ADC12 card",       /* RULBUS_MIS_CHN */
-	"More than one range for card",                    /* RULBUS_RNG_DUP */
-	"More than one polarity for card",                 /* RULBUS_POL_DUP */
-	"Invalid polarity setting",                        /* RULBUS_INV_POL */
-	"More thann one setting for external trigger",     /* RULBUS_EXT_DUP */
-	"Invalid argument for external trigger setting",   /* RULBUS_EXT_INV */
-	"Missing external trigger setting",                /* RULBUS_EXT_NO  */
-	"Missing range setting",                           /* RULBUS_NO_RNG  */
-    "Invalid range setting",                           /* RULBUS_INV_RNG */
-	"Missing polarity setting for DAC12 card",         /* RULBUS_NO_POL  */
-	"Too many cards for single rack",                  /* RULBUS_CRD_CNT */
-	"No cards found in configuration file",            /* RULBUS_NO_CRD  */
-	"Missing card name in configuration file",         /* RULBUS_CRD_NAM */
-	"Invalid card type in configuration file",         /* RULBUS_INV_TYP */
-	NULL,									           /* RULBUS_ADD_CFL */
-	"Missing modules for card",                        /* RULBUS_TYP_HND */
-	"Missing intialization of Rulbus library",         /* RULBUS_NO_INIT */
-	"Invalid function argument",                       /* RULBUS_INV_ARG */
-	"No such card",                                    /* RULBUS_INV_CRD */
-	"Invalid card handle",                             /* RULBUS_INV_HND */
-	"Card has not been opened",                        /* RULBUS_CRD_NOP */
-	"Invalid card address offset",                     /* RULBUS_INV_OFF */
-	"Write error",                                     /* RULBUS_WRT_ERR */
-	"Read error",                                      /* RULBUS_RD_ERR  */
-	"Card is busy",                                    /* RULBUS_CRD_BSY */
-	"Voltage out of range",                            /* RULBUS_INV_VLT */
-	"Card can't be triggered externally",              /* RULBUS_NO_EXT  */
-	"Rulbus timeout"                                   /* RULBUS_TIM_OUT */
+	"Success",                          /* RULBUS_OK */
+	"Running out of memory",            /* RULBUS_NO_MEMORY */
+	"No permission to open configuration file",
+										/* RULBUS_CONF_FILE_ACCESS */
+	"Invalid name of configuration file (or missing)",
+										/* RULBUS_CONF_FILE_NAME_INVALID */
+    "Can't open configuration file",    /* RULBUS_CONF_FILE_OPEN_FAIL */
+	"Syntax error in configuration file before line %d, column %d",
+	                                    /* RULBUS_CF_SYNTAX_ERROR */
+	"End of configuration file in comment",
+										/* RULBUS_CF_EOF_IN_COMMENT */
+	"More than one device file in configuration file before line %d, "
+	"column %d",                        /* RULBUS_CF_DEV_FILE_DUPLICATE */
+	"More than one address for the same rack in configuration file before "
+	"line %d, column %d",				/* RULBUS_CF_RACK_ADDR_DUPLICATE */
+	"Invalid rack address in configuration file before line %d, column %d",
+										/* RULBUS_CF_RACK_ADDR_INVALID */
+	"Address conflict between racks in configuration file before line %d, "
+	"column %d",                        /* RULBUS_CF_RACK_ADDR_CONFLICT */
+	"Missing rack addresses in configuration file before line %d, column %d",
+										/* RULBUS_CF_RACK_ADDR_DEF_DUPLICATE */
+	"More than maximum number of cards in configuration file before line %d, "
+	"column %d",                        /* RULBUS_CF_TOO_MANY_CARDS */
+	"Too many cards for single rack in configuration file before line %d, "
+	"column %d",                        /* RULBUS_CF_TOO_MANY_CARDS_IN_RACK */
+	"Unsupported card type in configuration file before line %d, column %d",
+										/* RULBUS_CF_UNSUPPORTED_CARD_TYPE */
+	"Identical names used for two cards in configuration file before line %d, "
+	"column %d",                        /* RULBUS_CF_CARD_NAME_CONFLICT */
+	"Invalid card address in configuration file before line %d, column %d",
+										/* RULBUS_CF_CARD_ADDR_INVALID */
+	"Identical addresses for different cards same rack in in configuration "
+	"file before line %d",              /* RULBUS_CF_CARD_ADDR_CONFLICT  */
+	"Different addresses already specified for card in configuration file "
+	"before line %d, column %d",        /* RULBUS_CF_CARD_ADDR_DUPLICATE */
+	"More than one card of same type without specified addresses in "
+	"configuration file before line %d, column %d",
+										/* RULBUS_CF_CARD_ADDR_DEF_CONFLICT */
+	"Address ranges of cards overlap in configuration file before line %d, "
+	"column %d",                        /* RULBUS_CF_CARD_ADDR_OVERLAP */
+	"Address specified specified for card of type \"rb_generic\" in "
+	"configuration file before line %d, column %d",
+										/* RULBUS_CF_CARD_ADDR_GENERIC */
+	"Specified property not applicable for card of this type in configuration "
+	"file before line %d, column %d",   /* RULBUS_CF_CARD_PROPERTY_INVALID */
+	"Different number of channels already specified for card in configuration "
+	"file before line %d, column %d",   /* RULBUS_CF_DUPLICATE_NUM_CHANNELS */
+	"Invalid number of channels specified in configuration file before "
+	"line %d, column %d",      			/* RULBUS_CF_INVALID_NUM_CHANNELS */
+	"Different 'volt_per_bit' values already specified for card in "
+	"configuration file before line %d, column %d",
+										/* RULBUS_CF_VPB_DUPLICATE */
+	"Invalid 'volt_per_bit' value specified in configuration file before line "
+	"%d, column %d",               		/* RULBUS_CF_INVALID_VPB */
+	"Different settings for 'bipolar' property already specified for card in "
+	"configuration file before line %d, column %d",
+										/* RULBUS_CF_BIPLOAR_DUPLICATE */
+	"Different 'intr_delay' value already pecified for card in configuration "
+	"file before line %d, column %d",   /* RULBUS_CF_INTR_DELAY_DUPLICATE */
+	"Invalid 'intr_delay' value specified in configuration file before line "
+	"%d, column %d",               		/* RULBUS_CF_INTR_DELAY_INVALID */
+	"Not permission to open device file",
+										/* RULBUS_DEV_FILE_ACCESS */
+	"Invalid name for device file",     /* RULBUS_DEV_FILE_NAME_INVALID */
+	"Can't open device file",           /* RULBUS_DEV_FILE_OPEN_FAIL */
+	"Missing intialization of Rulbus library",
+										/* RULBUS_NO_INITIALIZATION */
+	"Invalid function argument",        /* RULBUS_INVALID_ARGUMENT */
+	"No such card with that name",      /* RULBUS_INVALID_CARD_NAME */
+	"Invalid card handle",              /* RULBUS_INVALID_CARD_HANDLE */
+	"Card has not been opened",         /* RULBUS_CARD_NOT_OPEN */
+	"Invalid card address offset",      /* RULBUS_INVALID_CARD_OFFSET */
+	"Rulbus write error",               /* RULBUS_WRITE_ERROR */
+	"Rulbus read error",                /* RULBUS_READ_ERROR  */
+	"Card is busy",                     /* RULBUS_CARD_IS_BUSY */
+	"Voltage out of range",             /* RULBUS_INVALID_VOLTAGE */
+	"Rulbus timeout",                   /* RULBUS_TIME_OUT */
+	"No clock frequency has been set for delay card"
+										/* RULBUS_NO_CLOCK_FREQ */
 };
 
 
-char rulbus_stx_err[ ] =
-			"Syntax error in configuration file near line xxxxx, column xxxxx";
-
-static char rulbus_add_cfl[ ] =
-		 "Address confict for cards with addresses 0xxx and 0xxx in same rack";
+static char rulbus_err_str[ 256 ];
 
 static const int rulbus_nerr =
                 ( int ) ( sizeof rulbus_errlist / sizeof rulbus_errlist[ 0 ] );
@@ -115,6 +140,7 @@ static int rulbus_read_rack( unsigned char rack, unsigned char addr,
 							 unsigned char *data, size_t len );
 
 extern int rulbus_parse( void );
+extern void rulbus_parser_init( void );
 
 
 typedef struct RULBUS_CARD_HANDLER RULBUS_CARD_HANDLER;
@@ -129,40 +155,50 @@ struct RULBUS_CARD_HANDLER {
 };
 
 static RULBUS_CARD_HANDLER rulbus_card_handler[ ] =
-		{
-			{                /* RB8509 12-bit ADC card */
-				RB8509,
-				rulbus_adc12_init,
-				rulbus_adc12_exit,
-				rulbus_adc12_card_init,
-				rulbus_adc12_card_exit,
-				UNSET
-			},
-			{                /* RB8510 12 bit DAC card */
-				RB8510,
-				rulbus_dac12_init,
-				rulbus_dac12_exit,
-				rulbus_dac12_card_init,
-				rulbus_dac12_card_exit,
-				UNSET
-			},
-			{                /* RB8514 delay card */
-				RB8514,
-				rulbus_delay_init,
-				rulbus_delay_exit,
-				rulbus_delay_card_init,
-				rulbus_delay_card_exit,
-				UNSET
-			},
-			{                /* RB8515 clock card */
-				RB8515,
-				rulbus_clock_init,
-				rulbus_clock_exit,
-				rulbus_clock_card_init,
-				rulbus_clock_card_exit,
-				UNSET
-			},
-		};
+{
+	{                /* Generic card */
+		RB_GENERIC,
+		rulbus_generic_init,
+		rulbus_generic_exit,
+		rulbus_generic_card_init,
+		rulbus_generic_card_exit,
+		UNSET
+	},
+				
+	{                /* RB8509 12-bit ADC card */
+		RB8509,
+		rulbus_adc12_init,
+		rulbus_adc12_exit,
+		rulbus_adc12_card_init,
+		rulbus_adc12_card_exit,
+		UNSET
+	},
+	{                /* RB8510 12 bit DAC card */
+		RB8510,
+		rulbus_dac12_init,
+		rulbus_dac12_exit,
+		rulbus_dac12_card_init,
+		rulbus_dac12_card_exit,
+		UNSET
+	},
+	{                /* RB8514 delay card */
+		RB8514,
+		rulbus_delay_init,
+		rulbus_delay_exit,
+		rulbus_delay_card_init,
+		rulbus_delay_card_exit,
+		UNSET
+	},
+	{                /* RB8515 clock card */
+		RB8515,
+		rulbus_clock_init,
+		rulbus_clock_exit,
+		rulbus_clock_card_init,
+		rulbus_clock_card_exit,
+		UNSET
+	},
+};
+
 
 static const int rulbus_num_card_handlers = 
 	  ( int ) ( sizeof rulbus_card_handler / sizeof rulbus_card_handler[ 0 ] );
@@ -178,7 +214,7 @@ static const int rulbus_num_card_handlers =
 int rulbus_open( void )
 {
 	const char *config_name;
-	extern FILE *rulbus_in;         /* fron the parser */
+	extern FILE *rulbus_in;             /* defined in parser.y */
 	int fd_flags;
 	int retval;
 	int i;
@@ -189,9 +225,6 @@ int rulbus_open( void )
 	if ( rulbus_in_use )
 		return rulbus_errno = RULBUS_OK;
 
-	rulbus_errlist[ - RULBUS_STX_ERR ] = rulbus_stx_err;
-	rulbus_errlist[ - RULBUS_ADD_CFL ] = rulbus_add_cfl;
-
 	/* Figure out the name of the configuration file and try to open it */
 
 	if ( ( config_name = getenv( "RULBUS_CONFIG_FILE" ) ) == NULL )
@@ -201,20 +234,21 @@ int rulbus_open( void )
 		switch ( errno )
 		{
 			case ENOMEM :
-				return rulbus_errno = RULBUS_NO_MEM;
+				return rulbus_errno = RULBUS_NO_MEMORY;
 
 			case EACCES :
-				return rulbus_errno = RULBUS_CFG_ACC;
+				return rulbus_errno = RULBUS_CONF_FILE_ACCESS;
 
 			case ENOENT : case ENOTDIR : case ENAMETOOLONG : case ELOOP :
-				return rulbus_errno = RULBUS_INV_CFG;
+				return rulbus_errno = RULBUS_CONF_FILE_NAME_INVALID;
 
 			default :
-				return rulbus_errno = RULBUS_OPN_CFG;
+				return rulbus_errno = RULBUS_CONF_FILE_OPEN_FAIL;
 		}
 
 	/* Parse the configuration file */
 
+	rulbus_parser_init( );
     if ( ( retval = rulbus_parse( ) ) != RULBUS_OK )
 	{
 		fclose( rulbus_in );
@@ -243,16 +277,16 @@ int rulbus_open( void )
 		switch ( stored_errno )
 		{
 			case ENOMEM :
-				return rulbus_errno = RULBUS_NO_MEM;
+				return rulbus_errno = RULBUS_NO_MEMORY;
 
 			case EACCES :
-				return rulbus_errno = RULBUS_DVF_ACC;
+				return rulbus_errno = RULBUS_DEV_FILE_ACCESS;
 
 			case ENOENT : case ENOTDIR : case ENAMETOOLONG : case ELOOP :
-				return rulbus_errno = RULBUS_DVF_CFG;
+				return rulbus_errno = RULBUS_DEV_FILE_NAME_INVALID;
 
 			default :
-				return rulbus_errno = RULBUS_DVF_OPN;
+				return rulbus_errno = RULBUS_DEV_FILE_OPEN_FAIL;
 		}
 	}
 
@@ -325,14 +359,22 @@ void rulbus_close( void )
 
 int rulbus_perror( const char *s )
 {
-	if ( ! rulbus_in_use )
-		rulbus_errno = RULBUS_NO_INIT;
+	extern int rulbus_lineno;
+	extern int rulbus_column;
+	char *p = ( char * ) rulbus_errlist[ - rulbus_errno ];
+	int count = 0;
+
 
     if ( s != NULL && *s != '\0' )
-        return fprintf( stderr, "%s: %s\n",
-                        s, rulbus_errlist[ - rulbus_errno ] );
+		count +=fprintf( stderr, "%s: ", s );
 
-    return fprintf( stderr, "%s\n", rulbus_errlist[ - rulbus_errno ] );
+	if ( strstr( p, "%d" ) )
+        count += fprintf( stderr, p,
+						  rulbus_lineno, rulbus_column );
+	else
+		count += fprintf( stderr, "%s", p );
+
+	return count += fprintf( stderr, "\n" );
 }
 
 
@@ -344,6 +386,17 @@ int rulbus_perror( const char *s )
 
 const char *rulbus_strerror( void )
 {
+	extern int rulbus_lineno;
+	extern int rulbus_column;
+
+
+	if ( ! strstr( rulbus_errlist[ - rulbus_errno ], "%%d" ) )
+	{
+		sprintf( rulbus_err_str, rulbus_errlist[ - rulbus_errno ],
+				 rulbus_lineno, rulbus_column );
+		return rulbus_err_str;
+	}
+
     return rulbus_errlist[ - rulbus_errno ];
 }
 
@@ -363,17 +416,17 @@ int rulbus_card_open( const char *name )
 
 
 	if ( ! rulbus_in_use )
-		rulbus_errno = RULBUS_NO_INIT;
+		rulbus_errno = RULBUS_NO_INITIALIZATION;
 
 	if ( name == NULL || *name == '\0' )
-		return rulbus_errno = RULBUS_INV_ARG;
+		return rulbus_errno = RULBUS_INVALID_ARGUMENT;
 
 	for ( i = 0; i < rulbus_num_cards; i++ )
 		if ( ! strcmp( name, rulbus_card[ i ].name ) )
 			break;
 
 	if ( i == rulbus_num_cards )
-		return rulbus_errno = RULBUS_INV_CRD;
+		return rulbus_errno = RULBUS_INVALID_CARD_NAME;
 
 	/* Call the type specific funtion for initialization of the card */
 
@@ -399,7 +452,7 @@ int rulbus_card_open( const char *name )
 int rulbus_card_close( int handle )
 {
 	if ( handle < 0 || handle >= rulbus_num_cards )
-		return rulbus_errno = RULBUS_INV_HND;
+		return rulbus_errno = RULBUS_INVALID_CARD_HANDLE;
 
 	/* Call the type specific funtion for deactivating the card */
 
@@ -430,19 +483,19 @@ int rulbus_write( int handle, unsigned char offset, unsigned char *data,
 
 
 	if ( ! rulbus_in_use )
-		return rulbus_errno = RULBUS_NO_INIT;
+		return rulbus_errno = RULBUS_NO_INITIALIZATION;
 
 	if ( handle < 0 || handle >= rulbus_num_cards )
-		return rulbus_errno = RULBUS_INV_HND;
+		return rulbus_errno = RULBUS_INVALID_CARD_HANDLE;
 
 	if ( ! rulbus_card[ handle ].in_use )
-		return rulbus_errno = RULBUS_CRD_NOP;
+		return rulbus_errno = RULBUS_CARD_NOT_OPEN;
 
 	if ( offset >= rulbus_card[ handle ].width )
-		return rulbus_errno = RULBUS_INV_OFF;
+		return rulbus_errno = RULBUS_INVALID_CARD_OFFSET;
 
 	if ( data == NULL || len == 0 )
-		return rulbus_errno = RULBUS_INV_ARG;
+		return rulbus_errno = RULBUS_INVALID_ARGUMENT;
 
 	retval = rulbus_write_rack( rulbus_card[ handle ].rack,
 								rulbus_card[ handle ].addr + offset,
@@ -472,19 +525,19 @@ int rulbus_read( int handle, unsigned char offset, unsigned char *data,
 
 
 	if ( ! rulbus_in_use )
-		return rulbus_errno = RULBUS_NO_INIT;
+		return rulbus_errno = RULBUS_NO_INITIALIZATION;
 
 	if ( handle < 0 || handle >= rulbus_num_cards )
-		return rulbus_errno = RULBUS_INV_HND;
+		return rulbus_errno = RULBUS_INVALID_CARD_HANDLE;
 
 	if ( ! rulbus_card[ handle ].in_use )
-		return rulbus_errno = RULBUS_CRD_NOP;
+		return rulbus_errno = RULBUS_CARD_NOT_OPEN;
 
 	if ( offset >= rulbus_card[ handle ].width )
-		return rulbus_errno = RULBUS_INV_OFF;
+		return rulbus_errno = RULBUS_INVALID_CARD_OFFSET;
 
 	if ( data == NULL || len == 0 )
-		return rulbus_errno = RULBUS_INV_ARG;
+		return rulbus_errno = RULBUS_INVALID_ARGUMENT;
 
 	retval = rulbus_read_rack( rulbus_card[ handle ].rack,
 							   rulbus_card[ handle ].addr + offset,
@@ -512,80 +565,23 @@ static int rulbus_check_config( void )
 
 	if ( rulbus_dev_file == NULL &&
 		 ( rulbus_dev_file = strdup( RULBUS_DEFAULT_DEVICE_FILE ) ) == NULL )
-		return RULBUS_NO_MEM;
+		return RULBUS_NO_MEMORY;
 
-	/* Check that there were cards listed */
+	/* Return if there are no cards */
 
 	if ( rulbus_num_cards == 0 )
-		return RULBUS_NO_CRD;
+		return RULBUS_OK;
 
-	/* Check that all cards have been assigned a name and set their widths,
-	   i.e. how many 8-bit addresses are used by the cards, and, while were
-	   at it, also check if the cards types make sense and there's a
-	   registered handler for the card type (which then is assigned to the
-	   card)  */
+	/* Figure out which handler functions to use for the card */
 
 	for ( i = 0; i < rulbus_num_cards; i++ )
 	{
-		if ( rulbus_card[ i ].name == NULL )
-			return RULBUS_CRD_NAM;
-
-		switch ( rulbus_card[ i ].type )
-		{
-			case RB8509 :
-				rulbus_card[ i ].width = RB8509_WIDTH;
-				if ( rulbus_card[ i ].nchan < 0 )
-					return RULBUS_MIS_CHN;
-				break;
-
-			case RB8510 :
-				rulbus_card[ i ].width = RB8510_WIDTH;
-				break;
-
-			case RB8514 :
-				rulbus_card[ i ].width = RB8514_WIDTH;
-				break;
-
-			case RB8515 :
-				rulbus_card[ i ].width = RB8515_WIDTH;
-				break;
-
-			default :
-				return RULBUS_INV_TYP;
-		}
-
 		for ( j = 0; j < rulbus_num_card_handlers; j++ )
 			if ( rulbus_card[ i ].type == rulbus_card_handler[ j ].card_type )
 				break;
 
-		if ( j == rulbus_num_card_handlers )
-			return RULBUS_TYP_HND;
-
 		rulbus_card[ i ].handler = rulbus_card_handler + j;
 	}
-
-	/* Check that address ranges of cards on the same rack don't overlap */
-
-	for ( i = 0; i < rulbus_num_cards - 1; i++ )
-		for ( j = i + 1; j < rulbus_num_cards; j++ )
-		{
-			if ( rulbus_card[ i ].rack != rulbus_card[ j ].rack )
-				continue;
-
-			if ( rulbus_card[ i ].addr == rulbus_card[ j ].addr ||
-				 ( rulbus_card[ i ].addr < rulbus_card[ j ].addr &&
-				   rulbus_card[ i ].addr + rulbus_card[ i ].width >
-				   rulbus_card[ j ].addr ) ||
-				 ( rulbus_card[ j ].addr < rulbus_card[ i ].addr &&
-				   rulbus_card[ j ].addr + rulbus_card[ j ].width >
-				   rulbus_card[ i ].addr ) )
-			{
-				char *p = strstr( rulbus_add_cfl, " with addresses " );
-				sprintf( p, " with addresses 0x%02X and 0x%02X in same rack",
-						 rulbus_card[ i ].addr, rulbus_card[ j ].addr );
-				return RULBUS_ADD_CFL;
-			}
-		}
 
 	return RULBUS_OK;
 }
@@ -635,13 +631,13 @@ static int rulbus_write_rack( unsigned char rack, unsigned char addr,
 		switch ( errno )
 		{
 			case ENOMEM :
-				return RULBUS_NO_MEM;
+				return RULBUS_NO_MEMORY;
 
 			case EIO :
-				return RULBUS_TIM_OUT;
+				return RULBUS_TIME_OUT;
 
 			default :                   /* catch all for "impossible" errors */
-				return RULBUS_WRT_ERR;
+				return RULBUS_WRITE_ERROR;
 		}
 
 	return retval;
@@ -664,16 +660,97 @@ static int rulbus_read_rack( unsigned char rack, unsigned char addr,
 		switch ( errno )
 		{
 			case ENOMEM :
-				return RULBUS_NO_MEM;
+				return RULBUS_NO_MEMORY;
 
 			case EIO :
-				return RULBUS_TIM_OUT;
+				return RULBUS_TIME_OUT;
 
 			default :                   /* catch all for "impossible" errors */
-				return RULBUS_RD_ERR;
+				return RULBUS_READ_ERROR;
 		}
 
 	return retval;
+}
+
+
+/*--------------------------------------------------------------*
+ * Function returns some informations about the cards as far as
+ * specified by the configuration file
+ *--------------------------------------------------------------*/
+
+int rulbus_get_card_info( const char *name, RULBUS_CARD_INFO *card_info )
+{
+	const char *config_name;
+	extern FILE *rulbus_in;             /* defined in parser.y */
+	int retval;
+	int i;
+
+
+	if ( name == NULL || card_info == NULL )
+		return RULBUS_INVALID_ARGUMENT;
+
+	if ( ! rulbus_in_use )
+	{
+		/* Figure out the name of the configuration file and try to open it */
+
+		if ( ( config_name = getenv( "RULBUS_CONFIG_FILE" ) ) == NULL )
+			config_name = RULBUS_DEFAULT_CONFIG_FILE;
+
+		if ( ( rulbus_in = fopen( config_name, "r" ) ) == NULL )
+			switch ( errno )
+			{
+				case ENOMEM :
+					return rulbus_errno = RULBUS_NO_MEMORY;
+
+				case EACCES :
+					return rulbus_errno = RULBUS_CONF_FILE_ACCESS;
+
+				case ENOENT : case ENOTDIR : case ENAMETOOLONG : case ELOOP :
+					return rulbus_errno = RULBUS_CONF_FILE_NAME_INVALID;
+
+				default :
+					return rulbus_errno = RULBUS_CONF_FILE_OPEN_FAIL;
+			}
+
+		/* Parse the configuration file */
+
+		rulbus_parser_init( );
+		if ( ( retval = rulbus_parse( ) ) != RULBUS_OK )
+		{
+			fclose( rulbus_in );
+			rulbus_cleanup( );
+			return rulbus_errno = retval;
+		}
+
+		fclose( rulbus_in );
+
+		/* Check that the data from the configuration file were reasonable */
+
+		if ( ( retval = rulbus_check_config( ) ) != RULBUS_OK )
+		{
+			rulbus_cleanup( );
+			return rulbus_errno = retval;
+		}
+	}
+
+	for ( i = 0; i < rulbus_num_cards; i++ )
+		if ( ! strcmp( name, rulbus_card[ i ].name ) )
+			break;
+
+	if ( i == rulbus_num_cards )
+	{
+		rulbus_cleanup( );
+		return rulbus_errno = RULBUS_INVALID_CARD_NAME;
+	}
+
+	card_info->type = rulbus_card[ i ].type;
+	card_info->num_channels = rulbus_card[ i ].num_channels;
+	card_info->volt_per_bit = rulbus_card[ i ].vpb;
+	card_info->bipolar = rulbus_card[ i ].bipolar;
+	card_info->intr_delay = rulbus_card[ i ].intr_delay;
+
+	rulbus_cleanup( );
+	return RULBUS_OK;	
 }
 
 

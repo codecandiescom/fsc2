@@ -648,6 +648,7 @@ Var *pulser_pulse_reset( Var *v )
 static void rb_pulser_card_setup( void )
 {
 	int i;
+	RULBUS_CARD_INFO card_info;
 
 
 	clock_card[ ERT_CLOCK ].name  = ERT_CLOCK_CARD;
@@ -658,18 +659,13 @@ static void rb_pulser_card_setup( void )
 	for ( i = 0; i < NUM_CLOCK_CARDS; i++ )
 		clock_card[ i ].handle = -1;
 
-	for ( i = 0; i < NUM_DELAY_CARDS; i++ )
-	{
-		delay_card[ i ].handle = -1;
-		delay_card[ i ].prev = NULL;
-		delay_card[ i ].next = NULL;
-		delay_card[ i ].needs_update = UNSET;
-		delay_card[ i ].is_active = UNSET;
-	}
-
 	delay_card[ ERT_DELAY ]. name = ERT_DELAY_CARD;
+	delay_card[ ERT_DELAY ]. prev = NULL;
+	delay_card[ ERT_DELAY ]. next = NULL;
 
 	delay_card[ INIT_DELAY ].name = INIT_DELAY_CARD;
+	delay_card[ INIT_DELAY ]. prev = NULL;
+	delay_card[ INIT_DELAY ]. next = NULL;
 
 	delay_card[ MW_DELAY_0 ].name = MW_DELAY_CARD_0;
 	delay_card[ MW_DELAY_0 ].prev = delay_card + INIT_DELAY;
@@ -689,9 +685,11 @@ static void rb_pulser_card_setup( void )
 
 	delay_card[ MW_DELAY_4 ].name = MW_DELAY_CARD_4;
 	delay_card[ MW_DELAY_4 ].prev = delay_card + MW_DELAY_3;
+	delay_card[ MW_DELAY_4 ].next = NULL;
 
 	delay_card[ RF_DELAY ].name = RF_DELAY_CARD;
 	delay_card[ RF_DELAY ].prev = delay_card + INIT_DELAY;
+	delay_card[ RF_DELAY ].next = NULL;
 
 	delay_card[ DET_DELAY_0 ].name = DET_DELAY_CARD_0;
 	delay_card[ DET_DELAY_0 ].prev = delay_card + INIT_DELAY;
@@ -699,6 +697,23 @@ static void rb_pulser_card_setup( void )
 
 	delay_card[ DET_DELAY_1 ].name = DET_DELAY_CARD_1;
 	delay_card[ DET_DELAY_1 ].prev = delay_card + DET_DELAY_0;
+	delay_card[ DET_DELAY_0 ].next = NULL;
+
+	for ( i = 0; i < NUM_DELAY_CARDS; i++ )
+	{
+		delay_card[ i ].handle = -1;
+		delay_card[ i ].needs_update = UNSET;
+		delay_card[ i ].is_active = UNSET;
+		if ( rulbus_get_card_info( delay_card[ i ].name, &card_info )
+			 													 != RULBUS_OK )
+		{
+			print( FATAL, "Failed to get RULBUS configuration: %s.\n",
+				   rulbus_strerror( ) );
+			THROW( EXCEPTION );
+		}
+
+		delay_card[ i ].intr_delay = card_info.intr_delay;
+	}
 }
 
 

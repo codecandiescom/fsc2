@@ -45,7 +45,6 @@ static struct {
 	bool gain_is_set;
 	int trig_mode;
 	bool trig_mode_is_set;
-	bool ext_trig_used;
 } rb8509, rb8509_stored;
 
 
@@ -68,16 +67,26 @@ static int rb8509_translate_channel( long channel );
 
 int rb8509_init_hook( void )
 {
+	RULBUS_CARD_INFO card_info;
+
+
 	need_RULBUS = SET;
+
+	if ( rulbus_get_card_info( RULBUS_CARD_NAME, &card_info )
+		 != RULBUS_OK )
+	{
+		print( FATAL, "Failed to get RULBUS configuration: %s.\n",
+			   rulbus_strerror( ) );
+		THROW( EXCEPTION );
+	}
 
 	rb8509.handle = -1;
 	rb8509.channel = 0;
-	rb8509.nchan = -1;
+	rb8509.nchan = card_info.num_channels;
 	rb8509.gain = RULBUS_ADC12_GAIN_1;
 	rb8509.gain_is_set = SET;
 	rb8509.trig_mode = RULBUS_ADC12_INT_TRIG;
 	rb8509.trig_mode_is_set = SET;
-	rb8509.ext_trig_used = UNSET;
 
 	return 1;
 }
@@ -99,9 +108,6 @@ int rb8509_test_hook( void )
 
 int rb8509_exp_hook( void )
 {
-	int has_ext_trig;
-
-
 	rb8509 = rb8509_stored;
 	rb8509.channel = 0;
 
@@ -111,42 +117,6 @@ int rb8509_exp_hook( void )
 	{
 		print( FATAL, "Initialization of card failed: %s.\n",
 			   rulbus_strerror( ) );
-		THROW( EXCEPTION );
-	}
-
-	/* Find out how many channels the card has */
-
-	if ( ( rb8509.nchan = rulbus_adc12_num_channels( rb8509.handle ) ) < 0 )
-	{
-		print( FATAL, "Initialization of card failed: %s.\n",
-			   rulbus_strerror( ) );
-		THROW( EXCEPTION );
-	}
-
-	/* Check if during the test run an invalid channel was used */
-
-	if ( rb8509.nchan < rb8509_stored.nchan )
-	{
-		print( FATAL, "During the test run CH%d was used but the card has "
-			   "only %d channels.\n", rb8509_stored.nchan, rb8509.nchan );
-		THROW( EXCEPTION );
-	}
-
-	/* Check if during the test run an external trigger was used but the
-	   card does not support external triggering */
-
-	if ( ( has_ext_trig =
-					 rulbus_adc12_has_external_trigger( rb8509.handle ) ) < 0 )
-	{
-		print( FATAL, "Initialization of card failed: %s.\n",
-			   rulbus_strerror( ) );
-		THROW( EXCEPTION );
-	}
-
-	if ( ! has_ext_trig && rb8509.ext_trig_used )
-	{
-		print( FATAL, "During the test run an external trigger was used but "
-			   "the card can't use external triggers.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -225,11 +195,6 @@ Var *daq_get_voltage( Var *v )
 	channel = rb8509_translate_channel(
 								  get_strict_long( v, "ADC channel number" ) );
 
-	if ( FSC2_MODE == TEST )
-	{
-		rb8509.nchan = channel + 1;
-		return vars_push( FLOAT_VAR, TEST_VOLTS / rb8509.gain );
-	}
 
 	if ( channel >= rb8509.nchan )
 	{
@@ -237,6 +202,9 @@ Var *daq_get_voltage( Var *v )
 			   "is CH%d\n", channel, rb8509.nchan - 1 );
 		THROW( EXCEPTION );
 	}
+
+	if ( FSC2_MODE == TEST )
+		return vars_push( FLOAT_VAR, TEST_VOLTS / rb8509.gain );
 
 	too_many_arguments( v );
 
@@ -320,9 +288,6 @@ Var *daq_trigger_mode( Var *v )
 		print( FATAL, "Communication failure: %s.\n", rulbus_strerror( ) );
 		THROW( EXCEPTION );
 	}
-
-	if ( rb8509.trig_mode == RULBUS_ADC12_EXT_TRIG )
-		rb8509.ext_trig_used = SET;
 
 	return vars_push( INT_VAR, rb8509.trig_mode );
 }

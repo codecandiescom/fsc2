@@ -126,6 +126,7 @@ struct RULBUS_DELAY_CARD {
 	const char *name;
 	int handle;
 	Ticks delay;
+	double intr_delay;
 	RULBUS_DELAY_CARD *prev;
 	RULBUS_DELAY_CARD *next;
 	int num_next;
