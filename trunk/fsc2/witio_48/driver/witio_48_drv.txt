@@ -11,6 +11,12 @@ It only supports simple DIO using the two 82C55A chips on the board in
 mode 0 ("Betriebsart 0"). The 8254/82C54 timer/counter chips also on
 the board are not supported.
 
+* Please note: It is impossible to figure out if there's really a *
+* card in the computer (or at the address that has been specified *
+* as the I/O port base address). Thus it is possible to load the  *
+* driver even if no card exists at all (or it is jumpered to use  *
+* a different base address from the one the driver uses).         *
+
 Each of the two 24-bit DIOs can be split up independently into sub-DIOs,
 which then can be used indendently for input or output. There exist
 four modes, each of the tow DIOs can be in:
