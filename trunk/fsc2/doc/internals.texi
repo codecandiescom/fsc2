@@ -431,14 +431,16 @@ do this by entering
 (gdb) handle SIGUSR2 nostop noprint
 @end example
 
-Debugging the child process, running the experiment requires the
+
+Debugging the child process, running the experiment, requires the
 debugger to attach to the newly created child process. To be able to do
-so easily without the child process already starting to execute while
-you're still trying to attach it you should set the environment variable
+so without the child process already starting to execute while you're
+still trying to attach it you should set the environment variable
 @code{FSC2_CHILD_DEBUG}, e.g.@:
 @example
 > export FSC2_CHILD_DEBUG=1
 @end example
+@noindent
 When this environment variable is defined the child process will sleep
 for about ten hour before it starts, which should be more than enough
 for you to attach to it. Moreover, when this environment variable is set
