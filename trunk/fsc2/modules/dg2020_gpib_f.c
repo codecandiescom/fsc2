@@ -145,10 +145,18 @@ bool dg2020_init( const char *name )
 {
 	int i;
 	FUNCTION *f;
+	char reply[ 100 ];
+	long len = 100;
 
 
 	if ( gpib_init_device( name, &dg2020.device ) == FAILURE )
 		return FAIL;
+
+	/* Try to get the status byte to make sure the pulser reacts */
+
+	if ( gpib_write( dg2020.device, "*STB?\n", 6 ) == FAILURE ||
+		 gpib_read( dg2020.device, reply, &len ) == FAILURE )
+		dg2020_gpib_failure( );
 
     /* Set pulser to short form of replies */
 

@@ -13,6 +13,7 @@ my $num_runs    = 1;
 my $tc          = "Don't set";
 my $sens        = "Don't set";
 my $how         = 'Start experiment';
+my $bridge      = 'cw';
 
 
 my %fp = ( '-side' => 'top',
@@ -28,6 +29,18 @@ my %wp = ( '-side' => 'left',
 # Create all the graphic stuff
 
 my $mw = MainWindow->new( );
+
+my $f0 = $mw->Frame( );
+my $f0_l1 = $f0->Label( '-text' => 'Bridge:',
+						'-width' => '20',
+						'anchor' => 'w' );
+my $f0_m = $f0->Optionmenu( '-options' => [ ( 'cw', 'pulsed' ) ],
+							'-width' => 9,
+							'-variable' => \$bridge );
+$f0->pack( %fp );
+$f0_l1->pack( %wp );
+$f0_m->pack( %wp );
+
 
 my $f1 = $mw->Frame( );
 my $f1_l1 = $f1->Label( '-text' => 'Start field:',
@@ -120,8 +133,8 @@ $f5_m->pack( %wp );
 
 my $f6 = $mw->Frame( );
 my $f6_l = $f6->Label( '-text' => 'Time constant:',
-						'-width' => '20',
-						'anchor' => 'w' );
+					   '-width' => '20',
+					   'anchor' => 'w' );
 my $f6_m = $f6->Optionmenu( '-options' =>
 							[ ( "Don't set", '100 s', ' 30 s', ' 10 s',
 							    '  3 s', '  1 s', '300 ms', '100 ms', ' 30 ms',
@@ -186,7 +199,6 @@ return if &do_checks( ) != 0;
 local *F;
 
 my $how2;
-my $text = "";
 
 $how2 = "start" if $how =~ /^Start/;
 $how2 = "test"  if $how =~ /^Test/;
@@ -195,12 +207,11 @@ $how2 = "load"  if $how =~ /^Load/;
 open( F, "|fsc2_$how2" ) or die "Can't find utility.\n";
 
 print F
-"DEVICES:
-
-dg2020_b;
-er035m_s;
-aeg_x_band;\n";
-print F lc( $lockin ), ";\n\n\n";
+"DEVICES:\n\n";
+print F "dg2020_b;\n" if $bridge =~ /pulsed/;
+print F lc( $lockin ), ";\n";
+print F "er035m_s;
+aeg_x_band;\n\n\n";
 
 print F
 "VARIABLES:\n\nI";
@@ -209,13 +220,14 @@ print F ";
 start_field = $start_field G;
 end_field = $end_field G;
 field_step = ";
-print F ( $end_field > $start_field ) ? $field_step : - $field_step;
+print F $end_field > $start_field ? $field_step : - $field_step;
 print F " G;
 N_points = ceil( abs( end_field - start_field ) / abs( field_step ) ) + 1;
-data[ N_points ];\n";
+data[ N_points ];
+N_runs = $num_runs;\n";
 
 if ( $num_runs != 1 ) {
-	print F "N_runs = $num_runs;\nnew_data[ N_points ];\n";
+    print F "new_data[ N_points ];\n";
 }
 
 if ( $tc eq "Don't set" ) {
@@ -224,25 +236,18 @@ if ( $tc eq "Don't set" ) {
 	print F "tc = $tc;\n";
 }
 
-print F 
+print F
 "\n\nASSIGNMENTS:\n
 TIMEBASE:	  5 ns;
 MICROWAVE:	  POD = 1, 2, 3, 4, 5, V_HIGH = 5 V, V_LOW = 0 V, INVERTED;
-PHASE_SETUP:  MICROWAVE, CW: 5;
+PHASE_SETUP:  MICROWAVE, CW: 5;\n" if $bridge =~ /pulsed/;
 
 
-PREPARATIONS:
-
-pulser_cw_mode( );
-magnet_setup( start_field, field_step );\n";
-if ( $tc ne "Don't set" ) {
-	print F "lockin_time_constant( tc );\n";
-}
-
-if ( $sens ne "Don't set" ) {
-	print F "lockin_sensitivity( $sens );\n";
-}
-
+print F "\n\nPREPARATIONS:\n\n";
+print F "pulser_cw_mode( );\n" if $bridge =~ /pulsed/;
+print F "magnet_setup( start_field, field_step );\n";
+print F "lockin_time_constant( tc );\n" if $tc ne "Don't set";
+print F "lockin_sensitivity( $sens );\n" if $sens ne "Don't set";
 print F "init_1d( ";
 print F $num_runs == 1 ? "1" : "3";
 print F ", N_points, start_field, field_step, \"Magnetic field / G\",
@@ -263,20 +268,14 @@ fsave( \"% Field:\\n\"
 	   lockin_sensitivity( ), lockin_time_constant( ), lockin_phase( ),
 	   N_runs );
 save_comment( \"% \" );
-save_program( \"% \" );
+save_program( \"% \" );\n\n";
 
-";
-
-if ( $tc eq "Don't set" ) {
-	print F "tc = lockin_time_constant( );\n\n";
-
-}
-
+print F "tc = lockin_time_constant( );\n\n" if $tc eq "Don't set";
 if ( $num_runs != 1 ) {
 	print F
 "FOR J = 1 : N_runs \{
 
-	print( \"Starting #. run of #\\n\", J, N_runs );
+	print( \"Starting #. run out of #\\n\", J, N_runs );
 
 	FOR I = 1 : N_points \{
 

@@ -1889,6 +1889,7 @@ Var *f_save_o( Var *v )
 static bool print_browser( int browser, int fid, const char* comment )
 {
 	char *line;
+	char *lp;
 
 
 	writer( browser ==  0 ? C_PROG : C_OUTPUT );
@@ -1902,8 +1903,11 @@ static bool print_browser( int browser, int fid, const char* comment )
 		if ( line != NULL )
 		{
 			if ( *line == '@' )
-				T_fprintf( fid, "%s%s\n", comment,
-						   line + browser == 0 ? 6 : 5 );
+			{
+				lp = line + 1;
+				while ( *lp++ != 'f' );
+				T_fprintf( fid, "%s%s\n", comment, lp );
+			}
 			else
 				T_fprintf( fid, "%s%s\n", comment, line );
 		}
