@@ -541,7 +541,7 @@ void lecroy9400_set_up_averaging( long channel, long source, long num_avg,
 
 	if ( rec_len == UNDEFINED_REC_LEN )
 	{
-		for ( i = 0; j < CL_ENTRIES; j++ )
+		for ( i = 0; i < CL_ENTRIES; i++ )
 			if ( cl[ i ] >= ml[ lecroy9400.tb_index ] )
 				break;
 		rec_len = lecroy9400.rec_len[ channel ] = cl[ i ];

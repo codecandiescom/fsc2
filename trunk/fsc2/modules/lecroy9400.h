@@ -330,6 +330,7 @@ extern double sr[ 21 ];
 extern int ppd[ 21 ];
 extern long na[ 16 ];
 extern long cl[ 10 ];
+extern long ml[ 21 ];
 
 extern bool lecroy9400_IN_SETUP;
 
