@@ -179,7 +179,7 @@ int keithley228a_init_hook( void )
 	if ( ! exists_device( keithley228a.lockin_name ) )
 	{
 		eprint( FATAL, SET, "%s: Module for lock-in amplifier '%s' needed by "
-				"the power supply isn't loaded.\n", DEVICE_NAME,
+				"the magnet power supply isn't loaded.\n", DEVICE_NAME,
 				keithley228a.lockin_name );
 		
 		THROW( EXCEPTION );
@@ -193,12 +193,7 @@ int keithley228a_init_hook( void )
 	   lock-in number. */
 
 	if ( ( seq = get_lib_number( keithley228a.lockin_name ) ) > 1 )
-	{
-		keithley228a.lockin_append =
-								   get_string( ( int ) floor( log10( seq ) ) );
-		sprintf( keithley228a.lockin_append, "#%d", seq );
-	}
-	else
+		keithley228a.lockin_append = get_init_string( "#%d", seq );
 		keithley228a.lockin_append = T_strdup( "" );
 
 	/* Set the DAC port to be used and check that it is a valid number */
@@ -234,10 +229,7 @@ int keithley228a_init_hook( void )
 
 	/* Check if a function for setting the DAC port exists */
 
-	fn = get_string( strlen( "lockin_dac_voltage" ) + 
-					 strlen( keithley228a.lockin_append ) );
-	strcpy( fn, "lockin_dac_voltage" );
-	strcat( fn, keithley228a.lockin_append );
+	fn = get_init_string( "lockin_dac_voltage%s", keithley228a.lockin_append );
 	if ( ( func_ptr = func_get( fn, &access ) ) == NULL )
 	{
 		eprint( FATAL, SET, "%s: No lock-in amplifier module loaded "
@@ -862,10 +854,7 @@ static double keithley228a_set_current( double new_current )
 	/* Set the voltage on the lock-ins DAC - the function needs two arguments,
 	   the port number and the voltage */
 
-	fn = get_string( strlen( "lockin_dac_voltage" ) + 
-					 strlen( keithley228a.lockin_append ) );
-	strcpy( fn, "lockin_dac_voltage" );
-	strcat( fn, keithley228a.lockin_append );
+	fn = get_init_string( "lockin_dac_voltage%s", keithley228a.lockin_append );
 	func_ptr = func_get( fn, &access );
 	T_free( fn );
 	vars_push( INT_VAR, keithley228a.lockin_dac_port );

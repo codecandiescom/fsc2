@@ -25,8 +25,7 @@
 #define UTIL_HEADER
 
 
-char *get_string( size_t len );
-char *get_init_string( const char *fmt, ... );
+char *get_string( const char *fmt, ... );
 char *string_to_lower( char *str );
 void *get_memcpy( const void *array, size_t size );
 char *correct_line_breaks( char *str );

@@ -363,7 +363,7 @@ long reader( void *ret )
 
 			if ( header.data.str_len[ 0 ] > 0 )
 			{
-				str[ 0 ] = get_string( header.data.str_len[ 0 ] );
+				str[ 0 ] = T_malloc( header.data.str_len[ 0 ] + 1 );
 				pipe_read( pd[ READ ], str[ 0 ],
 						   header.data.str_len[ 0 ] );
 				str[ 0 ][ header.data.str_len[ 0 ] ] = '\0';
@@ -391,7 +391,7 @@ long reader( void *ret )
 
 			if ( header.data.str_len[ 0 ] > 0 )
 			{
-				str[ 0 ] = get_string( header.data.str_len[ 0 ] );
+				str[ 0 ] = T_malloc( header.data.str_len[ 0 ] + 1 );
 				pipe_read( pd[ READ ], str[ 0 ],
 						   header.data.str_len[ 0 ] );
 				str[ 0 ][ header.data.str_len[ 0 ] ] = '\0';
@@ -421,7 +421,7 @@ long reader( void *ret )
 
 			if ( header.data.str_len[ 0 ] > 0 )
 			{
-				str[ 0 ] = get_string( header.data.str_len[ 0 ] );
+				str[ 0 ] = T_malloc( header.data.str_len[ 0 ] + 1 );
 				pipe_read( pd[ READ ], str[ 0 ],
 						   header.data.str_len[ 0 ] );
 				str[ 0 ][ header.data.str_len[ 0 ] ] = '\0';
@@ -458,7 +458,7 @@ long reader( void *ret )
 			{
 				if ( header.data.str_len[ i ] > 0 )
 				{
-					str[ i ] = get_string( header.data.str_len[ i ] );
+					str[ i ] = T_malloc( header.data.str_len[ i ] + 1 );
 					pipe_read( pd[ READ ], str[ i ],
 							   header.data.str_len[ i ] );
 					str[ i ][ header.data.str_len[ i ] ] = '\0';
@@ -492,7 +492,7 @@ long reader( void *ret )
 			{
 				if ( header.data.str_len[ i ] > 0 )
 				{
-					str[ i ] = get_string( header.data.str_len[ i ] );
+					str[ i ] = T_malloc( header.data.str_len[ i ] + 1 );
 					pipe_read( pd[ READ ], str[ i ],
 							   header.data.str_len[ i ] );
 					str[ i ][ header.data.str_len[ i ] ] = '\0';
@@ -537,7 +537,7 @@ long reader( void *ret )
 			for ( i = 0; i < 2 ; i++ )
 				if ( header.data.str_len[ i ] > 0 )
 				{
-					str[ i ] = get_string( header.data.str_len[ i ] );
+					str[ i ] = T_malloc( header.data.str_len[ i ] + 1 );
 					pipe_read( pd[ READ ], str[ i ],
 							   header.data.str_len[ i ] );
 					str[ i ][ header.data.str_len[ i ] ] = '\0';
@@ -706,7 +706,7 @@ long reader( void *ret )
 
 			T_free( retstr );
 
-			retstr = get_string( header.data.len );
+			retstr = T_malloc( header.data.len + 1 );
             if ( header.data.len > 0 )
 			{
 				pipe_read( pd[ READ ], retstr, header.data.len );

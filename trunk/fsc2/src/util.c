@@ -24,23 +24,12 @@
 #include "fsc2.h"
 
 
-/*-----------------------------------------------------------------*/
-/* Function allocates memory for a string with one extra character */
-/* for the end-of-string null-byte.                                */
-/*-----------------------------------------------------------------*/
-
-char *get_string( size_t len )
-{
-	return T_malloc( len + 1 );
-}
-
-
 /*--------------------------------------------------------------*/
 /* Function gets a format string as in printf and all arguments */
 /* and returns a string into which the arguments are printed.   */
 /*--------------------------------------------------------------*/
 
-char *get_init_string( const char *fmt, ... )
+char *get_string( const char *fmt, ... )
 {
 	char *c = NULL;
 	int len = 128;

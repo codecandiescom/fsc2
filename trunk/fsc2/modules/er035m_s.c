@@ -708,7 +708,7 @@ static bool er035m_s_write( const char *buf )
 
 		TRY
 		{
-			wrbuf = get_string( wrlen );
+			wrbuf = T_malloc( wrlen + 1 );
 			TRY_SUCCESS;
 		}
 

@@ -116,32 +116,32 @@ void bug_report_callback( FL_OBJECT *a, long b )
 
 	fprintf( tmp, "\"ulimit -a -S\" returns:\n\n" );
 	fclose( tmp );
-	cmd = get_init_string( "ulimit -a -S >> %s", filename );
+	cmd = get_string( "ulimit -a -S >> %s", filename );
 	system( cmd );
 	T_free( cmd );
 
-	cmd = get_init_string( "echo >> %s", filename );
+	cmd = get_string( "echo >> %s", filename );
 	system( cmd );
 	T_free( cmd );
 
 	/* Append current disk usage to the file to detect problems due to a
 	   full disk */
 
-	cmd = get_init_string( "df >> %f", filename );
+	cmd = get_string( "df >> %f", filename );
 	system( cmd );
 	T_free( cmd );
 
 	/* Finally append the file with the version informations so that I'll know
 	   what the sender is really using */
 
-	cmd = get_init_string( "echo \"\nVersion (use uudecode file "
-						   "| gunzip -c to unpack):\n\" >> %s", filename );
+	cmd = get_string( "echo \"\nVersion (use uudecode file "
+					  "| gunzip -c to unpack):\n\" >> %s", filename );
 	system( cmd );
 	T_free( cmd );
 
-	cmd = get_init_string( "cat %s%sversion.ugz >> %s", libdir,
-						   libdir[ strlen( libdir ) - 1 ] != '/' ? "/" : "",
-						   filename);
+	cmd = get_string( "cat %s%sversion.ugz >> %s", libdir,
+					  libdir[ strlen( libdir ) - 1 ] != '/' ? "/" : "",
+					  filename);
 	system( cmd );
 	T_free( cmd );
 
@@ -195,10 +195,9 @@ void bug_report_callback( FL_OBJECT *a, long b )
 
 		/* Assemble the command for sending the mail */
 
-		cmd = get_init_string( "%s -s \"fsc2 bug report\" %s %s %s < %s",
-							   MAIL_PROGRAM, user != NULL ? "-c" : "",
-							   user != NULL ? user : "", MAIL_ADDRESS,
-							   filename);
+		cmd = get_string( "%s -s \"fsc2 bug report\" %s %s %s < %s",
+						  MAIL_PROGRAM, user != NULL ? "-c" : "",
+						  user != NULL ? user : "", MAIL_ADDRESS, filename);
 		system( cmd );                 /* send the mail */
 		T_free( cmd );
 	}
