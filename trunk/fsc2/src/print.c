@@ -658,6 +658,10 @@ static void start_printing_2d( FILE *fp, char *name )
 	fprintf( fp, "%f %f m\n0 %f rl\n%f 0 rl\n0 %f rl cp clip np\n",
 			 x_0 - 0.1, y_0 - 0.1, h + 0.2, w + 0.2, - ( h + 0.2 ) );
 
+	/* The way the program is working currently only the first alternative
+	   will happen (b&w support for 2D is currently switched off because
+	   I didn't come up with a good way to draw it...) */
+
 	if ( print_with_color )
 		eps_draw_surface( fp, G.active_curve );
 	else
