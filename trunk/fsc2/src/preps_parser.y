@@ -184,7 +184,7 @@ unit:    /* empty */               { $$ = vars_push( INT_VAR, 1L ); }
        | NV_TOKEN                  { $$ = vars_push( FLOAT_VAR, 1.0e-9 ); }
        | UV_TOKEN                  { $$ = vars_push( FLOAT_VAR, 1.0e-6 ); }
        | MV_TOKEN                  { $$ = vars_push( FLOAT_VAR, 1.0e-3 ); }
-       | V_TOKEN                   { $$ = vars_push( FLOAT_VAR, 1.o ); }
+       | V_TOKEN                   { $$ = vars_push( FLOAT_VAR, 1.0 ); }
 ;
 
 /* list of indices for access of an array element */

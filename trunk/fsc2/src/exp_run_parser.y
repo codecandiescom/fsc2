@@ -48,7 +48,11 @@ static Var *CV;
 %token E_US_TOKEN	  270
 %token E_MS_TOKEN	  271
 %token E_S_TOKEN	  272
-%token E_NEG	      273
+%token E_NS_TOKEN	  273
+%token E_US_TOKEN	  274
+%token E_MS_TOKEN	  275
+%token E_S_TOKEN	  276
+%token E_NEG	      277
 
 
 %token <vptr> E_VAR_TOKEN         /* variable name */
@@ -60,6 +64,7 @@ static Var *CV;
 %token E_EQ E_LT E_LE E_GT E_GE
 
 %token E_NS_TOKEN E_US_TOKEN E_MS_TOKEN E_S_TOKEN
+%token E_NV_TOKEN E_UV_TOKEN E_MV_TOKEN E_V_TOKEN
 %type <vptr> expr unit line list1
 
 
@@ -152,6 +157,10 @@ unit:    /* empty */              { $$ = vars_push( INT_VAR, 1L ); }
        | E_US_TOKEN               { $$ = vars_push( INT_VAR, 1000L ); }
        | E_MS_TOKEN               { $$ = vars_push( INT_VAR, 1000000L ); }
        | E_S_TOKEN                { $$ = vars_push( INT_VAR, 1000000000L ); }
+       | NV_TOKEN                 { $$ = vars_push( FLOAT_VAR, 1.0e-9 ); }
+       | UV_TOKEN                 { $$ = vars_push( FLOAT_VAR, 1.0e-6 ); }
+       | MV_TOKEN                 { $$ = vars_push( FLOAT_VAR, 1.0e-3 ); }
+       | V_TOKEN                  { $$ = vars_push( FLOAT_VAR, 1.0 ); }
 ;
 
 
