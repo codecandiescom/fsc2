@@ -140,6 +140,9 @@ or
 @example
 TM: EXTERNAL, LEVEL = -1.2 V, SLOPE = POSITIVE, IMPEDANCE = HIGH;
 @end example
+Please note: The trigger input impedance can only be set for the
+Sony/Tektronix DG2020.
+
 The keywords @code{LEVEL} can be shortend to @code{LEV}, @code{SLOPE} to
 @code{SL}, @code{POSITIVE} to @code{POS}, @code{NEGATIVE} to @code{NEG},
 @code{IMPEDANCE} to @code{IMP} and, finally, @code{HIGH} to @code{H} and
@@ -169,11 +172,17 @@ defined:
 @itemize @bullet
 @item @code{MICROWAVE} (or @code{MW}, @code{MICRO_WAVE}, @code{MICROW},
       @code{MICRO_W}, @code{MWAVE}, @code{M_WAVE} or @code{M_W})
-@item @code{TRAVELING_WAVE_TUBE} (or @code{TWT} )
-@item @code{TRAVELING_WAVE_TUBE_GATE}
+@item @code{TRAVELING_WAVE_TUBE} (or @code{TWT} or all other combinations,
+      where any of constituting words is replaced by its initial character
+      or one or all underscore characters are missing)
+@item @code{TRAVELING_WAVE_TUBE_GATE} (or @code{TWTG} or all other
+      combinations, where any of constituting words is replaced by its
+      initial character or one or all underscore characters are missing)
+@item @code{DETECTION} (or @code{DET})
+@item @code{DETECTION_GATE} (or @code{DETG}, @code{DET_G},
+      @code{DETECTIONGATE}, @code{DETECTION_G}, @code{DETECTIONG},
+      @code{DET_GATE} or @code{DETGATE})
 @end itemize
-@c T(RAVELING)?_?W(AVE)?_?T(UBE)?:?
-@c TWT_GATE    T(RAVELING)?_?W(AVE)?_?T(UBE)?_?G(ATE)?:?
 @c DET         DET(ECTION)?:?
 @c DET_GATE    DET(ECTION)?_?G(ATE)?:?
 @c DEF         DEF(ENSE)?:?
