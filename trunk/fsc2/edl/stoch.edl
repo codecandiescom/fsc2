@@ -1,0 +1,27 @@
+VARIABLES:
+
+
+Len = 1000;
+Stoch[ Len ];
+Set[ Len ];
+Index;
+I;
+File;
+Rep = 0;
+
+
+EXPERIMENT:
+
+
+Index = floor( Len * random( ) );
+FOR I = 1 : Len {
+	WHILE Set[ Index + 1 ] != 0 {
+		Index = ( Index + 1 ) % Len;
+		Rep += 1;
+	}
+	Set[ Index + 1 ] = 1;
+	Stoch[ I ] = Index + 1;
+	Index = int( Len * random( ) );
+}
+
+print( "\TRep = #\n", Rep );

@@ -94,7 +94,7 @@ bool hp8647a_init( const char *name )
 
 	/* Set source and amplitude for each modulation type as far as it's set */
 
-	for ( i = 0; i < NUM_MOD_TYPES; i++ )
+	for ( i = 0; i < NUM_MOD_TYPES - 1; i++ )
 	{
 		if ( hp8647a.mod_source_is_set[ i ] )
 			hp8647a_set_mod_source( i, hp8647a.mod_source[ i ] );
@@ -285,7 +285,7 @@ int hp8647a_get_mod_type( void )
 			return MOD_TYPE_FM;
 	}
 
-	for ( i = 0; i < NUM_MOD_TYPES; i++ )
+	for ( i = 0; i < NUM_MOD_TYPES - 1; i++ )
 	{
 		length = 100;
 		sprintf( cmd, "%s:STAT?\n", types[ i ] );

@@ -1,6 +1,6 @@
 @c $Id$
 
-@node Overview, EDL, Top, Top
+@node Overview, Command Line Options, Top, Top
 @chapter Overview
 @cindex overview
 

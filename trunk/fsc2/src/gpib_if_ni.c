@@ -262,7 +262,7 @@ static void gpib_init_log( char *log_file_name )
 	if ( ! access_ok && errno == ENOENT )        /* file doesn't exist yet ? */
 		set_perms = SET;
 
-    if ( ( gpib_log = fopen( name, "a+" ) ) == NULL )        /* open fails ? */
+    if ( ( gpib_log = fopen( name, "w" ) ) == NULL )        /* open fails ? */
     {
         gpib_log = stderr;
         fprintf( stderr, "Can't open log file %s - using stderr instead.\n",

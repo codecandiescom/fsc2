@@ -13,6 +13,7 @@ my $sweep_method       = "sweep_up/sweep_down";
 my $field_error        = "";
 my $hidden_field_error = "";
 my $num_runs	       = 1;
+my $tc_fact  	       = 1;
 my $tc			       = "Don't set";
 my $sens		       = "Don't set";
 my $how			       = 'Start experiment';
@@ -157,6 +158,24 @@ $f6->pack( %fp );
 $f6_l1->pack( %wp );
 $f6_v->pack( %wp );
 $f6_l2->pack( %wp );
+
+
+my $f6a = $mw->Frame( );
+my $f6a_l1 = $f6a->Label( '-text' => 'Waiting time:',
+						  '-width' => '20',
+						  'anchor' => 'w' );
+my $f6a_v = $f6a->Entry( '-textvariable' => \$tc_fact,
+						 '-width' => '6',
+						 '-validate' => 'key',
+						 '-validatecommand' => \&is_numeric,
+						 '-relief' => 'sunken' );
+my $f6a_l2 = $f6a->Label( '-text' => '* tc',
+						  '-width' => 2 );
+
+$f6a->pack( %fp );
+$f6a_l1->pack( %wp );
+$f6a_v->pack( %wp );
+$f6a_l2->pack( %wp );
 
 
 
@@ -445,7 +464,7 @@ if ( $sweep_method eq 'sweep' ) {
 		"field_error );";
 }
 print F "
-			wait( tc );
+			wait( $tc_fact * tc );
 		\}
 	\}
 
@@ -461,7 +480,7 @@ if ( $sweep_method eq 'sweep' ) {
 	print F "act_field = set_field( start_field );";
 }
 print F "
-		wait( tc );
+		wait( $tc_fact * tc );
 	\}
 \}
 
@@ -492,7 +511,7 @@ if ( $sweep_method eq 'sweep' ) {
 	print F "act_field = set_field( start_field + I * field_step, field_error );";
 }
 print F "
-		wait( tc );
+		wait( $tc_fact * tc );
 	\}
 \}";
 }
