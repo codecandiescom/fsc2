@@ -22,7 +22,6 @@ static void G_init_curves_1d( void );
 static void G_init_curves_2d( void );
 static void create_label_pixmap( int coord );
 static void setup_canvas( Canvas *c, FL_OBJECT *obj );
-static void create_colors( void );
 static void canvas_off( Canvas *c, FL_OBJECT *obj );
 
 
@@ -763,35 +762,6 @@ void delete_pixmap( Canvas *c )
 
 	if ( G.is_init )
 		XFreeGC( G.d, c->box_gc );
-}
-
-
-/*--------------------------------------------------------------*/
-/*--------------------------------------------------------------*/
-
-void create_colors( void )
-{
-    FL_COLOR i;
-	int rgb[ 3 ];
-
-
-	/* Create the colors between blue and red */
-
-	for ( i = 0; i < NUM_COLORS; i++ )
-	{
-		i2rgb( ( double ) i / ( double ) ( NUM_COLORS - 1 ), rgb );
-		fl_mapcolor( i + FL_FREE_COL1 + 1, 
-					 rgb[ RED ], rgb[ GREEN ], rgb[ BLUE ] );
-	}
-
-	/* Finally create colors for values too large and values too small */
-
-	i2rgb( 2.0, rgb );
-	fl_mapcolor( NUM_COLORS + FL_FREE_COL1 + 1,
-				 rgb[ RED ], rgb[ GREEN ], rgb[ BLUE ] );
-	i2rgb( -1.0, rgb );
-	fl_mapcolor( NUM_COLORS + FL_FREE_COL1 + 2,
-				 rgb[ RED ], rgb[ GREEN ], rgb[ BLUE ] );
 }
 
 

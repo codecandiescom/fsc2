@@ -364,10 +364,11 @@ bool fsc2_locking( void )
 /*------------------------------------------------------------------------*/
 /* If fsc2 crashes while running an experiment shared memory segments may */
 /* remain undeleted. To get rid of them we now check all shared segments  */
-/* if they belong to fsc2 and start with the magic 'fsc2'. If they do     */
-/* they are debris from a crashes and have to be deleted to avoid using   */
-/* up all segments after some time. Since the segments belong to the user */
-/* fsc2 this routine must be run with the effective ID of fsc2.           */
+/* if they belong to the user `fsc2' and start with the magic 'fsc2'. If  */
+/* they do they are obviously debris from a crash and have to be deleted  */
+/* to avoid using up all segments after some time. Since the segments     */
+/* belong to the user `fsc2' this routine must be run with the effective  */
+/* ID of fsc2.                                                            */
 /* This routine is more or less a copy of the code from the ipcs utility, */
 /* hopefully it will continue to work with newer versions of Linux...     */
 /*------------------------------------------------------------------------*/
@@ -462,14 +463,53 @@ void i2rgb( double h, int *rgb )
 }
 
 
+void create_colors( void )
+{
+    FL_COLOR i;
+	int rgb[ 3 ];
+
+
+	/* Create the colors between blue and red */
+
+	for ( i = 0; i < NUM_COLORS; i++ )
+	{
+		i2rgb( ( double ) i / ( double ) ( NUM_COLORS - 1 ), rgb );
+		fl_mapcolor( i + FL_FREE_COL1 + 1, 
+					 rgb[ RED ], rgb[ GREEN ], rgb[ BLUE ] );
+	}
+
+	/* Finally create colors for values too large and values too small */
+
+	i2rgb( 2.0, rgb );
+	fl_mapcolor( NUM_COLORS + FL_FREE_COL1 + 1,
+				 rgb[ RED ], rgb[ GREEN ], rgb[ BLUE ] );
+	i2rgb( -1.0, rgb );
+	fl_mapcolor( NUM_COLORS + FL_FREE_COL1 + 2,
+				 rgb[ RED ], rgb[ GREEN ], rgb[ BLUE ] );
+}
+
+
+inline unsigned long d2color( double a )
+{
+	if ( a <= - 0.5 / ( double ) NUM_COLORS )
+		return fl_get_pixel( NUM_COLORS + FL_FREE_COL1 + 2 );
+	if ( a >= 1.0 + 0.5 / ( double ) NUM_COLORS )
+		return fl_get_pixel( NUM_COLORS + FL_FREE_COL1 + 1 );
+	else
+		return fl_get_pixel( FL_FREE_COL1 + 1
+							 + lround( a * ( NUM_COLORS - 1 ) ) );
+}
+
+
+
 /* Here some more utility functions - they are that short that inlining them
-   seems to be a good idea... */
+   seemed to be a good idea... */
 
 /* The next two functions do a conversion of double or integer values to
-   short.  Both are exclusively used in the conversion of data to points to be
-   drawn on the screen via XPoint structure which contain to short ints.  To
-   avoid overflows in the calculations we restrict the values to half the
-   allowed range of sort ints - thus allowing canvas sizes of up to half the
+   short. Both are exclusively used in the conversion of data to points to be
+   drawn on the screen via a XPoint structure which contains two short ints.
+   To avoid overflows in the calculations we restrict the values to half the
+   allowed range of short ints - thus allowing canvas sizes of up to half the
    size of a short int. */
 
 #define SHRT_MAX_HALF ( SHRT_MAX >> 1 )
@@ -478,7 +518,7 @@ void i2rgb( double h, int *rgb )
 
 inline short d2shrt( double a )
 {
-	if ( a > SHRT_MAX_HALF << 1 )
+	if ( a > SHRT_MAX_HALF )
 		return SHRT_MAX_HALF;
 	if ( a < SHRT_MIN_HALF )
 		return SHRT_MIN_HALF;
@@ -494,19 +534,6 @@ inline short i2shrt( int a )
 		return SHRT_MIN_HALF;
 	return ( short ) a;
 }
-
-
-inline unsigned long d2color( double a )
-{
-	if ( a <= - 0.5 / ( double ) NUM_COLORS )
-		return fl_get_pixel( NUM_COLORS + FL_FREE_COL1 + 2 );
-	if ( a >= 1.0 + 0.5 / ( double ) NUM_COLORS )
-		return fl_get_pixel( NUM_COLORS + FL_FREE_COL1 + 1 );
-	else
-		return fl_get_pixel( FL_FREE_COL1 + 1
-							 + lround( a * ( NUM_COLORS - 1 ) ) );
-}
-
 
 
 // long lround( double x ) { return ( long ) ( 2 * x ) - ( long ) x ); }
