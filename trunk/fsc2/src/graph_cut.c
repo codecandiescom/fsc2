@@ -53,10 +53,10 @@ static void cut_save_scale_state( void );
 extern FL_resource xresources[ ];
 
 #if ( SIZE == HI_RES )
-#define WIN_MIN_WIDTH   350
+#define WIN_MIN_WIDTH   430
 #define WIN_MIN_HEIGHT  435
 #else
-#define WIN_MIN_WIDTH   300
+#define WIN_MIN_WIDTH   380
 #define WIN_MIN_HEIGHT  380
 #endif
 
@@ -138,6 +138,9 @@ void cut_show( int dir, long index )
 
 		if ( cut_has_been_shown )
 		{
+			cut_x += border_offset_x - 1;
+			cut_y += border_offset_y - 1;
+
 			fl_set_form_geometry( cut_form->cut, cut_x, cut_y, cut_w, cut_h );
 			needs_pos = SET;
 		}
@@ -147,21 +150,18 @@ void cut_show( int dir, long index )
 					  FL_FULLBORDER, "fsc2: Cross section" );
 		cut_has_been_shown = SET;
 
+		fl_winminsize( cut_form->cut->window, WIN_MIN_WIDTH, WIN_MIN_HEIGHT );
+		fl_set_form_atclose( cut_form->cut, cut_form_close_handler, NULL );
+
 		cut_setup_canvas( &G.cut_x_axis, cut_form->cut_x_axis );
 		cut_setup_canvas( &G.cut_y_axis, cut_form->cut_y_axis );
 		cut_setup_canvas( &G.cut_z_axis, cut_form->cut_z_axis );
 		cut_setup_canvas( &G.cut_canvas, cut_form->cut_canvas );
 
-		fl_winminsize( cut_form->cut->window, WIN_MIN_WIDTH, WIN_MIN_HEIGHT );
-		fl_set_form_atclose( cut_form->cut, cut_form_close_handler, NULL );
-
 		G_init_cut_curve( );
 	}
 	else if ( ! is_mapped )
-	{
 		XMapWindow( G.d, cut_form->cut->window );
-		XMapSubwindows( G.d, cut_form->cut->window );
-	}
 
 	fl_raise_form( cut_form->cut );
 
@@ -904,8 +904,18 @@ static void cut_setup_canvas( Canvas *c, FL_OBJECT *obj )
 
 	c->obj = obj;
 
-	c->w = obj->w;
-	c->h = obj->h;
+	/* We need to make sure the canvas hasn't a size less than 1 otherwise
+	   hell will break loose... */
+
+	if ( obj->w > 0 )
+		c->w = obj->w;
+	else
+		c->w = 1;
+	if ( obj->h > 0 )
+		c->h = obj->h;
+	else
+		c->h = 1;
+
 	create_pixmap( c );
 
 	fl_add_canvas_handler( c->obj, Expose, ch, ( void * ) c );
@@ -1625,7 +1635,7 @@ void cut_close_callback( FL_OBJECT *a, long b )
 	b = b;
 
 	G.is_cut = UNSET;
-	XUnmapSubwindows( G.d, cut_form->cut->window );
+
 	XUnmapWindow( G.d, cut_form->cut->window );
 	is_mapped = UNSET;
 	for ( i = 0; i < MAX_CURVES; i++ )

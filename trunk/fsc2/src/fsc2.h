@@ -177,6 +177,9 @@ volatile bool conn_child_replied = UNSET;
 bool react_to_do_quit = SET;
 bool exit_hooks_are_run = UNSET;
 
+int border_offset_x;
+int border_offset_y;
+
 Graphics G;
 KEY *Key;
 int Key_ID = -1;
@@ -236,6 +239,9 @@ extern int semaphore;
 extern volatile bool do_quit;
 extern bool react_to_do_quit;
 extern bool exit_hooks_are_run;
+
+extern int border_offset_x;
+extern int border_offset_y;
 
 extern Graphics G;
 extern KEY *Key;

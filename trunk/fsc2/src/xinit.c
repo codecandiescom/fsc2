@@ -79,6 +79,10 @@ bool xforms_init( int *argc, char *argv[] )
 	int flags, wx, wy, ww, wh;
 	XFontStruct *font;
 	FL_CMD_OPT app_opt[ N_APP_OPT ];
+	bool needs_pos = UNSET;
+	XWindowAttributes attr;
+	Window root, parent, *children;
+	int nchilds;
 
 
 	set_up_app_options( app_opt );
@@ -214,18 +218,27 @@ bool xforms_init( int *argc, char *argv[] )
 		}
 
 		if ( XValue & flags && YValue & flags )
-		{
-			fl_set_form_position( main_form->fsc2, wx, wy );
-			fl_show_form( main_form->fsc2, FL_PLACE_GEOMETRY,
-						  FL_FULLBORDER, "fsc2" );
-		}
-		else
-			fl_show_form( main_form->fsc2, FL_PLACE_MOUSE | FL_FREE_SIZE,
-						  FL_FULLBORDER, "fsc2" );
+			needs_pos = SET;
+	}
+
+	if ( needs_pos )
+	{
+		fl_set_form_position( main_form->fsc2, wx, wy );
+		fl_show_form( main_form->fsc2, FL_PLACE_POSITION,
+					  FL_FULLBORDER, "fsc2" );
 	}
 	else
 		fl_show_form( main_form->fsc2, FL_PLACE_MOUSE | FL_FREE_SIZE,
 					  FL_FULLBORDER, "fsc2" );
+
+	
+	XQueryTree( fl_display, main_form->fsc2->window, &root,
+				&parent, &children, &nchilds );
+	XQueryTree( fl_display, parent, &root,
+				&parent, &children, &nchilds );
+	XGetWindowAttributes( fl_display, parent, &attr );
+	border_offset_x = main_form->fsc2->x - attr.x;
+	border_offset_y = main_form->fsc2->y - attr.y;
 
 	fl_winminsize( main_form->fsc2->window, WIN_MIN_WIDTH, WIN_MIN_HEIGHT );
 

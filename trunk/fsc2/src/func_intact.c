@@ -2236,8 +2236,8 @@ static void recreate_Tool_Box( void )
 
 			if ( XValue & flags && YValue & flags )
 			{
-				tool_x += border_offset_x - attr.x - 1;
-				tool_y += border_offset_y - attr.y - 1;
+				tool_x += border_offset_x - 1;
+				tool_y += border_offset_y - 1;
 				needs_pos = SET;
 			}
 		}
