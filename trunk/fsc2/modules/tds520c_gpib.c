@@ -488,11 +488,12 @@ bool tds520c_clear_SESR( void )
 
 void tds520c_finished( void )
 {
-	const char *cmd = "ACQ:STATE STOP;*SRE 0;:ACQ:STOPA RUNST;STATE RUN\n";
+	const char *cmd = "*SRE 0;:ACQ:STOPA RUNST;STATE RUN\n";
 
 	if ( ! tds520c.is_reacting )
 		return;
 
+    gpib_write( tds520c.device, "ACQ:STATE STOP\n", 15 );
     tds520c_clear_SESR( );
     gpib_write( tds520c.device, cmd, strlen( cmd ) );
 	gpib_local( tds520c.device );
