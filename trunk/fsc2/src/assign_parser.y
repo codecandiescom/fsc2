@@ -18,7 +18,7 @@ extern char *assigntext;
 
 int assignerror( const char *s );
 void ass_func( int function );
-void set_protocoll( long prot );
+void set_protocol( long prot );
 
 /* locally used global variables */
 
@@ -250,7 +250,7 @@ pcd:    /* empty */
       | pcd inv
 	  | pcd vh
       | pcd vl
-	  | pcd                        { set_protocoll( PHASE_FFM_PROT ); }
+	  | pcd                        { set_protocol( PHASE_FFM_PROT ); }
         func sep2
 ;
 
@@ -425,7 +425,7 @@ phs:      PHS_TOK                  { Cur_PHS = $1;
 ;
 
 phsl:     /* empty */
-		| phsl                     { set_protocoll( PHASE_BLN_PROT ); }
+		| phsl                     { set_protocol( PHASE_BLN_PROT ); }
 		  func sep2
         | phsl PXY_TOK sep1        { Cur_PHST = $2; }
           phsp
@@ -435,36 +435,36 @@ phsp:    /* empty */
 		| phsp phsv  sep2          { p_phs_setup( Cur_PHS, Cur_PHST, -1, $2,
 												  Cur_PROT ); }
         | phsp POD1_TOK sep1
-		  phsv sep2                { set_protocoll( PHASE_FFM_PROT );
+		  phsv sep2                { set_protocol( PHASE_FFM_PROT );
 			                         p_phs_setup( Cur_PHS, Cur_PHST, 0, $4,
 												  Cur_PROT ); }
         | phsp POD2_TOK sep1
-		  phsv sep2                { set_protocoll( PHASE_FFM_PROT );
+		  phsv sep2                { set_protocol( PHASE_FFM_PROT );
 			                         p_phs_setup( Cur_PHS, Cur_PHST, 1, $4,
 												  Cur_PROT ); }
 		| POD_TOKEN sep1 INT_TOKEN
-          sep2                     { set_protocoll( PHASE_BLN_PROT );
+          sep2                     { set_protocol( PHASE_BLN_PROT );
                                      p_phs_setup( Cur_PHS, Cur_PHST, 0, $3,
 												  Cur_PROT ); }
 ;
 
 phsv:     INT_TOKEN                { $$ = $1; }
-        | ON_TOK                   { set_protocoll( PHASE_FFM_PROT );
+        | ON_TOK                   { set_protocol( PHASE_FFM_PROT );
 		                             $$ = 1;}
-        | OFF_TOK                  { set_protocoll( PHASE_FFM_PROT );
+        | OFF_TOK                  { set_protocol( PHASE_FFM_PROT );
 		                             $$ = 0; }
 ;
 
 /* Handling of PHASE_SWITCH_DELAY commands (Frankfurt version only) */
 
 psd:      PSD_TOKEN expr           { p_set_psd( $1, $2 );
-                                     set_protocoll( PHASE_FFM_PROT ); }
+                                     set_protocol( PHASE_FFM_PROT ); }
 ;
 
 /* Handling of GRACE_PERIOD commands (Frankfurt version only) */
 
-gp:       GP_TOKEN expr            { set_protocoll( PHASE_FFM_PROT );
-                                      p_set_gp( $2 ); }
+gp:       GP_TOKEN expr            { set_protocol( PHASE_FFM_PROT );
+                                     p_set_gp( $2 ); }
 
 %%
 
@@ -482,6 +482,20 @@ int assignerror ( const char *s )
 	THROW( EXCEPTION );
 }
 
+
+/*--------------------------------------------------------------------*/
+/* Called when a pulse function token has been found. If no function  */
+/* has been set yet (flag `Func_is_set' is still unset) just the      */
+/* global variable `Channel_Type' has to be set - thus we know that   */
+/* we're at a line with a function definition. `Func_is_set' is also  */
+/* set at the start of a (Berlin version) PHASE_SETUP line because a  */
+/* following function token is meant to be the function the phase     */
+/* setup is meant up.                                                 */
+/* If `Func_is_set' is set the function token is the function the     */
+/* phase function (Frankfurt version) or the PHASE_SETUP line (Berlin */
+/* is for.                                                            */
+/* `Func_is_set' has to be unset at the start of each line!           */
+/*--------------------------------------------------------------------*/
 
 void ass_func( int function )
 {
@@ -502,11 +516,22 @@ void ass_func( int function )
 			break;
 
 		default :
-			assert( 1 == 0 );
+			eprint( FATAL, "Internal error detected at %s:%d.\n",
+					__FILE__, __LINE__ );
+			THROW( EXCEPTION );
 	}
 }
 
-void set_protocoll( long prot )
+
+/*-----------------------------------------------------------------*/
+/* Called when it becomes clear which phase protocol (Frankfurt or */
+/* Berlin) is to be used. If a protocol is already recognized it   */
+/* can't be changed later. It mist be made sure that the global    */
+/* variable `Cur_Prot' is unset and reset to `PHASE_UNKNOWN_PROT'  */
+/* at the start and after the end of the ASSIGNMENTS section.      */
+/*-----------------------------------------------------------------*/
+
+void set_protocol( long prot )
 {
 	if ( Cur_PROT != PHASE_UNKNOWN_PROT && Cur_PROT != prot )
 	{

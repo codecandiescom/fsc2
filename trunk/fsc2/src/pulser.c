@@ -537,42 +537,75 @@ void p_set_rep_freq( Var *v )
 }
 
 
-/*---------------------------------------------------*/
-/*---------------------------------------------------*/
+/*-----------------------------------------------------------------*/
+/* `func' is either the phase functions number (Frankfurt version) */
+/* or the number of the PHASE_SETUP (Berlin version). `ref' is the */
+/* function the phase stuff is meant for.                          */  
+/*-----------------------------------------------------------------*/
 
-void p_phase_ref( long func, int ref )
-{
-	assert( func == 0 || func == 1 );
-	assert( ref >= PHASE_TYPES_MIN && ref <= PHASE_TYPES_MAX );
-
-	is_pulser_func( pulser_struct.set_phase_reference,
-					"setting a function for phase cycling" );
-
-	( *pulser_struct.set_phase_reference )( ( int ) func, ref );
-}
-
-
-/*---------------------------------------------------*/
-/*---------------------------------------------------*/
-
-void p_phase_ref_f( long func, int ref )
+void p_phase_ref( long prot, long func, int ref )
 {
     is_pulser_func( pulser_struct.set_phase_reference,
                     "setting a function for phase cycling" );
 
-    if ( func != PULSER_CHANNEL_PHASE_1 && func != PULSER_CHANNEL_PHASE_2 )
-    {
-        eprint( FATAL, "%s:%ld: A reference function can only be set for the "
-                "PHASE functions.", Fname, Lc );
-        THROW( EXCEPTION );
-    }
+	switch ( prot )
+	{
+		case PHASE_FFM_PROT :
+			if ( ! exist_device( "dg2020_f" ) )
+			{
+				eprint( FATAL, "%s:%ld: Frankfurt phase syntax used with "
+						"wrong pulser driver.\n", Fname, Lc );
+				THROW( EXCEPTION );
+			}
 
-    if ( ref == PULSER_CHANNEL_PHASE_1 || ref == PULSER_CHANNEL_PHASE_2 )
-    {
-        eprint( FATAL, "%s:%ld: A PHASE function can't be phase cycled.",
-                Fname, Lc );
-        THROW( EXCEPTION );
-    }
+			if ( func < PULSER_CHANNEL_FUNC_MIN ||
+				 func > PULSER_CHANNEL_FUNC_MAX )
+			{
+				eprint( FATAL, "Internal error detected at %s:%d.\n",
+						__FILE__, __LINE__ );
+				THROW( EXCEPTION );
+			}
+
+			if ( func != PULSER_CHANNEL_PHASE_1 &&
+				 func != PULSER_CHANNEL_PHASE_2 )
+			{
+				eprint( FATAL, "%s:%ld: Function `%s' can't be used as PHASE "
+						"functions.", Fname, Lc, Function_Names[ func ] );
+				THROW( EXCEPTION );
+			}
+
+			if ( ref == PULSER_CHANNEL_PHASE_1 ||
+				 ref == PULSER_CHANNEL_PHASE_2 )
+			{
+				eprint( FATAL, "%s:%ld: A PHASE function can't be phase "
+						"cycled.", Fname, Lc );
+				THROW( EXCEPTION );
+			}
+			break;
+
+		case PHASE_BLN_PROT :
+			if ( ! exist_device( "dg2020_b" ) )
+			{
+				eprint( FATAL, "%s:%ld: Berlin phase syntax used with "
+						"wrong pulser driver.\n", Fname, Lc );
+				THROW( EXCEPTION );
+			}
+
+			if ( ( func != 0 && func != 1 )    ||
+				 ref < PULSER_CHANNEL_FUNC_MIN ||
+				 ref > PULSER_CHANNEL_FUNC_MAX )
+			{
+				eprint( FATAL, "Internal error detected at %s:%d.\n",
+						__FILE__, __LINE__ );
+				THROW( EXCEPTION );
+			}
+			break;
+
+		default :
+			eprint( FATAL, "Internal error detected at %s:%d.\n",
+					__FILE__, __LINE__ );
+			THROW( EXCEPTION );
+	}
 
     ( *pulser_struct.set_phase_reference )( ( int ) func, ref );
 }
@@ -782,6 +815,13 @@ void p_set_psd( int func, Var *v )
 {
 	assert( func == 0 || func == 1 );
 
+	if ( ! exist_device( "dg2020_f" ) )
+	{
+		eprint( FATAL, "%s:%ld: Frankfurt phase syntax used with wrong pulser "
+				"driver.\n", Fname, Lc );
+		THROW( EXCEPTION );
+	}
+
 	vars_check( v, INT_VAR | FLOAT_VAR );
 	is_pulser_func( pulser_struct.set_phase_switch_delay,
 					"setting a phase switch delay" );
@@ -790,7 +830,7 @@ void p_set_psd( int func, Var *v )
 	( *pulser_struct.set_phase_switch_delay )( func == 0 ?
 											   PULSER_CHANNEL_PHASE_1 :
 											   PULSER_CHANNEL_PHASE_2,
-												   VALUE( v ) );
+											   VALUE( v ) );
 	vars_pop( v );
 }
 
@@ -801,6 +841,13 @@ void p_set_psd( int func, Var *v )
 
 void p_set_gp( Var *v )
 {
+	if ( ! exist_device( "dg2020_f" ) )
+	{
+		eprint( FATAL, "%s:%ld: Frankfurt phase syntax used with wrong pulser "
+				"driver.\n", Fname, Lc );
+		THROW( EXCEPTION );
+	}
+
 	vars_check( v, INT_VAR | FLOAT_VAR );
 	is_pulser_func( pulser_struct.set_grace_period,
 					"setting a grace period" );
