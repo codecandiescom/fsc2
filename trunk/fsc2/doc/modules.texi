@@ -532,8 +532,61 @@ correct sequence, so it's not completely foolproof.
 
 @subsection Files to be included
 
-Each module has to include the header file @file{fsc2.h} --- otherwise it
-will not be able to use @acronym{fsc2}'s variables.
+First of all, each module has to include the header file @file{fsc2.h}
+--- otherwise it will not be able to use @acronym{fsc2}'s variables.
+
+Second, all modules that use the GPIB bus should include
+@file{gpib_if.h}, this contains all the definitions and declarations of
+macros, variables and functions for GPIB functions. Actually, it will in
+turn include further header files and knows (hopefully) which are the
+correct ones -- @acronym{fsc2} is supposed to work with different
+implementations of the GPIB functionality and by including
+@code{gpib_if.h} you don't have to care about which on is going to be
+used.
+
+Third, each module should but its basic configuration information into a
+special file which should be well enough commented to allow even people
+without much programming experience to adapt the behaviour of the module
+to his/her needs. A good example are modules for devices that are accessed
+via the serial port. Because you probably won't know which serial port
+the user is going to use you shouldn't hide this information somewhere
+deep in the innard of your module but put it in a prominent place where
+it's easy to find. Thus this is one of the items that should go into the
+configuration file (and should be well commented).
+
+All configuration files are in the @file{config} directory. For obvious
+reasons the names of the configuration files should make it clear for
+which module they are supposed to be. Currently, all of them have the
+extension @code{.conf}. Each configuration file should contain at least
+to items. First a string with the device name should be defined, e.g.
+@example
+#define DEVICE_NAME     "TDS754A"
+@end example
+@noindent
+This device name should be used in all places where the module has to
+print out error messages or warnings. For devices connected via the GPIB
+bus this device name should be identical to the one it is advertised as
+in the GPIB configuration file (usually @file{/etc/gpib.conf}).
+
+For each module also a second string needs to be defined which describes
+the device type, e.g.
+@example
+#define DEVICE_TYPE     "digitizer"
+@end example
+@noindent
+This device type is used by the program to figure out if more than one
+device with the same functionality is being used by an @acronym{EDL}
+program. You probably already have read that when you have two such
+devices you can access the second device by appending a '@code{#2}' when
+calling an @acronym{EDL}-function. But, obviously, for this to work
+@acronym{fsc2} must know which devices have similar capabilities and
+which don't. This is done via the device type string. Thus if you decide
+which device type string you're going to use please first check the
+device types of other devices as defined in their configuration files.
+If your device is similar enough to one of the exiting devices pick the
+same device type string, otherwise pick a descriptive name. Please also
+see the next section.
+
 
 
 @subsection Hook functions
