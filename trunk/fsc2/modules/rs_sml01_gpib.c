@@ -138,6 +138,28 @@ bool rs_sml01_init( const char *name )
 
 	rs_sml01_set_frequency( rs_sml01.freq );
 
+#if defined WITH_PULSE_MODULATION
+	if ( rs_sml01.pulse_trig_slope_is_set )
+		rs_sml01_set_pulse_trig_slope( rs_sml01.pulse_trig_slope );
+	else
+		rs_sml01.pulse_trig_slope = rs_sml01_get_pulse_trig_slope( );
+
+	if ( rs_sml01.pulse_width_is_set )
+		rs_sml01_set_pulse_width( rs_sml01.pulse_width );
+	else
+		rs_sml01.pulse_width = rs_sml01_get_pulse_width( );
+
+	if ( rs_sml01.pulse_delay_is_set )
+		rs_sml01_set_pulse_delay( rs_sml01.pulse_delay );
+	else
+		rs_sml01.pulse_delay = rs_sml01_get_pulse_delay( );
+
+	if ( rs_sml01.pulse_mode_state_is_set )
+		rs_sml01_set_pulse_state( rs_sml01.pulse_mode_state );
+	else
+		rs_sml01.pulse_mode_state = rs_sml01_get_pulse_state( );
+#endif
+
 	rs_sml01_set_output_state( rs_sml01.state );
 
 	return OK;

@@ -11,7 +11,6 @@ Makefile
 README
 README.mail
 TODO
-xxx.edl
 
 Fcntl_Lock/Changes
 Fcntl_Lock/Fcntl_Lock.pm
@@ -92,7 +91,7 @@ config/ni6601.conf
 config/pci_mio_16e_1.conf
 config/pt2025.conf
 config/rb8509.conf
-config/rb8509.conf~
+config/rb_pulser.conf
 config/rs690.conf
 config/rs_sml01.conf
 config/rs_spec10.conf
@@ -259,6 +258,14 @@ modules/pci_mio_16e_1_msc.c
 modules/pci_mio_16e_1_util.c
 modules/pt2025.c
 modules/rb8509.c
+modules/rb_pulser.c
+modules/rb_pulser.h
+modules/rb_pulser_gen.c
+modules/rb_pulser_init.c
+modules/rb_pulser_ll.c
+modules/rb_pulser_pulse.c
+modules/rb_pulser_run.c
+modules/rb_pulser_util.c
 modules/rs690.c
 modules/rs690.h
 modules/rs690_gen.c

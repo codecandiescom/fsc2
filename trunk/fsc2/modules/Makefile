@@ -72,6 +72,9 @@ pci_mio_16e_1   := pci_mio_16e_1.c pci_mio_16e_1_ai.c pci_mio_16e_1_ao.c \
 				   pci_mio_16e_1_dio.c pci_mio_16e_1_gpct.c \
 				   pci_mio_16e_1_msc.c pci_mio_16e_1_util.c
 rs_sml01        := rs_sml01.c rs_sml01_util.c rs_sml01_gpib.c rs_sml01_lexer.c
+rb_pulser       := rb_pulser.c rb_pulser_gen.c rb_pulser_pulse.c \
+				   rb_pulser_util.c rb_pulser_init.c rb_pulser_run.c \
+				   rb_pulser_ll.c
 
 
 # List of all "complicated" modules that are to be made from more than a
@@ -108,7 +111,7 @@ endif
 
 ifdef WITH_RULBUS
 simp_modules    += rb8509
-#comp_modules    += rb_pulser
+comp_modules    += rb_pulser
 endif
 
 src_headers     := $(addprefix $(sdir)/,$(headers)) $(sdir)/fsc2_module.h
