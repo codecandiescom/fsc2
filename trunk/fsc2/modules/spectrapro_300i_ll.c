@@ -688,18 +688,20 @@ void spectrapro_300i_set_offset( long gn, long offset )
 	CLOBBER_PROTECT( gn );
 
 	fsc2_assert( gn >= 0 && gn < MAX_GRATINGS );
-
 	fsc2_assert( spectrapro_300i.grating[ gn ].is_installed );
-	fsc2_assert ( labs( offset - ( gn % 3 ) * INIT_OFFSET ) <=
-				  INIT_OFFSET_RANGE /
-				  spectrapro_300i.grating[ gn ].grooves );
+
+	/* Make sure the new offset isn't completely wrong (taking into account
+	   possible rounding errors, that's why we don't compare to 1.0) */
+
+	fsc2_assert ( 1.0000001 >= labs( offset - ( gn % 3 ) * INIT_OFFSET ) 
+				  			   * spectrapro_300i.grating[ gn ].grooves
+							   / INIT_OFFSET_RANGE );
 
 	buf = get_string( "%ld INIT-GRATING", gn + 1 );
 
 	TRY
 	{
 		spectrapro_300i_send( buf );
-		T_free( buf );
 		TRY_SUCCESS;
 	}
 	OTHERWISE
@@ -708,13 +710,13 @@ void spectrapro_300i_set_offset( long gn, long offset )
 		RETHROW( );
 	}
 
+	T_free( buf );
 	buf = get_string( "%.3f INIT-WAVELENGTH",
 					  1.0e9 * spectrapro_300i.wavelength );
 
 	TRY
 	{
 		spectrapro_300i_send( buf );
-		T_free( buf );
 		TRY_SUCCESS;
 	}
 	OTHERWISE
@@ -723,12 +725,12 @@ void spectrapro_300i_set_offset( long gn, long offset )
 		RETHROW( );
 	}
 
+	T_free( buf );
 	buf = get_string( "%ld %ld INIT-SP300-OFFSET", offset, gn );
 
 	TRY
 	{
 		spectrapro_300i_send( buf );
-		T_free( buf );
 		TRY_SUCCESS;
 	}
 	OTHERWISE
@@ -737,6 +739,7 @@ void spectrapro_300i_set_offset( long gn, long offset )
 		RETHROW( );
 	}
 
+	T_free( buf );
 	buf = spectrapro_300i_talk( "MONO-RESET", 4096 );
 	T_free( buf );
 }
