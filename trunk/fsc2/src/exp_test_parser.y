@@ -295,8 +295,7 @@ void exp_test_init( void )
 
 static void exp_testerror( const char *s )
 {
-	s = s;                    /* avoid compiler warning */
-
+	UNUSED_ARGUMENT( s );
 
 	if ( ! dont_print_error && ! in_cond )
 	{

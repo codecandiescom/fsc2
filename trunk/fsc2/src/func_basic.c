@@ -41,7 +41,7 @@ Var *f_abort( Var *v )
 	char *str;
 
 
-	v = v;                       /* keeps the compiler happy */
+	UNUSED_ARGUMENT( v );
 
 	if ( Internals.mode != TEST )
 	{
@@ -65,7 +65,7 @@ Var *f_abort( Var *v )
 
 Var *f_stopsim( Var *v )
 {
-	v = v;
+	UNUSED_ARGUMENT( v );
 	EDL.do_quit = SET;
 	return NULL;
 }
@@ -1477,7 +1477,7 @@ Var *f_time( Var *v )
 	char ts[ 100 ];
 
 
-	v = v;
+	UNUSED_ARGUMENT( v );
 	time( &tp );
 	if ( strftime( ts, 100, "%H:%M:%S", localtime( &tp ) ) == 0 )
 	{
@@ -1505,8 +1505,7 @@ Var *f_dtime( Var *v )
 	double diff_time;
 
 
-	v = v;                          /* keep the compiler happy */
-
+	UNUSED_ARGUMENT( v );
 	new_time = experiment_time( );
 	diff_time = new_time - old_time;
 	old_time = new_time;
@@ -1524,7 +1523,7 @@ Var *f_date( Var *v )
 	char ts[ 100 ];
 
 
-	v = v;
+	UNUSED_ARGUMENT( v );
 	time( &tp );
 	if ( strftime( ts, 100, "%a %b %d, %Y", localtime( &tp ) ) == 0 )
 	{

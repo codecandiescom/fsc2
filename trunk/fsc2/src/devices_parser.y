@@ -70,7 +70,7 @@ sep:     ';'
 
 static void deviceserror ( const char *s )
 {
-	s = s;                    /* stupid but avoids compiler warning */
+	UNUSED_ARGUMENT( s );
 
 	if ( *devicestext == '\0' )
 		print( FATAL, "Unexpected end of file in DEVICES section.\n" );

@@ -700,9 +700,8 @@ void recreate_Tool_Box( void )
 
 static int tool_box_close_handler( FL_FORM *a, void *b )
 {
-	a = a;
-	b = b;
-
+	UNUSED_ARGUMENT( a );
+	UNUSED_ARGUMENT( b );
 	return FL_IGNORE;
 }
 

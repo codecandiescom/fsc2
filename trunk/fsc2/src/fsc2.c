@@ -661,7 +661,7 @@ void load_file( FL_OBJECT *a, long reload )
 	FILE *tmp_fp;
 
 
-	a = a;                          /* keep the compiler happy... */
+	UNUSED_ARGUMENT( a );
 
 	notify_conn( BUSY_SIGNAL );
 	old_in_file= NULL;
@@ -871,9 +871,8 @@ void edit_file( FL_OBJECT *a, long b )
 	int res;
 
 
-	a = a;
-	b = b;
-
+	UNUSED_ARGUMENT( a );
+	UNUSED_ARGUMENT( b );
 
 	/* Fork and execute editor in child process */
 
@@ -1000,8 +999,8 @@ void test_file( FL_OBJECT *a, long b )
 	static bool in_test = UNSET;
 
 
+	UNUSED_ARGUMENT( b );
 	a->u_ldata = 0;
-	b = b;
 
 	/* While program is being tested the test can be aborted by pressing the
 	   test button again - in this case we simply throw an exception */
@@ -1149,8 +1148,8 @@ void run_file( FL_OBJECT *a, long b )
 		 str2[ 128 ];
 
 
-	a = a;
-	b = b;
+	UNUSED_ARGUMENT( a );
+	UNUSED_ARGUMENT( b );
 
 	notify_conn( BUSY_SIGNAL );
 
@@ -1446,9 +1445,7 @@ void run_help( FL_OBJECT *a, long b )
 	int bn;
 
 
-	/* Keep the compiler happy... */
-
-	b = b;
+	UNUSED_ARGUMENT( b );
 
 	bn = fl_get_button_numb( a );
 	if ( bn != FL_SHORTCUT + 'S' && bn == FL_RIGHT_MOUSE )
@@ -1795,9 +1792,8 @@ void usage( int return_status )
 
 int idle_handler( XEvent *a, void *b )
 {
-	a = a;
-	b = b;
-
+	UNUSED_ARGUMENT( a );
+	UNUSED_ARGUMENT( b );
 
 	/* Check if a request from the child for external conections has
 	   come in */

@@ -322,7 +322,7 @@ static bool check_result( Var *v )
 
 static void conditionerror( const char *s )
 {
-	s = s;                    /* avoid compiler warning */
+	UNUSED_ARGUMENT( s );
 
 	print( FATAL, "Syntax error in loop or IF/UNLESS condition.\n" );
 	THROW( EXCEPTION );

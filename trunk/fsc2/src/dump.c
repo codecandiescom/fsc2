@@ -211,7 +211,7 @@ void DumpStack( void *crash_address )
 
 	fail_mess_fd = answer_fd[ DUMP_ANSWER_READ ];
 #else
-	crash_address = crash_address;
+	UNUSED_ARGUMENT( crash_address );
 #endif
 }
 

@@ -237,9 +237,8 @@ void end_comm( void )
 
 int new_data_callback( XEvent *a, void *b )
 {
-	a = a;
-	b = b;
-
+	UNUSED_ARGUMENT( a );
+	UNUSED_ARGUMENT( b );
 
 	/* Check if the child raised a signal to tell us it's done. If it did
 	   send it a DO_QUIT signal (but only if it's still alive) and remove

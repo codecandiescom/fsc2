@@ -310,8 +310,7 @@ strs:    /* empty */
 
 static void exp_runerror ( const char *s )
 {
-	s = s;                    /* avoid compiler warning */
-
+	UNUSED_ARGUMENT( s );
 
 	print( FATAL, "Syntax error in EXPERIMENT section.\n" );
 	THROW( EXCEPTION );

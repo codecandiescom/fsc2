@@ -409,6 +409,8 @@ enum {
 };
 
 
+#define UNUSED_ARGUMENT( a )   ( void ) ( a )
+
 #endif /* ! FSC2_GLOBAL */
 
 

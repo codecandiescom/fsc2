@@ -104,8 +104,7 @@ void fsc2_request_serial_port( int sn, const char *devname )
 #endif
 
 #else
-	sn = sn;
-
+	UNUSED_ARGUMENT( sn );
 	eprintf( FATAL, UNSET, "%s: Device needs serial port but fsc2 was "
 			 "not compiled with support for serial port access.\n", devname );
 	THROW( EXCEPTION );
@@ -261,9 +260,9 @@ struct termios *fsc2_serial_open( int sn, const char *devname, int flags )
 
 	return &Serial_Port[ sn ].new_tio;
 #else
-	sn = sn;
-	devname = devname;
-	flags = flags;
+	UNUSED_ARGUMENT( sn );
+	UNUSED_ARGUMENT( devname );
+	UNUSED_ARGUMENT( flags );
 
 
 	errno = EACCES;
@@ -298,7 +297,7 @@ void fsc2_serial_close( int sn )
 	if ( Serial_Port[ sn ].have_lock )
 		remove_serial_lock( sn );
 #else
-	sn = sn;
+	UNUSED_ARGUMENT( sn );
 #endif
 }
 
@@ -476,7 +475,7 @@ static bool get_serial_lock( int sn )
 	lower_permissions( );
 	Serial_Port[ sn ].have_lock = SET;
 #else
-	sn = sn;
+	UNUSED_ARGUMENT( sn );
 #endif
 	return OK;
 }
@@ -559,7 +558,7 @@ int fsc2_tcsendbreak( int sn, int duration )
 	}
 
 	raise_permissions( );
-	ret_val =  tcsendbreak( Serial_Port[ sn ].fd, duration );
+	ret_val = tcsendbreak( Serial_Port[ sn ].fd, duration );
 	lower_permissions( );
 
 	return ret_val;

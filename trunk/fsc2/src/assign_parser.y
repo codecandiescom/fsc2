@@ -541,7 +541,7 @@ gp:       GP_TOKEN expr            { p_set_gp( $2 ); }
 
 static void assignerror ( const char *s )
 {
-	s = s;                                 /* avoid compiler warning */
+	UNUSED_ARGUMENT( s );
 
 	if ( *assigntext == '\0' )
 		print( FATAL, "Unexpected end of file in ASSIGNMENTS section.\n" );

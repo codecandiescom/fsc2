@@ -110,6 +110,7 @@ ssize_t do_read( int fd, char *ptr );
 
 static volatile sig_atomic_t sig_type = 0;
 
+#define UNUSED_ARGUMENT( a )   ( void ) ( a )
 
 /*-----------------------------------------------------------*/
 /*-----------------------------------------------------------*/
@@ -120,7 +121,7 @@ int main( int argc, char *argv[ ] )
 	int sock_fd;
 
 
-	argc = argc;                      /* keeps the compiler happy ;-) */
+	UNUSED_ARGUMENT( argc );
 
 	make_tmp_file( fname );
 	if ( ( sock_fd = open_socket( fname ) ) == -1 )
