@@ -336,7 +336,6 @@ bool xforms_init( int *argc, char *argv[ ] )
 	/* Create the form for writing a comment */
 
 	input_form = G_Funcs.create_form_input_form( );
-	input_main_form = input_form->input_form;
 
 	return OK;
 }

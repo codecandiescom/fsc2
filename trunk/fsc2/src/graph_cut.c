@@ -142,7 +142,7 @@ void cut_show( int dir, long index )
 				if ( cut_h < WIN_MIN_HEIGHT )
 					cut_h = WIN_MIN_HEIGHT;
 
-				fl_set_form_size( cut_main_form, cut_w, cut_h );
+				fl_set_form_size( cut_form->cut, cut_w, cut_h );
 			}
 
 			if ( XValue & flags && YValue & flags )
@@ -150,24 +150,24 @@ void cut_show( int dir, long index )
 				cut_x += border_offset_x - 1;
 				cut_y += border_offset_y - 1;
 
-				fl_set_form_position( cut_main_form, cut_x, cut_y );
+				fl_set_form_position( cut_form->cut, cut_x, cut_y );
 				needs_pos = SET;
 			}
 		}
 
 		if ( cut_has_been_shown )
 		{
-			fl_set_form_geometry( cut_main_form, cut_x, cut_y, cut_w, cut_h );
+			fl_set_form_geometry( cut_form->cut, cut_x, cut_y, cut_w, cut_h );
 			needs_pos = SET;
 		}
 
-		fl_show_form( cut_main_form, needs_pos ?
+		fl_show_form( cut_form->cut, needs_pos ?
 					  FL_PLACE_POSITION : FL_PLACE_MOUSE | FL_FREE_SIZE,
 					  FL_FULLBORDER, "fsc2: Cross section" );
 		cut_has_been_shown = SET;
 
-		fl_winminsize( cut_main_form->window, WIN_MIN_WIDTH, WIN_MIN_HEIGHT );
-		fl_set_form_atclose( cut_main_form, cut_form_close_handler, NULL );
+		fl_winminsize( cut_form->cut->window, WIN_MIN_WIDTH, WIN_MIN_HEIGHT );
+		fl_set_form_atclose( cut_form->cut, cut_form_close_handler, NULL );
 
 		cut_setup_canvas( &G.cut_x_axis, cut_form->cut_x_axis );
 		cut_setup_canvas( &G.cut_y_axis, cut_form->cut_y_axis );
@@ -179,11 +179,11 @@ void cut_show( int dir, long index )
 	}
 	else if ( ! is_mapped )
 	{
-		XMapWindow( G.d, cut_main_form->window );
-		XMoveWindow( G.d, cut_main_form->window, cut_x + 1, cut_y + 1 );
+		XMapWindow( G.d, cut_form->cut->window );
+		XMoveWindow( G.d, cut_form->cut->window, cut_x + 1, cut_y + 1 );
 	}
 
-	fl_raise_form( cut_main_form );
+	fl_raise_form( cut_form->cut );
 
 	/* Set up the labels if the cut window does't not exist yet or the cut
 	   direction changed */
@@ -528,14 +528,14 @@ void cut_form_close( void )
 	cv->points  = T_free( cv->points );
 	cv->xpoints = T_free( cv->xpoints );
 
-	cut_x = cut_main_form->x;
-	cut_y = cut_main_form->y;
-	cut_w = cut_main_form->w;
-	cut_h = cut_main_form->h;
+	cut_x = cut_form->cut->x;
+	cut_y = cut_form->cut->y;
+	cut_w = cut_form->cut->w;
+	cut_h = cut_form->cut->h;
 
-	fl_hide_form( cut_main_form );
+	fl_hide_form( cut_form->cut );
 
-	fl_free_form( cut_main_form );
+	fl_free_form( cut_form->cut );
 
 	CG.is_shown = is_mapped = UNSET;
 }
@@ -557,12 +557,12 @@ void cut_close_callback( FL_OBJECT *a, long b )
 
 	G.is_cut = is_mapped = UNSET;
 
-	cut_x = cut_main_form->x;
-	cut_y = cut_main_form->y;
-	cut_w = cut_main_form->w;
-	cut_h = cut_main_form->h;
+	cut_x = cut_form->cut->x;
+	cut_y = cut_form->cut->y;
+	cut_w = cut_form->cut->w;
+	cut_h = cut_form->cut->h;
 
-	XUnmapWindow( G.d, cut_main_form->window );
+	XUnmapWindow( G.d, cut_form->cut->window );
 
 	for ( i = 0; i < MAX_CURVES; i++ )
 		CG.has_been_shown[ i ] = UNSET;
@@ -2669,7 +2669,7 @@ void cut_change_dir( FL_OBJECT *a, long b )
 	if ( G.raw_button_state != 3 )
 		return;
 
-	fl_get_win_mouse( cut_main_form->window, &px, &py, &keymask );
+	fl_get_win_mouse( cut_form->cut->window, &px, &py, &keymask );
 	px -= cut_form->cut_canvas->x;
 
 	if ( px < 0 || px > cut_form->cut_canvas->w )

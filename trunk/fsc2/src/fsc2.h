@@ -244,13 +244,9 @@ extern bool just_testing;
 
 extern G_FUNCS G_Funcs;
 extern FD_fsc2 *main_form;
-extern FL_FORM *fsc2_main_form;
 extern FD_run *run_form;
-extern FL_FORM *run_main_form;
 extern FD_input_form *input_form;
-extern FL_FORM *input_main_form;
 extern FD_cut *cut_form;
-extern FL_FORM *cut_main_form;
 
 extern int I_am;
 extern int pd[ ];                  /* pipe descriptors */

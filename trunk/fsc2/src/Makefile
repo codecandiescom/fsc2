@@ -25,7 +25,7 @@ c_sources     = fsc2.c xinit.c pulser.c util.c exceptions.c variables.c   \
 				T.c phases.c exp.c devices.c run.c gpib_if.c chld_func.c  \
 				graphics.c comm.c accept.c graph_handler_1d.c             \
 				graph_handler_2d.c graph_cut.c loader.c bugs.c print.c    \
-				conn.c ipc.c fsc2_rsc.c fsc2_assert.c dump.c
+				conn.c ipc.c fsc2_assert.c dump.c
 bison_sources = $(wildcard *_parser.y)
 flex_sources  = $(wildcard *_lexer.l)
 sources       = $(bison_sources:.y=.c) $(flex_sources:.l=.c) ${c_sources}
@@ -33,6 +33,8 @@ objects       = $(sources:.c=.o)
 headers       = ${c_sources:.c=.h} global.h
 
 export headers        # export list of header files to the modules Makefile
+
+SLFLAGS        = -shared -fpic 
 
 
 .SUFFIXES:
@@ -49,8 +51,7 @@ all:
 			    -o "$(GPIB_LIBRARY)" = "ni"               \
 			    -o "$(GPIB_LIBRARY)" = "jtt"              \
 			    -o "$(GPIB_LIBRARY)" = "none" \) ]; then  \
-		$(MAKE) res;                                      \
-		$(MAKE) gpib;                                     \
+		$(MAKE) fsc2_rsc_lr.so fsc2_rsc_hr.so gpib;       \
 		$(MAKE) fsc2 fsc2_clean fsc2_connect modules;     \
 	else                                                  \
 		echo "****************************************";  \
@@ -103,20 +104,27 @@ fsc2_connect.o: fsc2_connect.c
 # if either fsc2_rsc.[ch] or fsc2_rsc_[hl]r.[ch] don't exist, the file they
 # are made from is newer or the existing files are for the wrong resolution
 
-res:
-	@if [ ! -e fsc2_rsc.c -o ! -e fsc2_rsc.h                         \
-		  -o ! -e fsc2_rsc_$(RESOLUTION).c                           \
-		  -o ! -e fsc2_rsc_$(RESOLUTION).h                           \
-		  -o fsc2_rsc_$(RESOLUTION).fd -nt fsc2_rsc_$(RESOLUTION).c  \
-		  -o fsc2_rsc_$(RESOLUTION).fd -nt fsc2_rsc_$(RESOLUTION).h  \
-		  -o ! fsc2_rsc_$(RESOLUTION).c -ef fsc2_rsc.c               \
-		  -o ! fsc2_rsc_$(RESOLUTION).h -ef fsc2_rsc.h ]; then       \
-		$(RM) $(RMFLAGS) fsc2_rsc.[ch];                              \
-		$(RM) $(RMFLAGS) fsc2_rsc_[lh]r.[ch];                        \
-		fdesign -convert fsc2_rsc_$(RESOLUTION).fd;                  \
-		$(LN) $(LNFLAGS) fsc2_rsc_$(RESOLUTION).c fsc2_rsc.c;        \
-		$(LN) $(LNFLAGS) fsc2_rsc_$(RESOLUTION).h fsc2_rsc.h;        \
+rsc:
+	@if [ ! -e fsc2_rsc_lr.c -o ! -e fsc2_rsc_lr.h                   \
+		  -e fsc2_rsc_lr.so                                          \
+		  -a \( fsc2_rsc_lr.fd -nt fsc2_rsc_lr.so \) ]               \
+		fdesign -convert fsc2_rsc_lr.fd;                             \
+	fi                                                               \
+	@if [ ! -e fsc2_rsc_hr.c -o ! -e fsc2_rsc_hr.h                   \
+		  -e fsc2_rsc_hr.so                                          \
+		  -a \( fsc2_rsc_hr.fd -nt fsc2_rsc_hr.so \) ]               \
+		fdesign -convert fsc2_rsc_lr.fd;                             \
 	fi
+
+%.so: %.o
+	$(LD) $(SLFLAGS) $^ -o $@
+	chmod 644 $@
+
+fsc2_rsc_lr.o: fsc2_rsc_lr.c fsc2_rsc_lr.h
+	$(CC) $(CFLAGS) -c $(SLFLAGS) $< -o $@
+
+fsc2_rsc_hr.o: fsc2_rsc_hr.c fsc2_rsc_hr.h
+	$(CC) $(CFLAGS) -c $(SLFLAGS) $< -o $@
 
 
 # Create files and links needed for the GPIB interface - they need making if

@@ -171,15 +171,15 @@ static const char *handle_input( const char *content, const char *label )
 
 	fl_set_input( input_form->comm_input, content );
 
-	fl_show_form( input_main_form,
+	fl_show_form( input_form->input_form,
 				  FL_PLACE_MOUSE | FL_FREE_SIZE, FL_FULLBORDER,
 				  "fsc2: Comment editor" );
 
 	while ( fl_do_forms( ) != input_form->comm_done )
 		;
 
-	if ( fl_form_is_visible( input_main_form ) )
-		fl_hide_form( input_main_form );
+	if ( fl_form_is_visible( input_form->input_form ) )
+		fl_hide_form( input_form->input_form );
 
 	return fl_get_input( input_form->comm_input );
 }

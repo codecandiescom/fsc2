@@ -38,7 +38,6 @@
 
 
 FD_print *print_form;
-FL_FORM *print_main_form;
 
 char *cmd = NULL;                 /* for storing the last print command */
 int print_type = S2P;             /* the way to print: S2P or P2F */
@@ -250,8 +249,7 @@ static int get_print_file( FILE **fp, char **name )
 
 	/* Create the form for print setup */
 
-	print_form = create_form_print( );
-	print_main_form = print_form->print;
+	print_form = G_Funcs.create_form_print( );
 
 	/* If a printer command has already been set put it into the input object,
 	   otherwise set default command */
@@ -335,7 +333,7 @@ static int get_print_file( FILE **fp, char **name )
 		fl_set_button( print_form->col_button, 0 );
 	}
 
-	fl_show_form( print_main_form, FL_PLACE_MOUSE, FL_TRANSIENT,
+	fl_show_form( print_form->print, FL_PLACE_MOUSE, FL_TRANSIENT,
 				  "fsc2: Print" );
 
 	/* Let the user fill in the form */
@@ -377,8 +375,8 @@ static int get_print_file( FILE **fp, char **name )
 	if ( 1 == fl_get_button( print_form->Legal ) )
 		 paper_type = Legal_PAPER;
 
-	fl_hide_form( print_main_form );
-	fl_free_form( print_main_form );
+	fl_hide_form( print_form->print );
+	fl_free_form( print_form->print );
 
 	/* If cancel button was pressed (or an error happened) return now */
 
