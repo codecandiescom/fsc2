@@ -2,6 +2,9 @@
    $Id$
 
    $Log$
+   Revision 1.30  1999/07/28 21:25:01  jens
+   *** empty log message ***
+
    Revision 1.29  1999/07/28 14:13:03  jens
    *** empty log message ***
 
@@ -132,29 +135,28 @@ typedef VarretFnct *FnctPtr;
   long and double type) or an integer or float array (INT_ARR or FLOAT_ARR) of
   as many dimensions as the user thinks it should have. Since at the moment of
   creation of a variable its type can not be determined there is also a
-  further type, UNDEF_VAR, which the variable has until finds out if the
-  variable is just a simple variable or an array.
+  further type, UNDEF_VAR which is assigned to the variable until it is
+  possible to find out if the variable is just a simple variable or an array.
 
   What kind of type a variable has, i.e. integer or float, is controlled via
-  the function IF_FUNC(), defined as macro in variables.h, which just gets to
-  know about the very first character of the variable's name - if the function
-  returns TRUE the variable is an integer (or the array is an integer array)
-  otherwise its type is FLOAT. So, changing IF_FUNC() and recompiling will
-  change the behaviour of the program in this respect. Currently, as agreed
-  with Axel and Thomas, IF_FUNC returns TRUE for variables starting with a
-  capital letters, thus making the variable an integer. But this is easily
-  changed...
+  the function IF_FUNC(), defined as macro in variables.h, which gets the
+  passed the variable's name - if the function returns TRUE the variable is an
+  integer (or the array is an integer array) otherwise its type is FLOAT. So,
+  changing IF_FUNC() and recompiling will change the behaviour of the program
+  in this respect. Currently, as agreed with Axel and Thomas, IF_FUNC returns
+  TRUE for variables starting with a capital letters, thus making the variable
+  an integer. But this is easily changed...
 
   Now, when the input file is read in, lines like
 
            A = B + 3.25;
 
-  are found. While this form is rather convenient for a human a reverse polish
-  notation (RPN) for the right hand side of the assignment of the form
+  are found. While this form is convenient for to read a human, a reverse
+  polish notation (RPN) for the right hand side of the assignment of the form
 
-           B 3.25 +
+           A B 3.25 + =
 
-  is much easier to handle for a computer. For this reason there exists a
+  is much easier to handle for a computer. For this reason there exists the
   variable stack (which actually isn't a stack but a linked list).
 
   So, if the lexer finds an identifier like `A', it first tries to get a
@@ -1085,7 +1087,7 @@ Var *vars_arr_start( Var *v )
 	   otherwise if its really an array */
 
 	if ( v->type == UNDEF_VAR )
-		v->type = IF_FUNC( v->name[ 0 ] ) ? INT_ARR : FLOAT_ARR;
+		v->type = IF_FUNC( v->name ) ? INT_ARR : FLOAT_ARR;
 	else
 		vars_check( v, INT_ARR | FLOAT_ARR );
 
@@ -1562,7 +1564,7 @@ void vars_ass_from_var( Var *src, Var *dest )
 
 	if ( dest->type == UNDEF_VAR )
 	{
-		dest->type = IF_FUNC( dest->name[ 0 ] ) ? INT_VAR : FLOAT_VAR;
+		dest->type = IF_FUNC( dest->name ) ? INT_VAR : FLOAT_VAR;
 		dest->flags &= ~NEW_VARIABLE;
 	}
 

@@ -12,7 +12,7 @@
 /* Variables with a name starting with a capital letter will be integers, all
    others float variables */
 
-#define IF_FUNC( a )  ( isupper( a ) )
+#define IF_FUNC( a )  ( isupper( a[ 0 ] ) )
 
 
 /* some people prefer C-style arrays, some FORTRAN- or MATLAB-style arrays -

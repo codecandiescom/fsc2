@@ -2,6 +2,9 @@
   $Id$
 
   $Log$
+  Revision 1.12  1999/07/28 21:24:42  jens
+  *** empty log message ***
+
   Revision 1.11  1999/07/28 21:24:03  jens
   *** empty log message ***
 
@@ -167,37 +170,37 @@ UNREC       [^\n \t;,\(\)\=\+\-\*\/\[\]\{\}\%\^]+
 			/* all needed pulse related keywords... */
 
 {P}?"."{F}  {
-				defaultslval.vptr
+				variableslval.vptr
 				           = pulse_get_by_addr( n2p( variablestext ), P_FUNC );
 				return VAR_REF;
             }
 
 {P}?"."{S}  {
-				defaultslval.vptr
+				variableslval.vptr
 				            = pulse_get_by_addr( n2p( variablestext ), P_POS );
 				return VAR_REF;
             }
 
 {P}?"."{L}  {
-				defaultslval.vptr
+				variableslval.vptr
 				            = pulse_get_by_addr( n2p( variablestext ), P_LEN );
 				return VAR_REF;
             }
 
 {P}?"."{DS} {
-				defaultslval.vptr
+				variableslval.vptr
 				           = pulse_get_by_addr( n2p( variablestext ), P_DPOS );
 				return VAR_REF;
             }
 
 {P}?"."{DL} {
-				defaultslval.vptr
+				variableslval.vptr
 				           = pulse_get_by_addr( n2p( variablestext ), P_DLEN );
 				return VAR_REF;
             }
 
 {P}?"."{ML} {
-				defaultslval.vptr
+				variableslval.vptr
 				         = pulse_get_by_addr( n2p( variablestext ), P_MAXLEN );
 				return VAR_REF;
             }
