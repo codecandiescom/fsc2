@@ -88,7 +88,7 @@ static Var *f_tb_wait_child( Var *v );
 
 void toolbox_create( long layout )
 {
-	unsigned int h, dummy;
+	int h, dummy;
 
 	if ( Toolbox != NULL )
 		return;

@@ -280,7 +280,7 @@ typedef enum {
 	NI_DAQ_GAIN_10  = 4,		  /* amplify by factor of 10 */ 
 	NI_DAQ_GAIN_20  = 5,		  /* amplify by factor of 20 */ 
 	NI_DAQ_GAIN_50  = 6,		  /* amplify by factor of 50 */ 
-	NI_DAQ_GAIN_100 = 7,		  /* amplify by factor of 100 */
+	NI_DAQ_GAIN_100 = 7		  /* amplify by factor of 100 */
 } NI_DAQ_AI_GAIN_TYPES;
 
 
@@ -342,7 +342,7 @@ typedef struct {
 
 typedef enum {
 	NI_DAQ_AO_CHANNEL_SETUP,
-	NI_DAQ_AO_DIRECT_OUTPUT,
+	NI_DAQ_AO_DIRECT_OUTPUT
 } NI_DAQ_AO_CMD;
 
 

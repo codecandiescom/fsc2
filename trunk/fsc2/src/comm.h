@@ -97,7 +97,7 @@ enum {
 	C_XABLE,
 	C_XABLE_REPLY,
 	C_GETPOS,
-	C_GETPOS_REPLY,
+	C_GETPOS_REPLY
 };
 
 
