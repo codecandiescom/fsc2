@@ -92,7 +92,8 @@ void dg2020_basic_pulse_check( void )
 		   leads to an obviously endless high pulse, while not setting the
 		   first bit keeps the pulser from working at all...) */
 
-		if ( p->pos + p->len + p->function->delay >= MAX_PULSER_BITS )
+		if ( p->is_pos && p->is_len &&
+			 p->pos + p->len + p->function->delay >= MAX_PULSER_BITS )
 		{
 			eprint( FATAL, "DG2020: Pulse %ld does not fit into the pulsers "
 					"memory. Maybe, you could try a longer pulser time "
