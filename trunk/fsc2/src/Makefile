@@ -62,7 +62,6 @@ fsc2: $(objects)
 modules:
 	$(MAKE) -C ../modules all
 
-
 %.o: %.c $(headers)
 	$(CC) $(CFLAGS) -c -o $@ $<
 
