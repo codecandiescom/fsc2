@@ -490,6 +490,7 @@ EOF
 	close $f;
 	my $g;
 	no warnings "exec";
+
 	unless ( open $g, "-|", "fsc2 -ng $fn 2>&1" ) {
 		close $f;
 		unlink $fn;
@@ -501,15 +502,15 @@ EOF
 	close $g;
 	unlink $fn;
 
-	main::show_message( "Can't set monochromators laser line" )
-		  if defined $reply;
-
-	if ( $reply =~ /^Please press the "REMOTE" button/ ) {
-		main::show_message( "Please press the \"REMOTE\" button at\n" .
-							"the console to allow computer control\n" .
+	if ( defined $reply and $reply =~ /^Please press the "REMOTE" button/ ) {
+		main::show_message( "Please press the \"REMOTE\" button at" .
+							"the console to allow computer control" .
 							"of the monochromator." );
 		return;
 	}
+
+	main::show_message( "Can't set monochromators laser line" )
+		  if defined $reply;
 }
 
 
@@ -2536,7 +2537,8 @@ our ( $laser_line,             # position of laser line (abs. cm^-1)
 	  $cwn_offset,             # offset to center wavenumber required due to
 	                           # unsymmetric ROI (abs. cm^-1)
 	  $exp_time,               # exposure time
-	  $N_scans );              # number of repetitions of experiment
+	  $N_scans,                # number of repetitions of experiment
+	  @units );
 
 sub run {
 	my ( $top, $geom, $ccd_w );
@@ -2544,6 +2546,8 @@ sub run {
 	( $laser_line, $ROI[ 0 ], $ROI[ 1 ], $ROI[ 2 ], $ROI[ 3 ], $BIN[ 0 ],
 	  $BIN[ 1 ], $offset, $pixel_diff, $ccd_w ) = State::get( );
 	return unless defined $laser_line;
+
+	@units = $laser_line != 0.0 ? ( 0, 1 ) : ( 1, 0 );
 
 	if ( $pixel_diff <= 0.0 ) {
 		main::show_message( "Please do a CCD camera calibration first." );
@@ -2624,6 +2628,19 @@ sub run {
 	$f[ 20 ] = $f[ 17 ]->Label( -text => "",
 								-width => 9 );
 
+	if ( $laser_line != 0.0 ) {
+		$f[ 28 ] = $f[ 0 ]->Frame( );
+		$f[ 29 ] = $f[ 28 ]->Label( -text => "Units:",
+									-width => 10,
+									-anchor => 'w' );
+		$f[ 30 ] = $f[ 28 ]->Checkbutton( -variable => \$units[ 0 ],
+										  -width => 9,
+										  -text => "abs. cm^-1" );
+		$f[ 31 ] = $f[ 28 ]->Checkbutton( -variable => \$units[ 1 ],
+										  -width => 9,
+										  -text => "rel. cm^-1" );
+	}
+
 	$f[ 21 ] = $f[ 0 ]->Frame( );
 	$f[ 22 ] = $f[ 21 ]->Label( -text => "Spectral resolution:",
 								-width => 20,
@@ -2639,8 +2656,15 @@ sub run {
 	$f[ 26 ] = $f[ 25 ]->Button( -text => "Start measurement",
 								 -command => \&multi_window_run );
 	$f[ 27 ] = $f[ 25 ]->Button( -text => "Quit",
-								 -command => sub { $top->deiconify;
-												   $f[ 0 ]->destroy; } );
+								 -command => 
+								 sub { if ( $laser_line != 0.0 and
+											$units[ 0 ] == 1 ) {
+									 	   $$start_wn = $laser_line
+											   			- $$start_wn;
+										   $$end_wn = $laser_line - $$end_wn;
+									   }
+									   $top->deiconify;
+									   $f[ 0 ]->destroy; } );
 
 	$f[ 1 ]->pack( %fp );
 	$f[ 2 ]->pack( %wp );
@@ -2666,6 +2690,13 @@ sub run {
 	$f[ 18 ]->pack( %wp );
 	$f[ 19 ]->pack( %wp );
 	$f[ 20 ]->pack( %up );
+
+	if ( $laser_line != 0.0 ) {
+		$f[ 28 ]->pack( %fp );
+		$f[ 29 ]->pack( %wp );
+		$f[ 30 ]->pack( %wp );
+		$f[ 31 ]->pack( %up );
+	}
 
 	$f[ 21 ]->pack( %fp );
 	$f[ 22 ]->pack( %wp );
@@ -2698,6 +2729,13 @@ sub run {
 														 $$exp_time, $N );
 										return 1; } );
 
+	if ( $laser_line != 0.0 ) {
+		$f[ 30 ]->configure( -command =>
+							 sub { set_units( 0, $f[ 4 ], $f[ 8 ] ); } );
+		$f[ 31 ]->configure( -command => 
+							 sub { set_units( 1, $f[ 4 ], $f[ 8 ] ); } );
+	}
+
 	check_all_parms( $f[ 26 ], $$start_wn, $$end_wn, $$overlap, $$exp_time,
 					 $$N_scans );
 
@@ -2723,6 +2761,27 @@ sub run {
 	 }
 
 	MainLoop;
+}
+
+
+#############################################
+
+sub set_units {
+	my ( $which, $sl, $el ) = @_;
+
+	if ( $which == 0 ) {
+		$units[ 1 ] = 0;
+		$sl->configure( -text => " cm^-1 abs." );
+		$el->configure( -text => " cm^-1 abs." );
+		$$start_wn = $laser_line - $$start_wn;
+		$$end_wn = $laser_line - $$end_wn;
+	} else {
+		$units[ 0 ] = 0;
+		$sl->configure( -text => " cm^-1 rel." );
+		$el->configure( -text => " cm^-1 rel." );
+		$$start_wn = $laser_line - $$start_wn;
+		$$end_wn = $laser_line - $$end_wn;
+	}
 }
 
 
@@ -2799,12 +2858,12 @@ sub check_all_parms {
 
 
 	if ( $swn =~ /^[+-]?$float_rep$/ ) {
-		$swn = $laser_line - $swn if $laser_line != 0.0;
+		$swn = $laser_line - $swn if $units[ 1 ] == 1;
 		$swn -= $offset + $cwn_offset;
 	}
 
 	if ( $ewn =~ /^[+-]?$float_rep$/ ) {
-		$ewn = $laser_line - $ewn if $laser_line != 0.0;
+		$ewn = $laser_line - $ewn if $units[ 1 ] == 1;
 		$ewn -= $offset + $cwn_offset;
 	}
 
@@ -2843,12 +2902,20 @@ sub multi_window_run {
 # is larger than the requested spectral width
 
 sub multi_single_run {
-    my $fh;
+    my ( $fh, $swn, $ewn );
 
 	no warnings "exec";
     unless ( open $fh, "|fsc2_iconic_start" ) {
 		main::show_message( "Can't start fsc2" );
 		return;
+	}
+
+	if ( $laser_line != 0.0 and $units[ 0 ] == 1 ) {
+		$swn = $laser_line - $$start_wn;
+		$ewn = $laser_line - $$end_wn;
+	} else {
+		$swn = $$start_wn;
+		$ewn = $$end_wn;
 	}
 
     print $fh <<EOF;
@@ -2859,8 +2926,8 @@ rs_spec10;
 
 VARIABLES:
 
-start_wn = $$start_wn cm^-1;           // start of spectrum
-end_wn   = $$end_wn cm^-1;             // end of spectrum
+start_wn = $swn cm^-1;                 // start of spectrum
+end_wn   = $ewn cm^-1;                 // end of spectrum
 exposure_time = $$exp_time s;          // CCD exposure time
 N_scans = $$N_scans;                   // number of scans
 
@@ -2920,15 +2987,31 @@ IF laser_line != 0.0 {
 	N_Points = round( width / step_wn ) + 1;
 	monochromator_wavenumber( cwn + cwn_offset );
 
-	change_label_1d( "Wavenumbers [rel. cm^-1]", "Counts" );
-	change_scale( start_wn, step_wn );
-	wn = lin_space( start_wn, start_wn + ( N_Points - 1 ) * step_wn,
-                    N_Points );
-
 	B_rel = button_create( "RADIO_BUTTON", "Relative wavenumbers" );
 	B_abs = button_create( "RADIO_BUTTON", B_rel, "Absolute wavenumbers" );
 	B_wl  = button_create( "RADIO_BUTTON", B_rel, "Wavelengths" );
 
+EOF
+
+	if ( $units[ 0 ] == 1 ) {
+		print $fh <<EOF;
+	change_label_1d( "Wavenumbers [abs. cm^-1]", "Counts" );
+	change_scale( laser_line - start_wn, - step_wn );
+	wn = lin_space( laser_line - start_wn,
+                    laser_line - start_wn - ( N_Points - 1 ) * step_wn,
+					N_Points );
+
+	button_state( B_abs, 1 );
+EOF
+	} else {
+		print $fh <<EOF;
+	change_label_1d( "Wavenumbers [rel. cm^-1]", "Counts" );
+	change_scale( start_wn, step_wn );
+	wn = lin_space( start_wn, start_wn + ( N_Points - 1 ) * step_wn,
+                    N_Points );
+EOF
+	}
+	print $fh <<EOF;
 } ELSE {
 	ccd_start_wn = cwn + 0.5 * ( CCD_Points - 1 ) * step_wn;
 	Start_Point = floor( ( ccd_start_wn - start_wn ) / step_wn ) + 1;
@@ -2957,7 +3040,7 @@ FOR I = 1 : N_scans {
 	spec = slice( ccd_camera_get_spectrum( ), Start_Point, N_Points );
 
 	F_cur = clone_file( F_all, "dat", sprint( "scan_#.dat", I ) );
-	fsave( F_cur, "\\#. scan\\n\\n", I );
+	fsave( F_cur, "\\# #. scan\\n\\n", I );
 	FOR J = 1 : N_Points {
 		fsave( F_cur, "# #\\n", wn[ J ], spec[ J ] );
 	}
@@ -3001,19 +3084,33 @@ FOR I = 1 : N_scans {
 	}
 }
 
+I -= 1;
+
 ON_STOP:
 
 fsave( F_all, "\\# Date:               # #\\n"
-              "\\# Start wavenumber = # cm^-1\\n"
+              "\\# Start wavenumber =  # cm^-1\\n"
               "\\# Width of spectrum = # cm^-1\\n"
               "\\# Resolution        = # cm^-1\\n"
               "\\# Exposure time     = # s\\n"
               "\\# Number of scans   = #\\n",
+EOF
+	if ( $laser_line != 0.0 and $units[ 0 ] == 1 ) {
+		print $fh <<EOF;
+              date( ), time( ), laser_line - start_wn,
+			  ( CCD_Points - 1 ) * calib[ 2 ],
+              calib[ 2 ] *  Bin [ 1 ], exposure_time, I );
+EOF
+	} else {
+		print $fh <<EOF;
               date( ), time( ), start_wn, ( CCD_Points - 1 ) * calib[ 2 ],
               calib[ 2 ] *  Bin [ 1 ], exposure_time, I );
+EOF
+	}
+	print $fh <<EOF;
 
 IF laser_line != 0.0 {
-    fsave( F_all, "\\# Laser lin         = # cm^-1\\n\\n", laser_line );
+    fsave( F_all, "\\# Laser line        = # cm^-1\\n\\n", laser_line );
 } ELSE {
 	fsave( F_all, "\\n" );
 }
@@ -3052,12 +3149,20 @@ EOF
 # is smaller than the requested spectral width
 
 sub multi_run {
-    my $fh;
+    my ( $fh, $swn, $ewn );
 
 	no warnings "exec";
     unless ( open $fh, "|fsc2_iconic_start" ) {
 		main::show_message( "Can't start fsc2" );
 		return;
+	}
+
+	if ( $laser_line != 0.0 and $units[ 0 ] == 1 ) {
+		$swn = $laser_line - $$start_wn;
+		$ewn = $laser_line - $$end_wn;
+	} else {
+		$swn = $$start_wn;
+		$ewn = $$end_wn;
 	}
 
     print $fh <<EOF;
@@ -3069,8 +3174,8 @@ rs_spec10;
 
 VARIABLES:
 
-start_wn = $$start_wn cm^-1;           // start of spectrum
-end_wn   = $$end_wn cm^-1;             // end of spectrum
+start_wn = $swn cm^-1;                 // start of spectrum
+end_wn   = $ewn cm^-1;                 // end of spectrum
 overlap  = $$overlap cm^-1;            // minimum overlap between spectra
 exposure_time = $$exp_time s;          // CCD exposure time
 N_scans = $$N_scans;                   // number of scans
@@ -3174,12 +3279,25 @@ hide_toolbox( 1 );
 I_scan = output_create( "INT_OUTPUT", 0,
                         sprint( "Current scan (of #)", N_scans ) );
 IF laser_line != 0.0 {
-	change_label_1d( "Wavenumbers [rel. cm^-1]", "Counts" );
-	change_scale( start_wn, step_wn );
 	B_rel = button_create( "RADIO_BUTTON", "Relative wavenumbers" );
 	B_abs = button_create( "RADIO_BUTTON", B_rel, "Absolute wavenumbers" );
 	B_wl  = button_create( "RADIO_BUTTON", B_rel, "Wavelengths" );
 
+EOF
+
+	if ( $units[ 0 ] == 1 ) {
+		print $fh <<EOF;
+	change_label_1d( "Wavenumbers [abs. cm^-1]", "Counts" );
+	change_scale( laser_line - start_wn, - step_wn );
+	button_state( B_abs, 1 );
+EOF
+	} else {
+		print $fh <<EOF;
+	change_label_1d( "Wavenumbers [rel. cm^-1]", "Counts" );
+	change_scale( start_wn, step_wn );
+EOF
+	}
+	print $fh <<EOF;
 } ELSE {
 	change_label_1d( "Wavenumbers [abs. cm^-1]", "Counts" );
 	change_scale( start_wn, - step_wn );
@@ -3210,11 +3328,27 @@ FOR I = 1 : N_scans {
 		// Write raw spectral data to file
 
 		IF laser_line != 0.0 {
+EOF
+	if ( $units[ 0 ] == 1 ) {
+		print $fh <<EOF;
+			fsave( F_cur, "\\# #. scan, spectrum from # cm^-1 to "
+                          "# cm^-1\\n\\n",
+                          I, laser_line - cur_wn,
+						  laser_line - cur_wn - ( CCD_Points - 1 ) * step_wn );
+			wn = lin_space( laser_line - cur_wn,
+                            laser_line - cur_wn - ( CCD_Points - 1 ) * step_wn,
+							CCD_Points );
+EOF
+	} else {
+		print $fh <<EOF;
 			fsave( F_cur, "\\# #. scan, spectrum from # cm^-1 to "
                           "# cm^-1\\n\\n",
                           I, cur_wn, cur_wn + ( CCD_Points - 1 ) * step_wn );
 			wn = lin_space( cur_wn, cur_wn + ( CCD_Points - 1 ) * step_wn,
 							CCD_Points );
+EOF
+	}
+	print $fh <<EOF;
 		} ELSE {
 			fsave( F_cur, "\\# #. scan, spectrum from # cm^-1 to "
                           "# cm^-1\\n\\n",
@@ -3305,8 +3439,20 @@ FOR I = 1 : N_scans {
 
 	fsave( F_cur, "\\# Data from #. scan\\n\\n", I );
 	IF laser_line != 0.0 {
+EOF
+	if ( $units[ 0 ] == 1 ) {
+		print $fh <<EOF;
+		wn = lin_space( laser_line - start_wn,
+						laser_line - start_wn - ( N_Points - 1 ) * step_wn,
+						N_Points );
+EOF
+	} else {
+		print $fh <<EOF;
 		wn = lin_space( start_wn, start_wn + ( N_Points - 1 ) * step_wn,
 						N_Points );
+EOF
+	}
+	print $fh <<EOF;
 	} ELSE {
 		wn = lin_space( start_wn, start_wn - ( N_Points - 1 ) * step_wn,
 						N_Points );
@@ -3323,6 +3469,7 @@ FOR I = 1 : N_scans {
 	clear_curve( 1 );
 }
 
+I -= 1;
 
 ON_STOP:
 
@@ -3337,12 +3484,36 @@ IF I > 0 {
 	              "\\# Resolution        = # cm^-1\\n"
 	              "\\# Exposure time     = # s\\n"
 	              "\\# Number of scans   = #\\n",
+EOF
+	if ( $laser_line != 0.0 and $units[ 0 ] == 1 ) {
+		print $fh <<EOF;
+	              date( ), time( ), laser_line - start_wn, laser_line - end_wn,
+				  calib[ 2 ] *  Bin [ 1 ], exposure_time, I );
+EOF
+	} else {
+		print $fh <<EOF;
 	              date( ), time( ), start_wn, end_wn, calib[ 2 ] *  Bin [ 1 ],
 				  exposure_time, I );
+EOF
+	}
+	print $fh <<EOF;
+
 	IF laser_line != 0.0 {
 	    fsave( F_all, "\\# Laser line        = # cm^-1\\n\\n", laser_line );
+EOF
+	if ( $units[ 0 ] == 1 ) {
+		print $fh <<EOF;
+		wn = lin_space( laser_line - start_wn,
+						laser_line - start_wn - ( N_Points - 1 ) * step_wn,
+						N_Points );
+EOF
+	} else {
+		print $fh <<EOF;
 		wn = lin_space( start_wn, start_wn + ( N_Points - 1 ) * step_wn,
 						N_Points );
+EOF
+	}
+	print $fh <<EOF;
 	} ELSE {
 		fsave( F_all, "\\n" );
 		wn = lin_space( start_wn, start_wn - ( N_Points - 1 ) * step_wn,
