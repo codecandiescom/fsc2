@@ -397,9 +397,9 @@ void load_file( FL_OBJECT *a, long reload )
 	static char *title = NULL;
 
 
-	a = a;
-
 	notify_conn( BUSY_SIGNAL );
+
+	a = a;
 
 	/* If new file is to be loaded get its name and store it, otherwise use
 	   previous name */
@@ -950,6 +950,35 @@ static bool display_file( char *name, FILE *fp )
 			}
 		}
 		*lp = '\0';
+
+		lp = line + len + 2;
+		if ( ! strcmp ( lp, "DEVICES:" ) ||
+			 ! strcmp ( lp, "DEVICE:" ) ||
+			 ! strcmp ( lp, "DEVS:\n" ) ||
+			 ! strcmp ( lp, "DEV:" ) ||
+			 ! strcmp ( lp, "VARIABLES:" ) ||
+			 ! strcmp ( lp, "VARIABLE:" ) ||
+			 ! strcmp ( lp, "VARS:" ) ||
+			 ! strcmp ( lp, "VAR:" ) ||
+			 ! strcmp ( lp, "ASSIGNMENTS:" ) ||
+			 ! strcmp ( lp, "ASSIGNMENT:" ) ||
+			 ! strcmp ( lp, "ASS:" ) ||
+			 ! strcmp ( lp, "PREPARATIONS:" ) ||
+			 ! strcmp ( lp, "PREPARATION:" ) ||
+			 ! strcmp ( lp, "PREP:" ) ||
+			 ! strcmp ( lp, "PREPS:" ) ||
+			 ! strcmp ( lp, "EXPERIMENT:" ) ||
+			 ! strcmp ( lp, "EXP:" ) ||
+			 ! strcmp ( lp, "ON_STOP:" ) )
+		{
+			memmove( line + 6, line, strlen( line ) + 1 );
+			line[ 0 ] = '@';
+			line[ 1 ] = 'C';
+			line[ 2 ] = '2';
+			line[ 3 ] = '4';
+			line[ 4 ] = '@';
+			line[ 5 ] = 'f';
+		}
 
 		fl_add_browser_line( main_form->browser, line );
 	}

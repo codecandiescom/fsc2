@@ -1900,7 +1900,13 @@ static bool print_browser( int browser, int fid, const char* comment )
 	{
 		reader( &line );
 		if ( line != NULL )
-			T_fprintf( fid, "%s%s\n", comment, line );
+		{
+			if ( *line == '@' )
+				T_fprintf( fid, "%s%s\n", comment,
+						   line + browser == 0 ? 6 : 5 );
+			else
+				T_fprintf( fid, "%s%s\n", comment, line );
+		}
 		else
 			break;
 	}
