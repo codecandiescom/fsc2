@@ -36,11 +36,11 @@ my @lines;
 my @vars;
 my $guify_entry = '^\s*===\s+';
 my $var_entry = $guify_entry .
-	'([A-Za-z0-9_]+)\s+(int|float|menu|file)(\s+(.*))?';
-my $if_entry = $guify_entry . 'if\\s+';
-my $elsif_entry = $guify_entry . "elsif\\s+";
-my $else_entry = $guify_entry . "else\\s*\$";
-my $endif_entry = $guify_entry . "endif\\s*\$";
+    '([A-Za-z0-9_]+)\s+(int|float|menu|file)(\s+(.*))?';
+my $if_entry = $guify_entry . 'if\s*';
+my $elsif_entry = $guify_entry . 'elsif\s*';
+my $else_entry = $guify_entry . 'else\s*$';
+my $endif_entry = $guify_entry . 'endif\s*$';
 my $if_level = 0;
 my $lino;
 
@@ -56,83 +56,87 @@ my $if = *STDIN;
 my $of = *STDOUT;
 
 if ( $ARGV[ 0 ] ) {
-	usage( ) if $ARGV[ 0 ] =~ /^-h$/ or $ARGV[ 0 ] =~ /^--h(elp)?$/;
-	open( $if, "<" . $ARGV[ 0 ] )
-		or die "Can't open input file " . $ARGV[ 0 ] . ": $!\n";
+    usage( ) if $ARGV[ 0 ] =~ /^-h$/ or $ARGV[ 0 ] =~ /^--h(elp)?$/;
+    open( $if, "<" . $ARGV[ 0 ] )
+        or die "Can't open input file " . $ARGV[ 0 ] . ": $!\n";
 }
 
 while ( <$if> ) {
 
-	# Just store lines with normal EDL code
+    # Just store lines with normal EDL code
 
-	unless ( /$guify_entry/o ) {
-		push @lines, { line => $_, lino => $. };
-		next;
-	}
+    unless ( /$guify_entry/o ) {
+        push @lines, { line => $_, lino => $. };
+        next;
+    }
 
-	# If line ends in a backslash append the next line to it (which then also
-	# must be a line starting with the 'guify' signature)
+    # If line ends in a backslash append the next line to it (which then also
+    # must be a line starting with the 'guify' signature)
 
-	my $cur_line = $_;
-	$lino = $.;
-	while ( $cur_line =~ /\\\s*$/ ) {
-		$cur_line =~ s/(.*)\\\s*$/$1 /;
-		die "Unexpected end of input file\n" unless defined( $_ = <$if> );
-		die "Missing continuation at line $.\n" unless /$guify_entry/o;
-		s/$guify_entry(.*)/$1/o;
-		$cur_line .= $_;
-	}
+    my $cur_line = $_;
+    $lino = $.;
+    while ( $cur_line =~ /\\\s*$/ ) {
+        $cur_line =~ s/(.*)\\\s*$/$1 /;
+        die "Unexpected end of input file\n" unless defined( $_ = <$if> );
+        die "Missing continuation at line $.\n" unless /$guify_entry/o;
+        s/$guify_entry(.*)/$1/o;
+        $cur_line .= $_;
+    }
 
-	# if/else/elsif/endif lines stay in the program for later handling
+    # if/else/elsif/endif lines stay in the program for later handling
 
-	if ( $cur_line =~ /$if_entry/o ) {
-		$if_level++;
-		push @lines, { line => $cur_line, lino => $lino };
-		next;
-	}
+    if ( $cur_line =~ /$if_entry/o ) {
+        die "'if' found without a condition at line $lino\n"
+            if $cur_line =~ /$if_entry\s+$/o;
+        $if_level++;
+        push @lines, { line => $cur_line, lino => $lino };
+        next;
+    }
 
-	if ( $cur_line =~ /$else_entry/o ) {
-		die "'else' found without previous 'if' at line $lino\n"
-			if $if_level <= 0;
-		push @lines, { line => $cur_line, lino => $lino };
-		next;
-	}
+    if ( $cur_line =~ /$else_entry/o ) {
+        die "'else' found without previous 'if' at line $lino\n"
+            if $if_level <= 0;
+        push @lines, { line => $cur_line, lino => $lino };
+        next;
+    }
 
-	if ( $cur_line =~ /$elsif_entry/o ) {
-		die "'elsif' found without previous 'if' at line $lino\n"
-			if $if_level <= 0;
-		push @lines, { line => $cur_line, lino => $lino };
-		next;
-	}
+    if ( $cur_line =~ /$elsif_entry/o ) {
+        die "'elsif' found without previous 'if' at line $lino\n"
+            if $if_level <= 0;
+        die "'elsif' found without a condition at line $lino\n"
+            if $cur_line =~ /$elsif_entry\s+$/o;
+        push @lines, { line => $cur_line, lino => $lino };
+        next;
+    }
 
-	if ( $cur_line =~ /$endif_entry/o ) {
-		die "'endif' found without previous 'if' at line $lino\n"
-			if $if_level <= 0;
-		$if_level--;
-		push @lines, { line => $cur_line, lino => $lino };
-		next;
-	}
+    if ( $cur_line =~ /$endif_entry/o ) {
+        die "'endif' found without previous 'if' at line $lino\n"
+            if $if_level <= 0;
+        $if_level--;
+        push @lines, { line => $cur_line, lino => $lino };
+        next;
+    }
 
-	# Lines defining variables must be analyzed directly
+    # Lines defining variables must be analyzed directly
 
-	if ( $cur_line =~ /$var_entry/o ) {
-		chomp $cur_line;
-		my $var_options = { name => $1, type => $2, value => undef,
-							line => $cur_line };
-		if ( defined $4 ) {
-			my $option = $4;
-			die "Syntax error at line $lino, garbage after variable type\n"
-				unless $option =~ /^\s*[\"\[]/;
-			analyze_var_options( $var_options, $option );
-		}
-		push @vars, $var_options;
-		next;
-	}
+    if ( $cur_line =~ /$var_entry/o ) {
+        chomp $cur_line;
+        my $var_options = { name => $1, type => $2, value => undef,
+                            line => $cur_line };
+        if ( defined $4 ) {
+            my $option = $4;
+            die "Syntax error at line $lino, garbage after variable type\n"
+                unless $option =~ /^\s*[\"\[]/;
+            analyze_var_options( $var_options, $option );
+        }
+        push @vars, $var_options;
+        next;
+    }
 
-	chomp $cur_line;
-	$cur_line =~ s/^\s*===\s+//o;
-	$cur_line = $1 if $cur_line =~ /^[A-Za-z0-9_]+\s+(.*)$/o;
-	die "Invalid syntax at line $lino near \"$cur_line\"\n";
+    chomp $cur_line;
+    $cur_line =~ s/^\s*===\s+//o;
+    $cur_line = $1 if $cur_line =~ /^[A-Za-z0-9_]+\s+(.*)$/o;
+    die "Invalid syntax at line $lino near \"$cur_line\"\n";
 }
 
 close $if;
@@ -143,29 +147,29 @@ die "No variables found in input\n" if @vars == 0;
 # Set values for variables that don't have been given a default value
 
 for ( @vars ) {
-	if ( exists $$_{ value } and defined $$_{ value } ) {
-		$$_{ def_value } = $$_{ value };
-		next;
-	}
+    if ( exists $$_{ value } and defined $$_{ value } ) {
+        $$_{ def_value } = $$_{ value };
+        next;
+    }
 
-	if ( $$_{ type } =~ /^int|float$/ ) {
-		if ( defined $$_{ max } and defined $$_{ min } ) {
-			$$_{ value } = 0.5 * ( $$_{ max } + $$_{ min } );
-			$$_{ value } = int( $$_{ value } ) if $$_{ type } =~ /^int$/;
-		} elsif ( defined $$_{ max } and ! defined $$_{ min } ) {
-			$$_{ value } = $$_{ max };
-		} elsif ( ! defined $$_{ max } and defined $$_{ min } ) {
-			$$_{ value } = $$_{ min };
-		} else {
-			$$_{ value } = 0;
-		}
-		$$_{ def_value } = $$_{ value };
-	} elsif ( $$_{ type } =~ /^menu$/ ) {
-		$$_{ value } = $$_{ def_value } = $$_{ menu_entries }->[ 0 ];
-	} else {
-		$$_{ value } = $$_{ def_value } = "";
-		$entry_width = 15;
-	}
+    if ( $$_{ type } =~ /^int|float$/ ) {
+        if ( defined $$_{ max } and defined $$_{ min } ) {
+            $$_{ value } = 0.5 * ( $$_{ max } + $$_{ min } );
+            $$_{ value } = int( $$_{ value } ) if $$_{ type } =~ /^int$/;
+        } elsif ( defined $$_{ max } and ! defined $$_{ min } ) {
+            $$_{ value } = $$_{ max };
+        } elsif ( ! defined $$_{ max } and defined $$_{ min } ) {
+            $$_{ value } = $$_{ min };
+        } else {
+            $$_{ value } = 0;
+        }
+        $$_{ def_value } = $$_{ value };
+    } elsif ( $$_{ type } =~ /^menu$/ ) {
+        $$_{ value } = $$_{ def_value } = $$_{ menu_entries }->[ 0 ];
+    } else {
+        $$_{ value } = $$_{ def_value } = "";
+        $entry_width = 15;
+    }
 }
 
 # Check the if and elsif lines for Perl syntax errors
@@ -175,8 +179,8 @@ cond_check( );
 # Write out the script
 
 if ( $ARGV[ 1 ] ) {
-	open( $of, ">" . $ARGV[ 1 ] )
-		or die "Can't open ouput file " . $ARGV[ 0 ] . ": $!\n";
+    open( $of, ">" . $ARGV[ 1 ] )
+        or die "Can't open ouput file " . $ARGV[ 0 ] . ": $!\n";
 }
 
 select $of;
@@ -191,150 +195,150 @@ chmod( 0755, $ARGV[ 1 ] ) if $ARGV[ 1 ];
 ################################################################
 
 sub usage {
-	print "Usage: fsc2_guify [ IN_FILE [ OUT_FILE ] ]\n" .
-		  "A program to GUI-fy (slightly modified) EDL scripts.\n";
-	exit 0;
+    print "Usage: fsc2_guify [ IN_FILE [ OUT_FILE ] ]\n" .
+          "A program to GUI-fy (slightly modified) EDL scripts.\n";
+    exit 0;
 }
 
 
 ################################################################
 
 sub analyze_var_options {
-	my ( $hr, $str ) = @_;
-	my $res;
+    my ( $hr, $str ) = @_;
+    my $res;
 
-	if ( $hr->{ type } =~ /^float$/o ) {
-		$str = get_float_limits( $hr, $str );
-	} elsif ( $hr->{ type } =~ /^int$/o ) {
-		$str = get_int_limits( $hr, $str );
-	} elsif ( $hr->{ type } =~ /^menu$/o ) {
-		$str = get_menu_entries( $hr, $str );
-	}
+    if ( $hr->{ type } =~ /^float$/o ) {
+        $str = get_float_limits( $hr, $str );
+    } elsif ( $hr->{ type } =~ /^int$/o ) {
+        $str = get_int_limits( $hr, $str );
+    } elsif ( $hr->{ type } =~ /^menu$/o ) {
+        $str = get_menu_entries( $hr, $str );
+    }
 
-	unless ( $hr->{ type } =~ /^file$/o ) {
-		( $res, $str ) = get_default_value( $str, $hr );
-		$hr->{ value } = $res if defined $res;
-	}
+    unless ( $hr->{ type } =~ /^file$/o ) {
+        ( $res, $str ) = get_default_value( $str, $hr );
+        $hr->{ value } = $res if defined $res;
+    }
 
-	( $res, $str ) = get_string( $str, $hr );
-	$hr->{ label } = defined $res ? $res : '""';
+    ( $res, $str ) = get_string( $str, $hr );
+    $hr->{ label } = defined $res ? $res : '""';
 
-	unless ( $hr->{ type } =~ /^file$/o ) {
-		( $res, $str ) = get_string( $str );
-		$hr->{ unit } = defined $res ? $res : '""';
-	}
+    unless ( $hr->{ type } =~ /^file$/o ) {
+        ( $res, $str ) = get_string( $str );
+        $hr->{ unit } = defined $res ? $res : '""';
+    }
 
-	die "Syntax error at line $lino near \"$str\"\n"
-		if defined $str and $str !~ /^\s*$/;
+    die "Syntax error at line $lino near \"$str\"\n"
+        if defined $str and $str !~ /^\s*$/;
 }
 
 
 ################################################################
 
 sub get_float_limits {
-	my ( $hr, $str ) = @_;
-	my ( $min, $max );
-	my $float_rep = '[+-]?((\d+(\.(\d+)?)?)|(\.\d+))([eE][+-]?\d+)?';
+    my ( $hr, $str ) = @_;
+    my ( $min, $max );
+    my $float_rep = '[+-]?((\d+(\.(\d+)?)?)|(\.\d+))([eE][+-]?\d+)?';
 
 
-	if ($str !~ /^\s*\[/o ) {
-		$hr->{ max } = $hr->{ min } = undef;
-		return $str;
-	}
+    if ($str !~ /^\s*\[/o ) {
+        $hr->{ max } = $hr->{ min } = undef;
+        return $str;
+    }
 
-	if ( $str =~ /^\s*(\[\s*([^:\s]+)?\s*:\s*([^:\s]+)?\s*\])(\s+(.*))?$/o ) {
-		$str = $5;
+    if ( $str =~ /^\s*(\[\s*([^:\s]+)?\s*:\s*([^:\s]+)?\s*\])(\s+(.*))?$/o ) {
+        $str = $5;
 
-		$min = $2 if defined $2;
-		$max = $3 if defined $3;
+        $min = $2 if defined $2;
+        $max = $3 if defined $3;
 
-		die "Not a floating point number ($min) at line $lino\n"
-			if defined $min and $min !~ /^$float_rep$/o;
+        die "Not a floating point number ($min) at line $lino\n"
+            if defined $min and $min !~ /^$float_rep$/o;
 
-		die "Not a floating point number ($max) at line $lino\n"
-			if defined $max and $max !~ /^$float_rep$/o;
+        die "Not a floating point number ($max) at line $lino\n"
+            if defined $max and $max !~ /^$float_rep$/o;
 
-		if ( defined $min and defined $max and $min > $max ) {
-			my $temp = $min;
-			$min = $max;
-			$max = $temp;
-		}
+        if ( defined $min and defined $max and $min > $max ) {
+            my $temp = $min;
+            $min = $max;
+            $max = $temp;
+        }
 
-		$hr->{ max } = $max;
-		$hr->{ min } = $min;
-	}  else {
-		$hr->{ max } = $hr->{ min } = undef;
-	}
+        $hr->{ max } = $max;
+        $hr->{ min } = $min;
+    }  else {
+        $hr->{ max } = $hr->{ min } = undef;
+    }
 
-	return $str;
+    return $str;
 }
 
 
 ################################################################
 
 sub get_int_limits {
-	my ( $hr, $str ) = @_;
-	my ( $min, $max );
-	my $int_rep = '[+-]?\d+';
+    my ( $hr, $str ) = @_;
+    my ( $min, $max );
+    my $int_rep = '[+-]?\d+';
 
 
-	if ($str !~ /^\s*\[/o ) {
-		$hr->{ max } = $hr->{ min } = undef;
-		return $str;
-	}
+    if ($str !~ /^\s*\[/o ) {
+        $hr->{ max } = $hr->{ min } = undef;
+        return $str;
+    }
 
-	if ( $str =~ /^(\[\s*([^:\s]+)?\s*:\s*([^:\s]+)?\s*\])(\s+(.*))?$/o ) {
-		$str = $5;
+    if ( $str =~ /^(\[\s*([^:\s]+)?\s*:\s*([^:\s]+)?\s*\])(\s+(.*))?$/o ) {
+        $str = $5;
 
-		$min = $2 if defined $2;
-		$max = $3 if defined $3;
+        $min = $2 if defined $2;
+        $max = $3 if defined $3;
 
-		die "Not an integer number ($min) at line $lino\n"
-			if defined $min and $min !~ /^$int_rep$/o;
+        die "Not an integer number ($min) at line $lino\n"
+            if defined $min and $min !~ /^$int_rep$/o;
 
-		die "Not a integer number ($max) at line $lino\n"
-			if defined $max and $max !~ /^$int_rep$/o;
+        die "Not a integer number ($max) at line $lino\n"
+            if defined $max and $max !~ /^$int_rep$/o;
 
-		if ( defined( $min ) and defined( $max ) and $min > $max ) {
-			my $temp = $min;
-			$min = $max;
-			$max = $temp;
-		}
+        if ( defined( $min ) and defined( $max ) and $min > $max ) {
+            my $temp = $min;
+            $min = $max;
+            $max = $temp;
+        }
 
-		$hr->{ max } = $max;
-		$hr->{ min } = $min;
-	} else {
-		$hr->{ max } = $hr->{ min } = undef;
-	}
+        $hr->{ max } = $max;
+        $hr->{ min } = $min;
+    } else {
+        $hr->{ max } = $hr->{ min } = undef;
+    }
 
-	return $str;
+    return $str;
 }
 
 
 ################################################################
 
 sub get_menu_entries {
-	my ( $hr, $str ) = @_;
-	my $string_rep = '"((\"|[^"])*)"';
+    my ( $hr, $str ) = @_;
+    my $string_rep = '"((\"|[^"])*)"';
 
-	if ( $str =~
-		 /^s*\[\s*($string_rep(\s*,\s*$string_rep)?)\s*\](\s+(.*)?)?$/o ) {
-		$str = $8;
-		my $mstr = $1;
-		my @menu_entries;
-		$mstr =~ /^"((\\"|[^"])*)"/og;
-		push @menu_entries, $1;
-		push @menu_entries, $1 while $mstr =~ /\G\s*,\s*"((\\\"|[^\"])*)"/go;
-		die "Less than 2 entries in menu descriptor starting at line $lino\n"
-			if @menu_entries < 2;
-		die "Syntax error in menu descriptor starting at line $lino\n"
-			unless $' =~ /^\s*$/;
-		$hr->{ menu_entries } = \@menu_entries;
-	} else {
-		die "Missing entries in menu descriptor starting at line $lino\n";
-	}
+    if ( $str =~
+         /^s*\[\s*($string_rep(\s*,\s*$string_rep)?)\s*\](\s+(.*)?)?$/o ) {
+        $str = $8;
+        my $mstr = $1;
+        my @menu_entries;
+        $mstr =~ /^"((\\"|[^"])*)"/og;
+        push @menu_entries, $1;
+        push @menu_entries, $1 while $mstr =~ /\G\s*,\s*"((\\\"|[^\"])*)"/go;
+        die "Less than 2 entries in menu descriptor starting at line $lino\n"
+            if @menu_entries < 2;
+        die "Syntax error in menu descriptor starting at line $lino\n"
+            unless $' =~ /^\s*$/;
+        $hr->{ menu_entries } = \@menu_entries;
+    } else {
+        die "Missing entries in menu descriptor starting at line $lino\n";
+    }
 
-	return $str;
+    return $str;
 }
 
 
@@ -342,67 +346,67 @@ sub get_menu_entries {
 
 sub get_default_value {
 
-	my ( $str, $hr ) = @_;
-	my $val;
+    my ( $str, $hr ) = @_;
+    my $val;
 
 
-	return ( undef, undef ) unless defined $str;
+    return ( undef, undef ) unless defined $str;
 
-	return ( undef, $str ) unless
-		$str =~ /^\s*\[\s*([^\]\s]+)\s*\](\s+(.*)?)?$/o;
+    return ( undef, $str ) unless
+        $str =~ /^\s*\[\s*([^\]\s]+)\s*\](\s+(.*)?)?$/o;
 
-	$val = $1;
-	$str = $3;
+    $val = $1;
+    $str = $3;
 
-	if ( $hr->{ type } =~ /^int$/ ) {
-		if ( $val =~ /^[+-]?\d+$/ ) {
-			die "Default value for $hr->{ name } does not fit into range at " .
-				"line $lino\n"
-					if ( defined $hr->{ max } and $hr->{ max } < $val ) or
-					   ( defined $hr->{ min } and $hr->{ min } > $val );
-			return ( $val, $str );
-		} else {
-			die "Default value ($val) isn't an integer number at line $lino\n";
-		}
-	} elsif ( $hr->{ type } =~ /^float$/ ) {
-		if ( $val =~ /^[+-]?((\d+(\.(\d+)?)?)|(\.\d+))([eE][+-]?\d+)?/o ) {
-			die "Initil value for $hr->{ name } does not fit into range at " .
-				"line $lino\n"
-					if ( defined $hr->{ max } and $hr->{ max } < $val ) or
-					   ( defined $hr->{ min } and $hr->{ min } > $val );
-			return ( $val, $str );
-		} else {
-			die "Default value ($val) isn't a floating point number at " .
-				"line $lino\n";
-		}
-	} else {
-		if ( $val =~ /^\d+/o ) {
-			die "Default value ($val) for $hr->{ name } is larger than the " .
-				"number of menu entries at line $lino\n"
-				if $val > @{ $hr->{ menu_entries } };
-			die "Invalid default value of 0 for $hr->{ name } at " .
-				"line $lino, must be at least 1.\n" if $val == 0;
-			return ( $hr->{ menu_entries }->[ $val - 1 ], $str );
-		} else {
-			die "Default value ($val) isn't a positive integer number at " .
-				"line $lino\n";
-		}
-	}
+    if ( $hr->{ type } =~ /^int$/ ) {
+        if ( $val =~ /^[+-]?\d+$/ ) {
+            die "Default value for $hr->{ name } does not fit into range at " .
+                "line $lino\n"
+                    if ( defined $hr->{ max } and $hr->{ max } < $val ) or
+                       ( defined $hr->{ min } and $hr->{ min } > $val );
+            return ( $val, $str );
+        } else {
+            die "Default value ($val) isn't an integer number at line $lino\n";
+        }
+    } elsif ( $hr->{ type } =~ /^float$/ ) {
+        if ( $val =~ /^[+-]?((\d+(\.(\d+)?)?)|(\.\d+))([eE][+-]?\d+)?/o ) {
+            die "Initil value for $hr->{ name } does not fit into range at " .
+                "line $lino\n"
+                    if ( defined $hr->{ max } and $hr->{ max } < $val ) or
+                       ( defined $hr->{ min } and $hr->{ min } > $val );
+            return ( $val, $str );
+        } else {
+            die "Default value ($val) isn't a floating point number at " .
+                "line $lino\n";
+        }
+    } else {
+        if ( $val =~ /^\d+/o ) {
+            die "Default value ($val) for $hr->{ name } is larger than the " .
+                "number of menu entries at line $lino\n"
+                if $val > @{ $hr->{ menu_entries } };
+            die "Invalid default value of 0 for $hr->{ name } at " .
+                "line $lino, must be at least 1.\n" if $val == 0;
+            return ( $hr->{ menu_entries }->[ $val - 1 ], $str );
+        } else {
+            die "Default value ($val) isn't a positive integer number at " .
+                "line $lino\n";
+        }
+    }
 }
 
 
 ################################################################
 
 sub get_string {
-	my $str = shift;
+    my $str = shift;
 
-	return ( undef, undef ) unless defined $str;
+    return ( undef, undef ) unless defined $str;
 
-	die "Syntax error at line $lino near \"$str\"\n" unless $str =~ /^\s*\"/o;
+    die "Syntax error at line $lino near \"$str\"\n" unless $str =~ /^\s*\"/o;
 
-	$str =~ /^\s*(\"([^\"]|\\\")*\")(\s+(.*)?)?$/o;
-	return ( $1, $4 ) if defined $1;
-	return ( undef, $str );
+    $str =~ /^\s*(\"([^\"]|\\\")*\")(\s+(.*)?)?$/o;
+    return ( $1, $4 ) if defined $1;
+    return ( undef, $str );
 }
 
 
@@ -414,24 +418,24 @@ sub get_string {
 
 sub cond_check {
 
-	my $defs = "";
-	$defs .= "my \$$$_{ name } = \"$$_{ value }\"\n;" for ( @vars );
+    my $defs = "";
+    $defs .= "my \$$$_{ name } = \"$$_{ value }\"\n;" for ( @vars );
 
-	for ( @lines ) {
-		next unless $$_{ line } =~ /$guify_entry/o;
-		$$_{ line } =~ /$guify_entry(if|else|elsif|endif)\s*(.*?)\s*$/;
-		my ( $type, $rcmd ) = ( $1, $2 );
-		next unless $type =~ /^if|elsif$/o;
-		my $cmd = $rcmd;
-		$cmd =~ s/\b$$_{ name }\b/\$$$_{ name }/g for ( @vars );
+    for ( @lines ) {
+        next unless $$_{ line } =~ /$guify_entry/o;
+        $$_{ line } =~ /$guify_entry(if|else|elsif|endif)\s*(.*?)\s*$/;
+        my ( $type, $rcmd ) = ( $1, $2 );
+        next unless $type =~ /^if|elsif$/o;
+        my $cmd = $rcmd;
+        $cmd =~ s/\b$$_{ name }\b/\$$$_{ name }/g for ( @vars );
 
-		# Disable warnings for the test call of eval
+        # Disable warnings for the test call of eval
 
-		local $SIG{ __WARN__ }= sub{ };
-		eval $defs . $cmd;
-		die "Syntax error in $type condition at line $$_{ lino }: \"$rcmd\"\n"
-			if $@;
-	}
+        local $SIG{ __WARN__ }= sub{ };
+        eval $defs . $cmd;
+        die "Syntax error in $type condition at line $$_{ lino }: \"$rcmd\"\n"
+            if $@;
+    }
 }
 
 
@@ -439,15 +443,15 @@ sub cond_check {
 
 sub write_script {
 
-	# Write out the start of the script
+    # Write out the start of the script
 
-	print '#!/usr/bin/perl
+    print '#!/usr/bin/perl
 # -*- cperl -*-
 # Generated by fsc2_guify';
 print " from $ARGV[ 0 ]" if $ARGV[ 0 ];
-print " at " . `date`;
+print " on " . `date`;
 
-	print <<'EOT';
+    print <<'EOT';
 
 use strict;
 use warnings;
@@ -459,18 +463,18 @@ die "Installed Perl-Tk version is $Tk::VERSION but Tk800.022 is required.\n"
     if $version[ 0 ] + 0.001 * $version[ 1 ] < 800.022;
 
 my %fp = ( -side => 'top',
-		   -fill => 'x',
-		   -padx => '2m',
-		   -pady => '2m' );
+           -fill => 'x',
+           -padx => '2m',
+           -pady => '2m' );
 my %wp = ( -side => 'left',
-		   -fill => 'x',
-		   -expand => 1 );
+           -fill => 'x',
+           -expand => 1 );
 my %up = ( -side => 'left' );
 
 my $fsc2_how_to_run = "Test program";
 my @fsc2_how_to_run = ( "Start experiment",
                         "Test program",
-						"Load into fsc2" );
+                        "Load into fsc2" );
 my $fsc2_main_window = MainWindow->new( );
 my $fsc2_main_frame = $fsc2_main_window->Frame( -relief => "ridge",
                                                 -borderwidth => "1m" );
@@ -490,10 +494,10 @@ $fsc2_apply_frame->pack( -side => "bottom",
 
 EOT
 
-	# Now write the code for creating the editing fields for the variables
+    # Now write the code for creating the editing fields for the variables
 
-	for ( @vars ) {
-		print <<"EOT";
+    for ( @vars ) {
+        print <<"EOT";
 # $$_{ line }
 my \%$$_{ name };
 \$$$_{ name }\{ tk_frame \} = \$fsc2_main_frame->Frame( );
@@ -502,8 +506,8 @@ my \%$$_{ name };
 -anchor => 'w' );
 EOT
 
-		if ( $$_{ type } =~ /^int|float$/o ) {
-			print "my \$$$_{ name } = $$_{ value };
+        if ( $$_{ type } =~ /^int|float$/o ) {
+            print "my \$$$_{ name } = $$_{ value };
 \$$$_{ name }\{ min \} = " . ( defined $$_{ min } ? $$_{ min } : "undef" ) . ";
 \$$$_{ name }\{ max \} = " . ( defined $$_{ max } ? $$_{ max } : "undef" ) . ";
 \$$$_{ name }\{ tk_entry \} = \$$$_{ name }\{ tk_frame \}->Entry( -textvariable => \\\$$$_{ name },
@@ -517,60 +521,60 @@ EOT
 -balloonmsg  => \"Range: [ \" . ( defined \$$$_{ name }\{ min \} ? \$$$_{ name }\{ min \} : '-inf' ) .
 \" : \" . ( defined \$$$_{ name }\{ max \} ? \$$$_{ name }\{ max \} : '+inf' ) . \" ]\" );
 ";
-		} elsif ( $$_{ type } =~ /^menu$/o ) {
-			print "my \$$$_{ name } = \"$$_{ value }\";
+        } elsif ( $$_{ type } =~ /^menu$/o ) {
+            print "my \$$$_{ name } = \"$$_{ value }\";
 my \@$$_{ name } = ( \"$$_{ menu_entries }[ 0 ]\"";
-			for ( my $i = 1; $i < @{ $$_{ menu_entries } }; $i++ ) {
-				print ", \"" . ${ $$_{ menu_entries } }[ $i ] . "\"";
-			}
-			print " );
+            for ( my $i = 1; $i < @{ $$_{ menu_entries } }; $i++ ) {
+                print ", \"" . ${ $$_{ menu_entries } }[ $i ] . "\"";
+            }
+            print " );
 \$$$_{ name }\{ tk_entry \} = \$$$_{ name }\{ tk_frame \}->Optionmenu( " .
 "-options => \\\@$$_{ name },
 -width => $entry_width,
 -textvariable => \\\$$$_{ name } );
 ";
-		} elsif( $$_{ type } =~ /^file$/o ) {
-			print "my \$$$_{ name } = \"$$_{ value }\";
+        } elsif( $$_{ type } =~ /^file$/o ) {
+            print "my \$$$_{ name } = \"$$_{ value }\";
 \$$$_{ name }\{ tk_entry \} = \$$$_{ name }\{ tk_frame \}->Entry( -textvariable => \\\$$$_{ name },
 -width => $entry_width,
 -relief => 'sunken' );
 ";
-		}
+        }
 
-		if ( $$_{ type } =~ /^int|float|menu$/o ) {
-			print <<"EOT";
+        if ( $$_{ type } =~ /^int|float|menu$/o ) {
+            print <<"EOT";
 \$$$_{ name }\{ tk_unit \} = \$$$_{ name }\{ tk_frame \}->Label( -text => $$_{ unit },
 -width => $unit_width );
 EOT
-		} elsif ( $$_{ type } =~ /^file$/o ) {
-			print <<"EOT";
+        } elsif ( $$_{ type } =~ /^file$/o ) {
+            print <<"EOT";
 \$$$_{ name }\{ tk_unit \} = \$$$_{ name }\{ tk_frame \}->Button( -text => \"...\",
 -command => sub { my \$fn = \$fsc2_main_window->fsc2_filesel::show( \$$$_{ name } );
-				  \$$$_{ name } = \$fn if defined \$fn;
- 				  \$$$_{ name }\{ tk_entry \}->xview( length( \$$$_{ name } ) - $entry_width ) }
+                  \$$$_{ name } = \$fn if defined \$fn;
+                  \$$$_{ name }\{ tk_entry \}->xview( length( \$$$_{ name } ) - $entry_width ) }
 );
 EOT
-		}
+        }
 
-		print <<"EOT";
+        print <<"EOT";
 \$$$_{ name }\{ tk_frame \}->pack( \%fp );
 \$$$_{ name }\{ tk_label \}->pack( \%wp );
 \$$$_{ name }\{ tk_entry \}->pack( \%wp );
 \$$$_{ name }\{ tk_unit \}->pack( \%up );
 
 EOT
-	}
+    }
 
-	# Finally add the menu for selection how to run the generated EDL script
-	# and the Apply- and Quit-button
+    # Finally add the menu for selection how to run the generated EDL script
+    # and the Apply- and Quit-button
 
-	print <<"EOT";
+    print <<"EOT";
 
 \$fsc2_main_frame->pack( \%fp, -pady => '1m' );
 \$fsc2_main_window->Optionmenu( -options => \\\@fsc2_how_to_run,
-				                -textvariable => \\\$fsc2_how_to_run,
-			                  )->pack( -padx => '3m',
-						               -pady => '3m' );
+                                -textvariable => \\\$fsc2_how_to_run,
+                              )->pack( -padx => '3m',
+                                       -pady => '3m' );
 
 \$fsc2_apply_button->pack( \%wp, padx => '5m', -pady => '3m' );
 \$fsc2_quit_button->pack( \%wp, padx => '5m', -pady => '3m' );
@@ -578,67 +582,67 @@ EOT
 load_defs( );
 EOT
 
-	for ( @vars ) {
-	print "\$$$_{ name }\{ tk_entry \}->xview( length( \$$$_{ name } ) - $entry_width );
+    for ( @vars ) {
+    print "\$$$_{ name }\{ tk_entry \}->xview( length( \$$$_{ name } ) - $entry_width );
 " if $$_{ type } =~ /^file$/o;
-	}
+    }
 
-	# Ok, everything needed for the graphical interface done. After the
-	# MainLoop() call follow all the funcions that needed by the script
+    # Ok, everything needed for the graphical interface done. After the
+    # MainLoop() call follow all the funcions that needed by the script
 
-	print <<"EOT";
+    print <<"EOT";
 MainLoop;
 
 
 ################################################################
 
 sub int_check {
-	my ( \$new, \$min, \$max ) = \@_;
+    my ( \$new, \$min, \$max ) = \@_;
 
-	return 0 if \$new =~ /^\\+?(\\d+)?\$/ and defined \$max and \$max < 0;
-	return 0 if \$new =~ /^-/ and defined \$min and \$min >= 0;
-	if ( \$new =~ /^[+-]?\$/ ) {
-		 \$fsc2_apply_button->configure( -state => 'disabled' );
-		 return 1;
-	 }
+    return 0 if \$new =~ /^\\+?(\\d+)?\$/ and defined \$max and \$max < 0;
+    return 0 if \$new =~ /^-/ and defined \$min and \$min >= 0;
+    if ( \$new =~ /^[+-]?\$/ ) {
+         \$fsc2_apply_button->configure( -state => 'disabled' );
+         return 1;
+     }
 
-	return 0 unless \$new =~ /^[+-]?\\d+?\$/;
+    return 0 unless \$new =~ /^[+-]?\\d+?\$/;
 
-	if ( ( defined \$min and \$new < \$min )
+    if ( ( defined \$min and \$new < \$min )
          or ( defined \$max and \$new > \$max ) ) {
-		 \$fsc2_apply_button->configure( -state => 'disabled' );
-	 } else {
-		 \$fsc2_apply_button->configure( -state => 'normal' );
-	 }
-	 return 1;
+         \$fsc2_apply_button->configure( -state => 'disabled' );
+     } else {
+         \$fsc2_apply_button->configure( -state => 'normal' );
+     }
+     return 1;
 }
 
 
 ################################################################
 
 sub float_check {
-	my ( \$new, \$min, \$max ) = \@_;
-	my \$float_rep = '[+-]?((\\d+(\\.(\\d+)?)?)|(\\.\\d+))([eE][+-]?\\d+)?';
+    my ( \$new, \$min, \$max ) = \@_;
+    my \$float_rep = '[+-]?((\\d+(\\.(\\d+)?)?)|(\\.\\d+))([eE][+-]?\\d+)?';
 
-	return 0 if \$new =~ /^\\+/ and defined \$max and \$max < 0;
-	return 0 if \$new =~ /^-/ and defined \$min and \$min > 0;
+    return 0 if \$new =~ /^\\+/ and defined \$max and \$max < 0;
+    return 0 if \$new =~ /^-/ and defined \$min and \$min > 0;
 
-	if ( \$new =~ /^\$float_rep\$/ ) {
-		if ( ( defined \$max and \$max < \$new ) or
-			 ( defined \$min and \$min > \$new ) ) {
-			\$fsc2_apply_button->configure( -state => 'disabled' );
-		} else {
-			\$fsc2_apply_button->configure( -state => 'normal' );
-		}
-		return 1;
-	}
+    if ( \$new =~ /^\$float_rep\$/ ) {
+        if ( ( defined \$max and \$max < \$new ) or
+             ( defined \$min and \$min > \$new ) ) {
+            \$fsc2_apply_button->configure( -state => 'disabled' );
+        } else {
+            \$fsc2_apply_button->configure( -state => 'normal' );
+        }
+        return 1;
+    }
 
-	if ( \$new =~ /^[+-]?(\\d+)?\\.?(\\d+)?([Ee][+-]?(\\d+)?)?\$/ ) {
-		 \$fsc2_apply_button->configure( -state => 'disabled' );
-		 return 1;
-	 }
+    if ( \$new =~ /^[+-]?(\\d+)?\\.?(\\d+)?([Ee][+-]?(\\d+)?)?\$/ ) {
+         \$fsc2_apply_button->configure( -state => 'disabled' );
+         return 1;
+     }
 
-	 return 0;
+     return 0;
 }
 
 
@@ -650,110 +654,111 @@ sub write_out {
         or die \"Can't find utility fsc2_\" . lc \$fsc2_how_to_run . \".\\n\\n\";
 EOT
 
-	# Here the body of the EDL script that the script we are just writing is
-	# going to send to fsc2 is written. For normal lines we just have to
-	# double all backslashes, escape double quotes and dollars and prepend
-	# an (escaped) $ to the variable names.
-	# For the possibly embedded if, else, elsif and endif commands we
-	# have to built in some Perl code to allow the written script to
-	# decide which parts need to be written to the EDL script depending
-	# on what values or menu entries the user selected. Here the eval
-	# function comes quite handy because we can simply treat the conditions
-	# as some Perl code after prepending a $ to the variable name...
-	# This way the user can use even rather complicated expressions as
-	# the conditions (actually, even complete scripts... ;-)
+    # Here the body of the EDL script that the script we are just writing is
+    # going to send to fsc2 is written. For normal lines we just have to
+    # double all backslashes, escape double quotes and dollars and prepend
+    # an (escaped) $ to the variable names.
+    # For the possibly embedded if, else, elsif and endif commands we
+    # have to built in some Perl code to allow the written script to
+    # decide which parts need to be written to the EDL script depending
+    # on what values or menu entries the user selected. Here the eval
+    # function comes quite handy because we can simply treat the conditions
+    # as some Perl code after prepending a $ to the variable name...
+    # This way the user can use even rather complicated expressions as
+    # the conditions (actually, even complete scripts... ;-)
 
-	print "	print \$fh \"";
-	for ( @lines ) {
-		my $line = $$_{ line };
-		if ( $line =~ /$guify_entry/o ) {
-			chomp $line;
-			$line =~ /$guify_entry(if|else|elsif|endif)\s*(.*?)\s*$/;
-			my ( $type, $cmd ) = ( $1, $2 );
-			if ( $type =~ /^if|elsif$/o ) {
-				$cmd =~ s/\b$$_{ name }\b/\$$$_{ name }/g for ( @vars );
-			}
-			if ( $type =~ /^if$/o ) {
-				print "\";
+    print "    print \$fh \"";
+    for ( @lines ) {
+        my $line = $$_{ line };
+        if ( $line =~ /$guify_entry/o ) {
+            chomp $line;
+            $line =~ /$guify_entry(if|else|elsif|endif)\s*(.*?)\s*$/;
+            my ( $type, $cmd ) = ( $1, $2 );
+            if ( $type =~ /^if|elsif$/o ) {
+                $cmd =~ s/\b$$_{ name }\b/\$$$_{ name }/g for ( @vars );
+            }
+            if ( $type =~ /^if$/o ) {
+                print "\";
 # $line
-if ( eval { $cmd } ) {
-print \$fh \"";
-			} elsif ( $type =~ /^elsif$/o ) {
-				print "\";
+    if ( eval { $cmd } ) {
+        print \$fh \"";
+            } elsif ( $type =~ /^elsif$/o ) {
+                print "\";
 # $line
-} elsif ( eval { $cmd } ) {
-print \$fh \"";
-			} elsif ( $type =~ /^else$/o ) {
-				print "\";
+    } elsif ( eval { $cmd } ) {
+        print \$fh \"";
+            } elsif ( $type =~ /^else$/o ) {
+                print "\";
 # $line
-} else {
-print \$fh \"";
-			} else {
-				print "\";
+    } else {
+        print \$fh \"";
+            } else {
+                print "\";
 # $line
-}
-print \$fh \"";
-			}
-			next;
-		}
-		$line =~ s/\\/\\\\/g;
-		$line =~ s/\"/\\\"/g;
-		$line =~ s{\$}{\\\$}g;
-		for ( @vars ) {
-			if ( $$_{ type } =~ /^int|float|menu$/o ) {
-				$line =~ s/\b$$_{ name }\b/\$$$_{ name }/g;
-			} elsif ( $$_{ type } =~ /^file$/o ) {
+    }
 
-				# The following is a hack that is needed for the deprecated use
-				# of hard-coded file names in the get_file() function. It only
-				# works if the first argument is on the same line as the
-				# function name. Hopefully, the this can go away when all
-				# people use the new open_file() function instead.
+    print \$fh \"";
+            }
+            next;
+        }
+        $line =~ s/\\/\\\\/g;
+        $line =~ s/\"/\\\"/g;
+        $line =~ s{\$}{\\\$}g;
+        for ( @vars ) {
+            if ( $$_{ type } =~ /^int|float|menu$/o ) {
+                $line =~ s/\b$$_{ name }\b/\$$$_{ name }/g;
+            } elsif ( $$_{ type } =~ /^file$/o ) {
 
-				if ( $line !~ /get_file\s*\(\s*$$_{ name }/ ) {
-					$line =~ s/\b$$_{ name }\b/\\\"\$$$_{ name }\\\"/g;
-				} else {
-					$line =~ s/\b$$_{ name }\b/\\\"\\\\\$$$_{ name }\\\"/g;
-				}
-			}
-		}
-		print $line;
-	}
+                # The following is a hack that is needed for the deprecated use
+                # of hard-coded file names in the get_file() function. It only
+                # works if the first argument is on the same line as the
+                # function name. Hopefully, the this can go away when all
+                # people use the new open_file() function instead.
 
-	print <<'EOT';
+                if ( $line !~ /get_file\s*\(\s*$$_{ name }/ ) {
+                    $line =~ s/\b$$_{ name }\b/\\\"\$$$_{ name }\\\"/g;
+                } else {
+                    $line =~ s/\b$$_{ name }\b/\\\"\\\\\$$$_{ name }\\\"/g;
+                }
+            }
+        }
+        print $line;
+    }
+
+    print <<'EOT';
 ";
-	close $fh;
+    close $fh;
 
-	my $text;
-	if ( $? != 0 ) {
-		if ( $? >> 8 == -1 ) {
-			$text = "Internal error.";
-		} elsif ( $? >> 8 == 1 ) {
-			$text = "Someone else is running fsc2.";
-		} elsif ( $? >> 8 == 2 ) {
-			$text = "fsc2 is already testing or\nrunning an experiment.";
-		} elsif ( $? >> 8 == 3 ) {
-			$text = "Internal error of fsc2.";
-		} elsif ( $? >> 8 == 4 ) {
-			$text = "Could not start fsc2.";
-		} else {
-			$text = "Something strange\nis going on here.";
-		}
+    my $text;
+    if ( $? != 0 ) {
+        if ( $? >> 8 == -1 ) {
+            $text = "Internal error.";
+        } elsif ( $? >> 8 == 1 ) {
+            $text = "Someone else is running fsc2.";
+        } elsif ( $? >> 8 == 2 ) {
+            $text = "fsc2 is already testing or\nrunning an experiment.";
+        } elsif ( $? >> 8 == 3 ) {
+            $text = "Internal error of fsc2.";
+        } elsif ( $? >> 8 == 4 ) {
+            $text = "Could not start fsc2.";
+        } else {
+            $text = "Something strange\nis going on here.";
+        }
 
-		&show_message( $text ) if $? >> 8 != 0;
-	}
+        &show_message( $text ) if $? >> 8 != 0;
+    }
 }
 
 
 ################################################################
 
 sub show_message {
-	my $text = shift;
+    my $text = shift;
 
-	$fsc2_main_window->messageBox( -icon => 'error',
-					 			   -type => 'Ok',
-					 			   -title => 'Error',
-					 			   -message => $text );
+    $fsc2_main_window->messageBox( -icon => 'error',
+                                   -type => 'Ok',
+                                   -title => 'Error',
+                                   -message => $text );
 }
 
 
@@ -761,128 +766,128 @@ sub show_message {
 
 sub store_defs {
 
-	my $fh;
-	my $name = $0;
+    my $fh;
+    my $name = $0;
 
-	$name =~ s|^.*?([^/]+)$|$1|;
-	mkdir "$ENV{ HOME }/.fsc2", 0777 unless -e "$ENV{ HOME }/.fsc2";
-	open( $fh, ">$ENV{ HOME }/.fsc2/$name" ) or return;
-	print $fh "# Do not edit - created automatically!\n";
+    $name =~ s|^.*?([^/]+)$|$1|;
+    mkdir "$ENV{ HOME }/.fsc2", 0777 unless -e "$ENV{ HOME }/.fsc2";
+    open( $fh, ">$ENV{ HOME }/.fsc2/$name" ) or return;
+    print $fh "# Do not edit - created automatically!\n";
 EOT
 
-	for ( @vars ) {
-		if ( $$_{ type } =~ /^int$/o ) {
-			print "
-	if ( \$$$_{ name } =~ /^[+-]?\\d+\$/o and
-		 ( defined \$$$_{ name }\{ max \} ? \$$$_{ name }\{ max \} >= \$$$_{ name } : 1 ) and
-		 ( defined \$$$_{ name }\{ min \} ? \$$$_{ name }\{ min \} <= \$$$_{ name } : 1 ) ) {
-		print \$fh \"\$$$_{ name }\\n\";
-	} else {
-		print \$fh \"$$_{ def_value }\\n\";
-	}
+    for ( @vars ) {
+        if ( $$_{ type } =~ /^int$/o ) {
+            print "
+    if ( \$$$_{ name } =~ /^[+-]?\\d+\$/o and
+         ( defined \$$$_{ name }\{ max \} ? \$$$_{ name }\{ max \} >= \$$$_{ name } : 1 ) and
+         ( defined \$$$_{ name }\{ min \} ? \$$$_{ name }\{ min \} <= \$$$_{ name } : 1 ) ) {
+        print \$fh \"\$$$_{ name }\\n\";
+    } else {
+        print \$fh \"$$_{ def_value }\\n\";
+    }
 ";
-		} elsif ( $$_{ type } =~ /^float$/o ) {
-			print "
-	if ( \$$$_{ name } =~ /^[+-]?((\\d+(\\.(\\d+)?)?)|(\\.\\d+))([eE][+-]?\\d+)?\$/o and
-		 ( defined \$$$_{ name }\{ max \} ? \$$$_{ name }\{ max \} >= \$$$_{ name } : 1 ) and
-		 ( defined \$$$_{ name }\{ min \} ? \$$$_{ name }\{ min \} <= \$$$_{ name } : 1 ) ) {
-		print \$fh \"\$$$_{ name }\\n\";
-	} else {
-		print \$fh \"$$_{ def_value }\\n\";
-	}
+        } elsif ( $$_{ type } =~ /^float$/o ) {
+            print "
+    if ( \$$$_{ name } =~ /^[+-]?((\\d+(\\.(\\d+)?)?)|(\\.\\d+))([eE][+-]?\\d+)?\$/o and
+         ( defined \$$$_{ name }\{ max \} ? \$$$_{ name }\{ max \} >= \$$$_{ name } : 1 ) and
+         ( defined \$$$_{ name }\{ min \} ? \$$$_{ name }\{ min \} <= \$$$_{ name } : 1 ) ) {
+        print \$fh \"\$$$_{ name }\\n\";
+    } else {
+        print \$fh \"$$_{ def_value }\\n\";
+    }
 ";
-		} elsif ( $$_{ type } =~ /^menu$|file/o ) {
-			print "
-	print \$fh \"\$$$_{ name }\\n\";
+        } elsif ( $$_{ type } =~ /^menu$|file/o ) {
+            print "
+    print \$fh \"\$$$_{ name }\\n\";
 ";
-		}
-	}
-	print "
-	print \$fh \"\$fsc2_how_to_run\\n\";
+        }
+    }
+    print "
+    print \$fh \"\$fsc2_how_to_run\\n\";
 
 ";
 
-	print <<'EOT';
-	close $fh;
+    print <<'EOT';
+    close $fh;
 };
 
 
 ################################################################
 
 sub load_defs {
-	my $fh;
-	my $name = $0;
-	my $ne;
-	my $found;
+    my $fh;
+    my $name = $0;
+    my $ne;
+    my $found;
 
-	$name =~ s|^.*?([^/]+)$|$1|;
-	if ( $ARGV[ 0 ] ) {
-		open( $fh, "<$ARGV[ 0 ]" ) or return;
-	} else {
-		open( $fh, "<$ENV{ HOME }/.fsc2/$name" ) or return;
-	}
+    $name =~ s|^.*?([^/]+)$|$1|;
+    if ( $ARGV[ 0 ] ) {
+        open( $fh, "<$ARGV[ 0 ]" ) or return;
+    } else {
+        open( $fh, "<$ENV{ HOME }/.fsc2/$name" ) or return;
+    }
 
-	goto done_reading unless defined( $ne = <$fh> ) and $ne =~ /^#/;
+    goto done_reading unless defined( $ne = <$fh> ) and $ne =~ /^#/;
 EOT
 
-	for ( @vars ) {
-		if ( $$_{ type } =~ /^int$/o ) {
-			print "
-	goto done_reading unless defined( \$ne = <\$fh> )
-		and \$ne =~ /^[+-]?\\d+\$/;
-	chomp \$ne;
-	goto done_reading if ( defined \$$$_{ name }\{ max \} and \$ne > \$$$_{ name }\{ max \} ) or
-						 ( defined \$$$_{ name }\{ min \} and \$ne < \$$$_{ name }\{ min \} );
-	\$$$_{ name } = \$ne;
+    for ( @vars ) {
+        if ( $$_{ type } =~ /^int$/o ) {
+            print "
+    goto done_reading unless defined( \$ne = <\$fh> )
+        and \$ne =~ /^[+-]?\\d+\$/;
+    chomp \$ne;
+    goto done_reading if ( defined \$$$_{ name }\{ max \} and \$ne > \$$$_{ name }\{ max \} ) or
+                         ( defined \$$$_{ name }\{ min \} and \$ne < \$$$_{ name }\{ min \} );
+    \$$$_{ name } = \$ne;
 ";
-		} elsif ( $$_{ type } =~ /^float$/o ) {
-			print "
-	goto done_reading unless defined( \$ne = <\$fh> )
-		and \$ne =~ /^[+-]?((\\d+(\\.(\\d+)?)?)|(\\.\\d+))([eE][+-]?\\d+)?\$/o;
-	chomp \$ne;
-	goto done_reading if ( defined \$$$_{ name }\{ max \} and \$ne > \$$$_{ name }\{ max \} ) or
-						 ( defined \$$$_{ name }\{ min \} and \$ne < \$$$_{ name }\{ min \} );
-	\$$$_{ name } = \$ne;
+        } elsif ( $$_{ type } =~ /^float$/o ) {
+            print "
+    goto done_reading unless defined( \$ne = <\$fh> )
+        and \$ne =~ /^[+-]?((\\d+(\\.(\\d+)?)?)|(\\.\\d+))([eE][+-]?\\d+)?\$/o;
+    chomp \$ne;
+    goto done_reading if ( defined \$$$_{ name }\{ max \} and \$ne > \$$$_{ name }\{ max \} ) or
+                         ( defined \$$$_{ name }\{ min \} and \$ne < \$$$_{ name }\{ min \} );
+    \$$$_{ name } = \$ne;
 ";
-		} elsif ( $$_{ type } =~ /^menu$/o ) {
-			print"
-	goto done_reading unless defined( \$ne = <\$fh> );
-	chomp \$ne;
-	\$found = 0;
-	for ( \@$$_{ name } ) {
-		if ( \$ne eq \$_) {
-			\$found = 1;
-			last;
-		}
-	}
-	goto done_reading unless \$found;
-	\$$$_{ name } = \$ne;
+        } elsif ( $$_{ type } =~ /^menu$/o ) {
+            print"
+    goto done_reading unless defined( \$ne = <\$fh> );
+    chomp \$ne;
+    \$found = 0;
+    for ( \@$$_{ name } ) {
+        if ( \$ne eq \$_) {
+            \$found = 1;
+            last;
+        }
+    }
+    goto done_reading unless \$found;
+    \$$$_{ name } = \$ne;
 ";
-		} elsif ( $$_{ type } =~ /^file$/o ) {
-			print "
-	goto done_reading unless defined( \$ne = <\$fh> );
-	chomp \$ne;
-	\$$$_{ name } = \$ne;
+        } elsif ( $$_{ type } =~ /^file$/o ) {
+            print "
+    goto done_reading unless defined( \$ne = <\$fh> );
+    chomp \$ne;
+    \$$$_{ name } = \$ne;
 ";
-		}
-	}
+        }
+    }
 
-	print <<'EOT';
+    print <<'EOT';
 
-	goto done_reading unless defined( $ne = <$fh> );
-	chomp $ne;
-	$found = 0;
-	for ( @fsc2_how_to_run ) {
-		if ( $ne eq $_) {
-			$found = 1;
-			last;
-		}
-	}
-	goto done_reading unless $found;
-	$fsc2_how_to_run = $ne;
+    goto done_reading unless defined( $ne = <$fh> );
+    chomp $ne;
+    $found = 0;
+    for ( @fsc2_how_to_run ) {
+        if ( $ne eq $_) {
+            $found = 1;
+            last;
+        }
+    }
+    goto done_reading unless $found;
+    $fsc2_how_to_run = $ne;
 
   done_reading:
-	close $fh;
+    close $fh;
 };
 
 
@@ -898,145 +903,145 @@ my $cur_dir;
 my $cur_file;
 
 BEGIN {
-	$cur_dir = `pwd`;
-	chomp $cur_dir;
+    $cur_dir = `pwd`;
+    chomp $cur_dir;
 }
 
 sub show {
-	my ( $top, $file ) = @_;
+    my ( $top, $file ) = @_;
 
-	my $selected = undef;
+    my $selected = undef;
 
-	if ( defined $file and $file =~ m|^((.*?)/)?([^/]+)$|o ) {
-		$cur_file = $3;
-		$cur_dir = $2 ne "" ? $2 : $1 if defined $1;
-	} else {
-		$cur_file = "";
-	}
+    if ( defined $file and $file =~ m|^((.*?)/)?([^/]+)$|o ) {
+        $cur_file = $3;
+        $cur_dir = $2 ne "" ? $2 : $1 if defined $1;
+    } else {
+        $cur_file = "";
+    }
 
-	my %fs;
+    my %fs;
 
-	$fs{ top } = $top->Toplevel( '-title' => 'File Select' );
-	$fs{ top }->grab;
-	$fs{ dir } = $fs{ top }->Entry( -textvariable => \$cur_dir,
-									-width => 35
-								  )->pack( -side => 'top',
-										   -fill => 'x',
-										   -padx => '2m',
-										   -pady => '1m',
-										 );
-	$fs{ list } = $fs{ top }->Scrolled( 'Listbox',
-										-selectmode => 'single',
-										-scrollbars => 'osoe',
-									  )->pack( -side => 'top',
-											   -fill => 'both',
-											   -anchor => 's',
-											   -padx => '2m',
-											   -pady => '1m',
-											   -expand => 1 );
-	populate_fs( $fs{ list }, $cur_dir );
-	$fs{ file } = $fs{ top }->Entry( -textvariable => \$cur_file
-								   )->pack( -side => 'top',
-											-fill => 'x',
-											-padx => '2m',
-											-pady => '1m'
-										  );
-	$fs{ frame } = $fs{ top }->Frame( )->pack( -side => 'bottom' );
-	$fs{ frame }->Button( -text => 'Cancel',
-						  -command => sub { $selected = "" }
-						)->pack( -side => 'left',
-								 -padx => '2m',
-								 -pady => '1m'
-							   );
-	$fs{ frame }->Button( -text => 'Rescan',
-						  -command => [ &populate_fs, $fs{ list },
-										$cur_dir ]
-						)->pack( -side => 'left',
-								 -padx => '2m',
-								 -pady => '1m'
-											 );
-	$fs{ frame }-> Button( -text => '  Ok  ',
-						   -command => sub { $selected = $cur_file }
-						 )->pack( -side => 'right',
-								  -padx => '2m',
-								  -pady => '1m'
-								);
-	$fs{ list }->bind( '<ButtonPress-1>' =>
-					   [ &new_selection, $fs{ list }, Ev( 'y' ) ] );
-	$fs{ top }->bind( '<ButtonPress-4>' =>
-					   sub { $fs{ list }->yview( scroll => -1, 'units' ) } );
-	$fs{ top }->bind( '<Up>' =>
-					   sub { $fs{ list }->yview( scroll => -1, 'units' ) } );
-	$fs{ top }->bind( '<Prior>' =>
-					   sub { $fs{ list }->yview( scroll => -1, 'page' ) } );
-	$fs{ top }->bind( '<ButtonPress-5>' =>
-					   sub { $fs{ list }->yview( scroll => 1, 'units' ) } );
-	$fs{ top }->bind( '<Down>' =>
-					   sub { $fs{ list }->yview( scroll => 1, 'units' ) } );
-	$fs{ top }->bind( '<Next>' =>
-					   sub { $fs{ list }->yview( scroll => 1, 'page' ) } );
-	$fs{ top }->bind( '<Home>' => sub { $fs{ list }->yview( 0 ) } );
-	$fs{ top }->bind( '<End>' =>
-					  sub { $fs{ list }->yview( $fs{ list }->size - 1 ) } );
-	$fs{ top }->bind( '<Delete>' => sub { $selected = "" } );
-	$fs{ top }->bind( '<BackSpace>' => sub { $selected = "" } );
-	$fs{ top }->bind( '<Return>' => sub { $selected = $cur_file } );
-	$fs{ top }->bind( '<Tab>' =>
-					  sub { populate_fs( $fs{ list }, $cur_dir ) } );
+    $fs{ top } = $top->Toplevel( '-title' => 'File Select' );
+    $fs{ top }->grab;
+    $fs{ dir } = $fs{ top }->Entry( -textvariable => \$cur_dir,
+                                    -width => 35
+                                  )->pack( -side => 'top',
+                                           -fill => 'x',
+                                           -padx => '2m',
+                                           -pady => '1m',
+                                         );
+    $fs{ list } = $fs{ top }->Scrolled( 'Listbox',
+                                        -selectmode => 'single',
+                                        -scrollbars => 'osoe',
+                                      )->pack( -side => 'top',
+                                               -fill => 'both',
+                                               -anchor => 's',
+                                               -padx => '2m',
+                                               -pady => '1m',
+                                               -expand => 1 );
+    populate_fs( $fs{ list }, $cur_dir );
+    $fs{ file } = $fs{ top }->Entry( -textvariable => \$cur_file
+                                   )->pack( -side => 'top',
+                                            -fill => 'x',
+                                            -padx => '2m',
+                                            -pady => '1m'
+                                          );
+    $fs{ frame } = $fs{ top }->Frame( )->pack( -side => 'bottom' );
+    $fs{ frame }->Button( -text => 'Cancel',
+                          -command => sub { $selected = "" }
+                        )->pack( -side => 'left',
+                                 -padx => '2m',
+                                 -pady => '1m'
+                               );
+    $fs{ frame }->Button( -text => 'Rescan',
+                          -command => [ &populate_fs, $fs{ list },
+                                        $cur_dir ]
+                        )->pack( -side => 'left',
+                                 -padx => '2m',
+                                 -pady => '1m'
+                                             );
+    $fs{ frame }-> Button( -text => '  Ok  ',
+                           -command => sub { $selected = $cur_file }
+                         )->pack( -side => 'right',
+                                  -padx => '2m',
+                                  -pady => '1m'
+                                );
+    $fs{ list }->bind( '<ButtonPress-1>' =>
+                       [ &new_selection, $fs{ list }, Ev( 'y' ) ] );
+    $fs{ top }->bind( '<ButtonPress-4>' =>
+                       sub { $fs{ list }->yview( scroll => -1, 'units' ) } );
+    $fs{ top }->bind( '<Up>' =>
+                       sub { $fs{ list }->yview( scroll => -1, 'units' ) } );
+    $fs{ top }->bind( '<Prior>' =>
+                       sub { $fs{ list }->yview( scroll => -1, 'page' ) } );
+    $fs{ top }->bind( '<ButtonPress-5>' =>
+                       sub { $fs{ list }->yview( scroll => 1, 'units' ) } );
+    $fs{ top }->bind( '<Down>' =>
+                       sub { $fs{ list }->yview( scroll => 1, 'units' ) } );
+    $fs{ top }->bind( '<Next>' =>
+                       sub { $fs{ list }->yview( scroll => 1, 'page' ) } );
+    $fs{ top }->bind( '<Home>' => sub { $fs{ list }->yview( 0 ) } );
+    $fs{ top }->bind( '<End>' =>
+                      sub { $fs{ list }->yview( $fs{ list }->size - 1 ) } );
+    $fs{ top }->bind( '<Delete>' => sub { $selected = "" } );
+    $fs{ top }->bind( '<BackSpace>' => sub { $selected = "" } );
+    $fs{ top }->bind( '<Return>' => sub { $selected = $cur_file } );
+    $fs{ top }->bind( '<Tab>' =>
+                      sub { populate_fs( $fs{ list }, $cur_dir ) } );
 
-	$fs{ top }->waitVariable( \$selected );
-	$fs{ top }->destroy;
-	return undef if $selected =~ /^$/o;
-	if ( $cur_dir =~ m|^/$|o ) {
- 		return "/$selected";
-	} else {
- 		return "$cur_dir/$selected";
-	}
+    $fs{ top }->waitVariable( \$selected );
+    $fs{ top }->destroy;
+    return undef if $selected =~ /^$/o;
+    if ( $cur_dir =~ m|^/$|o ) {
+        return "/$selected";
+    } else {
+        return "$cur_dir/$selected";
+    }
 }
 
 
 sub new_selection {
-	my ( $d, $l, $y ) = @_;
-	my $sel = $l->get( $l->nearest( $y ) );
-	if ( $sel =~ /^d (.*)$/o ) {
-		my $dir = $1;
-		$cur_file = "";
-		return if $dir =~ /^\.$/o;
-		if ( $dir =~ /^\.\.$/o ) {
-			$cur_dir =~ s|^(.*?)/[^/]+$|$1|;
-			$cur_dir = "/" if $cur_dir =~ /^$/o;
-			populate_fs( $l, $cur_dir );
-		}
-		else {
-			if ( $cur_dir =~ m|^/$|o ) {
-				$cur_dir .= "$dir";
-			} else {
-				$cur_dir .= "/$dir";
-			}
-			populate_fs( $l, $cur_dir );
-		}
-	} else {
-		$cur_file = $sel;
-		$cur_file =~ s/^[l ] (.*)$/$1/o;
-	}
+    my ( $d, $l, $y ) = @_;
+    my $sel = $l->get( $l->nearest( $y ) );
+    if ( $sel =~ /^d (.*)$/o ) {
+        my $dir = $1;
+        $cur_file = "";
+        return if $dir =~ /^\.$/o;
+        if ( $dir =~ /^\.\.$/o ) {
+            $cur_dir =~ s|^(.*?)/[^/]+$|$1|;
+            $cur_dir = "/" if $cur_dir =~ /^$/o;
+            populate_fs( $l, $cur_dir );
+        }
+        else {
+            if ( $cur_dir =~ m|^/$|o ) {
+                $cur_dir .= "$dir";
+            } else {
+                $cur_dir .= "/$dir";
+            }
+            populate_fs( $l, $cur_dir );
+        }
+    } else {
+        $cur_file = $sel;
+        $cur_file =~ s/^[l ] (.*)$/$1/o;
+    }
 }
 
 
 sub populate_fs {
-	my ( $list, $dir ) = @_;
+    my ( $list, $dir ) = @_;
 
-	$list->delete( 0, 'end' );
-	my @ls = `ls -a $dir`;
-	for ( @ls ) {
-		chomp;
-		next unless -d "$dir/$_";
-		$list->insert( 'end', "d $_" );
-		undef $_;
-	}
+    $list->delete( 0, 'end' );
+    my @ls = `ls -a $dir`;
+    for ( @ls ) {
+        chomp;
+        next unless -d "$dir/$_";
+        $list->insert( 'end', "d $_" );
+        undef $_;
+    }
 
-	for ( @ls ) {
-		$list->insert( 'end', "  $_" ) if defined;
-	}
+    for ( @ls ) {
+        $list->insert( 'end', "  $_" ) if defined;
+    }
 }
 
 1;
