@@ -63,6 +63,7 @@ static int set_bipolar( int is_bipolar );
 static int set_exttrig( int is_ext_trigger );
 static int set_intr_delay( double intr_delay );
 static void rulbus_error( const char *s );
+static inline long lrnd( double x );
 
 %}
 
@@ -811,4 +812,18 @@ void rulbus_parser_clean_up( void )
 
 	rulbus_num_racks = 0;
 	rulbus_rack_names = NULL;
+}
+
+
+/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
+
+static inline long lrnd( double x )
+{
+	if ( x > LONG_MAX )
+		return LONG_MAX;
+	if ( x < LONG_MIN )
+		return LONG_MIN;
+
+	return ( long ) ( x < 0.0 ? ceil( x - 0.5 ) : floor( x + 0.5 ) );
 }

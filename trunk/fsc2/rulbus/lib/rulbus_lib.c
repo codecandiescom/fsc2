@@ -731,18 +731,12 @@ int rulbus_get_card_info( const char *card_name, RULBUS_CARD_INFO *card_info )
 		/* Parse the configuration file */
 
 		rulbus_parser_init( );
-		if ( ( retval = rulbus_parse( ) ) != RULBUS_OK )
-		{
-			fclose( rulbus_in );
-			rulbus_cleanup( );
-			return rulbus_errno = retval;
-		}
-
+		retval = rulbus_parse( );
+		rulbus_parser_clean_up( );
 		fclose( rulbus_in );
 
-		/* Check that the data from the configuration file were reasonable */
-
-		if ( ( retval = rulbus_check_config( ) ) != RULBUS_OK )
+		if ( retval != RULBUS_OK ||
+			 ( retval = rulbus_check_config( ) ) != RULBUS_OK )
 		{
 			rulbus_cleanup( );
 			return rulbus_errno = retval;
