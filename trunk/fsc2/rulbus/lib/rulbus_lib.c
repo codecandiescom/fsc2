@@ -48,7 +48,7 @@ static const char *rulbus_errlist[ ] = {
 	"Not permission to open device file",              /* RULBUS_DVF_ACC */
 	"Invalid name for device file",                    /* RULBUS_DVF_CFG */
 	"Can't open device file",                          /* RULBUS_DVF_OPN */
-	"Syntax error in configuration file",              /* RULBUS_STX_ERR */
+	NULL,					 				           /* RULBUS_STX_ERR */
 	"Running out of memory",                           /* RULBUS_NO_MEM  */
 	"Too many racks listed in configuration file",     /* RULBUS_RCK_CNT */
 	"Duplicate rack address in configuration file",    /* RULBUS_RCK_DUP */
@@ -65,7 +65,7 @@ static const char *rulbus_errlist[ ] = {
 	"No cards found in configuration file",            /* RULBUS_NO_CRD  */
 	"Missing card name in configuration file",         /* RULBUS_CRD_NAM */
 	"Invalid card type in configuration file",         /* RULBUS_INV_TYP */
-	"Address confict for cards in same rack",          /* RULBUS_ADD_CFL */
+	NULL,									           /* RULBUS_ADD_CFL */
 	"Missing modules for card",                        /* RULBUS_TYP_HND */
 	"Missing intialization of library",                /* RULBUS_NO_INIT */
 	"Invalid function argument",                       /* RULBUS_INV_ARG */
@@ -84,6 +84,13 @@ static const char *rulbus_errlist[ ] = {
 	"Missing polarity setting for DAC12 card",         /* RULBUS_NO_POL  */
 	"Voltage out of range",                            /* RULBUS_INV_VLT */
 };
+
+
+char rulbus_stx_err[ ] =
+			  "Syntax error in configuration file at line xxxxx, column xxxxx";
+
+static char rulbus_add_cfl[ ] =
+		 "Address confict for cards with addresses 0xxx and 0xxx in same rack";
 
 static const int rulbus_nerr =
                 ( int ) ( sizeof rulbus_errlist / sizeof rulbus_errlist[ 0 ] );
@@ -172,6 +179,9 @@ int rulbus_open( void )
 
 	if ( rulbus_in_use )
 		return rulbus_errno = RULBUS_OK;
+
+	rulbus_errlist[ - RULBUS_STX_ERR ] = rulbus_stx_err;
+	rulbus_errlist[ - RULBUS_ADD_CFL ] = rulbus_add_cfl;
 
 	/* Figure out the name of the configuration file and try to open it */
 
@@ -556,7 +566,12 @@ static int rulbus_check_config( void )
 				 ( rulbus_card[ j ].addr < rulbus_card[ i ].addr &&
 				   rulbus_card[ j ].addr + rulbus_card[ j ].width >
 				   rulbus_card[ i ].addr ) )
+			{
+				char *p = strstr( rulbus_add_cfl, " with addresses " );
+				sprintf( p, " with addresses 0x%02X and 0x%02X in same rack",
+						 rulbus_card[ i ].addr, rulbus_card[ j ].addr );
 				return RULBUS_ADD_CFL;
+			}
 		}
 
 	return RULBUS_OK;

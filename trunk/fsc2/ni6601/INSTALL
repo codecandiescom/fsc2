@@ -266,7 +266,7 @@ fi
 make install >> makelog 2>&1
 if [ $? -ne 0 ]; then
 	dialog --msgbox \
-"  Sorry, instalation failed.\nSee \"makelog\" for the reasons.\n" 7 35;
+"  Sorry, installation failed.\nSee \"makelog\" for the reasons.\n" 7 35;
     exit 1
 fi
 
@@ -277,7 +277,7 @@ if [ -n "$NI6601_KERNEL_SOURCE" ]; then
    `pwd`/driver/ni6601.o was *not* copied to the\n\
    appropriate module directory (which probably\n\
   is /lib/modules/${NI6601_KERNEL_SOURCE##/}) and\n\
-       also 'depmod -a' was not run.\n\n\
+       also 'depmod -a' won't be run.\n\n\
 Only the user library and header files got installed." 12 58
 fi
 
