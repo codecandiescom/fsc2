@@ -148,16 +148,16 @@ static int func_cmp( const void *a, const void *b )
 /* name is loaded.                                               */
 /*---------------------------------------------------------------*/
 
-bool exists_device( const char *name )
+int exists_device( const char *name )
 {
 	Device *cd;
 
 	for ( cd = EDL.Device_List; cd != NULL; cd = cd->next )
 		if ( cd->is_loaded &&
 			 ! strcasecmp( strip_path( cd->name ), name ) )
-			return OK;
+			return cd->count;
 
-	return FAIL;
+	return 0;
 }
 
 
