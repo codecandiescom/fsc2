@@ -19,11 +19,11 @@
 @node Pulser Overview, Setting up the Pulser, Using Pulsers, Using Pulsers
 @section Pulser Overview
 
-Using the pulsers has its own chapter to cover the special methods to
+Using the pulsers has its own chapter, covering the special methods to
 handle the pulser setup, create pulses und do phase cycling. It also
-describes who the way the pulser is to be used depends on the hardware
-used in the spectrometer. Currently, there are three combinations of
-pulsers and spectrometers implemented:
+describes how the way the pulser is to be used depends on the hardware
+used in the spectrometer. Currently, there are three
+pulsers/spectrometer combinations of implemented:
 @itemize @bullet
 @item Sony/Tektronix DG2020 with S-band spectrometer in Frankfurt/Main
 @item Sony/Tektronix DG2020 with X-band spectrometer in Berlin
@@ -39,14 +39,14 @@ ASSIGNMENTS:
 PHASES:
 @end example
 The first section deals with the basic setup of the pulser, the second
-is only necessary when phase cycling is used.
-
-Valid statements in these sections differ slightly depending on the
-type of the pulser and the spectrometer it is supposed to work with.
+is only needed when phase cycling is used.  Valid statements in these
+sections differ slightly depending on the type of the pulser and the
+spectrometer.
 
 Beside these additional sections there are several other constructs for
 the creation of pulses and their subsequent manipulation. These are
-identical for all pulsers and are explained in in subsequent sections.
+identical for all pulsers and are explained in in subsequent sections of
+this chapter.
 
 
 @c ########################################################
@@ -76,6 +76,8 @@ etc.).
 @anchor{Setting the TIMEBASE}
 @subsubsection Setting the @code{TIMEBASE}
 @cindex Setting the @code{TIMEBASE}
+@cindex @code{TIMEBASE}
+
 
 The first statement of the @code{ASSIGNMENTS} section has to be the
 setting of the timebase of the pulser. All pulsers function similarly:
@@ -109,6 +111,15 @@ pulsers:
 @anchor{Setting the trigger mode}
 @subsubsection Setting the trigger mode
 @cindex Setting the trigger mode
+@cindex @code{TRIGGER_MODE}
+@cindex @code{REPEAT_FREQUENCY}
+@cindex @code{REPEAT_TIME}
+@cindex @code{INTERNAL}
+@cindex @code{EXTERNAL}
+@cindex @code{SLOPE}
+@cindex @code{LEVEL}
+@cindex @code{IMPEDANCE}
+
 
 The next statement concerns the triggering of the pulser. A pulser
 starts a new sequence of pulses either on receiving an external trigger
@@ -179,12 +190,70 @@ range between @w{-5V} and @w{+5 V}, while for the @strong{Tektronix
 HFS9003} the allowed trigger level range is @w{-4.7 V} to @w{+4.7 V}.
 
 
+@c ########################################################
+
+@anchor{Maximum pulse pattern length}
+@subsection Maximum pulse pattern length
+@cindex Maximum pulse pattern length
+@cindex @code{MAXIMUM_PATTERN_LENGTH}
+
+In most cases the program will be able to figure out automatically how
+long the length of the longest pulse pattern in the experiment is going
+to be when doing the test run. The longest pulse pattern length is
+needed to set up the pulser correctly. Unfortunately, there are certain
+syntax constructs that make it difficult or even impossible to find out
+this maximum pattern length. These constructs are @code{FOREVER} loops
+and sometimes cases, where changes of pulse positions or lengths are
+done within @code{IF-ELSE} or @code{UNLESS-ELSE} constructs (please also
+see the discussion of the problems introduced by @code{FOREVER} loops
+and @code{IF} and @code{ELSE} constructs, @pxref{Control structures}).
+
+Whenever there is a reason to suspect that these problems may occur one
+can set the maximum pulse pattern length manually (i.e.@ the end point
+of the last pulse when it has been set to its latest position in the
+experiment. This is done by a statement in the @code{ASSIGMENTS} section
+starting with the @code{MAXIMUM_PATTERN_LENGTH} keyword@footnote{In
+@code{MAXIMUM_PATTERN_LENGTH} @code{MAXIMUM} can be abbreviated to
+@code{MAX}, @code{PATTERN} to @code{PATT} and @code{LENGTH} to
+@code{LEN}. The intermediate underscore characters are also optional.}:
+@example
+MAXIMUM_PATTERN_LENGTH: 1.2 us
+@end example
+This will tell the program to expect a maximum pattern length of 1.2
+micro-seconds. Unless in the test run a longer pattern length is found,
+this value is used. It is not a problem to specify too long a maximum
+pattern length, so a conservative guess will do. The only penality
+incurred is a slightly longer time needed to set up the pulser at the
+start of the experiment. On the other hand, too short a pattern length
+will lead to the experiment being stopped with an error message when the
+actual pattern length becomes larger than the one specified.
+
 
 @c ########################################################
 
 @anchor{Channel setup}
 @subsubsection Channel setup
 @cindex Channel setup
+@cindex @code{MICROWAVE}
+@cindex @code{TWT}
+@cindex @code{TWT_GATE}
+@cindex @code{DETECTION}
+@cindex @code{DETECTION_GATE}
+@cindex @code{DEFENSE}
+@cindex @code{RADIO_FREQUENCY}
+@cindex @code{RADIO_FREQUENCY_GATE}
+@cindex @code{PULSE_SHAPER}
+@cindex @code{OTHER_1}
+@cindex @code{OTHER_2}
+@cindex @code{OTHER_3}
+@cindex @code{OTHER_4}
+@cindex @code{CHANNEL}
+@cindex @code{POD}
+@cindex @code{TRIGGER_OUT}
+@cindex @code{V_HIGH}
+@cindex @code{V_LOW}
+@cindex @code{INVERTED}
+@cindex @code{DELAY}
 
 The statements described in the following deal with setting up the
 channels of the pulser. The basic idea is to abstract from the real
@@ -356,6 +425,9 @@ difficult. By the way, the keyword @code{DELAY} can be abbreviated to
 @anchor{Phase channel setup}
 @subsubsection Phase channel setup
 @cindex Phase channel setup
+@cindex @code{PHASE_SETUP}
+@cindex @code{PHASE_SWITCH_DELAY}
+@cindex @code{GRACE_PERIOD}
 
 Please note that a phase channel setup can only be done with the
 @strong{Sony/Tektronix DG2020} pulsers and that there are several
@@ -489,6 +561,9 @@ an error message).
 @anchor{PHASES section}
 @subsubsection @code{PHASES} section
 @cindex Phases section
+@cindex @code{PHASE_SEQUENCE}
+@cindex @code{ACQUSISTION_SEQUENCE}
+
 
 The @code{PHASES} section is for defining phase sequences and,
 optionally, aquisition sequences. As the word says a phase sequence
@@ -557,6 +632,13 @@ lengths have to be identical to the lengths of the phase sequences.
 @node Defining Pulses, Using Pulses, Setting up the Pulser, Using Pulsers
 @section Defining Pulses
 
+@cindex @code{PULSE_}x
+@cindex @code{FUNCTION}
+@cindex @code{START}
+@cindex @code{LENGTH}
+@cindex @code{DELTA_START}
+@cindex @code{DELTA_LENGTH}
+@cindex @code{PHASE_CYCLE}
 
 Every pulse has at least three properties: a unique number, a function
 and a start position. Actually, pulses also need a length, but as
@@ -575,8 +657,8 @@ As usual, most of the keywords can be abbreviated, @code{PULSE_1:} to
 @code{FUNC} or @code{F}, @code{START} to @code{S}, and finally,
 @code{LENGTH} to @code{LEN} or @code{L}.
 
-Pulse numbers can be choosen at random, the only requirementis that the
-numbers are positive (includeing 0) and not larger than 2147483647
+Pulse numbers can be choosen randomly - the only requirement is that the
+numbers are positive (including 0) and not larger than 2147483647
 @w{(2^32 - 1)}.
 
 There are three additional properties a pulse can have. The first one is
