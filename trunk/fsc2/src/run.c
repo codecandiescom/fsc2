@@ -116,6 +116,7 @@ bool run( void )
 		run_end_of_exp_hooks( );
 		if ( need_GPIB )
 			gpib_shutdown( );
+		stop_graphics( );
 		fl_set_cursor( FL_ObjWin( main_form->run ), XC_left_ptr );
 		return FAIL;
 	}

@@ -21,7 +21,10 @@ void *T_malloc( size_t size )
 
 	if ( mem == NULL )
 	{
-		eprint( FATAL, "%s:%ld: Running out of memory.\n", Fname, Lc );
+		if ( Fname == NULL )
+			eprint( FATAL, "Running out of memory.\n" );
+		else
+			eprint( FATAL, "%s:%ld: Running out of memory.\n", Fname, Lc );
 		THROW( OUT_OF_MEMORY_EXCEPTION );
 	}
 
@@ -46,7 +49,10 @@ void *T_calloc( size_t nmemb, size_t size )
 
 	if ( mem == NULL )
 	{
-		eprint( FATAL, "%s:%ld: Running out of memory.\n", Fname, Lc );
+		if ( Fname == NULL )
+			eprint( FATAL, "Running out of memory.\n" );
+		else
+			eprint( FATAL, "%s:%ld: Running out of memory.\n", Fname, Lc );
 		THROW( OUT_OF_MEMORY_EXCEPTION );
 	}
 
@@ -73,7 +79,10 @@ void *T_realloc( void *ptr, size_t size )
 	if ( new_ptr == NULL )
 	{
 		T_free( ptr );
-		eprint( FATAL, "%s:%ld: Running out of memory.\n", Fname, Lc );
+		if ( Fname == NULL )
+			eprint( FATAL, "Running out of memory.\n" );
+		else
+			eprint( FATAL, "%s:%ld: Running out of memory.\n", Fname, Lc );
 		THROW( OUT_OF_MEMORY_EXCEPTION );
 	}
 
@@ -119,7 +128,10 @@ char *T_strdup( const char *str )
 
 	if ( ( new_str = strdup( str ) ) == NULL )
 	{
-		eprint( FATAL, "%s:%ld: Running out of memory.\n", Fname, Lc );
+		if ( Fname == NULL )
+			eprint( FATAL, "Running out of memory.\n" );
+		else
+			eprint( FATAL, "%s:%ld: Running out of memory.\n", Fname, Lc );
 		THROW( OUT_OF_MEMORY_EXCEPTION );
 	}
 

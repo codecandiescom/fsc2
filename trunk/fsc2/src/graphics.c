@@ -254,8 +254,8 @@ void start_graphics( void )
 
 	if ( G.is_init )
 	{
-		G_struct_init( );
 		fl_set_form_atclose( run_form->run, run_form_close_handler, NULL );
+		G_struct_init( );
 	}
 
 	if ( G.dim == 1 )
@@ -357,16 +357,16 @@ static void G_struct_init( void )
 	G.rw_max = - HUGE_VAL;
 	G.is_scale_set = UNSET;
 
-	if ( G.dim == 1 )
-		G_init_curves_1d( );
-	else
-		G_init_curves_2d( );
-
 	if ( G.label[ Y ] != NULL && G.font != NULL )
 		create_label_pixmap( &G.y_axis, Y, G.label[ Y ] );
 
 	if ( G.dim == 2 && G.label[ Z ] != NULL && G.font != NULL )
 		create_label_pixmap( &G.z_axis, Z, G.label[ Z ] );
+
+	if ( G.dim == 1 )
+		G_init_curves_1d( );
+	else
+		G_init_curves_2d( );
 
 	first_time = UNSET;
 }
@@ -381,6 +381,9 @@ static void G_init_curves_1d( void )
 	Curve_1d *cv;
 	unsigned int depth;
 
+
+	for ( i = 0; i < G.nc; i++ )
+		G.curve[ i ] = NULL;
 
 	depth = fl_get_canvas_depth( G.canvas.obj );
 
@@ -397,13 +400,7 @@ static void G_init_curves_1d( void )
 		cv = G.curve[ i ] = T_malloc( sizeof( Curve_1d ) );
 
 		cv->points = NULL;
-		cv->points = T_malloc( G.nx * sizeof( Scaled_Point ) );
-
-		for ( j = 0; j < G.nx; j++ )           /* no points are known in yet */
-			cv->points[ j ].exist = UNSET;
-
 		cv->xpoints = NULL;
-		cv->xpoints = T_malloc( G.nx * sizeof( XPoint ) );
 
 		/* Create a GC for drawing the curve and set its colour */
 
@@ -465,6 +462,15 @@ static void G_init_curves_1d( void )
 		cv->count = 0;
 		cv->active = SET;
 		cv->can_undo = UNSET;
+
+		/* Finally get memory for the data */
+
+		cv->points = T_malloc( G.nx * sizeof( Scaled_Point ) );
+
+		for ( j = 0; j < G.nx; j++ )           /* no points are known in yet */
+			cv->points[ j ].exist = UNSET;
+
+		cv->xpoints = T_malloc( G.nx * sizeof( XPoint ) );
 	}
 }
 
@@ -480,6 +486,9 @@ static void G_init_curves_2d( void )
 	unsigned int depth;
 
 
+	for ( i = 0; i < G.nc; i++ )
+		G.curve_2d[ i ] = NULL;
+
 	depth = fl_get_canvas_depth( G.canvas.obj );
 
 	fl_set_cursor_color( G.cur_1, FL_BLACK, FL_WHITE );
@@ -492,21 +501,13 @@ static void G_init_curves_2d( void )
 
 	for ( i = 0; i < G.nc; i++ )
 	{
-		/* Allocate memory for the curve and its data */
+		/* Allocate memory for the curve */
 
 		cv = G.curve_2d[ i ] = T_malloc( sizeof( Curve_2d ) );
 
 		cv->points = NULL;
 		cv->xpoints = NULL;
 		cv->xpoints_s = NULL;
-
-		cv->points = T_malloc( G.nx * G.ny * sizeof( Scaled_Point ) );
-
-		for ( sp = cv->points, j = 0; j < G.nx * G.ny; sp++, j++ )
-			sp->exist = UNSET;
-
-		cv->xpoints = T_malloc( G.nx * G.ny * sizeof( XPoint ) );
-		cv->xpoints_s = T_malloc( G.nx * G.ny * sizeof( XPoint ) );
 
 		/* Create a GC for drawing the curve and set its colour */
 
@@ -583,6 +584,17 @@ static void G_init_curves_2d( void )
 		cv->rw_min = HUGE_VAL;
 		cv->rw_max = - HUGE_VAL;
 		cv->is_scale_set = UNSET;
+
+		/* Now get also memory for the data */
+
+		cv->points = T_malloc( G.nx * G.ny * sizeof( Scaled_Point ) );
+
+		for ( sp = cv->points, j = 0; j < G.nx * G.ny; sp++, j++ )
+			sp->exist = UNSET;
+
+		cv->xpoints = T_malloc( G.nx * G.ny * sizeof( XPoint ) );
+		cv->xpoints_s = T_malloc( G.nx * G.ny * sizeof( XPoint ) );
+
 	}
 }
 
@@ -693,51 +705,47 @@ void graphics_free( void )
 
 
 	/* Deallocate memory for pixmaps, scaled data and XPoints */
+	/* The function must also work correctly when it is called because
+	   we ran out of memory. The way things are organized after allocating
+	   memory for a curve first the graphical elements are created and
+	   afterwards memory for the data are allocated. */
 
 	if ( G.dim == 1 )
 		for ( i = 0; i < G.nc; i++ )
 		{
-			cv = G.curve[ i ];
+			if ( ( cv = G.curve[ i ] ) == NULL )
+				 break;
 
 			XFreeGC( G.d, cv->gc );
-
 			XFreePixmap( G.d, cv->up_arrow );
 			XFreePixmap( G.d, cv->down_arrow );
 			XFreePixmap( G.d, cv->left_arrow );
 			XFreePixmap( G.d, cv->right_arrow );
-
 			XFreeGC( G.d, cv->font_gc );
 
-			if ( cv != NULL )
-			{
-				T_free( cv->points );
-				T_free( cv->xpoints );
-				T_free( cv );
-				G.curve_2d[ i ] = NULL;
-			}
+			T_free( cv->points );
+			T_free( cv->xpoints );
+			T_free( cv );
+			G.curve_2d[ i ] = NULL;
 		}
 	else
 		for ( i = 0; i < G.nc; i++ )
 		{
-			cv2 = G.curve_2d[ i ];
+			if ( ( cv2 = G.curve_2d[ i ] ) == NULL )
+				break;
 
 			XFreeGC( G.d, cv2->gc );
-
 			XFreePixmap( G.d, cv2->up_arrow );
 			XFreePixmap( G.d, cv2->down_arrow );
 			XFreePixmap( G.d, cv2->left_arrow );
 			XFreePixmap( G.d, cv2->right_arrow );
-
 			XFreeGC( G.d, cv2->font_gc );
 
-			if ( cv2 != NULL )
-			{
-				T_free( cv2->points );
-				T_free( cv2->xpoints );
-				T_free( cv2->xpoints_s );
-				T_free( cv2 );
-				G.curve_2d[ i ] = NULL;
-			}
+			T_free( cv2->points );
+			T_free( cv2->xpoints );
+			T_free( cv2->xpoints_s );
+			T_free( cv2 );
+			G.curve_2d[ i ] = NULL;
 		}
 
 	if ( G.font != NULL )
