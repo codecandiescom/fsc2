@@ -1775,7 +1775,6 @@ of an @code{EDL} program.
 @anchor{pulser_dump_pulses}
 @item pulser_dump_pulses()
 @findex{pulser_dump_pulses}
-@findex{pulser_show_pulses}
 This function exists for the Berlin X-band pulser modules
 @code{dg2020_b} and @code{ep385} only. It requests the user to select a
 file name and then writes all pulse settings during the test run into
