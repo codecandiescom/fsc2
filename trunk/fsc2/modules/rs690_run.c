@@ -29,9 +29,8 @@ static bool rs690_update_pulses( bool flag );
 static void rs690_pulse_check( FUNCTION *f );
 static void rs690_defense_shape_check( FUNCTION *shape );
 static void rs690_commit( bool flag );
-
-static void rs690_make_fs( void );
-static void rs690_populate_fs( void );
+static void rs690_make_fs( FS *start_fs );
+static void rs690_populate_fs( FS *start_fs );
 static void rs690_check_fs( void );
 static void rs690_correct_fs_for_8ns( void );
 static void rs690_correct_fs_for_4ns( void );
@@ -988,7 +987,13 @@ static void rs690_commit( bool flag )
 /* put (each field corresponds to a 'Field' of the pulser of which    */
 /* the individual bits can be assigned to the channels of the output  */
 /* connectors).                                                       */
+/* Things get a bit more complicated because the pulser needs a state */
+/* of zero for all channels at the start or strange things happen (i. */
+/* e. when starting the pulser but not triggering it yet all initial  */
+/* states are output for a longer time etc.)                          */
 /*--------------------------------------------------------------------*/
+
+#define START_OFFSET 1
 
 void rs690_channel_setup( bool flag )
 {
@@ -1023,14 +1028,14 @@ void rs690_channel_setup( bool flag )
 
 	TRY
 	{
-		rs690.new_fs = rs690_append_fs( 0 );
-		memset( rs690.new_fs->fields, 0, sizeof rs690.new_fs->fields );
+		rs690.new_fs = rs690_append_fs( - START_OFFSET );
 		rs690.new_fs->len = 1;
+		memset( rs690.new_fs->fields, 0, sizeof rs690.new_fs->fields );
 
-		rs690_append_fs( 1 );
+		rs690_append_fs( 0 );
 
-		rs690_make_fs( );
-		rs690_populate_fs( );
+		rs690_make_fs( rs690.new_fs->next );
+		rs690_populate_fs( rs690.new_fs->next );
 		rs690_check_fs( );
 		TRY_SUCCESS;
 	}
@@ -1050,7 +1055,7 @@ void rs690_channel_setup( bool flag )
 /* for each change of the state of one of the pulses.         */
 /*------------------------------------------------------------*/
 
-static void rs690_make_fs( void )
+static void rs690_make_fs( FS *start_fs )
 {
 	FUNCTION *f;
 	CHANNEL *ch;
@@ -1073,54 +1078,60 @@ static void rs690_make_fs( void )
 			if ( ch->num_active_pulses == 0 )
 				continue;
 
-			for ( n = rs690.new_fs->next, pp = ch->pulse_params, k = 0;
+			/* We run twice over all pulses and FS structures - first for
+			   the state change at the begin of a pulse, then for the end
+			   of a pulse. */
+
+			for ( n = start_fs, pp = ch->pulse_params, k = 0;
 				  k < ch->num_active_pulses; pp++, k++ )
 			{
 				for ( ; n != NULL; n = n->next )
-					if ( pp->pos > n->pos - 1 )
+					if ( pp->pos > n->pos )
 					{
 						if ( n->next == NULL )
 						{
-							n = rs690_append_fs( pp->pos + 1 );
+							n = rs690_append_fs( pp->pos );
 							break;
 						}
 
-						if ( n->next != NULL && n->next->pos - 1 <= pp->pos )
+						if ( n->next != NULL && n->next->pos <= pp->pos )
 							continue;
 
-						n = rs690_insert_fs( n, pp->pos + 1 );
+						n = rs690_insert_fs( n, pp->pos );
 						break;
 					}
-					else if ( pp->pos == n->pos - 1 )
+					else if ( pp->pos == n->pos )
 						break;
 			}
 
-			for ( n = rs690.new_fs->next, pp = ch->pulse_params, k = 0;
+			for ( n = start_fs, pp = ch->pulse_params, k = 0;
 				  k < ch->num_active_pulses; pp++, k++ )
 			{
 				for ( ; n != NULL; n = n->next )
-					if ( pp->pos + pp->len > n->pos - 1 )
+					if ( pp->pos + pp->len > n->pos )
 					{
 						if ( n->next == NULL )
 						{
-							n = rs690_append_fs( pp->pos + pp->len + 1 );
+							n = rs690_append_fs( pp->pos + pp->len );
 							break;
 						}
 
 						if ( n->next != NULL &&
-							 n->next->pos - 1 <= pp->pos + pp->len )
+							 n->next->pos <= pp->pos + pp->len )
 							continue;
 
-						n = rs690_insert_fs( n, pp->pos + pp->len + 1 );
+						n = rs690_insert_fs( n, pp->pos + pp->len );
 						break;
 					}
-					else if ( pp->pos + pp->len == n->pos - 1 )
+					else if ( pp->pos + pp->len == n->pos )
 						break;
 			}
 		}
 	}
 
-	for ( n = rs690.new_fs->next; n->next != NULL; n = n->next )
+	/* Set the pulse lengths */
+
+	for ( n = start_fs; n->next != NULL; n = n->next )
 		n->len = n->next->pos - n->pos;
 }
 
@@ -1130,7 +1141,7 @@ static void rs690_make_fs( void )
 /* all the FS structures to reflect the pulse states.              */
 /*-----------------------------------------------------------------*/
 
-static void rs690_populate_fs( void )
+static void rs690_populate_fs( FS *start_fs )
 {
 	FUNCTION *f;
 	CHANNEL *ch;
@@ -1153,14 +1164,14 @@ static void rs690_populate_fs( void )
 			if ( ch->num_active_pulses == 0 )
 				continue;
 
-			for ( n = rs690.new_fs->next, pp = ch->pulse_params, k = 0;
+			for ( n = start_fs, pp = ch->pulse_params, k = 0;
 				  k < ch->num_active_pulses; pp++, k++ )
 				for ( ; n != NULL; n = n->next )
 				{
-					if ( pp->pos > n->pos - 1 )
+					if ( pp->pos > n->pos )
 						continue;
 
-					if ( pp->pos + pp->len <= n->pos - 1 )
+					if ( pp->pos + pp->len <= n->pos )
 						break;
 
 					if ( ! f->is_inverted )
@@ -1196,11 +1207,11 @@ void rs690_check_fs( void )
 
 	if ( rs690.is_repeat_time )
 	{
-		if ( n->pos > rs690.repeat_time )
+		if ( n->pos + START_OFFSET > rs690.repeat_time )
 		{
 			TRY
 			{
-				s = T_strdup( rs690_pticks( n->pos ) );
+				s = T_strdup( rs690_pticks( n->pos + 1 ) );
 				print( FATAL, "Pulse sequence is longer (%s) than the "
 					   "repetition time of %s.\n",
 					   s, rs690_pticks( rs690.repeat_time ) );
@@ -1215,50 +1226,24 @@ void rs690_check_fs( void )
 
 			THROW( EXCEPTION );
 		}
-		else if ( n->pos == rs690.repeat_time )
+		else if ( n->pos + START_OFFSET == rs690.repeat_time )
 		{
-			static char *o;
-
-			TRY
-			{
-				o = T_strdup( rs690_pticks( rs690.repeat_time ) );
-
-				print( SEVERE, "Pulse sequence is exactly as long as the "
-					   "repetition time of %s, it needs to be lengthened to "
-					   "%s.\n", o, rs690_pticks( rs690.repeat_time +=
-											  ( 4 >> rs690.timebase_type ) ) );
-				TRY_SUCCESS;
-			}
-			OTHERWISE
-			{
-				o = CHAR_P T_free( o );
-				RETHROW( );
-			}
-
-			T_free( o );
-			n->len = 4 >> rs690.timebase_type;
+			print( SEVERE, "Pulse sequence is exactly as long as the "
+				   "repetition time of %s, it needs to be lengthened a "
+				   "bit.\n", rs690_pticks( rs690.repeat_time ) );
+			n->len = 1;
 		}
 		else
 			n->len = rs690.repeat_time - n->pos;
 	}
 	else      /* no repetition time has been set */
-	{
-		/* Make sure the length of the last FS structure (which represents a
-		   state without any pulse at all) is non-zero and a multiple of 2
-		   for a 8 ns time base and a multiple of 4 for a 4 ns time base. */
+		n->len = 1;
 
-		if ( rs690.timebase_type == TIMEBASE_16_NS )
-			n->len = 1;
-		else if ( rs690.timebase_type == TIMEBASE_8_NS )
-			n->len = ( n->pos % 2 ) ? 1 : 2;
-		else if ( rs690.timebase_type == TIMEBASE_4_NS )
-			n->len = ( n->pos % 4 ) ? 4 - n->pos % 4 : 4;
-	}
+	/* If the fields of two adjacent FS structures have the same bit pattern
+	   combine them (this can happen if e.g. the distance between two pulses
+	   is zero). */
 
-	/* If two adjacent FS structures have the same bit pattern combine them
-	   (this can happen if e.g. the distance between two pulses is zero). */
-
-	for ( n = rs690.new_fs; n != NULL; n = n->next )
+	for ( n = rs690.new_fs; n->next != NULL; n = n->next )
 		while ( n->next != NULL &&
 				! memcmp( n->fields, n->next->fields, sizeof n->fields ) )
 		{
@@ -1267,17 +1252,8 @@ void rs690_check_fs( void )
 			rs690.new_fs_count--;
 		}
 
-	for ( n = rs690.new_fs; n != NULL; n = n->next )
-		while ( n->next != NULL &&
-				! memcmp( n->fields, n->next->fields, sizeof n->fields ) )
-		{
-			n->len += n->next->len;
-			rs690_delete_fs_successor( n );
-			rs690.new_fs_count--;
-		}
-
-	/* If the sequence has that many state changes that it can't be 
-	   represented with the maximum number of words we got to bail out */
+	/* Now for the shorter time bases we have to make sure the FS structures
+	   lengths aren't too short */
 
 	if ( rs690.timebase_type == TIMEBASE_8_NS )
 		rs690_correct_fs_for_8ns( );
@@ -1286,32 +1262,26 @@ void rs690_check_fs( void )
 
 	/* Check that none of the FS structures is longer than the maximum allowed
 	   time (MAX_TICKS_PER_ENTRY), otherwise split them up in as many shorter
-	   ones as needed. The only exception is the very last one if it
-	   represents the repetition time - with this we've got to deal when
-	   setting up the pulser for real. */
+	   ones as needed. The only exception is the very last, it represents the
+	   repetition time and with this we've got to deal when setting up the
+	   pulser for real. */
 
-	for ( n = rs690.new_fs; n != NULL; n = n->next )
+	for ( n = rs690.new_fs; n->next != NULL; n = n->next )
 		if ( n->len > MAX_TICKS_PER_ENTRY )
 		{
-			if ( n->next == NULL &&
-				 ! memcmp( n->fields, rs690_default_fields,
-						   sizeof n->fields ) )
-			{
-				rs690.last_new_fs = n;
-				break;
-			}
-
 			nn = rs690_insert_fs( n, n->pos + MAX_TICKS_PER_ENTRY );
 			nn->len = n->len - MAX_TICKS_PER_ENTRY;
 			n->len = MAX_TICKS_PER_ENTRY;
 			memcpy( nn->fields, n->fields, sizeof n->fields );
 		}
 
-	/* Finally, if the pulse sequence is that complicated that more than the
-	   maximum number of words we have for table entries would be needed we
-	   have to bail out. */
+	rs690.last_new_fs = n;
 
-	if ( rs690.new_fs_count > TS_MAX_WORDS - 2 )
+	/* Finally, if the pulse sequence is that complicated that more than the
+	   maximum number of words we have for storing table entries would be
+	   needed we have to bail out. */
+
+	if ( rs690.new_fs_count > TS_MAX_WORDS - 3 )
 	{
 		print( FATAL, "Pulse sequence is too complicated to create with "
 			   "this device.\n" );
@@ -1328,20 +1298,9 @@ void rs690_check_fs( void )
 /* channels) to be able to clock out data at a 125 MHz rate while new words */
 /* can be loaded only in 16 ns).                                            */
 /* Until now the fields in the FS structures were treated as needed for a   */
-/* 16 ns time base. But now we have adjust the fields so that we can simply */
-/* write out 16 bit words. In the simplest case the length of a FS period   */
-/* is divisible by 2, in which case the lower 8 bits are copied to the      */
-/* higher 8 bits. But when the length is odd it's getting a bit more        */
-/* complictated. In this case we have to split the FS into two, one with an */
-/* even length (which can be treated like a normal even length FS) and a    */
-/* new FS, where at first only half of a word is set. When we now get to    */
-/* the next FS structure we need to push its first minimal length slice     */
-/* into the only semi-filled FS structure we just had to create to make it  */
-/* have an even length. Then we have to treat the new FS structure as       */
-/* having one Tick less.                                                    */
-/* In order to not end up with a semi-filled FS structure we have taken     */
-/* care in the rest of the program that the total length of the pulse       */
-/* sequence has an even number of ticks.                                    */
+/* 16 ns time base. But now we have adjust for structures that are only 1   */
+/* Tick long - they need to be merged with another Tick from the following  */
+/* structure.                                                               */
 /*--------------------------------------------------------------------------*/
 
 static void rs690_correct_fs_for_8ns( void )
@@ -1376,7 +1335,7 @@ static void rs690_correct_fs_for_8ns( void )
 
 		/* If the current FS was just one Tick long and this Tick got shifted
 		   into the previous FS structure it's now empty, so delete it (we're
-		   guaranteed that now FS strcuture will ever have a length of 0
+		   guaranteed that now FS strcuture will never have a length of 0
 		   for any other reasons). */
 
 		if ( n->len == 0 )
@@ -1386,50 +1345,30 @@ static void rs690_correct_fs_for_8ns( void )
 			n = p;
 		}
 
-		/* If the current FS is now only one Tick long we continue with the
-		   next one, we will have to shift a Tick of the next FS into it. */
+		/* If the current FS is now only one Tick long we will have to shift
+		   a Tick of the next FS into it. */
 
 		if ( n->len == 1 )
 		{
 			fr = 1;
 			p = n;
 			n->len = 2;              /* FS lengths must always be even */
-			continue;
 		}
-
-		/* Correct the values in the fields of the current FS (the upper byte
-		   gets set to the same bit pattern as the lower byte) */
-
-		for ( i = 0; i <= rs690.last_used_field; i++ )
-			n->fields[ i ] |= n->fields[ i ] << 8;
 	}			
-
-	for ( i = 0; i <= rs690.last_used_field; i++ )
-		rs690_default_fields[ i ] |= rs690_default_fields[ i ] << 8;
 }
 
 
 /*------------------------------------------------------------------*/
 /* For a time base of 4 ns we have a similar problem as for an 8 ns */
 /* time base (see above), but it gets even a bit more complicated.  */
-/* For a 4 ns second time base each 16 bit word is split into 4     */
+/* For a 4 ns second time base each 16 bit word can be split into 4 */
 /* nibbles for 4 consecutive output states of 4 channels (you can't */
 /* have more than 4 channels per connector with a 4 ns time base to */
 /* have a clock out frequency of 125 MHz while word loading happens */
 /* at 62.5 MHz only).                                               */
-/* If the length of an FS structure is divisible by 4 dealing with  */
-/* this is quite simple, the lowest nibble (which are the only bits */
-/* that have been set until now) is just copied to the 3 higher     */
-/* nibbles. Things become a bit more involved when the length of a  */
-/* FS structure is not divisible by 4. In this case we have to      */
-/* split it up into one FS structure divisible by 4 and a new one   */
-/* for the remaining Ticks. When dealing with the next FS strcuture */
-/* we have to take as many Ticks from this structure and push them  */
-/* into the not completely filled one, we just had to create (while */
-/* taking into account the posibility that the next is not long     */
-/* enough to fill all the Ticks in the additional one). The we deal */
-/* with what remains of this structure as if it had been like this  */
-/* from the start.                                                  */
+/* If the length of an FS structure is at least 4 Ticks long we do  */
+/* not have to do anything. But for shorter structures we need to   */
+/* fill it with Ticks from the following structure.                 */
 /*------------------------------------------------------------------*/
 
 static void rs690_correct_fs_for_4ns( void )
@@ -1447,7 +1386,7 @@ static void rs690_correct_fs_for_4ns( void )
 	{
 		/* If there is still room in the previous FS move as many Ticks
 		   of the current FS into it as there is room (and while there
-		   are still left Ticks in the current FS). */
+		   are still Ticks left in the current FS). */
 
 		while ( fr > 0 && n->len > 0 )
 		{
@@ -1470,7 +1409,7 @@ static void rs690_correct_fs_for_4ns( void )
 			continue;
 		}
 
-		/* If the current FS is now shorter then 4 Ticks we have to prepare
+		/* If the current FS is now shorter than 4 Ticks we have to prepare
 		   it to become the next successor into which we're going to shift
 		   Ticks from the next FS. */
 
@@ -1484,22 +1423,8 @@ static void rs690_correct_fs_for_4ns( void )
 			fr = 4 - n->len;   /* calculate how many Ticks are still free */
 			n->len = 4;        /* length must be 4 */
 			p = n;
-			continue;
 		}
-
-		/* Correct the values in the fields of the current FS (all the upper
-		   3 nibbles get set the to the bit pattern of the lowest nibble) */
-
-		for ( i = 0; i <= rs690.last_used_field; i++ )
-			for ( j = 0; j < 3; j++ )
-				n->fields[ i ] = ( n->fields[ i ] << 4 ) |
-								 ( n->fields[ i ] & 0xF );
 	}			
-
-	for ( i = 0; i <= rs690.last_used_field; i++ )
-		for ( j = 0; j < 3; j++ )
-			rs690_default_fields[ i ] = ( rs690_default_fields[ i ] << 4 ) |
-										( rs690_default_fields[ i ] & 0xF );
 }
 
 
