@@ -229,25 +229,8 @@ try_again:
 	{
 		switch ( *bp )
 		{
-			case '0' :      /* Probe F0 is connected -> OK for S-band */
+			case '0' : case '1' :     /* Probe F0 or F1 is connected */
 				break;
-				/*
-				if ( exist_device( "aeg_s_band" ) )
-					break;
-				eprint( FATAL, "%s: Wrong field probe (F0) connected to the "
-						"NMR gaussmeter.\n", DEVICE_NAME );
-				THROW( EXCEPTION );
-				*/
-				
-			case '1' :      /* Probe F1 is connected -> OK for X-band */
-				break;
-				/*
-				if ( exist_device( "aeg_x_band" ) )
-					break;
-				eprint( FATAL, "%s: Wrong field probe (F1) connected to the "
-						"NMR gaussmeter.\n", DEVICE_NAME );
-				THROW( EXCEPTION );
-				*/
 
 			case '2' :      /* No probe connected -> error */
 				eprint( FATAL, "%s: No field probe connected to the NMR "
