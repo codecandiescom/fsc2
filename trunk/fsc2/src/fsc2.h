@@ -124,6 +124,7 @@ Phase_Sequence PSeq[ MAX_PHASE_SEQ_LEN ];
 Acquisition_Sequence ASeq[ 2 ];
 
 Pulse *Plist = NULL;
+Pulse *Cur_Pulse = NULL;
 
 #else
 
@@ -142,7 +143,7 @@ extern Phase_Sequence PSeq[ ];
 extern Acquisition_Sequence ASeq[ ];
 
 extern Pulse *Plist;
-
+extern Pulse *Cur_Pulse;
 
 #endif
 
