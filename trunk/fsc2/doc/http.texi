@@ -65,7 +65,7 @@ of the browser for error messages and other output from the running
 @code{EDL} program.
 
 Currently, graphics will only be sent in either PNG or JPEG format, thus
-your browser must support on of these formats. While there is no
+your browser must support one of these formats. While there is no
 technical problem not to support also graphics in GIF format some legal
 issues which keep me from doing so (as far as I know the LWZ compression
 method used with the GIF format is patented by Unisys and I am not going
@@ -98,11 +98,11 @@ The only other conceivable problem would be that someone really
 malicious would constantly send requests to the server which, in turn,
 must bother @code{fsc2} to tell it about its current status and to
 create graphics with the window contents. In cases when @code{fsc2} is
-already having problems acquiring and displaying the measured data this
-could further increase its workload and, in extreme cases, might slow
-down the experiment a bit. If you have reasons to suspect something like
-this to happen simply switching off the web server (or not switching it
-on in the first place) is probably the best solution.
+already having problems acquiring and displaying the measured data fast
+enough this could further increase its workload and, in extreme cases,
+might slow down the experiment a bit. If you have reasons to suspect
+something like this to happen simply switching off the web server (or
+not switching it on in the first place) is probably the best solution.
 
 Please note: If multiple instances of @code{fsc2} are running only one
 of them can run the web server on the default port 8080. So if you want
