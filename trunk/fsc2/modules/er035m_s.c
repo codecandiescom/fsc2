@@ -87,6 +87,7 @@ static char er035m_s_eol[ ] = "\r\n";
    lock is already achieved but the field value is too unstable! */
 
 #define ER035M_S_MAX_RETRIES 100
+#define FAIL_RETRIES         5
 
 
 enum {
@@ -194,6 +195,7 @@ int er035m_s_exp_hook( void )
 	long length = 20;
 	int try_count = 0;
 	Var *v;
+	long retries;
 
 
 	if ( ! nmr.is_needed )
@@ -213,19 +215,29 @@ int er035m_s_exp_hook( void )
 		er035_s_comm_fail( );
 	usleep( ER035M_S_WAIT );
 
-	/* Ask gaussmeter to send status byte and test if it does */
+	/* Ask gaussmeter to send status byte and test if it does - sometimes the
+	   fucking thing does not answer (i.e. it just seems to send the prompt
+	   character and nothing else) so in this case we give it another chance
+	   (or even two, see FAIL_RETRIES above) */
 
 	nmr.state = ER035M_S_UNKNOWN;
 
 try_again:
 
-	if ( er035m_s_write( "PS" ) == FAIL )
-		er035_s_comm_fail( );
-	usleep( ER035M_S_WAIT );
+	for ( retries = FAIL_RETRIES; ; retries-- )
+	{
+		if ( er035m_s_write( "PS" ) == FAIL )
+			er035_s_comm_fail( );
+		usleep( ER035M_S_WAIT );
 
-	length = 20;
-	if ( er035m_s_read( buffer, &length ) == FAIL )
-		er035_s_comm_fail( );
+		length = 20;
+		if ( er035m_s_read( buffer, &length ) == OK )
+			break;
+
+		printf( "%s didn't answer correctly!\n", DEVICE_NAME );
+		if ( retries <= 0 )
+			er035_s_comm_fail( );
+	}
 
 	/* Now look if the status byte says that device is OK where OK means that
 	   for the X-Band magnet the F0-probe and for the S-band the F1-probe is
@@ -415,6 +427,7 @@ Var *find_field( Var *v )
 	char buffer[ 21 ];
 	char *bp;
 	long length;
+	long retries;
 
 
 	v = v;
@@ -441,15 +454,25 @@ Var *find_field( Var *v )
 
 	while ( nmr.state != ER035M_S_LOCKED )
 	{
-		/* Get status byte and check if lock was achieved */
+		/* Get status byte and check if lock was achieved - sometimes the
+		   fucking thing does not answer (i.e. it just seems to send the
+		   prompt character and nothing else) so in this case we give it
+		   another chance (or even two, see FAIL_RETRIES above) */
 
-		if ( er035m_s_write( "PS" ) == FAIL )
-			er035_s_comm_fail( );
-		usleep( ER035M_S_WAIT );
+		for ( retries = FAIL_RETRIES; ; retries-- )
+		{
+			if ( er035m_s_write( "PS" ) == FAIL )
+				er035_s_comm_fail( );
+			usleep( ER035M_S_WAIT );
 
-		length = 20;
-		if ( er035m_s_read( buffer, &length ) == FAIL )
-			er035_s_comm_fail( );
+			length = 20;
+			if ( er035m_s_read( buffer, &length ) == FAIL )
+				break;
+
+			printf( "%s didn't answer correctly!\n", DEVICE_NAME );
+			if ( retries <= 0 )
+				er035_s_comm_fail( );
+		}
 
 		bp = buffer;
 
@@ -569,6 +592,7 @@ static double er035m_s_get_field( void )
 	char *state_flag;
 	long length;
 	long tries = ER035M_S_MAX_RETRIES;
+	long retries;
 
 
 	/* Repeat asking for field value until it's correct up to the LSD -
@@ -577,15 +601,25 @@ static double er035m_s_get_field( void )
 
 	do
 	{
-		/* Ask gaussmeter to send the current field and read result */
+		/* Ask gaussmeter to send the current field and read result -
+		 sometimes the fucking thing does not answer (i.e. it just seems to
+		 send the prompt character and nothing else) so in this case we give
+		 it another chance (or even two, see FAIL_RETRIES above) */
 
-		if ( er035m_s_write( "PF" ) == FAIL )
-			er035_s_comm_fail( );
-		usleep( ER035M_S_WAIT );
+		for ( retries = FAIL_RETRIES; ; retries-- )
+		{
+			if ( er035m_s_write( "PF" ) == FAIL )
+				er035_s_comm_fail( );
+			usleep( ER035M_S_WAIT );
 
-		length = 20;
-		if ( er035m_s_read( buffer, &length ) == FAIL )
-			er035_s_comm_fail( );
+			length = 20;
+			if ( er035m_s_read( buffer, &length ) == OK )
+				break;
+
+			printf( "%s didn't answer correctly!\n", DEVICE_NAME );
+			if ( retries <= 0 )
+				er035_s_comm_fail( );
+		}
 
 		/* Disassemble field value and flag showing the state */
 
@@ -658,6 +692,8 @@ static bool er035m_s_write( const char *buf )
 		return OK;
 	wlen = strlen( buf );
 
+printf( "WRITE: `%s'\n", buf );
+
 	if ( er035m_s_eol != NULL && strlen( er035m_s_eol ) > 0 )
 	{
 		wlen += strlen( er035m_s_eol );
@@ -700,6 +736,8 @@ static bool er035m_s_read( char *buf, long *len )
 	   sometimes may send complete BS) */
 
 	buf[ *len ] = '\0';         /* make sure there's an end of string marker */
+
+printf( "READ: `%s'\n", buf );
 
 	if ( ( ptr = strchr( buf, '\r' ) ) ||
 		 ( ptr = strchr( buf, '\n' ) )    )
@@ -814,6 +852,6 @@ static bool er035m_s_comm( int type, ... )
 
 void er035_s_comm_fail( void )
 {
-	eprint( FATAL, "%s: Can't access the NMR gaussmeter.", DEVICE_NAME );
+	eprint( FATAL, "%s: Can't access the NMR gaussmeter.", DEVICE_NANE );
 	THROW( EXCEPTION );
 }
