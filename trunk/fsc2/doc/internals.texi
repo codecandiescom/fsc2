@@ -1388,30 +1388,30 @@ finally takes care of the problem, which might make figuring out what
 will happen on such errors hard to figure out.
 
 
-@code{C++} has methods of error handling which are very elegant when
-compared to how it's usually is done in @code{C}. They resolve around
-the notion of exceptions, which usually are seen as error conditions
-(but could also be used for other unusual conditions). A function can
-declare itself responsible for a certain type of expections by executing
-some block of code, where this exception might be triggered, within a
-@i{try}-block and after the end of the @i{try}-block @i{catch} the
-exception. That means that when the exception happens (gets thrown)
-control is transfered immediately to the code in the block of code
-following the @i{catch} without functions on the intermediate levels
-having to get involved. So throwing an exception results in priciple in
-a non-local jumo from the place where the exception got thrown to the
-code in the @i{catch} block. The idea of non-local jumps is a bit alien
-to most @code{C} programmers because, when one uses the infamous
-@code{goto} at all, it can only be used to jump within the code of a
-function (and even then only with some restrictions). But there's a pair
-of (rarely used) "functions" in @code{C} that allow such non-local
-jumps, @code{setjmp()} and @code{longjmp()}. And these function can be
-used to cobble together some poor mans equivalent of the @i{try},
-@i{throw} and @i{catch} functionality of @code{C++} with a set of macros
-and functions. Of course, it's not as polished as its big brother from
-@code{C++}, it's more difficult to use, more error prone and also much
-more restricted, but it still can make life a bit simpler when compared
-to the usual way error handling is done in @code{C}.
+@code{C++} has a concept of error handling which is very elegant when
+compared to how it's usually is done in @code{C}, the notion of
+exceptions, which usually are seen as error conditions (but could also
+be used for other unusual conditions). A function can declare itself
+responsible for a certain type of expections by executing some block of
+code, where this exception might be triggered, within a @i{try}-block
+and after the end of the @i{try}-block @i{catch} the exception. That
+means that when the exception happens (gets thrown) control is
+transfered immediately to the code in the block of code following the
+@i{catch} without functions on the intermediate levels having to get
+involved. So throwing an exception results in priciple in a non-local
+jumo from the place where the exception got thrown to the code in the
+@i{catch} block. The idea of non-local jumps is a bit alien to most
+@code{C} programmers because, when one uses the infamous @code{goto} at
+all, it can only be used to jump within the code of a function (and even
+then only with some restrictions). But there's a pair of (rarely used)
+"functions" in @code{C} that allow such non-local jumps, @code{setjmp()}
+and @code{longjmp()}. And these function can be used to cobble together
+some poor mans equivalent of the @i{try}, @i{throw} and @i{catch}
+functionality of @code{C++} with a set of macros and functions. Of
+course, it's not as polished as its big brother from @code{C++}, it's
+more difficult to use, more error prone and also much more restricted,
+but it still can make life a bit simpler when compared to the usual way
+error handling is done in @code{C}.
 
 
 I don't want to go into details on how exactly it works, you will find
