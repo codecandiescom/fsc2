@@ -97,7 +97,7 @@ int main( int argc, char *argv[ ] )
 	/* If '-d' was given on the command line store flags that are tested to
 	   find out if the files needs to be deleted */
 
-	if ( flags & DO_DELETE )
+	if ( fname != NULL && flags & DO_DELETE )
 		delete_file = delete_old_file = SET;
 
 	/* If there is a file as argument try to load it */
