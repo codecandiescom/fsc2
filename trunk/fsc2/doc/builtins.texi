@@ -1353,20 +1353,20 @@ an object (button, slider or in- or output field) has been invoked.
 @item toolbox_changed()
 @findex toolbox_changed()
 This function lets you test if the state of one of the objects in the
-toolbox has been changed by the user, i.e.@: a button has been pressed,
-a slider has been moved, an input field has been edited or the selected
-of a menu has been changed. You can pass this function a list of object
-IDs, in which case only the objects in the list are checked. When no
-arguments are passed to the function all objects (except output fields)
-are checked. If the state of one or more objects has been changed the
-function returns the ID of the first object (in the list or of all
-objects in the toolbox) that has been changed. If none have been changed
-@code{0} will be returned.
+toolbox has been changed by the user, i.e.@: if a button has been
+pressed, a slider has been moved, an input field has been edited or the
+selected entryof a menu has been changed. You can pass this function a
+list of object IDs, in which case only the objects in the list are
+checked. When no argument is passed to the function all objects (except
+output fields) are checked. If the state of one or more objects has been
+changed the function returns the ID of the first object (in the list or
+of all objects in the toolbox) that has been changed. If none have been
+changed @code{0} is returned.
 
 Please note: the function will @strong{not} report changes due to
 function calls that change the state of an object, e.g.@: when setting a
-new slider position from within the @code{EDL} script. The function
-also will report a change until the new state of the object has been
+new slider position from within the @code{EDL} script. The function also
+will report a change until the new state of the object has been
 determined by an appropriate function call. I.e.@: it will repeatedly
 report e.g.@: a new slider value until you have called
 @code{slider_value()} for the object.
