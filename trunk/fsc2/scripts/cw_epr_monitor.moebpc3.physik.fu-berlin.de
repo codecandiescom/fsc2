@@ -169,7 +169,7 @@ FOREVER {
 	   of the sweep direction, in the later case also stop and restart the
 	   lock-in's auto-acquisition to empty its internal data buffer. */
 
-	IF  Sweep_State != UP & button_state( Sweep_Up ) & I < MAX_POINTS 	{
+	IF  Sweep_State != UP & button_state( Sweep_Up ) & I < MAX_POINTS {
 		IF Sweep_State == STOPPED {
 			magnet_sweep( UP );
 			Sweep_State = UP;
