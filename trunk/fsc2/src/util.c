@@ -31,10 +31,12 @@
 /* caller of the function is responsible for free-ing the string.  */
 /*-----------------------------------------------------------------*/
 
+#define GET_STRING_TRY_LENGTH 128
+
 char *get_string( const char *fmt, ... )
 {
 	char *c = NULL;
-	int len = 128;
+	int len = GET_STRING_TRY_LENGTH;
 	va_list ap;
 	int wr;
 
@@ -58,10 +60,11 @@ char *get_string( const char *fmt, ... )
 			continue;
 		}
 
-		if ( wr + 1 < len )        /* trim string to number of needed chars */
-			T_realloc( c, wr + 1 );
 		break;
 	}
+
+	if ( wr + 1 < len )            /* trim string to number of needed chars */
+		T_realloc( c, wr + 1 );
 
 	return c;
 }

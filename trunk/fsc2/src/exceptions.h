@@ -115,4 +115,4 @@ enum {
         longjmp( exception_env_stack[ --exception_env_stack_pos ], e ); \
     }
 
-#endif  /* EXCEPTIONS_HEADER */
+#endif  /* ! EXCEPTIONS_HEADER */
