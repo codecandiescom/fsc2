@@ -1812,7 +1812,7 @@ static void repaint_cut_canvas( Canvas *c )
 
 			x_pos = scv->rwc_delta[ r_coord ]
 				    * ( c->ppos[ X ] - G.start[ X ] ) / cv->s2d[ X ];
-			y_pos = scv->rwc_delta[ r_coord ]
+			y_pos = scv->rwc_delta[ Z ]
 					* ( G.start[ Y ] - c->ppos[ Y ] ) / cv->s2d[ Y ];
 
 			sprintf( buf, " %#g   %#g ", x_pos, y_pos );
