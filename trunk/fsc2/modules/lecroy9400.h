@@ -118,7 +118,7 @@ typedef struct
 	int device;
 
 	bool is_reacting;
-	int data_size;              /* # of bytes transfered for data points */
+	int data_size;                  /* # of bytes transfered for data points */
 
 	bool is_displayed[ MAX_CHANNELS ];
 
@@ -166,7 +166,7 @@ typedef struct
 
 	bool is_reject[ MAX_CHANNELS ];
 
-	WINDOW *w;               /* start element of list of windows             */
+	WINDOW *w;             /* start element of list of windows               */
 	int num_windows;
 
 	double cursor_pos;     /* current position of cursor 1                   */
@@ -184,6 +184,7 @@ typedef struct
 /* declaration of exported functions */
 
 int lecroy9400_init_hook( void );
+int lecroy9400_test_hook( void );
 int lecroy9400_exp_hook( void );
 int lecroy9400_end_of_exp_hook( void );
 void lecroy9400_exit_hook( void );
@@ -213,6 +214,7 @@ const char *lecroy9400_ptime( double p_time );
 void lecroy9400_delete_windows( void );
 void lecroy9400_do_pre_exp_checks( void );
 long lecroy9400_translate_channel( int dir, long channel );
+void lecroy9400_store_state( LECROY9400 *src, LECROY9400 *dest );
 
 bool lecroy9400_init( const char *name );
 double lecroy9400_get_timebase( void );
@@ -298,7 +300,20 @@ int ppd[ 21 ] = { 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 2500,
 long na[ 16 ] = { 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000,
 				  20000, 50000, 100000, 200000, 500000, 1000000 };
 
+
+/* Maximum curve lengths */
+
 long cl[ 10 ] = { 50, 125, 250, 625, 1250, 2500, 6250, 12500, 25000, 32000 };
+
+
+/* Memory limits for averaging, i.e. the maximum number of points that can be
+   averaged for the different time bases - not too surprising this is always
+   10 times the number of points per division, i.e. the number of points
+   displayed */
+
+long ml[ 21 ] = { 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000, 25000,
+				  25000, 25000, 25000, 25000, 25000, 25000, 25000, 25000,
+				  25000, 25000, 25000 };
 
 bool lecroy9400_IN_SETUP = UNSET;
 

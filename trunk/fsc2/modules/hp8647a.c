@@ -319,7 +319,7 @@ Var *synthesizer_frequency( Var *v )
 				"synthesizers range (%f kHz - %g Mhz).\n",
 				DEVICE_NAME, 1.0e-6 * freq, 1.0e-3 * MIN_FREQ,
 				1.0e-6 * MAX_FREQ );
-		if ( FSC2_MOD == EXPERIMENT )
+		if ( FSC2_MODE == EXPERIMENT )
 			return vars_push( FLOAT_VAR, hp8647a.freq );
 		else
 			THROW( EXCEPTION )
