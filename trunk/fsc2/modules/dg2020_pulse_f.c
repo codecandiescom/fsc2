@@ -55,7 +55,7 @@ bool dg2020_new_pulse( long pnum )
 	cp->channel = NULL;
 	
 	cp->needs_update = UNSET;
-	cp->has_been_active = UNSET;
+	cp->has_been_active = cp->was_active = UNSET;
 
 	return OK;
 }
@@ -384,44 +384,40 @@ bool dg2020_change_pulse_position( long pnum, double time )
 		THROW( EXCEPTION );
 	}
 
-	if ( dg2020_double2ticks( time ) == p->pos )
+	if ( p->is_pos && dg2020_double2ticks( time ) == p->pos )
 	{
 		eprint( WARN, "%s:%ld: DG2020: Old and new position of pulse %ld are "
 				"identical.\n", Fname, Lc, pnum );
 		return OK;
 	}
 
-	if ( ! p->is_old_pos )
+	if ( p->is_pos && ! p->is_old_pos  )
 	{
 		p->old_pos = p->pos;
 		p->is_old_pos = SET;
 	}
 
 	p->pos = dg2020_double2ticks( time );
-
-	/* If a previously inactive pulse gets a position set and also has a
-	   non-zero length it becomes active */
-
-	if ( ! p->is_pos && p->is_len && p->len > 0 )
-		p->is_active = p->has_been_active = SET;
-
 	p->is_pos = SET;
 
-	/* If the pulse is active we've got to update the pulser */
+	p->has_been_active |= ( p->is_active = IS_ACTIVE( p ) );
+	p->needs_update = NEEDS_UPDATE( p );
 
-	if ( p->is_active )
+	if ( p->needs_update )
 	{
-		p->needs_update = SET;
 		dg2020.needs_update = SET;
 
 		/* stop the pulser */
-
+/*!%!%!%!%*/
+/*
 		if ( ! TEST_RUN && ! dg2020_run( STOP ) )
 		{
 			eprint( FATAL, "%s:%ld: DG2020: Communication with pulser "
 					"failed.\n", Fname, Lc );
 			THROW( EXCEPTION );
 		}
+*/
+/*!%!%!%!%*/
 	}
 
 	return OK;
@@ -434,7 +430,6 @@ bool dg2020_change_pulse_position( long pnum, double time )
 bool dg2020_change_pulse_length( long pnum, double time )
 {
 	PULSE *p = dg2020_get_pulse( pnum );
-	bool was_active = p->is_active;
 
 
 	if ( time < 0 )
@@ -445,14 +440,14 @@ bool dg2020_change_pulse_length( long pnum, double time )
 		THROW( EXCEPTION );
 	}
 
-	if ( p->len == dg2020_double2ticks( time ) )
+	if ( p->is_len && p->len == dg2020_double2ticks( time ) )
 	{
 		eprint( WARN, "%s:%ld: DG2020: Old and new length of pulse %ld are "
 				"identical.\n", Fname, Lc, pnum );
 		return OK;
 	}
 
-	if ( ! p->is_old_len )
+	if ( p->is_len && ! p->is_old_len )
 	{
 		p->old_len = p->len;
 		p->is_old_len = SET;
@@ -461,28 +456,24 @@ bool dg2020_change_pulse_length( long pnum, double time )
 	p->len = dg2020_double2ticks( time );
 	p->is_len = SET;
 
-	/* If a previously inactive pulse gets a non-zero length and also has a
-	   position set to it it autoatically becomes active */
+	p->has_been_active |= ( p->is_active = IS_ACTIVE( p ) );
+	p->needs_update = NEEDS_UPDATE( p );
 
-	if ( ! p->is_active && p->is_pos && p->len > 0 )
-		p->is_active = p->has_been_active = SET;
-	else
-		p->is_active = UNSET;
-
-		/* If the pulse was or is active we've got to update the pulser */
-
-	if ( was_active || p->is_active )
+	if ( p->needs_update )
 	{
-		p->needs_update = dg2020.needs_update = SET;
+		dg2020.needs_update = SET;
 
 		/* stop the pulser */
-
+/*!%!%!%!%*/
+/*
 		if ( ! TEST_RUN && ! dg2020_run( STOP ) )
 		{
 			eprint( FATAL, "%s:%ld: DG2020: Communication with pulser "
 					"failed.\n", Fname, Lc );
 			THROW( EXCEPTION );
 		}
+*/
+/*!%!%!%!%*/
 	}
 
 	return OK;

@@ -245,7 +245,7 @@ int dg2020_get_phase_pulse_list( FUNCTION *f, CHANNEL *channel, PULSE ***list )
 		*( *list + num_pulses++ ) = f->pulses[ i ];
 	}
 
-	qsort( list, num_pulses, sizeof( PULSE * ), dg2020_start_compare );
+	qsort( *list, num_pulses, sizeof( PULSE * ), dg2020_start_compare );
 
 	return num_pulses;
 }
@@ -429,4 +429,75 @@ bool dg2020_prep_cmd( char **cmd, int channel, Ticks address, Ticks length )
 			 dummy );
 
 	return OK;
+}
+
+
+void dg2020_set( bool *arena, Ticks start, Ticks len, Ticks offset )
+{
+	bool *where = arena + offset + start;
+	Ticks i;
+
+
+	for ( i = 0; i < len; i++ )
+		*where++ = SET;
+}
+
+
+int dg2020_diff( bool *old, bool *new, Ticks *start, Ticks *length )
+{
+	static Ticks where = 0;
+	int ret;
+	bool *a = old + where,
+		 *b = new + where;
+
+
+	/* If we reached the end of the arena in the last call return 0 */
+
+	if ( where == -1 )
+	{
+		where = 0;
+		return 0;
+	}
+
+	/* Search for next difference in the arena */
+
+	while ( where < dg2020.max_seq_len && *a == *b )
+	{
+		where++;
+		a++;
+		b++;
+	}
+
+	/* If none was found anymore */
+
+	if ( where == dg2020.max_seq_len )
+	{
+		where = 0;
+		return 0;
+	}
+
+	/* store the start position (including the offset and the necessary one
+	   due to the pulsers firmware bug) and store if we wave to reset (-1)
+	   or to set (1) */
+
+	*start = where + 1;
+	ret = *a == SET ? -1 : 1;
+
+	/* Now figure out the length of the area we have to set or reset */
+
+	*length = 0;
+	while ( where < dg2020.max_seq_len && *a != *b )
+	{
+		where++;
+		a++;
+		b++;
+		( *length )++;
+	}
+
+	/* Set a marker that we reached the end of the arena */
+
+	if ( where == dg2020.max_seq_len )
+		where = -1;
+
+	return ret;
 }

@@ -570,6 +570,11 @@ PULSE *dg2020_new_phase_pulse( FUNCTION *f, PULSE *p, int nth, int pos,
 	np->initial_pos = np->pos;
 	np->initial_is_len = SET;
 
+/*!%!%!%!%*/
+	printf( "New phase pulse %ld for %ld in channel %d\n",
+			np->num, p->num, np->channel->self );
+/*!%!%!%!%*/
+
 	return np;
 }
 
