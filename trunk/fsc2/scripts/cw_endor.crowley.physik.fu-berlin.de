@@ -596,7 +596,10 @@ synthesizer_state( \"OFF\" );
 
 IF I > 0
 {
-    save( File_2, mean_data / K );
+	FOR J = 1 : N_points {
+		fsave( File_2, \"# #\n\",
+			   start_freq + ( J - 1 ) * step_freq, mean_data[ J ] / K );
+	}
 }
 ";
 
