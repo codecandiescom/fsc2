@@ -328,7 +328,7 @@ previous function and the only difference is that it will return a
 @code{double} and print a warning message if the variable is an
 integer variable instead of the expected floating point variable.
 
-If your function can accept integer variables only there's a third
+If your function can accept an integer variable only there's a third
 function:
 @example
 long get_strict_long( Var *var, const char *snippet )
@@ -337,14 +337,14 @@ long get_strict_long( Var *var, const char *snippet )
 This function has the same arguments as the two other functions but it
 will throw an exception (see below what this means) when getting passed
 a floating point number, stopping the interpretation of the @code{EDL}
-script except while doing the experiment, in which case only a warning
-message is printed and the floating point number is converted to the
-nearest integer, which is then returned (thus avoiding the termination
-of a running experiment). But usually the wrong parameter should already
-have been found during the test run, thus forcing the user to correct
-her script.
+script. Only while doing the experiment only a warning message is
+printed and the floating point number is converted to the nearest
+integer, which is then returned, thus avoiding the termination of a
+running experiment. But usually the wrong parameter should already have
+been found during the test run, thus forcing the user to correct the
+script.
 
-Finally, there is a function for the case that you want a boolean
+Finally, there is a function for the case where you want a boolean
 variable, i.e.@: a variable that can be either true or false. This
 function is declared as
 @example
@@ -365,11 +365,11 @@ foo.edl:17: LECRONIX: abc(): Floating point number found where
                              boolean value was expected.
 @end example
 @noindent
-is printed and an exception is thrown. Should @code{fsc2} be running an
-experiment the warning message is printed but instead of terminating the
-experiment the floating point value is converted to the nearest integer
-value and the truth value of this number is returned to avoid stopping
-the experiment.
+is printed and an exception is thrown. Should @code{fsc2} already be
+running the experiment (instead of just doing the test run) a warning
+message is printed and instead of terminating the experiment the
+floating point value is converted to the nearest integer value and the
+truth value of this number is returned to avoid stopping the experiment.
 
 Finally, if the @code{get_boolean()} function receives a string variable
 that is neither @code{"ON"} nor @code{"OFF"} (including variations of
@@ -378,8 +378,9 @@ the case of the characters) an error message is printed:
 foo.edl:17: LECRONIX: abc(): Invalid boolean argument ("bla").
 @end example
 @noindent
-(assuming that the string was @code{"bla"}) and an exception is thrown
-in all cases, even during the experiment.
+(assuming that the string passed to the function was @code{"bla"}) and
+an exception is thrown in all cases, even during the experiment, since
+there is no obvious way how to determine the truth value of that string.
 
 
 @subsection Getting at the data of an one-dimensional array
@@ -410,12 +411,13 @@ For arrays of 2 or more dimensions (i.e.@: variables of type
 @code{INT_REF} and @code{FLOAT_REF}) the dimension of the array is
 stored in the @code{dim} field of the variables structure. For the data
 of such arrays the @code{vptr} field in the @code{val} union of the
-variable structure is relevant, @code{vptr} is an array of variable
-pointers, pointing to the next lower-dimension sub-arrays. How many of
-such sub-arrays exist can be determined from the @code{len} field of the
-variable structure. As already for the one-dimensional arrays care has
-to be taken to check that @code{len} isn't @code{0} in case none of the
-sub-arrays have been defined yet for variable sized arrays.
+variable structure is relevant. @code{vptr} then points to an array of
+variable pointers, each pointing to the next lower-dimension sub-arrays.
+How many of such sub-arrays exist can be determined from the @code{len}
+field of the variable structure. As already for the one-dimensional
+arrays care has to be taken to check that @code{len} isn't @code{0} in
+case none of the sub-arrays have been defined yet for variable sized
+arrays.
 
 If the dimension of a variable is 2 all the sub-arrays are
 one-dimensional arrays (i.e.@: have a type of @code{INT_ARR} or
@@ -435,6 +437,47 @@ Of course, before one tries to access the element one always should check
 that @code{var->len} is at least @code{4}, @code{var->val.vptr[3]->len}
 is at least @code{3} and @code{var->val.vptr[3]->val.vptr[2]->len} is
 at least @code{6}.
+
+
+But there's also a function that does all the required checks
+automatically and returns an element. It is called @code{get_element()}
+and declared as
+@example
+   Var *get_element( Var *v, int len, ... );
+@end example
+@noindent
+It takes an unspecified number of arguments, but at least three. The
+first one is a pointer to the array or matrix from which you want an
+element and then the number of remaining arguments. This number may not
+be larger than the dimension of the array or matrix. All the remaining
+arguments are the indices into the array.
+
+The function returns on success a variable that is either an integer or
+float value or a pointer to an array or matrix. On failure (e.g.@:
+because the accessed element does not exist) an exception is thrown.
+
+If you have a 1-dimensional array of integers named @code{ivar_1d} and
+you want to determine its fourth element you can call this function like
+this
+@example
+    elem = get_element( ivar_1d, 1, 3 );
+@end example
+@noindent
+and the returned variable @code{elem} will be of type @code{INT_VAR},
+having the value of the fourth element of the array (please remember
+that array indices start at @code{0}, so the fourth element has the
+index @code{3}).
+
+If, in contrast, you want the element @code{[3,2,5]} of the variable
+@code{fvar_3d} pointing a three-dimensional floating point matrix
+you would call the function as
+@example
+    elem = get_element( var_3d, 3, 3, 2, 5 );
+@end example
+
+You can also call the function with less indices as the matrix has
+dimensions. In this case the function returns a variable pointing to
+the indexed array or sub-matrix.
 
 
 @subsection Returning data from EDL functions
