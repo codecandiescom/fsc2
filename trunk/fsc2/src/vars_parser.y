@@ -42,7 +42,7 @@ static Var *CV;
 %token AND OR XOR NOT
 
 
-%token NT_TOKEN UT_TOKEN MT_TOKEN T_TOKEN
+%token NT_TOKEN UT_TOKEN MT_TOKEN T_TOKEN KT_TOKEN MGT_TOKEN
 %token NU_TOKEN UU_TOKEN MU_TOKEN KU_TOKEN MEG_TOKEN
 %type <vptr> expr arrass list1 list2 list3 unit
 
@@ -136,6 +136,8 @@ unit:    /* empty */               { $$ = NULL; }
        | UT_TOKEN                  { $$ = vars_push( FLOAT_VAR, 1.0e-2 ); }
        | MT_TOKEN                  { $$ = vars_push( FLOAT_VAR, 10.0 ); }
        | T_TOKEN                   { $$ = vars_push( FLOAT_VAR, 1.0e4 ); }
+       | KT_TOKEN                  { $$ = vars_push( FLOAT_VAR, 1.0e7 ); }
+       | MGT_TOKEN                 { $$ = vars_push( FLOAT_VAR, 1.0e10 ); }
        | NU_TOKEN                  { $$ = vars_push( FLOAT_VAR, 1.0e-9 ); }
        | UU_TOKEN                  { $$ = vars_push( FLOAT_VAR, 1.0e-6 ); }
        | MU_TOKEN                  { $$ = vars_push( FLOAT_VAR, 1.0e-3 ); }

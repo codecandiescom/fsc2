@@ -280,6 +280,8 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 "\x4utesla" return E_UT_TOKEN;
 "\x4mtesla" return E_MT_TOKEN;
 "\x4tesla"  return E_T_TOKEN;
+"\x4ktesla" return E_KT_TOKEN;
+"\x4Mtesla" return E_MGT_TOKEN;
 
 "\x4nunit"  return E_NU_TOKEN;
 "\x4uunit"  return E_UU_TOKEN;

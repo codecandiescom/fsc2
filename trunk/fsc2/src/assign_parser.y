@@ -102,7 +102,7 @@ static bool Func_is_set = UNSET;
 %token EQ NE LT LE GT GE
 
 %token NU_TOKEN UU_TOKEN MU_TOKEN KU_TOKEN MEG_TOKEN
-%token NT_TOKEN UT_TOKEN MT_TOKEN T_TOKEN
+%token NT_TOKEN UT_TOKEN MT_TOKEN T_TOKEN KT_TOKEN MGT_TOKEN
 
 %type <lval> phsv
 %type <vptr> expr list1 unit sl_val
@@ -333,6 +333,8 @@ unit:    /* empty */               { $$ = NULL; }
        | UT_TOKEN  				   { $$ = vars_push( FLOAT_VAR, 1.0e-2 ); }
        | MT_TOKEN  				   { $$ = vars_push( FLOAT_VAR, 10.0 ); }
        | T_TOKEN   				   { $$ = vars_push( FLOAT_VAR, 1.0e4 ); }
+       | KT_TOKEN  				   { $$ = vars_push( FLOAT_VAR, 1.0e7 ); }
+       | MGT_TOKEN 				   { $$ = vars_push( FLOAT_VAR, 1.0e10 ); }
        | NU_TOKEN                  { $$ = vars_push( FLOAT_VAR, 1.0e-9 ); }
        | UU_TOKEN                  { $$ = vars_push( FLOAT_VAR, 1.0e-6 ); }
        | MU_TOKEN                  { $$ = vars_push( FLOAT_VAR, 1.0e-3 ); }

@@ -97,11 +97,15 @@ INTs     {INT}[\t \r]*"nT"
 IUT      {INT}[\t \r]*"uT"
 IMT      {INT}[\t \r]*"mT"
 IT       {INT}[\t \r]*"T"
+IKT      {INT}[\t \r]*"kT"
+IMGT     {INT}[\t \r]*"MT"
 
 FNT      {FLOAT}[\t \r]*"nT"
 FUT      {FLOAT}[\t \r]*"uT"
 FMT      {FLOAT}[\t \r]*"mT"
 FT       {FLOAT}[\t \r]*"T"
+FKT      {FLOAT}[\t \r]*"kT"
+FMGT     {FLOAT}[\t \r]*"MT"
 
 
 WLWS     ^[\t ]*\n
@@ -304,15 +308,21 @@ KEEP    [^\t" \n(\/*),;:=%\^\-\+]+
 {IUT}/[^a-zA-z_]     unit_spec( yytext, -2 );
 {IMT}/[^a-zA-z_]     unit_spec( yytext,  1 );
 {IT}/[^a-zA-z_]      unit_spec( yytext,  4 );
+{IKT}/[^a-zA-z_]     unit_spec( yytext,  7 );
+{IMGT}/[^a-zA-z_]    unit_spec( yytext, 10 );
 {FNT}/[^a-zA-z_]     unit_spec( yytext, -5 );
 {FUT}/[^a-zA-z_]     unit_spec( yytext, -2 );
 {FMT}/[^a-zA-z_]     unit_spec( yytext,  1 );
 {FT}/[^a-zA-z_]      unit_spec( yytext,  4 );
+{FKT}/[^a-zA-z_]     unit_spec( yytext,  7 );
+{FMGT}/[^a-zA-z_]    unit_spec( yytext, 10 );
 
 "nT"/[^a-zA-z_]      printf( "\x4ntesla" );
 "uT"/[^a-zA-z_]      printf( "\x4utesla" );
 "mT"/[^a-zA-z_]      printf( "\x4mtesla" );
 "T"/[^a-zA-z_]       printf( "\x4tesla" );
+"kT"/[^a-zA-z_]      printf( "\x4ktesla" );
+"MT"/[^a-zA-z_]      printf( "\x4Mtesla" );
 
 "n"{UNIT}/[^a-zA-z_] printf( "\x4nunit" );
 "u"{UNIT}/[^a-zA-z_] printf( "\x4uunit" );

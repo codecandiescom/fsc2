@@ -309,6 +309,8 @@ WS          [\n=: ]+
 "\x4utesla"  return UT_TOKEN;
 "\x4mtesla"  return MT_TOKEN;
 "\x4tesla"   return T_TOKEN;
+"\x4ktesla"  return MT_TOKEN;
+"\x4Ktesla"  return MT_TOKEN;
 
 			/* all pulse related keywords... */
 

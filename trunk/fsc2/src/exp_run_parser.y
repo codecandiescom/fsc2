@@ -50,26 +50,28 @@ static Var *CV;
 %token E_UT_TOKEN	  271
 %token E_MT_TOKEN	  272
 %token E_T_TOKEN	  273
-%token E_NU_TOKEN	  274
-%token E_UU_TOKEN	  275
-%token E_MU_TOKEN	  276
-%token E_KU_TOKEN	  277
-%token E_MEG_TOKEN	  278
-%token E_NEG	      279
-%token E_AND          280
-%token E_OR           281
-%token E_XOR          282
-%token E_NOT          283
-%token E_PPOS         284
-%token E_PLEN         285
-%token E_PDPOS        286
-%token E_PDLEN        287
-%token E_PLSA         288
-%token E_MINA         289
-%token E_MULA         290
-%token E_DIVA         291
-%token E_MODA         292
-%token E_EXPA         293
+%token E_KT_TOKEN	  274
+%token E_MGT_TOKEN	  275
+%token E_NU_TOKEN	  276
+%token E_UU_TOKEN	  277
+%token E_MU_TOKEN	  278
+%token E_KU_TOKEN	  279
+%token E_MEG_TOKEN	  280
+%token E_NEG	      281
+%token E_AND          282
+%token E_OR           283
+%token E_XOR          284
+%token E_NOT          285
+%token E_PPOS         286
+%token E_PLEN         287
+%token E_PDPOS        288
+%token E_PDLEN        289
+%token E_PLSA         290
+%token E_MINA         291
+%token E_MULA         292
+%token E_DIVA         293
+%token E_MODA         294
+%token E_EXPA         295
 
 
 %token <vptr> E_VAR_TOKEN         /* variable name */
@@ -81,7 +83,7 @@ static Var *CV;
 %token E_EQ E_NE E_LT E_LE E_GT E_GE
 %token <lval> E_PPOS E_PLEN E_PDPOS E_PDLEN
 
-%token E_NT_TOKEN E_UT_TOKEN E_MT_TOKEN E_T_TOKEN
+%token E_NT_TOKEN E_UT_TOKEN E_MT_TOKEN E_T_TOKEN E_KT_TOKEN E_MGT_TOKEN
 %token E_NU_TOKEN E_UU_TOKEN E_MU_TOKEN E_KU_TOKEN E_MEG_TOKEN
 %type <vptr> expr unit line list1
 
@@ -263,6 +265,8 @@ unit:    /* empty */               { $$ = NULL; }
        | E_UT_TOKEN                { $$ = vars_push( FLOAT_VAR, 1.0e-2 ); }
        | E_MT_TOKEN                { $$ = vars_push( FLOAT_VAR, 10.0 ); }
        | E_T_TOKEN                 { $$ = vars_push( FLOAT_VAR, 1.0e4 ); }
+       | E_KT_TOKEN                { $$ = vars_push( FLOAT_VAR, 1.0e7 ); }
+       | E_MGT_TOKEN               { $$ = vars_push( FLOAT_VAR, 1.0e10 ); }
        | E_NU_TOKEN                { $$ = vars_push( FLOAT_VAR, 1.0e-9 ); }
        | E_UU_TOKEN                { $$ = vars_push( FLOAT_VAR, 1.0e-6 ); }
        | E_MU_TOKEN                { $$ = vars_push( FLOAT_VAR, 1.0e-3 ); }

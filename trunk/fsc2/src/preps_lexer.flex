@@ -383,6 +383,8 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 "\x4utesla" return UT_TOKEN;
 "\x4mtesla" return MT_TOKEN;
 "\x4tesla"  return T_TOKEN;
+"\x4ktesla" return KT_TOKEN;
+"\x4Mtesla" return MGT_TOKEN;
 
 "\x4nunit"  return NU_TOKEN;
 "\x4uunit"  return UU_TOKEN;
