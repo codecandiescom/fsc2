@@ -63,15 +63,15 @@ static struct sigaction sigchld_oact,
 
 
 /*------------------------------------------------------------------*/
-/* run() starts an experiment. To do so it initializes all needed   */
+/* run() starts an experiment. To do so it initialises all needed   */
 /* devices and opens a new window for displaying the measured data. */
 /* Then everything needed for the communication between parent and  */
 /* the child to be created is set up, i.e. pipes, a semaphore and a */
 /* shared memory segment for storing the type of the data and a key */
-/* for a further shared memory segment that contains the data.      */
-/* Finally, after initializing some global variables and setting up */
+/* for a further shared memory segment will contain the data.       */
+/* Finally, after initialising some global variables and setting up */
 /* signal handlers used for synchronization the processes the child */
-/* process is started and thus the experiments begins.              */
+/* is started and thus the experiments begins.                      */
 /*------------------------------------------------------------------*/
 
 bool run( void )
@@ -100,7 +100,7 @@ bool run( void )
 	fl_set_cursor( FL_ObjWin( main_form->run ), XC_watch );
 	XFlush( fl_get_display( ) );
 
-	/* If the devices need the GPIB bus initialism it now */
+	/* If the devices need the GPIB bus initialise it now */
 
 	if ( need_GPIB && gpib_init( GPIB_LOG_FILE, GPIB_LOG_LEVEL ) == FAILURE )
 	{
@@ -607,10 +607,12 @@ static void run_child( void )
 	do_quit = UNSET;
 	set_child_signals( );
 
-#if 0                                    /* used for child process debugging */
-	bool h = SET;
-	while ( h );
-#endif
+//#if 0                                    /* used for child process debugging */
+	{
+		bool h = SET;
+		while ( h );
+	}
+//#endif
 
 	TRY {
 		do_measurement( );               /* run the experiment */
@@ -725,7 +727,7 @@ void child_sig_handler( int signo )
 
 		default :
 			if ( * ( ( int * ) xresources[ NOCRASHMAIL ].var ) == 0 &&
-				 ! ( cmdline_flags & 32 ) )              /* 32 means NO_MAIL */
+				 ! ( cmdline_flags & NO_MAIL ) )
 			{
 				DumpStack( );
 				death_mail( signo );

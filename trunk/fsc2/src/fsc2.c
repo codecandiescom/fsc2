@@ -46,15 +46,6 @@ static char *title = NULL;
 static bool delete_file = UNSET;
 static bool delete_old_file = UNSET;
 
-enum {
-	DO_LOAD   =  1,
-	DO_TEST   =  2,
-	DO_START  =  4,
-	DO_SIGNAL =  8,
-	DO_DELETE = 16,
-	NO_MAIL   = 32,
-};
-
 static volatile int fsc2_death = 0;
 
 extern FL_resource xresources[ ];             /* from xinit.c */
@@ -69,8 +60,6 @@ static bool display_file( char *name, FILE *fp );
 static void start_editor( void );
 static void start_help_browser( void );
 static void set_main_signals( void );
-
-int cmdline_flags;               /* also used in child_sig_handler) in run.c */
 
 
 

@@ -275,6 +275,15 @@ enum {
 	CHILD  = 1,
 };
 
+enum {
+	DO_LOAD    =  1,
+	DO_TEST    =  2,
+	DO_START   =  4,
+	DO_SIGNAL  =  8,
+	DO_DELETE  = 16,
+	NO_MAIL    = 32,
+	NO_BALLOON = 64
+};
 
 /* Convenience macros for accessing the value of simple variables
    (but be careful with the VALUE macro: the returned value is always
