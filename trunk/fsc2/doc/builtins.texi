@@ -796,7 +796,12 @@ it will return 3.
 @findex size()
 The function takes two arguments, an array and one of the dimensions of the
 array, and returns the size of this dimension. I.e.@: for an array defined as
-@code{X[ 4, 2, 5 ]} @code{size( X, 3 )} will return 5.
+@example
+@code{X[ 4, 2, 5 ]}
+@end example
+@noindent
+@code{size( X, 3 )} will return 5.
+
 
 @item sizes()
 @anchor{sizes}
