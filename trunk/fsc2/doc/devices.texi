@@ -857,6 +857,15 @@ Before the @code{EXPERIMENT} section this function can't be called in
 query mode, i.e.@: without an argument (unless the attenuation has already
 been set by calling the function with an argument).
 
+
+@item synthesizer_minimum_attenuation()
+@findex synthesizer_minimum_attenuation()
+The function queries or sets the minimum output attenuation. If called to set
+the attenuation it accepts one argument, the attenuation in the range
+between @w{+10 db} and @w{-136 db}. Calling the function restricts
+setting the attenuation to ranges below the value passed to the function.
+
+
 @item synthesizer_step_frequency()
 @findex synthesizer_step_frequency()
 The function queries or sets the RF step frequency to be used in calls
