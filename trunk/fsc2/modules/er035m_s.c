@@ -103,8 +103,8 @@ static double res_list[ 3 ] = { 0.1, 0.01, 0.001 };
 
 /* If the field is unstable the gausmeter might never get to the state where
    the field value is valid with the requested resolution eventhough the look
-   state is achieved. `ER035M_S_MAX_RETRIES' tells how many times we retry in
-   this case. With a value of 100 and the current setting of `ER035M_S_WAIT'
+   state is achieved. 'ER035M_S_MAX_RETRIES' tells how many times we retry in
+   this case. With a value of 100 and the current setting of 'ER035M_S_WAIT'
    of 200 ms it will take at least 20 s before this will happen.
 
    Take care: This does not mean that we stop trying to get the field while
@@ -681,7 +681,7 @@ static double er035m_s_get_field( void )
 
 
 	/* Repeat asking for field value until it's correct up to the LSD -
-	   it will give up after `ER035M_S_MAX_RETRIES' retries to avoid
+	   it will give up after 'ER035M_S_MAX_RETRIES' retries to avoid
 	   getting into an infinite loop when the field is too unstable */
 
 	do

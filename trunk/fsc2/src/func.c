@@ -167,7 +167,7 @@ static int func_cmp2( const void *a, const void *b );
 
 
 /*--------------------------------------------------------------------*/
-/* Function parses the function data base in `Functions' and makes up */
+/* Function parses the function data base in 'Functions' and makes up */
 /* a complete list of all built-in and user-supplied functions.       */
 /*--------------------------------------------------------------------*/
 
@@ -184,7 +184,7 @@ bool functions_init( void )
 	/*
 	   1. Get new memory for the functions structures and copy the built-in
 	      functions into it.
-	   2. Parse the function name data base `Functions' where all additional
+	   2. Parse the function name data base 'Functions' where all additional
 	      functions have to be listed.
 	   3. Sort the functions by name so that they can be found using bsearch()
 	*/

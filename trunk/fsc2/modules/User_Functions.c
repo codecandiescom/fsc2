@@ -557,9 +557,9 @@ static Var *get_phase_cycled_area_2( Var *v )
 
 
 /*-----------------------------------------------------------------------*/
-/* Checks if the variable `v', used in the function `func_name`, holds a */
+/* Checks if the variable 'v', used in the function 'func_name', holds a */
 /* value that is a channel number to be used with the current digitizer. */
-/* If it is the value is returned in `channel'.                          */
+/* If it is the value is returned in 'channel'.                          */
 /*-----------------------------------------------------------------------*/
 
 static bool get_channel_number( Var *v, long *channel )

@@ -45,7 +45,7 @@ static bool in_cond;
 
 
 /* the following union and the token definitions MUST be identical to the ones
-   in `exp.h' ! */
+   in 'exp.h' ! */
 
 %union {
 	long   lval;
@@ -178,10 +178,10 @@ line:    E_VAR_TOKEN ass                              { }
        | E_VAR_TOKEN '[' list1 ']' ass                { }
        | E_FUNC_TOKEN '(' list2 ')'                   { }
        | E_FUNC_TOKEN '['
-          { print( FATAL, "`%s' is a predefined function.\n", $1->name );
+          { print( FATAL, "'%s' is a predefined function.\n", $1->name );
 		    THROW( EXCEPTION ); }
        | E_VAR_TOKEN '('
-          { print( FATAL, "`%s' is a variable, not a funnction.\n", $1->name );
+          { print( FATAL, "'%s' is a variable, not a funnction.\n", $1->name );
 		    THROW( EXCEPTION ); }
        | pt ass
        | BREAK_TOK
@@ -212,7 +212,7 @@ expr:    E_INT_TOKEN unit                { }
        | E_FUNC_TOKEN '['         { print( FATAL, "%s' is a predefined "
 									        "function.\n", $1->name );
 	                                THROW( EXCEPTION ); }
-       | E_VAR_TOKEN '('          { print( FATAL, "`%s' is a variable, "
+       | E_VAR_TOKEN '('          { print( FATAL, "'%s' is a variable, "
 											"not a function.\n", $1->name );
 	                                THROW( EXCEPTION ); }
        | pt

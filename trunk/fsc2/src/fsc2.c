@@ -330,8 +330,8 @@ static int scan_args( int *argc, char *argv[ ], char **fname )
 		{
 			if ( flags & DO_CHECK )
 			{
-				fprintf( stderr, "fsc2: Can't have both flags `-t' and "
-						"`-X'.\n" );
+				fprintf( stderr, "fsc2: Can't have both flags '-t' and "
+						"'-X'.\n" );
 				usage( EXIT_FAILURE );
 			}
 
@@ -394,15 +394,15 @@ static int scan_args( int *argc, char *argv[ ], char **fname )
 		{
 			if ( flags & DO_CHECK )
 			{
-				fprintf( stderr, "fsc2: Can't have both flags `-S' and "
-						"`-X'.\n" );
+				fprintf( stderr, "fsc2: Can't have both flags '-S' and "
+						"'-X'.\n" );
 				usage( EXIT_FAILURE );
 			}
 
 			if ( flags & DO_TEST )
 			{
-				fprintf( stderr, "fsc2: Can't have both flags `-S' and "
-						"`-T'.\n" );
+				fprintf( stderr, "fsc2: Can't have both flags '-S' and "
+						"'-T'.\n" );
 				usage( EXIT_FAILURE );
 			}
 
@@ -435,15 +435,15 @@ static int scan_args( int *argc, char *argv[ ], char **fname )
 		{
 			if ( flags & DO_CHECK )
 			{
-				fprintf( stderr, "fsc2: Can't have both flags `-T' and "
-						"`-X'.\n" );
+				fprintf( stderr, "fsc2: Can't have both flags '-T' and "
+						"'-X'.\n" );
 				usage( EXIT_FAILURE );
 			}
 
 			if ( flags & DO_START )
 			{
-				fprintf( stderr, "fsc2: Can't have both flags `-T' and "
-						"`-S'.\n" );
+				fprintf( stderr, "fsc2: Can't have both flags '-T' and "
+						"'-S'.\n" );
 				usage( EXIT_FAILURE );
 			}
 
@@ -476,22 +476,22 @@ static int scan_args( int *argc, char *argv[ ], char **fname )
 		{
 			if ( flags & DO_CHECK )
 			{
-				fprintf( stderr, "fsc2: Can't have both flags `-X' and "
-						"`-t'.\n" );
+				fprintf( stderr, "fsc2: Can't have both flags '-X' and "
+						"'-t'.\n" );
 				usage( EXIT_FAILURE );
 			}
 
 			if ( flags & DO_START )
 			{
-				fprintf( stderr, "fsc2: Can't have both flags `-X' and "
-						"`-S'.\n" );
+				fprintf( stderr, "fsc2: Can't have both flags '-X' and "
+						"'-S'.\n" );
 				usage( EXIT_FAILURE );
 			}
 
 			if ( flags & DO_TEST )
 			{
-				fprintf( stderr, "fsc2: Can't have both flags `-X' and "
-						"`-T'.\n" );
+				fprintf( stderr, "fsc2: Can't have both flags '-X' and "
+						"'-T'.\n" );
 				usage( EXIT_FAILURE );
 			}
 
@@ -506,7 +506,7 @@ static int scan_args( int *argc, char *argv[ ], char **fname )
 					else
 					{
 						fprintf( stderr, "Flag '-X' needs a numerical "
-								 "argument but got `%s'.\n",
+								 "argument but got '%s'.\n",
 								 argv[ cur_arg ] + 2);
 						usage( EXIT_FAILURE );
 					}

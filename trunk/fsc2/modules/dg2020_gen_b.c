@@ -78,7 +78,7 @@ bool dg2020_assign_function( int function, long pod )
 	if ( p->function != NULL )
 	{
 		print( FATAL, "Pod number %ld has already been assigned to function "
-			   "`%s'.\n", pod, Function_Names[ p->function->self ] );
+			   "'%s'.\n", pod, Function_Names[ p->function->self ] );
 		THROW( EXCEPTION );
 	}
 
@@ -129,12 +129,12 @@ bool dg2020_assign_channel_to_function( int function, long channel )
 	{
 		if ( c->function->self == function )
 		{
-			print( SEVERE, "Channel %ld is assigned twice to function `%s'.\n",
+			print( SEVERE, "Channel %ld is assigned twice to function '%s'.\n",
 				   channel, Function_Names[ c->function->self ] );
 			return FAIL;
 		}
 
-		print( FATAL, "Channel %ld is already used for function `%s'.\n",
+		print( FATAL, "Channel %ld is already used for function '%s'.\n",
 			   channel, Function_Names[ c->function->self ] );
 		THROW( EXCEPTION );
 	}
@@ -170,7 +170,7 @@ bool dg2020_set_function_delay( int function, double delay )
 
 	if ( dg2020.function[ function ].is_delay )
 	{
-		print( FATAL, "Delay for function `%s' has already been set.\n",
+		print( FATAL, "Delay for function '%s' has already been set.\n",
 			   Function_Names[ function ] );
 		THROW( EXCEPTION );
 	}
@@ -221,7 +221,7 @@ bool dg2020_set_function_high_level( int function, double voltage )
 
 	if ( voltage < MIN_POD_HIGH_VOLTAGE || voltage > MAX_POD_HIGH_VOLTAGE )
 	{
-		print( FATAL, "Invalid high level of %g V for function `%s', valid "
+		print( FATAL, "Invalid high level of %g V for function '%s', valid "
 			   "range is %g V to %g V.\n", voltage, Function_Names[ function ],
 			   MIN_POD_HIGH_VOLTAGE, MAX_POD_HIGH_VOLTAGE );
 		THROW( EXCEPTION );
@@ -248,7 +248,7 @@ bool dg2020_set_function_low_level( int function, double voltage )
 
 	if ( voltage < MIN_POD_LOW_VOLTAGE || voltage > MAX_POD_LOW_VOLTAGE )
 	{
-		print( FATAL, "Invalid low level of %g V for function `%s', valid "
+		print( FATAL, "Invalid low level of %g V for function '%s', valid "
 			   "range is %g V to %g V.\n", voltage, Function_Names[ function ],
 			   MIN_POD_LOW_VOLTAGE, MAX_POD_LOW_VOLTAGE );
 		THROW( EXCEPTION );
@@ -600,7 +600,7 @@ bool dg2020_phase_setup_prep( int phs, int type, int pod, long val )
 	{
 		fsc2_assert( dg2020_phs[ phs ].pod[ type ] != NULL );
 
-		print( SEVERE, "Pod for controlling phase type `%s' has already been "
+		print( SEVERE, "Pod for controlling phase type '%s' has already been "
 			   "set to %d.\n",
 			   Phase_Types[ type ], dg2020_phs[ phs ].pod[ type ]->self );
 		return FAIL;

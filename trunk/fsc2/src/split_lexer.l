@@ -166,7 +166,7 @@ bool scan_main( char *file )
 	if ( ! functions_init( ) || ! device_list_parse( ) )
 		return FAIL;
 
-	/* Filter input through "fsc2_clean" (expected to be in `bindir') */
+	/* Filter input through "fsc2_clean" (expected to be in 'bindir') */
 
 	cmd = get_string( "%s%sfsc2_clean %s", bindir, slash( bindir ), file );
 

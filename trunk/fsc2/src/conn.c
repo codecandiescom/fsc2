@@ -208,7 +208,7 @@ static void connect_handler( int listen_fd )
 			continue;
 		}
 
-		/* Read the method to use and store it in the first byte of `line',
+		/* Read the method to use and store it in the first byte of 'line',
 		   close connection if method doesn't start with either 'S' (start),
 		   'T' (test) or 'L' (load). The second character can be 'd' (delete)
 		   to tell fsc2 to delete the file after it has been used. If there

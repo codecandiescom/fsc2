@@ -2438,10 +2438,9 @@ static void vars_ass_from_trans_ptr( Var *src, Var *dest )
 	{
 		if ( d->sizes[ d->dim - 1 ] != src->len )
 		{
-			print( FATAL, SET, "Array slice assigned to array '%s' does not "
-				   "fit its length, its size is %ld while the slice has "
-				   "%ld elements.\n",
-				   d->name, d->sizes[ d->dim - 1 ], src->len );
+			print( FATAL, "Array slice assigned to array '%s' does not fit "
+				   "its length, its size is %ld while the slice has %ld "
+				   "elements.\n", d->name, d->sizes[ d->dim - 1 ], src->len );
 			THROW( EXCEPTION );
 		}
 

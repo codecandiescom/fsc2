@@ -106,7 +106,7 @@ bool dg2020_set_pulse_function( long pnum, int function )
 	if ( p->is_function )
 	{
 		print( FATAL, "The function of pulse %ld has already been set to "
-			   "`%s'.\n", pnum, Function_Names[ p->function->self ] );
+			   "'%s'.\n", pnum, Function_Names[ p->function->self ] );
 		THROW( EXCEPTION );
 	}
 

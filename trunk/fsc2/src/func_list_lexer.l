@@ -112,7 +112,7 @@ IDENT    [A-Za-z][A-Za-z_0-9]*
 
 {EREM1}     {  /* End of comment without start */
 				eprint( FATAL, UNSET, "End of comment found at line %ld in "
-						"function data base `%s'.\n", EDL.Lc, EDL.Fname );
+						"function data base '%s'.\n", EDL.Lc, EDL.Fname );
 				THROW( EXCEPTION );
 			}
 
@@ -140,7 +140,7 @@ PREP        return PREP_TOKEN;
 
 .           {
 				eprint( FATAL, UNSET, "Syntax error at line %ld in function "
-							   "data base `%s'.\n", EDL.Lc, EDL.Fname );
+							   "data base '%s'.\n", EDL.Lc, EDL.Fname );
 				THROW( EXCEPTION );
 			}
 
@@ -168,7 +168,7 @@ size_t func_list_parse( Func **fncts, size_t num_func )
 
 	if ( ( func_listin = fopen( EDL.Fname, "r" ) ) == NULL )
 	{
-		eprint( FATAL, UNSET, "Can't open function data base `%s'.\n",
+		eprint( FATAL, UNSET, "Can't open function data base '%s'.\n",
 				EDL.Fname );
 		THROW( EXCEPTION );
 	}
@@ -264,9 +264,9 @@ static size_t fll_count_functions( Func *fncts, size_t num_predef_func )
 			if ( ( f = bsearch( func_listtext, fncts, num_predef_func,
 								sizeof( Func ), ffl_func_cmp2 ) ) != NULL )
 			{
-				eprint( WARN, UNSET, "Loadable function `%s()' hides "
+				eprint( WARN, UNSET, "Loadable function '%s()' hides "
 						"built-in function (line %ld in function data "
-						"base `%s').\n", f->name, EDL.Lc, EDL.Fname );
+						"base '%s').\n", f->name, EDL.Lc, EDL.Fname );
 
 				f->name = T_strdup( f->name );
 				f->fnct = NULL;
@@ -289,7 +289,7 @@ static size_t fll_count_functions( Func *fncts, size_t num_predef_func )
 	if ( last_token != ';' )
 	{
 		eprint( FATAL, UNSET, "Missing semiciolon at end of function data "
-				"base `%s'.\n", EDL.Fname );
+				"base '%s'.\n", EDL.Fname );
 		THROW( EXCEPTION );
 	}
 
@@ -333,7 +333,7 @@ static void fll_get_functions( Func *fncts, size_t num_predef_func )
 				if ( state != 0 )
 				{
 					eprint( FATAL, UNSET, "Syntax error at line %ld in "
-							"function data base `%s'.\n", EDL.Lc, EDL.Fname );
+							"function data base '%s'.\n", EDL.Lc, EDL.Fname );
 					THROW( EXCEPTION );
 				}
 
@@ -349,9 +349,9 @@ static void fll_get_functions( Func *fncts, size_t num_predef_func )
 							act = i;
 						else
 						{
-							eprint( FATAL, UNSET, "Function `%s()' is declared"
+							eprint( FATAL, UNSET, "Function '%s()' is declared"
 									"more than once in function data base "
-									"`%s'.\n", func_listtext, EDL.Fname );
+									"'%s'.\n", func_listtext, EDL.Fname );
 							THROW( EXCEPTION );
 						}
 						break;
@@ -367,7 +367,7 @@ static void fll_get_functions( Func *fncts, size_t num_predef_func )
 				if ( state != 1 )
 				{
 					eprint( FATAL, UNSET, "Syntax error at line %ld of "
-							"function data base `%s'.\n", EDL.Lc, EDL.Fname );
+							"function data base '%s'.\n", EDL.Lc, EDL.Fname );
 					THROW( EXCEPTION );
 				}
 
@@ -382,7 +382,7 @@ static void fll_get_functions( Func *fncts, size_t num_predef_func )
 				if ( state != 2 )
 				{
 					eprint( FATAL, UNSET, "Syntax error at line %ld of "
-							"function data base `%s'.\n", EDL.Lc, EDL.Fname );
+							"function data base '%s'.\n", EDL.Lc, EDL.Fname );
 					THROW( EXCEPTION );
 				}
 
@@ -408,8 +408,8 @@ static void fll_get_functions( Func *fncts, size_t num_predef_func )
 				if ( state != 0 && state < 2 )
 				{
 					eprint( FATAL, UNSET, "Missing number of arguments for "
-                            "function `%s' at line %ld in function data base "
-                            "`%s'.\n", fncts[ act ].name, EDL.Lc, EDL.Fname );
+                            "function '%s' at line %ld in function data base "
+                            "'%s'.\n", fncts[ act ].name, EDL.Lc, EDL.Fname );
 					THROW( EXCEPTION );
 				}
 				state = 0;

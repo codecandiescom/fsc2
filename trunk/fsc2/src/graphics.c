@@ -792,7 +792,7 @@ static void G_init_curves_2d( void )
 
 /*----------------------------------------------------------------------*/
 /* This routine creates a pixmap with the label for either the y- or z- */
-/* axis (set `coord' to 1 for y and 2 for z). The problem is that it's  */
+/* axis (set 'coord' to 1 for y and 2 for z). The problem is that it's  */
 /* not possible to draw rotated text so we have to write the text to a  */
 /* pixmap and then rotate this pixmap 'by hand'.                        */
 /*----------------------------------------------------------------------*/

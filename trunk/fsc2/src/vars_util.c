@@ -66,7 +66,7 @@ static void vars_params( Var *v, size_t *elems, long **lpnt, double **dpnt )
 
 			if ( v->from->flags & NEED_ALLOC )
 			{
-				print( FATAL, "Array `%s' is a dynamically sized array and "
+				print( FATAL, "Array '%s' is a dynamically sized array and "
 					   "its size is still unknown.\n", v->from->name );
 				THROW( EXCEPTION );
 			}

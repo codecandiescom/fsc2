@@ -319,7 +319,7 @@ KEEP    [^\t" \n(\/*),;:=%\^\-\+]+
 				   yy_push_state( comm );
 				else
 				{
-					printf( "\x03\n%s:%ld: `#INCLUDE' expects \"FILENAME\" "
+					printf( "\x03\n%s:%ld: '#INCLUDE' expects \"FILENAME\" "
 							"or <FILENAME>.\n", Fname, Incl_Lc );
 					exit( EXIT_FAILURE );
 				}
@@ -477,7 +477,7 @@ int main( int argc, char *argv[ ] )
 	}
 	CATCH( MISPLACED_SHEBANG )
 	{
-		printf( "\x03\n%s: `#!' must appear on first line instead of "
+		printf( "\x03\n%s: '#!' must appear on first line instead of "
 				"line %ld.\n", Fname, Lc );
 		exit( EXIT_FAILURE );
 	}
@@ -514,7 +514,7 @@ static void include_handler( char *file )
 		if ( incl_depth + 1 == MAX_INCLUDE_DEPTH )
 			THROW( TOO_DEEPLY_NESTED_EXCEPTION );
 
-		/* Now check if file name is enclosed by `"' or '<' and '>' - in the
+		/* Now check if file name is enclosed by '"' or '<' and '>' - in the
 		   later case prepend the default directory */
 
 		if ( file[ 0 ] == '"' )

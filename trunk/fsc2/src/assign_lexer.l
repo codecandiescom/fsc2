@@ -464,7 +464,7 @@ WS          [\n=: ]+
 
 {CTRL}      {
 				print( FATAL, "Flow control structures can't be used in the "
-					   ASSIGNMENTS section.\n" );
+					   "ASSIGNMENTS section.\n" );
 				THROW( EXCEPTION );
 			}
 

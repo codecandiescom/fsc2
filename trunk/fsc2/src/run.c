@@ -972,7 +972,7 @@ static void child_confirmation_handler( int signo )
 
 /*-------------------------------------------------------------------*/
 /* do_measurement() runs through and executes all commands. Since it */
-/* is executed by the child it has got to honor the `do_quit' flag.  */
+/* is executed by the child it has got to honor the 'do_quit' flag.  */
 /*-------------------------------------------------------------------*/
 
 static void do_measurement( void )

@@ -161,12 +161,12 @@ void dg2020_do_checks( FUNCTION *f )
 				 ( FSC2_MODE == TEST ? MAX_PULSER_BITS : dg2020.max_seq_len ) )
 			{
 				if ( FSC2_MODE == TEST )
-					print( FATAL, "Pulse sequence for function `%s' does not "
+					print( FATAL, "Pulse sequence for function '%s' does not "
 						   "fit into the pulsers memory. Maybe, you could try "
 						   "a longer pulser time base.\n",
 						   Function_Names[ f->self ] );
 				else
-					print( FATAL, "Pulse sequence for function `%s' is too "
+					print( FATAL, "Pulse sequence for function '%s' is too "
 						   "long. Perhaps you should try the "
 						   "MAXIMUM_PATTERN_LENGTH command.\n",
 						   Function_Names[ f->self ] );
@@ -460,7 +460,7 @@ set_length:
 		if ( flag )                // in test run
 			phase_p->len = -1;
 		else
-			/* Take care: the variable `dg2020.max_seq_len' already
+			/* Take care: the variable 'dg2020.max_seq_len' already
 			   includes the delay for the functions... */
 
 			phase_p->len = dg2020.max_seq_len - f->delay - phase_p->pos;
@@ -612,7 +612,7 @@ PULSE *dg2020_delete_pulse( PULSE *p )
 	{
 		p->function->pulses = T_free( p->function->pulses );
 
-		print( SEVERE, "Function `%s' isn't used at all because all its "
+		print( SEVERE, "Function '%s' isn't used at all because all its "
 			   "pulses are never used.\n",
 				Function_Names[ p->function->self ] );
 		p->function->is_used = UNSET;
@@ -660,7 +660,7 @@ void dg2020_finalize_phase_pulses( int func )
 
 	/* Find the last active phase pulses and set its length to the maximum
 	   posible amount, i.e. to the maximum sequence length - take care, the
-	   variable `dg2020.max_seq_len' already includes the delay for the
+	   variable 'dg2020.max_seq_len' already includes the delay for the
 	   function... */
 
 	for ( i = 0; i < f->num_pulses; i++ )

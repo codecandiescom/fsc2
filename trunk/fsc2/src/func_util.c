@@ -45,9 +45,9 @@ extern volatile bool is_alrm;
    Prints variable number of arguments using a format string supplied as
    the first argument. Types of arguments to be printed are integer and
    float data and strings. To get a value printed the format string has
-   to contain the character `#'. The escape character is the backslash,
-   with a double backslash for printing one backslash. Beside the `\#'
-   combination to print a `#' some of the escape sequences from printf()
+   to contain the character '#'. The escape character is the backslash,
+   with a double backslash for printing one backslash. Beside the '\#'
+   combination to print a '#' some of the escape sequences from printf()
    ('\n', '\t', and '\"') do work. If the text should even be printed while
    the test is running the string has to start with "\T".
 
@@ -64,7 +64,7 @@ Var *f_print( Var *v )
 	char *sptr;
 	int in_format,               // number of wild cards characters
 		on_stack,                // number of arguments (beside format string )
-		percs,                   // number of `%' characters
+		percs,                   // number of '%' characters
 		n = 0;                   // number of variables printed
 	bool print_anyway = UNSET;
 
@@ -87,9 +87,9 @@ Var *f_print( Var *v )
 		print_anyway = SET;
 	}
 
-	/* Count the number of specifiers `#' in the format string but don't count
-	   escaped `#' (i.e "\#"). Also count number of `%' - since this is a
-	   format string we need to replace each `%' by a `%%' since printf() and
+	/* Count the number of specifiers '#' in the format string but don't count
+	   escaped '#' (i.e "\#"). Also count number of '%' - since this is a
+	   format string we need to replace each '%' by a '%%' since printf() and
 	   friends use it in the conversion specification. */
 
 	percs = *sptr == '%' ? 1 : 0;
@@ -120,7 +120,7 @@ Var *f_print( Var *v )
 	if ( on_stack > in_format )
 		print( SEVERE, "More data than format descriptors format string.\n" );
 
-	/* Get string long enough to replace each `#' by a 3 char sequence
+	/* Get string long enough to replace each '#' by a 3 char sequence
 	   plus a '\0' character */
 
 	fmt = T_malloc( strlen( sptr ) + 3 * in_format + percs + 3 );
@@ -133,7 +133,7 @@ Var *f_print( Var *v )
 		if ( *cp != '\\' && *cp != '#' && *cp != '%' )
 			continue;
 
-		/* Convert format descriptor (un-escaped `#') to 4 \x01 (as long as
+		/* Convert format descriptor (un-escaped '#') to 4 \x01 (as long as
            there are still variables to be printed) */
 
 		if ( *cp == '#' )
@@ -148,7 +148,7 @@ Var *f_print( Var *v )
 			continue;
 		}
 
-		/* Double all `%'s */
+		/* Double all '%'s */
 
 		if ( *cp == '%' )
 		{

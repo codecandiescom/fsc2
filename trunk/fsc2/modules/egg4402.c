@@ -274,7 +274,7 @@ Var *boxcar_get_curve( Var *v )
 
 		if ( curve_type == -1 )
 		{
-			print( FATAL, "First argument (`%s') is invalid.\n", v->val.sptr );
+			print( FATAL, "First argument ('%s') is invalid.\n", v->val.sptr );
 			THROW( EXCEPTION );
 		}
 

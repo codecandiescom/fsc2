@@ -484,7 +484,7 @@ void print( int severity, const char *fmt, ... )
 /* and tell the user about it. The lock automatically expires when fsc2   */
 /* exits (on normal termination it will also delete the lock file).       */
 /* To make this work correctly for more then one user the lock file must  */
-/* belong to a special user (e.g. a user named `fsc2') as well as the     */
+/* belong to a special user (e.g. a user named 'fsc2') as well as the     */
 /* program belong to this user and have the setuid bit set.               */
 /* Another purpose of this scheme is to get rid of shared memory segments */
 /* that remain after fsc2 crashed or was killed. Therefore, all shared    */
@@ -510,7 +510,7 @@ bool fsc2_locking( void )
 		 < 0 )
 	{
 		lower_permissions( );
-		fprintf( stderr, "Error: Can't access lock file `%s'.\n",
+		fprintf( stderr, "Error: Can't access lock file '%s'.\n",
 				 FSC2_LOCKFILE );
 		return FAIL;
 	}
@@ -537,7 +537,7 @@ bool fsc2_locking( void )
 			if ( ( name_end = strchr( name, '\n' ) ) != NULL )
 			{
 				*name_end = '\0';
-				fprintf( stderr, " and the user is `%s'.\n", name );
+				fprintf( stderr, " and the user is '%s'.\n", name );
 			}
 			else
 				fprintf( stderr, ".\n" );
@@ -560,7 +560,7 @@ bool fsc2_locking( void )
 	{
 		unlink( FSC2_LOCKFILE );
 		lower_permissions( );
-		fprintf( stderr, "Error: Can't write lock file `%s'.\n",
+		fprintf( stderr, "Error: Can't write lock file '%s'.\n",
 				 FSC2_LOCKFILE );
 		return FAIL;
 	}
@@ -573,7 +573,7 @@ bool fsc2_locking( void )
 	{
 		unlink( FSC2_LOCKFILE );
 		lower_permissions( );
-		fprintf( stderr, "Error: Can't write lock file `%s'.\n",
+		fprintf( stderr, "Error: Can't write lock file '%s'.\n",
 				 FSC2_LOCKFILE );
 		return FAIL;
 	}
@@ -585,7 +585,7 @@ bool fsc2_locking( void )
 
 /*--------------------------------------------------------------------------*/
 /* Functions checks if a supplied input string is identical to one of 'max' */
-/* alternatives, pointed to by `alternatives', but neglecting the case of   */
+/* alternatives, pointed to by 'alternatives', but neglecting the case of   */
 /* the characters and removing leading and trailing white space from the    */
 /* input string before the comparison. The comparison is case insensitive   */
 /* and the function returns the index of the found alternative (a number    */
@@ -629,9 +629,9 @@ int is_in( const char *supplied_in, const char **alternatives, int max )
 /* Function converts intensities into rgb values (between 0 and 255). For */
 /* values below 0 a dark kind of violet is returned, for values above 1 a */
 /* creamy shade of white. The interval [ 0, 1 ] itself is subdivided into */
-/* 6 subintervals at the points defined by the array `p' and rgb colours  */
+/* 6 subintervals at the points defined by the array 'p' and rgb colours  */
 /* ranging from blue via cyan, green and yellow to red are calculated     */
-/* with `v' defining the intensities of the three primary colours at the  */
+/* with 'v' defining the intensities of the three primary colours at the  */
 /* endpoints of the intervals and using linear interpolation in between.  */
 /*------------------------------------------------------------------------*/
 

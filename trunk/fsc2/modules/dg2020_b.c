@@ -422,7 +422,7 @@ Var *pulser_cw_mode( Var *v )
 
 	if ( ! dg2020.function[ PULSER_CHANNEL_MW ].is_used )
 	{
-		print( FATAL, "Function `MICROWAVE' has not been defined as needed "
+		print( FATAL, "Function 'MICROWAVE' has not been defined as needed "
 			   "for CW mode.\n" );
 		THROW( EXCEPTION );
 	}
@@ -678,7 +678,7 @@ Var *pulser_next_phase( Var *v )
 		if ( ! f->is_used )
 		{
 			if ( FSC2_MODE == TEST )
-				print( SEVERE, "Function `%s' to be phase cycled is not "
+				print( SEVERE, "Function '%s' to be phase cycled is not "
 					   "used.\n", Function_Names[ f->self ] );
 			return vars_push( INT_VAR, 0 );
 		}
@@ -754,7 +754,7 @@ Var *pulser_phase_reset( Var *v )
 		if ( ! f->is_used )
 		{
 			if ( FSC2_MODE == TEST )
-				print( SEVERE, "Function `%s' to be phase cycled is not "
+				print( SEVERE, "Function '%s' to be phase cycled is not "
 					   "used.\n", Function_Names[ f->self ] );
 			return vars_push( INT_VAR, 0 );
 		}

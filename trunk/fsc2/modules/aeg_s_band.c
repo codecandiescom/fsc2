@@ -582,7 +582,7 @@ static double aeg_s_band_field_check( double field, bool *err_flag )
 #define sign( x ) ( ( ( x ) >= 0.0 ) ? 1.0 : -1.0 )
 
 /* MAGNET_ZERO_STEP is the data to be send to the magnet to achieve a sweep
-   speed of exactly zero - which is 0x800 minus `half a bit' :-)
+   speed of exactly zero - which is 0x800 minus 'half a bit' :-)
    MAGNET_ZERO_STEP and MAGNET_MAX_STEP must always add up to something not
    more than 0xFFF and MAGNET_ZERO_STEP minus MAGNET_MAX_STEP must always be
    zero or larger ! */
@@ -891,7 +891,7 @@ static bool magnet_goto_field_rec( double field, double error, int rec,
 		}
 	}
 
-	/* Deviation from target field has to be no more than `max_deviation'
+	/* Deviation from target field has to be no more than 'max_deviation'
 	   otherwise try another (hopefully smaller) step */
 
 	max_dev = magnet.max_deviation > fabs( error ) ?

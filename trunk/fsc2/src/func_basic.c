@@ -1576,7 +1576,7 @@ Var *f_size( Var *v )
 
 	if ( v->next->type == FLOAT_VAR )
 	{
-		print( WARN, "Floating point value used as index for array `%s'.\n",
+		print( WARN, "Floating point value used as index for array '%s'.\n",
 			   v->from->name );
 		size = ( int ) v->next->val.dval - ARRAY_OFFSET;
 	}
@@ -1585,7 +1585,7 @@ Var *f_size( Var *v )
 
 	if ( size >= v->from->dim )
 	{
-		print( FATAL, "Array `%s' has only %d dimensions, can't return size "
+		print( FATAL, "Array '%s' has only %d dimensions, can't return size "
 			   "of %d. dimension.\n", v->from->name, v->from->dim, size );
 		THROW( EXCEPTION );
 	}

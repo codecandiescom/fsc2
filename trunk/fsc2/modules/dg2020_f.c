@@ -563,7 +563,7 @@ Var *pulser_next_phase( Var *v )
 
 		if ( ! f->is_used && FSC2_MODE == TEST )
 		{
-			print( SEVERE, "Phase function `%s' is not used.\n",
+			print( SEVERE, "Phase function '%s' is not used.\n",
 				   Function_Names[ f->self ] );
 			return vars_push( INT_VAR, 0 );
 		}
@@ -629,7 +629,7 @@ Var *pulser_phase_reset( Var *v )
 
 		if ( ! f->is_used && FSC2_MODE == TEST )
 		{
-			print( SEVERE, "Phase function `%s' is not used.\n",
+			print( SEVERE, "Phase function '%s' is not used.\n",
 				   Function_Names[ f->self ] );
 			return vars_push( INT_VAR, 0 );
 		}

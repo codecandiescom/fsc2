@@ -784,7 +784,7 @@ static void eps_make_scale( FILE *fp, void *cv, int coord, long dim )
 	order = pow( 10.0, mag );
 	modf( rwc_delta / order, &rwc_delta );
 
-	/* Now get a `smooth' value for the real world ticks distance, i.e. either
+	/* Now get a 'smooth' value for the real world ticks distance, i.e. either
 	   2, 2.5, 5 or 10 */
 
 	if ( rwc_delta <= 2.0 )       /* in [ 1, 2 ] -> units of 2 */
@@ -816,10 +816,10 @@ static void eps_make_scale( FILE *fp, void *cv, int coord, long dim )
 
 	d_delta_fine = s2d[ coord ] * rwc_delta / fabs( rwcd );
 
-	/* `rwc_start' is the first value in the display (i.e. the smallest x or y
-	   value still shown in the frame), `rwc_start_fine' the position of the
+	/* 'rwc_start' is the first value in the display (i.e. the smallest x or y
+	   value still shown in the frame), 'rwc_start_fine' the position of the
 	   first small tick (both in real world coordinates) and, finally,
-	   `d_start_fine' is the same position but in points */
+	   'd_start_fine' is the same position but in points */
 
 	if ( dim <= 1 )
 		rwc_start = rwcs - ( ( Curve_1d * ) cv )->shift[ coord ] * rwcd;
@@ -1641,7 +1641,7 @@ static void do_print( char *name, const char *command )
 
 
 /*-----------------------------------------------------------*/
-/* Starts a `grand-child' process to do the actual printing. */
+/* Starts a 'grand-child' process to do the actual printing. */
 /*-----------------------------------------------------------*/
 
 static void start_printing( char **argv, char *name )

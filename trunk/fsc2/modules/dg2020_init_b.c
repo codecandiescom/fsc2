@@ -89,7 +89,7 @@ void dg2020_basic_pulse_check( void )
 
 		if ( ! p->function->is_used )
 		{
-			print( FATAL, "Function `%s' of pulse %ld hasn't been declared in "
+			print( FATAL, "Function '%s' of pulse %ld hasn't been declared in "
 				   "the ASSIGNMENTS section.\n",
 				   Function_Names[ p->function->self ], p->num );
 			THROW( EXCEPTION );
@@ -127,7 +127,7 @@ void dg2020_basic_pulse_check( void )
 			if ( p->function->num_pods == 1 )
 			{
 				print( FATAL, "Phase %ld needs phase cycling but its "
-					   "function `%s' has only one pod assigned to it.\n",
+					   "function '%s' has only one pod assigned to it.\n",
 					   p->num, Function_Names[ p->function->self ] );
 				THROW( EXCEPTION );
 			}
@@ -135,7 +135,7 @@ void dg2020_basic_pulse_check( void )
 			if ( p->function->phase_setup == NULL )
 			{
 				print( FATAL, "Pulse %ld needs phase cycling but a phase "
-					   "setup for its function `%s' is missing.\n",
+					   "setup for its function '%s' is missing.\n",
 					   p->num, Function_Names[ p->function->self ] );
 				THROW( EXCEPTION );
 			}
@@ -145,7 +145,7 @@ void dg2020_basic_pulse_check( void )
 				cur_type = p->pc->sequence[ i ];
 				if  ( cur_type < PHASE_PLUS_X || cur_type > PHASE_CW )
 				{
-					print( FATAL, "Pulse %ld needs phase type `%s' but this "
+					print( FATAL, "Pulse %ld needs phase type '%s' but this "
 						   "type isn't possible with this driver.\n",
 						   p->num, Phase_Types[ cur_type ] );
 					THROW( EXCEPTION );
@@ -159,7 +159,7 @@ void dg2020_basic_pulse_check( void )
 		{
 			if ( p->function->phase_setup == NULL )
 			{
-				print( FATAL, "Function `%s' has more than one pod but "
+				print( FATAL, "Function '%s' has more than one pod but "
 					   "association between pods and phases is missing.\n",
 					   Function_Names[ p->function->self ] );
 				THROW( EXCEPTION );
@@ -226,7 +226,7 @@ static void dg2020_basic_functions_check( void )
 
 		if ( ! f->is_needed )
 		{
-			print( WARN, "No pulses have been assigned to function `%s'.\n",
+			print( WARN, "No pulses have been assigned to function '%s'.\n",
 				   Function_Names[ i ] );
 			f->is_used = UNSET;
 
@@ -244,7 +244,7 @@ static void dg2020_basic_functions_check( void )
 
 		if ( f->num_pods == 0 )
 		{
-			print( FATAL, "No pod has been assigned to function `%s'.\n",
+			print( FATAL, "No pod has been assigned to function '%s'.\n",
 				   Function_Names[ i ] );
 			THROW( EXCEPTION );
 		}
@@ -273,7 +273,7 @@ static void dg2020_basic_functions_check( void )
 
 		if ( f->num_pods > 1 && f->phase_setup == NULL )
 		{
-			print( FATAL, "Missing phase setup for function `%s'.\n",
+			print( FATAL, "Missing phase setup for function '%s'.\n",
 				   Function_Names[ i ] );
 			THROW( EXCEPTION );
 		}
@@ -354,7 +354,7 @@ static void dg2020_phase_setup_check( FUNCTION *f )
 		if ( j == f->num_pods )                 /* not found ? */
 		{
 			print( FATAL, "According to the the phase setup pod %d is needed "
-				   "for function `%s' but it's not assigned to it.\n",
+				   "for function '%s' but it's not assigned to it.\n",
 				   f->phase_setup->pod[ i ]->self, Function_Names[ f->self ] );
 			THROW( EXCEPTION );
 		}
@@ -368,7 +368,7 @@ static void dg2020_phase_setup_check( FUNCTION *f )
 	{
 		if ( f->phase_setup->is_needed[ i ] && ! f->phase_setup->is_set[ i ] )
 		{
-			print( FATAL, "Phase type `%s' is needed for function `%s' but it "
+			print( FATAL, "Phase type '%s' is needed for function '%s' but it "
 				   "hasn't been not defined in a PHASE_SETUP command.\n",
 				   Phase_Types[ i + PHASE_PLUS_X ],
 				   Function_Names[ f->self ] );
@@ -421,13 +421,13 @@ static void dg2020_phase_setup_check( FUNCTION *f )
 				   a pulse but to just to create a constant voltage. */
 
 				if ( f->phase_setup->is_needed[ j ] )
-					print( FATAL, "Pod %ld can't be used for phase type `%s' "
-						   "and `%s' at the same time.\n",
+					print( FATAL, "Pod %ld can't be used for phase type '%s' "
+						   "and '%s' at the same time.\n",
 						   f->phase_setup->pod[ i ]->self,
 						   Phase_Types[ i + PHASE_PLUS_X ],
 						   Phase_Types[ j + PHASE_PLUS_X ] );
 				else
-					print( FATAL, "Pod %ld is needed for phase type `%s' and "
+					print( FATAL, "Pod %ld is needed for phase type '%s' and "
 						   "can't be also used for other phase types.\n",
 						   f->phase_setup->pod[ i ]->self,
 						   Phase_Types[ i + PHASE_PLUS_X ] );
@@ -656,7 +656,7 @@ static void dg2020_cw_init( void )
 
 		if ( dg2020.function[ i ].is_used )
 		{
-			print( WARN, "Function `%s' can't be used in CW mode.\n",
+			print( WARN, "Function '%s' can't be used in CW mode.\n",
 				   Function_Names[ i ] );
 			dg2020.function[ i ].is_used = UNSET;
 		}
@@ -669,7 +669,7 @@ static void dg2020_cw_init( void )
 
 	if ( f->phase_setup == NULL )
 	{
-		print( FATAL, "CW mode needs a phase setup for the function `%s'.\n",
+		print( FATAL, "CW mode needs a phase setup for the function '%s'.\n",
 			   Function_Names[ f->self ] );
 		THROW( EXCEPTION );
 	}
@@ -687,7 +687,7 @@ static void dg2020_cw_init( void )
 	if ( f->num_pods <= 1 )
 	{
 		print( FATAL, "Not enough pods (i.e. not at least 2) have been "
-			   "assigned to function `%s'.\n", Function_Names[ f->self ] );
+			   "assigned to function '%s'.\n", Function_Names[ f->self ] );
 		THROW( EXCEPTION );
 	}
 

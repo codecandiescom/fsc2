@@ -2170,7 +2170,7 @@ static void cut_make_scale( Canvas *c, int coord )
 		}
 	}
 
-	/* The distance between the smallest ticks should be `G.scale_tick_dist'
+	/* The distance between the smallest ticks should be 'G.scale_tick_dist'
 	   points - calculate the corresponding delta in real word units */
 
 	rwc_delta = ( double ) G.scale_tick_dist
@@ -2182,7 +2182,7 @@ static void cut_make_scale( Canvas *c, int coord )
 	order = pow( 10.0, mag );
 	modf( rwc_delta / order, &rwc_delta );
 
-	/* Get a `smooth' value for the ticks distance, i.e. either 2, 2.5, 5 or
+	/* Get a 'smooth' value for the ticks distance, i.e. either 2, 2.5, 5 or
 	   10 and convert it to real world coordinates */
 
 	if ( rwc_delta <= 2.0 )       /* in [ 1, 2 ] -> units of 2 */
@@ -2214,10 +2214,10 @@ static void cut_make_scale( Canvas *c, int coord )
 
 	d_delta_fine = r_scale * rwc_delta / fabs( cv2->rwc_delta[ r_coord ] );
 
-	/* `rwc_start' is the first value in the display (i.e. the smallest x or y
-	   value still shown in the canvas), `rwc_start_fine' the position of the
+	/* 'rwc_start' is the first value in the display (i.e. the smallest x or y
+	   value still shown in the canvas), 'rwc_start_fine' the position of the
 	   first small tick (both in real world coordinates) and, finally,
-	   `d_start_fine' is the same position but in points */
+	   'd_start_fine' is the same position but in points */
 
 	if ( coord != Z )
 		rwc_start = cv2->rwc_start[ r_coord ]
@@ -2399,7 +2399,7 @@ static void cut_make_scale( Canvas *c, int coord )
 
 
 /*-------------------------------------------------------------------*/
-/* This is basically a simplified version of `cut_recalc_XPoints()'  */
+/* This is basically a simplified version of 'cut_recalc_XPoints()'  */
 /* because we need to do much less calculations, i.e. just adding an */
 /* offset to all XPoints instead of going through all the scalings...*/
 /*-------------------------------------------------------------------*/

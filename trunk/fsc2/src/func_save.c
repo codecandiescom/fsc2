@@ -81,13 +81,13 @@ Var *f_is_file( Var *v )
 /* pointer array or -1 if no file was selected.                              */
 /* Optional input variables (each will replaced by a default string if the   */
 /* argument is either NULL or the empty string) are:                         */
-/* 1. Message string (not allowed to start with a backslash `\'!)            */
+/* 1. Message string (not allowed to start with a backslash '\'!)            */
 /* 2. Default pattern for file name                                          */
 /* 3. Default directory                                                      */
 /* 4. Default file name                                                      */
 /* 5. Default extension to add (in case it's not already there)              */
 /* Alternatively, to hardcode a file name into the EDL program only send the */
-/* file name instead of the message string, but with a backslash `\' as the  */
+/* file name instead of the message string, but with a backslash '\' as the  */
 /* very first character (it will be skipped and not be used as part of the   */
 /* file name). The other strings still can be set but will only be used if   */
 /* opening the file fails.                                                   */
@@ -109,12 +109,12 @@ Var *f_getf( Var *var )
 	r = NULL;
 	old_File_List = NULL;
 
-	/* If there was a call of `f_save()' without a previous call to `f_getf()'
-	   then `f_save()' already called `f_getf()' by itself and now does not
-	   expects file identifiers anymore - in this case `No_File_Numbers' is
-	   set. So, if we get a call to `f_getf()' while `No_File_Numbers' is set
+	/* If there was a call of 'f_save()' without a previous call to 'f_getf()'
+	   then 'f_save()' already called 'f_getf()' by itself and now does not
+	   expects file identifiers anymore - in this case 'No_File_Numbers' is
+	   set. So, if we get a call to 'f_getf()' while 'No_File_Numbers' is set
 	   we must tell the user that he can't have it both ways, i.e. (s)he
-	   either has to call `f_getf()' before any call to `f_save()' or never. */
+	   either has to call 'f_getf()' before any call to 'f_save()' or never. */
 
 	if ( No_File_Numbers )
 	{
@@ -387,7 +387,7 @@ Var *f_clonef( Var *v )
 /*---------------------------------------------------------------------*/
 /* This function is called by the functions for saving. If they didn't */
 /* get a file identifier it is assumed the user wants just one file    */
-/* that is opened at the first call of a function of the `save_xxx()'  */
+/* that is opened at the first call of a function of the 'save_xxx()'  */
 /* family of functions.                                                */
 /*---------------------------------------------------------------------*/
 
@@ -495,9 +495,9 @@ void close_all_files( void )
 
 
 /*--------------------------------------------------------------------------*/
-/* Saves data to a file. If `get_file()' hasn't been called yet it will be  */
+/* Saves data to a file. If 'get_file()' hasn't been called yet it will be  */
 /* called now - in this case the file opened this way is the only file to   */
-/* be used and no file identifier is allowed as first argument to `save()'. */
+/* be used and no file identifier is allowed as first argument to 'save()'. */
 /* This version of save writes the data in an unformatted way, i.e. each    */
 /* on its own line with the only exception of arrays of more than one       */
 /* dimension where an empty line is put between the slices.                 */
@@ -562,7 +562,7 @@ Var *f_save( Var *v )
 			case ARR_REF :
 				if ( v->from->flags & NEED_ALLOC )
 				{
-					print( WARN, "Variable sized array `%s' is still "
+					print( WARN, "Variable sized array '%s' is still "
 						   "undefined - skipping'.\n", v->from->name );
 					break;
 				}
@@ -644,11 +644,11 @@ static int print_slice( Var *v, int fid )
 
 
 /*--------------------------------------------------------------------------*/
-/* Saves data to a file. If `get_file()' hasn't been called yet it will be  */
+/* Saves data to a file. If 'get_file()' hasn't been called yet it will be  */
 /* called now - in this case the file opened this way is the only file to   */
-/* be used and no file identifier is allowed as first argument to `save()'. */
+/* be used and no file identifier is allowed as first argument to 'save()'. */
 /* This function is the formated save with the same meaning of the format   */
-/* string as in `print()'.                                                  */
+/* string as in 'print()'.                                                  */
 /* The function returns the number of chars it wrote to the file.           */
 /*--------------------------------------------------------------------------*/
 
@@ -1335,10 +1335,10 @@ static long do_printf( int file_num, Var *v )
 
 
 /*-------------------------------------------------------------------------*/
-/* Saves the EDL program to a file. If `get_file()' hasn't been called yet */
+/* Saves the EDL program to a file. If 'get_file()' hasn't been called yet */
 /* it will be called now - in this case the file opened this way is the    */
 /* only file to be used and no file identifier is allowed as first argu-   */
-/* ment to `save()'.                                                       */
+/* ment to 'save()'.                                                       */
 /* Beside the file identifier the other (optional) parameter is a string   */
 /* that gets prepended to each line of the EDL program (i.e. a comment     */
 /* character).                                                             */
@@ -1368,10 +1368,10 @@ Var *f_save_p( Var *v )
 
 
 /*--------------------------------------------------------------------------*/
-/* Saves the content of the output window to a file. If `get_file()' hasn't */
+/* Saves the content of the output window to a file. If 'get_file()' hasn't */
 /* been called yet it will be called now - in this case the file opened     */
 /* this way is the only file to be used and no file identifier is allowed   */
-/* as first argument to `save()'.                                           */
+/* as first argument to 'save()'.                                           */
 /* Beside the file identifier the other (optional) parameter is a string    */
 /* that gets prepended to each line of the output (i.e. a comment char).    */
 /*--------------------------------------------------------------------------*/

@@ -935,7 +935,7 @@ static bool zoom_xy_1d( Canvas *c )
 
 
 /*-----------------------------------------------------------------------*/
-/* This is basically a simplified version of `recalc_XPoints_of_curve()' */
+/* This is basically a simplified version of 'recalc_XPoints_of_curve()' */
 /* because we need to do much less calculations, i.e. just adding an     */
 /* offset to all XPoints instead of going through all the scalings...    */
 /*-----------------------------------------------------------------------*/
@@ -1505,7 +1505,7 @@ void make_scale_1d( Curve_1d *cv, Canvas *c, int coord )
 	short last = -1000;
 
 
-	/* The distance between the smallest ticks should be `G.scale_tick_dist'
+	/* The distance between the smallest ticks should be 'G.scale_tick_dist'
 	   points - calculate the corresponding delta in real word units */
 
 	rwc_delta = ( double ) G.scale_tick_dist
@@ -1517,7 +1517,7 @@ void make_scale_1d( Curve_1d *cv, Canvas *c, int coord )
 	order = pow( 10.0, mag );
 	modf( rwc_delta / order, &rwc_delta );
 
-	/* Get a `smooth' value for the ticks distance, i.e. either 2, 2.5, 5 or
+	/* Get a 'smooth' value for the ticks distance, i.e. either 2, 2.5, 5 or
 	   10 and convert it to real world coordinates */
 
 	if ( rwc_delta <= 2.0 )       /* in [ 1, 2 ] -> units of 2 */
@@ -1549,10 +1549,10 @@ void make_scale_1d( Curve_1d *cv, Canvas *c, int coord )
 
 	d_delta_fine = cv->s2d[ coord ] * rwc_delta / fabs( G.rwc_delta[ coord ] );
 
-	/* `rwc_start' is the first value in the display (i.e. the smallest x or y
-	   value still shown in the canvas), `rwc_start_fine' the position of the
+	/* 'rwc_start' is the first value in the display (i.e. the smallest x or y
+	   value still shown in the canvas), 'rwc_start_fine' the position of the
 	   first small tick (both in real world coordinates) and, finally,
-	   `d_start_fine' is the same position but in points */
+	   'd_start_fine' is the same position but in points */
 
 	rwc_start = G.rwc_start[ coord ]
 		        - cv->shift[ coord ] * G.rwc_delta[ coord ];

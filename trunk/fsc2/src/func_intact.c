@@ -273,13 +273,13 @@ Var *f_layout( Var *v )
 			default :
 				if ( Internals.I_am == PARENT )
 				{
-					print( FATAL, "Unknown layout keyword `%s'.\n",
+					print( FATAL, "Unknown layout keyword '%s'.\n",
 						   v->val.sptr );
 					THROW( EXCEPTION );
 				}
 				else
 				{
-					print( FATAL, "Unknown layout keyword `%s', using default "
+					print( FATAL, "Unknown layout keyword '%s', using default "
 						   "vertical layout.\n", v->val.sptr );
 					return vars_push( INT_VAR, 0 );
 				}

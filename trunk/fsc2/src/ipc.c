@@ -180,10 +180,10 @@ void delete_all_shm( void )
 /*------------------------------------------------------------------------*/
 /* If fsc2 crashes while running an experiment shared memory segments may */
 /* remain undeleted. To get rid of them we now check all shared segments  */
-/* for the ones that belong to the user `fsc2' and start with the magic   */
+/* for the ones that belong to the user 'fsc2' and start with the magic   */
 /* 'fsc2'. They are obviously debris from a crash and have to be deleted  */
 /* to avoid using up all segments after some time. Since the segments     */
-/* belong to the user `fsc2' this routine must be run with the effective  */
+/* belong to the user 'fsc2' this routine must be run with the effective  */
 /* UID and GID of fsc2.                                                   */
 /* This routine is more or less a copy of the code from the ipcs utility, */
 /* hopefully it will continue to work with newer versions of Linux (it    */

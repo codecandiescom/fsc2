@@ -83,7 +83,7 @@ bool dg2020_assign_function( int function, long pod )
 	if ( p->function != NULL )
 	{
 		print( FATAL, "Pod number %ld has already been assigned to function "
-			   "`%s'.\n", pod, Function_Names[ p->function->self ] );
+			   "'%s'.\n", pod, Function_Names[ p->function->self ] );
 		THROW( EXCEPTION );
 	}
 
@@ -97,14 +97,14 @@ bool dg2020_assign_function( int function, long pod )
 			 f->self != PULSER_CHANNEL_PHASE_2 )
 		{
 			print( FATAL, "A pod has already been assigned to function "
-				   "`%s'.\n", Function_Names[ f->self ] );
+				   "'%s'.\n", Function_Names[ f->self ] );
 			THROW( EXCEPTION );
 		}
 
 		if ( f->pod2 != NULL )
 		{
 			print( FATAL, "There have already been two pods assigned to "
-				   "function `%s'.\n", Function_Names[ f->self ] );
+				   "function '%s'.\n", Function_Names[ f->self ] );
 			THROW( EXCEPTION );
 		}
 
@@ -138,12 +138,12 @@ bool dg2020_assign_channel_to_function( int function, long channel )
 	{
 		if ( c->function->self == function )
 		{
-			print( SEVERE, "Channel %ld is assigned twice to function `%s'.\n",
+			print( SEVERE, "Channel %ld is assigned twice to function '%s'.\n",
 				   channel, Function_Names[ c->function->self ] );
 			return FAIL;
 		}
 
-		print( FATAL, "Channel %ld is already used for function `%s'.\n",
+		print( FATAL, "Channel %ld is already used for function '%s'.\n",
 			   channel, Function_Names[ c->function->self ] );
 		THROW( EXCEPTION );
 	}
@@ -179,7 +179,7 @@ bool dg2020_set_function_delay( int function, double delay )
 
 	if ( dg2020.function[ function ].is_delay )
 	{
-		print( FATAL, "Delay for function `%s' has already been set.\n",
+		print( FATAL, "Delay for function '%s' has already been set.\n",
 			   Function_Names[ function ] );
 		THROW( EXCEPTION );
 	}
@@ -229,7 +229,7 @@ bool dg2020_set_function_high_level( int function, double voltage )
 
 	if ( voltage < MIN_POD_HIGH_VOLTAGE || voltage > MAX_POD_HIGH_VOLTAGE )
 	{
-		print( FATAL, "Invalid high level of %g V for function `%s', valid "
+		print( FATAL, "Invalid high level of %g V for function '%s', valid "
 			   "range is %g V to %g V.\n", voltage, Function_Names[ function ],
 			   MIN_POD_HIGH_VOLTAGE, MAX_POD_HIGH_VOLTAGE );
 		THROW( EXCEPTION );
