@@ -25,6 +25,7 @@ Var *f_rescale( Var *v );
 Var *f_display( Var *v );
 Var *f_clearcv( Var *v );
 Var *f_getf(    Var *v );
+Var *f_clonef(  Var *v );
 Var *f_save(    Var *v );
 Var *f_fsave(   Var *v );
 Var *f_save_p(  Var *v );
