@@ -35,10 +35,10 @@ char *get_string( size_t len )
 }
 
 
-/*----------------------------------------------------------------*/
-/* Function gets a format string like in printf and all arguments */
-/* and returns a string into which the arguments are printed.     */
-/*----------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/* Function gets a format string as in printf and all arguments */
+/* and returns a string into which the arguments are printed.   */
+/*--------------------------------------------------------------*/
 
 char *get_init_string( const char *fmt, ... )
 {

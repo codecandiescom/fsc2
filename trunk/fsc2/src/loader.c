@@ -156,9 +156,8 @@ static void load_functions( Device *dev )
 	/* Assemble name of library to be loaded - this will also work for cases
 	   where the device name contains a relative path */
 
-	lib_name = get_string( strlen( libdir ) + strlen( dev->name ) + 4 );
-	sprintf( lib_name, "%s%s%s.so", libdir,
-			 libdir[ strlen( libdir ) - 1 ] != '/' ? "/" : "", dev->name );
+	lib_name = get_init_string( "%s%s%s.so", libdir,
+				 libdir[ strlen( libdir ) - 1 ] != '/' ? "/" : "", dev->name );
 
 	/* Try to open the library. If it can't be found in the place defined at
 	   compilation time give it another chance by checking the paths defined
@@ -301,7 +300,6 @@ static void resolve_functions( Device *dev )
 	int num;
 	void *cur;
 	char *new_func_name;
-	char buf[ 12 ];
 	char *temp;
 	long len;
 	int num_new_funcs = 0;
@@ -349,11 +347,8 @@ static void resolve_functions( Device *dev )
 			f->device = dev;
 			if ( dev->count != 1 )
 			{
-				snprintf( buf, 12, "#%d", dev->count );
-				new_func_name = T_malloc(   strlen( f->name )
-										  + strlen( buf ) + 1 );
-				strcpy( new_func_name, f->name );
-				strcat( new_func_name, buf );
+				new_func_name = get_init_string( "%s#%d",
+												 f->name, dev->count );
 				T_free( ( char * ) f->name );
 				f->name = new_func_name;
 			}
@@ -380,8 +375,6 @@ static void add_function( int index, void *new_func, Device *new_dev,
 {
 	int i;
 	char *new_func_name;
-	char buf[ 12 ];
-	long len;
 	char *temp;
 	Func *f;
 
@@ -406,11 +399,8 @@ static void add_function( int index, void *new_func, Device *new_dev,
 		for ( i = 0, f = Fncts; i < Num_Func + num_new; f++, i++ )
 			if ( f->device == new_dev )
 			{
-				snprintf( buf, 12, "#%d", new_dev->count );
-				new_func_name = get_string(   strlen( f->name )
-											+ strlen( buf ) );
-				strcpy( new_func_name, f->name );
-				strcat( new_func_name, buf );
+				new_func_name = get_init_string( "%s#%d",
+												 f->name, new_dev->count );
 				T_free( ( char * ) f->name );
 				f->name = new_func_name;
 			}
@@ -424,11 +414,9 @@ static void add_function( int index, void *new_func, Device *new_dev,
 			for ( i = 0, f = Fncts; i < Num_Func; f++, i++ )
 				if ( Fncts[ i ].device == new_dev )
 				{
-					len = strchr( f->name, '#' ) - f->name;
-					snprintf( buf, 12, "#%d", new_dev->count );
-					new_func_name = get_string( len + strlen( buf ) );
-					strncpy( new_func_name, f->name, len );
-					strcpy( new_func_name + len, buf );
+					new_func_name = get_init_string( "%*s%d",
+										  strchr( f->name, '#' ) - f->name + 1,
+										  f->name, new_dev->count );
 					T_free( ( char * ) f->name );
 					f->name = new_func_name;
 				}
@@ -443,21 +431,12 @@ static void add_function( int index, void *new_func, Device *new_dev,
 	
 	f->fnct   = new_func;
 	f->device = new_dev;
-	snprintf( buf, 12, "#%d", new_dev->count );
-	
 	if ( ( temp = strchr( Fncts[ index ].name, '#' ) ) == NULL )
-	{
-		f->name = get_string( strlen( Fncts[ index ].name ) + strlen( buf ) );
-		strcpy( ( char * ) f->name, Fncts[ index ].name );
-		strcat( ( char * ) f->name, buf );
-	}
+		f->name = get_init_string( "%s#%d",
+								   Fncts[ index ].name, new_dev->count );
 	else
-	{
-		len = temp - Fncts[ index ].name;
-		f->name = get_string( len + strlen( buf ) );
-		strncpy( ( char * ) f->name, Fncts[ index ].name, len );
-		strcpy( ( char * ) f->name + len, buf );
-	}
+		f->name = get_init_string( "%*s%d", temp - Fncts[ index ].name + 1,
+								   Fncts[ index ].name, new_dev->count );
 }
 
 
