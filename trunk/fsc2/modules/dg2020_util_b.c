@@ -38,8 +38,8 @@ Ticks dg2020_double2ticks( double p_time )
 
 	if ( ! dg2020.is_timebase )
 	{
-		eprint( FATAL, SET, "%s: Can't set a time because no pulser time "
-				"base has been set.\n", pulser_struct.name );
+		print( FATAL, "Can't set a time because no pulser time base has been "
+			   "set.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -48,9 +48,9 @@ Ticks dg2020_double2ticks( double p_time )
 	if ( fabs( ticks - lrnd( ticks ) ) > 1.0e-2 )
 	{
 		char *t = T_strdup( dg2020_ptime( p_time ) );
-		eprint( FATAL, SET, "%s: Specified time of %s is not an integer "
-				"multiple of the pulser time base of %s.\n",
-				pulser_struct.name, t, dg2020_ptime( dg2020.timebase ) );
+		print( FATAL, "Specified time of %s is not an integer multiple of the "
+			   "pulser time base of %s.\n",
+			   t, dg2020_ptime( dg2020.timebase ) );
 		T_free( t );
 		THROW( EXCEPTION );
 	}
@@ -79,25 +79,23 @@ void dg2020_check_pod_level_diff( double high, double low )
 {
 	if ( low > high )
 	{
-		eprint( FATAL, SET, "%s: Low voltage level is above high level, use "
-				"keyword INVERT to invert the polarity.\n",
-				pulser_struct.name );
+		print( FATAL, "Low voltage level is above high level, use keyword "
+			   "INVERT to invert the polarity.\n" );
 		THROW( EXCEPTION );
 	}
 
 	if ( high - low > MAX_POD_VOLTAGE_SWING + 0.1 * VOLTAGE_RESOLUTION )
 	{
-		eprint( FATAL, SET, "%s: Difference between high and low "
-				"voltage of %g V is too big, maximum is %g V.\n",
-				pulser_struct.name, high - low, MAX_POD_VOLTAGE_SWING );
+		print( FATAL, "Difference between high and low voltage of %g V is too "
+			   "big, maximum is %g V.\n", high - low, MAX_POD_VOLTAGE_SWING );
 		THROW( EXCEPTION );
 	}
 
 	if ( high - low < MIN_POD_VOLTAGE_SWING - 0.1 * VOLTAGE_RESOLUTION )
 	{
-		eprint( FATAL, SET, "%s: Difference between high and low "
-				"voltage of %g V is too small, minimum is %g V.\n",
-				pulser_struct.name, high - low, MIN_POD_VOLTAGE_SWING );
+		print( FATAL, "Difference between high and low voltage of %g V is too "
+			   "small, minimum is %g V.\n",
+			   high - low, MIN_POD_VOLTAGE_SWING );
 		THROW( EXCEPTION );
 	}
 }
@@ -114,8 +112,7 @@ PULSE *dg2020_get_pulse( long pnum )
 
 	if ( pnum < 0 )
 	{
-		eprint( FATAL, SET, "%s: Invalid pulse number: %ld.\n",
-				pulser_struct.name, pnum );
+		print( FATAL, "Invalid pulse number: %ld.\n", pnum );
 		THROW( EXCEPTION );
 	}
 
@@ -128,8 +125,7 @@ PULSE *dg2020_get_pulse( long pnum )
 
 	if ( cp == NULL )
 	{
-		eprint( FATAL, SET, "%s: Referenced pulse %ld does not exist.\n",
-				pulser_struct.name, pnum );
+		print( FATAL, "Referenced pulse %ld does not exist.\n", pnum );
 		THROW( EXCEPTION );
 	}
 
@@ -268,9 +264,8 @@ void dg2020_calc_padding( void )
 
 	if ( dg2020.max_seq_len >= MAX_PULSER_BITS )
 	{
-		eprint( FATAL, UNSET, "%s: The requested pulse sequences don't fit "
-				"into the pulsers memory. You could try a longer pulser time "
-				"base.\n", pulser_struct.name );
+		print( FATAL, "The requested pulse sequences don't fit into the "
+			   "pulsers memory. You could try a longer pulser time base.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -300,9 +295,9 @@ void dg2020_calc_padding( void )
 		if ( padding < 0 )
 		{
 			char *t = T_strdup( dg2020_pticks( dg2020.max_seq_len ) );
-			eprint( SEVERE, UNSET, "%s: Pulse pattern is %s long and thus "
-					"longer than the repeat time of %s.\n", pulser_struct.name,
-					t, dg2020_pticks( dg2020.repeat_time ) );
+			print( SEVERE, "Pulse pattern is %s long and thus longer than the "
+				   "repeat time of %s.\n",
+				   t, dg2020_pticks( dg2020.repeat_time ) );
 			T_free( t );
 		}
 		dg2020.mem_size = dg2020.max_seq_len + 1;
@@ -326,9 +321,8 @@ void dg2020_calc_padding( void )
 
 	if ( dg2020.max_seq_len + padding + block_length >= MAX_PULSER_BITS )
 	{
-		eprint( FATAL, UNSET, "%s: Can't set the repetition rate for the "
-				"experiment because it wouldn't fit into the pulsers "
-				"memory.\n", pulser_struct.name );
+		print( FATAL, "Can't set the repetition rate for the experiment "
+			   "because it wouldn't fit into the pulsers memory.\n" );
 		THROW( EXCEPTION );
 	}
 

@@ -39,8 +39,7 @@ bool dg2020_new_pulse( long pnum )
 
 	if ( dg2020.is_cw_mode )
 	{
-		eprint( FATAL, SET, "%s: Pulses can't be used in CW mode.\n",
-				pulser_struct.name );
+		print( FATAL, "Pulses can't be used in CW mode.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -48,8 +47,8 @@ bool dg2020_new_pulse( long pnum )
 	{
 		if ( cp->num == pnum )
 		{
-			eprint( FATAL, SET, "%s: Can't create pulse with number %ld, "
-					"it already exists.\n", pulser_struct.name, pnum );
+			print( FATAL, "Can't create pulse with number %ld, it already "
+				   "exists.\n", pnum );
 			THROW( EXCEPTION );
 		}
 		lp = cp;
@@ -100,16 +99,14 @@ bool dg2020_set_pulse_function( long pnum, int function )
 	if ( function == PULSER_CHANNEL_PHASE_1 || 
 		 function == PULSER_CHANNEL_PHASE_2 )
 	{
-		eprint( FATAL, SET, "%s: Phase functions can't be used with this "
-				"driver.\n", pulser_struct.name );
+		print( FATAL, "Phase functions can't be used with this driver.\n" );
 		THROW( EXCEPTION );
 	}
 
 	if ( p->is_function )
 	{
-		eprint( FATAL, SET, "%s: The function of pulse %ld has already "
-				"been set to `%s'.\n", pulser_struct.name, pnum,
-				Function_Names[ p->function->self ] );
+		print( FATAL, "The function of pulse %ld has already been set to "
+			   "`%s'.\n", pnum, Function_Names[ p->function->self ] );
 		THROW( EXCEPTION );
 	}
 
@@ -131,17 +128,15 @@ bool dg2020_set_pulse_position( long pnum, double p_time )
 
 	if ( p->is_pos )
 	{
-		eprint( FATAL, SET, "%s: The start position of pulse %ld has "
-				"already been set to %s.\n", pulser_struct.name,
-				pnum, dg2020_pticks( p->pos ) );
+		print( FATAL, "The start position of pulse %ld has already been set "
+			   "to %s.\n", pnum, dg2020_pticks( p->pos ) );
 		THROW( EXCEPTION );
 	}
 
 	if ( p_time < 0 )
 	{
-		eprint( FATAL, SET, "%s: Invalid (negative) start position for "
-				"pulse %ld: %s.\n", pulser_struct.name, pnum,
-				dg2020_ptime( p_time ) );
+		print( FATAL, "Invalid (negative) start position for pulse %ld: %s.\n",
+			   pnum, dg2020_ptime( p_time ) );
 		THROW( EXCEPTION );
 	}
 
@@ -172,17 +167,15 @@ bool dg2020_set_pulse_length( long pnum, double p_time )
 
 	if ( p->is_len )
 	{
-		eprint( FATAL, SET, "%s: Length of pulse %ld has already been set "
-				"to %s.\n", pulser_struct.name, pnum,
-				dg2020_pticks( p->len ) );
+		print( FATAL, "Length of pulse %ld has already been set to %s.\n",
+			   pnum, dg2020_pticks( p->len ) );
 		THROW( EXCEPTION );
 	}
 
 	if ( p_time < 0.0 )
 	{
-		eprint( FATAL, SET, "%s: Invalid negative length set for "
-				"pulse %ld: %s.\n", pulser_struct.name, pnum,
-				dg2020_ptime( p_time ) );
+		print( FATAL, "Invalid negative length set for pulse %ld: %s.\n",
+			   pnum, dg2020_ptime( p_time ) );
 		THROW( EXCEPTION );
 	}
 
@@ -214,16 +207,14 @@ bool dg2020_set_pulse_position_change( long pnum, double p_time )
 
 	if ( p->is_dpos )
 	{
-		eprint( FATAL, SET, "%s: The position change of pulse %ld has "
-				"already been set to %s.\n", pulser_struct.name,
-				pnum, dg2020_pticks( p->dpos ) );
+		print( FATAL, "The position change of pulse %ld has already been set "
+			   "to %s.\n", pnum, dg2020_pticks( p->dpos ) );
 		THROW( EXCEPTION );
 	}
 
 	if ( dg2020_double2ticks( p_time ) == 0 )
 	{
-		eprint( SEVERE, SET, "%s: Zero position change value for pulse "
-				"%ld.\n", pulser_struct.name, pnum );
+		print( SEVERE, "Zero position change value for pulse %ld.\n", pnum );
 		return FAIL;
 	}
 
@@ -250,16 +241,14 @@ bool dg2020_set_pulse_length_change( long pnum, double p_time )
 
 	if ( p->is_dlen )
 	{
-		eprint( FATAL, SET, "%s: Length change of pulse %ld has already "
-				"been set to %s.\n", pulser_struct.name,
-				pnum, dg2020_pticks( p->len ) );
+		print( FATAL, "Length change of pulse %ld has already been set to "
+			   "%s.\n", pnum, dg2020_pticks( p->len ) );
 		THROW( EXCEPTION );
 	}
 
 	if ( dg2020_double2ticks( p_time ) == 0 )
 	{
-		eprint( SEVERE, SET, "%s: Zero length change value for pulse "
-				"%ld.\n", pulser_struct.name, pnum );
+		print( SEVERE, "Zero length change value for pulse %ld.\n", pnum );
 		return FAIL;
 	}
 
@@ -287,15 +276,14 @@ bool dg2020_set_pulse_phase_cycle( long pnum, long cycle )
 
 	if ( p->pc != NULL )
 	{
-		eprint( FATAL, SET, "%s: Pulse %ld has already been assigned a "
-				"phase cycle.\n", pulser_struct.name, pnum );
+		print( FATAL, "Pulse %ld has already been assigned a phase cycle.\n",
+			   pnum );
 		THROW( EXCEPTION );
 	}
 
 	if ( cycle != 1 && cycle != 2 )
 	{
-		eprint( FATAL, SET, "%s: Only phase sequence 1 or 2 can be used.\n",
-				pulser_struct.name );
+		print( FATAL, "Only phase sequence 1 or 2 can be used.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -308,8 +296,8 @@ bool dg2020_set_pulse_phase_cycle( long pnum, long cycle )
 
 	if ( pc == NULL )
 	{
-		eprint( FATAL, SET, "%s: Referenced phase sequence %d hasn't been "
-				"defined.\n", pulser_struct.name, cycle );
+		print( FATAL, "Referenced phase sequence %d hasn't been defined.\n",
+			   cycle );
 		THROW( EXCEPTION );
 	}
 
@@ -328,8 +316,7 @@ bool dg2020_get_pulse_function( long pnum, int *function )
 
 	if ( ! p->is_function )
 	{
-		eprint( FATAL, SET, "%s: The function of pulse %ld hasn't been "
-				"set.\n", pulser_struct.name, pnum );
+		print( FATAL, "The function of pulse %ld hasn't been set.\n", pnum );
 		THROW( EXCEPTION );
 	}
 
@@ -347,8 +334,8 @@ bool dg2020_get_pulse_position( long pnum, double *p_time )
 
 	if ( ! p->is_pos )
 	{
-		eprint( FATAL, SET, "%s: The start position of pulse %ld hasn't "
-				"been set.\n", pulser_struct.name, pnum );
+		print( FATAL, "The start position of pulse %ld hasn't been set.\n",
+			   pnum );
 		THROW( EXCEPTION );
 	}
 
@@ -367,8 +354,7 @@ bool dg2020_get_pulse_length( long pnum, double *p_time )
 
 	if ( ! p->is_len )
 	{
-		eprint( FATAL, SET, "%s: Length of pulse %ld hasn't been set.\n",
-				pulser_struct.name, pnum );
+		print( FATAL, "Length of pulse %ld hasn't been set.\n", pnum );
 		THROW( EXCEPTION );
 	}
 
@@ -387,8 +373,8 @@ bool dg2020_get_pulse_position_change( long pnum, double *p_time )
 
 	if ( ! p->is_dpos )
 	{
-		eprint( FATAL, SET, "%s: The position change of pulse %ld hasn't "
-				"been set.\n", pulser_struct.name, pnum );
+		print( FATAL, "The position change of pulse %ld hasn't been set.\n",
+			   pnum );
 		THROW( EXCEPTION );
 	}
 
@@ -407,8 +393,7 @@ bool dg2020_get_pulse_length_change( long pnum, double *p_time )
 
 	if ( ! p->is_dlen )
 	{
-		eprint( FATAL, SET, "%s: Length change of pulse %ld hasn't been "
-				"set.\n", pulser_struct.name, pnum );
+		print( FATAL, "Length change of pulse %ld hasn't been set.\n", pnum );
 		THROW( EXCEPTION );
 	}
 
@@ -427,8 +412,7 @@ bool dg2020_get_pulse_phase_cycle( long pnum, long *cycle )
 
 	if ( p->pc == NULL )
 	{
-		eprint( FATAL, SET, "%s: No phase cycle has been set for pulse "
-				"%ld.\n", pulser_struct.name, pnum );
+		print( FATAL, "No phase cycle has been set for pulse %ld.\n", pnum );
 		THROW( EXCEPTION );
 	}
 
@@ -448,9 +432,8 @@ bool dg2020_change_pulse_position( long pnum, double p_time )
 
 	if ( p_time < 0 )
 	{
-		eprint( FATAL, SET, "%s: Invalid (negative) start position for "
-				"pulse %ld: %s.\n", pulser_struct.name, pnum,
-				dg2020_ptime( p_time ) );
+		print( FATAL, "Invalid (negative) start position for pulse %ld: %s.\n",
+			   pnum, dg2020_ptime( p_time ) );
 		if ( FSC2_MODE == EXPERIMENT )
 			return FAIL;
 		else
@@ -472,8 +455,8 @@ bool dg2020_change_pulse_position( long pnum, double p_time )
 
 	if ( p->is_pos && new_pos == p->pos )
 	{
-		eprint( WARN, SET, "%s: Old and new position of pulse %ld are "
-				"identical.\n", pulser_struct.name, pnum );
+		print( WARN, "Old and new position of pulse %ld are identical.\n",
+			   pnum );
 		return OK;
 	}
 
@@ -507,9 +490,8 @@ bool dg2020_change_pulse_length( long pnum, double p_time )
 
 	if ( p_time < 0 )
 	{
-		eprint( FATAL, SET, "%s: Invalid (negative) length for pulse %ld: "
-				"%s.\n", pulser_struct.name, pnum,
-				dg2020_ptime( p_time ) );
+		print( FATAL, "Invalid (negative) length for pulse %ld: %s.\n",
+			   pnum, dg2020_ptime( p_time ) );
 		if ( FSC2_MODE == EXPERIMENT )
 			return FAIL;
 		else
@@ -531,8 +513,8 @@ bool dg2020_change_pulse_length( long pnum, double p_time )
 
 	if ( p->is_len && p->len == new_len )
 	{
-		eprint( WARN, SET, "%s: Old and new length of pulse %ld are "
-				"identical.\n", pulser_struct.name, pnum );
+		print( WARN, "Old and new length of pulse %ld are identical.\n",
+			   pnum );
 		return OK;
 	}
 
@@ -579,8 +561,7 @@ bool dg2020_change_pulse_position_change( long pnum, double p_time )
 
 	if ( new_dpos == 0 && FSC2_MODE == TEST )
 	{
-		eprint( SEVERE, SET, "%s: Zero position change value for pulse "
-				"%ld.\n", pulser_struct.name, pnum );
+		print( SEVERE, "Zero position change value for pulse %ld.\n", pnum );
 		return FAIL;
 	}
 
@@ -615,8 +596,7 @@ bool dg2020_change_pulse_length_change( long pnum, double p_time )
 
 	if ( new_dlen == 0 && FSC2_MODE == TEST )
 	{
-		eprint( SEVERE, SET, "%s: Zero length change value for pulse %ld.\n",
-				pulser_struct.name, pnum );
+		print( SEVERE, "Zero length change value for pulse %ld.\n", pnum );
 		return FAIL;
 	}
 

@@ -225,8 +225,7 @@ Var *magnet_setup( Var *v )
 
 	if ( v == NULL )
 	{
-		eprint( FATAL, SET, "%s: Missing parameter in call of function "
-				"%s().\n", DEVICE_NAME, Cur_Func );
+		print( FATAL, "Missing arguments.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -236,8 +235,7 @@ Var *magnet_setup( Var *v )
 
 	if ( ( v = vars_pop( v ) ) == NULL )
 	{
-		eprint( FATAL, SET, "%s: Missing field step size in call of "
-				"%s().\n", DEVICE_NAME, Cur_Func );
+		print( FATAL, "Missing field step size.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -245,9 +243,8 @@ Var *magnet_setup( Var *v )
 
 	if ( fabs( field_step ) < ER032M_MIN_FIELD_STEP )
 	{
-		eprint( FATAL, SET, "%s: Field sweep step size (%lf G) too small in "
-				"%s(), minimum is %f G.\n", DEVICE_NAME, VALUE( v ), Cur_Func,
-				ER032M_MIN_FIELD_STEP );
+		print( FATAL, "Field sweep step size (%lf G) too small, minimum is "
+			   "%f G.\n", VALUE( v ), ER032M_MIN_FIELD_STEP );
 		THROW( EXCEPTION );
 	}
 		
@@ -273,9 +270,8 @@ Var *sweep_up( Var *v )
 
 	if ( ! magnet.is_init )
 	{
-		eprint( FATAL, SET, "%s: No sweep step size has been set - you must "
-				"call function magnet_setup() to be able to do sweeps.\n",
-				DEVICE_NAME );
+		print( FATAL, "No sweep step size has been set - you must call "
+			   "function magnet_setup() to be able to do sweeps.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -324,9 +320,8 @@ Var *sweep_down( Var *v )
 
 	if ( ! magnet.is_init )
 	{
-		eprint( FATAL, SET, "%s: No sweep step size has been set - you must "
-				"call function magnet_setup() to be able to do sweeps.\n",
-				DEVICE_NAME );
+		print( FATAL, "No sweep step size has been set - you must call "
+			   "function magnet_setup() to be able to do sweeps.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -372,9 +367,8 @@ Var *reset_field( Var *v )
 
 	if ( ! magnet.is_init )
 	{
-		eprint( FATAL, SET, "%s: Start field has not been defined  - you must "
-				"call function magnet_setup() to be able to use %s().\n",
-				DEVICE_NAME, Cur_Func );
+		print( FATAL, "Start field has not been defined  - you must call "
+			   "function magnet_setup() before.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -410,16 +404,14 @@ Var *set_field( Var *v )
 
 	if ( v == NULL )
 	{
-		eprint( FATAL, SET, "%s: Missing parameter in function %s().\n",
-				DEVICE_NAME, Cur_Func );
+		print( FATAL, "Missing arguments.\n" );
 		THROW( EXCEPTION );
 	}
 
 	field = get_double( v, "magnetic field" );
 
 	if ( ( v = vars_pop( v ) ) != NULL )
-		eprint( SEVERE, SET, "%s: Can't use a maximum field error in %s().\n",
-				DEVICE_NAME, Cur_Func );
+		print( SEVERE, "Can't use a maximum field error.\n" );
 
 	too_many_arguments( v );
 
@@ -444,8 +436,8 @@ static void er032m_init( void )
 	if ( gpib_init_device( DEVICE_NAME, &magnet.device ) == FAILURE )
 	{
 		magnet.device = -1;
-		eprint( FATAL, UNSET, "%s: Initialization of device failed: %s\n",
-				DEVICE_NAME, gpib_error_msg );
+		print( FATAL, "Initialization of device failed: %s\n",
+			   gpib_error_msg );
 		THROW( EXCEPTION );
 	}
 
@@ -912,15 +904,15 @@ static void er032m_field_check( double field )
 {
 	if ( field > ER032M_MAX_FIELD )
 	{
-		eprint( FATAL, SET, "%s: Field of %f G is too high, maximum field is "
-				"%f G.\n", DEVICE_NAME, field, ER032M_MAX_FIELD );
+		print( FATAL, "Field of %f G is too high, maximum field is %f G.\n",
+			   field, ER032M_MAX_FIELD );
 		THROW( EXCEPTION );
 	}
 
 	if ( field < ER032M_MIN_FIELD )
 	{
-		eprint( FATAL, SET, "%s: Field of %f G is too low, minimum field is "
-				"%f G.\n", DEVICE_NAME, field, ER032M_MIN_FIELD );
+		print( FATAL, "Field of %f G is too low, minimum field is %f G.\n",
+			   field, ER032M_MIN_FIELD );
 		THROW( EXCEPTION );
 	}
 }
@@ -962,8 +954,8 @@ static void er032m_test_leds( void )
 					break;
 
 				case '2' :
-					eprint( FATAL, UNSET, "%s: Probehead thermostat not in "
-							"equilibrilum.\n", DEVICE_NAME );
+					print( FATAL, "Probehead thermostat not in "
+						   "equilibrilum.\n" );
 					THROW( EXCEPTION );
 					break;
 
@@ -982,8 +974,7 @@ static void er032m_test_leds( void )
 
 		if ( ! is_remote )
 		{
-			eprint( FATAL, UNSET, "%s: Device isn't in remote state.\n",
-					DEVICE_NAME );
+			print( FATAL, "Device isn't in remote state.\n" );
 			THROW( EXCEPTION );
 		}
 
@@ -997,8 +988,7 @@ static void er032m_test_leds( void )
 			usleep( ER032M_WAIT_TIME );
 		else
 		{
-			eprint( FATAL, UNSET, "%s: Field regulation loop not balanced.\n",
-					DEVICE_NAME );
+			print( FATAL, "Field regulation loop not balanced.\n" );
 			THROW( EXCEPTION );
 		}
 	}
@@ -1048,8 +1038,7 @@ static double er032m_set_cf( double center_field )
 
 	if ( i == 0 )
 	{
-		eprint( FATAL, UNSET, "%s: Failed to set center field.\n",
-				DEVICE_NAME );
+		print( FATAL, "Failed to set center field.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -1099,8 +1088,7 @@ static double er032m_set_sw( double sweep_width )
 
 	if ( i == 0 )
 	{
-		eprint( FATAL, UNSET, "%s: Failed to set sweep width.\n",
-				DEVICE_NAME );
+		print( FATAL, "Failed to set sweep width.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -1169,8 +1157,7 @@ static int er032m_get_swa( void )
 
 static void er032m_failure( void )
 {
-	eprint( FATAL, UNSET, "%s: Can't access the field controller.\n",
-			DEVICE_NAME );
+	print( FATAL, "Can't access the field controller.\n" );
 	THROW( EXCEPTION );
 }
 

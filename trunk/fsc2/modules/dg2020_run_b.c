@@ -146,14 +146,14 @@ void dg2020_do_checks( FUNCTION *f )
 				 ( FSC2_MODE == TEST ? MAX_PULSER_BITS : dg2020.max_seq_len ) )
 			{
 				if ( FSC2_MODE == TEST )
-					eprint( FATAL, SET, "%s: Pulse sequence for function "
-							"`%s' does not fit into the pulsers memory.\n",
-							pulser_struct.name, Function_Names[ f->self ] );
+					print( FATAL, "Pulse sequence for function `%s' does not "
+						   "fit into the pulsers memory.\n",
+						   Function_Names[ f->self ] );
 				else
-					eprint( FATAL, ! dg2020_IN_SETUP, "%s: Pulse sequence for "
-							"function `%s' is too long. Perhaps you should "
-							"try the MAXIMUM_PATTERN_LENGTH command.\n",
-							pulser_struct.name, Function_Names[ f->self ] );
+					print( FATAL, "Pulse sequence for function `%s' is too "
+						   "long. Perhaps you should try the "
+						   "MAXIMUM_PATTERN_LENGTH command.\n",
+						   Function_Names[ f->self ] );
 				THROW( EXCEPTION );
 			}
 
@@ -166,13 +166,11 @@ void dg2020_do_checks( FUNCTION *f )
 			 p->pos + p->len > f->pulses[ i + 1 ]->pos )
 		{
 			if ( dg2020_IN_SETUP )
-				eprint( FSC2_MODE == TEST ? FATAL : SEVERE, UNSET,
-						"%s: Pulses %ld and %ld overlap.\n",
-						pulser_struct.name, p->num, f->pulses[ i + 1 ]->num );
+				print( FSC2_MODE == TEST ? FATAL : SEVERE, "Pulses %ld and "
+					   "%ld overlap.\n", p->num, f->pulses[ i + 1 ]->num );
 			else
-				eprint( FATAL, SET, "%s: Pulses %ld and %ld begin to "
-						"overlap.\n", pulser_struct.name,
-						p->num, f->pulses[ i + 1 ]->num );
+				print( FATAL, "Pulses %ld and %ld begin to overlap.\n",
+					   p->num, f->pulses[ i + 1 ]->num );
 			THROW( EXCEPTION );
 		}
 	}
@@ -219,15 +217,13 @@ static void dg2020_defense_twt_check( void )
 
 			if ( twt_p->pos < defense_p->pos &&
 				 twt_p->len + twt_p->pos + twt_2_defense > defense_p->pos )
-				eprint( SEVERE, ! dg2020_IN_SETUP, "%s: TWT_GATE pulse %ld "
-						"gets dangerously near to DEFENSE pulse %ld.\n",
-						pulser_struct.name, twt_p->num, defense_p->num );
+				print( SEVERE, "TWT_GATE pulse %ld gets dangerously near to "
+					   "DEFENSE pulse %ld.\n", twt_p->num, defense_p->num );
 
 			if ( twt_p->pos > defense_p->pos &&
 				 defense_p->pos + defense_p->len + defense_2_twt > twt_p->pos )
-				eprint( SEVERE, ! dg2020_IN_SETUP, "%s: DEFENSE pulse %ld "
-						"gets dangerously near to TWT_GATE pulse %ld.\n",
-						pulser_struct.name, defense_p->num, twt_p->num );
+				print( SEVERE, "DEFENSE pulse %ld gets dangerously near to "
+					   "TWT_GATE pulse %ld.\n", defense_p->num, twt_p->num );
 		}
 	}
 }
@@ -304,8 +300,7 @@ void dg2020_full_reset( void )
 		if ( ! p->has_been_active && ! dg2020.keep_all )
 		{
 			if ( p->num >=0 )
-				eprint( WARN, UNSET, "%s: Pulse %ld is never used.\n",
-						pulser_struct.name, p->num );
+				print( WARN, "Pulse %ld is never used.\n", p->num );
 			p = dg2020_delete_pulse( p );
 			continue;
 		}
@@ -370,9 +365,8 @@ PULSE *dg2020_delete_pulse( PULSE *p )
 	{
 		p->function->pulses = T_free( p->function->pulses );
 
-		eprint( SEVERE, UNSET, "%s: Function `%s' isn't used at all because "
-				"all its pulses are unused.\n", pulser_struct.name,
-				Function_Names[ p->function->self ] );
+		print( SEVERE, "Function `%s' isn't used at all because all its "
+			   "pulses are unused.\n", Function_Names[ p->function->self ] );
 		p->function->is_used = UNSET;
 	}
 
@@ -538,8 +532,7 @@ void dg2020_cw_setup( void )
 		 ! dg2020_set_constant( f->channel[ 1 ]->self, -1, 1, 0 ) ||
 		 ! dg2020_set_constant( f->channel[ 1 ]->self, 0, 127, type_ON( f ) ) )
 	{
-		eprint( FATAL, UNSET, "%s: Failed to setup pulser.\n",
-				pulser_struct.name );
+		print( FATAL, "Failed to setup pulser.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -560,8 +553,7 @@ void dg2020_cw_setup( void )
 	if ( ! dg2020_make_blocks( 2, dg2020.block ) ||
 		 ! dg2020_make_seq( 2, dg2020.block ) )
 	{
-		eprint( FATAL, UNSET, "%s: Failed to setup pulser.\n",
-				pulser_struct.name );
+		print( FATAL, "Failed to setup pulser.\n" );
 		THROW( EXCEPTION );
 	}
 
