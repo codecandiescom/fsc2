@@ -490,7 +490,7 @@ Var *f_obj_clabel( Var *v )
 {
 	IOBJECT *io;
 	char *label = NULL;
-	long ID;
+	long ID = 0;
 
 
 	CLOBBER_PROTECT( v );
