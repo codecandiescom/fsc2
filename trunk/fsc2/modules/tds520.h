@@ -121,9 +121,10 @@ bool tds520_set_snap( bool flag );
 bool tds520_display_channel( int channel );
 double tds520_get_sens( int channel );
 bool tds520_start_aquisition( void );
-double tds520_get_area( int channel, WINDOW *w );
-bool tds520_get_curve( int channel, WINDOW *w, double **data, long *length );
-double tds520_get_amplitude( int channel, WINDOW *w );
+double tds520_get_area( int channel, WINDOW *w, bool use_cursor );
+bool tds520_get_curve( int channel, WINDOW *w, double **data, long *length,
+					   bool use_cursor );
+double tds520_get_amplitude( int channel, WINDOW *w, bool use_cursor );
 
 
 
