@@ -774,6 +774,7 @@ clean:
 	$(MAKE) -C $(ddir) clean
 	$(MAKE) -C me6x00 clean
 	$(MAKE) -C ni6601 clean
+	$(MAKE) -C witio_48 clean
 
 distclean:
 	$(MAKE) -C $(sdir) distclean
