@@ -268,7 +268,7 @@ sub serve_main {
 		$body .= "<P><CENTER><H1>Status:  Something weird is " .
 			     "happening here...$crlf" .
 			     "</H1></CENTER>$crlf" .
-			     "<P>Ok, you seem to have found a bug. " .
+			     "<P>Ok, you seem to have found a bug in fsc2. " .
 			     "Please tell nobody ;-)$crlf" .
 			     "</P>$crlf</BODY></HTML>$crlf";
 
