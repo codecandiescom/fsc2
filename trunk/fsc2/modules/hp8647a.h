@@ -127,7 +127,7 @@ typedef struct
 
 HP8647A hp8647a;
 bool HP8647A_INIT = UNSET;
-const char *mod_types[ ] =   { "FM", "AM", "PHASE" };
+const char *mod_types[ ] =   { "FM", "AM", "PHASE", "OFF" };
 const char *mod_sources[ ] = { "EXT AC", "EXT DC", "INT 1kHz", "INT 400 Hz" };
 
 #else
