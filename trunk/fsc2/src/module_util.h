@@ -26,15 +26,15 @@
 #define MODULE_UTIL_HEADER
 
 
-inline int get_mode( void );
-inline int get_check_state( void );
-inline void stop_on_user_request( void );
-inline void too_many_arguments( Var *v );
-inline void no_query_possible( void );
-inline long get_long( Var *v, const char *snippet );
-inline double get_double( Var *v, const char *snippet );
-inline long get_strict_long( Var *v, const char *snippet );
-inline bool get_boolean( Var *v );
+int get_mode( void );
+int get_check_state( void );
+void stop_on_user_request( void );
+void too_many_arguments( Var *v );
+void no_query_possible( void );
+long get_long( Var *v, const char *snippet );
+double get_double( Var *v, const char *snippet );
+long get_strict_long( Var *v, const char *snippet );
+bool get_boolean( Var *v );
 double experiment_time( void );
 
 #define MODULE_CALL_ESTIMATE   0.02   /* 20 ms per module function call -

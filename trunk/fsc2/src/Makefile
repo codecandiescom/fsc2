@@ -36,7 +36,7 @@ flex_sources  = $(wildcard *_lexer.l)
 sources       = $(bison_sources:.y=.c) $(flex_sources:.l=.c) $(c_sources)
 objects       = $(sources:.c=.o)
 resources     = $(wildcard fsc2_rsc_*r.fd)
-headers       = ${c_sources:.c=.h} global.h fsc2_types.h
+headers       = ${c_sources:.c=.h} global.h fsc2_types.h inline.h
 all_headers   = $(headers) $(bison_sources:.y=.h) $(resources:.fd=.h)
 
 export headers        # export list of header files to the modules Makefile

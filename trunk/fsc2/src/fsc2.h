@@ -335,6 +335,12 @@ extern const char *Phase_Types[ PHASE_TYPES_MAX ];
 #endif
 
 
+/* The inlined functions reference some of the previously defined variables
+   and thus can only be included now */
+
+#include "inline.h"
+
+
 #endif  /* ! FSC2_HEADER */
 
 #endif  /* ! FSC2_MODULE_HEADER */

@@ -158,7 +158,7 @@ int dg2020_f_init_hook( void )
 
 	dg2020_is_needed = SET;
 
-	phase_numbers[ 0 ] = phase_numbers[ 2 ] = -1;
+	phase_numbers[ 0 ] = phase_numbers[ 1 ] = -1;
 
 	return 1;
 }

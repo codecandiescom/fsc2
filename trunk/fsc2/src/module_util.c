@@ -30,7 +30,7 @@
 /* current mode without them being able to change it.  */
 /*-----------------------------------------------------*/
 
-inline int get_mode( void )
+int get_mode( void )
 {
 	return Internals.mode;
 }
@@ -41,7 +41,7 @@ inline int get_mode( void )
 /* just a check run without graphical interface or a check run */
 /*-------------------------------------------------------------*/
 
-inline int get_check_state( void )
+int get_check_state( void )
 {
 	return Internals.cmdline_flags & DO_CHECK || Internals.just_testing;
 }
@@ -52,7 +52,7 @@ inline int get_check_state( void )
 /* and throws an USER_BREAK_EXCEPTION in this case.     */
 /*------------------------------------------------------*/
 
-inline void stop_on_user_request( void )
+void stop_on_user_request( void )
 {
 	if ( Internals.I_am == PARENT )
 		fl_check_only_forms( );
@@ -67,7 +67,7 @@ inline void stop_on_user_request( void )
 /* arguments to a function.                                     */
 /*--------------------------------------------------------------*/
 
-inline void too_many_arguments( Var *v )
+void too_many_arguments( Var *v )
 {
 	if ( v == NULL || ( v = vars_pop( v ) ) == NULL )
 		return;
@@ -86,7 +86,7 @@ inline void too_many_arguments( Var *v )
 /* section) and then trows an exception.                      */
 /*------------------------------------------------------------*/
 
-inline void no_query_possible( void )
+void no_query_possible( void )
 {
 	print( FATAL, "Function can be used for queries in the EXPERIMENT "
 		   "section only.\n" );
@@ -97,7 +97,7 @@ inline void no_query_possible( void )
 /*--------------------------------------------------------------*/
 /*--------------------------------------------------------------*/
 
-inline long get_long( Var *v, const char *snippet )
+long get_long( Var *v, const char *snippet )
 {
 	vars_check( v, INT_VAR | FLOAT_VAR );
 
@@ -115,7 +115,7 @@ inline long get_long( Var *v, const char *snippet )
 /*--------------------------------------------------------------*/
 /*--------------------------------------------------------------*/
 
-inline double get_double( Var *v, const char *snippet )
+double get_double( Var *v, const char *snippet )
 {
 	vars_check( v, INT_VAR | FLOAT_VAR );
 
@@ -134,7 +134,7 @@ inline double get_double( Var *v, const char *snippet )
 /* value is converted to an int and this value returned.                */
 /*----------------------------------------------------------------------*/
 
-inline long get_strict_long( Var *v, const char *snippet )
+long get_strict_long( Var *v, const char *snippet )
 {
 	vars_check( v, INT_VAR | FLOAT_VAR );
 
@@ -172,7 +172,7 @@ inline long get_strict_long( Var *v, const char *snippet )
 /* match either "ON" or "OFF" and exception is thrown in every case.         */
 /*---------------------------------------------------------------------------*/
 
-inline bool get_boolean( Var *v )
+bool get_boolean( Var *v )
 {
 	const char *alt[ 2 ] = { "OFF", "ON" };
 	int res;
