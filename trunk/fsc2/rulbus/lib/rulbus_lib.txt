@@ -728,8 +728,6 @@ indicating the reason for the failure.
 int rulbus_rb8514_software_start( int handle )
 
 This function allows to start the creation of a delay via software.
-Please note calling this function will switch the trigger input slope
-to trigger on raising edge, whatever it was set to before!
 
 On success the function returns RULBUS_OK, otherwise a negative value
 indicating the reason for the failure.
