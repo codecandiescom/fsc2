@@ -113,7 +113,8 @@ static Var *CV;
 %left '+' '-'
 %left '*' '/'
 %left '%'
-%right E_NEG E_NOT
+%right E_NEG
+%ight E_NOT
 %right '^'
 
 
@@ -254,7 +255,7 @@ expr:    E_INT_TOKEN unit          { $$ = apply_unit( vars_push( INT_VAR, $1 ),
        | expr E_AND expr           { $$ = vars_comp( COMP_AND, $1, $3 ); }
        | expr E_OR expr            { $$ = vars_comp( COMP_OR, $1, $3 ); }
        | expr E_XOR expr           { $$ = vars_comp( COMP_XOR, $1, $3 ); }
-       | E_NOT expr                { $$ = vars_lnegate( $2 ); }
+       | E_NOT expr %prec E_NOT    { $$ = vars_lnegate( $2 ); }
        | expr E_EQ expr            { $$ = vars_comp( COMP_EQUAL, $1, $3 ); }
        | expr E_NE expr            { $$ = vars_comp( COMP_UNEQUAL, $1, $3 ); }
        | expr E_LT expr            { $$ = vars_comp( COMP_LESS, $1, $3 ); }
