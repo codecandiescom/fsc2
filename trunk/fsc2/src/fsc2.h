@@ -290,6 +290,7 @@ GUI_Stuff GUI;
 Graphics G;
 Graphics_1d G1;
 Graphics_2d G2;
+Cut_Graphics CG;
 
 char *prog_name;                 /* Name the program was started with */
 bool need_GPIB = UNSET;          /* Flag, set if GPIB bus is needed */
@@ -337,6 +338,7 @@ extern GUI_Stuff GUI;
 extern Graphics G;
 extern Graphics_1d G1;
 extern Graphics_2d G2;
+extern Cut_Graphics CG;
 
 
 extern bool need_GPIB;

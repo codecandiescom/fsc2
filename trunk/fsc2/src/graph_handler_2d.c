@@ -2087,6 +2087,14 @@ void set_marker_2d( long x_pos, long y_pos, long color, long curve )
 
 	m->x_pos = x_pos;
 	m->y_pos = y_pos;
+
+	if ( G2.is_cut && curve == CG.curve )
+	{
+		if ( CG.cut_dir == X && x_pos == CG.index )
+			set_cut_marker( y_pos, color );
+		else if ( CG.cut_dir == Y && y_pos == CG.index )
+			set_cut_marker( x_pos, color );
+	}
 }
 
 
@@ -2115,6 +2123,14 @@ static void delete_marker_2d( long x_pos, long y_pos, long curve )
 	{
 		if ( m->x_pos != x_pos || m->y_pos != y_pos )
 			continue;
+
+		if ( G2.is_cut && curve == CG.curve )
+		{
+			if ( CG.cut_dir == X && x_pos == CG.index )
+				delete_cut_marker( y_pos );
+			else if ( CG.cut_dir == Y && y_pos == CG.index )
+				delete_cut_marker( x_pos );
+		}
 
 		XFreeGC( G.d, m->gc );
 		if ( mp != NULL )

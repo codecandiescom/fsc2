@@ -170,6 +170,7 @@ typedef struct {
 	double old_z_factor;
 
 	Marker_2D *marker_2d;
+	Marker_1D *cut_marker;  /* linked list of markers in cut through curve */
 
 	GC font_gc;             /* gc for font */
 } Curve_2d;

@@ -83,6 +83,8 @@ void cut_undo_button_callback( FL_OBJECT *a, long b );
 void cut_close_callback( FL_OBJECT *a, long b );
 void cut_fs_button_callback( FL_OBJECT *a, long b );
 void cut_clear_curve( long curve );
+void set_cut_marker( long x_pos, long color );
+void delete_cut_marker( long x_pos );
 
 
 #endif   /* ! GRAPH_CUT_HEADER */

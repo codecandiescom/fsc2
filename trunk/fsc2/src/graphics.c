@@ -1158,7 +1158,8 @@ static void G_init_curves_2d( void )
 		cv->xpoints_s = XPOINT_P T_malloc( G2.nx * G2.ny
 										   * sizeof *cv->xpoints_s );
 
-		cv->marker_2d = NULL;
+		cv->marker_2d  = NULL;
+		cv->cut_marker = NULL;
 	}
 }
 

@@ -66,6 +66,7 @@ static bool cut_zoom_x( Canvas *c );
 static bool cut_zoom_y( Canvas *c );
 static bool cut_zoom_xy( Canvas *c );
 static void cut_save_scale_state( void );
+static void delete_all_cut_markers( void );
 
 
 extern FL_resource xresources[ ];
@@ -79,7 +80,6 @@ static struct {
 
 
 static bool is_mapped = UNSET;  /* set while form is mapped */
-Cut_Graphics CG;
 static int cut_x, cut_y;
 static unsigned int cut_w, cut_h;
 static bool cut_has_been_shown = UNSET;
@@ -566,6 +566,7 @@ void cut_close_callback( FL_OBJECT *a, long b )
 	UNUSED_ARGUMENT( a );
 	UNUSED_ARGUMENT( b );
 
+	delete_all_cut_markers( );
 	G2.is_cut = is_mapped = UNSET;
 
 	cut_x = GUI.cut_form->cut->x - 1;
@@ -592,6 +593,7 @@ static void cut_calc_curve( int dir, long p_index, bool has_been_shown )
 	Curve_1d *cv = &G2.cut_curve;
 	Curve_2d *scv = G2.curve_2d[ G2.active_curve ];
 	Scaled_Point *sp, *ssp;
+	Marker_2D *m;
 
 
 	/* Store direction of cross section - if called with an unreasonable
@@ -703,6 +705,16 @@ static void cut_calc_curve( int dir, long p_index, bool has_been_shown )
 				sp->exist = UNSET;
 	}
 
+	delete_all_cut_markers( );
+
+	for ( m = scv->marker_2d; m != NULL; m = m->next )
+	{
+		if ( CG.cut_dir == X && m->x_pos == CG.index )
+			set_cut_marker( m->y_pos, m->color );
+		else if ( CG.cut_dir == Y && m->y_pos == CG.index )
+			set_cut_marker( m->x_pos, m->color );
+	}
+
 	cut_recalc_XPoints( );
 }
 
@@ -773,6 +785,10 @@ void cut_new_curve_handler( void )
 			CG.old_shift[ CG.curve ][ i ] = cv->old_shift[ i ];
 		}
 	}
+
+	/* Delete all markers that had been shown for the previous curve */
+
+	delete_all_cut_markers( );
 
 	if ( G2.active_curve == -1 )
 	{
@@ -1876,16 +1892,26 @@ void redraw_all_cut_canvases( void )
 static void redraw_cut_canvas( Canvas *c )
 {
 	Curve_1d *cv = &G2.cut_curve;
+	Marker_1D *m;
+	short int x;
 
 
 	/* Clear the canvas by drawing over its pixmap in the background color */
 
 	XFillRectangle( G.d, c->pm, c->gc, 0, 0, c->w, c->h );
 
-	/* For the main canvas draw the curve and the out of range errors */
+	/* For the main canvas draw the markers, then the curve and finally the
+	   out of range arrows */
 
 	if ( c == &G2.cut_canvas && CG.curve != -1 && cv->count > 1 )
 	{
+		for ( m = G2.curve_2d[ G2.active_curve ]->cut_marker;
+			  m != NULL; m = m->next )
+		{
+			x = d2shrt( cv->s2d[ X ] * ( m->x_pos + cv->shift[ X ] ) );
+			XDrawLine( G.d, c->pm, m->gc, x, 0, x, c->h );
+		}
+
 		XDrawLines( G.d, c->pm, cv->gc, cv->xpoints, cv->count,
 					CoordModeOrigin );
 
@@ -2765,6 +2791,8 @@ void cut_next_index( FL_OBJECT *a, long b )
 {
 	UNUSED_ARGUMENT( a );
 
+
+	delete_all_cut_markers( );
 	switch( b )
 	{
 		case 0 :           /* go one curve up */
@@ -2811,6 +2839,8 @@ void cut_change_dir( FL_OBJECT *a, long b )
 	if ( px < 0 || px > GUI.cut_form->cut_canvas->w )
 		return;
 
+	delete_all_cut_markers( );
+
 	p_index = lrnd( px / cv->s2d[ X ] - cv->shift[ X ] );
 
 	if ( CG.cut_dir == X )
@@ -2849,6 +2879,101 @@ void cut_change_dir( FL_OBJECT *a, long b )
 	}
 
 	cut_show( CG.cut_dir == X ? Y : X, p_index );
+}
+
+
+/*-------------------------------------------*/
+/* Gets called to create a marker at 'x_pos' */
+/*-------------------------------------------*/
+
+void set_cut_marker( long x_pos, long color )
+{
+	Marker_1D *m, *cm;
+	XGCValues gcv;
+	Curve_2d *cv = G2.curve_2d[ G2.active_curve ];
+
+
+	m = MARKER_1D_P T_malloc( sizeof *m );
+	m->next = NULL;
+
+	if ( cv->cut_marker == NULL )
+		cv->cut_marker = m;
+	else
+	{
+		cm = cv->cut_marker;
+		while ( cm->next != NULL )
+			cm = cm->next;
+		cm->next = m;
+	}
+
+	gcv.line_style = LineOnOffDash;
+
+	m->color = color;
+	m->gc = XCreateGC( G.d, G2.cut_canvas.pm, GCLineStyle, &gcv );
+
+	if ( color == 0 )
+		XSetForeground( G.d, m->gc, fl_get_pixel( FL_WHITE ) );
+	else if ( color <= MAX_CURVES )
+		XSetForeground( G.d, m->gc, fl_get_pixel( G.colors[ color - 1 ] ) );
+	else
+		XSetForeground( G.d, m->gc, fl_get_pixel( FL_BLACK ) );
+
+	m->x_pos = x_pos;
+
+	redraw_cut_canvas( &G2.cut_canvas );
+}
+
+
+/*----------------------------------------------------------*/
+/*----------------------------------------------------------*/
+
+void delete_cut_marker( long x_pos )
+{
+	Marker_1D *m, *mn = NULL;
+
+
+	for ( m = G2.curve_2d[ CG.curve ]->cut_marker; m != NULL; m = m->next )
+	{
+		if ( m->x_pos == x_pos )
+			break;
+		mn = m;
+	}
+
+	if ( m == NULL )
+		return;
+
+	if ( mn == NULL )
+		G2.curve_2d[ CG.curve ]->cut_marker = m->next;
+	else
+		mn->next = m->next;
+		
+	XFreeGC( G.d, m->gc );
+	T_free( m );
+
+	redraw_cut_canvas( &G2.cut_canvas );
+}
+
+
+/*----------------------------------------------------------*/
+/*----------------------------------------------------------*/
+
+static void delete_all_cut_markers( void )
+{
+	Marker_1D *m, *mn;
+
+
+	if ( CG.curve == -1 ||
+		 G2.curve_2d[ CG.curve ]->cut_marker == NULL )
+		return;
+
+	for ( m = G2.curve_2d[ CG.curve ]->cut_marker; m != NULL; m = mn )
+	{
+		XFreeGC( G.d, m->gc );
+		mn = m->next;
+		T_free( m );
+	}
+
+	G2.curve_2d[ CG.curve ]->cut_marker = NULL;
 }
 
 
