@@ -123,7 +123,7 @@ void start_graphics( void )
 		for ( i = X; i <= Y; i++ )
 			G1.label[ i ] = T_strdup( G1.label_orig[ i ] );
 
-		G1.marker = NULL;
+		G1.marker_1d = NULL;
 	}
 
 	if ( G.dim & 2 )
@@ -1128,6 +1128,8 @@ static void G_init_curves_2d( void )
 		cv->xpoints_s = XPOINT_P T_malloc( G2.nx * G2.ny
 										   * sizeof *cv->xpoints_s );
 
+		cv->marker_2d = NULL;
+
 	}
 }
 
@@ -1215,7 +1217,8 @@ void create_label_pixmap( Canvas *c, int coord, char *label )
 void stop_graphics( void )
 {
 	int i;
-	Marker *m, *mn;
+	Marker_1D *m, *mn;
+	Marker_2D *m2, *mn2;
 
 
 	G.is_fully_drawn = UNSET;
@@ -1328,12 +1331,20 @@ void stop_graphics( void )
 		GUI.run_form_2d = NULL;
 	}
 
-	for ( m = G1.marker; m != NULL; m = mn )
+	for ( m = G1.marker_1d; m != NULL; m = mn )
 	{
 		XFreeGC( G.d, m->gc );
 		mn = m->next;
-		m = MARKER_P T_free( m );
+		m = MARKER_1D_P T_free( m );
 	}
+
+	for ( i = 0; i < G2.nc; i++ )
+		for ( m2 = G2.curve_2d[ i ]->marker_2d; m2 != NULL; m = mn )
+		{
+			XFreeGC( G.d, m2->gc );
+			mn2 = m2->next;
+			m2 = MARKER_2D_P T_free( m2 );
+		}
 
 	if ( G_stored )
 	{
@@ -2028,7 +2039,7 @@ void curve_button_callback_1d( FL_OBJECT *obj, long data )
 
 	redraw_canvas_1d( &G1.x_axis );
 	redraw_canvas_1d( &G1.y_axis );
-	if ( G1.marker != NULL )
+	if ( G1.marker_1d != NULL )
 		redraw_canvas_1d( &G1.canvas );
 }
 
@@ -2352,7 +2363,7 @@ void rescale_1d( long new_nx )
 	long i, k, count;
 	long max_x = 0;
 	Scaled_Point *sp;
-	Marker *m;
+	Marker_1D *m;
 
 
 	/* Return immediately on unreasonable values */
@@ -2372,7 +2383,7 @@ void rescale_1d( long new_nx )
 				count--;
 			}
 
-	for ( m = G1.marker; m != NULL; m = m->next )
+	for ( m = G1.marker_1d; m != NULL; m = m->next )
 		if ( m->x_pos > max_x )
 			max_x = m->x_pos;
 
@@ -2545,7 +2556,7 @@ void change_mode( long mode, long width )
 	long curves;
 	long i;
 	Scaled_Point *sp;
-	Marker *m, *mn;
+	Marker_1D *m, *mn;
 	Curve_1d *cv;
 
 
@@ -2580,14 +2591,14 @@ void change_mode( long mode, long width )
 					   / ( double ) ( width - 1 );
 	}
 
-	for ( m = G1.marker; m != NULL; m = mn )
+	for ( m = G1.marker_1d; m != NULL; m = mn )
 	{
 		XFreeGC( G.d, m->gc );
 		mn = m->next;
-		m = MARKER_P T_free( m );
+		m = MARKER_1D_P T_free( m );
 	}
 
-	G1.marker = NULL;
+	G1.marker_1d = NULL;
 
 	G.mode = mode;
 	G1.nx = width;

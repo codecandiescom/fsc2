@@ -837,7 +837,7 @@ Var *f_cscale( Var *v )
 
 	if ( G.dim == 3 )
 	{
-		print( FATAL, "Both 1D- and 2D- display are in use, use either "
+		print( FATAL, "Both 1D- and 2D-display are in use, use either "
 			   "function change_scale_1d() or change_scale_2d().\n" );
 		THROW( EXCEPTION );
 	}
@@ -1103,7 +1103,7 @@ Var *f_clabel( Var *v )
 
 	if ( G.dim == 3 )
 	{
-		print( FATAL, "Both 1D- and 2D- display are in use, use either "
+		print( FATAL, "Both 1D- and 2D-display are in use, use either "
 			   "function change_label_1d() or change_label_2d().\n" );
 		THROW( EXCEPTION );
 	}
@@ -1371,7 +1371,7 @@ Var *f_rescale( Var *v )
 
 	if ( G.dim == 3 )
 	{
-		print( FATAL, "Both 1D- and 2D- display are in use, use either "
+		print( FATAL, "Both 1D- and 2D-display are in use, use either "
 			   "function rescale_1d() or rescale_2d().\n" );
 		THROW( EXCEPTION );
 	}
@@ -1608,7 +1608,7 @@ Var *f_display( Var *v )
 
 	if ( G.dim == 3 )
 	{
-		print( FATAL, "Both 1D- and 2D- display are in use, use either "
+		print( FATAL, "Both 1D- and 2D-display are in use, use either "
 			   "function display_1d() or display_2d().\n" );
 		THROW( EXCEPTION );
 	}
@@ -2278,7 +2278,7 @@ Var *f_clearcv( Var *v )
 
 	if ( G.dim == 3 )
 	{
-		print( FATAL, "Both 1D- and 2D- display are in use, use either "
+		print( FATAL, "Both 1D- and 2D-display are in use, use either "
 			   "function clear_curve_1d() or clear__curve_2d().\n" );
 		THROW( EXCEPTION );
 	}
@@ -2346,7 +2346,7 @@ Var *f_clearcv_1d( Var *v )
 
 			curve = get_long( v, "curve number" );
 
-			if ( curve < 0 || curve > G1.nc )
+			if ( curve < 1 || curve > G1.nc )
 			{
 				if ( Internals.mode == TEST )
 					print( SEVERE, "Can't clear 1D curve %ld, curve "
@@ -2484,7 +2484,7 @@ Var *f_clearcv_2d( Var *v )
 
 			curve = get_long( v, "curve number" );
 
-			if ( curve < 0 || curve > G2.nc )
+			if ( curve < 1 || curve > G2.nc )
 			{
 				if ( Internals.mode == TEST )
 					print( SEVERE, "Can't clear 2D curve %ld, curve "
@@ -2566,19 +2566,37 @@ Var *f_clearcv_2d( Var *v )
 }
 
 
-/*---------------------------------------------------*/
-/* Function draws a marker (in 1D display mode only) */
-/*---------------------------------------------------*/
+/*-------------------------*/
+/* Function draws a marker */
+/*-------------------------*/
 
 Var *f_setmark( Var *v )
 {
-	return f_setmark_1d( v );
+	if ( ! G.is_init )
+	{
+		if ( Internals.mode == TEST )
+			print( WARN, "Can't draw marker, missing graphics "
+				   "initialisation.\n" );
+		return vars_push( INT_VAR, 0 );
+	}
+
+	if ( G.dim == 3 )
+	{
+		print( FATAL, "Both 1D- and 2D-display are in use, use either "
+			   "function draw_marker_1d() or draw_marker_2d().\n" );
+		THROW( EXCEPTION );
+	}
+
+	if ( G.dim == 1 )
+		return f_setmark_1d( v );
+	else
+		return f_setmark_2d( v );
 }
 
 
-/*---------------------------------------------------*/
-/* Function draws a marker (in 1D display mode only) */
-/*---------------------------------------------------*/
+/*----------------------------*/
+/* Function draws a 1D marker */
+/*----------------------------*/
 
 Var *f_setmark_1d( Var *v )
 {
@@ -2606,8 +2624,7 @@ Var *f_setmark_1d( Var *v )
 
 	if ( ! ( G.dim & 1 ) )
 	{
-		print( WARN, "Can't set marker, markers can only be set for "
-			   "1D display.\n" );
+		print( WARN, "Can't set 1D marker, use draw_marker_2d() instead.\n" );
 		return vars_push( INT_VAR, 0 );
 	}
 
@@ -2702,19 +2719,197 @@ Var *f_setmark_1d( Var *v )
 }
 
 
-/*---------------------------------------------------*/
-/* Function deletes all markers (in 1D display only) */
-/*---------------------------------------------------*/
+/*----------------------------*/
+/* Function draws a 2D marker */
+/*----------------------------*/
 
-Var *f_clearmark( Var *v )
+Var *f_setmark_2d( Var *v )
 {
-	return f_clearmark_1d( v );
+	long x_pos;
+	long y_pos;
+	long color = 0;
+	long curve = -1;
+	long len = 0;                    /* total length of message to send */
+	void *buf;
+	char *ptr;
+	int type = D_SET_MARKER;
+	int shm_id;
+	const char *colors[ ] = { "WHITE", "RED", "GREEN", "YELLOW",
+							  "BLUE", "BLACK", "DELETE" };
+	long num_colors = sizeof colors / sizeof *colors;
+
+
+	/* This function can only be called in the EXPERIMENT section and needs
+	   a previous graphics initialisation */
+
+	if ( ! G.is_init )
+	{
+		print( WARN, "Can't set a marker, missing graphics "
+			   "initialisation.\n" );
+		return vars_push( INT_VAR, 0 );
+	}
+
+	if ( ! ( G.dim & 2 ) )
+	{
+		print( WARN, "Can't set 2D marker, use draw_marker_1d() instead.\n" );
+		return vars_push( INT_VAR, 0 );
+	}
+
+	if ( v == NULL )
+	{
+		print( WARN, "Missing arguments\n" );
+		return vars_push( INT_VAR, 0 );
+	}
+
+	x_pos = get_long( v, "marker x-position" ) - ARRAY_OFFSET;
+
+	if ( x_pos < 0 )
+	{
+		print( FATAL, "Invalid x-index (%ld).\n", x_pos + ARRAY_OFFSET );
+		THROW( EXCEPTION );
+	}
+
+	if ( ( v = vars_pop( v ) ) == NULL )
+	{
+		print( WARN, "Missing y-position arguments\n" );
+		return vars_push( INT_VAR, 0 );
+	}
+
+	y_pos = get_long( v, "marker y-position" ) - ARRAY_OFFSET;
+
+	if ( y_pos < 0 )
+	{
+		print( FATAL, "Invalid y-index (%ld).\n", y_pos + ARRAY_OFFSET );
+		THROW( EXCEPTION );
+	}
+
+	if ( ( v = vars_pop( v ) ) != NULL )
+	{
+		curve = get_long( v, "curve number" ) - 1;
+
+		if ( curve < 0 || curve >= G2.nc )
+		{
+			print( SEVERE, "Can't clear marker on 2D curve %ld, curve does "
+				   "not exist.\n", curve + 1 );
+			return vars_push( INT_VAR, 0 );
+		}
+
+		if ( ( v = vars_pop( v ) ) != NULL )
+		{
+			if ( v->type & ( INT_VAR | FLOAT_VAR ) )
+				color = get_long( v, "marker color" );
+			else
+			{
+				vars_check( v, STR_VAR );
+				for ( color = 0; color < num_colors; color++ )
+					if ( ! strcasecmp( colors[ color ], v->val.sptr ) )
+					break;
+			}
+
+			if ( color >= num_colors )
+			{
+				if ( v->type & ( INT_VAR | FLOAT_VAR ) )
+					print( WARN, "Invalid marker color number (%ld), using "
+						   "default of 0 (white).\n", color );
+				else
+					print( WARN, "Invalid marker color (\"%s\"), using "
+						   "default of \"WHITE\".\n", v->val.sptr );
+				color = 0;
+			}
+		}
+	}
+
+	too_many_arguments( v );
+
+	/* In a test run this all there is to be done */
+
+	if ( Internals.mode == TEST )
+		return vars_push( INT_VAR, 1 );
+	
+	/* Now starts the code only to be executed by the child, i.e. while the
+	   measurement is running. */
+
+	fsc2_assert( Internals.I_am == CHILD );
+
+	/* Now try to get a shared memory segment */
+
+	len =   sizeof len + sizeof type + sizeof x_pos + sizeof y_pos
+		  + sizeof color + sizeof curve;
+
+	if ( ( buf = get_shm( &shm_id, len ) ) == ( void * ) - 1 )
+	{
+		eprint( FATAL, UNSET, "Internal communication problem at %s:%d.\n",
+				__FILE__, __LINE__ );
+		THROW( EXCEPTION );
+	}
+
+	/* Copy all data into the shared memory segment */
+
+	ptr = CHAR_P buf;
+
+	memcpy( ptr, &len, sizeof len );               /* total length */
+	ptr += sizeof len;
+
+	memcpy( ptr, &type, sizeof type );             /* type indicator  */
+	ptr += sizeof type;
+
+	memcpy( ptr, &x_pos, sizeof x_pos );
+	ptr += sizeof x_pos;
+
+	memcpy( ptr, &y_pos, sizeof y_pos );
+	ptr += sizeof y_pos;
+
+	memcpy( ptr, &color, sizeof color );
+	ptr += sizeof color;
+
+	memcpy( ptr, &curve, sizeof curve );
+	
+	/* Detach from the segment with the data */
+
+	detach_shm( buf, NULL );
+
+	/* Wait for parent to become ready to accept new data, then store
+	   identifier and send signal to tell it about them */
+
+	send_data( DATA_2D, shm_id );
+
+	/* All the rest has now to be done by the parent process... */
+
+	return vars_push( INT_VAR, 1 );
 }
 
 
-/*---------------------------------------------------*/
-/* Function deletes all markers (in 1D display only) */
-/*---------------------------------------------------*/
+/*------------------------------*/
+/* Function deletes all markers */
+/*------------------------------*/
+
+Var *f_clearmark( Var *v )
+{
+	if ( ! G.is_init )
+	{
+		if ( Internals.mode == TEST )
+			print( WARN, "Can't clear markers, missing graphics "
+				   "initialisation.\n" );
+		return vars_push( INT_VAR, 0 );
+	}
+
+	if ( G.dim == 3 )
+	{
+		print( FATAL, "Both 1D- and 2D-display are in use, use either "
+			   "function clear_marker_1d() or clear_marker_2d().\n" );
+		THROW( EXCEPTION );
+	}
+
+	if ( G.dim == 1 )
+		return f_clearmark_1d( v );
+	else
+		return f_clearmark_2d( v );
+}
+
+
+/*---------------------------------*/
+/* Function deletes all 1D markers */
+/*---------------------------------*/
 
 Var *f_clearmark_1d( Var *v )
 {
@@ -2738,11 +2933,11 @@ Var *f_clearmark_1d( Var *v )
 	}
 
 	if ( ! ( G.dim & 1 ) )
-	{
-		print( WARN, "Can't clear marker, markers can only be used for "
-			   "1D display.\n" );
-		return vars_push( INT_VAR, 0 );
-	}
+    {
+        print( WARN, "Can't clear 1D markers, use clear_marker_2d() "
+			   "instead.\n" );
+        return vars_push( INT_VAR, 0 );
+    }
 
 	/* In a test run this all there is to be done */
 
@@ -2782,6 +2977,83 @@ Var *f_clearmark_1d( Var *v )
 	   identifier and send signal to tell it about them */
 
 	send_data( DATA_1D, shm_id );
+
+	/* All the rest has now to be done by the parent process... */
+
+	return vars_push( INT_VAR, 1 );
+}
+	
+
+/*---------------------------------*/
+/* Function deletes all 2D markers */
+/*---------------------------------*/
+
+Var *f_clearmark_2d( Var *v )
+{
+	long len = 0;                    /* total length of message to send */
+	void *buf;
+	char *ptr;
+	int type = D_CLEAR_MARKERS;
+	int shm_id;
+
+
+	UNUSED_ARGUMENT( v );
+
+	/* This function can only be called in the EXPERIMENT section and needs
+	   a previous graphics initialisation */
+
+	if ( ! G.is_init )
+	{
+		print( WARN, "Can't clear markers, missing graphics "
+			   "initialisation.\n" );
+		return vars_push( INT_VAR, 0 );
+	}
+
+	if ( ! ( G.dim & 2 ) )
+    {
+        print( WARN, "Can't clear 2D markers, use clear_marker_1d() "
+			   "instead.\n" );
+        return vars_push( INT_VAR, 0 );
+    }
+
+	/* In a test run this all there is to be done */
+
+	if ( Internals.mode == TEST )
+		return vars_push( INT_VAR, 1 );
+	
+	/* Now starts the code only to be executed by the child, i.e. while the
+	   measurement is running. */
+
+	fsc2_assert( Internals.I_am == CHILD );
+
+	/* Now try to get a shared memory segment */
+
+	len = sizeof len + sizeof type;
+
+	if ( ( buf = get_shm( &shm_id, len ) ) == ( void * ) - 1 )
+	{
+		eprint( FATAL, UNSET, "Internal communication problem at %s:%d.\n",
+				__FILE__, __LINE__ );
+		THROW( EXCEPTION );
+	}
+
+	/* Copy all data into the shared memory segment */
+
+	ptr = CHAR_P buf;
+
+	memcpy( ptr, &len, sizeof len );               /* total length */
+	ptr += sizeof len;
+
+	memcpy( ptr, &type, sizeof type );             /* type indicator  */
+
+	/* Detach from the segment with the data */
+
+	detach_shm( buf, NULL );
+
+	/* Wait for parent to become ready to accept new data, then store
+	   identifier and send signal to tell it about them */
+
+	send_data( DATA_2D, shm_id );
 
 	/* All the rest has now to be done by the parent process... */
 

@@ -51,8 +51,10 @@ Var *f_clearcv_1d( Var *v );
 Var *f_clearcv_2d( Var *v );
 Var *f_setmark( Var *v );
 Var *f_setmark_1d( Var *v );
+Var *f_setmark_2d( Var *v );
 Var *f_clearmark( Var *v );
 Var *f_clearmark_1d( Var *v );
+Var *f_clearmark_2d( Var *v );
 
 
 #endif  /* ! FUNC_UTIL_HEADER */

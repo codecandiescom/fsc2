@@ -43,6 +43,7 @@ static void reconfigure_window_2d( Canvas *c, int w, int h );
 static void recalc_XPoints_2d( void );
 static void make_color_scale( Canvas *c, Curve_2d *cv );
 static inline unsigned long d2color( double a );
+static void delete_marker_2d( long x_pos, long y_pos, long curve );
 
 
 /*-----------------------------------------------------------*/
@@ -1286,6 +1287,9 @@ void redraw_canvas_2d( Canvas *c )
 	Curve_2d *cv;
 	Scaled_Point *sp;
 	XPoint *xps;
+	Marker_2D *m;
+	XPoint points[ 5 ];
+	short int dw, dh;
 
 
 	XFillRectangle( G.d, c->pm, c->gc, 0, 0, c->w, c->h );
@@ -1330,6 +1334,43 @@ void redraw_canvas_2d( Canvas *c )
 					XFillRectangle( G.d, c->pm, cv->gc,
 									xps->x, xps->y, cv->w, cv->h );
 				}
+
+			/* Draw markers of the current curve */
+
+			if ( cv->marker_2d != NULL )
+			{
+				dw = i2shrt( ( cv->w + 1 ) / 2 );
+				dh = i2shrt( ( cv->h + 1 ) / 2 );
+				if ( dw < 3 )
+					dw = 3;
+				if ( dh < 3 )
+					dh = 3;
+
+				points[ 1 ].x = 2 * dw;
+				points[ 1 ].y = 0;
+
+				points[ 2 ].x = 0;
+				points[ 2 ].y = 2 * dh;
+
+				points[ 3 ].x = - 2 * dw;
+				points[ 3 ].y = 0;
+
+				points[ 4 ].x = 0;
+				points[ 4 ].y = - 2 * dh;
+
+				for ( m = cv->marker_2d; m != NULL; m = m->next )
+				{
+					points[ 0 ].x =   d2shrt( cv->s2d[ X ] 
+											  * ( m->x_pos + cv->shift[ X ] ) )
+									- dw;
+					points[ 0 ].y =   i2shrt( G2.canvas.h ) - 1
+									- d2shrt( cv->s2d[ Y ] 
+											  * ( m->y_pos + cv->shift[ Y ] ) )
+									- dh;
+					XDrawLines( G.d, c->pm, m->gc, points, 5,
+								CoordModePrevious );
+				}
+			}
 
 			/* Now draw the out of range arrows */
 
@@ -1975,6 +2016,135 @@ static inline unsigned long d2color( double a )
 		return G2.color_list[ c_index ];
 	else
 		return G2.color_list[ NUM_COLORS + 1 ];
+}
+
+
+/*-------------------------------------------------------*/
+/* Gets called to create a marker at 'x_pos' and 'y_pos' */
+/*-------------------------------------------------------*/
+
+void set_marker_2d( long x_pos, long y_pos, long color, long curve )
+{
+	Marker_2D *m, *cm;
+	XGCValues gcv;
+	Curve_2d *cv;
+
+
+	if ( color > MAX_CURVES + 1 )
+	{
+		delete_marker_2d( x_pos, y_pos, curve );
+		return;
+	}
+
+	/* If no curve number was given and currently there's no curve
+	   displayed we can't draw a marker */
+
+	if ( curve < 0 )
+	{
+		if ( G2.active_curve == -1 )
+			return;
+		cv = G2.curve_2d[ G2.active_curve ];
+	}
+	else
+		cv = G2.curve_2d[ curve ];
+
+	m = MARKER_2D_P T_malloc( sizeof *m );
+	m->next = 0;
+
+	if ( cv->marker_2d == NULL )
+		cv->marker_2d = m;
+	else
+	{
+		cm = cv->marker_2d;
+		while ( cm->next != NULL )
+			cm = cm->next;
+		cm->next = m;
+	}
+
+	gcv.line_style = LineSolid;
+	gcv.line_width = 2;
+
+	m->color = color;
+	m->gc = XCreateGC( G.d, G2.canvas.pm, GCLineStyle | GCLineWidth, &gcv );
+
+	if ( color == 0 )
+		XSetForeground( G.d, m->gc, fl_get_pixel( FL_WHITE ) );
+	else if ( color <= MAX_CURVES )
+		XSetForeground( G.d, m->gc, fl_get_pixel( G.colors[ color - 1 ] ) );
+	else
+		XSetForeground( G.d, m->gc, fl_get_pixel( FL_BLACK ) );
+
+	m->x_pos = x_pos;
+	m->y_pos = y_pos;
+}
+
+
+/*------------------------------------------*/
+/*------------------------------------------*/
+
+static void delete_marker_2d( long x_pos, long y_pos, long curve )
+{
+	Marker_2D *m, *mp;
+	Curve_2d *cv;
+
+
+	/* If no curve number was given and currently there's no curve
+	   displayed we can't remove a marker */
+
+	if ( curve < 0 )
+	{
+		if ( G2.active_curve == -1 )
+			return;
+		cv = G2.curve_2d[ G2.active_curve ];
+	}
+	else
+		cv = G2.curve_2d[ curve ];
+
+	for ( mp = NULL, m = cv->marker_2d; m != NULL; mp = m, m = m->next )
+	{
+		if ( m->x_pos != x_pos || m->y_pos != y_pos )
+			continue;
+
+		XFreeGC( G.d, m->gc );
+		if ( mp != NULL )
+			mp->next = m->next;
+		if ( m == cv->marker_2d )
+			cv->marker_2d = m->next;
+		T_free( m );
+		return;
+	}
+}
+
+
+/*-----------------------------------*/
+/* Gets called to delete all markers */
+/*-----------------------------------*/
+
+void remove_markers_2d( void )
+{
+	Marker_2D *m, *mn;
+	Curve_2d *cv;
+	int i;
+
+
+	for ( i = 0; i < G2.nc; i++ )
+	{
+		cv = G2.curve_2d[ i ];
+
+		if ( cv->marker_2d == NULL )
+			continue;
+
+		for ( m = cv->marker_2d; m != NULL; m = mn )
+		{
+			XFreeGC( G.d, m->gc );
+			mn = m->next;
+			m = MARKER_2D_P T_free( m );
+		}
+		cv->marker_2d = NULL;
+
+		if ( i == G2.active_curve )
+			repaint_canvas_2d( &G2.canvas );
+	}
 }
 
 

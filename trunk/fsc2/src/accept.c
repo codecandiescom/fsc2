@@ -246,6 +246,8 @@ static void other_data_request( int dim, int type, char *ptr )
 	long color;
 	long mode;
 	long width;
+	long x_pos;
+	long y_pos;
 
 
 	switch( type )
@@ -299,18 +301,33 @@ static void other_data_request( int dim, int type, char *ptr )
 			break;
 
 		case D_SET_MARKER :
-			fsc2_assert( dim == DATA_1D );
-			memcpy( &position, ptr, sizeof position );
-			ptr += sizeof position;
-			memcpy( &color, ptr, sizeof color );
-			if ( position >= G1.nx && G.mode == NORMAL_DISPLAY )
-				rescale_1d( position );
-			set_marker( position, color );
+			if ( dim == DATA_1D )
+			{
+				memcpy( &position, ptr, sizeof position );
+				ptr += sizeof position;
+				memcpy( &color, ptr, sizeof color );
+				if ( position >= G1.nx && G.mode == NORMAL_DISPLAY )
+					rescale_1d( position );
+				set_marker_1d( position, color );
+			}
+			else
+			{
+				memcpy( &x_pos, ptr, sizeof x_pos );
+				ptr += sizeof x_pos;
+				memcpy( &y_pos, ptr, sizeof y_pos );
+				ptr += sizeof position;
+				memcpy( &color, ptr, sizeof color );
+				ptr += sizeof color;
+				memcpy( &count, ptr, sizeof count );
+				set_marker_2d( x_pos, y_pos, color, count );
+			}
 			break;
 
 		case D_CLEAR_MARKERS :
-			fsc2_assert( dim == DATA_1D );
-			remove_marker( );
+			if ( dim == DATA_1D )
+				remove_markers_1d( );
+			else
+				remove_markers_2d( );
 			break;
 
 		case D_CHANGE_MODE :
@@ -529,7 +546,7 @@ static void accept_1d_data_sliding( long curve, int type, char *ptr )
 	Scaled_Point *sp, *sp1, *sp2;
 	long count;
 	long shift;
-	Marker *m, *mn, *mp;
+	Marker_1D *m, *mn, *mp;
 
 
 	/* Get the amount of new data and a pointer to the start of the data */
@@ -628,7 +645,7 @@ static void accept_1d_data_sliding( long curve, int type, char *ptr )
 			}
 		}
 
-		for ( mp = NULL, m = G1.marker; m != NULL; )
+		for ( mp = NULL, m = G1.marker_1d; m != NULL; )
 		{
 			m->x_pos -= shift;
 			if ( m->x_pos < 0 )
@@ -637,9 +654,9 @@ static void accept_1d_data_sliding( long curve, int type, char *ptr )
 				mn = m->next;
 				if ( mp != NULL )
 					mp->next = mn;
-				if ( m == G1.marker )
-					G1.marker = mn;
-				m = MARKER_P T_free( m );
+				if ( m == G1.marker_1d )
+					G1.marker_1d = mn;
+				m = MARKER_1D_P T_free( m );
 				m = mn;
 			}
 			else

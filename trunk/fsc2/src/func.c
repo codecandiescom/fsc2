@@ -72,7 +72,7 @@ bool No_File_Numbers;
 bool Dont_Save;
 
 
-/* Take care: The number of maximum parameters have to be changed for
+/* Take care: The number of maximum parameters has to be changed for
               display() and clear_curve() if the maximum number of curves
 			  (defined as MAX_CURVES in graphics.h) should ever be changed. */
 
@@ -170,8 +170,12 @@ Func Def_Fncts[ ] =              /* List of built-in functions */
 	{ "object_delete",   f_objdel,	   INT_MIN, ACCESS_EXP,  NULL, UNSET },
     { "hide_toolbox",    f_freeze,           1, ACCESS_EXP,  NULL, UNSET },
 	{ "show_message",    f_showm,            1, ACCESS_EXP,  NULL, UNSET },
-    { "draw_marker",     f_setmark,         -2, ACCESS_EXP,  NULL, UNSET },
+    { "draw_marker",     f_setmark,         -4, ACCESS_EXP,  NULL, UNSET },
+    { "draw_marker_1d",  f_setmark_1d,      -2, ACCESS_EXP,  NULL, UNSET },
+    { "draw_marker_2d",  f_setmark_2d,      -4, ACCESS_EXP,  NULL, UNSET },
     { "clear_marker",    f_clearmark,        0, ACCESS_EXP,  NULL, UNSET },
+    { "clear_marker_1d", f_clearmark_1d,     0, ACCESS_EXP,  NULL, UNSET },
+    { "clear_marker_2d", f_clearmark_1d,     0, ACCESS_EXP,  NULL, UNSET },
 	{ "end",             f_stopsim,          0, ACCESS_EXP,  NULL, UNSET },
 	{ "abort",           f_abort,            0, ACCESS_EXP,  NULL, UNSET },
 	{ NULL,              NULL,     	         0, 0,           NULL, UNSET }

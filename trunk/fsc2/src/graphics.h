@@ -79,6 +79,23 @@ typedef	struct {
 } Scaled_Point;
 
 
+typedef struct MRKR1_ {
+	long x_pos;
+	long color;
+	GC gc;
+	struct MRKR1_ *next;
+} Marker_1D;
+
+
+typedef struct MRKR2_ {
+	long x_pos;
+	long y_pos;
+	long color;
+	GC gc;
+	struct MRKR2_ *next;
+} Marker_2D;
+
+
 typedef struct {
 	Scaled_Point *points;
 	XPoint *xpoints;
@@ -152,6 +169,8 @@ typedef struct {
 	double old_shift[ 3 ];
 	double old_z_factor;
 
+	Marker_2D *marker_2d;
+
 	GC font_gc;             /* gc for font */
 } Curve_2d;
 
@@ -175,14 +194,6 @@ typedef struct {
 
 	GC font_gc;             /* gc for font */
 } Canvas;
-
-
-typedef struct MRKR_ {
-	long x_pos;
-	long color;
-	GC gc;
-	struct MRKR_ *next;
-} Marker;
 
 
 typedef struct {
@@ -279,7 +290,7 @@ typedef struct {
 
 	Curve_1d *curve[ MAX_CURVES ];
 
-	Marker *marker;         /* linked list of markers */
+	Marker_1D *marker_1d;   /* linked list of markers */
 
 } Graphics_1d;
 
