@@ -18,7 +18,7 @@
 static bool is_loaded = UNSET;       /* set when EDL file is loaded */
 static bool is_tested = UNSET;       /* set when EDL file has been  tested */
 static bool state = UNSET;           /* set when EDL passed the tests */
-static char *in_file = NULL;  /* used for name of input file */
+static char *in_file = NULL;         /* name of input file */
 static time_t in_file_mod = 0;
 static double slider_size = 0.05;
 static bool delete_file = UNSET;
