@@ -568,6 +568,7 @@ void cut_close_callback( FL_OBJECT *a, long b )
 	UNUSED_ARGUMENT( a );
 	UNUSED_ARGUMENT( b );
 
+	G.coord_display &= ~ 4;
 	delete_all_cut_markers( UNSET );
 	G2.is_cut = is_mapped = UNSET;
 
@@ -1423,6 +1424,7 @@ static void cut_press_handler( FL_OBJECT *obj, Window window,
 			if ( G.drag_canvas <= DRAG_CUT_Z )
 				break;
 			fl_set_cursor( window, cursor_c[ CROSSHAIR_CURSOR ] );
+			G.coord_display = 4;
 
 			/* Don't draw the box anymore */
 
@@ -1628,6 +1630,7 @@ static void cut_release_handler( FL_OBJECT *obj, Window window,
 	G.button_state = 0;
 	G.raw_button_state &= ~ ( 1 << ( ev->xbutton.button - 1 ) );
 	G.drag_canvas = DRAG_NONE;
+	G.coord_display &= ~ 4;
 
 	G2.cut_select = NO_CUT_SELECT;
 	fl_reset_cursor( window );

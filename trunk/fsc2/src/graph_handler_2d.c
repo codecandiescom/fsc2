@@ -229,6 +229,7 @@ static void press_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev,
 
 		case 3:                                /* left and middle button */
 			fl_set_cursor( window, G2.cursor[ CROSSHAIR_CURSOR ] );
+			G.coord_display = 2;
 
 			/* Don't draw the box anymore */
 
@@ -488,6 +489,7 @@ static void release_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev,
 	G.button_state = 0;
 	G.raw_button_state &= ~ ( 1 << ( ev->xbutton.button - 1 ) );
 	G.drag_canvas = DRAG_NONE;
+	G.coord_display &= ~ 2;
 
 	G2.cut_select = NO_CUT_SELECT;
 	fl_reset_cursor( window );

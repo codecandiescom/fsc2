@@ -237,6 +237,9 @@ struct Graphics {
 	XFontStruct *font;            /* font used for drawing texts */
 	int font_asc, font_desc;
 
+	int coord_display;            /* set when coordinates are shown in one
+									 of the display windows */
+
 	unsigned int up_arrow_w,      /* sizes of out of range markers */
 		         up_arrow_h,
 		         down_arrow_w,
