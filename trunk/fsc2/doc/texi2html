@@ -2815,9 +2815,11 @@ sub l2h_FromCache
   return undef;
 }
 
-# insert generated html into cache, move away images, 
+# insert generated html into cache, move away images,
 # return transformed html
+
 $maximage = 1;
+
 sub l2h_ToCache
 {
   my $count = shift;
@@ -4027,271 +4029,290 @@ $in_menu = 0;				# am I inside a menu
 
 while (@lines) {
     $_ = shift(@lines);
+
     #
     # special case (protected sections)
     #
-    if (/^$PROTECTTAG/o) {
-	  push(@lines2, $_);
-	  next;
+
+    if ( /^$PROTECTTAG/o ) {
+		push( @lines2, $_ );
+		next;
     }
+
     #
     # menu
     #
-    if (/^\@menu\b/)
-    {
-      $in_menu = 1;
-      $in_menu_listing = 1;
-      push(@lines2, &debug("<BLOCKQUOTE><TABLE BORDER=0 CELLSPACING=0> \n", __LINE__));
-      next;
+
+    if ( /^\@menu\b/ ) {
+		$in_menu = 1;
+		$in_menu_listing = 1;
+		push( @lines2, &debug( "<BLOCKQUOTE><TABLE BORDER=0 CELLSPACING=0> \n",
+							   __LINE__));
+		next;
     }
-    if (/^\@end\s+menu\b/)
-    {
-      if ($in_menu_listing)
-      {
-	    push(@lines2, &debug("</TABLE></BLOCKQUOTE>\n", __LINE__));
-      }
-      else
-      {
-	    push(@lines2, &debug("</BLOCKQUOTE>\n", __LINE__));
-      }
-      $in_menu = 0;
-      $in_menu_listing = 0;
-      next;
+
+    if ( /^\@end\s+menu\b/ ) {
+		if ( $in_menu_listing ) {
+			push( @lines2, &debug( "</TABLE></BLOCKQUOTE>\n", __LINE__ ) );
+		} else {
+			push( @lines2, &debug( "</BLOCKQUOTE>\n", __LINE__ ) );
+		}
+		$in_menu = 0;
+		$in_menu_listing = 0;
+		next;
     }
-    if ($in_menu) 
-    {
-      my ($node, $name, $descr);
-      if (/^\*\s+($NODERE)::/o)
-      {
-	    $node = $1;
-	    $descr = $';
-      }
-      elsif (/^\*\s+(.+):\s+([^\t,\.\n]+)[\t,\.\n]/)
-      {
-	    $name = $1;
-	    $node = $2;
-	    $descr = $';
-      }
-      elsif (/^\*/)
-      {
-	    warn "$ERROR Bad menu line: $_";
-      }
-      else
-      {
-	    if ($in_menu_listing)
-		{
-		  $in_menu_listing = 0;
-	      push(@lines2, &debug("</TABLE>\n", __LINE__));
-	    }
+
+    if ( $in_menu ) {
+		my ( $node, $name, $descr );
+		if ( /^\*\s+($NODERE)::/o ) {
+			$node = $1;
+			$descr = $';
+		} elsif ( /^\*\s+(.+):\s+([^\t,\.\n]+)[\t,\.\n]/ ) {
+			$name = $1;
+			$node = $2;
+			$descr = $';
+		} elsif ( /^\*/ ) {
+			warn "$ERROR Bad menu line: $_";
+		} else {
+			if ( $in_menu_listing ) {
+				$in_menu_listing = 0;
+				push( @lines2, &debug( "</TABLE>\n", __LINE__ ) );
+			}
+
 	    # should be like verbatim -- preseve spaces, etc
-		s/ /\&nbsp;/g;
-		$_ .= "<br>\n";
-		push(@lines2, $_);
-      }
-      if ($node)
-      {
-	    if (! $in_menu_listing)
-		{
-	      $in_menu_listing = 1;
-	      push(@lines2, &debug("<TABLE BORDER=0 CELLSPACING=0>\n", __LINE__));
-	    }
-	    # look for continuation
-	    while ($lines[0] =~ /^\s+\w+/)
-	    {
-	      $descr .= shift(@lines);
-	    }
-	    &menu_entry($node, $name, $descr);
-      }
-      next;
+
+			s/ /\&nbsp;/g;
+			$_ .= "<br>\n";
+			push( @lines2, $_ );
+		}
+
+		if ( $node ) {
+			if ( ! $in_menu_listing ) {
+				$in_menu_listing = 1;
+				push( @lines2,
+					  &debug( "<TABLE BORDER=0 CELLSPACING=0>\n", __LINE__ ) );
+			}
+
+			# look for continuation
+			while ( $lines[ 0 ] =~ /^\s+\w+/ ) {
+				$descr .= shift( @lines );
+			}
+			&menu_entry( $node, $name, $descr );
+		}
+		next;
     }
+
     #
     # printindex
     #
-    PrintIndex(\@lines2, $2, $1), next
-      if (/^<!--::(.*)::-->\@printindex\s+(\w+)/);
+
+    PrintIndex( \@lines2, $2, $1 ), next
+		if ( /^<!--::(.*)::-->\@printindex\s+(\w+)/ );
     #
     # simple style substitutions
     #
-    $_ = &substitute_style($_);
+
+    $_ = &substitute_style( $_ );
+
     #
     # xref
     #
-    while (/\@(x|px|info|)ref{([^{}]+)(}?)/) {
+
+    while ( /\@(x|px|info|)ref{([^{}]+)(}?)/ ) {
+
 	# note: Texinfo may accept other characters
-	($type, $nodes, $full) = ($1, $2, $3);
-	($before, $after) = ($`, $');
-	if (! $full && $after) {
-	    warn "$ERROR Bad xref (no ending } on line): $_";
-	    $_ = "$before$;0${type}ref\{$nodes$after";
-	    next; # while xref
-	}
-	if ($type eq 'x') {
-	    $type = "$T2H_WORDS->{$T2H_LANG}->{'See'} ";
-	} elsif ($type eq 'px') {
-	    $type = "$T2H_WORDS->{$T2H_LANG}->{'see'} ";
-	} elsif ($type eq 'info') {
-	    $type = "$T2H_WORDS->{$T2H_LANG}->{'See'} Info";
-	} else {
-	    $type = '';
-	}
-	unless ($full) {
-	    $next = shift(@lines);
-	    $next = &substitute_style($next);
-	    chop($nodes); # remove final newline
-	    if ($next =~ /\}/) { # split on 2 lines
-		$nodes .= " $`";
-		$after = $';
-	    } else {
-		$nodes .= " $next";
-		$next = shift(@lines);
-		$next = &substitute_style($next);
-		chop($nodes);
-		if ($next =~ /\}/) { # split on 3 lines
-		    $nodes .= " $`";
-		    $after = $';
-		} else {
-		    warn "$ERROR Bad xref (no ending }): $_";
-		    $_ = "$before$;0xref\{$nodes$after";
-		    unshift(@lines, $next);
-		    next; # while xref
+
+		( $type, $nodes, $full ) = ( $1, $2, $3 );
+		( $before, $after ) = ( $`, $' );
+		if ( ! $full && $after ) {
+			warn "$ERROR Bad xref (no ending } on line): $_";
+			$_ = "$before$;0${type}ref\{$nodes$after";
+			next; # while xref
 		}
-	    }
-	}
-	$nodes =~ s/\s+/ /g; # remove useless spaces
-	@args = split(/\s*,\s*/, $nodes);
-	$node = $args[0]; # the node is always the first arg
-	$node = &normalise_node($node);
-	$sec = $args[2] || $args[1] || $node2sec{$node};
-	$href = $node2href{$node};
-	if (@args == 5) { # reference to another manual
-	    $sec = $args[2] || $node;
-	    $man = $args[4] || $args[3];
-	    $_ = "${before}${type}$T2H_WORDS->{$T2H_LANG}->{'section'} `$sec' in \@cite{$man}$after";
-	} elsif ($type =~ /Info/) { # inforef
-	    warn "$ERROR Wrong number of arguments: $_" unless @args == 3;
-	    ($nn, $_, $in) = @args;
-	    $_ = "${before}${type} file `$in', node `$nn'$after";
-	} elsif ($sec && $href && ! $T2H_SHORT_REF) {
-	    $_  = "${before}${type}";
-	    $_ .= "$T2H_WORDS->{$T2H_LANG}->{'section'} " if ${type};
-	    $_ .= &t2h_anchor('', $href, $sec) . $after;
-	}
-	elsif ($href)
-	{
-	  $_ = "${before}${type} " . 
-	    &t2h_anchor('', $href, $args[2] || $args[1] || $node) .
-	      $after;
-	}
-	else {
-	    warn "$ERROR Undefined node ($node): $_";
-	    $_ = "$before$;0xref{$nodes}$after";
-	}
+		if ( $type eq 'x' ) {
+			$type = "$T2H_WORDS->{$T2H_LANG}->{'See'} ";
+		} elsif ( $type eq 'px' ) {
+			$type = "$T2H_WORDS->{$T2H_LANG}->{'see'} ";
+		} elsif ( $type eq 'info' ) {
+			$type = "$T2H_WORDS->{$T2H_LANG}->{'See'} Info";
+		} else {
+			$type = '';
+		}
+		unless ( $full ) {
+			$next = shift( @lines );
+			$next = &substitute_style( $next );
+			chop( $nodes );                # remove final newline
+			if ( $next =~ /\}/ ) {         # split on 2 lines
+				$nodes .= " $`";
+				$after = $';
+			} else {
+				$nodes .= " $next";
+				$next = shift( @lines );
+				$next = &substitute_style( $next );
+				chop( $nodes );
+				if ( $next =~ /\}/ ) {         # split on 3 lines
+					$nodes .= " $`";
+					$after = $';
+				} else {
+					warn "$ERROR Bad xref (no ending }): $_";
+					$_ = "$before$;0xref\{$nodes$after";
+					unshift( @lines, $next );
+					next;                    # while xref
+				}
+			}
+		}
+
+		$nodes =~ s/\s+/ /g;             # remove useless spaces
+		@args = split( /\s*,\s*/, $nodes );
+		$node = $args[ 0 ];              # the node is always the first arg
+		$node = &normalise_node( $node );
+		$sec = $args[ 2 ] || $args[ 1 ] || $node2sec{ $node };
+		$href = $node2href{ $node };
+
+		if ( @args == 5 ) {                # reference to another manual
+			$sec = $args[ 2 ] || $node;
+			$man = $args[ 4 ] || $args[ 3 ];
+			$_ = "${before}${type}$T2H_WORDS->{$T2H_LANG}->{'section'} `$sec'
+                 in \@cite{$man}$after";
+		} elsif ( $type =~ /Info/ ) {      # inforef
+			warn "$ERROR Wrong number of arguments: $_" unless @args == 3;
+			( $nn, $_, $in ) = @args;
+			$_ = "${before}${type} file `$in', node `$nn'$after";
+		} elsif ( $sec && $href && ! $T2H_SHORT_REF ) {
+			$_  = "${before}${type}";
+			$_ .= "$T2H_WORDS->{$T2H_LANG}->{'section'} " if ${ type };
+			$_ .= &t2h_anchor( '', $href, $sec ) . $after;
+		} elsif ( $href ) {
+			$_ = "${before}${type} " .
+				 &t2h_anchor( '', $href, $args[ 2 ] || $args[ 1 ] || $node ) .
+				 $after;
+		} else {
+			warn "$ERROR Undefined node ($node): $_";
+			$_ = "$before$;0xref{$nodes}$after";
+		}
     }
 
     # replace images
-    s[\@image\s*{(.+?)}]
-    {
+
+    s[\@image\s*{(.+?)}(.*)]
+	{
+	 my $in_line = $2;
+	 my $next_line = shift( @lines );
+	 unshift( @lines, $next_line );
      my @args = split (/\s*,\s*/, $1);
-     my $base = $args[0];
-     my $image = 
-       LocateIncludeFile("$base.png") || 
-       LocateIncludeFile("$base.jpg") ||
-       LocateIncludeFile("$base.gif");
-     warn "$ERROR no image file for $base: $_" unless ($image && -e $image);
-     "<IMG SRC=\"$image\" ALT=\"$base\">";
-     ($T2H_CENTER_IMAGE ?
-      "<CENTER><IMG SRC=\"$image\" ALT=\"$base\"></CENTER>" :
-      "<IMG SRC=\"$image\" ALT=\"$base\">");
+     my $base = $args[ 0 ];
+     my $image = LocateIncludeFile( "$base.png" ) ||
+	             LocateIncludeFile( "$base.jpg" ) ||
+                 LocateIncludeFile( "$base.gif" );
+     warn "$ERROR no image file for $base: $_" unless ( $image && -e $image );
+     if ( $in_line =~ /\s*/ and $next_line =~ /^\s*<\/P><P>\s*$/
+		  and $T2H_CENTER_IMAGE ) {
+		 "<CENTER><IMG SRC=\"$image\" ALT=\"$base\"></CENTER>$in_line";
+	 } else {
+		 "<IMG SRC=\"$image\" ALT=\"$base\">$in_line";
+	 }
     }eg;
 
     #
     # try to guess bibliography references or glossary terms
     #
+
     unless (/^<H\d><A NAME=\"SEC\d/) {
-	if ($use_bibliography) {
-	    $done = '';
-	    while (/$BIBRE/o) {
-		($pre, $what, $post) = ($`, $&, $');
-		$href = $bib2href{$what};
-		if (defined($href) && $post !~ /^[^<]*<\/A>/) {
-		    $done .= $pre . &t2h_anchor('', $href, $what);
-		} else {
-		    $done .= "$pre$what";
+		if ($use_bibliography) {
+			$done = '';
+			while (/$BIBRE/o) {
+				($pre, $what, $post) = ($`, $&, $');
+				$href = $bib2href{$what};
+				if (defined($href) && $post !~ /^[^<]*<\/A>/) {
+					$done .= $pre . &t2h_anchor('', $href, $what);
+				} else {
+					$done .= "$pre$what";
+				}
+				$_ = $post;
+			}
+			$_ = $done . $_;
 		}
-		$_ = $post;
-	    }
-	    $_ = $done . $_;
-	}
-	if ($T2H_USE_GLOSSARY) {
-	    $done = '';
-	    while (/\b\w+\b/) {
-		($pre, $what, $post) = ($`, $&, $');
-		$entry = $what;
-		$entry =~ tr/A-Z/a-z/ unless $entry =~ /^[A-Z\s]+$/;
-		$href = $gloss2href{$entry};
-		if (defined($href) && $post !~ /^[^<]*<\/A>/) {
-		    $done .= $pre . &t2h_anchor('', $href, $what);
-		} else {
-		    $done .= "$pre$what";
+		if ($T2H_USE_GLOSSARY) {
+			$done = '';
+			while (/\b\w+\b/) {
+				($pre, $what, $post) = ($`, $&, $');
+				$entry = $what;
+				$entry =~ tr/A-Z/a-z/ unless $entry =~ /^[A-Z\s]+$/;
+				$href = $gloss2href{$entry};
+				if (defined($href) && $post !~ /^[^<]*<\/A>/) {
+					$done .= $pre . &t2h_anchor('', $href, $what);
+				} else {
+					$done .= "$pre$what";
+				}
+				$_ = $post;
+			}
+			$_ = $done . $_;
 		}
-		$_ = $post;
-	    }
-	    $_ = $done . $_;
-	}
     }
+
     # otherwise
+
     push(@lines2, $_);
 }
+
 print "# end of pass 2\n" if $T2H_VERBOSE;
 
 #
 # split style substitutions
 #
+
 while (@lines2) {
     $_ = shift(@lines2);
+
     #
     # special case (protected sections)
     #
+
     if (/^$PROTECTTAG/o) {
-	push(@lines3, $_);
-	next;
+		push(@lines3, $_);
+		next;
     }
+
     #
     # split style substitutions
     #
+
     $old = '';
     while ($old ne $_) {
         $old = $_;
-	if (/\@(\w+)\{/) {
-	    ($before, $style, $after) = ($`, $1, $');
-	    if (defined($style_map{$style})) {
-		$_ = $after;
-		$text = '';
-		$after = '';
-		$failed = 1;
-		while (@lines2) {
-		    if (/\}/) {
-			$text .= $`;
-			$after = $';
-			$failed = 0;
-			last;
-		    } else {
-			$text .= $_;
-			$_ = shift(@lines2);
-		    }
+		if (/\@(\w+)\{/) {
+			($before, $style, $after) = ($`, $1, $');
+			if (defined($style_map{$style})) {
+				$_ = $after;
+				$text = '';
+				$after = '';
+				$failed = 1;
+				while (@lines2) {
+					if (/\}/) {
+						$text .= $`;
+						$after = $';
+						$failed = 0;
+						last;
+					} else {
+						$text .= $_;
+						$_ = shift(@lines2);
+					}
+				}
+				if ($failed) {
+					die "* Bad syntax (\@$style) after: $before\n";
+				} else {
+					$text = &apply_style($style, $text);
+					$_ = "$before$text$after";
+				}
+			}
 		}
-		if ($failed) {
-		    die "* Bad syntax (\@$style) after: $before\n";
-		} else {
-		    $text = &apply_style($style, $text);
-		    $_ = "$before$text$after";
-		}
-	    }
-	}
     }
+
     # otherwise
+
     push(@lines3, $_);
 }
+
 print "# end of pass 3\n" if $T2H_VERBOSE;
 
 #############################################################################
