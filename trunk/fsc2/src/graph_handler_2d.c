@@ -23,9 +23,9 @@ static void shift_XPoints_of_curve_2d( Canvas *c, Curve_2d *cv );
 static void make_color_scale( Canvas *c, Curve_2d *cv );
 
 
-/*--------------------------------------------------------*/
-/* Handler for all kinds of X events the canvas receives. */
-/*--------------------------------------------------------*/
+/*-----------------------------------------------------------*/
+/* Handler for all kinds of X events the canvas may receive. */
+/*-----------------------------------------------------------*/
 
 int canvas_handler_2d( FL_OBJECT *obj, Window window, int w, int h, XEvent *ev,
 					   void *udata )
@@ -66,8 +66,9 @@ int canvas_handler_2d( FL_OBJECT *obj, Window window, int w, int h, XEvent *ev,
 }
 
 
-/*----------------------------------------------------------*/
-/*----------------------------------------------------------*/
+/*-------------------------------------------------------------*/
+/* Handler for events due to pressing one of the mouse buttons */
+/*-------------------------------------------------------------*/
 
 void press_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
 {
@@ -212,8 +213,9 @@ void press_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
 }
 
 
-/*----------------------------------------------------------*/
-/*----------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+/* Handler for events due to releasing one of the mouse buttons. */
+/*---------------------------------------------------------------*/
 
 void release_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
 {
@@ -331,8 +333,9 @@ void release_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
 }
 
 
-/*----------------------------------------------------------*/
-/*----------------------------------------------------------*/
+/*---------------------------------------------------*/
+/* Handler for events due to movements of the mouse. */
+/*---------------------------------------------------*/
 
 void motion_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
 {
@@ -441,8 +444,9 @@ void motion_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
 }
 
 
-/*----------------------------------------------------------*/
-/*----------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+/* Stores the current scaling state of the currently shown curve */
+/*---------------------------------------------------------------*/
 
 void save_scale_state_2d( Curve_2d *cv )
 {
@@ -1689,6 +1693,8 @@ void make_scale_2d( Curve_2d *cv, Canvas *c, int coord )
 }
 
 
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
 
 void make_color_scale( Canvas *c, Curve_2d *cv )
 {
