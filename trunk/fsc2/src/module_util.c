@@ -321,8 +321,6 @@ FILE *fsc2_fopen( const char *path, const char *mode )
 {
 	FILE *fp;
 
-	if ( ( fp = fopen( path, mode ) ) == NULL && errno != EACCESS )
-		return NULL;
 
 	raise_permissions( );
 	fp = fopen( path, mode );
