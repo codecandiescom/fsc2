@@ -514,12 +514,11 @@ save_comment( File_2, \"% \" );
 save_program( File_2, \"% \" );\n\n";
 
 print F "
-FOR I = 1 : N_runs
-{
+FOR I = 1 : N_runs {
+
 	print( \"Starting #. run out of #\\n\", I, N_runs );
 
-	FOR J = 1 : N_points
-	{
+	FOR J = 1 : N_points {
 		data[ J ] = lockin_get_data$lin( );
 		display( J, data[ J ], 1, J, ( mean_data[ J ] + data[ J ] ) / I, 2 );
 		synthesizer_frequency( start_freq + J * step_freq );
@@ -537,8 +536,7 @@ ON_STOP:
 
 synthesizer_state( \"OFF\" );
 
-IF I > 0
-{
+IF I > 0 {
     save( File_2, mean_data / K );
 }
 ";
