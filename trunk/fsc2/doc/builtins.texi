@@ -723,7 +723,9 @@ Returns a string with the current date in a form like @code{Sun Jun 17, 2000}.
 Waits for the specified time. Times are always to be given in seconds or
 alternatively with a unit, e.g.@: @w{100 ms}. Unfortunately, the time
 resolution of @code{wait()} is in the @w{10 ms} range and may even be
-less precise.
+less precise. If the argument is negative the function will print an
+error message and return immediately. The maximum time the function
+accepts is more than 2.1 billion seconds (or about 68 years).
 
 @item dim()
 @anchor{dim}
