@@ -213,7 +213,7 @@ long get_file_length( FILE *fp, int *len )
 			else
 			{
 				is_char = SET;
-				while ( *cur != '\n' && cur < end )
+				while ( cur < end && *cur != '\n' )
 					cur++;
 			}
 		}
