@@ -64,8 +64,8 @@ static int cur_1,
 /* through the data at the positon the mouse button was released. If the */
 /* window with the cross section is already shown the cut at the mouse   */
 /* position is shown.                                                    */
-/* dir: axis the mouse button was pressed in (X or Y)                    */
-/* pos: x- or y- position the mouse was pressed (for x- or y-axis,       */
+/* dir: axis canvas the mouse button was pressed in (X or Y)             */
+/* pos: x- or y- position the mouse was pressed at (in screen units)     */
 /*      respectively)                                                    */
 /*-----------------------------------------------------------------------*/
 
@@ -101,10 +101,6 @@ void cut_show( int dir, int pos )
 
 		G_init_cut_curve( );
 
-		cv->s2d[ X ] = ( double ) ( G.cut_canvas.w - 1 ) /
-			           ( double ) ( CG.nx - 1 );
-		cv->s2d[ Y ] = ( double ) ( G.cut_canvas.h - 1 );
-
 		is_shown = is_mapped = SET;
 	}
 	else if ( ! is_mapped )
@@ -117,6 +113,40 @@ void cut_show( int dir, int pos )
 	G.is_cut = SET;
 
 	fl_raise_form( cut_form->cut );
+
+	/* Calculate the scaling factors */
+
+	if ( scv->is_fs )
+	{
+		cv->s2d[ X ] = ( double ) ( G.cut_canvas.w - 1 ) /
+			           ( double ) ( CG.nx - 1 );
+		cv->s2d[ Y ] = ( double ) ( G.cut_canvas.h - 1 );
+		cv->shift[ X ] = 0.0;
+		cv->shift[ Y ] = 0.0;
+
+		CG.is_fs = SET;
+		fl_set_button( cut_form->cut_full_scale_button, 1 );
+		fl_set_object_helper( cut_form->cut_full_scale_button,
+							  "Switch off automatic rescaling" );
+	}
+	else
+	{
+		cv->s2d[ Y ] = scv->s2d[ Z ] / ( double ) ( G.z_axis.h - 1 )
+			           * ( double ) ( G.cut_canvas.h - 1 );
+		cv->shift[ Y ] = scv->shift[ Z ];
+
+//		if ( dir == X )
+
+		cv->s2d[ X ] = ( double ) ( G.cut_canvas.w - 1 ) /
+			           ( double ) ( CG.nx - 1 );
+		cv->shift[ X ] = 0.0;
+
+		CG.is_fs = UNSET;
+		fl_set_button( cut_form->cut_full_scale_button, 0 );
+		fl_set_object_helper( cut_form->cut_full_scale_button,
+							  "Rescale curves to fit into the window\n"
+							  "and switch on automatic rescaling" );
+	}
 
 	/* Calculate index into curve where cut is to be shown */
 
@@ -625,7 +655,7 @@ void G_init_cut_curve( void )
 	cv->can_undo = UNSET;
 
 	CG.is_fs = SET;
-	CG.nx = -1;
+	CG.nx = 0;
 	CG.label_pm[ Y ] = G.label_pm[ Z ];
 }
 
