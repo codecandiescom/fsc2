@@ -737,7 +737,7 @@ Unless the acquistion hasn't been stopped (i.e.@: as long as
 data. To be able to display both the @i{x}- and @i{y}-phase signal we
 tell it to return data for both channel @code{1} and @code{2}. Of
 course, it must return 2 values, which it stores in an array with two
-elements, @code{data}. Please note, that not all lock-in amplifiers have
+elements, @code{data}. Please note that not all lock-in amplifiers have
 two channels, for these we would have to change the script a bit to
 fetch and display only one data point.
 
