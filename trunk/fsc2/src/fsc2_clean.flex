@@ -312,14 +312,14 @@ KEEP    [^\t" \n(\/*),;:=%\^\-\+]+
 {FS}/(;|,)  unit_spec( yytext, yyleng, "\x04sec" );
 {FS}        unit_spec( yytext, yyleng, "\x04sec" );
 
-{NV}/(,|;)  printf( "\x04nsec" );
-{NV}        printf( "\x04nsec" );
-{UV}/(;|,)  printf( "\x04usec" );
-{UV}        printf( "\x04usec" );
-{MV}/(;|,)  printf( "\x04msec" );
-{MV}        printf( "\x04msec" );
-{V}/(;|,)   printf( "\x04sec" );
-{V}         printf( "\x04sec" );
+{NV}/(,|;)  printf( "\x04nvolt" );
+{NV}        printf( "\x04nvolt" );
+{UV}/(;|,)  printf( "\x04uvolt" );
+{UV}        printf( "\x04uvolt" );
+{MV}/(;|,)  printf( "\x04mvolt" );
+{MV}        printf( "\x04mvolt" );
+{V}/(;|,)   printf( "\x04volt" );
+{V}         printf( "\x04volt" );
 {INV}/(;|,) unit_spec( yytext, yyleng, "\x04nvolt" );
 {INV}       unit_spec( yytext, yyleng, "\x04nvolt" );
 {IUV}/(;|,) unit_spec( yytext, yyleng, "\x04uvolt" );

@@ -156,7 +156,7 @@ Var *lockin_get_data( Var *v )
 Var *lockin_sensitivity( Var *v )
 {
 	double sens;
-	int Sens;
+	int Sens = -1;
 	int i;
 
 
@@ -225,7 +225,7 @@ Var *lockin_sensitivity( Var *v )
 
 	if ( Sens < 0 )                                   /* not found yet ? */
 	{
-		if ( sens < slist[ 0 ] )
+		if ( sens > slist[ 0 ] )
 			Sens = 1;
 		else
 		    Sens = 27;
@@ -233,7 +233,7 @@ Var *lockin_sensitivity( Var *v )
 		if ( ! sr510.Sens_warn )                      /* no warn message yet */
 		{
 		if ( sens >= 1.0e-3 )
-			eprint( WARN, "sr510: Invalid sensitivity to %.0lfV, using "
+			eprint( WARN, "sr510: Invalid sensitivity to %.0lfmV, using "
 					"%.0lfmV instead.\n", sens * 1.0e3,
 					slist[ Sens - 1 ] * 1.0e3 );
 		else
