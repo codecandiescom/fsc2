@@ -31,23 +31,32 @@
 
 extern int rulbus_lex( void );
 
+void rulbus_parser_init( void );
+
 extern RULBUS_CARD_LIST *rulbus_card;
 extern int rulbus_num_cards;
 
-static int rack;
-static int card_no;
-static int ret;
+static int rack;                 /* address of current rack */
+static RULBUS_CARD_LIST *card;   /* pointer to current card */
+static int ret;                  
+static bool rulbus_rack_addrs[ RULBUS_DEF_RACK_ADDR + 1 ];
 
 static int set_dev_file( const char *name );
-static int new_card( void );
-static int set_name( const char *name );
-static int set_addr( unsigned int addr );
-static int set_type( unsigned int type );
-static int set_nchan( unsigned int chan );
-static int set_range( double range );
-static int set_polar( const char *polar );
-static int set_exttrg( unsigned int exttrg );
-static int set_rack( void );
+static int rack_addr( int addr );
+static int setup_cards( void );
+static int new_card( int type, char *name );
+static int set_defaults( RULBUS_CARD_LIST *card );
+static int set_rb8509_defaults( RULBUS_CARD_LIST *card );
+static int set_rb8510_defaults( RULBUS_CARD_LIST *card );
+static int set_rb8514_defaults( RULBUS_CARD_LIST *card );
+static int set_rb8515_defaults( RULBUS_CARD_LIST *card );
+static int set_rb_generic_defaults( RULBUS_CARD_LIST *card );
+static int set_addr( int addr );
+static int set_nchan( int nchan );
+static int set_vpb( double vpb );
+static int set_bipolar( int is_bipolar );
+static int set_exttrig( int is_ext_trigger );
+static int set_intr_delay( double intr_delay );
 static void rulbus_error( const char *s );
 
 %}
@@ -59,83 +68,100 @@ static void rulbus_error( const char *s );
     char *sval;
 }
 
-%token FILE_TOKEN RACK_TOKEN CARD_TOKEN NAME_TOKEN TYPE_TOKEN ADDR_TOKEN
-%token RANGE_TOKEN POLAR_TOKEN NUM_TOKEN CARD_TYPE_TOKEN STR_TOKEN
-%token NCHAN_TOKEN ERR_TOKEN FLOAT_TOKEN EXTTRG_TOKEN
+%token FILE_TOKEN RACK_TOKEN ADDR_TOKEN VPB_TOKEN POL_TOKEN NUM_TOKEN
+%token CARD_TOKEN STR_TOKEN NCHAN_TOKEN ERR_TOKEN EOFC_TOKEN EXTTRIG_TOKEN
+%token FLOAT_TOKEN UNIT_TOKEN IDEL_TOKEN
 
-%type <ival> NUM_TOKEN CARD_TYPE_TOKEN
-%type <dval> FLOAT_TOKEN number
+%type <ival> NUM_TOKEN CARD_TOKEN
+%type <dval> FLOAT_TOKEN UNIT_TOKEN number unit
 %type <sval> STR_TOKEN
 
 
 %%
 
+
 line:     /* empty */
 	    | line file
 	    | line rack
-        | error                           { return RULBUS_STX_ERR; }
-        | ERR_TOKEN                       { return RULBUS_STX_ERR; }
+        | error                         { return RULBUS_CF_SYNTAX_ERROR; }
+        | ERR_TOKEN                     { return RULBUS_CF_SYNTAX_ERROR; }
+        | EOFC_TOKEN                    { return RULBUS_CF_EOF_IN_COMMENT; }
 ;
 
-
-file:     FILE_TOKEN sep1 STR_TOKEN sep2  { if ( ( ret = set_dev_file( $3 ) ) )
-								  				return ret; }
+file:     FILE_TOKEN sep1 STR_TOKEN
+	                                    { if ( ( ret = set_dev_file( $3 ) ) )
+								  			  return ret; }
+          sep2
 ;
 
-
-rack:     RACK_TOKEN sep1				  { card_no = rulbus_num_cards;
-											rack = -1; }
-		  '{' rdata '}' sep2			  { if ( ( ret = set_rack( ) ) )
-												return ret; }
+rack:     RACK_TOKEN sep1       		{ rack = RULBUS_INV_RACK_ADDR; }
+		  STR_TOKEN rinit sep0
 ;
 
+rinit:    /* empty */
+		| '{' rdata '}'                 { if ( ( ret = setup_cards( ) ) )
+			                                  return ret; }
+;
 
 rdata:    /* empty */
-        | rdata ADDR_TOKEN sep1 NUM_TOKEN sep2
-										  { if ( rack != -1 )
-								  				return RULBUS_RCK_DUP;
-							  				rack = ( unsigned char ) $4; }
-		| rdata CARD_TOKEN sep1 '{'		  { if ( ( ret =  new_card( ) ) )
-												return ret; }
-		  cdata '}' sep2
+        | rdata ADDR_TOKEN sep1 NUM_TOKEN
+	                                    { if ( ( ret = rack_addr( $4 ) ) )
+											  return ret; }
+          sep2
+		| rdata CARD_TOKEN sep1 STR_TOKEN
+                                        { if ( ( ret = new_card( $2, $4 ) ) )
+											  return ret; }
+		  cinit sep0
 ;
 
+cinit:    /* empty */
+		| '{' cdata '}'                 { if ( ( ret = set_defaults( card ) ) )
+			                                  return ret; }
+;
 
 cdata:    /* empty */
-		| cdata NAME_TOKEN sep1 STR_TOKEN sep2
-										  { if ( ( ret = set_name( $4 ) )  )
-												return ret; }
-		| cdata ADDR_TOKEN sep1 NUM_TOKEN sep2
-										  { if ( ( ret = set_addr( $4 ) ) )
-												return ret; }
-		| cdata TYPE_TOKEN sep1 CARD_TYPE_TOKEN sep2
-										  { if ( ( ret = set_type( $4 ) ) )
-												return ret; }
-		| cdata NCHAN_TOKEN sep1 NUM_TOKEN sep2
-										  { if ( ( ret = set_nchan( $4 ) ) )
-												return ret; }
-		| cdata RANGE_TOKEN sep1 number sep2
-										  { if ( ( ret = set_range( $4 ) ) )
-												return ret; }
-		| cdata POLAR_TOKEN sep1 STR_TOKEN sep2
-										  { if ( ( ret = set_polar( $4 ) ) )
-												return ret; }
-		| cdata EXTTRG_TOKEN sep1 NUM_TOKEN sep2
-										  { if ( ( ret = set_exttrg( $4 ) ) )
-												return ret; }
+		| cdata ADDR_TOKEN sep1 NUM_TOKEN
+										{ if ( ( ret = set_addr( $4 ) ) )
+											  return ret; }
+          sep2
+		| cdata NCHAN_TOKEN sep1 NUM_TOKEN
+										{ if ( ( ret = set_nchan( $4 ) ) )
+											  return ret; }
+          sep2
+		| cdata VPB_TOKEN sep1 number
+										{ if ( ( ret = set_vpb( $4 ) ) )
+											  return ret; }
+          sep2
+		| cdata POL_TOKEN sep1 NUM_TOKEN
+										{ if ( ( ret = set_bipolar( $4 ) ) )
+											  return ret; }
+          sep2
+		| cdata EXTTRIG_TOKEN sep1 NUM_TOKEN
+										{ if ( ( ret = set_exttrig( $4 ) ) )
+											  return ret; }
+          sep2
+		| cdata IDEL_TOKEN sep1 number
+										{ if ( ( ret = set_intr_delay( $4 ) ) )
+											  return ret; }
+          sep2
 ;
 
-
-number:   NUM_TOKEN                        { $$ = ( double ) $1; }
-        | FLOAT_TOKEN                      { $$ = $1; }
+number:   NUM_TOKEN unit                 { $$ = $1 * $2; }
+        | FLOAT_TOKEN unit               { $$ = $1 * $2; }
 ;
 
+unit:     /* empty */                    { $$ = 1.0; }
+        | UNIT_TOKEN                     { $$ = $1; }
+;
+
+sep0:     /* empty */
+        | ';'
+;
 
 sep1:     /* empty */
         | '='
         | ':'
 ;
-
 
 sep2:     /* empty */
         | ','
@@ -146,9 +172,9 @@ sep2:     /* empty */
 %%
 
 
-/*----------------------------------------------------------------------------
- * Function for setting the name of the device file - can only be called once
- *---------------------------------------------------------------------------*/
+/*--------------------------------------------------*
+ * Function for setting the name of the device file
+ *--------------------------------------------------*/
 
 static int set_dev_file( const char *name )
 {
@@ -157,14 +183,94 @@ static int set_dev_file( const char *name )
 
 	if ( rulbus_dev_file != NULL )
 	{
-		free( rulbus_dev_file );
-		return RULBUS_DVF_CNT;
+		if ( ! strcmp( rulbus_dev_file, name ) )
+			return RULBUS_CF_DEV_FILE_DUPLICATE;
+		else
+			return RULBUS_OK;
 	}
 
 	if ( ( rulbus_dev_file = strdup( name ) ) == NULL )
-		return RULBUS_NO_MEM;
+		return RULBUS_NO_MEMORY;
 
-	strcpy( rulbus_dev_file, name );
+	return RULBUS_OK;
+}
+
+
+/*----------------------------------------------*
+ * Function called for rack address assignments
+ *----------------------------------------------*/
+
+static int rack_addr( int addr )
+{
+	int i;
+
+
+	/* Check that no other address has been set for the rack yet */
+
+	if ( rack == addr )
+		return RULBUS_OK;
+
+	if ( rack != RULBUS_INV_RACK_ADDR )
+		return RULBUS_CF_RACK_ADDR_DUPLICATE;
+
+	/* Check that the address is valid */
+
+	if ( addr < 0 || addr > RULBUS_DEF_RACK_ADDR )
+		return RULBUS_CF_RACK_ADDR_INVALID;
+
+	/* Check that it isn't already used by a different rack */
+
+	if ( rulbus_rack_addrs[ addr ] )
+		return RULBUS_CF_RACK_ADDR_CONFLICT;
+
+	/* Mark the address as used */
+
+	rulbus_rack_addrs[ addr ] = SET;
+
+	rack = addr;
+
+	/* Set the rack address for all cards that haven't been assigned one */
+
+	for ( i = 0; i < rulbus_num_cards; i++ )
+		if ( rulbus_card[ i ].rack == RULBUS_INV_RACK_ADDR )
+			rulbus_card[ i ].rack = ( unsigned char ) rack;
+
+	return RULBUS_OK;
+}
+
+
+/*-------------------------------------------------*
+ * Function called at the end of a rack definition
+ *-------------------------------------------------*/
+
+static int setup_cards( void )
+{
+	int i;
+
+
+	/* Handle the situation where no rack address has been specified. In this
+	   it gets assigned the default address of 0x0F (that also has that the
+	   special property that then this is the only rack that can be
+	   accessed and is always selected). */
+
+	if ( rack == RULBUS_INV_RACK_ADDR )
+	{
+		if ( rulbus_rack_addrs[ RULBUS_DEF_RACK_ADDR ] )
+			return RULBUS_CF_RACK_ADDR_CONFLICT;
+
+		for ( i = 0; i < RULBUS_DEF_RACK_ADDR; i++ )
+			if ( rulbus_rack_addrs[ i ] )
+				return RULBUS_CF_RACK_ADDR_DEF_DUPLICATE;
+
+		rulbus_rack_addrs[ RULBUS_DEF_RACK_ADDR ] = SET;
+
+		rack = RULBUS_DEF_RACK_ADDR;
+
+		for ( i = 0; i < rulbus_num_cards; i++ )
+			if ( rulbus_card[ i ].rack == RULBUS_INV_RACK_ADDR )
+				rulbus_card[ i ].rack = RULBUS_DEF_RACK_ADDR;
+	}
+
 	return RULBUS_OK;
 }
 
@@ -173,234 +279,445 @@ static int set_dev_file( const char *name )
  * Function to be called when a new card is found
  *------------------------------------------------*/
 
-static int new_card( void )
+static int new_card( int type, char *name )
 {
 	RULBUS_CARD_LIST *tmp;
+	int i;
 
 
-	/* Check that there aren't too many cards */
+	/* Weed out unsupported card types */
 
-	if ( rulbus_num_cards >= RULBUS_MAX_CARDS )
-		return RULBUS_MAX_CRD;
+	if ( type == RB8506 || type == RB8506 || type == RB8506 ||
+		 type == RB8513 || type == RB8905 || type == RB9005 ||
+		 type == RB9603 )
+		return RULBUS_CF_UNSUPPORTED_CARD_TYPE;
+
+	/* Check that the name isn't already used for another card */
+
+	for ( i = 0; i < rulbus_num_cards; i++ )
+		if ( ! strcmp( name, rulbus_card[ i ].name ) )
+			 return RULBUS_CF_CARD_NAME_CONFLICT;
 
 	/* Set up a new structure for the card */
 
 	if ( ( tmp = realloc( rulbus_card,
 						  ( rulbus_num_cards + 1 ) * sizeof *tmp ) ) == NULL )
-		return RULBUS_NO_MEM;
+		return RULBUS_NO_MEMORY;
 
 	rulbus_card = tmp;
 
-	rulbus_card[ rulbus_num_cards ].name = NULL;
-	rulbus_card[ rulbus_num_cards ].addr = RULBUS_INVALID_ADDR;
-	rulbus_card[ rulbus_num_cards ].type = -1;
-	rulbus_card[ rulbus_num_cards ].nchan = -1;
-	rulbus_card[ rulbus_num_cards ].range = -1.0;
-	rulbus_card[ rulbus_num_cards ].exttrg = -1;
-	rulbus_card[ rulbus_num_cards++ ].polar = -1;
+	if ( ( rulbus_card[ rulbus_num_cards ].name = strdup( name ) ) == NULL )
+		return RULBUS_NO_MEMORY;
+
+	card = rulbus_card + rulbus_num_cards++;
+	card->type = type;
+	card->rack = ( unsigned char ) rack;
+
+	/* Set all other card properties to invalid values so we we can tell where
+	   we need to set default values later on */
+
+	card->addr = RULBUS_INV_CARD_ADDR;
+	card->num_channels = -1;
+	card->vpb = -1.0;
+	card->bipolar = -1;
+	card->intr_delay = -1.0;
 
 	return RULBUS_OK;
 }
 
 
-/*------------------------------------------------------------*
- * Function that gets called when the name of a card is found 
- *------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * Function for setting default values for unspecified properties
+ *----------------------------------------------------------------*/
 
-static int set_name( const char *name )
+static int set_defaults( RULBUS_CARD_LIST *card )
 {
 	int i;
 
 
-	/* Check that the name hasn't been used before */
+	/* Set default properties for card if necessray */
 
-	for ( i = 0; i < rulbus_num_cards - 1; i++ )
-		if ( rulbus_card[ i ].name &&
-			 ! strcmp( rulbus_card[ i ].name, name ) )
-			return RULBUS_NAM_DUP;
+	switch ( card->type )
+	{
+		case RB8509 :
+			if ( ( ret = set_rb8509_defaults( card ) ) != RULBUS_OK )
+				return ret;
+			break;
 
-	/* Check that the card hasn't already been assigned a name */
+		case RB8510 :
+			if ( ( ret = set_rb8510_defaults( card ) ) != RULBUS_OK )
+				return ret;
+			break;
 
-	if ( rulbus_card[ rulbus_num_cards - 1 ].name != NULL )
-		return RULBUS_DUP_NAM;
+		case RB8514 :
+			if ( ( ret = set_rb8514_defaults( card ) ) != RULBUS_OK )
+				return ret;
+			break;
 
-	if ( ( rulbus_card[ rulbus_num_cards - 1 ].name = strdup( name ) )
-		 															  == NULL )
-		return RULBUS_NO_MEM;
+		case RB8515 :
+			if ( ( ret = set_rb8515_defaults( card ) ) != RULBUS_OK )
+				return ret;
+			break;
+
+		case RB_GENERIC :
+			return set_rb_generic_defaults( card );
+	}
+
+	/* Check the cards address range does not overlap with the range of a
+	   different card in the same rack (don't check cards of type
+	   "rb_generic", they are supposed to cover the whole address range) */
+
+	for ( i = 0; i < rulbus_num_cards; i++ )
+	{
+		if ( rulbus_card[ i ].type == RB_GENERIC ||
+			 rulbus_card + i == card ||
+			 rulbus_card[ i ].rack != card->rack )
+			continue;
+
+		if ( ( rulbus_card[ i ].addr < card->addr &&
+			   rulbus_card[ i ].addr + rulbus_card[ i ].width > card->addr ) ||
+			 ( card->addr < rulbus_card[ i ].addr &&
+			   card->addr + card->width > rulbus_card[ i ].addr ) )
+			return RULBUS_CF_CARD_ADDR_OVERLAP;
+	}
 
 	return RULBUS_OK;
 }
 
 
-/*--------------------------------------------------------*
- * Function that gets called when a card address is found
- *--------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * Function for setting default values for unspecified properties
+ * of RB8509 cards
+ *----------------------------------------------------------------*/
 
-static int set_addr( unsigned int addr )
+static int set_rb8509_defaults( RULBUS_CARD_LIST *card )
 {
-	/* Check that the address is reasonable */
+	int i;
 
-	if ( addr < RULBUS_MIN_CARD_ADDR || addr > RULBUS_MAX_CARD_ADDR )
-		return RULBUS_CRD_ADD;
 
-	/* Check that the card hasn't already been assigned an address */
+	/* If the card hasn't been assigned an address take the default address
+	   (unless it hasn't been assigned to another card) */
 
-	if ( rulbus_card[ rulbus_num_cards - 1 ].addr != RULBUS_INVALID_ADDR )
-		return RULBUS_ADD_DUP;
+	if ( card->addr == RULBUS_INV_CARD_ADDR )
+	{
+		for ( i = 0; i < rulbus_num_cards; i++ )
+			if ( rulbus_card[ i ].addr == RULBUS_RB8509_DEF_ADDR )
+				return RULBUS_CF_CARD_ADDR_DEF_CONFLICT;
 
-	rulbus_card[ rulbus_num_cards - 1 ].addr = ( unsigned char ) addr;
+		card->addr = RULBUS_RB8509_DEF_ADDR;
+	}
+
+	if ( card->num_channels == -1 )
+		card->num_channels = RULBUS_RB8509_DEF_NUM_CHANNELS;
+
+	if ( card->vpb <= 0.0 )
+		card->vpb = RULBUS_RB8509_DEF_VPB;
+
+	if ( card->bipolar == -1 )
+		card->bipolar = RULBUS_RB8509_DEF_BIPOLAR;
+
+	if ( card->ext_trigger == -1 )
+		card->ext_trigger = RULBUS_RB8509_DEF_EXT_TRIGGER;
+
+	card->width = RULBUS_RB8509_WIDTH;
+
 	return RULBUS_OK;
 }
 
 
-/*-----------------------------------------------------*
- * Function that gets called when a card type is found 
- *-----------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * Function for setting default values for unspecified properties
+ * of RB8510 cards
+ *----------------------------------------------------------------*/
 
-static int set_type( unsigned int type )
+static int set_rb8510_defaults( RULBUS_CARD_LIST *card )
 {
-	/* Check that the card hasn't already been assigned a type */
+	int i;
 
-	if ( rulbus_card[ rulbus_num_cards - 1 ].type != -1 )
-		return RULBUS_TYP_DUP;
 
-	rulbus_card[ rulbus_num_cards - 1 ].type = type;
+	/* If the card hasn't been assigned an address take the default address
+	   (unless it hasn't been assigned to another card) */
+
+	if ( card->addr == RULBUS_INV_CARD_ADDR )
+	{
+		for ( i = 0; i < rulbus_num_cards; i++ )
+			if ( rulbus_card[ i ].addr == RULBUS_RB8510_DEF_ADDR )
+				return RULBUS_CF_CARD_ADDR_DEF_CONFLICT;
+
+		card->addr = RULBUS_RB8510_DEF_ADDR;
+	}
+
+	if ( card->vpb <= 0.0 )
+		card->vpb = RULBUS_RB8510_DEF_VPB;
+
+	if ( card->bipolar == -1 )
+		card->bipolar = RULBUS_RB8510_DEF_BIPOLAR;
+
+	card->width = RULBUS_RB8510_WIDTH;
+
 	return RULBUS_OK;
 }
 
 
-/*---------------------------------------------------------*
- *---------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * Function for setting default values for unspecified properties
+ * of RB8514 cards
+ *----------------------------------------------------------------*/
 
-static int set_nchan( unsigned int nchan )
+static int set_rb8514_defaults( RULBUS_CARD_LIST *card )
 {
-	/* Check that the card hasn't already been assigned a number of channels */
+	int i;
 
-	if ( rulbus_card[ rulbus_num_cards - 1 ].nchan != -1 )
-		return RULBUS_CHN_DUP;
 
-	/* Check that it's not too large */
+	/* If the card hasn't been assigned an address take the default address
+	   (unless it hasn't been assigned to another card) */
 
-	if ( nchan < 1 || nchan > RULBUS_ADC12_MAX_CHANNELS )
-		return RULBUS_CHN_INV;
+	if ( card->addr == RULBUS_INV_CARD_ADDR )
+	{
+		for ( i = 0; i < rulbus_num_cards; i++ )
+			if ( rulbus_card[ i ].addr == RULBUS_RB8514_DEF_ADDR )
+				return RULBUS_CF_CARD_ADDR_DEF_CONFLICT;
 
-	rulbus_card[ rulbus_num_cards - 1 ].nchan = nchan;
-	return RULBUS_OK;
-}
+		card->addr = RULBUS_RB8514_DEF_ADDR;
+	}
 
-/*------------------------------------------------------*
- * Function that gets called when a card range is found 
- *------------------------------------------------------*/
+	if ( card->intr_delay <= 0.0 )
+		card->intr_delay = RULBUS_RB8514_DEF_INTR_DELAY;
 
-static int set_range( double range )
-{
-	/* Check that the card hasn't already been assigned a range */
+	card->width = RULBUS_RB8510_WIDTH;
 
-	if ( rulbus_card[ rulbus_num_cards - 1 ].range >= 0.0 )
-		return RULBUS_RNG_DUP;
-
-	rulbus_card[ rulbus_num_cards - 1 ].range = range;
 	return RULBUS_OK;
 }
 
 
-/*---------------------------------------------------------*
- * Function that gets called when a card polarity is found 
- *---------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * Function for setting default values for unspecified properties
+ * of RB8515 cards
+ *----------------------------------------------------------------*/
 
-static int set_polar( const char *polar )
+static int set_rb8515_defaults( RULBUS_CARD_LIST *card )
 {
-	/* Check that the card hasn't already been assigned a polarity */
+	int i;
 
-	if ( rulbus_card[ rulbus_num_cards - 1 ].polar != -1 )
-		return RULBUS_POL_DUP;
 
-	/* Check the string */
+	/* If the card hasn't been assigned an address take the default address
+	   (unless it hasn't been assigned to another card) */
 
-	if ( ! strcasecmp( polar, "unipolar" ) )
-		rulbus_card[ rulbus_num_cards - 1 ].polar = RULBUS_UNIPOLAR;
-	else if ( ! strcasecmp( polar, "bipolar" ) )
-		rulbus_card[ rulbus_num_cards - 1 ].polar = RULBUS_BIPOLAR;
-	else
-		return RULBUS_INV_POL;
+	if ( card->addr == RULBUS_INV_CARD_ADDR )
+	{
+		for ( i = 0; i < rulbus_num_cards; i++ )
+			if ( rulbus_card[ i ].addr == RULBUS_RB8515_DEF_ADDR )
+				return RULBUS_CF_CARD_ADDR_DEF_CONFLICT;
+
+		card->addr = RULBUS_RB8515_DEF_ADDR;
+	}
+
+	card->width = RULBUS_RB8510_WIDTH;
+
+	return RULBUS_OK;
+}
+
+
+/*----------------------------------------------------------------*
+ * Function for setting default values for unspecified properties
+ * of generic cards
+ *----------------------------------------------------------------*/
+
+static int set_rb_generic_defaults( RULBUS_CARD_LIST *card )
+{
+	/* The address for the generic card is always 0 and the width is set
+	   to the whole range plus one (which then allows access to all
+	   possible addresses). */
+
+	card->addr = 0;
+	card->width = RULBUS_MAX_CARD_ADDR + 1;
 
 	return RULBUS_OK;
 }
 
 
 /*--------------------------------------------------------------------*
- * Function that gets called when a external trigger setting is found
+ * Function that gets called when a card address is found in the file
  *--------------------------------------------------------------------*/
 
-static int set_exttrg( unsigned int exttrg )
-{
-	/* Check that the card hasn't already been assigned a type */
-
-	if ( rulbus_card[ rulbus_num_cards - 1 ].exttrg != -1 )
-		return RULBUS_EXT_DUP;
-
-	if ( exttrg != 0 && exttrg != 1 )
-		return RULBUS_EXT_INV;
-
-	rulbus_card[ rulbus_num_cards - 1 ].exttrg = exttrg;
-	return RULBUS_OK;
-}
-
-
-/*-----------------------------------------------------------------------*
- * Function that gets called when the end of a rack description is found
- *-----------------------------------------------------------------------*/
-
-static int set_rack( void )
+static int set_addr( int addr )
 {
 	int i;
 
 
-	/* Check that a rack address was set and that it is reasonable */
+	/* RB_GENERIC cards don't allow setting an address */
 
-	if ( rack == -1 )
-		return RULBUS_NO_RCK;
+	if ( card->type == RB_GENERIC )
+		return RULBUS_CF_CARD_ADDR_GENERIC;
 
-	if ( rack > RULBUS_MAX_RACK_NO )
-		return RULBUS_INV_RCK;
+	/* Check that the address is reasonable */
 
-	/* Check that there aren't too many cards for the rack */
+	if ( addr < RULBUS_MIN_CARD_ADDR || addr > RULBUS_MAX_CARD_ADDR )
+		return RULBUS_CF_CARD_ADDR_INVALID;
 
-	if ( rulbus_num_cards - card_no > RULBUS_MAX_CARDS_IN_RACK )
-		return RULBUS_CRD_CNT;
+	/* Check that the card hasn't already been assigned an address */
 
-	/* Set the rack number for all of the cards */
+	if ( card->addr != RULBUS_INV_CARD_ADDR && card->addr != addr )
+		return RULBUS_CF_CARD_ADDR_DUPLICATE;
 
-	for ( i = card_no; i < rulbus_num_cards; i++ )
-	{
-		rulbus_card[ i ].rack = ( unsigned char ) rack;
-		rulbus_card[ i ].in_use = UNSET;
-	}
+	/* Check that the address hasn't been used for a different card in the
+	   same rack (the rack addresses of all cards of the rack are still set
+	   to an invalid value) */
 
-	rack = -1;
+	for ( i = 0; i < rulbus_num_cards; i++ )
+		if ( rulbus_card[ i ].rack == RULBUS_INV_RACK_ADDR &&
+			 rulbus_card[ i ].addr == addr )
+			return RULBUS_CF_CARD_ADDR_CONFLICT;;
+
+	card->addr = ( unsigned char ) addr;
+	return RULBUS_OK;
+}
+
+
+/*---------------------------------------------------------------------------*
+ * Function to be called when a 'num_channels' property is found in the file
+ *---------------------------------------------------------------------------*/
+
+static int set_nchan( int nchan )
+{
+	/* Check if card has this property */
+
+	if ( card->type != RB8509 )
+		return RULBUS_CF_CARD_PROPERTY_INVALID;
+
+	/* Check that the card hasn't already been assigned a number of channels */
+
+	if ( card->num_channels != -1 && card->num_channels != nchan )
+		return RULBUS_CF_DUPLICATE_NUM_CHANNELS;
+
+	/* Check that it's not too large */
+
+	if ( nchan < 1 || nchan > RULBUS_RB8509_MAX_CHANNELS )
+		return RULBUS_CF_INVALID_NUM_CHANNELS;
+
+	card->num_channels = nchan;
+	return RULBUS_OK;
+}
+
+/*---------------------------------------------------------------------------*
+ * Function to be called when a 'volt_per_bit' property is found in the file
+ *---------------------------------------------------------------------------*/
+
+static int set_vpb( double vpb )
+{
+	/* Check if card has this property */
+
+	if ( card->type != RB8509 && card->type != RB8510 )
+		return RULBUS_CF_CARD_PROPERTY_INVALID;
+
+	/* Check that the card hasn't already been assigned a volt_per_bit value */
+
+	if ( card->vpb >= 0.0 && card->vpb != vpb )
+		return RULBUS_CF_VPB_DUPLICATE;
+
+	/* Check that the argument isn't completely unreasonable */
+
+	if ( vpb <= 0.0 )
+		return RULBUS_CF_INVALID_VPB;
+
+	card->vpb = vpb;
+	return RULBUS_OK;
+}
+
+
+/*----------------------------------------------------------------------*
+ * Function to be called when a 'bipolar' property is found in the file
+ *----------------------------------------------------------------------*/
+
+static int set_bipolar( int is_bipolar )
+{
+	/* Check if card has this property */
+
+	if ( card->type != RB8509 && card->type != RB8510 )
+		return RULBUS_CF_CARD_PROPERTY_INVALID;
+
+	/* Check that the card hasn't already been assigned a polarity */
+
+	if ( card->bipolar != -1 && card->bipolar != ( is_bipolar == 1 ) )
+		return RULBUS_CF_BIPLOAR_DUPLICATE;
+
+	card->bipolar = is_bipolar == 1;
 
 	return RULBUS_OK;
 }
 
 
-/*-------------------------------------------------------------*
- * Function to put some use information into the error message 
- *-------------------------------------------------------------*/
+/*----------------------------------------------------------------------*
+ * Function to be called when a 'bipolar' property is found in the file
+ *----------------------------------------------------------------------*/
+
+static int set_exttrig( int is_ext_trigger )
+{
+	/* Check if card has this property */
+
+	if ( card->type != RB8509 )
+		return RULBUS_CF_CARD_PROPERTY_INVALID;
+
+	/* Check that the card hasn't already been assigned a polarity */
+
+	if ( card->ext_trigger != -1 &&
+		 card->ext_trigger != ( is_ext_trigger == 1 ) )
+		return RULBUS_CF_EXT_TRIGGER_DUPLICATE;
+
+	card->ext_trigger = is_ext_trigger == 1;
+
+	return RULBUS_OK;
+}
+
+
+/*---------------------------------------------.---------------------------*
+ * Function to be called when a 'intr_delay' property is found in the file
+ *-------------------------------------------------------------------------*/
+
+static int set_intr_delay( double intr_delay )
+{
+	/* Check if card has this property */
+
+	if ( card->type != RB8514 )
+		return RULBUS_CF_CARD_PROPERTY_INVALID;
+
+	/* Check that the card hasn't already been assigned a type */
+
+	if ( card->intr_delay > 0.0 && card->intr_delay != intr_delay )
+		return RULBUS_CF_INTR_DELAY_DUPLICATE;
+
+	/* Check that the argument isn't completely unreasonable */
+
+	if ( intr_delay < 0.0 )
+		return RULBUS_CF_INTR_DELAY_INVALID;
+
+	card->intr_delay = intr_delay;
+	return RULBUS_OK;
+}
+
+
+/*-----------------------------------------------------*
+ * Dummy function (required by bison) called on errors
+ *-----------------------------------------------------*/
 
 static void rulbus_error( const char *s )
 {
-	extern int rulbus_lineno;
-	extern unsigned int rulbus_column;
-	extern char rulbus_stx_err[ ];
-	char *p;
-
 	s = s;
-	if ( ( p = strstr( rulbus_stx_err, " near line " ) ) != NULL )
-	{
-		if ( rulbus_lineno < 100000 && rulbus_column < 100000 )
-			sprintf( p, " near line %d, column %u",
-					 rulbus_lineno, rulbus_column );
-		else
-			sprintf( p, " near line ?" );
-	}
+}
+
+
+/*-----------------------------------------------------*
+ * Function for initialization of the parser and lexer
+ *-----------------------------------------------------*/
+
+void rulbus_parser_init( void )
+{
+	int i;
+	extern int rulbus_column;
+
+
+	rulbus_column = 0;
+
+	for ( i = 0; i <= RULBUS_DEF_RACK_ADDR; i++ )
+		rulbus_rack_addrs[ i ] = UNSET;
 }
