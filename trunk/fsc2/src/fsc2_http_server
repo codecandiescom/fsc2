@@ -95,7 +95,8 @@ $has_ppmtojpeg = defined $a[ 0 ];
 my $server = IO::Socket::INET->new( LocalPort => $port,
 									Type      => SOCK_STREAM,
 									Reuse     => 1,
-									Listen    => $max_reqs )
+									Listen    => $max_reqs,
+								    Proto     => 'tcp' )
 	or exit 1;
 
 
@@ -119,6 +120,7 @@ while ( $client = $server->accept( ) ) {
 		close $client;
 	} elsif ( defined $pid ) {      # child
 		serve( );
+		exit 0;                     # just to be 100% sure...
 	} elsif ( $! == EAGAIN ) {      # (hopefully) recoverable fork problem
 		sleep 1;
 		redo FORK;
@@ -216,7 +218,7 @@ sub serve {
 	}
 
 	close $client;
-	exit;
+	exit 0;
 }
 
 
@@ -510,7 +512,7 @@ sub not_found {
 	print $body if $req =~ /^GET$/io;
 
 	close $client;
-	exit;
+	exit 0;
 }
 
 
@@ -538,7 +540,7 @@ sub unsupported_request {
 	print $body if $req =~ /^GET$/io;
 
 	close $client;
-	exit;
+	exit 0;
 }
 
 
@@ -563,7 +565,7 @@ sub illegal_request {
 		  "$body";
 
 	close $client;
-	exit;
+	exit 0;
 }
 
 
@@ -594,7 +596,7 @@ sub missing_host_field {
 	print $body if $req =~ /^GET$/io;
 
 	close $client;
-	exit;
+	exit 0;
 }
 
 
@@ -615,7 +617,7 @@ sub def_txt {
 
 	$reply .= "Connection: close$crlf" if $maj >= 1 and $min >= 1;
 	$reply .= "Cache-Control: no-cache$crlf" unless $no_expire;
-	return $reply
+	return $reply;
 }
 
 
