@@ -109,8 +109,8 @@ enum {
 /* The gaussmeter seems to be more cooperative if we wait for some time
    (i.e. 200 ms) after each write operation... */
 
-#define E2_US           100000    /* 100 ms, used in calls of usleep() */
-#define ER035M_SAS_WAIT 200000    /* this means 200 ms for usleep() */
+#define E2_US           100000    /* 100 ms, used in calls of fsc2_usleep() */
+#define ER035M_SAS_WAIT 200000    /* this means 200 ms for fsc2_usleep() */
 
 
 /* If the field is too unstable the gausmeter might never get to the state
@@ -1123,7 +1123,6 @@ static bool er035m_sas_comm( int type, ... )
 	char *buf;
 	ssize_t len;
 	size_t *lptr;
-	long read_retries = 10;            /* number of times we try to read */
 
 
 	switch ( type )
@@ -1178,17 +1177,11 @@ static bool er035m_sas_comm( int type, ... )
 			lptr = va_arg( ap, size_t * );
 			va_end( ap );
 
-			/* The gaussmeter might not be ready yet to send data, in this
-			   case we retry it a few times before giving up */
+			/* Read from the gaussmeter, give it up to 2 seconds time to
+			   respond */
 
-			len = 1;
-			do
-			{
-				if ( len < 0 )
-					fsc2_usleep( ER035M_SAS_WAIT, UNSET );
-				len = fsc2_serial_read( SERIAL_PORT, buf, *lptr );
-			}
-			while ( len < 0 && errno == EAGAIN && read_retries-- > 0 );
+			len = fsc2_serial_read( SERIAL_PORT, buf, *lptr,
+									10 * ER035M_S_WAIT, UNSET );
 
 			if ( len < 0 )
 			{

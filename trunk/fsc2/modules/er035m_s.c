@@ -1189,7 +1189,6 @@ static bool er035m_s_comm( int type, ... )
 	char *buf;
 	ssize_t len;
 	size_t *lptr;
-	long read_retries = 10;            /* number of times we try to read */
 
 
 	switch ( type )
@@ -1248,17 +1247,11 @@ static bool er035m_s_comm( int type, ... )
 			lptr = va_arg( ap, size_t * );
 			va_end( ap );
 
-			/* The gaussmeter might not be ready yet to send data, in this
-			   case we retry it a few times before giving up */
+			/* Read from the gaussmeter, give it up to 2 seconds time to
+			   respond */
 
-			len = 1;
-			do
-			{
-				if ( len < 0 )
-					fsc2_usleep( ER035M_S_WAIT, UNSET );
-				len = fsc2_serial_read( SERIAL_PORT, buf, *lptr );
-			}
-			while ( len < 0 && errno == EAGAIN && read_retries-- > 0 );
+			len = fsc2_serial_read( SERIAL_PORT, buf, *lptr,
+									10 * ER035M_S_WAIT, UNSET );
 
 			if ( len < 0 )
 			{
