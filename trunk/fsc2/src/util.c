@@ -501,6 +501,145 @@ void lower_permissions( void )
 }
 
 
+/*-----------------------------------------------------------------*/
+/* Function replaces escape sequences in a string by the character */
+/* it stands for - all C type escape sequences are supported.      */
+/*-----------------------------------------------------------------*/
+
+static char *handle_escape( char *str )
+{
+	char *cp;
+	int esc_len;
+
+
+	for ( cp = str; *cp != '\0'; cp++)
+	{
+		if ( *cp != '\\' )
+			continue;
+
+		switch ( *( cp + 1 ) )
+		{
+			case '\0' :
+				print( FATAL, "End of string directly following escape "
+					   "character '\\'.\n" );
+				THROW( EXCEPTION );
+				break;
+
+			case 'a' :
+				*cp = '\a';
+				memmove( cp + 1, cp + 2, strlen( cp + 1 ) );
+				break;
+
+			case 'b' :
+				*cp = '\b';
+				memmove( cp + 1, cp + 2, strlen( cp + 1 ) );
+				break;
+
+			case 'f' :
+				*cp = '\f';
+				memmove( cp + 1, cp + 2, strlen( cp + 1 ) );
+				break;
+
+			case 'n' :
+				*cp = '\n';
+				memmove( cp + 1, cp + 2, strlen( cp + 1 ) );
+				break;
+
+			case 'r' :
+				*cp = '\r';
+				memmove( cp + 1, cp + 2, strlen( cp + 1 ) );
+				break;
+
+			case 't' :
+				*cp = '\t';
+				memmove( cp + 1, cp + 2, strlen( cp + 1 ) );
+				break;
+
+			case 'v' :
+				*cp = '\v';
+				memmove( cp + 1, cp + 2, strlen( cp + 1 ) );
+				break;
+
+			case '\\' :
+				*cp = '\\';
+				memmove( cp + 1, cp + 2, strlen( cp + 1 ) );
+				break;
+
+			case '\?' :
+				*cp = '\?';
+				memmove( cp + 1, cp + 2, strlen( cp + 1 ) );
+				break;
+
+			case '\'' :
+				*cp = '\'';
+				memmove( cp + 1, cp + 2, strlen( cp + 1 ) );
+				break;
+
+			case '\"' :
+				*cp = '\"';
+				memmove( cp + 1, cp + 2, strlen( cp + 1 ) );
+				break;
+
+			case 'x' :
+				if ( ! isdigit( *( cp + 2 ) ) &&
+					 ( toupper( *( cp + 2 ) ) < 'A' ||
+					   toupper( *( cp + 2 ) ) > 'F' ) )
+				{
+					print( FATAL, "'\\x' with no following hex digits "
+						   "in string.\n" );
+					THROW( EXCEPTION );
+				}
+				esc_len = 1;
+				*cp = *( cp + 2 )
+					  - ( isdigit( *( cp + 2 ) ) ? '0' : ( 'A' + 10 ) );
+
+				if ( isdigit( *( cp + 3 ) ) ||
+					 ( toupper( *( cp + 3 ) ) >= 'A' &&
+					   toupper( *( cp + 3 ) ) <= 'F' ) )
+				{
+					esc_len++;
+					*cp = *cp * 16
+					      + ( *( cp + 3 )
+						  - ( isdigit( *( cp + 3 ) ) ? '0' : ( 'A' + 10 ) ) );
+				}
+
+				memmove( cp + 1, cp + 2 + esc_len,
+						 strlen( cp + 1 + esc_len ) );
+				break;
+
+			default :
+				if ( *( cp + 1 ) < '0' || *( cp + 1 ) > '7' )
+				{
+					print( FATAL, "Unknown escape sequence '\\%c' in "
+						   "string.\n", *( cp + 1 ) );
+					THROW( EXCEPTION );
+				}
+
+				*cp = *( cp + 1 ) - '0';
+				esc_len = 1;
+
+				if ( *( cp + 2 ) >= '0' && *( cp + 2 ) <= '7' )
+				{
+					*cp = *cp * 8 + *( cp + 2 ) - '0';
+					esc_len++;
+
+					if ( *( cp + 3 ) >= '0' && *( cp + 3 ) <= '7' &&
+						 *cp < 0x1F )
+					{
+						*cp = *cp * 8 + *( cp + 3 ) - '0';
+						esc_len++;
+					}
+				}
+
+				memmove( cp + 1, cp + 1 + esc_len, strlen( cp + esc_len ) );
+				break;
+		}
+	}
+
+	return str;
+}
+
+
 /*-------------------------------------------------------------------------*/
 /* This routine takes the input file and feeds it to 'fsc2_clean' which is */
 /* running as a child process. The output of fsc2_clean gets written to a  */

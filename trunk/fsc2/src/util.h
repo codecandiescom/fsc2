@@ -36,6 +36,7 @@ void eprint( int severity, bool print_fl, const char *fmt, ... );
 void print( int severity, const char *fmt, ... );
 void raise_permissions( void );
 void lower_permissions( void );
+char *handle_escape( char *str );
 FILE *filter_edl( const char *name, FILE *fp );
 bool fsc2_locking( void );
 int fsc2_usleep( unsigned long us_dur, bool quit_on_signal );
