@@ -124,3 +124,10 @@ void p_exists_function( int function );
 
 
 #endif  /* ! PULSER_HEADER */
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

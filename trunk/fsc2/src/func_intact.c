@@ -2919,3 +2919,10 @@ Var *f_objdel( Var *v )
 
 	return vars_push( INT_VAR, 1 );
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

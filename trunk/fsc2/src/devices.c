@@ -228,7 +228,7 @@ void delete_devices( void )
 	Device *cd, *cdp;
 
 
-	if ( Device_List == NULL )         /* list is empty (does not exist) ? */
+	if ( Device_List == NULL )           /* list is empty or does not exist */
 		return;
 
 	/* Get last element of list - always delete last entry first */
@@ -267,3 +267,10 @@ void delete_device_name_list( void )
 
 	Device_Name_List = NULL;
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

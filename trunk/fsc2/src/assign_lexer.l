@@ -509,3 +509,10 @@ int assignments_parser( FILE *in )
 
 	return Assign_Next_Section;
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

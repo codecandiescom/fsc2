@@ -260,3 +260,10 @@ extern TOOL_BOX *Tool_Box;
 
 
 #endif  /* ! FSC2_HEADER */
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

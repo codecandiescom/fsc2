@@ -574,3 +574,10 @@ static void er035m_sa_failure( void )
 	eprint( FATAL, UNSET, "%s: Can't access the NMR gaussmeter.\n", nmr.name );
 	THROW( EXCEPTION )
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

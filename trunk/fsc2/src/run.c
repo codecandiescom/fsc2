@@ -1013,3 +1013,10 @@ static void do_measurement( void )
 			PASSTHROU( )
 	}
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

@@ -206,3 +206,10 @@ int devices_parser( FILE *in )
 
 	return Devices_Next_Section;
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

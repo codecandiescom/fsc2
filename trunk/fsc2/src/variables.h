@@ -147,3 +147,10 @@ Var *vars_val( Var *v );
 
 
 #endif  /* ! VARIABLES_HEADER */
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

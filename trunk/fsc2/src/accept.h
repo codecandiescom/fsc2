@@ -30,3 +30,10 @@
 void accept_new_data( void );
 
 #endif   /* ! ACCEPT_HEADER */
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

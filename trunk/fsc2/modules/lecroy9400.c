@@ -1164,3 +1164,10 @@ Var *digitizer_run( Var *v )
 		lecroy9400_free_running( );
 	return vars_push( INT_VAR,1 );
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

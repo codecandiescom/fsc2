@@ -883,3 +883,10 @@ void er035_s_comm_fail( void )
 			DEVICE_NAME );
 	THROW( EXCEPTION )
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

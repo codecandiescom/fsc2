@@ -246,3 +246,10 @@ int er023m_nb( void );
 void er023m_srq( int on_off );
 unsigned char er023m_st( void );
 void er023m_failure( void );
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

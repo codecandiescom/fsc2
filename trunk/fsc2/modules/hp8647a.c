@@ -1145,3 +1145,10 @@ Var *synthesizer_mod_ampl( Var *v )
 
 	return vars_push( FLOAT_VAR, hp8647a.mod_ampl[ hp8647a.mod_type ] );
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

@@ -224,3 +224,10 @@ static double pt2025_get_field( void )
 	sscanf( buf + 1, "%lf", &field );
 	return field * 1.0e4;
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

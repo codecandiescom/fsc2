@@ -1228,3 +1228,10 @@ Var *digitizer_lock_keyboard( Var *v )
 	tds754a.lock_state = lock;
 	return vars_push( INT_VAR, lock ? 1 : 0 );
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

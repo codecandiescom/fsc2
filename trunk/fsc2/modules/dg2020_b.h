@@ -402,3 +402,10 @@ bool dg2020_make_seq( int num_blocks, BLOCK *block );
 bool dg2020_set_constant( int channel, Ticks address,
 						  Ticks length, int state );
 bool dg2020_lock_state( bool lock );
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

@@ -35,3 +35,10 @@ pid_t spawn_conn( bool start_state );
 
 
 #endif  /* ! CONN_HEADER */
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

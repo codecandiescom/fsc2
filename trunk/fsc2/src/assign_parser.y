@@ -570,3 +570,10 @@ static void ass_func( int function )
 		THROW( EXCEPTION )
 	}
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

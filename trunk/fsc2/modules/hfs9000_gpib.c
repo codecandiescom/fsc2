@@ -423,3 +423,10 @@ static void hfs9000_gpib_failure( void )
 			pulser_struct.name );
 	THROW( EXCEPTION )
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

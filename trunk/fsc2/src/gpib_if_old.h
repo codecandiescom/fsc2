@@ -95,3 +95,10 @@ GPIB_VARIABLE char gpib_error_msg[ 1024 ]; /* global for GPIB error messages */
 #define  LL_ERR   1    /* log errors only */
 #define  LL_CE    2    /* log function calls and function exits */
 #define  LL_ALL   3    /* log calls with parameters and function exits */
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

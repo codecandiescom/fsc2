@@ -213,3 +213,10 @@ static void conditionerror( const char *s )
 	eprint( FATAL, SET, "Syntax error in loop or IF/UNLESS condition.\n" );
 	THROW( EXCEPTION )
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

@@ -95,3 +95,10 @@ void cut_clear_curve( long curve );
 
 
 #endif   /* ! GRAPH_CUT_HEADER */
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

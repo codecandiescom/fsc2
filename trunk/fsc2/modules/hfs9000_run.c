@@ -450,3 +450,10 @@ static void hfs9000_commit( FUNCTION *f, bool flag )
 	f->channel->needs_update = UNSET;
 	T_free( f->channel->old );
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

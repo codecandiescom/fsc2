@@ -334,3 +334,10 @@ bool hfs9000_set_trig_out_pulse( void );
 bool hfs9000_run( bool flag );
 bool hfs9000_get_channel_state( int channel );
 bool hfs9000_set_channel_state( int channel, bool flag );
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

@@ -1820,3 +1820,10 @@ static void make_color_scale( Canvas *c, Curve_2d *cv )
 					   d2shrt( c->h - ( i + 1 ) * h_inc ), G.z_line_width, h );
 	}
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

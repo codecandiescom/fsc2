@@ -566,3 +566,10 @@ static void egg4402_query( char *buffer, long *length )
 		 gpib_read( egg4402.device, buffer, length ) == FAILURE )
 		egg4402_failure( );
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

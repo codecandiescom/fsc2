@@ -118,3 +118,10 @@ enum {
 
 
 #endif  /* ! EXCEPTIONS_HEADER */
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

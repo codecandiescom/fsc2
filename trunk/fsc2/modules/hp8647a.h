@@ -172,3 +172,10 @@ int hp8647a_set_mod_source( int type, int source );
 int hp8647a_get_mod_source( int type );
 double hp8647a_set_mod_ampl( int type, double ampl );
 double hp8647a_get_mod_ampl( int type );
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

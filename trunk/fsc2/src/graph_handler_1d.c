@@ -1473,3 +1473,10 @@ void make_scale_1d( Curve_1d *cv, Canvas *c, int coord )
 		}
 	}
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

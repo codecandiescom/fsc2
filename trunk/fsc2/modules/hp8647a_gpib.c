@@ -598,3 +598,10 @@ static void hp8647a_check_complete( void )
 	} while ( buffer[ 1 ] != '1' );
 }
 	
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

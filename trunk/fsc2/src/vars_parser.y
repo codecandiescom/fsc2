@@ -215,3 +215,10 @@ static void varserror ( const char *s )
 		eprint( FATAL, SET, "Syntax error near token `%s'.\n", varstext );
 	THROW( EXCEPTION )
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

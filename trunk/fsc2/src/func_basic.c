@@ -1749,3 +1749,10 @@ Var *f_fslice( Var *v )
 
 	return ret;
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

@@ -874,3 +874,10 @@ Var *lockin_is_overload( Var *v )
 
 	return vars_push( INT_VAR, res );
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

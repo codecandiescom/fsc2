@@ -40,3 +40,10 @@ void save_scale_state_2d( Curve_2d *cv );
 
 
 #endif   /* ! GRAPH_HANDLER_2D_HEADER */
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

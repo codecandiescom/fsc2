@@ -30,3 +30,10 @@ void death_mail( int signo );
 
 
 #endif /* ! BUGS_HEADER */
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

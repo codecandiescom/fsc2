@@ -55,3 +55,10 @@ void phases_end( void );
 
 
 #endif  /* ! PHASES_HEADER */
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

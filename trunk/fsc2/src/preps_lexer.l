@@ -486,3 +486,10 @@ int preparations_parser( FILE *in )
 
 	return Preps_Next_Section;
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

@@ -78,3 +78,10 @@ static void deviceserror ( const char *s )
 		eprint( FATAL, SET, "Syntax error near token `%s'.\n", devicestext );
 	THROW( EXCEPTION )
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

@@ -47,3 +47,10 @@ Var *f_is_file( Var *v );
 
 
 #endif  /* ! FUNC_SAVE_HEADER */
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

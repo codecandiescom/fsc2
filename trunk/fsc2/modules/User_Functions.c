@@ -702,3 +702,10 @@ static void pc_basic_check( const char *func_name, const char *func_1,
 		THROW( EXCEPTION )
 	}
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

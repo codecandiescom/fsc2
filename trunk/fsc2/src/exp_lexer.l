@@ -395,3 +395,10 @@ int experiment_parser( FILE *in )
 
 	return Exp_Next_Section;
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

@@ -729,3 +729,10 @@ inline int irnd( double x )
 		return INT_MIN;
 	return ( int ) rint( x );                   /* Leads to compiler warning */
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

@@ -932,3 +932,10 @@ Var *pulser_lock_keyboard( Var *v )
 
 	return vars_push( INT_VAR, lock ? 1 : 0 );
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

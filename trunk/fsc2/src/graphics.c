@@ -2009,3 +2009,10 @@ static void rescale_2d( long new_nx, long new_ny )
 
 	redraw_all_cut_canvases( );
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

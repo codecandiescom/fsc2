@@ -1985,3 +1985,10 @@ Var *vars_array_check( Var *v1, Var *v2 )
 	vars_pop( v1 );
 	return v;
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

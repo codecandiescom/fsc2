@@ -41,3 +41,10 @@ void save_scale_state_1d( Curve_1d *cv );
 
 
 #endif   /* ! GRAPH_HANDLER_1D_HEADER */
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

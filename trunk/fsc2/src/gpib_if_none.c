@@ -108,3 +108,10 @@ void gpib_log_message( const char *fmt, ... )
 	fprintf( stderr, fmt, ap );
 	va_end( ap );
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

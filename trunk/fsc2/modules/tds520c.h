@@ -218,3 +218,10 @@ enum {
 	SAMPLE,
 	AVERAGE
 };
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

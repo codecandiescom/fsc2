@@ -78,3 +78,10 @@ void close_all_files( void );
 size_t func_list_parse( Func **fncts, size_t num_func );
 
 #endif  /* ! FUNC_HEADER */
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

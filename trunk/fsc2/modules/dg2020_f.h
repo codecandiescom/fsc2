@@ -427,3 +427,10 @@ bool dg2020_set_trigger_in_slope( int slope );
 bool dg2020_set_trigger_in_impedance( int state );
 void dg2020_gpib_failure( void );
 bool dg2020_lock_state( bool lock );
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

@@ -254,3 +254,10 @@ static void prepserror ( const char *s )
 				isprint( *prepstext ) ? prepstext : prepstext + 1 );
 	THROW( EXCEPTION )
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

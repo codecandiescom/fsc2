@@ -744,3 +744,10 @@ static void lower_permissions( void )
 	seteuid( getuid( ) );
 	setegid( getgid( ) );
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

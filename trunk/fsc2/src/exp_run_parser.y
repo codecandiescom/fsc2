@@ -316,3 +316,10 @@ static void exp_runerror ( const char *s )
 	eprint( FATAL, SET, "Syntax error in EXPERIMENT section.\n" );
 	THROW( EXCEPTION )
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

@@ -40,3 +40,10 @@ Var *f_clearcv( Var *v );
 
 
 #endif  /* ! FUNC_UTIL_HEADER */
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

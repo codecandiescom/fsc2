@@ -546,3 +546,10 @@ long tds520c_translate_channel( int dir, long channel )
 
 	return -1;
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

@@ -1038,3 +1038,10 @@ void gpib_log_message( const char *fmt, ... )
 	va_end( ap );
 	lower_permissions( );
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

@@ -409,3 +409,10 @@ Var *lockin_mf( Var *v )
 
 	return vars_push( INT_VAR, ( long ) mf_index );
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

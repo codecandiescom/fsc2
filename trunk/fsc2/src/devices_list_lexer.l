@@ -198,3 +198,10 @@ bool device_list_parse( void )
 	fclose( devices_listin );
 	return OK;
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

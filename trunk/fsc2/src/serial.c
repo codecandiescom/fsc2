@@ -625,3 +625,10 @@ int fsc2_tcflow( int sn, int action )
 
 	return ret_val;
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

@@ -298,3 +298,10 @@ int hfs9000_diff( char *old, char *new, Ticks *start, Ticks *length )
 
 	return ret;
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

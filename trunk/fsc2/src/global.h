@@ -359,3 +359,10 @@ enum {
 
 
 #endif /* ! FSC2_GLOBAL */
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

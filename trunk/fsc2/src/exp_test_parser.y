@@ -306,3 +306,10 @@ static void exp_testerror( const char *s )
 
 	dont_print_error = UNSET;
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

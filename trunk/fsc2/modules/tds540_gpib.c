@@ -1048,3 +1048,10 @@ bool tds540_lock_state( bool lock )
 
 	return OK;
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

@@ -42,3 +42,10 @@ void unload_device( Device *dev );
 
 
 #endif  /* ! LOADER_HEADER */
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

@@ -1692,3 +1692,10 @@ static void save_restore_variables( bool flag )
 		exists_copy = UNSET;
 	}
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

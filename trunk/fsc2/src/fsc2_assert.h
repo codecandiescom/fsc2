@@ -45,3 +45,10 @@ void fsc2_assert_print( const char *expression, const char *filename,
 
 
 #endif   /* ! FSC2_ASSERT__HEADER */
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

@@ -276,3 +276,10 @@ bool section_parser( int section )
 
 	return FAIL;
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

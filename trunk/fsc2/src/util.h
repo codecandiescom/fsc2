@@ -65,3 +65,10 @@ inline int irnd( double x );
 
 
 #endif  /* ! UTIL_HEADER */
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

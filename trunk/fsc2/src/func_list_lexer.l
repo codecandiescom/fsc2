@@ -440,3 +440,10 @@ static void fll_get_functions( Func *fncts, size_t num_predef_func )
 		}
 	}
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

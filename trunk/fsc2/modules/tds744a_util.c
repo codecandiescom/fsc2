@@ -549,3 +549,10 @@ long tds744a_translate_channel( int dir, long channel )
 	fsc2_assert( 1 == 0 );
 	return -1;
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

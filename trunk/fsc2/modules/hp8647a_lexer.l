@@ -417,3 +417,10 @@ static int hp8647a_comp( const void *a, const void *b )
 
 	return A->freq < B->freq ? -1 : 1;
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

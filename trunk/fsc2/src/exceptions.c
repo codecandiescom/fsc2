@@ -61,3 +61,10 @@ void longjmperror( void )
 			exception_id, __FILE__, __LINE__ );
 	exit( - exception_id );
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

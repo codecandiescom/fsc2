@@ -38,3 +38,10 @@ double T_atof( const char *txt );
 
 
 #endif   /* ! T_HEADER */
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

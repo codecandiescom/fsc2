@@ -27,3 +27,10 @@
 void DumpStack( void );
 
 #endif   /* ! DUMP__HEADER */
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

@@ -1120,3 +1120,10 @@ void gpib_error_setup( char *buffer, size_t buffer_length )
     gpib_error_buffer = buffer;
     gpib_error_buffer_length = buffer_length;
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

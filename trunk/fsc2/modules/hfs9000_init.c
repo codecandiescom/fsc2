@@ -201,3 +201,10 @@ static void hfs9000_pulse_start_setup( void )
 		hfs9000_do_checks( f );
 	}
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

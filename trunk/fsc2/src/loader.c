@@ -658,3 +658,10 @@ void unload_device( Device *dev )
 	dlclose( dev->driver.handle );
 	dev->driver.handle = NULL;
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

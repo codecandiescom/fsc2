@@ -31,3 +31,10 @@ void print_2d( FL_OBJECT *obj, long data );
 
 #endif   /* ! PRINT_HEADER */
 
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

@@ -291,3 +291,10 @@ double T_atof( const char *txt )
 
 	return ret;
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

@@ -473,3 +473,10 @@ Var *func_call( Var *f )
 
 	return ret;
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

@@ -319,3 +319,10 @@ int hp8647a_set_mod_param( Var *v, double *dres, int *ires )
 
 	return -1;               /* we're never going to get here... */
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

@@ -111,3 +111,10 @@ void tools_clear( void );
 
 
 #endif   /* ! INTERACTIVE_HEADER */
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

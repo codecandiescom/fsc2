@@ -2778,3 +2778,10 @@ void cut_change_dir( FL_OBJECT *a, long b )
 
 	cut_show( CG.cut_dir == X ? Y : X, p_index );
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

@@ -52,3 +52,10 @@ bool run( void );
 
 
 #endif  /* ! RUN_HEADER */
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

@@ -275,3 +275,10 @@ void redraw_canvas_2d( Canvas *c );
 
 
 #endif   /* ! GRAPHICS_HEADER */
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

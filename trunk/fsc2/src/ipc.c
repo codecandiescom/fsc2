@@ -352,3 +352,10 @@ int sema_post( int sema_id )
 	lower_permissions( );
 	return 0;
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

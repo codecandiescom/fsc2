@@ -1451,3 +1451,10 @@ void usage( int return_status )
 			 docdir, slash( docdir ), docdir, slash( docdir ) );
 	exit( return_status );
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

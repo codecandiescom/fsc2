@@ -2636,3 +2636,10 @@ Var *vars_val( Var *v )
 	fsc2_assert( 1 == 0 );
 	return NULL;
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

@@ -271,3 +271,10 @@ void phases_end( void )
 		THROW( EXCEPTION )
 	}
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

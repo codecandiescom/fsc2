@@ -1077,3 +1077,10 @@ static void keithley228a_get_corrected_current( double c, double *psc,
 		 *dacv -= V_TO_A_FACTOR * 0.004;
 	 }
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

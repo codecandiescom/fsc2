@@ -496,3 +496,10 @@ ssize_t writen( int fd, const void *vptr, size_t n )
 
 	return n;
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

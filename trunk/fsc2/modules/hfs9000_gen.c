@@ -468,3 +468,10 @@ bool hfs9000_keep_all( void )
 	hfs9000.keep_all = SET;
 	return OK;
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

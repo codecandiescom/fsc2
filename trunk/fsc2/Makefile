@@ -150,6 +150,8 @@ adir             := $(fdir)/aux
 cdir             := $(fdir)/config
 
 
+tagsfile         := $(fdir)/TAGS
+
 # Set up a variable with the machines FQDN
 
 machine_name     := $(shell hostname -f)
@@ -359,7 +361,8 @@ export            # export all variables to sub-makes
 # Switch off all implicit rules
 
 .SUFFIXES:
-.PHONY: all install-strip install uninstall version clean distclean pack ZIP
+.PHONY: all install-strip install uninstall version clean distclean \
+		tags pack ZIP
 
 
 # Default rule: make the main program, the primary lexer and the modules
@@ -373,6 +376,7 @@ all:
 			sed -e 's/^.*$$Id\: \(.*\) jens Exp $$.*/\1/g' |             \
 				gzip -c -9 | uuencode - > version.ugz
 	$(MAKE) -C src all
+	$(MAKE) tags
 	$(MAKE) -C utils all
 	$(MAKE) -C doc all
 
@@ -449,7 +453,13 @@ distclean:
 	$(MAKE) -C modules distclean
 	$(MAKE) -C doc distclean
 	$(MAKE) -C utils distclean
-	-$(RM) $(RMFLAGS) version.ugz makelog *~
+	-$(RM) $(RMFLAGS) version.ugz $(tagsfile) makelog *~
+
+
+# Create a tags file to be used with emacs or vi
+
+tags:
+	find . -name "*.[chly]" -print | etags -o $(tagsfile) -
 
 
 # Clean up everything for a distribution and create a zipped tarball

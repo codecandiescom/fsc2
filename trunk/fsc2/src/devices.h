@@ -58,3 +58,10 @@ bool device_list_parse( void );
 
 
 #endif  /* ! DEVICE_HEADER */
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

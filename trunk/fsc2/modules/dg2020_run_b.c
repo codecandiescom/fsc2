@@ -569,3 +569,10 @@ void dg2020_cw_setup( void )
 
 	dg2020_update_data( );
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

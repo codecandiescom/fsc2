@@ -684,3 +684,10 @@ Var *pulser_stop_on_update( Var *v )
 	hfs9000.stop_on_update = v->val.lval == 0 ? UNSET : SET;
 	return vars_push( INT_VAR, ( long ) hfs9000.stop_on_update );
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

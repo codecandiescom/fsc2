@@ -697,3 +697,10 @@ bool dg2020_lock_state( bool lock )
 
 	return OK;
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

@@ -1133,3 +1133,10 @@ static void send_browser( FL_OBJECT *browser )
 
 	writer( C_STR, NULL );
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

@@ -904,3 +904,10 @@ void p_exists_function( int function )
 		THROW( EXCEPTION );
 	}
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

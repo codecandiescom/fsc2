@@ -711,3 +711,10 @@ static void dg2020_cw_init( void )
 	f->num_needed_channels = 2;
 	dg2020_distribute_channels( );
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

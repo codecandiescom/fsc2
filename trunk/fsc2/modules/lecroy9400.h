@@ -331,3 +331,10 @@ enum {
 #define TB_ENTRIES ( sizeof tb / sizeof tb[ 0 ] )
 #define NA_ENTRIES ( sizeof na / sizeof na[ 0 ] )
 #define CL_ENTRIES ( sizeof cl / sizeof cl[ 0 ] )
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

@@ -849,3 +849,10 @@ bool dg2020_keep_all( void )
 	dg2020.keep_all = SET;
 	return OK;
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

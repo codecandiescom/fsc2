@@ -167,3 +167,10 @@ bool test_for_cond( Prg_Token *cur );
 
 
 #endif   /* ! EXP_HEADER */
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

@@ -39,3 +39,10 @@ void fsc2_assert_print( const char *expression, const char *filename,
 	Assert_struct.filename = filename;
 	abort( );
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

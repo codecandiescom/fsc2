@@ -1148,3 +1148,10 @@ static void sr530_failure( void )
 			DEVICE_NAME );
 	THROW( EXCEPTION )
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

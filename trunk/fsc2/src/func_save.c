@@ -1939,3 +1939,10 @@ static char *handle_escape( char *str )
 
 	return str;
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

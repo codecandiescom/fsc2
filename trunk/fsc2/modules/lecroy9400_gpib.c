@@ -715,3 +715,10 @@ void lecroy9400_gpib_failure( void )
 			DEVICE_NAME );
 	THROW( EXCEPTION )
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

@@ -1224,3 +1224,10 @@ Var *digitizer_lock_keyboard( Var *v )
 	tds540.lock_state = lock;
 	return vars_push( INT_VAR, lock ? 1 : 0 );
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

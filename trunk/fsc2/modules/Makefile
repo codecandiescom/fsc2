@@ -213,7 +213,7 @@ uninstall-crowley.none:
 # How to clean up the mess we created
 
 clean:
-	-$(RM) $(RMFLAGS) *.o *_lexer.c TAGS cscope.out *.make *~
+	-$(RM) $(RMFLAGS) *.o *_lexer.c cscope.out *.make *~
 
 distclean:
 	$(MAKE) clean

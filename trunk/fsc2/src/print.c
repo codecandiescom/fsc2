@@ -1362,3 +1362,10 @@ static int start_printing( char **argv, char *name )
 	unlink( name );
 	_exit( EXIT_SUCCESS );
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

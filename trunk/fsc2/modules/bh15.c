@@ -439,3 +439,10 @@ static double bh15_get_field( void )
 
 	return bh15.field;
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

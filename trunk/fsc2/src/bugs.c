@@ -298,3 +298,10 @@ void death_mail( int signo )
 	signo = signo;              /* keeps the compiler happy :-) */
 #endif
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

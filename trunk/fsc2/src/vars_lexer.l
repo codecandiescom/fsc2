@@ -387,3 +387,10 @@ int variables_parser( FILE *in )
 
 	return Vars_Next_Section;
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

@@ -946,3 +946,10 @@ bool exp_objdel( char *buffer, ptrdiff_t len )
 		return SET;
 	}
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

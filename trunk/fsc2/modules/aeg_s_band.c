@@ -1090,3 +1090,10 @@ static bool magnet_do( int command )
 
 	return OK;
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

@@ -290,3 +290,10 @@ int phases_parser( FILE *in )
 
 	return Phases_Next_Section;
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

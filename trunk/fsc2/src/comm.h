@@ -126,3 +126,10 @@ void writer( int type, ... );
 
 
 #endif  /* ! COMM_HEADER */
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

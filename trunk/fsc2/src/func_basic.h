@@ -68,3 +68,10 @@ Var *f_fslice(  Var *v );
 
 
 #endif  /* ! FUNC_BASIC_HEADER */
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

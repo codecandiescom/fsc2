@@ -59,3 +59,10 @@ bool exp_objdel( char *buffer, ptrdiff_t len );
 
 
 #endif  /* ! CHLD_FUNC_HEADER */
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

@@ -625,3 +625,10 @@ void er023m_failure( void )
 				DEVICE_NAME );
 	THROW( EXCEPTION )
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

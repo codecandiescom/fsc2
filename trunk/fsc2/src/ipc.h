@@ -54,3 +54,10 @@ int sema_post( int sema_id );
 
 
 #endif   /* ! IPC_HEADER */
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

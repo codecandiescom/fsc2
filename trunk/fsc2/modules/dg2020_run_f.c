@@ -952,3 +952,10 @@ void dg2020_clear_padding_block( FUNCTION *f )
 							 dg2020.mem_size - dg2020.block[ 1 ].start,
 							 type_OFF( f ) );
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

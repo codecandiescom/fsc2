@@ -41,3 +41,10 @@ void win_slider_callback( FL_OBJECT *a, long b );
 
 
 #endif   /* ! XINIT__HEADER */
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

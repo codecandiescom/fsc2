@@ -57,3 +57,10 @@ Var *vars_array_check( Var *v1, Var *v2 );
 
 
 #endif  /* ! VARS_UTIL_HEADER */
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

@@ -60,3 +60,10 @@ void fsc2_final_serial_cleanup( void );
 
 
 #endif   /* ! SERIAL_HEADER */
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

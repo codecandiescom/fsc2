@@ -193,3 +193,10 @@ void DumpStack( void )
 
 #endif  /* ! ADDR2LINE */
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

@@ -618,3 +618,10 @@ bool dg2020_change_pulse_length_change( long pnum, double p_time )
 
 	return OK;
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

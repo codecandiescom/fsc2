@@ -647,3 +647,10 @@ static int fsc2_xio_error_handler( Display *d )
 }
 
 #endif
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

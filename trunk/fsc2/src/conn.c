@@ -436,3 +436,10 @@ static void conn_sig_handler( int signo )
 
 	kill( getppid( ), SIGUSR2 );
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */
