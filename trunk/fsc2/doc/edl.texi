@@ -403,7 +403,7 @@ all the way up to @w{+2147483647}. In contrast, floating point variables
 can have much larger values (typically up to ca.@: 10^300), the exact
 limits depending on the machine @code{fsc2} is running on. The larger
 range for floating point numbers comes with a price: they have only a
-lilited precision, normally not more than about 14 to 15 digits can be
+limited precision, normally not more than about 14 to 15 digits can be
 trusted and rounding errors can lead to quite large errors if not used
 with great care in calculations.
 
@@ -464,16 +464,16 @@ recognized automatically, so you won't need empty sets within empty
 sets).
 @example
 E[ 3, 4 ] = @{ @{ 1, 2, 3 @},
-               @{ 4, 5, 6 @} @};
+              @{ 4, 5, 6 @} @};
 F[ 2, 3, 4 ] = @{ @{ @{ 1, 2, 3, 4 @},
-                     @{ @},
-                     @{ 9, 8, 7, 6 @},
-                     @{ 3, 5, 7, 9 @}
-                   @},
+                   @{ @},
+                   @{ 9, 8, 7, 6 @},
+                   @{ 3, 5, 7, 9 @}
+                  @},
                    E
                @};
 G[ 4, 3, 4 ] = @{ @{ @},
-                  @{ E[ 3 ], E[ 2 ], E[ 1 ] @}
+                 @{ E[ 3 ], E[ 2 ], E[ 1 ] @}
                @};
 @end example
 @noindent
@@ -579,7 +579,7 @@ a value to one of the lowest-level arrays like
 j[ 7, 9 ] = 3.1415927;
 @end example
 @noindent
-the third sub-array of @code{j} will suddenly spring into existence,
+the 7th sub-array of @code{j} will suddenly spring into existence,
 having a length of 9 (with all elements of this sub-array except the 9th
 being initialized to 0). But this does @strong{not} also create other
 sub-arrays -- the 1st to the 6th sub-array are still undefined (having a
@@ -591,7 +591,7 @@ sub-arrays it will start to exist, e.g.@: by having
 j[ 3, 2 ] = 2.7182818;
 @end example
 @noindent
-Now the 3rd and the 7th sub-array of @code{j} exist - but no others
+Now both the 3rd and the 7th sub-array of @code{j} exist - but no others
 (i.e.@: the 1st, 2nd, 4th, 5th and 6th sub-array do not exist yet and
 trying to use a value in one of these sub-arrays will result in an error
 message). And both these sub-arrays have different lengths, the 3rd
@@ -797,8 +797,8 @@ For the exponentiation the caret character @code{^} is to be used, e.g.@:
 3^2 = 9           6.5^1.5 = 16.5718134219...
 @end example
 @noindent
-As the usual mathematics dictate non-integer exponents can only be used
-with non-negative bases!
+As mathematics dictate non-integer exponents can only be used with
+non-negative bases!
 
 
 @anchor{Arithmetic-assignment operators}
