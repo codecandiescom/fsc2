@@ -286,17 +286,18 @@ Var *daq_ai_channel_setup( Var *v )
 		}
 
 		for ( range_index = -1, i = 0; i < r_list_len - 1; i++ )
-		{
-			if ( r_list[ i ] / range < range / r_list[ i + 1 ] )
-				range_index = i;
-			else
-				range_index = i + 1;
-			break;
-		}
+			if ( range <= r_list[ i ] && range >= r_list[ i + 1 ] )
+			{
+				if ( r_list[ i ] / range < range / r_list[ i + 1 ] )
+					range_index = i;
+				else
+					range_index = i + 1;
+				break;
+			}
 
 		if ( range_index >= 0 &&
 			 fabs( range - r_list[ range_index ] ) > range * 1.0e-2 )
-			print( WARN, "Can't set range to %.2%f V, using %.2%f V "
+			print( WARN, "Can't set range to %.2f V, using %.2f V "
 				   "instead.\n", range, r_list[ range_index ] );
 
 		if ( range_index < 0 )
@@ -306,7 +307,7 @@ Var *daq_ai_channel_setup( Var *v )
 			else
 				range_index = r_list_len - 1;
 
-			print( WARN, "Can't set range to %.2%f V, using %.2%f V "
+			print( WARN, "Can't set range to %.2f V, using %.2f V "
 				   "instead.\n", range, r_list[ range_index ] );
 		}
 

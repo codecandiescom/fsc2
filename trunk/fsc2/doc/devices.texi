@@ -3100,13 +3100,13 @@ floating. Examples are e.g.@: batteries, thermocouples, transformers
 etc. Finally, @code{"Differential"} is for cases where the signals
 source has its own reference signal or signal return path. In these
 cases two inputs channels are required, one from the range @code{CH0} to
-@code{CH7} and the second being having the number of the first
+@code{CH7} and the second being the number of the first channel
 incremented by 8 - thus if one of the channels involved is @code{CH0}
 the other channel to be used for differential input is @code{CH8}
-etc. This second channel must not be setup, its clear from the first
-channel (which must be between @code{CH0} and @code{CH7}) setup which
-one is going to be used. When it is not given the coupling will be
-set per default to @code{"Ground"}.
+etc. This second channel must not be set up, it's already clear from the
+setup for the first channel (which must be between @code{CH0} and
+@code{CH7}) that it's is going to be used and how. When not given
+the coupling will be set per default to @code{"Ground"}.
 
 The next optional argument is the polarity of the channel, specified
 by the strings @code{"BIPLOAR"} or @code{"UNIPLOAR"}. Per default

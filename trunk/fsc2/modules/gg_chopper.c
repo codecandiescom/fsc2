@@ -211,10 +211,9 @@ int gg_chopper_init_hook( void )
 	   and check if it exists */
 
 	if ( dev_num == 1 )
-		gg_chopper.freq_out_func = T_strdup( "daq_msc_freq_out" );
+		gg_chopper.freq_out_func = T_strdup( "daq_freq_out" );
 	else
-		gg_chopper.freq_out_func = 
-								 get_string( "daq_msc_freq_out#%d", dev_num );
+		gg_chopper.freq_out_func = get_string( "daq_freq_out#%d", dev_num );
 
 	if ( ! func_exists( gg_chopper.freq_out_func ) )
 	{
@@ -335,7 +334,7 @@ Var *chopper_rotation_frequency( Var *v )
 		if ( gg_chopper.dio_value == 0 )
 			return vars_push( FLOAT_VAR, 0.0 );
 
-		return vars_push( FLOAT_VAR, 1.0e5 / gg_chopper.dio_value );
+		return vars_push( FLOAT_VAR, 1.0e4 / gg_chopper.dio_value );
 	}
 
 	freq = get_double( v, "chopper rotation frequency" );
@@ -346,23 +345,23 @@ Var *chopper_rotation_frequency( Var *v )
 		dio_value = 0L;
 	else
 	{
-		dio_value = lrnd( 1.0e5 / freq );
+		dio_value = lrnd( 1.0e4 / freq );
 
 		if ( dio_value > MAX_DIO_VALUE || dio_value < MIN_DIO_VALUE )
 		{
 			print( FATAL, "Invalid chopper rotation frequency of %.2f Hz, it "
 				   "must be between %.2f Hz and %.2f Hz (or 0 Hz to stop the "
-				   "chopper).\n", freq, 1.0e5 / MAX_DIO_VALUE,
-				   1.0e5 / MIN_DIO_VALUE );
+				   "chopper).\n", freq, 1.0e4 / MAX_DIO_VALUE,
+				   1.0e4 / MIN_DIO_VALUE );
 			THROW( EXCEPTION );
 		}
 
 		/* Warn the user if the rotation frequency we're going to set deviates
 		   by more than 1% from the requested frequency. */
 
-		if ( fabs( freq - 1.0e5 / dio_value ) > 0.01 * freq )
+		if ( fabs( freq - 1.0e4 / dio_value ) > 0.01 * freq )
 			print( WARN, "Chopper rotation frequency had to be adjusted from "
-				   "%.2f Hz to %.2f Hz.\n", freq, 1.0e5 / dio_value );
+				   "%.2f Hz to %.2f Hz.\n", freq, 1.0e4 / dio_value );
 	}
 
 	/* Set the rotational speed of the chopper by outputting a value at
@@ -373,7 +372,7 @@ Var *chopper_rotation_frequency( Var *v )
 
 	gg_chopper.dio_value = ( unsigned char ) dio_value;
 
-	return vars_push( FLOAT_VAR, 1.0e5 / dio_value );
+	return vars_push( FLOAT_VAR, 1.0e4 / dio_value );
 }
 
 
