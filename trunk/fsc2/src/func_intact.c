@@ -1633,16 +1633,6 @@ static void convert_escapes( char *str )
 				memcpy( ptr + 1, ptr + 2, strlen( ptr + 2 ) + 1 );
 				*ptr = '\n';
 				break;
-
-			case 't' :
-				memcpy( ptr + 1, ptr + 2, strlen( ptr + 2 ) + 1 );
-				*ptr = '\t';
-				break;
-				
-			case 'r' :
-				memcpy( ptr + 1, ptr + 2, strlen( ptr + 2 ) + 1 );
-				*ptr = '\r';
-				break;
 		}
 
 		ptr++;
