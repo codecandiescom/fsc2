@@ -37,6 +37,7 @@
 
 static void hp8672a_comm_failure( void );
 
+
 /*
 #define gpib_write( a, b, c ) fprintf( stderr, "%s\n", ( b ) )
 #define gpib_init_device( a, b ) 1
@@ -133,7 +134,7 @@ void hp8672a_finished( void )
 
 bool hp8672a_set_output_state( bool state )
 {
-	char cmd[ 100 ];
+	char cmd[ 10 ];
 
 
 	if ( ! hp8672a.is_10db )
@@ -141,8 +142,7 @@ bool hp8672a_set_output_state( bool state )
 	else
 		sprintf( cmd, "O%c\n", state ? '3' : '0' );
 
-	if ( gpib_write( hp8672a.device, cmd, 3 ) == FAILURE )
-		hp8672a_comm_failure( );
+	hp8672a_command( cmd );
 
 	/* Switching RF ON/OFF takes about 30 ms or 5 ms, respectively */
 
@@ -204,8 +204,7 @@ double hp8672a_set_frequency( double freq )
 	}
 
 	sprintf( cmd + 1, "%ldZ8\n", ifreq );
-	if ( gpib_write( hp8672a.device, cmd, strlen( cmd ) ) == FAILURE )
-		hp8672a_comm_failure( );
+	hp8672a_command( cmd );
 
 	/* Frequency needs about 10 ms to settle */
 
@@ -245,8 +244,7 @@ double hp8672a_set_attenuation( double att )
 	else
 		sprintf( cmd, "K;%c\n", ':' + ( a - 120 ) );
 		
-	if ( gpib_write( hp8672a.device, cmd, strlen( cmd ) ) == FAILURE )
-		hp8672a_comm_failure( );
+	hp8672a_command( cmd );
 
 	/* Switch between extra 10 db on and off if necessary */
 
@@ -269,26 +267,20 @@ int hp8672a_set_modulation( void )
 
 	if ( hp8672a.mod_type == MOD_TYPE_OFF )
 	{
-		if ( gpib_write( hp8672a.device, "M06\n", 4 ) == FAILURE )
-			hp8672a_comm_failure( );
+		hp8672a_command( "M06\n" );
 		return 1;
 	}
 
 	if ( hp8672a.mod_type == MOD_TYPE_AM )
 	{
 		sprintf( cmd, "M%d6\n", 2 - hp8672a.mod_ampl[ hp8672a.mod_type ] );
-		if ( gpib_write( hp8672a.device, cmd, 4 ) == FAILURE )
-			hp8672a_comm_failure( );
-
+		hp8672a_command( cmd );
 		fsc2_usleep( 15000, UNSET );
-
 		return 1;
 	}		
 
 	sprintf( cmd, "M0%d\n", 5 - hp8672a.mod_ampl[ hp8672a.mod_type ] );
-	if ( gpib_write( hp8672a.device, cmd, 4 ) == FAILURE )
-		hp8672a_comm_failure( );
-
+	hp8672a_command( cmd );
 	fsc2_usleep( 50000, UNSET );
 
 	return 1;

@@ -126,6 +126,7 @@ static double sr510_get_ref_freq( void );
 static double sr510_set_dac_voltage( long channel, double voltage );
 static void sr510_lock_state( bool lock );
 static bool sr510_command( const char *cmd );
+static bool sr510_talk( const char *cmd, char *reply, long *length );
 static void sr510_failure( void );
 
 
@@ -765,10 +766,7 @@ double sr510_get_data( void )
 	long length = 20;
 
 
-	if ( gpib_write( sr510.device, "Q\n", 2 ) == FAILURE ||
-		 gpib_read( sr510.device, buffer, &length ) == FAILURE )
-		sr510_failure( );
-
+	sr510_talk( "Q\n",buffer, &length );
 	buffer[ length - 2 ] = '\0';
 	return T_atod( buffer );
 }
@@ -789,11 +787,7 @@ double sr510_get_adc_data( long channel )
 	fsc2_assert( channel >= 1 && channel <= 4 );
 
 	buffer[ 1 ] = ( char ) channel + '0';
-
-	if ( gpib_write( sr510.device, buffer, strlen( buffer ) ) == FAILURE ||
-		 gpib_read( sr510.device, buffer, &length ) == FAILURE )
-		sr510_failure( );
-
+	sr510_talk( buffer, buffer, &length );
 	buffer[ length - 2 ] = '\0';
 	return T_atod( buffer );
 }
@@ -811,10 +805,7 @@ double sr510_get_sens( void )
 
 	/* Ask lock-in for the sensitivity setting */
 
-	if ( gpib_write( sr510.device, "G\n", 2 ) == FAILURE ||
-		 gpib_read( sr510.device, buffer, &length ) == FAILURE )
-		sr510_failure( );
-
+	sr510_talk( "G\n", buffer, &length );
 	buffer[ length - 2 ] = '\0';
 	sens = sens_list[ SENS_ENTRIES - T_atol( buffer ) ];
 
@@ -822,9 +813,7 @@ double sr510_get_sens( void )
 	   by a factor of 10 */
 
 	length = 10;
-	if ( gpib_write( sr510.device, "E\n", 2 ) == FAILURE ||
-		 gpib_read( sr510.device, buffer, &length ) == FAILURE )
-		sr510_failure( );
+	sr510_talk( "E\n", buffer, &length );
 
 	if ( buffer[ 0 ] == '1' )
 		sens *= 0.1;
@@ -890,10 +879,7 @@ double sr510_get_tc( void )
 	long length = 10;
 
 
-	if ( gpib_write( sr510.device, "T1\n", 3 ) == FAILURE ||
-		 gpib_read( sr510.device, buffer, &length ) == FAILURE )
-		sr510_failure( );
-
+	sr510_talk( "T1\n", buffer, &length );
 	buffer[ length - 2 ] = '\0';
 	return tc_list[ T_atol( buffer ) - 1 ];
 }
@@ -942,10 +928,7 @@ double sr510_get_phase( void )
 	double phase;
 
 
-	if ( gpib_write( sr510.device, "P\n", 2 ) == FAILURE ||
-		 gpib_read( sr510.device, buffer, &length ) == FAILURE )
-		sr510_failure( );
-
+	sr510_talk( "P\n", buffer, &length );
 	buffer[ length - 2 ] = '\0';
 	phase = T_atod( buffer );
 
@@ -985,10 +968,8 @@ static double sr510_get_ref_freq( void )
 	char buffer[ 50 ];
 	long length = 50;
 
-	if ( gpib_write( sr510.device, "F\n", 2 ) == FAILURE ||
-		 gpib_read( sr510.device, buffer, &length ) == FAILURE )
-		sr510_failure( );
 
+	sr510_talk( "F\n", buffer, &length );
 	buffer[ length - 2 ] = '\0';
 	return T_atod( buffer );
 }
@@ -1041,6 +1022,18 @@ static void sr510_lock_state( bool lock )
 static bool sr510_command( const char *cmd )
 {
 	if ( gpib_write( sr510.device, cmd, strlen( cmd ) ) == FAILURE )
+		sr510_failure( );
+	return OK;
+}
+
+
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+
+static bool sr510_talk( const char *cmd, char *reply, long *length )
+{
+	if ( gpib_write( sr510.device, cmd, strlen( cmd ) ) == FAILURE ||
+		 gpib_read( sr510.device, reply, length ) == FAILURE )
 		sr510_failure( );
 	return OK;
 }

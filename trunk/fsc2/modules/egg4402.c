@@ -148,8 +148,7 @@ Var *boxcar_curve_length( Var *v )
 		if ( FSC2_MODE == TEST )
 			return vars_push( INT_VAR, EGG4402_TEST_CURVE_LENGTH );
 
-		if ( gpib_write( egg4402.device, "CL\n", 3 ) == FAILURE )
-			egg4402_failure( );
+		egg4402_command( "CL\n" );
 		egg4402_query( buffer, &length );
 
 		buffer[ length - 1 ] = '\0';
@@ -181,8 +180,7 @@ Var *boxcar_curve_length( Var *v )
 		return vars_push( INT_VAR, num_points );
 
 	sprintf( buffer, "CL %ld\n", num_points );
-	if ( gpib_write( egg4402.device, buffer, strlen( buffer ) ) == FAILURE )
-		egg4402_failure( );
+	egg4402_command( buffer );
 
 	return vars_push( INT_VAR, num_points );
 }
@@ -361,20 +359,17 @@ Var *boxcar_get_curve( Var *v )
 
 	/* Set transfer type to ASCII float */
 
-	if ( gpib_write( egg4402.device, "NT 1\n", 5 ) == FAILURE )
-		egg4402_failure( );
+	egg4402_command( "NT 1\n" );
 
 	/* Set the curve to use for the transfer */
 
 	sprintf( cmd, "CRV %ld %ld\n", curve_type, curve_number );
-	if ( gpib_write( egg4402.device, cmd, strlen( cmd ) ) == FAILURE )
-		egg4402_failure( );
+	egg4402_command( cmd );
 
 	/* Tell the boxcar to send points */
 
 	sprintf( cmd, "DC %ld %ld\n", first, num_points );
-	if ( gpib_write( egg4402.device, cmd, strlen( cmd ) ) == FAILURE )
-		egg4402_failure( );
+	egg4402_command( cmd );
 
 	/* Try to read the data - on failure we still have to free the buffer */
 
