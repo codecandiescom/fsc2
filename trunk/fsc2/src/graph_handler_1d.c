@@ -50,6 +50,8 @@ int canvas_handler_1d( FL_OBJECT *obj, Window window, int w, int h, XEvent *ev,
 					   void *udata )
 {
 	Canvas *c = ( Canvas * ) udata;
+	long i;
+	bool active = UNSET;
 
 
 	switch ( ev->type )
@@ -66,15 +68,24 @@ int canvas_handler_1d( FL_OBJECT *obj, Window window, int w, int h, XEvent *ev,
             break;
 
 		case ButtonPress :
-			press_handler_1d( obj, window, ev, c );
+			for ( i = 0; i < G.nc; i++ )
+				active |= G.curve[ i ]->active;
+			if ( active )
+				press_handler_1d( obj, window, ev, c );
 			break;
 
 		case ButtonRelease :
-			release_handler_1d( obj, window, ev, c );
+			for ( i = 0; i < G.nc; i++ )
+				active |= G.curve[ i ]->active;
+			if ( active )
+				release_handler_1d( obj, window, ev, c );
 			break;
 
 		case MotionNotify :
-			motion_handler_1d( obj, window, ev, c );
+			for ( i = 0; i < G.nc; i++ )
+				active |= G.curve[ i ]->active;
+			if ( active )
+				motion_handler_1d( obj, window, ev, c );
 			break;
 	}
 
