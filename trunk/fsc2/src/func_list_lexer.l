@@ -206,7 +206,7 @@ int func_list_parse( Func **fncts, int num_func )
 		( *fncts )[ cur ].nargs = 0;
 		( *fncts )[ cur ].access_flag = ACCESS_EXP;
 		( *fncts )[ cur ].to_be_loaded = SET;
-		( *fcnts )[ cur ].handle = NULL;
+		( *fcnts )[ cur ].device = NULL;
 		( *fcnts )[ cur ].count = 0;
 	}
 

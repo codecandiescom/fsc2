@@ -15,6 +15,8 @@ typedef struct
 	long nargs;                       /* number of arguments */
     int access_flag;                  /* asscessibility flag */
 	bool to_be_loaded;                /* set if function has to be loaded */
+	Device *device;                   /* handle of defining device module */
+	int count;
 } Func;
 
 
