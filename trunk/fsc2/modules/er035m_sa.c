@@ -70,6 +70,7 @@ static double er035m_sa_get_field( void );
 static int er035m_sa_get_resolution( void );
 static void er035m_sa_set_resolution( int res_index );
 static bool er035m_sa_command( const char *cmd );
+static bool er035m_sa_talk( const char *cmd, char *reply, long *length );
 static void er035m_sa_failure( void );
 
 
@@ -211,13 +212,8 @@ try_again:
 
 	stop_on_user_request( );
 
-	if ( gpib_write( nmr.device, "PS\r", 3 ) == FAILURE )
-		er035m_sa_failure( );
-	fsc2_usleep( ER035M_SA_WAIT, UNSET );
-
 	length = 20;
-	if ( gpib_read( nmr.device, buffer, &length ) == FAILURE )
-		er035m_sa_failure( );
+	er035m_sa_talk( "PS\r", buffer, &length );
 
 	/* Now look if the status byte says that device is OK where OK means that
 	   for the X-Band magnet the F0-probe is connected, modulation is on and
@@ -304,9 +300,7 @@ try_again:
 
 	/* Switch the display on */
 
-	if ( gpib_write( nmr.device, "ED\r", 3 ) == FAILURE )
-		er035m_sa_failure( );
-	fsc2_usleep( ER035M_SA_WAIT, UNSET );
+	er035m_sa_command( "ED\r"  );
 
 	/* If the gaussmeter is already locked just get the field value, other-
 	   wise try to achieve locked state */
@@ -385,12 +379,10 @@ Var *measure_field( Var *v )
 	   Starting with searching down is just as probable the wrong decision
 	   as searching up... */
 
-	if ( ( nmr.state == ER035M_SA_OU_ACTIVE ||
-		   nmr.state == ER035M_SA_OD_ACTIVE ||
-		   nmr.state == ER035M_SA_UNKNOWN ) &&
-		 gpib_write( nmr.device, "SD\r", 3 ) == FAILURE )
-		er035m_sa_failure( );
-	fsc2_usleep( ER035M_SA_WAIT, UNSET );
+	if ( nmr.state == ER035M_SA_OU_ACTIVE ||
+		 nmr.state == ER035M_SA_OD_ACTIVE ||
+		 nmr.state == ER035M_SA_UNKNOWN )
+		er035m_sa_command( "SD\r" );
 
 	/* wait for gaussmeter to go into lock state (or FAILURE) */
 
@@ -400,13 +392,8 @@ Var *measure_field( Var *v )
 
 		/* Get status byte and check if lock was achieved */
 
-		if ( gpib_write( nmr.device, "PS\r", 3 ) == FAILURE )
-			er035m_sa_failure( );
-		fsc2_usleep( ER035M_SA_WAIT, UNSET );
-
 		length = 20;
-		if ( gpib_read( nmr.device, buffer, &length ) == FAILURE )
-			er035m_sa_failure( );
+		er035m_sa_talk( "PS\r", buffer, &length );
 
 		bp = buffer + 2;   /* skip first two chars of status byte */
 
@@ -598,13 +585,8 @@ double er035m_sa_get_field( void )
 
 		/* Ask gaussmeter to send the current field and read result */
 
-		if ( gpib_write( nmr.device, "PF\r", 3 ) == FAILURE )
-			er035m_sa_failure( );
-		fsc2_usleep( ER035M_SA_WAIT, UNSET );
-
 		length = 20;
-		if ( gpib_read( nmr.device, buffer, &length ) == FAILURE )
-			er035m_sa_failure( );
+		er035m_sa_talk( "PF\r", buffer, &length );
 
 		/* Disassemble field value and flag showing the state */
 
@@ -648,13 +630,7 @@ static int er035m_sa_get_resolution( void )
 	long length = 20;
 
 
-	if ( gpib_write( nmr.device, "RS\r", 3 ) == FAILURE )
-		er035m_sa_failure( );
-
-	fsc2_usleep( ER035M_SA_WAIT, UNSET );
-
-	if ( gpib_read( nmr.device, buffer, &length ) == FAILURE )
-		er035m_sa_failure( );
+	er035m_sa_talk( "RS\r", buffer, &length );
 
 	switch ( buffer[ 2 ] )
 	{
@@ -684,11 +660,7 @@ static void er035m_sa_set_resolution( int res_index )
 
 
 	sprintf( buf, "RS%1d\r", res_index + 1 );
-	if ( gpib_write( nmr.device, buf, 4 ) == FAILURE )
-		er035m_sa_failure( );
-
-	fsc2_usleep( ER035M_SA_WAIT, UNSET );
-
+	er035m_sa_command( buf );
 }
 
 
@@ -698,6 +670,22 @@ static void er035m_sa_set_resolution( int res_index )
 static bool er035m_sa_command( const char *cmd )
 {
 	if ( gpib_write( nmr.device, cmd, strlen( cmd ) ) == FAILURE )
+		er035m_sa_failure( );
+	fsc2_usleep( ER035M_SA_WAIT, UNSET );
+
+	return OK;
+}
+
+
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+
+static bool er035m_sa_talk( const char *cmd, char *reply, long *length )
+{
+	if ( gpib_write( nmr.device, cmd, strlen( cmd ) ) == FAILURE )
+		er035m_sa_failure( );
+	fsc2_usleep( ER035M_SA_WAIT, UNSET );
+	if ( gpib_read( nmr.device, reply, length ) == FAILURE )
 		er035m_sa_failure( );
 
 	return OK;

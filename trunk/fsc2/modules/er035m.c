@@ -655,7 +655,7 @@ double er035m_get_field( void )
 		/* Ask gaussmeter to send the current field and read result */
 
 		length = 20;
-		er035m_talk( "PF\r" buffer, &length );
+		er035m_talk( "PF\r", buffer, &length );
 
 		/* Disassemble field value and flag showing the state */
 
