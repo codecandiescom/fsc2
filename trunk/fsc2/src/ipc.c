@@ -175,7 +175,7 @@ void delete_all_shm( void )
 /* 'fsc2'. They are obviously debris from a crash and have to be deleted  */
 /* to avoid using up all segments after some time. Since the segments     */
 /* belong to the user `fsc2' this routine must be run with the effective  */
-/* ID of fsc2.                                                            */
+/* UID and GID of fsc2.                                                   */
 /* This routine is more or less a copy of the code from the ipcs utility, */
 /* hopefully it will continue to work with newer versions of Linux (it    */
 /* seems to work with 2.0, 2.2 and 2.4 kernels)                           */
