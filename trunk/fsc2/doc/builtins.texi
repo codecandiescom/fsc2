@@ -263,7 +263,8 @@ of the @w{@code{save_xxx()}}-family. If no argument is given a file selector
 is shown and lets the user choose a file. If opening the selected file
 fails the user is asked to select a different file name. If the user
 cancels the selection of a file (s)he is asked for confirmation since
-data may get lost.
+data may get lost. If the user decided not to select a file the function
+returns an (invalid) file identifier of @code{-1}.
 
 The function accepts up to four arguments, all of them optional. The
 first one is usually the prompt string to be printed in the file
