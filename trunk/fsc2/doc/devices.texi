@@ -741,7 +741,7 @@ or @code{FUNC_F}.
 
 @item digitizer_averaging()
 @findex digitizer_averaging()
-This function only exists for the @code{LeCroy 9400} and must be used to
+This function only exists for the @strong{LeCroy 9400} and must be used to
 set up averaging. It expects at least three arguments. The first
 argument is the channel to be used to do the averaging, i.e.@: either
 @code{FUNC_E} or @code{FUNC_F}. The second is the data source channel

@@ -85,7 +85,8 @@ PREPARATIONS:
 
 EXPERIMENT:
 
-  WHILE field <= end_field @{
+  WHILE field <= end_field
+  @{
       data = lockin_get_data( );
       display( I, data );
       save( data );
