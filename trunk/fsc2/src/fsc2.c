@@ -798,6 +798,7 @@ void test_file( FL_OBJECT *a, long b )
 	fl_deactivate_object( main_form->quit );
 	fl_set_object_lcol( main_form->quit, FL_INACTIVE_COL );
 	fl_set_object_label( main_form->test_file, "Stop Test" );
+	fl_set_button_shortcut( main_form->test_file, "T", 1 );
 
 	user_break = UNSET;
 	running_test = SET;
@@ -818,6 +819,7 @@ void test_file( FL_OBJECT *a, long b )
 	}
 
 	fl_set_object_label( main_form->test_file, "Test" );
+	fl_set_button_shortcut( main_form->test_file, "T", 1 );
 	fl_activate_object( main_form->Load );
 	fl_set_object_lcol( main_form->Load, FL_BLACK );
 	fl_activate_object( main_form->reload );
