@@ -36,7 +36,6 @@ const char generic_type[ ] = DEVICE_TYPE;
 
 
 int bh15_init_hook( void );
-int bh15_test_hook( void );
 int bh15_exp_hook( void );
 int bh15_end_of_exp_hook( void );
 void bh15_exit_hook( void );
@@ -46,8 +45,6 @@ Var *find_field( Var *v );
 Var *gaussmeter_resolution( Var *v );
 Var *gaussmeter_wait( Var *v );
 
-bool is_gaussmeter = UNSET;         /* tested by magnet power supply driver */
-
 
 static double bh15_get_field( void );
 
@@ -56,7 +53,6 @@ typedef struct
 {
 	int state;
 	int device;
-	bool is_needed;
 	const char *name;
 	double field;
 	double resolution;
@@ -72,7 +68,7 @@ enum {
 	BH15_LOCKED
 };
 
-#define BH15_MAX_TRIES   10
+#define BH15_MAX_TRIES   20
 
 
 /*****************************************************************************/
@@ -87,43 +83,12 @@ enum {
 
 int bh15_init_hook( void )
 {
-	/* Set global flag to tell magnet power supply driver that the
-	   field controller has already been loaded */
-
-	is_gaussmeter = SET;
-
-	if ( exists_device( "er035m" ) || exists_device( "er035m_s" ) )
-	{
-		print( FATAL, "Driver for Bruker ER035M gaussmeter is already loaded "
-			   "- there can only be one gaussmeter.\n" );
-		THROW( EXCEPTION );
-	}
-
-	if ( ! exists_device( "aeg_s_band" ) && ! exists_device( "aeg_x_band" ) )
-	{
-		print( WARN, "Driver for Bruker BH15 field controller is loaded but "
-			   "no appropriate magnet power supply driver.\n" );
-		bh15.is_needed = UNSET;
-	}
-	else
-	{
-		need_GPIB = SET;
-		bh15.is_needed = SET;
-		bh15.name = DEVICE_NAME;
-	}
+	need_GPIB = SET;
+	bh15.name = DEVICE_NAME;
 
 	bh15.state = BH15_UNKNOWN;
 	bh15.device = -1;
 
-	return 1;
-}
-
-
-/*--------------------------------------------------------*/
-/*--------------------------------------------------------*/
-
-int bh15_test_hook( void )
-{
 	return 1;
 }
 
@@ -138,15 +103,13 @@ int bh15_exp_hook( void )
 	int tries = 0;
 
 
-	if ( ! bh15.is_needed )
-		return 1;
-
 	fsc2_assert( bh15.device < 0 );
 
 	if ( gpib_init_device( bh15.name, &bh15.device ) == FAILURE )
 	{
 		bh15.device = -1;
-		print( FATAL, " Can't initialize device: %s\n", gpib_error_msg );
+		print( FATAL, "Can't initialize Bruker BH15 field controller: %s\n",
+			   gpib_error_msg );
 		THROW( EXCEPTION );
 	}
 
@@ -209,15 +172,10 @@ int bh15_exp_hook( void )
 
 int bh15_end_of_exp_hook( void )
 {
-	if ( ! bh15.is_needed )
-		return 1;
-
 	if ( bh15.device >= 0 )
-	{
-		bh15_get_field( );
 		gpib_local( bh15.device );
-	}
 
+	bh15.state = BH15_UNKNOWN;
 	bh15.device = -1;
 
 	return 1;
@@ -379,6 +337,7 @@ static double bh15_get_field( void )
 
 			case '2' :                             /* error larger than 1 G */
 				bh15.state = BH15_FAR_OFF;
+				tries = 0;
 				break;
 
 			case '3' :                             /* BH15 not in RUN mode */

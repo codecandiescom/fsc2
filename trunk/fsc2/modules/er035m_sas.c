@@ -353,7 +353,6 @@ int er035m_sas_end_of_exp_hook( void )
 void er035m_sas_end_hook( void )
 {
 	nmr.is_needed = UNSET;
-	er035m_sas_close( );
 }
 
 

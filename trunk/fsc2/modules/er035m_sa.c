@@ -229,18 +229,8 @@ try_again:
 		switch ( *bp )
 		{
 			case '0' :      /* Probe F0 is connected -> OK for S-band */
-				if ( exists_device( "aeg_s_band" ) )
-					break;
-				print( FATAL, "Wrong field probe (F0) connected to the NMR "
-					   "gaussmeter.\n" );
-				THROW( EXCEPTION );
-
 			case '1' :      /* Probe F1 is connected -> OK for X-band*/
-				if ( exists_device( "aeg_x_band" ) )
-					break;
-				print( FATAL, "Wrong field probe (F1) connected to the NMR "
-					   "gaussmeter.\n" );
-				THROW( EXCEPTION );
+				break;
 
 			case '2' :      /* No probe connected -> error */
 				print( FATAL, "No field probe connected to the NMR "
@@ -337,10 +327,7 @@ try_again:
 
 int er035m_sa_end_of_exp_hook( void )
 {
-	if ( ! nmr.is_needed )
-		return 1;
-
-	if ( nmr.device >= 0 )
+	if ( nmr.is_needed && nmr.device >= 0 )
 		gpib_local( nmr.device );
 
 	nmr.device = -1;
