@@ -30,7 +30,7 @@ int hfs9000_init_hook( void )
 		THROW( EXCEPTION );
 	}
 
-	pulser_struct.name = T_strdup( "HFS9000" );
+	pulser_struct.name = "HFS9000";
 
 	/* Set global variable to indicate that GPIB bus is needed */
 
