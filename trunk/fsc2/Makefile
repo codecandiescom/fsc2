@@ -29,12 +29,12 @@
 #  Also consider using a configuration file for your machine in the     #
 #  'machines' subdirectory. You simply can copy the 'template.nowhere'  #
 #  file in this directory to a file with the fully qualified hostname   #
-#  of your machine (that's what 'hostname -f' returns) and then edit    #
-#  this file. Then, whenever you want to install a new version of fsc2  #
-#  you only have to copy this file instead of editing this Makefile     #
-#  each time. Please also note that when such a configuration file      #
-#  for your machine exists its contents will override everything you    #
-#  set here!                                                            #
+#  of your machine (that's what 'hostname -f' returns when you enter    #
+#  at the command line) and then edit this file. Then, whenever you     #
+#  want to install a new version of fsc2 you only have to copy this     #
+#  file instead of editing the Makefile each time. Please also note     #
+#  that when such a configuration file for your machine exists its      #
+#  contents will override everything you set here!                      #
 #                                                                       #
 #########################################################################
 
@@ -73,7 +73,7 @@ GROUP             := uucp
 # The next variable defines the GPIB library to use, it must be set to either
 # 'LLP' for the LLP library, 'NI' for the National Instruments library or
 # 'JTT' for the library written by me. Alternatively, if no GPIB support is
-# needed, define GPIB_LIBRARY as 'NONE' (which is also the default if not set).
+# needed, define GPIB_LIBRARY as 'NONE' (which is the default if not set).
 
 GPIB_LIBRARY      := JTT
 
@@ -88,8 +88,8 @@ GPIB_CONF_FILE    := /etc/gpib.conf
 # Next set the file for writing logs about the activity on the GPIB bus.
 # Make sure that fsc2 or its users have write access to the directory the
 # log file will be created in. Don't use a partition on which you don't have
-# at least a few megabytes to spare, depending on the type of experiments you
-# will do the file can become rather long. But the file will not grow
+# at least a few megabytes to spare, depending on the type of experiments
+# you will do the file can become rather long. But the file will not grow
 # indefintely, if you start a new experiment its previous contents get
 # overwritten. If no file is specified logs will be written to stderr.
 
@@ -115,8 +115,8 @@ GPIB_LOG_LEVEL    := HIGH
 
 
 # NUM_SERIAL_PORTS defines the number of serial ports that are available on
-# the computer and defaults to 0 if not set (in which case no serial ports
-# can be used).
+# the computer (or how many you want to allow fsc2 to use) and defaults to 0
+# if not set (in which case no serial ports can be used).
 
 NUM_SERIAL_PORTS  := 2
 
@@ -135,8 +135,8 @@ SERIAL_LOCK_DIR   := /var/lock
 # where the linker will find it automatically (e.g. '/usr/lib' and
 # '/usr/local/lib') you need to specify the full absolut path for the
 # library (e.g. '/usr/xxx/yyy/libni6601.so'). You must make sure that the
-# library for the card is already installed if you want to build fsc2 with
-# support for the card.
+# library for the card is already properly installed if you want to build
+# fsc2 with support for the card.
 
 # WITH_NI6601       := yes
 # ni6601_libs       := libni6601.so
@@ -147,8 +147,8 @@ SERIAL_LOCK_DIR   := /var/lock
 # place where the linker will find it automatically (e.g. '/usr/lib' and
 # '/usr/local/lib') you need to specify the full absolut path for the
 # library  (e.g. '/opt/zzz/ttt/libme6x00.so'). You must make sure that the
-# library for the card is already installed if you want to build fsc2 with
-# support for the card.
+# library for the card is already properly installed if you want to build
+# fsc2 with support for the card.
 
 # WITH_ME6000       := yes
 # me6000_libs       := libme6x00.so
@@ -159,8 +159,8 @@ SERIAL_LOCK_DIR   := /var/lock
 # linker will find it automatically (e.g. '/usr/lib' and '/usr/local/lib')
 # you need to specify the full absolut path for the library (e.g.
 # '/usr/xxx/yyy/libwitio_48.so'). You must make sure that the library for
-# the card is already installed if you want to build fsc2 with support for
-# the card.
+# the card is already properly installed if you want to build fsc2 with
+# support for the card.
 
 # WITH_WITIO_48     := yes
 # witio_48_libs     := libwitio_48.so
@@ -168,15 +168,15 @@ SERIAL_LOCK_DIR   := /var/lock
 
 # The following three lines must be uncommented when you want support for the
 # Roper Scientific Spec-10 CCD camera. Depending on where you installed the
-# header files required by the PVCAM library (which is need to access the
+# header files required by the PVCAM library (which is needed to access the
 # camera) you may have to change the 'rs_spec10_incl' variable to the name
 # of the installation directory. The third variable, 'rs_spec10_libs', must
 # be changed if the library isn't in a place where the linker will find it
 # automatically(e.g. '/usr/lib' and '/usr/local/lib'). In this case it must
 # be the full absolute path to of the library (for example
-#  '/usr/lib/pvcam/libpvcam.so'). You must make sure that the library for the
-# camera is already installed if you want to build fsc2 with support for the
-# camera.
+#  '/usr/lib/pvcam/libpvcam.so'). You must make sure that the header files
+# and the library for the camera are already properly installed if you want
+# to build fsc2 with support for the camera.
 
 # WITH_SPEC10       := yes
 # rs_spec10_incl    := /usr/local/include/pvcam
@@ -184,7 +184,7 @@ SERIAL_LOCK_DIR   := /var/lock
 
 
 # Comment out the next two lines if you don't want the ability to run a HTTP
-# server that allows to monitor fsc2's current state via the Internet. The
+# server that allows to monitor fsc2s current state via the Internet. The
 # default port number the HTTP server will listen on can be set by the second
 # variable, DEFAULT_HTTP_PORT, which must be a  number between 1024 and 65535.
 
