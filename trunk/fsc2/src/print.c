@@ -447,7 +447,7 @@ static void get_print_comm( void )
 static void start_printing( FILE *fp, char *name, long what )
 {
 	pid_t pid;
-	char filename[ ] = P_tmpdir "/fsc2.XXXXXX";
+	char filename[ ] = P_tmpdir "/fsc2.print.XXXXXX";
 	int tmp_fd = -1;
 	char *args[ 4 ];
 

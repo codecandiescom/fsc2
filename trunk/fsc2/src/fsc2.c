@@ -641,6 +641,10 @@ void load_file( FL_OBJECT *a, long reload )
 	static char *old_in_file;
 	FILE *fp;
 	struct stat file_stat;
+	char tmp_file[ ] = P_tmpdir "/fsc2.stash.XXXXXX";
+	int c;
+	int tmp_fd;
+	FILE *tmp_fp;
 
 
 	a = a;                          /* keep the compiler happy... */
@@ -722,8 +726,41 @@ void load_file( FL_OBJECT *a, long reload )
 		return;
 	}
 
+	/* Now we create a copy of the file, so that we can still operate on the
+	   file in the currently loaded form at later times even when the user
+	   changes the file in between. In all the following we work on the
+	   file pointer 'fp' of this temporary file even though the file name
+	   'in_file' shown to the user still refers to the original file... */
+
+	if ( ( tmp_fd = mkstemp( tmp_file ) ) < 0 )
+	{
+		if ( Internals.cmdline_flags & DO_CHECK )
+			exit ( EXIT_FAILURE );
+		fl_show_alert( "Error", "Sorry, can't open a temporary file.",
+					   NULL, 1 );
+		old_in_file = T_free( old_in_file );
+		notify_conn( UNBUSY_SIGNAL );
+		return;
+	}
+
+	unlink( tmp_file );
+
+	if ( ( tmp_fp = fdopen( tmp_fd, "w+" ) ) == 0 )
+	{
+		close( tmp_fd );
+		if ( Internals.cmdline_flags & DO_CHECK )
+			exit ( EXIT_FAILURE );
+
+		fl_show_alert( "Error", "Sorry, can't open a temporary file.",
+					   NULL, 1 );
+		old_in_file = T_free( old_in_file );
+		notify_conn( UNBUSY_SIGNAL );
+		return;
+	}
+
 	if ( ( fp = fopen( in_file, "r" ) ) == NULL )
 	{
+		fclose( tmp_fp );
 		if ( Internals.cmdline_flags & DO_CHECK )
 			exit ( EXIT_FAILURE );
 
@@ -732,6 +769,22 @@ void load_file( FL_OBJECT *a, long reload )
 		notify_conn( UNBUSY_SIGNAL );
 		return;
 	}
+
+	/* Get modification time of file */
+
+	stat( in_file, &file_stat );
+	in_file_mod = file_stat.st_mtime;
+
+	/* Copy the contents of the EDL file into our temporary file */
+
+	while ( ( c = fgetc( fp ) ) != EOF )
+		fputc( c, tmp_fp );
+
+	fclose( fp );
+	fp = tmp_fp;
+
+	rewind( fp );
+	lseek( tmp_fd, 0, SEEK_SET );           /* paranoia... */
 
 	/* Now that we're sure that we can read the new file we can delete the
 	   old file (but only if the new and the old file are different !) */
@@ -755,11 +808,6 @@ void load_file( FL_OBJECT *a, long reload )
 
 	delete_file = UNSET;
 	old_in_file = T_free( old_in_file );
-
-	/* Get modification time of file */
-
-	stat( in_file, &file_stat );
-	in_file_mod = file_stat.st_mtime;
 
 	/* Set a new window title */
 
@@ -991,18 +1039,11 @@ void test_file( FL_OBJECT *a, long b )
 	   between - quit if file can't be read again. */
 
 	stat( in_file, &file_stat );
-	if ( in_file_mod != file_stat.st_mtime )
+	if ( in_file_mod != file_stat.st_mtime &&
+		 2 == fl_show_choice( "EDL file on disk is newer than the loaded ",
+							  "file. Reload file from disk?",
+							  "", 2, "No", "Yes", "", 1 ) )
 	{
-		if ( 1 == fl_show_choice( "EDL file on disk is newer than the loaded ",
-								  "file. Reload file from disk?",
-								  "",
-								  2, "No", "Yes", "", 1 ) )
-		{
-			notify_conn( UNBUSY_SIGNAL );
-			in_test = UNSET;
-			return;
-		}
-
 		load_file( GUI.main_form->browser, 1 );
 		if ( ! is_loaded )
 		{
@@ -1035,7 +1076,12 @@ void test_file( FL_OBJECT *a, long b )
 	fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_watch );
 	user_break = UNSET;
 
+	/* Parse the input file and, when we're done with it, close it, everything
+	   relevant is now stored in memory... */
+
 	state = scan_main( in_file, in_file_fp );
+	fclose( in_file_fp );
+	in_file_fp = NULL;
 
 	fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_left_ptr );
 	running_test = UNSET;
@@ -1107,22 +1153,19 @@ void run_file( FL_OBJECT *a, long b )
 	else
 	{
 		stat( in_file, &file_stat );
-		if ( in_file_mod != file_stat.st_mtime )
+		if ( in_file_mod != file_stat.st_mtime &&
+			 2 == fl_show_choice( "EDL file on disk is newer than loaded",
+								  "file. Reload the file from disk?",
+								  "", 2, "No", "Yes", "", 1 ) )
 		{
-			if ( 1 != fl_show_choice( "EDL file on disk is newer than loaded",
-									  "file. Reload the file from disk?",
-									  "",
-									  2, "No", "Yes", "", 1 ) )
-			{
-				load_file( GUI.main_form->browser, 1 );
-				if ( ! is_loaded )
-					return;
-				is_tested = UNSET;
-				test_file( GUI.main_form->test_file, 1 );
-				if ( GUI.main_form->test_file->u_ldata == 1 )/* user break ? */
-					return;
-				notify_conn( BUSY_SIGNAL );
-			}
+			load_file( GUI.main_form->browser, 1 );
+			if ( ! is_loaded )
+				return;
+			is_tested = UNSET;
+			test_file( GUI.main_form->test_file, 1 );
+			if ( GUI.main_form->test_file->u_ldata == 1 )/* user break ? */
+				return;
+			notify_conn( BUSY_SIGNAL );
 		}
 	}
 

@@ -41,7 +41,7 @@ void bug_report_callback( FL_OBJECT *a, long b )
 
 	FILE *tmp;
 	int tmp_fd;
-	char filename[ ] = P_tmpdir "/fsc2.XXXXXX";
+	char filename[ ] = P_tmpdir "/fsc2.mail.XXXXXX";
 	char cur_line[ FL_BROWSER_LINELENGTH ];
 	char *clp;
 	int lines;
