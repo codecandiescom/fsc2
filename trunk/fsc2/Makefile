@@ -209,6 +209,10 @@ install:
 	if [ `hostname --fqdn` = "pion.anorg.chemie.uni-frankfurt.de" ]; then \
 		ln -s $(libdir)/dg2020_f.so $(libdir)/dg2020.so; \
 		ln -s $(libdir)/aeg_s_band.so $(libdir)/s_band.so; \
+		ln -s $(libdir)/bh15.so $(libdir)/gaussmeter.so; \
+		ln -s $(libdir)/aeg_s_band.so $(libdir)/magnet.so; \
+		ln -s $(libdir)/sr510.so $(libdir)/lockin.so; \
+		ln -s $(libdir)/dg2020_f.so $(libdir)/pulser.so; \
 	fi
 	if [ `hostname --fqdn` = "moebi.fu-berlin.de" ]; then \
 		ln -s $(libdir)/dg2020_b.so $(libdir)/pulser.so; \
