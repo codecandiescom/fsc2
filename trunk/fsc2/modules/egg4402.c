@@ -225,7 +225,7 @@ Var *boxcar_get_curve( Var *v )
 	char cmd[ 100 ];
 	long length;
 	long curve_type;
-	long curve_number;
+	long curve_number = 0;
 	long max_points;
 	long first, last;
 	long num_points;

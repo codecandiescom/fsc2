@@ -518,7 +518,7 @@ Var *f_bcreate( Var *v )
 Var *f_bdelete( Var *v )
 {
 	IOBJECT *io, *nio; 
-	long new_anchor;
+	long new_anchor = 0;
 
 
 	if ( ! FI_sizes.is_init )
@@ -2305,7 +2305,7 @@ void tools_clear( void )
 
 static void recreate_Tool_Box( void )
 {
-	IOBJECT *io, *last_io;
+	IOBJECT *io, *last_io = NULL;
 	bool needs_pos = SET;
 	int flags;
 
@@ -2796,7 +2796,7 @@ static void convert_escapes( char *str )
 
 Var *f_objdel( Var *v )
 {
-	IOBJECT *io;
+	IOBJECT *io = NULL;
 
 
 	if ( ! FI_sizes.is_init )

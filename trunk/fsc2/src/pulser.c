@@ -755,7 +755,7 @@ Var *p_get_by_num( long pnum, int type )
 	int function;
 	double time;
 	long cycle;
-	Var *v;
+	Var *v = NULL;
 
 
 	switch ( type )

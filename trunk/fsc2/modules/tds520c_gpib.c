@@ -807,7 +807,7 @@ static double tds520c_get_area_wo_cursor( int channel, WINDOW *w )
 {
 	double *data, area;
 	long length, i;
-	double pos;
+	double pos = 0.0;
 	char buf[ 100 ];
 	long len = 100;
 

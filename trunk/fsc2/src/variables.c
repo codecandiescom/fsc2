@@ -288,7 +288,7 @@ Var *vars_new( char *name )
 
 Var *vars_add( Var *v1, Var *v2 )
 {
-	Var *new_var;
+	Var *new_var = NULL;
 	char *new_str;
 
 
@@ -381,7 +381,7 @@ Var *vars_add( Var *v1, Var *v2 )
 
 Var *vars_sub( Var *v1, Var *v2 )
 {
-	Var *new_var;
+	Var *new_var = NULL;
 
 
 	/* Make sure that `v1' and `v2' exist, are integers or float values or
@@ -454,7 +454,7 @@ Var *vars_sub( Var *v1, Var *v2 )
 
 Var *vars_mult( Var *v1, Var *v2 )
 {
-	Var *new_var;
+	Var *new_var = NULL;
 
 
 	/* Make sure that `v1' and `v2' exist, are integers or float values or
@@ -527,7 +527,7 @@ Var *vars_mult( Var *v1, Var *v2 )
 
 Var *vars_div( Var *v1, Var *v2 )
 {
-	Var *new_var;
+	Var *new_var = NULL;
 
 
 	/* Make sure that `v1' and `v2' exist, are integers or float values or
@@ -600,7 +600,7 @@ Var *vars_div( Var *v1, Var *v2 )
 
 Var *vars_mod( Var *v1, Var *v2 )
 {
-	Var *new_var;
+	Var *new_var = NULL;
 
 
 	/* Make sure that `v1' and `v2' exist, are integers or float values or
@@ -673,7 +673,7 @@ Var *vars_mod( Var *v1, Var *v2 )
 
 Var *vars_pow( Var *v1, Var *v2 )
 {
-	Var  *new_var;
+	Var  *new_var = NULL;
 
 
 	/* Make sure that `v1' and `v2' exist, are integers or float values or
@@ -748,7 +748,7 @@ Var *vars_negate( Var *v )
 {
 	Var *new_var;
 	long i;
-	long len;
+	long len = 0;
 	long *rlp;
 	double *rdp;
 	long *ilp = NULL;
@@ -873,7 +873,7 @@ Var *vars_negate( Var *v )
 
 Var *vars_comp( int comp_type, Var *v1, Var *v2 )
 {
-	Var *new_var;
+	Var *new_var = NULL;
 
 
 	/* Make sure that `v1' and `v2' exist, are integers or float values

@@ -229,7 +229,7 @@ Var *temp_contr_sample_channel( Var *v )
 
 Var *temp_contr_sensor_unit( Var *v )
 {
-	long unit;
+	long unit = 0;
 	const char *in_units  = "KCS";
 	int i;
 

@@ -693,8 +693,8 @@ static bool er035m_s_close( void )
 
 static bool er035m_s_write( const char *buf )
 {
-	char *wbuf;
-	long wlen;
+	char *wbuf = NULL;
+	long wlen = 0;
 	bool res;
 
 

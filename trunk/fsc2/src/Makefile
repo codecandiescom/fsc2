@@ -110,10 +110,10 @@ fsc2_rsc_hr.o: fsc2_rsc_hr.c
 	$(CC) $(CFLAGS) -c $(SLFLAGS) $< -o $@
 
 fsc2_rsc_lr.c: fsc2_rsc_lr.fd
-	fdesign -convert fsc2_rsc_lr.fd;                             \
+	fdesign -convert fsc2_rsc_lr.fd;
 
 fsc2_rsc_hr.c: fsc2_rsc_hr.fd
-	fdesign -convert fsc2_rsc_hr.fd;                             \
+	fdesign -convert fsc2_rsc_hr.fd;
 
 
 # Create files and links needed for the GPIB interface - they need making if

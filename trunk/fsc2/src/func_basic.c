@@ -147,7 +147,7 @@ Var *f_int( Var *v )
 	Var *new_var;
 	long i;
 	long len;
-	long *rlp;
+	long *rlp = NULL;
 	long *ilp;
 	double *idp;
 	
@@ -203,7 +203,7 @@ Var *f_float( Var *v )
 	Var *new_var;
 	long i;
 	long len;
-	double *rdp;
+	double *rdp = NULL;
 	long *ilp;
 	double *idp;
 	
@@ -249,7 +249,7 @@ Var *f_round( Var *v )
 	Var *new_var;
 	long i;
 	long len;
-	long *rlp;
+	long *rlp = NULL;
 	long *ilp;
 	double *idp;
 
@@ -305,7 +305,7 @@ Var *f_floor( Var *v )
 	Var *new_var;
 	long i;
 	long len;
-	long *rlp;
+	long *rlp = NULL;
 	long *ilp;
 	double *idp;
 
@@ -359,7 +359,7 @@ Var *f_ceil( Var *v )
 	Var *new_var;
 	long i;
 	long len;
-	long *rlp;
+	long *rlp = NULL;
 	long *ilp;
 	double *idp;
 

@@ -80,13 +80,14 @@ MAIL_ADDRESS     := Jens.Toerring@physik.fu-berlin.de
 ##############################################################################
 # Here follow settings determining the make process - which compiler and
 # tools to use as well as their respective options. Better leave this alone
-# if you don't have a good reason...
-# Don't use -fomit-frame-pointer in CFLAGS on Intel processors
+# if you don't have a good reason for doing changes...
+# Don't use '-fomit-frame-pointer' in CFLAGS on Intel processors (except if
+# you want to keep me from getting meaningful messages about crashes...)
 ##############################################################################
 
 SHELL            := /bin/sh
 CC               := gcc
-CFLAGS           := -ggdb -Wall -Wwrite-strings -Wstrict-prototypes \
+CFLAGS           := -ggdb -O3 -Wall -Wwrite-strings -Wstrict-prototypes \
 					-Wmissing-declarations -W
 				    # -DMDEBUG # for malloc debugging
 				    # -DDEBUG
@@ -129,7 +130,7 @@ machine_name     := $(shell hostname -f)
 # Check that the machine has a new libc, i.e. at least version 2, otherwise
 # some problems with the older libc have to be dealt with in the program
 
-ifneq ($(shell ls /lib/libc.so.6),/lib/libc.so.6)
+ifneq ($(shell ls /lib/libc.so.6 2>/dev/null),/lib/libc.so.6)
 	CFLAGS += -DIS_STILL_LIBC1
 endif
 
@@ -224,7 +225,7 @@ INSTALL_MACHINE   := install-unknown
 UNINSTALL_MACHINE := uninstall-unknown
 
 ifeq ($(machine_name),pion.anorg.chemie.uni-frankfurt.de)
-	GPIB_LIBRARY       := LLP
+	GPIB_LIBRARY       := JTT
 	INSTALL_MACHINE    := install-$(machine_name)
 	UNINSTALL_MACHINE  := uninstall-$(machine_name)
 endif

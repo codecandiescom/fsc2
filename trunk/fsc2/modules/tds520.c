@@ -174,7 +174,8 @@ Var *digitizer_name( Var *v )
 
 Var *digitizer_define_window( Var *v )
 {
-	double win_start, win_width = 0;
+	double win_start = 0,
+		   win_width = 0;
 	bool is_win_start = UNSET;
 	bool is_win_width = UNSET;
 	WINDOW *w;

@@ -676,7 +676,7 @@ double tds520_get_area( int channel, WINDOW *w, bool use_cursor )
 {
 	double *data, area, window;
 	long length, i;
-	double pos;
+	double pos = 0.0;
 	char buf[ 100 ];
 	long len = 100;
 

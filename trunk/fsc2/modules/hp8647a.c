@@ -995,7 +995,7 @@ Var *synthesizer_mod_type( Var *v )
 
 Var *synthesizer_mod_source( Var *v )
 {
-	int source;
+	int source = 0;
 	const char *sources[ ] = { "EXT AC", "AC", "EXT DC", "DC",
 							   "INT 1kHz", "INT 1 kHz", "INT 1", "1kHz",
 							   "1 kHz", "1", "INT 400Hz", "INT 400 Hz",

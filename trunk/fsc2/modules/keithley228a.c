@@ -978,7 +978,7 @@ static void keithley228a_get_corrected_current( double c, double *psc,
 												double *dacv )
 {
 	int i;
-	double del;
+	double del = 0.0;
 
 	static double
 		ranges[ ] =    { -7.5, -5.5, -4.5, -1.7, -0.007, 0.004, 5.3, 7.2,
