@@ -122,12 +122,6 @@ int exp_runerror( const char *s );
 input:   /* empty */
        | input eol
        | input line eol
-       | input line line           { eprint( FATAL, SET, "Missing semicolon"
-											 " before (or on) this line.\n" );
-	                                 THROW( EXCEPTION ); }
-       | input line ','            { eprint( FATAL, SET, "Missing semicolon"
-											 " before (or on) this line.\n" );
-	                                 THROW( EXCEPTION ); }
 ;
 
 eol:     ';'                       { fsc2_assert( Var_Stack == NULL );
@@ -135,8 +129,7 @@ eol:     ';'                       { fsc2_assert( Var_Stack == NULL );
                                          YYACCEPT; }
        | '}'                       { fsc2_assert( Var_Stack == NULL );
 	                                 YYACCEPT; }
-
-/* currently only the variables related stuff */
+;
 
 line:    E_VAR_TOKEN '=' expr      { vars_assign( $3, $1 ); }
        | E_VAR_TOKEN E_PLSA expr   { vars_assign( vars_add( $1, $3 ), $1 ); }
