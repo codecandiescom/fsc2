@@ -709,10 +709,10 @@ IF is_file( File ) {
 			fsave( File, \"\\n\" );
 		}
 	} ELSE IF I <= Num_Points {
-		FOR I = I : Num_Points {
+		FOR I = 1 : Num_Points {
 			fsave( File, \"# \", data[ I ] );
 		}
-		fsave( File, \"\n\" );
+		fsave( File, \"\\n\" );
 	}
 
     fsave( File,
