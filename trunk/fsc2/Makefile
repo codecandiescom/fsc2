@@ -282,8 +282,8 @@ pack:
 
 ZIP:
 	if ! `grep ZIP /etc/mtab > /dev/null`; then \
-		mount /ZIP; \
 	    sleep 1; \
+		mount /ZIP; \
 	fi
 	cp ../fsc2.tgz /ZIP
 	umount /ZIP
