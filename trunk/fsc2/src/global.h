@@ -79,6 +79,15 @@ typedef enum
 
 #define UNDEFINED -1
 
+enum {
+	PREPARATION = 0,
+	TEST,
+	SETUP,
+	EXPERIMENT,
+	SHUTDOWN
+};
+
+
 /* Define error severity types */
 
 enum {

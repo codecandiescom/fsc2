@@ -135,7 +135,9 @@ bool run( void )
 		fl_set_object_callback( main_form->run, stop_while_exp_hook, 0 );
 
 		fl_set_object_label( main_form->run, "Stop" );
+		FSC2_MODE = SETUP;
 		run_exp_hooks( );
+		FSC2_MODE = EXPERIMENT;
 
 		fl_set_object_callback( main_form->run, run_file, 0 );
 		fl_deactivate_object( main_form->run );
@@ -155,12 +157,14 @@ bool run( void )
 		fl_set_object_label( main_form->run, "Start" );
 		fl_set_object_callback( main_form->run, run_file, 0 );
 
+		FSC2_MODE = SHUTDOWN;
 		run_end_of_exp_hooks( );
 		vars_del_stack( );             /* some stack variables might be left
 										  over when an exception got thrown */
 		if ( need_GPIB )
 			gpib_shutdown( );
 		fsc2_serial_cleanup( );
+		FSC2_MODE = PERPARATION;
 
 		set_buttons_for_run( 1 );
 		stop_graphics( );
@@ -246,9 +250,13 @@ bool run( void )
 
 	child_pid = 0;
 	end_comm( );
+	FSC2_MODE = SHUTDOWN;
 	run_end_of_exp_hooks( );
 	if ( need_GPIB )
 		gpib_shutdown( );
+	fsc2_serial_cleanup( );
+	FSC2_MODE = PREPARATION;
+
 	stop_measurement( NULL, 1 );
 	return FAIL;
 }
@@ -303,10 +311,12 @@ static bool no_prog_to_be_run( void )
 		ret = FAIL;
 	}
 
+	FSC2_MODE = SHUTDOWN;
 	run_end_of_exp_hooks( );
 	if ( need_GPIB )
 		gpib_shutdown( );
 	fsc2_serial_cleanup( );
+	FSC2_MODE = PREPARATION;
 
 	set_buttons_for_run( 1 );
 	fl_set_cursor( FL_ObjWin( main_form->run ), XC_left_ptr );
@@ -577,9 +587,12 @@ void stop_measurement( FL_OBJECT *a, long b )
 	/* Reset all the devices and finally the GPIB bus */
 
 	tools_clear( );
+	FSC2_MODE = SHUTDOWN;
 	run_end_of_exp_hooks( );
 	if ( need_GPIB )
 		gpib_shutdown( );
+	fsc2_serial_cleanup( );
+	FSC2_MODE = PREPARATION;
 
 	fl_freeze_form( run_form->run );
 	fl_set_object_label( run_form->stop, "Close" );
@@ -667,7 +680,6 @@ static void run_child( void )
 
 
 	I_am = CHILD;
-	FSC2_MODE = EXPERIMENT;
 
     /* Set up pipes for communication with parent process */
 
