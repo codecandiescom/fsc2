@@ -144,3 +144,29 @@ const char *hfs9000_pticks( Ticks ticks )
 {
 	return hfs9000_ptime( hfs9000_ticks2double( ticks ) );
 }
+
+
+/*---------------------------------------------------------------------------
+  Comparison function for two pulses: returns 0 if both pulses are inactive,
+  -1 if only the second pulse is inactive or starts at a later time and 1 if
+  only the first pulse is inactive pulse or the second pulse starts earlier.
+---------------------------------------------------------------------------*/
+
+int hfs9000_start_compare( const void *A, const void *B )
+{
+	PULSE *a = *( PULSE ** ) A,
+		  *b = *( PULSE ** ) B;
+
+	if ( ! a->is_active )
+	{
+		if ( ! b->is_active )
+			return 0;
+		else
+			return 1;
+	}
+
+	if ( ! b->is_active || a->pos <= b->pos )
+		return -1;
+
+	return 1;
+}

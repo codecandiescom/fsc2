@@ -376,12 +376,18 @@ bool dg2020_prep_cmd( char **cmd, int channel, Ticks address, Ticks length )
 }
 
 
+/*----------------------------------------------------------*/
+/*----------------------------------------------------------*/
+
 void dg2020_set( bool *arena, Ticks start, Ticks len, Ticks offset )
 {
 	memset( ( void * ) ( arena + offset + start ),
 			( int ) SET, len * sizeof( bool ) );
 }
 
+
+/*----------------------------------------------------------*/
+/*----------------------------------------------------------*/
 
 int dg2020_diff( bool *old, bool *new, Ticks *start, Ticks *length )
 {

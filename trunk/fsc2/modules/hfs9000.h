@@ -58,6 +58,8 @@ Var *pulser_lock_keyboard( Var *v );
 
 #define MAX_PULSER_BITS       65536        // maximum number of bits in channel
 
+#define HFS9000_TRIG_OUT          0
+
 
 #define START ( ( bool ) 1 )
 #define STOP  ( ( bool ) 0 )
@@ -87,7 +89,6 @@ typedef struct _F_ {
 	bool is_needed;              // set if the function has been assigned
                                  // pulses
 	struct _C_ *channel;         // channel assigned to function
-	bool need_constant;
 
 	int num_pulses;              // number of pulses assigned to the function
 	int num_active_pulses;       // number of pulses currenty in use
@@ -140,7 +141,7 @@ typedef struct {
 	long max_seq_len;        // maximum length of all pulse sequences
 
 	FUNCTION function[ PULSER_CHANNEL_NUM_FUNC ];
-	CHANNEL channel[ MAX_CHANNELS ];
+	CHANNEL channel[ MAX_CHANNELS + 1 ];  /* zero is for TRIGGER_OUT ! */
 
 	int needed_channels;     // number of channels that are going to be needed
 	                         // in the experiment
@@ -232,6 +233,7 @@ bool hfs9000_set_trig_in_level( double voltage );
 bool hfs9000_set_trig_in_slope( int slope );
 bool hfs9000_set_repeat_time( double time );
 
+
 /* These are the functions from hfs9000_pulse.c */
 
 bool hfs9000_new_pulse( long pnum );
@@ -252,7 +254,13 @@ bool hfs9000_change_pulse_length( long pnum, double time );
 bool hfs9000_change_pulse_position_change( long pnum, double time );
 bool hfs9000_change_pulse_length_change( long pnum, double time );
 
-/* Here come the functions from hfs9000_util.c */
+
+/* Functions from hfs9000_init.c */
+
+void dg2020_init_setup( void );
+
+
+/* Functions from hfs9000_util.c */
 
 Ticks hfs9000_double2ticks( double time );
 double hfs9000_ticks2double( Ticks ticks );
@@ -265,3 +273,8 @@ Ticks hfs9000_get_max_seq_len( void );
 void hfs9000_calc_padding( void );
 void hfs9000_set( bool *arena, Ticks start, Ticks len, Ticks offset );
 int hfs9000_diff( bool *old, bool *new, Ticks *start, Ticks *length );
+
+
+/* Functions from hfs9000_gpib.c */
+
+bool hfs9000_init( const char *name );
