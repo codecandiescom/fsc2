@@ -84,19 +84,6 @@ typedef enum
 #define RULBUS_INV_CARD_ADDR      0xff
 
 
-#define RB_GENERIC             0       /* card of unspecified type */
-#define RB8506_PIA             1       /* unsupported */
-#define RB8506_SIFU            2       /* unsupported */
-#define RB8506_VIA             3       /* unsupported */
-#define RB8509_ADC12           4       /* 12-bit ADC card */
-#define RB8510_DAC12           5       /* 12-bit DAC card */
-#define RB8513_TIMEBASE        6       /* unsupported */
-#define RB8514_DELAY           7       /* Delay card */
-#define RB8515_CLOCK           8       /* Clock card */
-#define RB8905_ADC12           9       /* unsupported */
-#define RB9005_AMPLIFIER      10       /* unsupported */
-#define RB9603_MONOCHROMATOR  11       /* unsupported */
-
 #define RULBUS_RB_GENERIC_DEF_ADDR             0x00
 
 #define RULBUS_RB8509_ADC12_DEF_ADDR           0xC0

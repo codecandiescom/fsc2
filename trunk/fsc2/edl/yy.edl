@@ -4,13 +4,14 @@ VARIABLES:
 
 a;
 b = -2.34e7;
-
+F;
 
 EXPERIMENT:
 
+F = get_file( "", "", "", "xxx.dat" );
 
 FOR a = 0.1 : 3.01 : 0.1 {
 	b *= a;
-	fsave( " sdf\#fs \# sd\n" );
-	fsave( "#   #\n", a, b );
+	fsave( F, " sdf\#fs \# sd\n" );
+	fsave( F, "#   #\n", a, b );
 }

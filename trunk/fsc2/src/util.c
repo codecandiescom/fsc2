@@ -1378,26 +1378,14 @@ const char *fsc2_show_fselector( const char *message, const char *dir,
 	   the directory from the user specific configuration file */
 
 	if ( ( dir == NULL || *dir == '\0' ) && Internals.use_def_directory )
-	{
 		dir = Internals.def_directory;
-		Internals.use_def_directory = UNSET;
 
-	}
+	Internals.use_def_directory = UNSET;
 
 	ret = fl_show_fselector( message, dir, pattern, def_name );
 
-	/* Unless no file was chosen (or doesn't contain a slash) remember the
-	   last directory used */
-
-	if ( ret == NULL || *ret == '\0' || ( ep = strrchr( ret, '/' ) ) == NULL )
-		return ret;
-
 	if ( Internals.def_directory != NULL )
 		Internals.def_directory = CHAR_P T_free( Internals.def_directory );
-
-	Internals.def_directory = CHAR_P T_malloc( ep - ret + 1 );
-	strncpy( Internals.def_directory, ret, ep - ret );
-	Internals.def_directory[ ep - ret ] = '\0';
 
 	return ret;
 }

@@ -232,9 +232,9 @@ static int rack_addr( int addr )
 
 	/* Set the rack address for all cards that haven't been assigned one */
 
-	for ( i = 0; i < rulbus_num_cards; i++ )
-		if ( rulbus_card[ i ].rack == RULBUS_INV_RACK_ADDR )
-			rulbus_card[ i ].rack = ( unsigned char ) rack;
+	for ( i = rulbus_num_cards - 1;
+		  rulbus_card[ i ].rack == RULBUS_INV_RACK_ADDR && i >= 0; --i )
+		rulbus_card[ i ].rack = ( unsigned char ) rack;
 
 	return RULBUS_OK;
 }
@@ -284,21 +284,18 @@ static int setup_cards( void )
 	   there are cards, the default rack address isn't to be used up for an
 	   rack without cards). */
 
-	if ( rack == RULBUS_INV_RACK_ADDR )
+	if ( rack == RULBUS_INV_RACK_ADDR &&
+		 rulbus_card[ rulbus_num_cards - 1 ].rack == RULBUS_INV_RACK_ADDR )
 	{
-		for ( i = 0; i < rulbus_num_cards; i++ )
-			if ( rulbus_card[ i ].rack == RULBUS_INV_RACK_ADDR )
-			{
-				if ( ( retval = setup_rack( ) ) != RULBUS_OK )
-					return retval;
-				else
-					break;
-			}
+		if ( ( retval = setup_rack( ) ) != RULBUS_OK )
+			return retval;
 	}
+	else
+		return RULBUS_OK;
 
-	for ( ; i < rulbus_num_cards; i++ )
-		if ( rulbus_card[ i ].rack == RULBUS_INV_RACK_ADDR )
-			rulbus_card[ i ].rack = RULBUS_DEF_RACK_ADDR;
+	for ( i = rulbus_num_cards - 1;
+		  rulbus_card[ i ].rack == RULBUS_INV_RACK_ADDR && i >= 0; --i )
+		rulbus_card[ i ].rack = RULBUS_DEF_RACK_ADDR;
 
 	return RULBUS_OK;
 }

@@ -49,11 +49,15 @@ static volatile sig_atomic_t fsc2_death = 0;
 
 extern FL_resource xresources[ ];    /* from xinit.c */
 extern const char *prog_name;
+extern FILE *fsc2_confin;            /* from fsc2_conf_lexer.l */
+extern int fsc2_confparse( void );   /* from fsc2_conf_parser.y */
 
 
 /* Locally used functions */
 
 static void globals_init( const char *pname );
+static void fsc2_get_conf( void );
+static void fsc2_save_conf( void );
 static bool get_edl_file( char *fname );
 static void check_run( void );
 static void test_machine_type( void );
@@ -340,12 +344,122 @@ static void globals_init( const char *pname )
 }
 
 
-/*------------------------------------------------------------------*/
-/*------------------------------------------------------------------*/
+/*-------------------------------------------------------*/
+/* Read in some configuration information (the only item */
+/* currently getting stored is the last directory used)  */
+/*-------------------------------------------------------*/
 
 static void fsc2_get_conf( void )
 {
+	char *fname;
+	struct passwd *ue;
+	struct stat buf;
+
+
 	Internals.use_def_directory = UNSET;
+	Internals.def_directory = NULL;
+
+	if ( ( ue = getpwuid( getuid( ) ) ) == NULL ||
+		 ue->pw_dir == NULL || *ue->pw_dir == '\0' )
+		 return;
+
+	TRY
+	{
+		fname = get_string( "%s/.fsc2/fsc2_config", ue->pw_dir );
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+		return;
+
+	if ( ( fsc2_confin = fopen( fname, "r" ) ) == NULL )
+	{
+		T_free( fname );
+		return;
+	}
+
+	T_free( fname );
+
+	TRY
+	{
+		fsc2_confparse( );
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+	{
+		if ( Internals.def_directory != NULL )
+			Internals.def_directory = CHAR_P T_free( Internals.def_directory );
+		return;
+	}
+
+	if ( Internals.def_directory == NULL )
+		return;
+	
+	/* Don't use the name when it's either obviously unvalid (i.e. just an
+	   empty string, which shouldn't be possible), a stat() on it fails,
+	   or if it's neither a directory or a symbolic link (we better don't
+	   try to follow symbolic links, we could end up in a loop and it's not
+	   worth trying to implement a detection mechanism) or if not at least
+	   on of the permissions allows read access (we can't know here if the
+	   directory is going to be used for reading only or also writing, so
+	   we only check for the lowest hurdle). */
+
+	if ( *Internals.def_directory == '\0' ||
+		 stat( Internals.def_directory, &buf ) < 0 ||
+		 ( ! S_ISDIR( buf.st_mode ) && ! S_ISLNK( buf.st_mode ) ) ||
+		 ! ( buf.st_mode & ( S_IRUSR | S_IRGRP | S_IROTH ) ) )
+	{
+		Internals.def_directory = CHAR_P T_free( Internals.def_directory );
+		return;
+	}
+
+	Internals.use_def_directory = SET;
+
+	return;
+}
+
+
+/*-------------------------------------*/
+/* Save some configuration information */
+/*-------------------------------------*/
+
+static void fsc2_save_conf( void )
+{
+	char *fname;
+	struct passwd *ue;
+	FILE *fp;
+
+
+	if ( Internals.def_directory != NULL )
+		Internals.def_directory = CHAR_P T_free( Internals.def_directory );
+
+	/* The file selector has never been called, so the configuration file
+	   does not have to be rewritten */
+
+	if ( Internals.use_def_directory )
+		return;
+
+	if ( ( ue = getpwuid( getuid( ) ) ) == NULL ||
+		 ue->pw_dir == NULL || *ue->pw_dir == '\0' )
+		 return;
+
+	TRY
+	{
+		fname = get_string( "%s/.fsc2/fsc2_config", ue->pw_dir );
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+		return;
+
+	if ( ( fp = fopen( fname, "w" ) ) == NULL )
+	{
+		T_free( fname );
+		Internals.def_directory = CHAR_P T_free( Internals.def_directory );
+		return;
+	}
+
+	T_free( fname );
+	fprintf( fp, "DEFAULT_DIRECTORY: %s\n", fl_get_directory( ) );
+	fclose( fp );
 }
 
 
@@ -830,6 +944,8 @@ static void final_exit_handler( void )
 
 	if ( Internals.http_pid > 0 )
 		kill( Internals.http_pid, SIGTERM );
+
+	fsc2_save_conf( );
 
 	/* Do everything necessary to end the program */
 
