@@ -104,6 +104,7 @@ Var *f_getf( Var *var )
 	static char *r = NULL;
 	char *new_r, *m;
 	static FILE_LIST *old_File_List;
+	static bool first_time = SET;
 
 
 	r = NULL;
@@ -160,18 +161,23 @@ Var *f_getf( Var *var )
 
 	if ( s[ 2 ] == NULL || s[ 2 ][ 1 ] == '\0' )
 	{
-		s[ 2 ] = NULL;
-		len = 0;
-
-		do
+		if ( ! strcmp( fl_get_directory( ), "." ) )
 		{
-			len += PATH_MAX;
-			s[ 2 ] = T_realloc( s[ 2 ], len );
-			getcwd( s[ 2 ], len );
-		} while ( s[ 2 ] == NULL && errno == ERANGE );
+			s[ 2 ] = NULL;
+			len = 0;
 
-		if ( s[ 2 ] == NULL )
-			s[ 2 ] = T_strdup( "" );
+			do
+			{
+				len += PATH_MAX;
+				s[ 2 ] = T_realloc( s[ 2 ], len );
+				getcwd( s[ 2 ], len );
+			} while ( s[ 2 ] == NULL && errno == ERANGE );
+
+			if ( s[ 2 ] == NULL )
+				s[ 2 ] = T_strdup( "" );
+		}
+		else
+			s[ 2 ] = T_strdup( fl_get_directory( ) );
 	}
 	else
 		s[ 2 ] = T_strdup( s[ 2 ] );
