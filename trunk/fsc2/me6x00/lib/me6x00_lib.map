@@ -54,7 +54,7 @@ ME6x00_LIB_1.0 {
 			me6x00_perror;
 			me6x00_strerror;
 			me6x00_errlist;
-			int me6x00_nerr;
+			me6x00_nerr;
 
 	local:  *;
 };
