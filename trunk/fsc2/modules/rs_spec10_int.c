@@ -322,7 +322,7 @@ uns16 *rs_spec10_get_pic( void )
 
 	TRY
 	{
-		frame = T_malloc( ( size_t ) size );
+		frame = UNS16_P T_malloc( ( size_t ) size );
 //		  if ( mlock( frame, size ) != 0 )
 //		  {
 //            T_free( frame );

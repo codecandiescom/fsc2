@@ -352,17 +352,20 @@ Var *ccd_camera_exposure_time( Var *v )
 
 Var *ccd_camera_get_picture( Var *v )
 {
-	uns16 *frame;
+	uns16 *frame = NULL;
 	long width, height;
-	long w, mw;
+	long w;
 	unsigned long max_val;
-	Var *nv;
+	Var *nv = NULL;
 	long i, j, k;
-	long *bin_arr, *bap;
+	long *bin_arr = NULL;
+	long *bap;
 	long *cl;
 	uns16 *cf;
 	long *dest;
 	double divs;
+	uns16 bin[ 2 ];
+	uns16 urc[ 2 ];
 
 
 	UNUSED_ARGUMENT( v );
@@ -370,129 +373,151 @@ Var *ccd_camera_get_picture( Var *v )
 	CLOBBER_PROTECT( frame );
 	CLOBBER_PROTECT( width );
 	CLOBBER_PROTECT( height );
+	CLOBBER_PROTECT( nv );
+	CLOBBER_PROTECT( bin_arr );
+	CLOBBER_PROTECT( bin[ X ] );
+	CLOBBER_PROTECT( bin[ Y ] );
+	CLOBBER_PROTECT( urc[ X ] );
+	CLOBBER_PROTECT( urc[ Y ] );
 
-	width  = ( rs_spec10->ccd.roi[ X + 2 ] - rs_spec10->ccd.roi[ X ] + 1 )
-			 / rs_spec10->ccd.bin[ X ];
-	height = ( rs_spec10->ccd.roi[ Y + 2 ] - rs_spec10->ccd.roi[ Y ] + 1 )
-			 / rs_spec10->ccd.bin[ Y ];
+	/* Store the oringinal binning size and the position of the upper right
+	   hand corner, they might become adjusted and need to be reset at the
+	   end */
 
-	/* Make sure the dimensions of the ROI are not smaller than the binning
-	   area, otherwise print a warning an increase the ROI (as symmetrically
-	   as possible) to fit at least the binning area */
+	bin[ X ] = rs_spec10->ccd.bin[ X ];
+	bin[ Y ] = rs_spec10->ccd.bin[ Y ];
+	urc[ X ] = rs_spec10->ccd.roi[ X + 2 ];
+	urc[ Y ] = rs_spec10->ccd.roi[ Y + 2 ];
+
+	/* Calculate how many points the picture will have after binning */
+
+	width  = ( urc[ X ] - rs_spec10->ccd.roi[ X ] + 1 ) / bin[ X ];
+	height = ( urc[ Y ] - rs_spec10->ccd.roi[ Y ] + 1 ) / bin[ Y ];
+
+	/* If the binning area is larger than the ROI reduce the binning sizes
+	   to fit the the ROI sizes (the binning sizes are reset to their original
+	   values before returning from the function) */
 
 	if ( width == 0 )
 	{
-		rs_spec10->ccd.roi[ X ] +=
-			( rs_spec10->ccd.roi[ X + 2 ] - rs_spec10->ccd.roi[ X ] + 1 
-			  - rs_spec10->ccd.bin[ X ] ) / 2;
-		rs_spec10->ccd.roi[ X + 2 ] =
-							 rs_spec10->ccd.roi[ X ] + rs_spec10->ccd.bin[ X ];
-	}
-
-	if ( height == 0 )
-	{
-		rs_spec10->ccd.roi[ Y ] +=
-			( rs_spec10->ccd.roi[ Y + 2 ] - rs_spec10->ccd.roi[ Y ] + 1 
-			  - rs_spec10->ccd.bin[ Y ] ) / 2;
-		rs_spec10->ccd.roi[ Y + 2 ] =
-							 rs_spec10->ccd.roi[ Y ] + rs_spec10->ccd.bin[ Y ];
-	}
-
-	if ( width == 0 || height == 0 )
-		print( SEVERE, "ROI had to be expanded to LLC = (%ld, %ld) and "
-			   "URC = (%ld, %ld) to fit the binning area.\n",
-			   ( long ) rs_spec10->ccd.roi[ X ],
-			   ( long ) rs_spec10->ccd.roi[ X + 2 ],
-			   ( long ) rs_spec10->ccd.roi[ Y ],
-			   ( long ) rs_spec10->ccd.roi[ Y + 2 ] );
-
-	if ( width == 0 )
+		rs_spec10->ccd.bin[ X ] =
+					 rs_spec10->ccd.roi[ X + 2 ] - rs_spec10->ccd.roi[ X ] + 1;
 		width = 1;
-	if ( height == 0 )
-		height = 1;
-
-	if ( FSC2_MODE == EXPERIMENT )
-		frame = rs_spec10_get_pic( );
-	else
-	{
-		max_val = ~ ( uns16 ) 0 + 1;
-
-		frame = T_malloc( width * height * sizeof *frame );
-		for ( i = 0; i < width * height; i++ )
-			frame[ i ] = random( ) % max_val;
 	}
+
+	if ( height == 0 )
+	{
+		rs_spec10->ccd.bin[ Y ] =
+					 rs_spec10->ccd.roi[ Y + 2 ] - rs_spec10->ccd.roi[ Y ] + 1;
+		height = 1;
+	}
+
+	if ( rs_spec10->ccd.bin[ X ] != bin[ X ] ||
+		 rs_spec10->ccd.bin[ Y ] != bin[ Y ] )
+		print( SEVERE, "Binning parameters had to be changed from (%ld, %ld) "
+			   "to (%ld, %ld) because binning area was larger than ROI.\n",
+			   bin[ X ], bin[ Y ], rs_spec10->ccd.bin[ X ],
+			   rs_spec10->ccd.bin[ Y ] );
+
+	/* Reduce the ROI to the area we really need (in case the ROI sizes aren't
+	   integer multiples of the binning sizes) by moving the upper right hand
+	   corner nearer to the lower left hand corner in order to speed up
+	   fetching the picture a bit (before the function returns the ROI is set
+	   back to it's original size) */
+
+	rs_spec10->ccd.roi[ X + 2 ] =
+						 rs_spec10->ccd.roi[ X ] + rs_spec10->ccd.bin[ X ] - 1;
+	rs_spec10->ccd.roi[ Y + 2 ] =
+						 rs_spec10->ccd.roi[ Y ] + rs_spec10->ccd.bin[ Y ] - 1;
+
+	/* Now try to get the picture */
 
 	TRY
 	{
+		if ( FSC2_MODE == EXPERIMENT )
+			frame = rs_spec10_get_pic( );
+		else
+		{
+			max_val = ~ ( uns16 ) 0 + 1;
+
+			frame = UNS16_P T_malloc( width * height * sizeof *frame );
+			for ( i = 0; i < width * height; i++ )
+				frame[ i ] = random( ) % max_val;
+		}
+
 		nv = vars_push_matrix( INT_REF, 2, height, width );
+
+		/* During the test run or for hardware binning or without binning (i.e.
+		   if both binning sizes are 1) we can leave most of the work to the
+		   camera, otherwise we have to do the binning ourselves */
+
+		if ( FSC2_MODE == TEST ||
+			 rs_spec10->ccd.bin_mode == HARDWARE_BINNING ||
+			 ( rs_spec10->ccd.bin[ X ] == 1 && rs_spec10->ccd.bin[ Y ] == 1 ) )
+			for ( cf = frame, i = 0; i < height; i++ )
+			{
+				cl = nv->val.vptr[ i ]->val.lpnt;
+				for ( j = 0; j < width; j++ )
+					*cl++ = ( long ) *cf++;
+			}
+		else
+		{
+			w = width * rs_spec10->ccd.bin[ X ];
+			divs = 1.0 / ( rs_spec10->ccd.bin[ X ] * rs_spec10->ccd.bin[ Y ] );
+
+			bin_arr = LONG_P T_malloc( w * sizeof *bin_arr );
+
+			for ( cf = frame, i = 0; i < height; i++ )
+			{
+				memset( bin_arr, 0, w * sizeof *bin_arr );
+
+				/* Add up all values for the current piece in y-direction */
+
+				for ( bap = bin_arr, j = 0; j < w; j++, bap++ )
+					for ( k = 0; k < rs_spec10->ccd.bin[ Y ]; k++, cf++ )
+						*bap += ( long ) *cf;
+
+				/* Now do the binning in x-direction for all pieces - since
+				   with hardware binning the sum of all pixel counts is
+				   divided by the number of pixels in the binning area we also
+				   have to do this division for the total result of each of
+				   the pieces. */
+
+				for ( bap = bin_arr, dest = nv->val.vptr[ i ]->val.lpnt,
+						  j = 0; j < width; j++, dest++ )
+				{
+					for ( k = 0; k < rs_spec10->ccd.bin[ X ]; k++, bap++ )
+						*dest += *bap;
+					*dest = lrnd( *dest * divs );
+				}
+			}
+
+			bin_arr = LONG_P T_free( bin_arr );
+		}
+
 		TRY_SUCCESS;
 	}
 	OTHERWISE
 	{
-		T_free( frame );
+		if ( bin_arr != NULL )
+			T_free( bin_arr );
+		if ( frame != NULL )
+			T_free( frame );
+		if ( nv != NULL )
+			vars_pop( nv );
+		rs_spec10->ccd.bin[ X ] = bin[ X ];
+		rs_spec10->ccd.bin[ Y ] = bin[ Y ];
+		rs_spec10->ccd.roi[ X + 2 ] = urc[ X ];
+		rs_spec10->ccd.roi[ Y + 2 ] = urc[ X ];
 		RETHROW( );
 	}
 
-	if ( FSC2_MODE == TEST || rs_spec10->ccd.bin_mode == HARDWARE_BINNING ||
-		 ( rs_spec10->ccd.bin[ X ] == 1 && rs_spec10->ccd.bin[ Y ] == 1 ) )
-		for ( cf = frame, i = 0; i < height; i++ )
-		{
-			cl = nv->val.vptr[ i ]->val.lpnt;
-			for ( j = 0; j < width; j++ )
-				*cl++ = ( long ) *cf++;
-		}
-	else                         /* ...we have to do the binning ourselves */
-	{
-		w = width * rs_spec10->ccd.bin[ X ];
-		mw = rs_spec10->ccd.roi[ X + 2 ] - rs_spec10->ccd.roi[ X ] + 1;	   
-		divs = 1.0 / ( rs_spec10->ccd.bin[ X ] * rs_spec10->ccd.bin[ Y ] );
-
-		TRY
-		{
-			bin_arr = T_malloc( w * sizeof *bin_arr );
-			TRY_SUCCESS;
-		}
-		OTHERWISE
-		{
-			T_free( frame );
-			RETHROW( );
-		}
-
-		for ( cf = frame, i = 0; i < height; i++ )
-		{
-			memset( bin_arr, 0, w * sizeof *bin_arr );
-
-			/* Add up all values for the current piece of the whole area
-			   in y-direction */
-
-			for ( bap = bin_arr, j = 0; j < w; j++, bap++ )
-				for ( k = 0; k < rs_spec10->ccd.bin[ Y ]; k++, cf++ )
-					*bap += ( long ) *cf;
-
-			/* Skip the values in the data that don't fall into one of
-			   the pieces (i.e. when the x-binning size isn't an integer
-			   multiple of the x-ROI size */
-
-			cf += mw - w;
-
-			/* Now do the binning in x-direction for all pieces - since with
-			   hardware binning we get the total sum devided by the number
-			   of pixels in the binning area we also have to do this
-			   division for the total result of each of the pieces. */
-
-			for ( bap = bin_arr, dest = nv->val.vptr[ i ]->val.lpnt,
-				  j = 0; j < width; j++, dest++ )
-			{
-				for ( k = 0; k < rs_spec10->ccd.bin[ X ]; k++, bap++ )
-					*dest += *bap;
-				*dest = lrnd( *dest * divs );
-			}
-		}
-
-		T_free( bin_arr );
-	}
-
 	T_free( frame );
+
+	rs_spec10->ccd.bin[ X ] = bin[ X ];
+	rs_spec10->ccd.bin[ Y ] = bin[ Y ];
+	rs_spec10->ccd.roi[ X + 2 ] = urc[ X ];
+	rs_spec10->ccd.roi[ Y + 2 ] = urc[ X ];
 
 	return nv;
 }
