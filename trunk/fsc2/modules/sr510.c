@@ -58,7 +58,7 @@ static double tcs[ ] = { 1.0e-3, 3.0e-3, 1.0e-2, 3.0e-2, 1.0e-1, 3.0e-1,
 
 /* declaration of all functions used only in this file */
 
-static bool lockin_init( const char *name, int *device );
+static bool lockin_init( const char *name );
 static double sr510_get_data( void );
 static double sr510_get_adc_data( long channel );
 static double sr510_get_sens( void );
@@ -107,7 +107,7 @@ int sr510_exp_hook( void )
 
 	/* Initialize the lock-in */
 
-	if ( ! lockin_init( DEVICE_NAME, &sr510.device ) )
+	if ( ! lockin_init( DEVICE_NAME ) )
 	{
 		eprint( FATAL, "sr510: Can't access the lock-in amplifier.\n" );
 		THROW( EXCEPTION );
@@ -521,24 +521,24 @@ Var *lockin_phase( Var *v )
 /* it can be accessed by asking it to send its status byte.         */
 /*------------------------------------------------------------------*/
 
-bool lockin_init( const char *name, int *device )
+bool lockin_init( const char *name )
 {
 	char buffer[ 20 ];
 	long length = 20;
 
 
-	if ( gpib_init_device( name, device ) == FAILURE )
+	if ( gpib_init_device( name, &sr510.device ) == FAILURE )
         return FAIL;
 
 	/* Ask lock-in to send status byte and test if it does */
 
-	if ( gpib_write( *device, "Y\n", 2 ) == FAILURE ||
-		 gpib_read( *device, buffer, &length ) == FAILURE )
+	if ( gpib_write( sr510.device, "Y\n", 2 ) == FAILURE ||
+		 gpib_read( sr510.device, buffer, &length ) == FAILURE )
 		return FAIL;
 
 	/* Lock the keyboard */
 
-	if ( gpib_write( *device, "I1\n", 3 ) == FAILURE )
+	if ( gpib_write( sr510.device, "I1\n", 3 ) == FAILURE )
 		return FAIL;
 
 	/* If sensitivity, time constant or phase were set in one of the
