@@ -673,7 +673,6 @@ Var *magnet_command( Var *v )
 
 static bool ips120_20_init( const char *name )
 {
-	char cmd[ 100 ];
 	char reply[ 100 ];
 	long length;
 	double cur_limit;
@@ -800,7 +799,6 @@ static bool ips120_20_init( const char *name )
 
 static void ips120_20_to_local( void )
 {
-	char cmd[ 20 ];
 	char reply[ 100 ];
 
 
@@ -1148,7 +1146,7 @@ static double ips120_20_current_check( double current )
 		{
 			print( SEVERE, "Field of %f G is too high, using maximum field of "
 				   "%f G instead.\n",
-				   current * F2C:RATIO, ips120_20.max_current * F2C_RATIO );
+				   current * F2C_RATIO, ips120_20.max_current * F2C_RATIO );
 			return MAX_CURRENT;
 		}
 	}

@@ -49,6 +49,7 @@
 * hjs_sfc::         Simple Field Control (HJS_SFC, Steinhoff group, Osnabrueck)
 * hjs_fc::          Field Control (HJS_FC, Steinhoff group, Osnabrueck)
 * ips20_4::         Oxford Magnet Sweep Power Supply IPS20-4
+* ips20_4::         Oxford Magnet Sweep Power Supply IPS120-10
 * keithley228a::    Magnet Power Supply Keithley 228A (Berlin W-Band)
 * kontron4060::     Kontron 4060 Voltmeter
 * lakeshore330::    Lake Shore 330 Temperature Controller
@@ -1069,7 +1070,7 @@ automatically for this module.
 @c #############################################################
 
 
-@node ips20_4, keithley228a, hjs_fc, Device Reference
+@node ips20_4, ips120_10, hjs_fc, Device Reference
 @iftex
 @subheading Oxford Magnet Sweep Power Supply IPS20-4
 @end iftex
@@ -1110,7 +1111,42 @@ temperature controller transfering data between GPIB and Oxford ISOBUS.
 @c #############################################################
 
 
-@node keithley228a, kontron4060, ips20_4, Device Reference
+@node ips120_10, keithley228a, ips20_4, Device Reference
+@iftex
+@subheading Oxford Magnet Sweep Power Supply IPS120-10
+@end iftex
+@ifnottex
+@section Oxford Magnet Sweep Power Supply IPS120-10
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{ips20_4}
+
+@paragraphindent 0
+@strong{Description}: Power supply for the Oxford superconducting
+magnet used for Leiden @w{275 GHz} spektrometer.
+
+@paragraphindent 0
+@strong{Controlled via}: GPIB bus (IEEE 488)
+
+@paragraphindent 0
+@strong{Supported functions}:
+@multitable @columnfractions .45 .45
+@item @code{magnet_name()}              @tab @ref{magnet_name}
+@item @code{magnet_setup()}             @tab @ref{magnet_setup}
+@item @code{get_field()}                @tab @ref{get_field}
+@item @code{set_field()}                @tab @ref{set_field}
+@item @code{magnet_sweep_rate()}        @tab @ref{magnet_sweep_rate}
+@item @code{magnet_sweep()}             @tab @ref{magnet_sweep}
+@item @code{reset_field()}              @tab @ref{reset_field}
+@item @code{magnet_goto_field_on_end}   @tab @ref{magnet_goto_field_on_end}
+@end multitable
+
+
+@c #############################################################
+
+
+@node keithley228a, kontron4060, ips120_10, Device Reference
 @iftex
 @subheading Magnet Power Supply Keithley 228A (Berlin W-Band)
 @end iftex

@@ -78,6 +78,7 @@ config/hp8647a.table
 config/hp8648b.conf
 config/hp8648b.table
 config/hp8672a.conf
+config/ips120_10.conf
 config/ips20_4.conf
 config/keithley228a.conf
 config/kontron4060.conf
@@ -226,6 +227,7 @@ modules/hp8672a.h
 modules/hp8672a_gpib.c
 modules/hp8672a_lexer.l
 modules/hp8672a_util.c
+modules/ips120_10.c
 modules/ips20_4.c
 modules/keithley228a.c
 modules/kontron4060.c
