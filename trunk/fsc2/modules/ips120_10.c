@@ -1452,7 +1452,7 @@ static long ips120_10_talk( const char *message, char *reply, long length )
 			ips120_10_comm_failure( );
 	}
 
-	/* If the first character of the reply isn't equal to the third character
+	/* If the first character of the reply isn't equal to the first character
 	   of the message we probably read the reply for a previous command and
 	   try to read again... */
 
