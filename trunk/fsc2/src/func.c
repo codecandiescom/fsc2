@@ -935,10 +935,11 @@ void f_wait_alarm_handler( int sig_type )
 /*-------------------------------------------------------------------------*/
 /* f_init_display() has to be called to initialize the display system. It  */
 /* expects a variable number of arguments but at least two. The first arg- */
-/* ument has to be the dimensionality, 2 or 3. The Second argument is the  */
+/* ument has to be the dimensionality, 2 or 3. The second argument is the  */
 /* number of points in x-direction, and for 3D graphics the third must be  */
-/* the number of points in y-direction. Then follow optional label strings */
-/* for the x- and y-axes.                                                  */
+/* the number of points in y-direction. If the number of points isn't      */
+/* known a 0 has to be used. Then follow optional label strings for the x- */
+/* and y-axis.                                                             */
 /*-------------------------------------------------------------------------*/
 
 Var *f_init_display( Var *v )
@@ -984,6 +985,13 @@ Var *f_init_display( Var *v )
 	else
 		nx = rnd( v->val.dval );
 
+	if ( nx < 0 )
+	{
+		eprint( FATAL, "%s:%ld: Negative number of points in x-direction - "
+				"use 0 if the number isn't known yet.\n", Fname, Lc );
+		THROW( EXCEPTION );
+	}
+
 	v = v->next;
 
 	if ( dim == 3 )                  /* for 3D get # of points in y-direction*/
@@ -1001,6 +1009,13 @@ Var *f_init_display( Var *v )
 			ny = v->val.lval;
 		else
 			ny = rnd( v->val.dval );
+
+		if ( ny < 0 )
+		{
+			eprint( FATAL, "%s:%ld: Negative number of points in y-direction "
+					"- use 0 if the number isn't known yet.\n", Fname, Lc );
+			THROW( EXCEPTION );
+		}
 
 		v = v->next;
 	}
@@ -1032,7 +1047,7 @@ Var *f_init_display( Var *v )
 
 
 /*-----------------------------------------------------------------*/
-/*  */
+/* f_display() is used to send new data to the display system. */
 /*-----------------------------------------------------------------*/
 
 Var *f_display( Var *v )
