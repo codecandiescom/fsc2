@@ -33,6 +33,7 @@ typedef  unsigned char  bool;
 #include "variables.h"
 #include "func.h"
 #include "phases.h"
+#include "pulse.h"
 #include "ppcheck.h"
 
 
@@ -122,7 +123,7 @@ ASSIGNMENTS assignment[ PULSER_CHANNEL_PHASE_Y + 1 ];
 Phase_Sequence PSeq[ MAX_PHASE_SEQ_LEN ];
 Acquisition_Sequence ASeq[ 2 ];
 
-Pulse *Plist;
+Pulse *Plist = NULL;
 
 #else
 
