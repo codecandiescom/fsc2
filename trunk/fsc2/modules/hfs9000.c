@@ -570,7 +570,7 @@ Var *pulser_channel_state( Var *v )
 	v = vars_pop( v );
 	if ( v == NULL )
 		return vars_push( INT_VAR,
-						  hfs9000.channel[ channel ].state ? 1L : 0L ) );
+						  hfs9000.channel[ channel ].state ? 1L : 0L );
 
 	if ( v->type == INT_VAR )
 		state = v->val.lval != 0 ? SET : UNSET;
