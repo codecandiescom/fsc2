@@ -89,7 +89,7 @@ typedef struct {
 	long ny;                /* points in y-direction */
 	double rwc_start[ 3 ];
 	double rwc_delta[ 3 ];
-	char *label[ 2 ];       /* label for x- and y-axis */
+	char *label[ 3 ];       /* label for x-, y- and z-axis */
 
 	double rw_y_min;        /* minimum of real world y coordinates */
 	double rw_y_max;        /* maximum of real world y coordinates */
@@ -100,6 +100,7 @@ typedef struct {
 
 	Canvas x_axis;
 	Canvas y_axis;
+	Canvas z_axis;
 	Canvas canvas;
 
 	int drag_canvas;
@@ -122,7 +123,9 @@ typedef struct {
 
 	int start[ 3 ];
 
-	long axis_curve;
+	Pixmap label_pm[ 3 ];
+	unsigned int label_w[ 3 ],
+		         label_h[ 3 ];
 } Graphics;
 
 

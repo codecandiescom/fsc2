@@ -288,7 +288,6 @@ void release_handler( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
 		}			
 
 		redraw_all( );
-//		redraw_canvas( &G.canvas );
 	}
 
 	if ( ! scale_changed || c != &G.canvas )
@@ -382,6 +381,10 @@ void motion_handler( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
 			}
 
 			redraw_canvas( &G.canvas );
+			if ( G.drag_canvas & 1 )
+				redraw_canvas( &G.x_axis );
+			if ( G.drag_canvas & 2 )
+				redraw_canvas( &G.y_axis );
 			break;
 
 		case 3 : case 5 :               /* left and (middle or right) button */
@@ -416,26 +419,26 @@ bool change_x_range( Canvas *c )
 	double x1, x2;
 
 
-	if ( abs( G.start[ X ] - c->ppos[ X ] ) > 4 )
+	if ( abs( G.start[ X ] - c->ppos[ X ] ) <= 4 )
+		return UNSET;
+
+	for ( i = 0; i < G.nc; i++ )
 	{
-		for ( i = 0; i < G.nc; i++ )
-		{
-			cv = G.curve[ i ];
+		cv = G.curve[ i ];
 
-			if ( ! cv->active )
-				continue;
+		if ( ! cv->active )
+			continue;
 
-			save_scale_state( cv );
+		save_scale_state( cv );
 
-			x1 = G.start[ X ] / cv->s2d[ X ] - cv->shift[ X ];
-			x2 = c->ppos[ X ] / cv->s2d[ X ] - cv->shift[ X ];
+		x1 = G.start[ X ] / cv->s2d[ X ] - cv->shift[ X ];
+		x2 = c->ppos[ X ] / cv->s2d[ X ] - cv->shift[ X ];
 
-			cv->shift[ X ] = - d_min( x1, x2 );
-			cv->s2d[ X ] = ( double ) ( G.canvas.w - 1 ) / fabs( x1 - x2 );
+		cv->shift[ X ] = - d_min( x1, x2 );
+		cv->s2d[ X ] = ( double ) ( G.canvas.w - 1 ) / fabs( x1 - x2 );
 
-			recalc_XPoints_of_curve( cv );
-			scale_changed = SET;
-		}
+		recalc_XPoints_of_curve( cv );
+		scale_changed = SET;
 	}
 
 	return scale_changed;
@@ -453,28 +456,28 @@ bool change_y_range( Canvas *c )
 	double y1, y2;
 
 
-	if ( abs( G.start[ Y ] - c->ppos[ Y ] ) > 4 )
+	if ( abs( G.start[ Y ] - c->ppos[ Y ] ) <= 4 )
+		return UNSET;
+
+	for ( i = 0; i < G.nc; i++ )
 	{
-		for ( i = 0; i < G.nc; i++ )
-		{
-			cv = G.curve[ i ];
+		cv = G.curve[ i ];
 
-			if ( ! cv->active )
-				continue;
+		if ( ! cv->active )
+			continue;
 
-			save_scale_state( cv );
+		save_scale_state( cv );
 
-			y1 = ( ( double ) G.canvas.h - 1.0 - G.start[ Y ] ) / cv->s2d[ Y ]
-				 - cv->shift[ Y ];
-			y2 = ( ( double ) G.canvas.h - 1.0 - c->ppos[ Y ] ) / cv->s2d[ Y ]
-				 - cv->shift[ Y ];
+		y1 = ( ( double ) G.canvas.h - 1.0 - G.start[ Y ] ) / cv->s2d[ Y ]
+			 - cv->shift[ Y ];
+		y2 = ( ( double ) G.canvas.h - 1.0 - c->ppos[ Y ] ) / cv->s2d[ Y ]
+			 - cv->shift[ Y ];
 
-			cv->shift[ Y ] = - d_min( y1, y2 );
-			cv->s2d[ Y ] = ( double ) ( G.canvas.h - 1 ) / fabs( y1 - y2 );
+		cv->shift[ Y ] = - d_min( y1, y2 );
+		cv->s2d[ Y ] = ( double ) ( G.canvas.h - 1 ) / fabs( y1 - y2 );
 
-			recalc_XPoints_of_curve( cv );
-			scale_changed = SET;
-		}
+		recalc_XPoints_of_curve( cv );
+		scale_changed = SET;
 	}
 
 	return scale_changed;
@@ -549,32 +552,39 @@ bool zoom_x( Canvas *c )
 	double px;
 
 
-	if ( abs( G.start[ X ] - c->ppos[ X ] ) > 4 )
+	if ( abs( G.start[ X ] - c->ppos[ X ] ) <= 4 )
+		return UNSET;
+
+	for ( i = 0; i < G.nc; i++ )
 	{
-		for ( i = 0; i < G.nc; i++ )
-		{
-			cv = G.curve[ i ];
+		cv = G.curve[ i ];
 
-			if ( ! cv->active )
-				continue;
+		if ( ! cv->active )
+			continue;
 
-			save_scale_state( cv );
+		save_scale_state( cv );
 
-			px = G.start[ X ] / cv->s2d[ X ] - cv->shift[ X ];
-			if ( G.start[ X ] > c->ppos[ X ] )
-				cv->s2d[ X ] *= d_min( 4.0,
+		px = G.start[ X ] / cv->s2d[ X ] - cv->shift[ X ];
+
+		/* If the mouse was moved to lower values zoom the display by a factor
+		   of up to 4 (if the mouse was moved over the whole length of the
+		   scale) while keeping the point the move was started at the same
+		   position. If the mouse was movep upwards demagnify by the inverse
+		   factor. */
+
+		if ( G.start[ X ] > c->ppos[ X ] )
+			cv->s2d[ X ] *= d_min( 4.0,
 					   1.0 + 3.0 * ( double ) ( G.start[ X ] - c->ppos[ X ] ) /
 								                       ( double ) G.x_axis.w );
-			else
-				cv->s2d[ X ] /= d_min( 4.0,
+		else
+			cv->s2d[ X ] /= d_min( 4.0,
 					   1.0 + 3.0 * ( double ) ( c->ppos[ X ] - G.start[ X ] ) /
 								                       ( double ) G.x_axis.w );
 
-			cv->shift[ X ] = G.start[ X ] / cv->s2d[ X ] - px;
+		cv->shift[ X ] = G.start[ X ] / cv->s2d[ X ] - px;
 
-			recalc_XPoints_of_curve( cv );
-			scale_changed = SET;
-		}
+		recalc_XPoints_of_curve( cv );
+		scale_changed = SET;
 	}
 
 	return scale_changed;
@@ -592,34 +602,44 @@ bool zoom_y( Canvas *c )
 	double py;
 
 
-	if ( abs( G.start[ Y ] - c->ppos[ Y ] ) > 4 )
+	if ( abs( G.start[ Y ] - c->ppos[ Y ] ) <= 4 )
+		return UNSET;
+
+	for ( i = 0; i < G.nc; i++ )
 	{
-		for ( i = 0; i < G.nc; i++ )
-		{
-			cv = G.curve[ i ];
+		cv = G.curve[ i ];
 
-			if ( ! cv->active )
-				continue;
+		if ( ! cv->active )
+			continue;
 
-			save_scale_state( cv );
+		save_scale_state( cv );
 
-			py = ( ( double ) G.canvas.h - 1.0 - G.start[ Y ] ) / cv->s2d[ Y ]
-                 - cv->shift[ Y ];
-			if ( G.start[ Y ] < c->ppos[ Y ] )
-				cv->s2d[ Y ] *= d_min( 4.0,
+		/* Get the value in the interval [0, 1] corresponding to the mouse
+		   posaition */
+
+		py = ( ( double ) G.canvas.h - 1.0 - G.start[ Y ] ) / cv->s2d[ Y ]
+			 - cv->shift[ Y ];
+
+		/* If the mouse was moved to lower values zoom the display by a factor
+		   of up to 4 (if the mouse was moved over the whole length of the
+		   scale) while keeping the point the move was started at the same
+		   position. If the mouse was movep upwards demagnify by the inverse
+		   factor. */
+
+		if ( G.start[ Y ] < c->ppos[ Y ] )
+			cv->s2d[ Y ] *= d_min( 4.0,
 					   1.0 + 3.0 * ( double ) ( c->ppos[ Y ] - G.start[ Y ] ) /
 								                       ( double ) G.y_axis.h );
-			else
-				cv->s2d[ Y ] /= d_min( 4.0,
+		else
+			cv->s2d[ Y ] /= d_min( 4.0,
 					   1.0 + 3.0 * ( double ) ( G.start[ Y ] - c->ppos[ Y ] ) /
 								                       ( double ) G.y_axis.h );
 
-			cv->shift[ Y ] = ( ( double ) G.canvas.h - 1.0 - G.start[ Y ] ) /
+		cv->shift[ Y ] = ( ( double ) G.canvas.h - 1.0 - G.start[ Y ] ) /
 				                                             cv->s2d[ Y ] - py;
 
-			recalc_XPoints_of_curve( cv );
-			scale_changed = SET;
-		}
+		recalc_XPoints_of_curve( cv );
+		scale_changed = SET;
 	}
 
 	return scale_changed;
@@ -699,8 +719,8 @@ bool zoom_xy( Canvas *c )
 
 /*-----------------------------------------------------------------------*/
 /* This is basically a simplified version of `recalc_XPoints_of_curve()' */
-/* because we need to do much less calculations, i.e. just add an offset */
-/* to all XPoints instead of going through all the scalings...           */
+/* because we need to do much less calculations, i.e. just adding an     */
+/* offset to all XPoints instead of going through all the scalings...    */
 /*-----------------------------------------------------------------------*/
 
 void shift_XPoints_of_curve( Canvas *c, Curve_1d *cv )
@@ -747,8 +767,10 @@ void shift_XPoints_of_curve( Canvas *c, Curve_1d *cv )
 				cv->right = SET;
 			if ( cv->xpoints[ k ].y < 0 )
 				cv->up = SET;
-			if ( cv->xpoints[ k++ ].y >= ( int ) G.canvas.h )
+			if ( cv->xpoints[ k ].y >= ( int ) G.canvas.h )
 				cv->down = SET;
+
+			k++;
 		}
 	}
 }

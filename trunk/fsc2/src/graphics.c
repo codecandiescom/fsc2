@@ -18,6 +18,7 @@
 
 
 static void G_struct_init( void );
+static void create_label_pixmap( int coord );
 static void setup_canvas( Canvas *c, FL_OBJECT *obj );
 static void canvas_off( Canvas *c, FL_OBJECT *obj );
 static void create_pixmap( Canvas *c );
@@ -26,6 +27,7 @@ static void fs_rescale_1d( void );
 static void fs_rescale_2d( void );
 static void redraw_axis( int coord );
 static void make_scale( Curve_1d *cv, Canvas *c, int coord );
+static void make_label_string( char *lstr, double num, int res );
 
 
 /*----------------------------------------------------------------------*/
@@ -42,6 +44,17 @@ void start_graphics( void )
 
 	run_form = create_form_run( );
 	fl_set_object_helper( run_form->stop, "Stop the running program" );
+	fl_set_object_helper( run_form->undo_button, "Undo last rescaling" );
+	fl_set_object_helper( run_form->full_scale_button,
+						  "Switch off automatic rescaling" );
+	fl_set_object_helper( run_form->curve_1_button, 
+						  "Extempt curve 1 from rescaling" );
+	fl_set_object_helper( run_form->curve_2_button, 
+						  "Extempt curve 2 from rescaling" );
+	fl_set_object_helper( run_form->curve_3_button, 
+						  "Extempt curve 3 from rescaling" );
+	fl_set_object_helper( run_form->curve_4_button, 
+						  "Extempt curve 4 from rescaling" );
 
 	/* fdesign is unable to set the box type attributes for canvases... */
 
@@ -93,7 +106,10 @@ void start_graphics( void )
 
 	if ( G.is_init )
 	{
-		G.font = XLoadQueryFont( G.d, "lucidasanstypewriter-14" );
+		G.font = XLoadQueryFont( G.d, "*-lucida-bold-r-normal-sans-14-*" );
+		if ( G.font == NULL )
+			G.font = XLoadQueryFont( G.d, "lucidasanstypewriter-14" );
+
 		if ( G.font == NULL )
 			G.font = XLoadQueryFont( G.d, "9x15" );
 
@@ -173,8 +189,6 @@ void G_struct_init( void )
 	G.is_fs = SET;
 	G.scale_changed =  SET;
 
-	G.axis_curve = 0;
-
 	G.rw_y_min = HUGE_VAL;
 	G.rw_y_max = - HUGE_VAL;
 	G.is_scale_set = UNSET;
@@ -225,7 +239,8 @@ void G_struct_init( void )
 		/* Create a GC for the font and set the appropriate color */
 
 		cv->font_gc = XCreateGC( G.d, FL_ObjWin( G.canvas.obj ), 0, 0 );
-		XSetFont( G.d, cv->font_gc, G.font->fid );
+		if ( G.font != NULL )
+			XSetFont( G.d, cv->font_gc, G.font->fid );
 		XSetForeground( G.d, cv->font_gc, fl_get_pixel( G.colors[ i ] ) );
 		XSetBackground( G.d, cv->font_gc, fl_get_pixel( FL_BLACK ) );
 
@@ -240,7 +255,62 @@ void G_struct_init( void )
 		cv->can_undo = UNSET;
 	}
 
+	if ( G.label[ Y ] != NULL && G.font != NULL )
+		create_label_pixmap( Y );
+
 	first_time = UNSET;
+}
+
+
+/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*/
+
+void create_label_pixmap( int coord )
+{
+	Pixmap pm;
+	int width, height;
+	Canvas *c;
+	int i, j, k;
+
+	
+	assert( coord == Y || coord == Z );
+
+	if ( coord == Y )
+		c = &G.y_axis;
+	else
+		c = &G.z_axis;
+
+	/* Get size for intermediate pixmap */
+
+	width = XTextWidth( G.font, G.label[ coord ],
+						strlen( G.label[ coord ] ) ) + 10;
+	height = G.font_asc + G.font_desc + 5;
+
+	/* Create the intermediate pixmap, fill with color of the axis canvas and
+	   draw  the text */
+
+    pm = XCreatePixmap( G.d, FL_ObjWin( c->obj ), width, height,
+						fl_get_canvas_depth( c->obj ) );
+
+	XFillRectangle( G.d, pm, c->gc, 0, 0, width, height );
+	XDrawString( G.d, pm, c->font_gc, 5, height - 1 - G.font_desc, 
+				 G.label[ coord ], strlen( G.label[ coord ] ) );
+
+	/* Create the real pixmap for the label */
+
+    G.label_pm[ coord ] = XCreatePixmap( G.d, FL_ObjWin( c->obj ), height,
+										width, fl_get_canvas_depth( c->obj ) );
+	G.label_w[ coord ] = ( unsigned int ) height;
+	G.label_h[ coord ] = ( unsigned int ) width;
+
+	/* Now copy the contents of the intermediate pixmap to the final pixmap
+	   but rotated by 90 degree ccw */
+
+	for ( i = 0, k = width - 1; i < width; k--, i++ )
+		for ( j = 0; j < height; j++ )
+			XCopyArea( G.d, pm, G.label_pm[ coord ], c->gc, i, j, 1, 1, j, k );
+
+	XFreePixmap( G.d, pm );
 }
 
 
@@ -274,6 +344,7 @@ void stop_graphics( void )
 void graphics_free( void )
 {
 	long i;
+	int coord;
 	Curve_1d *cv;
 
 
@@ -306,6 +377,12 @@ void graphics_free( void )
 			}
 		}
 	}
+
+	if ( G.font != NULL )
+		for ( coord = Y; coord <= Z; coord++ )
+			if ( G.label[ coord ] != NULL )
+				XFreePixmap( G.d, G.label_pm[ coord ] );
+
 }
 
 
@@ -598,16 +675,14 @@ void redraw_axis( int coord )
 	}
 	else
 	{
-		c = &G.y_axis;
-/*
-		if ( G.label[ Y ] != NULL && G.font != NULL )
-		{
-			width = XTextWidth( G.font, G.label[ Y ], strlen( G.label[ Y ] ) );
-			XDrawString( G.d, c->pm, c->font_gc, c->w - width - 5,
-						 c->h - 5 - G.font_desc,
-						 G.label[ Y ], strlen( G.label[ Y ] ) );
-		}
-*/
+		if ( coord == Y )
+			c = &G.y_axis;
+		else
+			c = &G.z_axis;
+		
+		if ( G.label[ coord ] != NULL && G.font != NULL )
+			XCopyArea( G.d, G.label_pm[ coord ], c->pm, c->gc, 0, 0,
+					   G.label_w[ coord ], G.label_h[ coord ], 0, 0 );
 	}
 
 	if ( ! G.is_scale_set )                   /* no scaling -> no scale */
@@ -650,12 +725,15 @@ void make_scale( Curve_1d *cv, Canvas *c, int coord )
 		   rwc_start_coarse;   /* rwc value of first large tick */
 	double rwc_coarse;
 	short x, y;
+	char lstr[ 128 ];
+	int width;
+	short last = -1000;
 
 
 	/* The distance between the smallest ticks should be about 8 points -
 	   calculate the corresponding delta in real word units */
 
-	rwc_delta = 8.0 * fabs( G.rwc_delta[ coord ] ) / cv->s2d[ coord ];
+	rwc_delta = 7.0 * fabs( G.rwc_delta[ coord ] ) / cv->s2d[ coord ];
 
 	/* Now scale this distance to the interval [ 1, 10 [ */
 
@@ -672,19 +750,19 @@ void make_scale( Curve_1d *cv, Canvas *c, int coord )
 		coarse_factor = 25;
 		rwc_delta = 2.0 * order;
 	}
-	else if ( rwc_delta <= 3.0 )  /* in ] 2, 3 ] -> units of 2.5 */
+	else if ( rwc_delta <= 3.0 )  /* in ] 2, 2.5 ] -> units of 2.5 */
 	{
 		medium_factor = 4;
 		coarse_factor = 20;
 		rwc_delta = 2.5 * order;
 	}
-	else if ( rwc_delta <= 6.0 )  /* in ] 3, 6 ] -> units of 5 */
+	else if ( rwc_delta <= 6.0 )  /* in ] 3, 5 ] -> units of 5 */
 	{
 		medium_factor = 2;
 		coarse_factor = 10;
 		rwc_delta = 5.0 * order;
 	}
-	else                          /* in ] 6, 10 [ -> units of 10 */
+	else                          /* in ] 5, 10 [ -> units of 10 */
 	{
 		medium_factor = 5;
 		coarse_factor = 10;
@@ -703,13 +781,15 @@ void make_scale( Curve_1d *cv, Canvas *c, int coord )
 
 	rwc_start = G.rwc_start[ coord ]
 		        - cv->shift[ coord ] * G.rwc_delta[ coord ];
+	if ( G.rwc_delta[ coord ] < 0 )
+		rwc_delta *= -1.0;
 
 	modf( rwc_start / rwc_delta, &rwc_start_fine );
 	rwc_start_fine *= rwc_delta;
 
 	d_start_fine = cv->s2d[ coord ] * ( rwc_start_fine - rwc_start ) /
 		                                                  G.rwc_delta[ coord ];
-	if ( rnd( d_start_fine ) < 0 )
+	if ( lround( d_start_fine ) < 0 )
 		d_start_fine += d_delta_fine;
 
 
@@ -720,10 +800,10 @@ void make_scale( Curve_1d *cv, Canvas *c, int coord )
 
 	d_start_medium = cv->s2d[ coord ] * ( rwc_start_medium - rwc_start ) /
 			                                              G.rwc_delta[ coord ];
-	if ( rnd( d_start_medium ) < 0 )
+	if ( lround( d_start_medium ) < 0 )
 		d_start_medium += medium_factor * d_delta_fine;
 
-	medium = rnd( ( d_start_fine - d_start_medium ) / d_delta_fine );
+	medium = lround( ( d_start_fine - d_start_medium ) / d_delta_fine );
 
 	/* Calculate start index for first large tick */
 
@@ -732,10 +812,13 @@ void make_scale( Curve_1d *cv, Canvas *c, int coord )
 
 	d_start_coarse = cv->s2d[ coord ] * ( rwc_start_coarse - rwc_start ) /
 			                                              G.rwc_delta[ coord ];
-	if ( rnd( d_start_coarse ) < 0 )
+	if ( lround( d_start_coarse ) < 0 )
+	{
 		d_start_coarse += coarse_factor * d_delta_fine;
+		rwc_start_coarse += coarse_factor * rwc_delta;
+	}
 
-	coarse = rnd( ( d_start_fine - d_start_coarse ) / d_delta_fine );
+	coarse = lround( ( d_start_fine - d_start_coarse ) / d_delta_fine );
 
 
 	/* Now, finally we got everything we need to draw the axis... */
@@ -745,7 +828,7 @@ void make_scale( Curve_1d *cv, Canvas *c, int coord )
 	if ( coord == X )
 	{
 		y = 20;
-		XDrawLine( G.d, c->pm, cv->gc, 0, y, c->w - 1, y );
+		XFillRectangle( G.d, c->pm, cv->gc, 0, y - 2, c->w, 3 );
 
 		for ( cur_p = d_start_fine; cur_p < c->w; 
 			  medium++, coarse++, cur_p += d_delta_fine )
@@ -754,18 +837,33 @@ void make_scale( Curve_1d *cv, Canvas *c, int coord )
 
 			if ( coarse % coarse_factor == 0 )
 			{
-				XDrawLine( G.d, c->pm, cv->gc, x, y + 3, x, y - 14 );
+				XDrawLine( G.d, c->pm, c->font_gc, x, y + 3, x, y - 14 );
+				if ( G.font == NULL )
+				{
+					rwc_coarse += coarse_factor * rwc_delta;
+					continue;
+				}
+
+				make_label_string( lstr, rwc_coarse, ( int ) mag );
+				width = XTextWidth( G.font, lstr, strlen( lstr ) );
+				if ( x - ( width >> 1 ) - 10 > last )
+				{
+					XDrawString( G.d, c->pm, c->font_gc, x - ( width >> 1 ),
+								 y + 7 + G.font_asc, lstr, strlen( lstr ) );
+					last = x + ( width >> 1 );
+				}
 				rwc_coarse += coarse_factor * rwc_delta;
 			}
 			else if ( medium % medium_factor == 0 )
-				XDrawLine( G.d, c->pm, cv->gc, x, y, x, y - 10 );
+				XDrawLine( G.d, c->pm, c->font_gc, x, y, x, y - 10 );
 			else
-				XDrawLine( G.d, c->pm, cv->gc, x, y, x, y - 5 );
+				XDrawLine( G.d, c->pm, c->font_gc, x, y, x, y - 5 );
 		}
 	}
 	else
 	{
 		x = c->w - 21;
+		XFillRectangle( G.d, c->pm, cv->gc, x, 0, 3, c->h );
 		XDrawLine( G.d, c->pm, cv->gc, x, 0, x, c->h - 1 );
 
 		for ( cur_p = c->h - 1 - d_start_fine; cur_p >= 0; 
@@ -775,15 +873,69 @@ void make_scale( Curve_1d *cv, Canvas *c, int coord )
 
 			if ( coarse % coarse_factor == 0 )
 			{
-				XDrawLine( G.d, c->pm, cv->gc, x - 3, y, x + 14, y );
+				XDrawLine( G.d, c->pm, c->font_gc, x - 3, y, x + 14, y );
+
+				if ( G.font == NULL )
+				{
+					rwc_coarse += coarse_factor * rwc_delta;
+					continue;
+				}
+
+				make_label_string( lstr, rwc_coarse, ( int ) mag );
+				width = XTextWidth( G.font, lstr, strlen( lstr ) );
+				XDrawString( G.d, c->pm, c->font_gc, x - 7 - width,
+							 y + ( G.font_asc >> 1 ) , lstr, strlen( lstr ) );
 				rwc_coarse += coarse_factor * rwc_delta;
 			}
 			else if ( medium % medium_factor == 0 )
-				XDrawLine( G.d, c->pm, cv->gc, x, y, x + 10, y );
+				XDrawLine( G.d, c->pm, c->font_gc, x, y, x + 10, y );
 			else
-				XDrawLine( G.d, c->pm, cv->gc, x, y, x + 5, y );
+				XDrawLine( G.d, c->pm, c->font_gc, x, y, x + 5, y );
 		}
 	}
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+void make_label_string( char *lstr, double num, int res )
+{
+	int n, mag;
+
+
+	if ( num == 0 )
+	{
+		sprintf( lstr, "0" );
+		return;
+	}
+
+   res++;
+
+	mag = ( int ) floor( log10( fabs( num ) ) );
+	if ( mag >= 0 )
+		mag++;
+
+	/* n is the number of relevant digits */
+
+	n = i_max( 1, mag - res );
+
+	if ( mag > 5 )                              /* num > 10^5 */
+		sprintf( lstr, "%1.*E", n - 1, num );
+	else if ( mag > 0 )                         /* num >= 1 */
+	{
+		if ( res >= 0 )
+			sprintf( lstr, "%*g", mag, num );
+		else
+			sprintf( lstr, "%*.*f\n", n, abs( res ), num );
+	}
+	else if ( mag > -4 && res >= - 4 )          /* num > 10^-4 */
+		sprintf( lstr, "%1.*f", abs( res ), num );
+	else                                        /* num < 10^-4 */
+		if ( mag < res )
+			sprintf( lstr, "0" );
+		else
+			sprintf(  lstr, "%1.*E", n - 1, num );
 }
 
 
@@ -794,7 +946,7 @@ void make_scale( Curve_1d *cv, Canvas *c, int coord )
 void repaint_canvas( Canvas *c )
 {
 	static int i;
-	char buf[ 70 ];
+	char buf[ 256 ];
 	int x, y;
 	unsigned int w, h;
 	Curve_1d *cv;
@@ -869,7 +1021,13 @@ void repaint_canvas( Canvas *c )
 					       * ( ( ( double ) G.canvas.h - 1.0 - c->ppos[ Y ] ) /
 									           cv->s2d[ Y ] - cv->shift[ Y ] );
 
-				sprintf( buf, "%#g, %#g", x_pos, y_pos );
+				make_label_string( buf, x_pos, ( int ) floor( log10( fabs(
+					G.rwc_delta[ X ] ) / cv->s2d[ X ] ) ) - 2 );
+				strcat( buf, ", " ); 
+				make_label_string( buf + strlen( buf ), y_pos,
+								   ( int ) floor( log10( fabs(
+								   G.rwc_delta[ Y ] ) / cv->s2d[ Y ] ) ) - 2 );
+
 				if ( G.font != NULL )
 					XDrawImageString( G.d, G.pm, cv->font_gc, 5,
 									  ( G.font_asc + 3 ) * ( i + 1 ) +
@@ -911,6 +1069,7 @@ void repaint_canvas( Canvas *c )
 
 	XCopyArea( G.d, G.pm, FL_ObjWin( c->obj ), c->gc,
 			   0, 0, c->w, c->h, 0, 0 );
+	XFlush( G.d );
 }
 
 
@@ -960,8 +1119,10 @@ void recalc_XPoints( void )
 }
 
 
-/*----------------------------------------------------------*/
-/*----------------------------------------------------------*/
+/*-----------------------------------------------------------------*/
+/* Recalculates the graphics data for a curve using the the curves */
+/* settings for the scale and the offset.                          */
+/*-----------------------------------------------------------------*/
 
 void recalc_XPoints_of_curve( Curve_1d *cv )
 {
@@ -994,15 +1155,17 @@ void recalc_XPoints_of_curve( Curve_1d *cv )
 }
 
 
-/*----------------------------------------------------------*/
-/*----------------------------------------------------------*/
+/*-------------------------------------------*/
+/* Undos the last action as far as possible. */
+/*-------------------------------------------*/
 
 void undo_button_callback( FL_OBJECT *a, long b )
 {
 	long i;
 	bool is_undo = UNSET;
 	Curve_1d *cv;
-
+	double temp_s2d[ 2 ],
+		   temp_shift[ 2 ];
 
 	a = a;
 	b = b;
@@ -1015,12 +1178,21 @@ void undo_button_callback( FL_OBJECT *a, long b )
 		if ( ! cv->can_undo )
 			continue;
 
+		temp_s2d[ X ] = cv->s2d[ X ];
+		temp_s2d[ Y ] = cv->s2d[ Y ];
+		temp_shift[ X ] = cv->shift[ X ];
+		temp_shift[ Y ] = cv->shift[ Y ];
+
 		cv->s2d[ X ] = cv->old_s2d[ X ];
 		cv->s2d[ Y ] = cv->old_s2d[ Y ];
 		cv->shift[ X ] = cv->old_shift[ X ];
 		cv->shift[ Y ] = cv->old_shift[ Y ];
 
-		cv->can_undo = UNSET;
+		cv->old_s2d[ X ] = temp_s2d[ X ];
+		cv->old_s2d[ Y ] = temp_s2d[ Y ];
+		cv->old_shift[ X ] = temp_shift[ X ];
+		cv->old_shift[ Y ] = temp_shift[ Y ];
+
 		is_undo = SET;
 
 		recalc_XPoints_of_curve( cv );
@@ -1037,8 +1209,9 @@ void undo_button_callback( FL_OBJECT *a, long b )
 }
 
 
-/*----------------------------------------------------------*/
-/*----------------------------------------------------------*/
+/*-------------------------------------------------------------*/
+/* Rescales the display so that the canvas is completely used. */
+/*-------------------------------------------------------------*/
 
 void fs_button_callback( FL_OBJECT *a, long b )
 {
@@ -1081,9 +1254,16 @@ void fs_button_callback( FL_OBJECT *a, long b )
 
 			G.is_fs = SET;
 			fs_rescale_1d( );
+			fl_set_object_helper( run_form->full_scale_button,
+								  "Switch off automatic rescaling" );
 		}
 		else                     /* if button got switched off */
+		{
 			G.is_fs = UNSET;
+			fl_set_object_helper( run_form->full_scale_button,
+								  "Rescale curves to fit into window\n"
+								  "and switch on automatic rescaling" );
+		}
 	}
 	else
 		fs_rescale_2d( );
@@ -1094,8 +1274,10 @@ void fs_button_callback( FL_OBJECT *a, long b )
 }
 
 
-/*----------------------------------------------------------*/
-/*----------------------------------------------------------*/
+/*---------------------------------------------------------*/
+/* Does a rescale of the data for 1d graphics so that all  */
+/* curves fit into the canvas and occupy the whole canvas. */
+/*---------------------------------------------------------*/
 
 void fs_rescale_1d( void )
 {
@@ -1175,6 +1357,18 @@ void fs_rescale_2d( void )
 
 void curve_button_callback( FL_OBJECT *obj, long data )
 {
+	char hstr[ 128 ];
+
 	obj = obj;
 	G.curve[ data - 1 ]->active ^= SET;
+
+	if ( fl_get_button( obj ) )
+		sprintf( hstr, "Extempt curve %ld from rescaling", data );
+	else
+		sprintf( hstr, "Apply rescaling to curve %ld", data );
+
+	fl_set_object_helper( obj, hstr );
+
+	redraw_canvas( &G.x_axis );
+	redraw_canvas( &G.y_axis );
 }
