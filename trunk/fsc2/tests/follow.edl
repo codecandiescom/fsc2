@@ -12,7 +12,7 @@ em = float( M );
 f[ 4, 2 ] = { {    0.0,    0.0 },
 	          {    0.0, em - 1 },
 			  { em - 1, em - 1 },
-			  { em - 1,   0.0  } };
+			  { em - 1,    0.0 } };
 d = em;
 v[ * ] = { 0.0, 0.0 };
 vt;
@@ -30,20 +30,20 @@ EXPERIMENT:
 FOR I = 1 : M {
 	l = ( 3.0 * ( M - I ) ) / ( M - 1 );
 	IF I % 5 == 0 {
-		draw_marker( I, I, 1, ( I / 5 ) % 6 );
+		draw_marker_2d( I, I, 1, ( I / 5 ) % 6 );
 	}
-	display( 1, I, l );
+	display_2d( 1, I, l );
 	wait( 0.05 s );
 }
 
 wait( 1 s );
-clear_marker( );
+clear_marker_2d( );
 
 WHILE  d > sqrt( 2 ) {
 	FOR I = 1 : 4 {
 		f[ I ] += v;
 		K = round( f[ I ] + 1 );
-		display( K[ 1 ] , K[ 2 ], I % 4 );
+		display_2d( K[ 1 ] , K[ 2 ], I % 4 );
 		vt = -1 * v[ 1 ];
 		v[ 1 ] = v[ 2 ];
 		v[ 2 ] = vt;
