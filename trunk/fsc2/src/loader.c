@@ -14,6 +14,9 @@ extern Func *Fncts;         /* structure for list of functions */
 extern Func Def_Fncts[ ];   /* structures for list of built-in functions */
 
 
+static void add_function( int index, void *new_func, Device *new_dev );
+static int func_cmp( const void *a, const void *b );
+
 
 /*------------------------------------------------------------------------*/
 /* Function to be called after the DEVICES section is read in. It links   */
@@ -40,6 +43,11 @@ void load_all_drivers( void )
 
 	for ( cd = Device_List; cd != NULL; cd = cd->next )
 		load_functions( cd );
+
+	/* Because some multiply defined functions may have been added resort
+	   the function list to make searching via bsearch() possible */
+
+	qsort( Fncts, Num_Func, sizeof( Func ), func_cmp );
 
 	/* This done we run the init hooks (if they exist) and warn if they don't
 	   return successfully (if an init hook thinks it should kill the whole
@@ -70,11 +78,11 @@ void load_all_drivers( void )
 
 
 /*--------------------------------------------*/
-/* Function tests if hte device driver passed */
+/* Function tests if the device driver passed */
 /* to the function by name is loaded.         */
 /*--------------------------------------------*/
 
-bool exist_device( const char *name )
+bool exists_device( const char *name )
 {
 	Device *cd;
 
@@ -92,7 +100,7 @@ bool exist_device( const char *name )
 /* Routine tests if a function passed to the routine by name exists. */
 /*-------------------------------------------------------------------*/
 
-bool exist_function( const char *name )
+bool exists_function( const char *name )
 {
 	int i;
 
@@ -120,6 +128,10 @@ void load_functions( Device *dev )
 	char *hook_func_name;
 	char *dev_name;
 	void *cur;
+	char *new_func_name;
+	char buf[ 100 ];
+	char *temp;
+	long len;
 
 
 	/* Assemble name of library to be loaded - this will also work for cases
@@ -241,9 +253,7 @@ void load_functions( Device *dev )
 	exit_hooks_are_run = UNSET;
 
 	/* Run through all the functions in the function list and if they need
-	   to be resolved try to find them in the device driver functions - check
-	   that the function has not already been loaded (but overloading built-in
-	   functions is acceptable). */
+	   to be resolved try to find them in the device driver functions */
 
 	for ( num = 0; num < Num_Func; num++ )
 	{
@@ -253,20 +263,166 @@ void load_functions( Device *dev )
 			continue;
 
 		dlerror( );                /* make sure it's NULL before we continue */
-		cur = dlsym( dev->driver.handle, Fncts[ num ].name );
 
-		if ( dlerror( ) != NULL )     /* function not found in library ? */
+		/* If the functions name is still the original one try it, otherwise
+		   first remove the extension with the '#' and the device count */
+
+		if ( ( temp = strchr( Fncts[ num ].name, '#' ) ) == NULL )
+			 cur = dlsym( dev->driver.handle, Fncts[ num ].name );
+		else
+		{
+			len = temp - Fncts[ num ].name;
+			temp = T_malloc( len + 1 );
+			strncpy( temp, Fncts[ num ].name, len );
+			temp[ len ] = '\0';
+
+			cur = dlsym( dev->driver.handle, temp );
+			T_free( temp );
+		}
+
+		if ( dlerror( ) != NULL )
 			continue;
 
-		/* Utter strong warning and don't load if function would overload
-		   an already loaded (i.e. non-built-in) function */
+		/* If the function is completely new just set the pointer to the
+		   place the function is to be found in the library and - if
+		   necessary, i.e. if another function from the current library
+		   had a add twin in a different library, add '#' and the number
+		   of the device to the functions name. Otherwise this is a multiple
+		   defined function and it got to be appended to function list. */
 
-		if ( Fncts[ num ].fnct != NULL )
-			eprint( SEVERE, " Function `%s()' found in module `%s.so' has "
-					"already been loaded'.\n", Fncts[ num ].name, dev->name );
-		else
+		if ( Fncts[ num ].fnct == NULL )
+		{
 			Fncts[ num ].fnct = cur;
+			Fncts[ num ].device = ( void * ) dev;
+			if ( dev->count != 1 )
+			{
+				snprintf( buf, 100, "#%d", dev->count );
+				new_func_name = T_malloc(   strlen( Fncts[ num ].name )
+										  + strlen( buf ) + 1 );
+				strcpy( new_func_name, Fncts[ num ].name );
+				strcat( new_func_name, buf );
+				T_free( ( char * ) Fncts[ num ].name );
+				Fncts[ num ].name = new_func_name;
+			}
+		}
+		else
+			add_function( num, cur, dev );
 	}
+}
+
+
+/*--------------------------------------------------------*/
+/*--------------------------------------------------------*/
+
+static int func_cmp( const void *a, const void *b )
+{
+	return strcmp( ( ( Func * ) a )->name, ( ( Func * ) b )->name );
+}
+
+
+/*----------------------------------------------------------------------*/
+/* This function is called when a function found in a device driver has */
+/* already been defined by a different device driver. In this case we   */
+/* have to extend the function list for this function, adding '#n' to   */
+/* the name of the function (with 'n' being the number of times the     */
+/* function has already been defined) and all functions defined for the */
+/* current device.                                                      */
+/*----------------------------------------------------------------------*/
+
+static void add_function( int index, void *new_func, Device *new_dev )
+{
+	int i;
+	char *new_func_name;
+	char buf[ 100 ];
+	long len;
+	char *temp;
+
+
+	/* Because, when adding a multiple defined function, it is appended to
+	   the function list, the function just added will be found when running
+	   through the list in load_functions(). This can be easily recognized
+	   because the 'new' function is from the current library, which can
+	   never happen (or the linker would complain about multiple defined
+	   functions). So, if the function has already been defined in the
+	   current library we just return. */
+
+	if ( Fncts[ index ].device == new_dev )
+		return;
+
+	/* Find out the correct device number - this is the next integer after
+	   the highrest device number of all devices that had twins in the current
+	   library. I.e., if module A exported th functions a1() and a2() and
+	   module B exported b1() and b2() then the functions in module C,
+	   also exporting a1() and b1() can be accessed as a1#2() and a2#2().
+	   This device number is, following a '#', appended to the function name
+	   (and the names of all functions from the currnt module).
+	   While not being bulletproof this method hopefully will work correctly
+	   with all modules writen in a reasonable way... */
+
+	if ( new_dev->count == 1 )
+	{
+		if ( ( temp = strchr( Fncts[ index ].name, '#' ) ) != NULL )
+			new_dev->count = atoi( temp + 1 ) + 1;
+		else
+			new_dev->count = 2;
+		for ( i = 0; i < Num_Func; i++ )
+			if ( Fncts[ i ].device == new_dev )
+			{
+				snprintf( buf, 100, "#%d", new_dev->count );
+				new_func_name = T_malloc(   strlen( Fncts[ i ].name )
+										  + strlen( buf ) );
+				strcpy( new_func_name, Fncts[ i ].name );
+				strcat( new_func_name, buf );
+				T_free( ( char * ) Fncts[ i ].name );
+				Fncts[ i ].name = new_func_name;
+			}
+	}
+	else
+	{
+		if ( ( temp = strchr( Fncts[ index ].name, '#' ) ) != NULL 
+			 && atoi( temp + 1 ) >= new_dev->count )
+		{
+			new_dev->count++;
+			for ( i = 0; i < Num_Func; i++ )
+				if ( Fncts[ i ].device == new_dev )
+				{
+					len = strchr( Fncts[ i ].name, '#' ) - Fncts[ i ].name;
+					snprintf( buf, 100, "#%d", new_dev->count );
+					new_func_name = T_malloc( len + strlen( buf ) + 1 );
+					strncpy( new_func_name, Fncts[ i ].name, len );
+					strcpy( new_func_name + len, buf );
+					T_free( ( char * ) Fncts[ i ].name );
+					Fncts[ i ].name = new_func_name;
+				}
+		}
+	}
+
+	/* Add an entry for the new function to the list of functions */
+
+	Fncts = T_realloc( Fncts, ( Num_Func + 2 ) * sizeof( Func ) );
+	memcpy( Fncts + Num_Func + 1, Fncts + Num_Func, sizeof( Func ) );
+	memcpy( Fncts + Num_Func, Fncts + index, sizeof( Func ) );
+	
+	Fncts[ Num_Func ].fnct = new_func;
+	Fncts[ Num_Func ].device = ( void * ) new_dev;
+	snprintf( buf, 100, "#%d", new_dev->count );
+	
+	if ( ( temp = strchr( Fncts[ index ].name, '#' ) ) == NULL )
+	{
+		Fncts[ Num_Func ].name = T_malloc(   strlen( Fncts[ index ].name )
+										   + strlen( buf ) + 1 );
+		strcpy( ( char * ) Fncts[ Num_Func ].name, Fncts[ index ].name );
+		strcat( ( char * ) Fncts[ Num_Func ].name, buf );
+	}
+	else
+	{
+		len = temp - Fncts[ index ].name;
+		Fncts[ Num_Func ].name = T_malloc( len + strlen( buf ) + 1 );
+		strncpy( ( char * ) Fncts[ Num_Func ].name, Fncts[ index ].name, len );
+		strcpy( ( char * ) Fncts[ Num_Func ].name + len, buf );
+	}
+
+	Num_Func++;
 }
 
 

@@ -205,9 +205,8 @@ int func_list_parse( Func **fncts, int num_func )
 		( *fncts )[ cur ].fnct = NULL;
 		( *fncts )[ cur ].nargs = 0;
 		( *fncts )[ cur ].access_flag = ACCESS_EXP;
+		( *fncts )[ cur ].device = NULL;
 		( *fncts )[ cur ].to_be_loaded = SET;
-		( *fcnts )[ cur ].device = NULL;
-		( *fcnts )[ cur ].count = 0;
 	}
 
 	( *fncts )[ num_func ].to_be_loaded = UNSET;
@@ -265,6 +264,7 @@ static int fll_count_functions( Func *fncts, int num_def_func )
 				f->fnct = NULL;
 				f->nargs = 0;
 				f->access_flag = ACCESS_EXP;
+				f->device = NULL;
 				f->to_be_loaded = SET;
 			}
 		}
