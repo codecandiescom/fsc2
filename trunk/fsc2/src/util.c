@@ -45,14 +45,14 @@ char *get_string( const char *fmt, ... )
 	char *c = NULL;
 	size_t len = GET_STRING_TRY_LENGTH;
 	va_list ap;
-	size_t wr;
+	int wr;
 
 
 	while ( 1 )
 	{
 		c = T_realloc( c, len );
 		va_start( ap, fmt );
-		wr = ( size_t ) vsnprintf( c, len, fmt, ap );
+		wr = vsnprintf( c, len, fmt, ap );
 		va_end( ap );
 
 		if ( wr < 0 )         /* indicates not enough space with older glibs */
@@ -71,7 +71,7 @@ char *get_string( const char *fmt, ... )
 	}
 
 	if ( wr + 1 < len )            /* trim string to number of needed chars */
-		T_realloc( c, wr + 1 );
+		T_realloc( c, ( size_t ) wr + 1 );
 
 	return c;
 }
@@ -288,13 +288,14 @@ void eprint( int severity, bool print_fl, const char *fmt, ... )
 
 		if ( print_fl && Fname )
 		{
-			count = snprintf( cp, space_left, "%s:%ld: ", Fname, Lc );
+			count = snprintf( cp, ( size_t ) space_left, "%s:%ld: ",
+							  Fname, Lc );
 			space_left -= count;
 			cp += count;
 		}
 
 		va_start( ap, fmt );
-		vsnprintf( cp, space_left, fmt, ap );
+		vsnprintf( cp, ( size_t ) space_left, fmt, ap );
 		va_end( ap );
 
 		if ( I_am == PARENT )
@@ -610,7 +611,7 @@ inline unsigned long d2color( double a )
 	if ( c_index < 0 )
 		return fl_get_pixel( NUM_COLORS + FL_FREE_COL1 + 1 );
 	else if ( c_index < NUM_COLORS )
-		return fl_get_pixel( FL_FREE_COL1 + 1 + c_index );
+		return fl_get_pixel( FL_FREE_COL1 + 1 + ( unsigned int ) c_index );
 	else
 		return fl_get_pixel( NUM_COLORS + FL_FREE_COL1 + 2 );
 }
