@@ -194,6 +194,12 @@ WS          [\n=: ]+
 
 {INV}       return INV_TOKEN;
 
+"\x4nunit"   return NU_TOKEN;
+"\x4uunit"   return UU_TOKEN;
+"\x4mvolt"   return MU_TOKEN;
+"\x4kunit"   return KU_TOKEN;
+"\x4megunit" return MEG_TOKEN;
+
 			/* all needed pulse related keywords... */
 
 			/* combinations of pulse and property, e.g. `P3.LEN' */

@@ -42,7 +42,6 @@ static Var *CV;
 %token AND OR XOR NOT
 
 
-%token NS_TOKEN US_TOKEN MS_TOKEN S_TOKEN
 %token NT_TOKEN UT_TOKEN MT_TOKEN T_TOKEN
 %token NU_TOKEN UU_TOKEN MU_TOKEN KU_TOKEN MEG_TOKEN
 %type <vptr> expr arrass list1 list2 list3 unit
@@ -139,19 +138,15 @@ expr:    INT_TOKEN unit           { if ( $2 == NULL )
 
 
 unit:    /* empty */               { $$ = NULL; }
-       | NS_TOKEN                  { $$ = vars_push( INT_VAR, 1L ); }
-       | US_TOKEN                  { $$ = vars_push( INT_VAR, 1000L ); }
-       | MS_TOKEN                  { $$ = vars_push( INT_VAR, 1000000L ); }
-       | S_TOKEN                   { $$ = vars_push( INT_VAR, 1000000000L ); }
        | NT_TOKEN                  { $$ = vars_push( FLOAT_VAR, 1.0e-5 ); }
        | UT_TOKEN                  { $$ = vars_push( FLOAT_VAR, 1.0e-2 ); }
-       | MT_TOKEN                  { $$ = vars_push( FLOAT_VAR, 10.0 ); }
-       | T_TOKEN                   { $$ = vars_push( INT_VAR, 1.0e4 ); }
+       | MT_TOKEN                  { $$ = vars_push( INT_VAR, 10 ); }
+       | T_TOKEN                   { $$ = vars_push( INT_VAR, 10000 ); }
        | NU_TOKEN                  { $$ = vars_push( FLOAT_VAR, 1.0e-9 ); }
-       | UU_TOKEN                  { $$ = vars_push( INT_VAR, 1.0e-6 ); }
+       | UU_TOKEN                  { $$ = vars_push( FLOAT_VAR, 1.0e-6 ); }
        | MU_TOKEN                  { $$ = vars_push( FLOAT_VAR, 1.0e-3 ); }
-       | KU_TOKEN                  { $$ = vars_push( FLOAT_VAR, 1.0e3 ); }
-       | MEG_TOKEN                 { $$ = vars_push( INT_VAR, 1.0e6 ); }
+       | KU_TOKEN                  { $$ = vars_push( INT_VAR, 1000 ); }
+       | MEG_TOKEN                 { $$ = vars_push( INT_VAR, 1000000 ); }
 ;
 
 

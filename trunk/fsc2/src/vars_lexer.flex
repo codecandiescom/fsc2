@@ -260,11 +260,6 @@ WS          [\n \t]+
 
 {WS}        /* skip white space */
 
-"\x4nsec"   return NS_TOKEN;
-"\x4usec"   return US_TOKEN;
-"\x4msec"   return MS_TOKEN;
-"\x4sec"    return S_TOKEN;
-
 "\x4ntesla" return NT_TOKEN;
 "\x4utesla" return UT_TOKEN;
 "\x4mtesla" return MT_TOKEN;
