@@ -937,7 +937,7 @@ Var *pulser_state( Var *v )
 		return vars_push( INT_VAR, ( long ) ( dg2020.is_running = state ) );
 
 	dg2020_run( state );
-	return vars_push( INT_VAR, ( long ) dg2020.is_running );
+	return vars_push( INT_VAR, ( long ) state );
 }
 
 
@@ -981,7 +981,7 @@ Var *pulser_update( Var *v )
 	/* If we're doing a real experiment also tell the pulser to start */
 
 	if ( FSC2_MODE == EXPERIMENT )
-		dg2020_run( START );
+		dg2020_run( dg2020.is_running );
 
 	return vars_push( INT_VAR, state ? 1 : 0 );
 }
@@ -1330,7 +1330,6 @@ Var *pulser_next_phase( Var *v )
 					return vars_push( INT_VAR, 0 );
 	}
 
-	dg2020.needs_update = SET;
 	return vars_push( INT_VAR, 1 );
 }
 
@@ -1341,6 +1340,9 @@ Var *pulser_next_phase( Var *v )
 Var *pulser_reset( Var *v )
 {
 	v = v;
+
+	if ( ! dg2020_is_needed )
+		return vars_push( INT_VAR, 1 );
 
 	if ( dg2020.is_cw_mode )
 	{
@@ -1353,7 +1355,7 @@ Var *pulser_reset( Var *v )
 		 dg2020_phs[ 1 ].function != NULL )
 		vars_pop( pulser_pulse_reset( NULL ) );
 
-	return vars_push( INT_VAR, 1 );
+	return pulser_update( NULL );
 }
 
 
@@ -1424,7 +1426,6 @@ Var *pulser_phase_reset( Var *v )
 					return vars_push( INT_VAR, 0 );
 	}
 
-	dg2020.needs_update = SET;
 	return vars_push( INT_VAR, 1 );
 }
 

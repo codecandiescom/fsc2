@@ -106,6 +106,8 @@ bool ep385_run( bool state )
 	if ( gpib_write( ep385.device, buf , strlen( buf ) ) == FAILURE )
 		ep385_gpib_failure( );
 
+	ep385.is_running = state;
+
 	return OK;
 }
 

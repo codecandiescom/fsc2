@@ -133,6 +133,8 @@ bool rs690_run( bool state )
 		 gpib_write( rs690.device, "TRG!", 4 ) == FAILURE )
 		rs690_gpib_failure( );
 
+	rs690.is_running = state;
+
 	return OK;
 }
 

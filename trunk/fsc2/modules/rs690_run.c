@@ -60,7 +60,7 @@ bool rs690_do_update( void )
 
 	if ( rs690.is_running )
 	{
-		restart = SET;
+		restart = rs690.is_running;
 		if ( FSC2_MODE == EXPERIMENT )
 			rs690_run( STOP );
 	}

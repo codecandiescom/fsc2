@@ -965,10 +965,10 @@ Var *pulser_state( Var *v )
 	state = get_boolean( v );
 
 	if ( FSC2_MODE != EXPERIMENT )
-		return vars_push( INT_VAR, 1 );
+		return vars_push( INT_VAR, ( long ) ( rs690.is_running = state ) );
 
 	rs690_run( state );
-	return vars_push( INT_VAR, state  );
+	return vars_push( INT_VAR, rs690.is_running );
 }
 
 
@@ -1270,12 +1270,15 @@ Var *pulser_reset( Var *v )
 		THROW( EXCEPTION );
 	}
 
+	if ( ! rs690_is_needed )
+		return vars_push( INT_VAR, 1 );
+
 	vars_pop( pulser_pulse_reset( NULL ) );
 	if ( rs690_phs[ 0 ].function != NULL ||
 		 rs690_phs[ 1 ].function != NULL )
 		vars_pop( pulser_pulse_reset( NULL ) );
 
-	return vars_push( INT_VAR, 1 );
+	return pulser_update( NULL );
 }
 
 
