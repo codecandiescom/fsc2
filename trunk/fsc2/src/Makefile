@@ -31,7 +31,7 @@ flex_sources  = $(wildcard *_lexer.l)
 sources       = $(bison_sources:.y=.c) $(flex_sources:.l=.c) ${c_sources}
 objects       = $(sources:.c=.o)
 headers       = ${c_sources:.c=.h} global.h
-
+machine_name  = $(shell hostname -f)
 
 export headers             # export headers to the modules Makefile
 

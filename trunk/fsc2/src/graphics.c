@@ -70,6 +70,7 @@ extern FL_resource xresources[ ];
 #define WIN_MIN_1D_WIDTH   400
 #define WIN_MIN_2D_WIDTH   500
 #define WIN_MIN_HEIGHT     435
+#define SMALL_FONT_SIZE    FL_SMALL_SIZE
 #define DEFAULT_AXISFONT_1 "*-lucida-bold-r-normal-sans-14-*"
 #define DEFAULT_AXISFONT_2 "lucidasanstypewriter-14"
 #define DEFAULT_AXISFONT_3 "9x15"
@@ -77,6 +78,7 @@ extern FL_resource xresources[ ];
 #define WIN_MIN_1D_WIDTH   300
 #define WIN_MIN_2D_WIDTH   350
 #define WIN_MIN_HEIGHT     380
+#define SMALL_FONT_SIZE    FL_TINY_SIZE
 #define DEFAULT_AXISFONT_1 "*-lucida-bold-r-normal-sans-10-*"
 #define DEFAULT_AXISFONT_2 "lucidasanstypewriter-10"
 #define DEFAULT_AXISFONT_3 "9x10"
@@ -141,12 +143,14 @@ void start_graphics( void )
 	if ( access( pixmap_file, R_OK ) == 0 )
 	{
 		fl_set_pixmapbutton_file( run_form->undo_button, pixmap_file );
+		fl_set_object_lsize( run_form->undo_button, SMALL_FONT_SIZE );
 		fl_set_object_helper( run_form->undo_button,
 							  "Undo last rescaling operation" );
 
 		if ( G.dim == 2 )
 		{
 			fl_set_pixmapbutton_file( cut_form->cut_undo_button, pixmap_file );
+			fl_set_object_lsize( cut_form->cut_undo_button, SMALL_FONT_SIZE );
 			fl_set_object_helper( cut_form->cut_undo_button,
 								  "Undo last rescaling operation" );
 		}
@@ -161,12 +165,14 @@ void start_graphics( void )
 	if ( access( pixmap_file, R_OK ) == 0 )
 	{
 		fl_set_pixmapbutton_file( run_form->print_button, pixmap_file );
+		fl_set_object_lsize( run_form->print_button, SMALL_FONT_SIZE );
 		fl_set_object_helper( run_form->print_button, "Print window" );
 
 		if ( G.dim == 2 )
 		{
 			fl_set_pixmapbutton_file( cut_form->cut_print_button,
 									  pixmap_file );
+			fl_set_object_lsize( cut_form->cut_print_button, SMALL_FONT_SIZE );
 			fl_set_object_helper( cut_form->cut_print_button, "Print window" );
 		}
 	}
