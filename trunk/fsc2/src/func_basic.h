@@ -37,6 +37,8 @@ Var *f_round(   Var *v );
 Var *f_floor(   Var *v );
 Var *f_ceil(    Var *v );
 Var *f_abs(     Var *v );
+Var *f_lmax(    Var *v );
+Var *f_lmin(    Var *v );
 Var *f_sin(     Var *v );
 Var *f_cos(     Var *v );
 Var *f_tan(     Var *v );

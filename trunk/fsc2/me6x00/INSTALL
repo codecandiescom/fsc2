@@ -338,10 +338,10 @@ else              # dynamically assigned major device number
 
 	# Test if the system is LSB 1.1.0 compliant
 
-	if [ ! \(    -d /etc/init.d                   	    \
-		      -a -e /lib/lsb/init-functions       	    \
-              -a -e /usr/lib/lsb/install_initd          \
-              -a -e /usr/lib/lsb/remove_initd \) ]; then
+	if [ ! \(    -d /etc/init.d                   	 \
+		      -a -e /lib/lsb/init-functions       	 \
+              -a -e /lib/lsb/install_initd           \
+              -a -e /lib/lsb/remove_initd \) ]; then
 	dialog --msgbox "\
 Sorry, your system does not seem to be LSB 1.1.0 compliant.\n\
 To have the ME6X00 module loaded at boot time and device files\n\
@@ -360,11 +360,11 @@ loaded at boot time and the device files are created\n\
 
 		if [ $? -eq 0 ]; then
 			if [ -e /etc/init.d/me6x00 ]; then
-				/usr/lib/lsb/remove_initd /etc/init.d/me6x00 >/dev/null 2>&1
+				/lib/lsb/remove_initd /etc/init.d/me6x00 >/dev/null 2>&1
 				rm -f /etc/init.d/me6x00
 			fi
 			install -m 744 utils/me6x00 /etc/init.d/me6x00
-			/usr/lib/lsb/install_initd /etc/init.d/me6x00
+			/lib/lsb/install_initd /etc/init.d/me6x00
 
 			dialog --msgbox "\
 Unless you reboot the system (which is *not* required)\n\

@@ -1558,7 +1558,7 @@ arguments, the label to be shown below the input field and a help
 text. The same escape sequences as for button and slider labels and help
 texts can be used for buttons and sliders.
 
-The final, optional field for an output object of @code{"FLOAT_outPUT"}
+The final, optional field for an output object of @code{"FLOAT_OUTPUT"}
 type is a format string that is used when printing the value. The format
 string is a simplified version of a C format string. It must start with
 @code{%}, optionally followed by the minimum field width, a dot, the
@@ -1717,8 +1717,23 @@ round( 8.6 ) = 9     round( -8.6 ) = -8
 @item abs()
 @findex abs()
 Returns the absolute value of an integer or floating point number (or
-all the elements of an array) .
+all the elements of an one-dimensional array) .
 
+
+@anchor{max}
+@item max()
+@findex max()
+Returns the largest value of all arguments. Arguments can be any number
+of numbers or (one-dimensional) arrays. If all arguments are integer
+numbers an integer number is returned, otherwise a floating point value.
+
+
+@anchor{min}
+@item min()
+@findex min()
+Returns the smallest value of all arguments. Arguments can be any number
+of numbers or (one-dimensional) arrays. If all arguments are integer
+numbers an integer number is returned, otherwise a floating point value.
 
 @anchor{mean}
 @item mean()

@@ -39,27 +39,27 @@
 To do an experiment using @code{fsc2} you have to write a program
 describing the experiment. While this may look like a daunting task if
 you have no programming experience at all it has the advantage that you
-have complete control over the way the experiment is done. You don't
-have to rely on some programmer (who probably isn't around when you need
-him or her most) to have got everything right before you even started
-planning the experiment. And writing @code{EDL} programs really isn't
-that difficult.
+have complete control over the way the experiment will be done. You
+don't have to rely on some programmer (who probably isn't around when
+you need him or her most) to have gotten everything right before you
+even started planning the experiment. And writing @code{EDL} scripts
+really isn't that difficult.
 
 
 @node Basics, Sections, EDL, EDL
 @section Basics
 
-An @code{EDL} program is roughly structured along the way an
-experiment is done. Before you start an experiment you first have to
-select the devices to be used and set them up. So the first part of an
-@code{EDL} program simply consists of a few lines specifying the
-devices to be controlled by the program and setting their parameters,
-i.e.@: the time base of the digitizer, the sensitivity of the lock-in
-amplifier or which pulses are to be created by the pulse generator. And
-as you would now start the experiment the second part of the
-@code{EDL} program describes how the experiment is to be done.
+An @code{EDL} program is roughly structured along the way an experiment
+is done. Before you start an experiment you first have to select the
+devices to be used and set them up. So the first part of an @code{EDL}
+script are just a few lines specifying the devices to be controlled by
+the program and then setting their parameters, e.g.@: the time base of
+the digitizer, the sensitivity of the lock-in amplifier or which pulses
+are to be created by the pulse generator. And as you would now start the
+experiment the second part of the @code{EDL} program describes how the
+experiment is to be done.
 
-To give you an impression how an @code{EDL} program may look like
+To give you a first impression how an @code{EDL} program may look like
 here's a program for a simple cw-EPR experiment:
 @example
 DEVICES:
@@ -101,27 +101,30 @@ Research lock-in amplifier SR530.
 In the following section, starting with the section keyword
 @code{VARIABLES}, all variables that are used in the program are listed
 and, if appropriate, initialized. The first three variables are for
-storing the start and end field of the field sweep as well as the step
-width between the data points. The next variable @code{field} will later
-be used for storing the actual field value and is initialized to the
-value of the start field. Finally, a counter variable @code{I},
-initialized to 1, and another variable, @code{data}, for the data
-received from the lock-in amplifier, are declared.
+storing the start and end field of the field sweep as well as the field
+step width to do between measuring new data points. The next variable
+@code{field} will later be used for storing the actual field value and
+is initialized to the value of the start field. Finally, a counter
+variable @code{I}, initialized to 1, and another variable, @code{data},
+for the data obtained from the lock-in amplifier, are declared.
 
-In the next section, after the @code{PREPARATIONS} section keyword,
-devices can be set up. The function @code{magnet_setup()} tells the
+In the next section, following the @code{PREPARATIONS} section keyword,
+the devices are set up. The function @code{magnet_setup()} tells the
 magnet to start with the field stored in the variable
-@w{@code{start_field}} and to use a step size of
-@w{@code{field_step}}. The next function call, @code{init_1d()}, tells
-the program that this is an 1-dimensional experiment and to use the
-appropriate kind of display for the data.
+@w{@code{start_field}} and to use a field step size of
+@w{@code{field_step}}. This will also make the magnet automatically go
+to the start field (after some calibration) when the experiment starts.
+
+The next function call, @code{init_1d()}, tells the program that this is
+an 1-dimensional experiment and to use the appropriate kind of display
+for the data.
 
 Now we're already done with the preparations and can start the
 experiment, as indicated by the section keyword @code{EXPERIMENT}. The
 whole experiment is done in a loop that is repeated as long as the
 actual field (stored in the variable @code{field}) isn't larger than the
 @code{end_field}. To tell the program where the loop starts and ends all
-statements belonging to the loop are enclosed in curly braces,
+the statements belonging to the loop are enclosed in curly braces,
 `@code{@{}' and `@code{@}}'.
 
 The first thing to do in the experiment loop is to fetch a new data
@@ -131,14 +134,14 @@ the @code{display()} function. Here two arguments are used, the number
 of the point, stored in the variable @code{I}, and the value of the
 new data point.
 
-Of course, we also need to write the data point to a file. This is done
-by the call of the function @code{save()} that automatically writes its
-argument to a file. When the function is called for the first time it
-prompts you for the name of the file to use.
+Of course, we also need to write the new data point to a data file. This
+is done by the call of the function @code{save()} that automatically
+writes its argument to a file. When the function is called for the first
+time it prompts you for the name of the file to use.
 
 What remains to be done is to increment the counter variable @code{I}
 and to sweep up the field. The function @code{sweep_up()} returns the new
-value of the field, which is then used in the test of the loop condition
+value of the field, which is later used in the test of the loop condition
 to decide if the experiment is finished, i.e.@: the end field is
 reached.
 
@@ -148,20 +151,21 @@ wait for the time constant of the lock-in amplifier to give it enough
 time to measure a new data point.
 
 When you have written such a program (using, for example, a simple ASCII
-editor) you load it into @code{fsc2} and press the test or the start
-button.  @code{fsc2} will now analyze the program very thoroughly. It
-will not only check for misspelt keywords, undefined variables,
-non-existent functions, syntax errors etc.@: but will also repeat the
-loop in the experiment section as often as in the real experiment to
-find out if no errors will happen during the experiment. This includes,
-for example, checking that the field will not be sweeped into regions
-the magnet or the gauss-meter can not handle (e.g.@: by incidentally
-setting an end field value of @w{34500.0 G} the magnet can't produce
-instead of @w{3450.00 G}). So you can be reasonable sure that the
-experiment will not abort due to a faulty @code{EDL} program after it
-has run for 2 hours and you have to start all over again.
+editor) you load it into @code{fsc2} and press the @code{Test} or the
+@code{Start} button.  @code{fsc2} will now analyze the program very
+thoroughly. It will not only check for misspelt keywords, undefined
+variables, non-existent functions, syntax errors etc.@: but will also
+repeat the loop in the experiment section as often as in the real
+experiment to find out if no errors will happen during the
+experiment. This includes, for example, checking that the field will not
+be sweeped into regions the magnet or the gauss-meter can not handle
+(e.g.@: by incidentally setting an end field value of @w{34500.0 G}
+which the magnet can't produce instead of @w{3450.00 G}). So you can be
+reasonable sure that the experiment will not be aborted due to a faulty
+@code{EDL} script after it has run for 2 hours and you have to start all
+over again.
 
-As you can already see form the example most of an @code{EDL} program
+As you can already see form the example most of an @code{EDL} script
 consists of function calls. Functions can be divided into two
 categories, built-in functions and device functions. Built-in functions
 (like @code{init_1d()}, @code{display()}, @code{save()} and
@@ -172,14 +176,14 @@ for is listed in the @code{DEVICES} section. For example, the functions
 @w{@code{lockin_sensitivity()}}, @w{@code{lockin_time_constant()}} and
 @w{@code{lockin_get_data()}} are obviously targeted at the lock-in
 amplifier and are only available when a lock-in amplifier module is
-specified. Most of these functions are available for all types of
-lock-in amplifiers (possibly with minor variations) so that using a
-different lock-in amplifier usually doesn't require a major rewrite of
-the @code{EDL} program but just changing the lock-ins name in the
-@code{DEVICES} section.
+specified in the @code{DEVICES} section. Most of these functions are
+available for all types of lock-in amplifiers (possibly with minor
+variations) so that using a different lock-in amplifier usually doesn't
+require a major rewrite of the @code{EDL} program but just changing the
+lock-in's name in the @code{DEVICES} section.
 
 To find out about all built-in and device functions, their arguments and
-when they may be used have a look at the next two chapters of this
+where they may be used have a look at the next two chapters of this
 manual, @pxref{Built-in Functions} and @pxref{Device Functions}.
 
 
@@ -188,9 +192,9 @@ manual, @pxref{Built-in Functions} and @pxref{Device Functions}.
 @cindex section
 
 
-As you already have seen in the example above, an @code{EDL} program
-consists of several section. There are up to 6 different sections. These
-are specified by the following section keywords:
+As you already have seen in the example above, an @code{EDL} script
+consists of section. There are up to 6 different types of
+sections. These are specified by the following section keywords:
 @example
 DEVICES
 VARIABLES
@@ -199,28 +203,28 @@ PHASES
 PREPARATIONS
 EXPERIMENT
 @end example
-
+@noindent
 Please note that the section keywords always have to be followed by a
 colon, @code{:}.
 
 @cindex @code{DEVICES} section
-The first and the last two sections you have already seen in our example
-program: The @code{DEVICES} section consists simply of a list of all the
+The first and last two sections have already been used in our example
+script: The @code{DEVICES} section consists simply of a list of all the
 devices that will be used in the experiment (or at least the ones that
 are going to be controlled by the computer).
-@cindex @code{VARIABLES} section
 
+@cindex @code{VARIABLES} section
 The @code{VARIABLES} section for declaring and initializing variables
 has also already been discussed in the example.
 
-Because pulses play such an important role in modern EPR experiments
-lots of elements for handling pulses and the pulser that creates them
-are built into @code{fsc2}. There are even two special sections,
+Because pulses play an important role in modern EPR experiments lots of
+elements for handling pulses and the pulsers that creates them are built
+into @code{fsc2}. Thus, there are even two special sections,
 @code{ASSIGNMENTS} and @code{PHASES}, exclusively devoted to the pulser
 setup. The basic setup of the pulser (e.g.@: setting the time base and
 trigger mode as well as setting up the pulser channels) is done in the
 @code{ASSIGNMENTS} section while the @code{PHASES} section is all about
-phase-cycling -- here you will have to define the phase sequences to be
+phase-cycling -- here you may have to define the phase sequences to be
 used in the experiment as well as the way the resulting echos will be
 added up. Because this is a rather extensive subject (and because of the
 different ways pulsers are used in the supported spectrometers) an
@@ -229,20 +233,21 @@ in-depth discussion of both these sections is part of a whole chapter
 
 @cindex @code{PREPARATIONS} section
 As you already have seen, the @code{PREPARATIONS} section is for setting
-up the other devices and graphics -- basically the things you would do
-before actually starting an experiment. This is also the section where
-pulses are going to be defined. For more details about this topic also
-see the chapter about pulse generators and pulses.
+up all the other devices and initializing graphics -- basically the
+things you would do before actually starting an experiment. This is also
+the section where pulses are going to be defined. Again, for more
+details about this last topic see the chapter about pulse generators and
+pulses (@pxref{Using Pulsers}).
 
 @cindex @code{EXPERIMENT} section
 Finally, there is the @code{EXPERIMENT} section. As you already have
 seen this section usually consists of one or more loops, possibly nested,
 where data are acquired and stored.
 
-While the sections of an @code{EDL} file don't have to appear in the
-sequence they are listed in above it is probably best not to experiment
-too much with this. In any case, if it exists the @code{EXPERIMENT}
-section must always be the last one.
+While the sections of an @code{EDL} script don't have to appear in the
+sequence in which they are listed above it is probably best not to
+experiment too much with this. In any case, if it exists the
+@code{EXPERIMENT} section must always be the last one.
 
 All the section keywords can be abbreviated, here's the complete list of
 valid section keywords:
@@ -255,7 +260,6 @@ valid section keywords:
 @item @code{EXPERIMENT}, or @code{EXP}
 @end itemize
 
-
 Beside these sections there is a label that looks very similar to a
 section label, the
 @itemize @bullet
@@ -265,31 +269,31 @@ section label, the
 @noindent
 label (which also must be foolowed by a colon, @code{:}). It can only be
 used within the @code{EXPERIMENT} section. The @code{ON_STOP} label can
-be used to guarantee that a certain part of the program is going to be
-executed even after the user hit the @code{Stop} button. This part of
-the @code{EXPERIMENT} section will probably contain code that stores
-previously unsaved data and does other things that are necessary before
-the experiment really stops.  When @code{fsc2} executes the code
-following the @code{ON_STOP} label it can't be stopped anymore by using
-the @code{Stop} button.
+be used to guarantee that a certain part of the @code{EXPERIMENT}
+section is going to be executed even after the user hit the @code{Stop}
+button. It will probably contain code that stores previously unsaved
+data and does other things that are necessary before the experiment
+really stops.  When @code{fsc2} executes the code following the
+@code{ON_STOP} label it won't react to the @code{Stop} button anymore.
+
 
 @node Syntax, Variables, Sections, EDL
 @section Syntax
 
-There are a few basic rules about the syntax of @code{EDL} programs.
-Each program consists of one or more sections that always start with one
-of the section keywords listed above. Each section keyword has to be
+There are a few basic rules about the syntax of @code{EDL} script.  Each
+script consists of one or more sections that always start with one of
+the section keywords listed above. Each section keyword has to be
 followed immediately (i.e.@: without any spaces, tabulator or newline
 characters in between) by a colon, `@code{:}'.
 
-Each section of the program consists of statements. What a valid
-statement is may depend on the section (e.g.@: in the @code{DEVICES}
-section all valid statements are just names of devices while in other
-sections a valid statement may be a complicated equation), but a
-statement must @strong{always} end in a semicolon, `@code{;}'.  There is
-nothing special about continuing a statement on a new line (i.e.@: a
-statement can span several lines), @code{fsc2} recognizes where a
-statement ends by the semicolon.
+The sections of the script consist of statements. What a valid statement
+is may depend on the section (e.g.@: in the @code{DEVICES} section all
+valid statements are just names of devices while in other sections a
+valid statement may be a complicated equation), but a statement must
+@strong{always} end in a semicolon, `@code{;}'.  There is nothing
+special about continuing a statement on a new line (i.e.@: a statement
+can span several lines), @code{fsc2} recognizes where a statement ends
+by the semicolon.
 
 Within a statement all characters like spaces, tabulator characters and
 newlines have no relevance at all (except separating variable names). So
@@ -320,7 +324,7 @@ arguments have to be separated by commas.
 
 Within the @code{VARIABLES}, @code{ASSIGNMENTS}, @code{PREPARATIONS} and
 @code{EXPERIMENT} section variables may be used. Each variable that is
-used in an @code{EDL} program must have been declared previously, i.e.@:
+used in an @code{EDL} script must have been declared previously, i.e.@:
 it has to be listed in the @code{VARIABLES} section before it may be
 used. The start of the @code{VARIABLES} section is indicated by a line
 stating
@@ -333,19 +337,19 @@ VARIABLES:
 
 Names of variables (and also of functions) always start with a
 character, i.e.@: A-Z or a-z. The remaining part of the variable name
-can consist of characters, numbers and the underscore character,
-'@code{_}' (or shorter, if you like regular expressions, valid names
+can consist of characters, numbers and underscore characters,
+'@code{_}' (or shorter, if you know regular expressions, valid names
 follow the following pattern: @code{[A-Za-z][A-Za-z_0-9]*}). Thus,
 '@code{AbC_12x}' and '@code{aBc_12X}' are legal variable names, while
 '@code{12xy}' or '@code{_Yx2}' are not. Please note that the variable
 names are case sensitive, i.e.@: '@code{XY}', '@code{Xy}', '@code{xY}'
-and '@code{xy}' are four completely different variables!
+and '@code{xy}' are all different variables!
 
 The name of a variable can, in principle, consist of as many characters
 as you wish (I hope nobody is going to the trouble of creating a variable
 name with, say, a few hundred thousand characters just to prove me wrong
 -- I tested it only with two variables with names consisting of 10000
-characters each and differing only in the very last character...)
+characters each and differing only in the last character...)
 
 There are some combinations of characters that can't be used as variable
 names. First of all, variable names may not be identical to function
@@ -387,20 +391,20 @@ depending on the machine @code{fsc2} is running on.
 To distinguish between integer and floating point variables the case of
 the first character of the variables name is important: if the name
 starts with an upper case letter, i.e.@: A-Z, it's an integer variable
-while a lower case character, i.e.@: a-z, indicates a floating point
-variable. (Actually, changing just one line of @code{fsc2} allows to set
-a completely different behavior.)
+while variables starting with a lower case character, i.e.@: a-z, are
+floating point variables. (Actually, changing just one line of
+@code{fsc2} allows to change to a completely different behavior.)
 
 
 @subsection Arrays
 
 Beside `normal' variables you can also use arrays. The names of arrays
 follow the same convention as that of normal variables, i.e.@: if an
-array name starts with an upper case character it is an array consisting
-of integers and if it starts with a lower case character it's a floating
-point array. To define an array in the @code{VARIABLES} section just
-append the sizes of the dimensions of the array, separated by commas, in
-square brackets. E.g.@: the lines
+array name starts with an upper case character it's an array consisting
+of integers only and if it starts with a lower case character it's a
+floating point array. To define an array in the @code{VARIABLES} section
+just append the sizes of the dimensions of the array, separated by
+commas, in square brackets. E.g.@: the lines
 @example
 F[ 100 ];
 b[ 4, 7, 3 ];
@@ -409,7 +413,8 @@ b[ 4, 7, 3 ];
 define an 1-dimensional array @code{F} of 100 integers and a
 3-dimensional floating point array @code{b} of rank 4x7x3. Indices of
 arrays start with 1 (like in MathLab and FORTRAN, but this can actually
-be changed easily if you adjust a single line in @code{fsc2}...).
+be easily changed if you adjust a single line in the code for
+@code{fsc2}...).
 
 All elements of an arrays are automatically initialized to zero. On the
 other hand, arrays can also be initialized within the @code{EDL} file

@@ -466,6 +466,134 @@ Var *f_abs( Var *v )
 }
 
 
+/*------------------------------------------------------*/
+/* max of all values (result is a float variable unless */
+/* all inputs were integer values)                      */
+/*------------------------------------------------------*/
+
+Var *f_lmax( Var *v )
+{
+	double m = - HUGE_VAL;
+	bool all_int = SET;
+	size_t i;
+	size_t len;
+	long *ilp;
+	double *idp;
+
+
+	if ( v == NULL )
+	{
+		print( FATAL, "Missing arguments.\n" );
+		THROW( EXCEPTION );
+	}
+
+	for ( ; v != NULL; v = vars_pop( v ) )
+	{
+		vars_check( v, INT_VAR | FLOAT_VAR | INT_CONT_ARR | FLOAT_CONT_ARR |
+					ARR_REF | ARR_PTR | INT_ARR | FLOAT_ARR );
+
+		if ( v->type == INT_VAR )
+		{
+			if ( v->val.lval > m )
+				m = v->val.lval;
+			continue;
+		}
+
+		if ( v->type == FLOAT_VAR )
+		{
+			if ( v->val.dval > m )
+				m = v->val.dval;
+			all_int = UNSET;
+			continue;
+		}
+
+		get_array_params( v, &len, &ilp, &idp );
+
+		if ( ilp != NULL )
+		{
+			for ( i = 0; i < len; ilp++, i++ )
+				if ( *ilp > m )
+					m = *ilp;
+		}
+		else
+		{
+			for ( i = 0; i < len; idp++, i++ )
+				if ( *idp > m )
+					m = *idp;
+			all_int = UNSET;
+		}
+	}
+
+	if ( all_int && m <= LONG_MAX && m >= LONG_MIN )
+		return vars_push( INT_VAR, ( long ) m );
+	return vars_push( FLOAT_VAR, m );
+}
+
+
+/*------------------------------------------------------*/
+/* min of all values (result is a float variable unless */
+/* all inputs were integer values)                      */
+/*------------------------------------------------------*/
+
+Var *f_lmin( Var *v )
+{
+	double m = HUGE_VAL;
+	bool all_int = SET;
+	size_t i;
+	size_t len;
+	long *ilp;
+	double *idp;
+
+
+	if ( v == NULL )
+	{
+		print( FATAL, "Missing arguments.\n" );
+		THROW( EXCEPTION );
+	}
+
+	for ( ; v != NULL; v = vars_pop( v ) )
+	{
+		vars_check( v, INT_VAR | FLOAT_VAR | INT_CONT_ARR | FLOAT_CONT_ARR |
+					ARR_REF | ARR_PTR | INT_ARR | FLOAT_ARR );
+
+		if ( v->type == INT_VAR )
+		{
+			if ( v->val.lval < m )
+				m = v->val.lval;
+			continue;
+		}
+
+		if ( v->type == FLOAT_VAR )
+		{
+			if ( v->val.dval < m )
+				m = v->val.dval;
+			all_int = UNSET;
+			continue;
+		}
+
+		get_array_params( v, &len, &ilp, &idp );
+
+		if ( ilp != NULL )
+		{
+			for ( i = 0; i < len; ilp++, i++ )
+				if ( *ilp < m )
+					m = *ilp;
+		}
+		else
+		{
+			for ( i = 0; i < len; idp++, i++ )
+				if ( *idp < m )
+					m = *idp;
+			all_int = UNSET;
+		}
+	}
+
+	if ( all_int && m <= LONG_MAX && m >= LONG_MIN )
+		return vars_push( INT_VAR, ( long ) m );
+	return vars_push( FLOAT_VAR, m );
+}
+
+
 /*-----------------------------------------------*/
 /* sin of argument (in radian) (result is float) */
 /*-----------------------------------------------*/
