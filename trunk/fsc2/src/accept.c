@@ -23,7 +23,7 @@ static bool	incr_x_and_y( long x_index, long len, long y_index );
 /* because REQUESTS need a reply) it will be moved to the end of the queue.  */
 /*---------------------------------------------------------------------------*/
 
-bool accept_new_data( void )
+void accept_new_data( void )
 {
 	void *buf;
 	int mq_next;
@@ -43,7 +43,8 @@ bool accept_new_data( void )
 			THROW( EXCEPTION );
 		}
 
-		/* Unpack and accept the data sets (skip the length field) */
+		/* Unpack and accept the data sets (skip the length field) - if an
+		   exception happens detach from segment and re-throw the exception */
 
 		TRY
 		{
@@ -53,14 +54,7 @@ bool accept_new_data( void )
 		OTHERWISE
 		{
 			detach_shm( buf, &Message_Queue[ message_queue_low ].shm_id );
-			kill( child_pid, SIGKILL );
-			if ( exception_id == OUT_OF_MEMORY_EXCEPTION )
-				eprint( FATAL, "Running out of memory.\n" );
-			else
-				eprint( FATAL, "Experiment stopped due to an unknown "
-						"reason.\n" );
-			printf( "shit shit shit!\n" );
-			return FAIL;
+			PASSTHROU( );
 		}
 
 		/* Detach from shared memory segment and remove it */
@@ -108,8 +102,6 @@ bool accept_new_data( void )
 		redraw_all_1d( );
 	else
 		redraw_all_2d( );
-
-	return OK;
 }
 
 
@@ -250,7 +242,7 @@ static void accept_1d_data( long x_index, long curve, int type, void *ptr )
 
 	if ( curve >= G.nc )
 	{
-		eprint( FATAL, "$s:%ld: There is no curve %ld.\n", Fname, Lc,
+		eprint( FATAL, "%s:%ld: There is no curve %ld.\n", Fname, Lc,
 				curve + 1 );
 		THROW( EXCEPTION );
 	}

@@ -230,13 +230,23 @@ void end_comm( void )
 
 
 /*------------------------------------------------------------*/
-/* new_data_callback() is responsible for either honouring a  */
+/* new_data_callback() is responsible for either honoring a   */
 /* a REQUEST or storing and displaying DATA from the child.   */
 /* Actually, this routine is the handler for an idle call-    */
 /* back.                                                      */
 /* The message queue is read as long as the low marker hasn't */
 /* reached the high marker, both being incremented in a wrap- */
 /* around fashion.                                            */
+/* When accepting new data or honoring a REQUEST things may   */
+/* fail, most probably by running out of memory. Therefore    */
+/* all the code has to e run in a TRY environment and when    */
+/* something bad happens we have to kill the child to prevent */
+/* it sending further data we can't accept anymore. We also   */
+/* need to stop this function being an idle callback, and     */
+/* since this doesn't seem to work immediately, to set the    */
+/* low and the high marker to the same value which should     */
+/* keep the function from being executed because the child is */
+/* now already dead and can't change the high marker anymore. */
 /*------------------------------------------------------------*/
 
 int new_data_callback( XEvent *a, void *b )
@@ -244,17 +254,29 @@ int new_data_callback( XEvent *a, void *b )
 	a = a;
 	b = b;
 
-	while ( message_queue_low != message_queue_high )
+
+	TRY
 	{
-		if ( Message_Queue[ message_queue_low ].type == REQUEST )
+		while ( message_queue_low != message_queue_high )
 		{
-			/* Increment of queue pointer must come first ! */
+			if ( Message_Queue[ message_queue_low ].type == REQUEST )
+			{
+				/* Increment of queue pointer must come first ! */
 			
-			message_queue_low = ( message_queue_low + 1 ) % QUEUE_SIZE;
-			reader( NULL );
+				message_queue_low = ( message_queue_low + 1 ) % QUEUE_SIZE;
+				reader( NULL );
+			}
+			else
+				accept_new_data( );
 		}
-		else if ( ! accept_new_data( ) )
-			break;
+
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+	{
+		kill( child_pid, SIGTERM );
+		fl_set_idle_callback( 0, NULL );
+		message_queue_low = message_queue_high;
 	}
 
 	return 0;
