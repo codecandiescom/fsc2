@@ -36,6 +36,7 @@ void eprint( int severity, bool print_fl, const char *fmt, ... );
 void print( int severity, const char *fmt, ... );
 FILE *filter_edl( const char *name, FILE *fp );
 bool fsc2_locking( void );
+int fsc2_usleep( unsigned long us_dur, bool quit_on_signal );
 int is_in( const char *supplied_in, const char **alternatives, int max );
 void i2rgb( double h, int *rgb );
 void create_colors( void );

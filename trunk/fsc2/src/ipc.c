@@ -56,7 +56,7 @@ void *get_shm( int *shm_id, long len )
 								IPC_CREAT | SHM_R | SHM_A ) ) < 0 )
 	{
 		if ( errno == ENOSPC || errno == ENOMEM ) /* wait for 10 ms */
-			usleep( 10000 );
+			fsc2_usleep( 10000, SET );
 		else                                      /* non-recoverable failure */
 		{
 #if defined  ( DEBUG )

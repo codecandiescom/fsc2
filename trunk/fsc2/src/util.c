@@ -711,6 +711,33 @@ bool fsc2_locking( void )
 }
 
 
+/*---------------------------------------------------------------------*/
+/* Replacement for usleep(), but you can decide by setting the second  */
+/* argument if the function should continue to sleep on receipt of a   */
+/* signal or if it should return immediately (in which case the return */
+/* value is -1 instead of 0). The first argument is the time to sleep  */
+/* in microseconds, times longer then a second are allowed.            */
+/*----------------------------------------------------------------------*/
+
+int fsc2_usleep( unsigned long us_dur, bool quit_on_signal )
+{
+	struct timespec req, rem;
+	int ret;
+
+
+	req.tv_sec = ( time_t ) us_dur / 1000000;
+	req.tv_nsec = ( us_dur % 1000000 ) * 1000;
+
+	do
+	{
+		ret = nanosleep( &req, &rem );
+		req = rem;
+	} ( ! quit_on_signal && ret == -1 && errno == EINTR );
+
+	return ret;
+}
+
+
 /*--------------------------------------------------------------------------*/
 /* Functions checks if a supplied input string is identical to one of 'max' */
 /* alternatives, pointed to by 'alternatives', but neglecting the case of   */

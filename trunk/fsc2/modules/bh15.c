@@ -177,7 +177,7 @@ int bh15_exp_hook( void )
 	{
 		stop_on_user_request( );
 
-		usleep( 100000 );
+		fsc2_usleep( 100000, UNSET );
 
 		if ( gpib_write( bh15.device, "LE\r", 3 ) == FAILURE )
 		{
@@ -279,7 +279,7 @@ Var *gaussmeter_wait( Var *v )
 
 	/* do this thing needs a time out ? */
 
-	usleep( 100000 );
+	fsc2_usleep( 100000, UNSET );
 
 	return vars_push( INT_VAR, 1 );
 }

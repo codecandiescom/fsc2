@@ -1640,7 +1640,7 @@ void notify_conn( int signo )
 	   did reply (as indicated by the variable). */
 
 	while ( ! conn_child_replied )
-		usleep( 50000 );
+		fsc2_usleep( 50000, SET );
 	conn_child_replied = UNSET;
 }
 

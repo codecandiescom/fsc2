@@ -112,7 +112,7 @@ pid_t spawn_conn( bool start_state )
 	{
 		close( Comm.conn_pd[ WRITE ] );
 		while ( ! conn_child_replied )
-			usleep( 50000 );
+			fsc2_usleep( 50000, SET );
 		conn_child_replied = UNSET;
 	}
 	else
