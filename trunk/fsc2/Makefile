@@ -55,6 +55,7 @@ modules        = User_Functions.c tds754a.c sr510.c sr810.c s_band.c \
 				 aeg_x_band.c er035m.c bh15.c hp8647a.c
 dg2020_f       = dg2020_f.c dg2020_gen_f.c dg2020_pulse_f.c dg2020_init_f.c \
 				 dg2020_run_f.c dg2020_util_f.c dg2020_gpib_f.c
+dg2020_b       = dg2020_b.c
 tds754a        = tds754a.c tds754a_gpib.c tds754a_util.c
 header         = ${c_sources:.c=.h} global.h
 
@@ -108,10 +109,14 @@ fsc2: $(objects) $(header)
 # specially since each has its own header file and is divided into several
 # source files
 
-mods: dg2020_f.so tds754a.so $(modules:.c=.so)
+mods: dg2020_f.so dg2020_b.so tds754a.so $(modules:.c=.so)
 
 dg2020_f.so: ${dg2020_f:.c=.lo} dg2020_f.h
 	$(CC) -shared -o $@ ${dg2020_f:.c=.lo} -lm $(LDFLAGS)
+	chmod 644 $@
+
+dg2020_b.so: ${dg2020_b:.c=.lo} dg2020_b.h
+	$(CC) -shared -o $@ ${dg2020_b:.c=.lo} -lm $(LDFLAGS)
 	chmod 644 $@
 
 tds754a.so: ${tds754a:.c=.lo} tds754a.h
@@ -123,6 +128,7 @@ tds754a.so: ${tds754a:.c=.lo} tds754a.h
 	chmod 644 $@
 
 ${dg2020_f:.c=.lo}: dg2020_f.h
+${dg2020_b:.c=.lo}: dg2020_b.h
 ${tds754a:.c=.lo}: tds754a.h
 
 %.lo: %.c $(header)
@@ -137,24 +143,22 @@ fsc2_clean: fsc2_clean.o exceptions.o
 fsc2_clean.c: fsc2_clean.flex $(header)
 	$(FLEX) -B -o$@ $<
 
-# install the main program and the modules
+
+# install the program in $bindir and all the other stuff in $libdir
 
 install:
-	cp fsc2 $(bindir)/fsc2
-	chown fsc2.fsc2 $(bindir)/fsc2
-	chmod 6755 $(bindir)/fsc2
-	strip $(bindir)/fsc2
-	cp *.so $(libdir)
-	cp fsc2_clean $(libdir)
-	cp *.xpm $(libdir)
-	chown fsc2.fsc2 $(libdir)/*.so $(libdir)/*.xpm $(libdir)/fsc2_clean
-	chmod 644 $(libdir)/*.so $(libdir)/*.xpm
-	chmod 755 $(libdir)/fsc2_clean
+	install -d $(bindir)
+	install -m 6755 -o fsc2 -g fsc2 -s fsc2 $(bindir)
+	install -d $(libdir)
+	install -m 755 -o fsc2 -g fsc2 -s fsc2_clean $(libdir)
+	install -m 644 -o fsc2 -g fsc2 -s *.so $(libdir)
+	install -m 644 -o fsc2 -g fsc2 -s *.xpm $(libdir)
 
 
 tags:
-	etags -T ${c_sources} *.flex *.y ${c_sources:.c=.h} $(header) \
-		  ${modules} ${dg2020_f} dg2020_f.h ${tds754a} tds754a.h
+	etags -T ${c_sources} *.flex *.y ${c_sources:.c=.h} $(header)  \
+		  ${modules} ${dg2020_f} dg2020_f.h ${dg2020_b} dg2020_b.h \
+		  ${tds754a} tds754a.h
 
 
 clean: 
