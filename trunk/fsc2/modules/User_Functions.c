@@ -300,10 +300,10 @@ Var *get_phase_cycled_area_1d( Var *v )
 			vars_pop( func_call( func_get( "pulser_update", &access ) ) );
 		}
 
-		if ( win_list[ 0 ] == -1 || num_windows )
+		if ( win_list[ 0 ] == -1 || num_windows == 1 )
 			vn = vars_push( FLOAT_VAR, data[ 0 ] );
 		else
-			vn = vars_push( FLOAT_TRANS_ARR, data, aseq->len );
+			vn = vars_push( FLOAT_TRANS_ARR, data, num_windows );
 
 		TRY_SUCCESS;
 	}
@@ -599,10 +599,10 @@ Var *get_phase_cycled_area_2d( Var *v )
 			vars_pop( func_call( func_get( "pulser_update", &access ) ) );
 		}
 
-		if ( win_list[ 0 ] == -1 || num_windows )
+		if ( win_list[ 0 ] == -1 || num_windows == 1 )
 			vn = vars_push( FLOAT_VAR, data[ 0 ] );
 		else
-			vn = vars_push( FLOAT_TRANS_ARR, data, aseq[ 0 ]->len );
+			vn = vars_push( FLOAT_TRANS_ARR, data, num_windows * 2 );
 
 		TRY_SUCCESS;
 	}
