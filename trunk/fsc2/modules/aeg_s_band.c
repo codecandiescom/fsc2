@@ -403,16 +403,14 @@ Var *set_field( Var *v )
 
 	if ( TEST_RUN )
 		return vars_push( FLOAT_VAR, VALUE( v ) );
-	else
+
+	if ( ! magnet_goto_field( VALUE( v ) ) )
 	{
-		if ( ! magnet_goto_field( VALUE( v ) ) )
-		{
-			eprint( FATAL, "S_BAND: Can't reach requested field of %lf G.",
-					VALUE( v ) );
-			THROW( EXCEPTION );
-		}
-		return vars_push( FLOAT_VAR, magnet.act_field );
+		eprint( FATAL, "S_BAND: Can't reach requested field of %lf G.",
+				VALUE( v ) );
+		THROW( EXCEPTION );
 	}
+	return vars_push( FLOAT_VAR, magnet.act_field );
 }
 
 
@@ -590,7 +588,7 @@ bool magnet_init( void )
 
 	/* First step: Initialization of the serial interface */
 
-	if ( magnet_do( SERIAL_INIT ) )
+	if ( ! magnet_do( SERIAL_INIT ) )
 		return FAIL;
 
 	/* Next step: We do MAGNET_FAST_TEST_STEPS or MAGNET_TEST_STEPS steps
@@ -890,6 +888,7 @@ bool magnet_do( int command )
 			magnet.new_tio.c_cflag = SERIAL_BAUDRATE | CS8 | CRTSCTS;
 			tcflush( magnet.fd, TCIFLUSH );
 			tcsetattr( magnet.fd, TCSANOW, &magnet.new_tio );
+			break;
 
 		case SERIAL_TRIGGER :                 /* send trigger pattern */
 			data[ 0 ] = 0x20;
