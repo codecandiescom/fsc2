@@ -442,11 +442,11 @@ only if either it has already been called with an argument or in the
 
 @item digitizer_sensitivity()
 @findex digitizer_sensitivity()
-The function queries (if called with no argument) or sets (if called
-with an argument) the sensitivity setting of on of the channels of the
-oscilloscope. It needs at least on argument, the channel, either
-symbolically  or numerically. The channels that can be specified, depend
-on the model of the oscilloscope:
+The function queries (if called with just one argument) or sets (if
+called with two arguments) the sensitivity setting of on of the channels
+of the oscilloscope. It needs at least on argument, the channel, either
+symbolically or numerically. The channels that can be used as arguments
+depend on the model of the oscilloscope:
 @table @samp
 @item TDS520
 @item TDS520A
@@ -462,15 +462,16 @@ on the model of the oscilloscope:
 @end itemize
 @end table
 
-If a second argument is given it is taken to be the new sensitivity
-setting in Volts per scale unit. Please note that for some of the
-oscilloscopes the range of admissible sensitivity settings also depends
-on the input impedance setting. If the sensitivity value passed to the
-function is not one of the possible values the next allowed value is
-used instead.
+If a second argument is given this is taken to be the new sensitivity
+setting in Volts. If the sensitivity value passed to the function is not
+one of the available settings the nearest allowed value is used
+instead. Please note that for some of the oscilloscopes the range of
+admissible sensitivity settings depends on the input impedance --
+unfortunmately this can only be checked for when the experiment has
+already been started!
 
 If no second argument is given the current sensitivity setting for the
-channel isr eturned.
+channel is returned.
 
 The function can be called in query mode (i.e.@: without a second
 argument) only if either the sensitivity has already been set or in the
@@ -480,12 +481,11 @@ argument) only if either the sensitivity has already been set or in the
 @item digitizer_num_averages()
 @findex digitizer_num_averages()
 The function queries (if called with no argument) or sets (if called
-with an argument) the number of averages done by the oscilloscope.  The
-function can be used in query mode only in the @code{EXPERIMENT}
-section. The argument for the number of averages must be at least 1
+with an argument) the number of averages done by the oscilloscope.  If
+the number of averages is passed to the function it must be at least 1
 (which will switch the oscilloscope into @code{SAMPLE} mode). If the
 argument is larger than the maximum number of averages the maximum
-number is used instead.
+available number of averages is used instead.
 
 The function can be called in query mode (i.e.@: without an argument)
 only if either it has already been called with an argument or in the

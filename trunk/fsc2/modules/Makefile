@@ -11,11 +11,12 @@ hfs9000        = hfs9000.c hfs9000_gen.c hfs9000_pulse.c hfs9000_util.c \
 				 hfs9000_init.c hfs9000_run.c hfs9000_gpib.c
 tds754a        = tds754a.c tds754a_gpib.c tds754a_util.c
 tds744a        = tds744a.c tds744a_gpib.c tds744a_util.c
+tds540         = tds540.c  tds540_gpib.c  tds540_util.c
 tds520a        = tds520a.c tds520a_gpib.c tds520a_util.c
-tds520         = tds520.c tds520_gpib.c tds520_util.c
+tds520         = tds520.c  tds520_gpib.c  tds520_util.c
 hp8647a        = hp8647a.c hp8647a_util.c hp8647a_gpib.c hp8647a_lexer.c
-comp_modules   = dg2020_f dg2020_b hfs9000 tds754a tds744a tds520a tds520 \
-				 hp8647a
+comp_modules   = dg2020_f dg2020_b hfs9000 tds754a tds744a tds540 tds520a \
+                 tds520 hp8647a
 
 src_headers    = $(addprefix ../src/,$(headers))
 
@@ -58,6 +59,10 @@ tds744a.so: ${tds744a:.c=.o}
 	$(CC) -shared -o $@ ${tds744a:.c=.o} -lm $(LDFLAGS)
 	chmod 644 $@
 
+tds540.so: ${tds540:.c=.o}
+	$(CC) -shared -o $@ ${tds540:.c=.o} -lm $(LDFLAGS)
+	chmod 644 $@
+
 tds520a.so: ${tds520a:.c=.o}
 	$(CC) -shared -o $@ ${tds520a:.c=.o} -lm $(LDFLAGS)
 	chmod 644 $@
@@ -79,6 +84,7 @@ ${dg2020_b:.c=.o}: dg2020_b.h
 ${hfs9000:.c=.o}:  hfs9000.h
 ${tds754a:.c=.o}:  tds754a.h
 ${tds744a:.c=.o}:  tds744a.h
+${tds540:.c=.o}:   tds540.h
 ${tds520a:.c=.o}:  tds520a.h
 ${tds520:.c=.o}:   tds520.h
 ${hp8647a:.c=.o}:  hp8647a.h
