@@ -11,7 +11,6 @@ Makefile
 README
 README.mail
 TODO
-xxx
 
 Fcntl_Lock/Changes
 Fcntl_Lock/Fcntl_Lock.pm
