@@ -389,6 +389,7 @@ Var *dio_mode( Var *v )
 			 mode = ( long ) WITIO_48_MODE_16_8;
 		else
 			mode = -1;
+	}
 	else
 		mode = get_strict_long( v, "DIO mode" );
 
