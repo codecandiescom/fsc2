@@ -14,6 +14,7 @@ use 5.006;
 use strict;
 use warnings;
 use POSIX;
+use Errno;
 use Carp;
 
 require Exporter;
@@ -28,9 +29,48 @@ our @EXPORT = qw( F_GETLK F_SETLK F_SETLKW
 				  SEEK_SET SEEK_CUR SEEK_END
 );
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
+
+# Set up an hash with the error messages, but only for errno's that Errno
+# knows about
+
+my %fcntl_error_texts;
+
+BEGIN {
+	my $err;
+
+	if ( $err = eval { &Errno::EACCES } ) {
+		$fcntl_error_texts{ $err } = "Lock is held by other processes";
+	}
+	if ( $err = eval { &Errno::EAGAIN } ) {
+		$fcntl_error_texts{ $err } = "File hsd been memory-mapped by other " .
+		                             "process";
+	}
+	if ( $err = eval { &Errno::EBADF } ) {
+		$fcntl_error_texts{ $err } = "Not an open file handle or descriptor";
+	}
+	if ( $err = eval { &Errno::EDEADLK } ) {
+		$fcntl_error_texts{ $err } = "Operation would cause a deadlock";
+	}
+	if ( $err = eval { &Errno::EFAULT } ) {
+		$fcntl_error_texts{ $err } = "Lock outside accessible address space";
+	}
+	if ( $err = eval { &Errno::EINTR } ) {
+		$fcntl_error_texts{ $err } = "Operation interrupted by a signal";
+	}
+	if ( $err = eval { &Errno::ENOLCK } ) {
+		$fcntl_error_texts{ $err } = "Too many segment locks open, lock " .
+			                         "table full or remote locking protocol " .
+									 "failure (e.g. NFS)";
+	}
+	if ( $err = eval { &Errno::EINVAL } ) {
+		$fcntl_error_texts{ $err } = "Internal error in Fcntl_Lock module";
+	}
+}
+
 
 bootstrap Fcntl_Lock $VERSION;
+
 
 # Preloaded methods go here.
 
@@ -41,17 +81,19 @@ sub new {
 	my $inv = shift;
     my $pkg = ref( $inv ) || $inv;
 
-    my $self = { 'l_type'   => F_RDLCK,
-				 'l_whence' => SEEK_SET,
-                 'l_start'  => 0,
-				 'l_len'    => 0,
-				 'l_pid'    => 0,
+    my $self = { 'l_type'        => F_RDLCK,
+				 'l_whence'      => SEEK_SET,
+                 'l_start'       => 0,
+				 'l_len'         => 0,
+				 'l_pid'         => 0,
+				 'errno'         => undef,
+				 'error_message' => undef
 			   };
 
 	croak "Missing value in key-value initializer list" if @_ % 2;
 	while ( @_ ) {
-		no strict 'refs';
 		my $key = shift;
+		no strict 'refs';
 		croak "Flock structure has no \'$key\' member" unless defined &$key;
 		&$key( $self, shift );
 	}
@@ -66,13 +108,13 @@ sub new {
 sub l_type {
     my $flock_struct = shift;
 
-    return $flock_struct->{ l_type } unless @_;
-
-    my $l_type = shift;
-    croak "Invalid value for l_type member"
-        unless $l_type == F_RDLCK or $l_type == F_WRLCK or $l_type == F_UNLCK;
-
-    $flock_struct->{ 'l_type' } = $l_type;
+	if ( @_ ) {
+		my $l_type = shift;
+		croak "Invalid value for l_type member"
+		 unless $l_type == F_RDLCK or $l_type == F_WRLCK or $l_type == F_UNLCK;
+		$flock_struct->{ 'l_type' } = $l_type;
+	}
+    return $flock_struct->{ l_type };
 }
 
 
@@ -82,14 +124,15 @@ sub l_type {
 sub l_whence {
     my $flock_struct = shift;
 
-    return $flock_struct->{ l_whence } unless @_;
-
-    my $l_whence = shift;
-    croak "Invalid value for l_whence member" unless $l_whence == SEEK_SET or
-											         $l_whence == SEEK_CUR or
-											         $l_whence == SEEK_END;
-
-    $flock_struct->{ l_whence } = $l_whence;
+	if ( @_ ) {
+		my $l_whence = shift;
+		croak "Invalid value for l_whence member"
+			unless $l_whence == SEEK_SET or
+				   $l_whence == SEEK_CUR or
+				   $l_whence == SEEK_END;
+		$flock_struct->{ l_whence } = $l_whence;
+	}
+    return $flock_struct->{ l_whence };
 }
 
 
@@ -99,9 +142,8 @@ sub l_whence {
 sub l_start {
     my $flock_struct = shift;
 
-    return $flock_struct->{ l_start } unless @_;
-
-    $flock_struct->{ l_start } = shift;
+    if ( @_ ) { $flock_struct->{ l_start } = shift };
+	return $flock_struct->{ l_start };
 }
 
 
@@ -111,12 +153,12 @@ sub l_start {
 sub l_len {
     my $flock_struct = shift;
 
-    return $flock_struct->{ l_len } unless @_;
-
-    my $l_len = shift;
-    croak "Invalid value for l_end member" if $l_len < 0;
-
-    $flock_struct->{ l_len } = $l_len;
+	if ( @_ ) {
+		my $l_len = shift;
+		croak "Invalid value for l_end member" if $l_len < 0;
+		$flock_struct->{ l_len } = $l_len;
+	}
+    return $flock_struct->{ l_len };
 }
 
 
@@ -126,12 +168,40 @@ sub l_len {
 sub l_pid {
     my $flock_struct = shift;
 
-    return $flock_struct->{ l_pid } unless @_;
+	if ( @_ ) {
+		my $l_pid = shift;
+		croak "Invalid value for l_pid member" unless $l_pid >= 0;
+		$flock_struct->{ l_pid } = $l_pid;
+	}
+    return $flock_struct->{ l_pid };
+}
 
-    my $l_pid = shift;
-    croak "Invalid value for l_pid member" unless $l_pid >= 0;
 
-    $flock_struct->{ l_pid } = $l_pid;
+###########################################################
+#
+
+sub fcntl_errno {
+    my $flock_struct = shift;
+	return $flock_struct->{ errno };
+}
+
+
+###########################################################
+#
+
+sub fcntl_error {
+    my $flock_struct = shift;
+	return $flock_struct->{ error };
+}
+
+
+###########################################################
+#
+
+sub fcntl_system_error {
+	my $flock_struct = shift;
+	return $! = $flock_struct->{ errno } if $flock_struct->{ errno };
+	return 'undef';
 }
 
 
@@ -139,16 +209,25 @@ sub l_pid {
 #
 
 sub fcntl_lock {
-	my ( $flock_struct, $fh, $function ) = @_;
+	my ( $flock_struct, $fh, $action ) = @_;
+	my $ret;
 
 	croak "Missing arguments to fcntl_lock()"
-		unless defined $flock_struct and defined $fh and defined $function;
-	croak "Invalid action argument" unless $function == F_GETLK or
-										   $function == F_SETLK or
-										   $function == F_SETLKW;
+		unless defined $flock_struct and defined $fh and defined $action;
+	croak "Invalid action argument" unless $action == F_GETLK or
+										   $action == F_SETLK or
+										   $action == F_SETLKW;
 
-	$fh = fileno( $fh ) if ref( $fh );
-	C_fcntl_lock( $fh, $function, $flock_struct );
+	my $fd = ref( $fh ) ? fileno( $fh ) : $fh;
+	if ( $ret = C_fcntl_lock( $fd, $action, $flock_struct ) ) {
+		$flock_struct->{ errno } = $flock_struct->{ error } = undef;
+	} else {
+		$flock_struct->{ errno } = $! + 0;
+		$flock_struct->{ error } = defined $fcntl_error_texts{ $! + 0 } ?
+			$fcntl_error_texts{ $! + 0 } : "Unexpected error: $!";
+	}
+
+	return $ret;
 }
 
 
@@ -171,13 +250,15 @@ Fcntl_Lock - Perl extension for file locking using fcntl()
 
   my $fh;
   open( $fh, ">>file_name" ) or die "Can't open file: $!\n";
-  $fs->fcntl_lock( $fh, F_SETLK ) or die "Can't obtain lock: $!\n";
+  unless ( $fs->fcntl_lock( $fh, F_SETLK ) ) {
+      print "Locking failed: " . $fs->error . "\n";
+  }
 
 =head1 DESCRIPTION
 
-File locking is usually done using the flock() function. Unfortunately, this
-allows only locks on whole files and is often implemented in terms of
-flock(2), which has some shortcomings.
+File locking in Perl is usually done using the flock() function.
+Unfortunately, this only allows locks on whole files and is often implemented
+in terms of flock(2), which has some shortcomings.
 
 Using this module file locking via fcntl(2) can be done (obviously, this
 restricts the use of the module to systems that have a fcntl() system
@@ -186,11 +267,11 @@ a flock structure must be created and its properties set. Afterwards, by
 calling the function fcntl_lock() a lock can be set or determined which
 process currently holds the lock.
 
-To create a new flock structure object simple call new():
+To create a new flock structure object simple call B<new>:
 
   fs = Fcntl_Lock->new;
 
-You also can pass the new() function a set of key-value pairs to initialize
+You also can pass the B<new> function a set of key-value pairs to initialize
 the members of the flock structure, e.g.
 
   $fs = Fcntl_Lock->new( 'l_type'   => F_WRLCK,
@@ -200,8 +281,8 @@ the members of the flock structure, e.g.
 
 if you plan to obtain a write lock for the first 100 bytes of a file.
 
-The following functions are available to set or query the properties of
-the object simulating the flock structure:
+The following functions are for setting and quering the properties of the
+object simulating the flock structure:
 
 =over 4
 
@@ -280,8 +361,36 @@ errno is set to B<EINTR>.
 =back
 
 On success the function returns the string "0 but true". Should you ever get
-a return value of 'undef' with errno being set to B<EINVAL> chances are high
-that you found a bug in the module.
+a return value of 'undef' with errno ($!) being set to B<EINVAL> chances are
+high that you found a bug in the module.
+
+If the function fails (as indicated by an 'undef' return value) you can either
+immediately evaluate the error number ($!, $ERRNO or $OS_ERROR) directly or
+check for it at some later time. There exist three functions for this purpose:
+
+=over 4
+
+=item B<fcntl_errno>
+
+This function returns the error number from the latest call of B<fcntl_lock>
+for the flock structure object. If the last call did not result in an error
+the function returns 'undef'.
+
+=item B<fcntl_error>
+
+The function returns a short description of the error that happened during the
+latest call of B<fcntl_lock> with the flock structure object. If there was no
+error the function returns 'undef'.
+
+=item B<fcntl_system_error>
+
+The previous function, B<fcntl_error>, tries to return a string with some
+relevance to the locking operation (i.e. "Lock is held by other processes"
+instead of "Permission denied"). If one instead wants to obtain the normal
+system error message one gets when using $! B<fcntl_system_error> can be
+called instead. Also this function returns 'undef' if there was no error.
+
+==back
 
 =head2 EXPORT
 

@@ -8,7 +8,7 @@
 #########################
 
 use Test;
-BEGIN { plan tests => 16 };
+BEGIN { plan tests => 17 };
 use POSIX;
 use Fcntl_Lock;
 ok(1); # If we made it this far, we're ok.
@@ -116,15 +116,59 @@ $fs = $fs->new( 'l_type'   => F_WRLCK,
 				'l_whence' => SEEK_SET,
 				'l_start'  => 0,
 				'l_len'    => 0 );
-open( $fh, ">fcntl_locking_test" ) or die "Can't open file.\n";
-unlink( "./fcntl_locking_test" );
+if ( open( $fh, ">fcntl_locking_test" ) ) {
+	unlink( "./fcntl_locking_test" );
+	if ( my $pid = fork ) {
+		sleep 1;
+		$i = 13;
+		for ( 1..12 ) {
+			$i = $_;
+			unless ( $fs->fcntl_lock( $fh, F_GETLK ) and 
+					 $fs->l_type == F_UNLCK or $fs->l_pid == $pid ) {
+				$i = 13;
+				last;
+			}
+			last if $fs->l_type == F_UNLCK;
+			select undef, undef, undef, 0.25;
+		}
+		if ( $i < 13 ) {
+			$fs->l_type( F_WRLCK );
+			ok( $state = $fs->fcntl_lock( $fh, F_SETLK ) );
+			$fs->l_type( F_UNLCK );
+			$fs->fcntl_lock( $fh, F_SETLK );
+		} else {
+			ok( 0 );
+		}
+		close $fh;
+	} elsif ( defined $pid ) {
+		$fs->fcntl_lock( $fh, F_SETLKW );
+		sleep 2;
+		$fs->l_type( F_UNLCK );
+		$fs->fcntl_lock( $fh, F_SETLK );
+		exit 0;
+	} else {
+		ok( 0 );
+		print STDERR "Can't fork: $!\n";
+	}
+} else {
+	print STDERR "Can't open a file for writing: $!\n";
+	ok( 0 );
+}
 
+##############################################
+# 17. Now another real test: basically the same as the previous one
+#     but instead of locking a file both processes try to lock STDOUT
+
+$fs = $fs->new( 'l_type'   => F_WRLCK,
+				'l_whence' => SEEK_SET,
+				'l_start'  => 0,
+				'l_len'    => 0 );
 if ( my $pid = fork ) {
     sleep 1;
 	$i = 13;
     for ( 1..12 ) {
 		$i = $_;
-		unless ( $fs->fcntl_lock( $fh, F_GETLK ) and 
+		unless ( $fs->fcntl_lock( STDOUT_FILENO, F_GETLK ) and
 				 $fs->l_type == F_UNLCK or $fs->l_pid == $pid ) {
 			$i = 13;
 			last;
@@ -132,19 +176,22 @@ if ( my $pid = fork ) {
 		last if $fs->l_type == F_UNLCK;
         select undef, undef, undef, 0.25;
     }
-	if( $i < 13 ) {
+	if ( $i < 13 ) {
         $fs->l_type( F_WRLCK );
-		ok( $fs->fcntl_lock( $fh, F_SETLK ) );
+		ok( $fs->fcntl_lock( STDOUT_FILENO, F_SETLK ) );
         $fs->l_type( F_UNLCK );
-		$fs->fcntl_lock( $fh, F_SETLK );
+		$fs->fcntl_lock( STDOUT_FILENO, F_SETLK );
 	} else {
 		ok( 0 );
 	}
-	close $fh;
+	close STDOUT_FILENO;
 } elsif ( defined $pid ) {
-	$fs->fcntl_lock( $fh, F_SETLKW );
+	$fs->fcntl_lock( STDOUT_FILENO, F_SETLKW );
     sleep 2;
     $fs->l_type( F_UNLCK );
+	$fs->fcntl_lock( STDOUT_FILENO, F_SETLK );
+	exit 0;
 } else {
-    die "Can't fork\n";
+	print STDERR "Can't fork: $!\n";
+	ok( 0 );
 }
