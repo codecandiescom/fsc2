@@ -266,10 +266,10 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 				prepslval.vptr = func_get( prepstext, &acc );
 				if ( prepslval.vptr != NULL )
 				{
-					if ( acc != ACCESS_ALL_SECTIONS )
+					if ( acc == ACCESS_EXP )
 					{
-						eprint( FATAL, "%s:%ld: Function `%s' can't be used "
-								"in PREPARATIONS section.\n",
+						eprint( FATAL, "%s:%ld: Function `%s' can only be "
+								"used in the EXPERIMENT section.\n",
 								 Fname, Lc, prepstext );
 						THROW( EXCEPTION );
 					}

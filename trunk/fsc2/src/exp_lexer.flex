@@ -211,6 +211,15 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 
 				prim_exp_val.vptr = func_get( prim_exptext, &acc );
 				if ( prim_exp_val.vptr != NULL )
+				{
+					if ( acc == ACCESS_PREP )
+					{
+						eprint( FATAL, "%s:%ld: Function `%s' can't be used "
+								"in the EXPERIMENT section.\n",
+								Fname, Lc, varstext );
+						THROW( EXCEPTION );
+					}
+					return FUNC_TOKEN;
 					return E_FUNC_TOKEN;
 
 				prim_exp_val.vptr = vars_get( prim_exptext );

@@ -211,10 +211,10 @@ WS          [\n \t]+
 					/* if it's a function check that the function can be used
 					   in the current context */
 
-					if ( acc != ACCESS_ALL_SECTIONS )
+					if ( acc == ACCESS_EXP )
 					{
-						eprint( FATAL, "%s:%ld: Function `%s' can't be used "
-								 "in VARIABLES section.\n",
+						eprint( FATAL, "%s:%ld: Function `%s' can only be "
+								"used in the EXPERIMENT section.\n",
 								 Fname, Lc, varstext );
 						THROW( EXCEPTION );
 					}

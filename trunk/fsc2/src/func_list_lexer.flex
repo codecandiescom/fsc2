@@ -23,7 +23,8 @@ static bool Eol;
 #define INT_TOKEN    256
 #define ALL_TOKEN    257
 #define EXP_TOKEN    258
-#define IDENT_TOKEN  259
+#define PREP_TOKEN   259
+#define IDENT_TOKEN  260
 
 
 %}
@@ -126,6 +127,7 @@ IDENT    [A-Za-z][A-Za-z_0-9]*
 
 ALL         return ALL_TOKEN;
 EXP         return EXP_TOKEN;
+PREP        return PREP_TOKEN;
 {INT}       return INT_TOKEN;
 {IDENT}     return IDENT_TOKEN;
 ;           return ';';
@@ -191,8 +193,8 @@ void func_list_parse( Func **fncts, int num_def_func, int *num_func )
 	   built-in functions are already set up ) and set defaults */
 
 	rewind( func_listin );
-	*fncts = T_realloc( *fncts, ( num + num_def_func + 1 ) * sizeof( Func ) );
 	*num_func = num + num_def_func;
+	*fncts = T_realloc( *fncts, ( *num_func + 1 ) * sizeof( Func ) );
 
 	for ( cur = num_def_func; cur <= *num_func; cur++ )
 	{
@@ -333,10 +335,21 @@ void fll_get_functions( Func *fncts, int num_def_func )
 					THROW( EXCEPTION );
 				}
 
-				if ( ret_token == ALL_TOKEN )				
-					fncts[ act ].access_flag = ACCESS_ALL_SECTIONS;
-				else
-					fncts[ act ].access_flag = ACCESS_RESTRICTED,
+				swicth ( ret_token ) ==  )				
+				{
+				    case ALL_TOKEN :
+						fncts[ act ].access_flag = ACCESS_ALL;
+						break;
+
+					case EXP_TOKEN :
+						fncts[ act ].access_flag = ACCESS_EXP;
+						break;
+						
+					case PREP_TOKEN :
+						fncts[ act ].access_flag = ACCESS_PREP;
+						break;
+				}
+		
 				state = 3;
 				break;
 

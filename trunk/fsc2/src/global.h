@@ -87,8 +87,9 @@ enum {
 /* Define access types for functions in certain sections */
 
 enum {
-	  ACCESS_RESTRICTED,
-	  ACCESS_ALL_SECTIONS
+	  ACCESS_EXP,
+	  ACCESS_PREP
+	  ACCESS_ALL
 };
 
 
