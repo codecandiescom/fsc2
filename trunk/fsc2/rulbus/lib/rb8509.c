@@ -143,9 +143,7 @@ int rulbus_adc12_card_init( int handle )
 	if ( rulbus_card[ handle ].polar == -1 )
 		return RULBUS_NO_POL;
 
-	/* Check the range setting - there are only 4 maximum input voltages
-	   and from exact value we can also determine if this is a bi- or
-	   unipolar card */
+	/* Check the range setting */
 
 	if ( rulbus_card[ handle ].range < 0.0 )
 		return RULBUS_NO_RNG;
@@ -157,7 +155,7 @@ int rulbus_adc12_card_init( int handle )
 	
 	switch ( i )
 	{
-		case 0 :
+		case 0 :    /* 0 V to +10.2375 V   or   -10.24 to +10.235 V
 			if ( rulbus_card[ handle ].polar == RULBUS_UNIPOLAR )
 			{
 				Vmin = 0.0;
@@ -170,7 +168,7 @@ int rulbus_adc12_card_init( int handle )
 			}
 			break;
 
-		case 1:
+		case 1:     /* 0 V to +10.0 V   or   -10.0 V to +10.0 V
 			if ( rulbus_card[ handle ].polar == RULBUS_UNIPOLAR )
 			{
 				Vmin = 0.0;
@@ -183,7 +181,7 @@ int rulbus_adc12_card_init( int handle )
 			}
 			break;
 
-		case 2 :
+		case 2 :    /* 0 V to +5.11875 V   or   -5.12 V to +5.1175 V
 			if ( rulbus_card[ handle ].polar == RULBUS_UNIPOLAR )
 			{
 				Vmin = 0.0;
@@ -196,7 +194,7 @@ int rulbus_adc12_card_init( int handle )
 			}
 			break;
 
-		case 3 :
+		case 3 :    /* 0 V to +5.0 V   or   -5.0 V to +5.0 V
 			if ( rulbus_card[ handle ].polar == RULBUS_UNIPOLAR )
 			{
 				Vmin = 0.0;
@@ -454,7 +452,7 @@ int rulbus_adc12_set_trigger_mode( int handle, int mode )
 
 /*---------------------------------------------------------------------*
  * Function to determine the minimum and maximum input voltage as well
- * as the coltage resolution of the card.
+ * as the voltage resolution of the card.
  *---------------------------------------------------------------------*/
 
 int rulbus_adc12_properties( int handle, double *Vmax, double *Vmin,
@@ -467,13 +465,13 @@ int rulbus_adc12_properties( int handle, double *Vmax, double *Vmin,
 	if ( ( card = rulbus_adc12_card_find( handle ) ) == NULL )
 		return RULBUS_INV_HND;
 
-	if ( Vmax )
+	if ( Vmax != NULL )
 		*Vmax = card->dV * ADC12_RANGE + card->Vmin;
 
-	if ( Vmin )
+	if ( Vmin != NULL )
 		*Vmin = card->Vmin;
 
-	if ( dV )
+	if ( dV != NULL )
 		*dV = card->dV;
 
 	return RULBUS_OK;
