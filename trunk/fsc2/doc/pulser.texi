@@ -96,7 +96,7 @@ etc.).
 
 For most pulsers the first statement of the @code{ASSIGNMENTS} section
 has to be the setting of the time base of the pulser unless the pulser
-has a fixed timebase, in which case no setting of the time base is
+has a fixed time base, in which case no setting of the time base is
 possible. All pulsers function similarly: they have a certain number of
 time slices (usually 65536, 2^16) and for each of them the output of the
 pulser can be either set to a high or a low voltage. By setting the
@@ -236,7 +236,7 @@ TM: EXTERNAL, LEVEL = -1.2 V, SLOPE = POSITIVE, IMPEDANCE = HIGH;
 @noindent
 Please note: The trigger input impedance can only be set for the
 @strong{Sony/Tektronix DG2020} and the @strong{Bruker EP385} does not
-allow the setting of any of these paramters.
+allow the setting of any of these parameters.
 
 For the @strong{Sony/Tektronix DG2020} the trigger level must be in the
 range between @w{-5V} and @w{+5 V}, while for the @strong{Tektronix
@@ -834,7 +834,7 @@ If more than one pulser is used it must also be indicated which pulser
 is supposed to create the pulse. This is done by appending the @code{#}
 character, followed by the pulser number, to the @code{PULSE}
 keyword. Thus, if e.g.@: the pulse numbered 3 has to be created by the
-second pulser it must be created by a command like the follwoing:
+second pulser it must be created by a command like the following:
 @example
 PULSE_3#2:   FUNCTION = RADIO_FREQUENCY,
              START    = 2 ms,
@@ -1073,7 +1073,7 @@ used.
 
 The next (rather simplified) example is the program for a phase cycled
 (1-dimensional) stimulated echo experiment. We need three microwave
-pulses and a further detection pulse that triggers the digitzer at the right
+pulses and a further detection pulse that triggers the digitizer at the right
 moment. During the experiment the first two microwave pulses have to be
 phase cycled.
 @example
