@@ -819,8 +819,9 @@ Var *f_setseed( Var *v )
    float data and strings. To get a value printed the format string has
    to contain the character `#'. The escape character is the backslash,
    with a double backslash for printing one backslash. Beside the `\#'
-   combination to print a `#' aome of the escape sequences from printf()
-   ('\n', '\t', and '\"') do work.
+   combination to print a `#' some of the escape sequences from printf()
+   ('\n', '\t', and '\"') do work. If the text should even be printed while
+   the test is running the string has to start with "\T".
 
    The function returns the number of variables it printed, not counting
    the format string.
