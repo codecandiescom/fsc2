@@ -31,7 +31,7 @@ static volatile bool child_is_ready;
 static volatile bool child_is_quitting;
 
 jmp_buf alrm_env;
-volatile bool can_jmp_alrm = UNSET;
+volatile sig_atomic_t can_jmp_alrm = 0;
 
 
 /*-------------------------------------------------------------------*/
