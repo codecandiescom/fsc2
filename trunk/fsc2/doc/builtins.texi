@@ -477,6 +477,16 @@ Returns the hyperbolic tangent of the argument.
 @cindex auxiliary functions
 
 @table @samp
+@item time()
+@findex time()
+Returns a string with the current time the form @code{hh:mm:ss}.
+
+@table @samp
+@item date()
+@findex date()
+Returns a string with the current date in a form like @code{Sun Jun 17, 2000}.
+
+@table @samp
 @item wait()
 @findex wait()
 Waits for the specified time. Times are always to be given in seconds or

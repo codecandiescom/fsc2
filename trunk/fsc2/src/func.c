@@ -81,6 +81,8 @@ Var *f_log(     Var *v );
 Var *f_sqrt(    Var *v );
 Var *f_random(  Var *v );
 Var *f_setseed( Var *v );
+Var *f_time(    Var *v );
+Var *f_date(    Var *v );
 Var *f_print(   Var *v );
 Var *f_wait(    Var *v );
 Var *f_init_1d( Var *v );
@@ -129,6 +131,8 @@ Func Def_Fncts[ ] =              /* List of built-in functions */
 	{ "sqrt",         f_sqrt,     1, ACCESS_ALL,  0 },
 	{ "random",       f_random,   0, ACCESS_ALL,  0 },
 	{ "set_seed",     f_setseed,  1, ACCESS_ALL,  0 },
+    { "time",         f_time,     0, ACCESS_ALL,  0 },
+    { "date",         f_date,     0, ACCESS_ALL,  0 },
 	{ "print",        f_print,   -1, ACCESS_ALL,  0 },
 	{ "wait",         f_wait,     1, ACCESS_ALL,  0 },
 	{ "init_1d",      f_init_1d, -1, ACCESS_PREP, 0 },
@@ -316,7 +320,7 @@ Var *func_call( Var *f )
 
 		if ( ac > f->dim )
 		{
-			eprint( SEVERE, "%s:%ld: Too many arguments for function `%s'.\n",
+			eprint( WARN, "%s:%ld: Too many arguments for function `%s'.\n",
 					Fname, Lc, f->name );
 
 			for ( ac = 0, ap = f->next; ac < f->dim; ++ac, ap = ap->next )
@@ -783,6 +787,52 @@ Var *f_setseed( Var *v )
 
 	srandom( arg );
 	return vars_push( INT_VAR, 1 );
+}
+
+
+/*--------------------------------------------------------------*/
+/* Returns a string with the current time in the form hh:mm:ss. */
+/*--------------------------------------------------------------*/
+
+Var *f_time( Var *v )
+{
+	time_t tp;
+	char ts[ 100 ];
+
+
+	v = v;
+	time( &tp );
+	if ( strftime( ts, 100, "%H:%M:%S", localtime( &tp ) ) == 0 )
+	{
+		eprint( SEVERE, "%s:%ld: time() returns invalid time string.\n",
+				Fname, Lc );
+		strcat( ts, "(Unknown time)" );
+	}
+
+	return vars_push( STR_VAR, ts );
+}
+
+
+/*--------------------------------------------------------------------------*/
+/* Returns a string with the current date in a form like "Sat Jun 17, 2000" */
+/*--------------------------------------------------------------------------*/
+
+Var *f_date( Var *v )
+{
+	time_t tp;
+	char ts[ 100 ];
+
+
+	v = v;
+	time( &tp );
+	if ( strftime( ts, 100, "%a %b %d, %Y", localtime( &tp ) ) == 0 )
+	{
+		eprint( SEVERE, "%s:%ld: date() returns invalid date string.\n",
+				Fname, Lc );
+		strcat( ts, "(Unknown date)" );
+	}
+
+	return vars_push( STR_VAR, ts );
 }
 
 
