@@ -775,17 +775,19 @@ void test_file( FL_OBJECT *a, long b )
 	{
 		is_tested = SET;                  /* show that file has been tested */
 		a->u_ldata = 0;
+		fl_deactivate_object( main_form->test_file );
+		fl_set_object_lcol( main_form->test_file, FL_INACTIVE );
 	}
 	else
 	{
 		a->u_ldata = 1;
 		user_break = UNSET;
+		fl_activate_object( main_form->test_file );
+		fl_set_object_lcol( main_form->test_file, FL_BLACK );
 	}
 
 	fl_set_object_label( main_form->test_file, "Test" );
 	fl_set_button_shortcut( main_form->test_file, "T", 1 );
-	fl_deactivate_object( main_form->test_file );
-	fl_set_object_lcol( main_form->test_file, FL_INACTIVE );
 	fl_activate_object( main_form->Load );
 	fl_set_object_lcol( main_form->Load, FL_BLACK );
 	fl_activate_object( main_form->reload );
