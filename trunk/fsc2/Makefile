@@ -387,9 +387,9 @@ LFLAGS			 := $(OPT) -shared -fpic  # needed for libraries
 ifeq ($(MPATROL),YES)
 	CONFFLAGS    += -DMPATROL
 	LIBS         := -L/usr/local/lib -lmpatrol -lelf -L/usr/X11R6/lib -lforms \
-					-lX11 -lm -ldl
+					-lX11 -lXpm -lm -ldl
 else
-	LIBS         := -L/usr/X11R6/lib -lforms -lX11 -lm -ldl
+	LIBS         := -L/usr/X11R6/lib -lforms -lX11 -lXpm -lm -ldl
 				    # -lmcheck   # for malloc debugging
 				    # -lefence   # to run with efence
 endif
