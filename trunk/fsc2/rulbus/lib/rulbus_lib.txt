@@ -5,13 +5,14 @@ Library for the Rulbus (Rijksuniversiteit Leiden BUS) with support
 
 Contents:
 
-    I   Rulbus Configuration File
-    II  General Functions
-    III RB8509 (12-bit ADC) Functions
-    IV  RB8510 (12-bit DAC) Functions
-    V   RB8514 (Delay Card) Functions
-    VI  RB8515 (Clock Card) Functions
-    VII Example Programs
+    I    Rulbus Configuration File
+    II   General Functions
+    III  rb8509_adc12 (12-bit ADC) Functions
+    IV   rb8510_dac12 (12-bit DAC) Functions
+    V    rb8514_delay (Delay Card) Functions
+    VI   rb8515_clock (Clock Card) Functions
+	VII  rb_generic (pseudo-card for debugging) Functions
+    VIII Example Programs
 
 
 ======================================================================
@@ -24,7 +25,7 @@ Before you can work with the library you must create a configuration
 file for the Rulbus. It contains informations about the device file
 used for the Rulbus interface, the racks attached to it and the
 cards sitting in these racks. Have a look at the file 'rulbus.conf'
-in the main directory of the package first, it should be nearly self-
+in the main directory of the package first, it should be mostly self-
 explaining.
 
 The configuration file may contain a line like this
@@ -39,8 +40,8 @@ will use '/dev/rulbus_epp' per default.
 
 For each rack connected to the Rulbus interface that you want to use
 you need a line starting with the keyword 'rack' and a rack name (a
-string, enclosed in single or double quotes") and followed by a set
-of further instructions enclosed in curly braces:
+string, enclosed in either single or double quotes) and followed by a
+set of further instructions enclosed in curly braces:
 
 rack "top rack" {
 
@@ -78,8 +79,16 @@ and followed by the address. The rack address can be given as a decimal
 number as well as a hexadecimal number (if it starts with '0x') or as a
 octal number (if it starts with a '0'). If you only have a single rack
 in the file with cards in it the rack address can be omitted and the rack
-is assumed to be always selected. When there's more than rack with cards
-listed in the configuration file rack addresses must be specified.
+is assumed to be always selected, having the default address 0c 15. When
+there's more than rack with cards listed in the configuration file rack
+addresses must be specified, which must be between 0 and 14.
+
+The configuration file may contain comments: everything following the
+a '#' or '//' is discarded uo to the end of the line. To create comments
+spanning multiple lines the usual C syntax for comments can be used, i.e.
+everything from the character sequence '/*' until the first encounter of
+'*/' is also discarded (with the consequence that such comments can't be
+nested).
 
 Further entries for a rack are for the cards in the rack (as many as there
 are cards). Each card description starts with the type of the rack, either
@@ -96,12 +105,13 @@ For each card its address should be specified by a line starting with the
 keyword 'address' and followed by the numeric card address. If no address
 is specified for the card a default address is used. Please note that the
 default address can't be used for two cards at the same time in a single
-rack.
+rack. Valid card addresses are in the range between 1 and 254.
 
 For 12-bit ADC (RB8509) cards the default address is 0xC0, for 12-bit DAC
 (RB8510) cards it is 0xD0, for delay (RB8514) cards it's 0xC4 and for
-clock (RB8515) cards 0xC8. No address can be specified for "generic"
-(rb_generic) cards.
+clock (RB8515) cards 0xC8. No address (or only the address 0, which is
+invalid for all other crads) can be specified for "generic" (rb_generic)
+cards.
 
 For 12-bit ADC (RB8509) cards additional informations to be specified are
 the number of channels, if the card works in bipolar or unipolar mode and
@@ -476,11 +486,15 @@ indicating the reason for the failure.
 int rulbus_rb8509_adc12_set_trigger_mode( int handle, int mode )
 
 This function allows to switch between the trigger modes, In internal
-mode a conversion is triggered by software, while in external trigger
-mode a conversion is triggered by an external signal. To switch to
-internal trigger mode call the function with mode set to the constant
-RULBUS_RB8509_ADC12_INT_TRIG, or use RULBUS_RB8509_ADC12_EXT_TRIG to
-switch to external trigger mode.
+mode a conversion is triggered by software, i.e. by asking for a converted
+value, while in external trigger mode a conversion is triggered by an
+external signal. To switch to internal trigger mode call the function
+with mode set to the constant RULBUS_RB8509_ADC12_INT_TRIG, or use
+RULBUS_RB8509_ADC12_EXT_TRIG to switch to external trigger mode.
+Please note that there are some cards that don't have an external
+trigger input. These cards should be set up in the Rulbus configuration
+file with the property 'has_external_trigger' being set to 'false' and
+then don't allow being switched to external trigger mode.
 
 On success the function returns RULBUS_OK, otherwise a negative value
 indicating the reason for the failure.
@@ -580,8 +594,43 @@ the card is left in the state it is at that moment.
 
 ----------------------------------------------------------------------
 
+int rulbus_rb8514_delay_set_clock_frequency( int handle, double freq )
+
+In order to be able to create delays when passed the delay time the
+library needs to know the frequency of the input clock. Therefor
+befor the function rulbus_rb8514_delay_set_delay() can be called
+successfully, rulbus_rb8514_delay_set_clock_frequency() must have
+been called to inform the library about the clock frequency (in Hz).
+
+On success the function returns RULBUS_OK, otherwise a negative value
+indicating the reason for the failure.
+
+
+----------------------------------------------------------------------
+
 int rulbus_rb8514_delay_set_delay( int handle, double delay, int force )
 
+This function can be called to set the delay to be produced by the
+card. In order to be able to do so the frequency of the input clock
+must have been set by a call of rulbus_rb8514_delay_set_delay().
+There is a lower limit to the delay that can be set, which is the
+intrinsic delay of the card (which can be specified in the Rulbus
+configuration file. The upper limit depends on the inout clock
+frequency and is 16777215 times the inverse of the input clock
+frequency plus the intrisic delay of the card.
+
+If the delay can't be produced exactly (because the value, reduced by
+the intrinsic delay, isn't an integer multiple of the inverse of the
+input clock frequency), the nearest possible delay is used instead.
+
+Usually when the card is just in the process of creating a delay the
+function will return the error RULBUS_CARD_BUSY and not set a new delay.
+To force the function to set a new delay value even in this case (and
+thereby ending the currently created delay prematurely) the function
+must be called with the 'force' argument set to a non-zero value.
+
+On success the function returns RULBUS_OK, otherwise a negative value
+indicating the reason for the failure.
 
 
 ----------------------------------------------------------------------
@@ -725,8 +774,49 @@ indicating the reason for the failure.
 ======================================================================
 
 
-VII Example Programs
---------------------
+VII rb_generic Functions
+------------------------
+
+
+Cards of type "rb_generic" aren't real cards, they are pseudo-cards,
+existing only in software. They are meant for debugging purposes
+only. Using such a card all addresses of a rack (between 1 and 254)
+can be written to or read from, allowing to bypass the functions
+for the real cards, which in some situations might be to restrictive
+in their error checking, or to access cards for which no module has
+been written.
+
+
+----------------------------------------------------------------------
+
+int rulbus_generic_write( int handle, unsigned char address,
+						  unsigned char *data, size_t len )
+
+Using this function 'len' bytes from buffer 'data' can be written
+to a rack address (must be between 1 and 254).
+
+On success the function returns RULBUS_OK, otherwise a negative value
+indicating the reason for the failure.
+
+
+----------------------------------------------------------------------
+
+int rulbus_generic_read( int handle, unsigned char address,
+						 unsigned char *data, size_t len )
+
+Using this function 'len' bytes can be read from a rack address (must
+be between 1 and 254), which are returned via the buffer 'data' (which
+must be allocated by the caller).
+
+On success the function returns RULBUS_OK, otherwise a negative value
+indicating the reason for the failure.
+
+
+======================================================================
+
+
+VIII Example Programs
+---------------------
 
 The following program demonstrates how to obtain a converted voltage
 from the 12-bit ADC (RB8509).
