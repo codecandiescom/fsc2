@@ -1480,10 +1480,10 @@ static void vars_arr_assign( Var *src, Var *dest )
 			dest->len = src->len;
 
 			if ( INT_TYPE( dest ) )
-				dest->val.lpnt = LONG_P T_malloc(   dest->len
+				dest->val.lpnt = LONG_P T_malloc( dest->len
 												  * sizeof *dest->val.lpnt );
 			else
-				dest->val.dpnt = DOUBLE_P T_malloc(   dest->len
+				dest->val.dpnt = DOUBLE_P T_malloc( dest->len
 													* sizeof *dest->val.dpnt );
 		}
 
@@ -2106,7 +2106,7 @@ static void vars_ref_copy_create( Var *nsv, Var *src, bool exact_copy )
 
 
 	/* If we're already at the lowest level, i.e. there are only one-
-	   dimensional arrays copy the contents. Then we're done. */
+	   dimensional arrays, copy the contents. Then we're done. */
 
 	if ( src->type & ( INT_ARR | FLOAT_ARR ) )
 	{
