@@ -39,7 +39,7 @@ static Var *vars_get_channel_name( void );
 extern void varsparse( void );
 
 
-/* locally used global variables */
+/* Locally used global variables */
 
 int Vars_Next_Section;
 
@@ -87,20 +87,20 @@ WS          [\n \t]+
 		/*---------------*/
 
 
-			/* handling of file name lines */
+			/* Handling of file name lines */
 {FILE}      {
 				*( varstext + varsleng - 1 ) = '\0';
 				T_free( Fname );
 				Fname = T_strdup( varstext + 2 );
 			}
 
-			/* handling of line number lines */
+			/* Handling of line number lines */
 {LNUM}		{
 				*( varstext + varsleng - 1 ) = '\0';
 				Lc = atol( varstext + 2 );
 			}
 
-			/* handling of error messages from the cleaner */
+			/* Handling of error messages from the cleaner */
 {ERR}		{
 				eprint( FATAL, "%s\n", varstext + 2 );
 				THROW( EXCEPTION );
@@ -112,43 +112,43 @@ WS          [\n \t]+
 				THROW( EXCEPTION );
 			}
 
-			/* handling of DEVICES: labels */
+			/* Handling of DEVICES: labels */
 {DEV}		{
 				Vars_Next_Section = DEVICES_SECTION;
 				return SECTION_LABEL;
 			}
 
-			/* handling of ASSIGNMENTS: label */
+			/* Handling of ASSIGNMENTS: label */
 {ASS}		{
 				Vars_Next_Section = ASSIGNMENTS_SECTION;
 				return SECTION_LABEL;
 			}
 
-			/* handling of VARIABLES: label */
+			/* Handling of VARIABLES: label */
 {VAR}		{
 				Vars_Next_Section = VARIABLES_SECTION;
 				return SECTION_LABEL;
 			}
 
-			/* handling of PHASES: label */
+			/* Handling of PHASES: label */
 {PHAS}		{
 				Vars_Next_Section = PHASES_SECTION;
 				return SECTION_LABEL;
 			}
 
-			/* handling of PREPARATIONS: label */
+			/* Handling of PREPARATIONS: label */
 {PREP}		{
 				Vars_Next_Section = PREPARATIONS_SECTION;
 				return SECTION_LABEL;
 			}
 
-			/* handling of EXPERIMENT: label */
+			/* Handling of EXPERIMENT: label */
 {EXP}		{
 				Vars_Next_Section = EXPERIMENT_SECTION;
 				return SECTION_LABEL;
 			}
 
-			/* all needed pulse related keywords... */
+			/* All needed pulse related keywords... */
 
 {P}"."{F}   {
 				varslval.vptr = p_get( varstext, P_FUNC );
@@ -180,19 +180,18 @@ WS          [\n \t]+
 				return VAR_REF;
             }
 
-			/* handling of integer numbers */
+			/* Handling of integer and floating point numbers */
 {INT}       {
 				varslval.lval = T_atol( varstext );
                 return INT_TOKEN;
             }
 
-			/* handling of floating point numbers */
 {FLOAT}     {
                 varslval.dval = T_atof( varstext );
                 return FLOAT_TOKEN;
             }
 
-            /* handling of string constants (to be used as format strings in
+            /* Handling of string constants (to be used as format strings in
 			   the print() function only */
 {STR}       {
 				varstext[ strlen( varstext ) - 1 ] = '\0';
@@ -206,16 +205,16 @@ WS          [\n \t]+
 				THROW( EXCEPTION );
 			}
 
-			/* handling of function, variable and array identifiers */
+			/* Handling of function, variable and array identifiers */
 {IDENT}     {
 				int acc;
 
-				/* first check if the identifier is a function name */
+				/* First check if the identifier is a function name */
 
 				varslval.vptr = func_get( varstext, &acc );
 				if ( varslval.vptr != NULL )
 				{
-					/* if it's a function check that the function can be used
+					/* If it's a function check that the function can be used
 					   in the current context */
 
 					if ( acc == ACCESS_EXP )
@@ -228,7 +227,7 @@ WS          [\n \t]+
 					return FUNC_TOKEN;
 				}
 
-				/* if it's not a function it's got to be a variable */
+				/* If it's not a function it's got to be a variable */
 
 				if ( ( varslval.vptr = vars_get( varstext ) )
 				     == NULL )
@@ -236,7 +235,7 @@ WS          [\n \t]+
 				return VAR_TOKEN;
 			}
 
-			/* stuff used with functions, arrays and math */
+			/* Stuff used with functions, arrays and math */
 
 "=="        return EQ;        /* equal */
 "!="        return NE;        /* unequal */
@@ -263,10 +262,10 @@ WS          [\n \t]+
 "|"         return OR;        /* logical or operator */
 "~"         return XOR;       /* logical exclusive or (xor) operator */
 
-			/* handling of end of statement character */
+			/* Handling of end of statement character */
 ";"			return ';';
 
-{WS}        /* skip white space */
+{WS}        /* Skip white space */
 
 "\x4ntesla" return NT_TOKEN;
 "\x4utesla" return UT_TOKEN;
@@ -281,14 +280,14 @@ WS          [\n \t]+
 "\x4kunit"  return KU_TOKEN;
 "\x4megunit" return MEG_TOKEN;
 
-			/* handling of invalid input */
+			/* Handling of invalid input */
 .           {
 				eprint( FATAL, "%s:%ld: Invalid input in VARIABLES section: "
 						"`%s'.\n", Fname, Lc, varstext );
 				THROW( EXCEPTION );
 			}
 
-			/* handling of end of file */
+			/* Handling of end of file */
 <<EOF>>	    {
 				Vars_Next_Section = NO_SECTION;
 				return 0;
@@ -317,7 +316,7 @@ int variables_parser( FILE *in )
 	static bool is_restart = UNSET;
 
 
-	/* don't allow more than one VARIABLES section */
+	/* Don't allow more than one VARIABLES section */
 
 	if ( compilation.sections[ VARIABLES_SECTION ] )
 	{
