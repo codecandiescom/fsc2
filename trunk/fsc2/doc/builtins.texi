@@ -1058,10 +1058,14 @@ sliders there isn't such a visual feedback. As already the function
 number to be used to identify the slider.
 
 The first argument the function expects is a string, either
-@code{"NORMAL_SLIDER"} or @code{"VALUE_SLIDER"} (the case of the
-letters doesn't matter). "Normal" sliders are just sliders without any
-decoration while "value" sliders have an extra field showing the current
-value set via the slider.
+@code{"NORMAL_SLIDER"}, @code{"VALUE_SLIDER"},
+@code{"SLOW_NORMAL_SLIDER"} or @code{"SLOW_VALUE_SLIDER"} (the keywords
+are case-insensitive). @code{NORMAL} sliders are just sliders without
+any decoration while @code{VALUE} sliders have an extra field showing
+the current value set via the slider. Normally, a slider reports a new
+value whenever the slider has been moved, @code{SLOW} sliders only
+report a new value only when also the mouse button (which has to be kept
+pressed down while the slider is moved) has been released.
 
 The second argument must be the minimum value the slider can be adjusted
 to and the third argument is the maximum value. The minimum value must
