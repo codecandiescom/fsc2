@@ -2428,7 +2428,7 @@ static bool cut_change_x_range( Canvas *c )
 static bool cut_change_y_range( Canvas *c )
 {
 	Curve_1d *cv = &G.cut_curve;
-	double y1, y2;
+	double cy1, cy2;
 
 
 	if ( abs( G.start[ Y ] - c->ppos[ Y ] ) <= 4 )
@@ -2436,14 +2436,15 @@ static bool cut_change_y_range( Canvas *c )
 
 	cut_save_scale_state( );
 
-	y1 = ( ( double ) G.cut_canvas.h - 1.0 - G.start[ Y ] ) / cv->s2d[ Y ]
-		 - cv->shift[ Y ];
-	y2 = ( ( double ) G.cut_canvas.h - 1.0 - c->ppos[ Y ] ) / cv->s2d[ Y ]
-		 - cv->shift[ Y ];
+	cy1 = ( ( double ) G.cut_canvas.h - 1.0 - G.start[ Y ] ) / cv->s2d[ Y ]
+		  - cv->shift[ Y ];
+	cy2 = ( ( double ) G.cut_canvas.h - 1.0 - c->ppos[ Y ] ) / cv->s2d[ Y ]
+		  - cv->shift[ Y ];
 
-	CG.shift[ G.active_curve ][ Y ] = cv->shift[ Y ] = - d_min( y1, y2 );
+	CG.shift[ G.active_curve ][ Y ] = cv->shift[ Y ] = - d_min( cy1, cy2 );
 	CG.s2d[ G.active_curve ][ Y ] = cv->s2d[ Y ] =
-		                   ( double ) ( G.cut_canvas.h - 1 ) / fabs( y1 - y2 );
+		                                      ( double ) ( G.cut_canvas.h - 1 )
+		                                      / fabs( cy1 - cy2 );
 	return SET;
 }
 
@@ -2455,7 +2456,7 @@ static bool cut_change_xy_range( Canvas *c )
 {
 	bool scale_changed = UNSET;
 	Curve_1d *cv = &G.cut_curve;
-	double x1, x2, y1, y2;
+	double cx1, cx2, cy1, cy2;
 
 
 	cut_save_scale_state( );
@@ -2468,9 +2469,10 @@ static bool cut_change_xy_range( Canvas *c )
 		x1 = G.start[ X ] / cv->s2d[ X ] - cv->shift[ X ];
 		x2 = c->ppos[ X ] / cv->s2d[ X ] - cv->shift[ X ];
 
-		CG.shift[ G.active_curve ][ X ] = cv->shift[ X ] = - d_min( x1, x2 );
+		CG.shift[ G.active_curve ][ X ] = cv->shift[ X ] = - d_min( cx1, cx2 );
 		CG.s2d[ G.active_curve ][ X ] = cv->s2d[ X ] =
-			               ( double ) ( G.cut_canvas.w - 1 ) / fabs( x1 - x2 );
+			                                  ( double ) ( G.cut_canvas.w - 1 )
+			                                  / fabs( cx1 - cx2 );
 
 		scale_changed = SET;
 	}
@@ -2479,14 +2481,15 @@ static bool cut_change_xy_range( Canvas *c )
 	{
 		CG.can_undo[ G.active_curve ] = SET;
 
-		y1 = ( ( double ) G.cut_canvas.h - 1.0 - G.start[ Y ] ) / cv->s2d[ Y ]
-			 - cv->shift[ Y ];
-		y2 = ( ( double ) G.cut_canvas.h - 1.0 - c->ppos[ Y ] ) / cv->s2d[ Y ]
-			 - cv->shift[ Y ];
+		cy1 = ( ( double ) G.cut_canvas.h - 1.0 - G.start[ Y ] ) / cv->s2d[ Y ]
+			  - cv->shift[ Y ];
+		cy2 = ( ( double ) G.cut_canvas.h - 1.0 - c->ppos[ Y ] ) / cv->s2d[ Y ]
+			  - cv->shift[ Y ];
 
-		CG.shift[ G.active_curve ][ Y ] = cv->shift[ Y ] = - d_min( y1, y2 );
+		CG.shift[ G.active_curve ][ Y ] = cv->shift[ Y ] = - d_min( cy1, cy2 );
 		CG.s2d[ G.active_curve ][ Y ] = cv->s2d[ Y ] =
-			               ( double ) ( G.cut_canvas.h - 1 ) / fabs( y1 - y2 );
+			                                  ( double ) ( G.cut_canvas.h - 1 )
+			                                  / fabs( cy1 - cy2 );
 
 		scale_changed = SET;
 	}

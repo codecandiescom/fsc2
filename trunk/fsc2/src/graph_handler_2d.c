@@ -571,7 +571,7 @@ static bool change_x_range_2d( Canvas *c )
 static bool change_y_range_2d( Canvas *c )
 {
 	Curve_2d *cv;
-	double y1, y2;
+	double cy1, cy2;
 
 
 	if ( abs( G.start[ Y ] - c->ppos[ Y ] ) <= 4 || G.active_curve == -1 ||
@@ -582,13 +582,13 @@ static bool change_y_range_2d( Canvas *c )
 
 	save_scale_state_2d( cv );
 
-	y1 = ( ( double ) G.canvas.h - 1.0 - G.start[ Y ] ) / cv->s2d[ Y ]
-		 - cv->shift[ Y ];
-	y2 = ( ( double ) G.canvas.h - 1.0 - c->ppos[ Y ] ) / cv->s2d[ Y ]
-		 - cv->shift[ Y ];
+	cy1 = ( ( double ) G.canvas.h - 1.0 - G.start[ Y ] ) / cv->s2d[ Y ]
+		  - cv->shift[ Y ];
+	cy2 = ( ( double ) G.canvas.h - 1.0 - c->ppos[ Y ] ) / cv->s2d[ Y ]
+		  - cv->shift[ Y ];
 
-	cv->shift[ Y ] = - d_min( y1, y2 );
-	cv->s2d[ Y ] = ( double ) ( G.canvas.h - 1 ) / fabs( y1 - y2 );
+	cv->shift[ Y ] = - d_min( cy1, cy2 );
+	cv->s2d[ Y ] = ( double ) ( G.canvas.h - 1 ) / fabs( cy1 - cy2 );
 
 	recalc_XPoints_of_curve_2d( cv );
 
@@ -603,7 +603,7 @@ static bool change_xy_range_2d( Canvas *c )
 {
 	bool scale_changed = UNSET;
 	Curve_2d *cv;
-	double x1, x2, y1, y2;
+	double cx1, cx2, cy1, cy2;
 
 
 	if ( G.active_curve == -1 ||
@@ -619,11 +619,11 @@ static bool change_xy_range_2d( Canvas *c )
 	{
 		cv->can_undo = SET;
 
-		x1 = G.start[ X ] / cv->s2d[ X ] - cv->shift[ X ];
-		x2 = c->ppos[ X ] / cv->s2d[ X ] - cv->shift[ X ];
+		cx1 = G.start[ X ] / cv->s2d[ X ] - cv->shift[ X ];
+		cx2 = c->ppos[ X ] / cv->s2d[ X ] - cv->shift[ X ];
 
-		cv->shift[ X ] = - d_min( x1, x2 );
-		cv->s2d[ X ] = ( double ) ( G.canvas.w - 1 ) / fabs( x1 - x2 );
+		cv->shift[ X ] = - d_min( cx1, cx2 );
+		cv->s2d[ X ] = ( double ) ( G.canvas.w - 1 ) / fabs( cx1 - cx2 );
 
 		scale_changed = SET;
 	}
@@ -632,13 +632,13 @@ static bool change_xy_range_2d( Canvas *c )
 	{
 		cv->can_undo = SET;
 
-		y1 = ( ( double ) G.canvas.h - 1.0 - G.start[ Y ] ) / cv->s2d[ Y ]
-			 - cv->shift[ Y ];
-		y2 = ( ( double ) G.canvas.h - 1.0 - c->ppos[ Y ] ) / cv->s2d[ Y ]
-			 - cv->shift[ Y ];
+		cy1 = ( ( double ) G.canvas.h - 1.0 - G.start[ Y ] ) / cv->s2d[ Y ]
+			  - cv->shift[ Y ];
+		cy2 = ( ( double ) G.canvas.h - 1.0 - c->ppos[ Y ] ) / cv->s2d[ Y ]
+			  - cv->shift[ Y ];
 
-		cv->shift[ Y ] = - d_min( y1, y2 );
-		cv->s2d[ Y ] = ( double ) ( G.canvas.h - 1 ) / fabs( y1 - y2 );
+		cv->shift[ Y ] = - d_min( cy1, cy2 );
+		cv->s2d[ Y ] = ( double ) ( G.canvas.h - 1 ) / fabs( cy1 - cy2 );
 
 		scale_changed = SET;
 	}

@@ -97,7 +97,7 @@ bool xforms_init( int *argc, char *argv[ ] )
 {
 	Display *display;
 	FL_Coord h, H;
-	FL_Coord x1, y1, w1, h1, x2, y2, w2, h2;
+	FL_Coord cx1, cy1, cw1, ch1, cx2, cy2, cw2, ch2;
 	int i;
 	int flags, wx, wy, ww, wh;
 	XFontStruct *font;
@@ -280,15 +280,15 @@ bool xforms_init( int *argc, char *argv[ ] )
 	fl_set_browser_fontstyle( main_form->browser, FL_FIXED_STYLE );
 	fl_set_browser_fontstyle( main_form->error_browser, FL_FIXED_STYLE );
 
-	fl_get_object_geometry( main_form->browser, &x1, &y1, &w1, &h1 );
-	fl_get_object_geometry( main_form->error_browser, &x2, &y2, &w2, &h2 );
+	fl_get_object_geometry( main_form->browser, &cx1, &cy1, &cw1, &ch1 );
+	fl_get_object_geometry( main_form->error_browser, &cx2, &cy2, &cw2, &ch2 );
 
-	h = y2 - y1 - h1;
-	H = h1 + h2 + h;
+	h = cy2 - cy1 - ch1;
+	H = ch1 + ch2 + h;
 
 	fl_set_slider_size( main_form->win_slider, XI_sizes.SLIDER_SIZE );
 	fl_set_slider_value( main_form->win_slider,
-						 ( double ) ( h1 + h / 2
+						 ( double ) ( ch1 + h / 2
 									  - 0.5 * H * XI_sizes.SLIDER_SIZE )
 						 / ( ( 1.0 - XI_sizes.SLIDER_SIZE ) * H ) );
 
@@ -384,6 +384,10 @@ bool xforms_init( int *argc, char *argv[ ] )
 
 static void setup_app_options( FL_CMD_OPT app_opt[ ] )
 {
+	static char def_null[ ] = "0";
+	static char def_none[ ] = "";
+
+
 	app_opt[ GEOMETRY ].option            = T_strdup( "-geometry" );
 	app_opt[ GEOMETRY ].specifier         = T_strdup( "*.geometry" );
 	app_opt[ GEOMETRY ].argKind           = XrmoptionSepArg;
@@ -392,22 +396,22 @@ static void setup_app_options( FL_CMD_OPT app_opt[ ] )
 	app_opt[ BROWSERFONTSIZE ].option     =  T_strdup( "-browserFontSize" );
 	app_opt[ BROWSERFONTSIZE ].specifier  = T_strdup( "*.browserFontSize" );
 	app_opt[ BROWSERFONTSIZE ].argKind    = XrmoptionSepArg;
-	app_opt[ BROWSERFONTSIZE ].value      = ( caddr_t ) "0";
+	app_opt[ BROWSERFONTSIZE ].value      = ( caddr_t ) def_null;
 
 	app_opt[ BUTTONFONTSIZE	].option      = T_strdup( "-buttonFontSize" );
 	app_opt[ BUTTONFONTSIZE	].specifier   = T_strdup( "*.buttonFontSize" );
 	app_opt[ BUTTONFONTSIZE	].argKind     = XrmoptionSepArg;
-	app_opt[ BUTTONFONTSIZE	].value       = ( caddr_t ) "0";
+	app_opt[ BUTTONFONTSIZE	].value       = ( caddr_t ) def_null;
 
 	app_opt[ INPUTFONTSIZE ].option       = T_strdup( "-inputFontSize" );
 	app_opt[ INPUTFONTSIZE ].specifier    = T_strdup( "*.inputFontSize" );
 	app_opt[ INPUTFONTSIZE ].argKind      = XrmoptionSepArg;
-	app_opt[ INPUTFONTSIZE ].value        = ( caddr_t ) "0";
+	app_opt[ INPUTFONTSIZE ].value        = ( caddr_t ) def_null;
 
 	app_opt[ LABELFONTSIZE ].option       = T_strdup( "-labelFontSize" );
 	app_opt[ LABELFONTSIZE ].specifier    = T_strdup( "*.labelFontSize" );
 	app_opt[ LABELFONTSIZE ].argKind      = XrmoptionSepArg;
-	app_opt[ LABELFONTSIZE ].value        = ( caddr_t ) "0";
+	app_opt[ LABELFONTSIZE ].value        = ( caddr_t ) def_null;
 
 	app_opt[ DISPLAYGEOMETRY ].option     = T_strdup( "-displayGeometry" );
 	app_opt[ DISPLAYGEOMETRY ].specifier  = T_strdup( "*.displayGeometry" );
@@ -432,34 +436,34 @@ static void setup_app_options( FL_CMD_OPT app_opt[ ] )
 	app_opt[ CHOICEFONTSIZE ].option      = T_strdup( "-choiceFontSize" );
 	app_opt[ CHOICEFONTSIZE ].specifier   = T_strdup( "*.choiceFontSize" );
 	app_opt[ CHOICEFONTSIZE ].argKind     = XrmoptionSepArg;
-	app_opt[ CHOICEFONTSIZE ].value       = ( caddr_t ) "0";
+	app_opt[ CHOICEFONTSIZE ].value       = ( caddr_t ) def_null;
 
 	app_opt[ SLIDERFONTSIZE ].option      = T_strdup( "-sliderFontSize" );
 	app_opt[ SLIDERFONTSIZE ].specifier   = T_strdup( "*.sliderFontSize" );
 	app_opt[ SLIDERFONTSIZE ].argKind     = XrmoptionSepArg;
-	app_opt[ SLIDERFONTSIZE ].value       = ( caddr_t ) "0";
+	app_opt[ SLIDERFONTSIZE ].value       = ( caddr_t ) def_null;
 
 	app_opt[ FILESELFONTSIZE ].option     =
 		                                   T_strdup( "-fileselectorFontSize" );
 	app_opt[ FILESELFONTSIZE ].specifier  =
 		                                  T_strdup( "*.fileselectorFontSize" );
 	app_opt[ FILESELFONTSIZE ].argKind    = XrmoptionSepArg;
-	app_opt[ FILESELFONTSIZE ].value      = ( caddr_t ) "0";
+	app_opt[ FILESELFONTSIZE ].value      = ( caddr_t ) def_null;
 
 	app_opt[ HELPFONTSIZE ].option        = T_strdup( "-helpFontSize" );
 	app_opt[ HELPFONTSIZE ].specifier     = T_strdup( "*.helpFontSize" );
 	app_opt[ HELPFONTSIZE ].argKind       = XrmoptionSepArg;
-	app_opt[ HELPFONTSIZE ].value         = ( caddr_t ) "0";
+	app_opt[ HELPFONTSIZE ].value         = ( caddr_t ) def_null;
 
 	app_opt[ STOPMOUSEBUTTON ].option     = T_strdup( "-stopMouseButton" );
 	app_opt[ STOPMOUSEBUTTON ].specifier  = T_strdup( "*.stopMouseButton" );
 	app_opt[ STOPMOUSEBUTTON ].argKind    = XrmoptionSepArg;
-	app_opt[ STOPMOUSEBUTTON ].value      = ( caddr_t ) "";
+	app_opt[ STOPMOUSEBUTTON ].value      = ( caddr_t ) def_none;
 
 	app_opt[ NOCRASHMAIL ].option         = T_strdup( "-noCrashMail" );
 	app_opt[ NOCRASHMAIL ].specifier      = T_strdup( "*.noCrashMail" );
 	app_opt[ NOCRASHMAIL ].argKind        = XrmoptionNoArg;
-	app_opt[ NOCRASHMAIL ].value          = ( caddr_t ) "0";
+	app_opt[ NOCRASHMAIL ].value          = ( caddr_t ) def_null;
 
 	app_opt[ RESOLUTION	].option          = T_strdup( "-size" );
 	app_opt[ RESOLUTION	].specifier       = T_strdup( "*.size" );
@@ -591,26 +595,26 @@ void win_slider_callback( FL_OBJECT *a, long b )
 {
 	FL_Coord h, H;
 	FL_Coord new_h1 ;
-	FL_Coord x1, y1, w1, h1, x2, y2, w2, h2;
+	FL_Coord cx1, cy1, cw1, ch1, cx2, cy2, cw2, ch2;
 
 
 	b = b;
 
 	fl_freeze_form( main_form->fsc2 );
 
-	fl_get_object_geometry( main_form->browser, &x1, &y1, &w1, &h1 );
-	fl_get_object_geometry( main_form->error_browser, &x2, &y2, &w2, &h2 );
+	fl_get_object_geometry( main_form->browser, &cx1, &cy1, &cw1, &ch1 );
+	fl_get_object_geometry( main_form->error_browser, &cx2, &cy2, &cw2, &ch2 );
 
-	h = y2 - y1 - h1;
-	H = y2 - y1 + h2;
+	h = cy2 - cy1 - ch1;
+	H = cy2 - cy1 + ch2;
 
 	new_h1 = ( FL_Coord ) ( ( 1.0 - XI_sizes.SLIDER_SIZE ) * H 
 							* fl_get_slider_value( a )
 							+ 0.5 * H * XI_sizes.SLIDER_SIZE - h / 2 );
 
-	fl_set_object_size( main_form->browser, w1, new_h1 );
-	fl_set_object_geometry( main_form->error_browser, x2, y1 + new_h1 + h,
-							w2, H - ( new_h1 + h ) );
+	fl_set_object_size( main_form->browser, cw1, new_h1 );
+	fl_set_object_geometry( main_form->error_browser, cx2, cy1 + new_h1 + h,
+							cw2, H - ( new_h1 + h ) );
 	fl_unfreeze_form( main_form->fsc2 );
 }
 
