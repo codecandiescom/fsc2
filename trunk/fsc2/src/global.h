@@ -241,9 +241,11 @@ enum {
 };
 
 
-/* Flags for type of phase handling - UNKNOWN -> type of protocol undecided,
-                                      FFM -> Frankfurt type protocol,
-                                      BLN -> Berlin kind of protocol */
+/* Flags for type of phase handling -
+   PHASE_UNKNOWN_PROT  -> type of protocol undecided,
+   PHASE_FFM_PROT      -> Frankfurt type protocol,
+   PHASE_BLN_PROT      -> Berlin kind of protocol
+*/
 
 enum {
 	PHASE_UNKNOWN_PROT,

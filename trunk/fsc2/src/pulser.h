@@ -28,7 +28,6 @@
 #include "fsc2.h"
 
 
-
 typedef struct {
 
 	const char *name;
@@ -75,7 +74,6 @@ typedef struct {
 	bool ( *keep_all_pulses )( void );
 
 } Pulser_Struct;
-
 
 
 enum {

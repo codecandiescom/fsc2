@@ -203,7 +203,7 @@ void p_assign_pod( long func, Var *v )
 /*------------------------------------------------------------------------*/
 /* This function has a double purpose: For pulsers that have pods and     */
 /* channels, the pod to channel assignment is done via this function. For */
-/* pulsers, that have just channels, the assignment of a function to a    */
+/* pulsers that have just channels the assignment of a function to a      */
 /* channel is done here (instead of p_assign_pod() as for the other type  */
 /* of pulsers)                                                            */
 /*------------------------------------------------------------------------*/

@@ -120,10 +120,6 @@ void DumpStack( void )
 		close( pipe_fd[ DUMP_PARENT_READ ] );
 		close( pipe_fd[ DUMP_PARENT_WRITE ] );
 
-		close( STDOUT_FILENO );
-		close( STDERR_FILENO );
-		close( STDIN_FILENO );
-
 		dup2( pipe_fd[ DUMP_CHILD_WRITE ], STDOUT_FILENO );
 		dup2( pipe_fd[ DUMP_CHILD_WRITE ], STDERR_FILENO );
 		dup2( pipe_fd[ DUMP_CHILD_READ  ], STDIN_FILENO );

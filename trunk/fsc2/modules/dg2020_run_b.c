@@ -28,8 +28,8 @@
 static void dg2020_defense_twt_check( void );
 
 
-#define ON( f )           ( ( f )->is_inverted ? LOW : HIGH )
-#define OFF( f )          ( ( f )->is_inverted ? HIGH : LOW )
+#define type_ON( f )           ( ( f )->is_inverted ? LOW : HIGH )
+#define type_OFF( f )          ( ( f )->is_inverted ? HIGH : LOW )
 
 
 /*-------------------------------------------------------------------------*/
@@ -255,7 +255,7 @@ void dg2020_set_pulses( FUNCTION *f )
 	{
 		dg2020_set_constant( f->channel[ i ]->self, -1, 1, LOW );
 		dg2020_set_constant( f->channel[ i ]->self, 0, dg2020.mem_size - 1,
-							 OFF( f ) );
+							 type_OFF( f ) );
 	}
 
 	/* Now simply run through all active pulses of the channel */
@@ -275,7 +275,7 @@ void dg2020_set_pulses( FUNCTION *f )
 
 			if ( start != end )
 				dg2020_set_constant( p->channel[ j ]->self, start, end - start,
-									 ON( f ) );
+									 type_ON( f ) );
 		}
 	}
 
@@ -489,7 +489,7 @@ void dg2020_commit( FUNCTION *f, bool flag )
 										  f->channel[ i ]->new, 
 										  &start, &len ) ) != 0 )
 				dg2020_set_constant( f->channel[ i ]->self, start, len,
-									 what == -1 ? OFF( f ) : ON( f ) );
+								   what == -1 ? type_OFF( f ) : type_ON( f ) );
 		}
 
 		f->channel[ i ]->needs_update = UNSET;
@@ -524,9 +524,10 @@ void dg2020_cw_setup( void )
 	   (i.e. the cw channel) to be always logical high */
 
 	if ( ! dg2020_set_constant( f->channel[ 0 ]->self, -1, 1, 0 ) ||
-		 ! dg2020_set_constant( f->channel[ 0 ]->self, 0, 127, OFF( f ) ) ||
+		 ! dg2020_set_constant( f->channel[ 0 ]->self, 0, 127,
+								type_OFF( f ) ) ||
 		 ! dg2020_set_constant( f->channel[ 1 ]->self, -1, 1, 0 ) ||
-		 ! dg2020_set_constant( f->channel[ 1 ]->self, 0, 127, ON( f ) ) )
+		 ! dg2020_set_constant( f->channel[ 1 ]->self, 0, 127, type_ON( f ) ) )
 	{
 		eprint( FATAL, UNSET, "%s: Failed to setup pulser.\n",
 				pulser_struct.name );

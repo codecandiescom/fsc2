@@ -50,6 +50,7 @@ void device_add( const char *name )
 	char *lib_name;
 	struct stat buf;
 	int length;
+	Device *cd;
 
 
 	dev_name = string_to_lower( T_strdup( name ) );
@@ -151,6 +152,19 @@ void device_add( const char *name )
 		THROW( EXCEPTION )
 	}
 
+	/* Make sure the device isn't already loaded */
+
+	for ( cd = Device_List; cd != NULL; cd = cd->next )
+		if ( ! strcmp( cd->name, dev_name ) ||
+			 ( real_name != NULL && ! strcmp( cd->name, real_name ) ) )
+		{
+			eprint( FATAL, SET, "Device `%s' is listed twice in the "
+					"DEVICES section%s%s.\n", dev_name, real_name != NULL ?
+					", the first time possibly under the name " : "",
+					real_name != NULL ? real_name : "" );
+			THROW( EXCEPTION )
+		}
+
 	/* Now append the device to the end of the device list */
 
 	TRY
@@ -180,20 +194,12 @@ void device_append_to_list( const char *dev_name )
 	Device *cd;
 
 
-	/* Let's first run through the device list and check that the device isn't
-	   already in it and (if this turns out ok) append a new new Device
-	   structure to the list of devices */
+	/* Append a new new Device structure to the list of devices */
 
 	if ( Device_List != NULL )
 	{
 		for ( cd = Device_List; cd->next != NULL; cd = cd->next )
-			if ( ! strcmp( cd->name, dev_name ) )
-			{
-				eprint( FATAL, SET, "Device `%s' is already listed in the "
-						"DEVICES section (possibly using an alternate "
-						"name).\n", dev_name );
-				THROW( EXCEPTION )
-			}
+			;
 
 		cd->next = T_malloc( sizeof( Device ) );
 		cd->next->prev = cd;

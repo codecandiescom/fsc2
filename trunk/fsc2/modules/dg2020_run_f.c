@@ -27,8 +27,8 @@
 
 
 
-#define ON( f )           ( ( f )->is_inverted ? LOW : HIGH )
-#define OFF( f )          ( ( f )->is_inverted ? HIGH : LOW )
+#define type_ON( f )           ( ( f )->is_inverted ? LOW : HIGH )
+#define type_OFF( f )          ( ( f )->is_inverted ? HIGH : LOW )
 
 
 
@@ -712,7 +712,7 @@ void dg2020_set_pulses( FUNCTION *f )
 		end = p->pos + f->delay;
 		if ( start != end )
 			dg2020_set_constant( p->channel->self, start, end - start,
-								   OFF( f ) );
+								 type_OFF( f ) );
 
 		/* Set the area of the pulse itself */
 
@@ -720,7 +720,7 @@ void dg2020_set_pulses( FUNCTION *f )
 		end = p->pos + p->len + f->delay;
 		if ( start != end )
 			dg2020_set_constant( p->channel->self, start, end - start,
-								   ON( f ) );
+								   type_ON( f ) );
 
 
 	}
@@ -739,7 +739,7 @@ void dg2020_set_pulses( FUNCTION *f )
 	}
 	else
 		dg2020_set_constant( f->channel[ 0 ]->self, -1,
-							 dg2020.max_seq_len + 1, OFF( f ) );
+							 dg2020.max_seq_len + 1, type_OFF( f ) );
 
 	for ( p = f->pulses[ 0 ], i = 0; i < f->num_pulses; p = f->pulses[ ++i ] )
 		p->was_active = p->is_active;
@@ -787,15 +787,13 @@ void dg2020_set_phase_pulses( FUNCTION *f )
 		else                                 /* no pulses in this channel */
 		{
 			if ( ! f->is_inverted )
-				dg2020_set_constant( f->channel[ i ]->self,
-									 -1,
-									 dg2020.max_seq_len + 1, OFF( f ) );
+				dg2020_set_constant( f->channel[ i ]->self, -1,
+									 dg2020.max_seq_len + 1, type_OFF( f ) );
 			else
 			{
-				dg2020_set_constant( f->channel[ i ]->self,
-									 -1, 1, LOW );
+				dg2020_set_constant( f->channel[ i ]->self, -1, 1, LOW );
 				dg2020_set_constant( f->channel[ i ]->self, 0,
-									 dg2020.max_seq_len, OFF( f ) );
+									 dg2020.max_seq_len, type_OFF( f ) );
 			}
 		}
 	}
@@ -889,7 +887,7 @@ void dg2020_commit( FUNCTION * f, bool flag )
 		ch = f->pulses[ 0 ]->channel->self;
 		while ( ( what = dg2020_diff( old, new, &start, &len ) ) != 0 )
 			dg2020_set_constant( ch, start, len,
-								 what == -1 ? OFF( f ) : ON( f ) );
+								 what == -1 ? type_OFF( f ) : type_ON( f ) );
 	}
 
 	T_free( old );
@@ -945,5 +943,5 @@ void dg2020_clear_padding_block( FUNCTION *f )
 		dg2020_set_constant( f->channel[ i ]->self,
 							 dg2020.block[ 1 ].start - 1,
 							 dg2020.mem_size - dg2020.block[ 1 ].start,
-							 OFF( f ) );
+							 type_OFF( f ) );
 }

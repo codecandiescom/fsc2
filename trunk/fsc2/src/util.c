@@ -411,7 +411,8 @@ bool fsc2_locking( void )
 	/* Truncate to zero length, write process ID and user name into the lock
 	   file and get the close-on-exec flag */
 
-	sprintf( buf, "%d\n%s\n", getpid( ), getpwuid( getuid( ) )->pw_name );
+	snprintf( buf, sizeof( buf ), "%ld\n%s\n", ( long ) getpid( ),
+			 getpwuid( getuid( ) )->pw_name );
 	if ( ftruncate( fd, 0 ) < 0 ||
 		 write( fd, buf, strlen( buf ) ) != ( ssize_t ) strlen( buf ) ||
 		 ( flags = fcntl( fd, F_GETFD, 0 ) ) < 0 )
