@@ -113,7 +113,7 @@ static Keithley228a keithley228a;
 int keithley228a_init_hook( void )
 {
 	Var *func_ptr;
-	int access;
+	int acc;
 	int i;
 	int *first_DAC_port;
 	int *last_DAC_port;
@@ -221,7 +221,7 @@ int keithley228a_init_hook( void )
 	/* Check if a function for setting the DAC port exists */
 
 	fn = get_string( "lockin_dac_voltage%s", keithley228a.lockin_append );
-	if ( ( func_ptr = func_get( fn, &access ) ) == NULL )
+	if ( ( func_ptr = func_get( fn, &acc ) ) == NULL )
 	{
 		eprint( FATAL, SET, "%s: No lock-in amplifier module loaded "
 				"supplying a function for setting a DAC.\n", DEVICE_NAME );
@@ -792,7 +792,7 @@ static double keithley228a_set_current( double new_current )
 	double dac_volts;
 	char cmd[ 100 ];
 	Var *func_ptr;
-	int access;
+	int acc;
 	char *fn;
 
 
@@ -846,7 +846,7 @@ static double keithley228a_set_current( double new_current )
 	   the port number and the voltage */
 
 	fn = get_string( "lockin_dac_voltage%s", keithley228a.lockin_append );
-	func_ptr = func_get( fn, &access );
+	func_ptr = func_get( fn, &acc );
 	T_free( fn );
 	vars_push( INT_VAR, keithley228a.lockin_dac_port );
 	vars_push( FLOAT_VAR, dac_volts );

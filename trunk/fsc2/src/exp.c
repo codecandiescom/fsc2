@@ -51,7 +51,7 @@ extern int conditionparse( void );        /* from condition_parser.y */
 extern int explex( void );                /* from exp_lexer.flex */
 extern FILE *expin;                       /* from exp_lexer.flex */
 
-extern void exprestart( FILE *expin );
+extern void exprestart( FILE *fp );
 
 extern Token_Val exp_runlval;             /* from exp_run_parser.y */
 extern Token_Val exp_testlval;            /* from exp_test_parser.y */
@@ -59,7 +59,7 @@ extern Token_Val conditionlval;           /* from condition_parser.y */
 
 /* local functions */
 
-static void push_curly_brace( const char *Fname, long Lc );
+static void push_curly_brace( const char *fname, long lc );
 static bool pop_curly_brace( void );
 static void loop_setup( void );
 static void setup_while_or_repeat( int type, long *pos );
@@ -369,15 +369,15 @@ void store_exp( FILE *in )
 /* print more informative error messages if the braces don't match up.     */
 /*-------------------------------------------------------------------------*/
 
-static void push_curly_brace( const char *Fname, long Lc )
+static void push_curly_brace( const char *fname, long lc )
 {
 	CB_Stack *new_cb;
 
 
 	new_cb = T_malloc( sizeof( CB_Stack ) );
 	new_cb->next = cb_stack;
-	new_cb->Fname = T_strdup( Fname );
-	new_cb->Lc = Lc;
+	new_cb->Fname = T_strdup( fname );
+	new_cb->Lc = lc;
 	cb_stack = new_cb;
 }
 
@@ -838,7 +838,6 @@ void exp_test_run( void )
 {
 	Prg_Token *cur;
 	long old_FLL = File_List_Len;
-	bool is_do_quit = UNSET;
 
 
 	Fname = T_free( Fname );

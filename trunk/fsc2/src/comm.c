@@ -130,7 +130,7 @@
 
 /* locally used routines */
 
-static bool pipe_read( int fd, void *buf, size_t bytes_to_read );
+static bool pipe_read( int fd, char *buf, size_t bytes_to_read );
 static void send_browser( FL_OBJECT *browser );
 
 
@@ -770,7 +770,7 @@ long reader( void *ret )
 /*    3. Number of bytes to be read                             */
 /*--------------------------------------------------------------*/
 
-static bool pipe_read( int fd, void *buf, size_t bytes_to_read )
+static bool pipe_read( int fd, char *buf, size_t bytes_to_read )
 {
 	long bytes_read;
 	long already_read = 0;
