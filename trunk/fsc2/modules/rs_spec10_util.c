@@ -29,8 +29,9 @@
 #define C2K_OFFSET   273.16         /* offset between Celsius and Kelvin */
 
 
-/*--------------------------------------------------*/
-/*--------------------------------------------------*/
+/*---------------------------------------------------------------------*/
+/* Function for converting a temperature from Kelvin to degree Celsius */
+/*---------------------------------------------------------------------*/
 
 double rs_spec10_k2c( double tk )
 {
@@ -38,8 +39,9 @@ double rs_spec10_k2c( double tk )
 }
 
 
-/*--------------------------------------------------*/
-/*--------------------------------------------------*/
+/*---------------------------------------------------------------------*/
+/* Function for converting a temperature from degree Celsius to Kelvin */
+/*---------------------------------------------------------------------*/
 
 double rs_spec10_c2k( double tc )
 {
@@ -47,8 +49,10 @@ double rs_spec10_c2k( double tc )
 }
 
 
-/*--------------------------------------------------*/
-/*--------------------------------------------------*/
+/*-------------------------------------------------*/
+/* Function for converting a temperature in Kelvin */
+/* to a value that can be send to the device.      */
+/*-------------------------------------------------*/
 
 int16 rs_spec10_k2ic( double tk )
 {
@@ -56,8 +60,10 @@ int16 rs_spec10_k2ic( double tk )
 }
 
 
-/*--------------------------------------------------*/
-/*--------------------------------------------------*/
+/*-------------------------------------------------------*/
+/* Function for converting a temperature from the value  */
+/* returned from the device into a temperature in Kelvin */
+/*-------------------------------------------------------*/
 
 double rs_spec10_ic2k( int16 tci )
 {
@@ -65,8 +71,13 @@ double rs_spec10_ic2k( int16 tci )
 }
 
 
-/*--------------------------------------------------*/
-/*--------------------------------------------------*/
+/*----------------------------------------------------------*/
+/* Function for testing if a certain attribute is available */
+/* and if it can be only read, only written or both. It     */
+/* returns FAIL if the attribute isn't available, otherwise */
+/* OK and the 'acc' pointer is set to either ACC_READ_ONLY, */
+/* ACC_WRITE_ONLY or ACC_READ_WRITE.                        */
+/*----------------------------------------------------------*/
 
 bool rs_spec10_param_access( uns32 param, uns16 *acc )
 {
@@ -87,8 +98,11 @@ bool rs_spec10_param_access( uns32 param, uns16 *acc )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*-------------------------------------------------------------------*/
+/* Function for writing a time value into a string in a pretty form. */
+/* Please note that the buffer for that string is static, i.e. the   */
+/* string is overwritten on each invokation of the function.         */
+/*-------------------------------------------------------------------*/
 
 const char *rs_spec10_ptime( double p_time )
 {
