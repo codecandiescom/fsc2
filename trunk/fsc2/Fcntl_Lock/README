@@ -22,7 +22,7 @@ DEPENDENCIES
 
 This module requires these other modules:
 
-  POSIX and Carp
+  POSIX, Errno, Carp
 
 IMPLEMENTATION DETAILS
 
