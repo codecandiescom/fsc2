@@ -1047,18 +1047,20 @@ statements of a loop but to go back to the test of the loop condition
 immediately. Whenever the keyword @code{NEXT} is encountered in a loop
 all the remaining statements are skipped and the program jumps back to
 the test of the loop condition (where the loop counter of @code{WHILE},
-@code{REPEAT} or @code{FOR} loops is set to the next value).
+@code{UNTIL}, @code{REPEAT} or @code{FOR} loops is set to the next
+value).
 
 
 @anchor{BREAK statement}
 @subsection BREAK statement
 @cindex BREAK
 
-There may be situations where one doesn't want to continue with a loop
-until the loop condition becomes untrue but where one has to exit the
-loop immediately. For this purpose the keyword @code{BREAK} can be used.
-If it is found as the next statement in a loop to be executed the
-program jumps to the first statement following the loop body.
+There also may be situations where one doesn't want to continue with a
+loop until the loop condition becomes satisfied but where one has to
+exit the loop immediately. For this purpose the keyword @code{BREAK} is
+to be used. If it is found as the next statement to be executed in a
+loop the program immediately jumps to the first statement following the
+loops block.
 
 
 @anchor{IF-ELSE constructs}
@@ -1068,12 +1070,13 @@ program jumps to the first statement following the loop body.
 @cindex IF-ELSE
 
 
-Finally, there's the @code{IF-ELSE} construct. It works as in most other
-programming languages. In the simplest case you just have the @code{IF}
-part to execute some instructions only under certain conditions. In this
-case you start with the @code{IF} keyword, followed by the condition
-that has to be met in order to run the following code and, finally, the
-statements enclosed in curly braces. Here's an simple example:
+Finally, there are the @code{IF-ELSE} constructs, functioning as in most
+other programming languages. In the simplest case you just have the
+@code{IF} part to execute some instructions only under certain
+conditions. In this case you start with the @code{IF} keyword, followed
+by the condition that has to be met in order to run the following code
+and then the statements enclosed in curly braces. Here's an simple
+example:
 @example
   IF x < 0 @{
       x *= -1.0;
@@ -1081,9 +1084,9 @@ statements enclosed in curly braces. Here's an simple example:
 @end example
 @noindent
 Here the variable @code{x} is multiplied by @code{-1} only if @code{x}
-is negative, i.e.@: it's basically just a calculation of the absolute
-value of @code{x} (there's also the built-in function @code{abs()} for
-doing this which is probably a lot faster).
+is negative, i.e.@: it basically just sets @code{x} to its absolute
+value (there's also the built-in function @code{abs()} for calculating
+the absolute value of variable which is probably a lot faster).
 
 By using the @code{ELSE} statement you can specify an alternative with
 statements to be executed if the @code{IF} condition is not being met.
@@ -1133,8 +1136,8 @@ much sense).
 @quotation
 @cartouche
 As already mentioned for @code{FOREVER} loops also @code{IF-ELSE} and
-@code{UNLESS-ELSE} constructs introduce some problems with the testing
-of an @acronym{EDL} program before the experiment is done. This happens
+@code{UNLESS-ELSE} constructs introduce some problems for testing an
+@acronym{EDL} program before the real experiment is done. This happens
 when the condition to be tested depends either on user input (e.g.@:
 tests if the user pressed a button etc.) or on the results of a
 measurement itself. In these cases the flow of control of the program
@@ -1149,8 +1152,8 @@ actual experiment stops with an error that could not be anticipated.
 @cindex Miscellaneous
 @cindex Miscellaneous
 
-The following covers a few additional syntactic elements that didn't fit
-into any of the previous sections.
+The remaining of this chapter covers a few additional syntactic elements
+that didn't fit into any of the previous sections.
 
 @anchor{#INCLUDE statement}
 @subsection @code{#INCLUDE} statement

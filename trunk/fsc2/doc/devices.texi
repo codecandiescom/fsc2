@@ -66,14 +66,14 @@ needs just this oscilloscope for a few days and one has to do with the
 TDS520 oscilloscope in between.
 
 Of course, using generic functions has its limitations - if e.g.@: the
-new lock-in amplifier has only one channel while the previous one had
-two no abstraction can make it have two channels. This means that,
+new lock-in amplifier has only one channel while the previously used one
+had two no abstraction can make it have two channels. This means that,
 while a lot of abstraction is possible, not all device functions can be
 completely identical for all devices of the same type. Thus, while the
 names of the functions remain identical, the arguments the functions are
 called with may differ sometimes for different devices. But while this
-can be annoyingly enough it at least reduces the amount of changes
-to be done to the @acronym{EDL} program considerably.
+can be annoyingly enough it at least reduces the amount of changes to be
+done to the @acronym{EDL} program considerably.
 
 But what if you need to use for example two lock-in amplifiers
 simultaneously? When the names of the functions for accessing both the
