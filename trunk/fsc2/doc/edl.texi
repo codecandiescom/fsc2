@@ -756,7 +756,7 @@ Within the @code{EXPERIMENT} section flow control structures can be
 used. These are @code{REPEAT}, @code{WHILE}, @code{UNTIL}, @code{FOR} and
 @code{FOREVER} loops and @code{IF-ELSE} and @code{UNLESS-ELSE}
 constructs. (Please note: all of these keywords have to be spelt in
-capital letters!).
+upper case letters!).
 
 
 Most flow control construct keywords are followed by a condition and all
