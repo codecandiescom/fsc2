@@ -246,7 +246,8 @@ void eprint( int severity, const char *fmt, ... )
 /* that remain after fsc2 crashed or was killed. Therefore, all shared    */
 /* memory segment have to be created with the EUID of fsc2 so that even   */
 /* another user may delete them when he starts fsc2.                      */
-/* This routine is mostly taken from R. Stevens' APitUE (A&W, 1997)       */
+/* This routine is mostly taken from R. Stevens' "Advanced Programming in */
+/* the UNIX Environment (Addison-Wesley 1997)                             */
 /*------------------------------------------------------------------------*/
 
 bool fsc2_locking( void )
@@ -298,7 +299,7 @@ bool fsc2_locking( void )
 	}
 
 	/* Truncate to zero length, write process ID and user name into the lock
-	   file and get the close-on-exec flag*/
+	   file and get the close-on-exec flag */
 
 	sprintf( buf, "%d\n%s\n", getpid( ), getpwuid( getuid( ) )->pw_name );
 	if ( ftruncate( fd, 0 ) < 0 ||
