@@ -493,7 +493,7 @@ print F "\n\nEXPERIMENT:
 
 synthesizer_state( \"ON\" );
 tc = lockin_time_constant$lin( );
-mod_freq = lockin_ref_freq$lin( );
+mod_freq = lockin_mod_freq$lin( );
 
 File_1 = get_file( \"File for storing all runs:\" );
 File_2 = get_file( \"File for storing final result:\" );

@@ -233,13 +233,13 @@ If you declared your function to expect two input parameters the
 function will always get exactly two. The @code{next}-pointer of the
 very last parameter will always be @code{NULL}. If the function gets
 called in the @acronym{EDL} file with more variables than you declared
-it to have a warning will be printed automatically and the superfluous
-variables are discarded and not passed to the function. If, on the other
-hand, there are not enough parameters the program will just print an
-error message and then stop (and not call your function). Having the
-parameters organized as a linked list also makes it easy to handle
-variable numbers of variables: as long as the @code{next}-pointer of a
-functions argument isn't @code{NULL} there is at least another one.
+it to have a warning will be printed, the superfluous variables
+discarded automatically and are not passed to the function. If, on the
+other hand, there are not enough parameters the program will just print
+an error message and then stop (and not call your function). Having the
+parameters organized as a linked list also makes it easy to a handle
+variable number of arguments: as long as the @code{next}-pointer of an
+argument isn't @code{NULL} there is at least another one.
 
 One word of warning: @strong{Never ever try to change the variables you
 get passed to your functions in any way!}
@@ -272,14 +272,20 @@ variables are coded into the bits of the the integer @code{type} in the
 variable's structure, so you have to use the bitwise inclusive OR
 operator @code{|} to test alternatives.
 
+You can also check if the argument is a string by testing a type
+of @code{STR_VAR}, i.e.@:
+@example
+vars_check( var, STR_VAR );
+@end example
+
 
 @code{vars_check()} not only checks that the variables has the correct
-type but will also do some internal consistency checks to make sure
-that the variable actually exists and has been assigned a value etc.
+type but also some internal consistency checks to make sure that the
+variable actually exists and has been assigned a value.
 
 
 A function that expects just integer arguments would probably start
-like te following example, just running through the linked list of
+like the following example, just running through the linked list of
 parameters:
 @example
 Var *my_function( Var *var )

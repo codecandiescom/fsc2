@@ -148,7 +148,7 @@ static double sr830_get_phase( void );
 static double sr830_set_phase( double phase );
 static double sr830_get_mod_freq( void );
 static double sr830_set_mod_freq( double freq );
-static long sr830_get_modmode( void );
+static long sr830_get_mod_mode( void );
 static long sr830_get_harmonic( void );
 static long sr830_set_harmonic( long harmonic );
 static double sr830_get_mod_level( void );
@@ -838,7 +838,7 @@ Var *lockin_mod_level( Var *v )
 	level = VALUE( v );
 	vars_pop( v );
 	
-	if ( level < MIN_MODLEVEL || level > MAX_MOD_LEVEL )
+	if ( level < MIN_MOD_LEVEL || level > MAX_MOD_LEVEL )
 	{
 		eprint( FATAL, SET, "%s: Modulation level of %f V is not within "
 				"valid range (%f V - %f V).\n", DEVICE_NAME,
