@@ -288,6 +288,8 @@ bool rs690_set_function_delay( int function, double delay )
 			THROW( EXCEPTION );
 		}
 
+		rs690.is_neg_delay = SET;
+
 		if ( Delay < rs690.neg_delay )
 		{
 			for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
