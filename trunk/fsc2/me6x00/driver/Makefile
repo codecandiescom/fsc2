@@ -67,4 +67,4 @@ endif
 	install -m 644 me6x00_drv.h $(incl_dir)
 
 clean:
-	rm -f me6x00.o *~
+	rm -f me6x00.o autoconf.h *~
