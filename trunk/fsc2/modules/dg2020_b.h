@@ -359,7 +359,6 @@ void dg2020_set_pulses( FUNCTION *f );
 void dg2020_set_phase_pulses( FUNCTION *f );
 void dg2020_commit( FUNCTION * f, bool flag );
 void dg2020_commit_phases( FUNCTION * f, bool flag );
-void dg2020_clear_padding_block( FUNCTION *f );
 
 
 /* Finally the functions from dg2020_gpib.c */
