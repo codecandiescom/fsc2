@@ -98,14 +98,20 @@ fsc2 runs with the real users ID and group but at a few places (e.g. when
 writing to log files, creating lock files, or accessing shared memory) it
 switches back to the EUID and EGID of fsc2.
 
-Finally, a variable named IS_I386 can be set. Please comment out this line
-or simply delete it if you want to compile the program for a machine that
-does not use an i386 type of processor (e.g. on a PPC). Some routines used
-for debugging purposes only employ a bit of assembler, so they wont work on
-a processor with a completely different architecture. If the line defining
-the variable IS_I386 is removed these parts are left out of the program,
-but in every other respect except debugging capabilities fsc2 should work
-as on an i386 machine.
+The next variable that can be set is named IS_I386. Please comment out the
+line defining this variable (or simply delete the line) if you want to compile
+the program for a machine that does not use an i386 type of processor (e.g.
+on a PPC). Some routines used for debugging purposes only employ a bit of
+assembler, so they wont work on a processor with a completely different
+architecture. If the line defining the variable IS_I386 is removed these
+parts are left out of the program, but in every other respect except
+debugging capabilities fsc2 should work as on an i386 machine.
+
+The final variable to be set is the email address of the person that will
+eceive bug reports and notifications if fsc2 should crash. Usually, you
+should not change this variable except when you apply changes to the program.
+In this case sending these kind of mails to me obviously doesn't make too
+much sense...
 
 
 C) Compiling and Installing
@@ -115,19 +121,17 @@ Go into the main directory of the package and type 'make'. This may take
 some time to finish. Usually no warnings should show up during the
 compilation (at least on systems with a newer libc and if my GPIB library
 is used), but warnings may occur when the documentation is created and some
-of the required tools are not available. It can even happen that make stops
+of the required tools are not available. It may even happen that make stops
 with an error message during this stage (i.e. while making the documentation).
 This does *not* mean that the program didn't compile succesfully!
 
 Please don't start 'make' from one of the subdirectories, this is bound to
-fail in most cases. The only exception is the documentation, if you run make
-in the doc subdirectory only the documentation will be created (but not
-installed).
+fail in most cases.
 
 If you get more than a few warnings during the compilation stage of the
 program or the make process fails completely please send me an email with
-the output of make. You can save to output of make to a file fsc2_make.log
-(while still being able to see the output) by starting make as
+the output of make. You can save to output of make to a file, e.g.
+fsc2_make.log, by running make with the command line
 
     make > fsc2_make.log 2>&1
 
@@ -135,7 +139,7 @@ if you're using the Bourne or Korn shell (sh or ksh) or bash. Use
 
     make >& fsc2_make.log
 
-if you're working under the C shell (csh) or tcsh.
+if you use the C shell (csh) or tcsh.
 
 When the compilation of the program succeds (even though making the
 documentation failed at some stage), you can now install the program by
