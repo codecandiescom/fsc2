@@ -251,7 +251,7 @@ directories that don't exist:\n\n\
  lib/libme6x00.a      => $PREFIX/lib/libme6x00.a\n\
  lib/libme6x00.so     => $PREFIX/lib/libme6x00.so\n\
  driver/me6x00.o      => /lib/modules/`uname -r`/misc/me6x00.o\n\n\
-		Do you want to continue ?" 15 65
+		Do you want to continue ?" 15 70
 
 test $? -eq 0 || exit 0
 

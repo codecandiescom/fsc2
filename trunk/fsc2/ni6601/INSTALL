@@ -244,7 +244,7 @@ directories that don't exist:\n\n\
  lib/libni6601.a      => $PREFIX/lib/libni6601.a\n\
  lib/libni6601.so     => $PREFIX/lib/libni6601.so\n\
  driver/ni6601.o      => /lib/modules/`uname -r`/misc/ni6601.o\n\n\
-		Do you want to continue ?" 15 65
+		Do you want to continue ?" 15 70
 
 test $? -eq 0 || exit 0
 

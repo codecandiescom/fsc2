@@ -271,7 +271,7 @@ directories that don't exist:\n\n\
  lib/libwitio_48.a      => $PREFIX/lib/libwitio_48.a\n\
  lib/libwitio_48.so     => $PREFIX/lib/libwitio_48.so\n\
  driver/witio_48.o      => /lib/modules/`uname -r`/misc/witio_48.o\n\n\
-		Do you want to continue ?" 15 65
+		Do you want to continue ?" 15 70
 
 test $? -eq 0 || exit 0
 
