@@ -1567,7 +1567,8 @@ void vars_assign( Var *src, Var *dest )
 			assert( 1 == 0 );           /* we never should end up here... */
 	}
 
-	vars_pop( dest );
+	if ( ! ( dest->type & ( INT_ARR | FLOAT_ARR ) ) )
+		vars_pop( dest );
 	vars_pop( src );
 }
 
@@ -1784,6 +1785,7 @@ void vars_ass_from_trans_ptr( Var *src, Var *dest )
 	int    i;
 	double *sdptr;
 	long   *slptr;
+	bool   dest_needs_pop = UNSET;
 
 
 	/* We can't assign from a transient array to a variable */
@@ -1793,6 +1795,28 @@ void vars_ass_from_trans_ptr( Var *src, Var *dest )
 		eprint( FATAL, "%s:%ld: Left hand side of assignment is a variable "
 				"while right hand side is an array (slice).", Fname, Lc ); 
 		THROW( EXCEPTION );
+	}
+
+	assert( dest->type & ( ARR_PTR | INT_ARR | FLOAT_ARR ) ); /* paranoia */
+
+	/* This is for assignments to one-dimensional arrays that are specified
+	   on the LHS just with their names and without any brackets */
+
+	if ( dest->type & ( INT_ARR | FLOAT_ARR ) )
+	{
+		if ( dest->dim != 1 )
+		{
+			eprint( FATAL, "%s:%ld: Left hand side of assignment isn't an "
+					"array slice.", Fname, Lc );
+			THROW( EXCEPTION );
+		}
+
+		dest = vars_push( ARR_PTR, ( dest->type == INT_ARR ) ?
+						  ( void * ) dest->val.lpnt :
+						  ( void * ) dest->val.dpnt, dest );
+		dest->flags |= NEED_SLICE;
+
+		dest_needs_pop = SET;
 	}
 
 	/* Again being paranoid... */
@@ -1870,6 +1894,9 @@ void vars_ass_from_trans_ptr( Var *src, Var *dest )
 				*dest->val.dpnt++ = *sdptr++;
 		}
 	}
+
+	if ( dest_needs_pop )
+		vars_pop( dest );
 }
 
 
