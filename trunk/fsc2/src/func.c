@@ -425,6 +425,19 @@ Var *func_call( Var *f )
 	{
 		if ( --in_call == 0 )
 			Cur_Func = NULL;
+#ifndef NDEBUG
+		if ( ! vars_exist( f ) )
+		{
+			if ( ! cur_func->to_be_loaded )
+				eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
+						__FILE__, __LINE__ );
+			else
+				eprint( FATAL, SET, "Function %s() from module %s.so messed "
+						"up the variable stack at %s:%d.\n", cur_func->name,
+						cur_func->device->name, __FILE__, __LINE__ );
+			PASSTHROU( )
+		}
+#endif
 		for ( ap = f; ap != NULL; ap = vars_pop( ap ) )
 			;
 		PASSTHROU( )
