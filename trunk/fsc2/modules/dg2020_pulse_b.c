@@ -439,7 +439,7 @@ bool dg2020_change_pulse_position( long pnum, double p_time )
 
 	CLOBBER_PROTECT( new_pos );
 
-	if ( p_time + p->function->delay * dg2020.timebase < 0 )
+	if ( p_time + p->function->delay * dg2020.timebase < 0.0 )
 	{
 		print( FATAL, "Invalid (negative) start position for pulse #%ld: "
 			   "%s.\n", pnum, dg2020_ptime( p_time ) );
