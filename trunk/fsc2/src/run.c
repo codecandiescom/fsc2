@@ -482,9 +482,9 @@ static void run_child( void )
 
 	kill( getppid( ), NEW_DATA );
 
-	/* Using a pause() here is tempting but there's a race condition -
-	   'do_send' may be set while the pause tests are under way. This isn't
-	   just paranoia but happens more often than I imagined... */
+	/* Using a pause() here is tempting but there exists a race condition
+	   between the deterimation of the value of 'do_send' and the start of
+	   pause() - and it happens... */
 
 	while ( ! do_send )
 		usleep( 50000 );
@@ -503,9 +503,9 @@ static void run_child( void )
 	do_quit = UNSET;
 	kill( getppid( ), QUITTING );          /* tell parent that we're exiting */
 
-	/* Using a pause() here is tempting but there's a race condition -
-	   'do_send' may be set while the pause tests are under way. This isn't
-	   just paranoia but happens more often than I imagenid... */
+	/* Using a pause() here is tempting but there exists a race condition
+	   between the deterimation of the value of 'do_quit' and the start of
+	   pause() - and it happens... */
 
 	while ( ! do_quit )                    /* wait for acceptance of signal  */
 		usleep( 50000 );
