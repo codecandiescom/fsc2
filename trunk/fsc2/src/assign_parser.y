@@ -126,8 +126,8 @@ input:   /* empty */
 	                                 Cur_PHS = -1;
 	                                 Cur_PHST = -1;
 									 Func_is_set = UNSET;
-                                     assert( Var_Stack == NULL ); }
-       | input SECTION_LABEL       { assert( Var_Stack == NULL );
+                                     fsc2_assert( Var_Stack == NULL ); }
+       | input SECTION_LABEL       { fsc2_assert( Var_Stack == NULL );
 	                                 Cur_PROT = PHASE_UNKNOWN_PROT;
 									 Func_is_set = UNSET;
 									 YYACCEPT; }
@@ -138,7 +138,7 @@ input:   /* empty */
 	                                 Cur_PHS = -1;
 	                                 Cur_PHST = -1;
 									 Func_is_set = UNSET;
-                                     assert( Var_Stack == NULL ); }
+                                     fsc2_assert( Var_Stack == NULL ); }
 ;
 
 

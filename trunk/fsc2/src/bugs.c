@@ -292,6 +292,7 @@ void death_mail( int signo )
 
 	fprintf( tmp, "fsc2 (%d, %s) killed by %s signal.\n\n", getpid( ),
 			 I_am == CHILD ? "CHILD" : "PARENT", strsignal( signo ) );
+
 #ifndef NDEBUG
 	if ( signo == SIGABRT )
 		fprintf( tmp, "%s:%u: failed assertion: %s\n\n",

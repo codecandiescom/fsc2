@@ -340,7 +340,7 @@ Var *vars_add( Var *v1, Var *v2 )
 			break;
 
 		default :
-			assert( 1 == 0 );
+			fsc2_assert( 1 == 0 );
 	}
 
 	/* Pop the variables from the variable stack (if they belong to it) */
@@ -413,7 +413,7 @@ Var *vars_sub( Var *v1, Var *v2 )
 			break;
 
 		default :
-			assert( 1 == 0 );
+			fsc2_assert( 1 == 0 );
 	}
 
 	/* Pop the variables from the variable stack (if they belong to it) */
@@ -486,7 +486,7 @@ Var *vars_mult( Var *v1, Var *v2 )
 			break;
 
 		default :
-			assert( 1 == 0 );
+			fsc2_assert( 1 == 0 );
 	}
 
 	/* Pop the variables from the variable stack (if they belong to it) */
@@ -559,7 +559,7 @@ Var *vars_div( Var *v1, Var *v2 )
 			break;
 
 		default :
-			assert( 1 == 0 );
+			fsc2_assert( 1 == 0 );
 	}
 
 	/* Pop the variables from the stack */
@@ -632,7 +632,7 @@ Var *vars_mod( Var *v1, Var *v2 )
 			break;
 
 		default :
-			assert( 1 == 0 );
+			fsc2_assert( 1 == 0 );
 	}
 
 	/* Pop the variables from the stack */
@@ -705,7 +705,7 @@ Var *vars_pow( Var *v1, Var *v2 )
 			break;
 
 		default :
-			assert( 1 == 0 );
+			fsc2_assert( 1 == 0 );
 	}
 
 	/* Pop the variables from the stack */
@@ -810,7 +810,7 @@ Var *vars_negate( Var *v )
 			break;
 
 		default :
-			assert( 1 == 0 );
+			fsc2_assert( 1 == 0 );
 	}
 
 	if ( ilp != NULL )
@@ -962,7 +962,7 @@ Var *vars_comp( int comp_type, Var *v1, Var *v2 )
 			break;
 
 		default:               /* this should never happen... */
-			assert( 1 == 0 );
+			fsc2_assert( 1 == 0 );
 	}
 
 	/* Pop the variables from the stack */
@@ -1091,7 +1091,7 @@ Var *vars_push( int type, ... )
 			break;
 
 		default :
-			assert( 1 == 0 );
+			fsc2_assert( 1 == 0 );
 	}
 
 	va_end( ap );
@@ -1283,13 +1283,13 @@ void vars_check( Var *v, int type )
 	/* Being paranoid we first check that the variable exists at all -
 	   probably this can vanish later. */
 
-	assert( vars_exist( v ) );
+	fsc2_assert( vars_exist( v ) );
 
 	/* Check that the variable has a value assigned to it */
 
 	if ( v->type == UNDEF_VAR )
 	{
-		assert( v->name != NULL );              /* just a bit paranoid ? */
+		fsc2_assert( v->name != NULL );         /* just a bit paranoid ? */
 
 		eprint( FATAL, "%s:%ld: The accessed variable `%s' has not been "
 				"assigned a value.\n", Fname, Lc, v->name );
@@ -1322,7 +1322,7 @@ void vars_warn_new( Var *v )
 {
  	if ( v->flags & NEW_VARIABLE )
 	{
-		assert( v->name != NULL );            /* just a bit paranoid ? */
+		fsc2_assert( v->name != NULL );            /* just a bit paranoid ? */
 
 		eprint( WARN, "%s:%ld: WARNING: Variable `%s' has not been assigned "
 				"a value.\n", Fname, Lc, v->name );
@@ -1350,7 +1350,7 @@ bool vars_exist( Var *v )
 
 	/* If variable can't be found do the in both lists we're really fucked */
 
-	assert( 1 == 0 );
+	fsc2_assert( 1 == 0 );
 	return FAIL;
 }
 
@@ -1369,7 +1369,7 @@ Var *vars_arr_start( Var *v )
 
 	/* <PARANOIA> Test if variable exists </PARANOIA> */
 
-	assert( vars_exist( v ) );
+	fsc2_assert( vars_exist( v ) );
 
 	/* Check if the array is completely new (type is still UNDEF_VAR). In this
 	   case set its type and zero the pointer to the data so we know no memory
@@ -1829,7 +1829,7 @@ void vars_assign( Var *src, Var *dest )
 {
 	/* <PARANOID> check that both variables exist </PARANOID> */
 
-	assert( vars_exist( src ) && vars_exist( dest ) );
+	fsc2_assert( vars_exist( src ) && vars_exist( dest ) );
 
 	switch ( src->type )
 	{
@@ -1846,7 +1846,7 @@ void vars_assign( Var *src, Var *dest )
 			break;
 
 		default :
-			assert( 1 == 0 );           /* we never should end up here... */
+			fsc2_assert( 1 == 0 );        /* we never should end up here... */
 	}
 
 	dest->flags &= ~NEED_INIT;
@@ -2015,7 +2015,7 @@ void vars_ass_from_ptr( Var *src, Var *dest )
 
 	/* May be that's paranoid, but... */
 
-	assert( src->from->type & ( INT_ARR | FLOAT_ARR ) );
+	fsc2_assert( src->from->type & ( INT_ARR | FLOAT_ARR ) );
 
 	/* We can't assign from an array slice to a variable */
 
@@ -2033,12 +2033,12 @@ void vars_ass_from_ptr( Var *src, Var *dest )
 		else if ( src->from->type == FLOAT_ARR )
 			src->val.gptr = src->from->val.dpnt;
 		else
-			assert( 1 == 0 );
+			fsc2_assert( 1 == 0 );
 	}
 
 	if ( dest->type == ARR_PTR )
 	{
-		assert( dest->flags & NEED_SLICE );
+		fsc2_assert( dest->flags & NEED_SLICE );
 
 		d = dest->from;
 		s = src->from;
@@ -2086,7 +2086,7 @@ void vars_ass_from_ptr( Var *src, Var *dest )
 	}
 	else
 	{
-		assert( dest->type & ( INT_ARR | FLOAT_ARR ) );
+		fsc2_assert( dest->type & ( INT_ARR | FLOAT_ARR ) );
 
 		d = dest;
 		s = src->from;
@@ -2208,7 +2208,7 @@ void vars_ass_from_trans_ptr( Var *src, Var *dest )
 
 	/* Again being paranoid... */
 
-	assert( dest->flags & NEED_SLICE || d->flags & NEED_ALLOC );
+	fsc2_assert( dest->flags & NEED_SLICE || d->flags & NEED_ALLOC );
 
 	/* Do allocation of memory (set size of missing dimension to the one of
 	   the transient array) if the destination array needs it, otherwise check
@@ -2378,7 +2378,7 @@ void vars_arr_init( Var *v )
 
 	for ( p1 = v->next; p1 != NULL; p1 = p2 )
 	{
-		assert( p1->type & ( INT_VAR | FLOAT_VAR ) );
+		fsc2_assert( p1->type & ( INT_VAR | FLOAT_VAR ) );
 
 		if ( a->type == INT_ARR )
 		{
@@ -2421,7 +2421,7 @@ Var *apply_unit( Var *var, Var *unit )
 {
 	if ( var->type == UNDEF_VAR )
 	{
-		assert( var->name != NULL );              /* just a bit paranoid ? */
+		fsc2_assert( var->name != NULL );         /* just a bit paranoid ? */
 
 		eprint( FATAL, "%s:%ld: The accessed variable `%s' has not been "
 				"assigned a value.\n", Fname, Lc, var->name );
@@ -2488,6 +2488,6 @@ Var *vars_val( Var *v )
 	else if ( v->from->type == FLOAT_ARR )
 		return vars_push( FLOAT_VAR, *( ( double * ) v->val.gptr ) );
 
-	assert( 1 == 0 );
+	fsc2_assert( 1 == 0 );
 	return NULL;
 }
