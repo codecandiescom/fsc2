@@ -15,7 +15,7 @@
 
 /* definitions for serial port access */
 
-#define SERIAL_BAUDRATE B1200        /* baud rate of field controller */
+#define SERIAL_BAUDRATE B9600        /* baud rate of field controller */
 #define SERIAL_PORT     0            /* serial port device file (COM1) */
 
 
