@@ -60,7 +60,6 @@ static void vars_ass_from_trans_ptr( Var *src, Var *dest );
   {
 	char *name;                         // name of the variable
 	int  type;                          // type of the variable
-	bool is_on_stack;
 	union
 	{
 		long   lval;                                // for integer values
@@ -79,6 +78,7 @@ static void vars_ass_from_trans_ptr( Var *src, Var *dest );
 	struct Var_ *from;
 	struct Var_ *next;       // next variable in list or stack
 	struct Var_ *prev;       // previous variable in list or stack
+	bool is_on_stack;        // indicates where to look for the variable
   }
 
   For each variable and array such a structure is created and appended to
