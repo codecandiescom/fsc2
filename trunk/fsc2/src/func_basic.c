@@ -1879,6 +1879,7 @@ Var *f_time( Var *v )
 	char ts[ 100 ];
 	char sep[ 3 ] = "::";
 	char *sp;
+	char *str = NULL;
 	size_t i;
 
 
@@ -1891,16 +1892,18 @@ Var *f_time( Var *v )
 			THROW( EXCEPTION );
 		}
 
-		if ( *v->val.sptr == '\0' )
+		str = handle_escape( v->val.sptr );
+
+		if ( *str == '\0' )
 			print( SEVERE, "Argument string does not contain any characters, "
 				   "using ':' as separator.\n ");
 		else
 		{
-			if ( strlen( v->val.sptr ) > 2 )
+			if ( strlen( str ) > 2 )
 				print ( SEVERE, "Argument string contains more than two "
 						"characters, using only the first two.\n ");
 
-			for ( sp = v->val.sptr; *sp; sp++ )
+			for ( sp = str; *sp; sp++ )
 				if ( ! isprint( *sp ) )
 				{
 					print( SEVERE, "Argument string contains non-printable "
@@ -1910,11 +1913,11 @@ Var *f_time( Var *v )
 
 			if ( *sp == '\0' )
 			{
-				sep[ 0 ] = *v->val.sptr;
-				if ( * ( v->val.sptr + 1 ) != '\0' )
-					sep[ 1 ] = * ( v->val.sptr + 1 );
+				sep[ 0 ] = *str;
+				if ( str[ 1 ] != '\0' )
+					sep[ 1 ] = str[ 1 ];
 				else
-					sep[ 1 ] = *v->val.sptr;
+					sep[ 1 ] = *str;
 			}
 		}
 	}
