@@ -181,7 +181,7 @@ try_again:
 		switch ( *bp )
 		{
 			case '0' :      /* Probe F0 is connected -> OK for S-band */
-				if ( exist_device( "s_band" ) )
+				if ( exist_device( "aeg_s_band" ) )
 					break;
 				eprint( FATAL, "%s: Wrong field probe (F0) connected to the "
 						"NMR gaussmeter.\n", nmr.name );
