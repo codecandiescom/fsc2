@@ -23,6 +23,7 @@
 
 
 #include "fsc2.h"
+#include <sys/timeb.h>
 
 #include "cursor1.xbm"             /* bitmaps for cursors */
 #include "cursor2.xbm"
@@ -50,9 +51,12 @@ static void change_label_1d( char **label );
 static void change_label_2d( char **label );
 static void rescale_1d( long new_nx );
 static void rescale_2d( long new_nx, long new_ny );
-static Pixmap dump_1d_window( void );
-static Pixmap dump_2d_window( void );
-static Pixmap dump_cut_window( void );
+static Pixmap get_1d_window( unsigned int *width, unsigned int *height );
+static Pixmap get_2d_window( unsigned int *width, unsigned int *height );
+static Pixmap get_cut_window( unsigned int *width, unsigned int *height );
+static void dump_1d( int fd, XImage *im, unsigned int w, unsigned int h );
+static void dump_2d( int fd, XImage *im, unsigned int w, unsigned int h );
+static void create_1d_colormap( void );
 
 
 static Graphics *G_stored = NULL;
@@ -508,6 +512,14 @@ static void G_struct_init( void )
 	if ( keymask & Button3Mask )
 		G.raw_button_state |= 4;
 
+	/* Define colours for the curves (this could be made user-configurable)
+	   - this must happen before color creation */
+
+	G.colors[ 0 ] = FL_TOMATO;
+	G.colors[ 1 ] = FL_GREEN;
+	G.colors[ 2 ] = FL_YELLOW;
+	G.colors[ 3 ] = FL_CYAN;
+
 	/* Create the different cursors and the colours needed for 2D displays */
 
 	if ( first_time )
@@ -541,17 +553,13 @@ static void G_struct_init( void )
 											 cursor7_width, cursor7_height,
 											 cursor7_x_hot, cursor7_y_hot );
 		create_colors( );
+		G_stored->cm_2 = G.cm_2;
+		create_1d_colormap( );
+		G_stored->cm_1 = G.cm_1;
 	}
 	else
 		for ( i = 0; i < 7; i++ )
 			G.cursor[ i ] = cursor[ i ];
-
-	/* Define colours for the curves (this should be made user-configurable) */
-
-	G.colors[ 0 ] = FL_TOMATO;
-	G.colors[ 1 ] = FL_GREEN;
-	G.colors[ 2 ] = FL_YELLOW;
-	G.colors[ 3 ] = FL_CYAN;
 
 	G.is_fs = SET;
 	G.scale_changed = UNSET;
@@ -2042,9 +2050,11 @@ static void rescale_2d( long new_nx, long new_ny )
 /*---------------------------------------------------------------*/
 /*---------------------------------------------------------------*/
 
-void dump_window( int type, const char *name )
+void dump_window( int type, int fd )
 {
-	FL_IMAGE *im;
+	XImage *im;
+	unsigned int w, h;
+	char buf[ 100 ];
 	Pixmap pm;
 
 
@@ -2054,52 +2064,67 @@ void dump_window( int type, const char *name )
 	if ( type == 1 )
 	{
 		if ( G.dim == 1 )
-			pm = dump_1d_window( );
+			pm = get_1d_window( &w, &h );
 		else
-			pm = dump_2d_window( );
+			pm = get_2d_window( &w, &h );
 	}
 	else
 	{
-		if ( G.is_cut )
+		if ( ! G.is_cut )
 			THROW( EXCEPTION );
-		pm = dump_cut_window( );
+		pm = get_cut_window( &w, &h );
 	}
 
-	if ( ( im = flimage_alloc( ) ) == NULL )
+	im = XGetImage( G.d, pm, 0, 0, w, h, AllPlanes, ZPixmap );
+	XFreePixmap( G.d, pm );
+
+	if ( im == NULL )
 	{
-		XFreePixmap( G.d, pm );
+		XDestroyImage( im );
 		THROW( EXCEPTION );
 	}
 
-	flimage_from_pixmap( im, pm );
+	snprintf( buf, 100, "P6 %d %d 255\n", w, h );
+	write( fd, buf, strlen( buf ) );
 
-	XFreePixmap( G.d, pm );
+	TRY
+	{
+		if ( ( type == 1 && G.dim == 1 ) || type == 2 )
+			dump_1d( fd, im, w, h );
+		else
+			dump_2d( fd, im, w, h );
+	}
+	OTHERWISE
+	{
+		XDestroyImage( im );
+		RETHROW( );
+	}
 
-	flimage_dump( im, name, "ppm" );
-	flimage_free( im );
+	close( fd );
+	XDestroyImage( im );
 }
 
 
 /*---------------------------------------------------------------*/
 /*---------------------------------------------------------------*/
 
-static Pixmap dump_1d_window( void )
+static Pixmap get_1d_window( unsigned int *width, unsigned int *height )
 {
 	Pixmap pm;
-	unsigned int width, height;
 	GC gc;
 
 
-	width  = G.y_axis.w + G.canvas.w;
-	height = G.x_axis.h + G.canvas.h;
+	*width  = G.y_axis.w + G.canvas.w;
+	*height = G.x_axis.h + G.canvas.h;
 
-    pm = XCreatePixmap( G.d, FL_ObjWin( GUI.run_form->canvas ), width, height,
+    pm = XCreatePixmap( G.d, FL_ObjWin( GUI.run_form->canvas ),
+						*width, *height,
 						fl_get_canvas_depth( GUI.run_form->canvas ) );
 
 	gc = XCreateGC( G.d, pm, 0, 0 );
 	XSetForeground( G.d, gc, fl_get_pixel( FL_COL1 ) );
 
-	XFillRectangle( G.d, pm, gc, 0, 0, width, height );
+	XFillRectangle( G.d, pm, gc, 0, 0, *width,*height );
 	XCopyArea( G.d, G.y_axis.pm, pm, gc, 0, 0, G.y_axis.w, G.y_axis.h, 0, 0 );
 	XCopyArea( G.d, G.canvas.pm, pm, gc, 0, 0, G.canvas.w, G.canvas.h,
 			   G.y_axis.w, 0 );
@@ -2108,7 +2133,7 @@ static Pixmap dump_1d_window( void )
 
 	XSetForeground( G.d, gc, fl_get_pixel( FL_BLACK ) );
 	XDrawLine( G.d, pm, gc, G.y_axis.w - 1, G.canvas.h,
-			   G.y_axis.w - 1, height - 1 );
+			   G.y_axis.w - 1, *height - 1 );
 
 	XFreeGC( G.d, gc );
 
@@ -2119,23 +2144,23 @@ static Pixmap dump_1d_window( void )
 /*---------------------------------------------------------------*/
 /*---------------------------------------------------------------*/
 
-static Pixmap dump_2d_window( void )
+static Pixmap get_2d_window( unsigned int *width, unsigned int *height )
 {
 	Pixmap pm;
-	unsigned int width, height;
 	GC gc;
 
 
-	width  = G.y_axis.w + G.canvas.w + G.z_axis.w + 5;
-	height = G.z_axis.h;
+	*width  = G.y_axis.w + G.canvas.w + G.z_axis.w + 5;
+	*height = G.z_axis.h;
 
-    pm = XCreatePixmap( G.d, FL_ObjWin( GUI.run_form->canvas ), width, height,
+    pm = XCreatePixmap( G.d, FL_ObjWin( GUI.run_form->canvas ),
+						*width, *height,
 						fl_get_canvas_depth( GUI.run_form->canvas ) );
 
 	gc = XCreateGC( G.d, pm, 0, 0 );
 	XSetForeground( G.d, gc, fl_get_pixel( FL_COL1 ) );
 
-	XFillRectangle( G.d, pm, gc, 0, 0, width, height );
+	XFillRectangle( G.d, pm, gc, 0, 0, *width, *height );
 	XCopyArea( G.d, G.y_axis.pm, pm, gc, 0, 0, G.y_axis.w, G.y_axis.h, 0, 0 );
 	XCopyArea( G.d, G.canvas.pm, pm, gc, 0, 0, G.canvas.w, G.canvas.h,
 			   G.y_axis.w, 0 );
@@ -2146,9 +2171,9 @@ static Pixmap dump_2d_window( void )
 
 	XSetForeground( G.d, gc, fl_get_pixel( FL_BLACK ) );
 	XDrawLine( G.d, pm, gc, G.y_axis.w - 1, G.canvas.h,
-			   G.y_axis.w - 1, height - 1 );
+			   G.y_axis.w - 1, *height - 1 );
 	XDrawLine( G.d, pm, gc, G.y_axis.w + G.canvas.w + 4, 0,
-			   G.y_axis.w + G.canvas.w + 4, height - 1 );
+			   G.y_axis.w + G.canvas.w + 4, *height - 1 );
 
 	XFreeGC( G.d, gc );
 
@@ -2159,24 +2184,23 @@ static Pixmap dump_2d_window( void )
 /*---------------------------------------------------------------*/
 /*---------------------------------------------------------------*/
 
-static Pixmap dump_cut_window( void )
+static Pixmap get_cut_window( unsigned int *width, unsigned int *height )
 {
 	Pixmap pm;
-	unsigned int width, height;
 	GC gc;
 
 
-	width  = G.cut_y_axis.w + G.cut_canvas.w + G.cut_z_axis.w + 5;
-	height = G.cut_z_axis.h;
+	*width  = G.cut_y_axis.w + G.cut_canvas.w + G.cut_z_axis.w + 5;
+	*height = G.cut_z_axis.h;
 
     pm = XCreatePixmap( G.d, FL_ObjWin( GUI.cut_form->cut_canvas ),
-						width, height,
+						*width, *height,
 						fl_get_canvas_depth( GUI.cut_form->cut_canvas ) );
 
 	gc = XCreateGC( G.d, pm, 0, 0 );
 	XSetForeground( G.d, gc, fl_get_pixel( FL_COL1 ) );
 
-	XFillRectangle( G.d, pm, gc, 0, 0, width, height );
+	XFillRectangle( G.d, pm, gc, 0, 0, *width, *height );
 	XCopyArea( G.d, G.cut_y_axis.pm, pm, gc, 0, 0,
 			   G.cut_y_axis.w, G.cut_y_axis.h, 0, 0 );
 	XCopyArea( G.d, G.cut_canvas.pm, pm, gc, 0, 0,
@@ -2190,13 +2214,105 @@ static Pixmap dump_cut_window( void )
 
 	XSetForeground( G.d, gc, fl_get_pixel( FL_BLACK ) );
 	XDrawLine( G.d, pm, gc, G.y_axis.w - 1, G.canvas.h,
-			   G.y_axis.w - 1, height - 1 );
+			   G.y_axis.w - 1, *height - 1 );
 	XDrawLine( G.d, pm, gc, G.cut_y_axis.w + G.cut_canvas.w + 4, 0,
-			   G.cut_y_axis.w + G.cut_canvas.w + 4, height - 1 );
+			   G.cut_y_axis.w + G.cut_canvas.w + 4, *height - 1 );
 
 	XFreeGC( G.d, gc );
 
 	return pm;
+}
+
+
+static void log_date( void )
+{
+    static char tc[ 26 ];
+	struct timeb mt;
+    time_t t;
+
+
+    t = time( NULL );
+    strcpy( tc, asctime( localtime( &t ) ) );
+	tc[ 10 ] = '\0';
+	tc[ 19 ] = '\0';
+    tc[ 24 ] = '\0';
+	ftime( &mt );
+    fprintf( stderr, "\n%s.%03d", tc + 11, mt.millitm );
+}
+
+/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+
+static void dump_1d( int fd, XImage *im, unsigned int w, unsigned int h )
+{
+	unsigned int i, j, k;
+	unsigned long pixel;
+
+
+	for ( j = 0; j < h; j++ )
+		for ( i = 0; i < w; i++ )
+		{
+			pixel = XGetPixel( im, i, j );
+			for ( k = 0; k < NUM_1D_COLS && pixel != G.cm_1[ k ].pixel;  k++ )
+				/* empty */ ;
+			write( fd, G.cm_1[ k ].rgb, 3 );
+		}
+}
+
+
+/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+
+static void dump_2d( int fd, XImage *im, unsigned int w, unsigned int h )
+{
+	unsigned int i, j;
+	ColorIndex l;
+	ColorIndex *cm_2;
+
+
+	for ( j = 0; j < h; j++ )
+		for ( i = 0; i < w; i++ )
+		{
+			l.pixel = XGetPixel( im, i, j );
+			cm_2 = bsearch( &l.pixel, G.cm_2, NUM_COLORS + FL_FREE_COL1 + 3,
+							sizeof( ColorIndex ), color_comp );
+			if ( cm_2 != NULL )
+				write( fd, cm_2->rgb, 3 );
+			else
+				THROW( EXCEPTION );
+		}
+}
+
+
+/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+
+static void create_1d_colormap( void )
+{
+	int i;
+	int r, g, b;
+	unsigned long colors[ NUM_1D_COLS ] = { FL_BLACK, FL_LEFT_BCOL, FL_RED,
+											FL_WHITE, FL_INACTIVE, FL_COL1 };
+
+
+	for ( i = 0; i < MAX_CURVES; i++ )
+		colors[ i + ( NUM_1D_COLS - MAX_CURVES ) ] = G.colors[ i ];
+
+	G.cm_1 = T_malloc( ( NUM_1D_COLS + 1 ) * sizeof( ColorIndex ) );
+
+	for ( i = 0; i < NUM_1D_COLS; i++ )
+	{
+		G.cm_1[ i ].pixel = fl_get_pixel( colors[ i ] );
+		fl_getmcolor( colors[ i ], &r, &g, &b );
+		G.cm_1[ i ].rgb[ RED   ] = r;
+		G.cm_1[ i ].rgb[ GREEN ] = g;
+		G.cm_1[ i ].rgb[ BLUE  ] = b;
+	}
+
+	/* This very last element is just a guard element and only here out of
+	   paranoia... */
+
+	memcpy( G.cm_1 + NUM_1D_COLS, G.cm_1, sizeof( ColorIndex ) );
 }
 
 

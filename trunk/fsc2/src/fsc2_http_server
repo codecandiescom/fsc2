@@ -451,7 +451,7 @@ HTTP
 #########################################################
 # If called without an argument the function returns the current (GMT) date
 # in RFC 1123 format, otherwise the date in about one years time (to be used
-# as the 'infinite' expiry date, according to RFC 2616)
+# as the 'infinite' expiry date according to RFC 2616)
 
 sub rfc_1123_date {
 	my @gm_time = gmtime( time( ) + ( @_ == 0 ? 0 : 31557600 ) );

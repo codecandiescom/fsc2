@@ -684,11 +684,32 @@ void create_colors( void )
 
 	/* Create the colours between blue and red */
 
+	G.cm_2 = T_malloc( ( NUM_COLORS + FL_FREE_COL1 + 3 )
+					   * sizeof( ColorIndex ) );
+
+	for ( i = 0; i <= FL_FREE_COL1; i++ )
+	{
+		G.cm_2[ i ].pixel = fl_get_pixel( i );
+		fl_getmcolor( i, rgb + RED, rgb + GREEN, rgb + BLUE );
+		G.cm_2[ i ].rgb[ RED   ] = rgb[ RED ];
+		G.cm_2[ i ].rgb[ GREEN ] = rgb[ GREEN ];
+		G.cm_2[ i ].rgb[ BLUE  ] = rgb[ BLUE ];
+	}
+
 	for ( i = 0; i < NUM_COLORS; i++ )
 	{
 		i2rgb( ( double ) i / ( double ) ( NUM_COLORS - 1 ), rgb );
 		fl_mapcolor( i + FL_FREE_COL1 + 1,
 					 rgb[ RED ], rgb[ GREEN ], rgb[ BLUE ] );
+
+		G.cm_2[ i + FL_FREE_COL1 + 1 ].rgb[ RED ] =
+			( unsigned char ) rgb[ RED ];
+		G.cm_2[ i + FL_FREE_COL1 + 1 ].rgb[ GREEN ] =
+			( unsigned char ) rgb[ GREEN ];
+		G.cm_2[ i + FL_FREE_COL1 + 1 ].rgb[ BLUE ] =
+			( unsigned char ) rgb[ BLUE ];
+		G.cm_2[ i + FL_FREE_COL1 + 1 ].pixel =
+			fl_get_pixel( i + FL_FREE_COL1 + 1 );
 	}
 
 	/* Finally create colours for values too small or too large */
@@ -696,9 +717,68 @@ void create_colors( void )
 	i2rgb( -1.0, rgb );
 	fl_mapcolor( NUM_COLORS + FL_FREE_COL1 + 1,
 				 rgb[ RED ], rgb[ GREEN ], rgb[ BLUE ] );
+
+	G.cm_2[ NUM_COLORS + FL_FREE_COL1 + 1 ].rgb[ RED ] =
+		( unsigned char ) rgb[ RED   ];
+	G.cm_2[ NUM_COLORS + FL_FREE_COL1 + 1 ].rgb[ GREEN ] =
+		( unsigned char ) rgb[ GREEN ];
+	G.cm_2[ NUM_COLORS + FL_FREE_COL1 + 1 ].rgb[ BLUE ] =
+		( unsigned char ) rgb[ BLUE  ];
+	G.cm_2[ NUM_COLORS + FL_FREE_COL1 + 1 ].pixel =
+		fl_get_pixel( NUM_COLORS + FL_FREE_COL1 + 1 );
+
 	i2rgb( 2.0, rgb );
 	fl_mapcolor( NUM_COLORS + FL_FREE_COL1 + 2,
 				 rgb[ RED ], rgb[ GREEN ], rgb[ BLUE ] );
+
+	G.cm_2[ NUM_COLORS + FL_FREE_COL1 + 2 ].rgb[ RED ] =
+		( unsigned char ) rgb[ RED   ];
+	G.cm_2[ NUM_COLORS + FL_FREE_COL1 + 2 ].rgb[ GREEN ] =
+		( unsigned char ) rgb[ GREEN ];
+	G.cm_2[ NUM_COLORS + FL_FREE_COL1 + 2 ].rgb[ BLUE ] =
+		( unsigned char ) rgb[ BLUE  ];
+	G.cm_2[ NUM_COLORS + FL_FREE_COL1 + 2 ].pixel =
+		fl_get_pixel( NUM_COLORS + FL_FREE_COL1 + 2 );
+
+	qsort( G.cm_2, NUM_COLORS + FL_FREE_COL1 + 3,
+		   sizeof( ColorIndex ), color_comp );
+}
+
+
+inline int color_comp( const void *a, const void *b )
+{
+	unsigned long pa = ( ( ColorIndex * ) a )->pixel,
+				  pb = ( ( ColorIndex * ) b )->pixel;
+
+	if ( pa == pb )
+		return 0;
+	else
+		return pa > pb ? 1 : -1;
+}
+
+
+
+/*--------------------------------------------------------------------------*/
+/* Returns the pixel value of an entry in XFORMs internal colour map from   */
+/* the colours set in create_colors(). For values slightly above 1 as well  */
+/* as for values just below 0 only one colour pixel value is returned while */
+/* for intermediate values one of NUM_COLORS (as defined in global.h) is    */
+/* returned, depending on the value.                                        */
+/*--------------------------------------------------------------------------*/
+
+inline unsigned long d2color( double a )
+{
+	long c_index;
+
+
+	c_index = lrnd( a * ( NUM_COLORS - 1 ) );
+
+	if ( c_index < 0 )
+		return fl_get_pixel( NUM_COLORS + FL_FREE_COL1 + 1 );
+	else if ( c_index < NUM_COLORS )
+		return fl_get_pixel( FL_FREE_COL1 + 1 + ( unsigned int ) c_index );
+	else
+		return fl_get_pixel( NUM_COLORS + FL_FREE_COL1 + 2 );
 }
 
 
@@ -765,30 +845,6 @@ inline void lower_permissions( void )
 {
 	seteuid( getuid( ) );
 	setegid( getgid( ) );
-}
-
-
-/*--------------------------------------------------------------------------*/
-/* Returns the pixel value of an entry in XFORMs internal colour map from   */
-/* the colours set in create_colors(). For values slightly above 1 as well  */
-/* as for values just below 0 only one colour pixel value is returned while */
-/* for intermediate values one of NUM_COLORS (as defined in global.h) is    */
-/* returned, depending on the value.                                        */
-/*--------------------------------------------------------------------------*/
-
-inline unsigned long d2color( double a )
-{
-	long c_index;
-
-
-	c_index = lrnd( a * ( NUM_COLORS - 1 ) );
-
-	if ( c_index < 0 )
-		return fl_get_pixel( NUM_COLORS + FL_FREE_COL1 + 1 );
-	else if ( c_index < NUM_COLORS )
-		return fl_get_pixel( FL_FREE_COL1 + 1 + ( unsigned int ) c_index );
-	else
-		return fl_get_pixel( NUM_COLORS + FL_FREE_COL1 + 2 );
 }
 
 
