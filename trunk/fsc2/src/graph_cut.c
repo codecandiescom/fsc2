@@ -2547,10 +2547,7 @@ void cut_next_index( FL_OBJECT *a, long b )
 			break;
 
 		case 2:
-			if ( dir == X )
-				cut_show( CG.cut_dir, G.nx - 1 );
-			else
-				cut_show( CG.cut_dir, G.ny - 1 );
+			cut_show( CG.cut_dir, CG.cut_dir == X ? G.nx - 1 : G.ny - 1 );
 			break;
 
 		case 3 :
