@@ -47,7 +47,8 @@ struct {
 	int	SLIDER_WIDTH;
 
 	int IN_OUT_WIDTH;
-	int IN_OUT_HEIGHT;
+	int IN_HEIGHT;
+	int OUT_HEIGHT;
 
 	int SYMBOL_SIZE_IN;
 } FI_sizes;
@@ -87,6 +88,8 @@ static Var *f_tb_wait_child( Var *v );
 
 void toolbox_create( long layout )
 {
+	unsigned int h, dummy;
+
 	if ( Toolbox != NULL )
 		return;
 
@@ -98,6 +101,10 @@ void toolbox_create( long layout )
 
 	if ( GUI.G_Funcs.size == LOW )
 	{
+		fl_get_string_dimension( FL_NORMAL_STYLE, GUI.toolboxFontSize,
+								 "1", 1, &dummy, &h );
+		h += 8;
+
 		FI_sizes.VERT_OFFSET         = 10;
 		FI_sizes.HORI_OFFSET         = 10;
 
@@ -109,10 +116,11 @@ void toolbox_create( long layout )
 		FI_sizes.PUSH_BUTTON_SIZE    = 30;
 		FI_sizes.RADIO_BUTTON_SIZE   = 30;
 
-		FI_sizes.SLIDER_HEIGHT       = 25;
+		FI_sizes.SLIDER_HEIGHT       = h;
 		FI_sizes.SLIDER_WIDTH        = 150;
 
-		FI_sizes.IN_OUT_HEIGHT       = 25;
+		FI_sizes.IN_HEIGHT           = h + 2;
+		FI_sizes.OUT_HEIGHT          = h;
 		FI_sizes.IN_OUT_WIDTH        = 150;
 
 		FI_sizes.MENU_WIDTH         = 150;
@@ -123,6 +131,10 @@ void toolbox_create( long layout )
 	}
 	else
 	{
+		fl_get_string_dimension( FL_NORMAL_STYLE, GUI.toolboxFontSize,
+								 "1", 1, &dummy, &h );
+		h += 8;
+
 		FI_sizes.VERT_OFFSET         = 30;
 		FI_sizes.HORI_OFFSET         = 20;
 
@@ -134,10 +146,11 @@ void toolbox_create( long layout )
 		FI_sizes.PUSH_BUTTON_SIZE    = 40;
 		FI_sizes.RADIO_BUTTON_SIZE   = 40;
 
-		FI_sizes.SLIDER_HEIGHT       = 35;
+		FI_sizes.SLIDER_HEIGHT       = h;
 		FI_sizes.SLIDER_WIDTH        = 210;
 
-		FI_sizes.IN_OUT_HEIGHT       = 35;
+		FI_sizes.IN_HEIGHT           = h + 2;
+		FI_sizes.OUT_HEIGHT          = h;
 		FI_sizes.IN_OUT_WIDTH        = 210;
 
 		FI_sizes.MENU_WIDTH         = 210;
@@ -1116,7 +1129,7 @@ static void normal_button_setup( IOBJECT *io )
 	{
 		if ( *io->label != '@' )
 		{
-			fl_get_string_dimension( FL_NORMAL_STYLE, xcntl.buttonFontSize,
+			fl_get_string_dimension( FL_NORMAL_STYLE, GUI.toolboxFontSize,
 									 io->label, strlen( io->label ),
 									 &io->w, &io->h );
 
@@ -1144,6 +1157,7 @@ static void normal_button_setup( IOBJECT *io )
 
 	io->self = fl_add_button( FL_NORMAL_BUTTON, io->x, io->y,
 							  io->w, io->h, io->label );
+	fl_set_object_lsize( io->self, GUI.toolboxFontSize );
 	fl_set_object_color( io->self, FL_MCOL, FL_GREEN );
 }
 
@@ -1163,11 +1177,11 @@ static void push_button_setup( IOBJECT *io )
 	   extremely tiny unless the alignment is explicitely set */
 
 	fl_set_object_lalign( io->self, FL_ALIGN_RIGHT );
-	fl_set_object_lsize( io->self, xcntl.labelFontSize );
+	fl_set_object_lsize( io->self, GUI.toolboxFontSize );
 
 	if ( io->label != NULL )
 	{
-		fl_get_string_dimension( FL_NORMAL_STYLE, xcntl.labelFontSize,
+		fl_get_string_dimension( FL_NORMAL_STYLE, GUI.toolboxFontSize,
 								 io->label, strlen( io->label ),
 								 &io->wt, &io->ht );
 
@@ -1220,11 +1234,11 @@ static void radio_button_setup( IOBJECT *io )
 	   extremely tiny unless the alignment is explicitely set */
 
 	fl_set_object_lalign( io->self, FL_ALIGN_RIGHT );
-	fl_set_object_lsize( io->self, xcntl.labelFontSize );
+	fl_set_object_lsize( io->self, GUI.toolboxFontSize );
 
 	if ( io->label != NULL )
 	{
-		fl_get_string_dimension( FL_NORMAL_STYLE, xcntl.labelFontSize,
+		fl_get_string_dimension( FL_NORMAL_STYLE, GUI.toolboxFontSize,
 								 io->label, strlen( io->label ),
 								 &io->wt, &io->ht );
 
@@ -1283,12 +1297,12 @@ static void slider_setup( IOBJECT *io )
 	io->self = fl_add_slider( FL_HOR_BROWSER_SLIDER, io->x, io->y,
 							  io->w, io->h, io->label );
 
-	fl_set_object_lsize( io->self, xcntl.sliderFontSize );
+	fl_set_object_lsize( io->self, GUI.toolboxFontSize );
 	fl_set_object_lalign( io->self, FL_ALIGN_BOTTOM );
 
 	if ( io->label != NULL )
 	{
-		fl_get_string_dimension( FL_NORMAL_STYLE, xcntl.sliderFontSize,
+		fl_get_string_dimension( FL_NORMAL_STYLE, GUI.toolboxFontSize,
 								 io->label, strlen( io->label ),
 								 &io->wt, &io->ht );
 
@@ -1332,12 +1346,12 @@ static void val_slider_setup( IOBJECT *io )
 	io->self = fl_add_valslider( FL_HOR_BROWSER_SLIDER, io->x, io->y,
 								 io->w, io->h, io->label );
 
-	fl_set_object_lsize( io->self, xcntl.sliderFontSize );
+	fl_set_object_lsize( io->self, GUI.toolboxFontSize );
 	fl_set_object_lalign( io->self, FL_ALIGN_BOTTOM );
 
 	if ( io->label != NULL )
 	{
-		fl_get_string_dimension( FL_NORMAL_STYLE, xcntl.sliderFontSize,
+		fl_get_string_dimension( FL_NORMAL_STYLE, GUI.toolboxFontSize,
 								 io->label, strlen( io->label ),
 								 &io->wt, &io->ht );
 
@@ -1381,16 +1395,17 @@ static void int_input_setup( IOBJECT *io )
 
 
 	io->w = FI_sizes.IN_OUT_WIDTH;
-	io->h = FI_sizes.IN_OUT_HEIGHT;
+	io->h = FI_sizes.IN_HEIGHT;
 
 	io->self = fl_add_input( FL_INT_INPUT, io->x, io->y,
 							 io->w, io->h, io->label );
 
 	fl_set_object_lalign( io->self, FL_ALIGN_BOTTOM );
+	fl_set_object_lsize( io->self, GUI.toolboxFontSize );
 
 	if ( io->label != NULL )
 	{
-		fl_get_string_dimension( FL_NORMAL_STYLE, xcntl.labelFontSize,
+		fl_get_string_dimension( FL_NORMAL_STYLE, GUI.toolboxFontSize,
 								 io->label, strlen( io->label ),
 								 &io->wt, &io->ht );
 
@@ -1425,16 +1440,17 @@ static void float_input_setup( IOBJECT *io )
 
 
 	io->w = FI_sizes.IN_OUT_WIDTH;
-	io->h = FI_sizes.IN_OUT_HEIGHT;
+	io->h = FI_sizes.IN_HEIGHT;
 
 	io->self = fl_add_input( FL_FLOAT_INPUT, io->x, io->y,
 							 io->w, io->h, io->label );
 
 	fl_set_object_lalign( io->self, FL_ALIGN_BOTTOM );
+	fl_set_object_lsize( io->self, GUI.toolboxFontSize );
 
 	if ( io->label != NULL )
 	{
-		fl_get_string_dimension( FL_NORMAL_STYLE, xcntl.labelFontSize,
+		fl_get_string_dimension( FL_NORMAL_STYLE, GUI.toolboxFontSize,
 								 io->label, strlen( io->label ),
 								 &io->wt, &io->ht );
 
@@ -1469,16 +1485,17 @@ static void int_output_setup( IOBJECT *io )
 
 
 	io->w = FI_sizes.IN_OUT_WIDTH;
-	io->h = FI_sizes.IN_OUT_HEIGHT;
+	io->h = FI_sizes.OUT_HEIGHT;
 
 	io->self = fl_add_input( FL_INT_INPUT, io->x, io->y,
 							 io->w, io->h, io->label );
 
 	fl_set_object_lalign( io->self, FL_ALIGN_BOTTOM );
+	fl_set_object_lsize( io->self, GUI.toolboxFontSize );
 
 	if ( io->label != NULL )
 	{
-		fl_get_string_dimension( FL_NORMAL_STYLE, xcntl.labelFontSize,
+		fl_get_string_dimension( FL_NORMAL_STYLE, GUI.toolboxFontSize,
 								 io->label, strlen( io->label ),
 								 &io->wt, &io->ht );
 
@@ -1517,16 +1534,17 @@ static void float_output_setup( IOBJECT *io )
 
 
 	io->w = FI_sizes.IN_OUT_WIDTH;
-	io->h = FI_sizes.IN_OUT_HEIGHT;
+	io->h = FI_sizes.OUT_HEIGHT;
 
 	io->self = fl_add_input( FL_FLOAT_INPUT, io->x, io->y,
 							 io->w, io->h, io->label );
 
 	fl_set_object_lalign( io->self, FL_ALIGN_BOTTOM );
+	fl_set_object_lsize( io->self, GUI.toolboxFontSize );
 
 	if ( io->label != NULL )
 	{
-		fl_get_string_dimension( FL_NORMAL_STYLE, xcntl.labelFontSize,
+		fl_get_string_dimension( FL_NORMAL_STYLE, GUI.toolboxFontSize,
 								 io->label, strlen( io->label ),
 								 &io->wt, &io->ht );
 
@@ -1567,7 +1585,7 @@ static void menu_setup( IOBJECT *io )
 	io->w = io->h = 0;
 	for ( i = 0; i < io->num_items; i++ )
 	{
-		fl_get_string_dimension( FL_NORMAL_STYLE, xcntl.choiceFontSize,
+		fl_get_string_dimension( FL_NORMAL_STYLE, GUI.toolboxFontSize,
 								 io->menu_items[ i ],
 								 strlen( io->menu_items[ i ] ),
 								 &wt, &ht );
@@ -1585,10 +1603,13 @@ static void menu_setup( IOBJECT *io )
 							  io->w, io->h, io->label );
 	
 	fl_set_object_lalign( io->self, FL_ALIGN_BOTTOM );
+	fl_set_object_lsize( io->self, GUI.toolboxFontSize );
+	fl_setpup_default_fontsize( GUI.toolboxFontSize );
+	fl_set_choice_fontsize( io->self, GUI.toolboxFontSize );
 
 	if ( io->label != NULL )
 	{
-		fl_get_string_dimension( FL_NORMAL_STYLE, xcntl.labelFontSize,
+		fl_get_string_dimension( FL_NORMAL_STYLE, GUI.toolboxFontSize,
 								 io->label, strlen( io->label ),
 								 &io->wt, &io->ht );
 
