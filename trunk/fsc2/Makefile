@@ -50,8 +50,7 @@ EXEC_INSTALL   = install             # command for installing executables
 # Set up variables with maintainer email address and the full paths for
 # the mail program 'mail' and the GNU utility 'addr2line'
 
-#MAIL_ADDRESS   = Jens.Toerring@physik.fu-berlin.de
-MAIL_ADDRESS   = jens
+MAIL_ADDRESS   = Jens.Toerring@physik.fu-berlin.de
 MAIL_PROGRAM   = $(shell which mail)
 ADDR2LINE      = $(shell which addr2line)
 
