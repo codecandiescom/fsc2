@@ -98,7 +98,7 @@ Exception_Types get_exception_type( const char *file, int line );
    statements with no effect, which we would get when the statement would
    consist of just taking the address of the variable. */
 
-#define CLOBBER_PROTECT( a )  do { if ( ( &a ) ) ( a ) = ( a ); } while( 0 )
+#define CLOBBER_PROTECT( a )  do { if ( &( a ) ) ( a ) = ( a ); } while( 0 )
 
 
 #endif  /* ! EXCEPTIONS_HEADER */
