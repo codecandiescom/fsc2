@@ -54,10 +54,7 @@
 #define CLOCK_CARD        1
 
 #define ERT_CLOCK         0
-
-#ifndef FIXED_TIMEBASE
 #define TB_CLOCK          1
-#endif
 
 #define ERT_DELAY         0
 #define INIT_DELAY        1
@@ -69,6 +66,9 @@
 #define RF_DELAY          7
 #define DET_DELAY_0       8
 #define DET_DELAY_1       9
+
+#define INVALID_DELAY_NUMBER -1
+#define INVALID_CLOCK_NUMBER -1
 
 
 /* Minimum precision (relative to the timebase) for pulse positions and
@@ -106,14 +106,14 @@ typedef struct Pulse Pulse_T;
 
 
 struct Rulbus_Clock_Card {
-	const char *name;
+	char *name;
 	int handle;
 	int freq;
 };
 
 
 struct Rulbus_Delay_Card {
-	const char *name;
+	char *name;
 	int handle;
 	Ticks delay;
 	double intr_delay;
@@ -187,6 +187,8 @@ struct Pulse {
 struct RB_Pulser {
 	bool is_needed;
 
+	char *config_file;
+
 	Rulbus_Clock_Card_T clock_card[ NUM_CLOCK_CARDS ];
 	Rulbus_Delay_Card_T delay_card[ NUM_DELAY_CARDS ];
 
@@ -254,6 +256,7 @@ Var_T *pulser_increment( Var_T *v );
 Var_T *pulser_reset( Var_T *v );
 Var_T *pulser_pulse_reset( Var_T *v );
 Var_T *pulser_pulse_minimum_specs( Var_T *v );
+void rb_pulser_cleanup( void );
 
 
 /* Functions defined in rb_pulser_gen.c */
@@ -311,6 +314,11 @@ const char *rb_pulser_pticks( Ticks ticks );
 void rb_pulser_show_pulses( void );
 void rb_pulser_dump_pulses( void );
 void rb_pulser_write_pulses( FILE *fp );
+
+
+/* Functions defined in rb_pulser_config.l */
+
+void rb_pulser_read_configuration( void );
 
 
 /* Functions defined in rb_pulser_ll.c */

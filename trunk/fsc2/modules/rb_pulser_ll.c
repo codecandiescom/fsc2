@@ -328,8 +328,7 @@ void rb_pulser_run( bool state )
 	{
 		/* To stop the pulser keep the ERT delay card from emitting further
 		   end pulses that would trigger the following cards, then stop the
-		   clock card feeding the ERT delay card and finally set the delay
-		   for ERT card to 0. */
+		   clock card feeding the delay card and finally set its delay to 0 */
 
 		if ( rulbus_rb8514_delay_set_output_pulse(
 									  rb_pulser.delay_card[ ERT_DELAY ].handle,

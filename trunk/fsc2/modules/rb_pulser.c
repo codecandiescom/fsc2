@@ -115,6 +115,13 @@ int rb_pulser_init_hook( void )
 
 	rb_pulser.is_running = UNSET;
 
+	if ( RB_PULSER_CONFIG_FILE[ 0 ] ==  '/' )
+		rb_pulser.config_file = T_strdup( RB_PULSER_CONFIG_FILE );
+	else
+		rb_pulser.config_file = get_string( "%s%s%s", libdir,
+											slash( libdir ),
+											RB_PULSER_CONFIG_FILE );
+
 	rb_pulser.is_trig_in_mode = UNSET;
 	rb_pulser.is_trig_in_slope = UNSET;
 	rb_pulser.is_rep_time = UNSET;
@@ -317,6 +324,8 @@ int rb_pulser_exp_hook( void )
 
 int rb_pulser_end_of_exp_hook( void )
 {
+	rb_pulser_cleanup( );
+
 	if ( ! rb_pulser.is_needed )
 		return 1;
 
@@ -687,66 +696,59 @@ Var_T *pulser_pulse_minimum_specs( Var_T *v )
 
 static void rb_pulser_card_setup( void )
 {
-	int i;
+	size_t i;
 	RULBUS_CARD_INFO card_info;
 
 
-	rb_pulser.clock_card[ ERT_CLOCK ].name  = ERT_CLOCK_CARD;
-#ifndef FIXED_TIMEBASE
-	rb_pulser.clock_card[ TB_CLOCK ].name   = TB_CLOCK_CARD;
-#endif
-
 	for ( i = 0; i < NUM_CLOCK_CARDS; i++ )
+	{
 		rb_pulser.clock_card[ i ].handle = -1;
+		rb_pulser.clock_card[ i ].name = NULL;
+	}
 
-	rb_pulser.delay_card[ ERT_DELAY ].name = ERT_DELAY_CARD;
+	for ( i = 0; i < NUM_DELAY_CARDS; i++ )
+		rb_pulser.delay_card[ i ].name = NULL;
+
+	rb_pulser_read_configuration( );
+
 	rb_pulser.delay_card[ ERT_DELAY ].prev = NULL;
 	rb_pulser.delay_card[ ERT_DELAY ].next = NULL;
 
-	rb_pulser.delay_card[ INIT_DELAY ].name = INIT_DELAY_CARD;
 	rb_pulser.delay_card[ INIT_DELAY ].prev = NULL;
 	rb_pulser.delay_card[ INIT_DELAY ].next = NULL;
 
-	rb_pulser.delay_card[ MW_DELAY_0 ].name = MW_DELAY_CARD_0;
 	rb_pulser.delay_card[ MW_DELAY_0 ].prev =
 											rb_pulser.delay_card + INIT_DELAY;
 	rb_pulser.delay_card[ MW_DELAY_0 ].next =
 											rb_pulser.delay_card + MW_DELAY_1;
 
-	rb_pulser.delay_card[ MW_DELAY_1 ].name = MW_DELAY_CARD_1;
 	rb_pulser.delay_card[ MW_DELAY_1 ].prev =
 											rb_pulser.delay_card + MW_DELAY_0;
 	rb_pulser.delay_card[ MW_DELAY_1 ].next =
 											rb_pulser.delay_card + MW_DELAY_2;
 
-	rb_pulser.delay_card[ MW_DELAY_2 ].name = MW_DELAY_CARD_2;
 	rb_pulser.delay_card[ MW_DELAY_2 ].prev =
 											rb_pulser.delay_card + MW_DELAY_1;
 	rb_pulser.delay_card[ MW_DELAY_2 ].next =
 											rb_pulser.delay_card + MW_DELAY_3;
 
-	rb_pulser.delay_card[ MW_DELAY_3 ].name = MW_DELAY_CARD_3;
 	rb_pulser.delay_card[ MW_DELAY_3 ].prev =
 											rb_pulser.delay_card + MW_DELAY_2;
 	rb_pulser.delay_card[ MW_DELAY_3 ].next =
 											rb_pulser.delay_card + MW_DELAY_4;
 
-	rb_pulser.delay_card[ MW_DELAY_4 ].name = MW_DELAY_CARD_4;
 	rb_pulser.delay_card[ MW_DELAY_4 ].prev =
 											rb_pulser.delay_card + MW_DELAY_3;
 	rb_pulser.delay_card[ MW_DELAY_4 ].next = NULL;
 
-	rb_pulser.delay_card[ RF_DELAY ].name = RF_DELAY_CARD;
 	rb_pulser.delay_card[ RF_DELAY ].prev = rb_pulser.delay_card + INIT_DELAY;
 	rb_pulser.delay_card[ RF_DELAY ].next = NULL;
 
-	rb_pulser.delay_card[ DET_DELAY_0 ].name = DET_DELAY_CARD_0;
 	rb_pulser.delay_card[ DET_DELAY_0 ].prev =
 											rb_pulser.delay_card + INIT_DELAY;
 	rb_pulser.delay_card[ DET_DELAY_0 ].next =
 											rb_pulser.delay_card + DET_DELAY_1;
 
-	rb_pulser.delay_card[ DET_DELAY_1 ].name = DET_DELAY_CARD_1;
 	rb_pulser.delay_card[ DET_DELAY_1 ].prev =
 											rb_pulser.delay_card + DET_DELAY_0;
 	rb_pulser.delay_card[ DET_DELAY_1 ].next = NULL;
@@ -766,6 +768,29 @@ static void rb_pulser_card_setup( void )
 
 		rb_pulser.delay_card[ i ].intr_delay = card_info.intr_delay;
 	}
+}
+
+
+/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*/
+
+void rb_pulser_cleanup( void )
+{
+	size_t i;
+
+
+	if ( rb_pulser.config_file != NULL )
+		rb_pulser.config_file = CHAR_P T_free( rb_pulser.config_file );
+
+	for ( i = 0; i < NUM_DELAY_CARDS; i++ )
+		if ( rb_pulser.delay_card[ i ].name != NULL )
+			rb_pulser.delay_card[ i ].name =
+							   CHAR_P T_free( rb_pulser.delay_card[ i ].name );
+
+	for ( i = 0; i < NUM_CLOCK_CARDS; i++ )
+		if ( rb_pulser.clock_card[ i ].name != NULL )
+			rb_pulser.clock_card[ i ].name =
+							  CHAR_P T_free( rb_pulser.clock_card[ i ].name );
 }
 
 
