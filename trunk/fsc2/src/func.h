@@ -73,7 +73,7 @@ typedef struct CALL_STACK_
 	const char *dev_name;
 	int dev_count;
 	long Cur_Pulser;
-	struct CALL_STACK_ *prev;
+	struct CALL_STACK_ *next;
 } CALL_STACK;
 
 

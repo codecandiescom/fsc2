@@ -603,7 +603,7 @@ CALL_STACK *call_push( Func *f, Device *device, const char *device_name,
 
 
 	cs = CALL_STACK_P T_malloc( sizeof *cs );
-	cs->prev = EDL.Call_Stack;
+	cs->next = EDL.Call_Stack;
 	cs->f = f;
 	if ( f != NULL )
 		cs->device = f->device;
@@ -651,13 +651,11 @@ CALL_STACK *call_pop( void )
 		return NULL;
 
 	cs = EDL.Call_Stack;
-	EDL.Call_Stack = cs->prev;
-	T_free( cs );
+	EDL.Call_Stack = cs->next;
 
-	if ( cs != NULL )
-		Cur_Pulser = cs->Cur_Pulser;
-	else
-		Cur_Pulser = -1;
+	Cur_Pulser = cs->Cur_Pulser;
+
+	T_free( cs );
 
 	return EDL.Call_Stack;
 }

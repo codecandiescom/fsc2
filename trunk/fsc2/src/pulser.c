@@ -950,7 +950,7 @@ long p_new( long pnum )
 	for ( cur_p = plist; cur_p != NULL; cur_p = cur_p->next )
 		if ( cur_p->num == pnum )
 		{
-			print( FATAL, "A pulse numbered %ld has already been defined.\n",
+			print( FATAL, "A pulse #%ld has already been defined.\n",
 				   pnum );
 			THROW( EXCEPTION );
 		}
@@ -993,9 +993,28 @@ void p_set( long pnum, int type, Var *v )
 {
 	long func, phase;
 	double pos, len, dpos, dlen;
+	static long dev_num = -1;
+	P_List *cur_p;
+	long stored_Cur_Pulser;
 
 
-	is_pulser_driver( );
+	for ( cur_p = plist; cur_p != NULL; cur_p = cur_p->next )
+		if ( cur_p->num == pnum )
+		{
+			dev_num = cur_p->dev_num;
+			break;
+		}
+
+	if ( dev_num == -1 )
+	{
+		print( FATAL, "Referenced pulse #%ld has not been "
+			   "defined.\n" );
+		THROW( EXCEPTION );
+	}
+
+	fsc2_assert( dev_num >= 0 && dev_num < EDL.Num_Pulsers );
+	stored_Cur_Pulser = Cur_Pulser;
+	Cur_Pulser = dev_num;
 
 	/* Now the correct driver function is called. All switches just check that
 	   the variable has the correct type and the driver function exists. */
@@ -1081,10 +1100,12 @@ void p_set( long pnum, int type, Var *v )
 	OTHERWISE
 	{
 		call_pop( );
+		Cur_Pulser = stored_Cur_Pulser;
 		RETHROW( );
 	}
 
 	call_pop( );
+	Cur_Pulser = stored_Cur_Pulser;
 }
 
 
@@ -1109,9 +1130,8 @@ Var *p_get_by_num( long pnum, int type )
 	static Var *v;
 	static long dev_num = -1;
 	P_List *cur_p;
+	long stored_Cur_Pulser;
 
-
-	is_pulser_driver( );
 
 	v = NULL;
 
@@ -1124,15 +1144,19 @@ Var *p_get_by_num( long pnum, int type )
 
 	if ( dev_num == -1 )
 	{
-		print( FATAL, "Referenced pulse numbered %ld has not been "
+		print( FATAL, "Referenced pulse #%ld has not been "
 			   "defined.\n" );
 		THROW( EXCEPTION );
 	}
 
+	fsc2_assert( dev_num >= 0 && dev_num < EDL.Num_Pulsers );
+	stored_Cur_Pulser = Cur_Pulser;
+	Cur_Pulser = dev_num;
+
 	TRY
 	{
 		call_push( NULL, pulser_struct[ Cur_Pulser ].device,
-				   pulser_struct[ dev_num ].name, Cur_Pulser + 1 );
+				   pulser_struct[ Cur_Pulser ].name, Cur_Pulser + 1 );
 		TRY_SUCCESS;
 	}
 
@@ -1141,47 +1165,49 @@ Var *p_get_by_num( long pnum, int type )
 		switch ( type )
 		{
 			case P_FUNC :
-				is_pulser_func( pulser_struct[ dev_num ].get_pulse_function,
+				is_pulser_func( pulser_struct[ Cur_Pulser ].get_pulse_function,
 								"returning the function of a pulse" );
-				pulser_struct[ dev_num ].get_pulse_function( pnum, &function );
+				pulser_struct[ Cur_Pulser ].get_pulse_function( pnum,
+																&function );
 				v = vars_push( INT_VAR, ( long ) function );
 				break;
 
 			case P_POS :
-				is_pulser_func( pulser_struct[ dev_num ].get_pulse_position,
+				is_pulser_func( pulser_struct[ Cur_Pulser ].get_pulse_position,
 								"returning a pulses position" );
-				pulser_struct[ dev_num ].get_pulse_position( pnum, &ptime );
+				pulser_struct[ Cur_Pulser ].get_pulse_position( pnum, &ptime );
 				v = vars_push( FLOAT_VAR, ptime );
 				break;
 
 			case P_LEN :
-				is_pulser_func( pulser_struct[ dev_num ].get_pulse_length,
+				is_pulser_func( pulser_struct[ Cur_Pulser ].get_pulse_length,
 								"returning a pulses length" );
-				pulser_struct[ dev_num ].get_pulse_length( pnum, &ptime );
+				pulser_struct[ Cur_Pulser ].get_pulse_length( pnum, &ptime );
 				v = vars_push( FLOAT_VAR, ptime );
 				break;
 
 			case P_DPOS :
 				is_pulser_func(
-					pulser_struct[ dev_num ].get_pulse_position_change,
+					pulser_struct[ Cur_Pulser ].get_pulse_position_change,
 					"returning a pulses position change" );
-				pulser_struct[ dev_num ].get_pulse_position_change( pnum,
+				pulser_struct[ Cur_Pulser ].get_pulse_position_change( pnum,
 																	  &ptime );
 				v = vars_push( FLOAT_VAR, ptime );
 				break;
 
 			case P_DLEN :
 				is_pulser_func(
-					pulser_struct[ dev_num ].get_pulse_length_change,
-					"returning a pulses length change" );
-				pulser_struct[ dev_num ].get_pulse_length_change( pnum,
+						   pulser_struct[ Cur_Pulser ].get_pulse_length_change,
+						   "returning a pulses length change" );
+				pulser_struct[ Cur_Pulser ].get_pulse_length_change( pnum,
 																	  &ptime );
 				v = vars_push( FLOAT_VAR, ptime );
 				break;
 
 			case P_PHASE :
-				is_pulser_func( pulser_struct[ dev_num ].get_pulse_phase_cycle,
-								"returning a pulses phase cycle" );
+				is_pulser_func(
+							 pulser_struct[ Cur_Pulser ].get_pulse_phase_cycle,
+							 "returning a pulses phase cycle" );
 				pulser_struct[ dev_num ].get_pulse_phase_cycle( pnum, &cycle );
 				v = vars_push( INT_VAR, cycle );
 				break;
@@ -1196,10 +1222,12 @@ Var *p_get_by_num( long pnum, int type )
 	OTHERWISE
 	{
 		call_pop( );
+		Cur_Pulser = stored_Cur_Pulser;
 		RETHROW( );
 	}
 
 	call_pop( );
+	Cur_Pulser = stored_Cur_Pulser;
 	return v;
 }
 

@@ -1,4 +1,9 @@
-1. When increasing the magnification of the display of the measured data
+1. Check if there's a way to find out from the Sony/Tektronix pulsers
+   if a DATA:UPD command is finished, and if wait for this to happen.
+   Currently the next read command may time out if the update takes
+   more than the time out set in gpib.conf.
+
+2. When increasing the magnification of the display of the measured data
    further and further there is a point after which rubish will get
    displayed (but the program does not crash). Since it will probably
    take a lot of work to get this resolved and, on the other hand, it
