@@ -327,6 +327,12 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 "\x4mvolt"  return MV_TOKEN;
 "\x4volt"   return V_TOKEN;
 
+"\x4mgauss" return MG_TOKEN;
+"\x4gauss"  return G_TOKEN;
+
+"\x4mhertz" return MHZ_TOKEN;
+"\x4khertz" return KHZ_TOKEN;
+"\x4hertz"  return HZ_TOKEN;
 
 			/* handling of invalid input */
 .           {

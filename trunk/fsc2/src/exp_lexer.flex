@@ -267,7 +267,7 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 "\x4mvolt"  return E_MV_TOKEN;
 "\x4volt"   return E_V_TOKEN;
 			
-"\x4gauss"  return E_MG_TOKEN;
+"\x4mgauss" return E_MG_TOKEN;
 "\x4gauss"  return E_G_TOKEN;
 
 "\x4mhertz" return E_MHZ_TOKEN;
