@@ -574,7 +574,7 @@ the device type, e.g.
 #define DEVICE_TYPE     "digitizer"
 @end example
 @noindent
-The device type string is used by @acronyn{fsc2} to figure out if more
+The device type string is used by @acronym{fsc2} to figure out if more
 than one device with the same functionality is being used by an
 @acronym{EDL} program. You probably already have read that when you have
 two such devices you can access the second device by appending a
