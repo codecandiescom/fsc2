@@ -299,7 +299,7 @@ int rulbus_delay_set_output_pulse_polarity( int handle, int type, int pol )
 		   type != RULBUS_DELAY_PULSE_BOTH ) ||
 		 ( pol != RULBUS_DELAY_POLARITY_NEGATIVE &&
 		   pol != RULBUS_DELAY_POLARITY_POSITIVE ) )
-		return RULBUS_INV_HND;
+		return RULBUS_INV_ARG;
 
 	ctrl = card->ctrl;
 

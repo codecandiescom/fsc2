@@ -150,7 +150,7 @@ int rulbus_clock_set_frequency( int handle, int freq )
 		return RULBUS_INV_HND;
 
 	if ( freq < RULBUS_CLOCK_FREQ_OFF || freq > RULBUS_CLOCK_FREQ_100MHz )
-		return RULBUS_INV_HND;
+		return RULBUS_INV_ARG;
 
 	if ( card->ctrl == freq )
 		return RULBUS_OK;

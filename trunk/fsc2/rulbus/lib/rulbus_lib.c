@@ -370,9 +370,6 @@ int rulbus_card_open( const char *name )
 	if ( name == NULL || *name == '\0' )
 		return rulbus_errno = RULBUS_INV_ARG;
 
-	if ( ! rulbus_in_use )
-		return rulbus_errno = RULBUS_NO_INIT;
-
 	for ( i = 0; i < rulbus_num_cards; i++ )
 		if ( ! strcmp( name, rulbus_card[ i ].name ) )
 			break;
@@ -432,7 +429,7 @@ int rulbus_write( int handle, unsigned char offset, unsigned char *data,
 
 
 	if ( ! rulbus_in_use )
-		rulbus_errno = RULBUS_NO_INIT;
+		return rulbus_errno = RULBUS_NO_INIT;
 
 	if ( handle < 0 || handle >= rulbus_num_cards )
 		return rulbus_errno = RULBUS_INV_HND;
@@ -454,7 +451,7 @@ int rulbus_write( int handle, unsigned char offset, unsigned char *data,
 		return rulbus_errno = RULBUS_WRT_ERR;
 
 	rulbus_errno = RULBUS_OK;
-	return retval;
+	return retval;               /* return number of bytes written */
 }
 
 
@@ -474,7 +471,7 @@ int rulbus_read( int handle, unsigned char offset, unsigned char *data,
 
 
 	if ( ! rulbus_in_use )
-		rulbus_errno = RULBUS_NO_INIT;
+		return rulbus_errno = RULBUS_NO_INIT;
 
 	if ( handle < 0 || handle >= rulbus_num_cards )
 		return rulbus_errno = RULBUS_INV_HND;
@@ -496,7 +493,7 @@ int rulbus_read( int handle, unsigned char offset, unsigned char *data,
 		return rulbus_errno = RULBUS_RD_ERR;
 
 	rulbus_errno = RULBUS_OK;
-	return retval;
+	return retval;                    /* return number of bytes read */
 }
 
 

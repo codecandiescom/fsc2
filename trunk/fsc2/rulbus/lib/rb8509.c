@@ -550,7 +550,7 @@ int rulbus_adc12_convert( int handle, double *volts )
 
 	/* If we're in internal trigger mode trigger a conversion (after making
 	   sure EOC is reset). The value we write to the trigger register is of
-	   no importance. */
+	   no importance, the mere act of writing to the register triggers. */
 
 	if ( card->trig_mode == RULBUS_ADC12_INT_TRIG &&
 		 ( ( retval = rulbus_read( handle, DATA_LOW_ADDR, &trig, 1 ) ) <  0 ||
