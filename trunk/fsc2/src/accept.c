@@ -7,7 +7,7 @@
 
 
 static void	unpack_and_accept( void *ptr );
-static void	other_data_request( int type, void * ptr );
+static void	other_data_request( int type, void *ptr );
 static void accept_1d_data( long x_index, long curve, int type, void *ptr );
 static void accept_2d_data( long x_index, long y_index, long curve, int type,
 							void *ptr );
@@ -120,7 +120,7 @@ static void unpack_and_accept( void *ptr )
 	long len;
 
 
-	nsets = *( ( int * ) ptr );
+	nsets = * ( int * ) ptr;
 	ptr += sizeof( int );
 
 	if ( nsets < 0 )                /* special for clear curve commands etc. */
@@ -133,16 +133,16 @@ static void unpack_and_accept( void *ptr )
 
 	for ( i = 0; i < nsets; ptr = ptr_next, i++ )
 	{
-		x_index = *( ( long * ) ptr );
+		x_index = * ( long * ) ptr;
 		ptr += sizeof( long );
 
-		y_index = *( ( long * ) ptr );
+		y_index = * ( long * ) ptr;
 		ptr += sizeof( long );
 
-		curve = *( ( long * ) ptr );
+		curve = * ( long * ) ptr;
 		ptr += sizeof( long );
 
-		type = *( ( int * ) ptr );
+		type = * ( int * ) ptr;
 		ptr += sizeof( int );
 			
 		switch ( type )
@@ -156,12 +156,12 @@ static void unpack_and_accept( void *ptr )
 				break;
 
 			case INT_ARR :
-				len = *( ( long * ) ptr );
+				len = * ( long * ) ptr;
 				ptr_next = ptr + ( len + 1 ) * sizeof( long );
 				break;
 
 			case FLOAT_ARR :
-				len = *( ( long * ) ptr );
+				len = * ( long * ) ptr;
 				ptr_next = ptr + sizeof( long ) + len * sizeof( double );
 				break;
 
@@ -182,7 +182,7 @@ static void unpack_and_accept( void *ptr )
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
-static void other_data_request( int type, void * ptr )
+static void other_data_request( int type, void *ptr )
 {
 	long i;
 	long count;
@@ -195,7 +195,7 @@ static void other_data_request( int type, void * ptr )
 	switch( type )
 	{
 		case D_CLEAR_CURVE :                  /* clear curve command */
-			count = * ( ( long * ) ptr );     /* length of list of curves */
+			count = * ( long * ) ptr;         /* length of list of curves */
 			ptr += sizeof( long );
 			ca = ( long * ) ptr;              /* list of curve numbers */
 
@@ -208,7 +208,7 @@ static void other_data_request( int type, void * ptr )
 			break;
 
 		case D_CHANGE_SCALE :                 /* change scale command */
-			is_set = *( ( int * ) ptr );      /* flags */
+			is_set = * ( int * ) ptr;         /* flags */
 			ptr += sizeof( int );
 			change_scale( is_set, ( double * ) ptr );
 			break;
@@ -278,13 +278,13 @@ static void accept_1d_data( long x_index, long curve, int type, void *ptr )
 			break;
 
 		case INT_ARR :
-			len = *( ( long * ) ptr );
+			len = * ( long * ) ptr;
 			ptr += sizeof( long );
 			l_data = ( long * ) ptr;
 			break;
 
 		case FLOAT_ARR :
-			len = *( ( long * ) ptr );
+			len = * ( long * ) ptr;
 			ptr += sizeof( long );
 			f_data = ( double * ) ptr;
 			break;
@@ -405,12 +405,12 @@ static void accept_1d_data( long x_index, long curve, int type, void *ptr )
 	{
 		if ( type & ( INT_VAR | INT_ARR ) )
 		{
-			data = ( double ) *( ( long * ) cur_ptr );
+			data = ( double ) * ( long * ) cur_ptr;
 			cur_ptr += sizeof( long );
 		}
 		else
 		{
-			data = * ( ( double * ) cur_ptr );
+			data = * ( double * ) cur_ptr;
 			cur_ptr += sizeof( double );
 		}
 
@@ -493,13 +493,13 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 			break;
 
 		case INT_ARR :
-			len = *( ( long * ) ptr );
+			len = * ( long * ) ptr;
 			ptr += sizeof( long );
 			l_data = ( long * ) ptr;
 			break;
 
 		case FLOAT_ARR :
-			len = *( ( long * ) ptr );
+			len = * ( long * ) ptr;
 			ptr += sizeof( long );
 			f_data = ( double * ) ptr;
 			break;
@@ -536,12 +536,12 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 	{
 		if ( type & ( INT_VAR | INT_ARR ) )
 		{
-			data = ( double ) *( ( long * ) cur_ptr );
+			data = ( double ) * ( long * ) cur_ptr;
 			cur_ptr += sizeof( long );
 		}
 		else
 		{
-			data = *( ( double * ) cur_ptr );
+			data = * ( double * ) cur_ptr;
 			cur_ptr += sizeof( double );
 		}
 
@@ -617,12 +617,12 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 	{
 		if ( type & ( INT_VAR | INT_ARR ) )
 		{
-			data = ( double ) *( ( long * ) cur_ptr );
+			data = ( double ) * ( long * ) cur_ptr;
 			cur_ptr += sizeof( long );
 		}
 		else
 		{
-			data = *( ( double * ) cur_ptr );
+			data = * ( double * ) cur_ptr;
 			cur_ptr += sizeof( double );
 		}
 
@@ -708,8 +708,8 @@ static bool incr_x( long x_index, long len )
 								   new_Gnx * G.ny * sizeof( XPoint ) );
 
 		if ( cv->is_fs )
-			cv->s2d[ X ] = ( double ) ( G.canvas.w - 1 ) /
-			                                        ( double ) ( new_Gnx - 1 );
+			cv->s2d[ X ] = ( double ) ( G.canvas.w - 1 )
+				           / ( double ) ( new_Gnx - 1 );
 		cv->scale_changed = SET;
 	}
 
@@ -775,7 +775,7 @@ static bool incr_x_and_y( long x_index, long len, long y_index )
 							   * sizeof( Scaled_Point ) );
 
 		/* Reorganise the old elements to fit into the new array and clear
-		   the the new elements in the already existing rows */
+		   the new elements in the already existing rows */
 
 		for ( sp = cv->points, j = 0; j < G.ny; j++ )
 		{
@@ -797,8 +797,8 @@ static bool incr_x_and_y( long x_index, long len, long y_index )
 
 		if ( cv->is_fs )
 		{
-			cv->s2d[ X ] = ( double ) ( G.canvas.w - 1 ) /
-			                                        ( double ) ( new_Gnx - 1 );
+			cv->s2d[ X ] = ( double ) ( G.canvas.w - 1 )
+				           / ( double ) ( new_Gnx - 1 );
 			cv->s2d[ Y ] = ( double ) ( G.canvas.h - 1 ) / ( double ) y_index;
 		}
 
