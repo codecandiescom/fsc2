@@ -1,0 +1,151 @@
+DEVICES:
+
+dg2020_f;
+tds754a;
+bh15;
+aeg_s_band;
+
+VARIABLES:
+
+timebase = 5 ns;
+tau = 220 ns;
+dtau = 20 ns;
+t_dead = 280 ns;
+data[ 2 ];
+res;
+File;
+f;
+I, J;
+WID1, WID2;
+
+
+ASSIGNMENTS:
+
+TIMEBASE:     timebase;
+TRIGGER_MODE: INTERNAL, REP_FREQ = 50 Hz;
+
+MICROWAVE:           POD = 5,    V_HIGH = 5 V, V_LOW = 0 V, INV;
+TWT_GATE:            POD = 8,    V_HIGH = 5 V, V_LOW = 0 V;
+DETECTION:           POD = 0,    V_HIGH = 5 V, V_LOW = 0 V;
+DETECTION_GATE:      POD = 7,    V_HIGH = 5 V, V_LOW = 0 V;
+PHASE_1:         MW, POD = 1, 2, V_HIGH = 5 V, V_LOW = 0 V;
+
+PHASE_1_SETUP:         +X: 0, 0,
+               +Y: 1, 0,
+               -X: 0, 1,
+               -Y: 1, 1;
+
+PHASE_SWITCH_DELAY_1 = 80ns;
+GRACE_PERIOD: 80ns;
+
+
+PHASES:
+
+PHASE_SEQUENCE_1     = x;
+
+ACQUISITION_SEQUENCE = +;
+
+
+PREPARATIONS:
+
+P0: FUNC        = MW,
+    START       = 300 ns,
+    LENGTH      = 15 ns,
+    PHASE_CYCLE = PHS1;
+
+P1: FUNC        = MW,
+    START       = P0.START + tau,
+    LENGTH      = 15 ns,
+    DSTART      = dtau,
+    PHASE_CYCLE = PHS1;
+
+P2: FUNC        = MW,
+    START       = P1.START + 1800 ns,
+    LENGTH      = 15 ns,
+    DSTART      = dtau;
+
+
+P3: FUNC        = TWT_GATE,
+    START       = 0 ns,
+    LENGTH      = P2.START + P2.LENGTH - 80 ns - P3.START,
+    DLENGTH     = dtau;
+
+P31: FUNC        = TWT_GATE;
+
+P32: FUNC        = TWT_GATE,
+     DSTART      = dtau;
+
+P4: FUNC        = DETECTION,
+    START       = P2.START,
+    LEN         = 10 ns,
+    DSTART      = dtau;
+
+P5: FUNC        = DETECTION_GATE,
+    START       = P3.START + P3.LENGTH + t_dead,
+    LENGTH      = 2000 ns,
+    DSTART      = dtau;
+
+
+WID1 = digitizer_define_window( 320 ns, 8 ns );
+WID2 = digitizer_define_window( 606 ns, 8 ns );
+digitizer_num_averages( 20 );
+digitizer_trigger_channel( CH4 );
+
+init_1d( 1, 1024, tau * 1e9, dtau * 1e9, "tau [ ns ]",
+         "Echo intensity [ Vs ]" );
+
+
+EXPERIMENT:
+
+
+pulser_update( );
+/*
+f=find_field( );
+print("Magnetfeld = # [G]\n", f );
+save_program( "% " );
+
+
+
+FOR I = 1 : 1024 {
+
+    res = 0.0;
+
+    FOR J = 1 : 4 {
+
+        digitizer_start_acquisition( );
+        data[ 1 ] = digitizer_get_area( CH1, WID1 );
+        data[ 2 ] = digitizer_get_area( CH1, WID2 );
+
+        IF ( J == 1 | J == 4 ) {
+            res = res + ( data [ 1 ] - data [ 2 ] );
+        } ELSE {
+            res = res - ( data [ 1 ] - data [ 2 ] );
+        }
+
+        pulser_next_phase( );
+        pulser_update( );
+    }
+
+    display( I, res );
+
+    fsave( "#\n", res );
+
+    pulser_shift( );
+    pulser_increment( );
+
+    IF ( P3.LENGTH > 4 us ) {
+        P31.START  = P3.START;
+        P31.LENGTH = P1.START + P1.LENGTH - 80 ns - P31.START;
+        P32.START  = P2.START - 500 ns;
+        P32.LENGTH = P2.START + P2.LENGTH - 80 ns - P32.START;
+        P3.LENGTH  = 0 ns;
+    }
+
+    pulser_update( );
+
+    IF ( float( I ) / 50 == float( I / 50 )) {
+        print("I = #  :B = # [G] - zurückgesetzt!\n",I,find_field());
+        set_field( f );
+	}
+}
+*/

@@ -1,0 +1,46 @@
+DEVICES:
+
+dg2020_b;
+
+VARIABLES:
+
+I;
+timebase = 5 ns;
+tau = 300 ns;
+dtau = 20 ns;
+
+
+ASSIGNMENTS:
+
+TIMEBASE:     timebase;
+TRIGGER_MODE: INTERNAL, REP_FREQ = 200 Hz;
+
+MW:  POD = 1, 2, V_HIGH = 5 V, V_LOW = 0 V, INV;
+PHASE_1_SETUP:  MW,
+		  		X: POD = 1;
+
+PREPARATIONS:
+
+P0:  FUNC        = MW,
+	 START       = 200 ns,
+	 LENGTH      = 15 ns;
+
+P1:  FUNC     	 = MW,
+	 START    	 = P0.START + tau,
+	 LENGTH   	 = 15 ns;
+
+P2:  FUNC        = MW,
+	 START       = P1.START + tau
+	 LENGTH      = 15 ns,
+	 DSTART      = dtau;
+
+
+EXPERIMENT:
+
+pulser_update( );
+
+FOR I = 1 : 1024 {
+	pulser_shift( );
+	pulser_update( );
+}
+

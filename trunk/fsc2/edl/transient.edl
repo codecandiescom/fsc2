@@ -1,0 +1,57 @@
+DEVICES:
+
+tds520;
+hp8647a;
+
+
+VARIABLES:
+
+start_field = 3000 G;
+field_step = 2 G;
+timebase = 20 ns;
+
+I;
+N = 400;
+a,b;
+W1, W2;
+
+curve[ * ];
+
+
+PREPARATIONS:
+
+W1 = digitizer_define_window( 50 ns, 20 ns );
+W2 = digitizer_define_window( 92.5 ns, 20 ns );
+digitizer_num_averages( 50 );
+digitizer_timebase( timebase );
+
+
+//init_2d( 1, 0, N, -20, 1e9 * timebase / 50, 3000, 2, "tau [ns]",
+//		 "Magnetic field [G]", "Intensity (arbitrary units)" );
+
+init_1d( 3, N, 10, 0.05, "Frequency / MHz", "RF Amplitude / V" );
+
+
+EXPERIMENT:
+
+
+//save_program( "% " );
+//fsave( "\n" );
+
+synthesizer_state( 1 );
+
+FOR I = 1 : N {
+
+	synthesizer_frequency( 10 MHz + ( I - 1 ) * 50 kHz );
+    digitizer_start_acquisition( );
+	a = digitizer_get_amplitude_fast( CH1, W1 );
+	b = digitizer_get_amplitude_fast( CH1, W2 );
+	display( I, a, 1,
+ 			 I, b, 2,
+ 			 I, a - b, 3 );
+//    curve = digitizer_get_curve( CH1 );
+//    display( 1, I, curve, 1 );
+
+//    save( curve );
+//	fsave( "\n" );
+}

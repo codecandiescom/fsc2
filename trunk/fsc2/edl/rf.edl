@@ -1,0 +1,19 @@
+DEVICES:
+
+hp8647a;
+
+PREPARATIONS:
+
+synthesizer_set_frequency( 150.0 MHz );
+synthesizer_set_step_frequency( 10.0 MHz );
+synthesizer_use_table( );
+
+EXPERIMENT:
+
+REPEAT 10 {
+	REPEAT 20 {
+		print( "freq = # MHz", 1e-6 * synthesizer_sweep_up( ) );
+	}
+	synthesizer_reset_frequency( );
+	wait( 1s );
+}

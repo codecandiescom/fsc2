@@ -1,0 +1,4 @@
+abc = 3;
+cde = abc + 5;
+efg[3,3] = { 0, 1, abc, cde % abc, 0, 1, abc + cde, abc - cde, abc^cde };
+klm = efg[1,1]+exp(1);

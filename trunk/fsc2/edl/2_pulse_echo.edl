@@ -1,0 +1,114 @@
+DEVICES:
+
+//er035m_s;
+//aeg_x_band;
+tds520a;
+dg2020_b;
+
+
+VARIABLES:
+
+timebase = 5 ns;
+I;
+
+ASSIGNMENTS:
+
+TIME_BASE: timebase;
+TRIGGER_MODE: INTERNAL, REP_FREQ = 200 Hz;
+
+MICROWAVE:         POD =  1, 2, 3, 4, 5, 
+				   CH = 35, 34, 33,
+				   V_HIGH = 5 V, V_LOW = 0 V,
+				   INVERTED;
+
+PULSE_SHAPE:       POD = 6,
+				   V_HIGH = 5 V, V_LOW = 0 V,
+				   INVERTED;
+
+DETECTION_GATE:    POD = 7,
+				   CH = 30,
+				   V_HIGH = 5 V, V_LOW = 0 V,
+				   INVERTED;
+
+//TWT_GATE:          POD 11,
+//					 V_HIGH = 5 V, V_LOW = 0 V,
+//					 INVERTED;
+
+DETECTION:         POD = 0
+					 V_HIGH = 5 V, V_LOW = 0 V;
+
+PHASE_1_SETUP:  MW,
+                 X: POD = 1,
+                +Y: POD = 2,
+                -X: POD = 3,
+                -Y: POD = 4,
+                CW: POD = 5;
+
+
+PHASES:
+
+PHS1 = +x, +x, -x, -x;
+PHS2 = +x, -x, +x, -x;
+PHS3 = -y, +y, +x, -x;
+ASEQ = +, -, -, +;
+
+
+
+PREPARATIONS:
+
+P0:   FUNCTION = MICROWAVE,
+	  START    = 400 ns,
+	  LENGTH   = 400 ns,
+	  PHC      = PHS1;
+
+
+P1:   FUNCTION = P0.FUNC,
+	  S        = P0.START + 8 us,
+	  L        = 400 ns,
+	  PHC      = PHS2;
+
+
+P2:   FUNCTION = P0.FUNC,
+	  S        = P0.START + 4 us,
+	  L        = 400 ns,
+	  PHC      = PHS3;
+
+
+P10:  FUNCTION = DETECTION_GATE,
+	  START    = P0.START - 200 ns,
+	  LENGTH   = P1.START + P1.LENGTH - P0.START + 400 ns;
+
+P20:  FUNCTION = DETECTION,
+	  START    = 200 ns,
+	  LENGTH   = 100 ns;
+
+
+P30: FUNCTION  = PULSE_SHAPE,
+	 START     = P0.START + 10 ns,
+	 LEN       = P0.LENGTH - 20 ns;
+
+P31: FUNCTION  = PULSE_SHAPE,
+	 START     = P1.START + 10 ns,
+	 LEN       = P1.LENGTH - 20 ns;
+
+P32: FUNCTION  = PULSE_SHAPE,
+	 START     = P2.START + 10 ns,
+	 LEN       = P2.LENGTH - 20 ns;
+
+	 
+
+EXPERIMENT:
+
+pulser_update( );
+
+
+REPEAT 1000 {
+	FOR I = 1:4 {
+//		wait( 1s );
+		pulser_next_phase( );
+		pulser_update( );
+	}
+}
+
+ON_STOP:
+

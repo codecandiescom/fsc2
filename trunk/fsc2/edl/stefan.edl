@@ -1,0 +1,232 @@
+DEVICES:
+
+dg2020_b;
+//tds520a;
+tds744a;
+er035m_s;
+aeg_x_band;
+
+
+VARIABLES:
+
+tau0      = 250 ns;         // start distance between first and second pulse
+delta_tau =  25 ns;         // and the change of this distance
+t0        = 400 ns;         // start distance between second and third pulse
+delta_t   =  50 ns;         // and the change of this distance
+
+N_tau    = 2;               // how often to shift the second pulse
+N_t      = 64;              // how often to shift the third pulse
+N_runs   = 1;               // how often to sweep the field
+
+pi_half_pulse_length = 40 ns;
+
+N_averages = 16;
+detection_window_length = 1 us;
+t_cursor_start_1        = 300 ns;
+t_cursor_end_1          = 400 ns;
+t_cursor_start_2        = 500 ns;
+t_cursor_end_2          = 600 ns;
+
+
+start_field = 3437.6 G;
+field_step  =    1.0 G;
+
+I, J, K;
+File1, File2;
+data[ 2 ];
+WinID1, WinID2;
+
+
+/*------------------------------------------------------------------
+ CAUTION:  the following settings should only be changed when you
+		   really know what you are doing...
+--------------------------------------------------------------------*/
+
+pulser_shape_delay            =  25 ns;
+twt_on_before_pulse           = 600 ns;
+twt_off_after_pulse           = -290 ns;
+detection_on_after_last_pulse = 140 ns;
+time_offset                   = 800 ns;
+
+
+ASSIGNMENTS:
+
+TIMEBASE:      5 ns;
+TRIGGER_MODE:  INTERNAL, REP_FREQ = 200 Hz;
+
+MW:            POD = 1, 2, 3, 4, 5, INVERTED, V_HIGH = 5 V, V_LOW = 0 V;
+PULSE_SHAPE:   POD = 6,             INVERTED, V_HIGH = 5 V, V_LOW = 0 V;
+DEFENSE:       POD = 7,             INVERTED, V_HIGH = 5 V, V_LOW = 0 V;
+TWT_GATE:      POD = 11,                      V_HIGH = 5 V, V_LOW = 0 V;
+DETECTION:     POD = 0,                       V_HIGH = 5 V, V_LOW = 0 V;;
+      
+       
+PHASE_SETUP:   MW,
+                X: POD = 1,
+               -X: POD = 2,
+                Y: POD = 3,
+               -Y: POD = 4,
+               CW: POD = 5;
+
+
+PHASES:
+
+PHASE_SEQUENCE_0 = +x, -x, +x, -x;
+PHASE_SEQUENCE_1 = +x, +x, -x, -x;
+ACQ_SEQUENCE     =  +,  -,  -,  +;
+
+
+PREPARATIONS:
+
+P0:  FUNCTION = MW,
+     START    = time_offset - pulser_shape_delay,
+     LENGTH   = pi_half_pulse_length + 2 * pulser_shape_delay,
+     PHC      = PHASE_SEQUENCE_0;
+     
+P1:  FUNCTION = MW,
+     START    = P0.START + P0.LENGTH  + tau0 - 2 * pulser_shape_delay,
+     LENGTH   = pi_half_pulse_length + 2 * pulser_shape_delay,
+     PHC      = PHASE_SEQUENCE_1;
+
+P2:  FUNCTION = MW,
+     START    = P1.START + P1.LENGTH + t0 - 2 * pulser_shape_delay,
+     LENGTH   = pi_half_pulse_length + 2 * pulser_shape_delay,
+     DSTART   = delta_t;
+
+P3:  FUNCTION = PULSE_SHAPE,
+     START    = P0.START + pulser_shape_delay, 
+     LENGTH   = pi_half_pulse_length;
+
+P4:  FUNCTION = PULSE_SHAPE,
+     START    = P1.START + pulser_shape_delay,
+     LENGTH   = pi_half_pulse_length;
+     
+P5:  FUNCTION = PULSE_SHAPE,
+     START    = P2.START + pulser_shape_delay,
+     LENGTH   = pi_half_pulse_length,
+     DSTART   = delta_t;
+
+P6:  FUNCTION = TWT_GATE,
+     START    = P3.START - twt_on_before_pulse,
+	 LENGTH   = P5.START + P5.LENGTH - P3.START	
+                + twt_off_after_pulse + twt_on_before_pulse,
+     DLENGTH   = delta_t;
+
+P7:  FUNCTION = TWT_GATE,
+     START    = P3.START - twt_on_before_pulse,
+	 LENGTH   = 0 ns;                            // not used at first
+
+P8:  FUNCTION = TWT_GATE,
+     START    = P5.START - twt_on_before_pulse,
+	 LENGTH   = 0 ns,                            // not used at first
+     DSTART   = delta_t;
+
+P9:  FUNCTION = DEFENSE,
+     START    = P5.START + P5.LENGTH + detection_on_after_last_pulse,
+     LENGTH   = detection_window_length,
+     DSTART   = delta_t;
+
+P10: FUNCTION = DETECTION,
+     START    = P5.START + P5.LENGTH,
+     LENGTH   = 10 ns,
+     DSTART   = delta_t;
+
+
+digitizer_num_averages( N_averages );
+digitizer_trigger_channel( CH4 );
+
+WinID1 = digitizer_define_window( t_cursor_start_1,
+								  t_cursor_end_1 - t_cursor_start_1 );
+WinID2 = digitizer_define_window( t_cursor_start_2,
+								  t_cursor_end_2 - t_cursor_start_2 );
+
+init_1d( 1, N_t, t0, delta_t, "T / s", "Echo intensity / Vs" );
+
+magnet_setup( start_field, field_step );
+
+
+EXPERIMENT:
+
+File1 = get_file( );
+File2 = get_file( );
+
+save_program( File1, "# " );
+fsave( File1, "\n" );
+
+FOR K = 1 : N_runs {
+
+    FOR J = 1 : N_tau {
+
+        FOR I = 1: N_t {
+
+			/* Check that the TWT gate didn't get too long, if it does split
+			   it into two new pulses, one covering the first two microwave
+			   pulses, the other one covering the third microwave pulse */
+
+			IF ( P6.LENGTH >= 12 us ) {
+				P6.LENGTH = 0 ns;
+				P7.LENGTH = P4.START + P4.LENGTH - P3.START
+			                + twt_off_after_pulse + twt_on_before_pulse;
+				P8.START  = P5.START - twt_on_before_pulse;
+				P8.LENGTH = P5.LENGTH
+	                        + twt_off_after_pulse + twt_on_before_pulse;
+			}
+            
+			data = get_phase_cycled_area_1d( CH1, WindID1, WinID2 );
+            
+            display( I, data[ 1 ] - data[ 2 ] );
+            
+            fsave( File1, "#,#\n", data[ 1 ], data[ 2 ] );
+            fsave( File2, "#\n", data[ 1 ] - data[ 2 ] );
+
+			IF ( P6.LENGTH != 0 ns ) {               // only one TWT gate pulse
+	            pulser_shift( P2, P5, P9, P10 );
+				pulser_increment( P6 );              // lengthen the TWT pulse
+			} ELSE {                                 // TWT gate is split
+	            pulser_shift( P2, P5, P8, P9, P10 );
+			}
+
+			pulser_update( );                        // commit changes
+        }
+
+		// Set second and third microwave pulses
+
+        P1.START  = P0.START + P0.LENGTH - 2 * pulser_shape_delay + tau0
+					+ J * delta_tau;
+        P2.START  = P1.START + P1.LENGTH - 2 * pulser_shape_delay + t0;
+
+		// Set second and third shaper pulses
+
+        P4.START  = P1.START + pulser_shape_delay;
+        P5.START  = P2.START + pulser_shape_delay;
+
+		/* Reset the TWT pulses (try to start off with just one pulse, if it's
+		   too long	it will get replaced by two pulses in the inner loop) */
+
+		P6.LENGTH = P5.START + P5.LENGTH - P3.START	
+                	+ twt_off_after_pulse + twt_on_before_pulse;
+		IF ( P7.LENGTH != 0 ns | P8.LENGTH != 0 ns ) {
+			P7.LENGTH = 0 ns;
+			P8.LENGTH = 0 ns;
+		}
+
+		// Set defense and detection pulses
+
+        P9.START  = P5.START + P5.LENGTH + detection_on_after_last_pulse
+					+ J * delta_tau;
+        P10.START = P5.START + P5.LENGTH + J * delta_tau;
+       
+		// Check the field position
+
+        set_field( start_field + ( K - 1 ) * field_step );
+
+        clear_curve( 1 );
+
+		pulser_update( );
+    }
+
+    set_field( start_field + K * field_step );
+
+    pulser_pulse_reset( );
+	pulser_update( );
+}

@@ -1,0 +1,24 @@
+DEVICES:
+
+sr810;
+
+
+VARIABLES:
+
+I;
+data[ 2 ];
+
+init_1d( 2, 1001, 0, .1, "Time [s]", "Lock-In signal [nV]" );
+
+EXPERIMENT:
+
+
+//lockin_sensitivity( 3nV );
+lockin_time_constant( 1s );
+
+FOR I = 1:1001 {
+	data = lockin_get_data( 0 );
+	display( I, data[ 1 ] * 1e9, 1,
+	         I, data[ 2 ] * 1e9, 2 );
+	wait( 0.1s );
+}

@@ -1,0 +1,15 @@
+DEVICES:
+
+hp8647a;
+
+
+PREPARATIONS:
+
+synthesizer_modulation( "PHASE", "AC", 9 );
+
+
+EXPERIMENT:
+
+print( "# # #\n", synthesizer_mod_type( ), synthesizer_mod_source( ), synthesizer_mod_ampl( ) );
+
+synthesizer_modulation( "FM", "EXT DC", 900.9 Hz );

@@ -1,0 +1,16 @@
+DEVICES:
+
+er035m_sas;
+
+VARIABLES:
+
+I;
+
+
+EXPERIMENT:
+
+
+FOR I = 1:10 {
+	wait( 1 s );
+	print( "Field = # G\n", measure_field( ) );
+}

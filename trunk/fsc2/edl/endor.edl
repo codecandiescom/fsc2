@@ -1,0 +1,39 @@
+DEVICES:
+
+hp8647a;
+
+
+VARIABLES:
+
+I;
+STATE = 0;
+att = -136.0;
+
+PREPARATIONS:
+
+square( att );
+
+synthesizer_use_table( );
+synthesizer_frequency( 10 MHz);
+synthesizer_step_frequency( 100 kHz );
+synthesizer_attenuation( -100 db );
+synthesizer_state( STATE );
+synthesizer_att_ref_freq( 14.0 MHz );
+synthesizer_modulation( "FM", "EXT AC", 50 kHz );
+
+EXPERIMENT:
+
+
+FOR I = 1:1000 {
+	synthesizer_sweep_up( );
+//	print( "# #\n", 10MHz + I*100kHz, synthesizer_frequency( ) );
+//	wait( 0.1s );
+	IF ( STATE == 1 ) {
+		STATE = 0;
+	} ELSE {
+		STATE = 1;
+	}
+	att = att + 0.1;
+//	synthesizer_attenuation( att );
+//	synthesizer_state( STATE );
+}

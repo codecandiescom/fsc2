@@ -1,0 +1,45 @@
+DEVICES:
+
+BH15;
+S_BAND;
+
+VARS:
+
+I=0;
+r;
+
+
+PREPARATIONS:
+
+magnet_setup( 900, 1 );
+
+EXPERIMENT:
+
+print( "B_start = # G\n", find_field( ) );
+
+for I = 1 : 100 {
+	sweep_up( );
+	wait( 200ms );
+	if ( I % 20 == 0 ) {
+	  print( "#: B = # G\n", I, find_field( ) );
+   }
+}
+
+/*
+
+for I = 1:10 {
+
+	for J = 1:100 {
+		X[I,J] = li_get_data();
+		Y[J] = Y[J] + X[I,J];	
+		draw( round( float( Y[J] ) / I ) );
+		sweep_up( );
+    }
+	magnet_reset( );
+}
+
+
+SAVE:
+
+		save( X, Y );
+*/

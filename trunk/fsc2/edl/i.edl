@@ -1,0 +1,60 @@
+VARIABLES:
+
+BID1, BID2, BID3, BID4, BID5, BID6, BID7, SID1, SID2;
+
+I = 0;
+
+PREPARATIONS:
+
+init_1d( );
+
+EXPERIMENT:
+
+layout( "VERTICAL" );
+BID1 = button_create( "NORMAL_BUTTON", "Clear curve",
+					  "Removes the currently\ndisplayed curve" );
+BID2 = button_create( "PUSH_BUTTON", "RF On / Off" );
+BID3 = button_create( "RADIO_BUTTON", "Bla3", "Help3" );
+button_state( BID3, 1 );
+BID4 = button_create( "RADIO_BUTTON", BID3, "Bla4", "Help4" );
+SID1 = slider_create( "NORMAL_SLIDER", 0, 1, "Blub1", "Hilfe1" );
+BID5 = button_create( "RADIO_BUTTON", "Sweep RF up" );
+BID6 = button_create( "RADIO_BUTTON", BID5, "Stop RF sweep" );
+button_state( BID6, 1 );
+BID7 = button_create( "RADIO_BUTTON", BID5, "Sweep RF down" );
+SID2 = slider_create( "VALUE_SLIDER", -100.0, -3.0, "Attenuation",
+					  "Adjusts RF attenuation" );
+
+FOREVER {
+
+	IF ( button_state( BID1 ) ) {
+		clear_curve( );
+		I = 0;
+	}
+
+	I += 1;
+//	  print( "I = #\n", I );
+//	  print( "Button1 : #\n", button_state( BID1 ) );
+//	  print( "Button2 : #\n", button_state( BID2 ) );
+//	  print( "Button3 : #\n", button_state( BID3 ) );
+//	  print( "Button4 : #\n", button_state( BID4 ) );
+//	  print( "Button5 : #\n", button_state( BID5 ) );
+//	  print( "Button6 : #\n", button_state( BID6 ) );
+//	  print( "Button7 : #\n\n", button_state( BID7 ) );
+//	  print( "Slider1 : #\n", slider_value( SID1 ) );
+//	  print( "Slider2 : #\n\n", slider_value( SID2 ) );
+
+	display( I, slider_value( SID2 ) * slider_value( SID1 ) );
+	wait( 500 ms );
+}
+
+ON_STOP:
+
+slider_delete( SID1 );
+
+wait( 6 );
+
+
+
+//button_state( BID6, 1 );
+//button_delete( BID5 );

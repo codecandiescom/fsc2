@@ -1,0 +1,27 @@
+DEVICES:
+
+dg2020_b;
+
+
+ASSIGNMENTS:
+
+TIMEBASE = 5 ns;
+TRIGGER_MODE: INTERNAL, REP_FREQ = 200 Hz;
+
+MICROWAVE:           POD = 5,    V_HIGH = 5 V, V_LOW = 0 V, INV;
+
+
+PREPARATIONS:
+
+P0: FUNC        = MW,
+	START       = 200 ns,
+	DSTART      = 10 ns,
+	LENGTH      = 0 ns;
+
+
+EXPERIMENT:
+
+	pulser_update( );
+	pulser_shift;
+	pulser_update( );
+	pulser_reset( );

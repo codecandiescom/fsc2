@@ -1,0 +1,16 @@
+DEVICES:
+
+VARIABLES:
+
+a;
+b = -2.34e7;
+
+
+EXPERIMENT:
+
+
+FOR a = 0.1 : 3.01 : 0.1 {
+	b *= a;
+	fsave( " sdf#fs # sd\n" );
+	fsave( "#   #\n", a, b );
+}

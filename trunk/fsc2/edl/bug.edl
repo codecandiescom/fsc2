@@ -1,0 +1,117 @@
+DEVICES:
+
+dg2020;
+//tds754a;
+
+
+VARIABLES:
+
+timebase = 5 ns;
+tau = 225 ns;
+dtau = 5 ns;
+t_dead = 280 ns;
+data[ 4 ];
+
+File;
+I;
+WID1, WID2;
+
+
+ASSIGNMENTS:
+
+TIMEBASE:     timebase;
+TRIGGER_MODE: INTERNAL, REP_FREQ = 200 Hz;
+
+MICROWAVE:           POD = 5,    V_HIGH = 5 V, V_LOW = 0 V, INV;
+TWT_GATE:            POD = 8,    V_HIGH = 5 V, V_LOW = 0 V;
+DETECTION:           POD = 0,    V_HIGH = 5 V, V_LOW = 0 V;
+DETECTION_GATE:      POD = 7,    V_HIGH = 5 V, V_LOW = 0 V;
+PHASE_1:         MW, POD = 1, 2, V_HIGH = 5 V, V_LOW = 0 V;
+
+PHASE_1_SETUP:  X: POD_1 = OFF, POD2 = OFF,
+               +Y: 1, 0,
+               -X: 0, 1,
+               -Y: 1, 1;
+
+PHASE_SWITCH_DELAY_1 = 40ns;
+GRACE_PERIOD: 10ns;
+
+
+PHASES:
+
+PHASE_SEQUENCE_1     = -x;
+
+ACQUISITION_SEQUENCE = +;
+
+
+PREPARATIONS:
+
+P0: FUNC        = MW,
+    START       = 200 ns,
+    LENGTH      = 15 ns,
+    PHASE_CYCLE = PHS1;
+
+P1: FUNC        = MW,
+    START       = P0.START + tau,
+    LENGTH      = 30 ns,
+    DSTART      = dtau,
+    PHASE_CYCLE = PHS1;
+
+P2: FUNC        = TWT_GATE,
+    START       = 0 ns,
+    LENGTH      = P1.START + P1.LENGTH - 80 ns - P2.START,
+    DLENGTH     = dtau;
+
+P3: FUNC        = DETECTION,
+    START       = P1.START,
+    LEN         = 10 ns,
+    DSTART      = 2 * dtau;
+
+P4: FUNC        = DETECTION_GATE,
+    START       = P2.START + P2.LENGTH + t_dead,
+    LENGTH      = 2000 ns,
+    DSTART      = 2 * dtau;
+
+
+//WID1 = digitizer_define_window( 316 ns, 104 ns );
+//WID2 = digitizer_define_window( 606 ns, 104 ns );
+//digitizer_num_averages( 100 );
+//digitizer_trigger_channel( CH4 );
+
+init_1d( 2, 512, tau * 1e9, dtau * 1e9, "tau [ ns ]",
+         "Echo intensity [ Vs ]" );
+
+
+EXPERIMENT:
+
+
+pulser_update( );
+
+
+//save_program( "% " );
+
+
+
+FOR I = 1 : 512 {
+
+
+//    digitizer_start_acquisition( );
+//    data[ 1 ] = digitizer_get_area( CH1, WID1 );
+//    data[ 2 ] = digitizer_get_area( CH1, WID2 );
+//    data[ 3 ] = digitizer_get_area( CH2, WID1 );
+//    data[ 4 ] = digitizer_get_area( CH2, WID2 );
+
+//    data[ 1 ] = data[ 1 ] - data[ 2 ];
+//    data[ 2 ] = data[ 3 ] - data[ 4 ];
+
+
+
+//    display( I, data[ 1 ], 1, I, data[ 2 ], 2 );
+
+
+//    fsave( "#  #\n", data[ 1 ] , data[ 2 ] );
+
+    pulser_shift( );
+    pulser_increment( );
+    pulser_update( );
+}

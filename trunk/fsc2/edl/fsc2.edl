@@ -1,0 +1,172 @@
+DEVICES:
+
+dg2020;
+TDS754A;
+
+
+VARIABLES:
+
+timebase = 10ns;
+bv =3;
+I;
+d[ * ];
+Window;
+
+ASSIGNMENTS:
+
+TIMEBASE: timebase;
+// TRIGGERMODE: EXTERNAL,
+// 			 	SLOPE = POSITIVE,
+// 			 	LEVEL = -20 nV,
+//              IMP = LOW;
+TRIGMODE:  INTERNAL,  REP_FREQ = 200 Hz;
+
+
+MICROWAVE:        POD = 0     CHANNEL = 0, V_HIGH = +6.3V, V_LOW = -2.7V;
+TWT:              POD = 1     CHANNEL = 1, DELAY = -100ns;
+TWT_GATE:         POD = 2     CHANNEL = 2, 3;
+DETECTION:        POD = 3     CHANNEL = 4;
+DETECTION_GATE:   POD = 4     CHANNEL = 5,  DELAY = 220ns;
+RADIO_FREQUENCY:  POD = 5     CHANNEL = 6;
+RADIO_FREQ_GATE:  POD = 6     CHANNEL = 9;
+PHASE_1:          POD = 7, 9  CHANNEL = 11, 12, 13, 14, 15, 16, 17, 18,
+				  RF, INV;
+//PHASE_2:          POD = 8, 10 CHANNEL = 15, 16, 17, 18, TWT;
+
+PHASE_1_SETUP:	X: POD_1 = ON, POD2 = OFF,
+			   +Y: 0, 0,
+			   -X: 0, 1,
+			   -Y: 1, 1;
+
+PHASE_2_SETUP:	X: POD_1 = OFF, POD2 = OFF,
+			   +Y: ON, OFF,
+			   -X: 0, 1,
+			   -Y: POD1 = 1, 1;
+
+// PHASE_SETUP:	X: POD_1 = OFF, POD2 = OFF,
+// 				  +Y: ON, OFF,
+// 				  -X: 0, 1,
+// 				  -Y: POD1 = 1, 1;
+// 
+PHASE_SWITCH_DELAY_1 = 40ns;
+PHASE_SWITCH_DELAY_2: 140ns;
+GRACE_PERIOD: 10ns;
+
+
+PHASES:
+
+PHS1              =  +x, +Y, -x, -y;
+PHASE_SEQUENCE_2  =   x, -y, -Y, +X;
+ACQ_SEQ           =  +A, +B, - +;
+
+
+PREPARATIONS:
+
+/*  P1 */
+// 	FUNC   = MW,
+// 	START  = 100ns,
+// 	LENGTH = 120 ns - 20 * sin( 2 * atan( 1 ) ) ns,
+// 	DSTART = 20ns;
+
+// P2: FUNC   = P1.FUNC,
+// 	START  = 100 *( P1.LEN / 2 + 10ns ),  // 6000 ns
+// 	L      = 2 * ( P1.S / 2 + 10ns ); // 120 ns
+
+P0: FUNC  = MW,
+	START = 0ns,
+	LEN   = 10ns;
+
+P1: FUNC  = TWT,
+	START = 0ns,
+	LEN   = 10ns;
+
+// P3:
+//  	FUNC   = RF
+//  	START  = 460ns
+//  	PHASE_CYCLE = PHS1
+//  	LENGTH = 1000ns,
+// 	DSTART = 160ns,
+// 	DLEN = 20ns;
+
+// P33:
+// 	FUNC = P3.FUNC;
+// 	PHASE_CYCLE = PHS1;
+// P333:
+// 	FUNC = P3.FUNC
+// 	PHASE_CYCLE = PHS2;
+
+P33:
+  	FUNC   = RF,
+  	START  = 2800ns,
+  	LENGTH = 100ns,
+	DSTART = 10ns,
+ 	DLEN   = 100ns,
+ 	PHC    = PHS2;
+
+P331:
+	FUNC   = P33.FUNC,
+	PHC    = P33.PHC;
+
+P332:
+	FUNC   = P33.FUNC,
+	PHC    = P33.PHC;
+
+
+// P333:
+// 	FUNC = P3.FUNC,
+// 	START = 6000ns,
+// 	LEN = 100ns;
+
+
+// P4:
+//  	FUNC   = TWT,
+//  	START  = 180ns,
+//  	LEN    = 20ns;
+
+// P5: 
+// 	FUNC   = TWT,
+// 	START  = 440ns,
+// 	LENGTH = 40 ns,
+// 	PHC    = PHS1;
+
+// P6: 
+// 	FUNC   = TWT,
+// 	START  = 200ns,
+// 	LENGTH = 20ns;
+
+// P7: FUNC = TWT,
+// 	LEN = 40 ns;
+
+Window = digitizer_define_window( 50ns, 480ns );
+digitizer_trigger_channel( LIN );
+digitizer_num_averages( 100 );
+
+
+EXPERIMENT:
+
+// P33.START = P3.START + 100ns;
+// P33.LEN = P3.LEN / 2;
+// P333.START = P3.START + P3.LEN + 100ns;
+// P333.LEN = P3.LEN / 2;
+// P3.LEN = 0;
+
+pulser_update( );
+
+FOR I = 1:10 {
+	pulser_shift( );
+	pulser_increment( );
+	IF ( P33.LEN == 800ns ) {
+ 		P331.START = P33.START;
+ 		P331.LEN = 600ns;
+ 		P332.LEN = 100ns;
+ 		P332.START = P33.START + P33.LEN - P332.LEN;
+ 		P332.DLEN = P33.DLEN;
+ 		P33.LEN = 0;
+ 	}
+	pulser_update( );
+	digitizer_start_aquisition( ); 
+	d[ ] = digitizer_get_curve( CH1, Window );
+}
+
+pulser_pulse_reset( );
+pulser_update( );

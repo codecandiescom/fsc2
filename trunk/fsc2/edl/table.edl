@@ -1,0 +1,149 @@
+DEVICES:
+
+tds520;
+hp8647a;
+
+
+VARIABLES:
+
+
+timebase = 200ns;
+
+start_freq = 7 MHz;
+end_freq = 25 MHz;
+step_freq = 200 kHz;
+atten = -13 db;
+
+
+freq = start_freq;
+I;
+N_points = round( ( end_freq - start_freq ) / step_freq ) + 1;
+N_low = 1;
+data[ N_points ];
+new_data[ N_points ];
+add_atten[ N_points ];
+v_low = 1e3;
+nu_low;
+File;
+Window;
+
+
+PREPARATIONS:
+
+Window = digitizer_define_window( 0 us, 1.6 us );
+digitizer_num_averages( 20 );
+digitizer_timebase( timebase );
+
+synthesizer_attenuation( atten );
+synthesizer_frequency( freq );
+
+init_1d( 3, N_points, freq * 1e-6, step_freq * 1e-6,
+	     "Frequency / MHz", "RF Amplitude / V" );
+
+
+EXPERIMENT:
+
+File = get_file( "Enter name of table file" );
+
+synthesizer_state( 1 );
+
+/* First run through all frequencies and record induced voltage */
+
+
+FOR I = 1 : N_points {
+    digitizer_start_acquisition( );
+	data[ I ] = digitizer_get_amplitude_fast( CH1, Window );
+	display( I, data[ I ], 1 );
+	IF v_low > data[ I ] {
+		v_low = data[ I ];
+	    N_low = I;
+	}
+	freq += step_freq;
+	synthesizer_frequency( freq );
+}
+
+nu_low = ( start_freq + ( N_low - 1 ) * step_freq );
+
+print( "Lowest voltage of # V at # MHz (at point \# #)\n", v_low, 
+		nu_low * 1e-6, N_low );
+
+
+
+freq = start_freq;
+
+I = 1;
+FOR I = 1 : N_points {
+
+	add_atten[ I ] = 0;
+	new_data[ I ] = data[ I ];
+
+	IF I == N_low {
+		fsave( File, "# MHz,   # db\n", freq * 1e-6, add_atten[ I ] );
+		freq += step_freq;
+		display( I, v_low, 2 );
+		NEXT;
+	}
+
+	synthesizer_frequency( freq );
+
+	WHILE new_data[ I ] > v_low {
+		add_atten[ I ] -= 2.0;
+		synthesizer_attenuation( atten + add_atten[ I ] );
+		digitizer_start_acquisition( );
+		new_data[ I ] = digitizer_get_amplitude_fast( CH1, Window );
+	}
+
+	WHILE new_data[ I ] < v_low {
+		add_atten[ I ] += 1.0;
+		synthesizer_attenuation( atten + add_atten[ I ] );
+		digitizer_start_acquisition( );
+		new_data[ I ] = digitizer_get_amplitude_fast( CH1, Window );
+	}
+
+	WHILE new_data[ I ] > v_low {
+		add_atten[ I ] -= 0.5;
+		synthesizer_attenuation( atten + add_atten[ I ] );
+		digitizer_start_acquisition( );
+		new_data[ I ] = digitizer_get_amplitude_fast( CH1, Window );
+	}
+
+	WHILE new_data[ I ] < v_low {
+		add_atten[ I ] += 0.1;
+		synthesizer_attenuation( atten + add_atten[ I ] );
+		digitizer_start_acquisition( );
+		new_data[ I ] = digitizer_get_amplitude_fast( CH1, Window );
+	}
+
+	display( I, new_data[ I ], 2 );
+
+	print( "f = # MHz, U = # V, add = # db\n",
+			freq * 1e-6, new_data[ I ], add_atten[ I ] );
+
+	fsave( File, "# MHz,   # db\n", freq * 1e-6, add_atten[ I ] );
+	freq += step_freq;
+}
+
+
+synthesizer_attenuation( atten );
+freq = start_freq;
+synthesizer_frequency( freq );
+
+I = 0;
+FOR I = 1 : N_points {
+	synthesizer_attenuation( atten + add_atten[ I ] );
+    digitizer_start_acquisition( );
+	data[ I ] = digitizer_get_amplitude_fast( CH1, Window );
+	display( I, data[ I ], 3 );
+	IF v_low > data[ I ] {
+		v_low = data[ I ];
+	    N_low = I;
+	}
+	freq += step_freq;
+	synthesizer_frequency( freq );
+}
+
+
+ON_STOP:
+
+
+synthesizer_state( 0 );

@@ -1,0 +1,36 @@
+VARIABLES:
+
+b[ 100 ];
+c[ 100 ];
+I, J;
+d[ 100 ];
+e;
+
+PREPARATIONS:
+
+
+print( "Hey, it's # #\n", time(), date());
+
+init_1d( 3, 100 );
+
+EXPERIMENT:
+
+FOR I = 1 : 1000 {
+	FOR J = 1 : 100 {
+		b[ J ] = random( ) - 0.5;
+	}
+
+	c += b;
+	display( 1, b, 1, 1, c / I, 2 );
+//	wait( 0.2 s );
+
+	IF ( I % 10 == 0 ) {
+		d = (c * c / I^2)^b;
+		e = 0.0;
+		FOR J = 1 : 100 {
+			e += d[ J ];
+		}
+		display( I / 10, sqrt( e ), 3 );
+		print( "# RMS = #\n", I, sqrt( e ) );
+	}
+}

@@ -1,0 +1,12 @@
+DEVICES:
+
+VARIABLE:
+
+I;
+
+
+EXPERIMENT:
+
+FOR I = 1 : 1024 {
+	fsave( "So, das wird ein langer Text. I ist jetzt #. Brauchen wir noch mehr?\n", I );
+}

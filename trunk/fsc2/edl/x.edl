@@ -1,0 +1,18 @@
+VARIABLES:
+
+X = 3,
+Y = 5,
+Z,
+R[ 4 ] = { 1, 2, 3, 4 },
+r;
+
+
+PREPARATIONS:
+
+Z = X + exp( Y ms );
+
+print( "\TZ = #\n", Z );
+print( "\Ta = #\n", exp( - 1000000 ) );
+
+EXPERIMENT:
+save( R );

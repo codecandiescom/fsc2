@@ -1,0 +1,79 @@
+DEVICES:
+
+hp8647a;
+sr810;
+
+
+VARIABLES:
+
+I = 1;
+
+B0, B1, B2, B3, B4;
+S1;
+
+
+atten = -100 db;
+new_atten;
+STATE = 0;
+
+
+PREPARATIONS:
+
+
+synthesizer_frequency( 14 MHz );
+synthesizer_step_frequency( 20 kHz );
+synthesizer_attenuation( atten );
+synthesizer_use_table( );
+
+init_1d( );
+
+
+EXPERIMENT:
+
+lockin_lock_keyboard( 0 );
+
+B0 = button_create( "NORMAL_BUTTON", "Clear curve" );
+
+B1 = button_create( "RADIO_BUTTON", "Sweep frequency up" );
+B2 = button_create( "RADIO_BUTTON", B1, "Stop frequency sweep" );
+B3 = button_create( "RADIO_BUTTON", B1, "Sweep frequency down" );
+button_state( B2, 1 );
+
+B4 = button_create( "PUSH_BUTTON", "RF power on/off" );
+
+S1 = slider_create( "VALUE_SLIDER", -136 db, -3 db, "Attenuation (db)" );
+slider_value( S1, atten );
+
+FOREVER {
+
+	IF button_state( B1 ) {
+		synthesizer_sweep_up( );
+	}
+	IF button_state( B3 ) {
+		synthesizer_sweep_down( );
+	}
+
+	new_atten = slider_value( S1 );
+	IF atten != new_atten {
+		synthesizer_attenuation( new_atten );
+		atten = new_atten;
+	}
+
+	IF button_state( B4 ) != STATE {
+		STATE = STATE ~ 1;
+		synthesizer_state( STATE );
+	}
+
+	IF button_state( B0 ) {
+		clear_curve( );
+		I = 1;
+	}
+
+	display( I, lockin_get_data( ) );
+	I += 1;
+	wait( lockin_time_constant( ) )
+}
+
+ON_STOP:
+
+synthesizer_state( "OFF" );

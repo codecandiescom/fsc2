@@ -1,0 +1,53 @@
+DEVICES:
+
+tds520;
+hp8647a;
+
+
+VARIABLES:
+
+
+timebase = 200ns;
+
+start_freq = 8 MHz;
+end_freq = 22 MHz;
+step_freq = 200 kHz;
+atten = -13 db;
+
+
+freq = start_freq;
+I;
+data;
+N_points = round( ( end_freq - start_freq ) / step_freq ) + 1;
+Window;
+
+PREPARATIONS:
+
+Window = digitizer_define_window( 0 us, 1.6 us );
+digitizer_num_averages( 20 );
+digitizer_timebase( timebase );
+
+synthesizer_frequency( start_freq );
+synthesizer_attenuation( atten );
+synthesizer_use_table( );
+synthesizer_att_ref_freq( 14 MHz );
+
+init_1d( 1, N_points, freq * 1e-6, step_freq * 1e-6,
+	     "Frequency / MHz", "RF Amplitude / V" );
+
+
+EXPERIMENT:
+
+synthesizer_state( 1 );
+
+FOR I = 1 : N_points {
+    digitizer_start_acquisition( );
+	data = digitizer_get_amplitude_fast( CH1, Window );
+	display( I, data );
+	freq += step_freq;
+	synthesizer_frequency( freq );
+}
+
+ON_STOP:
+
+synthesizer_state( 0 );

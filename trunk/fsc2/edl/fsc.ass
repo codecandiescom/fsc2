@@ -1,0 +1,316 @@
+
+0V bV
+
+/**************************************************************************/
+/*                                                                        */
+/**************************************************************************/
+
+
+DEVICES:
+
+DG2020;
+//TDS754A;
+//SR510;
+
+
+
+ASSIGNMENTS:
+
+TIMEBASE 5ns;
+
+MICROWAVE:               POD = 9,    CHANNEL = 29;
+TWT:                     POD = 1    CHANNEL = 1;
+TWT_GATE:                POD = 2    CHANNEL = 2, 3  DELAY = 100ns;
+DETECTION:               POD = 3    CHANNEL = 4;
+DETECTION_GATE:          POD = 4    CHANNEL = 5   INV;
+RADIO_FREQUENCY:         POD = 5    CHANNEL = 6;
+RADIO_FREQUENCY_GATE:   INV,    CH 9 10 DEL 2us  P 6 ;
+PHASE_X1:                 POD = 7    CHANNEL = 11, 12, 13, 14, 15, 16, 17, 18;
+PHASE_X2:                 POD = 8    CHANNEL = 19, 20, 21, 22, 23, 24, 25, 26;
+OTHER_1:                 POD = 11,   CHANNEL = 31;
+//OTHER_4:                 POD = 12,  CHANNEL = 32;
+
+VAR:
+
+I = 1 s;
+J = 1 s;
+
+
+
+J;
+
+print( "Starting with VARIABLES # # #  section:\n", 3, 2.3, "sklfjlsk");
+
+Z = 4^3; b = 2.5;
+ab2_c;
+X = int( 0.3 + b );
+//print( "DUDU # #\n", Z, X );
+XX;
+t = 4^2^3^-1;
+e = sin(sin(sin(sin(sin(sin(sin(sin(sin(sin(sin(sin(sin(sin(1))))))))))))));
+F = int( ( t + 3 ) * ( Z - 1 ) );
+L = round( 4.9999999 );
+xx = b >= L;
+pi=4*atan(1);
+
+
+r[ 3, 2 ] = { X, 2, 3, -4.9999^2, int(7 * acos(0)), 3 };
+
+
+k = r[ int( r[ 1 , 1 ] ), 2 ] % 3.5;
+tt = asin(0.3);
+
+r[2,2]=3;
+
+Data[ * ];    // a dynamically sized array
+
+ZZ[3,2];
+
+//RR = ZZ;
+
+ll = exp(exp( -3 ) +1 );
+
+
+//print( "Bla # \" # #\# \n", Z, k, tt);
+
+#include "v.dat"
+
+k;
+k = sin( 3.1514);
+
+
+
+
+B[ 2, * ];
+//B[ 1 ] = int_slice( 5 );
+//B[1,3] = 4;
+
+print( "Finished with VARIABLES section\n" );
+
+N;
+
+PHASES:
+
+PS1          =  x,  y,  x, y, x, x, x, x;
+PHASE_SEQ_2  =  x, -y, -x, y, x, x, x, y;
+ACQ_SEQ      =  +,  -,  -, +, -  -  -  +;
+
+PREP:
+
+P1:  FUNC  = MW,
+     START = 100 ns,
+     LEN   =  50ns,
+	 DLEN  =  10ns;
+
+print( "Now: pi = #\n", pi + 3 );
+print( "X = #\n", X );
+
+P2: FUNC=P1.FUNC,
+	START=P1.LEN,
+	LEN=1us+ pi us;
+
+pi=pi-3;
+
+print( "P2.Len = #\n", P2.Len );
+
+ZZ[ 1, 1 ] = int( 0.7 );
+
+
+print( "r   : # #\n", r[2,1], r[2,2] );
+
+print( "Now: pi = # #\n", pi + 3, r[ int( r[ 1, 1 ] ), 2 ] % 3.5 );
+
+
+
+
+print( "k = #, b = #\n", k, b );
+
+
+J = 5;
+
+B[ 1 ] = int_slice( 4 );
+B[1,3] = 4;
+
+EXP:
+
+print( "\T\nEXPERIMENT section starts here:\n\n" );
+
+
+I = 1;
+N = 1;
+WHILE ( I <= B[1,3] )
+{
+  N = N * I;
+  print( "\T**********************************************#! = #\n", I, N );
+  I = I + 1;
+}
+B[1,3]=17;
+
+Data[] = B[ 1 ];
+
+
+print( "\T@C1Data: # #\n", Data[1], Data[2]);
+print( "\TData: # #\n", Data[1], Data[2]);
+
+
+
+k = 5;
+print( "\Tk = #\n", k );
+print( "\Tk^2 = #\n", square( k ) );
+
+
+FOR I = 1:5 {
+	FOR J = 1:5 {
+		print( "\TI = #, J = #, I * J = #\n", I, J, I * J )
+	}
+}
+
+k = 1.0;
+WHILE k
+{
+	print( "\Tashdajkshdk\n" );
+	k = k - 1;
+}
+
+pi = 4 * atan( 1 );
+
+FOR k = pi - 3.14 : pi : 0.1
+{ print( "\TBla #\n", k )
+}
+
+I = 0;
+WHILE I < 4
+{
+	IF I == 0 { print( "\TI is 0\n" ) }
+	ELSE IF	I == 1 { print( "\TI is 1\n" ) }
+	ELSE IF	I == 2 { print( "\TI is 2\n" ) }
+	ELSE { print( "\TI is larger than 2\n" ) }
+	I = I + 1;
+}
+
+I = 1;
+WHILE I < 4
+{
+	print( "\T->I = #\n", I );
+	J = I;
+	WHILE J < 4
+	{
+		J = J + 1;
+		IF J > I + 1 { BREAK }
+		print( "\TI = #, J = #\n", I, J );
+    }
+	I = I + 1;
+}
+
+I = 1;
+WHILE I < 6
+{
+	I = I + 1;
+	k = 0;
+	WHILE k < 5
+	{
+	    IF I < 4 
+		{
+			print( "\TI is less than 4\n" );
+		} 
+		ELSE
+		{
+			print( "\TI isn't less than 4\n" );
+		}
+		print( "\Tk = # XXXXXXXXX\n", k );
+
+		k = k + 1;
+    }
+}
+
+if k < 3
+{
+	k = k + 5;
+
+}
+else
+{
+	k = k - 5;
+}
+
+print( "\Tk = #\n", k );
+
+I = 1;
+N = 1;
+while ( I <= 13 )
+{
+  N = N * I;
+  print( "\T#! = #\n", I, N );
+  I = I + 1;
+}
+
+print ( "\Tk = #, b = #\n", k, b );
+
+k = b + k + 2;
+
+print( "\T=> k = #\n", k );
+print( "\T=> P1.Start = #\n\n\n", P1.Start );
+
+I = 1;
+N = 1;
+while ( I <= 13 )
+{
+  N = N * I;
+  print( "\T#! = #\n", I, N );
+  I = I + 1;
+}
+
+
+if ( I == 1 )
+{
+	print( "\T333333333\n" );
+}
+else
+{
+	print( "\T444444444\n" );
+}
+
+if ( I == 1 )
+{
+	print( "\T333333333\n" );
+}
+else
+{
+	print( "\T444444444\n" );
+}
+
+if k < 5
+{
+	print( "\T\nk = #\n", k );
+}
+else
+{
+	print( "\T\nk is too big (#) !\n", k );
+}
+
+I = 0;
+while I < 6
+{
+	print( "\T>>> I = #\n", I );
+	I = I + 1;
+
+	k = 0;
+
+	while k < 5
+	{
+	    if I < 4 
+		{
+			print( "\TI is less than 4\n" );
+		} 
+		else
+		{
+			print( "\TI isn't less than 4\n" );
+		}
+		k = k + 1;
+    }
+}
+
+print( "\T\nThis is not the end yet !\n\n" );
+
+I = 0;
+repeat 3 { I = I + 1; print( "\TI = #\n", I ) }

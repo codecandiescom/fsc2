@@ -1,0 +1,90 @@
+EVICES:
+
+dg2020;
+//tds754a;
+
+VARIABLES:
+
+tb = 5 ns;
+I;
+Win;
+c[ * ];
+
+ASSIGNMENTS:
+
+TIMEBASE:     tb;
+TRIGGER_MODE: EXT, SLOPE = POSITIVE, LEVEL = 0.5 V, IMP = HIGH;
+
+//TM: INTERNAL, REP_FREQ = 200 Hz;
+
+MW:      POD = 0, CHANNEL = 35, V_HIGH = 3V, V_LOW = -1V;
+PHASE_1: POD = 3,4,  MW;
+
+PHASE_1_SETUP:	X: POD_1 = OFF, POD2 = OFF,
+			   +Y: 0, 1,
+			   -X: 1, 0,
+			   -Y: 1, 1;
+
+PHASE_SWITCH_DELAY_1 = 40ns;
+GRACE_PERIOD: 10ns;
+
+PHASES:
+
+PHS1              =  +x, +Y, -x, -y;
+PHS2              =  -y, -x,  y,  x;
+ACQ_SEQ           =  +A, +B, - +;
+
+
+PREPARATIONS:
+
+P0: FUNC = MW,
+	START = 50ns,
+	LEN = 5 ns,
+	DLEN = 5ns,
+	PHASE_CYCLE = PHS1;
+
+P1: FUNC = MW,
+	PHASE_CYCLE = PHS1;
+
+P2: FUNC = MW,
+	DLEN = P0.DLEN,
+	PHASE_CYCLE = PHS1;
+	
+P4: FUNC = MW,
+	START = 250ns,
+	LEN = 10ns,
+	DSTART = 5ns,
+	PHASE_CYCLE = PHS2;
+	
+	
+
+//Win = digitizer_define_window( -30ns );
+//digitizer_num_averages( 100 );
+//digitizer_trigger_channel( CH4 );
+//init_2d( 1, "Digitizer curve", "Repeats", "Voltage [V]" );
+init_1d( 1, "Digitizer curve", "Spannung [V]" );
+
+
+EXPERIMENT:
+
+FOR I = 1:50 {
+	pulser_increment( );
+	pulser_shift( );
+	IF ( P0.LEN > 50ns )
+	{
+		P1.START = P0.START;
+		P1.LEN   = 40ns;
+		P2.START = P0.START + P0.LEN - 10ns;
+		P2.LEN   = 10 ns;
+		P0.LEN   = 0 ns;
+	}
+	pulser_update( );
+	REPEAT 4 {
+//		digitizer_start_acquisition( );
+		pulser_next_phase( );
+//		c[ ] = digitizer_get_curve( CH4, Win );
+		pulser_update( );
+	}
+//	display( 1, I, c );
+//	display( 1, c );
+}

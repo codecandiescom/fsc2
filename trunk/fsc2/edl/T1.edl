@@ -1,0 +1,96 @@
+DEVICES:
+	dg2020_b;
+	tds520a;
+
+VARIABLES:
+
+tau = 300 ns;
+dtau = 20 ns;
+data[ 2 ];
+res = 0.0;
+WID1, WID2;
+
+I, J;
+
+
+
+ASSIGNMENTS:
+
+TIMEBASE:     5 ns;
+TRIGGER_MODE: INTERNAL, REP_FREQ = 20 kHz;
+
+MW:              POD = 1;//, 2, 3, 4, 5, INV;
+DETECTION:       POD = 11;
+
+// PHASE_SETUP:     MW,
+// 				 +X: POD = 1,
+// 				 -X: POD = 2,
+// 				 +Y: POD = 3,
+// 				 -Y: POD = 4;
+
+// PHASES:
+
+// PHASE_SEQUENCE_1     = +x, +x, +x, +x;
+// PHASE_SEQUENCE_2     = +x, -x, +y, -y;
+// PHASE_SEQUENCE_3     = +y, -y, +x, -x;
+//ACQUISITION_SEQUENCE = +, -, -, +;
+
+
+PREPARATIONS:
+
+P0:   FUNC = MW,
+	  START = 100 ns,
+	  LENGTH = 100 ns,
+;//	  PHASE_CYCLE = PHASE_SEQUENCE_1;
+
+P1:   FUNC = MW,
+	  START = P0.START + 200 ns,
+	  LENGTH = 100 ns,
+	  DELTA_START = 20 ns,
+;//	  PHASE_CYCLE = PHASE_SEQUENCE_2;
+
+P2:   FUNC = MW,
+	  START = P0.START + P0.L + 20ns,
+	  LENGTH = 60 ns,
+;//	  PHASE_CYCLE = PHASE_SEQUENCE_3;
+
+P4:   FUNC = DETECTION,
+	  START = P0.START - 20 ns,
+	  LENGTH = 5 ns;
+
+
+WID1 = digitizer_define_window( 656 ns, 100 ns );
+WID2 = digitizer_define_window( 3144 ns, 100 ns );
+digitizer_num_averages( 1 );
+digitizer_trigger_channel( AUX2 );
+
+init_1d( 1, 0, tau * 1e6, dtau * 1e6, "tau [ us ]",
+		 "Echo intensity [ Vs ]" );
+
+EXPERIMENT:
+
+pulser_update( );
+
+FOR I = 1:128 {
+//	FOR J = 1 : 4 {
+
+		digitizer_start_acquisition( );
+		data[ 1 ] = digitizer_get_area( CH1, WID1 );
+		data[ 2 ] = digitizer_get_area( CH2, WID2 );
+
+//		IF ( J == 1 | J == 4 ) {
+//			res = res + ( data[ 1 ] - data[ 2 ] );
+//		} ELSE {
+//			res = res - ( data[ 1 ] - data[ 2 ] );
+//		}
+
+//		pulser_next_phase( );
+//		pulser_update( );
+//	}
+
+	res = data[ 1 ] - data[ 2 ];
+	display( I, res );
+
+	pulser_shift( P1 );
+	pulser_update( );
+}

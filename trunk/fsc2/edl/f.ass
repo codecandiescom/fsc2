@@ -1,0 +1,101 @@
+DEVICES:
+
+//ER035M;
+//S_BAND;
+SR510;
+
+
+VARS:
+
+I;J=1;
+K=10;
+P1Len=3;
+xxxx[ * ];
+yyyy[ 2, 4 ] = { 1.0, 2.0, 3.0, 4.0, -1.0, -2.0, -3.0, -4.0 };
+bla = 123.4;
+//bli = 40mV;
+bli = 0.04;
+Ports[ 4 ] = { 1, 2, 3, 5 };
+
+PREPS:
+
+P2:
+     Func   = TWT_GATE,
+     Start  = 100 ns,
+     Len    = 50ns,
+	 DStart = 10ns,
+	 DLen   = 10ns,
+;//	 MLen   = 2us,
+//	 repl   = P1, P4;
+
+P4:
+     Func  = TWT_GATE,
+     Start = 100 ns,
+     Len   = 50ns,
+	 DLen  = 10ns;
+
+P3:
+     Func  = RF_GATE,
+     Start = 100 ns,
+     Len   = 50ns,
+	 DLen  = 10ns,
+;//	 Mlen  = 1ms,
+//	 repl  = P4;
+
+P1:
+     Func  = MW,
+     Start = 100 ns,
+     Len   = 50ns,
+	 DLen  = 10ns;
+//	 MLen  = 1 ms,
+//	 repl  = P2;
+
+
+
+print( "\Tbli = #\n", bli );
+lockin_sensitivity( bli );
+lockin_time_constant( 100 ms );
+lockin_phase( bla );
+
+
+print( "NOW STARTS THE EXPERIMENT\n" );
+EXP:
+
+//print( "Got file name: #\n",
+//	   filename( "Gimme a file:", "/usr/doc/packages", "*" ) );
+
+
+//init_display( 3, "x-label" );
+
+//for I = 1 : K { 
+//	wait( 2s );
+//	J = I * J;
+//	print( "@C2 #! = #\n", I, J);
+//}
+
+//K=square( 20 );
+/*
+lockin_sensitivity( 1 uV );
+print( "Sens = # V\n", lockin_sensitivity( ) );
+print( "TC = # s\n", lockin_time_constant( ) );
+print( "P = #\n\n\n", lockin_phase( ) );
+
+wait( 2 s );
+print( "v = # V\n", lockin_get_adc_data( I ) );
+wait( 1 s );
+print( "v = # V\n", lockin_get_adc_data( 2 ) );
+wait( 1 s );
+print( "v = # V\n", lockin_get_adc_data( 3 ) );
+wait( 1 s );
+print( "v = # V\n", lockin_get_adc_data( 4 ) );
+wait( 1 s );
+
+print( "\TP = #\n\n\n", lockin_phase( ) ms );
+
+
+print( "\T# # # #\n", xxxx[ 1 ], xxxx[ 2 ], xxxx[ 3 ], yyyy[ 1 ] );
+
+xxxx[ ] = lockin_get_adc_data( 2, 1, 3, 4 );
+*/
+
+xxxx[ ] = 3 * yyyy;
