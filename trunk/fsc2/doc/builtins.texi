@@ -1339,7 +1339,7 @@ Expects an one-dimensional array as input and returns the square root of
 the sum of the squared array elements, divided by the number of
 elements.  Optionally, it accepts up to two more integer arguments, the
 index of the first element of the array to be included into the
-calculation and the number of elements to be uses. If the length
+calculation and the number of elements to be used. If the length
 parameter is missing all elements up to the end of the array are used.
 
 @anchor{sqrt}
