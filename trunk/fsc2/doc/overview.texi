@@ -25,12 +25,13 @@
 @cindex Overview
 
 
-@code{fsc2} is a program for remotely controlling of spectrometers,
-currently with a bias toward cw- and pulsed EPR spectrometers. But the
-design of @code{fsc2} should make it also easy to use it to a broad
-range of experiments not releated to EPR. Its central component is an
-interpreter that executes a program describing the experiment in a
-language which in the following will be called @code{EDL}
+@code{fsc2} is a program for remotely controlling spectrometers,
+currently with a strong bias toward cw- and pulsed EPR
+spectrometers. But the design of @code{fsc2} should make it also easy to
+use it to a broad range of experiments not releated to EPR. Its central
+component is an interpreter that executes a program describing the
+experiment in a language which in the following will be called
+@code{EDL}
 @cindex @code{EDL}
 (@b{E}xperiment @b{D}escription @b{L}anguage). Making the execution of
 the experiment completely controllable by the user via a script is quite
