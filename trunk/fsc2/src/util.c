@@ -380,30 +380,32 @@ void i2rgb( double h, int *rgb )
 	int v[ 3 ][ 7 ] = { {  64,   0,   0,  32, 233, 255, 191 },     /* RED   */
 						{   0,  32, 233, 255, 233,  32,   0 },     /* GREEN */
 						{ 191, 255, 233,  32,   0,   0,   0 } };   /* BLUE  */
+	double scale;
 
 
-	if ( h < p[ 0 ] )
+	if ( h < p[ 0 ] )           /* return very dark blue for values below 0 */
 	{
-		rgb[ RED ]   = 72;
-		rgb[ GREEN ] = 0;
-		rgb[ BLUE ]  = 72;
+		rgb[ RED   ] = 72;
+		rgb[ GREEN ] =  0;
+		rgb[ BLUE  ] = 72;
 		return;
 	}
 
 	for ( i = 0; i < 6; i++ )
-		if ( p[ i ] != p[ i + 1 ] && h <= p[ i + 1 ] )
-		{
-			for ( j = RED; j <= BLUE; j++ )
-				rgb[ j ]   = ( int ) ( v[ j ][ i ] +
-									   ( v[ j ][ i + 1 ] - v[ j ][ i ] ) 
-									   * ( h - p[ i ] )
-									   / ( p[ i + 1 ] - p[ i ] ) );
-			return;
-		}
+	{
+		if ( p[ i ] == p[ i + 1 ] || h > p[ i + 1 ] )
+			continue;
 
-	rgb[ RED ] = 255;
+		scale = ( h - p[ i ] ) / ( p[ i + 1 ] - p[ i ] );
+		for ( j = RED; j <= BLUE; j++ )
+			rgb[ j ] = ( int ) ( v[ j ][ i ]
+								 + ( v[ j ][ i + 1 ] - v[ j ][ i ] ) * scale );
+		return;
+	}
+
+	rgb[ RED   ] = 255;           /* return creamy white for values above 1 */
 	rgb[ GREEN ] = 248;
-	rgb[ BLUE ] = 220;
+	rgb[ BLUE  ] = 220;
 }
 
 
@@ -443,6 +445,7 @@ void create_colors( void )
 /* be a good idea...                                                   */
 /***********************************************************************/
 
+
 /*--------------------------------------------------------------------------*/
 /* Returns the pixel value of an entry in XFORMs internal colour map from   */
 /* the colours set in create_colors(). For values slightly above 1 as well  */
@@ -463,13 +466,14 @@ inline unsigned long d2color( double a )
 }
 
 
-
-/* The next two functions do a conversion of double or integer values to
-   short. Both are exclusively used in the conversion of data to points to be
-   drawn on the screen via a XPoint structure which contains two short ints.
-   To avoid overflows in the calculations we restrict the values to half the
-   allowed range of short ints - thus allowing canvas sizes of up to half the
-   size of a short int. */
+/*-------------------------------------------------------------------------*/
+/* The next two functions do a conversion of double or integer values to   */
+/* short. Both are exclusively used in the conversion of data to points to */
+/* be drawn on the screen via a XPoint structure which contains two short  */
+/* ints. To avoid overflows in the calculations we restrict the values to  */
+/* half the allowed range of short ints - thus allowing canvas sizes of up */
+/* to half the size of a short int.                                        */
+/*-------------------------------------------------------------------------*/
 
 #define SHRT_MAX_HALF ( SHRT_MAX >> 1 )
 #define SHRT_MIN_HALF ( SHRT_MIN >> 1 )
@@ -495,17 +499,19 @@ inline short i2shrt( int a )
 }
 
 
-/* This function is needed for glib versions below 2.0 (or 2.1 ?) */
+/*---------------------------------------------------------------------*/
+/* This function is needed for glib versions below 2.0 (or 2.1 ?) only */
+/*---------------------------------------------------------------------*/
 
 #if ! defined ( lround )
 inline long lround( double x ) { return ( long ) ( 2 * x ) - ( long ) x; }
 #endif
 
 
-inline int    i_max( int    a, int    b ) { return a > b ? a : b ; }
-inline int    i_min( int    a, int    b ) { return a < b ? a : b ; }
-inline long   l_max( long   a, long   b ) { return a > b ? a : b ; }
-inline long   l_min( long   a, long   b ) { return a < b ? a : b ; }
+inline int    i_max( int    a, int    b ) { return a > b ? a : b; }
+inline int    i_min( int    a, int    b ) { return a < b ? a : b; }
+inline long   l_max( long   a, long   b ) { return a > b ? a : b; }
+inline long   l_min( long   a, long   b ) { return a < b ? a : b; }
 inline float  f_max( float  a, float  b ) { return a > b ? a : b; }
 inline float  f_min( float  a, float  b ) { return a < b ? a : b; }
 inline double d_max( double a, double b ) { return a > b ? a : b; }
