@@ -1531,8 +1531,8 @@ Var *f_icreate( Var *v )
 		{
 			if ( ! check_format_string( v->val.sptr ) )
 			{
-				eprint( FATAL, "%s:%ld: Invalid format string in %s().\n",
-						Fname, Lc, Cur_Func );
+				eprint( FATAL, "%s:%ld: Invalid format string \"%s\" in "
+						"%s().\n", Fname, Lc, v->val.sptr, Cur_Func );
 				THROW( EXCEPTION );
 			}
 			form_str = T_strdup( v->val.sptr );
@@ -2548,13 +2548,12 @@ static bool check_format_string( const char *buf )
 		return FAIL;
 
 
-	if ( *++bp != '.' )                 /* test for length */
-		while ( isdigit( *bp++ ) )
-			;
+	if ( *++bp != '.' )                 /* test for width parameter */
+		while ( isdigit( *bp ) )
+			bp++;
 
-	if ( bp == lcp )
+	if ( bp == lcp )                    /* no precision ? */
 		return OK;
-
 
 	if ( *bp++ != '.' )
 		return FAIL;
@@ -2567,7 +2566,6 @@ static bool check_format_string( const char *buf )
 
 	return lcp == bp;
 }
-
 
 
 /*------------------------------------------------------*/
