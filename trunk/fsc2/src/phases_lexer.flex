@@ -59,7 +59,7 @@ PX          "+"?[xX]
 MX          "-"[xX]
 PY          "+"?[yY]
 MY          "-"[yY]
-CW          "[cC][wW]"
+CW          [cC][wW]
 
 PA          ("+"[aA]?)|[aA]
 MA          "-"[aA]?
