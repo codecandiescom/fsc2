@@ -25,7 +25,8 @@
 
 @ifinfo
 @menu
-* Output functions::        Functions for printing, drawing and storing.
+* Output functions::        Functions for drawing and printing.
+* File handling functions:: Functions for storing data
 * Interaction functions::   Functions buttons and sliders.
 * Mathematical functions::  Function for doing mathematics.
 * Auxiliary functions::     All other functions.
@@ -63,7 +64,7 @@ consists of functions for dealing with time or date issues or for
 determining the sizes of arrays etc.
 
 
-@node Output functions, Interaction functions, Built-in Functions, Built-in Functions
+@node Output functions, File handling functions, Built-in Functions, Built-in Functions
 @section Output functions
 @cindex output functions
 
@@ -738,6 +739,18 @@ string} starts with this escape sequence the @code{print()} function
 will produce output already in the test run (the @code{T} is never
 printed).
 @end table
+
+
+@node File handling functions, Interaction functions, Output functions, Built-in Functions
+@section File handling functions
+@cindex file handling functions
+
+All the following functions are for opening files and writing data with
+different levels of user defined formating to these output files. Please
+note that you don't have to explicitely open a file from the @code{EDL}
+script as long as you only are going to use a single output file --
+@code{fsc2} will automatically ask for a file the first time you try to
+write data to a file in this case.
 
 
 @anchor{get_file}
