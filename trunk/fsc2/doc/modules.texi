@@ -370,7 +370,7 @@ name. To make it even clearer what triggered the warning message the
 next item in the message is name of the device, which you have to pass
 the function as the third argument (and which usually should be just
 @code{DEVICE_NAME} as defined in the configuration file for the device,
-see above). The second paramter is a string that gets imbedded into the
+see above). The second parameter is a string that gets embedded into the
 message. For example if the currently interpreted @acronym{EDL} file is
 @file{foo.edl} and the line where your function is called is line 17,
 the name of your device is @code{XYZ}, your function (that expects an
@@ -407,7 +407,7 @@ long get_strict_long( Var *var, const char *snippet, const char *device )
 @end example
 This function has the same arguments as the two other functions but it
 will usually throw an exception to stop the interpretation of the
-@acronym{EDL} program (see below) except when the expriment is really
+@acronym{EDL} program (see below) except when the experiment is really
 done, in which case it will print a warning message but will convert the
 number to next integer to avoid to abort a running experiment. But
 usually, the wrong parameter should already have been found during the
