@@ -348,8 +348,8 @@ Var *pulser_cw_mode( Var *v )
 
 	if ( dg2020_Pulses != NULL )
 	{
-		eprint( FATAL, "%s:%ld: %s: No pulses can be used in CW mode.\n",
-				Fname, Lc, pulser_struct.name );
+		eprint( FATAL, "%s:%ld: %s: CW mode and use of pulses is mutually "
+				"exclusive.\n", Fname, Lc, pulser_struct.name );
 		THROW( EXCEPTION );
 	}
 
