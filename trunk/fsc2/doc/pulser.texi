@@ -277,7 +277,7 @@ voltage is high while there are no pulses and low on pulses) use the
 @code{INVERTED} keyword@footnote{The keyword @code{INVERTED} can be
 shortened to @code{INVERT} or @code{INV}.}:
 @example
-RF:        POD = 6           V_HIGH = 2.6 V, V_LOW = 0 V, INVERTED;
+RF:        POD = 6   V_HIGH = 2.6 V, V_LOW = 0 V, INVERTED;
 @end example
 
 
