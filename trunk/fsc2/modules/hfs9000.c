@@ -20,12 +20,12 @@ int hfs9000_init_hook( void )
 
 
 	/* Test that the name entry in the pulser structure is NULL, otherwise
-	   assume, that another pulser driver has already been installed. */
+	   another pulser driver has already been installed. */
 
 	if ( pulser_struct.name != NULL )
 	{
 		eprint( FATAL, "%s:%ld: While loading driver HFS9000 found that a"
-				"driver fro pulser %s is already installed.\n",
+				"driver for pulser %s is already installed.\n",
 				Fname, Lc, pulser_struct.name );
 		THROW( EXCEPTION );
 	}

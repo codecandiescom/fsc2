@@ -22,7 +22,7 @@ int dg2020_b_init_hook( void )
 
 
 	/* Now test that the name entry in the pulser structure is NULL, otherwise
-	   assume, that another pulser driver has already been installed. */
+	   another pulser driver has already been installed. */
 
 	if ( pulser_struct.name != NULL )
 	{
