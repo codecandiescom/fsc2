@@ -254,14 +254,26 @@ MAIL_ADDRESS       := Jens.Toerring@physik.fu-berlin.de
 #
 # Here follow settings determining the make process - which compiler and
 # tools to use as well as their respective options. Better leave this alone
-# if you don't have a good reason to apply changes (put you will probably
-# need to if you don't use gcc)
+# if you don't have a good reason to apply changes (but you will probably
+# need to do so if you don't use gcc)
 #
 # Don't use '-fomit-frame-pointer' in CFLAGS on Intel processors (unless
 # you want to keep me from getting meaningful messages about crashes).
 #
 ##############################################################################
 
+
+# Set the optimization level
+
+OPTIMIZATION     := -O2
+
+
+# Define this in order to use mpatrol
+
+#MPATROL          := YES
+
+
+# Set where the program, the libraries etc. get installed
 
 ifndef prefix
 	prefix := /usr/local
@@ -273,6 +285,7 @@ auxdir           := $(libdir)/aux
 docdir           := $(prefix)/share/doc/fsc2
 mandir           := $(prefix)/man
 infodir          := $(prefix)/info
+
 
 # These variables are used internally in the make process
 
@@ -286,9 +299,6 @@ cdir             := $(fdir)/config
 ldir             := $(fdir)/Fcntl_Lock
 mchdir           := $(fdir)/machines
 
-#MPATROL          := YES                  # define this in order to use mpatrol
-
-OPTIMIZATION     := -O2
 
 SHELL            := /bin/sh
 CC               := gcc
@@ -326,6 +336,7 @@ INCLUDES         :=	-I$(fdir) -I$(adir) -I/usr/X11R6/include \
 
 
 LFLAGS			 := $(OPT) -shared -fpic  # needed for libraries
+
 
 ifeq ($(MPATROL),YES)
 	CONFFLAGS    += -DMPATROL

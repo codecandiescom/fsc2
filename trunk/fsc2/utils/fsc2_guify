@@ -252,7 +252,7 @@ sub get_float_limits {
         return $str;
     }
 
-    if ( $str =~ /^\s*(\[\s*([^:\s]+)?\s*:\s*([^:\s]+)?\s*\])(\s+(.*))?$/o ) {
+    if ( $str =~ /^\s*(\[\s*([^:\t ]+)?\s*:\s*([^:\t ]+)?\s*\])(\s+(.*))?$/o ) {
         $str = $5;
 
         $min = $2 if defined $2;
@@ -293,7 +293,7 @@ sub get_int_limits {
         return $str;
     }
 
-    if ( $str =~ /^(\[\s*([^:\s]+)?\s*:\s*([^:\s]+)?\s*\])(\s+(.*))?$/o ) {
+    if ( $str =~ /^(\[\s*([^:\t ]+)?\s*:\s*([^:\t ]+)?\s*\])(\s+(.*))?$/o ) {
         $str = $5;
 
         $min = $2 if defined $2;
@@ -359,7 +359,7 @@ sub get_default_value {
     return ( undef, undef ) unless defined $str;
 
     return ( undef, $str ) unless
-        $str =~ /^\s*\[\s*([^\]\s]+)\s*\](\s+(.*)?)?$/o;
+        $str =~ /^\s*\[\s*([^\]\t ]+)\s*\](\s+(.*)?)?$/o;
 
     $val = $1;
     $str = $3;
@@ -670,7 +670,7 @@ EOT
 
 	# The user may change variables from within the conditions. We must
 	# avoid that these changes "bubble up" to the rest of the script and
-    # therefore use variables local to the current funtion.
+    # therefore use variables local to the current function.
 
 	print "    my \$$$_{ name } = \$$$_{ name }\{ value \};\n" for ( @vars );
 

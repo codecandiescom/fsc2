@@ -69,9 +69,9 @@ typedef enum
 #define RULBUS_BIPOLAR        1
 
 
-#define RULBUS_MAX_CARDS           256    /* maximum total number of cards */
+#define RULBUS_MAX_CARDS           165    /* maximum total number of cards */
 #define RULBUS_MAX_RACK_NO        0x0f    /* maximum number of racks */
-#define RULBUS_MAX_CARDS_IN_RACK     8    /* maximum number of cards in rack */
+#define RULBUS_MAX_CARDS_IN_RACK    11    /* maximum number of cards in rack */
 #define RULBUS_MIN_CARD_ADDR      0x01
 #define RULBUS_MAX_CARD_ADDR      0xfe
 #define RULBUS_INVALID_ADDR       0xff

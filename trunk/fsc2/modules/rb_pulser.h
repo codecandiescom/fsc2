@@ -80,7 +80,7 @@
 
 /* Intrinsic delays introduced by the delay cards and the synthesizer */
 
-#define MIN_DELAY         6.0e-8      /* Delay a delay card introduces even
+#define MIN_DELAY         5.0e-8      /* Delay a delay card introduces even
 										 when delay time is set to 0, about
 										 60 ns */
 
@@ -178,9 +178,9 @@ struct PULSE {
 	bool is_dpos;
 	bool is_dlen;
 
-	Ticks initial_pos;       /* position, length, position change and length */
+	double initial_pos;      /* position, length, position change and length */
 	Ticks initial_len;       /* change at the start of the experiment */
-	Ticks initial_dpos;
+	double initial_dpos;
 	Ticks initial_dlen;
 
 	bool initial_is_pos;     /* property has initially been set */
@@ -195,6 +195,8 @@ struct PULSE {
 
 struct RB_PULSER {
 	bool is_needed;
+
+	bool exists_synthesizer;
 
 	double timebase;         /* time base of pulse clock */
 	int tb_index;            /* to be used as argument for clock card */
@@ -220,6 +222,7 @@ struct RB_PULSER {
 								test run or experiment */
 	bool is_running;         /* set if the pulser is in run mode */
 
+	char *synth_state;
 	char *synth_pulse_state;
 	char *synth_pulse_width;
 	char *synth_pulse_delay;

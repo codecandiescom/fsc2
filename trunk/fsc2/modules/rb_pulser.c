@@ -59,6 +59,8 @@ int rb_pulser_init_hook( void )
 
 	need_RULBUS = SET;
 
+	rb_pulser.exists_synthesizer = exists_device( SYNTHESIZER_MODULE );
+
 #ifndef FIXED_TIMEBASE
 	pulser_struct.set_timebase = rb_pulser_store_timebase;
 #else
@@ -84,7 +86,6 @@ int rb_pulser_init_hook( void )
 	pulser_struct.get_pulse_position_change =
 										   rb_pulser_get_pulse_position_change;
 	pulser_struct.get_pulse_length_change = rb_pulser_get_pulse_length_change;
-
 
 	pulser_struct.assign_function = NULL;
 	pulser_struct.assign_channel_to_function = NULL;
@@ -124,6 +125,7 @@ int rb_pulser_init_hook( void )
 	rb_pulser.trig_in_mode = INTERNAL;
 	rb_pulser.rep_time = 0;
 
+	rb_pulser.synth_state = NULL;
 	rb_pulser.synth_pulse_state = NULL;
 	rb_pulser.synth_pulse_width = NULL;
 	rb_pulser.synth_pulse_delay = NULL;
@@ -173,6 +175,26 @@ int rb_pulser_init_hook( void )
 
 int rb_pulser_test_hook( void )
 {
+	PULSE *p;
+
+
+	/* If a RF pulse exists make sure the synthesizer module got loaded before
+	   the pulser module, otherwise we'll get into trouble */
+
+	for ( p = rb_pulser_Pulses; p != NULL; p = p->next )
+		if ( p->function == rb_pulser.function + PULSER_CHANNEL_RF )
+		{
+			if ( ! rb_pulser.exists_synthesizer )
+			{
+				print( FATAL, "Module \"" SYNTHESIZER_MODULE "\" pulser must "
+					   "be listed before \"rb_pulser\" module in DEVICES "
+					   "section when RF pulses are used.\n" );
+				THROW( EXCEPTION );
+			}
+
+			break;
+		}
+
 	/* Check consistency of pulse settings and do everything to setup the
 	   pulser for the test run */
 
@@ -201,6 +223,14 @@ int rb_pulser_test_hook( void )
 		}
 
 		RETHROW( );
+	}
+
+	/* If a repetition time has been set set up the corresponding value in
+	   th structure for the card creating the repetition time */
+
+	if ( rb_pulser.trig_in_mode == INTERNAL ) {
+		clock_card[ ERT_CLOCK ].freq = rb_pulser.rep_time_index;
+		delay_card[ ERT_DELAY ].delay = rb_pulser.rep_time_ticks;
 	}
 
 	/* We now need some somewhat different functions for setting of pulse
@@ -313,6 +343,9 @@ void rb_pulser_exit_hook( void )
 		T_free( p );
 		p = pn;
 	}
+
+	if ( rb_pulser.synth_state )
+		rb_pulser.synth_pulse_state = CHAR_P T_free( rb_pulser.synth_state );
 
 	if ( rb_pulser.synth_pulse_state )
 		rb_pulser.synth_pulse_state =
@@ -650,7 +683,7 @@ static void rb_pulser_card_setup( void )
 	delay_card[ MW_DELAY_2 ].prev = delay_card + MW_DELAY_1;
 	delay_card[ MW_DELAY_2 ].next = delay_card + MW_DELAY_3;
 
-	delay_card[ MW_DELAY_3 ].name = MW_DELAY_CARD_4;
+	delay_card[ MW_DELAY_3 ].name = MW_DELAY_CARD_3;
 	delay_card[ MW_DELAY_3 ].prev = delay_card + MW_DELAY_2;
 	delay_card[ MW_DELAY_3 ].next = delay_card + MW_DELAY_4;
 

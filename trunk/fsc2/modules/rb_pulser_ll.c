@@ -86,12 +86,16 @@ void rb_pulser_init( void )
 	}
 	else
 	{
+		if ( rulbus_delay_set_trigger( delay_card[ ERT_DELAY ].handle,
+									   RULBUS_DELAY_FALLING_EDGE )
+			 													 != RULBUS_OK )
+			rb_pulser_failure( SET, "Failure to initialize pulser" );
 	}
 
-	if ( rulbus_delay_set_output_pulse_polarity( 
-									 delay_card[ ERT_DELAY ].handle,
-									 RULBUS_DELAY_END_PULSE,
-									 RULBUS_DELAY_RAISING_EDGE ) != RULBUS_OK )
+	if ( rulbus_delay_set_output_pulse_polarity(
+			 						delay_card[ ERT_DELAY ].handle,
+									RULBUS_DELAY_END_PULSE,
+									RULBUS_DELAY_RAISING_EDGE ) != RULBUS_OK )
 		rb_pulser_failure( SET, "Failure to initialize pulser" );
 
 	/* Set for all cards (execept the card for experiment repetition time,
@@ -152,7 +156,7 @@ static void rb_pulser_synthesizer_init( void )
 		rb_pulser_failure( UNSET, "Function for setting synthesizer pulse "
 						   "trigger slope is unknwon" );
 
-	if ( ( Func_ptr = func_get( rb_pulser.synth_pulse_state, &acc ) ) == NULL )
+	if ( ( Func_ptr = func_get( rb_pulser.synth_trig_slope, &acc ) ) == NULL )
 		rb_pulser_failure( UNSET, "Function for setting synthesizer pulse "
 						   "trigger slope is not available" );
 		
@@ -212,6 +216,9 @@ void rb_pulser_exit( void )
 	for ( i = 0; i < NUM_DELAY_CARDS; i++ )
 		if ( delay_card[ i ].handle >= 0 )
 		{
+			rulbus_delay_set_output_pulse( delay_card[ i ].handle,
+										   RULBUS_DELAY_OUTPUT_BOTH,
+										   RULBUS_DELAY_PULSE_NONE );
 			rulbus_delay_set_delay( delay_card[ i ].handle, 0, 1 );
 			rulbus_card_close( delay_card[ i ].handle );
 			delay_card[ i ].handle = -1;
@@ -274,7 +281,7 @@ void rb_pulser_run( bool state )
 			 												    != RULBUS_OK ||
 				 rulbus_delay_set_trigger( delay_card[ ERT_DELAY ].handle,
 										   RULBUS_DELAY_RAISING_EDGE )
-			 													 != RULBUS_OK )
+																!= RULBUS_OK )
 				rb_pulser_failure( SET, "Failure to start pulser" );
 		}
 	}
@@ -309,7 +316,7 @@ void rb_pulser_run( bool state )
 void rb_pulser_delay_card_state( int handle, bool state )
 {
 	unsigned char type = state == START ?
-						  RULBUS_DELAY_PULSE_BOTH : RULBUS_DELAY_PULSE_NONE;
+							  RULBUS_DELAY_END_PULSE : RULBUS_DELAY_PULSE_NONE;
 
 
 	if ( rulbus_delay_set_output_pulse( handle, RULBUS_DELAY_OUTPUT_BOTH,

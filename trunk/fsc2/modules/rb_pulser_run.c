@@ -106,13 +106,16 @@ void rb_pulser_function_init( void )
 }
 
 
-/*--------------------------------------------------------------------------*
- *--------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*
+ * Function sets the delay for the very first delay card, i.e. the card
+ * controllng the delay of the first microwave pulse. If there's no MW
+ * pulse the delay for this card is set to the shortest possible time.
+ *----------------------------------------------------------------------*/
 
 void rb_pulser_init_delay( void )
 {
 	FUNCTION *f = rb_pulser.function + PULSER_CHANNEL_MW;
-	PULSE *p = f->pulses[ 0 ];
+	PULSE *p;
 	double pos, shift;
 	Ticks delay;
 	RULBUS_DELAY_CARD *card = delay_card + INIT_DELAY;
@@ -132,6 +135,8 @@ void rb_pulser_init_delay( void )
 		card->delay = 0;
 		return;
 	}
+
+	p = f->pulses[ 0 ];
 
 	pos = p->pos + p->function->delay * rb_pulser.timebase - 2 * MIN_DELAY;
 
@@ -375,12 +380,13 @@ static void rb_pulser_commit( bool flag )
 		return;
 	}
 
-	for ( card = delay_card + INIT_DELAY, i = 0; i < NUM_DELAY_CARDS;
+	for ( card = delay_card + INIT_DELAY, i = INIT_DELAY; i < NUM_DELAY_CARDS;
 		  card++, i++ )
 	{
+/*
 		if ( ! card->needs_update )
 			continue;
-
+*/
 		if ( ! card->is_active )
 		{
 			rb_pulser_delay_card_state( card->handle, STOP );
@@ -389,7 +395,7 @@ static void rb_pulser_commit( bool flag )
 
 		rb_pulser_delay_card_delay( card->handle, card->delay );
 
-		if ( ! card->was_active )
+//		if ( ! card->was_active )
 			rb_pulser_delay_card_state( card->handle, START );
 	}
 }
@@ -426,16 +432,15 @@ static void rb_pulser_rf_pulse( void )
 		vars_pop( func_call( Func_ptr ) );
 	}
 
-	/* Switch pulse modulation on or off if the pulse just became active or
+	/* Switch synthesizer output on or off if the pulse just became active or
 	   inactive */
 
 	if ( ( p->was_active && ! p->is_active ) ||
 		 ( ! p->was_active && p->is_active ) )
 	{
-		if ( ( Func_ptr = func_get( rb_pulser.synth_pulse_state, &acc ) )
-																	  == NULL )
+		if ( ( Func_ptr = func_get( rb_pulser.synth_state, &acc ) ) == NULL )
 		{
-			print( FATAL, "Function for setting synthesizer pulse length is "
+			print( FATAL, "Function for setting synthesizer output state is "
 				   "not available.\n" );
 			THROW( EXCEPTION );
 		}

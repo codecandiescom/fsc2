@@ -43,6 +43,8 @@ void rb_pulser_init_setup( void )
 	rb_pulser_basic_functions_check( );
 	rb_pulser_rf_synth_init( );
 
+	
+
 	if ( rb_pulser.dump_file != NULL )
 		rb_pulser_init_print( rb_pulser.dump_file );
 
@@ -258,6 +260,29 @@ static void rb_pulser_rf_synth_init( void )
 
 	rb_pulser.synth_trig_slope = func;
 
+	if ( dev_num )
+		func = T_strdup( SYNTHESIZER_STATE );
+	else
+		func = get_string( SYNTHESIZER_STATE "#%d", dev_num );
+	
+	if ( ! func_exists( func ) ||
+		 ( Func_ptr = func_get( func, &acc ) ) == NULL )
+	{
+		rb_pulser.synth_pulse_state =
+								  CHAR_P T_free( rb_pulser.synth_pulse_state );
+		rb_pulser.synth_pulse_delay =
+								  CHAR_P T_free( rb_pulser.synth_pulse_delay );
+		rb_pulser.synth_pulse_width =
+								  CHAR_P T_free( rb_pulser.synth_pulse_width );
+		rb_pulser.synth_trig_slope =
+								  CHAR_P T_free( rb_pulser.synth_trig_slope );
+		T_free( func );
+		print( FATAL, "Function for setting the trigger slope is missing from "
+			   "the synthesizer module '%s'.\n", SYNTHESIZER_MODULE );
+		THROW( EXCEPTION );
+	}
+
+	rb_pulser.synth_state = func;
 }
 
 

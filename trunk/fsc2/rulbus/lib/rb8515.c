@@ -83,6 +83,7 @@ void rulbus_clock_exit( void )
 int rulbus_clock_card_init( int handle )
 {
 	RULBUS_CLOCK_CARD *tmp;
+	int retval;
 
 
 	tmp = realloc( rulbus_clock_card,
@@ -99,7 +100,10 @@ int rulbus_clock_card_init( int handle )
 
 	/* Stop the clock */
 
-	return rulbus_write( handle, 0, &tmp->ctrl, 1 );
+	if ( ( retval = rulbus_write( handle, 0, &tmp->ctrl, 1 ) ) != 1 )
+		return retval;
+
+	return RULBUS_OK;
 }
 	
 
@@ -142,6 +146,7 @@ void rulbus_clock_card_exit( int handle )
 int rulbus_clock_set_frequency( int handle, int freq )
 {
 	RULBUS_CLOCK_CARD *card;
+	int retval;
 
 
 	/* Try to find the card, if it doesn't exist just return */
@@ -155,7 +160,11 @@ int rulbus_clock_set_frequency( int handle, int freq )
 	if ( card->ctrl == freq )
 		return RULBUS_OK;
 
-	return rulbus_write( handle, 0, &card->ctrl, 1 );
+	card->ctrl = freq;
+	if ( ( retval = rulbus_write( handle, 0, &card->ctrl, 1 ) ) != 1 )
+		return retval;
+
+	return RULBUS_OK;
 }
 
 

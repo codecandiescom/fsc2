@@ -136,7 +136,7 @@ int rulbus_delay_card_init( int handle )
 	
 	for ( byte = 0, i = 0; i <= DATA_LSBYTE; i++ )
 		if ( ( retval = rulbus_write( handle, DATA_LSBYTE - i,
-									  &byte, 1 ) ) < 0 )
+									  &byte, 1 ) ) != 1 )
 			 return retval;
 
 	return RULBUS_OK;
@@ -201,7 +201,7 @@ int rulbus_delay_set_delay( int handle, unsigned long delay, int force )
 	   user to set a new delay even though a delay is already created, which
 	   then ends prematurely) */
 
-	if ( ( retval = rulbus_read( handle, STATUS_ADDR, &byte, 1 ) ) < 0 )
+	if ( ( retval = rulbus_read( handle, STATUS_ADDR, &byte, 1 ) ) != 1 )
 		 return retval;
 
 	if ( byte & DELAY_BUSY && ! force )
@@ -213,7 +213,7 @@ int rulbus_delay_set_delay( int handle, unsigned long delay, int force )
 	{
 		byte = ( unsigned char ) ( delay & 0xFF );
 		if ( ( retval = rulbus_write( handle, DATA_LSBYTE - i,
-									  &byte, 1 ) ) < 0 )
+									  &byte, 1 ) ) != 1 )
 			 return retval;
 	}
 
@@ -230,6 +230,7 @@ int rulbus_delay_set_trigger( int handle, int edge )
 {
 	RULBUS_DELAY_CARD *card;
 	unsigned char ctrl;
+	int retval;
 
 
 	if ( ( card = rulbus_delay_card_find( handle ) ) == NULL )
@@ -250,7 +251,12 @@ int rulbus_delay_set_trigger( int handle, int edge )
 		return RULBUS_OK;
 
 	card->ctrl = ctrl;
-	return rulbus_write( handle, CONTROL_ADDR, &card->ctrl, 1 );
+
+	if ( ( retval = rulbus_write( handle, CONTROL_ADDR,
+								  &card->ctrl, 1 ) ) != 1 )
+		return retval;
+
+	return RULBUS_OK;
 }
 
 
@@ -263,6 +269,7 @@ int rulbus_delay_set_output_pulse( int handle, int output, int type )
 {
 	RULBUS_DELAY_CARD *card;
 	unsigned char ctrl;
+	int retval;
 
 
 	if ( ( card = rulbus_delay_card_find( handle ) ) == NULL )
@@ -279,19 +286,19 @@ int rulbus_delay_set_output_pulse( int handle, int output, int type )
 
 	ctrl = card->ctrl & 0xF0;
 
-	if ( type & RULBUS_DELAY_OUTPUT_1 )
+	if ( output & RULBUS_DELAY_OUTPUT_1 )
 	{
-		if ( output & RULBUS_DELAY_START_PULSE )
+		if ( type & RULBUS_DELAY_START_PULSE )
 			ctrl |= START_PULSE_OUT_1_ENABLE;
-		if ( output & RULBUS_DELAY_END_PULSE )
+		if ( type & RULBUS_DELAY_END_PULSE )
 			ctrl |= END_PULSE_OUT_1_ENABLE;
 	}
 		
-	if ( type & RULBUS_DELAY_OUTPUT_2 )
+	if ( output & RULBUS_DELAY_OUTPUT_2 )
 	{
-		if ( output & RULBUS_DELAY_START_PULSE )
+		if ( type & RULBUS_DELAY_START_PULSE )
 			ctrl |= START_PULSE_OUT_2_ENABLE;
-		if ( output & RULBUS_DELAY_END_PULSE )
+		if ( type & RULBUS_DELAY_END_PULSE )
 			ctrl |= END_PULSE_OUT_2_ENABLE;
 	}
 
@@ -299,7 +306,12 @@ int rulbus_delay_set_output_pulse( int handle, int output, int type )
 		return RULBUS_OK;
 
 	card->ctrl = ctrl;
-	return rulbus_write( handle, CONTROL_ADDR, &card->ctrl, 1 );
+
+	if ( ( retval = rulbus_write( handle, CONTROL_ADDR,
+								  &card->ctrl, 1 ) ) != 1 )
+		return retval;
+
+	return RULBUS_OK;
 }
 
 
@@ -312,6 +324,7 @@ int rulbus_delay_set_output_pulse_polarity( int handle, int type, int pol )
 {
 	RULBUS_DELAY_CARD *card;
 	unsigned char ctrl;
+	int retval;
 
 
 	if ( ( card = rulbus_delay_card_find( handle ) ) == NULL )
@@ -346,7 +359,12 @@ int rulbus_delay_set_output_pulse_polarity( int handle, int type, int pol )
 		return RULBUS_OK;
 
 	card->ctrl = ctrl;
-	return rulbus_write( handle, CONTROL_ADDR, &card->ctrl, 1 );
+
+	if ( ( retval = rulbus_write( handle, CONTROL_ADDR,
+								  &card->ctrl, 1 ) ) != 1 )
+		return retval;
+
+	return RULBUS_OK;
 }
 
 
@@ -364,7 +382,7 @@ int rulbus_delay_busy( int handle )
 	if ( ( card = rulbus_delay_card_find( handle ) ) == NULL )
 		return RULBUS_INV_HND;
 
-	if ( ( retval = rulbus_read( handle, STATUS_ADDR, &byte, 1 ) ) < 0 )
+	if ( ( retval = rulbus_read( handle, STATUS_ADDR, &byte, 1 ) ) != 1 )
 		return retval;
 
 	return ( byte & DELAY_BUSY ) ? 1 : 0;
@@ -389,15 +407,15 @@ int rulbus_delay_software_start( int handle )
 	ctrl = card->ctrl;
 
 	ctrl |= TRIGGER_ON_FALLING_EDGE;
-	if ( ( retval = rulbus_write( handle, CONTROL_ADDR, &ctrl, 1 ) ) < 0 )
+	if ( ( retval = rulbus_write( handle, CONTROL_ADDR, &ctrl, 1 ) ) != 1 )
 		return retval;
 		 
 	ctrl &= ~ TRIGGER_ON_FALLING_EDGE;
-	if ( ( retval = rulbus_write( handle, CONTROL_ADDR, &ctrl, 1 ) ) < 0 )
+	if ( ( retval = rulbus_write( handle, CONTROL_ADDR, &ctrl, 1 ) ) != 1 )
 		return retval;
 
 	if ( ctrl != card->ctrl &&
-		 ( retval = rulbus_write( handle, CONTROL_ADDR, &ctrl, 1 ) ) < 0 )
+		 ( retval = rulbus_write( handle, CONTROL_ADDR, &ctrl, 1 ) ) != 1 )
 		return retval;
 
 	return RULBUS_OK;
