@@ -139,7 +139,7 @@ Device_Name *Device_Name_List = NULL;
 Pulser_Struct pulser_struct;
 
 Phase_Sequence *PSeq = NULL;
-Acquisition_Sequence ASeq[ 2 ] = { { 0, NULL, 0 }, { 0, NULL, 0 } };
+Acquisition_Sequence ASeq[ 2 ] = { { UNSET, NULL, 0 }, { UNSET, NULL, 0 } };
 
 long Cur_Pulse = -1;
 
