@@ -5,15 +5,15 @@
 use strict;
 use Tk;
 
-my $lockin      = 'SR810';
+my $lockin		= 'SR810';
 my $start_field = '';
-my $end_field   = '';
-my $field_step  = '';
-my $num_runs    = 1;
-my $tc          = "Don't set";
-my $sens        = "Don't set";
-my $how         = 'Start experiment';
-my $bridge      = 'cw';
+my $end_field	= '';
+my $field_step	= '';
+my $num_runs	= 1;
+my $tc			= "Don't set";
+my $sens		= "Don't set";
+my $how			= 'Start experiment';
+my $bridge		= 'cw';
 
 
 my %fp = ( '-side' => 'top',
@@ -137,8 +137,8 @@ my $f6_l = $f6->Label( '-text' => 'Time constant:',
 					   'anchor' => 'w' );
 my $f6_m = $f6->Optionmenu( '-options' =>
 							[ ( "Don't set", '100 s', ' 30 s', ' 10 s',
-							    '  3 s', '  1 s', '300 ms', '100 ms', ' 30 ms',
-							    ' 10 ms', '  3 ms', '  1 ms' ) ],
+								'  3 s', '	1 s', '300 ms', '100 ms', ' 30 ms',
+								' 10 ms', '	 3 ms', '  1 ms' ) ],
 							'-width' => 9,
 							'-variable' => \$tc );
 $f6->pack( %fp );
@@ -152,12 +152,12 @@ my $f7_l = $f7->Label( '-text' => 'Sensitivity:',
 						'anchor' => 'w' );
 my $f7_m = $f7->Optionmenu( '-options' =>
 							[ ( "Don't set", '500 mV', '200 mV', '100 mV',
-							    ' 50 mV', ' 20 mV', ' 10 mV', '  5 mv',
-								'  2 mV', '  1 mV', '500 uV', '200 uV',
+								' 50 mV', ' 20 mV', ' 10 mV', '	 5 mv',
+								'  2 mV', '	 1 mV', '500 uV', '200 uV',
 								'100 uV', ' 50 uV', ' 20 uV', ' 10 uV',
-								'  5 uV', '  2 uV', '  1 uV',
-							    '500 nV', '200 nV', '100 nV', ' 50 nV',
-								' 10 nV', '  5 nV', '  2 nV', '  1 nV' ) ],
+								'  5 uV', '	 2 uV', '  1 uV',
+								'500 nV', '200 nV', '100 nV', ' 50 nV',
+								' 10 nV', '	 5 nV', '  2 nV', '	 1 nV' ) ],
 							'-width' => 9,
 							'-variable' => \$sens );
 $f7->pack( %fp );
@@ -170,7 +170,7 @@ $mw->Optionmenu( '-options' => [ ( 'Start experiment', 'Test program',
 				 '-variable' => \$how,
 				 '-command' => \&write_out
 			   )->pack( '-padx' => '3m',
-					    '-pady' => '3m' );
+						'-pady' => '3m' );
 
 
 
@@ -201,8 +201,8 @@ local *F;
 my $how2;
 
 $how2 = "start" if $how =~ /^Start/;
-$how2 = "test"  if $how =~ /^Test/;
-$how2 = "load"  if $how =~ /^Load/;
+$how2 = "test"	if $how =~ /^Test/;
+$how2 = "load"	if $how =~ /^Load/;
 
 open( F, "|fsc2_$how2" ) or die "Can't find utility.\n";
 
@@ -227,7 +227,7 @@ data[ N_points ];
 N_runs = $num_runs;\n";
 
 if ( $num_runs != 1 ) {
-    print F "new_data[ N_points ];\n";
+	print F "new_data[ N_points ];\n";
 }
 
 if ( $tc eq "Don't set" ) {
@@ -297,7 +297,7 @@ if ( $num_runs != 1 ) {
 	display( 1, data / float( J ), 2 );
 
 	fsave( \"\\n\" );
-    IF ( J < N_runs ) \{
+	IF ( J < N_runs ) \{
 		reset_field( );
 		wait( tc );
 	\}
@@ -306,8 +306,9 @@ if ( $num_runs != 1 ) {
 
 ON_STOP:
 
+fsave( \"\\n\" );
 FOR I = 1 : N_points \{
-	fsave( \"\\n# #\\n\", start_field + ( I - 1 ) * field_step, data[ I ] );
+	fsave( \"# #\\n\", start_field + ( I - 1 ) * field_step, data[ I ] );
 \}
 ";
 } else {
@@ -364,11 +365,11 @@ sub do_checks {
 	}
 
 	if ( abs( $field_step ) > abs( $end_field - $start_field ) ) {
-	    &show_message( "Field step size larger than\n" .
+		&show_message( "Field step size larger than\n" .
 					   "difference between start and\n" .
 					   "end field." );
 		return -1;
-    }
+	}
 
 	if ( $num_runs =~ /^$/ ) {
 		&show_message( "Number of runs hasn't been\n" .
@@ -390,8 +391,8 @@ sub do_checks {
 sub show_message {
 	my $text = shift;
 
-    $mw->messageBox( '-icon' => 'error',
-                     '-type' => 'Ok',
-	                 '-title' => 'Error',
-                     '-message' => $text );
+	$mw->messageBox( '-icon' => 'error',
+					 '-type' => 'Ok',
+					 '-title' => 'Error',
+					 '-message' => $text );
 }
