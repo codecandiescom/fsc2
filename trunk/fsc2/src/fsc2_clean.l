@@ -787,7 +787,7 @@ static void lower_permissions( void )
 
 static void usage( void )
 {
-	fprintf( stderr, "Usage: fsc2_clean [FILE]\n"
+	fprintf( stderr, "Usage: fsc2_clean\n"
 			 "This program predigests EDL files and is only meant for\n"
 			 "internal use by fsc2(1). But since you're already here:\n"
 			 "fsc2_clean expects input (i.e. an EDL programs) on STDIN\n"
