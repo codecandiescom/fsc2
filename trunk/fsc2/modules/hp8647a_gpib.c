@@ -4,7 +4,7 @@
 
 /*
   I had some rather strange probems with this device. For example, when simply
-  just sweeping up the output frequency I nearyl never ended up with the
+  just sweeping up the output frequency I nearly never ended up with the
   expected end frequency but a bit below eventhough all commands got send
   correctly. Obviously, some kind of backlog of commands had built up. To get
   rid of this (and also some spurious break-downs in the communication) I now
