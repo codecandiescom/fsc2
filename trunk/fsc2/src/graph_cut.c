@@ -127,14 +127,10 @@ void cut_show( int dir, long index )
 	int flags;
 
 
-	/* Don't do anything if no curve is currently displayed */
+	/* Don't do anything if no curve is currently displayed or if mouse didn't
+       got released in one of the axis canvases */
 
-	if ( G.active_curve == -1 )
-		return;
-
-	/* Don't do anything if we didn't end in one of the axis canvases */
-
-	if ( index < 0 ||
+	if ( G.active_curve == -1 || index < 0 ||
 		 ( dir == X && index >= G.nx ) || ( dir == Y && index >= G.ny ) )
 		return;
 
@@ -559,11 +555,11 @@ void cut_form_close( void )
 }
 
 
-/*----------------------------------------------------------------*/
-/* Instead of calling fl_hide_form() we directly unmap the window */
-/* to make it easier to show it again (otherwise we would have to */
-/* first delete and later to recreate lots of stuff).             */
-/*----------------------------------------------------------------*/
+/*-------------------------------------------------------------*/
+/* Instead of calling fl_hide_form() directly unmap the window */
+/* to make it easier to show it again (otherwise we'd have to  */
+/* first delete and later to recreate lots of stuff).          */
+/*-------------------------------------------------------------*/
 
 void cut_close_callback( FL_OBJECT *a, long b )
 {
