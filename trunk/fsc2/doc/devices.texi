@@ -477,15 +477,19 @@ The modules with names starting with @code{er035m} are for the Bruker
 ER035M NMR gaussmeter. @code{er035m} and @code{er035m_sa} are to be used
 when the device is controlled via the GPIB bus while @code{er035m_s} and
 @code{er035m_sas} expect the device to be connected to a serial port of
-the computer. The @code{bh15} module is for the Hall controller used in
-some setups. The last module, @code{pt2025}, is for the Metrolab NMR
+the computer. (If you're wondering why there are versions for both the
+GPIB bus and the serial port, the simple explanation is that some of the
+ER035M gaussmeters simple don't work with the GPIB bus even though they
+should.) The @code{bh15} module is for the Hall controller used in some
+setups. The last module, @code{pt2025}, is for the Metrolab NMR
 gaussmeter from the Berlin W-Band spectrometer.
 
 The first three gaussmeter modules, @code{er035m}, @code{er035m_s} and
 @code{bh15}, are only to be used for controlling the sweep of a magnet
-power supply. Thus only one of these gaussmeter drivers can be loaded,
-and if other gaussmeters are also used it must be the first in the
-@code{DEVICES} section and must be specified @b{before} the magnet
+power supply. Thus only one of these gaussmeter drivers can be loaded at
+the same time. If other gaussmeters are also to be used the
+@code{er035m}, @code{er035m_s} or @code{bh15} module must be listed
+first in the @code{DEVICES} section and specified @b{before} the magnet
 module (see above) which relies on its existence,
 
 In contrast, the three other modules, @code{er035m_sa},
@@ -577,7 +581,6 @@ This function can be called to set of query the lower search limit (in
 Gauss) for the modules @code{er035m}, @code{er035m_s}, @code{er035m_sa}
 and @code{er035m_sas}. The function can only be called in the
 @code{EXPERIMENT} section.
-
 
 @end table
 
