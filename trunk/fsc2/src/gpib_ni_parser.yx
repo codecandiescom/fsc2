@@ -72,7 +72,7 @@ device: DEVICE_TOKEN '{'                    {
                                               dev.pad     = -1;
 									          dev.sad     = 0;
                                               dev.eos     = '\n';
-                                              dev.eosmode = 0;
+                                              dev.eosmode = EOT;
 			                                  dev.flags   = 0;
 									          dev.timo    = GPIB_DEF_TIMO;
                                             }
@@ -87,10 +87,22 @@ args:   /* empty */
       | args EOS_TOKEN sep1 NUM_TOKEN sep2	 { dev.eos = $4; }
       | args TIMO_TOKEN sep1 NUM_TOKEN sep2  { dev.timo = $4; }
       | args TIMO_TOKEN sep1 TIME_TOKEN sep2 { dev.timo = $4; }
-	  | args REOS_TOKEN sep1 bool sep2		 { dev.eosmode |= $4 * REOS; }
-	  | args XEOS_TOKEN sep1 bool sep2		 { dev.eosmode |= $4 * XEOS; }
-      | args BIN_TOKEN sep1 bool sep2		 { dev.eosmode |= $4 * BIN; }
-      | args EOT_TOKEN sep1 bool sep2		 { dev.eosmode |= $4 * EOT; }
+	  | args REOS_TOKEN sep1 bool sep2		 { if ( $4 )
+											   	   dev.eosmode |= REOS;
+	                                           else
+											   	   dev.eosmode &= ~ REOS; }
+	  | args XEOS_TOKEN sep1 bool sep2		 { if ( $4 )
+		  	                                       dev.eosmode |= XEOS;
+	                                           else
+												   dev.eosmode &= ~ XEOS; }
+      | args BIN_TOKEN sep1 bool sep2		 { if ( $4 )
+		                                           dev.eosmode |= BIN;
+	                                           else
+												   dev.eosmode &= ~ BIN; }
+      | args EOT_TOKEN sep1 bool sep2		 { if ( $4 )
+		                                           dev.eosmode |= EOT;
+	                                           else
+												   dev.eosmode &= ~ EOT; }
       | args MASTER_TOKEN sep2               { dev.flags |= IS_MASTER; }
       | args FILE_TOKEN sep1 STR_TOKEN sep2  { }
       | args ERR_TOKEN sep1 STR_TOKEN sep2   { }
