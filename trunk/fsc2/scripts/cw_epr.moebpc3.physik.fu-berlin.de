@@ -630,7 +630,6 @@ PREPARATIONS:
 
 init_1d( 3, Num_Points, start_current, step_size,
 		 \"Current [A]\", \"Signal [mV]\" );
-magnet_setup( start_current, sweep_rate );
 lockin_time_constant( tc );
 lockin_auto_setup( 1 / kd, 1 );
 
@@ -647,9 +646,11 @@ IF is_file( File ) {
 	fsave( File, \"\\n\" );
 }
 
+magnet_sweep_rate( sweep_rate );
+
 FOREVER {
 
-	reset_field( );
+	set_field( start_current );
 ";
 print F "	wait( $sleep_time s );\n" if $sleep_time ne "";
 print F
