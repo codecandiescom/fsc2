@@ -2,6 +2,8 @@
 
 @c $Id$
 @c
+@c Copyright (C) 2001 Jens Thoms Toerring
+@c
 @c This file is part of fsc2.
 @c
 @c Fsc2 is free software; you can redistribute it and/or modify
@@ -20,12 +22,14 @@
 @c Boston, MA 02111-1307, USA.
 
 @c %**start of header
+
 @setfilename fsc2.info
 @settitle fsc2
 @set lastupdate March 29, 2001
 @iftex
 @afourpaper
 @end iftex
+
 @c %**end of header
 
 

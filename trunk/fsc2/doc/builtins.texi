@@ -1,6 +1,6 @@
 @c $Id$
 @c
-@c Copyright (c) 2001 Jens Thoms Toerring
+@c Copyright (C) 2001 Jens Thoms Toerring
 @c
 @c This file is part of fsc2.
 @c
