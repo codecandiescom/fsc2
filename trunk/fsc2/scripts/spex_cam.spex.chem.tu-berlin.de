@@ -3250,7 +3250,7 @@ Bin = ccd_camera_binning( );
 CCD_Points = ( ROI[ 3 ] - ROI[ 1 ] + 1 ) / Bin[ 1 ];
 step_wn = calib[ 2 ] * Bin[ 1 ];
 
-// Calculate offset for center wavenumber due to asymmetric ROI
+// Calculate offset of center wavenumber due to asymmetric ROI
 
 cwn_offset = 0.5 * calib[ 2 ]
              * ( CCD_size[ 1 ] - ( ROI[ 3 ] + ROI[ 1 ] - 1 ) );
@@ -3586,8 +3586,15 @@ EOF
 B_eas = button_create( "PUSH_BUTTON", "Stop at end of running scan" );
 hide_toolbox( 0 );
 
+// Make sure the array for averaging has enough initialized points
+
 avg[ N_Points ] = 0.0;
+
+// Get a file name from the user
+
 F_all = get_file( "", "*.dat", "", "", "dat" );
+
+// And here we finally start...
 
 FOR I = 1 : N_scans {
 	cur_wn = start_wn;
