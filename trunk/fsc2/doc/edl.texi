@@ -1178,8 +1178,8 @@ calculation, they can't be used with arrays):
 @cindex larger than `>'
 @cindex >= (larger or equal)
 @cindex larger or equal `>='
-@multitable {@code{==}} {true if left hand side is @i{equal} to right hand side}
-@item @code{==} @tab  true if left hand side is @i{equal} to right hand side
+@multitable {@code{==}} {true if left hand side is @i{equal} to the right hand side}
+@item @code{==} @tab  true if left hand side is @i{equal} to the right hand side
 @item @code{!=} @tab  true if left and right hand side are @i{unequal}
 @item @code{<}  @tab  true if left side is @i{less than} right side
 @item @code{<=} @tab  true if left side is @i{less or equal} to right side
@@ -1193,28 +1193,28 @@ not work as expected. This is a result of the finite precision of
 floating point numbers.  Thus, for example, @code{0.1} and the result of
 e.g.@: @code{0.7 / 7} can be different numbers, in which case a
 comparison for equality will fail. Thus comparison for equality should
-in principle only with integer numbers.
+in principle only be used with integer numbers.
 
-Actually, all these operators do a calculation. When you see something
-like @code{a <= b} this evaluates to 1 if the expression is true (i.e.@:
-if the value of @code{a} is less or equal to the value of @code{b}),
-otherwise to 0. In the test of the conditional execution operator
-(i.e.@: everything before the question mark) it is checked if the result
-is a non-zero number, which is taken as true, or if it's zero, which is
-interpreted as false. Thus instead of en expression with a comparison
-operator the test part could also consist of a simple number and what is
-going to be executed of the two alternatives after the question marks
-depends on the value of this number: if it is non-zero the first
-alternative is used, and if it is zero the second. Thus it would be
-valid to write:
+All these comparison operators actually do a calculation, resulting in a
+new number. When you see something like @code{a <= b} this evaluates to
+1 if the expression is true (i.e.@: if the value of @code{a} is less or
+equal to the value of @code{b}), otherwise to 0. In the test of the
+conditional execution operator (i.e.@: everything before the question
+mark) it is checked if the result is a non-zero number, which is taken
+as true, or if it's zero, which is interpreted as false. Thus instead of
+en expression with a comparison operator the test part could also
+consist of a simple number and what is going to be executed of the two
+alternatives after the question marks depends on the value of this
+number: if it is non-zero the first alternative is used, and if it is
+zero the second. Thus it would be valid to write:
 @example
 exp_of_val = val ? exp( val ) : 1;
 @end example
 @noindent
 This checks if @code{val} is non-zero, in which case the exponential of
 @code{val} is calculated by doing a function call, otherwise, if
-@code{val} is @code{0}, the correct result (@code{1}) is written out
-directly.
+@code{val} is @code{0}, the correct result of @code{1} is written out
+directly instead of using a slightly slower function call.
 
 One has to be a bit careful when using the operator for conditional
 execution because it has a very low precedence. After
@@ -1225,17 +1225,20 @@ x2 = 1.0 + ( val < 0 ? 5 : 9 );
 @noindent
 @code{x1} and @code{x2} will have different values. In the first line it
 is checked if @code{val} plus @code{1.0} is smaller than @code{0} and
-@code{x1} is set accordingly, while in the second line it is checked if
-@code{val} is less than @code{0} and, depending on the result, either
-@code{5} or @code{9} is added to @code{1.0}. Also the follwing two
-assignments may result in different values:
+@code{x1} is set accordingly to either @ocde{5} or @code{9}, while in
+the second line it is checked if @code{val} is less than @code{0} and,
+depending on the result, either @code{5} or @code{9} is added to
+@code{1.0}, resulting in @code{6} or @code{10}. Also the follwing two
+assignments may result in different values, at least if @code{val} is
+negative:
 @example
 x1 = val < 0 ? 5 : 9 + 1;
 x2 = ( val < 0 ? 5 : 9 ) + 1;
 @end example
-The value of @code{x1} will be either set to @code{5} or @code{10} while
-@code{x2} will be set to @code{6} or @code{10}. Thus it is reasonable
-to use parentheses to make sure that the evaluation happens as expected.
+The value of @code{x1} will be either set to @code{5} or @code{10} (the
+sum of @code{9} and @code{1}, while @code{x2} will be set to @code{6} or
+@code{10}. Thus it is to be recommended to use parentheses to make sure
+that the evaluation happens as expected except in trival cases.
 
 Finally, the same effect as with the conditional operator can also be
 achieved by using an @code{IF-ELSE} construct (see below), but only
