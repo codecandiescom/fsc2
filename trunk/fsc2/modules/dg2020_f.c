@@ -203,7 +203,7 @@ int dg2020_exp_hook( void )
 
 	/* Initialize the device */
 
-#idndef MAX_DEBUG
+#ifndef MAX_DEBUG
 	if ( ! dg2020_init( DEVICE_NAME ) )
 	{
 		eprint( FATAL, "DG2020: Failure to initialize the pulser.\n" );
@@ -224,7 +224,7 @@ int dg2020_exp_hook( void )
 	/* Finally tell the pulser to update we're always running in manual
 	   update mode) and than switch the pulser into run mode */
 
-ifndef MAX_DEBUG
+#ifndef MAX_DEBUG
 	dg2020_update_data( );
 	if ( ! dg2020_run( START ) )
 	{
