@@ -10,22 +10,18 @@ if [ $! ]; then
 	mv $cdir/rs_spec10.conf.new $cdir/rs_spec10.conf;
 fi
 
-grep -E '^[ \t]*#define[ \t]+CCD_PIXEL_HEIGHT[ \t]+100[[:space:]]*$' \
+grep -E '^[ \t]*#define[ \t]+CCD_PIXEL_HEIGHT[ \t]+400[[:space:]]*$' \
 	 $cdir/rs_spec10.conf > /dev/null;
 if [ $! ]; then
-	sed 's/^\s*\(#define CCD_PIXEL_HEIGHT\).*$/\1 100/' $cdir/rs_spec10.conf \
+	sed 's/^\s*\(#define CCD_PIXEL_HEIGHT\).*$/\1 400/' $cdir/rs_spec10.conf \
 		> $cdir/rs_spec10.conf.new;
 	mv $cdir/rs_spec10.conf.new $cdir/rs_spec10.conf;
 fi
 
-grep -E '^[ \t]*[0-9]+[ \t]+[0-9]+[ \t]+1399[ \t]+99[[:space:]]*$' \
+grep -E '^[ \t]*[0-9]+[ \t]+[0-9]+[ \t]+1339+[ \t]+399[[:space:]]*$' \
 	 $cdir/rs_spec10.state > /dev/null;
 if [ $! ]; then
-	sed 's/\s*([0-9]+[ \t]+[0-9]+[ \t]+).*$/\1 1399 99/' \
+	sed 's/\s*([0-9]+[ \t]+[0-9]+[ \t]+).$/\1 1339 399/' \
 		$cdir/rs_spec10.state > $cdir/rs_spec10.state.new;
 	mv $cdir/rs_spec10.state.new $cdir/rs_spec10.state;
 fi
-mv $cdir/rs_spec.conf.new $cdir/rs_spec10.conf
-sed 's|^[ \t]*#define[ \t]+DEFAULT_CALIB_FILE.*$|#define DEFAULT_CALIB_FILE "/home/studier/edl/calib/spectrapro_300i.calib"|' \
-	$cdir/spectrapro_300i.conf > $cdir/spectrapro_300i.conf.new
-mv $cdir/spectrapro_300i.conf.new $cdir/spectrapro_300i.conf

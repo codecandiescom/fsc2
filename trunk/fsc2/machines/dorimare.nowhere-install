@@ -1,0 +1,13 @@
+# -*-Makefile-*-
+#
+# $Id$
+
+install-dorimare.nowhere:
+	$(MAKE) $(UNINSTALL_MACHINE)
+	if [ -e $(libdir)/rs_spec10.state ]; then \
+		$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) \
+		$(cdir)/rs_spec10.state $(libdir); \
+	fi
+
+uninstall-dorimare.nowhere:
+
