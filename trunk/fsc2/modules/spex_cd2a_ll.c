@@ -160,7 +160,8 @@ void spex_cd2a_set_wavelength( void )
 
 	if ( spex_cd2a.mode & WN_MODES )
 		spex_cd2a_print( mess + 2, 8,
-						 spex_cd2a_wl2mwn( spex_cd2a.wavelength ) );
+						 spex_cd2a_wl2mwn( spex_cd2a.wavelength )
+						 - spex_cd2a.offset );
 	else
 	{
 		if ( UNITS == NANOMETER )
@@ -245,6 +246,11 @@ void spex_cd2a_set_laser_line( void )
 	if ( FSC2_MODE != EXPERIMENT )
 		return;
 
+	/* Stop a running scan */
+
+	if ( spex_cd2a.in_scan )
+		spex_cd2a_halt( );
+
 	if ( spex_cd2a.mode == WN )
 		spex_cd2a_write( PARAMETER, mess );
 	else
@@ -309,7 +315,8 @@ void spex_cd2a_scan_start( void )
 
 	if ( spex_cd2a.mode & WN_MODES )
 		spex_cd2a_print( mess + 2, 8,
-						 spex_cd2a_wl2mwn( spex_cd2a.scan_start ) );
+						 spex_cd2a_wl2mwn( spex_cd2a.scan_start )
+						 - spex_cd2a.offset );
 	else
 	{
 		if ( UNITS == NANOMETER )
@@ -378,6 +385,7 @@ void spex_cd2a_scan_step( void )
 static void spex_cd2a_print( char *mess, int digits, double val )
 {
 	int pre_digits, after_digits;
+	char *buf;
 
 
 	fsc2_assert( digits > 0 );
@@ -391,15 +399,12 @@ static void spex_cd2a_print( char *mess, int digits, double val )
 	}
 	else
 	{
-		pre_digits = ( int ) floor( log10( fabs( val ) ) ) + 1;
-		if ( pre_digits == 0 )
-			pre_digits++;
-		if ( val < 0.0 )
-			pre_digits++;
-		if ( pre_digits == digits )
-			after_digits = 0;
-		else
-			after_digits = digits - pre_digits - 1;
+		buf = get_string( "%f", val );
+		for ( pre_digits = 0; pre_digits < digits - 1; pre_digits++ )
+			if ( buf[ pre_digits ] == '.' )
+				break;
+		T_free( buf );
+		after_digits = digits - pre_digits - 1;
 		fsc2_assert( after_digits >= 0 );
 	}
 
@@ -923,6 +928,7 @@ static ssize_t spex_cd2a_pos_mess_len( void )
 static void spex_cd2a_pos_mess_check( const char *bp )
 {
 	char *ep;
+	const char *eu = bp;
 
 
 	/* Check that the reported unit is reasonable */
@@ -937,14 +943,19 @@ static void spex_cd2a_pos_mess_check( const char *bp )
 		spex_cd2a_wrong_data( );
 
 	/* Check that the reported wavelength or -number is reasonable, i.e.
-	   is a number consisting of 8 bytes. */
+	   is a number consisting of 8 bytes (take care, negative numbers
+	   have a minus sign which is possibly followed by spaces before
+	   the number starts). */
+
+	if ( *bp == '-' )
+		bp++;
 
 	errno = 0;
 	strtod( bp, &ep );
-	if ( errno || ep != bp + 8 )
+	if ( errno || ep != eu + 9 )
 		spex_cd2a_wrong_data( );
 
-	bp += 8;
+	bp = ep;
 
 	/* In STANDARD data format the next byte has to be an ETX */
 
@@ -1060,12 +1071,19 @@ bool spex_cd2a_read_state( void )
 				fsc2_fseek( fp, -1, SEEK_CUR );
 				if ( ( i == 0 &&
 					   ( ( spex_cd2a.mode & WN_MODES &&
-						   fsc2_fscanf( fp, "%lf cm^-1", val + i++ ) != 1 )
+						   ( fsc2_fscanf( fp, "%lf[ \t]", val + i++ ) != 1 ||
+							 fgetc( fp ) != 'c' || fgetc( fp ) != 'm' ||
+							 fgetc( fp ) != '^' || fgetc( fp ) != '-' ||
+							 fgetc( fp ) != '1' ) )
 						 ||
 						 ( spex_cd2a.mode == WL &&
-						   fsc2_fscanf( fp, "%lf nm", val + i++ ) != 1 ) ) 
+						   fsc2_fscanf( fp, "%lf[ \t]", val + i++ ) != 1 ||
+							 fgetc( fp ) != 'n' || fgetc( fp ) != 'm' ) ) 
 					 ) || ( i == 1 &&
-						 fsc2_fscanf( fp, "%lf cm^-1", val + i++ ) != 1 ) )
+						 fsc2_fscanf( fp, "%lf[ \t]", val + i++ ) != 1 ||
+							 fgetc( fp ) != 'c' || fgetc( fp ) != 'm' ||
+							 fgetc( fp ) != '^' || fgetc( fp ) != '-' ||
+							 fgetc( fp ) != '1' ) )
 				{
 					print( FATAL, "Invalid calibration file '%s'.\n", fn );
 					T_free( fn );
