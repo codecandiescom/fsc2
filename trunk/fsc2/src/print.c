@@ -60,10 +60,9 @@ static char *pc_string = NULL;
 static bool get_print_file( FILE **fp, char **name, long data );
 static void get_print_comm( void );
 static void start_printing( FILE *fp, char *name, long what );
+static void print_header( FILE *fp, char *name );
 static void do_1d_printing( FILE *fp, long what );
 static void do_2d_printing( FILE *fp );
-static FILE *spawn_print_prog( const char *command );
-static void print_header( FILE *fp, char *name );
 static void eps_make_scale( FILE *fp, void *cv, int coord, long dim );
 static void eps_color_scale( FILE *fp );
 static void eps_draw_curve_1d( FILE *fp, Curve_1d *cv, int i, long dir );
@@ -448,6 +447,10 @@ static void get_print_comm( void )
 static void start_printing( FILE *fp, char *name, long what )
 {
 	pid_t pid;
+	char filename[ ] = P_tmpdir "/fsc2XXXXXX";
+	int tmp_fd = -1;
+	char *args[ 4 ];
+
 
 	/* Do a minimal sanity check of the print command */
 
@@ -470,9 +473,25 @@ static void start_printing( FILE *fp, char *name, long what )
 	if ( pid > 0 )
 		return;
 
-	if ( print_type == S2P &&
-		 ( fp = spawn_print_prog( cmd ) ) == NULL )
-		_exit( EXIT_FAILURE );
+	/* Some programs only work when the input is a seekable stream, so we
+	   first create a temporary file (that gets unlink()'ed immediately,
+	   so that its automatically gone when the process exits) */
+
+	if ( print_type == S2P )
+	{
+		if ( ( tmp_fd = mkstemp( filename ) ) < 0 ||
+			 ( fp = fdopen( tmp_fd, "w" ) ) == NULL )
+		{
+			if ( tmp_fd >= 0 )
+			{
+				unlink( filename );
+				close( tmp_fd );
+				_exit( EXIT_FAILURE );
+			}
+		}
+
+		unlink( filename );
+	}
 
 	print_header( fp, name );
 
@@ -485,58 +504,21 @@ static void start_printing( FILE *fp, char *name, long what )
 			 	 "%%%%Trailer\n"
 			 	 "end %% fsc2Dict\n"
 				 "%%%%EOF\n" );
-	fclose( fp );
 
-	_exit( EXIT_SUCCESS );
-}
-
-
-/*---------------------------------------------------------------------*/
-/* For real printing (as opposed to just writing a file) a new process */
-/* for the program that does the printing is spawned here.             */
-/*---------------------------------------------------------------------*/
-
-static FILE *spawn_print_prog( const char *command )
-{
-	pid_t pid;
-	char filename[ ] = P_tmpdir "/fsc2XXXXXX";
-	int tmp_fd;
-	FILE *tmp_fp = NULL;
-	char *args[ 4 ];
-
-
-	if ( command == NULL )
-		return NULL;
-
-	/* Create a temporary file for the data because some programs don't work
-	   well with a non-seekable stream like a simple pipe (but unlink the file
-	   immediately so it won't survive in case of any future problems) */
-
-	if ( ( tmp_fd = mkstemp( filename ) ) < 0 ||
-		 ( tmp_fp = fdopen( tmp_fd, "w" ) ) == NULL )
+	if ( print_type != S2P )
 	{
-		if ( tmp_fd >= 0 )
-		{
-			unlink( filename );
-			close( tmp_fd );
-			return NULL;
-		}
+		fclose( fp );
+		_exit( EXIT_SUCCESS );
 	}
 
-	unlink( filename );
+	/* If we have to print to a command it gets execv()'ed here with the
+	   standard input redirected to the temporary file */
 
-	if ( ( pid = fork( ) ) < 0 )
-	{
-		fclose( tmp_fp );
-		return NULL;
-	}
-
-	if ( pid > 0 )          /* parent has done everything it needed to do, */
-		return tmp_fp;      /* now it just got to write out the PS code... */
+	lseek( tmp_fd, 0, SEEK_SET );
 
 	args[ 0 ] = ( char * ) "sh";
 	args[ 1 ] = ( char * ) "-c";
-	args[ 2 ] = ( char * ) command;
+	args[ 2 ] = ( char * ) cmd;
 	args[ 3 ] = NULL;
 
 	dup2( tmp_fd, STDIN_FILENO );
@@ -544,6 +526,134 @@ static FILE *spawn_print_prog( const char *command )
 
 	execv( "/bin/sh", args );
 	_exit( EXIT_FAILURE );
+}
+
+
+/*------------------------------------------------------------------------*/
+/* Prints the header of the EPS-file as well as date, user and fsc2 logo. */
+/*------------------------------------------------------------------------*/
+
+static void print_header( FILE *fp, char *name )
+{
+	time_t d;
+	static char *tstr = NULL;
+
+
+	/* Writes EPS header plus some routines into the file */
+
+	d = time( NULL );
+
+	fprintf( fp, "%%!PS-Adobe-3.0 EPSF-3.0\n"
+			     "%%%%BoundingBox: 0 0 %d %d\n"
+			     "%%%%Creator: fsc2, Mar 2002\n"
+				 "%%%%CreationDate: %s"
+				 "%%%%Title: %s\n"
+				 "%%%%For: %s (%s)\n"
+			     "%%%%Orientation: Landscape\n"
+			 	 "%%%%DocumentData: Clean8Bit\n"
+				 "%%%%DocumentNeededResources: font Times-Roman\n"
+			     "%%%%EndComments\n",
+			 irnd( 72.0 * paper_width / INCH ),
+			 irnd( 72.0 * paper_height / INCH ),
+			 ctime( &d ), name ? name : "none",
+			 getpwuid( getuid( ) )->pw_name,
+			 getpwuid( getuid( ) )->pw_gecos );
+
+	/* Create a dictonary with the commands used in all the following */
+
+	fprintf( fp, "%%%%BeginProlog\n"
+			 	 "%%%%BeginResource: procset fsc2Dict\n"
+			     "/fsc2Dict 23 dict dup begin\n"
+			     "/b { bind def } bind def\n"
+			     "/s { stroke } b\n"
+			     "/f { fill } b\n"
+                 "/t { translate } b\n"
+			     "/r { rotate} b\n"
+				 "/m { moveto } b\n"
+			     "/l { lineto } b\n"
+			     "/rm { rmoveto } b\n"
+			     "/rl { rlineto } b\n"
+			     "/slw { setlinewidth } b\n"
+			     "/sd { setdash } b\n"
+			     "/srgb { setrgbcolor } b\n"
+			     "/sgr { setgray } b\n"
+			     "/sw { stringwidth pop } b\n"
+				 "/sf { exch findfont exch scalefont setfont } b\n"
+			     "/np { newpath } b\n"
+			     "/cp { closepath } b\n"
+			     "/gs { gsave } b\n"
+			     "/gr { grestore } b\n"
+			     "/slc { setlinecap } b\n"
+			     "/ch { gs np 0 0 m\n"
+			     "      false charpath flattenpath pathbbox\n"
+                 "      exch pop 3 -1 roll pop exch pop gr } b\n"
+				 "/cw { gs np 0 0 m\n"
+	             "      false charpath flattenpath pathbbox\n"
+			     "      pop exch pop exch pop gr } b\n" );
+
+	if ( print_with_color )
+		fprintf( fp,
+			     "/fsc2 { gs /Times-Roman 6 sf\n"
+			     "        (fsc2) ch sub 6 sub exch\n"
+			     "        (fsc2) cw sub 4 sub exch m\n"
+			     "        1 -0.025 0 { dup dup srgb gs (fsc2) show gr\n"
+			     "        -0.025 0.025 rm } for\n"
+			     "        1 1 1 srgb (fsc2) show gr } b\n" );
+	else
+		fprintf( fp,
+			     "/fsc2 { gs /Times-Roman 6 sf\n"
+			     "        (fsc2) ch sub 6 sub exch\n"
+			     "        (fsc2) cw sub 4 sub exch m\n"
+			     "        1 -0.025 0 { sgr gs (fsc2) show gr\n"
+			     "        -0.025 0.025 rm } for\n"
+			     "        1 setgray (fsc2) show gr } b\n" );
+
+	/* End of dictonary, now open it for all of the following (don't forget
+	   to close it at the end of the file !) */
+
+	fprintf( fp, "end readonly def %% fsc2Dict\n"
+			 	 "%%%%EndResource\n"
+			     "%%%%EndProlog\n"
+			 	 "%%%%BeginSetup\n"
+			     "fsc2Dict begin\n"
+			 	 "%%%%EndSetup\n" );
+
+	/* Setup the font that also supports umlauts etc., thanks to Adobe Systems
+	   Inc., "PostScript Language Reference", 3rd edition */
+
+	fprintf( fp, "/Times-RomanISOLatin1 /Times-Roman findfont dup length\n"
+			 	 "dict begin {\n"
+			 	 "  1 index /FID ne\n { def } { pop pop } ifelse\n"
+				 "} forall\n"
+				 "/Encoding ISOLatin1Encoding def\n"
+				 "currentdict end definefont pop\n" );
+
+	/* Rotate and shift for landscape format, scale to mm units, draw logo,
+	   set font and draw date and user name */
+
+	fprintf( fp, "%.6f dup scale 90 r 0 %.2f t\n",
+			 72.0 / INCH, - paper_width );
+
+	if ( paper_type == A5_PAPER )
+		fprintf( fp, "10 10 t\n0.5 sqrt dup scale\n" );
+
+	if ( paper_type == A6_PAPER )
+		fprintf( fp, "10 10 t\n0.5 dup scale\n" );
+
+	fprintf( fp, "%.2f %.2f fsc2\n", paper_height, paper_width );
+	fprintf( fp, "/Times-RomanISOLatin1 4 sf\n" );
+
+	TRY
+	{
+		tstr = T_strdup( ctime( &d ) );
+		tstr[ strlen( tstr ) - 1 ] = '\0';
+		fprintf( fp, "5 5 m (%s %s) show\n", tstr,
+				 getpwuid( getuid( ) )->pw_name );
+		T_free( tstr );
+		TRY_SUCCESS;
+	}
+	CATCH( OUT_OF_MEMORY_EXCEPTION )
+		fprintf( fp, "5 5 m (%s) show\n", getpwuid( getuid( ) )->pw_name );
 }
 
 
@@ -675,134 +785,6 @@ static void do_2d_printing( FILE *fp )
 		eps_draw_surface( fp, G.active_curve );
 	else
 		eps_draw_contour( fp, G.active_curve );
-}
-
-
-/*------------------------------------------------------------------------*/
-/* Prints the header of the EPS-file as well as date, user and fsc2 logo. */
-/*------------------------------------------------------------------------*/
-
-static void print_header( FILE *fp, char *name )
-{
-	time_t d;
-	static char *tstr = NULL;
-
-
-	/* Writes EPS header plus some routines into the file */
-
-	d = time( NULL );
-
-	fprintf( fp, "%%!PS-Adobe-3.0 EPSF-3.0\n"
-			     "%%%%BoundingBox: 0 0 %d %d\n"
-			     "%%%%Creator: fsc2, Mar 2002\n"
-				 "%%%%CreationDate: %s"
-				 "%%%%Title: %s\n"
-				 "%%%%For: %s (%s)\n"
-			     "%%%%Orientation: Landscape\n"
-			 	 "%%%%DocumentData: Clean8Bit\n"
-				 "%%%%DocumentNeededResources: font Times-Roman\n"
-			     "%%%%EndComments\n",
-			 irnd( 72.0 * paper_width / INCH ),
-			 irnd( 72.0 * paper_height / INCH ),
-			 ctime( &d ), name ? name : "none",
-			 getpwuid( getuid( ) )->pw_name,
-			 getpwuid( getuid( ) )->pw_gecos );
-
-	/* Create a dictonary with the commands used in all the following */
-
-	fprintf( fp, "%%%%BeginProlog\n"
-			 	 "%%%%BeginResource: procset fsc2Dict\n"
-			     "/fsc2Dict 23 dict dup begin\n"
-			     "/b { bind def } bind def\n"
-			     "/s { stroke } b\n"
-			     "/f { fill } b\n"
-                 "/t { translate } b\n"
-			     "/r { rotate} b\n"
-				 "/m { moveto } b\n"
-			     "/l { lineto } b\n"
-			     "/rm { rmoveto } b\n"
-			     "/rl { rlineto } b\n"
-			     "/slw { setlinewidth } b\n"
-			     "/sd { setdash } b\n"
-			     "/srgb { setrgbcolor } b\n"
-			     "/sgr { setgray } b\n"
-			     "/sw { stringwidth pop } b\n"
-				 "/sf { exch findfont exch scalefont setfont } b\n"
-			     "/np { newpath } b\n"
-			     "/cp { closepath } b\n"
-			     "/gs { gsave } b\n"
-			     "/gr { grestore } b\n"
-			     "/slc { setlinecap } b\n"
-			     "/ch { gs np 0 0 m\n"
-			     "      false charpath flattenpath pathbbox\n"
-                 "      exch pop 3 -1 roll pop exch pop gr } b\n"
-				 "/cw { gs np 0 0 m\n"
-	             "      false charpath flattenpath pathbbox\n"
-			     "      pop exch pop exch pop gr } b\n" );
-
-	if ( print_with_color )
-		fprintf( fp,
-			     "/fsc2 { gs /Times-Roman 6 sf\n"
-			     "        (fsc2) ch sub 6 sub exch\n"
-			     "        (fsc2) cw sub 4 sub exch m\n"
-			     "        1 -0.025 0 { dup dup srgb gs (fsc2) show gr\n"
-			     "        -0.025 0.025 rm } for\n"
-			     "        1 1 1 srgb (fsc2) show gr } b\n" );
-	else
-		fprintf( fp,
-			     "/fsc2 { gs /Times-Roman 6 sf\n"
-			     "        (fsc2) ch sub 6 sub exch\n"
-			     "        (fsc2) cw sub 4 sub exch m\n"
-			     "        1 -0.025 0 { sgr gs (fsc2) show gr\n"
-			     "        -0.025 0.025 rm } for\n"
-			     "        1 setgray (fsc2) show gr } b\n" );
-
-	/* End of dictonary, now open it for all of the following (don't forget
-	   to close it at the end of the file !) */
-
-	fprintf( fp, "end readonly def %% fsc2Dict\n"
-			 	 "%%%%EndResource\n"
-			     "%%%%EndProlog\n"
-			 	 "%%%%BeginSetup\n"
-			     "fsc2Dict begin\n"
-			 	 "%%%%EndSetup\n" );
-
-	/* Setup the font that also supports umlauts etc., thanks to Adobe Systems
-	   Inc., "PostScript Language Reference", 3rd edition */
-
-	fprintf( fp, "/Times-RomanISOLatin1 /Times-Roman findfont dup length\n"
-			 	 "dict begin {\n"
-			 	 "  1 index /FID ne\n { def } { pop pop } ifelse\n"
-				 "} forall\n"
-				 "/Encoding ISOLatin1Encoding def\n"
-				 "currentdict end definefont pop\n" );
-
-	/* Rotate and shift for landscape format, scale to mm units, draw logo,
-	   set font and draw date and user name */
-
-	fprintf( fp, "%.6f dup scale 90 r 0 %.2f t\n",
-			 72.0 / INCH, - paper_width );
-
-	if ( paper_type == A5_PAPER )
-		fprintf( fp, "10 10 t\n0.5 sqrt dup scale\n" );
-
-	if ( paper_type == A6_PAPER )
-		fprintf( fp, "10 10 t\n0.5 dup scale\n" );
-
-	fprintf( fp, "%.2f %.2f fsc2\n", paper_height, paper_width );
-	fprintf( fp, "/Times-RomanISOLatin1 4 sf\n" );
-
-	TRY
-	{
-		tstr = T_strdup( ctime( &d ) );
-		tstr[ strlen( tstr ) - 1 ] = '\0';
-		fprintf( fp, "5 5 m (%s %s) show\n", tstr,
-				 getpwuid( getuid( ) )->pw_name );
-		T_free( tstr );
-		TRY_SUCCESS;
-	}
-	CATCH( OUT_OF_MEMORY_EXCEPTION )
-		fprintf( fp, "5 5 m (%s) show\n", getpwuid( getuid( ) )->pw_name );
 }
 
 

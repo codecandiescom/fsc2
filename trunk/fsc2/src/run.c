@@ -298,7 +298,11 @@ static bool init_devs_and_graphics( void )
 		check_for_further_errors( &compile_test, &EDL.compilation );
 
 		start_graphics( );
+		fl_set_object_callback( GUI.run_form->stop,
+								run_stop_button_callback, 0 );
+
 		setup_comm( );
+
 		TRY_SUCCESS;
 	}
 	OTHERWISE
@@ -499,11 +503,11 @@ static void quitting_handler( int signo )
 }
 
 
-/*--------------------------------------------------------------------*/
-/* Callback function for the 'Stop' button - used to kill the child   */
-/* process. After the child is dead another callback function is used */
-/* for this button, see run_close_button_callback().                  */
-/*--------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*/
+/* Callback function for the 'Stop' button - used to kill the child  */
+/* process. After the child is dead a different callback function is */
+/* used for this button, see run_close_button_callback().            */
+/*-------------------------------------------------------------------*/
 
 void run_stop_button_callback( FL_OBJECT *a, long b )
 {
@@ -518,7 +522,10 @@ void run_stop_button_callback( FL_OBJECT *a, long b )
 	   effects. */
 
 	if ( Internals.child_pid == 0 || kill( Internals.child_pid, 0 ) == -1 )
+	{
+		fl_set_object_callback( a, NULL, 0 );
 		return;
+	}
 
 	/* Only send DO_QUIT signal if the mouse button has been used
 	   the user told us he/she would use... */
@@ -559,36 +566,37 @@ static void run_sigchld_handler( int signo )
 
 	errno_saved = errno;
 
-	if ( ( pid = wait( &return_status ) ) != Internals.child_pid )
+	while ( ( pid = waitpid( -1, &return_status, WNOHANG ) ) > 0 )
 	{
-		if ( pid != 0 && pid == Internals.http_pid )
+		if ( pid == Internals.http_pid )
 		{
 			Internals.http_pid = -1;
 			fl_trigger_object( GUI.main_form->server );
+			continue;
 		}
 
-		errno_saved = errno;
-		return;
-	}
+		if ( pid != Internals.child_pid )
+			continue;
 
 #if ! defined NDEBUG
-	if ( WIFSIGNALED( return_status ) )
-	{
-		fprintf( stderr, "Child process %d died due to signal %d\n",
-				 pid, WTERMSIG( return_status ) );
-		fflush( stderr );
-	}
+		if ( WIFSIGNALED( return_status ) )
+		{
+			fprintf( stderr, "Child process %d died due to signal %d\n",
+					 pid, WTERMSIG( return_status ) );
+			fflush( stderr );
+		}
 #endif
 
-	Internals.child_pid = 0;                             /* child is dead... */
-	sigaction( SIGCHLD, &sigchld_old_act, NULL );
+		Internals.child_pid = 0;                         /* child is dead... */
+		sigaction( SIGCHLD, &sigchld_old_act, NULL );
 
-	/* Disable the 'Stop' button */
+		/* Disable the 'Stop' button */
 
-	fl_set_object_callback( GUI.run_form->stop, NULL, 0 );
+		fl_set_object_callback( GUI.run_form->stop, NULL, 0 );
 
-	GUI.run_form->sigchld->u_ldata = ( long ) return_status;
-	fl_trigger_object( GUI.run_form->sigchld );
+		GUI.run_form->sigchld->u_ldata = ( long ) return_status;
+		fl_trigger_object( GUI.run_form->sigchld );
+	}
 
 	errno = errno_saved;
 }
@@ -611,7 +619,7 @@ void run_sigchld_callback( FL_OBJECT *a, long b )
 {
 	int hours, mins, secs;
 	const char *mess;
-	int state = 1;
+	int state = EXIT_SUCCESS;
 
 
 	b = b;
@@ -621,11 +629,11 @@ void run_sigchld_callback( FL_OBJECT *a, long b )
 		if ( ! ( Internals.cmdline_flags & DO_CHECK ) )
 		{
 			Internals.state = STATE_WAITING;
-			fl_show_alert( "Fatal Error", "Experiment stopped prematurely.",
+			fl_show_alert( "Fatal Error", "Experiment stopped unexpectedly.",
 						   NULL, 1 );
 		}
-		mess = "Experiment stopped prematurely after running for";
-		state = 2;
+		mess = "Experiment stopped unexpectedly after running for";
+		state = EXIT_FAILURE;
 	}
 	else if ( ! a->u_ldata )          /* return status indicates error ? */
 	{
@@ -636,12 +644,15 @@ void run_sigchld_callback( FL_OBJECT *a, long b )
 						   NULL, 1 );
 		}
 		mess = "Experiment had to be stopped after running for";
-		state = 2;
+		state = EXIT_FAILURE;
 	}
 	else                              /* normal death of child */
 		mess = "Experiment finished after running for";
 
 	Internals.state = STATE_FINISHED;
+
+	/* Get and display all remaining data the child sent before it died,
+	   then close the communication channels */
 
 	end_comm( );
 
@@ -653,9 +664,11 @@ void run_sigchld_callback( FL_OBJECT *a, long b )
 
 	fl_set_idle_callback( idle_handler, NULL );
 
-	/* Reset all the devices and finally the GPIB bus */
+	/* Remove the tool box */
 
 	tools_clear( );
+
+	/* Reset all the devices and finally the GPIB bus ad serial port(s) */
 
 	run_end_of_exp_hooks( );
 
@@ -663,7 +676,7 @@ void run_sigchld_callback( FL_OBJECT *a, long b )
 		gpib_shutdown( );
 	fsc2_serial_cleanup( );
 
-	/* Print out how much time the experiment has taken */
+	/* Print out for how long the experiment has been running */
 
 	secs  = irnd( experiment_time( ) );
 	hours = secs / 3600;
@@ -681,7 +694,7 @@ void run_sigchld_callback( FL_OBJECT *a, long b )
 			eprint( NO_ERROR, UNSET, "%s %d s.\n", mess, secs );
 	}
 
-	/* Reenable the stop button (which was disabled when the DO_QUIT
+	/* Re-enable the stop button (which was disabled when the DO_QUIT
 	   signal was send to the child) by associating it with a new
 	   handler that's responsible for closing the window. Also change the
 	   buttons label to 'Close'. */

@@ -289,8 +289,8 @@ static void check_run( void )
 			exit( EXIT_FAILURE );
 		while ( fl_do_forms( ) != GUI.main_form->quit )
 			/* empty */ ;
-		if ( Internals.check_return > 1 )
-			exit( EXIT_FAILURE );
+		if ( Internals.check_return != EXIT_SUCCESS )
+			exit( Internals.check_return );
 	}
 
 	exit( EXIT_SUCCESS );

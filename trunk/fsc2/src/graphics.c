@@ -160,8 +160,6 @@ void start_graphics( void )
 
 	GUI.run_form = GUI.G_Funcs.create_form_run( );
 
-	fl_set_object_callback( GUI.run_form->stop, run_stop_button_callback, 0 );
-
 	G.font = NULL;
 
 	CG.is_shown = UNSET;
