@@ -693,10 +693,6 @@ void spectrapro_300i_set_offset( long gn, long offset )
 				  						  spectrapro_300i.grating[ gn ].grooves
 										  + ( gn % 3 ) * INIT_OFFSET ) );
 
-1.0000001 >= labs( offset - ( gn % 3 ) * INIT_OFFSET ) 
-				  			   * spectrapro_300i.grating[ gn ].grooves
-							   / INIT_OFFSET_RANGE );
-
 	buf = get_string( "%ld INIT-GRATING", gn + 1 );
 
 	TRY
