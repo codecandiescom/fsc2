@@ -389,8 +389,8 @@ static int open_mail_socket( const char *remote, const char *local )
 	struct servent *se;
 
 
-	/* Get the number (in network order) of the SMTP port (should usually
-	   be 25) */
+	/* Get the number (in network byte order) of the SMTP port (this should
+	   normally be 25) */
 
 	if ( ( se = getservbyname( "smtp", "tcp" ) ) == NULL )
 		return -1;
