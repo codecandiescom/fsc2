@@ -904,4 +904,8 @@ to the acquisition sequence.
 Whenever an @acronym{EDL} file is tested, this involves also tests of
 the pulser settings. During the check of the program it is tested that
 pulses don't start to overlap and that the pulse sequence doesn't get
-longer than the maximum length the digitizer allows.
+longer than the maximum length the digitizer allows. So, as long as
+@acronym{fsc2} is able to completely check the program before it is run
+no errors (except communication problems) should happen during the
+experiment.
+
