@@ -334,14 +334,13 @@ bool tds754a_get_cursor_distance( double *cd )
 
 bool tds754a_set_trigger_channel( const char *name )
 {
-	char cmd[ 40 ] = "TRIG:MAI:EDGE:SOU ";
+	char cmd[ 40 ];
+
 
 	if ( strlen( name ) > 20 )
 		return FAIL;
 
-	strcat( cmd, name );
-	strcat( cmd, "\n" );
-
+	sprintf( cmd, "TRIG:MAI:EDGE:SOU %s\n", name );
 	if ( gpib_write( tds754a.device, cmd ) == FAILURE )
 		tds754a_gpib_failure( );
 
@@ -412,8 +411,8 @@ bool tds754a_clear_SESR( void )
 void tds754a_finished( void )
 {
     tds754a_clear_SESR( );
-    gpib_write( tds754a.device, "ACQ:STATE STOP\n" );
 
+    gpib_write( tds754a.device, "ACQ:STATE STOP\n" );
     gpib_write( tds754a.device, "*SRE 0\n" );
     gpib_write( tds754a.device, "ACQ:STOPA RUNST\n" );
     gpib_write( tds754a.device, "ACQ:STATE RUN\n" );
@@ -450,9 +449,10 @@ bool tds754a_set_cursor( int cur_num, double pos )
 
 bool tds754a_set_track_cursors( bool flag )
 {
-	char cmd[ 20 ] = "CURS:MODE ";
+	char cmd[ 20 ] = ;
 
-	strcat( cmd, flag ? "TRAC\n" : "IND\n" );
+
+	sprintf( cmd, "CURS:MODE %s\n", flag ? "TRAC" : "IND" );
     if ( gpib_write( tds754a.device, cmd ) == FAILURE )
 		tds754a_gpib_failure( );
 
@@ -465,9 +465,10 @@ bool tds754a_set_track_cursors( bool flag )
 
 bool tds754a_set_gated_meas( bool flag )
 {
-	char cmd[ 20 ] = "MEASU:GAT ";
+	char cmd[ 20 ];
 
-	strcat( cmd, flag ? "ON\n" : "OFF\n" );
+
+	sprintf( cmd, "MEASU:GAT %s\n", flag ? "ON" : "OFF" );
     if ( gpib_write( tds754a.device, cmd ) == FAILURE )
 		tds754a_gpib_failure( );
 
@@ -481,6 +482,7 @@ bool tds754a_set_gated_meas( bool flag )
 bool tds754a_set_snap( bool flag )
 {
 	char cmd[ 50 ];
+
 
 	if ( flag )
 	{
