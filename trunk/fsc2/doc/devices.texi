@@ -208,6 +208,7 @@ This function is defined in the device drivers @code{er035m} and
 Gauss.  The function can only be called in the @code{EXPERIMENT}
 section.
 
+
 @item field_resolution()
 @findex field_resolution()
 This function is defined in the device drivers @code{er035m} and
@@ -215,10 +216,11 @@ This function is defined in the device drivers @code{er035m} and
 of the magnetic field. The function can only be called in the
 @code{EXPERIMENT} section.
 
+
 @item measure_field()
 @findex measure_field()
 This function is defined in the device drivers @code{er035m_sa} and
-@code{er035m_sas}. It measures the current field and its value in
+@code{er035m_sas}. It measures the current field and retruns the value in
 Gauss. The function can only be called in the @code{EXPERIMENT} section.
 
 @end table
