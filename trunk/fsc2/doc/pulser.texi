@@ -25,7 +25,6 @@
 
 @ifinfo
 @menu
-* Pulser Overview::        Introduction
 * Setting up the Pulser::  @code{ASSIGNMENTS} and @code{PHASES} section
 * Defining Pulses::        How to define pulses
 * Using Pulses::           How to use pulses in the experiment
@@ -33,12 +32,7 @@
 @end ifinfo
 
 
-@c ########################################################
-
-@node Pulser Overview, Setting up the Pulser, Using Pulsers, Using Pulsers
-@section Pulser Overview
-
-Using the pulsers has its own chapter, covering the special methods to
+Using the pulsers has its own chapter covering the special methods to
 handle the pulser setup, create pulses and do phase cycling. It also
 describes how the way the pulser is to be used depends on the hardware
 used in the spectrometer. Currently, there are three
@@ -70,7 +64,7 @@ this chapter.
 
 @c ########################################################
 
-@node Setting up the Pulser, Defining Pulses, Pulser Overview, Using Pulsers
+@node Setting up the Pulser, Defining Pulses, Using Pulsers, Using Pulsers
 @section Setting up the Pulser
 
 The basic setup of the pulser happens in the @code{ASSIGNMENTS} and the
