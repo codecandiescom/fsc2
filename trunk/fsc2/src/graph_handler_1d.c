@@ -1277,8 +1277,8 @@ void make_scale_1d( Curve_1d *cv, Canvas *c, int coord )
 	/* The distance between the smallest ticks should be ca. `SCALE_TICK_DIST'
 	   points - calculate the corresponding delta in real word units */
 
-	rwc_delta = ( double ) SCALE_TICK_DIST * fabs( G.rwc_delta[ coord ] ) / 
-		                                                      cv->s2d[ coord ];
+	rwc_delta = ( double ) SCALE_TICK_DIST
+		        * fabs( G.rwc_delta[ coord ] ) / cv->s2d[ coord ];
 
 	/* Now scale this distance to the interval [ 1, 10 [ */
 
@@ -1331,8 +1331,8 @@ void make_scale_1d( Curve_1d *cv, Canvas *c, int coord )
 	modf( rwc_start / rwc_delta, &rwc_start_fine );
 	rwc_start_fine *= rwc_delta;
 
-	d_start_fine = cv->s2d[ coord ] * ( rwc_start_fine - rwc_start ) /
-		                                                  G.rwc_delta[ coord ];
+	d_start_fine = cv->s2d[ coord ]
+		           * ( rwc_start_fine - rwc_start ) / G.rwc_delta[ coord ];
 	if ( lround( d_start_fine ) < 0 )
 		d_start_fine += d_delta_fine;
 
@@ -1341,8 +1341,8 @@ void make_scale_1d( Curve_1d *cv, Canvas *c, int coord )
 	modf( rwc_start / ( medium_factor * rwc_delta ), &rwc_start_medium );
 	rwc_start_medium *= medium_factor * rwc_delta;
 
-	d_start_medium = cv->s2d[ coord ] * ( rwc_start_medium - rwc_start ) /
-			                                              G.rwc_delta[ coord ];
+	d_start_medium = cv->s2d[ coord ]
+		             * ( rwc_start_medium - rwc_start ) / G.rwc_delta[ coord ];
 	if ( lround( d_start_medium ) < 0 )
 		d_start_medium += medium_factor * d_delta_fine;
 
@@ -1353,8 +1353,8 @@ void make_scale_1d( Curve_1d *cv, Canvas *c, int coord )
 	modf( rwc_start / ( coarse_factor * rwc_delta ), &rwc_start_coarse );
 	rwc_start_coarse *= coarse_factor * rwc_delta;
 
-	d_start_coarse = cv->s2d[ coord ] * ( rwc_start_coarse - rwc_start ) /
-			                                              G.rwc_delta[ coord ];
+	d_start_coarse = cv->s2d[ coord ]
+		             * ( rwc_start_coarse - rwc_start ) / G.rwc_delta[ coord ];
 	if ( lround( d_start_coarse ) < 0 )
 	{
 		d_start_coarse += coarse_factor * d_delta_fine;
