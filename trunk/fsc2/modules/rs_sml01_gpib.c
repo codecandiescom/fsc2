@@ -55,6 +55,10 @@ bool rs_sml01_init( const char *name )
 	rs_sml01_command( "POW:OFFS 0\n" );
 	rs_sml01_command( "POW:ALC ON\n" );
 	rs_sml01_command( "OUTP:AMOD AUTO\n" );
+#if defined WITH_PULSE_MODULATION
+	rs_sml01_command( "SOUR:PULM:SOUR EXT; POL NORM; STAT OFF\n" );
+	rs_sml01_command( "SOUR:PULS:SOUB OFF\n\n" );
+#endif
 
 	/* Figure out the current frequency if it's not going to be set */
 
@@ -135,10 +139,10 @@ bool rs_sml01_init( const char *name )
 
 /*--------------------------------------------------------------*/
 /* Function figures out which types of modulation are currently */
-/* switched on. If none or only one is nothing is changed, but  */
-/* two or more modulations are on all are switched off. After-  */
-/* Wards the bandwidth for all types of modulation is switched  */
-/* to STANDARD.                                                 */
+/* switched on. If none or only one is on nothing is changed,   */
+/* but if two or more modulations are on all are switched off.  */
+/* Afterwards the bandwidth for all types of modulation is      */
+/* switched to STANDARD.                                        */
 /*--------------------------------------------------------------*/
 
 static void rs_sml01_initial_mod_setup( void )
