@@ -329,7 +329,8 @@ install:
 
 	$(MAKE) -C src install
 	$(MAKE) -C modules install
-	$(INSTALL) -m  644 -o $(OWNER) -g $(GROUP) version.ugz $(libdir)
+	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) version.ugz $(libdir)
+	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) $(cdir)/hp8647a.table $(libdir)
 	$(MAKE) -C utils install
 	$(MAKE) -C scripts install
 	$(MAKE) -C doc install
