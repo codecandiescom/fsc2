@@ -191,13 +191,13 @@ expr:    INT_TOKEN unit           { $$ = apply_unit( vars_push( INT_VAR, $1 ),
 unit:    /* empty */               { $$ = NULL; }
        | NT_TOKEN                  { $$ = vars_push( FLOAT_VAR, 1.0e-5 ); }
        | UT_TOKEN                  { $$ = vars_push( FLOAT_VAR, 1.0e-2 ); }
-       | MT_TOKEN                  { $$ = vars_push( INT_VAR, 10 ); }
-       | T_TOKEN                   { $$ = vars_push( INT_VAR, 10000 ); }
+       | MT_TOKEN                  { $$ = vars_push( FLOAT_VAR, 10.0 ); }
+       | T_TOKEN                   { $$ = vars_push( FLOAT_VAR, 1.0e4 ); }
        | NU_TOKEN                  { $$ = vars_push( FLOAT_VAR, 1.0e-9 ); }
        | UU_TOKEN                  { $$ = vars_push( FLOAT_VAR, 1.0e-6 ); }
        | MU_TOKEN                  { $$ = vars_push( FLOAT_VAR, 1.0e-3 ); }
-       | KU_TOKEN                  { $$ = vars_push( INT_VAR, 1000 ); }
-       | MEG_TOKEN                 { $$ = vars_push( INT_VAR, 1000000 ); }
+       | KU_TOKEN                  { $$ = vars_push( FLOAT_VAR, 1.0e3 ); }
+       | MEG_TOKEN                 { $$ = vars_push( FLOAT_VAR, 1.0e6 ); }
 ;
 
 /* list of indices for access of an array element */

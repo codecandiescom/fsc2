@@ -2036,30 +2036,15 @@ void vars_arr_init( Var *v )
 Var *apply_unit( Var *var, Var *unit ) 
 {
 	if ( unit == NULL )
-	{
-		if ( var->type & ( INT_VAR | FLOAT_VAR ) )
-			return vars_mult( var, vars_push( INT_VAR, 1 ) );
-		if ( var->type & ( INT_ARR | FLOAT_ARR ) )
-			return vars_push( ARR_REF, var );
-		if ( var->type & ( INT_TRANS_ARR | FLOAT_TRANS_ARR | ARR_PTR |
-			               STR_VAR | FUNC ) )
-			 return var;
+		return var;
 
-		/* Here starts the paranoia section... */
-
-		vars_check( var, ~UNDEF_VAR );
-		assert( 1 == 0 );
-	}
+	if ( var->type & ( INT_VAR | FLOAT_VAR ) )
+		return vars_mult( var, unit );
 	else
 	{
-		if ( var->type & ( INT_VAR | FLOAT_VAR ) )
-		    return vars_mult( var, unit );
-		else
-		{
-			eprint( FATAL, "%s:%ld: Syntax error: Unit is applied to a "
-					"non-number.\n", Fname, Lc );
-			THROW( EXCEPTION );
-		}
+		eprint( FATAL, "%s:%ld: Syntax error: Unit is applied to a "
+				"non-number.\n", Fname, Lc );
+		THROW( EXCEPTION );
 	}
 }
 
