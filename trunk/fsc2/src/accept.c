@@ -59,8 +59,10 @@ void accept_new_data( void )
 		if ( ( buf = attach_shm( Message_Queue[ message_queue_low ].shm_id ) )
 			 == ( void * ) - 1 )
 		{
-			eprint( FATAL, UNSET, "Internal communication error at %s:%d.\n",
-					__FILE__, __LINE__ );
+			eprint( FATAL, UNSET, "Internal communication error at %s:%d, "
+					"message_queue_low = %d, shm_id = %d.\n",
+					__FILE__, __LINE__, message_queue_low,
+					Message_Queue[ message_queue_low ].shm_id );
 			THROW( EXCEPTION )
 		}
 

@@ -50,7 +50,7 @@ const char generic_type[ ] = DEVICE_TYPE;
 /* Define the maximum number of retries before giving up if the
    overload LED is on */
 
-#define ER032M_MAX_RETRY    50
+#define ER032M_MAX_RETRIES   300
 
 
 /* When setting a new center field or sweep width the value send to the
@@ -952,7 +952,7 @@ static void er032m_test_leds( void )
 	char buf[ 20 ];
 	long length;
 	char *bp;
-	int max_retries = ER032M_MAX_RETRY;
+	int max_retries = ER032M_MAX_RETRIES;
 	bool is_overload;
 	bool is_remote;
 
