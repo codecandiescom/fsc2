@@ -615,59 +615,52 @@ Var *vars_mod( Var *v1, Var *v2 )
 Var *vars_pow( Var *v1, Var *v2 )
 {
 	Var  *new_var;
-	long ires;
-	long i;
 
 
-	/* Make sure that `v1' and `v2' exist, are integers or float values
-	   and have an value assigned to it */
+	/* Make sure that `v1' and `v2' exist, are integers or float values or
+	   arrays (or pointers thereto) */
 
-	vars_check( v1, INT_VAR | FLOAT_VAR );
-	vars_check( v2, INT_VAR | FLOAT_VAR );
+	vars_check( v1, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR | 
+				    INT_TRANS_ARR | FLOAT_TRANS_ARR | ARR_REF );
+	vars_check( v2, INT_VAR | FLOAT_VAR | ARR_REF | ARR_PTR |
+				    INT_TRANS_ARR | FLOAT_TRANS_ARR );
 
-	/* Make sure the base is not negative while the exponent 
-	   is not an integer */
 
-	if ( ( ( v1->type == INT_VAR && v1->val.lval < 0 ) ||
-		   ( v1->type == FLOAT_VAR && v1->val.dval < 0.0 ) )
-		 && v2->type != INT_VAR )
+	/* Divide the values while taking care to get the type right */
+
+	switch ( v1->type )
 	{
-		eprint( FATAL, "%s:%ld: Negative base while exponent not an integer "
-				"value.\n", Fname, Lc );
-		THROW( EXCEPTION );
-	}
+		case INT_VAR :
+			new_var = vars_pow_of_int_var( v1, v2 );
+			break;
 
-	/* Calculate the result and it push onto the stack */
+		case FLOAT_VAR :
+			new_var = vars_pow_of_float_var( v1, v2 );
+			break;
+			
+		case INT_ARR : case INT_TRANS_ARR :
+			new_var = vars_pow_of_int_arr( v1, v2 );
+			break;
 
-	if ( v1->type == INT_VAR )
-	{
-		if ( v1->val.lval == 0 )   /* powers of zero are always 1 */
-			new_var = vars_push( INT_VAR, 1L );
-		else
-		{
-			if ( v2->type == INT_VAR )
+		case FLOAT_ARR : case FLOAT_TRANS_ARR :
+			new_var = vars_pow_of_float_arr( v1, v2 );
+			break;
+
+		case ARR_REF :
+			if ( v1->from->dim != 1 )
 			{
-				for ( ires = v1->val.lval, i = 1;
-					  i < labs( v2->val.lval ); i++ )
-					ires *= v1->val.lval;
-				if ( v2->val.lval >= 0 )
-					new_var = vars_push( INT_VAR, ires );
-				else
-					new_var = vars_push( FLOAT_VAR, 1.0 / ( double ) ires );
+				eprint( FATAL, "%s:%ld: Arithmetic can be only done "
+						"on array slices.\n", Fname, Lc );
+				THROW( EXCEPTION );
 			}
+			if ( v1->from->type == INT_ARR )
+				new_var = vars_pow_of_int_arr( v1->from, v2 );
 			else
-				new_var = vars_push( FLOAT_VAR, pow( ( double ) v1->val.lval,
-													 v2->val.dval ) );
-		}
-	}
-	else
-	{
-		if ( v2->type == INT_VAR )
-			new_var = vars_push( FLOAT_VAR, pow( v1->val.dval,
-												 ( double ) v2->val.lval ) );
-		else
-			new_var = vars_push( FLOAT_VAR,
-								 pow( v1->val.dval, v2->val.dval ) );
+				new_var = vars_pow_of_float_arr( v1->from, v2 );
+			break;
+
+		default :
+			assert( 1 == 0 );
 	}
 
 	/* Pop the variables from the stack */
