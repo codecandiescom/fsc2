@@ -249,8 +249,8 @@ static Pixmap get_cut_window( unsigned int *width, unsigned int *height )
 			   G.cut_y_axis.w + G.cut_canvas.w + 4, *height - 1 );
 
 	XSetForeground( G.d, gc, fl_get_pixel( FL_LEFT_BCOL ) );
-	XDrawLine( G.d, pm, gc, 0, G.cut_canvas.h,
-			   G.cut_y_axis.w - 1, G.cut_canvas.h );
+	XDrawLine( G.d, pm, gc, 0, G.cut_y_axis.h,
+			   G.cut_y_axis.w - 1, G.cut_y_axis.h );
 	XDrawLine( G.d, pm, gc, G.cut_y_axis.w + G.cut_canvas.w, 0,
 			   G.cut_y_axis.w + G.cut_canvas.w, *height - 1 );
 
