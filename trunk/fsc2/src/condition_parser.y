@@ -90,8 +90,8 @@ static Var *CV;
 %left '+' '-'
 %left '*' '/'
 %left '%'
-%right '^'
 %right E_NEG E_NOT
+%right '^'
 
 
 %%

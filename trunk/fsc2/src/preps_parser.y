@@ -66,8 +66,8 @@ static Var *CV;
 %left '+' '-'
 %left '*' '/'
 %left '%'
-%right '^'
 %right NEG NOT
+%right '^'
 
 
 %%

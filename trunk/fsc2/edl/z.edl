@@ -33,7 +33,7 @@ FOR K = 1 : M
 		j[ 1, I ] = float( K  + I - 2 ) / float( M + N - 2 );
 		j[ 2, I ] = a + b;
 		j[ 3, I ] = a * ( 0.9 + 0.1 * cos( 0.2 * I ) ) - b;
-		j[ 4, I ] = j[ 2, I ] + 25 * random( );
+		j[ 4, I ] = j[ 2, I ] + 0.0002 * random( );
 
 		fsave( "# # # # # #\n", a, b, j[ 1, I ], j[ 2, I ], j[ 3, I ], j[ 4, I ] );
 	}
