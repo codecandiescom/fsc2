@@ -1768,7 +1768,7 @@ int get_mouse_pos_2d( double *pa )
 
 	if ( cv->points[ a_index ].exist )
 		pa[ Z ] = cv->rwc_start[ Z ] + cv->rwc_delta[ Z ]
-			* cv->points[ a_index ].v;
+				  * cv->points[ a_index ].v;
 
 	pa[ X ] = cv->rwc_start[ X ] + cv->rwc_delta[ X ]
 			  * ( ppos[ X ] / cv->s2d[ X ] - cv->shift[ X ] );
@@ -1776,10 +1776,7 @@ int get_mouse_pos_2d( double *pa )
 			  * ( ( G2.canvas.h - 1.0 - ppos[ Y ] )
 				  / cv->s2d[ Y ] - cv->shift[ Y ] );
 
-	if ( ! cv->points[ a_index ].exist )
-		return -2;
-
-	return 2;
+	return cv->points[ a_index ].exist ? 2 : -2;
 }
 
 

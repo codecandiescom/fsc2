@@ -2226,7 +2226,7 @@ FOR I = 1 : 10 @{
 
 @anchor{mouse_position}
 @item mouse_position()
-@findex mouse_position(
+@findex mouse_position()
 The function can be used to determine the current mouse position in the
 display windows when the left and middle mouse buttons are pressed at
 once. It accepts no arguments and returns an array with 9 floating point
