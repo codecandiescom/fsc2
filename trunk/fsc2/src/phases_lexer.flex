@@ -60,7 +60,7 @@ MX          "-"[xX]
 PY          "+"?[yY]
 MY          "-"[yY]
 
-PA          ("+"[aA]?)|[aA])
+PA          ("+"[aA]?)|[aA]
 MA          "-"[aA]?
 PB			"+"?[bB]
 MB			"-"[bB]
@@ -190,13 +190,13 @@ WS          [\n=,:. ]+
 				return A_TOKEN;
 		   }
 
-{BA}       {
+{PB}       {
 				phaseslval.lval = ACQ_PLUS_B;
-				return B_TOKEN;
+				return A_TOKEN;
 		   }
 {MB}       {
 				phaseslval.lval = ACQ_MINUS_B;
-				return B_TOKEN;
+				return A_TOKEN;
 		   }
 
 
