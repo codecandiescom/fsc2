@@ -1,93 +1,14 @@
 /* 
    $Id$
-
-   $Log$
-   Revision 1.30  1999/07/28 21:25:01  jens
-   *** empty log message ***
-
-   Revision 1.29  1999/07/28 14:13:03  jens
-   *** empty log message ***
-
-   Revision 1.28  1999/07/28 08:22:40  jens
-   Started to update the comments.
-
-   Revision 1.27  1999/07/27 22:09:39  jens
-   *** empty log message ***
-
-   Revision 1.26  1999/07/27 21:33:26  jens
-   Lots of changes mostly to get rid of the array stack and to use the variable
-   stack also for definition of and assignments to arrays. Improved treatment
-   of variable sized arrays. Functions can now return arrays &c.
-
-   Revision 1.25  1999/07/27 16:19:25  jens
-   *** empty log message ***
-
-   Revision 1.24  1999/07/23 23:43:59  jens
-   *** empty log message ***
-
-   Revision 1.23  1999/07/22 22:07:21  jens
-   *** empty log message ***
-
-   Revision 1.22  1999/07/22 16:37:00  jens
-   *** empty log message ***
-
-   Revision 1.21  1999/07/22 07:47:47  jens
-   *** empty log message ***
-
-   Revision 1.20  1999/07/21 23:01:23  jens
-   *** empty log message ***
-
-   Revision 1.19  1999/07/21 15:26:32  jens
-   *** empty log message ***
-
-   Revision 1.18  1999/07/21 07:32:24  jens
-   *** empty log message ***
-
-   Revision 1.17  1999/07/20 23:30:32  jens
-   Quite some changes: vars_push() has now a variable arguments list, thus we
-   don't have to pass it a void pointer to the data but, depending on the type,
-   it can find out what type of data the variable data is. Makes things a lot
-   easier...
-
-   Revision 1.16  1999/07/20 12:01:39  jens
-   *** empty log message ***
-
-   Revision 1.15  1999/07/20 11:23:33  jens
-   ars
-
-   Revision 1.14  1999/07/19 22:25:09  jens
-   *** empty log message ***
-
-   Revision 1.13  1999/07/19 07:40:08  jens
-   *** empty log message ***
-
-   Revision 1.12  1999/07/17 15:58:23  jens
-   Bug fix.
-
-   Revision 1.11  1999/07/17 15:45:01  jens
-   Changed vars_push to reflect new treatment of start of print statements.
-
-   Revision 1.10  1999/07/17 15:03:12  jens
-   Fixed a memory leak & changes to make lint more happy.
-
-   Revision 1.9  1999/07/17 13:32:18  jens
-   *** empty log message ***
-
-   Revision 1.8  1999/07/17 12:49:21  jens
-   Diverse corrections to make lint more happy...
-
-   Revision 1.7  1999/07/16 19:31:39  jens
-   *** empty log message ***
-
 */
-
 
 
 #include "fsc2.h"
 
 
-/* some typedefs needed due to the limitations of va_arg(), also see the
-   C-FAQ 15.11 on this point */
+/* some typedefs needed due to the limitations of va_arg() (also see the
+   C-FAQ 15.11 on this point): FnctPtr is a pointer to a Var pointer returning
+   function with a Var pointer as argument. */
 
 typedef Var *VarretFnct( Var * );
 typedef VarretFnct *FnctPtr;
@@ -266,12 +187,9 @@ typedef VarretFnct *FnctPtr;
   recorder where it is sometimes impossible to know the length of the data
   set in advance. Only the very last dimension of an array may be variable
   sized and making it variable sized is indicated by writing a star (`*') as
-  the size of this dimension. In contrast to fixed sized arrays variable
+  the size of this dimension. In contrast to fixed sized arrays, variable
   sized arrays cannot be initialized and the very first assignment to such
-  an array must be an array slice.
-
-
-
+  an array must be an array slice, i.e. an one-dimensional array.
 */
 
 

@@ -81,8 +81,8 @@ POD         P(OD)?
 CH          C(H(ANNEL)?)?
 INV         I(NV(ERT(ED)?)?)?
 
-WS          [\n=,:. ]+
-UNREC       [^\n \t;,\(\)\=\+\-\*\/\[\]\{\}\%\^]+
+WS          [\n=: ]+
+
 
 
 		/*---------------*/
@@ -293,8 +293,8 @@ UNREC       [^\n \t;,\(\)\=\+\-\*\/\[\]\{\}\%\^]+
 
 ";"         return ';';               /* end of statement character */
 
-			/* handling of invalid input */
-{UNREC}     THROW( INVALID_INPUT_EXCEPTION );
+			/* handling of invalid input (i.e. everything else) */
+.           THROW( INVALID_INPUT_EXCEPTION );
 
 <<EOF>>	    {
 				Assign_Next_Section = NO_SECTION;

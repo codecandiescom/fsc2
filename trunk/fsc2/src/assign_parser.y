@@ -8,6 +8,7 @@
 #include "fsc2.h"
 
 extern int assignlex( void );
+extern char *assigntext;
 
 /* locally used functions */
 
@@ -117,32 +118,43 @@ keywd:   MW_TOKEN                     { Channel_Type = PULSER_CHANNEL_MW; }
 ;
 
 
-/* Pod and channel asignments consists of the POD and CHANNEL keyword,
+/* Pod and channel assignments consists of the POD and CHANNEL keyword,
    followed by the pod or channel number(s), and, optionally, a DELAY keyword
    followed by the delay time and the INVERTED keyword. The sequence of the
    keywords is arbitrary. */
 
 
 pcd:    /* empty */
-      | pcd pod
-      | pcd ch
-      | pcd del
-      | pcd INV_TOKEN                { assign_inv_channel( Channel_Type ); }
+      | pcd podd
+      | pcd chd
+      | pcd deld
+      | pcd invd
 ;
 
+
+podd:   pod
+      | pod ','
+;
 
 pod:    POD_TOKEN INT_TOKEN          { assign_pod( Channel_Type, $2 ); }
+      | POD_TOKEN '=' INT_TOKEN      { assign_pod( Channel_Type, $3 ); }
 ;
 
-ch:     CH_TOKEN INT_TOKEN           { assign_channel( Channel_Type, $2 ); }
-        ch1
-;
+chd:    CH_TOKEN ch1
+      | CH_TOKEN '=' ch1
 
-ch1:    /* empty */
+ch1:    INT_TOKEN                    { assign_channel( Channel_Type, $1 ); }
+      | INT_TOKEN ','                { assign_channel( Channel_Type, $1 ); }
       | ch1 INT_TOKEN                { assign_channel( Channel_Type, $2 ); }
+      | ch1 INT_TOKEN ','            { assign_channel( Channel_Type, $2 ); }
+;
+
+deld:   del
+      | del ','
 ;
 
 del:    DEL_TOKEN time               { set_pod_delay( Channel_Type, $2 ); }
+      | DEL_TOKEN '=' time           { set_pod_delay( Channel_Type, $3 ); }
 ;
 
 time:   INT_TOKEN unit               { $$ = ( double ) $1 * $2; }
@@ -156,38 +168,41 @@ unit:   /* empty */                  { $$ = 1.0; }
       | S_TOKEN                      { $$ = 1.0e9; }
 ;
 
+invd:   INV_TOKEN                    { assign_inv_channel( Channel_Type ); }
+      | INV_TOKEN ','                { assign_inv_channel( Channel_Type ); }
+;
 
-expr:    INT_TOKEN                    { $$ = vars_push( INT_VAR, $1 ); }
-       | FLOAT_TOKEN                  { $$ = vars_push( FLOAT_VAR, $1 ); }
-       | VAR_TOKEN                    { $$ = vars_push_copy( $1 ); }
-       | VAR_TOKEN '['                { vars_arr_start( $1 ); }
-         list1 ']'                    { $$ = vars_arr_rhs( $4 ); }
-       | FUNC_TOKEN '(' list2 ')'     { $$ = func_call( $1 ); }
-       | VAR_REF                      { $$ = $1; }
-       | expr EQ expr                 { $$ = vars_comp( COMP_EQUAL, $1, $3 ); }
-       | expr LT expr                 { $$ = vars_comp( COMP_LESS, $1, $3 ); }
-       | expr GT expr                 { $$ = vars_comp( COMP_LESS, $3, $1 ); }
-       | expr LE expr                 { $$ = vars_comp( COMP_LESS_EQUAL,
-								      					$1, $3 ); }
-       | expr GE expr                 { $$ = vars_comp( COMP_LESS_EQUAL,
-								      					$3, $1 ); }
-       | expr '+' expr                { $$ = vars_add( $1, $3 ); }
-       | expr '-' expr                { $$ = vars_sub( $1, $3 ); }
-       | expr '*' expr                { $$ = vars_mult( $1, $3 ); }
-       | expr '/' expr                { $$ = vars_div( $1, $3 ); }
-       | expr '%' expr                { $$ = vars_mod( $1, $3 ); }
-       | expr '^' expr                { $$ = vars_pow( $1, $3 ); }
-       | '-' expr %prec NEG           { $$ = vars_negate( $2 ); }
-       | '(' expr ')'                 { $$ = $2 }
+expr:   INT_TOKEN                    { $$ = vars_push( INT_VAR, $1 ); }
+      | FLOAT_TOKEN                  { $$ = vars_push( FLOAT_VAR, $1 ); }
+      | VAR_TOKEN                    { $$ = vars_push_copy( $1 ); }
+      | VAR_TOKEN '['                { vars_arr_start( $1 ); }
+        list1 ']'                    { $$ = vars_arr_rhs( $4 ); }
+      | FUNC_TOKEN '(' list2 ')'     { $$ = func_call( $1 ); }
+      | VAR_REF                      { $$ = $1; }
+      | expr EQ expr                 { $$ = vars_comp( COMP_EQUAL, $1, $3 ); }
+      | expr LT expr                 { $$ = vars_comp( COMP_LESS, $1, $3 ); }
+      | expr GT expr                 { $$ = vars_comp( COMP_LESS, $3, $1 ); }
+      | expr LE expr                 { $$ = vars_comp( COMP_LESS_EQUAL,
+	 							     				   $1, $3 ); }
+      | expr GE expr                 { $$ = vars_comp( COMP_LESS_EQUAL,
+	 							     				   $3, $1 ); }
+      | expr '+' expr                { $$ = vars_add( $1, $3 ); }
+      | expr '-' expr                { $$ = vars_sub( $1, $3 ); }
+      | expr '*' expr                { $$ = vars_mult( $1, $3 ); }
+      | expr '/' expr                { $$ = vars_div( $1, $3 ); }
+      | expr '%' expr                { $$ = vars_mod( $1, $3 ); }
+      | expr '^' expr                { $$ = vars_pow( $1, $3 ); }
+      | '-' expr %prec NEG           { $$ = vars_negate( $2 ); }
+      | '(' expr ')'                 { $$ = $2 }
 ;
 
 
 /* list of indices for access of an array element */
 
 
-list1:   /* empty */                  { $$ = vars_push( UNDEF_VAR ); }
-	   | expr                         { $$ = $1; }
-       | list1 ',' expr               { $$ = $3; }
+list1:   /* empty */                 { $$ = vars_push( UNDEF_VAR ); }
+	   | expr                        { $$ = $1; }
+       | list1 ',' expr              { $$ = $3; }
 ;
 
 /* list of function arguments */
@@ -197,8 +212,8 @@ list2:   /* empty */
 	   | list2 ',' exprs
 ;
 
-exprs:   expr                         { }
-       | STR_TOKEN                    { vars_push( STR_VAR, $1 ); }
+exprs:   expr                        { }
+       | STR_TOKEN                   { vars_push( STR_VAR, $1 ); }
 ;
 
 
@@ -208,6 +223,11 @@ exprs:   expr                         { }
 
 int assignerror ( const char *s )
 {
-	return fprintf( stderr, "%s:%ld: %s in ASSIGNMENTS section.\n",
-					Fname, Lc, s );
+	if ( *assigntext == '\0' )
+		eprint( FATAL, "%s:%ld: Unexpected end of file in ASSIGNMENTS "
+				"section.\n", Fname, Lc );
+	else
+		eprint( FATAL, "%s:%ld: Syntax error near token `%s'.\n",
+				Fname, Lc, assigntext );
+	THROW( VARIABLES_EXCEPTION );
 }

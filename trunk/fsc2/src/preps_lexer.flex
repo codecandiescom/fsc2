@@ -1,16 +1,5 @@
 /*
   $Id$
-
-  $Log$
-  Revision 1.12  1999/07/28 21:19:26  jens
-  *** empty log message ***
-
-  Revision 1.11  1999/07/27 22:19:11  jens
-  *** empty log message ***
-
-  Revision 1.10  1999/07/21 07:09:39  jens
-  *** empty log message ***
-
 */
 
 
@@ -92,12 +81,9 @@ PH          PH(ASE(SEQ(UENCE)?)?)?_?{INT}?
 ML          M(AX(IMUM)?)?_?L(EN(GTH)?)?
 RP          R(EPL(ACEMENT)?)?_?P((ULSE)?S?)?
 
-
 WS          [\n \t]+
 
 IDENT       [A-Za-z]+[A-Za-z0-9_]*
-
-UNREC       [^\n \t;,\(\)\=\+\-\*\/\[\]\%\^:]+
 
 
 		/*---------------*/
@@ -308,7 +294,7 @@ UNREC       [^\n \t;,\(\)\=\+\-\*\/\[\]\%\^:]+
 "%"         return '%';       /* modulo operator */        
 "^"         return '^';       /* exponentiation operator */
 
-       /* quasi-assignment operator for pulse properties */
+            /* quasi-assignment operator for pulse properties */
 
 ":"         return ':';
 
@@ -323,11 +309,7 @@ UNREC       [^\n \t;,\(\)\=\+\-\*\/\[\]\%\^:]+
 "\x4sec"    return S_TOKEN;
 
 			/* handling of invalid input */
-{UNREC}     {
-				eprint( FATAL, "%s:%ld: Invalid input in PREPARATIONS section:"
-						" `%s'\n", Fname, Lc, prepstext );
-				return 0;
-			}
+.           THROW( INVALID_INPUT_EXCEPTION );
 
 <<EOF>>	    {
 				Preps_Next_Section = NO_SECTION;

@@ -1,28 +1,5 @@
 /*
   $Id$
-
-  $Log$
-  Revision 1.12  1999/07/28 21:24:42  jens
-  *** empty log message ***
-
-  Revision 1.11  1999/07/28 21:24:03  jens
-  *** empty log message ***
-
-  Revision 1.10  1999/07/27 22:21:11  jens
-  *** empty log message ***
-
-  Revision 1.9  1999/07/27 16:23:21  jens
-  *** empty log message ***
-
-  Revision 1.8  1999/07/20 23:32:03  jens
-  Changed to reflect new treatment of variables and functions.
-
-  Revision 1.7  1999/07/16 22:59:34  jens
-  I just learned: no C-style comments on the same line as a definition...
-
-  Revision 1.6  1999/07/16 22:54:14  jens
-  Mostly cosmetic changes.
-
 */
 
 
@@ -101,7 +78,6 @@ DL          D(EL(TA)?)?_?L(EN(GTH)?)?
 ML          M(AX(IMUM)?)?_?L(EN(GTH)?)?
 
 WS          [\n \t]+
-UNREC       [^\n \t;,\(\)\=\+\-\*\/\[\]\{\}\%\^]+
 
 
 		/*---------------*/
@@ -283,7 +259,7 @@ UNREC       [^\n \t;,\(\)\=\+\-\*\/\[\]\{\}\%\^]+
 {WS}        /* skip white space */
 
 			/* handling of invalid input */
-{UNREC}     THROW( INVALID_INPUT_EXCEPTION );
+.           THROW( INVALID_INPUT_EXCEPTION );
 
 			/* handling of end of file */
 <<EOF>>	    {
