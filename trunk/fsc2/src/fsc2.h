@@ -18,7 +18,7 @@
 
 /* make bool synonymous to unsigned char */
 
-typedef bool unsigned char
+typedef  unsigned char  bool;
 
 #define MAX_PHASE_SEQ_LEN  12    /* maximum length of phase sequence */
 
