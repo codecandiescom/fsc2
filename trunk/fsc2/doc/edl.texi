@@ -176,13 +176,12 @@ for is listed in the @code{DEVICES} section. For example, the functions
 amplifier and are only available when a lock-in amplifier module is
 specified. Most of these functions are available for all types of
 lock-in amplifiers (possibly with minor variations) so that using a
-different lock-in amplifier usually does not require a major rewrite of
-the @acronym{EDL} program but just changing the lock-in's name in the
+different lock-in amplifier usually doesn't require a major rewrite of
+the @acronym{EDL} program but just changing the lock-ins name in the
 @code{DEVICES} section.
 
 To find out about all built-in and device functions, their arguments and
-when they may be used have a look at the later parts of this manual
-(@pxref{Device Functions}).
+when they may be used have a look at the later parts of this manual.
 
 
 @node Sections, Syntax, Basics, EDL
@@ -206,7 +205,7 @@ The first and last two you have already seen: The @code{DEVICES} section
 is simply a list of all the devices that will be used in the experiment
 (or at least the ones that are going to be controlled by the computer).
 
-Please note that the section keywords have always to be followed by a
+Please note that the section keywords always have to be followed by a
 colon, `@code{:}'. Another important syntax element is the semicolon,
 `@code{;}', that indicates the logical end of a line of code. So, you
 also have to write a semicolon after each of the device names.
@@ -216,7 +215,7 @@ has also already been discussed in the example.
 
 Because pulses play such an important r@^ole in modern EPR experiments
 lots of elements for handling pulses and the pulser, that creates them,
-are built-in into @acronym{fsc2}. There are even two sections,
+are built into @acronym{fsc2}. There are even two sections,
 @code{ASSIGNMENTS} and @code{PHASES} exclusively devoted to the pulser
 setup. The basic setup of the pulser (e.g.@: setting the time base and
 trigger mode as well as setting up the pulser channels) is done in the
@@ -229,14 +228,16 @@ in-depth discussion of both these sections is part of a whole chapter
 (@pxref{Using Pulsers}).
 
 As you already have seen, the @code{PREPARATIONS} section is for setting
-up the other devices and the graphics. But this is also the section
-where the pulses are going to be defined. For more details about this
-also see the chapter about pulse generators and pulses.
+up the other devices and the graphics. This is also the section where
+pulses are going to be defined. For more details about this also see the
+chapter about pulse generators and pulses.
 
 Finally, there is the @code{EXPERIMENT} section. As you already have
-seen this section usually consists of one or more loops (possibly nested).
+seen this section usually consists of one or more loops, possibly nested.
+
+
 While the sections of an @acronym{EDL} file don't have to appear in the
-sequence they are listed above it is probably best not to experiment to
+sequence they are listed above it is probably best not to experiment too
 much with this. In any case, if it exists the @code{EXPERIMENT} section
 must always be the last one.
 
@@ -264,13 +265,13 @@ label, the
 @cindex @code{ON_STOP} label
 @noindent
 label. It can only be used within the @code{EXPERIMENT} section. The
-@code{ON_STOP} label should be used to guarantee that a certain part of
-the program is going to be executed even after the user hit the
-@code{Stop} button. This part of the @code{EXPERIMENT} section will
-probably contain code that stores previously unsaved data and does other
-things that are necessary before the experiment really stops.  When
-@acronym{fsc2} executes the code following the @code{UN_STOP} label it
-can't be stopped via the the @code{Stop} button.
+@code{ON_STOP} label can be used to guarantee that a certain part of the
+program is going to be executed even after the user hit the @code{Stop}
+button. This part of the @code{EXPERIMENT} section will probably contain
+code that stores previously unsaved data and does other things that are
+necessary before the experiment really stops.  When @acronym{fsc2}
+executes the code following the @code{ON_STOP} label it can't be stopped
+via the the @code{Stop} button.
 
 @node Syntax, Variables, Sections, EDL
 @section Syntax
@@ -329,12 +330,12 @@ VARIABLES:
 
 @subsection Variable names
 
-Names of variables must always start with a character, i.e.@: A-Z or
-a-z. The remaining part of the variable name can consist of characters,
-numbers and the underscore character, '@code{_}' (or shorter, if you
-like regular expressions, valid names follow the following pattern:
-@code{[A-Za-z][A-Za-z_0-9]*}). Thus, '@code{AbC_12x}' and
-'@code{aBc_12X}' are legal variable names, while '@code{12xy}' or
+Names of variables (and also functions) always start with a character,
+i.e.@: A-Z or a-z. The remaining part of the variable name can consist
+of characters, numbers and the underscore character, '@code{_}' (or
+shorter, if you like regular expressions, valid names follow the
+following pattern: @code{[A-Za-z][A-Za-z_0-9]*}). Thus, '@code{AbC_12x}'
+and '@code{aBc_12X}' are legal variable names, while '@code{12xy}' or
 '@code{_Yx2}' are not. Please note that the variable names are case
 sensitive, i.e.@: '@code{XY}', '@code{Xy}', '@code{xY}' and '@code{xy}'
 are four completely different variables!
@@ -345,11 +346,12 @@ name with, say, a few hundred thousand characters just to prove me wrong
 -- I tested it only with two variables with names consisting of 10000
 characters and differing only in the very last character...)
 
-There are some combinations of characters that can't be used as variable
-names because a they are already used for physical units
-as well as combinations of these with the characters @code{n} (nano),
-@code{u} (micro), @code{m} (milli), @code{k} (kilo) and @code{M} (mega).
-Here's the complete list:
+There are some names that can't be used for variables. First of all,
+variables names may not be identical to function names, neither built-in
+nor device function names. Second, some combination of characters are
+already used for physical units as well as combinations of these with
+the characters @code{n} (nano), @code{u} (micro), @code{m} (milli),
+@code{k} (kilo) and @code{M} (mega).  Here's the complete list:
 @quotation
 @multitable {Hz} {Hertz (and @code{nHz, uHz, mHz, kHz} and @code{MHz})}
 @item @code{s}  @tab Seconds (and @code{ns, us, ms, ks} and @code{Ms})
@@ -359,12 +361,14 @@ Here's the complete list:
 @item @code{A}  @tab Ampere (and @code{nA, uA, mA, kA} and @code{MA})
 @item @code{Hz} @tab Hertz (and @code{nHz, uHz, mHz, kHz} and @code{MHz})
 @item @code{dB} @tab Decibel (and @code{ndB, udB, mdB, kdB} and @code{MdB})
+@item @code{db} @tab Decibel (and @code{ndb, udb, mdb, kdb} and @code{Mdb})
 @end multitable
 @end quotation
 
-And, of course, also the reserved words can't be used as variable names. But
-they are easy to avoid, because all reserved words are spelt in all capital
-letters only.
+Finally, the keywords used by @acronym{EDL} also may not be used as
+variable names (to make it easier to avoid these, they are all spelled
+with capitals only). In the appendix you find a list of (hopefully) all
+reserved words, that can't be used as variable names.
 
 
 @subsection Variable types
@@ -413,7 +417,7 @@ d[ 5 ] = @{ sqrt( 2.0 ), sqrt( 3.0 ) + 1 @};
 E[ 2, 3 ] = @{ 1, 2, 3, 4, 5, 6 @};
 @end example
 @noindent
-The first line in the example shows the standard way -- each element of
+The first line in the example shows the simplest way -- each element of
 @code{C} is initialized by an element from the list. In the second line
 there are less initializers than the array @code{d} has elements, thus
 only the first two elements are set, i.e.@: @code{d[ 1 ]} and @code{d[ 2
@@ -430,10 +434,10 @@ E[ 2, 1 ] = 4     E[ 2, 2 ] = 5     E[ 2, 3 ] = 6
 
 
 There are some situations where one doesn't know the size of an array in
-advance, e.g.@: if an array for storing a trace from a digitizer is
-needed, so declaring its size in the @code{VARIABLES} section is not
-possible. Therefor, one may also define arrays with the size of the
-last dimension remaining undefined by specifying a @code{*} instead of a
+advance, e.g.@: an array for storing a trace from a digitizer, so
+declaring its size in advance in the @code{VARIABLES} section is not
+possible. Therefor, one may also define arrays with the size of the last
+dimension remaining undefined by specifying a @code{*} instead of a
 number.
 @example
 G[ * ];
@@ -482,8 +486,8 @@ surprisingly represented by the characters `@code{+}', `@code{-}',
 They can be used with simple integer and floating point values as well
 as with 1-dimensional arrays (see also below). If one of the values is a
 floating point value the result is also a floating point number - only
-if both values are integers the result is also an integer. The only
-exception is the division -- if you divide two integers the result is
+if both values are integers the result is also an integer. This also
+holds for the division -- if you divide two integers the result is
 still an integer, see below.
 
 Some care has to be taken in arithmetic with integers.
