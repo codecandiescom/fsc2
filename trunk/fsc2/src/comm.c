@@ -333,7 +333,7 @@ int new_data_callback( XEvent *a, void *b )
 
 long reader( void *ret )
 {
-	CS header;
+	CommStruct header;
 	char *str[ 4 ];
 	int i;
 	int n1, n2;
@@ -343,7 +343,7 @@ long reader( void *ret )
 
 	/* Get the header - failure indicates that the child is dead */
 
-	if ( ! pipe_read( pd[ READ ], &header, sizeof( CS ) ) )
+	if ( ! pipe_read( pd[ READ ], &header, sizeof( CommStruct ) ) )
 		return 0;
 
 	switch ( header.type )
@@ -703,7 +703,7 @@ static bool pipe_read( int fd, void *buf, size_t bytes_to_read )
 
 void writer( int type, ... )
 {
-	CS header;
+	CommStruct header;
 	va_list ap;
 	char *str[ 4 ];
 	int n1, n2;
@@ -742,7 +742,7 @@ void writer( int type, ... )
 			else
 				header.data.str_len[ 0 ] = strlen( str[ 0 ] );
 
-			write( pd[ WRITE ], &header, sizeof( CS ) );
+			write( pd[ WRITE ], &header, sizeof( CommStruct ) );
 			if ( header.data.str_len[ 0 ] > 0 )
 				write( pd[ WRITE ], str[ 0 ], header.data.len );
 			break;
@@ -758,7 +758,7 @@ void writer( int type, ... )
 			else
 				header.data.str_len[ 0 ] = strlen( str[ 0 ] );
 
-			write( pd[ WRITE ], &header, sizeof( CS ) );
+			write( pd[ WRITE ], &header, sizeof( CommStruct ) );
 			if ( header.data.str_len[ 0 ] > 0 )
 				write( pd[ WRITE ], str[ 0 ], header.data.len );
 
@@ -778,7 +778,7 @@ void writer( int type, ... )
 			else
 				header.data.str_len[ 0 ] = strlen( str[ 0 ] );
 
-			write( pd[ WRITE ], &header, sizeof( CS ) );
+			write( pd[ WRITE ], &header, sizeof( CommStruct ) );
 			if ( header.data.str_len[ 0 ] > 0 )
 				write( pd[ WRITE ], str[ 0 ], header.data.len );
 
@@ -813,7 +813,7 @@ void writer( int type, ... )
 
 			n2 = va_arg( ap, int );
 
-			write( pd[ WRITE ], &header, sizeof( CS ) );
+			write( pd[ WRITE ], &header, sizeof( CommStruct ) );
 			write( pd[ WRITE ], &n1, sizeof( int ) );
 			write( pd[ WRITE ], &n2, sizeof( int ) );
 
@@ -838,7 +838,7 @@ void writer( int type, ... )
 					header.data.str_len[ i ] = strlen( str[ i ] );
 			}
 
-			write( pd[ WRITE ], &header, sizeof( CS ) );
+			write( pd[ WRITE ], &header, sizeof( CommStruct ) );
 
 			/* write out all four strings */
 
@@ -852,7 +852,7 @@ void writer( int type, ... )
 
 		case C_PROG : case C_OUTPUT :
 			assert( I_am == CHILD );      /* only to be written by the child */
-			write( pd[ WRITE ], &header, sizeof( CS ) );
+			write( pd[ WRITE ], &header, sizeof( CommStruct ) );
 			break;
 
 		case C_INPUT :
@@ -873,7 +873,7 @@ void writer( int type, ... )
 
 			/* Send header and the two strings */
 
-			write( pd[ WRITE ], &header, sizeof( CS ) );
+			write( pd[ WRITE ], &header, sizeof( CommStruct ) );
 			for ( i = 0; i < 2; i++ )
 				if ( header.data.str_len[ i ] > 0 )
 					write( pd[ WRITE ], str[ i ], header.data.str_len[ i ] );
@@ -890,7 +890,7 @@ void writer( int type, ... )
 			else 
 				header.data.len = strlen( str[ 0 ] );
 
-			write( pd[ WRITE ], &header, sizeof( CS ) );
+			write( pd[ WRITE ], &header, sizeof( CommStruct ) );
 
 			if ( header.data.len > 0 )
 				write( pd[ WRITE ], str[ 0 ], header.data.len );
@@ -900,28 +900,28 @@ void writer( int type, ... )
 			assert( I_am == PARENT );    /* only to be written by the parent */
 
 			header.data.int_data = va_arg( ap, int );
-			write( pd[ WRITE ], &header, sizeof( CS ) );
+			write( pd[ WRITE ], &header, sizeof( CommStruct ) );
 			break;
 
 		case C_LONG :
 			assert( I_am == PARENT );    /* only to be written by the parent */
 
 			header.data.long_data = va_arg( ap, long );
-			write( pd[ WRITE ], &header, sizeof( CS ) );
+			write( pd[ WRITE ], &header, sizeof( CommStruct ) );
 			break;
 
 		case C_FLOAT :
 			assert( I_am == PARENT );    /* only to be written by the parent */
 
 			header.data.float_data = va_arg( ap, float );
-			write( pd[ WRITE ], &header, sizeof( CS ) );
+			write( pd[ WRITE ], &header, sizeof( CommStruct ) );
 			break;
 
 		case C_DOUBLE :
 			assert( I_am == PARENT );    /* only to be written by the parent */
 
 			header.data.double_data = va_arg( ap, double );
-			write( pd[ WRITE ], &header, sizeof( CS ) );
+			write( pd[ WRITE ], &header, sizeof( CommStruct ) );
 			break;
 
 		default :                     /* this should never be reached... */

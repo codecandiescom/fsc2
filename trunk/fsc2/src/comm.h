@@ -59,7 +59,7 @@ typedef struct {
 		double double_data;
 		long str_len[ 4 ];
 	} data;
-} CS;
+} CommStruct;
 
 
 
