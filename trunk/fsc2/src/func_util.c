@@ -1171,12 +1171,12 @@ Var *f_display( Var *v )
 					len += dp[ i ].v->from->sizes[ 0 ] * sizeof( double );
 				break;
 
-			case INT_TRANS_ARR :
+			case INT_ARR :
 				len += sizeof( long );
 				len += dp[ i ].v->len * sizeof( long );
 				break;
 
-			case FLOAT_TRANS_ARR :
+			case FLOAT_ARR :
 				len += sizeof( long );
 				len += dp[ i ].v->len * sizeof( double );
 				break;
@@ -1284,7 +1284,7 @@ Var *f_display( Var *v )
 				}
 				break;
 
-			case INT_TRANS_ARR :
+			case INT_ARR :
 				* ( int * ) ptr = INT_CONT_ARR;
 				ptr += sizeof( int );
 
@@ -1296,7 +1296,7 @@ Var *f_display( Var *v )
 				ptr += len * sizeof( long );
 				break;
 
-			case FLOAT_TRANS_ARR :
+			case FLOAT_ARR :
 				* ( int * ) ptr = FLOAT_CONT_ARR;
 				ptr += sizeof( int );
 
@@ -1416,7 +1416,7 @@ static DPoint *eval_display_args( Var *v, int *nsets )
 		}
 
 		vars_check( v, INT_VAR | FLOAT_VAR | ARR_PTR | ARR_REF |
-					   INT_TRANS_ARR | FLOAT_TRANS_ARR );
+					   INT_ARR | FLOAT_ARR );
 
 		dp[ *nsets ].v = v;
 
@@ -2068,12 +2068,12 @@ Var *f_save( Var *v )
 				T_fprintf( file_num, "%s\n", v->val.sptr );
 				break;
 
-			case INT_TRANS_ARR :
+			case INT_ARR :
 				for ( i = 0; i < v->len; i++ )
 					T_fprintf( file_num, "%ld\n", v->val.lpnt[ i ] );
 				break;
 				
-			case FLOAT_TRANS_ARR :
+			case FLOAT_ARR :
 				for ( i = 0; i < v->len; i++ )
 					T_fprintf( file_num, "%#.9g\n", v->val.dpnt[ i ] );
 				break;

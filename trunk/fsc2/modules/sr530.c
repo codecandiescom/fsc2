@@ -246,7 +246,7 @@ Var *lockin_get_data( Var *v )
 			;
 	}
 
-	return vars_push( FLOAT_TRANS_ARR, val, 2 );
+	return vars_push( FLOAT_ARR, val, 2 );
 }
 
 

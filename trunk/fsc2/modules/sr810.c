@@ -309,7 +309,7 @@ Var *lockin_get_data( Var *v )
 	}
 
 	if ( TEST_RUN )
-		return vars_push( FLOAT_TRANS_ARR, data, num_channels );
+		return vars_push( FLOAT_ARR, data, num_channels );
 
 	/* If we need less than two channels we've got to pass the function an
 	   extra value, it expects at least 2 - just take the next channel */
@@ -325,7 +325,7 @@ Var *lockin_get_data( Var *v )
 	if ( using_dummy_channels )
 		return vars_push( FLOAT_VAR, data[ 0 ] );
 
-	return vars_push( FLOAT_TRANS_ARR, data, num_channels );
+	return vars_push( FLOAT_ARR, data, num_channels );
 }
 
 

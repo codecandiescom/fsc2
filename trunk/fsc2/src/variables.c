@@ -92,7 +92,7 @@ static void vars_ass_from_trans_ptr( Var *src, Var *dest );
 
   Non-transient variables have one of the following types: They're either an
   integer or float variable (INT_VAR or FLOAT_VAR, which translates to C's
-  long and double type) or an integer or float array (INT_ARR or FLOAT_ARR) of
+  long and double type) or an integer or float array (INT_CONT_ARR or FLOAT_CONT_ARR) of
   as many dimensions as the user thinks it should have. Since at the moment of
   creation of a variable its type can not be determined there is also a
   further type, UNDEF_VAR which is assigned to the variable until it is
@@ -167,7 +167,7 @@ static void vars_ass_from_trans_ptr( Var *src, Var *dest );
 
   where `variable_identifier' is a array name. It calls vars_arr_start()
   where, if the array is still completely new, the type of the array is set
-  to INT_ARR or FLOAT_ARR (depending on the result of the macro IF_FUNC(), see
+  to INT_CONT_ARR or FLOAT_CONT_ARR (depending on the result of the macro IF_FUNC(), see
   above). Finally, it pushes a transient variable onto the stack of type
   ARR_PTR with the `from' element in the variable structure pointing to the
   original array. This transient variable serves as a kind of marker since the
@@ -389,16 +389,16 @@ Var *vars_add( Var *v1, Var *v2 )
 	/* Make sure that `v1' and `v2' exist, are integers or float values or
 	   arrays (or pointers thereto) */
 
-	vars_check( v1, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR | STR_VAR |
-				    INT_TRANS_ARR | FLOAT_TRANS_ARR | ARR_REF | ARR_PTR );
+	vars_check( v1, INT_VAR | FLOAT_VAR | INT_CONT_ARR | FLOAT_CONT_ARR |
+				    STR_VAR | INT_ARR | FLOAT_ARR | ARR_REF | ARR_PTR );
 	vars_check( v2, INT_VAR | FLOAT_VAR | STR_VAR | ARR_REF | ARR_PTR |
-				    INT_TRANS_ARR | FLOAT_TRANS_ARR );
+				    INT_ARR | FLOAT_ARR );
 
 
 	/* Add the values while taking care to get the type right */
 
-	if ( v1->type & ( INT_ARR | FLOAT_ARR | INT_TRANS_ARR |
-					  FLOAT_TRANS_ARR | ARR_REF ) )
+	if ( v1->type & ( INT_CONT_ARR | FLOAT_CONT_ARR | INT_ARR |
+					  FLOAT_ARR | ARR_REF ) )
 		v1 = vars_array_check( v1, v2 );
 
 	switch ( v1->type )
@@ -428,24 +428,24 @@ Var *vars_add( Var *v1, Var *v2 )
 			new_var = vars_add_to_float_var( v1, v2 );
 			break;
 			
-		case INT_ARR : case INT_TRANS_ARR :
+		case INT_CONT_ARR : case INT_ARR :
 			vars_array_check( v1, v2 );
 			new_var = vars_add_to_int_arr( v1, v2 );
 			break;
 
-		case FLOAT_ARR : case FLOAT_TRANS_ARR :
+		case FLOAT_CONT_ARR : case FLOAT_ARR :
 			new_var = vars_add_to_float_arr( v1, v2 );
 			break;
 
 		case ARR_REF :
-			if ( v1->from->type == INT_ARR )
+			if ( v1->from->type == INT_CONT_ARR )
 				new_var = vars_add_to_int_arr( v1->from, v2 );
 			else
 				new_var = vars_add_to_float_arr( v1->from, v2 );
 			break;
 
 		case ARR_PTR :
-			if ( v1->from->type == INT_ARR )
+			if ( v1->from->type == INT_CONT_ARR )
 				new_var = vars_add_to_int_arr( v1, v2 );
 			else
 				new_var = vars_add_to_float_arr( v1, v2 );
@@ -482,10 +482,10 @@ Var *vars_sub( Var *v1, Var *v2 )
 	/* Make sure that `v1' and `v2' exist, are integers or float values or
 	   arrays (or pointers thereto) */
 
-	vars_check( v1, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR | 
-				    INT_TRANS_ARR | FLOAT_TRANS_ARR | ARR_REF | ARR_PTR );
+	vars_check( v1, INT_VAR | FLOAT_VAR | INT_CONT_ARR | FLOAT_CONT_ARR | 
+				    INT_ARR | FLOAT_ARR | ARR_REF | ARR_PTR );
 	vars_check( v2, INT_VAR | FLOAT_VAR | ARR_REF | ARR_PTR |
-				    INT_TRANS_ARR | FLOAT_TRANS_ARR );
+				    INT_ARR | FLOAT_ARR );
 
 
 	/* Subtract the values while taking care to get the type right */
@@ -500,26 +500,26 @@ Var *vars_sub( Var *v1, Var *v2 )
 			new_var = vars_sub_from_float_var( v1, v2 );
 			break;
 			
-		case INT_ARR : case INT_TRANS_ARR :
+		case INT_CONT_ARR : case INT_ARR :
 			v1 = vars_array_check( v1, v2 );
 			new_var = vars_sub_from_int_arr( v1, v2 );
 			break;
 
-		case FLOAT_ARR : case FLOAT_TRANS_ARR :
+		case FLOAT_CONT_ARR : case FLOAT_ARR :
 			v1 = vars_array_check( v1, v2 );
 			new_var = vars_sub_from_float_arr( v1, v2 );
 			break;
 
 		case ARR_REF :
 			v1 = vars_array_check( v1, v2 );
-			if ( v1->from->type == INT_ARR )
+			if ( v1->from->type == INT_CONT_ARR )
 				new_var = vars_sub_from_int_arr( v1->from, v2 );
 			else
 				new_var = vars_sub_from_float_arr( v1->from, v2 );
 			break;
 
 		case ARR_PTR :
-			if ( v1->from->type == INT_ARR )
+			if ( v1->from->type == INT_CONT_ARR )
 				new_var = vars_sub_from_int_arr( v1, v2 );
 			else
 				new_var = vars_sub_from_float_arr( v1, v2 );
@@ -556,10 +556,10 @@ Var *vars_mult( Var *v1, Var *v2 )
 	/* Make sure that `v1' and `v2' exist, are integers or float values or
 	   arrays (or pointers thereto) */
 
-	vars_check( v1, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR | 
-				    INT_TRANS_ARR | FLOAT_TRANS_ARR | ARR_REF | ARR_PTR );
+	vars_check( v1, INT_VAR | FLOAT_VAR | INT_CONT_ARR | FLOAT_CONT_ARR | 
+				    INT_ARR | FLOAT_ARR | ARR_REF | ARR_PTR );
 	vars_check( v2, INT_VAR | FLOAT_VAR | ARR_REF | ARR_PTR |
-				    INT_TRANS_ARR | FLOAT_TRANS_ARR );
+				    INT_ARR | FLOAT_ARR );
 
 
 	/* Multiply the values while taking care to get the type right */
@@ -574,26 +574,26 @@ Var *vars_mult( Var *v1, Var *v2 )
 			new_var = vars_mult_by_float_var( v1, v2 );
 			break;
 			
-		case INT_ARR : case INT_TRANS_ARR :
+		case INT_CONT_ARR : case INT_ARR :
 			v1 = vars_array_check( v1, v2 );
 			new_var = vars_mult_by_int_arr( v1, v2 );
 			break;
 
-		case FLOAT_ARR : case FLOAT_TRANS_ARR :
+		case FLOAT_CONT_ARR : case FLOAT_ARR :
 			v1 = vars_array_check( v1, v2 );
 			new_var = vars_mult_by_float_arr( v1, v2 );
 			break;
 
 		case ARR_REF :
 			v1 = vars_array_check( v1, v2 );
-			if ( v1->from->type == INT_ARR )
+			if ( v1->from->type == INT_CONT_ARR )
 				new_var = vars_mult_by_int_arr( v1->from, v2 );
 			else
 				new_var = vars_mult_by_float_arr( v1->from, v2 );
 			break;
 
 		case ARR_PTR :
-			if ( v1->from->type == INT_ARR )
+			if ( v1->from->type == INT_CONT_ARR )
 				new_var = vars_mult_by_int_arr( v1, v2 );
 			else
 				new_var = vars_mult_by_float_arr( v1, v2 );
@@ -630,10 +630,10 @@ Var *vars_div( Var *v1, Var *v2 )
 	/* Make sure that `v1' and `v2' exist, are integers or float values or
 	   arrays (or pointers thereto) */
 
-	vars_check( v1, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR | 
-				    INT_TRANS_ARR | FLOAT_TRANS_ARR | ARR_REF | ARR_PTR );
+	vars_check( v1, INT_VAR | FLOAT_VAR | INT_CONT_ARR | FLOAT_CONT_ARR | 
+				    INT_ARR | FLOAT_ARR | ARR_REF | ARR_PTR );
 	vars_check( v2, INT_VAR | FLOAT_VAR | ARR_REF | ARR_PTR |
-				    INT_TRANS_ARR | FLOAT_TRANS_ARR );
+				    INT_ARR | FLOAT_ARR );
 
 
 	/* Divide the values while taking care to get the type right */
@@ -648,26 +648,26 @@ Var *vars_div( Var *v1, Var *v2 )
 			new_var = vars_div_of_float_var( v1, v2 );
 			break;
 			
-		case INT_ARR : case INT_TRANS_ARR :
+		case INT_CONT_ARR : case INT_ARR :
 			v1 = vars_array_check( v1, v2 );
 			new_var = vars_div_of_int_arr( v1, v2 );
 			break;
 
-		case FLOAT_ARR : case FLOAT_TRANS_ARR :
+		case FLOAT_CONT_ARR : case FLOAT_ARR :
 			v1 = vars_array_check( v1, v2 );
 			new_var = vars_div_of_float_arr( v1, v2 );
 			break;
 
 		case ARR_REF :
 			v1 = vars_array_check( v1, v2 );
-			if ( v1->from->type == INT_ARR )
+			if ( v1->from->type == INT_CONT_ARR )
 				new_var = vars_div_of_int_arr( v1->from, v2 );
 			else
 				new_var = vars_div_of_float_arr( v1->from, v2 );
 			break;
 
 		case ARR_PTR :
-			if ( v1->from->type == INT_ARR )
+			if ( v1->from->type == INT_CONT_ARR )
 				new_var = vars_div_of_int_arr( v1, v2 );
 			else
 				new_var = vars_div_of_float_arr( v1, v2 );
@@ -704,10 +704,10 @@ Var *vars_mod( Var *v1, Var *v2 )
 	/* Make sure that `v1' and `v2' exist, are integers or float values or
 	   arrays (or pointers thereto) */
 
-	vars_check( v1, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR | 
-				    INT_TRANS_ARR | FLOAT_TRANS_ARR | ARR_REF | ARR_PTR );
+	vars_check( v1, INT_VAR | FLOAT_VAR | INT_CONT_ARR | FLOAT_CONT_ARR | 
+				    INT_ARR | FLOAT_ARR | ARR_REF | ARR_PTR );
 	vars_check( v2, INT_VAR | FLOAT_VAR | ARR_REF | ARR_PTR |
-				    INT_TRANS_ARR | FLOAT_TRANS_ARR );
+				    INT_ARR | FLOAT_ARR );
 
 
 	/* Divide the values while taking care to get the type right */
@@ -722,26 +722,26 @@ Var *vars_mod( Var *v1, Var *v2 )
 			new_var = vars_mod_of_float_var( v1, v2 );
 			break;
 			
-		case INT_ARR : case INT_TRANS_ARR :
+		case INT_CONT_ARR : case INT_ARR :
 			v1 = vars_array_check( v1, v2 );
 			new_var = vars_mod_of_int_arr( v1, v2 );
 			break;
 
-		case FLOAT_ARR : case FLOAT_TRANS_ARR :
+		case FLOAT_CONT_ARR : case FLOAT_ARR :
 			v1 = vars_array_check( v1, v2 );
 			new_var = vars_mod_of_float_arr( v1, v2 );
 			break;
 
 		case ARR_REF :
 			v1 = vars_array_check( v1, v2 );
-			if ( v1->from->type == INT_ARR )
+			if ( v1->from->type == INT_CONT_ARR )
 				new_var = vars_mod_of_int_arr( v1->from, v2 );
 			else
 				new_var = vars_mod_of_float_arr( v1->from, v2 );
 			break;
 
 		case ARR_PTR :
-			if ( v1->from->type == INT_ARR )
+			if ( v1->from->type == INT_CONT_ARR )
 				new_var = vars_mod_of_int_arr( v1, v2 );
 			else
 				new_var = vars_mod_of_float_arr( v1, v2 );
@@ -778,10 +778,10 @@ Var *vars_pow( Var *v1, Var *v2 )
 	/* Make sure that `v1' and `v2' exist, are integers or float values or
 	   arrays (or pointers thereto) */
 
-	vars_check( v1, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR | 
-				    INT_TRANS_ARR | FLOAT_TRANS_ARR | ARR_REF | ARR_PTR );
+	vars_check( v1, INT_VAR | FLOAT_VAR | INT_CONT_ARR | FLOAT_CONT_ARR | 
+				    INT_ARR | FLOAT_ARR | ARR_REF | ARR_PTR );
 	vars_check( v2, INT_VAR | FLOAT_VAR | ARR_REF | ARR_PTR |
-				    INT_TRANS_ARR | FLOAT_TRANS_ARR );
+				    INT_ARR | FLOAT_ARR );
 
 
 	/* Divide the values while taking care to get the type right */
@@ -796,26 +796,26 @@ Var *vars_pow( Var *v1, Var *v2 )
 			new_var = vars_pow_of_float_var( v1, v2 );
 			break;
 			
-		case INT_ARR : case INT_TRANS_ARR :
+		case INT_CONT_ARR : case INT_ARR :
 			v1 = vars_array_check( v1, v2 );
 			new_var = vars_pow_of_int_arr( v1, v2 );
 			break;
 
-		case FLOAT_ARR : case FLOAT_TRANS_ARR :
+		case FLOAT_CONT_ARR : case FLOAT_ARR :
 			v1 = vars_array_check( v1, v2 );
 			new_var = vars_pow_of_float_arr( v1, v2 );
 			break;
 
 		case ARR_REF :
 			v1 = vars_array_check( v1, v2 );
-			if ( v1->from->type == INT_ARR )
+			if ( v1->from->type == INT_CONT_ARR )
 				new_var = vars_pow_of_int_arr( v1->from, v2 );
 			else
 				new_var = vars_pow_of_float_arr( v1->from, v2 );
 			break;
 
 		case ARR_PTR :
-			if ( v1->from->type == INT_ARR )
+			if ( v1->from->type == INT_CONT_ARR )
 				new_var = vars_pow_of_int_arr( v1, v2 );
 			else
 				new_var = vars_pow_of_float_arr( v1, v2 );
@@ -858,8 +858,8 @@ Var *vars_negate( Var *v )
 	/* Make sure that `v' exists, has integer or float type or is an array
 	   and has an value assigned to it */
 
-	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
-				   ARR_REF | ARR_PTR | INT_TRANS_ARR | FLOAT_TRANS_ARR );
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_CONT_ARR | FLOAT_CONT_ARR |
+				   ARR_REF | ARR_PTR | INT_ARR | FLOAT_ARR );
 
 	switch( v->type )
 	{
@@ -871,7 +871,7 @@ Var *vars_negate( Var *v )
 			v->val.dval = - v->val.dval;
 			return v;
 
-		case INT_ARR :
+		case INT_CONT_ARR :
 			if ( v->dim != 1 )
 			{
 				eprint( FATAL, SET, "Arithmetic can be only done "
@@ -882,7 +882,7 @@ Var *vars_negate( Var *v )
 			ilp = v->val.lpnt;
 			break;
 
-		case FLOAT_ARR :
+		case FLOAT_CONT_ARR :
 			if ( v->dim != 1 )
 			{
 				eprint( FATAL, SET, "Arithmetic can be only done "
@@ -895,7 +895,7 @@ Var *vars_negate( Var *v )
 
 		case ARR_PTR :
 			len = v->from->sizes[ v->from->dim - 1 ];
-			if ( v->from->type == INT_ARR )
+			if ( v->from->type == INT_CONT_ARR )
 				ilp = ( long * ) v->val.gptr;
 			else
 				idp = ( double * ) v->val.gptr;
@@ -910,18 +910,18 @@ Var *vars_negate( Var *v )
 			}
 
 			len = v->from->sizes[ 0 ];
-			if ( v->from->type == INT_ARR )
+			if ( v->from->type == INT_CONT_ARR )
 				ilp = v->from->val.lpnt;
 			else
 				idp = v->from->val.dpnt;
 			break;
 
-		case INT_TRANS_ARR :
+		case INT_ARR :
 			len = v->len;
 			ilp = v->val.lpnt;
 			break;
 
-		case FLOAT_TRANS_ARR :
+		case FLOAT_ARR :
 			len = v->len;
 			idp = v->val.dpnt;
 			break;
@@ -936,7 +936,7 @@ Var *vars_negate( Var *v )
 		rlp = T_malloc( len * sizeof( long ) );
 		for ( i = 0; i < len; ilp++, i++ )
 			rlp[ i ] = - *ilp;
-		new_var = vars_push( INT_TRANS_ARR, rlp, len );
+		new_var = vars_push( INT_ARR, rlp, len );
 		new_var->flags |= v->flags & IS_DYNAMIC;
 		T_free( rlp );
 	}
@@ -945,7 +945,7 @@ Var *vars_negate( Var *v )
 		rdp = T_malloc( len * sizeof( double ) );
 		for ( i = 0; i < len; idp++, i++ )
 			rdp[ i ] = - *idp;
-		new_var = vars_push( FLOAT_TRANS_ARR, rdp, len );
+		new_var = vars_push( FLOAT_ARR, rdp, len );
 		new_var->flags |= v->flags & IS_DYNAMIC;
 		T_free( rdp );
 	}
@@ -1177,7 +1177,7 @@ Var *vars_push( int type, ... )
 			new_stack_var->flags |= new_stack_var->from->flags & IS_DYNAMIC;
 			break;
 
-		case INT_TRANS_ARR :
+		case INT_ARR :
 			new_stack_var->val.lpnt = va_arg( ap, long * );
 			new_stack_var->len = va_arg( ap, long );
 			if ( new_stack_var->val.lpnt != NULL )
@@ -1189,7 +1189,7 @@ Var *vars_push( int type, ... )
 													sizeof( long ) );
 			break;
 
-		case FLOAT_TRANS_ARR :
+		case FLOAT_ARR :
 			new_stack_var->val.dpnt = va_arg( ap, double * );
 			new_stack_var->len = va_arg( ap, long );
 			if ( new_stack_var->val.dpnt != NULL )
@@ -1292,11 +1292,11 @@ Var *vars_pop( Var *v )
 				T_free( stack->name );
 				break;
 
-			case INT_TRANS_ARR :
+			case INT_ARR :
 				T_free( stack->val.lpnt );
 				break;
 
-			case FLOAT_TRANS_ARR :
+			case FLOAT_ARR :
 				T_free( stack->val.dpnt );
 				break;
 		}
@@ -1349,14 +1349,14 @@ static void free_vars( void )
 
 		switch( ptr->type )
 		{
-			case INT_ARR :
+			case INT_CONT_ARR :
 				if ( ptr->sizes != NULL )
 					T_free( ptr->sizes );
 				if ( ! ( ptr->flags & NEED_ALLOC ) && ptr->val.lpnt != NULL )
 					T_free( ptr->val.lpnt );
 				break;
 
-			case FLOAT_ARR :
+			case FLOAT_CONT_ARR :
 				if ( ptr->sizes != NULL )
 					T_free( ptr->sizes );
 				if ( ! ( ptr->flags & NEED_ALLOC ) && ptr->val.dpnt != NULL )
@@ -1502,15 +1502,15 @@ Var *vars_arr_start( Var *v )
 
 	if ( v->type == UNDEF_VAR )
 	{
-		v->type = IF_FUNC( v->name ) ? INT_ARR : FLOAT_ARR;
-		if ( v->type == INT_ARR )
+		v->type = IF_FUNC( v->name ) ? INT_CONT_ARR : FLOAT_CONT_ARR;
+		if ( v->type == INT_CONT_ARR )
 			v->val.lpnt = NULL;
 		else
 			v->val.dpnt = NULL;
 		v->flags |= NEED_INIT;
 	}
 	else
-		vars_check( v, INT_ARR | FLOAT_ARR );
+		vars_check( v, INT_CONT_ARR | FLOAT_CONT_ARR );
 
 	/* Push variable with generic pointer to array onto the stack */
 
@@ -1630,7 +1630,7 @@ static Var *vars_get_lhs_pointer( Var *v, int n )
 	}
 	else
 	{
-		if ( a->type == INT_ARR )
+		if ( a->type == INT_CONT_ARR )
 			ret = vars_push( ARR_PTR, a->val.lpnt + index, a );
 		else
 			ret = vars_push( ARR_PTR, a->val.dpnt + index, a );
@@ -1840,7 +1840,7 @@ static Var *vars_setup_new_array( Var *v, int dim )
 
 	/* Allocate memory */
 
-	if ( a->type == INT_ARR )
+	if ( a->type == INT_CONT_ARR )
 		a->val.lpnt = ( long * ) T_calloc( a->len, sizeof( long ) );
 	else
 		a->val.dpnt = ( double * ) T_calloc( a->len, sizeof( double ) );
@@ -1927,13 +1927,13 @@ Var *vars_arr_rhs( Var *v )
 
 	if ( dim == a->dim )
 	{
-		if ( a->type == INT_ARR )
+		if ( a->type == INT_CONT_ARR )
 			return vars_push( INT_VAR, *( a->val.lpnt + index ) );
 		else
 			return vars_push( FLOAT_VAR, *( a->val.dpnt + index ) );
 	}
 
-	if ( a->type == INT_ARR )
+	if ( a->type == INT_CONT_ARR )
 		return vars_push( ARR_PTR, a->val.lpnt + index, a );
 	else
 		return vars_push( ARR_PTR, a->val.dpnt + index, a );
@@ -1961,7 +1961,7 @@ void vars_assign( Var *src, Var *dest )
 			vars_ass_from_ptr( src, dest );
 			break;
 
-		case INT_TRANS_ARR : case FLOAT_TRANS_ARR :  /* transient array */
+		case INT_ARR : case FLOAT_ARR :              /* transient array */
 			vars_ass_from_trans_ptr( src, dest );
 			break;
 
@@ -1972,7 +1972,7 @@ void vars_assign( Var *src, Var *dest )
 
 	dest->flags &= ~NEED_INIT;
 
-	if ( ! ( dest->type & ( INT_ARR | FLOAT_ARR ) ) )
+	if ( ! ( dest->type & ( INT_CONT_ARR | FLOAT_CONT_ARR ) ) )
 		vars_pop( dest );
 	vars_pop( src );
 }
@@ -2057,7 +2057,7 @@ static void vars_ass_from_var( Var *src, Var *dest )
 			break;
 
 		case ARR_PTR :
-			if ( dest->from->type == INT_ARR )
+			if ( dest->from->type == INT_CONT_ARR )
 			{
 				if ( src->type == INT_VAR )
 					*( ( long * ) dest->val.gptr ) = src->val.lval;
@@ -2078,7 +2078,7 @@ static void vars_ass_from_var( Var *src, Var *dest )
 			}
 			break;
 
-		case INT_ARR :
+		case INT_CONT_ARR :
 			if ( dest->dim != 1 )
 			{
 				eprint( FATAL, SET, "Can't assign value to array with "
@@ -2099,7 +2099,7 @@ static void vars_ass_from_var( Var *src, Var *dest )
 				*lp++ = lval;
 			break;
 
-		case FLOAT_ARR :
+		case FLOAT_CONT_ARR :
 			if ( dest->dim != 1 )
 			{
 				eprint( FATAL, SET, "Can't assign value to array with "
@@ -2135,7 +2135,7 @@ static void vars_ass_from_ptr( Var *src, Var *dest )
 
 	/* May be that's paranoid, but... */
 
-	fsc2_assert( src->from->type & ( INT_ARR | FLOAT_ARR ) );
+	fsc2_assert( src->from->type & ( INT_CONT_ARR | FLOAT_CONT_ARR ) );
 
 	/* We can't assign from an array slice to a variable */
 
@@ -2148,9 +2148,9 @@ static void vars_ass_from_ptr( Var *src, Var *dest )
 
 	if ( src->type == ARR_REF )
 	{
-		if ( src->from->type == INT_ARR )
+		if ( src->from->type == INT_CONT_ARR )
 			src->val.gptr = src->from->val.lpnt;
-		else if ( src->from->type == FLOAT_ARR )
+		else if ( src->from->type == FLOAT_CONT_ARR )
 			src->val.gptr = src->from->val.dpnt;
 		else
 		{
@@ -2175,7 +2175,7 @@ static void vars_ass_from_ptr( Var *src, Var *dest )
 
 			d->len *= d->sizes[ d->dim - 1 ];
 
-			if ( d->type == INT_ARR )
+			if ( d->type == INT_CONT_ARR )
 			{
 				d->val.lpnt = T_calloc( d->len, sizeof( long ) );
 				dest->val.lpnt = d->val.lpnt
@@ -2199,7 +2199,7 @@ static void vars_ass_from_ptr( Var *src, Var *dest )
 				THROW( EXCEPTION );
 			}
 
-			if ( d->type == INT_ARR )
+			if ( d->type == INT_CONT_ARR )
 				dest->val.lpnt = ( long * ) dest->val.gptr;
 			else
 				dest->val.dpnt = ( double * ) dest->val.gptr;
@@ -2207,7 +2207,7 @@ static void vars_ass_from_ptr( Var *src, Var *dest )
 	}
 	else
 	{
-		fsc2_assert( dest->type & ( INT_ARR | FLOAT_ARR ) );
+		fsc2_assert( dest->type & ( INT_CONT_ARR | FLOAT_CONT_ARR ) );
 
 		d = dest;
 		s = src->from;
@@ -2215,7 +2215,7 @@ static void vars_ass_from_ptr( Var *src, Var *dest )
 		if ( dest->flags & NEED_ALLOC )
 		{
 			d->len = d->sizes[ 0 ] = s->sizes[ s->dim - 1 ];
-			if ( d->type == INT_ARR )
+			if ( d->type == INT_CONT_ARR )
 				d->val.lpnt = T_calloc( d->len, sizeof( long ) );
 			else
 				d->val.dpnt = T_calloc( d->len, sizeof( double ) );
@@ -2232,7 +2232,7 @@ static void vars_ass_from_ptr( Var *src, Var *dest )
 
 	/* Warn on float to integer assignment */
 
-	if ( d->type == INT_ARR && s->type == FLOAT_ARR )
+	if ( d->type == INT_CONT_ARR && s->type == FLOAT_CONT_ARR )
 		eprint( WARN, SET, "Assignment of float array (slice) `%s' to "
 				"integer array `%s'.\n", s->name, d->name );
 
@@ -2241,7 +2241,7 @@ static void vars_ass_from_ptr( Var *src, Var *dest )
 
 	if ( s->type == d->type )
 	{
-		if ( s->type == INT_ARR )
+		if ( s->type == INT_CONT_ARR )
 			memcpy( dest->val.lpnt, src->val.gptr,
 					d->sizes[ d->dim - 1 ] * sizeof( long ) );
 		else
@@ -2254,7 +2254,7 @@ static void vars_ass_from_ptr( Var *src, Var *dest )
 		   pointer to the start of the slice is always stored as a void
 		   pointer */
 
-		if ( s->type == INT_ARR )
+		if ( s->type == INT_CONT_ARR )
 			src->val.lpnt = ( long * ) src->val.gptr;
 		else
 			src->val.dpnt = ( double * ) src->val.gptr;
@@ -2263,7 +2263,7 @@ static void vars_ass_from_ptr( Var *src, Var *dest )
 
 		for ( i = 0; i < d->sizes[ d->dim - 1 ]; i++ )
 		{
-			if ( d->type == INT_ARR )
+			if ( d->type == INT_CONT_ARR )
 				*dest->val.lpnt++ = ( long ) *src->val.dpnt++;
 			else
 				*dest->val.dpnt++ = ( double ) *src->val.lpnt++;
@@ -2301,12 +2301,12 @@ static void vars_ass_from_trans_ptr( Var *src, Var *dest )
 		THROW( EXCEPTION );
 	}
 
-	vars_check( dest, ARR_PTR | INT_ARR | FLOAT_ARR );
+	vars_check( dest, ARR_PTR | INT_CONT_ARR | FLOAT_CONT_ARR );
 
 	/* This is for assignments to one-dimensional arrays that are specified
 	   on the LHS just with their names and without any brackets */
 
-	if ( dest->type & ( INT_ARR | FLOAT_ARR ) )
+	if ( dest->type & ( INT_CONT_ARR | FLOAT_CONT_ARR ) )
 	{
 		if ( dest->dim != 1 )
 		{
@@ -2315,7 +2315,7 @@ static void vars_ass_from_trans_ptr( Var *src, Var *dest )
 			THROW( EXCEPTION );
 		}
 
-		dest = vars_push( ARR_PTR, ( dest->type == INT_ARR ) ?
+		dest = vars_push( ARR_PTR, ( dest->type == INT_CONT_ARR ) ?
 						  ( void * ) dest->val.lpnt :
 						  ( void * ) dest->val.dpnt, dest );
 		dest->len = 0;
@@ -2341,7 +2341,7 @@ static void vars_ass_from_trans_ptr( Var *src, Var *dest )
 
 		d->len *= d->sizes[ d->dim - 1 ];
 
-		if ( d->type == INT_ARR )
+		if ( d->type == INT_CONT_ARR )
 		{
 			d->val.lpnt = T_calloc( d->len,  sizeof( long ) );
 			dest->val.lpnt = d->val.lpnt + dest->len * d->sizes[ d->dim - 1 ];
@@ -2363,7 +2363,7 @@ static void vars_ass_from_trans_ptr( Var *src, Var *dest )
 			THROW( EXCEPTION );
 		}
 
-		if ( d->type == INT_ARR )
+		if ( d->type == INT_CONT_ARR )
 			dest->val.lpnt = ( long * ) dest->val.gptr;
 		else
 			dest->val.dpnt = ( double * ) dest->val.gptr;
@@ -2371,7 +2371,7 @@ static void vars_ass_from_trans_ptr( Var *src, Var *dest )
 
 	/* Warn on float to integer assignment */
 
-	if ( d->type == INT_ARR && src->type == FLOAT_TRANS_ARR )
+	if ( d->type == INT_CONT_ARR && src->type == FLOAT_ARR )
 		eprint( WARN, SET, "Assignment of float array (or slice) to "
 				"integer array `%s'.\n", d->name );
 
@@ -2379,10 +2379,10 @@ static void vars_ass_from_trans_ptr( Var *src, Var *dest )
 	   variable types fit a fast memcpy() will do the job while in the other
 	   case the copying has to be done 'by hand' */
 
-	if ( ( src->type == INT_TRANS_ARR && d->type == INT_ARR ) ||
-		 ( src->type == FLOAT_TRANS_ARR && d->type == FLOAT_ARR ) )
+	if ( ( src->type == INT_ARR && d->type == INT_CONT_ARR ) ||
+		 ( src->type == FLOAT_ARR && d->type == FLOAT_CONT_ARR ) )
 	{
-		if ( src->type == INT_TRANS_ARR )
+		if ( src->type == INT_ARR )
 			memcpy( dest->val.lpnt, src->val.lpnt,
 					d->sizes[ d->dim - 1 ] * sizeof( long ) );
 		else
@@ -2391,14 +2391,14 @@ static void vars_ass_from_trans_ptr( Var *src, Var *dest )
 	}
 	else
 	{
-		if ( src->type == INT_TRANS_ARR )
+		if ( src->type == INT_ARR )
 			slptr = src->val.lpnt;
 		else
 			sdptr = src->val.dpnt;
 
 		for ( i = 0; i < d->sizes[ d->dim - 1 ]; i++ )
 		{
-			if ( d->type == INT_ARR )
+			if ( d->type == INT_CONT_ARR )
 				*dest->val.lpnt++ = ( long ) *sdptr++;
 			else
 				*dest->val.dpnt++ = ( double ) *slptr++;
@@ -2451,7 +2451,7 @@ void vars_arr_init( Var *v )
 		ni++;
 	}
 	a = v->from;
-	vars_check( a, INT_ARR | FLOAT_ARR );
+	vars_check( a, INT_CONT_ARR | FLOAT_CONT_ARR );
 
 
 	/* Variable sized arrays can't be initialized, they need the assignment of
@@ -2491,7 +2491,7 @@ void vars_arr_init( Var *v )
 	/* Finally do the assignments - walk through the data and copy them into
 	   the area for data in the array */
 
-	if ( a->type == INT_ARR )
+	if ( a->type == INT_CONT_ARR )
 		v->val.lpnt = a->val.lpnt;
 	else
 		v->val.dpnt = a->val.dpnt;
@@ -2500,7 +2500,7 @@ void vars_arr_init( Var *v )
 	{
 		fsc2_assert( p1->type & ( INT_VAR | FLOAT_VAR ) );
 
-		if ( a->type == INT_ARR )
+		if ( a->type == INT_CONT_ARR )
 		{
 			if ( p1->type == INT_VAR )
 				*v->val.lpnt++ = p1->val.lval;
@@ -2552,7 +2552,7 @@ Var *apply_unit( Var *var, Var *unit )
 	{
 		if ( var->type & ( INT_VAR | FLOAT_VAR ) )
 			return vars_mult( var, vars_push( INT_VAR, 1 ) );
-		if ( var->type & ( INT_ARR | FLOAT_ARR ) )
+		if ( var->type & ( INT_CONT_ARR | FLOAT_CONT_ARR ) )
 			return vars_push( ARR_REF, var );
 		return var;
 	}
@@ -2580,22 +2580,22 @@ Var *vars_val( Var *v )
 
 	if ( v->flags & NEED_SLICE )
 	{
-		vars_check( v->from, INT_ARR | FLOAT_ARR );
+		vars_check( v->from, INT_CONT_ARR | FLOAT_CONT_ARR );
 		if ( ! ( v->from->flags & NEED_ALLOC ) )
 		{
-			if ( v->from->type == INT_ARR )
-				vn = vars_push( INT_TRANS_ARR, v->val.vptr,
+			if ( v->from->type == INT_CONT_ARR )
+				vn = vars_push( INT_ARR, v->val.vptr,
 								v->from->sizes[ v->from->dim - 1 ] );
 			else
-				vn = vars_push( FLOAT_TRANS_ARR, v->val.vptr,
+				vn = vars_push( FLOAT_ARR, v->val.vptr,
 								v->from->sizes[ v->from->dim - 1 ] );
 		}
 		else
 		{
-			if ( v->from->type == INT_ARR )
-				vn = vars_push( INT_TRANS_ARR, NULL, 0 );
+			if ( v->from->type == INT_CONT_ARR )
+				vn = vars_push( INT_ARR, NULL, 0 );
 			else
-				vn = vars_push( FLOAT_TRANS_ARR, NULL, 0 );
+				vn = vars_push( FLOAT_ARR, NULL, 0 );
 			vn->flags |= NEED_ALLOC;
 		}
 
@@ -2603,9 +2603,9 @@ Var *vars_val( Var *v )
 		return vn;
 	}
 
-	if ( v->from->type == INT_ARR )
+	if ( v->from->type == INT_CONT_ARR )
 		return vars_push( INT_VAR, *( ( long * ) v->val.gptr ) );
-	else if ( v->from->type == FLOAT_ARR )
+	else if ( v->from->type == FLOAT_CONT_ARR )
 		return vars_push( FLOAT_VAR, *( ( double * ) v->val.gptr ) );
 
 	fsc2_assert( 1 == 0 );

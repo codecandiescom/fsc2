@@ -1068,7 +1068,7 @@ static Var *get_curve( Var *v, bool use_cursor )
 	if ( I_am == CHILD )
 	{
 		tds744a_get_curve( ch, w, &array, &length, use_cursor );
-		nv = vars_push( FLOAT_TRANS_ARR, array, length );
+		nv = vars_push( FLOAT_ARR, array, length );
 		T_free( array );
 		return nv;
 	}
@@ -1080,7 +1080,7 @@ static Var *get_curve( Var *v, bool use_cursor )
 	array = T_malloc( length * sizeof( double ) );
 	for ( i = 0; i < length; i++ )
 		array[ i ] = 1.0e-7 * sin( M_PI * i / 122.0 );
-	nv = vars_push( FLOAT_TRANS_ARR, array, length );
+	nv = vars_push( FLOAT_ARR, array, length );
 	nv->flags |= IS_DYNAMIC;
 	T_free( array );
 	return nv;

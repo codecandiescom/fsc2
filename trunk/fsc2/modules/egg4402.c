@@ -422,7 +422,7 @@ Var *boxcar_get_curve( Var *v )
 	{
 		
 		buffer = T_calloc( num_points, sizeof( double ) );
-		cl = vars_push( FLOAT_TRANS_ARR, buffer, last - first + 1 );
+		cl = vars_push( FLOAT_ARR, buffer, last - first + 1 );
 		if ( size_dynamic )
 			cl->flags |= IS_DYNAMIC;
 		T_free( buffer );
@@ -515,7 +515,7 @@ Var *boxcar_get_curve( Var *v )
 
 	T_free( buffer );
 
-	cl = vars_push( FLOAT_TRANS_ARR, ret_buffer, last - first + 1 );
+	cl = vars_push( FLOAT_ARR, ret_buffer, last - first + 1 );
 	T_free( ret_buffer );
 	return cl;
 }

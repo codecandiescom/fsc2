@@ -86,12 +86,12 @@ enum {
 	INT_VAR         = ( 1 << 0 ),      /*    1 */
 	FLOAT_VAR       = ( 1 << 1 ),      /*    2 */
 	STR_VAR         = ( 1 << 2 ),      /*    4 */
-	INT_ARR         = ( 1 << 3 ),      /*    8 */
-	FLOAT_ARR       = ( 1 << 4 ),      /*   16 */
+	INT_CONT_ARR    = ( 1 << 3 ),      /*    8 */
+	FLOAT_CONT_ARR  = ( 1 << 4 ),      /*   16 */
 	FUNC            = ( 1 << 5 ),      /*   32 */
 	ARR_PTR         = ( 1 << 6 ),      /*   64 */
-	INT_TRANS_ARR   = ( 1 << 7 ),      /*  128 */
-	FLOAT_TRANS_ARR = ( 1 << 8 ),      /*  256 */
+	INT_ARR         = ( 1 << 7 ),      /*  128 */
+	FLOAT_ARR       = ( 1 << 8 ),      /*  256 */
 	ARR_REF         = ( 1 << 9 ),      /*  512 */
 };
 

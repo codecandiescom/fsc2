@@ -267,7 +267,7 @@ static Var *get_phase_cycled_area_1( Var *v )
 		if ( win_list[ 0 ] == -1 || num_windows == 1 )
 			vn = vars_push( FLOAT_VAR, data[ 0 ] );
 		else
-			vn = vars_push( FLOAT_TRANS_ARR, data, num_windows );
+			vn = vars_push( FLOAT_ARR, data, num_windows );
 
 		TRY_SUCCESS;
 	}
@@ -566,7 +566,7 @@ static Var *get_phase_cycled_area_2( Var *v )
 		if ( win_list[ 0 ] == -1 || num_windows == 1 )
 			vn = vars_push( FLOAT_VAR, data[ 0 ] );
 		else
-			vn = vars_push( FLOAT_TRANS_ARR, data, num_windows * 2 );
+			vn = vars_push( FLOAT_ARR, data, num_windows * 2 );
 
 		TRY_SUCCESS;
 	}
