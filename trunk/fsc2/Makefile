@@ -4,17 +4,17 @@
 # by 'make install' as well as the name of the GPIB configuration and log file
 # together with its ownerships
 
-prefix         = /usr/local
-bindir         = $(prefix)/bin
-libdir         = $(prefix)/lib/fsc2
-auxdir         = $(libdir)/aux
-docdir         = $(libdir)/doc
+#prefix         = /usr/local
+#bindir         = $(prefix)/bin
+#libdir         = $(prefix)/lib/fsc2
+#auxdir         = $(libdir)/aux
+#docdir         = $(libdir)/doc
 
-#prefix         = $(shell pwd)
-#bindir         = $(prefix)
-#libdir         = $(prefix)
-#auxdir         = $(prefix)/aux
-#docdir         = $(prefix)/doc
+prefix         = $(shell pwd)
+bindir         = $(prefix)
+libdir         = $(prefix)
+auxdir         = $(prefix)/aux
+docdir         = $(prefix)/doc
 
 GPIB_CONF      = /etc/gpib.conf
 GPIB_LOG       = /tmp/gpib.log

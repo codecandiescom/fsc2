@@ -31,16 +31,15 @@
 enum {
 	NO_EXCEPTION                = 0,               /* must be 0 ! */
 	EXCEPTION                   = ( 1 << 0 ),
-	OUT_OF_MEMORY_EXCEPTION     = ( 1 << 1 ),
-	TOO_DEEPLY_NESTED_EXCEPTION = ( 1 << 2 ),
+	OUT_OF_MEMORY_EXCEPTION     = ( 2 << 1 ),
+	TOO_DEEPLY_NESTED_EXCEPTION = ( 3 << 2 ),
 	EOF_IN_COMMENT_EXCEPTION    = ( 1 << 3 ),
 	EOF_IN_STRING_EXCEPTION     = ( 1 << 4 ),
 	DANGLING_END_OF_COMMENT     = ( 1 << 5 ),
 	SYNTAX_ERROR_EXCEPTION      = ( 1 << 6 ),
 	MISSING_SEMICOLON_EXCEPTION = ( 1 << 7 ),
 	INVALID_INPUT_EXCEPTION     = ( 1 << 8 ),
-	USER_BREAK:EXCEPTION        = ( 1 << 9 ),
-	ALL_EXCEPTIONS              = 0xFFFF
+	USER_BREAK_EXCEPTION        = ( 1 << 9 ),
 };
 
 

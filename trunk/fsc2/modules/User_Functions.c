@@ -13,6 +13,7 @@ int User_Functions_end_of_exp_hook( void );
 void User_Functions_exit_hook( void );
 
 
+Var *bla( Var *v );
 Var *square( Var *v );
 Var *int_slice( Var *v );
 Var *float_slice( Var *v );
@@ -67,6 +68,18 @@ void User_Functions_exit_hook( void )
 /* Enter the definition of all needed functions below this line */
 /****************************************************************/
 
+
+Var *bla( Var *v )
+{
+	v = v;
+	while ( 1 )
+	{
+		if ( do_quit )
+			THROW( USER_BREAK_EXCEPTION );
+	}
+
+	return vars_push( INT_VAR, 1 );
+}
 
 /*------------------------------------------------------------*/
 /*------------------------------------------------------------*/
