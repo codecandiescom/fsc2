@@ -85,6 +85,14 @@ int er035m_init_hook( void )
 		THROW( EXCEPTION );
 	}
 
+	if ( exist_device( "er035m_s" ) )
+	{
+		eprint( FATAL, "ER035M: Driver for ER035 gaussmeter connected to "
+				"serial port is already loaded - there can only be one "
+				"gaussmeter." );
+		THROW( EXCEPTION );
+	}
+
 	if ( ! exist_device( "s_band" ) && ! exist_device( "aeg_x_band" ) )
 	{	
 		eprint( WARN, "ER035M: Driver for NMR gaussmeter is loaded "

@@ -184,9 +184,9 @@ int aeg_x_band_init_hook( void )
 
 	if ( need_Serial_Port[ SERIAL_PORT ] )
 	{
-		eprint( FATAL, "AEG_X_BAND: Serial port %d (i.e. /dev/ttyS%d) is "
-				"already in use by another device.",
-				SERIAL_PORT, SERIAL_PORT );
+		eprint( FATAL, "AEG_X_BAND: Serial port %d (i.e. /dev/ttyS%d or "
+				"COM%d) is already in use by another device.", SERIAL_PORT,
+				SERIAL_PORT, SERIAL_PORT + 1 );
 		THROW( EXCEPTION );
 	}
 
