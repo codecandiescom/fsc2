@@ -180,9 +180,9 @@ Var *lockin_get_data( Var *v )
 
 Var *lockin_get_adc_data( Var *v )
 {
-	long num_args, i;
+	long num_args, i, port;
 	double *voltages;
-	Var *cv;
+	Var *cv, *vn;
 
 
 	if ( v == NULL )
@@ -199,19 +199,21 @@ Var *lockin_get_adc_data( Var *v )
 
 	if ( v->next == NULL )
 	{
-		if ( ( long ) VALUE( v ) < 1 || ( long ) VALUE( v ) > 4 )
+		port = v->type == INT_VAR ? v->val.lval : ( long ) v->val.dval;
+		vars_pop( v );
+
+		if ( port < 1 || port > 4 )
 		{
 			eprint( FATAL, "sr510: Invalid ADC channel number (%ld) in call "
 					"of 'lockin_get_adc_data', valid channel are in the "
-					"range 1-4.\n", ( long ) VALUE( v ) );
+					"range 1-4.\n", port );
 			THROW( EXCEPTION );
 		}
 
 		if ( TEST_RUN )                  /* return dummy value in test run */
 			return vars_push( FLOAT_VAR, 0.0 );
 
-		return vars_push( FLOAT_VAR,
-						  sr510_get_adc_data( ( long ) VALUE( v ) ) );
+		return vars_push( FLOAT_VAR, sr510_get_adc_data( port ) );
 	}
 
 	/* If function is called with a list of port numbers the voltage for each
@@ -229,13 +231,15 @@ Var *lockin_get_adc_data( Var *v )
 
 	/* get voltage from each of the ports in the list */
 
-	for ( i = 0; v != NULL; i++, v = v->next )
+	for ( i = 0; v != NULL; i++, v = vn )
 	{
-		if ( ( long ) VALUE( v ) < 1 || ( long ) VALUE( v ) > 4 )
+		port = v->type == INT_VAR ? v->val.lval : ( long ) v->val.dval;
+
+		if ( port < 1 || port > 4 )
 		{
 			eprint( FATAL, "sr510: Invalid ADC channel number (%ld) in "
 					"call of 'lockin_get_adc_data', valid channel are in "
-					"the range 1-4.\n", ( long ) VALUE( v ) );
+					"the range 1-4.\n", port );
 			T_free( voltages );
 			THROW( EXCEPTION );
 		}
@@ -243,7 +247,10 @@ Var *lockin_get_adc_data( Var *v )
 		if ( TEST_RUN )
 			voltages[ i ] = 0.0;      /* return dummy value in test run */
 		else
-			voltages[ i ] = sr510_get_adc_data( ( long ) VALUE( v ) );
+			voltages[ i ] = sr510_get_adc_data( port );
+
+		vn = v->next;
+		vars_pop( v );
 	}
 
 	/* push the array of results onto the variable stack */
@@ -290,6 +297,7 @@ Var *lockin_sensitivity( Var *v )
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
 	sens = VALUE( v );
+	vars_pop( v );
 
 	if ( sens < 0.0 )
 	{
@@ -399,6 +407,7 @@ Var *lockin_time_constant( Var *v )
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
 	tc = VALUE( v ) / 1.0e9;
+	vars_pop( v );
 
 	if ( tc < 0.0 )
 	{
@@ -481,7 +490,7 @@ Var *lockin_phase( Var *v )
 
 	/* Without an argument just return current phase settting */
 
-	if ( v == 0 )
+	if ( v == NULL )
 	{
 		if ( TEST_RUN )
 			return vars_push( FLOAT_VAR, 0.0 );
@@ -501,8 +510,8 @@ Var *lockin_phase( Var *v )
 	/* Otherwise set phase to value passed to the function */
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
-
 	phase = VALUE( v );
+	vars_pop( v );
 
 	while ( phase >= 360.0 )    /* convert to 0-359 degree range */
 		phase -= 360.0;
