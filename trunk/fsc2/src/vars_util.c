@@ -1892,7 +1892,7 @@ static void vars_pow_check( double v1, double v2 )
 
 Var *vars_array_check( Var *v1, Var *v2 )
 {
-	Var *v == NULL;
+	Var *v = NULL;
 	long length = 0;
 
 

@@ -122,28 +122,28 @@ fsc2_rsc_hr.c: fsc2_rsc_hr.fd
 # configuration file are needed.
 
 gpib:
-	@if [ ! -e gpib_if.c -o ! -e gpib_if.h                     \
-		  -o gpib_if_$(GPIB_LIBRARY).c -nt gpib_if.c           \
-		  -o gpib_if_$(GPIB_LIBRARY).h -nt gpib_if.h           \
-		  -o gpib_if_$(GPIB_LIBRARY).c -ef gpib_if.c           \
-		  -o gpib_if_$(GPIB_LIBRARY).h -ef gpib_if.h ]; then   \
-		$(RM) $(RMFLAGS) gpib_if.[ch];                         \
-		$(LN) $(LNFLAGS) gpib_if_$(GPIB_LIBRARY).c gpib_if.c;  \
-		$(LN) $(LNFLAGS) gpib_if_$(GPIB_LIBRARY).h gpib_if.h;  \
-	fi;                                                        \
-	if [ "$(GPIB_LIBRARY)" = "ni" ]; then                      \
-		if [ ! -e gpib_lexer.l                                 \
-	          -o gpib_lexer.ll -nt gpib_lexer.l                \
-	          -o gpib_lexer.ll -ed gpib_lexer.l ]; then        \
-			$(RM) $(RMFLAGS) gpib_lexer.l;                     \
-			$(LN) $(LNFLAGS) gpib_lexer.ll gpib_lexer.l;       \
-		fi;                                                    \
-		if [ ! -e gpib_lexer.l                                 \
-	    	  -o gpib_lexer.ll -nt gpib_lexer.l                \
-	      	  -o gpib_lexer.ll -ed gpib_lexer.l ]; then        \
-			$(RM) $(RMFLAGS) gpib_lexer.l;                     \
-			$(LN) $(LNFLAGS) gpib_lexer.ll gpib_lexer.l;       \
-		fi;                                                    \
+	@if [ ! -e gpib_if.c -o ! -e gpib_if.h                      \
+		  -o gpib_if_$(GPIB_LIBRARY).c -nt gpib_if.c            \
+		  -o gpib_if_$(GPIB_LIBRARY).h -nt gpib_if.h            \
+		  -o ! gpib_if_$(GPIB_LIBRARY).c -ef gpib_if.c          \
+		  -o ! gpib_if_$(GPIB_LIBRARY).h -ef gpib_if.h ]; then  \
+		$(RM) $(RMFLAGS) gpib_if.[ch];                          \
+		$(LN) $(LNFLAGS) gpib_if_$(GPIB_LIBRARY).c gpib_if.c;   \
+		$(LN) $(LNFLAGS) gpib_if_$(GPIB_LIBRARY).h gpib_if.h;   \
+	fi;                                                         \
+	if [ "$(GPIB_LIBRARY)" = "ni" ]; then                       \
+		if [ ! -e gpib_lexer.l                                  \
+	          -o gpib_lexer.ll -nt gpib_lexer.l                 \
+	          -o gpib_lexer.ll -ed gpib_lexer.l ]; then         \
+			$(RM) $(RMFLAGS) gpib_lexer.l;                      \
+			$(LN) $(LNFLAGS) gpib_lexer.ll gpib_lexer.l;        \
+		fi;                                                     \
+		if [ ! -e gpib_lexer.l                                  \
+	    	  -o gpib_lexer.ll -nt gpib_lexer.l                 \
+	      	  -o gpib_lexer.ll -ed gpib_lexer.l ]; then         \
+			$(RM) $(RMFLAGS) gpib_lexer.l;                      \
+			$(LN) $(LNFLAGS) gpib_lexer.ll gpib_lexer.l;        \
+		fi;                                                     \
 	fi
 
 

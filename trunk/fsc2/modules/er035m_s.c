@@ -693,30 +693,30 @@ static bool er035m_s_close( void )
 
 static bool er035m_s_write( const char *buf )
 {
-	char *wbuf = NULL;
-	long wlen = 0;
+	char *wrbuf = NULL;
+	long wrlen = 0;
 	bool res;
 
 
 	if ( buf == NULL || *buf == '\0' )
 		return OK;
-	wlen = strlen( buf );
+	wrlen = strlen( buf );
 
 	if ( er035m_s_eol != NULL && strlen( er035m_s_eol ) > 0 )
 	{
-		wlen += strlen( er035m_s_eol );
+		wrlen += strlen( er035m_s_eol );
 
 		TRY
 		{
-			wbuf = get_string( wlen );
+			wrbuf = get_string( wrlen );
 			TRY_SUCCESS;
 		}
 
-		strcpy( wbuf, buf );
-		strcat( wbuf, er035m_s_eol );
+		strcpy( wrbuf, buf );
+		strcat( wrbuf, er035m_s_eol );
 
-		res = er035m_s_comm( SERIAL_WRITE, wbuf );
-		T_free( wbuf );
+		res = er035m_s_comm( SERIAL_WRITE, wrbuf );
+		T_free( wrbuf );
 	}
 	else
 		res = er035m_s_comm( SERIAL_WRITE, buf );
