@@ -52,7 +52,7 @@ int ep385_init_hook( void )
 
 	/* Set global variable to indicate that GPIB bus is needed */
 
-//	need_GPIB = SET;
+	need_GPIB = SET;
 
 	/* We have to set up the global structure for the pulser, especially the
 	   pointers for the functions that will get called from pulser.c */
@@ -369,13 +369,9 @@ int ep385_exp_hook( void )
 
 int ep385_end_of_exp_hook( void )
 {
-	const char *cmd = "FPAN:MESS \"\"\n";
-
-
 	if ( ! ep385_is_needed )
 		return 1;
 
-	gpib_write( ep385.device, cmd, strlen( cmd ) );
 	ep385_run( UNSET );
 	gpib_local( ep385.device );
 
@@ -882,6 +878,7 @@ Var *pulser_shift( Var *v )
 			p->sp->pos = p->pos;
 			p->sp->old_pos = p->old_pos;
 			p->sp->is_old_pos = p->is_old_pos;
+
 			p->sp->has_been_active |= ( p->sp->is_active = p->is_active );
 			p->sp->needs_update = p->needs_update;
 		}
@@ -964,13 +961,14 @@ Var *pulser_increment( Var *v )
 		p->has_been_active |= ( p->is_active = IS_ACTIVE( p ) );
 		p->needs_update = NEEDS_UPDATE( p );
 
-		/* Also lengthen shape pulses associated with the pulse */
+		/* Also reset shape pulses associated with the pulse */
 
 		if ( p->sp )
 		{
 			p->sp->len = p->len;
 			p->sp->old_len = p->old_len;
 			p->sp->is_old_len = p->is_old_len;
+
 			p->sp->has_been_active |= ( p->sp->is_active = p->is_active );
 			p->sp->needs_update = p->needs_update;
 		}
@@ -1003,7 +1001,9 @@ Var *pulser_pulse_reset( Var *v )
 		return vars_push( INT_VAR, 1 );
 
 	/* An empty pulse list means that we have to reset all pulses (even the
-       inactive ones) */
+       inactive ones). Do't explicitely reset automatically created pulses
+	   (which all have a negative pulse number), they will be reset together
+	   with the pulses belong to. */
 
 	if ( v == NULL )
 	{
@@ -1048,6 +1048,23 @@ Var *pulser_pulse_reset( Var *v )
 
 		p->has_been_active |= ( p->is_active = IS_ACTIVE( p ) );
 		p->needs_update = NEEDS_UPDATE( p );
+
+		/* Also lengthen shape pulses associated with the pulse */
+
+		if ( p->sp )
+		{
+			p->sp->pos = p->pos;
+			p->sp->old_pos = p->old_pos;
+			p->sp->is_old_pos = p->is_old_pos;
+
+			p->sp->len = p->len;
+			p->sp->old_len = p->old_len;
+			p->sp->is_old_len = p->is_old_len;
+
+			p->sp->has_been_active |= ( p->sp->is_active = p->is_active );
+			p->sp->needs_update = p->needs_update;
+		}
+			
 
 		if ( p->needs_update )
 			ep385.needs_update = SET;

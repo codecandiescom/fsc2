@@ -28,8 +28,10 @@
 static void ep385_gpib_failure( void );
 
 
+/*
 #define gpib_write( a, b, c ) fprintf( stderr, "%s\n", ( b ) )
 #define gpib_init_device( a, b ) 1
+*/
 
 
 /*----------------------------------------------------------------*/

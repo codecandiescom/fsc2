@@ -102,7 +102,7 @@ static bool pipe_read( char *buf, size_t bytes_to_read );
 static bool pipe_write( char *buf, size_t bytes_to_write );
 static bool send_browser( FL_OBJECT *browser );
 
-static bool comm_is_setup = FALSE;
+static bool comm_is_setup = UNSET;
 
 
 /*----------------------------------------------------------------*/
@@ -179,7 +179,7 @@ void setup_comm( void )
 		THROW( EXCEPTION );
 	}
 
-	comm_is_setup = TRUE;
+	comm_is_setup = SET;
 }
 
 
@@ -192,6 +192,8 @@ void end_comm( void )
 {
 	if ( ! comm_is_setup )
 		return;
+
+	comm_is_setup = UNSET;
 
 	/* Handle remaining messages */
 
