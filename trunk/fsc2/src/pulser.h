@@ -49,7 +49,6 @@ typedef struct {
 	bool ( *set_trig_in_level )( double voltage );
 	bool ( *set_trig_in_slope )( int slope );
 	bool ( *set_trig_in_impedance )( int state );
-	bool ( *set_max_seq_len )( double seq_len );
 
 	bool ( *set_phase_reference )( int phase, int function );
 
@@ -70,9 +69,13 @@ typedef struct {
 
 	bool ( *phase_setup_prep )( int func, int type, int pod, long val );
 	bool ( *phase_setup )( int func );
+
+	/* The remaining functions are for backward compatibility only */
+
+	bool ( *set_max_seq_len )( double seq_len );
+	bool ( *keep_all_pulses )( void );
 	bool ( *set_phase_switch_delay )( int function, double del_time );
 	bool ( *set_grace_period )( double gp_time );
-	bool ( *keep_all_pulses )( void );
 
 } Pulser_Struct;
 
@@ -110,13 +113,11 @@ void p_set_trigger_level( Var *v );
 void p_set_trigger_impedance( Var *v );
 void p_set_rep_time( Var *v );
 void p_set_rep_freq( Var *v );
-void p_set_max_seq_len( Var *v );
 void p_phase_ref( int function, int ref );
 
 long p_num( char *txt );
 void is_pulser_driver( void );
 void is_pulser_func( void *func, const char *text );
-double is_mult_ns( double val, const char * text );
 
 long p_new( long pnum );
 void p_set( long pnum, int type, Var *v );
@@ -126,12 +127,15 @@ Var *p_get_by_num( long pnum, int type );
 void p_phs_setup( int func, int type, int pod, long val, bool is_pod );
 void p_phs_end( int func );
 
+void p_exists_function( int function );
+
+/* The following functions are for backward compatibility only */
+
 void p_set_psd( int func, Var *v );
 void p_set_gp( Var *v );
-
+void p_set_max_seq_len( Var *v );
 void keep_all_pulses( void );
 
-void p_exists_function( int function );
 
 
 #endif  /* ! PULSER_HEADER */

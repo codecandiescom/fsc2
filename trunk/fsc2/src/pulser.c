@@ -193,36 +193,6 @@ void is_pulser_func( void *func, const char *text )
 }
 
 
-/*---------------------------------------------------------------------------*/
-/* Function tests if the time (in seconds) it gets passed is a reasonable    */
-/* integer multiple of 1 ns and tries to reduce rounding errors. If the time */
-/* is more than 10 ps off from a multiple of a nanosecond an error message   */
-/* is output, using the piece of text passed to the function as the second   */
-/* argument.                                                                 */
-/*---------------------------------------------------------------------------*/
-
-double is_mult_ns( double val, const char *text )
-{
-	double ip, fp;
-
-	val *= 1.e9;
-	fp = modf( val , &ip );
-
-	if ( fabs( fp ) > 1.e-2 && fabs( fp ) < 0.99 )
-	{
-		print( FATAL, "%s must be an integer multiple of 1 ns.\n", text );
-		THROW( EXCEPTION );
-	}
-
-	if ( ip < 0.0 && fp < -0.5 )
-		return ( ip - 1.0 ) * 1.0e-9;
-	if ( ip >= 0.0 && fp > 0.5 )
-		return ( ip + 1.0 ) * 1.0e-9;;
-
-	return ip * 1.0e-9;
-}
-
-
 /*-------------------------------------------------------------------------*/
 /* This function is called for the assignment of a function for a pod - it */
 /* can't be called when there are no pods, in this case the assignment has */
@@ -883,54 +853,6 @@ void p_set_rep_freq( Var *v )
 }
 
 
-/*----------------------------------------------------------------*/
-/* Function for setting a user defined maximum pattern length for */
-/* the pulser. This is needed when in the EDL program FOREVER     */
-/* loops are used because in this case in the test the maximum    */
-/* length can't be determined.                                    */
-/*----------------------------------------------------------------*/
-
-void p_set_max_seq_len( Var *v )
-{
-	static double seq_len;
-
-
-	is_pulser_driver( );
-
-	/* Check the variable and get its value */
-
-	seq_len = get_double( v, "maximum pattern length" );
-	vars_pop( v );
-
-	seq_len = is_mult_ns( seq_len, "Maximum pattern length" );
-
-	/* Call the appropriate function (if it exists) */
-
-    is_pulser_func( pulser_struct[ Cur_Pulser ].set_max_seq_len,
-                    "setting a maximum pattern length" );
-
-	TRY
-	{
-		call_push( NULL, pulser_struct[ Cur_Pulser ].device,
-				   pulser_struct[ Cur_Pulser ].name, Cur_Pulser + 1 );
-		TRY_SUCCESS;
-	}
-
-	TRY
-	{
-		pulser_struct[ Cur_Pulser ].set_max_seq_len( seq_len );
-		TRY_SUCCESS;
-	}
-	OTHERWISE
-	{
-		call_pop( );
-		RETHROW( );
-	}
-
-	call_pop( );
-}
-
-
 /*------------------------------------------------------------------------*/
 /* 'func' is either the phase functions number (pulser with phase switch) */
 /* or the number of the PHASE_SETUP (pulser without phase switch). 'ref'  */
@@ -1373,6 +1295,34 @@ void p_phs_end( int func )
 }
 
 
+/*-----------------------------------------------------------*/
+/* Checks if a function keyword is PHASE and if it is if the */
+/* the pulser driver supports phase switches.                */
+/*-----------------------------------------------------------*/
+
+void p_exists_function( int function )
+{
+	is_pulser_driver( );
+
+	fsc2_assert( function >= 0 && function < PULSER_CHANNEL_NUM_FUNC );
+
+	if ( ( function == PULSER_CHANNEL_PHASE_1 ||
+		   function == PULSER_CHANNEL_PHASE_2 ) &&
+		 ! pulser_struct[ Cur_Pulser ].needs_phase_pulses )
+	{
+		print( FATAL, "%s: Pulser driver does not support phase "
+			   "switches, so PHASE functions can't be used.\n",
+			   pulser_struct[ Cur_Pulser ].name );
+		THROW( EXCEPTION );
+	}
+}
+
+
+/****************************************************************/
+/* The following functions are for deprecated keywords only and */
+/* will be removed sometime.                                    */
+/****************************************************************/
+
 /*----------------------------------------------------------*/
 /* Function for setting the phase switch delay.             */
 /* 'func' is the phase function the data are to be used for */
@@ -1390,6 +1340,10 @@ void p_set_psd( int func, Var *v )
 	vars_pop( v );
 	is_pulser_func( pulser_struct[ Cur_Pulser ].set_phase_switch_delay,
 					"setting a phase switch delay" );
+
+	print( WARN, "Use of PHASE_SWITCH_DELAY keyword is deprecated, in the "
+		   "future please use the function pulser_phase_switch_delay() in "
+		   "the PREPARATIONS section.\n" );
 
 	TRY
 	{
@@ -1431,6 +1385,10 @@ void p_set_gp( Var *v )
 	is_pulser_func( pulser_struct[ Cur_Pulser ].set_grace_period,
 					"setting a grace period" );
 
+	print( WARN, "Use of GRACE_PERIOD keyword is deprecated, in the future "
+		   "please use the function pulser_grace_period() in the PREPARATIONS "
+		   "section.\n" );
+
 	TRY
 	{
 		call_push( NULL, pulser_struct[ Cur_Pulser ].device,
@@ -1441,6 +1399,58 @@ void p_set_gp( Var *v )
 	TRY
 	{
 		pulser_struct[ Cur_Pulser ].set_grace_period( gp );
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+	{
+		call_pop( );
+		RETHROW( );
+	}
+
+	call_pop( );
+}
+
+
+/*----------------------------------------------------------------*/
+/* Function for setting a user defined maximum pattern length for */
+/* the pulser. This is needed when in the EDL program FOREVER     */
+/* loops are used because in this case in the test the maximum    */
+/* length can't be determined.                                    */
+/*----------------------------------------------------------------*/
+
+void p_set_max_seq_len( Var *v )
+{
+	static double seq_len;
+
+
+	is_pulser_driver( );
+
+	/* Check the variable and get its value */
+
+	seq_len = get_double( v, "maximum pattern length" );
+	vars_pop( v );
+
+	seq_len = is_mult_ns( seq_len, "Maximum pattern length" );
+
+	/* Call the appropriate function (if it exists) */
+
+    is_pulser_func( pulser_struct[ Cur_Pulser ].set_max_seq_len,
+                    "setting a maximum pattern length" );
+
+	print( WARN, "Use of MAXIMUM_PATTERN_LENGTH keyword is deprecated, in the "
+		   "future please use the function pulser_maximum_pattern_length() in "
+		   "the PREPARATIONS section.\n" );
+
+	TRY
+	{
+		call_push( NULL, pulser_struct[ Cur_Pulser ].device,
+				   pulser_struct[ Cur_Pulser ].name, Cur_Pulser + 1 );
+		TRY_SUCCESS;
+	}
+
+	TRY
+	{
+		pulser_struct[ Cur_Pulser ].set_max_seq_len( seq_len );
 		TRY_SUCCESS;
 	}
 	OTHERWISE
@@ -1465,6 +1475,10 @@ void keep_all_pulses( void )
 	is_pulser_func( pulser_struct[ Cur_Pulser ].keep_all_pulses,
 					"enforcing of keeping all pulses" );
 
+	print( WARN, "Use of KEEP_ALL_PULSES keyword is deprecated, in the "
+		   "future please use the function pulser_keep_all_pulses() in "
+		   "the PREPARATIONS section.\n" );
+
 	TRY
 	{
 		call_push( NULL, pulser_struct[ Cur_Pulser ].device,
@@ -1484,29 +1498,6 @@ void keep_all_pulses( void )
 	}
 
 	call_pop( );
-}
-
-
-/*-----------------------------------------------------------*/
-/* Checks if a function keyword is PHASE and if it is if the */
-/* the pulser driver supports phase switches.                */
-/*-----------------------------------------------------------*/
-
-void p_exists_function( int function )
-{
-	is_pulser_driver( );
-
-	fsc2_assert( function >= 0 && function < PULSER_CHANNEL_NUM_FUNC );
-
-	if ( ( function == PULSER_CHANNEL_PHASE_1 ||
-		   function == PULSER_CHANNEL_PHASE_2 ) &&
-		 ! pulser_struct[ Cur_Pulser ].needs_phase_pulses )
-	{
-		print( FATAL, "%s: Pulser driver does not support phase "
-			   "switches, so PHASE functions can't be used.\n",
-			   pulser_struct[ Cur_Pulser ].name );
-		THROW( EXCEPTION );
-	}
 }
 
 

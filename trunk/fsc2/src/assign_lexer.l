@@ -137,8 +137,6 @@ CHN         [A-H]([0-9]|(1[0-5]))
 
 TB          T(IME)?_?B(ASE)?(#{INT})?:?
 TM          T(RIG(GER)?)?_?M(ODE)?(#{INT})?:?
-MPL         MAX(IMUM)?_?PATT(ERN)?_LEN(GTH)(#{INT})?
-KAP         KEEP_?ALL_?PULSES(#{INT})?:?
 
 INTERN      INT(ERN(AL)?)?
 EXTERN      EXT(ERN(AL)?)?
@@ -152,14 +150,17 @@ HIGH        H(IGH)?
 REPT        REP(EAT)?_?T(IME)?
 REPF        REP(EAT)?_?F(REQ(UENCY)?)?
 
-PSD1        PH(ASE)?_?S(W(ITCH)?)?_?D(EL(AY)?)?(_?1)?(#{INT})?:?
-PSD2        PH(ASE)?_?S(W(ITCH)?)?_?D(EL(AY)?)?_?2(#{INT})?:?
-
-GP          G(RACE)?_?P(ERIOD)?(#{INT})?:?
-
 TO          TRIG(GER)?_?OUT
 
 CTRL        (WHILE)|(BREAK)|(NEXT)|(IF)|(ELSE)|(REPEAT)|(FOR)
+
+/* The next five keywords are deprecated */
+
+PSD1        PH(ASE)?_?S(W(ITCH)?)?_?D(EL(AY)?)?(_?1)?(#{INT})?:?
+PSD2        PH(ASE)?_?S(W(ITCH)?)?_?D(EL(AY)?)?_?2(#{INT})?:?
+GP          G(RACE)?_?P(ERIOD)?(#{INT})?:?
+MPL         MAX(IMUM)?_?PATT(ERN)?_LEN(GTH)(#{INT})?
+KAP         KEEP_?ALL_?PULSES(#{INT})?:?
 
 WS          [\n=: ]+
 

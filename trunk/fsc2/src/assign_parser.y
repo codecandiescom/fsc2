@@ -83,9 +83,6 @@ static bool Func_is_set = UNSET;
 
 %token TB_TOKEN              /* TIMEBASE */
 %token TM_TOKEN              /* TRIGGERMODE */
-%token MPL_TOKEN             /* MAXIMUM_PATTERN_LENGTH */
-%token KAP_TOKEN             /* KEEP_ALL_PULSES */
-
 %token INTERN_TOKEN          /* INTERNAL */
 %token EXTERN_TOKEN          /* EXTERNAL */
 
@@ -103,6 +100,11 @@ static bool Func_is_set = UNSET;
 
 %token REPT_TOKEN            /* REPEAT TIME */
 %token REPF_TOKEN            /* REPEAT FREQUENCY */
+
+/* The next four tokens are deprecated and will be removed sometime later */
+
+%token MPL_TOKEN             /* MAXIMUM_PATTERN_LENGTH */
+%token KAP_TOKEN             /* KEEP_ALL_PULSES */
 
 %token PSD_TOKEN             /* PHASE SWITCH DELAY */
 %token GP_TOKEN              /* GRACE_PERIOD */
