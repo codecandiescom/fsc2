@@ -54,7 +54,7 @@ void *T_malloc( size_t size )
 
 	if ( mem == NULL )
 	{
-		eprint( FATAL, Internals.mode != TEST, "Running out of memory.\n" );
+		print( FATAL, "Running out of memory.\n" );
 		THROW( OUT_OF_MEMORY_EXCEPTION );
 	}
 
@@ -102,7 +102,7 @@ void *T_calloc( size_t nmemb, size_t size )
 
 	if ( mem == NULL )
 	{
-		eprint( FATAL, Internals.mode != TEST, "Running out of memory.\n" );
+		print( FATAL, "Running out of memory.\n" );
 		THROW( OUT_OF_MEMORY_EXCEPTION );
 	}
 
@@ -150,7 +150,7 @@ void *T_realloc( void *ptr, size_t size )
 
 	if ( new_ptr == NULL )
 	{
-		eprint( FATAL, Internals.mode != TEST, "Running out of memory.\n" );
+		print( FATAL, "Running out of memory.\n" );
 		THROW( OUT_OF_MEMORY_EXCEPTION );
 	}
 
@@ -220,7 +220,7 @@ char *T_strdup( const char *str )
 
 	if ( ( new_str = strdup( str ) ) == NULL )
 	{
-		eprint( FATAL, Internals.mode != TEST, "Running out of memory.\n" );
+		print( FATAL, "Running out of memory.\n" );
 		THROW( OUT_OF_MEMORY_EXCEPTION );
 	}
 
@@ -264,15 +264,13 @@ long T_atol( const char *txt )
 
 	if ( errno == ERANGE )
 	{
-		eprint( FATAL, Internals.mode != TEST,
-				"Long integer number out of range: %s.\n", txt );
+		print( FATAL, "Long integer number out of range: %s.\n", txt );
 		THROW( EXCEPTION );
 	}
 
 	if ( end_p == ( char * ) txt )
 	{
-		eprint( FATAL, Internals.mode != TEST,
-				"Not an integer number: %s.\n", txt );
+		print( FATAL, "Not an integer number: %s.\n", txt );
 		THROW( EXCEPTION );
 	}
 
@@ -300,15 +298,13 @@ int T_atoi( const char *txt )
 
 	if ( errno == ERANGE || ret > INT_MAX || ret < INT_MIN )
 	{
-		eprint( FATAL, Internals.mode != TEST,
-				"Integer number out of range: %s.\n", txt );
+		print( FATAL, "Integer number out of range: %s.\n", txt );
 		THROW( EXCEPTION );
 	}
 
 	if ( end_p == ( char * ) txt )
 	{
-		eprint( FATAL, Internals.mode != TEST,
-				"Not an integer number: %s.\n", txt );
+		print( FATAL, "Not an integer number: %s.\n", txt );
 		THROW( EXCEPTION );
 	}
 
@@ -336,15 +332,13 @@ double T_atod( const char *txt )
 
 	if ( errno == ERANGE )
 	{
-		eprint( FATAL, Internals.mode != TEST,
-				"Floating point number out of range: %s.\n", txt );
+		print( FATAL, "Floating point number out of range: %s.\n", txt );
 		THROW( EXCEPTION );
 	}
 
 	if ( end_p == ( char * ) txt )
 	{
-		eprint( FATAL, Internals.mode != TEST,
-				"Not a floating point number: %s.\n", txt );
+		print( FATAL, "Not a floating point number: %s.\n", txt );
 		THROW( EXCEPTION );
 	}
 

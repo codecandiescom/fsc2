@@ -335,11 +335,11 @@ expr:    INT_TOKEN unit            { $$ = apply_unit( vars_push( INT_VAR, $1 ),
        | FUNC_TOKEN '(' list2 ')'  { $$ = func_call( $1 ); }
          unit                      { $$ = apply_unit( $<vptr>5, $6 ); }
        | VAR_REF
-       | VAR_TOKEN '('             { eprint( FATAL, SET, "`%s' isn't a "
-											 "function.\n", $1->name );
+       | VAR_TOKEN '('             { print( FATAL, "'%s' isn't a function.\n",
+											$1->name );
 									 THROW( EXCEPTION ); }
-       | FUNC_TOKEN '['            { eprint( FATAL, SET, "`%s' is a predefined"
-                                             " function.\n", $1->name );
+       | FUNC_TOKEN '['            { print( FATAL, "'%s' is a predefined "
+                                             "function.\n", $1->name );
 	                                 THROW( EXCEPTION ); }
        | expr AND expr       	   { $$ = vars_comp( COMP_AND, $1, $3 ); }
        | expr OR expr        	   { $$ = vars_comp( COMP_OR, $1, $3 ); }
@@ -513,10 +513,9 @@ static void assignerror ( const char *s )
 	s = s;                                 /* avoid compiler warning */
 
 	if ( *assigntext == '\0' )
-		eprint( FATAL, SET, "Unexpected end of file in ASSIGNMENTS "
-				"section.\n" );
+		print( FATAL, "Unexpected end of file in ASSIGNMENTS section.\n" );
 	else
-		eprint( FATAL, SET, "Syntax error near `%s'.\n", assigntext );
+		print( FATAL, "Syntax error near '%s'.\n", assigntext );
 	THROW( EXCEPTION );
 }
 
@@ -550,8 +549,8 @@ static void ass_func( int function )
 			p_phase_ref( Channel_Type, function );
 		else
 		{
-			eprint( FATAL, SET, "Syntax error near `%s' when using pulser "
-					"%s.\n", assigntext, pulser_struct[ Cur_Pulser ].name );
+			print( FATAL, "Syntax error near '%s' when using pulser %s.\n",
+				   assigntext, pulser_struct[ Cur_Pulser ].name );
 			THROW( EXCEPTION );
 		}
 		return;
@@ -567,7 +566,7 @@ static void ass_func( int function )
 	{
 		fprintf( stderr, "%s:%ld: Cur_Pulser = %ld, Cur_PHS = %d\n",
 				 EDL.Fname, EDL.Lc, Cur_Pulser, Cur_PHS );
-		eprint( FATAL, SET, "Syntax error near `%s' when using pulser %s.\n",
+		print( FATAL, "Syntax error near '%s' when using pulser %s.\n",
 				assigntext, pulser_struct[ Cur_Pulser ].name );
 		THROW( EXCEPTION );
 	}

@@ -73,9 +73,9 @@ static void deviceserror ( const char *s )
 	s = s;                    /* stupid but avoids compiler warning */
 
 	if ( *devicestext == '\0' )
-		eprint( FATAL, SET, "Unexpected end of file in DEVICES section.\n" );
+		print( FATAL, "Unexpected end of file in DEVICES section.\n" );
 	else
-		eprint( FATAL, SET, "Syntax error near token `%s'.\n", devicestext );
+		print( FATAL, "Syntax error near token '%s'.\n", devicestext );
 	THROW( EXCEPTION );
 }
 

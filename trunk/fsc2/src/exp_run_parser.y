@@ -42,7 +42,7 @@ static void exp_runerror( const char *s );
 
 
 /* the following union and the token definitions MUST be identical to the ones
-   in `exp.h' and `condition_parser.y' ! */
+   in 'exp.h' and 'condition_parser.y' ! */
 
 %union {
 	long   lval;
@@ -142,8 +142,8 @@ line:    E_VAR_TOKEN '=' expr      { vars_assign( $3, $1 ); }
          list1 ']'                 { vars_arr_lhs( $4 ) }
          ass                       { fsc2_assert( EDL.Var_Stack == NULL ); }
        | E_FUNC_TOKEN '(' list2 ')'{ vars_pop( func_call( $1 ) ); }
-       | E_FUNC_TOKEN '['          { eprint( FATAL, SET, "`%s' is a predefined"
-											 " function.\n", $1->name );
+       | E_FUNC_TOKEN '['          { print( FATAL, "'%s' is a predefined "
+											"function.\n", $1->name );
 	                                 THROW( EXCEPTION ); }
        | E_PPOS '=' expr           { p_set( $1, P_POS, $3 ); }
        | E_PPOS E_PLSA expr        { p_set( $1, P_POS, vars_add(
@@ -232,10 +232,10 @@ expr:    E_INT_TOKEN unit          { $$ = apply_unit( vars_push( INT_VAR, $1 ),
          ')'                       { $$ = func_call( $1 ); }
          unit                      { $$ = apply_unit( $<vptr>5, $6 ); }
        | E_VAR_REF
-       | E_VAR_TOKEN '('           { print( FATAL, "`%s' isn't a function.\n", 
+       | E_VAR_TOKEN '('           { print( FATAL, "'%s' isn't a function.\n", 
 											$1->name );
 	                                 THROW( EXCEPTION ); }
-       | E_FUNC_TOKEN '['          { print( FATAL, "`%s' is a predefined"
+       | E_FUNC_TOKEN '['          { print( FATAL, "'%s' is a predefined"
 											 " function.\n", $1->name );
 	                                 THROW( EXCEPTION ); }
        | E_PPOS                    { $$ = p_get_by_num( $1, P_POS ); }

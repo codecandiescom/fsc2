@@ -157,8 +157,8 @@ WS          [\n\t ]+
 
 			/* handling of invalid input (i.e. everything else) */
 .           {
-				eprint( FATAL, SET, "Invalid input in DEVICES section: "
-						"`%s'.\n", devicestext );
+				print( FATAL, "Invalid input in DEVICES section: '%s'.\n",
+					   devicestext );
 				THROW( EXCEPTION );
 			}
 
@@ -183,7 +183,7 @@ int devices_parser( FILE *in )
 
 	if ( EDL.compilation.sections[ DEVICES_SECTION ] )
 	{
-		eprint( FATAL, SET, "Multiple instances of DEVICES section label.\n" );
+		print( FATAL, "Multiple instances of DEVICES section label.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -192,8 +192,8 @@ int devices_parser( FILE *in )
 		if ( EDL.compilation.sections[ i ] == UNSET )
 		    continue;
 
-		eprint( FATAL, SET, "Sorry, the DEVICES section has to be the very "
-				"first section.\n" );
+		print( FATAL, "Sorry, DEVICES section must be the very first "
+			   "section.\n" );
 		THROW( EXCEPTION );
 	}
 

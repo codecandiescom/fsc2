@@ -43,7 +43,7 @@ Var *f_abort( Var *v )
 
 	v = v;                       /* keeps the compiler happy */
 
-	eprint( NO_ERROR, SET, "Exit due to call of abort().\n" );
+	print( NO_ERROR, "Exit due to call of abort().\n" );
 
 	if ( Internals.mode != TEST )
 	{

@@ -83,7 +83,7 @@ IDENT    [A-Za-z0-9][A-Za-z_0-9]*
 
 			/* handling of EOF within a comment -> fatal error */
 <<EOF>>     {
-				eprint( FATAL, UNSET, "%s: End of device data base `%s' in "
+				eprint( FATAL, UNSET, "%s: End of device data base '%s' in "
 							   "comment starting at line %ld.\n",
 							   EDL.Fname, Comm_Lc );
 				THROW( EXCEPTION );
@@ -101,7 +101,7 @@ IDENT    [A-Za-z0-9][A-Za-z_0-9]*
 
 {EREM1}     {  /* End of comment without start */
 				eprint( FATAL, UNSET, "End of comment found at line %ld in "
-							   "device data base `%s'.\n", EDL.Lc, EDL.Fname );
+							   "device data base '%s'.\n", EDL.Lc, EDL.Fname );
 				THROW( EXCEPTION );
 			}
 
@@ -124,7 +124,7 @@ IDENT    [A-Za-z0-9][A-Za-z_0-9]*
 {IDENT}     return 1;
 
 .           {
-				eprint( FATAL, UNSET, "Syntax error in devices data base `%s' "
+				eprint( FATAL, UNSET, "Syntax error in devices data base '%s' "
 							   "at line %ld.\n", EDL.Fname, EDL.Lc );
 				THROW( EXCEPTION );
 			}
@@ -149,7 +149,7 @@ bool device_list_parse( void )
 
 	if ( ( devices_listin = fopen( EDL.Fname, "r" ) ) == NULL )
 	{
-		eprint( FATAL, UNSET, "Can't open device data base `%s'.\n",
+		eprint( FATAL, UNSET, "Can't open device data base '%s'.\n",
 					   EDL.Fname );
 		return FAIL;
 	}

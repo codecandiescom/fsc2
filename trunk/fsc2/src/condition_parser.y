@@ -65,7 +65,7 @@ int condition_gobble;
 
 
 /* The following union and the token definitions MUST be identical to
-   the ones in `exp.h' and `exp_run_parser.y' ! */
+   the ones in 'exp.h' and 'exp_run_parser.y' ! */
 
 %union {
 	long   lval;
@@ -175,10 +175,10 @@ expr:    E_INT_TOKEN unit         { if ( ! condition_gobble )
 		                                 vars_pop( $1 ); }
        | E_STR_TOKEN              { if ( ! condition_gobble )
 		                                 $$ = vars_push( STR_VAR, $<sptr>1 ); }
-       | E_VAR_TOKEN '('          { eprint( FATAL, SET, "`%s' isn't a "
-											"function.\n", $1->name );
+       | E_VAR_TOKEN '('          { print( FATAL, "'%s' isn't a function.\n",
+										   $1->name );
 	                                THROW( EXCEPTION ); }
-       | E_FUNC_TOKEN '['         { eprint( FATAL, SET, "`%s' is a predefined "
+       | E_FUNC_TOKEN '['         { print( FATAL, "'%s' is a predefined "
                                             "function.\n", $1->name );
 	                                THROW( EXCEPTION ); }
        | E_PPOS                   { if ( ! condition_gobble )
@@ -324,7 +324,7 @@ static void conditionerror( const char *s )
 {
 	s = s;                    /* avoid compiler warning */
 
-	eprint( FATAL, SET, "Syntax error in loop or IF/UNLESS condition.\n" );
+	print( FATAL, "Syntax error in loop or IF/UNLESS condition.\n" );
 	THROW( EXCEPTION );
 }
 

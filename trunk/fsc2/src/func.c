@@ -317,8 +317,7 @@ Var *func_get_long( const char *name, int *acc, bool flag )
 	{
 		if ( flag )
 		{
-			eprint( FATAL, SET, "%s(): Function has not been loaded.\n",
-					f->name );
+			print( FATAL, "%s(): Function has not been loaded.\n", f->name );
 			THROW( EXCEPTION );
 		}
 		else                     /* some callers do their own error handling */
@@ -405,8 +404,8 @@ Var *func_call( Var *f )
 
 		if ( ac > abs_len )
 		{
-			eprint( WARN, SET, "%s(): Too many arguments, discarding "
-					"superfluous arguments.\n", f->name );
+			print( WARN, "%s(): Too many arguments, discarding superfluous "
+				   "arguments.\n", f->name );
 
 			for ( ac = 0, ap = f->next; ac < abs_len; ++ac, ap = ap->next )
 				/* empty */ ;
@@ -421,9 +420,9 @@ Var *func_call( Var *f )
 
 		if ( f->dim >= 0 && ac < f->dim )
 		{
-			eprint( FATAL, SET, "%s(): Function expects %d argument%s but "
-					"only %d where found.\n", f->name, f->dim,
-					f->dim == 1 ? "" : "s", ac );
+			print( FATAL, "%s(): Function expects %d argument%s but only %d "
+				   "where found.\n",
+				   f->name, f->dim, f->dim == 1 ? "" : "s", ac );
 			THROW( EXCEPTION );
 		}
 	}
@@ -451,10 +450,9 @@ Var *func_call( Var *f )
 				eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
 						__FILE__, __LINE__ );
 			else
-				eprint( FATAL, SET, "Function %s() from module %s.so messed "
-						"up the variable stack at %s:%d.\n",
-						EDL.Call_Stack->f->name,
-						EDL.Call_Stack->f->device->name, __FILE__, __LINE__ );
+				print( FATAL, "Function %s() from module %s.so messed up the "
+					   "variable stack at %s:%d.\n", EDL.Call_Stack->f->name,
+					   EDL.Call_Stack->f->device->name, __FILE__, __LINE__ );
 			call_pop( );
 			RETHROW( );
 		}
@@ -476,10 +474,9 @@ Var *func_call( Var *f )
 			eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
 					__FILE__, __LINE__ );
 		else
-			eprint( FATAL, SET, "Function %s() from module %s.so messed "
-					"up the variables stack at %s:%d.\n",
-					EDL.Call_Stack->f->name, EDL.Call_Stack->f->device->name,
-					__FILE__, __LINE__ );
+			print( FATAL, "Function %s() from module %s.so messed up the "
+				   "variables stack at %s:%d.\n", EDL.Call_Stack->f->name,
+				   EDL.Call_Stack->f->device->name, __FILE__, __LINE__ );
 		THROW( EXCEPTION );
 	}
 #endif

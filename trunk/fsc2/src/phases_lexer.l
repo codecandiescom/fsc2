@@ -259,7 +259,7 @@ int phases_parser( FILE *in )
 
 	if ( EDL.compilation.sections[ PHASES_SECTION ] )
 	{
-		eprint( FATAL, SET, "Multiple instances of PHASES section label.\n" );
+		print( FATAL, "Multiple instances of PHASES section label.\n" );
 		THROW( EXCEPTION );
 	}
 	EDL.compilation.sections[ PHASES_SECTION ] = SET;
@@ -281,8 +281,7 @@ int phases_parser( FILE *in )
 	}
 	CATCH( INVALID_INPUT_EXCEPTION )
 	{
-		eprint( FATAL, SET, "Invalid input in PHASES section: `%s'.\n",
-				phasestext );
+		print( FATAL, "Invalid input in PHASES section: '%s'.\n", phasestext );
 		THROW( EXCEPTION );
 	}
 	OTHERWISE

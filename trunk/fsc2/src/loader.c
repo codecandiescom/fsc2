@@ -395,8 +395,8 @@ static void add_function( int num, void *new_func, Device *new_dev )
 		   strcasecmp( new_dev->generic_type,
 					   Fncts[ num ].device->generic_type ) != 0 ) )
 	{
-		eprint( FATAL, SET, "Functions with name %s() are defined in modules "
-				"of different types, '%s' and '%s'.\n",
+		eprint( FATAL, UNSET, "Functions with name %s() are defined in "
+				"modules of different types, '%s' and '%s'.\n",
 				Fncts[ num ].name, Fncts[ num ].device->name, new_dev->name );
 		THROW( EXCEPTION );
 	}

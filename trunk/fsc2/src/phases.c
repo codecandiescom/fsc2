@@ -42,8 +42,8 @@ void acq_seq_start( long acq_num, long acq_type )
 
 	if ( ASeq[ acq_num ].defined )
 	{
-		eprint( FATAL, SET, "Acquisition sequence numbered %ld has already "
-				"been defined.\n", acq_num );
+		print( FATAL, "Acquisition sequence numbered %ld has already been "
+			   "defined.\n", acq_num );
 		THROW( EXCEPTION );
 	}
 
@@ -118,8 +118,8 @@ Phase_Sequence *phase_seq_start( long phase_seq_num )
 	{
 		if ( cp->num == phase_seq_num )
 		{
-			eprint( FATAL, SET, "Phase sequence numbered %ld has already been "
-					"defined.\n", cp->num );
+			print( FATAL, "Phase sequence numbered %ld has already been "
+				   "defined.\n", cp->num );
 			THROW( EXCEPTION );
 		}
 		cp = cp->next;
@@ -175,7 +175,7 @@ void phases_add_phase( Phase_Sequence *p, int phase_type )
 
 void acq_miss_list( void )
 {
-	eprint( FATAL, SET, "Missing acquisition type list.\n" );
+	print( FATAL, "Missing acquisition type list.\n" );
 	THROW( EXCEPTION );
 }
 
@@ -187,8 +187,7 @@ void acq_miss_list( void )
 
 void phase_miss_list( Phase_Sequence *p )
 {
-	eprint( FATAL, SET, "Missing list of phases for phase sequence %d.\n",
-			p->num );
+	print( FATAL, "Missing list of phases for phase sequence %d.\n", p->num );
 	THROW( EXCEPTION );
 }
 

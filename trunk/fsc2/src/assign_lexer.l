@@ -407,7 +407,7 @@ WS          [\n=: ]+
 
 			/* all pulse related keywords... */
 
-			/* combinations of pulse and property, e.g. `P3.LEN' */
+			/* combinations of pulse and property, e.g. 'P3.LEN' */
 
 {P}"."{F}   {
 				assignlval.vptr = p_get( assigntext, P_FUNC );
@@ -463,8 +463,8 @@ WS          [\n=: ]+
 			}
 
 {CTRL}      {
-				eprint( FATAL, SET, "Flow control structures can't be used "
-						"in the ASSIGNMENTS section.\n" );
+				print( FATAL, "Flow control structures can't be used in the "
+					   ASSIGNMENTS section.\n" );
 				THROW( EXCEPTION );
 			}
 
@@ -489,8 +489,8 @@ WS          [\n=: ]+
 
 					if ( acc == ACCESS_EXP )
 					{
-						eprint( FATAL, SET, "Function `%s' can only be used "
-                                "in the EXPERIMENT section.\n", assigntext );
+						print( FATAL, "Function '%s' can only be used in the "
+							   "EXPERIMENT section.\n", assigntext );
 						THROW( EXCEPTION );
 					}
 					return FUNC_TOKEN;
@@ -500,8 +500,8 @@ WS          [\n=: ]+
 
 				if ( ( assignlval.vptr = vars_get( assigntext ) ) == NULL )
 				{
-					eprint(	FATAL, SET, "Variable or function `%s' has not "
-								   "been declared or loaded.\n", assigntext );
+					print(	FATAL, "Variable or function '%s' has not been "
+							"declared or loaded.\n", assigntext );
 					 THROW( EXCEPTION );
 				}
 
@@ -540,8 +540,8 @@ WS          [\n=: ]+
 
 			/* handling of invalid input (i.e. everything else) */
 .           {
-				eprint( FATAL, SET, "Invalid input in ASSIGNMENTS section: "
-						"`%s'.\n", assigntext );
+				print( FATAL, "Invalid input in ASSIGNMENTS section: '%s'.\n",
+					   assigntext );
 				THROW( EXCEPTION );
 			}
 
@@ -566,8 +566,7 @@ int assignments_parser( FILE *in )
 
 	if ( EDL.compilation.sections[ ASSIGNMENTS_SECTION ] )
 	{
-		eprint( FATAL, SET, "Multiple instances of ASSIGNMENTS section "
-		        "label.\n" );
+		print( FATAL, "Multiple instances of ASSIGNMENTS section label.\n" );
 		THROW( EXCEPTION );
 	}
 	EDL.compilation.sections[ ASSIGNMENTS_SECTION ] = SET;
@@ -604,7 +603,7 @@ static void set_cur_pulser( void )
 
 	if ( ( Cur_Pulser = T_atol( t + 1 ) - 1 ) >= EDL.Num_Pulsers )
 	{
-		eprint( FATAL, SET, "There is no pulser #%ld\n", Cur_Pulser + 1 );
+		print( FATAL, "There is no pulser #%ld\n", Cur_Pulser + 1 );
 		THROW( EXCEPTION );
 	}
 }

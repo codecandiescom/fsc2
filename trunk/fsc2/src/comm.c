@@ -77,7 +77,7 @@
    size of a shared memory segment. But this limit seems to be rather high
    (32768 kB!), so I hope this is never going to happen...  If it should ever
    happen this will result in the measurement getting stopped with an
-   `internal communication error' message printed out.
+   'internal communication error' message printed out.
 
    A final problem that can't be handled by the program is what happens if the
    program gets killed in a way that it can't release the shared memory

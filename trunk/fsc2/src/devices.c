@@ -164,8 +164,8 @@ void device_add( const char *name )
 
 	if ( dl == NULL )
 	{
-		eprint( FATAL, SET, "Device '%s' not found in device name data "
-				"base.\n", dev_name );
+		print( FATAL, "Device '%s' not found in device name data base.\n",
+			   dev_name );
 		T_free( real_name );
 		T_free( dev_name );
 		THROW( EXCEPTION );
@@ -177,8 +177,8 @@ void device_add( const char *name )
 		if ( ! strcmp( cd->name, dev_name ) ||
 			 ( real_name != NULL && ! strcmp( cd->name, real_name ) ) )
 		{
-			eprint( FATAL, SET, "Device '%s' is listed twice in the "
-					"DEVICES section%s%s.\n", dev_name, real_name != NULL ?
+			print( FATAL, "Device '%s' is listed twice in the DEVICES "
+				   "section%s%s.\n", dev_name, real_name != NULL ?
 					", the first time possibly under the name " : "",
 					real_name != NULL ? real_name : "" );
 			THROW( EXCEPTION );

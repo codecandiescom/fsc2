@@ -82,7 +82,7 @@ static const char *get_construct_name( int type );
   be painfully slow but also difficult since what we read is not the real EDL
   file(s) but a pipe that passes to us what remains from the input files (there
   could even be more than one when #include directives had been used) after
-  filtering through the program `fsc2_clean'. Second, we will have to run
+  filtering through the program 'fsc2_clean'. Second, we will have to run
   through the experiment section at least three times, first for syntax and
   sanity checks, then for the test run and finally for really doing the
   experiment. Third, handling of loops becomes rather simple because we only
@@ -136,21 +136,21 @@ void store_exp( FILE *in )
 		{
 			if ( parenthesis_count > 0 )
 			{
-				eprint( FATAL, SET, "Unbalanced parentheses before ON_STOP "
-						"label.\n" );
+				print( FATAL, "Unbalanced parentheses before ON_STOP "
+					   "label.\n" );
 				THROW( EXCEPTION );
 			}
 
 			if ( square_brace_count > 0 )
 			{
-				eprint( FATAL, SET, "Unbalanced square braces before ON_STOP "
+				print( FATAL, "Unbalanced square braces before ON_STOP "
 						"label.\n" );
 				THROW( EXCEPTION );
 			}
 
 			if ( cb_stack != NULL )
 			{
-				eprint( FATAL, SET, "ON_STOP label found within a block.\n" );
+				print( FATAL, "ON_STOP label found within a block.\n" );
 				THROW( EXCEPTION );
 			}
 
@@ -211,7 +211,7 @@ void store_exp( FILE *in )
 			case ')' :
 				if ( --parenthesis_count < 0 )
 				{
-					eprint( FATAL, SET, "Found ')' without matching '('.\n" );
+					print( FATAL, "Found ')' without matching '('.\n" );
 					THROW( EXCEPTION );
 				}
 				break;
@@ -219,15 +219,13 @@ void store_exp( FILE *in )
 			case '{' :
 				if ( parenthesis_count != 0 )
 				{
-					eprint( FATAL, SET, "More '(' than ')` found before a "
-							"'{'.\n" );
+					print( FATAL, "More '(' than ')' found before a '{'.\n" );
 					THROW( EXCEPTION );
 				}
 
 				if ( square_brace_count != 0 )
 				{
-					eprint( FATAL, SET, "More '[' than ']` found before a "
-							"'{'.\n" );
+					print( FATAL, "More '[' than ']' found before a '{'.\n" );
 					THROW( EXCEPTION );
 				}
 
@@ -239,21 +237,19 @@ void store_exp( FILE *in )
 			case '}' :
 				if ( parenthesis_count != 0 )
 				{
-					eprint( FATAL, SET, "More '(' than ')` found before a "
-							"'}'.\n" );
+					print( FATAL, "More '(' than ')' found before a '}'.\n" );
 					THROW( EXCEPTION );
 				}
 
 				if ( square_brace_count != 0 )
 				{
-					eprint( FATAL, SET, "More '[' than ']` found before a "
-							"'}'.\n" );
+					print( FATAL, "More '[' than ']' found before a '}'.\n" );
 					THROW( EXCEPTION );
 				}
 
 				if ( ! pop_curly_brace( ) )
 				{
-					eprint( FATAL, SET, "Found '}' without matching '{'.\n" );
+					print( FATAL, "Found '}' without matching '{'.\n" );
 					THROW( EXCEPTION );
 				}
 
@@ -269,7 +265,7 @@ void store_exp( FILE *in )
 			case ']' :
 				if ( --square_brace_count < 0 )
 				{
-					eprint( FATAL, SET, "Found ']' without matching '['.\n" );
+					print( FATAL, "Found ']' without matching '['.\n" );
 					THROW( EXCEPTION );
 				}
 				break;
@@ -304,15 +300,15 @@ void store_exp( FILE *in )
 			case ';' :
 				if ( parenthesis_count != 0 )
 				{
-					eprint( FATAL, SET, "More '(' than ')` found at end of"
+					print( FATAL, "More '(' than ')' found at end of"
 							"statement.\n" );
 					THROW( EXCEPTION );
 				}
 
 				if ( square_brace_count != 0 )
 				{
-					eprint( FATAL, SET, "More '[' than ']` found at end of "
-							"of statement.\n" );
+					print( FATAL, "More '[' than ']' found at end of of "
+						   "statement.\n" );
 					THROW( EXCEPTION );
 				}
 				break;
@@ -320,8 +316,8 @@ void store_exp( FILE *in )
 			case BREAK_TOK : case NEXT_TOK :
 				if ( ! in_loop )
 				{
-					eprint( FATAL, SET, "%s statement not within a loop.\n",
-							ret == BREAK_TOK ? "BREAK" : "NEXT" );
+					print( FATAL, "%s statement not within a loop.\n",
+						   ret == BREAK_TOK ? "BREAK" : "NEXT" );
 					THROW( EXCEPTION );
 				}
 				break;
@@ -561,7 +557,7 @@ static void setup_while_or_repeat( int type, long *pos )
 	   block beginning with the first token after the keyword. Handle nested
 	   WHILE, UNTIL, REPEAT, FOR, FOREVER, IF or UNLESS tokens by calling the
 	   appropriate setup functions recursively. BREAK and NEXT tokens store
-	   in `start' a pointer to the block header, i.e. the WHILE, UNTIL, REPEAT,
+	   in 'start' a pointer to the block header, i.e. the WHILE, UNTIL, REPEAT,
 	   FOR or FOREVER token. */
 
 	for ( ; i < EDL.prg_length; i++ )
@@ -611,7 +607,7 @@ static void setup_while_or_repeat( int type, long *pos )
 		}
 	}
 
-	eprint( FATAL, UNSET, "Missing `}' for %s loop starting at %s:%ld.\n",
+	eprint( FATAL, UNSET, "Missing '}' for %s loop starting at %s:%ld.\n",
 			get_construct_name( type ), cur->Fname, cur->Lc );
 	THROW( EXCEPTION );
 }
@@ -623,7 +619,7 @@ static void setup_while_or_repeat( int type, long *pos )
 /* ->                                                                   */
 /*    1. pointer to number of token                                     */
 /*    2. Pointer to program token of enclosing while, repeat or for     */
-/*       loop (needed for handling of `break' and `continue').          */
+/*       loop (needed for handling of 'break' and 'continue').          */
 /*----------------------------------------------------------------------*/
 
 static void setup_if_else( long *pos, Prg_Token *cur_wr )
@@ -709,7 +705,7 @@ static void setup_if_else( long *pos, Prg_Token *cur_wr )
 
 				if ( in_if )
 				{
-					eprint( FATAL, UNSET, "Missing `}' for ELSE block "
+					eprint( FATAL, UNSET, "Missing '}' for ELSE block "
 							"belonging to IF-ELSE construct starting at "
 							"%s:%ld.\n", cur->Fname, cur->Lc );
 					THROW( EXCEPTION );
@@ -758,7 +754,7 @@ static void setup_if_else( long *pos, Prg_Token *cur_wr )
 		}
 	}
 
-	eprint( FATAL, UNSET, "Missing `}' for %s starting at %s:%ld.\n",
+	eprint( FATAL, UNSET, "Missing '}' for %s starting at %s:%ld.\n",
 			in_if ? "IF/UNLESS" : "ELSE", cur->Fname, cur->Lc );
 	THROW( EXCEPTION );
 }
@@ -863,7 +859,7 @@ void exp_test_run( void )
 		{
 			token_count++;
 
-			/* Give the `Stop Test' button a chance to get tested... */
+			/* Give the 'Stop Test' button a chance to get tested... */
 
 			if ( ! Internals.just_testing && token_count >= CHECK_FORMS_AFTER )
 			{
@@ -1025,7 +1021,7 @@ void exp_test_run( void )
 /* parser the tokens that got stored while running store_exp().   */
 /* The only exceptions are tokens dealing with flow control - for */
 /* most of them the parser gets signaled an end of file, only the */
-/* `}' is handled by the parser itself (but also as an EOF but    */
+/* '}' is handled by the parser itself (but also as an EOF but    */
 /* also doing some sanity checks).                                */
 /*----------------------------------------------------------------*/
 
@@ -1122,8 +1118,7 @@ int conditionlex( void )
 			case ':' :                 /* separator in for loop condition */
 				if ( in_for_lex )
 					return 0;
-				eprint( FATAL, SET, "Syntax error in condition at token "
-						"`:'.\n" );
+				print( FATAL, "Syntax error in condition at token ':'.\n" );
 				THROW( EXCEPTION );
 
 			case E_STR_TOKEN :
@@ -1159,8 +1154,8 @@ int conditionlex( void )
 				return E_VAR_REF;
 
 			case '=' :
-				eprint( FATAL, SET, "For comparisons `==' must be used ('=' "
-						"is for assignments only).\n", EDL.Fname, EDL.Lc );
+				print( FATAL, "For comparisons '==' must be used ('=' is for "
+					   "assignments only).\n", EDL.Fname, EDL.Lc );
 				THROW( EXCEPTION );
 
 			default :
@@ -1250,7 +1245,7 @@ void get_max_repeat_count( Prg_Token *cur )
 
 	vars_pop( EDL.Var_Stack );
 	cur->count.repl.act = 0;
-	EDL.cur_prg_token++;                   /* skip the `{' */
+	EDL.cur_prg_token++;                   /* skip the '{' */
 	return;
 }
 
@@ -1268,7 +1263,7 @@ void get_for_cond( Prg_Token *cur )
 
 	EDL.cur_prg_token++;             /* skip the FOR keyword */
 
-	/* Make sure token is a variable and next token is `=' */
+	/* Make sure token is a variable and next token is '=' */
 
 	if ( EDL.cur_prg_token->token != E_VAR_TOKEN ||
 		 ( EDL.cur_prg_token + 1 )->token != '=' )
@@ -1304,8 +1299,8 @@ void get_for_cond( Prg_Token *cur )
 
 	/* Now get start value to be assigned to loop variable */
 
-	EDL.cur_prg_token +=2;                    /* skip variable and `=' token */
-	in_for_lex = SET;                         /* allow `:' as separator */
+	EDL.cur_prg_token +=2;                    /* skip variable and '=' token */
+	in_for_lex = SET;                         /* allow ':' as separator */
 	conditionparse( );                        /* get start value */
 	fsc2_assert( EDL.Var_Stack->next == NULL );   /* Paranoia as usual... */
 
@@ -1358,7 +1353,7 @@ void get_for_cond( Prg_Token *cur )
 
 	/* Get FOR loop end value */
 
-	EDL.cur_prg_token++;                           /* skip the `:' */
+	EDL.cur_prg_token++;                           /* skip the ':' */
 	conditionparse( );                             /* get end value */
 	fsc2_assert( EDL.Var_Stack->next == NULL );    /* Paranoia as usual... */
 
@@ -1373,7 +1368,7 @@ void get_for_cond( Prg_Token *cur )
 		THROW( EXCEPTION );
 	}
 
-	/* If loop variable is integer `end' must also be integer */
+	/* If loop variable is integer 'end' must also be integer */
 
 	if ( cur->count.forl.act->type == INT_VAR &&
 		 EDL.Var_Stack->type == FLOAT_VAR )
@@ -1414,7 +1409,7 @@ void get_for_cond( Prg_Token *cur )
 	}
 	else                                        /* get for loop increment */
 	{
-		EDL.cur_prg_token++;                    /* skip the `:' */
+		EDL.cur_prg_token++;                    /* skip the ':' */
 		conditionparse( );                      /* get end value */
 		in_for_lex = UNSET;
 		fsc2_assert( EDL.Var_Stack->next == NULL ); /* Paranoia as usual... */
@@ -1429,7 +1424,7 @@ void get_for_cond( Prg_Token *cur )
 			THROW( EXCEPTION );
 		}
 
-		/* If loop variable is an integer, `incr' must also be integer */
+		/* If loop variable is an integer, 'incr' must also be integer */
 
 		if ( cur->count.forl.act->type == INT_VAR &&
 			 EDL.Var_Stack->type == FLOAT_VAR )
@@ -1473,7 +1468,7 @@ void get_for_cond( Prg_Token *cur )
 	}
 
 	in_for_lex = UNSET;
-	EDL.cur_prg_token++;                /* skip the `{' */
+	EDL.cur_prg_token++;                /* skip the '{' */
 	return;
 
 }
@@ -1514,18 +1509,18 @@ bool test_for_cond( Prg_Token *cur )
 
 	if ( cur->count.forl.act->type == INT_VAR )
 	{
-		if ( ! sign )     /* `incr' has positive sign */
+		if ( ! sign )     /* 'incr' has positive sign */
 			return cur->count.forl.act->val.lval <= cur->count.forl.end.lval;
-		else              /* `incr' has negative sign */
+		else              /* 'incr' has negative sign */
 			return cur->count.forl.act->val.lval >= cur->count.forl.end.lval;
 	}
 	else
 	{
-		if ( ! sign )     /* `incr' has positive sign */
+		if ( ! sign )     /* 'incr' has positive sign */
 			return cur->count.forl.act->val.dval <=
 					   ( cur->count.forl.end.type == INT_VAR ?
 						 cur->count.forl.end.lval : cur->count.forl.end.dval );
-		else              /* `incr' has negative sign */
+		else              /* 'incr' has negative sign */
 			return cur->count.forl.act->val.dval >=
 					   ( cur->count.forl.end.type == INT_VAR ?
 						 cur->count.forl.end.lval : cur->count.forl.end.dval );
@@ -1541,8 +1536,8 @@ bool test_for_cond( Prg_Token *cur )
 
 
 /*------------------------------------------------------------------------*/
-/* This functions saves or restores all variables depending on `flag'. If */
-/* `flag' is set the variables are saved, otherwise they are copied back  */
+/* This functions saves or restores all variables depending on 'flag'. If */
+/* 'flag' is set the variables are saved, otherwise they are copied back  */
 /* from the backup into the normal variables space. Don't use the saved   */
 /* variables - the internal pointers are not adjusted. Currently, for     */
 /* string variables the string is not saved but just the pointer to the   */

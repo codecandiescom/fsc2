@@ -376,6 +376,9 @@ void print( int severity, const char *fmt, ... )
 			space_left -= 5;
 		}
 
+		/* Print EDL file name and line number unless we're running a hook
+		   function */
+
 		if ( ! Internals.in_hook && EDL.Fname )
 		{
 			count = snprintf( cp, ( size_t ) space_left, "%s:%ld: ",

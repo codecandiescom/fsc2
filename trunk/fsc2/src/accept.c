@@ -316,7 +316,7 @@ static void accept_1d_data( long x_index, long curve, int type, char *ptr )
 #ifndef NDEBUG
 	if ( curve >= G.nc )
 	{
-		eprint( FATAL, SET, "Internal error detected at %s:%d, there is no "
+		eprint( FATAL, UNSET, "Internal error detected at %s:%d, there is no "
 				"curve %ld.\n", __FILE__, __LINE__, curve + 1 );
 		THROW( EXCEPTION );
 	}
@@ -487,7 +487,7 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 #ifndef NDEBUG
 	if ( curve >= G.nc )
 	{
-		eprint( FATAL, SET, "Internal error detected at %s:%d, there is no "
+		eprint( FATAL, UNSET, "Internal error detected at %s:%d, there is no "
 				"curve %ld.\n", __FILE__, __LINE__, curve + 1 );
 		THROW( EXCEPTION );
 	}
@@ -673,7 +673,7 @@ static long get_number_of_new_points( char **ptr, int type )
 #ifndef NDEBUG
 	if ( len <= 0 )
 	{
-		eprint( FATAL, SET, "Internal error detected at %s:%d, number of "
+		eprint( FATAL, UNSET, "Internal error detected at %s:%d, number of "
 				"points to be drawn: %ld.\n", __FILE__, __LINE__, len );
 		THROW( EXCEPTION );
 	}
