@@ -916,8 +916,18 @@ static void setup_canvas( Canvas *c, FL_OBJECT *obj )
 
 	c->obj = obj;
 
-	c->w = obj->w;
-	c->h = obj->h;
+	/* We need to make sure the canvas hasn't a size less than 1 otherwise
+	   hell will break loose... */
+
+	if ( obj->w > 0 )
+		c->w = obj->w;
+	else
+		c->w = 1;
+	if ( obj->h > 0 )
+		c->h = obj->h;
+	else
+		c->h = 1;
+
 	create_pixmap( c );
 
 	fl_add_canvas_handler( c->obj, Expose, ch, ( void * ) c );
