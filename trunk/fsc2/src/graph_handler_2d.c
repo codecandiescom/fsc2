@@ -11,7 +11,6 @@ static void release_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev,
 								Canvas *c );
 static void motion_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev,
 							   Canvas *c );
-static void save_scale_state_2d( Curve_2d *cv );
 static bool change_x_range_2d( Canvas *c );
 static bool change_y_range_2d( Canvas *c );
 static bool change_xy_range_2d( Canvas *c );
@@ -808,10 +807,13 @@ bool zoom_z_2d( Canvas *c )
 void shift_XPoints_of_curve_2d( Canvas *c, Curve_2d *cv )
 {
 	long i;
-	int dx, dy, dz;
+	int dx = 0,
+		dy = 0,
+		dz;
 	int factor;
-	Scaled_Point *sp;
-	XPoint *xp, *xps;
+	Scaled_Point *sp = cv->points;
+	XPoint *xp = cv->xpoints,
+		   *xps = cv->xpoints_s;
 
 
 	/* Additionally pressing the right mouse button increases the amount the
@@ -844,8 +846,7 @@ void shift_XPoints_of_curve_2d( Canvas *c, Curve_2d *cv )
 
 	cv->up = cv->down = cv->left = cv->right = SET;
 
-	for ( sp = cv->points, xp = cv->xpoints, xps = cv->xpoints_s, i = 0;
-		  i < G.nx * G.ny; sp++, xp++, xps++, i++ )
+	for ( i = 0; i < G.nx * G.ny; sp++, xp++, xps++, i++ )
 	{
 		xp->x = i2shrt( xp->x + dx );
 		xp->y = i2shrt( xp->y + dy );
@@ -1156,6 +1157,7 @@ void repaint_canvas_2d( Canvas *c )
 	long index, index_1, index_2;
 	unsigned int w, h;
 	Curve_2d *cv;
+	Pixmap pm;
 	double x_pos, y_pos, z_pos, z_pos_1, z_pos_2;
 
 
@@ -1173,8 +1175,10 @@ void repaint_canvas_2d( Canvas *c )
 
 	/* Otherwise use another level of buffering and copy the pixmap with
 	   the curves into another pixmap */
-
-	XCopyArea( G.d, c->pm, G.pm, c->gc, 0, 0, c->w, c->h, 0, 0 );
+	
+	pm = XCreatePixmap( G.d, FL_ObjWin( c->obj ), c->w, c->h,
+						fl_get_canvas_depth( c->obj ) );
+	XCopyArea( G.d, c->pm, pm, c->gc, 0, 0, c->w, c->h, 0, 0 );
 
 	/* Draw the rubber box if needed (i.e. when the left button pressed
 	   in the canvas currently to be drawn) */
@@ -1203,7 +1207,7 @@ void repaint_canvas_2d( Canvas *c )
 			h = - c->box_h;
 		}
 
-		XDrawRectangle( G.d, G.pm, c->box_gc, x, y, w, h );
+		XDrawRectangle( G.d, pm, c->box_gc, x, y, w, h );
 	}
 
 	/* If this is the canvas and the left and either the middle or the right
@@ -1268,7 +1272,7 @@ void repaint_canvas_2d( Canvas *c )
 				strcat( buf, " " );
 
 				if ( G.font != NULL )
-					XDrawImageString( G.d, G.pm, cv->font_gc, 5,
+					XDrawImageString( G.d, pm, cv->font_gc, 5,
 									  G.font_asc + 5, buf, strlen( buf ) );
 			}
 		}
@@ -1334,24 +1338,25 @@ void repaint_canvas_2d( Canvas *c )
 					sprintf( buf, "%#g,  %#g,  %#g ", x_pos, y_pos,
 							 z_pos_1 - z_pos_2 );
 				if ( G.font != NULL )
-					XDrawImageString( G.d, G.pm, cv->font_gc, 5,
+					XDrawImageString( G.d, pm, cv->font_gc, 5,
 									  G.font_asc + 5, buf, strlen( buf ) );
 			}
 
-			XDrawArc( G.d, G.pm, c->font_gc,
+			XDrawArc( G.d, pm, c->font_gc,
 					  G.start[ X ] - 5, G.start[ Y ] - 5, 10, 10, 0, 23040 );
 
-			XDrawLine( G.d, G.pm, c->box_gc, G.start[ X ], G.start[ Y ],
+			XDrawLine( G.d, pm, c->box_gc, G.start[ X ], G.start[ Y ],
 					   c->ppos[ X ], G.start[ Y ] );
-			XDrawLine( G.d, G.pm, c->box_gc, c->ppos[ X ], G.start[ Y ],
+			XDrawLine( G.d, pm, c->box_gc, c->ppos[ X ], G.start[ Y ],
 					   c->ppos[ X ], c->ppos[ Y ] );
 		}
 	}
 
 	/* Finally copy the buffer pixmap onto the screen */
 
-	XCopyArea( G.d, G.pm, FL_ObjWin( c->obj ), c->gc,
+	XCopyArea( G.d, pm, FL_ObjWin( c->obj ), c->gc,
 			   0, 0, c->w, c->h, 0, 0 );
+	XFreePixmap( G.d, pm );
 	XFlush( G.d );
 }
 

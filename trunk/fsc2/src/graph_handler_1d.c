@@ -11,7 +11,6 @@ static void release_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
 								Canvas *c );
 static void motion_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
 							   Canvas *c );
-static void save_scale_state_1d( Curve_1d *cv );
 static bool change_x_range_1d( Canvas *c );
 static bool change_y_range_1d( Canvas *c );
 static bool change_xy_range_1d( Canvas *c );
@@ -1030,6 +1029,7 @@ void repaint_canvas_1d( Canvas *c )
 	unsigned int w, h;
 	Curve_1d *cv;
 	double x_pos, y_pos;
+	Pixmap pm;
 
 
 	/* If no or either the middle or the left button is pressed no extra stuff
@@ -1047,7 +1047,9 @@ void repaint_canvas_1d( Canvas *c )
 	/* Otherwise use another level of buffering and copy the pixmap with
 	   the curves into another pixmap */
 
-	XCopyArea( G.d, c->pm, G.pm, c->gc, 0, 0, c->w, c->h, 0, 0 );
+	pm = XCreatePixmap( G.d, FL_ObjWin( c->obj ), c->w, c->h,
+						fl_get_canvas_depth( c->obj ) );
+	XCopyArea( G.d, c->pm, pm, c->gc, 0, 0, c->w, c->h, 0, 0 );
 
 	/* Draw the rubber box if needed (i.e. when the left button pressed
 	   in the canvas currently to be drawn) */
@@ -1076,7 +1078,7 @@ void repaint_canvas_1d( Canvas *c )
 			h = - c->box_h;
 		}
 
-		XDrawRectangle( G.d, G.pm, c->box_gc, x, y, w, h );
+		XDrawRectangle( G.d, pm, c->box_gc, x, y, w, h );
 	}
 
 	/* If this is the canvas and the left and either the middle or the right
@@ -1110,7 +1112,7 @@ void repaint_canvas_1d( Canvas *c )
 				strcat( buf, " " );
 
 				if ( G.font != NULL )
-					XDrawImageString( G.d, G.pm, cv->font_gc, 5,
+					XDrawImageString( G.d, pm, cv->font_gc, 5,
 									  ( G.font_asc + 3 ) * ( i + 1 ) +
 									  G.font_desc * i + 2,
 									  buf, strlen( buf ) );
@@ -1130,26 +1132,27 @@ void repaint_canvas_1d( Canvas *c )
 
 				sprintf( buf, " %#g,  %#g ", x_pos, y_pos );
 				if ( G.font != NULL )
-					XDrawImageString( G.d, G.pm, cv->font_gc, 5,
+					XDrawImageString( G.d, pm, cv->font_gc, 5,
 									  ( G.font_asc + 3 ) * ( i + 1 ) +
 									  G.font_desc * i + 2,
 									  buf, strlen( buf ) );
 			}
 
-			XDrawArc( G.d, G.pm, G.curve[ 0 ]->gc,
+			XDrawArc( G.d, pm, G.curve[ 0 ]->gc,
 					  G.start[ X ] - 5, G.start[ Y ] - 5, 10, 10, 0, 23040 );
 
-			XDrawLine( G.d, G.pm, c->box_gc, G.start[ X ], G.start[ Y ],
+			XDrawLine( G.d, pm, c->box_gc, G.start[ X ], G.start[ Y ],
 					   c->ppos[ X ], G.start[ Y ] );
-			XDrawLine( G.d, G.pm, c->box_gc, c->ppos[ X ], G.start[ Y ],
+			XDrawLine( G.d, pm, c->box_gc, c->ppos[ X ], G.start[ Y ],
 					   c->ppos[ X ], c->ppos[ Y ] );
 		}
 	}
 
 	/* Finally copy the buffer pixmap onto the screen */
 
-	XCopyArea( G.d, G.pm, FL_ObjWin( c->obj ), c->gc,
+	XCopyArea( G.d, pm, FL_ObjWin( c->obj ), c->gc,
 			   0, 0, c->w, c->h, 0, 0 );
+	XFreePixmap( G.d, pm );
 	XFlush( G.d );
 }
 

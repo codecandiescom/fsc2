@@ -713,36 +713,23 @@ void setup_canvas( Canvas *c, FL_OBJECT *obj )
 }
 
 
-/*---------------------------------*/
-/* Creates a pixmap for buffering. */
-/*---------------------------------*/
+/*----------------------------------------------*/
+/* Creates a pixmap for a canvas for buffering. */
+/*----------------------------------------------*/
 
 void create_pixmap( Canvas *c )
 {
-    Window root;
-    int x, y;               /* x- and y-position */
-    unsigned int w,         /* width */
-		         h,         /* height */
-		         bw,        /* border width */
-		         d;         /* depth */
 	char dashes[ ] = { 2, 2 };
 
 
-    XGetGeometry( G.d, FL_ObjWin( c->obj ), &root, &x, &y, &w, &h, &bw, &d );
     c->gc = XCreateGC( G.d, FL_ObjWin( c->obj ), 0, 0 );
-    c->pm = XCreatePixmap( G.d, FL_ObjWin( c->obj ), c->w, c->h, d );
+    c->pm = XCreatePixmap( G.d, FL_ObjWin( c->obj ), c->w, c->h,
+						   fl_get_canvas_depth( c->obj ) );
 
 	if ( c == &G.canvas )
 	{
-		if ( G.is_init )
-		{
-			G.pm = XCreatePixmap( G.d, FL_ObjWin( c->obj ), c->w,
-								  c->h, d );
-			if ( G.dim == 1 )
-				XSetForeground( G.d, c->gc, fl_get_pixel( FL_BLACK ) );
-			else
-				XSetForeground( G.d, c->gc, fl_get_pixel( FL_INACTIVE ) );
-		}
+		if ( G.is_init && G.dim == 1 )
+			XSetForeground( G.d, c->gc, fl_get_pixel( FL_BLACK ) );
 		else
 			XSetForeground( G.d, c->gc, fl_get_pixel( FL_INACTIVE ) );
 	}
@@ -764,9 +751,9 @@ void create_pixmap( Canvas *c )
 }
 
 
-/*-----------------------------------*/
-/* Deletes the pixmap for buffering. */
-/*-----------------------------------*/
+/*------------------------------------------------*/
+/* Deletes the pixmap for a canvas for buffering. */
+/*------------------------------------------------*/
 
 void delete_pixmap( Canvas *c )
 {
@@ -774,11 +761,7 @@ void delete_pixmap( Canvas *c )
 	XFreePixmap( G.d, c->pm );
 
 	if ( G.is_init )
-	{
 		XFreeGC( G.d, c->box_gc );
-		if ( c == &G.canvas )
-			XFreePixmap( G.d, G.pm );
-	}
 }
 
 
@@ -791,12 +774,20 @@ void create_colors( void )
 	int rgb[ 3 ];
 
 
+	/* Create the colors between blue and red */
+
 	for ( i = 0; i < NUM_COLORS; i++ )
 	{
 		i2rgb( ( double ) i / ( double ) ( NUM_COLORS - 1 ), rgb );
 		fl_mapcolor( i + FL_FREE_COL1 + 1, 
 					 rgb[ RED ], rgb[ GREEN ], rgb[ BLUE ] );
 	}
+
+	/* Create a creamy kind of white and a dark violet for values too large
+	   or too small */
+
+	fl_mapcolor( NUM_COLORS + FL_FREE_COL1 + 1, 255, 248, 220 );
+	fl_mapcolor( NUM_COLORS + FL_FREE_COL1 + 2, 96, 0, 96 );
 }
 
 
@@ -813,7 +804,7 @@ void redraw_axis( int coord )
 
 	/* First draw the label - for the x-axis it's just done by drawing the
 	   string while for the y- and z-axis we have to copy a pixmap since the
-	   label is a string rotated by 90 degree which we have drawn in advance */
+	   label is a string rotated by 90 degree thta has been drawn in advance */
 
 	if ( coord == X )
 	{
@@ -910,8 +901,14 @@ void make_label_string( char *lstr, double num, int res )
 }
 
 
-/*----------------------------------------------------------*/
-/*----------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/
+/* This routine is called from functions (like the function showing the file */
+/* selector box) to switch off the special states entered by pressing one or */
+/* more of the mouse buttons. Otherwise, after these functions are finished  */
+/* (usually with all mouse buttons released) the drawing routines would      */
+/* think that the buttons are still pressed, forcing the user to press the   */
+/* buttons again, just to get the ButtonRelease event.                       */
+/*---------------------------------------------------------------------------*/
 
 void switch_off_special_cursors( void )
 {
@@ -919,25 +916,45 @@ void switch_off_special_cursors( void )
 	{
 		G.button_state = G.raw_button_state = 0;
 
-		if ( G.drag_canvas == 1 )
+		if ( G.drag_canvas == 1 )         /* x-axis window */
 		{
 			fl_reset_cursor( FL_ObjWin( G.x_axis.obj ) );
 			G.x_axis.is_box = UNSET;
-			repaint_canvas_1d( &G.x_axis );
+			if ( G.dim == 1 )
+				repaint_canvas_1d( &G.x_axis );
+			else
+				repaint_canvas_2d( &G.x_axis );
 		}
 
-		if ( G.drag_canvas == 2 )
+		if ( G.drag_canvas == 2 )         /* y-axis window */
 		{
 			fl_reset_cursor( FL_ObjWin( G.y_axis.obj ) );
 			G.y_axis.is_box = UNSET;
-			repaint_canvas_1d( &G.y_axis );
+			if ( G.dim == 1 )
+				repaint_canvas_1d( &G.y_axis );
+			else
+				repaint_canvas_2d( &G.y_axis );			
 		}
 
-		if ( G.drag_canvas == 3 )
+		if ( G.drag_canvas == 3 )         /* canvas window in 1D mode */
 		{
 			fl_reset_cursor( FL_ObjWin( G.canvas.obj ) );
 			G.canvas.is_box = UNSET;
 			repaint_canvas_1d( &G.canvas );
+		}
+
+		if ( G.drag_canvas == 4 )         /* z-axis window */
+		{
+			fl_reset_cursor( FL_ObjWin( G.z_axis.obj ) );
+			G.canvas.is_box = UNSET;
+			repaint_canvas_2d( &G.z_axis );
+		}
+
+		if ( G.drag_canvas == 7 )         /* canvas window in 2D mode */
+		{
+			fl_reset_cursor( FL_ObjWin( G.canvas.obj ) );
+			G.canvas.is_box = UNSET;
+			repaint_canvas_2d( &G.canvas );
 		}
 	}
 }
@@ -1042,7 +1059,6 @@ void fs_button_callback( FL_OBJECT *a, long b )
 {
 	int state;
 	int i;
-	Curve_1d *cv;
 
 
 	a = a;
@@ -1057,72 +1073,57 @@ void fs_button_callback( FL_OBJECT *a, long b )
 
 	state = fl_get_button( run_form->full_scale_button );
 
-	if ( state == 1 )
+	if ( G.dim == 1 )            /* for 1D display */
 	{
-		if ( G.dim == 1 )
-			G.is_fs = SET;
-		else
+		if ( state == 1 )        /* full scale got switched on */
 		{
-			if ( G.active_curve != -1 )
-				G.curve_2d[ G.active_curve ]->is_fs = SET;
+			G.is_fs = SET;
+
+			/* Store data of previous state... */
+
+			for ( i = 0; i < G.nc; i++ )
+				save_scale_state_1d( G.curve[ i ] );
+
+			/* ... and rescale to full scale */
+
+			fs_rescale_1d( );
+			redraw_all_1d( );
+			fl_set_object_helper( run_form->full_scale_button,
+								  "Switch off automatic rescaling" );
 		}
-		fl_set_object_helper( run_form->full_scale_button,
-							  "Switch off automatic rescaling" );
-	}
-	else
-	{
-		if ( G.dim == 1 )
+		else        /* full scale got switched off */
 		{
 			G.is_fs = UNSET;
 			fl_set_object_helper( run_form->full_scale_button,
 								  "Rescale curves to fit into the window\n"
 								  "and switch on automatic rescaling" );
 		}
-		else
+
+	}
+	else                         /* for 2D display */
+	{
+		if ( state == 1 )        /* full scale got switched on */
 		{
+			fl_set_object_helper( run_form->full_scale_button,
+								  "Switch off automatic rescaling" );
+
 			if ( G.active_curve != -1 )
-				G.curve_2d[ G.active_curve ]->is_fs = UNSET;
+			{
+				save_scale_state_2d( G.curve_2d[ G.active_curve ] );
+				G.curve_2d[ G.active_curve ]->is_fs = SET;
+				fs_rescale_2d( G.curve_2d[ G.active_curve ] );
+				redraw_all_2d( );
+			}
+		}
+		else                     /* full scale got switched off */
+		{	
 			fl_set_object_helper( run_form->full_scale_button,
 								  "Rescale curve to fit into the window\n"
 								  "and switch on automatic rescaling" );
+
+			if ( G.active_curve != -1 )
+				G.curve_2d[ G.active_curve ]->is_fs = UNSET;
 		}
-	}
-
-	if ( G.dim == 1 )
-	{
-		if ( state == 1 )        /* if button got switched on */
-		{
-			/* Store data of previous state... */
-
-			for ( i = 0; i < G.nc; i++ )
-			{
-				cv = G.curve[ i ];
-
-				cv->old_s2d[ X ] = cv->s2d[ X ];
-				cv->old_s2d[ Y ] = cv->s2d[ Y ];
-				cv->old_shift[ X ] = cv->shift[ X ];
-				cv->old_shift[ Y ] = cv->shift[ Y ];
-
-				cv->can_undo = SET;
-			}
-
-			/* ... and rescale to full scale */
-
-			fs_rescale_1d( );
-		}
-
-		redraw_all_1d( );
-	}
-	else if ( G.active_curve != -1 )
-	{
-		if ( state == 1 )
-		{
-			G.curve_2d[ G.active_curve ]->is_fs = SET;
-			fs_rescale_2d( G.curve_2d[ G.active_curve ] );
-			redraw_all_2d( );
-		}
-		else
-			G.curve_2d[ G.active_curve ]->is_fs = UNSET;
 	}
 }
 
