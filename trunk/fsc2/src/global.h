@@ -256,7 +256,7 @@ enum {
 
 
 
-#define DO_QUIT ( do_quit && react_to_do_quit )
+#define DO_STOP ( do_quit && react_to_do_quit )
 
 
 /* return codes from function get_lib_symbol() (in func.c) */

@@ -76,7 +76,7 @@ Var *bla( Var *v )
 	if ( ! TEST_RUN )
 		while ( 1 )
 		{
-			if ( DO_QUIT )
+			if ( DO_STOP )
 				THROW( USER_BREAK_EXCEPTION );
 		}
 
@@ -120,7 +120,7 @@ Var *int_slice( Var *v )
 
 	if ( ! TEST_RUN )
 		usleep( 10000 );
-	if ( DO_QUIT )
+	if ( DO_STOP )
 		THROW( USER_BREAK_EXCEPTION );
 
 	return ret;

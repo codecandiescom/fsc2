@@ -572,15 +572,15 @@ static void do_quit_handler( int sig_type )
 static void do_measurement( void )
 {
 	Prg_Token *cur;
-	bool react_to_do_quit = SET;
 
 
+	react_to_do_quit = SET;
 	TEST_RUN = UNSET;
 
-	TRY
+	while ( cur_prg_token != NULL &&
+			cur_prg_token < prg_token + prg_length )
 	{
-		while ( cur_prg_token != NULL &&
-				cur_prg_token < prg_token + prg_length )
+		TRY
 		{
 			if ( do_quit && react_to_do_quit )
 			{
@@ -593,6 +593,8 @@ static void do_measurement( void )
 					cur_prg_token = NULL;             /* -> stop immediately */
 				else                                  /* goto ON_STOP part */
 					cur_prg_token = prg_token + On_Stop_Pos;
+
+				do_quit = UNSET;
 
 				continue;
 			}
@@ -675,8 +677,15 @@ static void do_measurement( void )
 					exp_runparse( );               /* (re)start the parser */
 					break;
 			}
-		}
 
-		TRY_SUCCESS;
+			TRY_SUCCESS;
+		}
+		CATCH( USER_BREAK_EXCEPTION )
+		{
+			TRY_SUCCESS;
+			vars_del_stack( );     /* variable stack is probably messed up */
+			if ( ! react_to_do_quit )
+				THROW( EXCEPTION );
+		}
 	}
 }

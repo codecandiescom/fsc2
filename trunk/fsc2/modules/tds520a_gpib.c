@@ -613,7 +613,7 @@ double tds520a_get_area( int channel, WINDOW *w, bool use_cursor )
 
 	do
 	{
-		if ( DO_QUIT )
+		if ( DO_STOP )
 			THROW( USER_BREAK_EXCEPTION );
 
 		length = 40;
@@ -711,7 +711,7 @@ bool tds520a_get_curve( int channel, WINDOW *w, double **data, long *length,
 
 	do
 	{
-		if ( DO_QUIT )
+		if ( DO_STOP )
 			THROW( USER_BREAK_EXCEPTION );
 
 		len = 10;
@@ -801,7 +801,7 @@ double tds520a_get_amplitude( int channel, WINDOW *w, bool use_cursor )
 
 	do
 	{
-		if ( DO_QUIT )
+		if ( DO_STOP )
 			THROW( USER_BREAK_EXCEPTION );
 
 		length = 40;

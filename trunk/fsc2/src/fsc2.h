@@ -158,7 +158,7 @@ int pd[ 4 ];                    /* pipe descriptors */
 int child_pid = 0;              /* pid of child */
 volatile bool do_send = UNSET;  /* globals used with the signal handlers */
 volatile bool do_quit = UNSET;
-volatile bool react_to_do_quit = SET;
+bool react_to_do_quit = SET;
 bool exit_hooks_are_run = UNSET;
 
 Graphics G;
@@ -210,6 +210,7 @@ extern int pd[ ];                  /* pipe descriptors */
 extern int child_pid;              /* pid of child */
 extern volatile bool do_send;      /* globals used with the signal handlers */
 extern volatile bool do_quit;
+extern bool react_to_do_quit;
 extern bool exit_hooks_are_run;
 
 extern Graphics G;
