@@ -6,13 +6,23 @@ sr810;
 
 VARIABLES:
 
+freq      =  14 MHz;
+min_freq  =   1 MHz;
+max_freq  =  40 MHz;
+old_freq;
+
+step_freq     =  20 kHz;
+min_step_freq =   5 kHz;
+max_step_freq = 500 kHz;
+
+atten = -100 db;
+
 I = 1;
 
 B0, B1, B2, B3, B4, B5;
-S1;
+S1, S2, S3;
 
 
-atten = -100 db;
 new_atten;
 STATE = 0;
 
@@ -20,8 +30,7 @@ STATE = 0;
 PREPARATIONS:
 
 
-synthesizer_frequency( 14 MHz );
-synthesizer_step_frequency( 20 kHz );
+synthesizer_frequency( freq );
 synthesizer_attenuation( atten );
 synthesizer_use_table( );
 
@@ -34,46 +43,103 @@ lockin_lock_keyboard( 0 );
 
 B0 = button_create( "NORMAL_BUTTON", "Clear curve" );
 
+S1 = slider_create( "VALUE_SLIDER", min_freq, max_freq, "RF frequency (MHz)" );
+slider_value( S1, freq );
 B1 = button_create( "RADIO_BUTTON", "Sweep frequency up" );
 B2 = button_create( "RADIO_BUTTON", B1, "Stop frequency sweep" );
 B3 = button_create( "RADIO_BUTTON", B1, "Sweep frequency down" );
 button_state( B2, 1 );
 
+S2 = slider_create( "VALUE_SLIDER", min_step_freq, max_step_freq,
+					"Step frequency (kHz)" );
+slider_value( S2, step_freq );
+
 B4 = button_create( "PUSH_BUTTON", "RF power on/off" );
 
-S1 = slider_create( "VALUE_SLIDER", -136 db, -3 db, "Attenuation (db)" );
-slider_value( S1, atten );
+S3 = slider_create( "VALUE_SLIDER", -136 db, -3 db, "Attenuation (db)" );
+slider_value( S3, atten );
+
 B5 = button_create( "PUSH_BUTTON", "Pause" );
 
 FOREVER {
 
-	IF button_state( B5 ) {
-		wait( 0.5 s );
-		NEXT;
+	/* Clear curve if the corresponding button has been pressed */
+
+	IF button_state( B0 ) {
+		clear_curve( );
+		I = 1;
 	}
 
-	IF button_state( B1 ) {
-		synthesizer_sweep_up( );
-	}
-	IF button_state( B3 ) {
-		synthesizer_sweep_down( );
+	/* If the frequency slider has been changed set the new frequency */
+
+	old_freq = freq;
+	freq = slider_value( S1 );
+	IF  freq != old_freq {
+		synthesizer_frequency( freq );
 	}
 
-	new_atten = slider_value( S1 );
-	IF atten != new_atten {
-		synthesizer_attenuation( new_atten );
-		atten = new_atten;
-	}
+	/* Get new step frequency */
+
+	step_freq = slider_value( S2 );
+
+	/* Check if RF power on/off state has changed */
 
 	IF button_state( B4 ) != STATE {
 		STATE = STATE ~ 1;
 		synthesizer_state( STATE );
 	}
 
-	IF button_state( B0 ) {
-		clear_curve( );
-		I = 1;
+	/* Check if attenuation has been changed */
+
+	new_atten = slider_value( S3 );
+	IF atten != new_atten {
+		synthesizer_attenuation( new_atten );
+		atten = new_atten;
 	}
+
+	/* If pause is on go back to start after short sleeping period */
+
+	IF button_state( B5 ) {
+		wait( 0.5 s );
+		NEXT;
+	}
+
+	/* If sweep up button is pressed calculate new frequency. If it's still
+	   within the limits set synthesizer and slider accordingly, otherwise
+	   set to maximum frequency and active stopped sweep button */
+
+	IF button_state( B1 ) {
+		old_freq = freq;
+		freq += step_freq;
+		IF freq > max_freq {
+			freq = max_freq;
+			button_state( B2, 1 );
+		}
+		IF freq != old_freq {
+			slider_value( S1, freq );
+			synthesizer_frequency( freq );
+		}
+	}
+
+	/* If sweep down button is pressed calculate new frequency. If it's still
+	   within the limits set synthesizer and slider accordingly, otherwise
+	   set to minimum frequency and active stopped sweep button */
+
+	IF button_state( B3 ) {
+		old_freq = freq;
+		freq += step_freq;
+		IF freq < max_freq {
+			freq = min_freq;
+			button_state( B2, 1 );
+		}
+		IF freq != old_freq {
+			slider_value( S1, freq );
+			synthesizer_frequency( freq );
+		}
+	}
+
+	/* Get new value from lock-in and display it and wait for duration of
+	   lock-in time constant */
 
 	display( I, lockin_get_data( ) );
 	I += 1;
