@@ -407,7 +407,7 @@ void spectrapro_300i_set_turret( long turret )
 
 	fsc2_assert( turret >= 1 && turret <= MAX_TURRETS );
 
-	if ( spectrapro_300i.grating.turret == turret - 1 )
+	if ( spectrapro_300i.turret == turret - 1 )
 		return;
 
 	buf = get_string( "%ld TURRET", turret );
@@ -460,7 +460,7 @@ void spectrapro_300i_set_grating( long grating )
 				 grating - spectrapro_300i.turret * 3 <= 3 &&
 				 spectrapro_300i.grating[ grating - 1 ].is_installed );
 
-	if ( spectrapro_300i.grating.current_grating == grating - 1 )
+	if ( spectrapro_300i.current_grating == grating - 1 )
 		return;
 
 	buf = get_string( "%ld GRATING", grating );

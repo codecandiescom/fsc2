@@ -3082,7 +3082,7 @@ applied afterwards on the received data). Wile hardware binning is
 faster (mainly due to the reduced time required for the transfer) in
 some cases it might lead to artifacts when the sum of the values of all
 pixels combined in binning would be larger than 65535. In this case the
-value after binning is always 65536, leading to an effect that looks
+value after binning is always 65535, leading to an effect that looks
 like saturation of the region of the chip.
 
 The binning method argument must be either @code{0} or one of the
@@ -3358,15 +3358,15 @@ detector angle (in degrees), i.e.@: the angle by which the plane of the
 CCD chip is rotated out of the focal plane.
 
 In the calibration file you will find lines like the following for each
-of the grating:
+of the gratings:
 @example
 INCLUSION_ANGLE_1  =   30.3
 FOCAL_LENGTH_1     =   301.2 mm
 DETECTOR_ANGLE_1   =   0.324871
 @end example
 @noindent
-The number appended to each of the keywords stands for the grating they
-are to be used with.
+The number appended to each of the keywords stands for the grating (in
+this example the first) they are to be used with.
 
 Calling the function will load the data from the calibration file. These
 calibration data are required to be able to calculate correct
@@ -3483,6 +3483,50 @@ e.g.@: the monochromator has been opened up. Since the grating adjust
 values are stored in non-volatile memory of the monochomator the setting
 won't get lost when the monochromator is switched off.
 
+The function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} script.
+
+
+@anchor{monochromator_calibrate}
+@item monochromator_calibrate()
+@findex monochromator_calibrate()
+This function is for use in the dispersion calibration of a grating,
+i.e.@: the procedure where from a set of at least 4 measured positions
+of known lines (at at least two different center wavelengths) the
+optimum values for the inclusion angle, the focal length and the
+detector angle are determined.  This function requires that the module
+for a CCD camera is available that returns information about the number
+of pixels of the CCD chip and the distance between pixels.
+
+The function expects a minimum of 5 arguments. The first is the grating
+number (an integer between 1 and the maximum number of installed
+gratings). The second is an array of the wavelengths of at least 4
+measured lines (given in m). The third is the array of the center
+wavelengths used in the measurements of the lines (also given in m). The
+fourth is the array of the diffraction orders the lines where measured
+at. The fifth required array is the array of the measured line
+positions, given in pixel positions on the CCD chip (relative to the
+left edge, where the leftmost pixel is corresponds to position 1). All
+arrays must have the same length.
+
+Using these values the function will now try to find the best fit for
+first the inclusion angle, then the focal length and finally the
+detector angle using a Simplex algorithm.
+
+You may influence the way the Simplex algorithm tries to find the
+optimum values by specifying seven further, optional arguments: @w{1.@:
+the} end criterion for the fit (per default this value is set to
+@code{1.0e-9}, @w{2.@: the} start value for the inclusion angle (in
+degrees), @w{3.@: the} start value for the focal length (in m), @w{4.@:
+the} start value for the detector angle (in degrees), @w{5.@: the} start
+deviation for the inclusion angle (in degrees), @w{6.@: the} start
+deviation for the focal length (in m) and finally, @w{7.@: the} start
+deviation for the detector angle (in degrees).
+
+After the function found what it guesses to be the optimum paramters it
+returns an (1-dimensional) array with three elements, where the first
+element is the inclusion angle (in degrees), the second element is the
+focal length (in m) and the third is the detector angle (in degrees).
 
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.

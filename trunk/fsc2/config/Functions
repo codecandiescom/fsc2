@@ -309,6 +309,7 @@ monochromator_set_calibration, -1, EXP;   // manually set calibration
 monochromator_load_calibration, -1, EXP;  // read in calibration file
 monochromator_zero_offset, -1, EXP;
 monochromator_grating_adjust, -1, EXP;
+monochromator_calibrate, -1, EXP;
 
 
 /* Functions exported by the power supply (Thurlby&Thandar PL330DP) */

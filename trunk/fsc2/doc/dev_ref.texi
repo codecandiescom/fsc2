@@ -56,6 +56,7 @@
 * rs690::         Interface Technology RS690 Word Generator (Berlin 360 GHz)
 * s_band_magnet_broad::   S-band Magnet Power Supply (broad range)
 * s_band_magnet_narrow::  S-band Magnet Power Supply (narrow range)
+* spectrapro_300i::  Acton Research SpectraPro-300i Monochromator
 * sr510::         Stanford Research Lock-In Amplifier SR510
 * sr530::         Stanford Research Lock-In Amplifier SR530
 * sr810::         Stanford Research Lock-In Amplifier SR810
@@ -93,7 +94,7 @@ gaussmeter used, with @code{er035m} range is @w{460 G} to @w{2390 G},
 with @code{bh15} range is @w{-50 G} to @w{23000 G}.
 
 @paragraphindent 0
-@strong{Controlled via}: Serial port (@file{/dev/ttyS1} or @code{COM2}).
+@strong{Controlled via}: Serial port
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -129,7 +130,7 @@ depends on the gaussmeter used, with @code{er035m} range is @w{1460 G}
 to @w{19900 G}, with @code{bh15} range is @w{-50 G} to @w{23000 G}.
 
 @paragraphindent 0
-@strong{Controlled via}: Serial port (@file{/dev/ttyS0} or @code{COM1}).
+@strong{Controlled via}: Serial port
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -505,7 +506,7 @@ with the magnet power supply controllers @code{aeg_x_band} and
 range is @w{1460 G} to @w{19900 G}.
 
 @paragraphindent 0
-@strong{Controlled via}: Serial port (@file{/dev/ttyS1} or @code{COM2}).
+@strong{Controlled via}: Serial port
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -569,7 +570,7 @@ with @code{F0} probe it is @w{460 G} to @w{2390 G}, with @code{F1} probe
 the range is @w{1460 G} to @w{19900 G}.
 
 @paragraphindent 0
-@strong{Controlled via}: Serial port (@file{/dev/ttyS0} or @code{COM1}).
+@strong{Controlled via}: Serial port
 
 
 @paragraphindent 0
@@ -1174,7 +1175,7 @@ control to be used with the Frankfurt S-band spectrometer. Field range
 is 0 G to 2047.5 G with a resolution of 0.5 G.
 
 @paragraphindent 0
-@strong{Controlled via}: Serial port (@file{/dev/ttyS1} or @code{COM2}).
+@strong{Controlled via}: Serial port
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -1190,7 +1191,7 @@ is 0 G to 2047.5 G with a resolution of 0.5 G.
 @end multitable
 
 
-@node s_band_magnet_narrow, sr510, s_band_magnet_broad, Device Reference
+@node s_band_magnet_narrow, spectrapro_300i, s_band_magnet_broad, Device Reference
 @iftex
 @subheading S-band Magnet Power Supply (narrow range)
 @end iftex
@@ -1207,7 +1208,7 @@ control to be used with Frankfurt S-band spectrometer. Field range is
 1070 G to 1479.5 G with a resolution of 0.1 G.
 
 @paragraphindent 0
-@strong{Controlled via}: Serial port (@file{/dev/ttyS1} or @code{COM2}).
+@strong{Controlled via}: Serial port
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -1223,8 +1224,45 @@ control to be used with Frankfurt S-band spectrometer. Field range is
 @end multitable
 
 
+@node spectrapro_300i, sr510, s_band_magnet_narrow, Device Reference
+@iftex
+@subheading Acton Research SpectraPro-300i Monochromator
+@end iftex
+@ifnottex
+@section Acton Research SpectraPro-300i Monochromator
+@end ifnottex
 
-@node sr510, sr530, s_band_magnet_narrow, Device Reference
+@paragraphindent 0
+@strong{Module name}: @code{spectrapro_300i}
+
+@paragraphindent 0
+@strong{Description}: Acton Research SpectraPro-300i monochromator, up
+to 3 gratings on up to 3 turrets.
+
+@paragraphindent 0
+@strong{Controlled via}:  Serial port
+
+@paragraphindent 0
+@strong{Supported functions}:
+@multitable @columnfractions .45 .45
+@item @code{monochromator_name()}             @tab @ref{monochromator_name}
+@item @code{monochromator_grating()}          @tab @ref{monochromator_grating}
+@item @code{monochromator_wavelength()}       @tab @ref{monochromator_wavelength}
+@item @code{monochromator_groove_density()}   @tab @ref{monochromator_groove_density}
+@item @code{monochromator_wavelength_axis()}  @tab @ref{monochromator_wavelength_axis}
+@item @code{monochromator_calc_wavelength()}  @tab @ref{monochromator_calc_wavelength}
+@item @code{monochromator_set_calibration()}  @tab @ref{monochromator_set_calibration}
+@item @code{monochromator_load_calibration()} @tab @ref{monochromator_load_calibration}
+@item @code{monochromator_zero_offset()}      @tab @ref{monochromator_zero_offset}
+@item @code{monochromator_grating_adjust()}   @tab @ref{monochromator_grating_adjust}
+@item @code{monochromator_turret()}           @tab @ref{monochromator_turret}
+@item @code{monochromator_install_grating()}  @tab @ref{monochromator_install_grating}
+@item @code{monochromator_calibrate()}        @tab @ref{monochromator_calibrate}
+@end multitable
+
+
+
+@node sr510, sr530, spectrapro_300i, Device Reference
 @iftex
 @subheading Stanford Research Lock-In Amplifier SR510
 @end iftex

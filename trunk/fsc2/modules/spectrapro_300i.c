@@ -950,8 +950,6 @@ static double spectrapro_300i_conv( long g, double cwl, long num_pixels,
 
 Var *monochromator_set_calibration( Var *v )
 {
-	double init_offset;
-	double init_adjust;
 	long grating;
 	double inclusion_angle;
 	double focal_length;
@@ -1009,32 +1007,6 @@ Var *monochromator_set_calibration( Var *v )
 		return vars_push( INT_VAR, 1 );
 	}
 
-	init_offset = get_double( v, "init offset value" );
-	if ( fabs( init_offset ) > 1.0 )
-	{
-		print( FATAL, "Init offset value not within interval [-1,1].\n" );
-		THROW( EXCEPTION );
-	}
-
-	if ( ( v = vars_pop( v ) ) == NULL )
-	{
-		print( FATAL, "Missing arguments.\n" );
-		THROW( EXCEPTION );
-	}
-
-	init_adjust = get_double( v, "init adjust value" );
-	if ( fabs( init_offset ) > 1.0 )
-	{
-		print( FATAL, "Init adjust value not within interval [-1,1].\n" );
-		THROW( EXCEPTION );
-	}
-
-	if ( ( v = vars_pop( v ) ) == NULL )
-	{
-		print( FATAL, "Missing arguments.\n" );
-		THROW( EXCEPTION );
-	}
-
 	inclusion_angle = get_double( v, "inclusion angle" );
 	if ( inclusion_angle <= 0.0 )
 	{
@@ -1067,12 +1039,10 @@ Var *monochromator_set_calibration( Var *v )
 
 	too_many_arguments( v );
 
-	spectrapro_300i.grating[ grating - 1 ].init_offset = init_offset;
-	spectrapro_300i.grating[ grating - 1 ].init_adjust = init_adjust;
 	spectrapro_300i.grating[ grating - 1 ].inclusion_angle = inclusion_angle;
-	spectrapro_300i.grating[ grating - 1 ].focal_length = focal_length;
-	spectrapro_300i.grating[ grating - 1 ].detector_angle = detector_angle;
-	spectrapro_300i.grating[ grating - 1 ].is_calib = SET;
+	spectrapro_300i.grating[ grating - 1 ].focal_length    = focal_length;
+	spectrapro_300i.grating[ grating - 1 ].detector_angle  = detector_angle;
+	spectrapro_300i.grating[ grating - 1 ].is_calib        = SET;
 	spectrapro_300i.use_calib = SET;
 
 	return vars_push( INT_VAR, 1 );
@@ -1088,7 +1058,7 @@ Var *monochromator_set_calibration( Var *v )
 /* monochromator.                                                         */
 /*------------------------------------------------------------------------*/
 
-Var *monochromator_init_offset( Var *v )
+Var *monochromator_zero_offset( Var *v )
 {
 	long grating;
 	double offset;
@@ -1165,7 +1135,7 @@ Var *monochromator_init_offset( Var *v )
 /* monochromator.                                                    */
 /*-------------------------------------------------------------------*/
 
-Var *monochromator_init_adjust( Var *v )
+Var *monochromator_grating_adjust( Var *v )
 {
 	long grating;
 	double gadjust;
@@ -1231,7 +1201,7 @@ Var *monochromator_init_adjust( Var *v )
 /* Function for calculating the calibration values of a grating of the  */
 /* monochromator. It takes the results of at least four measurements    */
 /* of pixel offsets for known lines from the center of the detector (at */
-/* possibly different center wavelengths) and thries to to find the     */
+/* possibly different center wavelengths) and tries to to find the      */
 /* values for the inclusion angle, focal length and detector angle that */
 /* reproduce these experimental values with the lowest deviation by     */
 /* doing a simplex minimization. Unfortunately, when trying to minimize */
@@ -1257,7 +1227,7 @@ Var *monochromator_init_adjust( Var *v )
 /* 12. start deviation for detector angle                               */
 /*----------------------------------------------------------------------*/
 
-Var *monochromator_calibration( Var *v )
+Var *monochromator_calibrate( Var *v )
 {
 	CALIB_PARAMS c;
 	Var *cv;

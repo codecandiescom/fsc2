@@ -357,8 +357,9 @@ Var *ccd_camera_binning_method( Var *v )
 }
 
 
-/*--------------------------------------------------*/
-/*--------------------------------------------------*/
+/*----------------------------------------------------*/
+/* Function for query or setting if the exposure time */
+/*----------------------------------------------------*/
 
 Var *ccd_camera_exposure_time( Var *v )
 {
@@ -373,7 +374,7 @@ Var *ccd_camera_exposure_time( Var *v )
 
 	rs_spec10->ccd.exp_time = ( uns32 ) lrnd( et / rs_spec10->ccd.exp_res );
 
-	if ( rs_spec10->ccd.exp_time <= 0 )
+	if ( rs_spec10->ccd.exp_time < 1 )
 	{
 		print( FATAL, "Invalid exposure time of %s.\n",
 			   rs_spec10_ptime( et ) );
@@ -406,8 +407,10 @@ Var *ccd_camera_exposure_time( Var *v )
 }
 
 
-/*-----------------------------------------------*/
-/*-----------------------------------------------*/
+/*-----------------------------------------------------*/
+/* Function to query or set the number of clear cycles */
+/* to be done before an exposure.                      */
+/*-----------------------------------------------------*/
 
 Var *ccd_camera_clear_cycles( Var *v )
 {

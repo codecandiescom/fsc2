@@ -23,8 +23,6 @@
 
 # Calibration parameters for first grating (1-120-750)
 
-INIT_OFFSET_1      =  0.0
-INIT_ADJUST_1      =  0.0
 INCLUSION_ANGLE_1  =  35
 FOCAL_LENGTH_1     =  300 mm
 DETECTOR_ANGLE_1   =  0
@@ -32,8 +30,6 @@ DETECTOR_ANGLE_1   =  0
 
 # Calibration parameters for second grating (1-030-750)
 
-INIT_OFFSET_2      =  0.0
-INIT_ADJUST_2      =  0.0
 INCLUSION_ANGLE_2  = 35
 FOCAL_LENGTH_2     = 0.3 m
 DETECTOR_ANGLE_2   = 0

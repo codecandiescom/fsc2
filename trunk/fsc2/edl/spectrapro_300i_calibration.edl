@@ -137,7 +137,7 @@ Spec[ * ];                /* array of currently displayed spectrum */
 
 I;                        /* counter */
 new_val, New_val;         /* intermediate values */
-
+First_adjust;
 scale[ 2 ];               /* x-axis scaling values */
 
 l[ * ];                   /* array of line wavelengths */
@@ -147,7 +147,6 @@ px[ * ];                  /* array of line positions (in pixel, relative
 							 to center of the CCD chip) */
 calib[ NUM_GRATINGS, * ]; /* matrix of calibration parameter */
 
-CWL_is_set;
 io,
 ig,
 io_new,
@@ -301,6 +300,8 @@ FOREVER
 
 		} ELSE {
 
+			/* Create the form for the dispersion calibration */
+
 			CWL = input_create( "FLOAT_INPUT", 0.0, "Center wavelength [nm]" );
 			cwl = 0.0;
 
@@ -378,7 +379,7 @@ FOREVER
 			}
 
 			draw_marker_1d( round( cp0 ) );
-			output_value( LP, cp0 - 1 + scale[ 1 ] );
+			output_value( LP, ( cp0 - 1 ) * scale[ 2 ] + scale[ 1 ] );
 
 			/* Now set a slightly different offset - use a randomized value
 			   to avoid doing the same all over again in case the user does
@@ -412,13 +413,13 @@ FOREVER
 
 			clear_marker_1d( );
 			draw_marker_1d( round( cp1 ) );
-			output_value( LP, cp1 - 1 + scale[ 1 ] );
+			output_value( LP, ( cp1 - 1 ) * scale[ 2 ] + scale[ 1 ] );
 
 			/* Calculate the offset that should move the line to the zero
 			   position and set the monochromator accordingly */
 
-			io = io - ( cp0 - 0.5 * ( W[ 1 ] - 1 ) )
-					  * ( io_new - io ) / ( cp1 - cp0 );
+			io -=   ( cp0 - 0.5 * ( W[ 1 ] - 1 ) )
+				  * ( io_new - io ) / ( cp1 - cp0 );
 
 			monochromator_zero_offset( CG, io );
 
@@ -448,7 +449,7 @@ FOREVER
 
 			clear_marker_1d( );
 			draw_marker_1d( round( cp1 ) );
-			output_value( LP, cp1 - 1 + scale[ 1 ] );
+			output_value( LP, ( cp1 - 1 ) * scale[ 2 ] + scale[ 1 ] );
 		}
 
 		/* When the user is satisfied delete the form and create a new one
@@ -461,19 +462,23 @@ FOREVER
 			CWL = input_create( "FLOAT_INPUT", 0.0,
 								"Reference wavelength [nm]" );
 			cwl = 0.0;
-			CWL_is_set = 0;
 
 			LP  = input_create( "FLOAT_INPUT", 0.0, "Line position [nm]" );
 			lp  = 0.0;
+			object_enable( LP, "OFF" );
 
 			CL = button_create( "NORMAL_BUTTON", "Find peak" );
+			object_enable( CL, "OFF" );
 			DO = button_create( "NORMAL_BUTTON", "Accept position" );
+			object_enable( DO, "OFF" );
 			GO = button_create( "NORMAL_BUTTON", "Done" );
 
 			monochromator_set_calibration( CG, ia, fl, da );
 			scale = monochromator_wavelength_axis( ) / 1 nm;
 			change_scale_1d( scale[ 1 ], scale[ 2 ] );
 			change_label_1d( "Wavelength [nm]" );
+
+			First_adjust = 0;
 
 			hide_toolbox( 0 );
 
@@ -510,13 +515,14 @@ FOREVER
 			change_scale_1d( scale[ 1 ], scale[ 2 ] );
 
 			input_value( LP, cwl );
-			lp = 0.5 * W[ 1 ];
+			lp = 0.5 * ( W[ 1 ] - 1 );
 			output_value( LP, ( lp - 1 ) * scale[ 2 ] + scale[ 1 ] );
-			CWL_is_set = 1;
 			clear_marker_1d( );
-			draw_marker_1d( round( lp ) );
 
-			CWL_is_set = 1;
+			object_enable( LP, "ON" );
+			object_enable( DO, "ON" );
+			object_enable( CL, "ON" );
+
 			NEXT;
 		}
 
@@ -524,18 +530,11 @@ FOREVER
 
 		IF input_changed( LP )
 		{
-			/* Reference wavelength must be set first */
-
-			IF ! CWL_is_set {
-				input_value( LP, 0.0 );
-			}
-
 			/* Calculate the pixel postion (relative to left edge) of the newly
 			   entered wavelength. If it's within the visible range redraw
 			   the marker, otherwise reset to the previous wavelength */
 
-			new_val = input_value( LP );
-			new_val = ( new_val - scale[ 1 ] ) / scale[ 2 ] + 1;
+			new_val = ( input_value( LP ) - scale[ 1 ] ) / scale[ 2 ] + 1;
 
 			IF round( new_val ) < 1 | round( new_val ) > W[ 1 ] {
 				input_value( LP, ( lp - 1 ) * scale[ 2 ] + scale[ 1 ] );
@@ -550,12 +549,6 @@ FOREVER
 
 		IF button_changed( CL )
 		{
-			/* Reference wavelength must be set first */
-
-			IF ! CWL_is_set {
-				input_value( LP, 0.0 );
-			}
-
 			/* Try to find the line at the position the user entered. Complain
 			   if the position is very near to the limits or mno line can
 			   be found */
@@ -583,24 +576,21 @@ FOREVER
 
 		IF button_state( DO ) {
 
-			/* Reference wavelength must be set first */
-
-			IF ! CWL_is_set {
-				input_value( LP, 0.0 );
-			}
-
-			IF abs( ig_new - ig[ CG ] ) < 1.0e-9 {
+			IF First_adjust == 0 {
+				First_adjust = 1;
+				object_enable( GO, "OFF" );
 				cp0 = input_value( LP );
-				ig_new = ig[ CG ] + 0.2 + 0.1 * ( random( ) - 0.5 ); 
+				ig_new = ig + 0.2 + 0.1 * ( random( ) - 0.5 ); 
 				monochromator_grating_adjust( CG, ig_new );
 				clear_marker_1d( );
 			} ELSE {
+				First_adjust = 0;
 				cp1 = input_value( LP );
-				ig[ CG ] -=   ( cp0 - 0.5 * ( W[ 1 ] - 1 ) )
-							* ( io_new - ig[ CG ] ) / ( cp1 - cp0 );
-				monochromator_grating_adjust( CG, ig[ CL ] );
-				ig[ CG ] = ig_new;
+				ig -= ( cp0 - 0.5 * ( W[ 1 ] - 1 ) )
+					  * ( io_new - ig ) / ( cp1 - cp0 );
+				monochromator_grating_adjust( CG, ig );
 				clear_marker_1d( );
+				object_enable( GO, "ON" );
 			}
 		}
 
@@ -608,10 +598,6 @@ FOREVER
 		   for adjusting the dispersion properties of the grating. */
 
 		IF button_state( GO ) {
-			IF abs( ig_new - ig[ CG ] ) > 1.0e-9 {
-				ig_new = ig[ CG ];
-			}
-
 			hide_toolbox( 1 );
 			object_delete( GO, DO, CL, LP, CWL );
 			hide_toolbox( 0 );
@@ -648,7 +634,7 @@ FOREVER
 			change_scale_1d( scale[ 1 ], scale[ 2 ] );
 		}
 
-		/* Deal with changes of diffraction order - must be larger than 0. */
+		/* Deal with changes of diffraction order, it must be larger than 0. */
 
 		IF input_changed( DFO ) {
 			New_val = input_value( DFO );
@@ -659,8 +645,8 @@ FOREVER
 			}
 		}
 
-		/* Deal with changes of the wavelength of the line under consideration
-		   - must be at least 0 nm and below 10 um (such a large value could
+		/* Deal with changes of the wavelength of the line under consideration,
+		   it must be at least 0 nm and below 10 um (such a large value could
 		   only happen for gratings with less than 10 grooves per mm). */
 
 		IF  input_changed( LWL ) {
@@ -753,7 +739,7 @@ FOREVER
 
 			IF Count[ CG ] >= 4 {
 
-				calib[ CG ] = monochromator_calibration( CG, l, lc, M, px );
+				calib[ CG ] = monochromator_calibrate( CG, l, lc, M, px );
 
 				/* Change the x-axis scale to reflect the new calibration. */
 
@@ -853,7 +839,7 @@ FOREVER
 			}
 
 			IF Count[ CG ] >= 4 {
-				calib[ CG ] = monochromator_calibration( CG, l, lc, M, px );
+				calib[ CG ] = monochromator_calibrate( CG, l, lc, M, px );
 
 				/* Change x-axis to reflect the changed calibration. */
 
