@@ -21,8 +21,9 @@
   Boston, MA 02111-1307, USA.
 
 
-  Programming this field controller is a bit of a mess because of the
+  Programming this field controller became a bit of a mess because of the
   number of conditions to be taken into consideration:
+
   1. Field range is -50 G to 23000 G
   2. CF must be set with a resolution of 50 mG
   3. Sweep range limits 0 G to 16000 G
@@ -30,8 +31,8 @@
   5. CF plus or minus 0.5 time sweep range may never excced the field
      range limits
   6. Sweep range is not truely symmetric (in contrast to what the manual
-     claims), SWA settings can range from 0 to 4095, generated field equals
-	 CF for SWA = 2048
+     claims), SWA settings can range from 0 to 4095, the generated field
+	 is equal to CF for SWA = 2048
   7. Repeatability of CF setting: 5 mG
 */
 
@@ -52,7 +53,6 @@ const char generic_type[ ] = DEVICE_TYPE;
 #define MIN_SWA            0
 #define CENTER_SWA         2048
 #define MAX_SWA            4095
-#define SWA_RANGE          4096
 
 
 /* The maximum field resolution: this is, according to the manual the best
@@ -169,12 +169,12 @@ static struct
 
 
 #define DEVIATION( f )                                                      \
-	{                                                                       \
-		double d = fabs( f - magnet.cf                                      \
+	do {                                                                    \
+		double d = fabs( ( f ) - magnet.cf                                  \
 						 - ( magnet.swa - CENTER_SWA ) * magnet.swa_step ); \
 		if ( d > magnet.max_field_dev )                                     \
 			magnet.max_field_dev = d;                                       \
-	}
+	} while ( 0 )
 
 
 /*----------------------------------------------------------------*/
@@ -426,9 +426,8 @@ Var *sweep_up( Var *v )
 		er032m_set_swa( magnet.swa += magnet.step_incr );
 	else
 	{
-		if ( magnet.cf + 0.75 * SWA_RANGE * magnet.swa_step
-			 											   < ER032M_MAX_FIELD )
-			steps = SWA_RANGE / 4;
+		if ( magnet.cf + 0.75 * magnet.sw < ER032M_MAX_FIELD )
+			steps = MAX_SWA / 4;
 		else
 			steps = irnd( floor( ( ER032M_MAX_FIELD - magnet.cf )
 								 / magnet.swa_step ) ) - CENTER_SWA;
@@ -506,9 +505,8 @@ Var *sweep_down( Var *v )
 		er032m_set_swa( magnet.swa -= magnet.step_incr );
 	else
 	{
-		if ( magnet.cf - 0.75 * SWA_RANGE * magnet.swa_step >
-															 ER032M_MIN_FIELD )
-			steps = SWA_RANGE / 4;
+		if ( magnet.cf - 0.75 * magnet.sw > ER032M_MIN_FIELD )
+			steps = MAX_SWA / 4;
 		else
 			steps = irnd( floor( ( magnet.cf - ER032M_MIN_FIELD )
 								 / magnet.swa_step ) ) - CENTER_SWA;
@@ -887,10 +885,6 @@ static double er032m_set_field( double field )
 		else
 			er032m_change_field_and_keep_sw( field );
 	}
-
-	fprintf( stderr, "%20.3f %20.3f %20.3f\n", field,
-			 magnet.cf + ( magnet.swa - 2048 ) * magnet.swa_step,
-			 field - (magnet.cf + ( magnet.swa - 2048 ) * magnet.swa_step));
 
 	er032m_test_leds( );
 	DEVIATION( field );
