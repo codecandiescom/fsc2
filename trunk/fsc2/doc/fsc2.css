@@ -25,6 +25,7 @@ body {}
 
 code { color : #0000FF;
 	   font-family : monospace;
+       font-weight : bold;
 	 }
 
 samp { color       : #AA0000;

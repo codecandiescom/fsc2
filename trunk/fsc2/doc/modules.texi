@@ -33,6 +33,7 @@ This chapter tries to describe how to write new modules for use with
 * fsc2s Variables::       How to use fsc2's variables.
 * New Modules::           How to write new modules.
 * Programming Utils::     Functions that help in programming modules
+* Pulser Modules::        Writing modules for pulsers
 @end menu
 @end ifinfo
 
@@ -581,7 +582,7 @@ macros, variables and functions for GPIB functions. Actually, it will in
 turn include further header files and knows (hopefully) which are the
 correct ones -- @acronym{fsc2} is supposed to work with different
 implementations of the GPIB functionality and by including
-@code{gpib_if.h} you don't have to care about which on is going to be
+@code{gpib_if.h} you don't have to care about which one is going to be
 used.
 
 Third, each module should but its basic configuration information into a
@@ -686,15 +687,11 @@ need_GPIB = SET;
 @end example
 
 
-@subsection Requesting hardware
+@subsection Serial port handling
 
-If a device is controlled via the GPIB bus it has to set the global
-variable @code{need_GPIB}, as already explained in the previous section.
-Of course, the device needs also a valid entry in the GPIB configuration
-file but this is nothing @acronym{fsc2} can handle.
-
-For serial ports things are handled a bit differently. In the init hook
-function you must try to request the serial port you need by calling
+For serial ports things are handled a bit differently from GPIB devices.
+In the init hook function you must try to request the serial port you
+need by calling
 the function @code{fsc2_request_serial_port()}
 @example
 fsc2_request_serial_port( SERIAL_PORT, DEVICE_NAME );
@@ -708,11 +705,75 @@ already been claimed by a different device the function will print an
 error message and stop the @acronym{EDL} program, so you don't have to
 deal with error handling.
 
-All further dealings with the serial port are your own responsibility,
-i.e.@: you have to open the device file, set the communication
-parameters, write and read data and, when done with the serial port,
-reset the communication parameters back to reasonable values and close
-the device file.
+For all functions that deal directly with file descriptors for the
+serial port device files there are replacements. The following table
+lists all functions that are used with respect to serial ports with
+their replacements:
+@table @samp
+@item open() 
+@code{fsc2_serial_open()}
+@findex fsc2_serial_open()
+@item close()
+@code{fsc2_serial_close()}
+@findex fsc2_serial_close()
+@item write()
+@code{fsc2_serial_write()}
+@findex fsc2_serial_write()
+@item read
+@code{fsc2_serial_read()}
+@findex fsc2_serial_read()
+@item tcgetattr()
+@code{fsc2_tcgetattr()}
+@findex fsc2_tcgetattr()
+@item tcsetattr()
+@code{fsc2_tcsetattr()}
+@findex fsc2_tcsetattr()
+@item tcsendbreak()
+@code{fsc2_tcsendbreak()}
+@findex fsc2_tcsendbreak()
+@item tcdrain()
+@code{fsc2_tcdrain()}
+@findex fsc2_tcdrain()
+@item tcflush()
+@code{fsc2_tcflush()}
+@findex fsc2_tcflush()
+@item tcflow()
+@code{fsc2_tcflow()}
+@findex fsc2_tcflow()
+@end table
+
+The only functions that are rather different to their normal
+counterparts are @code{fsc2_serial_open()} and
+@code{fsc2_serial_close()}.
+
+@code{fsc2_serial_open()} is defined as
+@example
+struct termios *fsc2_serial_open( int sn, const char *devname,
+                                  int flags )
+@end example
+where @code{sn} is the number of the serial port as already used in
+@code{fsc2_request_serial_port()}, @code{devname} has to be the same
+device name that was used in the call of
+@code{fsc2_request_serial_port()} and @code{flags} are the same flags
+you would pass to a normal @code{open()} call. The function not only
+opens the file but also creates the necessary lock file and determines
+the current communication parameter settings for the serial port. These
+are returned via a pointer to a @code{termios} structure, that can be
+freely changed within the module. If the function returns a @code{NULL}
+pointer opening the device file failed and you can determine the reasons
+by checking @code{errno}.
+
+@code{fsc2_serial_close()} expects just one argument, the serial port
+number. Before closing the serial port device file it flushes it an
+resets the communication parameters to their initial state. It also
+deletes lock files. (If you don't close the serial ports device files
+they will be automatically closed at the end of the experiment.)
+
+All the remaining functions are completely identical to their usual form
+(see the @code{termios(3)} man page for all details) except that the
+first argument is always the serial port number instead of a file
+descriptor. If the function gets passed an invalid serial port number
+@code{errno} is set to @code{EBADF}.
 
 
 @subsection Hook functions
@@ -995,7 +1056,7 @@ result if you try to use it.
 
 
 
-@node Programming Utils, , New Modules, Modules
+@node Programming Utils, Pulser Modules, New Modules, Modules
 @section Additional utilities provided by fsc2
 
 When writing a module some of the following information might be useful.
@@ -1294,4 +1355,58 @@ if ( ! flag )
 ...
 if ( flag )
     do_something_else( );
+@end example
+
+
+@node Pulser Modules, , Programming Utils, Modules
+@section Writing modules for pulsers
+
+
+@example
+typedef struct @{
+
+	const char *name;
+	bool is_trigger_out;
+	long trigger_out_channel_number;
+
+	bool ( *assign_function )( int function, long connector );
+	bool ( *assign_channel_to_function )( int function, long channel );
+	bool ( *invert_function )( int function );
+	bool ( *set_function_delay )( int function, double delay );
+	bool ( *set_function_high_level )( int function, double high_voltage );
+	bool ( *set_function_low_level )( int function, double low_voltage );
+
+	bool ( *set_timebase )( double timebase );
+	bool ( *set_trigger_mode )( int mode );
+	bool ( *set_repeat_time )( double rep_time );
+	bool ( *set_trig_in_level )( double voltage );
+	bool ( *set_trig_in_slope )( int slope );
+	bool ( *set_trig_in_impedance )( int state );
+	bool ( *set_max_seq_len )( double seq_len );
+
+	bool ( *set_phase_reference )( int phase, int function );
+
+	bool ( *new_pulse )( long pulse_number );
+	bool ( *set_pulse_function )( long pulse_number, int function );
+	bool ( *set_pulse_position )( long pulse_number, double ptime );
+	bool ( *set_pulse_length )( long pulse_number, double ptime );
+	bool ( *set_pulse_position_change )( long pulse_number, double ptime );
+	bool ( *set_pulse_length_change )( long pulse_number, double ptime );
+	bool ( *set_pulse_phase_cycle )( long pulse_number, long cycle );
+
+	bool ( *get_pulse_function )( long pulse_number, int *function );
+	bool ( *get_pulse_position )( long pulse_number, double *ptime );
+	bool ( *get_pulse_length )( long pulse_number, double *ptime );
+	bool ( *get_pulse_position_change )( long pulse_number, double *ptime );
+	bool ( *get_pulse_length_change )( long pulse_number, double *ptime );
+	bool ( *get_pulse_phase_cycle )( long pulse_number, long *cycle );
+
+	bool ( *phase_setup_prep )( int func, int type, int pod, long val,
+								long protocol);
+	bool ( *phase_setup )( int function );
+	bool ( *set_phase_switch_delay )( int function, double del_time );
+	bool ( *set_grace_period )( double gp_time );
+	bool ( *keep_all_pulses )( void );
+
+@} Pulser_Struct;
 @end example
