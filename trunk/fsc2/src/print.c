@@ -163,9 +163,11 @@ void print_it( FL_OBJECT *obj, long data )
 
 static bool get_print_file( FILE **fp, char **name, long data )
 {
-	static FL_OBJECT *obj;
+	FL_OBJECT *obj;
 	struct stat stat_buf;
 
+
+	CLOBBER_PROTECT( obj );
 
 	print_form = GUI.G_Funcs.create_form_print( );
 
@@ -637,8 +639,10 @@ static void start_printing( FILE *fp, char *name, long what )
 static void print_header( FILE *fp, char *name )
 {
 	time_t d;
-	static char *tstr = NULL;
+	char *tstr = NULL;
 
+
+	CLOBBER_PROTECT( tstr );
 
 	/* Writes EPS header plus some routines into the file */
 
@@ -898,27 +902,39 @@ static void eps_make_scale( FILE *fp, void *cv, int coord, long dim )
 	double rwc_delta,           /* distance between small ticks (in rwc) */
 		   order,               /* and its order of magnitude */
 		   mag;
-	static double d_delta_fine, /* distance between small ticks (in points) */
+	double d_delta_fine,        /* distance between small ticks (in points) */
 		   d_start_fine,        /* position of first small tick (in points) */
 		   d_start_medium,      /* position of first medium tick (in points) */
 		   d_start_coarse,      /* position of first large tick (in points) */
 		   cur_p;               /* loop variable with position */
-	static int medium_factor,   /* number of small tick spaces between */
-			   coarse_factor;   /* medium and large tick spaces */
-	static int medium,          /* loop counters for medium and large ticks */
-			   coarse;
+	int medium_factor,          /* number of small tick spaces between */
+		coarse_factor;          /* medium and large tick spaces */
+	int medium,                 /* loop counters for medium and large ticks */
+		coarse;
 	double rwc_start = 0,       /* rwc value of first point */
 		   rwc_start_fine,      /* rwc value of first small tick */
 		   rwc_start_medium,    /* rwc value of first medium tick */
 		   rwc_start_coarse;    /* rwc value of first large tick */
-	static double rwc_coarse;
-	static double x, y;
+	double rwc_coarse;
+	double x, y;
 	char lstr[ 128 ];
 	double s2d[ 3 ];
 	int r_coord;
 	double rwcs, rwcd;
 	char *label;
 
+
+	CLOBBER_PROTECT( d_delta_fine );
+	CLOBBER_PROTECT( d_start_fine );
+	CLOBBER_PROTECT( d_start_medium );
+	CLOBBER_PROTECT( d_start_coarse );
+	CLOBBER_PROTECT( medium_factor );
+	CLOBBER_PROTECT( coarse_factor );
+	CLOBBER_PROTECT( medium );
+	CLOBBER_PROTECT( coarse );
+	CLOBBER_PROTECT( rwc_coarse );
+	CLOBBER_PROTECT( x );
+	CLOBBER_PROTECT( y );
 
 	if ( dim == 1 )
 	{
@@ -1544,17 +1560,20 @@ static void print_comm( FILE *fp )
 
 static char **split_into_lines( int *num_lines )
 {
-	static char **lines;
-	static char *cp;
-	static int nl;
-	static int cur_size;
-	static int i = 0;
+	char **lines = NULL;
+	char *cp;
+	int nl;
+	int cur_size = GUESS_NUM_LINES;
+	int i = 0;
 	int j;
 	ptrdiff_t count;
 
 
-	lines = NULL;
-	cur_size = GUESS_NUM_LINES;
+	CLOBBER_PROTECT( lines );
+	CLOBBER_PROTECT( cp );
+	CLOBBER_PROTECT( nl );
+	CLOBBER_PROTECT( cur_size );
+	CLOBBER_PROTECT( i );
 
 	TRY
 	{
