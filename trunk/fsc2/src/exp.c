@@ -1261,7 +1261,7 @@ void get_max_repeat_count( Prg_Token *cur )
 		eprint( WARN, UNSET, "%s:%ld: WARNING: Floating point value used as "
 				"maximum count in REPEAT loop.\n",
 				( cur + 1 )->Fname, ( cur + 1 )->Lc );
-		cur->count.repl.max = ( long ) EDL.Var_Stack->val.dval;
+		cur->count.repl.max = lrnd( EDL.Var_Stack->val.dval );
 	}
 
 	vars_pop( EDL.Var_Stack );
@@ -1364,7 +1364,7 @@ void get_for_cond( Prg_Token *cur )
 					"assignment to integer FOR loop variable %s.\n",
 					( cur + 1 )->Fname,
 					( cur + 1 )->Lc, cur->count.forl.act->name );
-			cur->count.forl.act->val.lval = ( long ) EDL.Var_Stack->val.dval;
+			cur->count.forl.act->val.lval = lrnd( EDL.Var_Stack->val.dval );
 		}
 		else
 			cur->count.forl.act->val.dval = EDL.Var_Stack->val.dval;

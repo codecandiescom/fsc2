@@ -93,7 +93,7 @@ bool run( void )
 	   being negative) we're already done */
 
 	if ( EDL.prg_length < 0 )
-		return 0;
+		return FAIL;
 
 	/* Start the GPIB bus (and do some changes to the graphics) */
 
