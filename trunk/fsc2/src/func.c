@@ -1152,6 +1152,13 @@ label_1d:
 		{
 			vars_check ( v, STR_VAR );
 			G.label[ X ] = get_string_copy( v->val.sptr );
+			v = v->next->next;
+		}
+
+		if ( v != NULL )
+		{
+			vars_check ( v, STR_VAR );
+			G.label[ Y ] = get_string_copy( v->val.sptr );
 		}
 	}
 	
