@@ -1342,7 +1342,9 @@ Var *pulser_reset( Var *v )
 {
 
 	vars_pop( pulser_pulse_reset( NULL ) );
-	vars_pop( pulser_pulse_reset( NULL ) );
+	if ( dg2020_phs[ 0 ].function != NULL ||
+		 dg2020_phs[ 1 ].function != NULL )
+		vars_pop( pulser_pulse_reset( NULL ) );
 
 	return vars_push( INT_VAR, 1 );
 }
