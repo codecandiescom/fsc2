@@ -223,8 +223,7 @@ sub serve_main {
 		print "<TITLE>fsc2: WEIRD</TITLE></HEAD>\r\n";
 
 		print "<P><CENTER><IMG SRC=\"fsc2." . ( $has_gif ? "gif" : "png" ) .
-			  "\" ALT=\"fsc2\"></CENTER></P>\r\n"
-				  if $has_png or $has_gif;
+			  "\" ALT=\"fsc2\"></CENTER></P>\r\n" if $has_png or $has_gif;
 
 		print "<P><CENTER><H1>Status:  Something weird is happening here..." .
 			  "</H1></CENTER>\r\n" .
