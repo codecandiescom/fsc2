@@ -46,11 +46,9 @@ of implemented:
 @item Interface Technology RS690 Word Generator (360 GHz and X-band
 spectrometer, Berlin)
 @end itemize
-The @strong{Interface Technology RS690} can also be used for the Berlin
-X-band spectrometer without any changes, and, of course, all pulsers can
-be used everywhere when no special requirements for phase-cycling exist,
-see the discussion below about the differences between the Frankfurt
-S-band and the Berlin X-band spectrometer.
+All pulsers can be used everywhere when no special requirements for
+phase-cycling exist, see the discussion below about the differences
+between the Frankfurt S-band and the Berlin X-band spectrometer.
 
 Because of the importance of the pulser for time-resolved experiments
 there are even two additional types of sections in the @code{EDL}
