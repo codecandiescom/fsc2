@@ -5320,11 +5320,12 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @section Light Chopper Functions
 @cindex Light Chopper Functions
 Currently there's just a single supported light chopper. It is a chopper
-used in the group of G.@: Gescheidt (University Graz, Austria), that,
-via some homebuild electronics@footnote{see Ph.D.@: thesis by Torsten
-Zytowski, Z@"urich 1998} is indirectly controlled by a data acquisition
-device, currently the National Instruments @w{PCI-MIO-16E-1} DAQ
-card. The module for the device is loaded by specifying
+used in the group of G.@: Gescheidt (Graz University of Technology,
+Austria), that, via some homebuild electronics@footnote{see Ph.D.@:
+thesis by Torsten Zytowski, Z@"urich 1998} is indirectly controlled by a
+data acquisition device, currently the National Instruments
+@w{PCI-MIO-16E-1} DAQ card. The module for the device is loaded by
+specifying
 @example
 gg_chopper
 @end example
@@ -5335,7 +5336,7 @@ module.
 
 Unless a rotation frequency has set already during the
 @code{PREPARATIONS} section the chopper will only start to rotate
-when a resonable rotation frequency gets set by calling the function
+when a resonable rotation frequency is set by calling the function
 @code{chopper_rotation_frequency()}. At the end of an experiment the
 chopper gets stopped automatically.
 
@@ -5352,25 +5353,26 @@ Returns a string with the name of the chopper being used.
 @findex chopper_rotation_frequency()
 This function allows to either query or set the rotation speed of the
 chopper. When called without an argument the function returns the
-current rotation frequency (@w{0 Hz} if the chopper is stopped).
-If called with an argument between @w{39.2 Hz} and @w{200 Hz} the chopper
+current rotation frequency or @w{0 Hz} when the chopper is stopped.  If
+called with an argument between @w{39.22 Hz} and @w{200 Hz} the chopper
 rotation frequency gets set to this value (if it is not possible to set
 the frequency with an accuracy of at least @w{1%} a warning is output,
-informing the user about the real rotation frequency). If the function
-is called with a zero or negative argument the chopper is stopped.
+informing the user about the real rotation frequency, which is also the
+value returned by the function). If the function is called with a zero
+or negative argument the chopper is stopped.
 
 When called during the @code{PREPARATIONS} section of thr @code{EDL}
 script the choppers rotation frequency is set to this value when the
 experiment is started.
 
+
 @anchor{chopper_create_trigger}
 @item chopper_create_trigger()
 @findex chopper_create_trigger()
 This function makes the electronics controlling the chopper create a TTL
-trigger pulse at the next time the light path gets opened.
+trigger pulse the next time the light path gets opened, e.g.@: to
+trigger an acquisition.
 
-The function can only be used in the @code{EXPERIMENT} section of an
-@code{EDL} script.
 
 @end table
 
