@@ -111,6 +111,7 @@ bool er023m_init( const char *name )
 						new_ct_mult );
 
 				er023m.ct_mult = new_ct_mult;
+			}
 		}
 		er023m_set_ct( er023m.ct_mult );
 
