@@ -3166,12 +3166,13 @@ may look like this:
 daq_ai_channel_setup( CH3, 5 V, "Differential", "BIPLOAR",
                       CH1, 500 mV, "UNIPOLAR", "DITHER_ON" );
 @end example
-In this case @code{CH3} and @code{CH11} will be used together for a
-signal in the range between @w{-5 V} and @w{+5V} (i.e. in bipolar mode),
-where the sampled voltage is the difference between both channels, and
-@code{CH1} is going to be used in unipolar mode for a voltage between
-@w{0 V} and @w{500 mV} in @code{"Ground"} coupling mode and with
-dithering switched on.
+In this case @code{CH3} and @code{CH11} will be used together (remember
+that for differential measurements always a second channel must be used
+automatically) for a signal in the range between @w{-5 V} and @w{+5V}
+(i.e. in bipolar mode), where the sampled voltage is the difference
+between both channels, and @code{CH1} is going to be used in unipolar
+mode for a voltage between @w{0 V} and @w{500 mV} in @code{"Ground"}
+coupling mode and with dithering switched on.
 
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
