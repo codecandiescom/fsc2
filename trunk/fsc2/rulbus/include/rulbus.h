@@ -83,6 +83,7 @@ int rulbus_delay_software_start( int handle );
 #define RULBUS_DELAY_OUTPUT_2          2
 #define RULBUS_DELAY_OUTPUT_BOTH       3
 
+#define RULBUS_DELAY_PULSE_NONE        0
 #define RULBUS_DELAY_START_PULSE       1
 #define RULBUS_DELAY_END_PULSE         2
 #define RULBUS_DELAY_PULSE_BOTH        3

@@ -485,7 +485,9 @@ The 'type' argument can be either the constant RULBUS_DELAY_START_PULSE,
 RULBUS_DELAY_END_PULSE or RULBUS_DELAY_PULSE_BOTH. In the first case
 only a start pulse, but no end pulse gets output, in the second case
 only an end pulse and in the third case both a start and an end pulse
-will be created on the selected output(s).
+will be created on the selected output(s). A 'type' argument of
+RULBUS_DELAY_PULSE_NONE keeps the the delay card from outputting start
+and/or pulses on the addressed output(s).
 
 On success the function returns RULBUS_OK, otherwise a negative value
 indicating the reason for the failure.
