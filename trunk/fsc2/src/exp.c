@@ -528,7 +528,7 @@ void exp_test_run( void )
 	{
 		/* 1. Run the test run hook functions of the modules.
 		   2. Save the variables so we can reset them to their initial values
-		      when the test run is completed.
+		      when the test run is finished.
 		   3. Save the relevant values from the pulse structures.
 		   3. Set up a signal handler so that it's possible to stop the test
 		      if there are e.g. infinite loops.
