@@ -9,22 +9,6 @@
 long cur_aseq;
 
 
-/*---------------------------------------------------------------------*/
-/* Called before the PHASES section is parsed to reset some variables. */
-/*---------------------------------------------------------------------*/
-
-void phases_clear( void )
-{
-	int i;
-
-
-	ASeq[ 0 ].defined = ASeq[ 1 ].defined = UNSET;
-
-	for ( i = 0; i < MAX_PHASE_SEQ_LEN; ++i )
-		PSeq[ i ].defined = UNSET;
-}
-
-
 /*-------------------------------------------------------*/
 /* Called when an acquisition sequence keyword is found. */
 /*-------------------------------------------------------*/
@@ -38,12 +22,16 @@ void acq_seq_start( long acq_num, long acq_type )
 	cur_aseq = acq_num;
 
 	if ( ASeq[ acq_num ].defined )
-		eprint( SEVERE, "%s:%ld: Multiple definition of acquisition "
-				"sequence, using new definition.\n", Fname, Lc );
+	{
+		eprint( FATAL, "%s:%ld: Acquisition sequence %c has already been "
+				"defined.\n", Fname, Lc, ( char ) ( acq_num + 'X' ) );
+		THROW( EXCEPTION );
+	}
 
 	/* initialize the acquisition sequence */
 
 	ASeq[ acq_num ].defined = SET;
+	ASeq[ acq_num ].sequence = T_malloc( sizeof( int ) );
 	ASeq[ acq_num ].sequence[ 0 ] = ( int ) acq_type;
 	ASeq[ acq_num ].len = 1;
 }
@@ -57,22 +45,18 @@ void acq_seq_start( long acq_num, long acq_type )
 
 void acq_seq_cont( long acq_type )
 {
+	int len;
+
 	/* Make real sure the acquisition type is reasonable */
 
 	assert( acq_type == ACQ_PLUS || acq_type == ACQ_MINUS );
 
-	/* Check that the sequence doesn't get too long */
-
-	if ( ASeq[ cur_aseq ].len >= MAX_PHASE_SEQ_LEN )
-	{
-		eprint( FATAL, "%s:%ld: Maximum acquisition sequence length of %d "
-				"exceeded.\n ", Fname, Lc, MAX_PHASE_SEQ_LEN );
-		THROW( EXCEPTION );
-	}
-
 	/* add the new acquisition type */
 
-	ASeq[ cur_aseq ].sequence[ ASeq[ cur_aseq ].len++ ] = ( int ) acq_type;
+	len = ++ASeq[ cur_aseq ].len;
+	ASeq[ cur_aseq ].sequence = T_realloc( ASeq[ cur_aseq ].sequence,
+										   len * sizeof( int ) );
+	ASeq[ cur_aseq ].sequence[ len - 1 ] = ( int ) acq_type;
 }
 
 
@@ -82,24 +66,41 @@ void acq_seq_cont( long acq_type )
 /*    * number of the phase sequence            */
 /*----------------------------------------------*/
 
-long phase_seq_start( long phase_seq_num )
+Phase_Sequence *phase_seq_start( long phase_seq_num )
 {
-	/* Again, let's be paranoid */
+	Phase_Sequence *cp = PSeq;
 
-	assert( phase_seq_num >= 0 && phase_seq_num < MAX_PHASE_SEQ_LEN );
 
-	/* Check that this phase sequence isn't already used */
+	assert( phase_seq_num >= 0 );       /* again, let's be paranoid */
 
-	if ( PSeq[ phase_seq_num ].defined )
-		eprint( SEVERE, "%s:%ld: Multiple definition of phase sequence "
-				"#%ld, using new definition.\n",
-				Fname, Lc, phase_seq_num + 1 );
+	/* Check that a phase sequence with this number isn't already defined */
 
-	/* initialize the phase sequence */
+	while ( cp != NULL )
+	{
+		if ( cp->num == ( int ) phase_seq_num )
+		{
+			eprint( FATAL, "%s:%ld: Phase sequence %ld has already been "
+					"defined\n", Fname, Lc, cp->num );
+			THROW( EXCEPTION );
+		}
+		cp = cp->next;
+	}
 
-	PSeq[ phase_seq_num ].defined = SET;
-	PSeq[ phase_seq_num ].len = 0;
-	return phase_seq_num;
+	/* create new sequence, append it to head of list and  initialize it */
+
+	cp = T_malloc( sizeof( Phase_Sequence ) );
+
+	if ( PSeq != NULL )
+		cp->next = PSeq;
+	else
+		cp->next = NULL;
+	PSeq = cp;
+
+	cp->num = ( int ) phase_seq_num;
+	cp->len = 0;
+	cp->sequence = NULL;
+
+	return cp;
 }
 
 
@@ -111,24 +112,15 @@ long phase_seq_start( long phase_seq_num )
 /*      PHASE_MINUS_Y                                               */
 /*------------------------------------------------------------------*/
 
-void phases_add_phase( long phase_seq_num, int phase_type )
+void phases_add_phase( Phase_Sequence *p, int phase_type )
 {
-	/* Again, let's be paranoid */
-
-	assert( phase_seq_num >= 0 && phase_seq_num < MAX_PHASE_SEQ_LEN );
 	assert ( phase_type >= PHASE_PLUS_X && phase_type <= PHASE_MINUS_Y );
 
-	/* make sure the phase sequence doesn't get too long */
+	/* append the new phase to the sequence */
 
-	if ( PSeq[ phase_seq_num ].len >= MAX_PHASE_SEQ_LEN )
-	{
-		eprint( FATAL, "%s:%ld: Maximum sequence length of %d for phase "
-				"sequence #%ld exceeded.\n ",
-				Fname, Lc, MAX_PHASE_SEQ_LEN, phase_seq_num + 1 );
-		THROW( EXCEPTION );
-	}
-
-	PSeq[ phase_seq_num ].sequence[ PSeq[ phase_seq_num ].len++ ] = phase_type;
+	p->len++;
+	p->sequence = T_realloc ( p->sequence, p->len * sizeof( int ) );
+	p->sequence[ p->len - 1 ] = phase_type;
 }
 
 
@@ -150,11 +142,34 @@ void acq_miss_list( void )
 /* without a corresponding list of phases.     */
 /*---------------------------------------------*/
 
-void phase_miss_list( long phase_seq_num )
+void phase_miss_list( Phase_Sequence *p )
 {
-	eprint( FATAL, "%s:%ld: Missing list of phases for phase sequence #%ld.\n",
-			Fname, Lc, phase_seq_num + 1 );
+	eprint( FATAL, "%s:%ld: Missing list of phases for phase sequence %d.\n",
+			Fname, Lc, p->num );
 	THROW( EXCEPTION );
+}
+
+
+void phases_clear( void )
+{
+	Phase_Sequence *p, *pn;
+	int i;
+
+
+	for ( i = 0; i < 2; i++ )
+	{
+		ASeq[ i ].defined = UNSET;
+		if ( ASeq[ i ].sequence != NULL )
+			T_free( ASeq[ i ].sequence );
+	}
+
+	for ( p = PSeq; p != NULL; p = pn )
+	{
+		pn = p->next;
+		if ( p->sequence != NULL )
+			T_free( p->sequence );
+		T_free( p );
+	}
 }
 
 
@@ -165,38 +180,31 @@ void phase_miss_list( long phase_seq_num )
 
 void phases_end( void )
 {
-	int i;
-	bool are_phases_defined = UNSET;
+	Phase_Sequence *p;
 
 
-	for ( i = 0; i < MAX_PHASE_SEQ_LEN; ++i )
-		if ( PSeq[ i ].defined )
-		{
-			are_phases_defined = SET;
-			break;
-		}
+	/* return immediately if no sequences were defined at all */
 
-	/* return immediately if no sequences were defined */
-
-	if ( ! ASeq[ 0 ].defined && ! ASeq[ 1 ].defined && ! are_phases_defined )
+	if ( ! ASeq[ 0 ].defined && ! ASeq[ 1 ].defined && PSeq == NULL )
 		return;
 
 	/* check that there is a acquisition sequence if there's a phase
 	   sequence */
 
-	if ( are_phases_defined && ! ASeq[ 0 ].defined && ! ASeq[ 1 ].defined )
+	if ( PSeq != NULL && ! ASeq[ 0 ].defined && ! ASeq[ 1 ].defined )
 	{
-		eprint( FATAL, "No acquisition sequence defined in PHASES "
-				"section.\n" );
+		eprint( FATAL, "Phase sequences but no acquisition sequence "
+				"defined in PHASES section.\n" );
 		THROW( EXCEPTION );
 	}
 
 	/* check that there is a phase sequence if there's a acquisition
 	   sequence */
 
-	if ( ( ASeq[ 0 ].defined || ASeq[ 1 ].defined ) && ! are_phases_defined )
+	if ( ( ASeq[ 0 ].defined || ASeq[ 1 ].defined ) && PSeq == NULL )
 	{
-		eprint( FATAL, "No phase sequence defined in PHASES section.\n" );
+		eprint( FATAL, "Aquisition sequences but no phase sequences defined "
+				"in PHASES section.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -206,52 +214,20 @@ void phases_end( void )
 	if ( ASeq[ 0 ].defined && ASeq[ 1 ].defined &&
 		 ASeq[ 0 ].len != ASeq[ 1 ].len )
 	{
-		eprint( FATAL, "Different length of acqusition sequences.\n" );
+		eprint( FATAL, "Different lengths of acqusition sequences.\n" );
 		THROW( EXCEPTION );
 	}
 
 	/* check that lengths of acquisition and phase sequences are identical */
 
-	for ( i = 0; i < MAX_PHASE_SEQ_LEN; ++i )
+	for ( p = PSeq; p != NULL; p = p->next )
 	{
-		if ( ! PSeq[ i ].defined )
-			continue;
-
-		if ( ASeq[ 0 ].len != PSeq[ i ].len )
+		if ( ASeq[ 0 ].len != p->len )
 		{
-			eprint( FATAL, "Different length of phase and acquisition "
-					"sequences in PHASES section.\n" );
+			eprint( FATAL, "Different lengths of phase sequence %d (%d) and "
+					"acquisition sequences (%d) in PHASES section.\n",
+					p->num, p->len, ASeq[0].len );
 			THROW( EXCEPTION );
 		}
 	}
-
-	/* Again, a check (i.e. if the sequence is defined its length is nonero)
-	   that never should fail, but... */
-
-	assert( ( ! ASeq[ 0 ].defined || ASeq[ 0 ].len != 0 ) &&
-			( ! ASeq[ 1 ].defined || ASeq[ 1 ].len != 0 ) );
-}
-
-
-/*---------------------------------------------------------------------*/
-/* Called after parsing the file to check that the phases setup is ok. */
-/*---------------------------------------------------------------------*/
-
-bool check_phase_setup( void )
-{
-	int len = ASeq[ 0 ].defined ? ASeq[ 0 ].len : ASeq[ 1 ].len;
-
-	/* Check that there are at least as many channels assigned for phase
-	   sequences as the phase and acquisition sequences are long */
-
-	if ( len > assignment[ PULSER_CHANNEL_PHASE_X ].num_channels )
-	{
-		eprint( FATAL, "The number of channels assigned for phases (%d) in "
-				"the ASSIGNMENTS section is too small for the phase sequence "
-				"length (%d) defined in the PHASES section.\n",
-				assignment[ PULSER_CHANNEL_PHASE_X ].num_channels, len );
-		return FAIL;
-	}
-
-	return OK;
 }

@@ -23,7 +23,7 @@ extern char *phasestext;
 
 /* locally used global variables */
 
-long Phase_Seq;
+Phase_Sequence *Phase_Seq;
 
 
 %}
@@ -44,9 +44,9 @@ long Phase_Seq;
 
 
 input:   /* empty */
-       | input line                   { Phase_Seq = -1; }
+       | input line                   { Phase_Seq = NULL; }
        | input SECTION_LABEL          { YYACCEPT; }
-       | input ';'
+       | input ';'                    { Phase_Seq = NULL; }
 ;
 
 line:    acq ';'

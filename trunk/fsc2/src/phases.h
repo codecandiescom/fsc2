@@ -9,16 +9,17 @@
 #include "fsc2.h"
 
 
-typedef struct {
-	bool defined;                       /* is this phase sequence defined? */
-	int sequence[ MAX_PHASE_SEQ_LEN ];  /* array of phase types */
-	int len;                            /* length of array of phase types */
+typedef struct _PhS_ {
+	int num;
+	int *sequence;                   /* array of phase types */
+	int len;                         /* length of array of phase types */
+	struct _PhS_ *next;
 } Phase_Sequence;
 
 
 typedef struct {
 	bool defined;                    /* is the acquisition sequence defined? */
-	int sequence[ MAX_PHASE_SEQ_LEN ];  /* array of acquisition types */
+	int *sequence;                   /* array of acquisition types */
 	int len;                         /* length of array of acquisition types */
 } Acquisition_Sequence;
 
@@ -27,12 +28,11 @@ typedef struct {
 void phases_clear( void );
 void acq_seq_start( long acq_num, long acq_type );
 void acq_seq_cont(  long acq_type );
-long phase_seq_start( long phase_seq_num );
-void phases_add_phase( long phase_seq_num, int phase_type );
+Phase_Sequence * phase_seq_start( long phase_seq_num );
+void phases_add_phase( Phase_Sequence *p, int phase_type );
 void acq_miss_list( void );
-void phase_miss_list( long phase_seq_num );
+void phase_miss_list( Phase_Sequence *p );
 void phases_end( void );
-bool check_phase_setup( void );
 
 
 #endif  /* ! PHASES_HEADER */

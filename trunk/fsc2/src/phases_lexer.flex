@@ -52,7 +52,7 @@ PHAS        ^[ \t]*PHA(SE)?S?:
 PREP        ^[ \t]*PREP(ARATION)?S?:
 EXP         ^[ \t]*EXP(ERIMENT)?:
 
-PS          ^[ \t]*P(HASE)?_?S(EQ(UENCE)?)?_?[0-9]{0,2}
+PS          ^[ \t]*P(HA(SE)?)?_?S(EQ(UENCE)?)?(_?[0-9]{1,2})?
 AS          ^[ \t]*A(CQ(UISITION)?)?_?S(EQ(UENCE)?)?(_?[XY])?
 
 PX          "+"?[xX]
@@ -125,12 +125,9 @@ WS          [\n=,:. ]+
 			}
 
             /* handling of PHASE_SEQUENCE with (optional) sequence number
-			   (if sequence number is left out 1 is used as the default) */
+			   (if sequence number is left out 0 is used as the default) */
 {PS}        {
 				char *cp = phasestext + phasesleng - 1;
-
-				if ( *cp == '_' )
-				    THROW( INVALID_INPUT_EXCEPTION );
 
 				/* determine number of phase sequence (0 to ...)*/
 
@@ -139,7 +136,7 @@ WS          [\n=,:. ]+
 				{
 					while ( isdigit( *cp ) )
 						cp--;
-					phaseslval.lval = atol( ++cp ) - 1;
+					phaseslval.lval = atol( ++cp );
 				}
 				return PS_TOKEN;
 			}
