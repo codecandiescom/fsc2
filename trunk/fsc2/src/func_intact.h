@@ -45,8 +45,8 @@ struct IOBJECT {
 		     w,
 			 h;
 
-	int wt;                   /* width and heigth of the bounding box */
-	int ht;                   /* of the object */
+	int wt,                   /* total width and height of object */
+		ht;                   /* (including the label) */
 
 	char *label;              /* object label */
 	char *help_text;          /* objects help text */
