@@ -1072,7 +1072,7 @@ argument:
 Name: cut
 Width: 1030
 Height: 800
-Number of Objects: 15
+Number of Objects: 17
 
 --------------------
 class: FL_BOX
@@ -1091,6 +1091,42 @@ gravity: FL_NoGravity FL_NoGravity
 name: 
 callback: 
 argument: 
+
+--------------------
+class: FL_BUTTON
+type: NORMAL_BUTTON
+box: 155 160 35 30
+boxtype: FL_UP_BOX
+colors: FL_COL1 FL_COL1
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_BLACK
+label: 
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: bottom_button
+callback: cut_next_index
+argument: 3
+
+--------------------
+class: FL_BUTTON
+type: NORMAL_BUTTON
+box: 155 115 35 30
+boxtype: FL_UP_BOX
+colors: FL_COL1 FL_COL1
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_BLACK
+label: 
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: top_button
+callback: cut_next_index
+argument: 2
 
 --------------------
 class: FL_BUTTON

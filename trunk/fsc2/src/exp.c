@@ -253,7 +253,7 @@ static void loop_setup( void )
 				setup_while_or_repeat( prg_token[ i ].token, &i );
 				if ( cur_pos < On_Stop_Pos && i > On_Stop_Pos )
 				{
-					eprint( FATAL, "ON_QUIT label is located within a "
+					eprint( FATAL, "ON_STOP label is located within a "
 							"loop.\n" );
 					THROW( EXCEPTION );
 				}
@@ -264,7 +264,7 @@ static void loop_setup( void )
 				setup_if_else( &i, NULL );
 				if ( cur_pos < On_Stop_Pos && i > On_Stop_Pos )
 				{
-					eprint( FATAL, "ON_QUIT label is located within an "
+					eprint( FATAL, "ON_STOP label is located within an "
 							"IF-ELSE construct.\n" );
 					THROW( EXCEPTION );
 				}
@@ -714,13 +714,13 @@ void exp_test_run( void )
 }
 
 
-/*-----------------------------------------------------------------*/
-/* Routine works as a kind of virtual lexer by simply passing the  */
-/* parser the tokens we stored while running store_exp(). The only */
-/* exception are tokens dealing with flow control - for most of    */
-/* them the parser gets signaled an end of file, only the `}' is   */
-/* handled by the parser itself (but also as an EOF).              */
-/*-----------------------------------------------------------------*/
+/*----------------------------------------------------------------*/
+/* Routine works as a kind of virtual lexer by simply passing the */
+/* parser the tokens that got stored while running store_exp().   */
+/* The only exceptions are tokens dealing with flow control - for */
+/* most of them the parser gets signaled an end of file, only the */
+/* `}' is handled by the parser itself (but also as an EOF).      */
+/*----------------------------------------------------------------*/
 
 int exp_runlex( void )
 {

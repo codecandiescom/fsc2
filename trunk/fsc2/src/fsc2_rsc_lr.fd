@@ -1072,7 +1072,7 @@ argument:
 Name: cut
 Width: 620
 Height: 450
-Number of Objects: 15
+Number of Objects: 17
 
 --------------------
 class: FL_BOX
@@ -1292,27 +1292,9 @@ callback: curve_button_callback
 argument: -4
 
 --------------------
-class: FL_CANVAS
-type: NORMAL_CANVAS
-box: 65 5 95 390
-boxtype: FL_FRAME_BOX
-colors: FL_COL1 FL_COL1
-alignment: FL_ALIGN_CENTER
-style: FL_NORMAL_STYLE
-size: FL_DEFAULT_SIZE
-lcol: FL_BLACK
-label: 
-shortcut: 
-resize: FL_RESIZE_Y
-gravity: FL_NorthWest FL_SouthWest
-name: cut_y_axis
-callback: 
-argument: 
-
---------------------
 class: FL_BUTTON
 type: NORMAL_BUTTON
-box: 110 15 20 20
+box: 110 20 20 20
 boxtype: FL_UP_BOX
 colors: FL_COL1 FL_COL1
 alignment: FL_ALIGN_CENTER
@@ -1344,6 +1326,60 @@ gravity: FL_NoGravity FL_NoGravity
 name: down_button
 callback: cut_next_index
 argument: 1
+
+--------------------
+class: FL_BUTTON
+type: NORMAL_BUTTON
+box: 110 80 20 20
+boxtype: FL_UP_BOX
+colors: FL_COL1 FL_COL1
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_BLACK
+label: 
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: top_button
+callback: cut_next_index
+argument: 2
+
+--------------------
+class: FL_BUTTON
+type: NORMAL_BUTTON
+box: 110 110 20 20
+boxtype: FL_UP_BOX
+colors: FL_COL1 FL_COL1
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_BLACK
+label: 
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: bottom_button
+callback: cut_next_index
+argument: 3
+
+--------------------
+class: FL_CANVAS
+type: NORMAL_CANVAS
+box: 65 5 95 390
+boxtype: FL_FRAME_BOX
+colors: FL_COL1 FL_COL1
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_BLACK
+label: 
+shortcut: 
+resize: FL_RESIZE_Y
+gravity: FL_NorthWest FL_SouthWest
+name: cut_y_axis
+callback: 
+argument: 
 
 ==============================
 create_the_forms
