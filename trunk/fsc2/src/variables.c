@@ -158,16 +158,16 @@ static void vars_ref_copy_create( Var_T *nsv, Var_T *src, bool exact_copy );
 static void *vars_get_pointer( ssize_t *iter, ssize_t depth, Var_T *p );
 
 
-/*----------------------------------------------------------------------*/
-/* vars_get() is called when a token is found that might be a variable  */
-/* identifier. The function checks if it is an already defined variable */
-/* and in this case returns a pointer to the corresponding structure,   */
-/* otherwise it returns NULL.                                           */
-/* ->                                                                   */
-/*   * string with name of variable                                     */
-/* <-                                                                   */
-/*   * pointer to VAR structure or NULL                                 */
-/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*
+ * vars_get() is called when a token is found that might be a variable
+ * identifier. The function checks if it is an already defined variable
+ * and in this case returns a pointer to the corresponding structure,
+ * otherwise it returns NULL.
+ * ->
+ *   * string with name of variable
+ * <-
+ *   * pointer to VAR structure or NULL
+ *----------------------------------------------------------------------*/
 
 Var_T *vars_get( char *name )
 {
@@ -188,14 +188,14 @@ Var_T *vars_get( char *name )
 }
 
 
-/*----------------------------------------------------------*/
-/* vars_new() sets up a new variable by getting memory for  */
-/* a variable structure and setting the important elements. */
-/* ->                                                       */
-/*   * string with variable name                            */
-/* <-                                                       */
-/*   * pointer to variable structure                        */
-/*----------------------------------------------------------*/
+/*----------------------------------------------------------*
+ * vars_new() sets up a new variable by getting memory for
+ * a variable structure and setting the important elements.
+ * ->
+ *   * string with variable name
+ * <-
+ *   * pointer to variable structure
+ *----------------------------------------------------------*/
 
 Var_T *vars_new( char *name )
 {
@@ -230,12 +230,12 @@ Var_T *vars_new( char *name )
 }
 
 
-/*-------------------------------------------------------------------*/
-/* This function is called when a 'VAR_TOKEN [' combination is found */
-/* in the input. For a new array it sets its type. Everything else   */
-/* it does is pushing a variable with a pointer to the array onto    */
-/* the stack.                                                        */
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * This function is called when a 'VAR_TOKEN [' combination is found
+ * in the input. For a new array it sets its type. Everything else
+ * it does is pushing a variable with a pointer to the array onto
+ * the stack.
+ *-------------------------------------------------------------------*/
 
 
 Var_T *vars_arr_start( Var_T *v )
@@ -249,12 +249,12 @@ Var_T *vars_arr_start( Var_T *v )
 }
 
 
-/*--------------------------------------------------------------*/
-/* Removes a variable from the linked list of variables, Unless */
-/* the flag passed as the second argument is set only variables */
-/* with names get removed (this is used to control if also sub- */
-/* variables for more-dimensional arrays get deleted).          */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ * Removes a variable from the linked list of variables, Unless
+ * the flag passed as the second argument is set only variables
+ * with names get removed (this is used to control if also sub-
+ * variables for more-dimensional arrays get deleted).
+ *--------------------------------------------------------------*/
 
 Var_T *vars_free( Var_T *v, bool also_nameless )
 {
@@ -315,9 +315,9 @@ Var_T *vars_free( Var_T *v, bool also_nameless )
 }
 
 
-/*---------------------------------------------------------------*/
-/* free_vars() removes all variables from the list of variables. */
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ * free_vars() removes all variables from the list of variables.
+ *---------------------------------------------------------------*/
 
 static void free_all_vars( void )
 {
@@ -329,9 +329,9 @@ static void free_all_vars( void )
 }
 
 
-/*----------------------------------------------------------------*/
-/* vars_del_stack() deletes all entries from the variables stack. */
-/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * vars_del_stack() deletes all entries from the variables stack.
+ *----------------------------------------------------------------*/
 
 void vars_del_stack( void )
 {
@@ -340,10 +340,10 @@ void vars_del_stack( void )
 }
 
 
-/*----------------------------------------------------------*/
-/* vars_clean_up() deletes the variable and array stack and */
-/* removes all variables from the list of variables         */
-/*----------------------------------------------------------*/
+/*----------------------------------------------------------*
+ * vars_clean_up() deletes the variable and array stack and
+ * removes all variables from the list of variables
+ *----------------------------------------------------------*/
 
 void vars_clean_up( void )
 {
@@ -353,10 +353,10 @@ void vars_clean_up( void )
 }
 
 
-/*-------------------------------------------------------------*/
-/* Pushes a copy of a variable onto the stack (but only if the */
-/* variable to be copied isn't already a stack variable).      */
-/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*
+ * Pushes a copy of a variable onto the stack (but only if the
+ * variable to be copied isn't already a stack variable).
+ *-------------------------------------------------------------*/
 
 Var_T *vars_push_copy( Var_T *v )
 {
@@ -399,8 +399,8 @@ Var_T *vars_push_copy( Var_T *v )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ *-----------------------------------------------------------------------*/
 
 Var_T *vars_push_matrix( Var_Type_T type, int dim, ... )
 {
@@ -476,8 +476,8 @@ Var_T *vars_push_matrix( Var_Type_T type, int dim, ... )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ *-----------------------------------------------------------------------*/
 
 static Var_T *vars_push_submatrix( Var_T *from, Var_Type_T type, int dim,
 								   ssize_t *sizes )
@@ -526,27 +526,27 @@ static Var_T *vars_push_submatrix( Var_T *from, Var_Type_T type, int dim,
 }
 
 
-/*-----------------------------------------------------------------------*/
-/* vars_push() creates a new entry on the variable stack (which actually */
-/* is not really a stack but a linked list) and sets its type and value. */
-/* The following sets of arguments are possible:                         */
-/* INT_VAR, long                      value is the value to be assigned  */
-/* FLOAT_VAR, double                  value is the value to be assigned  */
-/* INT_ARR, long * or NULL, long      first value is pointer to array to */
-/*                                    be assigned or NULL for initiali-  */
-/*                                    zation with 0, second length of    */
-/*                                    array                              */
-/* FLOAT_ARR, double * or NULL, long  first value is pointer to array to */
-/*                                    be assigned or NULL for initiali-  */
-/*                                    zation with 0, second length of    */
-/*                                    array                              */
-/* INT_PTR, long *                                                       */
-/* FLOAT_PTR, long *                                                     */
-/* INT_REF, Var_T *                                                      */
-/* FLOAT_REF, Var_T *                                                    */
-/* REF_PTR, Var_T *														 */
-/* FUNC_PTR, struct Func_T *											 */
-/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ * vars_push() creates a new entry on the variable stack (which actually
+ * is not really a stack but a linked list) and sets its type and value.
+ * The following sets of arguments are possible:
+ * INT_VAR, long                      value is the value to be assigned
+ * FLOAT_VAR, double                  value is the value to be assigned
+ * INT_ARR, long * or NULL, long      first value is pointer to array to
+ *                                    be assigned or NULL for initiali-
+ *                                    zation with 0, second length of
+ *                                    array
+ * FLOAT_ARR, double * or NULL, long  first value is pointer to array to
+ *                                    be assigned or NULL for initiali-
+ *                                    zation with 0, second length of
+ *                                    array
+ * INT_PTR, long *
+ * FLOAT_PTR, long *
+ * INT_REF, Var_T *
+ * FLOAT_REF, Var_T *
+ * REF_PTR, Var_T *
+ * FUNC_PTR, struct Func_T *
+ *-----------------------------------------------------------------------*/
 
 Var_T *vars_push( Var_Type_T type, ... )
 {
@@ -702,8 +702,8 @@ Var_T *vars_push( Var_Type_T type, ... )
 }
 
 
-/*------------------------------------------------------------------------*/
-/*------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*
+ *------------------------------------------------------------------------*/
 
 Var_T *vars_make( Var_Type_T type, Var_T *src )
 {
@@ -796,14 +796,14 @@ Var_T *vars_make( Var_Type_T type, Var_T *src )
 }
 
 
-/*------------------------------------------------------------------------*/
-/* Function for making a copy of an INT_REF or FLOAT_REF via vars_push(). */
-/* This also works with making a FLOAT type copy of an INT type matrix.   */
-/* Note that sub-matrices do not go onto the stack but into the variables */
-/* list (but without a name attached to them and the with IS_TEMP flag    */
-/* being set) - this is needed to keep the convention working that an EDL */
-/* functions gets one variable one the stack for each of its arguments.   */
-/*------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*
+ * Function for making a copy of an INT_REF or FLOAT_REF via vars_push().
+ * This also works with making a FLOAT type copy of an INT type matrix.
+ * Note that sub-matrices do not go onto the stack but into the variables
+ * list (but without a name attached to them and the with IS_TEMP flag
+ * being set) - this is needed to keep the convention working that an EDL
+ * functions gets one variable one the stack for each of its arguments.
+ *------------------------------------------------------------------------*/
 
 static void vars_ref_copy( Var_T *nsv, Var_T *src, bool exact_copy )
 {
@@ -822,10 +822,10 @@ static void vars_ref_copy( Var_T *nsv, Var_T *src, bool exact_copy )
 }
 
 
-/*------------------------------------------------------*/
-/* This function does the real work for vars_ref_copy() */
-/* and gets called recursively if necessary.            */
-/*------------------------------------------------------*/
+/*------------------------------------------------------*
+ * This function does the real work for vars_ref_copy()
+ * and gets called recursively if necessary.
+ *------------------------------------------------------*/
 
 static void vars_ref_copy_create( Var_T *nsv, Var_T *src, bool exact_copy )
 {
@@ -925,14 +925,14 @@ static void vars_ref_copy_create( Var_T *nsv, Var_T *src, bool exact_copy )
 }
 
 
-/*-----------------------------------------------------------------*/
-/* vars_pop() checks if a variable is on the variable stack and    */
-/* if it does removes it from the linked list making up the stack  */
-/* To make running through a list of variables easier for some     */
-/* functions, this function returns a pointer to the next variable */
-/* on the stack (if the popped variable was on the stack and had a */
-/* successor).                                                     */
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ * vars_pop() checks if a variable is on the variable stack and
+ * if it does removes it from the linked list making up the stack
+ * To make running through a list of variables easier for some
+ * functions, this function returns a pointer to the next variable
+ * on the stack (if the popped variable was on the stack and had a
+ * successor).
+ *-----------------------------------------------------------------*/
 
 Var_T *vars_pop( Var_T *v )
 {
@@ -1022,16 +1022,16 @@ Var_T *vars_pop( Var_T *v )
 }
 
 
-/*-------------------------------------------------------------------*/
-/* vars_check() first checks that the variable passed to it as the   */
-/* first argument really exists and then tests if the variable has   */
-/* the type passed as the second argument. The type to be tested for */
-/* can not only be a simple type but tests for different types at    */
-/* once are possible by specifying the types logically ored, i.e. to */
-/* test if a variable has integer or floating point type use         */
-/*               INT_VAR | FLOAT_VAR                                 */
-/* as the second argument.                                           */
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * vars_check() first checks that the variable passed to it as the
+ * first argument really exists and then tests if the variable has
+ * the type passed as the second argument. The type to be tested for
+ * can not only be a simple type but tests for different types at
+ * once are possible by specifying the types logically ored, i.e. to
+ * test if a variable has integer or floating point type use
+ *               INT_VAR | FLOAT_VAR
+ * as the second argument.
+ *-------------------------------------------------------------------*/
 
 void vars_check( Var_T *v, int types )
 {
@@ -1103,11 +1103,11 @@ void vars_check( Var_T *v, int types )
 }
 
 
-/*---------------------------------------------------------------*/
-/* vars_exist() checks if a variable really exists by looking it */
-/* up in the variable list or on the variable stack (depending   */
-/* on what type of variable it is).                              */
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ * vars_exist() checks if a variable really exists by looking it
+ * up in the variable list or on the variable stack (depending
+ * on what type of variable it is).
+ *---------------------------------------------------------------*/
 
 bool vars_exist( Var_T *v )
 {
@@ -1127,15 +1127,15 @@ bool vars_exist( Var_T *v )
 }
 
 
-/*-------------------------------------------------------------------*/
-/* This function is used to iterate over all elements of a (more-    */
-/* dimensional) array. On each call a (void) pointer to the next     */
-/* element of the array is returned. When there are no more elements */
-/* a NULL pointer gets returned.                                     */
-/* Important: the function *must* be called until NULL gets returned */
-/*            (i.e. there are no elements left) or, if this can't be */
-/*            done, must be called with a NULL argument.             */
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * This function is used to iterate over all elements of a (more-
+ * dimensional) array. On each call a (void) pointer to the next
+ * element of the array is returned. When there are no more elements
+ * a NULL pointer gets returned.
+ * Important: the function *must* be called until NULL gets returned
+ *            (i.e. there are no elements left) or, if this can't be
+ *            done, must be called with a NULL argument.
+ *-------------------------------------------------------------------*/
 
 void *vars_iter( Var_T *v )
 {
@@ -1180,13 +1180,13 @@ void *vars_iter( Var_T *v )
 }
 
 
-/*--------------------------------------------------------------*/
-/* Returns a pointer to an element within an array or matrix    */
-/* as indexed by the 'iter' array. If the indices in the 'iter' */
-/* array are to large it corrects them by stepping up the index */
-/* one dimension "further up". If there is no more following    */
-/* element a NULL pointer is returned.                          */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ * Returns a pointer to an element within an array or matrix
+ * as indexed by the 'iter' array. If the indices in the 'iter'
+ * array are to large it corrects them by stepping up the index
+ * one dimension "further up". If there is no more following
+ * element a NULL pointer is returned.
+ *--------------------------------------------------------------*/
 
 static void *vars_get_pointer( ssize_t *iter, ssize_t depth, Var_T *p )
 {
@@ -1225,13 +1225,13 @@ static void *vars_get_pointer( ssize_t *iter, ssize_t depth, Var_T *p )
 }
 
 
-/*------------------------------------------------------------------------*/
-/* This functions saves or restores all variables depending on 'flag'. If */
-/* 'flag' is set the variables are saved, otherwise they are copied back  */
-/* from the backup into the normal variables space.                       */
-/* This function is needed to save the state of all variables during the  */
-/* test run and then reset it afterwards.                                 */
-/*------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*
+ * This functions saves or restores all variables depending on 'flag'. If
+ * 'flag' is set the variables are saved, otherwise they are copied back
+ * from the backup into the normal variables space.
+ * This function is needed to save the state of all variables during the
+ * test run and then reset it afterwards.
+ *------------------------------------------------------------------------*/
 
 void vars_save_restore( bool flag )
 {
