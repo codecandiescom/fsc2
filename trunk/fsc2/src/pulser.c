@@ -679,7 +679,12 @@ void p_set( long pnum, int type, Var *v )
 
 Var *p_get( char *txt, int type )
 {
-	long pnum = p_num( txt );               /* determine pulse number */
+	return p_get_by_num( pnum( txt ), type );
+}
+
+
+Var *p_get_by_num( long p_num, int type )
+{
 	int function;
 	double time;
 	int cycle;

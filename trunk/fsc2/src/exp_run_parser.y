@@ -145,11 +145,11 @@ expr:    E_INT_TOKEN unit          { $$ = apply_unit( vars_push( INT_VAR, $1 ),
 											 "predefined function.\n",
 											 Fname, Lc, $1->name );
 	                                 THROW( EXCEPTION ); }
-       | E_PPOS                    { p_get( $1, P_POS ); }
-       | E_PLEN                    { p_get( $1, P_LEN ); }
-       | E_PDPOS                   { p_get( $1, P_DPOS ); }
-       | E_PDLEN                   { p_get( $1, P_DLEN ); }
-       | E_PMAXLEN                 { p_get( $1, P_MAXLEN ); }
+       | E_PPOS                    { p_get_by_num( $1, P_POS ); }
+       | E_PLEN                    { p_get_by_num( $1, P_LEN ); }
+       | E_PDPOS                   { p_get_by_num( $1, P_DPOS ); }
+       | E_PDLEN                   { p_get_by_num( $1, P_DLEN ); }
+       | E_PMAXLEN                 { p_get_by_num( $1, P_MAXLEN ); }
        | expr E_AND expr           { $$ = vars_comp( COMP_AND, $1, $3 ); }
        | expr E_OR expr            { $$ = vars_comp( COMP_OR, $1, $3 ); }
        | expr E_XOR expr           { $$ = vars_comp( COMP_XOR, $1, $3 ); }
