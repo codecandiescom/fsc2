@@ -38,7 +38,9 @@ static int ni6601_read_count( Board *board, NI6601_COUNTER_VAL *arg );
 static int ni6601_start_pulses( Board *board, NI6601_PULSES *arg );
 static int ni6601_start_counting( Board *board, NI6601_COUNTER *arg );
 static int ni6601_is_busy( Board *board, NI6601_IS_ARMED *arg );
+#if 0
 static void ni6601_irq_handler( int irq, void *data, struct pt_regs *dummy );
+#endif
 
 
 static Board boards[ NI6601_MAX_BOARDS ];
@@ -47,43 +49,10 @@ static int board_count = 0;
 
 
 struct file_operations ni6601_file_ops = {
-#if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 2, 0 )
-	NULL,               /* lseek              */
-	NULL,               /* read               */
-	NULL,               /* write              */
-	NULL,               /* readdir            */
-	NULL,               /* select             */
-	ni6601_ioctl,       /* ioctl              */
-	NULL,               /* mmap               */
-	ni6601_open,        /* open               */
-	ni6601_release,     /* release            */
-	NULL,               /* fsync              */
-	NULL,               /* fasync             */
-	NULL,               /* check_media_change */
-	NULL                /* revalidate         */
-#elif LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 2, 0 ) && \
-      LINUX_VERSION_CODE <  KERNEL_VERSION( 2, 4, 0 )
-	NULL,               /* llseek             */
-	NULL,               /* read               */
-	NULL,               /* write              */
-	NULL,               /* readdir            */
-	NULL,               /* poll               */
-	ni6601_ioctl,       /* ioctl              */
-	NULL,               /* mmap               */
-	ni6601_open,        /* open               */
-	NULL,               /* flush              */
-	ni6601_release,     /* release            */
-	NULL,               /* fsync              */
-	NULL,               /* fasync             */
-	NULL,               /* check_media_change */
-	NULL,               /* revalidate         */
-	NULL                /* lock               */
-#elif LINUX_VERSION_CODE > KERNEL_VERSION( 2, 4, 0 )
 	owner:		    THIS_MODULE,
 	ioctl:              ni6601_ioctl,
 	open:               ni6601_open,
 	release:            ni6601_release,
-#endif
 };
 
 
@@ -153,7 +122,9 @@ static int __init ni6601_init( void )
 static int __init ni6601_init_board( struct pci_dev *dev, Board *board )
 {
 	board->dev = dev;
+#if 0
 	board->irq = 0;
+#endif
 
         if ( pci_enable_device( dev ) )
 	{
@@ -196,15 +167,16 @@ static int __init ni6601_init_board( struct pci_dev *dev, Board *board )
 		board->mite + 0xC0 );
 
 	/* Request the interrupt used by the board */
-
+#if 0
 	if ( request_irq( dev->irq, ni6601_irq_handler, SA_SHIRQ,
 			  NI6601_NAME, board ) ) {
 		PDEBUG( "Can't obtain IRQ %d\n", dev->irq );
 		dev->irq = 0;
 		goto init_failure;
 	}
-	board->irq = dev->irq;
 
+	board->irq = dev->irq;
+#endif
 	spin_lock_init( &board->spinlock );
 
 	ni6601_register_setup( board );
@@ -403,7 +375,7 @@ static int ni6601_dio_in( Board *board, NI6601_DIO_VALUE *arg )
 
 	/* If necessary switch selected pins to input mode */
 
-	if ( ( u8 ) ( ( board->dio_mask & 0xFF ) ^ dio.mask ) != 0xFF ) {
+	if ( ( ( u8 ) ( board->dio_mask & 0xFF ) ^ dio.mask ) != 0xFF ) {
 		board->dio_mask &= ~ ( u16 ) dio.mask;
 		writew( board->dio_mask, board->regs.dio_control );
 	}
@@ -506,9 +478,9 @@ static int ni6601_read_count( Board *board, NI6601_COUNTER_VAL *arg )
 		return -EINVAL;
 	}
 
-	/* If required wait for counting to stop (by checking if the
-	   neighbouring counter creating the gate pulse is still counting)
-	   and then reset both counters */
+	/* If required wait for counting to stop (by waiting for the
+	   neighboring counter, creating the gate pulse, to stop) and then
+	   reset both counters. */
 
 	if ( cs.wait_for_end ) {
 		wait_queue_head_t waitqueue;
@@ -527,12 +499,12 @@ static int ni6601_read_count( Board *board, NI6601_COUNTER_VAL *arg )
 			board->regs.joint_reset[ cs.counter ] );
 	}
 
-	/* Read the SW save register */
+	/* Read the SW save register to get the current count value */
 
 	cs.count = readl( board->regs.sw_save[ cs.counter ] );
 
-	/* If the counter is armed repeatedly read the SW save register until
-	   two readings are identical */
+	/* If the counter is armed, re-read the SW save register until two
+	   readings are identical */
 
 	if ( readw( board->regs.joint_status[ cs.counter ] ) &
 	     ( cs.counter & 1 ? G1_ARMED : G0_ARMED ) )
@@ -738,10 +710,10 @@ static int ni6601_is_busy( Board *board, NI6601_IS_ARMED *arg )
 }
 
 
-/*-----------------------------------------------------------*/
-/* Interrupt handler for all boards, currently does nothing. */
-/*-----------------------------------------------------------*/
-
+/*----------------------------------------------------------*/
+/* Interrupt handler for all boards, not doing anything yet */
+/*----------------------------------------------------------*/
+#if 0
 static void ni6601_irq_handler( int irq, void *data, struct pt_regs *dummy )
 {
 	Board *board = ( Board * ) data;
@@ -754,7 +726,7 @@ static void ni6601_irq_handler( int irq, void *data, struct pt_regs *dummy )
 
 	PDEBUG( "Got interrupt\n" );
 }
-
+#endif
 
 
 EXPORT_NO_SYMBOLS;
@@ -763,12 +735,10 @@ EXPORT_NO_SYMBOLS;
 module_init( ni6601_init );
 module_exit( ni6601_cleanup );
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 2, 0 )
 MODULE_PARM( major, "i" );
 MODULE_PARM_DESC( major, "Major device number to use" );
 MODULE_AUTHOR( "Jens Thoms Toerring <Jens.Toerring@physik.fu-berlin.de>" );
 MODULE_DESCRIPTION( "National Instruments 6601 GBCT board driver" );
-#endif
 
 
 /* MODULE_LICENSE should be defined since at least 2.4.10 */

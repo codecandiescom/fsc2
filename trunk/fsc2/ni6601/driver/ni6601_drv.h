@@ -180,14 +180,9 @@ typedef struct {
 #include <linux/wait.h>
 #include <linux/delay.h>
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 2, 0 )
 #include <linux/spinlock.h>
 #include <linux/slab.h>
 #include <asm/uaccess.h>
-#else
-#include <linux/mm.h>
-#include <linux/malloc.h>
-#endif
 
 #ifdef CONFIG_PROC_FS
 #include <linux/proc_fs.h>
@@ -250,9 +245,9 @@ typedef struct {
 	unsigned long mite_len;
 	unsigned long addr_phys;
 	unsigned long addr_len;
-
+#if 0
 	unsigned int irq;
-
+#endif
 	int in_use;
 	uid_t owner;
 	spinlock_t spinlock;
@@ -326,6 +321,20 @@ int ni6601_input_source( int source, u16 *bits );
 #define DRQ_ERROR                           ( 1 << 14 )
 #define DRQ_READBACK                        ( 1 << 13 )
 
+/* Gi Status Register */
+
+#define Gi_INTERRUPT                        ( 1 << 15 )
+#define Gi_TC_STATUS                        ( 1 <<  3 )
+
+/* Gi Interrupt Acknowledge Register */
+
+#define Gi_TC_INTERRUPT_ACK                 ( 1 << 14 )
+
+/* #### The bit(s) of the Gi Interrupt Acknowledge Register aren't   ####
+   #### documented and picking bit 14 is pure guesswork, derived at  ####
+   #### from the documentation of the DAQ-STC chip, where also many  ####
+   #### other bits are at the same positions as on the TIO chip      #### */
+
 /* Gi Input Select Register */
 
 #define INVERTED_SOURCE_POLARITY            ( 1 << 15 )
@@ -372,11 +381,16 @@ int ni6601_input_source( int source, u16 *bits );
 #define G1_COUNTING                        ( 1 <<  3 )
 #define G0_COUNTING                        ( 1 <<  2 )
 
-
 /* G01/G23 Joint Reset Register */
 
 #define G0_RESET                           ( 1 <<  2 )
 #define G1_RESET                           ( 1 <<  3 )
+
+/* Gi Interrupt Enable Register */
+
+#define G1_TC_INTERRUPT_ENABLE             ( 1 <<  9 )
+#define G0_TC_INTERRUPT_ENABLE             ( 1 <<  6 )
+
 
 
 #if defined NI6601_DEBUG
