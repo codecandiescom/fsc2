@@ -90,9 +90,9 @@ cycling is to be done in the experiment.
 
 Within the @code{ASSIGNMENTS} section the pulsers time bases and trigger
 modes are set. It also deals with the basic setup of the channels,
-i.e. associating some or more output channels with certain functions and
-setting the physical characteristics of the channels (e.g.@: voltages
-etc.).
+i.e. associating some or more output connectors with pulse functions and
+setting the physical characteristics of the output (e.g.@: voltage
+levels, inverting the output etc.).
 
 @c ########################################################
 
@@ -154,8 +154,8 @@ pulsers:
 @itemize @bullet
 @item Sony/Tektronix DG2020: @w{5 ns} to @w{0.1 s}
 @item Tektronix HFS9003: @w{1.6 ns} to @w{20 us}
-@item Bruker EP385: internal clock @w{8 ns} only, external clock @w{8 ns} and
-larger
+@item Bruker EP385: internal clock @w{8 ns} only (no @code{TIMBASE}
+statement required), external clock @w{8 ns} and larger
 @item Interface Technology R690: @w{4 ns}, @w{8 ns} and @w{16 ns}
 for the internal clock, @w{4 ns} and larger with an external clock
 @end itemize
@@ -210,7 +210,7 @@ TRIGGER_MODE: EXTERNAL;
 @end example
 
 Especially when using the internal trigger it is useful to be able to
-set the rate or the frequency with which the experiment is
+set the rate or the frequency with which the experiment is to be
 repeated. Thus for the @strong{Sony/Tektronix DG2020}, the @code{Bruker
 EP385} and @strong{Interface Technology RS690} an additional keyword can
 be specified, either @code{REPEAT_TIME} or
@@ -240,10 +240,10 @@ guaranteed that the pulse sequence is as long as the repetition time,
 thus keeping the pulser from getting restarted before the end of the
 repetition time.
 
-Please note: Unfortunately, for the @strong{Tektronix HFS9000} no
-frequency or rate can be set, so an external trigger has to be used to
-determine the repetition rate of the experiment, otherwise the pulser
-will repeat the pulse sequence at the highest possible rate.
+For the @strong{Tektronix HFS9000} no repetition frequency or rate can
+be set, so an external trigger has to be used to determine the
+repetition rate of the experiment, otherwise the pulser will repeat the
+pulse sequence at the highest possible rate.
 
 For the @strong{Bruker EP385} pulser the highest repetition frequency is
 about @w{777.5 Hz} (when using the internal clock, otherwise multiply
@@ -323,10 +323,10 @@ need to append a @code{#} and the number of the pulser to tell the
 @cindex @code{DELAY}
 
 The statements described in the following deal with setting up the
-channels of the pulser. The basic idea is to abstract from the real
-output connectors of the pulser and to use symbolic names for the
-channels. Instead of telling the pulser to output a pulse at e.g.@: the
-output connector @w{numbered 1} during the experiment, in the
+output channels of the pulser. The basic idea is to abstract from the
+real output connectors of the pulser and to use symbolic names for them.
+So, instead of telling the pulser to output a pulse at e.g.@: the output
+connector @w{numbered 1} during the experiment, in the
 @code{ASSIGNMENTS} section output connectors are associated with
 symbolic names for the functions and these symbolic names are used when
 specifying pulses. While this may be only a convenience in simple
@@ -334,11 +334,11 @@ experiments (you only have to apply changes in one place when changing
 the output connectors instead of finding and changing it for all pulses
 concerned) it makes doing phase cycling much simpler because here the
 same pulse may have to be output at different output connectors,
-depending on the current phase. So, instead of always specifying which
-output connector to use for a certain phase for each phase, the program is
-told about which connectors to use for a function and then it's left to
-the program to do all the bookkeeping about when to use which output
-connector.
+depending on the current phase. Instead of always specifying which
+output connector to use for a certain phase for each pulse, the program
+is told about which connectors to use for a function (and which phase)
+and then it's left to the program to do all the bookkeeping about when
+to use which output connector.
 
 The following symbolic names for pulse functions are defined:
 @itemize @bullet
@@ -384,12 +384,12 @@ probably a good idea not to use e.g.@: the @code{MICROWAVE} function for
 something completely different (or other people will have major problems
 understanding what your @code{EDL} program is supposed to do and there's
 no obfuscated EDL contest yet;-). Besides, some of the pulser modules
-also define special functions (e.g.@: for sutomatically setting TWT
-pulses) that only work with certain of these functions.
+also define special functions (e.g.@: for automatically setting TWT
+pulses) that only work for some of these functions.
 
 The functions @code{OTHER_1} to @code{OTHER_4} should be used in cases
 where none of the function names seem to fit the special purpose you
-have in mind.
+have in mind for the pulses of this function.
 
 Before giving an example it is important to point out that there are
 some major differences between the @strong{Sony/Tektronix DG2020} on the
@@ -407,10 +407,10 @@ output channels. Each output channel can be addressed by a letter
 between @code{A} and @code{D} (or @code{H}, if two HSM cards are
 installed) for the connector, followed by a number between @code{0} and
 @code{15}, specifying the channel on the connector to use. Valid channel
-designators are e.g. @code{A3}, @code{C13} etc. Please note that the
-number of channels of a connector that can be used depends on the time
-base setting: for a time base of @w{4 ns} only the lowest 4 channels of
-each connector can be used, for a time base of @w{8 ns} only the lower 8
+designators are e.g. @code{A3}, @code{C13} etc. Moreover, the number of
+channels of a connector that can be used depends on the time base
+setting: for a time base of @w{4 ns} only the lowest 4 channels of each
+connector can be used, for a time base of @w{8 ns} only the lower 8
 channels.
 
 For the @strong{Tektronix HFS9003} simply a channel is associated with a
@@ -422,7 +422,7 @@ RF_GATE:   CH = 3;
 DETECTION: CHANNEL = TRIGGER_OUT;
 @end example
 @noindent
-or, for the @strong{Interface Technology RS690}
+or, for the @strong{Interface Technology RS690},
 @example
 MICROWAVE: CHANNEL = A3;
 RF:        CHANNEL = B7;
@@ -433,9 +433,12 @@ DETECTION: CHANNEL = D15;
 The output channels usually are numbered as printed on the device, one
 exception is the trigger-out channel of the @strong{Tektronix HFS9003},
 that is called @code{TRIGGER_OUT}, and has some special properties,
-e.g. allowing only one pulse of a fixed length.  The keyword
+e.g. allowing only one pulse of fixed length.  The keyword
 @code{CHANNEL} can be replaced by @code{CH} and @code{TRIGGER_OUT} by
 either @code{TRIGGEROUT}, @code{TRIG_OUT} or @code{TRIGOUT}.
+
+Please note: the @strong{Tektronix HFS9003} has only 4 channels and does
+not allow assignment of more than one channel to a single function.
 
 For the @strong{Sony/Tektronix DG2020} the function gets associated with
 one (or more pods, see below why sometimes more than one is needed):
@@ -446,24 +449,20 @@ RF_GATE:   POD = 7;
 DETECTION: POD = 11;
 @end example
 @noindent
-Instead of @code{POD} you can also simply write @code{P}.
-
+Instead of @code{POD} you can also write @code{P}.
 
 Optionally, for the @strong{Sony/Tektronix DG2020} you can also tell the
-program which of the internal channels should be used. If you don't the
-program will automatically grab as many internal channels as it needs,
-always using the ones with the lowest numbers first. To declare which of
-the internal channels are to be associated with the output connectors
-(PODs) use a statement like this:
+program which of its 36 internal channels (numbered 0 to 35) should be
+used. If you don't the program will automatically grab as many of the
+internal channels as it needs, always using the ones with the lowest
+numbers first. To declare which of the internal channels are to be
+associated with the output connectors (PODs) use a statement like this:
 @example
 MICROWAVE: POD = 1, 2, 3, 4  CHANNEL = 31, 32, 33, 34;
 RF:        POD = 6           CHANNEL = 35;
 RF_GATE:   POD = 7           CHANNEL = 17;
 DETECTION: POD = 11;   // leave it to the program to select the channel
 @end example
-
-Please note: the @strong{Tektronix HFS9003} has only 4 channels and does
-not allow assignment of more than one channel to a single function.
 
 Here a list of the pod and/or channel numbers that can be used for the
 pulsers:
@@ -476,12 +475,12 @@ pulsers:
 @end itemize
 
 Beside defining at which of the output connectors the pulses for a
-function will appear you can also set other properties for the pulses of
-a POD or channel. As far as the hardware allows it you may set the high
-and the low voltage for all pulses of a function by using the keywords
-@code{V_HIGH} and @code{V_LOW}@footnote{Instead of @code{V_HIGH} you can
-also write @code{VHIGH}, @code{V_H} or @code{VH} and for @code{V_LOW}
-you may use @code{VLOW}, @code{V_L} or @code{VL}.}:
+function will appear at you can also set other properties for the pulses
+of a POD or channel. As far as the hardware allows it you may set the
+high and the low voltage for all pulses of a function by using the
+keywords @code{V_HIGH} and @code{V_LOW}@footnote{Instead of
+@code{V_HIGH} you can also write @code{VHIGH}, @code{V_H} or @code{VH}
+and for @code{V_LOW} you may use @code{VLOW}, @code{V_L} or @code{VL}.}:
 @example
 MICROWAVE: POD = 1, 2, 3, 4  V_HIGH = 4.3 V, V_LOW = -0.5 V;
 RF:        POD = 6           V_HIGH = 2.6 V, V_LOW = 0 V;
