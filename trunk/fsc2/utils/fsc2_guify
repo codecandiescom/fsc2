@@ -145,7 +145,7 @@ while ( <$if> ) {
 close $if;
 
 die "Unbalanced if-endif construct(s)\n" if $if_level > 0;
-print STDERR "No variables found in input\n" if @vars == 0;
+print STDERR "Warning: No variables found in input\n" if @vars == 0;
 
 # Set values for variables that don't have been assigned a default value.
 # For ints and floats use the mean of maximum and minimum value are given,
