@@ -44,6 +44,22 @@ void *get_memcpy( const void *array, size_t size )
 }
 
 
+/*-----------------------------------------------*/
+/* strip_path() returns pointer to bare name the */
+/* function from a path like "/usr/bin/emacs".   */
+/*-----------------------------------------------*/
+
+const char *strip_path( const char *path )
+{
+    char *cp;
+    
+    if ( ( cp = strrchr( path, '/' ) ) == NULL )
+        return( path );
+    else
+        return( ++cp );
+}
+
+
 void eprint( int severity, const char *fmt, ... )
 {
 	va_list ap;
