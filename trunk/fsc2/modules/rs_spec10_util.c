@@ -153,7 +153,8 @@ int *rs_spec10_get_fd_list( void )
 			if ( S_ISDIR( buf.st_mode ) )
 				continue;
 
-			fd_list = T_realloc( fd_list, ( num_fds + 2 ) * sizeof *fd_list );
+			fd_list = INT_P T_realloc( fd_list,
+									   ( num_fds + 2 ) * sizeof *fd_list );
 			fd_list[ num_fds++ ] = fd;
 			TRY_SUCCESS;
 		}

@@ -441,7 +441,7 @@ Var *magnet_calibration_file( Var *v )
 										*v->val.sptr + 1 );
 	else
 	{
-		buf = T_malloc( PATH_MAX );
+		buf = CHAR_P T_malloc( PATH_MAX );
 
 		if ( getcwd( buf, PATH_MAX ) == NULL )
 		{

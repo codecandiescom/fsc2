@@ -121,7 +121,7 @@ int me6000_test_hook( void )
 
 int me6000_exp_hook( void )
 {
-	int num_dacs;
+	unsigned int num_dacs;
 	int i;
 
 
@@ -202,7 +202,7 @@ int me6000_exp_hook( void )
 		if ( me6000.dac[ i ].is_used )
 		{
 			print( FATAL, "Can't set voltage for CH%d, board has only "
-				   "%d channels.\n", i, me6000.num_dacs );
+				   "%u channels.\n", i, me6000.num_dacs );
 			me6x00_close( BOARD_NUMBER );
 			THROW( EXCEPTION );
 		}

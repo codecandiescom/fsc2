@@ -33,6 +33,13 @@
 #include <ni_daq.h>
 
 
+#ifdef __cplusplus
+#define NI_DAQ_POLARITY_P              ( NI_DAQ_POLARITY * )
+else
+#define NI_DAQ_POLARITY_P
+#endif
+
+
 /* Include configuration information for the device */
 
 #include "pci_mio_16e_1.conf"
@@ -42,7 +49,7 @@
 #define PCI_MIO_16E_1_MIN_CONV_TIME        8.0e-7     /* 800 ns */
 #define PCI_MIO_16E_1_AMPL_SWITCHING_TIME  2.0e-6     /*   2 us */
 
-#define MAX_NUM_SCANS               16777216L
+#define MAX_NUM_SCANS                      16777216L
 
 
 #define PCI_MIO_16E_1_TEST_CLOCK    NI_DAQ_FAST_CLOCK

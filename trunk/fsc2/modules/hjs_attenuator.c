@@ -148,7 +148,8 @@ void hjs_attenuator_child_exit_hook( void )
 {
 	if ( hjs_attenuator.is_step )
 		hjs_attenuator_set_attenuation(
-		   hjs_attenuator.att_table[ hjs_attenuator.att_table_len - 1 ].step );
+	 			lrnd( hjs_attenuator.att_table[ hjs_attenuator.att_table_len
+										    	- 1 ].step ) );
 }
 
 
@@ -412,7 +413,7 @@ static void hjs_attenuator_set_attenuation( long new_step )
 	/* Wait for the motor to move, we were using a speed of 300 steps per
 	   second. */
 
-	fsc2_usleep( labs( steps / 300.0 * 1000000L ), UNSET );
+	fsc2_usleep( lrnd( fabs( steps / 300.0 * 1000000L ) ), UNSET );
 
 	/* To always reach the end point from the same side we go a bit further
 	   up when we come from below and then back down again (obviously, the
@@ -575,8 +576,8 @@ static long hjs_attenuator_att_to_step( double att )
 	}
 
 	if ( att >= hjs_attenuator.max_table_att )
-		return
-			hjs_attenuator.att_table[ hjs_attenuator.att_table_len - 1 ].step;
+		return lrnd( hjs_attenuator.att_table[ hjs_attenuator.att_table_len
+											   - 1 ].step );
 
 	if ( att < hjs_attenuator.min_table_att * 0.999 )
 	{
@@ -586,7 +587,7 @@ static long hjs_attenuator_att_to_step( double att )
 	}
 
 	if ( att <= hjs_attenuator.min_table_att )
-		return hjs_attenuator.att_table[ 0 ].step;
+		return lrnd( hjs_attenuator.att_table[ 0 ].step );
 
 	/* Do a binary search of the list for the attenuation, interpolate if
 	   necesaary */

@@ -126,7 +126,7 @@ bool rb_pulser_set_pulse_position( long pnum, double p_time )
 	if ( p->is_pos )
 	{
 		print( FATAL, "The start position of pulse #%ld has already been set "
-			   "to %s.\n", pnum, rb_pulser_pticks( p->pos ) );
+			   "to %s.\n", pnum, rb_pulser_ptime( p->pos ) );
 		THROW( EXCEPTION );
 	}
 
@@ -190,7 +190,7 @@ bool rb_pulser_set_pulse_position_change( long pnum, double p_time )
 	if ( p->is_dpos )
 	{
 		print( FATAL, "The position change of pulse #%ld has already been set "
-			   "to %s.\n", pnum, rb_pulser_pticks( p->dpos ) );
+			   "to %s.\n", pnum, rb_pulser_ptime( p->dpos ) );
 		THROW( EXCEPTION );
 	}
 

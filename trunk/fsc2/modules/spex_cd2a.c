@@ -393,7 +393,7 @@ Var *monochromator_scan_setup( Var *v )
 	if ( v->next == NULL )
 	{
 		print( FATAL, "Missing scan step size argument.\n" );
-		THROW( EXPERIMENT );
+		THROW( EXCEPTION );
 	}
 
 	if ( spex_cd2a.mode & WN_MODES )

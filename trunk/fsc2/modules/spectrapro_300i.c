@@ -1176,7 +1176,7 @@ Var *monochromator_zero_offset( Var *v )
 
 	offset = get_double( v, "zero offset value" );
 
-	if ( abs( offset ) > 1.0 )
+	if ( fabs( offset ) > 1.0 )
 	{
 		print( FATAL, "Zero offset value is too large, valid range is "
 			   "[-1,+1].\n" );
@@ -1255,7 +1255,7 @@ Var *monochromator_grating_adjust( Var *v )
 
 	gadjust = get_double( v, "grating adjust value" );
 
-	if ( abs( gadjust ) > 1.0 )
+	if ( fabs( gadjust ) > 1.0 )
 	{
 		print( FATAL, "Grating adjust value of %2.f is too large, valid "
 			   "range is [-1,1].\n", gadjust );

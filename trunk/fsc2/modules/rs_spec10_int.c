@@ -24,6 +24,13 @@
 
 #include "rs_spec10.h"
 
+#ifdef __cplusplus
+#define UNS32_P              ( uns32 * )
+#else
+#define UNS32_P
+#endif
+
+
 #if defined RUNNING_WITH_ROOT_PRIVILEGES
 #include <sys/mman.h>
 #endif
@@ -174,7 +181,8 @@ static void rs_spec10_ccd_init( void )
 
 	if ( acc == ACC_READ_WRITE )
 	{
-		exp_res_array = T_malloc( exp_res_count * sizeof *exp_res_array );
+		exp_res_array = UNS32_P T_malloc( exp_res_count
+										  * sizeof *exp_res_array );
 
 		TRY
 		{
