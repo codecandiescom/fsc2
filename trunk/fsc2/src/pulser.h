@@ -47,7 +47,9 @@ typedef struct {
 	bool ( *get_pulse_length_change )( long pulse_number, double *time );
 	bool ( *get_pulse_phase_cycle )( long pulse_number, long *cycle );
 
-	bool ( *setup_phase )( int function, PHS phs );
+	bool ( *phase_setup_prep )( int func, int type, int pod, long val,
+								long protocol);
+	bool ( *setup_phase )( int function );
 	bool ( *set_phase_switch_delay )( int function, double time );
 	bool ( *set_grace_period )( double time );
 
