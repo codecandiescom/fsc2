@@ -2349,7 +2349,7 @@ exposure_time = $$exp_time s;          // CCD exposure time
 N_scans = $$N_scans;                   // number of scans
 
 width = abs( start_wn - end_wn );      // width of spectrum
-cwn = 0.5 * abs( start_wn + end_wn );  // center of spectrum
+cwn = 0.5 * ( start_wn + end_wn );     // center of spectrum
 ccd_start_wn;                          // start of CCD recorded spectrum
 step_wn;                               // wavenumber spacing between points
 N_Points;                              // points of spectrum
@@ -2397,8 +2397,8 @@ I_scan = output_create( "INT_OUTPUT", 0,
                         sprint( "Current scan (of #)", N_scans ) );
 IF laser_line != 0.0 {
 	ccd_start_wn = cwn - 0.5 * ( CCD_Points - 1 ) * step_wn;
-	Start_Point = floor( ( start_wn - ccd_start_wn ) / step_wn );
-	cwn_offset += ( start_wn - ccd_start_wn ) - Start_Point * step_wn;
+	Start_Point = floor( ( start_wn - ccd_start_wn ) / step_wn ) + 1;
+	cwn_offset += ( start_wn - ccd_start_wn ) - ( Start_Point - 1 ) * step_wn;
 	N_Points = round( width / step_wn ) + 1;
 	monochromator_wavenumber( cwn + cwn_offset );
 
@@ -2413,8 +2413,8 @@ IF laser_line != 0.0 {
 
 } ELSE {
 	ccd_start_wn = cwn + 0.5 * ( CCD_Points - 1 ) * step_wn;
-	Start_Point = floor( ( ccd_start_wn - start_wn ) / step_wn );
-	cwn_offset -= Start_Point * step_wn - ( ccd_start_wn - start_wn );
+	Start_Point = floor( ( ccd_start_wn - start_wn ) / step_wn ) + 1;
+	cwn_offset -= ( Start_Point - 1 ) * step_wn - ( ccd_start_wn - start_wn );
 	N_Points = round( width / step_wn ) + 1;
 	monochromator_wavenumber( cwn - cwn_offset );
 
@@ -2443,6 +2443,7 @@ FOR I = 1 : N_scans {
 	}
 
 	F_cur = clone_file( F_all, "dat", sprint( "scan_#.dat", I ) );
+	fsave( F_cur, "\\#. scan\\n\\n", I );
 	FOR J = 1 : N_Points {
 		fsave( F_cur, "# #\\n", wn[ J ], spec[ J ] );
 	}
@@ -2494,7 +2495,7 @@ fsave( F_all, "\\# Date:               # #\\n"
               "\\# Exposure time     = # s\\n"
               "\\# Number of scans   = #\\n",
               date( ), time( ), start_wn, ( CCD_Points - 1 ) * calib[ 2 ],
-              calib[ 2 ] *  Bin [ 1 ], exposure_time, N_scans );
+              calib[ 2 ] *  Bin [ 1 ], exposure_time, I );
 
 IF laser_line != 0.0 {
     fsave( F_all, "\\# Laser lin         = # cm^-1\\n\\n", laser_line );
@@ -2617,7 +2618,7 @@ cwn_offset = 0.5 * calib[ 2 ]
 // using the minimum overlap. From this calculate the overlap to use plus
 // the endpoint of the spectrum - we must arrange things so that the points
 // of the single spectra fit onto each other in the overlap region, so the
-// endpoint may have to be changed a tiny bit (making the spectrum a bit 
+// endpoint may have to be changed a tiny bit (making the spectrum a bit
 // broader than requested).
 
 N_specs = 1;
@@ -2637,7 +2638,7 @@ overlap = ccd_width - ( spec_width - ccd_width ) / ( N_specs - 1 );
 overlap = floor( overlap / step_wn ) * step_wn;
 Overlap_Points = round( overlap / step_wn );
 
-IF laser_line != 0 {
+IF laser_line != 0.0 {
 	end_wn = start_wn + ( N_specs - 1 ) * ( ccd_width - overlap )
              + ccd_width - step_wn;
 	wn_increment = ccd_width - overlap;
@@ -2692,13 +2693,15 @@ FOR I = 1 : N_scans {
 		// Write raw spectral data to file
 
 		IF laser_line != 0.0 {
-			fsave( F_cur, "\\# Spectrum from # cm^-1 to # cm^-1\\n\\n",
-				  cur_wn, cur_wn + ( CCD_Points - 1 ) * step_wn );
+			fsave( F_cur, "\\#. scan, spectrum from # cm^-1 to # "
+                          "cm^-1\\n\\n", I,
+                          cur_wn + ( CCD_Points - 1 ) * step_wn );
 			wn = lin_space( cur_wn, cur_wn + ( CCD_Points - 1 ) * step_wn,
 							CCD_Points );
 		} ELSE {
-			fsave( F_cur, "\\# Spectrum from # cm^-1 to # cm^-1\\n\\n",
-				  cur_wn, cur_wn - ( CCD_Points - 1 ) * step_wn );
+			fsave( F_cur, "\\#. scan, spectrum from # cm^-1 to # "
+                          "cm^-1\\n\\n", I,
+                          cur_wn - ( CCD_Points - 1 ) * step_wn );
 			wn = lin_space( cur_wn, cur_wn - ( CCD_Points - 1 ) * step_wn,
 							CCD_Points );
 		}
@@ -2813,7 +2816,7 @@ IF I > 0 {
 	              "\\# Exposure time     = # s\\n"
 	              "\\# Number of scans   = #\\n",
 	              date( ), time( ), start_wn, end_wn, calib[ 2 ] *  Bin [ 1 ],
-				  exposure_time, N_scans );
+				  exposure_time, I );
 	IF laser_line != 0.0 {
 	    fsave( F_all, "\\# Laser line        = # cm^-1\\n\\n", laser_line );
 		wn = lin_space( start_wn, start_wn + ( N_Points - 1 ) * step_wn,
@@ -2826,7 +2829,7 @@ IF I > 0 {
 
 	fsave( F_all, "\\n" );
 	FOR J = 1 : N_Points {
-		fsave( F_all, "# #\\n", wn[ J ], avg[ J ] / I );
+		fsave( F_all, "# #\\n", wn[ J ], avg[ J ] );
 	}
 }
 EOF
