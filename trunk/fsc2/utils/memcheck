@@ -1,0 +1,41 @@
+#! /usr/bin/perl -w
+
+use strict;
+
+
+my ( %h, $a, @f, $key );
+
+open( F, "<mem" ) or die "Can' open mem";
+
+while ( <F> ) {
+	@f = split /\s+/;
+
+	if ( $f[ 0 ] =~ /malloc:/ ) {
+		$h{ $f[ 1 ] } = "malloc";
+	}
+
+	if ( $f[ 0 ] =~ /calloc:/ ) {
+		$h{ $f[ 1 ] } = "calloc";
+	}
+
+	if ( $f[ 0 ] =~ /realloc:/ ) {
+		if ( $f[ 1 ] eq "(nil)" ) {
+			$h{ $f[ 3 ] } = "realloc (from (nil))";
+		} else {
+			die "realloc error for $f[ 1 ]\n" if not defined $h{ $f[ 1 ] };
+			delete $h{ $f[ 1 ] };
+			$h{ $f[ 3 ] } = "realloc";
+		}
+	}
+
+	if ( $f[ 0 ] =~ /free:/ ) {
+		die "free error for $[ 1 ]\n" if not defined $h{ $f[ 1 ] };
+		delete $h{ $f[ 1 ] };
+	}
+}
+
+close( F );
+
+foreach $key ( keys %h ) {
+	print "$key $h{ $key }\n";
+}
