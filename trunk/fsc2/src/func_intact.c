@@ -154,6 +154,15 @@ Var *f_bcreate( Var *v )
 					"button_create().\n", Fname, Lc );
 			type = lround( v->val.dval );
 		}
+
+		if ( type != NORMAL_BUTTON &&
+			 type != PUSH_BUTTON   &&
+			 type != RADIO_BUTTON     )
+		{
+			eprint( FATAL, "%s:%ld: Invalid button type (%ld) in "
+					"button_create().\n", Fname, Lc, type );
+			THROW( EXCEPTION );
+		}
 	}
 	else
 	{
@@ -822,6 +831,13 @@ Var *f_screate( Var *v )
 					"slider_create().\n", Fname, Lc );
 			type = lround( v->val.dval );
 		}
+
+		if ( type != NORMAL_SLIDER && type != VALUE_SLIDER )
+		{
+			eprint( FATAL, "%s:%ld: Invalid slider type (%ld) in "
+					"slider_create().\n", Fname, Lc, type );
+			THROW( EXCEPTION );
+		}
 	}
 	else
 	{
@@ -1177,7 +1193,6 @@ Var *f_sdelete( Var *v )
 Var *f_svalue( Var *v )
 {
 	IOBJECT *io;
-	int type;
 
 
 	/* We need at least the sliders ID */
@@ -1207,7 +1222,7 @@ Var *f_svalue( Var *v )
 		if ( v->type != INT_VAR || v->val.lval < 0 )
 		{
 			eprint( FATAL, "%s:%ld: Invalid slider identifier in "
-					"slider_state().\n", Fname, Lc );
+					"slider_value().\n", Fname, Lc );
 			THROW( EXCEPTION );
 		}
 		ID = v->val.lval;
@@ -1224,7 +1239,7 @@ Var *f_svalue( Var *v )
 		if ( ( v = vars_pop( v ) ) != NULL )
 		{
 			eprint( WARN, "%s:%ld: Superfluous arguments in call of "
-					"slider_state().\n", Fname, Lc );
+					"slider_value().\n", Fname, Lc );
 			while ( ( v = vars_pop( v ) ) != NULL )
 				;
 		}
@@ -1297,7 +1312,7 @@ Var *f_svalue( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	/* If there are no more arguments just set the sliders value */
+	/* If there are no more arguments just return the sliders value */
 
 	if ( ( v = vars_pop( v ) ) == NULL )
 		return vars_push( FLOAT_VAR, io->value );
@@ -1307,7 +1322,6 @@ Var *f_svalue( Var *v )
 	   the allowed range */
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
-	type = v->type;
 
 	io->value = VALUE( v );
 
@@ -1331,12 +1345,632 @@ Var *f_svalue( Var *v )
 	if ( ( v = vars_pop( v ) ) != NULL )
 	{
 		eprint( WARN, "%s:%ld: Superfluous arguments in call of "
-				"button_state().\n", Fname, Lc );
+				"slider_value().\n", Fname, Lc );
 		while ( ( v = vars_pop( v ) ) != NULL )
 			;
 	}
 
 	return vars_push( FLOAT_VAR, io->value );
+}
+
+
+/*----------------------------*/
+/* Creates a new input object */
+/*----------------------------*/
+
+Var *f_icreate( Var *v )
+{
+	long type;
+	char *label = NULL;
+	char *help_text = NULL;
+	IOBJECT *new_io, *ioi;
+	long ID = 0;
+	long lval = 0;
+	double dval = 0.0;
+
+
+	/* At least the type of the input object must be specified */
+
+	if ( v == NULL )
+	{
+		eprint( FATAL, "%s:%ld: Missing parameter in call of "
+				"input_create().\n", Fname, Lc );
+		THROW( EXCEPTION );
+	}
+
+	/* First argument must be type of input object ("INT_INPUT" or
+	   "FLOAT_INPUT" or 0 or 1) */
+
+	vars_check( v, INT_VAR | FLOAT_VAR | STR_VAR );
+
+	if ( v->type == INT_VAR || v->type == FLOAT_VAR )
+	{
+		if ( v->type == INT_VAR )
+			type = v->val.lval;
+		else
+		{
+			eprint( WARN, "%s:%ld: Float variable used as input object type "
+					"in function input_create().\n", Fname, Lc );
+			type = lround( v->val.dval );
+		}
+
+		if ( type != INT_INPUT && type != FLOAT_INPUT )
+		{
+			eprint( FATAL, "%s:%ld: Invalid input object type (%ld) in "
+					"function input_create().\n", Fname, Lc, type );
+			THROW( EXCEPTION );
+		}
+	}
+	else
+	{
+		if ( ! strcasecmp( v->val.sptr, "INT_INPUT" ) )
+			type = INT_INPUT;
+		else if ( ! strcasecmp( v->val.sptr, "FLOAT_INPUT" ) )
+			type = FLOAT_INPUT;
+		else
+		{
+			eprint( FATAL, "%s:%ld: Unknown input object type (`%s') in "
+					"function input_create().\n", Fname, Lc );
+			THROW( EXCEPTION );
+		}
+	}
+
+	v = vars_pop( v );
+
+	/* Next argument could be a value to be set in the input object */
+
+	if ( v != NULL && v->type & ( INT_VAR | FLOAT_VAR ) )
+	{
+		if ( type == INT_INPUT && v->type == FLOAT_VAR )
+		{
+			eprint( SEVERE, "%s:%ld: Float value used as initial value for "
+					"new integer input object in function input_create().\n",
+					Fname, Lc );
+			lval = round( v->val.dval );
+		}
+		else
+		{
+			if ( type == INT_INPUT )
+				lval = v->val.lval;
+			else
+				dval = VALUE( v );
+		}
+
+		v = vars_pop( v );
+	}
+
+	/* Next argument is the label string */
+
+	if ( v != NULL )
+	{
+		vars_check( v, STR_VAR );
+		label = T_strdup( v->val.sptr );
+		convert_escapes( label );
+		v = vars_pop( v );
+	}
+
+	/* Final argument can be a help text */
+
+	if ( v != NULL )
+	{
+		vars_check( v, STR_VAR );
+		help_text = T_strdup( v->val.sptr );
+		convert_escapes( help_text );
+		v = vars_pop( v );
+	}
+
+	/* Warn and get rid of superfluous arguments */
+
+	if ( v != NULL )
+	{
+		eprint( WARN, "%s:%ld: Superfluous arguments in call of "
+				"input_create().\n", Fname, Lc );
+		while ( ( v = vars_pop( v ) ) != NULL )
+			;
+	}
+
+	/* Since the child process can't use graphics it has to write the
+	   parameter into a buffer, pass it to the parent process and ask the
+	   parent to create the button */
+
+	if ( I_am == CHILD )
+	{
+		void *buffer, *pos;
+		long new_ID;
+		long *result;
+		size_t len;
+
+
+		/* Calculate length of buffer needed */
+
+		len = 3 * sizeof( long )
+			  + ( type == INT_INPUT ) ? sizeof( long ) : sizeof( double );
+		if ( Fname )
+			len += strlen( Fname ) + 1;
+		else
+			len++;
+		if ( label )
+			len += strlen( label ) + 1;
+		else
+			len++;
+		if ( help_text )
+			len += strlen( help_text ) + 1;
+		else
+			len++;
+
+		pos = buffer = T_malloc( len );
+
+		memcpy( pos, &Lc, sizeof( long ) );     /* current line number */
+		pos += sizeof( long );
+
+		memcpy( pos, &type, sizeof( long ) );   /* input object type */
+		pos += sizeof( long );
+
+		if ( type == INT_INPUT )
+		{
+			memcpy( pos, &lval, sizeof( long ) );
+			pos += sizeof( long );
+		}
+		else
+		{
+			memcpy( pos, &dval, sizeof( double ) );
+			pos += sizeof( double );
+		}
+
+		if ( Fname )
+		{
+			strcpy( ( char * ) pos, Fname );    /* current file name */
+			pos += strlen( Fname ) + 1;
+		}
+		else
+			*( ( char * ) pos++ ) = '\0';
+
+		if ( label )                            /* label string */
+		{
+			strcpy( ( char * ) pos, label );
+			pos += strlen( label ) + 1;
+		}
+		else
+			*( ( char * ) pos++ ) = '\0';
+
+		if ( help_text )                        /* help text string */
+		{
+			strcpy( ( char * ) pos, help_text );
+			pos += strlen( help_text ) + 1;
+		}
+		else
+			*( ( char * ) pos++ ) = '\0';
+
+
+		/* Pass buffer to parent and ask it to create the input object. It
+		   returns a buffer with two longs, the first one indicating success
+		   or failure (1 or 0), the second being the input objects ID */
+
+		result = exp_icreate( buffer, ( long ) ( pos - buffer ) );
+
+		T_free( label );
+		T_free( help_text );
+
+		if ( result[ 0 ] == 0 )      /* failure -> bomb out */
+		{
+			T_free( result );
+			THROW( EXCEPTION );
+		}
+
+		new_ID = result[ 1 ];
+		T_free( result );           /* free result buffer */
+
+		return vars_push( INT_VAR, new_ID );
+	}
+
+	/* Now that we're done with checking the parameters we can create the new
+       button - if the Tool_Box doesn't exist yet we've got to create it now */
+
+	if ( Tool_Box == NULL )
+	{
+		Tool_Box = T_malloc( sizeof( TOOL_BOX ) );
+		Tool_Box->objs = NULL;
+		Tool_Box->layout = VERT;
+		Tool_Box->Tools = NULL;
+	}
+
+	if ( Tool_Box->objs == NULL )
+	{
+		new_io = Tool_Box->objs = T_malloc( sizeof( IOBJECT ) );
+		new_io->next = new_io->prev = NULL;
+	}
+	else
+	{
+		for ( ioi = Tool_Box->objs; ioi->next != NULL; ioi = ioi->next )
+			;
+		ID = ioi->ID + 1;
+		new_io = ioi->next = T_malloc( sizeof( IOBJECT ) );
+		new_io->prev = ioi;
+		new_io->next = NULL;
+	}
+
+	new_io->ID = ID;
+	new_io->type = ( int ) type;
+	if ( type == INT_INPUT )
+		new_io->val.lval = lval;
+	else
+		new_io->val.dval = dval;
+	new_io->self = NULL;
+	new_io->group = NULL;
+	new_io->label = label;
+	new_io->help_text = help_text;
+
+	/* If this isn't just a test run really draw the new input object */
+
+	if ( ! TEST_RUN )
+		recreate_Tool_Box( );
+
+	return vars_push( INT_VAR, new_io->ID );
+}
+
+
+/*--------------------------------------------*/
+/* Deletes one or more input objects.         */
+/* Parameter are one or more input object IDs */
+/*--------------------------------------------*/
+
+Var *f_idelete( Var *v )
+{
+	IOBJECT *io;
+
+
+	/* We need the ID of the button to delete */
+
+	if ( v == NULL )
+	{
+		eprint( FATAL, "%s:%ld: Missing parameter in call of "
+				"input_delete().\n", Fname, Lc );
+		THROW( EXCEPTION );
+	}
+
+	/* Loop over all input object numbers */
+
+	while ( v != NULL )
+	{
+		/* Since the object 'belong' to the parent, the child needs to ask
+		   the parent to delete the object. The ID of each object to be deleted
+		   gets passed to te parent in a buffer and the parent is asked to
+		   delete the object */
+
+		if ( I_am == CHILD )
+		{
+			void *buffer, *pos;
+			size_t len;
+
+			/* Do all possible checking of the parameter */
+
+			if ( v->type != INT_VAR || v->val.lval < 0 )
+			{
+				eprint( FATAL, "%s:%ld: Invalid input object identifier in "
+						"input_delete().\n", Fname, Lc );
+				THROW( EXCEPTION );
+			}
+
+			/* Get a bufer long enough and write data */
+
+			len = 2 * sizeof( long );
+			if ( Fname )
+				len += strlen( Fname ) + 1;
+			else
+				len++;
+
+			pos = buffer = T_malloc( len );
+
+			memcpy( pos, &Lc, sizeof( long ) );       /* current line number */
+			pos += sizeof( long );
+			memcpy( pos, &v->val.lval, sizeof( long ) );  /* input object ID */
+			pos += sizeof( long );
+			if ( Fname )
+			{
+				strcpy( ( char * ) pos, Fname );    /* current file name */
+				pos += strlen( Fname ) + 1;
+			}
+			else
+				*( ( char * ) pos++ ) = '\0';
+
+			v = vars_pop( v );
+
+			/* Ask parent to delete the input object, bomb out on failure */
+
+			if ( ! exp_idelete( buffer, ( long ) ( pos - buffer ) ) )
+				THROW( EXCEPTION );
+
+			continue;
+		}
+
+		/* No tool box -> no input objects -> no input objects to delete... */
+
+		if ( Tool_Box == NULL || Tool_Box->objs == NULL )
+		{
+			eprint( FATAL, "%s:%ld: No input objects have been defined yet.\n",
+					Fname, Lc );
+			THROW( EXCEPTION );
+		}
+
+		/* Do checks on parameters */
+
+		if ( v->type != INT_VAR || v->val.lval < 0 ||
+			 ( io = find_object_from_ID( v->val.lval ) ) == NULL ||
+			 ( io->type != INT_INPUT &&
+			   io->type != FLOAT_INPUT ) )
+		{
+			eprint( FATAL, "%s:%ld: Invalid input object identifier in "
+					"input_delete().\n", Fname, Lc );
+			THROW( EXCEPTION );
+		}
+
+		/* Remove input object from the linked list */
+
+		if ( io->next != NULL )
+			io->next->prev = io->prev;
+		if ( io->prev != NULL )
+			io->prev->next = io->next;
+		else
+			Tool_Box->objs = io->next;
+
+		/* Delete the input object (its not drawn in a test run!) */
+
+		if ( ! TEST_RUN )
+		{
+			fl_delete_object( io->self );
+			fl_free_object( io->self );
+		}
+
+		T_free( io->label );
+		T_free( io->help_text );
+		T_free( io );
+
+		if ( Tool_Box->objs == NULL )
+		{
+			if ( ! TEST_RUN )
+			{
+				fl_hide_form( Tool_Box->Tools );
+				fl_free_form( Tool_Box->Tools );
+			}
+
+			Tool_Box = T_free( Tool_Box );
+
+			if ( ( v = vars_pop( v ) ) != NULL )
+			{
+				eprint( FATAL, "%s:%ld: Invalid input object identifier in "
+						"input_delete().\n", Fname, Lc );
+				THROW( EXCEPTION );
+			}
+
+			return vars_push( INT_VAR, 1 );
+		}
+
+		v = vars_pop( v );
+	}
+
+	/* The child process is already done here, and in a test run we're also */
+
+	if ( I_am == CHILD || TEST_RUN || ! Tool_Box )
+		return vars_push( INT_VAR, 1 );
+
+	/* Redraw the form without the deleted input objects */
+
+	recreate_Tool_Box( );
+
+	return vars_push( INT_VAR, 1 );
+}
+
+
+/*------------------------------------------------*/
+/* Sets or returns the content of an input object */
+/*------------------------------------------------*/
+
+Var *f_ivalue( Var *v )
+{
+	IOBJECT *io;
+	char buf[ MAX_INPUT_CHARS + 1 ];
+
+
+	/* We need at least the input objects ID */
+
+	if ( v == NULL )
+	{
+		eprint( FATAL, "%s:%ld: Missing parameters in call of "
+				"input_value().\n", Fname, Lc );
+		THROW( EXCEPTION );
+	}
+
+	/* Again, the child has to pass the arguments to the parent and ask it
+	   to set or return the input objects value */
+
+	if ( I_am == CHILD )
+	{
+		long ID;
+		long state = 0;
+		long lval = 0;
+		double dval = 0.0;
+		void *buffer, *pos;
+		INPUT_RES *input_res;
+		long len;
+
+
+		/* Very basic sanity check... */
+
+		if ( v->type != INT_VAR || v->val.lval < 0 )
+		{
+			eprint( FATAL, "%s:%ld: Invalid input object identifier in "
+					"input_value().\n", Fname, Lc );
+			THROW( EXCEPTION );
+		}
+		ID = v->val.lval;
+		
+		/* Another argument means that the input objects value is to be set */
+
+		if ( ( v = vars_pop( v ) ) != NULL )
+		{
+			vars_check( v, INT_VAR | FLOAT_VAR );
+
+			if ( v->type == INT_VAR )
+			{
+				state = 1;
+				lval = v->val.lval;
+			}
+			else
+			{
+				state = 2;
+				dval = VALUE( v );
+			}
+		}
+
+		if ( ( v = vars_pop( v ) ) != NULL )
+		{
+			eprint( WARN, "%s:%ld: Superfluous arguments in call of "
+					"input_value().\n", Fname, Lc );
+			while ( ( v = vars_pop( v ) ) != NULL )
+				;
+		}
+
+		len = 2 * sizeof( long );
+		len += state > 1 ? sizeof( double ) : sizeof( long );
+		if ( Fname )
+			len += strlen( Fname ) + 1;
+		else
+			len++;
+
+		pos = buffer = T_malloc( len );
+
+		memcpy( pos, &Lc, sizeof( long ) );     /* current line number */
+		pos += sizeof( long );
+
+		memcpy( pos, &ID, sizeof( long ) );     /* sliders ID */
+		pos += sizeof( long );
+
+		memcpy( pos, &state, sizeof( long ) );  /* needs input setting ? */
+		pos += sizeof( long );
+
+		if ( state <= 1 )                       /* new input object value */
+		{
+			memcpy( pos, &lval, sizeof( long ) );
+			pos += sizeof( long );
+		}
+		else
+		{
+			memcpy( pos, &dval, sizeof( double ) );
+			pos += sizeof( double );
+		}
+
+		if ( Fname )
+		{
+			strcpy( ( char * ) pos, Fname );    /* current file name */
+			pos += strlen( Fname ) + 1;
+		}
+		else
+			*( ( char * ) pos++ ) = '\0';
+		
+		/* Ask parent to set or get the slider value - it will return a pointer
+		   to an INPUT_RES structure, where the res entry indicates failure
+		   (negative value) and the type of the returned value (0 is integer,
+		   positive non-zero is float), and the second entry is a union for
+		   the return value, i.e. the input objects value. */
+
+		input_res = exp_istate( buffer, ( long ) ( pos - buffer ) );
+
+		/* Bomb out on failure */
+
+		if ( input_res->res < 0 )
+		{
+			T_free( input_res );
+			THROW( EXCEPTION );
+		}
+
+		state = input_res->res;
+		if ( state == 0 )
+			lval = input_res->val.lval;
+		else
+			dval = input_res->val.dval;
+		T_free( input_res );
+
+		if ( state == 0 )
+			return vars_push( INT_VAR, lval );
+		else
+			return vars_push( FLOAT_VAR, dval );
+	}
+
+	/* No tool box -> no sliders... */
+
+	if ( Tool_Box == NULL || Tool_Box->objs == NULL )
+	{
+		eprint( FATAL, "%s:%ld: No input objects have been defined yet.\n",
+				Fname, Lc );
+		THROW( EXCEPTION );
+	}
+
+	/* Check that ID is ID of a slider */
+
+	if ( v->type != INT_VAR || v->val.lval < 0 ||
+		 ( io = find_object_from_ID( v->val.lval ) ) == NULL ||
+		 ( io->type != INT_INPUT &&
+		   io->type != FLOAT_INPUT ) )
+	{
+		eprint( FATAL, "%s:%ld: Invalid input object identifier in "
+				"input_value().\n", Fname, Lc );
+		THROW( EXCEPTION );
+	}
+
+	/* If there are no more arguments just return the sliders value */
+
+	if ( ( v = vars_pop( v ) ) == NULL )
+	{
+		if ( io->type == INT_INPUT )
+			return vars_push( INT_VAR, io->val.lval );
+		else
+			return vars_push( FLOAT_VAR, io->val.dval );
+	}
+
+	/* Otherwise check the next argument, i.e. the value to be set */
+
+	vars_check( v, INT_VAR | FLOAT_VAR );
+
+	if ( io->type == INT_INPUT && v->type == FLOAT_VAR )
+	{
+		eprint( SEVERE, "%s:%ld: Float number used as integer input object "
+				"value in input_value().\n", Fname, Lc );
+		io->val.lval = round( v->val.dval );
+	}
+	else
+	{
+		if ( io->type == INT_INPUT )
+			io->val.lval = v->val.lval;
+		else
+			io->val.dval = VALUE( v );
+	}
+
+	if ( ! TEST_RUN )
+	{
+		if ( io->type == INT_INPUT )
+		{
+			sprintf( buf, "%ld", io->val.lval );
+			fl_set_input( io->self, buf );
+		}
+		else
+		{
+			sprintf( buf, "%f", io->val.dval );
+			fl_set_input( io->self, buf );
+		}
+	}
+
+	if ( ( v = vars_pop( v ) ) != NULL )
+	{
+		eprint( WARN, "%s:%ld: Superfluous arguments in call of "
+				"input_value().\n", Fname, Lc );
+		while ( ( v = vars_pop( v ) ) != NULL )
+			;
+	}
+
+	if ( io->type == INT_INPUT )
+		return vars_push( INT_VAR, io->val.lval );
+	else
+		return vars_push( FLOAT_VAR, io->val.dval );
 }
 
 
@@ -1436,7 +2070,12 @@ static void recreate_Tool_Box( void )
 
 	for ( io = Tool_Box->objs; io != NULL; io = io->next )
 		if ( Tool_Box->layout == VERT )
+		{
 			Tool_Box->h += OBJ_HEIGHT + VERT_OFFSET;
+			if ( io->next != NULL && 
+				 ( io->type == INT_INPUT || io->type == FLOAT_INPUT ) )
+				Tool_Box->h += LABEL_VERT_OFFSET;
+		}
 		else
 			Tool_Box->w += OBJ_WIDTH + HORI_OFFSET
 				           - ( io->type == NORMAL_BUTTON ?
@@ -1482,6 +2121,7 @@ static void recreate_Tool_Box( void )
 static FL_OBJECT *append_object_to_form( IOBJECT *io )
 {
 	double prec;
+	char buf[ MAX_INPUT_CHARS + 1 ];
 	IOBJECT *nio;
 
 
@@ -1501,8 +2141,10 @@ static FL_OBJECT *append_object_to_form( IOBJECT *io )
 								  NORMAL_BUTTON_DELTA : 0 );
 			io->y = io->prev->y + io->prev->h + VERT_OFFSET +
 				( io->prev->type == NORMAL_SLIDER ||
-				  io->prev->type == VALUE_SLIDER ?
-				  SLIDER_VERT_OFFSET : 0 );
+				  io->prev->type == VALUE_SLIDER  ||
+				  io->prev->type == INT_INPUT     ||
+				  io->prev->type == FLOAT_INPUT ?
+				  LABEL_VERT_OFFSET : 0 );
 		}
 		else
 		{
@@ -1582,6 +2224,30 @@ static FL_OBJECT *append_object_to_form( IOBJECT *io )
 									prec <= 0.0 ? 0 : ( int ) lround( prec ) );
 			break;
 
+		case INT_INPUT :
+			io->w = INPUT_WIDTH;
+			io->h = INPUT_HEIGHT;
+			io->self = fl_add_input( FL_INT_INPUT, io->x, io->y, io->w, io->h,
+									 io->label );
+			fl_set_object_lalign( io->self, FL_ALIGN_BOTTOM );
+			fl_set_input_return( io->self, FL_RETURN_END_CHANGED );
+			fl_set_input_maxchars( io->self, MAX_INPUT_CHARS );
+			sprintf( buf, "%ld", io->val.lval );
+			fl_set_input( io->self, buf );
+			break;
+
+		case FLOAT_INPUT :
+			io->w = INPUT_WIDTH;
+			io->h = INPUT_HEIGHT;
+			io->self = fl_add_input( FL_FLOAT_INPUT, io->x, io->y,
+									 io->w, io->h, io->label );
+			fl_set_object_lalign( io->self, FL_ALIGN_BOTTOM );
+			fl_set_input_return( io->self, FL_RETURN_END_CHANGED );
+			fl_set_input_maxchars( io->self, MAX_INPUT_CHARS );
+			sprintf( buf, "%f", io->val.dval );
+			fl_set_input( io->self, buf );
+			break;
+
 		default :
 			assert( 1 == 0 );
 	}
@@ -1607,6 +2273,9 @@ static FL_OBJECT *append_object_to_form( IOBJECT *io )
 static void tools_callback( FL_OBJECT *obj, long data )
 {
 	IOBJECT *io, *oio;
+	long lval;
+	double dval;
+	const char *buf;
 
 
 	data = data;
@@ -1642,6 +2311,20 @@ static void tools_callback( FL_OBJECT *obj, long data )
 
 		case NORMAL_SLIDER : case VALUE_SLIDER :
 			io->value = fl_get_slider_value( obj );
+			break;
+
+		case INT_INPUT :
+			buf = fl_get_input( obj );
+			sscanf( buf, "%ld", &lval );
+			if ( lval != io->val.lval )
+				io->val.lval = lval;
+			break;
+
+		case FLOAT_INPUT :
+			buf = fl_get_input( obj );
+			sscanf( buf, "%lf", &dval );
+			if ( dval != io->val.dval )
+				io->val.dval = dval;
 			break;
 
 		default :                 /* this can never happen :) */

@@ -1,6 +1,6 @@
 VARIABLES:
 
-BID1, BID2, BID3, BID4, BID5, BID6, BID7, SID1, SID2;
+BID1, BID2, BID3, BID4, BID5, BID6, BID7, SID1, SID2, I1, I2;
 
 I = 0;
 
@@ -24,6 +24,8 @@ button_state( BID6, 1 );
 BID7 = button_create( "RADIO_BUTTON", BID5, "Sweep RF down" );
 SID2 = slider_create( "VALUE_SLIDER", -100.0, -3.0, "Attenuation",
 					  "Adjusts RF attenuation" );
+I1   = input_create( "INT_INPUT", 17, "Na, was wohl?", "Weiss auch nicht..." );
+I2   = input_create( "FLOAT_INPUT", -13, "Noch eins", "Foobar" );
 
 FOREVER {
 
@@ -33,6 +35,16 @@ FOREVER {
 	}
 
 	I += 1;
+	print( "Input 1 : #\n", input_value( I1 ) );
+	print( "Input 2 : #\n", input_value( I2 ) );
+
+	IF input_value( I1 ) > 100 {
+		input_value( I1, 17 );
+	}
+
+	IF input_value( I2 ) > 100.0 {
+		input_value( I2, 17.0 );
+	}
 //	  print( "I = #\n", I );
 //	  print( "Button1 : #\n", button_state( BID1 ) );
 //	  print( "Button2 : #\n", button_state( BID2 ) );
@@ -51,6 +63,7 @@ FOREVER {
 ON_STOP:
 
 slider_delete( SID1 );
+input_delete( I1 );
 
 wait( 6 );
 

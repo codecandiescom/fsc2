@@ -624,3 +624,232 @@ double *exp_sstate( void *buffer, long len )
 		return NULL;
 	}
 }
+
+
+/*--------------------------------------------------------------*/
+/* Child and parent side function for passing the arguments and */
+/* the return values of the input_create() function.            */
+/*--------------------------------------------------------------*/
+
+long *exp_icreate( void *buffer, long len )
+{
+	if ( I_am == CHILD )
+	{
+		long *result;
+
+
+		writer( C_ICREATE, len, buffer );
+		T_free( buffer );
+		result = T_malloc( 2 * sizeof( long ) );
+		reader( ( void * ) result );
+		return ( long * ) result;
+	}
+	else
+	{
+		char *old_Fname = Fname;
+		long old_Lc = Lc;
+		Var *Func_ptr;
+		Var *ret = NULL;
+		int access;
+		long result[ 2 ];
+		void *pos;
+		long type;
+
+
+		/* Get variable with address of function to create an input object */
+
+		Func_ptr = func_get( "input_create", &access );
+
+		/* Unpack parameter and push them onto the stack */
+
+		pos = buffer;
+		memcpy( &Lc, pos, sizeof( long ) );      /* get current line number */
+		pos += sizeof( long );
+
+		type = * ( ( long * ) pos );
+		vars_push( INT_VAR, type );              /* type of input object */
+		pos += sizeof( long );
+
+		if ( type == INT_INPUT )
+		{
+			vars_push( INT_VAR, * ( ( long * ) pos ) );
+			pos += sizeof( long );
+		}
+		else
+		{
+			vars_push( FLOAT_VAR, * ( ( double * ) pos ) );
+			pos += sizeof( double );
+		}
+
+		Fname = ( char * ) pos;                  /* get current file name */
+		pos += strlen( ( char * ) pos ) + 1;
+
+		vars_push( STR_VAR, ( char * ) pos );    /* get label string */
+		pos += strlen( ( char * ) pos ) + 1;
+
+		if ( *( ( char * ) pos ) != '\0' )       /* get help text */
+			vars_push( STR_VAR, ( char * ) pos );
+
+		/* Call the function */
+
+		TRY
+		{
+			ret = func_call( Func_ptr );
+			result[ 0 ] = 1;
+			result[ 1 ] = ret->val.lval;
+			TRY_SUCCESS;
+		}
+		OTHERWISE
+			result[ 0 ] = 0;
+
+		vars_pop( ret );
+		Fname = old_Fname;
+		Lc = old_Lc;
+		writer( C_ICREATE_REPLY, 2 * sizeof( long ), result );
+
+		return NULL;
+	}
+}
+
+
+/*--------------------------------------------------------------*/
+/* Child and parent side function for passing the arguments and */
+/* the return value of the input_delete() function.             */
+/*--------------------------------------------------------------*/
+
+bool exp_idelete( void *buffer, long len )
+{
+	if ( I_am == CHILD )
+	{
+		writer( C_IDELETE, len, buffer );
+		T_free( buffer );
+		return ( bool ) reader( NULL );
+	}
+	else
+	{
+		char *old_Fname = Fname;
+		long old_Lc = Lc;
+		Var *Func_ptr;
+		int access;
+		void *pos;
+
+
+		/* Get variable with address of function to delete an input object */
+
+		Func_ptr = func_get( "input_delete", &access );
+
+		/* Unpack parameter and push them onto the stack */
+
+		pos = buffer;
+		memcpy( &Lc, pos, sizeof( long ) );    /* get current line number */
+		pos += sizeof( long );
+
+		vars_push( INT_VAR, * ( ( long * ) pos ) );
+		pos += sizeof( long );
+
+		Fname = ( char * ) pos;                /* get current file name */
+
+		/* Call the function */
+
+		TRY
+		{
+			vars_pop( func_call( Func_ptr ) );
+			writer( C_IDELETE_REPLY, 1L );
+			TRY_SUCCESS;
+		}
+		OTHERWISE
+			writer( C_IDELETE_REPLY, 0L );
+
+		Fname = old_Fname;
+		Lc = old_Lc;
+		return SET;
+	}
+}
+
+
+/*--------------------------------------------------------------*/
+/* Child and parent side function for passing and returning the */
+/* arguments and results of the input_value() function          */
+/*--------------------------------------------------------------*/
+
+INPUT_RES *exp_istate( void *buffer, long len )
+{
+	if ( I_am == CHILD )
+	{
+		INPUT_RES *input_res;
+
+
+		writer( C_ISTATE, len, buffer );
+		T_free( buffer );
+		input_res = T_malloc( sizeof( INPUT_RES ) );
+		reader( ( void * ) input_res );
+		return input_res;
+	}
+	else
+	{
+		char *old_Fname = Fname;
+		long old_Lc = Lc;
+		long type;
+		Var *Func_ptr;
+		Var *ret = NULL;
+		int access;
+		void *pos;
+		INPUT_RES input_res;
+
+
+		/* Get variable with address of function to set/get slider value */
+
+		Func_ptr = func_get( "input_value", &access );
+
+		/* Unpack parameter and push them onto the stack */
+
+		pos = buffer;
+		memcpy( &Lc, pos, sizeof( long ) );    /* get current line number */
+		pos += sizeof( long );
+
+		vars_push( INT_VAR, *( ( long * ) pos ) );  /* objects ID */
+		pos += sizeof( long );
+
+		memcpy( &type, pos, sizeof( long ) );
+		pos += sizeof( long );
+
+		if ( type == 1 )                            /* new integer value */
+		{
+			vars_push( INT_VAR, * ( ( long * ) pos ) );
+			pos += sizeof( long );
+		}
+		else if ( type == 2 )                       /* new float value */
+		{
+			vars_push( FLOAT_VAR, * ( ( double * ) pos ) );
+			pos += sizeof( double );
+		}
+
+		Fname = ( char * ) pos;                /* get current file name */
+
+		/* Call the function */
+
+		TRY
+		{
+			ret = func_call( Func_ptr );
+			if ( ret->type == INT_VAR )
+			{
+				input_res.res = 0;
+				input_res.val.lval = ret->val.lval;
+			}
+			else
+			{
+				input_res.res = 1;
+				input_res.val.dval = ret->val.dval;
+			}
+			TRY_SUCCESS;
+		}
+		OTHERWISE
+			input_res.res = -1;
+
+		vars_pop( ret );
+		Fname = old_Fname;
+		Lc = old_Lc;
+		writer( C_ISTATE_REPLY, sizeof( INPUT_RES ), &input_res );
+		return NULL;
+	}
+}

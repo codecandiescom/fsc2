@@ -10,6 +10,14 @@
 #include "fsc2.h"
 
 
+typedef struct {
+	int res;
+	union {
+		long lval;
+		double dval;
+	} val;
+} INPUT_RES;
+
 
 void show_message( const char *str );
 void show_alert( const char *str );
@@ -25,6 +33,9 @@ long exp_bstate( void *buffer, long len );
 long *exp_screate( void *buffer, long len );
 bool exp_sdelete( void *buffer, long len );
 double *exp_sstate( void *buffer, long len );
+long *exp_icreate( void *buffer, long len );
+bool exp_idelete( void *buffer, long len );
+INPUT_RES *exp_istate( void *buffer, long len );
 
 
 #endif  /* ! CHLD_FUNC_HEADER */

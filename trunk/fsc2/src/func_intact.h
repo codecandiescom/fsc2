@@ -16,7 +16,7 @@ typedef struct _IOBJ_ {
 	struct _IOBJ_ *prev;    /* pointer to previous object */
 	struct _IOBJ_ *next;    /* pointer to next object */
 
-	int type;               /* button type (NORMAL, PUSH, RADIO, SLIDER) */
+	int type;               /* object type (BUTTON, SLIDER, etc.) */
 
 	FL_COORD x,             /* position and dimensions of object */
 		     y,
@@ -26,13 +26,19 @@ typedef struct _IOBJ_ {
 	char *label;            /* object label */
 	char *help_text;        /* objects help text */
 
-	volatile int state;     /* state (on/off) or press count (buttons) */
+	volatile int state;     /* state (on/off) of press count (buttons) 
+							   or did text change (input objects) */
 	FL_OBJECT *group;       /* group (RADIO) button belongs to */
 	long partner;
 
 	volatile double value;  /* current value of slider */
 	double start_val,       /* maximum and minimum value */
 		   end_val;
+
+	union {
+		long lval;
+		double dval;
+	} val;
 
 } IOBJECT;
 
@@ -51,10 +57,14 @@ typedef struct {
 #define RADIO_BUTTON  2
 #define NORMAL_SLIDER 3
 #define VALUE_SLIDER  4
+#define INT_INPUT     5
+#define FLOAT_INPUT   6
 
 #define VERT          0
 #define HORI          1
 
+
+#define MAX_INPUT_CHARS 100
 
 #if ( SIZE == HI_RES )
 
@@ -67,8 +77,11 @@ typedef struct {
 
 #define SLIDER_HEIGHT             35
 #define SLIDER_WIDTH              210
-#define SLIDER_VERT_OFFSET        15
 
+#define INPUT_HEIGHT              35
+#define INPUT_WIDTH               210
+
+#define LABEL_VERT_OFFSET         15
 #define VERT_OFFSET               15
 #define HORI_OFFSET               20
 
@@ -88,8 +101,11 @@ typedef struct {
 
 #define SLIDER_HEIGHT             25
 #define SLIDER_WIDTH              150
-#define SLIDER_VERT_OFFSET        15
 
+#define INPUT_HEIGHT              25
+#define INPUT_WIDTH               150
+
+#define LABEL_VERT_OFFSET         15
 #define VERT_OFFSET               10
 #define HORI_OFFSET               10
 
@@ -104,13 +120,18 @@ typedef struct {
 /* exported functions */
 
 
-Var *f_layout( Var *v );
+Var *f_layout(  Var *v );
 Var *f_bcreate( Var *v );
 Var *f_bdelete( Var *v );
-Var *f_bstate( Var *v );
+Var *f_bstate(  Var *v );
 Var *f_screate( Var *v );
 Var *f_sdelete( Var *v );
-Var *f_svalue( Var *v );
+Var *f_svalue(  Var *v );
+Var *f_icreate( Var *v );
+Var *f_idelete( Var *v );
+Var *f_ivalue(  Var *v );
+Var *f_idelete( Var *v );
+Var *f_ivalue(  Var *v );
 
 void tools_clear( void );
 
