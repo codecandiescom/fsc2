@@ -530,8 +530,6 @@ Var *pulser_increment( Var *v )
 			THROW( EXCEPTION );
 		}
 
-		p->len += p->dlen;
-
 		p->has_been_active |= ( p->is_active = IS_ACTIVE( p ) );
 	}
 
