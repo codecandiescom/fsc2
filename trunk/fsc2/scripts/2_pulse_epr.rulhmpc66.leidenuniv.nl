@@ -646,57 +646,73 @@ sub load_defs {
     goto done_reading unless defined( $ne = <$fh> )
         and $ne =~ /^[+-]?((\d+(\.(\d+)?)?)|(\.\d+))([eE][+-]?\d+)?$/o;
     chomp $ne;
-    goto done_reading if ( defined $REP_TIME{ max } and $ne > $REP_TIME{ max } ) or
-                         ( defined $REP_TIME{ min } and $ne < $REP_TIME{ min } );
+    goto done_reading if ( defined $REP_TIME{ max } and
+						   $ne > $REP_TIME{ max } ) or
+                         ( defined $REP_TIME{ min } and
+						   $ne < $REP_TIME{ min } );
     $REP_TIME{ value } = $ne;
 
     goto done_reading unless defined( $ne = <$fh> )
         and $ne =~ /^[+-]?\d+$/;
     chomp $ne;
-    goto done_reading if ( defined $P1_LEN{ max } and $ne > $P1_LEN{ max } ) or
-                         ( defined $P1_LEN{ min } and $ne < $P1_LEN{ min } );
+    goto done_reading if ( defined $P1_LEN{ max } and
+						   $ne > $P1_LEN{ max } ) or
+                         ( defined $P1_LEN{ min } and
+						   $ne < $P1_LEN{ min } );
     $P1_LEN{ value } = $ne;
 
     goto done_reading unless defined( $ne = <$fh> )
         and $ne =~ /^[+-]?\d+$/;
     chomp $ne;
-    goto done_reading if ( defined $P2_LEN{ max } and $ne > $P2_LEN{ max } ) or
-                         ( defined $P2_LEN{ min } and $ne < $P2_LEN{ min } );
+    goto done_reading if ( defined $P2_LEN{ max } and
+						   $ne > $P2_LEN{ max } ) or
+                         ( defined $P2_LEN{ min } and
+						   $ne < $P2_LEN{ min } );
     $P2_LEN{ value } = $ne;
 
     goto done_reading unless defined( $ne = <$fh> )
         and $ne =~ /^[+-]?\d+$/;
     chomp $ne;
-    goto done_reading if ( defined $PULSE_DIST{ max } and $ne > $PULSE_DIST{ max } ) or
-                         ( defined $PULSE_DIST{ min } and $ne < $PULSE_DIST{ min } );
+    goto done_reading if ( defined $PULSE_DIST{ max } and
+						   $ne > $PULSE_DIST{ max } ) or
+						 ( defined $PULSE_DIST{ min } and
+						   $ne < $PULSE_DIST{ min } );
     $PULSE_DIST{ value } = $ne;
 
     goto done_reading unless defined( $ne = <$fh> )
         and $ne =~ /^[+-]?\d+$/;
     chomp $ne;
-    goto done_reading if ( defined $DET_OFFSET{ max } and $ne > $DET_OFFSET{ max } ) or
-                         ( defined $DET_OFFSET{ min } and $ne < $DET_OFFSET{ min } );
+    goto done_reading if ( defined $DET_OFFSET{ max } and
+						   $ne > $DET_OFFSET{ max } ) or
+                         ( defined $DET_OFFSET{ min } and
+						   $ne < $DET_OFFSET{ min } );
     $DET_OFFSET{ value } = $ne;
 
     goto done_reading unless defined( $ne = <$fh> )
         and $ne =~ /^[+-]?((\d+(\.(\d+)?)?)|(\.\d+))([eE][+-]?\d+)?$/o;
     chomp $ne;
-    goto done_reading if ( defined $START_FIELD{ max } and $ne > $START_FIELD{ max } ) or
-                         ( defined $START_FIELD{ min } and $ne < $START_FIELD{ min } );
+    goto done_reading if ( defined $START_FIELD{ max } and
+						   $ne > $START_FIELD{ max } ) or
+                         ( defined $START_FIELD{ min } and
+						   $ne < $START_FIELD{ min } );
     $START_FIELD{ value } = $ne;
 
     goto done_reading unless defined( $ne = <$fh> )
         and $ne =~ /^[+-]?((\d+(\.(\d+)?)?)|(\.\d+))([eE][+-]?\d+)?$/o;
     chomp $ne;
-    goto done_reading if ( defined $END_FIELD{ max } and $ne > $END_FIELD{ max } ) or
-                         ( defined $END_FIELD{ min } and $ne < $END_FIELD{ min } );
+    goto done_reading if ( defined $END_FIELD{ max } and
+						   $ne > $END_FIELD{ max } ) or
+                         ( defined $END_FIELD{ min } and
+						   $ne < $END_FIELD{ min } );
     $END_FIELD{ value } = $ne;
 
     goto done_reading unless defined( $ne = <$fh> )
         and $ne =~ /^[+-]?((\d+(\.(\d+)?)?)|(\.\d+))([eE][+-]?\d+)?$/o;
     chomp $ne;
-    goto done_reading if ( defined $FIELD_STEP{ max } and $ne > $FIELD_STEP{ max } ) or
-                         ( defined $FIELD_STEP{ min } and $ne < $FIELD_STEP{ min } );
+    goto done_reading if ( defined $FIELD_STEP{ max } and
+						   $ne > $FIELD_STEP{ max } ) or
+                         ( defined $FIELD_STEP{ min } and
+						   $ne < $FIELD_STEP{ min } );
     $FIELD_STEP{ value } = $ne;
 
     goto done_reading unless defined( $ne = <$fh> );
