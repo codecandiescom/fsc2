@@ -210,7 +210,7 @@ Var *func_get( const char *name, int *access )
 
 
 /*------------------------------------------------------------------------*/
-/* Here's the function that finally calls a EDL function-
+/* Here's the function that finally calls a EDL function */
 /*------------------------------------------------------------------------*/
 
 Var *func_call( Var *f )
