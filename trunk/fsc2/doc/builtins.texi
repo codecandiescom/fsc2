@@ -697,6 +697,11 @@ elements of an array).
 @cindex auxiliary functions
 
 @table @samp
+@item date()
+@anchor{date}
+@findex date()
+Returns a string with the current date in a form like @code{Sun Jun 17, 2000}.
+
 @item time()
 @anchor{time}
 @findex time()
@@ -710,11 +715,6 @@ the program) returns the time (in seconds) since the last call of the
 functions as a floating point value. When called for the very first time
 it returns the time since the start of the experiment. The time
 returned by the function has micro-second resolution.
-
-@item date()
-@anchor{date}
-@findex date()
-Returns a string with the current date in a form like @code{Sun Jun 17, 2000}.
 
 @item wait()
 @anchor{wait}
