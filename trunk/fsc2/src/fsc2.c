@@ -258,7 +258,7 @@ void load_file( FL_OBJECT *a, long reload )
 
 	/* get modification time of file */
 
-	stat ( fn, &file_stat );
+	stat( fn, &file_stat );
 	in_file_mod = file_stat.st_mtime;
 
 	/* Read in and display the new file */
