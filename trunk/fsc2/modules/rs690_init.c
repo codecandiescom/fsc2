@@ -692,9 +692,14 @@ static void rs690_setup_channels( void )
 		}
 		else
 		{
-			print( WARN, "Channel %s associated with function '%s' is not "
-				   "used.\n", rs690_num_2_channel( ch->self ),
-				   ch->function->name );
+			/* Tell the user that the channel is never used when it never
+			   contained any pulses and its function is not set up for phase
+			   cycling */
+
+			if ( ! ch->function->phase_setup )
+				print( WARN, "Channel %s associated with function '%s' is not "
+					   "used.\n", rs690_num_2_channel( ch->self ),
+					   ch->function->name );
 			ch->pulse_params = ch->old_pulse_params = NULL;
 		}
 
@@ -703,16 +708,17 @@ static void rs690_setup_channels( void )
 
 		ch->field = field;
 		ch->bit = bit++;
+
+		rs690.last_used_field = field;
+
 		if ( bit >= ( 4 << rs690.timebase_type ) )
 		{
 			bit = 0;
 			field++;
 		}
 
-		rs690.last_used_field = field;
-
-		/* If the function is supposed to deliver a high volatge level when
-		   there's no pulse set the bit to default to on */
+		/* If the function is used with inverted levels set the bit in the
+		   field corresponding to the channel to default to on */
 
 		if ( f-> is_inverted )
 			rs690_default_fields[ ch->field ] |= 1 << ch->bit;

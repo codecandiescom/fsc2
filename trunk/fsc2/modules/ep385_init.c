@@ -688,8 +688,13 @@ static void ep385_setup_channels( void )
 		}
 		else
 		{
-			print( WARN, "Channel %d associated with function '%s' is not "
-				   "used.\n", ch->self, ch->function->name );
+			/* Tell the user that the channel is never used when it never
+			   contained a pulse and its function is not set up for phase
+			   cycling */
+
+			if ( ! ch->function->phase_setup )
+				print( WARN, "Channel %d associated with function '%s' is not "
+					   "used.\n", ch->self, ch->function->name );
 			ch->pulse_params = ch->old_pulse_params = NULL;
 		}
 	}

@@ -325,9 +325,10 @@ bool rs690_set_trigger_mode( int mode )
 	fsc2_assert( mode == INTERNAL || mode == EXTERNAL );
 
 
-	if ( rs690.is_trig_in_mode )
+	if ( rs690.is_trig_in_mode && rs690.trig_in_mode != mode )
 	{
-		print( FATAL, "Trigger mode has already been set.\n" );
+		print( FATAL, "Trigger mode has already been set to %sTERNAL.\n",
+			   rs690.trig_in_mode == INTERNAL ? "IN" : "EX" );
 		THROW( EXCEPTION );
 	}
 
@@ -337,6 +338,9 @@ bool rs690_set_trigger_mode( int mode )
 			   "for functions isn't possible.\n" );
 		THROW( EXCEPTION );
 	}
+
+	rs690.trig_in_mode = mode;
+	rs690.is_trig_in_mode = SET;
 
 	return OK;
 }
@@ -356,19 +360,25 @@ bool rs690_set_trig_in_slope( int slope )
 		THROW( EXCEPTION );
 	}
 
-	if ( ( rs690.is_trig_in_mode && rs690.trig_in_mode == INTERNAL ) ||
-		 rs690.is_repeat_time)
+	if ( rs690.is_trig_in_mode && rs690.trig_in_mode == INTERNAL )
 	{
 		print( SEVERE, "Setting a trigger slope is useless in INTERNAL "
 			   "trigger mode.\n" );
 		return FAIL;
 	}
 
+	if ( rs690.is_repeat_time )
+	{
+		print( FATAL, "Setting a trigger slope and requesting a fixed "
+			   "repetition time or frequency is mutually exclusive.\n" );
+		THROW( EXCEPTION );
+	}
+
 	if ( rs690.is_neg_delay &&
 		 ! ( ( rs690.is_trig_in_mode && rs690.trig_in_mode == INTERNAL ) ||
 			 rs690.is_repeat_time ) )
 	{
-		print( FATAL, "Setting a trigger slope (implicitly selecting EXTERNAL "
+		print( FATAL, "Setting a trigger slope (requiring EXTERNAL "
 			   "trigger mode) and using negative delays for functions is "
 			   "impossible.\n" );
 		THROW( EXCEPTION );
@@ -408,12 +418,18 @@ bool rs690_set_trig_in_level_type( double type )
 		THROW( EXCEPTION );
 	}
 
-	if ( ( rs690.is_trig_in_mode && rs690.trig_in_mode == INTERNAL ) ||
-		 rs690.is_repeat_time )
+	if ( rs690.is_trig_in_mode && rs690.trig_in_mode == INTERNAL )
 	{
-		print( SEVERE, "Setting a trigger level is useless in INTERNAL "
+		print( SEVERE, "Setting a trigger level type is useless in INTERNAL "
 			   "trigger mode.\n" );
 		return FAIL;
+	}
+
+	if ( rs690.is_repeat_time )
+	{
+		print( FATAL, "Setting a trigger input level type and requesting a "
+			   "fixed repetition time or frequency is mutually exclusive.\n" );
+		THROW( EXCEPTION );
 	}
 
 	if ( rs690.is_neg_delay &&
@@ -422,7 +438,8 @@ bool rs690_set_trig_in_level_type( double type )
 	{
 		print( FATAL, "Setting a trigger level type (thus implicitly "
 			   "selecting EXTERNAL trigger mode) and using negative delays "
-			   "for functions is incompatible.\n" );
+			   "for functions or a fixed repetition time or frequency "
+			   "mutually exclusive.\n" );
 		THROW( EXCEPTION );
 	}
 
