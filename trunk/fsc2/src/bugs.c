@@ -18,10 +18,10 @@ void bug_report_callback( FL_OBJECT *a, long b )
 	char filename[ ] = P_tmpdir "/fsc2XXXXXX";
 	int lines;
 	int i;
-	char *cmd, *user;
+	char *cmd, *user = NULL;
 	char cur_dir[ PATH_MAX ];
 	char *ed;
-	int res, cc;
+	int res;
 
 
 	a = a;
@@ -198,18 +198,18 @@ void bug_report_callback( FL_OBJECT *a, long b )
 	{
 		/* Ask the user if he wants a carbon copy */
 
-		cc = fl_show_question( "Do you want a copy of the bug report ?", 0 );
-		if ( cc == 1 )
+		if ( 1 == 
+			 fl_show_question( "Do you want a copy of the bug report ?", 0 ) )
 			user = ( getpwuid( getuid( ) ) )->pw_name;
 
 		/* Assemble the command for sending the mail */
 
 		cmd = get_string( strlen( "mail -s \"fsc2 bug report\" -c    < " ) +
 						  + strlen( MAIL_ADDRESS ) + strlen( filename ) +
-						  ( cc ? strlen( user ) : 0 ) );
+						  ( user != NULL ? strlen( user ) : 0 ) );
 		strcpy( cmd, "mail -s \"fsc2 bug report\" " );
 
-		if ( cc == 1 )                 /* append option for the carbon copy */
+		if ( user != NULL )             /* append option for the carbon copy */
 		{
 			strcat( cmd, "-c " );
 			strcat( cmd, user );

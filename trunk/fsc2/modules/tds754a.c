@@ -108,7 +108,7 @@ void tds754a_exit_hook( void )
 Var *digitizer_define_window( Var *v )
 {
 	long win_num;
-	double win_start, win_width;
+	double win_start, win_width = 0;
 	bool is_win_width = UNSET;
 	WINDOW *w;
 

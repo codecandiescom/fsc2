@@ -224,7 +224,7 @@ static bool other_data_request( int type, void * ptr )
 
 static void accept_1d_data( long x_index, long curve, int type, void *ptr )
 {
-	long len;
+	long len = 0;
 	long *l_data;
 	double *f_data;
 	double rw_max,
@@ -270,6 +270,11 @@ static void accept_1d_data( long x_index, long curve, int type, void *ptr )
 			ptr += sizeof( long );
 			f_data = ( double * ) ptr;
 			break;
+
+		default :
+			eprint( FATAL, "Internal communication error at %s:%d.",
+					__FILE__, __LINE__ );
+			THROW( EXCEPTION );
 	}
 
 	/* If the number of points exceeds the size of the arrays for the curves

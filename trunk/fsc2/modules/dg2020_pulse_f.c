@@ -13,7 +13,7 @@
 bool dg2020_new_pulse( long pnum )
 {
 	PULSE *cp = dg2020_Pulses;
-	PULSE *lp;
+	PULSE *lp = NULL;
 
 
 	while ( cp != NULL )

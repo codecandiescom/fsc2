@@ -1782,8 +1782,8 @@ void vars_ass_from_trans_ptr( Var *src, Var *dest )
 {
 	Var    *d;
 	int    i;
-	double *sdptr;
-	long   *slptr;
+	double *sdptr = NULL;
+	long   *slptr = NULL;
 	bool   dest_needs_pop = UNSET;
 
 
@@ -1871,26 +1871,28 @@ void vars_ass_from_trans_ptr( Var *src, Var *dest )
 
 	/* Now copy the transient array as slice to the destination */
 
-	if ( src->type == INT_TRANS_ARR )          /* set auxiliary variables */
-		slptr = src->val.lpnt;
-	else
-		sdptr = src->val.dpnt;
-
-	for ( i = 0; i < d->sizes[ d->dim - 1 ]; i++ )
+	if ( src->type == d->type )
 	{
-		if ( d->type == INT_ARR )
-		{
-			if ( src->type == INT_TRANS_ARR )
-				*dest->val.lpnt++ = *slptr++;
-			else
-				*dest->val.lpnt++ = ( long ) *sdptr++;
-		}
+		if ( src->type == INT_TRANS_ARR )
+			memcpy( dest->val.lpnt, src->val.lpnt,
+					d->sizes[ d->dim - 1 ] * sizeof( long ) );
 		else
+			memcpy( dest->val.dpnt, src->val.dpnt,
+					d->sizes[ d->dim - 1 ] * sizeof( double ) );
+	}
+	else
+	{
+		if ( src->type == INT_TRANS_ARR )
+			slptr = src->val.lpnt;
+		else
+			sdptr = src->val.dpnt;
+
+		for ( i = 0; i < d->sizes[ d->dim - 1 ]; i++ )
 		{
-			if ( src->type == INT_TRANS_ARR )
-				*dest->val.dpnt++ = ( double ) *slptr++;
+			if ( d->type == INT_ARR )
+				*dest->val.lpnt++ = ( long ) *sdptr++;
 			else
-				*dest->val.dpnt++ = *sdptr++;
+				*dest->val.dpnt++ = ( double ) *slptr++;
 		}
 	}
 

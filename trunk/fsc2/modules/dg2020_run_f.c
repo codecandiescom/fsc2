@@ -619,7 +619,7 @@ void dg2020_set_pulses( FUNCTION *f )
 {
 	PULSE *p,
 		  *pp;
-	Ticks start, end;
+	Ticks start, end = 0;
 	int i;
 
 

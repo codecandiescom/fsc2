@@ -279,7 +279,7 @@ static void setup_while_or_repeat( int type, long *pos )
 {
 	Prg_Token *cur = prg_token + *pos;
 	long i = *pos + 1;
-	const char *t = "??";
+	const char *t = NULL;
 
 
 	/* Start of with some sanity checks */
@@ -355,8 +355,11 @@ static void setup_while_or_repeat( int type, long *pos )
 	if ( type == FOR_TOK )
 		t = "FOR";
 	
-	eprint( FATAL, "Missing `}' for %s loop starting at %s:%ld.",
-			t, cur->Fname, cur->Lc );
+	if ( t == NULL)
+		eprint( FATAL, "Internal error at %s:%d.", __FILE__, __LINE__ );
+	else
+		eprint( FATAL, "Missing `}' for %s loop starting at %s:%ld.",
+				t, cur->Fname, cur->Lc );
 	THROW( EXCEPTION );
 }
 
@@ -831,7 +834,7 @@ bool test_condition( Prg_Token *cur )
 
 	if ( ! ( Var_Stack->type & ( INT_VAR | FLOAT_VAR ) ) )
 	{
-		const char *t;
+		const char *t = NULL;
 
 		if ( cur->token == WHILE_TOK )
 			t = "WHILE loop";
@@ -843,8 +846,11 @@ bool test_condition( Prg_Token *cur )
 			t = "IF construct";
 
 		cur++;
-		eprint( FATAL, "%s:%ld: Invalid condition for %s.",
-				cur->Fname, cur->Lc, t );
+		if ( t == NULL )
+			eprint( FATAL, "Internal error at %s:%d.", __FILE__, __LINE__ );
+		else
+			eprint( FATAL, "%s:%ld: Invalid condition for %s.",
+					cur->Fname, cur->Lc, t );
 		THROW( EXCEPTION );
 	}
 			 
