@@ -9,7 +9,7 @@
 
 /* name of device as given in GPIB configuration file /etc/gpib.conf */
 
-#define DEVICE_NAME "STANFORD_SR510"
+#define DEVICE_NAME "SR510"
 
 
 /* declaration of exported functions */
@@ -112,7 +112,8 @@ int sr510_exp_hook( void )
 
 	if ( ! lockin_init( DEVICE_NAME ) )
 	{
-		eprint( FATAL, "sr510: Can't access the lock-in amplifier." );
+		eprint( FATAL, "%s: Can't access the lock-in amplifier.",
+				DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
 
@@ -158,8 +159,8 @@ void sr510_exit_hook( void )
 Var *lockin_get_data( Var *v )
 {
 	if ( v != NULL )
-		eprint( WARN, "%s:%ld: sr510: Useless parameter in call of "
-				"lockin_get_data().", Fname, Lc );
+		eprint( WARN, "%s:%ld: %s: Useless parameter in call of "
+				"lockin_get_data().", Fname, Lc, DEVICE_NAME );
 
 	if ( TEST_RUN )                  /* return dummy value in test run */
 		return vars_push( FLOAT_VAR, 0.0 );
@@ -183,16 +184,16 @@ Var *lockin_get_adc_data( Var *v )
 	vars_check( v, INT_VAR | FLOAT_VAR );
 
 	if ( v->type == FLOAT_VAR )
-		eprint( WARN, "%s:%ld: sr510: Floating point number used as ADC port "
-				"number.", Fname, Lc );
+		eprint( WARN, "%s:%ld: %s: Floating point number used as ADC port "
+				"number.", Fname, Lc, DEVICE_NAME );
 
 	port = v->type == INT_VAR ? v->val.lval : ( long ) v->val.dval;
 
 	if ( port < 1 || port > 4 )
 	{
-		eprint( FATAL, "%s:%ld: sr510: Invalid ADC channel number (%ld) "
+		eprint( FATAL, "%s:%ld: %s: Invalid ADC channel number (%ld) "
 				"in call of 'lockin_get_adc_data', valid channel are in "
-				"the range 1-4.", Fname, Lc, port );
+				"the range 1-4.", Fname, Lc, DEVICE_NAME, port );
 		THROW( EXCEPTION );
 	}
 
@@ -225,9 +226,9 @@ Var *lockin_sensitivity( Var *v )
 		{
 			if ( I_am == PARENT )
 			{
-				eprint( FATAL, "%s:%ld: sr510: Function `lockin_sensitivity' "
+				eprint( FATAL, "%s:%ld: %s: Function `lockin_sensitivity' "
 						"with no argument can only be used in the EXPERIMENT "
-						"section.", Fname, Lc );
+						"section.", Fname, Lc, DEVICE_NAME );
 				THROW( EXCEPTION );
 			}
 			return vars_push( FLOAT_VAR, sr510_get_sens( ) );
@@ -240,8 +241,8 @@ Var *lockin_sensitivity( Var *v )
 
 	if ( sens < 0.0 )
 	{
-		eprint( FATAL, "%s:%ld: sr510: Invalid negative sensitivity.",
-				Fname, Lc );
+		eprint( FATAL, "%s:%ld: %s: Invalid negative sensitivity.",
+				Fname, Lc, DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
 
@@ -268,17 +269,17 @@ Var *lockin_sensitivity( Var *v )
 		 ! sr510.Sens_warn  )                       /* no warn message yet ? */
 	{
 		if ( sens >= 1.0e-3 )
-			eprint( WARN, "%s:%ld: sr510: Can't set sensitivity to %.0lf mV, "
-					"using %.0lf V instead.", Fname, Lc, sens * 1.0e3,
-					slist[ Sens - 1 ] * 1.0e3 );
+			eprint( WARN, "%s:%ld: %s: Can't set sensitivity to %.0lf mV, "
+					"using %.0lf V instead.", Fname, Lc, DEVICE_NAME,#
+					sens * 1.0e3, slist[ Sens - 1 ] * 1.0e3 );
 		else if ( sens >= 1.0e-6 ) 
-			eprint( WARN, "%s:%ld: sr510: Can't set sensitivity to %.0lf V, "
-					"using %.0lf uV instead.", Fname, Lc, sens * 1.0e6,
-					slist[ Sens - 1 ] * 1.0e6 );
+			eprint( WARN, "%s:%ld: %s: Can't set sensitivity to %.0lf V, "
+					"using %.0lf uV instead.", Fname, Lc, DEVICE_NAME,
+					sens * 1.0e6, slist[ Sens - 1 ] * 1.0e6 );
 		else
-			eprint( WARN, "%s:%ld: sr510: Can't set sensitivity to %.0lf nV, "
-					"using %.0lfnV instead.", Fname, Lc, sens * 1.0e9, 
-					slist[ Sens - 1 ] * 1.0e9 );
+			eprint( WARN, "%s:%ld: %s: Can't set sensitivity to %.0lf nV, "
+					"using %.0lfnV instead.", Fname, Lc, DEVICE_NAME,
+					sens * 1.0e9, slist[ Sens - 1 ] * 1.0e9 );
 		sr510.Sens_warn = SET;
 	}
 
@@ -292,13 +293,13 @@ Var *lockin_sensitivity( Var *v )
 		if ( ! sr510.Sens_warn )                      /* no warn message yet */
 		{
 		if ( sens >= 1.0e-3 )
-			eprint( WARN, "%s:%ld: sr510: Sensitivity of %.0lf mV is too low, "
-					"using %.0lf mV instead.", Fname, Lc, sens * 1.0e3,
-					slist[ Sens - 1 ] * 1.0e3 );
+			eprint( WARN, "%s:%ld: %s: Sensitivity of %.0lf mV is too low, "
+					"using %.0lf mV instead.", Fname, Lc, DEVICE_NAME,
+					sens * 1.0e3, slist[ Sens - 1 ] * 1.0e3 );
 		else
-			eprint( WARN, "%s:%ld: sr510: Sensitivity of %.0lf nV is too high,"
-					" using %.0lf nV instead.", Fname, Lc, sens * 1.0e9, 
-					slist[ Sens - 1 ] * 1.0e9 );
+			eprint( WARN, "%s:%ld: %s: Sensitivity of %.0lf nV is too high,"
+					" using %.0lf nV instead.", Fname, Lc, DEVICE_NAME,
+					sens * 1.0e9, slist[ Sens - 1 ] * 1.0e9 );
 			sr510.Sens_warn = SET;
 		}
 	}
@@ -336,9 +337,9 @@ Var *lockin_time_constant( Var *v )
 		{
 			if ( I_am == PARENT )
 			{
-				eprint( FATAL, "%s:%ld: sr510: Function `lockin_time_constant'"
+				eprint( FATAL, "%s:%ld: %s: Function `lockin_time_constant'"
 						" with no argument can only be used in the EXPERIMENT "
-						"section.", Fname, Lc );
+						"section.", Fname, Lc, DEVICE_NAME );
 				THROW( EXCEPTION );
 			}
 			return vars_push( FLOAT_VAR, sr510_get_tc( ) );
@@ -351,8 +352,8 @@ Var *lockin_time_constant( Var *v )
 
 	if ( tc < 0.0 )
 	{
-		eprint( FATAL, "%s:%ld: sr510: Invalid negative time constant.",
-				Fname, Lc );
+		eprint( FATAL, "%s:%ld: %s: Invalid negative time constant.",
+				Fname, Lc, DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
 
@@ -377,12 +378,13 @@ Var *lockin_time_constant( Var *v )
 		 ! sr510.TC_warn )                          /* no warn message yet ? */
 	{
 		if ( tc >= 1.0 )
-			eprint( WARN, "%s:%ld: sr510: Can't set time constant to %.0lf s, "
-					"using %.0lf s instead.", Fname, Lc, tc, tcs[ TC - 1 ] );
+			eprint( WARN, "%s:%ld: %s: Can't set time constant to %.0lf s, "
+					"using %.0lf s instead.", Fname, Lc, DEVICE_NAME, tc,
+					tcs[ TC - 1 ] );
 		else
-			eprint( WARN, "%s:%ld: sr510: Can't set time constant to %.0lf ms,"
-					" using %.0lf ms instead.", Fname, Lc, tc * 1.0e3,
-					tcs[ TC - 1 ] * 1.0e3 );
+			eprint( WARN, "%s:%ld: %s: Can't set time constant to %.0lf ms,"
+					" using %.0lf ms instead.", Fname, Lc, DEVICE_NAME,
+					tc * 1.0e3, tcs[ TC - 1 ] * 1.0e3 );
 		sr510.TC_warn = SET;
 	}
 	
@@ -396,13 +398,13 @@ Var *lockin_time_constant( Var *v )
 		if ( ! sr510.TC_warn )                      /* no warn message yet ? */
 		{
 			if ( tc >= 1.0 )
-				eprint( WARN, "%s:%ld: sr510: Time constant of %.0lf s is too "
-						"large, using %.0lf s instead.", Fname, Lc, tc,
-						tcs[ TC - 1 ] );
+				eprint( WARN, "%s:%ld: %s: Time constant of %.0lf s is too "
+						"large, using %.0lf s instead.", Fname, Lc,
+						DEVICE_NAME, tc, tcs[ TC - 1 ] );
 			else
-				eprint( WARN, "%s:%ld: sr510: Time constant of %.0lf ms is too"
+				eprint( WARN, "%s:%ld: %s: Time constant of %.0lf ms is too"
 						" short, using %.0lfms instead.", Fname, Lc,
-						tc * 1.0e3, tcs[ TC - 1 ] * 1.0e3 );
+						DEVICE_NAME, tc * 1.0e3, tcs[ TC - 1 ] * 1.0e3 );
 			sr510.TC_warn = SET;
 		}
 	}
@@ -442,9 +444,9 @@ Var *lockin_phase( Var *v )
 		{
 			if ( I_am == PARENT )
 			{
-				eprint( FATAL, "%s:%ld: sr510: Function `lockin_phase' with "
+				eprint( FATAL, "%s:%ld: %s: Function `lockin_phase' with "
 						"no argument can only be used in the EXPERIMENT "
-						"section.", Fname, Lc  );
+						"section.", Fname, Lc, DEVICE_NAME );
 				THROW( EXCEPTION );
 			}
 			return vars_push( FLOAT_VAR, sr510_get_phase( ) );
@@ -544,7 +546,8 @@ double sr510_get_data( void )
 	if ( gpib_write( sr510.device, "Q\n", 2 ) == FAILURE ||
 		 gpib_read( sr510.device, buffer, &length ) == FAILURE )
 	{
-		eprint( FATAL, "sr510: Can't access the lock-in amplifier." );
+		eprint( FATAL, "%s: Can't access the lock-in amplifier.",
+				DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
 
@@ -570,7 +573,8 @@ double sr510_get_adc_data( long channel )
 	if ( gpib_write( sr510.device, buffer, 3 ) == FAILURE ||
 		 gpib_read( sr510.device, buffer, &length ) == FAILURE )
 	{
-		eprint( FATAL, "sr510: Can't access the lock-in amplifier." );
+		eprint( FATAL, "%s: Can't access the lock-in amplifier.",
+				DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
 
@@ -594,7 +598,8 @@ double sr510_get_sens( void )
 	if ( gpib_write( sr510.device, "G\n", 2 ) == FAILURE ||
 		 gpib_read( sr510.device, buffer, &length ) == FAILURE )
 	{
-		eprint( FATAL, "sr510: Can't access the lock-in amplifier." );
+		eprint( FATAL, "%s: Can't access the lock-in amplifier.",
+				DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
 
@@ -608,7 +613,8 @@ double sr510_get_sens( void )
 	if ( gpib_write( sr510.device, "E\n", 2 ) == FAILURE ||
 		 gpib_read( sr510.device, buffer, &length ) == FAILURE )
 	{
-		eprint( FATAL, "sr510: Can't access the lock-in amplifier." );
+		eprint( FATAL, "%s: Can't access the lock-in amplifier.",
+				DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
 
@@ -645,7 +651,8 @@ void sr510_set_sens( int Sens )
 	{
 		if ( gpib_write( sr510.device, "E1\n", 3 ) == FAILURE )
 		{
-			eprint( FATAL, "sr510: Can't access the lock-in amplifier." );
+			eprint( FATAL, "%s: Can't access the lock-in amplifier.",
+					DEVICE_NAME );
 			THROW( EXCEPTION );
 		}
 		Sens += 3;
@@ -654,7 +661,8 @@ void sr510_set_sens( int Sens )
 	{
 		if ( gpib_write( sr510.device, "E0\n", 3 ) == FAILURE )
 		{
-			eprint( FATAL, "sr510: Can't access the lock-in amplifier." );
+			eprint( FATAL, "%s: Can't access the lock-in amplifier.",
+					DEVICE_NAME );
 			THROW( EXCEPTION );
 		}
 	}
@@ -665,7 +673,8 @@ void sr510_set_sens( int Sens )
 
 	if ( gpib_write( sr510.device, buffer, strlen( buffer ) ) == FAILURE )
 	{
-		eprint( FATAL, "sr510: Can't access the lock-in amplifier." );
+		eprint( FATAL, "%s: Can't access the lock-in amplifier.",
+				DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
 }
@@ -686,7 +695,8 @@ double sr510_get_tc( void )
 	if ( gpib_write( sr510.device, "T1\n", 3 ) == FAILURE ||
 		 gpib_read( sr510.device, buffer, &length ) == FAILURE )
 	{
-		eprint( FATAL, "sr510: Can't access the lock-in amplifier." );
+		eprint( FATAL, "%s: Can't access the lock-in amplifier.",
+				DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
 
@@ -710,7 +720,8 @@ void sr510_set_tc( int TC )
 	sprintf( buffer, "T1,%d\n", TC );
 	if ( gpib_write( sr510.device, buffer, strlen( buffer ) ) == FAILURE )
 	{
-		eprint( FATAL, "sr510: Can't access the lock-in amplifier." );
+		eprint( FATAL, "%s: Can't access the lock-in amplifier.",
+				DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
 
@@ -721,20 +732,23 @@ void sr510_set_tc( int TC )
 
 	if ( TC <= 4 && gpib_write( sr510.device, "T2,0\n", 5 ) == FAILURE )
 	{
-		eprint( FATAL, "sr510: Can't access the lock-in amplifier." );
+		eprint( FATAL, "%s: Can't access the lock-in amplifier.",
+				DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
 
 	if ( TC > 4 && TC <= 6 &&
 		 gpib_write( sr510.device, "T2,1\n", 5 ) == FAILURE )
 	{
-		eprint( FATAL, "sr510: Can't access the lock-in amplifier." );
+		eprint( FATAL, "%s: Can't access the lock-in amplifier.",
+				DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
 
 	if ( TC > 6 && gpib_write( sr510.device, "T2,2\n", 5 ) == FAILURE )
 	{
-		eprint( FATAL, "sr510: Can't access the lock-in amplifier." );
+		eprint( FATAL, "%s: Can't access the lock-in amplifier.",
+				DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
 }
@@ -755,7 +769,8 @@ double sr510_get_phase( void )
 	if ( gpib_write( sr510.device, "P\n", 2L ) == FAILURE ||
 		 gpib_read( sr510.device, buffer, &length ) == FAILURE )
 	{
-		eprint( FATAL, "sr510: Can't access the lock-in amplifier." );
+		eprint( FATAL, "%s: Can't access the lock-in amplifier.",
+				DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
 
@@ -791,7 +806,8 @@ double sr510_set_phase( double phase )
 	sprintf( buffer, "P%.2f\n", phase );
 	if ( gpib_write( sr510.device, buffer, strlen( buffer ) ) == FAILURE )
 	{
-		eprint( FATAL, "sr510: Can't access the lock-in amplifier." );
+		eprint( FATAL, "%s: Can't access the lock-in amplifier.",
+				DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
 

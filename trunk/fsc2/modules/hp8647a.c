@@ -28,9 +28,8 @@ int hp8647a_end_of_exp_hook( void );
 void hp8647a_exit_hook( void );
 
 
-Var *synthesizer_set_frequency( Var *v );
-Var *synthesizer_set_step_frequency( Var *v );
-Var *synthesizer_get_frequency( Var *v );
+Var *synthesizer_frequency( Var *v );
+Var *synthesizer_step_frequency( Var *v );
 Var *synthesizer_sweep_up( Var *v );
 Var *synthesizer_sweep_down( Var *v );
 Var *synthesizer_reset_frequency( Var *v );
@@ -171,12 +170,35 @@ void hp8647a_exit_hook( void )
 }
 
 
+/*---------------------------------------------------------------------*/
+/* Function sets or returns (if called with no argument) the frequency */
+/* of the synthesizer. If called for setting the frequency before the  */
+/* experiment is started the frequency value is stored and set in the  */
+/* setup phase of the experiment.                                      */
+/*---------------------------------------------------------------------*/
 
-
-Var *synthesizer_set_frequency( Var *v )
+Var *synthesizer_frequency( Var *v )
 {
 	double freq;
 
+
+	if ( v == NULL )              /* i.e. return the current frequency */
+	{
+		if ( TEST_RUN )
+			return vars_push( FLOAT_VAR, hp8647a.freq );
+		else
+		{
+			if ( I_am == PARENT )
+			{
+				eprint( FATAL, "%s:%ld: %s: Function `synthesizer_frequency'"
+						" with no argument can only be used in the EXPERIMENT "
+						"section.", Fname, Lc, DEVICE_NAME );
+				THROW( EXCEPTION );
+			}
+
+			return vars_push( FLOAT_VAR, hp8647a_get_frequency( ) );
+		}
+	}
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
 
@@ -203,6 +225,14 @@ Var *synthesizer_set_frequency( Var *v )
 		THROW( EXCEPTION );
 	}
 
+	if ( ( v = vars_pop( v ) ) != NULL )
+	{
+		eprint( WARN, "%s:%ld: %s: Superfluous arguments in call of "
+				"function `synthesizer_frequency'.", Fname, Lc, DEVICE_NAME );
+		while ( ( v = vars_pop( v ) ) != NULL )
+			;
+	}
+
 	if ( TEST_RUN )                      /* In test run of experiment */
 		hp8647a.freq = freq;
 	else if ( I_am == PARENT )           /* in PREPARATIONS section */
@@ -217,29 +247,36 @@ Var *synthesizer_set_frequency( Var *v )
 }
 
 
-Var *synthesizer_set_step_frequency( Var *v )
+/*-----------------------------------------------------------*/
+/* Function sets or returns (if called with no argument) the */
+/* step frequency for RF sweeps.                             */
+/*-----------------------------------------------------------*/
+
+Var *synthesizer_step_frequency( Var *v )
 {
-	vars_check( v, INT_VAR | FLOAT_VAR );
+	if ( v != NULL )
+	{
+		vars_check( v, INT_VAR | FLOAT_VAR );
 
-	if ( v->type == INT_VAR )
-		eprint( WARN, "%s:%ld: %s: Integer variable used as step frequency in "
-				"call of function `synthesizer_set_step_frequency'.", Fname,
-				Lc, DEVICE_NAME );
+		if ( v->type == INT_VAR )
+			eprint( WARN, "%s:%ld: %s: Integer variable used as step "
+					"frequency in call of function "
+					"`synthesizer_set_step_frequency'.", Fname,
+					Lc, DEVICE_NAME );
 
-	hp8647a.freq_step = VALUE( v );
+		hp8647a.freq_step = VALUE( v );
+
+		if ( ( v = vars_pop( v ) ) != NULL )
+		{
+			eprint( WARN, "%s:%ld: %s: Superfluous arguments in call of "
+					"function `synthesizer_step_frequency'.", Fname,
+					Lc, DEVICE_NAME );
+			while ( ( v = vars_pop( v ) ) != NULL )
+				;
+		}
+	}
 
 	return vars_push( FLOAT_VAR, hp8647a.freq_step );
-}
-
-
-/*-------------------------------------------------------------*/
-/* This function may only be called in the EXPERIMENT section! */
-/*-------------------------------------------------------------*/
-
-Var *synthesizer_get_frequency( Var *v )
-{
-	v = v;
-	return vars_push( FLOAT_VAR, hp8647a_get_frequency( ) );
 }
 
 
@@ -265,15 +302,15 @@ Var *synthesizer_sweep_up( Var *v )
 
 	if ( new_freq < MIN_FREQ )
 	{
-		eprint( FATAL, "%s:%ld: %s: Frequency is getting below lower limit of "
-				"%f kHz.", Fname, Lc, DEVICE_NAME, 1.0e-3 * MIN_FREQ );
+		eprint( FATAL, "%s:%ld: %s: Frequency is dropping below lower limit "
+				"of %f kHz.", Fname, Lc, DEVICE_NAME, 1.0e-3 * MIN_FREQ );
 		THROW( EXCEPTION );
 	}
 
 	if ( new_freq > MAX_FREQ )
 	{
-		eprint( FATAL, "%s:%ld: %s: Frequency is getting above upper limit of "
-				"%f MHz.", Fname, Lc, DEVICE_NAME, 1.0e-6 * MAX_FREQ );
+		eprint( FATAL, "%s:%ld: %s: Frequency is increased above upper limit "
+				"of %f MHz.", Fname, Lc, DEVICE_NAME, 1.0e-6 * MAX_FREQ );
 		THROW( EXCEPTION );
 	}
 
@@ -430,7 +467,6 @@ static double hp8647a_get_frequency( void )
 		eprint( FATAL, "%s: Can't access the synthesizer.", DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
-
 
 	return T_atof( buffer );
 }
