@@ -611,10 +611,9 @@ static void cut_calc_curve( int dir, long p_index, bool has_been_shown )
 		if ( scv->is_fs )
 		{
 			CG.s2d[ G2.active_curve ][ X ] = cv->s2d[ X ] =
-											 ( double ) ( G2.cut_canvas.w - 1 )
-											 / ( double ) ( CG.nx - 1 );
+									 ( G2.cut_canvas.w - 1.0 ) / ( CG.nx - 1 );
 			CG.s2d[ G2.active_curve ][ Y ] = cv->s2d[ Y ] =
-				                    ( double ) ( G2.cut_canvas.h - 1 );
+														 G2.cut_canvas.h - 1.0;
 			CG.shift[ G2.active_curve ][ X ] = CG.shift[ G2.active_curve ][ Y ]
 				                       = cv->shift[ X ] = cv->shift[ Y ] = 0.0;
 
@@ -627,24 +626,23 @@ static void cut_calc_curve( int dir, long p_index, bool has_been_shown )
 		else
 		{
 			CG.s2d[ G2.active_curve ][ Y ] = cv->s2d[ Y ] =
-				                 scv->s2d[ Z ] / ( double ) ( G2.z_axis.h - 1 )
-						         * ( double ) ( G2.cut_canvas.h - 1 );
+				 scv->s2d[ Z ] / ( G2.z_axis.h - 1 ) * ( G2.cut_canvas.h - 1 );
 			CG.shift[ G2.active_curve ][ Y ] =
 											  cv->shift[ Y ] = scv->shift[ Z ];
 
 			if ( CG.cut_dir == X )
 			{
 				CG.s2d[ G2.active_curve ][ X ] = cv->s2d[ X ] =
-					             scv->s2d[ Y ] / ( double ) ( G2.canvas.h - 1 )
-							     * ( double ) ( G2.cut_canvas.w - 1 );
+											scv->s2d[ Y ] / ( G2.canvas.h - 1 )
+											* ( G2.cut_canvas.w - 1 );
 				CG.shift[ G2.active_curve ][ X ] = cv->shift[ X ] =
 					                                           scv->shift[ Y ];
 			}
 			else
 			{
 				CG.s2d[ G2.active_curve ][ X ] = cv->s2d[ X ] =
-					             scv->s2d[ X ] / ( double ) ( G2.canvas.w - 1 )
-							     * ( double ) ( G2.cut_canvas.w - 1 );
+											scv->s2d[ X ] / ( G2.canvas.w - 1 )
+											* ( G2.cut_canvas.w - 1 );
 				CG.shift[ G2.active_curve ][ X ] = cv->shift[ X ] =
 					                                           scv->shift[ X ];
 			}
@@ -664,9 +662,9 @@ static void cut_calc_curve( int dir, long p_index, bool has_been_shown )
 	else if ( CG.is_fs[ G2.active_curve ] )
 	{
 		CG.s2d[ G2.active_curve ][ X ] =  cv->s2d[ X ] =
-				 ( double ) ( G2.cut_canvas.w - 1 ) / ( double ) ( CG.nx - 1 );
+									 ( G2.cut_canvas.w - 1.0 ) / ( CG.nx - 1 );
 		CG.s2d[ G2.active_curve ][ Y ] = cv->s2d[ Y ] =
-			                                ( double ) ( G2.cut_canvas.h - 1 );
+														 G2.cut_canvas.h - 1.0;
 		CG.shift[ G2.active_curve ][ X ] = CG.shift[ G2.active_curve ][ Y ]
 				                       = cv->shift[ X ] = cv->shift[ Y ] = 0.0;
 	}
@@ -973,7 +971,7 @@ bool cut_num_points_changed( int dir, long num_points )
 	if ( CG.is_fs[ G2.active_curve ] )
 	{
 		CG.s2d[ G2.active_curve ][ X ] = cv->s2d[ X ] =
-			( double ) ( G2.cut_canvas.w - 1 ) / ( double ) ( num_points - 1 );
+								( G2.cut_canvas.w - 1.0 ) / ( num_points - 1 );
 
 		for ( sp = cv->points, k = 0; k < CG.nx; sp++, k++ )
 			if ( sp->exist )
@@ -1183,31 +1181,25 @@ static void cut_reconfigure_window( Canvas *c, int w, int h )
 	{
 		for ( i = 0; i < G2.nc; i++ )
 		{
-			CG.s2d[ i ][ X ] *= ( double ) ( w - 1 )
-				                / ( double ) ( old_w - 1 );
-			CG.s2d[ i ][ Y ] *= ( double ) ( h - 1 )
-				                / ( double ) ( old_h - 1 );
+			CG.s2d[ i ][ X ] *= ( w - 1.0 ) / ( old_w - 1 );
+			CG.s2d[ i ][ Y ] *= ( h - 1.0 ) / ( old_h - 1 );
 
 			if ( CG.can_undo[ i ] )
 			{
-				CG.old_s2d[ i ][ X ] *=
-					           ( double ) ( w - 1 ) / ( double ) ( old_w - 1 );
-				CG.old_s2d[ i ][ Y ] *=
-					           ( double ) ( h - 1 ) / ( double ) ( old_h - 1 );
+				CG.old_s2d[ i ][ X ] *= ( w - 1.0 ) / ( old_w - 1 );
+				CG.old_s2d[ i ][ Y ] *= ( h - 1.0 ) / ( old_h - 1 );
 			}
 		}
 
 		if ( G2.active_curve != -1 )
 		{
-			cv->s2d[ X ] *= ( double ) ( w - 1 ) / ( double ) ( old_w - 1 );
-			cv->s2d[ Y ] *= ( double ) ( h - 1 ) / ( double ) ( old_h - 1 );
+			cv->s2d[ X ] *= ( w - 1.0 ) / ( old_w - 1 );
+			cv->s2d[ Y ] *= ( h - 1.0 ) / ( old_h - 1 );
 
 			if ( CG.can_undo[ G2.active_curve ] )
 			{
-				cv->old_s2d[ X ] *= ( double ) ( w - 1 )
-					                / ( double ) ( old_w - 1 );
-				cv->old_s2d[ Y ] *= ( double ) ( h - 1 )
-					                / ( double ) ( old_h - 1 );
+				cv->old_s2d[ X ] *= ( w - 1.0 ) / ( old_w - 1 );
+				cv->old_s2d[ Y ] *= ( h - 1.0 ) / ( old_h - 1 );
 			}
 		}
 
@@ -1517,7 +1509,7 @@ static void cut_release_handler( FL_OBJECT *obj, Window window,
 
 				case DRAG_CUT_Z :                       /* in z-axis window */
 					cut_show( CG.cut_dir,
-							  lrnd( ( double ) ( c->h - 1 - c->ppos[ Y ] )
+							  lrnd( ( c->h - 1.0 - c->ppos[ Y ] )
 								  * ( ( CG.cut_dir == X ? G2.nx : G2.ny ) - 1 )
 								  / c->h ) );
 					break;
@@ -1726,7 +1718,7 @@ static void cut_motion_handler( FL_OBJECT *obj, Window window,
 
 					if ( c->box_y + c->box_h < 0 )
 						c->box_h = - c->box_y;
-					p_index = lrnd( ( double ) ( c->h - 1 - c->ppos[ Y ] )
+					p_index = lrnd( ( c->h - 1.0 - c->ppos[ Y ] )
 								  * ( ( CG.cut_dir == X ? G2.nx : G2.ny ) - 1 )
 								  / c->h );
 					if ( p_index != CG.index )
@@ -2024,8 +2016,8 @@ static void repaint_cut_canvas( Canvas *c )
 			x_pos = scv->rwc_start[ r_coord ] + scv->rwc_delta[ r_coord ]
 				    * ( c->ppos[ X ] / cv->s2d[ X ] - cv->shift[ X ] );
 			y_pos = scv->rwc_start[ Z ] + scv->rwc_delta[ Z ]
-					* ( ( ( double ) G2.cut_canvas.h - 1.0 - c->ppos[ Y ] )
-						/ cv->s2d[ Y ] - cv->shift[ Y ] );
+					* ( ( G2.cut_canvas.h - 1.0 - c->ppos[ Y ] ) / cv->s2d[ Y ]
+						- cv->shift[ Y ] );
 
 			strcpy( buf, " x = " );
 			make_label_string( buf + 5, x_pos,
@@ -2187,20 +2179,20 @@ static void cut_make_scale( Canvas *c, int coord )
 		if ( CG.cut_dir == X )
 		{
 			r_coord = X;
-			r_scale = ( double ) ( c->h - 1 ) / ( double ) ( G2.nx - 1 );
+			r_scale = ( c->h - 1.0 ) / ( G2.nx - 1 );
 		}
 		else
 		{
 			r_coord = Y;
-			r_scale = ( double ) ( c->h - 1 ) / ( double ) ( G2.ny - 1 );
+			r_scale = ( c->h - 1.0 ) / ( G2.ny - 1 );
 		}
 	}
 
 	/* The distance between the smallest ticks should be 'G.scale_tick_dist'
 	   points - calculate the corresponding delta in real word units */
 
-	rwc_delta = ( double ) G.scale_tick_dist
-		        * fabs( cv2->rwc_delta[ r_coord ] ) / r_scale;
+	rwc_delta = G.scale_tick_dist * fabs( cv2->rwc_delta[ r_coord ] )
+				/ r_scale;
 
 	/* Now scale this distance to the interval [ 1, 10 [ */
 
@@ -2342,7 +2334,7 @@ static void cut_make_scale( Canvas *c, int coord )
 
 		/* Draw all the ticks and numbers */
 
-		for ( cur_p = ( double ) c->h - 1.0 - d_start_fine; cur_p > - 0.5;
+		for ( cur_p = c->h - 1.0 - d_start_fine; cur_p > - 0.5;
 			  medium++, coarse++, cur_p -= d_delta_fine )
 		{
 			y = d2shrt( cur_p );
@@ -2378,7 +2370,7 @@ static void cut_make_scale( Canvas *c, int coord )
 
 		/* Draw all the ticks and numbers */
 
-		for ( cur_p = ( double ) c->h - 1.0 - d_start_fine; cur_p > -0.5;
+		for ( cur_p = c->h - 1.0 - d_start_fine; cur_p > -0.5;
 			  medium++, coarse++, cur_p -= d_delta_fine )
 		{
 			y = d2shrt( cur_p );
@@ -2409,11 +2401,11 @@ static void cut_make_scale( Canvas *c, int coord )
 
 		triangle[ 0 ].x = i2shrt( x - G.long_tick_len - 3 );
 		if ( CG.cut_dir == X )
-			triangle[ 0 ].y = d2shrt( ( G2.cut_z_axis.h - 1 ) *
-					( 1.0 - ( double ) CG.index / ( double ) ( G2.nx - 1 ) ) );
+			triangle[ 0 ].y = d2shrt( ( G2.cut_z_axis.h - 1 )
+									  * ( 1.0 - CG.index / ( G2.nx - 1.0 ) ) );
 		else
-			triangle[ 0 ].y = d2shrt( ( G2.cut_z_axis.h - 1 ) *
-					( 1.0 - ( double ) CG.index / ( double ) ( G2.ny - 1 ) ) );
+			triangle[ 0 ].y = d2shrt( ( G2.cut_z_axis.h - 1 )
+									  * ( 1.0 - CG.index / ( G2.ny - 1.0 ) ) );
 		triangle[ 1 ].x = - ( G.z_scale_offset - G.long_tick_len - 10 );
 		triangle[ 1 ].y = i2shrt( - G.long_tick_len / 3 );
 		triangle[ 2 ].x = 0;
@@ -2453,13 +2445,13 @@ static void shift_XPoints_of_cut_curve( Canvas *c )
 		if ( G.drag_canvas & DRAG_CUT_X & 3 )     /* x-axis or canvas window */
 		{
 			dx = factor * ( c->ppos[ X ] - G.start[ X ] );
-			cv->shift[ X ] += ( double ) dx / cv->s2d[ X ];
+			cv->shift[ X ] += dx / cv->s2d[ X ];
 		}
 
 		if ( G.drag_canvas & DRAG_CUT_Y & 3 )     /* y-axis or canvas window */
 		{
 			dy = factor * ( c->ppos[ Y ] - G.start[ Y ] );
-			cv->shift[ Y ] -= ( double ) dy / cv->s2d[ Y ];
+			cv->shift[ Y ] -= dy / cv->s2d[ Y ];
 		}
 	}
 
@@ -2506,7 +2498,7 @@ static bool cut_change_x_range( Canvas *c )
 
 	CG.shift[ CG.curve ][ X ] = cv->shift[ X ] = - d_min( x1, x2 );
 	CG.s2d[ CG.curve ][ X ] = cv->s2d[ X ] =
-		                  ( double ) ( G2.cut_canvas.w - 1 ) / fabs( x1 - x2 );
+									 ( G2.cut_canvas.w - 1 ) / fabs( x1 - x2 );
 	return SET;
 }
 
@@ -2525,15 +2517,14 @@ static bool cut_change_y_range( Canvas *c )
 
 	cut_save_scale_state( );
 
-	cy1 = ( ( double ) G2.cut_canvas.h - 1.0 - G.start[ Y ] ) / cv->s2d[ Y ]
+	cy1 = ( G2.cut_canvas.h - 1.0 - G.start[ Y ] ) / cv->s2d[ Y ]
 		  - cv->shift[ Y ];
-	cy2 = ( ( double ) G2.cut_canvas.h - 1.0 - c->ppos[ Y ] ) / cv->s2d[ Y ]
+	cy2 = ( G2.cut_canvas.h - 1.0 - c->ppos[ Y ] ) / cv->s2d[ Y ]
 		  - cv->shift[ Y ];
 
 	CG.shift[ G2.active_curve ][ Y ] = cv->shift[ Y ] = - d_min( cy1, cy2 );
 	CG.s2d[ G2.active_curve ][ Y ] = cv->s2d[ Y ] =
-		                                     ( double ) ( G2.cut_canvas.h - 1 )
-		                                     / fabs( cy1 - cy2 );
+								   ( G2.cut_canvas.h - 1 ) / fabs( cy1 - cy2 );
 	return SET;
 }
 
@@ -2561,8 +2552,7 @@ static bool cut_change_xy_range( Canvas *c )
 		CG.shift[ G2.active_curve ][ X ] =
 										  cv->shift[ X ] = - d_min( cx1, cx2 );
 		CG.s2d[ G2.active_curve ][ X ] = cv->s2d[ X ] =
-			                                 ( double ) ( G2.cut_canvas.w - 1 )
-			                                 / fabs( cx1 - cx2 );
+								   ( G2.cut_canvas.w - 1 ) / fabs( cx1 - cx2 );
 
 		scale_changed = SET;
 	}
@@ -2571,16 +2561,15 @@ static bool cut_change_xy_range( Canvas *c )
 	{
 		CG.can_undo[ G2.active_curve ] = SET;
 
-		cy1 = ( ( double ) G2.cut_canvas.h - 1.0 - G.start[ Y ] )
-			  / cv->s2d[ Y ] - cv->shift[ Y ];
-		cy2 = ( ( double ) G2.cut_canvas.h - 1.0 - c->ppos[ Y ] )
-			  / cv->s2d[ Y ] - cv->shift[ Y ];
+		cy1 = ( G2.cut_canvas.h - 1.0 - G.start[ Y ] ) / cv->s2d[ Y ]
+			  - cv->shift[ Y ];
+		cy2 = ( G2.cut_canvas.h - 1.0 - c->ppos[ Y ] ) / cv->s2d[ Y ]
+			  - cv->shift[ Y ];
 
 		CG.shift[ G2.active_curve ][ Y ] =
 										  cv->shift[ Y ] = - d_min( cy1, cy2 );
 		CG.s2d[ G2.active_curve ][ Y ] = cv->s2d[ Y ] =
-			                                 ( double ) ( G2.cut_canvas.h - 1 )
-			                                 / fabs( cy1 - cy2 );
+								   ( G2.cut_canvas.h - 1 ) / fabs( cy1 - cy2 );
 
 		scale_changed = SET;
 	}
@@ -2612,13 +2601,13 @@ static bool cut_zoom_x( Canvas *c )
 	   factor. */
 
 	if ( G.start[ X ] > c->ppos[ X ] )
-		cv->s2d[ X ] *= d_min( 4.0,
-					     1.0 + 3.0 * ( double ) ( G.start[ X ] - c->ppos[ X ] )
-							   / ( double ) G2.cut_x_axis.w );
+		cv->s2d[ X ] *= 3 * d_min( 1.0,
+								   ( double ) ( G.start[ X ] - c->ppos[ X ] )
+								   / G2.cut_x_axis.w ) + 1;
 	else
-		cv->s2d[ X ] /= d_min( 4.0,
-						 1.0 + 3.0 * ( double ) ( c->ppos[ X ] - G.start[ X ] )
-							   / ( double ) G2.cut_x_axis.w );
+		cv->s2d[ X ] /= 3 * d_min( 1.0,
+								   ( double ) ( c->ppos[ X ] - G.start[ X ] )
+								   / G2.cut_x_axis.w ) + 1;
 	CG.s2d[ G2.active_curve ][ X ] = cv->s2d[ X ];
 
 	CG.shift[ G2.active_curve ][ X ] = cv->shift[ X ] =
@@ -2645,7 +2634,7 @@ static bool cut_zoom_y( Canvas *c )
 	/* Get the value in the interval [0, 1] corresponding to the mouse
 	   position */
 
-	py = ( ( double ) G2.cut_canvas.h - 1.0 - G.start[ Y ] ) / cv->s2d[ Y ]
+	py = ( G2.cut_canvas.h - 1.0 - G.start[ Y ] ) / cv->s2d[ Y ]
 		 - cv->shift[ Y ];
 
 	/* If the mouse was moved to lower values zoom the display by a factor of
@@ -2654,18 +2643,17 @@ static bool cut_zoom_y( Canvas *c )
 	   the mouse was moved upwards demagnify by the inverse factor. */
 
 	if ( G.start[ Y ] < c->ppos[ Y ] )
-		cv->s2d[ Y ] *= d_min( 4.0,
-						 1.0 + 3.0 * ( double ) ( c->ppos[ Y ] - G.start[ Y ] )
-							   / ( double ) G2.cut_y_axis.h );
+		cv->s2d[ Y ] *= 3 * d_min( 1.0,
+								   ( double ) ( c->ppos[ Y ] - G.start[ Y ] )
+								   / G2.cut_y_axis.h ) + 1;
 	else
-		cv->s2d[ Y ] /= d_min( 4.0,
-						 1.0 + 3.0 * ( double ) ( G.start[ Y ] - c->ppos[ Y ] )
-							   / ( double ) G2.cut_y_axis.h );
+		cv->s2d[ Y ] /= 3 * d_min( 1.0,
+								   ( double ) ( G.start[ Y ] - c->ppos[ Y ] )
+								   / G2.cut_y_axis.h ) + 1;
 	CG.s2d[ G2.active_curve ][ Y ] = cv->s2d[ Y ];
 
 	CG.shift[ G2.active_curve ][ Y ] = cv->shift[ Y ] =
-							( ( double ) G2.cut_canvas.h - 1.0 - G.start[ Y ] )
-							/ cv->s2d[ Y ] - py;
+				  ( G2.cut_canvas.h - 1.0 - G.start[ Y ] ) / cv->s2d[ Y ] - py;
 
 	return SET;
 }
@@ -2691,13 +2679,13 @@ static bool cut_zoom_xy( Canvas *c )
 		px = G.start[ X ] / cv->s2d[ X ] - cv->shift[ X ];
 
 		if ( G.start[ X ] > c->ppos[ X ] )
-			cv->s2d[ X ] *= d_min( 4.0,
-						 1.0 + 3.0 * ( double ) ( G.start[ X ] - c->ppos[ X ] )
-								   / ( double ) G2.cut_x_axis.w );
+			cv->s2d[ X ] *= 3 * d_min( 1.0,
+									 ( double ) ( G.start[ X ] - c->ppos[ X ] )
+									 / G2.cut_x_axis.w ) + 1;
 		else
-			cv->s2d[ X ] /= d_min( 4.0,
-						 1.0 + 3.0 * ( double ) ( c->ppos[ X ] - G.start[ X ] )
-								   / ( double ) G2.cut_x_axis.w );
+			cv->s2d[ X ] /= 3 * d_min( 1.0,
+									 ( double ) ( c->ppos[ X ] - G.start[ X ] )
+									 / G2.cut_x_axis.w ) + 1;
 		CG.s2d[ G2.active_curve ][ X ] = cv->s2d[ X ];
 
 		CG.shift[ G2.active_curve ][ X ] = cv->shift[ X ] =
@@ -2710,22 +2698,21 @@ static bool cut_zoom_xy( Canvas *c )
 	{
 		CG.can_undo[ G2.active_curve ] = SET;
 
-		py = ( ( double ) G2.cut_canvas.h - 1.0 - G.start[ Y ] )
-			 / cv->s2d[ Y ] - cv->shift[ Y ];
+		py = ( G2.cut_canvas.h - 1.0 - G.start[ Y ] ) / cv->s2d[ Y ]
+			 - cv->shift[ Y ];
 
 		if ( G.start[ Y ] < c->ppos[ Y ] )
-			cv->s2d[ Y ] *= d_min( 4.0,
-						 1.0 + 3.0 * ( double ) ( c->ppos[ Y ] - G.start[ Y ] )
-								   / ( double ) G2.cut_y_axis.h );
+			cv->s2d[ Y ] *= 3 * d_min( 1.0,
+									 ( double ) ( c->ppos[ Y ] - G.start[ Y ] )
+									 / G2.cut_y_axis.h ) + 1;
 		else
-			cv->s2d[ Y ] /= d_min( 4.0,
-						 1.0 + 3.0 * ( double ) ( G.start[ Y ] - c->ppos[ Y ] )
-								   / ( double ) G2.cut_y_axis.h );
+			cv->s2d[ Y ] /= 3 * d_min( 1.0,
+									 ( double ) ( G.start[ Y ] - c->ppos[ Y ] )
+									 / G2.cut_y_axis.h ) + 1;
 		CG.s2d[ G2.active_curve ][ Y ] = cv->s2d[ Y ];
 
 		CG.shift[ G2.active_curve ][ Y ] = cv->shift[ Y ] =
-			                ( ( double ) G2.cut_canvas.h - 1.0 - G.start[ Y ] )
-			                / cv->s2d[ Y ] - py;
+				  ( G2.cut_canvas.h - 1.0 - G.start[ Y ] ) / cv->s2d[ Y ] - py;
 
 		scale_changed = SET;
 	}
@@ -2846,15 +2833,16 @@ void cut_change_dir( FL_OBJECT *a, long b )
 		if ( CG.cut_dir == Y )
 		{
 			CG.s2d[ G2.active_curve ][ X ] = cv->s2d[ X ] =
-								 scv->s2d[ Y ] / ( double ) ( G2.canvas.h - 1 )
-								 * ( double ) ( G2.cut_canvas.w - 1 );
-			CG.shift[ G2.active_curve ][ X ] = cv->shift[ X ] = scv->shift[ Y ];
+										  scv->s2d[ Y ] / ( G2.canvas.h - 1.0 )
+										  * ( G2.cut_canvas.w - 1 );
+			CG.shift[ G2.active_curve ][ X ] =
+											  cv->shift[ X ] = scv->shift[ Y ];
 		}
 		else
 		{
 			CG.s2d[ G2.active_curve ][ X ] = cv->s2d[ X ] =
-					             scv->s2d[ X ] / ( double ) ( G2.canvas.w - 1 )
-							     * ( double ) ( G2.cut_canvas.w - 1 );
+										  scv->s2d[ X ] / ( G2.canvas.w - 1.0 )
+										  * ( G2.cut_canvas.w - 1 );
 			CG.shift[ G2.active_curve ][ X ] =
 											  cv->shift[ X ] = scv->shift[ X ];
 		}
