@@ -27,7 +27,7 @@
 @ifinfo
 @menu
 * Batch mode::              Non-supervised operation
-* Non-exclusive mode::      Running more than one instance at once
+* Non-exclusive mode::      Running more than one instance of @code{fsc2} at once
 * Options summary::         List of all command line options
 @end menu
 @end ifinfo
