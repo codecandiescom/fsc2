@@ -62,14 +62,6 @@ if [ -z $1 ]; then
 	exit 2;
 fi
 
-# We need root privileges to be able to continue
-
-if [ $UID != 0 -a $1 != "status" ]; then
-	log_failure_msg "Insufficient privilege to change ME6X00 support."
-	exit 4
-fi
-
-
 case "$1" in
     start)
 		insmod me6x00 > /dev/null 2>&1
@@ -82,26 +74,29 @@ case "$1" in
 			log_failure_msg "Can't determine major device number for ME6X00 cards."
 			exit 1
 		fi
-		for i in 0 1 2 3; do
+		nboards=`grep '1402:6[01][013][48f]' /proc/pci | wc -l`
+		i=0;
+		while [ $i -lt $nboards ]; do
 			mknod /dev/me6x00_$i c $major $i
 			if [ $? != 0 ]; then
 				log_failure_msg "Creating device files for ME6X00 cards failed."
 				exit 1
 			fi
 			chmod 666 /dev/me6x00_$i
+			i=$(($i+1))
 		done
 		test "$2" = "restart" || log_success_msg "Starting ME6X00 support."
 		;;
 
 	 stop)
-		for i in 0 1 2 3; do
-			rm -f /dev/me6x00_$i
+		for f in /dev/me6x00_*
+			rm -f $f
 			if [ $? != 0 ]; then
 				log_failure_msg "Deleting device files for ME6X00 cards failed."
 				exit 1
 			fi
 		done
-		rmmod me6x00
+		rmmod me6x00 > /dev/null 2>&1
 		if [ $? != 0 ]; then
 			log_failure_msg "Unloading ME6X00 module failed."
 			exit 1

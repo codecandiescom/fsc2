@@ -62,14 +62,6 @@ if [ -z $1 ]; then
 	exit 2;
 fi
 
-# We need root privileges to be able to continue
-
-if [ $UID != 0 -a $1 != "status" ]; then
-	log_failure_msg "Insufficient privilege to change NI6601 support."
-	exit 4
-fi
-
-
 case "$1" in
     start)
 		insmod ni6601 > /dev/null 2>&1
@@ -82,26 +74,29 @@ case "$1" in
 			log_failure_msg "Can't determine major device number for NI6601 cards."
 			exit 1
 		fi
-		for i in 0 1 2 3; do
+		nboards=`grep '1093:2c60' /proc/pci | wc -l`
+		i=0;
+		while [ $i -lt $nboards ]; do
 			mknod /dev/ni6601_$i c $major $i
 			if [ $? != 0 ]; then
 				log_failure_msg "Creating device files for NI6601 cards failed."
 				exit 1
 			fi
 			chmod 666 /dev/ni6601_$i
+			i=$(($i+1))
 		done
 		test "$2" = "restart" || log_success_msg "Starting NI6601 support."
 		;;
 
 	 stop)
-		for i in 0 1 2 3; do
-			rm -f /dev/ni6601_$i
+		for f in /dev/ni6601_*
+			rm -f $f
 			if [ $? != 0 ]; then
 				log_failure_msg "Deleting device files for NI6601 cards failed."
 				exit 1
 			fi
 		done
-		rmmod ni6601
+		rmmod ni6601 > /dev/null 2>&1
 		if [ $? != 0 ]; then
 			log_failure_msg "Unloading NI6601 module failed."
 			exit 1
