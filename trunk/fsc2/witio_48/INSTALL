@@ -328,12 +328,10 @@ if [ $MAJOR -ne 0 ]; then
 Delete existing file and replace with a new one?" 7 54;
 			if [ $? -eq 0 ]; then
 				rm -f /dev/witio_48
-				mknod /dev/witio_48 c $MAJOR $i
-				chmod 666 /dev/witio_48
+				mknod -m 666 /dev/witio_48 c $MAJOR 0
 			fi
 		else
-			mknod /dev/witio_48 c $MAJOR $i
-			chmod 666 /dev/witio_48
+			mknod -m 666 /dev/witio_48 c $MAJOR 0
 		fi
 	fi
 

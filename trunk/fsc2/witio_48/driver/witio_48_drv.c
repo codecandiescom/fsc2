@@ -129,6 +129,7 @@ static int __init witio_48_init( void )
 
 	/* Finally tell the world about the successful installation ;-) */
 
+	printk( KERN_INFO "witio_48: Module succesfully installed.\n" );
 	printk( KERN_INFO "witio_48: Major = %d\n", board.major );
 	printk( KERN_INFO "witio_48: Base = 0x%lx\n",
 		( unsigned long ) board.base );
