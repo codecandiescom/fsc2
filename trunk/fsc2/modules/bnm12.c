@@ -179,10 +179,14 @@ int bnm12_init_hook( void )
 	/* Get the name for the function for reading from the DIO and check if
 	   it exists */
 
-	bnm12.dio_value_func = get_string( "dio_value#%ld", dev_num );
+	if ( dev_num == 1 )
+		bnm12.dio_value_func = T_strdup( "dio_value" );
+	else
+		bnm12.dio_value_func = get_string( "dio_value#%ld", dev_num );
 
 	if ( ! func_exists( bnm12.dio_value_func ) )
 	{
+		bnm12.dio_value_func = CHAR_P T_free( bnm12.dio_value_func );
 		print( FATAL, "Function for reading from the DIO mode is missing.\n" );
 		THROW( EXCEPTION );
 	}
