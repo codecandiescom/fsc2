@@ -257,6 +257,10 @@ and will set the magnetic field to this value. For the Keithley power
 supply (@code{keithley228a}) and the @w{360 GHz} magnet (@code{ips20_4})
 specify a current value.
 
+The function returns the new value of the field (which, in same cases
+might differ a bit from the requested value due to the properties of the
+device, i.e.@: restrictions of the esolution).
+
 For the @strong{AEG} magnets the function also accepts a second optional
 parameter, the maximum acceptable deviation of the field from the value
 to be set. For example by the call
@@ -285,6 +289,8 @@ before. It doesn't take an argument and will sweep up the magnet by the
 field step size value set in the @code{magnet_setup()} function.  The
 actual size of the step will @b{not} be controlled using the gaussmeter.
 
+The function returns the new field value.
+
 For the @strong{AEG} magnets the precision of the field sweep depends on
 the step size. While the precision is usually quite good for step sizes
 of up to @w{1 G}, for much larger step sizes it may deteriorate quite
@@ -306,6 +312,8 @@ sweep the magnetic field down instead of up by the field step size
 defined in @code{magnet_setup()}. The function can only be called in the
 @code{EXPERIMENT} section.
 
+The function returns the new field value.
+
 This function is not available for the Oxford magnet sweep power supply
 (@code{ips20_4}). Use the function @code{magnet_sweep} instead.
 
@@ -315,6 +323,8 @@ This function is not available for the Oxford magnet sweep power supply
 @findex reset_field()
 This function resets the magnetic field to the start field value defined
 in @code{magnet_setup()} (which has to be called before).
+
+The function returns the new field value.
 
 Please note that for the Oxford magnet sweep power supply
 (@code{ips20_4}) calling this function also automatically stops a
