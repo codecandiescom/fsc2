@@ -42,12 +42,15 @@ int ep385_init_hook( void )
 	int i, j;
 
 
+	fsc2_assert( SHAPE_2_DEFENSE_DEFAULT_MIN_DISTANCE > 0 );
+	fsc2_assert( DEFENSE_2_SHAPE_DEFAULT_MIN_DISTANCE > 0 );
+
 	pulser_struct.name     = DEVICE_NAME;
 	pulser_struct.has_pods = UNSET;
 
 	/* Set global variable to indicate that GPIB bus is needed */
 
-	need_GPIB = SET;
+//	need_GPIB = SET;
 
 	/* We have to set up the global structure for the pulser, especially the
 	   pointers for the functions that will get called from pulser.c */
@@ -108,6 +111,11 @@ int ep385_init_hook( void )
 	ep385.is_timebase = UNSET;
 	ep385.timebase_mode = EXTERNAL;
 
+	ep385.is_shape_2_defense = UNSET;
+	ep385.is_defense_2_shape = UNSET;
+	ep385.shape_2_defense_too_near = UNSET;
+	ep385.defense_2_shape_too_near = UNSET;
+
 	for ( i = 0; i < MAX_CHANNELS; i++ )
 	{
 		ep385.channel[ i ].self = i;
@@ -154,6 +162,11 @@ int ep385_test_hook( void )
 		ep385.is_timebase = SET;
 		ep385.timebase_mode = INTERNAL;
 		ep385.timebase = FIXED_TIMEBASE;
+
+		ep385.shape_2_defense = ( Ticks )
+				 lrnd( SHAPE_2_DEFENSE_DEFAULT_MIN_DISTANCE / FIXED_TIMEBASE );
+		ep385.defense_2_shape = ( Ticks )
+				 lrnd( DEFENSE_2_SHAPE_DEFAULT_MIN_DISTANCE / FIXED_TIMEBASE );
 	}
 
 	if ( ep385_Pulses == NULL && ! ep385.is_cw_mode )
@@ -196,6 +209,23 @@ int ep385_end_of_test_hook( void )
 	if ( ! ep385.is_cw_mode )
 		ep385_full_reset( );
 
+	/* If in the test it was found that shape and defense pulses got too
+	   near to each other bail out */
+
+	if ( ep385.shape_2_defense_too_near )
+	{
+		print( FATAL, "Distance between PULSE_SHAPE and DEFENSE pulses was "
+			   "too small during test run.\n" );
+		THROW( EXCEPTION );
+	}
+
+	if ( ep385.defense_2_shape_too_near )
+	{
+		print( FATAL, "Distance between DEFENSE and PULSE_SHAPE pulses was "
+			   "too small during test run.\n" );
+		THROW( EXCEPTION );
+	}
+
 	return 1;
 }
 
@@ -211,6 +241,48 @@ int ep385_exp_hook( void )
 
 	if ( ! ep385_is_needed )
 		return 1;
+
+	/* Extra safety net: If the minimum distances between shape and defense
+	   pulses have been changed by calling the appropriate functions ask
+	   the user again if (s)he is 100% sure that's what (s)he really wants.
+	   If this was an error we might kill the detector...
+	   This extra bother to have to click on the "Yes" button can be switched
+	   off by commenting out the definition in config/ep385.conf of
+	   "ASK_FOR_SHAPE_DEFENSE_DISTANCE_CONFORMATION" */
+
+#if defined ASK_FOR_SHAPE_DEFENSE_DISTANCE_CONFORMATION
+	if ( ep385.is_shape_2_defense || ep385.is_defense_2_shape )
+	{
+		char str[ 500 ];
+
+		if ( ep385.is_shape_2_defense && ep385.is_defense_2_shape )
+		{
+			sprintf( str, "Minimum distance between SHAPE and DEFENSE\n"
+					 "pulses has been changed to %s",
+					 ep385_ptime( 
+						 ep385_ticks2double( ep385.shape_2_defense ) ) );
+			sprintf( str + strlen( str ), " and %s.\n"
+					 "***** Is this really what you want? *****",
+					 ep385_ptime(
+						 ep385_ticks2double( ep385.defense_2_shape ) ) );
+		}
+		else if ( ep385.is_shape_2_defense )
+			sprintf( str, "Minimum distance between SHAPE and DEFENSE\n"
+					 "pulses has been changed to %s.\n"
+					 "***** Is this really what you want? *****",
+					 ep385_ptime(
+						 ep385_ticks2double( ep385.shape_2_defense ) ) );
+		else
+			sprintf( str, "Minimum distance between DEFENSE and SHAPE\n"
+					 "pulses has been changed to %s.\n"
+					 "***** Is this really what you want? *****",
+					 ep385_ptime(
+						 ep385_ticks2double( ep385.defense_2_shape ) ) );
+
+		if ( 2 != show_choices( str, 2, "Abort", "Yes", "", 1 ) )
+			THROW( EXCEPTION );
+	}
+#endif
 
 	/* Initialize the device */
 
@@ -326,6 +398,68 @@ Var *pulser_name( Var *v )
 {
 	v = v;
 	return vars_push( STR_VAR, DEVICE_NAME );
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+Var *pulser_shape_to_defense_minimum_distance( Var *v )
+{
+	double s2d;
+
+
+	if ( ep385.is_shape_2_defense )
+	{
+		print( FATAL, "SHAPE to DEFENSE pulse minimum distance has already "
+			   "been set to %s.\n",
+			   ep385_ptime( ep385_ticks2double( ep385.shape_2_defense ) ) );
+		THROW( EXCEPTION );
+	}
+
+	s2d = get_double( v, "SHAPE to DEFENSE pulse minimum distance" );
+
+	if ( s2d < 0 )
+	{
+		print( FATAL, "Negative SHAPE to DEFENSE pulse minimum distance.\n" );
+		THROW( EXCEPTION );
+	}
+
+	ep385.shape_2_defense = ep385_double2ticks( s2d );
+	ep385.is_shape_2_defense = SET;
+
+	return vars_push( FLOAT_VAR, s2d );
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+Var *pulser_defense_to_shape_minimum_distance( Var *v )
+{
+	double d2s;
+
+
+	if ( ep385.is_defense_2_shape )
+	{
+		print( FATAL, "DEFENSE to SHAPE pulse minimum distance has already "
+			   "been set to %s.\n",
+			   ep385_ptime( ep385_ticks2double( ep385.defense_2_shape ) ) );
+		THROW( EXCEPTION );
+	}
+
+	d2s = get_double( v, "DEFENSE to SHAPE pulse minimum distance" );
+
+	if ( d2s < 0 )
+	{
+		print( FATAL, "Negative DEFENSE to SHAPE pulse minimum distance.\n" );
+		THROW( EXCEPTION );
+	}
+
+	ep385.defense_2_shape = ep385_double2ticks( d2s );
+	ep385.is_defense_2_shape = SET;
+
+	return vars_push( FLOAT_VAR, d2s );
 }
 
 

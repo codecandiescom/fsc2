@@ -329,7 +329,7 @@ static void ep385_defense_shape_check( FUNCTION *shape )
 					THROW( EXCEPTION );
 				}
 
-				print( FATAL, "Distance between DEFENSE pulse %ld and "
+				print( SEVERE, "Distance between DEFENSE pulse %ld and "
 					   "PULSE_SHAPE pulse %ld got shorter than %s.\n",
 					   defense_p->num, shape_p->num, ep385_ptime(
 						   ep385_ticks2double( ep385.defense_2_shape ) ) );

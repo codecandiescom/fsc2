@@ -42,6 +42,8 @@ void ep385_exit_hook( void );
 
 
 Var *pulser_name( Var *v );
+Var *pulser_shape_to_defense_minimum_distance( Var *v );
+Var *pulser_defense_to_shape_minimum_distance( Var *v );
 Var *pulser_state( Var *v );
 Var *pulser_channel_state( Var *v );
 Var *pulser_cw_mode( Var *v );
@@ -71,7 +73,12 @@ Var *pulser_lock_keyboard( Var *v );
 
 #define MAX_PULSER_BITS       32767     /* maximum number of bits in channel */
 
-#define BITS_PER_MEMORY_BLOCK  2048
+#define MAX_MEMORY_BLOCKS      16       /* maximum number of memory blocks */
+#define BITS_PER_MEMORY_BLOCK  2048     /* length of memory block (in Ticks) */
+
+#define MAX_REPEAT_TIMES       65535
+#define MIN_REPEAT_TIMES       10
+#define REPEAT_TICKS           12800
 
 #define MAX_PULSES_PER_CHANNEL   59
 
@@ -195,6 +202,15 @@ typedef struct {
 							    test run or experiment */
 	bool is_running;         /* set if the pulser is in run mode */
 	bool has_been_running;
+
+	Ticks shape_2_defense;
+	bool is_shape_2_defense;
+	bool shape_2_defense_too_near;
+
+	Ticks defense_2_shape;
+	bool is_defense_2_shape;
+	bool defense_2_shape_too_near;
+
 } EP385;
 
 

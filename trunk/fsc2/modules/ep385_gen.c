@@ -226,8 +226,10 @@ bool ep385_set_repeat_time( double rep_time )
 	/* Complain if a different time base already has been set */
 
 	if ( ep385.is_repeat_time &&
-		 rep_time != ( new_rep_time = ( 12800 * ep385.repeat_time + 2048 * 16 )
-					   * ep385.timebase ) )
+		 rep_time != 
+		 	( new_rep_time = ( 12800 * ep385.repeat_time 
+								+ BITS_PER_MEMORY_BLOCK * MAX_MEMORY_BLOCKS )
+							 * ep385.timebase ) )
 	{
 		print( FATAL, "A different repeat time/frequency of %s/%g Hz has "
 			   "already been set.\n", ep385_ptime( new_rep_time ),
@@ -253,8 +255,10 @@ bool ep385_set_repeat_time( double rep_time )
 		THROW( EXCEPTION );
 	}
 
-	min_repeat_time	= ( 2048 * 16 + 10 * 12800 ) * ep385.timebase;
-	max_repeat_time	= ( 2048 * 16 + 65535 * 12800 ) * ep385.timebase;
+	min_repeat_time	= ( BITS_PER_MEMORY_BLOCK * MAX_MEMORY_BLOCKS
+						+ MIN_REPEAT_TIMES * REPEAT_TICKS ) * ep385.timebase;
+	max_repeat_time	= ( BITS_PER_MEMORY_BLOCK * MAX_MEMORY_BLOCKS
+						+ MAX_REPEAT_TIMES * REPEAT_TICKS ) * ep385.timebase;
 
 	if ( rep_time < min_repeat_time * 0.99 ||
 		 rep_time > max_repeat_time * 1.01 )
@@ -281,9 +285,12 @@ bool ep385_set_repeat_time( double rep_time )
 		}
 	}
 
-	ep385.repeat_time = lrnd( ceil( ( ep385_double2ticks( rep_time ) 
-									   - 2048 * 16 ) / 12800.0 ) );
-	new_rep_time = ( ep385.repeat_time * 12800 + 2048 * 16 ) * ep385.timebase;
+	ep385.repeat_time = lrnd( ceil( ( ep385_double2ticks( rep_time )
+								  - BITS_PER_MEMORY_BLOCK * MAX_MEMORY_BLOCKS )
+									/ (double ) REPEAT_TICKS ) );
+	new_rep_time = ( ep385.repeat_time * REPEAT_TICKS 
+					 + BITS_PER_MEMORY_BLOCK * MAX_MEMORY_BLOCKS )
+				   * ep385.timebase;
 
 	/* If the adjusted repetition time doesn't fit within 1% with the
 	   requested time print a warning */

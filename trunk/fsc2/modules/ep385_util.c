@@ -44,6 +44,11 @@ Ticks ep385_double2ticks( double p_time )
 		ep385.is_timebase = SET;
 		ep385.timebase_mode = INTERNAL;
 		ep385.timebase = FIXED_TIMEBASE;
+
+		ep385.shape_2_defense = ( Ticks )
+				 lrnd( SHAPE_2_DEFENSE_DEFAULT_MIN_DISTANCE / FIXED_TIMEBASE );
+		ep385.defense_2_shape = ( Ticks )
+				 lrnd( DEFENSE_2_SHAPE_DEFAULT_MIN_DISTANCE / FIXED_TIMEBASE );
 	}
 
 	ticks = p_time / ep385.timebase;
