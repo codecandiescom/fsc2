@@ -27,7 +27,7 @@
 
 
 inline int get_mode( void );
-inline bool get_do_stop( void );
+inline void stop_on_user_request( void );
 inline void too_many_arguments( Var *v );
 inline void no_query_possible( void );
 inline long get_long( Var *v, const char *snippet );

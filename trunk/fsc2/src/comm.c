@@ -130,6 +130,8 @@
 
 /* locally used routines */
 
+static long parent_reader( CommStruct *header );
+static long child_reader( void *ret, CommStruct *header );
 static bool pipe_read( int fd, char *buf, size_t bytes_to_read );
 static void send_browser( FL_OBJECT *browser );
 
@@ -341,12 +343,6 @@ int new_data_callback( XEvent *a, void *b )
 long reader( void *ret )
 {
 	CommStruct header;
-	char *str[ 4 ] = { NULL, NULL, NULL, NULL };
-	int i;
-	int n1, n2;
-	long retval = 0;
-	static char *retstr = NULL;
-	void *data;
 
 
 	/* Get the header - failure indicates that the child is dead */
@@ -354,21 +350,36 @@ long reader( void *ret )
 	if ( ! pipe_read( pd[ READ ], ( char * ) &header, sizeof( CommStruct ) ) )
 		return 0;
 
-	switch ( header.type )
+	return I_am == PARENT ?
+		   parent_reader( &header ) : child_reader( ret, &header );
+}
+
+
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+
+static long parent_reader( CommStruct *header )
+{
+	char *str[ 4 ] = { NULL, NULL, NULL, NULL };
+	int i;
+	int n1, n2;
+	void *data;
+
+
+	switch ( header->type )
 	{
 		case C_EPRINT :          
-			fsc2_assert( I_am == PARENT );  /* only to be read by the parent */
-
 			/* Get the string to be printed... */
 
-			if ( header.data.str_len[ 0 ] > 0 )
+			if ( header->data.str_len[ 0 ] > 0 )
 			{
-				str[ 0 ] = T_malloc( ( size_t ) header.data.str_len[ 0 ] + 1 );
+				str[ 0 ] = T_malloc( ( size_t ) header->data.str_len[ 0 ]
+									 + 1 );
 				pipe_read( pd[ READ ], str[ 0 ],
-						   ( size_t ) header.data.str_len[ 0 ] );
-				str[ 0 ][ header.data.str_len[ 0 ] ] = '\0';
+						   ( size_t ) header->data.str_len[ 0 ] );
+				str[ 0 ][ header->data.str_len[ 0 ] ] = '\0';
 			}
-			else if ( header.data.str_len[ 0 ] == 0 )
+			else if ( header->data.str_len[ 0 ] == 0 )
 				str[ 0 ] = T_strdup( "" );
 			else
 				str[ 0 ] = NULL;
@@ -380,23 +391,20 @@ long reader( void *ret )
 			/* Get rid of the string and return */
 
 			str[ 0 ] = T_free( str[ 0 ] );
-			retval = 0;
 
 			sema_post( semaphore );
-
 			break;
 
 		case C_SHOW_MESSAGE :
-			fsc2_assert( I_am == PARENT );  /* only to be read by the parent */
-
-			if ( header.data.str_len[ 0 ] > 0 )
+			if ( header->data.str_len[ 0 ] > 0 )
 			{
-				str[ 0 ] = T_malloc( ( size_t ) header.data.str_len[ 0 ] + 1 );
+				str[ 0 ] = T_malloc( ( size_t ) header->data.str_len[ 0 ]
+									 + 1 );
 				pipe_read( pd[ READ ], str[ 0 ],
-						   ( size_t ) header.data.str_len[ 0 ] );
-				str[ 0 ][ header.data.str_len[ 0 ] ] = '\0';
+						   ( size_t ) header->data.str_len[ 0 ] );
+				str[ 0 ][ header->data.str_len[ 0 ] ] = '\0';
 			}
-			else if ( header.data.str_len[ 0 ] == 0 )
+			else if ( header->data.str_len[ 0 ] == 0 )
 				str[ 0 ] = T_strdup( "" );
 			else
 				str[ 0 ] = NULL;
@@ -413,20 +421,18 @@ long reader( void *ret )
 			   been read by the user */
 
 			write( pd[ WRITE ], "X", 1 );
-			retval = 0;
 			break;
 
 		case C_SHOW_ALERT :
-			fsc2_assert( I_am == PARENT );  /* only to be read by the parent */
-
-			if ( header.data.str_len[ 0 ] > 0 )
+			if ( header->data.str_len[ 0 ] > 0 )
 			{
-				str[ 0 ] = T_malloc( ( size_t ) header.data.str_len[ 0 ] + 1 );
+				str[ 0 ] = T_malloc( ( size_t ) header->data.str_len[ 0 ]
+									 + 1 );
 				pipe_read( pd[ READ ], str[ 0 ],
-						   ( size_t ) header.data.str_len[ 0 ] );
-				str[ 0 ][ header.data.str_len[ 0 ] ] = '\0';
+						   ( size_t ) header->data.str_len[ 0 ] );
+				str[ 0 ][ header->data.str_len[ 0 ] ] = '\0';
 			}
-			else if ( header.data.str_len[ 0 ] == 0 )
+			else if ( header->data.str_len[ 0 ] == 0 )
 				str[ 0 ] = T_strdup( "" );
 			else
 				str[ 0 ] = NULL;
@@ -444,8 +450,6 @@ long reader( void *ret )
 			break;
 
 		case C_SHOW_CHOICES :
-			fsc2_assert( I_am == PARENT );  /* only to be read by the parent */
-
 			/* Get number of buttons and number of default button */
 
 			pipe_read( pd[ READ ], ( char * ) &n1, sizeof( int ) );
@@ -455,15 +459,15 @@ long reader( void *ret )
 
 			for ( i = 0; i < 4; i++ )
 			{
-				if ( header.data.str_len[ i ] > 0 )
+				if ( header->data.str_len[ i ] > 0 )
 				{
 					str[ i ] =
-						   T_malloc( ( size_t ) header.data.str_len[ i ] + 1 );
+						  T_malloc( ( size_t ) header->data.str_len[ i ] + 1 );
 					pipe_read( pd[ READ ], str[ i ],
-							   ( size_t ) header.data.str_len[ i ] );
-					str[ i ][ header.data.str_len[ i ] ] = '\0';
+							   ( size_t ) header->data.str_len[ i ] );
+					str[ i ][ header->data.str_len[ i ] ] = '\0';
 				}
-				else if ( header.data.str_len[ i ] == 0 )
+				else if ( header->data.str_len[ i ] == 0 )
 					str[ i ] = T_strdup( "" );
 				else
 					str[ i ] = NULL;
@@ -484,21 +488,19 @@ long reader( void *ret )
 			break;
 
 		case C_SHOW_FSELECTOR :
-			fsc2_assert( I_am == PARENT );  /* only to be read by the parent */
-
 			/* Get the 4 parameter strings */
 
 			for ( i = 0; i < 4; i++ )
 			{
-				if ( header.data.str_len[ i ] > 0 )
+				if ( header->data.str_len[ i ] > 0 )
 				{
 					str[ i ] =
-						   T_malloc( ( size_t ) header.data.str_len[ i ] + 1 );
+						  T_malloc( ( size_t ) header->data.str_len[ i ] + 1 );
 					pipe_read( pd[ READ ], str[ i ],
-							   ( size_t ) header.data.str_len[ i ] );
-					str[ i ][ header.data.str_len[ i ] ] = '\0';
+							   ( size_t ) header->data.str_len[ i ] );
+					str[ i ][ header->data.str_len[ i ] ] = '\0';
 				}
-				else if ( header.data.str_len[ i ] == 0 )
+				else if ( header->data.str_len[ i ] == 0 )
 					str[ i ] = T_strdup( "" );
 				else
 					str[ i ] = NULL;
@@ -516,34 +518,28 @@ long reader( void *ret )
 
 			for ( i = 0; i < 4; i++ )
 				str[ i ] = T_free( str[ i ] );
-			retval = 0;
 			break;
 
 		case C_PROG : case C_OUTPUT :
-			fsc2_assert( I_am == PARENT );  /* only to be read by the parent */
-
 			sema_post( semaphore );
-			send_browser( header.type == C_PROG ?
+			send_browser( header->type == C_PROG ?
 						  main_form->browser : main_form->error_browser );
-			retval = 0;
 			break;
 
 		case C_INPUT :
-			fsc2_assert( I_am == PARENT );  /* only to be read by the parent */
-
 			/* Get length of predefined content and label from header and 
 			   read them */
 
 			for ( i = 0; i < 2 ; i++ )
-				if ( header.data.str_len[ i ] > 0 )
+				if ( header->data.str_len[ i ] > 0 )
 				{
 					str[ i ] =
-						   T_malloc( ( size_t ) header.data.str_len[ i ] + 1 );
+						  T_malloc( ( size_t ) header->data.str_len[ i ] + 1 );
 					pipe_read( pd[ READ ], str[ i ],
-							   ( size_t ) header.data.str_len[ i ] );
-					str[ i ][ header.data.str_len[ i ] ] = '\0';
+							   ( size_t ) header->data.str_len[ i ] );
+					str[ i ][ header->data.str_len[ i ] ] = '\0';
 				}
-				else if ( header.data.str_len[ i ] == 0 )
+				else if ( header->data.str_len[ i ] == 0 )
 					str[ i ] = T_strdup( "" );
 				else
 					str[ i ] = NULL;
@@ -553,220 +549,177 @@ long reader( void *ret )
 			/* Send string from input form to child */
 
 			writer( C_STR, show_input( str[ 0 ], str[ 1 ] ) );
-			retval = 0;
 			break;
 
 		case C_LAYOUT :
-			fsc2_assert( I_am == PARENT );  /* only to be read by the parent */
-
-			data = T_malloc( ( size_t ) header.data.len );
-			pipe_read( pd[ READ ], data, ( size_t ) header.data.len );
+			data = T_malloc( ( size_t ) header->data.len );
+			pipe_read( pd[ READ ], data, ( size_t ) header->data.len );
 			sema_post( semaphore );
-			exp_layout( data, header.data.len );
+			exp_layout( data, header->data.len );
 			T_free( data );
-			retval = 0;
 			break;
 
 		case C_BCREATE :
-			fsc2_assert( I_am == PARENT );  /* only to be read by the parent */
-
-			data = T_malloc( ( size_t ) header.data.len );
-			pipe_read( pd[ READ ], data, ( size_t ) header.data.len );
+			data = T_malloc( ( size_t ) header->data.len );
+			pipe_read( pd[ READ ], data, ( size_t ) header->data.len );
 			sema_post( semaphore );
-			exp_bcreate( data, header.data.len );
+			exp_bcreate( data, header->data.len );
 			T_free( data );
-			retval = 0;
-			break;
-
-		case C_BCREATE_REPLY :
-		case C_SCREATE_REPLY : case C_SSTATE_REPLY :
-		case C_ICREATE_REPLY : case C_ISTATE_REPLY :
-			fsc2_assert( I_am == CHILD );    /* only to be read by the child */
-
-			pipe_read( pd[ READ ], ret, ( size_t ) header.data.len );
-			retval = 0;
 			break;
 
 		case C_BDELETE :
-			fsc2_assert( I_am == PARENT );  /* only to be read by the parent */
-
-			data = T_malloc( ( size_t ) header.data.len );
-			pipe_read( pd[ READ ], data, ( size_t ) header.data.len );
+			data = T_malloc( ( size_t ) header->data.len );
+			pipe_read( pd[ READ ], data, ( size_t ) header->data.len );
 			sema_post( semaphore );
-			exp_bdelete( data, header.data.len );
+			exp_bdelete( data, header->data.len );
 			T_free( data );
-			retval = 0;
 			break;
 
 		case C_BSTATE :
-			fsc2_assert( I_am == PARENT );  /* only to be read by the parent */
-
-			data = T_malloc( ( size_t ) header.data.len );
-			pipe_read( pd[ READ ], data, ( size_t ) header.data.len );
+			data = T_malloc( ( size_t ) header->data.len );
+			pipe_read( pd[ READ ], data, ( size_t ) header->data.len );
 			sema_post( semaphore );
-			exp_bstate( data, header.data.len );
+			exp_bstate( data, header->data.len );
 			T_free( data );
-			retval = 0;
-			break;
-
-		case C_LAYOUT_REPLY : case C_BDELETE_REPLY : case C_BSTATE_REPLY :
-		case C_SDELETE_REPLY :
-		case C_IDELETE_REPLY :
-		case C_ODELETE_REPLY :
-			fsc2_assert( I_am == CHILD );    /* only to be read by the child */
-			retval = header.data.long_data;
 			break;
 
 		case C_SCREATE :
-			fsc2_assert( I_am == PARENT );  /* only to be read by the parent */
-
-			data = T_malloc( ( size_t ) header.data.len );
-			pipe_read( pd[ READ ], data, ( size_t ) header.data.len );
+			data = T_malloc( ( size_t ) header->data.len );
+			pipe_read( pd[ READ ], data, ( size_t ) header->data.len );
 			sema_post( semaphore );
-			exp_screate( data, header.data.len );
+			exp_screate( data, header->data.len );
 			T_free( data );
-			retval = 0;
 			break;
 
 		case C_SDELETE :
-			fsc2_assert( I_am == PARENT );  /* only to be read by the parent */
-
-			data = T_malloc( ( size_t ) header.data.len );
-			pipe_read( pd[ READ ], data, ( size_t ) header.data.len );
+			data = T_malloc( ( size_t ) header->data.len );
+			pipe_read( pd[ READ ], data, ( size_t ) header->data.len );
 			sema_post( semaphore );
-			exp_sdelete( data, header.data.len );
+			exp_sdelete( data, header->data.len );
 			T_free( data );
-			retval = 0;
 			break;
 
 		case C_SSTATE :
-			fsc2_assert( I_am == PARENT );  /* only to be read by the parent */
-
-			data = T_malloc( ( size_t ) header.data.len );
-			pipe_read( pd[ READ ], data, ( size_t ) header.data.len );
+			data = T_malloc( ( size_t ) header->data.len );
+			pipe_read( pd[ READ ], data, ( size_t ) header->data.len );
 			sema_post( semaphore );
-			exp_sstate( data, header.data.len );
+			exp_sstate( data, header->data.len );
 			T_free( data );
-			retval = 0;
 			break;
 
 		case C_ICREATE :
-			fsc2_assert( I_am == PARENT );  /* only to be read by the parent */
-
-			data = T_malloc( ( size_t ) header.data.len );
-			pipe_read( pd[ READ ], data, ( size_t ) header.data.len );
+			data = T_malloc( ( size_t ) header->data.len );
+			pipe_read( pd[ READ ], data, ( size_t ) header->data.len );
 			sema_post( semaphore );
-			exp_icreate( data, header.data.len );
+			exp_icreate( data, header->data.len );
 			T_free( data );
-			retval = 0;
 			break;
 
 		case C_IDELETE :
-			fsc2_assert( I_am == PARENT );  /* only to be read by the parent */
-
-			data = T_malloc( ( size_t ) header.data.len );
-			pipe_read( pd[ READ ], data, ( size_t ) header.data.len );
+			data = T_malloc( ( size_t ) header->data.len );
+			pipe_read( pd[ READ ], data, ( size_t ) header->data.len );
 			sema_post( semaphore );
-			exp_idelete( data, header.data.len );
+			exp_idelete( data, header->data.len );
 			T_free( data );
-			retval = 0;
 			break;
 
 		case C_ISTATE :
-			fsc2_assert( I_am == PARENT );  /* only to be read by the parent */
-
-			data = T_malloc( ( size_t ) header.data.len );
-			pipe_read( pd[ READ ], data, ( size_t ) header.data.len );
+			data = T_malloc( ( size_t ) header->data.len );
+			pipe_read( pd[ READ ], data, ( size_t ) header->data.len );
 			sema_post( semaphore );
-			exp_istate( data, header.data.len );
+			exp_istate( data, header->data.len );
 			T_free( data );
-			retval = 0;
 			break;
 
 		case C_ODELETE :
-			fsc2_assert( I_am == PARENT );  /* only to be read by the parent */
-
-			data = T_malloc( ( size_t ) header.data.len );
-			pipe_read( pd[ READ ], data, ( size_t ) header.data.len );
+			data = T_malloc( ( size_t ) header->data.len );
+			pipe_read( pd[ READ ], data, ( size_t ) header->data.len );
 			sema_post( semaphore );
-			exp_objdel( data, header.data.len );
+			exp_objdel( data, header->data.len );
 			T_free( data );
-			retval = 0;
 			break;
 
 		case C_FREEZE :
-			fsc2_assert( I_am == PARENT );  /* only to be read by the parent */
-
 			sema_post( semaphore );
-			parent_freeze( header.data.int_data );
+			parent_freeze( header->data.int_data );
 			break;
 
-		case C_STR :
-			fsc2_assert( I_am == CHILD );    /* only to be read by the child */
+		default :                     /* this better never gets triggered... */
+			fsc2_assert( 1 == 0 );
+	}
 
-			if ( header.data.len == -1 )
+	return 0;
+}
+
+
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+
+static long child_reader( void *ret, CommStruct *header )
+{
+	static char *retstr = NULL;
+
+
+	switch ( header->type )
+	{
+		case C_STR :
+			if ( header->data.len == -1 )
 			{
                 if ( ret != NULL ) 
 				     *( ( char ** ) ret ) = NULL;
-				retval = 1;
-				break;
+				return 1;
 			}
 
 			T_free( retstr );
 
-			retstr = T_malloc( ( size_t ) header.data.len + 1 );
-            if ( header.data.len > 0 )
+			retstr = T_malloc( ( size_t ) header->data.len + 1 );
+            if ( header->data.len > 0 )
 			{
-				pipe_read( pd[ READ ], retstr, ( size_t ) header.data.len );
-				retstr[ header.data.len ] = '\0';
+				pipe_read( pd[ READ ], retstr, ( size_t ) header->data.len );
+				retstr[ header->data.len ] = '\0';
 			}
 			else
 				strcpy( retstr, "" );
 
 			if ( ret != NULL )
 				*( ( char ** ) ret ) = retstr;
-
-			retval = 1;
-			break;
+			return 1;
 
 		case C_INT :
-			fsc2_assert( I_am == CHILD );
-
 			if ( ret != NULL )
-				*( ( int * ) ret ) = header.data.int_data;
-
-			retval = 1;
-			break;
+				*( ( int * ) ret ) = header->data.int_data;
+			return 1;
 
 		case C_LONG :
-			fsc2_assert( I_am == CHILD );    /* only to be read by the child */
-
 			if ( ret != NULL )
-				*( ( long * ) ret ) = header.data.long_data;
-			retval = 1;
-			break;
+				*( ( long * ) ret ) = header->data.long_data;
+			return 1;
 
 		case C_FLOAT :
-			fsc2_assert( I_am == CHILD );    /* only to be read by the child */
-
 			if ( ret != NULL )
-				*( ( float * ) ret ) = header.data.float_data;
-			retval = 1;
-			break;
+				*( ( float * ) ret ) = header->data.float_data;
+			return 1;
 
 		case C_DOUBLE :
-			fsc2_assert( I_am == CHILD );    /* only to be read by the child */
 			if ( ret != NULL )
-				*( ( double * ) ret ) = header.data.double_data;
-			retval = 1;
-			break;
+				*( ( double * ) ret ) = header->data.double_data;
+			return 1;
 
+		case C_BCREATE_REPLY :
+		case C_SCREATE_REPLY : case C_SSTATE_REPLY :
+		case C_ICREATE_REPLY : case C_ISTATE_REPLY :
+			pipe_read( pd[ READ ], ret, ( size_t ) header->data.len );
+			return 0;
 
-		default :                         /* this should never be reached... */
-			fsc2_assert( 1 == 0 );
+		case C_LAYOUT_REPLY : case C_BDELETE_REPLY : case C_BSTATE_REPLY :
+		case C_SDELETE_REPLY :
+		case C_IDELETE_REPLY :
+		case C_ODELETE_REPLY :
+			return header->data.long_data;
 	}
 
-	return retval;
+	fsc2_assert( 1 == 0 );            /* this better never gets triggered... */
+	return 0;
 }
 
 

@@ -38,42 +38,40 @@ experimental parameters can be set and then one of a set of predefined
 experiment is started.
 
 The obvious drawback with the traditional approach is that there is
-always only a fixed set of experiments that can be done using the
-program. The problems start when one needs to do an experiment for which
-the program was not written for. Either one has to find some ways to
-trick the program into doing something it wasn't intended for or, if this
-fails, to change the program. This not only tends to take a lot of time
-(especially when the person that wrote the program isn't around anymore)
-but often also leads to the introduction of new bugs or even the
-realization that the program has not written in a way that allows it to
-be adapted to the new requirements, in which case the old program
-becomes useless and has to be rewritten from scratch.
+always only a fixed set of experiments that can be done. The problems
+start when one needs to do an experiment the program was not written
+for. Either one has to find some ways to trick the program into doing
+something it wasn't intended for or, if this fails, to change the
+program. This not only tends to take a lot of time (especially if the
+person who wrote the program isn't around anymore) but often also leads
+to the introduction of new bugs or even the realization that the program
+has not written in a way that allows it to be adapted to the new
+requirements, in which case the old program becomes useless and has to
+be rewritten from scratch.
 
 @acronym{fsc2} is different in this respect because it wasn't developed
 with a certain set of experiments in mind but is intended to make it as
-easy as possible to do all kinds of experiments, even such that weren't
-even conceived at the time it was written. Of course, this comes with a
-small price: one has to specify clearly how the experiment is to be done
-by writing a (usually rather short) program. @acronym{fsc2} will
+easy as possible to do all kinds of experiments. Of course, this comes
+with a small price: one has to specify clearly how the experiment is to
+be done by writing a (usually rather short) program. @acronym{fsc2} will
 interpret this program and do the experiment accordingly. Writing a
 program may sound difficult, but the @acronym{EDL} language that is used
-to define an experiment isn't very hard to learn (it's much simpler
-than, for example, @code{C}). And when this hurdle has been taken you
-will have complete control over the way the experiment is done. Just to
-give a few very trivial examples: sometimes signals are distributed over
-a large field range with nothing of interest in between, so it would be
-rather useful to skip these regions. Most normal programs won't allow
-this and one has to either record also the uninteresting field regions
-(thus loosing lots of time) or to restart the experiments for each of
-the regions of interest manually. In contrast, with @acronym{fsc2} it
-shouldn't take more than a few minutes to write an @code{EDL} program
-consisting of just a few lines of code that can not only skip these
-regions but also repeat the experiment as often as needed, and if
-necessary do different numbers of accumulations of the different parts
-(if, for example, the signals are huge in some of the regions while
-in others are hardly detectable above the noise floor) or with
-automatically changing the lock-in amplifiers sensitivity or time
-constant in between.
+to define an experiment isn't very hard to learn. And when this hurdle
+has been taken you will have complete control over the way the
+experiment is done. Just to give a few trivial examples: sometimes
+signals are distributed over a large field range with nothing of
+interest in between, so it would be rather useful to skip these
+regions. Most normal programs won't allow this and one has to either
+record also the uninteresting field regions (thus loosing lots of time)
+or to manually restart the experiments for each of the regions of
+interest. In contrast, with @acronym{fsc2} it shouldn't take more than a
+few minutes to write an @code{EDL} program consisting of just a few
+lines of code that can not only skip these regions but also repeat the
+experiment as often as needed, and if necessary do different numbers of
+accumulations of the different parts (if, for example, the signals are
+huge in some of the regions while in others are hardly detectable above
+the noise floor) or with automatically changing the lock-in amplifiers
+sensitivity or time constant in between.
 
 But one does not have to write a new program for every experiment one is
 going to do -- for the standard experiments, once such a program has
@@ -141,8 +139,8 @@ devices (@pxref{Using Pulsers}).
 
 The next chapter (@pxref{Command Line Options}) lists all the command
 line options that can be passed to @acronym{fsc2}, the following
-(@pxref{Modules}) explains in detail everything there is to know about
-writing new modules, and the final chapter (@pxref{Interfacing}) is
-about writing programs that interface with @acronym{fsc2}, i.e.@: that
-can send @acronym{EDL} programs to @acronym{fsc2} that in turn will
-execute them.
+chapters (@pxref{Cloning Devices}, @pxref{Modules}) explain in detail
+everything there is to know about writing new modules, and the final
+chapter (@pxref{Interfacing}) is about writing programs that interface
+with @acronym{fsc2}, i.e.@: that can send @acronym{EDL} programs to
+@acronym{fsc2} that in turn will execute them.

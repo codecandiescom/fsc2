@@ -36,15 +36,17 @@ inline int get_mode( void )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/* This function is called by modules to determine if the user pressed   */
-/* the Stop button. The function call is wrapped into a macro (DO_STOP ) */
-/* tht makes it look like a access to a variable.                        */
-/*-----------------------------------------------------------------------*/
+/*------------------------------------------------------*/
+/* Function tests if the user has hit the "Stop" button */
+/* and throws an USER_BREAK_EXCEPTION in this case.     */
+/*------------------------------------------------------*/
 
-inline bool get_do_stop( void )
+inline void stop_on_user_request( void )
 {
-	return do_quit && react_to_do_quit;
+	if ( I_am == PARENT )
+		fl_check_only_forms( );
+	if ( do_quit && react_to_do_quit )
+		THROW( USER_BREAK_EXCEPTION );
 }
 
 
@@ -153,6 +155,10 @@ inline long get_strict_long( Var *v, const char *snippet )
 
 inline bool get_boolean( Var *v )
 {
+	const char *alt[ 2 ] = { "OFF", "ON" };
+	int res;
+
+
 	vars_check( v, INT_VAR | FLOAT_VAR | STR_VAR );
 
 	if ( v->type == FLOAT_VAR )
@@ -170,11 +176,8 @@ inline bool get_boolean( Var *v )
 	}
 	else if ( v->type == STR_VAR )
 	{
-		if ( ! strcasecmp( v->val.sptr, "OFF" ) )
-			return UNSET;
-
-		if ( ! strcasecmp( v->val.sptr, "ON" ) )
-			return SET;
+		if ( ( res = is_in( v->val.sptr, alt, 2 ) ) >= 0 )
+			return res != 0 ? SET : UNSET;
 
 		print( FATAL, "Invalid boolean argument (\"%s\").\n",  v->val.sptr );
 		THROW( EXCEPTION );

@@ -572,15 +572,15 @@ bool fsc2_locking( void )
 }
 
 
-/*---------------------------------------------------------------------*/
-/* Functions checks if a supplied input string is identical to one of  */
-/* `max' alternatives, pointed to by `altern', but neglecting the case */
-/* of the characters. Leading and trailing white space is removed from */
-/* the input string. The comparison is case insensitive. The function  */
-/* returns the index of the found altenative (i.e. a number between 0  */
-/* and max - 1) or -1 if none of the alternatives was identical to the */
-/* input string.                                                       */
-/*---------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------*/
+/* Functions checks if a supplied input string is identical to one of 'max' */
+/* alternatives, pointed to by `altern', but neglecting the case of the     */
+/* characters and removing leading and trailing white space from the input  */
+/* string before the comparison. The comparison is case insensitive and the */
+/* function returns the index of the found alternative (a number between 0  */
+/* and max - 1) or -1 if none of the alternatives was identical to the      */
+/* input string.                                                            */
+/*--------------------------------------------------------------------------*/
 
 int is_in( const char *supplied_in, const char **altern, int max )
 {

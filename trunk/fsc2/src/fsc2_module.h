@@ -72,7 +72,6 @@
 
 
 #define FSC2_MODE get_mode( )
-#define DO_STOP   get_do_stop( )
 
 
 extern void show_message( const char *str );

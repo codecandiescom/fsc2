@@ -37,6 +37,7 @@ my $field_error        = "";
 my $hidden_field_error = "";
 my $num_runs           = 1;
 my $pulses_per_trace   = 10;
+my $pretrigger         = 10;
 my @digitizers         = qw/ TDS520 TDS520A TDS520C TDS540 TDS744A TDS754A /;
 my $digitizer          = $digitizers[ 0 ];
 my @channels_1         = qw/ CH1 CH2 MATH1 MATH2 MATH3 /;
@@ -109,26 +110,26 @@ my $f3_l2 = $f3->Label( '-text'           => 'G',
 						'-width'          => 1 );
 
 
-my $f5 = $mw->Frame( );
-my $f5_l1 = $f5->Label( '-text'           => 'Maximum field error:',
+my $f4 = $mw->Frame( );
+my $f4_l1 = $f4->Label( '-text'           => 'Maximum field error:',
 						'-width'          => '20',
 						'anchor'          => 'w' );
-my $f5_v = $f5->Entry( '-textvariable'    => \$field_error,
+my $f4_v = $f4->Entry( '-textvariable'    => \$field_error,
 					   '-width'           => '8',
 					   '-validate'        => 'key',
 					   '-validatecommand' => \&is_numeric,
 					   '-relief'          => 'sunken',
 					   'state'            => $sweep_method eq 'sweep' ?
 					                              'disabled' : 'normal' );
-my $f5_l2 = $f5->Label( '-text'           => 'G',
+my $f4_l2 = $f4->Label( '-text'           => 'G',
 						'-width'          => 1 );
 
 
-my $f4 = $mw->Frame( );
-my $f4_l = $f4->Label( '-text'              => 'Sweep method:',
+my $f5 = $mw->Frame( );
+my $f5_l = $f5->Label( '-text'              => 'Sweep method:',
 						'-width'            => '20',
 						'anchor'            => 'w' );
-my $f4_m = $f4->Optionmenu( '-options'      => [ ( 'sweep', 'set_field' ) ],
+my $f5_m = $f5->Optionmenu( '-options'      => [ ( 'sweep', 'set_field' ) ],
 							'-width'        => 9,
 						    '-command'      => \&set_sweep_method,
 							'-textvariable' => \$sweep_method );
@@ -157,6 +158,20 @@ my $f7_v = $f7->Entry( '-textvariable'    => \$pulses_per_trace,
 					   '-relief'          => 'sunken' );
 my $f7_l2 = $f7->Label( '-text'           => ' ',
 						'-width'          => 1 );
+
+
+my $f13 = $mw->Frame( );
+my $f13_l1 = $f13->Label( '-text'           => 'Amount of pretrigger:',
+						  '-width'          => '20',
+						  'anchor'          => 'w' );
+my $f13_v = $f13->Entry( '-textvariable'    => \$pretrigger,
+						 '-width'           => '8',
+						 '-validate'        => 'key',
+						 '-validatecommand' => 
+						 sub { $_[ 0 ] =~ /^\s*\d*\s*$/ },
+						 '-relief'          => 'sunken' );
+my $f13_l2 = $f13->Label( '-text'           => '%',
+						  '-width'          => 1 );
 
 
 my $f8 = $mw->Frame( );
@@ -215,14 +230,14 @@ $f3_l1->pack( %wp );
 $f3_v->pack( %wp );
 $f3_l2->pack( %wp );
 
-$f4->pack( %fp );
-$f4_l->pack( %wp );
-$f4_m->pack( %wp );
-
 $f5->pack( %fp );
-$f5_l1->pack( %wp );
-$f5_v->pack( %wp );
-$f5_l2->pack( %wp );
+$f5_l->pack( %wp );
+$f5_m->pack( %wp );
+
+$f4->pack( %fp );
+$f4_l1->pack( %wp );
+$f4_v->pack( %wp );
+$f4_l2->pack( %wp );
 
 $f6->pack( %fp );
 $f6_l1->pack( %wp );
@@ -233,6 +248,11 @@ $f7->pack( %fp );
 $f7_l1->pack( %wp );
 $f7_v->pack( %wp );
 $f7_l2->pack( %wp );
+
+$f13->pack( %fp );
+$f13_l1->pack( %wp );
+$f13_v->pack( %wp );
+$f13_l2->pack( %wp );
 
 $f8->pack( %fp );
 $f8_l1->pack( %wp );
@@ -391,11 +411,11 @@ sub do_checks {
 
 sub set_sweep_method {
 	if ( $sweep_method eq 'sweep' ) {
-		$f5_v->configure( 'state' => 'disabled' );
+		$f4_v->configure( 'state' => 'disabled' );
 		$hidden_field_error = $field_error;
 		$field_error = "";
 	} else {
-		$f5_v->configure( 'state' => 'normal' );
+		$f4_v->configure( 'state' => 'normal' );
 		$field_error = $hidden_field_error;
 	}
 }
@@ -556,19 +576,24 @@ ground;
 
 PREPARATIONS:
 
-init_2d( 2, 0, N, 0, 1, start_field, field_step, \"Time / us\",
-	     \"Field / G\", \"Signal / mV \" );
-
+init_2d( 2, 0, N, 0, 1, start_field, field_step, \"Time [µs]\",
+	     \"Field [G]\", \"Signal [mV] \" );
 magnet_setup( start_field, field_step );
-
-digitizer_num_averages( Num_avg );
-digitizer_trigger_channel( $trig_channel );
+digitizer_num_averages( Num_avg );\n";
+print F "digitizer_trigger_channel( $trig_channel );\n"
+	if ( $trig_channel ne "Don't set" );
+print F "
 
 EXPERIMENT:
 
-Rec_len   = digitizer_record_length( );
-trig_pos  = digitizer_trigger_position( );
-time_base = digitizer_timebase( );
+Rec_len   = digitizer_record_length( );\n";
+if ( $pretrigger ne "" ) {
+	print F "trig_pos  = digitizer_trigger_position( " .
+		( 0.01 * $pretrigger ) . " );\n";
+} else {
+	print F "trig_pos  = digitizer_trigger_position( );\n";
+}
+print F "time_base = digitizer_timebase( );
 time_res  = time_base / 50.0;
 min_time = - trig_pos * Rec_len * time_res;
 Pretrigger = int( 0.9 * trig_pos * Rec_len );

@@ -1,37 +1,41 @@
 DEVICES:
 
 hp8647a;
-sr830;
+sr810;
 er035m_sas;
 
 
 VARIABLES:
 
-start_freq = 5.0 MHz;
-end_freq   = 25.0 MHz;
-step_freq  = 25 kHz;
+start_freq = 7.0 MHz;
+end_freq   = 22.0 MHz;
+step_freq  = 20 kHz;
 freq;
 
 ref_freq   = 19 kHz;
 
 I = 1;
 J = 1;
-N_runs = 20;
+N_runs = 25;
 N_points = int( ( end_freq - start_freq ) / step_freq ) + 1;
 data[ N_runs, N_points ];
 dat_mean[ N_points ];
 
 File1, File2;
 
+B1, OO1, OO2;
+
 
 PREPARATIONS:
 
 
-synthesizer_use_table( );
-synthesizer_attenuation( -4.5 dB );
+synthesizer_use_table( "~/table.dat" );
+synthesizer_minimum_attenuation(-5 dB);
+synthesizer_attenuation( -6.5 dB );
 synthesizer_att_ref_freq( 14 MHz );
 synthesizer_frequency( start_freq );
-synthesizer_modulation( "FM", "EXT DC", 50 kHz );
+synthesizer_modulation( "FM", "EXT DC", 40 kHz );
+//synthesizer_modulation( "OFF" );
 
 init_1d( 2, N_points, start_freq * 1e-6, step_freq * 1e-6,
 	 "Frequency / MHz", "Signal / V" ); 
@@ -39,48 +43,65 @@ init_1d( 2, N_points, start_freq * 1e-6, step_freq * 1e-6,
 
 EXPERIMENT:
 
+synthesizer_state( 1 );
+
 lockin_ref_freq( ref_freq );
 lockin_ref_level( 1 V );
-lockin_lock_keyboard( 0 );
 
 File1 = get_file( "File for single runs:" );
 File2 = get_file( "For final results:" );
 
 fsave( File2, "% Field at start = # G\n", measure_field( ) );
 
-synthesizer_state( 1 );
+
+B1 = button_create( "PUSH_BUTTON", "Pause before next run" );
+OO1 = output_create( "INT_OUTPUT", "Number of runs" );
+OO2 = output_create( "FLOAT_OUTPUT", "RF Frequency [MHz]" );
 
 FOR I = 1 : N_runs {
-    print( "Starting #. run.\n", J );
 
-    wait(lockin_time_constant( ) *3);
+	output_value( OO1, I );
+	output_value( OO2, start_freq * 1.0e-6 );
+
+	IF button_state( B1 ) {
+		WHILE button_state( B1 ) {
+			wait( 0.5 s );
+		}
+	}
+
+    print( "Starting #. run.\n", I );
+
+    wait( lockin_time_constant( ) * 10.0 );
     FOR J = 1 : N_points { 
 
         data[ I, J ] = lockin_get_data( );
-		display( J, data[ I, J ], 1, J,
-		 		 ( dat_mean[ J ] + data[ I, J ] ) / I, 2 );
+            display( J, data[ I, J ], 2,
+                         J, ( dat_mean[ J ] + data[ I, J ] ) / I, 1 );
         IF J < N_points {
             synthesizer_frequency( start_freq + J * step_freq );
+			output_value( OO2, ( start_freq  + J * step_freq ) * 1.0e-6 );
         }
-        wait( lockin_time_constant( ) );
+        wait( lockin_time_constant( ) * 3.0 );
     }
 
     dat_mean += data[ I ];
     save( File1, data[ I ] );
     fsave( File1, "\n\n" );
-    clear_curve( 1 );
+    clear_curve( 2 );
     synthesizer_frequency( start_freq );
+	output_value( OO2, start_freq * 1.0e-6 );
 }
 
 ON_STOP:
 
 synthesizer_state( 0 );
-fsave( File2, "% Field at end   = # G\n\n", measure_field( ) );
+clear_curve( 2 );
+display( 1, dat_mean );
+//fsave( File2, "% Field at end   = # G\n\n", measure_field( ) );
 freq = start_freq;
 FOR I = 1 : N_points {
-    fsave(File2, "# #\n", freq * 1.0e-6, dat_mean[ I ] );
+    fsave( File2, "# #\n", freq * 1.0e-6, dat_mean[ I ] );
     freq += step_freq;
 }
-
 
 

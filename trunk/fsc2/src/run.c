@@ -35,8 +35,12 @@ extern FL_resource xresources[ ];             /* from xinit.c */
 
 /* Routines of the main process exclusively used in this file */
 
+static bool start_gpib( void );
+static bool no_prog_to_run( void );
+static bool init_devs_and_graphics( void );
 static void stop_while_exp_hook( FL_OBJECT *a, long b );
-static bool no_prog_to_be_run( void );
+static void setup_signal_handlers( void );
+static void fork_failure( int stored_errno );
 static void check_for_further_errors( Compilation *c_old, Compilation *c_all );
 static void new_data_handler( int signo	);
 static void quitting_handler( int signo	);
@@ -47,11 +51,12 @@ static void set_buttons_for_run( int active );
 /* Routines of the child process doing the measurement */
 
 static void run_child( void );
-static void set_child_signals( void );
-void child_sig_handler( int signo );
+static void setup_child_signals( void );
+static void child_sig_handler( int signo );
 static void do_measurement( void );
 static void wait_for_confirmation( void );
 static void child_confirmation_handler( int signo );
+static void deal_with_program_tokens( void );
 
 
 /* Locally used global variables used in parent, child and signal handlers */
@@ -68,40 +73,93 @@ static struct sigaction sigchld_oact,
 static int child_return_status;
 
 
-
 /*------------------------------------------------------------------*/
 /* run() starts an experiment. To do so it initialises all needed   */
 /* devices and opens a new window for displaying the measured data. */
 /* Then everything needed for the communication between parent and  */
 /* the child to be created is set up, i.e. pipes, a semaphore and a */
 /* shared memory segment for storing the type of the data and a key */
-/* for a further shared memory segment will contain the data.       */
-/* Finally, after initialising some global variables and setting up */
-/* signal handlers used for synchronization the processes the child */
-/* is started and thus the experiments begins.                      */
+/* for a further shared memory segment that will contain the data.  */
+/* Finally, after initializing some global variables and setting up */
+/* signal handlers used for synchronization of the processes the    */
+/* child process is started and thus the experiments begins.        */
 /*------------------------------------------------------------------*/
 
 bool run( void )
 {
-	Compilation compile_test;
-	struct sigaction sact;
+	int stored_errno;
 
 
-	/* If there are no commands but a EXPERIMENT section label we just run
-	   all the init hooks, then the exit hooks and then are already done.
-	   If, on the other hand, there isn't even an EXPERIMENT section label
-	   (as indicated by prg_length being negative) we just return without
-	   doing anything at all. */
-
-	if ( prg_token == NULL || prg_length <= 0 )
-		return prg_length < 0 ? OK : no_prog_to_be_run( );
-
-	/* There can't be more than one experiment - so quit if child_pid != 0 */
+	/* We can't run more than one experiment - so quit if child_pid != 0 */
 
 	if ( child_pid != 0 )
 		return FAIL;
 
-	/* Disable some buttons */
+	/* If there's no EXPERIMENT section at all (indicated by 'prg_length'
+	   being negative) we're already done */
+
+	if ( prg_length < 0 )
+		return 0;
+
+	/* Start the GPIB bus (and do some changes to the graphics) */
+
+	if ( ! start_gpib( ) )
+		return FAIL;
+
+	/* If there are no commands but an EXPERIMENT section label we just run
+	   all the init hooks, then the exit hooks and are already done. */
+
+	if ( prg_token == NULL )
+		return no_prog_to_run( );
+
+	/* Initialize devices and graphics */
+
+	if ( ! init_devs_and_graphics(  ) )
+		return FAIL;
+
+	/* Setup the signal handlers for signals used for communication between
+	   parent and child process and an idle callback function for displaying
+	   new data. */
+
+	setup_signal_handlers( );
+
+	fl_set_cursor( FL_ObjWin( main_form->run ), XC_left_ptr );
+
+	/* Here the experiment starts - the child process is forked */
+
+	if ( ( child_pid = fork( ) ) == 0 )
+		run_child( );
+
+	stored_errno = errno;            /* for later dissemination... */
+	close_all_files( );              /* only child is going to write to them */
+
+	close( pd[ READ ] );             /* close unused ends of pipes */
+	close( pd[ 3 ] );
+	pd[ READ ] = pd[ 2 ];
+
+	if ( child_pid != -1 )           /* if fork() succeeded */
+	{
+		FSC2_MODE = PREPARATION;
+		sema_post( semaphore );      /* we're ready to read data */
+		need_post = UNSET;
+		return OK;
+	}
+
+	/* If forking the child failed we end up here */
+
+	fork_failure( stored_errno );
+	return FAIL;
+}
+
+
+/*-------------------------------------------------------------------*/
+/* This function first does some smaller changes to the GUI and then */
+/* starts the GPIB bus if at least one of the devices needs it.      */
+/*-------------------------------------------------------------------*/
+
+static bool start_gpib( void )
+{
+	/* Disable some buttons and show a watch cusor */
 
 	set_buttons_for_run( 0 );
 	fl_set_cursor( FL_ObjWin( main_form->run ), XC_watch );
@@ -118,26 +176,80 @@ bool run( void )
 		return FAIL;
 	}
 
+	return OK;
+}
+
+
+/*----------------------------------------------------------------------*/
+/* This all to be done when the experiment section does not contain any */
+/* commands: devices get initialized, again de-initialized, and then we */
+/* already return.                                                      */
+/*----------------------------------------------------------------------*/
+
+static bool no_prog_to_run( void )
+{
+	bool ret;
+
+
+	TRY
+	{
+		vars_pop( f_dtime( NULL ) );
+		run_exp_hooks( );
+		ret = OK;
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+	{
+		run_end_of_exp_hooks( );
+		vars_del_stack( );                /* some stack variables might be left
+										     over if an exception got thrown */
+		ret = FAIL;
+	}
+
+	run_end_of_exp_hooks( );
+
+	if ( need_GPIB )
+		gpib_shutdown( );
+
+	fsc2_serial_cleanup( );
+
+	set_buttons_for_run( 1 );
+	fl_set_cursor( FL_ObjWin( main_form->run ), XC_left_ptr );
+
+	return ret;
+} 
+
+
+/*--------------------------------------------------------------------------*/
+/* Function sets a zero point for the dtime() function, runs the experiment */
+/* hooks (while still allowing the user to break in between), initializes   */
+/* the graphics and creates two pipes for two-way communication between the */
+/* parent and child process.                                                */
+/*--------------------------------------------------------------------------*/
+
+static bool init_devs_and_graphics( void )
+{
+	Compilation compile_test;
+
+
 	/* Make a copy of the errors found while compiling the program */
 
 	memcpy( &compile_test, &compilation, sizeof( Compilation ) );
-
-	/* Set zero point for the dtime() function, run the experiment hooks
-	   (while allowing the user to break in between), initialize the graphics
-	   and create two pipes for two-way communication between the parent and
-	   child process. */
 
 	TRY
 	{
 		vars_pop( f_dtime( NULL ) );
 
-		do_quit = react_to_do_quit = UNSET;
+		do_quit = UNSET;
+		react_to_do_quit = SET;
 		fl_set_object_callback( main_form->run, stop_while_exp_hook, 0 );
 
 		fl_set_object_label( main_form->run, "Stop" );
 
 		FSC2_MODE = EXPERIMENT;
 		run_exp_hooks( );
+
+		react_to_do_quit = UNSET;
 
 		fl_set_object_callback( main_form->run, run_file, 0 );
 		fl_deactivate_object( main_form->run );
@@ -173,10 +285,26 @@ bool run( void )
 	}
 
 	fl_set_object_callback( main_form->run, run_file, 0 );
-
 	child_is_quitting = UNSET;
 
-	/* Set the signal handlers */
+	return OK;
+}
+
+
+/*-----------------------------------------------------------------*/
+/* Sets the signal handlers for all signals used for communication */
+/* between the parent and the child process. Finally, it activates */
+/* an idle callback routine which the parent uses for displaying   */
+/* new data (thus new data only get drawn when the parent process  */
+/* has some spare time, but this doesn't mean new data won't get   */
+/* accepted immediately, which is done in a signal handler of its  */
+/* own independently to guarantee minimum response times).         */
+/*-----------------------------------------------------------------*/
+
+static void setup_signal_handlers( void )
+{
+	struct sigaction sact;
+
 
 	sact.sa_handler = new_data_handler;
 	sigemptyset( &sact.sa_mask );
@@ -194,35 +322,33 @@ bool run( void )
 	sigaction( SIGCHLD, &sact, &sigchld_oact );
 
 	fl_set_idle_callback( new_data_callback, NULL );
+}
 
-	fl_set_cursor( FL_ObjWin( main_form->run ), XC_left_ptr );
 
-	/* Here the experiment starts - child process for doing it is forked */
+/*--------------------------------------------------------------------------*/
+/* Callback handler for the main "Stop" button during device initialization */
+/*--------------------------------------------------------------------------*/
 
-	if ( ( child_pid = fork( ) ) == 0 )
-		run_child( );
+static void stop_while_exp_hook( FL_OBJECT *a, long b )
+{
+	a = a;
+	b = b;
 
-	close_all_files( );              /* only child is going to write to them */
+	do_quit = react_to_do_quit = SET;
+}
 
-	close( pd[ READ ] );             /* close unused ends of pipes */
-	close( pd[ 3 ] );
-	pd[ READ ] = pd[ 2 ];
 
-	if ( child_pid != -1 )           /* if fork() succeeded */
-	{
-		FSC2_MODE = PREPARATION;
-		sema_post( semaphore );      /* we're ready to read data */
-		need_post = UNSET;
-		return OK;
-	}
+/*------------------------------------------------------------------------*/
+/* Things that remain to be done when forking the child process failed... */
+/*------------------------------------------------------------------------*/
 
-	/* If forking the child failed we end up here */
-
+static void fork_failure( int stored_errno )
+{
 	sigaction( SIGCHLD,  &sigchld_oact,  NULL );
 	sigaction( NEW_DATA, &new_data_oact, NULL );
 	sigaction( QUITTING, &quitting_oact, NULL );
 
-	switch ( errno )
+	switch ( stored_errno )
 	{
 		case EAGAIN :
 			eprint( FATAL, UNSET, "Not enough system resources left to run "
@@ -259,75 +385,13 @@ bool run( void )
 	FSC2_MODE = PREPARATION;
 
 	stop_measurement( NULL, 1 );
-	return FAIL;
 }
-
-
-/*------------------------------------------------------------------*/
-/*------------------------------------------------------------------*/
-
-static void stop_while_exp_hook( FL_OBJECT *a, long b )
-{
-	a = a;
-	b = b;
-
-	do_quit = react_to_do_quit = SET;
-}
-
-
-/*------------------------------------------------------------------*/
-/* This all to be done when the experiment section does not has any */
-/* commands: We just initialize all devices to get and then return. */
-/*------------------------------------------------------------------*/
-
-static bool no_prog_to_be_run( void )
-{
-	bool ret;
-
-
-	fl_set_cursor( FL_ObjWin( main_form->run ), XC_watch );
-	set_buttons_for_run( 0 );
-
-	if ( need_GPIB && gpib_init( GPIB_LOG_FILE, GPIB_LOG_LEVEL ) == FAILURE )
-	{
-		eprint( FATAL, UNSET, "Can't initialize GPIB bus: %s\n",
-				gpib_error_msg );
-		set_buttons_for_run( 1 );
-		fl_set_cursor( FL_ObjWin( main_form->run ), XC_left_ptr );
-		return FAIL;
-	}
-
-	TRY
-	{
-		vars_pop( f_dtime( NULL ) );
-		run_exp_hooks( );
-		ret = OK;
-		TRY_SUCCESS;
-	}
-	OTHERWISE
-	{
-		run_end_of_exp_hooks( );
-		vars_del_stack( );             /* some stack variables might be left
-										  over when an exception got thrown */
-		ret = FAIL;
-	}
-
-	run_end_of_exp_hooks( );
-	if ( need_GPIB )
-		gpib_shutdown( );
-	fsc2_serial_cleanup( );
-
-	set_buttons_for_run( 1 );
-	fl_set_cursor( FL_ObjWin( main_form->run ), XC_left_ptr );
-
-	return ret;
-} 
 
 
 /*-------------------------------------------------------------------*/
 /* Checks if new errors etc. were found while running the exp_hooks. */
-/* If so ask the user if she wants to continue - unless an exception */
-/* was thrown.                                                       */
+/* In this case it asks the user if she wants to continue - unless   */
+/* an exception was thrown.                                          */
 /*-------------------------------------------------------------------*/
 
 static void check_for_further_errors( Compilation *c_old, Compilation *c_all )
@@ -348,21 +412,21 @@ static void check_for_further_errors( Compilation *c_old, Compilation *c_all )
 		{
 			if ( diff.error[ WARN ] != 0 )
 			{
-				sprintf( str1, "Starting the experiment there where %d "
+				sprintf( str1, "During start of the experiment there where %d "
 						 "severe", diff.error[ SEVERE ] );
 				sprintf( str2, "and %d warnings.", diff.error[ WARN ] );
 			}
 			else
 			{
-				sprintf( str1, "Starting the experiment there  where %d "
+				sprintf( str1, "During start of the experiment there where %d "
 						 "severe warnings.", diff.error[ SEVERE ] );
 				str2[ 0 ] = '\0';
 			}
 		}
 		else
 		{
-			sprintf( str1, "Starting the experiment there where %d warnings.",
-					 diff.error[ WARN ] );
+			sprintf( str1, "During start of the experiment there where %d "
+					 "warnings.", diff.error[ WARN ] );
 			str2[ 0 ] = '\0';
 		}
 
@@ -376,35 +440,37 @@ static void check_for_further_errors( Compilation *c_old, Compilation *c_all )
 /*-------------------------------------------------------------------*/
 /* new_data_handler() is the handler for the NEW_DATA signal sent by */
 /* the child to the parent if there are new data.                    */
-/* The child always stores the data in a shared memory segment. Then */
+/* The child will always store data in a shared memory segment. Then */
 /* it waits for the parent to become ready to accept the data by     */
 /* waiting for a semaphore to become posted. Next it puts the memory */
-/* segment key plus the identifier of the type of data in a common   */
+/* segment key plus the identifier for the data type in a common     */
 /* shared memory segment and finally sends the parent a NEW_DATA     */
-/* signal.                                                           */
-/* This in turn makes the parent execute this signal handler. The    */
+/* signal to tell it that the data are ready to be fetched.          */
+/* This signal is handled by the parent in this signal handler. The  */
 /* parent has a buffer for storing the information about the data it */
-/* gets from the child, the message queue. In this handler it stores */
-/* the information about the data in the next free slot of the       */
-/* message queue and increments the marker pointing to the next free */
-/* slot.                                                             */
-/* There are two types of data, DATA and REQUESTS: Messages of type  */
+/* gets from the child, the message queue. It stores the information */
+/* about the data in the next free slot of the message queue and     */
+/* increments the marker pointing to the next free slot.             */
+/* There are two types of data, DATA and REQUESTS. Messages of type  */
 /* DATA simply get stored in the message queue and will be dealt     */
-/* with whenever there is time (via an idle callback, see comm.c).   */
-/* As long as the message queue isn't full yet, for DATA messages    */
-/* semaphore gets posted again, telling the child that the parent is */
-/* prepared to accept further messages. On the other hand, if the    */
-/* messages queue is full a global variable is set, thus indicating  */
-/* to the function removing the data from the message queue to post  */
-/* the semaphore when it is done with the data.                      */
+/* with whenever there is time (via an idle callback). As long as    */
+/* the message queue isn't full yet, following a DATA message the    */
+/* semaphore gets posted again immediately, telling the child that   */
+/* the parent is prepared to accept further messages. If, on the     */
+/* other hand, the messages queue is full the semaphore can't be     */
+/* posted yet but only when some of the messages have been taken out */
+/* of the message queue. In this case the global variable need_post  */
+/* is set to tell the function removing items from the message queue */
+/* to post the semaphore when space has become available again in    */
+/* the queue.                                                        */
 /* In contrast, messages of type REQUEST come from functions where   */
-/* the child sends data not via shared mmory segments but a pipe.    */
-/* In this case the child is waiting to write data to a pipe. It     */
-/* starts writing only when the semaphore gets posted. On the other  */
-/* side, the parent has to deal with all the earlier messages in the */
-/* message queue before it starts reading the pipe. So, for this     */
-/* kind of messages the semaphore isn't posted yet but only when the */
-/* parent is ready for reading on the pipe.                          */
+/* the child sends data not via shared memory segments but a pipe    */
+/* and usually awaits a reply from the parent. In this case the      */
+/* parent does not post the semaphore here but only when it is       */
+/* prepared to listen on the pipe. It does so only after it has      */
+/* dealt with all the earlier messages in the message queue. The     */
+/* child, in turn, waits for the semaphore before starting to write  */
+/* to the pipe.                                                      */
 /*-------------------------------------------------------------------*/
 
 static void new_data_handler( int signo )
@@ -436,11 +502,11 @@ static void new_data_handler( int signo )
 }
 
 
-/*----------------------------------------------------------------*/
-/* quitting_handler() is the handler for the QUITTING signal sent */
-/* by the child when it exits normally: It sets a global variable */
-/* and reacts by sending (another) DO_QUIT signal.                */
-/*----------------------------------------------------------------*/
+/*---------------------------------------------------------------------*/
+/* quitting_handler() is the parents handler for the QUITTING signal   */
+/* sent by the child when it exits normally: the handler sets a global */
+/* variable and reacts by sending the child a DO_QUIT signal.          */
+/*---------------------------------------------------------------------*/
 
 static void quitting_handler( int signo )
 {
@@ -450,6 +516,7 @@ static void quitting_handler( int signo )
 	signo = signo;
 	errno_saved = errno;
 	child_is_quitting = SET;
+
 	if ( kill( child_pid, DO_QUIT ) < 0 )
 	{
 		child_pid = 0;                                   /* child is dead... */
@@ -457,6 +524,7 @@ static void quitting_handler( int signo )
 		fl_trigger_object( run_form->sigchld );
 		stop_measurement( NULL, 1 );
 	}
+
 	errno = errno_saved;
 }
 
@@ -535,14 +603,15 @@ void run_sigchld_callback( FL_OBJECT *a, long b )
 }
 
 
-/*---------------------------------------------------------------------*/
-/* stop_measurement() has two functions - if called with the parameter */
-/* b set to 0 it serves as the callback for the stop button and just   */
-/* sends a DO_QUIT signal to the child telling it to exit. This in     */
-/* turn will cause another call of the function, this time with b set  */
-/* to 1 by run_sigchld_handler(), catching the SIGCHLD from the child  */
-/* in order to get the post-measurement clean-up done.                 */
-/*---------------------------------------------------------------------*/
+/*-----------------------------------------------------------------*/
+/* stop_measurement() has two functions: if called with the second */
+/* argument b set to 0 it serves as the callback for the "STOP"    */
+/* button and just sends a DO_QUIT signal to the child telling it  */
+/* to exit. This in turn will cause another call of the function,  */
+/* this time with b set to 1 by run_sigchld_handler(), catching    */
+/* the SIGCHLD from the child in order to get the post-measurement */
+/* clean-up done.                                                  */
+/*-----------------------------------------------------------------*/
 
 void stop_measurement( FL_OBJECT *a, long b )
 {
@@ -690,12 +759,12 @@ static void run_child( void )
 	child_return_status = OK;
 	cur_prg_token = prg_token;
 	do_quit = UNSET;
-	set_child_signals( );
+	setup_child_signals( );
 
 #ifndef NDEBUG
-	/* By stetting the environment variable FSC2_CHILD_DEBUG to something
-	   not an empty string the child will sleep here for about 10 hours or
-	   until it gets a non-deadly signal, e.g. by the debugger attaching. */
+	/* Setting the environment variable FSC2_CHILD_DEBUG to a non-empty
+	   string will induce the child to sleep for about 10 hours or until
+	   it receives a signal, e.g. from the debugger attaching to it. */
 
 	if ( ( fcd = getenv( "FSC2_CHILD_DEBUG" ) ) != NULL &&
 		 fcd[ 0 ] != '\0' )
@@ -705,6 +774,8 @@ static void run_child( void )
 		sleep( 36000 );
 	}
 #endif
+
+	/* Initialization is finished and child can start doing its real work */
 
 	TRY
 	{
@@ -731,7 +802,7 @@ static void run_child( void )
 /* (in case it was killed by a signal it couldn't catch).            */
 /*-------------------------------------------------------------------*/
 
-static void set_child_signals( void )
+static void setup_child_signals( void )
 {
 	struct sigaction sact;
 	int sig_list[ ] = { SIGHUP, SIGINT, SIGQUIT, SIGILL, SIGABRT, SIGFPE,
@@ -782,7 +853,7 @@ static void set_child_signals( void )
 /* unexpected happens.                                            */
 /*----------------------------------------------------------------*/
 
-void child_sig_handler( int signo )
+static void child_sig_handler( int signo )
 {
 	switch ( signo )
 	{
@@ -882,9 +953,6 @@ static void child_confirmation_handler( int signo )
 
 static void do_measurement( void )
 {
-	Prg_Token *cur;
-
-
 	react_to_do_quit = SET;
 	TEST_RUN = UNSET;
 
@@ -919,115 +987,130 @@ static void do_measurement( void )
 				do_quit = UNSET;
 			}
 
-			switch ( cur_prg_token->token )
-			{
-				case '}' :
-					cur_prg_token = cur_prg_token->end;
-					break;
+			/* Do whatever is necessary to do for the program token */
 
-				case WHILE_TOK :
-					cur = cur_prg_token;
-					if ( test_condition( cur ) )
-					{
-						cur->counter = 1;
-						cur_prg_token = cur->start;
-					}
-					else
-					{
-						cur->counter = 0;
-						cur_prg_token = cur->end;
-					}
-					break;
-
-				case UNTIL_TOK :
-					cur = cur_prg_token;
-					if ( ! test_condition( cur ) )
-					{
-						cur->counter = 1;
-						cur_prg_token = cur->start;
-					}
-					else
-					{
-						cur->counter = 0;
-						cur_prg_token = cur->end;
-					}
-					break;
-
-				case REPEAT_TOK :
-					cur = cur_prg_token;
-					if ( cur->counter == 0 )
-						get_max_repeat_count( cur );
-					if ( ++cur->count.repl.act <= cur->count.repl.max )
-					{
-						cur->counter++;
-						cur_prg_token = cur->start;
-					}
-					else
-					{
-						cur->counter = 0;
-						cur_prg_token = cur->end;
-					}
-					break;
-
-				case FOR_TOK :
-					cur = cur_prg_token;
-					if ( cur->counter == 0 )
-						get_for_cond( cur );
-
-					if ( test_for_cond( cur ) )
-					{
-						cur->counter = 1;
-						cur_prg_token = cur->start;
-					}
-					else
-					{
-						cur->counter = 0;
-						cur_prg_token = cur->end;
-					}
-					break;
-
-				case FOREVER_TOK :
-					cur_prg_token = cur_prg_token->start;
-					break;
-
-				case BREAK_TOK :
-					cur_prg_token->start->counter = 0;
-					cur_prg_token = cur_prg_token->start->end;
-					break;
-
-				case NEXT_TOK :
-					cur_prg_token = cur_prg_token->start;
-					break;
-
-				case IF_TOK : case UNLESS_TOK :
-					cur = cur_prg_token;
-					cur_prg_token
-						       = test_condition( cur ) ? cur->start : cur->end;
-					break;
-
-				case ELSE_TOK :
-					if ( ( cur_prg_token + 1 )->token == '{' )
-						cur_prg_token += 2;
-					else
-						cur_prg_token++;
-					break;
-
-				default :
-					exp_runparse( );               /* (re)start the parser */
-					break;
-			}
+			deal_with_program_tokens( );
 
 			TRY_SUCCESS;
 		}
 		CATCH( USER_BREAK_EXCEPTION )
 		{
 			TRY_SUCCESS;
-			vars_del_stack( );     /* variable stack is probably messed up */
+			vars_del_stack( );          /* variable stack could be messed up */
 			if ( ! react_to_do_quit )
 				THROW( EXCEPTION );
 		}
 		OTHERWISE
 			PASSTHROUGH( );
+	}
+}
+
+
+/*-----------------------------------------------------------------------*/
+/* The following is just a lengthy switch to deal with tokens that can't */
+/* be handled by the parser directly, i.e. tokens for flow control.      */
+/*-----------------------------------------------------------------------*/
+
+static void deal_with_program_tokens( void )
+{
+	Prg_Token *cur;
+
+
+	switch ( cur_prg_token->token )
+	{
+		case '}' :
+			cur_prg_token = cur_prg_token->end;
+			break;
+
+		case WHILE_TOK :
+			cur = cur_prg_token;
+			if ( test_condition( cur ) )
+			{
+				cur->counter = 1;
+				cur_prg_token = cur->start;
+			}
+			else
+			{
+				cur->counter = 0;
+				cur_prg_token = cur->end;
+			}
+			break;
+
+		case UNTIL_TOK :
+			cur = cur_prg_token;
+			if ( ! test_condition( cur ) )
+			{
+				cur->counter = 1;
+				cur_prg_token = cur->start;
+			}
+			else
+			{
+				cur->counter = 0;
+				cur_prg_token = cur->end;
+			}
+			break;
+
+		case REPEAT_TOK :
+			cur = cur_prg_token;
+			if ( cur->counter == 0 )
+				get_max_repeat_count( cur );
+			if ( ++cur->count.repl.act <= cur->count.repl.max )
+			{
+				cur->counter++;
+				cur_prg_token = cur->start;
+			}
+			else
+			{
+				cur->counter = 0;
+				cur_prg_token = cur->end;
+			}
+			break;
+
+		case FOR_TOK :
+			cur = cur_prg_token;
+			if ( cur->counter == 0 )
+				get_for_cond( cur );
+
+			if ( test_for_cond( cur ) )
+			{
+				cur->counter = 1;
+				cur_prg_token = cur->start;
+			}
+			else
+			{
+				cur->counter = 0;
+				cur_prg_token = cur->end;
+			}
+			break;
+
+		case FOREVER_TOK :
+			cur_prg_token = cur_prg_token->start;
+			break;
+
+		case BREAK_TOK :
+			cur_prg_token->start->counter = 0;
+			cur_prg_token = cur_prg_token->start->end;
+			break;
+
+		case NEXT_TOK :
+			cur_prg_token = cur_prg_token->start;
+			break;
+
+		case IF_TOK : case UNLESS_TOK :
+			cur = cur_prg_token;
+			cur_prg_token = test_condition( cur ) ? cur->start : cur->end;
+			break;
+
+		case ELSE_TOK :
+			if ( ( cur_prg_token + 1 )->token == '{' )
+				cur_prg_token += 2;
+			else
+				cur_prg_token++;
+			break;
+
+		default :
+			exp_runparse( );                         /* (re)start the parser */
+			break;
 	}
 }
 

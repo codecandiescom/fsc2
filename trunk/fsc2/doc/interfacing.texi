@@ -20,7 +20,7 @@
 @c Boston, MA 02111-1307, USA.
 
 
-@node Interfacing, Reserved Words, Modules, Top
+@node Interfacing, Device Reference, Modules, Top
 @chapter Interfacing
 
 @c ########################################################

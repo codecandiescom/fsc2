@@ -36,8 +36,6 @@ typedef struct {
 
 static DPoint *eval_display_args( Var *v, int *npoints );
 
-extern void child_sig_handler( int signo );
-
 extern sigjmp_buf alrm_env;
 extern volatile sig_atomic_t can_jmp_alrm;
 extern volatile bool is_alrm;
@@ -291,8 +289,9 @@ Var *f_wait( Var *v )
 
 	/* Now here comes the tricky part: We have to wait for either the SIGALRM
 	   or the DO_QUIT signal but must be immune to DO_SEND signals. A naive
-	   implementation would define a variable 'is_alarm' to be set in the
-	   signal handler for SIGALRM, initialize it to zero and then do
+	   implementation (i.e. my first idea ;-) would be to define a variable
+	   'is_alarm' to be set in the signal handler for SIGALRM, initialize it
+	   to zero and then do
 
 	   setitimer( ITIMER_REAL, &sleepy, NULL );
 	   while( ! is_alarm && ! do_quit )
@@ -309,7 +308,7 @@ Var *f_wait( Var *v )
 	   the signal handler that the jump buffer is initialized. Next we start
 	   setitimer() and finally start the pause(). This is done in an endless
 	   loop because the pause() can also be ended by a DO_SEND signal which we
-	   have to ignore. In the signal handler for both SIGALRM and the DO_QUIT
+	   have to ignore. In the signal handler for both the SIGALRM and DO_QUIT
 	   signal a siglongjmp() is done if the 'can_jmp_alrm' flag is set,
 	   getting us to the point after the 'if'-block because it will always
 	   return with to the point where we called sigsetjmp() with a non-zero
@@ -323,7 +322,7 @@ Var *f_wait( Var *v )
 	   scenario for this to happen is when the user clicks on the stop button
 	   at an really unlucky moment. And if the wait period isn't too long he
 	   will probably never notice that he triggered the race condition -
-	   otherwise he simply has to click the stop button a second time.  */
+	   otherwise he simply has to click the stop button a second time. */
 
 	if ( sigsetjmp( alrm_env, 1 ) == 0 )
 	{

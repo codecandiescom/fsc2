@@ -480,9 +480,10 @@ static void egg4402_query( char *buffer, long *length )
 
 	do
 	{
+		stop_on_user_request( );
+
 		usleep( 100000 );
-		if ( DO_STOP )
-			THROW( USER_BREAK_EXCEPTION );
+
 		if ( gpib_serial_poll( egg4402.device, &stb ) == FAILURE )
 			egg4402_failure( );
 	} while ( ! ( stb & 0x80 ) && ! ( stb & 1 ) );

@@ -41,7 +41,10 @@ const char generic_type[ ] = DEVICE_TYPE;
 #define HIGH_RES    2               /* 0.001 G */
 #define UNDEF_RES  -1
 
-static int res_list[ 3 ] = { 0.1, 0.01, 0.001 };
+#define PROBE_ORIENTATION_PLUS       0
+#define PROBE_ORIENTATION_MINUS      1
+#define PROBE_ORIENTATION_UNDEFINED -1
+#define UNDEF_RESOLUTION            -1
 
 
 /* exported functions and symbols */
@@ -55,6 +58,7 @@ void er035m_s_end_hook( void );
 Var *gaussmeter_name( Var *v );
 Var *find_field( Var *v );
 Var *gaussmeter_resolution( Var *v );
+Var *gaussmeter_probe_orientation( Var *v );
 Var *gaussmeter_wait( Var *v );
 
 bool is_gaussmeter = UNSET;         /* tested by magnet power supply driver */
@@ -82,12 +86,12 @@ typedef struct
 	int resolution;         /* LOW = 0.01 G, HIGH = 0.001 G */
     struct termios *tio;    /* serial port terminal interface structure */
 	char prompt;            /* prompt character send on each reply */
+	int probe_orientation;
 } NMR;
 
 static NMR nmr, nmr_stored;
-
 static const char *er035m_s_eol = "\r\n";
-
+static double res_list[ 3 ] = { 0.1, 0.01, 0.001 };
 
 
 /* The gaussmeter seems to be more cooperative if we wait for some time
@@ -239,7 +243,7 @@ int er035m_s_exp_hook( void )
 		er035m_s_set_resolution( res_list[ nmr.resolution ] );
 
 	/* Ask gaussmeter to send status byte and test if it does - sometimes the
-	   fucking thing does not answer (i.e. it just seems to send the prompt
+	   f..king thing does not answer (i.e. it just seems to send the prompt
 	   character and nothing else) so in this case we give it another chance
 	   (or even two, see FAIL_RETRIES above) */
 
@@ -249,8 +253,7 @@ try_again:
 
 	for ( retries = FAIL_RETRIES; ; retries-- )
 	{
-		if ( DO_STOP )
-			THROW( USER_BREAK_EXCEPTION );
+		stop_on_user_request( );
 
 		if ( er035m_s_write( "PS" ) == FAIL )
 			er035m_s_comm_fail( );
@@ -313,10 +316,12 @@ try_again:
 				print( FATAL, "Modulation is switched off.\n" );
 				THROW( EXCEPTION );
 
-			case '7' :      /* MOD POS -> OK (default state) */
+			case '7' :      /* MOD POS */
+				nmr.probe_orientation = PROBE_ORIENTATION_PLUS;
 				break;
 
-			case '8' :      /* MOD NEG -> OK */
+			case '8' :      /* MOD NEG */
+				nmr.probe_orientation = PROBE_ORIENTATION_MINUS;
 				break;
 
 			case '9' :      /* System in lock -> very good... */
@@ -348,7 +353,7 @@ try_again:
 				break;
 
 			default :
-				print( FATAL, "Undocumented data received.\n" );
+				print( FATAL, "Undocumented data received from device.\n" );
 				THROW( EXCEPTION );
 		}
 	} while ( *++bp ); 
@@ -438,6 +443,7 @@ Var *find_field( Var *v )
 		   nmr.state == ER035M_S_UNKNOWN ) &&
 		 er035m_s_write( "SD" ) == FAIL )
 		er035m_s_comm_fail( );
+
 	usleep( ER035M_S_WAIT );
 
 	/* Wait for gaussmeter to go into lock state (or FAIL) */
@@ -445,14 +451,13 @@ Var *find_field( Var *v )
 	while ( nmr.state != ER035M_S_LOCKED )
 	{
 		/* Get status byte and check if lock was achieved - sometimes the
-		   fucking thing does not answer (i.e. it just seems to send the
+		   f**king thing does not answer (i.e. it just seems to send the
 		   prompt character and nothing else) so in this case we give it
 		   another chance (or even two, see FAIL_RETRIES above) */
 
 		for ( retries = FAIL_RETRIES; ; retries-- )
 		{
-			if ( DO_STOP )
-				THROW( USER_BREAK_EXCEPTION );
+			stop_on_user_request( );
 
 			if ( er035m_s_write( "PS" ) == FAIL )
 				er035m_s_comm_fail( );
@@ -520,8 +525,8 @@ Var *find_field( Var *v )
 					break;
 
 				default :
-					print( FATAL, "Undocumented data received from the NMR "
-						   "gaussmeter.\n" );
+					print( FATAL, "Undocumented data received from "
+						   "device.\n" );
 					THROW( EXCEPTION );
 			}
 		} while ( *++bp );
@@ -601,6 +606,38 @@ Var *gaussmeter_resolution( Var *v )
 }
 
 
+/*--------------------------------------------------------*/
+/*--------------------------------------------------------*/
+
+Var *gaussmeter_probe_orientation( Var *v )
+{
+	if ( v == NULL )
+	{
+		if ( FSC2_MODE == PREPARATION )
+		{
+			no_query_possible( );
+			THROW( EXCEPTION );
+		}
+
+		if ( FSC2_MODE == TEST )
+			return vars_push( INT_VAR, 1 );
+
+		return vars_push( INT_VAR, ( long ) nmr.probe_orientation );
+	}
+
+	/* While the manual claims something different these idiots at Bruker
+	   made sure it doesn't really. I'm still waiting for the day that I
+	   see a device by these guys where the way the computer interface works
+	   (if it works at all) is just remotely similar to what they claim
+	   in the manuals (which usually are a complete piece of shit anyway.) */
+
+	print( FATAL, "Device does not allow setting of probe orientation.\n" );
+	THROW( EXPERIMENT );
+
+	return NULL;
+}
+
+
 /*-------------------------------------------------------*/
 /*-------------------------------------------------------*/
 
@@ -656,8 +693,7 @@ static double er035m_s_get_field( void )
 
 		for ( retries = FAIL_RETRIES; ; retries-- )
 		{
-			if ( DO_STOP )
-				THROW( USER_BREAK_EXCEPTION );
+			stop_on_user_request( );
 
 			if ( er035m_s_write( "PF" ) == FAIL )
 				er035m_s_comm_fail( );
@@ -722,8 +758,7 @@ static int er035m_s_get_resolution( void )
 
 	for ( retries = FAIL_RETRIES; ; retries-- )
 	{
-		if ( DO_STOP )
-			THROW( USER_BREAK_EXCEPTION );
+		stop_on_user_request( );
 
 		if ( er035m_s_write( "RS" ) == FAIL )
 			er035m_s_comm_fail( );
@@ -750,7 +785,7 @@ static int er035m_s_get_resolution( void )
 			return HIGH_RES;
 	}
 
-	print( FATAL, "Undocumented data received.\n" );
+	print( FATAL, "Undocumented data received from device.\n" );
 	THROW( EXCEPTION );
 
 	return UNDEF_RES;
@@ -770,7 +805,6 @@ static void er035m_s_set_resolution( int res_index )
 		er035m_s_comm_fail( );
 
 	usleep( ER035M_S_WAIT );
-
 }
 
 
@@ -936,6 +970,7 @@ static bool er035m_s_comm( int type, ... )
 			len = strlen( buf );
 			if ( fsc2_serial_write( SERIAL_PORT, buf, len ) != len )
 				return FAIL;
+
 			break;
 
 		case SERIAL_READ :
@@ -963,11 +998,12 @@ static bool er035m_s_comm( int type, ... )
 			}
 
 			/* The two most significant bits of each byte the gaussmeter
-			   sends are cmpletely useless, so get rid of them... */
+			   sends are completely useless, so get rid of them... */
 
 			*lptr = len;
 			for ( len = 0; len < *lptr; len++ )
 				buf[ len ] &= 0x3f;
+
 			break;
 
 		default :

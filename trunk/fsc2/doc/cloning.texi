@@ -26,7 +26,7 @@
 
 
 Unfortunately, all devices listed in the @code{DEVICES} section must be
-different. This is due to limitations of to the way shared libraries are
+different. This is due to limitations of the way shared libraries are
 handled and, as far as devices are concerned that are controlled via the
 GPIB bus, to certain requirements of the GPIB libraries. Thus, if two or
 more exactly identical devices are to be used simultaneously additional

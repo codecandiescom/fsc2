@@ -36,6 +36,7 @@ const char generic_type[ ] = DEVICE_TYPE;
 /* Exported functions */
 
 int aeg_s_band_init_hook( void );
+int aeg_s_band_test_hook( void );
 int aeg_s_band_exp_hook( void );
 int aeg_s_band_end_of_exp_hook( void );
 void aeg_s_band_exit_hook( void );
@@ -86,14 +87,12 @@ static struct
 	bool fast_init;         /* if set do a fast initialization */
 } magnet;
 
-
 enum {
 	   SERIAL_INIT,
 	   SERIAL_TRIGGER,
 	   SERIAL_VOLTAGE,
 	   SERIAL_EXIT
 };
-
 
 
 /*****************************************************************************/
@@ -189,6 +188,18 @@ int aeg_s_band_init_hook( void )
 	magnet.is_field_step = UNSET;
 	magnet.is_opened     = UNSET;
 	magnet.fast_init     = UNSET;
+
+	return 1;
+}
+
+
+/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*/
+
+int aeg_s_band_test_hook( void )
+{
+	if ( magnet.is_field )
+		magnet.act_field = magnet.field;
 
 	return 1;
 }
@@ -676,9 +687,7 @@ try_again:
 
 	for ( i = 0; i < test_steps; ++i )
 	{
-		fl_check_only_forms( );
-		if ( DO_STOP )
-			THROW( USER_BREAK_EXCEPTION );
+		stop_on_user_request( );
 
 		magnet_do( SERIAL_TRIGGER );
 		vars_pop( func_call( func_get( "gaussmeter_wait", &acc ) ) );
@@ -704,9 +713,7 @@ try_again:
 
 	for ( i = 0; i < test_steps; ++i )
 	{
-		fl_check_only_forms( );
-		if ( DO_STOP )
-			THROW( USER_BREAK_EXCEPTION );
+		stop_on_user_request( );
 
 		magnet_do( SERIAL_TRIGGER );
 		vars_pop( func_call( func_get( "gaussmeter_wait", &acc ) ) );
@@ -839,14 +846,12 @@ static bool magnet_goto_field_rec( double field, double error, int rec,
 
 		for ( i = 0; i < steps; ++i )
 		{
-			if ( DO_STOP )
-				THROW( USER_BREAK_EXCEPTION );
+			stop_on_user_request( );
 			magnet_do( SERIAL_TRIGGER );
 		}
 	}
 
-	if ( DO_STOP )
-		THROW( USER_BREAK_EXCEPTION );
+	stop_on_user_request( );
 
 	if ( ( magnet.step = remain ) != 0.0 )
 	{
@@ -963,17 +968,15 @@ static void magnet_sweep( int dir )
 
 		for ( i = 0; i < steps; ++i )
 		{
-			if ( DO_STOP )
-				THROW( USER_BREAK_EXCEPTION );
+			stop_on_user_request( );
 
 			magnet_do( SERIAL_TRIGGER );
 			magnet.act_field += ( MAGNET_ZERO_STEP - magnet.int_step )
-			                                               * magnet.mini_step;
+				                * magnet.mini_step;
 		}
 	}
 
-	if ( DO_STOP )
-		THROW( USER_BREAK_EXCEPTION );
+	stop_on_user_request( );
 
 	if ( ( magnet.step = remain ) != 0.0 )
 	{

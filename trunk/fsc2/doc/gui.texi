@@ -150,10 +150,10 @@ immediately).
 To start the experiment click onto the @code{Start} button. If the
 program hasn't been tested a test will be run now and, if the test
 succeeds, the experiment is started. While the devices are initialized
-the text in the @code{Star} button changes to @code{Stop} and clicking
-on the button lets you interrupt the device initialization stage. When
-the device initialization is finished a new window opens up for
-displaying the measured data that will be described in the next section.
+the text of the @code{Start} button changes to @code{Stop} and clicking
+on the button lets you interrupt at the device initialization stage.
+When the device initialization is finished a new window, to be described
+in the next section, opens up for displaying the measured data.
 
 
 @ifnotinfo

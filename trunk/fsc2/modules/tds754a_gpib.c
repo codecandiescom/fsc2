@@ -154,14 +154,14 @@ bool tds754a_init( const char *name )
 	else
 		tds754a.timebase = tds754a_get_timebase( );
 
-	/* If sensitivities have been set in the preparation set them now */
+	/* If a sensitivity has been set in the PREPARATION section set them now */
 
 	for ( ch = TDS754A_CH1; ch <= TDS754A_CH4; ch++ )
 		if ( tds754a.is_sens[ ch ] )
 			tds754a_set_sens( ch, tds754a.sens[ ch ] );
 
 	/* If the number of averages has been set in the PREPARATIONS section send
-       to the digitizer now */
+       it to the digitizer now */
 
 	if ( tds754a.is_num_avg == SET )
 		tds754a_set_num_avg( tds754a.num_avg );
@@ -770,8 +770,7 @@ double tds754a_get_area( int channel, WINDOW *w, bool use_cursor )
 
 	do
 	{
-		if ( DO_STOP )
-			THROW( USER_BREAK_EXCEPTION );
+		stop_on_user_request( );
 
 		length = 40;
 		usleep( 100000 );
@@ -889,8 +888,7 @@ bool tds754a_get_curve( int channel, WINDOW *w, double **data, long *length,
 
 	do
 	{
-		if ( DO_STOP )
-			THROW( USER_BREAK_EXCEPTION );
+		stop_on_user_request( );
 
 		len = 10;
 		usleep( 100000 );
@@ -978,8 +976,7 @@ double tds754a_get_amplitude( int channel, WINDOW *w, bool use_cursor )
 
 	do
 	{
-		if ( DO_STOP )
-			THROW( USER_BREAK_EXCEPTION );
+		stop_on_user_request( );
 
 		length = 40;
 		usleep( 100000 );

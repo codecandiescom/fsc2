@@ -1,0 +1,1121 @@
+@c $Id$
+@c
+@c Copyright (C) 2001 Jens Thoms Toerring
+@c
+@c This file is part of fsc2.
+@c
+@c Fsc2 is free software; you can redistribute it and/or modify
+@c it under the terms of the GNU General Public License as published by
+@c the Free Software Foundation; either version 2, or (at your option)
+@c any later version.
+@c
+@c Fsc2 is distributed in the hope that it will be useful,
+@c but WITHOUT ANY WARRANTY; without even the implied warranty of
+@c MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+@c GNU General Public License for more details.
+@c
+@c You should have received a copy of the GNU General Public License
+@c along with fsc2; see the file COPYING.  If not, write to
+@c the Free Software Foundation, 59 Temple Place - Suite 330,
+@c Boston, MA 02111-1307, USA.
+
+
+@node Device Reference, Reserved Words, Interfacing, Top
+@appendix Device Reference
+
+
+@ifinfo
+@menu
+* aeg_s_band::    S-band AEG Magnet Power Supply
+* aeg_x_band::    X-band AEG Magnet Power Supply
+* bh15::          Bruker Hall Effect Field Controller BH 15
+* dg2020_b::      Sony/Tektronix Data Generator DG2020 (Berlin Version)
+* dg2020_f::      Sony/Tektronix Data Generator DG2020 (Frankfurt Version)
+* egg4402::       EG&G PARC Box-Car Integrator 4402
+* er023m::        Bruker Signal Channel ER 023 M
+* er032m::        Bruker Field controller ER 032 M 
+* er035m::        Bruker NMR Gaussmeter ER 035 M (GPIB)
+* er035m_s::      Bruker NMR Gaussmeter ER 035 M (Serial)
+* er035m_sa::     Bruker NMR Gaussmeter ER 035 M (GPIB, Stand-Alone)
+* er035m_sas::    Bruker NMR Gaussmeter ER 035 M (Serial, Stand-Alone)
+* hfs9000::       Tektronix Stimulus System HFS9000 (Berlin W-Band)
+* hp8647a::       HP RF Synthesizer HP8647A
+* keithley228a::  Magnet Power Supply Keithley 228A (Berlin W-Band)
+* kontron4060::   Kontron 4060 Voltmeter
+* lakeshore330::  Lake Shore 330 Temperature Controller
+* lecroy9400::    LeCroy Digitizing Oscilloscope 9400
+* pt2025::        Metrolab NMR Teslameter PT2025
+* sr510::         Stanford Research Lock-In Amplifier SR510
+* sr530::         Stanford Research Lock-In Amplifier SR530
+* sr810::         Stanford Research Lock-In Amplifier SR810
+* sr830::         Stanford Research Lock-In Amplifier SR830
+* tds520::        Tektronix Digitizing Oscilloscope TDS520
+* tds520a::       Tektronix Digitizing Oscilloscope TDS520A
+* tds520c::       Tektronix Digitizing Oscilloscope TDS520C
+* tds540::        Tektronix Digitizing Oscilloscope TDS540
+* tds744a::       Tektronix Digitizing Oscilloscope TDS744A
+* tds754a::       Tektronix Digitizing Oscilloscope TDS754A
+@end menu
+@end ifinfo
+
+
+
+@node aeg_s_band, aeg_x_band, Device Reference, Device Reference
+@iftex
+@subheading S-band AEG Magnet Power Supply
+@end iftex
+@ifnottex
+@section S-band AEG Magnet Power Supply
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{aeg_s_band}
+
+@paragraphindent 0
+@strong{Description}: Power supply for AEG magnet with home-built
+computer control to be used with an S-band spectrometer. Requires either
+the @code{er035m} or @code{er035_s} NMR gaussmeter (with @code{F0}
+probe) or the @code{bh15} Hall effect field controller, which must be
+listed before the magnet power supply module. Field range depends on the
+gaussmeter used, with @code{er035m} range is @w{460 G} to @w{2390 G},
+with @code{bh15} range is @w{-50 G} to @w{23000 G}.
+
+@paragraphindent 0
+@strong{Controlled via}: Serial port (@file{/dev/ttyS1} or @code{COM2}).
+
+@paragraphindent 0
+@strong{Supported functions}:
+@table @samp
+@item magnet_name( )
+@item magnet_setup( )
+@item magnet_fast_init( )
+@item set_field( )
+@item get_field( )
+@item sweep_up( )
+@item sweep_down( )
+@item reset_field( )
+@end table
+
+@node aeg_x_band, bh15, aeg_s_band, Device Reference
+@iftex
+@subheading X-band AEG Magnet Power Supply
+@end iftex
+@ifnottex
+@section X-band AEG Magnet Power Supply
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{aeg_x_band}
+
+@paragraphindent 0
+@strong{Description}: Power supply for AEG magnet with home-built
+computer control to be used with an X-band spectrometer. Requires either
+the @code{er035m} or @code{er035_s} NMR gaussmeter (with @code{F1}
+probe) or the @code{bh15} Hall effect field controller to work, which
+must be listed before the magnet power supply module. Field range
+depends on the gaussmeter used, with @code{er035m} range is @w{1460 G}
+to @w{19900 G}, with @code{bh15} range is @w{-50 G} to @w{23000 G}.
+
+@paragraphindent 0
+@strong{Controlled via}: Serial port (@file{/dev/ttyS0} or @code{COM1}).
+
+@paragraphindent 0
+@strong{Supported functions}:
+@table @samp
+@item magnet_name( )
+@item magnet_setup( )
+@item magnet_fast_init( )
+@item set_field( )
+@item get_field( )
+@item sweep_up( )
+@item sweep_down( )
+@item reset_field( )
+@end table
+
+
+@node bh15, dg2020_b, aeg_x_band, Device Reference
+@iftex
+@subheading Bruker Hall Effect Field Controller BH 15
+@end iftex
+@ifnottex
+@section Bruker Hall Effect Field Controller BH 15
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{bh15}
+
+@paragraphindent 0
+@strong{Description}: Bruker BH15 Hall effect controller for measuring
+magnetic fields in combination with power supply controllers
+@code{aeg_s_band} and @code{aeg_x_band}. Field range that can be
+measured is from @w{-50 G} to @w{23000 G}.
+
+@paragraphindent 0
+@strong{Controlled via}: GPIB bus (IEEE).
+
+@paragraphindent 0
+@strong{Supported functions}:
+@table @samp
+@item gaussmeter_name( )
+@item find_field( )
+@item gaussmeter_resolution( )
+@item gaussmeter_wait( )
+@end table
+
+@node dg2020_b, dg2020_f, bh15, Device Reference
+@iftex
+@subheading Sony/Tektronix Data Generator DG2020 (Berlin Version)
+@end iftex
+@ifnottex
+@section Sony/Tektronix Data Generator DG2020 (Berlin Version)
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{dg2020_b}
+
+@paragraphindent 0
+@strong{Description}: Sony/Tektronix Data generator DG2020, used as
+pulser for the Berlin X-band spectrometer, with 36 internal channels and
+12 output pod channels.
+
+@paragraphindent 0
+Timebases: Between @w{5 ns} and @w{100 ms}, maximim pulse voltage
+between @w{-2 V} and @w{7 V}, minimum pulse voltage between @w{-3 V} and
+@w{6 V}, difference must be not more than @w{9 V} and at least @w{0.5
+V}, resolution of pulse voltages is @w{0.1 V}. Trigger-in levels
+can range from @w{-5 V} to @w{5 V}.
+
+@paragraphindent 0
+@strong{Controlled via}: GPIB bus (IEEE).
+
+@paragraphindent 0
+@strong{Supported functions}:
+@table @samp
+@item pulser_name( )
+@item pulser_state( )
+@item pulser_channel_state( )
+@item pulser_update( )
+@item pulser_cw_mode( )
+@item pulser_shift( )
+@item pulser_increment( )
+@item pulser_next_phase( )
+@item pulser_phase_reset( )
+@item pulser_pulse_reset( )
+@item pulser_lock_keyboard( )
+@end table
+
+
+@node dg2020_f, egg4402, dg2020_b, Device Reference
+@iftex
+@subheading Sony/Tektronix Data Generator DG2020 (Frankfurt Version)
+@end iftex
+@ifnottex
+@section Sony/Tektronix Data Generator DG2020 (Frankfurt Version)
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{dg2020_f}
+
+@paragraphindent 0
+@strong{Description}: Sony/Tektronix Data generator DG2020, used as
+pulser for the Frankfurt S-band spectrometer, with 36 internal channels
+and 12 output pod channels.
+
+@paragraphindent 0
+Timebases: Between @w{5 ns} and @w{100 ms}, maximim pulse voltage
+between @w{-2 V} and @w{7 V}, minimum pulse voltage between @w{-3 V} and
+@w{6 V}, difference must be not more than @w{9 V} and at least @w{0.5
+V}, resolution of pulse voltages is @w{0.1 V}. Trigger-in levels can
+range from @w{-5 V} to @w{5 V}.
+
+@paragraphindent 0
+@strong{Controlled via}: GPIB bus (IEEE).
+
+@paragraphindent 0
+@strong{Supported functions}:
+@table @samp
+@item pulser_name( )
+@item pulser_state( )
+@item pulser_channel_state( )
+@item pulser_update( )
+@item pulser_cw_mode( )
+@item pulser_shift( )
+@item pulser_increment( )
+@item pulser_next_phase( )
+@item pulser_phase_reset( )
+@item pulser_pulse_reset( )
+@item pulser_lock_keyboard( )
+@end table
+
+
+@node egg4402, er023m, dg2020_f, Device Reference
+@iftex
+@subheading EG&G PARC Box-Car Integrator 4402
+@end iftex
+@ifnottex
+@section EG&G PARC Box-Car Integrator 4402
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{egg4402}
+
+@paragraphindent 0
+@strong{Description}: EG&G PARC box-car integrator - only download of
+already measured curves is currently supported
+
+@paragraphindent 0
+@strong{Controlled via}: GPIB bus (IEEE).
+
+@paragraphindent 0
+@strong{Supported functions}:
+@table @samp
+@item boxcar_name( )
+@item boxcar_curve_length( )
+@item boxcar_get_curve( )
+@end table
+
+
+@node er023m, er032m, egg4402, Device Reference
+@iftex
+@subheading Bruker Signal Channel ER 023 M
+@end iftex
+@ifnottex
+@section Bruker Signal Channel ER 023 M
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{er023m}
+
+@paragraphindent 0
+@strong{Description}: Bruker Signal Channel ER 023 M used in older
+Bruker EPR spectrometers -- lock-in amplifier with built-in
+analog-to-digital converter.
+
+@paragraphindent 0
+@strong{Controlled via}: GPIB bus (IEEE).
+
+@paragraphindent 0
+@strong{Supported functions}:
+@table @samp
+@item lockin_name( )
+@item lockin_get_data( )
+@item lockin_sensitivity( )
+@item lockin_time_constant( )
+@item lockin_phase( )
+@item lockin_offset( )
+@item lockin_conversion_time( )
+@item lockin_ref_freq( )
+@item lockin_ref_level( )
+@item lockin_harmonic( )
+@item lockin_resonator( )
+@item lockin_is_overload( )
+@item lockin_rg( )
+@item lockin_tc( )
+@item lockin_ma( )
+@item lockin_ct( )
+@item lockin_mf( )
+@end table
+
+
+@node er032m, er035m, er023m, Device Reference
+@iftex
+@subheading Bruker Field controller ER 032 M
+@end iftex
+@ifnottex
+@section Bruker Field controller ER 032 M
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{er032m}
+
+@paragraphindent 0
+@strong{Description}: Bruker ER 032 M field controller, used to control
+the field in older Bruker EPR spectrometers. Maximum field range is from
+@w{-50 G} to @w{23000 G}, minimum field step width is @w{1 mG}.
+
+@paragraphindent 0
+@strong{Controlled via}: GPIB bus (IEEE).
+
+@paragraphindent 0
+@strong{Supported functions}:
+@table @samp
+@item magnet_name( )
+@item magnet_setup( )
+@item set_field( )
+@item get_field( )
+@item sweep_up( )
+@item sweep_down( )
+@item reset_field( )
+@end table
+
+
+@node er035m, er035m_s, er032m, Device Reference
+@iftex
+@subheading Bruker NMR Gaussmeter ER 035 M (GPIB)
+@end iftex
+@ifnottex
+@section Bruker NMR Gaussmeter ER 035 M (GPIB)
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{er035m}
+
+@paragraphindent 0
+@strong{Description}: Bruker NMR gaussmeter ER 035 M used in conjunction
+with the magnet power supply controllers @code{aeg_s_band} and
+@code{aeg_x_band}. Measuarable field range depends on probe used, with
+@code{F0} probe it is @w{460 G} to @w{2390 G}, with @code{F1} probe the
+range is @w{1460 G} to @w{19900 G}.
+
+@paragraphindent 0
+@strong{Controlled via}: GPIB bus (IEEE).
+
+@paragraphindent 0
+@strong{Supported functions}:
+@table @samp
+@item gaussmeter_name( )
+@item find_field( )
+@item gaussmeter_resolution( )
+@item gaussmeter_probe_orientation( )
+@item gaussmeter_wait( )
+@end table
+
+
+@node er035m_s, er035m_sa, er035m, Device Reference
+@iftex
+@subheading Bruker NMR Gaussmeter ER 035 M (Serial)
+@end iftex
+@ifnottex
+@section Bruker NMR Gaussmeter ER 035 M (Serial)
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{er035m_s}
+
+@paragraphindent 0
+@strong{Description}: Bruker NMR gaussmeter ER 035 M used in conjunction
+with the magnet power supply controllers @code{aeg_x_band} and
+@code{aeg_x_band}. Measuarable field range depends on probe used, with
+@code{F0} probe it is @w{460 G} to @w{2390 G}, with @code{F1} probe the
+range is @w{1460 G} to @w{19900 G}.
+
+@paragraphindent 0
+@strong{Controlled via}: Serial port (@file{/dev/ttyS1} or @code{COM2}).
+
+@paragraphindent 0
+@strong{Supported functions}:
+@table @samp
+@item gaussmeter_name( )
+@item find_field( )
+@item gaussmeter_resolution( )
+@item gaussmeter_probe_orientation( )
+@item gaussmeter_wait( )
+@end table
+
+
+@node er035m_sa, er035m_sas, er035m_s, Device Reference
+@iftex
+@subheading Bruker NMR Gaussmeter ER 035 M (GPIB, Stand-Alone)
+@end iftex
+@ifnottex
+@section Bruker NMR Gaussmeter ER 035 M (GPIB, Stand-Alone)
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{er035m_sa}
+
+@paragraphindent 0
+@strong{Description}: Bruker NMR gaussmeter ER 035 M used as simple,
+stand-alone gaussmeter. Measuarable field range depends on probe used,
+with @code{F0} probe it is @w{460 G} to @w{2390 G}, with @code{F1} probe
+the range is @w{1460 G} to @w{19900 G}.
+
+@paragraphindent 0
+@strong{Controlled via}: GPIB bus (IEEE).
+
+@paragraphindent 0
+@strong{Supported functions}:
+@table @samp
+@item gaussmeter_name( )
+@item measure_field( )
+@item gaussmeter_resolution( )
+@item gaussmeter_probe_orientation( )
+@end table
+
+
+@node er035m_sas, hfs9000, er035m_sa, Device Reference
+@iftex
+@subheading Bruker NMR Gaussmeter ER 035 M (Serial, Stand-Alone)
+@end iftex
+@ifnottex
+@section Bruker NMR Gaussmeter ER 035 M (Serial, Stand-Alone)
+@end ifnottex
+
+@paragraphindent 0
+@strong{Description}: Bruker NMR gaussmeter ER 035 M used as simple,
+stand-alone gaussmeter. Measuarable field range depends on probe used,
+with @code{F0} probe it is @w{460 G} to @w{2390 G}, with @code{F1} probe
+the range is @w{1460 G} to @w{19900 G}.
+
+@paragraphindent 0
+@strong{Controlled via}: Serial port (@file{/dev/ttyS0} or @code{COM1}).
+
+
+@paragraphindent 0
+@strong{Supported functions}:
+@table @samp
+@item gaussmeter_name( )
+@item measure_field( )
+@item gaussmeter_resolution( )
+@item gaussmeter_probe_orientation( )
+@end table
+
+@node hfs9000, hp8647a, er035m_sas, Device Reference
+@iftex
+@subheading Tektronix Stimulus System HFS9000 (Berlin W-Band)
+@end iftex
+@ifnottex
+@section Tektronix Stimulus System HFS9000 (Berlin W-Band)
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{hfs9000}
+
+@paragraphindent 0
+@strong{Description}: Tektronix Stimulus System HFS9000, used as pulser
+in the Berlin W-band spectrometer. No support for phase cycled experiments.
+
+@paragraphindent 0
+Timebases: Between @w{1.6 ns} and @w{20 us}, maximim pulse voltage
+between @w{-1.5 V} and @w{5.5 V}, minimum pulse voltage between @w{-2 V}
+and @w{5 V}, difference must be not more than @w{5.5 V} and at least
+@w{0.5 V}, resolution of pulse voltages is @w{10 mV}. Trigger-in levels
+can range from @w{-4.7 V} to @w{4.7 V}.
+
+
+@paragraphindent 0
+@strong{Controlled via}: GPIB bus (IEEE).
+
+@paragraphindent 0
+@strong{Supported functions}:
+@table @samp
+@item pulser_name( )
+@item pulser_state( )
+@item pulser_channel_state( )
+@item pulser_update( )
+@item pulser_shift( )
+@item pulser_increment( )
+@item pulser_pulse_reset( )
+@item pulser_lock_keyboard( )
+@item pulser_stop_on_update( )
+@end table
+
+
+@node hp8647a, keithley228a, hfs9000, Device Reference
+@iftex
+@subheading HP RF Synthesizer HP8647A
+@end iftex
+@ifnottex
+@section HP RF Synthesizer HP8647A
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{hp8647a}
+
+@paragraphindent 0
+@strong{Description}: Hewlett-Packard RF synthesizer HP8647A with
+support for output level normalization via frequency/amplitude table
+files. For security reasons only output attenuations below @w{-5 db} are
+allowed -- change the configuration file to allow higher output levels.
+
+@paragraphindent 0
+@strong{Controlled via}: GPIB bus (IEEE).
+
+@paragraphindent 0
+@strong{Supported functions}:
+@table @samp
+@item synthesizer_name( )
+@item synthesizer_state( )
+@item synthesizer_frequency( )
+@item synthesizer_step_frequency( )
+@item synthesizer_attenuation( )
+@item synthesizer_minimum_attenuation( )
+@item synthesizer_sweep_up( )
+@item synthesizer_sweep_down( )
+@item synthesizer_reset_frequency( )
+@item synthesizer_use_table( )
+@item synthesizer_attenuation( )
+@item synthesizer_att_ref_freq( )
+@item synthesizer_modulation( )
+@item synthesizer_mod_ampl( )
+@item synthesizer_mod_type( )
+@item synthesizer_mod_source( )
+@end table
+
+
+@node keithley228a, kontron4060, hp8647a, Device Reference
+@iftex
+@subheading Magnet Power Supply Keithley 228A (Berlin W-Band)
+@end iftex
+@ifnottex
+@section Magnet Power Supply Keithley 228A (Berlin W-Band)
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{keithley228a}
+
+@paragraphindent 0
+@strong{Description}: Keithley 228A power supply used as sweep coil
+power supply for the Berlin W-band spectrometer. In order to improve the
+current resolution an aditional voltage source is needed. Currently this
+done via the DAC output @code{6} (can be changed by one of the
+functions) of the Stanford Research lock-in amplifier SR510 and the
+module @code{sr510} must be listed before the power supply
+module. Alternatively, after minor changes to the configuration file,
+also other lock-in amplifiers can be used.
+
+@paragraphindent 0
+Please note: With this module the functions expect arguments in terms of
+the currents through the sweep coil, not in field units!
+
+@paragraphindent 0
+@strong{Controlled via}: GPIB bus (IEEE).
+
+@paragraphindent 0
+@strong{Supported functions}:
+@table @samp
+@item magnet_name( )
+@item magnet_setup( )
+@item magnet_use_correction( )
+@item magnet_use_dac_port( )
+@item set_field( )
+@item get_field( )
+@item sweep_up( )
+@item sweep_down( )
+@item reset_field( )
+@end table
+
+@node kontron4060, lakeshore330, keithley228a, Device Reference
+@iftex
+@subheading Kontron 4060 Voltmeter
+@end iftex
+@ifnottex
+@section Kontron 4060 Voltmeter
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{kontron4060}
+
+@paragraphindent 0
+@strong{Description}: Kontron digital voltmeter 4060.
+
+@paragraphindent 0
+@strong{Controlled via}: GPIB bus (IEEE).
+
+@paragraphindent 0
+@strong{Supported functions}:
+@table @samp
+@item voltmeter_name( )
+@item voltmeter_get_data( )
+@item voltmeter_ac_measurement( )
+@item voltmeter_dc_measurement( )
+@end table
+
+
+@node lakeshore330, lecroy9400, kontron4060, Device Reference
+@iftex
+@subheading Lake Shore 330 Temperature Controller
+@end iftex
+@ifnottex
+@section Lake Shore 330 Temperature Controller
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{lakeshore330}
+
+@paragraphindent 0
+@strong{Description}: Lake Shore 330 temperature controller. Currently
+only temperature measurements are supported, no automatic adjustment of
+the temperature.
+
+@paragraphindent 0
+@strong{Controlled via}: GPIB bus (IEEE).
+
+@paragraphindent 0
+@strong{Supported functions}:
+@table @samp
+@item temp_contr_name( )
+@item temp_contr_temperature( )
+@item temp_contr_sample_channel( )
+@item temp_contr_sensor_unit( )
+@item temp_contr_lock_keyboard( )
+@end table
+
+
+@node lecroy9400, pt2025, lakeshore330, Device Reference
+@iftex
+@subheading LeCroy Digitizing Oscilloscope 9400
+@end iftex
+@ifnottex
+@section LeCroy Digitizing Oscilloscope 9400
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{lecroy9400}
+
+@paragraphindent 0
+@strong{Description}: Lecroy Digitizing Oscilloscope 9400, 2 measurement
+channels, 2 function channels (needed for averaging).
+
+@paragraphindent 0
+@strong{Controlled via}: GPIB bus (IEEE).
+
+@paragraphindent 0
+@strong{Supported functions}:
+@table @samp
+@item digitizer_name( )
+@c @item digitizer_define_window( )
+@item digitizer_timebase( )
+@item digitizer_time_per_point( )
+@item digitizer_sensitivity( )
+@item digitizer_averaging( )
+@item digitizer_num_averages( )
+@item digitizer_record_length( )
+@c @item digitizer_trigger_position( )
+@item digitizer_meas_channel_ok( )
+@c @item digitizer_trigger_channel( )
+@item digitizer_start_acquisition( )
+@item digitizer_get_curve( )
+@c @item digitizer_get_curve_fast( )
+@c @item digitizer_run( )
+@end table
+
+
+@node pt2025, sr510, lecroy9400,  Device Reference
+@iftex
+@subheading Metrolab NMR Teslameter PT2025
+@end iftex
+@ifnottex
+@section Metrolab NMR Teslameter PT2025
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{pt2025}
+
+@paragraphindent 0
+@strong{Description}: Metrolab NMR Teslameter PT2025 - module currently
+only deals with the 1.5 T to 3.4 T probe and fields above 3.15
+T. Measured fields are returned in Gauss, not Tesla!
+
+@paragraphindent 0
+@strong{Controlled via}: GPIB bus (IEEE).
+
+@paragraphindent 0
+@strong{Supported functions}:
+@table @samp
+@item gaussmeter_name( )
+@item measure_field( )
+@item gaussmeter_resolution( )
+@item gaussmeter_probe_orientation( )
+@end table
+
+@node sr510, sr530, pt2025, Device Reference
+@iftex
+@subheading Stanford Research Lock-In Amplifier SR510
+@end iftex
+@ifnottex
+@section Stanford Research Lock-In Amplifier SR510
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{sr510}
+
+@paragraphindent 0
+@strong{Description}: Stanford Research lock-in amplifier SR510, single
+channel, no internal modulation, 4 ADC and 2 DAC ports.
+
+@paragraphindent 0
+@strong{Controlled via}: GPIB bus (IEEE).
+
+@paragraphindent 0
+@strong{Supported functions}:
+@table @samp
+@item lockin_name( )
+@item lockin_get_data( )
+@item lockin_get_adc_data( )
+@item lockin_sensitivity( )
+@item lockin_time_constant( )
+@item lockin_phase( )
+@item lockin_ref_freq( )
+@item lockin_dac_voltage( )
+@item lockin_lock_keyboard( )
+@end table
+
+
+@node sr530, sr810, sr510, Device Reference
+@iftex
+@subheading Stanford Research Lock-In Amplifier SR530
+@end iftex
+@ifnottex
+@section Stanford Research Lock-In Amplifier SR530
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{sr530}
+
+@paragraphindent 0
+@strong{Description}: Stanford Research lock-in amplifier SR530, two
+channels, no internal modulation, 4 ADC and 2 DAC ports.
+
+@paragraphindent 0
+@strong{Controlled via}: GPIB bus (IEEE).
+
+@paragraphindent 0
+@strong{Supported functions}:
+@table @samp
+@item lockin_name( )
+@item lockin_get_data( )
+@item lockin_get_adc_data( )
+@item lockin_sensitivity( )
+@item lockin_time_constant( )
+@item lockin_phase( )
+@item lockin_ref_freq( )
+@item lockin_dac_voltage( )
+@item lockin_lock_keyboard( )
+@end table
+
+
+@node sr810, sr830, sr530, Device Reference
+@iftex
+@subheading Stanford Research Lock-In Amplifier SR810
+@end iftex
+@ifnottex
+@section Stanford Research Lock-In Amplifier SR810
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{sr810}
+
+@paragraphindent 0
+@strong{Description}: Stanford Research lock-in amplifier SR810, two
+channels, internal modulation, 4 ADC and 4 DAC ports.
+
+@paragraphindent 0
+@strong{Controlled via}: GPIB bus (IEEE).
+
+@paragraphindent 0
+@strong{Supported functions}:
+@table @samp
+@item lockin_name( )
+@item lockin_get_data( )
+@item lockin_get_adc_data( )
+@item lockin_dac_voltage( )
+@item lockin_sensitivity( )
+@item lockin_time_constant( )
+@item lockin_phase( )
+@item lockin_ref_freq( )
+@item lockin_harmonic( )
+@item lockin_ref_mode( )
+@item lockin_ref_level( )
+@item lockin_lock_keyboard( )
+@end table
+
+
+@node sr830, tds520, sr810, Device Reference
+@iftex
+@subheading Stanford Research Lock-In Amplifier SR830
+@end iftex
+@ifnottex
+@section Stanford Research Lock-In Amplifier SR830
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{sr830}
+
+@paragraphindent 0
+@strong{Description}: Stanford Research lock-in amplifier SR830, two
+channels, internal modulation, 4 ADC and 4 DAC ports.
+
+@paragraphindent 0
+@strong{Controlled via}: GPIB bus (IEEE).
+
+@paragraphindent 0
+@strong{Supported functions}:
+@table @samp
+@item lockin_name( )
+@item lockin_get_data( )
+@item lockin_get_adc_data( )
+@item lockin_dac_voltage( )
+@item lockin_sensitivity( )
+@item lockin_time_constant( )
+@item lockin_phase( )
+@item lockin_ref_freq( )
+@item lockin_harmonic( )
+@item lockin_ref_mode( )
+@item lockin_ref_level( )
+@item lockin_lock_keyboard( )
+@end table
+
+
+@node tds520, tds520a, sr830, Device Reference
+@iftex
+@subheading Tektronix Digitizing Oscilloscope TDS520
+@end iftex
+@ifnottex
+@section Tektronix Digitizing Oscilloscope TDS520
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{tds520}
+
+@paragraphindent 0
+@strong{Description}: Tektronix Digitizing Oscilloscope TDS520, 2
+measurement channels, 2 auxiliary channels (to be used as trigger inputs
+only), 3 math channels and 4 reference channels.
+
+@paragraphindent 0
+@strong{Controlled via}: GPIB bus (IEEE).
+
+@paragraphindent 0
+@strong{Supported functions}:
+@table @samp
+@item digitizer_name( )
+@item digitizer_define_window( )
+@item digitizer_timebase( )
+@item digitizer_time_per_point( )
+@item digitizer_sensitivity( )
+@item digitizer_num_averages( )
+@item digitizer_record_length( )
+@item digitizer_trigger_position( )
+@item digitizer_meas_channel_ok( )
+@item digitizer_trigger_channel( )
+@item digitizer_start_acquisition( )
+@item digitizer_get_area( )
+@item digitizer_get_area_fast( )
+@item digitizer_get_curve( )
+@item digitizer_get_curve_fast( )
+@item digitizer_get_amplitude( )
+@item digitizer_get_amplitude_fast( )
+@item digitizer_run( )
+@item digitizer_lock_keyboard( )
+@end table
+
+
+@node tds520a, tds520c, tds520, Device Reference
+@iftex
+@subheading Tektronix Digitizing Oscilloscope TDS520A
+@end iftex
+@ifnottex
+@section Tektronix Digitizing Oscilloscope TDS520A
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{tds520a}
+
+@paragraphindent 0
+@strong{Description}: Tektronix Digitizing Oscilloscope TDS520A, 2
+measurement channels, 2 auxiliary channels (to be used as trigger inputs
+only), 3 math channels and 4 reference channels.
+
+@paragraphindent 0
+@strong{Controlled via}: GPIB bus (IEEE).
+
+@paragraphindent 0
+@strong{Supported functions}:
+@table @samp
+@item digitizer_name( )
+@item digitizer_define_window( )
+@item digitizer_timebase( )
+@item digitizer_time_per_point( )
+@item digitizer_sensitivity( )
+@item digitizer_num_averages( )
+@item digitizer_record_length( )
+@item digitizer_trigger_position( )
+@item digitizer_meas_channel_ok( )
+@item digitizer_trigger_channel( )
+@item digitizer_start_acquisition( )
+@item digitizer_get_area( )
+@item digitizer_get_area_fast( )
+@item digitizer_get_curve( )
+@item digitizer_get_curve_fast( )
+@item digitizer_get_amplitude( )
+@item digitizer_get_amplitude_fast( )
+@item digitizer_run( )
+@item digitizer_lock_keyboard( )
+@end table
+
+
+@node tds520c, tds540, tds520a, Device Reference
+@iftex
+@subheading Tektronix Digitizing Oscilloscope TDS520C
+@end iftex
+@ifnottex
+@section Tektronix Digitizing Oscilloscope TDS520C
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{tds520c}
+
+@paragraphindent 0
+@strong{Description}: Tektronix Digitizing Oscilloscope TDS520C, 2
+measurement channels, 2 auxiliary channels (to be used as trigger inputs
+only), 3 math channels and 4 reference channels.
+
+@paragraphindent 0
+@strong{Controlled via}: GPIB bus (IEEE).
+
+@paragraphindent 0
+@strong{Supported functions}:
+@table @samp
+@item digitizer_name( )
+@item digitizer_define_window( )
+@item digitizer_timebase( )
+@item digitizer_time_per_point( )
+@item digitizer_sensitivity( )
+@item digitizer_num_averages( )
+@item digitizer_record_length( )
+@item digitizer_trigger_position( )
+@item digitizer_meas_channel_ok( )
+@item digitizer_trigger_channel( )
+@item digitizer_start_acquisition( )
+@item digitizer_get_area( )
+@item digitizer_get_area_fast( )
+@item digitizer_get_curve( )
+@item digitizer_get_curve_fast( )
+@item digitizer_get_amplitude( )
+@item digitizer_get_amplitude_fast( )
+@item digitizer_run( )
+@item digitizer_lock_keyboard( )
+@end table
+
+
+@node tds540, tds744a, tds520c, Device Reference
+@iftex
+@subheading Tektronix Digitizing Oscilloscope TDS540
+@end iftex
+@ifnottex
+@section Tektronix Digitizing Oscilloscope TDS540
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{tds540}
+
+@paragraphindent 0
+@strong{Description}: Tektronix Digitizing Oscilloscope TDS540, 4
+measurement channels, 1 auxiliary channel (to be used as trigger input
+only), 3 math channels and 4 reference channels.
+
+@paragraphindent 0
+@strong{Controlled via}: GPIB bus (IEEE).
+
+@paragraphindent 0
+@strong{Supported functions}:
+@table @samp
+@item digitizer_name( )
+@item digitizer_define_window( )
+@item digitizer_timebase( )
+@item digitizer_time_per_point( )
+@item digitizer_sensitivity( )
+@item digitizer_num_averages( )
+@item digitizer_record_length( )
+@item digitizer_trigger_position( )
+@item digitizer_meas_channel_ok( )
+@item digitizer_trigger_channel( )
+@item digitizer_start_acquisition( )
+@item digitizer_get_area( )
+@item digitizer_get_area_fast( )
+@item digitizer_get_curve( )
+@item digitizer_get_curve_fast( )
+@item digitizer_get_amplitude( )
+@item digitizer_get_amplitude_fast( )
+@item digitizer_run( )
+@item digitizer_lock_keyboard( )
+@end table
+
+
+@node tds744a, tds754a, tds540, Device Reference
+@iftex
+@subheading Tektronix Digitizing Oscilloscope TDS744A
+@end iftex
+@ifnottex
+@section Tektronix Digitizing Oscilloscope TDS744A
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{tds744a}
+
+@paragraphindent 0
+@strong{Description}: Tektronix Digitizing Oscilloscope TDS744A, 4
+measurement channels, 1 auxiliary channel (to be used as trigger input
+only), 3 math channels and 4 reference channels.
+
+@paragraphindent 0
+@strong{Controlled via}: GPIB bus (IEEE).
+
+@paragraphindent 0
+@strong{Supported functions}:
+@table @samp
+@item digitizer_name( )
+@item digitizer_define_window( )
+@item digitizer_timebase( )
+@item digitizer_time_per_point( )
+@item digitizer_sensitivity( )
+@item digitizer_num_averages( )
+@item digitizer_record_length( )
+@item digitizer_trigger_position( )
+@item digitizer_meas_channel_ok( )
+@item digitizer_trigger_channel( )
+@item digitizer_start_acquisition( )
+@item digitizer_get_area( )
+@item digitizer_get_area_fast( )
+@item digitizer_get_curve( )
+@item digitizer_get_curve_fast( )
+@item digitizer_get_amplitude( )
+@item digitizer_get_amplitude_fast( )
+@item digitizer_run( )
+@item digitizer_lock_keyboard( )
+@end table
+
+
+@node tds754a, , tds744a, Device Reference
+@iftex
+@subheading Tektronix Digitizing Oscilloscope TDS754A
+@end iftex
+@ifnottex
+@section Tektronix Digitizing Oscilloscope TDS754A
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{tds754a}
+
+@paragraphindent 0
+@strong{Description}: Tektronix Digitizing Oscilloscope TDS754A, 4
+measurement channels, 1 auxiliary channel (to be used as trigger input
+only), 3 math channels and 4 reference channels.
+
+@paragraphindent 0
+@strong{Controlled via}: GPIB bus (IEEE).
+
+@paragraphindent 0
+@strong{Supported functions}:
+@table @samp
+@item digitizer_name( )
+@item digitizer_define_window( )
+@item digitizer_timebase( )
+@item digitizer_time_per_point( )
+@item digitizer_sensitivity( )
+@item digitizer_num_averages( )
+@item digitizer_record_length( )
+@item digitizer_trigger_position( )
+@item digitizer_meas_channel_ok( )
+@item digitizer_trigger_channel( )
+@item digitizer_start_acquisition( )
+@item digitizer_get_area( )
+@item digitizer_get_area_fast( )
+@item digitizer_get_curve( )
+@item digitizer_get_curve_fast( )
+@item digitizer_get_amplitude( )
+@item digitizer_get_amplitude_fast( )
+@item digitizer_run( )
+@item digitizer_lock_keyboard( )
+@end table

@@ -933,8 +933,7 @@ static void er032m_test_leds( void )
 
 	while ( 1 )
 	{
-		if ( DO_STOP )
-			THROW( USER_BREAK_EXCEPTION );
+		stop_on_user_request( );
 
 		is_overload = is_remote = UNSET;
 

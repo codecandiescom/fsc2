@@ -741,9 +741,9 @@ void test_file( FL_OBJECT *a, long b )
 		THROW( EXCEPTION );
 	}
 
-	/* If fsc2 is too busy testing a program to react to clicks on the "Stop
+	/* If fsc2 is too busy testing a program to react to clicks of the "Stop
 	   Test" button and the user presses the button several times strange
-	   things happen, especially the "Quit" button becomes unusable.  The
+	   things happen, especially the "Quit" button becomes unusable. The
 	   following helps avoiding to execute the handler again while it's
 	   already running... */
 

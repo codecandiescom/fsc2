@@ -641,8 +641,7 @@ void lecroy9400_get_curve( int ch, WINDOW *w, double **array, long *length,
 		long cur_avg;
 		long j;
 
-		if ( DO_STOP )
-			THROW( USER_BREAK_EXCEPTION );
+		stop_on_user_request( );
 
 		usleep( 20000 );
 

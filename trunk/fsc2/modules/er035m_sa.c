@@ -43,15 +43,10 @@ const char generic_type[ ] = DEVICE_TYPE;
 #define ER035M_TEST_FIELD 2000.0   /* returned as current fireld in test run */
 #define ER035M_TEST_RES   0.001
 
-enum {
-	UNDEF_RES = -1,
-	LOW_RES,
-	MEDIUM_RES,
-	HIGH_RES
-};
-
-static int res_list[ 3 ] = { 0.1, 0.01, 0.001 };
-
+#define PROBE_ORIENTATION_PLUS       0
+#define PROBE_ORIENTATION_MINUS      1
+#define PROBE_ORIENTATION_UNDEFINED -1
+#define UNDEF_RESOLUTION            -1
 
 
 /* exported functions and symbols */
@@ -65,6 +60,7 @@ void er035m_sa_exit_hook( void );
 Var *gaussmeter_name( Var *v );
 Var *measure_field( Var *v );
 Var *gaussmeter_resolution( Var *v );
+Var *gaussmeter_probe_orientation( Var *v );
 
 
 /* internally used functions */
@@ -83,10 +79,19 @@ typedef struct
 	const char *name;
 	double field;
 	int resolution;
+	int probe_orientation;
 } NMR;
 
 
 static NMR nmr, nmr_stored;
+static double res_list[ 3 ] = { 0.1, 0.01, 0.001 };
+
+enum {
+	UNDEF_RES = -1,
+	LOW_RES,
+	MEDIUM_RES,
+	HIGH_RES
+};
 
 
 /* The gaussmeter seems to be more cooperative if we wait for some time
@@ -202,8 +207,7 @@ int er035m_sa_exp_hook( void )
 
 try_again:
 
-	if ( DO_STOP )
-		THROW( USER_BREAK_EXCEPTION );
+	stop_on_user_request( );
 
 	if ( gpib_write( nmr.device, "PS\r", 3 ) == FAILURE )
 		er035m_sa_failure( );
@@ -267,11 +271,13 @@ try_again:
 					   "off.\n" );
 				THROW( EXCEPTION );
 
-			case '7' :      /* MOD POS -> OK (default state) */
+			case '7' :      /* MOD POS -> OK */
+				nmr.probe_orientation = PROBE_ORIENTATION_PLUS;
 				break;
 
-			case '8' :      /* MOD NEG -> OK (should never happen */
-				break;      /* because of initialisation) */ 
+			case '8' :      /* MOD NEG -> OK */
+				nmr.probe_orientation = PROBE_ORIENTATION_MINUS;
+				break;
 
 			case '9' :      /* System in lock -> very good... */
 				nmr.state = ER035M_SA_LOCKED;
@@ -403,8 +409,7 @@ Var *measure_field( Var *v )
 
 	while ( nmr.state != ER035M_SA_LOCKED )
 	{
-		if ( DO_STOP )
-			THROW( USER_BREAK_EXCEPTION );
+		stop_on_user_request( );
 
 		/* Get status byte and check if lock was achieved */
 
@@ -571,8 +576,7 @@ double er035m_sa_get_field( void )
 
 	do
 	{
-		if ( DO_STOP )
-			THROW( USER_BREAK_EXCEPTION );
+		stop_on_user_request( );
 
 		/* Ask gaussmeter to send the current field and read result */
 

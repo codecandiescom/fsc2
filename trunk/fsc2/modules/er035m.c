@@ -41,7 +41,10 @@ const char generic_type[ ] = DEVICE_TYPE;
 #define HIGH_RES    2               /* 0.001 G */
 #define UNDEF_RES  -1
 
-static int res_list[ 3 ] = { 0.1, 0.01, 0.001 };
+#define PROBE_ORIENTATION_PLUS       0
+#define PROBE_ORIENTATION_MINUS      1
+#define PROBE_ORIENTATION_UNDEFINED -1
+#define UNDEF_RESOLUTION            -1
 
 
 /* exported functions and symbols */
@@ -55,10 +58,8 @@ void er035m_exit_hook( void );
 Var *gaussmeter_name( Var *v );
 Var *find_field( Var *v );
 Var *gaussmeter_resolution( Var *v );
+Var *gaussmeter_probe_orientation( Var *v );
 Var *gaussmeter_wait( Var *v );
-
-bool is_gaussmeter = UNSET;         /* tested by magnet power supply driver */
-
 
 /* internally used functions */
 
@@ -77,11 +78,13 @@ typedef struct
 	const char *name;
 	double field;
 	int resolution;
+	int probe_orientation;
 } NMR;
 
 
 static NMR nmr, nmr_stored;
-
+static double res_list[ 3 ] = { 0.1, 0.01, 0.001 };
+bool is_gaussmeter = UNSET;         /* tested by magnet power supply driver */
 
 
 /* The gaussmeter seems to be more cooperative if we wait for some time
@@ -163,6 +166,7 @@ int er035m_init_hook( void )
 	nmr.name = DEVICE_NAME;
 	nmr.state = ER035M_UNKNOWN;
 	nmr.resolution = UNDEF_RES;
+	nmr.probe_orientation = PROBE_ORIENTATION_UNDEFINED;
 	nmr.device = -1;
 
 	return 1;
@@ -229,11 +233,11 @@ int er035m_exp_hook( void )
 
 try_again:
 
-	if ( DO_STOP )
-		THROW( USER_BREAK_EXCEPTION );
+	stop_on_user_request( );
 
 	if ( gpib_write( nmr.device, "PS\r", 3 ) == FAILURE )
 		er035m_failure( );
+
 	usleep( ER035M_WAIT );
 
 	length = 20;
@@ -288,11 +292,13 @@ try_again:
 				print( FATAL, "Modulation is switched off.\n" );
 				THROW( EXCEPTION );
 
-			case '7' :      /* MOD POS -> OK (default state) */
+			case '7' :      /* MOD POS -> OK */
+				nmr.probe_orientation = PROBE_ORIENTATION_PLUS;
 				break;
 
-			case '8' :      /* MOD NEG -> OK (should never happen */
-				break;      /* because of initialisation) */ 
+			case '8' :      /* MOD NEG -> OK*/
+				nmr.probe_orientation = PROBE_ORIENTATION_MINUS;
+				break;
 
 			case '9' :      /* System in lock -> very good... */
 				nmr.state = ER035M_LOCKED;
@@ -422,8 +428,7 @@ Var *find_field( Var *v )
 
 	while ( nmr.state != ER035M_LOCKED )
 	{
-		if ( DO_STOP )
-			THROW( USER_BREAK_EXCEPTION );
+		stop_on_user_request( );
 
 		/* Get status byte and check if lock was achieved */
 
@@ -556,6 +561,32 @@ Var *gaussmeter_resolution( Var *v )
 }
 
 
+/*--------------------------------------------------------*/
+/*--------------------------------------------------------*/
+
+Var *gaussmeter_probe_orientation( Var *v )
+{
+	if ( v == NULL )
+	{
+		if ( FSC2_MODE == PREPARATION )
+		{
+			no_query_possible( );
+			THROW( EXCEPTION );
+		}
+
+		if ( FSC2_MODE == TEST )
+			return vars_push( INT_VAR, 1 );
+
+		return vars_push( INT_VAR, ( long ) nmr.probe_orientation );
+	}
+
+	print( FATAL, "Device does not allow setting of probe orientation.\n" );
+	THROW( EXPERIMENT );
+
+	return NULL;
+}
+
+
 /*-------------------------------------------------------*/
 /*-------------------------------------------------------*/
 
@@ -601,8 +632,7 @@ double er035m_get_field( void )
 
 	do
 	{
-		if ( DO_STOP )
-			THROW( USER_BREAK_EXCEPTION );
+		stop_on_user_request( );
 
 		/* Ask gaussmeter to send the current field and read result */
 

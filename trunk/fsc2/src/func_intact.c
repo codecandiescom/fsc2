@@ -33,6 +33,7 @@ static FL_OBJECT *append_object_to_form( IOBJECT *io );
 static void tools_callback( FL_OBJECT *ob, long data );
 static bool check_format_string( const char *buf );
 static void convert_escapes( char *str );
+static void check_label( char *str );
 static void store_geometry( void );
 
 
@@ -200,7 +201,7 @@ void parent_freeze( int freeze )
 /*------------------------------------------------------------*/
 /* Function sets the layout of the tool box, either vertical  */
 /* or horizontal by passing it either 0 or 1  or "vert[ical]" */
-/* or "hori[zontal]" (case in-sensitive). Must be called      */
+/* or "hori[zontal]" (case insensitive). Must be called       */
 /* before any object (button or slider) is created (or after  */
 /* all of them have been deleted again :).                    */
 /*------------------------------------------------------------*/
@@ -250,7 +251,7 @@ Var *f_layout( Var *v )
 		}
 
 	/* The child has no control over the graphical stuff, it has to pass all
-	   requests concerning them to the parent... */
+	   requests to the parent... */
 
 	if ( I_am == CHILD )
 	{
@@ -357,7 +358,7 @@ Var *f_bcreate( Var *v )
 			type = RADIO_BUTTON;
 		else
 		{
-			print( FATAL, "Unknown button type (`%s').\n", v->val.sptr );
+			print( FATAL, "Unknown button type: '%s'.\n", v->val.sptr );
 			THROW( EXCEPTION );
 		}
 	}
@@ -390,8 +391,8 @@ Var *f_bcreate( Var *v )
 
 				if ( ( cio = find_object_from_ID( coll ) ) == NULL )
 				{
-					print( FATAL, "Button with ID %ld does not exist.\n",
-						   coll );
+					print( FATAL, "Specified group leader button does not "
+						   "exist.\n", coll );
 					THROW( EXCEPTION );
 				}
 
@@ -399,8 +400,8 @@ Var *f_bcreate( Var *v )
 
 				if ( cio->type != RADIO_BUTTON )
 				{
-					print( FATAL, "Button with ID %ld isn't a RADIO_BUTTON.\n",
-						   coll );
+					print( FATAL, "Button speciied as goup leader isn't a "
+						   "RADIO_BUTTON.\n", coll );
 					THROW( EXCEPTION );
 				}
 			}
@@ -415,6 +416,7 @@ Var *f_bcreate( Var *v )
 	{
 		vars_check( v, STR_VAR );
 		label = T_strdup( v->val.sptr );
+		check_label( label );
 		convert_escapes( label );
 		v = vars_pop( v );
 	}
@@ -763,7 +765,6 @@ Var *f_bstate( Var *v )
 {
 	IOBJECT *io, *oio;
 	int state;
-	const char *on_off_str[ ] = { "OFF", "ON" };
 
 
 	if ( ! FI_sizes.is_init )
@@ -800,32 +801,7 @@ Var *f_bstate( Var *v )
 		/* If there's a second parameter it's the state of button to set */
 
 		if ( ( v = vars_pop( v ) ) != NULL )
-		{
-			vars_check( v, INT_VAR | FLOAT_VAR | STR_VAR );
-
-			if ( v->type & ( INT_VAR | FLOAT_VAR ) )
-			{
-				if ( v->type == INT_VAR )
-					chld_state = v->val.lval != 0 ? 1 : 0;
-				else
-					chld_state = v->val.dval != 0.0 ? 1 : 0;
-			}
-			else
-				switch ( is_in( v->val.sptr, on_off_str, 2 ) )
-				{
-					case 0 :
-						chld_state = 0;
-						break;
-
-					case 1 :
-						chld_state = 1;
-						break;
-
-					default :
-						print( FATAL, "Invalid string `%s'.\n", v->val.sptr );
-						THROW( EXCEPTION );
-				}
-		}
+			chld_state = get_boolean( v );
 
 		/* No more parameters accepted... */
 
@@ -921,30 +897,7 @@ Var *f_bstate( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	vars_check( v, INT_VAR | FLOAT_VAR | STR_VAR );
-
-	if ( v->type & ( INT_VAR | FLOAT_VAR ) )
-	{
-		if ( v->type == INT_VAR )
-			io->state = v->val.lval != 0 ? 1 : 0;
-		else
-			io->state = v->val.dval != 0.0 ? 1 : 0;
-	}
-	else
-		switch ( is_in( v->val.sptr, on_off_str, 2 ) )
-		{
-			case 0 :
-				io->state = 0;
-				break;
-
-			case 1 :
-				io->state = 1;
-				break;
-
-			default :
-				print( FATAL, "Invalid string `%s'.\n", v->val.sptr );
-				THROW( EXCEPTION );
-		}
+	io->state = get_boolean( v );
 
 	/* Can't switch off a radio button that is switched on */
 
@@ -1045,7 +998,7 @@ Var *f_screate( Var *v )
 			type = VALUE_SLIDER;
 		else
 		{
-			print( FATAL, "Unknown slider type (`%s').\n", v->val.sptr );
+			print( FATAL, "Unknown slider type: '%s'.\n", v->val.sptr );
 			THROW( EXCEPTION );
 		}
 	}
@@ -1103,6 +1056,7 @@ Var *f_screate( Var *v )
 		if ( *v->val.sptr != '\0' )
 		{
 			label = T_strdup( v->val.sptr );
+			check_label( label );
 			convert_escapes( label );
 		}
 	}
@@ -1627,7 +1581,7 @@ Var *f_icreate( Var *v )
 			type = v->val.lval;
 		else
 		{
-			print( WARN, "Float variable used as in- or output object "
+			print( WARN, "Float variable used as input or output object "
 				   "type.\n" );
 			type = lrnd( v->val.dval );
 		}
@@ -1635,7 +1589,7 @@ Var *f_icreate( Var *v )
 		if ( type != INT_INPUT && type != FLOAT_INPUT &&
 			 type != INT_OUTPUT && type != FLOAT_OUTPUT )
 		{
-			print( FATAL, "Invalid in- or output object type (%ld).\n",
+			print( FATAL, "Invalid input or output object type (%ld).\n",
 				   type );
 			THROW( EXCEPTION );
 		}
@@ -1652,7 +1606,7 @@ Var *f_icreate( Var *v )
 			type = FLOAT_OUTPUT;
 		else
 		{
-			print( FATAL, "Unknown in- or output object type (`%s').\n" );
+			print( FATAL, "Unknown input or output object type: '%s'.\n" );
 			THROW( EXCEPTION );
 		}
 	}
@@ -1668,7 +1622,7 @@ Var *f_icreate( Var *v )
 			 v->type == FLOAT_VAR )
 		{
 			print( SEVERE, "Float value used as initial value for new integer "
-				   "in- or output object.\n" );
+				   "input or output object.\n" );
 			lval = lrnd( v->val.dval );
 		}
 		else
@@ -1688,6 +1642,7 @@ Var *f_icreate( Var *v )
 	{
 		vars_check( v, STR_VAR );
 		label = T_strdup( v->val.sptr );
+		check_label( label );
 		convert_escapes( label );
 		v = vars_pop( v );
 	}
@@ -1944,7 +1899,7 @@ Var *f_idelete( Var *v )
 
 			if ( v->type != INT_VAR || v->val.lval < 0 )
 			{
-				print( FATAL, "Invalid in- or output object identifier.\n" );
+				print( FATAL, "Invalid input or output object identifier.\n" );
 				THROW( EXCEPTION );
 			}
 
@@ -1984,7 +1939,7 @@ Var *f_idelete( Var *v )
 
 		if ( Tool_Box == NULL || Tool_Box->objs == NULL )
 		{
-			print( FATAL, "No in- or output objects have been defined "
+			print( FATAL, "No input or output objects have been defined "
 				   "yet.\n" );
 			THROW( EXCEPTION );
 		}
@@ -1996,7 +1951,7 @@ Var *f_idelete( Var *v )
 			 ( io->type != INT_INPUT && io->type != FLOAT_INPUT &&
 			   io->type != INT_OUTPUT && io->type != FLOAT_OUTPUT ) )
 		{
-			print( FATAL, "Invalid in- or output object identifier.\n" );
+			print( FATAL, "Invalid input or output object identifier.\n" );
 			THROW( EXCEPTION );
 		}
 
@@ -2044,7 +1999,7 @@ Var *f_idelete( Var *v )
 
 			if ( ( v = vars_pop( v ) ) != NULL )
 			{
-				print( FATAL, "Invalid in- or output object identifier.\n"  );
+				print( FATAL, "Invalid input or output object identifier.\n" );
 				THROW( EXCEPTION );
 			}
 
@@ -2106,7 +2061,7 @@ Var *f_ivalue( Var *v )
 
 		if ( v->type != INT_VAR || v->val.lval < 0 )
 		{
-			print( FATAL, "Invalid in- or output object identifier.\n" );
+			print( FATAL, "Invalid input or output object identifier.\n" );
 			THROW( EXCEPTION );
 		}
 		ID = v->val.lval;
@@ -2207,7 +2162,7 @@ Var *f_ivalue( Var *v )
 
 	if ( Tool_Box == NULL || Tool_Box->objs == NULL )
 	{
-		print( FATAL, "No in- or output objects have been defined yet.\n" );
+		print( FATAL, "No input or output objects have been defined yet.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -2218,7 +2173,7 @@ Var *f_ivalue( Var *v )
 		 ( io->type != INT_INPUT && io->type != FLOAT_INPUT &&
 		   io->type != INT_OUTPUT && io->type != FLOAT_OUTPUT ) )
 	{
-		print( FATAL, "Invalid in- or output object identifier.\n" );
+		print( FATAL, "Invalid input or output object identifier.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -2239,7 +2194,7 @@ Var *f_ivalue( Var *v )
 	if ( ( io->type == INT_INPUT || io->type == INT_OUTPUT ) &&
 		 v->type == FLOAT_VAR )
 	{
-		print( SEVERE, "Float number used as integer in- or output object "
+		print( SEVERE, "Float number used as integer input or output object "
 			   "value.\n" );
 		io->val.lval = lrnd( v->val.dval );
 	}
@@ -2834,7 +2789,7 @@ static void convert_escapes( char *str )
 			case '\\' :
 				memcpy( ptr + 1, ptr + 2, strlen( ptr + 2 ) + 1 );
 				break;
-			
+
 			case 'n' :
 				memcpy( ptr + 1, ptr + 2, strlen( ptr + 2 ) + 1 );
 				*ptr = '\n';
@@ -2846,10 +2801,110 @@ static void convert_escapes( char *str )
 }
 
 
-/*------------------------------------------*/
-/* Deletes one or more objects of any kind. */
-/* Parameter are one or more object IDs     */
-/*------------------------------------------*/
+/*-----------------------------------------------------------------*/
+/* Labels strings may start with a '@' character to display one of */
+/* several symbols instead of a text. The following function tests */
+/* if the layout of these special label strings complies with the  */
+/* requirements given in the XForms manual.                        */
+/*-----------------------------------------------------------------*/
+
+static void check_label( char *str )
+{
+	const char *sym[ ] = { "->", "<-", ">", "<", ">>", "<<", "<->", "->|",
+						   ">|", "|>", "-->", "=", "arrow", "returnarrow",
+						   "square", "circle", "line", "plus", "UpLine",
+						   "DnLine", "UpArrrow", "DnArrow" };
+	char *p = str;
+	unsigned int i;
+	bool is_ar = UNSET;
+
+
+	/* If the label string does not start with a '@' character or with two of
+	   them nothing further needs to be checked. */
+
+	if ( *p != '@' || ( *p == '@' && *( p + 1 ) == '@' ) )
+		return;
+
+	/* If given the first part is either the '#' character (to guarantee a
+	   fixed aspect ratio) or the size change (either '+' or '-', followed
+	   by a single digit). */
+
+	p++;
+	if ( *p == '#' )
+	{
+		is_ar = SET;
+		p++;
+	}
+
+	if ( *p == '+' )
+	{
+		if ( ! isdigit( *( p + 1 ) ) )
+			goto bad_label_string;
+		else
+			p += 2;
+
+		if ( *p == '#' )
+		{
+			if ( ! is_ar )
+				p++;
+			else
+				goto bad_label_string;
+		}
+	}
+	else if ( *p == '-' )
+	{
+		if ( ! isdigit( *( p + 1 ) ) &&
+			 *( p + 1 ) != '>' && *( p + 1 ) != '-' )
+			goto bad_label_string;
+
+		if ( isdigit( *( p + 1 ) ) )
+			p += 2;
+
+		if ( *p == '#' )
+		{
+			if ( ! is_ar )
+				p++;
+			else
+				goto bad_label_string;
+		}
+	}
+
+	/* Next thing is the orientation, either a number from the range between
+	   1 and 9 with the exception of 5, or an angle, starting with 0 and
+	   followed by exactly three digits. */
+
+	if ( isdigit( *p ) )
+	{
+		if ( *p == '5' )
+			goto bad_label_string;
+		else if ( *p == '0' )
+		{
+			if ( ! isdigit( *( p + 1 ) ) || ! isdigit( *( p + 2 ) ) ||
+				 ! isdigit( *( p + 3 ) ) )
+				goto bad_label_string;
+			p += 4;
+		}
+		else
+			p++;
+	}
+
+	/* The remaining must be one of the allowed strings as defined by the
+	   aray 'sym'. */
+
+	for ( i = 0; i < sizeof sym / sizeof sym[ 0 ]; i++ )
+		if ( ! strcmp( p, sym[ i ] ) )
+			return;
+
+  bad_label_string:
+
+	print( FATAL, "Invalid label string.\n" );
+	THROW( EXCEPTION );
+}
+
+
+/*--------------------------------------------------------------------*/
+/* Deletes one or more objects, parameter are one or more object IDs. */
+/*--------------------------------------------------------------------*/
 
 Var *f_objdel( Var *v )
 {

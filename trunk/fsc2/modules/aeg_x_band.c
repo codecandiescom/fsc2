@@ -35,6 +35,7 @@ const char generic_type[ ] = DEVICE_TYPE;
 /* Exported functions */
 
 int aeg_x_band_init_hook( void );
+int aeg_x_band_test_hook( void );
 int aeg_x_band_exp_hook( void );
 int aeg_x_band_end_of_exp_hook( void );
 void aeg_x_band_exit_hook( void );
@@ -93,7 +94,6 @@ enum {
 	   SERIAL_VOLTAGE,
 	   SERIAL_EXIT
 };
-
 
 
 /*****************************************************************************/
@@ -194,6 +194,18 @@ int aeg_x_band_init_hook( void )
 
 
 /*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*/
+
+int aeg_x_band_test_hook( void )
+{
+	if ( magnet.is_field )
+		magnet.act_field = magnet.field;
+
+	return 1;
+}
+
+
+/*---------------------------------------------------------------------*/
 /* Opens connection to the power supply and calibrates the field sweep */
 /*---------------------------------------------------------------------*/
 
@@ -221,7 +233,6 @@ int aeg_x_band_exp_hook( void )
 	magnet.is_opened = SET;
 
 	/* When same EDL file is run again always use fast initialization mode */
-	/* Is this really a good idea ????*/
 
 	magnet.fast_init = SET;
 
@@ -235,7 +246,7 @@ int aeg_x_band_exp_hook( void )
 
 int aeg_x_band_end_of_exp_hook( void )
 {
-	/* reset the serial port */
+	/* Reset the serial port */
 
 	if ( magnet.is_opened )
 		magnet_do( SERIAL_EXIT );
@@ -678,9 +689,7 @@ try_again:
 
 	for ( i = 0; i < test_steps; ++i )
 	{
-		fl_check_only_forms( );
-		if ( DO_STOP )
-			THROW( USER_BREAK_EXCEPTION );
+		stop_on_user_request( );
 
 		magnet_do( SERIAL_TRIGGER );
 		vars_pop( func_call( func_get( "gaussmeter_wait", &acc ) ) );
@@ -706,9 +715,7 @@ try_again:
 
 	for ( i = 0; i < test_steps; ++i )
 	{
-		fl_check_only_forms( );
-		if ( DO_STOP )
-			THROW( USER_BREAK_EXCEPTION );
+		stop_on_user_request( );
 
 		magnet_do( SERIAL_TRIGGER );
 		vars_pop( func_call( func_get( "gaussmeter_wait", &acc ) ) );
@@ -831,7 +838,7 @@ static bool magnet_goto_field_rec( double field, double error, int rec,
 	steps = irnd( floor( fabs( mini_steps ) / MAGNET_MAX_STEP ) );
 	remain = mini_steps - sign( mini_steps ) * steps * MAGNET_MAX_STEP;
 
-	/* Now do all the steps to reach the target field */
+	/* Now do all the steps needed to reach the target field */
 
 	if ( steps > 0 )
 	{
@@ -840,15 +847,12 @@ static bool magnet_goto_field_rec( double field, double error, int rec,
 
 		for ( i = 0; i < steps; ++i )
 		{
-			if ( DO_STOP )
-				THROW( USER_BREAK_EXCEPTION );
-
+			stop_on_user_request( );
 			magnet_do( SERIAL_TRIGGER );
 		}
 	}
 
-	if ( DO_STOP )
-		THROW( USER_BREAK_EXCEPTION );
+	stop_on_user_request( );
 
 	if ( ( magnet.step = remain ) != 0.0 )
 	{
@@ -964,17 +968,15 @@ static void magnet_sweep( int dir )
 
 		for ( i = 0; i < steps; ++i )
 		{
-			if ( DO_STOP )
-				THROW( USER_BREAK_EXCEPTION );
+			stop_on_user_request( );
 
 			magnet_do( SERIAL_TRIGGER );
-			magnet.act_field +=	  ( MAGNET_ZERO_STEP - magnet.int_step )
+			magnet.act_field +=	( MAGNET_ZERO_STEP - magnet.int_step )
 								* magnet.mini_step;
 		}
 	}
 
-	if ( DO_STOP )
-		THROW( USER_BREAK_EXCEPTION );
+	stop_on_user_request( );
 
 	if ( ( magnet.step = remain ) != 0.0 )
 	{

@@ -79,10 +79,6 @@ FOR K = 1 : 5 {
 		IF I == N / 2 {
 			change_scale( -10.0, 2.5 );
 		}
-
-		UNLESS I % 2 {
-			print( "#\n", I );
-		}
 	}
 
 	IF K != 5 {

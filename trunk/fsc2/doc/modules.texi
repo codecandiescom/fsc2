@@ -1172,7 +1172,7 @@ beneath the definition of the make variable @code{simp_modules} another
 variable, @code{comp_modules}, is defined, which (at the moment) is set to:
 @example
 comp_modules   = dg2020_f dg2020_b hfs9000 tds754a tds744a tds540 tds520c \
-                 tds520a tds520 hp8647a
+                 tds520a tds520 hp8647a er023m lecroy9400
 @end example
 @noindent
 Here you have to append the name of your own module (just the name with
@@ -1472,24 +1472,23 @@ thrown by @acronym{fsc2}s special functions for memory allocation (see
 next section), so don't throw it yourself without a very good reason. A
 @code{USER_BREAK_EXCEPTION} should be thrown from within a module when
 the module is doing something rather time consuming (e.g.@: waiting for
-a device to become ready or doing some calibration). In this case you
-should think about checking if the user pressed the @code{Stop}
-buttom. To find out you can use a macro, @code{DO_STOP} -- if it returns
-@code{TRUE} the user has pressed the stop button. If you're prepared to
-stop on the users request you simply have to throw an
+a device to become ready or doing some calibration) and the user has
+pressed the @code{STOP} button. Fot this purpose there is a function
+@example
+void stop_on_user_request( void )
+@end example
+that should be called. It will automtically determine if the user has
+pressed the @code{STOP} button and, if she did, will throw an
 @code{USER_BREAK_EXCEPTION}.
 
 
 Here's some code taken from the module for a digitizer. It waits
 indefinitely in a loop for the digitizer to become finished with a
-measurement. To allow the user to break from it within this loop
-@code{DO_STOP} is tested, and if set, an @code{USER_BREAK_EXCEPTION} is
-thrown:
+measurement. To allow the user to break from it within this loop:
 @example
 while ( 1 )                   /* loop forever */
 @{
-    if ( DO_STOP )
-        THROW( USER_BREAK_EXCEPTION );
+    stop_on_user_request( );
 
     length = 40;
     usleep( 100000 );

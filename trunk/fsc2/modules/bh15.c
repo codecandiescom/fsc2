@@ -175,8 +175,7 @@ int bh15_exp_hook( void )
 
 	do
 	{
-		if ( DO_STOP )
-			THROW( USER_BREAK_EXCEPTION );
+		stop_on_user_request( );
 
 		usleep( 100000 );
 
@@ -310,8 +309,7 @@ static double bh15_get_field( void )
 
 	do
 	{
-		if ( DO_STOP )
-			THROW( USER_BREAK_EXCEPTION );
+		stop_on_user_request( );
 
 		usleep( 100000 );
 
@@ -335,8 +333,7 @@ static double bh15_get_field( void )
 
 	do
 	{
-		if ( DO_STOP )
-			THROW( USER_BREAK_EXCEPTION );
+		stop_on_user_request( );
 
 		usleep( 100000 );
 

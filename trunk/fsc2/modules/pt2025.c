@@ -366,6 +366,8 @@ static double pt2025_get_field( void )
 
 	do
 	{
+		stop_on_user_request( );
+
 		len = 50;
 		if ( gpib_read( pt2025.device, buf, &len ) == FAILURE )
 		{
@@ -376,15 +378,10 @@ static double pt2025_get_field( void )
 		if ( toupper( *buf ) == 'L' )
 			break;
 
-		if ( DO_STOP )
-			THROW( USER_BREAK_EXCEPTION );
+		stop_on_user_request( );
 
 		if ( count > 1 )
 			usleep( 250000 );
-
-		if ( DO_STOP )
-			THROW( USER_BREAK_EXCEPTION );
-
 	} while ( --count > 0 );
 
 	if ( count == 0 )

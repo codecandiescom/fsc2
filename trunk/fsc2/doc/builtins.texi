@@ -37,15 +37,16 @@ detail. These functions are available even when no device modules have
 been specified in the @code{DEVICES} section (or this section is
 missing). Many functions can be used in the @code{VARIABLES},
 @code{PREPARATIONS} as well as the @code{EXPERIMENT} section of an
-@acronym{EDL} program, but there are some that can be used in either
-@code{PREPARATIONS} or the @code{EXPERIMENT} section only.
+@acronym{EDL} program, but there are some that can be used only either
+before the @code{EXPERIMENT} section starts or within the
+@code{EXPERIMENT} section.
 
 The built-in functions can be roughly divided into four classes. The
 first class of functions are functions for drawing the measured data
 onto the screen, i.e.@: the main area of the display window (including
 functions for changing the axis scaling and labels etc.@:), functions
 for dealing with the output of the program, either by writing text to
-the browser in the lower half of the main window, or by writing data
+the browser in the lower half of the main window or by writing data
 etc.@: into files (including functions for specifying the files to be
 used).
 
@@ -77,23 +78,23 @@ specify the measured value. To be able to draw a meaningful @i{x}-axis
 the program needs another piece of information: the starting point of
 the @i{x}-axis and the difference between the points drawn at the
 @i{x}-axis. For example, if you do an cw-EPR experiment, starting with a
-field of @w{3400 G} with spacing of @w{0.5 G} between the data points
-you will have to tell the program in the graphic initialization. If you
-now specify when drawing a new point an @i{x}-coordinate of @code{11}
-the point will appear at an axis position of @w{3410 G} because the
-point numbered @code{1} is drawn at @w{3400 G}, the point numbered
-@code{2} at @w{3400.5 G} etc.@:, so the point numbered @code{11} will
-appear at @w{3410 G}.
+field of @w{3400 G} and with spacing of @w{0.5 G} between the data
+points you will have to tell the program about this in the graphic
+initialization. If you now specify, when drawing a new point, an
+@i{x}-coordinate of @code{11} the point will appear at an axis position
+of @w{3410 G} because the point numbered @code{1} is drawn at @w{3400
+G}, the point numbered @code{2} at @w{3400.5 G} etc.@:, so the point
+numbered @code{11} will appear at @w{3410 G}.
 
 In contrast, for a 2D-display you have to specify three coordinates for
-a new data point. Here both the @i{x}- and @i{y}-coordinate are integers,
-both starting at @code{1}. The point with both the @i{x}- and
+a new data point. Here both the @i{x}- and @i{y}-coordinate are
+integers, both starting at @code{1}. The point with both the @i{x}- and
 @i{y}-coordinate set to @code{1} is the left-most point at the bottom of
 the window. The third coordinate is the measured value, which usually
-will be a floating point number. As already in case of 1D-displays the
-program needs some more information to be able to draw useful axis. But
-here not only the starting point and increment for the @i{x}-axis must
-be given but also values for the @i{y}-axis.
+will be a floating point number. As already in the case of 1D-displays
+the program needs some more information to be able to draw meaningful
+axis. Here not only the starting point and increment for the @i{x}-axis
+must be given but also values for the @i{y}-axis.
 
 Finally, another point: If you have not only one data point to draw but
 a whole array you can do this without having to draw each point on its
@@ -101,7 +102,7 @@ own. Instead, when in the function for drawing you enter a
 (one-dimensional) array instead of a value (as the @i{y}-coordinate for
 1D-display or the @i{z}-coordinate for 2D-display) all the points of the
 array will be drawn, starting at the place you specified and from there
-to the right, i.e.@: always in the @i{x}-direction.
+to the right, i.e.@: always in @i{x}-direction.
 
 
 @table @samp
@@ -218,8 +219,8 @@ This function can only be used in the @code{PREPARATIONS} section of an
 @anchor{display}
 @item display( )
 @findex display()
-This function has to be called to display data in 1-dimensional as well as
-2-dimensional experiments. It takes the following arguments:
+This function is used called to display data in 1-dimensional as well as
+in 2-dimensional experiments. It takes the following arguments:
 @enumerate
 @item
 The (@i{x}) point number (coordinate) where the data point (if only a
@@ -456,9 +457,9 @@ extension but not in the filename. In this case the function
 @code{clone_file()} can be useful. It expects exactly three
 arguments. The first one is an identifier for an already existing file as
 returned by the function @code{get_file()}. (If in the call of
-@code{get_file()} the user did @b{not} to choose a file, i.e. pressed
+@code{get_file()} the user did @b{not} to choose a file, i.e.@: pressed
 the @code{Cancel}-button, it is silently assumed that also the second
-file is @b{not} to be used.)
+file to be created by @code{clone_file()} is @b{not} to be used.)
 
 The second and third arguments both have to be strings. The second
 argument is the expected extension of the file that was selected via the
@@ -480,7 +481,7 @@ If the user chooses @code{experiment.dat} as the first file, a second
 file with the name @code{experiment.list} will be opened automatically.
 
 The function also takes care that no files will be overwritten
-accidentally. If the second file already exists the user gets asked to
+accidentally. If the second file already exists the user is asked to
 select different file. The program enforces that the extension of the
 new file is identical to the one passed to it as the third argument.
 
@@ -787,36 +788,122 @@ checks if it is valid and the associated file is open for writing.
 @section Interaction functions
 @cindex interaction functions
 
-These functions are for creating, handling and deleting of buttons,
-sliders and in- and output fields. When such an object is created for
-the first time a new window with the title "Toolbox" opens up. The
-objects (i.e.@: buttons, sliders and in- and output fields) displayed
-in the toolbox allow the user to influence the experiment when it is
-already running. The toolbox window will vanish automatically when all
-objects have been deleted. The toolbox with its objects can only be used
-during the experiment, i.e.@: the functions for creating, handling and
-deleting of objects can only be used within the @code{EXPERIMENT}
-section of the program.
+The following functions are for creating, handling and deleting of
+buttons, sliders and input and output fields. When such an object is
+created for the first time a new window with the title "Toolbox" gets
+created.  The objects (i.e.@: buttons, sliders and iput and output
+fields) displayed in this toolbox window allow the user to influence the
+experiment when it is already running. The toolbox window will vanish
+automatically when all objects have been deleted. The toolbox with its
+objects can only be used during the experiment, i.e.@: the functions for
+creating, handling and deleting of objects can only be used within the
+@code{EXPERIMENT} section of the program.
 
 Please note that when the objects in the toolbox are used it usually
 isn't possible anymore to check the complete experiment before it is run
 because it is impossible to forsee which buttons, sliders or input
-fields are used at what moment (the only exception is when only output
-fields are used). Therefore, these functions should only be used where
-it is really necessary, e.g.@: when you're trying to find the optimum
-parameters for an experiment but not in the final experiment.
+fields are going to be used at what moment in time (the only exception
+is when only output fields are used). Therefore, these functions should
+only be used where it is really necessary, e.g.@: when you're trying to
+find the optimum parameters for an experiment but not in the final
+experiment.
 
 When the program is tested before the experiment is started it is
-assumed that all buttons are not pressed and switched off (unless they
-have been set by the function @code{button_state()}, all sliders are
-assumed to be in the middle position unless a different value has been
-set via the function @code{slider_value()} and all input and output
-fields are initialized to @code{0} unless an initial value has been
-passed to the functions @code{input_create()} or @code{output_create()}.
+assumed that all buttons are not pressed and switched off (unless their
+state has been set explicitly by the function @code{button_state()}, all
+sliders are assumed to be in the middle position unless a different
+value has been set via the function @code{slider_value()} and all input
+and output fields are initialized to @code{0} unless an initial value
+has been passed to the functions @code{input_create()} or
+@code{output_create()}.
 
-All functions of this type can only be used in the @code{EXPERIMENT}
+For all the objects to be created a label string to be drawn with the
+object can be defined. Normally this will be a simple text, indicating
+the meaning of the object. But in some cases it might be useful also to
+be able to draw some symbols instead of text. This can be done by
+starting the label string by the @code{'@@'} character. Immediately
+after the @code{'@@'} one of the following texts can be used to draw a
+symbol:
+@table @samp
+@item ->
+Normal arrow pointing to the right.
+@item <-
+Normal arrow pointing to the left.
+@item >
+Triangular arrow pointing to the right.
+@item <
+Triangular arrow pointing to the left.
+@item >>
+Double triangle pointing to the right.
+@item <<
+Double triangle pointing to the left.
+@item <->
+Arrow pointing left and right.
+@item ->|
+Normal arrow pointing to the right and ending in a vertical bar.
+@item >|
+Triangular arrow pointing to the right and ending in a vertical bar.
+@item |>
+Triangular arrow pointing to the right and starting in a vertical bar.
+@item -->
+Thin arrow pointing to the right.
+@item =
+Three embossed lines.
+@item arrow
+Same as @code{-->}.
+@item returnarrow
+@code{<Return>} key symbol.
+@item square
+A square.
+@item circle
+A circle.
+@item line
+A horizontal line.
+@item plus
+A plus sign (rotate to get a cross).
+@item UpLine
+An embossed vertical line.
+@item DnLine
+An engraved vertical line.
+@item UpArrow
+An embossed triangular arrow pointing to the right.
+@item DnArrow
+An engraved triangular arrow pointing to the right.
+@end table
+
+It is also possible to rotate most of the symbols. When a symbol name is
+preceeded by a digit between @code{1} and @code{9} (except @code{5}) the
+symbol is rotated like on the numerical keypad, i.e. @: @code{6}
+indicates no rotation, @code{9} a rotation by 45 degrees
+anti-clockwise,8 a rotation by 90 degrees, etc. Hence the order is
+@code{6,9,8,7,4,1,2,3} (just think of the keypad as consisting of arrow
+keys). So to get an arrow pointing to the left top use a label string of
+@code{"@@7->"}. To rotate the symbols in other directions not fitting
+into this 45 degrees scheme put a @code{0} directly after the
+@code{'@@'}, followed by exactly three digits that indicate the angle
+(counter-clockwise). E.g.@: to get an arrow at an angle of 30 degrees
+use the label string @code{"@@0030->"}.
+
+The symbols are designed for labels with a square bounding box. But in
+most cases the labels bounding box will not be square and the symbol is
+scaled differently in @i{x}- and @i{y}-direction. If keeping the aspect
+ration is desired, put a @code{'#'} character immediately after the
+@code{'@@'}, e.g.@: @code{"@@#9->"}.
+
+Two additional prefixes, @code{'+'} and @code{'-'}, followed by a single
+digit, can be used to make small size adjustments. These prefixes must
+either follow immediately after the @code{'@@'} or the @code{'#'}. The
+@code{'+'} indicates an increase of the symbol size while @code{'-'}
+will decrease the size. The digit following the prefix indicates the
+incement or decrement in pixels. For example, to draw a circle that is 3
+pixels smaller than the default size use the label string
+@code{"@@-3circle"}.
+
+
+@subsection List of Interaction Functions
+
+All the following functions can only be used in the @code{EXPERIMENT}
 section of an @acronym{EDL} program.
-
 
 @table @samp
 @anchor{layout}
