@@ -50,8 +50,8 @@ void dump_window( int type, int fd )
 	if ( ! G.is_init || ! G.is_fully_drawn || G.color_hash == NULL )
 		THROW( EXCEPTION );
 
-	/* We need a stream because writing with write(2) is maddingly slow
-	   because of missing buffering */
+	/* We need a stream because write(2) is horribly slow because it does
+	   not use buffering */
 
 	if ( ( fp = fdopen( fd, "w" ) ) == NULL )
 		THROW( EXCEPTION );
