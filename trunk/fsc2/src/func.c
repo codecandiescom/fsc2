@@ -2172,13 +2172,16 @@ static int get_save_file( Var **v, const char *calling_function )
 	{
 		if ( *v != NULL )
 		{
+			/* Check that the first variable is an integer, i.e. can be a
+			   file identifier */
+
 			if ( ( *v )->type != INT_VAR )
 			{
 				eprint( FATAL, "%s:%ld: First argument in `%s' isn't a "
 						"file identifier.", Fname, Lc, calling_function );
 				THROW( EXCEPTION );
 			}
-			file_num = ( int ) file->val.lval;
+			file_num = ( int ) ( *v )->val.lval;
 		}
 		else
 		{

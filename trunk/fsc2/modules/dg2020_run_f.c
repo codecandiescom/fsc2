@@ -94,6 +94,9 @@ void dg2020_reorganize_pulses( bool flag )
 		qsort( f->pulses, f->num_pulses, sizeof( PULSE * ),
 			   dg2020_start_compare );
 
+		/* Pulse positions have only to be checked in the test run, afterwards
+		   we can assume that they are ok */
+
 		if ( flag )
 			dg2020_do_checks( f );
 
@@ -293,8 +296,8 @@ void dg2020_recalc_phase_pulse( FUNCTION *f, PULSE *phase_p,
 
 		/* Don't do anything if the position is already set and the pulse
 		   starts at a reasonable position, i.e. it starts long enough before
-		   the pulse its associated with and it doesn't start to near to the
-		   previous pulse */
+		   the pulse its associated with and not too near to the previous
+		   pulse */
 
 		if ( phase_p->is_pos &&
 			 ( ( phase_p->pos <= p->pos - f->psd &&
@@ -332,9 +335,9 @@ void dg2020_recalc_phase_pulse( FUNCTION *f, PULSE *phase_p,
 		phase_p->pos = p->pos - f->psd;
 
 		/* If this is too near to the preceeding pulse leave out the grace
-		   period, and if this still is too near to the previous pulse
-		   complain (except when both pulses use the same phase sequence since
-		   than both phase pulses get merged into one) */
+		   period, and if this still is too near complain (except when both
+		   pulses use the same phase sequence since than both phase pulses get
+		   merged into one) */
 
 		if ( phase_p->pos < pp->pos + pp->len + dg2020.grace_period )
 		{
