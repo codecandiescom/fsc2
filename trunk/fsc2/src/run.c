@@ -480,9 +480,6 @@ static void set_buttons_for_run( int active )
 /**************************************************************/
 
 
-static int return_status;
-
-
 /*------------------------------------------------------------------*/
 /* run_child() is the child process for doing the real measurement. */
 /* It sets up the signal handlers and its global variables and then */
@@ -504,6 +501,9 @@ static int return_status;
 
 static void run_child( void )
 {
+	int return_status = OK;
+
+
 	I_am = CHILD;
 
     /* Set up pipes for communication with parent process */
