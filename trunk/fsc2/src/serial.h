@@ -41,7 +41,7 @@
 void fsc2_request_serial_port( int sn, const char *devname );
 void fsc2_serial_init( void );
 void fsc2_serial_cleanup( void );
-int fsc2_serial_open( int sn, int flags );
+int fsc2_serial_open( int sn, const char *devname, int flags );
 
 
 #endif   /* ! SERIAL_HEADER */

@@ -737,7 +737,7 @@ static bool er035m_sas_comm( int type, ... )
 			   should not become the controlling terminal, otherwise line
 			   noise read as a CTRL-C might kill the program. */
 
-			if ( ( nmr.fd = fsc2_serial_open( SERIAL_PORT,
+			if ( ( nmr.fd = fsc2_serial_open( SERIAL_PORT, DEVICE_NAME,
 							  O_RDWR | O_EXCL | O_NOCTTY | O_NONBLOCK ) ) < 0 )
 				return FAIL;
 

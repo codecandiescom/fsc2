@@ -1030,7 +1030,7 @@ bool magnet_do( int command )
 			   should not become the controlling terminal, otherwise line
 			   noise read as a CTRL-C might kill the program. */
 
-			if ( ( magnet.fd = fsc2_serial_open( SERIAL_PORT,
+			if ( ( magnet.fd = fsc2_serial_open( SERIAL_PORT, DEVICE_NAME,
 							O_WRONLY | O_EXCL | O_NOCTTY | O_NONBLOCK ) ) < 0 )
 				return FAIL;
 

@@ -26,7 +26,7 @@
 #include "serial.h"
 
 
-#if NUM_SERIAL_PORTS > 0
+#if defined( NUM_SERIAL_PORTS ) && NUM_SERIAL_PORTS > 0
 static struct {
 	bool in_use;
 	const char* devname;
@@ -36,18 +36,20 @@ static struct {
 
 
 
-/*----------------------------------------------------------------------*/
-/*----------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*/
+/* This function must be called by device modules that need a serial */
+/* port. Here it is checked if the requested serial port is still    */
+/* available and if the user has access permissions to the serial    */
+/* ports device file. If one of these conditions isn't satisfied the */
+/* function throws an exception.                                     */
+/* -> 1. Serial port number - must be smaller than compiled in       */
+/*       constant NUM_SERIAL_PORTS                                   */
+/*    2. Name of the device the serial port is requested for         */
+/*-------------------------------------------------------------------*/
 
 void fsc2_request_serial_port( int sn, const char *devname )
 {
-#if NUM_SERIAL_PORTS < 1
-	sn = sn;
-
-	eprintf( FATAL, UNSET, "%s: Device needs serial port but fsc2 was "
-			 "not compiled with support for serial port access.\n", devname );
-	THROW( EXCEPTION );
-#else
+#if defined( NUM_SERIAL_PORTS ) && NUM_SERIAL_PORTS > 0
 	int l, snc;
 
 
@@ -98,6 +100,12 @@ void fsc2_request_serial_port( int sn, const char *devname )
 					"port %d.\n", devname, sn );
 		THROW( EXCEPTION );
 	}
+#else
+	sn = sn;
+
+	eprintf( FATAL, UNSET, "%s: Device needs serial port but fsc2 was "
+			 "not compiled with support for serial port access.\n", devname );
+	THROW( EXCEPTION );
 #endif
 }
 
@@ -109,7 +117,7 @@ void fsc2_request_serial_port( int sn, const char *devname )
 
 void fsc2_serial_init( void )
 {
-#if NUM_SERIAL_PORTS > 0
+#if defined( NUM_SERIAL_PORTS ) && NUM_SERIAL_PORTS > 0
 	int i;
 
 
@@ -131,6 +139,7 @@ void fsc2_serial_init( void )
 
 void fsc2_serial_cleanup( void )
 {
+#if defined( NUM_SERIAL_PORTS ) && NUM_SERIAL_PORTS > 0
 #if NUM_SERIAL_PORTS > 0
 	int i;
 
@@ -146,17 +155,25 @@ void fsc2_serial_cleanup( void )
 }
 
 
-/*----------------------------------------------------------------------*/
-/*----------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*/
+/* This function should be called by device modules that need to open */
+/* a serial port device file. Instead of the device file name as in   */
+/* the open() function this routine expects the number of the serial  */
+/* port and the name of the device to make it possible to check if    */
+/* the device has requested this port. The third parameter is, as in  */
+/* the open() function, the flags used for opening the device file.   */
+/*--------------------------------------------------------------------*/
 
-int fsc2_serial_open( int sn, int flags )
+int fsc2_serial_open( int sn, const char *devname, int flags )
 {
+#if defined( NUM_SERIAL_PORTS ) && NUM_SERIAL_PORTS > 0
 	int fd;
 
 
 	/* Check if serial port has been requested */
 
-	if ( ! Serial_Port[ sn ].in_use )
+	if ( ! Serial_Port[ sn ].in_use ||
+		 strcmp( Serial_Port[ sn ].devname, devname ) )
 	{
 		errno = EACCES;
 		return -1;
@@ -165,4 +182,13 @@ int fsc2_serial_open( int sn, int flags )
 	fd = open( Serial_Port[ sn ].dev_file, flags );
 
 	return fd;
+else
+	sn = sn;
+	devname = devname;
+	flags = flags;
+
+
+	errno = EACCES;
+	return -1;
+#endif
 }
