@@ -42,13 +42,13 @@ inline int get_mode( void )
 /* arguments to a function.                                     */
 /*--------------------------------------------------------------*/
 
-inline void too_many_arguments( Var *v, const char *device_name )
+inline void too_many_arguments( Var *v, const char *device )
 {
 	if ( v == NULL || ( v = vars_pop( v ) ) == NULL )
 		return;
 
 	eprint( WARN, SET, "%s: Superfluous argument%s in call of function "
-			"%s().\n", device_name, v->next != NULL ? "s" : "", Cur_Func );
+			"%s().\n", device, v->next != NULL ? "s" : "", Cur_Func );
 	while ( ( v = vars_pop( v ) ) != NULL )
 		;
 }
@@ -57,10 +57,10 @@ inline void too_many_arguments( Var *v, const char *device_name )
 /*--------------------------------------------------------------*/
 /*--------------------------------------------------------------*/
 
-inline void no_query_possible( const char *device_name )
+inline void no_query_possible( const char *device )
 {
-	eprint( FATAL, SET, "%s: Function %s() with no argument can only be used "
-			"in the EXPERIMENT section.\n", device_name, Cur_Func );
+	eprint( FATAL, SET, "%s: %s() can be used for queries in the EXPERIMENT "
+			"section only.\n", device, Cur_Func );
 	THROW( EXCEPTION )
 }
 
@@ -68,13 +68,13 @@ inline void no_query_possible( const char *device_name )
 /*--------------------------------------------------------------*/
 /*--------------------------------------------------------------*/
 
-inline long get_long( Var *v, const char *snippet, const char *device_name )
+inline long get_long( Var *v, const char *snippet, const char *device )
 {
 	vars_check( v, INT_VAR | FLOAT_VAR );
 
 	if ( v->type == FLOAT_VAR )
 		eprint( WARN, SET, "%s: Floating point number used as %s in %s().\n",
-				device_name, snippet, Cur_Func );
+				device, snippet, Cur_Func );
 
 	return v->type == INT_VAR ? v->val.lval : ( long ) v->val.dval;
 }
@@ -83,14 +83,13 @@ inline long get_long( Var *v, const char *snippet, const char *device_name )
 /*--------------------------------------------------------------*/
 /*--------------------------------------------------------------*/
 
-inline double get_double( Var *v, const char *snippet,
-						  const char *device_name )
+inline double get_double( Var *v, const char *snippet, const char *device )
 {
 	vars_check( v, INT_VAR | FLOAT_VAR );
 
 	if ( v->type == INT_VAR )
 		eprint( WARN, SET, "%s: Integer number used as %s in %s().\n",
-				device_name, snippet, Cur_Func );
+				device, snippet, Cur_Func );
 
 	return v->type == INT_VAR ? v->val.lval : v->val.dval;
 }
