@@ -36,10 +36,10 @@ const char generic_type[ ] = DEVICE_TYPE;
 HFS9000_T hfs9000;
 
 
-/*----------------------------------------------------------------------
-  This function is called directly after all modules are loaded. It
-  initializes all global variables that are needed in the module.
-----------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * This function is called directly after all modules are loaded. It
+ * initializes all global variables that are needed in the module.
+ *-------------------------------------------------------------------*/
 
 int hfs9000_init_hook( void )
 {
@@ -158,8 +158,8 @@ int hfs9000_init_hook( void )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 int hfs9000_test_hook( void )
 {
@@ -214,8 +214,8 @@ int hfs9000_test_hook( void )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 int hfs9000_end_of_test_hook( void )
 {
@@ -247,8 +247,8 @@ int hfs9000_end_of_test_hook( void )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 int hfs9000_exp_hook( void )
 {
@@ -292,8 +292,8 @@ int hfs9000_exp_hook( void )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 int hfs9000_end_of_exp_hook( void )
 {
@@ -311,8 +311,8 @@ int hfs9000_end_of_exp_hook( void )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 void hfs9000_exit_hook( void )
 {
@@ -340,8 +340,8 @@ void hfs9000_exit_hook( void )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 Var_T *pulser_name( UNUSED_ARG Var_T *v )
 {
@@ -349,8 +349,8 @@ Var_T *pulser_name( UNUSED_ARG Var_T *v )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 Var_T *pulser_show_pulses( UNUSED_ARG Var_T *v )
 {
@@ -421,8 +421,8 @@ Var_T *pulser_show_pulses( UNUSED_ARG Var_T *v )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 Var_T *pulser_dump_pulses( UNUSED_ARG Var_T *v )
 {
@@ -501,8 +501,8 @@ Var_T *pulser_dump_pulses( UNUSED_ARG Var_T *v )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 Var_T *pulser_keep_all_pulses( UNUSED_ARG Var_T *v )
 {
@@ -511,8 +511,8 @@ Var_T *pulser_keep_all_pulses( UNUSED_ARG Var_T *v )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 Var_T *pulser_maximum_pattern_length( Var_T *v )
 {
@@ -525,9 +525,9 @@ Var_T *pulser_maximum_pattern_length( Var_T *v )
 }
 
 
-/*---------------------------------------------*/
-/* Switches the output of the pulser on or off */
-/*---------------------------------------------*/
+/*---------------------------------------------*
+ * Switches the output of the pulser on or off
+ *---------------------------------------------*/
 
 Var_T *pulser_state( Var_T *v )
 {
@@ -547,10 +547,10 @@ Var_T *pulser_state( Var_T *v )
 }
 
 
-/*------------------------------------------------------------*/
-/* Switches an individual channel of the pulser on or off or, */
-/* if called with just one argument, returns the state.       */
-/*------------------------------------------------------------*/
+/*------------------------------------------------------------*
+ * Switches an individual channel of the pulser on or off or,
+ * if called with just one argument, returns the state.
+ *------------------------------------------------------------*/
 
 Var_T *pulser_channel_state( Var_T *v )
 {
@@ -603,8 +603,8 @@ Var_T *pulser_channel_state( Var_T *v )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 Var_T *pulser_update( UNUSED_ARG Var_T *v )
 {
@@ -620,13 +620,13 @@ Var_T *pulser_update( UNUSED_ARG Var_T *v )
 }
 
 
-/*----------------------------------------------------------------------*/
-/* Public function to change the position of pulses. If called with no  */
-/* argument all active pulses that have a position change time set will */
-/* be moved, otherwise all pulses passed as arguments to the function.  */
-/* Take care: The changes will only commited on the next call of the    */
-/*            function pulser_update() !                                */
-/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*
+ * Public function to change the position of pulses. If called with no
+ * argument all active pulses that have a position change time set will
+ * be moved, otherwise all pulses passed as arguments to the function.
+ * Take care: The changes will only commited on the next call of the
+ *            function pulser_update() !
+ *----------------------------------------------------------------------*/
 
 Var_T *pulser_shift( Var_T *v )
 {
@@ -692,13 +692,13 @@ Var_T *pulser_shift( Var_T *v )
 }
 
 
-/*-------------------------------------------------------------------------*/
-/* Public function for incrementing the length of pulses. If called with   */
-/* no argument all active pulses that have a length change defined are     */
-/* incremented, oltherwise all pulses passed as arguments to the function. */
-/* Take care: The changes will only commited on the next call of the       */
-/*            function pulser_update() !                                   */
-/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*
+ * Public function for incrementing the length of pulses. If called with
+ * no argument all active pulses that have a length change defined are
+ * incremented, oltherwise all pulses passed as arguments to the function.
+ * Take care: The changes will only commited on the next call of the
+ *            function pulser_update() !
+ *-------------------------------------------------------------------------*/
 
 Var_T *pulser_increment( Var_T *v )
 {
@@ -773,8 +773,8 @@ Var_T *pulser_increment( Var_T *v )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 Var_T *pulser_reset( UNUSED_ARG Var_T *v )
 {
@@ -783,8 +783,8 @@ Var_T *pulser_reset( UNUSED_ARG Var_T *v )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 Var_T *pulser_pulse_reset( Var_T *v )
 {
@@ -849,8 +849,8 @@ Var_T *pulser_pulse_reset( Var_T *v )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 Var_T *pulser_lock_keyboard( UNUSED_ARG Var_T *v )
 {
@@ -859,8 +859,8 @@ Var_T *pulser_lock_keyboard( UNUSED_ARG Var_T *v )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 Var_T *pulser_stop_on_update( Var_T *v )
 {
@@ -871,8 +871,8 @@ Var_T *pulser_stop_on_update( Var_T *v )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 Var_T *pulser_command( Var_T *v )
 {

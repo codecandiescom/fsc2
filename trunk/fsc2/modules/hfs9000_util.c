@@ -26,10 +26,10 @@
 
 
 
-/*-----------------------------------------------------------------*/
-/* Converts a time into the internal type of a time specification, */
-/* i.e. an integer multiple of the time base                       */
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ * Converts a time into the internal type of a time specification,
+ * i.e. an integer multiple of the time base
+ *-----------------------------------------------------------------*/
 
 Ticks hfs9000_double2ticks( double p_time )
 {
@@ -67,9 +67,9 @@ Ticks hfs9000_double2ticks( double p_time )
 }
 
 
-/*-----------------------------------------------------*/
-/* Does the exact opposite of the previous function... */
-/*-----------------------------------------------------*/
+/*-----------------------------------------------------*
+ * Does the exact opposite of the previous function...
+ *-----------------------------------------------------*/
 
 double hfs9000_ticks2double( Ticks ticks )
 {
@@ -78,10 +78,10 @@ double hfs9000_ticks2double( Ticks ticks )
 }
 
 
-/*----------------------------------------------------------------------*/
-/* Checks if the difference of the levels specified for a pod connector */
-/* are within the valid limits.                                         */
-/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*
+ * Checks if the difference of the levels specified for a pod connector
+ * are within the valid limits.
+ *----------------------------------------------------------------------*/
 
 void hfs9000_check_pod_level_diff( double high, double low )
 {
@@ -109,9 +109,9 @@ void hfs9000_check_pod_level_diff( double high, double low )
 }
 
 
-/*-----------------------------------------------*/
-/* Returns the structure for pulse numbered pnum */
-/*-----------------------------------------------*/
+/*-----------------------------------------------*
+ * Returns the structure for pulse numbered pnum
+ *-----------------------------------------------*/
 
 Pulse_T *hfs9000_get_pulse( long pnum )
 {
@@ -141,8 +141,8 @@ Pulse_T *hfs9000_get_pulse( long pnum )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 const char *hfs9000_ptime( double p_time )
 {
@@ -161,8 +161,8 @@ const char *hfs9000_ptime( double p_time )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 const char *hfs9000_pticks( Ticks ticks )
 {
@@ -170,11 +170,12 @@ const char *hfs9000_pticks( Ticks ticks )
 }
 
 
-/*---------------------------------------------------------------------------
-  Comparison function for two pulses: returns 0 if both pulses are inactive,
-  -1 if only the second pulse is inactive or starts at a later time and 1 if
-  only the first pulse is inactive pulse or the second pulse starts earlier.
----------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ * Comparison function for two pulses: returns 0 if both pulses are
+ * inactive, -1 if only the second pulse is inactive or starts at a
+ * later time and 1 if only the first pulse is inactive pulse or the
+ * second pulse starts earlier.
+ *--------------------------------------------------------------------*/
 
 int hfs9000_start_compare( const void *A, const void *B )
 {
@@ -196,9 +197,9 @@ int hfs9000_start_compare( const void *A, const void *B )
 }
 
 
-/*---------------------------------------------------------
-  Determines the longest sequence of all pulse functions.
------------------------------------------------------------*/
+/*---------------------------------------------------------*
+ * Determines the longest sequence of all pulse functions.
+ *---------------------------------------------------------*/
 
 Ticks hfs9000_get_max_seq_len( void )
 {
@@ -228,8 +229,8 @@ Ticks hfs9000_get_max_seq_len( void )
 }
 
 
-/*----------------------------------------------------------*/
-/*----------------------------------------------------------*/
+/*----------------------------------------------------------*
+ *----------------------------------------------------------*/
 
 void hfs9000_set( char *arena, Ticks start, Ticks len, Ticks offset )
 {
@@ -239,8 +240,8 @@ void hfs9000_set( char *arena, Ticks start, Ticks len, Ticks offset )
 }
 
 
-/*----------------------------------------------------------*/
-/*----------------------------------------------------------*/
+/*----------------------------------------------------------*
+ *----------------------------------------------------------*/
 
 int hfs9000_diff( char *old_p, char *new_p, Ticks *start, Ticks *length )
 {
@@ -304,8 +305,8 @@ int hfs9000_diff( char *old_p, char *new_p, Ticks *start, Ticks *length )
 }
 
 
-/*-------------------------------------------------------------------*/
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ *-------------------------------------------------------------------*/
 
 void hfs9000_dump_channels( FILE *fp )
 {
@@ -341,8 +342,8 @@ void hfs9000_dump_channels( FILE *fp )
 }
 
 
-/*-------------------------------------------------------------------*/
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ *-------------------------------------------------------------------*/
 
 long hfs9000_ch_to_num( long channel )
 {

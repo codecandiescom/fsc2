@@ -30,11 +30,11 @@ static bool hfs9000_update_pulses( bool flag );
 static bool hfs9000_commit( Function_T *f, bool flag );
 
 
-/*---------------------------------------------------------------------------
-  Function is called in the experiment after pulses have been changed to
-  update the pulser accordingly. No checking has to be done except in the
-  test run.
-----------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*
+ * Function is called in the experiment after pulses have been changed to
+ * update the pulser accordingly. No checking has to be done except in the
+ * test run.
+ *-------------------------------------------------------------------------*/
 
 bool hfs9000_do_update( void )
 {
@@ -73,9 +73,9 @@ bool hfs9000_do_update( void )
 }
 
 
-/*---------------------------------------------------------------------------
-  This function sorts the pulses and checks that the pulses don't overlap.
----------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------*
+ * This function sorts the pulses and checks that the pulses don't overlap.
+ *--------------------------------------------------------------------------*/
 
 static bool hfs9000_update_pulses( bool flag )
 {
@@ -145,11 +145,11 @@ static bool hfs9000_update_pulses( bool flag )
 }
 
 
-/*------------------------------------------------------------------------
-  Function is called after pulses have been changed to check if the new
-  settings are still ok, i.e. that they still fit into the pulsers memory
-  and don't overlap.
---------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*
+ * Function is called after pulses have been changed to check if the new
+ * settings are still ok, i.e. that they still fit into the pulsers memory
+ * and don't overlap.
+ *-------------------------------------------------------------------------*/
 
 void hfs9000_do_checks( Function_T *f )
 {
@@ -214,10 +214,10 @@ void hfs9000_do_checks( Function_T *f )
 }
 
 
-/*----------------------------------------------------------------------------
-  Function creates all active pulses in the channels of the pulser assigned
-  to the function passed as argument.
-----------------------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ * Function creates all active pulses in the channels of the pulser
+ * assigned to the function passed as argument.
+ *------------------------------------------------------------------*/
 
 void hfs9000_set_pulses( Function_T *f )
 {
@@ -263,10 +263,10 @@ void hfs9000_set_pulses( Function_T *f )
 }
 
 
-/*----------------------------------------------------------------------------
-  Function is called after the test run to reset all the variables describing
-  the state of the pulser to their initial values
-----------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * Function is called after the test run to reset all the variables
+ * describing the state of the pulser to their initial values
+ *-------------------------------------------------------------------*/
 
 void hfs9000_full_reset( void )
 {
@@ -310,10 +310,10 @@ void hfs9000_full_reset( void )
 }
 
 
-/*----------------------------------------------------------------------------
-  Function deletes a pulse and returns a pointer to the next pulse in the
-  pulse list.
-----------------------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ * Function deletes a pulse and returns a pointer to the next pulse 
+ * in the pulse list.
+ *------------------------------------------------------------------*/
 
 static Pulse_T *hfs9000_delete_pulse( Pulse_T *p )
 {
@@ -372,11 +372,12 @@ static Pulse_T *hfs9000_delete_pulse( Pulse_T *p )
 }
 
 
-/*----------------------------------------------------------------------------
-  Changes the pulse pattern in the channels belonging to function 'f' so that
-  the data in the pulser get in sync with the its internal representation.
-  Some care has taken to minimize the number of commands and their length.
-----------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*
+ * Changes the pulse pattern in the channels belonging to function 'f'
+ * so that the data in the pulser get in sync with the its internal
+ * representation. Some care has taken to minimize the number of
+ * commands and their length.
+ *---------------------------------------------------------------------*/
 
 static bool hfs9000_commit( Function_T *f, bool flag )
 {

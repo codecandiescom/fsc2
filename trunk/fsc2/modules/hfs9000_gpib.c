@@ -29,9 +29,9 @@ static void hfs9000_gpib_failure( void );
 static void hfs9000_setup_trig_in( void );
 
 
-/*-----------------------------------------------------------*/
-/*Intialization of the device at the start of the experiment */
-/*-----------------------------------------------------------*/
+/*------------------------------------------------------------*
+ * Intialization of the device at the start of the experiment
+ *------------------------------------------------------------*/
 
 bool hfs9000_init( const char *name )
 {
@@ -241,18 +241,18 @@ bool hfs9000_init( const char *name )
 }
 
 
-/*-------------------------------------------------------------------*/
-/* Sets up the way the pulser runs. If the pulser is to run without  */
-/* an external trigger in event it is switched to ABURST mode (i.e.  */
-/* the pulse sequence is repeated automatically with a delay for the */
-/* re-arm time of ca. 15 us). If the pulser has to react to trigger  */
-/* in events it is run in BURST mode, i.e. the pulse sequence is     */
-/* output after a trigger in event. In this case also the parameter  */
-/* for the trigger in are set. Because there's a delay of ca. 130 ns */
-/* between the trigger in and the pulser outputting the data this is */
-/* somewhat reduced by setting the maximum possible negative channel */
-/* delay for all used channels.                                      */
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * Sets up the way the pulser runs. If the pulser is to run without
+ * an external trigger in event it is switched to ABURST mode (i.e.
+ * the pulse sequence is repeated automatically with a delay for the
+ * re-arm time of ca. 15 us). If the pulser has to react to trigger
+ * in events it is run in BURST mode, i.e. the pulse sequence is
+ * output after a trigger in event. In this case also the parameter
+ * for the trigger in are set. Because there's a delay of ca. 130 ns
+ * between the trigger in and the pulser outputting the data this is
+ * somewhat reduced by setting the maximum possible negative channel
+ * delay for all used channels.
+ *-------------------------------------------------------------------*/
 
 static void hfs9000_setup_trig_in( void )
 {
@@ -305,9 +305,9 @@ static void hfs9000_setup_trig_in( void )
 }
 
 
-/*-------------------------------------------------------------------------*/
-/* Sets 'length' slots, starting at 'start', of a channel to either 1 or 0 */
-/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*
+ * Sets 'length' slots, starting at 'start', of a channel to either 1 or 0
+ *-------------------------------------------------------------------------*/
 
 bool hfs9000_set_constant( int channel, Ticks start, Ticks length, int state )
 {
@@ -323,9 +323,9 @@ bool hfs9000_set_constant( int channel, Ticks start, Ticks length, int state )
 }
 
 
-/*-------------------------------------*/
-/* Sets the trigger out pulse position */
-/*-------------------------------------*/
+/*-------------------------------------*
+ * Sets the trigger out pulse position
+ *-------------------------------------*/
 
 bool hfs9000_set_trig_out_pulse( void )
 {
@@ -341,15 +341,15 @@ bool hfs9000_set_trig_out_pulse( void )
 }
 
 
-/*-----------------------------------------------------------------*/
-/* Sets the run mode of the the pulser - either running or stopped */
-/* after waiting for previous commands to finish (that's what the  */
-/* "*WAI;" bit in the command is about)                            */
-/* ->                                                              */
-/*  * state to be set: 1 = START, 0 = STOP                         */
-/* <-                                                              */
-/*  * 1: ok, 0: error                                              */
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ * Sets the run mode of the the pulser - either running or stopped
+ * after waiting for previous commands to finish (that's what the
+ * "*WAI;" bit in the command is about)
+ * ->
+ *  * state to be set: 1 = START, 0 = STOP
+ * <-
+ *  * 1: ok, 0: error
+ *-----------------------------------------------------------------*/
 
 bool hfs9000_run( bool flag )
 {
@@ -363,9 +363,9 @@ bool hfs9000_run( bool flag )
 }
 
 
-/*-----------------------------------------------*/
-/* Determines if a channel is switched on or off */
-/*-----------------------------------------------*/
+/*-----------------------------------------------*
+ * Determines if a channel is switched on or off
+ *-----------------------------------------------*/
 
 bool hfs9000_get_channel_state( int channel )
 {
@@ -385,9 +385,9 @@ bool hfs9000_get_channel_state( int channel )
 }
 
 
-/*------------------------------*/
-/* Switches a channel on or off */
-/*------------------------------*/
+/*------------------------------*
+ * Switches a channel on or off
+ *------------------------------*/
 
 bool hfs9000_set_channel_state( int channel, bool flag )
 {
@@ -405,9 +405,9 @@ bool hfs9000_set_channel_state( int channel, bool flag )
 }
 
 
-/*-------------------------------*/
-/* Sends a command to the device */
-/*-------------------------------*/
+/*-------------------------------*
+ * Sends a command to the device
+ *-------------------------------*/
 
 bool hfs9000_command( const char *cmd )
 {
@@ -417,9 +417,9 @@ bool hfs9000_command( const char *cmd )
 }
 
 
-/*---------------------------------------------------------------*/
-/* Function to poll the device until all operations are complete */
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ * Function to poll the device until all operations are complete
+ *---------------------------------------------------------------*/
 
 bool hfs9000_operation_complete( void )
 {
@@ -440,9 +440,9 @@ bool hfs9000_operation_complete( void )
 }
 
 
-/*---------------------------------------------------*/
-/* Called on failures to communicate with the device */
-/*---------------------------------------------------*/
+/*---------------------------------------------------*
+ * Called on failures to communicate with the device
+ *---------------------------------------------------*/
 
 static void hfs9000_gpib_failure( void )
 {

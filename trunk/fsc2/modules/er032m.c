@@ -176,8 +176,8 @@ static struct
 	} while ( 0 )
 
 
-/*----------------------------------------------------------------*/
-/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ *----------------------------------------------------------------*/
 
 int er032m_init_hook( void )
 {
@@ -203,8 +203,8 @@ int er032m_init_hook( void )
 }
 
 
-/*---------------------------------------------------------*/
-/*---------------------------------------------------------*/
+/*---------------------------------------------------------*
+ *---------------------------------------------------------*/
 
 int er032m_test_hook( void )
 {
@@ -241,8 +241,8 @@ int er032m_test_hook( void )
 }
 
 
-/*---------------------------------------------------------*/
-/*---------------------------------------------------------*/
+/*---------------------------------------------------------*
+ *---------------------------------------------------------*/
 
 int er032m_end_of_test_hook( void )
 {
@@ -261,8 +261,8 @@ int er032m_end_of_test_hook( void )
 }
 
 
-/*---------------------------------------------------------*/
-/*---------------------------------------------------------*/
+/*---------------------------------------------------------*
+ *---------------------------------------------------------*/
 
 int er032m_exp_hook( void )
 {
@@ -271,8 +271,8 @@ int er032m_exp_hook( void )
 }
 
 
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ *---------------------------------------------------------------*/
 
 int er032m_end_of_exp_hook( void )
 {
@@ -294,8 +294,8 @@ int er032m_end_of_exp_hook( void )
 }
 
 
-/*-------------------------------------------------------------------*/
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ *-------------------------------------------------------------------*/
 
 Var_T *magnet_name( UNUSED_ARG Var_T *v )
 {
@@ -303,10 +303,10 @@ Var_T *magnet_name( UNUSED_ARG Var_T *v )
 }
 
 
-/*--------------------------------------------------*/
-/* Function for registering the start field and the */
-/* field step size during the PREPARATIONS section. */
-/*--------------------------------------------------*/
+/*--------------------------------------------------*
+ * Function for registering the start field and the
+ * field step size during the PREPARATIONS section.
+ *--------------------------------------------------*/
 
 Var_T *magnet_setup( Var_T *v )
 {
@@ -381,8 +381,8 @@ Var_T *magnet_setup( Var_T *v )
 }
 
 
-/*-------------------------------------------------------------------*/
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ *-------------------------------------------------------------------*/
 
 Var_T *sweep_up( UNUSED_ARG Var_T *v )
 {
@@ -460,8 +460,8 @@ Var_T *sweep_up( UNUSED_ARG Var_T *v )
 }
 
 
-/*-------------------------------------------------------------------*/
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ *-------------------------------------------------------------------*/
 
 Var_T *sweep_down( UNUSED_ARG Var_T *v )
 {
@@ -535,8 +535,8 @@ Var_T *sweep_down( UNUSED_ARG Var_T *v )
 }
 
 
-/*-------------------------------------------------------------------*/
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ *-------------------------------------------------------------------*/
 
 Var_T *reset_field( UNUSED_ARG Var_T *v )
 {
@@ -553,8 +553,8 @@ Var_T *reset_field( UNUSED_ARG Var_T *v )
 }
 
 
-/*-------------------------------------------------------------------*/
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ *-------------------------------------------------------------------*/
 
 Var_T *get_field( UNUSED_ARG Var_T *v )
 {
@@ -562,8 +562,8 @@ Var_T *get_field( UNUSED_ARG Var_T *v )
 }
 
 
-/*-------------------------------------------------------------------*/
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ *-------------------------------------------------------------------*/
 
 Var_T *set_field( Var_T *v )
 {
@@ -589,8 +589,8 @@ Var_T *set_field( Var_T *v )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 Var_T *magnet_command( Var_T *v )
 {
@@ -621,9 +621,9 @@ Var_T *magnet_command( Var_T *v )
 }
 
 
-/*------------------------------*/
-/* Initialization of the device */
-/*------------------------------*/
+/*------------------------------*
+ * Initialization of the device
+ *------------------------------*/
 
 static void er032m_init( void )
 {
@@ -697,14 +697,14 @@ static void er032m_init( void )
 }
 
 
-/*--------------------------------------------------------------------*/
-/* Function sets up the magnet in case magnet_setp() had been called, */
-/* assuming that field will be changed via sweep_up() or sweep_down() */
-/* calls, in which case the sweep usually can be done via changes of  */
-/* the SWA and without changing the center field. The center field is */
-/* set to the required start field, so that up and down sweeps can be */
-/* done without changing the center field.                            */
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ * Function sets up the magnet in case magnet_setp() had been called,
+ * assuming that field will be changed via sweep_up() or sweep_down()
+ * calls, in which case the sweep usually can be done via changes of
+ * the SWA and without changing the center field. The center field is
+ * set to the required start field, so that up and down sweeps can be
+ * done without changing the center field.
+ *--------------------------------------------------------------------*/
 
 static void er032m_start_field( void )
 {
@@ -826,27 +826,27 @@ static void er032m_start_field( void )
 }
 
 
-/*---------------------------------------------------------------------*/
-/* This function is called when the user asks for setting a new field. */
-/* One important point here is to change the center field only if      */
-/* absolutely necessary. We have to distinguish several cases:         */
-/* 1. There is no sweep step size set and thus the sweep width is set  */
-/*    to zero. In this case we try to guess a step size from the       */
-/*    difference between the currrent field and the target field. This */
-/*    is used to set a sweep width, and if we're lucky (i.e. the user  */
-/*    does not require random field changes in the future) we can use  */
-/*    the SWAs also for later field changes.                           */
-/* 2. If there is a sweep width set but there was no magnet_setup()    */
-/*    call we try to set the field using SWAs if one of them fits the  */
-/*    the new field value. If not we have to shift the center field,   */
-/*    but we first try to keep the change as small as possible.        */
-/*    Because our guess about the typical field changes didn't work    */
-/*    out we also have to adapt the sweep width.                       */
-/* 3. If magnet_setup() has been called changing the sweep width can't */
-/*    be done. If possible field change is done via changing the SWA,  */
-/*    otherwise a combination of changing the SWA and shifting the     */
-/*    center field is used.                                            */
-/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*
+ * This function is called when the user asks for setting a new field.
+ * One important point here is to change the center field only if
+ * absolutely necessary. We have to distinguish several cases:
+ * 1. There is no sweep step size set and thus the sweep width is set
+ *    to zero. In this case we try to guess a step size from the
+ *    difference between the currrent field and the target field. This
+ *    is used to set a sweep width, and if we're lucky (i.e. the user
+ *    does not require random field changes in the future) we can use
+ *    the SWAs also for later field changes.
+ * 2. If there is a sweep width set but there was no magnet_setup()
+ *    call we try to set the field using SWAs if one of them fits the
+ *    the new field value. If not we have to shift the center field,
+ *    but we first try to keep the change as small as possible.
+ *    Because our guess about the typical field changes didn't work
+ *    out we also have to adapt the sweep width.
+ * 3. If magnet_setup() has been called changing the sweep width can't
+ *    be done. If possible field change is done via changing the SWA,
+ *    otherwise a combination of changing the SWA and shifting the
+ *    center field is used.
+ *---------------------------------------------------------------------*/
 
 static double er032m_set_field( double field )
 {
@@ -874,8 +874,8 @@ static double er032m_set_field( double field )
 }
 
 
-/*----------------------------------------------------------------------*/
-/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*
+ *----------------------------------------------------------------------*/
 
 static void er032m_change_field_and_set_sw( double field )
 {
@@ -942,8 +942,8 @@ static void er032m_change_field_and_set_sw( double field )
 }
 
 
-/*----------------------------------------------------------------------*/
-/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*
+ *----------------------------------------------------------------------*/
 
 static void er032m_change_field_and_sw( double field )
 {
@@ -967,15 +967,15 @@ static void er032m_change_field_and_sw( double field )
 }
 
 
-/*------------------------------------------------------------------*/
-/* This function gets called for the set_field() EDL function when  */
-/* the magnet_setup() EDL function had also been called during the  */
-/* PREPARATION stage. In this case we can't change the sweep width  */
-/* and have to do our best trying to achieve the requested field    */
-/* with just changing the center field and the SWA count. Sometimes */
-/* we will only be able to set the field with a certain deviation   */
-/* from the requested field.                                        */
-/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ * This function gets called for the set_field() EDL function when
+ * the magnet_setup() EDL function had also been called during the
+ * PREPARATION stage. In this case we can't change the sweep width
+ * and have to do our best trying to achieve the requested field
+ * with just changing the center field and the SWA count. Sometimes
+ * we will only be able to set the field with a certain deviation
+ * from the requested field.
+ *------------------------------------------------------------------*/
 
 static void er032m_change_field_and_keep_sw( double field )
 {
@@ -1069,13 +1069,13 @@ static void er032m_change_field_and_keep_sw( double field )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/* This function tries to guess a useful sweep range from the difference */
-/* between the current center field and the target field so that the     */
-/* jump can be done by setting a SWA. If it isn't possible to find such  */
-/* a setting the function returns FAIL, otherwise both the entries sw,   */
-/* swa and swa_step in the magnet structure get set and OK is returned.  */
-/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ * This function tries to guess a useful sweep range from the difference
+ * between the current center field and the target field so that the
+ * jump can be done by setting a SWA. If it isn't possible to find such
+ * a setting the function returns FAIL, otherwise both the entries sw,
+ * swa and swa_step in the magnet structure get set and OK is returned.
+ *-----------------------------------------------------------------------*/
 
 static bool er032m_guess_sw( double field_diff )
 {
@@ -1148,8 +1148,8 @@ static bool er032m_guess_sw( double field_diff )
 }
 
 
-/*-------------------------------------------------------------------*/
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ *-------------------------------------------------------------------*/
 
 static void er032m_field_check( double field )
 {
@@ -1169,8 +1169,8 @@ static void er032m_field_check( double field )
 }
 
 
-/*-------------------------------------------------------------------*/
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ *-------------------------------------------------------------------*/
 
 static void er032m_test_leds( void )
 {
@@ -1245,8 +1245,8 @@ static void er032m_test_leds( void )
 }
 
 
-/*-------------------------------------------------------*/
-/*-------------------------------------------------------*/
+/*-------------------------------------------------------*
+ *-------------------------------------------------------*/
 
 static double er032m_get_field( void )
 {
@@ -1263,8 +1263,8 @@ static double er032m_get_field( void )
 }
 
 
-/*-------------------------------------------------------*/
-/*-------------------------------------------------------*/
+/*-------------------------------------------------------*
+ *-------------------------------------------------------*/
 
 static double er032m_set_cf( double center_field )
 {
@@ -1300,8 +1300,8 @@ static double er032m_set_cf( double center_field )
 }
 
 
-/*-------------------------------------------------------*/
-/*-------------------------------------------------------*/
+/*-------------------------------------------------------*
+ *-------------------------------------------------------*/
 
 static double er032m_get_cf( void )
 {
@@ -1318,8 +1318,8 @@ static double er032m_get_cf( void )
 }
 
 
-/*-------------------------------------------------------*/
-/*-------------------------------------------------------*/
+/*-------------------------------------------------------*
+ *-------------------------------------------------------*/
 
 static double er032m_set_sw( double sweep_width )
 {
@@ -1365,8 +1365,8 @@ static double er032m_set_sw( double sweep_width )
 }
 
 
-/*-------------------------------------------------------*/
-/*-------------------------------------------------------*/
+/*-------------------------------------------------------*
+ *-------------------------------------------------------*/
 
 static double er032m_get_sw( void )
 {
@@ -1383,8 +1383,8 @@ static double er032m_get_sw( void )
 }
 
 
-/*-------------------------------------------------------*/
-/*-------------------------------------------------------*/
+/*-------------------------------------------------------*
+ *-------------------------------------------------------*/
 
 static int er032m_set_swa( int sweep_address )
 {
@@ -1402,8 +1402,8 @@ static int er032m_set_swa( int sweep_address )
 }
 
 
-/*-------------------------------------------------------*/
-/*-------------------------------------------------------*/
+/*-------------------------------------------------------*
+ *-------------------------------------------------------*/
 
 #if 0
 static int er032m_get_swa( void )
@@ -1422,8 +1422,8 @@ static int er032m_get_swa( void )
 #endif
 
 
-/*--------------------------------------------------------------*/
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *--------------------------------------------------------------*/
 
 static bool er032m_command( const char *cmd )
 {
@@ -1433,8 +1433,8 @@ static bool er032m_command( const char *cmd )
 }
 
 
-/*--------------------------------------------------------------*/
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *--------------------------------------------------------------*/
 
 static bool er032m_talk( const char *cmd, char *reply, long *length )
 {
@@ -1445,8 +1445,8 @@ static bool er032m_talk( const char *cmd, char *reply, long *length )
 }
 
 
-/*-------------------------------------------------------*/
-/*-------------------------------------------------------*/
+/*-------------------------------------------------------*
+ *-------------------------------------------------------*/
 
 static void er032m_failure( void )
 {
@@ -1455,8 +1455,8 @@ static void er032m_failure( void )
 }
 
 
-/*-------------------------------------------------------*/
-/*-------------------------------------------------------*/
+/*-------------------------------------------------------*
+ *-------------------------------------------------------*/
 
 #define MAX_RECURSION 20          /* deepest level of recursion */
 #define MAX_ADD_STEPS 100         /* maximum number of additional SWA steps */
