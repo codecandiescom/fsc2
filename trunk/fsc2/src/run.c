@@ -732,7 +732,8 @@ void run_sigchld_callback( FL_OBJECT *a, long b )
 
 	tools_clear( );
 
-	/* Reset all the devices and finally the GPIB bus ad serial port(s) */
+	/* Reset all the devices and finally the GPIB bus, RULBUS and serial
+	   port(s) */
 
 	run_end_of_exp_hooks( );
 
