@@ -376,7 +376,7 @@ bool tds520_get_cursor_position( int cur_no, double *cp )
     long length = 30;
 
 
-	assert( cur_no == 1 || cur_no == 2 );
+	fsc2_assert( cur_no == 1 || cur_no == 2 );
 
 	strcat( cmd, cur_no == 1 ? "1?\n" : "2?\n" );
     if ( gpib_write( tds520.device, cmd, strlen( cmd ) ) == FAILURE ||
@@ -503,7 +503,7 @@ bool tds520_set_cursor( int cur_num, double pos )
     char cmd[ 60 ];
 
 
-	assert( cur_num == 1 || cur_num == 2 );
+	fsc2_assert( cur_num == 1 || cur_num == 2 );
 
     /* set cursors to specified positions */
 
@@ -554,7 +554,7 @@ bool tds520_display_channel( int channel )
     long length = 10;
 
 
-	assert( channel >= TDS520_CH1 && channel < TDS520_AUX1 );
+	fsc2_assert( channel >= TDS520_CH1 && channel < TDS520_AUX1 );
 
 	/* Get the channels sensitivity */
 
@@ -594,7 +594,7 @@ double tds520_get_sens( int channel )
     long length = 30;
 
 
-	assert( channel >= TDS520_CH1 && channel <= TDS520_CH2 );
+	fsc2_assert( channel >= TDS520_CH1 && channel <= TDS520_CH2 );
 
 	sprintf( cmd, "%s:SCA?\n", Channel_Names[ channel ] );
 	if ( gpib_write( tds520.device, cmd, strlen( cmd ) ) == FAILURE ||
@@ -616,7 +616,7 @@ bool tds520_set_sens( int channel, double sens )
     char cmd[ 40 ];
 
 
-	assert( channel >= TDS520_CH1 && channel <= TDS520_CH2 );
+	fsc2_assert( channel >= TDS520_CH1 && channel <= TDS520_CH2 );
 
 	sprintf( cmd, "%s:SCA ", Channel_Names[ channel ] );
 	gcvt( sens, 8, cmd + strlen( cmd ) );
@@ -720,7 +720,7 @@ bool tds520_get_curve( int channel, WINDOW *w, double **data, long *length,
 	long len1, len2;
 
 
-	assert( channel >= TDS520_CH1 && channel < TDS520_AUX1 );
+	fsc2_assert( channel >= TDS520_CH1 && channel < TDS520_AUX1 );
 
 	/* If asked to simulate using the cursors (as may be used with the newer
 	   oszilloscopes) by setting the cursors to the start and end position
@@ -808,7 +808,7 @@ bool tds520_get_curve( int channel, WINDOW *w, double **data, long *length,
 	   to do it...) Also scale data so that we get the real measured
 	   voltage. */
 
-	assert( sizeof( short ) == 2 );
+	fsc2_assert( sizeof( short ) == 2 );
 
 	b = buffer + len1 + len2 + 1;
 

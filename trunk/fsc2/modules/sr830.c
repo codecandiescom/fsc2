@@ -885,7 +885,7 @@ static bool sr830_init( const char *name )
 	int i;
 
 
-	assert( sr830.device < 0 );
+	fsc2_assert( sr830.device < 0 );
 
 	if ( gpib_init_device( name, &sr830.device ) == FAILURE )
         return FAIL;
@@ -972,13 +972,13 @@ static void sr830_get_xy_data( double *data, long *channels, int num_channels )
 	int i;
 
 
-	assert( num_channels >= 2 && num_channels <= 6 );
+	fsc2_assert( num_channels >= 2 && num_channels <= 6 );
 
 	/* Assemble the command to be send to the lock-in */
 
 	for ( i = 0; i < num_channels; i++ )
 	{
-		assert( channels[ i ] > 0 && channels[ i ] <= NUM_CHANNELS );
+		fsc2_assert( channels[ i ] > 0 && channels[ i ] <= NUM_CHANNELS );
 
 		if ( i == 0 )
 			sprintf( cmd + strlen( cmd ), "%ld\n", channels[ i ] );
@@ -1027,7 +1027,7 @@ static double sr830_get_adc_data( long channel )
 	long length = 16;
 
 
-	assert( channel >= 1 && channel <= 4 );
+	fsc2_assert( channel >= 1 && channel <= 4 );
 	buffer[ 5 ] = ( char ) channel + '0';
 
 	if ( gpib_write( sr830.device, buffer, strlen( buffer ) ) == FAILURE ||
@@ -1049,8 +1049,8 @@ static double sr830_set_dac_data( long port, double voltage )
 {
 	char buffer [ 40 ];
 
-	assert( port >= 1 && port <= 4 );
-	assert( voltage >= DAC_MIN_VOLTAGE && voltage <= DAC_MAX_VOLTAGE );
+	fsc2_assert( port >= 1 && port <= 4 );
+	fsc2_assert( voltage >= DAC_MIN_VOLTAGE && voltage <= DAC_MAX_VOLTAGE );
 
 	sprintf( buffer, "AUXV %ld,%f\n", port, voltage );
 	if ( gpib_write( sr830.device, buffer, strlen( buffer ) ) == FAILURE )
@@ -1283,7 +1283,7 @@ static long sr830_set_harmonic( long harmonic )
 	char buffer[ 20 ];
 
 
-	assert( harmonic >= MIN_HARMONIC && harmonic <= MAX_HARMONIC );
+	fsc2_assert( harmonic >= MIN_HARMONIC && harmonic <= MAX_HARMONIC );
 
 	sprintf( buffer, "HARM %ld\n", harmonic );
 	if ( gpib_write( sr830.device, buffer, strlen( buffer ) ) == FAILURE )
@@ -1331,7 +1331,7 @@ static double sr830_set_ref_level( double level )
 	char buffer[ 50 ];
 
 
-	assert( level >= MIN_REF_LEVEL && level <= MAX_REF_LEVEL );
+	fsc2_assert( level >= MIN_REF_LEVEL && level <= MAX_REF_LEVEL );
 
 	sprintf( buffer, "SLVL %f\n", level );
 	if ( gpib_write( sr830.device, buffer, strlen( buffer ) ) == FAILURE )

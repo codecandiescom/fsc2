@@ -539,7 +539,7 @@ bool dg2020_set_phase_reference( int phs, int function )
 	FUNCTION *f;
 
 
-	assert ( Cur_PHS != - 1 ? ( Cur_PHS == phs ) : 1 );
+	fsc2_assert ( Cur_PHS != - 1 ? ( Cur_PHS == phs ) : 1 );
 
 	Cur_PHS = phs;
 
@@ -591,8 +591,7 @@ bool dg2020_phase_setup_prep( int phs, int type, int pod, long val,
 							  long protocol )
 {
 	pod = pod;                        /* keep the compiler happy... */
-	assert ( Cur_PHS != - 1 ? ( Cur_PHS == phs ) : 1 );
-
+	fsc2_assert ( Cur_PHS != - 1 ? ( Cur_PHS == phs ) : 1 );
 
 	Cur_PHS = phs;
 

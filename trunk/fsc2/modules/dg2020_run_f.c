@@ -192,8 +192,8 @@ void dg2020_reorganize_phases( FUNCTION *f, bool flag )
 	bool need_update = UNSET;
 
 
-	fsc2_assert( ( f->self == PULSER_CHANNEL_PHASE_1 ||
-				   f->self == PULSER_CHANNEL_PHASE_2 ) && f->is_used );
+	fsc2_assert( f->is_used && ( f->self == PULSER_CHANNEL_PHASE_1 ||
+								 f->self == PULSER_CHANNEL_PHASE_2 ) );
 
 	/* First check if any of the phase pulses needs to be updated */
 

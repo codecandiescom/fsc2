@@ -612,7 +612,7 @@ static double keithley228a_goto_current( double new_current )
 	bool do_test;
 
 	
-	assert( fabs( new_current ) <= KEITHLEY228A_MAXMAX_CURRENT );
+	fsc2_assert( fabs( new_current ) <= KEITHLEY228A_MAXMAX_CURRENT );
 
 	/* Nothing really to be done in a test run */
 
@@ -699,7 +699,7 @@ static double keithley228a_set_current( double new_current )
 	int access;
 
 
-	assert( fabs( new_current ) <= KEITHLEY228A_MAXMAX_CURRENT );
+	fsc2_assert( fabs( new_current ) <= KEITHLEY228A_MAXMAX_CURRENT );
 
 	if ( ! keithley228a.use_correction )
 	{

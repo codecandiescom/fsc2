@@ -160,7 +160,7 @@ double hp8647a_set_frequency( double freq )
 	char cmd[ 100 ];
 
 
-	assert( freq >= MIN_FREQ && freq <= MAX_FREQ );
+	fsc2_assert( freq >= MIN_FREQ && freq <= MAX_FREQ );
 
 	sprintf( cmd, "FREQ:CW %.0f\n", freq );
 	if ( gpib_write( hp8647a.device, cmd, strlen( cmd ) ) == FAILURE )
@@ -196,7 +196,7 @@ double hp8647a_set_attenuation( double att )
 	char cmd[ 100 ];
 
 
-	assert( att >= MAX_ATTEN && att <= hp8647a.min_attenuation );
+	fsc2_assert( att >= MAX_ATTEN && att <= hp8647a.min_attenuation );
 
 	sprintf( cmd, "POW:AMPL %6.1f\n", att );
 	if ( gpib_write( hp8647a.device, cmd, strlen( cmd ) ) == FAILURE )
@@ -233,7 +233,7 @@ int hp8647a_set_mod_type( int type )
 	int i;
 
 
-	assert( type >= 0 && type < NUM_MOD_TYPES );
+	fsc2_assert( type >= 0 && type < NUM_MOD_TYPES );
 
 	/* The manual is not really clear about this but it looks as if we
 	   have to make sure that only one modulation type is switched on... */
@@ -310,8 +310,8 @@ int hp8647a_set_mod_source( int type, int source )
 	char cmd1[ 100 ], cmd2[ 100 ];
 
 
-	assert( type >= 0 && type < NUM_MOD_TYPES );
-	assert( source >= 0 && source < NUM_MOD_SOURCES );
+	fsc2_assert( type >= 0 && type < NUM_MOD_TYPES );
+	fsc2_assert( source >= 0 && source < NUM_MOD_SOURCES );
 
 	/* Neither AM nor phase modulation allows external DC as modulation
 	   source */
@@ -354,7 +354,7 @@ int hp8647a_set_mod_source( int type, int source )
 			break;
 
 		default :                         /* this can never happen... */
-			assert( 1 == 0 );
+			fsc2_assert( 1 == 0 );
 	}
 
 	if ( I_am == PARENT && ! HP8647A_INIT )
@@ -382,7 +382,7 @@ int hp8647a_get_mod_source( int type )
 	long freq;
 
 
-	assert( type >= 0 && type < NUM_MOD_TYPES );
+	fsc2_assert( type >= 0 && type < NUM_MOD_TYPES );
 
 	if ( TEST_RUN )
 	{
@@ -432,7 +432,7 @@ double hp8647a_set_mod_ampl( int type, double ampl )
 	char cmd[ 100 ];
 
 
-	assert( type >= 0 && type < NUM_MOD_TYPES );
+	fsc2_assert( type >= 0 && type < NUM_MOD_TYPES );
 
 	if ( ampl < 0.0 )
 	{
@@ -506,7 +506,7 @@ double hp8647a_set_mod_ampl( int type, double ampl )
 			break;
 
 		default :                         /* this can never happen... */
-			assert( 1 == 0 );
+			fsc2_assert( 1 == 0 );
 	}
 
 	if ( I_am == PARENT && ! HP8647A_INIT )
@@ -531,7 +531,7 @@ double hp8647a_get_mod_ampl( int type )
 	double defaults[ ] = { 1.0e5, 100.0, 10.0 };
 
 
-	assert( type >= 0 && type < NUM_MOD_TYPES );
+	fsc2_assert( type >= 0 && type < NUM_MOD_TYPES );
 
 	if ( TEST_RUN )
 	{

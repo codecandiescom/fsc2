@@ -753,7 +753,7 @@ bool sr530_init( const char *name )
 	int i;
 
 
-	assert( sr530.device < 0 );
+	fsc2_assert( sr530.device < 0 );
 
 	if ( gpib_init_device( name, &sr530.device ) == FAILURE )
         return FAIL;
@@ -798,7 +798,7 @@ double sr530_get_data( int channel )
 	long length = 20;
 
 
-	assert( channel == 1 || channel == 2 );
+	fsc2_assert( channel == 1 || channel == 2 );
 
 	cmd[ 1 ] = ( char ) ( channel + '0' );
 	
@@ -1041,7 +1041,7 @@ static double sr530_set_dac_voltage( long channel, double voltage )
 	/* Just some more sanity checks, should already been done by calling
        function... */
 
-	assert( channel >= first_DAC_port || channel <= last_DAC_port );
+	fsc2_assert( channel >= first_DAC_port || channel <= last_DAC_port );
 	if ( fabs( voltage ) >= 10.24 )
 	{
 		if ( voltage > 0.0 )

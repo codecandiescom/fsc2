@@ -46,7 +46,7 @@ Ticks dg2020_double2ticks( double time )
 
 double dg2020_ticks2double( Ticks ticks )
 {
-	assert( dg2020.is_timebase );
+	fsc2_assert( dg2020.is_timebase );
 	return ( double ) ( dg2020.timebase * ticks );
 }
 
@@ -162,7 +162,7 @@ CHANNEL *dg2020_get_next_free_channel( void )
 	while ( dg2020.channel[ i ].function != NULL )
 		i++;
 
-	assert( i < MAX_CHANNELS );                 /* this can't happen ;-) */
+	fsc2_assert( i < MAX_CHANNELS );               /* this can't happen ;-) */
 
 	return &dg2020.channel[ i ];
 }

@@ -178,8 +178,8 @@ void hfs9000_set_pulses( FUNCTION *f )
 	int i;
 
 
-	assert( f->self != PULSER_CHANNEL_PHASE_1 &&
-			f->self != PULSER_CHANNEL_PHASE_2 );
+	fsc2_assert( f->self != PULSER_CHANNEL_PHASE_1 &&
+				 f->self != PULSER_CHANNEL_PHASE_2 );
 
 	if ( f->channel->self == HFS9000_TRIG_OUT )
 	{
@@ -279,7 +279,7 @@ static PULSE *hfs9000_delete_pulse( PULSE *p )
 		if ( p->function->pulses[ i ] == p )
 			break;
 
-	assert( i < p->function->num_pulses );  /* Paranoia */
+	fsc2_assert( i < p->function->num_pulses );             /* Paranoia */
 
 	/* Put the last of the functions pulses into the slot for the pulse to
 	   be deleted and shorten the list by one element */

@@ -381,7 +381,7 @@ bool tds754a_get_cursor_position( int cur_no, double *cp )
     char reply[ 30 ];
     long length = 30;
 
-	assert( cur_no == 1 || cur_no == 2 );
+	fsc2_assert( cur_no == 1 || cur_no == 2 );
 
 	strcat( cmd, cur_no == 1 ? "1?\n" : "2?\n" );
     if ( gpib_write( tds754a.device, cmd, strlen( cmd ) ) == FAILURE ||
@@ -516,7 +516,7 @@ bool tds754a_set_cursor( int cur_num, double pos )
     char cmd[ 60 ] = "CURS:VBA:POSITION";
 
 
-	assert( cur_num == 1 || cur_num == 2 );
+	fsc2_assert( cur_num == 1 || cur_num == 2 );
 
     /* set cursors to specified positions */
 
@@ -597,7 +597,7 @@ bool tds754a_display_channel( int channel )
     long length = 10;
 
 
-	assert( channel >= TDS754A_CH1 && channel < TDS754A_AUX );
+	fsc2_assert( channel >= TDS754A_CH1 && channel < TDS754A_AUX );
 
 	/* Get the channels sensitivity */
 
@@ -637,7 +637,7 @@ double tds754a_get_sens( int channel )
     long length = 30;
 
 
-	assert( channel >= TDS754A_CH1 && channel <= TDS754A_CH4 );
+	fsc2_assert( channel >= TDS754A_CH1 && channel <= TDS754A_CH4 );
 
 	sprintf( cmd, "%s:SCA?\n", Channel_Names[ channel ] );
 	if ( gpib_write( tds754a.device, cmd, strlen( cmd ) ) == FAILURE ||
@@ -661,7 +661,7 @@ bool tds754a_set_sens( int channel, double sens )
 	long length = 40;
 
 
-	assert( channel >= TDS754A_CH1 && channel <= TDS754A_CH4 );
+	fsc2_assert( channel >= TDS754A_CH1 && channel <= TDS754A_CH4 );
 
 	/* On this digitizer the sensitivity can only be set to higher values than
 	   1 V when using 50 Ohm input impedance */ 
@@ -736,7 +736,7 @@ double tds754a_get_area( int channel, WINDOW *w, bool use_cursor )
     if ( gpib_write( tds754a.device, "MEASU:IMM:TYP ARE\n", 18 ) == FAILURE )
 		tds754a_gpib_failure( );
 
-	assert( channel >= TDS754A_CH1 && channel < TDS754A_AUX );
+	fsc2_assert( channel >= TDS754A_CH1 && channel < TDS754A_AUX );
 
 	/* Set channel (if the channel is not already set) */
 
@@ -836,7 +836,7 @@ bool tds754a_get_curve( int channel, WINDOW *w, double **data, long *length,
 	long len1, len2;
 
 
-	assert( channel >= TDS754A_CH1 && channel < TDS754A_AUX );
+	fsc2_assert( channel >= TDS754A_CH1 && channel < TDS754A_AUX );
 
 	/* Calculate the scale factor for converting the data returned by the
 	   digitizer (2-byte integers) into real voltage levels */
@@ -914,7 +914,7 @@ bool tds754a_get_curve( int channel, WINDOW *w, double **data, long *length,
 	   to do it...) Also scale data so that we get the real measured
 	   voltage. */
 
-	assert( sizeof( short ) == 2 );
+	fsc2_assert( sizeof( short ) == 2 );
 
 	b = buffer + len1 + len2 + 1;
 
@@ -944,7 +944,7 @@ double tds754a_get_amplitude( int channel, WINDOW *w, bool use_cursor )
     if ( gpib_write( tds754a.device, "MEASU:IMM:TYP AMP\n", 18 ) == FAILURE )
 		tds754a_gpib_failure( );
 
-	assert( channel >= TDS754A_CH1 && channel < TDS754A_AUX );
+	fsc2_assert( channel >= TDS754A_CH1 && channel < TDS754A_AUX );
 
 	/* Set channel (if the channel is not already set) */
 

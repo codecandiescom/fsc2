@@ -856,7 +856,7 @@ Var *synthesizer_modulation( Var *v )
 					break;
 
 				default :                 /* this definitely can't happen... */
-					assert( 1 == 0 );
+					fsc2_assert( 1 == 0 );
 			}
 		}
 		set |= ( 1 << ( res - 1 ) );

@@ -344,7 +344,7 @@ bool hfs9000_get_channel_state( int channel )
 	long len = 100;
 
 
-	assert ( channel >= MIN_CHANNEL && channel <= MAX_CHANNEL );
+	fsc2_assert ( channel >= MIN_CHANNEL && channel <= MAX_CHANNEL );
 
 	sprintf( cmd, "PGENA:CH%1d:OUT?\n", channel );
 	if ( gpib_write( hfs9000.device, cmd, strlen( cmd ) ) == FAILURE ||
@@ -363,7 +363,7 @@ bool hfs9000_set_channel_state( int channel, bool flag )
 	char cmd[ 100 ];
 
 
-	assert ( channel >= MIN_CHANNEL && channel <= MAX_CHANNEL );
+	fsc2_assert ( channel >= MIN_CHANNEL && channel <= MAX_CHANNEL );
 
 	sprintf( cmd, "*WAI;:PGENA:CH%1d:OUTP %s\n", channel,
 			 flag ? "ON" : "OFF" );

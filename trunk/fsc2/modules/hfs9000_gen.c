@@ -282,7 +282,7 @@ bool hfs9000_set_function_low_level( int function, double voltage )
 
 bool hfs9000_set_trigger_mode( int mode )
 {
-	assert( mode == INTERNAL || mode == EXTERNAL );
+	fsc2_assert( mode == INTERNAL || mode == EXTERNAL );
 
 
 	if ( hfs9000.is_trig_in_mode )
@@ -380,7 +380,7 @@ bool hfs9000_set_trig_in_level( double voltage )
 
 bool hfs9000_set_trig_in_slope( int slope )
 {
-	assert( slope == POSITIVE || slope == NEGATIVE );
+	fsc2_assert( slope == POSITIVE || slope == NEGATIVE );
 
 	if ( hfs9000.is_trig_in_slope && hfs9000.trig_in_slope != slope )
 	{

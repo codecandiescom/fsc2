@@ -510,7 +510,7 @@ Var *boxcar_get_curve( Var *v )
 
 static bool egg4402_init( const char *name )
 {
-	assert( egg4402.device < 0 );
+	fsc2_assert( egg4402.device < 0 );
 
 	if ( gpib_init_device( name, &egg4402.device ) == FAILURE )
         return FAIL;

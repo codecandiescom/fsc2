@@ -9,9 +9,10 @@
 #define _GNU_SOURCE 1
 
 
-/* define my email address for bug reports */
+/* define my email address for bug and crash reports */
 
-#define MAIL_ADDRESS "Jens.Toerring@physik.fu-berlin.de"
+//#define MAIL_ADDRESS "Jens.Toerring@physik.fu-berlin.de"
+#define MAIL_ADDRESS "jens"
 
 #define FSC2_SOCKET  "/tmp/fsc2.uds"
 
@@ -59,6 +60,8 @@
 
 #include "fsc2_rsc.h"
 #include "global.h"               /* must be the very first to be included ! */
+#include "fsc2_assert.h"
+#include "bugs.h"
 #include "xinit.h"
 #include "comm.h"
 #include "ipc.h"
@@ -134,6 +137,7 @@ gid_t EGID;                  /* with (should both translate to fsc2) */
 long Lc = 0;                 /* line number in currently parsed file */
 char *Fname = NULL;          /* name of currently parsed file */
 const char *Cur_Func = NULL; /* name of currently executed function */
+Fsc2_Assert Assert_struct;
 Compilation compilation;     /* structure with infos about compilation state */
 Prg_Token *prg_token = NULL; /* array with predigested program */
 long prg_length = 0;         /* number of array elements in predigested
@@ -204,6 +208,7 @@ extern gid_t EGID;
 extern long Lc;
 extern char *Fname;
 extern const char *Cur_Func;
+extern Fsc2_Assert Assert_struct;
 extern Compilation compilation;
 extern Prg_Token *prg_token;
 extern long prg_length;

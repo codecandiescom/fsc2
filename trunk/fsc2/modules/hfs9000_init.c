@@ -119,8 +119,8 @@ static void hfs9000_basic_functions_check( void )
 
 		/* Phase functions are not supported in this driver... */
 
-		assert( i != PULSER_CHANNEL_PHASE_1 &&
-				i != PULSER_CHANNEL_PHASE_2 );
+		fsc2_assert( i != PULSER_CHANNEL_PHASE_1 &&
+					 i != PULSER_CHANNEL_PHASE_2 );
 
 		/* Check if the function has pulses assigned to it */
 

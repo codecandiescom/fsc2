@@ -550,7 +550,7 @@ bool dg2020_set_phase_reference( int phase, int function )
 
 	/* First a sanity check... */
 
-	assert ( Cur_PHS != - 1 ? ( Cur_PHS == phase ) : 1 );
+	fsc2_assert ( Cur_PHS != - 1 ? ( Cur_PHS == phase ) : 1 );
 
 	/* The phase function can't be phase cycled... */
 
@@ -617,7 +617,7 @@ bool dg2020_phase_setup_prep( int func, int type, int pod, long val,
 {
 	/* First a sanity check... */
 
-	assert ( Cur_PHS != - 1 ? ( Cur_PHS == func ) : 1 );
+	fsc2_assert ( Cur_PHS != - 1 ? ( Cur_PHS == func ) : 1 );
 
 	/* This driver only accepts the Frankfurt method of declaring a
 	   phase setup - unrecognized method is also ok */ 
@@ -746,7 +746,8 @@ bool dg2020_phase_setup( int func )
 
 bool dg2020_phase_setup_finalize( int func, PHS phs )
 {
-	fsc2_assert( func == PULSER_CHANNEL_PHASE_1 || func == PULSER_CHANNEL_PHASE_2 );
+	fsc2_assert( func == PULSER_CHANNEL_PHASE_1 ||
+				 func == PULSER_CHANNEL_PHASE_2 );
 
 	if ( dg2020.function[ func ].is_phs )
 	{

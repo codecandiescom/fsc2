@@ -404,7 +404,7 @@ static void lakeshore330_set_unit( long unit )
 	char buf[ 30 ];
 
 
-	assert( unit >= UNIT_KELVIN && unit <= UNIT_SENSOR );
+	fsc2_assert( unit >= UNIT_KELVIN && unit <= UNIT_SENSOR );
 
 	sprintf( buf, "SUNI %c\n", in_units[ unit ] );
 	if ( gpib_write( lakeshore330.device, buf, strlen( buf ) ) == FAILURE )
@@ -447,7 +447,7 @@ static long lakeshore330_sample_channel( long channel )
 	char buf[ 20 ];
 
 
-	assert( channel == SAMPLE_CHANNEL_A || channel == SAMPLE_CHANNEL_B );
+	fsc2_assert( channel == SAMPLE_CHANNEL_A || channel == SAMPLE_CHANNEL_B );
 
 	sprintf( buf, "SCHN %c\n", ( char ) ( channel + 'A' ) );
 	if ( gpib_write( lakeshore330.device, buf, strlen( buf ) ) == FAILURE )
