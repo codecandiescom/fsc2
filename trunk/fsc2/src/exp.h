@@ -86,7 +86,7 @@ typedef struct PT_ {
 
 /*
   [1] In WHILE and REPEAT tokens `start' points to the start of the executable
-	  block, in CONTINUE tokens it points to the corresponding while or
+	  block, in NEXT tokens it points to the corresponding while or
 	  repeat. In IF tokens it points to the first executable block (the on to
 	  be executed if the condition is met).
   [2] In WHILE and REPEAT tokens `end' points to the statement following the

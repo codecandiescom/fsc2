@@ -40,7 +40,7 @@ static void setup_if_else( long *pos, Prg_Token *cur_wr );
 
 
 
-/*
+/*-----------------------------------------------------------------------------
    This routine stores the experiment section of an EDL file in the form of
    tokens (together with their semantic values if there is one) as returned by
    the lexer. Thus it serves as a kind of intermediate between the lexer and
@@ -61,7 +61,7 @@ static void setup_if_else( long *pos, Prg_Token *cur_wr );
    the loop again and again. Of course, beside storing the experiment section
    in tokenised form as done by this function, we also need a routine that
    later feeds the stored tokens to the parser(s).
-*/
+-----------------------------------------------------------------------------*/
 
 
 void store_exp( FILE *in )
@@ -280,8 +280,9 @@ static void setup_while_or_repeat( int type, long *pos )
 
 	if ( i == prg_length )
 	{
-		eprint( FATAL, "%s:%ld: Unexpected end of file.\n",
-				prg_token[ i ].Fname, prg_token[ i ].Lc );
+		eprint( FATAL, "%s:%ld: Unexpected end of file in EXPERIMENT "
+				"section.\n", prg_token[ i - 1 ].Fname,
+				prg_token[ i - 1 ].Lc );
 		THROW( EXCEPTION );
 	}
 	if ( prg_token[ i ].token == '{' )
@@ -325,8 +326,9 @@ static void setup_while_or_repeat( int type, long *pos )
 			case '{' :
 				if ( i + 1 == prg_length )
 				{
-					eprint( FATAL, "%s:%ld: Unexpected end of file.\n",
-							prg_token[ i ].Fname, prg_token[ i ].Lc );
+					eprint( FATAL, "%s:%ld: Unexpected end of file in "
+							"EXPERIMENT section.\n", prg_token[ i ].Fname,
+							prg_token[ i ].Lc );
 					THROW( EXCEPTION );
 				}
 				cur->start = &prg_token[ i + 1 ];
@@ -370,12 +372,13 @@ static void setup_if_else( long *pos, Prg_Token *cur_wr )
 	bool dont_need_close_paran = UNSET;      /* set for ELSE IF constructs */
 
 
-	/* Start of with some sanity checks */
+	/* Start with some sanity checks */
 
 	if ( i == prg_length )
 	{
-		eprint( FATAL, "%s:%ld: Unexpected end of file.\n",
-				prg_token[ i ].Fname, prg_token[ i ].Lc );
+		eprint( FATAL, "%s:%ld: Unexpected end of file in EXPERIMENT "
+				"section.\n", prg_token[ i - 1 ].Fname,
+				prg_token[ i - 1 ].Lc );
 		THROW( EXCEPTION );
 	}
 	if ( prg_token[ i ].token == '{' )
@@ -433,7 +436,8 @@ static void setup_if_else( long *pos, Prg_Token *cur_wr )
 			case ELSE_TOK :
 				if ( i + 1 == prg_length )
 				{
-					eprint( FATAL, "%s:%ld: Unexpected end of file.\n",
+					eprint( FATAL, "%s:%ld: Unexpected end of file in "
+							"EXPERIMENT section.\n",
 							prg_token[ i ].Fname, prg_token[ i ].Lc );
 					THROW( EXCEPTION );
 				}
@@ -465,7 +469,8 @@ static void setup_if_else( long *pos, Prg_Token *cur_wr )
 			case '{' :
 				if ( i + 1 == prg_length )
 				{
-					eprint( FATAL, "%s:%ld: Unexpected end of file.\n",
+					eprint( FATAL, "%s:%ld: Unexpected end of file in "
+							"EXERIMENT section.\n",
 							prg_token[ i ].Fname, prg_token[ i ].Lc );
 					THROW( EXCEPTION );
 				}
