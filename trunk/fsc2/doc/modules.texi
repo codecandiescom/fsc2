@@ -1363,52 +1363,86 @@ if ( flag )
 @node Pulser Modules, , Programming Utils, Modules
 @section Writing modules for pulsers
 
+Unfortunately, modules for pulsers are more difficult to write than
+drivers for other devices. The reason is that pulsers play, at least for
+meaurements with pulsed irradiation (microwave of RF) of the sample, an
+extremely important role and setting up the pulses is often one of the
+most time-consuming task. Of course, it would be possible to deal with
+pulsers in exactly the same way as normal devices, i.e.@: to define just
+a set of functions for setting different pulse properties etc.@: but
+this would make the programs much harder to write and understand. Instead
+it was decided to integrate many aspects of dealing with pulsers
+directly into the @acronym{EDL} language. While this makes it easier
+fot the user writing programs it requires more work by the writer of
+modules for pulsers.
 
+To make it possible to integrate handling of pulsers directly into
+@acronym{EDL} modules for pulsers must define quite a lot of
+non-@acronym{EDL} functions and some variables. All of them are 
+collected in on structure, @code{pulser_struct}:
 @example
-typedef struct @{
+struct @{
+    const char *name;
+    bool has_phase_switch;
 
-	const char *name;
-	bool is_trigger_out;
-	long trigger_out_channel_number;
+    bool ( *assign_function )( int function, long connector );
+    bool ( *assign_channel_to_function )( int function, long channel );
+    bool ( *invert_function )( int function );
+    bool ( *set_function_delay )( int function, double delay );
+    bool ( *set_function_high_level )( int function, double high_voltage );
+    bool ( *set_function_low_level )( int function, double low_voltage );
 
-	bool ( *assign_function )( int function, long connector );
-	bool ( *assign_channel_to_function )( int function, long channel );
-	bool ( *invert_function )( int function );
-	bool ( *set_function_delay )( int function, double delay );
-	bool ( *set_function_high_level )( int function, double high_voltage );
-	bool ( *set_function_low_level )( int function, double low_voltage );
+    bool ( *set_timebase )( double timebase );
+    bool ( *set_trigger_mode )( int mode );
+    bool ( *set_repeat_time )( double rep_time );
+    bool ( *set_trig_in_level )( double voltage );
+    bool ( *set_trig_in_slope )( int slope );
+    bool ( *set_trig_in_impedance )( int state );
+    bool ( *set_max_seq_len )( double seq_len );
 
-	bool ( *set_timebase )( double timebase );
-	bool ( *set_trigger_mode )( int mode );
-	bool ( *set_repeat_time )( double rep_time );
-	bool ( *set_trig_in_level )( double voltage );
-	bool ( *set_trig_in_slope )( int slope );
-	bool ( *set_trig_in_impedance )( int state );
-	bool ( *set_max_seq_len )( double seq_len );
+    bool ( *new_pulse )( long pulse_number );
+    bool ( *set_pulse_function )( long pulse_number, int function );
+    bool ( *set_pulse_position )( long pulse_number, double ptime );
+    bool ( *set_pulse_length )( long pulse_number, double ptime );
+    bool ( *set_pulse_position_change )( long pulse_number, double ptime );
+    bool ( *set_pulse_length_change )( long pulse_number, double ptime );
+    bool ( *set_pulse_phase_cycle )( long pulse_number, long cycle );
 
-	bool ( *set_phase_reference )( int phase, int function );
+    bool ( *get_pulse_function )( long pulse_number, int *function );
+    bool ( *get_pulse_position )( long pulse_number, double *ptime );
+    bool ( *get_pulse_length )( long pulse_number, double *ptime );
+    bool ( *get_pulse_position_change )( long pulse_number, double *ptime );
+    bool ( *get_pulse_length_change )( long pulse_number, double *ptime );
+    bool ( *get_pulse_phase_cycle )( long pulse_number, long *cycle );
 
-	bool ( *new_pulse )( long pulse_number );
-	bool ( *set_pulse_function )( long pulse_number, int function );
-	bool ( *set_pulse_position )( long pulse_number, double ptime );
-	bool ( *set_pulse_length )( long pulse_number, double ptime );
-	bool ( *set_pulse_position_change )( long pulse_number, double ptime );
-	bool ( *set_pulse_length_change )( long pulse_number, double ptime );
-	bool ( *set_pulse_phase_cycle )( long pulse_number, long cycle );
+    bool ( *set_phase_reference )( int phase, int function );
+    bool ( *phase_setup_prep )( int func, int type, int pod, long val,
+                                long protocol);
+    bool ( *phase_setup )( int function );
 
-	bool ( *get_pulse_function )( long pulse_number, int *function );
-	bool ( *get_pulse_position )( long pulse_number, double *ptime );
-	bool ( *get_pulse_length )( long pulse_number, double *ptime );
-	bool ( *get_pulse_position_change )( long pulse_number, double *ptime );
-	bool ( *get_pulse_length_change )( long pulse_number, double *ptime );
-	bool ( *get_pulse_phase_cycle )( long pulse_number, long *cycle );
-
-	bool ( *phase_setup_prep )( int func, int type, int pod, long val,
-								long protocol);
-	bool ( *phase_setup )( int function );
-	bool ( *set_phase_switch_delay )( int function, double del_time );
-	bool ( *set_grace_period )( double gp_time );
-	bool ( *keep_all_pulses )( void );
-
-@} Pulser_Struct;
+    bool ( *set_phase_switch_delay )( int function, double del_time );
+    bool ( *set_grace_period )( double gp_time );
+    bool ( *keep_all_pulses )( void );
+@} pulser_struct;
 @end example
+When a new @acronym{EDL} program is read, all the pointers in this
+structure get set to @code{NULL} and the boolean variable
+@code{has_phase_switch} is set to false. When the @code{init_hook} of a
+module gets run it has to fill in values for all the pointers. Most of
+the following text will try to explain in detail the meaing of the
+arguments of the functions and what these functions are supposed to do.
+
+
+But first the two variables to be set will be discussed. The first
+variable, @code{name}, is simply the name of the pulser that will be
+used in error messages etc. When setting this variable within the
+@code{init_hook} function it should be checked if it is still a
+@code{NULL} pointer. If not the module should print an error message an
+quit immediately - when @code{name} is not @code{NULL} a different
+pulser module has already been loaded and currently it is not possible
+to deal with more than one pulser.
+
+The second variable, @code{has_phase_switch} must be set to a true value
+if pulse phases are switched via phase switches. This probably requires some
+explanation. Currently, there are three types of pulsed spectrometers
+supported by @acronym{fsc2}.
