@@ -44,7 +44,7 @@ static RULBUS_GENERIC_CARD *rulbus_generic_card_find( int handle );
 
 /*------------------------------------------------------------------*
  * Function for initializing the generic card subsystem (gets invoked
- * automatically by the rulbus_open( ) function, so it's not to be
+ * automatically by the rulbus_open() function, so it's not to be
  * called by the user directly)
  *------------------------------------------------------------------*/
 
@@ -58,8 +58,10 @@ int rulbus_generic_init( void )
 
 /*------------------------------------------------------------------*
  * Function for deactivating the generic card subsystem (gets invoked
- * automatically by the rulbus_close( ) function, so it's not to be
- * called by the user directly)
+ * automatically by the rulbus_close() function, so it's not to be
+ * called by the user directly). Usually it won't even do anything,
+ * at least if rulbus_generic_card_exit() has been called for all
+ * existing cards.
  *------------------------------------------------------------------*/
 
 void rulbus_generic_exit( void )
@@ -73,11 +75,11 @@ void rulbus_generic_exit( void )
 }
 
 
-/*----------------------------------------------------------------------*
+/*---------------------------------------------------------------------*
  * Function for initializing a single card (gets invoked automatically
- * by the rulbus_card_open( ) function, so it's not to be called by the
+ * by the rulbus_card_open() function, so it's not to be called by the
  * user directly)
- *----------------------------------------------------------------------*/
+ *---------------------------------------------------------------------*/
 
 int rulbus_generic_card_init( int handle )
 {
@@ -99,11 +101,11 @@ int rulbus_generic_card_init( int handle )
 }
 	
 
-/*----------------------------------------------------------------*
+/*---------------------------------------------------------------*
  * Function for deactivation a card (gets invoked automatically
- * by the rulbus_card_close( ) function, so it's not to be called
+ * by the rulbus_card_close() function, so it's not to be called
  * by the user directly)
- *----------------------------------------------------------------*/
+ *---------------------------------------------------------------*/
 
 int rulbus_generic_card_exit( int handle )
 {
@@ -117,18 +119,27 @@ int rulbus_generic_card_exit( int handle )
 
 	/* Remove the entry for the card */
 
-	if ( card != rulbus_generic_card + rulbus_num_generic_cards - 1 )
-		memmove( card, card + 1, sizeof *card *
-				 ( rulbus_num_generic_cards -
-				   ( card - rulbus_generic_card ) - 1 ) );
+	if ( rulbus_num_generic_cards > 1 )
+	{
+		if ( card != rulbus_generic_card + rulbus_num_generic_cards - 1 )
+			memmove( card, card + 1, sizeof *card *
+					 ( rulbus_num_generic_cards -
+					   ( card - rulbus_generic_card ) - 1 ) );
 
-	card = realloc( rulbus_generic_card,
-					( rulbus_num_generic_cards - 1 ) * sizeof *card );
+		card = realloc( rulbus_generic_card,
+						( rulbus_num_generic_cards - 1 ) * sizeof *card );
 
-	if ( card == NULL )
-		return RULBUS_NO_MEMORY;
+		if ( card == NULL )
+			return RULBUS_NO_MEMORY;
 
-	rulbus_generic_card = card;
+		rulbus_generic_card = card;
+	}
+	else
+	{
+		free( rulbus_generic_card );
+		rulbus_generic_card = NULL;
+	}
+
 	rulbus_num_generic_cards--;
 
 	return rulbus_errno = RULBUS_OK;

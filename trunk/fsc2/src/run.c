@@ -651,8 +651,7 @@ void run_stop_button_callback( FL_OBJECT *a, UNUSED_ARG long b )
 
 	/* Activating the Stop button when the child is already dead should
 	   not be possible, but to make real sure (in case of some real
-	   subtle timing problems) we better make sure it doesn't has any
-	   effects. */
+	   subtle timing problems) we better check */
 
 	if ( Fsc2_Internals.child_pid == 0 ||
 		 kill( Fsc2_Internals.child_pid, 0 ) == -1 )

@@ -1202,6 +1202,11 @@ void create_label_pixmap( Canvas_T *c, int coord, char *label )
 	width = XTextWidth( G.font, label, strlen( label ) ) + 10;
 	height = G.font_asc + G.font_desc + 5;
 
+	if ( width > USHRT_MAX )
+		width = USHRT_MAX;
+	if ( height > USHRT_MAX )
+		height = USHRT_MAX;
+
 	/* Create the temporary pixmap, fill with the color of the axis canvas
 	   and draw the text */
 
@@ -1212,14 +1217,20 @@ void create_label_pixmap( Canvas_T *c, int coord, char *label )
 	XDrawString( G.d, pm, c->font_gc, 5, height - 1 - G.font_desc,
 				 label, strlen( label ) );
 
-	/* Create the real pixmap for the label */
+	/* Create the real pixmap for the label and copy the contents of the
+	   temporary pixmap to the final pixmap, rotated by 90 degree ccw */
 
 	if ( c == &G_1d.y_axis )
 	{
 		G_1d.label_pm = XCreatePixmap( G.d, FL_ObjWin( c->obj ), height, width,
 									   fl_get_canvas_depth( c->obj ) );
+
 		G_1d.label_w = i2ushrt( height );
 		G_1d.label_h = i2ushrt( width );
+
+		for ( i = 0, k = width - 1; i < width; k--, i++ )
+			for ( j = 0; j < height; j++ )
+				XCopyArea( G.d, pm, G_1d.label_pm, c->gc, i, j, 1, 1, j, k );
 	}
 	else
 	{
@@ -1227,22 +1238,15 @@ void create_label_pixmap( Canvas_T *c, int coord, char *label )
 								XCreatePixmap( G.d, FL_ObjWin( c->obj ),
 											   height, width,
 											   fl_get_canvas_depth( c->obj ) );
+
 		G_2d.label_w[ r_coord ] = i2ushrt( height );
 		G_2d.label_h[ r_coord ] = i2ushrt( width );
-	}
 
-	/* Now copy the contents of the temporary pixmap to the final pixmap,
-	   rotated by 90 degree ccw */
-
-	if ( c == &G_1d.y_axis )
-		for ( i = 0, k = width - 1; i < width; k--, i++ )
-			for ( j = 0; j < height; j++ )
-				XCopyArea( G.d, pm, G_1d.label_pm, c->gc, i, j, 1, 1, j, k );
-	else
 		for ( i = 0, k = width - 1; i < width; k--, i++ )
 			for ( j = 0; j < height; j++ )
 				XCopyArea( G.d, pm, G_2d.label_pm[ r_coord ], c->gc,
 						   i, j, 1, 1, j, k );
+	}
 
 	/* Finally get rid of the temporary pixmap */
 
