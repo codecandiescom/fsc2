@@ -938,7 +938,8 @@ static void eps_draw_contour( FILE *fp, int cn )
 }
 
 
-/* Some implementation details: If we want to send data directly to the
+/*-----------------------------------------------------------------------------
+   Some implementation details: If we want to send data directly to the
    printer the best way would seem to be to simply create a pipe via popen()
    to lpr (or whatever the appropriate print command is) and then write the
    data to be printed to lpr's standard input. Unfortunately, there's a
@@ -962,8 +963,8 @@ static void eps_draw_contour( FILE *fp, int cn )
    This double level of forking insures that the temporary file is really
    going to be deleted, even if the parent processes dies in the mean time -
    otherwise we would have to know the correct flags for the print command to
-   make it delete this file by itself. */
-
+   make it delete this file by itself.
+-----------------------------------------------------------------------------*/
 
 static void do_print( char *name, const char *command )
 {
