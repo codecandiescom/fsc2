@@ -183,7 +183,8 @@ sub new {
 		$self->{ 'offset' } = 0;
 	}
 
-	# Calculate width of window to display *all* data
+	# Calculate width of window to display *all* data (with and without
+	# delays)
 
 	my $h = $Channels->num_channels * $self->{ 'hstep' } + 80;
 	my @wx = $Channels->longest_sequence;
