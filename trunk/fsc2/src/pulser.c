@@ -33,6 +33,7 @@ void pulser_struct_init( void )
 	pulser_struct.set_trig_in_level = NULL;
 	pulser_struct.set_trig_in_slope = NULL;
 	pulser_struct.set_trig_in_impedance = NULL;
+	pulser_struct.set_min_seq_len = NULL;
 	pulser_struct.set_phase_reference = NULL;
 	pulser_struct.set_grace_period = NULL;
 	pulser_struct.set_pulse_function = NULL;
@@ -530,6 +531,27 @@ void p_set_rep_freq( Var *v )
 	is_pulser_func( pulser_struct.set_repeat_time,
 					"setting a repeat frequency" );
 	( *pulser_struct.set_repeat_time )( time );
+}
+
+
+/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*/
+
+void p_set_min_seq_len( Var *v )
+{
+	double seq_len;
+
+	/* check the variable and get its value */
+
+	vars_check( v, INT_VAR | FLOAT_VAR );
+	seq_len = ( v->type == INT_VAR ) ? ( double ) v->val.lval :  v->val.dval;
+	vars_pop( v );
+
+	/* Call the appropriate function (if it exists) */
+
+    is_pulser_func( pulser_struct.set_min_seq_len,
+                    "setting a minimum pattern length" );
+	( *pulser_struct.set_min_seq_len )( seq_len );
 }
 
 

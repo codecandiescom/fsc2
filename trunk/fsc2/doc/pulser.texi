@@ -9,6 +9,7 @@
 * Setting up the Pulser::  @code{ASSIGNMENTS} and @code{PHASES} section
 * Defining Pulses::        How to define pulses
 * Using Pulses::           How to use pulses in the experiment
+* Caveats::                Further things necessary to know
 @end menu
 @end ifinfo
 
@@ -18,11 +19,11 @@
 @node Pulser Overview, Setting up the Pulser, Using Pulsers, Using Pulsers
 @section Pulser Overview
 
-Using the pulsers has its own chapter because several special methods
-to handle the pulser setup, create pulses und how to do phase cycling
-have to be introduced. Beside, the way the pulser is to be used depends
-hardware used in the spectrometer. Currently, there are three
-combinations of pulsers and spectrometers implemented:
+Using the pulsers has its own chapter to cover the special methods to
+handle the pulser setup, create pulses und do phase cycling. It also
+describes who the way the pulser is to be used depends on the hardware
+used in the spectrometer. Currently, there are three combinations of
+pulsers and spectrometers implemented:
 @itemize @bullet
 @item Sony/Tektronix DG2020 with S-band spectrometer in Frankfurt/Main
 @item Sony/Tektronix DG2020 with X-band spectrometer in Berlin
@@ -30,21 +31,22 @@ combinations of pulsers and spectrometers implemented:
 @end itemize
 Because of the importance of the pulser for time-resolved experiments
 there are even two additional types of sections in the @acronym{EDL}
-program in order to set up the pulser. These are
+program in order to set up the pulser. These
+are@footnote{@code{ASSIGNMENTS:} can be abbreviated to
+@code{ASSIGNMENT:} or @code{ASS:} and @code{PHASES:} to @code{PHA}.}
 @example
 ASSIGNMENTS:
 PHASES:
 @end example
-The first one deals with the basic setup of the pulser, the second
-one is only necessary when phase cycling is
-used@footnote{@code{ASSIGNMENTS:} can be abbreviated to
-@code{ASSIGNMENT:} or @code{ASS:} and @code{PHASES:} to @code{PHA}.}.
+The first section deals with the basic setup of the pulser, the second
+is only necessary when phase cycling is used.
+
 Valid statements in these sections differ slightly depending on the
 type of the pulser and the spectrometer it is supposed to work with.
 
-Beside these additional sections there are some other constructa for the
-creation of pulses and their subsequent manipulation. These are
-identical for all pulsers.
+Beside these additional sections there are several other constructs for
+the creation of pulses and their subsequent manipulation. These are
+identical for all pulsers and are explained in in subsequent sections.
 
 
 @c ########################################################
@@ -63,6 +65,12 @@ cycling is planned for the experinment.
 @subsection @code{ASSIGNMENTS} section
 @cindex ASSIGNMENTS section
 
+Within the @code{ASSIGNMENTS} section the pulsers timebase and the
+trigger mode is set. It also deals with the basic setup of the channels,
+i.e. associating some or more output channels with certain functions and
+setting the physical characteristics of the channels (e.g.@: voltages
+etc.).
+
 @c ########################################################
 
 @anchor{Setting the TIMEBASE}
@@ -71,19 +79,19 @@ cycling is planned for the experinment.
 
 The first statement of the @code{ASSIGNMENTS} section has to be the
 setting of the timebase of the pulser. All pulsers function similarly:
-They have a certain number of time slices (65536, 2 to the power of 16)
-for which the output of the pulser can be either set to a high or a low
-voltage individually. By setting the output during one or more time slices
-to a high voltage and for the neighbouring time slices to low pulses are
+they have a certain number of time slices (65536, 2^16) and for each of
+them the output of the pulser can be either set to a high or a low
+voltage. By setting the output during one or more of these time slices
+to a high voltage (and for the neighbouring slices to low) pulses are
 created.  The timebase to be set first in the @code{ASSIGNMENT} section
 is the length of one of these time slices. From the above it is clear,
 that all pulses (as well as all the times between pulses) have to be
-integer multiples of the length of a time slice.
+integer multiples of the length of this timebase.
 
 The statement to set the timebase, i.e.@ the length of the individual
 time slices is@footnote{Instead of @code{TIMEBASE} one may also write
 @code{TB:}, @code{T_B}, @code{TBASE:}, @code{T_BASE:}, @code{TIMEB},
-@code{TIME_B:} or @code{TIME_BASE:} insetad of @code{TIMEBASE:}.}:
+@code{TIME_B:} or @code{TIME_BASE:} instead of @code{TIMEBASE:}.}:
 @example
 TIMEBASE: 5 ns;
 @end example
@@ -104,7 +112,7 @@ pulsers:
 
 The next statement concerns the triggering of the pulser. A pulser
 starts a new sequence of pulses either on receiving an external trigger
-or it's triggered internally. Which type of triggering is to be used
+or it has to use an internal trigger. Which type of triggering to use
 depends, of course, on the experiment. To set either internal or
 external trigger use a statement like this@footnote{Instead of
 @code{TRIGGER_MODE} also @code{TM:}, @code{T_M:}, @code{TRIGM:},
@@ -120,7 +128,6 @@ or
 @example
 TRIGGER_MODE: EXTERNAL;
 @end example
-
 
 When using the internal trigger it is useful to be able to set the rate
 or the frequency with which the experiment is repeated. Thus, for
@@ -145,7 +152,7 @@ to set the repetition rate of the the experiment to @w{100 Hz}. Please
 note that the repeat time must be an integer multiple of the timebase of
 the pulser.
 
-Please note: Unfortunately, with the @strong{Tektronix HFS9000} no
+Please note: Unfortunately, for the @strong{Tektronix HFS9000} no
 frequency or rate can be set, so an external trigger has to be used to
 determine the repetition rate of the experiment, otherwise the pulser
 will repeat the pulse sequence at the highest possible rate.
@@ -167,6 +174,11 @@ TM: EXTERNAL, LEVEL = -1.2 V, SLOPE = POSITIVE, IMPEDANCE = HIGH;
 Please note: The trigger input impedance can only be set for the
 @strong{Sony/Tektronix DG2020}.
 
+For the @strong{Sony/Tektronix DG2020} the trigger level must be in the
+range between @w{-5V} and @w{+5 V}, while for the @strong{Tektronix
+HFS9003} the allowed trigger level range is @w{-4.7 V} to @w{+4.7 V}.
+
+
 
 @c ########################################################
 
@@ -175,19 +187,21 @@ Please note: The trigger input impedance can only be set for the
 @cindex Channel setup
 
 The statements described in the following deal with setting up the
-channels of the pulser. The idea is to abstract from the output
-connectors of the pulser and to use symbolic names for the
-channels. This means that instead of specifying to output a pulse from
-the connector @w{numbered 1} of the pulser in the experiment, in the
+channels of the pulser. The basic idea is to abstract from the real
+output connectors of the pulser and to use symbolic names for the
+channels. Instead of telling the pulser to output a pulse from e.g.@:
+connector @w{numbered 1} of the pulser in the experiment, in the
 @code{ASSIGNMENTS} section symbolic names for the functions of the
 channels are defined and these symbolic names are used when specifying
-pulses. While this may be only a convenience in simple experiments
-it makes it much simpler when doing e.g.@ phase cycling, because here
-the same pulse must be output on different channels, depending on the
-current phase. And instead of always specifying which output to use in a
-certain situation, the program is told about which channels to use and
-then it's left to the program to do the bookkeeping which output
-channel is to be used for the current phase.
+pulses. While this may be only a convenience in simple experiments (you
+only have to do a change in one place when changing the output instead
+of finding and changing it for all pulses concerned) it makes doing
+phase cycling much simpler because here the same pulse may have to be
+output on different channels, depending on the current phase. So,
+instead of always specifying which output channel to use for a certain
+phase for each phase, the program is told about which channels to use
+for a function and then it's left to the program to do all the
+bookkeeping when to use which output channel.
 
 The following symbolic names for pulse functions are defined:
 @itemize @bullet
@@ -229,21 +243,22 @@ abbreviate @code{PULSE_SHAPER} to @code{PULSESH}, @code{PULSE_SH},
 @end itemize
 The names of the functions do not enforce what the channels that will
 become associated with them are really going to be used for, but it is
-probably a good idea not to use e.g. the @code{MICROWAVE} channel for
+probably a good idea not to use e.g.@: the @code{MICROWAVE} channel for
 something completely different (other people will have major problems
-understanding what your @acronym{EDL} program is supposed to do).
+understanding what your @acronym{EDL} program is supposed to do and
+there's no Obfuscated EDL Contest yet;-).
 
 The functions @code{OTHER_1} to @code{OTHER_4} should be used in cases
-where none of the function names do fit the special purpose you have
-in mind (instead of using an inpropriate name).
+where none of the function names seem to fit the special purpose you
+have in mind.
 
 Before giving an example it is important to point out that there are
 some major differences between the @strong{Sony/Tektronix DG2020} and
 the @strong{Tektronix HFS9003}. The @strong{Tektronix HFS9003} is quite
 simple in that it has just a number of output channels. In contrast, the
-@strong{Sony/Tektronix DG2020} has 36 internal channels that can be
+@strong{Sony/Tektronix DG2020} has 36 internal channels that have to be
 mapped to what is called the POD, that in both cases (Frankfurt S-band
-and Berlin X-band spectrometer) has 12 output channels. 
+and Berlin X-band spectrometer) has 12 real output channels. 
 
 For the @strong{Tektronix HFS9003} simply a channel is associated with a
 function by statements like
@@ -255,14 +270,14 @@ DETECTION: CHANNEL = TRIGGER_OUT;
 @end example
 Please note, that usually the output channels are numbered as printed on
 the device, the only exception for the @strong{Tektronix HFS9003} is the
-trigger out channel, that is called @code{TRIGGER_OUT}, and has some
+trigger-out channel, that is called @code{TRIGGER_OUT}, and has some
 special properties, e.g. allowing only one pulse of a fixed length.
 The keyword @code{CHANNEL} can be replaced by @code{CH} and
 @code{TRIGGER_OUT} by either @code{TRIGGEROUT}, @code{TRIG_OUT} or
 @code{TRIGOUT}.
 
 For the @strong{Sony/Tektronix DG2020} the function gets associated with
-one (or more pods, see below, why sometimes more than one is needed):
+one (or more pods, see below why sometimes more than one is needed):
 @example
 MICROWAVE: POD = 1, 2, 3, 4;
 RF:        POD = 6;
@@ -273,10 +288,11 @@ Instead of @code{POD} you can also simply write @code{P}.
 
 
 Optionally, for the @strong{Sony/Tektronix DG2020} you can also set
-which of the internal channels are going to be used. If you don't the
-channel the program will automatically grab as many as it needs (using
-always the ones with the lowest numbers first). You can tell the program
-which of the internal channels it should use via a statement like this:
+which of the internal channels should be used. If you don't the channel
+the program will automatically grab as many of the internal channels as
+it needs (using always the ones with the lowest numbers first). You can
+tell the program which of the internal channels it should use via a
+statement like this:
 @example
 MICROWAVE: POD = 1, 2, 3, 4  CHANNEL = 31, 32, 33, 34;
 RF:        POD = 6           CHANNEL = 35;
@@ -300,6 +316,18 @@ RF_GATE:   POD = 7           V_HIGH = 5 V,   V_LOW = 0 V;
 Please note that the high voltage must always be larger than the low
 voltage.
 
+For the @strong{Sony/Tektronix DG2020} the high voltage can be adjusted
+to values between @w{-2 V} and @w{+7 V} and the low voltage can be in
+the range between @w{-3 V} and @w{+6 V}. The difference between the
+voltages must be between @w{0.5 V} and @w{9 V} and can be set in
+increments of @w{0.1 V}.
+
+For the @strong{Tektronix HFS9003} the high voltage can be adjusted to
+values between @w{-1.5 V} and @w{+5.5 V}, the low voltage has to be in
+the range from @w{-2 V} to @w{+5 V}. Rhe minimum and maximum voltage
+swing is @w{0.5 V} and @w{5.5 V}, respectively, and the voltage
+resolution is @w{10 mV}.
+
 If a function requires the output levels to be inverted (i.e.@: that the
 voltage is high while there are no pulses and low on pulses) use the
 @code{INVERTED} keyword@footnote{The keyword @code{INVERTED} can be
@@ -318,8 +346,8 @@ MICROWAVE: POD = 1, 2, 3, 4  DELAY = 50 ns;
 For obvious reasons setting negative delays is only possible when using
 internal trigger mode@footnote{The obvious reason is, of course,
 causality - the pulser can't know when the external trigger is going to
-happen, so starting before the trigger is detected would a bit
-difficult.). By the way, the keyword @code{DELAY} can be abbreviated to
+happen, so starting before the trigger is detected would be a bit
+difficult. By the way, the keyword @code{DELAY} can be abbreviated to
 @code{DEL}.}.
 
 
@@ -330,7 +358,7 @@ difficult.). By the way, the keyword @code{DELAY} can be abbreviated to
 @cindex Phase channel setup
 
 Please note that a phase channel setup can only be done with the
-@strong{Sony/Tektronix DG2020} pulser and that there are several
+@strong{Sony/Tektronix DG2020} pulsers and that there are several
 differences between the Frankfurt S-band and the Berlin X-band
 spectrometer. And all the following is only relevant if phase
 cycling is to be used.
@@ -339,7 +367,7 @@ cycling is to be used.
 
 The Berlin bridge setup is rather simple in that it expects pulses with
 different phases to appear on different input channels of the microwave
-bridge. I.e.@ the bridge has 5 different inputs (one for each phase
+bridge. The bridge has 5 different inputs (one for each phase
 @code{+X}, @code{-X}, @code{+Y} and @code{-Y} and one to be used for
 @i{cw} experiments) and the phase of the pulse coming fom the bridge
 and going to the TWT amplifier depends on which input channel was used
@@ -347,10 +375,10 @@ for the pulse.
 
 Now all you have to do is to tell the program once which pulser pod
 channel is connected to which phase input of the bridge (and, to allow
-some sanity checks, which functions is to be phase cycled). This is done
-via the following statement in the @code{ASSIGNMENTS} section:
+for some sanity checks, which functions is to be phase cycled). This is
+done via the following statement in the @code{ASSIGNMENTS} section:
 @example
-PHASE_SETUP:  MW,
+PHASE_SETUP:  MICROWAVE,
                X: POD = 1,
               +Y: POD = 2,
               -X: POD = 4,
@@ -360,10 +388,10 @@ PHASE_SETUP:  MW,
 In this example you obviously want to phase cycle the microwave pulses
 and the @code{+X} input of the bridge is connected to pod channel 1 of
 the pulser etc.@footnote{As usual, the keyword @code{PHASE_SETUP} can be
-abbreviated to either @code{PH_SETUP}, @code{PHASE_S}, or @code{PHS}.}
-Moreover, since you actually can have 2 phase cycled function, you can
-append either @code{1} or @code{_1} and @code{2} or @code{_2} to
-distinguish between the two phase setups, i.e.@ @code{PHASE_SETUP_1}.
+abbreviated, either to @code{PH_SETUP}, @code{PHASE_S}, or @code{PHS}.}
+Since you actually can have 2 phase cycled function, you may append
+either @code{1} or @code{_1} and @code{2} or @code{_2} to distinguish
+between the two phase setups, i.e.@ @code{PHASE_SETUP_1}.
 
 
 @strong{Frankurt S-band spectrometer}:
@@ -378,15 +406,15 @@ phases @code{+X}, @code{-X}, @code{+Y} and @code{-Y}.
 In order to create the phase pulses an extra function is needed for
 these pulses, which is called @code{PHASE} (or, abbreviated @code{PH}).
 For being able to feed both the bridge's phase inputs, for this function
-two pod channel outputs of the pulser are needed. The definition of the
+two of the pod channels of the pulser are needed. The definition of this
 function looks nearly identical to the other functions, the only
 exception is that also the name of the function to be phase cycled using the
 phase function needs to be specified:
 @example
-PHASE:        MW, POD = 8, 9, V_HIGH = 5 V, V_LOW = 0 V;
+PHASE:        MICROWAVE, POD = 8, 9, V_HIGH = 5 V, V_LOW = 0 V;
 @end example
 In this example the phase function is used to phase cycle the microwave
-pulses and its pod channels are number 8 and 9.
+pulses and the pod channels assigned to it are the ones numbered 8 and 9.
 
 The second thing that is needed is which voltages have to be present at
 the outputs to set a certain phase. Here's an example:
@@ -396,7 +424,7 @@ PHASE_SETUP:   X: POD_1 = OFF, POD2 = OFF,
               -X: 0, 1,
               -Y: 1, 1;
 @end example
-The phase setup command tells the program that to set the @code{+X} phase
+This phase setup command tells the program that to set the @code{+X} phase
 the voltage at both pod outputs of the phase function have to be in the
 low state, while for the @code{-Y} phase the first pod output (set to pod
 channel 8 by the @code{PHASE} command, see above) has to be in the high
@@ -407,7 +435,7 @@ to indicate a high output state, @code{OFF} and @code{0} stand for a low
 state.
 
 With these informations the program is able (or nearly is) to create the
-phase pulses (i.e.@ the pulses that control the phase switch) without
+phase pulses (i.e.@: the pulses that control the phase switch) without
 the user having to deal with it. So, all that needs to be done later
 is to create the microwave pulses and define the sequence of phases for
 the pulse. The program will automatically create the pulses necessary to
@@ -462,51 +490,55 @@ an error message).
 @subsubsection @code{PHASES} section
 @cindex Phases section
 
-In the @code{PHASES} section is for defining phase sequences and,
+The @code{PHASES} section is for defining phase sequences and,
 optionally, aquisition sequences. As the word says a phase sequence
 defines for one (or more) pulses the sequence of phases the pulse is
 switched between in the experiment. For example, in a phase cycled
-stimulated echo experiment the first pulse is first set to a @code{+X}
-phase, then to @code{-X} and again to @code{+X} and @code{-X}.  The
-second pulse will run at the same time trough the sequence @code{+X},
-@code{+X}, @code{-X} and @code{-X}. The third pulse has alway the same
-@code{+X} phase.  Because a constant phase of @code{+X} is the default,
-only two phase sequences have to be defined:
+stimulated echo experiment the first microwave pulse usually is set
+first to a @code{+X} phase, then to @code{-X}, again to @code{+X} and
+finally to @code{-X}. The second pulse will run at the same time through
+the sequence @code{+X}, @code{+X}, @code{-X} and @code{-X}. The third
+pulse has alway the same @code{+X} phase.  Because a constant phase of
+@code{+X} is the default, only two phase sequences have to be defined:
 @example
-PHASE_SEQUENCE_1: +x, -x, +x, -x;  // 1st pulse
-PHASE_SEQUENCE_2: +x, +x, -x, -x;  // 2nd pulse
+PHASE_SEQUENCE_1: +x, -x, +x, -x;  // for 1st pulse
+PHASE_SEQUENCE_2: +x, +x, -x, -x;  // for 2nd pulse
 @end example
 As can be seen from this example the keyword is
-@code{PHASE_SEQUENCE}@footnote{optionally shortened to
+@code{PHASE_SEQUENCE}@footnote{@code{PHASE_SEQUENCE}can be shortened to
 @code{PHASESEQUENCE}, @code{PH_SEQUENCE}, @code{PHSEQUENCE},
 @code{PHASE_SEQ}, @code{PHASESEQ}, @code{PHASEA_S}, @code{PHASES},
-@code{PH_SEQ}, @code{PHSEQ}, @code{PH_S}, @code{PHS}}, followed by an
-optional underscore and a number of the phase sequence (if there is only
-one phase sequence no number is needed). For the phase number any number
-between 0 and 2147483647 @w{(2^32 - 1)} can be choosen. Of course the
-lengths of all phase sequences have to be identical.
+@code{PH_SEQ}, @code{PHSEQ}, @code{PH_S}, @code{PHS}.}, followed by an
+optional underscore and the number of the phase sequence (if there is
+only one phase sequence no number is needed). For the phase number any
+number between 0 and 2147483647 @w{(2^32 - 1)} can be choosen. Of course
+the lengths of all phase sequences have to be identical.
+
+In one of the following sections it is explained how the phase sequences
+become associated with certain pulses.
 
 Beside the phase sequences also acquisition sequences can be defined.
-These are used by some functions to determine how the results of the
-single phases have to be added up in order to give the final result for a
-complete phase cycling sequence. In the example of a phase cycled
-stimulated echo experiment the area of echo with the second phase
-setting has to be subtracted from the area of the first, the area of the
-third also has to be subtracted, and for the fourth the area as to be
-added. Thus the acquisition sequence would be defined as:
+These are used by some @acronym{EDL} functions to determine how the
+results of the experiments with different phases have to be added up in
+order to give the final result for a complete phase cycling sequence. In
+the example of a phase cycled stimulated echo experiment the area of the
+echo measured for the second phase setting has to be subtracted from the
+area of the first phase, the area of the third also has to be subtracted, and
+for the fourth the area has to be added. Thus the acquisition sequence
+would be defined as:
 @example
 ACQUSISTION_SEQUENCE: +, -, -, +;
 @end example
 
-When one has a setup with a quadrature mixer one also can define in the 
-acqusition sequence which of the signals from the two channels has to be
-used. The first channel is named @code{A} and the second @code{B}. In
-this case one also needs usually two acquisition sequences, one for the
-real part and one for the imaginary part of the signal. To distinguish
-between the sequences one appends either @code{1} or @code{2} to the
-keyword (optionally with an underscore in between. As an example here
-the phase and acquisition sequence definitions for an inversion revocery
-experiment with FID detection and phase cycling:
+When one has a setup with a quadrature mixer one also can define in the
+acqusition sequence which of the signals from the two digitizer channels
+has to be used. The first channel is named @code{A} and the second
+@code{B}. In this case one usually also needs two acquisition sequences,
+one for the real part and one for the imaginary part of the signal. To
+distinguish between the sequences one appends either @code{1} or
+@code{2} to the keyword (optionally with an underscore in between. As an
+example here the phase and acquisition sequence definitions for an
+inversion revocery experiment with FID detection and phase cycling:
 @example
 PHASE_SEQUENCE_1       = +x, +x, +x, +x, -x, -x, -x, -x;
 PHASE_SEQUENCE_2       = +x, -x, +y, -y, +x, -x, +y, -y;
@@ -515,7 +547,7 @@ ACQUISITION_SEQUENCE_2 = +B, -B, -A, +A, +B, -B, -A, +A;
 @end example
 
 The definition of acquisition sequences is optional. If defined the
-length has to be identical to the lengths of the phase sequences.
+lengths have to be identical to the lengths of the phase sequences.
 
 
 
@@ -530,7 +562,7 @@ Every pulse has at least three properties: a unique number, a function
 and a start position. Actually, pulses also need a length, but as
 long as the length is not set (or is 0) the pulse stays switched
 off.  All pulses are defined in the @code{PREPARATIONS} section of the
-@acronym{EDL} program. Here an example of how to create a pulser
+@acronym{EDL} program. Here's an example of how to create a pulse
 numbered @code{1}, that is a microwave pulse, starts at @w{100 ns}
 (i.e.@: @w{100 ns} after the trigger) and has a length of @w{250 ns}:
 @example
@@ -543,8 +575,9 @@ As usual, most of the keywords can be abbreviated, @code{PULSE_1:} to
 @code{FUNC} or @code{F}, @code{START} to @code{S}, and finally,
 @code{LENGTH} to @code{LEN} or @code{L}.
 
-Pulse numbers can be choosen at random, the only requirementis that
-the numbers are positive and not larger than 2147483647 @w{(2^32 - 1)}.
+Pulse numbers can be choosen at random, the only requirementis that the
+numbers are positive (includeing 0) and not larger than 2147483647
+@w{(2^32 - 1)}.
 
 There are three additional properties a pulse can have. The first one is
 the amount of time the start position of the pulse will be changed by
@@ -552,17 +585,16 @@ during the experiment, keyword is
 @code{DELTA_START}@footnote{@code{DELTA_START} can be abbreviated to
 @code{DELTASTART}, @code{DELTA_S}, @code{DELTAS}, @code{DEL_START},
 @code{DELSTART}, @code{DEL_S}, @code{DELS}, @code{D_START},
-@code{DSTART}, @code{D_S} or @code{DS}.)}. Second, there's the length
+@code{DSTART}, @code{D_S} or @code{DS}.}. Second, there's the length
 change of the pulse, @code{DELTA_LENGTH}@footnote{@code{DELTA_LENGTH}
 can be shortened to @code{DELTALENGTH}, @code{DELTA_L}, @code{DELTAL},
 @code{DEL_LENGTH}, @code{DELLENGTH}., @code{DEL_L}. @code{DELL},
 @code{D_LENGTH}, @code{DLENGTH}, @code{DEL_L}, @code{DELL},
-@code{D_LENGTH}, @code{DLENGTH}, @code{D_L} or @code{DL}}. And finally,
-there is the phase sequence to be used for phase cycling of the by the
-pulse - here the keyword is
-@code{PHASE_CYCLE}@footnote{@code{PHASE_CYCLE} can also be written as
-@code{PHASECYCLE}, @code{PHASE_C}, @code{PHASEC}, @code{PH_CYCLE},
-@code{PHCYCLE}, @code{PH_C} or @code{PHC}}.
+@code{D_LENGTH}, @code{DLENGTH}, @code{D_L} or @code{DL}.}. And finally,
+there is the phase sequence to be used for phase cycling of the pulse -
+here the keyword is @code{PHASE_CYCLE}@footnote{@code{PHASE_CYCLE} can
+also be written as @code{PHASECYCLE}, @code{PHASE_C}, @code{PHASEC},
+@code{PH_CYCLE}, @code{PHCYCLE}, @code{PH_C} or @code{PHC}.}.
 
 With these additional properties (using, for phase cycling of the pulse,
 the first phase sequence defined in the @code{PHASES} section, see
@@ -577,11 +609,11 @@ PULSE_1:    FUNCTION     = MICROWAVE,
 @end example
 
 When setting the properties of further pulses the properties of pulses
-already defined can be used. This is down by giving the name of the
+already defined can be used. This is done by specifying the name of the
 pulse (e.g.@ @code{P} and the pulse number), followed by a dot and the
 property to be used. If, for example, you want to create a second
-pulse, that is also a microwave pulse, starts @w{300 ns} after the end
-of the first pulse as defined above and is twice as long, you would
+pulse, that is also a microwave pulse, starting @w{300 ns} after the end
+of the first pulse and twice as long, you could
 write:
 @example
 PULSE_2:    FUNCTION     = PULSE_1.FUNCTION,
@@ -590,37 +622,41 @@ PULSE_2:    FUNCTION     = PULSE_1.FUNCTION,
 @end example
 
 
-@node Using Pulses, , Defining Pulses, Using Pulsers
+@c ########################################################
+
+@node Using Pulses, Caveats, Defining Pulses, Using Pulsers
 @section Using Pulses
 
+
 When pulses have been defined and the experiment is started with the
-begin of the @code{EXPERIMENT} section, all pulses get set and all
-channels or PODs, that have been assigned pulses (that are used in the
-experiment), are switched on.
+begin of the @code{EXPERIMENT} section, all pulses get set (as long as
+their length is defined and is non-zero) and all channels or PODs, that
+have been assigned pulses (that are used in the experiment), are
+switched on.
 
 Now there are several methods to change the properties of pulses. To
 change the start position of pulse 1 by the start position change time
-as defined in the properties of the pulse the function
+(@code{DELTA_START}) as defined in the properties of the pulse the function
 @code{pulser_shift()} (see also @ref{Pulser Functions}) can be used:
 @example
 pulser_shift( P1 );      // or  pulser_shift( 1 );
 @end example
 If the start position of several pulses has to be changed, this function
-also accepts a (comman separated) list of pulses. If the function is
-called with no argument the start position of all pulses that have a
+also accepts a (comma separated) list of pulses. If the function is
+called with no arguments the start position of all pulses that have a
 @code{DELTA_START} defined are changed.
 
 There is also a similar function for changing the length of a pulse by
-it's @code{DELTA_LENGTH},@code{pulser_increment()} (see also @ref{Pulser
+it's @code{DELTA_LENGTH}, @code{pulser_increment()} (see also @ref{Pulser
 Functions}):
 @example
 pulser_increment( P3 );  // or  pulser_increment( 3 );
 @end example
 As for the other function, also here a list of pulses can be passed to
-the function and no argument automatically lengthens all pulses that
-have a @code{DELTA_LENGTH} defined.
+the function and calling it with no arguments automatically lengthens
+all pulses that have a @code{DELTA_LENGTH} defined.
 
-But it is also possibleto change the start position or length of a pulse
+But it is also possible to change the start position or length of a pulse
 directly and in other increments as @code{DELTA_START} and
 @code{DELTA_LENGTH}. If, for example, the position of pulse 4 should be
 changed to @w{500 ns} and its length to @w{120 ns}, one could write
@@ -628,6 +664,7 @@ changed to @w{500 ns} and its length to @w{120 ns}, one could write
 P4.START  = 500 ns;
 P4.LENGTH = 120 ns;
 @end example
+Please note that by setting the length of a pulse to 0 you switch it off.
 
 Of course, as in the definition of the pulses in the @code{PREPARTATION}
 section the properties of the pulse itself and other pulses can be used
@@ -636,7 +673,8 @@ in setting the new values, e.g.:
 P4.START  = P3.START + 200 ns;
 P4.LENGTH = 2 * P4.LENGTH + 20 ns;
 @end example
-Actually, the properties of pulses can be treated as a normal variable.
+Actually, these properties (i.e.@: start position and length and the
+corresponding delta's) of pulses can be treated as normal variables.
 
 Even the values for @code{DELTA_START} and @code{DELTA_LENGTH} can be
 changed in this way anytime during the experiment:
@@ -647,27 +685,25 @@ P4.DELTA_LENGTH = 10 ns;
 even if they haven't been defined in the @code{PREPARATION} section.
 
 The only pulse properties that may not be changed during the experiment
-are its function and the phase sequence associated with the pulse.
+are the function and the phase sequence associated with the pulse.
 
 There is only one point that needs to be taken care of: Just calling any
 of these functions does not change the real pulses immediately. Instead,
 all these changes are stored internally in the program and the changes
-will get only send to the pulser when the function
-@code{pulser_update()} (see also @ref{Pulser Functions}) gets
-called. Therefor, the normal way to change the pulse pattern is to
-change all pulse properties and when everything is done
-@code{pulser_update()} is called to makethe real changes. Because the
-new pulse settings only are checked this also avoids getting spurious
-error messages when, e.g. due to a change of a pulse length the pulse
-becomes to near to the next pulse, but the following pulse is moved away
-with the next command.
+get only send to the pulser when the function @code{pulser_update()}
+(see also @ref{Pulser Functions}) is called. Therefor, the normal way to
+change the pulse pattern is to change all necessary pulse properties and
+when everything is done @code{pulser_update()} is called to make the real
+changes. In this moment the program will also check that no pulses
+overlap.
 
-There's also a further function that resets all pulses to their intial
+There's a further function that resets all pulses to their intial
 state, @code{pulser_pulse_reset()}. This function can, for example, be
 used for repeating the same experiment several times without having to
 reset each pulse individually. As in the other functions the argument
 can be either one pulse, a list of pulses, or no argument, in which case
-all pulses are reset to their initial positions and lengths.
+all pulses are reset to their initial positions and lengths (i.e.@: set
+in the initial defineition of the pulse in the @code{PREPARAIONS} section.
 
 Here is now a somewhat shortened example of a 2 pulse Hahn-echo
 experiment. Two microwave pulses are needed, a pi/half and a pi-pulse,
@@ -832,9 +868,10 @@ FOR I = 1: 128 @{
 The inner loop in this example runs through the 4 different phase
 settings and adds up the areas with the correct sign. Instead of writing
 this loop one could also define an acquisition sequence and use the
-function @code{get_phase_cycled()}. This function does everything done
-in the loop automatically and thus makes the program much more
-legible. The only changes needed are in the @code{PHASES} section
+@acronym{EDL} function @code{get_phase_cycled_area()}. This function
+automatically does everything spelled out explicitely in the loop in the
+previous example and thus makes the program much more legible. The only
+changes needed are in the @code{PHASES} section
 @example
 PHASES:
 
@@ -857,3 +894,14 @@ As can be seen from this example @code{get_phase_cycled_area()} not only
 sets the pulse phases but also starts the digitizer acquisition, fetches
 the measured areas from the digitizer and adds up the areas according to
 to the acquisition sequence.
+
+
+@c ########################################################
+
+@node Caveats, , Using Pulses, Using Pulsers
+@section Caveats
+
+Whenever an @acronym{EDL} file is tested, this involves also tests of
+the pulser settings. During the check of the program it is tested that
+pulses don't start to overlap and that the pulse sequence doesn't get
+longer than the maximum length the digitizer allows.

@@ -412,3 +412,33 @@ bool hfs9000_set_trig_in_slope( int slope )
 
 	return OK;
 }
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+bool hfs9000_set_min_seq_len( double seq_len )
+{
+	if ( hfs9000.is_max_seq_len &&
+		 hfs9000.max_seq_len != hfs9000_double2ticks( seq_len ) )
+	{
+		eprint( FATAL, "%s:%ld: %s: A differrent minimum pattern length of %s "
+				"has already been set.\n", Fname, Lc, pulser_struct.name,
+				hfs9000_pticks( hfs9000.max_seq_len ) );
+		THROW( EXCEPTION );
+	}
+
+	/* Check that the value is reasonable */
+
+	if ( seq_len <= 0 )
+	{
+		eprint( FATAL, "%s:%ls: %s: Zero or negative minimum pattern "
+				"length.\n", Fname, Lc, pulser_struct.name );
+		THROW( EXCEPTION );
+	}
+
+	hfs9000.max_seq_len = hfs9000_double2ticks( seq_len );
+	hfs9000.is_max_seq_len = SET;
+
+	return OK;
+}

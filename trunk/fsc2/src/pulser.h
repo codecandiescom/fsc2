@@ -38,6 +38,7 @@ typedef struct {
 	bool ( *set_pulse_length )( long pulse_number, double time );
 	bool ( *set_pulse_position_change )( long pulse_number, double time );
 	bool ( *set_pulse_length_change )( long pulse_number, double time );
+	bool ( *set_min_seq_len )( double seq_len );
 	bool ( *set_pulse_phase_cycle )( long pulse_number, long cycle );
 
 	bool ( *get_pulse_function )( long pulse_number, int *function );
@@ -81,6 +82,7 @@ void p_set_trigger_level( Var *v );
 void p_set_trigger_impedance( Var *v );
 void p_set_rep_time( Var *v );
 void p_set_rep_freq( Var *v );
+void p_set_min_seq_len( Var *v );
 void p_phase_ref( long prot, long function, int ref );
 
 long p_num( char *txt );

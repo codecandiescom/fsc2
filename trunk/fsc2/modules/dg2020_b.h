@@ -196,6 +196,7 @@ typedef struct {
 	bool is_neg_delay;       // if any of the functions has a negative delay
 
 	long max_seq_len;        // maximum length of all pulse sequences
+	bool is_max_seq_len;
 
 	FUNCTION function[ PULSER_CHANNEL_NUM_FUNC ];
 	POD pod[ MAX_PODS ];
@@ -304,6 +305,7 @@ bool dg2020_set_trig_in_level( double voltage );
 bool dg2020_set_trig_in_slope( int slope );
 bool dg2020_set_trig_in_impedance( int state );
 bool dg2020_set_repeat_time( double time );
+bool dg2020_set_min_seq_len( double seq_len );
 bool dg2020_set_phase_reference( int phase, int function );
 bool dg2020_phase_setup_prep( int func, int type, int pod, long val,
 							  long protocol );

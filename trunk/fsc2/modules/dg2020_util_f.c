@@ -277,7 +277,7 @@ Ticks dg2020_get_max_seq_len( void )
 	}
 
 	if ( dg2020.is_max_seq_len )
-		max = Ticks_max( max, dg20202.max_seq_len );
+		max = Ticks_max( max, dg2020.max_seq_len );
 
 	return max + dg2020.grace_period;
 }

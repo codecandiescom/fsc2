@@ -248,7 +248,7 @@ bool hfs9000_set_function_low_level( int function, double voltage );
 bool hfs9000_set_trigger_mode( int mode );
 bool hfs9000_set_trig_in_level( double voltage );
 bool hfs9000_set_trig_in_slope( int slope );
-bool hfs9000_set_min_seq_len( double seq_len )
+bool hfs9000_set_min_seq_len( double seq_len );
 
 
 /* These are the functions from hfs9000_pulse.c */

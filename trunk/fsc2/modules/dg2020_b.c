@@ -59,6 +59,7 @@ int dg2020_b_init_hook( void )
 	pulser_struct.set_trig_in_level = dg2020_set_trig_in_level;
 	pulser_struct.set_trig_in_slope = dg2020_set_trig_in_slope;
 	pulser_struct.set_trig_in_impedance = dg2020_set_trig_in_impedance;
+	pulser_struct.set_min_seq_len = dg2020_set_min_seq_len;
 
 	pulser_struct.set_phase_reference = dg2020_set_phase_reference;
 
@@ -86,15 +87,14 @@ int dg2020_b_init_hook( void )
 	/* Finally, we initialize variables that store the state of the pulser */
 
 	dg2020.is_timebase = UNSET;
-
 	dg2020.is_cw_mode = UNSET;
-
 	dg2020.is_trig_in_mode = UNSET;
 	dg2020.is_trig_in_slope = UNSET;
 	dg2020.is_trig_in_level = UNSET;
 	dg2020.is_repeat_time = UNSET;
 	dg2020.is_neg_delay = UNSET;
 	dg2020.neg_delay = 0;
+	dg2020.is_max_seq_len = UNSET;
 
 	dg2020.block[ 0 ].is_used = dg2020.block[ 1 ].is_used = UNSET;
 
