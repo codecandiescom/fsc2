@@ -234,7 +234,7 @@ structure @code{var} points to the first of the two parameters. And if
 you look back at the typedef for @acronym{fsc2}'s variables, there is a
 @code{next} pointer. This is the key to access the next parameter --
 @code{var->next} points to next of the input parameters. If the function
-expects even more arguments, @code{var->next->next} etc. let's you get
+expects even more arguments, @code{var->next->next} etc.@: let's you get
 them, i.e.@: the input variables are organized as a linked list:
 @example
   var                               pointer passed to function
@@ -918,14 +918,14 @@ the format string.
 
 For serial ports things are handled a bit differently from GPIB
 devices. In the init hook function you must try to request the serial
-port you need by calling the function @code{fsc2_request_serial_port()}
+port you need by calling the function
 @example
 fsc2_request_serial_port( SERIAL_PORT, DEVICE_NAME );
 @end example
 @noindent
 with the number of the serial port (0 stands for the device file
 @file{/dev/ttyS0}, which is what is called @code{COM1} in DOS-speak, 1
-for @file{/dev/ttyS1} or for @code{COM2} etc.@.) as the first and the
+for @file{/dev/ttyS1} or for @code{COM2} etc.@:) as the first and the
 device name as the second argument. If the requested serial port has
 already been claimed by a different device the function will print an
 error message and stop the @acronym{EDL} program, so you don't have to
@@ -968,9 +968,8 @@ with their replacements:
 @findex fsc2_tcflow()
 @end table
 
-The only functions that are rather different to their normal
-counterparts are @code{fsc2_serial_open()} and
-@code{fsc2_serial_close()}.
+The only functions that are different to their normal counterparts are
+@code{fsc2_serial_open()} and @code{fsc2_serial_close()}.
 
 @code{fsc2_serial_open()} is defined as
 @example
@@ -980,25 +979,25 @@ struct termios *fsc2_serial_open( int sn, const char *devname,
 @noindent
 where @code{sn} is the number of the serial port as already used in
 @code{fsc2_request_serial_port()}, @code{devname} has to be the same
-device name that was used in the call of
-@code{fsc2_request_serial_port()} and @code{flags} are the same flags
-you would pass to a normal @code{open()} call. The function not only
-opens the file but also creates the necessary lock file and determines
-the current communication parameter settings for the serial port. These
-are returned via a pointer to a @code{termios} structure, that can be
-freely changed within the module. If the function returns a @code{NULL}
-pointer opening the device file failed and you can determine the reasons
-by checking @code{errno}.
+device name as used in the call of @code{fsc2_request_serial_port()} and
+@code{flags} are the same flags you would pass to a normal @code{open()}
+call. The function not only opens the file but also creates the
+necessary lock file and determines the current communication parameter
+settings for the serial port. These are returned via a pointer to a
+@code{termios} structure, that can be freely changed within the
+module. If the function returns a @code{NULL} pointer opening the device
+file failed and you can determine the reasons by checking @code{errno}.
 
 @code{fsc2_serial_close()} expects just one argument, the serial port
-number. Before closing the serial port device file it flushes it an
+number. Before closing the serial port device file it flushes it and
 resets the communication parameters to their initial state. It also
 deletes lock files. (If you don't close the serial ports device files
-they will be automatically closed at the end of the experiment.)
+explicitely they will be automatically closed at the end of the
+experiment.)
 
-All the remaining functions are completely identical to their usual form
-(see the @code{termios(3)} man page for all details) except that the
-first argument is always the serial port number instead of a file
+All remaining functions are identical to their usual form (see the
+@code{termios(3)} man page for all details) except that the first
+argument is always the serial port number instead of a file
 descriptor. If the function gets passed an invalid serial port number
 @code{errno} is set to @code{EBADF}.
 
@@ -1728,18 +1727,23 @@ function in the pulsers structure. All functions are supposed to return
 a boolean value. Please remember that not all functions must exist, if
 they don't exist and you don't supply a pointer for some of the
 functions in the pulser structure @acronym{fsc2} will tell the user
-automatically, that the ability associated with the function is not
+automatically that the ability associated with the function is not
 available with the driver. You can be sure that all time values that
 these function receive are integer multiples of one nanosecond.
 
 
-Except four of the functions for setting pulse properties, i.e.@:
-@code{set_pulse_position()}, @code{set_pulse_length()},
-@code{set_pulse_position_change()} and @code{set_pulse_length_change()},
-and the functions for asking pulse properties from the module, i.e.@:
-all functions with names starting with @code{get_pulse_}, all functions
-will only be called before the experiment is started, i.e. in the time
-between the calls of the init_hook() and the test_hook() function.
+With the exception of the functions for setting pulse properties
+@example
+set_pulse_position()
+set_pulse_length()
+set_pulse_position_change()
+set_pulse_length_change()
+@end example
+@noindent
+and the functions for asking pulse properties, i.e.@: the functions with
+names starting with @code{get_pulse_}, all functions will only be called
+before the experiment is started, i.e. in the time between the calls of
+the init_hook() and the test_hook() function.
 
 
 During the test run. i.e.@: between the @code{test_hook()} and the
@@ -1749,7 +1753,7 @@ will be called. In this functions the internal representation of the
 pulser state has to be updated and the consistency of the state has to
 be checked (i.e. do the pulses stay separated, don't they overtake each
 other, do the lengths remain larger than zero, do the positions stay
-larger than zero and don't exceed the maximum channel length, etc.). The
+larger than zero and don't exceed the maximum channel length, etc.@:). The
 driver also might choose to store the longest duration of a pulse
 sequence during the test run to be used later in the calculation of the
 padding needed to set a fixed repeat time for the experiment.
