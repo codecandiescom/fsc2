@@ -32,7 +32,6 @@ my @version = split /\./, $Tk::VERSION;
 die "Installed Perl-Tk version is $Tk::VERSION but Tk800.022 is required.\n"
     if $version[ 0 ] + 0.001 * $version[ 1 ] < 800.022;
 
-
 my ( $line, $time_base, $Delay, $has_auto_pulses );
 my $if = *STDIN;
 my $Channels = Channels->new;
