@@ -219,8 +219,10 @@ int rulbus_adc12_set_channel( int handle, int channel )
 }
 
 
-/*----------------------------------------------------*
- *----------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * Function for setting the gain of the card. Available gains are
+ * either 1, 2, 4 or 8.
+ *----------------------------------------------------------------*/
 
 int rulbus_adc12_set_gain( int handle, int gain )
 {
@@ -264,8 +266,10 @@ int rulbus_adc12_set_gain( int handle, int gain )
 }
 
 
-/*----------------------------------------------------*
- *----------------------------------------------------*/
+/*-------------------------------------------------------------*
+ * Function for setting the trigger mode of the card to either
+ * RULBUS_ADC12_INT_TRIG or RULBUS_ADC12_INT_TRIG
+ *-------------------------------------------------------------*/
 
 int rulbus_adc12_set_trigger_mode( int handle, int mode )
 {
@@ -358,6 +362,7 @@ int rulbus_adc12_conversion_done( int handle )
 
 
 /*----------------------------------------------------*
+ * 
  *----------------------------------------------------*/
 
 int rulbus_adc12_convert( int handle, double *volts )
