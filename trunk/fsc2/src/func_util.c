@@ -630,6 +630,149 @@ labels_2d:
 
 
 /*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*/
+
+
+Var *f_cscale( Var *v )
+{
+	double x_0, y_0, dx, dy;
+	int is_set = 0;
+	int shm_id;
+	long len = 0;                    /* total length of message to send */
+	void *buf;
+	void *ptr;
+	int type = D_CHANGE_SCALE;
+
+
+	/* No rescaling without graphics... */
+
+	if ( ! G.is_init )
+	{
+		eprint( WARN, "%s:%ld: Can't change scale, missing initialization.\n",
+				Fname, Lc );
+		return vars_push( INT_VAR, 0 );
+	}
+
+	/* Check and store the parameter */
+
+	if ( v == NULL )
+	{
+		eprint( FATAL, "%s:%ld: Missing parameter in call of "
+				"`change_scale'.\n", Fname, Lc );
+		THROW( EXCEPTION );
+	}
+
+	vars_check( v, INT_VAR | FLOAT_VAR | STR_VAR );
+
+	if ( v->type & ( INT_VAR | FLOAT_VAR ) )
+	{
+		x_0 = VALUE( v );
+		is_set = 1;
+	}
+
+	if ( ( v = vars_pop( v ) ) != NULL )
+	{
+		is_set <<= 1;
+		if ( v->type & ( INT_VAR | FLOAT_VAR ) )
+		{
+			dx = VALUE( v );
+			is_set++;
+		}
+	}
+
+	if ( v != NULL && ( v = vars_pop( v ) ) != NULL )
+	{
+		if ( G.dim == 1 )
+		{
+			eprint( FATAL, "%s:%ld: With 1D graphics only the x-sclae can be "
+					"changed.\n", Fname, Lc );
+			THROW( EXCEPTION );
+		}
+
+		is_set <<= 1;
+		if ( v->type & ( INT_VAR | FLOAT_VAR ) )
+		{
+			y_0 = VALUE( v );
+			is_set++;
+		}
+	}
+
+	if ( v != NULL && ( v = vars_pop( v ) ) != NULL )
+	{
+		is_set <<= 1;
+		if ( v->type & ( INT_VAR | FLOAT_VAR ) )
+		{
+			dy = VALUE( v );
+			is_set++;
+		}
+	}
+
+	/* In a test run we're already done */
+
+	if ( TEST_RUN )
+		return vars_push( INT_VAR, 1 );
+
+	/* Function can only be used in experiment section */
+
+	assert( I_am == CHILD );
+
+	len =   sizeof( len )                 /* length field itself */
+		  + 2 * sizeof( int )             /* type field and flags */
+		  + 4 * sizeof( double );         /* new scale settings */
+
+	/* Now try to get a shared memory segment */
+
+	if ( ( buf = get_shm( &shm_id, len ) ) == ( void * ) - 1 )
+	{
+		T_free( dp );
+		eprint( FATAL, "Internal communication problem at %s:%d.\n",
+				__FILE__, __LINE__ );
+		THROW( EXCEPTION );
+	}
+
+	/* Copy the data to the segment */
+
+	ptr = buf;
+
+	memcpy( ptr, &len, sizeof( long ) );               /* total length */
+	ptr += sizeof( long );
+
+	memcpy( ptr, &type, sizeof( int ) );               /* type indicator  */
+	ptr += sizeof( int );
+
+	memcpy( ptr, is_set, sizeof( int ) );              /* flags */
+	ptr += sizeof( int );
+
+	memcpy( ptr, x_0, sizeof( int ) );                 /* new x-offset */
+	ptr += sizeof( double );
+
+	memcpy( ptr, dx, sizeof( int ) );                  /* new x-increment */
+	ptr += sizeof( double );
+
+	memcpy( ptr, y_0, sizeof( int ) );                 /* new y-offset */
+	ptr += sizeof( double );
+
+	memcpy( ptr, dy, sizeof( int ) );                  /* new y-increment */
+	ptr += sizeof( double );
+
+	/* Detach from the segment with the data segment */
+
+	detach_shm( buf, NULL );
+
+	/* Wait for parent to become ready to accept new data, then store
+	   identifier and send signal to tell parent about the data */
+
+	sema_wait( semaphore );
+	Key->shm_id = shm_id;
+	Key->type = DATA;
+	kill( getppid( ), NEW_DATA );
+
+	/* That's all, folks... */
+
+	return vars_push( INT_VAR, 1 );
+}
+
+/*-------------------------------------------------------------*/
 /* f_display() is used to send new data to the display system. */
 /*-------------------------------------------------------------*/
 

@@ -246,5 +246,7 @@ void clear_curve( long curve );
 void create_pixmap( Canvas *c );
 void delete_pixmap( Canvas *c );
 void redraw_axis( int coord );
+void change_scale( int is_set, double *vals );
+
 
 #endif   /* ! GRAPHICS_HEADER */

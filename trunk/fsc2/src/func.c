@@ -79,6 +79,7 @@ Func Def_Fncts[ ] =              /* List of built-in functions */
 	{ "wait",          f_wait,     1, ACCESS_ALL,  UNSET	},
 	{ "init_1d",       f_init_1d, -1, ACCESS_PREP, UNSET	},
 	{ "init_2d",       f_init_2d, -1, ACCESS_PREP, UNSET	},
+    { "change_scale ", f_cscale,  -1, ACCESS_EXP,  UNSET    },
 	{ "display",       f_display, -1, ACCESS_EXP,  UNSET	},
 	{ "clear_curve",   f_clearcv, -1, ACCESS_EXP,  UNSET	},
 	{ "dim",           f_dim,      1, ACCESS_ALL,  UNSET	},
