@@ -137,7 +137,7 @@ sub serve {
 
 	my $txt;
 	my %f = ( 'png' => 0, 'gif' => 0, 'jpeg' => 0 );
-	my $host_field = "";
+	my $is_host_field = 0;
 
 
 	# Make the client connection the default I/O channel and unbuffer it.
@@ -185,8 +185,7 @@ sub serve {
 				$f{ $_ } = 1 for ( keys %f );
 			}
 		} else {
-			$txt =~ /^Host:\s*([^\r]+)\r*$/i;
-			$host_field = $1;
+			$is_host_field = 1;
 		}
 	}
 
@@ -202,12 +201,7 @@ sub serve {
 	# claiming to be HTTP/1.1 compliant
 
 	missing_host_field( $req, $maj, $min )
-		if $maj >= 1 and $min >= 1 and $host_field eq "";
-
-	# If we got send a host field check that it is a valid address of our
-	# machine
-
-	check_host_field( $host_field, $req, $maj, $min ) if $host_field ne "";
+		if $maj >= 1 and $min >= 1 and not $is_host_field;
 
 	# Ok, now it's finally our turn to send something back to the client...
 
@@ -590,41 +584,6 @@ sub missing_host_field {
 		   	   "understand:$crlf" .
 		   	   "Client sent HTTP/1.1 request without a hostname (see " .
 			   "RFC2616 section 14.23)</P>$crlf" .
-			   "</HR><ADDRESS>fsc2 HTTP server v$version at $hostname " .
-			   "Port $port</ADDRESS>$crlf</BODY></HTML>$crlf";
-
-	print "HTTP/1.1 400 Bad Request$crlf" . def_txt( 0, $maj, $min ) .
-		  "Content-Type: text/html; charset=iso-8859-1$crlf" .
-		  "Content-Lenght: " . length( $body ) . "$crlf$crlf";
-
-	print $body if $req =~ /^GET$/io;
-
-	close $client;
-	exit;
-}
-
-
-#########################################################
-# Checks that the Host field of the request (if there is one) is a
-# valid address of the machine we're running on.
-
-sub check_host_field {
-
-	my ( $host, $req, $maj, $min ) = @_;
-
-	$host =~ s|^$hostname$||io;
-	$host =~ s|^$_$||i for ( split /[ \t]+/, `hostname -i` );
-	$host =~ s|^$_$||i for ( split /[ \t]+/, `hostname -a` );
-
-	return if $host eq "";
-
-	my $body = "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">$crlf" .
-		   	   "<HTML>$crlf<HEAD>$crlf" .
-		   	   "<TITLE>400 Bad Request</TITLE>$crlf" .
-		   	   "</HEAD><BODY>$crlf" .
-		   	   "<H1>Bad Request</H1>$crlf" .
-		   	   "<P>Your browser send a Host field ($host) that isn't a " .
-			   "valid address of this server.$crlf" .
 			   "</HR><ADDRESS>fsc2 HTTP server v$version at $hostname " .
 			   "Port $port</ADDRESS>$crlf</BODY></HTML>$crlf";
 
