@@ -55,7 +55,6 @@ Var *daq_maximum_output_voltage( Var *v );
 Var *daq_set_voltage( Var *v );
 Var *daq_get_voltage( Var *v );
 
-static double hjs_daadc_val_to_da_volts( int val );
 static int hjs_daadc_da_volts_to_val( double volts );
 static double hjs_daadc_val_to_ad_volts( int val );
 static bool hjs_daadc_serial_init( void );
@@ -81,8 +80,9 @@ struct HJS_DAADC {
 HJS_DAADC hjs_daadc, hjs_daadc_stored;
 
 
-/*---------------------------------------------------------*/
-/*---------------------------------------------------------*/
+/*------------------------------------------------------*/
+/* Function called when the module has just been loaded */
+/*------------------------------------------------------*/
 
 int hjs_daadc_init_hook( void )
 {
@@ -91,15 +91,16 @@ int hjs_daadc_init_hook( void )
 	hjs_daadc.is_open   = UNSET;
 	hjs_daadc.out_val   = DEF_OUT_VAL;
 	hjs_daadc.max_volts = MAX_OUT_VOLTS;
-	hjs_daadc.volts_out = hjs_daadc_val_to_da_volts( hjs_daadc.out_val );
+	hjs_daadc.volts_out = MAX_OUT_VOLTS * DEF_OUT_VAL / 4095.0;
 	hjs_daadc.has_dac_been_set = UNSET;
 
 	return 1;
 }
 
 
-/*---------------------------------------------------------*/
-/*---------------------------------------------------------*/
+/*----------------------------------------------*/
+/* Function called at the start of the test run */
+/*----------------------------------------------*/
 
 int hjs_daadc_test_hook( void )
 {
@@ -108,12 +109,14 @@ int hjs_daadc_test_hook( void )
 }
 
 
-/*---------------------------------------------------------*/
-/*---------------------------------------------------------*/
+/*-----------------------------------------------*/
+/* Function called at the start of an experiment */
+/*-----------------------------------------------*/
 
 int hjs_daadc_exp_hook( void )
 {
-	/* Restore state from before the start of the test run */
+	/* Restore state from before the start of the test run (or the
+	   last experiment) */
 
 	hjs_daadc = hjs_daadc_stored;
 
@@ -124,8 +127,9 @@ int hjs_daadc_exp_hook( void )
 }
 
 
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
+/*---------------------------------------------*/
+/* Function called at the end of an experiment */
+/*---------------------------------------------*/
 
 int hjs_daadc_end_of_exp_hook( void )
 {
@@ -136,8 +140,9 @@ int hjs_daadc_end_of_exp_hook( void )
 }
 
 
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
+/*------------------------------------------------------*/
+/* Function called just before the module gets unloaded */
+/*------------------------------------------------------*/
 
 void hjs_daadc_exit_hook( void )
 {
@@ -214,8 +219,13 @@ Var *daq_maximum_output_voltage( Var *v )
 }
 
 
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
+/*----------------------------------------------------------------------*/
+/* Function for either querying the current output voltage or setting a */
+/* new output voltage. The output voltage must be between 0 V and the   */
+/* maximum voltage set by the function daq_maximum_output_voltage() (if */
+/* the function hasn't been called the maximum output voltage defaults  */
+/* to the highest possible value of 10 V).                              */
+/*----------------------------------------------------------------------*/
 
 Var *daq_set_voltage( Var *v )
 {
@@ -267,8 +277,14 @@ Var *daq_set_voltage( Var *v )
 }
 
 
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------------*/
+/* Function for determining the input voltage at the ADC input. It can */
+/* be between -10 V and +10 V. Please note that, because a conversion  */
+/* is only done when a new output voltage is set, getting a new input  */
+/* voltage may require setting the output voltage of the DAC to a      */
+/* default value (this happens when daq_get_voltage() has never been   */
+/* called yet).                                                        */
+/*---------------------------------------------------------------------*/
 
 Var *daq_get_voltage( Var *v )
 {
@@ -287,17 +303,9 @@ Var *daq_get_voltage( Var *v )
 }
 
 
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
-
-static double hjs_daadc_val_to_da_volts( int val )
-{
-	return hjs_daadc.max_volts * val / 4095.0;
-}
-
-
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
+/*-----------------------------------------------*/
+/* Conversion of a voltage to a DAC output value */
+/*-----------------------------------------------*/
 
 static int hjs_daadc_da_volts_to_val( double volts )
 {
@@ -308,8 +316,9 @@ static int hjs_daadc_da_volts_to_val( double volts )
 }
 
 
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
+/*-----------------------------------------------*/
+/* Conversion of an ADC input value to a voltage */
+/*-----------------------------------------------*/
 
 static double hjs_daadc_val_to_ad_volts( int val )
 {
@@ -318,6 +327,7 @@ static double hjs_daadc_val_to_ad_volts( int val )
 
 
 /*---------------------------------------------------------------*/
+/* Initialization of the serial port the device is connected to. */
 /*---------------------------------------------------------------*/
 
 static bool hjs_daadc_serial_init( void )
@@ -345,8 +355,9 @@ static bool hjs_daadc_serial_init( void )
 }
 
 
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------*/
+/* Function for outputting a value at the DAC output */
+/*---------------------------------------------------*/
 
 static void hjs_daadc_out( int out )
 {
@@ -356,8 +367,9 @@ static void hjs_daadc_out( int out )
 }
 
 
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
+/*-----------------------------------------------*/
+/* Function for getting a new value from the ADC */
+/*-----------------------------------------------*/
 
 static int hjs_daadc_in( void )
 {
@@ -378,7 +390,8 @@ static int hjs_daadc_in_out( int out )
 	/* Split up the 12 bit input data into 4-bit chunks and store them in
 	   lower nibbles of the output bytes. The upper nibbles are control
 	   bits. The fourth byte to be send is control data only, telling the
-	   DAC to output the data. */
+	   DAC and output the data (and at the same time to convert the
+	   voltage at the input of the ADC). */
 
 	out_bytes[ 0 ] |= out & 0x0F;
 	out_bytes[ 1 ] |= ( out >>= 4 ) & 0x0F;
@@ -386,8 +399,8 @@ static int hjs_daadc_in_out( int out )
 
 	/* We can always write, even if the device is switched off, because
 	   there exist no control lines, checking the return value is just
-	   cosmetics ;-). The data from the conversion should be available
-	   within 20 ms. */
+	   cosmetics ;-). The data from the ADC should have arrived within
+	   20 ms. */
 
 	if ( fsc2_serial_write( SERIAL_PORT, out_bytes, 4 ) != 4 ||
 		 fsc2_serial_read( SERIAL_PORT, in_bytes, 4, 20000, UNSET ) != 4 )
