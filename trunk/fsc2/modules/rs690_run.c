@@ -90,8 +90,6 @@ static bool rs690_update_pulses( bool flag )
 	PULSE_PARAMS *pp;
 
 
-	rs690.needs_update = UNSET;
-
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 	{
 		f = rs690.function + i;
