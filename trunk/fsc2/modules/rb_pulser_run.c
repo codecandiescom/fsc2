@@ -390,9 +390,8 @@ static void rb_pulser_commit( bool flag )
 		return;
 	}
 
-	for ( card = rb_pulser.delay_card + INIT_DELAY, i = INIT_DELAY;
-		  i < NUM_DELAY_CARDS;
-		  card++, i++ )
+	for ( i = INIT_DELAY, card = rb_pulser.delay_card + i;
+		  i < NUM_DELAY_CARDS; card++, i++ )
 	{
 /*
 		if ( ! card->needs_update )
