@@ -233,7 +233,7 @@ Ticks dg2020_get_max_seq_len( void )
 /* the requested repetition time. It then sets up the blocks if they are  */
 /* needed. The additional bit in the memory size is needed because, due   */
 /* to a bug in the pulsers firmware, the first bit can't be used          */
---------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*/
 
 void dg2020_calc_padding( void )
 {

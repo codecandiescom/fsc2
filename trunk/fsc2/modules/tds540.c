@@ -158,7 +158,7 @@ Var *digitizer_define_window( Var *v )
 
 	if ( tds540.num_windows >= MAX_NUM_OF_WINDOWS )
 	{
-		eprint( FATAL, SERT, "%s: Maximum number of digitizer windows (%ld) "
+		eprint( FATAL, SET, "%s: Maximum number of digitizer windows (%ld) "
 				"exceeded in %s().\n",
 				DEVICE_NAME, MAX_NUM_OF_WINDOWS, Cur_Func );
 		THROW( EXCEPTION );

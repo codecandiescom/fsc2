@@ -153,7 +153,7 @@ bool hfs9000_set_pulse_position( long pnum, double time )
 
 	if ( p->is_pos )
 	{
-		eprint( FATAL, "%s: The start position of pulse %ld has "
+		eprint( FATAL, SET, "%s: The start position of pulse %ld has "
 				"already been set to %s.\n", pulser_struct.name,
 				pnum, hfs9000_pticks( p->pos ) );
 		THROW( EXCEPTION );
