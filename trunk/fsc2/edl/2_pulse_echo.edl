@@ -21,7 +21,7 @@ TRIGGER_MODE: INTERNAL, REP_FREQ = 200 Hz;
 
 MICROWAVE#2:       POD = 1;
 
-MICROWAVE:         POD =  1, 2, 3, 4, 5,
+MICROWAVE:         POD =  1, 2, 3, 4,
 				   CH = 35, 34, 33,
 				   V_HIGH = 5 V, V_LOW = 0 V,
 				   INVERTED;
@@ -46,8 +46,7 @@ PHASE_SETUP_1:     MW,
                    	X: POD = 1,
                    +Y: POD = 2,
                    -X: POD = 3,
-                   -Y: POD = 4,
-                   CW: POD = 5;
+                   -Y: POD = 4;
 
 PHASES:
 
@@ -117,6 +116,9 @@ REPEAT 1000 {
 		pulser_increment#2( );
 		pulser_update( );
 		pulser_update#2( );
+		IF P17.LEN > 100 ns {
+			print( "#\n", P32.LEN );
+		}
 	}
 }
 

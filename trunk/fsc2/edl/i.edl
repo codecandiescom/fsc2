@@ -2,14 +2,11 @@ DEVICES:
 
 VARIABLES:
 
-BID1, BID2, BID3, BID4, BID5, BID6, BID7, SID1, SID2, I1, I2, I3, I4, I5;
+BID1, BID2, BID3, BID4, BID5, BID6, BID7, SID1, SID2, I1, I2, I3, I4, I5, M;
 NX = 32;
-NNX;
 FILE1, FILE2;
 I = 0;
-M;
 M_STATE = 1;
-M_NEW_STATE;
 S = 0;
 
 PREPARATIONS:
@@ -18,7 +15,7 @@ init_1d( 4, 32, "Blödsinn [nT]", "Schwachsinn [V]" );
 
 EXPERIMENT:
 
-hide_toolbox( 1 );
+hide_toolbox( "ON" );
 layout( "VERTICAL" );
 M = menu_create( "Lock-in acquisition rate", "32 Hz", "16 Hz", "8 Hz", "4 Hz",
 				 "2 Hz", "1 Hz", "1/2 Hz", "1/4 Hz", "1/8 Hz", "1/16 Hz" );
@@ -28,7 +25,7 @@ BID2 = button_create( "PUSH_BUTTON", "RF On / Off" );
 BID3 = button_create( "RADIO_BUTTON", "Bla3", "Help3" );
 button_state( BID3, 1 );
 BID4 = button_create( "RADIO_BUTTON", BID3, "Bla4", "Help4" );
-SID1 = slider_create( "NORMAL_SLIDER", 0, 1, 0.2, "Blub1", "Hilfe1" );
+SID1 = slider_create( "SLOW_NORMAL_SLIDER", 0, 1, 0.2, "Blub1", "Hilfe1" );
 BID5 = button_create( "RADIO_BUTTON", "Sweep RF up" );
 BID6 = button_create( "RADIO_BUTTON", BID5, "Stop RF\nsweep" );
 button_state( BID6, 1 );
@@ -44,14 +41,20 @@ I5   = input_create( "INT_INPUT", NX, "Points in x direction" );
 FILE1 = get_file( "", "*.dat", "", "", "dat" );
 FILE2 = clone_file( FILE1, "dat", "dxx" );
 */
-hide_toolbox( 0 );
+hide_toolbox( "OFF" );
 
 FOREVER {
 
-	M_NEW_STATE = menu_choice( M );
-	IF M_NEW_STATE != M_STATE {
-		print( "Now # is selected\n", M_NEW_STATE );
-		M_STATE = M_NEW_STATE;
+	UNLESS toolbox_wait( 10.5 s ) {
+		print( "Sleeping\n" );
+		NEXT;
+	}
+
+	print( "Toolbox changed\n" );
+
+	IF menu_changed( M ) {
+		M_STATE = menu_choice( M );
+		print( "Now # is selected\n", M_STATE );
 	}
 
 	IF ( button_state( BID1 ) ) {
@@ -92,19 +95,24 @@ FOREVER {
 	}
 
 	display( I, slider_value( SID2 ) * slider_value( SID1 ) );
-	wait( 500 ms );
 
-	NNX = input_value( I5 );
-	IF NNX != NX {
-		menu_choice( M, 3 );
-		rescale( NNX );
-		NX = NNX;
+	IF input_changed( I5 ) {
+		print( "I5 changed\n" );
+		M_STATE = 3;
+		menu_choice( M, M_STATE );
+		NX = input_value( I5 );
+		rescale( NX );
 	}
+
+	button_state( BID2 );
+	button_state( BID3 );
+	button_state( BID4 );
+	input_value( I2 );
 }
 
 ON_STOP:
 
-show_message( "This\nis\nthe\nend,\nmy\nfriend!" );
+show_message( "This\nis\nthe\nend!" );
 
 /*
 hide_toolbox( 1 );
