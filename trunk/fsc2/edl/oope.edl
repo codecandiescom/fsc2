@@ -13,36 +13,35 @@ t0        = 250 ns;
 pi_len    =  30 ns;
 Num_avg   =  10;
 
-Repeats   = 512;
+Repeats   = 128;
 
 I;
 W1, W2;
-x1, x2, y1, y2;
+x_data[ 2 ], y_data[ 2 ];
 
 
 ASSIGNMENTS:
 
 TIME_BASE:      timebase;
-TRIGGER_MODE:   EXTERNAL;
-MAX_PATT_LEN:   50 us;  
+TRIGGER_MODE:   INTERNAL, REP_FREQ = 200 Hz;
 
 
-MICROWAVE:      POD =  1, 2, 3, 4, 5,
+MICROWAVE:      POD =  1, 2, 3, 4, 5, CH = 1, 2, 3, 4, 5,
                 V_HIGH = 5 V, V_LOW = 0 V,
                 INVERTED;
 
-PULSE_SHAPE:    POD = 6,
+PULSE_SHAPE:    POD = 6, CH = 6,
                 V_HIGH = 5 V, V_LOW = 0 V,
                 INVERTED;
 
-TWT_GATE:       POD = 11,
+TWT_GATE:       POD = 11, CH = 11,
                 V_HIGH = 5 V, V_LOW = 0 V;
 
-DEFENSE:        POD = 7,
+DEFENSE:        POD = 7, CH = 7
                 V_HIGH = 5 V, V_LOW = 0 V,
                 INVERTED;
 
-DETECTION:      POD = 0
+DETECTION:      POD = 0, CH = 0,
                 V_HIGH = 5 V, V_LOW = 0 V;   
 
 PHASE_SETUP_1:  MW,
@@ -55,23 +54,24 @@ PHASE_SETUP_1:  MW,
 
 PREPARATIONS:
 
-P0:   FUNCTION     = MICROWAVE,
-      START        = dead_time - 10 ns,
-      LENGTH       = pi_len / 2 + 30 ns;
-
-P1:   FUNCTION     = P0.FUNC,
-      START        = P0.START + t0,
-      DELTA_START  = delta_t,
-      LENGTH       = pi_len + 30 ns;
 
 P30:  FUNCTION     = PULSE_SHAPE,
-      START        = P0.START + 10 ns,
-      LEN          = P0.LENGTH - 20 ns;
+      START        = dead_time,
+      LEN          = pi_len / 2;
 
 P31:  FUNCTION     = PULSE_SHAPE,
-      START        = P1.START + 10 ns,
+      START        = P30.START + P30.LENGTH + t0,
       DELTA_START  = delta_t,
-      LEN          = P1.LENGTH - 20 ns;
+      LEN          = 2 * P30.LENGTH ;
+
+P0:   FUNCTION     = MICROWAVE,
+      START        = P30.START - 10 ns,
+      LENGTH       = P30.LENGTH + 30 ns;
+
+P1:   FUNCTION     = P0.FUNC,
+      START        = P31.START - 10 ns,
+      DELTA_START  = P31.DELTA_START,
+      LENGTH       = P31.LENGTH + 30 ns ns;
 
 P4:   FUNCTION     = TWT_GATE,
       START        = 0 ns,
@@ -79,7 +79,7 @@ P4:   FUNCTION     = TWT_GATE,
       DELTA_LENGTH = delta_t;
 
 P10:  FUNCTION     = DEFENSE,
-      START        = P31.START + P31.LENGTH + 130 ns,
+      START        = P31.START + P31.LENGTH + 140 ns,
       DELTA_START  = 2 * delta_t,
       LENGTH       = 1 us;
 
@@ -89,7 +89,8 @@ P20:  FUNCTION     = DETECTION,
       LENGTH       = 10 ns;
 
 
-init_1d( 2 );
+init_1d( 2, Repeats, ( P31.START - ( P30.START + P30.LEN ) ) * 10^6,
+	     delta_t * 10^6, "Pulse separation [ us ]", "Signal [ pVs ]" );
 
 digitizer_num_averages( Num_avg );
 digitizer_trigger_channel( AUX2 );
@@ -100,20 +101,23 @@ W2 = digitizer_define_window( 500ns, 10ns );
 
 EXPERIMENT:
 
+digitizer_lock_keyboard( 0 );
+pulser_lock_keyboard( 0 );
 
 FOR I = 1 : Repeats {
 
     pulser_update( );
 
     digitizer_start_acquisition( );
-    x1 = digitizer_get_area_fast( CH1, W1 );
-    x2 = digitizer_get_area_fast( CH1, W2 );
-    y1 = digitizer_get_area_fast( CH2, W1 );
-    y2 = digitizer_get_area_fast( CH2, W2 );
+    x_data[ 1 ] = digitizer_get_area_fast( CH1, W1 );
+    x_data[ 2 ] = digitizer_get_area_fast( CH1, W2 );
+    y_data[ 1 ] = digitizer_get_area_fast( CH2, W1 );
+    y_data[ 2 ] = digitizer_get_area_fast( CH2, W2 );
 
-    display( I, x1 - x2, 1, I, y1 - y2, 2 );
+    display( I, 10^12 * ( x_data[ 1 ] - x_data[ 2 ] ), 1,
+	         I, 10^12 * ( y_data[ 1 ] - y_data[ 2 ] ), 2 );
 
-    fsave( "# # # #\n", x1, x2, y1, y2 );
+    fsave( "# # # #\n", x_data[ 1 ], x_data[ 2 ], y_data[ 1 ], y_data[ 2 ] );
 
     pulser_shift( );
     pulser_increment( );

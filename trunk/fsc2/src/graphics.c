@@ -843,7 +843,7 @@ void stop_graphics( void )
 	if ( G_stored )
 	{
 		memcpy( &G, G_stored, sizeof( Graphics ) );
-		T_free( G_stored );
+		G_stored = T_free( G_stored );
 		for ( i = X; i <= Z; i++ )
 			G.label[ i ] = NULL;
 	}

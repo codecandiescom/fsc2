@@ -117,7 +117,7 @@ void dg2020_do_checks( FUNCTION *f )
 			   test run) or the maximum sequence length (in the real run) */
 
 			f->max_seq_len = Ticks_max( f->max_seq_len, p->pos + p->len );
-			if ( f->delay + f->max_seq_len >=
+			if ( f->delay + f->max_seq_len >
 						  ( TEST_RUN ? MAX_PULSER_BITS : dg2020.max_seq_len ) )
 			{
 				if ( TEST_RUN )
@@ -127,9 +127,9 @@ void dg2020_do_checks( FUNCTION *f )
 							"base.\n", pulser_struct.name, 
 							Function_Names[ f->self ] );
 				else
-					eprint( FATAL, SET, "%s: Pulse sequence for function "
-							"`%s' is too long. You could try to set a higher "
-							"MAXIMUM_PATTERN_LENGTH.\n",
+					eprint( FATAL, ! dg2020_IN_SETUP, "%s: Pulse sequence for "
+							"function `%s' is too long. You could try to set "
+							"a higher MAXIMUM_PATTERN_LENGTH.\n",
 							pulser_struct.name, Function_Names[ f->self ] );
 				THROW( EXCEPTION );
 			}
