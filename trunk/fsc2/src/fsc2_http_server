@@ -414,7 +414,7 @@ sub serve_pics {
 	stdout_lock( 1 ) or exit 1;
 	print STDOUT $which;
 	1 while defined ( $state = <STDIN> ) and $state =~ /^$/o;
-	return undef unless defined $state;
+	return stdout_lock( 0 ) unless defined $state;
 
 	# If we get a positive reply from fsc2 (it's sending us a character which
 	# is not '0') the next thing it sends is the name of a file with the

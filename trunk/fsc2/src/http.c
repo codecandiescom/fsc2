@@ -344,6 +344,8 @@ static void http_send_picture( int pd, int type )
 		reply[ 0 ] = '0';
 		write( pd, reply, 2 );
 	}
+
+	close( tmp_fd );
 }
 
 
