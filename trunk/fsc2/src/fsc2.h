@@ -133,6 +133,7 @@ volatile bool do_quit = UNSET;
 bool exit_hooks_are_run = UNSET;
 
 Graphics G;
+Data_Buffer *dbuf;
 
 
 #else   /*  ! FSC2_MAIN */
@@ -176,6 +177,7 @@ extern volatile bool do_quit;
 extern bool exit_hooks_are_run;
 
 extern Graphics G;
+extern Data_Buffer *dbuf;
 
 #endif
 
