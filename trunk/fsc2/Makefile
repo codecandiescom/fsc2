@@ -153,7 +153,8 @@ install:
 tags:
 	etags -T ${c_sources} *.flex *.y ${c_sources:.c=.h} $(headers)  \
 		  ${modules} ${dg2020_f} dg2020_f.h ${dg2020_b} dg2020_b.h \
-		  ${tds754a} tds754a.h ${tds520a} tds520a.h
+		  ${tds754a} tds754a.h ${tds744a} tds744a.h ${tds520a} tds520a.h \
+		  ${tds520} tds520.h
 
 
 # make all documentation
