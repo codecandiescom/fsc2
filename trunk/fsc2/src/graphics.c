@@ -62,7 +62,7 @@ void start_graphics( void )
 	T_free( pixmap_file );
 	fl_set_object_helper( run_form->print_button, "Print results" );
 
-	fl_set_object_helper( run_form->stop, "Stop the running program" );
+	fl_set_object_helper( run_form->stop, "Stop the experiment" );
 	fl_set_object_helper( run_form->undo_button,
 						  "Undo last rescaling operation" );
 	fl_set_object_helper( run_form->full_scale_button,
