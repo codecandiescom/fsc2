@@ -64,4 +64,4 @@ install:
 	install -m 644 ni6601.h $(incl_dir)
 
 clean:
-	rm -f *.o me_test *.so *.a *~
+	rm -f *.o ni_test *.so *.a *~
