@@ -45,7 +45,7 @@ static const char *rulbus_errlist[ ] = {
 	"Running out of memory",            /* RULBUS_NO_MEMORY */
 	"No permission to open configuration file",
 										/* RULBUS_CONF_FILE_ACCESS */
-	"Invalid name of configuration file (or missing)",
+	"Invalid name of configuration file or missing configuration file",
 										/* RULBUS_CONF_FILE_NAME_INVALID */
     "Can't open configuration file",    /* RULBUS_CONF_FILE_OPEN_FAIL */
 	"Syntax error in configuration file before line %d, column %d",
@@ -103,7 +103,8 @@ static const char *rulbus_errlist[ ] = {
 	"%d, column %d",               		/* RULBUS_CF_INTR_DELAY_INVALID */
 	"Not permission to open device file",
 										/* RULBUS_DEV_FILE_ACCESS */
-	"Invalid device file name",         /* RULBUS_DEV_FILE_NAME_INVALID */
+	"Invalid device file name or missing device file",
+										/* RULBUS_DEV_FILE_NAME_INVALID */
 	"Can't open device file",           /* RULBUS_DEV_FILE_OPEN_FAIL */
 	"Device doesn't exit or driver not loaded",
 										/* RULBUS_DEV_NO_DEVICE */
