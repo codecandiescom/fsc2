@@ -31,6 +31,7 @@
 
 
 int explex( void );
+static int exp_get_channel_name( void );
 
 extern Token_Val exp_val;
 
@@ -71,6 +72,8 @@ L			L(EN(GTH)?)?
 DS          D(EL(TA)?)?_?S(TART)?
 DL          D(EL(TA)?)?_?L(EN(GTH)?)?
 PH          PH(ASE(SEQ(UENCE)?)?)?_?([0-9])?
+
+CHT         "CH1"|"CH2"|"CH3"|"CH4"|"AUX"|"MATH1"|"MATH2"|"MATH3"|"REF1"|"REF2"|"REF3"|"REF4"
 
 WS          [\n \t]+
 
@@ -206,6 +209,10 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 				return E_PDLEN;
             }
 
+
+CHT         return exp_get_channel_name( );
+
+
 {IDENT}     {
 				int acc;
 
@@ -311,4 +318,26 @@ int experiment_parser( FILE *in )
 	}
 
 	return Exp_Next_Section;
+}
+
+
+static int exp_get_channel_name( void )
+{
+	Var *func, *v;
+	int access;
+
+
+	if ( ( func = func_get_long( "digitizer_get_channel_number",
+								 &access, SET ) ) != NULL )
+	{
+		vars_push( STR_VAR, exptext );
+		v = func_call( func );
+		if ( v !=NULL && v->val.lval != UNDEFINED )
+			 return E_VAR_REF;
+	}
+
+	eprint( FATAL, "%s:%ld: Token `%s' can't be used, no digitizer module "
+			"loaded or module does not know how to interpret the token.\n",
+			Fname, Lc, exptext );
+	THROW( EXCEPTION );
 }

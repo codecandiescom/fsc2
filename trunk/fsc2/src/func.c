@@ -228,6 +228,12 @@ void functions_exit( void )
 
 Var *func_get( const char *name, int *access )
 {
+	return func_get_long( name, access, 0 );
+}
+
+
+Var *func_get_long( const char *name, int *access, bool flag )
+{
 	int i;
 	Var *ret;
 
@@ -242,9 +248,13 @@ Var *func_get( const char *name, int *access )
 		{
 			if ( Fncts[ i ].fnct == NULL )
 			{
-				eprint( FATAL, "%s:%ld: Function `%s' has not been loaded.\n",
-						Fname, Lc, Fncts[ i ].name );
-				THROW( EXCEPTION );
+				if ( ! flag )
+				{
+					eprint( FATAL, "%s:%ld: Function `%s' has not been "
+							"loaded.\n", Fname, Lc, Fncts[ i ].name );
+					THROW( EXCEPTION );
+				}
+				return NULL;
 			}
 						
 			ret = vars_push( FUNC, Fncts[ i ].fnct );
