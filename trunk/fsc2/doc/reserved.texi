@@ -35,6 +35,7 @@ functions and may not be used as variable names.
 @item @code{abort}            @tab Built-in function (@ref{abort})
 @item @code{abs}              @tab Built-in function (@ref{abs})
 @item @code{acos}             @tab Built-in function (@ref{acos})
+@item @code{AND}              @tab logical AND operator
 @item @code{asin}             @tab Built-in function (@ref{asin})
 @item @code{atan}             @tab Built-in function (@ref{atan})
 @item @code{ASS:}             @tab Starts the @code{ASSIGNMENTS} section
@@ -199,9 +200,11 @@ functions and may not be used as variable names.
 @item @code{NEGATIVE}         @tab
 @item @code{NEXT}             @tab Loop control statement (@ref{NEXT statement})
 @item @code{NEXT_GATE}        @tab Channel Name
+@item @code{NOT}              @tab logical NOT operator
 @item                         @tab
 @item @code{object_delete}    @tab Built-in function (@ref{object_delete})
 @item @code{ON_STOP:}         @tab Label in @code{EXPERIMENT} section
+@item @code{OR}               @tab logical OR operator
 @item @code{output_create}    @tab Built-in function (@ref{output_create})
 @item @code{output_delete}    @tab Built-in function (@ref{output_delete})
 @item @code{output_value}     @tab Built-in function (@ref{output_value})
@@ -311,6 +314,8 @@ functions and may not be used as variable names.
 @item                         @tab
 @item @code{wait}             @tab Built-in function (@ref{wait})
 @item @code{WHILE}            @tab Keyword for @code{WHILE} loops (@ref{WHILE loops})
+@item                         @tab
+@item @code{XOR}              @tab logical XOR operator
 @end multitable
 
 

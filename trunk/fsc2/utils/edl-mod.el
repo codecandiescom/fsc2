@@ -134,6 +134,10 @@
      "OFF\\>"
      "TTL\\>"
      "ECL\\>"
+	 "AND\\>"
+	 "OR\\>"
+	 "NOT\\>"
+	 "XOR\\>"
      "[+-]?[xX]\\>"
      "[+-]?[yY]\\>"
 	 "[cC][wW]\\>" ) )
@@ -170,7 +174,7 @@
    (cons (concat "\\<\\("
 				 (mapconcat 'identity edl-reserved-words "\\|") "\\)\\|{\\|}")
 		 'font-lock-keyword-face)
-   (cons "\\(<=\\|>=\\|==\\|!=\\|<\\|>\\|&\\|!\\|~\\|?\\|:\\)" 'font-lock-builtin-face)
+   (cons "\\(<=\\|>=\\|==\\|!=\\|<\\|>\\|&\\||\\|!\\|~\\|?\\|:\\)" 'font-lock-builtin-face)
    (cons edl-unit-keywords 'font-lock-type-face))
   "EDL expressions to highlight." )
 
