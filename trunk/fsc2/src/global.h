@@ -180,6 +180,9 @@ enum {
 };
 
 
+#define PHASE_TYPES_MIN  PHASE_PLUS_X
+#define PHASE_TYPES_MAX  PHASE_CW
+
 #if defined ( FSC2_MAIN )
 const char *Phase_Types[ ] = { "X", "-X", "Y", "-Y", "CW" };
 #else
