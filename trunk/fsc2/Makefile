@@ -63,11 +63,17 @@ GPIB_LOG_FILE    := /tmp/gpib.log
 GPIB_LOG_LEVEL   := HIGH
 
 
-# This variable defines the number of serial ports that are available on
-# the computer (defaults to 0 if not set)
+# NUM_SERIAL_PORTS defines the number of serial ports that are available on
+# the computer and defaults to 0 if not set (in which case no serial ports
+# can be used). The second variable, SERIAL_LOCK_DIR, is the directory where
+# UUCP style lock files for the serial ports are created. If this variable
+# is not set, no lock files will be created or tested for. If it is defined
+# fsc2 must belong to the group (as secondary group) that has write access
+# rights to this directory, this group usually is 'uucp'.
 
 NUM_SERIAL_PORTS := 2
 SERIAL_LOCK_DIR  := "/var/lock"
+
 
 # This variable controls to whom mail with bug reports and crash messages will
 # be send - if not set no "Bug report" button will be shown. Please change
