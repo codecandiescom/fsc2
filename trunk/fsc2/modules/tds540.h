@@ -187,8 +187,8 @@ static double max_sens = 1e-3,
 
 #else
 
-	extern TDS540 tds540;
-	extern const char *TDS540_Channel_Names[ ];
+extern TDS540 tds540;
+extern const char *TDS540_Channel_Names[ ];
 
 #endif
 

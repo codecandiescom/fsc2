@@ -150,51 +150,51 @@ enum {
 
 #ifdef TDS744A_MAIN
 
-	TDS744A tds744a;
+TDS744A tds744a;
 
-	/* This array must be set to the available record lengths of the digitizer
-	   and must always end with a 0 */
+/* This array must be set to the available record lengths of the digitizer
+   and must always end with a 0 */
 
-	static long record_lengths[ ] = { 500, 1000, 2500, 5000, 15000, 50000, 0 };
+static long record_lengths[ ] = { 500, 1000, 2500, 5000, 15000, 50000, 0 };
 
-	/* List of all allowed time base values (in seconds) */
+/* List of all allowed time base values (in seconds) */
 
-	static double tb[ ] = {                     500.0e-12,
-							  1.0e-9,   2.0e-9,   5.0e-9,
-							 12.5e-9,  25.0e-9,  50.0e-9,
-							100.0e-9, 200.0e-9, 500.0e-9,
-							  1.0e-6,   2.0e-6,   5.0e-6,
-							 10.0e-6,  20.0e-6,  50.0e-6,
-							100.0e-6, 200.0e-6, 500.0e-6,
-							  1.0e-3,   2.0e-3,   5.0e-3,
-							 10.0e-3,  20.0e-3,  50.0e-3,
-							100.0e-3, 200.0e-3, 500.0e-3,
-							  1.0,      2.0,      5.0,
-							 10.0 };
+static double tb[ ] = {                     500.0e-12,
+						  1.0e-9,   2.0e-9,   5.0e-9,
+						 12.5e-9,  25.0e-9,  50.0e-9,
+						100.0e-9, 200.0e-9, 500.0e-9,
+						  1.0e-6,   2.0e-6,   5.0e-6,
+						 10.0e-6,  20.0e-6,  50.0e-6,
+						100.0e-6, 200.0e-6, 500.0e-6,
+						  1.0e-3,   2.0e-3,   5.0e-3,
+						 10.0e-3,  20.0e-3,  50.0e-3,
+						100.0e-3, 200.0e-3, 500.0e-3,
+						  1.0,      2.0,      5.0,
+						 10.0 };
 
-	#define TB_ENTRIES ( sizeof tb / sizeof tb[ 0 ] )
+#define TB_ENTRIES ( sizeof tb / sizeof tb[ 0 ] )
 
 
-	/* Maximum and minimum sensitivity settings (in V) of the measurement
-	   channels
-	   Take care: The minimum sensitivity of 10 V only works with 1 M Ohm input
-	   impedance, while for 50 Ohm the minimum sensitivity is only 1V.
-	   Unfortunately, this can only be tested after the digitizer is online. */
+/* Maximum and minimum sensitivity settings (in V) of the measurement
+   channels
+   Take care: The minimum sensitivity of 10 V only works with 1 M Ohm input
+   impedance, while for 50 Ohm the minimum sensitivity is only 1V.
+   Unfortunately, this can only be tested after the digitizer is online. */
 
-	double max_sens = 1e-3,
-		   min_sens_50 = 1.0,
-           min_sens = 10.0;
+double max_sens = 1e-3,
+	   min_sens_50 = 1.0,
+	   min_sens = 10.0;
 
-	const char *TDS744A_Channel_Names[ MAX_CHANNELS  ] = {
+const char *TDS744A_Channel_Names[ MAX_CHANNELS  ] = {
 											"CH1", "CH2", "CH3", "CH4",
 								 			"MATH1", "MATH2", "MATH3", "REF1",
 								 			"REF2", "REF3", "REF4",
 								 			"AUX", "LINE" };
 #else
 
-	extern TDS744A tds744a;
-	extern const char *TDS744A_Channel_Names[ MAX_CHANNELS ];
-	extern double max_sens, min_sens_50, min_sens;
+extern TDS744A tds744a;
+extern const char *TDS744A_Channel_Names[ MAX_CHANNELS ];
+extern double max_sens, min_sens_50, min_sens;
 
 #endif
 
