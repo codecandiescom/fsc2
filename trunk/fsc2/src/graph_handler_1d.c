@@ -95,9 +95,9 @@ static void press_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
 	bool active = UNSET;
 
 
-	/* In the axis areas two buttons pressed simultaneously doesn't has a
-	   special meaning, so don't care about another button. Also don't react
-	   if the pressed buttons have lost there meaning */
+	/* In the axis areas two buttons getting pressed simultaneously doesn't
+	   has a special meaning, so don't care about another button. Also don't
+	   react if the pressed buttons have lost there meaning */
 
 	if ( ( c != &G.canvas && G.raw_button_state != 0 ) ||
 		 ( G.button_state == 0 && G.raw_button_state != 0 ) )
@@ -272,8 +272,8 @@ static void release_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
 
 	obj = obj;
 
-	/* If the released button didn't has a meaning just clear it from the
-	   button state pattern and then forget about it */
+	/* If the released button didn't has a meaning just remove it from the
+	   button state pattern */
 
 	if ( ! ( ( 1 << ( ev->xbutton.button - 1 ) ) & G.button_state ) )
 	{
@@ -507,9 +507,9 @@ static void motion_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
 
 	obj = obj;
 
-	/* We need to do event compression to avoid being flooded with motion
-	   events - instead of handling them all individually we only react to
-	   the latest in the series of motion events for the current window */
+	/* Do event compression to avoid being flooded with motion events -
+	   instead of handling them all individually only react to the latest
+	   in a series of motion events for the current window */
 
 	while ( fl_XEventsQueued( QueuedAfterReading ) > 0 )
 	{
