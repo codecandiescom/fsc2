@@ -250,8 +250,8 @@ Var *f_getf( Var *var )
 
 	if ( No_File_Numbers )
 	{
-		print( FATAL, "Function can't be called if one save()-type functions "
-			   "akready has been invoked.\n" );
+		print( FATAL, "Function can't be called if one of the save()-type "
+			   "functions already has been invoked.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -2221,7 +2221,7 @@ get_repl_retry:
 		return n;
 	}
 
-	/* Ooops, also failed to write to new file */
+	/* Ooops, also failed to write to the new file */
 
 	mess = get_string( "Can't write to (replacement) file\n%s\n"
 					   "Please choose a different file.",
