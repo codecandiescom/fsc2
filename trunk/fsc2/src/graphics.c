@@ -901,7 +901,7 @@ void make_label_string( char *lstr, double num, int res )
 		if ( mag < res )
 			sprintf( lstr, "0" );
 		else
-			sprintf(  lstr, "%1.*E", n - 1, num );
+			sprintf(  lstr, "%1.*E", n, num );
 }
 
 
