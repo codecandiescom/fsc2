@@ -54,7 +54,7 @@ The XFORMS library is available from e.g. (some links may be outdated)
 
 The GPIB library consists of a library and a module to interface GPIB
 cards. You can either use the one I've written (works, as far as I know,
-for fsc2 with 2.0, 2.2 and 2.4 kernels), the older LLP (Linux Lab Project)
+with 2.0, 2.2 and 2.4 kernels), the older LLP (Linux Lab Project)
 library to be found at
 
   http://www.llp.fu-berlin.de
@@ -69,6 +69,10 @@ the LLP library supports cards from other companies than National
 Instruments. You may also compile fsc2 without having a GPIB library, but
 then devices controlled via the GPIB bus can't be used for obvious reasons.
 
+There now is also an updated version of the LLP library, working with
+2.4 kernels and downloadable from sourceforge. I would guess that it
+also will work, but I didn't yet had the time to investigate this.
+
 Please make sure that the GPIB library you want to use is already compiled
 and installed before trying to compile fsc2 (unless you don't need GPIB
 support built into fsc2).
@@ -81,9 +85,9 @@ If you want to do more than just a few simple tests with fsc2 you should
 create a special account for it. fsc2 needs to be installed setuid'ed,
 so for security reasons its account should have as low privileges as
 possible so that no-one with this account is able to log in (e.g. by
-setting its shell in /etc/passwd to /bin/false) and the account shouldn't
+setting its shell in /etc/passwd to /bin/false), and the account shouldn't
 have root privileges! Most of the time fsc2 runs with the effective user
-ID (EUID) and effective group ID (EGID) set to the real users ID and group
+ID (EUID) and effective group ID (EGID) set to the real users ID and group,
 but in a few places (e.g. when writing to log files, manipulating lock files
 or accessing shared memory or device files) it reverts back to the EUID and
 EGID of the fsc2 account.
@@ -298,7 +302,7 @@ Just start by typing 'fsc2 edl/a.edl' or 'fsc2 edl/z.edl' (assuming you're
 still in fsc2's main directory) and click onto the "Start" button to get an
 idea about how fsc2 displays 1- and 2-dimensional data sets.
 
-             November 21, 2002             Much luck, Jens
+             November 28, 2002             Much luck, Jens
 --
        _  _____  _____
       | ||_   _||_   _|         Jens.Toerring@physik.fu-berlin.de
