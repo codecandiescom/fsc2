@@ -97,7 +97,7 @@ etc.).
 For most pulsers the first statement of the @code{ASSIGNMENTS} section
 has to be the setting of the time base of the pulser unless the pulser
 has a fixed time base, in which case no setting of the time base is
-possible. All pulsers function similarly: they have a certain number of
+possible. Most pulsers function similarly: they have a certain number of
 time slices (usually 65536, 2^16) and for each of them the output of the
 pulser can be either set to a high or a low voltage. By setting the
 output during one or more of these time slices to a high voltage (and
@@ -107,12 +107,24 @@ these time slices. From the above it is clear, that all pulses (as well
 as all the times between pulses) have to be integer multiples of the
 length of the time base.
 
-The only exception to date is the @strong{Bruker EP385} pulse
-programmer. This pulser has a fixed built-in time base of @w{8 ns}. In
-this case a @code{TIMEBASE} statement (see below) may only be given if
-you use an external clock input, in which case you need to specify the
-inverse of the frequency of the external clock to be able to use correct
-values for pulse lengths etc.
+An exception is the @strong{Bruker EP385} pulse programmer. This pulser
+has a fixed built-in time base of @w{8 ns}. In this case a
+@code{TIMEBASE} statement (see below) may only be given if you use an
+external clock input, in which case you need to specify the inverse of
+the frequency of the external clock to be able to use correct values for
+pulse lengths etc.
+
+In case of the @strong{Interface Technology RS690} the internal clock is
+automatically used for time bases of @w{4 ns}, @w{8 ns} and @w{16 ns},
+all other time bases require an external clock. To distinguish between
+the @code{TTL} and @code{ECL} level input for the external clock the
+additional keywords @code{TTL} and @code@code{ECL} can be given together
+with the time base value. When one of these keywords is given the
+external clock will be used, even if the time base value is one of the
+three values that can be realized using the internal clock. When neither
+of the two keywords is given and the specified time base requires an
+external clock the @code{TTL} level colck input is used per default.
+
 
 The statement to set the time base, i.e.@: the length of the individual
 time slices is@footnote{Instead of @code{TIMEBASE} one may also write
@@ -121,6 +133,12 @@ time slices is@footnote{Instead of @code{TIMEBASE} one may also write
 @example
 TIMEBASE: 5 ns;
 @end example
+@noindent
+or, for the @strong{Interface Technology RS690}, when using an external
+clock:
+@example
+TIMEBASE: 25 ns, TTL;
+@end example
 
 The minimum and maximum values for the time base differ for the different
 pulsers:
@@ -128,7 +146,9 @@ pulsers:
 @item Sony/Tektronix DG2020: @w{5 ns} to @w{0.1 s}
 @item Tektronix HFS9003: @w{1.6 ns} to @w{20 us}
 @item Bruker EP385 (external clock only): @w{8 ns}, no upper limit specified
-      in the manual.
+in the manual.
+@item Interface Technology R690: @w{4 ns}, @w{8 ns} and @w{16 ns}
+internal clock, @w{4 ns} and larger internal clock
 @end itemize
 
 If you're using two or more pulsers simultaneously you need as many
@@ -245,6 +265,12 @@ HFS9003} the allowed trigger level range is @w{-4.7 V} to @w{+4.7 V}.
 For the @strong{Bruker EP385} trigger slopes, trigger levels or input
 impedances can't be set.
 
+For the @strong{Interface Technology RS690} no input trigger level can be
+set but it has two trigger input connectors, one for @code{TTL} and one
+for @code{ECL} level trigger input. To distinguish between both the
+input ports the additional keywords @code{TTL} and @code{ECL} can be
+given. If none is given the @code{TTL} level input port is used per default.
+
 If you need to control more than one pulser you must have a
 @code{TRIGGER_MODE} statement for each of the pulsers. In this case you
 need to append a @code{#} and the number of the pulser to tell the
@@ -353,6 +379,18 @@ EP385} on the other. The @strong{Tektronix HFS9003} and the
 mapped to what is called the POD, that in both cases (Frankfurt S-band
 and Berlin X-band spectrometer) has 12 real output channels (pods).
 
+Finally, the @strong{Interface Technology RS690} has 4 output connectors
+(or even 8, if a second HSM card is installed), each with 16 output
+channels. Each output channel can be addressed by a letter between
+@code{A} and @code{D} (or @code{H}, if two HSM cards are installed) for
+the connector, followed by a number between @code{0} and @code{16},
+specifying the channel on the connector to use. Valid channel
+designators are e.g. @code{A3}, @code{C13} etc. Please note that the
+number of channels of a connector, that can be used, depends on the time
+base setting: for a time base of @w{4 ns} only the lowest 4 channels of
+a connector can be used, for a time base of @w{8 ns} only the lower 8
+channels.
+
 For the @strong{Tektronix HFS9003} simply a channel is associated with a
 function by statements like
 @example
@@ -362,13 +400,20 @@ RF_GATE:   CH = 3;
 DETECTION: CHANNEL = TRIGGER_OUT;
 @end example
 @noindent
-Please note that the output channels usually are numbered as printed on
-the device, the only exception for the @strong{Tektronix HFS9003} is the
-trigger-out channel, that is called @code{TRIGGER_OUT}, and has some
-special properties, e.g. allowing only one pulse of a fixed length.
-The keyword @code{CHANNEL} can be replaced by @code{CH} and
-@code{TRIGGER_OUT} by either @code{TRIGGEROUT}, @code{TRIG_OUT} or
-@code{TRIGOUT}.
+or, for the @strong{Interface Technology RS690}
+@example
+MICROWAVE: CHANNEL = A3;
+RF:        CHANNEL = B7;
+RF_GATE:   CH = C5;
+DETECTION: CHANNEL = D15;
+@example
+@noindent
+The output channels usually are numbered as printed on the device, one
+exception is the trigger-out channel of the @strong{Tektronix HFS9003},
+that is called @code{TRIGGER_OUT}, and has some special properties,
+e.g. allowing only one pulse of a fixed length.  The keyword
+@code{CHANNEL} can be replaced by @code{CH} and @code{TRIGGER_OUT} by
+either @code{TRIGGEROUT}, @code{TRIG_OUT} or @code{TRIGOUT}.
 
 For the @strong{Sony/Tektronix DG2020} the function gets associated with
 one (or more pods, see below why sometimes more than one is needed):
@@ -396,9 +441,9 @@ DETECTION: POD = 11;   // leave it to the program to select the channel
 @end example
 
 
-In contrast, for the @strong{Tektronix HFS9003} and the @strong{Bruker
-EP385} not @code{POD}s but channels get associated with a function,
-e.g.@:
+In contrast, for the @strong{Tektronix HFS9003}, the @strong{Bruker
+EP385} and the @strong{Interface Technology RS690} not @code{POD}s but
+channels get associated with a function, e.g.@:
 @example
 MICROWAVE: CH = 0, 1, 2, 3;
 RF:        CH = 5;
@@ -415,7 +460,9 @@ pulsers:
 @itemize @bullet
 @item Sony/Tektronix DG2020: POD = 0..11, CH = 0..35
 @item Tektronix HFS9003: CH = 1..4
-@item Bruker EP385 Pulse Programmer: CH = 0..7
+@item Bruker EP385: CH = 0..7
+@item Interface Technology RS690: CH = X0..15 with X standing for A..D
+(or A..H when two HSM cards are installed)
 @end itemize
 
 Beside defining at which of the output connectors the pulses for a
@@ -455,9 +502,10 @@ RF:        POD = 6   V_HIGH = 2.6 V, V_LOW = 0 V, INVERTED;
 @end example
 
 
-For the @strong{Bruker EP385} pulser pulse levels can't be
-specified. Also the @code{INVERTED} keyword cannot be used, use instead
-the inverted output.
+For both the @strong{Bruker EP385} and @strong{Interface Technology
+RS690} pulser pulse levels can't be specified. For the @strong{Bruker
+EP385} also the @code{INVERTED} keyword cannot be used, use instead the
+inverted output connectors.
 
 
 Finally, in order to take care of different cable lengths a delay for a
@@ -495,8 +543,8 @@ that there are several differences between the Frankfurt S-band and the
 Berlin X-band spectrometer. And all the following is only relevant if
 phase cycling is to be used.
 
-@strong{Berlin X-band spectrometer} (both @strong{Sony/Tektronix DG2020}
-and @strong{Bruker EP385}):
+@strong{Berlin X-band spectrometer} (@strong{Sony/Tektronix DG2020}
+and @strong{Bruker EP385} and @strong{Interface Technology RS690}):
 
 The Berlin bridge setup is rather simple in that it expects pulses with
 different phases to appear on different input connectors of the
@@ -682,6 +730,9 @@ For the @strong{Bruker EP385} no maximum pattern length can be
 specified, it is fixed to 32768 times the clocks oscillation period
 (i.e.@: @w{262.144 us} when using the internal clock).
 
+Because the @strong{Interface Technology RS690} uses a rather different
+concept in principle there is no maximum pattern length.
+
 When more than one pulser is used you may to append a @code{#} character
 plus the pulser number to the @code{MAXIMUM_PATTERN_LENGTH} keyword to
 indicate for which pulser it is to be used.
@@ -827,8 +878,10 @@ functions can be used.
 
 Pulse numbers can be chosen randomly - the only requirement is that the
 numbers are positive (including 0) and not larger than 2147483647
-@w{(2^32 - 1)}. Positions and lengths of pulses have to be positive
-(including 0). A pulse of zero length is invisible.
+@w{(2^32 - 1)} (of course there always is some limitation by the device
+that won't allow to create that many pulses). Positions and lengths of
+pulses have to be positive (including 0). A pulse of zero length is
+invisible.
 
 If more than one pulser is used it must also be indicated which pulser
 is supposed to create the pulse. This is done by appending the @code{#}

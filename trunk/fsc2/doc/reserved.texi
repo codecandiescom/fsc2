@@ -100,6 +100,7 @@
 @item @code{DSTART}           @tab Pulse @code{DELTA_START} keyword
 @item @code{D_START}          @tab Pulse @code{DELTA_START} keyword
 @item                         @tab
+@item @code{ECL}              @tab Input level keyword
 @item @code{ELSE}             @tab Part of @code{IF-ELSE} constructs (@ref{IF-ELSE constructs})
 @item @code{EXP:}             @tab Starts the @code{EXPERIMENT} section
 @item @code{EXPERIMENT:}      @tab Starts the @code{EXPERIMENT} section
@@ -287,6 +288,7 @@
 @item @code{TIME_B}           @tab Pulser @code{TIME_BASE} keyword
 @item @code{TIMEBASE}         @tab Pulser @code{TIME_BASE} keyword
 @item @code{TIME_BASE}        @tab Pulser @code{TIME_BASE} keyword
+@item @code{TTL}              @tab Input level keyword
 @item                         @tab
 @item @code{uA}               @tab Unit, Micro-Ampere
 @item @code{udB}              @tab Unit, Micro-Dezibel
