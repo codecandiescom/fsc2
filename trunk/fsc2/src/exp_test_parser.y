@@ -172,7 +172,7 @@ line:    lhs ass_op expr	                          { }
 	        THROW( EXCEPTION ); }
 ;
 
-/* Left hand side of assignments */ 
+/* Left hand side of an assignment */ 
 
 lhs:     lhs_var
        | E_PPOS
