@@ -335,9 +335,9 @@ inline short i2shrt( int a )
 inline unsigned long d2color( double a )
 {
 	if ( a <= - 0.5 / ( double ) NUM_COLORS )
-		return fl_get_pixel( FL_BLACK );
+		return fl_get_pixel( NUM_COLORS + FL_FREE_COL1 + 2 );
 	if ( a >= 1.0 + 0.5 / ( double ) NUM_COLORS )
-		return fl_get_pixel( FL_WHITE );
+		return fl_get_pixel( NUM_COLORS + FL_FREE_COL1 + 1 );
 	else
 		return fl_get_pixel( FL_FREE_COL1 + 1
 							 + lround( a * ( NUM_COLORS - 1 ) ) );
