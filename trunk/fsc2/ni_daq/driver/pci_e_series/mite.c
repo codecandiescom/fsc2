@@ -532,7 +532,8 @@ int pci_dma_shutdown( Board *board, NI_DAQ_SUBSYSTEM sys )
 
 	/* Stop the MITE */
 
-	writel( CHOR_PON | CHOR_STOP, mite_CHOR( sys ) );
+	writel( CHOR_DMARESET | CHOR_CLRDONE | CHOR_FRESET | CHOR_ABORT,
+		mite_CHOR( sys ) );
 	board->mite_irq_enabled[ sys ] = 0;
 
 	/* Release DMA memory and clear the ADC FIFO */

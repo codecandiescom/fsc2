@@ -31,8 +31,6 @@ void pci_mite_close( Board *board );
 
 #if defined NI_DAQ_DEBUG
 void pci_mite_dump( Board *board, int channel );
-#else
-pci_mite_dump( x, y )
 #endif
 
 

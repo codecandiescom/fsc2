@@ -239,11 +239,11 @@ static ssize_t ni_daq_read( struct file *filep, char *buff, size_t count,
 	     ( ret = AI_start_acq( board ) ) < 0 )
 		return ret;
 
-	/* If the device file was not opened in non-blocking mode make sure
-	   there are data: if no data are available immediately enable the
-	   STOP interrupt (which gets raised when a scan is finished) and
-	   then wait for it (or for the SC TC interrupt, which is raised
-	   at the end of the acquisition). */
+	/* If the device file wasopened in blocking mode make sure there are
+	   data: if no data are available immediately enable the STOP
+	   interrupt (which gets raised when a scan is finished) and then
+	   wait for it (or for the SC TC interrupt, which is raised at the
+	   end of the acquisition). */
 
 	if ( ! ( filep->f_flags & O_NONBLOCK ) &&
 	     ! board->func->dma_get_available( board,
@@ -281,13 +281,17 @@ static ssize_t ni_daq_read( struct file *filep, char *buff, size_t count,
 		daq_irq_disable( board, IRQ_AI_SC_TC );
 		MSC_PFI_setup( board, NI_DAQ_AI_SUBSYSTEM, NI_DAQ_ALL,
 			       NI_DAQ_PFI_UNUSED );
-		board->func->dma_shutdown( board, NI_DAQ_AI_SUBSYSTEM );
 	}
 
 	if ( ret < 0 )
+	{
+		board->func->dma_shutdown( board, NI_DAQ_AI_SUBSYSTEM );
 		return ret;
+	}
 
 	*offp += count;
+
+	printk( KERN_INFO "Returning count = %ld\n", ( long ) count );
 
 	return count;
 }

@@ -556,6 +556,13 @@ ssize_t ni_daq_ai_get_acq_data( int board, double *volts[ ],
 
 	count = read( ni_daq_dev[ board ].fd, buf, count );
 
+	if ( wait_for_end && count < ( ssize_t ) ( 2 * num_data_per_channel
+						   * ni_daq_dev[ board ].ai_state.num_data_per_scan ) )
+	{
+		free( buf );
+		return ni_daq_errno = NI_DAQ_ERR_INT;
+	}
+
 	if ( count < 0 )
 	{
 		free( buf );

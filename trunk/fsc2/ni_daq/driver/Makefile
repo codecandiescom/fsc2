@@ -37,10 +37,11 @@ endif
 MODULE = ni_daq.o
 SOURCES = $(shell ls pci_e_series/*.c daq_stc/*.c)
 INCLUDES := -I$(KERNEL_SRC)/include -I.
-CFLAGS   := -D__KERNEL__ -DMODULE -DLINUX -O2 -Wall -Wstrict-prototypes
+CC       := gcc
+CFLAGS   := -D__KERNEL__ -DMODULE -DLINUX -O2 -Wall -Wstrict-prototypes -s
 
 
-export CFLAGS INCLUDES
+export CC CFLAGS INCLUDES
 
 
 .SUFFIXES:

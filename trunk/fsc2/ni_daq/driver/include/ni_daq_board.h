@@ -24,6 +24,7 @@
   Jens.Toerring@physik.fu-berlin.de
 */
 
+
 #if ! defined __KERNEL__
 #error "This file is for inclusion by modules only."
 #endif
@@ -31,8 +32,6 @@
 
 #if ! defined NI_DAQ_BOARD_HEADER
 #define NI_DAQ_BOARD_HEADER
-
-#include "autoconf.h"
 
 #include <linux/config.h>
 
@@ -70,16 +69,17 @@
 #include <asm/uaccess.h>
 #include <linux/poll.h>
 
-#ifdef CONFIG_PROC_FS
+#if defined ( CONFIG_PROC_FS )
 #include <linux/proc_fs.h>
 #endif
 
 
-/* Pleae note: All of the following must *not* depend on the special
-               hardware, i.e. it must work for both PCI-E-series as
-	       well as AT-MIO-series boards! */
+/* Please note: All of the following must *not* depend on the special
+                hardware, i.e. it must work for both PCI-E-series as
+	        well as AT-MIO-series boards! */
 
 
+#include "autoconf.h"
 #include "ni_daq_drv.h"
 #include "daq_stc.h"
 
@@ -332,10 +332,10 @@ struct Board {
 
 
 #if defined NI_DAQ_DEBUG
-#define PDEBUG( fmt, args... ) \
-	do { \
-        	printk( KERN_DEBUG " "BOARD_SERIES_NAME ": " \
-			__FUNCTION__ "(): " fmt, ## args ); \
+#define PDEBUG( fmt, args... )                                \
+	do {                                                  \
+        	printk( KERN_DEBUG " "BOARD_SERIES_NAME ": "  \
+			__FUNCTION__ "(): " fmt, ## args );   \
 	} while( 0 )
 #else
 #define PDEBUG( fmt, args... )
