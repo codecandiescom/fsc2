@@ -228,14 +228,14 @@ void func_list_parse( Func **fncts, int num_def_func, int *num_func )
 
 
 /*---------------------------------------------------*/
-/* Function runs once to the function data base file */
-/* and counts the number of defined functions        */
+/* Function runs once through the function data base */
+/* file and counts the number of defined functions   */
 /*---------------------------------------------------*/
 
 int fll_count_functions( void )
 {
 	int ret_token;
-	int last_token;
+	int last_token = "";
 	int num = 0;
 
 
