@@ -452,14 +452,14 @@ install-crowley.none:
 	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) config/hp8647a.table $(libdir)
 
 
-# Create zipped tarball and write it to the ZIP drive (at home or on moebi
+# Create zipped tarball and write it to the ZIP drive (at home or on isaak
 # also mount and unmount the ZIP drive otherwise assume that it's already
 # mounted)
 
 ZIP:
 	$(MAKE) pack
 	if [    "$(machine_name)" = "crowley.none"                       \
-		 -o "$(machine_name)" = "moebi.physik.fu-berlin.de" ]; then  \
+		 -o "$(machine_name)" = "isaak.physik.fu-berlin.de" ]; then  \
 		if ! `grep ZIP /etc/mtab > /dev/null`; then                  \
 			sleep 1;                                                 \
 			mount /ZIP;                                              \
@@ -467,5 +467,5 @@ ZIP:
 		cp ../fsc2.tgz /ZIP;                                         \
 		umount /ZIP;                                                 \
 	else                                                             \
-		scp ../fsc2.tgz moebi.physik.fu-berlin.de:/ZIP;              \
+		scp ../fsc2.tgz isaak.physik.fu-berlin.de:/ZIP;              \
 	fi
