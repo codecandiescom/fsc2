@@ -75,8 +75,8 @@ analyzing the files with the list of device modules,
 tokens).
 
 
-Finally, there is @file{fsc2_clean.l}. @code{EDL} expects its input
-to be a single file in a certain format. Thus it does not deal directly
+Finally, there is @file{fsc2_clean.l}. @code{EDL} expects its input to
+be a single file in a certain format. Thus it does not deal directly
 with the input files (there can be more than one when there are
 @code{#INCLUDE} statements in an @code{EDL} program) but there is an
 extra program, @file{fsc2_clean} that translates the input @code{EDL}
@@ -85,8 +85,13 @@ for example removes all comments, includes files for @code{#INCLUDE}
 statements, adds information about line numbers and file names etc., and
 then passes this cleaned-up input to the @code{fsc2} program. If you are
 interested what @code{fsc2} really sees of an @code{EDL} file you can
-run @code{fsc2_clean} with the @code{EDL} file as its input (please
-note that the output of @code{fsc2_clean} program contains some
+run @code{fsc2_clean} with the @code{EDL} file as its standard input,
+i.e.
+@example
+fsc2_clean < edl_script.edl
+@end example
+@noindent
+(please note that the output of @code{fsc2_clean} program contains some
 non-printable characters).
 
 
