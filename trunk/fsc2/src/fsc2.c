@@ -22,6 +22,7 @@ static char *in_file = NULL;         /* name of input file */
 static time_t in_file_mod = 0;
 static double slider_size = 0.05;
 static bool delete_file = UNSET;
+static bool delete_old_file = UNSET;
 
 
 /* Locally used functions */
@@ -197,20 +198,11 @@ int main( int argc, char *argv[ ] )
 		load_file( main_form->browser, 1 );
 	}
 
-	/* Trigger test or start of current EDL program if the appropriate flags
-	   were passed to the program on the command line */
-
-	if ( do_test && is_loaded )
-		fl_trigger_object( main_form->test_file );
-	if ( do_start && is_loaded )
-		fl_trigger_object( main_form->run );
-	if ( do_delete )
-		delete_file = SET;
-
 	/* Set handler for signal that's going to be send by the process that
 	   accepts external connections (to be spawned next) */
 
 	signal( SIGUSR1, sigusr1_handler );
+	signal( SIGUSR2, sigusr1_handler );
 
 	/* If starting the server for external connections succeeds we can
 	   really start the main loop */
@@ -218,6 +210,16 @@ int main( int argc, char *argv[ ] )
 	if ( ( conn_pid = spawn_conn( ( do_test || do_start ) && is_loaded ) )
 		 != -1 )
 	{
+		/* Trigger test or start of current EDL program if the appropriate
+		   flags were passed to the program on the command line */
+
+		if ( do_test && is_loaded )
+			fl_trigger_object( main_form->test_file );
+		if ( do_start && is_loaded )
+			fl_trigger_object( main_form->run );
+		if ( do_delete )
+			delete_file = delete_old_file = SET;
+
 		/* If required send signal to parent process, then loop until quit
 		   button is pressed */
 
@@ -235,6 +237,8 @@ int main( int argc, char *argv[ ] )
 
 	/* Do everything necessary to end the program */
 
+	if ( delete_old_file && in_file != NULL )
+		unlink( in_file );
 	unlink( FSC2_SOCKET );
 	clean_up( );
 	xforms_close( );
@@ -331,6 +335,11 @@ static bool xforms_init( int *argc, char *argv[] )
 	fl_show_form( main_form->fsc2, FL_PLACE_MOUSE | FL_FREE_SIZE,
 				  FL_FULLBORDER, "fsc2" );
 
+	/* Set c_cdata and u_cdata elements of load button structure */
+
+	main_form->Load->u_ldata = 0;
+	main_form->Load->u_cdata = NULL;
+
 	/* Create the form for writing a comment */
 
 	input_form = create_form_input_form( );
@@ -361,8 +370,8 @@ static void xforms_close( void )
 
 void load_file( FL_OBJECT *a, long reload )
 {
-	static const char *fn;
-	static char *old_in_file;
+	const char *fn;
+	char *old_in_file = NULL;
 	FILE *fp;
 	struct stat file_stat;
 	static char *title = NULL;
@@ -370,89 +379,100 @@ void load_file( FL_OBJECT *a, long reload )
 
 	a = a;
 
-	if ( conn_pid >= 0 )
-		kill( conn_pid, BUSY_SIGNAL );
+	notify_conn( BUSY_SIGNAL );
 
-	/* If new file is to be loaded get its name, otherwise use previous name */
-
-	if ( ! reload )
-	{
-		fn = fl_show_fselector( "Select input file:", NULL, "*.edl", NULL );
-		if ( fn == NULL )
-		{
-			if ( conn_pid )
-				kill( conn_pid, UNBUSY_SIGNAL );
-			return;
-		}
-	}
-	else
-		fn = in_file;
-
-	/* If this is not a reload save name of file */
+	/* If new file is to be loaded get its name and store it, otherwise use
+	   previous name */
 
 	if ( ! reload )
 	{
-		old_in_file = in_file;
+		if ( main_form->Load->u_ldata == 0 &&
+			 main_form->Load->u_cdata == NULL )
+		{
+			fn = fl_show_fselector( "Select input file:", NULL, "*.edl",
+									NULL );
+			if ( fn == NULL )
+			{
+				notify_conn( UNBUSY_SIGNAL );
+				return;
+			}
 
-		TRY
-		{
-			in_file = get_string_copy( fn );
-			TRY_SUCCESS;
+			old_in_file = in_file;
+
+			TRY
+			{
+				in_file = get_string_copy( fn );
+				TRY_SUCCESS;
+			}
+			OTHERWISE
+			{
+				in_file = old_in_file;
+				notify_conn( UNBUSY_SIGNAL );
+				return;
+			}
 		}
-		OTHERWISE
+		else
 		{
-			in_file = old_in_file;
-			if ( conn_pid >= 0 )
-				kill( conn_pid, UNBUSY_SIGNAL );
+			old_in_file = in_file;
+
+			in_file = main_form->Load->u_cdata;
+			main_form->Load->u_cdata = NULL;
+		}
+	}
+	else                              /* call via reload buton */
+	{
+		/* Quit if name of previous file is empty */
+
+		if ( in_file == '\0' )
+		{
+			fl_show_alert( "Error", "Sorry, no file is loaded yet.", NULL, 1 );
+			old_in_file = T_free( old_in_file );
+			notify_conn( UNBUSY_SIGNAL );
 			return;
 		}
-
-		T_free( old_in_file );
-	}
-
-	/* Quit if this is a reload but name of previous file is empty */
-
-	if ( reload && fn == '\0' )
-	{
-		fl_show_alert( "Error", "Sorry, no file is loaded yet.", NULL, 1 );
-		if ( conn_pid >= 0 )
-			kill( conn_pid, UNBUSY_SIGNAL );
-		return;
 	}
 
 	/* Test if the file is readable and can be opened */
 
-	if ( access( fn, R_OK ) == -1 )
+	if ( access( in_file, R_OK ) == -1 )
 	{
 		if ( errno == ENOENT )
-			fl_show_alert( "Error", "Sorry, file not found:", fn, 1 );
+			fl_show_alert( "Error", "Sorry, file not found:", in_file, 1 );
 		else
 			fl_show_alert( "Error", "Sorry, no permission to read file:",
-						   fn, 1 );
-		if ( conn_pid >= 0 )
-			kill( conn_pid, UNBUSY_SIGNAL );
+						   in_file, 1 );
+		old_in_file = T_free( old_in_file );
+		notify_conn( UNBUSY_SIGNAL );
 		return;
 	}
 
-	if ( ( fp = fopen( fn, "r" ) ) == NULL )
+	if ( ( fp = fopen( in_file, "r" ) ) == NULL )
 	{
-		fl_show_alert( "Error", "Sorry, can't open file:", fn, 1 );
-		if ( conn_pid >= 0 )
-			kill( conn_pid, UNBUSY_SIGNAL );
+		fl_show_alert( "Error", "Sorry, can't open file:", in_file, 1 );
+		old_in_file = T_free( old_in_file );
+		notify_conn( UNBUSY_SIGNAL );
 		return;
 	}
 
-	/* get modification time of file */
+	/* Now that we're sure that we can read the new file we can delete the
+	   old file */
 
-	stat( fn, &file_stat );
+	if ( delete_old_file && old_in_file != NULL )
+		unlink( old_in_file );
+	delete_old_file = delete_file ? SET : UNSET;
+	old_in_file = T_free( old_in_file );
+
+	/* Get modification time of file */
+
+	stat( in_file, &file_stat );
 	in_file_mod = file_stat.st_mtime;
 
 	/* Set a new window title */
 
 	T_free( title );
-	title = T_malloc( 7 + strlen( fn ) );
+	title = T_malloc( 7 + strlen( in_file ) );
 	strcpy( title, "fsc2: " );
-	strcat( title, fn );
+	strcat( title, in_file );
 	fl_set_form_title( main_form->fsc2, title );
 
 	/* Read in and display the new file */
@@ -471,8 +491,17 @@ void load_file( FL_OBJECT *a, long reload )
 		    compilation.error[ WARN ] = 0;
 
 	fclose( fp );
-	if ( conn_pid >= 0 )
-		kill( conn_pid, UNBUSY_SIGNAL );
+
+	if ( main_form->Load->u_ldata != 0 )
+	{
+		if ( main_form->Load->u_ldata == ( long ) 's' )
+			fl_trigger_object( main_form->run );
+		if ( main_form->Load->u_ldata == ( long ) 't' )
+			fl_trigger_object( main_form->test_file );
+		main_form->Load->u_ldata = 0;
+	}
+
+	notify_conn( UNBUSY_SIGNAL );
 }
 
 
@@ -611,7 +640,7 @@ void test_file( FL_OBJECT *a, long b )
 	a->u_ldata = 0;
 	b = b;
 
-	kill( conn_pid, BUSY_SIGNAL );
+	notify_conn( BUSY_SIGNAL );
 
 	/* While program is being tested the test can be aborted by pressing the
 	   test button again - in this case we simply throw an exception */
@@ -622,6 +651,7 @@ void test_file( FL_OBJECT *a, long b )
 		user_break = SET;
 		delete_devices( );                       /* run the exit hooks ! */
 		eprint( FATAL, "Test of program aborted, received user break.\n" );
+		notify_conn( UNBUSY_SIGNAL );
 		THROW( EXCEPTION );
 	}
 
@@ -630,14 +660,14 @@ void test_file( FL_OBJECT *a, long b )
 	if ( ! is_loaded )
 	{
 		fl_show_alert( "Error", "Sorry, but no file is loaded.", NULL, 1 );
-		kill( conn_pid, UNBUSY_SIGNAL );
+		notify_conn( UNBUSY_SIGNAL );
 		return;
 	}
 		
     if ( is_tested )
 	{
 		fl_show_alert( "Warning", "File has already been tested.", NULL, 1 );
-		kill( conn_pid, UNBUSY_SIGNAL );
+		notify_conn( UNBUSY_SIGNAL );
 		return;
 	}
 
@@ -647,19 +677,19 @@ void test_file( FL_OBJECT *a, long b )
 	stat( in_file, &file_stat );
 	if ( in_file_mod != file_stat.st_mtime )
 	{
-		if ( 1 == fl_show_choice( "EDL file on disk is newer than loaded.",
-								  "file. Reload the file from disk?",
+		if ( 1 == fl_show_choice( "EDL file on disk is newer than the loaded ",
+								  "file. Reload file from disk?",
 								  "",
 								  2, "No", "Yes", "", 1 ) )
 		{
-			kill( conn_pid, UNBUSY_SIGNAL );
+			notify_conn( UNBUSY_SIGNAL );
 			return;
 		}
 
 		load_file( main_form->browser, 1 );
 		if ( ! is_loaded )
 			return;
-		kill( conn_pid, BUSY_SIGNAL );
+		notify_conn( BUSY_SIGNAL );
 	}
 
 	/* While the test is run the only accessible button is the test button
@@ -710,7 +740,7 @@ void test_file( FL_OBJECT *a, long b )
 	fl_activate_object( main_form->quit );
 	fl_set_object_lcol( main_form->quit, FL_BLACK );
 
-	kill( conn_pid, UNBUSY_SIGNAL );
+	notify_conn( UNBUSY_SIGNAL );
 }
 
 
@@ -729,12 +759,12 @@ void run_file( FL_OBJECT *a, long b )
 	a = a;
 	b = b;
 
-	kill( conn_pid, BUSY_SIGNAL );
+	notify_conn( BUSY_SIGNAL );
 
 	if ( ! is_loaded )              /* check that there is a file loaded */
 	{
 		fl_show_alert( "Error", "Sorry, but no file is loaded.", NULL, 1 );
-		kill( conn_pid, UNBUSY_SIGNAL );
+		notify_conn( UNBUSY_SIGNAL );
 		return;
 	}
 
@@ -743,7 +773,7 @@ void run_file( FL_OBJECT *a, long b )
 		test_file( main_form->test_file, 1 );
 		if ( main_form->test_file->u_ldata == 1 )  /* user break ? */
 			return;
-		kill( conn_pid, BUSY_SIGNAL );
+		notify_conn( BUSY_SIGNAL );
 	}
 	else
 	{
@@ -762,7 +792,7 @@ void run_file( FL_OBJECT *a, long b )
 				test_file( main_form->test_file, 1 );
 				if ( main_form->test_file->u_ldata == 1 )  /* user break ? */
 					return;
-				kill( conn_pid, BUSY_SIGNAL );
+				notify_conn( BUSY_SIGNAL );
 			}
 		}
 	}
@@ -770,7 +800,7 @@ void run_file( FL_OBJECT *a, long b )
 	if ( ! state )               /* return if program failed the test */
 	{
 		fl_show_alert( "Error", "Sorry, but test of file failed.", NULL, 1 );
-		kill( conn_pid, UNBUSY_SIGNAL );
+		notify_conn( UNBUSY_SIGNAL );
 		return;
 	}
 
@@ -803,7 +833,7 @@ void run_file( FL_OBJECT *a, long b )
 		if ( 1 == fl_show_choice( str1, str2, "Continue to run the program?",
 								  2, "No", "Yes", "", 1 ) )
 		{
-			kill( conn_pid, UNBUSY_SIGNAL );
+			notify_conn( UNBUSY_SIGNAL );
 			return;
 		}
 	}		
@@ -820,8 +850,6 @@ void run_file( FL_OBJECT *a, long b )
 		fl_show_alert( "Error", "Sorry, can't run the experiment.",
 					   "See browser for more information.", 1 );
 	}
-
-	kill( conn_pid, UNBUSY_SIGNAL );
 }
 
 
@@ -837,7 +865,7 @@ static bool display_file( char *name, FILE *fp )
 {
 	int len, key;
 	long lc, cc, i;                         /* line and char counter */
-	char line[ FL_BROWSER_LINELENGTH + 1 ]; /* used to store the lines */
+	char line[ FL_BROWSER_LINELENGTH ];
 	char *lp;
 
 
@@ -875,7 +903,7 @@ static bool display_file( char *name, FILE *fp )
 		lp = line + len + 2;
 		cc = 0;
 		while ( ( key = fgetc( fp ) ) != '\n' &&
-			    key != EOF && ++cc < FL_BROWSER_LINELENGTH - len - 2 )
+			    key != EOF && ++cc < FL_BROWSER_LINELENGTH - len - 3 )
 		{
 			if ( ( char ) key != '\t' )
 				*lp++ = ( char ) key;
@@ -884,7 +912,7 @@ static bool display_file( char *name, FILE *fp )
 				do
 					*lp++ = ' ';
 				while ( cc++ % TAB_LENGTH &&
-						cc < FL_BROWSER_LINELENGTH - len - 2 )
+						cc < FL_BROWSER_LINELENGTH - len - 3 )
 					;
 				cc--;
 			}
@@ -1066,14 +1094,38 @@ void sigusr1_handler( int signo )
 	int count;
 
 
-	assert( signo == SIGUSR1 );
+	assert( signo == SIGUSR1 || signo == SIGUSR2 );
 
+	signal( signo, sigusr1_handler );
+
+	if ( signo == SIGUSR2 )
+	{
+		conn_child_replied = SET;
+		return;
+	}
 
 	while ( ( count = read( conn_pd[ READ ], line, MAXLINE ) ) == -1 &&
 			errno == EINTR )
 		;
 
-	if ( count > 0 )
-		line[ count - 1 ] = '\0';
-	printf( "%s\n", line );
+	line[ count - 1 ] = '\0';
+	main_form->Load->u_ldata = ( long ) line[ 0 ];
+	if ( line[ 1 ] == 'd' )
+		delete_file = SET;
+	main_form->Load->u_cdata = get_string_copy( line + 2 );
+	fl_trigger_object( main_form->Load );
+}
+
+
+/*------------------------------------------------------------*/  
+/*------------------------------------------------------------*/  
+
+void notify_conn( int signo )
+{
+	if ( conn_pid <= 0 )
+		return;
+	kill( conn_pid, signo );
+	if ( ! conn_child_replied )
+		sleep( INT_MAX );
+	conn_child_replied = UNSET;
 }

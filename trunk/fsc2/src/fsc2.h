@@ -109,6 +109,7 @@ int phases_parser( FILE *in );
 int preparations_parser( FILE *in );
 int experiment_parser( FILE *in );
 void sigusr1_handler( int signo );
+void notify_conn( int signo );
 
 
 #define TAB_LENGTH        4
@@ -162,6 +163,7 @@ pid_t child_pid = 0;            /* pid of child */
 pid_t conn_pid = -1;            /* pid of communication child */
 volatile bool do_send = UNSET;  /* globals used with the signal handlers */
 volatile bool do_quit = UNSET;
+volatile bool conn_child_replied = UNSET;
 bool react_to_do_quit = SET;
 bool exit_hooks_are_run = UNSET;
 
@@ -225,6 +227,7 @@ extern Graphics G;
 extern KEY *Key;
 extern KEY *Message_Queue;
 extern volatile int message_queue_low, message_queue_high;
+extern volatile bool conn_child_replied;
 
 extern FILE_LIST *File_List;
 extern int File_List_Len;

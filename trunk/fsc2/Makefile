@@ -70,6 +70,10 @@ endif
 
 CFLAGS += $(patsubst %,-I%,$(subst :, ,$(VPATH)))
 
+ifdef bindir
+	CFLAGS += -Dbindir=\"$(bindir:/=)/\"
+endif
+
 ifdef libdir
 	CFLAGS += -Dlibdir=\"$(libdir:/=)/\"
 endif
@@ -98,6 +102,11 @@ all:
 	$(MAKE) -C src all
 	cp src/fsc2 .
 	cp src/fsc2_clean .
+	cp src/fsc2_connect .
+	$(RM) $(RMFLAGS) fsc2_start fsc2_test fsc2_load
+	ln -s fsc2_connect fsc2_start
+	ln -s fsc2_connect fsc2_test
+	ln -s fsc2_connect fsc2_load
 	cp modules/*.so .
 	$(MAKE) -C utils all
 	$(MAKE) -C doc all
@@ -113,6 +122,12 @@ install:
 	install -d $(auxdir)
 	install -d $(docdir)
 	$(MAKE) -C utils install
+	install -m 755 -o fsc2 -g fsc2 -s fsc2_connect $(bindir)
+	$(RM) $(RMFLAGS) $(bindir)/fsc2_start $(bindir)/fsc2_test \
+					 $(bindir)/fsc2_load
+	ln -s $(bindir)/fsc2_connect $(bindir)/fsc2_start
+	ln -s $(bindir)/fsc2_connect $(bindir)/fsc2_test
+	ln -s $(bindir)/fsc2_connect $(bindir)/fsc2_load
 	install -m 755 -o fsc2 -g fsc2 -s fsc2_clean $(libdir)
 	install -m 644 -o fsc2 -g fsc2 Functions $(libdir)
 	install -m 644 -o fsc2 -g fsc2 Devices $(libdir)
@@ -127,10 +142,10 @@ install:
 
 
 install-pion.anorg.chemie.uni-frankfurt.de:
-	rm -rf $(libdir)/dg2020.so $(libdir)/s_band.so \
-		$(libdir)/lockin.so $(libdir)/gaussmeter.so \
-        $(libdir)/magnet.so $(libdir)/pulser.so \
-		$(libdir)/tds520c.so
+	$(RM) $(RMFLAGS)  $(libdir)/dg2020.so $(libdir)/s_band.so \
+					  $(libdir)/lockin.so $(libdir)/gaussmeter.so \
+					  $(libdir)/magnet.so $(libdir)/pulser.so \
+					  $(libdir)/tds520c.so
 	ln -s $(libdir)/dg2020_f.so $(libdir)/dg2020.so
 	chown fsc2.fsc2 $(libdir)/dg2020.so
 	ln -s $(libdir)/aeg_s_band.so $(libdir)/s_band.so
@@ -147,8 +162,8 @@ install-pion.anorg.chemie.uni-frankfurt.de:
 	chown fsc2.fsc2 $(libdir)/tds520c.so
 
 install-crowley.physik.fu-berlin.de:
-	rm -rf $(libdir)/gaussmeter.so $(libdir)/synthesizer.so \
-		$(libdir)/boxcar.so
+	$(RM) $(RMFLAGS) $(libdir)/gaussmeter.so $(libdir)/synthesizer.so \
+					 $(libdir)/boxcar.so
 	ln -s $(libdir)/er035m_sas.so $(libdir)/gaussmeter.so
 	chown fsc2.fsc2 $(libdir)/gaussmeter.so
 	ln -s $(libdir)/hp8647a.so $(libdir)/synthesizer.so
@@ -157,7 +172,8 @@ install-crowley.physik.fu-berlin.de:
 	chown fsc2.fsc2 $(libdir)/boxcar.so
 
 install-moebi.physik.fu-berlin.de:
-	rm -rf $(libdir)/pulser.so $(libdir)/magnet.so $(libdir)/gaussmeter.so
+	$(RM) $(RMFLAGS) $(libdir)/pulser.so $(libdir)/magnet.so \
+					 $(libdir)/gaussmeter.so
 	ln -s $(libdir)/dg2020_b.so $(libdir)/pulser.so
 	chown fsc2.fsc2 $(libdir)/pulser.so
 	ln -s $(libdir)/aeg_x_band.so $(libdir)/magnet.so

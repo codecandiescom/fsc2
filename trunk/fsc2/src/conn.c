@@ -64,7 +64,15 @@ pid_t spawn_conn( bool start_state )
 	if ( ( new_pid = fork( ) ) == 0 )
 		connect_handler( listen_fd );
 
-	close( conn_pd[ WRITE ] );
+	/* Wait for child to signal that it got its signal handlers installed */
+
+	if ( new_pid >= 0 )
+	{
+		close( conn_pd[ WRITE ] );
+		if ( ! conn_child_replied )
+			sleep( INT_MAX );
+		conn_child_replied = UNSET;
+	}
 
 	return new_pid;
 }
@@ -88,6 +96,10 @@ static void connect_handler( int listen_fd )
 	signal( UNBUSY_SIGNAL, comm_sig_handler );
 
 	close( conn_pd[ READ ] );
+
+	/* Signal parent that child is up and running and can accept signals */
+
+	kill( getppid( ), SIGUSR2 );
 
 	while ( 1 )
 	{
@@ -140,11 +152,12 @@ static void connect_handler( int listen_fd )
 		if ( is_busy )
 			strcpy( line, "BUSY\n" );
 		else
-			strcpy( line, extern_UID == EUID ? "OK\n" : "FAIL\n" );
+			strcpy( line, ( unsigned int ) extern_UID == getuid( ) ?
+					"OK\n" : "FAIL\n" );
 
 		if ( writen( conn_fd, line, strlen( line ) )
 			 != ( ssize_t ) strlen( line ) ||
-			 is_busy || extern_UID != EUID )
+			 is_busy || ( unsigned int ) extern_UID != getuid( ) )
 		{
 			close( conn_fd );
 			continue;
@@ -152,20 +165,26 @@ static void connect_handler( int listen_fd )
 
 		/* Read the method to use and store it in the first byte of `line',
 		   close connection if method doesn't start with either 's' (start),
-		   't' (test) or 'l' (load). */
+		   't' (test) or 'l' (load). The second character can be 'd' (delete)
+		   to tell fsc2 to delete the file after it has been used. If there
+		   is no 'd' replace the newline with a space */
 
 		if ( ( count = read_line( conn_fd, line, MAXLINE ) ) <= 0 ||
-			 ( line[ 0 ] != 's' && line[ 0 ] != 'l' && line[ 0 ] != 't' ) )
+			 ( line[ 0 ] != 's' && line[ 0 ] != 'l' && line[ 0 ] != 't' ) ||
+			 ( line[ 1 ] != '\n' && line[ 1 ] != 'd' ) )
 		{
 			close( conn_fd );
 			continue;
 		}
 
+		if ( line[ 1 ] == '\n' )
+			line[ 1 ] = ' ';
+
 		/* Return "OK\n" unless parent has become busy in the mean time */
 
-		strcpy( line + 1, is_busy ? "BUSY\n" : "OK\n" );
-		if ( writen( conn_fd, line + 1, strlen( line + 1 ) )
-			 != ( ssize_t ) strlen( line + 1 ) || is_busy )
+		strcpy( line + 2, is_busy ? "BUSY\n" : "OK\n" );
+		if ( writen( conn_fd, line + 2, strlen( line + 2 ) )
+			 != ( ssize_t ) strlen( line + 2 ) || is_busy )
 		{
 			close( conn_fd );
 			continue;
@@ -173,7 +192,7 @@ static void connect_handler( int listen_fd )
 
 		/* Now read the file name */
 
-		if ( ( count = read_line( conn_fd, line + 1, MAXLINE - 1 ) ) <= 0 )
+		if ( ( count = read_line( conn_fd, line + 2, MAXLINE - 2 ) ) <= 0 )
 		{
 			close( conn_fd );
 			continue;
@@ -182,19 +201,16 @@ static void connect_handler( int listen_fd )
 		/* Check that file exists and we have permission to read it,
 		   if not close the connection */
 
-		if ( line[ count ] == '\n' )
-			line[ count ] = '\0';
-		else
+		line[ count + 1 ] = '\0';
+
+		if ( access( line + 2, R_OK ) == -1 )
 		{
 			close( conn_fd );
 			continue;
 		}
 
-		if ( access( line + 1, R_OK ) == -1 )
-		{
-			close( conn_fd );
-			continue;
-		}
+		line[ count + 1 ] = '\n';
+		line[ count + 2 ] = '\0';
 
 		/* Now inform parent about it (but check that it hasn't become busy
 		   in the mean time) and also send reply to client */
@@ -334,6 +350,6 @@ static void comm_sig_handler( int signo )
 		default :
 			assert( 1 == 0 );
 	}
-
 	signal( signo, comm_sig_handler );
+	kill( getppid( ), SIGUSR2 );
 }

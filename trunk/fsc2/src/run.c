@@ -13,7 +13,7 @@ extern int exp_runparse( void );              /* from exp_run_parser.y */
 
 void check_for_further_errors( Compilation *c_old, Compilation *c_all );
 static void new_data_handler( int sig_type );
-static void quitting_handler( int sig_type, void *data );
+static void quitting_handler( int sig_type );
 static void run_sigchld_handler( int sig_type );
 static void set_buttons_for_run( int active );
 
@@ -125,8 +125,7 @@ bool run( void )
 	wasn't reliable enough, so... */
 
 	signal( NEW_DATA, new_data_handler );
-	fl_add_signal_callback( QUITTING, quitting_handler, NULL );
-
+	signal( QUITTING, quitting_handler );
 	signal( SIGCHLD, run_sigchld_handler );
 
 	fl_set_idle_callback( new_data_callback, NULL );
@@ -169,6 +168,7 @@ bool run( void )
 
 	signal( SIGCHLD, SIG_IGN );
 	signal( SIGUSR1, sigusr1_handler );
+	signal( SIGUSR2, sigusr1_handler );
 	run_end_of_exp_hooks( );
 	if ( need_GPIB )
 		gpib_shutdown( );
@@ -267,11 +267,10 @@ static void new_data_handler( int sig_type )
 /* and reacts by sending (another) DO_QUIT signal.                */
 /*----------------------------------------------------------------*/
 
-static void quitting_handler( int sig_type, void *data )
+static void quitting_handler( int sig_type )
 {
-	data = data;
-
 	assert( sig_type == QUITTING );
+	signal( QUITTING, quitting_handler );
 	child_is_quitting = SET;
 	kill( child_pid, DO_QUIT );
 }
@@ -370,9 +369,10 @@ void stop_measurement( FL_OBJECT *a, long b )
 
 	/* Remove the signal handlers */
 
-	signal( NEW_DATA, SIG_DFL );
-	fl_remove_signal_callback( QUITTING );
 	fl_set_idle_callback( 0, NULL );
+
+	signal( SIGUSR1, sigusr1_handler );
+	signal( SIGUSR2, sigusr1_handler );
 
 	/* reset all the devices and finally the GPIB bus */
 
@@ -441,6 +441,8 @@ static void set_buttons_for_run( int active )
 		fl_set_object_lcol( main_form->quit, FL_BLACK );
 
 		fl_unfreeze_form( main_form->fsc2 );
+
+		notify_conn( UNBUSY_SIGNAL );
 	}
 }
 

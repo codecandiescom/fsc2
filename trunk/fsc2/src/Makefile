@@ -35,7 +35,7 @@ all:
 	if [ `hostname -f` = "pion.anorg.chemie.uni-frankfurt.de" ]; then \
 		$(MAKE) pion; \
 	fi
-	$(MAKE) fsc2 fsc2_clean modules
+	$(MAKE) fsc2 fsc2_clean fsc2_connect modules
 
 
 # make the main program from the c, flex and bison source files
@@ -68,10 +68,17 @@ fsc2_clean: fsc2_clean.o exceptions.o
 fsc2_clean.c: fsc2_clean.flex $(headers)
 	$(FLEX) -B -o$@ $<
 
+fsc2_connect: fsc2_connect.o
+	$(CC) -o $@ $^
+
+fsc2_connect.o: fsc2_connect.c
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+
 
 clean:
 	$(RM) $(RMFLAGS) *.o *.output *_parser.c *_parser.h *_lexer.c \
-					 fsc2_clean.c fsc2 fsc2_clean mem *~
+					 fsc2_clean.c fsc2 fsc2_clean fsc2_connect mem *~
 
 
 # unfortunately, for the pion we need a different GPIB interface...
