@@ -27,15 +27,15 @@ use warnings;
 use strict;
 use Tk;
 
+
 my @version = split /\./, $Tk::VERSION;
 die "Installed Perl-Tk version is $Tk::VERSION but Tk800.022 is required.\n"
     if $version[ 0 ] + 0.001 * $version[ 1 ] < 800.022;
 
 
-
-my ( $line, $time_base, $Delay, $Channels );
+my ( $line, $time_base, $Delay );
 my $if = *STDIN;
-$Channels = Channels->new;
+my $Channels = Channels->new;
 
 read_input( );
 Pulse_Window->new;
@@ -125,7 +125,10 @@ sub new {
 				 'delay' => 1 };
 	bless $self, $class;
 
-	my $w = $self->{ 'mag' } * ( $Channels->longest_sequence + $Delay );
+	$self->{ 'early' } = $Channels->earliest_pulse;
+
+	my $w = $self->{ 'mag' } * ( $Channels->longest_sequence +
+								 $Delay - $self->{ 'early' } );
 	while ( $w < 400 ) {
 		$w *= 2;
 		$self->{ 'mag' } *= 2;
@@ -340,7 +343,7 @@ sub primary_draw {
 
 		my $y = 10 + ( $i + 0.5 ) * $self->{ 'hstep' };
 		$c->create( 'text', 10, $y, '-anchor' => 'w', '-text' => $ch->key,
-					'-fill' => 'white' );
+					'-fill' => 'green' );
 
 		my $x1 = 150;
 		my $x2 = 160 + $self->{ 'len' };
@@ -383,7 +386,11 @@ sub draw_scale {
 	}
 
 	my $delay = 0;
-	$delay = $Delay if $self->{ 'delay' };
+	if ( $self->{ 'delay' } ) {
+		$delay = $Delay;
+	} else {
+		$delay = -$self->{ 'early' };
+	}
 
 	my $cx = 0;
 	my $x = 150 + $self->{ 'mag' } * $delay;
@@ -392,7 +399,7 @@ sub draw_scale {
 					'-tags' => 'scale');
 		$c->create( 'text', $x, $y1 + 10,
 					'-text' => $cx * $time_base * $factor . $unit,
-					'-fill' => 'white', '-tags' => 'scale' );
+					'-fill' => 'green', '-tags' => 'scale' );
 		$x += $self->{ 'mag' } * 25;
 		$cx += 25;
 	}
@@ -404,7 +411,7 @@ sub draw_scale {
 					'-tags' => 'scale' );
 		$c->create( 'text', $x, $y1 + 10,
 					'-text' => $cx * $time_base * $factor . $unit,
-					'-fill' => 'white', '-tags' => 'scale' );
+					'-fill' => 'green', '-tags' => 'scale' );
 		$x -= $self->{ 'mag' } * 25;
 		$cx -= 25;
 	}
@@ -432,9 +439,9 @@ sub redraw {
 		my $yt = 10 + ( $i + 0.75 ) * $self->{ 'hstep' };
 
 		for my $cp ( @$pl ) {
-			my $x1 = $cp->start
+			my $x1 = $cp->start - $self->{ 'early' }
 				- ( $self->{ delay } ? 0 : $ch->{ 'delay' } );
-			my $x2 = $cp->start + $cp->len
+			my $x2 = $cp->start + $cp->len - $self->{ 'early' }
 				- ( $self->{ delay } ? 0 : $ch->{ 'delay' } );
 			$x1 = 150 + $self->{ mag } * $x1;
 			$x2 = 150 + $self->{ mag } * $x2;
@@ -444,12 +451,13 @@ sub redraw {
 			$c->create( 'text', 0.5 * ( $x1 + $x2 ), $yt,
 						'-text' => $cp->num,
 						'-tags' => $ch->key,
-						'-fill' => 'white' );
+						'-fill' => 'green' );
 		}
 	}
 }
 
 1;
+
 
 #=========================================================================
 
@@ -538,6 +546,21 @@ sub longest_sequence {
 	return $duration - $Delay;
 }
 
+#---------------------------------------------------------
+
+sub earliest_pulse {
+
+	my $self = shift;
+	my $earliest = 0;
+
+	for ( @{ $self->{ channels } } ) {
+		my $e = $_->earliest_pulse - $_->delay;
+		$earliest = $e if $earliest > $e;
+	}
+
+	return $earliest;
+}
+
 1;
 
 
@@ -561,8 +584,14 @@ sub new {
 
 sub key {
 
-	my $self = shift;
-	return $self->{ 'key' };
+	return shift->{ 'key' };
+}
+
+#---------------------------------------------------------
+
+sub delay  {
+
+	return shift->{ 'delay' };
 }
 
 #---------------------------------------------------------
@@ -601,7 +630,23 @@ sub longest_sequence {
 	return $duration;
 }
 
+#---------------------------------------------------------
+
+sub earliest_pulse {
+
+	my $self = shift;
+	my $earliest = 0;
+
+	for ( keys %{ $self->{ 'plist' } } ) {
+		my $e = $self->{ 'plist' }{ $_ }->start;
+		$earliest = $e if $earliest > $e;
+	}
+
+	return $earliest;
+}
+
 1;
+
 
 #=========================================================================
 
@@ -630,6 +675,21 @@ sub len {
 	return $duration;
 }
 
+#---------------------------------------------------------
+
+sub start {
+
+	my $self = shift;
+	my $start = 0;
+
+	for ( @$self ) {
+		my $s = $_->start;
+		$start = $s if $start > $s;
+	}
+
+	return $start;
+}
+
 1;
 
 
@@ -649,22 +709,19 @@ sub new {
 #---------------------------------------------------------
 
 sub num {
-	my $self = shift;
-	return $self->{ 'num' };
+	return shift->{ 'num' };
 }
 
 #---------------------------------------------------------
 
 sub start {
-	my $self = shift;
-	return $self->{ 'start' };
+	return shift->{ 'start' };
 }
 
 #---------------------------------------------------------
 
 sub len {
-	my $self = shift;
-	return $self->{ 'len' };
+	return shift->{ 'len' };
 }
 
 1;
