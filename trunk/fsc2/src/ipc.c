@@ -77,10 +77,9 @@ void *get_shm( int *shm_id, long len )
 	   it easier to identify it later */
 
 	memcpy( buf, "fsc2", 4 );                         /* magic id */
-	buf += 4;
 
 	lower_permissions( );
-	return buf;
+	return ( void * ) ( ( char * ) buf + 4 );
 }
 
 
@@ -105,7 +104,7 @@ void *attach_shm( int key )
 	}
 
 	lower_permissions( );
-	return buf + 4;
+	return ( void * ) ( ( char * ) buf + 4 );
 }
 
 
@@ -119,7 +118,7 @@ void detach_shm( void *buf, int *key )
 {
 	raise_permissions( );
 	
-	shmdt( buf - 4 );
+	shmdt( ( void * ) ( ( char * ) buf - 4 ) ) ;
 	if ( key != NULL )
 	{
 		shmctl( *key, IPC_RMID, NULL );

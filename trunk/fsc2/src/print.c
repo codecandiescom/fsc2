@@ -1027,13 +1027,17 @@ static void eps_draw_curve_1d( FILE *fp, Curve_1d *cv, int i, long dir )
 static void eps_draw_surface( FILE *fp, int cn )
 {
 	Curve_2d *cv = G.curve_2d[ cn ];
-	double s2d[ 2 ] = { w * cv->s2d[ X ] / G.canvas.w,
-						h * cv->s2d[ Y ] / G.canvas.h };
-	double dw = s2d[ X ] / 2,
-		   dh = s2d[ Y ] / 2;
+	double s2d[ 2 ];
+	double dw,
+		   dh;
 	long i, j, k;
 	int rgb[ 3 ];
 
+
+	s2d[ X ] = w * cv->s2d[ X ] / G.canvas.w;
+	s2d[ Y ] = h * cv->s2d[ Y ] / G.canvas.h;
+	dw = s2d[ X ] / 2;
+	dh = s2d[ Y ] / 2;
 
 	fprintf( fp, "gs\n" );
 
@@ -1084,16 +1088,20 @@ static void eps_draw_surface( FILE *fp, int cn )
 static void eps_draw_contour( FILE *fp, int cn )
 {
 	Curve_2d *cv = G.curve_2d[ cn ];
-	double s2d[ 2 ] = { w * cv->s2d[ X ] / G.canvas.w,
-						h * cv->s2d[ Y ] / G.canvas.h };
-	double dw = s2d[ X ] / 2,
-		   dh = s2d[ Y ] / 2;
+	double s2d[ 2 ];
+	double dw,
+		   dh;
 	double cur_p;
 	double z;
 	long i, j, k;
 	double z1, z2, g;
 	int rgb[ 3 ];
 
+
+	s2d[ X ] = w * cv->s2d[ X ] / G.canvas.w;
+	s2d[ Y ] = h * cv->s2d[ Y ] / G.canvas.h;
+	dw = s2d[ X ] / 2;
+	dh = s2d[ Y ] / 2;
 
 	fprintf( fp, "gs\n" );
 
