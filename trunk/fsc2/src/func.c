@@ -26,7 +26,7 @@
 #include "fsc2.h"
 
 
-/* When in the input an identifier is found it is always tested first if it
+/* When an identifier is found in the input it is always tested first if it
    is a function by a calling func_get(). If it is a function, a pointer to a
    temporary variable on the stack of type FUNC is returned.  The variable's
    structure contains a pointer to the function, a copy of the name of
@@ -289,24 +289,24 @@ int func_exists( const char *name )
 
 Var *func_get( const char *name, int *acc )
 {
-	const char *appendix;
+	static const char *appendix;
 	char *sec_name;
 	Var *func_ptr;
 
 
-	/* We have to help the writers of modules a bit: If she or he wants a
-	   pointer to a function within the same module s/he does not know if
-	   there are other modules with the same generic type and thus have no
-	   chance to figure out if they need to append a '#' plus the number of
-	   the device to the function name to get the correct functon within the
-	   same module.
+	/* We have to help the writers of modules a bit: If they want a
+	   pointer to a function from within the same module they don't know
+	   if there are other modules with the same generic type and thus
+	   have no chance to figure out if they need to append a '#' plus the
+	   number of the device to the function name to get the correct
+	   function within the same module.
 	   Thus we check if the last call came from a device function that has
 	   a '#' appended to its name. If this is the case we try to figure out
 	   if a function with the name passed to us by the user exists in this
-	   module and then automatically append the same '#' plus dvice number,
-	   thus restricting the search for functions within the module. */
+	   module and then automatically append the same '#' plus device number,
+	   thus restricting the search to functions from within this module. */
 
-	if ( EDL.Call_Stack != NULL && EDL.Call_Stack->f->to_be_loaded &&
+	if ( EDL.Call_Stack != NULL && EDL.Call_Stack->f->device != NULL &&
 		 strrchr( name, '#' ) == NULL &&
 		 ( appendix =  strrchr( EDL.Call_Stack->f->name, '#' ) ) != NULL )
 	{
@@ -315,7 +315,16 @@ Var *func_get( const char *name, int *acc )
 		if ( dlerror( ) == NULL )
 		{
 			sec_name = get_string( "%s%s", name, appendix );
-			func_ptr = func_get_long( sec_name, acc, SET );
+			TRY
+			{
+				func_ptr = func_get_long( sec_name, acc, SET );
+				TRY_SUCCESS;
+			}
+			OTHERWISE
+			{
+				T_free( sec_name );
+				RETHROW( );
+			}
 			T_free( sec_name );
 			return func_ptr;
 		}
@@ -378,12 +387,12 @@ static int func_cmp2( const void *a, const void *b )
 }
 
 
-/*---------------------------------------------------------------*/
-/* This function is called to really execute an EDL function.    */
-/* It must be able to also handle situations where, for example, */
-/* an EDL function calls another EDL function, which throws an   */
-/* exception that then is caught by the first function etc.      */
-/*---------------------------------------------------------------*/
+/*----------------------------------------------------------------*/
+/* This function is called to execute an EDL function. It must be */
+/* able to also handle situations where, for example, an EDL      */
+/* function calls another EDL function, which throws an exception */
+/* that then is caught by the first function etc.                 */
+/*----------------------------------------------------------------*/
 
 Var *func_call( Var *f )
 {
@@ -404,6 +413,16 @@ Var *func_call( Var *f )
 				__FILE__, __LINE__ );
 		THROW( EXCEPTION );
 	}
+
+/* A weaker check than the one we're currently using....
+
+	if ( f->val.fnct < Fncts || f->val.fnct >= Fncts + Num_Func )
+	{
+		eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
+				__FILE__, __LINE__ );
+		THROW( EXCEPTION );
+	}
+*/
 
 	for ( i = 0; i < Num_Func; i++ )
 		if ( Fncts[ i ].fnct == f->val.fnct->fnct )
@@ -449,6 +468,7 @@ Var *func_call( Var *f )
 
 		/* For functions with a fixed number of arguments (a positive number
 		   of arguments is specified in the nargs entry of the functions
+		   structure, which has been copied to the dim entry of the variables
 		   structure) less arguments than needed by the function is a fatal
 		   error. */
 
@@ -555,6 +575,9 @@ CALL_STACK *call_push( Func *f, const char *device_name )
 	cs->prev = EDL.Call_Stack;
 	cs->f = f;
 	cs->dev_name = device_name;
+
+	/* If this is a function for a pulser figure out the number of the pulser
+	   (there might be more than one pulser) */
 
 	if ( f != NULL && f->device != NULL && f->device->generic_type != NULL &&
 		 ! strcasecmp( f->device->generic_type, PULSER_GENERIC_TYPE ) )
