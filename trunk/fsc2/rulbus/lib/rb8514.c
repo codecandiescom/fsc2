@@ -462,17 +462,17 @@ int rulbus_rb8514_delay_set_output_pulse_polarity( int handle, int type,
 }
 
 
-/*-----------------------------------------------------------------*
+/*------------------------------------------------------------------*
  * Function to start a delay via software (by toggling the trigger
- * slope bit). Afterwards triger slope is set back to the original
+ * slope bit). Afterwards trigger slope is set back to the original
  * setting.
- *-----------------------------------------------------------------*/
+ *------------------------------------------------------------------*/
 
 int rulbus_rb8514_software_start( int handle )
 {
 	RULBUS_RB8514_DELAY_CARD *card;
 	unsigned char bytes[ 4 ];
-	size_t i;
+	size_t cnt;
 	int retval;
 
 	if ( ( card = rulbus_rb8514_delay_card_find( handle ) ) == NULL )
@@ -481,9 +481,10 @@ int rulbus_rb8514_software_start( int handle )
 	bytes[ 0 ] = bytes[ 2 ] = card->ctrl & ~ TRIGGER_ON_FALLING_EDGE;
 	bytes[ 1 ] = bytes[ 3 ] = card->ctrl | TRIGGER_ON_FALLING_EDGE;
 	
-	if ( ( retval = rulbus_write( handle, CONTROL_ADDR, bytes,
-								  card->ctrl & TRIGGER_ON_FALLING_EDGE ?
-								  4 : 3 ) ) != 1 )
+	cnt = card->ctrl & TRIGGER_ON_FALLING_EDGE ? 4 : 3;
+
+	if ( ( retval = rulbus_write( handle, CONTROL_ADDR,
+								  bytes, cnt ) ) != ( int ) cnt )
 		return rulbus_errno = retval;
 
 	return rulbus_errno = RULBUS_OK;
