@@ -1145,7 +1145,7 @@ Var *f_display( Var *v )
 
 			case ARR_PTR :
 				len += sizeof( long );
-				if ( dp[ i ].v->from->type == INT_ARR )
+				if ( dp[ i ].v->from->type == INT_CONT_ARR )
 					len += dp[ i ].v->from->sizes[ dp[ i ].v->from->dim - 1 ]
 						   * sizeof( long );
 				else
@@ -1165,7 +1165,7 @@ Var *f_display( Var *v )
 
 				len += sizeof( long );
 
-				if ( dp[ i ].v->from->type == INT_ARR )
+				if ( dp[ i ].v->from->type == INT_CONT_ARR )
 					len += dp[ i ].v->from->sizes[ 0 ] * sizeof( long );
 				else
 					len += dp[ i ].v->from->sizes[ 0 ] * sizeof( double );
@@ -1237,8 +1237,8 @@ Var *f_display( Var *v )
 				break;
 
 			case ARR_PTR :
-				fsc2_assert( dp[ i ].v->from->type == INT_ARR ||
-							 dp[ i ].v->from->type == FLOAT_ARR );
+				fsc2_assert( dp[ i ].v->from->type == INT_CONT_ARR ||
+							 dp[ i ].v->from->type == FLOAT_CONT_ARR );
 				memcpy( ptr, &dp[ i ].v->from->type, sizeof( int ) );
 				ptr += sizeof( int );
 
@@ -1246,7 +1246,7 @@ Var *f_display( Var *v )
 				memcpy( ptr, &len, sizeof( long ) );
 				ptr += sizeof( long );
 
-				if ( dp[ i ].v->from->type == INT_ARR )
+				if ( dp[ i ].v->from->type == INT_CONT_ARR )
 				{
 					memcpy( ptr, dp[ i ].v->val.gptr,
 							len * sizeof( long ) );
@@ -1261,8 +1261,8 @@ Var *f_display( Var *v )
 				break;
 
 			case ARR_REF :
-				fsc2_assert( dp[ i ].v->from->type == INT_ARR ||
-							 dp[ i ].v->from->type == FLOAT_ARR );
+				fsc2_assert( dp[ i ].v->from->type == INT_CONT_ARR ||
+							 dp[ i ].v->from->type == FLOAT_CONT_ARR );
 				memcpy( ptr, &dp[ i ].v->from->type, sizeof( int ) );
 				ptr += sizeof( int );
 					
@@ -1270,7 +1270,7 @@ Var *f_display( Var *v )
 				memcpy( ptr, &len, sizeof( long ) );
 				ptr += sizeof( long );
 
-				if ( dp[ i ].v->from->type == INT_ARR )
+				if ( dp[ i ].v->from->type == INT_CONT_ARR )
 				{
 					memcpy( ptr, dp[ i ].v->from->val.lpnt,
 							len * sizeof( long ) );
@@ -1285,7 +1285,7 @@ Var *f_display( Var *v )
 				break;
 
 			case INT_TRANS_ARR :
-				* ( int * ) ptr = INT_ARR;
+				* ( int * ) ptr = INT_CONT_ARR;
 				ptr += sizeof( int );
 
 				len = dp[ i ].v->len;
@@ -1297,7 +1297,7 @@ Var *f_display( Var *v )
 				break;
 
 			case FLOAT_TRANS_ARR :
-				* ( int * ) ptr = FLOAT_ARR;
+				* ( int * ) ptr = FLOAT_CONT_ARR;
 				ptr += sizeof( int );
 
 				len = dp[ i ].v->len;
@@ -2125,7 +2125,7 @@ static bool print_array( Var *v, long cur_dim, long *start, int fid )
 	{
 		for ( i = 0; i < v->sizes[ cur_dim ]; (*start)++, i++ )
 		{
-			if ( v->type == INT_ARR )
+			if ( v->type == INT_CONT_ARR )
 				T_fprintf( fid, "%ld\n", v->val.lpnt[ *start ] );
 			else
 				T_fprintf( fid, "%#.9g\n", v->val.dpnt[ *start ] );
@@ -2146,7 +2146,7 @@ static bool print_slice( Var *v, int fid )
 	long i;
 
 	for ( i = 0; i < v->from->sizes[ v->from->dim - 1 ]; i++ )
-		if ( v->from->type == INT_ARR )
+		if ( v->from->type == INT_CONT_ARR )
 			T_fprintf( fid, "%ld\n", * ( ( long * ) v->val.gptr + i ) );
 		else
 			T_fprintf( fid, "%#.9g\n",

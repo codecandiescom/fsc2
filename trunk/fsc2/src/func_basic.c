@@ -66,7 +66,7 @@ static void get_array_params( Var *v, long *len, long **ilp, double **idp )
 
 	switch ( v->type )
 	{
-		case INT_ARR :
+		case INT_CONT_ARR :
 			if ( v->dim != 1 )
 			{
 				eprint( FATAL, SET, "Argument of function %s() is neither a "
@@ -77,7 +77,7 @@ static void get_array_params( Var *v, long *len, long **ilp, double **idp )
 			*ilp = v->val.lpnt;
 			break;
 			
-		case FLOAT_ARR :
+		case FLOAT_CONT_ARR :
 			if ( v->dim != 1 )
 			{
 				eprint( FATAL, SET, "Argument of function %s() is neither a "
@@ -90,7 +90,7 @@ static void get_array_params( Var *v, long *len, long **ilp, double **idp )
 			
 		case ARR_PTR :
 			*len = v->from->sizes[ v->from->dim - 1 ];
-			if ( v->from->type == INT_ARR )
+			if ( v->from->type == INT_CONT_ARR )
 				*ilp = ( long * ) v->val.gptr;
 			else
 				*idp = ( double * ) v->val.gptr;
@@ -113,18 +113,18 @@ static void get_array_params( Var *v, long *len, long **ilp, double **idp )
 			}
 
 			*len = v->from->sizes[ 0 ];
-			if ( v->from->type == INT_ARR )
+			if ( v->from->type == INT_CONT_ARR )
 				*ilp = v->from->val.lpnt;
 			else
 				*idp = v->from->val.dpnt;
 			break;
 
-		case INT_TRANS_ARR :
+		case INT_ARR :
 			*len = v->len;
 			*ilp = v->val.lpnt;
 			break;
 
-		case FLOAT_TRANS_ARR :
+		case FLOAT_ARR :
 			*len = v->len;
 			*idp = v->val.dpnt;
 			break;
@@ -153,8 +153,8 @@ Var *f_int( Var *v )
 	
 
 
-	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
-				   ARR_REF | ARR_PTR | INT_TRANS_ARR | FLOAT_TRANS_ARR );
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_CONT_ARR | FLOAT_CONT_ARR |
+				   ARR_REF | ARR_PTR | INT_ARR | FLOAT_ARR );
 
 	switch ( v->type )
 	{
@@ -172,7 +172,7 @@ Var *f_int( Var *v )
 	}
 
 	if ( ilp != NULL )
-		new_var = vars_push( INT_TRANS_ARR, ilp, len );
+		new_var = vars_push( INT_ARR, ilp, len );
 	else
 	{
 		rlp = T_malloc( len * sizeof( long ) );
@@ -184,7 +184,7 @@ Var *f_int( Var *v )
 			rlp[ i ] = ( long ) *idp;
 		}
 
-		new_var = vars_push( INT_TRANS_ARR, rlp, len );
+		new_var = vars_push( INT_ARR, rlp, len );
 	}
 
 	new_var->flags |= v->flags & IS_DYNAMIC;
@@ -209,8 +209,8 @@ Var *f_float( Var *v )
 	
 
 
-	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
-				   ARR_REF | ARR_PTR | INT_TRANS_ARR | FLOAT_TRANS_ARR );
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_CONT_ARR | FLOAT_CONT_ARR |
+				   ARR_REF | ARR_PTR | INT_ARR | FLOAT_ARR );
 
 	switch ( v->type )
 	{
@@ -225,13 +225,13 @@ Var *f_float( Var *v )
 	}
 
 	if ( idp != NULL )
-		new_var = vars_push( FLOAT_TRANS_ARR, idp, len );
+		new_var = vars_push( FLOAT_ARR, idp, len );
 	else
 	{
 		rdp = T_malloc( len * sizeof( double ) );
 		for ( i = 0; i < len; i++ )
 			rdp[ i ] = ( double ) *ilp++;
-		new_var = vars_push( FLOAT_TRANS_ARR, rdp, len );
+		new_var = vars_push( FLOAT_ARR, rdp, len );
 	}
 
 	new_var->flags |= v->flags & IS_DYNAMIC;
@@ -254,8 +254,8 @@ Var *f_round( Var *v )
 	double *idp;
 
 
-	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
-				   ARR_REF | ARR_PTR | INT_TRANS_ARR | FLOAT_TRANS_ARR );
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_CONT_ARR | FLOAT_CONT_ARR |
+				   ARR_REF | ARR_PTR | INT_ARR | FLOAT_ARR );
 
 	switch ( v->type )
 	{
@@ -275,7 +275,7 @@ Var *f_round( Var *v )
 	}
 
 	if ( ilp != NULL )
-		new_var = vars_push( INT_TRANS_ARR, ilp, len );
+		new_var = vars_push( INT_ARR, ilp, len );
 	else
 	{
 		rlp = T_malloc( len * sizeof( long ) );
@@ -287,7 +287,7 @@ Var *f_round( Var *v )
 			rlp[ i ] = ( long ) ( 2 * *idp ) - ( long ) *idp;
 		}
 
-		new_var = vars_push( INT_TRANS_ARR, rlp, len );
+		new_var = vars_push( INT_ARR, rlp, len );
 	}
 
 	new_var->flags |= v->flags & IS_DYNAMIC;
@@ -310,8 +310,8 @@ Var *f_floor( Var *v )
 	double *idp;
 
 
-	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
-				   ARR_REF | ARR_PTR | INT_TRANS_ARR | FLOAT_TRANS_ARR );
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_CONT_ARR | FLOAT_CONT_ARR |
+				   ARR_REF | ARR_PTR | INT_ARR | FLOAT_ARR );
 
 	switch ( v->type )
 	{
@@ -329,7 +329,7 @@ Var *f_floor( Var *v )
 	}
 
 	if ( ilp != NULL )
-		new_var = vars_push( INT_TRANS_ARR, ilp, len );
+		new_var = vars_push( INT_ARR, ilp, len );
 	else
 	{
 		rlp = T_malloc( len * sizeof( long ) );
@@ -341,7 +341,7 @@ Var *f_floor( Var *v )
 			rlp[ i ] = ( long ) floor( *idp );
 		}
 
-		new_var = vars_push( INT_TRANS_ARR, rlp, len );
+		new_var = vars_push( INT_ARR, rlp, len );
 	}
 
 	new_var->flags |= v->flags & IS_DYNAMIC;
@@ -364,8 +364,8 @@ Var *f_ceil( Var *v )
 	double *idp;
 
 
-	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
-				   ARR_REF | ARR_PTR | INT_TRANS_ARR | FLOAT_TRANS_ARR );
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_CONT_ARR | FLOAT_CONT_ARR |
+				   ARR_REF | ARR_PTR | INT_ARR | FLOAT_ARR );
 
 	switch ( v->type )
 	{
@@ -383,7 +383,7 @@ Var *f_ceil( Var *v )
 	}
 
 	if ( ilp != NULL )
-		new_var = vars_push( INT_TRANS_ARR, ilp, len );
+		new_var = vars_push( INT_ARR, ilp, len );
 	else
 	{
 		rlp = T_malloc( len * sizeof( long ) );
@@ -395,7 +395,7 @@ Var *f_ceil( Var *v )
 			rlp[ i ] = ( long ) ceil( *idp );
 		}
 
-		new_var = vars_push( INT_TRANS_ARR, rlp, len );
+		new_var = vars_push( INT_ARR, rlp, len );
 	}
 
 	new_var->flags |= v->flags & IS_DYNAMIC;
@@ -420,8 +420,8 @@ Var *f_abs( Var *v )
 	double *idp;
 
 
-	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
-				   ARR_REF | ARR_PTR | INT_TRANS_ARR | FLOAT_TRANS_ARR );
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_CONT_ARR | FLOAT_CONT_ARR |
+				   ARR_REF | ARR_PTR | INT_ARR | FLOAT_ARR );
 
 	switch ( v->type )
 	{
@@ -448,7 +448,7 @@ Var *f_abs( Var *v )
 						Cur_Func );
 			rlp[ i ] = labs( *ilp );
 		}
-		new_var = vars_push( INT_TRANS_ARR, rlp, len );
+		new_var = vars_push( INT_ARR, rlp, len );
 		T_free( rlp );
 	}
 	else
@@ -456,7 +456,7 @@ Var *f_abs( Var *v )
 		rdp = T_malloc( len * sizeof( double ) );
 		for ( i = 0; i < len; idp++, i++ )
 			rdp[ i ] = fabs( *idp );
-		new_var = vars_push( FLOAT_TRANS_ARR, rdp, len );
+		new_var = vars_push( FLOAT_ARR, rdp, len );
 		T_free( rdp );
 	}
 
@@ -479,8 +479,8 @@ Var *f_sin( Var *v )
 	double *idp;
 
 
-	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
-				   ARR_REF | ARR_PTR | INT_TRANS_ARR | FLOAT_TRANS_ARR );
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_CONT_ARR | FLOAT_CONT_ARR |
+				   ARR_REF | ARR_PTR | INT_ARR | FLOAT_ARR );
 
 	if ( v->type & ( INT_VAR | FLOAT_VAR ) )
 		return vars_push( FLOAT_VAR, sin( VALUE( v ) ) );
@@ -495,7 +495,7 @@ Var *f_sin( Var *v )
 		for ( i = 0; i < len; i++ )
 			rdp[ i ] = sin( *idp++ );
 
-	new_var = vars_push( FLOAT_TRANS_ARR, rdp, len );
+	new_var = vars_push( FLOAT_ARR, rdp, len );
 	new_var->flags |= v->flags & IS_DYNAMIC;
 
 	T_free( rdp );
@@ -518,8 +518,8 @@ Var *f_cos( Var *v )
 	double *idp;
 
 
-	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
-				   ARR_REF | ARR_PTR | INT_TRANS_ARR | FLOAT_TRANS_ARR );
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_CONT_ARR | FLOAT_CONT_ARR |
+				   ARR_REF | ARR_PTR | INT_ARR | FLOAT_ARR );
 
 	if ( v->type & ( INT_VAR | FLOAT_VAR ) )
 		return vars_push( FLOAT_VAR, cos( VALUE( v ) ) );
@@ -534,7 +534,7 @@ Var *f_cos( Var *v )
 		for ( i = 0; i < len; i++ )
 			rdp[ i ] = cos( *idp++ );
 
-	new_var = vars_push( FLOAT_TRANS_ARR, rdp, len );
+	new_var = vars_push( FLOAT_ARR, rdp, len );
 	new_var->flags |= v->flags & IS_DYNAMIC;
 
 	T_free( rdp );
@@ -559,8 +559,8 @@ Var *f_tan( Var *v )
 	bool is_int;
 
 
-	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
-				   ARR_REF | ARR_PTR | INT_TRANS_ARR | FLOAT_TRANS_ARR );
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_CONT_ARR | FLOAT_CONT_ARR |
+				   ARR_REF | ARR_PTR | INT_ARR | FLOAT_ARR );
 
 	if ( v->type & ( INT_VAR | FLOAT_VAR ) )
 	{
@@ -583,7 +583,7 @@ Var *f_tan( Var *v )
 					Cur_Func );
 	}
 
-	new_var = vars_push( FLOAT_TRANS_ARR, rdp, len );
+	new_var = vars_push( FLOAT_ARR, rdp, len );
 	new_var->flags |= v->flags & IS_DYNAMIC;
 
 	T_free( rdp );
@@ -608,8 +608,8 @@ Var *f_asin( Var *v )
 	bool is_int;
 
 
-	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
-				   ARR_REF | ARR_PTR | INT_TRANS_ARR | FLOAT_TRANS_ARR );
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_CONT_ARR | FLOAT_CONT_ARR |
+				   ARR_REF | ARR_PTR | INT_ARR | FLOAT_ARR );
 
 	if ( v->type & ( INT_VAR | FLOAT_VAR ) )
 	{
@@ -640,7 +640,7 @@ Var *f_asin( Var *v )
 		rdp[ i ] = asin( arg );
 	}
 
-	new_var = vars_push( FLOAT_TRANS_ARR, rdp, len );
+	new_var = vars_push( FLOAT_ARR, rdp, len );
 	new_var->flags |= v->flags & IS_DYNAMIC;
 
 	T_free( rdp );
@@ -665,8 +665,8 @@ Var *f_acos( Var *v )
 	bool is_int;
 
 
-	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
-				   ARR_REF | ARR_PTR | INT_TRANS_ARR | FLOAT_TRANS_ARR );
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_CONT_ARR | FLOAT_CONT_ARR |
+				   ARR_REF | ARR_PTR | INT_ARR | FLOAT_ARR );
 
 	if ( v->type & ( INT_VAR | FLOAT_VAR ) )
 	{
@@ -697,7 +697,7 @@ Var *f_acos( Var *v )
 		rdp[ i ] = acos( arg );
 	}
 
-	new_var = vars_push( FLOAT_TRANS_ARR, rdp, len );
+	new_var = vars_push( FLOAT_ARR, rdp, len );
 	new_var->flags |= v->flags & IS_DYNAMIC;
 
 	T_free( rdp );
@@ -720,8 +720,8 @@ Var *f_atan( Var *v )
 	double *idp;
 
 
-	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
-				   ARR_REF | ARR_PTR | INT_TRANS_ARR | FLOAT_TRANS_ARR );
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_CONT_ARR | FLOAT_CONT_ARR |
+				   ARR_REF | ARR_PTR | INT_ARR | FLOAT_ARR );
 
 	if ( v->type & ( INT_VAR | FLOAT_VAR ) )
 		return vars_push( FLOAT_VAR, atan( VALUE( v ) ) );
@@ -736,7 +736,7 @@ Var *f_atan( Var *v )
 		for ( i = 0; i < len; i++ )
 			rdp[ i ] = atan( *idp++ );
 
-	new_var = vars_push( FLOAT_TRANS_ARR, rdp, len );
+	new_var = vars_push( FLOAT_ARR, rdp, len );
 	new_var->flags |= v->flags & IS_DYNAMIC;
 
 	T_free( rdp );
@@ -761,8 +761,8 @@ Var *f_sinh( Var *v )
 	bool is_int;
 
 
-	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
-				   ARR_REF | ARR_PTR | INT_TRANS_ARR | FLOAT_TRANS_ARR );
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_CONT_ARR | FLOAT_CONT_ARR |
+				   ARR_REF | ARR_PTR | INT_ARR | FLOAT_ARR );
 
 	if ( v->type & ( INT_VAR | FLOAT_VAR ) )
 	{
@@ -785,7 +785,7 @@ Var *f_sinh( Var *v )
 		rdp[ i ] = res;
 	}
 
-	new_var = vars_push( FLOAT_TRANS_ARR, rdp, len );
+	new_var = vars_push( FLOAT_ARR, rdp, len );
 	new_var->flags |= v->flags & IS_DYNAMIC;
 
 	T_free( rdp );
@@ -810,8 +810,8 @@ Var *f_cosh( Var *v )
 	bool is_int;
 
 
-	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
-				   ARR_REF | ARR_PTR | INT_TRANS_ARR | FLOAT_TRANS_ARR );
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_CONT_ARR | FLOAT_CONT_ARR |
+				   ARR_REF | ARR_PTR | INT_ARR | FLOAT_ARR );
 
 	if ( v->type & ( INT_VAR | FLOAT_VAR ) )
 	{
@@ -834,7 +834,7 @@ Var *f_cosh( Var *v )
 		rdp[ i ] = res;
 	}
 
-	new_var = vars_push( FLOAT_TRANS_ARR, rdp, len );
+	new_var = vars_push( FLOAT_ARR, rdp, len );
 	new_var->flags |= v->flags & IS_DYNAMIC;
 
 	T_free( rdp );
@@ -857,8 +857,8 @@ Var *f_tanh( Var *v )
 	double *idp;
 
 
-	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
-				   ARR_REF | ARR_PTR | INT_TRANS_ARR | FLOAT_TRANS_ARR );
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_CONT_ARR | FLOAT_CONT_ARR |
+				   ARR_REF | ARR_PTR | INT_ARR | FLOAT_ARR );
 
 	if ( v->type & ( INT_VAR | FLOAT_VAR ) )
 		return vars_push( FLOAT_VAR, tanh( VALUE( v ) ) );
@@ -873,7 +873,7 @@ Var *f_tanh( Var *v )
 		for ( i = 0; i < len; i++ )
 			rdp[ i ] = tanh( *idp++ );
 
-	new_var = vars_push( FLOAT_TRANS_ARR, rdp, len );
+	new_var = vars_push( FLOAT_ARR, rdp, len );
 	new_var->flags |= v->flags & IS_DYNAMIC;
 
 	T_free( rdp );
@@ -898,8 +898,8 @@ Var *f_exp( Var *v )
 	bool is_int;
 
 
-	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
-				   ARR_REF | ARR_PTR | INT_TRANS_ARR | FLOAT_TRANS_ARR );
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_CONT_ARR | FLOAT_CONT_ARR |
+				   ARR_REF | ARR_PTR | INT_ARR | FLOAT_ARR );
 
 	if ( v->type & ( INT_VAR | FLOAT_VAR ) )
 	{
@@ -929,7 +929,7 @@ Var *f_exp( Var *v )
 		rdp[ i ] = res;
 	}
 
-	new_var = vars_push( FLOAT_TRANS_ARR, rdp, len );
+	new_var = vars_push( FLOAT_ARR, rdp, len );
 	new_var->flags |= v->flags & IS_DYNAMIC;
 
 	T_free( rdp );
@@ -954,8 +954,8 @@ Var *f_ln( Var *v )
 	bool is_int;
 
 
-	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
-				   ARR_REF | ARR_PTR | INT_TRANS_ARR | FLOAT_TRANS_ARR );
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_CONT_ARR | FLOAT_CONT_ARR |
+				   ARR_REF | ARR_PTR | INT_ARR | FLOAT_ARR );
 
 	if ( v->type & ( INT_VAR | FLOAT_VAR ) )
 	{
@@ -996,7 +996,7 @@ Var *f_ln( Var *v )
 		rdp[ i ] = res;
 	}
 
-	new_var = vars_push( FLOAT_TRANS_ARR, rdp, len );
+	new_var = vars_push( FLOAT_ARR, rdp, len );
 	new_var->flags |= v->flags & IS_DYNAMIC;
 
 	T_free( rdp );
@@ -1021,8 +1021,8 @@ Var *f_log( Var *v )
 	bool is_int;
 
 
-	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
-				   ARR_REF | ARR_PTR | INT_TRANS_ARR | FLOAT_TRANS_ARR );
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_CONT_ARR | FLOAT_CONT_ARR |
+				   ARR_REF | ARR_PTR | INT_ARR | FLOAT_ARR );
 
     if ( v->type & ( INT_VAR | FLOAT_VAR ) )
 	{
@@ -1063,7 +1063,7 @@ Var *f_log( Var *v )
 		rdp[ i ] = res;
 	}
 
-	new_var = vars_push( FLOAT_TRANS_ARR, rdp, len );
+	new_var = vars_push( FLOAT_ARR, rdp, len );
 	new_var->flags |= v->flags & IS_DYNAMIC;
 
 	T_free( rdp );
@@ -1088,8 +1088,8 @@ Var *f_sqrt( Var *v )
 	bool is_int;
 
 
-	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
-				   ARR_REF | ARR_PTR | INT_TRANS_ARR | FLOAT_TRANS_ARR );
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_CONT_ARR | FLOAT_CONT_ARR |
+				   ARR_REF | ARR_PTR | INT_ARR | FLOAT_ARR );
 
 	if ( v->type & ( INT_VAR | FLOAT_VAR ) )
 	{
@@ -1121,7 +1121,7 @@ Var *f_sqrt( Var *v )
 		rdp[ i ] = sqrt( arg );
 	}
 
-	new_var = vars_push( FLOAT_TRANS_ARR, rdp, len );
+	new_var = vars_push( FLOAT_ARR, rdp, len );
 	new_var->flags |= v->flags & IS_DYNAMIC;
 
 	T_free( rdp );
@@ -1361,7 +1361,7 @@ Var *f_size( Var *v )
 Var *f_sizes( Var *v )
 {
 	vars_check( v, ARR_REF );
-	return vars_push( INT_TRANS_ARR, v->from->sizes, ( long ) v->from->dim );
+	return vars_push( INT_ARR, v->from->sizes, ( long ) v->from->dim );
 }
 
 
@@ -1392,8 +1392,8 @@ Var *f_mean( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	vars_check( v, INT_ARR | FLOAT_ARR | ARR_REF | ARR_PTR |
-				   INT_TRANS_ARR | FLOAT_TRANS_ARR );
+	vars_check( v, INT_CONT_ARR | FLOAT_CONT_ARR | ARR_REF | ARR_PTR |
+				   INT_ARR | FLOAT_ARR );
 
 	get_array_params( v, &len, &ilp, &idp );
 	slice_len = len;
@@ -1486,8 +1486,8 @@ Var *f_rms( Var *v )
 	double val = 0.0;
 
 
-	vars_check( v, INT_ARR | FLOAT_ARR | ARR_REF | ARR_PTR |
-				   INT_TRANS_ARR | FLOAT_TRANS_ARR );
+	vars_check( v, INT_CONT_ARR | FLOAT_CONT_ARR | ARR_REF | ARR_PTR |
+				   INT_ARR | FLOAT_ARR );
 
 	get_array_params( v, &len, &ilp, &idp );
 
@@ -1526,8 +1526,8 @@ Var *f_slice( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	vars_check( v, INT_ARR | FLOAT_ARR | ARR_REF | ARR_PTR |
-				   INT_TRANS_ARR | FLOAT_TRANS_ARR );
+	vars_check( v, INT_CONT_ARR | FLOAT_CONT_ARR | ARR_REF | ARR_PTR |
+				   INT_ARR | FLOAT_ARR );
 
 	get_array_params( v, &len, &ilp, &idp );
 
@@ -1587,9 +1587,9 @@ Var *f_slice( Var *v )
 	}
 
 	if ( ilp != NULL )
-		return vars_push( INT_TRANS_ARR, ilp + index, slice_len );
+		return vars_push( INT_ARR, ilp + index, slice_len );
 	else
-		return vars_push( FLOAT_TRANS_ARR, idp + index, slice_len );
+		return vars_push( FLOAT_ARR, idp + index, slice_len );
 }
 
 
@@ -1607,8 +1607,8 @@ Var *f_square( Var *v )
 	double *idp;
 
 
-	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
-				   ARR_REF | ARR_PTR | INT_TRANS_ARR | FLOAT_TRANS_ARR );
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_CONT_ARR | FLOAT_CONT_ARR |
+				   ARR_REF | ARR_PTR | INT_ARR | FLOAT_ARR );
 
 	switch ( v->type )
 	{
@@ -1635,7 +1635,7 @@ Var *f_square( Var *v )
 						Cur_Func );
 			rlp[ i ] = *ilp * *ilp;
 		}
-		new_var = vars_push( INT_TRANS_ARR, rlp, len );
+		new_var = vars_push( INT_ARR, rlp, len );
 		T_free( rlp );
 	}
 	else
@@ -1643,7 +1643,7 @@ Var *f_square( Var *v )
 		rdp = T_malloc( len * sizeof( double ) );
 		for ( i = 0; i < len; idp++, i++ )
 			rdp[ i ] = *idp * *idp;
-		new_var = vars_push( FLOAT_TRANS_ARR, rdp, len );
+		new_var = vars_push( FLOAT_ARR, rdp, len );
 		T_free( rdp );
 	}
 
@@ -1674,7 +1674,7 @@ Var *f_islice( Var *v )
 	}
 
 	array = T_calloc( size, sizeof( long ) );
-	ret = vars_push( INT_TRANS_ARR, array, size );
+	ret = vars_push( INT_ARR, array, size );
 	T_free( array );
 
 	return ret;
@@ -1706,7 +1706,7 @@ Var *f_fslice( Var *v )
 	array = T_malloc( size * sizeof( double ) );
 	for( i = 0; i < size; i++ )
 		*( array + i ) = 0.0;
-	ret = vars_push( FLOAT_TRANS_ARR, array, size );
+	ret = vars_push( FLOAT_ARR, array, size );
 	T_free( array );
 
 	return ret;

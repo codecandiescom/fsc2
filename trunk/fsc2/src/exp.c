@@ -1605,20 +1605,21 @@ static void save_restore_variables( bool flag )
 		{
 			memcpy( cpy, src, sizeof( Var ) );
 
-			if ( cpy->type == INT_ARR && ! ( cpy->flags & NEED_ALLOC ) )
+			if ( cpy->type == INT_CONT_ARR && ! ( cpy->flags & NEED_ALLOC ) )
 			{
 				src->val.lpnt = NULL;
 				src->val.lpnt =
 					  get_memcpy( cpy->val.lpnt, cpy->len * sizeof( long ) );
 			}
-			if ( cpy->type == FLOAT_ARR && ! ( cpy->flags & NEED_ALLOC ) )
+			if ( cpy->type == FLOAT_CONT_ARR && ! ( cpy->flags & NEED_ALLOC ) )
 			{
 				src->val.dpnt = NULL;
 				src->val.dpnt =
 					  get_memcpy( cpy->val.dpnt, cpy->len * sizeof( double ) );
 			}
 
-			if ( cpy->type & ( INT_ARR | FLOAT_ARR ) && cpy->sizes != NULL )
+			if ( cpy->type & ( INT_CONT_ARR | FLOAT_CONT_ARR ) &&
+				 cpy->sizes != NULL )
 			{
 				src->sizes = NULL;
 				src->sizes
@@ -1638,13 +1639,15 @@ static void save_restore_variables( bool flag )
 
 		for ( cpy = var_list; cpy != NULL; cpy = cpy->next )
 		{
-			if ( cpy->type == INT_ARR && ! ( cpy->flags & NEED_ALLOC ) &&
+			if ( cpy->type == INT_CONT_ARR && ! ( cpy->flags & NEED_ALLOC ) &&
 				 cpy->val.lpnt != NULL )
 				T_free( cpy->val.lpnt );
-			if ( cpy->type == FLOAT_ARR && ! ( cpy->flags & NEED_ALLOC ) &&
+			if ( cpy->type == FLOAT_CONT_ARR &&
+				 ! ( cpy->flags & NEED_ALLOC ) &&
 				 cpy->val.dpnt != NULL )
 				T_free( cpy->val.dpnt );
-			if ( cpy->type & ( INT_ARR | FLOAT_ARR ) && cpy->sizes != NULL )
+			if ( cpy->type & ( INT_CONT_ARR | FLOAT_CONT_ARR ) &&
+				 cpy->sizes != NULL )
 				T_free( cpy->sizes );
 		}
 

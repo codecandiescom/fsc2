@@ -193,12 +193,12 @@ static void unpack_and_accept( void *ptr )
 				ptr_next = ptr + sizeof( double );
 				break;
 
-			case INT_ARR :
+			case INT_CONT_ARR :
 				len = * ( long * ) ptr;
 				ptr_next = ptr + ( len + 1 ) * sizeof( long );
 				break;
 
-			case FLOAT_ARR :
+			case FLOAT_CONT_ARR :
 				len = * ( long * ) ptr;
 				ptr_next = ptr + sizeof( long ) + len * sizeof( double );
 				break;
@@ -319,13 +319,13 @@ static void accept_1d_data( long x_index, long curve, int type, void *ptr )
 			f_data = ( double * ) ptr;
 			break;
 
-		case INT_ARR :
+		case INT_CONT_ARR :
 			len = * ( long * ) ptr;
 			ptr += sizeof( long );
 			l_data = ( long * ) ptr;
 			break;
 
-		case FLOAT_ARR :
+		case FLOAT_CONT_ARR :
 			len = * ( long * ) ptr;
 			ptr += sizeof( long );
 			f_data = ( double * ) ptr;
@@ -372,7 +372,7 @@ static void accept_1d_data( long x_index, long curve, int type, void *ptr )
 
 	for ( cur_ptr = ptr, i = 0; i < len; i++ )
 	{
-		if ( type & ( INT_VAR | INT_ARR ) )
+		if ( type & ( INT_VAR | INT_CONT_ARR ) )
 		{
 			data = ( double ) *( ( long * ) cur_ptr );
 			cur_ptr += sizeof( long );
@@ -445,7 +445,7 @@ static void accept_1d_data( long x_index, long curve, int type, void *ptr )
 	for ( cur_ptr = ptr, i = x_index, sp = G.curve[ curve ]->points + x_index;
 		  i < x_index + len; sp++, i++ )
 	{
-		if ( type & ( INT_VAR | INT_ARR ) )
+		if ( type & ( INT_VAR | INT_CONT_ARR ) )
 		{
 			data = ( double ) * ( long * ) cur_ptr;
 			cur_ptr += sizeof( long );
@@ -535,13 +535,13 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 			f_data = ( double * ) ptr;
 			break;
 
-		case INT_ARR :
+		case INT_CONT_ARR :
 			len = * ( long * ) ptr;
 			ptr += sizeof( long );
 			l_data = ( long * ) ptr;
 			break;
 
-		case FLOAT_ARR :
+		case FLOAT_CONT_ARR :
 			len = * ( long * ) ptr;
 			ptr += sizeof( long );
 			f_data = ( double * ) ptr;
@@ -577,7 +577,7 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 
 	for ( cur_ptr = ptr, i = 0; i < len; i++ )
 	{
-		if ( type & ( INT_VAR | INT_ARR ) )
+		if ( type & ( INT_VAR | INT_CONT_ARR ) )
 		{
 			data = ( double ) * ( long * ) cur_ptr;
 			cur_ptr += sizeof( long );
@@ -658,7 +658,7 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 		  sp = cv->points + y_index * G.nx + x_index;
 		  i < x_index + len; sp++, i++ )
 	{
-		if ( type & ( INT_VAR | INT_ARR ) )
+		if ( type & ( INT_VAR | INT_CONT_ARR ) )
 		{
 			data = ( double ) * ( long * ) cur_ptr;
 			cur_ptr += sizeof( long );

@@ -47,7 +47,7 @@
    push its result onto the stack. This can be either a simple integer or
    float variable (i.e. of type INT_VAR or FLOAT_VAR) or a transient array.
    In the later case the function has to allocate memory for the array, set
-   its elements and push a variable of either INT_TRANS_ARR or FLOAT_TRANS_ARR
+   its elements and push a variable of either INT_ARR or FLOAT_ARR
    onto the variable stack with the pointer to the array and its length (as a
    long!) as additional arguments.
 
