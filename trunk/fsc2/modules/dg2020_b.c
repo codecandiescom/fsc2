@@ -1338,6 +1338,19 @@ Var *pulser_next_phase( Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
+Var *pulser_reset( Var *v )
+{
+
+	vars_pop( pulser_pulse_reset( NULL ) );
+	vars_pop( pulser_pulse_reset( NULL ) );
+
+	return vars_push( INT_VAR, 1 );
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
 Var *pulser_phase_reset( Var *v )
 {
 	int j;
@@ -1356,9 +1369,6 @@ Var *pulser_phase_reset( Var *v )
 
 	if ( v == NULL )
 	{
-		long ret = 1;
-
-
 		if ( dg2020_phs[ 0 ].function == NULL &&
 			 dg2020_phs[ 1 ].function == NULL &&
 			 FSC2_MODE == TEST )
@@ -1368,10 +1378,10 @@ Var *pulser_phase_reset( Var *v )
 		}
 
 		if ( dg2020_phs[ 0 ].function != NULL )
-			ret &= pulser_phase_reset( vars_push( INT_VAR, 1 ) )->val.lval;
+			vars_pop( pulser_phase_reset( vars_push( INT_VAR, 1 ) ) );
 		if ( dg2020_phs[ 1 ].function != NULL )
-			ret &= pulser_phase_reset( vars_push( INT_VAR, 2 ) )->val.lval;
-		return vars_push( INT_VAR, ret );
+			vars_pop( pulser_phase_reset( vars_push( INT_VAR, 2 ) ) );
+		return vars_push( INT_VAR, 1 );
 	}
 
 	for ( ; v != NULL; v = vars_pop( v ) )
@@ -1432,19 +1442,15 @@ Var *pulser_pulse_reset( Var *v )
 
 	if ( v == NULL )
 	{
-		long ret = 1;
-
-
 		if ( dg2020_phs[ 0 ].function != NULL ||
 			 dg2020_phs[ 1 ].function != NULL )
-			pulser_phase_reset( NULL );
+			vars_pop( pulser_phase_reset( NULL ) );
 
 		for ( p = dg2020_Pulses; p != NULL; p = p->next )
 			if ( p->num >= 0 )
-				ret &=
-				  pulser_pulse_reset( vars_push( INT_VAR, p->num ) )->val.lval;
+				vars_pop( pulser_pulse_reset( vars_push( INT_VAR, p->num ) ) );
 
-		return vars_push( INT_VAR, ret );
+		return vars_push( INT_VAR, 1 );
 	}
 
 	/* Otherwise run through the supplied pulse list */

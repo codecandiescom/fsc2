@@ -58,6 +58,7 @@ Var *pulser_next_phase( Var *v );
 Var *pulser_phase_reset( Var *v );
 Var *pulser_pulse_reset( Var *v );
 Var *pulser_reset( Var *v );
+Var *pulser_reset( Var *v );
 Var *pulser_lock_keyboard( Var *v );
 
 
