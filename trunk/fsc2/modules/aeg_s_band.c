@@ -173,6 +173,13 @@ int s_band_init_hook( void )
 
 	/* Claim the serial port */
 
+	if ( SERIAL_PORT >= NUM_SERIAL_PORTS )
+	{
+		eprintf( FATAL, "s_band: Serial port number out of valid "
+				 "range (0-%d).", NUM_SERIAL_PORTS - 1 );
+		THROW( EXCEPTION );
+	}
+
 	if ( need_Serial_Port[ SERIAL_PORT ] )
 	{
 		eprint( FATAL, "s_band: Serial port %d (i.e. /dev/ttyS%d) has already "

@@ -13,6 +13,11 @@
 typedef  unsigned char  bool;
 
 
+/* Defines the number of serial ports on the system */
+
+
+#define NUM_SERIAL_PORTS 2
+
 
 /* Define the maximum number of pulses (thus pulse numbers have to be in
    the range between 0 and MAX_PULSE_NUM - 1) */
@@ -28,10 +33,6 @@ typedef  unsigned char  bool;
 /* Define the default time base (in ns) to be used in the program */
 
 #define DEFAULT_TIME_UNIT 1
-
-
-
-#define PRG_CHUNK_SIZE 128
 
 
 /* Define some useful abbreviations - never ever change these ! */

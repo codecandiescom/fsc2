@@ -6,6 +6,11 @@
 #include <signal.h>
 
 
+/* number of program token structures to be allocated as a chunk */
+
+#define PRG_CHUNK_SIZE 128
+
+
 static bool in_for_lex = UNSET;
 
 extern int prim_exp_runparse( void );     /* from prim_exp__run_parser.y */
