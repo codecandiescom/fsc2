@@ -126,9 +126,9 @@ bool run( void )
 	/* We have to be careful: When the child process gets forked it may
 	   already be finished running *before* the fork() call returns in the
 	   parent. In this case the signal handlers of the parent don't know the
-	   PID of the child process and thus won't work correctly. Therefore the
-	   signals the child may send are blocked until we can be sure the parent
-	   has got the childs PID. */
+	   PID of the child process and thus won't work correctly. Therefore all
+	   the signals the child may send are blocked until we can be sure the
+	   parent has got the childs PID. */
 
 	sigemptyset( &new_mask );
 	sigaddset( &new_mask, SIGCHLD );
