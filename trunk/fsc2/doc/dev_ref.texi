@@ -109,6 +109,25 @@ with @code{bh15} range is @w{-50 G} to @w{23000 G}.
 @strong{Controlled via}: Serial port
 
 @paragraphindent 0
+@strong{Options to be set in configuration file}:
+@table @samp
+@item SERIAL_PORT
+Number of serial port device is connected to
+@item SERIAL_BAUDRATE
+Baud rate used in communication with device
+@item SERIAL_TIME
+Length of sweep pulses in @code{us}
+@item AEG_S_BAND_WITH_ER035M_MIN_FIELD
+Minimum field when used with @code{ER035M} NMR gaussmeter
+@item AEG_S_BAND_WITH_ER035M_MAX_FIELD
+Maximum field when used with @code{ER035M} NMR gaussmeter
+@item AEG_S_BAND_WITH_BH15_MIN_FIELD
+Minimum field when used with @code{BH15} Hall effect gaussmeter
+@item AEG_S_BAND_WITH_BH15_MAX_FIELD
+Maximum field when used with @code{BH15} Hall effect gaussmeter
+@end table
+
+@paragraphindent 0
 @strong{Supported functions}:
 @multitable @columnfractions .45 .45
 @item @code{magnet_name()}            @tab @ref{magnet_name}
@@ -151,6 +170,25 @@ to @w{19900 G}, with @code{bh15} range is @w{-50 G} to @w{23000 G}.
 
 @paragraphindent 0
 @strong{Controlled via}: Serial port
+
+@paragraphindent 0
+@strong{Options to be set in configuration file}:
+@table @samp
+@item SERIAL_PORT
+Number of serial port device is connected to
+@item SERIAL_BAUDRATE
+Baud rate used in communication with device
+@item SERIAL_TIME
+Length of sweep pulses in @code{us}
+@item AEG_X_BAND_WITH_ER035M_MIN_FIELD
+Minimum field when used with @code{ER035M} NMR gaussmeter
+@item AEG_X_BAND_WITH_ER035M_MAX_FIELD
+Maximum field when used with @code{ER035M} NMR gaussmeter
+@item AEG_X_BAND_WITH_BH15_MIN_FIELD
+Minimum field when used with @code{BH15} Hall effect gaussmeter
+@item AEG_X_BAND_WITH_BH15_MAX_FIELD
+Maximum field when used with @code{BH15} Hall effect gaussmeter
+@end table
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -226,6 +264,14 @@ WITIO-48 DIO card (@code{witio_48}) is loaded.
 @strong{Controlled via}: Read only via WITIO-48 DIO card.
 
 @paragraphindent 0
+@strong{Options to be set in configuration file}:
+@table @samp
+@item DIO_NUMBER
+Number of DIO of @code{WITIO-48} card the gaussmeters output is read
+with.
+@end table
+
+@paragraphindent 0
 @strong{Please note}: If a field resolution other than @w{0.1 G} is set
 at the front panel of the device, the function
 @code{gaussmeter_resolution()} must be called, otherwise the field values
@@ -282,6 +328,42 @@ for function/output channels declared as @code{INVERTED}).
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).
+
+@paragraphindent 0
+@strong{Options to be set in configuration file}:
+@table @samp
+@item NUM_PODS
+Number of POD output channels
+@item SHAPE_2_DEFENSE_DEFAULT_MIN_DISTANCE
+Default minimum time a defense pulse can start after a shape pulse when
+either @code{TWT} or @code{TWT_GATE} pulses are used.
+@item DEFENSE_2_SHAPE_DEFAULT_MIN_DISTANCE
+Default minimum time a shape pulse can start after a defense pulse when
+either @code{TWT} or @code{TWT_GATE} pulses are used.
+@item ASK_FOR_SHAPE_DEFENSE_DISTANCE_CONFORMATION
+If defined user will get asked for confirmattion if the shape to defense
+pulse or the defense to shape pulse minimum distance has been reduced
+below the above values by calling
+@code{pulser_shape_to_defense_mininum_distance()} or
+@code{defence_to_shape_minimum_distance()}.
+@item AUTO_SHAPE_LEFT_PADDING
+Amount of time a pulse is made to start earlier if an (automatically
+created) shape pulse is associated to it.
+@item AUTO_SHAPE_RIGHT_PADDING
+Amount of time appended to a pulse if an (automatically created) shape
+pulse is associated to it.
+@item AUTO_TWT_LEFT_PADDING
+Amount an automatically created @code{TWT} pulse starts before the
+(microwave) pulse it is created for.
+@item AUTO_TWT_RIGHT_PADDING
+Amount of time an automatically created @code{TWT} pulse lasts after
+the end of the (microwave) pulse it is created for.
+@item MINIMUM_TWT_PULSE_DISTANCE
+Minimum distance between two automatically created @code{TWT} pulses,
+pulses with shorter distances get merged into one.
+@item MAX_TWT_DUTY_CYCLE
+Maximum duty cycle the TWT can sustain.
+@end table
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -348,6 +430,19 @@ for function/output channels declared as @code{INVERTED}).
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).
+
+@paragraphindent 0
+@strong{Options to be set in configuration file}:
+@table @samp
+@item NUM_PODS
+Number of POD output channels
+@item DEFAULT_PHASE_SWITCH_DELAY
+Amount of time an automatically created phase pulse has to start
+before the pulse it was created for.
+@item GRACE_PERIOD
+Amount of time an automatically created phase pulse has to last after
+the end of the pulse it was created for.
+@end table
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -434,6 +529,42 @@ Output channels: 8
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).
+
+@paragraphindent 0
+@strong{Options to be set in configuration file}:
+@table @samp
+@item NUM_PODS
+Number of POD output channels
+@item SHAPE_2_DEFENSE_DEFAULT_MIN_DISTANCE
+Default minimum time a defense pulse can start after a shape pulse when
+either @code{TWT} or @code{TWT_GATE} pulses are used.
+@item DEFENSE_2_SHAPE_DEFAULT_MIN_DISTANCE
+Default minimum time a shape pulse can start after a defense pulse when
+either @code{TWT} or @code{TWT_GATE} pulses are used.
+@item ASK_FOR_SHAPE_DEFENSE_DISTANCE_CONFORMATION
+If defined user will get asked for confirmattion if the shape to defense
+pulse or the defense to shape pulse minimum distance has been reduced
+below the above values by calling
+@code{pulser_shape_to_defense_mininum_distance()} or
+@code{defence_to_shape_minimum_distance()}.
+@item AUTO_SHAPE_LEFT_PADDING
+Amount of time a pulse is made to start earlier if an (automatically
+created) shape pulse is associated to it.
+@item AUTO_SHAPE_RIGHT_PADDING
+Amount of time appended to a pulse if an (automatically created) shape
+pulse is associated to it.
+@item AUTO_TWT_LEFT_PADDING
+Amount an automatically created @code{TWT} pulse starts before the
+(microwave) pulse it is created for.
+@item AUTO_TWT_RIGHT_PADDING
+Amount of time an automatically created @code{TWT} pulse lasts after
+the end of the (microwave) pulse it is created for.
+@item MINIMUM_TWT_PULSE_DISTANCE
+Minimum distance between two automatically created @code{TWT} pulses,
+pulses with shorter distances get merged into one.
+@item MAX_TWT_DUTY_CYCLE
+Maximum duty cycle the TWT can sustain.
+@end table
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -525,6 +656,19 @@ the field in older Bruker EPR spectrometers. Maximum field range is from
 @strong{Controlled via}: GPIB bus (IEEE 488).
 
 @paragraphindent 0
+@strong{Options to be set in configuration file}:
+@table @samp
+@item ER032M_MIN_FIELD
+Minimum field that can be set
+@item ER032M_MAX_FIELD
+Maximum field that can set
+@item ER032M_MAX_SWEEP_WIDTH
+Maximum sweep width thatcan be achieved with the device
+@item ER032M_MIN_FIELD_STEP
+Smallest field step width to be done with the device
+@end table
+
+@paragraphindent 0
 @strong{Supported functions}:
 @multitable @columnfractions .45 .45
 @item @code{magnet_name()}   @tab @ref{magnet_name}
@@ -600,6 +744,15 @@ range is @w{1460 G} to @w{19900 G}.
 @strong{Controlled via}: Serial port
 
 @paragraphindent 0
+@strong{Options to be set in configuration file}:
+@table @samp
+@item SERIAL_PORT
+Number of the serial port the device is connected to
+@item SERIAL_BAUDRATE
+Baud rate used in communication with device
+@end table
+
+@paragraphindent 0
 @strong{Supported functions}:
 @multitable @columnfractions .45 .45
 @item @code{gaussmeter_name()}               @tab @ref{gaussmeter_name}
@@ -669,6 +822,14 @@ the range is @w{1460 G} to @w{19900 G}.
 @paragraphindent 0
 @strong{Controlled via}: Serial port
 
+@paragraphindent 0
+@strong{Options to be set in configuration file}:
+@table @samp
+@item SERIAL_PORT
+Number of the serial port the device is connected to
+@item SERIAL_BAUDRATE
+Baud rate used in communication with device
+@end table
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -716,6 +877,12 @@ Fixed length of TRIGGER_OUT pulse: @w{20 ns}
 @strong{Controlled via}: GPIB bus (IEEE 488).
 
 @paragraphindent 0
+@strong{Options to be set in configuration file}:
+@table @samp NUM_CHANNEL_CARDS
+Number of cards with 4 channels each build into the device
+@end table
+
+@paragraphindent 0
 @strong{Supported functions}:
 @multitable @columnfractions .45 .45
 @item @code{pulser_name()}            @tab @ref{pulser_name}
@@ -754,7 +921,6 @@ Fixed length of TRIGGER_OUT pulse: @w{20 ns}
 a very old device even pre-dating the GPIB-standard. Only its capability
 to return the measured frequency can be used.
 
-
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).
 
@@ -792,6 +958,19 @@ to @w{3 db}
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).
+
+@paragraphindent 0
+@strong{Options to be set in configuration file}:
+@table @samp
+@item DEFAULT_TABLE_FILE
+Name of the default table file
+@item DEF_ATT_REF_FREQ
+Reference frequency for which the attenuation will not be changed,
+for all other frequencies the attenuation is adapted relative to this
+reference
+@item MIN_ATTEN
+Minimum attenuation the device will use
+@end table
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -841,6 +1020,19 @@ to @w{14.5 db}.
 @strong{Controlled via}: GPIB bus (IEEE 488).
 
 @paragraphindent 0
+@strong{Options to be set in configuration file}:
+@table @samp
+@item DEFAULT_TABLE_FILE
+Name of the default table file
+@item DEF_ATT_REF_FREQ
+Reference frequency for which the attenuation will not be changed,
+for all other frequencies the attenuation is adapted relative to this
+reference
+@item MIN_ATTEN
+Minimum attenuation the device will use
+@end table
+
+@paragraphindent 0
 @strong{Supported functions}:
 @multitable @columnfractions .45 .45
 @item @code{synthesizer_name()}                 @tab @ref{synthesizer_name}
@@ -884,6 +1076,19 @@ allowed -- change the configuration file to allow higher output levels.
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).
+
+@paragraphindent 0
+@strong{Options to be set in configuration file}:
+@table @samp
+@item DEFAULT_TABLE_FILE
+Name of the default table file
+@item DEF_ATT_REF_FREQ
+Reference frequency for which the attenuation will not be changed,
+for all other frequencies the attenuation is adapted relative to this
+reference
+@item MIN_ATTEN
+Minimum attenuation the device will use
+@end table
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -935,6 +1140,17 @@ setting.
 @strong{Controlled via}: Serial port
 
 @paragraphindent 0
+@strong{Options to be set in configuration file}:
+@table @samp
+@item SERIAL_PORT
+Number of serial port device is connected to
+@item SERIAL_BAUDRATE
+Baud rate used in communication with device
+@item DEFAULT_CALIB_FILE
+Name of the default calibration file
+@end table
+
+@paragraphindent 0
 @strong{Supported functions}:
 @multitable @columnfractions .45 .45
 @item @code{mw_attenuator_name()}                @tab @ref{mw_attenuator_name}
@@ -965,6 +1181,18 @@ voltage can be reduced via a potentiometer at the front panel.
 
 @paragraphindent 0
 @strong{Controlled via}: Serial port
+
+@paragraphindent 0
+@strong{Options to be set in configuration file}:
+@table @samp
+@item SERIAL_PORT
+Number of serial port device is connected to
+@item SERIAL_BAUDRATE
+Baud rate used in communication with device
+@item DEF_OUT_VAL
+Output value representing the voltage to be output when DAC gets
+switched on
+@end table
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -1008,6 +1236,13 @@ data getting set in the configuration file for the module.  Because
 there's no gaussmeter to control the real field only this calibration
 can be used. When this module is used the DAC of the DA and AD converter
 can't be used, it gets reserved automatically for this module.
+
+@paragraphindent 0
+@strong{Options to be set in configuration file}:
+@table @samp
+@item DEFAULT_CALIB_FILE
+Name of the default calibration file
+@end table
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -1056,6 +1291,21 @@ is used neither the DAC of the DA and AD converter nor the first DIO
 automatically for this module.
 
 @paragraphindent 0
+@strong{Options to be set in configuration file}:
+@table @samp
+@item FIELD_RANGE_GUESS
+Guess for the width of the field range
+@item HJS_FC_FIELD_SET_MULTIPLIER
+Number of minimum field steps done done at once when sweeping to a new
+field position
+@item HJS_FC_FIELD_SET_TIMEOUT
+Waiting time after each of the steps done while sweeping to a new
+field position
+@item DEFAULT_CALIB_FILE
+Name of the default calibration file
+@end table
+
+@paragraphindent 0
 @strong{Supported functions}:
 @multitable @columnfractions .45 .45
 @item @code{magnet_name()}            @tab @ref{magnet_name}
@@ -1094,6 +1344,27 @@ units!
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488) via the Oxford ITC 503
 temperature controller transfering data between GPIB and Oxford ISOBUS.
+
+@paragraphindent 0
+@strong{Options to be set in configuration file}:
+@table @samp
+@item MASTER_ISOBUS_ADDRESS
+Address of the master device on the Oxford ISOBUS
+@item IPS20_4_ISOBUS_ADDRESS
+Address of the device on teh Oxford ISOBUS
+@item MAX_CURRENT
+Maximum current that can be set
+@item MIN_CURRENT
+Minimum current that can be set
+@item CURRENT_RESOLUTION
+Minimum current step that can be used
+@item MAX_SWEEP_RATE
+Maximum sweep rate that can be used
+@item MIN_SWEEP_RATE
+Minimum sweep rate that can be used
+@item FAST_SWEEP_RATE
+Fastest sweep rate to be used when going to a set point
+@end table
 
 @paragraphindent 0
 @strong{Supported functions}:
