@@ -31,6 +31,14 @@
 #endif
 
 
+
+/* External functions that are needed here but which can't for some reason be
+   defined via a header file */
+
+extern void fsc2_serial_init( void );
+extern void fsc2_serial_cleanup( void );
+
+
 /* Locally used global variables */
 
 static bool is_loaded = UNSET;       /* set when EDL file is loaded */
@@ -1111,11 +1119,6 @@ void clean_up( void )
 	/* delete stored program */
 
 	forget_prg( );
-
-	/* Unset used flags for all serial ports */
-
-	for ( i = 0; i < NUM_SERIAL_PORTS; i++ )
-		need_Serial_Port[ i ] = UNSET;
 }
 
 

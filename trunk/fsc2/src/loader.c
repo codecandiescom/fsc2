@@ -53,8 +53,6 @@ void load_all_drivers( void )
 {
 	Device *cd;
 	bool saved_need_GPIB;
-	bool saved_need_Serial_Port[ NUM_SERIAL_PORTS ];
-	int i;
 
 
 	/* Treat "User_Functions" also as a kind of device driver and append
@@ -77,15 +75,13 @@ void load_all_drivers( void )
 	/* This done we run the init hooks (if they exist) and warn if they don't
 	   return successfully (if an init hook thinks it should kill the whole
 	   program it is supposed to throw an exception). To keep the modules
-	   writers from erroneously unsetting the global variables `need_GPIB' and
-	   `need_Serial_Port' they are stored before each init_hook() function is
-	   called and, if necessary, are restored to their previous values. */
+	   writers from erroneously unsetting the global variable `need_GPIB' it
+	   is stored before each init_hook() function is called and, if necessary,
+	   is restored to its previous values. */
 
 	for ( cd = Device_List; cd != NULL; cd = cd->next )
 	{
 		saved_need_GPIB = need_GPIB;
-		memcpy( saved_need_Serial_Port, need_Serial_Port,
-				NUM_SERIAL_PORTS * sizeof( bool ) );
 
 		if ( cd->is_loaded && cd->driver.is_init_hook &&
 			 ! cd->driver.init_hook( ) )
@@ -94,10 +90,6 @@ void load_all_drivers( void )
 
 		if ( need_GPIB == UNSET && saved_need_GPIB == SET )
 			need_GPIB = SET;
-		for ( i = 0; i < NUM_SERIAL_PORTS; i++ )
-			if ( need_Serial_Port[ i ] == UNSET &&
-				 saved_need_Serial_Port[ i ] == SET )
-				need_Serial_Port[ i ] = SET;
 	}
 }
 

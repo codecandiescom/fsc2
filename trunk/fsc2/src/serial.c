@@ -66,6 +66,8 @@ void fsc2_request_serial_port( int sn, const char *devname )
 	int l, snc;
 
 
+	/* Do some sanity checks on the serial port number */
+
 	if ( sn >= NUM_SERIAL_PORTS || sn < 0 )
 	{
 		if ( NUM_SERIAL_PORTS > 1 )
@@ -76,6 +78,8 @@ void fsc2_request_serial_port( int sn, const char *devname )
 					"range (0 is allowed only).\n", sn, devname );
 		THROW( EXCEPTION );
 	}
+
+	/* Check that serial port isn't already in use by another device */
 
 	if ( Serial_Port[ sn ].in_use )
 	{
@@ -89,10 +93,14 @@ void fsc2_request_serial_port( int sn, const char *devname )
 	Serial_Port[ sn ].devname = devname;
 	Serial_Port[ sn ].dev_file = NULL;
 
+	/* Assemble name of the device file */
+
 	for ( l = 1, snc = sn; snc /= 10, l++ )
 		;
 	Serial_Port[ sn ].dev_file = get_string( strlen( "/dev/ttyS" ) + l );
 	sprintf( Serial_Port[ sn ].dev_file, "/dev/ttyS%d", sn );
+
+	/* Test if device file exists and we have read and write permissions */
 
 	raise_permissions( );
 	if ( access( Serial_Port[ sn ].dev_file, R_OK | W_OK) == -1 )
@@ -134,7 +142,7 @@ void fsc2_serial_init( void )
 /*----------------------------------------------------------------------*/
 /*----------------------------------------------------------------------*/
 
-void fsc2_serial_clean_up( void )
+void fsc2_serial_cleanup( void )
 {
 #if NUM_SERIAL_PORTS > 0
 	int i;
