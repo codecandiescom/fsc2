@@ -50,9 +50,13 @@ typedef struct {
 
 
 typedef struct {
+	bool is_fs;
+
 	Scaled_Point *points;
-	XRectangle *xpoints;
+	XPoint *xpoints;
 	long count;            /* points in curve */
+
+	unsigned short w, h;
 
 	GC gc;
 
@@ -116,8 +120,8 @@ typedef struct {
 	double rwc_delta[ 3 ];  /* real world coordinate increment values */
 	char *label[ 3 ];       /* label for x-, y- and z-axis */
 
-	double rw_y_min;        /* minimum of real world y coordinates */
-	double rw_y_max;        /* maximum of real world y coordinates */
+	double rw_min;          /* minimum of real world y- or z-coordinates */
+	double rw_max;          /* maximum of real world y- or z-coordinates */
 
 	Display *d;             /* pointer to display structure */
 
