@@ -107,9 +107,10 @@ lakeshore330  // Lakeshore 330 temperature controller
 hp5340a       // HP5340A frequency counter
 
 
-// DA converters (ME-6000 board)
+// DAQ cards and devices (ME-6000 board, HJS_DAADC)
 
 me6000        // ME-6000 DAC card
+hjs_daadc     // DA/AD converter from the group of H.-J. Steinhoff
 
 
 // Event counter (NI6601 board)

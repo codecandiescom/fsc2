@@ -27,7 +27,7 @@ hp864_list    := hp8647a hp8648b
 simp_modules  := User_Functions sr510 sr530 sr810 sr830 aeg_s_band        \
 				 aeg_x_band er035m er035m_s hp5340a er035m_sa er035m_sas  \
 				 bh15 keithley228a egg4402 kontron4060 lakeshore330       \
-				 pt2025 er032m ips20_4 $(s_band_list) thurlby330
+				 pt2025 er032m ips20_4 $(s_band_list) thurlby330 hjs_daadc
 
 ifdef WITH_ME6000
 simp_modules  += me6000

@@ -34,7 +34,6 @@ static struct {
 	char *lock_file;
 	bool have_lock;
 	bool is_open;
-	bool is_blocking;
 	int fd;
 	struct termios old_tio,
 		           new_tio;
@@ -132,7 +131,6 @@ void fsc2_serial_init( void )
 		Serial_Port[ i ].in_use      = UNSET;
 		Serial_Port[ i ].have_lock   = UNSET;
 		Serial_Port[ i ].is_open     = UNSET;
-		Serial_Port[ i ].is_blocking = UNSET;
 		Serial_Port[ i ].fd          = -1;
 	}
 #endif
@@ -267,7 +265,6 @@ struct termios *fsc2_serial_open( int sn, const char *devname, int flags )
 
 	Serial_Port[ sn ].fd = fd;
 	Serial_Port[ sn ].is_open = SET;
-	Serial_Port[ sn ].is_blocking = ! ( flags & O_NONBLOCK );
 
 	return &Serial_Port[ sn ].new_tio;
 #else
@@ -364,11 +361,10 @@ ssize_t fsc2_serial_read( int sn, void *buf, size_t count,
 
 	raise_permissions( );
 
-	/* If there is a non-negative timeout period and the serial port is
-	   opened in non-blocking mode wait for data for the specified
-	   timeout. A zero timeout means wait forever. */
+	/* If there is a zero timeout period wait for data for the specified
+	   timeout. A negative timeout means wait forever. */
 
-	if ( us_wait != 0 && ! Serial_Port[ sn ].is_blocking )
+	if ( us_wait != 0 )
 	{
 		FD_ZERO( &rfds );
 		FD_SET( Serial_Port[ sn ].fd, &rfds );
