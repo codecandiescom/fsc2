@@ -757,10 +757,10 @@ void close_all_files( void )
 
 	for ( i = 0; i < EDL.File_List_Len; i++ )
 	{
-		if ( EDL.File_List[ i ].name )
-			T_free( EDL.File_List[ i ].name );
 		if ( EDL.File_List[ i ].fp )
 			fclose( EDL.File_List[ i ].fp );
+		if ( EDL.File_List[ i ].name )
+			T_free( EDL.File_List[ i ].name );
 	}
 
 	EDL.File_List = FILE_LIST_P T_free( EDL.File_List );
