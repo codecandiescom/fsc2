@@ -37,7 +37,7 @@ exits or a new file is loaded. This flag is only useful for cases where
 the input file is a temporary file that needs to be deleted when it
 isn't needed anymore, so better be @strong{real careful}.
 
-@item @option{-sb button_number}
+@item @option{-m button_number}
 Specifies which mouse button has to be used to activate the stop button
 while the experiment is running. Use @code{1} for the left mouse button,
 @code{2} for the middle and @code{3} for the right mosue button. Per

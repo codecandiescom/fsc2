@@ -282,7 +282,7 @@ static int scan_args( int *argc, char *argv[ ], char **fname )
 			break;
 		}
 
-		if ( ! strncmp( argv[ cur_arg ], "-sb", 3 ) )
+		if ( ! strncmp( argv[ cur_arg ], "-m", 2 ) )
 		{
 			if ( argv[ cur_arg ][ 2 ] == '\0' && *argc == cur_arg + 1 )
 			{
@@ -290,9 +290,9 @@ static int scan_args( int *argc, char *argv[ ], char **fname )
 				usage( );
 			}
 
-			if ( argv[ cur_arg ][ 3 ] != 0 )
+			if ( argv[ cur_arg ][ 2 ] != '\0' )
 			{
-				bn = argv[ cur_arg ] + 3;
+				bn = argv[ cur_arg ] + 2;
 				for ( i = cur_arg; i < *argc; i++ )
 					argv[ i ] = argv[ i + 1 ];
 				*argc -= 1;
@@ -307,7 +307,7 @@ static int scan_args( int *argc, char *argv[ ], char **fname )
 
 			if ( *( bn + 1 ) != '\0' || *bn < '1' || *bn > '3' )
 			{
-				fprintf( stderr, "fsc2 -sb %s: Invalid button number\n", bn );
+				fprintf( stderr, "fsc2 -m %s: Invalid button number\n", bn );
 				usage( );
 			}
 
@@ -1290,8 +1290,7 @@ void usage( void )
 			 "  -S FILE    start interpreting FILE (i.e. start the "
 			 "experiment)\n"
 			 "  --delete   delete input file when fsc2 is done with it\n"
-             "  -sb NUMBER Mask for mouse buttons to be used to stop "
-			 "experiment\n"
+             "  -m NUMBER  Mouse button to be used to stop an experiment\n"
 			 "             1 = left, 2 = middle, 3 = right button\n"
 			 "  -geometry geometry\n"
 			 "             specify preferred size and position of main "
