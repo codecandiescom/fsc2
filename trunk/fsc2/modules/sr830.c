@@ -2299,7 +2299,7 @@ static void sr830_lock_state( bool lock )
 static bool sr830_command( const char *cmd )
 {
 	if ( gpib_write( sr830.device, cmd, strlen( cmd ) ) == FAILURE )
-		sr830_gpib_failure( );
+		sr830_failure( );
 	return OK;
 }
 

@@ -54,6 +54,7 @@ Var *pulser_reset( Var *v );
 Var *pulser_phase_reset( Var *v );
 Var *pulser_pulse_reset( Var *v );
 Var *pulser_lock_keyboard( Var *v );
+Var *pulser_command( Var *v );
 
 
 /* Definitions needed for the pulser */
@@ -441,6 +442,7 @@ bool dg2020_set_trigger_in_slope( int slope );
 bool dg2020_set_trigger_in_impedance( int state );
 void dg2020_gpib_failure( void );
 bool dg2020_lock_state( bool lock );
+bool dg2020_command( const char *cmd );
 
 
 /*

@@ -641,10 +641,10 @@ unsigned char er023m_st( void )
 /*--------------------------------------------------------------*/
 /*--------------------------------------------------------------*/
 
-bool er023_command( const char *cmd )
+bool er023m_command( const char *cmd )
 {
-	if ( gpib_write( er023.device, cmd, strlen( cmd ) ) == FAILURE )
-		er023_gpib_failure( );
+	if ( gpib_write( er023m.device, cmd, strlen( cmd ) ) == FAILURE )
+		er023m_gpib_failure( );
 	return OK;
 }
 

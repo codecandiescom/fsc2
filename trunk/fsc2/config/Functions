@@ -198,6 +198,7 @@ synthesizer_modulation, -1, ALL;
 synthesizer_mod_type, -1, ALL;
 synthesizer_mod_source, -1, ALL;
 synthesizer_mod_ampl, -1, ALL;
+synthesizer_command, 1, EXP;
 
 
 /* Functions exported by the boxcar (EGG4402) */

@@ -1081,7 +1081,7 @@ static void sr530_lock_state( bool lock )
 static bool sr530_command( const char *cmd )
 {
 	if ( gpib_write( sr530.device, cmd, strlen( cmd ) ) == FAILURE )
-		sr530_gpib_failure( );
+		sr530_failure( );
 	return OK;
 }
 
