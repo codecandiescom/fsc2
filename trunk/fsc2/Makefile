@@ -138,6 +138,8 @@ SERIAL_LOCK_DIR   := /var/lock
 # WITH_NI6601       := yes
 
 
+WITH RS_SPEC10      := yes
+
 # Comment out the next two lines if you don't want the ability to run a HTTP
 # server that allows to monitor fsc2's current state via the Internet. The
 # default port number the HTTP server will listen on can be set by the second
@@ -286,6 +288,12 @@ else
 	NI6601_SUPPORT     := NO
 endif
 
+ifdef WITH_RS_SPEC10
+	RS_SPEC10_SUPPORT  := YES
+else
+	RS_SPEC10_SUPPORT  := NO
+endif
+
 # Here's some stuff that makes it more convenient to make and install on
 # machines that are known well enough - for these machines one doesn't has
 # to edit the Makefile all the time...
@@ -301,6 +309,7 @@ ifeq ($(machine_name),pion.anorg.chemie.uni-frankfurt.de)
 	SERIAL_LOCK_DIR    := /var/lock
 	ME6000_SUPPORT     := NO
 	NI6601_SUPPORT     := NO
+	RS_SPEC10_SUPPORT  := NO
 	INSTALL_MACHINE    := install-$(machine_name)
 	UNINSTALL_MACHINE  := uninstall-$(machine_name)
 endif
@@ -314,6 +323,7 @@ ifeq ($(machine_name),crowley.physik.fu-berlin.de)
 	SERIAL_LOCK_DIR    := /var/lock
 	ME6000_SUPPORT     := NO
 	NI6601_SUPPORT     := NO
+	RS_SPEC10_SUPPORT  := NO
 	INSTALL_MACHINE    := install-$(machine_name)
 	UNINSTALL_MACHINE  := uninstall-$(machine_name)
 endif
@@ -327,6 +337,7 @@ ifeq ($(machine_name),door.physik.fu-berlin.de)
 	SERIAL_LOCK_DIR    := /var/lock
 	ME6000_SUPPORT     := NO
 	NI6601_SUPPORT     := NO
+	RS_SPEC10_SUPPORT  := NO
 	INSTALL_MACHINE    := install-$(machine_name)
 	UNINSTALL_MACHINE  := uninstall-$(machine_name)
 endif
@@ -340,6 +351,7 @@ ifeq ($(machine_name),isaak.physik.fu-berlin.de)
 	SERIAL_LOCK_DIR    := /var/lock
 	ME6000_SUPPORT     := NO
 	NI6601_SUPPORT     := NO
+	RS_SPEC10_SUPPORT  := NO
 	INSTALL_MACHINE    := install-$(machine_name)
 	UNINSTALL_MACHINE  := uninstall-$(machine_name)
 endif
@@ -352,6 +364,7 @@ ifeq ($(machine_name),moebpc3.physik.fu-berlin.de)
 	SERIAL_LOCK_DIR    := /var/lock
 	ME6000_SUPPORT     := NO
 	NI6601_SUPPORT     := NO
+	RS_SPEC10_SUPPORT  := NO
 	INSTALL_MACHINE    := install-$(machine_name)
 	UNINSTALL_MACHINE  := uninstall-$(machine_name)
 endif
@@ -364,6 +377,7 @@ ifeq ($(machine_name),single.physik.fu-berlin.de)
 	SERIAL_LOCK_DIR    := /var/lock
 	ME6000_SUPPORT     := YES
 	NI6601_SUPPORT     := YES
+	RS_SPEC10_SUPPORT  := YES
 	INSTALL_MACHINE    := install-$(machine_name)
 	UNINSTALL_MACHINE  := uninstall-$(machine_name)
 endif
@@ -376,6 +390,7 @@ ifeq ($(machine_name),sunone.chemie.unibas.ch)
 	SERIAL_LOCK_DIR    := /var/lock
 	ME6000_SUPPORT     := YES
 	NI6601_SUPPORT     := YES
+	RS_SPEC10_SUPPORT  := NO
 	INSTALL_MACHINE    := install-$(machine_name)
 	UNINSTALL_MACHINE  := uninstall-$(machine_name)
 endif
@@ -388,6 +403,7 @@ ifeq ($(machine_name),tresr.physik.fu-berlin.de)
 	SERIAL_LOCK_DIR    := /var/lock
 	ME6000_SUPPORT     := NO
 	NI6601_SUPPORT     := NO
+	RS_SPEC10_SUPPORT  := NO
 	INSTALL_MACHINE    := install-$(machine_name)
 	UNINSTALL_MACHINE  := uninstall-$(machine_name)
 endif
@@ -400,6 +416,7 @@ ifeq ($(machine_name),crowley.none)
 	SERIAL_LOCK_DIR    := /var/lock
 	ME6000_SUPPORT     := YES
 	NI6601_SUPPORT     := YES
+	RS_SPEC10_SUPPORT  := NO
 	INSTALL_MACHINE    := install-$(machine_name)
 	UNINSTALL_MACHINE  := uninstall-$(machine_name)
 endif
@@ -411,6 +428,7 @@ ifeq ($(machine_name),dorimare.nowhere)
 	NUM_SERIAL_PORTS   := 2
 	ME6000_SUPPORT     := YES
 	NI6601_SUPPORT     := YES
+	RS_SPEC10_SUPPORT  := YES
 	SERIAL_LOCK_DIR    := /var/lock
 	INSTALL_MACHINE    := install-$(machine_name)
 	UNINSTALL_MACHINE  := uninstall-$(machine_name)
@@ -525,6 +543,9 @@ ifeq ($(NI6601_SUPPORT),YES)
 	LIBS                 += -lni6601
 endif
 
+ifeq ($(RS_SPEC10_SUPPORT),YES)
+	LIBS                 += -lpvcam
+endif
 
 # Finally take care that the variables for GPIB support are set correctly
 

@@ -79,6 +79,7 @@ int ni6601_init_hook( void )
 {
 	int i;
 
+
 	for ( i = 0; i < 4; i++ )
 		states[ i ] = 0;
 
