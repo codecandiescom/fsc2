@@ -178,7 +178,8 @@ name of a variable, which may consist of all normal characters, digits
 and the underscore character. But you must make sure that its name does
 not coincide with the name of a variable already used in the
 @code{EDL} program. The next required item is the type of the
-variable, which can be either @code{int}, @code{float} or @code{menu}.
+variable, which can be either @code{int}, @code{float}, @code{menu} or
+@code{file}.
 
 For variables of type @code{int} and @code{float} all the following
 items are optional. The first thing you can tell the conversion program
@@ -216,23 +217,23 @@ The only difference between a @code{float} and an @code{int} variable
 is that, obviously, for @code{int} variables you may only use integer
 numbers for the range values and the initial value.
 
-But there's a third type of variables, @code{menu}. These are for cases
-where you want to have one value selected from a list of values. To
-demonstrate this let's improve the @code{EDL} program a bit. For
-examples sake we assume that you have to switch between different
-lock-in amplifiers quite often because some colleague of yours tends to
-borrow your favorite one. In this case it would be rather useful to be
-able to also select the type of the lock-in amplifier from within the
-script. Therefore, we need to replace the line where the lock-in
-amplifier is specified in the @code{DEVICES} section
+But there's also a third type of variables, @code{menu}. These are for
+cases where you want to have one value selected from a list of
+values. To demonstrate this let's improve the @code{EDL} program a
+bit. For examples sake we assume that you have to switch between
+different lock-in amplifiers quite often because some colleague of yours
+tends to borrow your favorite one. In this case it would be rather
+useful to be able to also select the type of the lock-in amplifier from
+within the script. Therefore, we need to replace the line where the
+lock-in amplifier is specified in the @code{DEVICES} section
 @example
   sr530;                 // lock-in amplifier module
 @end example
 @noindent
 by a lines defining a @code{menu} variable like this:
 @example
-=== LI menu [ "SR510", "SR530", "SR810" ] [ 2 ] "Lock-in amplifier:"
-  LI;                    // lock-in amplifier module
+=== LOCKIN menu [ "SR510", "SR530", "SR810" ] [ 2 ] "Lock-in amplifier:"
+  LOCKIN;                // lock-in amplifier module
 @end example
 
 In contrast to the @code{int} and @code{float} variables, where the type
@@ -261,7 +262,22 @@ amplifier to be used in the experiment.
 @end ifnotinfo
 
 
-But that's not all you can do.Sometimes it's necessary to change the
+Finally, there are @code{file} variables. These are for cases where you
+want to put a file name into an @code{EDL} program. The syntax is even
+easier, you just need a line like this:
+@example
+=== FILENAME file "Data file"
+File = open_file( FILENAME );
+@end example
+@noindent
+to get an additional field in the graphical interface for entering a
+file name. The only (optional) item you can put on such a line is the
+string to be shown on the left hand side from the field. On the right
+hand side of the field a button automatically appears that lets you
+start a file selector.
+
+
+But that's not all you can do. Sometimes it's necessary to change the
 @code{EDL} code depending on what the user selected. For an useful
 example let's further improve the @code{EDL} program to include
 setting the lock-in's time constant. To do so, you normally would
@@ -273,8 +289,8 @@ program now would look like this:
 DEVICES:
   er035m_s;              // gaussmeter module
   aeg_x_band;            // magnet module
-=== LI menu [ "SR510", "SR530", "SR810" ] [ 2 ] "Lock-in amplifier:"
-  LI;                    // lock-in amplifier module
+=== LoCKIN menu [ "SR510", "SR530", "SR810" ] [ 2 ] "Lock-in amplifier:"
+  LOCKIN;                    // lock-in amplifier module
 
 VARIABLES:
 === START_FIELD float [ 2000 : 5000 ] [ 3360 ] "Start field:" "G"
@@ -295,6 +311,9 @@ PREPARATIONS:
   init_1d( );
 
 EXPERIMENT:
+
+=== FILENAME file "Data file"
+  File = open_file( FILENAME );
 
   lockin_time_constant( tc );
 
@@ -381,7 +400,8 @@ really should need an @code{EDL} string you would have to include the
 double quotes when declaring the menu entries, e.g.@: by using
 @w{@code{"\"Don't set\""}}, but then also make sure you use this form
 also in the three-equal-signs part, or, alternatively, put the variable
-in the @code{EDL} part in double quotes.)
+in the @code{EDL} part in double quotes. In contrast to @code{menu}
+variables, @code{file} variables are always treated as strings.)
 
 Instead of the comparison for equality, @code{eq}, we could also have
 used the opposite operator, @code{ne}, which evaluates to true if the
@@ -544,18 +564,18 @@ from the return value:
 @item 0
 Everything ok, program finished successfully
 @item -1
-An internal error as been detected in the program handling the
-connection to @code{fsc2}, please send a bug report
+An internal error has been detected in the program handling the
+connection to @code{fsc2} (please send a bug report)
 @item 1
 A different user is already running fsc2
 @item 2
 @code{fsc2} is busy, i.e. it's already running an experiment
 (or a test run)
 @item 3
-Internal error in @code{fsc2} detected, please send a bug report
+Internal error in @code{fsc2} detected (please send a bug report)
 @item 4
-@code{fsc2} could not be started (probably because the
-executable was not found)
+@code{fsc2} could not be started (probably because its
+executable could not found)
 @end table
 
 Using these programs you are able to send @code{EDL} programs, created
@@ -564,5 +584,5 @@ with whichever method or programming language you prefer, to
 @code{scripts} subdirectory of the main directory of the package. (You
 could also examine on of the scripts created by @code{fsc2_guify} but be
 warned that these scripts may not look too nice because they were
-written by a program that doesn't care much about proper indentation
+written by a program that doesn't care too much about proper indentation
 etc.)
