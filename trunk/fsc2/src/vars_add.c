@@ -503,7 +503,7 @@ static Var_T *vars_float_arr_add( Var_T *v1, Var_T *v2 )
 }
 
 
-/*-----------------------------------------------------*/
+/*-----------------------------------------------------*
  * Function for adding a variable of arbitrary type to
  * a more-dimensional integer or floating point array
  *-----------------------------------------------------*/

@@ -29,19 +29,19 @@ static int fsc2_simplex_is_minimum( int n, double *y, double epsilon );
 static ssize_t do_read( int fd, char *ptr );
 
 
-/*------------------------------------------------------------------*/
-/* Function expects a format string as printf() and arguments which */
-/* must correspond to the given format string and returns a string  */
-/* of the right length into which the arguments are written. The    */
-/* caller of the function is responsible for free-ing the string.   */
-/* -> 1. printf()-type format string                                */
-/*    2. As many arguments as there are conversion specifiers etc.  */
-/*       in the format string                                       */
-/* <- Pointer to character array of exactly the right length into   */
-/*    which the string characterized by the format string has been  */
-/*    written. On failure, i.e. if there is not enough space, the   */
-/*    function throws an OUT_OF_MEMORY exception.                   */
-/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ * Function expects a format string as printf() and arguments which
+ * must correspond to the given format string and returns a string
+ * of the right length into which the arguments are written. The
+ * caller of the function is responsible for free-ing the string.
+ * -> 1. printf()-type format string
+ *    2. As many arguments as there are conversion specifiers etc.
+ *       in the format string.
+ * <- Pointer to character array of exactly the right length into
+ *    which the string characterized by the format string has been
+ *    written. On failure, i.e. if there is not enough space, the
+ *    function throws an OUT_OF_MEMORY exception.
+ *------------------------------------------------------------------*/
 
 #define GET_STRING_TRY_LENGTH 128
 
@@ -85,11 +85,11 @@ char *get_string( const char *fmt, ... )
 }
 
 
-/*--------------------------------------------------------------*/
-/* Converts all upper case characters in a string to lower case */
-/* (in place, i.e. the string itself is changed, not a copy of  */
-/* the string).                                                 */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ * Converts all upper case characters in a string to lower case
+ * (in place, i.e. the string itself is changed, not a copy of
+ * the string).
+ *--------------------------------------------------------------*/
 
 char *string_to_lower( char *str )
 {
@@ -106,10 +106,10 @@ char *string_to_lower( char *str )
 }
 
 
-/*---------------------------------------------------*/
-/* This routine returns a copy of a piece of memory. */
-/* On failure an OUT_OF_MEMORY exception is thrown.  */
-/*---------------------------------------------------*/
+/*---------------------------------------------------*
+ * This routine returns a copy of a piece of memory.
+ * On failure an OUT_OF_MEMORY exception is thrown.
+ *---------------------------------------------------*/
 
 void *get_memcpy( const void *array, size_t size )
 {
@@ -122,12 +122,12 @@ void *get_memcpy( const void *array, size_t size )
 }
 
 
-/*----------------------------------------------------------------------*/
-/* Function replaces all occurrences of the character combination "\n"  */
-/* in a string by the line break character '\n'. This is done in place, */
-/* i.e. the string passed to the function is changed, not a copy. So,   */
-/* never call it with a char array defined as const.                    */
-/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*
+ * Function replaces all occurrences of the character combination "\n"
+ * in a string by the line break character '\n'. This is done in place,
+ * i.e. the string passed to the function is changed, not a copy. So,
+ * never call it with a char array defined as const.
+ *----------------------------------------------------------------------*/
 
 char *correct_line_breaks( char *str )
 {
@@ -147,10 +147,10 @@ char *correct_line_breaks( char *str )
 }
 
 
-/*--------------------------------------------------------------------*/
-/* strip_path() returns a pointer to the basename of a path, i.e. for */
-/* "/usr/bin/emacs" a pointer to "emacs" in the string is returned.   */
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ * strip_path() returns a pointer to the basename of a path, i.e. for
+ * "/usr/bin/emacs" a pointer to "emacs" in the string is returned.
+ *--------------------------------------------------------------------*/
 
 const char *strip_path( const char *path )
 {
@@ -164,10 +164,10 @@ const char *strip_path( const char *path )
 }
 
 
-/*-----------------------------------------------------------------*/
-/* Function returns the string "/" if the string passed to it does */
-/* not end with a slash, otherwise it returns the empty string "". */
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ * Function returns the string "/" if the string passed to it does
+ * not end with a slash, otherwise it returns the empty string "".
+ *-----------------------------------------------------------------*/
 
 
 const char *slash( const char *path )
@@ -176,15 +176,15 @@ const char *slash( const char *path )
 }
 
 
-/*-----------------------------------------------------------------*/
-/* get_file_length() returns the number of lines in a file as well */
-/* as the number of digits in the number of lines.                 */
-/* ->                                                              */
-/*   * name of file                                                */
-/*   * pointer for returning number of digits in number of lines   */
-/* <-                                                              */
-/*   * number of lines or -1: failed to get file descriptor        */
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ * get_file_length() returns the number of lines in a file as well
+ * as the number of digits in the number of lines.
+ * ->
+ *   * name of file
+ *   * pointer for returning number of digits in number of lines
+ * <-
+ *   * number of lines or -1: failed to get file descriptor
+ *-----------------------------------------------------------------*/
 
 long get_file_length( FILE *fp, int *len )
 {
@@ -238,26 +238,26 @@ long get_file_length( FILE *fp, int *len )
 }
 
 
-/*--------------------------------------------------------------------*/
-/* This function is used all over the pogram to print error messages. */
-/* Its first argument is the severity of the error, an integer in the */
-/* range between 0 (FATAL) and 3 (NO_ERROR), see also global.h for    */
-/* abbreviations. If the second argument, a boolean value, is set,    */
-/* the name of the currently loaded EDL program and the line number   */
-/* we are at is prepended to the output string. The next argument is  */
-/* a format string having the same syntax as the format string for    */
-/* functions like printf(). Then an unspecified number of arguments   */
-/* may follow (which should correspond to the conversion specifiers   */
-/* in the format string).                                             */
-/* When the program is running with graphics the output goes to the   */
-/* error browser, otherwise to stderr. The maximum line length to be  */
-/* output is FL_BROWSER_LINELENGTH, which was defined to 2048 (at     */
-/* least the last time I checked) in /usr/include/forms.h. Usually,   */
-/* one can't use the complete length, because of the prepended file   */
-/* name, and a few bytes are also used for other purposes. So better  */
-/* keep the expected line length a bit lower (if the line would get   */
-/* too long it gets truncated).                                       */
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ * This function is used all over the pogram to print error messages.
+ * Its first argument is the severity of the error, an integer in the
+ * range between 0 (FATAL) and 3 (NO_ERROR), see also global.h for
+ * abbreviations. If the second argument, a boolean value, is set,
+ * the name of the currently loaded EDL program and the line number
+ * we are at is prepended to the output string. The next argument is
+ * a format string having the same syntax as the format string for
+ * functions like printf(). Then an unspecified number of arguments
+ * may follow (which should correspond to the conversion specifiers
+ * in the format string).
+ * When the program is running with graphics the output goes to the
+ * error browser, otherwise to stderr. The maximum line length to be
+ * output is FL_BROWSER_LINELENGTH, which was defined to 2048 (at
+ * least the last time I checked) in /usr/include/forms.h. Usually,
+ * one can't use the complete length, because of the prepended file
+ * name, and a few bytes are also used for other purposes. So better
+ * keep the expected line length a bit lower (if the line would get
+ * too long it gets truncated).
+ *--------------------------------------------------------------------*/
 
 void eprint( int severity, bool print_fl, const char *fmt, ... )
 {
@@ -343,13 +343,13 @@ void eprint( int severity, bool print_fl, const char *fmt, ... )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/* This a somewhat simplified version of the previous function, eprint() */
-/* mainly for writers of moduls. The only argument beside the usual ones */
-/* one would pass to printf() and friends is the severity of the error.  */
-/* Everything else (i.e. the decision if to prepend a file name, a line  */
-/* number or a function name) is dealt with automatically.               */
-/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ * This a somewhat simplified version of the previous function, eprint()
+ * mainly for writers of moduls. The only argument beside the usual ones
+ * one would pass to printf() and friends is the severity of the error.
+ * Everything else (i.e. the decision if to prepend a file name, a line
+ * number or a function name) is dealt with automatically.
+ *-----------------------------------------------------------------------*/
 
 void print( int severity, const char *fmt, ... )
 {
@@ -490,13 +490,13 @@ void print( int severity, const char *fmt, ... )
 }
 
 
-/*---------------------------------------------------------------------*/
-/* The program starts with the EUID and EGID set to the ones of fsc2,  */
-/* but these privileges get dropped immediately. Only for some special */
-/* actions (like dealing with shared memory and lock and log files)    */
-/* this function is called to change the EUID and EGID to the one of   */
-/* fsc2.                                                               */
-/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*
+ * The program starts with the EUID and EGID set to the ones of fsc2,
+ * but these privileges get dropped immediately. Only for some special
+ * actions (like dealing with shared memory and lock and log files)
+ * this function is called to change the EUID and EGID to the one of
+ * fsc2.
+ *---------------------------------------------------------------------*/
 
 void raise_permissions( void )
 {
@@ -505,10 +505,10 @@ void raise_permissions( void )
 }
 
 
-/*---------------------------------------------------------------------*/
-/* This function sets the EUID and EGID to the one of the user running */
-/* the program.                                                        */
-/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*
+ * This function sets the EUID and EGID to the one of the user running
+ * the program.
+ *---------------------------------------------------------------------*/
 
 void lower_permissions( void )
 {
@@ -517,10 +517,10 @@ void lower_permissions( void )
 }
 
 
-/*-----------------------------------------------------------------*/
-/* Function replaces escape sequences in a string by the character */
-/* it stands for - all C type escape sequences are supported.      */
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ * Function replaces escape sequences in a string by the character
+ * it stands for - all C type escape sequences are supported.
+ *-----------------------------------------------------------------*/
 
 char *handle_escape( char *str )
 {
@@ -656,14 +656,14 @@ char *handle_escape( char *str )
 }
 
 
-/*-------------------------------------------------------------------------*/
-/* This routine takes the input file and feeds it to 'fsc2_clean' which is */
-/* running as a child process. The output of fsc2_clean gets written to a  */
-/* pipe for which an immediately readable stream (the immediately bit is   */
-/* important because otherwise the lexer just sees an EOF instead of the   */
-/* output of fsc2_clean...) is returned by the function (or NULL instead   */
-/* on errors within the parent process).                                   */
-/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*
+ * This routine takes the input file and feeds it to 'fsc2_clean' which is
+ * running as a child process. The output of fsc2_clean gets written to a
+ * pipe for which an immediately readable stream (the immediately bit is
+ * important because otherwise the lexer just sees an EOF instead of the
+ * output of fsc2_clean...) is returned by the function (or NULL instead
+ * on errors within the parent process).
+ *-------------------------------------------------------------------------*/
 
 FILE *filter_edl( const char *name, FILE *fp )
 {
@@ -830,13 +830,13 @@ FILE *filter_edl( const char *name, FILE *fp )
 }
 
 
-/*---------------------------------------------------------------------*/
-/* Replacement for usleep(), but you can decide by setting the second  */
-/* argument if the function should continue to sleep on receipt of a   */
-/* signal or if it should return immediately (in which case the return */
-/* value is -1 instead of 0). The first argument is the time to sleep  */
-/* in microseconds, times longer then a second are allowed.            */
-/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*
+ * Replacement for usleep(), but you can decide by setting the second
+ * argument if the function should continue to sleep on receipt of a
+ * signal or if it should return immediately (in which case the return
+ * value is -1 instead of 0). The first argument is the time to sleep
+ * in microseconds, times longer then a second are allowed.
+ *---------------------------------------------------------------------*/
 
 int fsc2_usleep( unsigned long us_dur, bool quit_on_signal )
 {
@@ -857,15 +857,15 @@ int fsc2_usleep( unsigned long us_dur, bool quit_on_signal )
 }
 
 
-/*--------------------------------------------------------------------------*/
-/* Functions checks if a supplied input string is identical to one of 'max' */
-/* alternatives, pointed to by 'alternatives', but neglecting the case of   */
-/* the characters and removing leading and trailing white space from the    */
-/* input string before the comparison. The comparison is case insensitive   */
-/* and the function returns the index of the found alternative (a number    */
-/* between 0 and max - 1) or -1 if none of the alternatives was identical   */
-/* to the input string.                                                     */
-/*--------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------*
+ * Functions checks if a supplied input string is identical to one of 'max'
+ * alternatives, pointed to by 'alternatives', but neglecting the case of
+ * the characters and removing leading and trailing white space from the
+ * input string before the comparison. The comparison is case insensitive
+ * and the function returns the index of the found alternative (a number
+ * between 0 and max - 1) or -1 if none of the alternatives was identical
+ * to the input string.
+ *--------------------------------------------------------------------------*/
 
 int is_in( const char *supplied_in, const char **alternatives, int max )
 {
@@ -899,15 +899,15 @@ int is_in( const char *supplied_in, const char **alternatives, int max )
 }
 
 
-/*------------------------------------------------------------------------*/
-/* Function converts intensities into rgb values (between 0 and 255). For */
-/* values below 0 a dark kind of violet is returned, for values above 1 a */
-/* creamy shade of white. The interval [ 0, 1 ] itself is subdivided into */
-/* 6 subintervals at the points defined by the array 'p' and rgb colours  */
-/* ranging from blue via cyan, green and yellow to red are calculated     */
-/* with 'v' defining the intensities of the three primary colours at the  */
-/* endpoints of the intervals and using linear interpolation in between.  */
-/*------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*
+ * Function converts intensities into rgb values (between 0 and 255). For
+ * values below 0 a dark kind of violet is returned, for values above 1 a
+ * creamy shade of white. The interval [ 0, 1 ] itself is subdivided into
+ * 6 subintervals at the points defined by the array 'p' and rgb colours
+ * ranging from blue via cyan, green and yellow to red are calculated
+ * with 'v' defining the intensities of the three primary colours at the
+ * endpoints of the intervals and using linear interpolation in between.
+ *------------------------------------------------------------------------*/
 
 void i2rgb( double h, int *rgb )
 {
@@ -945,10 +945,10 @@ void i2rgb( double h, int *rgb )
 }
 
 
-/*----------------------------------------------------------------*/
-/* Function creates a set of colours in XFORMs internal color map */
-/* for use in 2D graphics (NUM_COLORS is defined in global.h).    */
-/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * Function creates a set of colours in XFORMs internal color map
+ * for use in 2D graphics (NUM_COLORS is defined in global.h).
+ *----------------------------------------------------------------*/
 
 void create_colors( void )
 {
@@ -977,9 +977,9 @@ void create_colors( void )
 }
 
 
-/*-----------------------------------------------------*/
-/* Converts a string with a channel name into a number */
-/*-----------------------------------------------------*/
+/*-----------------------------------------------------*
+ * Converts a string with a channel name into a number
+ *-----------------------------------------------------*/
 
 Var_T *convert_to_channel_number( const char *channel_name )
 {
@@ -1017,25 +1017,25 @@ Var_T *convert_to_channel_number( const char *channel_name )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/* Function for determining the minimum of a function using the SIMPLEX  */
-/* algorithm (see J.A. Nelder, R. Mead, Comp. J. 7, (1965), p. 308-313)  */
-/* Input arguments:                                                      */
-/* 1. number of parameters of function                                   */
-/* 2. array of starting values for the fit                               */
-/* 3. array of deviations of start values                                */
-/* 4. void pointer that gets passed on to the function to be minimized   */
-/* 5. address of function to be minimized - function has to accept the   */
-/*    following arguments:                                               */
-/*    a. pointer to (double array) of parameters                         */
-/*    b. void pointer (can be used to transfer further required data)    */
-/* 6. size of criterion for end of minimization: when the ratio between  */
-/*    the standard error of the function values at the corners of the    */
-/*    simplex to the mean of this function values is smaller than the    */
-/*    size minimization is stopped.                                      */
-/* When the function returns the data in the array with the start values */
-/* has been overwritten by the paramters that yield the mimimum value.   */
-/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ * Function for determining the minimum of a function using the SIMPLEX
+ * algorithm (see J.A. Nelder, R. Mead, Comp. J. 7, (1965), p. 308-313)
+ * Input arguments:
+ * 1. number of parameters of function
+ * 2. array of starting values for the fit
+ * 3. array of deviations of start values
+ * 4. void pointer that gets passed on to the function to be minimized
+ * 5. address of function to be minimized - function has to accept the
+ *    following arguments:
+ *    a. pointer to (double array) of parameters
+ *    b. void pointer (can be used to transfer further required data)
+ * 6. size of criterion for end of minimization: when the ratio between
+ *    the standard error of the function values at the corners of the
+ *    simplex to the mean of this function values is smaller than the
+ *    size minimization is stopped.
+ * When the function returns the data in the array with the start values
+ * has been overwritten by the paramters that yield the mimimum value.
+ *-----------------------------------------------------------------------*/
 
 double fsc2_simplex( size_t n, double *x, double *dx, void *par,
 					 double func( double *x, void *par ), double epsilon )
@@ -1241,17 +1241,17 @@ double fsc2_simplex( size_t n, double *x, double *dx, void *par,
 }
 
 
-/*-------------------------------------------------------------------*/
-/* Tests for the simplex() function if the minimum has been reached. */
-/* It checks if the ratio of the standard error of the function      */
-/* values at the corners of the simplex and the mean of the function */
-/* values is smaller than a constant 'epsilon'.                      */
-/* Arguments:                                                        */
-/* 1. number of corners of the simplex                               */
-/* 2. array of function values at the corners                        */
-/* 3. constant 'epsilon'                                             */
-/* Function returns 1 when the minimum has been found, 0 otherwise.  */
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * Tests for the simplex() function if the minimum has been reached.
+ * It checks if the ratio of the standard error of the function
+ * values at the corners of the simplex and the mean of the function
+ * values is smaller than a constant 'epsilon'.
+ * Arguments:
+ * 1. number of corners of the simplex
+ * 2. array of function values at the corners
+ * 3. constant 'epsilon'
+ * Function returns 1 when the minimum has been found, 0 otherwise.
+ *-------------------------------------------------------------------*/
 
 static int fsc2_simplex_is_minimum( int n, double *y, double epsilon )
 {
@@ -1273,10 +1273,10 @@ static int fsc2_simplex_is_minimum( int n, double *y, double epsilon )
 }
 
 
-/*----------------------------------------------------------------*/
-/* Reads a line of text of max_len characters ending in '\n' from */
-/* a socket. This is directly copied from W. R. Stevens, UNP1.2  */
-/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * Reads a line of text of max_len characters ending in '\n' from
+ * a socket. This is directly copied from W. R. Stevens, UNP1.2.
+ *----------------------------------------------------------------*/
 
 ssize_t read_line( int fd, void *vptr, size_t max_len )
 {
@@ -1309,9 +1309,9 @@ ssize_t read_line( int fd, void *vptr, size_t max_len )
 }
 
 
-/*----------------------------------------------------*/
-/* This is directly copied from W. R. Stevens, UNP1.2 */
-/*----------------------------------------------------*/
+/*-----------------------------------------------------*
+ * This is directly copied from W. R. Stevens, UNP1.2.
+ *-----------------------------------------------------*/
 
 static ssize_t do_read( int fd, char *ptr )
 {
@@ -1341,10 +1341,10 @@ static ssize_t do_read( int fd, char *ptr )
 }
 
 
-/*-----------------------------------------------------*/
-/* Write a line of a n characters of text to a socket. */
-/* This is directly copied from W. R. Stevens, UNP1.2  */
-/*-----------------------------------------------------*/
+/*-----------------------------------------------------*
+ * Write a line of a n characters of text to a socket.
+ * This is directly copied from W. R. Stevens, UNP1.2.
+ *-----------------------------------------------------*/
 
 ssize_t writen( int fd, const void *vptr, size_t n )
 {
@@ -1373,11 +1373,11 @@ ssize_t writen( int fd, const void *vptr, size_t n )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/* This function is just a wrapper around fl_show_fselector() to set the */
-/* start directory on the very first invokation if no start directory is */
-/* specified by the user.                                                */
-/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ * This function is just a wrapper around fl_show_fselector() to set the
+ * start directory on the very first invokation if no start directory is
+ * specified by the user.
+ *-----------------------------------------------------------------------*/
 
 const char *fsc2_show_fselector( const char *message, const char *dir,
 								 const char *pattern, const char *def_name )
@@ -1403,9 +1403,9 @@ const char *fsc2_show_fselector( const char *message, const char *dir,
 }
 
 
-/*------------------------------------------------------------------*/
-/* Determine the exact position of the top window containing a form */
-/*------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * Determine the exact position of the top window containing a form.
+ *-------------------------------------------------------------------*/
 
 void get_form_position( FL_FORM *form, int *x, int *y )
 {
