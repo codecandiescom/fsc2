@@ -283,7 +283,7 @@ l2e:     expr
 ;
 
 strs:    E_STR_TOKEN                { if ( ! dont_exec )
-	                                      $$ =vars_push( STR_VAR, $1 ); }
+	                                      $$ = vars_push( STR_VAR, $1 ); }
        | strs E_STR_TOKEN           { if ( ! dont_exec )
 	                                  {
 	                                      Var *v = vars_push( STR_VAR, $2 );
