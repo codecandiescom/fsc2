@@ -251,8 +251,8 @@ Var *lockin_get_data( Var *v )
 
 	if ( v != NULL )
 	{
-		eprint( WARN, SET, "%s: Superfluous paramter in call of %s().\n",
-				DEVICE_NAME, Cur_Func );
+		eprint( WARN, SET, "%s: Superfluous paramter%s in call of %s().\n",
+				DEVICE_NAME, v->next != NULL ? "s" : "", Cur_Func );
 		while ( ( v = vars_pop( v ) ) != NULL )
 			;
 	}
