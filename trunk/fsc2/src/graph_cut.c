@@ -20,8 +20,8 @@ static void motion_cut_handler( FL_OBJECT *obj, Window window,
 static void cut_canvas_off( Canvas *c, FL_OBJECT *obj );
 
 
-static bool is_shown  = UNSET;
-static bool is_mapped = UNSET;
+static bool is_shown  = UNSET;  /* set on fl_show_form() */
+static bool is_mapped = UNSET;  /* while form is mapped */
 
 /*----------------------------------------------------------*/
 /*----------------------------------------------------------*/
@@ -203,7 +203,15 @@ static void motion_cut_handler( FL_OBJECT *obj, Window window,
 void cut_form_close( void )
 {
 	if ( is_shown )
+	{
+		cut_canvas_off( &G.cut_x_axis, cut_form->cut_x_axis );
+		cut_canvas_off( &G.cut_y_axis, cut_form->cut_y_axis );
+		cut_canvas_off( &G.cut_z_axis, cut_form->cut_z_axis );
+		cut_canvas_off( &G.cut_canvas, cut_form->cut_canvas );
+
 		fl_hide_form( cut_form->cut );
+	}
+
 	fl_free_form( cut_form->cut );
 	is_shown = is_mapped = UNSET;
 }
@@ -219,8 +227,11 @@ void cut_undo_button_callback( FL_OBJECT *a, long b )
 }
 
 
-/*----------------------------------------------------------*/
-/*----------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+/* Instead of calling fl_hide_form() we directly unmap the forms */
+/* window, otherwise there were some "bad window" messages on    */
+/* showing the form again (obviously on redrawing the canvases)  */
+/*---------------------------------------------------------------*/
 
 void cut_close_callback( FL_OBJECT *a, long b )
 {
@@ -243,15 +254,12 @@ static void cut_canvas_off( Canvas *c, FL_OBJECT *obj )
 
 	fl_remove_canvas_handler( obj, Expose, ch );
 
-	if ( G.is_init )
-	{
-		fl_remove_canvas_handler( obj, ConfigureNotify, ch );
-		fl_remove_canvas_handler( obj, ButtonPress, ch );
-		fl_remove_canvas_handler( obj, ButtonRelease, ch );
-		fl_remove_canvas_handler( obj, MotionNotify, ch );
+	fl_remove_canvas_handler( obj, ConfigureNotify, ch );
+	fl_remove_canvas_handler( obj, ButtonPress, ch );
+	fl_remove_canvas_handler( obj, ButtonRelease, ch );
+	fl_remove_canvas_handler( obj, MotionNotify, ch );
 
-		XFreeGC( G.d, c->font_gc );
-	}
+	XFreeGC( G.d, c->font_gc );
 
 	delete_pixmap( c );
 }
