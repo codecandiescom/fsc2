@@ -341,10 +341,6 @@ enum {
                        ( a )->val.lval : ( a )->val.dval )
 
 
-
-#define DO_STOP ( do_quit && react_to_do_quit )
-
-
 /* Return codes from function get_lib_symbol() (in func.c) */
 
 enum {

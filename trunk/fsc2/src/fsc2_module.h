@@ -70,7 +70,8 @@
 #endif
 
 
-#define FSC2_MODE get_mode( )
+#define FSC2_MODE    get_mode( )
+#define FSC2_DO_STOP get_do_stop( )
 
 extern void show_message( const char *str );
 extern void show_alert( const char *str );
@@ -87,8 +88,6 @@ extern Phase_Sequence *PSeq;
 extern Acquisition_Sequence ASeq[ ];
 
 extern bool need_GPIB;
-extern volatile const bool do_quit;
-extern const bool react_to_do_quit;
 
 #endif  /* ! FSC2_MODULE_HEADER */
 

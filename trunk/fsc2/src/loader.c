@@ -564,7 +564,7 @@ void run_exp_hooks( void )
 			/* Give user a chance to stop while running the experiment hooks */
 
 			fl_check_only_forms( );
-			if ( DO_STOP )
+			if ( do_quit && react_to_do_quit )
 				THROW( USER_BREAK_EXCEPTION );
 		}
 

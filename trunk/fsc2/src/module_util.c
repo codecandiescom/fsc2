@@ -36,6 +36,17 @@ inline int get_mode( void )
 }
 
 
+/*-----------------------------------------------------------------------*/
+/* This function is called by modules to determine if the user pressed   */
+/* the Stop button. The function call is wrapped into a macro (DO_STOP ) */
+/* tht makes it look like a access to a variable.                        */
+/*-----------------------------------------------------------------------*/
+
+inline bool get_do_stop( void )
+{
+	return do_quit && react_to_do_quit;
+}
+
 /*--------------------------------------------------------------*/
 /* This function might be called to check if there are any more */
 /* variables on the variable stack, representing superfluous    */
