@@ -42,6 +42,7 @@ struct G_FUNCS {
 bool xforms_init( int *argc, char *argv[ ] );
 void xforms_close( void );
 void win_slider_callback( FL_OBJECT *a, long b );
+int is_iconic( Display *d, Window w );
 
 
 #endif   /* ! XINIT__HEADER */
