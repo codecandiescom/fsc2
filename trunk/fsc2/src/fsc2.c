@@ -849,7 +849,7 @@ void bug_report_callback( FL_OBJECT *a, long b )
 	fclose( tmp );
 
 	/* Append a directory listing of configuration files and modules
-	   to make it easier to check the permissions */
+	   to allow check of permissions */
 
 	cmd = get_string( strlen( "ls -al  >> " ) + strlen( libdir ) +
 					  strlen( "/Devices" ) + strlen( filename ) );
