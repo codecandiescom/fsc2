@@ -83,8 +83,8 @@ IDENT    [A-Za-z][A-Za-z_0-9]*
 
 			/* handling of EOF within a comment -> fatal error */
 <<EOF>>     {
-				eprint( FATAL, "%s: End of file in comment starting at line "
-						"%ld.\n", Fname, Comm_Lc );
+				eprint( FATAL, UNSET, "%s: End of file in comment starting at "
+						"line %ld.\n", Fname, Comm_Lc );
 				THROW( EXCEPTION );
 			}
 
@@ -100,8 +100,8 @@ IDENT    [A-Za-z][A-Za-z_0-9]*
 } /* end of <comm> */
 
 {EREM1}     {  /* End of comment without start */
-				eprint( FATAL, "End of comment found at line %ld in function "
-						"data base `%s'.\n", Lc, Fname );
+				eprint( FATAL, UNSET, "End of comment found at line %ld in "
+						"function data base `%s'.\n", Lc, Fname );
 				THROW( EXCEPTION );
 			}
 
@@ -134,8 +134,8 @@ PREP        return PREP_TOKEN;
 ;           return ';';
 
 .           {
-				eprint( FATAL, "Syntax error at line %ld in function data "
-						"base `%s'.\n", Lc, Fname );
+				eprint( FATAL, UNSET, "Syntax error at line %ld in function "
+							   "data base `%s'.\n", Lc, Fname );
 				THROW( EXCEPTION );
 			}
 
@@ -165,7 +165,7 @@ int func_list_parse( Func **fncts, int num_func )
 
 	if ( ( func_listin = fopen( Fname, "r" ) ) == NULL )
 	{
-		eprint( FATAL, "Can't open function data base `%s'.\n", Fname );
+		eprint( FATAL, UNSET, "Can't open function data base `%s'.\n", Fname );
 		THROW( EXCEPTION );
 	}
 
@@ -262,7 +262,7 @@ static int fll_count_functions( Func *fncts, int num_predef_func )
 			if ( ( f = bsearch( func_listtext, fncts, num_predef_func,
 								sizeof( Func ), ffl_func_cmp2 ) ) != NULL )
 			{
-				eprint( WARN, "Loadable function `%s()' hides "
+				eprint( WARN, UNSET, "Loadable function `%s()' hides "
 						"built-in function (line %ld in function data "
 						"base `%s').\n", f->name, Lc, Fname );
 
@@ -286,8 +286,8 @@ static int fll_count_functions( Func *fncts, int num_predef_func )
 
 	if ( last_token != ';' )
 	{
-		eprint( FATAL, "Missing semiciolon at end of function data base "
-				"`%s'.\n", Fname );
+		eprint( FATAL, UNSET, "Missing semiciolon at end of function data "
+				"base `%s'.\n", Fname );
 		THROW( EXCEPTION );
 	}
 
@@ -331,8 +331,8 @@ static void fll_get_functions( Func *fncts, int num_predef_func )
 			case IDENT_TOKEN :
 				if ( state != 0 )
 				{
-					eprint( FATAL, "Syntax error at line %ld in function data "
-							"base `%s'.\n", Lc, Fname );
+					eprint( FATAL, UNSET, "Syntax error at line %ld in "
+							"function data base `%s'.\n", Lc, Fname );
 					THROW( EXCEPTION );
 				}
 
@@ -348,9 +348,9 @@ static void fll_get_functions( Func *fncts, int num_predef_func )
 							act = i;
 						else
 						{
-							eprint( FATAL, "Function `%s()' is declared more "
-									"than once in function data base `%s'.\n",
-									func_listtext, Fname );
+							eprint( FATAL, UNSET, "Function `%s()' is declared"
+									"more than once in function data base "
+									"`%s'.\n", func_listtext, Fname );
 							THROW( EXCEPTION );
 						}
 						break;
@@ -365,8 +365,8 @@ static void fll_get_functions( Func *fncts, int num_predef_func )
 			case INT_TOKEN :
 				if ( state != 1 )
 				{
-					eprint( FATAL, "Syntax error at line %ld of function data "
-							"base `%s'.\n", Lc, Fname );
+					eprint( FATAL, UNSET, "Syntax error at line %ld of "
+							"function data base `%s'.\n", Lc, Fname );
 					THROW( EXCEPTION );
 				}
 
@@ -377,8 +377,8 @@ static void fll_get_functions( Func *fncts, int num_predef_func )
 			case ALL_TOKEN : case EXP_TOKEN : case PREP_TOKEN :
 				if ( state != 2 )
 				{
-					eprint( FATAL, "Syntax error at line %ld of function data "
-							"base `%s'.\n", Lc, Fname );
+					eprint( FATAL, UNSET, "Syntax error at line %ld of "
+							"function data base `%s'.\n", Lc, Fname );
 					THROW( EXCEPTION );
 				}
 
@@ -403,9 +403,9 @@ static void fll_get_functions( Func *fncts, int num_predef_func )
 			case ';' :
 				if ( state != 0 && state < 2 )
 				{
-					eprint( FATAL, "Missing number of arguments for function "
-							"`%s' at line %ld in function data base `%s'.\n",
-							fncts[ act ].name, Lc, Fname );
+					eprint( FATAL, UNSET, "Missing number of arguments for "
+                            "function `%s' at line %ld in function data base "
+                            "`%s'.\n", fncts[ act ].name, Lc, Fname );
 					THROW( EXCEPTION );
 				}
 				state = 0;
