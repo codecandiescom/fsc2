@@ -32,14 +32,13 @@ my $lockin     = 'SR810';
 my $start_freq = 8;
 my $end_freq   = 22;
 my $step_freq  = 25;
-my $atten      = -5;
+my $atten      = -8;
 my $mod_freq   = 19;
 my $mod_ampl   = 80;
 my $N_runs     = 20;
 my $tc         = "Don't set";
 my $sens       = "Don't set";
 my $how        = 'Start program';
-my $calls      = 0;
 
 
 my %fp = ( '-side' => 'top',
@@ -404,7 +403,6 @@ sub li_conf {
 
 sub write_out {
 
-return if $calls++ == 0;
 return if &do_checks( ) != 0;
 
 local *F;
