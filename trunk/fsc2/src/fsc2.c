@@ -69,7 +69,7 @@ static void start_editor( void );
 static void start_help_browser( void );
 static void set_main_signals( void );
 
-int flags;
+int cmdline_flags;               /* also used in child_sig_handler) in run.c */
 
 
 
@@ -105,7 +105,7 @@ int main( int argc, char *argv[ ] )
 
 	/* Run a first test of the command line arguments */
 
-	flags = scan_args( &argc, argv, &fname );
+	cmdline_flags = scan_args( &argc, argv, &fname );
 
 	/* Check via the lock file if there is already a process holding a lock,
 	   otherwise create one. This has to done after parsing the command line
@@ -134,19 +134,19 @@ int main( int argc, char *argv[ ] )
 
 	if ( argc > 1 )
 	{
-		flags |= DO_LOAD;
+		cmdline_flags |= DO_LOAD;
 		fname = argv[ 1 ];
 	}
 
 	/* If '--delete' was given on the command line store flags that the input
 	   files needs to be deleted */
 
-	if ( fname != NULL && flags & DO_DELETE )
+	if ( fname != NULL && cmdline_flags & DO_DELETE )
 		delete_file = delete_old_file = SET;
 
 	/* If there is a file argument try to load it */
 
-	if ( flags & DO_LOAD )
+	if ( cmdline_flags & DO_LOAD )
 	{
 		TRY
 		{
@@ -168,20 +168,20 @@ int main( int argc, char *argv[ ] )
 	/* Only if starting the server for external connections succeeds really
 	   start the main loop */
 
-	if ( -1 != ( conn_pid =
-				 spawn_conn( flags & ( DO_TEST | DO_START ) && is_loaded ) ) )
+	if ( -1 != ( conn_pid = spawn_conn( cmdline_flags & ( DO_TEST | DO_START )
+										&& is_loaded ) ) )
 	{
 		/* Trigger test or start of current EDL program if the appropriate
 		   flags were passed to the program on the command line */
 
-		if ( flags & DO_TEST && is_loaded )
+		if ( cmdline_flags & DO_TEST && is_loaded )
 			fl_trigger_object( main_form->test_file );
-		if ( flags & DO_START && is_loaded )
+		if ( cmdline_flags & DO_START && is_loaded )
 			fl_trigger_object( main_form->run );
 
 		/* If required send signal to invoking process */
 
-		if ( flags & DO_SIGNAL )
+		if ( cmdline_flags & DO_SIGNAL )
 			kill( getppid( ), SIGUSR1 );
 
 		/* And, finally, here's the main loop of the program... */
@@ -404,14 +404,14 @@ static void final_exit_handler( void )
 	if ( fsc2_death != 0 && fsc2_death != SIGTERM )
 	{
 		if ( * ( ( int * ) xresources[ NOCRASHMAIL ].var ) == 0 &&
-			  ! ( flags & NO_MAIL ) )
+			  ! ( cmdline_flags & NO_MAIL ) )
 			death_mail( fsc2_death );
 
 		fprintf( stderr, "fsc2 (%d) killed by %s signal.\n", getpid( ),
 				 strsignal( fsc2_death ) );
 
 		if ( * ( ( int * ) xresources[ NOCRASHMAIL ].var ) == 0 &&
-			  ! ( flags & NO_MAIL ) )
+			  ! ( cmdline_flags & NO_MAIL ) )
 			fprintf( stderr, "A crash report has been sent to %s\n",
 					 MAIL_ADDRESS );
 	}
@@ -1335,7 +1335,7 @@ void main_sig_handler( int signo )
 		default :
 			fsc2_death = signo;
 
-			if ( ! ( flags & NO_MAIL ) )
+			if ( ! ( cmdline_flags & NO_MAIL ) )
 				DumpStack( );
 
 			exit( EXIT_FAILURE );

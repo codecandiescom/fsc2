@@ -698,7 +698,7 @@ static void set_child_signals( void )
 
 void child_sig_handler( int signo )
 {
-	extern int flags;
+	extern int cmdline_flags;                /* defined in fsc2.c */
 
 
 	switch ( signo )
@@ -725,7 +725,7 @@ void child_sig_handler( int signo )
 
 		default :
 			if ( * ( ( int * ) xresources[ NOCRASHMAIL ].var ) == 0 &&
-				 ! ( flags & 32 ) )                  /* 32 means NO_MAIL */
+				 ! ( cmdline_flags & 32 ) )              /* 32 means NO_MAIL */
 			{
 				DumpStack( );
 				death_mail( signo );

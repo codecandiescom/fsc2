@@ -276,6 +276,7 @@ else
 	else
 		ifeq ($(GPIB_LIBRARY),JTT)
 			GPIB_LIBRARY := jtt
+			LIBS         += -lgpib
 		else
 			GPIB_LIBRARY := none
 		endif
