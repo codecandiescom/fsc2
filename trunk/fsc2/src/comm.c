@@ -740,7 +740,7 @@ long reader( void *ret )
 /* ->                                                           */
 /*    1. File descriptor of read end of pipe                    */
 /*    2. Buffer for data                                        */
-/*    3. Number of bytes to read                                */
+/*    3. Number of bytes to be read                             */
 /*--------------------------------------------------------------*/
 
 static bool pipe_read( int fd, void *buf, size_t bytes_to_read )
@@ -751,13 +751,12 @@ static bool pipe_read( int fd, void *buf, size_t bytes_to_read )
 
 
 	/* From man 2 read(): POSIX allows a read that is interrupted after
-	   reading some data to return -1 (with errno set to EINTR) or to
-	   return the number of bytes already read.
-
-	   The latter happens on Linux system with kernel 2.0.36 while the first
-	   happens on a newer system, e.g. 2.2.12. Blocking all expected signals
-	   while reading and using this rather lengthy loop tries to get it right
-	   for both kinds of systems. */
+	   reading some data to return -1 (with errno set to EINTR) or to return
+	   the number of bytes already read.
+	   The latter happens on Linux system with kernel 2.0.36 while on a newer
+	   system, e.g. 2.2.12, -1 is returned when the read is interrupted.
+	   Blocking all expected signals while reading and using this rather
+	   lengthy loop tries to get it right in both cases. */
 
 	sigemptyset( &new_mask );
 	if ( I_am == CHILD )
