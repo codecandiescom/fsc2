@@ -125,6 +125,7 @@
 @item                         @tab
 @item @code{G}                @tab Unit, Gauss
 @item @code{get_file}         @tab Built-in function (@ref{get_file})
+@item @code{GRACE_PERIOD}     @tab Deprecated keyword
 @item                         @tab
 @item @code{H}                @tab @code{HIGH} keyword
 @item @code{hide_toolbox}     @tab Built-in function (@ref{hide_toolbox})
@@ -146,11 +147,12 @@
 @item @code{INVERTED}         @tab @code{INVERTED} keyword
 @item @code{IMP}              @tab @code{IMPEDANCE} keyword
 @item @code{IMPEDANCE}        @tab @code{IMPEDANCE} keyword
-@item @code{is_file}          @tab Built-in function (@ref{is_file})
+@item @code{is_file}          @tab Deprecated function
 @item                         @tab
 @item @code{kA}               @tab Unit, Kilo-Ampere
 @item @code{kdB}              @tab Unit, Kilo-Dezibel
 @item @code{kdb}              @tab Unit, Kilo-Dezibel
+@item @code{KEEP_ALL_PULSES}  @tab Deprecated keyword
 @item @code{kG}               @tab Unit, Kilo-Gauss
 @item @code{kHz}              @tab Unit, Kilo-Hertz
 @item @code{ks}               @tab Unit, Kilo-Seconds
@@ -172,6 +174,7 @@
 @item @code{MATH1}            @tab Digitizer channel name
 @item @code{MATH2}            @tab Digitizer channel name
 @item @code{MATH3}            @tab Digitizer channel name
+@item @code{MAXIMUM_PATTERN_LENGTH}  @tab Deprecated keyword
 @item @code{mean}             @tab Built-in function (@ref{mean})
 @item @code{MEM_C}            @tab Digitizer channel name
 @item @code{MEM_D}            @tab Digitizer channel name
@@ -216,6 +219,7 @@
 @item @code{PHAS:}            @tab Starts the @code{PHASES} section
 @item @code{PHASE:}           @tab Starts the @code{PHASES} section
 @item @code{PHASES:}          @tab Starts the @code{PHASES} section
+@item @code{PHASE_SWITCH_DELAY} @tab Deprecated keyword
 @item @code{POD}              @tab
 @item @code{POS}              @tab
 @item @code{POSITIVE}         @tab

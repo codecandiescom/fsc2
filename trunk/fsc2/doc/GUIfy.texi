@@ -42,11 +42,10 @@ Often there is a small set of standard experiments, each with a few
 parameters that need to be changed all of the time. For example in a cw
 EPR experiment the start and end field and the sweep speed typically are
 such parameters. After some time it can become rather tedious to always
-having to edit the corresponding @code{EDL} file to set the
-parameters. Beside, for someone not used to @code{fsc2} and its syntax
-and who just wants to do a simple experiment it may be too daunting a
-task to safely apply the necessary changes to an existing @code{EDL}
-program.
+edit the corresponding @code{EDL} file to set the parameters. Beside,
+for someone not used to @code{fsc2} and its syntax and who just wants to
+do a simple experiment it may be too daunting a task to safely apply the
+necessary changes to an existing @code{EDL} program.
 
 Fortunately, once you have written an @code{EDL} program it usually is
 rather simple to create a script from this @code{EDL} program that

@@ -822,14 +822,6 @@ This function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} program.
 
 
-@anchor{is_file}
-@item is_file()
-@findex is_file()
-This function expects a file handle as returned by @code{get_file()} and
-checks if it is valid and the associated file is open for writing.
-@end table
-
-
 @node Interaction functions, Mathematical functions, Output functions, Built-in Functions
 @section Interaction functions
 @cindex interaction functions

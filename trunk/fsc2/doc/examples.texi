@@ -50,10 +50,10 @@ the full documentation in the previous chapters when in doubt.
 @node An enhanced cw-EPR experiment, GUI-fying the script, Example EDL Scripts, Example EDL Scripts
 @section An enhanced cw-EPR experiment
 
-In the chapter describing the @code{EDL} language already a script for
-doing a very simple @i{cw}-EPR experiment was given. Here we will now
-enhance this script a bit to allow e.g.@: multiple runs over the field
-range:
+In the chapter describing the @code{EDL} language (@pxref{EDL}) already
+a script for doing a very simple @i{cw}-EPR experiment was given. Here
+we will now enhance this script a bit to allow e.g.@: multiple runs over
+the field range:
 @example
  1 DEVICES:
  2   er035m_s;              // gaussmeter module
@@ -96,27 +96,21 @@ range:
 39       mean_data[ J ] += data;
 40       display( J, 1.0e6 * data, 1,
 41                J, 1.0e6 * mean_data[ J ] / I, 2 );
-42       IF is_file( File_1 )
-43       @{
-44         fsave( File_1, "# #\n", field, data );
-45       @}
-46       field = sweep_up( );
-47     @}
-48 
-49     fsave( File_1, "\n" );
-50     field = reset_field( );
-51     clear_curve( 1 );
-52   @}
-53 
-54   IF is_file( File_2 )
-55   @{
-56     fsave( File_2, "% Start field     = # G\n", start_field );
-57     fsave( File_2, "% End field       = # G\n", end_field );
-58     fsave( File_2, "% Field step      = # G\n", field_step );
-59     fsave( File_2, "% Number of runs  = #\n", Number_of_runs );
-60     fsave( File_2, "% Time constant   = # ms\n", tc * 1.0e3 );
-61     save( File_2, mean / Number_of_runs );
-62   @}
+42       fsave( File_1, "# #\n", field, data );
+43       field = sweep_up( );
+44     @}
+45 
+46     fsave( File_1, "\n" );
+47     field = reset_field( );
+48     clear_curve( 1 );
+49   @}
+50 
+51   fsave( File_2, "% Start field     = # G\n", start_field );
+52   fsave( File_2, "% End field       = # G\n", end_field );
+53   fsave( File_2, "% Field step      = # G\n", field_step );
+54   fsave( File_2, "% Number of runs  = #\n", Number_of_runs );
+55   fsave( File_2, "% Time constant   = # ms\n", tc * 1.0e3 );
+56   save( File_2, mean / Number_of_runs );
 @end example
 
 The @code{DEVICES} section is identical to the original script, again we
@@ -206,16 +200,12 @@ a @i{x}-coordinate of @code{1} to make the data point appear at the
 field scale value of @code{start_field}, a @i{x}-coordinate of @code{2}
 at @code{start_value + field_step} etc.
 
-The next instruction (line 42 ff.@:) is to store the newly measured
-value, together with the current field, in the first file. Because we
-can't be sure that the user really did open a file (and didn't instead
-choose not to save the data) we first check if the file number we got is
-a valid one by calling the function @code{is_file()}
-(@pxref{is_file}). Only if it returns a true we try to write to the
-file. In this case we use the function @code{fsave()} (@pxref{fsave}) to
-write both the current field (as stored in the variable @code{field})
-and the new data into the (first) file. According to the format string
-both values will appear on one line.
+The next instruction (line 42) stores the newly measured value, together
+with the current field, in the first file. In this case we use the
+function @code{fsave()} (@pxref{fsave}) to write both the current field
+(as stored in the variable @code{field}) and the new data into the
+(first) file. According to the format string both values will appear on
+one line.
 
 All now still needed in the inner loop is to sweep to a new magnetic
 field (which, according to the our call of @code{magnet_setup()}
@@ -240,7 +230,7 @@ parameter. This done we can go back to repeating the inner loop.
 
 When the experiment finally is done, i.e.@: it's finished doing the
 @code{Number_of_runs} repetitions of the field sweep we end up at line
-54 where we now can store the whole array of mean values, together with
+51 where we now can store the whole array of mean values, together with
 some information about the experimental parameters. Please note that
 using the function @code{save()} (@pxref{save}) it is possible to write
 whole (one-dimensional) arrays with one call, also this is an example
@@ -313,27 +303,21 @@ All that is needed is to add and change a few lines.:
 49       mean_data[ J ] += data;
 50       display( J, 1.0e6 * data, 1,
 51                J, 1.0e6 * mean_data[ J ] / I, 2 );
-52       IF is_file( File_1 )
-53       @{
-54         fsave( File_1, "# #\n", field, data );
-55       @}
-56       field = sweep_up( );
-57     @}
-58 
-59     fsave( File_1, "\n" );
-60     field = reset_field( );
-61     clear_curve( 1 );
-62   @}
-63 
-64   IF is_file( File_2 )
-65   @{
-66     fsave( File_2, "% Start field     = # G\n", start_field );
-67     fsave( File_2, "% End field       = # G\n", end_field );
-68     fsave( File_2, "% Field step      = # G\n", field_step );
-69     fsave( File_2, "% Number of runs  = #\n", Number_of_runs );
-70     fsave( File_2, "% Time constant   = # ms\n", tc * 1.0e3 );
-71     save( File_2, mean / Number_of_runs );
-72   @}
+52       fsave( File_1, "# #\n", field, data );
+53       field = sweep_up( );
+54     @}
+55 
+56     fsave( File_1, "\n" );
+57     field = reset_field( );
+58     clear_curve( 1 );
+59   @}
+60 
+61   fsave( File_2, "% Start field     = # G\n", start_field );
+62   fsave( File_2, "% End field       = # G\n", end_field );
+63   fsave( File_2, "% Field step      = # G\n", field_step );
+64   fsave( File_2, "% Number of runs  = #\n", Number_of_runs );
+65   fsave( File_2, "% Time constant   = # ms\n", tc * 1.0e3 );
+66   save( File_2, mean / Number_of_runs );
 @end example
 
 The new first four lines are for defining some special variables that

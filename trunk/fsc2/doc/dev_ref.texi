@@ -223,6 +223,8 @@ for function/output channels declared as @code{INVERTED}).
 @item @code{pulser_defense_to_shape_minimum_distance()} @tab @ref{pulser_defense_to_shape_minimum_distance}
 @item @code{pulser_automatic_shape_pulses()} @tab @ref{pulser_automatic_shape_pulses}
 @item @code{pulser_automatic_twt_pulses()} @tab @ref{pulser_automatic_twt_pulses}
+@item @code{pulser_keep_all_pulses()} @tab @ref{pulser_keep_all_pulses}
+@item @code{pulser_maximum_pattern_length()} @tab @ref{pulser_maximum_pattern_length}
 @item @code{pulser_show_pulses()}    @tab @ref{pulser_show_pulses}
 @item @code{pulser_dump_pulses()}    @tab @ref{pulser_dump_pulses}
 @end multitable
@@ -278,6 +280,10 @@ for function/output channels declared as @code{INVERTED}).
 @item @code{pulser_phase_reset()}    @tab @ref{pulser_phase_reset}
 @item @code{pulser_pulse_reset()}    @tab @ref{pulser_pulse_reset}
 @item @code{pulser_lock_keyboard()}  @tab @ref{pulser_lock_keyboard}
+@item @code{pulser_phase_switch_delay()} @tab @ref{pulser_phase_switch_delay}
+@item @code{pulser_grace_period()} @tab @ref{pulser_grace_period}
+@item @code{pulser_keep_all_pulses()} @tab @ref{pulser_keep_all_pulses}
+@item @code{pulser_maximum_pattern_length()} @tab @ref{pulser_maximum_pattern_length}
 @item @code{pulser_show_pulses()}    @tab @ref{pulser_show_pulses}
 @item @code{pulser_dump_pulses()}    @tab @ref{pulser_dump_pulses}
 @end multitable
@@ -597,6 +603,8 @@ Fixed length of TRIGGER_OUT pulse: @w{20 ns}
 @item @code{pulser_pulse_reset()}     @tab @ref{pulser_pulse_reset}
 @item @code{pulser_lock_keyboard()}   @tab @ref{pulser_lock_keyboard}
 @item @code{pulser_stop_on_update()}  @tab @ref{pulser_stop_on_update}
+@item @code{pulser_keep_all_pulses()} @tab @ref{pulser_keep_all_pulses}
+@item @code{pulser_maximum_pattern_length()} @tab @ref{pulser_maximum_pattern_length}
 @item @code{pulser_show_pulses()}     @tab @ref{pulser_show_pulses}
 @item @code{pulser_dump_pulses()}     @tab @ref{pulser_dump_pulses}
 @end multitable
