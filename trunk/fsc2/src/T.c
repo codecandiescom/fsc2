@@ -57,7 +57,7 @@ void *T_malloc( size_t size )
 	}
 #endif
 
-	if ( ( mem = malloc( size ) == NULL )
+	if ( ( mem = malloc( size ) ) == NULL )
 	{
 		print( FATAL, "Running out of memory.\n" );
 		THROW( OUT_OF_MEMORY_EXCEPTION );
