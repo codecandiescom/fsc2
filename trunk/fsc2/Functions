@@ -43,6 +43,7 @@ reset_field, 0, EXP;            // go back to start field
 // Functions for the W_BAND power supply driver only
 
 magnet_use_correction, 0, PREP; // if called field corrections are applied
+magnet_use_dac_port, 1, PREP;   // to set the lock-ins DAC port to be used
 set_current, 1, EXP;            // go to a current value
 reset_current, 0, EXP;          // go back st start current
 

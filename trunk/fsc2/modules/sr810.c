@@ -54,7 +54,7 @@ Var *lockin_lock_keyboard( Var *v );
 /* exported symbols (use by W-band power supply driver) */
 
 int first_DAC_port = 1;
-int last_DAC_prot = 4;
+int last_DAC_port = 4;
 
 
 /* typedefs and global variables used only in this file */
