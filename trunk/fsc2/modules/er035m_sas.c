@@ -72,7 +72,7 @@ static void er035m_sas_set_lower_search_limit( long	ll );
 static bool er035m_sas_open( void );
 static bool er035m_sas_close( void );
 static bool er035m_sas_write( const char *buf );
-static bool er035m_sas_read( char *buf, long *len );
+static bool er035m_sas_read( char *buf, size_t *len );
 static bool er035m_sas_comm( int type, ... );
 static void er035m_sas_comm_fail( void );
 

@@ -81,7 +81,7 @@ static void er035m_s_set_lower_search_limit( long ll );
 static bool er035m_s_open( void );
 static bool er035m_s_close( void );
 static bool er035m_s_write( const char *buf );
-static bool er035m_s_read( char *buf, long *len );
+static bool er035m_s_read( char *buf, size_t *len );
 static bool er035m_s_comm( int type, ... );
 static void er035m_s_comm_fail( void );
 
@@ -1135,7 +1135,7 @@ static bool er035m_s_write( const char *buf )
 /*-----------------------------------------------------------------------*/
 /*-----------------------------------------------------------------------*/
 
-static bool er035m_s_read( char *buf, long *len )
+static bool er035m_s_read( char *buf, size_t *len )
 {
 	char *ptr;
 
@@ -1169,7 +1169,7 @@ static bool er035m_s_read( char *buf, long *len )
 
 	for ( ptr = buf; *ptr == nmr.prompt; ptr++ )
 		/* empty */ ;
-	*len -= ( long ) ( ptr - buf );
+	*len -= ( size_t ) ( ptr - buf );
 
 	if ( *len == 0 )          /* if nothing (except the prompt) was received */
 		return FAIL;
@@ -1187,7 +1187,7 @@ static bool er035m_s_comm( int type, ... )
 {
 	va_list ap;
 	char *buf;
-	long len;
+	ssize_t len;
 	size_t *lptr;
 	long read_retries = 10;            /* number of times we try to read */
 
