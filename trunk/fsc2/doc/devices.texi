@@ -43,7 +43,7 @@ Of course, using generic functions has its limitations - when e.g.@: the
 lock-in amplifier has only one channel no abstraction can make it have
 two channels - but wait, actually, it can: rotate the phase by 90
 degrees, wait for another time constant and you basically have two
-channels, at least realized in software (of course there's a penality -
+channels, at least realized in software (of course, there's a penality -
 measurements take at least twice the time needed with a two-channel
 lock-in amplifier). But there can be real hard limitations - if you've
 got a device with only 2 DACs no software trickery will ever magically
