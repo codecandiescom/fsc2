@@ -880,10 +880,8 @@ Var *lockin_harmonic( Var *v )
 /*------------------------------------------------------------------*/
 /*------------------------------------------------------------------*/
 
-Var *lockin_ref_mode( Var *v )
+Var *lockin_ref_mode( UNUSED_ARGVar *v )
 {
-	UNUSED_ARGUMENT( v );
-
 	if ( FSC2_MODE == TEST )
 		return vars_push( INT_VAR, SR810_TEST_MOD_MODE );
 	return vars_push( INT_VAR, sr810_get_mod_mode( ) );
@@ -1176,13 +1174,11 @@ Var *lockin_auto_setup( Var *v )
 /*---------------------------------------------------------------*/
 /*---------------------------------------------------------------*/
 
-Var *lockin_get_sample_time( Var *v )
+Var *lockin_get_sample_time( UNUSED_ARG Var *v )
 {
 	long st_index;
 	double tc;
 
-
-	UNUSED_ARGUMENT( v );
 
 	st_index = sr810.st_index;
 
