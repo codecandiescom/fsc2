@@ -46,10 +46,10 @@ int keithley228a_end_of_exp_hook( void );
 Var *magnet_setup( Var *v );
 Var *magnet_use_correction( Var *v );
 Var *magnet_use_dac_port( Var *v );
-Var *set_current( Var *v );
+Var *set_field( Var *v );
 Var *sweep_up( Var *v );
 Var *sweep_down( Var *v );
-Var *reset_current( Var *v );
+Var *reset_field( Var *v );
 
 
 /* internally used functions */
@@ -291,7 +291,7 @@ Var *magnet_use_dac_port( Var *v )
 /*--------------------------------------------------------------*/
 /*--------------------------------------------------------------*/
 
-Var *set_current( Var *v )
+Var *set_field( Var *v )
 {
 	double new_current;
 
@@ -299,7 +299,7 @@ Var *set_current( Var *v )
 	if ( v == NULL )
 	{
 		eprint( FATAL, "%s:%ld: %s: Missing parameter in function "
-				"`set_current'.\n", Fname, Lc, DEVICE_NAME );
+				"`set_field'.\n", Fname, Lc, DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
 
@@ -395,12 +395,12 @@ Var *sweep_down( Var *v )
 /*--------------------------------------------------------------*/
 /*--------------------------------------------------------------*/
 
-Var *reset_current( Var *v )
+Var *reset_field( Var *v )
 {
 	if ( v != NULL )
 	{
 		eprint( WARN, "%s:%ld: %s: Superfluous parameter in call of function "
-				"`reset_current'.\n", Fname, Lc, DEVICE_NAME );
+				"`reset_field'.\n", Fname, Lc, DEVICE_NAME );
 		while ( ( v = vars_pop( v ) ) )
 			;
 	}
