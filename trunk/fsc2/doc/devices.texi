@@ -532,17 +532,13 @@ symbolically or numerically. The channels that can be used as arguments
 depend on the model of the oscilloscope:
 @table @samp
 @item TDS520
-@item TDS520A
-@itemize @bullet
-@item @code{CH1} or @code{CH2} or, alternatively @code{0} or @code{1}
-@end itemize
+@itemx TDS520A
+@code{CH1} or @code{CH2} or, alternatively @code{0} or @code{1}
 @item TDS540
-@item TDS744A
-@item TDS754A
-@itemize @bullet
-@item @code{CH1}, @code{CH2}, @code{CH3} or @code{CH4} or, alternatively
+@itemx TDS744A
+@itemx TDS754A
+@code{CH1}, @code{CH2}, @code{CH3} or @code{CH4} or, alternatively
 @code{0}, @code{1}, @code{2} or @code{3}
-@end itemize
 @end table
 
 If a second argument is given this is taken to be the new sensitivity
@@ -583,15 +579,15 @@ depending on the type of the oscilloscope (return values are always
 numeric!):
 @table @samp
 @item TDS520
-@item TDS520A
+@itemx TDS520A
 @itemize @bullet
 @item @code{CH1} or @code{CH2} or, alternatively @code{0} or @code{1}
 @item @code{AUX1}, @code{AUX2} or @code{LINE} or, alternatively @code{9},
 @code{10} or @code{11} (@code{LINE} can be abbreviated to @code{LIN})
 @end itemize
 @item TDS540
-@item TDS744A
-@item TDS754A
+@itemx TDS744A
+@itemx TDS754A
 @itemize @bullet
 @item @code{CH1}, @code{CH2}, @code{CH3} or @code{CH4} or, alternatively
 @code{0}, @code{1}, @code{2} or @code{3}
@@ -686,7 +682,7 @@ is computed from. The channel that can be used depend on the model of
 the digitizer:
 @table @samp
 @item TDS520
-@item TDS520A
+@itemx TDS520A
 @itemize @bullet
 @item @code{CH1} or @code{CH2} or, alternatively @code{0} or @code{1}
 @item @code{MATH1}, @code{MATH2} or @code{MATH3} or, alternatively,
@@ -695,8 +691,8 @@ the digitizer:
 alternatively, @code{5}, @code{6}, @code{7} or @code{8}
 @end itemize
 @item TDS540
-@item TDS744A
-@item TDS754A
+@itemx TDS744A
+@itemx TDS754A
 @itemize @bullet
 @item @code{CH1}, @code{CH2}, @code{CH3} or @code{CH4} or, alternatively
 @code{0}, @code{1}, @code{2} or @code{3}
@@ -745,7 +741,7 @@ the time interval. Valid choices of the data channel depend on the model
 of the digitizer:
 @table @samp
 @item TDS520
-@item TDS520A
+@itemx TDS520A
 @itemize @bullet
 @item @code{CH1} or @code{CH2} or, alternatively @code{0} or @code{1}
 @item @code{MATH1}, @code{MATH2} or @code{MATH3} or, alternatively,
@@ -754,8 +750,8 @@ of the digitizer:
 alternatively, @code{5}, @code{6}, @code{7} or @code{8}
 @end itemize
 @item TDS540
-@item TDS744A
-@item TDS754A
+@itemx TDS744A
+@itemx TDS754A
 @itemize @bullet
 @item @code{CH1}, @code{CH2}, @code{CH3} or @code{CH4} or, alternatively
 @code{0}, @code{1}, @code{2} or @code{3}
@@ -796,7 +792,7 @@ the time interval. Valid choices of the data channel depend on the model
 of the digitizer:
 @table @samp
 @item TDS520
-@item TDS520A
+@itemx TDS520A
 @itemize @bullet
 @item @code{CH1} or @code{CH2} or, alternatively @code{0} or @code{1}
 @item @code{MATH1}, @code{MATH2} or @code{MATH3} or, alternatively,
@@ -805,8 +801,8 @@ of the digitizer:
 alternatively, @code{5}, @code{6}, @code{7} or @code{8}
 @end itemize
 @item TDS540
-@item TDS744A
-@item TDS754A
+@itemx TDS744A
+@itemx TDS754A
 @itemize @bullet
 @item @code{CH1}, @code{CH2}, @code{CH3} or @code{CH4} or, alternatively
 @code{0}, @code{1}, @code{2} or @code{3}

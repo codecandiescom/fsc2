@@ -493,26 +493,41 @@ X[ 3, 2 ] = 6
 Within the format string and the argument strings escape sequences, all
 starting with a backslash character @code{\}, can be used to print
 otherwise unprintable characters. These are
-@itemize
-@item @code{\a} prints an alert (bell) character (0x07)
-@item @code{\b} prints a backspace character (0x08)
-@item @code{\f} prints a formfeed character (0x0C)
-@item @code{\n} prints a newline character (0x0A)
-@item @code{\r} prints a carriage return character (0x0D)
-@item @code{\t} prints a horizontal tab character (0x09)
-@item @code{\v} prints a vertical tab character (0x0B)
-@item @code{\\} prints a backslash @code{\}
-@item @code{\?} prints a question mark @code{?}
-@item @code{\'} prints a single quote @code{\'}
-@item @code{\"} prints a double quote @code{"}
-@item @code{\}@i{ooo} replaces the octal number @i{ooo} by the
-corresponding character (as many octal digits are
-accepted as long as the resulting number is less then 255)
-@item @code{\x}@i{hh} replaces the hexadecimal number @i{hh} by the
-corresponding character (there must be one or two hexadecimal digits)
-@item @code{\#} prints a @code{#} (this is a special escape sequence to be
-used with @code{fsave()} exclusively)
-@end itemize
+@table @samp
+@item @code{\a}
+prints an alert (bell) character (0x07)
+@item @code{\b}
+prints a backspace character (0x08)
+@item @code{\f}
+prints a formfeed character (0x0C)
+@item @code{\n}
+prints a newline character (0x0A)
+@item @code{\r}
+prints a carriage return character (0x0D)
+@item @code{\t}
+prints a horizontal tab character (0x09)
+@item @code{\v}
+prints a vertical tab character (0x0B)
+@item @code{\\}
+prints a backslash @code{\}
+@item @code{\?}
+prints a question mark @code{?}
+@item @code{\'}
+prints a single quote @code{\'}
+@item @code{\"}
+prints a double quote @code{"}
+@item @code{\}@i{ooo}
+replaces the octal number @i{ooo} by the corresponding character (as
+many octal digits are used as long as the resulting number is less
+then 255)
+@item @code{\x}@i{hh}
+replaces the hexadecimal number @i{hh} by the corresponding character
+(there must be one or two hexadecimal digits)
+
+@item @code{\#}
+prints a @code{#} (this is a special escape sequence to be used with
+@code{fsave()} only)
+@end table
 
 The function returns the total number of characters that have been written to
 the file.
