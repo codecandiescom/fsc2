@@ -47,7 +47,7 @@ something it wasn't intended for or, if this fails, to change the
 program itself. This not only tends to take a lot of time (especially if
 the person who wrote the program isn't around anymore) but often also
 leads to the introduction of new bugs or even the realization that the
-program has not written in a way that allows it to be adapted to the new
+program has not written in a way that allows it to adapt it to the new
 requirements, in which case the old program becomes useless and has to
 be rewritten from scratch.
 
