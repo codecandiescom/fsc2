@@ -143,6 +143,428 @@ const char *show_input( const char *content, const char *label )
 /*---------------------------------------------------------------*/
 /*---------------------------------------------------------------*/
 
+long *exp_bcreate( void *buffer, long len )
+{
+	if ( I_am == CHILD )
+	{
+		long *result;
+
+
+		writer( C_BCREATE, len, buffer );
+		T_free( buffer );
+		result = T_malloc( 2 * sizeof( long ) );
+		reader( ( void * ) result );
+		return ( long * ) result;
+	}
+	else
+	{
+		char *old_Fname = Fname;
+		long old_Lc = Lc;
+		Var *Func_ptr;
+		Var *ret = NULL;
+		long val;
+		int access;
+		long result[ 2 ];
+		void *pos;
+
+
+		/* Get variable with address of function to create a button */
+
+		Func_ptr = func_get( "button_create", &access );
+
+		/* Unpack parameter and push them onto the stack */
+
+		pos = buffer;
+		memcpy( &Lc, pos, sizeof( long ) );      /* get current line number */
+		pos += sizeof( long );
+
+		vars_push( INT_VAR, *( ( long * ) pos ) );
+		pos += sizeof( long );
+
+		memcpy( &val, pos, sizeof( long ) );     /* get colleague */
+		if ( val >= 0 )
+			vars_push( INT_VAR, val );
+		pos += sizeof( long );
+
+		Fname = ( char * ) pos;                  /* get current file name */
+		pos += strlen( ( char * ) pos ) + 1;
+
+		vars_push( STR_VAR, ( char * ) pos );    /* get label string */
+		pos += strlen( ( char * ) pos ) + 1;
+
+		if ( *( ( char * ) pos ) != '\0' )       /* get help text */
+			vars_push( STR_VAR, ( char * ) pos );
+
+		/* Call the function */
+
+		TRY
+		{
+			ret = func_call( Func_ptr );
+			T_free( buffer );
+			Fname = old_Fname;
+			Lc = old_Lc;
+			result[ 0 ] = 1;
+			result[ 1 ] = ret->val.lval;
+			TRY_SUCCESS;
+		}
+		OTHERWISE
+			result[ 0 ] = 0;
+
+		vars_pop( ret );
+		writer( C_BCREATE_REPLY, 2 * sizeof( long ), result );
+
+		return NULL;
+	}
+}
+
+
+/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+
+bool exp_bdelete( void *buffer, long len )
+{
+	if ( I_am == CHILD )
+	{
+		writer( C_BDELETE, len, buffer );
+		T_free( buffer );
+		return ( bool ) reader( NULL );
+	}
+	else
+	{
+		char *old_Fname = Fname;
+		long old_Lc = Lc;
+		Var *Func_ptr;
+		int access;
+		void *pos;
+
+
+		/* Get variable with address of function to create a button */
+
+		Func_ptr = func_get( "button_delete", &access );
+
+		/* Unpack parameter and push them onto the stack */
+
+		pos = buffer;
+		memcpy( &Lc, pos, sizeof( long ) );    /* get current line number */
+		pos += sizeof( long );
+
+		vars_push( INT_VAR, *( ( long * ) pos ) );
+		pos += sizeof( long );
+
+		Fname = ( char * ) pos;                /* get current file name */
+
+		/* Call the function */
+
+		TRY
+		{
+			vars_pop( func_call( Func_ptr ) );
+			T_free( buffer );
+			Fname = old_Fname;
+			Lc = old_Lc;
+			writer( C_BDELETE_REPLY, 1L );
+			TRY_SUCCESS;
+		}
+		OTHERWISE
+		{
+			T_free( buffer );
+			Fname = old_Fname;
+			Lc = old_Lc;
+			writer( C_BDELETE_REPLY, 0L );
+		}
+
+		return SET;
+	}
+}
+
+
+/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+
+long exp_bstate( void *buffer, long len )
+{
+	if ( I_am == CHILD )
+	{
+		writer( C_BSTATE, len, buffer );
+		T_free( buffer );
+		return reader( NULL );
+	}
+	else
+	{
+		char *old_Fname = Fname;
+		long old_Lc = Lc;
+		long val;
+		Var *Func_ptr;
+		Var *ret = NULL;
+		int access;
+		void *pos;
+
+		/* Get variable with address of function to create a button */
+
+		Func_ptr = func_get( "button_state", &access );
+
+		/* Unpack parameter and push them onto the stack */
+
+		pos = buffer;
+		memcpy( &Lc, pos, sizeof( long ) );    /* get current line number */
+		pos += sizeof( long );
+
+		vars_push( INT_VAR, *( ( long * ) pos ) );
+		pos += sizeof( long );
+
+		memcpy( &val, pos, sizeof( long ) );   /* get state to be set */
+		if ( val >= 0 )
+			vars_push( INT_VAR, val );
+		pos += sizeof( long );
+
+		Fname = ( char * ) pos;                /* get current file name */
+
+		/* Call the function */
+
+		TRY
+		{
+			ret = func_call( Func_ptr );
+			T_free( buffer );
+			Fname = old_Fname;
+			Lc = old_Lc;
+			writer( C_BSTATE_REPLY, ret->val.lval );
+			vars_pop( ret );
+			TRY_SUCCESS;
+		}
+		OTHERWISE
+		{
+			vars_pop( ret );
+			T_free( buffer );
+			Fname = old_Fname;
+			Lc = old_Lc;
+			writer( C_BSTATE_REPLY, -1L );
+		}
+
+		return 0;
+	}
+}
+
+
+/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+
+long *exp_screate( void *buffer, long len )
+{
+	if ( I_am == CHILD )
+	{
+		long *result;
+
+
+		writer( C_SCREATE, len, buffer );
+		T_free( buffer );
+		result = T_malloc( 2 * sizeof( long ) );
+		reader( ( void * ) result );
+		return ( long * ) result;
+	}
+	else
+	{
+		char *old_Fname = Fname;
+		long old_Lc = Lc;
+		Var *Func_ptr;
+		Var *ret = NULL;
+		int access;
+		long result[ 2 ];
+		void *pos;
+
+
+		/* Get variable with address of function to create a button */
+
+		Func_ptr = func_get( "slider_create", &access );
+
+		/* Unpack parameter and push them onto the stack */
+
+		pos = buffer;
+		memcpy( &Lc, pos, sizeof( long ) );      /* get current line number */
+		pos += sizeof( long );
+
+		vars_push( INT_VAR, *( ( long * ) pos ) );
+		pos += sizeof( long );
+
+		vars_push( FLOAT_VAR, *( ( double * ) pos ) );
+		pos += sizeof( double );
+
+		vars_push( FLOAT_VAR, *( ( double * ) pos ) );
+		pos += sizeof( double );
+
+		Fname = ( char * ) pos;                  /* get current file name */
+		pos += strlen( ( char * ) pos ) + 1;
+
+		vars_push( STR_VAR, ( char * ) pos );    /* get label string */
+		pos += strlen( ( char * ) pos ) + 1;
+
+		if ( *( ( char * ) pos ) != '\0' )       /* get help text */
+			vars_push( STR_VAR, ( char * ) pos );
+
+		/* Call the function */
+
+		TRY
+		{
+			ret = func_call( Func_ptr );
+			T_free( buffer );
+			Fname = old_Fname;
+			Lc = old_Lc;
+			result[ 0 ] = 1;
+			result[ 1 ] = ret->val.lval;
+			TRY_SUCCESS;
+		}
+		OTHERWISE
+			result[ 0 ] = 0;
+
+		vars_pop( ret );
+		writer( C_SCREATE_REPLY, 2 * sizeof( long ), result );
+
+		return NULL;
+	}
+}
+
+
+/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+
+bool exp_sdelete( void *buffer, long len )
+{
+	if ( I_am == CHILD )
+	{
+		writer( C_SDELETE, len, buffer );
+		T_free( buffer );
+		return ( bool ) reader( NULL );
+	}
+	else
+	{
+		char *old_Fname = Fname;
+		long old_Lc = Lc;
+		Var *Func_ptr;
+		int access;
+		void *pos;
+
+
+		/* Get variable with address of function to create a button */
+
+		Func_ptr = func_get( "slider_delete", &access );
+
+		/* Unpack parameter and push them onto the stack */
+
+		pos = buffer;
+		memcpy( &Lc, pos, sizeof( long ) );    /* get current line number */
+		pos += sizeof( long );
+
+		vars_push( INT_VAR, *( ( long * ) pos ) );
+		pos += sizeof( long );
+
+		Fname = ( char * ) pos;                /* get current file name */
+
+		/* Call the function */
+
+		TRY
+		{
+			vars_pop( func_call( Func_ptr ) );
+			T_free( buffer );
+			Fname = old_Fname;
+			Lc = old_Lc;
+			writer( C_SDELETE_REPLY, 1L );
+			TRY_SUCCESS;
+		}
+		OTHERWISE
+		{
+			T_free( buffer );
+			Fname = old_Fname;
+			Lc = old_Lc;
+			writer( C_SDELETE_REPLY, 0L );
+		}
+
+		return SET;
+	}
+}
+
+
+/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+
+double *exp_sstate( void *buffer, long len )
+{
+	if ( I_am == CHILD )
+	{
+		double *result;
+
+
+		writer( C_SSTATE, len, buffer );
+		T_free( buffer );
+		result = T_malloc( 2 * sizeof( double ) );
+		reader( ( void * ) result );
+		return ( double * ) result;
+	}
+	else
+	{
+		char *old_Fname = Fname;
+		long old_Lc = Lc;
+		long lval;
+		double dval;
+		Var *Func_ptr;
+		Var *ret = NULL;
+		int access;
+		void *pos;
+		double res[ 2 ];
+
+
+		/* Get variable with address of function to set/get slider value */
+
+		Func_ptr = func_get( "slider_value", &access );
+
+		/* Unpack parameter and push them onto the stack */
+
+		pos = buffer;
+		memcpy( &Lc, pos, sizeof( long ) );    /* get current line number */
+		pos += sizeof( long );
+
+		vars_push( INT_VAR, *( ( long * ) pos ) );
+		pos += sizeof( long );
+
+		memcpy( &lval, pos, sizeof( long ) );
+		pos += sizeof( long );
+		if ( lval > 0 )
+		{
+			memcpy( &dval, pos, sizeof( long ) );
+			vars_push( FLOAT_VAR, dval );
+		}
+		pos += sizeof( double );
+
+		Fname = ( char * ) pos;                /* get current file name */
+
+		/* Call the function */
+
+		TRY
+		{
+			ret = func_call( Func_ptr );
+			T_free( buffer );
+			Fname = old_Fname;
+			Lc = old_Lc;
+			res[ 0 ] = 10.0;
+			res[ 1 ] = ret->val.dval;
+			vars_pop( ret );
+			TRY_SUCCESS;
+		}
+		OTHERWISE
+		{
+			vars_pop( ret );
+			T_free( buffer );
+			Fname = old_Fname;
+			Lc = old_Lc;
+			res[ 0 ] = -10.0;
+		}
+
+		writer( C_SSTATE_REPLY, 2 * sizeof( double ), res );
+		return NULL;
+	}
+}
+
+
+/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+
 static const char *handle_input( const char *content, const char *label )
 {
 	if ( label != NULL && label != '\0' )

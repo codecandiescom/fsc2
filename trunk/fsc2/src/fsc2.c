@@ -819,6 +819,10 @@ void clean_up( void )
 
 	phases_clear( );
 
+	/* Delete everything connected with user buttons */
+
+	tools_clear( );
+
 	/* delete variables and get rid of variable stack */
 
 	vars_clean_up( );

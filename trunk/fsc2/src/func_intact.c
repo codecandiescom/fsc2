@@ -140,7 +140,7 @@ Var *f_bcreate( Var *v )
 
 
 		buffer = T_malloc( 3 * sizeof( long ) + strlen( Fname )
-						   + strlen( label ) + strlen( help_text ) );
+						   + strlen( label ) + strlen( help_text ) + 3 );
 		pos = buffer;
 
 		memcpy( pos, &Lc, sizeof( long ) );     /* store current line number */
@@ -225,12 +225,12 @@ Var *f_bcreate( Var *v )
 
 		if ( Tool_Box->x == 0 && Tool_Box->y == 0 )
 			fl_show_form( Tool_Box->Tools, FL_PLACE_MOUSE | FL_FREE_SIZE,
-						  FL_FULLBORDER, "fsc2: Tool box" );
+						  FL_FULLBORDER, "fsc2: Tools" );
 		else
 		{
 			fl_set_form_position( Tool_Box->Tools, Tool_Box->x, Tool_Box->y );
 			fl_show_form( Tool_Box->Tools, FL_PLACE_POSITION,
-						  FL_FULLBORDER, "fsc2: Tool box" );
+						  FL_FULLBORDER, "fsc2: Tools" );
 		}
 		XFlush( fl_get_display( ) );
 	}
@@ -263,7 +263,7 @@ Var *f_bdelete( Var *v )
 			void *buffer, *pos;
 
 
-			if ( v->type != INT_VAR )
+			if ( v->type != INT_VAR || v->val.lval < 0 )
 			{
 				eprint( FATAL, "%s:%ld: Invalid button identifier in "
 						"`button_delete'.\n", Fname, Lc );
@@ -282,7 +282,7 @@ Var *f_bdelete( Var *v )
 
 			v = vars_pop( v );
 
-			if ( ! exp_bdelete( buffer, ( long ) ( buffer - pos ) ) )
+			if ( ! exp_bdelete( buffer, ( long ) ( pos - buffer ) ) )
 				THROW( EXCEPTION );
 
 			continue;
@@ -295,7 +295,7 @@ Var *f_bdelete( Var *v )
 			THROW( EXCEPTION );
 		}
 
-		if ( v->type != INT_VAR ||
+		if ( v->type != INT_VAR || v->val.lval < 0 ||
 			 ( io = find_object_from_ID( v->val.lval ) ) == NULL ||
 			 ( io->type != NORMAL_BUTTON &&
 			   io->type != PUSH_BUTTON   &&
@@ -389,12 +389,12 @@ Var *f_bdelete( Var *v )
 
 		if ( Tool_Box->x == 0 && Tool_Box->y == 0 )
 			fl_show_form( Tool_Box->Tools, FL_PLACE_MOUSE | FL_FREE_SIZE,
-						  FL_FULLBORDER, "fsc2: Tool box" );
+						  FL_FULLBORDER, "fsc2: Tools" );
 		else
 		{
 			fl_set_form_position( Tool_Box->Tools, Tool_Box->x, Tool_Box->y );
 			fl_show_form( Tool_Box->Tools, FL_PLACE_POSITION,
-						  FL_FULLBORDER, "fsc2: Tool box" );
+						  FL_FULLBORDER, "fsc2: Tools" );
 		}
 		XFlush( fl_get_display( ) );
 	}
@@ -422,9 +422,57 @@ Var *f_bstate( Var *v )
 
 	if ( I_am == CHILD )
 	{
-		while ( ( v = vars_pop( v ) ) != NULL )
-			;
-		return vars_push( INT_VAR, 0 );
+		long ID;
+		long state = -1;
+		void *buffer, *pos;
+
+
+		if ( v->type != INT_VAR || v->val.lval < 0 )
+		{
+			eprint( FATAL, "%s:%ld: Invalid button identifier in "
+					"`button_state'.\n", Fname, Lc );
+			THROW( EXCEPTION );
+		}
+		ID = v->val.lval;
+		
+		if ( ( v = vars_pop( v ) ) != NULL )
+		{
+			vars_check( v, INT_VAR | FLOAT_VAR );
+			if ( v->type == INT_VAR )
+				state = v->val.lval != 0 ? 1 : 0;
+			else
+				state = v->val.dval != 0.0 ? 1 : 0;
+		}
+
+		if ( ( v = vars_pop( v ) ) != NULL )
+		{
+			eprint( WARN, "%s:%ld: Superfluous arguments in call of "
+					"`button_state'.\n", Fname, Lc );
+			while ( ( v = vars_pop( v ) ) != NULL )
+				;
+		}
+
+		buffer = T_malloc( 3 * sizeof( long ) + strlen( Fname ) + 1 );
+		pos = buffer;
+
+		memcpy( pos, &Lc, sizeof( long ) );
+		pos += sizeof( long );
+
+		memcpy( pos, &ID, sizeof( long ) );
+		pos += sizeof( long );
+
+		memcpy( pos, &state, sizeof( long ) );
+		pos += sizeof( long );
+
+		strcpy( pos, Fname );
+		pos += strlen( ( char * ) pos ) + 1;
+		
+		state = exp_bstate( buffer, ( long ) ( pos - buffer ) );
+
+		if ( state < 0 )
+			THROW( EXCEPTION );
+
+		return vars_push( INT_VAR, state );
 	}
 
 	if ( Tool_Box == NULL )
@@ -434,7 +482,7 @@ Var *f_bstate( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	if ( v->type != INT_VAR ||
+	if ( v->type != INT_VAR || v->val.lval < 0 ||
 		 ( io = find_object_from_ID( v->val.lval ) ) == NULL ||
 		 ( io->type != NORMAL_BUTTON &&
 		   io->type != PUSH_BUTTON   &&
@@ -594,9 +642,61 @@ Var *f_screate( Var *v )
 	
 	if ( I_am == CHILD )
 	{
+		void *buffer, *pos;
+		long new_ID;
+		long *result;
+
+
+		buffer = T_malloc( 2 * sizeof( long ) + 2 + sizeof( double )
+						   + strlen( Fname ) + strlen( label )
+						   + strlen( help_text ) + 3 );
+		pos = buffer;
+
+		memcpy( pos, &Lc, sizeof( long ) );     /* store current line number */
+		pos += sizeof( long );
+
+		memcpy( pos, &type, sizeof( long ) );   /* store slider type */
+		pos += sizeof( long );
+
+		memcpy( pos, &start_val, sizeof( double ) );
+		pos += sizeof( double );
+
+		memcpy( pos, &end_val, sizeof( double ) );
+		pos += sizeof( double );
+
+		strcpy( ( char * ) pos, Fname );        /* store current file name */
+		pos += strlen( Fname ) + 1;
+
+		if ( label )                            /* store label string */
+		{
+			strcpy( ( char * ) pos, label );
+			pos += strlen( label ) + 1;
+		}
+		else
+			*( ( char * ) pos++ ) = '\0';
+
+		if ( help_text )                        /* store help text string */
+		{
+			strcpy( ( char * ) pos, help_text );
+			pos += strlen( help_text ) + 1;
+		}
+		else
+			*( ( char * ) pos++ ) = '\0';
+
+		result = exp_screate( buffer, ( long ) ( pos - buffer ) );
+
 		T_free( label );
 		T_free( help_text );
-		return vars_push( INT_VAR, 0 );
+
+		if ( result[ 0 ] == 0 )
+		{
+			T_free( result );
+			THROW( EXCEPTION );
+		}
+
+		new_ID = result[ 1 ];
+		T_free( result );
+		return vars_push( INT_VAR, new_ID );
 	}
 
 	/* Now that we're done with checking the parameters we can create the new
@@ -622,9 +722,10 @@ Var *f_screate( Var *v )
 
 	new_io->ID = ID;
 	new_io->type = ( int ) type;
+	new_io->self = NULL;
 	new_io->start_val = start_val;
 	new_io->end_val = end_val;
-	new_io->value = 0.5 * ( end_val - start_val );
+	new_io->value = 0.5 * ( end_val + start_val );
 	new_io->label = label;
 	new_io->help_text = help_text;
 	new_io->is_created = UNSET;
@@ -636,12 +737,12 @@ Var *f_screate( Var *v )
 
 		if ( Tool_Box->x == 0 && Tool_Box->y == 0 )
 			fl_show_form( Tool_Box->Tools, FL_PLACE_MOUSE | FL_FREE_SIZE,
-						  FL_FULLBORDER, "fsc2: Tool box" );
+						  FL_FULLBORDER, "fsc2: Tools" );
 		else
 		{
 			fl_set_form_position( Tool_Box->Tools, Tool_Box->x, Tool_Box->y );
 			fl_show_form( Tool_Box->Tools, FL_PLACE_POSITION,
-						  FL_FULLBORDER, "fsc2: Tool box" );
+						  FL_FULLBORDER, "fsc2: Tools" );
 		}
 		XFlush( fl_get_display( ) );
 	}
@@ -670,9 +771,32 @@ Var *f_sdelete( Var *v )
 	{
 		if ( I_am == CHILD )
 		{
-			while ( ( v = vars_pop( v ) ) != NULL )
-				;
-			return vars_push( INT_VAR, 0 );
+			void *buffer, *pos;
+
+
+			if ( v->type != INT_VAR || v->val.lval < 0 )
+			{
+				eprint( FATAL, "%s:%ld: Invalid slider identifier in "
+						"`slider_delete'.\n", Fname, Lc );
+				THROW( EXCEPTION );
+			}
+
+			buffer = T_malloc( 2 * sizeof( long ) + strlen( Fname ) + 1 );
+
+			pos = buffer;
+			memcpy( pos, &Lc, sizeof( long ) );
+			pos += sizeof( long );
+			memcpy( pos, &v->val.lval, sizeof( long ) );
+			pos += sizeof( long );
+			strcpy( pos, Fname );
+			pos += strlen( ( char * ) pos ) + 1;
+
+			v = vars_pop( v );
+
+			if ( ! exp_sdelete( buffer, ( long ) ( pos - buffer ) ) )
+				THROW( EXCEPTION );
+
+			continue;
 		}
 
 		if ( Tool_Box == NULL )
@@ -682,11 +806,10 @@ Var *f_sdelete( Var *v )
 			THROW( EXCEPTION );
 		}
 
-		if ( v->type != INT_VAR ||
+		if ( v->type != INT_VAR || v->val.lval < 0 ||
 			 ( io = find_object_from_ID( v->val.lval ) ) == NULL ||
-			 ( io->type != NORMAL_BUTTON &&
-			   io->type != PUSH_BUTTON   &&
-			   io->type != RADIO_BUTTON ) )
+			 ( io->type != NORMAL_SLIDER &&
+			   io->type != VALUE_SLIDER ) )
 		{
 			eprint( FATAL, "%s:%ld: Invalid slider identifier in "
 					"`slider_delete'.\n", Fname, Lc );
@@ -748,18 +871,21 @@ Var *f_sdelete( Var *v )
 		v = vars_pop( v );
 	}
 
+	if ( I_am == CHILD )
+		return vars_push( INT_VAR, 1 );
+
 	if ( ! TEST_RUN )
 	{
 		recreate_Tool_Box( );
 
 		if ( Tool_Box->x == 0 && Tool_Box->y == 0 )
 			fl_show_form( Tool_Box->Tools, FL_PLACE_MOUSE | FL_FREE_SIZE,
-						  FL_FULLBORDER, "fsc2: Tool box" );
+						  FL_FULLBORDER, "fsc2: Tools" );
 		else
 		{
 			fl_set_form_position( Tool_Box->Tools, Tool_Box->x, Tool_Box->y );
 			fl_show_form( Tool_Box->Tools, FL_PLACE_POSITION,
-						  FL_FULLBORDER, "fsc2: Tool box" );
+						  FL_FULLBORDER, "fsc2: Tools" );
 		}
 		XFlush( fl_get_display( ) );
 	}
@@ -787,9 +913,66 @@ Var *f_svalue( Var *v )
 
 	if ( I_am == CHILD )
 	{
-		while ( ( v = vars_pop( v ) ) != NULL )
-			;
-		return vars_push( FLOAT_VAR, 1.23 );
+		long ID;
+		long state = 0;
+		double val = 0.0;
+		void *buffer, *pos;
+		double *res;
+
+
+		if ( v->type != INT_VAR || v->val.lval < 0 )
+		{
+			eprint( FATAL, "%s:%ld: Invalid slider identifier in "
+					"`slider_state'.\n", Fname, Lc );
+			THROW( EXCEPTION );
+		}
+		ID = v->val.lval;
+		
+		if ( ( v = vars_pop( v ) ) != NULL )
+		{
+			state = 1;
+			vars_check( v, INT_VAR | FLOAT_VAR );
+			val = VALUE( v );
+		}
+
+		if ( ( v = vars_pop( v ) ) != NULL )
+		{
+			eprint( WARN, "%s:%ld: Superfluous arguments in call of "
+					"`slider_state'.\n", Fname, Lc );
+			while ( ( v = vars_pop( v ) ) != NULL )
+				;
+		}
+
+		buffer = T_malloc( 3 * sizeof( long ) + sizeof( double )
+						   + strlen( Fname ) + 1 );
+		pos = buffer;
+
+		memcpy( pos, &Lc, sizeof( long ) );
+		pos += sizeof( long );
+
+		memcpy( pos, &ID, sizeof( long ) );
+		pos += sizeof( long );
+
+		memcpy( pos, &state, sizeof( long ) );
+		pos += sizeof( long );
+
+		memcpy( pos, &val, sizeof( double ) );
+		pos += sizeof( double );
+
+		strcpy( pos, Fname );
+		pos += strlen( ( char * ) pos ) + 1;
+		
+		res = exp_sstate( buffer, ( long ) ( pos - buffer ) );
+
+		if ( res[ 0 ] < 0 )
+		{
+			T_free( res );
+			THROW( EXCEPTION );
+		}
+
+		val = res[ 1 ];
+		T_free( res );
+		return vars_push( FLOAT_VAR, val );
 	}
 
 	if ( Tool_Box == NULL )
@@ -799,7 +982,7 @@ Var *f_svalue( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	if ( v->type != INT_VAR ||
+	if ( v->type != INT_VAR || v->val.lval < 0 ||
 		 ( io = find_object_from_ID( v->val.lval ) ) == NULL ||
 		 ( io->type != NORMAL_SLIDER &&
 		   io->type != VALUE_SLIDER ) )
@@ -842,10 +1025,7 @@ Var *f_svalue( Var *v )
 			;
 	}
 
-	if ( type == INT_VAR )
-		return vars_push( INT_VAR, lround( io->value ) );
-	else
-		return vars_push( FLOAT_VAR, io->value );
+	return vars_push( FLOAT_VAR, io->value );
 }
 
 
@@ -880,7 +1060,8 @@ void tools_clear( void )
 	if ( Tool_Box == NULL )
 		return;
 
-	fl_hide_form( Tool_Box->Tools );
+	if ( Tool_Box->Tools )
+		fl_hide_form( Tool_Box->Tools );
 
 	for ( io = Tool_Box->objs; io != NULL; io = next )
 	{
@@ -889,15 +1070,23 @@ void tools_clear( void )
 		T_free( io->label );
 		T_free( io->help_text );
 
-		fl_delete_object( io->self );
-		fl_free_object( io->self );
+		if ( io->self )
+		{
+			fl_delete_object( io->self );
+			fl_free_object( io->self );
+		}
+
 		T_free( io );
 	}
 
-	fl_delete_object( Tool_Box->background_box );
-	fl_free_object( Tool_Box->background_box );
+	if ( Tool_Box->Tools )
+	{
+		fl_delete_object( Tool_Box->background_box );
+		fl_free_object( Tool_Box->background_box );
 
-	fl_free_form( Tool_Box->Tools );
+		fl_free_form( Tool_Box->Tools );
+	}
+
 	Tool_Box = T_free( Tool_Box );
 }
 

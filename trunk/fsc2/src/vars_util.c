@@ -1593,6 +1593,8 @@ Var *vars_array_check( Var *v1, Var *v2 )
 	long length;
 
 
+	/* If the left hand side has a defined size nothing needs to be done */
+
 	if ( v1->type == ARR_REF )
 	{
 		if ( v1->from->dim != 1 )

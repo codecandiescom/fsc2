@@ -99,6 +99,7 @@ bool exp_bdelete( void *buffer, long len );
 long exp_bstate( void *buffer, long len );
 long *exp_screate( void *buffer, long len );
 bool exp_sdelete( void *buffer, long len );
+double *exp_sstate( void *buffer, long len );
 
 
 #endif  /* ! COMM_HEADER */
