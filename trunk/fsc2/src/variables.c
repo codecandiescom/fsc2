@@ -1135,11 +1135,16 @@ Var *vars_arr_rhs( Var *v )
 
 void vars_assign( Var *src, Var *dest )
 {
-	/* <PARANOID> Check that both variables exist </PARANOID> */
-
-	fsc2_assert( vars_exist( src ) && vars_exist( dest ) );
-
 #ifndef NDEBUG
+	/* Check that both variables exist and src has a reasonable type */
+
+	if ( ! vars_exist( src ) || ! vars_exist( dest ) )
+	{
+		eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
+				__FILE__, __LINE__ );
+		THROW( EXCEPTION );
+	}
+
 	if ( ! ( src->type & ( INT_VAR | FLOAT_VAR |
 						   INT_ARR | FLOAT_ARR |
 						   INT_REF | FLOAT_REF ) ) )
@@ -1827,6 +1832,23 @@ static Var *vars_push_submatrix( Var *from, int type, int dim, ssize_t *sizes )
 /*-----------------------------------------------------------------------*/
 /* vars_push() creates a new entry on the variable stack (which actually */
 /* is not really a stack but a linked list) and sets its type and value. */
+/* The following sets of arguments are possible:                         */
+/* INT_VAR, long                      value is the value to be assigned  */
+/* FLOAT_VAR, double                  value is the value to be assigned  */
+/* INT_ARR, long * or NULL, long      first value is pointer to array to */
+/*                                    be assigned or NULL for initiali-  */
+/*                                    zation with 0, second length of    */
+/*                                    array                              */
+/* FLOAT_ARR, double * or NULL, long  first value is pointer to array to */
+/*                                    be assigned or NULL for initiali-  */
+/*                                    zation with 0, second length of    */
+/*                                    array                              */
+/* INT_PTR, long *                                                       */
+/* FLOAT_PTR, long *                                                     */
+/* INT_REF, Var *                                                        */
+/* FLOAT_REF, Var *                                                      */
+/* REF_PTR, Var *														 */
+/* FUNC_PTR, struct Func *												 */
 /*-----------------------------------------------------------------------*/
 
 Var *vars_push( int type, ... )
@@ -1982,7 +2004,8 @@ Var *vars_push( int type, ... )
 
 Var *vars_make( int type, Var *src )
 {
-	Var *nv, *stack;
+	Var *nv = NULL;
+	Var **stack;
 	ssize_t i;
 
 
@@ -2030,7 +2053,7 @@ Var *vars_make( int type, Var *src )
 			}
 			else
 				nv->val.lpnt = NULL;
-			return nv;
+			break;
 
 		case FLOAT_ARR :
 			nv->len = src->len;
@@ -2044,7 +2067,7 @@ Var *vars_make( int type, Var *src )
 			}
 			else
 				nv->val.dpnt = NULL;
-			return nv;
+			break;
 
 		case INT_REF : case FLOAT_REF :
 			nv->dim = src->dim;
@@ -2060,11 +2083,13 @@ Var *vars_make( int type, Var *src )
 				nv->val.vptr = NULL;
 				nv->len = 0;
 			}
-			return nv;
+			break;
+
+		default :
+			fsc2_assert( 1 == 0 );
 	}
 
-	fsc2_assert( 1 == 0 );
-	return NULL;
+	return nv;
 }
 
 
@@ -2308,23 +2333,28 @@ void vars_check( Var *v, int type )
 							 "ARRAY REFERENCE", "FUNCTION" };
 
 
+#ifndef NDEBUG
 	/* Someone might call the function with a NULL pointer - handle this
 	   gracefully, i.e. by throwing an exception and don't crash (even
 	   though this clearly is a bug) */
 
-#ifndef NDEBUG
 	if ( v == NULL )
 	{
 		eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
 				__FILE__, __LINE__ );
 		THROW( EXCEPTION );
 	}
-#endif
 
 	/* Being real paranoid we check that the variable exists at all -
 	   probably this can vanish later. */
 
-	fsc2_assert( vars_exist( v ) );
+	if ( ! vars_exist( v ) )
+	{
+		eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
+				__FILE__, __LINE__ );
+		THROW( EXCEPTION );
+	}
+#endif
 
 	/* Check that the variable has a value assigned to it */
 
@@ -2379,9 +2409,6 @@ bool vars_exist( Var *v )
 		for ( lp = EDL.Var_List; lp != NULL && lp != v; lp = lp->next )
 			/* empty */ ;
 
-	/* If the variable can't be found in the lists we've got a problem... */
-
-	fsc2_assert( lp == v );
 	return lp == v;
 }
 
