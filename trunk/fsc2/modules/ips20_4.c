@@ -58,7 +58,7 @@ Var *set_sweep_rate( Var *v );
 Var *magnet_sweep( Var *v );
 Var *magnet_sweep_rate( Var *v );
 Var *reset_field( Var *v );
-Var *magnet_goto_current_on_end( Var *v );
+Var *magnet_goto_field_on_end( Var *v );
 
 
 static void magnet_sweep_up( void );
@@ -619,7 +619,7 @@ Var *reset_field( Var *v )
 /* the experiment has ended.                                 */
 /*-----------------------------------------------------------*/
 
-Var *magnet_goto_current_on_end( Var *v )
+Var *magnet_goto_field_on_end( Var *v )
 {
 	double cur;
 

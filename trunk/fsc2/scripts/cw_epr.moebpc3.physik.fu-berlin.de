@@ -703,7 +703,7 @@ init_1d( 3, Num_Points, start_current, step_size,
 		 \"Current [A]\", \"Signal [mV]\" );
 lockin_time_constant( tc );
 lockin_auto_setup( 1 / kd, 1 );
-magnet_goto_current_on_end( start_current );
+magnet_goto_field_on_end( start_current );
 
 
 EXPERIMENT:
@@ -908,7 +908,7 @@ init_1d( 3, Num_Points, start_current, step_size,
 		 \"Current [A]\", \"Signal [mV]\" );
 lockin_time_constant( tc );
 lockin_auto_setup( 1 / kd, 1 );
-magnet_goto_current_on_end( start_current );
+magnet_goto_field_on_end( start_current );
 
 
 EXPERIMENT:
