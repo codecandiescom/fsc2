@@ -102,7 +102,7 @@ int rs_spec10_exp_hook( void )
 	rs_spec10_exp = rs_spec10_prep;
 	rs_spec10 = &rs_spec10_exp;
 
-	rs_spec10_init_camera( );
+//	rs_spec10_init_camera( );
 	return 1;
 }
 
@@ -115,7 +115,7 @@ int rs_spec10_end_of_exp_hook( void )
 {
 	if ( rs_spec10->is_open )
 	{
-		pl_cam_close( rs_spec10->handle );
+//		pl_cam_close( rs_spec10->handle );
 		rs_spec10->is_open = UNSET;
 	}
 
@@ -523,7 +523,7 @@ Var *ccd_camera_get_picture( Var *v )
 			frame = rs_spec10_get_pic( &size );
 		else
 		{
-			max_val = ~ ( uns16 ) 0 + 1;
+			max_val = ~ ( uns16 ) 0;
 
 			size = ( uns32 ) ( width * height *sizeof *frame );
 			frame = UNS16_P T_malloc( size );
@@ -676,7 +676,7 @@ Var *ccd_camera_get_spectrum( Var *v )
 			frame = rs_spec10_get_pic( &size );
 		else
 		{
-			max_val = ~ ( uns16 ) 0 + 1;
+			max_val = ~ ( uns16 ) 0;
 
 			size = ( uns32 ) ( width * sizeof *frame );
 			frame = UNS16_P T_malloc( size );
@@ -694,7 +694,7 @@ Var *ccd_camera_get_spectrum( Var *v )
 		   start only at the second element. This hack tries to avoid the
 		   problem.*/
 
-		if ( FSC2_MODE == TEST || rs_spec10->ccd.bin_mode == HARDWARE_BINNING )
+		if ( rs_spec10->ccd.bin_mode == HARDWARE_BINNING )
 			cf = frame + size / sizeof *frame - width;
 		else
 			cf = frame;
@@ -826,8 +826,29 @@ Var *ccd_camera_temperature( Var *v )
 
 Var *ccd_camera_pixel_size( Var *v )
 {
+	UNUSED_ARGUMENT( v );
+
 	return vars_push( FLOAT_VAR, RS_SPEC10_PIXEL_SIZE );
 }
+
+
+/*------------------------------------------------------*/
+/*------------------------------------------------------*/
+
+Var *ccd_camera_pixel_area( Var *v )
+{
+	Var *cv;
+
+
+	UNUSED_ARGUMENT( v );
+
+	cv = vars_push( INT_ARR, NULL, 2 );
+	cv->val.lpnt[ 0 ] = CCD_PIXEL_WIDTH;
+	cv->val.lpnt[ 1 ] = CCD_PIXEL_HEIGHT;
+
+	return cv;
+}
+
 
 /*
  * Local variables:
