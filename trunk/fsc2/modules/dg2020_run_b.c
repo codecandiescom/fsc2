@@ -190,7 +190,7 @@ void dg2020_do_checks( FUNCTION *f )
 		   test run) or the maximum sequence length (in the real run) */
 
 		f->max_seq_len = Ticks_max( f->max_seq_len, pp->pos + pp->len );
-		if ( f->delay + f->max_seq_len >
+		if ( f->max_seq_len >
 				 ( FSC2_MODE == TEST ? MAX_PULSER_BITS : dg2020.max_seq_len ) )
 		{
 			if ( FSC2_MODE == TEST )

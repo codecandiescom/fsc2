@@ -493,9 +493,9 @@ Var *pulser_automatic_shape_pulses( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	/* Check that a channel has been set for shape pulses */
+	/* Check that a pod has been set for shape pulses */
 
-	if ( dg2020.function[ PULSER_CHANNEL_PULSE_SHAPE ].num_channels == 0 )
+	if ( dg2020.function[ PULSER_CHANNEL_PULSE_SHAPE ].num_pods == 0 )
 	{
 		print( FATAL, "No channel has been set for function '%s' needed for "
 			   "creating shape pulses.\n",
@@ -606,9 +606,9 @@ Var *pulser_automatic_twt_pulses( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	/* Check that a channel has been set for TWT pulses */
+	/* Check that a pod has been set for TWT pulses */
 
-	if ( dg2020.function[ PULSER_CHANNEL_TWT ].num_channels == 0 )
+	if ( dg2020.function[ PULSER_CHANNEL_TWT ].num_pods == 0 )
 	{
 		print( FATAL, "No channel has been set for function '%s' needed for "
 			   "creating TWT pulses.\n",

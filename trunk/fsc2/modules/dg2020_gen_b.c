@@ -78,7 +78,7 @@ bool dg2020_assign_function( int function, long pod )
 	if ( p->function != NULL )
 	{
 		print( FATAL, "Pod number %ld has already been assigned to function "
-			   "'%s'.\n", pod, Function_Names[ p->function->self ] );
+			   "'%s'.\n", pod, p->function->name );
 		THROW( EXCEPTION );
 	}
 
@@ -96,8 +96,7 @@ bool dg2020_assign_function( int function, long pod )
 	if ( f->num_pods >= MAX_PODS_PER_FUNC )
 	{
 		print( FATAL, "Function %s has already been assigned the maximum "
-			   "number of %d pods.\n",
-				Function_Names[ f->self ], ( int ) MAX_PODS_PER_FUNC );
+			   "number of %d pods.\n", f->name, ( int ) MAX_PODS_PER_FUNC );
 		THROW( EXCEPTION );
 	}
 
@@ -130,12 +129,24 @@ bool dg2020_assign_channel_to_function( int function, long channel )
 		if ( c->function->self == function )
 		{
 			print( SEVERE, "Channel %ld is assigned twice to function '%s'.\n",
-				   channel, Function_Names[ c->function->self ] );
+				   channel, c->function->name );
 			return FAIL;
 		}
 
 		print( FATAL, "Channel %ld is already used for function '%s'.\n",
-			   channel, Function_Names[ c->function->self ] );
+			   channel, c->function->name );
+		THROW( EXCEPTION );
+	}
+
+	/* The PULSE_SHAPE and TWT function can only have one channel assigned
+	   to it */
+
+	if ( ( function == PULSER_CHANNEL_PULSE_SHAPE ||
+		   function == PULSER_CHANNEL_TWT ) &&
+		 f->num_channels > 0 )
+	{
+		print( FATAL, "Only one channel can be assigned to function '%s'.\n",
+			   Function_Names[ function ] );
 		THROW( EXCEPTION );
 	}
 
@@ -548,8 +559,7 @@ bool dg2020_set_phase_reference( int phs, int function )
 	if ( dg2020_phs[ phs ].function != NULL )
 	{
 		print( FATAL, "PHASE_SETUP_%d has already been assoiated with "
-			   "function %s.\n",
-			   phs, Function_Names[ dg2020_phs[ phs ].function->self ] );
+			   "function %s.\n", phs, dg2020_phs[ phs ].function->name );
 		THROW( EXCEPTION );
 	}
 
@@ -560,7 +570,7 @@ bool dg2020_set_phase_reference( int phs, int function )
 	if ( f->phase_setup != NULL )
 	{
 		print( SEVERE, "Phase setup for function %s has already been done.\n",
-			   Function_Names[ f->self ] );
+			   f->name );
 		return FAIL;
 	}
 
@@ -662,7 +672,7 @@ bool dg2020_phase_setup( int phs )
 		{
 			print( FATAL, "Pod %d needed for phase '%s' is not reserved for "
 				   "function '%s'.\n", dg2020_phs[ phs ].pod[ i ]->self,
-				   Phase_Types[ i ], Function_Names[ f->self ] );
+				   Phase_Types[ i ], f->name );
 			THROW( EXCEPTION );
 		}
 
