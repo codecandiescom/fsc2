@@ -219,7 +219,7 @@ void end_comm( void )
 /* change the high marker anymore.                                 */
 /*-----------------------------------------------------------------*/
 
-int new_data_callback( void )
+int new_data_handler( void )
 {
 	/* Check if the child raised a signal to tell us it's done. If it did
 	   send it a DO_QUIT signal (but only if it's still alive) and remove

@@ -63,7 +63,7 @@ static bool display_file( char *name, FILE *fp );
 static void start_editor( void );
 static void start_help_browser( void );
 static void set_main_signals( void );
-static void conn_request_handler( void );
+
 
 
 /**************************/
@@ -173,13 +173,14 @@ int main( int argc, char *argv[ ] )
 		argc -= 1;
 	}
 
-	/* Set handler for signal that's going to be send by the process that
-	   accepts external connections (to be spawned next) */
+	/* Set up handler for signals and a handler function that gets called when
+	   the program exits */
 
 	set_main_signals( );
 	atexit( final_exit_handler );
 
-	fl_set_idle_callback( idle_handler, NULL );
+	/* If the program was started in test mode call the appropriate function
+	   (which never returns) */
 
 	if ( Internals.cmdline_flags & DO_CHECK )
 		check_run( );
@@ -205,13 +206,22 @@ int main( int argc, char *argv[ ] )
 		if ( Internals.cmdline_flags & DO_SIGNAL )
 			kill( getppid( ), SIGUSR1 );
 
-		/* And, finally, here's the main loop of the program. In batch mode
-		   we try to get the next file from the command line and start it. */
+		/* And, finally, here's the main loop of the program - it first checks
+		   the objects of the GUI, if necessary executing the associated
+		   callbacks, then calls a function that does everything else required
+		   (while no experiment is run just dealing with requests from the
+		   child process handling external connections and from the HTTP
+		   server, during an experiment also accepting new data and requests
+		   from the child process running the experiment). In batch mode we
+		   then try to get the next file from the command line and start it. */
 
 	run_next:
 
-		while ( fl_do_forms( ) != GUI.main_form->quit )
-			/* empty */ ;
+		while ( fl_check_forms( ) != GUI.main_form->quit )
+			if ( ! Internals.child_pid )
+				idle_handler( );
+			else
+				new_data_handler( );
 
 		if ( Internals.cmdline_flags & BATCH_MODE && argc > 1 )
 		{
@@ -1828,7 +1838,7 @@ static void start_help_browser( void )
 /* listening for external connections (to send a new EDL program) */
 /*----------------------------------------------------------------*/
 
-static void conn_request_handler( void )
+void conn_request_handler( void )
 {
 	char line[ MAXLINE ];
 	int count;
