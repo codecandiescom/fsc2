@@ -1,7 +1,7 @@
 /*
   $Id$
  
-  Driver for National Instruments 6070E boards
+  Driver for National Instruments PCI E Series DAQ boards
 
   Copyright (C) 2003-2004 Jens Thoms Toerring
 

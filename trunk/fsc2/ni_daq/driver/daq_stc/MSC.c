@@ -1,5 +1,4 @@
 /*
-
   $Id$
  
   Driver for National Instruments DAQ boards based on a DAQ-STC
