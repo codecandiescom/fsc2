@@ -4166,8 +4166,8 @@ invocation of the function @code{mw_attenuator_use_table()}. Attenuation
 values within this range but not listed in the table are handled by
 linear interpolation of the nearest neighboring values.
 
-@strong{Please note}: it is required that the function
-@code{mw_attenuator_initial_attenuation()} has been called before the
+@strong{Please note}: The function
+@code{mw_attenuator_initial_attenuation()} must be called before the
 first invocation of this function to make the module aware about the
 setting of the attenuation when the experiment was started.
 
