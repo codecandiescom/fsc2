@@ -161,7 +161,6 @@ bool run( void )
 
 	end_comm( );
 
-	fl_remove_signal_callback( SIGCHLD );
 	fl_add_signal_callback( SIGCHLD, sigchld_handler, NULL );
 	run_exit_hooks( );
 	if ( need_GPIB )
@@ -251,7 +250,6 @@ void run_sigchld_handler( int sig_type )
 #endif
 
 	child_pid = 0;                          /* the child is dead... */
-//	fl_remove_signal_callback( SIGCHLD );
 	fl_add_signal_callback( SIGCHLD, sigchld_handler, NULL );
 
 	run_form->sigchld->u_ldata = ( long ) return_status;
