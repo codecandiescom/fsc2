@@ -47,6 +47,7 @@ the three programs
   fsc2_test
   fsc2_start
 @end example
+@noindent
 with the @acronym{EDL} program text supplie at its standard input. Each
 of the three programs will either start @acronym{fsc2} or, if
 @acronym{fsc2} is already running, connect to it, and will ask

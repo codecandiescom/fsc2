@@ -1430,6 +1430,7 @@ Dim_X[ * ];
 
 Dim_X = size( X );
 @end example
+@noindent
 will set the array @code{Dim_X} to @code{4, 2, 5}.
 
 

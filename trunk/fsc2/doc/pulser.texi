@@ -51,6 +51,7 @@ are@footnote{@code{ASSIGNMENTS:} can be abbreviated to
 ASSIGNMENTS:
 PHASES:
 @end example
+@noindent
 The first section deals with the basic setup of the pulser, the second
 is only needed when phase cycling is used.  Valid statements in these
 sections differ slightly depending on the type of the pulser and the
@@ -148,6 +149,7 @@ external trigger use a statement like this@footnote{Instead of
 @example
 TRIGGER_MODE: INTERNAL;
 @end example
+@noindent
 or
 @example
 TRIGGER_MODE: EXTERNAL;
@@ -168,10 +170,12 @@ one may use:
 @example
 TRIGGER_MODE: INTERNAL, REPEAT_TIME = 10 ms;
 @end example
+@noindent
 or
 @example
 TRIGGER_MODE: INTERNAL, REPEAT_FREQUENCY = 100 Hz;
 @end example
+@noindent
 to set the repetition rate of the the experiment to @w{100 Hz}. Please
 note that the repeat time must be an integer multiple of the time base of
 the pulser.
@@ -191,10 +195,12 @@ finally, @code{HIGH} to @code{H} and @code{LOW} to @code{L}.}:
 @example
 TRIG_MODE: EXTERNAL, LEVEL = 3.5 V, SLOPE = NEGATIVE, IMPEDANCE = LOW;
 @end example
+@noindent
 or
 @example
 TM: EXTERNAL, LEVEL = -1.2 V, SLOPE = POSITIVE, IMPEDANCE = HIGH;
 @end example
+@noindent
 Please note: The trigger input impedance can only be set for the
 @strong{Sony/Tektronix DG2020}.
 
@@ -311,6 +317,7 @@ RF:        CHANNEL = 2;
 RF_GATE:   CH = 3;
 DETECTION: CHANNEL = TRIGGER_OUT;
 @end example
+@noindent
 Please note, that usually the output channels are numbered as printed on
 the device, the only exception for the @strong{Tektronix HFS9003} is the
 trigger-out channel, that is called @code{TRIGGER_OUT}, and has some
@@ -327,6 +334,7 @@ RF:        POD = 6;
 RF_GATE:   POD = 7;
 DETECTION: POD = 11;
 @end example
+@noindent
 Instead of @code{POD} you can also simply write @code{P}.
 
 
@@ -356,6 +364,7 @@ MICROWAVE: POD = 1, 2, 3, 4  V_HIGH = 4.3 V, V_LOW = -0.5 V;
 RF:        POD = 6           V_HIGH = 2.6 V, V_LOW = 0 V;
 RF_GATE:   POD = 7           V_HIGH = 5 V,   V_LOW = 0 V;
 @end example
+@noindent
 Please note that the high voltage must always be larger than the low
 voltage.
 
@@ -386,6 +395,7 @@ position of each pulse of this function:
 @example
 MICROWAVE: POD = 1, 2, 3, 4  DELAY = 50 ns;
 @end example
+@noindent
 For obvious reasons setting negative delays is only possible when using
 internal trigger mode@footnote{The obvious reason is, of course,
 causality - the pulser can't know when the external trigger is going to
@@ -431,6 +441,7 @@ PHASE_SETUP:  MICROWAVE,
               -Y: 5,
               CW: 3;
 @end example
+@noindent
 In this example you obviously want to phase cycle the microwave pulses
 and the @code{+X} input of the bridge is connected to pod channel 1 of
 the pulser etc.@footnote{As usual, the keyword @code{PHASE_SETUP} can be
@@ -459,6 +470,7 @@ phase function needs to be specified:
 @example
 PHASE:        MICROWAVE, POD = 8, 9, V_HIGH = 5 V, V_LOW = 0 V;
 @end example
+@noindent
 In this example the phase function is used to phase cycle the microwave
 pulses and the pod channels assigned to it are the ones numbered 8 and 9.
 
@@ -470,6 +482,7 @@ PHASE_SETUP:   X: POD_1 = OFF, POD2 = OFF,
               -X: 0, 1,
               -Y: 1, 1;
 @end example
+@noindent
 This phase setup command tells the program that to set the @code{+X} phase
 the voltage at both pod outputs of the phase function have to be in the
 low state, while for the @code{-Y} phase the first pod output (set to pod
@@ -494,6 +507,7 @@ to settle). This time can be set via a statement like
 @example
 PHASE_SWITCH_DELAY: 40ns;
 @end example
+@noindent
 This will lead to the phase pulse being switched at least @w{40 ns}
 before the real pulse starts. When this statement is missing a default
 value of @w{20 ns} is used. If there are two different phase functions
@@ -509,6 +523,7 @@ and is set via
 @example
 GRACE_PERIOD: 20ns;
 @end example
+@noindent
 Without this statement a default grace period of @w{10 ns} will be
 used.
 
@@ -565,6 +580,7 @@ starting with the @code{MAXIMUM_PATTERN_LENGTH} keyword@footnote{In
 @example
 MAXIMUM_PATTERN_LENGTH: 1.2 us
 @end example
+@noindent
 This will tell the program to expect a maximum pattern length of 1.2
 micro-seconds. Unless in the test run a longer pattern length is found,
 this value is used. It is not a problem to specify too long a maximum
@@ -595,6 +611,7 @@ section, i.e.@: just write
 @example
 KEEP_ALL_PULSES;
 @end example
+@noindent
 and pulses will not be deleted even if they seem to be unused.
 
 
@@ -621,6 +638,7 @@ pulse has alway the same @code{+X} phase. Because a constant phase of
 PHASE_SEQUENCE_1: +x, -x, +x, -x;  // for 1st pulse
 PHASE_SEQUENCE_2: +x, +x, -x, -x;  // for 2nd pulse
 @end example
+@noindent
 As can be seen from this example the keyword is
 @code{PHASE_SEQUENCE}@footnote{@code{PHASE_SEQUENCE}can be shortened to
 @code{PHASESEQUENCE}, @code{PH_SEQUENCE}, @code{PHSEQUENCE},
@@ -700,6 +718,7 @@ PULSE_1:    FUNCTION = MICROWAVE,
             START    = 100 ns,
             LENGTH   = 250 ns;
 @end example
+@noindent
 As usual, most of the keywords can be abbreviated, @code{PULSE_1:} to
 @code{PULSE1:}, @code{P_1:} or @code{P1:}, @code{FUNCTION} to either
 @code{FUNC} or @code{F}, @code{START} to @code{S}, and finally,
@@ -775,6 +794,7 @@ used:
 @example
 pulser_shift( P1 );      // or  pulser_shift( 1 );
 @end example
+@noindent
 Also the start position of several pulses at once can be changed because
 this function also accepts a (comma separated) list of pulses. If the
 function is called with no arguments at all the start positions of all
@@ -786,6 +806,7 @@ There is a similar function for changing the length of pulses by their
 @example
 pulser_increment( P3 );  // or  pulser_increment( 3 );
 @end example
+@noindent
 As for the @code{pulser_shift()} function also this functions accepts a
 comma separated list of pulses, and calling it with no arguments
 automatically lengthens all pulses that have the @code{DELTA_LENGTH}
@@ -800,6 +821,7 @@ write
 P4.START  = 500 ns;
 P4.LENGTH = 120 ns;
 @end example
+@noindent
 This method can also be used to switch off a pulse completely by
 assigning 0 to the pulse length.
 
@@ -810,6 +832,7 @@ in setting the new values, e.g.:
 P4.START  = P3.START + 200 ns;
 P4.LENGTH = 2 * P4.LENGTH + 20 ns;
 @end example
+@noindent
 As you see, these properties (i.e.@: start positions and lengths and the
 corresponding delta start positions and lengths) of pulses can be treated
 nearly as if they are just normal variables.
@@ -820,6 +843,7 @@ changed in this way at any time during the experiment:
 P4.DELTA_START  = 20 ns;
 P4.DELTA_LENGTH = 10 ns;
 @end example
+@noindent
 This holds even if these properties haven't been defined in the
 @code{PREPARATION} section at all.
 
@@ -1057,6 +1081,7 @@ FOR I = 1: 128 @{
     pulser_update( );
 @}
 @end example
+@noindent
 As can be seen from this example @code{get_phase_cycled_area()} not only
 sets the pulse phases but also starts the digitizer acquisition, fetches
 the measured areas from the digitizer and adds up the areas according to
@@ -1069,6 +1094,7 @@ sequence like this:
 @example
 ACQUISITION_SEQUENCE =  +A, -B, -A, +B;
 @end example
+@noindent
 which means that the value for the first phase setting has to be fetched
 from the first digitizer channel (associated with @code{A}) and that for
 the second phase setting the value from the second digitizer channel
