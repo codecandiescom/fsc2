@@ -658,8 +658,8 @@ static void cut_calc_curve( int dir, long p_index, bool has_been_shown )
 				                       = cv->shift[ X ] = cv->shift[ Y ] = 0.0;
 	}
 
-	/* If the index is reasonable store it (if called with index smaller than
-	   zero keep the old index) */
+	/* If the index is reasonable store it (if called with an index smaller
+	   than zero keep the old index) */
 
 	if ( p_index >= 0 )
 		CG.index = p_index;

@@ -37,13 +37,22 @@
 
 
 /* Define number of colors to be used in 2D graphics - must be less than
-   FL_MAX_COLORS - FL_FREE_COL1 + 3, i.e. not more than about 1005. On
+   FL_MAX_COLORS - (FL_FREE_COL1 + 3), i.e. not more than about 997. On
    the other hand, the sum of all colors shouldn't exceed the number of
    colors available on the system (and should leave some color slots for
    other processes, so don't ask for more than about the half of the
    number of available colors...) */
 
 #define NUM_COLORS 128
+
+
+/* The colors used in 2D graphics are also needed when exporting the current
+   state of the experiment via the webserver. The lookup is done via a hash
+   and the size of the hash is defined here - it should be about ten times
+   the total numbers of colors (which is ( NUM_COLORS + 26) and it *MUST* be
+   a prime number! */
+
+#define COLOR_HASH_SIZE 1543
 
 
 /* Sone definitions used for the program display browser */
@@ -86,6 +95,15 @@ enum {
 };
 
 
+/* States to be returned to the HTTP server */
+
+enum {
+	STATE_IDLE = 0,
+	STATE_RUNNING,
+	STATE_WAITING,
+	STATE_FINISHED
+};
+
 /* Define error severity types */
 
 enum {
@@ -113,7 +131,8 @@ enum {
 	HELPFONTSIZE,
 	STOPMOUSEBUTTON,
 	NOCRASHMAIL,
-	RESOLUTION
+	RESOLUTION,
+	HTTPPORT
 };
 
 /* Definition for HIGH/LOW states */

@@ -262,8 +262,10 @@ int new_data_callback( XEvent *a, void *b )
 			Comm.MQ->low = Comm.MQ->high;
 		}
 
+#if defined WITH_HTTP_SERVER
 	if ( Internals.http_pid > 0 )
 		http_check( );
+#endif
 
 	return 0;
 }

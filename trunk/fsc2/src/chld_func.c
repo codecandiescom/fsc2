@@ -41,7 +41,9 @@ void show_message( const char *str )
 		else
 		{
 			switch_off_special_cursors( );
+			Internals.state = STATE_WAITING;
 			fl_show_messages( str );
+			Internals.state = STATE_RUNNING;
 		}
 	}
 	else
@@ -87,7 +89,9 @@ void show_alert( const char *str )
 		else
 		{
 			switch_off_special_cursors( );
+			Internals.state = STATE_WAITING;
 			fl_show_alert( strs[ 0 ], strs[ 1 ], strs[ 2 ], 1 );
+			Internals.state = STATE_RUNNING;
 		}
 
 		T_free( strc );
@@ -125,7 +129,10 @@ int show_choices( const char *text, int numb, const char *b1, const char *b2,
 		else
 		{
 			switch_off_special_cursors( );
-			return fl_show_choices( text, numb, b1, b2, b3, def );
+			Internals.state = STATE_WAITING;
+			ret = fl_show_choices( text, numb, b1, b2, b3, def );
+			Internals.state = STATE_RUNNING;
+			return ret;
 		}
 	}
 	else
@@ -158,7 +165,10 @@ const char *show_fselector( const char *message, const char *directory,
 	if ( Internals.I_am == PARENT )
 	{
 		switch_off_special_cursors( );
-		return fl_show_fselector( message, directory, pattern, def );
+		Internals.state = STATE_WAITING;
+		ret = fl_show_fselector( message, directory, pattern, def );
+		Internals.state = STATE_RUNNING;
+		return ret;
 	}
 	else
 	{
@@ -209,8 +219,12 @@ static const char *handle_input( const char *content, const char *label )
 				  FL_PLACE_MOUSE | FL_FREE_SIZE, FL_FULLBORDER,
 				  "fsc2: Comment editor" );
 
+	Internals.state = STATE_WAITING;
+
 	while ( fl_do_forms( ) != GUI.input_form->comm_done )
 		/* empty */ ;
+
+	Internals.state = STATE_RUNNING;
 
 	if ( fl_form_is_visible( GUI.input_form->input_form ) )
 		fl_hide_form( GUI.input_form->input_form );

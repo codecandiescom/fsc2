@@ -50,6 +50,9 @@
 
 #define MAX_LABEL_LEN     128   /* maximum length of tick label string */
 
+#define NUM_1D_COLS ( MAX_CURVES + 6 )
+
+
 
 typedef	struct {
 	double v;               /* value of the point (in interval [0,1] */
@@ -164,6 +167,15 @@ typedef struct MRKR_ {
 
 
 typedef struct {
+	bool is_used;
+	FL_COLOR pixel;
+	unsigned char rgb[ 3 ];
+} G_Hash_Entry;
+
+typedef G_Hash_Entry* G_Hash;
+
+
+typedef struct {
 	bool is_init;           /* has init_1d() or init2d() been run ? */
 	bool is_fully_drawn;
 	bool is_warn;
@@ -208,6 +220,11 @@ typedef struct {
 	Curve_1d cut_curve;
 
 	FL_COLOR colors[ MAX_CURVES ];
+
+	G_Hash hash_1d;
+	int hash_size_1d;
+	G_Hash hash_2d;
+	int hash_size_2d;
 
 	int cursor[ 7 ];              /* the different cursors */
 
@@ -285,7 +302,6 @@ void change_scale( int is_set, void *ptr );
 void change_label( char **label );
 void rescale( void *new_dims );
 void redraw_canvas_2d( Canvas *c );
-void dump_window( int type, const char *name );
 
 
 #endif   /* ! GRAPHICS_HEADER */

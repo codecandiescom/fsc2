@@ -119,10 +119,12 @@ cycling.
 The manual is organized along the following lines: the next chapter
 (@pxref{GUI}) explains in detail the graphical user interface used for
 starting an @acronym{EDL} program and displaying the measured data. The
-following chapter (@pxref{EDL}) explains all about the @acronym{EDL}
-language. To give you an expression how easy writing an @acronym{EDL}
-program is you may have a look at the first example (@pxref{Basics}) which
-discusses a program for doing a simple cw-detected EPR-experiment.
+following chapter (@pxref{EDL}) explains how to monitor @acronym{fsc2}'s
+progress via the internet, using a browser. Then follows a chapter
+(@pxref{EDL}) that explains all about the @acronym{EDL} language. To
+give you an expression how easy writing an @acronym{EDL} program is you
+may have a look at the first example (@pxref{Basics}) which discusses a
+program for doing a simple cw-detected EPR-experiment.
 
 The next chapter (@pxref{Built-in Functions}) lists all functions that
 are already built into @acronym{fsc2}. These include functions for

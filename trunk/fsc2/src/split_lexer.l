@@ -73,7 +73,7 @@ EXP         ^[\t ]*EXP(ERIMENT)?:
 			/* handling of file name lines */
 {FILE}      {
 				*( splittext + splitleng - 1 ) = '\0';
-				T_free( EDL.Fname );
+				EDL.Fname = T_free( EDL.Fname );
 				EDL.Fname = T_strdup( splittext + 2 );
 			}
 
@@ -85,7 +85,7 @@ EXP         ^[\t ]*EXP(ERIMENT)?:
 
 			/* handling of error messages from the cleaner */
 {ERR}		{
-				printf( "%s", splittext + 2 );
+				eprint( FATAL, UNSET, "%s", splittext + 2 );
 				return FAIL;
 			}
 
@@ -147,15 +147,12 @@ EXP         ^[\t ]*EXP(ERIMENT)?:
 		/*----------------------*/
 
 
-bool scan_main( char *file )
+bool scan_main( const char *name, FILE *fp )
 {
-	char *cmd;
 	bool split_error;
-	struct sigaction sact;
-	struct sigaction oact;
 
 
-	fsc2_assert( file != NULL && *file != '\0' );
+	fsc2_assert( fp != NULL );
 
 	/* Forget everything about previous tests */
 
@@ -166,27 +163,33 @@ bool scan_main( char *file )
 	if ( ! functions_init( ) || ! device_list_parse( ) )
 		return FAIL;
 
-	/* Filter input through "fsc2_clean" (expected to be in 'bindir') */
-
-	cmd = get_string( "%s%sfsc2_clean %s", bindir, slash( bindir ), file );
-
 	/* Setting the program length to -1 means that no EXPERIMENT section has
 	   been found yet. */
 
 	EDL.prg_length = -1;
 
-	sact.sa_handler = ( void ( * )( int ) ) SIG_IGN;
-	sigaction( SIGCHLD, &sact, &oact );
+	/* Make the lexer read its input from the output of fsc2_clean */
 
-	splitin = popen( cmd, "r" );
+	if ( ( splitin = filter_edl( name, fp ) ) == NULL )
+	{
+#ifndef NDEBUG
+		eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
+				__FILE__, __LINE__ );
+#endif
+		return FAIL;
+	}
 
 	/* Parse the predigested EDL file, i.e. what we get back from fsc2_clean */
 
 	split_error = ( bool ) splitlex( );
 
-	pclose( splitin );
-	sigaction( SIGCHLD, &oact, NULL );
-	T_free( cmd );
+	fclose( splitin );
+
+	/* In case there was an error and the input file wasn't read until the
+	   end it sometimes is necessary to flush the lexer's input buffer */
+
+	YY_FLUSH_BUFFER;
+
 	return split_error;
 }
 

@@ -40,6 +40,7 @@ print ( "X[1,1,2] = #\n", X[ 1, 1, 2 ] );
 X[1,1,2] += 3;
 print( "X[1,1,2] = #\n", X[ 1, 1, 2 ] );
 
+print( "This a very long line. This a very long line. This a very long line. This a very long line. This a very long line. This a very long line. This a very long line. This a very long line. This a very long line. This a very long line.\n" );
 print( "b = #\n", b );
 print( "dim = #\n", dim( c ) );
 print( "size[1] = #, size[2] = #\n", size( c, 1 ), size( c, 2 ) );

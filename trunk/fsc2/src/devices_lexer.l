@@ -88,7 +88,7 @@ WS          [\n\t ]+
 			/* handling of file name lines */
 {FILE}      {
 				*( devicestext + devicesleng - 1 ) = '\0';
-				T_free( EDL.Fname );
+				EDL.Fname = T_free( EDL.Fname );
 				EDL.Fname = T_strdup( devicestext + 2 );
 			}
 

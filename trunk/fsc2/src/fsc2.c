@@ -1036,7 +1036,7 @@ void test_file( FL_OBJECT *a, long b )
 	fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_watch );
 	user_break = UNSET;
 
-	scan_main( in_file, in_file_fp );
+	state = scan_main( in_file, in_file_fp );
 
 	fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_left_ptr );
 	running_test = UNSET;

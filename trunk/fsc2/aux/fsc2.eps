@@ -1,0 +1,46 @@
+%!PS-Adobe-3.0 EPSF-3.0
+%%BoundingBox: 0 0 110 55
+%%Creator: fsc2, Nov 2001
+%%CreationDate: Mon Mar  4 10:45:59 2002
+%%Title: x.ps
+%%For: jens ()
+%%DocumentNeededResources: font Times-Roman
+%%End Comments
+%%BeginProlog
+/b { bind def } bind def
+/s { stroke } b
+/f { fill } b
+/t { translate } b
+/r { rotate} b
+/m { moveto } b
+/l { lineto } b
+/rm { rmoveto } b
+/rl { rlineto } b
+/slw { setlinewidth } b
+/sd { setdash } b
+/srgb { setrgbcolor } b
+/sgr { setgray } b
+/sw { stringwidth pop } b
+/sf { exch findfont exch scalefont setfont } b
+/np { newpath } b
+/cp { closepath } b
+/gs { gsave } b
+/gr { grestore } b
+/slc { setlinecap } b
+/ch { gs np 0 0 m
+      false charpath flattenpath pathbbox
+      exch pop 3 -1 roll pop exch pop gr } b
+/cw { gs np 0 0 m
+      false charpath flattenpath pathbbox
+      pop exch pop exch pop gr } b
+/fsc2 { gs /Times-Roman 6 sf
+        (fsc2) ch sub 6 sub exch
+        (fsc2) cw sub 4 sub exch m
+        0.9875 -0.0125 0 { dup dup srgb gs (fsc2) show gr
+        -0.0125 0.0125 rm } for
+        1 0 0 srgb (fsc2) show gr }b
+%%EndProlog
+
+10 dup scale
+15.1 10.2 fsc2
+showpage

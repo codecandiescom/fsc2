@@ -108,7 +108,7 @@
 /* Some global functions */
 
 void clean_up( void );
-bool scan_main( char *file );
+bool scan_main( const char *name, FILE *fp );
 int  devices_parser( FILE *in );
 int  assignments_parser( FILE *in );
 int  variables_parser( FILE *in );
@@ -251,7 +251,6 @@ EDL_Stuff EDL;
 COMMUNICATION Comm;
 GUI_Stuff GUI;
 Graphics G;
-
 
 char *prog_name;                 /* Name the program was started with */
 bool need_GPIB = UNSET;          /* Flag, set if GPIB bus is needed */

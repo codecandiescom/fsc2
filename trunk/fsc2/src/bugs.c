@@ -62,7 +62,10 @@ void bug_report_callback( FL_OBJECT *a, long b )
 		 ( tmp = fdopen( tmp_fd, "w" ) ) == NULL )
 	{
 		if ( tmp_fd >= 0 )
+		{
+			unlink( filename );
 			close( tmp_fd );
+		}
 
 		fl_show_messages( "Sorry, can't send a bug report." );
 		notify_conn( UNBUSY_SIGNAL );

@@ -20,7 +20,7 @@
 @c Boston, MA 02111-1307, USA.
 
 
-@node EDL, Built-in Functions, GUI, Top
+@node EDL, Built-in Functions, Web Server, Top
 @chapter @acronym{EDL}
 @cindex @acronym{EDL}
 

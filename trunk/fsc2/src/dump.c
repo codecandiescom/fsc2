@@ -124,7 +124,11 @@ void DumpStack( void )
 		dup2( pipe_fd[ DUMP_CHILD_WRITE ], STDERR_FILENO );
 		dup2( pipe_fd[ DUMP_CHILD_READ  ], STDIN_FILENO );
 
-		execl( ADDR2LINE, ADDR2LINE, "-C", "-f", "-e", bindir "fsc2", NULL );
+		if ( Internals.cmdline_flags & DO_CHECK )
+			execl( ADDR2LINE, ADDR2LINE, "-C", "-f", "-e", sdir "fsc2", NULL );
+		else
+			execl( ADDR2LINE, ADDR2LINE, "-C", "-f", "-e", bindir "fsc2",
+				   NULL );
 		_exit( EXIT_FAILURE );
 	}
 	else if ( pid < 0 )               /* fork failed */

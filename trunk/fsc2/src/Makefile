@@ -28,6 +28,9 @@ c_sources     = fsc2.c xinit.c pulser.c util.c exceptions.c variables.c    \
 				ipc.c print.c serial.c graphics.c graph_handler_1d.c       \
 				graph_handler_2d.c graph_cut.c bugs.c fsc2_assert.c        \
 				dump.c module_util.c
+ifdef WITH_HTTP_SERVER
+c_sources    += http.c dump_graphic.c
+endif
 bison_sources = $(wildcard *_parser.y)
 flex_sources  = $(wildcard *_lexer.l)
 sources       = $(bison_sources:.y=.c) $(flex_sources:.l=.c) $(c_sources)
@@ -166,6 +169,9 @@ install:
 	-$(LN) $(LNFLAGS) $(bindir)/fsc2_connect $(bindir)/fsc2_test
 	-$(LN) $(LNFLAGS) $(bindir)/fsc2_connect $(bindir)/fsc2_load
 
+ifdef WITH_HTTP_SERVER
+	$(EXEC_INSTALL) -m 755 -o $(OWNER) -g $(GROUP) fsc2_http_server $(bindir)
+endif
 
 uninstall:
 	-$(RM) $(RMFLAGS) $(bindir)/fsc2 $(bindir)/fsc2_clean          \
