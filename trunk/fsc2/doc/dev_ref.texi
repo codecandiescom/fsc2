@@ -974,7 +974,7 @@ output ports, depending on model of card.
 
 @paragraphindent 0
 @strong{Controlled via}: PCI card (requires module and library coming
-with @code{fsc2} being installed)
+with @code{fsc2} to be installed)
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -1001,7 +1001,7 @@ channels, used for event counting and pulse creation
 
 @paragraphindent 0
 @strong{Controlled via}: PCI card (requires module and library coming
-with @code{fsc2} being installed)
+with @code{fsc2} to be installed)
 
 @paragraphindent 0
 @strong{Supported functions}:
