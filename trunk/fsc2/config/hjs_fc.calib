@@ -1,0 +1,6 @@
+# This file is the calibration file for the hjs_fc module.
+# It must contain two entries, first the field at the minimum DAC output
+# voltage of 0 V  and than the field at the maximum output voltage.
+
+2900.00 G
+3400.00 G
