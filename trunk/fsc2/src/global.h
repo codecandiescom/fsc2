@@ -59,7 +59,7 @@
 /******************************************************************/
 
 
-/* create a bool type */
+/* Create a bool type - this is stolen from gcc's stdbool.h ;-) */
 
 typedef enum
 {

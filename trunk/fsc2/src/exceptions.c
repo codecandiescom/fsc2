@@ -50,9 +50,9 @@
 
 void longjmperror( void );
 
-jmp_buf      exception_env_stack[ MAX_NESTED_EXCEPTION ];
-unsigned int exception_env_stack_pos = 0;
-unsigned int exception_id;
+jmp_buf       exception_env_stack[ MAX_NESTED_EXCEPTION ];
+unsigned int  exception_env_stack_pos = 0;
+int           exception_id;
 
 
 void longjmperror( void )

@@ -1250,10 +1250,18 @@ CATCH( OUT_OF_MEMORY_EXCEPTION )
 
 @acronym{fsc2} already has a @code{typedef} for the @code{bool} type,
 i.e.@: for variables that can have only two values, either @code{1} or
-@code{0}. You can use either the macros @code{SET}, @code{OK} or
-@code{TRUE} instead of @code{1} and @code{UNSET}, @code{FAIL} or
-@code{FALSE} instead of @code{1}. You can use this type to do things
-like this
+@code{0}. It is declared as
+@example
+typedef enum
+@{
+    false = 0,
+    true  = 1
+@} bool;
+@end example
+
+You can use either the macros @code{SET}, @code{OK} or @code{TRUE}
+instead of @code{1} and @code{UNSET}, @code{FAIL} or @code{FALSE}
+instead of @code{1}. Use this type to do things like
 @example
 bool is_flag;
 

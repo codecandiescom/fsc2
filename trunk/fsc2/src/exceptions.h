@@ -56,12 +56,11 @@
 #define MAX_NESTED_EXCEPTION 256
 #endif
 
-
 #ifndef EXCEPTIONS_SOURCE_COMPILE
 
 extern jmp_buf exception_env_stack[ ];
 extern unsigned int exception_env_stack_pos;
-extern unsigned int exception_id;
+extern int exception_id;
 extern void longjmperror( void );
 
 #endif  /* ! EXCEPTIONS_SOURCE_COMPILE */
@@ -80,8 +79,9 @@ enum {
 	MISSING_SEMICOLON_EXCEPTION = ( 1 <<  8 ),
 	INVALID_INPUT_EXCEPTION     = ( 1 <<  9 ),
 	USER_BREAK_EXCEPTION        = ( 1 << 10 ),
-	ABORT_EXCEPTION             = ( 1 << 11 )
+	ABORT_EXCEPTION             = ( 1 << 11 ),
 };
+
 
 
 #define TRY \
@@ -114,5 +114,7 @@ enum {
 		    longjmperror( ); \
         longjmp( exception_env_stack[ --exception_env_stack_pos ], e ); \
     }
+
+
 
 #endif  /* ! EXCEPTIONS_HEADER */
