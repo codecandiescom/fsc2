@@ -52,6 +52,7 @@ void tds520a_do_pre_exp_checks( void )
     double width, window, dcs, dcd, dtb, fac;
     long tb, cs, cd;
 	int i;
+	char *buffer;
 
 
 	/* If a trigger channel has been set in the PREPARATIONS section send
@@ -155,9 +156,11 @@ void tds520a_do_pre_exp_checks( void )
 		{
 			cs = ( cs / tb ) * tb;
 			dcs = cs * fac / TDS_POINTS_PER_DIV;
+			buffer = get_string_copy( tds520_ptime( dcs ) );
 			eprint( WARN, "%s: Start point of window %ld had to be readjusted "
 					"from %s to %s.\n", DEVICE_NAME, w->num,
-					tds520a_ptime( w->start ), tds520a_ptime( dcs ) );
+					tds520a_ptime( w->start ), buffer );
+			T_free( buffer );
 			w->start = dcs;
 		}
 
@@ -177,18 +180,22 @@ void tds520a_do_pre_exp_checks( void )
 		if ( labs( cd ) < tb )     /* window smaller than one point ? */
 		{
 			dcd = tds520a.timebase / TDS_POINTS_PER_DIV;
+			buffer = get_string_copy( tds520_ptime( dcd ) );
 			eprint( SEVERE, "%s: Width of window %ld had to be readjusted "
 					"from %s to %s.\n", DEVICE_NAME, w->num,
-					tds520a_ptime( w->width  ), tds520a_ptime( dcd ) );
+					tds520a_ptime( w->width  ), buffer );
+			T_free( buffer );
 			w->width = dcd;
 		}
 		else if ( cd % tb )        /* window width not multiple of a point ? */
 		{
 			cd = ( cd / tb ) * tb;
 			dcd = cd * fac / TDS_POINTS_PER_DIV;
+			buffer = get_string_copy( tds520_ptime( dcd ) );
 			eprint( WARN, "%s: Width of window %ld had to be readjusted from "
 					"%s to %s.\n", DEVICE_NAME, w->num,
-					tds520a_ptime( w->width  ), tds520a_ptime( dcd ) );
+					tds520a_ptime( w->width  ), buffer );
+			T_free( buffer );
 			w->width = dcd;
 		}
 
