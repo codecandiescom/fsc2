@@ -151,7 +151,7 @@ pulsers:
 @item Sony/Tektronix DG2020: @w{5 ns} to @w{0.1 s}
 @item Tektronix HFS9003: @w{1.6 ns} to @w{20 us}
 @item Bruker EP385: internal clock @w{8 ns} only (no @code{TIMBASE}
-statement required), external clock @w{8 ns} and larger
+statement allowed), external clock @w{8 ns} and larger
 @item Interface Technology R690: @w{4 ns}, @w{8 ns} and @w{16 ns}
 for the internal clock, @w{4 ns} and larger with an external clock
 @end itemize
