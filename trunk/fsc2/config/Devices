@@ -142,9 +142,10 @@ spectrapro_300i
 spex_cd2a
 
 
-// Power Supplies (Thurlby&Thandar PL330DP)
+// Power Supplies (Thurlby&Thandar PL330DP, FUG MCN700-2000)
 
 thurlby330
+mcn700
 
 
 // DIOs (WITIO-48 card)
