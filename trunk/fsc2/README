@@ -163,6 +163,15 @@ and AT-GPIB/TNT (ISA) cards I wrote and which can be downloaded from
 the same URL as fsc2, see above.
 
 
+Support
+-------
+
+While I am prepared to help for free as far as my time allows, you also
+can hire me for e.g. writing drivers for not currently supported devices,
+creating scripts for experiments, installation support, instructing users
+etc. Please send me an eail to discuss conditions.
+
+
 Limitations
 -----------
 

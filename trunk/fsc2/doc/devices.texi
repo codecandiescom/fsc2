@@ -2248,7 +2248,7 @@ the device by changing the definition of @code{DEF_ATT_REF_FREQ}).
 Using this function for the @code{HP8647A} and @code{HP8648B} the type,
 source and amplitude of the modulation can be set, for the
 @code{HP8672A} both type and amplitude. It can set all of these
-parameters at once or only parts of them.
+parameters at once or only a subset of them.
 
 For the @code{HP8647A} and @code{HP8648B} there are four possible types
 of modulation: FM, AM and phase modulation. The modulation type is
