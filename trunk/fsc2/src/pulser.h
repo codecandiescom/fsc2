@@ -27,6 +27,7 @@ typedef struct {
 	bool ( *set_trig_in_level )( double voltage );
 	bool ( *set_trig_in_slope )( int slope );
 
+	bool ( *new_pulse )( long pulse_number );
 	bool ( *set_pulse_function )( long pulse_number, int function );
 	bool ( *set_pulse_position )( long pulse_number, double time );
 	bool ( *set_pulse_length )( long pulse_number, double time );

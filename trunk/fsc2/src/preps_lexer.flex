@@ -226,7 +226,7 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 {P}/[\t \n,;] {
 				if ( Cur_Pulse < 0 )
 				{
-					Cur_Pulse = p_num( prepstext );
+					Cur_Pulse = p_new( p_num( prepstext ) );
 					return P_TOK;
 				}
 
