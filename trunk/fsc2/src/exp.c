@@ -89,7 +89,7 @@ void store_exp( FILE *in )
 	if ( is_restart )
 	    exprestart( expin );
 	else
-		 is_restart = SET;
+		is_restart = SET;
 
 	prg_token = NULL;
 
