@@ -28,8 +28,6 @@
 /* Globals declared in func_intact.c */
 
 extern TOOL_BOX *Tool_Box;
-extern bool tool_has_been_shown;
-extern FI_SIZES FI_sizes;
 
 
 static Var *f_screate_child( Var *v, long type, double start_val,
@@ -53,9 +51,6 @@ Var *f_screate( Var *v )
 	char *help_text = NULL;
 	long ID = 0;
 
-
-	if ( ! FI_sizes.is_init )
-		func_intact_init( );
 
 	/* We need at least the type of the slider and the minimum and maximum
 	   value */
@@ -192,12 +187,7 @@ Var *f_screate( Var *v )
 	TRY
 	{
 		if ( Tool_Box == NULL )
-		{
-			Tool_Box = T_malloc( sizeof *Tool_Box );
-			Tool_Box->objs = NULL;
-			Tool_Box->layout = VERT;
-			Tool_Box->Tools = NULL;
-		}
+			tool_box_create( VERT );
 
 		new_io = T_malloc( sizeof *new_io );
 		TRY_SUCCESS;
@@ -360,9 +350,6 @@ static Var *f_screate_child( Var *v, long type, double start_val,
 
 Var *f_sdelete( Var *v )
 {
-	if ( ! FI_sizes.is_init )
-		func_intact_init( );
-
 	/* At least one slider ID is needed... */
 
 	if ( v == NULL )
@@ -491,27 +478,11 @@ static void f_sdelete_parent( Var *v )
 	T_free( ( void * ) io->help_text );
 	T_free( io );
 
-	/* If this was the very last object delete also the form */
+	/* If this was the very last object also delete the form */
 
 	if ( Tool_Box->objs == NULL )
 	{
-		if ( Internals.mode != TEST )
-		{
-			if ( Tool_Box->Tools )
-			{
-				if ( fl_form_is_visible( Tool_Box->Tools ) )
-				{
-					store_geometry( );
-					fl_hide_form( Tool_Box->Tools );
-				}
-
-				fl_free_form( Tool_Box->Tools );
-			}
-			else
-				tool_has_been_shown = UNSET;
-		}
-
-		Tool_Box = T_free( Tool_Box );
+		tool_box_delete( );
 
 		if ( v->next != NULL )
 		{
@@ -530,9 +501,6 @@ Var *f_svalue( Var *v )
 {
 	IOBJECT *io;
 
-
-	if ( ! FI_sizes.is_init )
-		func_intact_init( );
 
 	/* We need at least the sliders ID */
 

@@ -28,8 +28,6 @@
 /* Globals declared in func_intact.c */
 
 extern TOOL_BOX *Tool_Box;
-extern bool tool_has_been_shown;
-extern FI_SIZES FI_sizes;
 
 
 static Var *f_ocreate_child( Var *v, long type, long lval, double dval );
@@ -54,9 +52,6 @@ Var *f_ocreate( Var *v )
 	long lval = 0;
 	double dval = 0.0;
 
-
-	if ( ! FI_sizes.is_init )
-		func_intact_init( );
 
 	/* At least the type of the input or output object must be specified */
 
@@ -213,12 +208,7 @@ Var *f_ocreate( Var *v )
 	TRY
 	{
 		if ( Tool_Box == NULL )
-		{
-			Tool_Box = T_malloc( sizeof *Tool_Box );
-			Tool_Box->objs = NULL;
-			Tool_Box->layout = VERT;
-			Tool_Box->Tools = NULL;
-		}
+			tool_box_create( VERT );
 
 		new_io = T_malloc( sizeof *new_io );
 
@@ -439,9 +429,6 @@ static Var *f_ocreate_child( Var *v, long type, long lval, double dval )
 
 Var *f_odelete( Var *v )
 {
-	if ( ! FI_sizes.is_init )
-		func_intact_init( );
-
 	/* We need the ID of the button to delete */
 
 	if ( v == NULL )
@@ -581,23 +568,7 @@ static void f_odelete_parent( Var *v )
 
 	if ( Tool_Box->objs == NULL )
 	{
-		if ( Internals.mode != TEST )
-		{
-			if ( Tool_Box->Tools )
-			{
-				if ( fl_form_is_visible( Tool_Box->Tools ) )
-				{
-					store_geometry( );
-					fl_hide_form( Tool_Box->Tools );
-				}
-
-				fl_free_form( Tool_Box->Tools );
-			}
-			else
-				tool_has_been_shown = UNSET;
-		}
-
-		Tool_Box = T_free( Tool_Box );
+		tool_box_delete( );
 
 		if ( v->next != NULL )
 		{
@@ -618,9 +589,6 @@ Var *f_ovalue( Var *v )
 	IOBJECT *io;
 	char buf[ MAX_INPUT_CHARS + 1 ];
 
-
-	if ( ! FI_sizes.is_init )
-		func_intact_init( );
 
 	/* We need at least the objects ID */
 

@@ -28,8 +28,6 @@
 /* Globals declared in func_intact.c */
 
 extern TOOL_BOX *Tool_Box;
-extern bool tool_has_been_shown;
-extern FI_SIZES FI_sizes;
 
 
 static Var *f_mcreate_child( Var *v, size_t len, long num_strs );
@@ -51,9 +49,6 @@ Var *f_mcreate( Var *v )
 	long ID = 0;
 	long i;
 
-
-	if ( ! FI_sizes.is_init )
-		func_intact_init( );
 
 	/* At least a label and two menu entries must be specified */
 
@@ -81,12 +76,7 @@ Var *f_mcreate( Var *v )
        button - if the Tool_Box doesn't exist yet we've got to create it now */
 
 	if ( Tool_Box == NULL )
-	{
-		Tool_Box = T_malloc( sizeof *Tool_Box );
-		Tool_Box->objs = NULL;
-		Tool_Box->layout = VERT;
-		Tool_Box->Tools = NULL;
-	}
+		tool_box_create( VERT );
 
 	new_io = NULL;
 
@@ -234,9 +224,6 @@ static Var *f_mcreate_child( Var *v, size_t len, long num_strs )
 
 Var *f_mdelete( Var *v )
 {
-	if ( ! FI_sizes.is_init )
-		func_intact_init( );
-
 	/* At least one menu ID is needed... */
 
 	if ( v == NULL )
@@ -371,21 +358,7 @@ static void f_mdelete_parent( Var *v )
 
 	if ( Tool_Box->objs == NULL )
 	{
-		if ( Internals.mode != TEST )
-		{
-			if ( Tool_Box->Tools )
-			{
-				if ( fl_form_is_visible( Tool_Box->Tools ) )
-				{
-					store_geometry( );
-					fl_hide_form( Tool_Box->Tools );
-				}
-
-				fl_free_form( Tool_Box->Tools );
-			}
-			else
-				tool_has_been_shown = UNSET;
-		}
+		tool_box_delete( );
 
 		Tool_Box = T_free( Tool_Box );
 
@@ -407,9 +380,6 @@ Var *f_mchoice( Var *v )
 	IOBJECT *io;
 	long select_item = 0;
 
-
-	if ( ! FI_sizes.is_init )
-		func_intact_init( );
 
 	/* We need at least the ID of the menu */
 

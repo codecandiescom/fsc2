@@ -230,6 +230,8 @@ static void other_data_request( int type, char *ptr )
 	int is_set;
 	char *label[ 3 ];
 	long lengths[ 3 ];
+	long position;
+	long color;
 
 
 	switch( type )
@@ -266,6 +268,15 @@ static void other_data_request( int type, char *ptr )
 
 		case D_CHANGE_POINTS :                /* rescale command */
 			rescale( ( void * ) ptr );
+			break;
+
+		case D_SET_MARKER :
+			memcpy( ptr, &position, sizeof position );
+			ptr += sizeof position;
+			memcpy( ptr, &position, sizeof color );
+			break;
+
+		case D_CLEAR_MARKERS :
 			break;
 
 		default :                             /* unknown command */

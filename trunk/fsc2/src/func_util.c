@@ -1622,6 +1622,121 @@ Var *f_clearcv( Var *v )
 }
 
 
+/*-------------------------------------------------*/
+/* Function makes all points of a curve invisible. */
+/*-------------------------------------------------*/
+
+Var *f_setmark( Var *v )
+{
+	long position;
+	long color = 0;
+	long len = 0;                    /* total length of message to send */
+	void *buf;
+	char *ptr;
+	int type = D_SET_MARKER;
+	int shm_id;
+
+
+	/* This function can only be called in the EXPERIMENT section and needs
+	   a previous graphics initialisation */
+
+	if ( ! G.is_init )
+	{
+		if ( Internals.mode == TEST )
+			print( WARN, "Can't set a marker, missing graphics "
+				   "initialisation.\n" );
+		return vars_push( INT_VAR, 0 );
+	}
+
+	if ( G.dim != 1 )
+	{
+		if ( Internals.mode == TEST )
+			print( WARN, "Can't set marker, markers can only be set for "
+				   "1D display.\n" );
+		return vars_push( INT_VAR, 0 );
+	}
+
+	/* If there is no argument default to curve 1 */
+
+	if ( v == NULL )
+	{
+		if ( Internals.mode == TEST )
+			print( WARN, "Missing arguments\n" );
+		return vars_push( INT_VAR, 0 );
+	}
+
+	position = get_strict_long( v, "marker position" ) - ARRAY_OFFSET;
+
+	if ( position < 0 )
+	{
+		print( FATAL, "Invalid x-index (%ld).\n", position + ARRAY_OFFSET );
+		THROW( EXCEPTION );
+	}
+
+	if ( ( v = vars_pop( v ) ) == NULL )
+	{
+		color = get_strict_long( v, "marker color" );
+
+		if ( color > 4 )
+		{
+			print( WARN, "Invalid marker color (%ld), using default of 0.\n",
+				   color );
+			color = 0;
+		}
+	}
+
+	/* In a test run this all there is to be done */
+
+	if ( Internals.mode == TEST )
+		return vars_push( INT_VAR, 1 );
+	
+	/* Now starts the code only to be executed by the child, i.e. while the
+	   measurement is running. */
+
+	fsc2_assert( Internals.I_am == CHILD );
+
+	/* Now try to get a shared memory segment */
+
+	len = sizeof len + sizeof type + sizeof position + sizeof color;
+
+	if ( ( buf = get_shm( &shm_id, len ) ) == ( void * ) - 1 )
+	{
+		eprint( FATAL, UNSET, "Internal communication problem at %s:%u.\n",
+				__FILE__, __LINE__ );
+		THROW( EXCEPTION );
+	}
+
+	/* Copy all data into the shared memory segment */
+
+	ptr = buf;
+
+	memcpy( ptr, &len, sizeof len );               /* total length */
+	ptr += sizeof len;
+
+	memcpy( ptr, &type, sizeof type );             /* type indicator  */
+	ptr += sizeof type;
+
+	memcpy( ptr, &position, sizeof position );
+	ptr += sizeof position;
+
+	memcpy( ptr, &color, sizeof color );
+
+	/* Detach from the segment with the data */
+
+	detach_shm( buf, NULL );
+
+	/* Wait for parent to become ready to accept new data, then store
+	   identifier and send signal to tell it about them */
+
+	send_data( DATA, shm_id );
+
+	/* All the rest has now to be done by the parent process... */
+
+	return vars_push( INT_VAR, 1 );
+}
+
+
+
 /*
  * Local variables:
  * tags-file-name: "../TAGS"

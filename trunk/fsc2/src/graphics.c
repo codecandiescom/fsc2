@@ -454,8 +454,12 @@ void start_graphics( void )
 		G_struct_init( );
 	}
 
-	if ( G.dim == 1 || ! G.is_init )
+	/* Make sure the window gets drawn correctly immediately */
+
+	if ( G.dim == 1 )
 		redraw_all_1d( );
+	else
+		redraw_all_2d( );
 
 	fl_raise_form( GUI.run_form->run );
 }

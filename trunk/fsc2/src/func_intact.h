@@ -69,39 +69,13 @@ typedef struct _IOBJ_ {
 
 typedef struct {
 	int layout;               /* 0 / 1 <-> vertical / horizontal */
+	bool has_been_shown;
 	FL_FORM *Tools;
 	FL_COORD w,               /* size of form */
 		     h;
 	IOBJECT *objs;            /* linked list of objects in form */
 } TOOL_BOX;
 
-
-typedef struct {
-	bool is_init;
-
-	int	WIN_MIN_WIDTH;
-	int	WIN_MIN_HEIGHT;
-
-	int	OBJ_HEIGHT;
-	int	OBJ_WIDTH;
-
-	int	BUTTON_HEIGHT;
-	int	BUTTON_WIDTH;
-	int	NORMAL_BUTTON_DELTA;
-
-	int	SLIDER_HEIGHT;
-	int	SLIDER_WIDTH;
-
-	int INPUT_HEIGHT;
-	int INPUT_WIDTH;
-
-	int	LABEL_VERT_OFFSET;
-	int	VERT_OFFSET;
-	int	HORI_OFFSET;
-
-	int	OFFSET_X0;
-	int	OFFSET_Y0;
-} FI_SIZES;
 
 
 #define NORMAL_BUTTON 0
@@ -125,21 +99,11 @@ typedef struct {
 /* exported functions */
 
 
+void tool_box_create( long layout );
+void tool_box_delete( void );
 Var *f_layout(  Var *v );
-Var *f_screate( Var *v );
-Var *f_sdelete( Var *v );
-Var *f_svalue(  Var *v );
-Var *f_icreate( Var *v );
-Var *f_idelete( Var *v );
-Var *f_ivalue(  Var *v );
-Var *f_idelete( Var *v );
-Var *f_ivalue(  Var *v );
-Var *f_mcreate( Var *v );
-Var *f_mdelete( Var *v );
-Var *f_mchoice( Var *v );
 Var *f_objdel(  Var *v );
 Var *f_freeze(  Var *v );
-void func_intact_init( void );
 IOBJECT *find_object_from_ID( long ID );
 void recreate_Tool_Box( void );
 void convert_escapes( char *str );

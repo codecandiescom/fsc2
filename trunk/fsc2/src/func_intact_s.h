@@ -22,7 +22,7 @@
 */
 
 
-#if ! defined INTERACTIVE_BUTTONS_HEADER
+#if ! defined INTERACTIVE_SLIDERS_HEADER
 #define INTERACTIVE_SLIDERS_HEADER
 
 #include "fsc2.h"

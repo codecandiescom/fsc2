@@ -38,6 +38,7 @@ Var *f_clabel(  Var *v );
 Var *f_rescale( Var *v );
 Var *f_display( Var *v );
 Var *f_clearcv( Var *v );
+Var *f_setmark( Var *v );
 
 
 #endif  /* ! FUNC_UTIL_HEADER */

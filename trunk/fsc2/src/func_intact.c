@@ -26,14 +26,32 @@
 
 
 
-static Var *f_layout_child( long layout );
-static FL_OBJECT *append_object_to_form( IOBJECT *io );
-static void tools_callback( FL_OBJECT *ob, long data );
-
-
 TOOL_BOX *Tool_Box = NULL;
-bool tool_has_been_shown = UNSET;
-FI_SIZES FI_sizes = { UNSET, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+struct {
+	int	WIN_MIN_WIDTH;
+	int	WIN_MIN_HEIGHT;
+
+	int	OBJ_HEIGHT;
+	int	OBJ_WIDTH;
+
+	int	BUTTON_HEIGHT;
+	int	BUTTON_WIDTH;
+	int	NORMAL_BUTTON_DELTA;
+
+	int	SLIDER_HEIGHT;
+	int	SLIDER_WIDTH;
+
+	int INPUT_HEIGHT;
+	int INPUT_WIDTH;
+
+	int	LABEL_VERT_OFFSET;
+	int	VERT_OFFSET;
+	int	HORI_OFFSET;
+
+	int	OFFSET_X0;
+	int	OFFSET_Y0;
+} FI_sizes = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
 
 extern FL_resource xresources[ ];
@@ -43,11 +61,28 @@ static bool is_frozen = UNSET;
 static bool needs_pos = SET;
 
 
+static Var *f_layout_child( long layout );
+static void f_objdel_child( Var *v );
+static void f_objdel_parent( Var *v );
+static FL_OBJECT *append_object_to_form( IOBJECT *io );
+static void tools_callback( FL_OBJECT *ob, long data );
+
+
+
 /*------------------------------------------------------------*/
 /*------------------------------------------------------------*/
 
-void func_intact_init( void )
+void tool_box_create( long layout )
 {
+	if ( Tool_Box != NULL )
+		return;
+
+	Tool_Box                 = T_malloc( sizeof *Tool_Box );
+	Tool_Box->layout         = layout;
+	Tool_Box->Tools          = NULL;                 /* no form created yet */
+	Tool_Box->objs           = NULL;                 /* and also no objects */
+	Tool_Box->has_been_shown = UNSET;
+
 	if ( GUI.G_Funcs.size == LOW )
 	{
 		FI_sizes.WIN_MIN_WIDTH       = 30;
@@ -98,8 +133,26 @@ void func_intact_init( void )
 		FI_sizes.OFFSET_X0           = 20;
 		FI_sizes.OFFSET_Y0           = 20;
 	}
+}
 
-	FI_sizes.is_init = SET;
+
+/*------------------------------------------------------------*/
+/*------------------------------------------------------------*/
+
+void tool_box_delete( void )
+{
+	if ( Internals.mode != TEST && Tool_Box->Tools )
+	{
+		if ( fl_form_is_visible( Tool_Box->Tools ) )
+		{
+			store_geometry( );
+			fl_hide_form( Tool_Box->Tools );
+		}
+
+		fl_free_form( Tool_Box->Tools );
+	}
+
+	Tool_Box = T_free( Tool_Box );
 }
 
 
@@ -148,7 +201,7 @@ void parent_freeze( int freeze )
 			tool_y = Tool_Box->Tools->y;
 		}
 
-		tool_has_been_shown = SET;
+		Tool_Box->has_been_shown = SET;
 		fl_winminsize( Tool_Box->Tools->window,
 					   FI_sizes.WIN_MIN_WIDTH, FI_sizes.WIN_MIN_HEIGHT );
 	}
@@ -180,9 +233,6 @@ Var *f_layout( Var *v )
 	long layout;
 	const char *str[ ] = { "VERT", "VERTICAL", "HORI", "HORIZONTAL" };
 
-
-	if ( ! FI_sizes.is_init )
-		func_intact_init( );
 
 	if ( Internals.I_am == PARENT && Tool_Box != NULL )
 	{
@@ -237,10 +287,7 @@ Var *f_layout( Var *v )
 
 	/* Set up structure for tool box */
 
-	Tool_Box = T_malloc( sizeof *Tool_Box );
-	Tool_Box->layout = layout;
-	Tool_Box->Tools = NULL;                       /* no form created yet */
-	Tool_Box->objs = NULL;                        /* and also no objects */
+	tool_box_create( layout );
 
 	return vars_push( INT_VAR, layout );
 }
@@ -292,10 +339,7 @@ static Var *f_layout_child( long layout )
 
 Var *f_objdel( Var *v )
 {
-	if ( ! FI_sizes.is_init )
-		func_intact_init( );
-
-	/* We need the ID of the button to delete */
+	/* We need the ID of the object to delete */
 
 	if ( v == NULL )
 	{
@@ -303,118 +347,130 @@ Var *f_objdel( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	/* Loop over all object numbers */
+	/* Loop over all object numbers - since the object 'belong' to the parent,
+	   the child needs to ask the parent to delete the object. The ID of each
+	   object to be deleted gets passed to the parent in a buffer and the
+	   parent is asked to delete the object. */
 
 	do
 	{
-		/* Since the object 'belong' to the parent, the child needs to ask
-		   the parent to delete the object. The ID of each object to be deleted
-		   gets passed to the parent in a buffer and the parent is asked to
-		   delete the object */
-
 		if ( Internals.I_am == CHILD )
-		{
-			char *buffer, *pos;
-			size_t len;
-			long ID;
-
-
-			/* Do all possible checking of the parameter */
-
-			ID = get_strict_long( v, "object ID" );
-
-			if ( ID < 0 )
-			{
-				print( FATAL, "Invalid object identifier.\n" );
-				THROW( EXCEPTION );
-			}
-
-			/* Get a bufer long enough and write data */
-
-			len = sizeof EDL.Lc + sizeof v->val.lval;
-
-			if ( EDL.Fname )
-				len += strlen( EDL.Fname ) + 1;
-			else
-				len++;
-
-			pos = buffer = T_malloc( len );
-
-			memcpy( pos, &EDL.Lc, sizeof EDL.Lc );    /* current line number */
-			pos += sizeof EDL.Lc;
-
-			memcpy( pos, &ID, sizeof ID );            /* object ID */
-			pos += sizeof ID;
-
-			if ( EDL.Fname )
-			{
-				strcpy( pos, EDL.Fname );             /* current file name */
-				pos += strlen( EDL.Fname ) + 1;
-			}
-			else
-				*pos++ = '\0';
-
-			/* Ask parent to delete the object, bomb out on failure */
-
-			if ( ! exp_objdel( buffer, pos - buffer ) )
-				THROW( EXCEPTION );
-		}
+			f_objdel_child( v );
 		else
-		{
-			IOBJECT *io = NULL;
-
-
-			/* No tool box -> no objects -> no objects to delete... */
-
-			if ( Tool_Box == NULL || Tool_Box->objs == NULL )
-			{
-				print( FATAL, "No objects have been defined yet.\n" );
-				THROW( EXCEPTION );
-			}
-
-			/* Do checks on parameters */
-
-			io = find_object_from_ID(  get_strict_long( v, "object ID" ) );
-
-			if ( io == NULL )
-			{
-				print( FATAL, "Invalid object identifier.\n" );
-				THROW( EXCEPTION );
-			}
-
-			switch ( io->type )
-			{
-				case NORMAL_BUTTON :
-				case PUSH_BUTTON :
-				case RADIO_BUTTON :
-					vars_pop( f_bdelete( vars_push( INT_VAR, v->val.lval ) ) );
-					break;
-
-				case NORMAL_SLIDER :
-				case VALUE_SLIDER :
-					vars_pop( f_sdelete( vars_push( INT_VAR, v->val.lval ) ) );
-					break;
-
-				case INT_INPUT :
-				case FLOAT_INPUT :
-				case INT_OUTPUT :
-				case FLOAT_OUTPUT :
-					vars_pop( f_odelete( vars_push( INT_VAR, v->val.lval ) ) );
-					break;
-
-				case MENU:
-					vars_pop( f_mdelete( vars_push( INT_VAR, v->val.lval ) ) );
-					break;
-
-				default :
-					eprint( FATAL, UNSET, "Internal error at %s:%u.\n",
-							__FILE__, __LINE__ );
-					THROW( EXCEPTION );
-			}
-		}
+			f_objdel_parent( v );
 	} while ( ( v = vars_pop( v ) ) != NULL );
 
 	return vars_push( INT_VAR, 1 );
+}
+
+
+/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*/
+
+static void f_objdel_child( Var *v )
+{
+	char *buffer, *pos;
+	size_t len;
+	long ID;
+
+
+	/* Do all possible checking of the parameter */
+
+	ID = get_strict_long( v, "object ID" );
+
+	if ( ID < 0 )
+	{
+		print( FATAL, "Invalid object identifier.\n" );
+		THROW( EXCEPTION );
+	}
+
+	/* Get a bufer long enough and write data */
+
+	len = sizeof EDL.Lc + sizeof v->val.lval;
+
+	if ( EDL.Fname )
+		len += strlen( EDL.Fname ) + 1;
+	else
+		len++;
+
+	pos = buffer = T_malloc( len );
+
+	memcpy( pos, &EDL.Lc, sizeof EDL.Lc );    	/* current line number */
+	pos += sizeof EDL.Lc;
+
+	memcpy( pos, &ID, sizeof ID );            	/* object ID */
+	pos += sizeof ID;
+
+	if ( EDL.Fname )
+	{
+		strcpy( pos, EDL.Fname );             	/* current file name */
+		pos += strlen( EDL.Fname ) + 1;
+	}
+	else
+		*pos++ = '\0';
+
+	/* Ask parent to delete the object, bomb out on failure */
+
+	if ( ! exp_objdel( buffer, pos - buffer ) )
+		THROW( EXCEPTION );
+}
+
+
+/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*/
+
+static void f_objdel_parent( Var *v )
+{
+	IOBJECT *io = NULL;
+
+
+	/* No tool box -> no objects -> no objects to delete... */
+
+	if ( Tool_Box == NULL || Tool_Box->objs == NULL )
+	{
+		print( FATAL, "No objects have been defined yet.\n" );
+		THROW( EXCEPTION );
+	}
+
+	/* Do checks on parameters */
+
+	io = find_object_from_ID(  get_strict_long( v, "object ID" ) );
+
+	if ( io == NULL )
+	{
+		print( FATAL, "Invalid object identifier.\n" );
+		THROW( EXCEPTION );
+	}
+
+	switch ( io->type )
+	{
+		case NORMAL_BUTTON :
+		case PUSH_BUTTON :
+		case RADIO_BUTTON :
+			vars_pop( f_bdelete( vars_push( INT_VAR, v->val.lval ) ) );
+			break;
+
+		case NORMAL_SLIDER :
+		case VALUE_SLIDER :
+			vars_pop( f_sdelete( vars_push( INT_VAR, v->val.lval ) ) );
+			break;
+
+		case INT_INPUT :
+		case FLOAT_INPUT :
+		case INT_OUTPUT :
+		case FLOAT_OUTPUT :
+			vars_pop( f_odelete( vars_push( INT_VAR, v->val.lval ) ) );
+			break;
+
+		case MENU:
+			vars_pop( f_mdelete( vars_push( INT_VAR, v->val.lval ) ) );
+			break;
+
+		default :
+			eprint( FATAL, UNSET, "Internal error at %s:%u.\n",
+					__FILE__, __LINE__ );
+			THROW( EXCEPTION );
+	}
 }
 
 
@@ -455,8 +511,6 @@ void tools_clear( void )
 
 	is_frozen = UNSET;
 	needs_pos = SET;
-	tool_has_been_shown = UNSET;
-
 
 	if ( Tool_Box == NULL )
 		return;
@@ -498,8 +552,6 @@ void tools_clear( void )
 
 	if ( Tool_Box->Tools )
 		fl_free_form( Tool_Box->Tools );
-	else
-		tool_has_been_shown = UNSET;
 
 	Tool_Box = T_free( Tool_Box );
 }
@@ -551,7 +603,7 @@ void recreate_Tool_Box( void )
 		needs_pos = UNSET;
 		Tool_Box->Tools = fl_bgn_form( FL_UP_BOX, 1, 1 );
 
-		if ( ! tool_has_been_shown &&
+		if ( ! Tool_Box->has_been_shown &&
 			 * ( char * ) xresources[ TOOLGEOMETRY ].var != '\0' )
 		{
 			flags = XParseGeometry( ( char * ) xresources[ TOOLGEOMETRY ].var,
@@ -566,7 +618,7 @@ void recreate_Tool_Box( void )
 		}
 	}
 
-	if ( tool_has_been_shown )
+	if ( Tool_Box->has_been_shown )
 		needs_pos = SET;
 
 	for ( io = Tool_Box->objs; io != NULL; io = io->next )
@@ -616,7 +668,7 @@ void recreate_Tool_Box( void )
 			tool_y = Tool_Box->Tools->y;
 		}
 
-		tool_has_been_shown = SET;
+		Tool_Box->has_been_shown = SET;
 		fl_winminsize( Tool_Box->Tools->window,
 					   FI_sizes.WIN_MIN_WIDTH, FI_sizes.WIN_MIN_HEIGHT );
 	}

@@ -28,8 +28,6 @@
 /* Globals declared in func_intact.c */
 
 extern TOOL_BOX *Tool_Box;
-extern bool tool_has_been_shown;
-extern FI_SIZES FI_sizes;
 
 
 static Var *f_bcreate_child( Var *v, long type, long coll );
@@ -51,9 +49,6 @@ Var *f_bcreate( Var *v )
 	IOBJECT *new_io = NULL, *ioi, *cio;
 	long ID = 0;
 
-
-	if ( ! FI_sizes.is_init )
-		func_intact_init( );
 
 	/* At least the type of the button must be specified */
 
@@ -193,12 +188,7 @@ Var *f_bcreate( Var *v )
 	TRY
 	{
 		if ( Tool_Box == NULL )
-		{
-			Tool_Box = T_malloc( sizeof *Tool_Box );
-			Tool_Box->objs = NULL;
-			Tool_Box->layout = VERT;
-			Tool_Box->Tools = NULL;
-		}
+			tool_box_create( VERT );
 
 		new_io = T_malloc( sizeof *new_io );
 
@@ -361,9 +351,6 @@ static Var *f_bcreate_child( Var *v, long type, long coll )
 
 Var *f_bdelete( Var *v )
 {
-	if ( ! FI_sizes.is_init )
-		func_intact_init( );
-
 	/* We need the ID of the button to delete */
 
 	if ( v == NULL )
@@ -524,25 +511,11 @@ static void f_bdelete_parent( Var *v )
 	T_free( ( void * ) io->help_text );
 	T_free( io );
 
+	/* If this was the last object also delete the form */
+
 	if ( Tool_Box->objs == NULL )
 	{
-		if ( Internals.mode != TEST )
-		{
-			if ( Tool_Box->Tools )
-			{
-				if ( fl_form_is_visible( Tool_Box->Tools ) )
-				{
-					store_geometry( );
-					fl_hide_form( Tool_Box->Tools );
-				}
-
-				fl_free_form( Tool_Box->Tools );
-			}
-			else
-				tool_has_been_shown = UNSET;
-		}
-
-		Tool_Box = T_free( Tool_Box );
+		tool_box_delete( );
 
 		if ( v->next != NULL )
 		{
@@ -562,9 +535,6 @@ Var *f_bstate( Var *v )
 	IOBJECT *io, *oio;
 	int state;
 
-
-	if ( ! FI_sizes.is_init )
-		func_intact_init( );
 
 	/* We need at least the ID of the button */
 
