@@ -2,6 +2,9 @@
    $Id$
 
    $Log$
+   Revision 1.10  1999/07/17 15:03:12  jens
+   Fixed a memory leak & changes to make lint more happy.
+
    Revision 1.9  1999/07/17 13:32:18  jens
    *** empty log message ***
 
@@ -923,6 +926,9 @@ void vars_pop( Var *v )
 			prev->next = stack->next;
 		else
 			Var_Stack = stack->next;
+
+		if ( stack->name != NULL ) /* functions store the format string here */
+			free( stack->name );
 		free( stack );
 	}
 }

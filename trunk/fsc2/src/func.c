@@ -89,9 +89,9 @@ Var *func_get( char *name, int *access )
 
 Var *func_call( Var *f )
 {
-	Var *sptr, *sptr_old;
+	Var *sptr, *sptr_old, *ret;
 	int ac;
-	double *args;
+	double *args = NULL;
 	double dret;
 	long iret;
 	
@@ -136,15 +136,17 @@ Var *func_call( Var *f )
 	/* get an array for the arguments and copy the arguments */
 
 	if ( ac > 0 )
+	{
 		args = ( double * ) T_malloc( ac * sizeof( double ) );
 
-	for ( ac = 0, sptr = f->next; sptr != NULL; ++ac )
-	{
-		args[ ac ] = ( sptr->type == INT_VAR ) ? 
-			         ( double ) sptr->val.lval : sptr->val.dval;
-		sptr_old = sptr;
-		sptr = sptr->next;
-		vars_pop( sptr_old );
+		for ( ac = 0, sptr = f->next; sptr != NULL; ++ac )
+		{
+			args[ ac ] = ( sptr->type == INT_VAR ) ? 
+				( double ) sptr->val.lval : sptr->val.dval;
+			sptr_old = sptr;
+			sptr = sptr->next;
+			vars_pop( sptr_old );
+		}
 	}
 
 	/* now call the function and push the return value onto the stack
@@ -153,21 +155,21 @@ Var *func_call( Var *f )
 	if ( fncts[ f->len ].ret_type == INT_VAR )
 	{
 		 iret = ( long ) ( *f->val.fnct )( f->len, args );
-		 free( f->name );
-		 vars_pop( f );
-		 return( vars_push( INT_VAR, &iret ) );
+		 ret = vars_push( INT_VAR, &iret );
 	}
 	else
 	{
 		 dret = ( double ) ( *f->val.fnct )( f->len, args );
-		 free( f->name );
-		 vars_pop( f );
-		 return( vars_push( FLOAT_VAR, &dret ) );
+		 ret = vars_push( FLOAT_VAR, &dret );
 	}
 
-	/* if we ever get to this place something is horribly wrong... */
+	/* finally do clean up and return result */
 
-	assert( 1 == 0 );
+	if ( args )
+		free( args );
+	vars_pop( f );
+
+	return( ret );
 }
 
 
@@ -185,7 +187,7 @@ double f_float( long n, double *args )
 
 double f_round( long n, double *args )
 {
-	return( (double ) ( ( long ) ( 2 * *args ) - ( long ) *args ) );
+	return( ( double ) ( ( long ) ( 2 * *args ) - ( long ) *args ) );
 }
 
 
@@ -317,7 +319,7 @@ double f_sqrt( long n, double *args )
 Var *print_call( char *fmt )
 {
 	Var *print_statement = vars_push( UNDEF_VAR, NULL );
-	print_statement->name = fmt;
+	print_statement->name = get_string_copy( fmt );
 	return( print_statement );
 }
 
@@ -383,7 +385,7 @@ Var *print_args( Var *print_statement )
 
 	/* count number of backslashes */
 
-	for ( cp = fmt, bs = 0; *cp; ++cp )
+	for ( cp = fmt, bs = 0; *cp != '\0' ; ++cp )
 		if ( *cp == '\\' )
 			bs++;
 
@@ -392,7 +394,7 @@ Var *print_args( Var *print_statement )
 	fmt = get_string( strlen( print_statement->name ) + 2 * bs + 1 );
 	strcpy( fmt, print_statement->name );
 
-	for ( cp = fmt; *cp; ++cp )
+	for ( cp = fmt; *cp != '\0' ; ++cp )
 	{
 		/* skip normal characters */
 
@@ -456,7 +458,7 @@ Var *print_args( Var *print_statement )
 				break;
 		}
 		
-		for ( ep = cp + 1; *ep; ep++ )
+		for ( ep = cp + 1; *ep != '\0'; ep++ )
 			*ep = *( ep + 1 );
 	}
 
@@ -476,11 +478,11 @@ Var *print_args( Var *print_statement )
 		vars_pop( cv );
 		cv = print_statement->next;
 	}
-	if ( *cp )
+	if ( *cp != '\0' )
 		eprint( NO_ERROR, cp );
 
+	free( fmt );
 	vars_pop( print_statement );
 
-	free( fmt );
 	return( vars_push( INT_VAR, &in_format ) );
 }
