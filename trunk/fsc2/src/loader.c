@@ -1,4 +1,4 @@
-/*
+Q/*
   $Id$
 
   Copyright (C) 1999-2004 Jens Thoms Toerring
@@ -142,6 +142,21 @@ void load_all_drivers( void )
 		call_pop( );
 		vars_del_stack( );
 		Internals.in_hook = UNSET;
+
+		/* On failure to run an init hook we have to unload all modules that
+		   already have their init hooks run */
+
+		for ( cd = cd->prev; cd != NULL; cd = cd->prev )
+			TRY
+			{
+				unload_device( cd );
+				TRY_SUCCESS;
+			}
+			OTHERWISE
+			{
+				/* nothing to be done, keep going with the next driver */
+			}
+
 		RETHROW( );
 	}
 

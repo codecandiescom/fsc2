@@ -1162,7 +1162,8 @@ just before the module is unloaded. Please take care: you can't talk to
 the device anymore when this hook is called. It should only be used to
 e.g.@: get rid of memory allocated withing the module before the it
 becomes unloaded (and thus any memory not deallocated properly would
-result in a memory leak).
+result in a memory leak). The exit hook can be run immediately after the
+init hook, so write your module in a way that it can handle this case!
 
 Please note that the first three functions, i.e.@:
 @code{sr510_init_hook}, @code{sr510_test_hook} and
