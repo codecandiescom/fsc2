@@ -110,6 +110,7 @@ pulser_stop_on_update, 1, ALL;  // sets stop during updates (HFS9000 only)
 
 pulser_shape_to_defense_minimum_distance, 1, PREP;
 pulser_defense_to_shape_minimum_distance, 1, PREP;
+pulser_show_pulses, 0, PREP;
 pulser_dump_pulses, 0, PREP;
 pulser_automatic_shape_pulses, -1, PREP;
 pulser_automatic_twt_pulses, -1, PREP;

@@ -184,6 +184,7 @@ fdir             := $(shell pwd)
 sdir             := $(fdir)/src
 mdir             := $(fdir)/modules
 adir             := $(fdir)/aux
+udir             := $(fdir)/utils
 cdir             := $(fdir)/config
 ldir             := $(fdir)/Fcntl_Lock
 
@@ -310,6 +311,12 @@ ifdef bindir
 	CFLAGS += -Dbindir=\"$(bindir:/=)/\"
 else
 	CFLAGS += -Dbindir=\"$(fdir)/bin/\"
+endif
+
+ifdef udir
+	CFLAGS += -Dudir=\"$(udir:/=)/\"
+else
+	CFLAGS += -Dudir=\"$(fdir)/utils/\"
 endif
 
 ifdef libdir
