@@ -70,8 +70,6 @@ if [ $UID != 0 -a $1 != "status" ]; then
 fi
 
 
-# Here the real work starts....
-
 case "$1" in
     start)
 		insmod me6x00 > /dev/null 2>&1
@@ -117,7 +115,7 @@ case "$1" in
 		;;
 
 	 status)
-		$GPIB_LIST -s >/dev/null 2>&1
+		grep me6x00 /proc/devices
 		if [ $? = 0 ]; then
 			log_success_msg "ME6X00 support is up and running."
 			exit 0
