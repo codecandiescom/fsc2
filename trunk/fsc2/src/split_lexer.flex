@@ -159,7 +159,9 @@ bool scan_main( char *file )
 	cmd = get_string( strlen( libdir ) + 1 + strlen( "fsc2_clean " )
 	                  + strlen( file ) );
 	strcpy( cmd, libdir );
-	strcat( cmd, "/fsc2_clean " );
+	if ( libdir[ strlen( libdir ) - 1 ] != '/' )
+		strcat( cmd, "/" );
+	strcat( cmd, "fsc2_clean " );
 	strcat( cmd, file );
 
 	splitin = popen( cmd, "r" );

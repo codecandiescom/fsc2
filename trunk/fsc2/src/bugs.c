@@ -74,20 +74,22 @@ void bug_report_callback( FL_OBJECT *a, long b )
 	/* Append a directory listing of configuration files and modules
 	   to allow a check of the permissions */
 
-	cmd = get_string( strlen( "ls -al  >> " ) + strlen( libdir ) +
-					  strlen( "/Devices" ) + strlen( filename ) );
+	cmd = get_string( strlen( "ls -al  >> " ) + strlen( libdir )
+					  + strlen( "/Devices" ) + strlen( filename ) );
 	strcpy( cmd, "ls -al " );
 	strcat( cmd, libdir );
-	strcat( cmd, "/Devices >> " );
+	if ( libdir[ strlen( libdir ) - 1 ] != '/' )
+		strcat( cmd, "/" );
+	strcat( cmd, "Devices >> " );
 	strcat( cmd, filename );
 	system( cmd );
 	T_free( cmd );
 
-	cmd = get_string( strlen( "ls -al  >> " ) + strlen( libdir ) +
-					  strlen( "/Functions" ) + strlen( filename ) );
+	cmd = get_string( strlen( "ls -al  >> " ) + strlen( libdir )
+					  + strlen( "/Functions" ) + strlen( filename ) );
 	strcpy( cmd, "ls -al " );
 	strcat( cmd, libdir );
-	strcat( cmd, "/Functions >> " );
+	strcat( cmd, "Functions >> " );
 	strcat( cmd, filename );
 	system( cmd );
 	T_free( cmd );
@@ -96,7 +98,9 @@ void bug_report_callback( FL_OBJECT *a, long b )
 					  strlen( "/*.so" ) + strlen( filename ) );
 	strcpy( cmd, "ls -al " );
 	strcat( cmd, libdir );
-	strcat( cmd, "/*.so >> " );
+	if ( libdir[ strlen( libdir ) - 1 ] != '/' )
+		strcat( cmd, "/" );
+	strcat( cmd, "*.so >> " );
 	strcat( cmd, filename );
 	system( cmd );
 
@@ -127,7 +131,9 @@ void bug_report_callback( FL_OBJECT *a, long b )
 					  + strlen( "/Devices" ) + strlen( filename ) );
 	strcpy( cmd, "cat " );
 	strcat( cmd, libdir );
-	strcat( cmd, "/Devices" );
+	if ( libdir[ strlen( libdir ) - 1 ] != '/' )
+		strcat( cmd, "/" );
+	strcat( cmd, "Devices" );
 	strcat( cmd, " >> " );
 	strcat( cmd, filename );
 	system( cmd );
@@ -146,7 +152,9 @@ void bug_report_callback( FL_OBJECT *a, long b )
 					  + strlen( "/Functions" ) + strlen( filename ) );
 	strcpy( cmd, "cat " );
 	strcat( cmd, libdir );
-	strcat( cmd, "/Functions" );
+	if ( libdir[ strlen( libdir ) - 1 ] != '/' )
+		strcat( cmd, "/" );
+	strcat( cmd, "Functions" );
 	strcat( cmd, " >> " );
 	strcat( cmd, filename );
 	system( cmd );
