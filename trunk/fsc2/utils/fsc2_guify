@@ -116,7 +116,9 @@ while ( <$if> ) {
 	# Lines defining variables must be analyzed directly
 
 	if ( $cur_line =~ /$var_entry/o ) {
-		my $var_options = { name => $1, type => $2, value => undef };
+		chomp $cur_line;
+		my $var_options = { name => $1, type => $2, value => undef,
+							line => $cur_line };
 		if ( defined $4 ) {
 			my $option = $4;
 			die "Syntax error at line $lino, garbage after variable type\n"
@@ -485,6 +487,7 @@ EOT
 
 	for ( @vars ) {
 		print <<"EOT";
+# $$_{ line }
 my \%$$_{ name };
 \$$$_{ name }\{ tk_frame \} = \$fsc2_main_frame->Frame( );
 \$$$_{ name }\{ tk_label \} = \$$$_{ name }\{ tk_frame \}->Label( -text => $$_{ label },
@@ -535,7 +538,7 @@ EOT
 		} elsif ( $$_{ type } =~ /^file$/o ) {
 			print <<"EOT";
 \$$$_{ name }\{ tk_unit \} = \$$$_{ name }\{ tk_frame \}->Button( -text => \"...\",
--command => sub { my \$fn = \&fsc2_filesel::show( \$fsc2_main_window, \$$$_{ name } );
+-command => sub { my \$fn = \$fsc2_main_window->fsc2_filesel::show( \$$$_{ name } );
 				  \$$$_{ name } = \$fn if defined \$fn;
  				  \$$$_{ name }\{ tk_entry \}->xview( length( \$$$_{ name } ) - $entry_width ) }
 );
@@ -654,6 +657,7 @@ EOT
 	for ( @lines ) {
 		my $line = $$_{ line };
 		if ( $line =~ /$guify_entry/o ) {
+			chomp $line;
 			$line =~ /$guify_entry(if|else|elsif|endif)\s*(.*?)\s*$/;
 			my ( $type, $cmd ) = ( $1, $2 );
 			if ( $type =~ /^if|elsif$/o ) {
@@ -661,18 +665,22 @@ EOT
 			}
 			if ( $type =~ /^if$/o ) {
 				print "\";
+# $line
 if ( eval { $cmd } ) {
 print \$fh \"";
 			} elsif ( $type =~ /^elsif$/o ) {
 				print "\";
+# $line
 } elsif ( eval { $cmd } ) {
 print \$fh \"";
 			} elsif ( $type =~ /^else$/o ) {
 				print "\";
+# $line
 } else {
 print \$fh \"";
 			} else {
 				print "\";
+# $line
 }
 print \$fh \"";
 			}
