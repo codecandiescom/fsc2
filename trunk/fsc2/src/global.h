@@ -115,6 +115,7 @@ typedef enum
 #define TRUE    true
 #endif
 
+
 /* Define some useful abbreviations - never ever change these ! */
 
 #define UNDEFINED -1
@@ -472,12 +473,10 @@ enum {
 
 /* Having a line like "UNUSED_ADRGUMENT( a );" for arguments of a function
    that aren't needed will shut up the compiler complaining about unused
-   arguments and makes it easier to see that the argument isn't used on
-   purpose. The statement will be optimized away by the compiler anyway,
-   so there's no runtime penalty for using the construct. The only arguments
-   for which this can't be used are const variables. */
+   arguments and make it easier to see that the argument isn't used on
+   purpose. */
 
-#define UNUSED_ARGUMENT( a )   ( a ) = ( a )
+#define UNUSED_ARGUMENT( a )   ( ( void ) ( a ) )
 
 
 #endif /* ! FSC2_GLOBAL */
