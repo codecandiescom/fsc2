@@ -982,3 +982,20 @@ static GPIB_Device *gpib_get_dev( int device )
 	
 	return NULL;
 }
+
+
+/*--------------------------------------------------------*/
+/*--------------------------------------------------------*/
+
+void gpib_log_message( const char *fmt, ... )
+{
+	va_list ap;
+
+
+	raise_permissions( );
+	gpib_log_date( );
+	va_start( ap, fmt );
+	vfprintf( gpib_log, fmt, ap );
+	va_end( ap );
+	lower_permissions( );
+}

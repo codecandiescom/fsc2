@@ -248,7 +248,7 @@ void bug_report_callback( FL_OBJECT *a, long b )
 
 void death_mail( int signo )
 {
-#if defined ( MAIL_ADDRESS ) && defined ( MAIL_PROGRAM )
+#if ! defined( NDEBUG ) && defined ( MAIL_ADDRESS ) && defined ( MAIL_PROGRAM )
 
 #define DM_BUF_SIZE 512
 

@@ -97,3 +97,14 @@ int gpib_read( int device, char *buffer, long *length )
 	length = length;
 	return FAILURE;
 }
+
+
+void gpib_log_message( const char *fmt, ... )
+{
+	va_list ap;
+
+
+	va_start( ap, fmt );
+	fprintf( stderr, fmt, ap );
+	va_end( ap );
+}

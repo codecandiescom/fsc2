@@ -959,3 +959,20 @@ static char *gpib_get_dev_name( int device )
 
 	return cur_dev == NULL ? NULL : cur_dev->name;
 }
+
+
+/*--------------------------------------------------------*/
+/*--------------------------------------------------------*/
+
+void gpib_log_message( const char *fmt, ... )
+{
+	va_list ap;
+
+
+	raise_permissions( );
+	gpib_log_date( );
+	va_start( ap, fmt );
+	vfprintf( gpib_log, fmt, ap );
+	va_end( ap );
+	lower_permissions( );
+}
