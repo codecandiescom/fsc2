@@ -462,7 +462,8 @@ int tds540_get_trigger_channel( void )
 
 void tds540_gpib_failure( void )
 {
-	eprint( FATAL, "%s: Communication with device failed.\n", DEVICE_NAME );
+	eprint( FATAL, UNSET, "%s: Communication with device failed.\n",
+			DEVICE_NAME );
 	THROW( EXCEPTION );
 }
 

@@ -111,7 +111,7 @@ void tds540_do_pre_exp_checks( void )
 
 		if ( width == 0.0 )
 		{
-			eprint( FATAL, "%s: Can't determine a reasonable value for "
+			eprint( FATAL, UNSET, "%s: Can't determine a reasonable value for "
 					"the missing window widths.\n", DEVICE_NAME );
 			THROW( EXCEPTION );
 		}
@@ -231,8 +231,8 @@ static void tds540_window_check_2( void )
 			cs = ( cs / tb ) * tb;
 			dcs = cs * fac / TDS_POINTS_PER_DIV;
 			buffer = T_strdup( tds540_ptime( dcs ) );
-			eprint( WARN, "%s: Start point of window %ld had to be readjusted "
-					"from %s to %s.\n", DEVICE_NAME, w->num,
+			eprint( WARN, UNSET, "%s: Start point of window %ld had to be "
+					"readjusted from %s to %s.\n", DEVICE_NAME, w->num,
 					tds540_ptime( w->start ), buffer );
 			T_free( buffer );
 			w->start = dcs;
@@ -255,8 +255,8 @@ static void tds540_window_check_2( void )
 		{
 			dcd = tds540.timebase / TDS_POINTS_PER_DIV;
 			buffer = T_strdup( tds540_ptime( dcd ) );
-			eprint( SEVERE, "%s: Width of window %ld had to be readjusted "
-					"from %s to %s.\n", DEVICE_NAME, w->num,
+			eprint( SEVERE, UNSET, "%s: Width of window %ld had to be "
+					"readjusted from %s to %s.\n", DEVICE_NAME, w->num,
 					tds540_ptime( w->width  ), buffer );
 			T_free( buffer );
 			w->width = dcd;
@@ -266,8 +266,8 @@ static void tds540_window_check_2( void )
 			cd = ( cd / tb ) * tb;
 			dcd = cd * fac / TDS_POINTS_PER_DIV;
 			buffer = T_strdup( tds540_ptime( dcd ) );
-			eprint( WARN, "%s: Width of window %ld had to be readjusted from "
-					"%s to %s.\n", DEVICE_NAME, w->num,
+			eprint( WARN, UNSET, "%s: Width of window %ld had to be "
+					"readjusted from %s to %s.\n", DEVICE_NAME, w->num,
 					tds540_ptime( w->width ), buffer );
 			T_free( buffer );
 			w->width = dcd;
@@ -303,8 +303,8 @@ static void tds540_window_check_3( void )
              w->start < - tds540.trig_pos * window ||
              w->start + w->width < - tds540.trig_pos * window )
         {
-			eprint( FATAL, "%s: Window %ld doesn't fit into current digitizer "
-					"time range.\n", DEVICE_NAME, w->num );
+			eprint( FATAL, UNSET, "%s: Window %ld doesn't fit into current "
+					"digitizer time range.\n", DEVICE_NAME, w->num );
 			THROW( EXCEPTION );
 		}
 
@@ -318,8 +318,8 @@ static void tds540_window_check_3( void )
 
 		if ( w->end_num - w->start_num <= 0 )
         {
-			eprint( FATAL, "%s: Window %ld has width of less than 1 point.\n",
-					DEVICE_NAME, w->num );
+			eprint( FATAL, UNSET, "%s: Window %ld has width of less than 1 "
+					"point.\n",	DEVICE_NAME, w->num );
 			THROW( EXCEPTION );
 		}
     }
