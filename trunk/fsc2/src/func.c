@@ -1,5 +1,16 @@
 #include "fsc2.h"
 
+/*
+   $Id$
+
+   $Log$
+   Revision 1.6  1999/07/21 07:15:25  jens
+   *** empty log message ***
+
+*/
+
+
+
 
 /* When in the input an identifier is found it is always tried first if the
    identifier is a function by a call to func_get(). If it is a function, a
@@ -20,7 +31,8 @@
    As the next step the function is called. The function gets passed a pointer
    to the first argument on the stack. It has to check by itself if the
    variables have the correct type and are reasonable. Each function has to
-   push its result onto the stack.
+   push its result onto the stack (the print() function returns the number of
+   variables it printed, not counting the format string).
 
    On return func_call() will remove all arguments from the stack as well as
    the variable for the function. Again, for functions with a variable number
