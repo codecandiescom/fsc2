@@ -475,11 +475,11 @@ bool xforms_init( int *argc, char *argv[ ] )
 	}
 
 	if ( GUI.win_has_pos )
-	{
 		fl_set_form_position( GUI.main_form->fsc2, GUI.win_x, GUI.win_y );
+
+	if ( GUI.win_has_pos )
 		fl_show_form( GUI.main_form->fsc2, FL_PLACE_POSITION,
 					  FL_FULLBORDER, "fsc2" );
-	}
 	else
 		fl_show_form( GUI.main_form->fsc2, FL_PLACE_MOUSE | FL_FREE_SIZE,
 					  FL_FULLBORDER, "fsc2" );

@@ -1,3 +1,4 @@
+
 /*
   $Id$
 
@@ -255,9 +256,11 @@ Var *daq_ao_channel_setup( Var *v )
 		
 	if ( FSC2_MODE == EXPERIMENT )
 	{
+		NI_DAQ_STATE l_er;
+		NI_DAQ_BU_POLARITY l_pol;
+
 		if ( ( ret = ni_daq_ao_channel_configuration( pci_mio_16e_1.board, 1,
-										&dac, ( NI_DAQ_STATE * ) &er,
-										( NI_DAQ_BU_POLARITY * ) &pol ) ) < 0 )
+												  &dac, &l_er, &l_pol ) ) < 0 )
 		{
 			switch ( ret )
 			{
@@ -276,6 +279,9 @@ Var *daq_ao_channel_setup( Var *v )
 
 			THROW( EXCEPTION );
 		}
+
+		er = l_er;
+		pol = l_pol;
 	}
 
 	if ( pci_mio_16e_1.ao_state.is_used[ dac ] )

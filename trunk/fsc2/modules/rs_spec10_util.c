@@ -42,7 +42,7 @@ bool rs_spec10_read_state( void )
 	int i = 0;
 	bool in_comment = UNSET;
 	bool found_end = UNSET;
-	unsigned long val;
+	long val;
 	int line = 1;
 
 
@@ -91,7 +91,7 @@ bool rs_spec10_read_state( void )
 
 				fsc2_fseek( fp, -1, SEEK_CUR );
 
-				if ( i > 7 || fsc2_fscanf( fp, "%lu", &val ) != 1 )
+				if ( i > 7 || fsc2_fscanf( fp, "%l", &val ) != 1 )
 				{
 					print( FATAL, "Invalid line %d in state file '%s'.\n",
 						   line, fn );

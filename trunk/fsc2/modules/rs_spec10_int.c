@@ -647,7 +647,7 @@ uns16 *rs_spec10_get_pic( uns32 *size )
 
 	pl_exp_uninit_seq( );
 
-#else /* if defined RS_SPEC10_TEST */
+#else  /* #if defined RS_SPEC10_TEST */
 	{
 		uns32 i;
 		unsigned long max_val = ~ ( uns16 ) 0;
@@ -655,7 +655,7 @@ uns16 *rs_spec10_get_pic( uns32 *size )
 		for ( i = 0; i < *size / sizeof *frame; i++ )
 			frame[ i ] = random( ) & max_val;
 	}
-#endif ! defined RS_SPEC10_TEST
+#endif
 
 #if defined RUNNING_WITH_ROOT_PRIVILEGES
 	munlock( frame, *size );

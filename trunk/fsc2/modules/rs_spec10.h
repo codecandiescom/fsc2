@@ -1,3 +1,4 @@
+
 /*
   $Id$
 
@@ -28,9 +29,9 @@
 /* Define the following for test purposes where no real communication with
    the camera is supposed to happen */
 
-
+/*
 #define RS_SPEC10_TEST
-
+*/
 
 /* The following sequence of includes and undefining BIG_ENDIAN is
    required to avoid some compiler warnings. The include files coming
@@ -51,7 +52,7 @@
 #include "rs_spec10.conf"
 
 
-if ! defined RS_SPEC10_UPSIDE_DOWN
+#if ! defined RS_SPEC10_UPSIDE_DOWN
 #define RS_SPEC10_UPSIDE_DOWN 0
 #endif
 
