@@ -209,7 +209,7 @@ Var *daq_freq_out( Var *v )
 Var *daq_trigger_setup( Var *v )
 {
 	NI_DAQ_TRIG_TYPE trigger_type;
-	const char *tt[ ] = { "TTL", "Low_Window", "High_Window", "Middle_Window",
+	const char *tt[ ] = { "TTL", "Low_Window", "High_Window", "Middle_Window",
 						  "High_Hysteresis", "Low_Hysteresis" };
 	double level;
 	double tl = -10.0;
