@@ -108,7 +108,7 @@ void rb_pulser_function_init( void )
 
 /*----------------------------------------------------------------------*
  * Function sets the delay for the very first delay card, i.e. the card
- * controllng the delay of the first microwave pulse. If there's no MW
+ * controlling the delay of the first microwave pulse. If there's no MW
  * pulse the delay for this card is set to the shortest possible time.
  *----------------------------------------------------------------------*/
 
@@ -217,8 +217,8 @@ void rb_pulser_delay_card_setup( void )
 				THROW( EXCEPTION );
 			}
 
-			/* All execpt the first MW pulse have a previous delay card which
-			   isn't the delay card for the inital delay and which must be set
+			/* All except the first MW pulse have a previous delay card which
+			   isn't the delay card for the initial delay and which must be set
 			   to make the pulse start at the correct moment */
 
 			if ( f->self != PULSER_CHANNEL_MW ||

@@ -34,7 +34,7 @@ static void rb_pulser_synthesizer_init( void );
  * the pulser into the state it's supposed to be in. This mainly
  * includes "opening" the Rulbus cards it's made of and setting
  * them up and also initializing the pulse modulation system of
- * the RF synthesizer that takes care of the single possibke RF
+ * the RF synthesizer that takes care of the single possible RF
  * pulse
  *---------------------------------------------------------------*/
 
@@ -100,7 +100,7 @@ void rb_pulser_init( void )
 																 != RULBUS_OK )
 		rb_pulser_failure( SET, "Failure to initialize pulser" );
 
-	/* Set for all cards (execept the card for experiment repetition time,
+	/* Set for all cards (except the card for experiment repetition time,
 	   which must remain inactive until the experiment is started, and the
 	   card for the delay for the detection pulse, which is triggered on the
 	   falling edge) the input trigger slope to trigger on raising edge */
@@ -157,7 +157,7 @@ static void rb_pulser_synthesizer_init( void )
 
 	if ( ! rb_pulser.synth_trig_slope )
 		rb_pulser_failure( UNSET, "Function for setting synthesizer pulse "
-						   "trigger slope is unknwon" );
+						   "trigger slope is unknown" );
 
 	if ( ( Func_ptr = func_get( rb_pulser.synth_trig_slope, &acc ) ) == NULL )
 		rb_pulser_failure( UNSET, "Function for setting synthesizer pulse "
@@ -168,7 +168,7 @@ static void rb_pulser_synthesizer_init( void )
 
 	if ( ! rb_pulser.synth_pulse_delay )
 		rb_pulser_failure( UNSET, "Function for setting synthesizer pulse "
-						   "delay is unknwon" );
+						   "delay is unknown" );
 
 	if ( ( Func_ptr = func_get( rb_pulser.synth_pulse_delay, &acc ) ) == NULL )
 		rb_pulser_failure( UNSET, "Function for setting synthesizer pulse "
@@ -179,7 +179,7 @@ static void rb_pulser_synthesizer_init( void )
 
 	if ( ! rb_pulser.synth_pulse_state )
 		rb_pulser_failure( UNSET, "Function for switching synthesizer pulse "
-						   "modulation on or off is unknwon" );
+						   "modulation on or off is unknown" );
 
 	if ( ( Func_ptr = func_get( rb_pulser.synth_pulse_state, &acc ) ) == NULL )
 		rb_pulser_failure( UNSET, "Function for switching synthesizer pulse "
@@ -208,7 +208,7 @@ void rb_pulser_exit( void )
 	for ( i = 0; i < NUM_CLOCK_CARDS; i++ )
 		if ( clock_card[ i ].handle >= 0 )
 		{
-			/* Commented out according to Huibs wishes, he want's the clocks
+			/* Commented out according to Huibs wishes, he wants the clocks
 			   to continue to run even after the end of the experiment.
 
 			rulbus_rb8515_clock_set_frequency( clock_card[ i ].handle,
@@ -224,8 +224,8 @@ void rb_pulser_exit( void )
 	for ( i = 0; i < NUM_DELAY_CARDS; i++ )
 		if ( delay_card[ i ].handle >= 0 )
 		{
-			/* Commented out according to Huibs wishes, he want's the pulses
-			   to stay where they were at the end of the experiement.
+			/* Commented out according to Huibs wishes, he ant's the pulses
+			   to stay where they were at the end of the experiment.
 
 			rulbus_rb8514_delay_set_output_pulse( delay_card[ i ].handle,
 										   RULBUS_RB8514_DELAY_OUTPUT_BOTH,
@@ -375,3 +375,10 @@ static void rb_pulser_failure( bool rb_flag, const char *mess )
 	rb_pulser_exit( );
 	THROW( EXCEPTION );
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

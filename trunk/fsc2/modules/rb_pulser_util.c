@@ -188,7 +188,7 @@ void rb_pulser_show_pulses( void )
 		return;
 	}
 
-	/* Here's the childs code */
+	/* Here's the child's code */
 
 	if ( pid == 0 )
 	{

@@ -164,7 +164,7 @@ Var *ccd_camera_name( Var *v )
 /* The function expects to get passed an array with  */
 /* 4 elements with the coordinates of the lower left */
 /* hand and the upper right hand corner. If one of   */
-/* the elements is 0 the corresponfing ROI value     */
+/* the elements is 0 the corresponding ROI value     */
 /* remains unchanged.                                */
 /*---------------------------------------------------*/
 
@@ -472,7 +472,7 @@ Var *ccd_camera_get_image( Var *v )
 	CLOBBER_PROTECT( urc[ X ] );
 	CLOBBER_PROTECT( urc[ Y ] );
 
-	/* Store the oringinal binning size and the position of the upper right
+	/* Store the original binning size and the position of the upper right
 	   hand corner, they might become adjusted and need to be reset at the
 	   end */
 
@@ -632,7 +632,7 @@ Var *ccd_camera_get_spectrum( Var *v )
 	CLOBBER_PROTECT( urc[ X ] );
 	CLOBBER_PROTECT( urc[ Y ] );
 
-	/* Store the oringinal binning size and the position of the upper right
+	/* Store the original binning size and the position of the upper right
 	   hand corner, they might become adjusted and need to be reset at the
 	   end */
 

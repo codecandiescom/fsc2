@@ -462,8 +462,8 @@ Var *pulser_update( Var *v )
  * Public function to change the position of pulses. If called with no
  * argument all active pulses that have a position change time set will
  * be moved, otherwise all pulses passed as arguments to the function.
- * Take care: The changes will only be commited on the next call of the
- *            function pulser_update() !
+ * Take care: The changes will only be committed on the next call of
+ *            the function pulser_update() !
  *----------------------------------------------------------------------*/
 
 Var *pulser_shift( Var *v )
@@ -514,8 +514,8 @@ Var *pulser_shift( Var *v )
 /*-------------------------------------------------------------------------*
  * Public function for incrementing the length of pulses. If called with
  * no argument all active pulses that have a length change defined are
- * incremented, oltherwise all pulses passed as arguments to the function.
- * Take care: The changes will only be commited on the next call of the
+ * incremented, otherwise all pulses passed as arguments to the function.
+ * Take care: The changes will only be committed on the next call of the
  *            function pulser_update() !
  *-------------------------------------------------------------------------*/
 
@@ -544,7 +544,7 @@ Var *pulser_increment( Var *v )
 		if ( ! p->is_len )
 		{
 			print( FATAL, "Pulse #%ld has no length set, so incrementing its "
-				   "length isn't possibe.\n", p->num );
+				   "length isn't possible.\n", p->num );
 			THROW( EXCEPTION );
 		}
 
@@ -600,7 +600,7 @@ Var *pulser_pulse_reset( Var *v )
 		return vars_push( INT_VAR, 1L );
 
 	/* An empty pulse list means that we have to reset all pulses (even the
-       inactive ones). Do't explicitely reset automatically created pulses
+       inactive ones). Don't explicitely reset automatically created pulses
 	   (which all have a negative pulse number), they will be reset together
 	   with the pulses belong to. */
 
@@ -641,7 +641,7 @@ Var *pulser_pulse_reset( Var *v )
 
 
 /*---------------------------------------------------------------------*
- * This is a special funtion for the Rulbus pulser only which returns
+ * This is a special function for the Rulbus pulser only which returns
  * some minimum values for a pulse: for each first pulse of a function
  * the earliest possible position for the pulse, for all others the
  * minimum delay between the end of its predecessor and its start.
@@ -682,10 +682,10 @@ Var *pulser_pulse_minimum_specs( Var *v )
 }
 
 
-/*----------------------------------------------------------*
- * Function for intialization of the stuctures representing
+/*------------------------------------------------------------*
+ * Function for initialization of the structures representing
  * the Rulbus cards the pulser is made of
- *----------------------------------------------------------*/
+ *------------------------------------------------------------*/
 
 static void rb_pulser_card_setup( void )
 {

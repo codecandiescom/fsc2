@@ -264,7 +264,7 @@ bool rb_pulser_get_pulse_function( long pnum, int *function )
 
 
 /*-----------------------------------------*
- * Function returns the postion of a pulse 
+ * Function returns the position of a pulse 
  *-----------------------------------------*/
 
 bool rb_pulser_get_pulse_position( long pnum, double *p_time )
