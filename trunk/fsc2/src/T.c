@@ -39,6 +39,16 @@ void *T_malloc( size_t size )
 	int *EBP;           /* assumes sizeof( int ) equals size of pointers */
 #endif
 
+
+#ifndef NDEBUG
+	if ( size == 0 )
+	{
+		eprint( FATAL, Fname != NULL, "Internal error detected at %s:%d "
+				"(malloc with size 0).\n", __FILE__, __LINE__ );
+		THROW( EXCEPTION )
+	}
+#endif
+
 	mem = malloc( size );
 
 	if ( mem == NULL )
@@ -75,6 +85,15 @@ void *T_calloc( size_t nmemb, size_t size )
 #endif
 
 
+#ifndef NDEBUG
+	if ( size == 0 )
+	{
+		eprint( FATAL, Fname != NULL, "Internal error detected at %s:%d "
+				"(calloc with size 0).\n", __FILE__, __LINE__ );
+		THROW( EXCEPTION )
+	}
+#endif
+
 	mem = calloc( nmemb, size );
 
 	if ( mem == NULL )
@@ -109,6 +128,16 @@ void *T_realloc( void *ptr, size_t size )
 	void *new_ptr;
 #if defined( MDEBUG )
 	int *EBP;           /* assumes sizeof( int ) equals size of pointers */
+#endif
+
+
+#ifndef NDEBUG
+	if ( size == 0 )
+	{
+		eprint( FATAL, Fname != NULL, "Internal error detected at %s:%d "
+				"(realloc with size 0).\n", __FILE__, __LINE__ );
+		THROW( EXCEPTION )
+	}
 #endif
 
 	new_ptr = realloc( ptr, size );
@@ -217,6 +246,25 @@ long T_atol( const char *txt )
 
 	ret = strtol( txt, NULL, 10 );
 	if ( errno == ERANGE )
+	{
+		eprint( FATAL, SET, "Long integer number out of range: %s.\n", txt );
+		THROW( EXCEPTION )
+	}
+
+	return ret;
+}
+
+
+/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*/
+
+long T_atoi( const char *txt )
+{
+	long ret;
+
+
+	ret = strtol( txt, NULL, 10 );
+	if ( errno == ERANGE || ret > INT_MAX || ret < INT_MIN )
 	{
 		eprint( FATAL, SET, "Integer number out of range: %s.\n", txt );
 		THROW( EXCEPTION )
