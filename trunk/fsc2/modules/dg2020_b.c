@@ -133,6 +133,9 @@ int dg2020_b_init_hook( void )
 
 	dg2020.twt_distance_warning = 0;
 
+	dg2020.dummy_phase_setup = NULL;
+	dg2020.num_dummy_phase_setups = 0;
+
 	for ( i = 0; i < MAX_PODS; i++ )
 	{
 		dg2020.pod[ i ].self = i;
@@ -549,6 +552,9 @@ void dg2020_b_exit_hook( void )
 		f->pm = BOOL_P T_free( f->pm );
 		f->pulses = PULSE_PP T_free( f->pulses );
 	}
+
+	if ( dg2020.dummy_phase_setup )
+		T_free( dg2020.dummy_phase_setup );
 }
 
 

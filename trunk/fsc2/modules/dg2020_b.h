@@ -297,6 +297,9 @@ typedef struct {
 	Ticks minimum_twt_pulse_distance;
 	long twt_distance_warning;
 
+	PHASE_SETUP *dummy_phase_setup;
+	int num_dummy_phase_setups;
+
 } DG2020;
 
 
@@ -362,7 +365,6 @@ typedef struct _p_ {
 								reference to pulse it is associated with */
 	PULSE_PARAMS *pp;
 	PULSE_PARAMS *old_pp;
-
 } PULSE;
 
 

@@ -529,7 +529,19 @@ static void ep385_basic_functions_check( void )
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 		if ( ep385.function[ i ].is_needed )
+		{
 			ep385_create_phase_matrix( ep385.function + i );
+
+			/* Warn the user if there is more than one channel assigned to the
+			   function but there's no PHASE_SETUP that we're going to use
+			   only the very first channel for creating pulses */
+
+			if ( ep385.function[ i ].phase_setup == NULL &&
+				 ep385.function[ i ].num_channels > 1 )
+				print( WARN, "Using only channel %d for %s pulses.\n",
+					   ep385.function[ i ].channel[ 0 ]->self,
+					   ep385.function[ i ].name );
+		}
 }
 
 

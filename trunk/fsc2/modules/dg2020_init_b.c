@@ -33,6 +33,7 @@ static void dg2020_phase_setup_check( FUNCTION *f );
 static void dg2020_distribute_channels( void );
 static void dg2020_setup_phase_matrix( FUNCTION *f );
 static void dg2020_pulse_start_setup( void );
+static PHASE_SETUP *dg2020_create_dummy_phase_setup( FUNCTION *f );
 static Phase_Sequence *dg2020_create_dummy_phase_seq( void );
 static void dg2020_create_shape_pulses( void );
 static void dg2020_create_twt_pulses( void );
@@ -97,12 +98,12 @@ static void dg2020_init_print( FILE *fp )
 
 /*-------------------------------------------------------------------------*/
 /* Function runs through all pulses and checks that at least:              */
-/* 1. a pulse function is set and the function itself has been declared in */
+/* 1. A pulse function is set and the function itself has been declared in */
 /*	  the ASSIGNMENTS section											   */
-/* 2. the start position is set											   */
-/* 3. the length is set (only exception: if pulse function is DETECTION	   */
+/* 2. The start position is set											   */
+/* 3. The length is set (only exception: if pulse function is DETECTION	   */
 /*	  and no length is set it's more or less silently set to one tick)	   */
-/* 4. the sum of function delay, pulse start position and length does not  */
+/* 4. The sum of function delay, pulse start position and length does not  */
 /*	  exceed the pulsers memory											   */
 /*-------------------------------------------------------------------------*/
 
@@ -170,13 +171,21 @@ void dg2020_basic_pulse_check( void )
 		}
 		else if ( p->function->num_pods > 1 )
 		{
+			/* If the function has more than one pod but no phase setup
+			   create a new dummy PHASE_SETUP which will use only the
+			   first pod for pulses (the other pods assigned to the function
+			   will be constantly low). */
+
 			if ( p->function->phase_setup == NULL )
 			{
-				print( FATAL, "Function '%s' has more than one pod but "
-					   "association between pods and phases is missing.\n",
+				p->function->phase_setup =
+								dg2020_create_dummy_phase_setup( p->function );
+
+				print( WARN, "Using only POD %d for %s pulses.\n",
+					   p->function->pod[ 0 ]->self,
 					   p->function->name );
-				THROW( EXCEPTION );
 			}
+
 			p->pc = dg2020_create_dummy_phase_seq( );
 			p->function->phase_setup->is_needed[ PHASE_PLUS_X ] = SET;
 		}
@@ -274,13 +283,7 @@ static void dg2020_basic_functions_check( void )
 		/* Check that for functions that need phase cycling there was also a
 		   PHASE_SETUP command */
 
-		if ( f->num_pods > 1 && f->phase_setup == NULL )
-		{
-			print( FATAL, "Function '%s' has more than one pod but "
-				   "association between pods and phases is missing.\n",
-				   f->name );
-			THROW( EXCEPTION );
-		}
+		fsc2_assert( f->num_pods == 1 || f->phase_setup != NULL );
 
 		/* Now its time to check the phase setup for functions which use phase
 		   cycling */
@@ -641,6 +644,31 @@ static void dg2020_pulse_start_setup( void )
 
 
 /*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*/
+
+static PHASE_SETUP *dg2020_create_dummy_phase_setup( FUNCTION *f )
+{
+	int i;
+
+
+	i = dg2020.num_dummy_phase_setups;
+	dg2020.dummy_phase_setup = PHASE_SETUP_P
+								T_realloc( dg2020.dummy_phase_setup,
+										   ++dg2020.num_dummy_phase_setups *
+										   sizeof *dg2020.dummy_phase_setup );
+
+
+	dg2020.dummy_phase_setup[ i ].is_defined = SET;
+	dg2020.dummy_phase_setup[ i ].is_set[ 0 ] = SET;
+	dg2020.dummy_phase_setup[ i ].is_needed[ 0 ] = SET;
+	dg2020.dummy_phase_setup[ i ].pod[ 0 ] = f->pod[ 0 ];
+	dg2020.dummy_phase_setup[ i ].function = f;
+
+	return dg2020.dummy_phase_setup + i;
+}
+
+
+/*-----------------------------------------------------------------------*/
 /* This function creates a dummy phase sequence for pulses with no phase */
 /* sequence defined but belonging to a function that has more than one   */
 /* pod assigned to it. This dummy phase sequence consists of just '+X'   */
@@ -933,7 +961,7 @@ static void dg2020_create_twt_pulses( void )
 		np->sp = NULL;
 
 		/* The remaining properties are just exact copies of the
-		   pulse the shape pulse has to be used with */
+		   pulse the TWT pulse has to be used with */
 
 		np->is_active = rp->is_active;
 		np->was_active = rp->was_active;
