@@ -114,8 +114,8 @@ Var *monochromator_wavelength_axis( Var * v );
 Var *monochromator_calc_wavelength( Var *v );
 Var *monochromator_load_calibration( Var * v );
 Var *monochromator_set_calibration( Var *v );
-Var *monochromator_init_offset( Var *v );
-Var *monochromator_init_adjust( Var *v );
+Var *monochromator_zero_offset( Var *v );
+Var *monochromator_grating_adjust( Var *v );
 
 
 FILE *spectrapro_300i_find_calib( char *name );
