@@ -66,6 +66,7 @@
 * tds540::        Tektronix Digitizing Oscilloscope TDS540
 * tds744a::       Tektronix Digitizing Oscilloscope TDS744A
 * tds754a::       Tektronix Digitizing Oscilloscope TDS754A
+* thurlby330::    Thurlby & Thandar Power Supply PL330DP
 @end menu
 @end ifinfo
 
@@ -1560,7 +1561,7 @@ only), 3 math channels and 4 reference channels.
 @end multitable
 
 
-@node tds754a, , tds744a, Device Reference
+@node tds754a, thurlby330, tds744a, Device Reference
 @iftex
 @subheading Tektronix Digitizing Oscilloscope TDS754A
 @end iftex
@@ -1604,4 +1605,37 @@ only), 3 math channels and 4 reference channels.
 @item @code{digitizer_get_amplitude_fast()}  @tab @ref{digitizer_get_amplitude_fast}
 @item @code{digitizer_run()}                 @tab @ref{digitizer_run}
 @item @code{digitizer_lock_keyboard()}       @tab @ref{digitizer_lock_keyboard}
+@end multitable
+
+
+@node thurlby330, , tds754a, Device Reference
+@iftex
+@subheading Thurlby & Thandar Power Supply PL330DP
+@end iftex
+@ifnottex
+@section Thurlby & Thandar Power Supply PL330DP
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{thurlby330}
+
+@paragraphindent 0
+@strong{Description}: Thurlby & Thandar Power Supply PL330DP, 3 output
+channels, voltage range: @w{0 V} to @w{32 V} with resolution of @w{10
+mV}, current range: @w{0 A} to @w{3 A} with resolution of @w{1 mA}.
+
+
+@paragraphindent 0
+@strong{Controlled via}: GPIB bus (IEEE 488).
+
+@paragraphindent 0
+@strong{Supported functions}:
+@multitable @columnfractions .45 .45
+@item @code{powersupply_name()}           @tab @ref{powersupply_name}
+@item @code{powersupply_damping()}        @tab @ref{powersupply_damping}
+@item @code{powersupply_channel_state()}  @tab @ref{powersupply_channel_state}
+@item @code{powersupply_voltage()}        @tab @ref{powersupply_voltage}
+@item @code{powersupply_voltage_limit()}  @tab @ref{powersupply_voltage_limit}
+@item @code{powersupply_current()}        @tab @ref{powersupply_current}
+@item @code{powersupply_current_limit()}  @tab @ref{powersupply_current_limit}
 @end multitable

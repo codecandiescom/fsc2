@@ -161,12 +161,6 @@ Var *powersupply_damping( Var *v )
 	long length = 100;
 
 
-	if ( v == NULL )
-	{
-		print( FATAL, "Missing arguments.\n" );
-		THROW( EXCEPTION );
-	}
-
 	/* First argument must be the channel number (1 or 2) */
 
 	channel = thurlby330_get_channel( v );
@@ -180,8 +174,6 @@ Var *powersupply_damping( Var *v )
 	/* Second argument must be 0 or "OFF" for OFF or not 0 or "ON" for ON */
 
 	status = get_boolean( v );
-
-	too_many_arguments( v );
 
 	if ( FSC2_MODE != EXPERIMENT )
 		return vars_push( FLOAT_VAR, status );
@@ -209,12 +201,6 @@ Var *powersupply_channel_state( Var *v )
 	long length = 100;
 
 
-	if ( v == NULL )
-	{
-		print( FATAL, "Missing arguments.\n" );
-		THROW( EXCEPTION );
-	}
-
 	/* First argument must be the channel number (1 or 2) */
 
 	channel = thurlby330_get_channel( v );
@@ -228,8 +214,6 @@ Var *powersupply_channel_state( Var *v )
 	/* Second argument must be 0 or "OFF" for OFF and not 0 or "ON" for ON */
 
 	status = get_boolean( v );
-
-	too_many_arguments( v );
 
 	if ( FSC2_MODE == TEST )
 		return vars_push( FLOAT_VAR, status );
@@ -669,14 +653,14 @@ static long thurlby330_get_channel( Var *v )
 
 	channel = get_long( v, "channel number" );
 
-	if ( channel < 1 || channel > 2 )
+	if ( channel < CHANNEL_CH1 || channel > CHANNEL_CH2 )
 	{
 		print( FATAL, "Invalid power supply channel number %ld, valid "
-			   "channels are 1 and 2.\n", channel );
+			   "channels are 'CH1' and 'CH2'.\n", channel );
 		THROW( EXCEPTION );
 	}
 
-	return channel;
+	return channel + 1;
 }
 
 /*
