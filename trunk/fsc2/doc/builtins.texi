@@ -2442,10 +2442,10 @@ between adjacent points being identical.
 @item spike_remove()
 @findex spike_remove()
 The function tries to remove spikes from 1-dimensional arrays. Before going
-on to describing the arguments an explanation how it works. That's required
-because a fit-it-all function for detecting and removing spikes is impossible
-and when this function is used it must be done with all the restrictions in
-mind.
+on describing the arguments here's an explanation how it works. That's
+necessary because a fit-it-all function for detecting and removing spikes
+is impossible and when this function is used it must be done with all the
+restrictions in mind.
 
 The function calculates numerically the first derivative of the 1-dimensional
 arrays by computing the differences between neighbouring points of the array.
