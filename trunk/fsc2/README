@@ -35,7 +35,7 @@ Download
 
 You can download the sources for the program and the device modules from:
 
-       http://www.physik.fu-berlin.de/~toerring/fsc2.html
+       http://www.physik.fu-berlin.de/~toerring/fsc2.phtml
 
 The documentation in Postscript or PDF format can be downloaded from:
 
@@ -44,7 +44,7 @@ The documentation in Postscript or PDF format can be downloaded from:
 
 You also will find an online version of the documentation at:
 
-       http://www.physik.fu-berlin.de/~toerring/fsc2
+       http://www.physik.fu-berlin.de/~toerring/fsc2/
 
 
 Features
@@ -121,6 +121,7 @@ Suported devices
   * Tektronix Stimulus System HFS9003
   * Bruker EP385 Pulse Programmer
   * Interface Technology RS690 Digital Word Generator
+  * RULBUS (Rijksuniversiteit Leiden BUS) Pulser
 
  Lock-in amplifiers:
 
@@ -155,6 +156,7 @@ Suported devices
   * Hewlett-Packard Synthesizer HP8647A
   * Hewlett-Packard Synthesizer HP8648B
   * Hewlett-Packard Synthesizer HP8672A
+  * Rohde & Schwarz SML01 Signal Generator
 
  Frequency counters:
 
@@ -163,6 +165,7 @@ Suported devices
  Temperature controllers:
 
   * LakeShore 330 Temperature Controller
+  * Oxford ITC 503 Temperature Controller 
 
  Digital voltmeters:
 
@@ -180,6 +183,15 @@ Suported devices
   * National Instruments PCI-MIO-16E1 card (Linux device driver comes
     with the package)
   * Home-built AD and DA converter (H.-J. Steinhoff, University Onsabrueck)
+  * RULBUS (Rijksuniversiteit Leiden BUS) 12-bit DAC card (Linux device
+    driver comes with the package)
+  * RULBUS (Rijksuniversiteit Leiden BUS) 12-bit ADC card (Linux device
+    driver comes with the package)
+
+ DIO cards:
+
+  * WITIO-48 DIO ISA card by Messcomp Messcomp Datentechnik GmbH
+    (Linux device driver comes with the package)
 
  Event counter cards:
 
@@ -232,8 +244,10 @@ Limitations
 
 Due to my professional background fsc2 has been written with the different
 types of EPR (Electron Paramagnetic Resonance) experiments in mind. On the
-other hand, fsc2's basic concepts should make it easy to use it also for
-quite a wide range of other types of spectrometers.
+other hand, fsc2's basic concepts should make it easy to use it also for a
+wide range of other types of spectrometers as has been succesfully
+demonstrated by using it for (optical) single molecule as well a Raman
+spectrometer.
 
                                      Regards, Jens Thoms Toerring
 
