@@ -86,7 +86,7 @@ with @code{bh15} range is @w{-50 G} to @w{23000 G}.
 
 @paragraphindent 0
 @strong{Supported functions}:
-@multitable @columnfractions .5 .5
+@multitable @columnfractions .45 .45
 @item @code{magnet_name()}            @tab @ref{magnet_name}
 @item @code{magnet_setup()}           @tab @ref{magnet_setup}
 @item @code{magnet_fast_init()}       @tab @ref{magnet_fast_init}
@@ -122,7 +122,7 @@ to @w{19900 G}, with @code{bh15} range is @w{-50 G} to @w{23000 G}.
 
 @paragraphindent 0
 @strong{Supported functions}:
-@multitable @columnfractions .5 .5
+@multitable @columnfractions .45 .45
 @item @code{magnet_name()}            @tab @ref{magnet_name}
 @item @code{magnet_setup()}           @tab @ref{magnet_setup}
 @item @code{magnet_fast_init()}       @tab @ref{magnet_fast_init}
@@ -156,7 +156,7 @@ measured is from @w{-50 G} to @w{23000 G}.
 
 @paragraphindent 0
 @strong{Supported functions}:
-@multitable @columnfractions .5 .5
+@multitable @columnfractions .45 .45
 @item @code{gaussmeter_name()}        @tab @ref{gaussmeter_name}
 @item @code{find_field()}             @tab @ref{find_field}
 @item @code{gaussmeter_resolution()}  @tab @ref{gaussmeter_resolution}
@@ -191,7 +191,7 @@ can range from @w{-5 V} to @w{5 V}.
 
 @paragraphindent 0
 @strong{Supported functions}:
-@multitable @columnfractions .5 .5
+@multitable @columnfractions .45 .45
 @item @code{pulser_name()}           @tab @ref{pulser_name}
 @item @code{pulser_state()}          @tab @ref{pulser_state}
 @item @code{pulser_channel_state()}  @tab @ref{pulser_channel_state}
@@ -234,7 +234,7 @@ range from @w{-5 V} to @w{5 V}.
 
 @paragraphindent 0
 @strong{Supported functions}:
-@multitable @columnfractions .5 .5
+@multitable @columnfractions .45 .45
 @item @code{pulser_name()}           @tab @ref{pulser_name}
 @item @code{pulser_state()}          @tab @ref{pulser_state}
 @item @code{pulser_channel_state()}  @tab @ref{pulser_channel_state}
@@ -269,7 +269,7 @@ already measured curves is currently supported.
 
 @paragraphindent 0
 @strong{Supported functions}:
-@multitable @columnfractions .5 .5
+@multitable @columnfractions .45 .45
 @item @code{boxcar_name()}          @tab @ref{boxcar_name}
 @item @code{boxcar_curve_length()}  @tab @ref{boxcar_curve_length}
 @item @code{boxcar_get_curve()}     @tab @ref{boxcar_get_curve}
@@ -297,7 +297,7 @@ analog-to-digital converter.
 
 @paragraphindent 0
 @strong{Supported functions}:
-@multitable @columnfractions .5 .5
+@multitable @columnfractions .45 .45
 @item @code{lockin_name()}             @tab @ref{lockin_name}
 @item @code{lockin_get_data()}         @tab @ref{lockin_get_data}
 @item @code{lockin_sensitivity()}      @tab @ref{lockin_sensitivity}
@@ -339,7 +339,7 @@ the field in older Bruker EPR spectrometers. Maximum field range is from
 
 @paragraphindent 0
 @strong{Supported functions}:
-@multitable @columnfractions .5 .5
+@multitable @columnfractions .45 .45
 @item @code{magnet_name()}   @tab @ref{magnet_name}
 @item @code{magnet_setup()}  @tab @ref{magnet_setup}
 @item @code{set_field()}     @tab @ref{set_field}
@@ -373,7 +373,7 @@ range is @w{1460 G} to @w{19900 G}.
 
 @paragraphindent 0
 @strong{Supported functions}:
-@multitable @columnfractions .5 .5
+@multitable @columnfractions .45 .45
 @item @code{gaussmeter_name()}               @tab @ref{gaussmeter_name}
 @item @code{find_field()}                    @tab @ref{find_field}
 @item @code{gaussmeter_resolution()}         @tab @ref{gaussmeter_resolution}
@@ -405,7 +405,7 @@ range is @w{1460 G} to @w{19900 G}.
 
 @paragraphindent 0
 @strong{Supported functions}:
-@multitable @columnfractions .5 .5
+@multitable @columnfractions .45 .45
 @item @code{gaussmeter_name()}               @tab @ref{gaussmeter_name}
 @item @code{find_field()}                    @tab @ref{find_field}
 @item @code{gaussmeter_resolution()}         @tab @ref{gaussmeter_resolution}
@@ -436,7 +436,7 @@ the range is @w{1460 G} to @w{19900 G}.
 
 @paragraphindent 0
 @strong{Supported functions}:
-@multitable @columnfractions .5 .5
+@multitable @columnfractions .45 .45
 @item @code{gaussmeter_name()}               @tab @ref{gaussmeter_name}
 @item @code{measure_field()}                 @tab @ref{measure_field}
 @item @code{gaussmeter_resolution()}         @tab @ref{gaussmeter_resolution}
@@ -464,7 +464,7 @@ the range is @w{1460 G} to @w{19900 G}.
 
 @paragraphindent 0
 @strong{Supported functions}:
-@multitable @columnfractions .5 .5
+@multitable @columnfractions .45 .45
 @item @code{gaussmeter_name()}               @tab @ref{gaussmeter_name}
 @item @code{measure_field()}                 @tab @ref{measure_field}
 @item @code{gaussmeter_resolution()}         @tab @ref{gaussmeter_resolution}
@@ -499,7 +499,7 @@ can range from @w{-4.7 V} to @w{4.7 V}.
 
 @paragraphindent 0
 @strong{Supported functions}:
-@multitable @columnfractions .5 .5
+@multitable @columnfractions .45 .45
 @item @code{pulser_name()}            @tab @ref{pulser_name}
 @item @code{pulser_state()}           @tab @ref{pulser_state}
 @item @code{pulser_channel_state()}   @tab @ref{pulser_channel_state}
@@ -534,7 +534,7 @@ allowed -- change the configuration file to allow higher output levels.
 
 @paragraphindent 0
 @strong{Supported functions}:
-@multitable @columnfractions .5 .5
+@multitable @columnfractions .45 .45
 @item @code{synthesizer_name()}                 @tab @ref{synthesizer_name}
 @item @code{synthesizer_state()}                @tab @ref{synthesizer_state}
 @item @code{synthesizer_frequency()}            @tab @ref{synthesizer_frequency}
@@ -580,7 +580,7 @@ temperature controller transfering data between GPIB and Oxford ISOBUS.
 
 @paragraphindent 0
 @strong{Supported functions}:
-@multitable @columnfractions .5 .5
+@multitable @columnfractions .45 .45
 @item @code{magnet_name()}        @tab @ref{magnet_name}
 @item @code{magnet_setup()}       @tab @ref{magnet_setup}
 @item @code{get_field()}          @tab @ref{get_field}
@@ -621,7 +621,7 @@ the currents through the sweep coil, not in field units!
 
 @paragraphindent 0
 @strong{Supported functions}:
-@multitable @columnfractions .5 .5
+@multitable @columnfractions .45 .45
 @item @code{magnet_name()}            @tab @ref{magnet_name}
 @item @code{magnet_setup()}           @tab @ref{magnet_setup}
 @item @code{magnet_use_correction()}  @tab @ref{magnet_use_correction}
@@ -652,7 +652,7 @@ the currents through the sweep coil, not in field units!
 
 @paragraphindent 0
 @strong{Supported functions}:
-@multitable @columnfractions .5 .5
+@multitable @columnfractions .45 .45
 @item @code{voltmeter_name()}            @tab @ref{voltmeter_name}
 @item @code{voltmeter_get_data()}        @tab @ref{voltmeter_get_data}
 @item @code{voltmeter_ac_measurement()}  @tab @ref{voltmeter_ac_measurement}
@@ -681,7 +681,7 @@ the temperature.
 
 @paragraphindent 0
 @strong{Supported functions}:
-@multitable @columnfractions .5 .5
+@multitable @columnfractions .45 .45
 @item @code{temp_contr_name()}            @tab @ref{temp_contr_name}
 @item @code{temp_contr_temperature()}     @tab @ref{temp_contr_temperature}
 @item @code{temp_contr_sample_channel()}  @tab @ref{temp_contr_sample_channel}
@@ -710,7 +710,7 @@ channels, 2 function channels (needed for averaging).
 
 @paragraphindent 0
 @strong{Supported functions}:
-@multitable @columnfractions .5 .5
+@multitable @columnfractions .45 .45
 @item @code{digitizer_name()}                 @tab @ref{digitizer_name}
 @c @code{@item digitizer_define_window()}      @tab @ref{@item digitizer_define_window}
 @item @code{digitizer_timebase()}             @tab @ref{digitizer_timebase}
@@ -750,7 +750,7 @@ T. Measured fields are returned in Gauss, not Tesla!
 
 @paragraphindent 0
 @strong{Supported functions}:
-@multitable @columnfractions .5 .5
+@multitable @columnfractions .45 .45
 @item @code{gaussmeter_name()}               @tab @ref{gaussmeter_name}
 @item @code{measure_field()}                 @tab @ref{measure_field}
 @item @code{gaussmeter_resolution()}         @tab @ref{gaussmeter_resolution}
@@ -777,7 +777,7 @@ channel, no internal modulation, 4 ADC and 2 DAC ports.
 
 @paragraphindent 0
 @strong{Supported functions}:
-@multitable @columnfractions .5 .5
+@multitable @columnfractions .45 .45
 @item @code{lockin_name()}           @tab @ref{lockin_name}
 @item @code{lockin_get_data()}       @tab @ref{lockin_get_data}
 @item @code{lockin_get_adc_data()}   @tab @ref{lockin_get_adc_data}
@@ -810,7 +810,7 @@ channels, no internal modulation, 4 ADC and 2 DAC ports.
 
 @paragraphindent 0
 @strong{Supported functions}:
-@multitable @columnfractions .5 .5
+@multitable @columnfractions .45 .45
 @item @code{lockin_name()}           @tab @ref{lockin_name}
 @item @code{lockin_get_data()}       @tab @ref{lockin_get_data}
 @item @code{lockin_get_adc_data()}   @tab @ref{lockin_get_adc_data}
@@ -843,7 +843,7 @@ channels, auto acquisition, internal modulation, 4 ADC and 4 DAC ports.
 
 @paragraphindent 0
 @strong{Supported functions}:
-@multitable @columnfractions .5 .5
+@multitable @columnfractions .45 .45
 @item @code{lockin_name()}              @tab @ref{lockin_name}
 @item @code{lockin_auto_setup()}        @tab @ref{lockin_auto_setup}
 @item @code{lockin_auto_acquisition()}  @tab @ref{lockin_auto_acquisition}
@@ -881,7 +881,7 @@ channels, auto acquisition, internal modulation, 4 ADC and 4 DAC ports.
 
 @paragraphindent 0
 @strong{Supported functions}:
-@multitable @columnfractions .5 .5
+@multitable @columnfractions .45 .45
 @item @code{lockin_name()}              @tab @ref{lockin_name}
 @item @code{lockin_auto_setup()}        @tab @ref{lockin_auto_setup}
 @item @code{lockin_auto_acquisition()}  @tab @ref{lockin_auto_acquisition}
@@ -920,7 +920,7 @@ reference channels.
 
 @paragraphindent 0
 @strong{Supported functions}:
-@multitable @columnfractions .5 .5
+@multitable @columnfractions .45 .45
 @item @code{digitizer_name()}                @tab @ref{digitizer_name}
 @item @code{digitizer_define_window()}       @tab @ref{digitizer_define_window}
 @item @code{digitizer_change_window()}       @tab @ref{digitizer_change_window}
@@ -967,7 +967,7 @@ reference channels.
 
 @paragraphindent 0
 @strong{Supported functions}:
-@multitable @columnfractions .5 .5
+@multitable @columnfractions .45 .45
 @item @code{digitizer_name()}                @tab @ref{digitizer_name}
 @item @code{digitizer_define_window()}       @tab @ref{digitizer_define_window}
 @item @code{digitizer_change_window()}       @tab @ref{digitizer_change_window}
@@ -1014,7 +1014,7 @@ reference channels.
 
 @paragraphindent 0
 @strong{Supported functions}:
-@multitable @columnfractions .5 .5
+@multitable @columnfractions .45 .45
 @item @code{digitizer_name()}                @tab @ref{digitizer_name}
 @item @code{digitizer_define_window()}       @tab @ref{digitizer_define_window}
 @item @code{digitizer_change_window()}       @tab @ref{digitizer_change_window}
@@ -1061,7 +1061,7 @@ only), 3 math channels and 4 reference channels.
 
 @paragraphindent 0
 @strong{Supported functions}:
-@multitable @columnfractions .5 .5
+@multitable @columnfractions .45 .45
 @item @code{digitizer_name()}                @tab @ref{digitizer_name}
 @item @code{digitizer_define_window()}       @tab @ref{digitizer_define_window}
 @item @code{digitizer_change_window()}       @tab @ref{digitizer_change_window}
@@ -1108,7 +1108,7 @@ only), 3 math channels and 4 reference channels.
 
 @paragraphindent 0
 @strong{Supported functions}:
-@multitable @columnfractions .5 .5
+@multitable @columnfractions .45 .45
 @item @code{digitizer_name()}                @tab @ref{digitizer_name}
 @item @code{digitizer_define_window()}       @tab @ref{digitizer_define_window}
 @item @code{digitizer_change_window()}       @tab @ref{digitizer_change_window}
@@ -1155,7 +1155,7 @@ only), 3 math channels and 4 reference channels.
 
 @paragraphindent 0
 @strong{Supported functions}:
-@multitable @columnfractions .5 .5
+@multitable @columnfractions .45 .45
 @item @code{digitizer_name()}                @tab @ref{digitizer_name}
 @item @code{digitizer_define_window()}       @tab @ref{digitizer_define_window}
 @item @code{digitizer_change_window()}       @tab @ref{digitizer_change_window}

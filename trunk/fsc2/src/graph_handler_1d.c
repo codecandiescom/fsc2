@@ -989,6 +989,9 @@ void redraw_canvas_1d( Canvas *c )
 {
 	long i;
 	Curve_1d *cv;
+	Marker *m;
+	short x;
+
 
 
 	XFillRectangle( G.d, c->pm, c->gc, 0, 0, c->w, c->h );
@@ -997,7 +1000,24 @@ void redraw_canvas_1d( Canvas *c )
 	{
 		if ( c == &G.canvas && G.is_scale_set )
 		{
-			/* First draw all curves */
+			/* First draw the marker */
+
+			for ( i = 0; i < G.nc; i++ )
+				if ( G.curve[ i ]->active )
+				{
+					cv = G.curve[ i ];
+					break;
+				}
+
+			if ( i != G.nc )
+				for ( m = G.marker; m != NULL; m = m->next )
+				{
+					x = d2shrt( cv->s2d[ X ]
+								* ( m->position + cv->shift[ X ] ) );
+					XDrawLine( G.d, c->pm, m->gc, x, 0, x, c->h );
+				}
+
+			/* Now draw all curves */
 
 			for ( i = G.nc - 1 ; i >= 0; i-- )
 			{
@@ -1471,6 +1491,66 @@ void make_scale_1d( Curve_1d *cv, Canvas *c, int coord )
 						   x + G.short_tick_len, y );
 		}
 	}
+}
+
+
+/*----------------------------------------------*/
+/* Gets called to create a marker at 'position' */
+/*----------------------------------------------*/
+
+void set_marker( long position, long color )
+{
+	Marker *m, *cm;
+	XGCValues gcv;
+
+
+	m = T_malloc( sizeof *m );
+	m->next = 0;
+
+	if ( G.marker == NULL )
+		G.marker = m;
+	else
+	{
+		cm = G.marker;
+		while ( cm->next != NULL )
+			cm = cm->next;
+		cm->next = m;
+	}
+
+	gcv.line_style = LineOnOffDash;
+	m->gc = XCreateGC( G.d, G.canvas.pm, GCLineStyle, &gcv );
+	if ( color > 0 && color <= MAX_CURVES )
+		XSetForeground( G.d, m->gc, fl_get_pixel( G.colors[ color - 1 ] ) );
+	else if ( color == 0 )
+		XSetForeground( G.d, m->gc, fl_get_pixel( FL_WHITE ) );
+	else
+		XSetForeground( G.d, m->gc, fl_get_pixel( FL_BLACK ) );
+
+	m->position = position;
+}
+
+
+/*-----------------------------------*/
+/* Gets called to delete all markers */
+/*-----------------------------------*/
+
+void remove_marker( void )
+{
+	Marker *m, *mn;
+
+
+	if ( G.marker == NULL )
+		return;
+
+	for ( m = G.marker; m != NULL; m = mn )
+	{
+		XFreeGC( G.d, m->gc );
+		mn = m->next;
+		m = T_free( m );
+	}
+	G.marker = NULL;
+
+	repaint_canvas_1d( &G.canvas );
 }
 
 

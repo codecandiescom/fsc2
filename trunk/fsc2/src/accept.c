@@ -271,12 +271,16 @@ static void other_data_request( int type, char *ptr )
 			break;
 
 		case D_SET_MARKER :
-			memcpy( ptr, &position, sizeof position );
+			memcpy( &position, ptr, sizeof position );
 			ptr += sizeof position;
-			memcpy( ptr, &position, sizeof color );
+			memcpy( &color, ptr, sizeof color );
+			if ( position >= G.nx )
+				rescale( &position );
+			set_marker( position, color );
 			break;
 
 		case D_CLEAR_MARKERS :
+			remove_marker( );
 			break;
 
 		default :                             /* unknown command */

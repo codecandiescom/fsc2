@@ -26,8 +26,10 @@
 @ifinfo
 
 @menu
-* Main Window::        The program's main window
+* Main Window::         The program's main window
 * Experiment Window::   The window to display experimental data
+* Tool Box Window::     The tool box window for user input
+* Customization::       Customizing the way the GUI looks like
 @end menu
 
 @end ifinfo
@@ -168,7 +170,7 @@ output browser.
 @end ifnotinfo
 
 
-@node Experiment Window, , Main Window, GUI
+@node Experiment Window, Tool Box Window, Main Window, GUI
 @section Experiment Window
 
 When an experiment is started another window will pop up. It is up to
@@ -504,20 +506,37 @@ direction. Now hit the @code{Space} bar and the cross section in the
 other direction is drawn.
 
 
-@subsection Creating a tool box
+@node Tool Box Window, Customization, Experiment Window, GUI
+@section Tool Box Window
 
 Sometimes it is necessary to adjust certain values while a measurement
-is running, especially if one is trying to determine the optimum
-parameters for an experiment. Therefore, it is possible to write an
-@code{EDL} program that creates several different kinds of objects
+is running. Usually, this is the case when one is trying to determine
+optimum parameters for an experiment. Therefore, it is possible to write
+an @code{EDL} program that creates several different kinds of objects
 allowing user input during the experiment. All these elements appear in
 a separate window, the tool box.
+
+Please note, that @acronym{fsc2} usually will not be able to do a real
+thorough test before the experiment is started when the tool box is
+used. In this case the flow of control is often controlled by user input
+which can not be predicted. Therefore, @acronym{fsc2} has no possibility
+to determine which parts of the @acronym{EDL} will be run at what time
+and if data to be send to devices will be correct. For these reasons
+it is probably better not to use a tool box when running important
+experiments, or only a tool box to display (but not change) relevant
+data.
+
 @ifnotinfo
 The next figure shows all types of objects that can be created.
 
 @image{fsc2fig7,4cm,}
 
 @end ifnotinfo
+@ifinfo
+@ifnothtml
+A tool box may contain the following types of objects:
+@end ifnothtml
+@end ifinfo
 
 First there are the normal buttons. A normal button can be clicked on to
 and the @acronym{EDL} program can determine how often the button has
@@ -542,3 +561,103 @@ integer values only and one for floating point numbers.
 Finally, there are popup-menu buttons. If clicked on a menu with two or
 more items to select pops up and allows the user to chose one of several
 alternatives.
+
+
+@node Customization, , Tool Box Window, GUI
+@section Customization
+
+Several aspects of the way @acronym{fsc2}s GUI looks like can be
+customized. On the one hand, this can be done by starting @acronym{fsc2}
+with the appropriate command line flags (@pxref{Command Line Options}).
+In order not to have to list a long line of command line options each
+time @acronym{fsc2} is started the required settings can also be made
+permanent by adding them to the file @file{.Xdefaults} in the users
+home directory (please note that the name of the file starts with a dot,
+the dot keeps it from being listed with the normal @code{ls} command,
+use @code{ls -a} to make @code{ls} also list files starting with a dot).
+
+All entries in the @file{.Xdefaults} file start with @code{fsc2.}  or
+@code{fsc2*}, followed by the option to set, a colon and the value of
+the option. Here's and example:
+@example
+fsc2.geometry:         800x600+200+200
+fsc2*buttonFontSize:   12
+@end example
+@noindent
+After having edited @file{.Xdefaults} the new settings will not be used
+immediately but only after either logging out and in again or executing
+the command
+@example
+xrdb -load $HOME/.Xdefaults
+@end example
+
+Now follows a list of all options that can be set via the
+@file{.Xdefaults} file:
+@table @samp
+@item geometry
+Sets the size and position of the main window of @acronym{fsc2}. The
+size and position have to be specified in the form
+@i{width}@code{x}@i{height}@code{+}@i{x}@code{+}@i{y}. Both the size
+(i.e.@: @i{width}@code{x}@i{height}) or the position (i.e.@:
+@code{+}@i{x}@code{+}@i{y}) can be given alone.
+
+@item displayGeometry
+Sets the size and postion of the display window, where size and position
+have to be specified as above.
+
+@item cutGeometry
+Sets the size and postion of the window showing a cut through a surface
+(only relevant for 2D display).
+
+@item toolGeometry
+Sets the position of the toolbox window  - the size can't be
+specified. The position must be specifying in the form
+@code{+}@i{x}@code{+}@i{y}.
+
+@item size
+There are two versions for the windows, one for low resolution and one
+for high resolution displays. Without specifying a preferred size the
+program picks the one it guesses to be the correct one. By setting
+@code{size} t @code{Small}, @code{small}, @code{S} or @code{s} you
+manually select the low resolution version, while with @code{Large},
+@code{large}, @code{L} or @code{l} the high resolution version is
+chosen.
+
+@item browserFontSize
+Selects the font size (in pixels) to be used for browser.
+
+@item buttonFontSize
+Selects the font size to be used for buttons.
+
+@item inputFontSize
+Selects the font size to be used for input (and output) objects (in the
+toolbox window).
+
+@item sliderFontSize
+Selects the font size to be used for sliders (in the toolbox window).
+
+@item helpFontSize
+Selects the font size to be used for the popup help texts.
+
+@item fileselectorFontsize
+Selects the font size to be used for the file selector.
+
+@item axisFont
+Selects the font to be used to draw the axes in the display window.
+
+@item stopMouseButton
+Specifies the mouse button that must be used to activate the @code{Stop}
+button to stop a running experiment. This can be set to @code{1},
+@code{2} or @code{3} or, alternatively, to @code{left}, @code{middle} or
+@code{right}.
+
+@item noCrashMail
+This can be set to keep the program from sending an email to the author
+when it crashes. Set this to @code{True} and no mails are send.
+
+@item noBalloons
+This options can be used to switch off the display of help texts when
+the mouse is hovering over a button for some time. If you're fed up with
+this texts popping up simply set it to @code{True}.
+
+@end table

@@ -214,10 +214,10 @@ static void varserror ( const char *s )
 	else
 	{
 		if ( isprint( *varstext ) )
-			eprint( FATAL, SET, "Syntax error near token `%s'.\n", varstext );
+			eprint( FATAL, SET, "Syntax error near token '%s'.\n", varstext );
 		else
-			eprint( FATAL, SET, "Syntax error near token `\"%s\"'.\n",
-					varstext + 1);
+			eprint( FATAL, SET, "Syntax error near token '\"%s\"'.\n",
+					varstext + 1 );
 	}
 	THROW( EXCEPTION );
 }

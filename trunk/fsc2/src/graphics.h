@@ -156,6 +156,13 @@ typedef struct {
 } Canvas;
 
 
+typedef struct MRKR_ {
+	long position;
+	GC gc;
+	struct MRKR_ *next;
+} Marker;
+
+
 typedef struct {
 	bool is_init;           /* has init_1d() or init2d() been run ? */
 	bool is_warn;
@@ -241,6 +248,8 @@ typedef struct {
 	int z_line_offset;		/* distance between colour scale and window */
 	int z_line_width;       /* width of colour scale */
 	int enlarge_box_width;	/* width of enlarge box */
+
+	Marker *marker;         /* lined list of markers (1D only) */
 
 } Graphics;
 

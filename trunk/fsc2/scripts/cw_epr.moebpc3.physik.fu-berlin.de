@@ -657,6 +657,8 @@ print F
 	J += 1;
 	print( \"Starting #. run\\n\", J );
 
+	data = 0.0;
+
 	FOR I = 1 : Num_Points {
 
 		data[ I ] = lockin_get_data( );
@@ -684,6 +686,7 @@ print F
 	avg += data;
 	clear_curve( 1, 3 );
 	display( 1, data, 3 );
+	data = 0.0;
 	print( \"#. run finished, sweeping magnet to start current.\\n\", J );
 }
 
@@ -711,7 +714,10 @@ IF is_file( File ) {
 			fsave( File, \"\\n\" );
 		}
 	} ELSE IF I <= Num_Points {
-		J -= 1;
+		FOR I = I : Num_Points {
+			fsave( File, \"# \", data[ I ] );
+		}
+		fsave( File, \"\n\" );
 	}
 
     fsave( File,

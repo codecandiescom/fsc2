@@ -1951,7 +1951,7 @@ Returns a string with the name of the voltmeter being used.
 @anchor{voltmeter_get_data}
 @item voltmeter_get_data()
 @findex voltmeter_get_data()
-The function returns the current volatge measured by the voltmeter.
+The function returns the current voltage measured by the voltmeter.
 
 
 @anchor{voltmeter_ac_measurement}
@@ -1992,16 +1992,16 @@ Returns a string with the name of the boxcar integrator being used.
 @item boxcar_curve_length()
 @findex boxcar_curve_length()
 Returns an integer variable with the length of curves to be sent by the
-boxcar inetgrator.
+boxcar integrator.
 
 @anchor{boxcar_get_curve}
 @item boxcar_get_curve()
 @findex boxcar_get_curve()
-Fetches a curve from the boxcar inetgrator. Two first argument is either
+Fetches a curve from the boxcar integrator. Two first argument is either
 a number, either @code{0} for a live curve or @code{1} for a memory
 curve, or one of the strings @code{"LC"}, @code{"LIVECURVE"},
 @code{"LIVE_CURVE} or @code{"MC"}, @code{"MEMORYCURVE"} or
-@code{"MEMORY_CURVE"}. The second argument must be an inetger specifying
+@code{"MEMORY_CURVE"}. The second argument must be an integer specifying
 the curve number, it must be @code{1} or @code{2} for live curves and
 between @code{1} and @code{3} for memory curves.
 

@@ -328,6 +328,37 @@ This function can only be used in the @code{EXPERIMENT} section of an
 @acronym{EDL} program.
 
 
+@anchor{draw_marker}
+@item draw_marker()
+@findex draw_marker()
+This function is only available for 1D grahics and draws a vertical
+dashed line on the display window. It expects at least one argument, an
+integer number defining the @i{x}-position of the marker to be drawn. A
+second, optional argument is the color of the marker, here one may
+specify either an integer number or a string:
+@multitable @columnfractions 0.15 .35 .35
+@item Number @tab String @tab Color
+@item @code{1} @tab @code{"WHITE"} @tab white
+@item @code{2} @tab @code{"RED"} @tab red
+@item @code{3} @tab @code{"GREEN"} @tab green
+@item @code{4} @tab @code{"YELLOW"} @tab yellow
+@item @code{5} @tab @code{"BLUE"} @tab blue
+@item @code{6} @tab @code{"BLACK"} @tab black
+@end multitable
+@noindent
+The last color, black, is invisible on the background and can be used to
+make an already drawn marker invisible (markers set at the same
+@i{x}-position are drawn on top of each other, with the latest set
+marker drawn last).
+
+
+@anchor{clear_marker}
+@item clear_marker()
+@findex clear_marker()
+This function is only available for 1D grahics and deletes all
+previously set markers. It accepts no arguments.
+
+
 @anchor{print}
 @item print()
 @findex print()

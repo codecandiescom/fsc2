@@ -139,6 +139,8 @@ void start_graphics( void )
 
 		for ( i = X; i <= Y; i++ )
 			G.label[ i ] = T_strdup( G.label_orig[ i ] );
+
+		G.marker = NULL;
 	}
 	else
 	{
@@ -856,6 +858,7 @@ void create_label_pixmap( Canvas *c, int coord, char *label )
 void stop_graphics( void )
 {
 	int i;
+	Marker *m, *mn;
 
 
 	if ( G.is_init )
@@ -909,6 +912,13 @@ void stop_graphics( void )
 	}
 	else
 		display_has_been_shown = UNSET;
+
+	for ( m = G.marker; m != NULL; m = mn )
+	{
+		XFreeGC( G.d, m->gc );
+		mn = m->next;
+		m = T_free( m );
+	}
 
 	if ( GUI.run_form )
 	{
@@ -1508,10 +1518,12 @@ void curve_button_callback( FL_OBJECT *obj, long data )
 			fl_set_object_helper( obj, hstr );
 
 		/* Redraw both axis to make sure the axis for the first active button
-		   is shown */
+		   is shown. If markers are shown also redraw the canvas. */
 
 		redraw_canvas_1d( &G.x_axis );
 		redraw_canvas_1d( &G.y_axis );
+		if ( G.marker != NULL )
+			redraw_canvas_1d( &G.canvas );
 	}
 	else
 	{
@@ -1834,6 +1846,7 @@ static void rescale_1d( long new_nx )
 	long i, k, count;
 	long max_x = 0;
 	Scaled_Point *sp;
+	Marker *m;
 
 
 	/* Return immediately on unreasonable values */
@@ -1841,7 +1854,7 @@ static void rescale_1d( long new_nx )
 	if ( new_nx < 0 )
 		return;
 
-	/* Find the maximum x-index currently used by a point */
+	/* Find the maximum x-index currently used by a point or a marker */
 
 	for ( k = 0; k < G.nc; k++ )
 		for ( count = G.curve[ k ]->count, sp = G.curve[ k ]->points, i = 0;
@@ -1852,6 +1865,10 @@ static void rescale_1d( long new_nx )
 					max_x = i;
 				count--;
 			}
+
+	for ( m = G.marker; m != NULL; m = m->next )
+		if ( m->position > max_x )
+			max_x = m->position;
 
 	if ( max_x != 0 )
 		max_x++;
@@ -1893,8 +1910,6 @@ static void rescale_1d( long new_nx )
 				recalc_XPoints_of_curve_1d( G.curve[ k ] );
 		}
 	}
-
-	G.nx = max_x;
 }
 
 

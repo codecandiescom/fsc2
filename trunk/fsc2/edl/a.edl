@@ -76,6 +76,10 @@ FOR K = 1 : 5 {
 		wait( 150 ms );
 		dt2 = delta_time();
 
+		IF I % 20 == 0 {
+			draw_marker( I, 0 );
+		}
+
 		IF I == N / 2 {
 			change_scale( -10.0, 2.5 );
 			change_label( "Magnetic field [G]" );

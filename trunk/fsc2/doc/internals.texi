@@ -1,0 +1,366 @@
+@c $Id$
+@c
+@c Copyright (C) 1999-2002 Jens Thoms Toerring
+@c
+@c This file is part of fsc2.
+@c
+@c Fsc2 is free software; you can redistribute it and/or modify
+@c it under the terms of the GNU General Public License as published by
+@c the Free Software Foundation; either version 2, or (at your option)
+@c any later version.
+@c
+@c Fsc2 is distributed in the hope that it will be useful,
+@c but WITHOUT ANY WARRANTY; without even the implied warranty of
+@c MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+@c GNU General Public License for more details.
+@c
+@c You should have received a copy of the GNU General Public License
+@c along with fsc2; see the file COPYING.  If not, write to
+@c the Free Software Foundation, 59 Temple Place - Suite 330,
+@c Boston, MA 02111-1307, USA.
+
+
+@node Internals, Modules, Cloning Devices, Top
+@chapter Internals
+
+
+In this chapter I will try to explain in some detail how @acronym{fsc2}
+does work internally. I hope that this will help especially if you try
+to write a new module for a device (or if you get upset about things
+@acronym{fsc2} does differently from the way you would like it to do).
+
+
+As you will already have understood @acronym{fsc2} is basically an
+interpreter for @acronym{EDL} programs. But in contrast to other
+interpreters it does not interpret each line of input individually,
+i.e.@: analyzing a line, and, if the line is syntactically correct,
+executing it. Instead, the interpretation of an @acronym{EDL} file is a
+three-stage process. In the first step the program as a whole is
+analyzed and checked for syntactic correctness and, everything up to the
+start of the @code{EXPERIMENT} section, is executed. Only the
+@code{EXPERIMENT} section itself is only read in and some basic syntax
+checks are done. In the second step, a complete test run of
+@code{EXPERIMENT} section of the program is done to avoid that the
+experiment will have to be stopped due to syntactic or logical errors in
+the @acronym{EDL} program. Only if this test run succeeds the third
+stage, the qexecution of the @code{EXPERIMENT} section of the
+@acronym{EDL} program, is started, i.e.@: the experiment is run.
+
+
+@section First stage of interpretation
+
+
+In the first stage of the interpretation the program is read in in a
+token by token fashion, where tokens are e.g.@: variable or function
+names, numbers, braces, semicolons, section labels etc. This is mainly
+done by the code within the files which you'll find in the @file{src}
+directory, having an extension of @code{.l}. As you will see there's
+such a file for each of the different sections an @acronym{EDL} program
+may contain. Actually, there are some extra ones, @file{split_lexer.l}
+is a central switch for the first stage that calls the individual
+tokenizers in turn on finding the section labels and deals with errors
+conditions they can't handle. Two extra tokenizers,
+@file{devices_list_lexer.l} and @code{func_list_lexer.l} are for
+analyzing the files with the list of device modules,
+@file{conf/Devices}, and the list of functions, @file{conf/Functions}
+(they also contain some additional @code{C} code for interpreting the
+tokens).
+
+
+Finally, there is @file{fsc2_clean.l}. @acronym{EDL} expects its input
+to be a single file in a certain format. Thus it does not deal directly
+with the input files (there can be more than one when there are
+@code{#INCLUDE} statements in an @acronym{EDL} program) but there is an
+extra program, @file{fsc2_clean} that translates the input @acronym{EDL}
+file into a form that the main program understands. @code{fsc2_clean}
+for example removes all comments, includes files for @code{#INCLUDE}
+statements, adds information about line numbers and file names etc., and
+then passes this cleaned-up input to the @code{fsc2} program. If you are
+interested what @code{fsc2} really sees of an @acronym{EDL} file you can
+run @code{fsc2_clean} with the @acronym{EDL} file as its input (please
+note that the output of @code{fsc2_clean} program contains some
+non-printable characters).
+
+
+In the sections preceeding the @code{EXPERIMENT} section the lines of
+the @acronym{EDL} program are also already executed. E.g.@: during the
+handling of the @code{DEVICES} section the modules for the listed
+devices are loaded and the functions defined in the modules are included
+into @acronym{fsc2}s internal list of functions that can be used from
+within the @acronym{EDL} program. While reading the @code{VARIABLES}
+section the newly defined variables are added to @acronym{fsc2}s list of
+variables, and, if necessary, are also initialized.
+
+
+While the tokenizers (i.e.@: the files with an extension of @code{.l})
+are used for splitting of the input into manageable tokens, the
+execution of the code (now consisting of a stream of tokens) is done in
+the files with an extension of @code{.y} (or, to be precise, by the code
+created from these files). In these files, the parsers, actions (mostly
+a few lines of @code{C} code) are executed for syntactically correct
+sets of tokens. Because actions can only be executed for input with the
+right syntax, these files also define what is syntactically correct and
+what is not.
+
+
+To give you an example, here's a very simple statement from an
+@acronym{EDL} program:
+@example
+A = B + 3;
+@end example
+The tokenizer doesn't has too much to do in this case, it will output a
+list of the bits of this line, together with some information about the
+class the individual tokens belong to. So, it will pass the following
+kind of information to the parser:
+@example
+Variable, named A
+Equal operator
+Variable, name 'B'
+Plus operator
+Integer number with value 3
+End of statement character
+@end example
+
+
+The parser, in turn, has a list of all syntactically correct
+statements@footnote{Actually, the parser does not really has a list of
+all syntactically correct statements but contains a set of rules that
+define exactly how such statements may look like. One of these rules for
+example is that an equal operator may be followed by either a variable,
+a function call or an integer or floating point number. Everything not
+fitting this pattern is an syntax error.}, together with the information
+what to do for these statements. One of the rules is that a statement
+consisting of sequence of the tokens
+@example
+Variable, Equal operator, Variable, Plus operator,
+integer number, end of statement character
+@end example
+@noindent
+is syntactically correct and that for this sequence of tokens some
+@code{C} code has to be executed that fetches the contents of the
+variable @code{B}, adds to it the value of the integer number and
+finally stores the result into the variable @code{A}. Statements that
+are not in the parsers list are @i{per definitionem} syntactically
+incorrect. For example, there is no rule on how to deal with a sequence
+of tokens as the one above but with the integer number missing. Because
+the parser looks at the statements token by token it won't complain
+while getting the first four tokens up to the plus. Only if the end of
+statement operator, the semicolon, is found directly following the plus
+sign it will recognize that there is no rule on how to deal with the
+situation, print the error message @code{Syntax error near token
+';'} (plus the file name and line number) and abort.
+
+
+The @code{EXPERIMENT} section is handled differently. Most important,
+the code of the @code{EXPERIMENT} section is not executed at this
+stage. It is just split up into its tokens and only some rudimentary
+kind of syntax check is done, e.g.@: undefined variables or mismatched
+braces etc.@: are detected. Instead, an internal list of all the
+tokens the @code{EXPERIMENT} section consists of is created. This list
+is later used to test and execute the @code{EXPERIMENT} section.
+
+
+Writers of modules should know that the modules already get loaded when
+the @code{DEVICES} section (which always must be the first one) is dealt
+with. A module may contain a special function, called a hook function,
+that automatically gets called automatically when the module has just
+been loaded.  This allows for example to set the internal variables of
+the module to a well-defined state. This function may not call any
+functions accessing the device because neither the GPIB bus nor the
+serials ports are configured at this moment.
+
+
+While handling the part of the @acronym{EDL} program up to the start of
+the @code{EXPERIMENT} section, functions from the modules may be called
+(unless they have been explicitely declared to be used only during the
+experiment). Usually, such function calls will be used to define the
+state of the device at the start of the experiment. For example, the
+@code{PREPARATIONS} section may contain a line like
+@example
+lockin_sensitivity( 100 uV );
+@end example
+@noindent
+When @acronym{fsc2} interprets this line it will call the appropriate
+function in the module for the lock-in amplifier with a floating point
+number of @code{0.0001} as the argument (the module does not have to
+take care of dealing with units, they are already translated by
+@acronym{fsc2}).  The module function for setting the lock-in amplifiers
+sensitivity should now check the argument it got passed (there my or may
+not be a sensitivity setting of @code{0.0001} and only the module knows
+about this). If the argument is reasonable the module should store the
+value to be set when the lock-in amplifier gets initialized at the start
+of the experiment.
+
+How to deal with completely wrong arguments or arguments that don't fit
+(e.g.@: if the argument is @code{40 uV} but the lock-in amplifier has
+only discreet sensitivity settings of @code{30 uV} and @code{100 uV}) is
+completely up to the writer of the module, @acronym{fsc2} will accept
+whatever the module returns. For example, the module may accept the
+argument after converting it to something more correct and printing out
+a warning or it may bail out and tell @acronym{fsc2} to stop with
+interpreting the @acronym{EDL} file.
+
+
+Another thing module writers should keep in mind is that this first (and
+also the second) stage is only run once, while the experiment itself may
+be run several times. Thus it is important that the values with which a
+device must be intialized at the start of an experiment are stored in a
+way that they aren't overwritten during the experiment. For example, it
+does not suffice to have one single variable for the lock-in amplifiers
+sensitivity because the sensitivity and thus the variable might get
+changed during the experiment.
+
+
+@section Second stage of interpretation
+
+The second stage of the interpretation of an @acronym{EDL} program is
+the test run of the @code{EXPERIMENT} section. A test run is necessary
+for two reasons. First, only a very rudimentary syntax check has been
+done for the @code{EXPERIMENT} section until now. Second, and much more
+important, the program may contain logical errors and it would be rather
+annoying if these would only be found after the experiment had already
+been run for several hours, necessitating the premature end of the
+experiment. For example, without a "dry" run it could happen that only
+after a long time it is detected that the field of the magnet is
+requested to be set to a value that the magnet can't produce. In this
+case there usually are only few alternatives, if any, to aborting the
+experiment. Forseeing and taking the appropiate measures for such
+possibly fatal situation would complicate both the writing of modules
+and @acronym{EDL} programs enormously and probably would still not catch
+all of them.
+
+
+By doing a test run, on the other hand, for example the function for
+setting the magnet to a new field will be called with all values that
+are to be expected during the real experiment and thus invalid field
+settings can be detected in advance. Doing a test run is much faster
+than running the experiment itself, because during the test run the
+devices will not be accessed (which usually uses at least 90% of the
+whole time), calls of the @code{wait()} function do not make the program
+sleep for the requested time, no graphics are drawn etc.
+
+
+The writers of modules have an important responcibility to make running
+the test run possible. During the test run the devices can't be
+accessed. Despite this the modules have to deal in a reasonable way with
+requests for returning data from the devices. Thus the modules must,
+during the test run, "invent" data for the real ones. This can be a bit
+tricky and special care must be taken to insure that these "invented"
+data are consistent. For example, if a module for a lock-in amplifier
+first gets asked for the sensitivity setting and then for measured data
+it may not return data that represent voltages larger than the
+sensitivity setting it "invented". There may even be situations, where
+the module has no chance to find out if the arguments it gets passed for
+a function are acceptable without determining the real state of the
+device. If possible, incidents like this should be stored by the module
+and the module should test at the time of device initialization if these
+arguments were really acceptable and, if not, stop the experiment.
+
+
+One real-world example of this case are the settings for windows for the
+digitizers, defining the parts of the complete measured curve that get
+returned or that are integrated over etc. Because during the test run
+neither the time base nor the amount of pretrigger the digitizer is set
+to are known (unless both have been set explicitely from the
+@acronym{EDL} program) it can't be tested if the windows start and end
+positions are within the time slice the digitizer measures. Thus the
+module can just store these settings and tell @acronym{fsc2} that they
+seem to be reasonable. Only when the experiment starts and the module
+has it's first chance to find out the real time base and pretrigger
+setting it can do the necessary checks on the window settings and should
+abort the experiment at the earliest possible point of time if
+necessary.
+
+
+To make things a bit easier when writing modules two hook functions can
+be defined within a module that get called automatically at the start of
+the test run and after the test run finished successfully.
+
+
+@section Third stage of interpretation
+
+
+The third and final stage of the interpretation of an @acronym{EDL}
+program is running the real experiment. This third stage may be repeated
+several times if the user restarts an experiment without reloading the
+@acronym{EDL} file.
+
+
+At the start of the third stage first the GPIB bus and the serial ports
+are initialized (at least if one of the devices needs them). Next hook
+functions in the modules are called that allow the modules to initialize
+the devices and do all checks they find necessary. If this was
+successful the graphics for the experiment is initialized, opening up
+the display window. When all this has been done @acronym{fsc2} is ready
+to do the experiment, i.e.@: to interpret the @code{EXPERIMENT} section.
+
+
+But there is a twist. Just before starting to interpret the
+@code{EXPERIMENT} section @acronym{fsc2} splits itself into two
+independent processes by doing a @code{fork()}. If you use the @code{ps}
+command to list all your running processes suddenly a new instance of
+@code{fsc2} will be listed@footnote{Please note that already before the
+experiment gets started you will find two instances of @acronym{fsc2}
+running, during the experiment there are three.}. One of these two
+processes is doing the interpretation of the @code{EXPERIMENT} section
+while the other process is responsible for the graphics and all
+interaction with the user.
+
+
+The main reason for splitting the execution of the experiment into two
+separate tasks is the following: The execution of the experiment, as far
+as concerned with acquiring data from the devices etc.@: should be
+unimpeded (at least as far as possible) from the task of dealing with
+user requests to allow maximum execution speed and to make the timing of
+the experiment less dependend on user interruptions. Take for example
+the case that the user starts to move one of @acronym{fsc2}s windows
+around on the screen. As long as she is moving the window no other
+instructions of the program can be executed, which effectively would
+stop the experiment for this time even though nothing really relevant
+happens. By having one task for the actual execution of the experiment
+and one for the user interaction this problem vanishes because the task
+for the experiment can continue while only the other task is
+blocked. This, of course, also applies to all other actions the user may
+initiate, e.g.@: resizing of windows, magnification of data etc.
+
+
+The approach requires some channels of communication between the two
+processes. Because the user interaction task has to draw the new data
+the execution task will have to send the newly acquired data to the user
+interaction task and for the other way round the user interaction task
+must be able to stop the experiment when the user hit the @code{Stop}
+button. But this is done in a way that usually can't be impeded by user
+interruptions. The only exceptions are cases where the further execution
+of the experiment depends on user input, e.g.@: if within the experiment
+a new file has to be opened and the name must be selected by the user.
+
+
+The most important part of the communication between parent process (the
+user interaction task) and the child process (the task running the
+experiment) is basically a one-way communication -- the child process
+must pass newly acquired data to be drawn to the parent process. The
+child processes stores the new data (together with the information where
+they are to be drawn) in a shared memory segment and stores the the key
+for this memory segment in an used slot in a buffer (that is also
+resides in shared memory). Then it sends the parent prorcess a signal to
+inform it that new data are available and can continue immediately.
+
+
+The parent, one the other hand, gets interrupted immediately by the
+signal (even while it is doing some other tasks on behalf of the user)
+and can deal with the new data whenever it has the time to do so.
+
+
+Problems can arise only if the child process creates new data at a much
+higher rate than the parent can deal with them, in which case the buffer
+for segment keys would get filled up@footnote{The buffer is is guarded
+against overflows by a semaphore that is initialized to the number of
+slots in the buffer and on which the child process does a down operation
+before writing data into the buffer while the parent process posts it
+after removing an item.}. Only in this case the child process would have
+to halt the expriment until the parent empties some of the slots for
+keys in the buffer. But, fortunately, in practice this rarely
+happens. And as a further safeguard against this happening the parent is
+written in a way that it will empty slots in the buffer as fast as
+possible, if necessary deferring to draw data or to react to user
+requests.

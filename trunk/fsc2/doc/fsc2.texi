@@ -25,7 +25,7 @@
 
 @setfilename fsc2.info
 @settitle fsc2
-@set lastupdate January 17, 2002
+@set lastupdate January 21, 2002
 @iftex
 @afourpaper
 @end iftex
@@ -40,7 +40,7 @@
 @sp 4
 @center @titlefont{fsc2}
 @sp 4
-@center A program for the remote control of EPR spectrometers
+@center A Program for the Remote Control of EPR Spectrometers
 @sp 2
 @center January 2002
 @sp 10
@@ -49,6 +49,24 @@
 @center @email{Jens.Toerring@@physik.fu-berlin.de}
 @sp 16
 @center Copyright @copyright{} 1999--2002 Jens Thoms T@"orring
+Permission is granted to make and distribute verbatim
+copies of this manual provided the copyright notice and
+this permission notice are preserved on all copies.
+
+Permission is granted to copy and distribute modified
+versions of this manual under the conditions for
+verbatim copying, provided also that the sections
+entitled ``Copying'' and ``GNU General Public License''
+are included exactly as in the original, and provided
+that the entire resulting derived work is distributed
+under the terms of a permission notice identical to this
+one.
+
+Permission is granted to copy and distribute
+translations of this manual into another language,
+under the above conditions for modified versions,
+except that this permission notice may be stated in a
+translation approved by the Free Software Foundation.
 @end titlepage
 
 
@@ -56,10 +74,8 @@
 @direntry
 * fsc2: (fsc2). A program for the remote control of EPR spetrometers.
 @end direntry
-@end ifinfo
 
 
-@ifinfo
 @node Top, , (dir), (dir)
 @top Top
 
@@ -81,6 +97,7 @@ devices to be used in the experiment.
 * Using Pulsers::           How to work with the pulsers
 * Command Line Options::    How to invoke @acronym{fsc2}
 * Cloning Devices::         Creating modules for identical devices
+* Internals::               How fsc2 works internally
 * Modules::                 How to create new modules.
 * Interfacing::             Accessing fsc2 from other programs
 * Device Reference::        List of devices and their functions
@@ -89,6 +106,31 @@ devices to be used in the experiment.
 * Copying::                 The GNU General Public License
 * Index::                   List of all indexed words.
 @end menu
+
+
+@ignore
+Permission is granted to process this file through TeX
+and print the results, provided the printed document
+carries a copying permission notice identical to this
+one except for the removal of this paragraph (this
+paragraph not being relevant to the printed manual).
+@end ignore
+
+Permission is granted to copy and distribute modified
+versions of this manual under the conditions for
+verbatim copying, provided also that the sections
+entitled ``Copying'' and ``GNU General Public License''
+are included exactly as in the original, and provided
+that the entire resulting derived work is distributed
+under the terms of a permission notice identical to this
+one.
+
+Permission is granted to copy and distribute
+translations of this manual into another language,
+under the above conditions for modified versions,
+except that this permission notice may be stated in a
+translation approved by the Free Software Foundation.
+
 
 @end ifinfo
 
@@ -102,6 +144,7 @@ devices to be used in the experiment.
 @include pulser.texi
 @include cmd.texi
 @include cloning.texi
+@include internals.texi
 @include modules.texi
 @include interfacing.texi
 @include dev_ref.texi

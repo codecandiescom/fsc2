@@ -28,17 +28,18 @@
 #include "fsc2.h"
 
 
-Var *f_print(   Var *v );
-Var *f_showm(   Var *v );
-Var *f_wait(    Var *v );
+Var *f_print( Var *v );
+Var *f_showm( Var *v );
+Var *f_wait( Var *v );
 Var *f_init_1d( Var *v );
 Var *f_init_2d( Var *v );
-Var *f_cscale(  Var *v );
-Var *f_clabel(  Var *v );
+Var *f_cscale( Var *v );
+Var *f_clabel( Var *v );
 Var *f_rescale( Var *v );
 Var *f_display( Var *v );
 Var *f_clearcv( Var *v );
 Var *f_setmark( Var *v );
+Var *f_clearmark( Var *v );
 
 
 #endif  /* ! FUNC_UTIL_HEADER */

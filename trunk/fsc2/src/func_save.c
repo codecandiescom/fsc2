@@ -949,8 +949,7 @@ static void ff_format_check( Var *v )
 		{
 			if ( vptr == NULL )
 			{
-				print( FATAL, "Not enough arguments for format "
-					   "string.\n" );
+				print( FATAL, "Not enough arguments for format string.\n" );
 				THROW( EXCEPTION );
 			}
 

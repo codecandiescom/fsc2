@@ -93,7 +93,11 @@ inline long get_long( Var *v, const char *snippet )
 	if ( v->type == FLOAT_VAR && snippet != NULL )
 		print( WARN, "Floating point number used as %s.\n", snippet );
 
-	return v->type == INT_VAR ? v->val.lval : ( long ) v->val.dval;
+	if ( v->type == FLOAT_VAR && 
+		 ( v->val.dval > LONG_MAX || v->val.dval < LONG_MIN ) )
+		print( SEVERE, "Integer argument overflow.\n" );
+
+	return v->type == INT_VAR ? v->val.lval : lrnd( v->val.dval );
 }
 
 
@@ -130,6 +134,10 @@ inline long get_strict_long( Var *v, const char *snippet )
 			if ( snippet != NULL )
 				print( SEVERE, "Floating point number used as %s, "
 					   "trying to continue!\n", snippet );
+
+			if ( v->val.dval > LONG_MAX || v->val.dval < LONG_MIN )
+				print( SEVERE, "Integer argument overflow.\n" );
+
 			return lrnd( v->val.dval );
 		}
 

@@ -22,7 +22,7 @@
 
 @node Command Line Options, Cloning Devices, Using Pulsers, Top
 @chapter Command Line Options
-@cindex command line options
+@cindex command ine options
 
 @acronym{fsc2} can be invoked from the command line with the following
 syntax:

@@ -10,6 +10,7 @@ I = 0;
 M;
 M_STATE = 1;
 M_NEW_STATE;
+S = 0;
 
 PREPARATIONS:
 
@@ -56,10 +57,29 @@ FOREVER {
 	IF ( button_state( BID1 ) ) {
 		button_state( BID4, 1 );
 		clear_curve( );
+		clear_marker( );
 		I = 0;
 	}
 
 	I += 1;
+
+	IF S != 0 & button_state( BID6 )
+	{
+		draw_marker( I, "WHITE" );
+		S = 0;
+	}
+
+	IF S != 1 & button_state( BID5 )
+	{
+		draw_marker( I, "YELLOW" );
+		S = 1;
+	}
+
+	IF S != -1 & button_state( BID7 )
+	{
+		draw_marker( I, "BLUE" );
+		S = -1;
+	}
 
 	IF input_value( I1 ) > 100 {
 		input_value( I3, I );

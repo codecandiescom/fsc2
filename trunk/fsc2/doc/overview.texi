@@ -34,8 +34,8 @@ called @acronym{EDL}
 the experiment completely controllable in this way is quite different
 from the approach usually taken in programs for remote spectrometer
 control which tend to have a graphical user interface where just the
-experimental parameters can be set and then one of a set of predefined
-experiment is started.
+experimental parameters can be set and then a predefined experiment is
+started.
 
 The obvious drawback with the traditional approach is that there is
 always only a fixed set of experiments that can be done. The problems
@@ -82,33 +82,36 @@ change only these if necessary. If this is still too much hassle it is
 even possible to write a script (not an @acronym{EDL} program but, for
 example, a Perl script or whatever your prefered scripting language is)
 which allows to set the parameters via a graphical user interface and
-then have the script generate the @acronym{EDL} program from a template
-which in turn is passed directly to @acronym{fsc2} without any further
-user interaction. If such a utility already exists one doesn't even have
-to learn how to write @acronym{EDL} programs.
+then have the script generate the @acronym{EDL} program which in turn is
+passed directly to @acronym{fsc2} without any further user
+interaction. If such a utility already exists one doesn't even have to
+learn how to write @acronym{EDL} programs and you have all the
+convenience of the traditional type of programs without having to
+sacrifice the flexibility of @acronym{fsc2}.
 
-Another common problem with the traditional type of programs is the use of
-different devices or the integration of new ones. Usually, the devices are
-hard-coded into the program and changing just one device requires a major
-rewrite. In contrast, @acronym{fsc2} has a strictly modular approach to
-the handling of devices. For each device a separate module exists that
-only gets used if it is listed explicitely in the @acronym{EDL}
-program. Thus changing the experiment to work with e.g.@: a different
-lock-in amplifier or digitizer usually does not require more than changing
-one line of the @acronym{EDL} program (at least as long as the devices are
-not too different in their capabilities). Moreover, this is also a major
-advantage when a new device has to be integrated. Instead of changing the
-whole program that controls the experiment only a module for the new
-device has to be written. Writing such a module does not even require a
-thorough understanding of the way @acronym{fsc2} works but only some
-knowledge about a few conventions (which are explained in detail in one of
-the later parts of this manual). This also allows the module to be tested
-independently of the main program and there is no danger of introducing
-new bugs into @acronym{fsc2} itself.
+Another common problem with the traditional type of programs is the use
+of different devices or the integration of new ones. Usually, the
+devices are hard-coded into the program and changing just one device
+requires a major rewrite. In contrast, @acronym{fsc2} has a strictly
+modular approach to the handling of devices. For each device a separate
+module exists that only gets used if it is listed explicitely in the
+@acronym{EDL} program. Thus changing the experiment to work with e.g.@:
+a different lock-in amplifier or digitizer usually does not require more
+than changing one line of the @acronym{EDL} program (at least as long as
+the devices aren't too different in their capabilities). Moreover, this
+is also a major advantage when a new device has to be
+integrated. Instead of changing the whole program that controls the
+experiment only a module for the new device has to be written. Writing
+such a module does not even require a thorough understanding of the way
+@acronym{fsc2} works but only some knowledge about a few conventions
+(which are explained in detail in one of the later parts of this
+manual). This also allows the module to be tested independently of the
+main program and there is no danger of introducing new bugs into
+@acronym{fsc2} itself.
 
 The advantages of the approach taken in @code{fsc2} have made it
 possible to use it successfully to control spectrometers in S-, X- and
-W-band and even at 360 GHz, using completely different hardware, and for
+W-band and at 360 GHz, using completely different hardware, and for
 all kinds of experiments, ranging from cw-EPR, ENDOR, EPR on transient
 signals to experiments with pulsed microwave excitation and phase
 cycling.
@@ -140,7 +143,9 @@ devices (@pxref{Using Pulsers}).
 The next chapter (@pxref{Command Line Options}) lists all the command
 line options that can be passed to @acronym{fsc2}, the following
 chapters (@pxref{Cloning Devices}, @pxref{Modules}) explain in detail
-everything there is to know about writing new modules, and the final
-chapter (@pxref{Interfacing}) is about writing programs that interface
-with @acronym{fsc2}, i.e.@: that can send @acronym{EDL} programs to
-@acronym{fsc2} that in turn will execute them.
+everything there is to know about writing new modules. Another chapter
+(@pxref{Internals}) give a short overview about how @acronym{fsc2} works
+internally, which may also be helpful when writing a new module. The
+final chapter (@pxref{Interfacing}) explains how to write programs that
+interface with @acronym{fsc2}, i.e.@: that can send @acronym{EDL}
+programs to @acronym{fsc2} that in turn will execute them.

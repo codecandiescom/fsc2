@@ -359,10 +359,10 @@ static void fork_failure( int stored_errno )
 
 		default :
 			if ( errno < sys_nerr )
-				eprint( FATAL, SET, "System error \"%s\" when trying to "
+				eprint( FATAL, UNSET, "System error \"%s\" when trying to "
 						"start experiment.\n", sys_errlist[ errno ] );
 			else
-				eprint( FATAL, SET, "Unrecognized system error (errno = %d) "
+				eprint( FATAL, UNSET, "Unrecognized system error (errno = %d) "
 						"when trying to start experiment.\n", errno );
 			fl_show_alert( "FATAL Error", "System error on start of "
 						   "experiment.", "", 1 );

@@ -20,7 +20,7 @@
 @c Boston, MA 02111-1307, USA.
 
 
-@node Modules, Interfacing, Cloning Devices, Top
+@node Modules, Interfacing, Internals, Top
 @chapter Modules
 @cindex modules
 

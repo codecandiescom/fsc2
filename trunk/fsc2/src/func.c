@@ -148,7 +148,8 @@ Func Def_Fncts[ ] =              /* List of built-in functions */
 	{ "object_delete", f_objdel,  INT_MIN, ACCESS_EXP,  NULL, UNSET },
     { "hide_toolbox",  f_freeze,        1, ACCESS_EXP,  NULL, UNSET },
 	{ "show_message",  f_showm,         1, ACCESS_EXP,  NULL, UNSET },
-    { "set_marker",    f_setmark,      -2, ACCESS_EXP,  NULL, UNSET },
+    { "draw_marker",   f_setmark,       2, ACCESS_EXP,  NULL, UNSET },
+    { "clear_marker",  f_clearmark,     0, ACCESS_EXP,  NULL, UNSET },
 	{ "end",           f_stopsim,  	    0, ACCESS_EXP,  NULL, UNSET },
 	{ "abort",         f_abort,    	    0, ACCESS_EXP,  NULL, UNSET },
 	{ NULL,             NULL,     	    0, 0,           NULL, UNSET }

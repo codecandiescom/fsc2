@@ -443,15 +443,7 @@ Var *f_init_1d( Var *v )
 	if ( v->type == STR_VAR )
 		goto labels_1d;
 
-	vars_check( v, INT_VAR | FLOAT_VAR );             /* number of curves */
-
-	if ( v->type == INT_VAR )
-		G.nc = v->val.lval;
-	else
-	{
-		print( WARN, "Floating point value used as number of curves.\n" );
-		G.nc = lrnd( v->val.dval );
-	}
+	G.nc = get_long( v, "number of curves" );
 
 	if ( G.nc < 1 || G.nc > MAX_CURVES )
 	{
@@ -465,15 +457,7 @@ Var *f_init_1d( Var *v )
 	if ( v->type == STR_VAR )
 		goto labels_1d;
 
-	vars_check( v, INT_VAR | FLOAT_VAR );      /* # of points in x-direction */
-
-	if ( v->type == INT_VAR )
-		G.nx = v->val.lval;
-	else
-	{
-		print( WARN, "Floating point value used as number of points.\n" );
-		G.nx = lrnd( v->val.dval );
-	}
+	G.nx = get_long( v, "number of points" );
 
 	if ( G.nx <= 0 )
 		G.nx = DEFAULT_1D_X_POINTS;
@@ -492,8 +476,7 @@ Var *f_init_1d( Var *v )
 		if ( v->next == NULL ||
 			 ! ( v->next->type & ( INT_VAR | FLOAT_VAR ) ) )
 		{
-			print( FATAL, "Real word coordinate found but missing "
-				   "increment." );
+			print( FATAL, "Start x value found but delta x is missing.\n" );
 			THROW( EXCEPTION );
 		}
 
@@ -571,15 +554,7 @@ Var *f_init_2d( Var *v )
 	if ( v->type == STR_VAR )
 		goto labels_2d;
 
-	vars_check( v, INT_VAR | FLOAT_VAR );                /* number of curves */
-
-	if ( v->type == INT_VAR )
-		G.nc = v->val.lval;
-	else
-	{
-		print( WARN, "Floating point value used as number of curves.\n" );
-		G.nc = lrnd( v->val.dval );
-	}
+	G.nc = get_long( v, "number of curves" );
 
 	if ( G.nc < 1 || G.nc > MAX_CURVES )
 	{
@@ -593,16 +568,7 @@ Var *f_init_2d( Var *v )
 	if ( v->type == STR_VAR )
 		goto labels_2d;
 
-	vars_check( v, INT_VAR | FLOAT_VAR );      /* # of points in x-direction */
-
-	if ( v->type == INT_VAR )
-		G.nx = v->val.lval;
-	else
-	{
-		print( WARN, "Floating point value used as number of points "
-			   "in x-direction.\n" );
-		G.nx = lrnd( v->val.dval );
-	}
+	G.nx = get_long( v, "number of points in x-direction" );
 
 	if ( G.nx <= 0 )
 		G.nx = DEFAULT_2D_X_POINTS;
@@ -613,16 +579,7 @@ Var *f_init_2d( Var *v )
 	if ( v->type == STR_VAR )
 		goto labels_2d;
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
-
-	if ( v->type == INT_VAR )
-		G.ny = v->val.lval;
-	else
-	{
-		print( WARN, "Floating point value used as number of points "
-			   "in y-direction.\n" );
-		G.ny = lrnd( v->val.dval );
-	}
+	G.ny = get_long( v, "number of points in y-direction" );
 
 	if ( G.ny <= 0 )
 		G.ny = DEFAULT_2D_Y_POINTS;
@@ -641,7 +598,7 @@ Var *f_init_2d( Var *v )
 		if ( v->next == NULL ||
 			 ! ( v->next->type & ( INT_VAR | FLOAT_VAR ) ) )
 		{
-			print( FATAL, "Incomplete real world x coordinates.\n" );
+			print( FATAL, "Start x value found but delta x is missing.\n" );
 			THROW( EXCEPTION );
 		}
 
@@ -670,7 +627,7 @@ Var *f_init_2d( Var *v )
 		if ( v->next == NULL ||
 			 ! ( v->next->type & ( INT_VAR | FLOAT_VAR ) ) )
 		{
-			print( FATAL, "Incomplete real world y coordinates.\n" );
+			print( FATAL, "Start y value found but delta y is missing.\n" );
 			THROW( EXCEPTION );
 		}
 
@@ -744,7 +701,8 @@ Var *f_cscale( Var *v )
 
 	if ( ! G.is_init )
 	{
-		print( SEVERE, "Can't change scale, missing initialization.\n" );
+		print( SEVERE, "Can't change scale, missing graphics "
+			   "initialization.\n" );
 		return vars_push( INT_VAR, 0 );
 	}
 
@@ -874,7 +832,8 @@ Var *f_clabel( Var *v )
 
 	if ( ! G.is_init )
 	{
-		print( SEVERE, "Can't change labels, missing initialization.\n" );
+		print( SEVERE, "Can't change labels, missing graphics "
+			   "initialization.\n" );
 		return vars_push( INT_VAR, 0 );
 	}
 
@@ -1008,19 +967,13 @@ Var *f_rescale( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
-
-	if ( v->type & INT_VAR )
-		new_nx = v->val.lval;
-	else
-	{
-		print( WARN, "Float number used as new number of points.\n" );
-		new_nx = lrnd( v->val.dval );
-	}
+	new_nx = get_long( v, G.dim == 1 ? "number of points" :
+					                   "number of points in x-direction" );
 
 	if ( new_nx < -1 )
 	{
-		print( FATAL, "Invalid negative number of points (%ld).\n", new_nx );
+		print( FATAL, "Invalid negative number of points (%ld)%s.\n",
+			   new_nx, G.dim == 1 ? "" : " in x-direction" );
 		THROW( EXCEPTION );
 	}
 
@@ -1033,20 +986,12 @@ Var *f_rescale( Var *v )
 			THROW( EXCEPTION );
 		}
 
-		vars_check( v, INT_VAR | FLOAT_VAR );
-
-		if ( v->type & INT_VAR )
-			new_ny = v->val.lval;
-		else
-		{
-			print( WARN, "Float number used as new number of points.\n" );
-			new_ny = lrnd( v->val.dval );
-		}
+		new_ny = get_long( v, "number of points in y-direction" );
 
 		if ( new_ny < -1 )
 		{
-			print( FATAL, "Invalid negative number of points (%ld).\n",
-				   new_nx );
+			print( FATAL, "Invalid negative number of points (%ld) in "
+				   "y-direction.\n", new_ny );
 			THROW( EXCEPTION );
 		}
 	} else if ( G.dim == 2 )
@@ -1380,14 +1325,9 @@ static DPoint *eval_display_args( Var *v, int *nsets )
 
 		dp = T_realloc( dp, ( *nsets + 1 ) * sizeof *dp );
 
-		/* check and store the x-index */
+		/* Check and store the x-index */
 
-		vars_check( v, INT_VAR | FLOAT_VAR );
-
-		if ( v->type == INT_VAR )
-			dp[ *nsets ].nx = v->val.lval - ARRAY_OFFSET;
-		else
-			dp[ *nsets ].nx = lrnd( v->val.dval - ARRAY_OFFSET );
+		dp[ *nsets ].nx = get_long( v, "x-index" ) - ARRAY_OFFSET;
 
 		if ( dp[ *nsets ].nx < 0 )
 		{
@@ -1410,12 +1350,7 @@ static DPoint *eval_display_args( Var *v, int *nsets )
 				THROW( EXCEPTION );
 			}
 
-			vars_check( v, INT_VAR | FLOAT_VAR );
-
-			if ( v->type == INT_VAR )
-				dp[ *nsets ].ny = v->val.lval - ARRAY_OFFSET;
-			else
-				dp[ *nsets ].ny = lrnd( v->val.dval - ARRAY_OFFSET );
+			dp[ *nsets ].ny = get_long( v, "y-index" ) - ARRAY_OFFSET;
 
 			if ( dp[ *nsets ].ny < 0 )
 			{
@@ -1456,12 +1391,7 @@ static DPoint *eval_display_args( Var *v, int *nsets )
 			return dp;
 		}
 
-		vars_check( v, INT_VAR | FLOAT_VAR );
-
-		if ( v->type == INT_VAR )
-			dp[ *nsets ].nc = v->val.lval - 1;
-		else
-			dp[ *nsets ].nc = lrnd( v->val.dval - 1 );
+		dp[ *nsets ].nc = get_long( v, "curve number" ) - 1;
 
 		if ( dp[ *nsets ].nc < 0 || dp[ *nsets ].nc >= G.nc )
 		{
@@ -1525,21 +1455,9 @@ Var *f_clearcv( Var *v )
 
 		do
 		{
-			/* Check variable type and get curve number */
+			/* Get the curve number and make sure the curve exists */
 
-			vars_check( v, INT_VAR | FLOAT_VAR );     /* get number of curve */
-
-			if ( v->type == INT_VAR )
-				curve = v->val.lval;
-			else
-			{
-				if ( Internals.mode == TEST )
-					print( WARN, "Floating point value used as curve "
-						   "number.\n" );
-				curve = lrnd( v->val.dval );
-			}
-
-			/* Make sure the curve exists */
+			curve = get_long( v, "curve number" );
 
 			if ( curve < 0 || curve > G.nc )
 			{
@@ -1553,6 +1471,7 @@ Var *f_clearcv( Var *v )
 
 			ca = T_realloc( ca, ( count + 1 ) * sizeof *ca );
 			ca[ count++ ] = curve - 1;
+
 		} while ( ( v = v->next ) != NULL );
 
 		if ( ca == NULL )
@@ -1562,7 +1481,7 @@ Var *f_clearcv( Var *v )
 		}
 	}
 
-	/* In a test run this all there is to be done */
+	/* In a test run this already everything to be done */
 
 	if ( Internals.mode == TEST )
 	{
@@ -1622,9 +1541,9 @@ Var *f_clearcv( Var *v )
 }
 
 
-/*-------------------------------------------------*/
-/* Function makes all points of a curve invisible. */
-/*-------------------------------------------------*/
+/*---------------------------------------------------*/
+/* Function draws a marker (in 1D display mode only) */
+/*---------------------------------------------------*/
 
 Var *f_setmark( Var *v )
 {
@@ -1635,6 +1554,9 @@ Var *f_setmark( Var *v )
 	char *ptr;
 	int type = D_SET_MARKER;
 	int shm_id;
+	const char *colors[ ] = { "WHITE", "RED", "GREEN", "YELLOW",
+							  "BLUE", "BLACK" };
+	long num_colors = sizeof colors / sizeof *colors;
 
 
 	/* This function can only be called in the EXPERIMENT section and needs
@@ -1642,30 +1564,25 @@ Var *f_setmark( Var *v )
 
 	if ( ! G.is_init )
 	{
-		if ( Internals.mode == TEST )
-			print( WARN, "Can't set a marker, missing graphics "
-				   "initialisation.\n" );
+		print( WARN, "Can't set a marker, missing graphics "
+			   "initialisation.\n" );
 		return vars_push( INT_VAR, 0 );
 	}
 
 	if ( G.dim != 1 )
 	{
-		if ( Internals.mode == TEST )
-			print( WARN, "Can't set marker, markers can only be set for "
-				   "1D display.\n" );
+		print( WARN, "Can't set marker, markers can only be set for "
+			   "1D display.\n" );
 		return vars_push( INT_VAR, 0 );
 	}
-
-	/* If there is no argument default to curve 1 */
 
 	if ( v == NULL )
 	{
-		if ( Internals.mode == TEST )
-			print( WARN, "Missing arguments\n" );
+		print( WARN, "Missing arguments\n" );
 		return vars_push( INT_VAR, 0 );
 	}
 
-	position = get_strict_long( v, "marker position" ) - ARRAY_OFFSET;
+	position = get_long( v, "marker position" ) - ARRAY_OFFSET;
 
 	if ( position < 0 )
 	{
@@ -1673,17 +1590,31 @@ Var *f_setmark( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	if ( ( v = vars_pop( v ) ) == NULL )
+	if ( ( v = vars_pop( v ) ) != NULL )
 	{
-		color = get_strict_long( v, "marker color" );
-
-		if ( color > 4 )
+		if ( v->type & ( INT_VAR | FLOAT_VAR ) )
+			color = get_long( v, "marker color" );
+		else
 		{
-			print( WARN, "Invalid marker color (%ld), using default of 0.\n",
-				   color );
+			vars_check( v, STR_VAR );
+			for ( color = 0; color < num_colors; color++ )
+				if ( ! strcasecmp( colors[ color ], v->val.sptr ) )
+					break;
+		}
+
+		if ( color >= num_colors )
+		{
+			if ( v->type & ( INT_VAR | FLOAT_VAR ) )
+				print( WARN, "Invalid marker color number (%ld), using "
+					   "default of 0 (white).\n", color );
+			else
+				print( WARN, "Invalid marker color (\"%s\"), using default of "
+					   "\"WHITE\".\n", v->val.sptr );
 			color = 0;
 		}
 	}
+
+	too_many_arguments( v );
 
 	/* In a test run this all there is to be done */
 
@@ -1736,6 +1667,82 @@ Var *f_setmark( Var *v )
 }
 
 
+/*---------------------------------------------------*/
+/* Function deletes all markers (in 1D display only) */
+/*---------------------------------------------------*/
+
+Var *f_clearmark( Var *v )
+{
+	long len = 0;                    /* total length of message to send */
+	void *buf;
+	char *ptr;
+	int type = D_CLEAR_MARKERS;
+	int shm_id;
+
+
+	v = v;         /* keeps the compiler happy... */
+
+	/* This function can only be called in the EXPERIMENT section and needs
+	   a previous graphics initialisation */
+
+	if ( ! G.is_init )
+	{
+		print( WARN, "Can't clear markers, missing graphics "
+			   "initialisation.\n" );
+		return vars_push( INT_VAR, 0 );
+	}
+
+	if ( G.dim != 1 )
+	{
+		print( WARN, "Can't clear marker, markers can only be used for "
+			   "1D display.\n" );
+		return vars_push( INT_VAR, 0 );
+	}
+
+	/* In a test run this all there is to be done */
+
+	if ( Internals.mode == TEST )
+		return vars_push( INT_VAR, 1 );
+	
+	/* Now starts the code only to be executed by the child, i.e. while the
+	   measurement is running. */
+
+	fsc2_assert( Internals.I_am == CHILD );
+
+	/* Now try to get a shared memory segment */
+
+	len = sizeof len + sizeof type;
+
+	if ( ( buf = get_shm( &shm_id, len ) ) == ( void * ) - 1 )
+	{
+		eprint( FATAL, UNSET, "Internal communication problem at %s:%u.\n",
+				__FILE__, __LINE__ );
+		THROW( EXCEPTION );
+	}
+
+	/* Copy all data into the shared memory segment */
+
+	ptr = buf;
+
+	memcpy( ptr, &len, sizeof len );               /* total length */
+	ptr += sizeof len;
+
+	memcpy( ptr, &type, sizeof type );             /* type indicator  */
+
+	/* Detach from the segment with the data */
+
+	detach_shm( buf, NULL );
+
+	/* Wait for parent to become ready to accept new data, then store
+	   identifier and send signal to tell it about them */
+
+	send_data( DATA, shm_id );
+
+	/* All the rest has now to be done by the parent process... */
+
+	return vars_push( INT_VAR, 1 );
+}
+	
 
 /*
  * Local variables:

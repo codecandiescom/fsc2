@@ -64,6 +64,7 @@ static bool needs_pos = SET;
 static Var *f_layout_child( long layout );
 static void f_objdel_child( Var *v );
 static void f_objdel_parent( Var *v );
+static int tool_box_close_handler( FL_FORM *a, void *b );
 static FL_OBJECT *append_object_to_form( IOBJECT *io );
 static void tools_callback( FL_OBJECT *ob, long data );
 
@@ -200,6 +201,11 @@ void parent_freeze( int freeze )
 			tool_x = Tool_Box->Tools->x;
 			tool_y = Tool_Box->Tools->y;
 		}
+
+		/* Set a close handler that avoids that the tool box window can be
+		   closed */
+
+		fl_set_form_atclose( Tool_Box->Tools, tool_box_close_handler, NULL );
 
 		Tool_Box->has_been_shown = SET;
 		fl_winminsize( Tool_Box->Tools->window,
@@ -668,10 +674,27 @@ void recreate_Tool_Box( void )
 			tool_y = Tool_Box->Tools->y;
 		}
 
+		/* Set a close handler that avoids that the tool box window can be
+		   closed */
+
+		fl_set_form_atclose( Tool_Box->Tools, tool_box_close_handler, NULL );
+
 		Tool_Box->has_been_shown = SET;
 		fl_winminsize( Tool_Box->Tools->window,
 					   FI_sizes.WIN_MIN_WIDTH, FI_sizes.WIN_MIN_HEIGHT );
 	}
+}
+
+
+/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*/
+
+static int tool_box_close_handler( FL_FORM *a, void *b )
+{
+	a = a;
+	b = b;
+
+	return FL_IGNORE;
 }
 
 

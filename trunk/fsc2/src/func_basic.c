@@ -174,7 +174,7 @@ Var *f_int( Var *v )
 
 		case FLOAT_VAR :
 			if ( v->val.dval > LONG_MAX || v->val.dval < LONG_MIN )
-				print( SEVERE, "Argument nteger overflow.\n" );
+				print( SEVERE, "Argument integer overflow.\n" );
 			return vars_push( INT_VAR, ( long ) v->val.dval );
 
 		default :

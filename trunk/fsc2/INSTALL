@@ -75,8 +75,8 @@ its shell in /etc/passwd to /bin/false) and not be installed with root
 privileges. Most of the time fsc2 runs with the effective user ID (EUID)
 and effective group ID (EGID) set to the real users ID and group but in
 a few places (e.g. when writing to log files, manipulating lock files or
-accessing shared memory or device files) it sets back the EUID and EGID
-to the one of fsc2.
+accessing shared memory or device files) it reverts back to the EUID and
+EGID of the fsc2 account.
 
 What group the fsc2 account belongs to does not matter. Relevant is only
 the group of the executable, i.e the file itself. I would recommend to
@@ -90,10 +90,10 @@ make them world readable and writable, or to make all users of fsc2 belong
 to this group (probably as one of their supplementary groups).
 
 By setting the group of the device file for the GPIB board to the group
-that owns the executable file of fsc2 (i.e. usually 'uucp' or 'dialout')
-also the access permissions to the boards device file don't have to be
-set to allow either access by 'other' or to make all users members of
-the group that has access permissions but can be restricted to this group.
+that fsc2 belongs to (i.e. usually 'uucp' or 'dialout') also the access
+permissions to the boards device file don't have to be set to allow either
+access by 'other' or to make all users members of the group that has
+access permissions but can be restricted to this group.
 
 
 C) Preparing for Installation
@@ -124,7 +124,7 @@ devices are controlled via the serial ports.
 
 If you use the National Instruments GPIB driver you can set the location
 where fsc2 will expect the GPIB configuration file, gpib.conf. But usually
-there is no reason to change the default value.
+there is no reason to change the default value (which is /etc/gpib.conf).
 
 While running fsc2 may write out information about the activity on the
 GPIB bus into a log file. You can change the default log file /tmp/gpib.log
@@ -132,10 +132,11 @@ to something appropriate for your setup (or even to /dev/null). You can also
 set the verbosity of the logs by changing the variable GPIB_LOG_LEVEL to
 either HIGH, MEDIUM, LOW or OFF.
 
-The next to variables, NUM_SERIAL_PORTS and SERIAL_LOCK_DIR are for handling
-of the serial ports. NUM_SERIAL_PORTS should be set to the number of serial
-ports that the computer has. If the variable is not set (or set to 0) no
-serial ports can be used.
+The next two variables, NUM_SERIAL_PORTS and SERIAL_LOCK_DIR, are used in
+handling of the serial ports. NUM_SERIAL_PORTS should be set to the number
+of serial ports that your computer has (or which you want fsc2 to have
+access to). If the variable is not set (or set to 0) no serial ports can
+be used.
 
 SERIAL_LOCK_DIR must be a string with the name of the directory where UUCP
 type lock files for the serial ports are created (there is a convention that
@@ -144,10 +145,10 @@ process ID (PID) of the program as a decimal ASCII number, so that other
 programs can check if the port is already in use and by whom). According to
 version 2.2 of the Filesystem Hierachy Standard this directory should be
 '/var/lock', but on old systems also '/usr/spool/locks' and '/usr/spool/uucp'
-where commonly used, so this can be adjusted via this variable. If you don't
+were commonly used, so this can be adjusted via this variable. If you don't
 want lock files for the serial port to be created simply don't define this
-variable. A possible problem arises in case you use programs creating lock
-files not in the HDB UUCP format (the PID being stored in a ten byte string,
+variable. A possible problem arises if you use programs creating lock files
+not in the HDB UUCP format (the PID being stored in a ten byte string,
 left-padded with spaces and with a trailing newline). In this case fsc2 will
 not try to remove stale lock files and instead print an error message to the
 terminal and the lock file has to be removed manually.
@@ -166,12 +167,13 @@ Go into the main directory of the package and type 'make'. This may take
 some time to finish. Usually no warnings should show up during the
 compilation (at least on systems with a newer libc and if my GPIB library
 is used), but warnings may occur when the documentation is created and some
-of the required tools are not available. It may even happen that make stops
-with an error message during this stage (i.e. while making the documentation).
-This does *not* mean that the program didn't compile succesfully!
+of the required tools are not available. It may even happen that the make
+process stops with an error message during this stage (i.e. while making
+the documentation). This does *not* mean that the program didn't compile
+succesfully!
 
 Please don't start 'make' from one of the subdirectories, this is bound to
-fail in most cases.
+fail in most cases and will never create everything needed.
 
 If you get more than a few warnings (about problems with fsc2, not header
 files included by fsc2) during the compilation stage of the program (or
@@ -192,7 +194,7 @@ documentation failed at some stage), you can now install the program by
 typing 'make install'. Normally, you will need root privileges to do this.
 If making the documentation failed with an error also the installon may
 fail while installing the documentation, but this is not something to
-worry about...
+worry about too much...
 
 Please note: If you installed the program and then decide that you don't
 like it and want to get rid of it, you can always de-install it by running
@@ -200,6 +202,21 @@ like it and want to get rid of it, you can always de-install it by running
    make deinstall
 
 as long as you haven't changed the makefiles in between.
+
+To manualy remove the installed package you have to delete the following
+files and directories (assuming you used the default locations):
+
+/usr/local/bin/fsc2
+/usr/local/bin/fsc2_connect
+/usr/local/bin/fsc2_clean
+/usr/local/bin/fsc2_test
+/usr/local/bin/fsc2_load
+/usr/local/bin/fsc2_start
+/usr/lib/fsc2/
+/usr/local/share/doc/fsc2/
+/usr/local/man/man1/fsc2.1.gz
+/usr/local/info/fsc2.info.gz
+/usr/local/info/fsc2-*.info.gz     with * set to the numbers from 1 to 10
 
 
 E) Simple Tests
@@ -221,11 +238,11 @@ without any devices, these are
   2_td.edl
   tools.edl
 
-Just start by typing 'fsc2 a.edl' or 'fsc2 z.edl' and click onto the "Start"
-button to get an idea about how fsc2 displays 1-dimensional and 2-dimensional
-data sets.
+Just start by typing 'fsc2 edl/a.edl' or 'fsc2 edl/z.edl' (assuming you're
+still in fsc2's main directory) and click onto the "Start" button to get an
+idea about how fsc2 displays 1- and 2-dimensional data sets.
 
-             January 14, 2002             Have fun, Jens
+             January 19, 2002             Have fun, Jens
 
 -----------------------------------------------------------------------------
        _  _____  _____
