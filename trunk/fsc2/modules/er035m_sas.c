@@ -196,7 +196,7 @@ int er035m_sas_test_hook( void )
 int er035m_sas_exp_hook( void )
 {
 	char buffer[ 21 ], *bp;
-	long length = 20;
+	size_t length = 20;
 	Var *v;
 	long retries;
 	int cur_res;
@@ -417,7 +417,7 @@ Var *measure_field( Var *v )
 {
 	char buffer[ 21 ];
 	char *bp;
-	long length;
+	size_t length;
 	long retries;
 
 
@@ -760,7 +760,7 @@ static double er035m_sas_get_field( void )
 	char buffer[ 21 ];
 	char *vs;
 	char *state_flag;
-	long length;
+	size_t length;
 	long tries = ER035M_SAS_MAX_RETRIES;
 	long retries;
 	const char *res[ ] = { "0.1", "0.01", "0.001" };
@@ -838,7 +838,7 @@ static int er035m_sas_get_resolution( void )
 {
 	int retries;
 	char buffer[ 20 ];
-	long length = 20;
+	size_t length = 20;
 
 
 	for ( retries = FAIL_RETRIES; ; retries-- )
@@ -901,7 +901,7 @@ static long er035m_sas_get_upper_search_limit( void )
 {
 	int retries;
 	char buffer[ 20 ];
-	long length = 20;
+	size_t length = 20;
 	char *ptr;
 
 
@@ -943,7 +943,7 @@ static long er035m_sas_get_lower_search_limit( void )
 {
 	int retries;
 	char buffer[ 20 ];
-	long length = 20;
+	size_t length = 20;
 	char *ptr;
 
 
@@ -1069,7 +1069,7 @@ static bool er035m_sas_write( const char *buf )
 /*-----------------------------------------------------------------------*/
 /*-----------------------------------------------------------------------*/
 
-static bool er035m_sas_read( char *buf, long *len )
+static bool er035m_sas_read( char *buf, size_t *len )
 {
 	char *ptr;
 
@@ -1103,7 +1103,7 @@ static bool er035m_sas_read( char *buf, long *len )
 
 	for ( ptr = buf; *ptr == nmr.prompt; ptr++ )
 		/* empty */ ;
-	*len -= ( long ) ( ptr - buf );
+	*len -= ( size_t ) ( ptr - buf );
 
 	if ( *len == 0 )          /* if nothing (except the prompt) was received */
 		return FAIL;
@@ -1121,8 +1121,8 @@ static bool er035m_sas_comm( int type, ... )
 {
 	va_list ap;
 	char *buf;
-	long len;
-	long *lptr;
+	ssize_t len;
+	size_t *lptr;
 	long read_retries = 10;            /* number of times we try to read */
 
 

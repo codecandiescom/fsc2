@@ -229,7 +229,7 @@ int er035m_s_test_hook( void )
 int er035m_s_exp_hook( void )
 {
 	char buffer[ 21 ], *bp;
-	long length = 20;
+	size_t length = 20;
 	Var *v;
 	long retries;
 	int cur_res;
@@ -462,7 +462,7 @@ Var *find_field( Var *v )
 {
 	char buffer[ 21 ];
 	char *bp;
-	long length;
+	size_t length;
 	long retries;
 
 
@@ -826,7 +826,7 @@ static double er035m_s_get_field( void )
 	char buffer[ 21 ];
 	char *vs;
 	char *state_flag;
-	long length;
+	size_t length;
 	long tries = ER035M_S_MAX_RETRIES;
 	long retries;
 
@@ -904,7 +904,7 @@ static int er035m_s_get_resolution( void )
 {
 	int retries;
 	char buffer[ 20 ];
-	long length = 20;
+	size_t length = 20;
 
 
 	for ( retries = FAIL_RETRIES; ; retries-- )
@@ -966,7 +966,7 @@ static long er035m_s_get_upper_search_limit( void )
 {
 	int retries;
 	char buffer[ 20 ];
-	long length = 20;
+	size_t length = 20;
 	char *ptr;
 
 
@@ -1009,7 +1009,7 @@ static long er035m_s_get_lower_search_limit( void )
 {
 	int retries;
 	char buffer[ 20 ];
-	long length = 20;
+	size_t length = 20;
 	char *ptr;
 
 
@@ -1188,7 +1188,7 @@ static bool er035m_s_comm( int type, ... )
 	va_list ap;
 	char *buf;
 	long len;
-	long *lptr;
+	size_t *lptr;
 	long read_retries = 10;            /* number of times we try to read */
 
 
@@ -1245,7 +1245,7 @@ static bool er035m_s_comm( int type, ... )
 		case SERIAL_READ :
 			va_start( ap, type );
 			buf = va_arg( ap, char * );
-			lptr = va_arg( ap, long * );
+			lptr = va_arg( ap, size_t * );
 			va_end( ap );
 
 			/* The gaussmeter might not be ready yet to send data, in this
