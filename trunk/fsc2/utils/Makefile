@@ -28,6 +28,7 @@ edl-mod.elc: edl-mod.el
 	emacs -batch -f batch-byte-compile edl-mod.el
 
 install:
+	$(INSTALL) -m 755 fsc2_guify $(bindir)
 	$(INSTALL) -d $(emacs_dir)
 	$(INSTALL) -m 644 edl-mod.el $(emacs_dir)
 	$(INSTALL) -m 444 edl-mod.elc $(emacs_dir)

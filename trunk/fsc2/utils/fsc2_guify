@@ -1,0 +1,755 @@
+#!/usr/bin/perl
+# -*- cperl -*-
+#
+#  $Id$
+#
+#  Copyright (C) 1999-2002 Jens Thoms Toerring
+#
+#  This file is part of fsc2.
+#
+#  Fsc2 is free software; you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation; either version 2, or (at your option)
+#  any later version.
+#
+#  Fsc2 is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with fsc2; see the file COPYING.  If not, write to
+#  the Free Software Foundation, 59 Temple Place - Suite 330,
+#  Boston, MA 02111-1307, USA.
+#
+#
+#  This script tries to GUI-fy a suitably adapted EDL script, i.e. it takes
+#  a slightly modified EDL script and creates a Perl script which, in turn,
+#  allows the user to set parameters via a GUI and then creates an EDL sript
+#  from the parameters and sends it to fsc2 for execution.
+
+
+use strict;
+use warnings;
+
+
+my @lines;
+my @vars;
+my $guify_entry = '^\s*==\s+';
+my $var_entry = $guify_entry .
+	'([A-Za-z0-9]+)\s+(int|float|menu)(\s+(.*))?';
+my $if_entry = $guify_entry . 'if\\s+';
+my $elsif_entry = $guify_entry . "elsif\\s+";
+my $else_entry = $guify_entry . "else\\s*\$";
+my $endif_entry = $guify_entry . "endif\\s*\$";
+my $if_level = 0;
+
+# By changing the following variables the layout of the form can be changed!
+
+my $label_width = 20;
+my $entry_width = 10;
+my $unit_width  = 5;
+
+# Read in the complete input and open the output file (and make it STDOUT)
+
+my $if = *STDIN;
+my $of = *STDOUT;
+
+if ( $ARGV[ 0 ] ) {
+	usage( ) if $ARGV[ 0 ] =~ /^-h$/ or $ARGV[ 0 ] =~ /^--h(elp)?$/;
+	open( $if, "<" . $ARGV[ 0 ] )
+		or die "Can't open input file " . $ARGV[ 0 ] . ": $!\n";
+}
+
+if ( $ARGV[ 1 ] ) {
+	open( $of, ">" . $ARGV[ 1 ] )
+		or die "Can't open ouput file " . $ARGV[ 0 ] . ": $!\n";
+}
+
+select $of;
+
+while ( <$if> ) {
+
+	# Just store lines with normal EDL code
+
+	unless ( /$guify_entry/o ) {
+		push @lines, $_;
+		next;
+	}
+
+	# If line ends in a backslash append the next line to it (which then also
+	# must be a line starting with the 'guify' signature)
+
+	my $cur_line = $_;
+	while ( $cur_line =~ /\\\s*$/ ) {
+		$cur_line =~ s/(.*)\\\s*$/$1 /;
+		die "Unexpected end of input file\n" unless defined( $_ = <$if> );
+		die "Missing continuation at line $.\n" unless /$guify_entry/o;
+		$_ =~ s/$guify_entry(.*)/$1/o;
+		$cur_line .= $_;
+	}
+
+	# if/else/elsifendif lines stay in the program for later evaluation
+
+	if ( $cur_line =~ /$if_entry/o ) {
+		$if_level++;
+		push @lines, $_;
+		next;
+	}
+
+	if ( $cur_line =~ /$else_entry/o ) {
+		die "'else' found without previous 'if' at line $.\n"
+			if $if_level <= 0;
+		push @lines, $_;
+		next;
+	}
+
+	if ( $cur_line =~ /$elsif_entry/o ) {
+		die "'elsif' found without previous 'if' at line $.\n"
+			if $if_level <= 0;
+		push @lines, $_;
+		next;
+	}
+
+	if ( $cur_line =~ /$endif_entry/o ) {
+		die "'endif' found without previous 'if' at line $.\n"
+			if $if_level <= 0;
+		$if_level--;
+		push @lines, $_;
+		next;
+	}
+
+	# Lines defining variables must be analyzed directly
+
+	if ( $cur_line =~ /$var_entry/o ) {
+		my $var_options = { name => $1, type => $2, value => undef };
+		analyze_var_options( $var_options, $4 ) if defined $4;
+		push @vars, $var_options;
+		next;
+	}
+
+	die "Invalid syntax on line $.\n";
+}
+
+close $if;
+
+die "Unbalanced if-endif construct(s)\n" if $if_level > 0;
+die "No variables found in input\n" if @vars == 0;
+
+# Set values for variables that don't have been given a default value
+
+for ( @vars ) {
+	if ( exists $$_{ value } and defined $$_{ value } ) {
+		$$_{ def_value } = $$_{ value };
+		next;
+	}
+
+	if ( $$_{ type } =~ /^int|float$/ ) {
+		if ( defined $$_{ max } and defined $$_{ min } ) {
+			$$_{ value } = 0.5 * ( $$_{ max } + $$_{ min } );
+			$$_{ value } = int( $$_{ value } ) if $$_{ type } =~ /^int$/;
+		} elsif ( defined $$_{ max } and ! defined $$_{ min } ) {
+			$$_{ value } = $$_{ max };
+		} elsif ( ! defined $$_{ max } and defined $$_{ min } ) {
+			$$_{ value } = $$_{ min };
+		} else {
+			$$_{ value } = 0;
+		}
+		$$_{ def_value } = $$_{ value };
+	} else {
+		$$_{ value } = $$_{ menu_entries }->[ 0 ];
+	}
+}
+
+# Write out the script
+
+write_script( );
+
+# Finally make the new script executable
+
+chmod( 0755, $ARGV[ 1 ] ) if $ARGV[ 1 ];
+
+
+################################################################
+
+sub usage {
+	print "Usage: fsc2_guify [ IN_FILE [ OUT_FILE ] ]\n" .
+		  "A program to GUI-fy (slightly modified) EDL scripts.\n";
+	exit 0;
+}
+
+
+################################################################
+
+sub analyze_var_options {
+	my ( $hr, $str ) = @_;
+	my $res;
+
+	if ( $hr->{ type } =~ /^float$/o ) {
+		$str = get_float_limits( $hr, $str );
+	} elsif ( $hr->{ type } =~ /^int$/o ) {
+		$str = get_int_limits( $hr, $str );
+	} else {
+		$str = get_menu_entries( $hr, $str );
+	}
+
+	( $res, $str ) = get_default_value( $str, $hr );
+	$hr->{ value } = $res if defined $res;
+
+	( $res, $str ) = get_string( $str, $hr );
+	$hr->{ label } = defined $res ? $res : '""';
+
+	( $res, $str ) = get_string( $str );
+	$hr->{ unit } = defined $res ? $res : '""';
+}
+
+
+################################################################
+
+sub get_float_limits {
+	my ( $hr, $str ) = @_;
+	my ( $min, $max );
+	my $float_rep = '[+-]?((\d+(\.(\d+)?)?)|(\.\d+))([eE][+-]?\d+)?';
+
+
+	if ( $str =~ /^\s*(\[\s*([^:\s]+)?\s*:\s*([^:\s]+)?\s*\])(\s+(.*))?$/o ) {
+		$str = $5;
+
+		$min = $2 if defined $2;
+		$max = $3 if defined $3;
+
+		die "Not a floating point number ($min) at line $.\n"
+			if defined $min and $min !~ /^$float_rep$/o;
+
+		die "Not a floating point number ($max) at line $.\n"
+			if defined $max and $max !~ /^$float_rep$/o;
+
+		if ( defined $min and defined $max and $min > $max ) {
+			my $temp = $min;
+			$min = $max;
+			$max = $temp;
+		}
+
+		$hr->{ max } = $max;
+		$hr->{ min } = $min;
+	}  else {
+		$hr->{ max } = $hr->{ min } = undef;
+	}
+
+	return $str;
+}
+
+
+################################################################
+
+sub get_int_limits {
+	my ( $hr, $str ) = @_;
+	my ( $min, $max );
+	my $int_rep = '[+-]?\d+';
+
+
+	if ( $str =~ /^(\[\s*([^:\s]+)?\s*:\s*([^:\s]+)?\s*\])(\s+(.*))?$/o ) {
+		$str = $5;
+
+		$min = $2 if defined $2;
+		$max = $3 if defined $3;
+
+		die "Not an integer number ($min) at line $.\n"
+			if defined $min and $min !~ /^$int_rep$/o;
+
+		die "Not a integer number ($max) at line $.\n"
+			if defined $max and $max !~ /^$int_rep$/o;
+
+		if ( defined( $min ) and defined( $max ) and $min > $max ) {
+			my $temp = $min;
+			$min = $max;
+			$max = $temp;
+		}
+
+		$hr->{ max } = $max;
+		$hr->{ min } = $min;
+	} else {
+		$hr->{ max } = $hr->{ min } = undef;
+	}
+
+	return $str;
+}
+
+
+################################################################
+
+sub get_menu_entries {
+	my ( $hr, $str ) = @_;
+	my $string_rep = '"((\"|[^"])*)"';
+
+	if ( $str =~
+		 /^s*\[\s*($string_rep(\s*,\s*$string_rep)?)\s*\](\s+(.*)?)?$/o ) {
+		$str = $8;
+		my $mstr = $1;
+		my @menu_entries;
+		$mstr =~ /^"((\\"|[^"])*)"/og;
+		push @menu_entries, $1;
+		push @menu_entries, $1 while $mstr =~ /\G\s*,\s*"((\\\"|[^\"])*)"/go;
+		die "Less then 2 menu entries at line $.\n" if @menu_entries < 2;
+		$hr->{ menu_entries } = \@menu_entries;
+	} else {
+		die "Missing entries for menu at line $.\n";
+	}
+
+	return $str;
+}
+
+
+################################################################
+
+sub get_default_value {
+
+	my ( $str, $hr ) = @_;
+	my $val;
+
+
+	return ( undef, undef ) unless defined $str;
+
+	return ( undef, $str ) unless
+		$str =~ /\s*\[\s*([^\]\s]+)\s*\](\s+(.*)?)?$/o;
+
+	$val = $1;
+	$str = $3;
+
+	if ( $hr->{ type } =~ /^int$/ ) {
+		if ( $val =~ /^[+-]?\d+$/ ) {
+			die "Default value for $hr->{ name } does not fit into range at " .
+				"line $.\n"
+					if ( defined $hr->{ max } and $hr->{ max } < $val ) or
+					   ( defined $hr->{ min } and $hr->{ min } > $val );
+			return ( $val, $str );
+		} else {
+			die "Default value ($val) isn't an integer number at line $.\n";
+		}
+	} elsif ( $hr->{ type } =~ /^float$/ ) {
+		if ( $val =~ /^[+-]?((\d+(\.(\d+)?)?)|(\.\d+))([eE][+-]?\d+)?/o ) {
+			die "Initil value for $hr->{ name } does not fit into range at " .
+				"line $.\n"
+					if ( defined $hr->{ max } and $hr->{ max } < $val ) or
+					   ( defined $hr->{ min } and $hr->{ min } > $val );
+			return ( $val, $str );
+		} else {
+			die "Default value ($val) isn't a floating point number at " .
+				"line $.\n";
+		}
+	} else {
+		if ( $val =~ /^\d+/o ) {
+			die "Default value ($val) for $hr->{ name } is larger than the " .
+				"number of menu entries at line $.\n"
+				if $val > @{ $hr->{ menu_entries } };
+			die "Invalid default value of 0 for $hr->{ name } at line $., " .
+				"must be at least 1.\n" if $val == 0;
+			return ( $hr->{ menu_entries }->[ $val - 1 ], $str );
+		} else {
+			die "Default value ($val) isn't a positive integer number at " .
+				"line $.\n";
+		}
+	}
+}
+
+
+################################################################
+
+sub get_string {
+	my $str = shift;
+
+	return ( undef, undef ) unless defined $str;
+
+	$str =~ /^s*(\"([^\"]|\\\")*\")(\s+(.*)?)?$/o;
+	return ( $1, $4 ) if defined $1;
+	return ( undef, $4 );
+}
+
+
+################################################################
+
+sub write_script {
+
+	# Write out the start of the script
+
+	print <<'EOT';
+#!/usr/bin/perl
+# -*- cperl -*-
+# This script was automatically generated by fsc2_guify.
+
+use strict;
+use warnings;
+use Tk;
+use Tk::Balloon;
+
+my @version = split /\./, $Tk::VERSION;
+die "Installed Perl-Tk version is $Tk::VERSION but Tk800.022 is required.\n"
+    if $version[ 0 ] + 0.001 * $version[ 1 ] < 800.022;
+
+my %fp = ( -side => "top",
+		   -fill => "x",
+		   -padx => "2m",
+		   -pady => "2m" );
+my %wp = ( -side => "left",
+		   -fill => "x",
+		   -expand => 1 );
+
+my $fsc2_how_to_run = "Test program";
+my @fsc2_how_to_run = ( "Start experiment",
+                        "Test program",
+						"Load into fsc2" );
+my $fsc2_main_window = MainWindow->new( );
+my $fsc2_main_frame = $fsc2_main_window->Frame( -relief => "ridge",
+                                                -borderwidth => "1m" );
+my $fsc2_balloon = $fsc2_main_frame->Balloon( );
+my $fsc2_apply_frame = $fsc2_main_window->Frame( );
+my $fsc2_apply_button = $fsc2_apply_frame->Button( -text => "Apply",
+                                                   -command => \\&write_out );
+$fsc2_apply_button->bind( "all", "<Control-a>" => \\&write_out );
+my $fsc2_quit_button = $fsc2_apply_frame->Button( -text => "Quit",
+                 -command => sub { &store_defs; $fsc2_main_window->destroy } );
+$fsc2_quit_button->bind( "all",
+                         "<Control-q>" =>
+                         sub { &store_defs; $fsc2_main_window->destroy } );
+$fsc2_apply_frame->pack( -side => "bottom",
+                         -fill => "x",
+                         -padx => "4m" );
+
+EOT
+
+	# Now write the code for editing the variables
+
+	for ( @vars ) {
+		print <<"EOT";
+my \%$$_{ name };
+\$$$_{ name }\{ tk_frame \} = \$fsc2_main_frame->Frame( );
+\$$$_{ name }\{ tk_label \} = \$$$_{ name }\{ tk_frame \}->Label(
+-text => $$_{ label },
+-width => $label_width,
+-anchor => 'w' );
+EOT
+
+		if ( $$_{ type } =~ /^int|float$/ ) {
+			print "my \$$$_{ name } = $$_{ value };
+\$$$_{ name }\{ min \} = " . ( defined $$_{ min } ? $$_{ min } : "undef" ) . ";
+\$$$_{ name }\{ max \} = " . ( defined $$_{ max } ? $$_{ max } : "undef" ) . ";
+\$$$_{ name }\{ tk_entry \} = \$$$_{ name }\{ tk_frame \}->Entry( -textvariable => \\\$$$_{ name },
+-width => $entry_width,
+-validate => 'key',
+-validatecommand => sub{ $$_{ type }_check( shift,
+( defined \$$$_{ name }\{ min \} ? \$$$_{ name }\{ min \} : undef ),
+( defined \$$$_{ name }\{ max \} ? \$$$_{ name }\{ max \} : undef ) ); },
+-relief => 'sunken' );
+\$fsc2_balloon->attach( \$$$_{ name }\{ tk_entry \},
+-balloonmsg  => \"Range: [ \" . ( defined \$$$_{ name }\{ min \} ? \$$$_{ name }\{ min \} : '-inf' ) .
+\" : \" . ( defined \$$$_{ name }\{ max \} ? \$$$_{ name }\{ max \} : '+inf' ) . \" ]\" );
+";
+		} else {
+			print "my \$$$_{ name } = \"$$_{ value }\";
+my \@$$_{ name } = ( \"$$_{ menu_entries }[ 0 ]\"";
+			for ( my $i = 1; $i < @{ $$_{ menu_entries } }; $i++ ) {
+				print ", \"" . ${ $$_{ menu_entries } }[ $i ] . "\"";
+			}
+			print " );
+\$$$_{ name }\{ tk_entry \} = \$$$_{ name }\{ tk_frame \}->Optionmenu( " .
+"-options => \\\@$$_{ name },
+-width => $entry_width,
+-textvariable => \\\$$$_{ name } );
+";
+		}
+
+		print <<"EOT";
+\$$$_{ name }\{ tk_unit \} = \$$$_{ name }\{ tk_frame \}->Label( -text => $$_{ unit },
+-width => $unit_width );
+\$$$_{ name }\{ tk_frame \}->pack( \%fp );
+\$$$_{ name }\{ tk_label \}->pack( \%wp );
+\$$$_{ name }\{ tk_entry \}->pack( \%wp );
+\$$$_{ name }\{ tk_unit \}->pack( \%wp );
+
+EOT
+	}
+
+	# Finally add the menu for selection how to run the generated EDL script
+	# and the Apply- and Quit-button
+
+	print <<"EOT";
+\$fsc2_main_frame->pack( \%fp, -pady => '1m' );
+\$fsc2_main_window->Optionmenu( -options => \\\@fsc2_how_to_run,
+				                -textvariable => \\\$fsc2_how_to_run,
+			                  )->pack( -padx => '3m',
+						               -pady => '3m' );
+
+\$fsc2_apply_button->pack( \%wp, padx => '5m', -pady => '3m' );
+\$fsc2_quit_button->pack( \%wp, padx => '5m', -pady => '3m' );
+
+load_defs( );
+MainLoop;
+
+
+################################################################
+
+sub int_check {
+	my ( \$new, \$min, \$max ) = \@_;
+
+	return 0 if \$new =~ /^\\+?(\\d+)?\$/ and defined \$max and \$max < 0;
+	return 0 if \$new =~ /^-/ and defined \$min and \$min >= 0;
+	if ( \$new =~ /^[+-]?\$/ ) {
+		 \$fsc2_apply_button->configure( -state => 'disabled' );
+		 return 1;
+	 }
+
+	return 0 unless \$new =~ /^[+-]?\\d+?\$/;
+
+	if ( ( defined \$min and \$new < \$min )
+         or ( defined \$max and \$new > \$max ) ) {
+		 \$fsc2_apply_button->configure( -state => 'disabled' );
+	 } else {
+		 \$fsc2_apply_button->configure( -state => 'normal' );
+	 }
+	 return 1;
+}
+
+
+################################################################
+
+sub float_check {
+	my ( \$new, \$min, \$max ) = \@_;
+	my \$float_rep = '[+-]?((\\d+(\\.(\\d+)?)?)|(\\.\\d+))([eE][+-]?\\d+)?';
+
+	return 0 if \$new =~ /^\\+/ and defined \$max and \$max < 0;
+	return 0 if \$new =~ /^-/ and defined \$min and \$min > 0;
+
+	if ( \$new =~ /^\$float_rep\$/ ) {
+		if ( ( defined \$max and \$max < \$new ) or
+			 ( defined \$min and \$min > \$new ) ) {
+			\$fsc2_apply_button->configure( -state => 'disabled' );
+		} else {
+			\$fsc2_apply_button->configure( -state => 'normal' );
+		}
+		return 1;
+	}
+
+	if ( \$new =~ /^[+-]?(\\d+)?\\.?(\\d+)?([Ee][+-]?(\\d+)?)?\$/ ) {
+		 \$fsc2_apply_button->configure( -state => 'disabled' );
+		 return 1;
+	 }
+
+	 return 0;
+}
+
+
+################################################################
+
+sub write_out {
+    my \$fh;
+    open( \$fh, \"|fsc2_\" . lc \$fsc2_how_to_run )
+        or die \"Can't find utility fsc2_\" . lc \$fsc2_how_to_run . \".\\n\";
+EOT
+
+	# Here the body of the EDL script that the script we are just writing is
+	# going to send to fsc2 is written. For normal lines we just have to
+	# double all backslashes, escape double quotes and dollars and prepend
+	# an (escaped) $ to the variable names.
+	# For the possibly embedded if, else, elsif and endif commands we
+	# have to built in some Perl code to allow the written script to
+	# decide which parts need to be written to the EDL script depending
+	# on what values or menu entries the user selected. Here the eval
+	# function comes quite handy because we can simply treat the conditions
+	# as some Perl code after prepending a $ to the variable name...
+	# This way the user can use even rather complicated expressions as
+	# the conditions...
+
+	print "print \$fh \"";
+	for my $line ( @lines ) {
+		if ( $line =~ /$guify_entry/o ) {
+			$line =~ /$guify_entry(if|else|elsif|endif)\s*(.*?)\s*$/;
+			my ( $type, $cmd ) = ( $1, $2 );
+			if ( $type =~ /^if|elsif$/o ) {
+				$cmd =~ s/\b$$_{ name }\b/\$$$_{ name }/g for ( @vars );
+			}
+			if ( $type =~ /^if$/o ) {
+				print "\";
+if ( eval { $cmd } ) {
+print \$fh \"";
+			} elsif ( $type =~ /^elsif$/o ) {
+				print "\";
+} elsif ( eval { $cmd } ) {
+print \$fh \"";
+			} elsif ( $type =~ /^else$/o ) {
+				print "\";
+} else {
+print \$fh \"";
+			} else {
+				print "\";
+}
+print \$fh \"";
+			}
+			next;
+		}
+		$line =~ s/\\/\\\\/g;
+		$line =~ s/\"/\\\"/g;
+		$line =~ s{\$}{\\\$}g;
+		$line =~ s/\b$$_{ name }\b/\$$$_{ name }/g for ( @vars );
+		print $line;
+	}
+
+	print <<'EOT';
+";
+	close $fh;
+
+	my $text;
+	if ( $? != 0 ) {
+		if ( $? >> 8 == -1 ) {
+			$text = "Internal error.";
+		} elsif ( $? >> 8 == 1 ) {
+			$text = "Someone else is running fsc2.";
+		} elsif ( $? >> 8 == 2 ) {
+			$text = "fsc2 is already testing or\nrunning an experiment.";
+		} elsif ( $? >> 8 == 3 ) {
+			$text = "Internal error of fsc2.";
+		} elsif ( $? >> 8 == 4 ) {
+			$text = "Could not start fsc2.";
+		} else {
+			$text = "Something strange\nis going on here.";
+		}
+
+		&show_message( $text ) if $? >> 8 != 0;
+	}
+}
+
+
+################################################################
+
+sub show_message {
+	my $text = shift;
+
+	$fsc2_main_window->messageBox( -icon => 'error',
+					 			   -type => 'Ok',
+					 			   -title => 'Error',
+					 			   -message => $text );
+}
+
+
+################################################################
+
+sub store_defs {
+
+	my $fh;
+	my $name = $0;
+
+	$name =~ s|^.*?([^/]+)$|$1|;
+	mkdir "$ENV{ HOME }/.fsc2", 0777 unless -e "$ENV{ HOME }/.fsc2";
+	open( $fh, ">$ENV{ HOME }/.fsc2/$name" ) or return;
+	print $fh "# Do not edit - created automatically!\n";
+EOT
+
+	for ( @vars ) {
+		if ( $$_{ type } =~ /^int$/o ) {
+			print "
+	if ( \$$$_{ name } =~ /^[+-]?\\d+\$/o and
+		 ( defined \$$$_{ name }\{ max \} ? \$$$_{ name }\{ max \} >= \$$$_{ name } : 1 ) and
+		 ( defined \$$$_{ name }\{ min \} ? \$$$_{ name }\{ min \} <= \$$$_{ name } : 1 ) ) {
+		print \$fh \"\$$$_{ name }\\n\";
+	} else {
+		print \$fh \"$$_{ def_value }\\n\";
+	}
+";
+		} elsif ( $$_{ type } =~ /^float$/o ) {
+			print "
+	if ( \$$$_{ name } =~ /^[+-]?((\\d+(\\.(\\d+)?)?)|(\\.\\d+))([eE][+-]?\\d+)?\$/o and
+		 ( defined \$$$_{ name }\{ max \} ? \$$$_{ name }\{ max \} >= \$$$_{ name } : 1 ) and
+		 ( defined \$$$_{ name }\{ min \} ? \$$$_{ name }\{ min \} <= \$$$_{ name } : 1 ) ) {
+		print \$fh \"\$$$_{ name }\\n\";
+	} else {
+		print \$fh \"$$_{ def_value }\\n\";
+	}
+";
+		} else {
+			print "
+	print \$fh \"\$$$_{ name }\\n\";
+";
+		}
+	}
+	print "
+	print \$fh \"\$fsc2_how_to_run\\n\";
+
+";
+
+	print <<'EOT';
+	close $fh;
+};
+
+
+################################################################
+
+sub load_defs {
+	my $fh;
+	my $name = $0;
+	my $ne;
+	my $found;
+
+	$name =~ s|^.*?([^/]+)$|$1|;
+	if ( $ARGV[ 0 ] ) {
+		open( $fh, "<$ARGV[ 0 ]" ) or return;
+	} else {
+		open( $fh, "<$ENV{ HOME }/.fsc2/$name" ) or return;
+	}
+
+	goto done_reading unless defined( $ne = <$fh> ) and $ne =~ /^#/;
+EOT
+
+	for ( @vars ) {
+		if ( $$_{ type } =~ /^int$/o ) {
+			print "
+	goto done_reading unless defined( \$ne = <\$fh> )
+		and \$ne =~ /^[+-]?\\d+\$/;
+	chomp \$ne;
+	goto done_reading if ( defined \$$$_{ name }\{ max \} and \$ne > \$$$_{ name }\{ max \} ) or
+						 ( defined \$$$_{ name }\{ min \} and \$ne < \$$$_{ name }\{ min \} );
+	\$$$_{ name } = \$ne;
+";
+		} elsif ( $$_{ type } =~ /^float$/o ) {
+			print "
+	goto done_reading unless defined( \$ne = <\$fh> )
+		and \$ne =~ /^[+-]?((\\d+(\\.(\\d+)?)?)|(\\.\\d+))([eE][+-]?\\d+)?\$/o;
+	chomp \$ne;
+	goto done_reading if ( defined \$$$_{ name }\{ max \} and \$ne > \$$$_{ name }\{ max \} ) or
+						 ( defined \$$$_{ name }\{ min \} and \$ne < \$$$_{ name }\{ min \} );
+	\$$$_{ name } = \$ne;
+";
+		} else {
+			print"
+	goto done_reading unless defined( \$ne = <\$fh> );
+	chomp \$ne;
+	\$found = 0;
+	for ( \@$$_{ name } ) {
+		if ( \$ne eq \$_) {
+			\$found = 1;
+			last;
+		}
+	}
+	goto done_reading unless \$found;
+	\$$$_{ name } = \$ne;
+";
+		}
+	}
+
+	print <<'EOT';
+
+	goto done_reading unless defined( $ne = <$fh> );
+	chomp $ne;
+	$found = 0;
+	for ( @fsc2_how_to_run ) {
+		if ( $ne eq $_) {
+			$found = 1;
+			last;
+		}
+	}
+	goto done_reading unless $found;
+	$fsc2_how_to_run = $ne;
+
+  done_reading:
+	close $fh;
+};
+EOT
+}
