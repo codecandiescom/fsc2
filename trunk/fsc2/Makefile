@@ -57,7 +57,7 @@ GROUP             := uucp
 # always to write out the full path. If no such repository exists its save
 # to leave this variable undefined.
 
-DEF_INCL_DIR      := /scratch/EDL/includes
+# DEF_INCL_DIR      := /scratch/EDL/includes
 
 
 # The next variable defines the GPIB library to use, it must be set to either
