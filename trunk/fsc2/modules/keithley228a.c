@@ -660,7 +660,6 @@ static bool keithley228a_set_state( bool new_state )
 	/* Set the new state */
 
 	keithley228a_command( new_state == STANDBY ? "F0X\r\n" : "F1X\r\n" );
-		keithley228a_gpib_failure( );
 
 	/* When switching to STANDBY the power supply needs about half a second
 	   of timeout */
