@@ -46,7 +46,7 @@ pdf: fsc2.pdf
 
 fsc2.pdf: $(docs)
 	if [ "`eval texi2dvi --help 2>/dev/null`" -a     \
-		 "`eval pdftex --help 2>/dev/null` " ]; then \
+		 "`eval pdftex --help 2>/dev/null`" ]; then \
 		texi2dvi --pdf -c fsc2.texi; \
 	fi
 
