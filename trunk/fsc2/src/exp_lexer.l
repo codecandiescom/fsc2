@@ -175,6 +175,7 @@ FUNC        {IDENT}"#"[0-9]+
 "NEXT"      return CONT_TOK;
 "IF"        return IF_TOK;
 "ELSE"      return ELSE_TOK;
+"UNLESS"    return UNLESS_TOK;
 "REPEAT"    return REPEAT_TOK;
 "FOR"       return FOR_TOK;
 "FOREVER"   return FOREVER_TOK;
@@ -360,7 +361,7 @@ int experiment_parser( FILE *in )
 {
 	if ( compilation.sections[ EXPERIMENT_SECTION ] )
 	{
-		eprint( FATAL, SET, "Multiple instances of EXPERIMENTS section "
+		eprint( FATAL, SET, "Multiple instances of EXPERIMENT section "
 		        "label.\n" );
 		THROW( EXCEPTION );
 	}
