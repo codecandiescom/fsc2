@@ -242,6 +242,14 @@ The two buttons below, labeled @code{Undo} and @code{Print} allow you to
 undo the last rescaling operation or to send a snapshot of the current
 results to a printer (or, alternatively, write it to a file).
 
+Please note: When printing using a different command than the built-in
+command (@code{lpr -h}) please be aware that the print command will
+receive its input (in PostScript) on its standard input channel. Some
+programs require that you specify a single dash (@code{-}) in place of a
+file name in this case. For example, if you want to view the snapshot
+with ghostscript instead of directly sending it to a printer you have
+to enter @code{ghostview -} as the print command.
+
 The @code{Stop} button lets you abort the currently running experiment -
 when the experiment is finished its label changes to
 @code{Close}. Finally, the button labeled @code{FS} is the "Full scale"
