@@ -1,8 +1,4 @@
-1. The Internet Explorer seems to have problems getting served corectly 
-   by the web server, I heard that sometimes the graphics don't get
-   delivered (thanks to Martin Fuchs for pointing out the problem).
-
-2. When increasing the magnification of the display of the measured data
+1. When increasing the magnification of the display of the measured data
    further and further there is a point after which rubish will get
    displayed (but the program does not crash). Since it will probably
    take a lot of work to get this resolved and, on the other hand, it
