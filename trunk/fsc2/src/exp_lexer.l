@@ -148,6 +148,41 @@ FUNC        {IDENT}"#"[0-9]+
 				return 0;
 			}
 
+"=="        return E_EQ;      /* equal */
+"!="        return E_NE;      /* unequal */
+"<"         return E_LT;      /* less than */
+"<="        return E_LE;      /* less than or equal */
+">"         return E_GT;      /* greater than */
+">="        return E_GE;      /* greater than or equal */
+"="         return '=';       /* assignment operator */
+"["         return '[';       /* start of array indices */
+"]"         return ']';       /* end of array indices */
+","         return ',';       /* list separator */
+"("         return '(';       /* start of function argument list */
+")"         return ')';       /* end of function argument list */
+"+"         return '+';       /* addition operator */
+"-"         return '-';       /* subtraction operator or unary minus */
+"*"         return '*';       /* multiplication operator */
+"/"         return '/';       /* division operator */
+"%"         return '%';       /* modulo operator */
+"^"         return '^';       /* exponentiation operator */
+":"         return ':';       /* condition separator in for loops */
+"!"         return E_NOT;     /* logical negation operator */
+"NOT"       return E_NOT;     /* logical negation operator */
+"&"         return E_AND;     /* logical and operator */
+"AND"       return E_AND;     /* logical and operator */
+"|"         return E_OR;      /* logical or operator */
+"OR"        return E_OR;      /* logical or operator */
+"~"         return E_XOR;     /* logical exclusive or (xor) operator */
+"XOR"       return E_XOR;     /* logical exclusive or (xor) operator */
+"+="        return E_PLSA;
+"-="        return E_MINA;
+"*="        return E_MULA;
+"/="        return E_DIVA;
+"%="        return E_MODA;
+"^="        return E_EXPA;
+"?"         return '?';
+
 			/* Handling of VARIABLES: labels */
 {VAR}		{
 				Exp_Next_Section = VARIABLES_SECTION;
@@ -312,41 +347,6 @@ FUNC        {IDENT}"#"[0-9]+
 
 				return E_VAR_TOKEN;
 			}
-
-"=="        return E_EQ;      /* equal */
-"!="        return E_NE;      /* unequal */
-"<"         return E_LT;      /* less than */
-"<="        return E_LE;      /* less than or equal */
-">"         return E_GT;      /* greater than */
-">="        return E_GE;      /* greater than or equal */
-"="         return '=';       /* assignment operator */
-"["         return '[';       /* start of array indices */
-"]"         return ']';       /* end of array indices */
-","         return ',';       /* list separator */
-"("         return '(';       /* start of function argument list */
-")"         return ')';       /* end of function argument list */
-"+"         return '+';       /* addition operator */
-"-"         return '-';       /* subtraction operator or unary minus */
-"*"         return '*';       /* multiplication operator */
-"/"         return '/';       /* division operator */
-"%"         return '%';       /* modulo operator */
-"^"         return '^';       /* exponentiation operator */
-":"         return ':';       /* condition separator in for loops */
-"!"         return E_NOT;     /* logical negation operator */
-"NOT"       return E_NOT;     /* logical negation operator */
-"&"         return E_AND;     /* logical and operator */
-"AND"       return E_AND;     /* logical and operator */
-"|"         return E_OR;      /* logical or operator */
-"OR"        return E_OR;      /* logical or operator */
-"~"         return E_XOR;     /* logical exclusive or (xor) operator */
-"XOR"       return E_XOR;     /* logical exclusive or (xor) operator */
-"+="        return E_PLSA;
-"-="        return E_MINA;
-"*="        return E_MULA;
-"/="        return E_DIVA;
-"%="        return E_MODA;
-"^="        return E_EXPA;
-"?"         return '?';
 
 			/* Handling of end of statement character */
 ";"			return ';';

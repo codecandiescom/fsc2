@@ -149,6 +149,37 @@ WS          [\n \t]+
 				return SECTION_LABEL;
 			}
 
+"=="        return EQ;        /* equal */
+"!="        return NE;        /* unequal */
+"<"         return LT;        /* less than */
+"<="        return LE;        /* less than or equal */
+">"         return GT;        /* greater than */
+">="        return GE;        /* greater than or equal */
+"="         return '=';       /* assignment operator */
+"["         return '[';       /* start of array indices */
+"]"         return ']';       /* end of array indices */
+","         return ',';       /* list separator */
+"("         return '(';       /* start of function argument list */
+")"         return ')';       /* end of function argument list */
+"{"         return '{';       /* start of initialisation data list */
+"}"         return '}';       /* end of initialisation data list */
+"+"         return '+';       /* addition operator */
+"-"         return '-';       /* subtraction operator or unary minus */
+"*"         return '*';       /* multiplication operator */
+"/"         return '/';       /* division operator */
+"%"         return '%';       /* modulo operator */
+"^"         return '^';       /* exponentiation operator */
+"!"         return NOT;       /* logical negation operator */
+"NOT"       return NOT;       /* logical negation operator */
+"&"         return AND;       /* logical and operator */
+"AND"       return AND;       /* logical and operator */
+"|"         return OR;        /* logical or operator */
+"OR"        return OR;        /* logical or operator */
+"~"         return XOR;       /* logical exclusive or (xor) operator */
+"XOR"       return XOR;       /* logical exclusive or (xor) operator */
+"?"         return '?';
+":"         return ':';
+
 			/* Handling of VARIABLES: label */
 {VAR}		{
 				Vars_Next_Section = VARIABLES_SECTION;
@@ -290,39 +321,6 @@ WS          [\n \t]+
 					varslval.vptr = vars_new( varstext );
 				return VAR_TOKEN;
 			}
-
-			/* Stuff used with functions, arrays and math */
-
-"=="        return EQ;        /* equal */
-"!="        return NE;        /* unequal */
-"<"         return LT;        /* less than */
-"<="        return LE;        /* less than or equal */
-">"         return GT;        /* greater than */
-">="        return GE;        /* greater than or equal */
-"="         return '=';       /* assignment operator */
-"["         return '[';       /* start of array indices */
-"]"         return ']';       /* end of array indices */
-","         return ',';       /* list separator */
-"("         return '(';       /* start of function argument list */
-")"         return ')';       /* end of function argument list */
-"{"         return '{';       /* start of initialisation data list */
-"}"         return '}';       /* end of initialisation data list */
-"+"         return '+';       /* addition operator */
-"-"         return '-';       /* subtraction operator or unary minus */
-"*"         return '*';       /* multiplication operator */
-"/"         return '/';       /* division operator */
-"%"         return '%';       /* modulo operator */
-"^"         return '^';       /* exponentiation operator */
-"!"         return NOT;       /* logical negation operator */
-"NOT"       return NOT;       /* logical negation operator */
-"&"         return AND;       /* logical and operator */
-"AND"       return AND;       /* logical and operator */
-"|"         return OR;        /* logical or operator */
-"OR"        return OR;        /* logical or operator */
-"~"         return XOR;       /* logical exclusive or (xor) operator */
-"XOR"       return XOR;       /* logical exclusive or (xor) operator */
-"?"         return '?';
-":"         return ':';
 
 			/* Handling of end of statement character */
 ";"			return ';';
