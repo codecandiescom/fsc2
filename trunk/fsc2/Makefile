@@ -20,8 +20,9 @@ GPIB_LOG       = /tmp/gpib.log
 # if you don't have a really good reason...
 ##############################################################################
 
-MAIL_ADDRESS   = Jens.Toerring@physik.fu-berlin.de
-MAIL_PROGRAM   = /usr/bin/mail
+#MAIL_ADDRESS   = Jens.Toerring@physik.fu-berlin.de
+MAIL_ADDRESS   = jens
+MAIL_PROGRAM   = $(shell which mail )
 
 SHELL          = /bin/sh
 CC             = gcc
