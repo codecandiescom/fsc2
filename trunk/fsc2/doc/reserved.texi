@@ -211,6 +211,7 @@
 @item @code{size}             @tab Built-in function (@pxref{size})
 @item @code{sizes}            @tab Built-in function (@pxref{sizes})
 @item @code{SL}               @tab
+@item @code{slice}            @tab Built-in function (@pxref{slice})
 @item @code{SLOPE}            @tab
 @item @code{sqrt}             @tab Built-in function (@pxref{sqrt})
 @item @code{START}            @tab
