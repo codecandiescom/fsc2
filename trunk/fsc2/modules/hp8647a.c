@@ -28,6 +28,7 @@ int hp8647a_end_of_exp_hook( void );
 void hp8647a_exit_hook( void );
 
 
+Var *synthesizer_state( Var *v );
 Var *synthesizer_frequency( Var *v );
 Var *synthesizer_step_frequency( Var *v );
 Var *synthesizer_attenuation( Var *v );
@@ -57,6 +58,8 @@ typedef struct
 	double attenuation;
 	bool attenuation_is_set;
 
+	bool state;
+
 	char *table_file;      /* name of attenuation table file */
 	bool use_table;
 	ATT_TABLE_ENTRY **att_table;
@@ -70,6 +73,8 @@ static HP8647A hp8647a,
 
 static bool hp8647a_init( const char *name );
 static void hp8647a_finished( void );
+static bool hp8647a_set_output_state( bool state );
+static bool hp8647a_get_output_state( void );
 static double hp8647a_set_frequency( double freq );
 static double hp8647a_get_frequency( void );
 static double hp8647a_set_attenuation( double att );
@@ -95,6 +100,8 @@ int hp8647a_init_hook( void )
 	need_GPIB = SET;
 
 	hp8647a.device = -1;
+
+	hp8647a.state = UNSET;
 
 	hp8647a.freq_is_set = UNSET;
 	hp8647a.step_freq_is_set = UNSET;
@@ -174,6 +181,49 @@ void hp8647a_exit_hook( void )
 		T_free( hp8647a.att_table );
 }
 
+
+/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*/
+
+Var *synthesizer_state( Var *v )
+{
+	bool state;
+
+
+	if ( v == NULL )              /* i.e. return the current state */
+	{
+		if ( TEST_RUN )
+			return vars_push( INT_VAR, ( long ) hp8647a.state );
+		else if ( I_am == PARENT )
+		{
+			eprint( FATAL, "%s:%ld: %s: Function `synthesizer_state' with no "
+					"argument can only be used in the EXPERIMENT section.",
+					Fname, Lc, DEVICE_NAME );
+			THROW( EXCEPTION );
+		}
+		else
+			return vars_push( INT_VAR,
+							  ( long ) ( hp8647a.state =
+										 hp8647a_get_output_state( ) ) );
+	}
+
+	vars_check( v, INT_VAR | FLOAT_VAR );
+
+	if ( v->type != INT_VAR )
+	{
+		eprint( WARN, "%s:%ld: %s: Float variable used for synthesizer state.",
+				Fname, Lc, DEVICE_NAME );
+		state = ( v->val.dval != 0.0 );
+	}
+	else
+		state = ( v->val.lval != 0 );
+
+	hp8647a.state = state;
+	if ( TEST_RUN || I_am == PARENT )
+		return vars_push( INT_VAR, ( long )state );
+
+	return vars_push( INT_VAR, ( long ) hp8647a_set_output_state( state ) );
+}
 
 /*---------------------------------------------------------------------*/
 /* Function sets or returns (if called with no argument) the frequency */
@@ -584,6 +634,8 @@ static bool hp8647a_init( const char *name )
 	else
 		hp8647a.attenuation = hp8647a_get_attenuation( );
 
+	hp8647a_set_output_state( hp8647a.state );
+
 	return OK;
 }
 
@@ -599,6 +651,33 @@ static void hp8647a_finished( void )
 		T_free( hp8647a.att_table );
 		hp8647a.att_table = NULL;
 	}
+}
+
+
+static bool hp8647a_set_output_state( bool state )
+{
+	char cmd[ 100 ];
+
+
+	sprintf( cmd, "OUTP:STAT %s", state ? "ON" : "OFF" );
+	if ( gpib_write( hp8647a.device, cmd, strlen( cmd ) ) == FAILURE )
+		hp8647_comm_failure( );
+
+	return state;
+}
+
+
+static bool hp8647a_get_output_state( void )
+{
+	char buffer[ 10 ];
+	long length = 10;
+
+
+	if ( gpib_write( hp8647a.device, "OUTP:STAT?", 10 ) == FAILURE ||
+		 gpib_read( hp8647a.device, buffer, &length ) == FAILURE )
+		hp8647_comm_failure( );
+
+	return buffer[ 0 ] == '1';
 }
 
 
