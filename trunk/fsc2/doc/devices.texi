@@ -3058,16 +3058,16 @@ output the value for @code{CH2}.
 
 @end table
 
-Please note: trying to output a negative value will make program stop
-immediately as will trying to output too large a value during the test
-run. During the experiment a too large value will be truncated to the
-allowed range by stripping off the higher bits and an warning message is
-printed out.
+Please note: trying to output a negative value will make the program
+abort immediately as will trying to output too large a value during the
+test run. During the experiment a too large value will be truncated to
+the allowed range by stripping off the higher order bits and a warning
+message is printed out.
 
-Please note: if the DIO had previously reserved by a call of the
-function @code{dio_reserve_dio()} the pass-phrase specified in that call
-has to be passed to the function as the very first argument if you want
-to be able to read from or write to the DIO.
+Note also: if the DIO had previously reserved by a call of the function
+@code{dio_reserve_dio()} the pass-phrase specified in that call has to
+be passed to the function as the very first argument if you want to be
+able to read from or write to the DIO.
 
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
