@@ -76,16 +76,15 @@ bool hp8647a_init( const char *name )
 				  - hp8647a.att_at_ref_freq;
 			if ( att < MAX_ATTEN )
 			{
-				eprint( SEVERE, UNSET, "%s: Attenuation range is insufficient,"
-						" using %f db instead of %f db.\n",
-						DEVICE_NAME, MAX_ATTEN, att );
+				print( SEVERE, "Attenuation range is insufficient, using "
+					   "%f db instead of %f db.\n", MAX_ATTEN, att );
 				att = MAX_ATTEN;
 			}
 			if ( att > hp8647a.min_attenuation )
 			{
-				eprint( SEVERE, UNSET, "%s: Attenuation range is insufficient,"
-						" using %f db instead of %f db.\n",
-						DEVICE_NAME, hp8647a.min_attenuation, att );
+				eprint( SEVERE, "Attenuation range is insufficient, using "
+						"%f db instead of %f db.\n",
+						hp8647a.min_attenuation, att );
 				att = hp8647a.min_attenuation;
 			}
 		}
@@ -336,15 +335,9 @@ int hp8647a_set_mod_source( int type, int source )
 
 	if ( type != MOD_TYPE_FM && source == MOD_SOURCE_DC )
 	{
-		if ( HP8647A_INIT )
-			eprint( SEVERE, UNSET, "%s: Modulation source \"%s\" can't be "
-					"used for %s modulation, using \"AC\" instead.\n",
-					DEVICE_NAME, mod_sources[ source ], mod_types[ type ] );
-		else
-			eprint( SEVERE, SET, "%s: Modulation source \"%s\" can't be "
-					"used for %s modulation, using \"AC\" instead.\n",
-					DEVICE_NAME,
-					mod_sources[ source ], mod_types[ type ] );
+		print( SEVERE, "Modulation source \"%s\" can't be used for %s "
+			   "modulation, using \"AC\" instead.\n",
+			   mod_sources[ source ], mod_types[ type ] );
 		source = MOD_SOURCE_AC;
 	}
 
@@ -455,11 +448,10 @@ double hp8647a_set_mod_ampl( int type, double ampl )
 
 	if ( ampl < 0.0 )
 	{
-		eprint( FATAL, ! HP8647A_INIT, "%s: Invalid negative %s modulation "
-				"amplitude of %g %s.\n", DEVICE_NAME,
-				type != MOD_TYPE_PHASE ? types[ type ] : "phase",
-				type == MOD_TYPE_FM ? "kHz" :
-				( type == MOD_TYPE_AM ? "%%" : "rad" ) );
+		print( FATAL, "Invalid negative %s modulation amplitude of %g %s.\n",
+			   type != MOD_TYPE_PHASE ? types[ type ] : "phase",
+			   type == MOD_TYPE_FM ? "kHz" :
+			   ( type == MOD_TYPE_AM ? "%%" : "rad" ) );
 		THROW( EXCEPTION );
 	}
 
@@ -468,10 +460,9 @@ double hp8647a_set_mod_ampl( int type, double ampl )
 		case MOD_TYPE_FM :
 			if ( ampl > MAX_FM_AMPL )
 			{
-				eprint( FATAL, ! HP8647A_INIT, "%s: FM modulation amplitude "
-						"of %.1f kHz is too large, valid range is 0 - %.1f "
-						"kHz.\n", DEVICE_NAME, ampl * 1.0e-3,
-						MAX_FM_AMPL * 1.0e-3 );
+				print( FATAL, "FM modulation amplitude of %.1f kHz is too "
+					   "large, valid range is 0 - %.1f kHz.\n",
+					   ampl * 1.0e-3, MAX_FM_AMPL * 1.0e-3 );
 				THROW( EXCEPTION );
 			}
 			sprintf( cmd, "FM:DEV %ld HZ\n", 10 * lrnd( 0.1 * ampl ) );
@@ -480,9 +471,9 @@ double hp8647a_set_mod_ampl( int type, double ampl )
 		case MOD_TYPE_AM :
 			if ( ampl > MAX_AM_AMPL )
 			{
-				eprint( FATAL, ! HP8647A_INIT, "%s: AM modulation amplitude "
-						"of %.1f %% is too large, valid range is 0 - %.1f "
-						"%%.\n", DEVICE_NAME, ampl, ( double ) MAX_AM_AMPL );
+				print( FATAL, "AM modulation amplitude of %.1f %% is too "
+					   "large, valid range is 0 - %.1f %%.\n",
+					   ampl, ( double ) MAX_AM_AMPL );
 				THROW( EXCEPTION );
 			}
 			sprintf( cmd, "AM:DEPT %.1f PCT\n", ampl );
@@ -491,10 +482,9 @@ double hp8647a_set_mod_ampl( int type, double ampl )
 		case MOD_TYPE_PHASE :
 			if ( ampl > MAX_PHASE_AMPL )
 			{
-				eprint( FATAL, ! HP8647A_INIT, "%s: Phase modulation "
-						"amplitude of %.1f rad is too large, valid range is "
-						"0 - %.1f rad.\n", DEVICE_NAME, ampl,
-						( double ) MAX_PHASE_AMPL );
+				print( FATAL, "Phase modulation amplitude of %.1f rad is too "
+					   "large, valid range is 0 - %.1f rad.\n",
+					   ampl, ( double ) MAX_PHASE_AMPL );
 				THROW( EXCEPTION );
 			}
 			sprintf( cmd, "PM:DEV %.*f RAD\n", ampl < 9.95 ? 2 : 1, ampl );
@@ -550,8 +540,7 @@ double hp8647a_get_mod_ampl( int type )
 
 static void hp8647a_comm_failure( void )
 {
-	eprint( FATAL, UNSET, "%s: Communication with device failed.\n",
-			DEVICE_NAME );
+	print( FATAL, "Communication with device failed.\n" );
 	THROW( EXCEPTION );
 }
 
