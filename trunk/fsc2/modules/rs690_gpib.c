@@ -404,8 +404,8 @@ static void rs690_calc_tables( void )
 		rs690.last_new_fs->len <= MAX_TICKS_PER_ENTRY )
 		return;
 
-	/* Otherwise we reduce the last FS's length to everything that that isn't
-	   a multiple of MAX_TICKS_PER_ENTRY (only in case it then would be 0 we
+	/* Otherwise we reduce the last FS's length to something that isn't a
+	   multiple of MAX_TICKS_PER_ENTRY (only in case it then would be 0 we
 	   set it to MAX_TICKS_PER_ENTRY). */
 
 	count = rs690.last_new_fs->len;
