@@ -44,9 +44,11 @@ Var *gaussmeter_name( Var *v );
 Var *find_field( Var *v );
 Var *gaussmeter_resolution( Var *v );
 Var *gaussmeter_wait( Var *v );
+Var *pulser_command( Var *v );
 
 
 static double bh15_get_field( void );
+static bool bh15_command( const char *cmd );
 
 
 typedef struct
@@ -232,6 +234,37 @@ Var *gaussmeter_resolution( Var *v )
 }
 
 
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+Var *pulser_command( Var *v )
+{
+	static char *cmd;
+
+
+	cmd = NULL;
+	vars_check( v, STR_VAR );
+	
+	if ( FSC2_MODE == EXPERIMENT )
+	{
+		TRY
+		{
+			cmd = translate_escape_sequences( T_strdup( v->val.sptr ) );
+			bh15_command( cmd );
+			T_free( cmd );
+			TRY_SUCCESS;
+		}
+		OTHERWISE
+		{
+			T_free( cmd );
+			RETHROW( );
+		}
+	}
+
+	return vars_push( INT_VAR, 1 );
+}
+
+
 /*--------------------------------------------------------*/
 /*--------------------------------------------------------*/
 
@@ -388,6 +421,21 @@ static double bh15_get_field( void )
 	}
 
 	return bh15.field;
+}
+
+
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+
+static bool bh15_command( const char *cmd )
+{
+	if ( gpib_write( bh15.device, cmd, strlen( cmd ) ) == FAILURE )
+	{
+		print( FATAL, "Can't access the Bruker BH15 field controller.\n" );
+		THROW( EXCEPTION );
+	}
+
+	return OK;
 }
 
 

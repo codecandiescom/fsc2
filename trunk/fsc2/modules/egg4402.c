@@ -44,14 +44,14 @@ int egg4402_end_of_exp_hook( void );
 Var *boxcar_name( Var *v );
 Var *boxcar_curve_length( Var *v );
 Var *boxcar_get_curve( Var *v );
-
+Var *boxcar_command( Var *v);
 
 /* Locally used functions */
 
 static bool egg4402_init( const char *name );
 static void egg4402_failure( void );
 static void egg4402_query( char *buffer, long *length );
-
+static bool egg4402_command( const char *cmd );
 
 
 typedef struct
@@ -444,6 +444,37 @@ Var *boxcar_get_curve( Var *v )
 }
 
 
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+Var *boxcar_command( Var *v )
+{
+	static char *cmd;
+
+
+	cmd = NULL;
+	vars_check( v, STR_VAR );
+	
+	if ( FSC2_MODE == EXPERIMENT )
+	{
+		TRY
+		{
+			cmd = translate_escape_sequences( T_strdup( v->val.sptr ) );
+			egg4402_command( cmd );
+			T_free( cmd );
+			TRY_SUCCESS;
+		}
+		OTHERWISE
+		{
+			T_free( cmd );
+			RETHROW( );
+		}
+	}
+
+	return vars_push( INT_VAR, 1 );
+}
+
+
 /*--------------------------------------------------*/
 /*--------------------------------------------------*/
 
@@ -491,6 +522,18 @@ static void egg4402_query( char *buffer, long *length )
 	if ( gpib_read( egg4402.device, ( char * ) &stb, &dummy ) == FAILURE ||
 		 gpib_read( egg4402.device, buffer, length ) == FAILURE )
 		egg4402_failure( );
+}
+
+
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+
+static bool egg4402_command( const char *cmd )
+{
+	if ( gpib_write( egg4402.device, cmd, strlen( cmd ) ) == FAILURE )
+		egg4402_failure( );
+
+	return OK;
 }
 
 
