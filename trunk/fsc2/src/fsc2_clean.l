@@ -520,8 +520,9 @@ int main( int argc, char *argv[ ] )
 	{
 		output( "\x03\n%s: '#!' must appear on the very first line instead of "
 				"line %ld.\n", Fname, Lc );
-		exit( EXIT_FAILURE );
 	}
+	OTHERWISE
+		exit( EXIT_FAILURE );
 
 	/* Finished succesfully... */
 
