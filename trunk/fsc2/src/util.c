@@ -111,17 +111,66 @@ long get_file_length( char *name, int *len )
 
 void eprint( int severity, const char *fmt, ... )
 {
+	static char buffer[ BROWSER_MAXLINE + 1 ];
+	static char *cp = buffer;
+	static int space_left = BROWSER_MAXLINE;
 	va_list ap;
 
 	compilation.error[ severity ] = SET;
 
-	if ( severity != NO_ERROR )
-		printf( "%c ", severity[ "FSW" ] );      /* Hehe... */
+	if ( ! just_testing )
+	{
+		if ( cp == buffer )
+		{
+			if ( severity == FATAL )
+			{
+				strcpy( cp, "@C1" );
+				cp += 3;
+				space_left -= 3;
+			}
 
-	va_start( ap, fmt );
-	vprintf( fmt, ap );
-	va_end( ap );
-	fflush( stdout );
+			if ( severity == SEVERE )
+			{
+				strcpy( cp, "@C3" );
+				cp += 3;
+				space_left -= 3;
+			}
+
+			if ( severity == WARN )
+			{
+				strcpy( cp, "@C2" );
+				cp += 3;
+				space_left -= 3;
+			}
+		}
+
+		va_start( ap, fmt );
+		vsnprintf( cp, space_left, fmt, ap );
+		va_end( ap );
+		space_left -= strlen( cp );
+		cp = buffer + strlen( cp );
+
+		if ( buffer[ strlen( buffer ) - 1 ] != '\n' )
+			return;
+
+		buffer[ strlen( buffer ) - 1 ] = '\0';
+		fl_freeze_form( main_form->error_browser->form );
+		fl_add_browser_line( main_form->error_browser, buffer );
+		fl_unfreeze_form( main_form->error_browser->form );
+
+		cp = buffer;
+		space_left = BROWSER_MAXLINE;
+	}
+	else
+	{
+		if ( severity != NO_ERROR )
+			fprintf( stderr, "%c ", severity[ "FSW" ] );      /* Hehe... */
+
+		va_start( ap, fmt );
+		vfprintf( stderr, fmt, ap );
+		va_end( ap );
+		fflush( stderr );
+	}
 }
 
 
@@ -130,11 +179,11 @@ void eprint( int severity, const char *fmt, ... )
 
 inline long rnd( double x ) { return ( long ) ( 2 * x ) - ( long ) x; }
 
-inline int    imax( int    a, int    b ) { return a > b ? a : b ;  }
-inline int    imin( int    a, int    b ) { return a < b ? a : b ;  }
-inline long   lmax( long   a, long   b ) { return a > b ? a : b ;  }
-inline long   lmin( long   a, long   b ) { return a < b ? a : b ;  }
-inline float  fmax( float  a, float  b ) { return a > b ? a : b;  }
-inline float  fmin( float  a, float  b ) { return a < b ? a : b;  }
-inline double dmax( double a, double b ) { return a > b ? a : b;  }
-inline double dmin( double a, double b ) { return a < b ? a : b;  }
+inline int    imax( int    a, int    b ) { return a > b ? a : b ; }
+inline int    imin( int    a, int    b ) { return a < b ? a : b ; }
+inline long   lmax( long   a, long   b ) { return a > b ? a : b ; }
+inline long   lmin( long   a, long   b ) { return a < b ? a : b ; }
+inline float  fmax( float  a, float  b ) { return a > b ? a : b; }
+inline float  fmin( float  a, float  b ) { return a < b ? a : b; }
+inline double dmax( double a, double b ) { return a > b ? a : b; }
+inline double dmin( double a, double b ) { return a < b ? a : b; }

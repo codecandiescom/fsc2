@@ -9,6 +9,15 @@
 #define _GNU_SOURCE
 
 
+/* AWK might be defined via compiler flags - otherwise define it here */
+
+#if defined AWK
+#define AWK_PROG AWK
+#else
+#define AWK_PROG "awk"
+#endif
+
+
 /* inclusion system header files */
 
 #include <stdio.h>
@@ -21,10 +30,16 @@
 #include <ctype.h>
 #include <errno.h>
 #include <limits.h>
+#include <signal.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <forms.h>
 
 
 /* inclusion of programs own header files */
 
+#include "fsc2_rsc.h"
 #include "global.h"               /* must be the very first to be included ! */
 #include "exceptions.h"
 #include "T.h"
@@ -42,13 +57,24 @@
 /* The diverse lexers */
 
 void clean_up( void );
-bool split( char *file );
+bool scan_main( char *file );
 int devices_parser( FILE *in );
 int assignments_parser( FILE *in );
 int variables_parser( FILE *in );
 int phases_parser( FILE *in );
 int preparations_parser( FILE *in );
 int primary_experiment_parser( FILE *in );
+
+
+
+
+
+#define TAB_LENGTH          4
+#define BROWSER_MAXLINE  1024
+#define EDITOR_FAILED    123
+
+
+
 
 
 /* Global variables */
@@ -81,8 +107,23 @@ Acquisition_Sequence ASeq[ 2 ];
 Pulse *Plist = NULL;
 Pulse *Cur_Pulse = NULL;
 
-int TEST_RUN = 0;            /* flag, set while EXPERIMENT section is tested */
-int need_GPIB = 0;           /* flag, set if GPIB bus is needed */
+bool TEST_RUN = 0;           /* flag, set while EXPERIMENT section is tested */
+bool need_GPIB = 0;          /* flag, set if GPIB bus is needed */
+
+volatile bool do_send = UNSET;  /* globals used with the signal handlers */
+volatile bool do_quit = UNSET;
+
+
+
+bool just_testing;
+FD_fsc2 *main_form;
+FD_run *run_form;
+FD_device *device_form;
+
+char *in_file;       /* used for name of input file */
+
+
+
 
 
 #else   /*  ! FSC2_MAIN */
@@ -112,6 +153,19 @@ extern Pulse *Cur_Pulse;
 
 extern int TEST_RUN;
 extern int need_GPIB;
+
+extern volatile bool do_send;      /* globals used with the signal handlers */
+extern volatile bool do_quit;
+
+
+
+extern bool just_testing;
+extern FD_fsc2 *main_form;
+extern FD_run *run_form;
+extern FD_device *device_form;
+
+extern char *in_file;       /* used for name of input file */
+
 
 #endif
 

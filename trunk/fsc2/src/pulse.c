@@ -43,15 +43,15 @@ int ps2n( char *txt )
 	num = strtol( txt, NULL, 10 );
 	if ( errno == ERANGE )
 	{
-		eprint( FATAL, "%s:%ld: Pulse number out of range (0-%d).\n",
+		eprint( FATAL, "%s:%ld: Pulse number out of range (legal: 0-%d).\n",
 				Fname, Lc, MAX_PULSE_NUM - 1 );
 		THROW( EXCEPTION );
 	}
 
 	if ( num > INT_MAX )
 	{
-		eprint( FATAL, "%s:%ld: Pulse number %ld out of range (0-%d).\n",
-				Fname, Lc, num, MAX_PULSE_NUM - 1 );
+		eprint( FATAL, "%s:%ld: Pulse number %ld out of range "
+				"(legal: 0-%d).\n", Fname, Lc, num, MAX_PULSE_NUM - 1 );
 		THROW( EXCEPTION );
 	}
 
@@ -105,7 +105,6 @@ Pulse *pulse_new( char *txt )
 }
 
 
-
 /*-----------------------------------------------------------------*/
 /* Trys to find a pulse according to its number in the pulse list, */
 /* also checks that the number is in the allowed range.            */
@@ -123,8 +122,8 @@ Pulse *pulse_find( int num )
 
 	if ( num < 0 || num >= MAX_PULSE_NUM )
 	{
-		eprint( FATAL, "%s:%ld: Pulse number (%d) out of range (0-%d).\n",
-				Fname, Lc, num, MAX_PULSE_NUM - 1 );
+		eprint( FATAL, "%s:%ld: Pulse number (%d) out of range "
+				"(legal: 0-%d).\n", Fname, Lc, num, MAX_PULSE_NUM - 1 );
 		THROW( EXCEPTION );
 	}
 

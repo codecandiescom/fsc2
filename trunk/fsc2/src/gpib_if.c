@@ -1,4 +1,8 @@
 /*
+  $Id$
+*/
+
+/*
     Problems:                    (9-10-98)
 
     1. Shouldn't there be some kind of locking mechanism in order to avoid

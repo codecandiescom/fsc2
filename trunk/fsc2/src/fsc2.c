@@ -11,8 +11,37 @@
 #endif
 
 
+
+
+/* Locally used global variables */
+
+bool is_loaded = UNSET;       /* set when parameter file is loaded */
+bool is_tested = UNSET;       /* set when parameter file is tested */
+int state = UNSET;            /* set when parameter passed the tests */
+
+
+float *x;
+float *y;
+
+
+/* Locally used functions */
+
+
+static void xforms_init( int *argc, char *argv[ ] );
+static void xforms_close( void );
+static bool display_file( char *name, FILE *fp );
+static void sigchld_handler( int sig_type, void *data );
+
+
+/**************************/
+/* Here the fun starts... */
+/**************************/
+
 int main( int argc, char *argv[ ] )
 {
+	FL_OBJECT *obj;
+
+
 #if defined MDEBUG
 	if ( mcheck( NULL ) != 0 )
 	{
@@ -21,22 +50,586 @@ int main( int argc, char *argv[ ] )
 	}
 #endif
 
-	if ( argc < 2 )
+	clean_up( );
+
+	/* With the option "-t" just test the file and output results to stderr
+	   - this can be used to test a file e.g. from emacs's "M-x compile"
+	   feature or from the shell without any graphics stuff involved */
+
+	if ( argc > 1 && ! strcmp( argv[ 1 ], "-t" ) )
 	{
-		printf( "Missing input file.\n" );
-		return EXIT_FAILURE;
+		if ( argv[ 2 ] == NULL )          /* no file name with "-t" option ? */
+		{
+			fprintf( stderr, "fsc2 -t: No input file\n" );
+			return( 1 );
+		}
+
+		just_testing = SET;  /* signal "just_testing"-mode to print_errors() */
+		return( scan_main( argv[ 2 ] ) ? EXIT_SUCCESS : EXIT_FAILURE );
 	}
+	else
+		just_testing = UNSET;
+
+	/* Initialize xforms stuff */
+
+	xforms_init( &argc, argv );
+	fl_add_signal_callback( SIGCHLD, sigchld_handler, NULL );
+
+	/* If there is a file as argument try to load it */
+
+	if ( argc > 1 )
+	{
+		TRY
+		{
+			in_file = get_string_copy( argv[ 1 ] );
+			TRY_SUCCESS;
+		}
+		OTHERWISE
+			return( EXIT_FAILURE );
+
+		load_file( main_form->browser, 1 );
+	}
+	else
+		in_file = NULL;
+
+	/* Loop until quit button is pressed and there is no experiment running */
+
+	do
+	{
+		obj = fl_do_forms( );
+	} while ( obj != main_form->quit || fl_form_is_visible( run_form->run ) );
+
+	/* Do everything necessary to end program */
 
 	clean_up( );
-
-	split( argv[ 1 ] );
-	clean_up( );
+	xforms_close( );
+	if ( in_file != NULL )
+		T_free( in_file );
 
 	/* Make sure the TRY/CATCH stuff worked out right */
 
 	assert( exception_env_stack_pos == 0 );
 
-	return EXIT_SUCCESS;
+	return( EXIT_SUCCESS );
+}
+
+
+/*-------------------------------------------------*/
+/* xforms_init() registers the program with XFORMS */
+/* and creates all the forms needed by the program.*/
+/*-------------------------------------------------*/
+
+void xforms_init( int *argc, char *argv[] )
+{
+	fl_initialize( argc, argv, "fsc2", 0, 0 );
+
+	/* Create and display the main form */
+
+	main_form = create_form_fsc2( );
+
+	fl_set_browser_fontsize( main_form->browser, FL_LARGE_SIZE );
+	fl_set_browser_fontstyle( main_form->browser, FL_FIXED_STYLE );
+
+	fl_set_browser_fontsize( main_form->error_browser, FL_LARGE_SIZE );
+	fl_set_browser_fontstyle( main_form->error_browser, FL_FIXED_STYLE );
+
+	fl_show_form( main_form->fsc2, FL_PLACE_MOUSE, FL_FULLBORDER, "fsc2" );
+
+	/* Create the form for running experiments */
+
+	run_form = create_form_run( );
+	fl_deactivate_object( run_form->save );
+	fl_set_object_lcol( run_form->save, FL_INACTIVE_COL );
+
+	/* Create the form for selecting devices and setting default names */
+
+	device_form = create_form_device( );
+/*
+	set_device_names( -1 );
+*/
+	/* Set some properties of goodies */
+
+	fl_set_fselector_fontsize( FL_MEDIUM_SIZE );
+	fl_set_goodies_font( FL_NORMAL_STYLE, FL_LARGE_SIZE );
+	fl_set_oneliner_font( FL_NORMAL_STYLE, FL_LARGE_SIZE );
+}
+
+
+/*-----------------------------------------*/
+/* xforms_close() closes and deletes all   */
+/* forms previously needed by the program. */
+/*-----------------------------------------*/
+
+void xforms_close( void )
+{
+	if ( fl_form_is_visible( run_form->run ) )
+		fl_hide_form( run_form->run );
+	fl_free_form( run_form->run );
+
+	if ( fl_form_is_visible( device_form->device ) )
+		fl_hide_form( device_form->device );
+	fl_free_form( device_form->device );
+
+	if ( fl_form_is_visible( main_form->fsc2 ) )
+		fl_hide_form( main_form->fsc2 );
+	fl_free_form( main_form->fsc2 );
+}
+
+
+/*-------------------------------------------------------------------*/
+/* load_file() is used for loading or reloading a file, depending on */
+/* the value of the flag 'reload'. It's also the callback function   */
+/* for the Load- and Reload-buttons.                                 */
+/* reload == 0: read new file, reload == 1: reload file              */
+/*-------------------------------------------------------------------*/
+
+void load_file( FL_OBJECT *a, long reload )
+{
+	const char *fn;
+	char *old_in_file;
+	FILE *fp;
+
+
+	/* If new file is to be loaded get its name, otherwise use previous name */
+
+	if ( ! reload )
+	{
+		fn = fl_show_fselector( "Select input file:", NULL, "*.*", NULL );
+		if ( fn == NULL )
+			return;
+	}
+	else
+		fn = in_file;
+
+	/* Quit if this is a reload but name of previous file is empty */
+
+	if ( reload && fn == '\0' )
+	{
+		fl_show_alert( "Error", "Sorry, no file loaded yet.", NULL, 1 );
+		return;
+	}
+
+	/* Test if the file is readable and can be opened */
+
+	if ( access( fn , R_OK ) == -1 )
+	{
+		fl_show_alert( "Error", "Sorry, no permission to read file:", fn, 1 );
+		return;
+	}
+
+	if ( ( fp = fopen( fn, "r" ) ) == NULL )
+	{
+		fl_show_alert( "Error", "Sorry, cannot open file:", fn, 1 );
+		return;
+	}
+
+	/* If this is not a reload save name of file otherwise clear browsers */
+
+	if ( ! reload )
+	{
+		old_in_file = in_file;
+
+		TRY
+		{
+			in_file = get_string_copy( fn );
+			TRY_SUCCESS;
+		}
+		OTHERWISE
+		{
+			fl_show_alert( "Error", "Running out of memory.", "", 1 );
+			in_file = old_in_file;
+			return;
+		}
+
+		if ( old_in_file != NULL )
+			T_free( old_in_file );
+	}
+	else
+	{
+		fl_clear_browser( main_form->browser );
+		fl_clear_browser( main_form->error_browser );
+	}
+
+	/* Read in and display the new file */
+
+	is_loaded = display_file( in_file, fp );
+	state = is_tested = UNSET;
+	fclose( fp );
+}
+
+
+/*---------------------------------------------------------------------*/
+/* edit_file() allows to edit the current file (but it's also possible */
+/* to edit a new file if there is no file loaded) and is the callback  */
+/* function for the Edit-button.                                       */
+/*---------------------------------------------------------------------*/
+
+void edit_file( FL_OBJECT *a, long b )
+{
+	char *ed, *ep;
+	char **argv;
+	int argc = 1, i;
+	int res;
+
+
+	/* Try to find content of environement variable "EDITOR" -
+	   if it does not exist use vi as standard editor */
+
+	ed = getenv( "EDITOR" );
+
+	if ( ed == NULL || *ed == '\0' )
+	{
+		TRY
+		{
+			argv = T_malloc( 5 * sizeof ( char * ) );
+			TRY_SUCCESS;
+		}
+		OTHERWISE
+		{
+			fl_show_alert( "Error", "Sorry, unable to start the editor.",
+						   NULL, 1 );
+			return;
+		}
+
+		argv[ 0 ] = ( char * ) "xterm";
+		argv[ 1 ] = ( char * ) "-e";
+		argv[ 2 ] = ( char * ) "vi";
+		argv[ 3 ] = in_file;
+		argv[ 4 ] = NULL;
+	}
+	else              /* otherwise use the one given by EDITOR */
+	{
+		ep = ed;
+		while ( *ep && *ep != ' ' )
+			++ep;
+
+        /* Check if there are command line options and if so, count them
+		   and set up the argv pointer array */
+
+		if ( ! *ep )   /* no command line arguments */
+		{
+			if ( ( argv = ( char ** ) malloc( 5 * sizeof ( char * ) ) )
+				 == NULL )
+			{
+				fl_show_alert( "Error", "Sorry, unable to start the editor.",
+							   NULL, 1 );
+				return;
+			}
+
+			argv[ 0 ] = ( char * ) "xterm";
+			argv[ 1 ] = ( char * ) "-e";
+			argv[ 2 ] = ed;
+			argv[ 3 ] = in_file;
+			argv[ 4 ] = NULL;
+		}
+		else
+		{
+			while ( 1 )          /* count command line options */
+			{
+				while ( *ep && *ep != ' ' )
+					++ep;
+				if ( ! *ep )
+					break;
+				*ep++ = '\0';
+				++argc;
+			}
+		
+			if ( ( argv = ( char ** ) malloc( ( argc + 5 ) *
+											  sizeof ( char * ) ) ) == NULL )
+			{
+				fl_show_alert( "Error", "Sorry, unable to start the editor.",
+							   NULL, 1 );
+				return;
+			}
+
+			argv[ 0 ] = ( char * ) "xterm";
+			argv[ 1 ] = ( char * ) "-e";
+			for ( ep = ed, i = 2; i < argc + 2; ++i )
+			{
+				argv[ i ] = ep;
+				while ( *ep++ )
+					;
+			}
+
+			argv[ i ] = in_file;
+			argv[ ++i ] = NULL;
+		}
+	}
+
+	/* Fork and execute editor in child process */
+
+	if ( ( res = fork( ) ) == 0 )
+	{
+		/* Special treatment for emacs and xemacs: if emacs is called without
+		   the '-nw' option it will create its own window - so we don't embed
+		   it into a xterm - the same holds for xemacs which always creates
+		   its own window. */
+
+		if ( ! strcmp( strip_path( argv[ 2 ] ), "xemacs" ) )
+			execvp( argv[ 2 ], argv + 2 );
+
+		if ( ! strcmp( strip_path( argv[ 2 ] ), "emacs" ) )
+		{
+			for ( i = 3; argv[ i ] && strcmp( argv[ i ], "-nw" ); ++i )
+				;
+			if ( argv[ i ] == NULL )                    /* no '-nw' flag */
+				execvp( argv[ 2 ], argv + 2 );
+			else
+				execvp( "xterm", argv );
+		}
+		else
+			execvp( "xterm", argv );                /* all other editors */
+
+		/* If this point is reached the invocation of the editor failed -
+		   tell the parent by setting a special return value */
+
+		_exit( EDITOR_FAILED );
+	}
+
+	if ( res == -1 )                                /* fork failed ? */
+		fl_show_alert( "Error", "Sorry, unable to start the editor.",
+					   NULL, 1 );
+
+	T_free( argv );
+}
+
+
+/*-----------------------------------------------------*/
+/* test_file() does a syntax and plausibility check of */
+/* the currently loaded file.                          */
+/*-----------------------------------------------------*/
+
+void test_file( FL_OBJECT *a, long b )
+{
+	if ( ! is_loaded )
+	{
+		fl_show_alert( "Error", "Sorry, but no file is loaded.", NULL, 1 );
+		return;
+	}
+		
+    if ( is_tested )
+	{
+		fl_show_alert( "Warning", "File has already been tested.", NULL, 1 );
+		return;
+	}
+
+	/* Before scanning the file reload it since file on disk might have
+	   been changed in between - quit if file can't be read again. */
+
+	clean_up( );
+	load_file( main_form->browser, 1 );
+	if ( ! is_loaded )
+		return;
+
+	state = scan_main( in_file );
+	is_tested = SET;                  /* show that file is tested */
+}
+
+
+/*---------------------------------------------------------------*/
+/* run_file() first does a check of the current file (if this is */
+/* not already done) and on success starts the experiment.       */
+/*---------------------------------------------------------------*/
+
+void run_file( FL_OBJECT *a, long b )
+{
+	long max_mem = 1, j;
+	int i;
+
+
+	if ( ! is_loaded )              /* check that there is a file loaded */
+	{
+		fl_show_alert( "Error", "Sorry, but no file is loaded.", NULL, 1 );
+		return;
+	}
+
+	if ( ! is_tested )              /* test file if not already done */
+		test_file( NULL, 1 );
+
+	if ( ! state )               /* quit if program failed the test */
+	{
+		fl_show_alert( "Error", "Sorry, but test of file failed.", NULL, 1 );
+		return;
+	}
+
+	/* Allocate memory for measurement - has only to be done if 
+	   there will be data to be saved */
+/*
+	if ( m.dim != -1 )
+	{
+		for ( i = 0; i < m.dim; ++i )
+			max_mem *= m.points[ i ];
+
+		m.max_points = max_mem;
+		m.act_point = 0;
+		m.act_point_drawn = 0;
+
+		if ( ( m.data = ( DataType * ) malloc( max_mem * sizeof( DataType ) ) )
+			== NULL )
+		{
+			fl_show_alert( "Error", "Sorry, not enough memory available",
+						   NULL, 1 );
+			return;
+		}
+*/
+		/*!!!!!!!!!!!!!!!!!!!*/
+/*
+		m.x = ( float * ) malloc( 2 * max_mem * sizeof( float ) );
+		m.y = m.x + max_mem;
+
+		for ( j = 0; j < max_mem; ++j )
+		{
+			m.x[ j ] = ( float ) j;
+			m.y[ j ] = 0.0 ;
+		}
+	}
+*/
+	/* Finally start the experiment */
+/*
+	run( );
+*/
+}
+
+
+/*--------------------------------------------------------------------*/
+/* display_file() is used to put the contents of a file into the main */
+/* browser, numbering the lines and expanding tab chars.              */
+/* ->                                                                 */
+/*   * name of the file to be displayed                               */
+/*   * FILE pointer for the file                                      */
+/*--------------------------------------------------------------------*/
+
+bool display_file( char *name, FILE *fp )
+{
+	int len, key;
+	long lc, cc, i;                         /* line and char counter */
+	char line[ BROWSER_MAXLINE ];           /* used to store the lines */
+	char *lp;
+
+
+	/* Determine number of lines (and maximum number of digits) in order to
+	   find out about proper formating of line numbers */
+
+	if ( ( lc = get_file_length( name, &len ) ) <= 0 )
+	{
+		switch ( ( int ) lc )
+		{
+			case 0 :
+				fl_show_alert( "Error", "File is empty.", NULL, 1 );
+				return( FAIL );
+
+			case -1 :
+				fl_show_alert( "FATAL Error", "Running out of memory.",
+							   NULL, 1 );
+				return( FAIL );
+
+			case -2 :
+				fl_show_alert( "Error", "Can't determine length of file:",
+							   name, 1 );
+				return( FAIL );
+		}
+	}
+
+	/* Freeze browser, read consecutive lines, append to line number
+	   (after expanding tab chars) and send lines to browser */
+
+	fl_freeze_form( main_form->browser->form );
+
+	for ( i = 1; i <= lc; ++i )
+	{
+		sprintf( line, "%*ld: ", len, i );
+		lp = line + len + 2;
+		cc = 0;
+		while ( ( key = fgetc( fp ) ) != '\n' &&
+			    key != EOF && ++cc < BROWSER_MAXLINE - len - 3 )
+		{
+			if ( ( char ) key != '\t' )
+				*lp++ = ( char ) key;
+			else                         /* handling of tab chars */
+			{
+				do
+					*lp++ = ' ';
+				while ( cc++ % TAB_LENGTH && cc < BROWSER_MAXLINE - len - 3 )
+					;
+				cc--;
+			}
+		}
+		*lp = '\0';
+
+		fl_add_browser_line( main_form->browser, line );
+	}
+
+	/* Unfreeze and thus redisplay the browser */
+
+	fl_unfreeze_form( main_form->browser->form );
+	return( OK );
+}
+
+
+/*------------------------------------------------*/
+/* device_select() lets the user tell the program */
+/* which devices he is using.                     */
+/*------------------------------------------------*/
+
+void device_select( FL_OBJECT *a, long b )
+{
+	if ( a == main_form->device_button )
+	{
+		fl_show_form( device_form->device, FL_PLACE_MOUSE, FL_FULLBORDER,
+					  "fsc2: Device Select" );
+		return;
+	}
+
+/*
+	if ( a == device_form->device_select_ok ||
+		 a == device_form->device_select_cancel )
+		set_device_names( ( int ) b );
+*/
+	if ( fl_form_is_visible( device_form->device ) )
+		fl_hide_form( device_form->device );
+}
+
+
+/*----------------------------------------------------------*/
+/* sigchld_handler() is the default SIGCHLD handler used in */
+/* order to avoid having to many zombies hanging around.    */
+/*----------------------------------------------------------*/
+
+void sigchld_handler( int sig_type, void *data )
+{
+	int status;
+
+	if ( sig_type != SIGCHLD )
+		return;
+
+	/* Get exit status of child and display information if necessary */
+
+	wait( &status );
+	if ( status == EDITOR_FAILED )
+		fl_show_alert( "Error", "Sorry, unable to open editor.",
+					   NULL, 1 );
+}
+
+
+/*-----------------------------------------------------------*/
+/* new_data_callback() is responsible for really storing the */
+/* data from the experiment and then displaying them - a lot */
+/* of work has still be done for this function.              */
+/* Actually, new_data_callback() is the callback function    */
+/* for an invisible button in the form shown as long as the  */
+/* experiment is running - this button is triggered by the   */
+/* function get_data_from_pipe() when new data have arrived. */
+/*-----------------------------------------------------------*/
+
+void new_data_callback( FL_OBJECT *a, long b )
+{
+/*
+	for ( ; m.act_point_drawn < m.act_point; ++m.act_point_drawn )
+		m.y[ m.act_point_drawn ] = ( float ) m.data[ m.act_point_drawn ];
+
+	fl_set_xyplot_data( run_form->xy_plot, m.x, m.y, ( int ) m.max_points,
+						NULL, NULL, NULL );
+*/
 }
 
 
