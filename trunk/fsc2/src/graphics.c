@@ -5,16 +5,16 @@
 
 #include "fsc2.h"
 
-#include auxdir"c1.xbm"             /* bitmaps for cursors */
-#include auxdir"c2.xbm"
-#include auxdir"c3.xbm"
-#include auxdir"c4.xbm"
-#include auxdir"c5.xbm"
-
-#include auxdir"ua.xbm"             /* arrow bitmaps */
-#include auxdir"da.xbm"
-#include auxdir"la.xbm"
-#include auxdir"ra.xbm"
+#include "c1.xbm"             /* bitmaps for cursors */
+#include "c2.xbm"
+#include "c3.xbm"
+#include "c4.xbm"
+#include "c5.xbm"
+		 
+#include "ua.xbm"             /* arrow bitmaps */
+#include "da.xbm"
+#include "la.xbm"
+#include "ra.xbm"
 
 
 static void G_struct_init( void );
