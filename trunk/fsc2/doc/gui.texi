@@ -131,9 +131,9 @@ character, you have to enter the uppercase character from the keyboard!
 While a test of a @acronym{EDL} program is running most of the buttons
 can not be used (indicated by their labels becoming grayed out). The
 label of the @code{Test} button will become @code{Stop Test} - so if you
-want to stop the test press the @code{Test} button again. After a
-successful test the @code{Test} button will remain grayed out until a
-new program is loaded.
+want to stop the test press the @code{Test} button again. After a test
+has been run on the @acronym{EDL} program the @code{Test} button will
+remain grayed out until a new program is loaded.
 
 During the test @acronym{fsc2} may detect problems with the
 @acronym{EDL} program or even errors. It then will print messages in the
@@ -142,6 +142,14 @@ messages for severe problems and fatal error messages. Warnings are
 printed in green, messages for severe problems in blue and messages for
 fatal errors in red (in the latter case the test is also aborted
 immediately).
+
+To start the experiment click onto the @code{Start} button. If the
+program hasn't been tested a test will be run now. When the test succeeds
+the experiment is started. While he devices are initialized the text in
+the @code{Star} button changes to @code{Stop} and clicking on the button
+lets you interrupt the device initialization stage. When the device
+intialization is finished a new window opens up for displaying the
+measured data that will be described in the next section.
 
 
 @ifnotinfo
@@ -152,6 +160,7 @@ out some text already during the test, thus some lines are shown in the
 output browser.
 
 @image{fsc2fig2,11cm,}
+
 @end ifnotinfo
 
 
@@ -212,13 +221,42 @@ so that all data fit into the display area.
 If you want to find out the exact values of your newly measured data
 during the experiment you have to move the mouse into the display area
 onto the point you're interested in. Now press both the left and the
-right mouse button (or first the left one, then the middle on while
-keeping the left button pressed down). The cursor changes to a
-crosshair, @image{cursor4,2cm,} and in the upper left hand corner the
-exact coordinates of the current mouse position is shown. Because
-different curves can have a different scaling, if you have more than one
-curve displayed the coordinates in the scaling system of each curve are
-shown.
+right mouse button simultaneously (or first the left one, then the
+middle one while keeping the left button pressed down). The cursor
+changes to a crosshair, @image{cursor4,5mm,}, and in the upper left hand
+corner the exact coordinates of the current mouse position is
+shown. Because different curves can have a different scaling, if you
+have more than one curve displayed the coordinates in the scaling system
+of each curve are shown.
+
+Beside finding out the exact values of your measured data you also may
+determine differences between different data points. If you press both
+the left and the right mouse button simultaneously the cursor changes to
+a encircled crosshair, @image{cursor5,5mm,}. After moving the mouse while
+keeping both buttons pressed down a circle is drawn at the position you
+started from and a vertical and horizontal dashed line from this point
+to the current mouse position. In the left upper corner of the
+differences between the point where you first pressed the mouse buttons
+and the current mouse position.
+
+
+@subsubsection Rescaling and moving
+
+
+To zoom into the data displayed in the window click the left mouse
+button in the area where the data are displayed. This will change the
+arrow mouse pointer to an icon, @image{cursor1,5mm,}, that indicates
+that you're in zoom mode. If you now move the mouse while keeping the
+left moused button pressed down a rectangular box is drawn from the
+position where the mouse button was pressed to the current mouse
+position. When the left mouse button is released the display will be
+rescaled so that the area of the box is magnified to fill the display
+area. You also can use this method in the areas displaying the
+axis. Here also a small box is shown, indicating the range that will be
+magnified. If done in the area of the x-axis only the x-scaling is
+changed, while when used in the y-axis area only a magnification in
+y-direction happens.
+
 
 
 

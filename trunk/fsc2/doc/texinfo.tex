@@ -3,7 +3,7 @@
 % Load plain if necessary, i.e., if running under initex.
 \expandafter\ifx\csname fmtname\endcsname\relax\input plain\fi
 %
-\def\texinfoversion{2000-05-28.15}
+\def\texinfoversion{2001-07-15.21}
 %
 % Copyright (C) 1985, 86, 88, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99
 % Free Software Foundation, Inc.
@@ -5629,7 +5629,11 @@ width0pt\relax} \fi
 % #4 is just the usual extra ignored arg for parsing this stuff.
 \def\imagexxx#1,#2,#3,#4\finish{%
   \ifpdf
-    \centerline{\dopdfimage{#1}{#2}{#3}}%
+    \ifvmode
+      \centerline{\dopdfimage{#1}{#2}{#3}}%
+    \else
+      \dopdfimage{#1}{#2}{#3}
+    \fi
   \else
     % \epsfbox itself resets \epsf?size at each figure.
     \setbox0 = \hbox{\ignorespaces #2}\ifdim\wd0 > 0pt \epsfxsize=#2\relax \fi

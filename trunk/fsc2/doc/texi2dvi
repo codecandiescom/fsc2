@@ -430,8 +430,8 @@ for command_line_filename in ${1+"$@"}; do
   if test "$clean" = t; then
     $verbose "cd $tmpdir_src"
 	if [ $oformat = "pdf" ]; then
-		for f in `ls *.png`; do        # hack to get the figures correctly, JTT
-			cp ${f%.png}.pdf $tmpdir_src;
+		for f in `ls *.pdf`; do        # hack to get the figures correctly, JTT
+			cp $f $tmpdir_src;
 		done
 	fi
     cd "$tmpdir_src" || exit 1

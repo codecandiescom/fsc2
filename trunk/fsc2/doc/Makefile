@@ -102,8 +102,6 @@ else
 	exit 1;
 endif
 
-#convert -compress ZIP -page 20x20+0+0 ../aux/cursor_4.xbm cursor4.pdf
-
 
 # How to install the documentation
 
