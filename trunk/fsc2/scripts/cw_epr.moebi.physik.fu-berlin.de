@@ -40,7 +40,7 @@ $mw->title( "cw_epr" );
 
 my $f0 = $mw->Frame( );
 my $f0_l1 = $f0->Label( '-text' => 'Bridge:',
-						'-width' => '21',
+						'-width' => '20',
 						'anchor' => 'w' );
 my $f0_m = $f0->Optionmenu( '-options' => [ ( 'cw', 'pulsed' ) ],
 							'-width' => 9,
@@ -52,7 +52,7 @@ $f0_m->pack( %wp );
 
 my $f1 = $mw->Frame( );
 my $f1_l1 = $f1->Label( '-text' => 'Start field:',
-						'-width' => '21',
+						'-width' => '20',
 						'anchor' => 'w' );
 my $f1_v = $f1->Entry( '-textvariable' => \$start_field,
 					   '-width' => '8',
@@ -70,7 +70,7 @@ $f1_l2->pack( %wp );
 
 my $f2 = $mw->Frame( );
 my $f2_l1 = $f2->Label( '-text' => 'End field:',
-						'-width' => '21',
+						'-width' => '20',
 						'anchor' => 'w' );
 my $f2_v = $f2->Entry( '-textvariable' => \$end_field,
 					   '-width' => '8',
@@ -88,7 +88,7 @@ $f2_l2->pack( %wp );
 
 my $f3 = $mw->Frame( );
 my $f3_l1 = $f3->Label( '-text' => 'Field step size:',
-						'-width' => '21',
+						'-width' => '20',
 						'anchor' => 'w' );
 my $f3_v = $f3->Entry( '-textvariable' => \$field_step,
 					   '-width' => '8',
@@ -104,24 +104,10 @@ $f3_v->pack( %wp );
 $f3_l2->pack( %wp );
 
 
-my $f5 = $mw->Frame( );
-my $f5_l1 = $f5->Label( '-text' => 'Maximum field deviation:',
-						'-width' => '21',
-						'anchor' => 'w' );
-my $f5_v = $f5->Entry( '-textvariable' => \$field_error,
-					   '-width' => '8',
-					   '-validate' => 'key',
-					   '-validatecommand' => \&is_numeric,
-					   '-relief' => 'sunken',
-					   'state' => $sweep_method eq 'sweep' ?
-					   'disabled' : 'normal' );
-
-my $f5_l2 = $f5->Label( '-text' => 'G',
-						'-width' => 1 );
 
 my $f4 = $mw->Frame( );
 my $f4_l = $f4->Label( '-text' => 'Sweep method:',
-						'-width' => '21',
+						'-width' => '20',
 						'anchor' => 'w' );
 my $f4_m = $f4->Optionmenu( '-options' =>
 							[ ( 'sweep', 'set_field' ) ],
@@ -134,6 +120,19 @@ $f4_l->pack( %wp );
 $f4_m->pack( %wp );
 
 
+my $f5 = $mw->Frame( );
+my $f5_l1 = $f5->Label( '-text' => 'Maximum field error:',
+						'-width' => '20',
+						'anchor' => 'w' );
+my $f5_v = $f5->Entry( '-textvariable' => \$field_error,
+					   '-width' => '8',
+					   '-validate' => 'key',
+					   '-validatecommand' => \&is_numeric,
+					   '-relief' => 'sunken',
+					   'state' => $sweep_method eq 'sweep' ?
+					   'disabled' : 'normal' );
+my $f5_l2 = $f5->Label( '-text' => 'G',
+						'-width' => 1 );
 
 $f5->pack( %fp );
 $f5_l1->pack( %wp );
@@ -144,7 +143,7 @@ $f5_l2->pack( %wp );
 
 my $f6 = $mw->Frame( );
 my $f6_l1 = $f6->Label( '-text' => 'Number of runs:',
-						'-width' => '21',
+						'-width' => '20',
 						'anchor' => 'w' );
 my $f6_v = $f6->Entry( '-textvariable' => \$num_runs,
 					   '-width' => '8',
@@ -163,7 +162,7 @@ $f6_l2->pack( %wp );
 
 my $f7 = $mw->Frame( );
 my $f7_l = $f7->Label( '-text' => 'Lock-in amplifier:',
-						'-width' => '21',
+						'-width' => '20',
 						'anchor' => 'w' );
 my $f7_m = $f7->Optionmenu( '-options' =>
 							[ ( 'SR510', 'SR530', 'SR810', 'SR830' ) ],
@@ -177,7 +176,7 @@ $f7_m->pack( %wp );
 
 my $f8 = $mw->Frame( );
 my $f8_l = $f8->Label( '-text' => 'Time constant:',
-					   '-width' => '21',
+					   '-width' => '20',
 					   'anchor' => 'w' );
 my $f8_m = $f8->Optionmenu( '-options' =>
                             [ ( "Don't set", '100 s', ' 30 s', ' 10 s',
@@ -192,7 +191,7 @@ $f8_m->pack( %wp );
 
 my $f9 = $mw->Frame( );
 my $f9_l = $f9->Label( '-text' => 'Sensitivity:',
-						'-width' => '21',
+						'-width' => '20',
 						'anchor' => 'w' );
 my $f9_m = $f9->Optionmenu( '-options' =>
                             [ ( "Don't set", '500 mV', '200 mV', '100 mV',
@@ -270,7 +269,7 @@ chomp $ne;
 $field_step = $ne;
 
 goto done_reading unless defined( $ne = <F> )
-	and $ne =~ /^(sweep\(\))|(set_field\(\))$/;
+	and $ne =~ /^(sweep)|(set_field)$/;
 chomp $ne;
 $sweep_method = $ne;
 
@@ -361,8 +360,11 @@ start_field = $start_field G;
 end_field = $end_field G;
 field_step = ";
 print F $end_field > $start_field ? $field_step : - $field_step;
-print F " G;
-N_points = ceil( abs( end_field - start_field ) / abs( field_step ) ) + 1;
+print F " G;\n";
+print F "act_field;\nfield_error = $field_error G;\n"
+	if $sweep_method eq 'set_field';
+print F
+"N_points = ceil( abs( end_field - start_field ) / abs( field_step ) ) + 1;
 data[ N_points ];
 N_runs = $num_runs;\n";
 
@@ -385,7 +387,8 @@ PHASE_SETUP:  MICROWAVE, CW: 5;\n" if $bridge =~ /pulsed/;
 
 print F "\n\nPREPARATIONS:\n\n";
 print F "pulser_cw_mode( );\n" if $bridge =~ /pulsed/;
-print F "magnet_setup( start_field, field_step );\n";
+print F "magnet_setup( start_field, field_step );\n"
+	if $sweep_method eq 'sweep';
 print F "lockin_time_constant( tc );\n" if $tc ne "Don't set";
 print F "lockin_sensitivity( $sens );\n" if $sens ne "Don't set";
 print F "init_1d( ";
@@ -410,6 +413,8 @@ fsave( \"% Field:\\n\"
 save_comment( \"% \" );
 save_program( \"% \" );\n\n";
 
+print F "act_field = set_field( start_field );\n"
+	if $sweep_method eq 'set_field';
 print F "tc = lockin_time_constant( );\n\n" if $tc eq "Don't set";
 if ( $num_runs != 1 ) {
 	print F
@@ -419,15 +424,26 @@ if ( $num_runs != 1 ) {
 
 	FOR I = 1 : N_points \{
 
-		new_data[ I ] = lockin_get_data( );
+		new_data[ I ] = lockin_get_data( );\n\n\t\t";
 
-		fsave( \"# #\\n\", start_field + ( I - 1 ) * field_step, new_data[ I ] );
-
+if ( $sweep_method eq 'sweep' ) {
+	print F "fsave( \"# #\\n\", start_field + ( I - 1 ) * field_step, " .
+		    "new_data[ I ] );";
+} else {
+	print F "fsave( \"# #\\n\", act_field, new_data[ I ] );";
+}
+print F "
 		display( I, ( data[ I ] + new_data[ I ] ) / float( J ), 1 );
 		display( I, new_data[ I ], 3 );
 
-		IF ( I < N_points ) \{
-			sweep_up( );
+		IF ( I < N_points ) \{\n\t\t\t";
+if ( $sweep_method eq 'sweep' ) {
+	print F "sweep_up( );";
+} else {
+	print F "act_field = set_field( start_field + I * field_step, " .
+		"field_error );";
+}
+print F "
 			wait( tc );
 		\}
 	\}
@@ -437,8 +453,13 @@ if ( $num_runs != 1 ) {
 	display( 1, data / float( J ), 2 );
 
 	fsave( \"\\n\" );
-	IF ( J < N_runs ) \{
-		reset_field( );
+	IF ( J < N_runs ) \{\n\t\t";
+if ( $sweep_method eq 'sweep' ) {
+	print F	"reset_field( );";
+} else {
+	print F "act_field = set_field( start_field );";
+}
+print F "
 		wait( tc );
 	\}
 \}
@@ -454,11 +475,22 @@ FOR I = 1 : N_points \{
 } else {
 	print F
 "FOR I = 1 : N_points \{
-	data[ I ] = lockin_get_data( );
-	fsave( \"# #\\n\", start_field + ( I - 1 ) * field_step, data[ I ] );
+	data[ I ] = lockin_get_data( );\n\t";
+if ( $sweep_method eq 'sweep' ) {
+	print F "fsave( \"# #\\n\", " .
+		"start_field + ( I - 1 ) * field_step, data[ I ] );";
+} else {
+	print F "fsave( \"# #\\n\", act_field, data[ I ] );";
+}
+print F "
 	display( I, data[ I ] );
-	IF ( I < N_points ) \{
-		sweep_up( );
+	IF ( I < N_points ) \{\n\t\t";
+if ( $sweep_method eq 'sweep' ) {
+	print F "sweep_up( );";
+} else {
+	print F "act_field = set_field( start_field + I * field_step, field_error );";
+}
+print F "
 		wait( tc );
 	\}
 \}";
@@ -470,12 +502,10 @@ FOR I = 1 : N_points \{
 
 sub do_checks {
 
-	if ( $start_field =~ /^$/ ) {
+	if ( $start_field =~ /^\.?$/ ) {
 		&show_message( "Start field hasn't been set." );
 		return -1;
 	}
-
-	$start_field = 0 if $start_field eq ".";
 
 	if ( $start_field < 1460 ) {
 		&show_message( "Start field is too low." );
@@ -486,12 +516,10 @@ sub do_checks {
 		&show_message( "Start field is too high." );
 	}
 
-	if ( $end_field =~ /^$/ ) {
+	if ( $end_field =~ /^\.?$/ ) {
 		&show_message( "End field hasn't been set." );
 		return -1;
 	}
-
-	$end_field = 0 if $end_field eq ".";
 
 	if ( $end_field < 1460 ) {
 		&show_message( "End field is too low." );
@@ -503,12 +531,18 @@ sub do_checks {
 		return -1;
 	}
 
-	if ( $field_step =~ /^$/ ) {
+	if ( $field_step =~ /^\.?$/ ) {
 		&show_message( "Field step size hasn't been set." );
 		return -1;
 	}
 
-	$field_step = 0 if $field_step eq ".";
+	$field_error = 0
+		if $sweep_method eq 'set_field' and $field_error =~ /^\.?$/;
+
+	if ( $sweep_method eq 'set_field' and $field_error > 0.1 * $field_step ) {
+		&show_message( "Field error larger than\n10% of field step size." );
+		return -1;
+	}
 
 	if ( abs( $field_step ) > abs( $end_field - $start_field ) ) {
 		&show_message( "Field step size larger than\n" .
