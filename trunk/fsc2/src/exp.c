@@ -89,35 +89,36 @@ static void deal_with_token_in_test( void );
 static const char *get_construct_name( int token_type );
 
 
-/*-----------------------------------------------------------------------------
-  This routine stores the experiment section of an EDL file in the form of
-  tokens together with their semantic values as returned by the lexer. This
-  is necessary for two reasons: First, the experiment section may contain
-  loops. Without having the EDL program stored internally it would be rather
-  difficult to run through the loops since we would have to re-read and
-  re-tokenise the input file again and again, which not only would be
-  painfully slow but also difficult since what we read is not the real EDL
-  file(s) but a pipe that passes to us what remains from the input files
-  (there could even be more than one when #include directives had been used)
-  after filtering through the program 'fsc2_clean' (of course, beside storing
-  the experiment section in tokenised form as done by this function, we also
-  need routines that later pass the stored tokens to the parsers, exp_testlex()
-  and exp_runlex()). Second, we will have to run through the experiment section
-  at least three times, first for syntax and sanity checks, then for the test
-  run and finally for really doing the experiment. .
-
-  The function does the following:
-  1. It stores each token (with the semantic values it receives from the
-     lexer) in the array of program tokens, prg_token.
-  2. While doing so it also does a few preliminay tests - it checks that
-     opening and closing parentheses and braces match, BREAK and NEXT
-	 statements only appear in within loops and that THE ON_STOP statement
-	 isn't in a block or within parentheses or braces.
-  3. When done with storing the program it does everything needed to set up
-     loops, if-else and unless-else constructs.
-  4. Finally, a syntax check of the program is run. In this check the whole
-     program is feed to a parser to test if syntactic errors are found.
------------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*
+ * This routine stores the experiment section of an EDL file in the form
+ * of tokens together with their semantic values as returned by the
+ * lexer. This is necessary for two reasons: First, the experiment section
+ * may contain loops. Without having the EDL program stored internally it
+ * would be rather difficult to run through the loops since we would have
+ * to re-read and re-tokenise the input file again and again, which not
+ * only would be painfully slow but also difficult since what we read is
+ * not the real EDL file(s) but a pipe that passes to us what remains from
+ * the input files (there could even be more than one when #include
+ * directives had been used) after filtering through the program
+ * 'fsc2_clean' (of course, beside storing the experiment section in
+ * tokenised form as done by this function, we also need routines that
+ * later pass the stored tokens to the parsers, exp_testlex() and
+ * exp_runlex()). Second, we will have to run through the experiment
+ * section at least three times, first for syntax and sanity checks, then
+ * for the test run and finally for really doing the experiment. .
+ *
+ * The function does the following:
+ * 1. It stores each token (with the semantic values it receives from the
+ *    lexer) in the array of program tokens, prg_token.
+ * 2. While doing so it also does a few preliminay tests - it checks that
+ *    opening and closing parentheses and braces match, BREAK and NEXT
+ *  statements only appear in within loops and that THE ON_STOP statement
+ *  isn't in a block or within parentheses or braces.
+ * 3. When done with storing the program it does everything needed to set up
+ *    loops, if-else and unless-else constructs.
+ * 4. Finally, a syntax check of the program is run. In this check the whole
+ *    program is feed to a parser to test if syntactic errors are found.
+ *---------------------------------------------------------------------------*/
 
 void store_exp( FILE *in )
 {
@@ -194,12 +195,12 @@ void store_exp( FILE *in )
 }
 
 
-/*---------------------------------------------------------------------*/
-/* The function stores all token it receives from the lexer (together  */
-/* with the semantic value) in the array of program tokens, prg_token. */
-/* While doing so it also performs some preliminary checks on the      */
-/* balancedness of braces and parentheses.                             */
-/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*
+ * The function stores all token it receives from the lexer (together
+ * with the semantic value) in the array of program tokens, prg_token.
+ * While doing so it also performs some preliminary checks on the
+ * balancedness of braces and parentheses.
+ *---------------------------------------------------------------------*/
 
 static void get_and_store_tokens( long *parenthesis_count, 
 								  long *square_brace_count )
@@ -428,11 +429,11 @@ static void get_and_store_tokens( long *parenthesis_count,
 }
 
 
-/*-------------------------------------------------------------------------*/
-/* Function is called for each opening curly brace found in the input file */
-/* to store the current file name and line number and thus to be able to   */
-/* print more informative error messages if the braces don't match up.     */
-/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*
+ * Function is called for each opening curly brace found in the input file
+ * to store the current file name and line number and thus to be able to
+ * print more informative error messages if the braces don't match up.
+ *-------------------------------------------------------------------------*/
 
 static void push_curly_brace( Prg_Token_T *where )
 {
@@ -446,14 +447,14 @@ static void push_curly_brace( Prg_Token_T *where )
 }
 
 
-/*---------------------------------------------------------------------------*/
-/* Function is called when a closing curly brace is found in the input file  */
-/* to remove the entry on the curly brace stack for the corresponding        */
-/* opening brace. It returns OK when there was a corresponding opening brace */
-/* (i.e. opening and closing braces aren't unbalanced in favour of closing   */
-/* braces), otherwise FAIL is returned. This function is also used when      */
-/* getting rid of the curly brace stack after an exception was thrown.       */
-/*---------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*
+ * Function is called when a closing curly brace is found in the input file
+ * to remove the entry on the curly brace stack for the corresponding
+ * opening brace. It returns OK when there was a corresponding opening brace
+ * (i.e. opening and closing braces aren't unbalanced in favour of closing
+ * braces), otherwise FAIL is returned. This function is also used when
+ * getting rid of the curly brace stack after an exception was thrown.
+ *---------------------------------------------------------------------------*/
 
 static bool pop_curly_brace( void )
 {
@@ -471,10 +472,10 @@ static bool pop_curly_brace( void )
 }
 
 
-/*----------------------------------------------------*/
-/* Deallocates all memory used for storing the tokens */
-/* (and their semantic values) of a program.          */
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ * Deallocates all memory used for storing the tokens
+ * (and their semantic values) of a program.
+ *----------------------------------------------------*/
 
 void forget_prg( void )
 {
@@ -538,11 +539,11 @@ void forget_prg( void )
 }
 
 
-/*----------------------------------------------------------------*/
-/* Sets up the blocks of WHILE, UNTIL, REPEAT and FOR loops and   */
-/* IF-ELSE and UNLESS-ELSE constructs where a block is everything */
-/* between a matching pair of curly braces.                       */
-/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * Sets up the blocks of WHILE, UNTIL, REPEAT and FOR loops and
+ * IF-ELSE and UNLESS-ELSE constructs where a block is everything
+ * between a matching pair of curly braces.
+ *----------------------------------------------------------------*/
 
 static void loop_setup( void )
 {
@@ -577,13 +578,13 @@ static void loop_setup( void )
 }
 
 
-/*----------------------------------------------------------------*/
-/* Does the real work for setting up WHILE, REPEAT and FOR loops. */
-/* Can be called recursively to allow nested loops.               */
-/* ->                                                             */
-/*  1. Type of loop (WHILE_TOK, UNTIL_TOK, REPEAT_TOK or FOR_TOK) */
-/*  2. Pointer to number of token                                 */
-/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * Does the real work for setting up WHILE, REPEAT and FOR loops.
+ * Can be called recursively to allow nested loops.
+ * ->
+ *  1. Type of loop (WHILE_TOK, UNTIL_TOK, REPEAT_TOK or FOR_TOK)
+ *  2. Pointer to number of token
+ *----------------------------------------------------------------*/
 
 static void setup_while_or_repeat( int type, long *pos )
 {
@@ -671,14 +672,14 @@ static void setup_while_or_repeat( int type, long *pos )
 }
 
 
-/*----------------------------------------------------------------------*/
-/* Does the real work for setting up IF-ELSE or UNLESS-ELSE constructs. */
-/* Can be called recursively to allow nested IF and UNLESS tokens.      */
-/* ->                                                                   */
-/*    1. pointer to number of token                                     */
-/*    2. Pointer to program token of enclosing while, repeat or for     */
-/*       loop (needed for handling of 'break' and 'continue').          */
-/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*
+ * Does the real work for setting up IF-ELSE or UNLESS-ELSE constructs.
+ * Can be called recursively to allow nested IF and UNLESS tokens.
+ * ->
+ *    1. pointer to number of token
+ *    2. Pointer to program token of enclosing while, repeat or for
+ *       loop (needed for handling of 'break' and 'continue').
+ *----------------------------------------------------------------------*/
 
 static void setup_if_else( long *pos, Prg_Token_T *cur_wr )
 {
@@ -760,9 +761,9 @@ static void setup_if_else( long *pos, Prg_Token_T *cur_wr )
 }
 
 
-/*------------------------------------------------------*/
-/* Handling of 'ELSE' during the setup of IF-ELSE loops */
-/*------------------------------------------------------*/
+/*------------------------------------------------------*
+ * Handling of 'ELSE' during the setup of IF-ELSE loops
+ *------------------------------------------------------*/
 
 static void setup_else( Prg_Token_T *cur, long i, bool in_if,
 						bool *dont_need_close_parens )
@@ -801,9 +802,9 @@ static void setup_else( Prg_Token_T *cur, long i, bool in_if,
 }
 
 
-/*---------------------------------------------------*/
-/* Handling of '{' during the setup of IF-ELSE loops */
-/*---------------------------------------------------*/
+/*---------------------------------------------------*
+ * Handling of '{' during the setup of IF-ELSE loops
+ *---------------------------------------------------*/
 
 static void setup_open_brace_in_if_else( Prg_Token_T *cur, long i, bool in_if )
 {
@@ -822,9 +823,9 @@ static void setup_open_brace_in_if_else( Prg_Token_T *cur, long i, bool in_if )
 }
 
 
-/*---------------------------------------------------*/
-/* Handling of '}' during the setup of IF-ELSE loops */
-/*---------------------------------------------------*/
+/*---------------------------------------------------*
+ * Handling of '}' during the setup of IF-ELSE loops
+ *---------------------------------------------------*/
 
 static bool setup_close_brace_in_if_else( long *pos, Prg_Token_T *cur, long i,
 										  bool *in_if )
@@ -849,13 +850,13 @@ static bool setup_close_brace_in_if_else( long *pos, Prg_Token_T *cur, long i,
 }
 
 
-/*-------------------------------------------------------------------*/
-/* This function is called to start the syntax test of the currently */
-/* loaded EDL program. After initializing the pointer to the first   */
-/* program token all it does is calling the test parser defined in   */
-/* exp_test_parser.y. On syntax errors the test parser throws an     */
-/* exception, otherwise this routine returns normally.               */
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * This function is called to start the syntax test of the currently
+ * loaded EDL program. After initializing the pointer to the first
+ * program token all it does is calling the test parser defined in
+ * exp_test_parser.y. On syntax errors the test parser throws an
+ * exception, otherwise this routine returns normally.
+ *-------------------------------------------------------------------*/
 
 static void exp_syntax_check( void )
 {
@@ -881,12 +882,12 @@ static void exp_syntax_check( void )
 }
 
 
-/*-------------------------------------------------------------------*/
-/* This function just feeds the stored program token by token to the */
-/* syntax test parser exp_testparse(), defined in exp_test_parser.y. */
-/* No actions are associated with this parsing stage, all that is    */
-/* done is a test if the syntax of the program is ok.                */
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * This function just feeds the stored program token by token to the
+ * syntax test parser exp_testparse(), defined in exp_test_parser.y.
+ * No actions are associated with this parsing stage, all that is
+ * done is a test if the syntax of the program is ok.
+ *-------------------------------------------------------------------*/
 
 int exp_testlex( void )
 {
@@ -904,14 +905,14 @@ int exp_testlex( void )
 }
 
 
-/*-------------------------------------------------------------------*/
-/* Function does the test run of the program. For most of the stored */
-/* tokens of the EDL program it simply invokes the parser defined in */
-/* exp_run_parser.y, which will then call the function exp_runlex()  */
-/* to get further tokens. Exceptions are tokens that are related to  */
-/* flow control that aren't handled by the parser but by this        */
-/* function.                                                         */
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * Function does the test run of the program. For most of the stored
+ * tokens of the EDL program it simply invokes the parser defined in
+ * exp_run_parser.y, which will then call the function exp_runlex()
+ * to get further tokens. Exceptions are tokens that are related to
+ * flow control that aren't handled by the parser but by this
+ * function.
+ *-------------------------------------------------------------------*/
 
 void exp_test_run( void )
 {
@@ -1009,8 +1010,8 @@ void exp_test_run( void )
 }
 
 
-/*----------------------------------------------------------------*/
-/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ *----------------------------------------------------------------*/
 
 static void deal_with_token_in_test( void )
 {
@@ -1117,14 +1118,14 @@ static void deal_with_token_in_test( void )
 }
 
 
-/*----------------------------------------------------------------*/
-/* Routine works as a kind of virtual lexer by simply passing the */
-/* parser the tokens that got stored while running store_exp().   */
-/* The only exceptions are tokens dealing with flow control - for */
-/* most of them the parser gets signaled an end of file, only the */
-/* '}' is handled by the parser itself (but also as an EOF but    */
-/* also doing some sanity checks).                                */
-/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * Routine works as a kind of virtual lexer by simply passing the
+ * parser the tokens that got stored while running store_exp().
+ * The only exceptions are tokens dealing with flow control - for
+ * most of them the parser gets signaled an end of file, only the
+ * '}' is handled by the parser itself (but also as an EOF but
+ * also doing some sanity checks).
+ *----------------------------------------------------------------*/
 
 int exp_runlex( void )
 {
@@ -1192,10 +1193,10 @@ int exp_runlex( void )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/* This routines returns the tokens to the parser while the condition of */
-/* a WHILE, REPEAT, FOR, IF OR UNLESS is parsed.                         */
-/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ * This routines returns the tokens to the parser while the condition of
+ * a WHILE, REPEAT, FOR, IF OR UNLESS is parsed.
+ *-----------------------------------------------------------------------*/
 
 int conditionlex( void )
 {
@@ -1283,10 +1284,10 @@ int conditionlex( void )
 }
 
 
-/*--------------------------------------------------------------------*/
-/* Function tests the condition of a WHILE, UNTIL, FOR or REPEAT loop */
-/* or an IF or UNLESS construct.                                      */
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ * Function tests the condition of a WHILE, UNTIL, FOR or REPEAT loop
+ * or an IF or UNLESS construct.
+ *--------------------------------------------------------------------*/
 
 bool test_condition( Prg_Token_T *cur )
 {
@@ -1322,9 +1323,9 @@ bool test_condition( Prg_Token_T *cur )
 }
 
 
-/*---------------------------------------------------------*/
-/* Functions determines the repeat count for a REPEAT loop */
-/*---------------------------------------------------------*/
+/*---------------------------------------------------------*
+ * Functions determines the repeat count for a REPEAT loop
+ *---------------------------------------------------------*/
 
 void get_max_repeat_count( Prg_Token_T *cur )
 {
@@ -1361,12 +1362,12 @@ void get_max_repeat_count( Prg_Token_T *cur )
 }
 
 
-/*--------------------------------------------------------------------------*/
-/* Function gets all parts of a for loop condition, i.e. the loop variable, */
-/* the start value assigned to the loop variable, the end value and and the */
-/* optional increment value. If the loop variable is an integer also the    */
-/* end and increment variable must be integers.                             */
-/*--------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------*
+ * Function gets all parts of a for loop condition, i.e. the loop variable,
+ * the start value assigned to the loop variable, the end value and and the
+ * optional increment value. If the loop variable is an integer also the
+ * end and increment variable must be integers.
+ *--------------------------------------------------------------------------*/
 
 void get_for_cond( Prg_Token_T *cur )
 {
@@ -1585,9 +1586,9 @@ void get_for_cond( Prg_Token_T *cur )
 }
 
 
-/*--------------------------------------------------*/
-/* Function tests the loop condition of a for loop. */
-/*--------------------------------------------------*/
+/*--------------------------------------------------*
+ * Function tests the loop condition of a for loop.
+ *--------------------------------------------------*/
 
 bool test_for_cond( Prg_Token_T *cur )
 {
@@ -1648,8 +1649,8 @@ bool test_for_cond( Prg_Token_T *cur )
 }
 
 
-/*---------------------------------------------------------*/
-/*---------------------------------------------------------*/
+/*---------------------------------------------------------*
+ *---------------------------------------------------------*/
 
 bool check_result( Var_T *v )
 {
@@ -1669,8 +1670,8 @@ bool check_result( Var_T *v )
 }
 
 
-/*--------------------------------------------------------------*/
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *--------------------------------------------------------------*/
 
 static const char *get_construct_name( int token_type )
 {

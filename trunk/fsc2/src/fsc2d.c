@@ -72,14 +72,14 @@ static int new_client( int fd, Fsc2_Instance_T *instances, int num_instances );
 static void set_fs2d_signals( void );
 
 
-/*---------------------------------------------------------------------*/
-/* Function talks to the daemon process to figure out if the current   */
-/* instance of fsc2 is allowed to run. If such a daemon does not exist */
-/* yet it gets created. The function returns -1 when the current       */
-/* instance is not allowed to run, 0 when it's allowed to run but may  */
-/* not start a child listening for external connections and 1 when it  */
-/* may run and must start a child process for external connections.    */
-/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*
+ * Function talks to the daemon process to figure out if the current
+ * instance of fsc2 is allowed to run. If such a daemon does not exist
+ * yet it gets created. The function returns -1 when the current
+ * instance is not allowed to run, 0 when it's allowed to run but may
+ * not start a child listening for external connections and 1 when it
+ * may run and must start a child process for external connections.
+ *---------------------------------------------------------------------*/
 
 int check_spawn_fsc2d( bool exclusive, FILE *in_file_fp )
 {
@@ -185,11 +185,11 @@ int check_spawn_fsc2d( bool exclusive, FILE *in_file_fp )
 }
 
 
-/*-----------------------------------------------------------------*/
-/* Try to get a connection to the socket the "daemon" is listening */
-/* on. If this fails we must conclude that there's no "daemon" yet */
-/* and we have to create it.                                       */
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ * Try to get a connection to the socket the "daemon" is listening
+ * on. If this fails we must conclude that there's no "daemon" yet
+ * and we have to create it.
+ *-----------------------------------------------------------------*/
 
 static int connect_to_fsc2d( void )
 {
@@ -223,10 +223,10 @@ static int connect_to_fsc2d( void )
 }
 
 
-/*----------------------------------------------------------*/
-/* Try to create the "daemon" process that new instances of */
-/* fsc2 must get permission from before they may start.     */
-/*----------------------------------------------------------*/
+/*----------------------------------------------------------*
+ * Try to create the "daemon" process that new instances of
+ * fsc2 must get permission from before they may start.
+ *----------------------------------------------------------*/
 
 static int start_fsc2d( bool exclusive, FILE *in_file_fp )
 {
@@ -316,9 +316,9 @@ static int start_fsc2d( bool exclusive, FILE *in_file_fp )
 }
 
 
-/*--------------------------------------------------------------*/
-/* Signal handler for the main program for signal by the daemon */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ * Signal handler for the main program for signal by the daemon
+ *--------------------------------------------------------------*/
 
 static void fsc2d_sig_handler( int signo )
 {
@@ -327,14 +327,14 @@ static void fsc2d_sig_handler( int signo )
 }
 
 
-/*-------------------------------------------------------------------------*/
-/* The following is the code run by the "daemon". It waits for incoming    */
-/* connections by new instances of fsc2 and tells them if they are allowed */
-/* to run and if they may start a child process for external connections.  */
-/* The "daemon" also reguarly checks for instances to have exited and, if  */
-/* the last instance has died deletes possibly left-over shared memory     */
-/* segments and also quits.                                                */
-/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*
+ * The following is the code run by the "daemon". It waits for incoming
+ * connections by new instances of fsc2 and tells them if they are allowed
+ * to run and if they may start a child process for external connections.
+ * The "daemon" also reguarly checks for instances to have exited and, if
+ * the last instance has died deletes possibly left-over shared memory
+ * segments and also quits.
+ *-------------------------------------------------------------------------*/
 
 static void fsc2d( int fd, bool exclusive, struct passwd *ui )
 {
@@ -390,8 +390,8 @@ static void fsc2d( int fd, bool exclusive, struct passwd *ui )
 }
 
 
-/*---------------------------------------------------------------------*/
-/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*
+ *---------------------------------------------------------------------*/
 
 static int check_instances( Fsc2_Instance_T *instances, int num_instances,
 							int is_new_connect )
@@ -453,8 +453,8 @@ static int check_instances( Fsc2_Instance_T *instances, int num_instances,
 }
 
 
-/*---------------------------------------------------------------------*/
-/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*
+ *---------------------------------------------------------------------*/
 
 static int new_client( int fd, Fsc2_Instance_T *instances, int num_instances )
 {
@@ -592,9 +592,9 @@ static int new_client( int fd, Fsc2_Instance_T *instances, int num_instances )
 }
 
 
-/*------------------------------------------------------------------*/
-/* Signal handler for the "demon" process: all signals are ignored. */
-/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ * Signal handler for the "demon" process: all signals are ignored.
+ *------------------------------------------------------------------*/
 
 static void set_fs2d_signals( void )
 {

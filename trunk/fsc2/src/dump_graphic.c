@@ -33,12 +33,12 @@ static Pixmap get_cut_window( unsigned int *width, unsigned int *height );
 static void dump_as_ppm( FILE *dp, XImage *image );
 
 
-/*------------------------------------------------------------------------*/
-/* Writes a graphic with the 1D- or 2D-display (if type equals 1 or 2) or */
-/* the cross section window (for type equal to 2) to the file descriptor  */
-/* passed to the function - the function may throw an exception (instead  */
-/* of returning an error code).                                           */
-/*------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*
+ * Writes a graphic with the 1D- or 2D-display (if type equals 1 or 2) or
+ * the cross section window (for type equal to 2) to the file descriptor
+ * passed to the function - the function may throw an exception (instead
+ * of returning an error code).
+ *------------------------------------------------------------------------*/
 
 void dump_window( int type, int fd )
 {
@@ -106,10 +106,10 @@ void dump_window( int type, int fd )
 }
 
 
-/*--------------------------------------------------------------*/
-/* Function creates a pixmap with a copy of the contents of the */
-/* canvas for drawing 1D data and the surrounding axes canvases */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ * Function creates a pixmap with a copy of the contents of the
+ * canvas for drawing 1D data and the surrounding axes canvases
+ *--------------------------------------------------------------*/
 
 static Pixmap get_1d_window( unsigned int *width, unsigned int *height )
 {
@@ -155,10 +155,10 @@ static Pixmap get_1d_window( unsigned int *width, unsigned int *height )
 } 
 
 
-/*--------------------------------------------------------------*/
-/* Function creates a pixmap with a copy of the contents of the */
-/* canvas for drawing 2D data and the surrounding axes canvases */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ * Function creates a pixmap with a copy of the contents of the
+ * canvas for drawing 2D data and the surrounding axes canvases
+ *--------------------------------------------------------------*/
 
 static Pixmap get_2d_window( unsigned int *width, unsigned int *height )
 {
@@ -210,11 +210,11 @@ static Pixmap get_2d_window( unsigned int *width, unsigned int *height )
 } 
 
 
-/*---------------------------------------------------------------------*/
-/* Function creates a pixmap with a copy of the contents of the canvas */
-/* for cross sections through a 2D data set and the surrounding axes   */
-/* canvases                                                            */
-/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*
+ * Function creates a pixmap with a copy of the contents of the canvas
+ * for cross sections through a 2D data set and the surrounding axes
+ * canvases
+ *---------------------------------------------------------------------*/
 
 static Pixmap get_cut_window( unsigned int *width, unsigned int *height )
 {
@@ -268,17 +268,17 @@ static Pixmap get_cut_window( unsigned int *width, unsigned int *height )
 }
 
 
-/*----------------------------------------------------------------*/
-/* This function determines the pixel values of an image and uses */
-/* a hash created earlier to figure out the color of the points.  */
-/* It then writes out the colors as three rgb byte values to a    */
-/* file.                                                          */
-/* The part for determining the pixel values (instead of using    */
-/* XGetPixel(), which would be much slower) includes some ideas   */
-/* from the xv program (notably xvgrab.c) by John Bradley, which  */
-/* in turn seems to be based on 'xwdtopnm.c', which is part of    */
-/* the pbmplus package written by Jef Poskanzer.                  */
-/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * This function determines the pixel values of an image and uses
+ * a hash created earlier to figure out the color of the points.
+ * It then writes out the colors as three rgb byte values to a
+ * file.
+ * The part for determining the pixel values (instead of using
+ * XGetPixel(), which would be much slower) includes some ideas
+ * from the xv program (notably xvgrab.c) by John Bradley, which
+ * in turn seems to be based on 'xwdtopnm.c', which is part of
+ * the pbmplus package written by Jef Poskanzer.
+ *----------------------------------------------------------------*/
 
 static void dump_as_ppm( FILE *fp, XImage *image )
 {
@@ -379,9 +379,9 @@ static void dump_as_ppm( FILE *fp, XImage *image )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/* Creates a pixel value to rgb color hash for all colors possibly used. */
-/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ * Creates a pixel value to rgb color hash for all colors possibly used.
+ *-----------------------------------------------------------------------*/
 
 void create_color_hash( void )
 {

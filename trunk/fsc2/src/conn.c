@@ -39,11 +39,11 @@ typedef unsigned int socklen_t;
 #endif
 
 
-/*------------------------------------------------------*/
-/* Creates a child process that will listen on a socket */
-/* to allow other processes to run an EDL program. Must */
-/* return -1 on errors.                                 */
-/*------------------------------------------------------*/
+/*------------------------------------------------------*
+ * Creates a child process that will listen on a socket
+ * to allow other processes to run an EDL program. Must
+ * return -1 on errors.
+ *------------------------------------------------------*/
 
 pid_t spawn_conn( bool start_state, FILE *in_file_fp )
 {
@@ -126,8 +126,8 @@ pid_t spawn_conn( bool start_state, FILE *in_file_fp )
 }
 
 
-/*------------------------------------------------------*/
-/*------------------------------------------------------*/
+/*------------------------------------------------------*
+ *------------------------------------------------------*/
 
 static void connect_handler( int listen_fd )
 {
@@ -283,15 +283,15 @@ static void connect_handler( int listen_fd )
 }
 
 
-/*---------------------------------------------------------------------*/
-/* Sets up the signal handlers for all kinds of signals the connection */
-/* process may receive. This probably looks a bit like overkill, but I */
-/* just wan't to sure the child doesn't get killed by some meaningless */
-/* signals and, on the other hand, that on deadly signals it still     */
-/* gets a chance to try to get rid of shared memory that the parent    */
-/* didn't destroyed (in case it was killed by an signal it couldn't    */
-/* catch).                                                             */
-/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*
+ * Sets up the signal handlers for all kinds of signals the connection
+ * process may receive. This probably looks a bit like overkill, but I
+ * just wan't to sure the child doesn't get killed by some meaningless
+ * signals and, on the other hand, that on deadly signals it still
+ * gets a chance to try to get rid of shared memory that the parent
+ * didn't destroyed (in case it was killed by an signal it couldn't
+ * catch).
+ *---------------------------------------------------------------------*/
 
 static void set_conn_signals( void )
 {
@@ -314,9 +314,9 @@ static void set_conn_signals( void )
 }
 
 
-/*-----------------------------------------------------*/
-/* Set variable 'Is_busy' depending on type of signal. */
-/*-----------------------------------------------------*/
+/*-----------------------------------------------------*
+ * Set variable 'Is_busy' depending on type of signal.
+ *-----------------------------------------------------*/
 
 static void conn_sig_handler( int signo )
 {

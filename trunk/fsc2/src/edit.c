@@ -28,11 +28,11 @@
 static void start_editor( void );
 
 
-/*---------------------------------------------------------------------*/
-/* edit_file() allows to edit the current file (but it's also possible */
-/* to edit a new file if there is no file loaded) and is the callback  */
-/* function for the Edit-button.                                       */
-/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*
+ * edit_file() allows to edit the current file (but it's also possible
+ * to edit a new file if there is no file loaded) and is the callback
+ * function for the Edit-button.
+ *---------------------------------------------------------------------*/
 
 void edit_file( UNUSED_ARG FL_OBJECT *a, UNUSED_ARG long b )
 {
@@ -50,12 +50,12 @@ void edit_file( UNUSED_ARG FL_OBJECT *a, UNUSED_ARG long b )
 }
 
 
-/*---------------------------------------------------------------------*/
-/* This function is called to start the editor on the currently loaded */
-/* file. It is called after a fork(), so it may not return. Which      */
-/* editor is used depends on the environment variable EDITOR. If this  */
-/* variable isn't set vi is used.                                      */
-/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*
+ * This function is called to start the editor on the currently loaded
+ * file. It is called after a fork(), so it may not return. Which
+ * editor is used depends on the environment variable EDITOR. If this
+ * variable isn't set vi is used.
+ *---------------------------------------------------------------------*/
 
 static void start_editor( void )
 {

@@ -33,12 +33,12 @@ static long pathmax = 0;
 #define PATH_MAX_GUESS 4095      /* guess for maximum file name length... */
 
 
-/*--------------------------------------------------------------------------*/
-/* This function is called for each device found in the DEVICES section of  */
-/* the EDL file. It first checks if the device is listed in the device data */
-/* base file "Devices". Then it appends a new structure for the device to   */
-/* the end of the linked list.                                              */
-/*--------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------*
+ * This function is called for each device found in the DEVICES section of
+ * the EDL file. It first checks if the device is listed in the device data
+ * base file "Devices". Then it appends a new structure for the device to
+ * the end of the linked list.
+ *--------------------------------------------------------------------------*/
 
 void device_add( const char *name )
 {
@@ -207,10 +207,10 @@ void device_add( const char *name )
 }
 
 
-/*-----------------------------------------------------*/
-/* Function creates a new Device structure and appends */
-/* it to the list of devices.                          */
-/*-----------------------------------------------------*/
+/*-----------------------------------------------------*
+ * Function creates a new Device structure and appends
+ * it to the list of devices.
+ *-----------------------------------------------------*/
 
 void device_append_to_list( const char *dev_name )
 {
@@ -256,10 +256,10 @@ void device_append_to_list( const char *dev_name )
 }
 
 
-/*---------------------------------------------------------------------*/
-/* Function deletes the whole list of device structures after running  */
-/* the corresponding exit hook functions and unloading the modules.    */
-/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*
+ * Function deletes the whole list of device structures after running
+ * the corresponding exit hook functions and unloading the modules.
+ *---------------------------------------------------------------------*/
 
 void delete_devices( void )
 {
@@ -287,10 +287,10 @@ void delete_devices( void )
 }
 
 
-/*-------------------------------------------------------------*/
-/* Function deletes the list of known devices as read from the */
-/* device data base file "Devices".                            */
-/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*
+ * Function deletes the list of known devices as read from the
+ * device data base file "Devices".
+ *-------------------------------------------------------------*/
 
 void delete_device_name_list( void )
 {

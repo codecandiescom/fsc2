@@ -22,31 +22,31 @@
  */
 
 
-/********************************************************************/
-/* The basic ideas for the following code came from an article by   */
-/* Peter Simons in the iX magazine No. 5, 1998, pp. 160-162. It has */
-/* been changed a lot thanks to the very constructive criticism by  */
-/* Chris Torek <nospam@elf.eng.bsdi.com> on comp.lang.c.            */
-/*                                                                  */
-/* In order to avoid overflows of the fixed size exception frame    */
-/* stack (i.e. after MAX_NESTED_EXCEPTIONS successful TRY's) it is  */
-/* necessary to manually remove an exception frame (in contrast to  */
-/* C++ where this is handled automatically) by calling TRY_SUCCESS  */
-/* if the code of the TRY block finished successfully. A typical    */
-/* TRY block sequence is thus:                                      */
-/*                                                                  */
-/* TRY {                                                            */
-/*     statement;                                                   */
-/*     TRY_SUCCESS;                                                 */
-/* }                                                                */
-/* CATCH( exception ) {                                             */
-/*     ...                                                          */
-/* }                                                                */
-/*                                                                  */
-/* Don't use this exception mechanism from within signal handlers   */
-/* or other code invoked asynchronously, it easily could trigger a  */
-/* race condition.                                                  */
-/********************************************************************/
+/********************************************************************
+ * The basic ideas for the following code came from an article by   *
+ * Peter Simons in the iX magazine No. 5, 1998, pp. 160-162. It has *
+ * been changed a lot thanks to the very constructive criticism by  *
+ * Chris Torek <nospam@elf.eng.bsdi.com> on comp.lang.c.            *
+ *                                                                  *
+ * In order to avoid overflows of the fixed size exception frame    *
+ * stack (i.e. after MAX_NESTED_EXCEPTIONS successful TRY's) it is  *
+ * necessary to manually remove an exception frame (in contrast to  *
+ * C++ where this is handled automatically) by calling TRY_SUCCESS  *
+ * if the code of the TRY block finished successfully. A typical    *
+ * TRY block sequence is thus:                                      *
+ *                                                                  *
+ * TRY {                                                            *
+ *     statement;                                                   *
+ *     TRY_SUCCESS;                                                 *
+ * }                                                                *
+ * CATCH( exception ) {                                             *
+ *     ...                                                          *
+ * }                                                                *
+ *                                                                  *
+ * Don't use this exception mechanism from within signal handlers   *
+ * or other code invoked asynchronously, it easily could trigger a  *
+ * race condition.                                                  *
+ ********************************************************************/
 
 
 #include <stdlib.h>
@@ -72,23 +72,23 @@ static struct Exception_Struct Exception_stack[ MAX_NESTED_EXCEPTION ],
 static int Exception_stack_pos = -1;
 
 
-/*--------------------------------------------------------------------------*/
-/* Function sets up a new exception frame and returns a pointer to a new    */
-/* jmp_buf object needed by setjmp() to store the current environment. The  */
-/* function fails if already all slots in the array of Exception structures */
-/* are used up (i.e. there are more than MAX_NESTED_EXCEPTION) in which     */
-/* case the pogram throwing the exception is stopped immediatedly.          */
-/* Actually, there are two arrays of exceptions. The second array is        */
-/* necessary for being able to rethrow a caught exception even when in the  */
-/* code dealing with the exception another TRY block is used. This new TRY  */
-/* block would overwrite the array element for the thrown exception and     */
-/* thus would make it impossible to rethrow it. So whenever a TRY block is  */
-/* started (by calling this function) the state of the array element to be  */
-/* overwritten is saved in the second array (and restored when this TRY     */
-/* block succeded and thus the corresponding element gets removed from the  */
-/* array), so that we're back in the state we were in before the TRY block  */
-/* within the exception handler was started.                                */
-/*--------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------*
+ * Function sets up a new exception frame and returns a pointer to a new
+ * jmp_buf object needed by setjmp() to store the current environment. The
+ * function fails if already all slots in the array of Exception structures
+ * are used up (i.e. there are more than MAX_NESTED_EXCEPTION) in which
+ * case the pogram throwing the exception is stopped immediatedly.
+ * Actually, there are two arrays of exceptions. The second array is
+ * necessary for being able to rethrow a caught exception even when in the
+ * code dealing with the exception another TRY block is used. This new TRY
+ * block would overwrite the array element for the thrown exception and
+ * thus would make it impossible to rethrow it. So whenever a TRY block is
+ * started (by calling this function) the state of the array element to be
+ * overwritten is saved in the second array (and restored when this TRY
+ * block succeded and thus the corresponding element gets removed from the
+ * array), so that we're back in the state we were in before the TRY block
+ * within the exception handler was started.
+ *--------------------------------------------------------------------------*/
 
 jmp_buf *push_exception_frame( const char *file, int line )
 {
@@ -115,10 +115,10 @@ jmp_buf *push_exception_frame( const char *file, int line )
 }
 
 
-/*-------------------------------------------------------------------------*/
-/* Function removes the current exception frame from the stack. It fails   */
-/* (and calls exit() immediately) if the exception stack is already empty. */
-/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*
+ * Function removes the current exception frame from the stack. It fails
+ * (and calls exit() immediately) if the exception stack is already empty.
+ *-------------------------------------------------------------------------*/
 
 void pop_exception_frame( const char *file, int line )
 {
@@ -141,14 +141,14 @@ void pop_exception_frame( const char *file, int line )
 }
 
 
-/*------------------------------------------------------------------------*/
-/* This function gets called when an exception is to be thrown. It stores */
-/* the exception type in the current exception frame and returns the      */
-/* address of the jmp_buf object that is needed by longjmp() to restore   */
-/* the state at the time of the corresponding call of setjmp(). If the    */
-/* exception stack is already empty (i.e. the exception can't be caught   */
-/* because setjmp() was never called) the program is stopped immediately. */
-/*------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*
+ * This function gets called when an exception is to be thrown. It stores
+ * the exception type in the current exception frame and returns the
+ * address of the jmp_buf object that is needed by longjmp() to restore
+ * the state at the time of the corresponding call of setjmp(). If the
+ * exception stack is already empty (i.e. the exception can't be caught
+ * because setjmp() was never called) the program is stopped immediately.
+ *------------------------------------------------------------------------*/
 
 jmp_buf *throw_exception( Exception_Types_T type )
 {
@@ -171,10 +171,10 @@ jmp_buf *throw_exception( Exception_Types_T type )
 }
 
 
-/*-------------------------------------------------------------------------*/
-/* Function returns the type of the exception that has been thrown. If no  */
-/* exception has been thrown the program is stopped immediately.           */
-/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*
+ * Function returns the type of the exception that has been thrown. If no
+ * exception has been thrown the program is stopped immediately.
+ *-------------------------------------------------------------------------*/
 
 Exception_Types_T get_exception_type( const char *file, int line )
 {

@@ -106,10 +106,10 @@ static bool send_browser( FL_OBJECT *browser );
 static bool Comm_is_setup = UNSET;
 
 
-/*----------------------------------------------------------------*/
-/* This routine sets up the resources needed for the interprocess */
-/* communication. It is called before the child is forked.        */
-/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * This routine sets up the resources needed for the interprocess
+ * communication. It is called before the child is forked.
+ *----------------------------------------------------------------*/
 
 void setup_comm( void )
 {
@@ -175,10 +175,10 @@ void setup_comm( void )
 }
 
 
-/*--------------------------------------------------------------*/
-/* This routine is called after the child process died to clean */
-/* up the resources used in the interprocess communication.     */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ * This routine is called after the child process died to clean
+ * up the resources used in the interprocess communication.
+ *--------------------------------------------------------------*/
 
 void end_comm( void )
 {
@@ -208,20 +208,20 @@ void end_comm( void )
 }
 
 
-/*-----------------------------------------------------------------*/
-/* In new_data_handler() the parent checks for new messages in the */
-/* message queue. The message queue is read as long as the low     */
-/* marker does not reach the high marker, both being incremented   */
-/* in a wrap-around fashion. Accepting new data or honoring a      */
-/* REQUEST may fail, most probably due to running out of memory.   */
-/* Therefore all the code has to be run in a TRY environment and   */
-/* when something fails we have to kill the child to prevent it    */
-/* sending further data we can't accept anymore. end_comm() calls  */
-/* this function a last time, so we also have to set the low and   */
-/* the high marker to the same value which keeps the function from */
-/* being executed because the child is now already dead and can't  */
-/* change the high marker anymore.                                 */
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ * In new_data_handler() the parent checks for new messages in the
+ * message queue. The message queue is read as long as the low
+ * marker does not reach the high marker, both being incremented
+ * in a wrap-around fashion. Accepting new data or honoring a
+ * REQUEST may fail, most probably due to running out of memory.
+ * Therefore all the code has to be run in a TRY environment and
+ * when something fails we have to kill the child to prevent it
+ * sending further data we can't accept anymore. end_comm() calls
+ * this function a last time, so we also have to set the low and
+ * the high marker to the same value which keeps the function from
+ * being executed because the child is now already dead and can't
+ * change the high marker anymore.
+ *-----------------------------------------------------------------*/
 
 int new_data_handler( void )
 {
@@ -323,9 +323,9 @@ int new_data_handler( void )
 }
 
 
-/*-------------------------------------------------------------*/
-/* Called whenever the child needs to send data to the parent. */
-/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*
+ * Called whenever the child needs to send data to the parent.
+ *-------------------------------------------------------------*/
 
 void send_data( int type, int shm_id )
 {
@@ -349,11 +349,11 @@ void send_data( int type, int shm_id )
 }
 
 
-/*----------------------------------------------------------------------*/
-/* This function handles the reading from the pipe for both the parent  */
-/* and the child process. In each case a message is started by a header */
-/* that contains at least information about the type of message.        */
-/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*
+ * This function handles the reading from the pipe for both the parent
+ * and the child process. In each case a message is started by a header
+ * that contains at least information about the type of message.
+ *----------------------------------------------------------------------*/
 
 bool reader( void *ret )
 {
@@ -374,8 +374,8 @@ bool reader( void *ret )
 }
 
 
-/*--------------------------------------------------------------*/
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *--------------------------------------------------------------*/
 
 static bool parent_reader( Comm_Struct_T *header )
 {
@@ -978,8 +978,8 @@ static bool parent_reader( Comm_Struct_T *header )
 }
 
 
-/*--------------------------------------------------------------*/
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *--------------------------------------------------------------*/
 
 static bool child_reader( void *ret, Comm_Struct_T *header )
 {
@@ -1073,10 +1073,10 @@ static bool child_reader( void *ret, Comm_Struct_T *header )
 }
 
 
-/*-------------------------------------------------------------------------*/
-/* This function is the opposite of reader() (see above) - it writes the   */
-/* data into the pipe.                                                     */
-/*-------------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ * This function is the opposite of reader() (see above) - it writes the
+ * data into the pipe.
+ *-----------------------------------------------------------------------*/
 
 bool writer( int type, ... )
 {
@@ -1373,9 +1373,9 @@ bool writer( int type, ... )
 }
 
 
-/*------------------------------------------------------------------*/
-/* Sends all lines of one of the browsers successively to the child */
-/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ * Sends all lines of one of the browsers successively to the child
+ *------------------------------------------------------------------*/
 
 static bool send_browser( FL_OBJECT *browser )
 {
@@ -1390,14 +1390,14 @@ static bool send_browser( FL_OBJECT *browser )
 }
 
 
-/*--------------------------------------------------------------*/
-/* Functions reads from the pipe in chunks of the maximum size. */
-/* ->                                                           */
-/*    1. Pointer to buffer with data                            */
-/*    2. Number of bytes to be read                             */
-/*    3. Flag, set when reading by the child can be interrupted */
-/*       by a DO_QUIT signal                                    */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ * Functions reads from the pipe in chunks of the maximum size.
+ * ->
+ *    1. Pointer to buffer with data
+ *    2. Number of bytes to be read
+ *    3. Flag, set when reading by the child can be interrupted
+ *       by a DO_QUIT signal
+ *--------------------------------------------------------------*/
 
 static void pipe_read( char *buf, size_t bytes_to_read )
 {
@@ -1447,13 +1447,13 @@ static void pipe_read( char *buf, size_t bytes_to_read )
 }
 
 
-/*--------------------------------------------------------------*/
-/* Functions writes to the pipe in chunks of the maximum size.  */
-/*                                                              */
-/* ->                                                           */
-/*    1. Pointer to buffer for storing the data                 */
-/*    2. Number of bytes to be written                          */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ * Functions writes to the pipe in chunks of the maximum size.
+ *
+ * ->
+ *    1. Pointer to buffer for storing the data
+ *    2. Number of bytes to be written
+ *--------------------------------------------------------------*/
 
 static bool pipe_write( char *buf, size_t bytes_to_write )
 {

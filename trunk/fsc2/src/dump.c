@@ -44,28 +44,28 @@ enum {
 #endif
 
 
-/*-----------------------------------------------------------------------*/
-/* This function is hardware depended, i.e. it will only work on i386    */
-/* type processors, so it returns immediately without doing anything if  */
-/* the machine is not a i386.                                            */
-/* This function is called from the signal handler for 'deadly' signals, */
-/* e.g. SIGSEGV etc. It tries to figure out where this signal happend,   */
-/* creates a backtrace by running through the stackframes and determines */
-/* from the return addresses and with the help of the GNU utility        */
-/* 'addr2line' the function name and the source file and line number     */
-/* (asuming the executable was compiled with the -g flag and wasn't      */
-/* stripped). The result is written to the write end of a pipe that is   */
-/* (mis)used as a temporary buffer, from which the results will be read  */
-/* later (the read end is a global variable named 'Fail_Mess_Fd').       */
-/* If the macro ADDR2LINE isn't defined the function will do nothing.    */
-/* If it is defined it must be the complete path to 'addr2line'. The     */
-/* best way to set it correctly is probably to have lines like           */
-/* ADDR2LINE = $(shell which addr2line)                                  */
-/* ifneq ($(word 1,$(ADDR2LINE)),which:)                                 */
-/*     CFLAGS += -DADDR2LINE=\"$(ADDR2LINE)\"                            */
-/* endif                                                                 */
-/* in the Makefile.                                                      */
-/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ * This function is hardware depended, i.e. it will only work on i386
+ * type processors, so it returns immediately without doing anything if
+ * the machine is not a i386.
+ * This function is called from the signal handler for 'deadly' signals,
+ * e.g. SIGSEGV etc. It tries to figure out where this signal happend,
+ * creates a backtrace by running through the stackframes and determines
+ * from the return addresses and with the help of the GNU utility
+ * 'addr2line' the function name and the source file and line number
+ * (asuming the executable was compiled with the -g flag and wasn't
+ * stripped). The result is written to the write end of a pipe that is
+ * (mis)used as a temporary buffer, from which the results will be read
+ * later (the read end is a global variable named 'Fail_Mess_Fd').
+ * If the macro ADDR2LINE isn't defined the function will do nothing.
+ * If it is defined it must be the complete path to 'addr2line'. The
+ * best way to set it correctly is probably to have lines like
+ * ADDR2LINE = $(shell which addr2line)
+ * ifneq ($(word 1,$(ADDR2LINE)),which:)
+ *     CFLAGS += -DADDR2LINE=\"$(ADDR2LINE)\"
+ * endif
+ * in the Makefile.
+ *-----------------------------------------------------------------------*/
 
 #if ! defined( NDEBUG ) && defined( ADDR2LINE ) && ! defined __STRICT_ANSI__
 void DumpStack( void *crash_address )
@@ -231,8 +231,8 @@ void DumpStack( UNUSED_ARG void *crash_address )
 #endif
 
 
-/*-----------------------------------------------------------------------*/
-/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ *-----------------------------------------------------------------------*/
 
 #if ! defined( NDEBUG ) && defined( ADDR2LINE ) && ! defined __STRICT_ANSI__
 
