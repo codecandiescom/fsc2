@@ -23,7 +23,6 @@
 
 
 #include "fsc2.h"
-#include "pulser.h"
 
 
 #if defined( FSC2_MDEBUG ) || defined( LIBC_MDEBUG )

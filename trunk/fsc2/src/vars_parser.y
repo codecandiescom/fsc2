@@ -25,6 +25,7 @@
 
 #include "fsc2.h"
 
+
 void varsparser_init( void );
 
 extern int varslex( void );
