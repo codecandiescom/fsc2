@@ -203,6 +203,7 @@ void device_append_to_list( const char *dev_name )
 	cd->name = T_strdup( dev_name );
 	cd->is_loaded = UNSET;
 	cd->next = NULL;
+	cd->count = 1;
 }
 
 
