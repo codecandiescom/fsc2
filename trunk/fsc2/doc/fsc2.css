@@ -1,4 +1,4 @@
-<!--
+/*
   $Id$
 
   Copyright (C) 1999-2003 Jens Thoms Toerring
@@ -19,25 +19,28 @@
   along with fsc2; see the file COPYING.  If not, write to
   the Free Software Foundation, 59 Temple Place - Suite 330,
   Boston, MA 02111-1307, USA.
---!>
+*/
 
 
 body        { margin :            0%;
               padding :           0%;
+			  z-index :           0;
             }
 
 #links      { position :          fixed;
               width :             160px;
               height :            100%;
               padding :           10px 10px;
-              background :        white url(background.gif) repeat-y;
+              background :        white url(background.gif) repeat-y fixed;
+			  z-index :           1;
             }
 
 #main       { position :          absolute;
               left :              180px;
-              right :             10px;
+			  width :             auto;
               padding :           0 10px;
               background :        white;
+			  z-index :           2;
             }
 
 code        { font-family :       Lucidatypewriter, monospace;
@@ -54,7 +57,7 @@ td.example  { background-color :  #FFFF44;
             }
 
 table.navi  { background-color :  #e6e6e6;
-              cellpadding :       4em;
+              cellpadding :       10px;
               cellspacing :       0px;
               border :            none;
               width :             100%;
