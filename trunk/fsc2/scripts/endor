@@ -1,0 +1,171 @@
+#!/usr/bin/perl -w
+
+# $Id$
+
+use strict;
+use Tk;
+
+local *F;
+
+my $lockin     = 'sr810';
+my $start_freq = 8;
+my $end_freq   = 22;
+my $step_freq  = 25;
+my $atten      = -5;
+my $mod_freq   = 19;
+my $mod_ampl   = 80;
+my $N_runs     = 20;
+
+my $how        = 'Start program';
+
+my $mw = MainWindow->new( );
+
+$mw->Optionmenu( '-options' => [ ( 'sr510', 'sr530', 'sr810', 'sr830' ) ],
+				 '-text' => 'sr810',
+				 '-variable' => \$lockin
+			   )->pack( '-padx' => '3m',
+					    '-pady' => '3m' );
+
+$mw->Optionmenu( '-options' => [ ( 'Start program', 'Test program',
+								   'Load into fsc2' ) ],
+				 '-variable' => \$how,
+				 '-command' => sub{ &write_out( $how ) }
+			   )->pack( '-padx' => '3m',
+					    '-pady' => '3m' );
+
+$mw->Button( '-text' => 'Quit',
+			 '-command' => [ destroy => $mw ]
+		   )->pack( '-padx' => '3m',
+					'-pady' => '3m' );
+
+MainLoop;
+
+
+sub write_out {
+
+my $how = shift;
+my $text;
+
+$how = "start" if $how =~ /^Start/;
+$how = "test"  if $how =~ /^Test/;
+$how = "load"  if $how =~ /^Load/;
+
+open( F, "|fsc2_$how" ) or die "Can't find utility.\n";
+
+print F
+"DEVICES:
+
+hp8647a;
+$lockin;
+
+
+VARIABLES:
+
+start_freq  = $start_freq MHz;
+end_freq    = $end_freq MHz;
+step_freq   = $step_freq kHz;          
+
+attenuation = $atten db;
+
+mod_freq    = $mod_freq kHz;
+mod_ampl    = $mod_ampl kHz;
+
+N_runs      = $N_runs;
+
+
+/***********************************************************/
+/* The following variables normally shouldn't be changed ! */
+/***********************************************************/
+
+I = 0;
+J;
+K = 1;
+
+N_points = ceil( ( end_freq - start_freq ) / step_freq ) + 1;
+data[ N_points ];
+mean[ N_points ];
+tc;
+File_1, File_2;
+
+
+PREPARATIONS:
+
+synthesizer_use_table( );
+synthesizer_attenuation( attenuation );
+synthesizer_att_ref_freq( 14 MHz );
+synthesizer_frequency( start_freq );
+synthesizer_modulation( \"FM\", \"EXT DC\", mod_ampl );
+
+init_1d( 2, N_points, start_freq * 1e-6, step_freq * 1e-6,
+		 \"Frequency / MHz\", \"Signal / V\" ); 
+
+
+EXPERIMENT:
+
+File_1 = get_file( \"File for storing all runs:\" );
+File_2 = get_file( \"File for storing final result:\" );
+
+lockin_ref_freq( mod_freq );
+lockin_ref_level( 1 V );
+tc = lockin_time_constant( );
+
+synthesizer_state( 1 );
+
+FOR I = 1 : N_runs
+{
+	print( \"Starting #. run of #\\n\", I, N_runs );
+
+    FOR J = 1 : N_points 
+	{
+        data[ J ] = lockin_get_data( );
+        display( J, data[ J ], 1, J, ( mean[ J ] + data[ J ] ) / I, 2 );
+	    synthesizer_frequency( start_freq + J * step_freq );
+        wait( tc );
+    }
+
+	save( File_1, data );
+	mean += data;
+	K = I;
+    synthesizer_frequency( start_freq );
+}
+
+
+ON_STOP:
+
+synthesizer_state( 0 );
+
+IF I > 0
+{
+	save_program( File_2, \"% \" );
+	fsave( File_2, \"%\\n% Lock-in sens. = # V, time const. = # s, phase = #\\n\"
+		   \"% Mod. freq. = # kHz, mod. ampl. = # kHz\\n%\\n\",
+		   lockin_sensitivity( ), tc, lockin_phase( ),
+		   mod_freq * 1e-3, mod_ampl * 1e-3 );
+	save_comment( File_2, \"% \", \"Sample: \\nTemperature = \\nField = \\n\",
+				  \"Please enter additional comments:\" );
+	fsave( File_2, \"%\\n\" );
+	save( File_2, mean / K );
+}
+";
+
+close( F );
+
+if ( $? != 0 ) {
+    if ( $? >> 8 == -1 ) {
+        $text = "Internal error.";
+    } elsif ( $? >> 8 == 1 ) {
+        $text = "Someone else is running fsc2.";
+    } elsif ( $? >> 8 == 2 ) {
+        $text = "fsc2 is currently busy.";
+    } elsif ( $? >> 8 == 3 ) {
+        $text = "Internal error of fsc2.";
+    } elsif ( $? >> 8 == 4 ) {
+        $text = "Could not start fsc2.";
+    }
+
+    $mw->messageBox( '-icon' => 'error',
+                     '-type' => 'Ok',
+	                 '-title' => 'Error',
+                     '-message' => $text );
+}
+}
