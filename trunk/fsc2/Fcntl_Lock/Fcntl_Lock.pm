@@ -411,9 +411,9 @@ sub fcntl_errno {
 The function returns a short description of the error that happened during the
 latest call of B<fcntl_lock> with the flock structure object. Please take the
 messages with a grain of salt, they represent what SUSV3 (IEEE 1003.1-2001)
-and the Linux and TRUE64 man pages tell what the error numbers mean, there
-could be differences (and additional error numbers) on other systems. If
-there was no error the function returns 'undef'.
+and the Linux, TRUE64, OpenBSD3 and Solaris8 man pages tell what the error
+numbers mean, there could be differences (and additional error numbers) on
+other systems. If there was no error the function returns 'undef'.
 
 =cut
 
