@@ -71,7 +71,7 @@ static void set_main_signals( void );
 
 int main( int argc, char *argv[ ] )
 {
-	char *fname;
+	char *fname = NULL;
 
 
 #if defined MDEBUG
