@@ -971,6 +971,7 @@ sub add_pulse_list {
 
 
 #---------------------------------------------------------
+# Returns the longest sequence of all channels with and without delays
 
 sub longest_sequence {
 
@@ -989,6 +990,7 @@ sub longest_sequence {
 
 
 #---------------------------------------------------------
+# Returns the earliest postion of all the pulses of all channels
 
 sub first_pulse {
 
