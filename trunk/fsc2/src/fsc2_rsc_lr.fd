@@ -8,7 +8,7 @@ Unit of measure: FL_COORD_PIXEL
 SnapGrid: 5
 
 =============== FORM ===============
-Name: fsc2
+Name: fsc2_lr
 Width: 620
 Height: 450
 Number of Objects: 12
@@ -233,7 +233,7 @@ callback: run_help
 argument: 0
 
 =============== FORM ===============
-Name: run
+Name: run_lr
 Width: 620
 Height: 450
 Number of Objects: 14
@@ -496,7 +496,7 @@ callback:
 argument: 
 
 =============== FORM ===============
-Name: input_form
+Name: input_form_lr
 Width: 365
 Height: 270
 Number of Objects: 3
@@ -556,7 +556,7 @@ callback:
 argument: 
 
 =============== FORM ===============
-Name: print
+Name: print_lr
 Width: 440
 Height: 340
 Number of Objects: 28
@@ -1069,7 +1069,7 @@ callback:
 argument: 
 
 =============== FORM ===============
-Name: cut
+Name: cut_lr
 Width: 620
 Height: 450
 Number of Objects: 18
