@@ -122,6 +122,11 @@ ni6601
 rs_spec10
 
 
+// Monochromators (Acton SpectaPro-300i)
+
+spectrapro_300i
+
+
 // Power Supplies (Thurlby&Thandar PL330DP)
 
 thurlby330
