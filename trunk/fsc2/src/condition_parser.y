@@ -61,6 +61,7 @@ static Var *CV;
 %token E_PLEN         284
 %token E_PDPOS        285
 %token E_PDLEN        286
+%token E_PMAXLEN      287
 
 
 %token <vptr> E_VAR_TOKEN         /* variable name */
@@ -117,6 +118,7 @@ expr:    E_INT_TOKEN unit         { $$ = apply_unit( vars_push( INT_VAR, $1 ),
        | E_PLEN                   { p_get( $1, P_LEN ); }
        | E_PDPOS                  { p_get( $1, P_DPOS ); }
        | E_PDLEN                  { p_get( $1, P_DLEN ); }
+       | E_PMAXLEN                { p_get( $1, P_MAXLEN ); }
        | expr E_AND expr          { $$ = vars_comp( COMP_AND, $1, $3 ); }
        | expr E_OR expr           { $$ = vars_comp( COMP_OR, $1, $3 ); }
        | expr E_XOR expr          { $$ = vars_comp( COMP_XOR, $1, $3 ); }

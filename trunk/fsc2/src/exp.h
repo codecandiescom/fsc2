@@ -46,6 +46,7 @@ typedef union {
 #define	E_PLEN          284
 #define	E_PDPOS         285
 #define	E_PDLEN         286
+#define E_PMAXLEN       287
 
 #define IF_TOK         2049
 #define ELSE_TOK       2050
