@@ -645,8 +645,6 @@ static void print_header( FILE *fp, char *name )
 	             "      false charpath flattenpath pathbbox\n"
 			     "      pop exch pop exch pop gr } b\n" );
 
-	/* Throw out everything up to the next comment to get rid of the logo */
-
 	if ( print_with_color )
 		fprintf( fp, 
 			     "/fsc2 { gs /Times-Roman 6 sf\n"
@@ -664,12 +662,12 @@ static void print_header( FILE *fp, char *name )
 			     "        -0.025 0.025 rm } for\n"
 			     "        1 setgray (fsc2) show gr } b\n" );
 
-	/* Done with the header, tell the Postscript interpreter */
+	/* Now we're done with the header, tell the Postscript interpreter */
 
 	fprintf( fp, "%%%%EndProlog\n\n" );
 
-	/* Try to setup a font that also supports umlauts etc., thanks to
-	   Adobe Systems Inc., "PostScript Language Reference" 3rd edition */
+	/* Try to setup the font so that it also supports umlauts etc., thanks
+	   to Adobe Systems Inc., "PostScript Language Reference", 3rd edition */
 
 	fprintf( fp, "/Times-Roman findfont\n"
 				 "dup length dict begin\n"
