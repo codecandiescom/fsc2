@@ -224,13 +224,15 @@ Var *boxcar_get_curve( Var *v )
 
 	if ( v->type & ( INT_VAR | FLOAT_VAR ) )
 	{
-		curve_type = get_long( v, "curve type" );
+ 		curve_type = get_long( v, "curve type" );
 
 		if ( ( v = vars_pop( v ) ) == NULL )
 		{
 			print( FATAL, "Missing curve number.\n" );
 			THROW( EXCEPTION );
 		}
+
+		curve_number = get_long( v, "curve number" );
 
 		v = vars_pop( v );
 	}
@@ -276,7 +278,8 @@ Var *boxcar_get_curve( Var *v )
 
 		if ( curve_type == -1 )
 		{
-			print( FATAL, "First argument ('%s') is invalid.\n", v->val.sptr );
+			print( FATAL, "First argument ('%s') isn't a invalid curve.\n",
+				   v->val.sptr );
 			THROW( EXCEPTION );
 		}
 
