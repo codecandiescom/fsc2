@@ -501,8 +501,8 @@ int rulbus_adc12_check_convert( int handle, double *volts )
 	if ( ( card = rulbus_adc12_card_find( handle ) ) == NULL )
 		return RULBUS_INV_HND;
 
-	/* Return immediately if we're in internal trigger mode (or this is a
-	   card that can't be triggered externally) */
+	/* Return immediately if we're in internal trigger mode (or if this is
+	   a card that can't be triggered externally) */
 
 	if ( card->trig_mode == RULBUS_ADC12_INT_TRIG )
 		return 0;
