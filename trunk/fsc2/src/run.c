@@ -64,6 +64,7 @@ volatile sig_atomic_t can_jmp_alrm = 0;
 static struct sigaction sigchld_old_act,
 	                    quitting_old_act;
 static volatile sig_atomic_t child_return_status;
+static bool graphics_have_been_started = UNSET;
 
 
 /*------------------------------------------------------------------*/
@@ -267,6 +268,7 @@ static bool init_devs_and_graphics( void )
 	/* Make a copy of the errors found while compiling the program */
 
 	compile_test = EDL.compilation;
+	graphics_have_been_started = UNSET;
 
 	TRY
 	{
@@ -296,6 +298,8 @@ static bool init_devs_and_graphics( void )
 		check_for_further_errors( &compile_test, &EDL.compilation );
 
 		start_graphics( );
+		graphics_have_been_started = SET;
+
 		if ( G.dim & 1 || ! G.is_init )
 			fl_set_object_callback( GUI.run_form_1d->stop_1d,
 									run_stop_button_callback, 0 );
@@ -765,7 +769,11 @@ void run_close_button_callback( FL_OBJECT *a, long b )
 {
 	UNUSED_ARGUMENT( a );
 	UNUSED_ARGUMENT( b );
-	stop_graphics( );
+	if ( graphics_have_been_started )
+	{
+		stop_graphics( );
+		graphics_have_been_started = UNSET;
+	}
 	set_buttons_for_run( 0 );
 	Internals.state = STATE_IDLE;
 }
