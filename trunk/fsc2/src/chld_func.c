@@ -1764,6 +1764,70 @@ bool exp_objdel( char *buffer, ptrdiff_t len )
 }
 
 
+/*--------------------------------------------------------------*/
+/* Child and parent side function for passing the arguments and */
+/* the return value of the object_change_label() function.      */
+/*--------------------------------------------------------------*/
+
+bool exp_clabel( char *buffer, ptrdiff_t len )
+{
+	if ( Internals.I_am == CHILD )
+	{
+		if ( ! writer( C_CLABEL, len, buffer ) )
+		{
+			T_free( buffer );
+			return FAIL;
+		}
+		T_free( buffer );
+		return reader( NULL );
+	}
+	else
+	{
+		char *old_Fname = EDL.Fname;
+		long old_Lc = EDL.Lc;
+		Var *Func_ptr;
+		int acc;
+		char *pos;
+		long ID;
+
+
+		TRY
+		{
+			/* Get function to delete an input object */
+
+			Func_ptr = func_get( "object_change_label", &acc );
+
+			/* Unpack parameter and push them onto the stack */
+
+			pos = buffer;
+			memcpy( &EDL.Lc, pos, sizeof EDL.Lc );    /* current line number */
+			pos += sizeof EDL.Lc;
+
+			memcpy( &ID, pos, sizeof ID );            /* get object ID */
+			vars_push( INT_VAR, ID );
+			pos += sizeof ID;
+
+			EDL.Fname = pos;                          /* current file name */
+
+			vars_push( STR_VAR, pos );                /* get label string */
+			pos += strlen( pos ) + 1;
+
+			/* Call the function */
+
+			vars_pop( func_call( Func_ptr ) );
+			writer( C_CLABEL_REPLY, 1L );
+			TRY_SUCCESS;
+		}
+		OTHERWISE
+			writer( C_CLABEL_REPLY, 0L );
+
+		EDL.Fname = old_Fname;
+		EDL.Lc = old_Lc;
+		return SET;
+	}
+}
+
+
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
