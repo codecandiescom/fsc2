@@ -199,8 +199,8 @@ int ni_daq_ao_init( int board )
 	if ( ni_daq_dev[ board ].props.num_ao_channels == 0 )
 		return 0;
 
-	/* Switch all AO channels to bipolar mode and to use the internal reference
-	   voltage */
+	/* Switch all AO channels to bipolar mode and to use the internal
+	   reference voltage */
 
 	ao.cmd = NI_DAQ_AO_CHANNEL_SETUP;
 	ao.channel_args = &arg;
