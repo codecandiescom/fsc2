@@ -11,15 +11,19 @@ simple DIO using the two 82C55A chips on the board and only with mode 0
 ("Betriebsart 0"). The 8254/82C54 timer/counter chips on the board are
 not supported.
 
+
 The 24-bit wide DIOs can be split up into either three 8-bit DIOs, two
 12-bit DIO, one 24-bit DIOs or one 16-bit and one 8-bit DIO. Splitting
 is done programatically whenever necessary. Each of (split up) DIOs can
 be used for input as well as output and the direction can be changed.
 
+
 To use the kernel module and the library you need a device file for
 the board called 'witio_48' in the '/dev' directory.
 
+
 To use the library your program must include the header file 'witio_48.h'.
+
 
 The library supplies the following functions:
 
@@ -28,12 +32,14 @@ witio_48_get_mode()
 witio_48_dio_out()
 witio_48_dio_in()
 witio_48_close()
-witio_48_error_message()
+witio_48_perror()
+witio_48_strerror()
 
-All functions return an integer, indicating success or failure. On success,
-'WITIO_48_OK' (which is just 0) is returned. On failure a negative number,
-is returned, indicating the type of failure. The following values can be
-expected:
+
+Nearly all functions return an integer, indicating success or failure. On
+success, 'WITIO_48_OK' (which is just 0) is returned. On failure a negative
+number is returned, indicating the type of failure. The following values
+can be expected:
 
     WITIO_48_OK        Function call was successful
     WITIO_48_ERR_IVD   Invalid DIO number
@@ -49,8 +55,22 @@ expected:
     WITIO_48_ERR_DFP   Unspecified error when opening the device file
     WITIO_48_ERR_INT   Internal driver or library error
 
-Except the functions witio_48_close() and witio_48_error_message() all
-functions may return one of the following error codes in case of failure:
+The absolute value of the error code can be used as an index into a an
+array of short descriptions of the error encountered, which is defined as
+
+extern const char *witio_48_errlist[ ];
+
+The length of this array is given by the (constant) global variable
+
+extern const int witio_48_nerr;
+
+i.e. the largest  message number provided by the array of error messages
+is witio_48_nerr - 1.
+
+
+Except the functions witio_48_close(), witio_48_perror() and
+witio_48_strerror() all functions may return one of the following
+error codes in case of failure:
 
     WITIO_48_ERR_IVD    WITIO_48_ERR_BNO    WITIO_48_ERR_BBS
     WITIO_48_ERR_NDV    WITIO_48_ERR_ACS    WITIO_48_ERR_DFM
@@ -58,25 +78,30 @@ functions may return one of the following error codes in case of failure:
 
 They won't be listed anymore in the description of the functions below.
 
+
 There is no need to "open" the board before using it - the first call
 to one of the functions will automatically open the boards device file
 and make it exclusively accessible by the process that opened the board
 this way.
 
+
 Processes that get started by a call to the exec-family of functions
 won't be able to access the board, i.e. the close-on-exec flag is
 set for the file handle used for accessing the board.
 
-All functions (except witio_48_close() and witio_48_error_message())
-expect the number of the DIO chip to be used as the first argument.
-This must be either 0 or 1, or instead of directly specifying the
-number either 'WITIO_48_DIO_1' or 'WITIO_48_DIO_2'.
+
+All functions (except witio_48_close() and witio_48_perror() and
+witio_48_strerror()) expect the number of the DIO chip to be used as
+the first argument. This must be either 0 or 1, or instead of directly
+specifying the number either 'WITIO_48_DIO_1' or 'WITIO_48_DIO_2'.
+
 
 Wherever a I/O mode value is passed to a function or returned by a
 function (i.e. a value specifying how the 24-bit DIO is split into
 sub-DIOs), an unsigned integer between 0 and 3 is valid. Instead of
 using numbers directly you should use either 'WITIO_48_MODE_3x8',
 'WITIO_48_2x12', 'WITIO_48_1x24' or 'WITIO_48_16_8'.
+
 
 When sending data to or receiving data from the board a channel
 argument is required to specify which of the sub-DIOs is to be used.
@@ -86,10 +111,12 @@ and 'WITIO_48_CHANNEL_2' instead. Please note that depending on the
 current setting of the I/O mode not all of these channels may be
 valid.
 
+
 Data send to or received from the board are always exchanged as an
 unsigned long. Please note that depending on the current I/O mode,
 only a sub-range of the full range of values representable by an
 unsigned long is valid.
+
 
 When in the following A-, B- or C-pins are mentioned the pins labeled
 1PA0 to 1PA7 and 2PA0 to 2PA7, 1PB0 to 1PB7 and 2PB0 to 2PB7 and
@@ -250,3 +277,23 @@ The function returns a short error message about the reason the last
 call of one of the functions in the library failed. If there was no
 error during the last function call  (or no function was called since
 the library was loaded) an empty string is returned.
+
+
+======================================================================
+
+int witio_48_perror( const char *s )
+
+The function prints produces a message on the standard error output,
+describing the error encountered during the last call of one of the
+witio_48_xxx() functions. First (if s is not NULL and *s is not '\0')
+the argument string s is printed, followed by a colon and a blank.
+Then follows the error message and a new-line. The function returns
+the number of printed characters.
+
+
+======================================================================
+
+const char *witio_48_strerror( void )
+
+The function returns a string with the error message for the last
+call of one of the witio_48_xxx() functions.

@@ -64,7 +64,7 @@ expected:
 
 
 The absolute value of the error code can be used as an index into a an
-array of short descriptions of the error encountered, defined as
+array of short descriptions of the error encountered, which is defined as
 
 extern const char *ni6601_errlist[ ];
 
@@ -87,7 +87,7 @@ These error codes will not be mentioned explicitely in the description
 of the functions anymore.
 
 
-All functions require the number of the board as the first argument.
+Nearly all functions require the number of the board as the first argument.
 This argument is an integer number between 0 and (NI6601_MAX_BOARDS - 1)
 or the number of installed boards minus 1, whatever is smaller.
 

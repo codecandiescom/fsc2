@@ -71,7 +71,7 @@ indicating the type of failure. The following values can be expected:
     ME6X00_ERR_INT    Internal library error
 
 The absolute value of the error code can be used as an index into a an
-array of short descriptions of the error encountered, defined as
+array of short descriptions of the error encountered, which is defined as
 
 extern const char *me6x00_errlist[ ];
 

@@ -37,7 +37,12 @@ int witio_48_dio_out( WITIO_48_DIO dio, WITIO_48_CHANNEL channel,
 					  unsigned long value );
 int witio_48_dio_in( WITIO_48_DIO dio, WITIO_48_CHANNEL channel,
 					 unsigned long *value );
-const char *witio_48_error_message( void );
+int witio_48_perror( const char *s );
+const char *witio_48_strerror( void );
+
+
+extern const char *witio_48_errlist[ ];
+extern const int witio_48_nerr;
 
 
 #define WITIO_48_OK        0
@@ -53,19 +58,6 @@ const char *witio_48_error_message( void );
 #define WITIO_48_ERR_DFM -10
 #define WITIO_48_ERR_DFP -11
 #define WITIO_48_ERR_INT -12
-
-#define WITIO_48_ERR_ICA_MESS  "Invalid channel number"
-#define WITIO_48_ERR_ICM_MESS  "Invalid channel for current I/O mode"
-#define WITIO_48_ERR_IVD_MESS  "Invalid DIO number"
-#define WITIO_48_ERR_IMD_MESS  "Invalid mode"
-#define WITIO_48_ERR_IDV_MESS  "Invalid output value"
-#define WITIO_48_ERR_BBS_MESS  "Board is busy"
-#define WITIO_48_ERR_BNO_MESS  "Board not open"
-#define WITIO_48_ERR_NDV_MESS  "No driver loaded for board"
-#define WITIO_48_ERR_ACS_MESS  "No permissions to open device file"
-#define WITIO_48_ERR_DFM_MESS  "Device file does not exist"
-#define WITIO_48_ERR_DFP_MESS  "Unspecified error when opening device file"
-#define WITIO_48_ERR_INT_MESS  "Internal driver or library error"
 
 
 #ifdef __cplusplus
