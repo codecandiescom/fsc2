@@ -119,6 +119,9 @@ const char *show_fselector( const char *message, const char *directory,
 }
 
 
+/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+
 const char *show_input( const char *content, const char *label )
 {
 	char *ret = NULL;
@@ -136,6 +139,9 @@ const char *show_input( const char *content, const char *label )
 	}
 }
 
+
+/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
 
 static const char *handle_input( const char *content, const char *label )
 {

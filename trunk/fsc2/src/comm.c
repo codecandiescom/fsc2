@@ -762,7 +762,7 @@ void writer( int type, ... )
 			if ( header.data.str_len[ 0 ] > 0 )
 				write( pd[ WRITE ], str[ 0 ], header.data.len );
 
-			/* wait for a random character to be sent back as acknowledgement */
+			/* wait for random character to be sent back as acknowledgement */
 
 			read( pd[ READ ], &ack, sizeof( char ) );
 			break;
