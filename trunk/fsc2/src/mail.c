@@ -701,7 +701,7 @@ static int weed_out( unsigned char *buf, int len, unsigned char *ans_sec,
 	const char *host;
 	unsigned char rpq;
 	unsigned short prior_level = 0xFFFF;
-	unsigned short *non_local__prior;
+	unsigned short *non_local_prior;
 
 
 	/* Loop over all answers for the first time to check if the local
