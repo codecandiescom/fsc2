@@ -41,16 +41,17 @@ static struct sigaction sigchld_oact,
 	                    quitting_oact;
 
 
-/*-------------------------------------------------------------------*/
-/* run() starts an experiment. To do so it initializes all needed    */
-/* devices and opens a new window for displaying the measured data.  */
-/* Then a pipe is opened for passing measured data from the child    */
-/* process (to be created for acquiring the data) and the main       */
-/* process (that just accepts and displays the data). After          */
-/* initializing some global variables and setting up signal handlers */
-/* used for synchronization the processes the child process is       */
-/* started.                                                          */
-/*-------------------------------------------------------------------*/
+/*------------------------------------------------------------------*/
+/* run() starts an experiment. To do so it initializes all needed   */
+/* devices and opens a new window for displaying the measured data. */
+/* Then everything needed for the communication between parent and  */
+/* the child to be created is set up, i.e. pipes, a semaphore and a */
+/* shared memory segment for storing the type of the data and a key */
+/* for a further shared memory segment that contains the data.      */
+/* Finally, after initializing some global variables and setting up */
+/* signal handlers used for synchronization the processes the child */
+/* process is started and thus the experiments begins.              */
+/*------------------------------------------------------------------*/
 
 bool run( void )
 {
@@ -148,7 +149,7 @@ bool run( void )
 
 	fl_set_cursor( FL_ObjWin( main_form->run ), XC_left_ptr );
 
-	/* Here the experiment really starts - process for doing it is forked. */
+	/* Here the experiment starts - a child process for doing it is forked. */
 
 	if ( ( child_pid = fork( ) ) == 0 )     /* fork the child */
 		run_child( );
@@ -165,6 +166,8 @@ bool run( void )
 		sema_post( semaphore );      /* we're ready to read data */
 		return OK;
 	}
+
+	/* If forking the child failed we'll end up here... */
 
 	sigaction( SIGCHLD,  &sigchld_oact,  NULL );
 	sigaction( NEW_DATA, &new_data_oact, NULL );
@@ -287,20 +290,41 @@ static void check_for_further_errors( Compilation *c_old, Compilation *c_all )
 
 /*-------------------------------------------------------------------*/
 /* new_data_handler() is the handler for the NEW_DATA signal sent by */
-/* the child to the parent if there are new data - only exception:   */
-/* the first instance of the signal (while 'child_is_ready' is still */
-/* zero) just tells the parent that the child has now installed its  */
-/* signal handlers and is ready to accept signals. The handler       */
-/* always sends the DO_SEND signal to the child to allow it to       */
-/* continue with whatever it needs to do (the child waits after      */
-/* sending data for this signal in order to avoid flooding the       */
-/* parent with excessive amounts of data and signals).               */
+/* the child to the parent if there are new data.                    */
+/* The child always stores the data in a shared memory segment. Then */
+/* it waits for the parent to become ready to accept the data by     */
+/* waiting for a semaphore to become posted. Next it puts the memory */
+/* segment key plus the identifier of the type of data in a common   */
+/* shared memory segment and finally sends the parent a NEW_DATA     */
+/* signal.                                                           */
+/* This in turn makes the parent execute this signal handler. The    */
+/* parent has a buffer for storing the information about the data it */
+/* gets from the child, the message queue. In this handler it stores */
+/* the information about the data in the next free slot of the       */
+/* message queue and increments the marker pointing to the next free */
+/* slot.                                                             */
+/* There are two types of data, DATA and REQUESTS: Messages of type  */
+/* DATA simply get stored in the message queue and will be dealt     */
+/* with whenever there is time (via an idle callback, see comm.c).   */
+/* As long as the message queue isn't full yet, for DATA messages    */
+/* semaphore gets posted again, telling the child that the parent is */
+/* prepared to accept further messages. On the other hand, if the    */
+/* messages queue is full a global variable is set, thus indicating  */
+/* to the function removing the data from the message queue to post  */
+/* the semaphore when it is done with the data.                      */
+/* In contrast on messages of type REQUEST come from functions where */
+/* the child sends data not via shared mmory segments but a pipe.    */
+/* In this case the child is waiting to write data to a pipe. It     */
+/* starts writing only when the semaphore gets posted. On the other  */
+/* side, the parent has to deal with all the earlier messages in the */
+/* message queue before it starts reading the pipe. So, for this     */
+/* kind if messages the semaphore isn't posted yet but only when the */
+/* parent is ready for reading on the pipe.                          */
 /*-------------------------------------------------------------------*/
 
 static void new_data_handler( int signo )
 {
 	int errno_saved;
-	int new_high;
 
 
 	signo = signo;
@@ -308,24 +332,18 @@ static void new_data_handler( int signo )
 
 	Message_Queue[ message_queue_high ].shm_id = Key->shm_id;
 	Message_Queue[ message_queue_high ].type = Key->type;
-	new_high = ( message_queue_high + 1 ) % QUEUE_SIZE;
+	message_queue_high = ( message_queue_high + 1 ) % QUEUE_SIZE;
 
 	/* If this were data tell child that it can send new data (as long as the
 	   message queue isn't full) */
 
 	if ( Key->type == DATA )
 	{
-		if ( new_high != message_queue_low )
-		{
-			message_queue_high = new_high;
+		if ( ( message_queue_high + 1 ) % QUEUE_SIZE != message_queue_low )
 			sema_post( semaphore );
-		}
 		else
 			need_post = SET;
 	}
-	else
-		if ( new_high != message_queue_low )
-			message_queue_high = new_high;
 
 	errno = errno_saved;
 }

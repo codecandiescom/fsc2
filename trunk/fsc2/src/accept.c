@@ -67,6 +67,12 @@ void accept_new_data( void )
 
 		message_queue_low = ( message_queue_low + 1 ) % QUEUE_SIZE;
 
+		if ( need_post )
+		{
+			need_post = UNSET;
+			sema_post( semaphore );
+		}
+
 		/* Return if all entries in the message queue are used up */
 
 		if ( message_queue_low == message_queue_high )

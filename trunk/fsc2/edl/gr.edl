@@ -1,0 +1,21 @@
+VARIABLES:
+
+I;
+g;
+MAX = 1000;
+g[ MAX ], r[ MAX ];
+
+PREPARATIONS:
+
+init_1d( 2 );
+
+EXPERIMENT:
+
+
+FOR I = 1 : MAX {
+	g[ I ] = grandom( );
+	r[ I ] = random( );
+	display( I, g[ I ], 1, I, r[ I ], 2 );
+}
+
+print( "g = #, r = #\n", rms( g ), rms( r ) );

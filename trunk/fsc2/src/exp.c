@@ -78,6 +78,9 @@ void store_exp( FILE *in )
 	static bool is_restart = UNSET;
 	int ret;
 	char *cur_Fname = NULL;
+	long curly_brace_count = 0;
+	long paranthesis_count = 0;
+	long square_brace_count = 0;
 
 
 	/* Set input file */
@@ -115,10 +118,50 @@ void store_exp( FILE *in )
 		   But there are a few exceptions: For strings we need also a copy of
 		   the string since it's not persistent. Function tokens and also
 		   variable references just push their data onto the variable stack,
-		   so we have to copy them from the stack into the token structure */
+		   so we have to copy them from the stack into the token structure.
+		   Beside we have to do some sanity checks on paranthesis etc. */
 
 		switch( ret )
 		{
+			case '(' :
+				paranthesis_count++;
+				break;
+
+			case ')' :
+				if ( --paranthesis_count < 0 )
+				{
+					eprint( FATAL, "%s:%ld: Found ')' without matching '('.\n",
+							Fname, Lc );
+					THROW( EXCEPTION );
+				}
+				break;
+
+			case '{' :
+				curly_brace_count++;
+				break;
+
+			case '}' :
+				if ( --curly_brace_count < 0 )
+				{
+					eprint( FATAL, "%s:%ld: Found '}' without matching '{'.\n",
+							Fname, Lc );
+					THROW( EXCEPTION );
+				}
+				break;
+
+			case '[' :
+				square_brace_count++;
+				break;
+
+			case ']' :
+				if ( --square_brace_count < 0 )
+				{
+					eprint( FATAL, "%s:%ld: Found ']' without matching '['.\n",
+							Fname, Lc );
+					THROW( EXCEPTION );
+				}
+				break;
+
 			case E_STR_TOKEN :
 				prg_token[ prg_length ].tv.sptr = T_strdup( exp_val.sptr );
 				break;
@@ -870,9 +913,9 @@ int conditionlex( void )
 }
 
 
-/*------------------------------------------------*/
-/* Function tests the condition of a while or if. */
-/*------------------------------------------------*/
+/*-------------------------------------------------------*/
+/* Function tests the condition of a WHILE, UNTIL or IF. */
+/*-------------------------------------------------------*/
 
 bool test_condition( Prg_Token *cur )
 {
@@ -909,7 +952,7 @@ bool test_condition( Prg_Token *cur )
 					cur->Fname, cur->Lc, t );
 		THROW( EXCEPTION );
 	}
-			 
+
 	/* Test the result - everything nonzero returns OK */
 
 	if ( Var_Stack->type == INT_VAR )
