@@ -635,7 +635,7 @@ Var *lockin_dac_voltage( Var *v )
 	channel = v->type == INT_VAR ? v->val.lval : ( long ) v->val.dval;
 	v = vars_pop( v );
 
-	if ( channel < first_DAC_port && channel > last_DAC_port )
+	if ( channel < first_DAC_port || channel > last_DAC_port )
 	{
 		eprint( FATAL, "%s:%ld: %s: Invalid lock-in DAC channel number %ld, "
 				"valid channels are in the range from %d to %d.\n", Fname, Lc,
