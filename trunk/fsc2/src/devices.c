@@ -62,9 +62,8 @@ void device_add( const char *name )
 	   locally adjustable names for the devices. Therefor, we assemble the
 	   name of the modules corresponding to the device name */
 
-	lib_name = get_string( strlen( libdir ) + strlen( dev_name ) + 4 );
-	sprintf( lib_name, "%s%s%s.so\n", libdir,
-			 libdir[ strlen( libdir ) - 1 ] != '/' ? "/" : "", dev_name );
+	lib_name = get_init_string( "%s%s%s.so\n", libdir,
+				  libdir[ strlen( libdir ) - 1 ] != '/' ? "/" : "", dev_name );
 
 	/* Try to access the module (also allow the name to be defined via
 	   LD_LIBRARY_PATH) - don't follow links yet */
@@ -104,7 +103,7 @@ void device_add( const char *name )
 			}
 		}
 
-		real_name = get_string( pathmax );
+		real_name = T_malloc( pathmax + 1 );
 		if ( ( length = readlink( lib_name, real_name, pathmax ) ) < 0 )
 		{
 			eprint( FATAL, UNSET, "Can't follow symbolic link for `%s'.\n",

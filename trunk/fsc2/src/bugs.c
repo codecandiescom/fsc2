@@ -116,48 +116,32 @@ void bug_report_callback( FL_OBJECT *a, long b )
 
 	fprintf( tmp, "\"ulimit -a -S\" returns:\n\n" );
 	fclose( tmp );
-	cmd = get_string( strlen( "ulimit -a -S >> " ) + strlen( filename ) );
-	strcpy( cmd, "ulimit -a -S >> " );
-	strcat( cmd, filename );
+	cmd = get_init_string( "ulimit -a -S >> %s", filename );
 	system( cmd );
 	T_free( cmd );
 
-	cmd = get_string( strlen( "echo >> " ) + strlen( filename ) );
-	sprintf( cmd, "echo >> %s", filename );
-	system( cmd );
+	cmd = get_init_string( "echo >> %s", filename );
 	system( cmd );
 	T_free( cmd );
 
 	/* Append current disk usage to the file to detect problems due to a
 	   full disk */
 
-	cmd = get_string( strlen( "df >> " ) + strlen( filename ) );
-	strcpy( cmd, "df >> " );
-	strcat( cmd, filename );
+	cmd = get_init_string( "df >> %f", filename );
 	system( cmd );
 	T_free( cmd );
 
 	/* Finally append the file with the version informations so that I'll know
 	   what the sender is really using */
 
-	cmd = get_string( strlen( "echo \"\n\nVersion (use 'uudecode file "
-							  "| bunzip2 -c to unpack):\n\" >> " )
-					  + strlen( filename ) );
-	strcpy( cmd, "echo \"\n\nVersion (use 'uudecode file "
-			     "| bunzip2 -c to unpack):\n\" >> " );
-	strcat( cmd, filename );
+	cmd = get_init_string( "echo \"\nVersion (use uudecode file "
+						   "| gunzip -c to unpack):\n\" >> %s", filename );
 	system( cmd );
 	T_free( cmd );
 
-	cmd = get_string( strlen( "cat  >> " ) + strlen( libdir )
-					  + strlen( "/version.ubz " ) + strlen( filename ) );
-	strcpy( cmd, "cat " );
-	strcat( cmd, libdir );
-	if ( libdir[ strlen( libdir ) - 1 ] != '/' )
-		strcat( cmd, "/" );
-	strcat( cmd, "version.ubz" );
-	strcat( cmd, " >> " );
-	strcat( cmd, filename );
+	cmd = get_init_string( "cat %s%sversion.ugz >> %s", libdir,
+						   libdir[ strlen( libdir ) - 1 ] != '/' ? "/" : "",
+						   filename);
 	system( cmd );
 	T_free( cmd );
 
@@ -166,12 +150,12 @@ void bug_report_callback( FL_OBJECT *a, long b )
 	ed = getenv( "EDITOR" );
 	if ( ed == NULL || *ed == '\0' )
 	{
-		cmd = get_string( 6 + strlen( filename ) );
+		cmd = T_malloc( 7 + strlen( filename ) );
 		strcpy( cmd, "vi" );
 	}
 	else
 	{
-		cmd = get_string( 4 + strlen( ed ) + strlen( filename ) );
+		cmd = T_malloc( 5 + strlen( ed ) + strlen( filename ) );
 		strcpy( cmd, ed );
 
 		/* If the EDITOR environment variable contains the '-nw' option
@@ -211,23 +195,10 @@ void bug_report_callback( FL_OBJECT *a, long b )
 
 		/* Assemble the command for sending the mail */
 
-		cmd = get_string( strlen( MAIL_PROGRAM MAIL_ADDRESS
-								  " -s \"fsc2 bug report\" -c    < " ) +
-						  + strlen( filename )
-						  + ( user != NULL ? strlen( user ) : 0 ) );
-		strcpy( cmd, MAIL_PROGRAM " -s \"fsc2 bug report\" " );
-
-		if ( user != NULL )            /* append option for the carbon copy */
-		{
-			strcat( cmd, "-c " );
-			strcat( cmd, user );
-			strcat( cmd, " " );
-		}
-		strcat( cmd, MAIL_ADDRESS );
-
-		strcat( cmd, " < " );          /* append the file name to be mailed */
-		strcat( cmd, filename );
-
+		cmd = get_init_string( "%s -s \"fsc2 bug report\" %s %s %s < %s",
+							   MAIL_PROGRAM, user != NULL ? "-c" : "",
+							   user != NULL ? user : "", MAIL_ADDRESS,
+							   filename);
 		system( cmd );                 /* send the mail */
 		T_free( cmd );
 	}

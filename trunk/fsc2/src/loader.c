@@ -229,7 +229,7 @@ static void resolve_hook_functions( Device *dev, char *dev_name )
 	   (the string will be reused for the other hook functions, so make
 	   it long enough that the longest name will fit into it) */
 
-	hook_func_name = get_string( strlen( dev_name ) + 17 );
+	hook_func_name = T_malloc( strlen( dev_name ) + 18 );
 	strcpy( hook_func_name, dev_name );
 	app = hook_func_name + strlen( dev_name );
 	strcat( app, "_init_hook" );

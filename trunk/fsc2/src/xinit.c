@@ -470,16 +470,12 @@ bool dl_fsc2_rsc( void )
 
 
 	/* Assemble name of library to be loaded - this will also work for cases
-	   where the device name contains a relative path */
+	   where the name contains a relative path */
 
 	lib_name = get_string( strlen( libdir ) + 17 );
-	strcpy( lib_name, libdir );
-	if ( libdir[ strlen( libdir ) - 1 ] != '/' )
-		strcat( lib_name, "/" );
-	if ( G_Funcs.size == LOW )
-		strcat( lib_name, "fsc2_rsc_lr.so" );
-	else
-		strcat( lib_name, "fsc2_rsc_hr.so" );
+	sprintf( lib_name, "%s%sfsc2_rsc_%cr.so", libdir,
+			 libdir[ strlen( libdir ) - 1 ] != '/' ? "/" : "",
+			 G_Funcs.size == LOW ? 'l' : 'h' );
 
 	/* Try to open the library. If it can't be found in the place defined at
 	   compilation time give it another chance by trying the paths defined
