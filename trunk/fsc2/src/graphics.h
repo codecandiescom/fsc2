@@ -42,34 +42,6 @@
 #define MAX_LABEL_LEN     128   /* maximum length of tick label string */
 
 
-#if ( SIZE == HI_RES )
-#define SCALE_TICK_DIST   6     /* mean minimum distance between ticks */
-#define SHORT_TICK_LEN    5     /* length of short ticks */
-#define MEDIUM_TICK_LEN  10     /* length of medium ticks */
-#define LONG_TICK_LEN    14     /* length of long ticks */
-#define LABEL_DIST        7     /* distance between label and scale line */
-#define X_SCALE_OFFSET   20     /* x distance between scale line and window */
-#define Y_SCALE_OFFSET   21     /* y distance between scale line and window */
-#define Z_SCALE_OFFSET   46     /* z distance between scale line and window */
-#define Z_LINE_OFFSET    10     /* distance bewteen colour scale and window */
-#define Z_LINE_WIDTH     14     /* width of colour scale */
-#define ENLARGE_BOX_WIDTH 5     /* width of enlarge box */
-#else
-#define SCALE_TICK_DIST   4
-#define SHORT_TICK_LEN    3
-#define MEDIUM_TICK_LEN   6
-#define LONG_TICK_LEN     8
-#define LABEL_DIST        5
-#define X_SCALE_OFFSET   12
-#define Y_SCALE_OFFSET   12
-#define Z_SCALE_OFFSET   25
-#define Z_SCALE_WIDTH     8
-#define Z_LINE_OFFSET     5
-#define Z_LINE_WIDTH      8
-#define ENLARGE_BOX_WIDTH 3
-#endif
-
-
 typedef	struct {
 	double v;               /* value of the point (in interval [0,1] */
 	bool exist;             /* set if value has been set at all */
@@ -253,6 +225,32 @@ typedef struct {
 
 	bool is_cut;            /* set when cross section window is shown */
 	int cut_select;
+
+#define SCALE_TICK_DIST   6     /* mean minimum distance between ticks */
+#define SHORT_TICK_LEN    5     /* length of short ticks */
+#define MEDIUM_TICK_LEN  10     /* length of medium ticks */
+#define LONG_TICK_LEN    14     /* length of long ticks */
+#define LABEL_DIST        7     /* distance between label and scale line */
+#define X_SCALE_OFFSET   20     /* x distance between scale line and window */
+#define Y_SCALE_OFFSET   21     /* y distance between scale line and window */
+#define Z_SCALE_OFFSET   46     /* z distance between scale line and window */
+#define Z_LINE_OFFSET    10     /* distance bewteen colour scale and window */
+#define Z_LINE_WIDTH     14     /* width of colour scale */
+#define ENLARGE_BOX_WIDTH 5     /* width of enlarge box */
+
+    int scale_tick_dist;    /* mean minimum distance between ticks */
+	int short_tick_len;     /* length of short ticks */
+	int medium_tick_len;    /* length of medium ticks */
+	int long_tick_len;      /* length of long ticks */
+	int label_dist;         /* distance between label and scale line */
+	int x_scale_offset;     /* x distance between scale line and window */
+	int y_scale_offset;		/* y distance between scale line and window */
+	int z_scale_offset;		/* z distance between scale line and window */
+	int z_scale_width;
+	int z_line_offset;		/* distance between colour scale and window */
+	int z_line_width;       /* width of colour scale */
+	int enlarge_box_width;	/* width of enlarge box */
+
 } Graphics;
 
 
