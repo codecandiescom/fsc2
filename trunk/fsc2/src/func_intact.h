@@ -26,11 +26,11 @@ typedef struct _IOBJ_ {
 	char *label;            /* object label */
 	char *help_text;        /* objects help text */
 
-	int state;              /* state (on/off) or press count (buttons) */
+	volatile int state;     /* state (on/off) or press count (buttons) */
 	FL_OBJECT *group;       /* group (RADIO) button belongs to */
 	long partner;
 
-	double value;
+	volatile double value;
 	double start_val,       /* start and end value */
 		   end_val;
 
