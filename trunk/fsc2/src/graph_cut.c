@@ -119,9 +119,6 @@ static int cut_canvas_handler( FL_OBJECT *obj, Window window, int w, int h,
 	Canvas *c = ( Canvas * ) udata;
 
 
-	obj = obj;
-	window = window;
-
 	switch ( ev->type )
     {
         case Expose :
