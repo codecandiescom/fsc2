@@ -59,7 +59,7 @@ Var *get_phase_cycled_area_1d( Var *v )
 
 	if ( first_time )
 	{
-		pc_basic_check( "get_phase_cycled_area_1d", "digitizer_get_area",
+		pc_basic_check( Cur_Func, "digitizer_get_area",
 						&is_get_area, "digitizer_get_area_fast",
 						&is_get_area_fast, "an area" );
 		first_time = UNSET;
@@ -69,8 +69,8 @@ Var *get_phase_cycled_area_1d( Var *v )
 
 	if ( v == NULL )
 	{
-		eprint( FATAL, "%s:%ld: get_phase_cycled_area_1d(): Missing "
-				"arguments.\n", Fname, Lc );
+		eprint( FATAL, "%s:%ld: %s(): Missing "
+				"arguments.\n", Fname, Lc, Curt_Func );
 		THROW( EXCEPTION );
 	}
 
@@ -85,10 +85,10 @@ Var *get_phase_cycled_area_1d( Var *v )
 	/* The first parameter must be a channel number in any case, ask digitizer
 	   module if it really is one */
 
-	if ( ! get_channel_number( v, "get_phase_cycled_area_1d", channel ) )
+	if ( ! get_channel_number( v, Cur_Func, channel ) )
 	{
-		eprint( FATAL, "%s:%ld: get_phase_cycled_area_1d(): Invalid digitizer "
-				"channel number: %ld.\n", Fname, Lc, channel[ 0 ] );
+		eprint( FATAL, "%s:%ld: %s(): Invalid digitizer "
+				"channel number: %ld.\n", Fname, Lc, Cur_Func, channel[ 0 ] );
 		THROW( EXCEPTION );
 	}
 
@@ -98,21 +98,19 @@ Var *get_phase_cycled_area_1d( Var *v )
 
 	if ( ( v = vars_pop( v ) ) != NULL )
 	{
-		is_channel = get_channel_number( v , "get_phase_cycled_area_1d",
-										 channel + 1 );
+		is_channel = get_channel_number( v , Cur_Func, channel + 1 );
 
 		if ( channels_needed == 2 && ! is_channel )
 		{
-			eprint( FATAL, "%s:%ld: get_phase_cycled_area_1d(): Two digitizer "
-					"channel nunmbers are needed but second argument isn't "
-					"one.\n", Fname, Lc );
+			eprint( FATAL, "%s:%ld: %s(): Two digitizer channel nunmbers are "
+					"needed but second argument isn't one.\n",
+					Fname, Lc, Cur_Func );
 			THROW( EXCEPTION );
 		}
 
 		if ( channels_needed == 1 && is_channel )
-			eprint( WARN, "%s:%ld: get_phase_cycled_area_1d(): Superfluous "
-					"digitizer channel number found as second argument.\n",
-					Fname, Lc );
+			eprint( WARN, "%s:%ld: %s(): Superfluous digitizer channel number "
+					"found as second argument.\n", Fname, Lc, Cur_Func );
 
 		if ( is_channel )
 			v = vars_pop( v );
@@ -144,9 +142,8 @@ Var *get_phase_cycled_area_1d( Var *v )
 					win_list[ i ] = v->val.lval;
 				else
 				{
-					eprint( WARN, "%s:%ld: get_phase_cycled_area_1d(): "
-							"Floating point value used as window number.\n",
-							Fname, Lc );
+					eprint( WARN, "%s:%ld: %s(): Floating point value used as "
+							"window number.\n", Fname, Lc, Cur_Func );
 					win_list[ i ] = lround( v->val.dval );
 				}
 
@@ -284,16 +281,16 @@ Var *get_phase_cycled_area_2d( Var *v )
 
 	if ( first_time )
 	{
-		pc_basic_check( "get_phase_cycled_area_2d", "digitizer_get_area",
-						&is_get_area, "digitizer_get_area_fast",
-						&is_get_area_fast, "an area" );
+		pc_basic_check( Cur_Func, "digitizer_get_area", &is_get_area,
+						"digitizer_get_area_fast", &is_get_area_fast,
+						"an area" );
 		first_time = UNSET;
 	}
 
 	if ( ! aseq[ 1 ]->defined )
 	{
-		eprint( FATAL, "%s:%ld: get_phase_cycled_area_2d(): Second "
-				"acquisition sequence (B) hasn't been defined.\n", Fname, Lc );
+		eprint( FATAL, "%s:%ld: %s(): Second acquisition sequence (B) hasn't "
+				"been defined.\n", Fname, Lc, Cur_Func );
 		THROW( EXCEPTION );
 	}
 
@@ -301,8 +298,8 @@ Var *get_phase_cycled_area_2d( Var *v )
 
 	if ( v == NULL )
 	{
-		eprint( FATAL, "%s:%ld: get_phase_cycled_area_2d(): Missing "
-				"arguments.\n", Fname, Lc );
+		eprint( FATAL, "%s:%ld: %s(): Missing arguments.\n",
+				Fname, Lc, Cur_Func );
 		THROW( EXCEPTION );
 	}
 
@@ -325,10 +322,10 @@ Var *get_phase_cycled_area_2d( Var *v )
 	/* The first parameter must be a channel number in any case, ask digitizer
 	   module if it really is one */
 
-	if ( ! get_channel_number( v, "get_phase_cycled_area_2d", channel ) )
+	if ( ! get_channel_number( v, Cur_Func, channel ) )
 	{
-		eprint( FATAL, "%s:%ld: get_phase_cycled_area_2d(): Invalid digitizer "
-				"channel number: %ld.\n", Fname, Lc, channel[ 0 ] );
+		eprint( FATAL, "%s:%ld: %s(): Invalid digitizer channel number: "
+				"%ld.\n", Fname, Lc, Cur_Func, channel[ 0 ] );
 		THROW( EXCEPTION );
 	}
 
@@ -338,21 +335,19 @@ Var *get_phase_cycled_area_2d( Var *v )
 
 	if ( ( v = vars_pop( v ) ) != NULL )
 	{
-		is_channel = get_channel_number( v , "get_phase_cycled_area_2d",
-										 channel + 1 );
+		is_channel = get_channel_number( v , Cur_Func, channel + 1 );
 
 		if ( channels_needed == 2 && ! is_channel )
 		{
-			eprint( FATAL, "%s:%ld: get_phase_cycled_area_2d(): Two digitizer "
-					"channel nunmbers are needed but second argument isn't "
-					"one.\n", Fname, Lc );
+			eprint( FATAL, "%s:%ld: %s(): Two digitizer channel nunmbers are "
+					"needed but second argument isn't one.\n",
+					Fname, Lc, Cur_Func );
 			THROW( EXCEPTION );
 		}
 
 		if ( channels_needed == 1 && is_channel )
-			eprint( WARN, "%s:%ld: get_phase_cycled_area_2d(): Superfluous "
-					"digitizer channel number found as second argument.\n",
-					Fname, Lc );
+			eprint( WARN, "%s:%ld: %s(): Superfluous digitizer channel number "
+					"found as second argument.\n", Fname, Lc, Cur_Func );
 
 		if ( is_channel )
 			v = vars_pop( v );
@@ -386,8 +381,8 @@ Var *get_phase_cycled_area_2d( Var *v )
 				win_list[ i ] = v->val.lval;
 			else
 			{
-				eprint( WARN, "%s:%ld: get_phase_cycled_area_2d(): Floating "
-						"point value used as window number.\n", Fname, Lc );
+				eprint( WARN, "%s:%ld: %s(): Floating point value used as "
+						"window number.\n", Fname, Lc, Cur_Func );
 				win_list[ i ] = lround( v->val.dval );
 			}
 
