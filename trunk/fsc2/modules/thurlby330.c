@@ -105,7 +105,7 @@ int thurlby330_init_hook( void )
 
 int thurlby330_exp_hook( void )
 {
-	/* Initialize the power supply*/
+	/* Initialize the power supply */
 
 	if ( ! thurlby330_init( DEVICE_NAME ) )
 	{
