@@ -43,7 +43,7 @@
 * hp8647a::       HP RF Synthesizer HP8647A
 * hp8648b::       HP RF Synthesizer HP8648B
 * hp8672a::       HP RF Synthesizer HP8672A
-* hjsdaadc::      Home-built AD and DA converter
+* hjs_daadc::     Home-built AD and DA converter
 * ips20_4::       Oxford Magnet Sweep Power Supply IPS20-4
 * keithley228a::  Magnet Power Supply Keithley 228A (Berlin W-Band)
 * kontron4060::   Kontron 4060 Voltmeter
@@ -754,7 +754,7 @@ to @w{14.5 db}.
 @end multitable
 
 
-@node hp8672a, hjsdaadc, hp8648b, Device Reference
+@node hp8672a, hjs_daadc, hp8648b, Device Reference
 @iftex
 @subheading HP RF Synthesizer HP8672A
 @end iftex
@@ -795,7 +795,7 @@ allowed -- change the configuration file to allow higher output levels.
 @end multitable
 
 
-@node hjsdaadc, ips20_4, hp8672a, Device Reference
+@node hjs_daadc, ips20_4, hp8672a, Device Reference
 @iftex
 @subheading Home-built AD and DA converter
 @end iftex
@@ -804,7 +804,7 @@ allowed -- change the configuration file to allow higher output levels.
 @end ifnottex
 
 @paragraphindent 0
-@strong{Module name}: @code{hjsdaadc}
+@strong{Module name}: @code{hjs_daadc}
 
 @paragraphindent 0
 @strong{Description}: Home-built single channel AD and DA converter
@@ -824,7 +824,7 @@ potentiometer at the front panel.
 @end multitable
 
 
-@node ips20_4, keithley228a, hjsdaadc, Device Reference
+@node ips20_4, keithley228a, hjs_daadc, Device Reference
 @iftex
 @subheading Oxford Magnet Sweep Power Supply IPS20-4
 @end iftex
