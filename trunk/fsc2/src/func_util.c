@@ -2182,7 +2182,7 @@ static void T_fprintf( int file_num, const char *func, const char *fmt, ... )
 
 	while ( 1 ) {
 
-        /* Try to print in the allocated space */
+        /* Try to print into the allocated space */
 
         va_start( ap, fmt );
         n = vsnprintf( p, size, fmt, ap );
