@@ -376,7 +376,6 @@ all:
 			sed -e 's/^.*$$Id\: \(.*\) jens Exp $$.*/\1/g' |             \
 				gzip -c -9 | uuencode - > version.ugz
 	$(MAKE) -C src all
-	$(MAKE) tags
 	$(MAKE) -C utils all
 	$(MAKE) -C doc all
 
