@@ -751,6 +751,8 @@ static void hjs_fc_init_with_calib_file( void )
 
 	hjs_fc_read_calibration( );
 
+	hjs_fc.cur_volts = hjs_fc.dac_min_volts;
+
 	/* Check that we at least have a field resolution of 0.1 G with the
 	   value we got from our tests */
 
