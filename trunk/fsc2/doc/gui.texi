@@ -18,9 +18,30 @@
 @ifnotinfo
 
 Whenever you start @acronym{fsc2} you will see the following window:
+
+@image{fsc2fig1,11cm}
+
 @end ifnotinfo
 
 @ifinfo
+@ifnothtml
+
 The first window you see when you start @acronym{fsc2} contains the
-following buttons:
+following elements:
+@itemize @bullet
+@item At the top the browser for displaying the @acronym{EDL} file to be run
+@item Below this another browser where error messages as well as output
+      from the @acronym{EDL} program will be displayed
+@item The @code{Load} button - when you click onto it a file selector
+      is shown that allows you to select a new @acronym{EDL} program
+@item The @code{Reload} button - when you have edited the currently
+      loaded @acronym{EDL} program you have to click onto this button to
+      make @acronym{fsc2} load the changed file
+@item The @code{Edit} button - when you click onto it an editor will
+      open up with the curently loaded @acronym{EDL} program. Which
+      editor to use depends on the environment variable @code{EDITOR},
+      when it isn't set @code{vi} is used as the default editor.
+@end itemize
+
+@end ifnothtml
 @end ifinfo
