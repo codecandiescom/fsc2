@@ -250,10 +250,10 @@ void new_data_callback( FL_OBJECT *a, long b )
 	{
 		if ( Message_Queue[ message_queue_low ].type == REQUEST )
 		{
-			reader( NULL );
+			/* Increment of the queue pointer must come first ! */
 
-			message_queue_low++;
-			message_queue_low %= QUEUE_SIZE;
+			message_queue_low = ( message_queue_low + 1 ) % QUEUE_SIZE;
+			reader( NULL );
 		}
 		else
 			accept_new_data( );
@@ -646,21 +646,20 @@ bool pipe_read( int fd, void *buf, size_t bytes_to_read )
 		   return the number of bytes already read.
 
 		   The first happens on a Linux system with kernel 2.0.36 while the
-		   latter happens on a newer system with 2.2.12. On the older system
+		   latter happens on a newer system, e.g. 2.2.12. On the older system
 		   this leads to trouble: While the child is waiting for data the
-		   parent first sends its data but before the child can read them
-		   the parent also sents a DO_SEND signal. This interrupts the child
-		   and read() returns -1 with errno set to EINTR but nothing has
-		   been read yet. Alas, ignoring the -1 and restarting the read does
-		   only work if the signal comes in BEFORE the first byte is read in
-		   since nothing tells us how many bytes actually have been read. To
+		   parent first sends its data but before the child can read them the
+		   parent also sents a DO_SEND signal. This interrupts the childs
+		   read(), returning -1 with errno set to EINTR while nothing has been
+		   read yet. Alas, ignoring the -1 and restarting the read does only
+		   work if the signal comes in BEFORE the first byte has been read
+		   since nothing tells us how many bytes aleady have been read. To
 		   make sure, at least for the DO_SEND signal, that the signal is
-		   received before the read starts the parent sends the signal
-		   always before replying to a request. Quite another problem is the
-		   DO_QUIT signal - let's hope the read is atomic or it's never
-		   going to happen... The only real solution here would be to block
-		   all signals just before the read() and handle them directly
-		   afterwards. */
+		   received before the read starts the parent sends the signal always
+		   before replying to a request. Quite another problem is the DO_QUIT
+		   signal - let's hope the read is atomic or it's never going to
+		   happen... The only real solution here would be to block all signals
+		   just before the read() and handle them directly afterwards. */
 
 		if ( bytes_read == -1 && errno == EINTR )
 			continue;
