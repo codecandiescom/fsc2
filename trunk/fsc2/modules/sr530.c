@@ -67,31 +67,32 @@ int last_DAC_port = 6;
 typedef struct
 {
 	int device;
-	int Sens;
-	bool Sens_warn;
+	int sens_index;
+	bool sens_warn;
 	double phase;
-	bool P;
-	int TC;
+	bool is_phase;
+	int tc_index;
 	double dac_voltage[ 2 ];
 } SR530;
 
 
 static SR530 sr530;
+static SR530 sr530_store;
 
 /* Lists of valid sensitivity and time constant settings (the last three
    entries in the sensitivity list are only usable when the EXPAND button
    is switched on!) */
 
-static double slist[ ] = { 5.0e-1, 2.0e-1, 1.0e-1, 5.0e-2, 2.0e-2,
-						   1.0e-2, 5.0e-3, 2.0e-3, 1.0e-3, 5.0e-4,
-						   2.0e-4, 1.0e-4, 5.0e-5, 2.0e-5, 1.0e-5,
-						   5.0e-6, 2.0e-6, 1.0e-6, 5.0e-7, 2.0e-7,
-						   1.0e-7, 5.0e-8, 2.0e-8, 1.0e-8 };
+static double sens_list[ ] = { 5.0e-1, 2.0e-1, 1.0e-1, 5.0e-2, 2.0e-2,
+							   1.0e-2, 5.0e-3, 2.0e-3, 1.0e-3, 5.0e-4,
+							   2.0e-4, 1.0e-4, 5.0e-5, 2.0e-5, 1.0e-5,
+							   5.0e-6, 2.0e-6, 1.0e-6, 5.0e-7, 2.0e-7,
+							   1.0e-7, 5.0e-8, 2.0e-8, 1.0e-8 };
 
 /* List of all available time constants */
 
-static double tcs[ ] = { 1.0e-3, 3.0e-3, 1.0e-2, 3.0e-2, 1.0e-1, 3.0e-1,
-						 1.0, 3.0, 10.0, 30.0, 100.0 };
+static double tc_list[ ] = { 1.0e-3, 3.0e-3, 1.0e-2, 3.0e-2, 1.0e-1, 3.0e-1,
+							 1.0, 3.0, 10.0, 30.0, 100.0 };
 
 
 /* Declaration of all functions used only in this file */
@@ -101,9 +102,9 @@ static bool sr530_init( const char *name );
 static double sr530_get_data( int channel );
 static double sr530_get_adc_data( long channel );
 static double sr530_get_sens( void );
-static void sr530_set_sens( int Sens );
+static void sr530_set_sens( int sens_index );
 static double sr530_get_tc( void );
-static void sr530_set_tc( int TC );
+static void sr530_set_tc( int tc_index );
 static double sr530_get_phase( void );
 static double sr530_set_phase( double phase );
 static double sr530_get_ref_freq( void );
@@ -130,12 +131,12 @@ int sr530_init_hook( void )
 
 	sr530.device = -1;
 
-	sr530.Sens = -1;             /* no sensitivity has to be set at start of */
-	sr530.Sens_warn = UNSET;     /* experiment and no warning concerning the */
+	sr530.sens_index = -1;       /* no sensitivity has to be set at start of */
+	sr530.sens_warn = UNSET;     /* experiment and no warning concerning the */
                                  /* sensitivity setting has been printed yet */
-	sr530.P = UNSET;             /* no phase has to be set at start of the */
+	sr530.is_phase = UNSET;      /* no phase has to be set at start of the */
 	                             /* experiment */
-	sr530.TC = -1;               /* no time constant has to be set at the */
+	sr530.tc_index = -1;         /* no time constant has to be set at the */
 	                             /* start of the experiment and no warning */
 	                             /* concerning it has been printed yet */
 	for ( i = 0; i < 2; i++ )
@@ -155,6 +156,8 @@ int sr530_exp_hook( void )
 
 	if ( TEST_RUN )
 		return 1;
+
+	memcpy( &sr530_store, &sr530, sizeof( SR530 ) );
 
 	/* Initialize the lock-in */
 
@@ -183,6 +186,7 @@ int sr530_end_of_exp_hook( void )
         gpib_local( sr530.device );
     }
 
+	memcpy( &sr530, &sr530_store, sizeof( SR530 ) );
 	sr530.device = -1;
 	return 1;
 }
@@ -330,7 +334,7 @@ Var *lockin_get_adc_data( Var *v )
 Var *lockin_sensitivity( Var *v )
 {
 	double sens;
-	int Sens = -1;
+	int sens_index = -1;
 	int i;
 
 
@@ -372,67 +376,68 @@ Var *lockin_sensitivity( Var *v )
 	   within 1 percent, we utter a warning message (but only once). */
 
 	for ( i = 0; i < 23; i++ )
-		if ( sens <= slist[ i ] && sens >= slist[ i + 1 ] )
+		if ( sens <= sens_list[ i ] && sens >= sens_list[ i + 1 ] )
 		{
-			if ( slist[ i ] / sens < sens / slist[ i + 1 ] )
-				Sens = i + 1;
+			if ( sens_list[ i ] / sens < sens / sens_list[ i + 1 ] )
+				sens_index = i + 1;
 			else
-				Sens = i + 2;
+				sens_index = i + 2;
 			break;
 		}
 
-	if ( Sens < 0 && sens < slist[ 24 ] * 1.01 )
-		Sens = 24;
+	if ( sens_index < 0 && sens < sens_list[ 24 ] * 1.01 )
+		sens_index = 24;
 
-	if ( Sens > 0 &&                                   /* value found ? */
-		 fabs( sens - slist[ Sens - 1 ] ) > sens * 1.0e-2 && /* error > 1% ? */
-		 ! sr530.Sens_warn  )                       /* no warn message yet ? */
+	if ( sens_index > 0 &&                             /* value found ? */
+		 fabs( sens - sens_list[ sens_index - 1 ] ) > sens * 1.0e-2 &&
+                                                       /* error > 1% ? */
+		 ! sr530.sens_warn  )                       /* no warn message yet ? */
 	{
 		if ( sens >= 1.0e-3 )
 			eprint( WARN, SET, "%s: Can't set sensitivity to %.0lf mV, "
 					"using %.0lf V instead.\n", DEVICE_NAME,
-					sens * 1.0e3, slist[ Sens - 1 ] * 1.0e3 );
+					sens * 1.0e3, sens_list[ sens_index - 1 ] * 1.0e3 );
 		else if ( sens >= 1.0e-6 ) 
 			eprint( WARN, SET, "%s: Can't set sensitivity to %.0lf uV, "
 					"using %.0lf uV instead.\n", DEVICE_NAME,
-					sens * 1.0e6, slist[ Sens - 1 ] * 1.0e6 );
+					sens * 1.0e6, sens_list[ sens_index - 1 ] * 1.0e6 );
 		else
 			eprint( WARN, SET, "%s: Can't set sensitivity to %.0lf nV, "
 					"using %.0lf nV instead.\n", DEVICE_NAME,
-					sens * 1.0e9, slist[ Sens - 1 ] * 1.0e9 );
-		sr530.Sens_warn = SET;
+					sens * 1.0e9, sens_list[ sens_index - 1 ] * 1.0e9 );
+		sr530.sens_warn = SET;
 	}
 
-	if ( Sens < 0 )                                   /* not found yet ? */
+	if ( sens_index < 0 )                                /* not found yet ? */
 	{
-		if ( sens > slist[ 0 ] )
-			Sens = 1;
+		if ( sens > sens_list[ 0 ] )
+			sens_index = 1;
 		else
-		    Sens = 24;
+		    sens_index = 24;
 
-		if ( ! sr530.Sens_warn )                      /* no warn message yet */
+		if ( ! sr530.sens_warn )                      /* no warn message yet */
 		{
 		if ( sens >= 1.0e-3 )
 			eprint( WARN, SET, "%s: Sensitivity of %.0lf mV is too low, "
 					"using %.0lf mV instead.\n", DEVICE_NAME,
-					sens * 1.0e3, slist[ Sens - 1 ] * 1.0e3 );
+					sens * 1.0e3, sens_list[ sens_index - 1 ] * 1.0e3 );
 		else
 			eprint( WARN, SET, "%s: Sensitivity of %.0lf nV is too high,"
 					" using %.0lf nV instead.\n", DEVICE_NAME,
-					sens * 1.0e9, slist[ Sens - 1 ] * 1.0e9 );
-			sr530.Sens_warn = SET;
+					sens * 1.0e9, sens_list[ sens_index - 1 ] * 1.0e9 );
+			sr530.sens_warn = SET;
 		}
 	}
 
 	if ( ! TEST_RUN )
 	{
 		if ( I_am == CHILD )         /* if called in EXPERIMENT section */
-			sr530_set_sens( Sens );
+			sr530_set_sens( sens_index );
 		else                         /* if called in a preparation sections */ 
-			sr530.Sens = Sens;
+			sr530.sens_index = sens_index;
 	}
 	
-	return vars_push( FLOAT_VAR, slist[ Sens - 1 ] );
+	return vars_push( FLOAT_VAR, sens_list[ sens_index - 1 ] );
 }
 
 
@@ -445,7 +450,7 @@ Var *lockin_sensitivity( Var *v )
 Var *lockin_time_constant( Var *v )
 {
 	double tc;
-	int TC = -1;
+	int tc_index = -1;
 	int i;
 
 
@@ -488,54 +493,54 @@ Var *lockin_time_constant( Var *v )
 	   within 1 percent, we utter a warning message (but only once). */
 	
 	for ( i = 0; i < 10; i++ )
-		if ( tc >= tcs[ i ] && tc <= tcs[ i + 1 ] )
+		if ( tc >= tc_list[ i ] && tc <= tc_list[ i + 1 ] )
 		{
-			if ( tc / tcs[ i ] < tcs[ i + 1 ] / tc )
-				TC = i + 1;
+			if ( tc / tc_list[ i ] < tc_list[ i + 1 ] / tc )
+				tc_index = i + 1;
 			else
-				TC = i + 2;
+				tc_index = i + 2;
 			break;
 		}
 
-	if ( TC > 0 &&                                    /* value found ? */
-		 fabs( tc - tcs[ TC - 1 ] ) > tc * 1.0e-2 )   /* error > 1% ? */
+	if ( tc_index > 0 &&                                    /* value found ? */
+		 fabs( tc - tc_list[ tc_index - 1 ] ) > tc * 1.0e-2 )/* error > 1% ? */
 	{
 		if ( tc >= 1.0 )
 			eprint( WARN, SET, "%s: Can't set time constant to %g s, "
 					"using %.0lf s instead.\n", DEVICE_NAME, tc,
-					tcs[ TC - 1 ] );
+					tc_list[ tc_index - 1 ] );
 		else
 			eprint( WARN, SET, "%s: Can't set time constant to %g s, "
 					"using %.0lf ms instead.\n", DEVICE_NAME,
-					tc, tcs[ TC - 1 ] * 1.0e3 );
+					tc, tc_list[ tc_index - 1 ] * 1.0e3 );
 	}
 	
-	if ( TC < 0 )                                  /* not found yet ? */
+	if ( tc_index < 0 )                                  /* not found yet ? */
 	{
-		if ( tc < tcs[ 0 ] )
-			TC = 1;
+		if ( tc < tc_list[ 0 ] )
+			tc_index = 1;
 		else
-			TC = 11;
+			tc_index = 11;
 
 		if ( tc >= 1.0 )
 			eprint( WARN, SET, "%s: Time constant of %g s is too large, "
 					"using %.0lf s instead.\n", DEVICE_NAME, tc,
-					tcs[ TC - 1 ] );
+					tc_list[ tc_index - 1 ] );
 		else
 			eprint( WARN, SET, "%s: Time constant of %g s is too short, "
 					"using %.0lf ms instead.\n", DEVICE_NAME, tc,
-					tcs[ TC - 1 ] * 1.0e3 );
+					tc_list[ tc_index - 1 ] * 1.0e3 );
 	}
 
 	if ( ! TEST_RUN )
 	{
 		if ( I_am == CHILD )         /* if called in EXPERIMENT section */
-			sr530_set_tc( TC );
+			sr530_set_tc( tc_index );
 		else                         /* if called in a preparation sections */ 
-			sr530.TC = TC;
+			sr530.tc_index = tc_index;
 	}
 	
-	return vars_push( FLOAT_VAR, tcs[ TC - 1 ] );
+	return vars_push( FLOAT_VAR, tc_list[ tc_index - 1 ] );
 }
 
 
@@ -598,8 +603,8 @@ Var *lockin_phase( Var *v )
 			return vars_push( FLOAT_VAR, sr530_set_phase( phase ) );
 		else                         /* if called in a preparation sections */ 
 		{
-			sr530.phase = phase;
-			sr530.P = SET;
+			sr530.phase    = phase;
+			sr530.is_phase = SET;
 			return vars_push( FLOAT_VAR, phase );
 		}
 	}
@@ -795,12 +800,12 @@ bool sr530_init( const char *name )
 	   actual setting now because the lock-in could not be accessed before
 	   Finally set the DAC output voltages to a defined value (default 0 V).*/
 
-	if ( sr530.Sens != -1 )
-		sr530_set_sens( sr530.Sens );
-	if ( sr530.P == SET )
+	if ( sr530.sens_index != -1 )
+		sr530_set_sens( sr530.sens_index );
+	if ( sr530.is_phase == SET )
 		sr530_set_phase( sr530.phase );
-	if ( sr530.TC != -1 )
-		sr530_set_tc( sr530.TC );
+	if ( sr530.tc_index != -1 )
+		sr530_set_tc( sr530.tc_index );
 	for ( i = 0; i < 2; i++ )
 		sr530_set_dac_voltage( i + first_DAC_port, sr530.dac_voltage[ i ] );
 
@@ -872,7 +877,7 @@ double sr530_get_sens( void )
 		sr530_failure( );
 
 	buffer[ length - 2 ] = '\0';
-	sens = slist[ 24 - T_atol( buffer ) ];
+	sens = sens_list[ 24 - T_atol( buffer ) ];
 
     /* Check if EXPAND is switched on - this increases the sensitivity 
 	   by a factor of 10 */
@@ -893,30 +898,30 @@ double sr530_get_sens( void )
 /* Function sets the sensitivity of the lock-in amplifier to one of the */
 /* valid values. The parameter can be in the range from 1 to 27,  where */
 /* 1 is 0.5 V and 27 is 10 nV - these and the other values in between   */
-/* are listed in the global array 'slist' at the start of the file. To  */
-/* achieve sensitivities below 100 nV EXPAND has to switched on.        */
+/* are listed in the global array 'sens_list' at the start of the file. */
+/* To achieve sensitivities below 100 nV EXPAND has to switched on.     */
 /*----------------------------------------------------------------------*/
 
-void sr530_set_sens( int Sens )
+void sr530_set_sens( int sens_index )
 {
 	char buffer[ 10 ];
 
 
 	/* Coding of sensitivity commands work just the other way round as
-	   in the list of sensitivities 'slist', i.e. 1 stands for the highest
-	   sensitivity (10nV) and 24 for the lowest (500mV) */
+	   in the list of sensitivities 'sens_list', i.e. 1 stands for the
+	   highest sensitivity (10nV) and 24 for the lowest (500mV) */
 
-	Sens = 25 - Sens;
+	sens_index = 25 - sens_index;
 
 	/* For sensitivities lower than 100 nV EXPAND has to be switched on
 	   (for both channels) otherwise it got to be switched off */
 
-	if ( Sens <= 3 )
+	if ( sens_index <= 3 )
 	{
 		if ( gpib_write( sr530.device, "E1,1\n", 5 ) == FAILURE ||
 			 gpib_write( sr530.device, "E2,1\n", 5 ) == FAILURE)
 			sr530_failure( );
-		Sens += 3;
+		sens_index += 3;
 	}
 	else
 	{
@@ -927,7 +932,7 @@ void sr530_set_sens( int Sens )
 
 	/* Now set the sensitivity */
 
-	sprintf( buffer, "G%d\n", Sens );
+	sprintf( buffer, "G%d\n", sens_index );
 
 	if ( gpib_write( sr530.device, buffer, strlen( buffer ) ) == FAILURE )
 		sr530_failure( );
@@ -936,8 +941,8 @@ void sr530_set_sens( int Sens )
 
 /*----------------------------------------------------------------------*/
 /* Function returns the current time constant of the lock-in amplifier. */
-/* See also the global array 'tcs' with the possible time constants at  */
-/* the start of the file.                                               */
+/* See also the global array 'tc_list' with the possible time constants */
+/* at the start of the file.                                            */
 /*----------------------------------------------------------------------*/
 
 double sr530_get_tc( void )
@@ -951,7 +956,7 @@ double sr530_get_tc( void )
 		sr530_failure( );
 
 	buffer[ length - 2 ] = '\0';
-	return tcs[ T_atol( buffer ) - 1 ];
+	return tc_list[ T_atol( buffer ) - 1 ];
 }
 
 
@@ -959,29 +964,29 @@ double sr530_get_tc( void )
 /* Function sets the time constant (plus the post time constant) to one    */
 /* of the valid values. The parameter can be in the range from 1 to 11,    */
 /* where 1 is 1 ms and 11 is 100 s - these and the other values in between */
-/* are listed in the global array 'tcs' (cf. start of file)                */
+/* are listed in the global array 'tc_list' (cf. start of file)            */
 /*-------------------------------------------------------------------------*/
 
-void sr530_set_tc( int TC )
+void sr530_set_tc( int tc_index )
 {
 	char buffer[ 10 ];
 
 
-	sprintf( buffer, "T1,%d\n", TC );
+	sprintf( buffer, "T1,%d\n", tc_index );
 	if ( gpib_write( sr530.device, buffer, strlen( buffer ) ) == FAILURE )
 		sr530_failure( );
 
 	/* Also set the POST time constant where 'T2,0' switches it off, 'T2,1'
 	   sets it to 100ms and 'T1,2' to 1s */
 
-	if ( TC <= 4 && gpib_write( sr530.device, "T2,0\n", 5 ) == FAILURE )
+	if ( tc_index <= 4 && gpib_write( sr530.device, "T2,0\n", 5 ) == FAILURE )
 		sr530_failure( );
 
-	if ( TC > 4 && TC <= 6 &&
+	if ( tc_index > 4 && tc_index <= 6 &&
 		 gpib_write( sr530.device, "T2,1\n", 5 ) == FAILURE )
 		sr530_failure( );
 
-	if ( TC > 6 && gpib_write( sr530.device, "T2,2\n", 5 ) == FAILURE )
+	if ( tc_index > 6 && gpib_write( sr530.device, "T2,2\n", 5 ) == FAILURE )
 		sr530_failure( );
 }
 
