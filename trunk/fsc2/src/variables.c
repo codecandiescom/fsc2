@@ -874,8 +874,8 @@ Var *vars_negate( Var *v )
 		case INT_CONT_ARR :
 			if ( v->dim != 1 )
 			{
-				eprint( FATAL, SET, "Arithmetic can be only done "
-						"on array slices.\n" );
+				eprint( FATAL, SET, "Arithmetic can be only done on array "
+						"slices.\n" );
 				THROW( EXCEPTION );
 			}
 			len = v->len;
@@ -885,8 +885,8 @@ Var *vars_negate( Var *v )
 		case FLOAT_CONT_ARR :
 			if ( v->dim != 1 )
 			{
-				eprint( FATAL, SET, "Arithmetic can be only done "
-						"on array slices.\n" );
+				eprint( FATAL, SET, "Arithmetic can be only done on array "
+						"slices.\n" );
 				THROW( EXCEPTION );
 			}
 			len = v->len;
@@ -1456,8 +1456,8 @@ static void vars_warn_new( Var *v )
  	if ( v->flags & NEW_VARIABLE )
 	{
 		fsc2_assert( v->name != NULL );            /* just a bit paranoid ? */
-		eprint( WARN, SET, "WARNING: Variable `%s' has not been assigned "
-				"a value.\n", v->name );
+		eprint( WARN, SET, "Variable `%s' has not been assigned a value.\n",
+				v->name );
 	}
 }
 
@@ -1688,8 +1688,8 @@ static long vars_calc_index( Var *a, Var *v )
 			cur = v->val.lval - ARRAY_OFFSET;
 		else
 		{
-			eprint( WARN, SET, "WARNING: Float variable used as index #%d "
-					"for array `%s'.\n", i + 1, a->name );
+			eprint( WARN, SET, "Float variable used as index #%d for array "
+					"`%s'.\n", i + 1, a->name );
 			cur = ( int ) v->val.dval - ARRAY_OFFSET;
 		}
 
@@ -1835,8 +1835,8 @@ static Var *vars_setup_new_array( Var *v, int dim )
 		}
 		else
 		{
-			eprint( WARN, SET, "WARNING: FLOAT value (value=%f) used as size "
-					"in definition of array `%s'.\n", v->val.dval, a->name );
+			eprint( WARN, SET, "FLOAT value (value=%f) used as size in "
+					"definition of array `%s'.\n", v->val.dval, a->name );
 			cur = ( int ) v->val.dval;
 		}
 
@@ -2056,7 +2056,7 @@ static void vars_ass_from_var( Var *src, Var *dest )
 					dest->val.lval = src->val.lval;
 				else
 				{
-					eprint( WARN, SET, "WARNING: Using float value in "
+					eprint( WARN, SET, "Floating point value used in "
 							"assignment to integer variable.\n" );
 					dest->val.lval = ( long ) src->val.dval;
 				}
@@ -2077,7 +2077,7 @@ static void vars_ass_from_var( Var *src, Var *dest )
 					*( ( long * ) dest->val.gptr ) = src->val.lval;
 				else
 				{
-					eprint( WARN, SET, "WARNING: Using float value in "
+					eprint( WARN, SET, "Floating point value used in "
 							"assignment to integer variable.\n" );
 					*( ( long * ) dest->val.gptr ) = ( long ) src->val.dval;
 				}
@@ -2519,8 +2519,8 @@ void vars_arr_init( Var *v )
 				*v->val.lpnt++ = p1->val.lval;
 			else
 			{
-				eprint( WARN, SET, "Float value used in initialization of "
-						"integer array `%s'.\n", a->name );
+				eprint( WARN, SET, "Floating point value used in "
+						"initialization of integer array `%s'.\n", a->name );
 				*v->val.lpnt++ = ( long ) p1->val.dval;
 			}
 		}
