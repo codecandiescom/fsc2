@@ -21,22 +21,29 @@
   Boston, MA 02111-1307, USA.
 */
 
-#if ! defined FUNC_UTIL_HEADER
-#define FUNC_UTIL_HEADER
+
+#if ! defined FUNC_SAVE_HEADER
+#define FUNC_SAVE_HEADER
 
 
 #include "fsc2.h"
 
 
-Var *f_print(   Var *v );
-Var *f_wait(    Var *v );
-Var *f_init_1d( Var *v );
-Var *f_init_2d( Var *v );
-Var *f_cscale(  Var *v );
-Var *f_clabel(  Var *v );
-Var *f_rescale( Var *v );
-Var *f_display( Var *v );
-Var *f_clearcv( Var *v );
+typedef struct {
+	FILE *fp;
+	char *name;
+} FILE_LIST;
 
 
-#endif  /* ! FUNC_UTIL_HEADER */
+Var *f_getf(    Var *v );
+Var *f_clonef(  Var *v );
+Var *f_save(    Var *v );
+Var *f_fsave(   Var *v );
+Var *f_printf(  Var *v );
+Var *f_save_p(  Var *v );
+Var *f_save_o(  Var *v );
+Var *f_save_c(  Var *v );
+Var *f_is_file( Var *v );
+
+
+#endif  /* ! FUNC_SAVE_HEADER */

@@ -70,6 +70,7 @@
 #include "devices.h"              /* load before "loader.h"  */
 #include "func_basic.h"
 #include "func_util.h"
+#include "func_save.h"
 #include "loader.h"
 #include "phases.h"
 #include "pulser.h"

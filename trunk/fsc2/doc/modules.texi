@@ -1069,14 +1069,15 @@ simple. If you run into an error that can't be handled by the module
 just use something like
 @example
 if ( non_recoverable_error )
-    THROW( EXCEPTION );
+    THROW( EXCEPTION )
 @end example
 @findex THROW()
 @findex EXCEPTION
 @noindent
-and @acronym{fsc2} will take care of all error handling. That's all you need to
-know about exceptions for nearly all cases that have to be handled within
-modules.
+and @acronym{fsc2} will take care of all error handling (please note the
+missing semicolon after the @code{THROW( EXCEPTION )}). That's all you
+need to know about exceptions for nearly all cases that have to be
+handled within modules.
 
 
 @subsubsection More on programming with exceptions
@@ -1177,13 +1178,13 @@ is tested, and if set, an @code{USER_BREAK_EXCEPTION} is thrown:
 do
 @{
     if ( DO_STOP )
-        THROW( USER_BREAK_EXCEPTION );
+        THROW( USER_BREAK_EXCEPTION )
 
     length = 40;
     usleep( 100000 );
     if ( gpib_write( tds754a.device, "BUSY?\n", 6 ) == FAILURE ||
          gpib_read_w( tds754a.device, reply, &length ) == FAILURE )
-        THROW( EXCEPTION );
+        THROW( EXCEPTION )
 @} while ( reply[ 0 ] == '1' ); 
 @end example
 

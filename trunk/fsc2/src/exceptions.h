@@ -104,9 +104,9 @@ enum {
     else
 
 #define PASSTHROU( ) \
-    THROW( exception_id )
+    THROW( exception_id );
 
-#define THROW( e ) \
+#define THROW( e ); \
     { \
 		lower_permissions( ); \
         exception_id = e; \
