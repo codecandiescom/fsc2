@@ -531,8 +531,8 @@ all:
 	$(MAKE) -C $(sdir) src
 	$(MAKE) -C $(sdir) modules
 	$(MAKE) http_server
-	$(MAKE) docs
 	$(MAKE) utils
+	$(MAKE) docs
 
 
 config: fsc2_config.h
