@@ -1054,52 +1054,54 @@ tds744a
 tds754a
 @end example
 
-When a digitizer channel or trigger input is used as an argument in
-calls of one of the following functions the symbolic channel names can
-be replaced by integer numbers:
+When specifying digitizer channels or trigger inputs you should use only
+the following symbolic names (internally these symbolic names get
+replaced by integer numbers, so the functions expecting channel numbers
+accept integers, but the relation between a channel specified by its
+symbolic name and the corresponding number isn't trivial).
 @table @samp
 @item CH1
-@code{0} - First digitizer channel (all models)
+First digitizer channel (all models)
 @item CH2
-@code{1} - Second digitizer channel (all models)
+Second digitizer channel (all models)
 @item CH3
-@code{2} - Third digitizer channel (Tektronix TDS540, TDS744A, TDS754A)
+Third digitizer channel (Tektronix TDS540, TDS744A, TDS754A)
 @item CH4
-@code{3} - Fourth digitizer channel (Tektronix TDS540, TDS744A, TDS754A)
+Fourth digitizer channel (Tektronix TDS540, TDS744A, TDS754A)
 @item MATH1
-@code{4} - First mathematic function channel (all Tektronix digitizers)
+First mathematic function channel (all Tektronix digitizers)
 @item MATH2
-@code{5} - Second mathematic function channel (all Tektronix digitizers)
+Second mathematic function channel (all Tektronix digitizers)
 @item MATH3
-@code{6} - Third mathematic function channel (all Tektronix digitizers)
+Third mathematic function channel (all Tektronix digitizers)
 @item REF1
-@code{7} - First reference channel (all Tektronix digitizers)
+First reference channel (all Tektronix digitizers)
 @item REF2
-@code{8} - Second reference channel (all Tektronix digitizers)
+Second reference channel (all Tektronix digitizers)
 @item REF3
-@code{9} - Third reference channel (all Tektronix digitizers)
+Third reference channel (all Tektronix digitizers)
 @item REF4
-@code{10} - Fourth reference channel (all Tektronix digitizers)
+Fourth reference channel (all Tektronix digitizers)
 @item AUX
-@code{11} - Auxiliary channel (Tektronix TDS540, TDS744A, TDS754A)
+Auxiliary channel (Tektronix TDS540, TDS744A, TDS754A)
 @item AUX1
-@code{12} - First auxiliary channel (Tektronix TDS520, TDS520A, TDS520C)
+First auxiliary channel (Tektronix TDS520, TDS520A, TDS520C)
 @item AUX2
-@code{13} - Second auxiliary channel (Tektronix TDS520, TDS520A, TDS520C)
+Second auxiliary channel (Tektronix TDS520, TDS520A, TDS520C)
 @item LINE
-@code{14} - Line In for trigger (all models)
+Line In for trigger (all models)
 @item MEM_C
-@code{15} - First memory channel (LeCroy 9400)
+First memory channel (LeCroy 9400)
 @item MEM_D
-@code{16} - Second memory channel (LeCroy 9400)
+Second memory channel (LeCroy 9400)
 @item FUNC_E
-@code{17} - First function (averaging) channel (LeCroy 9400)
+First function (averaging) channel (LeCroy 9400)
 @item FUNC_F
-@code{18} - second function (averaging) channel (LeCroy 9400)
+second function (averaging) channel (LeCroy 9400)
 @item EXT
-@code{19} - External trigger input (LeCroy 9400)
+External trigger input (LeCroy 9400)
 @item EXT10
-@code{20} - External amplified trigger input (LeCroy 9400)
+External amplified trigger input (LeCroy 9400)
 @end table
 
 
@@ -2707,10 +2709,9 @@ Returns a string with the name of the DAC being used.
 @findex dac_voltage()
 This function has to be used to output a voltage at one of the output
 ports. The first argument has to be the output port, specified by one of
-the symbolic values between @code{CH0} and @code{CH15} (please
-@strong{don't} use numbers directly, the mapping between the symbolic
-values and channel numbers is non-trivial). The second argument is the
-voltage (in the range between @w{-10 V} and @w{+10 V}) to be output.
+the symbolic values between @code{CH0} and @code{CH15} (don't try to use
+simple numbers instead!). The second argument is the voltage (in the
+range between @w{-10 V} and @w{+10 V}) to be output.
 
 If an output voltage has already been set for an output port the last
 set voltage is returned when the function is called without a second
@@ -3217,7 +3218,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
 
 
-@anchor {monochromator_wavelength}
+@anchor{monochromator_wavelength}
 @item monochromator_wavelength()
 @findex monochromator_wavelength()
 If called with no argument the function returns the current center
@@ -3232,9 +3233,9 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @item monochromator_groove_density()
 @findex monochromator_groove_density()
 If called with no argument the function returns the number of grooves
-(per meter) of the currently used grating. If called with an integer
-argument it returns the number of grooves (per m) off the grating
-indexed by this number (starting with 1).
+per meter of the currently used grating. If called with an integer
+argument it returns the number of grooves per m off the grating indexed
+(starting with 1) by the number passed to it.
 
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
@@ -3255,33 +3256,37 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @anchor{monochromator_wavelength_axis}
 @item monochromator_wavelength_axis()
 @findex monochromator_wavelength_axis()
-This function requires that also the module for a CCD camera is
-available that returns information about the number of pixels and the
-distance between pixels. It then returns an array with two elements,
-where the first element is the wavelength at the leftmost pixel of the
-CCD chip and the second element is the wavelength difference between
-neighboring pixels. The function also accepts up to two arguments, an
+This function requires that the module for a CCD camera is available
+that returns information about the number of pixels and the distance
+between pixels. It then returns an array with two elements, where the
+first element is the wavelength at the leftmost pixel of the CCD chip
+and the second element is the wavelength difference between neighboring
+pixels. The function can also be called with up to two arguments, an
 integer for the grating number and the wavelength at the center of the
 chip. If these arguments aren't given, the currently used grating and
-the wavelength of the monochromator is used.
+wavelength of the monochromator is used.
 
-To be able to work the function requires that a calibration for the
+To be able to work the function also requires that a calibration for the
 grating has been loaded, either by calling
 @code{monochromator_set_calibration()} or
 @code{monochromator_read_calibration()} (see below). If no calibration
-has been loaded for the grating a warning is printed and both elements of
-the array get set to @code{1}.
+has been loaded for the grating a warning is printed and the returned
+scaling values represent pixel numbers, not wavelengths (i.e.@: both are
+values are simply 1).
 
-Please note, that in reality the wavelength difference at two
-neighboring pixels isn't constant over the whole width of the chip. When
-you use the returned values for the center of the chip, the results for
-are in quite good agreement with the real wavelengths, but at the edges
-of the chip the accuracy deteriorates, for a grating with 1200 grooves
-per mm the deviation is about @w{0.5 nm} and for gratings with lower
-groove densities the deviations get larger proportional to the inverse
-of the groove density. To obtain the exact wavelength for a certain
-pixel of the chip use the function
-@code{monochromator_calc_wavelength()} discussed below.
+The function is especially meant to make it easy to obtain a wavelength
+scale to be used with the functions @code{change_scale_1d()} and
+@code{change_scale_2d()}. Please note that the wavelength difference
+between two neighboring pixels isn't really constant over the whole
+width of the chip. When you use the returned values only for the center
+of the chip, the results are in quite good agreement with the real
+wavelengths, but at the edges of the chip the accuracy deteriorates
+significantly, for example for a grating with 1200 grooves per mm the
+deviation is about @w{0.5 nm} and for gratings with lower groove
+densities the deviation gets even larger, proportional to the inverse of
+the groove density. To obtain the exact wavelength for a certain pixel
+of the chip use the function @code{monochromator_calc_wavelength()}
+discussed below.
 
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
@@ -3290,14 +3295,135 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @anchor{monochromator_calc_wavelength}
 @item monochromator_calc_wavelength()
 @findex monochromator_calc_wavelength()
+This function requires that the module for a CCD camera is
+available that returns information about the number of pixels and the
+distance between pixels. It accepts a pixel position or an array of
+pixel positions on the CCD chip (relative to the left edge of the chip
+and starting with 1) and returns, depending on the type of the argument,
+either a number or an array with the exact wavelengths for these pixel
+positions. The function also accepts up to two arguments, an integer for
+the grating number and the wavelength at the center of the chip. If
+these arguments aren't given, the currently used grating and wavelength
+of the monochromator is used.
+
+To be able to work the function also requires that a calibration for the
+grating has been loaded, either by calling
+@code{monochromator_set_calibration()} or
+@code{monochromator_read_calibration()} (see below). If no calibration
+has been loaded for the grating a warning is printed and the input
+value(s) are simply returned.
+
+The function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} script.
 
 
+@anchor{monochromator_load_calibration}
+@item monochromator_load_calibration()
+@findex monochromator_load_calibration()
+The function tries to load a file with calibration data for one or more
+of the gratings. For each grating five values are required for a
+complete calibration.
 
-@c monochromator_install_grating, 2, EXP;    // install new grating
-@c monochromator_set_calibration, -1, EXP;   // manually set calibration
-@c monochromator_load_calibration, -1, EXP;  // read in calibration file
+The first value is the zero wavelength offset of the grating (a number
+between in the interval @code{[-1,-1]}) designating the amount of offset
+by a monochromator specific maximum value. If the value is correct the
+zero-order maximum gets projected onto the center of the CCD chip. If
+the second value, the adjust value, is set correctly setting a
+wavelength of the monochromator results in a line of this wavelength
+appearing at the center of the CCD chip. It can be varied in the
+interval @code{[-1,1]}. The third value is the inclusion angle of the
+monochromator (in degree), the fourth the focal length of the
+monochromator (in m) and the fifth and final value is the detector angle
+(in degree), i.e.@: the angle by which the plane of the CCD chip is
+rotated out of the focal plane.
+
+In the calibration file you will find lines like the following for each
+of the grating:
+@example
+INIT_OFFSET_1      =  -0.003251
+INIT_ADJUST_1      =   0.012131
+INCLUSION_ANGLE_1  =   30.3
+FOCAL_LENGTH_1     =   301.2 mm
+DETECTOR_ANGLE_1   =   0.324871
+@end example
+@noindent
+The number appended to each of the keywords stands for the grating they
+are to be used with.
+
+Calling the function will load the data from the calibration file. These
+calibration data are required to be able to calculate correct
+wavelengths for the pixel positions of the CCD chip.
+
+When the function gets called without an argument it tries to read a
+default calibration file. The name of this file is compiled into the
+module and can be changed via the configuration file of the module and
+then recompiling the module. If an argument is passed to the function
+this must be a string with the name of a file that the program has the
+permissions to read.
+
+@strong{Please note:} Reading the calibration data from the file does
+not also send the values for the zero-offset (@code{INIT_OFFSET}) and
+the adjust value (@code{INIT_ADJUST}) to the monochromator. This action
+takes quite a long time (about half a minute) because the monochromator
+has to be reset afterwards. Thus it would not be desirable to repeat
+this procedure for each experiment. Both values are stored in
+non-volatile memory in the monochromators memory, so they also don't get
+lost when the monochromator gets switched off. Moreover, these values
+will hardly ever change as long as the monochromator doesn't get opened,
+so setting them only from time to time during calibration procedures
+should be sufficient.
+
+The function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} script.
+
+
+@anchor{monochromator_set_calibration}
+@item monochromator_set_calibration()
+@findex monochromator_set_calibration()
+This function allows to set calibration data for a grating directly
+instead of reading them from a file. It can also used to reset the
+calibration for a grating.
+
+The function expects 6 arguments, the grating number between 1 and the
+maximum number of installed gratings), the zero-offset and adjust value
+for the monochromator (both numbers in the interval @code{[-1,1]}), the
+inclusion angle (in degree), the focal length (in m) and the detector
+angle (in degree).
+
+Alternatively, to clear the calibration for a grating the function can
+also be called with two arguments, the number of the grating and the
+string @code{"DELETE_CALIBRATION"}.
+
+The function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} script.
+
+
+@anchor{monochromator_install_grating}
+@item monochromator_install_grating()
+@findex monochromator_install_grating()
+This function can be used to tell the monochromator about a new grating.
+It expects two arguments, the grating number (a number between 1 and the
+maximum number of installable gratings) and a string with the part
+number of the newly installed grating. All part numbers are expected to
+start with a single digit, followed by a dash, the number of grooves per
+thenth of a mm, another dash and an identifier for the blaze wavelength
+or type of the grating. Thus a valid part number string would be e.g.@:
+@code{"1-120-750"} for a grating with 1200 grooves per mm and a blazing
+wavelength of @w{750 nm}. Another possible part number string is
+@code{"1-120-HVIS"}. The total length of the string may not excceed 10
+characters.
+
+Alternatively, the function can also be used to tell the monochromator
+that a grating has been removed. In this case the part number string has
+to be replaced by the string @code{"UNINSTALL"}.
+
+The function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} script.
+
+
 @c monochromator_init_offset, -1, EXP;
 @c monochromator_init_adjust, -1, EXP;
+@c monochromator_init, -1, EXP;
 
 
 @end table
@@ -3308,7 +3434,8 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @cindex Power Supply Functions
 
 The only currently supplied power supply is the @strong{Thurlby &
-Thandar Power Supply} PL330DP. The module for the power supply is loaded by specifying
+Thandar Power Supply} PL330DP. The module for the power supply is loaded
+by specifying
 @example
 thurlby330
 @end example
@@ -3327,10 +3454,9 @@ Returns a string with the name of the power supply being used.
 @findex powersupply_channel_state()
 This function alllows to switch the channels of the power supply on or
 off. It requires two arguments. The first one is the channel, which must
-be either @code{CH1} or @code{CH2} (don't use numbers directly
-or, if you do, use @code{0} for @code{CH1} and @code{1} for @code{CH2}).
-The second argument is the state, i.e.@: either @code{"ON"} or
-@code{"OFF"} (or @code{1} for on and @code{0} for off).
+be either @code{CH1} or @code{CH2} (don't try use simple numbers
+instead!). The second argument is the state, i.e.@: either
+@code{"ON"} or @code{"OFF"} (or @code{1} for on and @code{0} for off).
 
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
@@ -3342,9 +3468,8 @@ The function can only be used in the @code{EXPERIMENT} section of an
 This function alllows to switch damping of the output of one of the
 channels of the power supply on or off. It requires two arguments. The
 first one is the channel, which must be either @code{CH1} or @code{CH2}
-(don't use numbers directly, or, if you do, use @code{0} for @code{CH1}
-and @code{1} for @code{CH2}).  The second argument is the damping state,
-i.e.@: either @code{"ON"} or @code{"OFF"} (or @code{1} for on and
+(don't use simple numbers instead!).  The second argument is the damping
+state, i.e.@: either @code{"ON"} or @code{"OFF"} (or @code{1} for on and
 @code{0} for off).
 
 The function can only be used in the @code{EXPERIMENT} section of an
@@ -3356,8 +3481,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 This function allows to either set or query the output voltage of one of
 the channels. For a query only one argument is required, the channel,
 which must be specified as either @code{CH1} or @code{CH2} (don't use
-numbers directly, or, if you do, use @code{0} for @code{CH1} and
-@code{1} for @code{CH2}).  If there is no second argument the output
+simple numbers instead!). If there is no second argument the output
 voltage at the channel is returned.
 
 If there is a second argument, being a voltage in the range between @w{0
@@ -3373,8 +3497,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @findex powersupply_voltage_limit()
 This function allows to query the current setting of the voltage limit.
 It expects one argument, the channel, which must be specified as either
-@code{CH1} or @code{CH2} (don't use numbers directly, or, if you do, use
-@code{0} for @code{CH1} and @code{1} for @code{CH2}).
+@code{CH1} or @code{CH2} (don't use simple numbers instead!).
 
 If there is a second argument, being a voltage in the range between @w{0
 V} and @w{32 V}, this value is used as the new voltage limit. The same
@@ -3390,8 +3513,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 This function allows to either set or query the output current of one of
 the channels. For a query only one argument is required, the channel,
 which must be specified as either @code{CH1} or @code{CH2} (don't use
-numbers directly, or, if you do, use @code{0} for @code{CH1} and
-@code{1} for @code{CH2}).  If there is no second argument the output
+simple numbers instead!). If there is no second argument the output
 current at the channel is returned.
 
 If there is a second argument, being a current in the range between @w{0
@@ -3407,8 +3529,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @findex powersupply_current_limit()
 This function allows to query the current setting of the current limit.
 It expects one argument, the channel, which must be specified as either
-@code{CH1} or @code{CH2} (don't use numbers directly, or, if you do, use
-@code{0} for @code{CH1} and @code{1} for @code{CH2}).
+@code{CH1} or @code{CH2} (don't use simple numbers instead!).
 
 If there is a second argument, being a current in the range between @w{0
 A} and @w{3 A}, this value is used as the new current limit. The same
