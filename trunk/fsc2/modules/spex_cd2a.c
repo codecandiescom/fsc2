@@ -25,9 +25,9 @@
 #include "spex_cd2a.h"
 
 
-/*--------------------------------*/
-/* global variables of the module */
-/*--------------------------------*/
+/*--------------------------------*
+ * global variables of the module
+ *--------------------------------*/
 
 const char device_name[ ]  = DEVICE_NAME;
 const char generic_type[ ] = DEVICE_TYPE;
@@ -36,9 +36,9 @@ SPEX_CD2A spex_cd2a, spex_cd2a_stored;
 
 
 
-/*------------------------------------------------------------*/
-/* Function that gets called when the module has been loaded. */
-/*------------------------------------------------------------*/
+/*------------------------------------------------------------*
+ * Function that gets called when the module has been loaded.
+ *------------------------------------------------------------*/
 
 int spex_cd2a_init_hook( void )
 {
@@ -273,9 +273,9 @@ int spex_cd2a_init_hook( void )
 }
 
 
-/*-------------------------------------------------------------------------*/
-/* Function called (in the parents context) at the start of the experiment */
-/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*
+ * Function called (in the parents context) at the start of the experiment
+ *-------------------------------------------------------------------------*/
 
 int spex_cd2a_test_hook( void )
 {
@@ -285,9 +285,9 @@ int spex_cd2a_test_hook( void )
 }
 
 
-/*-----------------------------------------------------------*/
-/* Function gets called always at the start of an experiment */
-/*-----------------------------------------------------------*/
+/*-----------------------------------------------------------*
+ * Function gets called always at the start of an experiment
+ *-----------------------------------------------------------*/
 
 int spex_cd2a_exp_hook( void )
 {
@@ -319,10 +319,10 @@ int spex_cd2a_exp_hook( void )
 }
 
 
-/*--------------------------------------------------------------*/
-/* Function gets called just before the child process doing the */
-/* experiment exits.                                            */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ * Function gets called just before the child process doing the
+ * experiment exits.
+ *--------------------------------------------------------------*/
 
 void spex_cd2a_child_exit_hook( void )
 {
@@ -332,9 +332,9 @@ void spex_cd2a_child_exit_hook( void )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/* Function called (in the parents context) at the end of the experiment */
-/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ * Function called (in the parents context) at the end of the experiment
+ *-----------------------------------------------------------------------*/
 
 int spex_cd2a_end_of_exp_hook( void )
 {
@@ -343,9 +343,9 @@ int spex_cd2a_end_of_exp_hook( void )
 }
 
 
-/*----------------------------------------------*/
-/* Returns a string with the name of the device */
-/*----------------------------------------------*/
+/*----------------------------------------------*
+ * Returns a string with the name of the device
+ *----------------------------------------------*/
 
 Var *monochromator_name( Var *v )
 {
@@ -354,19 +354,19 @@ Var *monochromator_name( Var *v )
 }
 
 
-/*-------------------------------------------------------------------------*/
-/* Function can be used to either determine the current settings for scans */
-/* (by calling it without an argument) or to set new scan parameters. In   */
-/* the second case two arguments are required, the start position of the   */
-/* scan and the scan step size. If a new scan setup is done while the      */
-/* device is already doing a scan (is in scan mode) the currently running  */
-/* scan is aborted. For wavelength driven monochromators the scan start    */
-/* position and the step size must be given in m while for wavenumber      */
-/* driven ones in cm^-1. Of course, in queries both are also returned in   */
-/* these units. For wavenumber driven monochromators we also have to deal  */
-/* with a laser line being set: if it is the start wavenumber is taken to  */
-/* in relative, otherwise in absolute units.                               */
-/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*
+ * Function can be used to either determine the current settings for scans
+ * (by calling it without an argument) or to set new scan parameters. In
+ * the second case two arguments are required, the start position of the
+ * scan and the scan step size. If a new scan setup is done while the
+ * device is already doing a scan (is in scan mode) the currently running
+ * scan is aborted. For wavelength driven monochromators the scan start
+ * position and the step size must be given in m while for wavenumber
+ * driven ones in cm^-1. Of course, in queries both are also returned in
+ * these units. For wavenumber driven monochromators we also have to deal
+ * with a laser line being set: if it is the start wavenumber is taken to
+ * in relative, otherwise in absolute units.
+ *-------------------------------------------------------------------------*/
 
 Var *monochromator_scan_setup( Var *v )
 {
@@ -544,12 +544,12 @@ Var *monochromator_scan_setup( Var *v )
 }
 
 
-/*----------------------------------------------------------*/
-/* Set or query the current wavelength of the monochromator */
-/* (always return the absolute wavelength in m, even when   */
-/* in wavenumber mode). If the monochromator is doing a     */
-/* scan and a new wavelength is set the scan is aborted.    */
-/*----------------------------------------------------------*/
+/*----------------------------------------------------------*
+ * Set or query the current wavelength of the monochromator
+ * (always return the absolute wavelength in m, even when
+ * in wavenumber mode). If the monochromator is doing a
+ * scan and a new wavelength is set the scan is aborted.
+ *----------------------------------------------------------*/
 
 Var *monochromator_wavelength( Var *v )
 {
@@ -609,12 +609,12 @@ Var *monochromator_wavelength( Var *v )
 }
 
 
-/*----------------------------------------------------------------------*/
-/* Queries the current wavenumber (in cm^-1) of the monochromator. When */
-/* in wavenumber offset mode the difference to the laser line is used.  */
-/* If the monochromator is currently doing scan and a new wavenumber is */
-/* set the currently running scan is aborted.                           */
-/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*
+ * Queries the current wavenumber (in cm^-1) of the monochromator. When
+ * in wavenumber offset mode the difference to the laser line is used.
+ * If the monochromator is currently doing scan and a new wavenumber is
+ * set the currently running scan is aborted.
+ *----------------------------------------------------------------------*/
 
 Var *monochromator_wavenumber( Var *v )
 {
@@ -673,11 +673,11 @@ Var *monochromator_wavenumber( Var *v )
 }
 
 
-/*------------------------------------------------------------------*/
-/* Function for starting a new scan: the monochromator is driven to */
-/* the start position of the scan. If the monochromator was already */
-/* doing a scan the old scan is aborted.                            */
-/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ * Function for starting a new scan: the monochromator is driven to
+ * the start position of the scan. If the monochromator was already
+ * doing a scan the old scan is aborted.
+ *------------------------------------------------------------------*/
 
 Var *monochromator_start_scan( Var *v )
 {
@@ -700,10 +700,10 @@ Var *monochromator_start_scan( Var *v )
 }
 
 
-/*------------------------------------------------------------*/
-/* Function for doing a scan step, requires that a scan setup */
-/* has been done and a scan already has been started.         */
-/*------------------------------------------------------------*/
+/*------------------------------------------------------------*
+ * Function for doing a scan step, requires that a scan setup
+ * has been done and a scan already has been started.
+ *------------------------------------------------------------*/
 
 Var *monochromator_scan_step( Var *v )
 {
@@ -768,20 +768,20 @@ Var *monochromator_scan_step( Var *v )
 }
 
 
-/*-------------------------------------------------------------*/
-/* Function for setting the laser line position. This can only */
-/* be done for monochromators that are wavenumber driven. When */
-/* a laser line has been set in the following only relative    */
-/* wavenumbers can be used (i.e. differences between the laser */
-/* line position and absolute wavenumbers), and all functions  */
-/* involving wavenumbers return relative positions. A laser    */
-/* line position can switched of (reverting also to use of     */
-/* absolute wavenumbers) by setting a zero or negative laser   */
-/* line position. If called without an argument the function   */
-/* returns the current setting of the laser line position      */
-/* (always in absolute wavenumbers) or zero if no laser line   */
-/* position has been set.                                      */
-/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*
+ * Function for setting the laser line position. This can only
+ * be done for monochromators that are wavenumber driven. When
+ * a laser line has been set in the following only relative
+ * wavenumbers can be used (i.e. differences between the laser
+ * line position and absolute wavenumbers), and all functions
+ * involving wavenumbers return relative positions. A laser
+ * line position can switched of (reverting also to use of
+ * absolute wavenumbers) by setting a zero or negative laser
+ * line position. If called without an argument the function
+ * returns the current setting of the laser line position
+ * (always in absolute wavenumbers) or zero if no laser line
+ * position has been set.
+ *-------------------------------------------------------------*/
 
 Var *monochromator_laser_line( Var *v )
 {
@@ -840,9 +840,9 @@ Var *monochromator_laser_line( Var *v )
 }
 
 
-/*------------------------------------------------------------------*/
-/* Function returns the number of grooves per meter of the grating. */
-/*------------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ * Function returns the number of grooves per meter of the grating
+ *-----------------------------------------------------------------*/
 
 Var *monochromator_groove_density( Var *v )
 {
@@ -853,12 +853,12 @@ Var *monochromator_groove_density( Var *v )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/* Function for querying setting the limits for shutters (if installed). */
-/* To set new limits the function expects two arguments, first the lower */
-/* limit and the upper limit (where the lower limit must not be a larger */
-/* number than the upper limit).                                         */
-/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ * Function for querying setting the limits for shutters (if installed).
+ * To set new limits the function expects two arguments, first the lower
+ * limit and the upper limit (where the lower limit must not be a larger
+ * number than the upper limit).
+ *-----------------------------------------------------------------------*/
 
 Var *monochromator_shutter_limits( Var *v )
 {
@@ -974,36 +974,36 @@ Var *monochromator_shutter_limits( Var *v )
 }
 
 
-/*--------------------------------------------------------------------*/
-/* Function for calibration of the monochromator. It tells the driver */
-/* 1. about an offset between what the driver reports to the user and */
-/*    where a line is supposed to be.                                 */
-/* 2. (optionally) the width of a single pixel on the CCD camera      */
-/*                                                                    */
-/* The function is to be called at least with the difference between  */
-/* the expected position and the position where the line really       */
-/* appears according to scales derived from the values reported by    */
-/* the driver. If, for example a sweep is done from 400 nm to 404 nm, */
-/* with the laser line appearing at 401 nm while it is expected to be */
-/* at 402 nm the function should be called with a value of +1 nm to   */
-/* to correct for this offset. Since the wavelengths or wavenumbers   */
-/* the user is dealing with are already offset-corrected the argument */
-/* isn't taken to be the offset itself but is subtracted from the     */
-/* existing value of the offset.                                      */
-/* For wavelength driven monochromators the offset must be given in   */
-/* wavelength units, while for wavenumber driven monochromators in    */
-/* wavenumber units (i.e. cm^-1).                                     */
-/*                                                                    */
-/* If there's another argument it has to be the wavelength or wave-   */
-/* number (depending on the type of the monochromator) difference     */
-/* between two pixels of the CCD camera. If not given the old value   */
-/* is retained.                                                       */
-/*                                                                    */
-/* If called without an argument the function returns an array of two */
-/* values with the offset and the pixel difference. A value of 0 for  */
-/* the pixel difference means that no calibration of this value has   */
-/* been done.                                                         */
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ * Function for calibration of the monochromator. It tells the driver
+ * 1. about an offset between what the driver reports to the user and
+ *    where a line is supposed to be.
+ * 2. (optionally) the width of a single pixel on the CCD camera
+ *
+ * The function is to be called at least with the difference between
+ * the expected position and the position where the line really
+ * appears according to scales derived from the values reported by
+ * the driver. If, for example a sweep is done from 400 nm to 404 nm,
+ * with the laser line appearing at 401 nm while it is expected to be
+ * at 402 nm the function should be called with a value of +1 nm to
+ * to correct for this offset. Since the wavelengths or wavenumbers
+ * the user is dealing with are already offset-corrected the argument
+ * isn't taken to be the offset itself but is subtracted from the
+ * existing value of the offset.
+ * For wavelength driven monochromators the offset must be given in
+ * wavelength units, while for wavenumber driven monochromators in
+ * wavenumber units (i.e. cm^-1).
+ *
+ * If there's another argument it has to be the wavelength or wave-
+ * number (depending on the type of the monochromator) difference
+ * between two pixels of the CCD camera. If not given the old value
+ * is retained.
+ *
+ * If called without an argument the function returns an array of two
+ * values with the offset and the pixel difference. A value of 0 for
+ * the pixel difference means that no calibration of this value has
+ * been done.
+ *--------------------------------------------------------------------*/
 
 
 Var *monochromator_calibrate( Var *v )
@@ -1090,14 +1090,14 @@ Var *monochromator_calibrate( Var *v )
 }
 
 
-/*----------------------------------------------------------------------*/
-/* Function returns an array of two wavelength values that are suitable */
-/* for use as axis description parameters (start of axis and increment) */
-/* required by by the change_scale() function (if the camera uses       */
-/* binning the second element may have to be multiplied by the          */
-/* x-binning width). Please note: since the axis is not really linear   */
-/* the axis displayed when using these values isn't absolutely correct! */
-/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*
+ * Function returns an array of two wavelength values that are suitable
+ * for use as axis description parameters (start of axis and increment)
+ * required by by the change_scale() function (if the camera uses
+ * binning the second element may have to be multiplied by the x-binning
+ * width). Please note: since the axis is not really linear the axis
+ * displayed when using these values isn't absolutely correct!
+ *----------------------------------------------------------------------*/
 
 Var *monochromator_wavelength_axis( Var *v )
 {
@@ -1162,36 +1162,33 @@ Var *monochromator_wavelength_axis( Var *v )
 
 	if ( spex_cd2a.mode == WL )
 	{
-		cv->val.dpnt[ 0 ] =
-			spex_cd2a_Swl2Uwl( wl - 0.5 * ( num_pixels - 1 )
-							   * spex_cd2a.pixel_diff );
+		cv->val.dpnt[ 0 ] = spex_cd2a_Swl2Uwl( wl - 0.5 * ( num_pixels - 1 )
+											   * spex_cd2a.pixel_diff );
 		cv->val.dpnt[ 1 ] = spex_cd2a.pixel_diff;
 	}
 	else
 	{
-		cv->val.dpnt[ 0 ] =
-			spex_cd2a_SAwn2Uwl( spex_cd2a_wl2Awn( wl )
-								+ 0.5 * ( num_pixels - 1 )
-								* spex_cd2a.pixel_diff );
-		cv->val.dpnt[ 1 ] = 
-			( spex_cd2a_SAwn2Uwl( spex_cd2a_wl2Awn( wl )
-								- 0.5 * ( num_pixels - 1 )
-								* spex_cd2a.pixel_diff )
-			  - cv->val.dpnt[ 0 ] ) / ( num_pixels - 1 );
+		cv->val.dpnt[ 0 ] =	spex_cd2a_SAwn2Uwl( spex_cd2a_wl2Awn( wl )
+												+ 0.5 * ( num_pixels - 1 )
+												* spex_cd2a.pixel_diff );
+		cv->val.dpnt[ 1 ] = ( spex_cd2a_SAwn2Uwl( spex_cd2a_wl2Awn( wl )
+												  - 0.5 * ( num_pixels - 1 )
+												  * spex_cd2a.pixel_diff )
+							  - cv->val.dpnt[ 0 ] ) / ( num_pixels - 1 );
 	}
 
 	return cv;
 }
 
 
-/*----------------------------------------------------------------------*/
-/* Function returns an array of two wavenumber values that are suitable */
-/* for use as axis description parameters (start of axis and increment) */
-/* required by by the change_scale() function (if the camera uses       */
-/* binning the second element may have to be multiplied by the          */
-/* x-binning width). Please note: since the axis is not really linear   */
-/* the axis displayed when using these values isn't absolutely correct! */
-/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*
+ * Function returns an array of two wavenumber values that are suitable
+ * for use as axis description parameters (start of axis and increment)
+ * required by by the change_scale() function (if the camera uses
+ * binning the second element may have to be multiplied by the x-binning
+ * width). Please note: since the axis is not really linear the axis
+ * displayed when using these values isn't absolutely correct!
+ *----------------------------------------------------------------------*/
 
 Var *monochromator_wavenumber_axis( Var *v )
 {
@@ -1256,22 +1253,19 @@ Var *monochromator_wavenumber_axis( Var *v )
 
 	if ( spex_cd2a.mode == WL )
 	{
-		cv->val.dpnt[ 0 ] = 
-			spex_cd2a_SAwn2Uwl( spex_cd2a_wl2Awn( wl )
-								+ 0.5 * ( num_pixels - 1 )
-								* spex_cd2a.pixel_diff );
-		cv->val.dpnt[ 1 ] =
-			( spex_cd2a_SAwn2Uwl( spex_cd2a_wl2Awn( wl )
-								  - 0.5 * ( num_pixels - 1 )
-								  * spex_cd2a.pixel_diff )
-			  - cv->val.dpnt[ 0 ] ) / ( num_pixels - 1 );
+		cv->val.dpnt[ 0 ] = spex_cd2a_SAwn2Uwl( spex_cd2a_wl2Awn( wl )
+												+ 0.5 * ( num_pixels - 1 )
+												* spex_cd2a.pixel_diff );
+		cv->val.dpnt[ 1 ] = ( spex_cd2a_SAwn2Uwl( spex_cd2a_wl2Awn( wl )
+												  - 0.5 * ( num_pixels - 1 )
+												  * spex_cd2a.pixel_diff )
+							  - cv->val.dpnt[ 0 ] ) / ( num_pixels - 1 );
 	}
 	else
 	{
-		cv->val.dpnt[ 0 ] =
-			spex_cd2a_SAwn2UMwn( spex_cd2a_wl2Awn( wl )
-								 - 0.5 * ( num_pixels - 1 )
-								 * spex_cd2a.pixel_diff );
+		cv->val.dpnt[ 0 ] = spex_cd2a_SAwn2UMwn( spex_cd2a_wl2Awn( wl )
+												 - 0.5 * ( num_pixels - 1 )
+												 * spex_cd2a.pixel_diff );
 		cv->val.dpnt[ 1 ] = spex_cd2a.pixel_diff;
 		if ( spex_cd2a.mode == WN )
 			cv->val.dpnt[ 1 ] *= -1.0;
