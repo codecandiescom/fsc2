@@ -810,6 +810,7 @@ Var *f_print( Var *v )
 		on_stack,
 		s;
 	bool print_anyway = UNSET;
+	int percs;
 
 	
 	/* a call to print() without any argument just prints a newline */
@@ -836,9 +837,14 @@ Var *f_print( Var *v )
 	/* count the number of specifiers `#' in the format string but don't count
 	   escaped `#' (i.e "\#") */
 
-	for ( in_format = 0, sptr; ( cp = strchr( cp, '#' ) ) != NULL; ++cp )
+	for ( percs = in_format = 0, sptr; ( cp = strchr( cp, '#' ) ) != NULL;
+		  ++cp )
+	{
 		if ( *( cp - 1 ) != '\\' )
 			in_format++;
+		if ( *cp == '%' )
+			percs++;
+	}
 
 	/* check and count number of variables on the stack following the format
 	   string */
@@ -868,17 +874,17 @@ Var *f_print( Var *v )
 	/* get string long enough to replace each `#' by a 4-char sequence 
 	   plus a '\0' */
 
-	fmt = get_string( strlen( sptr ) + 4 * s + 2 );
+	fmt = get_string( strlen( sptr ) + 4 * s + percs + 2 );
 	strcpy( fmt, sptr );
 
 	for ( cp = fmt; *cp != '\0'; ++cp )
 	{
 		/* skip normal characters */
 
-		if ( *cp != '\\' && *cp != '#' )
+		if ( *cp != '\\' && *cp != '#' && *cp != '%' )
 			continue;
 
-		/* convert format descriptor (un-escaped `#') to 4 \x01 */
+		/* convert format descriptor (un-escaped `#') to 5 \x01 */
 
 		if ( *cp == '#' )
 		{
@@ -889,6 +895,13 @@ Var *f_print( Var *v )
 			*cp++ = '\x01';
 			*cp++ = '\x01';
 			*cp = '\x01';
+			continue;
+		}
+
+		if ( *cp == '%' )
+		{
+			memmove( cp + 1, cp, strlen( cp ) + 1 );
+			cp++;
 			continue;
 		}
 
@@ -2346,6 +2359,7 @@ Var *f_fsave( Var *v )
 	int in_format,
 		on_stack,
 		s;
+	int percs;
 
 
 	/* Determine the file identifier */
@@ -2375,9 +2389,14 @@ Var *f_fsave( Var *v )
 	/* Count the number of specifiers `#' in the format string but don't count
 	   escaped `#' (i.e "\#") */
 
-	for ( in_format = 0, sptr; ( cp = strchr( cp, '#' ) ) != NULL; ++cp )
+	for ( percs = in_format = 0, sptr; ( cp = strchr( cp, '#' ) ) != NULL;
+		  ++cp )
+	{
 		if ( *( cp - 1 ) != '\\' )
 			in_format++;
+		if ( *cp == '%' )
+			percs++;
+	}
 
 	/* Check and count number of variables on the stack following the format
 	   string */
@@ -2407,14 +2426,14 @@ Var *f_fsave( Var *v )
 	/* Get string long enough to replace each `#' by a 4-char sequence 
 	   plus a '\0' */
 
-	fmt = get_string( strlen( sptr ) + 4 * s + 2 );
+	fmt = get_string( strlen( sptr ) + 4 * s + percs + 2 );
 	strcpy( fmt, sptr );
 
 	for ( cp = fmt; *cp != '\0'; ++cp )
 	{
 		/* Skip normal characters */
 
-		if ( *cp != '\\' && *cp != '#' )
+		if ( *cp != '\\' && *cp != '#' && *cp != '%' )
 			continue;
 
 		/* Convert format descriptor (un-escaped `#') to 5 \x01 */
@@ -2428,6 +2447,13 @@ Var *f_fsave( Var *v )
 			*cp++ = '\x01';
 			*cp++ = '\x01';
 			*cp = '\x01';
+			continue;
+		}
+
+		if ( *cp == '%' )
+		{
+			memmove( cp + 1, cp, strlen( cp ) + 1 );
+			cp++;
 			continue;
 		}
 
