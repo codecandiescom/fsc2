@@ -47,6 +47,8 @@ double fsc2_simplex( size_t n, double *x, double *dx, void *par,
 					 double func( double *x, void *par ), double epsilon );
 ssize_t read_line( int fd, void *vptr, size_t max_len );
 ssize_t writen( int fd, const void *vptr, size_t n );
+const char *fsc2_show_fselector( const char *message, const char *dir,
+								 const char *pattern, const char *def_name );
 
 
 #endif  /* ! UTIL_HEADER */

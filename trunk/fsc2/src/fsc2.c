@@ -298,6 +298,7 @@ static void globals_init( const char *pname )
 	Internals.is_linux_i386 = UNSET;
 	Internals.conn_child_replied = UNSET;
 	Internals.title = NULL;
+	fsc2_get_conf( );
 
 	/* Figure out if the machine has an INTEL i386 type processor and we're
 	   running under Linux */
@@ -336,6 +337,15 @@ static void globals_init( const char *pname )
 	/* Setup a structure used when dealing with serial ports */
 
 	fsc2_serial_init( );
+}
+
+
+/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*/
+
+static void fsc2_get_conf( void )
+{
+	Internals.use_def_directory = UNSET;
 }
 
 
@@ -897,8 +907,8 @@ void load_file( FL_OBJECT *a, long reload )
 		if ( GUI.main_form->Load->u_ldata == 0 &&
 			 GUI.main_form->Load->u_cdata == NULL )
 		{
-			fn = fl_show_fselector( "Select input file:", NULL, "*.edl",
-									NULL );
+			fn = fsc2_show_fselector( "Select input file:", NULL, "*.edl",
+									  NULL );
 			if ( fn == NULL || *fn == '\0' )
 			{
 				notify_conn( UNBUSY_SIGNAL );

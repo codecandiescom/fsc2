@@ -532,12 +532,13 @@ static bool parent_reader( CommStruct *header )
 						str[ i ] = T_strdup( "" );
 				}
 
-				/* Call fl_show_fselector() and send the result back to the
+				/* Call fsc2_show_fselector() and send the result back to the
 				   child process (which is waiting to read in the mean time) */
 
 				Internals.state = STATE_WAITING;
-				if ( ! writer( C_STR, fl_show_fselector( str[ 0 ], str[ 1 ],
-													   str[ 2 ], str[ 3 ] ) ) )
+				if ( ! writer( C_STR, fsc2_show_fselector( str[ 0 ], str[ 1 ],
+														   str[ 2 ],
+														   str[ 3 ] ) ) )
 					THROW( EXCEPTION );
 				TRY_SUCCESS;
 			}

@@ -221,6 +221,8 @@ struct INTERNALS {
 	volatile sig_atomic_t conn_child_replied;
 
 	char *title;                 /* string with title of the main window */
+	bool use_def_directory;
+	char *def_directory;         /* default directory for file open dialog */
 };
 
 

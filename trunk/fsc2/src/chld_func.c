@@ -169,7 +169,7 @@ const char *show_fselector( const char *message, const char *directory,
 	{
 		switch_off_special_cursors( );
 		Internals.state = STATE_WAITING;
-		ret = fl_show_fselector( message, directory, pattern, def );
+		ret = fsc2_show_fselector( message, directory, pattern, def );
 		Internals.state = STATE_RUNNING;
 		return ret;
 	}

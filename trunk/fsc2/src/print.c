@@ -391,8 +391,8 @@ void print_callback( FL_OBJECT *obj, long data )
 	}
 	else if ( obj == print_form->p2f_browse )
 	{
-		fn = fl_show_fselector( "Select output EPS file:", NULL,
-								"*.eps", NULL );
+		fn = fsc2_show_fselector( "Select output EPS file:", NULL,
+								  "*.eps", NULL );
 		if ( fn != NULL )
 			fl_set_input( print_form->p2f_input, fn );
 	}
