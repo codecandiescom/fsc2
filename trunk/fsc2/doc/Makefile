@@ -65,7 +65,7 @@ fsc2.ps: $(docs) $(eps_pics)
 	@if [ "`eval tex -help 2>/dev/null`" -a         \
 		 "`eval dvips --help 2>/dev/null`" ]; then  \
 		./texi2dvi -c fsc2.texi;                    \
-		dvips fsc2.dvi;                             \
+		dvips fsc2.dvi -o fsc2.ps;                  \
 	else                                            \
 		echo                                        \
 		"Can't make PostScript documentation, programs tex and/or dvips not found."; \
@@ -124,7 +124,7 @@ install:
 	if [ -f fsc2.pdf ]; then \
 		$(INSTALL) -m 444 -o $(OWNER) -g $(GROUP) fsc2.pdf $(docdir); \
 	fi
-	install-info --delete fsc2 $(infodir)/dir
+	install-info --remove fsc2 $(infodir)/dir
 	-$(RM) $(RMFLAGS) $(infodir)/fsc2.info*.gz
 	$(INSTALL) -m 444 -o $(OWNER) -g $(GROUP) fsc2.info* $(infodir)
 	gzip -9 -f $(infodir)/fsc2.info*

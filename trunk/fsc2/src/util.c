@@ -346,7 +346,7 @@ void eprint( int severity, bool print_fl, const char *fmt, ... )
 /* memory segment have to be created with the EUID of fsc2 so that even   */
 /* another user may delete them when he starts fsc2.                      */
 /* This routine is mostly taken from R. Stevens' "Advanced Programming in */
-/* the UNIX Environment (Addison-Wesley 1997)                             */
+/* the UNIX Environment" (Addison-Wesley 1997)                            */
 /*------------------------------------------------------------------------*/
 
 bool fsc2_locking( void )
