@@ -363,7 +363,7 @@ void store_exp( FILE *in )
 		THROW( EXCEPTION );
 	}
 
-	/* Check and initialise if's and loops */
+	/* Check and initialize IF constructs and loops */
 
 	loop_setup( );
 
