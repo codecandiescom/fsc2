@@ -39,6 +39,7 @@
 * er035m_s::        Bruker NMR Gaussmeter ER 035 M (Serial)
 * er035m_sa::       Bruker NMR Gaussmeter ER 035 M (GPIB, Stand-Alone)
 * er035m_sas::      Bruker NMR Gaussmeter ER 035 M (Serial, Stand-Alone)
+* gg_chopper::      Light chopper (Gescheidt group, Graz)
 * hfs9000::         Tektronix Stimulus System HFS9000 (Berlin W-Band)
 * hp5340a::         HP Frequency Counter HP5340A
 * hp8647a::         HP RF Synthesizer HP8647A
@@ -686,8 +687,39 @@ the range is @w{1460 G} to @w{19900 G}.
 
 @c #############################################################
 
+@node gg_chopper, hfs9000, er035m_sas, Device Reference
+@iftex
+@subheading Light chopper (Gescheidt group, Graz)
+@end iftex
+@ifnottex
+@section Light chopper (Gescheidt group, Graz)
+@end ifnottex
 
-@node hfs9000, hp5340a, er035m_sas, Device Reference
+@paragraphindent 0
+@strong{Module name}: @code{hfs9000}
+
+@paragraphindent 0
+@strong{Additionally required module}: @code{pci_mio_16e_1}
+
+@paragraphindent 0
+@strong{Description}: Light chopper used in the group of G.@: Gescheidt
+(University of Graz, Austria). This module doesn't control the device
+directly but, via some homebuild electronics, by using a data
+acquisition card, currently the National Instruments PCI-MIO-16E-4 DAQ
+card.
+
+@paragraphindent 0
+@strong{Supported functions}:
+@multitable @columnfractions .45 .45
+@item @code{chopper_name()}               @tab @ref{chopper_name}
+@item @code{chopper_rotation_frequency()} @tab @ref{chopper_rotation_frequency}
+@end multitable
+
+
+@c #############################################################
+
+
+@node hfs9000, hp5340a, gg_chopper, Device Reference
 @iftex
 @subheading Tektronix Stimulus System HFS9000 (Berlin W-Band)
 @end iftex

@@ -43,6 +43,7 @@
 * Monochromator Functions::
 * Power Supply Functions::
 * Microwave Attenuator Functions::
+* Light Chopper Functions::
 * Multi-Device Functions::
 @end menu
 @end ifinfo
@@ -5006,7 +5007,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 The only currently supported computer controllable microwave attenuator
 is a home-built device from the group of H.-J.@: Steinhoff at the
 University of Osnabrueck. It works with a stepper motor controlled via
-the serial port. The module for the dvice is loaded by specifying
+the serial port. The module for the device is loaded by specifying
 @example
 hjs_attenuator
 @end example
@@ -5106,12 +5107,57 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @end table
 
 
+@node Light Chopper Functions, Multi-Device Functions, Microwave Attenuator Functions, Device Functions
+@section Light Chopper Functions
+@cindex Light Chopper Functions
+Currently there's just a single supported light chopper. It is a chopper
+used in the group of G.@: Gescheidt (University Graz, Austria), that,
+via some homebuild electronics\footnote{see Ph.D.@: thesis by Torsten
+Zytowski, Z@"urich 1998} is indirectly controlled by a data acquisition
+device, currently the National Instruments @{PCI-MIO-16E-1} DAQ
+card. The module for the device is loaded by specifying
+@example
+gg_chopper
+@end example
+@noindent
+in the @code{DEVICES} section. Please note that the name of the module
+for the DAQ device (usually @code{pci_mio_16e_1}= must be listed before
+this module.
 
-@node Multi-Device Functions, , Microwave Attenuator Functions, Device Functions
+Unless a rotation frequency has set already during the
+@code{PREPARATIONS} section the chopper will only start to rotate
+when a resonable rotation frequency gets set by calling the function
+@code{chopper_rotation_frequency()}. At the end of an experiment the
+chopper gets stopped automatically.
+
+
+@table @samp
+
+@anchor{chopper_name}
+@item chopper_name()
+@findex chopper_name()
+Returns a string with the name of the chopper being used.
+
+@anchor{chopper_rotation_frequency}
+@item chopper_rotation_frequency()
+@findex chopper_rotation_frequency()
+This function allows to either query or set the rotation speed of the
+chopper. When called without an argument the function returns the
+current rotation frequency (@w{0 Hz} if the chopper is stopped).
+If called with an argument between @w{39.2 Hz} and @{200 Hz} the chopper
+rotation frequency gets set to this value (if it is not possible to set
+the frequency with an accuracy of at least @w{1%} a warning is output,
+informing the user about the real rotation frequency). If the function
+is called with a zero or negative argument the chopper is stopped.
+
+@end table
+
+
+@node Multi-Device Functions, , Light Chopper Functions, Device Functions
 @section Multi-Device Functions
 @cindex Multi-Device Functions
 
-Currently, there is just one function that uses two devices at once. It
+Currently there is just one function that uses two devices at once. It
 uses the single-device functions (and thus will print error messages if
 the modules for the required devices aren't loaded or if the modules
 don't support the needed functions). The module they are defined in is
