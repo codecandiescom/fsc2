@@ -856,14 +856,13 @@ thrown by @acronym{fsc2}s special functions for memory allocation (see
 next section), so don't throw it yourself without a very good reason. A
 @code{USER_BREAK_EXCEPTION} should be thrown from within a module when
 the module is doing something rather time consuming (e.g. waiting for a
-device to become ready or doing a calbration if this takes a long time)
-and the module detects that the user has pressed the stop button. To
-find about the this you can use a macro, @code{DO_STOP} - if it returns
-@code{TRUE} the user has pressed the stop button. Here's some code taken
-from the module for a digitizer. It waits indefinitely in a loop for the
-digitizer to become ready. To allow the user to break from it within the
-loop @code{DO_STOP} is tested, and if set, an
-@code{USER_BREAK_EXCEPTION} is thrown:
+device to become ready or doing some calbration) and the module detects
+that the user has pressed the stop button. To find about the this you
+can use a macro, @code{DO_STOP} - if it returns @code{TRUE} the user has
+pressed the stop button. Here's some code taken from the module for a
+digitizer. It waits indefinitely in a loop for the digitizer to become
+ready. To allow the user to break from it within the loop @code{DO_STOP}
+is tested, and if set, an @code{USER_BREAK_EXCEPTION} is thrown:
 @example
   do
   @{
