@@ -44,7 +44,7 @@
 	int c;                                                  \
 	while ( ( c = fgetc( expin ) ) == EOF )                 \
 		/* empty */ ;                                       \
-	result = ( c == 0x07 ) ? YY_NULL : ( buf[ 0 ] = c, 1 ); \
+	result = ( c == EOF ) ? YY_NULL : ( buf[ 0 ] = c, 1 );  \
 }
 
 

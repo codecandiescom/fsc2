@@ -174,7 +174,6 @@ KEEP     [^\t" \n(\/*),;:=%\^\-\+]+
 \004        /* Indicates a unit */
 \005        /* Indicates a start of string */
 \006        /* Indicates an end of string */
-\007        /* Indicates end of input (we can't rely on EOF) */
 
 			/* Handling of string constants */
 \"          {
@@ -295,10 +294,7 @@ KEEP     [^\t" \n(\/*),;:=%\^\-\+]+
 			}
 
    		    /* "#QUIT" means that all following input is to be discarded */
-{QUIT}		{
-				output( "\x07\x07" );
-				exit( EXIT_SUCCESS );
-			}
+{QUIT}		exit( EXIT_SUCCESS );
 
 		    /* Handling of lines starting with "#INCLUDE" */
 {INCL}      {
@@ -337,7 +333,7 @@ KEEP     [^\t" \n(\/*),;:=%\^\-\+]+
 				else
 				{
 					output( "\x03\n%s:%ld: '#INCLUDE' expects \"FILENAME\" "
-							"or <FILENAME>.\n\x07\x07", Fname, Incl_Lc );
+							"or <FILENAME>.\n", Fname, Incl_Lc );
 					exit( EXIT_FAILURE );
 				}
 			}
@@ -436,7 +432,7 @@ int main( int argc, char *argv[ ] )
 		yyin = stdin;
 		if ( yyin == NULL )
 		{
-			output( "\x03\nCan't read from stdin.\n\x07\x07" );
+			output( "\x03\nCan't read from stdin.\n" );
 			return EXIT_FAILURE;
 		}
 
@@ -454,7 +450,7 @@ int main( int argc, char *argv[ ] )
 		yyin = stdin;
 		if ( yyin == NULL )
 		{
-			output( "\x03\nCan't read input file %s.\n\x07\x07", argv[ 1 ] );
+			output( "\x03\nCan't read input file %s.\n", argv[ 1 ] );
 			return EXIT_FAILURE;
 		}
 
@@ -478,42 +474,41 @@ int main( int argc, char *argv[ ] )
 	TRY
 	{
 		yylex( );
-		output( "\x07\x07" );
 		TRY_SUCCESS;
 	}
 	CATCH( OUT_OF_MEMORY_EXCEPTION )
 	{
-		output( "\x03\n%s:%ld: Running out of memory.\n\x07\x07", Fname, Lc );
+		output( "\x03\n%s:%ld: Running out of memory.\n", Fname, Lc );
 		exit( EXIT_FAILURE );
 	}
 	CATCH( TOO_DEEPLY_NESTED_EXCEPTION )
 	{
-		output( "\x03\n%s:%ld: Include levels too deeply nested.\n\x07\x07",
+		output( "\x03\n%s:%ld: Include levels too deeply nested.\n",
 				Fname, Lc );
 		exit( EXIT_FAILURE );
 	}
 	CATCH( EOF_IN_COMMENT_EXCEPTION )
 	{
-		output( "\x03\n%s: End of file in comment starting at line %ld.\n"
-				"\x0\x077", Fname, Comm_Lc );
+		output( "\x03\n%s: End of file in comment starting at line %ld.\n",
+				Fname, Comm_Lc );
 		exit( EXIT_FAILURE );
 	}
 	CATCH( EOF_IN_STRING_EXCEPTION )
 	{
 		output( "\x03\n%s: End of line in string constant starting at "
-				"line %ld.\n\x07\x07", Fname, Str_Lc );
+				"line %ld.\n", Fname, Str_Lc );
 		exit( EXIT_FAILURE );
 	}
 	CATCH( DANGLING_END_OF_COMMENT )
 	{
 		output( "\x03\n%s: End of comment found in program text at "
-				"line %ld.\n\x07\x07", Fname, Lc );
+				"line %ld.\n", Fname, Lc );
 		exit( EXIT_FAILURE );
 	}
 	CATCH( MISPLACED_SHEBANG )
 	{
 		output( "\x03\n%s: '#!' must appear on the very first line instead of "
-				"line %ld.\n\x07\x07", Fname, Lc );
+				"line %ld.\n", Fname, Lc );
 		exit( EXIT_FAILURE );
 	}
 
@@ -580,7 +575,7 @@ static void include_handler( char *file )
 
 		if ( ( fp[ incl_depth + 1 ] = fopen( incl_file, "r" ) ) == NULL )
 		{
-			output( "\x03\n%s:%ld: Can't open include file %s.\n\x07\x07",
+			output( "\x03\n%s:%ld: Can't open include file %s.\n",
 					Fname, Lc, incl_file );
 			exit( EXIT_FAILURE );
 		}
@@ -622,7 +617,6 @@ static void include_handler( char *file )
 		if ( incl_depth == -1 )
 		{
 			T_free( Fname );
-			output( "\x07\x07" );
 			exit( EXIT_SUCCESS );
 		}
 		else
@@ -676,7 +670,7 @@ static void unit_spec( char *text, int power )
 	if ( ( dval == HUGE_VAL || dval == 0.0 ) && errno == ERANGE )
 	{
 		output( "\x03\n%s:%ld: Overflow or underflow occurred while "
-				"reading a number.\n\x07\x07", Fname, Lc );
+				"reading a number.\n", Fname, Lc );
 		exit( EXIT_FAILURE );
 	}
 
@@ -727,7 +721,7 @@ static void unit_spec( char *text, int power )
 			 break;
 
 		default :
-			 output( "\x03\n%s:%ld: Internal error in fsc2_clean.\n\x07\x07",
+			 output( "\x03\n%s:%ld: Internal error in fsc2_clean.\n",
 					 Fname, Lc );
 			 exit( EXIT_FAILURE );
 	}

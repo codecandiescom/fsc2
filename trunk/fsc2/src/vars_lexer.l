@@ -42,12 +42,9 @@
 
 #define YY_INPUT( buf, result, max_size )                   \
 {                                                           \
-	int c;                                                  \
-	while ( ( c = fgetc( varsin ) ) == EOF )                \
-		/* empty */ ;                                       \
-	result = ( c == 0x07 ) ? YY_NULL : ( buf[ 0 ] = c, 1 ); \
+	int c = fgetc( varssin );                               \
+	result = ( c == EOF ) ? YY_NULL : ( buf[ 0 ] = c, 1 );  \
 }
-
 
 
 #include "fsc2.h"

@@ -41,11 +41,10 @@
 
 #define YY_INPUT( buf, result, max_size )                   \
 {                                                           \
-	int c;                                                  \
-	while ( ( c = fgetc( phasesin ) ) == EOF )              \
-		/* empty */ ;                                       \
-	result = ( c == 0x07 ) ? YY_NULL : ( buf[ 0 ] = c, 1 ); \
+	int c = fgetc( phasesin );                              \
+	result = ( c == EOF ) ? YY_NULL : ( buf[ 0 ] = c, 1 );  \
 }
+
 
 #include "fsc2.h"
 #include "phases_parser.h"
