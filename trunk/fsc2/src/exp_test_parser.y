@@ -259,20 +259,38 @@ unit:    /* empty */
 /* list of indices of array element */
 
 list1:   /* empty */
-       | expr list2
+       | list2 l1e
+	   | ','                       { print( FATAL, "Superfluous comma in "
+											"array index list.\n" );
+	                                 THROW( EXCEPTION ); }
 ;
 
-list2:   /* empty */
+list2:   expr
        | list2 ',' expr
+;
+
+l1e:     /* empty */
+       | ','                       { print( FATAL, "Superfluous comma in "
+											"array index list.\n" );
+	                                 THROW( EXCEPTION ); }
 ;
 
 /* list of function arguments */
 
 list3:   /* empty */
-       | exprs list4
+       | list4 l3e
+       | ','                       { print( FATAL, "Superfluous comma in "
+											"function argument list.\n" );
+	                                 THROW( EXCEPTION ); }
 ;
 
-list4:   /* empty */
+l3e:     /* empty */
+       | ','                       { print( FATAL, "Superfluous comma in "
+											"function argument list.\n" );
+	                                 THROW( EXCEPTION ); }
+;
+
+list4:   exprs
        | list4 ',' exprs
 ;
 

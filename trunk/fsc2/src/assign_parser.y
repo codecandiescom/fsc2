@@ -128,7 +128,7 @@ static bool Func_is_set = UNSET;
 %token NT_TOKEN UT_TOKEN MT_TOKEN T_TOKEN KT_TOKEN MGT_TOKEN
 
 %type <lval> phsv
-%type <vptr> expr list1 unit sl_val
+%type <vptr> expr list1 list2 unit sl_val
 
 
 
@@ -393,20 +393,39 @@ unit:    /* empty */               { $$ = NULL; }
 
 
 list1:   /* empty */               { $$ = vars_push( UNDEF_VAR ); }
-       | expr list2                { }
+       | list2 l1e                 { $$ = $1; }
+	   | ','                       { print( FATAL, "Superfluous comma in "
+											"array index list.\n" );
+	                                 THROW( EXCEPTION ); }
 ;
 
-list2:   /* empty */
+list2:   expr
        | list2 ',' expr
+;
+
+l1e:     /* empty */
+       | ','                       { print( FATAL, "Superfluous comma in "
+											"array index list.\n" );
+	                                 THROW( EXCEPTION ); }
 ;
 
 /* list of function arguments */
 
 list3:   /* empty */
-       | exprs list4
+       | list4 l3e
+       | ','                       { print( FATAL, "Superfluous comma in "
+											"function argument list.\n" );
+	                                 THROW( EXCEPTION ); }
 ;
 
-list4:   /* empty */
+l3e:     /* empty */
+       | ','                       { print( FATAL, "Superfluous comma in "
+											"function argument list.\n" );
+	                                 THROW( EXCEPTION ); }
+;
+
+
+list4:   exprs
        | list4 ',' exprs
 ;
 

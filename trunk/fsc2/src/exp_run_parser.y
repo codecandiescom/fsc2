@@ -102,7 +102,7 @@ static void exp_runerror( const char *s );
 
 %token E_NT_TOKEN E_UT_TOKEN E_MT_TOKEN E_T_TOKEN E_KT_TOKEN E_MGT_TOKEN
 %token E_NU_TOKEN E_UU_TOKEN E_MU_TOKEN E_KU_TOKEN E_MEG_TOKEN
-%type <vptr> expr unit line list1
+%type <vptr> expr unit line list1 list2
 
 
 
@@ -231,7 +231,7 @@ expr:    E_INT_TOKEN unit          { $$ = apply_unit( vars_push( INT_VAR, $1 ),
        | E_FUNC_TOKEN '(' list3
          ')'                       { $$ = func_call( $1 ); }
          unit                      { $$ = apply_unit( $<vptr>5, $6 ); }
-       | E_VAR_REF
+       | E_VAR_REF                 { $$ = $1; }
        | E_VAR_TOKEN '('           { print( FATAL, "'%s' isn't a function.\n", 
 											$1->name );
 	                                 THROW( EXCEPTION ); }
@@ -282,21 +282,21 @@ unit:    /* empty */               { $$ = NULL; }
 
 /* list of indices for access of an array element */
 
-list1:   /* empty */               { $$ = vars_push( UNDEF_VAR ); }
-       | expr list2                { }
+list1:   /* empty */                 { $$ = vars_push( UNDEF_VAR ); }
+	   | list2
 ;
 
-list2:   /* empty */
-       | list2 ',' expr
+list2:   expr                        { $$ = $1; }
+       | list2 ',' expr              { $$ = $3; }
 ;
 
 /* list of function arguments */
 
 list3:   /* empty */
-       | exprs list4
+       | list4
 ;
 
-list4:   /* empty */
+list4:   exprs
        | list4 ',' exprs
 ;
 

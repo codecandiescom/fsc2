@@ -72,7 +72,7 @@ static void prepserror( const char *s );
 
 %token NT_TOKEN UT_TOKEN MT_TOKEN T_TOKEN KT_TOKEN MGT_TOKEN
 %token NU_TOKEN UU_TOKEN MU_TOKEN KU_TOKEN MEG_TOKEN
-%type <vptr> expr unit list1
+%type <vptr> expr unit list1 list2
 
 
 %left EQ NE LT LE GT GE
@@ -217,20 +217,38 @@ unit:    /* empty */              { $$ = NULL; }
 /* list of indices for access of array element */
 
 list1:   /* empty */              { $$ = vars_push( UNDEF_VAR ); }
-       | expr list2               { }
+       | list2 l1e                { $$ = $1; }
+	   | ','                      { print( FATAL, "Superfluous comma in "
+										   "array index list.\n" );
+	                                THROW( EXCEPTION ); }
 ;
 
-list2:   /* empty */
+list2:   expr
        | list2 '.' expr
+;
+
+l1e:     /* empty */
+       | ','                       { print( FATAL, "Superfluous comma in "
+											"array index list.\n" );
+	                                 THROW( EXCEPTION ); }
 ;
 
 /* list of function arguments */
 
 list3:   /* empty */
-       | exprs list4
+       | list4 l3e
+       | ','                       { print( FATAL, "Superfluous comma in "
+											"function argument list.\n" );
+	                                 THROW( EXCEPTION ); }
 ;
 
-list4:   /* empty */
+l3e:     /* empty */
+       | ','                       { print( FATAL, "Superfluous comma in "
+											"function argument list.\n" );
+	                                 THROW( EXCEPTION ); }
+;
+
+list4:   exprs
        | list4 ',' exprs
 ;
 
