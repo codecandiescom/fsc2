@@ -405,7 +405,29 @@ bool dg2020_channel_assign( int channel, int pod )
 
 bool dg2020_update_data( void )
 {
+	char reply[ 10 ];
+	long len;
+
+
 	dg2020_command( "DATA:UPD\n" );
+	dg2020_command( "*OPC\n" );
+
+	while( 1 )
+	{
+		dg2020_command( "*ESE\n" );
+		len = 10;
+		if ( gpib_read( dg2020.device, reply, &len ) == FAILURE )
+			dg2020_gpib_failure( );
+#ifdef DG2020_B_GPIB_DEBUG
+		strcpy( reply, "1\n" );
+		len = 2;
+#endif
+		reply[ len ] = '\0';
+		if ( T_atoi( reply ) & 1 )
+			break;
+		usleep( 50000 );
+	}
+
 	return OK;
 }
 
