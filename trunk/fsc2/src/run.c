@@ -287,8 +287,6 @@ static void quitting_handler( int signo )
 	child_is_quitting = SET;
 	kill( child_pid, DO_QUIT );
 	errno = errno_saved;
-
-	printf( "In quitting_handler()\n" );
 }
 
 
@@ -346,9 +344,6 @@ void run_sigchld_callback( FL_OBJECT *a, long b )
 {
 	b = b;
 
-	printf( "In run_sigchld_callback() with child_is_quitting = %d.\n",
-			child_is_quitting ? 1 : 0 );
-
 	if ( ! child_is_quitting )   /* missing notification by the child ? */
 		fl_show_alert( "FATAL Error", "Experiment stopped prematurely.",
 					   NULL, 1 );
@@ -385,8 +380,6 @@ void stop_measurement( FL_OBJECT *a, long b )
 
 		return;
 	}
-
-	printf( "In stop_measurement() with b set to 1.\n" );
 
 	end_comm( );
 

@@ -244,7 +244,6 @@ Var *f_print( Var *v )
 Var *f_wait( Var *v )
 {
 	struct itimerval sleepy;
-	struct sigaction sact;
 	double how_long;
 	double secs;
 
@@ -271,11 +270,6 @@ Var *f_wait( Var *v )
 
 	if ( TEST_RUN )
 		return vars_push( INT_VAR, 1 );
-
-	/* If the child has been asked to stop it won't wait anymore */
-
-	if ( do_quit )
-		return vars_push( INT_VAR, 0 );
 
 	/* Set everything up for sleeping */
 
@@ -328,18 +322,15 @@ Var *f_wait( Var *v )
 	}
 
 	/* Return 1 if end of sleeping time was reached, 0 if 'do_quit' was set.
-	   In case the wait was ended because of a DO_QUIT signal we have to set
-	   the handling of SIGALRM to ignore, because after receipt of a
-	   'do_quit' signal the timer may still be running and the finally
-	   arriving signal could kill the child prematurely. */
+	   In case the wait ended due to a DO_QUIT signal we have to switch off
+	   the timer because after receipt of a 'do_quit' signal the timer may
+	   still be running and the finally arriving signal could kill the child
+	   prematurely. */
 
 	if ( do_quit )
 	{
-		sact.sa_handler = SIG_IGN;
-		sigemptyset( &sact.sa_mask );
-		sact.sa_flags = 0;
-		if ( sigaction( SIGALRM, &sact, NULL ) < 0 )
-			_exit( -1 );
+		sleepy.it_value.tv_usec = 0;
+		sleepy.it_value.tv_sec  = 0;
 	}
 
 	return vars_push( INT_VAR, do_quit ? 0 : 1 );
