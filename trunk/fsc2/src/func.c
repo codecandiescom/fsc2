@@ -193,7 +193,7 @@ void load_all_drivers( void )
 	for ( cd = Device_List; cd != NULL; cd = cd->next )
 		if ( cd->is_loaded && cd->driver.is_init_hook &&
 			 ! cd->driver.init_hook( ) )
-			eprint( WARN, "Initialization of library `%s.so' failed.\n",
+			eprint( WARN, "Initialization of module `%s.so' failed.\n",
 					cd->name );
 }
 
@@ -234,11 +234,11 @@ bool exist_function( const char *name )
 }
 
 
-/*----------------------------------------------------------------------*/
-/* Function links a library file with the name passed to it (after      */
-/* adding the extension `so') and then tries to find still unresolved   */
-/* references to functions listed in the function data base `Function'. */
-/*----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*/
+/* Function links a library file with the name passed to it (after       */
+/* adding the extension `so') and then tries to find still unresolved    */
+/* references to functions listed in the function data base `Functions'. */
+/*-----------------------------------------------------------------------*/
 
 void load_functions( Device *dev )
 {
@@ -262,9 +262,9 @@ void load_functions( Device *dev )
 	if ( dev->driver.handle == NULL )
 	{
 		if ( ! strcmp( dev->name, "User_Functions" ) )
-			eprint( FATAL, "Can't open library `User_Functions.so'.\n" );
+			eprint( FATAL, "Can't open module `User_Functions.so'.\n" );
 		else
-			eprint( FATAL, "Can't open library for device `%s'.\n",
+			eprint( FATAL, "Can't open module for device `%s'.\n",
 					dev->name );
 		THROW( EXCEPTION );
 	}
@@ -325,11 +325,11 @@ void load_functions( Device *dev )
 	   that the function has not already been loaded (but overloading built-in
 	   functions is acceptable). */
 
-	eprint( NO_ERROR, "Loading functions from library `%s.so'.\n", dev->name );
+	eprint( NO_ERROR, "Loading functions from module `%s.so'.\n", dev->name );
 
 	for ( num = 0; num < num_func; num++ )
 	{
-		/* Don't try to load if function isn't listed in `Functions' */
+		/* Don't try to load functions that are not listed in `Functions' */
 
 		if ( ! fncts[ num ].to_be_loaded )
 			continue;
@@ -344,8 +344,8 @@ void load_functions( Device *dev )
 
 		if ( num >= num_def_func && fncts[ num ].fnct != NULL )
 		{
-			eprint( SEVERE, " Function `%s() has already been loaded'.\n",
-					fncts[ num ].name );
+			eprint( SEVERE, " Function `%s()' found in module `%s.so' has "
+					"already been loaded'.\n", fncts[ num ].name, dev->name );
 			continue;
 		}
 
@@ -356,13 +356,14 @@ void load_functions( Device *dev )
 		{
 			if ( fncts[ num ].fnct != def_fncts[ num ].fnct )
 			{
-				eprint( SEVERE, "  Built-in function `%s()' has already been "
-						"overloaded.\n", fncts[ num ].name );
+				eprint( SEVERE, "  Built-in function `%s()' found in module "
+						"`%s.so' has already been overloaded.\n",
+						fncts[ num ].name, dev->name );
 				continue;
 			}
 
-			eprint( NO_ERROR, "  Overloading built-in function `%s()'.\n",
-					fncts[ num ].name );
+			eprint( NO_ERROR, "  Overloading built-in function `%s()' from "
+					"module `%s.so'.\n", fncts[ num ].name, dev->name );
 		}
 		else
 			eprint( NO_ERROR, "  Loading function `%s()'.\n",
@@ -383,7 +384,7 @@ void run_test_hooks( void )
 	for ( cd = Device_List; cd != NULL; cd = cd->next )
 		if ( cd->is_loaded && cd->driver.is_test_hook &&
 			 ! cd->driver.test_hook( ) )
-			eprint( WARN, "Initialization for test run of library `%s.so' "
+			eprint( WARN, "Initialization for test run of module `%s.so' "
 					"failed.\n", cd->name );
 }
 
@@ -399,7 +400,7 @@ void run_exp_hooks( void )
 	for ( cd = Device_List; cd != NULL; cd = cd->next )
 		if ( cd->is_loaded && cd->driver.is_exp_hook &&
 			 ! cd->driver.exp_hook( ) )
-			eprint( WARN, "Initialization for experiment of library `%s.so' "
+			eprint( WARN, "Initialization for experiment of module `%s.so' "
 					"failed.\n", cd->name );
 }
 
@@ -417,7 +418,8 @@ void run_exit_hooks( void )
 		return;
 
 	/* Run all exit hooks but starting with the last device and ending with
-	   the very first one in the list */
+	   the very first one in the list. Also make sure that all exit hooks are
+	   run even if some of them fail with an exception. */
 
 	for( cd = Device_List; cd->next != NULL; cd = cd->next )
 		;
@@ -443,11 +445,11 @@ void run_exit_hooks( void )
 /* symbols in another module. Probably it's a BAD thing if they do, but  */
 /* sometimes it might be inevitable, so we better include this instead   */
 /* of having the writer of a module trying to figure out some other and  */
-/* probably more difficult and even dangerous method to do it anyway.    */
+/* probably more difficult or dangerous method to do it anyway.          */
 /*                                                                       */
 /* ->                                                                    */
-/*    1. Name of the module (without the `.so' bit) the symbol is to be  */
-/*       loaded from                                                     */
+/*    1. Name of the module (without the `.so' extension) the symbol is  */
+/*       to be loaded from                                               */
 /*    2. Name of the symbol to be loaded                                 */
 /*    3. Pointer to void pointer for returning the address of the symbol */
 /*                                                                       */
@@ -478,7 +480,7 @@ int get_lib_symbol( const char *from, const char *symbol, void **symbol_ptr )
 	if ( dlerror( ) != NULL )            /* symbol not found in library ? */
 		return LIB_ERR_NO_SYM;
 
-	return LIB_NO_ERR;
+	return LIB_OK;
 }
 
 
