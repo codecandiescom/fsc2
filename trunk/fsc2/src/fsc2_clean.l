@@ -44,9 +44,9 @@
 #include <math.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <errno.h>
 
 #include "exceptions.h"
-#include "errno.h"
 
 typedef unsigned char bool;
 

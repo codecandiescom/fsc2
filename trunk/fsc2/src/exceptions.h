@@ -39,7 +39,9 @@
 /*      ...                                                                */
 /*  }                                                                      */
 /*                                                                         */
-/*  Further changes are checks to avoid overflow of the exception stack.   */
+/*  Further changes are checks to avoid overflow of the exception stack    */
+/*  and, for added security, switching to the users privileges whenever    */
+/*  an exception is thrown.                                                */
 /***************************************************************************/
 
 
@@ -96,6 +98,7 @@ enum {
 
 #define THROW( e ) \
     { \
+		lower_permissions( ); \
         exception_id = e; \
         if ( exception_env_stack_pos == 0 ) \
 		    longjmperror( ); \

@@ -288,7 +288,7 @@ bool fsc2_locking( void )
 
 	if ( ( fd = open( LOCKFILE, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR ) ) < 0 )
 	{
-		lower_permisssions( );
+		lower_permissions( );
 		fprintf( stderr, "Error: Can't access lock file `%s'.\n", LOCKFILE );
 		return FAIL;
 	}
@@ -323,7 +323,7 @@ bool fsc2_locking( void )
 		else
 			fprintf( stderr, "\n" );
 
-		lower_permisssions( );
+		lower_permissions( );
 		return FAIL;
 	}
 
@@ -336,7 +336,7 @@ bool fsc2_locking( void )
 		 ( flags = fcntl( fd, F_GETFD, 0 ) ) < 0 )
 	{
 		unlink( LOCKFILE );
-		lower_permisssions( );
+		lower_permissions( );
 		fprintf( stderr, "Error: Can't write lock file `%s'.\n", LOCKFILE );
 		return FAIL;
 	}
@@ -348,7 +348,7 @@ bool fsc2_locking( void )
 	if ( fcntl( fd, F_GETFD, flags ) < 0 )
 	{
 		unlink( LOCKFILE );
-		lower_permisssions( );
+		lower_permissions( );
 		fprintf( stderr, "Error: Can't write lock file `%s'.\n", LOCKFILE );
 		return FAIL;
 	}
@@ -359,6 +359,11 @@ bool fsc2_locking( void )
 
 
 /*---------------------------------------------------------------------*/
+/* The program starts with the EUID and EGID set to the ones of fsc2,  */
+/* but these privileges get dropped immediately. Only for some special */
+/* actions (like dealing with shared memory and lock and log files)    */
+/* this function is called to change the EUID and EGID to the one of   */
+/* fsc2.                                                               */
 /*---------------------------------------------------------------------*/
 
 inline void raise_permissions( void )
@@ -369,6 +374,8 @@ inline void raise_permissions( void )
 
 
 /*---------------------------------------------------------------------*/
+/* This function sets the EUID and EGID to the one of the user running */
+/* the program.                                                        */
 /*---------------------------------------------------------------------*/
 
 inline void lower_permissions( void )

@@ -61,6 +61,7 @@ extern FL_resource xresources[ ];             /* from xinit.c */
 
 /* Locally used functions */
 
+static void test_machine_type( void );
 static int scan_args( int *argc, char *argv[ ], char **fname );
 static void final_exit_handler( void );
 static bool display_file( char *name, FILE *fp );
@@ -79,7 +80,6 @@ int flags;
 int main( int argc, char *argv[ ] )
 {
 	char *fname;
-	struct utsname utsbuf;
 
 
 #if defined MDEBUG
@@ -90,25 +90,25 @@ int main( int argc, char *argv[ ] )
 	}
 #endif
 
-	/* Figure out the machine type from the value returned by uname(),
-	   currently i[3-6]86 will be treated as having an Intel compatible
-	   processor. Only for these types of processors some stuff needing
-	   assembler and used to help with debugging can be used. */
+	/* As the very first action the effective UID and GID gets stored and
+	   then the program lowers the permissions of the real UID and GID, only
+	   switching back when creating or attaching to shared memory segments
+	   or accessing lock and log files. */
 
-	if ( uname( &utsbuf ) == 0 &&
-		 utsbuf.machine[ 0 ] == 'i' &&
-		 utsbuf.machine[ 1 ] >= '3' && utsbuf.machine[ 1 ] <= '6' &&
-		 ! strncmp( utsbuf.machine + 2, "86", 2 ) )
-		is_i386 = SET;
+	EUID = geteuid( );
+	EGID = getegid( );
+	lower_permissions( );
 
-	/* First we have to test for command line arguments */
+	/* Figure out if the machine is a INTEL type processor */
+
+	test_machine_type( );
+
+	/* Run a first test of the command line arguments */
 
 	flags = scan_args( &argc, argv, &fname );
 
 	/* Check via the lock file if there is already a process holding a lock,
-	   otherwise create one. This, as well as the following check for stale
-	   shared memory segments has to be done with the effective user ID, i.e.
-	   the UID of fsc2. This has to done after parsing the command line
+	   otherwise create one. This has to done after parsing the command line
 	   arguments because it should still be possible to test an EDL program
 	   via the '-t' flag although someone else is running fsc. */
 
@@ -119,13 +119,6 @@ int main( int argc, char *argv[ ] )
 	   crashes */
 
 	delete_stale_shms( );
-
-	/* Now set the effective user ID to the real user ID, only switch back
-	   when creating or attaching to shared memory segments etc. */
-
-	EUID = geteuid( );
-	EGID = getegid( );
-	lower_permissions( );
 
 	/* Setup a structure used when dealing with serial ports */
 
@@ -172,8 +165,8 @@ int main( int argc, char *argv[ ] )
 	set_main_signals( );
 	atexit( final_exit_handler );
 
-	/* If starting the server for external connections succeeds really start
-	   the main loop */
+	/* Only if starting the server for external connections succeeds really
+	   start the main loop */
 
 	if ( -1 != ( conn_pid =
 				 spawn_conn( flags & ( DO_TEST | DO_START ) && is_loaded ) ) )
@@ -191,7 +184,7 @@ int main( int argc, char *argv[ ] )
 		if ( flags & DO_SIGNAL )
 			kill( getppid( ), SIGUSR1 );
 
-		/* And, finally,  here's the main loop of the program... */
+		/* And, finally, here's the main loop of the program... */
 
 		while ( fl_do_forms( ) != main_form->quit )
 			;
@@ -205,6 +198,26 @@ int main( int argc, char *argv[ ] )
 	xforms_close( );
 
 	return EXIT_SUCCESS;
+}
+
+
+/*------------------------------------------------------------------*/
+/* Figure out the machine type from the value returned by uname(),  */
+/* currently i[3-6]86 will be treated as having an Intel compatible */
+/* processor. Only for these types of processors some stuff needing */
+/* assembler and used to help with debugging can be used.           */
+/*------------------------------------------------------------------*/
+
+static void test_machine_type( void )
+{
+	struct utsname utsbuf;
+
+
+	if ( uname( &utsbuf ) == 0 &&
+		 utsbuf.machine[ 0 ] == 'i' &&
+		 utsbuf.machine[ 1 ] >= '3' && utsbuf.machine[ 1 ] <= '6' &&
+		 ! strncmp( utsbuf.machine + 2, "86", 2 ) )
+		is_i386 = SET;
 }
 
 
