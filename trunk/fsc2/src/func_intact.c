@@ -82,9 +82,9 @@ static Var_T *f_tb_changed_child( Var_T *v );
 static Var_T *f_tb_wait_child( Var_T *v );
 
 
-/*---------------------------------------*/
-/* Function for initializing the toolbox */
-/*---------------------------------------*/
+/*---------------------------------------*
+ * Function for initializing the toolbox
+ *---------------------------------------*/
 
 void toolbox_create( long layout )
 {
@@ -171,9 +171,9 @@ void toolbox_create( long layout )
 }
 
 
-/*-------------------------------------------*/
-/* Function for finally deleting the toolbox */
-/*-------------------------------------------*/
+/*-------------------------------------------*
+ * Function for finally deleting the toolbox
+ *-------------------------------------------*/
 
 void toolbox_delete( void )
 {
@@ -192,9 +192,9 @@ void toolbox_delete( void )
 }
 
 
-/*----------------------------------------------------------------*/
-/* This function gets called for the EDL function hide_toolbox(). */
-/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * This function gets called for the EDL function hide_toolbox().
+ *----------------------------------------------------------------*/
 
 Var_T *f_freeze( Var_T *v )
 {
@@ -211,10 +211,10 @@ Var_T *f_freeze( Var_T *v )
 }
 
 
-/*-------------------------------------------------------------*/
-/* Function that gets called via the message passing mechanism */
-/* when the child executes f_freeze().                         */
-/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*
+ * Function that gets called via the message passing mechanism
+ * when the child executes f_freeze().
+ *-------------------------------------------------------------*/
 
 void parent_freeze( int freeze )
 {
@@ -278,13 +278,13 @@ void parent_freeze( int freeze )
 }
 
 
-/*------------------------------------------------------------*/
-/* Function sets the layout of the tool box, either vertical  */
-/* or horizontal by passing it either 0 or 1  or "vert[ical]" */
-/* or "hori[zontal]" (case insensitive). Must be called       */
-/* before any object (button or slider) is created (or after  */
-/* all of them have been deleted again :).                    */
-/*------------------------------------------------------------*/
+/*------------------------------------------------------------*
+ * Function sets the layout of the tool box, either vertical
+ * or horizontal by passing it either 0 or 1  or "vert[ical]"
+ * or "hori[zontal]" (case insensitive). Must be called
+ * before any object (button or slider) is created (or after
+ * all of them have been deleted again :).
+ *------------------------------------------------------------*/
 
 Var_T *f_layout( Var_T *v )
 {
@@ -357,11 +357,11 @@ Var_T *f_layout( Var_T *v )
 }
 
 
-/*----------------------------------------------------------------*/
-/* Part of the f_layout() function run by the child process only, */
-/* indirectly invoking the f_layout() function in the parent via  */
-/* the message passing mechanism.                                 */
-/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * Part of the f_layout() function run by the child process only,
+ * indirectly invoking the f_layout() function in the parent via
+ * the message passing mechanism.
+ *----------------------------------------------------------------*/
 
 static Var_T *f_layout_child( long layout )
 {
@@ -399,9 +399,9 @@ static Var_T *f_layout_child( long layout )
 }
 
 
-/*--------------------------------------------------------------------*/
-/* Deletes one or more objects, parameter are one or more object IDs. */
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ * Deletes one or more objects, parameter are one or more object IDs.
+ *--------------------------------------------------------------------*/
 
 Var_T *f_objdel( Var_T *v )
 {
@@ -436,11 +436,11 @@ Var_T *f_objdel( Var_T *v )
 }
 
 
-/*--------------------------------------------------------*/
-/* Part of the f_objdel() function run by the child only, */
-/* indirectly invoking the f_objdel() function in the     */
-/* parent via the message passing mechanism.              */
-/*--------------------------------------------------------*/
+/*--------------------------------------------------------*
+ * Part of the f_objdel() function run by the child only,
+ * indirectly invoking the f_objdel() function in the
+ * parent via the message passing mechanism.
+ *--------------------------------------------------------*/
 
 static void f_objdel_child( Var_T *v )
 {
@@ -491,9 +491,9 @@ static void f_objdel_child( Var_T *v )
 }
 
 
-/*---------------------------------------------------------------*/
-/* Part of the f_objdel() function run by the parent exclusively */
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ * Part of the f_objdel() function run by the parent exclusively
+ *---------------------------------------------------------------*/
 
 static void f_objdel_parent( Var_T *v )
 {
@@ -554,9 +554,9 @@ static void f_objdel_parent( Var_T *v )
 }
 
 
-/*----------------------------------------------*/
-/* Function for changing the label of an object */
-/*----------------------------------------------*/
+/*----------------------------------------------*
+ * Function for changing the label of an object
+ *----------------------------------------------*/
 
 Var_T *f_obj_clabel( Var_T *v )
 {
@@ -643,11 +643,11 @@ Var_T *f_obj_clabel( Var_T *v )
 }
 
 
-/*-----------------------------------------------------------*/
-/* Part of the f_ob_clabel() function run by the child only, */
-/* indirectly invoking the f_obj_clabel() function in the    */
-/* parent via the message passing mechanism.                 */
-/*-----------------------------------------------------------*/
+/*-----------------------------------------------------------*
+ * Part of the f_ob_clabel() function run by the child only,
+ * indirectly invoking the f_obj_clabel() function in the
+ * parent via the message passing mechanism.
+ *-----------------------------------------------------------*/
 
 static Var_T *f_obj_clabel_child( long ID, char *label )
 {
@@ -693,9 +693,9 @@ static Var_T *f_obj_clabel_child( long ID, char *label )
 }
 
 
-/*----------------------------------------------*/
-/* Function for enabling or disabling an object */
-/*----------------------------------------------*/
+/*----------------------------------------------*
+ * Function for enabling or disabling an object
+ *----------------------------------------------*/
 
 Var_T *f_obj_xable( Var_T *v )
 {
@@ -771,11 +771,11 @@ Var_T *f_obj_xable( Var_T *v )
 }
 
 
-/*----------------------------------------------------------*/
-/* Part of the f_ob_xable() function run by the child only, */
-/* indirectly invoking the f_obj_xable() function in the    */
-/* parent via the message passing mechanism.                */
-/*----------------------------------------------------------*/
+/*----------------------------------------------------------*
+ * Part of the f_ob_xable() function run by the child only,
+ * indirectly invoking the f_obj_xable() function in the
+ * parent via the message passing mechanism.
+ *----------------------------------------------------------*/
 
 static Var_T *f_obj_xable_child( long ID, long state )
 {
@@ -821,9 +821,9 @@ static Var_T *f_obj_xable_child( long ID, long state )
 }
 
 
-/*----------------------------------------------------------------------*/
-/* Returns a pointer to an object given its number or NULL if not found */
-/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*
+ * Returns a pointer to an object given its number or NULL if not found
+ *----------------------------------------------------------------------*/
 
 Iobject_T *find_object_from_ID( long ID )
 {
@@ -846,9 +846,9 @@ Iobject_T *find_object_from_ID( long ID )
 }
 
 
-/*---------------------------------------------------------------*/
-/* Removes all buttons and sliders and the window they belong to */
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ * Removes all buttons and sliders and the window they belong to
+ *---------------------------------------------------------------*/
 
 void tools_clear( void )
 {
@@ -900,9 +900,9 @@ void tools_clear( void )
 }
 
 
-/*--------------------------------------------------------------------*/
-/* Function for redrawing the toolbox after changes have been applied */
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ * Function for redrawing the toolbox after changes have been applied
+ *--------------------------------------------------------------------*/
 
 void recreate_Toolbox( void )
 {
@@ -1002,12 +1002,12 @@ void recreate_Toolbox( void )
 }
 
 
-/*--------------------------------------------------------------------*/
-/* Function is the handler when the tool box is about to be closed by */
-/* user intervention, i.e. by clicking on the close button. We make   */
-/* it impossible to close the tool box this way by simply ignoring    */
-/* the event.                                                         */
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ * Function is the handler when the tool box is about to be closed by
+ * user intervention, i.e. by clicking on the close button. We make
+ * it impossible to close the tool box this way by simply ignoring
+ * the event.
+ *--------------------------------------------------------------------*/
 
 static int toolbox_close_handler( UNUSED_ARG FL_FORM *a, UNUSED_ARG void *b )
 {
@@ -1015,11 +1015,11 @@ static int toolbox_close_handler( UNUSED_ARG FL_FORM *a, UNUSED_ARG void *b )
 }
 
 
-/*---------------------------------------------------------------------*/
-/* Function appends an object to the tool box. In vertical layout mode */
-/* it will be drawn at the bottom of the tool box, in horizontal mode  */
-/* to the right of the other objects.                                  */
-/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*
+ * Function appends an object to the tool box. In vertical layout mode
+ * it will be drawn at the bottom of the tool box, in horizontal mode
+ * to the right of the other objects.
+ *---------------------------------------------------------------------*/
 
 static FL_OBJECT *append_object_to_form( Iobject_T *io, int *w, int *h )
 {
@@ -1157,9 +1157,9 @@ static FL_OBJECT *append_object_to_form( Iobject_T *io, int *w, int *h )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/* Creates a normal button, determines its size and sets some properties */
-/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ * Creates a normal button, determines its size and sets some properties
+ *-----------------------------------------------------------------------*/
 
 static void normal_button_setup( Iobject_T *io )
 {
@@ -1200,9 +1200,9 @@ static void normal_button_setup( Iobject_T *io )
 }
 
 
-/*---------------------------------------------------------------------*/
-/* Creates a push button, determines its size and sets some properties */
-/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*
+ * Creates a push button, determines its size and sets some properties
+ *---------------------------------------------------------------------*/
 
 static void push_button_setup( Iobject_T *io )
 {
@@ -1242,9 +1242,9 @@ static void push_button_setup( Iobject_T *io )
 }
 
 
-/*----------------------------------------------------------------------*/
-/* Creates a radio button, determines its size and sets some properties */
-/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*
+ * Creates a radio button, determines its size and sets some properties
+ *----------------------------------------------------------------------*/
 
 static void radio_button_setup( Iobject_T *io )
 {
@@ -1323,9 +1323,9 @@ static void radio_button_setup( Iobject_T *io )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/* Creates a normal slider, determines its size and sets some properties */
-/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ * Creates a normal slider, determines its size and sets some properties
+ *-----------------------------------------------------------------------*/
 
 static void slider_setup( Iobject_T *io )
 {
@@ -1369,9 +1369,9 @@ static void slider_setup( Iobject_T *io )
 }
 
 
-/*----------------------------------------------------------------------*/
-/* Creates a value slider, determines its size and sets some properties */
-/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*
+ * Creates a value slider, determines its size and sets some properties
+ *----------------------------------------------------------------------*/
 
 static void val_slider_setup( Iobject_T *io )
 {
@@ -1422,10 +1422,10 @@ static void val_slider_setup( Iobject_T *io )
 }
 
 
-/*------------------------------------------------------*/
-/* Creates an integer input object, determines its size */
-/* and sets some properties                             */
-/*------------------------------------------------------*/
+/*------------------------------------------------------*
+ * Creates an integer input object, determines its size
+ * and sets some properties
+ *------------------------------------------------------*/
 
 static void int_input_setup( Iobject_T *io )
 {
@@ -1467,10 +1467,10 @@ static void int_input_setup( Iobject_T *io )
 }
 
 
-/*-------------------------------------------------------*/
-/* Creates a floating point input object, determines its */
-/* size and sets some properties                         */
-/*-------------------------------------------------------*/
+/*-------------------------------------------------------*
+ * Creates a floating point input object, determines its
+ * size and sets some properties
+ *-------------------------------------------------------*/
 
 static void float_input_setup( Iobject_T *io )
 {
@@ -1512,10 +1512,10 @@ static void float_input_setup( Iobject_T *io )
 }
 
 
-/*-------------------------------------------------------*/
-/* Creates an integer output object, determines its size */
-/* and sets some properties                              */
-/*-------------------------------------------------------*/
+/*-------------------------------------------------------*
+ * Creates an integer output object, determines its size
+ * and sets some properties
+ *-------------------------------------------------------*/
 
 static void int_output_setup( Iobject_T *io )
 {
@@ -1561,10 +1561,10 @@ static void int_output_setup( Iobject_T *io )
 }
 
 
-/*--------------------------------------------------------*/
-/* Creates a floating point output object, determines its */
-/* size and sets some properties                          */
-/*--------------------------------------------------------*/
+/*--------------------------------------------------------*
+ * Creates a floating point output object, determines its
+ * size and sets some properties
+ *--------------------------------------------------------*/
 
 static void float_output_setup( Iobject_T *io )
 {
@@ -1610,9 +1610,9 @@ static void float_output_setup( Iobject_T *io )
 }
 
 
-/*--------------------------------------------------------------*/
-/* Creates a menu, determines its size and sets some properties */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ * Creates a menu, determines its size and sets some properties
+ *--------------------------------------------------------------*/
 
 static void menu_setup( Iobject_T *io )
 {
@@ -1671,11 +1671,11 @@ static void menu_setup( Iobject_T *io )
 }
 
 
-/*----------------------------------------------------------*/
-/* Callback function for all the objects in the tool box.   */
-/* The states or values are stored in the object structures */
-/* to be used by the functions button_state() etc.          */
-/*----------------------------------------------------------*/
+/*----------------------------------------------------------*
+ * Callback function for all the objects in the tool box.
+ * The states or values are stored in the object structures
+ * to be used by the functions button_state() etc.
+ *----------------------------------------------------------*/
 
 static void tools_callback( FL_OBJECT *obj, UNUSED_ARG long data )
 {
@@ -1832,12 +1832,12 @@ static void tools_callback( FL_OBJECT *obj, UNUSED_ARG long data )
 }
 
 
-/*----------------------------------------------------------*/
-/* Input and output objects can have a C-like format string */
-/* that tells how the numbers are to be formated. Here we   */
-/* check if the syntax of the format string the user gave   */
-/* us is valid.                                             */
-/*----------------------------------------------------------*/
+/*----------------------------------------------------------*
+ * Input and output objects can have a C-like format string
+ * that tells how the numbers are to be formated. Here we
+ * check if the syntax of the format string the user gave
+ * us is valid.
+ *----------------------------------------------------------*/
 
 bool check_format_string( char *buf )
 {
@@ -1875,11 +1875,11 @@ bool check_format_string( char *buf )
 }
 
 
-/*------------------------------------------------------*/
-/* Function to convert character sequences in the label */
-/* help text strings that are escape sequences into the */
-/* corresponding ASCII characters.                      */
-/*------------------------------------------------------*/
+/*------------------------------------------------------*
+ * Function to convert character sequences in the label
+ * help text strings that are escape sequences into the
+ * corresponding ASCII characters.
+ *------------------------------------------------------*/
 
 void convert_escapes( char *str )
 {
@@ -1905,12 +1905,12 @@ void convert_escapes( char *str )
 }
 
 
-/*-----------------------------------------------------------------*/
-/* Labels strings may start with a '@' character to display one of */
-/* several symbols instead of a text. The following function tests */
-/* if the layout of these special label strings complies with the  */
-/* requirements given in the XForms manual.                        */
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ * Labels strings may start with a '@' character to display one of
+ * several symbols instead of a text. The following function tests
+ * if the layout of these special label strings complies with the
+ * requirements given in the XForms manual.
+ *-----------------------------------------------------------------*/
 
 void check_label( char *str )
 {
@@ -2006,9 +2006,9 @@ void check_label( char *str )
 }
 
 
-/*---------------------------------------------------*/
-/* Another function for dealing with a XForms bug... */
-/*---------------------------------------------------*/
+/*---------------------------------------------------*
+ * Another function for dealing with a XForms bug...
+ *---------------------------------------------------*/
 
 static void store_toolbox_position( void )
 {
@@ -2020,14 +2020,14 @@ static void store_toolbox_position( void )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/* Function returns the ID of the first object from a list (or of all    */
-/* objects in the toolbox when an empty list was passed to the function) */
-/* which has been changed (by the user by manipulating the toolbox). If  */
-/* none of the objects were changed 0 is returned. Output objects aren't */
-/* taken into account because they can't be changed by the user via the  */
-/* toolbox but only from within the EDL script.                          */
-/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ * Function returns the ID of the first object from a list (or of all
+ * objects in the toolbox when an empty list was passed to the function)
+ * which has been changed (by the user by manipulating the toolbox). If
+ * none of the objects were changed 0 is returned. Output objects aren't
+ * taken into account because they can't be changed by the user via the
+ * toolbox but only from within the EDL script.
+ *-----------------------------------------------------------------------*/
 
 Var_T *f_tb_changed( Var_T *v )
 {
@@ -2083,11 +2083,11 @@ Var_T *f_tb_changed( Var_T *v )
 }
 
 
-/*--------------------------------------------------------------------*/
-/* To figure out if any of the objects changed the child process must */
-/* pass the list of objects (which may be empty) to the parent and    */
-/* wait for it's reply.                                               */
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ * To figure out if any of the objects changed the child process must
+ * pass the list of objects (which may be empty) to the parent and
+ * wait for it's reply.
+ *--------------------------------------------------------------------*/
 
 static Var_T *f_tb_changed_child( Var_T *v )
 {
@@ -2159,13 +2159,13 @@ static Var_T *f_tb_changed_child( Var_T *v )
 }
 
 
-/*-----------------------------------------------------------------*/
-/* This function is called for the EDL function "toolbox_wait". It */
-/* pauses the execution of the EDL program until either the state  */
-/* of one of the objects (either all or one from a list the user   */
-/* passed to us) changes or the specified maximum waiting time is  */
-/* exceeded.                                                       */
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ * This function is called for the EDL function "toolbox_wait". It
+ * pauses the execution of the EDL program until either the state
+ * of one of the objects (either all or one from a list the user
+ * passed to us) changes or the specified maximum waiting time is
+ * exceeded.
+ *-----------------------------------------------------------------*/
 
 Var_T *f_tb_wait( Var_T *v )
 {
@@ -2300,13 +2300,13 @@ Var_T *f_tb_wait( Var_T *v )
 }
 
 
-/*---------------------------------------------------------------------*/
-/* This function is executed by the child process doing the experiment */
-/* for calls of the EDL function "toolbox_wait". Since the tool box    */
-/* belongs to the parent it just tells the parent about the parameter  */
-/* and lets it deal with the rest of the work. It only waits for the   */
-/* parent returning a result which gets passed on to the EDL script.   */
-/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*
+ * This function is executed by the child process doing the experiment
+ * for calls of the EDL function "toolbox_wait". Since the tool box
+ * belongs to the parent it just tells the parent about the parameter
+ * and lets it deal with the rest of the work. It only waits for the
+ * parent returning a result which gets passed on to the EDL script.
+ *---------------------------------------------------------------------*/
 
 static Var_T *f_tb_wait_child( Var_T *v )
 {
@@ -2391,11 +2391,11 @@ static Var_T *f_tb_wait_child( Var_T *v )
 }
 
 
-/*------------------------------------------------------------------*/
-/* This function gets called if either the timer for waiting for an */
-/* object change expired, an object we are waiting for changed its  */
-/* state or the STOP button was pressed while we are waiting.       */
-/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ * This function gets called if either the timer for waiting for an
+ * object change expired, an object we are waiting for changed its
+ * state or the STOP button was pressed while we are waiting.
+ *------------------------------------------------------------------*/
 
 void tb_wait_handler( long ID )
 {

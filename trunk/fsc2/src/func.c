@@ -212,10 +212,10 @@ static int func_cmp1( const void *a, const void *b );
 static int func_cmp2( const void *a, const void *b );
 
 
-/*--------------------------------------------------------------------*/
-/* Function parses the function data base in 'Functions' and makes up */
-/* a complete list of all built-in and user-supplied functions.       */
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ * Function parses the function data base in 'Functions' and makes up
+ * a complete list of all built-in and user-supplied functions.
+ *--------------------------------------------------------------------*/
 
 bool functions_init( void )
 {
@@ -254,9 +254,9 @@ bool functions_init( void )
 }
 
 
-/*-----------------------------------------------------------*/
-/* Function for qsort'ing functions according to their names */
-/*-----------------------------------------------------------*/
+/*-----------------------------------------------------------*
+ * Function for qsort'ing functions according to their names
+ *-----------------------------------------------------------*/
 
 static int func_cmp1( const void *a, const void *b )
 {
@@ -265,10 +265,10 @@ static int func_cmp1( const void *a, const void *b )
 }
 
 
-/*-----------------------------------------------------------------*/
-/* Function gets rid of all loaded functions (i.e. functions from  */
-/* modules). It also closes all files opened due to user requests. */
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ * Function gets rid of all loaded functions (i.e. functions from
+ * modules). It also closes all files opened due to user requests.
+ *-----------------------------------------------------------------*/
 
 void functions_exit( void )
 {
@@ -303,10 +303,10 @@ void functions_exit( void )
 }
 
 
-/*-------------------------------------------------------------------*/
-/* This function is thought for modules that just need to check if a */
-/* function exists.                                                  */
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * This function is thought for modules that just need to check if a
+ * function exists.
+ *-------------------------------------------------------------------*/
 
 int func_exists( const char *name )
 {
@@ -332,18 +332,18 @@ int func_exists( const char *name )
 }
 
 
-/*----------------------------------------------------------------------*/
-/* Function tries to find a function in the list of built-in and loaded */
-/* functions. If it finds it it creates a new variable on the variables */
-/* stack with a pointer to the function and returns a pointer to the    */
-/* variable. If the function can't be found it returns a NULL pointer.  */
-/* -> 1. Name of the function                                           */
-/*    2. Pointer for returning the access flag, i.e. a flag indicating  */
-/*       in which part of the EDL program the function can be used.     */
-/* <- Pointer to variable on variable stack that can be used to execute */
-/*    the function or NULL if function does not exist. If the function  */
-/*    exists but has not been loaded an exception is thrown.            */
-/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*
+ * Function tries to find a function in the list of built-in and loaded
+ * functions. If it finds it it creates a new variable on the variables
+ * stack with a pointer to the function and returns a pointer to the
+ * variable. If the function can't be found it returns a NULL pointer.
+ * -> 1. Name of the function
+ *    2. Pointer for returning the access flag, i.e. a flag indicating
+ *       in which part of the EDL program the function can be used.
+ * <- Pointer to variable on variable stack that can be used to execute
+ *    the function or NULL if function does not exist. If the function
+ *    exists but has not been loaded an exception is thrown.
+ *----------------------------------------------------------------------*/
 
 Var_T *func_get( const char *name, int *acc )
 {
@@ -404,12 +404,12 @@ Var_T *func_get( const char *name, int *acc )
 }
 
 
-/*----------------------------------------------------------------*/
-/* This function is the one really used for finding a function    */
-/* but with an additional argument that indicates if on failure   */
-/* for existing but not loaded functions an error message is      */
-/* printed and an exception is thrown or simply NULL is returned. */
-/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * This function is the one really used for finding a function
+ * but with an additional argument that indicates if on failure
+ * for existing but not loaded functions an error message is
+ * printed and an exception is thrown or simply NULL is returned.
+ *----------------------------------------------------------------*/
 
 Var_T *func_get_long( const char *name, int *acc, bool flag )
 {
@@ -460,9 +460,9 @@ Var_T *func_get_long( const char *name, int *acc, bool flag )
 }
 
 
-/*------------------------------------------------------------*/
-/* Function for bsearch to search for a function by its name. */
-/*------------------------------------------------------------*/
+/*------------------------------------------------------------*
+ * Function for bsearch to search for a function by its name.
+ *------------------------------------------------------------*/
 
 static int func_cmp2( const void *a, const void *b )
 {
@@ -470,12 +470,12 @@ static int func_cmp2( const void *a, const void *b )
 }
 
 
-/*----------------------------------------------------------------*/
-/* This function is called to execute an EDL function. It must be */
-/* able to also handle situations where, for example, an EDL      */
-/* function calls another EDL function, which throws an exception */
-/* that then is caught by the first function etc.                 */
-/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * This function is called to execute an EDL function. It must be
+ * able to also handle situations where, for example, an EDL
+ * function calls another EDL function, which throws an exception
+ * that then is caught by the first function etc.
+ *----------------------------------------------------------------*/
 
 Var_T *func_call( Var_T *f )
 {
@@ -634,38 +634,38 @@ Var_T *func_call( Var_T *f )
 }
 
 
-/*------------------------------------------------------------------------*/
-/* The following functions are for maintaining a stack of EDL (and other */
-/* module) functions calls, which is actually implemented as a linked    */
-/* list. The stack pointer, i.e. the pointer to the head of the linked   */
-/* list, is the 'Call_Stack' member of the global 'EDL' structure. The   */
-/* topmost element of the stack (i.e. the head of the linked list)       */
-/* always refers to the currently running (EDL) function.                */
-/* For the main program the functions only get called when an EDL        */
-/* function is invoked. In contrast, for modules they also are called    */
-/* for hook-function calls and, for pulser modules, also for calls of    */
-/* the functions declared in the pulser structure (i.e. functions, that  */
-/* the pulser module must export to allow the setting of the pulsers     */
-/* properties and the creation of pulses). The information stored in the */
-/* call stack elements is a pointer to the EDL function structure (if    */
-/* applicable, i.e. for EDL function calls), a pointer to the module     */
-/* structure (for calls from modules) and the name of the device         */
-/* controlled by the module (i.e. not the module name, but the name as   */
-/* it should appear in error messages for the device), and, finally, the */
-/* number of the device (this can be larger than 1 if there's more than  */
-/* one devices of the same generic type).                                */
-/* These informations are used in two situations: First when printing    */
-/* messages. The print() function is supposed to prepend EDL file name   */
-/* and line number, device name (if applicable) and function name. It    */
-/* gets the device and function name from the current call stack entry.  */
-/* Second, when within a module an EDL function from the same module is  */
-/* called (via func_get() and func_call()) the writer of the module has  */
-/* no information if there are other modules with the same generic type  */
-/* loaded, supplying a function by the same name. The information in the */
-/* current call stack entry is used to determine this and thus to auto-  */
-/* matically return the appropriate fucntion handle to the module, i.e.  */
-/* the function from the same module the func_get() call came from.      */
-/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ * The following functions are for maintaining a stack of EDL (and other
+ * module) functions calls, which is actually implemented as a linked
+ * list. The stack pointer, i.e. the pointer to the head of the linked
+ * list, is the 'Call_Stack' member of the global 'EDL' structure. The
+ * topmost element of the stack (i.e. the head of the linked list)
+ * always refers to the currently running (EDL) function.
+ * For the main program the functions only get called when an EDL
+ * function is invoked. In contrast, for modules they also are called
+ * for hook-function calls and, for pulser modules, also for calls of
+ * the functions declared in the pulser structure (i.e. functions, that
+ * the pulser module must export to allow the setting of the pulsers
+ * properties and the creation of pulses). The information stored in the
+ * call stack elements is a pointer to the EDL function structure (if
+ * applicable, i.e. for EDL function calls), a pointer to the module
+ * structure (for calls from modules) and the name of the device
+ * controlled by the module (i.e. not the module name, but the name as
+ * it should appear in error messages for the device), and, finally, the
+ * number of the device (this can be larger than 1 if there's more than
+ * one devices of the same generic type).
+ * These informations are used in two situations: First when printing
+ * messages. The print() function is supposed to prepend EDL file name
+ * and line number, device name (if applicable) and function name. It
+ * gets the device and function name from the current call stack entry.
+ * Second, when within a module an EDL function from the same module is
+ * called (via func_get() and func_call()) the writer of the module has
+ * no information if there are other modules with the same generic type
+ * loaded, supplying a function by the same name. The information in the
+ * current call stack entry is used to determine this and thus to auto-
+ * matically return the appropriate fucntion handle to the module, i.e.
+ * the function from the same module the func_get() call came from.
+ *-----------------------------------------------------------------------*/
 
 Call_Stack_T *call_push( Func_T *f, Device_T *device, const char *device_name,
 						 int dev_count )
@@ -711,8 +711,8 @@ Call_Stack_T *call_push( Func_T *f, Device_T *device, const char *device_name,
 }
 
 
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ *---------------------------------------------------------------*/
 
 Call_Stack_T *call_pop( void )
 {

@@ -35,9 +35,9 @@ static Var_T *f_bstate_child( Var_T *v );
 static Var_T *f_bchanged_child( Var_T *v );
 
 
-/*----------------------------------------------------*/
-/* Function for appending a new button to the toolbox */
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ * Function for appending a new button to the toolbox
+ *----------------------------------------------------*/
 
 Var_T *f_bcreate( Var_T *var )
 {
@@ -246,11 +246,11 @@ Var_T *f_bcreate( Var_T *var )
 }
 
 
-/*-----------------------------------------------------------------*/
-/* Part of the f_bcreate() function run by the child process only, */
-/* indirectly invoking the f_bcreate() function in the parent via  */
-/* the message passing mechanism.                                  */
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ * Part of the f_bcreate() function run by the child process only,
+ * indirectly invoking the f_bcreate() function in the parent via
+ * the message passing mechanism.
+ *-----------------------------------------------------------------*/
 
 static Var_T *f_bcreate_child( Var_T *v, long type, long coll )
 {
@@ -356,9 +356,9 @@ static Var_T *f_bcreate_child( Var_T *v, long type, long coll )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/* Deletes one or more buttons, parameter(s) are one or more button IDs. */
-/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ * Deletes one or more buttons, parameter(s) are one or more button IDs.
+ *-----------------------------------------------------------------------*/
 
 Var_T *f_bdelete( Var_T *v )
 {
@@ -399,11 +399,11 @@ Var_T *f_bdelete( Var_T *v )
 }
 
 
-/*-----------------------------------------------------------------*/
-/* Part of the f_bdelete() function run by the child process only, */
-/* indirectly invoking the f_bdelete() function in the parent via  */
-/* the message passing mechanism.                                  */
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ * Part of the f_bdelete() function run by the child process only,
+ * indirectly invoking the f_bdelete() function in the parent via
+ * the message passing mechanism.
+ *-----------------------------------------------------------------*/
 
 static void f_bdelete_child( Var_T *v )
 {
@@ -454,10 +454,10 @@ static void f_bdelete_child( Var_T *v )
 }
 
 
-/*---------------------------------------------------------*/
-/* Part of the f_bdelete() function only run by the parent */
-/* process, which actually removes the button.             */
-/*---------------------------------------------------------*/
+/*---------------------------------------------------------*
+ * Part of the f_bdelete() function only run by the parent
+ * process, which actually removes the button.
+ *---------------------------------------------------------*/
 
 static void f_bdelete_parent( Var_T *v )
 {
@@ -541,9 +541,9 @@ static void f_bdelete_parent( Var_T *v )
 }
 
 
-/*---------------------------------------*/
-/* Sets or returns the state of a button */
-/*---------------------------------------*/
+/*---------------------------------------*
+ * Sets or returns the state of a button
+ *---------------------------------------*/
 
 Var_T *f_bstate( Var_T *v )
 {
@@ -650,11 +650,11 @@ Var_T *f_bstate( Var_T *v )
 }
 
 
-/*----------------------------------------------------------------*/
-/* Part of the f_bstate() function run by the child process only, */
-/* indirectly invoking the f_bstate() function in the parent via  */
-/* the message passing mechanism.                                 */
-/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * Part of the f_bstate() function run by the child process only,
+ * indirectly invoking the f_bstate() function in the parent via
+ * the message passing mechanism.
+ *----------------------------------------------------------------*/
 
 static Var_T *f_bstate_child( Var_T *v )
 {
@@ -732,9 +732,9 @@ static Var_T *f_bstate_child( Var_T *v )
 }
 
 
-/*-------------------------------------------------------*/
-/* Function for testing if the state of a button changed */
-/*-------------------------------------------------------*/
+/*-------------------------------------------------------*
+ * Function for testing if the state of a button changed
+ *-------------------------------------------------------*/
 
 Var_T *f_bchanged( Var_T *v )
 {
@@ -777,11 +777,11 @@ Var_T *f_bchanged( Var_T *v )
 }
 
 
-/*------------------------------------------------------------------*/
-/* Part of the f_bchanged() function run by the child process only, */
-/* indirectly invoking the f_bchanged() function in the parent via  */
-/* the message passing mechanism.                                   */
-/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ * Part of the f_bchanged() function run by the child process only,
+ * indirectly invoking the f_bchanged() function in the parent via
+ * the message passing mechanism.
+ *------------------------------------------------------------------*/
 
 static Var_T *f_bchanged_child( Var_T *v )
 {
