@@ -59,7 +59,7 @@ void *T_malloc( size_t size )
 	}
 
 #if defined FSC2_MDEBUG && ! defined __STRICT_ANSI__
-	if ( Internals.is_i386 )
+	if ( Internals.is_linux_i386 )
 	{
 		asm( "mov %%ebp, %0" : "=g" ( EBP ) );
 		fprintf( stderr, "(%d) malloc:  %p (%u) from %p\n",
@@ -105,7 +105,7 @@ void *T_calloc( size_t nmemb, size_t size )
 	}
 
 #if defined FSC2_MDEBUG && ! defined __STRICT_ANSI__
-	if ( Internals.is_i386 )
+	if ( Internals.is_linux_i386 )
 	{
 		asm( "mov %%ebp, %0" : "=g" ( EBP ) );
 		fprintf( stderr, "(%d) calloc:  %p (%u) from %p\n",
@@ -151,7 +151,7 @@ void *T_realloc( void *ptr, size_t size )
 	}
 
 #if defined FSC2_MDEBUG && ! defined __STRICT_ANSI__
-	if ( Internals.is_i386 )
+	if ( Internals.is_linux_i386 )
 	{
 		asm( "mov %%ebp, %0" : "=g" ( EBP ) );
 		fprintf( stderr, "(%d) realloc: %p -> %p (%u) from %p\n",
@@ -180,7 +180,7 @@ void *T_free( void *ptr )
 		return NULL;
 
 #if defined FSC2_MDEBUG && ! defined __STRICT_ANSI__
-	if ( Internals.is_i386 )
+	if ( Internals.is_linux_i386 )
 	{
 		asm( "mov %%ebp, %0" : "=g" ( EBP ) );
 		fprintf( stderr, "(%d) free:    %p from %p\n",
@@ -224,7 +224,7 @@ char *T_strdup( const char *str )
 	strcpy( new_str, str );
 
 #if defined FSC2_MDEBUG && ! defined __STRICT_ANSI__
-	if ( Internals.is_i386 )
+	if ( Internals.is_linux_i386 )
 	{
 		asm( "mov %%ebp, %0" : "=g" ( EBP ) );
 		fprintf( stderr, "(%d) strdup:  %p (%u) from %p\n",

@@ -78,14 +78,26 @@ void DumpStack( void *crash_address )
 	char buf[ 128 ];
 	struct sigaction sact;
 	Device *cd;
+	static bool already_crashed = UNSET;
 
+
+	/* Sometimes the program crashes again while trying to send out the
+	   mail (remember, we're already deep in undefied behavior land when
+	   we get here at all, so all bets are off). To avoid getting into an
+	   infinite loop of crashes we bail out immediately when 'alread_crashed'
+	   is set. */
+
+	if ( already_crashed )
+		return;
+	else
+		already_crashed = SET;
 
 	/* Don't do anything on a machine with a non-Intel processor */
 
-	if ( ! Internals.is_i386 )
+	if ( ! Internals.is_linux_i386 )
 		return;
 
-	/* Childs death signal isn't needed */
+	/* Childs death signal isn't needed anymore */
 
 	sact.sa_handler = ( void ( * )( int ) ) SIG_DFL;
 	sact.sa_flags = 0;
@@ -98,8 +110,8 @@ void DumpStack( void *crash_address )
 	sact.sa_flags = 0;
 	sigaction( SIGPIPE, &sact, NULL );
 
-	/* Setup all the pipes, two for communication with child process and one
-	   as a temporary buffer for the result */
+	/* Set up the pipes, two for communication with child process and one
+	   misused as a temporary buffer for the result */
 
 	if ( pipe( pipe_fd ) < 0 )
 		return;

@@ -171,7 +171,7 @@ struct INTERNALS {
 									to allow viewing fsc2's state */
 	int http_port;               /* port the http server is running on */
 
-	bool is_i386;                /* Set if running on an i386 processor */
+	bool is_linux_i386;          /* Set if running Linux on i386 processors */
 
 	int cmdline_flags;           /* Stores command line options */
 
