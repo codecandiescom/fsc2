@@ -465,13 +465,13 @@ machine_name  := $(shell                                 \
 # 'machines' subdirectory. This makes configuring a new fsc2 version for a
 # certain machine much simpler since only the configuration file must be
 # copied instead of always having to edit this Makefile. The variable
-# 'MACHINE_INCLUDE' gets set to the name of the machine specific file
+# 'MACHINE_INCLUDE_FILE' gets set to the name of the machine specific file
 # to be included (if one exists, and only then we can include it;-) in
 # order to be able to automatically recompile when the file changed.
 
-MACHINE_INCLUDE := $(shell ls $(mchdir)/$(machine_name) 2>/dev/null)
-ifneq ($(MACHINE_INCLUDE),)
-	include $(MACHINE_INCLUDE)
+MACHINE_INCLUDE_FILE := $(shell ls $(mchdir)/$(machine_name) 2>/dev/null)
+ifneq ($(MACHINE_INCLUDE_FILE),)
+	include $(MACHINE_INCLUDE_FILE)
 endif
 
 
@@ -746,9 +746,10 @@ witio_48:
 
 
 # Create a header file with configuration information from the contents of
-# CONFFLAGS if either the Makefile got changed or it does not already exist
+# CONFFLAGS if the Makefile or the machine specific Makefile changed or if
+# the configuration file does not already exist.
 
-fsc2_config.h: Makefile $(MACHINE_INCLUDE)
+fsc2_config.h: Makefile $(MACHINE_INCLUDE_FILE)
 	@if [ -e fsc2_config.h ]; then           \
 		echo "Recreating fsc2_config.h...";  \
 	else                                     \
