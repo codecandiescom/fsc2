@@ -147,6 +147,7 @@ void notify_conn( int signo );
 void usage( int result_status );
 int idle_handler( void );
 
+
 /* Most global variables used in the program belong to one of the following
    structures. The only exceptions are variables that must be visible within
    the modules and to make it easier for module writers we keep them as simple

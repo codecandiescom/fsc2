@@ -153,7 +153,6 @@ bool run( void )
 
 	if ( Internals.child_pid > 0 )   /* fork() did succeeded */
 	{
-		fl_set_idle_callback( new_data_callback, NULL );
 		sigprocmask( SIG_SETMASK, &old_mask, NULL );
 		Internals.mode = PREPARATION;
 		return OK;
@@ -683,10 +682,6 @@ void run_sigchld_callback( FL_OBJECT *a, long b )
 	/* Reset the handler for the QUITTING signal */
 
 	sigaction( QUITTING, &quitting_old_act, NULL );
-
-	/* Go back to using the normal idle handler */
-
-	fl_set_idle_callback( idle_handler, NULL );
 
 	/* Remove the tool box */
 

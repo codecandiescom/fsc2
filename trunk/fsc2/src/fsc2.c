@@ -2089,11 +2089,8 @@ void usage( int return_status )
 /* and which deals with periodic tasks.                    */
 /*---------------------------------------------------------*/
 
-int idle_handler( XEvent *a, void *b )
+int idle_handler( void )
 {
-	UNUSED_ARGUMENT( a );
-	UNUSED_ARGUMENT( b );
-
 	/* Check if a request from the child for external conections has
 	   come in */
 
