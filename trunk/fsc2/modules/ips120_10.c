@@ -1201,7 +1201,8 @@ static double ips120_10_current_check( double current )
 
 static double ips120_10_sweep_rate_check( double sweep_rate )
 {
-	if ( sweep_rate > MAX_SWEEP_RATE )
+	if ( sweep_rate > MAX_SWEEP_RATE && 
+		 ( sweep_rate - MAX_SWEEP_RATE ) / sweep_rate > 0.0001 )
 	{
 		if ( FSC2_MODE != EXPERIMENT )
 		{
@@ -1219,7 +1220,8 @@ static double ips120_10_sweep_rate_check( double sweep_rate )
 		}
 	}
 
-	if ( sweep_rate < MIN_SWEEP_RATE )
+	if ( sweep_rate < MIN_SWEEP_RATE &&
+		 ( MIN_SWEEP_RATE - sweep_rate ) / MIN_SWEEP_RATE > 0.0001 )
 	{
 		if ( FSC2_MODE != EXPERIMENT )
 		{
