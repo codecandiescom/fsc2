@@ -1134,7 +1134,7 @@ int gpib_dev_setup( GPIB_Device *temp_dev )
 /* in the fd subdirectory in the /proc directory for the current   */
 /* process. Then the function for initialisation of the GPIB board */
 /* gets called where the device file is opened. Afterwards, the    */
-/* second function gets called, that compares the fd's in the list */
+/* second function gets called that compares the fd's in the list  */
 /* with the entries int the /proc/self/fd directory and sets the   */
 /* close-on-exec flag for the new fd. Of course, this will only    */
 /* work on Linux but fail (benignly) on other systems...           */
@@ -1147,6 +1147,8 @@ static int *get_fd_list( void )
 	int *fd_list = NULL;
 	int num_fds = 0;
 	char *dn;
+	int fd;
+	struct stat buf;
 
 
 	CLOBBER_PROTECT( fd_list );
@@ -1165,8 +1167,15 @@ static int *get_fd_list( void )
 
 		TRY
 		{
+			fd = T_atoi( de->d_name );
+			if ( fstat( fd, &buf ) == -1 )
+				THROW( EXCEPTION );
+
+			if ( S_ISDIR( buf.st_mode ) )
+				continue;
+
 			fd_list = T_realloc( fd_list, ( num_fds + 2 ) * sizeof *fd_list );
-			fd_list[ num_fds++ ] = T_atoi( de->d_name );
+			fd_list[ num_fds++ ] = fd;
 		}
 		OTHERWISE
 		{
