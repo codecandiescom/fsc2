@@ -56,10 +56,12 @@ to write
 @example
 new_data = digitizer_get_curve( CH1 );    // get curve from channel 1
 @end example
+@noindent
 instead of
 @example
 new_data = tds754a_get_curve( 1 );        // get curve from channel 1
 @end example
+@noindent
 but one doesn't has to change dozens of references to the TDS754A
 oscilloscope in each and every @acronym{EDL} program when someone else
 needs just this oscilloscope for a few days and one has to do with the
@@ -85,16 +87,19 @@ two lock-in amplifiers will be listed:
 sr510;         // first lock-in amplifier
 sr830;         // second lock-in amplifier
 @end example
+@noindent
 If now data from the first lock-in amplifier are needed one simply uses
 the normal way to get data, i.e.@: the usual function name:
 @example
 data_from_1st_lockin = lockin_get_data( );
 @end example
+@noindent
 But to get data from the second only the string @code{"#2"} needs to
 be appended to the function name:
 @example
 data_from_2nd_lockin = lockin_get_data#2( );
 @end example
+@noindent
 and @code{fsc2} will automatically know that now the second of the
 lock-in amplifiers from the list of devices is meant.
 
@@ -138,6 +143,7 @@ aeg_x_band
 aeg_s_band
 er032m
 @end example
+@noindent
 Because magnets hardly ever get changed (and if the program is set up
 correctly for the experiment) one can use @code{magnet} as the module
 name instead.
@@ -265,6 +271,7 @@ er035m_sa
 er035m_sas
 bh15
 @end example
+@noindent
 The first four modules are for the ER035M NMR gaussmeter. The first and
 third one are to be used when the device is controlled via the GPIB bus
 while the second and fourth if it is connected using the serial port of
@@ -331,6 +338,7 @@ sr810
 sr830
 er023m
 @end example
+@noindent
 Because the models have different capabilities, some of the functions
 are either only defined for parts of the models or may expect slightly
 different parameters.
@@ -1525,6 +1533,7 @@ needed, i.e.@: you have a line in the @code{PHASES} section like
 @example
 ACQUISITION_SEQUENCE = +A, -B, -A, +B;
 @end example
+@noindent
 also the second argument to the function must be a digitizer
 channel. The first channel is used for fetching the @code{A} data, the
 second for the @code{B} data. This is, of course, only relevant when you
@@ -1595,6 +1604,7 @@ FOR I = 1 : : Num_points @{
 
 ...
 @end example
+@noindent
 You may note, that in this program @code{pulser_update()} isn't called
 after @code{pulser_shift()}. This is possible because
 @code{get_phase_cycled_area()} internally calls @code{pulser_update()}

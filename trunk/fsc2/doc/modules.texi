@@ -362,6 +362,7 @@ integer. This is the function @code{get_long()}, defined as
 @example
 long get_long( Var *var, const char *snippet )
 @end example
+@noindent
 The first argument is a pointer to the variable you want to
 evaluate. The second parameter is used to setup a warning message when
 the variable isn't an integer variable but a float value. This message
@@ -376,6 +377,7 @@ point number) is @code{abc()} and the string you pass to the function
 @example
 get_long( var, "baz" );
 @end example
+@noindent
 the following warning message will be printed:
 @example
 foo.edl:17: XYZ: Floating point number used as bar in abc().
@@ -386,6 +388,7 @@ prepared to also accept an integer, you can use the function
 @example
 long get_double( Var *var, const char *snippet )
 @end example
+@noindent
 The arguments to this function are the same you would pass to the
 previous function (i.e. @code{get_long()}) and the only difference is
 that it will return a @code{double} and will print an warning message (if
@@ -394,6 +397,7 @@ point variable) of
 @example
 foo.edl:17: XYZ: Integer number used as bar in abc().
 @end example
+@noindent
 (assuming that everything else is identical to the above example).
 
 If your function can accept integer variables only there's a third
@@ -401,6 +405,7 @@ function:
 @example
 long get_strict_long( Var *var, const char *snippet )
 @end example
+@noindent
 This function has the same arguments as the two other functions but it
 will usually throw an exception to stop the interpretation of the
 @acronym{EDL} program (see below) except while doing the experiment, in
@@ -706,6 +711,7 @@ const char *device_name  = DEVICE_NAME;
 const char *generic_type = DEVICE_TYPE;
 @end example
 @acronym{fsc2} will use the first variable with the name for printing of
+@noindent
 warnings and error messages. Tes second string is needed to find out
 about the type of the device. If this variable does not exist it won't
 have any information about the device type and having another device of
@@ -779,6 +785,7 @@ line in the init hook function similar to
 @example
 need_GPIB = SET;
 @end example
+@noindent
 If you forget to set this variable chances are high that the program
 will stop with an error message, complaining that it can't access the
 GPIB bus.
@@ -800,6 +807,7 @@ functions dealing with the GPIB bus. This should be done in the
 @example
 int gpib_init_device( const char *name, int *device );
 @end example
+@noindent
 This function expects the name of the device (which will be used to look
 it up in the GPIB configuration file) and the address of an integer,
 which, on successful return, will contain a number now associated with
@@ -813,6 +821,7 @@ The next two most important functions are
 int gpib_write( int device, const char *buffer, long length );
 int gpib_read( int device, char *buffer, long *length );
 @end example
+@noindent
 The first functions sends @code{length} data contained in @code{buffer}
 to the device designated by @code{device} (which you got from a call of
 @code{gpib_init_device()}). The second function reads a maximum of
@@ -826,6 +835,7 @@ When you're done dealing with a device you should call
 @example
 int gpib_local( int device );
 @end example
+@noindent
 to bring it back into the local state. This function should be called
 in the @code{end_of_exp_hook} function (see below).
 
@@ -833,6 +843,7 @@ Using the function
 @example
 int gpib_timeout( int device, int period );
 @end example
+@noindent
 a new timeout value can be set for the device. The value of
 @code{period} depends on the values that the GPIB library you are using
 expect. Please check the manual for the library.
@@ -841,11 +852,13 @@ The function
 @example
 int gpib_clear_device( int device );
 @end example
+@noindent
 clears the device by sending it the Selected Device Clear (SDC) message.
 
 @example
 int gpib_trigger( int device );
 @end example
+@noindent
 triggers the device by sending it a Device Trigger Command.
 
 
@@ -855,6 +868,7 @@ communication on the GPIB bus:
 @example
 void gpib_log_message( const char *fmt, ... );
 @end example
+@noindent
 It expects a format string as you would use in the @code{C printf()}
 function plus arguments corresponding to the conversion specifiers in
 the format string.
@@ -923,6 +937,7 @@ counterparts are @code{fsc2_serial_open()} and
 struct termios *fsc2_serial_open( int sn, const char *devname,
                                   int flags )
 @end example
+@noindent
 where @code{sn} is the number of the serial port as already used in
 @code{fsc2_request_serial_port()}, @code{devname} has to be the same
 device name that was used in the call of
@@ -985,7 +1000,7 @@ int sr510_exp_hook( void )
 int sr510_end_of_exp_hook( void )
 void sr510_exit_hook( void )
 @end example
-@noindent
+
 
 If it exists, the first function, i.e.@: @code{sr510_init_hook()} is
 called immediately after the functions defined in all modules are
@@ -1092,6 +1107,7 @@ simp_modules  := User_Functions.c sr510.c sr530.c sr810.c sr830.c \
                  er035m_sa.c er035m_sas.c bh15.c keithley228a.c egg4402.c \
                  kontron4060.c lakeshore330.c pt2025.c
 @end example
+@noindent
 (The @code{\} characters at the ends of the lines tell make that the
 line continues on the next line.) All you've got to do to include your
 new module is to append the name of the single @code{C} file you have
@@ -1103,6 +1119,7 @@ simp_modules  := User_Functions.c sr510.c sr530.c sr810.c sr830.c \
                  er035m_sa.c er035m_sas.c bh15.c keithley228a.c egg4402.c \
                  kontron4060.c lakeshore330.c pt2025.c abc.c
 @end example
+@noindent
 If you now re-compile it will also be compiled, a shareable library will
 be created from it and when you do @code{make install} it will be copied
 to the appropriate place where @acronym{fsc2} will find it (but don't
@@ -1118,6 +1135,7 @@ variable, @code{comp_modules}, is defined, which (at the moment) is set to:
 comp_modules   = dg2020_f dg2020_b hfs9000 tds754a tds744a tds540 tds520c \
                  tds520a tds520 hp8647a
 @end example
+@noindent
 Here you have to append the name of your own module (just the name with
 no extension). Next you have to create a second variable that has the
 same name as your module (again without extension, i.e.@: identical to
@@ -1127,6 +1145,7 @@ example have a look at the definition of the variable @code{tds754a}:
 @example
 tds754a       := tds754a.c tds754a_gpib.c tds754a_util.c
 @end example
+@noindent
 The module @code{tds754a} consists of the four @code{C} source files
 listed here. You have to create a similar entry for your own
 module. After you've down so you're done and can now re-compile to
@@ -1142,10 +1161,12 @@ make a shareable library out of it you should compile it with at least
 @example
   gcc -I../src -I../config -shared -fpic -o abc.o abc.c
 @end example
+@noindent
 To create a shareable library from it you need
 @example
   ld -shared -fpic -o abc.so abc.c
 @end example
+@noindent
 (assuming you're using GNU's @code{gcc} and @code{ld}). If this succeeds
 you will still have to copy the library to the place where
 @acronym{fsc2} expects it, i.e.@: usually @file{/usr/local/lib/fsc2}.
@@ -1519,6 +1540,7 @@ typedef enum
 @} bool;
 @end example
 
+
 You can use either the macros @code{SET}, @code{OK} or @code{TRUE}
 instead of @code{1} and @code{UNSET}, @code{FAIL} or @code{FALSE}
 instead of @code{1}. Use this type to do things like
@@ -1561,6 +1583,7 @@ P3: FUNCTION = MW,
     START    = P1.START + 200 ns,
     LENGTH   = 140 ns;
 @end example
+@noindent
 When @code{fsc2} finds these lines it will have to call several
 functions that must be defined within the module. First it needs to call
 a function that allows it to inform the module that there is a new pulse
@@ -1630,6 +1653,7 @@ struct @{
 
 @} pulser_struct;
 @end example
+@noindent
 At the start all the pointers in this structure are set to @code{NULL}
 (@acronym{fsc2} has still no idea which functions it actually has to
 call), @code{name} is also a @code{NULL} pointer and the boolean
@@ -1705,6 +1729,7 @@ keyword is found, i.e.@:
 ASSIGNMENTS:
 MW: CH = 1, ....
 @end example
+@noindent
 There are two types of pulsers, pulsers (like the @strong{Sony/Tektronix
 DG2020} that have some internal channels, that can be freely assigned to
 output connector (and for which the variable @code{needs_phase_pulses}
@@ -1749,6 +1774,7 @@ const char *Function_Names[ ] = @{
 extern const char *Function_Names[ ];
 #endif
 @end example
+@noindent
 Beside the definition of pulse function numbers there is also an array
 with the full names for the functions (to be used in error messages).
 
@@ -1774,6 +1800,7 @@ the function description the @code{POD} keyword is found:
 ASSIGNMENTS:
   MW: POD = 3, ...
 @end example
+@noindent
 Only one function should be assignable to an output connector.
 
 
@@ -1817,6 +1844,7 @@ the @code{ASSIGNMENTS} section, i.e.@:
 ASSIGNMENTS:
   TIMEBASE: 10 ns;
 @end example
+@noindent
 You will have to check that this is an acceptable time base value and
 you will also have to check later that all pulse positions, lengths
 etc.@: are integer multiples of this time base.
@@ -1829,6 +1857,7 @@ the assignments section, i.e.@:
 ASSIGNMENTS:
   TRIGGER_MODE: EXTERNAL;
 @end example
+@noindent
 There are two possible values for the trigger mode, either external or
 internal. In @file{src/global.h} an enumeration is already defined for
 the values of @code{mode} with @code{EXTERNAL} (set to @code{1}) and
@@ -1888,6 +1917,7 @@ in the  @code{ASSIGNMENTS} section, i.e.@:
 ASSIGNMENTS:
   MAXIMUM_SEQUENCE_LENGTH: 10 us;
 @end example
+@noindent
 If you determine the maximum length of the pulser pattern in your module
 during the test run the value you get can be plain wrong if the
 @acronym{EDL} program contains e.g.@: @code{FOREVER} loops,
@@ -1934,6 +1964,7 @@ program contains a line like
 ASSIGNMENTS:
   PHASE_2: MICROWAVE, POD = 2, 3, ....
 @end example
+@noindent
 Obviously, this is meant for a pulser module that automatically creates
 phase pulses (otherwise the use of a phase function would not be
 allowed) and this statement is intended to tell the module that the
@@ -1952,6 +1983,7 @@ lines of the form
 ASSIGNMENTS:
   PHASE_SETUP_2:  MICROWAVE, ...
 @end example
+@noindent
 In this case @code{MICROWAVE} is again the function that has to be phase
 cycled and is passed to the function as the second argument. The first
 argument is either @code{0} or @code{1}, depending on if the this for the
@@ -1965,6 +1997,7 @@ This function is called when in the @code{ASSIGNMENTS} section a line like
 @example
   PHASE_SWITCH_DELAY: 40 ns;
 @end example
+@noindent
 is found. The module must use the value of the second argument
 @code{del_time} as the time that pulses of the phase function indicated
 by the first argument (which currently can be only either @code{1} or
@@ -1982,6 +2015,7 @@ This function is called when in the @code{ASSIGNMENTS} section a line like
 @example
   GRACE_PERIOD: 20 ns;
 @end example
+@noindent
 is found. The module must use the value of the second argument
 @code{gp_time} as the time that pulses of the phase function indicated
 by the first argument remain switched on after the 'real' pulses of the
@@ -2007,6 +2041,7 @@ PHASE_SETUP_1:  +X: POD_1 = ON, POD2 = OFF,
                 -X: POD2 = 0, 0,
                 -Y: 1, 1;
 @end example
+@noindent
 is expected in the @acronym{EDL} program. The first line indicates that
 the phase function 1 is to be used to control phase pulses for microwave
 pulses and the output pods to be used are the pods 2 and 3. The
@@ -2080,6 +2115,7 @@ PHASE_SETUP_1:  MICROWAVE,
               -Y: 5,
               CW: 3;
 @end example
+@noindent
 For these @acronym{EDL} code the function @code{phase_setup_prep()} gets
 called five times in a row. Again the first and second parameter the
 function will receive is the phase setup number (i.e.@: either @code{0}
@@ -2099,6 +2135,7 @@ phase_setup_prep( 0, PHASE_MINUS_X, (discard), 1 );
 phase_setup_prep( 0, PHASE_MINUS_Y, (discard), 2 );
 phase_setup_prep( 0, PHASE_CW, (discard), 1 );   
 @end example
+@noindent
 Here @code{(discard)} stands for an arbitrary value that has to be discarded.
 
 
@@ -2117,6 +2154,7 @@ This function is called when a new pulse definition is found in the
 @example
   PULSE_13: ...
 @end example
+@noindent
 For this the function will called (with @code{13} as the
 @code{pulse_number} argument) to tell the module that there's a new
 pulse to be dealt with. Pulse numbers are always non-negative, so
@@ -2130,6 +2168,7 @@ This function is called when the function of a new pulse is set in the
 @example
   PULSE_13:   FUNCTION = MICROWAVE, ...
 @end example
+@noindent
 The first argument is the pulse number (you can be sure that the
 function @code{new_pulse()} will have been called before with this pulse
 number as argument) and the pulse function number as the second argument
@@ -2147,12 +2186,14 @@ start position of a pulse, i.e.@: for lines like
 @example
   PULSE_13: START = 100 ns, ...
 @end example
+@noindent
 within the experiment section or when during the experiment the position
 of a pulse is changed directly by assigning a new start position i.e.@:
 for lines like
 @example
   P13.START = 260 ns;
 @end example
+@noindent
 If you need different handling of both situations you can assign a new
 function pointer to the corresponding structure entry at the start of
 the @code{EXPERIMENT} section, for example in the @code{exp_hook}
@@ -2200,6 +2241,7 @@ like
 @example
   PULSE_13: PHASE_CYCLE = PHASE_SEQUENCE_1, ...
 @end example
+@noindent
 are found in the @code{EXPERIMENT} section of the @acronym{EDL} file.
 The second argument is either the number @code{1} or @code{2},
 indicating one of the currently allowed two phase sequences. But to

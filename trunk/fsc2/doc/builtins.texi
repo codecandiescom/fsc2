@@ -475,6 +475,7 @@ A typical piece of code to open two files, the first with the extension
 FILE1 = get_file( "", "*.dat", "", "", "dat" );
 FILE2 = clone_file( FILE1, "dat", "list" );
 @end example
+@noindent
 If the user chooses @code{experiment.dat} as the first file, a second
 file with the name @code{experiment.list} will be opened automatically.
 

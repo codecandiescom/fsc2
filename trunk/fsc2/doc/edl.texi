@@ -550,6 +550,7 @@ is used and the result is the remainder of the division, e.g.@
 @example
 7 % 3 = 1         6.5 % 2.5 = 1.5 
 @end example
+@noindent
 For the exponentiation the caret character @code{^} is to be used, e.g.@:
 @findex ^ @r{(exponentiation)}
 @cindex exponentiation
@@ -578,11 +579,13 @@ variable:
 @example
 I = I + 1;
 @end example
+@noindent
 This assignment can be shortened (and sometimes made more readable) by
 using the `add and assign' operator `@code{+=}':
 @example
 I += 1;
 @end example
+@noindent
 Assignment operators mixed with arithmetic can also be used with all
 other arithmetic operators, i.e.@: you may use all of the following
 assignment operators
@@ -666,6 +669,7 @@ right of the expression:
 @example
  a | b & c    @r{will be treated as if written as}    ( a | b ) & c
 @end example
+@noindent
 To make your intentions more clear to human readers of your
 @acronym{EDL} programs it's probably a good idea to use parenthesis in
 these cases even if they are not strictly required.
