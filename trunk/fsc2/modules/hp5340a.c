@@ -198,7 +198,10 @@ static bool hp5340a_init( const char *name )
 	   addressed as talker(don't lock the keyboard, the user is supposed
 	   to do settngs at the front panel) */
 
-	if ( gpib_write( hp5340a.device, "JL", 2 ) == FAILURE )
+	if ( gpib_write( hp5340a.device, "L", 1 ) == FAILURE )
+		return FAIL;
+
+	if ( gpib_write( hp5340a.device, "J", 1 ) == FAILURE )
 		return FAIL;
 
 	return OK;
