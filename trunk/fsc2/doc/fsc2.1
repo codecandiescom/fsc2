@@ -86,9 +86,49 @@ try to expand.
 .TP
 \fB\-stopMouseButton\fR \fIbutton identifier\fR
 Specifies the mouse button that must be used to activate the stop button while
-the experiment is running. Use the string "left" or 1 for the left mouse
-button, "middle" or 2 for the middle and "right" or 3 for the right mouse
-button. Per default each of the three buttons can be used.
+the experiment is running. Use the string "left" or the number 1 for the left
+mouse button, "middle" or 2 for the middle and "right" or 3 for the right
+mouse button. Per default each of the three buttons can be used.
+.SH RESOURCES
+The program understands the following X resource names:
+.TP
+\fBgeometry\fR
+Specifies the preferred size and position of the main window.
+.TP
+\fBdisplayGeometry\fR
+Specifies the preferred size and position of the display window.
+.TP
+\fBcutGeometry\fR
+Specifies the preferred size and position of the cross section window.
+.TP
+\fBtoolGeometry\fR
+Specifies the preferred position of the tool window (its size can't be set).
+.TP
+\fBbrowserFontSize\fR
+Size (in pixels) of the font to be used in browsers.
+.TP
+\fBbuttonFontSize\fR
+Size (in pixels) of the font to be used for button labels.
+.TP
+\fBinputFontSize\fR
+Size (in pixels) of the font to be used for the text and label of input
+and output objects.
+.TP
+\fBsliderFontSize\fR
+Size (in pixels) of the font to be used for the text and label of sliders.
+.TP
+\fBhelpFontSize\fR
+Sets the size (in pixels) of the font to be used in the popup help texts.
+.TP
+\fBfileselectorFontSize\fR
+Size (in pixels) of the font to be used for the file selector.
+.TP
+\fBaxisFont\fR
+This option sets the font to be used in the axes in the display window.
+.TP
+\fBstopMouseButton\fR
+Specifies the mouse button that must be used to activate the stop button while
+the experiment is running.
 .SH SEE ALSO
 The complete documentation for \fPfsc2\fR in PostScript, PDF and HTML
 (with and without using frames) format can be found in the directory

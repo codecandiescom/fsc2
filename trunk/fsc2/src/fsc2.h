@@ -119,6 +119,7 @@ void usage( void );
 #define SLIDERFONTSIZE  10
 #define FILESELFONTSIZE 11
 #define HELPFONTSIZE    12
+#define STOPMOUSEBUTTON 13
 
 
 /* Global variables */

@@ -166,7 +166,6 @@ static int scan_args( int *argc, char *argv[ ], char **fname )
 {
 	int flags = 0;
 	int cur_arg = 1;
-	char *bn;
 	int i;
 
 
@@ -280,43 +279,6 @@ static int scan_args( int *argc, char *argv[ ], char **fname )
 
 			flags |= DO_LOAD | DO_TEST;
 			break;
-		}
-
-		if ( ! strncmp( argv[ cur_arg ], "-m", 2 ) )
-		{
-			if ( argv[ cur_arg ][ 2 ] == '\0' && *argc == cur_arg + 1 )
-			{
-				fprintf( stderr, "fsc2 -sb: Missing button number\n" );
-				usage( );
-			}
-
-			if ( argv[ cur_arg ][ 2 ] != '\0' )
-			{
-				bn = argv[ cur_arg ] + 2;
-				for ( i = cur_arg; i < *argc; i++ )
-					argv[ i ] = argv[ i + 1 ];
-				*argc -= 1;
-			}
-			else
-			{
-				bn = argv[ cur_arg + 1 ];
-				for ( i = cur_arg; i < *argc - 1; i++ )
-					argv[ i ] = argv[ i + 2 ];
-				*argc -= 2;
-			}
-
-			if ( *( bn + 1 ) != '\0' || *bn < '1' || *bn > '3' )
-			{
-				fprintf( stderr, "fsc2 -m %s: Invalid button number\n", bn );
-				usage( );
-			}
-
-			if ( *bn == '1' )
-				stop_button_mask = FL_LEFT_MOUSE;
-			if ( *bn == '2' )
-				stop_button_mask = FL_MIDDLE_MOUSE;
-			if ( *bn == '3' )
-				stop_button_mask = FL_RIGHT_MOUSE;
 		}
 
 		if ( argv[ cur_arg ][ 0 ] != '-' && *argc == cur_arg + 1 )
