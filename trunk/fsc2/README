@@ -43,7 +43,7 @@ Some key features:
   such scripts from (slightly modified) EDL programs. Once such a script
   has been created, "normal" user don't even have to know how to write EDL
   programs, thus having all the convenience of the traditional type of
-  programs but without sacrificing the flexibility of fsc2. Several examples
+  programs without sacrificing the flexibility of fsc2. Several examples
   of such scripts, written in Perl/Tk, are included in the distribution.
 
 * fsc2 comes with a simple web server (only running on user demand) that
@@ -108,7 +108,6 @@ just the documentation (in PostScript or PDF format) from
 or read the HTTP version of the documentation at
 
        http://www.physik.fu-berlin/~toerring/fsc2
-
 
                                         Regards, Jens Thoms Toerring
 
