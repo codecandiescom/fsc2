@@ -269,15 +269,45 @@ Var *vars_new( char *name )
 Var *vars_add( Var *v1, Var *v2 )
 {
 	Var *new_var;
+	long i;
+	long *lp;
+	double *dp;
 
 
 	/* Make sure that `v1' and `v2' exist, are integers or float values 
 	   and have an value assigned to it */
-
+/*
 	vars_check( v1, INT_VAR | FLOAT_VAR );
 	vars_check( v2, INT_VAR | FLOAT_VAR );
+*/
+
+	vars_check( v1, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR | 
+				    INT_TRANS_ARR | FLOAT_TRANS_ARR );
+	vars_check( v2, INT_VAR | FLOAT_VAR | ARR_REF |
+				    INT_TRANS_ARR | FLOAT_TRANS_ARR );
 
 	/* Add the values while taking care to get the type right */
+
+	switch ( v1->type )
+	{
+		case INT_VAR :
+			new_var = vars_add_to_iv( v1, v2 );
+			break;
+
+		case FLOAT_VAR :
+			new_var = vars_add_to_fv( v1, v2 );
+			break;
+			
+		case INT_ARR :
+			new_var = vars_add_to_ia( v1, v2 );
+			break;
+
+		case FLOAT_ARR :
+			new_var = vars_add_to_ia( v1, v2 );
+			break;
+
+/*
+
 
 	if ( v1->type == INT_VAR )
 	{
@@ -295,6 +325,7 @@ Var *vars_add( Var *v1, Var *v2 )
 		else
 			new_var = vars_push( FLOAT_VAR, v1->val.dval + v2->val.dval );
 	}
+*/
 
 	/* Pop the variables from the variable stack (if they belong to it) */
 
@@ -1135,7 +1166,7 @@ Var *vars_arr_lhs( Var *v )
 	while ( v->type != ARR_PTR )
 		v = v->prev;
 
-	/* Count the variable below v on the stack */
+	/* Count the variables below v on the stack */
 
 	for ( n = 0, cv = v->next; cv != 0; cv = cv->next )
 		if ( cv->type != UNDEF_VAR )
@@ -2062,13 +2093,25 @@ Var *vars_val( Var *v )
 {
 	vars_check( v, ARR_PTR );
 
+
 	if ( v->flags & NEED_SLICE )
+	{
+		vars_check( v->from, INT_ARR | FLOAT_ARR );
+		if ( v-from->type == INT_ARR )
+			return vars_push( INT_TRANS_ARR, v->val.vptr,
+							  v2->from->sizes[ v2->from->dim - 1 ] );
+		else
+			return vars_push( FLOAT_TRANS_ARR, v->val.vptr,
+							  v2->from->sizes[ v2->from->dim - 1 ] );
+	}
+
+/*
 	{
 		eprint( FATAL, "%s:%ld: Left hand side of assignment must be an "
 				"integer or float variable, not a slice.\n", Fname, Lc );
 		THROW( EXCEPTION );
 	}
-
+*/
 	if ( v->from->type == INT_ARR )
 		return vars_push( INT_VAR, *( ( long * ) v->val.gptr ) );
 	else if ( v->from->type == FLOAT_ARR )
