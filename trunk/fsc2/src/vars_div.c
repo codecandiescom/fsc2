@@ -34,8 +34,9 @@ static Var *vars_ref_div( Var *v1, Var *v2, bool exc );
 static void vars_div_check( double val );
 
 
-/*--------------------------------------------------------*/
-/*--------------------------------------------------------*/
+/*-----------------------------------------------------------*/
+/* Function for dividing of two variables of arbitrary types */
+/*-----------------------------------------------------------*/
 
 Var *vars_div( Var *v1, Var *v2 )
 {

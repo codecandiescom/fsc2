@@ -34,8 +34,9 @@ static Var *vars_ref_pow( Var *v1, Var *v2, bool exc );
 static void vars_pow_check( double v1, double v2 );
 
 
-/*--------------------------------------------------------*/
-/*--------------------------------------------------------*/
+/*-------------------------------------------------------------------*/
+/* Function for taking the power of two variables of arbitrary types */
+/*-------------------------------------------------------------------*/
 
 Var *vars_pow( Var *v1, Var *v2 )
 {

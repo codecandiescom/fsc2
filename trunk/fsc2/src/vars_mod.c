@@ -34,8 +34,9 @@ static Var *vars_ref_mod( Var *v1, Var *v2, bool exc );
 static void vars_mod_check( double val );
 
 
-/*--------------------------------------------------------*/
-/*--------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
+/* Function for calculating the modulo of two variables of arbitrary types */
+/*-------------------------------------------------------------------------*/
 
 Var *vars_mod( Var *v1, Var *v2 )
 {
