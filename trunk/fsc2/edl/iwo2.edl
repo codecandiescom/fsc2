@@ -23,7 +23,7 @@ F1, F2;
 
 PREPARATIONS:
 
-init_2d( 1, 0, 0, 0, 0, 0, 0, "Time axis", "Field [G]" );
+init_2d( 1, 0, 0, 0, 0, 0, 0, "Time [us]", "Field [G]" );
 magnet_setup( start_field[ 1 ], field_step );
 digitizer_averaging( FUNC_E, CH1, 50 );
 
