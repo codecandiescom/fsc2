@@ -129,6 +129,8 @@ int16 rs_spec10_k2ic( double tk );
 double rs_spec10_ic2k( int16 tci );
 bool rs_spec10_param_access( uns32 param, uns16 *acc );
 const char *rs_spec10_ptime( double p_time );
+int *rs_spec10_get_fd_list( void );
+void rs_spec10_close_on_exec_hack( int *fd_list );
 
 
 #endif /* ! RS_SPEC10_HEADER */

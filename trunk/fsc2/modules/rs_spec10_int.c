@@ -38,6 +38,7 @@ void rs_spec10_init_camera( void )
 	int16 total_cams;
 	char cam_name[ CAM_NAME_LEN ];
 	int16 i;
+	int *fd_list;
 
 
 	/* Try to figure out how many cameras are attached to the system */
@@ -63,11 +64,16 @@ void rs_spec10_init_camera( void )
 		THROW( EXCEPTION );
 	}
 
-	/* Try to get a handle for the camera */
+	/* Try to get a handle for the camera, apply a hack that makes sure the
+	   device file has the close-on-exec flag set */
+
+	fd_list = rs_spec10_get_fd_list( );
 
 	if ( ! pl_cam_open( ( char * ) rs_spec10->dev_file, &rs_spec10->handle,
 						OPEN_EXCLUSIVE ) )
 		rs_spec10_error_handling( );
+
+	rs_spec10_close_on_exec_hack( fd_list );
 
 	rs_spec10->is_open = SET;
 
@@ -257,12 +263,18 @@ static void rs_spec10_ccd_init( void )
 		THROW( EXCEPTION );
 	}
 
+	/* Find out if we can read and write the number of clear cycles */
+
+
 	if ( ! rs_spec10_param_access( PARAM_CLEAR_CYCLES, &acc ) ||
 		 acc != ACC_READ_WRITE )
 	{
 		print( FATAL, "Can't determine or set number of clear cycles.\n" );
 		THROW( EXCEPTION );
 	}
+
+	/* Check that the range for the number of clear cycles is identical to
+	   what is specified in the configuration file */
 
 	if ( ! pl_get_param( rs_spec10->handle, PARAM_CLEAR_CYCLES,
 						 ATTR_MAX, ( void_ptr ) &clear_cycles ) )

@@ -23,6 +23,7 @@
 
 
 #include "rs_spec10.h"
+#include <dirent.h>
 
 
 #define C2K_OFFSET   273.16         /* offset between Celsius and Kelvin */
@@ -102,6 +103,106 @@ const char *rs_spec10_ptime( double p_time )
 
 	return buffer;
 }
+
+
+/*--------------------------------------------------------------------*/
+/* The following functions are part of a dirty hack to get around the */
+/* problem that the PVCAM library does not set the close-on-exec flag */
+/* for the device file. The first function builds a list of all open  */
+/* file descriptor from the entries in the /proc/self/fd directory of */
+/* the current process. Then the function for initialisation of the   */
+/* board gets called, opening the device file. Afterwards, the second */
+/* function is invoked that compares the fd's in the list with the    */
+/* entries int the /proc/self/fd directory and sets the close-on-exec */
+/* flag for the new fd (i.e. the fd that wasn't already in the old    */
+/* list). Of course this will only work on Linux but fails (hopefully */
+/* benignly) on other systems.                                        */
+/*--------------------------------------------------------------------*/
+
+int *rs_spec10_get_fd_list( void )
+{
+	DIR *dir;
+	struct dirent *de;
+	int *fd_list = NULL;
+	int num_fds = 0;
+	char *dn;
+
+
+	CLOBBER_PROTECT( fd_list );
+	CLOBBER_PROTECT( num_fds );
+
+	if ( ( dir = opendir( "/proc/self/fd" ) ) == NULL )
+		return NULL;
+
+	while ( ( de = readdir( dir ) ) != NULL )
+	{
+		for ( dn = de->d_name; *dn && isdigit( *dn ); dn++ )
+			/* empty */ ;
+
+		if ( *dn != '\0' )
+			continue;
+
+		TRY
+		{
+			fd_list = T_realloc( fd_list, ( num_fds + 2 ) * sizeof *fd_list );
+			fd_list[ num_fds++ ] = T_atoi( de->d_name );
+		}
+		OTHERWISE
+		{
+			if ( fd_list != NULL )
+				T_free( fd_list );
+			closedir( dir );
+			return NULL;
+		}
+
+		fd_list[ num_fds ] = -1;
+	}
+
+	closedir( dir );
+	return fd_list;
+}
+
+
+/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*/
+
+void rs_spec10_close_on_exec_hack( int *fd_list )
+{
+	int *new_fd_list;
+	int i, j;
+	int flags;
+	bool found;
+
+
+	if ( fd_list == NULL )
+		return;
+
+	/* Get list of open file descriptors */
+
+	if ( ( new_fd_list = rs_spec10_get_fd_list( ) ) == NULL )
+	{
+		T_free( fd_list );
+		return;
+	}
+
+	/* Check for files that weren't in the old list and set the close-on-exec
+	   flag for these files (there should be only one...) */
+
+	for ( i = 0; new_fd_list[ i ] != -1; i++ )
+	{
+		for ( found = UNSET, j = 0; fd_list[ j ] != -1 && ! found; j++ )
+			found = new_fd_list[ i ] == fd_list[ j ];
+
+		if ( ! found &&
+			 ( flags = fcntl( new_fd_list [ i ], F_GETFD, 0 ) ) != -1 )
+			fcntl( new_fd_list [ i ], F_SETFD, flags | FD_CLOEXEC );
+	}
+
+	T_free( new_fd_list );
+	T_free( fd_list );
+}
+
+
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
