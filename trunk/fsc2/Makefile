@@ -23,8 +23,11 @@ GPIB_LOG       = /tmp/gpib.log
 AWK            = /usr/bin/awk
 
 
+##############################################################################
 # Here follow settings determining the make process - which compiler and
-# tools to use together with the respective options
+# tools to use as well as the respective options. Better leave them alone
+# if you don't have real good reasons...
+##############################################################################
 
 SHELL          = /bin/sh
 CC             = gcc
@@ -47,8 +50,8 @@ RMFLAGS        = -f
 
 
 ############################################################################
-##############  Don't change anything below this line  #####################
-############## (unless you know what you're doing ...) #####################
+###########     Don't change anything below this line     ##################
+########### (unless you really know what you're doing ...) #################
 ############################################################################
 
 VPATH          = .:src:modules
@@ -195,7 +198,7 @@ tags:
 		  ${tds754a} tds754a.h ${tds520a} tds520a.h
 
 
-# `clean' delets just all the files remaining from the compilation while
+# `clean' deletes just all the files remaining from the compilation while
 # `distclean' also removes all executables and shared libraries
 
 clean:
