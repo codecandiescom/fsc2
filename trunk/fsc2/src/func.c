@@ -1404,7 +1404,7 @@ Var *f_display( Var *v )
 		memcpy( ptr, &dp[ i ].nx, sizeof( long ) );     /* x-index */
 		ptr += sizeof( long );
 
-		memcpy( ptr, &dp[ i ].nx, sizeof( long ) );     /* y-index */
+		memcpy( ptr, &dp[ i ].ny, sizeof( long ) );     /* y-index */
 		ptr += sizeof( long );
 
 		memcpy( ptr, &dp[ i ].nc, sizeof( long ) );     /* curve number */
