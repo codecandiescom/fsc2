@@ -50,6 +50,7 @@
 
 /* inclusion of programs own header files as far as necessary */
 
+#include "config.h"
 #include "fsc2_types.h"
 #include "global.h"
 #include "fsc2_assert.h"

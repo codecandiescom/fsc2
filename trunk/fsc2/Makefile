@@ -19,24 +19,25 @@
 # the Free Software Foundation, 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.
 
+########################################################################
+#                                                                      #
+#  In the first section several variables can be set to configure      #
+#  fsc2. Please read the comments carefully and change the variables   #
+#  if necessary. Please take care, most settings are case-sensitive!   #
+#                                                                      #
+########################################################################
 
 # Please note: When there is some talk about "commenting out a variable"
 # in the following this simply means that you have to put a hash character
 # ('#') at the start of the line where the variable is set.
 
-# The following variables determine where the program, auxiliary files and
-# the documentation will be copied to by 'make install'.
+# The following variable determines under which directory the program and
+# its auxiliary files will be installed
 
 prefix            := /usr/local
-bindir            := $(prefix)/bin
-libdir            := $(prefix)/lib/fsc2
-auxdir            := $(libdir)/aux
-docdir            := $(prefix)/share/doc/fsc2
-mandir            := $(prefix)/man
-infodir           := $(prefix)/info
 
 
-# Here the owner and the group of the program and all files that will be
+# Next the owner and the group of the program and all files that will be
 # installed have to be set. I would recommended to create a special account
 # for the program, with 'fsc2' being the natural choice (which is also the
 # default). The group that owns the files, escpecially the executable fsc2
@@ -127,6 +128,27 @@ MAIL_ADDRESS      := Jens.Toerring@physik.fu-berlin.de
 # you want to keep me from getting meaningful messages about crashes).
 ##############################################################################
 
+ifndef prefix
+	prefix := /usr/local
+endif
+
+bindir           := $(prefix)/bin
+libdir           := $(prefix)/lib/fsc2
+auxdir           := $(libdir)/aux
+docdir           := $(prefix)/share/doc/fsc2
+mandir           := $(prefix)/man
+infodir          := $(prefix)/info
+
+# These variables are used internally in the make process
+
+fdir             := $(shell pwd)
+sdir             := $(fdir)/src
+mdir             := $(fdir)/modules
+adir             := $(fdir)/aux
+udir             := $(fdir)/utils
+cdir             := $(fdir)/config
+ldir             := $(fdir)/Fcntl_Lock
+
 #MPATROL          := YES                  # define this in order to use mpatrol
 
 OPTIMIZATION     := -O2
@@ -135,8 +157,8 @@ SHELL            := /bin/sh
 CC               := gcc
 CFLAGS           := $(OPTIMIZATION) \
 					-ggdb \
-					-I/usr/X11R6/include -I/usr/X11R6/include/X11 \
-					-I/usr/local/include \
+					-I$(fdir) -I/usr/X11R6/include \
+					-I/usr/X11R6/include/X11 -I/usr/local/include \
 					-Wall \
 					-Wwrite-strings \
 					-Wstrict-prototypes \
@@ -160,7 +182,7 @@ CFLAGS           := $(OPTIMIZATION) \
 LFLAGS			 := $(OPT) -shared -fpic  # needed for libraries
 
 ifeq ($(MPATROL),YES)
-	CFLAGS       += -DMPATROL
+	CONFFLAGS    += -DMPATROL
 	LIBS         := -L/usr/local/lib -lmpatrol -lelf -L/usr/X11R6/lib -lforms \
 					-lX11 -lm -ldl
 else
@@ -186,15 +208,6 @@ EXEC_INSTALL     := install
 ###########  unless you really know what you're doing ...  #################
 ############################################################################
 
-# These variables are used internally in the make process
-
-fdir             := $(shell pwd)
-sdir             := $(fdir)/src
-mdir             := $(fdir)/modules
-adir             := $(fdir)/aux
-udir             := $(fdir)/utils
-cdir             := $(fdir)/config
-ldir             := $(fdir)/Fcntl_Lock
 
 tagsfile         := $(fdir)/TAGS
 
@@ -207,7 +220,7 @@ machine_name     := $(shell hostname -f)
 # some problems with the older libc have to be dealt within the program
 
 ifneq ($(shell ls /lib/libc.so.6 2>/dev/null),/lib/libc.so.6)
-	CFLAGS += -DIS_STILL_LIBC1
+	CONFFLAGS += -DIS_STILL_LIBC1
 endif
 
 
@@ -313,62 +326,39 @@ endif
 # Pass lots of variables to the source files...
 # For directories make sure they end with a `/'.
 
-CFLAGS += -Dsdir=\"$(sdir:/=)/\"
+CONFFLAGS += -Dsdir=\"$(sdir:/=)/\"
+CONFFLAGS += -Dbindir=\"$(bindir:/=)/\"
+CONFFLAGS += -Dlibdir=\"$(libdir:/=)/\"
+CONFFLAGS += -Dauxdir=\"$(auxdir:/=)/\"
+CONFFLAGS += -Dudir=\"$(udir:/=)/\"
+CONFFLAGS += -Ddocdir=\"$(docdir:/=)/\"
 
-ifdef bindir
-	CFLAGS += -Dbindir=\"$(bindir:/=)/\"
-else
-	CFLAGS += -Dbindir=\"$(fdir)/bin/\"
-endif
-
-ifdef libdir
-	CFLAGS += -Dlibdir=\"$(libdir:/=)/\"
-else
-	CFLAGS += -Dlibdir=\"$(fdir)/lib/fsc2/\"
-endif
-
-ifdef auxdir
-	CFLAGS += -Dauxdir=\"$(auxdir:/=)/\" -I$(adir)
-else
-	CFLAGS += -Dauxdir=\"$(fdir)/lib/fsc2/aux/\" -I$(adir)
-endif
-
-ifdef udir
-	CFLAGS += -Dudir=\"$(udir:/=)/\"
-else
-	CFLAGS += -Dudir=\"$(fdir)/utils/\"
-endif
-
-ifdef docdir
-	CFLAGS += -Ddocdir=\"$(docdir:/=)/\"
-else
-	CFLAGS += -Ddocdir=\"$(fdir)/share/doc/\"
-endif
+CFLAGS    += -I$(adir)
 
 ifdef GPIB_LOG_FILE
-	CFLAGS += -DGPIB_LOG_FILE=\"$(GPIB_LOG_FILE)\"
+	CONFFLAGS += -DGPIB_LOG_FILE=\"$(GPIB_LOG_FILE)\"
 else
-	CFLAGS += -DGPIB_LOG_FILE=\"/tmp/gpib.log\"
+	CONFFLAGS += -DGPIB_LOG_FILE=\"/tmp/gpib.log\"
 endif
 
 ifdef WITH_HTTP_SERVER
 ifdef DEFAULT_HTTP_PORT
-	CFLAGS += -DWITH_HTTP_SERVER -DDEFAULT_HTTP_PORT=$(DEFAULT_HTTP_PORT)
+	CONFFLAGS += -DWITH_HTTP_SERVER -DDEFAULT_HTTP_PORT=$(DEFAULT_HTTP_PORT)
 else
-	CFLAGS += -DWITH_HTTP_SERVER -DDEFAULT_HTTP_PORT=8080
+	CONFFLAGS += -DWITH_HTTP_SERVER -DDEFAULT_HTTP_PORT=8080
 endif
 endif
 
 ifeq ($(GPIB_LOG_LEVEL),HIGH)
-	CFLAGS += -DGPIB_LOG_LEVEL=LL_ALL
+	CONFFLAGS += -DGPIB_LOG_LEVEL=LL_ALL
 else
 	ifeq ($(GPIB_LOG_LEVEL),MEDIUM)
-		CFLAGS += -DGPIB_LOG_LEVEL=LL_CE
+		CONFFLAGS += -DGPIB_LOG_LEVEL=LL_CE
 	else
 		ifeq ($(GPIB_LOG_LEVEL),OFF)
-			CFLAGS += -DGPIB_LOG_LEVEL=LL_NONE
+			CONFFLAGS += -DGPIB_LOG_LEVEL=LL_NONE
 		else
-			CFLAGS += -DGPIB_LOG_LEVEL=LL_ERR
+			CONFFLAGS += -DGPIB_LOG_LEVEL=LL_ERR
 		endif
 	endif
 endif
@@ -378,7 +368,7 @@ ifdef GPIB_HEADER_DIR
 endif
 
 ifdef MAIL_ADDRESS
-	CFLAGS += -DMAIL_ADDRESS=\"$(MAIL_ADDRESS)\"
+	CONFFLAGS += -DMAIL_ADDRESS=\"$(MAIL_ADDRESS)\"
 endif
 
 ifndef OWNER
@@ -390,13 +380,13 @@ ifndef GROUP
 endif
 
 ifdef NUM_SERIAL_PORTS
-	CFLAGS += -DNUM_SERIAL_PORTS=$(NUM_SERIAL_PORTS)
+	CONFFLAGS += -DNUM_SERIAL_PORTS=$(NUM_SERIAL_PORTS)
 else
-	CFLAGS += -DNUM_SERIAL_PORTS=0
+	CONFFLAGS += -DNUM_SERIAL_PORTS=0
 endif
 
 ifdef SERIAL_LOCK_DIR
-	CFLAGS += -DSERIAL_LOCK_DIR=\"$(SERIAL_LOCK_DIR)\"
+	CONFFLAGS += -DSERIAL_LOCK_DIR=\"$(SERIAL_LOCK_DIR)\"
 endif
 
 
@@ -407,13 +397,13 @@ endif
 
 MAIL_PROGRAM  := $(shell which mail)
 ifneq ($(word 1,$(MAIL_PROGRAM)),which:)
-	CFLAGS += -DMAIL_PROGRAM=\"$(MAIL_PROGRAM)\"
+	CONFFLAGS += -DMAIL_PROGRAM=\"$(MAIL_PROGRAM)\"
 endif
 
 ifndef NO_MAIL
 	ADDR2LINE     := $(shell which addr2line)
 	ifneq ($(word 1,$(ADDR2LINE)),which:)
-		CFLAGS += -DADDR2LINE=\"$(ADDR2LINE)\"
+		CONFFLAGS += -DADDR2LINE=\"$(ADDR2LINE)\"
 	endif
 endif
 
@@ -422,7 +412,7 @@ endif
 
 ifneq ($(GPIB_LIBRARY),NONE)
 	ifdef GPIB_CONF_FILE
-		CFLAGS           += -DGPIB_CONF_FILE=\"$(GPIB_CONF_FILE)\"
+		CONFFLAGS        += -DGPIB_CONF_FILE=\"$(GPIB_CONF_FILE)\"
 	else
 		CFLAGS           += -I/usr/local/include/gpib
 	endif
@@ -445,6 +435,10 @@ else
 	endif
 endif
 
+define STR
+$(FOO)
+$(BAR)
+endef
 
 export            # export all variables to sub-makes
 
@@ -453,7 +447,7 @@ export            # export all variables to sub-makes
 
 .SUFFIXES:
 .PHONY: all install-strip install uninstall \
-		version test clean distclean        \
+		config version test clean distclean \
 		mostlyclean tags pack manifest ZIP  \
 		pion.anorg.chemie.uni-frankfurt.de  \
 		crowley.physik.fu-berlin.de         \
@@ -474,6 +468,7 @@ export            # export all variables to sub-makes
 # the documentation and some other, more or less useful stuff
 
 all:
+	$(MAKE) config
 	if [ $(INSTALL_MACHINE) != "install-unknown" ]; then                 \
 		$(MAKE) $(machine_name);                                         \
 	fi
@@ -494,6 +489,16 @@ ifdef WITH_HTTP_SERVER
 endif
 	$(MAKE) -C utils all
 	$(MAKE) -C doc all
+
+
+# Create a header file with configuration info
+
+config:
+	echo $(CONFFLAGS) > config.h.in
+	echo -e "/*--- Created automatically, dont' change ---*/\n" > config.h
+	sed 's/\-D/\#define /g;s/\=/ /g;s/ \#/\~\#/g' config.h.in | \
+	tr '~' '\n' | sort | uniq >> config.h
+	$(RM) $(RMFLAGS) config.h.in
 
 
 # Install the program and everything else
@@ -585,7 +590,7 @@ ifdef WITH_HTTP_SERVER
 	fi
 endif
 	$(MAKE) -C utils distclean
-	-$(RM) $(RMFLAGS) version.ugz $(tagsfile) makelog *~
+	-$(RM) $(RMFLAGS) version.ugz $(tagsfile) makelog config.h *~
 
 mostlyclean:
 	$(MAKE) -C src distclean

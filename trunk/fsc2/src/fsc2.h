@@ -57,6 +57,7 @@
 
 /* inclusion of programs own header files */
 
+#include "config.h"
 #include "fsc2_types.h"
 #include "fsc2_rsc_hr.h"          /* must be the first to be included ! */
 #include "global.h"               /* must be the second to be included ! */
