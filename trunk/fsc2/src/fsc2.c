@@ -125,10 +125,10 @@ int main( int argc, char *argv[ ] )
 	   and the current instance of fsc2 wasn't started with the non-exclusive
 	   option we've got to quit. If there's no other instance we've got to
 	   spawn a process that deals with further instances of fsc2 and takes
-	   care of state shared memory segments (if there are any) */
+	   care of shared memory segments. */
 
 	if ( ( Internals.conn_pid =
-		 	  check_spawn_fsc2d( ! ( Internals.cmdline_flags & NON_EXCLUSIVE ),
+			  check_spawn_fsc2d( ! ( Internals.cmdline_flags & NON_EXCLUSIVE ),
 								 in_file_fp ) ) == -1 )
 		return EXIT_FAILURE;
 
@@ -366,7 +366,7 @@ static bool get_edl_file( char *fname )
 			size_t size;
 			char *buf;
 
-			size = pathconf( ".", _PC_PATH_MAX );
+			size = ( size_t ) pathconf( ".", _PC_PATH_MAX );
 			buf = CHAR_P T_malloc( size );
 			EDL.in_file = get_string( "%s/%s",
 									  getcwd( buf, size ), fname );

@@ -747,7 +747,7 @@ static void accept_1d_data_sliding( long curve, int type, char *ptr )
 					mp->next = mn;
 				if ( m == G1.marker_1d )
 					G1.marker_1d = mn;
-				m = MARKER_1D_P T_free( m );
+				T_free( m );
 				m = mn;
 			}
 			else

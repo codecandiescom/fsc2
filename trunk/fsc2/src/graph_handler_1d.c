@@ -222,6 +222,7 @@ static void press_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
 
 		case 5 :                               /* left and right button */
 			fl_set_cursor( window, G1.cursor[ TARGET_CURSOR ] );
+			G.dist_display = 1;
 
 			if ( G1.canvas.is_box == UNSET && old_button_state != 4 )
 			{
@@ -270,7 +271,7 @@ static void release_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
 {
 	unsigned int keymask;
 	bool scale_changed = UNSET;
-	int i;
+	long i;
 	Curve_1d *cv;
 	bool active = UNSET;
 
@@ -459,6 +460,7 @@ static void release_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
 	G.raw_button_state &= ~ ( 1 << ( ev->xbutton.button - 1 ) );
 	G.drag_canvas = DRAG_NONE;
 	G.coord_display &= ~ 1;
+	G.dist_display  &= ~ 1;
 
 	fl_reset_cursor( window );
 
@@ -1260,7 +1262,7 @@ void redraw_canvas_1d( Canvas *c )
 
 void repaint_canvas_1d( Canvas *c )
 {
-	int i;
+	long i;
 	char buf[ 256 ];
 	int x, y;
 	unsigned int w, h;
@@ -1327,7 +1329,7 @@ void repaint_canvas_1d( Canvas *c )
 
 	if ( c == &G1.canvas )
 	{
-		if ( G.button_state == 3 )
+		if ( G.coord_display == 1 )
 			for ( i = 0; i < G1.nc; i++ )
 			{
 				cv = G1.curve[ i ];
@@ -1355,7 +1357,7 @@ void repaint_canvas_1d( Canvas *c )
 									  buf, strlen( buf ) );
 			}
 
-		if ( G.button_state == 5 )
+		if ( G.dist_display == 1 )
 		{
 			for ( i = 0; i < G1.nc; i++ )
 			{
@@ -1397,7 +1399,7 @@ void repaint_canvas_1d( Canvas *c )
 int get_mouse_pos_1d( double *pa )
 {
 	Curve_1d *cv;
-	int i;
+	long i;
 	int ppos[ 2 ];
 	unsigned int keymask;
 
@@ -1407,6 +1409,10 @@ int get_mouse_pos_1d( double *pa )
 
 	fl_get_win_mouse( FL_ObjWin( G1.canvas.obj ),
 					  ppos + X, ppos + Y, &keymask );
+
+	if ( ppos[ X ] < 0 || ppos[ X ] > ( int ) G1.canvas.w - 1 ||
+		 ppos[ Y ] < 0 || ppos[ Y ] > ( int ) G1.canvas.h - 1 )
+		return -1;
 
 	for ( i = 0; i < G1.nc; i++ )
 	{
@@ -1605,7 +1611,7 @@ void make_scale_1d( Curve_1d *cv, Canvas *c, int coord )
 	if ( lrnd( d_start_medium ) < 0 )
 		d_start_medium += medium_factor * d_delta_fine;
 
-	medium = lrnd( ( d_start_fine - d_start_medium ) / d_delta_fine );
+	medium = irnd( ( d_start_fine - d_start_medium ) / d_delta_fine );
 
 	/* Calculate start index (in small tick counts) of first large tick */
 
@@ -1620,7 +1626,7 @@ void make_scale_1d( Curve_1d *cv, Canvas *c, int coord )
 		rwc_start_coarse += coarse_factor * rwc_delta;
 	}
 
-	coarse = lrnd( ( d_start_fine - d_start_coarse ) / d_delta_fine );
+	coarse = irnd( ( d_start_fine - d_start_coarse ) / d_delta_fine );
 
 	/* Now, finally we got everything we need to draw the axis... */
 

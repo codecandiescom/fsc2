@@ -63,8 +63,14 @@ static int new_client( int fd, FSC2_INSTANCE *instances, int num_instances );
 static void set_fs2d_signals( void );
 
 
-/*------------------------------------------------------*/
-/*------------------------------------------------------*/
+/*---------------------------------------------------------------------*/
+/* Function talks to the daemon process to figure out if the current   */
+/* instance of fsc2 is allowed to run. If such a daemon does not exist */
+/* yet it gets created. The function returns -1 when the current       */
+/* instance is not allowed to run, 0 when it's allowed to run but may  */
+/* not start a child listening for external connections and 1 when it  */
+/* may run and must start a child process for external connections.    */
+/*---------------------------------------------------------------------*/
 
 int check_spawn_fsc2d( bool exclusive, FILE *in_file_fp )
 {

@@ -246,6 +246,7 @@ static void press_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev,
 
 		case 5 :                               /* left and right button */
 			fl_set_cursor( window, G2.cursor[ TARGET_CURSOR ] );
+			G.dist_display = 2;
 
 			if ( G2.canvas.is_box == UNSET && old_button_state != 4 )
 			{
@@ -490,6 +491,7 @@ static void release_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev,
 	G.raw_button_state &= ~ ( 1 << ( ev->xbutton.button - 1 ) );
 	G.drag_canvas = DRAG_NONE;
 	G.coord_display &= ~ 2;
+	G.dist_display  &= ~ 2;
 
 	G2.cut_select = NO_CUT_SELECT;
 	fl_reset_cursor( window );
@@ -1596,7 +1598,7 @@ void repaint_canvas_2d( Canvas *c )
 
 	if ( c == &G2.canvas )
 	{
-		if ( G.button_state == 3 && G2.active_curve != -1 &&
+		if ( G.coord_display == 2 && G2.active_curve != -1 &&
 			 G2.curve_2d[ G2.active_curve ]->is_scale_set )
 		{
 			cv = G2.curve_2d[ G2.active_curve ];
@@ -1650,7 +1652,7 @@ void repaint_canvas_2d( Canvas *c )
 								  G.font_asc + 5, buf, strlen( buf ) );
 		}
 
-		if ( G.button_state == 5 )            /* left and right mouse button */
+		if ( G.dist_display == 2 )            /* left and right mouse button */
 		{
 			if ( G2.active_curve != -1 &&
 				 G2.curve_2d[ G2.active_curve ]->is_scale_set )
@@ -1761,22 +1763,21 @@ int get_mouse_pos_2d( double *pa )
 	if ( pa[ X ] < 0 || floor( pa[ X ] ) >= G2.nx ||
 		 pa[ Y ] < 0 || floor( pa[ Y ] ) >= G2.ny )
 		return 0;
-	else
-	{
-		a_index = G2.nx * lrnd( floor( pa[ Y ] ) ) + lrnd( floor( pa[ X ] ) );
 
-		if ( cv->points[ a_index ].exist )
-			pa[ Z ] = cv->rwc_start[ Z ] + cv->rwc_delta[ Z ]
-					  * cv->points[ a_index ].v;
-		else
-			return -2;
-	}
+	a_index = G2.nx * lrnd( floor( pa[ Y ] ) ) + lrnd( floor( pa[ X ] ) );
+
+	if ( cv->points[ a_index ].exist )
+		pa[ Z ] = cv->rwc_start[ Z ] + cv->rwc_delta[ Z ]
+			* cv->points[ a_index ].v;
 
 	pa[ X ] = cv->rwc_start[ X ] + cv->rwc_delta[ X ]
 			  * ( ppos[ X ] / cv->s2d[ X ] - cv->shift[ X ] );
 	pa[ Y ] = cv->rwc_start[ Y ] + cv->rwc_delta[ Y ]
 			  * ( ( G2.canvas.h - 1.0 - ppos[ Y ] )
 				  / cv->s2d[ Y ] - cv->shift[ Y ] );
+
+	if ( ! cv->points[ a_index ].exist )
+		return -2;
 
 	return 2;
 }
@@ -1961,7 +1962,7 @@ void make_scale_2d( Curve_2d *cv, Canvas *c, int coord )
 	if ( lrnd( d_start_medium ) < 0 )
 		d_start_medium += medium_factor * d_delta_fine;
 
-	medium = lrnd( ( d_start_fine - d_start_medium ) / d_delta_fine );
+	medium = irnd( ( d_start_fine - d_start_medium ) / d_delta_fine );
 
 	/* Calculate start index (in small tick counts) of first large tick */
 
@@ -1976,7 +1977,7 @@ void make_scale_2d( Curve_2d *cv, Canvas *c, int coord )
 		rwc_start_coarse += coarse_factor * rwc_delta;
 	}
 
-	coarse = lrnd( ( d_start_fine - d_start_coarse ) / d_delta_fine );
+	coarse = irnd( ( d_start_fine - d_start_coarse ) / d_delta_fine );
 
 	/* Now, finally we got everything we need to draw the axis... */
 
@@ -2250,26 +2251,26 @@ static void delete_marker_2d( long x_pos, long y_pos, long curve )
 		cv = G2.curve_2d[ curve ];
 
 	for ( mp = NULL, m = cv->marker_2d; m != NULL; mp = m, m = m->next )
-	{
-		if ( m->x_pos != x_pos || m->y_pos != y_pos )
-			continue;
+		if ( m->x_pos == x_pos && m->y_pos == y_pos )
+			break;
 
-		if ( G2.is_cut && curve == CG.curve )
-		{
-			if ( CG.cut_dir == X && x_pos == CG.index )
-				delete_cut_marker( y_pos );
-			else if ( CG.cut_dir == Y && y_pos == CG.index )
-				delete_cut_marker( x_pos );
-		}
-
-		XFreeGC( G.d, m->gc );
-		if ( mp != NULL )
-			mp->next = m->next;
-		if ( m == cv->marker_2d )
-			cv->marker_2d = m->next;
-		T_free( m );
+	if ( m == NULL )
 		return;
+
+	if ( G2.is_cut && curve == CG.curve )
+	{
+		if ( CG.cut_dir == X && x_pos == CG.index )
+			delete_cut_marker( y_pos );
+		else if ( CG.cut_dir == Y && y_pos == CG.index )
+			delete_cut_marker( x_pos );
 	}
+
+	XFreeGC( G.d, m->gc );
+	if ( mp != NULL )
+		mp->next = m->next;
+	if ( m == cv->marker_2d )
+		cv->marker_2d = m->next;
+	T_free( m );
 }
 
 
@@ -2281,7 +2282,7 @@ void remove_markers_2d( long *curves )
 {
 	Marker_2D *m, *mn;
 	Curve_2d *cv;
-	int i, j;
+	long i, j;
 	long c[ MAX_CURVES ];
 
 

@@ -540,7 +540,7 @@ Var *f_wait( Var *v )
 	if ( lrnd( modf( how_long, &secs ) * 1.0e6 ) == 0 && lrnd( secs ) == 0 )
 	{
 		print( WARN, "Argument is less than 1 ms.\n" );
-		return 0;
+		return vars_push( INT_VAR, -1L );
 	}
 
 	/* During the test run we not really wait but just add the expected
@@ -3271,6 +3271,70 @@ Var *f_clearmark_2d( Var *v )
 	/* All the rest has now to be done by the parent process... */
 
 	return vars_push( INT_VAR, 1L );
+}
+
+
+/*-------------------------------------------------*/
+/*-------------------------------------------------*/
+
+Var *f_get_pos( Var *v )
+{
+	Var *nv;
+	long len = 0;                    /* total length of message to send */
+	char *buffer, *pos;
+	double *result;
+
+
+	UNUSED_ARGUMENT( v );
+
+	nv = vars_push( FLOAT_ARR, NULL, 9 );
+
+	/* This function can only be called in the EXPERIMENT section and needs
+	   a previous graphics initialisation */
+
+	if ( ! G.is_init )
+	{
+		print( WARN, "Can't get mouse position, missing graphics "
+			   "initialisation.\n" );
+		return nv;
+	}
+
+	/* In a test run this all there is to be done */
+
+	if ( Internals.mode == TEST )
+		return nv;
+
+	/* Now starts the code only to be executed by the child, i.e. while the
+	   measurement is running. */
+
+	fsc2_assert( Internals.I_am == CHILD );
+
+	len = sizeof EDL.Lc;
+
+	if ( EDL.Fname )
+		len += strlen( EDL.Fname ) + 1;
+	else
+		len++;
+
+	pos = buffer = CHAR_P T_malloc( len );
+
+	memcpy( pos, &EDL.Lc, sizeof EDL.Lc ); /* current line number */
+	pos += sizeof EDL.Lc;
+
+	if ( EDL.Fname )
+	{
+		strcpy( pos, EDL.Fname );           /* current file name */
+		pos += strlen( EDL.Fname ) + 1;
+	}
+	else
+		*pos++ = '\0';
+
+	result = exp_getpos( buffer, pos - buffer );
+
+	memcpy( nv->val.dpnt, result, 9 * sizeof *result );
+	T_free( result );           /* free result buffer */
+
+	return nv;
 }
 
 

@@ -32,10 +32,10 @@
 #endif
 
 
-static inline short d2shrt( double a );
-static inline short i2shrt( int a );
-static inline unsigned short d2ushrt( double a );
-static inline unsigned short i2ushrt( int a );
+static inline short int d2shrt( double a );
+static inline short int i2shrt( int a );
+static inline unsigned short int d2ushrt( double a );
+static inline unsigned short int i2ushrt( int a );
 static inline int i_max( int a, int b );
 static inline int i_min( int a, int b );
 static inline long l_max( long a, long b );
@@ -52,56 +52,56 @@ static inline int irnd( double x );
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
 
-static inline short d2shrt( double a )
+static inline short int d2shrt( double a )
 {
 	if ( a > SHRT_MAX_HALF )
 		return SHRT_MAX_HALF;
 	if ( a < SHRT_MIN_HALF )
 		return SHRT_MIN_HALF;
 
-	return ( short ) ( a < 0.0 ? ceil( a - 0.5 ) : floor( a + 0.5 ) );
+	return ( short int ) ( a < 0.0 ? ceil( a - 0.5 ) : floor( a + 0.5 ) );
 }
 
 
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
 
-static inline short i2shrt( int a )
+static inline short int i2shrt( int a )
 {
 	if ( a > SHRT_MAX_HALF )
 		return SHRT_MAX_HALF;
 	if ( a < SHRT_MIN_HALF )
 		return SHRT_MIN_HALF;
 
-	return ( short ) a;
+	return ( short int ) a;
 }
 
 
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
 
-static inline unsigned short d2ushrt( double a )
+static inline unsigned short int d2ushrt( double a )
 {
 	if ( a > USHRT_MAX )
 		return USHRT_MAX;
 	if ( a < 0 )
 		return 0;
 
-	return ( unsigned short ) floor( a + 0.5 );
+	return ( unsigned short int ) floor( a + 0.5 );
 }
 
 
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
 
-static inline unsigned short i2ushrt( int a )
+static inline unsigned short int i2ushrt( int a )
 {
 	if ( a > USHRT_MAX )
 		return USHRT_MAX;
 	if ( a < 0 )
 		return 0;
 
-	return ( unsigned short ) a;
+	return ( unsigned short int ) a;
 }
 
 /*-------------------------------------------------------------------------*/

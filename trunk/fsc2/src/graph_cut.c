@@ -569,6 +569,7 @@ void cut_close_callback( FL_OBJECT *a, long b )
 	UNUSED_ARGUMENT( b );
 
 	G.coord_display &= ~ 4;
+	G.dist_display  &= ~ 4;
 	delete_all_cut_markers( UNSET );
 	G2.is_cut = is_mapped = UNSET;
 
@@ -1181,7 +1182,7 @@ static int cut_canvas_handler( FL_OBJECT *obj, Window window, int w, int h,
 
 static void cut_reconfigure_window( Canvas *c, int w, int h )
 {
-	int i;
+	long i;
 	static bool is_reconf[ 3 ] = { UNSET, UNSET, UNSET };
 	static bool need_redraw[ 3 ] = { UNSET, UNSET, UNSET };
 	Curve_1d *cv = &G2.cut_curve;
@@ -1445,6 +1446,7 @@ static void cut_press_handler( FL_OBJECT *obj, Window window,
 			if ( G.drag_canvas <= DRAG_CUT_Z )
 				break;
 			fl_set_cursor( window, cursor_c[ TARGET_CURSOR ] );
+			G.dist_display = 4;
 
 			if ( G2.cut_canvas.is_box == UNSET && old_button_state != 4 )
 			{
@@ -1631,6 +1633,7 @@ static void cut_release_handler( FL_OBJECT *obj, Window window,
 	G.raw_button_state &= ~ ( 1 << ( ev->xbutton.button - 1 ) );
 	G.drag_canvas = DRAG_NONE;
 	G.coord_display &= ~ 4;
+	G.dist_display  &= ~ 4;
 
 	G2.cut_select = NO_CUT_SELECT;
 	fl_reset_cursor( window );
@@ -2028,7 +2031,7 @@ static void repaint_cut_canvas( Canvas *c )
 
 	if ( c == &G2.cut_canvas )
 	{
-		if ( G.button_state == 3 )
+		if ( G.coord_display == 4 )
 		{
 			r_coord = CG.cut_dir == X ? Y : X;
 
@@ -2053,7 +2056,7 @@ static void repaint_cut_canvas( Canvas *c )
 								  G.font_asc + 5, buf, strlen( buf ) );
 		}
 
-		if ( G.button_state == 5 )
+		if ( G.dist_display == 4 )
 		{
 			r_coord = CG.cut_dir == X ? Y : X;
 
@@ -2094,15 +2097,25 @@ static void repaint_cut_canvas( Canvas *c )
 int get_mouse_pos_cut( double *pa )
 {
 	Curve_1d *cv = &G2.cut_curve;
+	Curve_2d *scv;
 	int r_coord;
+	int ppos[ 2 ];
+	unsigned int keymask;
 
 
 	if ( ! G2.is_cut || G2.active_curve == -1 ||
 		 ! G2.curve_2d[ G2.active_curve ]->is_scale_set )
 		return 0;
 
+	scv = G2.curve_2d[ G2.active_curve ];
+
 	fl_get_win_mouse( FL_ObjWin( G2.cut_canvas.obj ),
 					  ppos + X, ppos + Y, &keymask );
+
+
+	if ( ppos[ X ] < 0 || ppos[ X ] > ( int ) G2.cut_canvas.w - 1 ||
+		 ppos[ Y ] < 0 || ppos[ Y ] > ( int ) G2.cut_canvas.h - 1 )
+		return 0;
 
 	r_coord = CG.cut_dir == X ? Y : X;
 
@@ -2111,6 +2124,13 @@ int get_mouse_pos_cut( double *pa )
 	pa[ Y ] = scv->rwc_start[ Z ] + scv->rwc_delta[ Z ]
 			  * ( ( G2.cut_canvas.h - 1.0 - ppos[ Y ] ) / cv->s2d[ Y ]
 				  - cv->shift[ Y ] );
+
+	if ( CG.cut_dir == X )
+		pa[ Z ] = ( CG.index - scv->shift[ X ] ) * scv->rwc_delta[ X ] +
+				  + scv->rwc_start[ X ];
+	else
+		pa[ Z ] = ( CG.index - scv->shift[ Y ] ) * scv->rwc_delta[ Y ] +
+				  + scv->rwc_start[ Y ];
 
 	return 4;
 }
@@ -2312,7 +2332,7 @@ static void cut_make_scale( Canvas *c, int coord )
 	if ( lrnd( d_start_medium ) < 0 )
 		d_start_medium += medium_factor * d_delta_fine;
 
-	medium = lrnd( ( d_start_fine - d_start_medium ) / d_delta_fine );
+	medium = irnd( ( d_start_fine - d_start_medium ) / d_delta_fine );
 
 	/* Calculate start index (in small tick counts) of first large tick */
 
@@ -2327,7 +2347,7 @@ static void cut_make_scale( Canvas *c, int coord )
 		rwc_start_coarse += coarse_factor * rwc_delta;
 	}
 
-	coarse = lrnd( ( d_start_fine - d_start_coarse ) / d_delta_fine );
+	coarse = irnd( ( d_start_fine - d_start_coarse ) / d_delta_fine );
 
 	/* Now, finally we got everything we need to draw the axis... */
 
