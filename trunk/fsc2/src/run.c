@@ -184,7 +184,6 @@ bool run( void )
 	child_pid = 0;
 	end_comm( );
 	run_end_of_exp_hooks( );
-
 	if ( need_GPIB )
 		gpib_shutdown( );
 	stop_measurement( NULL, 1 );

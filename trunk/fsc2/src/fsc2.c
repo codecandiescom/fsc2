@@ -1299,12 +1299,12 @@ void main_sig_handler( int signo )
 
 void notify_conn( int signo )
 {
-	/* Don't send signal to the process responsible for connections when it's
-	   not existing (in load_file() at the very start) or when the experiment
+	/* Don't send signal to the process responsible for connections if it
+	   doesn't exist (in load_file() at the very start) or when the experiment
 	   is running - in this case fsc2 is busy anyway and the connection
 	   process has already been informed about this */
 
-	if ( conn_pid <= 0 || child_pid != 0 )
+	if ( conn_pid <= 0 || child_pid > 0 )
 		return;
 
 	kill( conn_pid, signo );

@@ -243,10 +243,11 @@ void end_comm( void )
 /* something bad happens we have to kill the child to prevent */
 /* it sending further data we can't accept anymore. We also   */
 /* need to stop this function being an idle callback, and     */
-/* since this doesn't seem to work immediately, to set the    */
-/* low and the high marker to the same value which should     */
-/* keep the function from being executed because the child is */
-/* now already dead and can't change the high marker anymore. */
+/* because end_comm() calls this function a last time we also */
+/* have to set the low and the high marker to the same value  */
+/* which should keep the function from being executed because */
+/* the child is now already dead and can't change the high    */
+/* marker anymore.                                            */
 /*------------------------------------------------------------*/
 
 int new_data_callback( XEvent *a, void *b )
@@ -274,7 +275,14 @@ int new_data_callback( XEvent *a, void *b )
 	}
 	OTHERWISE
 	{
-		kill( child_pid, SIGTERM );
+		/* Before we kill the child test that the pid isn't already set to 0
+		   (in which case we'ld commit suicide) and that it's still alive.
+		   The death of the child and all the necessary cleaning up is handled
+		   by the SIGCHLD handlers in run.c, so no need to worry here */
+
+		if ( child_pid > 0 && kill( child_pid, -1 ) )
+			kill( child_pid, SIGTERM );
+
 		fl_set_idle_callback( 0, NULL );
 		message_queue_low = message_queue_high;
 	}
