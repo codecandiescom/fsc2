@@ -3347,7 +3347,7 @@ Var *f_get_pos( Var *v )
 /* that it's a peak, not something looking like the derivative of a    */
 /* peak) and returns the index the point where the area under the peak */
 /* is half the total area, so it should also work with unsymmetric     */
-/*peaks.                                                               */
+/* peaks.                                                              */
 /*---------------------------------------------------------------------*/
 
 Var *f_find_peak( Var *v )
