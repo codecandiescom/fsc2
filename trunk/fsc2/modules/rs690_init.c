@@ -124,8 +124,9 @@ static void rs690_init_print( FILE *fp )
 			continue;
 
 		for ( j = 0; j < f->num_channels; j++ )
-			fprintf( fp, "%s:%s %ld\n", f->name,
-					 rs690_num_2_channel( f->channel[ j ]->self ), f->delay );
+			fprintf( fp, "%s:%s %ld%s\n", f->name,
+					 rs690_num_2_channel( f->channel[ j ]->self ), f->delay,
+					 f->is_inverted ? " I" : "" );
 	}
 }
 

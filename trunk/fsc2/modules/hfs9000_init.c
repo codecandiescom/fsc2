@@ -76,8 +76,8 @@ static void hfs9000_init_print( FILE *fp )
 		if ( ! f->is_needed )
 			continue;
 
-		fprintf( fp, "%s:%d %ld\n",
-				 f->name, f->channel->self, f->delay );
+		fprintf( fp, "%s:%d %ld%s\n", f->name, f->channel->self, f->delay,
+				 f->is_inverted ? " I" : "" );
 	}
 }
 

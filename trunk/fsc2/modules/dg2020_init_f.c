@@ -84,7 +84,8 @@ static void dg2020_init_print( FILE *fp )
 		if ( ! f->is_used || f->num_channels == 0 )
 			continue;
 
-		fprintf( fp, "%s:%d %ld\n", f->name, f->pod->self, f->delay );
+		fprintf( fp, "%s:%d %ld%s\n", f->name, f->pod->self, f->delay,
+				 f->is_inverted ? " I" : "" );
 
 		if ( f->pod2 != NULL )
 			fprintf( fp, "%s:%d %ld%s\n", f->name, f->pod2->self, f->delay,

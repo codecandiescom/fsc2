@@ -96,8 +96,7 @@ static void dg2020_init_print( FILE *fp )
 			continue;
 
 		for ( j = 0; j < f->num_pods; j++ )
-			fprintf( fp, "%s:%d %ld%s\n",
-					 f->name, f->pod[ j ]->self, f->delay,
+			fprintf( fp, "%s:%d %ld%s\n", f->name, f->pod[ j ]->self, f->delay,
 					 f->is_inverted ? " I" : "" );
 	}
 }
