@@ -39,6 +39,7 @@
 
 /* The diverse lexers */
 
+void clear_up( void );
 bool split( char *file );
 int devices_parser( FILE *in );
 int assignments_parser( FILE *in );

@@ -421,7 +421,7 @@ Var *vars_div( Var *v1, Var *v2 )
 		 ( v2->type == FLOAT_VAR && v2->val.dval == 0.0 ) )
 	{
 		eprint( FATAL, "%s:%ld: Division by zero.\n", Fname, Lc );
-		THROW( FLOATING_POINT_EXCEPTION );
+		THROW( EXCEPTION );
 	}
 
 	/* calculate the result and it push onto the stack */
@@ -477,7 +477,7 @@ Var *vars_mod( Var *v1, Var *v2 )
 		 ( v2->type == FLOAT_VAR && v2->val.dval == 0.0 ) )
 	{
 		eprint( FATAL, "%s:%ld: Modulo by zero.\n", Fname, Lc );
-		THROW( FLOATING_POINT_EXCEPTION );
+		THROW( EXCEPTION );
 	}
 
 	/* calculate the result and it push onto the stack */
@@ -540,7 +540,7 @@ Var *vars_pow( Var *v1, Var *v2 )
 	{
 		eprint( FATAL, "%s:%ld: Negative base while exponent not an integral "
 				"value.\n", Fname, Lc );
-		THROW( FLOATING_POINT_EXCEPTION );
+		THROW( EXCEPTION );
 	}
 
 	/* calculate the result and it push onto the stack */
@@ -668,44 +668,6 @@ Var *vars_comp( int comp_type, Var *v1, Var *v2 )
 	vars_pop( v2 );
 
 	return new_var;
-}
-
-
-/*--------------------------------------------------------------*/
-/* vars_push_copy() creates a new entry on the variable stack   */
-/* as a copy of an already existing variable (this is checked). */
-/*--------------------------------------------------------------*/
-
-Var *vars_push_copy( Var *v )
-{
-	assert( vars_exist( v ) );
-
-	if ( v->type == UNDEF_VAR )
-	{
-		if ( v->name != NULL )
-		{
-			eprint( FATAL, "%s:%ld: The accessed variable `%s' has never been "
-					"assigned a value.\n", Fname, Lc );
-			THROW( VARIABLES_EXCEPTION );
-		}
-		else
-		{
-			eprint( FATAL, "%s:%ld:fsc2:INTERNAL ERROR detected at %s:%d.\n",
-					__FILE__, __LINE__ );
-			exit( EXIT_FAILURE );
-		}
-	}
-
-	/* check that it exists and is a simple variable etc. */
-
-	vars_check( v, INT_VAR | FLOAT_VAR );
-
-	/* push a transient variable onto the stack with the relevant data set */
-
-	if ( v->type == INT_VAR )
-		return vars_push( INT_VAR, v->val.lval );
-	else
-		return vars_push( FLOAT_VAR, v->val.dval );
 }
 
 
@@ -857,23 +819,23 @@ void vars_pop( Var *v )
 		switch( stack->type )
 		{
 			case STR_VAR :
-				free( stack->val.sptr );
+				T_free( stack->val.sptr );
 				break;
 
 			case FUNC :
-				free( stack->name );
+				T_free( stack->name );
 				break;
 
 			case INT_TRANS_ARR :
-				free( stack->val.lpnt );
+				T_free( stack->val.lpnt );
 				break;
 
 			case FLOAT_TRANS_ARR :
-				free( stack->val.dpnt );
+				T_free( stack->val.dpnt );
 				break;
 		}
 
-		free( stack );
+		T_free( stack );
 	}
 }
 
@@ -913,7 +875,7 @@ void free_vars( void )
 	while ( var_list != NULL )
 	{
 		vp = var_list->next;
-		free( var_list );
+		T_free( var_list );
 		var_list = vp;
 	}
 }
@@ -933,8 +895,8 @@ void vars_check( Var *v, int type )
 		if ( v->name != NULL )
 		{
 			eprint( FATAL, "%s:%ld: The accessed variable `%s' has never been "
-					"assigned a value.\n", Fname, Lc );
-			THROW( VARIABLES_EXCEPTION );
+					"assigned a value.\n", Fname, Lc, v->name );
+			THROW( EXCEPTION );
 		}
 		else
 		{
@@ -949,8 +911,8 @@ void vars_check( Var *v, int type )
 	if ( ! ( v->type & type ) )
 	{
 		eprint( FATAL, "%s:%ld: Wrong type of variable.\n",
-				Fname, Lc, v->name );
-		THROW( VARIABLES_EXCEPTION );
+				Fname, Lc );
+		THROW( EXCEPTION );
 	}
 
 	vars_warn_new( v );
@@ -1088,7 +1050,7 @@ Var *vars_get_lhs_pointer( Var *a, Var *v, int dim )
 	{
 		eprint( FATAL, "%s:%ld: Not enough indices found for array `%s'.\n",
 				Fname, Lc, a->name );
-		THROW( VARIABLES_EXCEPTION );
+		THROW( EXCEPTION );
 	}
 
 	/* check that there are not too many indices */
@@ -1097,7 +1059,7 @@ Var *vars_get_lhs_pointer( Var *a, Var *v, int dim )
 	{
 		eprint( FATAL, "%s:%ld: Too many indices found for %d-dimensional "
 				"array `%s'.\n", Fname, Lc, a->dim, a->name );
-		THROW( VARIABLES_EXCEPTION );
+		THROW( EXCEPTION );
 	}
 
 	/* for arrays that still are variable sized we need assignment of a
@@ -1113,7 +1075,7 @@ Var *vars_get_lhs_pointer( Var *a, Var *v, int dim )
 		else
 			eprint( FATAL, "%s:%ld: Size of array `%s' is still unknown, "
 					"no indices are allowed here.\n", Fname, Lc, a->name );
-		THROW( VARIABLES_EXCEPTION );
+		THROW( EXCEPTION );
 	}
 
 	/* calculate the pointer to the indexed array element (or slice) */
@@ -1195,7 +1157,7 @@ long vars_calc_index( Var *a, Var *v )
 			eprint( FATAL, "%s:%ld: A `*' as index is only allowed in "
 					"declaration of an array, but not in assignment.\n",
 					Fname, Lc );
-			THROW( VARIABLES_EXCEPTION );
+			THROW( EXCEPTION );
 		}
 
 		/* check that the index is not too small or too large */
@@ -1205,7 +1167,7 @@ long vars_calc_index( Var *a, Var *v )
 			eprint( FATAL, "%s:%ld: Invalid array index #%d (value=%d) for "
 			"array `%s', minimum is %d.\n", Fname, Lc, i + 1,
 					cur + ARRAY_OFFSET, a->name, ARRAY_OFFSET );
-			THROW( VARIABLES_EXCEPTION );
+			THROW( EXCEPTION );
 		}
 
 		if ( cur >= a->sizes[ i ] )
@@ -1214,7 +1176,7 @@ long vars_calc_index( Var *a, Var *v )
 					"array `%s', maximum is %d.\n",
 					Fname, Lc, i + 1, cur + ARRAY_OFFSET, a->name,
 					a->sizes[ i ] - 1 + ARRAY_OFFSET );
-			THROW( VARIABLES_EXCEPTION );
+			THROW( EXCEPTION );
 		}
 
 		/* update the index */
@@ -1251,12 +1213,13 @@ Var *vars_setup_new_array( Var *a, int dim, Var *v )
 	{
 		eprint( FATAL, "%s:%ld: Missing indices in declaration of array "
 				"`%s'.\n", Fname, Lc, a->name );
-		THROW( VARIABLES_EXCEPTION );
+		THROW( EXCEPTION );
 	}
 
 	/* set array's dimension and allocate memory for their sizes */
 
 	a->dim = dim;
+	a->sizes = NULL;
 	a->sizes = T_malloc( dim * sizeof( int ) );
 	a->flags &= ~NEW_VARIABLE;
 	a->len = 1;
@@ -1291,7 +1254,7 @@ Var *vars_setup_new_array( Var *a, int dim, Var *v )
 				{
 					eprint( FATAL, "%s:%ld: Only the very last dimension of "
 							"an array can be set dynamically.\n", Fname, Lc );
-					THROW( VARIABLES_EXCEPTION );
+					THROW( EXCEPTION );
 				}
 
 				vars_pop( v );
@@ -1318,7 +1281,7 @@ Var *vars_setup_new_array( Var *a, int dim, Var *v )
 			eprint( FATAL, "%s:%ld: Invalid size (value=%d) used in "
 					"definition of array `%s', minimum is 2.\n",
 					Fname, Lc, cur, a->name );
-			THROW( VARIABLES_EXCEPTION );
+			THROW( EXCEPTION );
 		}
 
 		a->sizes[ i ] = cur;
@@ -1378,7 +1341,7 @@ Var *vars_arr_rhs( Var *v )
 	{
 		eprint( FATAL, "%s:%ld: The array `%s' is dynamically sized and has "
 				"not been assigned data yet.\n", Fname, Lc, a->name );
-		THROW( VARIABLES_EXCEPTION );
+		THROW( EXCEPTION );
 	}
 
 	/* count the indices on the stack */
@@ -1393,7 +1356,7 @@ Var *vars_arr_rhs( Var *v )
 	{
 		eprint( FATAL, "%s:%ld: Not enough indices found for array `%s'.\n",
 				Fname, Lc, a->name );
-		THROW( VARIABLES_EXCEPTION );
+		THROW( EXCEPTION );
 	}
 
 	/* check that there are not too many indices */
@@ -1402,7 +1365,7 @@ Var *vars_arr_rhs( Var *v )
 	{
 		eprint( FATAL, "%s:%ld: Too many indices found for %d-dimensional "
 				"array `%s'.\n", Fname, Lc, a->dim, a->name );
-		THROW( VARIABLES_EXCEPTION );
+		THROW( EXCEPTION );
 	}
 
 	/* calculate the position of the indexed array element (or slice) */
@@ -1482,7 +1445,7 @@ void vars_ass_from_var( Var *src, Var *dest )
 		eprint( FATAL, "%s:%ld: On right hand side of assignment a "
 				"variable is used that has never been assigned a value.\n",
 				Fname, Lc );
-		THROW( VARIABLES_EXCEPTION );
+		THROW( EXCEPTION );
 	}
 
 	/* stop if left hand side needs an array slice but all we have is
@@ -1493,7 +1456,7 @@ void vars_ass_from_var( Var *src, Var *dest )
 		eprint( FATAL, "%s:%ld: In assignment to array `%s' an array "
 				"slice is needed on the right hand side.\n",
 				Fname, Lc, dest->from->name );
-		THROW( VARIABLES_EXCEPTION );
+		THROW( EXCEPTION );
 	}
 
 	/* if the destination variable is still completely new set its type */
@@ -1580,7 +1543,7 @@ void vars_ass_from_ptr( Var *src, Var *dest )
 	{
 		eprint( FATAL, "%s:%ld: Left hand side of assignment is a variable "
 				"while right hand side is an array slice.\n", Fname, Lc ); 
-		THROW( VARIABLES_EXCEPTION );
+		THROW( EXCEPTION );
 	}
 
 	/* Again being paranoid... */
@@ -1619,7 +1582,7 @@ void vars_ass_from_ptr( Var *src, Var *dest )
 		{
 			eprint( FATAL, "%s:%ld: Array slices of array `%s' and `%s' have "
 					"different size.\n", Fname, Lc, d->name, s->name );
-			THROW( VARIABLES_EXCEPTION );
+			THROW( EXCEPTION );
 		}
 
 		if ( d->type == INT_ARR )
@@ -1681,7 +1644,7 @@ void vars_ass_from_trans_ptr( Var *src, Var *dest )
 	{
 		eprint( FATAL, "%s:%ld: Left hand side of assignment is a variable "
 				"while right hand side is an array slice.\n", Fname, Lc ); 
-		THROW( VARIABLES_EXCEPTION );
+		THROW( EXCEPTION );
 	}
 
 	/* Again being paranoid... */
@@ -1720,7 +1683,7 @@ void vars_ass_from_trans_ptr( Var *src, Var *dest )
 		{
 			eprint( FATAL, "%s:%ld: Array slices assigned to array `%s' does "
 					"not fit its length.\n", Fname, Lc, d->name );
-			THROW( VARIABLES_EXCEPTION );
+			THROW( EXCEPTION );
 		}
 
 		if ( d->type == INT_ARR )
@@ -1803,7 +1766,7 @@ void vars_arr_init( Var *v )
 	{
 		eprint( FATAL, "%s:%ld: Variable sized array `%s' can not be "
 				"initialized.\n", Fname, Lc, a->name );
-		THROW( VARIABLES_EXCEPTION );
+		THROW( EXCEPTION );
 	}
 
 	/* If the array isn't newly declared we can't do an assignment */
@@ -1812,7 +1775,7 @@ void vars_arr_init( Var *v )
 	{
 		eprint( FATAL, "%s:%ld: Initialization of array `%s' only allowed "
 				"immediately after declaration.\n", Fname, Lc, a->name );
-		THROW( VARIABLES_EXCEPTION );
+		THROW( EXCEPTION );
 	}
 
 	/* count number of initializers and check that it fits the number of
@@ -1829,7 +1792,7 @@ void vars_arr_init( Var *v )
 	{
 		eprint( FATAL, "%s:%ld: Too many initializers for array `%s'.\n",
 				Fname, Lc, a->name );
-		THROW( VARIABLES_EXCEPTION );
+		THROW( EXCEPTION );
 	}
 
 	/* Finaly do the assignments - walk through the data and copy them into

@@ -5,6 +5,10 @@
 
 #include "fsc2.h"
 
+
+int dg2020_init_hook( void );
+
+
 int dg2020_init_hook( void )
 {
 	void *x;

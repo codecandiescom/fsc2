@@ -24,7 +24,7 @@ typedef struct DN_ {
 
 
 
-void device_add( char *name );
+void device_add( char *dev_name );
 void device_append_to_list( const char *dev_name );
 void delete_devices( void );
 

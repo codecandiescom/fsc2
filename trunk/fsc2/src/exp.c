@@ -20,6 +20,8 @@ extern Token_Val conditionlval;
 extern char *Fname;
 extern long Lc;
 
+extern void prim_exprestart( FILE *prim_expin );
+
 
 /*
    This routine stores the experiment section of an EDL file in the form of
@@ -47,17 +49,27 @@ extern long Lc;
 
 void store_exp( FILE *in )
 {
+	static bool is_restart = UNSET;
 	int ret;
 	char *cur_Fname = NULL;
 
 
-	/* forget all about last run */
+	/* run the test hook functions from the modules */
 
-	forget_prg( );
+	run_test_hooks( );
 
 	/* set input file */
 
 	prim_expin = in;
+
+	/* Keep the lexer happy... */
+
+	if ( is_restart )
+	    prim_exprestart( prim_expin );
+	else
+		 is_restart = SET;
+
+	prg_token = NULL;
 
 	/* get and store all tokens */
 
@@ -85,6 +97,7 @@ void store_exp( FILE *in )
 				break;
 
 			case E_FUNC_TOKEN :
+				prg_token[ prg_length ].tv.vptr = NULL;
 				prg_token[ prg_length ].tv.vptr = T_malloc( sizeof( Var ) );
 				memcpy( prg_token[ prg_length ].tv.vptr, Var_Stack,
 						sizeof( Var ) );
@@ -94,6 +107,7 @@ void store_exp( FILE *in )
 				break;
 
 			case E_VAR_REF :
+				prg_token[ prg_length ].tv.vptr = NULL;
 				prg_token[ prg_length ].tv.vptr = T_malloc( sizeof( Var ) );
 				memcpy( prg_token[ prg_length ].tv.vptr, Var_Stack,
 						sizeof( Var ) );
@@ -109,7 +123,10 @@ void store_exp( FILE *in )
 		   pointer in structure to file name and copy current line number. */
 
 		if ( cur_Fname == NULL || strcmp( Fname, cur_Fname ) )
+		{
+			cur_Fname = NULL;
 			cur_Fname = get_string_copy( Fname );
+		}
 		prg_token[ prg_length ].Fname = cur_Fname;
 		prg_token[ prg_length ].Lc = Lc;
 
@@ -149,21 +166,21 @@ void forget_prg( void )
 	   free the string */
 
 	cur_Fname = prg_token[ 0 ].Fname;
-	free( cur_Fname );
+	T_free( cur_Fname );
 
 	for ( i = 0; i < prg_length; ++i )
 	{
 		switch( prg_token[ i ].token )
 		{
 			case E_STR_TOKEN :
-				free( prg_token[ i ].tv.sptr );
+				T_free( prg_token[ i ].tv.sptr );
 				break;
 			
 			case E_FUNC_TOKEN :       /* get rid of string for function name */
-				free( prg_token[ i ].tv.vptr->name );
+				T_free( prg_token[ i ].tv.vptr->name );
 				                                             /* NO break ! */
 			case E_VAR_REF :          /* get rid of copy of stack variable */
-				free( prg_token[ i ].tv.vptr );
+				T_free( prg_token[ i ].tv.vptr );
 				break;
 		}
 
@@ -171,12 +188,12 @@ void forget_prg( void )
            free the string */
 
 		if ( prg_token[ i ].Fname != cur_Fname )
-			free( cur_Fname = prg_token[ i ].Fname );
+			T_free( cur_Fname = prg_token[ i ].Fname );
 	}
 
 	/* get rid of the memory used for storing the tokens */
 
-	free( prg_token );
+	T_free( prg_token );
 	prg_token = NULL;
 	prg_length = 0;
 }
@@ -216,13 +233,13 @@ void setup_while_or_repeat( int type, long *pos )
 	{
 		eprint( FATAL, "%s:%ld: Unexpected end of file.\n",
 				prg_token[ i ].Fname, prg_token[ i ].Lc );
-		THROW( BLOCK_ERROR_EXCEPTION );
+		THROW( EXCEPTION );
 	}
 	if ( prg_token[ i ].token == '{' )
 	{
 		eprint( FATAL, "%s:%ld: Missing loop condition.\n",
 				prg_token[ i ].Fname, prg_token[ i ].Lc );
-		THROW( BLOCK_ERROR_EXCEPTION );
+		THROW( EXCEPTION );
 	}
 
 	/* Look for the start and end of the while, repeat or for block
@@ -254,14 +271,14 @@ void setup_while_or_repeat( int type, long *pos )
 			case ELSE_TOK :
 				eprint( FATAL, "%s:%ld: ELSE without IF in current block.\n",
 						prg_token[ i ].Fname, prg_token[ i ].Lc );
-				THROW( BLOCK_ERROR_EXCEPTION );
+				THROW( EXCEPTION );
 
 			case '{' :
 				if ( i + 1 == prg_length )
 				{
 					eprint( FATAL, "%s:%ld: Unexpected end of file.\n",
 							prg_token[ i ].Fname, prg_token[ i ].Lc );
-					THROW( BLOCK_ERROR_EXCEPTION );
+					THROW( EXCEPTION );
 				}
 				cur->start = &prg_token[ i + 1 ];
 				break;
@@ -283,7 +300,7 @@ void setup_while_or_repeat( int type, long *pos )
 	
 	eprint( FATAL, "Missing `}' for %s loop starting at %s:%ld.\n",
 			t, cur->Fname, cur->Lc );
-	THROW( BLOCK_ERROR_EXCEPTION );
+	THROW( EXCEPTION );
 }
 
 
@@ -299,7 +316,7 @@ void setup_if_else( long *pos, Prg_Token *cur_wr )
 	{
 		eprint( FATAL, "%s:%ld: Unexpected end of file.\n",
 				prg_token[ i ].Fname, prg_token[ i ].Lc );
-		THROW( BLOCK_ERROR_EXCEPTION );
+		THROW( EXCEPTION );
 	}
 	if ( prg_token[ i ].token == '{' )
 	{
@@ -321,7 +338,7 @@ void setup_if_else( long *pos, Prg_Token *cur_wr )
 					eprint( FATAL, "%s:%ld: CONTINUE not within WHILE, REPEAT "
 							"or FOR loop.\n", prg_token[ i ].Fname,
 							prg_token[ i ].Lc );
-					THROW( BLOCK_ERROR_EXCEPTION );
+					THROW( EXCEPTION );
 				}
 				prg_token[ i ].start = cur_wr;
 				break;
@@ -332,7 +349,7 @@ void setup_if_else( long *pos, Prg_Token *cur_wr )
 					eprint( FATAL, "%s:%ld: BREAK not within WHILE, REPEAT "
 							"or FOR loop.\n", prg_token[ i ].Fname,
 							prg_token[ i ].Lc );
-					THROW( BLOCK_ERROR_EXCEPTION );
+					THROW( EXCEPTION );
 				}
 				prg_token[ i ].start = cur_wr;
 				break;
@@ -358,14 +375,14 @@ void setup_if_else( long *pos, Prg_Token *cur_wr )
 				{
 					eprint( FATAL, "%s:%ld: Unexpected end of file.\n",
 							prg_token[ i ].Fname, prg_token[ i ].Lc );
-					THROW( BLOCK_ERROR_EXCEPTION );
+					THROW( EXCEPTION );
 				}
 				if ( prg_token[ i + 1 ].token != '{' &&
 					 prg_token[ i + 1 ].token != IF_TOK )
 				{
 					eprint( FATAL, "%s:%ld: Missing '{' after ELSE.\n",
 							prg_token[ i ].Fname, prg_token[ i ].Lc );
-					THROW( BLOCK_ERROR_EXCEPTION );
+					THROW( EXCEPTION );
 				}
 
 				if ( in_if )
@@ -373,7 +390,7 @@ void setup_if_else( long *pos, Prg_Token *cur_wr )
 					eprint( FATAL, "Missing `}' for ELSE block belonging to "
 							"IF-ELSE construct starting at %s:%ld.\n",
 							cur->Fname, cur->Lc );
-					THROW( BLOCK_ERROR_EXCEPTION );
+					THROW( EXCEPTION );
 				}
 
 
@@ -390,7 +407,7 @@ void setup_if_else( long *pos, Prg_Token *cur_wr )
 				{
 					eprint( FATAL, "%s:%ld: Unexpected end of file.\n",
 							prg_token[ i ].Fname, prg_token[ i ].Lc );
-					THROW( BLOCK_ERROR_EXCEPTION );
+					THROW( EXCEPTION );
 				}
 				if ( in_if )
 					cur->start = &prg_token[ i + 1 ];
@@ -419,7 +436,7 @@ void setup_if_else( long *pos, Prg_Token *cur_wr )
 
 	eprint( FATAL, "Missing `}' for %s starting at %s:%ld.\n",
 			in_if ? "IF" : "ELSE", cur->Fname, cur->Lc );
-	THROW( BLOCK_ERROR_EXCEPTION );
+	THROW( EXCEPTION );
 }
 
 
@@ -428,91 +445,107 @@ void prim_exp_run( void )
 	Prg_Token *cur;
 
 
+	if ( Fname != NULL )
+		T_free( Fname );
+	Fname = NULL;
+
 	save_restore_variables( SET );
 
 	cur_prg_token = prg_token;
 
-	while ( cur_prg_token != NULL && cur_prg_token < prg_token + prg_length )
+	TRY
 	{
-		switch ( cur_prg_token->token )
+		while ( cur_prg_token != NULL &&
+				cur_prg_token < prg_token + prg_length )
 		{
-			case '}' :
-				cur_prg_token = cur_prg_token->end;
-				break;
+			switch ( cur_prg_token->token )
+			{
+				case '}' :
+					cur_prg_token = cur_prg_token->end;
+					break;
 
-			case WHILE_TOK :
-				cur = cur_prg_token;
-				if ( test_condition( cur ) )
-				{
-					cur->counter++;
-					cur_prg_token = cur->start;
-				}
-				else
-				{
-					cur->counter = 0;
-					cur_prg_token = cur->end;
-				}
-				break;
+				case WHILE_TOK :
+					cur = cur_prg_token;
+					if ( test_condition( cur ) )
+					{
+						cur->counter++;
+						cur_prg_token = cur->start;
+					}
+					else
+					{
+						cur->counter = 0;
+						cur_prg_token = cur->end;
+					}
+					break;
 
-			case REPEAT_TOK :
-				cur = cur_prg_token;
-				if ( cur->counter == 0 )
-					get_max_repeat_count( cur );
-				if ( ++cur->count.repl.act <= cur->count.repl.max )
-				{
-					cur->counter++;
-					cur_prg_token = cur->start;
-				}
-				else
-				{
-					cur->counter = 0;
-					cur_prg_token = cur->end;
-				}
-				break;
+				case REPEAT_TOK :
+					cur = cur_prg_token;
+					if ( cur->counter == 0 )
+						get_max_repeat_count( cur );
+					if ( ++cur->count.repl.act <= cur->count.repl.max )
+					{
+						cur->counter++;
+						cur_prg_token = cur->start;
+					}
+					else
+					{
+						cur->counter = 0;
+						cur_prg_token = cur->end;
+					}
+					break;
 
-			case FOR_TOK :
-				cur = cur_prg_token;
-				if ( cur->counter == 0 )
-					get_for_cond( cur );
+				case FOR_TOK :
+					cur = cur_prg_token;
+					if ( cur->counter == 0 )
+						get_for_cond( cur );
 
-				if ( test_for_cond( cur ) )
-				{
-					cur->counter++;
-					cur_prg_token = cur->start;
-				}
-				else
-				{
-					cur->counter = 0;
-					cur_prg_token = cur->end;
-				}
-				break;
+					if ( test_for_cond( cur ) )
+					{
+						cur->counter++;
+						cur_prg_token = cur->start;
+					}
+					else
+					{
+						cur->counter = 0;
+						cur_prg_token = cur->end;
+					}
+					break;
 
-			case BREAK_TOK :
-				cur_prg_token = cur_prg_token->start->end;
-				break;
+				case BREAK_TOK :
+					cur_prg_token = cur_prg_token->start->end;
+					break;
 
-			case CONT_TOK :
-				cur_prg_token = cur_prg_token->start;
-				break;
+				case CONT_TOK :
+					cur_prg_token = cur_prg_token->start;
+					break;
 
-			case IF_TOK :
-				cur = cur_prg_token;
-				cur_prg_token = test_condition( cur ) ? cur->start : cur->end;
-				break;
+				case IF_TOK :
+					cur = cur_prg_token;
+					cur_prg_token
+						       = test_condition( cur ) ? cur->start : cur->end;
+					break;
 
-			case ELSE_TOK :
-				if ( ( cur_prg_token + 1 )->token == '{' )
-					 cur_prg_token += 2;
-				else
-					cur_prg_token++;
-				break;
+				case ELSE_TOK :
+					if ( ( cur_prg_token + 1 )->token == '{' )
+						cur_prg_token += 2;
+					else
+						cur_prg_token++;
+					break;
 
-			default :
-				prim_exp_runparse( );
-				break;
+				default :
+					prim_exp_runparse( );
+					break;
+			}
 		}
 	}
+	OTHERWISE
+	{
+		save_restore_variables( UNSET );
+		Fname = NULL;
+		PASSTHROU( );
+	}
 
+	Fname = NULL;
 	save_restore_variables( UNSET );
 }
 
@@ -530,8 +563,8 @@ int prim_exp_runlex( void )
 
 		switch( cur_prg_token->token )
 		{
-			case WHILE_TOK : case REPEAT_TOK : case BREAK_TOK : case CONT_TOK :
-			case FOR_TOK   : case IF_TOK :     case ELSE_TOK :
+			case WHILE_TOK : case REPEAT_TOK : case BREAK_TOK :
+			case CONT_TOK : case FOR_TOK   : case IF_TOK : case ELSE_TOK :
 				return 0;
 
 			case '}' :
@@ -577,7 +610,7 @@ int prim_exp_runlex( void )
 				return token;
 		}
 	}
-
+	
 	return 0;
 }
 
@@ -608,7 +641,7 @@ int conditionlex( void )
 					return 0 ;
 				eprint( FATAL, "%s:%ld: Syntax error in condition at "
 						"token `:'.\n", Fname, Lc  );
-				THROW( CONDITION_EXCEPTION );
+				THROW( EXCEPTION );
 
 			case E_STR_TOKEN :
 				conditionlval.sptr = cur_prg_token->tv.sptr;
@@ -645,7 +678,7 @@ int conditionlex( void )
 			case '=' :
 				eprint( FATAL, "%s:%ld: For comparisions `==' must be used "
 						"(`=' is for assignments only).\n", Fname, Lc );
-				THROW( CONDITION_EXCEPTION );
+				THROW( EXCEPTION );
 
 			default :
 				memcpy( &conditionlval, &cur_prg_token->tv,
@@ -692,7 +725,7 @@ bool test_condition( Prg_Token *cur )
 		cur++;
 		eprint( FATAL, "%s:%ld: Invalid condition for %s.\n",
 				cur->Fname, cur->Lc, t );
-		THROW( CONDITION_EXCEPTION );
+		THROW( EXCEPTION );
 	}
 			 
 	/* Test the result - erverything nonzero returns OK */
@@ -724,7 +757,7 @@ void get_max_repeat_count( Prg_Token *cur )
 		cur++;
 		eprint( FATAL, "%s:%ld: Invalid counter for REPEAT loop.\n",
 				cur->Fname, cur->Lc );
-		THROW( CONDITION_EXCEPTION );
+		THROW( EXCEPTION );
 	}
 
 	/* Set the repeat count - warn if value is float an convert to integer */
@@ -767,7 +800,7 @@ void get_for_cond( Prg_Token *cur )
 		cur++;
 		eprint( FATAL, "%s:%ld: Syntax error in condition of FOR loop.\n",
 				cur->Fname, cur->Lc );
-		THROW( CONDITION_EXCEPTION );
+		THROW( EXCEPTION );
 	}
 
 	/* If loop variable is new set its type */
@@ -786,7 +819,7 @@ void get_for_cond( Prg_Token *cur )
 		cur++;
 		eprint( FATAL, "%s:%ld: FOR loop variable must be integer or float "
 				"variable.\n", cur->Fname, cur->Lc );
-		THROW( CONDITION_EXCEPTION );
+		THROW( EXCEPTION );
 	}
 
 	/* store pointer to loop variable */
@@ -808,7 +841,7 @@ void get_for_cond( Prg_Token *cur )
 		in_for_lex = UNSET;
 		eprint( FATAL, "%s:%ld: Missing end value for FOR loop.\n",
 				cur->Fname, cur->Lc );
-		THROW( CONDITION_EXCEPTION );
+		THROW( EXCEPTION );
 	}
 
 	/* Make sure the returned value is either integer or float */
@@ -819,7 +852,7 @@ void get_for_cond( Prg_Token *cur )
 		in_for_lex = UNSET;
 		eprint( FATAL, "%s:%ld: Invalid start value in FOR loop.\n",
 				cur->Fname, cur->Lc );
-		THROW( CONDITION_EXCEPTION );
+		THROW( EXCEPTION );
 	}
 
 	/* Set start value of loop variable */
@@ -860,7 +893,7 @@ void get_for_cond( Prg_Token *cur )
 		in_for_lex = UNSET;
 		eprint( FATAL, "%s:%ld: Invalid end value for FOR loop.\n",
 				cur->Fname, cur->Lc );
-		THROW( CONDITION_EXCEPTION );
+		THROW( EXCEPTION );
 	}
 
 	/* If loop variable is integer `end' must also be integer */
@@ -872,7 +905,7 @@ void get_for_cond( Prg_Token *cur )
 		eprint( FATAL, "%s:%ld: End value of FOR loop is floating point "
 				"value while loop variable is an integer.\n",
 				cur->Fname, cur->Lc );
-		THROW( CONDITION_EXCEPTION );
+		THROW( EXCEPTION );
 	}
 
 	/* Set end value of loop */
@@ -915,7 +948,7 @@ void get_for_cond( Prg_Token *cur )
 			cur++;
 			eprint( FATAL, "%s:%ld: Invalid increment for FOR loop.\n",
 					cur->Fname, cur->Lc );
-			THROW( CONDITION_EXCEPTION );
+			THROW( EXCEPTION );
 		}
 
 		/* If loop variable is integer `incr' must also be integer */
@@ -928,7 +961,7 @@ void get_for_cond( Prg_Token *cur )
 			eprint( FATAL, "%s:%ld: FOR loop increment is floating point "
 					"value while loop variable is an integer.\n",
 				cur->Fname, cur->Lc );
-			THROW( CONDITION_EXCEPTION );
+			THROW( EXCEPTION );
 		}
 
 		cur->count.forl.incr.type = Var_Stack->type;
@@ -942,7 +975,7 @@ void get_for_cond( Prg_Token *cur )
 				cur++;
 				eprint( FATAL, "%s:%ld: Zero increment for FOR loop.\n",
 						cur->Fname, cur->Lc );
-				THROW( CONDITION_EXCEPTION );
+				THROW( EXCEPTION );
 			}
 			cur->count.forl.incr.lval = Var_Stack->val.lval;
 		}
@@ -953,7 +986,7 @@ void get_for_cond( Prg_Token *cur )
 				cur++;
 				eprint( FATAL, "%s:%ld: Zero increment for FOR loop.\n",
 						cur->Fname, cur->Lc );
-				THROW( CONDITION_EXCEPTION );
+				THROW( EXCEPTION );
 			}
 			cur->count.forl.incr.dval = Var_Stack->val.dval;
 		}
@@ -1075,6 +1108,7 @@ void save_restore_variables( bool flag )
 			for ( var_count = 0, cv = var_list; cv != NULL;
 				  var_count++, cv = cv->next )
 				;
+		prg_token[ prg_length ].tv.vptr = NULL;
 		var_list_copy = T_malloc( var_count * sizeof( Var ) );
 
 		/* copy all of them into the backup region */
@@ -1095,7 +1129,7 @@ void save_restore_variables( bool flag )
 		for ( cv = var_list, cb = var_list_copy; cv != NULL;
 			  cb++, cv = cv->next )
 			memcpy( cv, cb, sizeof( Var ) );
-		free( var_list_copy );
+		T_free( var_list_copy );
 		var_list_copy = NULL;
 	}
 }

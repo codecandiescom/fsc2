@@ -98,7 +98,7 @@ WS          [\n=: ]+
 {FILE}      {
 				*( assigntext + assignleng - 1 ) = '\0';
 				if ( Fname != NULL )
-					free( Fname );
+					T_free( Fname );
 				Fname = get_string_copy( assigntext + 2 );
 			}
 
@@ -109,11 +109,15 @@ WS          [\n=: ]+
 			}
 
 			/* handling of error messages from the cleaner */
-{ERR}		THROW( CLEANER_EXCEPTION );
+{ERR}		{
+				eprint( FATAL, "%s", assigntext + 2 );
+				THROW( EXCEPTION );
+			}
 
 {ESTR}		{
 				assigntext = strchr( assigntext, '\x03' );
-				THROW( CLEANER_EXCEPTION );
+				eprint( FATAL, "%s", assigntext + 2 );
+				THROW( EXCEPTION );
 			}
 
 			/* handling of DEVICES: labels */
@@ -258,7 +262,7 @@ WS          [\n=: ]+
 						eprint( FATAL, "%s:%ld: Function `%s' can't be used "
 								 "in ASSIGN section.\n",
 								 Fname, Lc, assigntext );
-						THROW( FUNCTION_EXCEPTION );
+						THROW( EXCEPTION );
 					}
 					return FUNC_TOKEN;
 				}
@@ -266,7 +270,11 @@ WS          [\n=: ]+
 				/* if it's not a function it should be a variable */
 
 				if ( ( assignlval.vptr = vars_get( assigntext ) ) == NULL )
-					 THROW( ACCESS_NONEXISTING_VARIABLE );
+				{
+					eprint(	FATAL, "%s:%ld: Variable `%s' has never been "
+							"declared.\n", Fname, Lc, assigntext );
+					 THROW( EXCEPTION );
+				}
 
 				return VAR_TOKEN;
 			}
@@ -298,7 +306,11 @@ WS          [\n=: ]+
 ";"         return ';';               /* end of statement character */
 
 			/* handling of invalid input (i.e. everything else) */
-.           THROW( INVALID_INPUT_EXCEPTION );
+.           {
+				eprint( FATAL, "%s:%ld: Invalid input in ASSIGNMENTS section: "
+						"`%s'\n", Fname, Lc, assigntext );
+				THROW( EXCEPTION );
+			}
 
 <<EOF>>	    {
 				Assign_Next_Section = NO_SECTION;
@@ -313,45 +325,28 @@ WS          [\n=: ]+
 
 int assignments_parser( FILE *in )
 {
+	static bool is_restart = UNSET;
+
+
 	if ( compilation.sections[ ASSIGNMENTS_SECTION ] )
 	{
 		eprint( FATAL, "%s:%ld: Multiple instances of ASSIGNMENTS section "
 		        "label.\n", Fname, Lc );
-		return FAIL;
+		THROW( EXCEPTION );
 	}
 	compilation.sections[ ASSIGNMENTS_SECTION ] = SET;
 
-	Assign_Next_Section = OK;
-
 	assignin = in;
-	assign_init( );
 
-	TRY
-	{
-		assignparse( );
-		assign_end( );
-	}
-	CATCH( ASSIGNMENTS_EXCEPTION )
-		return FAIL;
-	CATCH( FUNCTION_EXCEPTION )
-		return FAIL;
-	CATCH( INVALID_INPUT_EXCEPTION )
-	{
-		eprint( FATAL, "%s:%ld: Invalid input in ASSIGNMENTS section: "
-				"`%s'\n", Fname, Lc, assigntext );
-		return FAIL;
-    }
-	CATCH( ACCESS_NONEXISTING_VARIABLE )
-	{
-		eprint( FATAL, "%s:%ld: Variable `%s' has never been declared.\n",
-				Fname, Lc, assigntext );
-		return FAIL;
-	}
-	CATCH( CLEANER_EXCEPTION )
-	{
-		eprint( FATAL, "%s", assigntext + 2 );
-		return FAIL;
-	}
+	/* Keep the lexer happy... */
+
+	if ( is_restart )
+	    assignrestart( assignin );
+	else
+		 is_restart = SET;
+
+	assignparse( );
+	assign_end( );
 
 	return Assign_Next_Section;
 }

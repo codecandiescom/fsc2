@@ -22,31 +22,43 @@ int deviceserror( const char *s );
 %}
 
 
+%union {
+	char *sptr;
+}
 
 
 %token SECTION_LABEL         /* new section label */
-%token DEV_TOKEN
+%token <sptr> DEV_TOKEN
 
 
 %%
 
 
 input:   /* empty */
-       | input DEV_TOKEN              { device_add( devicestext ); }
+       | input ';'
+       | input DEV_TOKEN              { device_add( $2 ); }
+         sep
        | input SECTION_LABEL          { YYACCEPT; }
        | input error
 ;
+
+sep:     ';'
+	   | DEV_TOKEN                    { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+	   | SECTION_LABEL                { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+
 
 %%
 
 
 int deviceserror ( const char *s )
 {
+	s = s;                    /* stupid but avoids compiler warning */
+
 	if ( *devicestext == '\0' )
 		eprint( FATAL, "%s:%ld: Unexpected end of file in DEVICES "
 				"section.\n", Fname, Lc );
 	else
 		eprint( FATAL, "%s:%ld: Syntax error near token `%s'.\n",
 				Fname, Lc, devicestext );
-	THROW( DEVICES_EXCEPTION );
+	THROW( EXCEPTION );
 }

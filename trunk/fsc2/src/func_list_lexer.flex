@@ -7,7 +7,7 @@
 		/*     DEFINITIONS     */
 		/*---------------------*/
 
-%option noyywrap case-insensitive stack nounput
+%option noyywrap case-insensitive stack nounput noyy_top_state
 
 %{
 
@@ -16,9 +16,6 @@
 int func_listlex( void );
 int fll_count_functions( void );
 void fll_get_functions( Func *fncts, int num_def_func );
-
-static long Lc;
-static char *Fname;
 
 static long Comm_Lc;
 static bool Eol;
@@ -86,7 +83,7 @@ IDENT    [A-Za-z][A-Za-z_0-9]*
 <<EOF>>     {
 				eprint( FATAL, "%s: End of file in comment starting at line "
 						"%ld\n.", Fname, Comm_Lc );
-				THROW( FUNCTION_EXCEPTION );
+				THROW( EXCEPTION );
 			}
 
 			/* end of comment but not end of line */
@@ -103,7 +100,7 @@ IDENT    [A-Za-z][A-Za-z_0-9]*
 {EREM1}     {  /* End of comment without start */
 				eprint( FATAL, "End of comment found at line %ld in function "
 						"data base `%s'\n.", Lc, Fname );
-				THROW( FUNCTION_EXCEPTION );
+				THROW( EXCEPTION );
 			}
 
 			/* dump empty line (i.e. just containing tabs and spaces) */
@@ -136,7 +133,7 @@ EXP         return EXP_TOKEN;
 .           {
 				eprint( FATAL, "Syntax error at line %ld in function data "
 						"base `%s'.\n", Lc, Fname );
-				THROW( FUNCTION_EXCEPTION );
+				THROW( EXCEPTION );
 			}
 
 <<EOF>>		return( 0 );
@@ -150,38 +147,48 @@ EXP         return EXP_TOKEN;
 
 void func_list_parse( Func **fncts, int num_def_func, int *num_func )
 {
+	static bool is_restart = UNSET;
 	int num;
 	int cur;
 
 
+	if ( Fname != NULL )
+	    T_free( Fname );
 	Fname = get_string_copy( "Functions" );
 
 	if ( ( func_listin = fopen( Fname, "r" ) ) == NULL )
 	{
 		eprint( FATAL, "Can't open function data base `%s'", Fname );
-		THROW( FUNCTION_EXCEPTION );
+		THROW( EXCEPTION );
 	}
 
-	eprint( NO_ERROR, "Parsing function data base `%s'.\n", Fname );
+	/* Keep the lexer happy... */
+
+	if ( is_restart )
+	    func_listrestart( func_listin );
+	else
+		 is_restart = SET;
 
 	/* count the number of functions defined in the file */
+
+	eprint( NO_ERROR, "Parsing function data base `%s'.\n", Fname );
 
 	TRY
 	{
 		num = fll_count_functions( );
 		TRY_SUCCESS;
 	}
-	CATCH( FUNCTION_EXCEPTION )
+	OTHERWISE
 	{
 		fclose( func_listin );
-		free( Fname );
 		PASSTHROU( );
 	}
 
 	if ( num == 0 )                  /* none found in input file ? */
 	    return;
 
-	/* rewind input file, allocate memory for the functions and set defaults */
+	/* rewind input file, allocate memory for the additional functions (the
+	   built-in functions are already set up ) and set defaults */
 
 	rewind( func_listin );
 	*fncts = T_realloc( *fncts, ( num + num_def_func + 1 ) * sizeof( Func ) );
@@ -203,16 +210,14 @@ void func_list_parse( Func **fncts, int num_def_func, int *num_func )
 		fll_get_functions( *fncts, num_def_func );
 		TRY_SUCCESS;
 	}
-	CATCH( FUNCTION_EXCEPTION )
+	OTHERWISE
 	{
 		fclose( func_listin );
-		free( Fname );
 		PASSTHROU( );
 	}
 	
 
 	fclose( func_listin );
-	free( Fname );
 }
 
 
@@ -242,7 +247,7 @@ int fll_count_functions( void )
 	{
 		eprint( FATAL, "Missing semiciolon at end of function data base "
 				"`%s'.\n", Fname );
-		THROW( FUNCTION_EXCEPTION );
+		THROW( EXCEPTION );
 	}
 
 	return num;
@@ -277,7 +282,7 @@ void fll_get_functions( Func *fncts, int num_def_func )
 				{
 					eprint( FATAL, "Syntax error at line %ld in function data "
 							"base `%s' .\n", Lc, Fname );
-					THROW( FUNCTION_EXCEPTION );
+					THROW( EXCEPTION );
 				}
 
 				/* Allow overloading of buit-in functions (but warn)... */
@@ -299,7 +304,7 @@ void fll_get_functions( Func *fncts, int num_def_func )
 						eprint( FATAL, "Function `%s()' is declared more than "
 								"once in function data base `%s'.\n",
 								func_listtext, Fname );
-						THROW( FUNCTION_EXCEPTION );
+						THROW( EXCEPTION );
 					}
 
 
@@ -314,7 +319,7 @@ void fll_get_functions( Func *fncts, int num_def_func )
 				{
 					eprint( FATAL, "Syntax error at line %ld of function data "
 							"base `%s'.\n", Lc, Fname );
-					THROW( FUNCTION_EXCEPTION );
+					THROW( EXCEPTION );
 				}
 
 				fncts[ act ].nargs = atol( func_listtext );
@@ -326,7 +331,7 @@ void fll_get_functions( Func *fncts, int num_def_func )
 				{
 					eprint( FATAL, "Syntax error at line %ld of function data "
 							"base `%s'.\n", Lc, Fname );
-					THROW( FUNCTION_EXCEPTION );
+					THROW( EXCEPTION );
 				}
 
 				if ( ret_token == ALL_TOKEN )				
@@ -342,7 +347,7 @@ void fll_get_functions( Func *fncts, int num_def_func )
 					eprint( FATAL, "Missing number of arguments for function "
 							"`%s' at line %ld in function data base `%s'.\n",
 							fncts[ act ].name, Lc, Fname );
-					THROW( FUNCTION_EXCEPTION );
+					THROW( EXCEPTION );
 				}
 				state = 0;
 				act = ++cur;

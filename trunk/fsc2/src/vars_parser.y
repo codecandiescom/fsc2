@@ -71,7 +71,11 @@ line:    VAR_TOKEN                 /* no assignment to be done */
        | FUNC_TOKEN '['            { eprint( FATAL, "%s:%ld: `%s' is a "
 											 "function and not an array.\n",
 											 Fname, Lc, $1->name );
-	                                 THROW( VARIABLES_EXCEPTION ); }
+	                                 THROW( EXCEPTION ); }
+       | VAR_TOKEN '('             { eprint( FATAL, "%s:%ld: `%s' is an "
+											 "array and not a function.\n",
+											 Fname, Lc, $1->name );
+	                                 THROW( EXCEPTION ); }
 ;
 
 expr:    INT_TOKEN unit           { $$ = vars_mult( vars_push( INT_VAR, $1 ), 
@@ -100,11 +104,11 @@ expr:    INT_TOKEN unit           { $$ = vars_mult( vars_push( INT_VAR, $1 ),
        | VAR_TOKEN '('            { eprint( FATAL, "%s:%ld: `%s' isn't a "
 											"function.\n", Fname, Lc,
 											$1->name );
-	                                 THROW( UNKNOWN_FUNCTION_EXCEPTION ); }
+	                                 THROW( EXCEPTION ); }
        | FUNC_TOKEN '['           { eprint( FATAL, "%s:%ld: `%s' is a "
 											"predefined function.\n",
 											Fname, Lc, $1->name );
-	                                THROW( VARIABLES_EXCEPTION ); }
+	                                THROW( EXCEPTION ); }
        | expr EQ expr             { $$ = vars_comp( COMP_EQUAL, $1, $3 ); }
        | expr LT expr             { $$ = vars_comp( COMP_LESS, $1, $3 ); }
        | expr GT expr             { $$ = vars_comp( COMP_LESS, $3, $1 ); }
@@ -178,11 +182,13 @@ exprs:   expr                      { }
 
 void variableserror ( const char *s )
 {
+	s = s;                    /* stupid but avoids compiler warning */
+
 	if ( *variablestext == '\0' )
 		eprint( FATAL, "%s:%ld: Unexpected end of file in VARIABLES "
 				"section.\n", Fname, Lc );
 	else
 		eprint( FATAL, "%s:%ld: Syntax error near token `%s'.\n",
 				Fname, Lc, variablestext );
-	THROW( VARIABLES_EXCEPTION );
+	THROW( EXCEPTION );
 }

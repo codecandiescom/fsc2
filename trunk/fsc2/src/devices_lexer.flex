@@ -55,9 +55,9 @@ EXP         ^[ \t]*EXP(ERIMENT)?:
 STR         \x5[^\x6]*\x6
 ESTR        \x5.*\x3\n.*\n
 
-IDENT       [A-Za-z0-9]+
+IDENT       [A-Za-z0-9]+[A-Za-z_0-9]?
 
-WS          [\n=:; ]+
+WS          [\n\t ]+
 
 
 
@@ -70,7 +70,7 @@ WS          [\n=:; ]+
 {FILE}      {
 				*( devicestext + devicesleng - 1 ) = '\0';
 				if ( Fname != NULL )
-					free( Fname );
+					T_free( Fname );
 				Fname = get_string_copy( devicestext + 2 );
 			}
 
@@ -81,11 +81,15 @@ WS          [\n=:; ]+
 			}
 
 			/* handling of error messages from the cleaner */
-{ERR}		THROW( CLEANER_EXCEPTION );
+{ERR}		{
+				eprint( FATAL, "%s", devicestext + 2 );
+				THROW( EXCEPTION );
+			}
 
 {ESTR}		{
 				devicestext = strchr( devicestext, '\x03' );
-				THROW( CLEANER_EXCEPTION );
+				eprint( FATAL, "%s", devicestext + 2 );
+				THROW( EXCEPTION );
 			}
 
 			/* handling of DEVICES: labels */
@@ -124,13 +128,21 @@ WS          [\n=:; ]+
 				return SECTION_LABEL;
 			}
 
-{IDENT}     return DEV_TOKEN;
+{IDENT}     {
+				deviceslval.sptr = get_string_copy( devicestext );
+				return DEV_TOKEN;
+			}
 
+;           return ';';
 
 {WS}        /* skip prettifying characters */
 
 			/* handling of invalid input (i.e. everything else) */
-.           THROW( INVALID_INPUT_EXCEPTION );
+.           {
+				eprint( FATAL, "%s:%ld: Invalid input in DEVICES section: "
+						"`%s'\n", Fname, Lc, devicestext );
+				THROW( EXCEPTION );
+			}
 
 <<EOF>>	    {
 				Devices_Next_Section = NO_SECTION;
@@ -149,35 +161,14 @@ int devices_parser( FILE *in )
 	{
 		eprint( FATAL, "%s:%ld: Multiple instances of DEVICES section "
 		        "label.\n", Fname, Lc );
-		return FAIL;
+		THROW( EXCEPTION );
 	}
 	compilation.sections[ DEVICES_SECTION ] = SET;
 
-	Devices_Next_Section = OK;
-
 	devicesin = in;
 
-	TRY
-	{
-		device_list_parse( );	
-		devicesparse( );
-		load_all_drivers( );
-	}
-	CATCH( INVALID_INPUT_EXCEPTION )
-	{
-		eprint( FATAL, "%s:%ld: Invalid input in DEVICES section: "
-				"`%s'\n", Fname, Lc, devicestext );
-		return FAIL;
-    }
-	CATCH( CLEANER_EXCEPTION )
-	{
-		eprint( FATAL, "%s", devicestext + 2 );
-		return FAIL;
-	}
-	CATCH( DEVICES_EXCEPTION )
-		return FAIL;
-	CATCH( OUT_OF_MEMORY_EXCEPTION )
-		return FAIL;
+	devicesparse( );
+	load_all_drivers( );
 
 	return Devices_Next_Section;
 }

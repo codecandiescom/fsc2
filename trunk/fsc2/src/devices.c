@@ -7,14 +7,14 @@
 #include "fsc2.h"
 
 
+/* The string passed to the function is already allocated to the program
+   and has to be deallocated here to avoid a memory leak! */
 
-void device_add( char *name )
+void device_add( char *dev_name )
 {
-	char *dev_name;
 	Device_Name *dl;
 
 
-	dev_name = get_string_copy( name );
 	string_to_lower( dev_name );
 
 	/* First test if the device is in the list of device names */
@@ -25,10 +25,10 @@ void device_add( char *name )
 
 	if ( dl == NULL )
 	{
-		eprint( FATAL, "%s:%ld: Device `%s' not found in device name list.\n",
-				Fname, Lc, name );
-		free( dev_name );
-		THROW( DEVICES_EXCEPTION );
+		eprint( FATAL, "%s:%ld: Device `%s' not found in device name data "
+				"base.\n", Fname, Lc, dev_name );
+		T_free( dev_name );
+		THROW( EXCEPTION );
 	}
 
 	/* Now append the device to the end of the device list */
@@ -38,13 +38,13 @@ void device_add( char *name )
 		device_append_to_list( dev_name );
 		TRY_SUCCESS;
 	}
-	CATCH( OUT_OF_MEMORY_EXCEPTION )
+	OTHERWISE
 	{
-		free( dev_name );
+		T_free( dev_name );
 		PASSTHROU( );
 	}
 
-	free( dev_name );
+	T_free( dev_name );
 }
 
 
@@ -68,6 +68,7 @@ void device_append_to_list( const char *dev_name )
 
 	cd->name = get_string_copy( dev_name );
 	cd->is_loaded = UNSET;
+	cd->next = NULL;
 }
 
 
@@ -82,18 +83,18 @@ void delete_devices( void )
 	{
 		/* If there is a driver run the exit hooks and unload it */
 
-		if ( cd->driver.handle != NULL )
+		if ( cd->is_loaded )
 		{
 			if ( cd->driver.is_exit_hook )
-				cd->driver.lib_exit( );
+				cd->driver.exit_hook( );
 			dlclose( cd->driver.handle );
 		}
 
 		if ( cd->name != NULL )
-			free( cd->name );
+			T_free( cd->name );
 
 		cdn = cd->next;
-		free( cd );
+		T_free( cd );
 	}
 
 	Device_List = NULL;
@@ -107,8 +108,10 @@ void delete_device_name_list( void )
 	for ( cd = Device_Name_List; cd != NULL; cd = cdn )
 	{
 		if ( cd->name != NULL )
-			free( cd->name );
+			T_free( cd->name );
 		cdn = cd->next;
-		free( cd );
+		T_free( cd );
 	}
+
+	Device_Name_List = NULL;
 }

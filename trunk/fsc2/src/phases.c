@@ -13,7 +13,7 @@ long cur_aseq;
 /* Called before the PHASES section is parsed to reset some variables. */
 /*---------------------------------------------------------------------*/
 
-void phases_init( void )
+void phases_clear( void )
 {
 	int i;
 
@@ -67,7 +67,7 @@ void acq_seq_cont( long acq_type )
 	{
 		eprint( FATAL, "%s:%ld: Maximum acquisition sequence length of %d "
 				"exceeded.\n ", Fname, Lc, MAX_PHASE_SEQ_LEN );
-		THROW( PHASES_EXCEPTION );
+		THROW( EXCEPTION );
 	}
 
 	/* add the new acquisition type */
@@ -125,7 +125,7 @@ void phases_add_phase( long phase_seq_num, int phase_type )
 		eprint( FATAL, "%s:%ld: Maximum sequence length of %d for phase "
 				"sequence #%ld exceeded.\n ",
 				Fname, Lc, MAX_PHASE_SEQ_LEN, phase_seq_num + 1 );
-		THROW( PHASES_EXCEPTION );
+		THROW( EXCEPTION );
 	}
 
 	PSeq[ phase_seq_num ].sequence[ PSeq[ phase_seq_num ].len++ ] = phase_type;
@@ -141,7 +141,7 @@ void acq_miss_list( void )
 {
 	eprint( FATAL, "%s:%ld: Missing acquisition type list.\n",
 			Fname, Lc );
-	THROW( PHASES_EXCEPTION );
+	THROW( EXCEPTION );
 }
 
 
@@ -154,7 +154,7 @@ void phase_miss_list( long phase_seq_num )
 {
 	eprint( FATAL, "%s:%ld: Missing list of phases for phase sequence #%ld.\n",
 			Fname, Lc, phase_seq_num + 1 );
-	THROW( PHASES_EXCEPTION );
+	THROW( EXCEPTION );
 }
 
 
@@ -188,7 +188,7 @@ void phases_end( void )
 	{
 		eprint( FATAL, "No acquisition sequence defined in PHASES "
 				"section.\n" );
-		THROW( PHASES_EXCEPTION );
+		THROW( EXCEPTION );
 	}
 
 	/* check that there is a phase sequence if there's a acquisition
@@ -197,7 +197,7 @@ void phases_end( void )
 	if ( ( ASeq[ 0 ].defined || ASeq[ 1 ].defined ) && ! are_phases_defined )
 	{
 		eprint( FATAL, "No phase sequence defined in PHASES section.\n" );
-		THROW( PHASES_EXCEPTION );
+		THROW( EXCEPTION );
 	}
 
 	/* check that length of both acquisition sequences are identical
@@ -207,7 +207,7 @@ void phases_end( void )
 		 ASeq[ 0 ].len != ASeq[ 1 ].len )
 	{
 		eprint( FATAL, "Different length of acqusition sequences.\n" );
-		THROW( PHASES_EXCEPTION );
+		THROW( EXCEPTION );
 	}
 
 	/* check that lengths of acquisition and phase sequences are identical */
@@ -221,7 +221,7 @@ void phases_end( void )
 		{
 			eprint( FATAL, "Different length of phase and acquisition "
 					"sequences in PHASES section.\n" );
-			THROW( PHASES_EXCEPTION );
+			THROW( EXCEPTION );
 		}
 	}
 

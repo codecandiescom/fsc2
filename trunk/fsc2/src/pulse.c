@@ -38,7 +38,7 @@ Pulse *n2p( char *txt )
 	else
 		num = -1;          /* this should never happen... */
 
-	free( tp );
+	T_free( tp );
 	return pulse_find( num );
 }
 
@@ -56,7 +56,7 @@ Pulse *pulse_new( int num )
 	{
 		eprint( FATAL, "%s:%ld: Pulse with number %d already exists.\n",
 				Fname, Lc, num );
-		THROW( PREPARATIONS_EXCEPTION );
+		THROW( EXCEPTION );
 	}
 
 	/* allocate memory for the new pulse, set its number and link it
@@ -74,6 +74,7 @@ Pulse *pulse_new( int num )
 
 	p->num = num;
 	p->set_flags = 0;
+	p->rp = NULL;
 	p->n_rp = 0;
 
 	Plist = p;
@@ -102,7 +103,7 @@ Pulse *pulse_find( int num )
 	{
 		eprint( FATAL, "%s:%ld: Pulse number %d out of range (0-%d).\n",
 				Fname, Lc, num, MAX_PULSE_NUM - 1 );
-		THROW( PREPARATIONS_EXCEPTION );
+		THROW( EXCEPTION );
 	}
 
 	while ( p != NULL )
@@ -130,7 +131,7 @@ void pulse_set( Pulse *p, int type, Var *v )
 	if ( ! pulse_exist( p ) )
 	{
 		eprint( FATAL, "%s:%ld: Pulse does not exist.\n", Fname, Lc );
-		THROW( PREPARATIONS_EXCEPTION );
+		THROW( EXCEPTION );
 	}
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
@@ -183,7 +184,7 @@ Var *pulse_get_by_addr( Pulse *p, int type )
 	if ( ! pulse_exist( p ) )
 	{
 		eprint( FATAL, "%s:%ld: Pulse does not exist.\n", Fname, Lc );
-		THROW( PREPARATIONS_EXCEPTION );
+		THROW( EXCEPTION );
 	}
 
 	/* make sure the accessed property of the pulse has been set */
@@ -206,7 +207,7 @@ Var *pulse_get_by_addr( Pulse *p, int type )
 
 		eprint( FATAL, "%s:%ld: %s of pulse %d has not been set.\n", 
 				Fname, Lc, type_strings[ j ], p->num );
-		THROW( PREPARATIONS_EXCEPTION );
+		THROW( EXCEPTION );
 	}
 
 	/* now return the appropriate data */
@@ -246,7 +247,7 @@ Var *pulse_get_by_num( int pnum, int type )
 	{
 		eprint( FATAL, "%s:%l: Pulse with number %d does not exists.\n",
 				Fname, Lc, pnum );
-		THROW( PREPARATIONS_EXCEPTION );
+		THROW( EXCEPTION );
 	}
 
 	return pulse_get_by_addr( p, type );
@@ -274,7 +275,7 @@ void pulse_set_func( Pulse *p, Var *v )
 	{
 		eprint( FATAL, "%s:%ld: Invalid function type for pulse %d.\n",
 				Fname, Lc, p->num );
-		THROW( PREPARATIONS_EXCEPTION );
+		THROW( EXCEPTION );
 	}
 
 	if ( p->set_flags & P_FUNC )
@@ -290,7 +291,7 @@ void pulse_set_func( Pulse *p, Var *v )
 	{
 		eprint( FATAL, "%s:%ld: Invalid function type for pulse %d.\n",
 				Fname, Lc, p->num );
-		THROW( PREPARATIONS_EXCEPTION );
+		THROW( EXCEPTION );
 	}
 
 	p->func = v->val.lval;
@@ -317,14 +318,14 @@ void pulse_set_pos( Pulse *p, Var *v )
 	{
 		eprint( FATAL, "%s:%ld: Negative start position of pulse %d.\n",
 				Fname, Lc, p->num );
-		THROW( PREPARATIONS_EXCEPTION );
+		THROW( EXCEPTION );
 	}
 
 	if ( val > LONG_MAX )
 	{
 		eprint( FATAL, "%s:%ld: Start position of pulse %d too large.\n",
 				Fname, Lc, p->num );
-		THROW( PREPARATIONS_EXCEPTION );
+		THROW( EXCEPTION );
 	}
 
 	p->pos = val;
@@ -350,14 +351,14 @@ void pulse_set_len( Pulse *p, Var *v )
 	{
 		eprint( FATAL, "%s:%ld: Negative length of pulse %d.\n",
 				Fname, Lc, p->num );
-		THROW( PREPARATIONS_EXCEPTION );
+		THROW( EXCEPTION );
 	}
 
 	if ( val > LONG_MAX )
 	{
 		eprint( FATAL, "%s:%ld: Length of pulse %d too large.\n",
 				Fname, Lc, p->num );
-		THROW( PREPARATIONS_EXCEPTION );
+		THROW( EXCEPTION );
 	}
 
 	p->len = val;
@@ -384,7 +385,7 @@ void pulse_set_dpos( Pulse *p, Var *v )
 	{
 		eprint( FATAL, "%s:%ld: Position change of pulse %d too large.\n",
 				Fname, Lc, p->num );
-		THROW( PREPARATIONS_EXCEPTION );
+		THROW( EXCEPTION );
 	}
 
 	p->dpos = val;
@@ -411,7 +412,7 @@ void pulse_set_dlen( Pulse *p, Var *v )
 	{
 		eprint( FATAL, "%s:%ld: Length change of pulse %d too large.\n",
 				Fname, Lc, p->num );
-		THROW( PREPARATIONS_EXCEPTION );
+		THROW( EXCEPTION );
 	}
 
 	p->dlen = val;
@@ -438,9 +439,23 @@ void pulse_set_maxlen( Pulse *p, Var *v )
 	{
 		eprint( FATAL, "%s:%ld: Maximum length of pulse %d too large.\n",
 				Fname, Lc, p->num );
-		THROW( PREPARATIONS_EXCEPTION );
+		THROW( EXCEPTION );
 	}
 
 	p->maxlen = val;
 	p->set_flags |= P_MAXLEN;
+}
+
+
+void delete_pulses( void )
+{
+	Pulse *cp, *cpn;
+
+	for ( cp = Plist; cp != NULL; cp = cpn )
+	{
+		cpn = cp->next;
+		T_free( cp );
+	}
+
+	Plist = NULL;
 }

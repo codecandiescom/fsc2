@@ -7,14 +7,12 @@
 		/*     DEFINITIONS     */
 		/*---------------------*/
 
-%option noyywrap case-insensitive stack nounput
+%option noyywrap case-insensitive stack nounput noyy_top_state
 
 %{
 
 #include "fsc2.h"
 
-static long Lc;
-static char *Fname;
 static long Comm_Lc;
 static bool Eol;
 
@@ -37,7 +35,7 @@ LWS      ^[\t ]+
 WS       [\t ]+
 TWS      [\t ]+\n
 
-IDENT    [A-Za-z_0-9]+
+IDENT    [A-Za-z0-9]+[A-Za-z_0-9]?
 
 %x      comm
 
@@ -77,7 +75,7 @@ IDENT    [A-Za-z_0-9]+
 <<EOF>>     {
 				eprint( FATAL, "%s: End of device data base `%s' in comment "
 						"starting at line %ld\n.", Fname, Comm_Lc );
-				THROW( DEVICES_EXCEPTION );
+				THROW( EXCEPTION );
 			}
 
 			/* end of comment but not end of line */
@@ -94,7 +92,7 @@ IDENT    [A-Za-z_0-9]+
 {EREM1}     {  /* End of comment without start */
 				eprint( FATAL, "End of comment found at line %ld in device "
 						"data base `%s'\n.", Lc, Fname );
-				THROW( DEVICES_EXCEPTION );
+				THROW( EXCEPTION );
 			}
 
 			/* dump empty line (i.e. just containing tabs and spaces) */
@@ -124,7 +122,7 @@ IDENT    [A-Za-z_0-9]+
 .           {
 				eprint( FATAL, "Syntax error in devices data base `%s' at "
 						"line %ld.\n", Fname, Lc );
-				THROW( DEVICES_EXCEPTION );
+				THROW( EXCEPTION );
 			}
 
 <<EOF>>		return( 0 );
@@ -138,20 +136,31 @@ IDENT    [A-Za-z_0-9]+
 
 bool device_list_parse( void )
 {
+	static bool is_restart = UNSET;
 	Device_Name *new_device_name;
 
 
+	if ( Fname != NULL )
+	    T_free( Fname );
 	Fname = get_string_copy( "Devices" );
 
 	if ( ( devices_listin = fopen( Fname, "r" ) ) == NULL )
 	{
 		eprint( FATAL, "Can't open device data base `%s'.\n", Fname );
-		free( Fname );
-		THROW( DEVICES_EXCEPTION );
+		return FAIL;
 	}
+
+	/* Keep the lexer happy... */
+
+	if ( is_restart )
+	    devices_listrestart( devices_listin );
+	else
+		 is_restart = SET;
 
 	Lc = 1;
 	Eol = SET;
+
+	eprint( NO_ERROR, "Parsing device name data base `%s'.\n", Fname );
 
 	TRY
 	{
@@ -165,12 +174,10 @@ bool device_list_parse( void )
 		}
    		TRY_SUCCESS;
 	}
-	CATCH( OUT_OF_MEMORY_EXCEPTION )
+	OTHERWISE
 	{
 		fclose( devices_listin );
-		free( Fname );
-		delete_device_name_list( );
-		return FAIL;
+		PASSTHROU( );;
 	}
 
 	fclose( devices_listin );

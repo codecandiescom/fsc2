@@ -24,7 +24,7 @@ typedef struct {
 
 
 
-void phases_init( void );
+void phases_clear( void );
 void acq_seq_start( long acq_num, long acq_type );
 void acq_seq_cont(  long acq_type );
 long phase_seq_start( long phase_seq_num );

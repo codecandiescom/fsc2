@@ -95,7 +95,7 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 {FILE}      {
 				*( prepstext + prepsleng - 1 ) = '\0';
 				if ( Fname != NULL )
-					free( Fname );
+					T_free( Fname );
 				Fname = get_string_copy( prepstext + 2 );
 			}
 
@@ -106,11 +106,15 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 			}
 
 			/* handling of error messages from the cleaner */
-{ERR}		THROW( CLEANER_EXCEPTION );
+{ERR}		{
+				eprint( FATAL, "%s", prepstext + 2 );
+				THROW( EXCEPTION );
+			}
 
 {ESTR}		{
 				prepstext = strchr( prepstext, '\x03' );
-				THROW( CLEANER_EXCEPTION );
+				eprint( FATAL, "%s", prepstext + 2 );
+				THROW( EXCEPTION );
 			}
 
 			/* handling of DEVICES: labels */
@@ -262,7 +266,7 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 						eprint( FATAL, "%s:%ld: Function `%s' can't be used "
 								"in PREPARATIONS section.\n",
 								 Fname, Lc, prepstext );
-						THROW( SYNTAX_ERROR_EXCEPTION );
+						THROW( EXCEPTION );
 					}
 					return FUNC_TOKEN;
 				}
@@ -270,7 +274,11 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 				/* if it's not a function it should be a variable */
 
 				if ( ( prepslval.vptr = vars_get( prepstext ) ) == NULL )
-					 THROW( ACCESS_NONEXISTING_VARIABLE );
+				{
+					eprint( FATAL, "%s:%ld: Variable `%s' has never been "
+							"declared.\n", Fname, Lc, prepstext );
+					THROW( EXCEPTION );
+				}
 
 				return VAR_TOKEN;
 			}
@@ -310,7 +318,11 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 "\x4sec"    return S_TOKEN;
 
 			/* handling of invalid input */
-.           THROW( INVALID_INPUT_EXCEPTION );
+.           {
+				eprint( FATAL, "%s:%ld: Invalid input in PREPARATIONS "
+						"section: `%s'\n", Fname, Lc, prepstext );
+				THROW( EXCEPTION );
+			}
 
 <<EOF>>	    {
 				Preps_Next_Section = NO_SECTION;
@@ -325,39 +337,27 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 
 int preparations_parser( FILE *in )
 {
+	static bool is_restart = UNSET;
+
+
 	if ( compilation.sections[ PREPARATIONS_SECTION ] )
 	{
 		eprint( FATAL, "%s:%ld: Multiple instances of PREPARATIONS section "
 		        "label.\n", Fname, Lc );
-		return FAIL;
+		THROW( EXCEPTION );
 	}
 	compilation.sections[ PREPARATIONS_SECTION ] = SET;
 
-	Preps_Next_Section = OK;
-
 	prepsin = in;
 
-	TRY
-		prepsparse( );
-	CATCH( INVALID_INPUT_EXCEPTION )
-	{
-		eprint( FATAL, "%s:%ld: Invalid input in PREPARATIONS section: `%s'\n",
-				Fname, Lc, prepstext );
-		return FAIL;
-    }
-	CATCH( CLEANER_EXCEPTION )
-	{
-		eprint( FATAL, "%s", prepstext + 2 );
-		return FAIL;
-	}
-	CATCH( ACCESS_NONEXISTING_VARIABLE )
-	{
-		eprint( FATAL, "%s:%ld: Variable `%s' has never been declared.\n",
-				Fname, Lc, prepstext );
-		return FAIL;
-	}
-	CATCH( PREPARATIONS_EXCEPTION )
-		return FAIL;
+	/* Keep the lexer happy... */
+
+	if ( is_restart )
+	    prepsrestart( prepsin );
+	else
+		 is_restart = SET;
+
+	prepsparse( );
 
 	return Preps_Next_Section;
 }

@@ -67,7 +67,7 @@ WS          [\n=,:. ]+
 {FILE}      {
 				*( phasestext + phasesleng - 1 ) = '\0';
 				if ( Fname != NULL )
-					free( Fname );
+					T_free( Fname );
 				Fname = get_string_copy( phasestext + 2 );
 			}
 
@@ -211,32 +211,40 @@ WS          [\n=,:. ]+
 
 int phases_parser( FILE *in )
 {
+	static bool is_restart = UNSET;
+
+
 	if ( compilation.sections[ PHASES_SECTION ] )
 	{
 		eprint( FATAL, "%s:%ld: Multiple instances of PHASES section label.\n",
 				Fname, Lc );
-		return FAIL;
+		THROW( EXCEPTION );
 	}
 	compilation.sections[ PHASES_SECTION ] = SET;
 
-	Phases_Next_Section = OK;
-
-	phases_init( );
 	phasesin = in;
+
+	/* Keep the lexer happy... */
+
+	if ( is_restart )
+	    phasesrestart( phasesin );
+	else
+		 is_restart = SET;
 
 	TRY
 	{
 		phasesparse( );
 		phases_end( );
+		TRY_SUCCESS;
 	}
-	CATCH( PHASES_EXCEPTION )
-		return FAIL;
 	CATCH( INVALID_INPUT_EXCEPTION )
 	{
 		eprint( FATAL, "%s:%ld: Invalid input in PHASES section: `%s'\n",
 				Fname, Lc, phasestext );
-		return FAIL;
+		THROW( EXCEPTION );
 	}
+	OTHERWISE
+		PASSTHROU( );
 
 	return Phases_Next_Section;
 }

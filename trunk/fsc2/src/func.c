@@ -120,17 +120,13 @@ bool functions_init( void )
 
 	TRY
 	{
+		fncts = NULL;
 		fncts = T_malloc( ( num_def_func + 1 ) * sizeof( Func ) );
 		memcpy( fncts, def_fncts, ( num_def_func + 1 ) * sizeof( Func ) );
 		func_list_parse( &fncts, num_def_func, &num_func );
    		TRY_SUCCESS;
 	}
-	CATCH( OUT_OF_MEMORY_EXCEPTION )
-	{
-		functions_exit( );
-		return FAIL;
-	}
-	CATCH( FUNCTION_EXCEPTION )
+	OTHERWISE
 	{
 		functions_exit( );
 		return FAIL;
@@ -149,6 +145,8 @@ void functions_exit( void )
 {
 	int i;
 
+	if ( fncts == NULL )
+		return;
 
 	/* Get rid of the structures for the functions */
 
@@ -156,6 +154,7 @@ void functions_exit( void )
 		if ( fncts[ i ].name != NULL )
 			free( ( char * ) fncts[ i ].name );
 	free( fncts );
+	fncts = NULL;
 }
 
 
@@ -188,7 +187,7 @@ void load_all_drivers( void )
 
 	for ( cd = Device_List; cd != NULL; cd = cd->next )
 		if ( cd->is_loaded && cd->driver.is_init_hook &&
-			 ! cd->driver.lib_init( ) )
+			 ! cd->driver.init_hook( ) )
 			eprint( WARN, "Initialization of library `%s.so' failed.\n",
 					cd->name );
 }
@@ -204,8 +203,7 @@ void load_functions( Device *dev )
 {
 	int num;
 	char *lib_name;
-	char *init_func;
-	char *exit_func;
+	char *hook_func;
 	void *cur;
 
 
@@ -227,35 +225,59 @@ void load_functions( Device *dev )
 		else
 			eprint( FATAL, "Can't open library for device `%s'.\n",
 					dev->name );
-		THROW( LIBRARY_EXCEPTION );
+		THROW( EXCEPTION );
 	}
 
 	dev->is_loaded = SET;
 	dev->driver.is_init_hook = UNSET;
+	dev->driver.is_test_hook = UNSET;
+	dev->driver.is_exp_hook = UNSET;
 	dev->driver.is_exit_hook = UNSET;
 
 	/* If there is function with the name of the library file and the
 	   appended string "_init_hook" store it and set corresponding flag */
 
-	init_func = T_malloc( strlen( dev->name ) + 10 );
-	strcpy( init_func, dev->name );
-	strcat( init_func, "_init_hook" );	
+	hook_func = T_malloc( strlen( dev->name ) + 11 );
+	strcpy( hook_func, dev->name );
+	strcat( hook_func, "_init_hook" );	
 
-	dev->driver.lib_init = dlsym( dev->driver.handle, init_func );
+	dev->driver.init_hook = dlsym( dev->driver.handle, hook_func );
 	if ( dlerror( ) == NULL )
 		dev->driver.is_init_hook = SET;
-	free( init_func );
-		
-	/* Now check if there's also an exit hook function */
+	free( hook_func );
 
-	exit_func = T_malloc( strlen( dev->name ) + 10 );
-	strcpy( exit_func, dev->name );
-	strcat( exit_func, "_exit_hook" );	
+	/* Get test hook function if available */
+	
+	hook_func = T_malloc( strlen( dev->name ) + 11 );
+	strcpy( hook_func, dev->name );
+	strcat( hook_func, "_test_hook" );	
 
-	dev->driver.lib_exit = dlsym( dev->driver.handle, exit_func );
+	dev->driver.test_hook = dlsym( dev->driver.handle, hook_func );
+	if ( dlerror( ) == NULL )
+		dev->driver.is_test_hook = SET;
+	free( hook_func );
+
+	/* Get pre-experiment hook function if available */
+	
+	hook_func = T_malloc( strlen( dev->name ) + 10 );
+	strcpy( hook_func, dev->name );
+	strcat( hook_func, "_exp_hook" );	
+
+	dev->driver.exp_hook = dlsym( dev->driver.handle, hook_func );
+	if ( dlerror( ) == NULL )
+		dev->driver.is_exp_hook = SET;
+	free( hook_func );
+
+	/* Finally check if there's also an exit hook function */
+
+	hook_func = T_malloc( strlen( dev->name ) + 11 );
+	strcpy( hook_func, dev->name );
+	strcat( hook_func, "_exit_hook" );	
+
+	dev->driver.exit_hook = dlsym( dev->driver.handle, hook_func );
 	if ( dlerror( ) == NULL )
 		dev->driver.is_exit_hook = SET;
-	free( exit_func );
+	free( hook_func );
 
 	/* Run through all the functions in the function list and if they need
 	   to be resolved try to find them in the device driver functions - check
@@ -306,6 +328,34 @@ void load_functions( Device *dev )
 					fncts[ num ].name );
 		fncts[ num ].fnct = cur;
 	}
+}
+
+
+/* Functions runs the test hook functions of all modules */
+
+void run_test_hooks( void )
+{
+	Device *cd;
+
+	for ( cd = Device_List; cd != NULL; cd = cd->next )
+		if ( cd->is_loaded && cd->driver.is_test_hook &&
+			 ! cd->driver.test_hook( ) )
+			eprint( WARN, "Initialization for test run of library `%s.so' "
+					"failed.\n", cd->name );
+}
+
+
+/* Functions runs the experiment hook functions of all modules */
+
+void run_exp_hooks( void )
+{
+	Device *cd;
+
+	for ( cd = Device_List; cd != NULL; cd = cd->next )
+		if ( cd->is_loaded && cd->driver.is_exp_hook &&
+			 ! cd->driver.exp_hook( ) )
+			eprint( WARN, "Initialization for experiment of library `%s.so' "
+					"failed.\n", cd->name );
 }
 
 
@@ -379,7 +429,7 @@ Var *func_get( char *name, int *access )
 			{
 				eprint( FATAL, "%s:%ld: Function `%s' has not (yet) been "
                         "loaded.\n", Fname, Lc, fncts[ i ].name );
-				THROW( FUNCTION_EXCEPTION );
+				THROW( EXCEPTION );
 			}
 						
 			ret = vars_push( FUNC, fncts[ i ].fnct );
@@ -437,7 +487,7 @@ Var *func_call( Var *f )
 			eprint( FATAL, "%s:%ld: Function `%s' needs %d arguments but "
 					"found only %d.\n",
 					Fname, Lc, f->name, f->dim, ac );
-			THROW( FUNCTION_EXCEPTION );
+			THROW( EXCEPTION );
 		}
 	}
 
@@ -604,7 +654,7 @@ Var *f_asin( Var *v )
 	{
 		eprint( FATAL, "%s:%ld: Argument for function `asin' is out of "
 				"range.\n", Fname, Lc );
-		THROW( FUNCTION_EXCEPTION );
+		THROW( EXCEPTION );
 	}
 
 	return vars_push( FLOAT_VAR, asin( arg ) );
@@ -628,7 +678,7 @@ Var *f_acos( Var *v )
 	{
 		eprint( FATAL, "%s:%ld: Argument for function `acos' is out of "
 				"range.\n",  Fname, Lc );
-		THROW( FUNCTION_EXCEPTION );
+		THROW( EXCEPTION );
 	}
 
 	return vars_push( FLOAT_VAR, acos( arg ) );
@@ -717,7 +767,7 @@ Var *f_ln( Var *v )
 	{
 		eprint( FATAL, "%s:%ld: Argument for function `ln' is out of "
 				"range.\n", Fname, Lc );
-		THROW( FUNCTION_EXCEPTION );
+		THROW( EXCEPTION );
 	}
 	return vars_push( FLOAT_VAR, log( arg ) );
 }
@@ -740,7 +790,7 @@ Var *f_log( Var *v )
 	{
 		eprint( FATAL, "%s:%ld: Argument for function `log' is out of "
 				"range.\n", Fname, Lc );
-		THROW( FUNCTION_EXCEPTION );
+		THROW( EXCEPTION );
 	}
 	return vars_push( FLOAT_VAR, log10( arg ) );
 }
@@ -763,7 +813,7 @@ Var *f_sqrt( Var *v )
 	{
 		eprint( FATAL, "%s:%ld: Argument for function `sqrt' is negative.\n", 
 				Fname, Lc );
-		THROW( FUNCTION_EXCEPTION );
+		THROW( EXCEPTION );
 	}
 	return vars_push( FLOAT_VAR, sqrt( arg ) );
 }
@@ -777,7 +827,7 @@ Var *f_sqrt( Var *v )
    combination to print a `#' most of the escape sequences from printf()
    ('\a', '\b', '\f', '\n', '\r', '\t', '\v' and '\"') do function.
 
-   The unction returns the number of variables it printed, not counting
+   The function returns the number of variables it printed, not counting
    the format string. */
 
 Var *f_print( Var *v )

@@ -90,7 +90,7 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 {FILE}      {
 				*( prim_exptext + prim_expleng - 1 ) = '\0';
 				if ( Fname != NULL )
-					free( Fname );
+					T_free( Fname );
 				Fname = get_string_copy( prim_exptext + 2 );
 			}
 
@@ -101,11 +101,15 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 			}
 
 			/* handling of error messages from the cleaner */
-{ERR}		THROW( CLEANER_EXCEPTION );
+{ERR}		{
+				eprint( FATAL, "%s", prim_exptext + 2 );
+				THROW( EXCEPTION );
+			}
 
 {ESTR}		{
 				prim_exptext = strchr( prim_exptext, '\x03' );
-				THROW( CLEANER_EXCEPTION );
+				eprint( FATAL, "%s", prim_exptext + 2 );
+				THROW( EXCEPTION );
 			}
 
 			/* handling of DEVICES: labels */
@@ -217,7 +221,11 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 
 				prim_exp_val.vptr = vars_get( prim_exptext );
 				if ( prim_exp_val.vptr == NULL )
-					 THROW( ACCESS_NONEXISTING_VARIABLE );
+				{
+					eprint( FATAL, "%s:%ld: Variable `%s' has never been "
+							"declared.\n", Fname, Lc, prim_exptext );
+					 THROW( EXCEPTION );
+				}
 
 				return E_VAR_TOKEN;
 			}
@@ -252,7 +260,11 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 "\x4sec"    return E_S_TOKEN;
 
 			/* handling of invalid input */
-.           THROW( INVALID_INPUT_EXCEPTION );
+.           {
+				eprint( FATAL, "%s:%ld: Invalid input in EXPERIMENT section: "
+						"`%s'\n", Fname, Lc, prim_exptext );
+				THROW( EXCEPTION );
+			}
 
 <<EOF>>	    {
 				Prim_Exp_Next_Section = NO_SECTION;
@@ -271,44 +283,18 @@ int primary_experiment_parser( FILE *in )
 	{
 		eprint( FATAL, "%s:%ld: Multiple instances of EXPERIMENTS section "
 		        "label.\n", Fname, Lc );
-		return FAIL;
+		THROW( EXCEPTION );
 	}
 	compilation.sections[ EXPERIMENT_SECTION ] = SET;
 
-	Prim_Exp_Next_Section = OK;
-
-	TRY
-	{
-		store_exp( in );
-		prim_exp_run( );
-	}
-	CATCH( INVALID_INPUT_EXCEPTION )
-	{
-		eprint( FATAL, "%s:%ld: Invalid input in EXPERIMENT section: `%s'\n",
-				Fname, Lc, prim_exptext );
-		return FAIL;
-    }
-	CATCH( CLEANER_EXCEPTION )
-	{
-		eprint( FATAL, "%s", prim_exptext + 2 );
-		return FAIL;
-	}
-	CATCH( ACCESS_NONEXISTING_VARIABLE )
-	{
-		eprint( FATAL, "%s:%ld: Variable `%s' has never been declared.\n",
-				Fname, Lc, prim_exptext );
-		return FAIL;
-	}
-	CATCH( EXPERIMENT_EXCEPTION )
-		return FAIL;
-	CATCH( FUNCTION_EXCEPTION )
-		return FAIL;
+	store_exp( in );
+	prim_exp_run( );
 
 	if ( Prim_Exp_Next_Section != NO_SECTION )
 	{
 		eprint( FATAL, "%s:%ld: EXPERIMENT section has to be the very last "
 				"section.\n", Fname, Lc );
-		return( FAIL );
+		THROW( EXCEPTION );
 	}
 
 	return Prim_Exp_Next_Section;

@@ -89,7 +89,7 @@ WS          [\n \t]+
 {FILE}      {
 				*( variablestext + variablesleng - 1 ) = '\0';
 				if ( Fname != NULL )
-					free( Fname );
+					T_free( Fname );
 				Fname = get_string_copy( variablestext + 2 );
 			}
 
@@ -100,11 +100,15 @@ WS          [\n \t]+
 			}
 
 			/* handling of error messages from the cleaner */
-{ERR}		THROW( CLEANER_EXCEPTION );
+{ERR}		{
+				eprint( FATAL, "%s", variablestext + 2 );
+				THROW( EXCEPTION );
+			}
 
 {ESTR}		{
 				variablestext = strchr( variablestext, '\x03' );
-				THROW( CLEANER_EXCEPTION );
+				eprint( FATAL, "%s", variablestext + 2 );
+				THROW( EXCEPTION );
 			}
 
 			/* handling of DEVICES: labels */
@@ -218,7 +222,7 @@ WS          [\n \t]+
 						eprint( FATAL, "%s:%ld: Function `%s' can't be used "
 								 "in VARIABLES section.\n",
 								 Fname, Lc, variablestext );
-						THROW( FUNCTION_EXCEPTION );
+						THROW( EXCEPTION );
 					}
 					return FUNC_TOKEN;
 				}
@@ -264,7 +268,11 @@ WS          [\n \t]+
 "\x4sec"    return S_TOKEN;
 
 			/* handling of invalid input */
-.           THROW( INVALID_INPUT_EXCEPTION );
+.           {
+				eprint( FATAL, "%s:%ld: Invalid input in VARIABLES section: "
+						"`%s'\n", Fname, Lc, variablestext );
+				THROW( EXCEPTION );
+			}
 
 			/* handling of end of file */
 <<EOF>>	    {
@@ -292,39 +300,29 @@ WS          [\n \t]+
 
 int variables_parser( FILE *in )
 {
+	static bool is_restart = UNSET;
+
+
 	/* don't allow more than one VARIABLES section */
 
 	if ( compilation.sections[ VARIABLES_SECTION ] )
 	{
 		eprint( FATAL, "%s:%ld: Multiple instances of VARIABLES section "
 		        "label.\n", Fname, Lc );
-		return FAIL;
+		THROW( EXCEPTION );
 	}
 	compilation.sections[ VARIABLES_SECTION ] = SET;
 
-	Vars_Next_Section = OK;    /* until now... (allows section_parser()
-								  to catch several common errors) */
 	variablesin = in;
 
-	TRY
-		variablesparse( );
-	CATCH( MULTIPLE_VARIABLE_DEFINITION_EXCEPTION )
-		return FAIL;
-	CATCH( UNKNOWN_FUNCTION_EXCEPTION )
-		return FAIL;
-	CATCH( INVALID_INPUT_EXCEPTION )
-	{
-		eprint( FATAL, "%s:%ld: Invalid input in VARIABLES section: `%s'\n",
-				 Fname, Lc, variablestext );
-		return FAIL;
-    }
-	CATCH( CLEANER_EXCEPTION )
-	{
-		eprint( FATAL, "%s", variablestext + 2 );
-		return FAIL;
-	}
-	CATCH( FUNCTION_EXCEPTION )
-		return FAIL;
+	/* Keep the lexer happy... */
+
+	if ( is_restart )
+	    variablesrestart( variablesin );
+	else
+		 is_restart = SET;
+
+	variablesparse( );
 
 #ifdef DEBUG
 	print_all_vars( );

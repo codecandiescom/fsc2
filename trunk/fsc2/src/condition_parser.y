@@ -102,11 +102,11 @@ expr:    E_INT_TOKEN unit         { $$ = vars_mult( vars_push( INT_VAR, $1 ),
        | E_VAR_TOKEN '('          { eprint( FATAL, "%s:%ld: `%s' isn't a "
 											"function.\n", Fname, Lc,
 											$1->name );
-	                                 THROW( UNKNOWN_FUNCTION_EXCEPTION ); }
+	                                 THROW( EXCEPTION ); }
        | E_FUNC_TOKEN '['         { eprint( FATAL, "%s:%ld: `%s' is a "
 											"predefined function.\n",
 											Fname, Lc, $1->name );
-	                                THROW( VARIABLES_EXCEPTION ); }
+	                                THROW( EXCEPTION ); }
        | expr E_EQ expr           { $$ = vars_comp( COMP_EQUAL, $1, $3 ); }
        | expr E_LT expr           { $$ = vars_comp( COMP_LESS, $1, $3 ); }
        | expr E_GT expr           { $$ = vars_comp( COMP_LESS, $3, $1 ); }
@@ -156,6 +156,9 @@ exprs:   expr                      { }
 
 int conditionerror ( const char *s )
 {
-	eprint( FATAL, "%s:%ld: Syntax error in condition.\n", Fname, Lc  );
-	THROW( CONDITION_EXCEPTION );
+	s = s;                    /* stupid but avoids compiler warning */
+
+	eprint( FATAL, "%s:%ld: Syntax error in loop or if condition.\n",
+			Fname, Lc  );
+	THROW( EXCEPTION );
 }

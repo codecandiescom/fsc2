@@ -22,6 +22,8 @@ int assignerror( const char *s );
 
 int Channel_Type;
 
+static Var *CV;
+
 /* externally (in assign_lexer.flex) defined global variables */ 
 
 %}
@@ -62,8 +64,8 @@ int Channel_Type;
 %token <sptr> STR_TOKEN
 %token EQ LT LE GT GE
 
-%type <dval> time unit
-%type <vptr> expr list1
+%type <dval> 
+%type <vptr> expr list1 unit
 
 %left EQ LT LE GT GE
 %left '+' '-'
@@ -92,16 +94,7 @@ input:   /* empty */
 line:    keywd pcd                    { }
        | keywd pcd SECTION_LABEL      { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | keywd pcd keywd error        { THROW( MISSING_SEMICOLON_EXCEPTION ); }
-       | VAR_TOKEN '=' expr           { vars_assign( $3, $1 ); }
-       | VAR_TOKEN '['                { vars_arr_start( $1 ); }
-         list1 ']'                    { vars_arr_lhs( $4 ); }
-         '=' expr ';'                 { vars_assign( $8, $8->prev );
-                                        assert( Var_Stack == NULL ); }
-       | FUNC_TOKEN '(' list2 ')' ';' { vars_pop( func_call( $1 ) ); }
-       | FUNC_TOKEN '['               { eprint( FATAL, "%s:%ld: `%s' is a "
-												"function and not an array.\n",
-												Fname, Lc, $1->name );
-	                                    THROW( VARIABLES_EXCEPTION ); }
+       
 ;
 
 
@@ -140,84 +133,104 @@ podd:   pod
       | pod ','
 ;
 
-pod:    POD_TOKEN INT_TOKEN          { assign_pod( Channel_Type, $2 ); }
-      | POD_TOKEN '=' INT_TOKEN      { assign_pod( Channel_Type, $3 ); }
+pod:    POD_TOKEN INT_TOKEN       { assign_pod( Channel_Type, $2 ); }
+      | POD_TOKEN '=' INT_TOKEN   { assign_pod( Channel_Type, $3 ); }
+;								  
+								  
+chd:    CH_TOKEN ch1			  
+      | CH_TOKEN '=' ch1		  
+								  
+ch1:    INT_TOKEN                 { assign_channel( Channel_Type, $1 ); }
+      | INT_TOKEN ','             { assign_channel( Channel_Type, $1 ); }
+      | ch1 INT_TOKEN             { assign_channel( Channel_Type, $2 ); }
+      | ch1 INT_TOKEN ','         { assign_channel( Channel_Type, $2 ); }
+;								  
+								  
+deld:   del						  
+      | del ','					  
+;								  
+								  
+del:    DEL_TOKEN expr            { set_pod_delay( Channel_Type, $2 ); }
+      | DEL_TOKEN '=' expr        { set_pod_delay( Channel_Type, $3 ); }
+;								  
+								  
+invd:   INV_TOKEN                 { assign_inv_channel( Channel_Type ); }
+      | INV_TOKEN ','             { assign_inv_channel( Channel_Type ); }
 ;
 
-chd:    CH_TOKEN ch1
-      | CH_TOKEN '=' ch1
-
-ch1:    INT_TOKEN                    { assign_channel( Channel_Type, $1 ); }
-      | INT_TOKEN ','                { assign_channel( Channel_Type, $1 ); }
-      | ch1 INT_TOKEN                { assign_channel( Channel_Type, $2 ); }
-      | ch1 INT_TOKEN ','            { assign_channel( Channel_Type, $2 ); }
+expr:    INT_TOKEN unit           { $$ = vars_mult( vars_push( INT_VAR, $1 ), 
+													$2 ); }
+       | FLOAT_TOKEN unit         { $$ = vars_mult( vars_push( FLOAT_VAR, $1 ),
+													$2 ); }
+       | VAR_TOKEN unit           { $$ = vars_mult( $1, $2 ); }
+       | VAR_TOKEN '['            { vars_arr_start( $1 ); }
+         list1 ']'                { CV = vars_arr_rhs( $4 ); }
+         unit                     { if ( CV->type & ( INT_VAR | FLOAT_VAR ) )
+			                            $$ = vars_mult( CV, $7 );
+		                            else
+									{
+										vars_pop( $7 );
+									    $$ = CV;
+									} }
+       | FUNC_TOKEN '(' list2 ')' { CV = func_call( $1 ); }
+         unit                     { if ( CV->type & ( INT_VAR | FLOAT_VAR ) )
+			                            $$ = vars_mult( CV, $6 );
+		                            else
+									{
+										vars_pop( $6 );
+									    $$ = CV;
+									} }
+       | VAR_REF                  { $$ = $1; }
+       | VAR_TOKEN '('            { eprint( FATAL, "%s:%ld: `%s' isn't a "
+											"function.\n", Fname, Lc,
+											$1->name );
+	                                 THROW( EXCEPTION ); }
+       | FUNC_TOKEN '['           { eprint( FATAL, "%s:%ld: `%s' is a "
+											"predefined function.\n",
+											Fname, Lc, $1->name );
+	                                THROW( EXCEPTION ); }
+       | expr EQ expr             { $$ = vars_comp( COMP_EQUAL, $1, $3 ); }
+       | expr LT expr             { $$ = vars_comp( COMP_LESS, $1, $3 ); }
+       | expr GT expr             { $$ = vars_comp( COMP_LESS, $3, $1 ); }
+       | expr LE expr             { $$ = vars_comp( COMP_LESS_EQUAL,
+													$1, $3 ); }
+       | expr GE expr             { $$ = vars_comp( COMP_LESS_EQUAL, 
+													$3, $1 ); }
+       | expr '+' expr            { $$ = vars_add( $1, $3 ); }
+       | expr '-' expr            { $$ = vars_sub( $1, $3 ); }
+       | expr '*' expr            { $$ = vars_mult( $1, $3 ); }
+       | expr '/' expr            { $$ = vars_div( $1, $3 ); }
+       | expr '%' expr            { $$ = vars_mod( $1, $3 ); }
+       | expr '^' expr            { $$ = vars_pow( $1, $3 ); }
+       | '-' expr %prec NEG       { $$ = vars_negate( $2 ); }
+       | '(' expr ')' unit        { $$ = vars_mult( $2, $4 ); }
 ;
 
-deld:   del
-      | del ','
-;
-
-del:    DEL_TOKEN time               { set_pod_delay( Channel_Type, $2 ); }
-      | DEL_TOKEN '=' time           { set_pod_delay( Channel_Type, $3 ); }
-;
-
-time:   INT_TOKEN unit               { $$ = ( double ) $1 * $2; }
-      | FLOAT_TOKEN unit             { $$ = $1 * $2; }
-;									 
-									 
-unit:   /* empty */                  { $$ = 1.0; }
-      | NS_TOKEN                     { $$ = 1.0; }
-      | US_TOKEN                     { $$ = 1.0e3; }
-      | MS_TOKEN                     { $$ = 1.0e6; }
-      | S_TOKEN                      { $$ = 1.0e9; }
-;
-
-invd:   INV_TOKEN                    { assign_inv_channel( Channel_Type ); }
-      | INV_TOKEN ','                { assign_inv_channel( Channel_Type ); }
-;
-
-expr:   INT_TOKEN                    { $$ = vars_push( INT_VAR, $1 ); }
-      | FLOAT_TOKEN                  { $$ = vars_push( FLOAT_VAR, $1 ); }
-      | VAR_TOKEN                    { $$ = vars_push_copy( $1 ); }
-      | VAR_TOKEN '['                { vars_arr_start( $1 ); }
-        list1 ']'                    { $$ = vars_arr_rhs( $4 ); }
-      | FUNC_TOKEN '(' list2 ')'     { $$ = func_call( $1 ); }
-      | VAR_REF                      { $$ = $1; }
-      | expr EQ expr                 { $$ = vars_comp( COMP_EQUAL, $1, $3 ); }
-      | expr LT expr                 { $$ = vars_comp( COMP_LESS, $1, $3 ); }
-      | expr GT expr                 { $$ = vars_comp( COMP_LESS, $3, $1 ); }
-      | expr LE expr                 { $$ = vars_comp( COMP_LESS_EQUAL,
-	 							     				   $1, $3 ); }
-      | expr GE expr                 { $$ = vars_comp( COMP_LESS_EQUAL,
-	 							     				   $3, $1 ); }
-      | expr '+' expr                { $$ = vars_add( $1, $3 ); }
-      | expr '-' expr                { $$ = vars_sub( $1, $3 ); }
-      | expr '*' expr                { $$ = vars_mult( $1, $3 ); }
-      | expr '/' expr                { $$ = vars_div( $1, $3 ); }
-      | expr '%' expr                { $$ = vars_mod( $1, $3 ); }
-      | expr '^' expr                { $$ = vars_pow( $1, $3 ); }
-      | '-' expr %prec NEG           { $$ = vars_negate( $2 ); }
-      | '(' expr ')'                 { $$ = $2 }
+unit:    /* empty */               { $$ = vars_push( INT_VAR, 1L ); }
+       | NS_TOKEN                  { $$ = vars_push( INT_VAR, 1L ); }
+       | US_TOKEN                  { $$ = vars_push( INT_VAR, 1000L ); }
+       | MS_TOKEN                  { $$ = vars_push( INT_VAR, 1000000L ); }
+       | S_TOKEN                   { $$ = vars_push( INT_VAR, 1000000000L ); }
 ;
 
 
 /* list of indices for access of an array element */
 
 
-list1:   /* empty */                 { $$ = vars_push( UNDEF_VAR ); }
-	   | expr                        { $$ = $1; }
-       | list1 ',' expr              { $$ = $3; }
-;
-
-/* list of function arguments */
-
-list2:   /* empty */
-       | exprs
-	   | list2 ',' exprs
-;
-
-exprs:   expr                        { }
-       | STR_TOKEN                   { vars_push( STR_VAR, $1 ); }
+list1:   /* empty */               { $$ = vars_push( UNDEF_VAR ); }
+	   | expr                      { $$ = $1; }
+       | list1 ',' expr            { $$ = $3; }
+;								   
+								   
+/* list of function arguments */   
+								   
+list2:   /* empty */			   
+       | exprs					   
+	   | list2 ',' exprs		   
+;								   
+								   
+exprs:   expr                      { }
+       | STR_TOKEN                 { vars_push( STR_VAR, $1 ); }
 ;
 
 
@@ -227,11 +240,13 @@ exprs:   expr                        { }
 
 int assignerror ( const char *s )
 {
+	s = s;                    /* stupid but avoids compiler warning */
+
 	if ( *assigntext == '\0' )
 		eprint( FATAL, "%s:%ld: Unexpected end of file in ASSIGNMENTS "
 				"section.\n", Fname, Lc );
 	else
 		eprint( FATAL, "%s:%ld: Syntax error near token `%s'.\n",
 				Fname, Lc, assigntext );
-	THROW( VARIABLES_EXCEPTION );
+	THROW( EXCEPTION );
 }

@@ -90,7 +90,7 @@ line:    P_TOK prop
        | FUNC_TOKEN '['            { eprint( FATAL, "%s:%ld: `%s' is a "
 											 "predefined function.\n",
 											 Fname, Lc, $1->name );
-	                                 THROW( VARIABLES_EXCEPTION ); }
+	                                 THROW( EXCEPTION ); }
 ;
 
 prop:   /* empty */
@@ -142,11 +142,11 @@ expr:    INT_TOKEN unit           { $$ = vars_mult( vars_push( INT_VAR, $1 ),
        | VAR_TOKEN '('            { eprint( FATAL, "%s:%ld: `%s' isn't a "
 											"function.\n", Fname, Lc,
 											$1->name );
-	                                 THROW( UNKNOWN_FUNCTION_EXCEPTION ); }
+	                                 THROW( EXCEPTION ); }
        | FUNC_TOKEN '['           { eprint( FATAL, "%s:%ld: `%s' is a "
 											"predefined function.\n",
 											Fname, Lc, $1->name );
-	                                THROW( VARIABLES_EXCEPTION ); }
+	                                THROW( EXCEPTION ); }
        | expr EQ expr             { $$ = vars_comp( COMP_EQUAL, $1, $3 ); }
        | expr LT expr             { $$ = vars_comp( COMP_LESS, $1, $3 ); }
        | expr GT expr             { $$ = vars_comp( COMP_LESS, $3, $1 ); }
@@ -195,11 +195,13 @@ exprs:   expr                      { }
 
 void prepserror ( const char *s )
 {
+	s = s;                    /* stupid but avoids compiler warning */
+
 	if ( *prepstext == '\0' )
 		eprint( FATAL, "%s:%ld: Unexpected end of file in PREPARATIONS "
 				"section.\n", Fname, Lc );
 	else
 		eprint( FATAL, "%s:%ld: Syntax error near token `%s'.\n",
 				Fname, Lc, prepstext );
-	THROW( PREPARATIONS_EXCEPTION );
+	THROW( EXCEPTION );
 }

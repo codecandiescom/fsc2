@@ -5,6 +5,8 @@
 
 #include "fsc2.h"
 
+#include <mcheck.h>
+
 
 void *T_malloc( size_t size )
 {
@@ -25,7 +27,6 @@ void *T_malloc( size_t size )
 void *T_calloc( size_t nmemb, size_t size )
 {
 	void *mem;
-
 
 	mem = calloc( nmemb, size );
 
@@ -52,4 +53,14 @@ void *T_realloc( void *ptr, size_t size )
 	}
 
 	return new_ptr;
+}
+
+
+void T_free( void *ptr )
+{
+#if defined DEBUG
+	assert( mprobe( ptr ) == MCHECK_OK );
+#endif
+
+	free( ptr );
 }

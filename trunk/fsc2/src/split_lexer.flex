@@ -51,7 +51,7 @@ EXP         ^[\t ]*EXP(ERIMENT)?:
 {FILE}      {
 				*( splittext + splitleng - 1 ) = '\0';
 				if ( Fname != NULL )
-					free( Fname );
+					T_free( Fname );
 				Fname = get_string_copy( splittext + 2 );
 			}
 
@@ -129,23 +129,12 @@ bool split( char *file )
 {
 	char *cmd;
 	bool split_error;
-	int i;
 
 
 	/* Parse the function and the device name data base */
 
-	if ( ! functions_init( ) )
+	if ( ! functions_init( ) || ! device_list_parse( ) )
 		return FAIL;
-
-	if ( ! device_list_parse( ) )
-	    return FAIL;
-
-	/* clear up the compilation structure */
-
-	for ( i = 0; i < 3; ++i )
-		compilation.error[ 3 ] = UNSET;
-	for ( i = ASSIGNMENTS_SECTION; i <= EXPERIMENT_SECTION; ++i )
-		compilation.sections[ i ] = UNSET;
 
 	/* check that the file name is reasonable */
 
@@ -171,13 +160,6 @@ bool split( char *file )
 
 	pclose( splitin );
 
-	if ( Fname != NULL )
-		free( Fname );
-
-	delete_device_name_list( );
-	delete_devices( );
-	functions_exit( );
-
 	return split_error;
 }
 
@@ -201,94 +183,63 @@ bool split( char *file )
 
 bool section_parser( int section )
 {
-	do
+	TRY 
 	{
-		/* First run the appropriate lexer/parser combination */
-
-		switch ( section )
+		do
 		{
-			case DEVICES_SECTION :
-				section = devices_parser( splitin );
-				break;
+			/* First run the appropriate lexer/parser combination */
 
-			case ASSIGNMENTS_SECTION :
-				section = assignments_parser( splitin );
-				break;
+			switch ( section )
+			{
+				case DEVICES_SECTION :
+					section = devices_parser( splitin );
+					break;
+	
+				case ASSIGNMENTS_SECTION :
+					section = assignments_parser( splitin );
+					break;
+	
+				case VARIABLES_SECTION :
+					section = variables_parser( splitin );
+					break;
+	
+				case PHASES_SECTION :
+					section = phases_parser( splitin );
+					break;
+	
+				case PREPARATIONS_SECTION :
+					section = preparations_parser( splitin );
+					break;
+	
+				case EXPERIMENT_SECTION :
+					section = primary_experiment_parser( splitin );
+					break;
+	
+				default :              /* this should never happen, but ... */
+					assert( 1 == 0 );
+			}
+	
+		} while ( section != NO_SECTION );
 
-			case VARIABLES_SECTION :
-				section = variables_parser( splitin );
-				break;
+		/* Finally, we have to do all the checks on that only can be done
+		   after the EDL file has been completely parsed */
 
-			case PHASES_SECTION :
-				section = phases_parser( splitin );
-				break;
+		post_parse_check( );
+		TRY_SUCCESS;
+		return OK;
 
-			case PREPARATIONS_SECTION :
-				section = preparations_parser( splitin );
-				break;
+	}
+	CATCH( SYNTAX_ERROR_EXCEPTION )
+	{
+		eprint( FATAL, "%s:%ld: Syntax error.\n", Fname, Lc ); 
+		return FAIL;
+	}
+	CATCH( MISSING_SEMICOLON_EXCEPTION )
+	{		
+		eprint( FATAL, "%s:%ld: Missing semicolon before (or on) this "
+				"line.\n", Fname, Lc );
+		return FAIL;
+	}
 
-			case EXPERIMENT_SECTION :
-				section = primary_experiment_parser( splitin );
-				break;
-
-			default :              /* this should never happen, but ... */
-				assert( 1 == 0 );
-				return FAIL;
-		}
-
-		/* Now follows the handling of errors: Each lexer starts its action
-		   in a TRY environment (see `exceptions.c' and `exception.h' for
-		   the gory details) - if the try fails, in many cases (i.e. in the
-		   ones common to all lexers and easily to be handled centrally) we
-		   will end up here and ave to catch the error. First we check if the
-		   lexer returned unsuccessfully. In this case the error was already
-		   caught by a CATCH and a FAIL state was returned, so we immediately
-		   return unsuccessfully to splitlex(). Then we check if there was
-		   no exception because also on uncaught exception (i.e. an exceptions
-		   did actually happen) the return state of the lexer seems seems to
-		   be successful. So, if there were no exception we only pop the
-		   jump address from the exception stack and continue with calling
-		   the next lexer. Otherwise the appropriate error handler is
-		   executed (which automatically removes the jump address from the
-		   exception stack) and failure is returned to splitlex(). */
-
-		if ( section == FAIL )                 /* error was already handled */
-		   return FAIL;
-
-		if ( exception_id == NO_EXCEPTION )    /* everything worked out fine */
-	   		TRY_SUCCESS;
-		CATCH( OUT_OF_MEMORY_EXCEPTION )
-		{
-			eprint( FATAL, "%s:%ld: Running out of memory.\n", Fname, Lc );
-			return FAIL;
-		}
-		CATCH( SYNTAX_ERROR_EXCEPTION )
-		{
-			eprint( FATAL, "%s:%ld: Syntax error.\n", Fname, Lc ); 
-			return FAIL;
-		}
-		CATCH( MISSING_SEMICOLON_EXCEPTION )
-		{		
-			eprint( FATAL, "%s:%ld: Missing semicolon before (or on) this "
-					"line.\n", Fname, Lc );
-			return FAIL;
-		}
-		CATCH( LIBRARY_EXCEPTION )
-			return FAIL;
-		CATCH( FLOATING_POINT_EXCEPTION )
-			return FAIL;
-		CATCH( PRINT_SYNTAX_EXCEPTION )
-			return FAIL;
-		CATCH( VARIABLES_EXCEPTION )
-			return FAIL;
-		CATCH( FUNCTION_EXCEPTION )
-			return FAIL;
-		CATCH( BLOCK_ERROR_EXCEPTION )
-			return FAIL;
-	} while ( section != NO_SECTION );
-
-	/* Finally, we have to do all the checks on that only can be done
-	   after the EDL file has been completely parsed */
-
-	return post_parse_check( );
+	return FAIL;
 }
