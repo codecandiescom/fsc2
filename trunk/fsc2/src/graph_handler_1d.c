@@ -1098,8 +1098,9 @@ void repaint_canvas_1d( Canvas *c )
 
 	if ( c == &G.canvas )
 	{
-		if ( G.button_state == 3 )
-		{
+		if ( G.button_state == 3 &&
+			 c->ppos[ X ] >= 0 && c->ppos[ X ] < c->w &&
+			 c->ppos[ Y ] >= 0 && c->ppos[ Y ] < c->h )
 			for ( i = 0; i < G.nc; i++ )
 			{
 				cv = G.curve[ i ];
@@ -1125,30 +1126,29 @@ void repaint_canvas_1d( Canvas *c )
 									  G.font_desc * i + 2,
 									  buf, strlen( buf ) );
 			}
-		}
 
 		if ( G.button_state == 5 )
 		{
-			for ( i = 0; i < G.nc; i++ )
-			{
-				cv = G.curve[ i ];
+			if ( c->ppos[ X ] >= 0 && c->ppos[ X ] < c->w &&
+				 c->ppos[ Y ] >= 0 && c->ppos[ Y ] < c->h )
+				for ( i = 0; i < G.nc; i++ )
+				{
+					cv = G.curve[ i ];
 
-				x_pos = G.rwc_delta[ X ] * ( c->ppos[ X ] - G.start[ X ] ) /
-					                                              cv->s2d[ X ];
-				y_pos = G.rwc_delta[ Y ] * ( G.start[ Y ] - c->ppos[ Y ] ) /
-					                                              cv->s2d[ Y ];
-
-				sprintf( buf, " %#g   %#g ", x_pos, y_pos );
-				if ( G.font != NULL )
-					XDrawImageString( G.d, pm, cv->font_gc, 5,
-									  ( G.font_asc + 3 ) * ( i + 1 ) +
-									  G.font_desc * i + 2,
-									  buf, strlen( buf ) );
-			}
+					x_pos = G.rwc_delta[ X ] * ( c->ppos[ X ] - G.start[ X ] )
+					        / cv->s2d[ X ];
+					y_pos = G.rwc_delta[ Y ] * ( G.start[ Y ] - c->ppos[ Y ] )
+					        / cv->s2d[ Y ];
+					sprintf( buf, " %#g   %#g ", x_pos, y_pos );
+					if ( G.font != NULL )
+						XDrawImageString( G.d, pm, cv->font_gc, 5,
+										  ( G.font_asc + 3 ) * ( i + 1 ) +
+										  G.font_desc * i + 2,
+										  buf, strlen( buf ) );
+				}
 
 			XDrawArc( G.d, pm, G.curve[ 0 ]->gc,
 					  G.start[ X ] - 5, G.start[ Y ] - 5, 10, 10, 0, 23040 );
-
 			XDrawLine( G.d, pm, c->box_gc, G.start[ X ], G.start[ Y ],
 					   c->ppos[ X ], G.start[ Y ] );
 			XDrawLine( G.d, pm, c->box_gc, c->ppos[ X ], G.start[ Y ],
