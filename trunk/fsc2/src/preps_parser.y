@@ -121,8 +121,6 @@ ass:     '=' expr                  { vars_assign( $2, $2->prev ); }
 															$2 ), C ); }
 ;                                     
 
-
-
 prop:   /* empty */
        | prop F_TOK sep1 expr sep2  { p_set( Cur_Pulse, P_FUNC, $4 ); }
        | prop S_TOK sep1 expr sep2  { p_set( Cur_Pulse, P_POS, $4 ); }
