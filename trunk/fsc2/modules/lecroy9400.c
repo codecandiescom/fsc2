@@ -28,7 +28,7 @@
 
 
 const char generic_type[ ] = DEVICE_TYPE;
-LECROY9400 lecroy9400_store;
+LECROY9400 lecroy9400_stored;
 
 
 static Var *get_curve( Var *v, bool use_cursor );
@@ -82,6 +82,19 @@ int lecroy9400_init_hook( void )
 		lecroy9400.is_reject[ i ]  = UNSET;
 	}
 
+	lecroy9400_stored.w = NULL;
+
+	return 1;
+}
+
+
+/*-----------------------------------*/
+/* Test hook function for the module */
+/*-----------------------------------*/
+
+int lecroy9400_test_hook( void )
+{
+	lecroy9400_store_state( &lecroy9400_stored, &lecroy9400 );
 	return 1;
 }
 
@@ -92,42 +105,10 @@ int lecroy9400_init_hook( void )
 
 int lecroy9400_exp_hook( void )
 {
-	int i;
+	/* Reset structure describing the state of the digitizer to the one
+	   it had before the test run was started */
 
-
-	/* Store the state the digitizer was set to in the preparations section -
-	   we need this when starting the same experiment again... */
-
-	lecroy9400_store.num_used_channels = lecroy9400.num_used_channels;
-
-	lecroy9400_store.is_timebase = lecroy9400.is_timebase;
-	lecroy9400_store.tb_index    = lecroy9400.tb_index;
-	lecroy9400_store.timebase    = lecroy9400.is_timebase;
-
-	lecroy9400_store.is_trig_pos = lecroy9400.is_trig_pos;
-	lecroy9400_store.trig_pos    = lecroy9400.trig_pos;
-
-	lecroy9400_store.data_source = lecroy9400.data_source;
-	lecroy9400_store.meas_source = lecroy9400.meas_source;
-
-	for ( i = LECROY9400_CH1; i <= LECROY9400_FUNC_F; i++ )
-		lecroy9400_store.channels_in_use[ i ] =
-			lecroy9400.channels_in_use[ i ];
-
-	for ( i = LECROY9400_CH1; i <= LECROY9400_CH2; i++ )
-	{
-		lecroy9400_store.is_sens[ i ] = lecroy9400.is_sens[ i ];
-		lecroy9400_store.sens[ i ]    = lecroy9400.sens[ i ];
-	}
-
-	for ( i = LECROY9400_FUNC_E; i <= LECROY9400_FUNC_F; i++ )
-	{
-		lecroy9400_store.is_num_avg[ i ] = lecroy9400.is_num_avg[ i ];
-		lecroy9400_store.num_avg[ i ]    = lecroy9400.num_avg[ i ];
-		lecroy9400_store.source_ch[ i ]  = lecroy9400.source_ch[ i ];
-		lecroy9400_store.rec_len[ i ]    = lecroy9400.rec_len[ i ];
-		lecroy9400_store.is_reject[ i ]  = lecroy9400.is_reject[ i ];
-	}
+	lecroy9400_store_state( &lecroy9400, &lecroy9400_stored );
 
 	lecroy9400_IN_SETUP = SET;
 	if ( ! lecroy9400_init( DEVICE_NAME ) )
@@ -150,48 +131,12 @@ int lecroy9400_exp_hook( void )
 
 int lecroy9400_end_of_exp_hook( void )
 {
-	int i;
-
-
 	lecroy9400_finished( );
 
-	/* Reset the digitizer to the state it was set to in the preparations
-	   section - we need this when starting the same experiment again... */
+	/* Reset structure describing the state of the digitizer to the one
+	   it had before the test run was started */
 
-	lecroy9400.is_reacting      = UNSET;
-
-	lecroy9400.num_used_channels = lecroy9400_store.num_used_channels;
-
-	lecroy9400.is_timebase      = lecroy9400_store.is_timebase;
-	lecroy9400.timebase         = lecroy9400_store.timebase;
-
-	lecroy9400.is_trig_pos      = lecroy9400_store.is_trig_pos;
-	lecroy9400.trig_pos         = lecroy9400_store.trig_pos;
-
-	lecroy9400.data_source      = lecroy9400_store.data_source;
-	lecroy9400.meas_source      = lecroy9400_store.meas_source;
-
-	lecroy9400.lock_state       = lecroy9400_store.lock_state;
-
-	for ( i = LECROY9400_CH1; i <= LECROY9400_FUNC_F; i++ )
-		lecroy9400.channels_in_use[ i ] =
-			lecroy9400_store.channels_in_use[ i ];
-
-	for ( i = LECROY9400_CH1; i <= LECROY9400_CH2; i++ )
-	{
-		lecroy9400.is_sens[ i ] = lecroy9400_store.is_sens[ i ];
-		lecroy9400.sens[ i ]    = lecroy9400_store.sens[ i ];
-	}
-
-	for ( i = LECROY9400_FUNC_E; i <= LECROY9400_FUNC_F; i++ )
-	{
-		lecroy9400.is_num_avg[ i ] = lecroy9400_store.is_num_avg[ i ];
-		lecroy9400.num_avg[ i ]    = lecroy9400_store.num_avg[ i ];
-		lecroy9400.source_ch[ i ]  = lecroy9400_store.source_ch[ i ];
-		lecroy9400.rec_len[ i ]    = lecroy9400_store.rec_len[ i ];
-		lecroy9400.is_reject[ i ]  = lecroy9400_store.is_reject[ i ];
-	}
-
+	lecroy9400_store_state( &lecroy9400, &lecroy9400_stored );
 	return 1;
 }
 
@@ -429,6 +374,7 @@ Var *digitizer_timebase( Var *v )
 Var *digitizer_time_per_point( Var *v )
 {
 	v = v;
+
 	return vars_push( FLOAT_VAR, tpp[ lecroy9400.tb_index ] );
 }
 
@@ -723,7 +669,7 @@ Var *digitizer_averaging( Var *v )
 			i = 0;
 			while ( 1 )
 			{
-				if ( i >= ( int ) NA_ENTRIES )
+				if ( i >= ( int ) CL_ENTRIES )
 				{
 					eprint( FATAL, SET, "%s: Record length %ld too long in "
 							"%s().\n", DEVICE_NAME, rec_len, Cur_Func );
@@ -999,10 +945,9 @@ Var *digitizer_trigger_channel( Var *v )
         case LECROY9400_CH1 : case LECROY9400_CH2 : case LECROY9400_LIN :
 		case LECROY9400_EXT : case LECROY9400_EXT10 :
 			lecroy9400.trigger_channel = channel;
+			lecroy9400.is_trigger_channel = SET;
 			if ( FSC2_MODE == EXPERIMENT )
 				lecroy9400_set_trigger_source( channel );
-			if ( FSC2_MDOE != TEST )
-				lecroy9400.is_trigger_channel = SET;
             break;
 
 		default :
