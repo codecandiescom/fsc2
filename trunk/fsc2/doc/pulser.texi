@@ -413,8 +413,8 @@ output channels. Each output channel can be addressed by a letter
 between @code{A} and @code{D} (or @code{H}, if two HSM cards are
 installed) for the connector, followed by a number between @code{0} and
 @code{15}, specifying the channel on the connector to use. Valid channel
-designators are e.g. @code{A3}, @code{C13} etc. Moreover, the number of
-channels of a connector that can be used depends on the time base
+designators are e.g.@: @code{A3}, @code{C13} etc. Moreover, the number
+of channels of a connector that can be used depends on the time base
 setting: for a time base of @w{4 ns} only the lowest 4 channels of each
 connector can be used, for a time base of @w{8 ns} only the lower 8
 channels.
@@ -439,7 +439,7 @@ DETECTION: CHANNEL = D15;
 The output channels usually are numbered as printed on the device, one
 exception is the trigger-out channel of the @strong{Tektronix HFS9003},
 that is called @code{TRIGGER_OUT}, and has some special properties,
-e.g. allowing only one pulse of fixed length.  The keyword
+e.g.@: allowing only one pulse of fixed length.  The keyword
 @code{CHANNEL} can be replaced by @code{CH} and @code{TRIGGER_OUT} by
 either @code{TRIGGEROUT}, @code{TRIG_OUT} or @code{TRIGOUT}.
 
