@@ -119,8 +119,8 @@ of the corresponding data point.
 
 Of course, we also need to save the data point in a file. This is done
 by the call of the function @code{save} that automatically writes its
-argument to a file. When the function is called the first time it will
-prompt you for the name of the file to use.
+argument to a file. When the function is called for the first time it
+prompts for the name of the file to use.
 
 What remains to be done is to increment the counter variable @code{I}
 and to sweep up the field. The function @code{sweep_up} returns the new
@@ -143,8 +143,8 @@ the experiment. This includes for example checking that the field will
 not be sweeped into regions the magnet or the gaussmeter can not handle
 etc.@: (e.g.@: by incidentally setting an end field value of @w{34500.0
 G} the magnet can't produce). So you can be reasonable sure that the
-experiment will not crash due to a faulty program after it has run for 2
-hours and you have to start all over again.
+experiment will not crash due to a faulty @acronym{EDL} program after it
+has run for 2 hours and you have to start all over again.
 
 
 As you can already see form the example most of a @acronym{EDL} program
