@@ -116,8 +116,10 @@ sub read_input {
 		my $i;
 
 		for ( $i = 0; $i <= $#Function_Names; $i++ ) {
-			if ( $line =~ /^(($Function_Names[ $i ]):([A-H]?\d+)) (\d+)$/ ) {
-				$Channels->add_channel( $1, $2, $3, $4 );
+			if ( $line =~
+				 /^(($Function_Names[ $i ]):([A-H]?\d+)) (\d+)( I)?$/ ) {
+				my $inv = defined $5 ? 1 : 0;
+				$Channels->add_channel( $1, $2, $3, $4, $inv );
 				last;
 			}
 		}
@@ -399,6 +401,7 @@ sub primary_draw {
 
 		my $x1 = 150;
 		my $x2 = 160 + $self->{ 'len' };
+		$y -= 0.5 * $ch->{ 'inv' } * $self->{ 'hstep' };
 		$c->create( 'line', $x1, $y, $x2, $y, '-fill' => 'white' );
 	}
 	$self->redraw;
@@ -932,7 +935,7 @@ sub first_pulse {
     my $self = shift;
     my $first;
 
-    for ( @{ $self->{ channels } } ) {
+    for ( @{ $self->{ 'channels' } } ) {
         my $e = $_->first_pulse;
 		next unless defined $e;
         $first = $e if ! defined $first or $first > $e;
@@ -955,6 +958,7 @@ sub new {
 				 'name' => shift,
 			     'num'  => shift,
 				 'delay' => shift,
+				 'inv'   => shift,
 			     'plist' => { } };
 
 	return bless $self, $class;
@@ -972,6 +976,12 @@ sub key {
 sub delay  {
 
 	return shift->{ 'delay' };
+}
+
+#---------------------------------------------------------
+
+sub inv {
+	return shift->{ 'inv' };
 }
 
 #---------------------------------------------------------
