@@ -194,7 +194,7 @@ bool run( void )
 
 /*-------------------------------------------------------------------*/
 /* Checks if new errors etc. were found while running the exp_hooks. */
-/* If so ask the user if she wants to continue - if not an exception */
+/* If so ask the user if she wants to continue - unless an exception */
 /* is thrown.                                                        */
 /*-------------------------------------------------------------------*/
 
