@@ -1198,7 +1198,7 @@ static void sr810_set_tc( int tc_index )
 
 /*-----------------------------------------------------------*/
 /* Function returns the current phase setting of the lock-in */
-/* amplifier (in degree between 0 and 359).                  */
+/* amplifier (in degrees between 0 and 359).                 */
 /*-----------------------------------------------------------*/
 
 static double sr810_get_phase( void )
