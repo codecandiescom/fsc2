@@ -510,47 +510,6 @@ bool dg2020_make_seq( int num_blocks, BLOCK *block )
 }
 
 
-/*----------------------------------------------------*/
-/* dg2020_set_channel() sets a bit pattern in one of  */
-/* the channels of the pulser.                        */
-/* ->                                                 */
-/*  * channel number                                  */
-/*  * start address for pattern (0 to 0xFFFF)         */
-/*  * length of pattern (1 to 0xFFFF)                 */
-/*    (address + length must be less or equal 0xFFFF) */
-/*  * array with pattern (as a char array)            */
-/* <-                                                 */
-/*  * 1: ok, 0: error                                 */
-/*----------------------------------------------------*/
-
-bool pulser_set_channel( int channel, Ticks address,
-						 Ticks length, char *pattern )
-{
-	char *cmd;
-	Ticks k, l;
-
-
-	/* Check parameters, allocate memory and set up start of command string */
-
-	if ( ! dg2020_prep_cmd( &cmd, channel, address, length ) )
-		return FAIL;
-
-	/* Assemble rest of command string */
-
-	for ( k = 0, l = strlen( cmd ); k < length; ++k, ++l )
-		cmd[ l ] = ( pattern[ k ] ? '1' : '0' );
-	cmd[ l ] = '\0';
-
-	/* Send command string to the pulser */
-
-	if ( gpib_write( dg2020.device, cmd, strlen( cmd ) ) == FAILURE )
-		dg2020_gpib_failure( );
-
-	T_free( cmd );
-	return OK;
-}
-
-
 /*-----------------------------------------------------*/
 /* dg2020_set_constant() sets a certain number of bits */
 /* in one of the channels either to high or low.       */
