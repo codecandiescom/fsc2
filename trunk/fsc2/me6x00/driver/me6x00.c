@@ -45,7 +45,7 @@
  */
 
 
-#include <linux/autoconf.h>
+#include <linux/config.h>
 
 #if defined( CONFIG_MODVERSIONS ) && ! defined( MODVERSIONS )
 #define MODVERSIONS
@@ -94,20 +94,6 @@
 /* Compatibility file for kernels from 2.0 up to 2.4 */
 
 #include "sysdep.h"
-
-
-#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 2, 0 )
-MODULE_DESCRIPTION( "Preliminary driver for ME6x00 D/A cards "
-		    "(Meilhaus Electronic GmbH)" );
-MODULE_PARM( major, "i" );
-MODULE_PARM_DESC( major, "Major device number to use" );
-#endif
-
-/* MODULE_LICENSE should be defined since at least 2.4.10 */
-
-#if defined MODULE_LICENSE
-MODULE_LICENSE( "GPL" );
-#endif
 
 
 /* Include-File for the Meilhaus ME6000 and ME6100 I/O boards */
@@ -302,7 +288,7 @@ static unsigned int sval_regs[ ] = {
 
 /*
  * Routine:
- *   init_module
+ *   me6x00_init / init_module
  *
  * Description:
  *   This function is called by the kernel when the module is loaded. It
@@ -328,7 +314,11 @@ static unsigned int sval_regs[ ] = {
  */
 
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 4, 0 )
+static int __init me6x00_init( void )
+#else
 int init_module( void )
+#endif
 {
 #ifdef CONFIG_PCI
 	int i;
@@ -376,7 +366,6 @@ int init_module( void )
 	return -ENODEV
 #endif
 }
-
 
 
 /*
@@ -436,7 +425,6 @@ static int me6x00_find_boards( void )
 
 	return board_count;
 }
-
 
 
 /*
@@ -622,7 +610,6 @@ static int me6x00_init_board( int board_count, struct pci_dev *dev )
 }
 
 
-
 /*
  * Routine
  *   me6x00_xilinx_download
@@ -748,7 +735,6 @@ static int me6x00_xilinx_download( me6x00_info_st *info )
 }
 
 
-
 /*
  * Routine
  *   me6x00_reset_board
@@ -836,7 +822,6 @@ static int me6x00_reset_board( int board_count, int from )
 
 	return 0;
 }
-
 
 
 /*
@@ -937,7 +922,6 @@ static int me6x00_open( struct inode *inode_p, struct file *file_p )
 }
 
 
-
 /*
  * Routine:
  *   me6x00_release
@@ -1001,7 +985,6 @@ static int me6x00_release( struct inode *inode_p, struct file *file_p )
 	MOD_DEC_USE_COUNT;
 	return 0;
 }
-
 
 
 /*
@@ -1120,7 +1103,6 @@ static int me6x00_ioctl( struct inode * inode_p, struct file *file_p,
 }
 
 
-
 /*
  * Routine:
  *   me6x00_set_mode
@@ -1168,7 +1150,6 @@ static int me6x00_board_info( me6x00_dev_info *arg, int minor )
 }
 
 
-
 /*
  * Routine:
  *   me6x00_board_keep_volts
@@ -1214,7 +1195,6 @@ static int me6x00_board_keep_volts( me6x00_keep_st *arg, int minor )
 
 	return 0;
 }
-
 
 
 /*
@@ -1280,7 +1260,6 @@ static int me6x00_set_mode( me6x00_mode_st *arg, int minor )
 
 	return 0;
 }
-
 
 
 /*
@@ -1391,7 +1370,6 @@ static int me6x00_start_stop_conv( me6x00_stasto_st *arg, int minor )
 }
 
 
-
 /*
  * Routine:
  *   me6x00_clear_enable_fifo
@@ -1459,7 +1437,6 @@ static int me6x00_clear_enable_fifo( me6x00_endis_st *arg, int minor )
 }
 
 
-
 /*
  * Routine:
  *   me6x00_endis_extrig
@@ -1525,7 +1502,6 @@ static int me6x00_endis_extrig( me6x00_endis_st *arg, int minor )
 
 	return 0;
 }
-
 
 
 /*
@@ -1596,7 +1572,6 @@ static int me6x00_rifa_extrig( me6x00_rifa_st *arg, int minor )
 }
 
 
-
 /*
  * Routine:
  *   me6x00_set_timer
@@ -1662,7 +1637,6 @@ static int me6x00_set_timer( me6x00_timer_st *arg, int minor )
 
 	return 0;
 }
-
 
 
 /*
@@ -1749,7 +1723,6 @@ static int me6x00_write_single( me6x00_single_st *arg, int minor )
 
 	return 0;
 }
-
 
 
 /*
@@ -1955,7 +1928,6 @@ static int me6x00_write_continuous( me6x00_write_st *arg, int minor )
 }
 
 
-
 /*
  * Routine:
  *   me6x00_write_wraparound
@@ -2105,7 +2077,6 @@ static int me6x00_write_wraparound( me6x00_write_st *arg, int minor )
 
 	return 0;
 }
-
 
 
 /*
@@ -2284,10 +2255,9 @@ static void me6x00_isr( int irq, void *dev_id, struct pt_regs *dummy )
 }
 
 
-
 /*
  * Routine:
- *   cleanup_module
+ *   me6x00_exit / cleanup_module
  *
  * Description:
  *   This routine is called when the module is removed from the kernel.
@@ -2303,7 +2273,11 @@ static void me6x00_isr( int irq, void *dev_id, struct pt_regs *dummy )
  * Modification: JTT
  */
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 4, 0 )
+static void __exit me6x00_exit( vod )
+#else
 void cleanup_module( void )
+#endif
 {
 	int i;
 
@@ -2319,7 +2293,6 @@ void cleanup_module( void )
 	else
 		printk( KERN_INFO "ME6X00: driver de-installed.\n" );
 }
-
 
 
 /*
@@ -2342,7 +2315,6 @@ void cleanup_module( void )
 static int me6x00_buf_count( me6x00_circ_buf_st *buf ) {
 	return ( buf->head - buf->tail ) & ( ME6X00_BUFFER_COUNT - 1 );
 }
-
 
 
 /*
@@ -2378,7 +2350,6 @@ static int me6x00_values_to_end( me6x00_circ_buf_st *buf )
 }
 
 
-
 /*
  * Routine:
  *   me6x00_space_to_end
@@ -2411,7 +2382,6 @@ static int me6x00_space_to_end( me6x00_circ_buf_st *buf )
 }
 
 
-
 /*
  * Routine:
  *   me6x00_outb
@@ -2432,7 +2402,6 @@ static void me6x00_outb( unsigned char value, unsigned int port )
 	PORT_PDEBUG( "--> 0x%02X port 0x%04X\n", value, port );
 	outb( value, port );
 }
-
 
 
 /*
@@ -2457,7 +2426,6 @@ static void me6x00_outw( unsigned short value, unsigned int port )
 }
 
 
-
 /*
  * Routine:
  *   me6x00_outl
@@ -2478,7 +2446,6 @@ static void me6x00_outl( unsigned int value, unsigned int port )
 	PORT_PDEBUG( "--> 0x%08X port 0x%04X\n", value, port );
 	outl( value, port );
 }
-
 
 
 /*
@@ -2507,7 +2474,6 @@ static unsigned char me6x00_inb( unsigned int port )
 }
 
 
-
 /*
  * Routine:
  *   me6x00_inw
@@ -2534,7 +2500,6 @@ static unsigned short me6x00_inw( unsigned int port )
 }
 
 
-
 /*
  * Routine:
  *   me6x00_inl
@@ -2559,6 +2524,28 @@ static unsigned int me6x00_inl( unsigned int port )
 	return value;
 }
 
+
+
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 2, 0 )
+MODULE_DESCRIPTION( "Preliminary driver for ME6x00 D/A cards "
+		    "(Meilhaus Electronic GmbH)" );
+MODULE_PARM( major, "i" );
+MODULE_PARM_DESC( major, "Major device number to use" );
+#endif
+
+
+/* MODULE_LICENSE should be defined since at least 2.4.10 */
+
+#if defined MODULE_LICENSE
+MODULE_LICENSE( "GPL" );
+#endif
+
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 4, 0 )
+module_init( me6x00_init );
+module_exit( me6x00_exit );
+#endif
 
 
 /*

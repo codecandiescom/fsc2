@@ -29,10 +29,6 @@
 char kernel_version[ ] = UTS_RELEASE;
 
 
-/* No symbols are exported from the module */
-
-EXPORT_NO_SYMBOLS;
-
 
 /* Local function declarations */
 
@@ -878,6 +874,14 @@ static unsigned char witio_48_board_in( unsigned char *addr )
 	return inb_p( ( PORT ) addr );
 }
 
+
+
+/* No symbols are exported from the module */
+
+EXPORT_NO_SYMBOLS;
+
+
+/* Mark the init and cleanup routines */
 
 module_init( witio_48_init );
 module_exit( witio_48_cleanup );
