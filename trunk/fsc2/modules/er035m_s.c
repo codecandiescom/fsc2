@@ -16,7 +16,7 @@
 /* definitions for serial port access */
 
 #define SERIAL_BAUDRATE B9600        /* baud rate of field controller */
-#define SERIAL_PORT     0            /* serial port device file (COM1) */
+#define SERIAL_PORT     1            /* serial port device file (COM1) */
 
 
 #define DEVICE_NAME "ER035M_S"     /* name of device */
