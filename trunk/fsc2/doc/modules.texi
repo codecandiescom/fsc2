@@ -686,13 +686,85 @@ line in the init hook function similar to
 need_GPIB = SET;
 @end example
 
+@subsection Handling GPIB devices
+
+To make dealing with the GPIB bus simpler there are several routines
+that can be used when writing a module, which then call the needed
+functions from the GPIB library you choose when installing
+@acronym{fsc2}. The declaration of all of these functions can be found
+in @file{gpib_if.h}.
+
+The first thing that must be done is to announce the device to the set
+of functions dealing with the GPIB bus. This should be done in the
+@code{exp_hook} function (see below) and is done via the function
+@example
+int gpib_init_device( const char *name, int *device );
+@end example
+The function expects the name of the function (which will be used to
+look it up in the GPIB configuration file) and the address of an
+integer, which, on successful return, will contain a number now
+associated with the device and to be used in all further calls of
+GPIB functions for this device. The function returns one of to value,
+either @code{SUCCESS} or @code{FAILURE} with obvious meaning. All of the
+functions described in rest of this section return these values.
+
+The next two most important functions are
+@example
+int gpib_write( int device, const char *buffer, long length );
+int gpib_read( int device, char *buffer, long *length );
+@end example
+The first functions sends @code{length} data contained in @code{buffer}
+to the device designated by @code{device} (which you got from a call of
+@code{gpib_init_device()}). The second function reads a maximum of
+@code{length} byte from the device @code{device} and stores them in
+@code{buffer}. Before @code{gpib_read()} is called @code{length} must
+have been set to the maximum number of data that should be read, after a
+successful call @code{length} contains the number of bytes that have
+been read.
+
+When you're done dealing with a device you should call
+@example
+int gpib_local( int device );
+@end example
+to bring it back into the local state. This function should be called
+in the @code{end_of_exp_hook} function (see below).
+
+Using the function
+@example
+int gpib_timeout( int device, int period );
+@end example
+a new timeout value can be set for the device. The value of
+@code{period} depends on the values that the GPIB library you are using
+expect. Please check the manual for the library.
+
+The function
+@example
+int gpib_clear_device( int device );
+@end example
+clears the device by sending it the Selected Device Clear (SDC) message.
+
+@example
+int gpib_trigger( int device );
+@end example
+triggers the device by sending it a Device Trigger Command.
+
+
+Finally, there is an additional function to let you directly write to
+the log file that stores information about the details of the
+communication on the GPIB bus:
+@example
+void gpib_log_message( const char *fmt, ... );
+@end example
+It expects a format string as you would use in the @code{C printf()}
+function plus arguments corresponding to the conversion specifiers in
+the format string.
+
 
 @subsection Serial port handling
 
-For serial ports things are handled a bit differently from GPIB devices.
-In the init hook function you must try to request the serial port you
-need by calling
-the function @code{fsc2_request_serial_port()}
+For serial ports things are handled a quite bit differently from GPIB
+devices. In the init hook function you must try to request the serial
+port you need by calling the function @code{fsc2_request_serial_port()}
 @example
 fsc2_request_serial_port( SERIAL_PORT, DEVICE_NAME );
 @end example
@@ -1088,7 +1160,7 @@ avoid confusion should you accidentally try to redefine it.
 
 When writing a module one often has places where it is necessary to
 print out messages to inform the user e.g.@: about invalid arguments
-etc.  For this purpose there's the @code{print()} function in
+etc.  For this purpose there's the @code{eprint()} function in
 @acronym{fsc2} that helps you deal with this and prints messages to the
 lower browser in the main form. Except for the first two arguments the
 function is identical to the @code{printf()} in @code{C}, i.e.@: the
@@ -1363,18 +1435,17 @@ if ( flag )
 @node Pulser Modules, , Programming Utils, Modules
 @section Writing modules for pulsers
 
-Unfortunately, modules for pulsers are more difficult to write than
-drivers for other devices. The reason is that pulsers play, at least for
-meaurements with pulsed irradiation (microwave of RF) of the sample, an
-extremely important role and setting up the pulses is often one of the
-most time-consuming task. Of course, it would be possible to deal with
-pulsers in exactly the same way as normal devices, i.e.@: to define just
-a set of functions for setting different pulse properties etc.@: but
-this would make the programs much harder to write and understand. Instead
-it was decided to integrate many aspects of dealing with pulsers
-directly into the @acronym{EDL} language. While this makes it easier
-fot the user writing programs it requires more work by the writer of
-modules for pulsers.
+Modules for pulsers are abit more difficult to write than drivers for
+other devices. The reason is that pulsers play, at least for meaurements
+with pulsed irradiation, an extremely important role and thus setting up
+the pulses should be made as easy as possible for the user. Of course,
+it would be possible to deal with pulsers in exactly the same way as
+normal devices, i.e.@: to define just a set of functions for setting
+different pulse properties etc.@: but this would make the programs much
+harder to write and understand. Instead many aspects of dealing with
+pulsers were integrated directly into the @acronym{EDL} language. While
+this makes it easier fot the user writing programs it requires more work
+by the writer of modules for pulsers.
 
 To make it possible to integrate handling of pulsers directly into
 @acronym{EDL} modules for pulsers must define quite a lot of
@@ -1383,7 +1454,7 @@ collected in on structure, @code{pulser_struct}:
 @example
 struct @{
     const char *name;
-    bool has_phase_switch;
+    bool needs_phase_pulses;
 
     bool ( *assign_function )( int function, long connector );
     bool ( *assign_channel_to_function )( int function, long channel );
@@ -1395,10 +1466,14 @@ struct @{
     bool ( *set_timebase )( double timebase );
     bool ( *set_trigger_mode )( int mode );
     bool ( *set_repeat_time )( double rep_time );
+
     bool ( *set_trig_in_level )( double voltage );
     bool ( *set_trig_in_slope )( int slope );
     bool ( *set_trig_in_impedance )( int state );
+
     bool ( *set_max_seq_len )( double seq_len );
+
+    bool ( *set_phase_reference )( int phase, int function );
 
     bool ( *new_pulse )( long pulse_number );
     bool ( *set_pulse_function )( long pulse_number, int function );
@@ -1415,11 +1490,8 @@ struct @{
     bool ( *get_pulse_length_change )( long pulse_number, double *ptime );
     bool ( *get_pulse_phase_cycle )( long pulse_number, long *cycle );
 
-    bool ( *set_phase_reference )( int phase, int function );
-    bool ( *phase_setup_prep )( int func, int type, int pod, long val,
-                                long protocol);
+    bool ( *phase_setup_prep )( int func, int type, int pod, long val );
     bool ( *phase_setup )( int function );
-
     bool ( *set_phase_switch_delay )( int function, double del_time );
     bool ( *set_grace_period )( double gp_time );
     bool ( *keep_all_pulses )( void );
@@ -1427,11 +1499,14 @@ struct @{
 @end example
 When a new @acronym{EDL} program is read, all the pointers in this
 structure get set to @code{NULL} and the boolean variable
-@code{has_phase_switch} is set to false. When the @code{init_hook} of a
-module gets run it has to fill in values for all the pointers. Most of
-the following text will try to explain in detail the meaing of the
-arguments of the functions and what these functions are supposed to do.
-
+@code{needs_phase_pulses} is set to false. When the @code{init_hook} of
+a module gets run it has to fill in values for the function pointers it
+supplies functions for. When the module does not define a function that
+can be called via one of the function pointer it must leave the
+corresponding entry in the structure unchanged, i.e.@: leave it a
+@code{NULL} pointer. Most of the following text will try to explain in
+detail the meaning of the arguments of the functions and what these
+functions are supposed to do.
 
 But first the two variables to be set will be discussed. The first
 variable, @code{name}, is simply the name of the pulser that will be
@@ -1442,7 +1517,11 @@ quit immediately - when @code{name} is not @code{NULL} a different
 pulser module has already been loaded and currently it is not possible
 to deal with more than one pulser.
 
-The second variable, @code{has_phase_switch} must be set to a true value
-if pulse phases are switched via phase switches. This probably requires some
-explanation. Currently, there are three types of pulsed spectrometers
-supported by @acronym{fsc2}.
+The second variable, @code{needs_phase_pulses} must be set to a true
+value only if the experiment the pulser is connected to has phase
+switches that need their own pulses and that the module is prepared to
+create automatically. Currently, this is only the case for the Frankfurt
+S-band spectrometer.
+
+@subsection Pulse functions
+

@@ -99,7 +99,8 @@
 @item @code{ELSE}             @tab Part of @code{IF-ELSE} constructs (@pxref{IF-ELSE constructs})
 @item @code{EXP:}             @tab Starts the @code{EXPERIMENT} section
 @item @code{EXPERIMENT:}      @tab Starts the @code{EXPERIMENT} section
-@item @code{EXT}              @tab
+@item @code{EXT}              @tab EXTERNAL keyword / Digitizer channel name
+@item @code{EXT10}            @tab Digitizer channel name
 @item @code{EXTERN}           @tab
 @item @code{EXTERNAL}         @tab
 @item                         @tab
@@ -110,6 +111,10 @@
 @item @code{FOREVER}          @tab Keyword for @code{FOREVER} loops (@pxref{FOREVER loops})
 @item @code{fsave}            @tab Built-in function (@pxref{fsave})
 @item @code{FUNC}             @tab
+@item @code{FUNC_E}           @tab Digitizer channel name
+@item @code{FUNC_F}           @tab Digitizer channel name
+@item @code{FUNCE}            @tab Digitizer channel name
+@item @code{FUNCF}            @tab Digitizer channel name
 @item @code{FUNCTION}         @tab
 @item                         @tab
 @item @code{G}                @tab Unit, Gauss
@@ -154,6 +159,10 @@
 @item @code{MATH2}            @tab Digitizer channel name
 @item @code{MATH3}            @tab Digitizer channel name
 @item @code{mean}             @tab Built-in function (@pxref{mean})
+@item @code{MEM_C}            @tab Digitizer channel name
+@item @code{MEM_D}            @tab Digitizer channel name
+@item @code{MEMC}             @tab Digitizer channel name
+@item @code{MEMD}             @tab Digitizer channel name
 @item @code{MG}               @tab Unit, Mega-Gauss
 @item @code{MHz}              @tab Unit, Mega-Hertz
 @item @code{Ms}               @tab Unit, Mega-Seconds

@@ -92,7 +92,7 @@ DS          D(EL(TA)?)?_?S(TART)?
 DL          D(EL(TA)?)?_?L(EN(GTH)?)?
 PH          PH(ASE(SEQ(UENCE)?)?)?_?([0-9])?
 
-CHT         ((CH[1-4])|(AUX[12])|(MATH[1-3])|(REF[1-4])|(LIN(E)?)|(MEM_?[CD])|(FUNC_?[EF])|(EXT)|(EXT10))
+CHT         ((CH[1-4])|(AUX[12]?)|(MATH[1-3])|(REF[1-4])|(LIN(E)?)|(MEM_?[CD])|(FUNC_?[EF])|(EXT(10)?))
 
 WS          [\n \t]+
 
