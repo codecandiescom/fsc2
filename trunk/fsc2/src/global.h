@@ -37,7 +37,7 @@ typedef  unsigned char  bool;
 
 /* Define number of colors to be used in 2D graphics */
 
-#define NUM_COLORS 128
+#define NUM_COLORS 256
 
 
 /* Define some useful abbreviations - never ever change these ! */

@@ -1390,12 +1390,14 @@ Var *f_display( Var *v )
 				len += sizeof( double );
 				break;
 
-			case INT_TRANS_ARR :
-				len += ( dp[ i ].v->len + 1 ) * sizeof( long );
-				break;
-
-			case FLOAT_TRANS_ARR :
-				len += sizeof( long ) + dp[ i ].v->len * sizeof( double );
+			case ARR_PTR :
+				len += sizeof( long );
+				if ( dp[ i ].v->from->type == INT_ARR )
+					len += dp[ i ].v->from->sizes[ dp[ i ].v->from->dim - 1 ]
+						   * sizeof( long );
+				else
+					len += dp[ i ].v->from->sizes[ dp[ i ].v->from->dim - 1 ]
+						   * sizeof( double );
 				break;
 
 			default :                   /* this better never happens... */
@@ -1443,37 +1445,50 @@ Var *f_display( Var *v )
 
 		memcpy( ptr, &dp[ i ].nc, sizeof( long ) );     /* curve number */
 		ptr += sizeof( int );
-		
-		memcpy( ptr, &dp[ i ].v->type, sizeof( int ) ); /* type of data */
-		ptr += sizeof( int );
-	
+
 		switch( dp[ i ].v->type )                       /* and now the data  */
 		{
 			case INT_VAR :
+				memcpy( ptr, &dp[ i ].v->type, sizeof( int ) );
+				ptr += sizeof( int );
 				memcpy( ptr, &dp[ i ].v->val.lval, sizeof( long ) );
 				ptr += sizeof( long );
 				break;
 
 			case FLOAT_VAR :
+				memcpy( ptr, &dp[ i ].v->type, sizeof( int ) );
+				ptr += sizeof( int );
 				memcpy( ptr, &dp[ i ].v->val.dval, sizeof( double ) );
 				ptr += sizeof( double );
 				break;
 
-			case INT_TRANS_ARR :
-				memcpy( ptr, &dp[ i ].v->len, sizeof( long ) );
+			case ARR_PTR :
+				memcpy( ptr, &dp[ i ].v->from->type, sizeof( int ) );
+				ptr += sizeof( int );
+
+				len = dp[ i ].v->from->sizes[ dp[ i ].v->from->dim - 1 ];
+				memcpy( ptr, &len, sizeof( long ) );
 				ptr += sizeof( long );
-				memcpy( ptr, dp[ i ].v->val.lpnt,
-						dp[ i ].v->len * sizeof( long ) );
-				ptr += dp[ i ].v->len * sizeof( long );
+
+				if ( dp[ i ].v->from->type == INT_ARR )
+				{
+					memcpy( ptr, dp[ i ].v->val.gptr,
+							len * sizeof( long ) );
+					ptr += len * sizeof( long );
+				}
+				else
+				{
+					memcpy( ptr, dp[ i ].v->val.gptr,
+							len * sizeof( double ) );
+					ptr += len * sizeof( double );
+				}
 				break;
 
-			case FLOAT_TRANS_ARR :
-				memcpy( ptr, &dp[ i ].v->len, sizeof( long ) );
-				ptr += sizeof( long );
-				memcpy( ptr, dp[ i ].v->val.dpnt,
-						dp[ i ].v->len * sizeof( double ) );
-				ptr += dp[ i ].v->len * sizeof( double );
-				break;
+			default :                   /* this better never happens... */
+				T_free( dp );
+				eprint( FATAL, "Internal communication error at %s:%d.\n",
+						__FILE__, __LINE__ );
+				THROW( EXCEPTION );
 		}
 	}
 
@@ -1581,14 +1596,15 @@ DPoint *eval_display_args( Var *v, int *nsets )
 			THROW( EXCEPTION );
 		}
 
-		vars_check( v, INT_VAR | FLOAT_VAR | INT_TRANS_ARR | FLOAT_TRANS_ARR );
+		vars_check( v, INT_VAR | FLOAT_VAR | ARR_PTR );
 
 		dp[ *nsets ].v = v;
 
 		v = v->next;
 
 		/* There can be several curves and we check if there's a curve number,
-		   then we test and store it */
+		then we test and store it. If there are no more argument we default to
+		the first curve.*/
 
 		if ( v == NULL )
 		{
