@@ -465,7 +465,7 @@ taken.
 @end ifnotinfo
 This axis area can also be used to choose a different cross
 section. When you press the left mouse button in that area
-the cursor changes to an arrow pointing to te left
+the cursor changes to an arrow pointing to the left
 @ifnotinfo
 , @image{cursor8,5mm,},
 @end ifnotinfo
