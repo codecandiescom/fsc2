@@ -198,6 +198,7 @@ void dg2020_do_checks( FUNCTION *f )
 	}
 
 	dg2020_shape_padding_check_1( f );
+
 	if ( f->self == PULSER_CHANNEL_TWT )
 		dg2020_twt_padding_check( f );
 
@@ -241,26 +242,23 @@ void dg2020_do_checks( FUNCTION *f )
 				if ( pp->pulse->sp != NULL && ppn->pulse->sp != NULL &&
 					 pp->pulse->sp->function != ppn->pulse->sp->function )
 					print( FATAL, "Shape pulses for pulses #%ld function "
-						   "'%s') and #%ld (function '%s') %s"
+						   "'%s') and #%ld (function '%s') start to "
 						   "overlap.\n", pp->pulse->sp->num,
 						   pp->pulse->sp->function->name, ppn->pulse->sp->num,
-						   ppn->pulse->sp->function->name,
-						   dg2020_IN_SETUP ? "" : "start to " );
+						   ppn->pulse->sp->function->name );
 				if ( pp->pulse->sp != NULL && ppn->pulse->sp == NULL )
 					print( FATAL, "Automatically created shape pulse for "
-						   "pulse #%ld (function '%s') and SHAPE pulse "
-						   "#%ld %soverlap.\n", pp->pulse->sp->num,
-						   pp->pulse->sp->function->name, ppn->pulse->num,
-						   dg2020_IN_SETUP ? "" : "start to " );
+						   "pulse #%ld (function '%s') and PULSE_SHAPE pulse "
+						   "#%ld start to overlap.\n", pp->pulse->sp->num,
+						   pp->pulse->sp->function->name, ppn->pulse->num );
 				else if ( pp->pulse->sp == NULL && ppn->pulse->sp != NULL )
 					print( FATAL, "Automatically created shape pulse for "
-						   "pulse #%ld (function '%s') and SHAPE pulse "
-						   "#%ld %soverlap.\n", ppn->pulse->sp->num,
-						   ppn->pulse->sp->function->name, pp->pulse->num,
-						   dg2020_IN_SETUP ? "" : "start to " );
+						   "pulse #%ld (function '%s') and PULSE_SHAPE pulse "
+						   "#%ld star to overlap.\n", ppn->pulse->sp->num,
+						   ppn->pulse->sp->function->name, pp->pulse->num );
 			}
 			else
-				print( FATAL, "Pulses #%ld and #%ld of function '%s' %s"
+				print( FATAL, "Pulses #%ld and #%ld (function '%s') %s"
 					   "overlap.\n", pp->pulse->num, ppn->pulse->num,
 					   f->name, dg2020_IN_SETUP ? "" : "start to "  );
 			THROW( EXCEPTION );

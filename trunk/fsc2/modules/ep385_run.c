@@ -329,7 +329,7 @@ static void ep385_pulse_check( FUNCTION *f )
 							   p2->sp->function->name, p1->num );
 				}
 				else
-					print( FATAL, "Pulses #%ld and #%ld of function '%s' "
+					print( FATAL, "Pulses #%ld and #%ld (function '%s') "
 						   "start to overlap.\n", p1->num, p2->num, f->name );
 
 				THROW( EXCEPTION );

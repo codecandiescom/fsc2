@@ -172,13 +172,20 @@ static void ep385_basic_pulse_check( void )
 
 
 /*--------------------------------------------------------------------------*/
+/* The function automatically adds shape pulses for all pulses of functions */
+/* that have been marked by a call of pulser_automatic_shape_pulses() for   */
+/* the automatic creation of shape pulses. Each pulse for which a shape     */
+/* pulse is created is linked with its shape pulse (and also the other way  */
+/* round) by a pointer, 'sp', in the pulse structure. When done with        */
+/* creating shape pulses we still have to check that these automatically    */
+/* created pulses don't overlap with manually set shape pulses or with each */
+/* other, which would beat the purpose of shape pulses.                     */
 /*--------------------------------------------------------------------------*/
 
 static void ep385_create_shape_pulses( void )
 {
-	FUNCTION *spf = ep385.function + PULSER_CHANNEL_PULSE_SHAPE;
 	FUNCTION *f;
-	PULSE *np, *cp, *rp, *p1, *p2, *old_end;
+	PULSE *np = NULL, *cp, *rp, *p1, *p2, *old_end;
 
 
 	if ( ! ep385.auto_shape_pulses || ep385_Pulses == NULL )
@@ -187,8 +194,8 @@ static void ep385_create_shape_pulses( void )
 	/* Find the end of the pulse list (to be able to add further shape
 	   pulses) */
 
-	for ( cp = np = ep385_Pulses; np != NULL; np = np->next )
-		cp = np;
+	for ( cp = ep385_Pulses; cp->next != NULL; cp = cp->next )
+		/* empty */ ;
 	old_end = cp;
 
 	/* Loop over all pulses */
@@ -200,7 +207,8 @@ static void ep385_create_shape_pulses( void )
 		/* No shape pulses can be set for the PULSE_SHAPE function itself
 		   and functions that don't need shape pulses */
 
-		if ( f == spf || ! f->uses_auto_shape_pulses )
+		if ( f->self == PULSER_CHANNEL_PULSE_SHAPE ||
+			 ! f->uses_auto_shape_pulses )
 			continue;
 
 		np = PULSE_P T_malloc( sizeof *np );
@@ -211,7 +219,7 @@ static void ep385_create_shape_pulses( void )
 		np->next = NULL;
 		np->pc = NULL;
 
-		np->function = spf;
+		np->function = ep385.function + PULSER_CHANNEL_PULSE_SHAPE;
 		np->is_function = SET;
 
 		/* These 'artifical' pulses get negative numbers */
@@ -261,13 +269,42 @@ static void ep385_create_shape_pulses( void )
 		np->needs_update = rp->needs_update;
 	}
 
-	if ( np != old_end )
-		spf->is_needed = SET;
+	if ( np != NULL )
+		ep385.function[ PULSER_CHANNEL_PULSE_SHAPE ].is_needed = SET;
+	else             /* no shape pulses have been created automatically */
+		return;
 
-	/* Now after we got all the necessary shape pulses we've got to check
-	   that they don't overlap when they are for pulses of different
-	   functions (overlaps for pulses of the same function will be detected
-	   later and reported as overlaps for the pulses they belong to) */
+	/* Now after we created all the necessary shape pulses we've got to check
+	   that they don't overlap with manually created shape pulses or with
+	   shape pulses for pulses of different functions (overlaps of shape
+	   pulses for pulses of the same function will be detected later and
+	   reported as overlaps of the pulses they belong to, which is the only
+	   reason this could happen). */
+
+	for ( p1 = ep385_Pulses; p1 != old_end->next; p1 = p1->next )
+	{
+		if ( ! p1->is_active ||
+			 p1->function->self != PULSER_CHANNEL_PULSE_SHAPE )
+			continue;
+
+		for ( p2 = old_end->next; p2 != NULL; p2 = p2->next )
+		{
+			if ( ! p2->is_active ||
+				 p2->function->self != PULSER_CHANNEL_PULSE_SHAPE )
+				continue;
+
+			if ( p1->pos == p2->pos ||
+				 ( p1->pos < p2->pos && p1->pos + p1->len > p2->pos ) ||
+				 ( p1->pos > p2->pos && p1->pos < p2->pos + p2->pos ) )
+			{
+				print( FATAL, "PULSE_SHAPE pulse #%ld and automatically "
+					   "created shape pulse for pulse #%ld (function '%s') "
+					   "overlap.\n", p1->num, p2->sp->num,
+					   p2->sp->function->name );
+				THROW( EXCEPTION );
+			}
+		}
+	}
 
 	for ( p1 = old_end->next; p1 != NULL && p1->next != NULL; p1 = p1->next )
 	{
@@ -279,6 +316,10 @@ static void ep385_create_shape_pulses( void )
 			if ( ! p2->is_active )
 				continue;
 
+			/* An overlap of automtically created shape pulses for pulses of
+			   the same funtion can only happen if already the pulses they
+			   were created for overlap. */
+
 			if ( p1->sp->function == p2->sp->function )
 				continue;
 
@@ -287,9 +328,8 @@ static void ep385_create_shape_pulses( void )
 				 ( p1->pos > p2->pos && p1->pos < p2->pos + p2->pos ) )
 			{
 				print( FATAL, "Automatically created shape pulses for pulse "
-					   "#%ld of function '%s' and #%ld of function '%s' would "
-					   "overlap.\n",
-					   p1->sp->num, p1->sp->function->name,
+					   "#%ld (function '%s') and #%ld (function '%s') "
+					   "overlap.\n", p1->sp->num, p1->sp->function->name,
 					   p2->sp->num, p2->sp->function->name );
 				THROW( EXCEPTION );
 			}
@@ -298,14 +338,18 @@ static void ep385_create_shape_pulses( void )
 }
 
 
-/*--------------------------------------------------------------------------*/
-/*--------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*/
+/* The function automatically adds TWT pulses for all pulses of functions */
+/* that have been marked by a call of pulser_automatic_twt_pulses() for   */
+/* the automatic creation of TWT pulses. In contrast to automatic shape   */
+/* pulses the automatic created TWT pulses may overlap, these overlaps    */
+/* will be taken care of later.                                           */
+/*------------------------------------------------------------------------*/
 
 static void ep385_create_twt_pulses( void )
 {
-	FUNCTION *tpf = ep385.function + PULSER_CHANNEL_TWT;
 	FUNCTION *f;
-	PULSE *np, *cp, *rp, *old_end;
+	PULSE *np = NULL, *cp, *rp, *old_end;
 
 
 	if ( ! ep385.auto_twt_pulses || ep385_Pulses == NULL )
@@ -314,8 +358,8 @@ static void ep385_create_twt_pulses( void )
 	/* Find the end of the pulse list (to be able to add further TWT
 	   pulses) */
 
-	for ( cp = np = ep385_Pulses; np != NULL; np = np->next )
-		cp = np;
+	for ( cp = ep385_Pulses; cp->next != NULL; cp = cp->next )
+		/* empty */ ;
 	old_end = cp;
 
 	/* Loop over all pulses */
@@ -327,7 +371,8 @@ static void ep385_create_twt_pulses( void )
 		/* No TWT pulses can be set for the TWT or TWT_GATE function and
 		   functions that don't need TWT pulses */
 
-		if ( f == tpf || f->self == PULSER_CHANNEL_TWT_GATE ||
+		if ( f->self == PULSER_CHANNEL_TWT ||
+			 f->self == PULSER_CHANNEL_TWT_GATE ||
 			 ! f->uses_auto_twt_pulses )
 			continue;
 
@@ -339,7 +384,7 @@ static void ep385_create_twt_pulses( void )
 		np->next = NULL;
 		np->pc = NULL;
 
-		np->function = tpf;
+		np->function = ep385.function + PULSER_CHANNEL_TWT;
 		np->is_function = SET;
 
 		/* These 'artifical' pulses get negative numbers */
@@ -389,8 +434,8 @@ static void ep385_create_twt_pulses( void )
 		np->needs_update = rp->needs_update;
 	}
 
-	if ( np != old_end )
-		tpf->is_needed = SET;
+	if ( np != NULL )
+		ep385.function[ PULSER_CHANNEL_TWT ].is_needed = SET;
 }
 
 
@@ -813,19 +858,15 @@ static void ep385_pulse_init_check( FUNCTION *f )
 
 	/* Loop over all active pulses of the function and check that they don't
 	   overlap. A few things have to be taken into account:
-	   1. Automatically created shape pulses for pulses of the same function
-	      should not be reported - they can only clash if also the pulses they
-		  were created for do overlap. Thus for automatically created shape
-		  pulses we only need to check for overlap if the pulses they belong
-		  to are from different functions.
-	   2. We do have to check for overlaps between automatically generated
-	      shape pulses and user defined shape pulses.
-	   3. Automatically created TWT pulses can't overlap - if they do we
+	   1. Overlaps of automatically created shape pulses for pulses of the
+	      same function should not be reported - they can only clash if also
+		  the pulses they were created for do overlap.
+	   2. Automatically created TWT pulses can't overlap - if they do we
 	      will automatically reduce their lengths to avoid overlaps.
-	   4. Also user defined TWT pulses and automatically created ones can't
+	   3. Also user defined TWT pulses and automatically created ones can't
 	      overlap. Again, the automatically generated ones will shrink if
 		  necessary.
-	   5. User defined TWT pulses can overlap and thus must be tested.
+	   4. User defined TWT pulses can overlap and thus must be tested.
 	*/
 
 	for ( i = 0; i < f->num_pulses - 1; i++ )
@@ -833,9 +874,10 @@ static void ep385_pulse_init_check( FUNCTION *f )
 		p1 = f->pulses[ i ];
 
 		/* Skip checks for inactive pulses and automatically generated
-		   TWT pulses */
+		   shape and TWT pulses */
 
 		if ( ! p1->is_active ||
+			 ( f->self == PULSER_CHANNEL_PULSE_SHAPE && p1->sp != NULL ) ||
 			 ( f->self == PULSER_CHANNEL_TWT && p1->tp != NULL ) )
 			continue;
 
@@ -843,9 +885,11 @@ static void ep385_pulse_init_check( FUNCTION *f )
 		{
 			p2 = f->pulses[ j ];
 
-			/* Skip checks for inactive pulses */
+			/* Skip checks for inactive pulses and automatically generated
+			   shape and TWT pulses */
 
 			if ( ! p2->is_active ||
+				 ( f->self == PULSER_CHANNEL_PULSE_SHAPE && p2->sp != NULL ) ||
 				 ( f->self == PULSER_CHANNEL_TWT && p2->tp != NULL ) )
 				continue;
 
@@ -853,30 +897,8 @@ static void ep385_pulse_init_check( FUNCTION *f )
 				 ( p1->pos < p2->pos && p1->pos + p1->len > p2->pos ) ||
 				 ( p2->pos < p1->pos && p2->pos + p2->len > p1->pos ) )
 			{
-				if ( ep385.auto_shape_pulses &&
-					 f->self == PULSER_CHANNEL_PULSE_SHAPE )
-				{
-					if ( p1->sp != NULL && p2->sp != NULL &&
-						 p1->sp->function != p2->sp->function )
-						print( FATAL, "Shape pulses for pulses #%ld (function "
-							   "'%s') and #%ld (function '%s') overlap.\n",
-							   p1->sp->num, p1->sp->function->name,
-							   p2->sp->num, p2->sp->function->name );
-					if ( p1->sp != NULL && p2->sp == NULL )
-						print( FATAL, "Automatically created shape pulse for "
-							   "pulse #%ld (function '%s') and SHAPE pulse "
-							   "#%ld overlap.\n", p1->sp->num,
-							   p1->sp->function->name, p2->num );
-					else if ( p1->sp == NULL && p2->sp != NULL )
-						print( FATAL, "Automatically created shape pulse for "
-							   "pulse #%ld (function '%s') and SHAPE pulse "
-							   "#%ld overlap.\n", p2->sp->num,
-							   p2->sp->function->name, p1->num );
-				}
-				else
-					print( FATAL, "Pulses #%ld and #%ld of function '%s' "
-						   "overlap.\n", p1->num, p2->num, f->name );
-
+				print( FATAL, "Pulses #%ld and #%ld (function '%s') "
+					   "overlap.\n", p1->num, p2->num, f->name );
 				THROW( EXCEPTION );
 			}
 		}
@@ -887,7 +909,7 @@ static void ep385_pulse_init_check( FUNCTION *f )
 /*------------------------------------------------------------------------*/
 /* Function checks if the distance between pulse shape pulses and defense */
 /* pulses is large enough. The minimum lengths the shape_2_defense and    */
-/* defense_2_shape members of the ep395 structure. Both are set to rather */
+/* defense_2_shape members of the ep385 structure. Both are set to rather */
 /* large values at first but can be customized by calling the EDL         */
 /* functions pulser_shape_to_defense_minimum_distance() and               */
 /* pulser_defense_to_shape_minimum_distance() (names are intentionally    */
