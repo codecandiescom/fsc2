@@ -83,7 +83,7 @@ mods: $(modules:.c=.so)
 
 %.so: %.c $(header)
 	gcc $(CFLAGS) -c -fPIC -DPIC $< -o $*.lo
-	gcc -shared -o $@ $*.lo -Wl,-E -lc -lm
+	gcc -shared -o $@ $*.lo -Wl,-E -lm
 	chmod 644 $@
 
 #mods: $(patsubst %,lib_fsc2_%, $(modules:.c=.la))
