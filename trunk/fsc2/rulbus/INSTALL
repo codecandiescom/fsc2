@@ -89,17 +89,6 @@ device number." \
 	fi
 done
 
-# Ask for further compilation options
-
-dialog --yesno "Build driver with debugging code?" 6 50
-DEBUG=$?
-
-if [ $DEBUG -eq 0 ]; then
-    dbg="Yes";
-else
-    dbg="No"
-fi;
-
 # Finally get user to set the install directory
 
 PREFIX="/usr/local"
@@ -115,7 +104,6 @@ PREFIX=${PREFIX%%/}    # strip trailing slashes
 dialog --yesno "\
 You selected the following settings for the driver:\n\n\
       Major device number:     $MAJOR\n\
-      Include debbuging code:  $dbg\n\
       Install directory:       '$PREFIX'\n\n\
            Create 'include/autoconf.h'?\n" 11 57
 
@@ -133,7 +121,6 @@ echo "/* Automatically created - change carefully */" > include/autoconf.h
 echo "" >> include/autoconf.h
 echo "#define RULBUS_EPP_MAJOR    $MAJOR" >> include/autoconf.h
 echo "#define RULBUS_EPP_BASE     $BASE"  >> include/autoconf.h
-test $DEBUG -ne 0 || echo "#define RULBUS_EPP_DEBUG    1" >> include/autoconf.h
 echo "#define RULBUS_EPP_PREFIX   \"$PREFIX\"" >> include/autoconf.h
 
 } # end of make_auto()

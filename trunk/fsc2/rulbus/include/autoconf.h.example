@@ -2,5 +2,4 @@
 
 #define RULBUS_EPP_MAJOR    0
 #define RULBUS_EPP_BASE     0x378
-#define RULBUS_EPP_DEBUG    0
 #define RULBUS_EPP_PREFIX   "/usr/local"

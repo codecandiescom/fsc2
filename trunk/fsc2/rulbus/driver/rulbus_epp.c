@@ -644,8 +644,8 @@ static inline void rulbus_parport_write_addr( unsigned char addr )
 
 static inline void rulbus_parport_reverse( void )
 {
-//        rulbus.direction ^= 1;
-//        outb( inb( CTRL_BYTE ) ^ 0x20, CTRL_BYTE );
+        rulbus.direction ^= 1;
+        outb( inb( CTRL_BYTE ) ^ 0x20, CTRL_BYTE );
 }
 
 
