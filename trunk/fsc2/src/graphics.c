@@ -37,11 +37,15 @@ void start_graphics( void )
 	/* Create the form for running experiments */
 
 	run_form = create_form_run( );
+
+	/* It still need some modifications... */
+
 	fl_set_object_helper( run_form->stop, "Stop the running program" );
 	fl_set_object_helper( run_form->undo_button,
 						  "Undo last rescaling operation" );
 	fl_set_object_helper( run_form->full_scale_button,
 						  "Switch off automatic rescaling" );
+
 	if ( G.dim == 1 )
 	{
 		fl_set_object_helper( run_form->curve_1_button, 
@@ -119,12 +123,13 @@ void start_graphics( void )
 
 	G.d = FL_FormDisplay( run_form->run );
 
-	/* Set minimum size for display window */
+	/* Set minimum size for display window switch on the full scale button */
 
-	fl_winminsize( run_form->run->window, 400, 320 );
+	fl_winminsize( run_form->run->window, 400, 335 );
 	fl_set_button( run_form->full_scale_button, 1 );
 
-	/* Load a font hopefully available on all machines */
+	/* Load a font hopefully available on all machines (we try at least three,
+	 in principal this should be made user configurable) */
 
 	if ( G.is_init )
 	{
@@ -139,6 +144,8 @@ void start_graphics( void )
 			XTextExtents( G.font, "Xy", 2, &dummy, &G.font_asc, &G.font_desc,
 						  &font_prop );
 	}
+
+	/* Create the canvas and the axes */
 
 	setup_canvas( &G.x_axis, run_form->x_axis );
 	setup_canvas( &G.y_axis, run_form->y_axis );
@@ -204,7 +211,8 @@ void G_struct_init( void )
 		fl_set_cursor_color( G.cur_5, FL_RED, FL_WHITE );
 	}
 
-	/* Define colors for the curves */
+	/* Define colors for the curves (in principal this should be made
+       configurable by the user) */
 
 	G.colors[ 0 ] = FL_TOMATO;
 	G.colors[ 1 ] = FL_GREEN;
@@ -302,6 +310,10 @@ void G_struct_init( void )
 
 
 /*----------------------------------------------------------------------*/
+/* This routine creates a pixmap with the label for either the y- or z- */
+/* axis (set `coord' to 1 for y and 2 for z). The problem is that it's  */
+/* not possible to draw rotated text so we have to write the text to a  */
+/* pixmap and then rotate this pixmap 'by hand'.                        */
 /*----------------------------------------------------------------------*/
 
 void create_label_pixmap( int coord )
@@ -672,10 +684,10 @@ void make_scale( Curve_1d *cv, Canvas *c, int coord )
 	short last = -1000;
 
 
-	/* The distance between the smallest ticks should be about 8 points -
+	/* The distance between the smallest ticks should be about 6 points -
 	   calculate the corresponding delta in real word units */
 
-	rwc_delta = 7.0 * fabs( G.rwc_delta[ coord ] ) / cv->s2d[ coord ];
+	rwc_delta = 6.0 * fabs( G.rwc_delta[ coord ] ) / cv->s2d[ coord ];
 
 	/* Now scale this distance to the interval [ 1, 10 [ */
 
