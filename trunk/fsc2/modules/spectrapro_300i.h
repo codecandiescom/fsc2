@@ -96,6 +96,7 @@ Var *monochromator_name( Var *v );
 Var *monochromator_turret( Var *v );
 Var *monochromator_grating( Var *v );
 Var *monochromator_wavelength( Var *v );
+Var *monochromator_wavenumber( Var *v );
 Var *monochromator_install_grating( Var *v );
 Var *monochromator_groove_density( Var *v );
 Var *monochromator_calibrate( Var *v );
@@ -125,6 +126,8 @@ long spectrapro_300i_get_adjust( long gn );
 void spectrapro_300i_set_adjust( long gn, long adjust );
 void spectrapro_300i_install_grating( long gn, const char *part_no );
 void spectrapro_300i_uninstall_grating( long gn );
+double spectrapro_300i_wl2wn( double wl );
+double spectrapro_300i_wn2wl( double wn );
 
 
 void spectrapro_300i_read_calib( FILE *fp, const char *calib_file );
