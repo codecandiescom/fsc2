@@ -33,7 +33,7 @@ int dg2020_f_init_hook( void )
 		THROW( EXCEPTION );
 	}
 
-	pulser_struct.name = get_string_copy( "DG2020_F" );
+	pulser_struct.name = DEVICE_NAME;
 
 	/* Set global variable to indicate that GPIB bus is needed */
 
