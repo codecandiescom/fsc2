@@ -41,6 +41,14 @@
 #include <arpa/nameser.h>
 #include <resolv.h>
 
+
+#ifdef USE_IPv6
+#define AF_INET_X  AF_INET_6
+#else
+#define AF_INET_X  AF_INET
+#endif
+
+
 /* Define the maximum length of data we're prepared to get on a DNS query
    for the MX RRs */
 
@@ -377,7 +385,7 @@ static int open_mail_socket( const char *remote, const char *local )
 
 	/* Try to open a socket */
 
-	if ( ( sock_fd = socket( AF_INET, SOCK_STREAM, 0 ) ) == -1 )
+	if ( ( sock_fd = socket( AF_INET_X, SOCK_STREAM, 0 ) ) == -1 )
 		return -1;
 
 	/* We can't simply connect to the remote host but must first figure
@@ -388,7 +396,7 @@ static int open_mail_socket( const char *remote, const char *local )
 		  host = get_mail_server( NULL, local ) )
 	{
 		memset( &serv_addr, 0, sizeof( serv_addr ) );
-		serv_addr.sin_family = AF_INET;
+		serv_addr.sin_family = AF_INET_X;
 		serv_addr.sin_port = htons( MAIL_PORT );
 
 		if ( ( hp = gethostbyname( host ) ) == NULL ||

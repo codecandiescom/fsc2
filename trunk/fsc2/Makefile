@@ -185,15 +185,18 @@ DEFAULT_HTTP_PORT := 8080
 
 
 # Normally, fsc2 will use the systems 'mail' command when it needs to send
-# emails. This requires that a mail transport agent like sendmail is installed
-# on the system (i.e. sendmail or a similar program is installed, but not
-# necessarily be running, waiting for incoming connections). Otherwise, when
-# no MTA is installed a somewhat rudimentary mail transfer agent built into
-# fsc2 can be used instead. If you want to use fsc2s mail transfer agent (e.g.
-# because sendmail isn't installed on your machine) uncomment the following
-# line.
+# emails. This requires that a mail transport agent (MTA) like sendmail is
+# installed on the system (i.e. sendmail or a similar program is installed,
+# but not necessarily be running, waiting for incoming connections).
+# Otherwise, when no MTA is installed a somewhat rudimentary mail transfer
+# agent built into fsc2 can be used instead. If you want to use fsc2s MTA
+# (e.g. because sendmail isn't installed on your machine) uncomment the
+# following line. In this case you must also uncomment the line defining
+# the USE_IPv6 variable if your machine uses the new IP address scheme with
+# 128 bit addresses instead of the traditional one with only 32 bit addresses.
 
 USE_FSC2_MTA = yes
+# USE_IPv6   = yes
 
 
 # This last variable controls to whom emails with bug reports and about
