@@ -1944,11 +1944,30 @@ This function allows to view the pulses as they become set during the
 test run. If this function is called an additional window pops up after
 the end of the test run which shows the position of all pulses at the
 start of the experiment. By using the (fast) forward and backward)
-buttons (or the up and down arrow keys (with and without the
-@code{<SHIFT>} key, the @w{@code{<PAGE UP>}} and @w{@code{<PAGE DOWN>}}
-as well as the @code{<HOME>} and @code{>END}> keys) you may view all
-pulse settings during the experiment (as far as they can be determined
-during the test run).
+buttons, the @w{@code{<PAGE UP>}} and @w{@code{<PAGE DOWN>}} as well as
+the @code{<HOME>} and @code{>END}> keys) you may view all pulse settings
+during the experiment (as far as they can be determined during the test
+run). Alternatively, the step number can be edited directly.
+
+By using the @code{Show delays} button you can switch between a display
+where the pulses are shown at their "logical" positions (as they would
+be set if there would be no delays) and the positions at which they,
+due to delays really will be set.
+
+In an additional window the paramters of the pulse the mouse is currenty
+positioned on are displayed. These include the pulse number (when the
+pulse number is enclosed in parentheses it's an automatically created
+pulse), the position with and without delays (depending on the current
+setting of the @code{Show delays} button, in parentheses the value for
+the other button state is shown), the pulse length, its function and the
+number of the pod or channel to which the pulse will be routed.
+
+Further informations are the edge-to-edge distance to the previous and
+the next pulse (in parentheses the center-to center distance) is shown.
+
+Finally, for automatically created pulses informations about the parent
+pulse, i.e.@: the pulse for which this pulse was created for, are
+displayed. 
 
 The function uses the @code{fsc2_pulses} program to display the pulse
 settings. @code{fsc2_pulses} only works if both Perl and Perl/Tk (in not
