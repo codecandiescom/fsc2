@@ -743,7 +743,7 @@ file to allow higher output levels.
 @subheading HP RF Synthesizer HP8672A
 @end iftex
 @ifnottex
-@section HP RF Synthesizer HP8672AA
+@section HP RF Synthesizer HP8672A
 @end ifnottex
 
 @paragraphindent 0
