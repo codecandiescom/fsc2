@@ -119,7 +119,10 @@ struct RULBUS_CARD_LIST {
 	double                      intr_delay;
 };
 
+
 extern RULBUS_CARD_LIST *rulbus_card;
+extern int rulbus_errno;
+
 
 int rulbus_write( int handle, unsigned char offset, unsigned char *data,
 				  size_t len );

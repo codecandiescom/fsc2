@@ -53,7 +53,7 @@ int rulbus_rb8515_clock_init( void )
 {
 	rulbus_rb8515_clock_card = NULL;
 	rulbus_num_clock_cards = 0;
-	return RULBUS_OK;
+	return rulbus_errno = RULBUS_OK;
 }
 
 
@@ -90,7 +90,7 @@ int rulbus_rb8515_clock_card_init( int handle )
 				   ( rulbus_num_clock_cards + 1 ) * sizeof *tmp );
 
 	if ( tmp == NULL )
-		return RULBUS_NO_MEMORY;
+		return rulbus_errno = RULBUS_NO_MEMORY;
 
 	rulbus_rb8515_clock_card = tmp;
 	tmp += rulbus_num_clock_cards++;
@@ -101,9 +101,9 @@ int rulbus_rb8515_clock_card_init( int handle )
 	/* Stop the clock */
 
 	if ( ( retval = rulbus_write( handle, 0, &tmp->ctrl, 1 ) ) != 1 )
-		return retval;
+		return rulbus_errno = retval;
 
-	return RULBUS_OK;
+	return rulbus_errno = RULBUS_OK;
 }
 	
 
@@ -153,20 +153,20 @@ int rulbus_rb8515_clock_set_frequency( int handle, int freq )
 	/* Try to find the card, if it doesn't exist just return */
 
 	if ( ( card = rulbus_rb8515_clock_card_find( handle ) ) == NULL )
-		return RULBUS_INVALID_CARD_HANDLE;
+		return rulbus_errno = RULBUS_INVALID_CARD_HANDLE;
 
 	if ( freq < RULBUS_RB8515_CLOCK_FREQ_OFF ||
 		 freq > RULBUS_RB8515_CLOCK_FREQ_100MHz )
-		return RULBUS_INVALID_ARGUMENT;
+		return rulbus_errno = RULBUS_INVALID_ARGUMENT;
 
 	if ( card->ctrl == freq )
-		return RULBUS_OK;
+		return rulbus_errno = RULBUS_OK;
 
 	card->ctrl = freq;
 	if ( ( retval = rulbus_write( handle, 0, &card->ctrl, 1 ) ) != 1 )
-		return retval;
+		return rulbus_errno = retval;
 
-	return RULBUS_OK;
+	return rulbus_errno = RULBUS_OK;
 }
 
 

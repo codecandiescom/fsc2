@@ -91,7 +91,7 @@ int rulbus_rb8509_adc12_init( void )
 {
 	rulbus_rb8509_adc12_card = NULL;
 	rulbus_num_adc12_cards = 0;
-	return RULBUS_OK;
+	return rulbus_errno = RULBUS_OK;
 }
 
 
@@ -129,7 +129,7 @@ int rulbus_rb8509_adc12_card_init( int handle )
 				   ( rulbus_num_adc12_cards + 1 ) * sizeof *tmp );
 
 	if ( tmp == NULL )
-		return RULBUS_NO_MEMORY;
+		return rulbus_errno = RULBUS_NO_MEMORY;
 
 	rulbus_rb8509_adc12_card = tmp;
 	tmp += rulbus_num_adc12_cards++;
@@ -163,9 +163,9 @@ int rulbus_rb8509_adc12_card_init( int handle )
 		tmp = realloc( rulbus_rb8509_adc12_card,
 					   --rulbus_num_adc12_cards * sizeof *tmp );
 		if ( tmp == NULL )
-			return RULBUS_NO_MEMORY;
+			return rulbus_errno = RULBUS_NO_MEMORY;
 		rulbus_rb8509_adc12_card = tmp;
-		return retval;
+		return rulbus_errno = retval;
 	}
 
 	usleep( ADC12_DELAY );      /* allow for settling time after gain switch */
@@ -177,10 +177,12 @@ int rulbus_rb8509_adc12_card_init( int handle )
 		tmp = realloc( rulbus_rb8509_adc12_card,
 					   --rulbus_num_adc12_cards * sizeof *tmp );
 		if ( tmp == NULL )
-			return RULBUS_NO_MEMORY;
+			return rulbus_errno = RULBUS_NO_MEMORY;
 		rulbus_rb8509_adc12_card = tmp;
+		return rulbus_errno = retval;
 	}
 
+	rulbus_errno = RULBUS_OK;
 	return retval;
 }
 
@@ -228,8 +230,9 @@ int rulbus_rb8509_adc12_num_channels( int handle )
 
 
 	if ( ( card = rulbus_rb8509_adc12_card_find( handle ) ) == NULL )
-		return RULBUS_INVALID_CARD_HANDLE;
+		return rulbus_errno = RULBUS_INVALID_CARD_HANDLE;
 
+	rulbus_errno = RULBUS_OK;
 	return card->num_channels;
 }
 
@@ -247,27 +250,27 @@ int rulbus_rb8509_adc12_set_channel( int handle, int channel )
 
 
 	if ( ( card = rulbus_rb8509_adc12_card_find( handle ) ) == NULL )
-		return RULBUS_INVALID_CARD_HANDLE;
+		return rulbus_errno = RULBUS_INVALID_CARD_HANDLE;
 
 	if ( channel < 0 || channel >= card->num_channels )
-		return RULBUS_INVALID_ARGUMENT;
+		return rulbus_errno = RULBUS_INVALID_ARGUMENT;
 
 	ctrl = ( card->ctrl & ~ CTRL_CHANNEL_MASK ) | channel;
 
 	if ( ctrl == card->ctrl )
-		return RULBUS_OK;
+		return rulbus_errno = RULBUS_OK;
 
 	card->ctrl = ctrl;
 	if ( ( retval = rulbus_write( handle, CONTROL_ADDR, &card->ctrl, 1 ) )
 		 																 != 1 )
-		return retval;
+		return rulbus_errno = retval;
 
 	/* Read the low data byte to make sure the EOC bit is cleared */
 
 	if ( ( retval = rulbus_read( handle, DATA_LOW_ADDR, &ctrl, 1 ) ) != 1 )
-		return retval;
+		return rulbus_errno = retval;
 
-	return RULBUS_OK;
+	return rulbus_errno = RULBUS_OK;
 }
 
 
@@ -285,10 +288,10 @@ int rulbus_rb8509_adc12_set_gain( int handle, int gain )
 
 
 	if ( ( card = rulbus_rb8509_adc12_card_find( handle ) ) == NULL )
-		return RULBUS_INVALID_CARD_HANDLE;
+		return rulbus_errno = RULBUS_INVALID_CARD_HANDLE;
 
 	if ( gain != 1 && gain != 2 && gain != 4 && gain != 8 )
-		return RULBUS_INVALID_ARGUMENT;
+		return rulbus_errno = RULBUS_INVALID_ARGUMENT;
 
 	card->gain = ( double ) gain;
 
@@ -300,12 +303,12 @@ int rulbus_rb8509_adc12_set_gain( int handle, int gain )
 	ctrl = ( card->ctrl & ~ CTRL_GAIN_MASK ) | gain_bits;
 
 	if ( ctrl == card->ctrl )
-		return RULBUS_OK;
+		return rulbus_errno = RULBUS_OK;
 
 	card->ctrl = ctrl;
 	if ( ( retval = rulbus_write( handle, CONTROL_ADDR, &card->ctrl, 1 ) )
 																		 != 1 )
-		return retval;
+		return rulbus_errno = retval;
 
 	/* The card needs a settling time of about 18 us after gain switching */
 
@@ -314,9 +317,9 @@ int rulbus_rb8509_adc12_set_gain( int handle, int gain )
 	/* Read the low data byte to make sure the EOC bit is cleared */
 
 	if ( ( retval = rulbus_read( handle, DATA_LOW_ADDR, &ctrl, 1 ) ) != 1 )
-		 return retval;
+		 return rulbus_errno = retval;
 
-	return RULBUS_OK;
+	return rulbus_errno = RULBUS_OK;
 }
 
 
@@ -333,16 +336,16 @@ int rulbus_rb8509_adc12_set_trigger_mode( int handle, int mode )
 
 
 	if ( ( card = rulbus_rb8509_adc12_card_find( handle ) ) == NULL )
-		return RULBUS_INVALID_CARD_HANDLE;
+		return rulbus_errno = RULBUS_INVALID_CARD_HANDLE;
 
 	if ( mode != RULBUS_RB8509_ADC12_INT_TRIG &&
 		 mode != RULBUS_RB8509_ADC12_EXT_TRIG )
-		return RULBUS_INVALID_ARGUMENT;
+		return rulbus_errno = RULBUS_INVALID_ARGUMENT;
 
 	/* Some cards can't be triggered externally */
 
 	if ( mode != RULBUS_RB8509_ADC12_INT_TRIG && ! card->has_ext_trigger )
-		return RULBUS_NO_EXT_TRIGGER;
+		return rulbus_errno = RULBUS_NO_EXT_TRIGGER;
 
 	if ( mode == RULBUS_RB8509_ADC12_INT_TRIG )
 		ctrl = card->ctrl & ~ CTRL_EXT_TRIGGER_ENABLE;
@@ -350,21 +353,21 @@ int rulbus_rb8509_adc12_set_trigger_mode( int handle, int mode )
 		ctrl = card->ctrl | CTRL_EXT_TRIGGER_ENABLE;
 
 	if ( ctrl == card->ctrl )
-		return RULBUS_OK;
+		return rulbus_errno = RULBUS_OK;
 
 	card->ctrl = ctrl;
 	card->trig_mode = mode;
 
 	if ( ( retval = rulbus_write( handle, CONTROL_ADDR, &card->ctrl, 1 ) )
 																		 != 1 )
-		return retval;
+		return rulbus_errno = retval;
 
 	/* Read the low data byte to make sure the EOC bit is cleared */
 
 	if ( ( retval = rulbus_read( handle, DATA_LOW_ADDR, &ctrl, 1 ) ) != 1 )
-		return retval;
+		return rulbus_errno = retval;
 
-	return RULBUS_OK;
+	return rulbus_errno = RULBUS_OK;
 }
 
 
@@ -374,14 +377,14 @@ int rulbus_rb8509_adc12_set_trigger_mode( int handle, int mode )
  *---------------------------------------------------------------------*/
 
 int rulbus_rb8509_adc12_properties( int handle, double *Vmax, double *Vmin,
-							 double *dV )
+									double *dV )
 
 {
 	RULBUS_RB8509_ADC12_CARD *card;
 
 
 	if ( ( card = rulbus_rb8509_adc12_card_find( handle ) ) == NULL )
-		return RULBUS_INVALID_CARD_HANDLE;
+		return rulbus_errno = RULBUS_INVALID_CARD_HANDLE;
 
 	if ( Vmax != NULL )
 		*Vmax = card->Vmax;
@@ -392,7 +395,7 @@ int rulbus_rb8509_adc12_properties( int handle, double *Vmax, double *Vmin,
 	if ( dV != NULL )
 		*dV = card->dV;
 
-	return RULBUS_OK;
+	return rulbus_errno = RULBUS_OK;
 }
 
 
@@ -406,8 +409,9 @@ int rulbus_rb8509_adc12_has_external_trigger( int handle )
 
 
 	if ( ( card = rulbus_rb8509_adc12_card_find( handle ) ) == NULL )
-		return RULBUS_INVALID_CARD_HANDLE;
+		return rulbus_errno = RULBUS_INVALID_CARD_HANDLE;
 
+	rulbus_errno = RULBUS_OK;
 	return ( int ) card->has_ext_trigger;
 }
 
@@ -428,35 +432,42 @@ int rulbus_rb8509_adc12_check_convert( int handle, double *volts )
 
 
 	if ( volts == NULL )
-		return RULBUS_INVALID_ARGUMENT;
+		return rulbus_errno = RULBUS_INVALID_ARGUMENT;
 
 	if ( ( card = rulbus_rb8509_adc12_card_find( handle ) ) == NULL )
-		return RULBUS_INVALID_CARD_HANDLE;
+		return rulbus_errno = RULBUS_INVALID_CARD_HANDLE;
 
 	/* Return immediately if we're in internal trigger mode */
 
 	if ( card->trig_mode == RULBUS_RB8509_ADC12_INT_TRIG )
+	{
+		rulbus_errno = RULBUS_OK;
 		return 0;
+	}
 
 	/* Check if a conversion has already happened which also means that an
 	   external trigger was received */
 
 	if ( ( retval = rulbus_read( handle, STATUS_ADDR, &hi, 1 ) ) != 1 )
-		return retval;
+		return rulbus_errno = retval;
 
 	if ( ! ( hi & STATUS_EOC ) )
+	{
+		rulbus_errno = RULBUS_OK;
 		return 0;
+	}
 
 	/* If the conversion is already done also get the low data byte and
 	   return the value to the user */
 
 	if ( ( retval = rulbus_read( handle, DATA_LOW_ADDR, &low, 1 ) ) != 1 )
-		return retval;
+		return rulbus_errno = retval;
 
 	/* Calculate the voltage from the data we just received */
 
 	card->data = ( ( hi & STATUS_DATA_MASK ) << 8 ) | low;
 	*volts = ( card->dV * card->data + card->Vmin ) / card->gain;
+	rulbus_errno = RULBUS_OK;
 	return 1;
 }
 
@@ -474,10 +485,10 @@ int rulbus_rb8509_adc12_convert( int handle, double *volts )
 
 
 	if ( volts == NULL )
-		return RULBUS_INVALID_ARGUMENT;
+		return rulbus_errno = RULBUS_INVALID_ARGUMENT;
 
 	if ( ( card = rulbus_rb8509_adc12_card_find( handle ) ) == NULL )
-		return RULBUS_INVALID_CARD_HANDLE;
+		return rulbus_errno = RULBUS_INVALID_CARD_HANDLE;
 
 	/* If we're in internal trigger mode trigger a conversion (after making
 	   sure EOC is reset). The value we write to the trigger register is of
@@ -486,26 +497,26 @@ int rulbus_rb8509_adc12_convert( int handle, double *volts )
 	if ( card->trig_mode == RULBUS_RB8509_ADC12_INT_TRIG &&
 		 ( ( retval = rulbus_read( handle, DATA_LOW_ADDR, &trig, 1 ) ) != 1 ||
 		   ( retval = rulbus_write( handle, TRIGGER_ADDR, &trig, 1 ) ) != 1 ) )
-		return retval;
+		return rulbus_errno = retval;
 
 	/* Check the EOC (end of conversion) bit */
 
 	do
 	{
 		if ( ( retval = rulbus_read( handle, STATUS_ADDR, &hi, 1 ) ) != 1 )
-			return retval;
+			return rulbus_errno = retval;
 	} while ( ! ( hi & STATUS_EOC ) );
 
 	/* Get the low data byte (thereby also resetting the EOC bit) */
 
 	if ( ( retval = rulbus_read( handle, DATA_LOW_ADDR, &low, 1 ) ) != 1 )
-		return retval;
+		return rulbus_errno = retval;
 
 	/* Calculate the voltage from the data we just received */
 
 	card->data = ( ( hi & STATUS_DATA_MASK ) << 8 ) | low;
 	*volts = ( card->dV * card->data + card->Vmin ) / card->gain;
-	return RULBUS_OK;
+	return rulbus_errno = RULBUS_OK;
 }
 
 

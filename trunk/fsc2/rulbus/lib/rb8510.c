@@ -64,7 +64,7 @@ int rulbus_rb8510_dac12_init( void )
 {
 	rulbus_rb8510_dac12_card = NULL;
 	rulbus_num_dac12_cards = 0;
-	return RULBUS_OK;
+	return rulbus_errno = RULBUS_OK;
 }
 
 
@@ -100,7 +100,7 @@ int rulbus_rb8510_dac12_card_init( int handle )
 				   ( rulbus_num_dac12_cards + 1 ) * sizeof *tmp );
 
 	if ( tmp == NULL )
-		return RULBUS_NO_MEMORY;
+		return rulbus_errno = RULBUS_NO_MEMORY;
 
 	rulbus_rb8510_dac12_card = tmp;
 	tmp += rulbus_num_dac12_cards++;
@@ -121,7 +121,7 @@ int rulbus_rb8510_dac12_card_init( int handle )
 
 	tmp->v = DAC12_RANGE + 1;                     /* impossible value */
 
-	return RULBUS_OK;
+	return rulbus_errno = RULBUS_OK;
 }
 	
 
@@ -169,7 +169,7 @@ int rulbus_rb8510_dac12_properties( int handle, double *Vmax, double *Vmin,
 
 
 	if ( ( card = rulbus_rb8510_dac12_card_find( handle ) ) == NULL )
-		return RULBUS_INVALID_CARD_HANDLE;
+		return rulbus_errno = RULBUS_INVALID_CARD_HANDLE;
 
 	if ( Vmax )
 		*Vmax = card->Vmax;
@@ -180,7 +180,7 @@ int rulbus_rb8510_dac12_properties( int handle, double *Vmax, double *Vmin,
 	if ( dV )
 		*dV = card->dV;
 
-	return RULBUS_OK;
+	return rulbus_errno = RULBUS_OK;
 }
 
 
@@ -197,29 +197,29 @@ int rulbus_rb8510_dac12_set_voltage( int handle, double volts )
 
 
 	if ( ( card = rulbus_rb8510_dac12_card_find( handle ) ) == NULL )
-		return RULBUS_INVALID_CARD_HANDLE;
+		return rulbus_errno = RULBUS_INVALID_CARD_HANDLE;
 
 	if ( volts + 0.5 * card->dV < card->Vmin ||
 		 volts - 0.5 * card->dV > card->Vmax )
-		return RULBUS_INVALID_VOLTAGE;
+		return rulbus_errno = RULBUS_INVALID_VOLTAGE;
 
 	val = ( unsigned short int )
 							  floor( ( volts - card->Vmin ) / card->dV + 0.5 );
 
 	if ( card->v == val )
-		return RULBUS_OK;
+		return rulbus_errno = RULBUS_OK;
 
 	card->v = val;
 
 	byte = ( val >> 8 ) & 0xFF;
 	if ( ( retval = rulbus_write( handle, DAC12_MSB, &byte, 1 ) ) != 1 )
-		return retval;
+		return rulbus_errno = retval;
 
 	byte = val & 0xFF;
 	if ( ( retval = rulbus_write( handle, DAC12_LSB, &byte, 1 ) ) != 1 )
-		return retval;
+		return rulbus_errno = retval;
 
-	return RULBUS_OK;
+	return rulbus_errno = RULBUS_OK;
 }
 
 
