@@ -44,8 +44,6 @@ static int start_printing( char **argv );
 
 
 /*------------------------------------------------------------*/
-/* Prints one or more one-dimensional curves. If called from  */
-/* the normal display window it will print all active curves. */
 /*------------------------------------------------------------*/
 
 void print_1d( FL_OBJECT *obj, long data )
