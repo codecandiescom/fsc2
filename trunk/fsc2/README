@@ -177,8 +177,8 @@ Limitations
 
 Due to my professional background fsc2 has been written with the different
 types of EPR (Electron Paramagnetic Resonance) experiments in mind. On the
-other hand, fsc2's basic concepts should make it easy to use it also for a
-wide range of other types of spectrometers.
+other hand, fsc2's basic concepts should make it easy to use it also for
+quite a wide range of other types of spectrometers.
 
                                      Regards, Jens Thoms Toerring
 
