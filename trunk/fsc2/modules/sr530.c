@@ -68,7 +68,7 @@ static double tcs[ ] = { 1.0e-3, 3.0e-3, 1.0e-2, 3.0e-2, 1.0e-1, 3.0e-1,
 
 static double get_single_channel_data( Var *v );
 static bool sr530_init( const char *name );
-static double sr530_get_data( void );
+static double sr530_get_data( int channel );
 static double sr530_get_adc_data( long channel );
 static double sr530_get_sens( void );
 static void sr530_set_sens( int Sens );
@@ -208,13 +208,16 @@ Var *lockin_get_data( Var *v )
 
 static double get_single_channel_data( Var *v )
 {
+	long channel;
+
+
 	if ( v == NULL )
 		channel = 1;
 	else
 	{
 		vars_check( v, INT_VAR | FLOAT_VAR );
 
-		if ( v->type == IT_VAR )
+		if ( v->type == INT_VAR )
 			channel = v->val.lval;
 		else
 		{
