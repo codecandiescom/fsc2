@@ -24,8 +24,7 @@ bool dg2020_store_timebase( double timebase )
 
 		eprint( FATAL, "%s:%ld: %s: Invalid time base of %s, valid range is "
 				"%s to %s.\n", Fname, Lc, pulser_struct.name,
-				dg2020_ptime( timebase ),
-				min, max );
+				dg2020_ptime( timebase ), min, max );
 		T_free( min );
 		T_free( max );
 		THROW( EXCEPTION );
