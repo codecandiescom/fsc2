@@ -169,7 +169,7 @@ CHANNEL *dg2020_get_next_free_channel( void )
 
 /*---------------------------------------------------------------------------
   Comparison function for two pulses: returns 0 if both pulses are inactive,
-  -1 if only the second pulse is inactive or starts at a late time and 1 if
+  -1 if only the second pulse is inactive or starts at a later time and 1 if
   only the first pulse is inactive pulse or the second pulse starts earlier.
 ---------------------------------------------------------------------------*/
 
