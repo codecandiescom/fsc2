@@ -65,7 +65,7 @@ fsc2.ps: $(docs) $(patsubst %.png,%.eps,$(figures))
 	fi
 
 
-ifneq ($(word 1,$(shell which conver)),which:)
+ifneq ($(word 1,$(shell which convert)),which:)
 %.eps: %.png
 	convert $< $@
 else
@@ -84,7 +84,7 @@ fsc2.pdf: $(docs) $(patsubst %.png,%.pdf,$(figures))
 	fi
 
 
-ifneq ($(word 1,$(shell which conver)),which:)
+ifneq ($(word 1,$(shell which convert)),which:)
 %.pdf: %.png
 	convert -compress Zip $< $@
 else

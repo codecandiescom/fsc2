@@ -135,9 +135,9 @@ if you're using the Bourne or Korn shell (sh or ksh) or bash. Use
 
     make >& fsc2_make.log
 
-if you use the C shell (csh) or tcsh.
+if you're working under the C shell (csh) or tcsh.
 
-When the compilation of the program succeded (even though making the
+When the compilation of the program succeds (even though making the
 documentation failed at some stage), you can now install the program by
 typing 'make install'. Normally, you will need root privileges to do this.
 If making the documentation failed with an error also the installon may
