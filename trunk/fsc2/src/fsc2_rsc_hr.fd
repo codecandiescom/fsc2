@@ -1072,7 +1072,7 @@ argument:
 Name: cut
 Width: 1030
 Height: 800
-Number of Objects: 17
+Number of Objects: 18
 
 --------------------
 class: FL_BOX
@@ -1362,6 +1362,24 @@ gravity: FL_NoGravity FL_NoGravity
 name: down_button
 callback: cut_next_index
 argument: 1
+
+--------------------
+class: FL_BUTTON
+type: HIDDEN_BUTTON
+box: 155 105 35 30
+boxtype: FL_UP_BOX
+colors: FL_COL1 FL_COL1
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_BLACK
+label: 
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: change_button
+callback: cut_change_dir
+argument: 0
 
 --------------------
 class: FL_CANVAS

@@ -108,6 +108,8 @@ void cut_show( int dir, long index )
 
 	if ( ! CG.is_shown )
 	{
+		fl_set_object_shortcutkey( cut_form->change_button, XK_space );
+
 		if ( ! cut_has_been_shown &&
 			 * ( ( char * ) xresources[ CUTGEOMETRY ].var ) != '\0' )
 		{
@@ -2627,4 +2629,49 @@ void cut_next_index( FL_OBJECT *a, long b )
 			cut_show( CG.cut_dir, 0 );
 			break;
 	}
+}
+
+
+/*----------------------------------------------------------*/
+/*----------------------------------------------------------*/
+
+void cut_change_dir( FL_OBJECT *a, long b )
+{
+	Curve_1d *cv = &G.cut_curve;
+	long index;
+	int keymask;
+	int px, py;
+
+
+
+	a = a;
+	b = b;
+
+	if ( G.raw_button_state != 3 )
+		return;
+
+	fl_get_win_mouse( cut_form->cut->window, &px, &py, &keymask );
+	px -= cut_form->cut_canvas->x;
+
+	if ( px < 0 || px > cut_form->cut_canvas->w )
+		return;
+
+	index = lround( px / cv->s2d[ X ] - cv->shift[ X ] );
+
+	if ( CG.cut_dir == X )
+	{
+		if ( index >= G.ny )
+			index = G.ny - 1;
+		if ( index < 0 )
+			index = 0;
+	}
+	else
+	{
+		if ( index >= G.nx )
+			index = G.nx - 1;
+		if ( index < 0 )
+			index = 0;
+	}
+
+	cut_show( CG.cut_dir == X ? Y : X, index );
 }
