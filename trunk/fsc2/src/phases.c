@@ -32,7 +32,18 @@ void acq_seq_start( long acq_num, long acq_type )
 
 	ASeq[ acq_num ].defined = SET;
 	ASeq[ acq_num ].sequence = T_malloc( sizeof( int ) );
+
+	if ( acq_type == ACQ_PLUS_U && cur_aseq == 0 )
+		acq_type = ACQ_PLUS_A;
+	if ( acq_type == ACQ_MINUS_U && cur_aseq == 0 )
+		acq_type = ACQ_MINUS_A;
+	if ( acq_type == ACQ_PLUS_U && cur_aseq == 1 )
+		acq_type = ACQ_PLUS_B;
+	if ( acq_type == ACQ_MINUS_U && cur_aseq == 1 )
+		acq_type = ACQ_MINUS_B;
+
 	ASeq[ acq_num ].sequence[ 0 ] = ( int ) acq_type;
+
 	ASeq[ acq_num ].len = 1;
 }
 
@@ -51,7 +62,7 @@ void acq_seq_cont( long acq_type )
 
 	assert( acq_type >= ACQ_PLUS_U && acq_type <= ACQ_MINUS_B );
 
-	/* add the new acquisition type */
+	/* Add the new acquisition type */
 
 	if ( acq_type == ACQ_PLUS_U && cur_aseq == 0 )
 		acq_type = ACQ_PLUS_A;
