@@ -721,7 +721,7 @@ Var *lockin_ref_freq( Var *v )
 	freq = VALUE( v );
 	vars_pop( v );
 	
-	if ( sr810_get_ref_mode( ) != REF_MODE_INTERNAL )
+	if ( ! TEST_RUN && sr810_get_ref_mode( ) != REF_MODE_INTERNAL )
 	{
 		eprint( FATAL, "%s:%ld: %s: Can't set reference frequency while "
 				"reference source isn't internal.\n", Fname, Lc, DEVICE_NAME );
