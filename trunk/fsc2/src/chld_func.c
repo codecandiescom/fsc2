@@ -5,6 +5,7 @@
 
 #include "fsc2.h"
 
+static const char *handle_input( const char *content, const char *label );
 
 
 /*-------------------------------------------------------*/
@@ -104,4 +105,42 @@ const char *show_fselector( const char *message, const char *directory,
 		reader( ( void * ) &ret );
 		return ret;
 	}
+}
+
+
+const char *show_input( const char *content, const char *label )
+{
+	char *ret = NULL;
+
+	if ( I_am == PARENT )
+		return handle_input( content, label );
+	else
+	{
+		writer( C_INPUT, content, label );
+		reader( ( void * ) &ret );
+		return ret;
+	}
+}
+
+
+const char *handle_input( const char *content, const char *label )
+{
+	if ( label != NULL && label != '\0' )
+		fl_set_object_label( input_form->comm_input, label );
+	else
+		fl_set_object_label( input_form->comm_input, "Enter your comment:" );
+
+	fl_set_input( input_form->comm_input, content );
+
+	fl_show_form( input_form->input_form,
+				  FL_PLACE_MOUSE | FL_FREE_SIZE, FL_FULLBORDER,
+				  "fsc: Comment editor" );
+
+	while ( fl_do_forms( ) != input_form->comm_done )
+		;
+
+	if ( fl_form_is_visible( input_form->input_form ) )
+		fl_hide_form( input_form->input_form );
+
+	return fl_get_input( input_form->comm_input );
 }
