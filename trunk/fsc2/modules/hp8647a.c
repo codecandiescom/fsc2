@@ -218,6 +218,7 @@ Var *synthesizer_state( Var *v )
 	return vars_push( INT_VAR, ( long ) hp8647a_set_output_state( state ) );
 }
 
+
 /*---------------------------------------------------------------------*/
 /* Function sets or returns (if called with no argument) the frequency */
 /* of the synthesizer. If called for setting the frequency before the  */
