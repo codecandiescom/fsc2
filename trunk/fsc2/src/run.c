@@ -922,8 +922,12 @@ static void run_child( void )
 
 #ifndef NDEBUG
 	/* Setting the environment variable FSC2_CHILD_DEBUG to a non-empty
-	   string will induce the child to sleep for about 10 hours or until
-	   it receives a signal, e.g. from the debugger attaching to it. */
+	   string will induce the child to sleep for about 10 hours or until it
+	   receives a signal, e.g. from the debugger attaching to it. In the case
+	   that this environment variable isn't set make the process ignore
+	   SIGTRAP signals, that could lead to a premature termination of the
+	   process if the parent process is being debugged and a breakpoint has
+	   been set in a part of code that is shared between parent and child. */
 
 	if ( ( fcd = getenv( "FSC2_CHILD_DEBUG" ) ) != NULL &&
 		 fcd[ 0 ] != '\0' )
@@ -932,6 +936,8 @@ static void run_child( void )
 		fflush( stderr );
 		sleep( 36000 );
 	}
+	else
+		signal( SIGTRAP, SIG_IGN );
 #endif
 
 	/* Initialization is done and the child can start doing its real work */
