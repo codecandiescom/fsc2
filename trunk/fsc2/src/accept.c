@@ -782,4 +782,3 @@ static bool incr_x_and_y( long x_index, long len, long y_index )
 	ret = cut_num_points_changed( X, new_Gnx );
 	return ret || cut_num_points_changed( Y, y_index + 1 );
 }
-

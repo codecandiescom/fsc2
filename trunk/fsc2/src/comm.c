@@ -249,12 +249,15 @@ int new_data_callback( XEvent *a, void *b )
 		if ( Message_Queue[ message_queue_low ].type == REQUEST )
 		{
 			/* Increment of queue pointer must come first ! */
-
+			
 			message_queue_low = ( message_queue_low + 1 ) % QUEUE_SIZE;
 			reader( NULL );
 		}
 		else
-			accept_new_data( );
+		{
+			if ( ! accept_new_data( ) )
+				break;
+		}
 	}
 
 	return 0;
