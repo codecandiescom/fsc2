@@ -236,9 +236,9 @@ static void __exit ni6601_cleanup( void )
 }
 
 
-/*---------------------------------------------------------------------*/
-/* Function gets exectuted when the device file for a board get opened */
-/*---------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*/
+/* Function gets exectuted when the device file for a board gets opened */
+/*----------------------------------------------------------------------*/
 
 static int ni6601_open( struct inode *inode_p, struct file *file_p )
 {
