@@ -197,6 +197,7 @@ Var *lockin_ct( Var *v );
 Var *lockin_mf( Var *v );
 
 
+bool er023m_init( const char *name );
 int er023m_get_rg( void );
 void er023m_set_rg( int rg_index );
 int er023m_get_tc( void );

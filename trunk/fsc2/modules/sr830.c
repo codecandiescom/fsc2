@@ -202,7 +202,7 @@ int sr830_init_hook( void )
 
 int sr830_exp_hook( void )
 {
-	/* Initialize the lock-in */
+	/* Store current state and initialize the lock-in */
 
 	memcpy( &sr830_store, &sr830, sizeof( SR830 ) );
 

@@ -203,12 +203,7 @@ int sr810_init_hook( void )
 
 int sr810_exp_hook( void )
 {
-	/* Nothing to be done yet in a test run */
-
-	if ( TEST_RUN )
-		return 1;
-
-	/* Initialize the lock-in */
+	/* Store current state and initialize the lock-in */
 
 	memcpy( &sr810_store, &sr810, sizeof( SR810 ) );
 

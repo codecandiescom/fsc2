@@ -163,10 +163,7 @@ int sr530_init_hook( void )
 
 int sr530_exp_hook( void )
 {
-	/* Nothing to be done yet in a test run */
-
-	if ( TEST_RUN )
-		return 1;
+	/* Store the current state */
 
 	memcpy( &sr530_store, &sr530, sizeof( SR530 ) );
 
