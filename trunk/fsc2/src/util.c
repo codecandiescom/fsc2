@@ -28,7 +28,7 @@
 /* Function gets a format string as in printf and arguments which  */
 /* must correspond to the given format string and returns a string */
 /* of the right length into which the arguments are written. The   */
-/* caller of the function is responcible for free-ing the string.  */
+/* caller of the function is responsible for free-ing the string.  */
 /*-----------------------------------------------------------------*/
 
 char *get_string( const char *fmt, ... )
