@@ -1392,9 +1392,9 @@ static void cut_make_scale( Canvas *c, int coord )
 				              - ( ( double ) CG.index / ( double ) ( G.ny - 1 )
 								  * G.cut_z_axis.h );
 		triangle[ 1 ].x = - ( Z_SCALE_OFFSET - LONG_TICK_LEN - 10 );
-		triangle[ 1 ].y = - 5;
+		triangle[ 1 ].y = - LONG_TICK_LEN / 3;
 		triangle[ 2 ].x = 0;
-		triangle[ 2 ].y = 10;
+		triangle[ 2 ].y = 2 * ( LONG_TICK_LEN / 3 );
 		XFillPolygon( G.d, c->pm, c->font_gc, triangle, 3,
 					  Convex, CoordModePrevious );
 	}
