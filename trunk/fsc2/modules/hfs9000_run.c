@@ -7,6 +7,95 @@
 
 
 static PULSE *hfs9000_delete_pulse( PULSE *p );
+static bool hfs9000_update_pulses( bool flag );
+static void hfs9000_commit( FUNCTION *f, bool flag );
+
+
+/*---------------------------------------------------------------------------
+  Function is called in the experiment after pulses have been changed to
+  update the pulser accordingly. No checking has to be done except in the
+  test run.
+----------------------------------------------------------------------------*/
+
+void hfs9000_do_update( void )
+{
+	bool restart = UNSET;
+
+
+	if ( ! hfs9000_is_needed )
+		return;
+
+	/* Resort the pulses and check that the new pulse settings are
+	   reasonable and finally commit all changes */
+
+	if ( hfs9000.is_running )
+	{
+		restart = SET;
+		hfs9000_run( STOP );
+	}
+	hfs9000_update_pulses( TEST_RUN );
+	hfs9000.needs_update = UNSET;
+	if ( restart )
+		hfs9000_run( START );
+}
+
+
+/*---------------------------------------------------------------------------
+  This function sorts the pulses and checks that the pulses don't overlap.
+---------------------------------------------------------------------------*/
+
+static bool hfs9000_update_pulses( bool flag )
+{
+	int i;
+	FUNCTION *f;
+	PULSE *p;
+
+
+	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
+	{
+		f = &hfs9000.function[ i ];
+
+		/* Nothing to be done for unused functions */
+
+		if ( ! f->is_used )
+			continue;
+
+		if ( f->num_pulses > 1 )
+			qsort( f->pulses, f->num_pulses, sizeof( PULSE * ),
+				   hfs9000_start_compare );
+
+		/* Check the new pulse positions and lengths, if they're not ok stop
+		   program if it's doing the test run, while for the real run just
+		   reset the pulses to their previous positions and lengths */
+
+		TRY
+		{
+			hfs9000_do_checks( f );
+			TRY_SUCCESS;
+		}
+		CATCH( EXCEPTION )
+		{
+			if ( flag )
+				THROW( EXCEPTION );
+
+			for ( p = hfs9000_Pulses; p != NULL; p = p->next )
+			{
+				if ( p->is_old_pos )
+					p->pos = p->old_pos;
+				if ( p->is_old_len )
+					p->len = p->old_len;
+				p->is_active = IS_ACTIVE( p );
+				p->needs_update = UNSET;
+			}
+
+			return FAIL;
+		}
+
+		hfs9000_commit( f, flag );
+	}
+
+	return OK;
+}
 
 
 /*------------------------------------------------------------------------
@@ -75,7 +164,7 @@ void hfs9000_set_pulses( FUNCTION *f )
 		if ( f->pulses != NULL )
 		{
 			hfs9000_set_trig_out_pulse( );
-			f->pulses[ 0 ]->was_active = f->pulses[ 0 ]->is_active;
+			f->pulses[ 0 ]->was_active = f->pulses[ 0 ]->is_active = SET;
 		}
 		return;
 	}
@@ -120,9 +209,8 @@ void hfs9000_full_reset( void )
 
 		if ( ! p->has_been_active )
 		{
-			if ( p->num >=0 )
-				eprint( WARN, "%s: Pulse %ld is never used.\n",
-						pulser_struct.name, p->num );
+			eprint( WARN, "%s: Pulse %ld is never used.\n",
+					pulser_struct.name, p->num );
 			p = hfs9000_delete_pulse( p );
 			continue;
 		}
@@ -142,8 +230,7 @@ void hfs9000_full_reset( void )
 
 		p->is_old_pos = p->is_old_len = UNSET;
 
-		p->is_active = ( p->is_pos && p->is_len &&
-						 ( p->len > 0 || p->len == -1 ) );
+		p->is_active = ( p->is_pos && p->is_len && p->len > 0 );
 
 		p = p->next;
 	}
@@ -190,7 +277,7 @@ static PULSE *hfs9000_delete_pulse( PULSE *p )
 		p->function->is_used = UNSET;
 	}
 
-	/* Now remove the pulse from the real pulse list */
+	/* Now remove the pulse from the pulse list */
 
 	if ( p->next != NULL )
 		p->next->prev = p->prev;
@@ -201,4 +288,97 @@ static PULSE *hfs9000_delete_pulse( PULSE *p )
 	T_free( p );
 
 	return pp;
+}
+
+
+/*----------------------------------------------------------------------------
+  Changes the pulse pattern in the channels belonging to function 'f' so that
+  the data in the pulser get in sync with the its internal representation.
+  Some care has taken to minimize the number of commands and their length.
+----------------------------------------------------------------------------*/
+
+static void hfs9000_commit( FUNCTION *f, bool flag )
+{
+	PULSE *p;
+	int i;
+	Ticks start, len;
+	int what;
+
+
+	/* In a test run just reset the flags of all pulses that say that the
+	   pulse needs updating */
+
+	if ( flag )
+	{
+		for ( i = 0; i < f->num_pulses; i++ )
+		{
+			p = f->pulses[ i ];
+			p->needs_update = UNSET;
+			p->was_active = p->is_active;
+			p->is_old_pos = p->is_old_len = UNSET;
+		}
+
+		return;
+	}
+
+	/* In a real run we now have to change the pulses. The only way to keep
+	   the number and length of commands to be sent to the pulser at a minimum
+	   while getting it right in every imaginable case is to create two images
+	   of the pulser channel states, one before the changes and a second one
+	   after the changes. These images are compared and only that parts where
+	   differences are found are changed. Of course, that needs quite some
+	   computer time but probable is faster, or at least easier to understand
+	   and to debug, than any alternative I came up with...
+
+	   First allocate memory for the old and the new states of the channels
+	   used by the function */
+
+	f->channel->old = T_calloc( 2 * hfs9000.max_seq_len, sizeof( char ) );
+	f->channel->new = f->channel->old + hfs9000.max_seq_len;
+
+	/* Now loop over all pulses and pick the ones that need changes */
+
+	for ( i = 0; i < f->num_pulses; i++ )
+	{
+		p = f->pulses[ i ];
+
+		if ( ! p->needs_update )
+		{
+			p->is_old_len = p->is_old_pos = UNSET;
+			p->was_active = p->is_active;
+			continue;
+		}
+
+		if ( p->is_old_pos || ( p->is_old_len && p->old_len != 0 ) )
+			hfs9000_set( p->channel->old,
+						 p->is_old_pos ? p->old_pos : p->pos,
+						 p->is_old_len ? p->old_len : p->len, f->delay );
+		if ( p->is_pos && p->is_len && p->len != 0 )
+			hfs9000_set( p->channel->new, p->pos, p->len, f->delay );
+
+		p->channel->needs_update = SET;
+
+		p->is_old_len = p->is_old_pos = UNSET;
+		if ( p->is_active )
+			p->was_active = SET;
+		p->needs_update = UNSET;
+	}
+
+	/* Loop over all channels belonging to the function and for each channel
+	   that needs to be changeda find all differences between the old and the
+	   new state by repeatedly calling hfs9000_diff() - it returns +1 or -1 for
+	   setting or resetting plus the start and length of the different area or
+	   0 if no differences are found anymore. For each difference set the real
+	   pulser channel accordingly. */
+
+	if ( f->channel->needs_update )
+	{
+		while ( ( what = hfs9000_diff( f->channel->old, f->channel->new, 
+									   &start, &len ) ) != 0 )
+			hfs9000_set_constant( f->channel->self, start, len,
+								  what == -1 ? 0 : 1 );
+	}
+
+	f->channel->needs_update = UNSET;
+	T_free( f->channel->old );
 }

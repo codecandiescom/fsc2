@@ -200,3 +200,78 @@ Ticks hfs9000_get_max_seq_len( void )
 
 	return max;
 }
+
+
+/*----------------------------------------------------------*/
+/*----------------------------------------------------------*/
+
+void hfs9000_set( char *arena, Ticks start, Ticks len, Ticks offset )
+{
+	memset( ( void * ) ( arena + offset + start ),
+			( int ) SET, len * sizeof( bool ) );
+}
+
+
+/*----------------------------------------------------------*/
+/*----------------------------------------------------------*/
+
+int hfs9000_diff( char *old, char *new, Ticks *start, Ticks *length )
+{
+	static Ticks where = 0;
+	int ret;
+	char *a = old + where,
+		 *b = new + where;
+	char cur_state;
+
+
+	/* If we reached the end of the arena in the last call return 0 */
+
+	if ( where == -1 )
+	{
+		where = 0;
+		return 0;
+	}
+
+	/* Search for next difference in the arena */
+
+	while ( where < hfs9000.max_seq_len && *a == *b )
+	{
+		where++;
+		a++;
+		b++;
+	}
+
+	/* If none was found anymore */
+
+	if ( where == hfs9000.max_seq_len )
+	{
+		where = 0;
+		return 0;
+	}
+
+	/* store the start position (including the offset and the necessary one
+	   due to the pulsers firmware bug) and store if we wave to reset (-1)
+	   or to set (1) */
+
+	*start = where;
+	ret = *a == SET ? -1 : 1;
+	cur_state = *a;
+
+	/* Now figure out the length of the area we have to set or reset */
+
+	*length = 0;
+	while ( where < hfs9000.max_seq_len && *a != *b && *a == cur_state )
+	{
+		where++;
+		a++;
+		b++;
+		( *length )++;
+	}
+
+	/* Set a marker that we reached the end of the arena */
+
+	if ( where == hfs9000.max_seq_len )
+		where = -1;
+
+	return ret;
+}

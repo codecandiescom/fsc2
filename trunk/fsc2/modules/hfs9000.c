@@ -99,6 +99,7 @@ int hfs9000_init_hook( void )
 	{
 		hfs9000.channel[ i ].self = i;
 		hfs9000.channel[ i ].function = NULL;
+		hfs9000.channel[ i ].state = UNSET;
 	}
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )

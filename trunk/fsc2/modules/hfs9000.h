@@ -124,6 +124,7 @@ typedef struct _C_ {
 	bool needs_update;
 	char *old;
 	char *new;
+	bool state;
 } CHANNEL;
 
 
@@ -298,3 +299,5 @@ bool hfs9000_init( const char *name );
 bool hfs9000_set_constant( int channel, Ticks start, Ticks length, int state );
 bool hfs9000_set_trig_out_pulse( void );
 bool hfs9000_run( bool flag );
+bool hfs9000_get_channel_state( int channel );
+bool hfs9000_set_channel_state( int channel, bool flag );

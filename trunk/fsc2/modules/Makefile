@@ -93,9 +93,6 @@ hp8647a_lexer.c: hp8647a_lexer.flex $(src_header)
 	$(CC) $(CFLAGS) -c -fpic -o $@ $<
 
 
-# `clean' deletes just all the files remaining from the compilation while
-# `distclean' also removes all executables and shared libraries
-
 clean:
 	$(RM) $(RMFLAGS) *.o *_lexer.c *.so TAGS *~
 
