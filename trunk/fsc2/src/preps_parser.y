@@ -48,8 +48,7 @@ long Billion  = 1000000000L;
 %token ML_TOK                   /* maximum pulse length */
 %token RP_TOK                   /* replacement pulses */
 
-%token <lval> FUNC_TOK          /* type of function */
-
+%token <vptr> VAR_REF
 
 %token <vptr>  VAR_TOKEN        /* variable */
 %token <vptr> FUNC_TOKEN        /* function */
@@ -60,7 +59,6 @@ long Billion  = 1000000000L;
 %token EQ LT LE GT GE
 
 %token NS_TOKEN US_TOKEN MS_TOKEN S_TOKEN
-%type <lval> func
 %type <vptr> expr line time unit
 
 
@@ -88,7 +86,7 @@ input:   /* empty */
 
 /* currently only the variables related stuff */
 
-line:    P_TOK pprop               {}
+line:    P_TOK prop                {}
        | VAR_TOKEN '=' expr        { vars_assign( $3, $1 );
                                      assert( Var_Stack == NULL );
 	                                 assert( Arr_Stack == NULL ); }
@@ -106,38 +104,26 @@ line:    P_TOK pprop               {}
 
 
 
-pprop:   /* empty */
-       | pprop F_TOK sep1 func sep2 
-                                   { long f = $4;
-									 pulse_set( Cur_Pulse, P_FUNC,
-												vars_push( INT_VAR, &f ) ); }
-       | pprop S_TOK sep1 time sep2     
-                                   { pulse_set( Cur_Pulse, P_POS, $4 ); }
-       | pprop L_TOK sep1 time sep2 
-                                   { pulse_set( Cur_Pulse, P_LEN,$4 ); }
-       | pprop DS_TOK sep1 time sep2
-                                   { pulse_set( Cur_Pulse, P_DPOS, $4 ); }
-       | pprop DL_TOK sep1 time sep2
-                                   { pulse_set( Cur_Pulse, P_DLEN, $4 ); }
-       | pprop ML_TOK sep1 time sep2
-                                   { pulse_set( Cur_Pulse, P_MAXLEN, $4 ); }
+prop:   /* empty */
+       | prop F_TOK sep1 expr sep2  { pulse_set( Cur_Pulse, P_FUNC, $4 ); }
+       | prop S_TOK sep1 time sep2  { pulse_set( Cur_Pulse, P_POS, $4 ); }
+       | prop L_TOK sep1 time sep2  { pulse_set( Cur_Pulse, P_LEN,$4 ); }
+       | prop DS_TOK sep1 time sep2 { pulse_set( Cur_Pulse, P_DPOS, $4 ); }
+       | prop DL_TOK sep1 time sep2 { pulse_set( Cur_Pulse, P_DLEN, $4 ); }
+       | prop ML_TOK sep1 time sep2 { pulse_set( Cur_Pulse, P_MAXLEN, $4 ); }
 ;
 
-
-func:    FUNC_TOK                  { $$ = $1; }
-       | INT_TOKEN                 { $$ = $1; }
-;
 
 time:    expr unit                 { $$ = vars_mult( $1, $2 ); }
 ;
 
 
-unit:   /* empty */                { $$ = vars_push( INT_VAR,
+unit:    /* empty */               { $$ = vars_push( INT_VAR,
 													 &Default_Time_Base ); }
-      | NS_TOKEN                   { $$ = vars_push( INT_VAR, &One ); }
-      | US_TOKEN                   { $$ = vars_push( INT_VAR, &Thousand ); }
-      | MS_TOKEN                   { $$ = vars_push( INT_VAR, &Million ); }
-      | S_TOKEN                    { $$ = vars_push( INT_VAR, &Billion ); }
+       | NS_TOKEN                  { $$ = vars_push( INT_VAR, &One ); }
+       | US_TOKEN                  { $$ = vars_push( INT_VAR, &Thousand ); }
+       | MS_TOKEN                  { $$ = vars_push( INT_VAR, &Million ); }
+       | S_TOKEN                   { $$ = vars_push( INT_VAR, &Billion ); }
 ;
 
 /* separator between keyword and value */
@@ -158,6 +144,7 @@ sep2:    /* empty */
 expr:    INT_TOKEN                 { $$ = vars_push( INT_VAR, &$1 ); }
        | FLOAT_TOKEN               { $$ = vars_push( FLOAT_VAR, &$1 ); }
        | VAR_TOKEN                 { $$ = vars_push_simple( $1 ); }
+       | VAR_REF                   { $$ = $1; }
        | VAR_TOKEN '['             { vars_push_astack( $1 ); }
          list3 ']'                 { $$ = vars_pop_astack( ); }
        | FUNC_TOKEN '(' list4 ')'  { $$ = func_call( $1 ); }

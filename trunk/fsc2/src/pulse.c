@@ -127,12 +127,14 @@ void pulse_set( Pulse *p, int type, Var *v )
 }
 
 
-long pulse_get_by_addr( Pulse *p, int type )
+Var *pulse_get_by_addr( Pulse *p, int type )
 {
 	const char *type_strings[ ] = { "Function", "Start", "Length",
 									"Position change", "Length change",
 									"Maximum Length" };
 	int i, j;
+	long i_data;
+	double f_data;
 
 
 	/* test that the referenced pulse exists */
@@ -171,22 +173,67 @@ long pulse_get_by_addr( Pulse *p, int type )
 	switch ( type )
 	{
 		case P_FUNC :
-			return( p->func );
+			return( vars_push( INT_VAR, &p->func ) );
 
 		case P_POS :
-			return( p->pos );
+			if ( p->pos % Default_Time_Base )
+			{
+				f_data = ( double ) p->pos / ( double ) Default_Time_Base;
+				return( vars_push( FLOAT_VAR, &f_data ) );
+			}
+			else
+			{
+				i_data = p->pos / Default_Time_Base;
+				return( vars_push( INT_VAR, &i_data ) );
+			}
 
 		case P_LEN :
-			return( p->len );
+			if ( p->len % Default_Time_Base )
+			{
+				f_data = ( double ) p->len / ( double ) Default_Time_Base;
+				return( vars_push( FLOAT_VAR, &f_data ) );
+			}
+			else
+			{
+				i_data = p->len / Default_Time_Base;
+				return( vars_push( INT_VAR, &i_data ) );
+			}
 
 		case P_DPOS :
-			return( p->dpos );
+			if ( p->dpos % Default_Time_Base )
+			{
+				f_data = ( double ) p->dpos / ( double ) Default_Time_Base;
+				return( vars_push( FLOAT_VAR, &f_data ) );
+			}
+			else
+			{
+				i_data = p->dpos / Default_Time_Base;
+				return( vars_push( INT_VAR, &i_data ) );
+			}
 
 		case P_DLEN :
-			return( p->dlen );
+			if ( p->dlen % Default_Time_Base )
+			{
+				f_data = ( double ) p->dlen / ( double ) Default_Time_Base;
+				return( vars_push( FLOAT_VAR, &f_data ) );
+			}
+			else
+			{
+				i_data = p->dlen / Default_Time_Base;
+				return( vars_push( INT_VAR, &i_data ) );
+			}
 
 		case P_MAXLEN :
-			return( p->maxlen );
+			if ( p->maxlen % Default_Time_Base )
+			{
+				f_data = ( double ) p->maxlen / ( double ) Default_Time_Base;
+				return( vars_push( FLOAT_VAR, &f_data ) );
+			}
+			else
+			{
+				i_data = p->maxlen / Default_Time_Base;
+				return( vars_push( INT_VAR, &i_data ) );
+			}
 	}
 
 	assert( 1 == 0 );      /* this should never happen... */
@@ -194,7 +241,7 @@ long pulse_get_by_addr( Pulse *p, int type )
 }
 
 
-long pulse_get_by_num( int pnum, int type )
+Var *pulse_get_by_num( int pnum, int type )
 {
 	Pulse *p;
 

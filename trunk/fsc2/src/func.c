@@ -1,33 +1,32 @@
 #include "fsc2.h"
 
 
-double f_int( long n, double *args );
-double f_float( long n, double *args );
-double f_round( long n, double *args );
-double f_floor( long n, double *args );
-double f_ceil( long n, double *args );
-double f_sin( long n, double *args );
-double f_cos( long n, double *args );
-double f_tan( long n, double *args );
-double f_asin( long n, double *args );
-double f_acos( long n, double *args );
-double f_atan( long n, double *args );
-double f_sinh( long n, double *args );
-double f_cosh( long n, double *args );
-double f_tanh( long n, double *args );
-double f_exp( long n, double *args );
-double f_ln( long n, double *args );
-double f_log( long n, double *args );
-double f_sqrt( long n, double *args );
+Var *f_int(   long n, double *args );
+Var *f_float( long n, double *args );
+Var *f_round( long n, double *args );
+Var *f_floor( long n, double *args );
+Var *f_ceil(  long n, double *args );
+Var *f_sin(   long n, double *args );
+Var *f_cos(   long n, double *args );
+Var *f_tan(   long n, double *args );
+Var *f_asin(  long n, double *args );
+Var *f_acos(  long n, double *args );
+Var *f_atan(  long n, double *args );
+Var *f_sinh(  long n, double *args );
+Var *f_cosh(  long n, double *args );
+Var *f_tanh(  long n, double *args );
+Var *f_exp(   long n, double *args );
+Var *f_ln(    long n, double *args );
+Var *f_log(   long n, double *args );
+Var *f_sqrt(  long n, double *args );
 
 
 
 typedef struct
 {
 	const char *name;                    /* name of the function */
-    double ( *fnct )( long, double * );  /* pointer to the function */
+    Var * ( * fnct )( long, double * );  /* pointer to the function */
 	long nargs;                          /* number of arguments */
-	int ret_type;                        /* return type of function */
     int access_flag;                     /* asscessibility flag */
 } Func;
 
@@ -36,25 +35,25 @@ typedef struct
    to be called is defined and the following list still ends with two
    NULL's and three zeros...*/
 
-Func fncts[ ] = { { "int",   f_int,   1, INT_VAR,   ACCESS_ALL_SECTIONS	},
-				  { "float", f_float, 1, FLOAT_VAR, ACCESS_ALL_SECTIONS	},
-				  { "round", f_round, 1, INT_VAR,   ACCESS_ALL_SECTIONS	},
-				  { "floor", f_floor, 1, INT_VAR,   ACCESS_ALL_SECTIONS	},
-				  { "ceil",  f_ceil,  1, INT_VAR,   ACCESS_ALL_SECTIONS	},
-				  { "sin",   f_sin,   1, FLOAT_VAR, ACCESS_ALL_SECTIONS	},
-				  { "cos",   f_cos,   1, FLOAT_VAR, ACCESS_ALL_SECTIONS	},
-  				  { "tan",   f_tan,   1, FLOAT_VAR, ACCESS_ALL_SECTIONS	},
-				  { "asin",  f_asin,  1, FLOAT_VAR, ACCESS_ALL_SECTIONS	},
-				  { "acos",  f_acos,  1, FLOAT_VAR, ACCESS_ALL_SECTIONS	},
-  				  { "atan",  f_atan,  1, FLOAT_VAR, ACCESS_ALL_SECTIONS	},
-				  { "sinh",  f_sinh,  1, FLOAT_VAR, ACCESS_ALL_SECTIONS	},
-				  { "cosh",  f_cosh,  1, FLOAT_VAR, ACCESS_ALL_SECTIONS	},
-  				  { "tanh",  f_tanh,  1, FLOAT_VAR, ACCESS_ALL_SECTIONS	},
-				  { "exp",   f_exp,   1, FLOAT_VAR, ACCESS_ALL_SECTIONS	},
-				  { "ln",    f_ln,    1, FLOAT_VAR, ACCESS_ALL_SECTIONS	},
-  				  { "log",   f_log,   1, FLOAT_VAR, ACCESS_ALL_SECTIONS	},
-				  { "sqrt",  f_sqrt,  1, FLOAT_VAR, ACCESS_ALL_SECTIONS	},
-				  { "",      NULL,    0, 0,         0 } /* marks last entry! */
+Func fncts[ ] = { { "int",   f_int,   1, ACCESS_ALL_SECTIONS	},
+				  { "float", f_float, 1, ACCESS_ALL_SECTIONS	},
+				  { "round", f_round, 1, ACCESS_ALL_SECTIONS	},
+				  { "floor", f_floor, 1, ACCESS_ALL_SECTIONS	},
+				  { "ceil",  f_ceil,  1, ACCESS_ALL_SECTIONS	},
+				  { "sin",   f_sin,   1, ACCESS_ALL_SECTIONS	},
+				  { "cos",   f_cos,   1, ACCESS_ALL_SECTIONS	},
+  				  { "tan",   f_tan,   1, ACCESS_ALL_SECTIONS	},
+				  { "asin",  f_asin,  1, ACCESS_ALL_SECTIONS	},
+				  { "acos",  f_acos,  1, ACCESS_ALL_SECTIONS	},
+  				  { "atan",  f_atan,  1, ACCESS_ALL_SECTIONS	},
+				  { "sinh",  f_sinh,  1, ACCESS_ALL_SECTIONS	},
+				  { "cosh",  f_cosh,  1, ACCESS_ALL_SECTIONS	},
+  				  { "tanh",  f_tanh,  1, ACCESS_ALL_SECTIONS	},
+				  { "exp",   f_exp,   1, ACCESS_ALL_SECTIONS	},
+				  { "ln",    f_ln,    1, ACCESS_ALL_SECTIONS	},
+  				  { "log",   f_log,   1, ACCESS_ALL_SECTIONS	},
+				  { "sqrt",  f_sqrt,  1, ACCESS_ALL_SECTIONS	},
+				  { "",      NULL,    0, 0 } /* marks last entry! */
                 };
 
 
@@ -92,8 +91,6 @@ Var *func_call( Var *f )
 	Var *sptr, *sptr_old, *ret;
 	int ac;
 	double *args = NULL;
-	double dret;
-	long iret;
 	
 
 	/* check that's really a function variable - just being paranoid... */
@@ -149,19 +146,9 @@ Var *func_call( Var *f )
 		}
 	}
 
-	/* now call the function and push the return value onto the stack
-	   (and don't forget to pop the variable for the function) */
+	/* now call the function and pop the variable for the function */
 
-	if ( fncts[ f->len ].ret_type == INT_VAR )
-	{
-		 iret = ( long ) ( *f->val.fnct )( f->len, args );
-		 ret = vars_push( INT_VAR, &iret );
-	}
-	else
-	{
-		 dret = ( double ) ( *f->val.fnct )( f->len, args );
-		 ret = vars_push( FLOAT_VAR, &dret );
-	}
+	ret = ( *f->val.fnct )( f->len, args );
 
 	/* finally do clean up and return result */
 
@@ -173,56 +160,65 @@ Var *func_call( Var *f )
 }
 
 
-double f_int( long n, double *args )
+Var *f_int( long n, double *args )
 {
-	return( *args );
+	long res = ( long ) *args;
+	return( vars_push( INT_VAR, &res ) );
 }
 
 
-double f_float( long n, double *args )
+Var *f_float( long n, double *args )
 {
-	return( *args );
+	return( vars_push( FLOAT_VAR, args ) );
 }
 
 
-double f_round( long n, double *args )
+Var *f_round( long n, double *args )
 {
-	return( ( double ) ( ( long ) ( 2 * *args ) - ( long ) *args ) );
+	long res = ( long ) ( 2 * *args ) - ( long ) *args;
+	return( vars_push( INT_VAR, &res ) );
 }
 
 
-double f_floor( long n, double *args )
+Var *f_floor( long n, double *args )
 {
-	return( floor( *args ) );
+	long res = ( long ) floor( *args );
+	return( vars_push( INT_VAR, &res ) );
 }
 
 
-double f_ceil( long n, double *args )
+Var *f_ceil( long n, double *args )
 {
-	return( ceil( *args ) );
+	long res = ( long ) ceil( *args );
+	return( vars_push( INT_VAR, &res ) );
 }
 
 
-double f_sin( long n, double *args )
+Var *f_sin( long n, double *args )
 {
-	return( sin( *args ) );
+	double res = sin( *args );
+	return( vars_push( FLOAT_VAR, &res ) );
 }
 
 
-double f_cos( long n, double *args )
+Var *f_cos( long n, double *args )
 {
-	return( cos( *args ) );
+	double res = cos( *args );
+	return( vars_push( FLOAT_VAR, &res ) );
 }
 
 
-double f_tan( long n, double *args )
+Var *f_tan( long n, double *args )
 {
-	return( tan( *args ) );
+	double res = tan( *args );
+	return( vars_push( FLOAT_VAR, &res ) );
 }
 
 
-double f_asin( long n, double *args )
+Var *f_asin( long n, double *args )
 {
+	double res;
+
 	if ( fabs( *args ) > 1.0 )
 	{
 		eprint( FATAL, "%s:%ld: Argument for function `asin' is out of "
@@ -230,12 +226,15 @@ double f_asin( long n, double *args )
 		THROW( FUNCTION_EXCEPTION );
 	}
 
-	return( asin( *args ) );
+	res = asin( *args );
+	return( vars_push( FLOAT_VAR, &res ) );
 }
 
 
-double f_acos( long n, double *args )
+Var *f_acos( long n, double *args )
 {
+	double res;
+
 	if ( fabs( *args ) > 1.0 )
 	{
 		eprint( FATAL, "%s:%ld: Argument for function `acos' is out of "
@@ -243,42 +242,50 @@ double f_acos( long n, double *args )
 		THROW( FUNCTION_EXCEPTION );
 	}
 
-	return( acos( *args ) );
+	res = acos( *args );
+	return( vars_push( FLOAT_VAR, &res ) );
 }
 
 
-double f_atan( long n, double *args )
+Var *f_atan( long n, double *args )
 {
-	return( atan( *args ) );
+	double res = atan( *args );
+	return( vars_push( FLOAT_VAR, &res ) );
 }
 
 
-double f_sinh( long n, double *args )
+Var *f_sinh( long n, double *args )
 {
-	return( sinh( *args ) );
+    double res = sinh( *args );
+	return( vars_push( FLOAT_VAR, &res ) );
 }
 
 
-double f_cosh( long n, double *args )
+Var *f_cosh( long n, double *args )
 {
-	return( cosh( *args ) );
+	double res = cosh( *args );
+	return( vars_push( FLOAT_VAR, &res ) );
 }
 
 
-double f_tanh( long n, double *args )
+Var *f_tanh( long n, double *args )
 {
-	return( tanh( *args ) );
+	double res = tanh( *args );
+	return( vars_push( FLOAT_VAR, &res ) );
 }
 
 
-double f_exp( long n, double *args )
+Var *f_exp( long n, double *args )
 {
-	return( exp( *args ) );
+	double res = exp( *args );
+	return( vars_push( FLOAT_VAR, &res ) );
 }
 
 
-double f_ln( long n, double *args )
+Var *f_ln( long n, double *args )
 {
+	double res;
+
 	if ( *args <= 0.0 )
 	{
 		eprint( FATAL, "%s:%ld: Argument for function `ln' is out of "
@@ -286,12 +293,15 @@ double f_ln( long n, double *args )
 		THROW( FUNCTION_EXCEPTION );
 	}
 
-	return( log( *args ) );
+	res = log( *args );
+	return( vars_push( FLOAT_VAR, &res ) );
 }
 
 
-double f_log( long n, double *args )
+Var *f_log( long n, double *args )
 {
+	double res;
+
 	if ( *args <= 0.0 )
 	{
 		eprint( FATAL, "%s:%ld: Argument for function `log' is out of "
@@ -299,12 +309,15 @@ double f_log( long n, double *args )
 		THROW( FUNCTION_EXCEPTION );
 	}
 
-	return( log10( *args ) );
+	res = log10( *args );
+	return( vars_push( FLOAT_VAR, &res ) );
 }
 
 
-double f_sqrt( long n, double *args )
+Var *f_sqrt( long n, double *args )
 {
+	double res;
+
 	if ( *args < 0.0 )
 	{
 		eprint( FATAL, "%s:%ld: Argument for function `sqrt' is negative.\n", 
@@ -312,7 +325,8 @@ double f_sqrt( long n, double *args )
 		THROW( FUNCTION_EXCEPTION );
 	}
 
-	return( sqrt( *args ) );
+	res = sqrt( *args );
+	return( vars_push( FLOAT_VAR, &res ) );
 }
 
 

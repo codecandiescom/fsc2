@@ -41,7 +41,7 @@ typedef struct Var_
 		double dval;                        /* for float values */
 		long *lpnt;                         /* for integer arrays */
 		double *dpnt;                       /* for double arrays */
-		double ( *fnct )( long, double * ); /* for functions */
+		struct Var_ * ( * fnct )( long, double * ); /* for functions */
 	} val;
 	long dim;             /* dimension of array / number of args of function */
 	long *sizes;

@@ -42,8 +42,8 @@ enum {
 Pulse *pulse_new( int num );
 Pulse *pulse_find( int num );
 void pulse_set( Pulse *p, int type, Var *v );
-long pulse_get_by_addr( Pulse *p, int type );
-long pulse_get_by_num( int pnum, int type );
+Var *pulse_get_by_addr( Pulse *p, int type );
+Var *pulse_get_by_num( int pnum, int type );
 bool pulse_exist( Pulse *p );
 void pulse_set_func( Pulse *p, Var *v );
 void pulse_set_pos( Pulse *p, Var *v );

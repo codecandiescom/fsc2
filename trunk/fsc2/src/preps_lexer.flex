@@ -23,6 +23,7 @@
 	result = ( c == EOF ) ? YY_NULL : ( buf[ 0 ] = c, 1 ); \
 }
 
+
 #include "fsc2.h"
 #include "preps_parser.h"
 
@@ -30,7 +31,7 @@
 int prepslex( void );
 extern void prepsparse( void );
 
-int extr_pnum( char *txt );
+Pulse *fp( char *txt );
 
 
 /* locally used global variables */
@@ -155,7 +156,7 @@ UNREC       [^\n \t;,\(\)\=\+\-\*\/\[\]\%\^:]+
             /* handling of string constants (to be used as format strings in
 			   the print() function only */
 {STR}       {
-				prepstext[ strlen( prepstext ) - 1 ] = '\0';
+				prepstext[ prepsleng - 1 ] = '\0';
 				prepslval.sptr = prepstext + 1;
 				return( STR_TOKEN );
 			}
@@ -164,7 +165,14 @@ UNREC       [^\n \t;,\(\)\=\+\-\*\/\[\]\%\^:]+
 			/* all pulse related keywords... */
 
 {P}":"?     {
-			    Cur_Pulse = pulse_new( extr_pnum( prepstext ) );
+				char *t = prepstext + prepsleng - 1;
+
+				if ( *t == ':' )
+				    *t = '\0';
+				while ( isdigit( *--t ) )
+					;
+
+			    Cur_Pulse = pulse_new( atoi( ++t ) );
 				return( P_TOK );
 			}
 
@@ -180,87 +188,71 @@ UNREC       [^\n \t;,\(\)\=\+\-\*\/\[\]\%\^:]+
 			/* combinations of pulse and property, e.g. `P3.LEN' */
 
 {P}?"."{F}  {
-				if ( *prepstext == '.' )
-					prepslval.lval = pulse_get_by_addr( Cur_Pulse, P_FUNC );
-				else
-					prepslval.lval = pulse_get_by_num( extr_pnum( prepstext ),
-													   P_FUNC );
-				return( INT_TOKEN );
+				prepslval.vptr = pulse_get_by_addr( fp( prepstext ), P_FUNC );
+				return( VAR_REF );
             }
 
 {P}?"."{S}  {
-				if ( *prepstext == '.' )
-					prepslval.lval = pulse_get_by_addr( Cur_Pulse, P_POS );
-				else
-					prepslval.lval = pulse_get_by_num( extr_pnum( prepstext ),
-													   P_POS );
-				return( INT_TOKEN );
+				prepslval.vptr = pulse_get_by_addr( fp( prepstext ), P_POS );
+				return( VAR_REF );
             }
 
 {P}?"."{L}  {
-				if ( *prepstext == '.' )
-					prepslval.lval = pulse_get_by_addr( Cur_Pulse, P_LEN );
-				else
-					prepslval.lval = pulse_get_by_num( extr_pnum( prepstext ),
-													   P_LEN );
-				return( INT_TOKEN );
+				prepslval.vptr = pulse_get_by_addr( fp( prepstext ), P_LEN );
+				return( VAR_REF );
             }
 
 {P}?"."{DS} {
-				if ( *prepstext == '.' )
-					prepslval.lval = pulse_get_by_addr( Cur_Pulse, P_DPOS );
-				else
-					prepslval.lval = pulse_get_by_num( extr_pnum( prepstext ),
-													   P_DPOS );
-				return( INT_TOKEN );
+				prepslval.vptr = pulse_get_by_addr( fp( prepstext ), P_DPOS );
+				return( VAR_REF );
             }
 
 {P}?"."{DL} {
-				if ( *prepstext == '.' )
-					prepslval.lval = pulse_get_by_addr( Cur_Pulse, P_DLEN );
-				else
-					prepslval.lval = pulse_get_by_num( extr_pnum( prepstext ),
-													   P_DLEN );
-				return( INT_TOKEN );
+				prepslval.vptr = pulse_get_by_addr( fp( prepstext ), P_DLEN );
+				return( VAR_REF );
             }
 
 {P}?"."{ML} {
-				if ( *prepstext == '.' )
-					prepslval.lval = pulse_get_by_addr( Cur_Pulse, P_MAXLEN );
-				else
-					prepslval.lval = pulse_get_by_num( extr_pnum( prepstext ),
-													   P_MAXLEN );
-				return( INT_TOKEN );
+				prepslval.vptr = pulse_get_by_addr( fp( prepstext ),
+													P_MAXLEN );
+				return( VAR_REF );
             }
 
 
 {MW}        {
-				prepslval.lval = PULSER_CHANNEL_MW;
-				return( FUNC_TOK );
+				long data = PULSER_CHANNEL_MW;
+				prepslval.vptr = vars_push( INT_VAR, &data );
+				return( VAR_REF );
 			}
 {TWT}       {
-				prepslval.lval = PULSER_CHANNEL_TWT;
-				return( FUNC_TOK );
+				long data = PULSER_CHANNEL_TWT;
+				prepslval.vptr = vars_push( INT_VAR, &data );
+				return( VAR_REF );
 			}
 {TWT_GATE}  {
-				prepslval.lval = PULSER_CHANNEL_TWT_GATE;
-				return( FUNC_TOK );
+				long data = PULSER_CHANNEL_TWT_GATE;
+				prepslval.vptr = vars_push( INT_VAR, &data );
+				return( VAR_REF );
 			}
 {DET}       {
-				prepslval.lval = PULSER_CHANNEL_DET;
-				return( FUNC_TOK );
+				long data = PULSER_CHANNEL_DET;
+				prepslval.vptr = vars_push( INT_VAR, &data );
+				return( VAR_REF );
 			}
 {DET_GATE}  {
-				prepslval.lval = PULSER_CHANNEL_DET;
-				return( FUNC_TOK );
+				long data = PULSER_CHANNEL_DET_GATE;
+				prepslval.vptr = vars_push( INT_VAR, &data );
+				return( VAR_REF );
 			}
 {RF}        {
-				prepslval.lval = PULSER_CHANNEL_RF;
-				return( FUNC_TOK );
+				long data = PULSER_CHANNEL_RF;
+				prepslval.vptr = vars_push( INT_VAR, &data );
+				return( VAR_REF );
 			}
 {RF_GATE}   {
-				prepslval.lval = PULSER_CHANNEL_RF_GATE;
-				return( FUNC_TOK );
+				long data = PULSER_CHANNEL_RF_GATE;
+				prepslval.vptr = vars_push( INT_VAR, &data );
+				return( VAR_REF );
 			}
 
 
@@ -397,27 +389,30 @@ int preparations_parser( FILE *in )
 /*    * pulse number or -1 on error             */
 /*----------------------------------------------*/
 
-int extr_pnum( char *txt )
+Pulse *fp( char *txt )
 {
-	char *tp = get_string_copy( txt );
-	char *t = tp;
-	int ret;
+	char *tp, *t;
+	int num;
 
 
-	while ( *t && *t != '.' && *t != ':' )
+	if ( *t == '.' )
+		return( Cur_Pulse );
+
+	tp = t = get_string_copy( txt );
+	while ( *t && *t != '.' )
 		t++;
 
-	if ( *t == '.' || *t == ':' )
+	if ( *t == '.' )
 	    *txt = '\0';
 
 	while( isdigit( *--t ) )
 		;
 
 	if ( isdigit( *++t ) )
-	    ret = atoi( t );
+	    num = atoi( t );
 	else
-		ret = -1;
+		num = -1;          /* this should never happen... */
 
 	free( tp );
-	return( ret );
+	return( pulse_find( num ) );
 }
