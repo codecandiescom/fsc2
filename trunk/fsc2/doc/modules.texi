@@ -428,7 +428,7 @@ For arrays of higher dimensions the pointers in the @code{val.vptr}
 array point to variables that also have a type of @code{INT_REF} or
 @code{FLOAT_REF}.
 
-Thus to find out the element @code{[3,2,5]} of variable @code{var}
+Thus to find out the element @code{[3][2][5]} of variable @code{var}
 pointing a three-dimensional floating point array one would have to use
 @example
   var->val.vptr[ 3 ]->val.vptr[ 2 ]->val.dpnt[ 5 ]
@@ -468,7 +468,7 @@ having the value of the fourth element of the array (please remember
 that array indices start at @code{0}, so the fourth element has the
 index @code{3}).
 
-If, in contrast, you want the element @code{[3,2,5]} of the variable
+If, in contrast, you want the element @code{[3][2][5]} of the variable
 @code{f_arr_3d} pointing a three-dimensional floating point matrix
 you would call the function as
 @example
