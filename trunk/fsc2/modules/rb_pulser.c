@@ -306,13 +306,7 @@ int rb_pulser_exp_hook( void )
 	/* Initialize the device */
 
 	rb_pulser_init( );
-
-	/* Now we have to tell the pulser about all the pulses - the card for the
-	   initial delay needs some special handling, otherwise its delay won't
-	   get set even though it should (thanks to Huib for pointing out that
-	   problem) */
-
-	rb_pulser.delay_card[ INIT_DELAY ].old_delay = -1;
+	rb_pulser_full_reset( );
 	rb_pulser_do_update( );
 
 	rb_pulser_run( rb_pulser.is_running );
