@@ -163,10 +163,9 @@ long get_file_length( char *name, int *len )
 
 void eprint( int severity, const char *fmt, ... )
 {
-	static char buffer[ BROWSER_MAXLINE ];
-	static char *cp = buffer;
-	static int space_left = BROWSER_MAXLINE - 1;
-	int written;
+	char buffer[ FL_BROWSER_LINELENGTH ];
+	char *cp = buffer;
+	int space_left = FL_BROWSER_LINELENGTH - 1;
 	va_list ap;
 
 	if ( severity != NO_ERROR )
@@ -174,68 +173,41 @@ void eprint( int severity, const char *fmt, ... )
 
 	if ( ! just_testing )
 	{
-		if ( cp == buffer )
+		if ( severity == FATAL )
 		{
-			if ( severity == FATAL )
-			{
-				strcpy( cp, "@C1" );
-				cp += 3;
-				space_left -= 3;
-			}
-
-			if ( severity == SEVERE )
-			{
-				strcpy( cp, "@C2" );
-				cp += 3;
-				space_left -= 3;
-			}
-
-			if ( severity == WARN )
-			{
-				strcpy( cp, "@C4" );
-				cp += 3;
-				space_left -= 3;
-			}
+			strcpy( buffer, "@C1" );
+			cp += 3;
+			space_left -= 3;
 		}
 
-		/* Avoid writing more than BROWSER_MAXLINE chars */
+		if ( severity == SEVERE )
+		{
+			strcpy( buffer, "@C2" );
+			cp += 3;
+			space_left -= 3;
+		}
+
+		if ( severity == WARN )
+		{
+			strcpy( buffer, "@C4" );
+			cp += 3;
+			space_left -= 3;
+		}
+
+
+		/* Avoid writing more than FL_BROWSER_LINELENGTH chars */
 
 		if ( space_left > 0 )
 		{
 			va_start( ap, fmt );
-			written = vsnprintf( cp, space_left, fmt, ap );
+			vsnprintf( cp, space_left, fmt, ap );
 			va_end( ap );
-
-			if ( written > 0 )
-			{
-				space_left -= written;
-				cp += written;
-			}
-			else
-				space_left = 0;
 		}
-
-		/* Catch stuff from f_print(), skip actual printing as long as last
-		   character is '\x7F' */
-
-		if ( buffer[ strlen( buffer ) - 1 ] == '\x7F' )
-		{
-
-			buffer[ strlen( buffer ) - 1 ] = '\0';
-			cp--;
-			space_left += 1;
-			return;
-		}
-
-		/* Catch stuff from f_print() */
-
-		if ( buffer[ strlen( buffer ) - 1 ] == '\x7E' )
-			 buffer[ strlen( buffer ) - 1 ] = '\0';
 
 		if ( I_am == PARENT )
 		{
 			fl_freeze_form( main_form->error_browser->form );
-			fl_add_browser_line( main_form->error_browser, buffer );
+			fl_addto_browser_chars( main_form->error_browser, buffer );
 
 			fl_set_browser_topline( main_form->error_browser,
 				  fl_get_browser_maxline( main_form->error_browser )
@@ -245,11 +217,8 @@ void eprint( int severity, const char *fmt, ... )
 		}
 		else
 			writer( C_EPRINT, buffer );
-
-		cp = buffer;
-		space_left = BROWSER_MAXLINE - 1;
 	}
-	else                               // simple test run
+	else                               /* simple test run ? */
 	{
 		if ( severity != NO_ERROR )
 			fprintf( stdout, "%c ", severity[ "FSW" ] );      /* Hehe... */
@@ -257,7 +226,6 @@ void eprint( int severity, const char *fmt, ... )
 		va_start( ap, fmt );
 		vfprintf( stdout, fmt, ap );
 		va_end( ap );
-		fprintf( stdout, "\n" );
 		fflush( stdout );
 	}
 }

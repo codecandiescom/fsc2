@@ -812,21 +812,18 @@ Var *f_print( Var *v )
 	bool print_anyway = UNSET;
 
 	
-	/* A call to print() without any argument just prints a newline */
+	/* A call to print() without any argument prints nothing */
 
 	if ( v == NULL )
-	{
-		if ( ! just_testing )
-			eprint( NO_ERROR, "\x7E" );
-		else
-			eprint( NO_ERROR, "\n" );
 		return vars_push( INT_VAR, 0 );
-	}
 
 	/* Make sure the first argument is a string */
 
 	vars_check( v, STR_VAR );
 	sptr = cp = v->val.sptr;
+
+	/* Do we also have to print while the TEST is running ? */
+
 	if ( *sptr == '\\' && *( sptr + 1 ) == 'T' )
 	{
 		sptr += 2;
@@ -868,9 +865,10 @@ Var *f_print( Var *v )
 		eprint( SEVERE, "%s:%ld: More data than format descriptors in "
 				"`print()' format string.", Fname, Lc );
 
-	/* Get string long enough to replace each `#' by a 5 char sequence */
+	/* Get string long enough to replace each `#' by a 3 char sequence
+	   plus a '\0' character */
 
-	fmt = get_string( strlen( sptr ) + 4 * in_format + percs + 2 );
+	fmt = get_string( strlen( sptr ) + 3 * in_format + percs + 2 );
 	strcpy( fmt, sptr );
 
 	for ( cp = fmt; *cp != '\0'; cp++ )
@@ -880,13 +878,13 @@ Var *f_print( Var *v )
 		if ( *cp != '\\' && *cp != '#' && *cp != '%' )
 			continue;
 
-		/* Convert format descriptor (un-escaped `#') to 5 \x01 */
+		/* Convert format descriptor (un-escaped `#') to 4 \x01 */
 
 		if ( *cp == '#' )
 		{
-			memmove( cp + 4, cp, strlen( cp ) + 1 );
-			memset( cp, '\x01', 5 );
-			cp += 4;
+			memmove( cp + 3, cp, strlen( cp ) + 1 );
+			memset( cp, '\x01', 4 );
+			cp += 3;
 			continue;
 		}
 
@@ -936,13 +934,8 @@ Var *f_print( Var *v )
 	/* Now lets start printing... */
 
 	cp = fmt;
-	if ( ! just_testing )
-		strcat( cp, "\x7E" );
-	else
-		strcat( cp, "\n" );
-
 	cv = v->next;
-	while ( ( ep = strstr( cp, "\x01\x01\x01\x01\x01" ) ) != NULL )
+	while ( ( ep = strstr( cp, "\x01\x01\x01\x01" ) ) != NULL )
 	{
 		if ( cv != NULL )      /* skip printing if there are not enough data */
 		{
@@ -950,26 +943,17 @@ Var *f_print( Var *v )
 				switch ( cv->type )
 				{
 					case INT_VAR :
-						if ( ! just_testing )
-							strcpy( ep, "%ld\x7F" );
-						else
-							strcpy( ep, "%ld" );
+						strcpy( ep, "%ld" );
 						eprint( NO_ERROR, cp, cv->val.lval );
 						break;
 
 					case FLOAT_VAR :
-						if ( ! just_testing )
-							strcpy( ep, "%#g\x7F" );
-						else
-							strcpy( ep, "%#g" );
+						strcpy( ep, "%#g" );
 						eprint( NO_ERROR, cp, cv->val.dval );
 						break;
 
 					case STR_VAR :
-						if ( ! just_testing )
-							strcpy( ep, "%s\x7F" );
-						else
-							strcpy( ep, "%s" );
+						strcpy( ep, "%s" );
 						eprint( NO_ERROR, cp, cv->val.sptr );
 						break;
 
@@ -980,7 +964,7 @@ Var *f_print( Var *v )
 			cv = cv->next;
 		}
 
-		cp = ep + 5;
+		cp = ep + 4;
 	}
 
 	if ( ! TEST_RUN || print_anyway ) 
@@ -2409,10 +2393,10 @@ Var *f_fsave( Var *v )
 		eprint( SEVERE, "%s:%ld: More data than format descriptors in "
 				"`save()' format string.", Fname, Lc );
 
-	/* Get string long enough to replace each `#' by a 4-char sequence 
+	/* Get string long enough to replace each `#' by a 3-char sequence 
 	   plus a '\0' */
 
-	fmt = get_string( strlen( sptr ) + 4 * in_format + percs + 2 );
+	fmt = get_string( strlen( sptr ) + 3 * in_format + percs + 2 );
 	strcpy( fmt, sptr );
 
 	for ( cp = fmt; *cp != '\0'; ++cp )
@@ -2422,13 +2406,13 @@ Var *f_fsave( Var *v )
 		if ( *cp != '\\' && *cp != '#' && *cp != '%' )
 			continue;
 
-		/* Convert format descriptor (un-escaped `#') to 5 \x01 */
+		/* Convert format descriptor (un-escaped `#') to 4 \x01 */
 
 		if ( *cp == '#' )
 		{
-			memmove( cp + 4, cp, strlen( cp ) + 1 );
-			memset( cp, '\x01', 5 );
-			cp += 4;
+			memmove( cp + 3, cp, strlen( cp ) + 1 );
+			memset( cp, '\x01', 4 );
+			cp += 3;
 			continue;
 		}
 
@@ -2479,7 +2463,7 @@ Var *f_fsave( Var *v )
 
 	cp = fmt;
 	cv = v->next;
-	while ( ( ep = strstr( cp, "\x01\x01\x01\x01\x01" ) ) != NULL )
+	while ( ( ep = strstr( cp, "\x01\x01\x01\x01" ) ) != NULL )
 	{
 		if ( cv != NULL )      /* skip printing if there are not enough data */
 		{
@@ -2507,7 +2491,7 @@ Var *f_fsave( Var *v )
 			cv = cv->next;
 		}
 
-		cp = ep + 5;
+		cp = ep + 4;
 	}
 
 	fprintf( File_List[ file_num ], cp );

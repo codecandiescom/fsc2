@@ -657,7 +657,7 @@ static bool display_file( char *name, FILE *fp )
 {
 	int len, key;
 	long lc, cc, i;                         /* line and char counter */
-	char line[ browser_maxline ];           /* used to store the lines */
+	char line[ FL_BROWSER_LINELENGTH + 1 ]; /* used to store the lines */
 	char *lp;
 
 
@@ -695,7 +695,7 @@ static bool display_file( char *name, FILE *fp )
 		lp = line + len + 2;
 		cc = 0;
 		while ( ( key = fgetc( fp ) ) != '\n' &&
-			    key != EOF && ++cc < browser_maxline - len - 3 )
+			    key != EOF && ++cc < FL_BROWSER_LINELENGTH - len - 2 )
 		{
 			if ( ( char ) key != '\t' )
 				*lp++ = ( char ) key;
@@ -703,7 +703,8 @@ static bool display_file( char *name, FILE *fp )
 			{
 				do
 					*lp++ = ' ';
-				while ( cc++ % TAB_LENGTH && cc < browser_maxline- len - 3 )
+				while ( cc++ % TAB_LENGTH &&
+						cc < FL_BROWSER_LINELENGTH - len - 2 )
 					;
 				cc--;
 			}

@@ -144,8 +144,6 @@ bool TEST_RUN = UNSET;       /* flag, set while EXPERIMENT section is tested */
 bool need_GPIB = UNSET;      /* flag, set if GPIB bus is needed */
 bool need_Serial_Port[ NUM_SERIAL_PORTS ];
 
-int browser_maxline = FL_BROWSER_LINELENGTH;
-
 bool just_testing;
 
 FD_fsc2 *main_form;
@@ -197,7 +195,6 @@ extern bool TEST_RUN;
 extern bool need_GPIB;
 extern bool need_Serial_Port[ NUM_SERIAL_PORTS ];
 
-extern int browser_maxline;
 extern bool just_testing;
 extern FD_fsc2 *main_form;
 extern FD_run *run_form;
