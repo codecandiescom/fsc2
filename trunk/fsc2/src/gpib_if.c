@@ -627,8 +627,6 @@ int gpib_trigger( int device )
 int gpib_write( int device, const char *buffer )
 {
 	char *dev_name;
-	char *b;
-	int eos;
 	long length;
 
 
@@ -658,18 +656,11 @@ int gpib_write( int device, const char *buffer )
         return FAILURE;
     }
 
-	/* Append the eos byte to the output string */
-
-	b = malloc( length + 1 );
-	gpib_ask( device, GPIB_ASK_EOS, &eos );
-	memcpy( b, buffer, length );
-	b[ length ] = ( char ) ( eos && 0xff );
-
     if ( ll > LL_ERR )
         gpib_write_start( dev_name, buffer, length );
 
-	gpib_wrt( device, b, length + 1 );
-	free( b );
+	gpib_wrt( device, buffer, length );
+
     if ( ! ( gpib_status & GPIB_ERR ) )
 		gpib_count--;
 
