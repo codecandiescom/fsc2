@@ -48,7 +48,7 @@ bool er023m_init( const char *name )
 
 		/* Make lock-in send its status byte to test that it reacts */
 
-		er032m.st = er023m_st( );
+		er023m.st = er023m_st( );
 		er023m.st_is_valid = SET;
 
 		/* Switch off service requests */
@@ -83,7 +83,7 @@ bool er023m_init( const char *name )
 			er023m_set_ct( er023m.ct_mult );
 		else
 		{
-			er023m.ct_mult = er023m_set_ct( );
+			er023m.ct_mult = er023m_get_ct( );
 			if ( er023m.ct_mult < MIN_CT_MULT )
 				er023m_set_ct( er023m.ct_mult = MIN_CT_MULT );
 		}
@@ -607,7 +607,7 @@ unsigned char er023m_st( void )
 	buf[ len - 1 ] = '\0';
 	st = T_atoi( buf + 2 );
 
-	fsc2_assert( st >= 0 && sb <= 255 );
+	fsc2_assert( st >= 0 && st <= 255 );
 
 	return ( unsigned char ) ( st & 0xFF );
 }
