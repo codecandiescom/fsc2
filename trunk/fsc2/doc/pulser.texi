@@ -670,10 +670,10 @@ pulses is done in the @code{PREPARATIONS} section.
 
 Each pulse has at least three properties: a unique number, a function
 and a start position. Actually, pulses also need a length, but as long
-as the length is not set (or is 0) the pulse stays switched off. Here's
-an example of how to create a pulse numbered @code{1}, that is a
-microwave pulse, starts at @w{100 ns} (i.e.@: @w{100 ns} after the
-trigger) and has a length of @w{250 ns}:
+as the length is not set (or is 0) the pulse stays switched off. Here is
+an example of how to create a pulse, numbered @code{1}, that is a
+microwave pulse, starts @w{100 ns} after the trigger) and has a length
+of @w{250 ns}:
 @example
 PULSE_1:    FUNCTION = MICROWAVE,
             START    = 100 ns,
