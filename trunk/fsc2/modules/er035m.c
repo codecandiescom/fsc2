@@ -68,6 +68,8 @@ enum {
 
 int er035m_init_hook( void )
 {
+	/* what's missing: check that not the other field controller is loaded */
+
 	if ( ! exist_device( "s_band" ) && ! exist_device( "x_band" ) )
 	{
 		eprint( WARN, "Driver for Bruker ER035M gaussmeter is loaded but no "
