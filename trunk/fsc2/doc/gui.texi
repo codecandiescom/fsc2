@@ -282,7 +282,7 @@ pair of values is displayed in the color of the curve they belong to.
 
 
 To zoom into the data displayed in the window click the left mouse
-button in the area where the data are displayed. If you do so the arrow
+button in the area where the data are displayed. If you do so the normal
 mouse pointer changes to a
 @ifnotinfo
 symbol, @image{cursor1,5mm,},
@@ -296,15 +296,16 @@ indicating that you're in zoom mode. If you now move the mouse while
 keeping the left mouse button pressed down a dashed rectangular box is
 drawn from the position where the mouse button was first pressed to the
 current mouse position. When the left mouse button is released the
-display will be rescaled so that the area of this box is magnified to
-fill the whole display area. You can also use this method in the areas
-of the axis. Here also a small box is shown, indicating the section that
-will be magnified. If done in the area of the x-axis only the x-scaling
-is changed, while when used in the y-axis area only a magnification in
-y-direction happens.
+display is rescaled so that the area of this box is magnified to fill
+the whole display area.
 
-You can also move the curves around on the screen. When you press the
-middle mouse button somewhere in the display are the cursor changes to a
+You can also use this method in the areas of the axis. Also here a small
+box is shown, indicating the section that will be magnified. If yo do so
+in the area of the x-axis only the x-scaling is changed, while when done
+in the y-axis area only a magnification in y-direction happens.
+
+You can also shift the curves around on the screen. When you press the
+middle mouse button somewhere in the display area the cursor changes to a
 @ifnotinfo
 hand, @image{cursor2,5mm,}.
 @end ifnotinfo
@@ -329,59 +330,58 @@ glass, @image{cursor3,5mm,}.
 glass.
 @end ifnottex
 @end ifnothtml
-When you move the mouse at first nothing will happen but if you release
-the mouse button the display scaling will either get magnified or
-de-magnified. This follows some simple rules: The point where you
-first pressed the right mouse button will stay at exactly the same
+When you move the mouse nothing happens at first and only when you
+release the mouse button the display scaling gets either magnified or
+de-magnified. This follows some simple rules: The point where you first
+pressed the right mouse button will stay at exactly the same
 position. If you move the mouse up, the display will be de-magnified in
 y-direction only, if you move the mouse down, the y-scale factor becomes
 larger, i.e.@: you do a zoom in y-direction. By moving the mouse to the
-right you can reduce the x-scale, by moving it to the left you increase it.
-If you do this operation in the areas of either the x- or y-axis only
-the corresponding scaling gets changed. The factor by which the scale
-gets changed depends on how far away from the starting point you move
-the mouse before releasing the left button. If you move the mouse along
-the whole length of the display area the scaling is changed by a factor
-of 4.
+right you can reduce the x-scale, by moving it to the left you increase
+it.  If you do this operation in the areas of either the x- or y-axis
+only the corresponding scaling gets changed. The factor by which the
+scaling changes depends on how far away from the starting point the
+mouse was moved before releasing the left button. If you move the mouse
+along the whole length of the display area the scaling is changed by a
+factor of 4.
 
-You don't have to change the scaling or the position for all curves at
+You don't have to change the scalings or positions of all the curves at
 once - this is what the buttons with the numbers in the colors of the
-curves are used for. Rescaling or moving will only apply to curves for
-which the corresponding button is active, i.e.@: pressed down (if not
-activated they are drawn with a grey background instead of the color of
-the curve they are associated with). By de-activating one or more of the
-buttons you can extempt the corresponding curves (i.e.@: the curves with
-the color as the button has in active state) from being rescaled or
-moved around.
+curves are to be used for. Rescaling or moving will only apply to curves
+for which the corresponding button is active, i.e.@: pressed down (if
+not activated the buttons are drawn with a grey background instead of
+the color of the curve they are associated with). By de-activating one
+or more of the buttons you can extempt the corresponding curves from
+being rescaled or shifted.
 
-Of course, this leads to a problem: If you de-activate some of the
-buttons and rescale, the question is for which of the curves the axis
-scales are valid now. That's the reason why the horizontal line of the
-x-axis and the vertical line of the y-axis is not black but colored:
-When these lines are red the displayed axis scales are valid for (at
-least) the red curve, if they are green they are valid for (at least)
-the green curve, etc. As a rule the axis scale is always valid for the
-lowest numbered curve for which its button is activated. That's also the
-reason why, when examining data (using either the middle or right button
-together with the left button), not just one pair of values is displayed
-but as many pairs as there are curves -- the scaling for each of the
-curves could be different
+This leads to a minor problem: If you de-activate some of the buttons
+and rescale or shift, the question is for which of the curves the
+scaling drawn in the axis areas is valid now. That is the reason why the
+horizontal line of the x-axis and the vertical line of the y-axis is not
+black but colored: When these lines are red the displayed axis scales
+are valid for (at least) the red curve, if they are green they are valid
+for (at least) the green curve, etc. As a rule the axis scale is always
+valid for the lowest numbered curve for which its button is
+activated. That's also the reason why, when examining data (using either
+the middle or right button together with the left button), not just one
+pair of values is displayed but as many pairs as there are curves -- the
+scaling for each of the curves may be different
 
-Finally, when you zoom into the display parts of a curve or even
-complete curves will not fit into the display area anymore. To indicate
-into which direction you have to look for the missing parts of the curve
-an arrow in the color of the curve will be shown for each direction in
+Finally, when you zoom in display parts of a curve or even complete
+curves will not fit into the display area anymore. To indicate into
+which direction you have to look for the missing parts of the curve an
+arrow in the color of the curve will be shown for each direction in
 which non-displayable data of the curve can be found.
 
 Whenever you rescale curves or move them around the "Full Scale" button,
 labeled @code{FS}, will become in-active (its color changes from green
 to gray). When you want to get back to the full scale display you simply
-have to click onto it and all curves (even the ones that usually are
-extempt from rescaling because their buttons is in-active) get rescaled
-so that all data will fit again into the display. A side effect of
-having the @code{FS} button active is that the display will be rescaled
-automatically when new data are measured that wouldn't fit into the
-display area. To switch this behaviour off simply deactivate the
+have to click onto it and all curves (even the ones that currently are
+extempted from rescaling because their buttons is in-active) are
+rescaled so that all data will fit again into the display. A side effect
+of having the @code{FS} button active is that the display will be
+rescaled automatically when new data are measured that wouldn't fit into
+the display area. To switch this behaviour off simply deactivate the
 @code{FS} button.
 
 
@@ -390,8 +390,8 @@ display area. To switch this behaviour off simply deactivate the
 @cindex 2D-Display
 
 @ifnotinfo
-When doing an 2D-experiment where you record time traces (e.g.@: after a
-laser flash) at different magnetic field positions the display probably
+When doing an 2D-experiment, e.g.@: when recording time traces after a
+laser flash at different magnetic field positions, the display probably
 will look similar to this:
 
 @image{fsc2fig4,11cm,}
@@ -400,9 +400,9 @@ will look similar to this:
 
 Because it would take too long to do a real 3-dimensional display the
 data values are displayed using a color code, where blue stands for the
-lowest and red for the highest values. To find out about which color
-stands a certain value on the right and side is another axis area for
-the z-axis. The color bar in this axis area indicates the exact scaling.
+lowest and red for the highest values. To show which color represents a
+certain value on the right hand side another axis area for the z-axis is
+drawn. The color bar in this axis area indicates the exact scaling.
 
 In 2D-display mode only one curve can be displayed at once. Thus the
 buttons for the different curves have a different meaning from the one
@@ -411,8 +411,8 @@ curves, i.e.@: only one of the buttons can be active at any time and
 will indicate which curve is currently shown. Each of the curves has each
 own scaling.
 
-As long as there are no data for some of the points these points will be
-drawn in a dark gray.
+As long as there are no measured data for some of the points of the
+display these points will be drawn in a dark gray.
 
 In 2D-display mode the same combinations of mouse buttons can be used to
 determine the values of data points and differences between points as in
@@ -430,15 +430,15 @@ All the methods for rescaling and moving are the same as in 1D-display
 mode. Additionally, you also can change the z-scaling. This will result
 in a change of the colors used for displaying the data. When changing
 the z-scaling it may happen that some of the data points can't be
-displayed with the avaliable colors anymore. In this case data values
+displayed with the available colors anymore. In this case data values
 larger than the maximum value of the z-axis will be drawn in white, and
 data that are too small are shown in black.
 
 @ifnotinfo
 Here is an example of how the display may look like after z-rescaling. A
 lot of the values are too small to be drawn using the values shown on
-the z-scale and are thus drawn in black, and the maximum values at the
-top of the high-field signal are to large and drawn in white.
+the z-scale and are thus drawn in black while the maximum values at the
+top of the high-field signal are too large and thus drawn in white.
 
 @image{fsc2fig5,11cm,}
 
@@ -446,46 +446,48 @@ top of the high-field signal are to large and drawn in white.
 
 @subsection Getting cross sections
 
-Quite often one needs to see a cross section through the data set. This
-can be down by holding down the @code{Shift} key and clicking with the
-left mouse button into either the x- or y-axis area at the place you
-want the cross section. When you release the left mouse button a new
-window opens up showing the cross section (please keep the @code{Shift}
-key pressed down until the window is shown. While the left mouse button
-is pressed down ther cursor is changed to an
+Quite often one needs to examine cross sections through a 2D-data
+set. This can done by holding down the @code{<Shift>} key and clicking
+with the left mouse button into either the x- or y-axis area at the
+position you want the cross section of. When you release the left mouse
+button a new window pops up showing the cross section (please keep the
+@code{<Shift>} key pressed down until this new window is shown). While
+the left mouse button is pressed down the cursor is changed to a
+vertical or horizontal
 @ifnotinfo
-arrow, either @image{cursor6,5mm,} or @image{cursor7,5mm,}
+arrow, i.e.@: either @image{cursor6,5mm,} or @image{cursor7,5mm,}
 .
 @end ifnotinfo
 @ifnothtml
 @ifnottex
-arrow pointing either to the right or up.
+arrow.
 @end ifnottex
 @end ifnothtml
 
 Eventhough the new window with the cross section through the data set
-only shows a 1D-curve it also has a z-axis. On this axis a red indicator
-shows for which value in either x- or y-direction the cross section was
-taken.
+only shows an 1D-curve it also has a z-axis. On this axis a red
+indicator shows the value for which the cross section either x- or
+y-direction was taken.
 @ifnotinfo
 
 @image{fsc2fig6,11cm,}
 
 @end ifnotinfo
-This z-axis area can also be used to choose a different cross
-section. When you press the left mouse button in that area the cursor
-changes to an arrow pointing to the left
+This z-axis area in the cross section window can also be used to select
+a cross section at a different position. When you press the left mouse
+button in the z-axis area the cursor changes to an arrow pointing to the
+left
 @ifnotinfo
 , @image{cursor8,5mm,},
 @end ifnotinfo
-and if you move the mouse (while keeping the left mouse button pressed
-down) new cross sections are displayed according to the current mouse
-position (and the indicator gets redrawn at the position of the current
-cross section). If you want to run through all cross sections
-sequentially you can also use the up- and down-cursor keys. To get to
-the first cross section (i.e.@: the one at the lower end of the z-scale)
-press the @code{Page down} key, to get to the last press the @code{Page
-up} key.
+and if you move the mouse (while keeping the left mouse button still
+pressed down) new cross sections are displayed in accordance with the
+current mouse position (and the indicator gets redrawn at the position
+of the current cross section). If you want to run through all cross
+sections sequentially you can also use the up- and down-cursor keys. To
+get to the first cross section (i.e.@: the one at the lower end of the
+z-scale) press the @code{<Page down>} key, to get to the last one press
+the @code{<Page up>} key.
 
 
 Of course, getting data values and differences between data as well as
@@ -506,10 +508,10 @@ other direction is drawn.
 
 Sometimes it is necessary to adjust certain values while a measurement
 is running, especially if one is trying to determine the optimum
-parameters for an experiment. Therefor it is possible to create several
-different kinds of objects that allow user input during the
-experiment. All of the user created elements appear in a seperate
-window, the tool box.
+parameters for an experiment. Therefor it is possible to write an
+@code{EDL} program that creates several different kinds of objects
+allowing user input during the experiment. All these elements appear in
+a seperate window, the tool box.
 @ifnotinfo
 The next figure shows all types of objects that can be created.
 
@@ -517,18 +519,19 @@ The next figure shows all types of objects that can be created.
 
 @end ifnotinfo
 
-First there are the normal buttons. A normal button can be clicked on
+First there are the normal buttons. A normal button can be clicked on to
 and the @acronym{EDL} program can determine how often the button has
 been pressed. The second type of objects are push buttons, i.e.@:
-buttons, that can be in two states, either pressed or released.
-The third type of objects, radio buttons, always come in groups and only
+buttons that can be in two states, either pressed or released.  The
+third type of objects, radio buttons, always come in groups and only
 exactly one of a group of radio buttons can be in the active state at
 any moment.
 
-The next objects are sliders to adjust numerical values. There are two
-types of sliders, normal sliders and value sliders. The only difference
-between these is that value sliders have an additional field displaying
-a number that indicates the value the slider is currently set to.
+The next set of objects are sliders to adjust numerical values in a
+predefined range. There are two types of sliders, normal sliders and
+value sliders. The only difference between these is that value sliders
+have an additional field displaying a number that indicates the value
+the slider is currently set to.
 
 Finally there are in- and output objects. Input objects are boxes into
 which the user can enter numbers, while output objects are used to

@@ -48,7 +48,7 @@
 @sp 1
 @center @email{Jens.Toerring@@physik.fu-berlin.de}
 @sp 16
-@center Copyright @copyright{} 2001 Jens Thoms T@"orring
+@center Copyright @copyright{} 1999-2001 Jens Thoms T@"orring
 @end titlepage
 
 

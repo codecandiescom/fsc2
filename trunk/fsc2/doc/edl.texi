@@ -41,7 +41,7 @@
 @section Basics
 
 To do an experiment using @acronym{fsc2} you have to write a program
-describing the experiment. While this may seem like a daunting task if
+describing the experiment. While this may look like a daunting task if
 you have no programming experience at all it has the advantage that you
 have complete control over the way the experiment is done. You don't
 have to rely on some programmer (who probably isn't around when you need
@@ -59,8 +59,8 @@ amplifier or which pulses are to be created by the pulse generator. And
 as you would now start the experiment the second part of the
 @acronym{EDL} program describes how the experiment is to be done.
 
-To give you an impression how an @acronym{EDL} program looks like here's
-the program for a cw-EPR experiment:
+To give you an impression how an @acronym{EDL} program may look like
+here's the program for a cw-EPR experiment:
 @example
 DEVICES:
 
@@ -112,7 +112,7 @@ and another variable, @code{data}, later to be used for storing the data
 received from the lock-in amplifier, are declared.
 
 In the next section, after the @code{PREPARATIONS:} keyword, devices can
-be set up. The function @code{magnet_setup} tells the magnet to start
+be set up. The function @code{magnet_setup()} tells the magnet to start
 with the field stored in the variable @w{@code{start_field}} and to use
 a step size of @w{@code{field_step}}. The next function call,
 @code{init_1d()}, tells the program that this is a 1-dimensional
@@ -133,10 +133,10 @@ the call of the @code{display()} function. Here two arguments are used,
 the number of the point, stored in the variable @code{I}, and the value
 of the corresponding data point.
 
-Of course, we also need to save the data point in a file. This is done
+Of course, we also need to write the data point to a file. This is done
 by the call of the function @code{save()} that automatically writes its
 argument to a file. When the function is called for the first time it
-prompts for the name of the file to use.
+prompts you for the name of the file to use.
 
 What remains to be done is to increment the counter variable @code{I}
 and to sweep up the field. The function @code{sweep_up()} returns the new
@@ -144,10 +144,10 @@ value of the field, which is then used in the test of the loop condition
 to decide if the experiment is finished, i.e.@: the end field is
 reached.
 
-The last function call of @code{wait()} with result of a call of the
-function @code{lockin_time_constant()} as the argument in the loop makes
-the program waits for the time constant of the lock-in amplifiers to
-give it enough time to measure a new data point.
+The last function call of @code{wait()} with the result of a call of the
+function @code{lockin_time_constant()} as the argument makes the program
+wait for the time constant of the lock-in amplifier to give it enough
+time to measure a new data point.
 
 When you have written such a program (using, for example, a simple ASCII
 editor) you load it into @acronym{fsc2} and press the test or the start
