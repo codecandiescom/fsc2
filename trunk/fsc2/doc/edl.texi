@@ -330,24 +330,24 @@ VARIABLES:
 
 @subsection Variable names
 
-Names of variables (and also functions) always start with a character,
-i.e.@: A-Z or a-z. The remaining part of the variable name can consist
-of characters, numbers and the underscore character, '@code{_}' (or
-shorter, if you like regular expressions, valid names follow the
-following pattern: @code{[A-Za-z][A-Za-z_0-9]*}). Thus, '@code{AbC_12x}'
-and '@code{aBc_12X}' are legal variable names, while '@code{12xy}' or
-'@code{_Yx2}' are not. Please note that the variable names are case
-sensitive, i.e.@: '@code{XY}', '@code{Xy}', '@code{xY}' and '@code{xy}'
-are four completely different variables!
+Names of variables (and also of functions) always start with a
+character, i.e.@: A-Z or a-z. The remaining part of the variable name
+can consist of characters, numbers and the underscore character,
+'@code{_}' (or shorter, if you like regular expressions, valid names
+follow the following pattern: @code{[A-Za-z][A-Za-z_0-9]*}). Thus,
+'@code{AbC_12x}' and '@code{aBc_12X}' are legal variable names, while
+'@code{12xy}' or '@code{_Yx2}' are not. Please note that the variable
+names are case sensitive, i.e.@: '@code{XY}', '@code{Xy}', '@code{xY}'
+and '@code{xy}' are four completely different variables!
 
 The name of a variable can, in principle, consist of as many characters
-as you wish (I hope nobody is going to the extent to create a variable
+as you wish (I hope nobody is going to the extent of creating a variable
 name with, say, a few hundred thousand characters just to prove me wrong
 -- I tested it only with two variables with names consisting of 10000
-characters and differing only in the very last character...)
+characters each and differing only in the very last character...)
 
 There are some names that can't be used for variables. First of all,
-variables names may not be identical to function names, neither built-in
+variable names may not be identical to function names, neither built-in
 nor device function names. Second, some combination of characters are
 already used for physical units as well as combinations of these with
 the characters @code{n} (nano), @code{u} (micro), @code{m} (milli),
@@ -367,8 +367,8 @@ the characters @code{n} (nano), @code{u} (micro), @code{m} (milli),
 
 Finally, the keywords used by @acronym{EDL} also may not be used as
 variable names (to make it easier to avoid these, they are all spelled
-with capitals only). In the appendix you find a list of (hopefully) all
-reserved words, that can't be used as variable names.
+with capitals only). In the appendix you'll find a list of (hopefully) all
+reserved words.
 
 
 @subsection Variable types
@@ -382,35 +382,35 @@ all the way up to @w{+2147483647}. In contrast, floating point variables
 can have much larger values (up to ca.@: 10^300), the exact limits
 depending on the machine @acronym{fsc2} is running on.
 
-To distinguish between integer and floating point variables the
-following convention is used: The names of all integer variables start
-with a upper case letter, i.e.@: A-Z, while the names of floating point
-variables always start with a lower case character, i.e.@:
-a-z. (Actually, changing just one line of the program allows to set a
-completely different behaviour.)
+To distinguish between integer and floating point variables the case of
+the first character of the variables name is important: if the name
+starts with an upper case letter, i.e.@: A-Z, it's an integer variable
+while a lower case character, i.e.@: a-z, indicates a floating point
+variable. (Actually, changing just one line of the program allows to set
+a completely different behaviour.)
 
 
 @subsection Arrays
 
-Beside `normal' variables you can also use arrays of variables. The
-names of the arrays follow the same convention as that of normal
-variables, i.e.@: if an array name starts with an upper case character
-it is an integer array and if it starts with a lower case character it's
-a floating point array. To define an array in the @code{VARIABLES}
-section just append the sizes of the dimensions of the array, separated
-by commas, in square brackets. E.g.
+Beside `normal' variables you can also use arrays. The names of arrays
+follow the same convention as that of normal variables, i.e.@: if an
+array name starts with an upper case character it is an integer array
+and if it starts with a lower case character it's a floating point
+array. To define an array in the @code{VARIABLES} section just append
+the sizes of the dimensions of the array, separated by commas, in square
+brackets. E.g.
 @example
 F[ 100 ];
 b[ 4, 7, 3 ];
 @end example
 @noindent
-defines a 1-dimensional integer array @code{F} with 100 elements and a
+defines a 1-dimensional array @code{F} of 100 integers and a
 3-dimensional floating point array @code{b} of rank 4x7x3.
 
 
 All elements of an arrays are automatically initialized to zero. On the
 other hand, arrays can also be initialized within the @acronym{EDL} file
-by equating it to a list of values, enclosed in curly braces.
+by equating the array to a list of values, enclosed in curly braces:
 @example
 C[ 3 ] = @{ 2, 1, -1 @};
 d[ 5 ] = @{ sqrt( 2.0 ), sqrt( 3.0 ) + 1 @};
@@ -418,15 +418,16 @@ E[ 2, 3 ] = @{ 1, 2, 3, 4, 5, 6 @};
 @end example
 @noindent
 The first line in the example shows the simplest way -- each element of
-@code{C} is initialized by an element from the list. In the second line
-there are less initializers than the array @code{d} has elements, thus
-only the first two elements are set, i.e.@: @code{d[ 1 ]} and @code{d[ 2
-]}, while all the remaining elements are set to zero. Besides, you can
-see that function calls etc.@: can be used in the intialization. The
-third examples shows the initialization of a multidimensional array, the
-elements of the array @code{E} being set starting with the first row and
-continuing with the next rows until all initializers are used
-up. Thus the array @code{E} will be initialized to
+the integer array @code{C} is initialized by an element from the
+list. In the second line there are less initializers than the array
+@code{d} has elements, thus only the first two elements are set, i.e.@:
+@code{d[ 1 ]} and @code{d[ 2 ]}, while the remaining elements are
+automatically set to zero. Besides, you can see that function calls,
+arithmetic etc.@: can be used in the intialization. The third example
+shows the initialization of a multidimensional array, the elements of
+the array @code{E} being set starting with the first row and continuing
+with the next rows until all initializers are used up. Thus the array
+@code{E} will be initialized to
 @example
 E[ 1, 1 ] = 1     E[ 1, 2 ] = 2     E[ 1, 3 ] = 3
 E[ 2, 1 ] = 4     E[ 2, 2 ] = 5     E[ 2, 3 ] = 6
@@ -434,11 +435,11 @@ E[ 2, 1 ] = 4     E[ 2, 2 ] = 5     E[ 2, 3 ] = 6
 
 
 There are some situations where one doesn't know the size of an array in
-advance, e.g.@: an array for storing a trace from a digitizer, so
-declaring its size in advance in the @code{VARIABLES} section is not
+advance, e.g.@: arrays to be used for storing a trace from a digitizer,
+so declaring its size in advance in the @code{VARIABLES} section is not
 possible. Therefor, one may also define arrays with the size of the last
 dimension remaining undefined by specifying a @code{*} instead of a
-number.
+number:
 @example
 G[ * ];
 h[ 2, * ];
@@ -446,7 +447,7 @@ h[ 2, * ];
 @noindent
 This defines an 1-dimensional integer array @code{G} with a still
 undefined number of elements and a 2-dimensional floating point matrix
-@code{h} with two rows of undefined length. The sizes of these arrays
+@code{h} with two rows of unknown length. The sizes of these arrays
 remain undefined until 1-dimensional arrays are assigned to them. The
 following assignment will set the length of @code{G} to 3 by assigning
 the second row of elements of @code{E} to @code{G}:
@@ -454,7 +455,7 @@ the second row of elements of @code{E} to @code{G}:
 G = E[ 2 ];
 @end example
 @noindent
-because the length of a row of @code{E} is three. After this assignment
+because the length of the rows of @code{E} is three. After this assignment
 the size of @code{G} is fixed and can't be changed anymore.
 
 In the same way the assignment
@@ -475,10 +476,9 @@ e.g.@: curves fetched from a digitizing oscilloscope.
 @section Arithmetic
 @cindex Arithmetic
 
-There are the usual arithmetic operations built into @acronym{fsc2},
-i.e.@: addition, subtraction, multiplication and division, not too
-surprisingly represented by the characters `@code{+}', `@code{-}',
-`@code{*}' and `@code{/}'.
+Of course, @acronym{fsc2} understands the usual arithmetic operations,
+i.e.@: addition, subtraction, multiplication and division, represented
+by the characters `@code{+}', `@code{-}', `@code{*}' and `@code{/}'.
 @cindex + (addition operator)
 @cindex - (subtraction operator)
 @cindex * (multiplication operator)
@@ -508,10 +508,10 @@ be completely bogus, e.g.@:
 @end example
 @noindent
 (There is actually some logic behind this result but that doesn't help
-much.) So, if you suspect the result of an integer operation to exceed
-the range of representable values, convert the values to floating point
-type (using the function @code{float()}) before you do the potentially
-problematic arithmetic operation.
+too much.) So, if you suspect the result of an integer operation to
+exceed the range of representable values, convert the values to floating
+point type (using the function @code{float()}) before you do the
+potentially problematic arithmetic operation.
 
 Of course, there are also limits to the range of numbers representable
 by a floating point number. Fortunately, these limits are much larger -
@@ -524,25 +524,27 @@ typically the maximum size of floating point numbers is in the range of
 @cindex overflow, floating point numbers
 @cindex underflow, floating point numbers
 
-Another important point about calculations involving integers concerns the
-division. The result of the division of two integer values is again an integer
-value. For non-integer results this is achieved by simply truncating the
-digits following the decimal point. Thus, typical results are
+
+Another important point about calculations involving integers concerns
+the division. The result of the division of two integer values is again
+an integer value. For non-integer results this is achieved by simply
+truncating the digits following the decimal point. Thus, typical results
+are
 @example
 7 / 2 = 3     8 / 3 = 2     -7 / 2 = -3
 @end example
 @cindex / (division operator)
 @cindex integer division
 @noindent
-To avoid this truncation convert (see the function @code{float()}) at
-least one of the values used in the division to floating point type,
+To avoid this truncation convert at least one of the values used in the
+division to a floating point type by using the @code{float()} function,
 i.e.@:
 @example
 float( 7 ) / 2 = 3.5    8 / float( 3 ) = 2.666666667
 @end example
 
 
-Beside the normal arithmetic operations there are two more very useful
+Beside the normal arithmetic operations there are two often needed
 operations, the modulo function and the exponentiation. For the modulo
 operation the percent sign @code{%}
 @findex % (modulo operator)
@@ -551,12 +553,9 @@ is used and the result is the remainder of the division, e.g.@
 @example
 7 % 3 = 1         6.5 % 2.5 = 1.5 
 @end example
-
-
 For the exponentiation the caret character @code{^} is to be used, e.g.@:
 @findex ^ @r{(exponentiation)}
 @cindex exponentiation
-
 @example
 3^2 = 9           6.5^1.5 = 16.5718134219...
 @end example
@@ -598,12 +597,12 @@ assignment operators
 @subsection Operator precedence
 @cindex operator precedence
 
-Usually one doesn't think about the precedence of operators. We already
-learned in primary school that multiplication and division have higher
-precedence than addition or subtraction. Of course, a programming
-language should follow this rules. But sometimes there are cases where
-it is necessary to know the precedence exactly, i.e.@: the exact
-sequence an expression is evaluated.
+Usually one doesn't need to think about the precedence of operators. We
+already learned in primary school that multiplication and division have
+higher precedence than addition and subtraction and, of course, a
+programming language should follow these rules. But sometimes there are
+cases where it is necessary to know the precedence exactly, i.e.@: the
+exact sequence an expression is evaluated.
 
 The unary operators (unary in the sense that they apply only to one
 number or variable) `@code{+}' and `@code{-}', i.e.@: the operators
@@ -627,6 +626,7 @@ evaluated from the right to the left:
  2^3^4    @r{will be treated as if written as}    2^(3^4)
 @end example
 
+
 The operator with the next lower precedence is the modulo operator,
 `@code{%}'. Expressions with more than one `@code{%}' in a row will be
 evaluated left to right, i.e.@:
@@ -635,21 +635,23 @@ evaluated left to right, i.e.@:
 @end example
 
 
-Now the multiplication and division operators, `@code{*}' and `@code{/},
-follow. Both have exactly the same precedence and expressions involving
-more than one of these operators are evaluated left to right, i.e.@:
+Now follow the multiplication and division operators, `@code{*}' and
+`@code{/}. Both have exactly the same precedence and expressions
+involving more than one of these operators are evaluated left to right,
+i.e.@:
 @example
  3 * 20 / 7    @r{will be treated as if written as}    ( 3 * 20 ) / 7
 @end example
 @noindent
-(Take care: This can make a lot of a difference - due to the rules of
-integer division @code{(3 * 20) / 7} will evaluate to @code{8}, while
-@code{3 * (20 / 7)} would result in @code{6}).
+(Take care: The order of evaluation can make a lot of a difference - due
+to the rules of integer division @code{(3 * 20) / 7} will evaluate to
+@code{8}, while @code{3 * (20 / 7)} would result in @code{6}).
 
 
 The next lower precedence operators are the addition and subtraction
 operators, `@code{+}' and `@code{-}'. Also for these operators
-expressions are evaluated left to right:
+expressions involving more than one of these operators are evaluated
+left to right:
 @example
  13 + 4 - 5    @r{will be treated as if written as}    ( 13 + 4 ) - 5
 @end example
@@ -667,10 +669,9 @@ right of the expression:
 @example
  a | b & c    @r{will be treated as if written as}    ( a | b ) & c
 @end example
-
 To make your intentions more clear to human readers of your
 @acronym{EDL} programs it's probably a good idea to use parenthesis in
-these cases even if they are not required.
+these cases even if they are not strictly required.
 
 Finally, the lowest precedence operators are the comparison operators
 (also the be discussed below in more detail), i.e.@: the test for equality,
@@ -689,8 +690,8 @@ statement you don't have to worry about the order of evaluation.
 
 Of course, the precedence of operators and the sequence they are
 evaluated in can always be changed by using parenthesis. So, if in
-doubt, use parenthesis -- this won't slow down the program but make the
-program much easier to understand.
+doubt, use parenthesis -- this won't slow down the program but will
+often make the program easier to understand.
 
 
 @subsection Arithmetic with arrays
@@ -698,8 +699,8 @@ program much easier to understand.
 
 Beside the usual arithmetic with numbers it is also possible to use
 arithmetic with one-dimensional arrays. As long as the sizes of two
-arrays are identical they can be added or subtracted. If the arrays
-@code{a} and @code{b} are defined as
+arrays are identical they can be added or subtracted. For example, if
+the arrays @code{a} and @code{b} are defined as
 @example
   a[ 3 ] = @{ 0.5,  1.0,  2.0 @};
   b[ 3 ] = @{ 1.0, -2.0, -3.0 @};
@@ -713,20 +714,21 @@ resulting in
 @end example
 @noindent
 Of course, you can also invert the sign of all the elements of an array
-by simply prepending a minus sign
+by simply prepending it with a minus sign
 @example
   -a         ->   @{ -0.5, -1.0, -2.0 @};
 @end example
 
-But it's also possible to add or subtract a number to or from each
-element of an array:
+But it's also possible to add a number to each element of an array or
+to subtract a number (or to subtract all array elements from a number):
 @example
   a + 5      ->   @{ 5.5, 6.0, 7.0 @}
   a - 3      ->   @{ -2.5, -2.0, -1.0 @}
+  3 - a      ->   @{ 2.5, 2.0, 1.0 @}
 @end example
 
-Also multiplication and division is possible with arrays. Again, this
-operations are implemented in a element-by-element way, i.e.@:
+Multiplication and division are also possible with whole arrays. Again,
+these operations are implemented in a element-by-element way, i.e.@:
 multiplying two arrays is not a dot product but results again in an
 array of the same size as both the original arrays. The same holds for
 the division. With the arrays @code{a} and @code{b} defined above the
@@ -737,17 +739,17 @@ results are:
   b / a      ->   @{ 2.0, -2.0, -1.5 @}
 @end example
 
-Again, also multiplication and division of an array with a number is
-defined as shown here:
+Multiplication and division of an array with a number is also defined as
+shown here:
 @example
   a * 2      ->   @{ 1.0, 2.0, 4.0 @}
   a / 3      ->   @{ 0.166667, 0.333333, 0.666667 @}
   3 / a      ->   @{ 6.0, 3.0, 1.5 @}
 @end example
 
-Finally, also calculation of the modulo function and exponentiation can
-be done with whole arrays. These operations are also implemented as
-element-by-element calculations, i.e.@: resulting in an array:
+Finally, calculation of the modulo function and exponentiation can be
+done with whole arrays. These operations are again implemented as
+element-by-element calculations, i.e.@: always resulting in an array:
 @example
   a % b      ->   @{ 0.5, 1.0, 2.0 @}
   b % a      ->   @{ 0.0, 0.0, -1.0 @}
@@ -764,7 +766,7 @@ arrays and simple numbers, also resulting in arrays:
   2 ^ a      ->   @{ 1.414215, 2.0, 4.0 @}
 @end example
 
-Also the built-in arithmetic functions can (as far as this makes any
+Further, the built-in arithmetic functions can (as far as this makes any
 sense) be applied to arrays. In every case the function is applied to
 each element of the array, thus the result is another array with its
 elements being the results of applying the function to each of the input
@@ -795,8 +797,9 @@ upper case letters!).
 
 Most flow control construct keywords are followed by a condition and all
 are then followed by a block of statements. Such a block of statements
-has to be enclosed in curly braces and may contain as many statements as
-needed (or still fit into the memory).
+has to be enclosed in curly braces (@code{@{} and @code{@}}) and may
+contain as many statements as needed (and still fit into the computers
+memory).
 
 
 @anchor{REPEAT loops}
@@ -826,17 +829,25 @@ example). After the initialization of the two variables `@code{I}' and
 repetitions. Now, in curly braces, i.e.@: between `@code{@{}' and
 `@code{@}}', follow the statements to be executed in the loop.
 
+Please note that if the number of repetitions of the loop is a variable
+or even expression it will be evaluated just once at the very start,
+i.e.@: before the loop is executed, so if you change the value of the
+variable (or the variables involved in the expression) within the loop
+the number of repetitions won't change.
+
+
 
 @anchor{WHILE loops}
 @subsection WHILE loops
 @cindex WHILE loops
 
 
-Nearly as simple a construct is the @code{WHILE} loop: following the
-keyword a condition is needed first. Usually, this will be a comparison
-between two numbers, but also a simple number will suffice -- if its
-value is non-zero it will be interpreted as TRUE. Of course, the keyword
-and the condition have to be followed by a block of statements.
+Nearly as simple a construct is the @code{WHILE} loop, but instead of a
+simple number following the keyword a condition is needed. Usually, this
+will be a comparison between two numbers, but also a simple number will
+suffice -- if its value is non-zero it will be interpreted as TRUE. Of
+course, the keyword and the condition have to be followed by a block of
+statements.
 
 Again, an example:
 @example
@@ -849,7 +860,7 @@ Again, an example:
   @}
 @end example
 
-This program snippet (that could also have been written using a
+This program snippet (that also could have been written using a
 @code{REPEAT} loop) calculates the factorial of 6. After initializing
 the variables `@code{I}' and `@code{Fact}' it is tested in the loop
 condition if `@code{I}' is still not larger that 6. If this is true, the
@@ -883,13 +894,13 @@ expressions (e.g.@: numbers):
 
 Please note, that using comparisons between floating point numbers may
 not work as you expect them to do. This is a result of the way floating
-point numbers are stored by computer sinternally, i.e.@: as binary
-numbers. Many numbers, that can be expressed easily in a decimal system,
-e.g.@: @code{0.1}, are, when expressed using the binary system, infinite
-fractions. But because the computer can only store a finite number of
-bits for the number rounding errors will occur. Thus @code{0.1} and the
-result of e.g.@: @code{0.7 / 7} can be different numbers and a
-comparison for equality will fail.
+point numbers are stored by computers internally, i.e.@: as binary
+numbers. Many numbers, that can be expressed easily in the decimal
+system, e.g.@: @code{0.1}, are, when expressed using the binary system,
+infinite fractions. But because the computer can only store a finite
+number of bits for the number rounding errors will occur. Thus
+@code{0.1} and the result of e.g.@: @code{0.7 / 7} can be different
+numbers, in which case a comparison for equality will fail.
 
 Here is now an example for using simple numbers in a condition,
 using the fact that a non-zero value is always interpreted as TRUE:
@@ -897,9 +908,9 @@ using the fact that a non-zero value is always interpreted as TRUE:
   I = 6;
   Fact = 1;
 
-  WHILE I  @{
-      Fact = Fact * I;
-      I = I - 1;
+  WHILE I @{
+      Fact *= I;
+      I -= 1;
   @}
 @end example
 
@@ -912,7 +923,8 @@ long as it is.
 
 Sometimes, you may want to check not for the truth but for the falsehood
 of an expression. In this case you have to prepend the expression with a
-exclamation mark, `@code{!}', to reverse the meaning of a test.
+exclamation mark, `@code{!}', to reverse the meaning of a test (or use
+an @code{UNTIL} loop, see below).
 
 If you want to check for combinations of expressions you can use the
 logical @code{AND}, @code{OR} or @code{XOR} (exclusive or)
@@ -944,10 +956,9 @@ operators. Here is a list of these operators and their meaning:
 @cindex UNTIL loops
 
 Directly related to the @code{WHILE} loop is the @code{UNTIL} loop. The
-only difference is that, instead of repeating until the loop condition
-becomes false, the @code{UNTIL} loop is repeated until the loop
-condition becomes true.
-
+only difference is that, instead of repeating the loop until the
+condition becomes false, the @code{UNTIL} loop is repeated until the
+loop condition becomes true.
 
 
 @anchor{FOR loops}
@@ -958,31 +969,31 @@ Before the @code{WHILE} loop one has to initialize the loop variable and
 within the statement block it has to be updated. In many cases (for
 example in both the examples for the @code{WHILE} loop above) it is
 simpler to use a @code{FOR} loop instead, because setting the loop
-variable as well as updating it is automatically done in the condition
+variable as well as updating it is automatically done in its condition
 part. Here's an example that does exactly the same as the first of the
 two examples for @code{WHILE} loops:
 @cindex FOR
 @example
   Fact = 1;
-  FOR I = 1:6 @{
-      Fact = Fact * I;
+  FOR I = 1 : 6 @{
+      Fact *= I;
   @}
 @end example
 
 At the very start of the @code{FOR} loop the loop variable `@code{I}' is
-set to 1 and the block is run using this value. When it is done,
+set to 1 and the loop block is run using this value. When it is done,
 `@code{I}' is automatically incremented by 1 and tested if it is still
-not larger than 6. If this is TRUE the loop is repeated with the new
-value of `@code{I}'. Take care: You can change `@code{I}' also within
-the loop, but you only should do this if you really mean it and know
-what you're doing!
+not larger than 6. If this is @code{TRUE} the loop is repeated with the
+new value of `@code{I}'. Take care: You can change `@code{I}' also
+within the loop, but you only should do this if you really mean it and
+know what you're doing!
 
 But you can also reproduce the second version of the factorial
 calculation using a @code{FOR} loop. Here it is:
 @example
   Fact = 1;
-  FOR I = 6:1:-1 @{
-      Fact = Fact * I;
+  FOR I = 6 : 1 : -1 @{
+      Fact *= I;
   @}
 @end example
 
@@ -1000,15 +1011,15 @@ variable!
 @subsection FOREVER loops
 @cindex FOREVER loops
 
-There can be situations where one wants to have the program running as
-long as the STOP button is hasn't been pressed. While something like
-this can be realized by using i.e.@: a @code{REPEAT} loop with a huge
-number of repeats, this could take extremely long to test the program
-before the @code{EXPERIMENT} is started.  In these cases a
-@code{FOREVER} loop is more convenient because the content of the loop
-is only tested once so the experiment can start much faster. For obvious
-resons, a @code{FOREVER} loop doesn't expect a loop condition but the
-statements of loop immediately following the @code{FOREVER} keyword.
+There are situations where one wants to have the program running as long
+as the STOP button hasn't been pressed. While something like this can be
+realized by using i.e.@: a @code{REPEAT} loop with a huge number of
+repeats, this would take extremely long to test the program before the
+@code{EXPERIMENT} is started. In these cases a @code{FOREVER} loop is
+more convenient because the content of the loop is only tested once so
+the experiment can start much faster. For obvious resons, a
+@code{FOREVER} loop doesn't expect a loop condition but the loop block
+immediately following the @code{FOREVER} keyword.
 
 @quotation
 @cartouche
@@ -1016,12 +1027,12 @@ There is a disadvantage of using a @code{FOREVER} loop: Because
 @acronym{fsc2} can't determine in advance when the @code{FOREVER} loop
 is going to be terminated it is not possible to test these kinds of
 loops thoroughly in the test run, i.e.@ before the experiment is
-started. Instead, in the test run a @code{FOREVER} loop is only run
-once to do a plausibility check, but further tests are not
-feasible. Thus, it can not be guaranteed that the experiment will run
-without errors. Therefor the use of @code{FOREVER} loops should be
-restricted to preliminary experiments where one for example tries to
-figure out the optimum parameter for an experiment.
+started. Instead, in the test run a @code{FOREVER} loop is only run once
+to do a plausibility check, but further tests are not feasible. Thus, it
+can not be guaranteed that the experiment will run without errors.
+Therefor, the use of @code{FOREVER} loops should be restricted to
+preliminary experiments, e.g. when trying to figure out the optimum
+parameters for an experiment.
 @end cartouche
 @end quotation
 
@@ -1032,11 +1043,10 @@ figure out the optimum parameter for an experiment.
 
 Under certain conditions one doesn't want to execute all remaining
 statements of a loop but to go back to the test of the loop condition
-immediately. Whenever the keyword @code{NEXT} appears as the next
-statement to be executed in a loop the remaining statements are skipped
-and the program jumps back to the test of the loop condition (with the
-loop counter in @code{REPEAT} and @code{FOR} loops being set to the next
-value).
+immediately. Whenever the keyword @code{NEXT} is encountered in a loop
+the remaining statements are skipped and the program jumps back to the
+test of the loop condition (with the loop counter of @code{WHILE},
+@code{REPEAT} or @code{FOR} loops being set to the next value).
 
 
 @anchor{BREAK statement}
@@ -1044,11 +1054,10 @@ value).
 @cindex BREAK
 
 There may be situations where one doesn't want to continue with a loop
-until the loop condition becomes untrue but where one has to leave the
+until the loop condition becomes untrue but where one has to exit the
 loop immediately. For this purpose the keyword @code{BREAK} can be used.
 If it is found as the next statement in a loop to be executed the
 program jumps to the first statement following the loop body.
-
 
 
 @anchor{IF-ELSE constructs}
@@ -1058,7 +1067,7 @@ program jumps to the first statement following the loop body.
 @cindex IF-ELSE
 
 
-Finally there's the @code{IF-ELSE} construct. It works as in most other
+Finally, there's the @code{IF-ELSE} construct. It works as in most other
 programming languages. In the simplest case you just have the @code{IF}
 part to execute some instructions only under certain conditions. In this
 case you start with the @code{IF} keyword, followed by the condition
@@ -1070,13 +1079,15 @@ statements enclosed in curly braces. Here's an simple example:
 @}
 @end example
 @noindent
-This is a basically a function that calculates the absolute value of the
-variable @code{x} (there's also the built-in function @code{abs()} for
+Here the variable @code{x} is multiplied by @code{-1} only if @code{x}
+is negative, i.e.@: it's basically just a calculation of the absolute
+value of @code{x} (there's also the built-in function @code{abs()} for
 doing this which is probably a lot faster).
 
-By using the @code{ELSE} you can specify an alternative, with the
-statements to be executed if the @code{IF} condition not being met again
-enclosed in curly braces. One more example:
+By using the @code{ELSE} statment you can specify an alternative with
+statements to be executed if the @code{IF} condition is not being met.
+Again the block of alternative staments must be enclosed in curly
+braces:
 @example
   IF x >= 0 @{
       x = 1.0;
@@ -1086,7 +1097,7 @@ enclosed in curly braces. One more example:
 @end example
 @noindent
 
-But things can also get more complex -- you can follow the @code{ELSE}
+But things can also get more complex -- you may follow the @code{ELSE}
 directly by another @code{IF}. Let's assume that you need to set
 @code{x} to 1 if it's larger than 1, to 0 if it belongs to the interval
 @w{[ 0, 1 ]} and to -1 if it's smaller than 0. Then you could use:
@@ -1109,7 +1120,7 @@ directly by another @code{IF}. Let's assume that you need to set
 @cindex UNLESS-ELSE
 
 @code{UNLESS} is identical to @code{IF} with the only exception that the
-condition is not tested for truth but for falsehood, i.e.@ while in an
+condition is not tested for truth but for falsehood, i.e.@: while in an
 @code{IF} construct the following block of statements is executed when
 the condition is true, in @code{UNLESS} constructs the block is only
 executed when the condition test fails. Of course, also with the
@@ -1120,15 +1131,15 @@ much sense).
 
 @quotation
 @cartouche
-As @code{FOREVER} loops also @code{IF-ELSE} and @code{UNLESS-ELSE}
-constructs introduce some problems with the testing of an @acronym{EDL}
-program before the experiment is done. This happens when the condition
-to be tested depends either on user input (e.g.@ tests, if the user
-pressed a button etc.) or on the results of a measurement itself. In
-these cases the flow of control of the program can not be known in
-advance and thus a thorough test is impossible. Therefor it can happen
-that the test run of the experiment succeeds but the actual experiment
-stops with an error that had not been anticipated.
+As already mentioned for @code{FOREVER} loops also @code{IF-ELSE} and
+@code{UNLESS-ELSE} constructs introduce some problems with the testing
+of an @acronym{EDL} program before the experiment is done. This happens
+when the condition to be tested depends either on user input (e.g.@:
+tests if the user pressed a button etc.) or on the results of a
+measurement itself. In these cases the flow of control of the program
+can not be known in advance and thus a thorough test is impossible. Thus
+it can happen that the test run of the experiment succeeds but the
+actual experiment stops with an error that could not be anticipated.
 @end cartouche
 @end quotation
 
@@ -1157,12 +1168,12 @@ to 16 levels deep.
 @cindex #EXIT statement
 
 When the @code{#EXIT} statement is found in an @acronym{EDL} program
-this is equivalent to end of the file - everything following the
+this is equivalent to the end of the file - everything following the
 statement is discarded. In the main file of an @acronym{EDL} program
-means that this is the end of the @acronym{EDL} program. If instead the
-current file is an included file (see the @code{#INCLUDE} statement)
-@acronym{fsc2} will immediately return to parsing the file from which
-the current file was included.
+this means that this is the end of the @acronym{EDL} program. If instead
+the current file is an included file (see the @code{#INCLUDE} statement)
+@acronym{fsc2} will immediately return to reading the file the current
+file was included from.
 
 
 @anchor{#QUIT statement}
@@ -1171,8 +1182,9 @@ the current file was included.
 
 When the @code{#QUIT} statement is encountered in a file @acronym{fsc2}
 immediately treats this as the complete end of the @acronym{EDL} program
-and won't parse any further lines. In the main file of an @acronym{EDL}
-this is equivalent to the @code{#EXIT} statement. But while in an included
-@acronym{EDL} file @code{#EXIT} will induce @acronym{fsc2} to return to
-the including file, @code{#QUIT} makes @acronym{fsc2} stop completely,
-i.e.@: it will not even return to higher level @acronym{EDL} files.
+and won't read any further lines. In the main file of an @acronym{EDL}
+this is equivalent to the @code{#EXIT} statement. But while in an
+included @acronym{EDL} file @code{#EXIT} will induce @acronym{fsc2} to
+return to the including file, @code{#QUIT} makes @acronym{fsc2} stop
+completely, i.e.@: it will not even return to higher level @acronym{EDL}
+files.

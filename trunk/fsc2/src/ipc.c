@@ -287,9 +287,12 @@ int sema_create( void )
 
 int sema_destroy( int sema_id )
 {
+	union semun sema_arg;
+
+
 	raise_permissions( );
 
-	if ( semctl( sema_id, 0, IPC_RMID ) < 0 )
+	if ( semctl( sema_id, 0, IPC_RMID, sema_arg ) < 0 )
 	{
 		lower_permissions( );
 		return -1;
