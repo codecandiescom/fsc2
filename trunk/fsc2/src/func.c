@@ -90,7 +90,7 @@ Func Def_Fncts[ ] =              /* List of built-in functions */
 	{ "save_output",   f_save_o,  -1, ACCESS_EXP,  UNSET	},
 	{ "save_comment",  f_save_c,  -1, ACCESS_EXP,  UNSET	},
     { "button_create", f_bcreate, -1, ACCESS_EXP,  UNSET	},
-	{ NULL,           NULL,       0, 0,           UNSET	}
+	{ NULL,            NULL,       0, 0,           UNSET	}
 	                   /* last set marks the very last entry, don't remove ! */
 };
 
