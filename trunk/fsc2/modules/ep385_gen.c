@@ -219,6 +219,9 @@ bool ep385_set_trigger_mode( int mode )
 		THROW( EXCEPTION );
 	}
 
+	ep385.is_trig_in_mode = SET;
+	ep385.trig_in_mode = mode;
+
 	return OK;
 }
 
