@@ -11,7 +11,7 @@ Berlin). Both where so kind to allow me to spend quite large amounts of
 time on getting it to the state it is in now. Prof.@: R.@: Bittl (Freie
 Universit@"at Berlin) and Prof.@: H.-J.@: Steinhoff (Universt@"at
 Osnabr@"uck) supported the development by employing me to to extend the
-program and write further device drivers fot their spectrometers.
+program and write further device drivers.
 
 Special thanks to Anton Savitsky for writing the module for the
 @w{Thurlby 330} programable power supply and allowing me to include
