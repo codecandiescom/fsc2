@@ -1344,7 +1344,7 @@ Var *f_slice( Var *v )
 	long *nlp;
 
 
-	if ( v == NULL || v->next != NULL )
+	if ( v == NULL || v->next == NULL )
 	{
 		eprint( FATAL, "%s:%ld: Not enough parameter in call of function "
 				"`slice'.\n", Fname, Lc );

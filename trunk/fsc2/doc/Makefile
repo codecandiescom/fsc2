@@ -45,7 +45,8 @@ fsc2.ps: $(docs)
 pdf: fsc2.pdf
 
 fsc2.pdf: $(docs)
-	if [ "`eval texi2dvi --help 2>/dev/null`" ]; then \
+	if [ "`eval texi2dvi --help 2>/dev/null`" -a     \
+		 "`eval pdftex --help 2>/dev/null` " ]; then \
 		texi2dvi --pdf -c fsc2.texi; \
 	fi
 
@@ -63,16 +64,11 @@ install:
 	if [ -f fsc2.pdf ]; then \
 		$(INSTALL) -m 444 -o fsc2 -g fsc2 fsc2.pdf $(docdir); \
 	fi
-	grep -v fsc2 /usr/info/dir > /usr/info/dir.xyz
-	mv /usr/info/dir.xyz /usr/info/dir
-	install-info --delete fsc2 /usr/info/dir
-	$(RM) $(RMFLAGS) $(docdir)/fsc2.info*.gz
-	$(INSTALL) -m 444 -o fsc2 -g fsc2 fsc2.info* $(docdir)
-	gzip -9 -f $(docdir)/fsc2.info*
-	install-info $(docdir)/fsc2.info /usr/info/dir
-	sed 's/(fsc2)/($(subst /,\/,$(docdir))\/fsc2)/' \
-		/usr/info/dir > /usr/info/dir.xyz
-	mv /usr/info/dir.xyz /usr/info/dir
+	install-info --delete fsc2 $(infodir)/dir
+	$(RM) $(RMFLAGS) $(infodir)/fsc2.info*.gz
+	$(INSTALL) -m 444 -o fsc2 -g fsc2 fsc2.info* $(infodir)
+	gzip -9 -f $(infodir)/fsc2.info*
+	install-info $(infodir)/fsc2.info $(infodir)/dir
 
 
 distclean:

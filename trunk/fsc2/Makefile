@@ -8,6 +8,7 @@ bindir         = $(prefix)/bin
 libdir         = $(prefix)/lib/fsc2
 auxdir         = $(libdir)/aux
 docdir         = $(libdir)/doc
+infodir        = /usr/local/info
 
 GPIB_CONF      = /etc/gpib.conf
 GPIB_LOG       = /tmp/gpib.log
