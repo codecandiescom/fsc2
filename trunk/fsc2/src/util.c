@@ -407,10 +407,10 @@ void i2rgb( double h, int *rgb )
 }
 
 
-/*-----------------------------------------------------------------*/
-/* Function creates a set of colours in XFORMs internal colour map */
-/* for use in 2D graphics (NUM_COLORS is defined in global.h).     */
-/*-----------------------------------------------------------------*/
+/*----------------------------------------------------------------*/
+/* Function creates a set of colours in XFORMs internal color map */
+/* for use in 2D graphics (NUM_COLORS is defined in global.h).    */
+/*----------------------------------------------------------------*/
 
 void create_colors( void )
 {
