@@ -33,10 +33,12 @@ install:
 		for file in $(scripts); do                           \
 			install -m 755 -o $(OWNER) -g $(GROUP)           \
 				$$file $(bindir)/$${file%.$(machine_name)};  \
-		done
+		done;                                                \
 	fi
 
 uninstall:
-	for file in $(scripts); do                                  \
-		-$(RM) $(RMFLAGS) $(bindir)/$${file%.$(machine_name)};  \
-	done
+	if [ -n "$(scripts)" ]; then                                    \
+		for file in $(scripts); do                                  \
+			-$(RM) $(RMFLAGS) $(bindir)/$${file%.$(machine_name)};  \
+		done;                                                       \
+	fi

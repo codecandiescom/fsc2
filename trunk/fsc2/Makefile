@@ -237,36 +237,43 @@ endif
 # machines that I know well enough - for these machines I don't have
 # to edit the Makefile all the time...
 
-INSTALL_MACHINE = install-unknown
+INSTALL_MACHINE   = install-unknown
+UNINSTALL_MACHINE = uninstall-unknown
 
 ifeq ($(machine_name),pion.anorg.chemie.uni-frankfurt.de)
-	GPIB_LIBRARY    = LLP
-	INSTALL_MACHINE = install-$(machine_name)
+	GPIB_LIBRARY      = LLP
+	INSTALL_MACHINE   = install-$(machine_name)
+	UNINSTALL_MACHINE = uninstall-$(machine_name)
 endif
 
 ifeq ($(machine_name),moebi.physik.fu-berlin.de)
-	GPIB_LIBRARY    = JTT
-	INSTALL_MACHINE = install-$(machine_name)
+	GPIB_LIBRARY      = JTT
+	INSTALL_MACHINE   = install-$(machine_name)
+	UNINSTALL_MACHINE = uninstall-$(machine_name)
 endif
 
 ifeq ($(machine_name),crowley.physik.fu-berlin.de)
-	GPIB_LIBRARY    = JTT
-	INSTALL_MACHINE = install-$(machine_name)
+	GPIB_LIBRARY      = JTT
+	INSTALL_MACHINE   = install-$(machine_name)
+	UNINSTALL_MACHINE = uninstall-$(machine_name)
 endif
 
 ifeq ($(machine_name),door.physik.fu-berlin.de)
-	GPIB_LIBRARY    = JTT
-	INSTALL_MACHINE = install-$(machine_name)
+	GPIB_LIBRARY      = JTT
+	INSTALL_MACHINE   = install-$(machine_name)
+	UNINSTALL_MACHINE = uninstall-$(machine_name)
 endif
 
 ifeq ($(machine_name),isaak.physik.fu-berlin.de)
-	GPIB_LIBRARY    = JTT
-	INSTALL_MACHINE = install-$(machine_name)
+	GPIB_LIBRARY      = JTT
+	INSTALL_MACHINE   = install-$(machine_name)
+	UNINSTALL_MACHINE = uninstall-$(machine_name)
 endif
 
 ifeq ($(machine_name),crowley.none)
-	 GPIB_LIBRARY    = JTT
-	 INSTALL_MACHINE = install-$(machine_name)
+	GPIB_LIBRARY      = JTT
+	INSTALL_MACHINE   = install-$(machine_name)
+	UNINSTALL_MACHINE = uninstall-$(machine_name)
 endif
 
 
@@ -304,14 +311,7 @@ export            # export all variables to sub-makes
 # Switch off all implicit rules
 
 .SUFFIXES:
-.PHONY: all install-strip install clean distclean pack  \
-        install-pion.anorg.chemie.uni-frankfurt.de      \
-		install-crowley.physik.fu-berlin.de             \
-		install-moebi.physik.fu-berlin.de               \
-		install-door.physik.fu-berlin.de                \
-		install-isaak.physik.fu-berlin.de               \
-		install-crowley.none                            \
-		ZIP
+.PHONY: all install-strip install uninstall clean distclean pack ZIP
 
 
 # Default rule: make the main program, the primary lexer and the modules
@@ -323,41 +323,42 @@ all:
 	$(MAKE) -C doc all
 
 
-# Install the program in bindir and all the other stuff in libdir, auxdir
-# and docdir. Finally create aliases for devices for the current machine.
+# Install the program and all the other stuff.
 
 install-strip:
 	$(MAKE) EXEC_INSTALL='$(INSTALL) -s' install
 
 install:
-	$(INSTALL) -d $(bindir)
 	$(INSTALL) -d $(libdir)
 	$(INSTALL) -d $(auxdir)
-	$(INSTALL) -d $(docdir)
 
-	$(EXEC_INSTALL) -m 6755 -o $(OWNER) -g $(GROUP) src/fsc2 $(bindir)
-	$(EXEC_INSTALL) -m  755 -o $(OWNER) -g $(GROUP) src/fsc2_clean $(bindir)
-	$(EXEC_INSTALL) -m  755 -o $(OWNER) -g $(GROUP) src/fsc2_connect $(bindir)
-	$(EXEC_INSTALL) -m  644 -o $(OWNER) -g $(GROUP) src/*.so $(libdir)
-	$(EXEC_INSTALL) -m  644 -o $(OWNER) -g $(GROUP) modules/*.so $(libdir)
+	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) $(cdir)/Functions $(libdir)
+	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) $(cdir)/Devices $(libdir)
+	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) $(adir)/*.xpm $(auxdir)
 
-	-$(RM) $(RMFLAGS) $(bindir)/fsc2_start $(bindir)/fsc2_test \
-					  $(bindir)/fsc2_load
-	$(LN) $(LNFLAGS) $(bindir)/fsc2_connect $(bindir)/fsc2_start
-	$(LN) $(LNFLAGS) $(bindir)/fsc2_connect $(bindir)/fsc2_test
-	$(LN) $(LNFLAGS) $(bindir)/fsc2_connect $(bindir)/fsc2_load
-
-	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) config/Functions $(libdir)
-	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) config/Devices $(libdir)
-	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) aux/*.xpm $(auxdir)
-
+	$(MAKE) -C src install
+	$(MAKE) -C modules install
 	$(MAKE) -C utils install
 	$(MAKE) -C scripts install
 	$(MAKE) -C doc install
-	if [ "$(INSTALL_MACHINE)" != "install-unknown" ]; then  \
-		$(MAKE) $(INSTALL_MACHINE);                         \
-	fi
 
+uninstall:
+	-$(RM) $(RMFLAGS) $(libdir)/Functions
+	-$(RM) $(RMFLAGS) $(libdir)/Devices
+	-for f in `basename $(adir)/*.xpm`; do  \
+		$(RM) $(RMFLAGS) $(auxdir)/$$f;    \
+	done
+	$(MAKE) -C src uninstall
+	$(MAKE) -C modules uninstall
+	$(MAKE) -C utils uninstall
+	$(MAKE) -C scripts uninstall
+	$(MAKE) -C doc uninstall
+	if [ -z "`ls -a $(bindir)`" ]; then  \
+		rmdir $(bindir);                 \
+	fi
+	if [ -z "`ls -a $(libdir)`" ]; then  \
+		rmdir $(libdir);                 \
+	fi
 
 # `clean' deletes all the files remaining from the compilation while
 # `distclean' also removes all executables, shared libraries and documentation
@@ -380,83 +381,6 @@ distclean:
 pack:
 	$(MAKE) distclean
 	cd ..; tar -c fsc2 | gzip -c -9 > fsc2.tgz
-
-
-# Here links to module libraries for often used devices for the different
-# spectrometers are created. If, for example, the spectrometer always uses
-# aeg_x_band.so as the driver for the magnet power supply, by creating a
-# link with the name magnet.so allows to use 'magnet' as an alternative
-# name for the power supply in EDL programs. Don't forget to delete already
-# existing links before creating new ones!
-
-install-pion.anorg.chemie.uni-frankfurt.de:
-	-$(RM) $(RMFLAGS) $(libdir)/dg2020.so
-	$(LN) $(LNFLAGS)  $(libdir)/dg2020_f.so $(libdir)/dg2020.so
-	chown $(OWNER).$(GROUP) $(libdir)/dg2020.so
-	-$(RM) $(RMFLAGS) $(libdir)/pulser.so
-	$(LN) $(LNFLAGS) $(libdir)/dg2020_f.so $(libdir)/pulser.so
-	chown $(OWNER).$(GROUP) $(libdir)/pulser.so
-	-$(RM) $(RMFLAGS) $(libdir)/s_band.so
-	$(LN) $(LNFLAGS) $(libdir)/aeg_s_band.so $(libdir)/s_band.so
-	chown $(OWNER).$(GROUP) $(libdir)/s_band.so
-	-$(RM) $(RMFLAGS) $(libdir)/magnet.so
-	$(LN) $(LNFLAGS) $(libdir)/aeg_s_band.so $(libdir)/magnet.so
-	chown $(OWNER).$(GROUP) $(libdir)/magnet.so
-	-$(RM) $(RMFLAGS) $(libdir)/gaussmeter.so
-	$(LN) $(LNFLAGS) $(libdir)/bh15.so $(libdir)/gaussmeter.so
-	chown $(OWNER).$(GROUP) $(libdir)/gaussmeter.so
-	-$(RM) $(RMFLAGS) $(libdir)/lockin.so
-	$(LN) $(LNFLAGS) $(libdir)/sr510.so $(libdir)/lockin.so
-	chown $(OWNER).$(GROUP) $(libdir)/lockin.so
-
-install-crowley.physik.fu-berlin.de:
-	-$(RM) $(RMFLAGS) $(libdir)/gaussmeter.so
-	$(LN) $(LNFLAGS) $(libdir)/er035m_sas.so $(libdir)/gaussmeter.so
-	chown $(OWNER).$(GROUP) $(libdir)/gaussmeter.so
-	-$(RM) $(RMFLAGS) $(libdir)/synthesizer.so
-	$(LN) $(LNFLAGS) $(libdir)/hp8647a.so $(libdir)/synthesizer.so
-	chown $(OWNER).$(GROUP) $(libdir)/synthesizer.so
-	-$(RM) $(RMFLAGS) $(libdir)/boxcar.so
-	$(LN) $(LNFLAGS) $(libdir)/egg4402so $(libdir)/boxcar.so
-	chown $(OWNER).$(GROUP) $(libdir)/boxcar.so
-	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) config/hp8647a.table $(libdir)
-
-install-moebi.physik.fu-berlin.de:
-	-$(RM) $(RMFLAGS) $(libdir)/pulser.so
-	$(LN) $(LNFLAGS) $(libdir)/dg2020_b.so $(libdir)/pulser.so
-	chown fsc2.fsc2 $(libdir)/pulser.so
-	-$(RM) $(RMFLAGS) $(libdir)/magnet.so
-	$(LN) $(LNFLAGS) $(libdir)/aeg_x_band.so $(libdir)/magnet.so
-	chown fsc2.fsc2 $(libdir)/magnet.so
-	-$(RM) $(RMFLAGS) $(libdir)/gaussmeter.so
-	$(LN) $(LNFLAGS) $(libdir)/er035m_s.so $(libdir)/gaussmeter.so
-	chown fsc2.fsc2 $(libdir)/gaussmeter.so
-
-install-door.physik.fu-berlin.de:
-	-$(RM) $(RMFLAGS) $(libdir)/hfs9003.so
-	$(LN) $(LNFLAGS) $(libdir)/hfs9000.so $(libdir)/hfs9003.so
-	chown fsc2.fsc2 $(libdir)/hfs9003.so
-	-$(RM) $(RMFLAGS) $(libdir)/w_band.so
-	$(LN) $(LNFLAGS) $(libdir)/keithley228a.so $(libdir)/w_band.so
-	chown fsc2.fsc2 $(libdir)/w_band.so
-	-$(RM) $(RMFLAGS) $(libdir)/magnet.so
-	$(LN) $(LNFLAGS) $(libdir)/keithley228a.so $(libdir)/magnet.so
-	chown fsc2.fsc2 $(libdir)/magnet.so
-	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) config/hp8647a.table $(libdir)
-
-install-isaak.physik.fu-berlin.de:
-	-$(RM) $(RMFLAGS) $(libdir)/pulser.so
-	$(LN) $(LNFLAGS) $(libdir)/dg2020_b.so $(libdir)/pulser.so
-	chown fsc2.fsc2 $(libdir)/pulser.so
-	-$(RM) $(RMFLAGS) $(libdir)/magnet.so
-	$(LN) $(LNFLAGS) $(libdir)/aeg_x_band.so $(libdir)/magnet.so
-	chown fsc2.fsc2 $(libdir)/magnet.so
-	-$(RM) $(RMFLAGS) $(libdir)/gaussmeter.so
-	$(LN) $(LNFLAGS) $(libdir)/er035m_s.so $(libdir)/gaussmeter.so
-	chown fsc2.fsc2 $(libdir)/gaussmeter.so
-
-install-crowley.none:
-	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) config/hp8647a.table $(libdir)
 
 
 # Create zipped tarball and write it to the ZIP drive (at home or on isaak

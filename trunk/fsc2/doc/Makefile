@@ -55,12 +55,12 @@ fsc2.html: $(docs)
 ps: fsc2.ps
 
 fsc2.ps: $(docs) $(patsubst %.png,%.eps,$(figures))
-	@if [ "`eval tex -help 2>/dev/null`" -a \
-		 "`eval dvips --help 2>/dev/null`" ]; then \
-		./texi2dvi -c fsc2.texi; \
-		dvips fsc2.dvi; \
-	else \
-		echo \
+	@if [ "`eval tex -help 2>/dev/null`" -a         \
+		 "`eval dvips --help 2>/dev/null`" ]; then  \
+		./texi2dvi -c fsc2.texi;                    \
+		dvips fsc2.dvi;                             \
+	else                                            \
+		echo                                        \
 		"Can't make PS documentation, programs tex and/or dvips not found."; \
 	fi
 
@@ -77,7 +77,7 @@ endif
 pdf: fsc2.pdf
 
 fsc2.pdf: $(docs) $(patsubst %.png,%.pdf,$(figures))
-	@if [ "`eval pdftex --help 2>/dev/null`" ]; then \
+	-@if [ "`eval pdftex --help 2>/dev/null`" ]; then \
 		./texi2dvi --pdf -c fsc2.texi; \
 	else \
 		echo "Can't make PDF documentation, program 'pdftex' not found."; \
@@ -98,6 +98,7 @@ endif
 
 install:
 	$(INSTALL) -d $(docdir)
+	$(INSTALL) -d $(infodir)
 	$(INSTALL) -d $(mandir)/man1
 	$(INSTALL) -m 444 fsc2.1.gz $(mandir)/man1
 	$(INSTALL) -m 444 -o $(OWNER) -g $(GROUP) fsc2*.html $(docdir)
@@ -129,6 +130,16 @@ uninstall:
 	-$(RM) $(RMFLAGS) $(docdir)/fsc2.pdf
 	-install-info --delete fsc2 $(infodir)/dir
 	-$(RM) $(RMFLAGS) $(infodir)/fsc2.info*.gz
+	if [ -z "`ls -a $(docdir)`" ]; then   \
+		rmdir $(coddir);                  \
+	fi
+	if [ -z "`ls -a $(infodir)`" ]; then  \
+		rmdir $(coddir);                  \
+	fi
+	if [ -z "`ls -a $(mandir)`" ]; then   \
+		rmdir $(coddir);                  \
+	fi
+
 
 # How to clean up the mess we created
 
