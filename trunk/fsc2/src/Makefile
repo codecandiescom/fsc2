@@ -152,7 +152,7 @@ gpib_setup:
 		fi;                                                          \
 	else                                                             \
 		echo "****************************************";             \
-		echo "*   Make not correctly configured!     *";             \
+		echo "*   Make not configured correctly!     *";             \
 		echo "****************************************";             \
 		exit 2;                                                      \
 	fi
