@@ -79,7 +79,7 @@ Var *f_stopsim( Var *v )
 
 Var *f_int( Var *v )
 {
-	Var *new_var;
+	Var *new_var = NULL;
 	ssize_t i;
 	long *dest;
 	double *src;
@@ -142,7 +142,7 @@ Var *f_int( Var *v )
 
 Var *f_float( Var *v )
 {
-	Var *new_var;
+	Var *new_var = NULL;
 	ssize_t i;
 	double *dest;
 	long *src;
@@ -199,7 +199,7 @@ Var *f_float( Var *v )
 
 Var *f_round( Var *v )
 {
-	Var *new_var;
+	Var *new_var = NULL;
 	ssize_t i;
 	long *dest;
 	double *src;
@@ -263,7 +263,7 @@ Var *f_round( Var *v )
 
 Var *f_floor( Var *v )
 {
-	Var *new_var;
+	Var *new_var = NULL;
 	ssize_t i;
 	long *dest;
 	double *src;
@@ -326,7 +326,7 @@ Var *f_floor( Var *v )
 
 Var *f_ceil( Var *v )
 {
-	Var *new_var;
+	Var *new_var = NULL;
 	ssize_t i;
 	long *dest;
 	double *src;
@@ -389,7 +389,7 @@ Var *f_ceil( Var *v )
 
 Var *f_abs( Var *v )
 {
-	Var *new_var;
+	Var *new_var = NULL;
 	ssize_t i;
 	long *lsrc, *ldest;
 	double *dsrc, *ddest;
@@ -608,7 +608,7 @@ Var *f_lmin( Var *v )
 
 Var *f_sin( Var *v )
 {
-	Var *new_var;
+	Var *new_var = NULL;
 	ssize_t i;
 	long *lsrc;
 	double *dest, *dsrc;
@@ -667,7 +667,7 @@ Var *f_sin( Var *v )
 
 Var *f_cos( Var *v )
 {
-	Var *new_var;
+	Var *new_var = NULL;
 	ssize_t i;
 	long *lsrc;
 	double *dest, *dsrc;
@@ -727,7 +727,7 @@ Var *f_cos( Var *v )
 Var *f_tan( Var *v )
 {
 	double res;
-	Var *new_var;
+	Var *new_var = NULL;
 	ssize_t i;
 	long *lsrc;
 	double *dsrc, *dest;
@@ -796,7 +796,7 @@ Var *f_tan( Var *v )
 Var *f_asin( Var *v )
 {
 	double arg;
-	Var *new_var;
+	Var *new_var = NULL;
 	ssize_t i;
 	long *lsrc;
 	double *dsrc, *dest;
@@ -872,7 +872,7 @@ Var *f_asin( Var *v )
 Var *f_acos( Var *v )
 {
 	double arg;
-	Var *new_var;
+	Var *new_var = NULL;
 	ssize_t i;
 	long *lsrc;
 	double *dsrc, *dest;
@@ -947,7 +947,7 @@ Var *f_acos( Var *v )
 
 Var *f_atan( Var *v )
 {
-	Var *new_var;
+	Var *new_var = NULL;
 	ssize_t i;
 	long *lsrc;
 	double *dsrc, *dest;
@@ -1003,7 +1003,7 @@ Var *f_atan( Var *v )
 Var *f_sinh( Var *v )
 {
 	double res;
-	Var *new_var;
+	Var *new_var = NULL;
 	ssize_t i;
 	long *lsrc;
 	double *dsrc, *dest;
@@ -1070,7 +1070,7 @@ Var *f_sinh( Var *v )
 Var *f_cosh( Var *v )
 {
 	double res;
-	Var *new_var;
+	Var *new_var = NULL;
 	ssize_t i;
 	long *lsrc;
 	double *dsrc, *dest;
@@ -1136,7 +1136,7 @@ Var *f_cosh( Var *v )
 
 Var *f_tanh( Var *v )
 {
-	Var *new_var;
+	Var *new_var = NULL;
 	ssize_t i;
 	long *lsrc;
 	double *dsrc, *dest;
@@ -1191,7 +1191,7 @@ Var *f_tanh( Var *v )
 
 Var *f_asinh( Var *v )
 {
-	Var *new_var;
+	Var *new_var = NULL;
 	ssize_t i;
 	long *lsrc;
 	double *dsrc, *dest;
@@ -1280,7 +1280,7 @@ Var *f_asinh( Var *v )
 
 Var *f_acosh( Var *v )
 {
-	Var *new_var;
+	Var *new_var = NULL;
 	ssize_t i;
 	long *lsrc;
 	double *dsrc, *dest;
@@ -1361,7 +1361,7 @@ Var *f_acosh( Var *v )
 
 Var *f_atanh( Var *v )
 {
-	Var *new_var;
+	Var *new_var = NULL;
 	ssize_t i;
 	long *lsrc;
 	double *dsrc, *dest;
@@ -1440,7 +1440,7 @@ Var *f_atanh( Var *v )
 
 Var *f_exp( Var *v )
 {
-	Var *new_var;
+	Var *new_var = NULL;
 	double res;
 	ssize_t i;
 	long *lsrc;
@@ -1514,7 +1514,7 @@ Var *f_exp( Var *v )
 Var *f_ln( Var *v )
 {
 	double arg, res;
-	Var *new_var;
+	Var *new_var = NULL;
 	ssize_t i;
 	long *lsrc;
 	double *dsrc, *dest;
@@ -1599,7 +1599,7 @@ Var *f_ln( Var *v )
 Var *f_log( Var *v )
 {
 	double arg, res;
-	Var *new_var;
+	Var *new_var = NULL;
 	ssize_t i;
 	long *lsrc;
 	double *dsrc, *dest;
@@ -1684,7 +1684,7 @@ Var *f_log( Var *v )
 Var *f_sqrt( Var *v )
 {
 	double arg;
-	Var *new_var;
+	Var *new_var = NULL;
 	ssize_t i;
 	long *lsrc;
 	double *dsrc, *dest;
@@ -1763,7 +1763,7 @@ Var *f_random( Var *v )
 	long len;
 	long i;
 	double *arr;
-	Var *new_var;
+	Var *new_var = NULL;
 
 
 	if ( v == NULL )
@@ -1799,7 +1799,7 @@ Var *f_grand( Var *v )
 	long len;
 	long i;
 	double *arr;
-	Var *new_var;
+	Var *new_var = NULL;
 
 
 	if ( v == NULL )
@@ -2137,7 +2137,7 @@ Var *f_dim( Var *v )
 
 Var *f_size( Var *v )
 {
-	Var *new_var;
+	Var *new_var = NULL;
 
 
 	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
@@ -2151,7 +2151,7 @@ Var *f_size( Var *v )
 			break;
 
 		case INT_ARR : case FLOAT_ARR : case INT_REF : case FLOAT_REF :
-			new_war = vars_push( INT_VAR, ( long ) v->len );
+			new_var = vars_push( INT_VAR, ( long ) v->len );
 			break;
 
 		default :
@@ -2453,7 +2453,7 @@ Var *f_slice( Var *v )
 {
 	long start;
 	ssize_t len;
-	Var *new_var;
+	Var *new_var = NULL;
 	ssize_t old_len;
 	Var **old_vptr;
 
@@ -2548,7 +2548,7 @@ Var *f_slice( Var *v )
 
 Var *f_square( Var *v )
 {
-	Var *new_var;
+	Var *new_var = NULL;
 	ssize_t i;
 	long *lsrc, *ldest;
 	double *dsrc, *ddest;
@@ -2634,7 +2634,7 @@ Var *f_square( Var *v )
 
 Var *f_G2T( Var *v )
 {
-	Var *new_var;
+	Var *new_var = NULL;
 	ssize_t i;
 	long *lsrc, *ldest;
 	double *dsrc, *ddest;
@@ -2693,7 +2693,7 @@ Var *f_G2T( Var *v )
 
 Var *f_T2G( Var *v )
 {
-	Var *new_var;
+	Var *new_var = NULL;
 	ssize_t i;
 	long *lsrc, *ldest;
 	double *dsrc, *ddest;
@@ -2752,7 +2752,7 @@ Var *f_T2G( Var *v )
 
 Var *f_C2K( Var *v )
 {
-	Var *new_var;
+	Var *new_var = NULL;
 	ssize_t i;
 	long *lsrc, *ldest;
 	double *dsrc, *ddest;
@@ -2812,7 +2812,7 @@ Var *f_C2K( Var *v )
 
 Var *f_K2C( Var *v )
 {
-	Var *new_var;
+	Var *new_var = NULL;
 	ssize_t i;
 	long *lsrc, *ldest;
 	double *dsrc, *ddest;
@@ -2872,7 +2872,7 @@ Var *f_K2C( Var *v )
 
 Var *f_D2R( Var *v )
 {
-	Var *new_var;
+	Var *new_var = NULL;
 	ssize_t i;
 	long *lsrc, *ldest;
 	double *dsrc, *ddest;
@@ -2932,7 +2932,7 @@ Var *f_D2R( Var *v )
 
 Var *f_R2D( Var *v )
 {
-	Var *new_var;
+	Var *new_var = NULL;
 	ssize_t i;
 	long *lsrc, *ldest;
 	double *dsrc, *ddest;
@@ -2992,7 +2992,7 @@ Var *f_R2D( Var *v )
 
 Var *f_WL2WN( Var *v )
 {
-	Var *new_var;
+	Var *new_var = NULL;
 	ssize_t i;
 	long *lsrc, *ldest;
 	double *dsrc, *ddest;
@@ -3075,7 +3075,7 @@ Var *f_WL2WN( Var *v )
 
 Var *f_WN2WL( Var *v )
 {
-	Var *new_var;
+	Var *new_var = NULL;
 	ssize_t i;
 	long *lsrc, *ldest;
 	double *dsrc, *ddest;
@@ -3158,7 +3158,7 @@ Var *f_WN2WL( Var *v )
 
 Var *f_F2WN( Var *v )
 {
-	Var *new_var;
+	Var *new_var = NULL;
 	ssize_t i;
 	long *lsrc, *ldest;
 	double *dsrc, *ddest;
@@ -3217,7 +3217,7 @@ Var *f_F2WN( Var *v )
 
 Var *f_WN2F( Var *v )
 {
-	Var *new_var;
+	Var *new_var = NULL;
 	ssize_t i;
 	long *lsrc, *ldest;
 	double *dsrc, *ddest;
