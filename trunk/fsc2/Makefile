@@ -99,6 +99,7 @@ all:
 	mv src/fsc2 .
 	mv src/fsc2_clean .
 	mv modules/*.so .
+	$(MAKE) -C utils all
 	$(MAKE) -C doc all
 
 
@@ -111,17 +112,18 @@ install:
 	install -d $(libdir)
 	install -d $(auxdir)
 	install -d $(docdir)
+	$(MAKE) -c utils install
 	install -m 755 -o fsc2 -g fsc2 -s fsc2_clean $(libdir)
 	install -m 644 -o fsc2 -g fsc2 Functions $(libdir)
 	install -m 644 -o fsc2 -g fsc2 Devices $(libdir)
 	install -m 644 -o fsc2 -g fsc2 -s *.so $(libdir)
 	install -m 644 -o fsc2 -g fsc2 hp8647a.table $(libdir)
 	install -m 644 -o fsc2 -g fsc2 aux/*.xpm $(auxdir)
+	$(MAKE) install-$(shell hostname -f)
 	install -m 444 -o fsc2 -g fsc2 doc/fsc2.html $(docdir)
 	install -m 444 -o fsc2 -g fsc2 doc/fsc2_*.html $(docdir)
 	install -m 444 -o fsc2 -g fsc2 doc/fsc2.ps $(docdir)
 	install -m 444 -o fsc2 -g fsc2 doc/fsc2.pdf $(docdir)
-	$(MAKE) install-$(shell hostname -f)
 
 
 install-pion.anorg.chemie.uni-frankfurt.de:
@@ -144,7 +146,7 @@ install-pion.anorg.chemie.uni-frankfurt.de:
 	ln -s $(libdir)/tds520a.so $(libdir)/tds520c.so
 	chown fsc2.fsc2 $(libdir)/tds520c.so
 
-install-crowley.fu-berlin.de:
+install-crowley.physik.fu-berlin.de:
 	rm -rf $(libdir)/gaussmeter.so $(libdir)/synthesizer.so \
 		$(libdir)/boxcar.so
 	ln -s $(libdir)/er035m_sas.so $(libdir)/gaussmeter.so
@@ -154,7 +156,7 @@ install-crowley.fu-berlin.de:
 	ln -s $(libdir)/egg4402so $(libdir)/boxcar.so
 	chown fsc2.fsc2 $(libdir)/boxcar.so
 
-install-moebi.fu-berlin.de:
+install-moebi.physik.fu-berlin.de:
 	rm -rf $(libdir)/pulser.so $(libdir)/magnet.so $(libdir)/gaussmeter.so
 	ln -s $(libdir)/dg2020_b.so $(libdir)/pulser.so
 	chown fsc2.fsc2 $(libdir)/pulser.so
@@ -202,6 +204,7 @@ clean:
 
 distclean:
 	$(MAKE) -C doc distclean
+	$(MAKE) -C utils distclean
 	$(MAKE) clean
 	$(RM) $(RMFLAGS) fsc2 fsc2_clean *.so *~
 
