@@ -322,13 +322,17 @@ characters in between).
 @item @code{A}                @tab Ampere
 @item @code{cm^-1}            @tab wave number, i.e.@: inverse of @code{cm}
 @item @code{dB}               @tab Decibel
+@item @code{dBm}              @tab Decibel (relative to 1 mV)
 @item @code{db}               @tab Decibel
+@item @code{dbm}              @tab Decibel (relative to 1 mV)
 @item @code{G}                @tab Gauss
 @item @code{Hz}               @tab Hertz
 @item @code{K}                @tab Kelvin
 @item @code{kA}               @tab Kilo-Ampere
 @item @code{kdB}              @tab Kilo-Dezibel
+@item @code{kdBm}             @tab Kilo-Dezibel  (relative to 1 mV)
 @item @code{kdb}              @tab Kilo-Dezibel
+@item @code{kdbm}             @tab Kilo-Dezibel (relative to 1 mV)
 @item @code{kG}               @tab Kilo-Gauss
 @item @code{kHz}              @tab Kilo-Hertz
 @item @code{kK}               @tab Kilo-Kelvin
@@ -338,7 +342,9 @@ characters in between).
 @item @code{m}                @tab Meter
 @item @code{MA}               @tab Mega-Ampere
 @item @code{MdB}              @tab Mega-Dezibel
+@item @code{MdBm}             @tab Mega-Dezibel (relative to 1 mV)
 @item @code{Mdb}              @tab Mega-Dezibel
+@item @code{Mdbm}             @tab Mega-Dezibel (relative to 1 mV)
 @item @code{MG}               @tab Mega-Gauss
 @item @code{MHz}              @tab Mega-Hertz
 @item @code{MK}               @tab Mega-Kelvin
@@ -347,7 +353,9 @@ characters in between).
 @item @code{MV}               @tab Mega-Volt
 @item @code{mA}               @tab Milli-Ampere
 @item @code{mdB}              @tab Milli-Dezibel
+@item @code{mdBm}             @tab Milli-Dezibel (relative to 1 mV)
 @item @code{mdb}              @tab Milli-Dezibel
+@item @code{mdbm}             @tab Milli-Dezibel (relative to 1 mV)
 @item @code{mG}               @tab Milli-Gauss
 @item @code{mHz}              @tab Milli-Hertz
 @item @code{mk}               @tab Milli-Kelvin
@@ -357,7 +365,9 @@ characters in between).
 @item @code{mV}               @tab Milli-Volt
 @item @code{nA}               @tab Nano-Ampere
 @item @code{ndB}              @tab Nano-Dezibel
+@item @code{ndBm}             @tab Nano-Dezibel (relative to 1 mV)
 @item @code{ndb}              @tab Nano-Dezibel
+@item @code{ndbm}             @tab Nano-Dezibel (relative to 1 mV)
 @item @code{nG}               @tab Nano-Gauss
 @item @code{nHz}              @tab Nano-Hertz
 @item @code{nK}               @tab Nano-Kelvin
@@ -370,7 +380,9 @@ characters in between).
 @item @code{uA}               @tab Micro-Ampere
 @item @code{uC}               @tab Micro-Clesius
 @item @code{udB}              @tab Micro-Dezibel
+@item @code{udBm}             @tab Micro-Dezibel (relative to 1 mV)
 @item @code{udb}              @tab Micro-Dezibel
+@item @code{udbm}             @tab Micro-Dezibel (relative to 1 mV)
 @item @code{uG}               @tab Micro-Gauss
 @item @code{uHz}              @tab Micro-Hertz
 @item @code{uK}               @tab Micro-Kelvin

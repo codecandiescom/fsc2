@@ -119,7 +119,7 @@ INT      [0-9]+
 EXPO     [Ee][+-]?{INT}
 FLOAT    ((([0-9]+"."[0-9]*)|([0-9]*"."[0-9]+)){EXPO}?)|({INT}{EXPO})
 
-UNIT     ("m"|"s"|"G"|"V"|"A"|"Hz"|"dB"|"db"|"K")
+UNIT     ("m"|"s"|"G"|"V"|"A"|"Hz"|"dBm"|"dB"|"dbm"|"db"|"K")
 
 INANO    {INT}[\t \r]*"n"{UNIT}
 IMICRO   {INT}[\t \r]*"u"{UNIT}
