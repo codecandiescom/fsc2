@@ -77,7 +77,7 @@ INT      [0-9]+
 EXPO     [EDed][+-]?{INT}
 FLOAT    ((([0-9]+"."[0-9]*)|([0-9]*"."[0-9]+)){EXPO}?)|({INT}{EXPO})
 
-UNIT     ("s"|"G"|"T"|"V"|"A"|"Hz")
+UNIT     ("s"|"G"|"V"|"A"|"Hz")
 
 INANO    {INT}[\t \r]*"n"{UNIT}
 IMICRO   {INT}[\t \r]*"u"{UNIT}
@@ -276,70 +276,40 @@ KEEP    [^\t" \n(\/*),;:=%\^\-\+]+
 
             /* here some special handling of numbers with units */
 
-{INANO}/(;|,)   unit_spec( yytext, 0, -9 );
-{INANO}         unit_spec( yytext, 0, -9 );
-{IMICRO}/(;|,)  unit_spec( yytext, 0, -6 );
-{IMICRO}        unit_spec( yytext, 0, -6 );
-{IMILLI}/(;|,)  unit_spec( yytext, 0, -3 );
-{IMILLI}        unit_spec( yytext, 0, -3 );
-{INONE}/(;|,)   unit_spec( yytext, 0, 0 );
-{INONE}         unit_spec( yytext, 0, 0 );
-{IKILO}/(;|,)   unit_spec( yytext, 0, 3 );
-{IKILO}         unit_spec( yytext, 0, 3 );
-{IMEGA}/(;|,)   unit_spec( yytext, 0, 6 );
-{IMEGA}         unit_spec( yytext, 0, 6 );
+{INANO}/[^a-zA-z_]   unit_spec( yytext, 0, -9 );
+{IMICRO}/[^a-zA-z_]  unit_spec( yytext, 0, -6 );
+{IMILLI}/[^a-zA-z_]  unit_spec( yytext, 0, -3 );
+{INONE}/[^a-zA-z_]   unit_spec( yytext, 0, 0 );
+{IKILO}/[^a-zA-z_]   unit_spec( yytext, 0, 3 );
+{IMEGA}/[^a-zA-z_]   unit_spec( yytext, 0, 6 );
 
-{FNANO}/(;|,)   unit_spec( yytext, 1, -9 );
-{FNANO}         unit_spec( yytext, 1, -9 );
-{FMICRO}/(;|,)  unit_spec( yytext, 1, -6 );
-{FMICRO}        unit_spec( yytext, 1, -6 );
-{FMILLI}/(;|,)  unit_spec( yytext, 1, -3 );
-{FMILLI}        unit_spec( yytext, 1, -3 );
-{FNONE}/(;|,)   unit_spec( yytext, 1, 0 );
-{FNONE}         unit_spec( yytext, 1, 0 );
-{FKILO}/(;|,)   unit_spec( yytext, 1, 3 );
-{FKILO}         unit_spec( yytext, 1, 3 );
-{FMEGA}/(;|,)   unit_spec( yytext, 1, 6 );
-{FMEGA}         unit_spec( yytext, 1, 6 );
+{FNANO}/[^a-zA-z_]   unit_spec( yytext, 1, -9 );
+{FMICRO}/[^a-zA-z_]  unit_spec( yytext, 1, -6 );
+{FMILLI}/[^a-zA-z_]  unit_spec( yytext, 1, -3 );
+{FNONE}/[^a-zA-z_]   unit_spec( yytext, 1, 0 );
+{FKILO}/[^a-zA-z_]   unit_spec( yytext, 1, 3 );
+{FMEGA}/[^a-zA-z_]   unit_spec( yytext, 1, 6 );
 
-{INTs}/(;|,)    unit_spec( yytext, 0, -5 );
-{INTs}          unit_spec( yytext, 0, -5 );
-{IUT}/(;|,)     unit_spec( yytext, 0, -2 );
-{IUT}           unit_spec( yytext, 0, -2 );
-{IMT}/(;|,)     unit_spec( yytext, 0, 1 );
-{IMT}           unit_spec( yytext, 0, 1 );
-{IT}/(;|,)      unit_spec( yytext, 0, 4 );
-{IT}            unit_spec( yytext, 0, 4 );
-{FNT}/(;|,)     unit_spec( yytext, 1, -5 );
-{FNT}           unit_spec( yytext, 1, -5 );
-{FUT}/(;|,)     unit_spec( yytext, 1, -2 );
-{FUT}           unit_spec( yytext, 1, -2 );
-{FMT}/(;|,)     unit_spec( yytext, 1, 1 );
-{FMT}           unit_spec( yytext, 1, 1 );
-{FT}/(;|,)      unit_spec( yytext, 1, 4 );
-{FT}            unit_spec( yytext, 1, 4 );
+{INTs}/[^a-zA-z_]    unit_spec( yytext, 0, -5 );
+{IUT}/[^a-zA-z_]     unit_spec( yytext, 0, -2 );
+{IMT}/[^a-zA-z_]     unit_spec( yytext, 0, 1 );
+{IT}/[^a-zA-z_]      unit_spec( yytext, 0, 4 );
+{FNT}/[^a-zA-z_]     unit_spec( yytext, 1, -5 );
+{FUT}/[^a-zA-z_]     unit_spec( yytext, 1, -2 );
+{FMT}/[^a-zA-z_]     unit_spec( yytext, 1, 1 );
+{FT}/[^a-zA-z_]      unit_spec( yytext, 1, 4 );
 
-"nT"/(,|;)      printf( "\x4ntesla" );
-"nT"            printf( "\x4ntesla" );
-"uT"/(;|,)      printf( "\x4utesla" );
-"uT"            printf( "\x4utesla" );
-"mT"/(;|,)      printf( "\x4mtesla" );
-"mT"            printf( "\x4mtesla" );
-"T"/(;|,)       printf( "\x4tesla" );
-"T"             printf( "\x4tesla" );
+"nT"/[^a-zA-z_]      printf( "\x4ntesla" );
+"uT"/[^a-zA-z_]      printf( "\x4utesla" );
+"mT"/[^a-zA-z_]      printf( "\x4mtesla" );
+"T"/[^a-zA-z_]       printf( "\x4tesla" );
 
-"n"{UNIT}/(,|;) printf( "\x4nunit" );
-"n"{UNIT}       printf( "\x4nunit" );
-"u"{UNIT}/(,|;) printf( "\x4uunit" );
-"u"{UNIT}       printf( "\x4uunit" );
-"m"{UNIT}/(,|;) printf( "\x4munit" );
-"m"{UNIT}       printf( "\x4munit" );
-{UNIT}/(,|;)
-{UNIT}
-"k"{UNIT}/(,|;) printf( "\x4kunit" );
-"k"{UNIT}       printf( "\x4kunit" );
-"M"{UNIT}/(,|;) printf( "\x4megunit" );
-"M"{UNIT}       printf( "\x4megunit" );
+"n"{UNIT}/[^a-zA-z_] printf( "\x4nunit" );
+"u"{UNIT}/[^a-zA-z_] printf( "\x4uunit" );
+"m"{UNIT}/[^a-zA-z_] printf( "\x4munit" );
+{UNIT}/[^a-zA-z_]
+"k"{UNIT}/[^a-zA-z_] printf( "\x4kunit" );
+"M"{UNIT}/[^a-zA-z_] printf( "\x4megunit" );
 
 			/* all the rest is simply copied to the output */
 

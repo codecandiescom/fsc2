@@ -38,31 +38,41 @@
 
 
 
-typedef struct {
-	int self;
+typedef struct _F_ {
+	int self;                    // the functions number
 
-	bool is_used;                // function has been mentioned in ASSIGNMENTS
-	bool is_needed;              // functin has been assigned pulses
+	bool is_used;                // set if the function has been declared in
+	                             // the ASSIGNMENTS section
+	bool is_needed;              // set if the function has been assigned
+                                 // pulses
 
 	struct _P_ *pod;             // points to the pod assigned to the function
 	struct _P_ *pod2;            // points to the second pod assigned to the 
 	                             // function (phase functions only)
 
 	int num_channels;            // number of channels assigned to function
+	int num_needed_channels;     // number of channels really needed
 	struct _C_ *channel[ MAX_CHANNELS ];
 
 	int num_pulses;              // number of pulses assigned to the function
 	struct _p_ **pulses;         // list of pulse pointers
 
-	bool is_inverted;
+	struct _F_ *phase_func;      // for phase functions here's stored which
+	                             // function it's going to take care of while
+	                             // for normal functions it's a pointer to the
+	                             // phase function responsible for it.
+
+	bool is_inverted;            // if set polarity is inverted
 
 	Ticks delay;                 // delay for the function/pod combination
 	bool is_delay;
 
-	double high_level;
-	double low_level;
+	double high_level;           // high and low voltage levels for the pod(s)
+	double low_level;            // associated with the fucntion
+
 	bool is_high_level;
 	bool is_low_level;
+
 } FUNCTION;
 
 
@@ -95,6 +105,7 @@ typedef struct
 	POD pod[ MAX_PODS ];
 	CHANNEL channel[ MAX_CHANNELS ];
 
+	int needed_channels;
 } DG2020;
 
 
@@ -149,6 +160,8 @@ static bool set_trig_in_level( double voltage );
 static bool set_trig_in_slope( int slope );
 static bool set_repeat_time( double time );
 
+static bool set_phase_reference( int phase, int function );
+
 static bool new_pulse( long pnum );
 static bool set_pulse_function( long pnum, int function );
 static bool set_pulse_position( long pnum, double time );
@@ -178,4 +191,6 @@ static void check_consistency( void );
 
 
 static void basic_pulse_check( void );
-static void basic_function_check( void );
+static void basic_functions_check( void );
+static void distribute_channels( void );
+static CHANNEL *get_next_free_channel( void );
