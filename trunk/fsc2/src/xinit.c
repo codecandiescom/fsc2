@@ -73,7 +73,7 @@ FL_resource xresources[ N_APP_OPT ] = {
 /* and creates all the forms needed by the program.*/
 /*-------------------------------------------------*/
 
-bool xforms_init( int *argc, char *argv[] )
+bool xforms_init( int *argc, char *argv[ ] )
 {
 	Display *display;
 	FL_Coord h, H;
@@ -93,6 +93,12 @@ bool xforms_init( int *argc, char *argv[] )
 	if ( ( display = fl_initialize( argc, argv, "Fsc2", app_opt, N_APP_OPT ) )
 		 == NULL )
 		return FAIL;
+
+	if ( argc != 1 )
+	{
+		fprintf( stderr, "Unknown option \"%s\".\n", argv[ 1 ] );
+		usage( );
+	}
 
 	fl_get_app_resources( xresources, N_APP_OPT );
 
@@ -124,7 +130,6 @@ bool xforms_init( int *argc, char *argv[] )
 	fl_set_tooltip_color( FL_BLACK, FL_YELLOW );
 
 	fl_disable_fselector_cache( 1 );
-//	fl_set_fselector_placement( FL_PLACE_MOUSE | FL_FREE_SIZE );
 	fl_set_fselector_border( FL_TRANSIENT );
 
 	/* Set default font sizes */
