@@ -42,7 +42,7 @@ Var *reset_field( Var *v );
 static double aeg_x_band_field_check( double field, bool *err_flag );
 static bool magnet_init( void );
 static bool magnet_goto_field( double field, double error );
-static bool magnet_goto_field_rec( double field, int rec );
+static bool magnet_goto_field_rec( double field, double error, int rec );
 static void magnet_sweep( int dir );
 static bool magnet_do( int command );
 
@@ -513,7 +513,7 @@ Var *reset_field( Var *v )
 		return vars_push( FLOAT_VAR, magnet.target_field );
 	}
 
-	magnet_goto_field( magnet.field );
+	magnet_goto_field( magnet.field, 0.0 );
 	return vars_push( FLOAT_VAR, magnet.act_field );
 }
 
@@ -766,7 +766,7 @@ try_again:
 	/* Finally using this ratio we go to the start field */
 
 	if ( magnet.is_field )
-		return magnet_goto_field( magnet.field );
+		return magnet_goto_field( magnet.field, 0.0 );
 	else
 		return OK;
 
@@ -777,9 +777,9 @@ try_again:
 /* This just a wrapper to hide the recursiveness of magnet_goto_field_rec() */
 /*--------------------------------------------------------------------------*/
 
-bool magnet_goto_field( double field )
+bool magnet_goto_field( double field, double error )
 {
-	if ( ! magnet_goto_field_rec( field, 0 ) )
+	if ( ! magnet_goto_field_rec( field, doube error, 0 ) )
 		return FAIL;
 
 	magnet.act_field = magnet.target_field = magnet.meas_field;
@@ -790,7 +790,7 @@ bool magnet_goto_field( double field )
 /*-----------------------------------------------------------------------*/
 /*-----------------------------------------------------------------------*/
 
-bool magnet_goto_field_rec( double field, int rec )
+bool magnet_goto_field_rec( double field, double error, int rec )
 {
 	double mini_steps;
 	int steps;
@@ -880,8 +880,11 @@ bool magnet_goto_field_rec( double field, int rec )
 	/* Deviation from target field has to be no more than `max_deviation'
 	   otherwise try another (hopefully smaller) step */
 
-	if ( fabs( field - magnet.meas_field ) > magnet.max_deviation &&
-		 ! magnet_goto_field_rec( field, 1 ) )
+	max_dev = magnet.max_deviation > fabs( error ) ?
+		      magnet.max_deviation : error;
+
+	if ( fabs( field - magnet.meas_field ) > max_dev &&
+		 ! magnet_goto_field_rec( field, error, 1 ) )
 		return FAIL;
 
 	return OK;
