@@ -55,21 +55,23 @@ static bool print_with_comment = UNSET;
 static double x_0, y_0, w, h;        /* position and size of print area */
 static double margin = 25.0;         /* margin (in mm) to leave on all sides */
 
-static const char *pc_string = NULL;
+static char *pc_string = NULL;
 
-static int get_print_file( FILE **fp, char **name );
+static bool get_print_file( FILE **fp, char **name );
 static void get_print_comm( void );
+static void start_printing( FILE *fp, char *name, int dim, long what );
+static void start_printing_1d( FILE *fp, char *name, long what );
+static void start_printing_2d( FILE *fp, char *name );
+static FILE *spawn_print_prog( const char *command );
 static void print_header( FILE *fp, char *name );
 static void eps_make_scale( FILE *fp, void *cv, int coord, long dim );
 static void eps_color_scale( FILE *fp );
 static void eps_draw_curve_1d( FILE *fp, Curve_1d *cv, int i, long dir );
 static void eps_draw_surface( FILE *fp, int cn );
 static void eps_draw_contour( FILE *fp, int cn );
-static void do_print( char *name, const char *command );
 static void print_comm( FILE *fp );
 static char **split_into_lines( int *num_lines );
 static char *paren_replace( const char *str );
-static void start_printing( char **argv, char *name );
 
 
 /*-------------------------------------------------------------------------*/
@@ -88,82 +90,25 @@ static void start_printing( char **argv, char *name );
 
 void print_1d( FL_OBJECT *obj, long data )
 {
-	FILE *fp;
+	FILE *fp = NULL;
 	char *name = NULL;
-	int i;
 
 
 	fl_deactivate_object( obj );
 
-	/* Find out about the way to print and get a file, then print the header */
+	/* Find out about the way to print and get a file */
 
-	if ( get_print_file( &fp, &name ) == 0 )
+	if ( get_print_file( &fp, &name ) )
 	{
-		fl_activate_object( obj );
-		return;
+		get_print_comm( );
+
+		start_printing( fp, name, 1, data );
+
+		if ( fp != NULL )
+			fclose( fp );
+		name = T_free( name );
 	}
 
-	get_print_comm( );
-
-	print_header( fp, name );
-
-	/* Set the area for the graph, leave a margin on all sides and,
-       additionally, 20 mm (x-axis) / 25 (y-axis) for labels and tick marks */
-
-	x_0 = margin + 25.0;              /* margin & 25 mm for the y-axis */
-	y_0 = margin + 20.0;              /* margin & 20 mm for the x-axis */
-	w = paper_height - margin - x_0;
-	h = paper_width - margin - y_0;
-
-	fprintf( fp, "0.05 slw 0 sgr\n" );
-
-	if ( print_with_comment )
-		print_comm( fp );
-
-	/* Draw the frame and the scales (just 0.5 mm outside the the area for the
-       graph) */
-
-	fprintf( fp, "%f %f m\n0 %f rl\n%f 0 rl\n0 %f rl cp s\n",
-			 x_0 - 0.5, y_0 - 0.5, h + 1.0, w + 1.0, - ( h + 1.0 ) );
-
-	if ( data == 1 )
-	{
-		for ( i = 0; i < G.nc; i++ )
-		{
-			if ( G.curve[ i ]->active )
-				break;
-		}
-
-		if ( i != G.nc )
-		{
-			eps_make_scale( fp, ( void * ) G.curve[ i ], X, 1 );
-			eps_make_scale( fp, ( void * ) G.curve[ i ], Y, 1 );
-		}
-	}
-	else
-	{
-		eps_make_scale( fp, ( void * ) &G.cut_curve, X, data );
-		eps_make_scale( fp, ( void * ) &G.cut_curve, Y, data );
-	}
-
-	/* Restrict drawings to the frame */
-
-	fprintf( fp, "%f %f m\n0 %f rl\n%f 0 rl\n0 %f rl cp clip np\n",
-			 x_0 - 0.1, y_0 - 0.1, h + 0.2, w + 0.2, - ( h + 0.2 ) );
-
-	if ( data == 1 )
-		for ( i = G.nc - 1; i >= 0; i-- )
-			eps_draw_curve_1d( fp, G.curve[ i ], i, 1 );
-	else
-		eps_draw_curve_1d( fp, &G.cut_curve, 0, data );
-
-	fprintf( fp, "showpage\n" );
-	fclose( fp );
-
-	if ( print_type == S2P )
-		do_print( name, cmd );
-
-	name = T_free( name );
 	fl_activate_object( obj );
 }
 
@@ -190,65 +135,19 @@ void print_2d( FL_OBJECT *obj, long data )
 		return;
 	}
 
-	/* Find out about the way to print and get a file, then print the header */
+	/* Find out about the way to print and get a file */
 
-	if ( get_print_file( &fp, &name ) == 0 )
+	if ( get_print_file( &fp, &name ) )
 	{
-		fl_activate_object( obj );
-		return;
+		get_print_comm( );
+
+		start_printing( fp, name, 2, 0 );
+
+		if ( fp != NULL )
+			fclose( fp );
+		name = T_free( name );
 	}
 
-	get_print_comm( );
-
-	print_header( fp, name );
-
-	/* Set the area for the graph, leave a margin on all sides and,
-       additionally, 20 mm (x-axis) / 25 (y-axis) for labels and tick marks */
-
-	x_0 = margin + 25.0;
-	y_0 = margin + 20.0;
-
-	if ( print_with_color )
-		w = paper_height - margin - x_0 - 35.0;
-	else
-		w = paper_height - margin - x_0;
-
-	h = paper_width - margin - y_0;
-
-	fprintf( fp, "0.05 slw 0 0 0 srgb\n" );
-
-	if ( print_with_comment )
-		print_comm( fp );
-
-	/* Draw the frame and the scales */
-
-	fprintf( fp, "%f %f m\n0 %f rl\n%f 0 rl\n0 %f rl cp s\n",
-			 x_0 - 0.5, y_0 - 0.5, h + 1.0, w + 1.0, - ( h + 1.0 ) );
-
-	eps_make_scale( fp, G.curve_2d[ G.active_curve ], X, 2 );
-	eps_make_scale( fp, G.curve_2d[ G.active_curve ], Y, 2 );
-
-	if ( print_with_color )
-		eps_make_scale( fp, G.curve_2d[ G.active_curve ], Z, 2 );
-
-	/* Restrict drawings to the frame */
-
-	fprintf( fp, "%f %f m\n0 %f rl\n%f 0 rl\n0 %f rl cp clip np\n",
-			 x_0 - 0.1, y_0 - 0.1, h + 0.2, w + 0.2, - ( h + 0.2 ) );
-
-	if ( print_with_color )
-		eps_draw_surface( fp, G.active_curve );
-	else
-		eps_draw_contour( fp, G.active_curve );
-
-	fprintf( fp, "showpage\n"
-				 "%%%%EOF" );
-	fclose( fp );
-
-	if ( print_type == S2P )
-		do_print( name, cmd );
-
-	name = T_free( name );
 	fl_activate_object( obj );
 }
 
@@ -258,11 +157,9 @@ void print_2d( FL_OBJECT *obj, long data )
 /* and, for printing to file mode, select the file              */
 /*--------------------------------------------------------------*/
 
-static int get_print_file( FILE **fp, char **name )
+static bool get_print_file( FILE **fp, char **name )
 {
 	static FL_OBJECT *obj;
-	int fd;
-	char filename[ ] = P_tmpdir "/fsc2.eps.XXXXXX";
 	struct stat stat_buf;
 
 
@@ -404,37 +301,13 @@ static int get_print_file( FILE **fp, char **name )
 	if ( obj == print_form->cancel_button )
 	{
 		*name = T_free( *name );
-		return 0;
+		return FAIL;
 	}
 
-	/* In send-to-printer mode try to create and open a temporary file */
+	/* In send-to-printer mode we're already done */
 
 	if ( print_type == S2P )
-	{
-		/* Create a temporary file */
-
-		if ( ( fd = mkstemp( filename ) < 0 ) ||
-			 ( *fp = fdopen( fd, "w" ) ) == NULL )
-		{
-			fl_show_alert( "Error", "Sorry, can't open a temporary file.",
-						   NULL, 1 );
-			if ( fd >= 0 )
-				close( fd );
-			return 0;
-		}
-
-		/* ... and store its name */
-
-		TRY
-		{
-			*name = T_strdup( filename );
-			TRY_SUCCESS;
-		}
-		CATCH( OUT_OF_MEMORY_EXCEPTION )
-			return 0;
-
-		return S2P;          /* print mode is 'send to printer' */
-	}
+		return OK;
 
 	/* In print-to-file mode ask for confirmation if the file already exists
 	   and try to open it for writing */
@@ -446,10 +319,10 @@ static int get_print_file( FILE **fp, char **name )
 		  ( *fp = fopen( *name, "w" ) ) == NULL )
 	{
 		*name = T_free( *name );
-		return 0;
+		return FAIL;
 	}
 
-	return P2F;              /* print mode is 'print to file' */
+	return OK;
 }
 
 
@@ -570,7 +443,7 @@ static void get_print_comm( void )
 	if ( pc_string != NULL )
 		fl_set_input( GUI.print_comment->pc_input, pc_string );
 
-	pc_string = T_free( ( char * ) pc_string );
+	pc_string = T_free( pc_string );
 
 	fl_show_form( GUI.print_comment->print_comment, FL_PLACE_MOUSE,
                   FL_TRANSIENT, "fsc2: Print Text" );
@@ -590,6 +463,222 @@ static void get_print_comm( void )
 }
 
 
+/*--------------------------------------------------------------*/
+/* Function forks of a child for doing the actually printing    */
+/* while the main program can continue taking care of new data. */
+/*--------------------------------------------------------------*/
+
+static void start_printing( FILE *fp, char *name, int dim, long what )
+{
+	pid_t pid;
+
+	/* Do a minimal sanity check of the print command */
+
+	if ( print_type == S2P && ( cmd == NULL || *cmd == '\0' ) )
+	{
+		fl_show_alert( "Error", "Sorry, missing print command.", NULL, 1 );
+		return;
+	}
+
+	if ( ( pid = fork( ) ) == -1 )
+	{
+		fl_show_alert( "Error", "Sorry, can't print.", NULL, 1 );
+		return;
+	}
+
+	/* fsc2's main process can now continue, the spawned child process
+	   takes care of printing */
+
+	if ( pid != 0 )
+		return;
+
+	if ( print_type == S2P &&
+		 ( fp = spawn_print_prog( cmd ) ) == NULL )
+		_exit( EXIT_FAILURE );
+
+	if ( dim == 1 )
+		start_printing_1d( fp, name, what );
+	else
+		start_printing_2d( fp, name );
+
+	fclose( fp );
+	_exit( EXIT_SUCCESS );
+}
+
+
+/*----------------------------------------------------------------*/
+/* For real printing (as opposed to just writing a file) a new    */
+/* process for the pogram that does the printing is spawned here. */
+/*----------------------------------------------------------------*/
+
+static FILE *spawn_print_prog( const char *command )
+{
+	pid_t pid;
+	char filename[ ] = P_tmpdir "/fsc2XXXXXX";
+	int tmp_fd;
+	FILE *tmp_fp = NULL;
+	char *args[ 4 ];
+
+
+	if ( command == NULL )
+		return NULL;
+
+	/* Create a temporary file for the data because some programs don't work
+	   well with a non-seekable stream (but unlink the file immediately so
+	   that it won't survive in case of any future problems) */
+
+	if ( ( tmp_fd = mkstemp( filename ) ) < 0 ||
+		 ( tmp_fp = fdopen( tmp_fd, "w" ) ) == NULL )
+	{
+		if ( tmp_fd >= 0 )
+		{
+			unlink( filename );
+			close( tmp_fd );
+			return NULL;
+		}
+	}
+
+	unlink( filename );
+
+	if ( ( pid = fork( ) ) == -1 )
+	{
+		fclose( tmp_fp );
+		return NULL;
+	}
+
+	if ( pid != 0 )
+		return tmp_fp;
+
+	args[ 0 ] = ( char * ) "sh";
+	args[ 1 ] = ( char * ) "-c";
+	args[ 2 ] = ( char * ) command;
+	args[ 3 ] = NULL;
+
+	dup2( tmp_fd, STDIN_FILENO );
+
+	execv( "/bin/sh", args );
+	_exit( EXIT_FAILURE );
+}
+
+
+/*-----------------------------------------------------------*/
+/*-----------------------------------------------------------*/
+
+static void start_printing_1d( FILE *fp, char *name, long what )
+{
+	int i;
+
+
+	print_header( fp, name );
+
+	/* Set the area for the graph, leave a margin on all sides and,
+       additionally, 20 mm (x-axis) / 25 (y-axis) for labels and tick marks */
+
+	x_0 = margin + 25.0;              /* margin & 25 mm for the y-axis */
+	y_0 = margin + 20.0;              /* margin & 20 mm for the x-axis */
+	w = paper_height - margin - x_0;
+	h = paper_width - margin - y_0;
+
+	fprintf( fp, "0.05 slw 0 sgr\n" );
+
+	if ( print_with_comment )
+		print_comm( fp );
+
+	/* Draw the frame and the scales (just 0.5 mm outside the the area for the
+       graph) */
+
+	fprintf( fp, "%f %f m\n0 %f rl\n%f 0 rl\n0 %f rl cp s\n",
+			 x_0 - 0.5, y_0 - 0.5, h + 1.0, w + 1.0, - ( h + 1.0 ) );
+
+	if ( what == 1 )    /* normal 1D printing */
+	{
+		/* Draw the scale for the active curve (if there is an active curve) */
+
+		for ( i = 0; i < G.nc; i++ )
+		{
+			if ( G.curve[ i ]->active )
+				break;
+		}
+
+		if ( i != G.nc )
+		{
+			eps_make_scale( fp, ( void * ) G.curve[ i ], X, 1 );
+			eps_make_scale( fp, ( void * ) G.curve[ i ], Y, 1 );
+		}
+	}
+	else                /* when printing a cross section */
+	{
+		eps_make_scale( fp, ( void * ) &G.cut_curve, X, what );
+		eps_make_scale( fp, ( void * ) &G.cut_curve, Y, what );
+	}
+
+	/* Restrict futher drawings to the frame of the scales */
+
+	fprintf( fp, "%f %f m\n0 %f rl\n%f 0 rl\n0 %f rl cp clip np\n",
+			 x_0 - 0.1, y_0 - 0.1, h + 0.2, w + 0.2, - ( h + 0.2 ) );
+
+	if ( what == 1 )
+		for ( i = G.nc - 1; i >= 0; i-- )
+			eps_draw_curve_1d( fp, G.curve[ i ], i, 1 );
+	else
+		eps_draw_curve_1d( fp, &G.cut_curve, 0, what );
+
+	fprintf( fp, "showpage\n"
+				 "%%%%EOF\n" );
+}
+
+
+/*-----------------------------------------------------------*/
+/*-----------------------------------------------------------*/
+
+static void start_printing_2d( FILE *fp, char *name )
+{
+	print_header( fp, name );
+
+	/* Set the area for the graph, leave a margin on all sides and,
+       additionally, 20 mm (x-axis) / 25 (y-axis) for labels and tick marks */
+
+	x_0 = margin + 25.0;
+	y_0 = margin + 20.0;
+
+	if ( print_with_color )
+		w = paper_height - margin - x_0 - 35.0;
+	else
+		w = paper_height - margin - x_0;
+
+	h = paper_width - margin - y_0;
+
+	fprintf( fp, "0.05 slw 0 0 0 srgb\n" );
+
+	if ( print_with_comment )
+		print_comm( fp );
+
+	/* Draw the frame and the scales */
+
+	fprintf( fp, "%f %f m\n0 %f rl\n%f 0 rl\n0 %f rl cp s\n",
+			 x_0 - 0.5, y_0 - 0.5, h + 1.0, w + 1.0, - ( h + 1.0 ) );
+
+	eps_make_scale( fp, G.curve_2d[ G.active_curve ], X, 2 );
+	eps_make_scale( fp, G.curve_2d[ G.active_curve ], Y, 2 );
+
+	if ( print_with_color )
+		eps_make_scale( fp, G.curve_2d[ G.active_curve ], Z, 2 );
+
+	/* Restrict further drawings to the frame of the scales */
+
+	fprintf( fp, "%f %f m\n0 %f rl\n%f 0 rl\n0 %f rl cp clip np\n",
+			 x_0 - 0.1, y_0 - 0.1, h + 0.2, w + 0.2, - ( h + 0.2 ) );
+
+	if ( print_with_color )
+		eps_draw_surface( fp, G.active_curve );
+	else
+		eps_draw_contour( fp, G.active_curve );
+
+	fprintf( fp, "showpage\n"
+				 "%%%%EOF\n" );
+}
+
+
 /*------------------------------------------------------------------------*/
 /* Prints the header of the EPS-file as well as date, user and fsc2 logo. */
 /*------------------------------------------------------------------------*/
@@ -606,16 +695,16 @@ static void print_header( FILE *fp, char *name )
 
 	fprintf( fp, "%%!PS-Adobe-3.0 EPSF-3.0\n"
 			     "%%%%BoundingBox: 0 0 %d %d\n"
-			     "%%%%Creator: fsc2, Nov 2001\n"
-			     "%%%%CreationDate: %s"
-			 	 "%%%%Title: %s\n"
-			     "%%%%For: %s (%s)\n"
+			     "%%%%Creator: fsc2, Mar 2002\n"
+				 "%%%%CreationDate: %s"
+				 "%%%%Title: %s\n"
+				 "%%%%For: %s (%s)\n"
 			     "%%%%Orientation: Landscape\n"
 				 "%%%%DocumentNeededResources: font Times-Roman\n"
-			     "%%%%End Comments\n",
+			     "%%%%EndComments\n",
 			 irnd( 72.0 * paper_width / INCH ),
 			 irnd( 72.0 * paper_height / INCH ),
-			 ctime( &d ), name,
+			 ctime( &d ), name ? name : "none",
 			 getpwuid( getuid( ) )->pw_name,
 			 getpwuid( getuid( ) )->pw_gecos );
 
@@ -666,7 +755,7 @@ static void print_header( FILE *fp, char *name )
 			     "        -0.025 0.025 rm } for\n"
 			     "        1 setgray (fsc2) show gr } b\n" );
 
-	/* Now we're done with the header, tell the Postscript interpreter */
+	/* Now we're done with the header and the document finally starts */
 
 	fprintf( fp, "%%%%EndProlog\n\n" );
 
@@ -1412,7 +1501,7 @@ static char **split_into_lines( int *num_lines )
 
 	TRY
 	{
-		lines = T_malloc( cur_size * sizeof( char * ) );
+		lines = T_malloc( cur_size * sizeof *lines );
 		TRY_SUCCESS;
 	}
 	OTHERWISE
@@ -1423,13 +1512,13 @@ static char **split_into_lines( int *num_lines )
 
 	TRY
 	{
-		for ( lines[ nl = 0 ] = cp = ( char * ) pc_string; *cp != '\0'; cp++ )
+		for ( lines[ nl = 0 ] = cp = pc_string; *cp != '\0'; cp++ )
 			if ( *cp == '\n' )
 			{
 				if ( nl++ == cur_size )
 				{
 					cur_size += GUESS_NUM_LINES;
-					lines = T_realloc( lines, cur_size * sizeof( char * ) );
+					lines = T_realloc( lines, cur_size * sizeof *lines );
 				}
 
 				lines[ nl ] = cp + 1;
@@ -1443,12 +1532,12 @@ static char **split_into_lines( int *num_lines )
 			if ( nl == 0 )
 				THROW( EXCEPTION );
 
-			lines = T_realloc( lines, ( nl + 1 ) * sizeof( char * ) );
+			lines = T_realloc( lines, ( nl + 1 ) * sizeof *lines );
 		}
 		else
 		{
 			if ( nl++ >= cur_size )
-				lines = T_realloc( lines, ( nl + 1 ) * sizeof( char * ) );
+				lines = T_realloc( lines, ( nl + 1 ) * sizeof *lines );
 
 			lines[ nl ] = cp + 2;
 		}
@@ -1538,144 +1627,6 @@ static char *paren_replace( const char *str )
 		}
 
 	return sp;
-}
-
-
-/*-----------------------------------------------------------------------------
-   Some implementation details: If we want to send data directly to the
-   printer the best way would seem to be to simply create a pipe via popen()
-   to lpr (or whatever the appropriate print command is) and then write the
-   data to be printed to lpr's standard input. Unfortunately, there's a
-   problem with this approach: Even though the main program gets the SIGCHLD
-   signal the exit status has already been reaped by pclose(). Thus, if we're
-   running an handler for SIGCHLD signals it will wait for the death of
-   another child instead of the process that exited due to the pclose()
-   While this might be OK as long as there are no other child processes,
-   at least while the measurement is running there is at least one other
-   child, the child that got forked to do the measurement. Now, after the
-   pclose() call the parent process will hang in the SIGCHLD signal handler,
-   waiting indefinitely for another child to exit, while the child process
-   doing the measurement also hangs, waiting for the parent process to send
-   signals allowing the measurement process to send further data...
-
-   So, instead we write all data to a temporary file and then fork another
-   process. This process forks again and then execs lpr (or whatever printing
-   command the user asked us to use). The first forked process waits until the
-   printing process finishes and removes the temporary file before it exits.
-   This double level of forking insures that the temporary file is really
-   going to be deleted, even if the parent processes dies in the mean time -
-   otherwise we would have to know the correct flags for the print command to
-   make it delete this file by itself.
------------------------------------------------------------------------------*/
-
-static void do_print( char *name, const char *command )
-{
-	char *cptr;
-	static char *cmd_line;
-	static char **argv;
-	int argc;
-	pid_t new_pid;
-
-
-	cmd_line = NULL;
-	argv = NULL;
-
-	/* Do a minimal sanity check of the print command */
-
-	if ( command == NULL || *command == '\0' )
-	{
-		fl_show_alert( "Error", "Sorry, bad print command.", NULL, 1 );
-		return;
-	}
-
-	/* Now let's try to assemble the command line, if this fails we can send
-       an error message. */
-
-	TRY
-	{
-		cmd_line = T_strdup( command );
-
-		argv = T_malloc( 3 * sizeof( char * ) );
-		argv[ 0 ] = cptr = cmd_line;
-		argc = 1;
-
-		while ( ( cptr = strchr( cptr, ' ' ) ) != NULL )
-		{
-			if ( cptr < cmd_line + 2 )
-			{
-				fl_show_alert( "Error", "Sorry, bad print command.", NULL, 1 );
-				THROW( EXCEPTION );
-			}
-
-			*cptr = '\0';
-			while ( *++cptr == ' ' )
-				/* empty */ ;
-
-			if ( *cptr != '\0' )
-			{
-				argv = T_realloc( argv, ( argc + 3 ) * sizeof( char * ) );
-				argv[ argc++ ] = cptr;
-			}
-		};
-
-		argv[ argc++ ] = name;          /* finally, append the file name */
-		argv[ argc ] = NULL;            /* end of the argument list */
-
-		/* Fork another process to do the printing */
-
-		if ( ( new_pid = fork( ) ) == 0 )
-			start_printing( argv, name );
-
-		if ( new_pid < 0 )
-		{
-			fl_show_alert( "Error", "Sorry, can't print results.",
-						   "Running out of resources.", 1 );
-			THROW( EXCEPTION );
-		}
-
-		TRY_SUCCESS;
-	}
-	CATCH( EXCEPTION )
-		unlink( name );              /* on failure delete the temporary file */
-
-	T_free( argv );
-	T_free( cmd_line );
-}
-
-
-/*-----------------------------------------------------------*/
-/* Starts a 'grand-child' process to do the actual printing. */
-/*-----------------------------------------------------------*/
-
-static void start_printing( char **argv, char *name )
-{
-	int i;
-	pid_t new_pid;
-	int status;
-	struct sigaction sact;
-
-
-	sact.sa_handler = ( void ( * )( int ) ) SIG_IGN;
-	sigaction( SIGCHLD, &sact, NULL );
-
-	if ( ( new_pid = fork( ) ) == 0 )
-		execvp( argv[ 0 ], argv );
-
-	if ( new_pid > 0 )
-		waitpid( new_pid, &status, 0 );
-
-	if ( new_pid < 0 || status != 0 )
-	{
-		fprintf( stderr, "fsc2: print command failed:" );
-		for ( i = 0; argv[ i ] != NULL; i++ )
-			fprintf( stderr, " %s", argv[ i ] );
-		fprintf( stderr, "\n" );
-		unlink( name );
-		_exit( EXIT_FAILURE );
-	}
-
-	unlink( name );
-	_exit( EXIT_SUCCESS );
 }
 
 
