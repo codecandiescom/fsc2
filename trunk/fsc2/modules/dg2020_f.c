@@ -9,11 +9,11 @@
 #define Ticks long
 
 
-#define MIN_TIMEBASE   5.0e-9     /* 5 ns */
-#define MAX_TIMEBASE   0.1        /* 0.1 s */
+#define MIN_TIMEBASE            5.0e-9     /* 5 ns */
+#define MAX_TIMEBASE            0.1        /* 0.1 s */
 
-#define MAX_PODS           12
-#define MAX_CHANNELS       36
+#define MAX_PODS                12
+#define MAX_CHANNELS            36
 
 
 # define MIN_POD_HIGH_VOLTAGE  -2.0   /* Data for P3420 (Variable Ouput Pod) */
@@ -74,11 +74,11 @@ typedef struct {
 
 	bool is_used;
 
-	struct POD *pod;
+	struct _P_ *pod;
 	bool is_inverted;
 
 	int num_channels;
-	int channel[ MAX_CHANNELS ];
+	struct _C_ *channel[ MAX_CHANNELS ];
 
 	Ticks delay;
 	bool is_delay;
@@ -90,12 +90,12 @@ typedef struct {
 } FUNCTION;
 
 
-typedef struct {
+typedef struct _P_ {
 	FUNCTION *function;
 } POD;
 
 
-typedef struct {
+typedef struct _C_ {
 	FUNCTION *function;
 } CHANNEL;
 
@@ -246,8 +246,8 @@ static bool set_timebase( double timebase )
 {
 	if ( timebase < MIN_TIMEBASE || timebase > MAX_TIMEBASE )
 	{
-		eprint( FATAL, "%s:%ld: DG2020: Invalid time base %f s, valid range  "
-				"is %f-%f s.\n", Fname, Lc, timebase,
+		eprint( FATAL, "%s:%ld: DG2020: Invalid time base %g s, valid range  "
+				"is %g-%g s.\n", Fname, Lc, timebase,
 				MIN_TIMEBASE, MAX_TIMEBASE );
 		THROW( EXCEPTION );
 	}
@@ -260,6 +260,10 @@ static bool set_timebase( double timebase )
 
 static bool assign_function( int function, long pod )
 {
+	FUNCTION *f = &dg2020.function[ function ];
+	POD *p = &dg2020.pod[ pod ];
+	
+
 	if ( pod < 0 || pod > MAX_PODS )
 	{
 		eprint( FATAL, "%s:%ld: DG2020: Invalid pod number: %ld, valid pod "
@@ -267,22 +271,27 @@ static bool assign_function( int function, long pod )
 		THROW( EXCEPTION );
 	}
 
-	if ( dg2020.pod[ pod ].function != NULL )
+	if ( p->function != NULL )
 	{
 		eprint( FATAL, "%s:%ld: DG2020: Pod number %ld has already been "
-				"assigned to function %s.\n", Fname, Lc, pod,
-				Function_Names[ dg2020.pod[ pod ].function->self ] );
+				"assigned to function `%s'.\n", Fname, Lc, pod,
+				Function_Names[ p->function->self ] );
 		THROW( EXCEPTION );
 	}
 
-	dg2020.function[ function ].is_used = SET;
-	dg2020.pod[ pod ].function = &dg2020.function[ function ];
+	f->is_used = SET;
+	f->pod = p;
+	
+	p->function = f;
 	return OK;
 }
 
 
 static bool assign_channel_to_function( int function, long channel )
 {
+	FUNCTION *f = &dg2020.function[ function ];
+	CHANNEL *c = &dg2020.channel[ channel ];
+
 	if ( channel < 0 || channel >= MAX_CHANNELS )
 	{
 		eprint( FATAL, "%s:%ld: DG2020: Invalid channel number: %ld, valid "
@@ -290,19 +299,26 @@ static bool assign_channel_to_function( int function, long channel )
 		THROW( EXCEPTION );
 	}
 
-	if ( dg2020.channel[ channel ].function != NULL )
+	if ( c->function != NULL )
 	{
+		if ( c->function->self == function )
+		{
+			eprint( SEVERE, "%s:%ld: DG2020: Channel %ld is assigned twice "
+					"to function `%s'.\n", Fname, Lc, channel,
+					Function_Names[ c->function->self ] );
+			return FAIL;
+		}
+
 		eprint( FATAL, "%s:%ld: DG2020: Channel %ld is already used for "
-				"function %s.\n", Fname, Lc,
-				Function_Names[ dg2020.channel[ channel ].function->self ] );
+				"function `%s'.\n", Fname, Lc, channel,
+				Function_Names[ c->function->self ] );
 		THROW( EXCEPTION );
 	}
 
-	dg2020.channel[ channel ].function = &dg2020.function[ function ];
+	f->is_used = SET;
+	f->channel[ f->num_channels++ ] = c;
 
-	dg2020.function[ function ].is_used = SET;
-	dg2020.function[ function ].channel[ 
-		dg2020.function[ function ].num_channels++ ] = channel;
+	c->function = f;
 
 	return OK;
 }
@@ -320,7 +336,7 @@ static bool set_delay_function( int function, double delay )
 {
 	if ( dg2020.function[ function ].is_delay )
 	{
-		eprint( FATAL, "%s:%ld: DG2020: Delay for function %s has already "
+		eprint( FATAL, "%s:%ld: DG2020: Delay for function `%s' has already "
 				"been set.\n", Fname, Lc, Function_Names[ function ] );
 		THROW( EXCEPTION );
 	}
@@ -338,8 +354,8 @@ static bool set_function_high_level( int function, double voltage )
 
 	if ( voltage < MIN_POD_HIGH_VOLTAGE || voltage > MAX_POD_HIGH_VOLTAGE )
 	{
-		eprint( FATAL, "%s:%ld: DG2020: Invalid high level of %f V for "
-				"function %s, valid range is %f V to %f V.\n", Fname, Lc,
+		eprint( FATAL, "%s:%ld: DG2020: Invalid high level of %g V for "
+				"function `%s', valid range is %g V to %g V.\n", Fname, Lc,
 				voltage, Function_Names[ function ], MIN_POD_HIGH_VOLTAGE,
 				MAX_POD_HIGH_VOLTAGE );
 		THROW( EXCEPTION );
@@ -362,8 +378,8 @@ static bool set_function_low_level( int function, double voltage )
 
 	if ( voltage < MIN_POD_LOW_VOLTAGE || voltage > MAX_POD_LOW_VOLTAGE )
 	{
-		eprint( FATAL, "%s:%ld: DG2020: Invalid low level of %f V for "
-				"function %s, valid range is %f V to %f V.\n", Fname, Lc,
+		eprint( FATAL, "%s:%ld: DG2020: Invalid low level of %g V for "
+				"function `%s', valid range is %g V to %g V.\n", Fname, Lc,
 				voltage, Function_Names[ function ], MIN_POD_LOW_VOLTAGE,
 				MAX_POD_LOW_VOLTAGE );
 		THROW( EXCEPTION );
@@ -433,7 +449,7 @@ static bool set_trig_in_level( double voltage )
 
 	if ( dg2020.is_trig_in_level && dg2020.trig_in_level != voltage )
 	{
-		eprint( FATAL, "%s:%ld: DG2020: A different level of %f V for the "
+		eprint( FATAL, "%s:%ld: DG2020: A different level of %g V for the "
 				"trigger has already been set.\n", Fname, Lc,
 				dg2020.trig_in_level );
 		THROW( EXCEPTION );
@@ -455,8 +471,8 @@ static bool set_trig_in_level( double voltage )
 
 	if ( voltage > MAX_TRIG_IN_LEVEL || voltage < MIN_TRIG_IN_LEVEL )
 	{
-		eprint( FATAL, "%s:%ld: DG2020: Inalid level for trigger of %f V, "
-				"valid range is %f V to %f V.\n", Fname, Lc, MIN_TRIG_IN_LEVEL,
+		eprint( FATAL, "%s:%ld: DG2020: Inalid level for trigger of %g V, "
+				"valid range is %g V to %g V.\n", Fname, Lc, MIN_TRIG_IN_LEVEL,
 				MAX_TRIG_IN_LEVEL );
 		THROW( EXCEPTION );
 	}
@@ -506,7 +522,7 @@ static bool set_repeat_time( double time )
 	if ( dg2020.is_repeat_time && dg2020.repeat_time != double2ticks( time ) )
 	{
 		eprint( FATAL, "%s:%ld: DG2020: A different repeat time/frequency of "
-				"%f s / %f Hz has already been set.\n", Fname, Lc,
+				"%g s / %g Hz has already been set.\n", Fname, Lc,
 				ticks2double( dg2020.repeat_time ),
 				1.0 / ticks2double( dg2020.repeat_time ) );
 		THROW( EXCEPTION );
@@ -552,8 +568,8 @@ static Ticks double2ticks( double time )
 
 	if ( ! dg2020.is_timebase )
 	{
-		eprint( FATAL, "%s:%ld: DG2020: Can't set delay, no time base has "
-				"been set yet.\n",Fname, Lc );
+		eprint( FATAL, "%s:%ld: DG2020: Can't set a time because no time base "
+				"has been set yet.\n",Fname, Lc );
 		THROW( EXCEPTION );
 	}
 
@@ -561,8 +577,9 @@ static Ticks double2ticks( double time )
 
 	if ( fabs( ticks - lround( ticks ) ) > 1.0e-2 )
 	{
-		eprint( FATAL, "%s:%ld: DG2020: Specified time %f is not a integer "
-				"multiple of the pulsers time base.\n", Fname, Lc, time );
+		eprint( FATAL, "%s:%ld: DG2020: Specified time %g is not a integer "
+				"multiple of the pulsers time base of %g s.\n", Fname, Lc,
+				time, dg2020.timebase );
 		THROW( EXCEPTION );
 	}
 
@@ -596,19 +613,19 @@ static void check_pod_level_diff( double high, double low )
 		THROW( EXCEPTION );
 	}
 
-	if ( high - low > MAX_POD_VOLTAGE_SWING )
+	if ( high - low > MAX_POD_VOLTAGE_SWING + 0.04 )
 	{
 		eprint( FATAL, "%s:%ld: DG2020: Diference between high and low "
-				"voltage is too big, maximum is %f V.\n", Fname, Lc,
-				MAX_POD_VOLTAGE_SWING );
+				"voltage of %g V is too big, maximum is %g V.\n", Fname, Lc,
+				high - low, MAX_POD_VOLTAGE_SWING );
 		THROW( EXCEPTION );
 	}
 
-	if ( high - low < MIN_POD_VOLTAGE_SWING )
+	if ( high - low < MIN_POD_VOLTAGE_SWING - 0.04 )
 	{
 		eprint( FATAL, "%s:%ld: DG2020: Diference between high and low "
-				"voltage is too small, minimum is %f V.\n", Fname, Lc,
-				MIN_POD_VOLTAGE_SWING );
+				"voltage of %g V is too small, minimum is %g V.\n", Fname, Lc,
+				high - low, MIN_POD_VOLTAGE_SWING );
 		THROW( EXCEPTION );
 	}
 }
