@@ -6,6 +6,7 @@
 #define COMM_HEADER
 
 #include "fsc2.h"
+#include <sys/ipc.h>
 #include <sys/shm.h>
 
 
@@ -14,13 +15,15 @@
    include files, but alas, for the current version of Linux the header files
    seem to be broken in this respect... */
 
+#if ! defined SHMMNI
 #define SHMMNI 128
+#endif
 
 /* Maximum number of shared memory segments plus some safety margin - the
    queue has always to be larger than the maximum number of shared segments,
    so make sure SHMMNI is correct ! */
 
-# define QUEUE_SIZE ( SHMMNI + 8 )   
+# define QUEUE_SIZE ( SHMMNI + 1 ) 
 
 
 
