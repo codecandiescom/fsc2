@@ -45,8 +45,20 @@ static int start_printing( char **argv, char *name );
 
 
 
-/*------------------------------------------------------------*/
-/*------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
+/* This function gets called as the callback routine for the print button  */
+/* in either the main display window in 1D display or in the cross section */
+/* window in for 2D graphics. It shows a form that lets the user select if */
+/* he/she wants to "print" the resulting PostScript ile (using whatever    */
+/* command the user specifies in the form) or to save it in a location     */
+/* selected by the user. Other things the use can choose in this form is   */
+/* the paper size (A4, A3, Legal, Letter or A5 or A6 as size reduced       */
+/* version of A4 created for a A4 printer) as well as if (s)he wants a b/w */
+/* or color output.                                                        */
+/* For drawing the curves from the main 1D display window the parameter    */
+/* 'data' is expected to be 1, while for cross section curves 'data' must  */
+/* be 0 fro cross sections through the x-axis and -1 for the y-axis!       */
+/*-------------------------------------------------------------------------*/
 
 void print_1d( FL_OBJECT *obj, long data )
 {
@@ -129,8 +141,10 @@ void print_1d( FL_OBJECT *obj, long data )
 }
 
 
-/*-------------------------------------------------------*/
-/*-------------------------------------------------------*/
+/*----------------------------------------------------------------------*/
+/* As the previous function, print_1d(), this is a callback routine for */
+/* the print button, but for the main display window for 2D graphics.   */
+/*----------------------------------------------------------------------*/
 
 void print_2d( FL_OBJECT *obj, long data )
 {
@@ -538,6 +552,9 @@ static void print_header( FILE *fp, char *name )
 				 "/cw { gs np 0 0 m\n"
 	             "      false charpath flattenpath pathbbox\n"
 			     "      pop exch pop exch pop gr } b\n" );
+
+	/* Throw out everything up to the next comment to get rid of the logo */
+
 	if ( print_with_color )
 		fprintf( fp, 
 			     "/fsc2 { gs /Times-Roman 6 sf\n"
@@ -858,6 +875,8 @@ static void eps_make_scale( FILE *fp, void *cv, int coord, int dim )
 
 
 /*-------------------------------------------------------*/
+/* Creates the scale for the color coding printed for 2D */
+/* output in color mode.                                 */
 /*-------------------------------------------------------*/
 
 static void eps_color_scale( FILE *fp )
