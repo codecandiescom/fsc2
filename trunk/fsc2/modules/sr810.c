@@ -1596,7 +1596,7 @@ static double sr810_set_dac_data( long port, double voltage )
 	fsc2_assert( voltage >= DAC_MIN_VOLTAGE && voltage <= DAC_MAX_VOLTAGE );
 
 	sprintf( buffer, "AUXV %ld,%f\n", port, voltage );
-	sr810_command( buffer, &length );
+	sr810_command( buffer );
 	return voltage;
 }
 
@@ -1615,7 +1615,7 @@ static double sr810_get_dac_data( long port )
 	fsc2_assert( port >= 1 && port <= 4 );
 
 	sprintf( buffer, "AUXV? %ld\n", port );
-	sr810_talk( buffer, buffer, &length );
+	sr810_talk( buffer, buffer, &len );
 	buffer[ len - 1 ] = '\0';
 	return T_atod( buffer );
 }
