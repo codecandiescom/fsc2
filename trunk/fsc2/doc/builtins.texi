@@ -592,10 +592,12 @@ slider value is set to the next value still within the allowed range.
 Converts a number (or the elements of an array) to integer type by
 truncating all digits following the decimal point.
 
+
 @item float()
 @anchor{float}
 @findex float()
 Converts a number (or the elements of an array) to floating point type.
+
 
 @item round()
 @anchor{round}
@@ -607,6 +609,7 @@ nearest integer, i.e.@:
 round( 8.5 ) = 9    round( 8.49 ) = 8    round( -1.75 ) = -2
 @end example
 
+
 @item floor()
 @anchor{floor}
 @findex floor()
@@ -616,6 +619,7 @@ largest integer that is not larger than the argument, i.e.@:
 @example
 floor( 8.6 ) = 8    floor( -8.6 ) = -9
 @end example
+
 
 @item ceil()
 @anchor{ceil}
@@ -627,17 +631,23 @@ smallest integer that is not less than the argument, i.e.@:
 round( 8.6 ) = 9     round( -8.6 ) = -8
 @end example
 
+
 @item abs()
 @anchor{abs}
 @findex abs()
 Returns the absolute value of an integer or floating point number (or
 the elements of an array) .
 
+
 @item mean()
 @anchor{mean}
 @findex mean()
-Expects an one-dimensional array as input and returns the mean value
-of the array elements.
+Expects an one-dimensional array as input and returns the mean value of
+the array elements. Optionally, it accepts up to two more integer
+arguments, the start index of the first element of the array top be
+included into the calculation and the number of elements to use. If the
+length parameter is missingall elements up to the end of the array are
+used.
 
 
 @item rms()
@@ -653,10 +663,12 @@ the sum of the squared array elements, divided by the number of elements.
 Returns the square root of an integer or floating point number (or the
 elements of an array). The argument must be a positive number.
 
+
 @item random()
 @anchor{random}
 @findex random()
 Returns a pseudo-random number in the interval @w{[0, 1]}.
+
 
 @item set_seed()
 @anchor{set_seed}
@@ -664,11 +676,13 @@ Returns a pseudo-random number in the interval @w{[0, 1]}.
 Sets a seed for the random number generator used in the function
 @code{random()} function. The argument has to be a positive integer.
 
+
 @item sin()
 @anchor{sin}
 @findex sin()
 Returns the sine of the argument (simple number or elements of an
 array), with the argument interpreted as the angle in radian.
+
 
 @item cos()
 @anchor{cos}
@@ -676,11 +690,13 @@ array), with the argument interpreted as the angle in radian.
 Returns the cosine of the argument (simple number or elements of an
 array), with the argument interpreted as the angle in radian.
 
+
 @item tan()
 @anchor{tan}
 @findex tan()
 Returns the tangent of the argument (simple number or elements of an
 array), with the argument interpreted as the angle in radian.
+
 
 @item asin()
 @anchor{asin}
@@ -690,6 +706,7 @@ or elements of an array) as an angle in radian. The argument must be in
 the interval @w{[-1, 1]}, the result an element of the interval
 @w{[-pi/2, pi/2]}.
 
+
 @item acos()
 @anchor{acos}
 @findex acos()
@@ -698,6 +715,7 @@ number or elements of an array) as an angle in radian. The argument must
 be in the interval @w{[-1, 1]}, the result an element of the interval
 @w{[0, pi]}.
 
+
 @item atan()
 @anchor{atan}
 @findex atan()
@@ -705,17 +723,20 @@ Returns the inverse of the tangent function of the argument (simple
 number or elements of an array) as an angle in radian, the result an
 element of the interval @w{[-pi, pi]}.
 
+
 @item sinh()
 @anchor{sinh}
 @findex sinh()
 Returns the hyperbolic sine of the argument (simple number or elements
 of an array).
 
+
 @item cosh()
 @anchor{cosh}
 @findex cosh()
 Returns the hyperbolic cosine of the argument (simple number or elements
 of an array).
+
 
 @item tanh()
 @anchor{tanh}
@@ -731,16 +752,19 @@ elements of an array).
 @section Auxiliary functions
 @cindex auxiliary functions
 
+
 @table @samp
 @item date()
 @anchor{date}
 @findex date()
 Returns a string with the current date in a form like @code{Sun Jun 17, 2000}.
 
+
 @item time()
 @anchor{time}
 @findex time()
 Returns a string with the current time in the form @code{hh:mm:ss}.
+
 
 @item delta_time()
 @anchor{delta_time}
@@ -751,6 +775,7 @@ functions as a floating point value. When called for the very first time
 it returns the time since the start of the experiment. The time
 returned by the function has micro-second resolution.
 
+
 @item wait()
 @anchor{wait}
 @findex wait()
@@ -760,6 +785,7 @@ resolution of @code{wait()} is in the @w{10 ms} range and may even be
 less precise. If the argument is negative the function will print an
 error message and return immediately. The maximum time the function
 accepts is more than 2.1 billion seconds (or about 68 years).
+
 
 @item slice()
 @anchor{slice}

@@ -2434,8 +2434,8 @@ Var *apply_unit( Var *var, Var *unit )
 		return vars_mult( var, unit );
 	else
 	{
-		eprint( FATAL, "%s:%ld: Syntax error: Unit is applied to a "
-				"non-number.\n", Fname, Lc );
+		eprint( FATAL, "%s:%ld: Syntax error: Unit is applied to something "
+				"not a number.\n", Fname, Lc );
 		THROW( EXCEPTION );
 	}
 }
