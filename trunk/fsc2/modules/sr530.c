@@ -42,7 +42,6 @@ typedef struct
 	double phase;
 	bool P;
 	int TC;
-	bool TC_warn;
 	double dac_voltage[ 2 ];
 } SR530;
 
@@ -103,7 +102,7 @@ int sr530_init_hook( void )
 	sr530.P = UNSET;             /* no phase has to be set at start of the */
 	                             /* experiment */
 	sr530.TC = -1;               /* no time constant has to be set at the */
-	sr530.TC_warn = UNSET;       /* start of the experiment and no warning */
+	                             /* start of the experiment and no warning */
 	                             /* concerning it has been printed yet */
 	for ( i = 0; i < 2; i++ )
 		sr530.dac_voltage[ i ]  = 0.0;
@@ -389,18 +388,16 @@ Var *lockin_time_constant( Var *v )
 		}
 
 	if ( TC > 0 &&                                    /* value found ? */
-		 fabs( tc - tcs[ TC - 1 ] ) > tc * 1.0e-2 &&  /* error > 1% ? */
-		 ! sr530.TC_warn )                          /* no warn message yet ? */
+		 fabs( tc - tcs[ TC - 1 ] ) > tc * 1.0e-2 )   /* error > 1% ? */
 	{
 		if ( tc >= 1.0 )
-			eprint( WARN, "%s:%ld: %s: Can't set time constant to %.0lf s, "
+			eprint( WARN, "%s:%ld: %s: Can't set time constant to %g s, "
 					"using %.0lf s instead.\n", Fname, Lc, DEVICE_NAME, tc,
 					tcs[ TC - 1 ] );
 		else
-			eprint( WARN, "%s:%ld: %s: Can't set time constant to %.0lf ms,"
-					" using %.0lf ms instead.\n", Fname, Lc, DEVICE_NAME,
-					tc * 1.0e3, tcs[ TC - 1 ] * 1.0e3 );
-		sr530.TC_warn = SET;
+			eprint( WARN, "%s:%ld: %s: Can't set time constant to %g s, "
+					"using %.0lf ms instead.\n", Fname, Lc, DEVICE_NAME,
+					tc, tcs[ TC - 1 ] * 1.0e3 );
 	}
 	
 	if ( TC < 0 )                                  /* not found yet ? */
@@ -410,18 +407,14 @@ Var *lockin_time_constant( Var *v )
 		else
 			TC = 11;
 
-		if ( ! sr530.TC_warn )                      /* no warn message yet ? */
-		{
-			if ( tc >= 1.0 )
-				eprint( WARN, "%s:%ld: %s: Time constant of %.0lf s is too "
-						"large, using %.0lf s instead.\n", Fname, Lc,
-						DEVICE_NAME, tc, tcs[ TC - 1 ] );
-			else
-				eprint( WARN, "%s:%ld: %s: Time constant of %.0lf ms is too"
-						" short, using %.0lf ms instead.\n", Fname, Lc,
-						DEVICE_NAME, tc * 1.0e3, tcs[ TC - 1 ] * 1.0e3 );
-			sr530.TC_warn = SET;
-		}
+		if ( tc >= 1.0 )
+			eprint( WARN, "%s:%ld: %s: Time constant of %g s is too large, "
+					"using %.0lf s instead.\n", Fname, Lc, DEVICE_NAME, tc,
+					tcs[ TC - 1 ] );
+		else
+			eprint( WARN, "%s:%ld: %s: Time constant of %g s is too short, "
+					"using %.0lf ms instead.\n", Fname, Lc, DEVICE_NAME, tc,
+					tcs[ TC - 1 ] * 1.0e3 );
 	}
 
 	if ( ! TEST_RUN )
@@ -737,11 +730,12 @@ void sr530_set_sens( int Sens )
 	Sens = 25 - Sens;
 
 	/* For sensitivities lower than 100 nV EXPAND has to be switched on
-	   otherwise it got to be switched off */
+	   (for both channels) otherwise it got to be switched off */
 
 	if ( Sens <= 3 )
 	{
-		if ( gpib_write( sr530.device, "E1,1", 4 ) == FAILURE )
+		if ( gpib_write( sr530.device, "E1,1", 4 ) == FAILURE ||
+			 gpib_write( sr530.device, "E2,1", 4 ) == FAILURE)
 		{
 			eprint( FATAL, "%s: Can't access the lock-in amplifier.\n",
 					DEVICE_NAME );
@@ -751,7 +745,8 @@ void sr530_set_sens( int Sens )
 	}
 	else
 	{
-		if ( gpib_write( sr530.device, "E1,0", 4 ) == FAILURE )
+		if ( gpib_write( sr530.device, "E1,0", 4 ) == FAILURE ||
+			 gpib_write( sr530.device, "E2,0", 4 ) == FAILURE )
 		{
 			eprint( FATAL, "%s: Can't access the lock-in amplifier.\n",
 					DEVICE_NAME );
