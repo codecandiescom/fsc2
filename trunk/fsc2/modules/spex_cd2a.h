@@ -155,6 +155,8 @@ typedef struct {
 	bool use_checksum;               /* do we need a checksum in transfers ? */
 	bool sends_lf;
 
+    bool fatal_error;                /* set on exceptions etc. */
+
 } SPEX_CD2A;
 
 extern SPEX_CD2A spex_cd2a;
@@ -224,6 +226,19 @@ double spex_cd2a_UAwn2Swl( double wn );
 double spex_cd2a_UMwn2Swl( double wn );
 double spex_cd2a_SAwn2Uwl( double wn );
 
+
+#define SPEX_CD2A_THROW( x )  do { spex_cd2a.fatal_error = SET;  \
+                                   THROW( x );                   \
+                                 } while ( 0 )
+
+#define SPEX_CD2A_RETHROW( )  do { spex_cd2a.fatal_error = SET;  \
+                                   RETHROW( );                   \
+                                 } while ( 0 )
+
+
+#define SPEX_CD2A_ASSERT( x ) do { spex_cd2a.fatal_error = SET;  \
+                                   fsc2_assert( x );             \
+                                 } while( 0 )
 
 #endif /* ! SPEX_CD2A_HEADER */
 

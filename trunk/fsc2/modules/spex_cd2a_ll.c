@@ -87,17 +87,13 @@ void spex_cd2a_init( void )
 			if ( 1 != show_choices( "Please press the \"REMOTE\" button at\n"
 									"the console to allow computer control\n"
 									"of the monochromator.",
-									2, "Abort", "Done", NULL, 1 ) )
+									1, "Abort", "Done", NULL, 1 ) )
 				continue;
-			spex_cd2a.fatal_error = SET;
-			THROW( EXCEPTION);
+			SPEX_CD2A_THROW( EXCEPTION );
 			
 		}
 		OTHERWISE
-		{
-			spex_cd2a.fatal_error = SET;
-			RETHROW( );
-		}
+			SPEX_CD2A_RETHROW( );
 
 		break;
 	}
@@ -455,8 +451,7 @@ void spex_cd2a_open( void )
 						  O_RDWR | O_EXCL | O_NOCTTY | O_NONBLOCK ) ) == NULL )
 	{
 		print( FATAL, "Can't open device file for monochromator.\n" );
-		spex_cd2a.fatal_error = SET;
-		THROW( EXCEPTION );
+		SPEX_CD2A_THROW( EXCEPTION );
 	}
 
 	spex_cd2a.tio->c_cflag = 0;
@@ -478,8 +473,7 @@ void spex_cd2a_open( void )
 			fsc2_serial_close( SERIAL_PORT );
 			print( FATAL, "Invalid setting for parity bit in "
 				   "configuration file for the device.\n" );
-			spex_cd2a.fatal_error = SET;
-			THROW( EXCEPTION );
+			SPEX_CD2A_THROW( EXCEPTION );
 	}
 
 	switch ( NUMBER_OF_STOP_BITS )
@@ -495,8 +489,7 @@ void spex_cd2a_open( void )
 			fsc2_serial_close( SERIAL_PORT );
 			print( FATAL, "Invalid setting for number of stop bits in "
 				   "configuration file for the device.\n" );
-			spex_cd2a.fatal_error = SET;
-			THROW( EXCEPTION );
+			SPEX_CD2A_THROW( EXCEPTION );
 	}
 
 	switch ( NUMBER_OF_BITS_PER_CHARACTER )
@@ -521,8 +514,7 @@ void spex_cd2a_open( void )
 			fsc2_serial_close( SERIAL_PORT );
 			print( FATAL, "Invalid setting for number of bits per "
 				   "in character configuration file for the device.\n" );
-			spex_cd2a.fatal_error = SET;
-			THROW( EXCEPTION );
+			SPEX_CD2A_THROW( EXCEPTION );
 	}
 
 	spex_cd2a.tio->c_cflag |= CLOCAL | CREAD;
@@ -641,8 +633,7 @@ static void spex_cd2a_read_ack( void )
 	if ( *buf == NAK )
 	{
 		print( FATAL, "Communication problem with device.\n" );
-		spex_cd2a.fatal_error = SET;
-		THROW( EXCEPTION );
+		SPEX_CD2A_THROW( EXCEPTION );
 	}
 
 	/* If the device sends an <ACK><CAN> sequence everything is fine */
@@ -682,8 +673,7 @@ static void spex_cd2a_read_ack( void )
 		if ( spex_cd2a_do_print_message )
 			print( FATAL, "Failure to execute command, error code: \"%s\".\n",
 			   buf + 2 );
-		spex_cd2a.fatal_error = SET;
-		THROW( EXCEPTION );
+		SPEX_CD2A_THROW( EXCEPTION );
 	}
 
 	/* If none of the above was received things went really wrong... */
@@ -793,8 +783,7 @@ static void spex_cd2a_read_cmd_ack( const char *cmd )
 			break;
 
 		default :                 /* no other commands are used */
-			spex_cd2a.fatal_error = SET;
-			fsc2_assert( 1 == 0 );
+			SPEX_CD2A_ASSERT( 1 == 0 );
 	}
 }
 
@@ -921,8 +910,7 @@ static void spex_cd2a_comm_fail( void )
 {
 	if ( spex_cd2a_do_print_message )
 		print( FATAL, "Can't access the monochromator.\n" );
-	spex_cd2a.fatal_error = SET;
-	THROW( EXCEPTION );
+	SPEX_CD2A_THROW( EXCEPTION );
 }
 
 
@@ -934,8 +922,7 @@ static void spex_cd2a_comm_fail( void )
 static void spex_cd2a_wrong_data( void )
 {
 	print( FATAL, "Device send unexpected data.\n" );
-	spex_cd2a.fatal_error = SET;
-	THROW( EXCEPTION );
+	SPEX_CD2A_THROW( EXCEPTION );
 }
 
 

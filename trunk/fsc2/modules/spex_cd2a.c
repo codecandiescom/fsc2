@@ -42,6 +42,8 @@ SPEX_CD2A spex_cd2a, spex_cd2a_stored;
 
 int spex_cd2a_init_hook( void )
 {
+	spex_cd2a.fatal_error = UNSET;
+
 	/* Claim the serial port (throws exception on failure) */
 
 	fsc2_request_serial_port( SERIAL_PORT, DEVICE_NAME );
@@ -67,7 +69,7 @@ int spex_cd2a_init_hook( void )
 		default :
 			print( FATAL, "Invalid setting for drive method in "
 				   "configuration file for device.\n" );
-			THROW( EXCEPTION );
+			SPEX_CD2A_THROW( EXCEPTION );
 	}
 
 	/* Read in the file where the state of the monochromator gets stored
@@ -89,7 +91,7 @@ int spex_cd2a_init_hook( void )
 		print( FATAL, "Offset setting in state file '%s' is "
 			   "unrealistically high.\n", fn );
 		T_free( fn );
-		THROW( EXCEPTION );
+		SPEX_CD2A_THROW( EXCEPTION );
 	}
 #endif
 
@@ -107,7 +109,7 @@ int spex_cd2a_init_hook( void )
 		{
 			print( FATAL, "Invalid setting for units in configuration file "
 				   "for the device.\n" );
-			THROW( EXCEPTION );
+			SPEX_CD2A_THROW( EXCEPTION );
 		}
 	}
 
@@ -127,7 +129,7 @@ int spex_cd2a_init_hook( void )
 		else
 			print( FATAL, "Invalid setting for lower wavelength limit in "
 				   "configuration file for the device.\n" );
-		THROW( EXCEPTION );
+		SPEX_CD2A_THROW( EXCEPTION );
 	}			
 
 	/* Find out which is the highest wavelength that can be set */
@@ -148,7 +150,7 @@ int spex_cd2a_init_hook( void )
 		else
 			print( FATAL, "Invalid setting for upper wavelength limit in "
 				   "configuration file for the device.\n" );
-		THROW( EXCEPTION );
+		SPEX_CD2A_THROW( EXCEPTION );
 	}
 
 	if ( spex_cd2a.mode & WN_MODES )
@@ -168,7 +170,7 @@ int spex_cd2a_init_hook( void )
 		else
 			print( FATAL, "Upper wavelength limit isn't larger than the "
 				   "lower limit in configuration file for the device.\n" );
-		THROW( EXCEPTION );
+		SPEX_CD2A_THROW( EXCEPTION );
 	}
 
 	/* Determine the number of grooves per meter for the installed grating */
@@ -177,7 +179,7 @@ int spex_cd2a_init_hook( void )
 	{
 		print( FATAL, "Invalid setting for number of grooves per mm of "
 			   "grating in configuration file for the device.\n" );
-		THROW( EXCEPTION );
+		SPEX_CD2A_THROW( EXCEPTION );
 	}
 
 	spex_cd2a.grooves = 1000 * GROOVE_DENSITY;
@@ -186,7 +188,7 @@ int spex_cd2a_init_hook( void )
 	{
 		print( FATAL, "Invalid setting for number of grooves per mm of "
 			   "standard grating in configuration file for the device.\n" );
-		THROW( EXCEPTION );
+		SPEX_CD2A_THROW( EXCEPTION );
 	}
 
 	/* Determine the number of grooves per meter for the standard grating */
@@ -214,7 +216,7 @@ int spex_cd2a_init_hook( void )
 	{
 		print( FATAL, "Invalid setting for steps per unit with standard "
 			   "grating in configuration file for the device.\n" );
-		THROW( EXCEPTION );
+		SPEX_CD2A_THROW( EXCEPTION );
 	}
 
 	/* Also the lower and upper limit must be corrected if the grating isn't
@@ -252,7 +254,7 @@ int spex_cd2a_init_hook( void )
 	{
 		print( FATAL, "Invalid setting for data format in configuration file "
 			   "for the device.\n" );
-		THROW( EXCEPTION );
+		SPEX_CD2A_THROW( EXCEPTION );
 	}
 
 	/* Determine if we need to send a checksum with commands */
@@ -303,7 +305,7 @@ int spex_cd2a_exp_hook( void )
 	{
 		print( FATAL, "Offset setting in state file '%s' is "
 			   "unrealistically high.\n" );
-		THROW( EXCEPTION );
+		SPEX_CD2A_THROW( EXCEPTION );
 	}
 #endif
 
@@ -328,7 +330,8 @@ void spex_cd2a_child_exit_hook( void )
 {
 	if ( spex_cd2a.in_scan )
 		spex_cd2a_halt( );
-	spex_cd2a_store_state( );
+	if ( ! spex_cd2a.fatal_error )
+		spex_cd2a_store_state( );
 }
 
 
@@ -379,7 +382,7 @@ Var *monochromator_scan_setup( Var *v )
 		if ( ! spex_cd2a.scan_is_init )
 		{
 			print( FATAL, "No scan setup has been done.\n" );
-			THROW( EXCEPTION );
+			SPEX_CD2A_THROW( EXCEPTION );
 		}
 
 		if ( spex_cd2a.mode & WN_MODES )
@@ -394,7 +397,7 @@ Var *monochromator_scan_setup( Var *v )
 	if ( v->next == NULL )
 	{
 		print( FATAL, "Missing scan step size argument.\n" );
-		THROW( EXCEPTION );
+		SPEX_CD2A_THROW( EXCEPTION );
 	}
 
 	if ( spex_cd2a.mode & WN_MODES )
@@ -410,7 +413,7 @@ Var *monochromator_scan_setup( Var *v )
 		else
 			print( FATAL, "Invalid start wavelength of %.5f nm.\n",
 				   1.0e9 * spex_cd2a_Swl2Uwl( start ) );
-		THROW( EXCEPTION );
+		SPEX_CD2A_THROW( EXCEPTION );
 	}
 
 	if ( start < spex_cd2a.lower_limit )
@@ -426,7 +429,7 @@ Var *monochromator_scan_setup( Var *v )
 				   "limit of the device of %.5f nm.\n",
 				   1.0e9 * spex_cd2a_Swl2Uwl( start ),
 				   1.0e9 * spex_cd2a_Swl2Uwl( spex_cd2a.lower_limit ) );
-		THROW( EXCEPTION );
+		SPEX_CD2A_THROW( EXCEPTION );
 	}
 
 	if ( start > spex_cd2a.upper_limit )
@@ -441,7 +444,7 @@ Var *monochromator_scan_setup( Var *v )
 				   "upper limit of the device of %.5f nm.\n",
 				   1.0e9 * spex_cd2a_Swl2Uwl( start ),
 				   1.0e9 * spex_cd2a_Swl2Uwl( spex_cd2a.upper_limit ) );
-		THROW( EXCEPTION );
+		SPEX_CD2A_THROW( EXCEPTION );
 	}
 
 	if ( spex_cd2a.mode & WN_MODES )
@@ -460,21 +463,21 @@ Var *monochromator_scan_setup( Var *v )
 	if ( step <= 0.0 ) 
 	{
 		print( FATAL, "Step size must be positive.\n" );
-		THROW( EXCEPTION );
+		SPEX_CD2A_THROW( EXCEPTION );
 	}
 
 	if ( spex_cd2a.mode == WL && start + step > spex_cd2a.upper_limit )
 	{
 		print( FATAL, "Step size of %.5f nm is too large.\n",
 			   10e9 * step );
-		THROW( EXCEPTION );
+		SPEX_CD2A_THROW( EXCEPTION );
 	}
 
 	if ( spex_cd2a.mode & WN_MODES &&
 		 spex_cd2a_Awn2wl( start - step ) > spex_cd2a.upper_limit )
 	{
 		print( FATAL, "Step size of %.4f cm^-1 is too large.\n", step );
-		THROW( EXCEPTION );
+		SPEX_CD2A_THROW( EXCEPTION );
 	}
 
 	if ( spex_cd2a.mode & WN_MODES &&
@@ -491,7 +494,7 @@ Var *monochromator_scan_setup( Var *v )
 		print( FATAL, "Step size of %.5f nm is smaller than the "
 			   "minimum possible step size of %.5f.\n",
 			   10e9 * step, 10e9 * spex_cd2a.mini_step );
-		THROW( EXCEPTION );
+		SPEX_CD2A_THROW( EXCEPTION );
 	}
 
 	if ( step < spex_cd2a.mini_step )
@@ -560,7 +563,7 @@ Var *monochromator_wavelength( Var *v )
 		if ( ! spex_cd2a.is_wavelength && ! spex_cd2a.scan_is_init )
 		{
 			print( FATAL, "Wavelength hasn't been set yet.\n ");
-			THROW( EXCEPTION );
+			SPEX_CD2A_THROW( EXCEPTION );
 		}
 
 		return vars_push( FLOAT_VAR,
@@ -573,7 +576,7 @@ Var *monochromator_wavelength( Var *v )
 	{
 		print( FATAL, "Invalid wavelength of %.5f nm.\n",
 			   1.0e9 * spex_cd2a_Swl2Uwl( wl ) );
-		THROW( EXCEPTION );
+		SPEX_CD2A_THROW( EXCEPTION );
 	}
 
 	if ( wl < spex_cd2a.lower_limit )
@@ -582,7 +585,7 @@ Var *monochromator_wavelength( Var *v )
 			   "lower wavelength limit of %.5f nm.\n",
 			   1.0e9 * spex_cd2a_Swl2Uwl( wl ),
 			   1.0e9 * spex_cd2a_Swl2Uwl( spex_cd2a.lower_limit ) );
-		THROW( EXCEPTION );
+		SPEX_CD2A_THROW( EXCEPTION );
 	}
 
 	if ( wl > spex_cd2a.upper_limit )
@@ -591,7 +594,7 @@ Var *monochromator_wavelength( Var *v )
 			   "upper wavelength limit of %.5f nm.\n",
 			   1,0e9 * spex_cd2a_Swl2Uwl( wl ),
 			   1.0e9 * spex_cd2a_Swl2Uwl( spex_cd2a.upper_limit ) );
-		THROW( EXCEPTION );
+		SPEX_CD2A_THROW( EXCEPTION );
 	}
 
 	too_many_arguments( v );
@@ -628,7 +631,7 @@ Var *monochromator_wavenumber( Var *v )
 		{
 			print( FATAL, "Invalid (absolute) wavenumber of %.4f cm^-1.\n",
 				   spex_cd2a_Swl2UAwn( wl ) );
-			THROW( EXCEPTION );
+			SPEX_CD2A_THROW( EXCEPTION );
 		}
 
 		if ( wl < spex_cd2a.lower_limit )
@@ -637,7 +640,7 @@ Var *monochromator_wavenumber( Var *v )
 				   "larger than the upper wavenumber limit of %.4f cm^-1.\n",
 				   spex_cd2a_Swl2UAwn( wl ),
 				   spex_cd2a_Swl2UAwn( spex_cd2a.lower_limit ) );
-			THROW( EXCEPTION );
+			SPEX_CD2A_THROW( EXCEPTION );
 		}
 
 		if ( wl > spex_cd2a.upper_limit )
@@ -646,7 +649,7 @@ Var *monochromator_wavenumber( Var *v )
 				   "lower than the lower wavenumber limit of %.4f cm^-1.\n",
 				   spex_cd2a_Swl2UAwn( wl ),
 				   spex_cd2a_Swl2UAwn( spex_cd2a.upper_limit ) );
-			THROW( EXCEPTION );
+			SPEX_CD2A_THROW( EXCEPTION );
 		}
 
 		too_many_arguments( v );
@@ -664,7 +667,7 @@ Var *monochromator_wavenumber( Var *v )
 		if ( ! spex_cd2a.is_wavelength && ! spex_cd2a.scan_is_init )
 		{
 			print( FATAL, "Wavenumber hasn't been set yet,\n ");
-			THROW( EXCEPTION );
+			SPEX_CD2A_THROW( EXCEPTION );
 		}
 	}
 
@@ -683,7 +686,7 @@ Var *monochromator_start_scan( UNUSED_ARG Var *v )
 	if ( ! spex_cd2a.scan_is_init )
 	{
 		print( FATAL, "Missing scan setup.\n" );
-		THROW( EXCEPTION );
+		SPEX_CD2A_THROW( EXCEPTION );
 	}
 
 	spex_cd2a_start_scan( );
@@ -707,13 +710,13 @@ Var *monochromator_scan_step( UNUSED_ARG Var *v )
 	if ( ! spex_cd2a.scan_is_init )
 	{
 		print( FATAL, "Missing scan setup.\n" );
-		THROW( EXCEPTION );
+		SPEX_CD2A_THROW( EXCEPTION );
 	}
 
 	if ( ! spex_cd2a.in_scan )
 	{
 		print( FATAL, "No scan has been started yet.\n" );
-		THROW( EXCEPTION );
+		SPEX_CD2A_THROW( EXCEPTION );
 	}
 
 	if ( spex_cd2a.mode == WL &&
@@ -727,7 +730,7 @@ Var *monochromator_scan_step( UNUSED_ARG Var *v )
 		}
 
 		print( FATAL, "Scan reached upper limit of wavelength range.\n" );
-		THROW( EXCEPTION );
+		SPEX_CD2A_THROW( EXCEPTION );
 	}
 
 	if ( spex_cd2a.mode & WN_MODES &&
@@ -742,7 +745,7 @@ Var *monochromator_scan_step( UNUSED_ARG Var *v )
 		}
 
 		print( FATAL, "Scan reached lower limit of wavenumber range.\n" );
-		THROW( EXCEPTION );
+		SPEX_CD2A_THROW( EXCEPTION );
 	}
 
 	spex_cd2a_trigger( );
@@ -790,7 +793,7 @@ Var *monochromator_laser_line( Var *v )
 	{
 		print( FATAL, "Laser line position can only be used in wavenumber "
 			   "mode of monochromator.\n" );
-		THROW( EXCEPTION );
+		SPEX_CD2A_THROW( EXCEPTION );
 	}
 
 	if ( v == NULL )
@@ -822,7 +825,7 @@ Var *monochromator_laser_line( Var *v )
 		{
 			print( FATAL, "Laser line position is not within the shutter "
 				   "range.\n" );
-			THROW( EXCEPTION );
+			SPEX_CD2A_THROW( EXCEPTION );
 		}
 
 		spex_cd2a.laser_wavenumber = spex_cd2a_UAwn2SAwn( wn );
@@ -865,7 +868,7 @@ Var *monochromator_shutter_limits( Var *v )
 	if ( ! spex_cd2a.has_shutter )
 	{
 		print( FATAL, "Device hasn't a shutter.\n" );
-		THROW( EXCEPTION );
+		SPEX_CD2A_THROW( EXCEPTION );
 	}
 
 	if ( v == NULL )
@@ -873,7 +876,7 @@ Var *monochromator_shutter_limits( Var *v )
 		if ( ! spex_cd2a.shutter_limits_are_set )
 		{
 			print( FATAL, "Shutter limits haven't been set yet.\n" );
-			THROW( EXCEPTION );
+			SPEX_CD2A_THROW( EXCEPTION );
 		}
 	}
 	else
@@ -883,7 +886,7 @@ Var *monochromator_shutter_limits( Var *v )
 		if ( ( v = vars_pop( v ) ) == NULL )
 		{
 			print( FATAL, "Missing upper shutter limit.\n ");
-			THROW( EXCEPTION );
+			SPEX_CD2A_THROW( EXCEPTION );
 		}
 
 		l[ 1 ] = get_double( v, "uppper shutter limit" );
@@ -894,7 +897,7 @@ Var *monochromator_shutter_limits( Var *v )
 		{
 			print( FATAL, "Lower shutter limit larger than upper shutter "
 				   "limit.\n ");
-			THROW( EXCEPTION );
+			SPEX_CD2A_THROW( EXCEPTION );
 		}
 
 		if ( spex_cd2a.mode & WN_MODES )
@@ -943,7 +946,7 @@ Var *monochromator_shutter_limits( Var *v )
 			{
 				print( FATAL, "New shutter limits do not cover the laser "
 					   "line position.\n" );
-				THROW( EXCEPTION );
+				SPEX_CD2A_THROW( EXCEPTION );
 			}
 		}
 
@@ -1022,7 +1025,7 @@ Var *monochromator_calibrate( Var *v )
 		print( FATAL, "Monochromator offset can't be set while in relative "
 			   "wavenumber mode. Set the laser line position to 0 before "
 			   "attempting to change the calibration.\n" );
-		THROW( EXCEPTION );
+		SPEX_CD2A_THROW( EXCEPTION );
 	}
 
 	if ( spex_cd2a.mode & WN_MODES )
@@ -1038,7 +1041,7 @@ Var *monochromator_calibrate( Var *v )
 		print( FATAL, "Offset of %.4f cm^-1 is unrealistically high. If this "
 			   "isn't an error change the \"SPEX_CD2A_MAX_OFFSET\" setting in "
 			   "the device configuration file and recompile.\n", new_offset );
-		THROW( EXCEPTION );
+		SPEX_CD2A_THROW( EXCEPTION );
 	}
 
 	if ( spex_cd2a.mode == WL && fabs( 1.0e9 * offset )
@@ -1048,7 +1051,7 @@ Var *monochromator_calibrate( Var *v )
 			   "isn't an error change the \"SPEX_CD2A_MAX_OFFSET\" setting in "
 			   "the device configuration file and recompile.\n",
 			   1.0e9 * new_offset );
-		THROW( EXCEPTION );
+		SPEX_CD2A_THROW( EXCEPTION );
 	}
 #endif
 
@@ -1066,7 +1069,7 @@ Var *monochromator_calibrate( Var *v )
 			print( FATAL, "Invalid negative wave%s difference for one CCD "
 				   "camera pixel.\n",
 				   spex_cd2a.mode & WN_MODES ? "number" : "length" );
-			THROW( EXCEPTION );
+			SPEX_CD2A_THROW( EXCEPTION );
 		}
 	}
 	else
@@ -1109,13 +1112,13 @@ Var *monochromator_wavelength_axis( Var *v )
 		if ( wl < 0.0 )
 		{
 			print( FATAL, "Invalid negative center wavelength.\n" );
-			THROW( EXCEPTION );
+			SPEX_CD2A_THROW( EXCEPTION );
 		}
 	}
 	else if ( ! spex_cd2a.is_wavelength && ! spex_cd2a.scan_is_init )
 	{
 		print( FATAL, "Wavelength hasn't been set yet.\n ");
-		THROW( EXCEPTION );
+		SPEX_CD2A_THROW( EXCEPTION );
 	}
 
 	too_many_arguments( v );
@@ -1126,7 +1129,7 @@ Var *monochromator_wavelength_axis( Var *v )
 	{
 		print( FATAL, "Function can only be used when the module for a "
 			   "CCD camera is loaded.\n" );
-		THROW( EXCEPTION );
+		SPEX_CD2A_THROW( EXCEPTION );
 	}
 
 	/* Get the width (in pixels) of the chip of the camera */
@@ -1135,7 +1138,7 @@ Var *monochromator_wavelength_axis( Var *v )
 	{
 		print( FATAL, "CCD camera has no function for determining the "
 			   "size of the chip.\n" );
-		THROW( EXCEPTION );
+		SPEX_CD2A_THROW( EXCEPTION );
 	}
 
 	cv = func_call( func_get( "ccd_camera_pixel_area", &acc ) );
@@ -1145,7 +1148,7 @@ Var *monochromator_wavelength_axis( Var *v )
 	{
 		print( FATAL, "Function of CCD for determining the size of the chip "
 			   "does not return a useful value.\n" );
-		THROW( EXCEPTION );
+		SPEX_CD2A_THROW( EXCEPTION );
 	}
 
 	num_pixels = cv->val.lpnt[ 0 ];
@@ -1200,13 +1203,13 @@ Var *monochromator_wavenumber_axis( Var *v )
 		if ( wl <= 0.0 )
 		{
 			print( FATAL, "Invalid center wavenumber.\n" );
-			THROW( EXCEPTION );
+			SPEX_CD2A_THROW( EXCEPTION );
 		}
 	}
 	else if ( ! spex_cd2a.is_wavelength && ! spex_cd2a.scan_is_init )
 	{
 		print( FATAL, "Wavenumber hasn't been set yet.\n ");
-		THROW( EXCEPTION );
+		SPEX_CD2A_THROW( EXCEPTION );
 	}
 
 	too_many_arguments( v );
@@ -1217,7 +1220,7 @@ Var *monochromator_wavenumber_axis( Var *v )
 	{
 		print( FATAL, "Function can only be used when the module for a "
 			   "CCD camera is loaded.\n" );
-		THROW( EXCEPTION );
+		SPEX_CD2A_THROW( EXCEPTION );
 	}
 
 	/* Get the width (in pixels) of the chip of the camera */
@@ -1226,7 +1229,7 @@ Var *monochromator_wavenumber_axis( Var *v )
 	{
 		print( FATAL, "CCD camera has no function for determining the "
 			   "size of the chip.\n" );
-		THROW( EXCEPTION );
+		SPEX_CD2A_THROW( EXCEPTION );
 	}
 
 	cv = func_call( func_get( "ccd_camera_pixel_area", &acc ) );
@@ -1236,7 +1239,7 @@ Var *monochromator_wavenumber_axis( Var *v )
 	{
 		print( FATAL, "Function of CCD for determining the size of the chip "
 			   "does not return a useful value.\n" );
-		THROW( EXCEPTION );
+		SPEX_CD2A_THROW( EXCEPTION );
 	}
 
 	num_pixels = cv->val.lpnt[ 0 ];

@@ -52,7 +52,7 @@ bool spex_cd2a_read_state( void )
 	{
 		print( FATAL, "Can't open state file '%s'.\n", fn );
 		T_free( fn );
-		THROW( EXCEPTION );
+		SPEX_CD2A_THROW( EXCEPTION );
 	}
 
 	do
@@ -85,7 +85,7 @@ bool spex_cd2a_read_state( void )
 					print( FATAL, "Invalid state file '%s'.\n", fn );
 					T_free( fn );
 					fsc2_fclose( fp );
-					THROW( EXCEPTION );
+					SPEX_CD2A_THROW( EXCEPTION );
 				}
 
 				while ( ( c = fsc2_fgetc( fp ) ) != EOF && isspace( c ) )
@@ -97,7 +97,7 @@ bool spex_cd2a_read_state( void )
 					print( FATAL, "Invalid state file '%s'.\n", fn );
 					T_free( fn );
 					fsc2_fclose( fp );
-					THROW( EXCEPTION );
+					SPEX_CD2A_THROW( EXCEPTION );
 				}
 				
 				if ( fsc2_fgetc( fp ) != 'm' ||
@@ -109,7 +109,7 @@ bool spex_cd2a_read_state( void )
 					print( FATAL, "Invalid state file '%s'.\n", fn );
 					T_free( fn );
 					fsc2_fclose( fp );
-					THROW( EXCEPTION );
+					SPEX_CD2A_THROW( EXCEPTION );
 				}
 
 				break;
@@ -123,7 +123,7 @@ bool spex_cd2a_read_state( void )
 	{
 		print( FATAL, "Invalid state file '%s'.\n", fn );
 		T_free( fn );
-		THROW( EXCEPTION );
+		SPEX_CD2A_THROW( EXCEPTION );
 	}	
 
 	if ( spex_cd2a.mode & WN_MODES )
@@ -136,7 +136,7 @@ bool spex_cd2a_read_state( void )
 		{
 			print( FATAL, "Invalid state file '%s'.\n", fn );
 			T_free( fn );
-			THROW( EXCEPTION );
+			SPEX_CD2A_THROW( EXCEPTION );
 		}
 
 		spex_cd2a.laser_wavenumber = val[ 2 ];
@@ -232,7 +232,7 @@ bool spex_cd2a_store_state( void )
 
 double spex_cd2a_wl2Awn( double wl )
 {
-	fsc2_assert( wl > 0 );
+	SPEX_CD2A_ASSERT( wl > 0 );
 	return 0.01 / wl;
 }
 
@@ -243,7 +243,7 @@ double spex_cd2a_wl2Awn( double wl )
 
 double spex_cd2a_Awn2wl( double wn )
 {
-	fsc2_assert( wn > 0 );
+	SPEX_CD2A_ASSERT( wn > 0 );
 	return 0.01 / wn;
 }
 
@@ -281,12 +281,8 @@ double spex_cd2a_Mwn2Awn( double wn )
 
 double spex_cd2a_wl2Mwn( double wl )
 {
-	double wn;
-
-
-	fsc2_assert( wl > 0 );
-	wn = 0.01 / wl;
-	return spex_cd2a_Awn2Mwn( wn );
+	SPEX_CD2A_ASSERT( wl > 0 );
+	return spex_cd2a_Awn2Mwn( 0.01 / wl );
 }
 
 
@@ -298,7 +294,7 @@ double spex_cd2a_wl2Mwn( double wl )
 double spex_cd2a_Mwn2wl( double wn )
 {
 	wn = spex_cd2a_Mwn2Awn( wn );
-	fsc2_assert( wn > 0 );
+	SPEX_CD2A_ASSERT( wn > 0 );
 	return 0.01 / wn;
 }
 
