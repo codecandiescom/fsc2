@@ -35,21 +35,22 @@
 
 /* Locally used global variables */
 
-static bool is_loaded = UNSET;       /* set when EDL file is loaded */
-static bool is_tested = UNSET;       /* set when EDL file has been tested */
-static bool parse_result = UNSET;    /* set when EDL passed the tests */
-static FILE *in_file_fp = NULL;
-static time_t in_file_mod = 0;
-static bool delete_file = UNSET;
-static bool delete_old_file = UNSET;
-static volatile sig_atomic_t fsc2_death = 0;
+static bool Is_loaded = UNSET;       /* set when EDL file is loaded */
+static bool Is_tested = UNSET;       /* set when EDL file has been tested */
+static bool Parse_result = UNSET;    /* set when EDL passed the tests */
+static FILE *In_file_fp = NULL;
+static time_t In_file_mod = 0;
+static bool Delete_file = UNSET;
+static bool Delete_old_file = UNSET;
+static volatile sig_atomic_t Fsc2_death = 0;
 
 
 /* Imported global variables */
 
-extern FL_resource Xresources[ ];    /* from xinit.c */
-extern const char *prog_name;
-extern FILE *fsc2_confin;            /* from fsc2_conf_lexer.l */
+extern FL_resource Xresources[ ];    /* defined in xinit.c */
+extern const char *Prog_Name;        /* defined in global.c */
+extern FILE *fsc2_confin;            /* defined in fsc2_conf_lexer.l */
+
 extern int fsc2_confparse( void );   /* from fsc2_conf_parser.y */
 
 
@@ -108,7 +109,7 @@ int main( int argc, char *argv[ ] )
 	if ( ( Fsc2_Internals.conn_pid =
 			   	( pid_t ) check_spawn_fsc2d( ! ( Fsc2_Internals.cmdline_flags &
 												 NON_EXCLUSIVE ),
-											 in_file_fp ) ) == -1 )
+											 In_file_fp ) ) == -1 )
 		return EXIT_FAILURE;
 
 	/* Initialize xforms stuff, quit on error */
@@ -134,7 +135,7 @@ int main( int argc, char *argv[ ] )
 	   the input files needs to be deleted */
 
 	if ( fname != NULL && Fsc2_Internals.cmdline_flags & DO_DELETE )
-		delete_file = delete_old_file = SET;
+		Delete_file = Delete_old_file = SET;
 
 	/* If there is a file argument try to load it */
 
@@ -152,7 +153,7 @@ int main( int argc, char *argv[ ] )
 	/* In batch mode try to get the next file if the first input file
 	   could not be accessed until we have one. */
 
-	while ( Fsc2_Internals.cmdline_flags & BATCH_MODE && ! is_loaded )
+	while ( Fsc2_Internals.cmdline_flags & BATCH_MODE && ! Is_loaded )
 	{
 		int i;
 
@@ -199,14 +200,14 @@ int main( int argc, char *argv[ ] )
 	if ( Fsc2_Internals.conn_pid == 0 ||
 		 ( Fsc2_Internals.conn_pid =
 			   spawn_conn( Fsc2_Internals.cmdline_flags &
-			   	   ( DO_TEST | DO_START ) && is_loaded, in_file_fp ) ) != -1 )
+			   	   ( DO_TEST | DO_START ) && Is_loaded, In_file_fp ) ) != -1 )
 	{
 		/* Trigger test or start of current EDL program if the appropriate
 		   flags were passed to the program on the command line */
 
-		if ( Fsc2_Internals.cmdline_flags & DO_TEST && is_loaded )
+		if ( Fsc2_Internals.cmdline_flags & DO_TEST && Is_loaded )
 			fl_trigger_object( GUI.main_form->test_file );
-		if ( Fsc2_Internals.cmdline_flags & DO_START && is_loaded )
+		if ( Fsc2_Internals.cmdline_flags & DO_START && Is_loaded )
 			fl_trigger_object( GUI.main_form->run );
 
 		/* If required send signal to the invoking process */
@@ -233,9 +234,9 @@ int main( int argc, char *argv[ ] )
 
 		if ( Fsc2_Internals.cmdline_flags & BATCH_MODE && argc > 1 )
 		{
-			is_loaded = UNSET;
+			Is_loaded = UNSET;
 
-			while ( argc > 1 && ! is_loaded )
+			while ( argc > 1 && ! Is_loaded )
 			{
 				int i;
 
@@ -255,7 +256,7 @@ int main( int argc, char *argv[ ] )
 				argc -= 1;
 			}
 
-			if ( is_loaded )
+			if ( Is_loaded )
 			{
 				fl_trigger_object( GUI.main_form->run );
 				goto run_next;
@@ -273,8 +274,8 @@ int main( int argc, char *argv[ ] )
 }
 
 
-/*------------------------------------------------------------------*/
-/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ *------------------------------------------------------------------*/
 
 static void globals_init( const char *pname )
 {
@@ -325,9 +326,9 @@ static void globals_init( const char *pname )
 	test_machine_type( );
 
 	if ( pname != NULL )
-		prog_name = pname;
+		Prog_Name = pname;
 	else
-		prog_name = "fsc2";
+		Prog_Name = "fsc2";
 
 	EDL.Lc = 0;
 	EDL.in_file = NULL;
@@ -359,10 +360,10 @@ static void globals_init( const char *pname )
 }
 
 
-/*-------------------------------------------------------*/
-/* Read in some configuration information (the only item */
-/* currently getting stored is the last directory used)  */
-/*-------------------------------------------------------*/
+/*-------------------------------------------------------*
+ * Read in some configuration information (the only item
+ * currently getting stored is the last directory used)
+ *-------------------------------------------------------*/
 
 static void fsc2_get_conf( void )
 {
@@ -435,9 +436,9 @@ static void fsc2_get_conf( void )
 }
 
 
-/*-------------------------------------*/
-/* Save some configuration information */
-/*-------------------------------------*/
+/*-------------------------------------*
+ * Save some configuration information
+ *-------------------------------------*/
 
 static void fsc2_save_conf( void )
 {
@@ -523,9 +524,9 @@ static void fsc2_save_conf( void )
 }
 
 
-/*----------------------------------------------------------------------*/
-/* Function sets 'EDL.infile' to the complete name of an EDL input file */
-/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*
+ * Function sets 'EDL.infile' to the complete name of an EDL input file
+ *----------------------------------------------------------------------*/
 
 static bool get_edl_file( char *fname )
 {
@@ -560,13 +561,13 @@ static bool get_edl_file( char *fname )
 }
 
 
-/*-------------------------------------------------------------------*/
-/* Function for running an experiment without using any GUI elements */
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * Function for running an experiment without using any GUI elements
+ *-------------------------------------------------------------------*/
 
 static void no_gui_run( void )
 {
-	if ( ! scan_main( EDL.in_file, in_file_fp ) ||
+	if ( ! scan_main( EDL.in_file, In_file_fp ) ||
 		 EDL.compilation.error[ FATAL ]  != 0 ||
 		 EDL.compilation.error[ SEVERE ] != 0 ||
 		 EDL.compilation.error[ WARN ]   != 0 )
@@ -584,8 +585,8 @@ static void no_gui_run( void )
 }
 
 
-/*------------------------------------------------------------------*/
-/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ *------------------------------------------------------------------*/
 
 static void check_run( void )
 {
@@ -607,14 +608,14 @@ static void check_run( void )
 	fl_deactivate_object( GUI.main_form->test_file );
 	fl_set_object_lcol( GUI.main_form->test_file, FL_INACTIVE_COL );
 
-	if ( ( in_file_fp = fopen( EDL.in_file, "r" ) ) == NULL )
+	if ( ( In_file_fp = fopen( EDL.in_file, "r" ) ) == NULL )
 		exit( EXIT_FAILURE );
 
 	user_break = UNSET;
 
 	fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_watch );
 
-	if ( ! scan_main( EDL.in_file, in_file_fp ) || user_break ||
+	if ( ! scan_main( EDL.in_file, In_file_fp ) || user_break ||
 		 EDL.compilation.error[ FATAL ]  != 0 ||
 		 EDL.compilation.error[ SEVERE ] != 0 ||
 		 EDL.compilation.error[ WARN ]   != 0 )
@@ -652,14 +653,14 @@ static void check_run( void )
 }
 
 
-/*------------------------------------------------------------------*/
-/* Figure out the machine type from the value returned by uname(),  */
-/* currently i[3-6]86 will be treated as having an Intel compatible */
-/* processor. Only for these types of processors (which also must   */
-/* have the same size for ints and pointers) and when running Linux */
-/* some stuff needing assembler and used to help with debugging can */
-/* be used.                                                         */
-/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ * Figure out the machine type from the value returned by uname(),
+ * currently i[3-6]86 will be treated as having an Intel compatible
+ * processor. Only for these types of processors (which also must
+ * have the same size for ints and pointers) and when running Linux
+ * some stuff needing assembler and used to help with debugging can
+ * be used.
+ *------------------------------------------------------------------*/
 
 static void test_machine_type( void )
 {
@@ -676,12 +677,12 @@ static void test_machine_type( void )
 }
 
 
-/*-------------------------------------------------------*/
-/* Do a preliminary check of the command line arguments. */
-/* The main handling of arguments is only done after the */
-/* graphics initialisation, but some arguments have to   */
-/* be dealt with earlier.                                */
-/*-------------------------------------------------------*/
+/*-------------------------------------------------------*
+ * Do a preliminary check of the command line arguments.
+ * The main handling of arguments is only done after the
+ * graphics initialisation, but some arguments have to
+ * be dealt with earlier.
+ *-------------------------------------------------------*/
 
 static int scan_args( int *argc, char *argv[ ], char **fname )
 {
@@ -732,12 +733,12 @@ static int scan_args( int *argc, char *argv[ ], char **fname )
 			seteuid( getuid( ) );
 			setegid( getgid( ) );
 
-			if ( ( in_file_fp = fopen( argv[ cur_arg ], "r" ) ) == NULL )
+			if ( ( In_file_fp = fopen( argv[ cur_arg ], "r" ) ) == NULL )
 				exit( EXIT_FAILURE );
 
 			set_main_signals( );
 
-			exit( scan_main( argv[ cur_arg ], in_file_fp ) ?
+			exit( scan_main( argv[ cur_arg ], In_file_fp ) ?
 				  EXIT_SUCCESS : EXIT_FAILURE );
 		}
 
@@ -776,7 +777,7 @@ static int scan_args( int *argc, char *argv[ ], char **fname )
 			if ( ! get_edl_file( argv[ cur_arg ] ) )
 				return EXIT_FAILURE;
 
-			if ( ( in_file_fp = fopen( EDL.in_file, "r" ) ) == NULL )
+			if ( ( In_file_fp = fopen( EDL.in_file, "r" ) ) == NULL )
 			{
 				fprintf( stderr, "Can't open file '%s'.\n", EDL.in_file );
 				exit( EXIT_FAILURE );
@@ -1128,9 +1129,9 @@ static int scan_args( int *argc, char *argv[ ], char **fname )
 
 				seteuid( getuid( ) );
 				setegid( getgid( ) );
-				if ( ( in_file_fp = fopen( *fname, "r" ) ) == NULL )
+				if ( ( In_file_fp = fopen( *fname, "r" ) ) == NULL )
 					exit( EXIT_FAILURE );
-				exit( scan_main( *fname, in_file_fp ) ?
+				exit( scan_main( *fname, In_file_fp ) ?
 					  EXIT_SUCCESS : EXIT_FAILURE );
 			}
 
@@ -1144,11 +1145,11 @@ static int scan_args( int *argc, char *argv[ ], char **fname )
 }
 
 
-/*----------------------------------------------------------*/
-/* This function is called after either exit() is called or */
-/* it returns from main(). Here some cleanup is done that   */
-/* is necessary even if the program crashed.                */
-/*----------------------------------------------------------*/
+/*----------------------------------------------------------*
+ * This function is called after either exit() is called or
+ * it returns from main(). Here some cleanup is done that
+ * is necessary even if the program crashed.
+ *----------------------------------------------------------*/
 
 static void final_exit_handler( void )
 {
@@ -1168,10 +1169,10 @@ static void final_exit_handler( void )
 
 	/* Do everything necessary to end the program */
 
-	if ( in_file_fp != NULL )
-		fclose( in_file_fp );
+	if ( In_file_fp != NULL )
+		fclose( In_file_fp );
 
-	if ( delete_old_file && EDL.in_file != NULL )
+	if ( Delete_old_file && EDL.in_file != NULL )
 		unlink( EDL.in_file );
 	unlink( FSC2_SOCKET );
 
@@ -1189,33 +1190,33 @@ static void final_exit_handler( void )
 	   error print out a message and (if this feature isn't switched off) 
 	   send an email */
 
-	if ( fsc2_death != 0 && fsc2_death != SIGTERM )
+	if ( Fsc2_death != 0 && Fsc2_death != SIGTERM )
 	{
 		if ( * ( ( int * ) Xresources[ NOCRASHMAIL ].var ) == 0 &&
 			  ! ( Fsc2_Internals.cmdline_flags & NO_MAIL ) )
 		{
-			death_mail( fsc2_death );
+			death_mail( Fsc2_death );
 			fprintf( stderr, "A crash report has been sent to %s\n",
 					 MAIL_ADDRESS );
 		}
 
 #if defined _GNU_SOURCE
 		fprintf( stderr, "fsc2 (%d) killed by %s signal.\n", getpid( ),
-				 strsignal( fsc2_death ) );
+				 strsignal( Fsc2_death ) );
 #else
 		fprintf( stderr, "fsc2 (%d) killed by signal %d.\n", getpid( ),
-				 fsc2_death);
+				 Fsc2_death);
 #endif
 	}
 }
 
 
-/*-------------------------------------------------------------------*/
-/* load_file() is used for loading or reloading a file, depending on */
-/* the value of the flag 'reload'. It's also the callback function   */
-/* for the Load- and Reload-buttons.                                 */
-/* reload == 0: read new file, reload == 1: reload file              */
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * load_file() is used for loading or reloading a file, depending on
+ * the value of the flag 'reload'. It's also the callback function
+ * for the Load- and Reload-buttons.
+ * reload == 0: read new file, reload == 1: reload file
+ *-------------------------------------------------------------------*/
 
 void load_file( UNUSED_ARG FL_OBJECT *a, long reload )
 {
@@ -1282,10 +1283,10 @@ void load_file( UNUSED_ARG FL_OBJECT *a, long reload )
 			return;
 		}
 
-		if ( in_file_fp != NULL )
+		if ( In_file_fp != NULL )
 		{
-			fclose( in_file_fp );
-			in_file_fp = NULL;
+			fclose( In_file_fp );
+			In_file_fp = NULL;
 		}
 	}
 
@@ -1299,7 +1300,7 @@ void load_file( UNUSED_ARG FL_OBJECT *a, long reload )
 		if ( Fsc2_Internals.cmdline_flags & BATCH_MODE )
 		{
 			fprintf( stderr, "Input file not found: '%s'.\n", EDL.in_file );
-			is_loaded = UNSET;
+			Is_loaded = UNSET;
 			return;
 		}
 
@@ -1328,7 +1329,7 @@ void load_file( UNUSED_ARG FL_OBJECT *a, long reload )
 		{
 			fprintf( stderr, "Can't open a temporary file, skipping input "
 					 "file '%s'.\n", EDL.in_file );
-			is_loaded = UNSET;
+			Is_loaded = UNSET;
 			return;
 		}
 
@@ -1351,7 +1352,7 @@ void load_file( UNUSED_ARG FL_OBJECT *a, long reload )
 		{
 			fprintf( stderr, "Can't open a temporary file, skipping input "
 					 "file '%s'.\n", EDL.in_file );
-			is_loaded = UNSET;
+			Is_loaded = UNSET;
 			return;
 		}
 
@@ -1371,7 +1372,7 @@ void load_file( UNUSED_ARG FL_OBJECT *a, long reload )
 		if ( Fsc2_Internals.cmdline_flags & BATCH_MODE )
 		{
 			fprintf( stderr, "Can't open input file: '%s'.\n", EDL.in_file );
-			is_loaded = UNSET;
+			Is_loaded = UNSET;
 			return;
 		}
 
@@ -1384,7 +1385,7 @@ void load_file( UNUSED_ARG FL_OBJECT *a, long reload )
 	/* Get modification time of file */
 
 	stat( EDL.in_file, &file_stat );
-	in_file_mod = file_stat.st_mtime;
+	In_file_mod = file_stat.st_mtime;
 
 	/* Copy the contents of the EDL file into our temporary file */
 
@@ -1404,20 +1405,20 @@ void load_file( UNUSED_ARG FL_OBJECT *a, long reload )
 	{
 		if ( strcmp( old_in_file, EDL.in_file ) )
 		{
-			if ( delete_old_file )
+			if ( Delete_old_file )
 				unlink( old_in_file );
-			delete_old_file = delete_file;
+			Delete_old_file = Delete_file;
 		}
 		else      /* don't delete reloaded files - they may have been edited */
-			delete_old_file = UNSET;
+			Delete_old_file = UNSET;
 
-		if ( in_file_fp != NULL )
-			fclose( in_file_fp );
+		if ( In_file_fp != NULL )
+			fclose( In_file_fp );
 	}
 
-	in_file_fp = fp;
+	In_file_fp = fp;
 
-	delete_file = UNSET;
+	Delete_file = UNSET;
 	old_in_file = CHAR_P T_free( old_in_file );
 
 	/* Set a new window title */
@@ -1429,7 +1430,7 @@ void load_file( UNUSED_ARG FL_OBJECT *a, long reload )
 
 	/* Read in and display the new file */
 
-	is_loaded = display_file( EDL.in_file, in_file_fp );
+	Is_loaded = display_file( EDL.in_file, In_file_fp );
 
 	fl_activate_object( GUI.main_form->reload );
 	fl_set_object_lcol( GUI.main_form->reload, FL_BLACK );
@@ -1452,17 +1453,17 @@ void load_file( UNUSED_ARG FL_OBJECT *a, long reload )
 	fl_activate_object( GUI.main_form->test_file );
 	fl_set_object_lcol( GUI.main_form->test_file, FL_BLACK );
 
-	parse_result = FAIL;
-	is_tested = UNSET;
+	Parse_result = FAIL;
+	Is_tested = UNSET;
 
 	notify_conn( UNBUSY_SIGNAL );
 }
 
 
-/*-----------------------------------------------------*/
-/* test_file() does a syntax and plausibility check of */
-/* the currently loaded file.                          */
-/*-----------------------------------------------------*/
+/*-----------------------------------------------------*
+ * test_file() does a syntax and plausibility check of
+ * the currently loaded file.
+ *-----------------------------------------------------*/
 
 void test_file( FL_OBJECT *a, UNUSED_ARG long b )
 {
@@ -1502,7 +1503,7 @@ void test_file( FL_OBJECT *a, UNUSED_ARG long b )
 
 	/* Here starts the real action... */
 
-	if ( ! is_loaded )
+	if ( ! Is_loaded )
 	{
 		fl_show_alert( "Error", "Sorry, but no file is loaded.", NULL, 1 );
 		notify_conn( UNBUSY_SIGNAL );
@@ -1510,7 +1511,7 @@ void test_file( FL_OBJECT *a, UNUSED_ARG long b )
 		return;
 	}
 
-    if ( is_tested )
+    if ( Is_tested )
 	{
 		fl_show_alert( "Warning", "File has already been tested.", NULL, 1 );
 		notify_conn( UNBUSY_SIGNAL );
@@ -1523,13 +1524,13 @@ void test_file( FL_OBJECT *a, UNUSED_ARG long b )
 	   again. */
 
 	stat( EDL.in_file, &file_stat );
-	if ( in_file_mod != file_stat.st_mtime &&
+	if ( In_file_mod != file_stat.st_mtime &&
 		 2 == fl_show_choice( "EDL file on disk is newer than the loaded ",
 							  "file. Reload file from disk?",
 							  "", 2, "No", "Yes", "", 1 ) )
 	{
 		load_file( GUI.main_form->browser, 1 );
-		if ( ! is_loaded )
+		if ( ! Is_loaded )
 		{
 			in_test = UNSET;
 			return;
@@ -1565,11 +1566,11 @@ void test_file( FL_OBJECT *a, UNUSED_ARG long b )
 	   relevant is now stored in memory (unless the parsing was interrupted
 	   by the user) */
 
-	parse_result = scan_main( EDL.in_file, in_file_fp );
+	Parse_result = scan_main( EDL.in_file, In_file_fp );
 	if ( ! user_break )
 	{
-		fclose( in_file_fp );
-		in_file_fp = NULL;
+		fclose( In_file_fp );
+		In_file_fp = NULL;
 	}
 
 	fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_left_ptr );
@@ -1577,7 +1578,7 @@ void test_file( FL_OBJECT *a, UNUSED_ARG long b )
 
 	if ( ! user_break )
 	{
-		is_tested = SET;                  /* show that file has been tested */
+		Is_tested = SET;                  /* show that file has been tested */
 		a->u_ldata = 0;
 		fl_deactivate_object( GUI.main_form->test_file );
 		fl_set_object_lcol( GUI.main_form->test_file, FL_INACTIVE );
@@ -1608,10 +1609,10 @@ void test_file( FL_OBJECT *a, UNUSED_ARG long b )
 }
 
 
-/*---------------------------------------------------------------*/
-/* run_file() first does a check of the current file (if this is */
-/* not already done) and on success starts the experiment.       */
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ * run_file() first does a check of the current file (if this is
+ * not already done) and on success starts the experiment.
+ *---------------------------------------------------------------*/
 
 void run_file( UNUSED_ARG FL_OBJECT *a, UNUSED_ARG long b )
 {
@@ -1622,14 +1623,14 @@ void run_file( UNUSED_ARG FL_OBJECT *a, UNUSED_ARG long b )
 
 	notify_conn( BUSY_SIGNAL );
 
-	if ( ! is_loaded )              /* check that there is a file loaded */
+	if ( ! Is_loaded )              /* check that there is a file loaded */
 	{
 		fl_show_alert( "Error", "Sorry, but no file is loaded.", NULL, 1 );
 		notify_conn( UNBUSY_SIGNAL );
 		return;
 	}
 
-	if ( ! is_tested )              /* test file if not already done */
+	if ( ! Is_tested )              /* test file if not already done */
 	{
 		test_file( GUI.main_form->test_file, 1 );
 		if ( GUI.main_form->test_file->u_ldata == 1 )  /* user break ? */
@@ -1639,15 +1640,15 @@ void run_file( UNUSED_ARG FL_OBJECT *a, UNUSED_ARG long b )
 	else
 	{
 		stat( EDL.in_file, &file_stat );
-		if ( in_file_mod != file_stat.st_mtime &&
+		if ( In_file_mod != file_stat.st_mtime &&
 			 2 == fl_show_choice( "EDL file on disk is newer than loaded",
 								  "file. Reload the file from disk?",
 								  "", 2, "No", "Yes", "", 1 ) )
 		{
 			load_file( GUI.main_form->browser, 1 );
-			if ( ! is_loaded )
+			if ( ! Is_loaded )
 				return;
-			is_tested = UNSET;
+			Is_tested = UNSET;
 			test_file( GUI.main_form->test_file, 1 );
 			if ( GUI.main_form->test_file->u_ldata == 1 )/* user break ? */
 				return;
@@ -1655,7 +1656,7 @@ void run_file( UNUSED_ARG FL_OBJECT *a, UNUSED_ARG long b )
 		}
 	}
 
-	if ( ! parse_result )          /* return if program failed the test */
+	if ( ! Parse_result )          /* return if program failed the test */
 	{
 		/* In batch mode write out an error message and trigger the "Quit"
 		   button to start dealing with the next EDL script. Otherwise
@@ -1725,12 +1726,12 @@ void run_file( UNUSED_ARG FL_OBJECT *a, UNUSED_ARG long b )
 }
 
 
-/*--------------------------------------------------------------------*/
-/* display_file() is used to put the contents of a file into the main */
-/* browser, numbering the lines and expanding tab chars. Arguments    */
-/* are the name of the file to be displayed and the FILE pointer of   */
-/* the file.                                                          */
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ * display_file() is used to put the contents of a file into the main
+ * browser, numbering the lines and expanding tab chars. Arguments
+ * are the name of the file to be displayed and the FILE pointer of
+ * the file.
+ *--------------------------------------------------------------------*/
 
 static bool display_file( char *name, FILE *fp )
 {
@@ -1851,11 +1852,11 @@ static bool display_file( char *name, FILE *fp )
 }
 
 
-/*--------------------------------------------------------------------*/
-/* Does everything that needs to be done (i.e. deallocating memory,   */
-/* unloading the device drivers, reinitializing all kinds of internal */
-/* structures etc.) before a new file can be loaded.                  */
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ * Does everything that needs to be done (i.e. deallocating memory,
+ * unloading the device drivers, reinitializing all kinds of internal
+ * structures etc.) before a new file can be loaded.
+ *--------------------------------------------------------------------*/
 
 void clean_up( void )
 {
@@ -1921,10 +1922,10 @@ void clean_up( void )
 }
 
 
-/*----------------------------------------------------------------*/
-/* Function that deals with requests by the child process that is */
-/* listening for external connections (to send a new EDL program) */
-/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * Function that deals with requests by the child process that is
+ * listening for external connections (to send a new EDL program)
+ *----------------------------------------------------------------*/
 
 void conn_request_handler( void )
 {
@@ -1938,19 +1939,19 @@ void conn_request_handler( void )
 	line[ count - 1 ] = '\0';
 	GUI.main_form->Load->u_ldata = ( long ) line[ 0 ];
 	if ( line[ 1 ] == 'd' )
-		delete_file = SET;
+		Delete_file = SET;
 	GUI.main_form->Load->u_cdata = T_strdup( line + 2 );
 	fl_trigger_object( GUI.main_form->Load );
 }
 
 
-/*-----------------------------------------------------------------------*/
-/* Sets up the signal handlers for all kinds of signals the main process */
-/* could receive. This probably looks a bit like overkill, but I just    */
-/* wan't to sure it doesn't get killed by some meaningless singnals and, */
-/* on the other hand, that on deadly signals it still gets a chance to   */
-/* try to get rid of shared memory and kill the other processes etc.     */
-/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ * Sets up the signal handlers for all kinds of signals the main process
+ * could receive. This probably looks a bit like overkill, but I just
+ * wan't to sure it doesn't get killed by some meaningless singnals and,
+ * on the other hand, that on deadly signals it still gets a chance to
+ * try to get rid of shared memory and kill the other processes etc.
+ *-----------------------------------------------------------------------*/
 
 static void set_main_signals( void )
 {
@@ -1976,9 +1977,9 @@ static void set_main_signals( void )
 }
 
 
-/*-------------------------------------*/
-/* Signal handler for the main program */
-/*-------------------------------------*/
+/*-------------------------------------*
+ * Signal handler for the main program
+ *-------------------------------------*/
 
 void main_sig_handler( int signo )
 {
@@ -2043,12 +2044,12 @@ void main_sig_handler( int signo )
 		case SIGPIPE :
 			return;
 
-		/* All the remaining signals are deadly - we set 'fsc2_death' to the
+		/* All the remaining signals are deadly - we set 'Fsc2_death' to the
 		   signal number so final_exit_handler() can do the appropriate
 		   things. */
 
 		default :
-			fsc2_death = signo;
+			Fsc2_death = signo;
 
 			if ( ! ( Fsc2_Internals.cmdline_flags & NO_MAIL ) )
 			{
@@ -2071,12 +2072,12 @@ void main_sig_handler( int signo )
 }
 
 
-/*-------------------------------------------------------------------*/
-/* Frunction for sending signals to the child process that waits for */
-/* external connections. It sends either BUSY_SIGNAL (aka SIGUSR1)   */
-/* or UNBUSY_SIGNAL (aka SIGUSR2) and then waits for the child       */
-/* to reply with its own signal.                                     */
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * Frunction for sending signals to the child process that waits for
+ * external connections. It sends either BUSY_SIGNAL (aka SIGUSR1)
+ * or UNBUSY_SIGNAL (aka SIGUSR2) and then waits for the child
+ * to reply with its own signal.
+ *-------------------------------------------------------------------*/
 
 void notify_conn( int signo )
 {
@@ -2100,9 +2101,9 @@ void notify_conn( int signo )
 }
 
 
-/*----------------------------------------*/
-/* Function prints help message and exits */
-/*----------------------------------------*/
+/*----------------------------------------*
+ * Function prints help message and exits
+ *----------------------------------------*/
 
 void usage( int return_status )
 {
@@ -2169,10 +2170,10 @@ void usage( int return_status )
 }
 
 
-/*---------------------------------------------------------*/
-/* Idle handler that's running while no experiment is done */
-/* and which deals with periodic tasks.                    */
-/*---------------------------------------------------------*/
+/*---------------------------------------------------------*
+ * Idle handler that's running while no experiment is done
+ * and which deals with periodic tasks.
+ *---------------------------------------------------------*/
 
 int idle_handler( void )
 {
