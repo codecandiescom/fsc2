@@ -414,6 +414,10 @@ static void fll_get_functions( Func *fncts, size_t num_predef_func )
                             "'%s'.\n", fncts[ act ].name, EDL.Lc, EDL.Fname );
 					THROW( EXCEPTION );
 				}
+
+				if ( state == 0 )   /* if there was a superfluous semicolon */
+					break;          /* in the input file */
+
 				state = 0;
 				if ( act == cur )   /* "new" function ? */
 					act = ++cur;
