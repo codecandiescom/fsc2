@@ -1572,8 +1572,6 @@ void rescale( long new_nx, long new_ny )
 					max_x = i;
 		max_x++;
 
-		printf( "max_x = %ld\n", max_x );
-
 		/* Make sure we don't rescale to less than the current number of
 		   points (or the minumum value, if larger) */
 
