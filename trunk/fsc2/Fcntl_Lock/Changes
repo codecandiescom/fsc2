@@ -1,5 +1,9 @@
 Revision history for Perl extension Fcntl_Lock.
 
+0.03  Sat Apr 20 16:54:32 2002
+	- Removed a bug in Makefile.PL pointed out by "Frodo Baggins"
+	- Added checks in Makefile.PL for compiler and <fcntl.h>
+
 0.02  Sat Apr 20 01:10:52 2002
 	- Added tests in test.pl
 	- Some changes in Makefile.PL thanks to Mark-Jason Dominus

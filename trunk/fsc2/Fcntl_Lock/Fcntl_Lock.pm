@@ -28,7 +28,7 @@ our @EXPORT = qw( F_GETLK F_SETLK F_SETLKW
 				  SEEK_SET SEEK_CUR SEEK_END
 );
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 bootstrap Fcntl_Lock $VERSION;
 
