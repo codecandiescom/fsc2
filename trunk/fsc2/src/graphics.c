@@ -354,7 +354,7 @@ void start_graphics( void )
 		fl_winminsize( run_main_form->window,
 					   WIN_MIN_1D_WIDTH, WIN_MIN_HEIGHT );
 	else
-		fl_winminsize( run_mainform->window,
+		fl_winminsize( run_main_form->window,
 					   WIN_MIN_2D_WIDTH, WIN_MIN_HEIGHT );
 
 	fl_set_button( run_form->full_scale_button, 1 );

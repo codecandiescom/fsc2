@@ -170,7 +170,7 @@ bool need_Serial_Port[ NUM_SERIAL_PORTS ];
 bool just_testing = UNSET;
 
 FD_fsc2 *main_form;
-FL_FORM *fsc2_main_form
+FL_FORM *fsc2_main_form;
 FD_run *run_form;
 FL_FORM *run_main_form;
 FD_input_form *input_form;

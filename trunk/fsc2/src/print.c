@@ -251,7 +251,7 @@ static int get_print_file( FILE **fp, char **name )
 	/* Create the form for print setup */
 
 	print_form = create_form_print( );
-	print_main_form = print_form_print;
+	print_main_form = print_form->print;
 
 	/* If a printer command has already been set put it into the input object,
 	   otherwise set default command */
