@@ -66,7 +66,7 @@ inline void no_query_possible( const char *device )
 	if (  device != NULL )
 		eprint( FATAL, SET, "%s: %s() can be used for queries in the "
 				"EXPERIMENT section only.\n", device, Cur_Func );
-	THROW( EXCEPTION )
+	THROW( EXCEPTION );
 }
 
 
@@ -125,7 +125,7 @@ inline long get_strict_long( Var *v, const char *snippet, const char *device )
 		if ( snippet != NULL  && device != NULL )
 			eprint( FATAL, SET, "%s: Floating point number can't be used as "
 					"%s in %s().\n", device, snippet, Cur_Func );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	vars_check( v, INT_VAR );
@@ -155,7 +155,7 @@ inline bool get_boolean( Var *v, const char *device )
 				eprint( FATAL, SET, "%s: Floating point number found where "
 						"boolean type value was expected in %s().\n", device,
 						Cur_Func );
-			THROW( EXCEPTION )
+			THROW( EXCEPTION );
 		}
 
 		if ( device != NULL )
@@ -175,7 +175,7 @@ inline bool get_boolean( Var *v, const char *device )
 		if ( device != NULL )
 			eprint( FATAL, SET, "%s: Invalid boolean argument (\"%s\") in "
 					"%s().\n", device, v->val.sptr, Cur_Func );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	return v->val.lval != 0;

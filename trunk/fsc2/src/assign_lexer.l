@@ -175,13 +175,13 @@ WS          [\n=: ]+
 			/* handling of error messages from the cleaner */
 {ERR}		{
 				eprint( FATAL, UNSET, "%s\n", assigntext + 2 );
-				THROW( EXCEPTION )
+				THROW( EXCEPTION );
 			}
 
 {ESTR}		{
 				assigntext = strchr( assigntext, '\x03' );
 				eprint( FATAL, UNSET, "%s\n", assigntext + 2 );
-				THROW( EXCEPTION )
+				THROW( EXCEPTION );
 			}
 
 			/* handling of DEVICES: labels */
@@ -395,7 +395,7 @@ WS          [\n=: ]+
 {CTRL}      {
 				eprint( FATAL, SET, "Flow control structures can't be used "
 						"in the ASSIGNMENTS section.\n" );
-				THROW( EXCEPTION )
+				THROW( EXCEPTION );
 			}
 
 			/* This is here for the HFS9000 which has a special TRIGGER_OUT
@@ -421,7 +421,7 @@ WS          [\n=: ]+
 					{
 						eprint( FATAL, SET, "Function `%s' can only be used "
                                 "in the EXPERIMENT section.\n", assigntext );
-						THROW( EXCEPTION )
+						THROW( EXCEPTION );
 					}
 					return FUNC_TOKEN;
 				}
@@ -432,7 +432,7 @@ WS          [\n=: ]+
 				{
 					eprint(	FATAL, SET, "Variable or function `%s' has not "
 								   "been declared or loaded.\n", assigntext );
-					 THROW( EXCEPTION )
+					 THROW( EXCEPTION );
 				}
 
 				return VAR_TOKEN;
@@ -469,7 +469,7 @@ WS          [\n=: ]+
 .           {
 				eprint( FATAL, SET, "Invalid input in ASSIGNMENTS section: "
 						"`%s'.\n", assigntext );
-				THROW( EXCEPTION )
+				THROW( EXCEPTION );
 			}
 
 <<EOF>>	    {
@@ -492,7 +492,7 @@ int assignments_parser( FILE *in )
 	{
 		eprint( FATAL, SET, "Multiple instances of ASSIGNMENTS section "
 		        "label.\n" );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 	compilation.sections[ ASSIGNMENTS_SECTION ] = SET;
 

@@ -55,14 +55,14 @@ Var *f_is_file( Var *v )
 	{
 		eprint( FATAL, SET, "Missing argument in call of function %s().\n",
 				Cur_Func );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	if ( v->type != INT_VAR )
 	{
 		eprint( FATAL, SET, "Parameter of function %s() isn't a file "
 				"handle.\n", Cur_Func );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
     if ( v->val.lval < 0 || v->val.lval >= File_List_Len ||
@@ -121,7 +121,7 @@ Var *f_getf( Var *var )
 	{
 		eprint( FATAL, SET, "Call of %s() after call of save()-type function "
 				"without previous call of %s().\n", Cur_Func, Cur_Func );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	/* While test is running just return a dummy value */
@@ -291,7 +291,7 @@ getfile_retry:
 	CATCH( OUT_OF_MEMORY_EXCEPTION )
 	{
 		File_List = old_File_List;
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	File_List[ File_List_Len ].fp = fp;
@@ -330,7 +330,7 @@ Var *f_clonef( Var *v )
 	{
 		 eprint( FATAL, SET, "First argument in call of %s() isn't a vaild "
 				 "file identifier.\n", Cur_Func );
-		 THROW( EXCEPTION )
+		 THROW( EXCEPTION );
 	}
 
 	if ( v->next->type != STR_VAR || v->next->next->type != STR_VAR ||
@@ -338,7 +338,7 @@ Var *f_clonef( Var *v )
 	{
 		eprint( FATAL, SET, "Invalid second and third argument in call of "
 				"%s().\n", Cur_Func );
-		 THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	if ( TEST_RUN )
@@ -430,7 +430,7 @@ static int get_save_file( Var **v )
 			{
 				eprint( FATAL, SET, "First argument in %s() isn't a "
 						"file identifier.\n", Cur_Func );
-				THROW( EXCEPTION )
+				THROW( EXCEPTION );
 			}
 			file_num = ( int ) ( *v )->val.lval;
 		}
@@ -458,7 +458,7 @@ static int get_save_file( Var **v )
 	if ( file_num >= File_List_Len )
 	{
 		eprint( FATAL, SET, "Invalid file identifier in %s().\n", Cur_Func );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	return file_num;
@@ -555,7 +555,7 @@ Var *f_save( Var *v )
 				if ( ( sub_count = print_slice( v, file_num ) ) >= 0 )
 					count += sub_count;
 				else
-					THROW( EXCEPTION )
+					THROW( EXCEPTION );
 				break;
 
 			case ARR_REF :
@@ -571,7 +571,7 @@ Var *f_save( Var *v )
 												 file_num ) ) >= 0 )
 					count += sub_count;
 				else
-					THROW( EXCEPTION )
+					THROW( EXCEPTION );
 				break;
 
 			default :
@@ -673,7 +673,7 @@ Var *f_fsave( Var *v )
 	{
 		eprint( FATAL, SET, "Missing format string in call of %s()\n",
 				Cur_Func );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	/* Rewrite the format string and check thar arguments are ok, then print */
@@ -733,7 +733,7 @@ static void f_format_check( Var *v )
 		{
 			eprint( FATAL, SET, "Less data than format descriptors in %s() "
 					"format string.\n", Cur_Func );
-			THROW( EXCEPTION )
+			THROW( EXCEPTION );
 		}
 
 		switch ( cv->type )
@@ -772,7 +772,7 @@ static void f_format_check( Var *v )
 			default :
 				eprint( FATAL, SET, "Function %s() can only write numbers and "
 						"strings to a file.\n", Cur_Func );
-				THROW( EXCEPTION )
+				THROW( EXCEPTION );
 		}
 
 		cv = cv->next;
@@ -824,7 +824,7 @@ Var *f_ffsave( Var *v )
 	{
 		eprint( FATAL, SET, "Missing format string in call of %s()\n",
 				Cur_Func );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	/* Check that format string and arguments are ok, then print */
@@ -870,7 +870,7 @@ static void ff_format_check( Var *v )
 		{
 			eprint( FATAL, SET, "'%%' found at end of format string in call "
 					"of %s().\n", Cur_Func );
-			THROW( EXCEPTION )
+			THROW( EXCEPTION );
 		}
 
 		if ( *sptr == '%' )
@@ -886,7 +886,7 @@ static void ff_format_check( Var *v )
 			{
 				eprint( FATAL, SET, "End of format string within conversion "
 						"specifier in call of %s().\n", Cur_Func );
-				THROW( EXCEPTION )
+				THROW( EXCEPTION );
 			}
 		}
 
@@ -900,7 +900,7 @@ static void ff_format_check( Var *v )
 			{
 				eprint( FATAL, SET, "Non-integer variable used as field "
 						"length in format string in %s().\n", Cur_Func );
-				THROW( EXCEPTION )
+				THROW( EXCEPTION );
 			}
 
 			sptr++;
@@ -914,7 +914,7 @@ static void ff_format_check( Var *v )
 		{
 			eprint( FATAL, SET, "End of format string within conversion "
 					"specifier in call of %s().\n", Cur_Func );
-			THROW( EXCEPTION )
+			THROW( EXCEPTION );
 		}
 
 		if ( *sptr == '.' )
@@ -927,14 +927,14 @@ static void ff_format_check( Var *v )
 				{
 					eprint( FATAL, SET, "Not enough arguments for format "
 							"string in %s().\n", Cur_Func );
-					THROW( EXCEPTION )
+					THROW( EXCEPTION );
 				}
 
 				if ( vptr->type != INT_VAR )
 				{
 					eprint( FATAL, SET, "Non-integer variable used as field "
 							"length in format string in %s().\n", Cur_Func );
-					THROW( EXCEPTION )
+					THROW( EXCEPTION );
 				}
 
 				sptr++;
@@ -948,7 +948,7 @@ static void ff_format_check( Var *v )
 			{
 				eprint( FATAL, SET, "End of format string within conversion "
 						"specifier in call of %s().\n", Cur_Func );
-				THROW( EXCEPTION )
+				THROW( EXCEPTION );
 			}
 		}
 
@@ -963,7 +963,7 @@ static void ff_format_check( Var *v )
 			{
 				eprint( FATAL, SET, "Not enough arguments for format "
 						"string in %s().\n", Cur_Func );
-				THROW( EXCEPTION )
+				THROW( EXCEPTION );
 			}
 
 			if ( vptr->type != STR_VAR )
@@ -971,7 +971,7 @@ static void ff_format_check( Var *v )
 				eprint( FATAL, SET, "Non-string variable found for string "
 						"type conversion specifier in format string in "
 						"%s().\n", Cur_Func );
-				THROW( EXCEPTION )
+				THROW( EXCEPTION );
 			}
 				
 			handle_escape( vptr->val.sptr );
@@ -986,7 +986,7 @@ static void ff_format_check( Var *v )
 			{
 				eprint( FATAL, SET, "Not enough arguments for format "
 						"string in %s().\n", Cur_Func );
-				THROW( EXCEPTION )
+				THROW( EXCEPTION );
 			}
 
 			if ( vptr->type != INT_VAR )
@@ -994,7 +994,7 @@ static void ff_format_check( Var *v )
 				eprint( WARN, SET, "Non-integer variable found for integer "
 						"type conversion specifier in format string in "
 						"%s().\n", Cur_Func );
-				THROW( EXCEPTION )
+				THROW( EXCEPTION );
 			}
 				
 			sptr++;
@@ -1009,7 +1009,7 @@ static void ff_format_check( Var *v )
 			{
 				eprint( FATAL, SET, "Not enough arguments for format "
 						"string in %s().\n", Cur_Func );
-				THROW( EXCEPTION )
+				THROW( EXCEPTION );
 			}
 
 			if ( vptr->type != FLOAT_VAR )
@@ -1017,7 +1017,7 @@ static void ff_format_check( Var *v )
 				eprint( WARN, SET, "Non-floating point variable found for "
 						"float type conversion specifier in format string "
 						"in %s().\n", Cur_Func );
-				THROW( EXCEPTION )
+				THROW( EXCEPTION );
 			}
 				
 			sptr++;
@@ -1027,7 +1027,7 @@ static void ff_format_check( Var *v )
 
 		eprint( FATAL, SET, "Unknown conversion specifier '%c' found in "
 				"format string in %s().\n", *sptr, Cur_Func );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	/* Check for superfluous arguments, print a warning if there are any and
@@ -1371,7 +1371,7 @@ Var *f_save_p( Var *v )
 		return vars_push( INT_VAR, 1 );
 
 	if ( ! print_browser( 0, file_num, v != NULL ? v->val.sptr : "" ) )
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 
 	return vars_push( INT_VAR, 1 );
 }
@@ -1403,7 +1403,7 @@ Var *f_save_o( Var *v )
 		return vars_push( INT_VAR, 1 );
 
 	if ( ! print_browser( 1, file_num, v != NULL ? v->val.sptr : "" ) )
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 
 	return vars_push( INT_VAR, 1 );
 }
@@ -1582,7 +1582,7 @@ static int T_fprintf( int file_num, const char *fmt, ... )
 		{
 			eprint( FATAL, SET, "Invalid file handle used in call of "
 					"function %s().\n", Cur_Func );
-			THROW( EXCEPTION )
+			THROW( EXCEPTION );
 		}
 
 		if ( File_List[ file_num ].fp == NULL )
@@ -1620,7 +1620,7 @@ static int T_fprintf( int file_num, const char *fmt, ... )
             {
 				show_message( "String to be written is too long." );
                 T_free( p );
-                THROW( EXCEPTION )
+                THROW( EXCEPTION );
             }
         }
 
@@ -1823,7 +1823,7 @@ static char *handle_escape( char *str )
 			case '\0' :
 				eprint( FATAL, SET, "End of string directly following escape "
 						"character '\\'.\n" );
-				THROW( EXCEPTION )
+				THROW( EXCEPTION );
 				break;
 
 			case 'a' :
@@ -1888,7 +1888,7 @@ static char *handle_escape( char *str )
 				{
 					eprint( FATAL, SET, "'\\x' with no following hex digits "
 							"in string.\n" );
-					THROW( EXCEPTION )
+					THROW( EXCEPTION );
 				}
 				esc_len = 1;
 				*cp = *( cp + 2 )
@@ -1913,7 +1913,7 @@ static char *handle_escape( char *str )
 				{
 					eprint( FATAL, SET, "Unknown escape sequence '\\%c' in "
 							"string.\n", *( cp + 1 ) );
-					THROW( EXCEPTION )
+					THROW( EXCEPTION );
 				}
 
 				*cp = *( cp + 1 ) - '0';

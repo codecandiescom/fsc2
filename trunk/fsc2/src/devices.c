@@ -73,7 +73,7 @@ void device_add( const char *name )
 				dev_name );
 		T_free( lib_name );
 		T_free( dev_name );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	/* If the module is a symbolic link try to figure out the name of the file
@@ -96,7 +96,7 @@ void device_add( const char *name )
 							"sucks!\n", __FILE__, __LINE__ );
 					T_free( lib_name );
 					T_free( dev_name );
-					THROW( EXCEPTION )
+					THROW( EXCEPTION );
 				}
 			}
 		}
@@ -109,7 +109,7 @@ void device_add( const char *name )
 			T_free( lib_name );
 			T_free( dev_name );
 			T_free( real_name );
-			THROW( EXCEPTION )
+			THROW( EXCEPTION );
 		}
 
 		real_name[ length ] = '\0';
@@ -123,7 +123,7 @@ void device_add( const char *name )
 			T_free( lib_name );
 			T_free( dev_name );
 			T_free( real_name );
-			THROW( EXCEPTION )
+			THROW( EXCEPTION );
 		}
 
 		*( real_name + length - 3 ) = '\0';
@@ -149,7 +149,7 @@ void device_add( const char *name )
 				"base.\n", dev_name );
 		T_free( real_name );
 		T_free( dev_name );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	/* Make sure the device isn't already loaded */
@@ -162,7 +162,7 @@ void device_add( const char *name )
 					"DEVICES section%s%s.\n", dev_name, real_name != NULL ?
 					", the first time possibly under the name " : "",
 					real_name != NULL ? real_name : "" );
-			THROW( EXCEPTION )
+			THROW( EXCEPTION );
 		}
 
 	/* Now append the device to the end of the device list */

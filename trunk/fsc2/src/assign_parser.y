@@ -154,7 +154,7 @@ input:   /* empty */
 	                                 Cur_PHS = -1;
 	                                 Cur_PHST = -1;
 	                                 Func_is_set = UNSET;
-		                             THROW ( SYNTAX_ERROR_EXCEPTION ) }
+		                             THROW ( SYNTAX_ERROR_EXCEPTION ); };
        | input ';'                 { Channel_Type = PULSER_CHANNEL_NO_TYPE;
 	                                 Cur_PHS = -1;
 	                                 Cur_PHST = -1;
@@ -182,78 +182,78 @@ line:    func                      { Func_is_set = SET; }
 /* all the next entries are just for catching missing semicolon errors */
 
 af:      /* empty */ 
-	   | SECTION_LABEL             { THROW( MISSING_SEMICOLON_EXCEPTION ) }
-       | TB_TOKEN                  { THROW( MISSING_SEMICOLON_EXCEPTION ) }
-       | TM_TOKEN                  { THROW( MISSING_SEMICOLON_EXCEPTION ) }
-       | MPL_TOKEN                 { THROW( MISSING_SEMICOLON_EXCEPTION ) }
-       | PHS_TOK                   { THROW( MISSING_SEMICOLON_EXCEPTION ) }
-       | PSD_TOKEN                 { THROW( MISSING_SEMICOLON_EXCEPTION ) }
-       | GP_TOKEN                  { THROW( MISSING_SEMICOLON_EXCEPTION ) }
+	   | SECTION_LABEL             { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | TB_TOKEN                  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | TM_TOKEN                  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | MPL_TOKEN                 { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | PHS_TOK                   { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | PSD_TOKEN                 { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | GP_TOKEN                  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
 ;
 
 
 atb:     /* empty */
-       | func                      { THROW( MISSING_SEMICOLON_EXCEPTION ) }
-       | TM_TOKEN                  { THROW( MISSING_SEMICOLON_EXCEPTION ) }
-       | MPL_TOKEN                 { THROW( MISSING_SEMICOLON_EXCEPTION ) }
-       | PHS_TOK                   { THROW( MISSING_SEMICOLON_EXCEPTION ) }
-       | PSD_TOKEN                 { THROW( MISSING_SEMICOLON_EXCEPTION ) }
-       | GP_TOKEN                  { THROW( MISSING_SEMICOLON_EXCEPTION ) }
-	   | SECTION_LABEL             { THROW( MISSING_SEMICOLON_EXCEPTION ) }
+       | func                      { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | TM_TOKEN                  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | MPL_TOKEN                 { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | PHS_TOK                   { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | PSD_TOKEN                 { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | GP_TOKEN                  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+	   | SECTION_LABEL             { THROW( MISSING_SEMICOLON_EXCEPTION ); }
 ;
 
 
 atm:     /* empty */
-       | func                      { THROW( MISSING_SEMICOLON_EXCEPTION ) }
-       | TB_TOKEN                  { THROW( MISSING_SEMICOLON_EXCEPTION ) }
-       | MPL_TOKEN                 { THROW( MISSING_SEMICOLON_EXCEPTION ) }
-       | PHS_TOK                   { THROW( MISSING_SEMICOLON_EXCEPTION ) }
-       | PSD_TOKEN                 { THROW( MISSING_SEMICOLON_EXCEPTION ) }
-       | GP_TOKEN                  { THROW( MISSING_SEMICOLON_EXCEPTION ) }
-	   | SECTION_LABEL             { THROW( MISSING_SEMICOLON_EXCEPTION ) }
+       | func                      { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | TB_TOKEN                  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | MPL_TOKEN                 { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | PHS_TOK                   { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | PSD_TOKEN                 { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | GP_TOKEN                  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+	   | SECTION_LABEL             { THROW( MISSING_SEMICOLON_EXCEPTION ); }
 ;
 
 ampl:    /*empty */
-       | func                      { THROW( MISSING_SEMICOLON_EXCEPTION ) }
-       | TB_TOKEN                  { THROW( MISSING_SEMICOLON_EXCEPTION ) }
-       | TM_TOKEN                  { THROW( MISSING_SEMICOLON_EXCEPTION ) }
-       | PHS_TOK                   { THROW( MISSING_SEMICOLON_EXCEPTION ) }
-       | PSD_TOKEN                 { THROW( MISSING_SEMICOLON_EXCEPTION ) }
-       | GP_TOKEN                  { THROW( MISSING_SEMICOLON_EXCEPTION ) }
-	   | SECTION_LABEL             { THROW( MISSING_SEMICOLON_EXCEPTION ) }
+       | func                      { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | TB_TOKEN                  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | TM_TOKEN                  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | PHS_TOK                   { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | PSD_TOKEN                 { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | GP_TOKEN                  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+	   | SECTION_LABEL             { THROW( MISSING_SEMICOLON_EXCEPTION ); }
 ;
 
 
 aphs:    /* empty */
-       | TB_TOKEN                  { THROW( MISSING_SEMICOLON_EXCEPTION ) }
-       | TM_TOKEN                  { THROW( MISSING_SEMICOLON_EXCEPTION ) }
-       | MPL_TOKEN                 { THROW( MISSING_SEMICOLON_EXCEPTION ) }
-       | PSD_TOKEN                 { THROW( MISSING_SEMICOLON_EXCEPTION ) }
-       | GP_TOKEN                  { THROW( MISSING_SEMICOLON_EXCEPTION ) }
-	   | SECTION_LABEL             { THROW( MISSING_SEMICOLON_EXCEPTION ) }
+       | TB_TOKEN                  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | TM_TOKEN                  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | MPL_TOKEN                 { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | PSD_TOKEN                 { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | GP_TOKEN                  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+	   | SECTION_LABEL             { THROW( MISSING_SEMICOLON_EXCEPTION ); }
 ;
 								   
 
 apsd:    /* empty */
-       | func                      { THROW( MISSING_SEMICOLON_EXCEPTION ) }
-       | TB_TOKEN                  { THROW( MISSING_SEMICOLON_EXCEPTION ) }
-       | TM_TOKEN                  { THROW( MISSING_SEMICOLON_EXCEPTION ) }
-       | MPL_TOKEN                 { THROW( MISSING_SEMICOLON_EXCEPTION ) }
-       | PHS_TOK                   { THROW( MISSING_SEMICOLON_EXCEPTION ) }
-       | GP_TOKEN                  { THROW( MISSING_SEMICOLON_EXCEPTION ) }
-	   | SECTION_LABEL             { THROW( MISSING_SEMICOLON_EXCEPTION ) }
+       | func                      { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | TB_TOKEN                  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | TM_TOKEN                  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | MPL_TOKEN                 { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | PHS_TOK                   { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | GP_TOKEN                  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+	   | SECTION_LABEL             { THROW( MISSING_SEMICOLON_EXCEPTION ); }
 ;
 
 
 agp:     /* empty */
-       | gp	func                   { THROW( MISSING_SEMICOLON_EXCEPTION ) }
-       | gp	TB_TOKEN               { THROW( MISSING_SEMICOLON_EXCEPTION ) }
-       | gp	TM_TOKEN               { THROW( MISSING_SEMICOLON_EXCEPTION ) }
-       | MPL_TOKEN                 { THROW( MISSING_SEMICOLON_EXCEPTION ) }
-       | gp	PHS_TOK                { THROW( MISSING_SEMICOLON_EXCEPTION ) }
-       | gp	PSD_TOKEN              { THROW( MISSING_SEMICOLON_EXCEPTION ) }
-       | gp	GP_TOKEN               { THROW( MISSING_SEMICOLON_EXCEPTION ) }
-	   | SECTION_LABEL             { THROW( MISSING_SEMICOLON_EXCEPTION ) }
+       | gp	func                   { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | gp	TB_TOKEN               { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | gp	TM_TOKEN               { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | MPL_TOKEN                 { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | gp	PHS_TOK                { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | gp	PSD_TOKEN              { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | gp	GP_TOKEN               { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+	   | SECTION_LABEL             { THROW( MISSING_SEMICOLON_EXCEPTION ); }
 ;
 
 
@@ -337,10 +337,10 @@ expr:    INT_TOKEN unit            { $$ = apply_unit( vars_push( INT_VAR, $1 ),
        | VAR_REF
        | VAR_TOKEN '('             { eprint( FATAL, SET, "`%s' isn't a "
 											 "function.\n", $1->name );
-	                                 THROW( EXCEPTION ) }
+									 THROW( EXCEPTION ); }
        | FUNC_TOKEN '['            { eprint( FATAL, SET, "`%s' is a predefined"
                                              " function.\n", $1->name );
-	                                 THROW( EXCEPTION ) }
+	                                 THROW( EXCEPTION ); }
        | expr AND expr       	   { $$ = vars_comp( COMP_AND, $1, $3 ); }
        | expr OR expr        	   { $$ = vars_comp( COMP_OR, $1, $3 ); }
        | expr XOR expr       	   { $$ = vars_comp( COMP_XOR, $1, $3 ); }
@@ -517,7 +517,7 @@ static void assignerror ( const char *s )
 				"section.\n" );
 	else
 		eprint( FATAL, SET, "Syntax error near `%s'.\n", assigntext );
-	THROW( EXCEPTION )
+	THROW( EXCEPTION );
 }
 
 
@@ -552,7 +552,7 @@ static void ass_func( int function )
 		{
 			eprint( FATAL, SET, "Syntax error near `%s' in when using pulser "
 					"module %s.\n", assigntext, pulser_struct.name );
-			THROW( EXCEPTION )
+			THROW( EXCEPTION );
 		}
 		return;
 	}
@@ -567,7 +567,7 @@ static void ass_func( int function )
 	{
 		eprint( FATAL, SET, "Syntax error near `%s' in when using pulser "
 				"module %s.\n", assigntext, pulser_struct.name );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 }
 

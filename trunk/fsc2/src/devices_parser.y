@@ -61,8 +61,8 @@ input:   /* empty */
 ;
 
 sep:     ';'
-	   | DEV_TOKEN                    { THROW( MISSING_SEMICOLON_EXCEPTION ) }
-	   | SECTION_LABEL                { THROW( MISSING_SEMICOLON_EXCEPTION ) }
+	   | DEV_TOKEN                    { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+	   | SECTION_LABEL                { THROW( MISSING_SEMICOLON_EXCEPTION ); }
 
 
 %%
@@ -76,7 +76,7 @@ static void deviceserror ( const char *s )
 		eprint( FATAL, SET, "Unexpected end of file in DEVICES section.\n" );
 	else
 		eprint( FATAL, SET, "Syntax error near token `%s'.\n", devicestext );
-	THROW( EXCEPTION )
+	THROW( EXCEPTION );
 }
 
 

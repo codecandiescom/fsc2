@@ -138,7 +138,7 @@ eol:     ';'
        |                         { dont_print_error = SET; }
          error                   { eprint( FATAL, SET, "Missing semicolon "
 										   "before (or on) this line.\n" );
-	                               THROW( EXCEPTION ) }
+	                               THROW( EXCEPTION ); }
 ;
 
 cond:    FOR_TOK                 { in_cond = SET; }
@@ -165,7 +165,7 @@ ls:      '{'
        |                         { dont_print_error = SET; }
          error                   { eprint( FATAL, SET, "Syntax error in "
 									       "loop or IF/UNLESS condition.\n" );
-	                               THROW( EXCEPTION ) }
+	                               THROW( EXCEPTION ); }
 ;
 
 et:      ls
@@ -178,11 +178,11 @@ line:    E_VAR_TOKEN ass                              { }
        | E_FUNC_TOKEN '(' list2 ')'                   { }
        | E_FUNC_TOKEN '['
           { eprint( FATAL, SET, "`%s' is a predefined function.\n", $1->name );
-		    THROW( EXCEPTION ) }
+		    THROW( EXCEPTION ); }
        | E_VAR_TOKEN '('
           { eprint( FATAL, SET, "`%s' is a variable, not a funnction.\n",
 					$1->name );
-		    THROW( EXCEPTION ) }
+		    THROW( EXCEPTION ); }
        | pt ass
        | BREAK_TOK
        | CONT_TOK
@@ -211,10 +211,10 @@ expr:    E_INT_TOKEN unit                             { }
        | E_VAR_REF                                    { }
        | E_FUNC_TOKEN '['         { eprint( FATAL, SET, "`%s' is a predefined "
 									        "function.\n", $1->name );
-	                                THROW( EXCEPTION ) }
+	                                THROW( EXCEPTION ); }
        | E_VAR_TOKEN '('          { eprint( FATAL, SET, "`%s' is a variable, "
 											"not a function.\n", $1->name );
-	                                THROW( EXCEPTION ) }
+	                                THROW( EXCEPTION ); }
        | pt
        | bin
        | '+' expr %prec E_NEG
@@ -288,7 +288,7 @@ static void exp_testerror( const char *s )
 	if ( ! dont_print_error && ! in_cond )
 	{
 		eprint( FATAL, SET, "Syntax error in EXPERIMENT section.\n" );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	if ( in_cond )
@@ -301,7 +301,7 @@ static void exp_testerror( const char *s )
 					"condition.\n" );
 
 		in_cond = UNSET;
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	dont_print_error = UNSET;

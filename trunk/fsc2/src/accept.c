@@ -72,7 +72,7 @@ void accept_new_data( void )
 			eprint( FATAL, UNSET, "Internal communication error at %s:%d.\n",
 					__FILE__, __LINE__ );
 #endif
-			THROW( EXCEPTION )
+			THROW( EXCEPTION );
 		}
 
 		/* Unpack and accept the data sets (skip the length field) - if an
@@ -217,7 +217,7 @@ static void unpack_and_accept( char *ptr )
 			default :
 				eprint( FATAL, UNSET, "Internal communication error at "
 						"%s:%d.\n", __FILE__, __LINE__ );
-				THROW( EXCEPTION )
+				THROW( EXCEPTION );
 		}
 
 		if ( G.dim == 1 )
@@ -283,7 +283,7 @@ static void other_data_request( int type, char *ptr )
 		default :                             /* unknown command */
 			eprint( FATAL, UNSET, "Internal communication error at %s:%d.\n",
 					__FILE__, __LINE__ );
-			THROW( EXCEPTION )
+			THROW( EXCEPTION );
 	}
 }
 
@@ -313,7 +313,7 @@ static void accept_1d_data( long x_index, long curve, int type, char *ptr )
 	{
 		eprint( FATAL, SET, "Internal error detected at %s:%d, there is no "
 				"curve %ld.\n", __FILE__, __LINE__, curve + 1 );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 #endif
 
@@ -342,7 +342,7 @@ static void accept_1d_data( long x_index, long curve, int type, char *ptr )
 		default :
 			eprint( FATAL, UNSET, "Internal communication error at %s:%d.\n",
 					__FILE__, __LINE__ );
-			THROW( EXCEPTION )
+			THROW( EXCEPTION );
 	}
 
 #ifndef NDEBUG
@@ -350,7 +350,7 @@ static void accept_1d_data( long x_index, long curve, int type, char *ptr )
 	{
 		eprint( FATAL, SET, "Internal error detected at %s:%d, no points"
 				"to be drawn: %ld.\n", __FILE__, __LINE__, len );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 #endif
 
@@ -533,7 +533,7 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 	{
 		eprint( FATAL, SET, "Internal error detected at %s:%d, there is no "
 				"curve %ld.\n", __FILE__, __LINE__, curve + 1 );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 #endif
 
@@ -564,7 +564,7 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 		default :
 			eprint( FATAL, UNSET, "Internal communication error at %s:%d.\n",
 					__FILE__, __LINE__ );
-			THROW( EXCEPTION )
+			THROW( EXCEPTION );
 	}
 
 #ifndef NDEBUG
@@ -572,7 +572,7 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 	{
 		eprint( FATAL, SET, "Internal error detected at %s:%d, no points"
 				"to be drawn: %ld.\n", __FILE__, __LINE__, len );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 #endif
 

@@ -131,10 +131,10 @@ expr:    E_INT_TOKEN unit         { $$ = apply_unit( vars_push( INT_VAR, $1 ),
        | E_VAR_REF
        | E_VAR_TOKEN '('          { eprint( FATAL, SET, "`%s' isn't a "
 											"function.\n", $1->name );
-	                                 THROW( EXCEPTION ) }
+	                                 THROW( EXCEPTION ); }
        | E_FUNC_TOKEN '['         { eprint( FATAL, SET, "`%s' is a predefined "
                                             "function.\n", $1->name );
-	                                THROW( EXCEPTION ) }
+	                                THROW( EXCEPTION ); }
        | E_PPOS                   { $$ = p_get_by_num( $1, P_POS ); }
        | E_PLEN                   { $$ = p_get_by_num( $1, P_LEN ); }
        | E_PDPOS                  { $$ = p_get_by_num( $1, P_DPOS ); }
@@ -211,7 +211,7 @@ static void conditionerror( const char *s )
 	s = s;                    /* avoid compiler warning */
 
 	eprint( FATAL, SET, "Syntax error in loop or IF/UNLESS condition.\n" );
-	THROW( EXCEPTION )
+	THROW( EXCEPTION );
 }
 
 

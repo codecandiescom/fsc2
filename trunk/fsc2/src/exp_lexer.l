@@ -121,13 +121,13 @@ FUNC        {IDENT}"#"[0-9]+
 			/* Handling of error messages from the cleaner */
 {ERR}		{
 				eprint( FATAL, UNSET, "%s\n", exptext + 2 );
-				THROW( EXCEPTION )
+				THROW( EXCEPTION );
 			}
 
 {ESTR}		{
 				exptext = strchr( exptext, '\x03' );
 				eprint( FATAL, UNSET, "%s\n", exptext + 2 );
-				THROW( EXCEPTION )
+				THROW( EXCEPTION );
 			}
 
 			/* Handling of DEVICES: labels */
@@ -248,14 +248,14 @@ FUNC        {IDENT}"#"[0-9]+
 					{
 						eprint( FATAL, SET, "Function %s() can't be used in "
 								"the EXPERIMENT section.\n", exptext );
-						THROW( EXCEPTION )
+						THROW( EXCEPTION );
 					}
 
 					if ( ! strcmp( exptext, "end" ) && On_Stop_Pos >= 0 )
 					{
 						eprint( FATAL, SET, "Function %s() can not be called "
 								"after the ON_STOP label.\n", exptext );
-						THROW( EXCEPTION )
+						THROW( EXCEPTION );
 					}
 
 					return E_FUNC_TOKEN;
@@ -264,7 +264,7 @@ FUNC        {IDENT}"#"[0-9]+
                 {
                     eprint( FATAL, SET, "Function `%s' is not loaded.\n",
 							exptext );
-					THROW( EXCEPTION )
+					THROW( EXCEPTION );
                 }
             }
 
@@ -278,14 +278,14 @@ FUNC        {IDENT}"#"[0-9]+
 					{
 						eprint( FATAL, SET, "Function `%s' can't be used in "
 								"the EXPERIMENT section.\n", exptext );
-						THROW( EXCEPTION )
+						THROW( EXCEPTION );
 					}
 
 					if ( ! strcmp( exptext, "end" ) && On_Stop_Pos >= 0 )
 					{
 						eprint( FATAL, SET, "Function %s() can not be called "
 								"after the ON_STOP label.\n", exptext );
-						THROW( EXCEPTION )
+						THROW( EXCEPTION );
 					}
 
 					return E_FUNC_TOKEN;
@@ -296,7 +296,7 @@ FUNC        {IDENT}"#"[0-9]+
 				{
 					eprint( FATAL, SET, "Variable or function `%s' has not "
 								   "been declared or loaded.\n", exptext );
-					 THROW( EXCEPTION )
+					 THROW( EXCEPTION );
 				}
 
 				return E_VAR_TOKEN;
@@ -355,7 +355,7 @@ FUNC        {IDENT}"#"[0-9]+
 .           {
 				eprint( FATAL, SET, "Invalid input in EXPERIMENT section: "
 						"`%s'.\n", exptext );
-				THROW( EXCEPTION )
+				THROW( EXCEPTION );
 			}
 
 <<EOF>>	    {
@@ -378,7 +378,7 @@ int experiment_parser( FILE *in )
 	{
 		eprint( FATAL, SET, "Multiple instances of EXPERIMENT section "
 		        "label.\n" );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 	compilation.sections[ EXPERIMENT_SECTION ] = SET;
 
@@ -390,7 +390,7 @@ int experiment_parser( FILE *in )
 	{
 		eprint( FATAL, SET, "EXPERIMENT section has to be the very last "
 				"section.\n" );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	return Exp_Next_Section;

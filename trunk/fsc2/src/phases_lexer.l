@@ -172,7 +172,7 @@ WS          [\n=,:. ]+
 				char *cp = phasestext + phasesleng - 1;
 
 				if ( *cp == '_' )
-				    THROW( INVALID_INPUT_EXCEPTION )
+				    THROW( INVALID_INPUT_EXCEPTION );
 
 				/* determine type of acquisition sequence (A or B) */
 
@@ -239,7 +239,7 @@ WS          [\n=,:. ]+
 ";"         return ';';              /* end of statement character */
 
 			/* handling of invalid input */
-.           THROW( INVALID_INPUT_EXCEPTION )
+.           THROW( INVALID_INPUT_EXCEPTION );
 
 <<EOF>>	    {
 				Phases_Next_Section = NO_SECTION;
@@ -260,7 +260,7 @@ int phases_parser( FILE *in )
 	if ( compilation.sections[ PHASES_SECTION ] )
 	{
 		eprint( FATAL, SET, "Multiple instances of PHASES section label.\n" );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 	compilation.sections[ PHASES_SECTION ] = SET;
 
@@ -283,7 +283,7 @@ int phases_parser( FILE *in )
 	{
 		eprint( FATAL, SET, "Invalid input in PHASES section: `%s'.\n",
 				phasestext );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 	OTHERWISE
 		PASSTHROU( )

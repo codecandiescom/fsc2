@@ -299,7 +299,7 @@ Var *func_get_long( const char *name, int *acc, bool flag )
 		{
 			eprint( FATAL, SET, "Function `%s' has not been loaded.\n",
 					f->name );
-			THROW( EXCEPTION )
+			THROW( EXCEPTION );
 		}
 		else                     /* some callers do their own error handling */
 			return NULL;
@@ -350,7 +350,7 @@ Var *func_call( Var *f )
 	{
 		eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
 				__FILE__, __LINE__ );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	for ( i = 0; i < Num_Func; i++ )
@@ -361,7 +361,7 @@ Var *func_call( Var *f )
 	{
 		eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
 				__FILE__, __LINE__ );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	cur_func = Fncts + i ;
@@ -406,7 +406,7 @@ Var *func_call( Var *f )
 			eprint( FATAL, SET, "Function `%s' expects %d argument%s but only "
 					"%d where found.\n", f->name, f->dim,
 					f->dim == 1 ? "" : "s", ac );
-			THROW( EXCEPTION )
+			THROW( EXCEPTION );
 		}
 	}
 
@@ -461,7 +461,7 @@ Var *func_call( Var *f )
 			eprint( FATAL, SET, "Function %s() from module %s.so messed "
 					"up the variable stack at %s:%d.\n", cur_func->name,
 					cur_func->device->name, __FILE__, __LINE__ );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 #endif
 

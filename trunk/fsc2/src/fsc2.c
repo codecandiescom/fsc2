@@ -738,7 +738,7 @@ void test_file( FL_OBJECT *a, long b )
 				"Test of program aborted, received user break.\n" );
 		notify_conn( UNBUSY_SIGNAL );
 		running_test = UNSET;
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	/* If fsc2 is too busy testing a program to react to clicks on the "Stop

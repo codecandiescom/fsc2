@@ -275,7 +275,7 @@ Var *f_wait( Var *v )
 	{
 		eprint( FATAL, SET, "Time of more that %ld seconds as argument "
 				"of function %s().\n", LONG_MAX, Cur_Func );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	if ( lrnd( modf( how_long, &secs ) * 1.0e6 ) == 0 && lrnd( secs ) == 0 )
@@ -404,7 +404,7 @@ Var *f_init_1d( Var *v )
 	{
 		eprint( FATAL, SET, "Invalid number of curves (%ld) in %s().\n",
 				G.nc, Cur_Func );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	if ( ( v = v->next ) == NULL )
@@ -443,7 +443,7 @@ Var *f_init_1d( Var *v )
 		{
 			eprint( FATAL, SET, "Real word coordinate found but missing "
 					"increment in %s().", Cur_Func );
-			THROW( EXCEPTION )
+			THROW( EXCEPTION );
 		}
 
 		G.rwc_start[ X ] = VALUE( v );
@@ -535,7 +535,7 @@ Var *f_init_2d( Var *v )
 	{
 		eprint( FATAL, SET, "Invalid number of curves (%ld) in %s().\n",
 				G.nc, Cur_Func );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	if ( ( v = v->next ) == NULL )
@@ -594,7 +594,7 @@ Var *f_init_2d( Var *v )
 		{
 			eprint( FATAL, SET, "Incomplete real world x coordinates "
 					"in %s().\n", Cur_Func );
-			THROW( EXCEPTION )
+			THROW( EXCEPTION );
 		}
 
 		G.rwc_start[ X ] = VALUE( v );
@@ -624,7 +624,7 @@ Var *f_init_2d( Var *v )
 		{
 			eprint( FATAL, SET, "Incomplete real world y coordinates "
 					"in %s().\n", Cur_Func );
-			THROW( EXCEPTION )
+			THROW( EXCEPTION );
 		}
 
 		G.rwc_start[ Y ] = VALUE( v );
@@ -707,7 +707,7 @@ Var *f_cscale( Var *v )
 	if ( v == NULL )
 	{
 		eprint( FATAL, SET, "Missing parameter in call of %s().\n", Cur_Func );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	vars_check( v, INT_VAR | FLOAT_VAR | STR_VAR );
@@ -731,7 +731,7 @@ Var *f_cscale( Var *v )
 		{
 			eprint( FATAL, SET, "With 1D graphics only the x-scaling can "
 					"be changed in %s().\n", Cur_Func );
-			THROW( EXCEPTION )
+			THROW( EXCEPTION );
 		}
 
 		if ( v->type & ( INT_VAR | FLOAT_VAR ) )
@@ -768,7 +768,7 @@ Var *f_cscale( Var *v )
 	{
 		eprint( FATAL, UNSET, "Internal communication problem at %s:%d.\n",
 				__FILE__, __LINE__ );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	/* Copy the data to the segment */
@@ -842,7 +842,7 @@ Var *f_clabel( Var *v )
 	if ( v == NULL )
 	{
 		eprint( FATAL, SET, "Missing parameter in call of %s().\n", Cur_Func );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	vars_check( v, STR_VAR );
@@ -864,7 +864,7 @@ Var *f_clabel( Var *v )
 						"%s().\n", Cur_Func );
 				T_free( l[ Y ] );
 				T_free( l[ X ] );
-				THROW( EXCEPTION )
+				THROW( EXCEPTION );
 			}
 
 			vars_check( v, STR_VAR );
@@ -896,7 +896,7 @@ Var *f_clabel( Var *v )
 		T_free( l[ Z ] );
 		T_free( l[ Y ] );
 		T_free( l[ X ] );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	/* Copy the data to the segment */
@@ -969,7 +969,7 @@ Var *f_rescale( Var *v )
 	if ( v == NULL )
 	{
 		eprint( FATAL, SET, "Missing parameter in call of %s().\n", Cur_Func );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
@@ -987,7 +987,7 @@ Var *f_rescale( Var *v )
 	{
 		eprint( FATAL, SET, "Invalid negative number of points (%ld) in "
 				"%s().\n", new_nx, Cur_Func );
-			THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	if ( ( v = vars_pop( v ) ) != NULL )
@@ -996,7 +996,7 @@ Var *f_rescale( Var *v )
 		{
 			eprint( FATAL, SET, "With 1D graphics only the number of "
 					"points in x-direction be changed in %s().\n", Cur_Func );
-			THROW( EXCEPTION )
+			THROW( EXCEPTION );
 		}
 
 		vars_check( v, INT_VAR | FLOAT_VAR );
@@ -1014,7 +1014,7 @@ Var *f_rescale( Var *v )
 		{
 			eprint( FATAL, SET, "Invalid negative number of points (%ld) "
 					"in %s().\n", new_nx, Cur_Func );
-				THROW( EXCEPTION )
+			THROW( EXCEPTION );
 		}
 	} else if ( G.dim == 2 )
 		new_ny = -1;
@@ -1037,7 +1037,7 @@ Var *f_rescale( Var *v )
 	{
 		eprint( FATAL, UNSET, "Internal communication problem at %s:%d.\n",
 				__FILE__, __LINE__ );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	/* Copy the data to the segment */
@@ -1149,7 +1149,7 @@ Var *f_display( Var *v )
 							"slices of more-dimensional arrays can be "
 							"displayed in %s().\n", Cur_Func );
 					T_free( dp );
-					THROW( EXCEPTION )
+					THROW( EXCEPTION );
 				}
 
 				len += sizeof( long );
@@ -1174,7 +1174,7 @@ Var *f_display( Var *v )
 				T_free( dp );
 				eprint( FATAL, UNSET, "Internal communication error at "
 						"%s:%d.\n", __FILE__, __LINE__ );
-				THROW( EXCEPTION )
+				THROW( EXCEPTION );
 		}
 	}
 
@@ -1185,7 +1185,7 @@ Var *f_display( Var *v )
 		T_free( dp );
 		eprint( FATAL, UNSET, "Internal communication problem at %s:%d.\n",
 				__FILE__, __LINE__ );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	/* Copy the data to the segment */
@@ -1301,7 +1301,7 @@ Var *f_display( Var *v )
 				T_free( dp );
 				eprint( FATAL, UNSET, "Internal communication error at "
 						"%s:%d.\n", __FILE__, __LINE__ );
-				THROW( EXCEPTION )
+				THROW( EXCEPTION );
 		}
 	}
 
@@ -1337,7 +1337,7 @@ static DPoint *eval_display_args( Var *v, int *nsets )
 	if ( v == NULL )
 	{
 		eprint( FATAL, SET, "Missing x-index in %s().\n", Cur_Func );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	do
@@ -1360,7 +1360,7 @@ static DPoint *eval_display_args( Var *v, int *nsets )
 			eprint( FATAL, SET, "Invalid x-index (= %ld) in %s().\n",
 					dp[ *nsets ].nx + ARRAY_OFFSET, Cur_Func );
 			T_free( dp );
-			THROW( EXCEPTION )
+			THROW( EXCEPTION );
 		}
 
 		v = v->next;
@@ -1373,7 +1373,7 @@ static DPoint *eval_display_args( Var *v, int *nsets )
 			{
 				eprint( FATAL, SET, "Missing y-index in %s().\n", Cur_Func );
 				T_free( dp );
-				THROW( EXCEPTION )
+				THROW( EXCEPTION );
 			}
 
 			vars_check( v, INT_VAR | FLOAT_VAR );
@@ -1388,7 +1388,7 @@ static DPoint *eval_display_args( Var *v, int *nsets )
 				eprint( FATAL, SET, "Invalid y-index (= %ld) in %s().\n",
 						dp[ *nsets ].ny + ARRAY_OFFSET, Cur_Func );
 				T_free( dp );
-				THROW( EXCEPTION )
+				THROW( EXCEPTION );
 			}
 
 			v = v->next;
@@ -1401,7 +1401,7 @@ static DPoint *eval_display_args( Var *v, int *nsets )
 		{
 			eprint( FATAL, SET, "Missing data in %s().\n", Cur_Func );
 			T_free( dp );
-			THROW( EXCEPTION )
+			THROW( EXCEPTION );
 		}
 
 		vars_check( v, INT_VAR | FLOAT_VAR | ARR_PTR | ARR_REF |
@@ -1434,7 +1434,7 @@ static DPoint *eval_display_args( Var *v, int *nsets )
 			eprint( FATAL, SET, "Invalid curve number (%ld) in %s().\n",
 					dp[ *nsets ].nc + 1, Cur_Func );
 			T_free( dp );
-			THROW( EXCEPTION )
+			THROW( EXCEPTION );
 		}
 
 		v = v->next;
@@ -1551,7 +1551,7 @@ Var *f_clearcv( Var *v )
 		T_free( ca );
 		eprint( FATAL, UNSET, "Internal communication problem at %s:%d.\n",
 				__FILE__, __LINE__ );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	/* Copy all data into the shared memory segment */

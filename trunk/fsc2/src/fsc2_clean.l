@@ -178,7 +178,7 @@ KEEP    [^\t" \n(\/*),;:=%\^\-\+]+
 
 [^"\\\n]+   printf( "%s", yytext );
 
-<<EOF>>		THROW( EOF_IN_STRING_EXCEPTION )
+<<EOF>>		THROW( EOF_IN_STRING_EXCEPTION );
 
 } /* end of <str> */
 
@@ -189,7 +189,7 @@ KEEP    [^\t" \n(\/*),;:=%\^\-\+]+
 					Eol = SET;
 				}
 				else
-				    THROW( MISPLACED_SHEBANG )
+				    THROW( MISPLACED_SHEBANG );
 			}
 
             /* Handling of C++ style comment spanning a whole line */
@@ -223,7 +223,7 @@ KEEP    [^\t" \n(\/*),;:=%\^\-\+]+
 			}
 
 			/* Handling of EOF within a comment -> fatal error */
-<<EOF>>		THROW( EOF_IN_COMMENT_EXCEPTION )
+<<EOF>>		THROW( EOF_IN_COMMENT_EXCEPTION );
 
 			/* End of comment but not end of line */
 {EREM1}		yy_pop_state( );
@@ -241,7 +241,7 @@ KEEP    [^\t" \n(\/*),;:=%\^\-\+]+
 			}
 } /* end of <comm> */
 
-{EREM1}     THROW( DANGLING_END_OF_COMMENT )
+{EREM1}     THROW( DANGLING_END_OF_COMMENT );
 
 			/* Dump empty line (i.e. just containing tabs and spaces) */
 {WLWS}      Lc++;

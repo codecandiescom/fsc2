@@ -44,7 +44,7 @@ void acq_seq_start( long acq_num, long acq_type )
 	{
 		eprint( FATAL, SET, "Acquisition sequence %c has already been "
 				"defined.\n", ( char ) ( acq_num + 'X' ) );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	/* Initialize the acquisition sequence */
@@ -120,7 +120,7 @@ Phase_Sequence *phase_seq_start( long phase_seq_num )
 		{
 			eprint( FATAL, SET, "Phase sequence %ld has already been "
 					"defined.\n", cp->num );
-			THROW( EXCEPTION )
+			THROW( EXCEPTION );
 		}
 		cp = cp->next;
 	}
@@ -177,7 +177,7 @@ void phases_add_phase( Phase_Sequence *p, int phase_type )
 void acq_miss_list( void )
 {
 	eprint( FATAL, SET, "Missing acquisition type list.\n" );
-	THROW( EXCEPTION )
+	THROW( EXCEPTION );
 }
 
 
@@ -190,7 +190,7 @@ void phase_miss_list( Phase_Sequence *p )
 {
 	eprint( FATAL, SET, "Missing list of phases for phase sequence %d.\n",
 			p->num );
-	THROW( EXCEPTION )
+	THROW( EXCEPTION );
 }
 
 
@@ -242,7 +242,7 @@ void phases_end( void )
 	{
 		eprint( FATAL, UNSET, "Aquisition sequence(s) defined but no phase "
 				"sequences in PHASES section.\n" );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	/* Return if neither phase sequences nor acquisition sequences are
@@ -258,7 +258,7 @@ void phases_end( void )
 		{
 			eprint( FATAL, UNSET, "Lengths of phase sequences defined in "
 					"PHASES section differ.\n" );
-			THROW( EXCEPTION )
+			THROW( EXCEPTION );
 		}
 
 	/* Check that lengths of acquisition and phase sequences are identical */
@@ -268,7 +268,7 @@ void phases_end( void )
 	{
 		eprint( FATAL, UNSET, "Lengths of phase and acquisition sequences "
 				"defined in PHASES section differ.\n" );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 }
 

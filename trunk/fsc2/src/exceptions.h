@@ -108,13 +108,14 @@ enum {
     THROW( exception_id )
 
 #define THROW( e ) \
+    do \
     { \
 		lower_permissions( ); \
         exception_id = e; \
         if ( exception_env_stack_pos == 0 ) \
 		    longjmperror( ); \
         longjmp( exception_env_stack[ --exception_env_stack_pos ], e ); \
-    }
+    } while ( 0 )
 
 
 
