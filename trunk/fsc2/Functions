@@ -81,6 +81,7 @@ digitizer_get_channel_number, 1, ALL;   // only for internal use !
 
 // functions exported by the rf synthesizer (HP8647A)
 
+synthesizer_state, -1, ALL;
 synthesizer_frequency, -1, ALL;
 synthesizer_attenuation, -1, ALL;
 synthesizer_step_frequency, -1, ALL;
