@@ -108,7 +108,7 @@
      "V_?L\\(OW\\)?\\>"
      "T\\(IME\\)?_?B\\(ASE\\)?\\>"
      "T\\(RIG\\(GER\\)?\\)?_?M\\(ODE\\)?\\>"
-	 "MAX\\(IMUM\\)?_?PATT\\(ERN)?_?LEN\\(GTH\\)?\\>"
+	 "MAX\\(IMUM\\)?_?PATT\\(ERN\\)?_?LEN\\(GTH\\)?\\>"
      "MODE\\>"
      "INT\\(ERN\\(AL\\)?\\)?\\>"
      "EXT\\(ERN\\(AL\\)?\\)?\\>"

@@ -632,7 +632,7 @@ double tds520a_get_sens( int channel )
     long length = 30;
 
 
-	assert( channel >= TDS520A_CH1 && channel < TDS520A_CH2 );
+	assert( channel >= TDS520A_CH1 && channel <= TDS520A_CH2 );
 
 	sprintf( cmd, "%s:SCA?\n", Channel_Names[ channel ] );
 	if ( gpib_write( tds520a.device, cmd, strlen( cmd ) ) == FAILURE ||
