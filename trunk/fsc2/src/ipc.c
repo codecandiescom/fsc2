@@ -59,6 +59,12 @@ void *get_shm( int *shm_id, long len )
 			usleep( 10000 );
 		else                                      /* non-recoverable failure */
 		{
+#if defined  ( DEBUG )
+			eprint( FATAL, UNSET, "Internal error at %s:%d, shmget() failed "
+					"with error number %d.\n*** PLEASE SEND A BUG REPORT "
+					"CITING THESE LINES *** Thank you.\n",
+					__FILE__, __LINE__, errno );
+#endif
 			lower_permissions( );
 			return ( void * ) -1;
 		}
@@ -98,6 +104,12 @@ void *attach_shm( int key )
 
 	if ( ( buf = shmat( key, NULL, SHM_RDONLY ) ) == ( void * ) - 1 )
 	{
+#if defined ( DEBUG )
+		eprint( FATAL, UNSET, "Internal error at %s:%d, shmat() with "
+				"SHM_RDONLY failed for key %d with error number %d.\n"
+				"*** PLEASE SEND A BUG REPORT CITING THESE LINES *** "
+				"Thank you.\n", __FILE__, __LINE__, key, errno );
+#endif
 		shmctl( key, IPC_RMID, NULL );       /* delete the segment */
 		lower_permissions( );
 		return ( void * ) -1;

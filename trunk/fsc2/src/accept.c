@@ -54,15 +54,24 @@ void accept_new_data( void )
 	while ( 1 )
 	{
 		/* Attach to the shared memory segment pointed to by the oldest
-		   entry in the message queue */
+		   entry in the message queue - even though this should never
+		   fail it sometimes does (2.0 kernels only?) so we better have
+		   a bit more of error output until this is sorted out. */
 
 		if ( ( buf = attach_shm( Message_Queue[ message_queue_low ].shm_id ) )
 			 == ( void * ) - 1 )
 		{
+#if defined  ( DEBUG )
 			eprint( FATAL, UNSET, "Internal communication error at %s:%d, "
-					"message_queue_low = %d, shm_id = %d.\n",
+					"message_queue_low = %d, shm_id = %d.\n"
+					"*** PLEASE SEND A BUG REPORT CITING THESE LINES *** "
+					"Thank you.\n",
 					__FILE__, __LINE__, message_queue_low,
 					Message_Queue[ message_queue_low ].shm_id );
+#else
+			eprint( FATAL, UNSET, "Internal communication error at %s:%d.\n",
+					__FILE__, __LINE__ );
+#endif
 			THROW( EXCEPTION )
 		}
 
