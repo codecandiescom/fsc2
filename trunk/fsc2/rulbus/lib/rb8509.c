@@ -33,7 +33,11 @@ typedef struct RULBUS_ADC12_CARD RULBUS_ADC12_CARD;
 struct RULBUS_ADC12_CARD {
 	int handle;
 	int nchan;
+	double range;
 	double gain;
+	double Vmin;
+	double dV;
+	int exttrg;
 	int trig_mode;
 	int data;
 	unsigned char ctrl;
@@ -64,13 +68,14 @@ struct RULBUS_ADC12_CARD {
 #define STATUS_EXT_TRIGGER             (    1 << 7 )
 
 
-#define VOLTAGE_SPAN                   20.47         /* 20.47 V */
 #define ADC12_RANGE                    0x0FFF
-#define ADC12_BIT_OFFSET               ( 1 << 11 )
-
 
 #define ADC12_DELAY                    18            /* 18 us */
 
+/* The possible ranges (in thenths of a mV) - the first two are for unipolar
+   cards, the second two for bipolar cards) */
+
+static long ranges = { 102375, 100000, 51175, 102350 };
 
 static RULBUS_ADC12_CARD *rulbus_adc12_card = NULL;
 static int rulbus_num_adc12_cards = 0;
@@ -133,10 +138,58 @@ int rulbus_adc12_card_init( int handle )
 	tmp += rulbus_num_adc12_cards++;
 
 	tmp->handle = handle;
-	if ( rulbus_card[ handle ].nchan >= 0 )
-		tmp->nchan = rulbus_card[ handle ].nchan;
-	else
-		tmp->nchan = RULBUS_ADC12_MAX_CHANNELS;
+
+	/* Check if the number of channels of the card has been set and is
+	   reasonable */
+
+	if ( rulbus_card[ handle ].nchan < 0 )
+		return RULBUS_MIS_CHN;
+	else if ( rulbus_card[ handle ].nchan > RULBUS_ADC12_MAX_CHANNELS )
+		return RULBUS_CHN_INV;
+		
+	tmp->nchan = rulbus_card[ handle ].nchan;
+
+	/* Check the range setting - there are only 4 maximum input voltages
+	   and from exact value we can also determine if this is a bi- or
+	   unipolar card */
+
+	if ( rulbus_card[ handle ].range < 0.0 )
+		return RULBUS_NO_RNG;
+
+	for ( i = 0; i < 4; i++ )
+		if ( ranges[ i ] ==
+			 		( int ) floor( rulbus_card[ handle ].range * 1e4 + 0.5 ) )
+			break;
+	
+	if ( i == 4 )
+		return RULBUS_INV_RNG;
+
+	switch ( i )
+	{
+		case 0 :
+			tmp->Vmin = 0.0;
+			tmp->dV = 2.5e-3;
+			break;
+
+		case 1:
+			tmp->Vmin = 0.0;
+			tmp->dV = 10.0 / ADC12_RANGE;
+			break;
+
+		case 2 :
+			tmp->Vmin = -5.12 V;
+			tmp->dV = 2.5e-3;
+			break;
+
+		case 3 :
+			tmp->Vmin = -10.24;
+			tmp->dV = 5.0e-3;
+	}
+
+	if ( rulbus_card[ handle ].exttrg < 0 )
+		return RULBUS_EXT_NO;
+
+	tmp->exttrg = rulbus_card[ handle ].exttrg;
 	tmp->gain = 1.0;
 	tmp->trig_mode = RULBUS_ADC12_INT_TRIG;
 	tmp->ctrl = 0;
@@ -203,6 +256,22 @@ int rulbus_adc12_num_channels( int handle )
 }
 
 
+/*-----------------------------------------------------*
+ * Function returns the number of channels of the card
+ *-----------------------------------------------------*/
+
+int rulbus_adc12_has_external_trigger( int handle )
+{
+	RULBUS_ADC12_CARD *card;
+
+
+	if ( ( card = rulbus_adc12_card_find( handle ) ) == NULL )
+		return RULBUS_INV_HND;
+
+	return card->exttrg;
+}
+
+
 /*---------------------------------------------------*
  * Function for selecting which channnel of the card
  * is to be used in conversions
@@ -256,7 +325,7 @@ int rulbus_adc12_set_gain( int handle, int gain )
 	if ( gain != 1 && gain != 2 && gain != 4 && gain != 8 )
 		return RULBUS_INV_ARG;
 
-	card->gain = 1.0 / gain;
+	card->gain = ( double ) gain;
 
 	while ( gain >>= 1 )
 		gain_bits++;
@@ -301,6 +370,11 @@ int rulbus_adc12_set_trigger_mode( int handle, int mode )
 	if ( mode != RULBUS_ADC12_INT_TRIG && mode != RULBUS_ADC12_EXT_TRIG )
 		return RULBUS_INV_ARG;
 
+	/* Some cards can't be triggered externally */
+
+	if ( mode != RULBUS_ADC12_INT_TRIG && ! card->exttrg )
+		return RULBUS_NO_EXT;
+
 	if ( mode == RULBUS_ADC12_INT_TRIG )
 		ctrl = card->ctrl & ~ CTRL_EXT_TRIGGER_ENABLE;
 	else
@@ -343,7 +417,8 @@ int rulbus_adc12_check_convert( int handle, double *volts )
 	if ( ( card = rulbus_adc12_card_find( handle ) ) == NULL )
 		return RULBUS_INV_HND;
 
-	/* Return immediately if we're in internal trigger mode */
+	/* Return immediately if we're in internal trigger mode (or this is a
+	   card that can't be triggered externally) */
 
 	if ( card->trig_mode == RULBUS_ADC12_INT_TRIG )
 		return 0;
@@ -366,10 +441,8 @@ int rulbus_adc12_check_convert( int handle, double *volts )
 	/* Calculate the voltage from the data we just received */
 
 	card->data = ( ( hi & STATUS_DATA_MASK ) << 8 ) | low;
-	if ( card->data & ADC12_BIT_OFFSET )
-		card->data = ADC12_BIT_OFFSET - card->data - 1;
 
-	*volts = ( VOLTAGE_SPAN / ADC12_RANGE ) * card->gain * card->data;
+	*volts = ( card->dV * card->data - card->Vmin ) / card->gain;
 	return 1;
 }
 
@@ -414,13 +487,10 @@ int rulbus_adc12_convert( int handle, double *volts )
 	if ( ( retval = rulbus_read( handle, DATA_LOW_ADDR, &low, 1 ) ) < 0 )
 		return retval;
 
-	/* Calculate the voltage from the dat we just received */
+	/* Calculate the voltage from the data we just received */
 
 	card->data = ( ( hi & STATUS_DATA_MASK ) << 8 ) | low;
-	if ( card->data & ADC12_BIT_OFFSET )
-		card->data = ADC12_BIT_OFFSET - card->data - 1;
-
-	*volts = ( VOLTAGE_SPAN / ADC12_RANGE ) * card->gain * card->data;
+	*volts = ( card->dV * card->data - card->Vmin ) / card->gain;
 	return RULBUS_OK;
 }
 

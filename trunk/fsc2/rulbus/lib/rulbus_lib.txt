@@ -159,6 +159,9 @@ Here is the complete list of error codes with a short explanation:
     RULBUS_RNG_DUP   More than one range for card
     RULBUS_POL_DUP   More than one polarity for card
     RULBUS_INV_POL   Invalid polarity setting
+	RULBUS_EXT_DUP   More thann one setting for external trigger
+	RULBUS_EXT_INV   Invalid argument for external trigger setting
+	RULBUS_EXT_NO    Missing external trigger setting
     RULBUS_NO_RNG    Missing range setting for DAC12 card
     RULBUS_INV_RNG   Invalid range setting for DAC12 card
     RULBUS_NO_POL    Missing polarity setting for DAC12 card
@@ -178,6 +181,7 @@ Here is the complete list of error codes with a short explanation:
     RULBUS_RD_ERR    Read error
     RULBUS_CRD_BSY   Card is busy
     RULBUS_INV_VLT   Voltage out of range
+	RULBUS_NO_EXT    Card can't be triggered externally
     RULBUS_TIM_OUT   Timeout
 
 

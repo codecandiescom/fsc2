@@ -67,8 +67,11 @@ static const char *rulbus_errlist[ ] = {
 	"More than one range for card",                    /* RULBUS_RNG_DUP */
 	"More than one polarity for card",                 /* RULBUS_POL_DUP */
 	"Invalid polarity setting",                        /* RULBUS_INV_POL */
-	"Missing range setting for DAC12 card",            /* RULBUS_NO_RNG  */
-    "Invalid range setting for DAC12 card",            /* RULBUS_INV_RNG */
+	"More thann one setting for external trigger",     /* RULBUS_EXT_DUP */
+	"Invalid argument for external trigger setting",   /* RULBUS_EXT_INV */
+	"Missing external trigger setting",                /* RULBUS_EXT_NO  */
+	"Missing range setting",                           /* RULBUS_NO_RNG  */
+    "Invalid range setting",                           /* RULBUS_INV_RNG */
 	"Missing polarity setting for DAC12 card",         /* RULBUS_NO_POL  */
 	"Too many cards for single rack",                  /* RULBUS_CRD_CNT */
 	"No cards found in configuration file",            /* RULBUS_NO_CRD  */
@@ -86,6 +89,7 @@ static const char *rulbus_errlist[ ] = {
 	"Read error"                                       /* RULBUS_RD_ERR  */
 	"Card is busy",                                    /* RULBUS_CRD_BSY */
 	"Voltage out of range",                            /* RULBUS_INV_VLT */
+	"Card can't be triggered externally",              /* RULBUS_NO_EXT  */
 	"Rulbus timeout"                                   /* RULBUS_TIM_OUT */
 };
 
