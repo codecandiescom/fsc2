@@ -290,7 +290,7 @@ void rb_pulser_run( bool state )
 		{
 			/* In internal trigger mode set the clock frequency to the value
 			   required for the experiment repetition time, set the delay of
-			   the card accordingly and the make the card output end pulses
+			   the card accordingly and the get the card to output end pulses
 			   on both the first and second start/end pulse connector */
 
 			if ( rulbus_rb8515_clock_set_frequency(
