@@ -45,7 +45,18 @@ enum {
 };
 
 
+#ifndef MAX_NESTED_EXCEPTION
+#define MAX_NESTED_EXCEPTION 256
+#endif
+
+
 #define TRY \
+    if ( exception_env_stack_pos >= MAX_NESTED_EXCEPTION - 1 ) \
+	{ \
+	    syslog( LOG_ERR, "INTERNAL ERROR: Too many exceptions at %s:%d.\n", \
+				__FILE__, __LINE__ ); \
+		exit( -1 ); \
+	} \
     exception_id = setjmp( exception_env_stack[ exception_env_stack_pos++ ] );\
     if ( exception_id == NO_EXCEPTION )
 
@@ -68,10 +79,6 @@ enum {
 		    longjmperror( ); \
         longjmp( exception_env_stack[ --exception_env_stack_pos ], e ); \
     }
-
-#ifndef MAX_NEST_EXCEPTION
-#define MAX_NEST_EXCEPTION 256
-#endif
 
 #ifndef EXCEPTIONS_SOURCE_COMPILE
 
