@@ -27,13 +27,11 @@ tds_list        := tds754a tds744a tds540 tds520c tds520a tds520
 hp864_list      := hp8647a hp8648b
 
 
-# List of modules that are to be made from a single source file only
+# List of modules that are to be made from a single source file only (as
+# far as they don't require some additional hardware that gets tested for
+# below)
 
-simp_modules    := User_Functions sr510 sr530 sr810 sr830 aeg_s_band        \
-				   aeg_x_band er035m er035m_s hp5340a er035m_sa er035m_sas  \
-				   bh15 keithley228a egg4402 kontron4060 lakeshore330       \
-				   pt2025 er032m ips20_4 ips120_10 $(s_band_list)           \
-				   thurlby330 hjs_daadc gg_chopper itc503
+simp_modules    := User_Functions gg_chopper 
 
 
 # For each of the "complicated" modules a list of all source files they are
@@ -80,13 +78,27 @@ rb_pulser       := rb_pulser.c rb_pulser_gen.c rb_pulser_pulse.c \
 # List of all "complicated" modules that are to be made from more than a
 # single source file (plus a header file)
 
-comp_modules    := dg2020_f dg2020_b hfs9000 ep385 rs690 er023m lecroy9400  \
-				   hp8672a $(hp864_list) $(tds_list) spectrapro_300i        \
-				   hjs_attenuator hjs_sfc spex_cd2a rs_sml01
+comp_modules    := hjs_sfc
 
 
-# Additional modules that only get created on demand (they require some
-# additional libraries that not installed on all systems)
+# Add modules that only get created on demand (they require either some
+# additional libraries that are not installed on all systems or a serial
+# port that may not be available everywhere)
+
+ifneq ($(GPIB_LIBRARY),none)
+simp_modules    += bh15 egg4402 er032m er035m er035m_sa hp5340a ips20_4    \
+				   ips120_10 itc503 keithley228a kontron4060 lakeshore330  \
+				   pt2025 sr510 sr530 sr810 sr830 thurlby330
+
+comp_modules    += dg2020_f dg2020_b ep385 er023m hfs9000 hp8672a \
+				   $(hp864_list) lecroy9400 rs690 rs_sml01 $(tds_list)
+endif
+
+ifneq ($(NUM_SERIAL_PORTS),0)
+simp_modules    += aeg_s_band aeg_x_band er035m_s er035m_sas hjs_daadc  \
+				   $(s_band_list)
+comp_modules    += hjs_attenuator spectrapro_300i spex_cd2a
+endif
 
 ifdef WITH_ME6000
 simp_modules    += me6000
@@ -110,9 +122,7 @@ comp_modules    += pci_mio_16e_1
 endif
 
 ifdef WITH_RULBUS
-simp_modules    += rb8509
-simp_modules    += rb8510_0
-simp_modules    += rb8510_1
+simp_modules    += rb8509 rb8510_0 rb8510_1
 comp_modules    += rb_pulser
 endif
 

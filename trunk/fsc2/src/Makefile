@@ -159,9 +159,9 @@ gpib_setup:
 			$(RM) $(RMFLAGS) gpib_parser.y gpib_lexer.l;             \
 		fi;                                                          \
 	else                                                             \
-		echo "****************************************";             \
-		echo "*   Make not correctly configured!     *";             \
-		echo "****************************************";             \
+		echo "************************************************";     \
+		echo "*   GPIB settings not correctly configured!    *";     \
+		echo "************************************************";     \
 		exit 2;                                                      \
 	fi
 
