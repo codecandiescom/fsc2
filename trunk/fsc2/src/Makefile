@@ -140,11 +140,15 @@ gpib_setup:
 		if [ ! -e gpib_if.h ]; then                                  \
 			$(LN) $(LNFLAGS) gpib_if_$(GPIB_LIBRARY).hx gpib_if.h;   \
 		fi;                                                          \
-		if [ "$(GPIB_LIBRARY)" = "ni" -a ! -e gpib_parser.y ]; then  \
-			$(LN) $(LNFLAGS) gpib_ni_parser.yx gpib_parser.y;        \
-		fi;                                                          \
-		if [ "$(GPIB_LIBRARY)" = "ni" -a ! -e gpib_lexer.l ]; then   \
-			$(LN) $(LNFLAGS) gpib_ni_lexer.lx gpib_lexer.l;          \
+		if [ "$(GPIB_LIBRARY)" = "ni" ]; then                        \
+			if [ ! -e gpib_parser.y ]; then                          \
+				$(LN) $(LNFLAGS) gpib_ni_parser.yx gpib_parser.y;    \
+			fi;                                                      \
+			if [ ! -e gpib_lexer.l ]; then                           \
+				$(LN) $(LNFLAGS) gpib_ni_lexer.lx gpib_lexer.l;      \
+			fi;                                                      \
+		else                                                         \
+			$(RM) $(RMFLAGS) gpib_parser.y gpib_lexer.l;             \
 		fi;                                                          \
 	else                                                             \
 		echo "****************************************";             \
