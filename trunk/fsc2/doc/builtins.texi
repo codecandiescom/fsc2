@@ -1190,21 +1190,21 @@ Same as @code{-->}.
 @item returnarrow
 @code{<Return>} key symbol.
 @item square
-A square.
+Square.
 @item circle
-A circle.
+Circle.
 @item line
-A horizontal line.
+Horizontal line.
 @item plus
-A plus sign (rotate to get a cross).
+Plus sign (rotate to get a cross).
 @item UpLine
-An embossed vertical line.
+Embossed vertical line.
 @item DnLine
-An engraved vertical line.
+Engraved vertical line.
 @item UpArrow
-An embossed triangular arrow pointing to the right.
+Embossed triangular arrow pointing to the right.
 @item DnArrow
-An engraved triangular arrow pointing to the right.
+Engraved triangular arrow pointing to the right.
 @end table
 
 It is also possible to rotate most of the symbols. When a symbol name is

@@ -896,7 +896,6 @@ static bool zoom_xy_2d( Canvas *c )
 	bool scale_changed = UNSET;
 	Curve_2d *cv;
 	double px, py;
-	double factor;
 
 
 	if ( G2.active_curve == -1 ||
@@ -935,17 +934,19 @@ static bool zoom_xy_2d( Canvas *c )
 		py = ( G2.canvas.h - 1.0 - G.start[ Y ] ) / cv->s2d[ Y ]
 			 - cv->shift[ Y ];
 
-		factor = 3 * d_min( 1.0, ( double ) ( c->ppos[ Y ] - G.start[ Y ] )
-								 / G2.y_axis.h ) + 1;
 		if ( G.start[ Y ] < c->ppos[ Y ] )
-			cv->s2d[ Y ] *= factor;
+			cv->s2d[ Y ] *= 3 * d_min( 1.0,
+								   ( double )  ( c->ppos[ Y ] - G.start[ Y ] )
+								   / G2.y_axis.h ) + 1;
 		else
-			cv->s2d[ Y ] /= factor;
+			cv->s2d[ Y ] /= 3 * d_min( 1.0,
+								   ( double ) ( G.start[ Y ] - c->ppos[ Y ] )
+								   / G2.y_axis.h ) + 1;
 
 		cv->shift[ Y ] = ( G2.canvas.h - 1.0 - G.start[ Y ] )
 						 / cv->s2d[ Y ] - py;
 
-			scale_changed = SET;
+		scale_changed = SET;
 	}
 
 	if ( scale_changed )
