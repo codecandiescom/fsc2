@@ -246,29 +246,33 @@ void eprint( int severity, const char *fmt, ... )
 /* Here some more utility functions - they are that short that inlining them
    seems to be a good idea... */
 
-/* Converts a double value to long int */
+/* The next two functions do a conversion of double or integer values to
+   short.  Both are exclusively used in the conversion of data to points to be
+   drawn on the screen via XPoint structure which contain to short ints.  To
+   avoid overflows in the calculations we restrict the values to half the
+   allowed range of sort ints - thus allowing canvas sizes of up to half the
+   size of a short int. */
 
-inline long rnd( double x ) { return ( long ) ( 2 * x ) - ( long ) x; }
+#define SHRT_MAX_HALF ( SHRT_MAX >> 1 )
+#define SHRT_MIN_HALF ( SHRT_MIN >> 1 )
 
-/* Converts a double value to a short int - if the value is too large or too
-   small the maximum or minimum short int is returned */
 
 inline short d2shrt( double a )
 {
-	if ( a > SHRT_MAX )
-		return SHRT_MAX;
-	if ( a < SHRT_MIN )
-		return SHRT_MIN;
-	return ( short ) rnd( a );
+	if ( a > SHRT_MAX_HALF << 1 )
+		return SHRT_MAX_HALF;
+	if ( a < SHRT_MIN_HALF )
+		return SHRT_MIN_HALF;
+	return ( short ) lround( a );
 }
 
 
 inline short i2shrt( int a )
 {
-	if ( a > SHRT_MAX )
-		return SHRT_MAX;
-	if ( a < SHRT_MIN )
-		return SHRT_MIN;
+	if ( a > SHRT_MAX_HALF )
+		return SHRT_MAX_HALF;
+	if ( a < SHRT_MIN_HALF )
+		return SHRT_MIN_HALF;
 	return ( short ) a;
 }
 
