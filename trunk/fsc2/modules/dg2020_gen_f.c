@@ -11,15 +11,16 @@
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-bool set_timebase( double timebase )
+bool dg2020_store_timebase( double timebase )
 {
 	if ( timebase < MIN_TIMEBASE || timebase > MAX_TIMEBASE )
 	{
-		char *min = get_string_copy( ptime( ( double ) MIN_TIMEBASE ) );
-		char *max = get_string_copy( ptime( ( double ) MAX_TIMEBASE ) );
+		char *min = get_string_copy( dg2020_ptime( ( double ) MIN_TIMEBASE ) );
+		char *max = get_string_copy( dg2020_ptime( ( double ) MAX_TIMEBASE ) );
 
 		eprint( FATAL, "%s:%ld: DG2020: Invalid time base of %s, valid range "
-				"is %s to %s.\n", Fname, Lc, ptime( timebase ), min, max );
+				"is %s to %s.\n", Fname, Lc, dg2020_ptime( timebase ),
+				min, max );
 		T_free( min );
 		T_free( max );
 		THROW( EXCEPTION );
@@ -27,6 +28,12 @@ bool set_timebase( double timebase )
 
 	dg2020.is_timebase = SET;
 	dg2020.timebase = timebase;
+
+	dg2020.function[ PULSER_CHANNEL_PHASE_1 ] =
+		( Ticks ) ceil( DEFAULT_PHASE_SWITCH_DELAY / timebase );
+	dg2020.function[ PULSER_CHANNEL_PHASE_2 ] =
+		( Ticks ) ceil( DEFAULT_PHASE_SWITCH_DELAY / timebase );
+
 	return OK;
 }
 
@@ -34,7 +41,7 @@ bool set_timebase( double timebase )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-bool assign_function( int function, long pod )
+bool dg2020_assign_function( int function, long pod )
 {
 	FUNCTION *f = &dg2020.function[ function ];
 	POD *p = &dg2020.pod[ pod ];
@@ -91,7 +98,7 @@ bool assign_function( int function, long pod )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-bool assign_channel_to_function( int function, long channel )
+bool dg2020_assign_channel_to_function( int function, long channel )
 {
 	FUNCTION *f = &dg2020.function[ function ];
 	CHANNEL *c = &dg2020.channel[ channel ];
@@ -131,7 +138,7 @@ bool assign_channel_to_function( int function, long channel )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-bool invert_function( int function )
+bool dg2020_invert_function( int function )
 {
 	dg2020.function[ function ].is_used = SET;
 	dg2020.function[ function ].is_inverted = SET;
@@ -142,7 +149,7 @@ bool invert_function( int function )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-bool set_delay_function( int function, double delay )
+bool dg2020_set_delay_function( int function, double delay )
 {
 	if ( dg2020.function[ function ].is_delay )
 	{
@@ -156,11 +163,11 @@ bool set_delay_function( int function, double delay )
 	if ( delay < 0 )
 	{
 		eprint( FATAL, "%s:%ld: Invalid negative delay: %s\n", Fname, Lc,
-				ptime( delay ) );
+				dg2020_ptime( delay ) );
 		THROW( EXCEPTION );
 	}
 
-	dg2020.function[ function ].delay = double2ticks( delay );
+	dg2020.function[ function ].delay = dg2020_double2ticks( delay );
 	dg2020.function[ function ].is_used = SET;
 
 	return OK;
@@ -170,7 +177,7 @@ bool set_delay_function( int function, double delay )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-bool set_function_high_level( int function, double voltage )
+bool dg2020_set_function_high_level( int function, double voltage )
 {
 	voltage = VOLTAGE_RESOLUTION * lround( voltage / VOLTAGE_RESOLUTION );
 
@@ -184,7 +191,8 @@ bool set_function_high_level( int function, double voltage )
 	}
 				
 	if ( dg2020.function[ function ].is_low_level )
-		check_pod_level_diff( voltage, dg2020.function[ function ].low_level );
+		dg2020_check_pod_level_diff( voltage,
+									 dg2020.function[ function ].low_level );
 
 	dg2020.function[ function ].high_level = voltage;
 	dg2020.function[ function ].is_high_level = SET;
@@ -197,7 +205,7 @@ bool set_function_high_level( int function, double voltage )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-bool set_function_low_level( int function, double voltage )
+bool dg2020_set_function_low_level( int function, double voltage )
 {
 	voltage = VOLTAGE_RESOLUTION * lround( voltage / VOLTAGE_RESOLUTION );
 
@@ -211,8 +219,8 @@ bool set_function_low_level( int function, double voltage )
 	}
 				
 	if ( dg2020.function[ function ].is_high_level )
-		check_pod_level_diff( dg2020.function[ function ].high_level,
-							  voltage );
+		dg2020_check_pod_level_diff( dg2020.function[ function ].high_level,
+									 voltage );
 
 	dg2020.function[ function ].low_level = voltage;
 	dg2020.function[ function ].is_low_level = SET;
@@ -225,7 +233,7 @@ bool set_function_low_level( int function, double voltage )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-bool set_trigger_mode( int mode )
+bool dg2020_set_trigger_mode( int mode )
 {
 	assert( mode == INTERNAL || mode == EXTERNAL );
 
@@ -274,7 +282,7 @@ bool set_trigger_mode( int mode )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-bool set_trig_in_level( double voltage )
+bool dg2020_set_trig_in_level( double voltage )
 {
 	voltage = VOLTAGE_RESOLUTION * lround( voltage / VOLTAGE_RESOLUTION );
 
@@ -318,7 +326,7 @@ bool set_trig_in_level( double voltage )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-bool set_trig_in_slope( int slope )
+bool dg2020_set_trig_in_slope( int slope )
 {
 	assert( slope == POSITIVE || slope == NEGATIVE );
 
@@ -354,14 +362,15 @@ bool set_trig_in_slope( int slope )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-bool set_repeat_time( double time )
+bool dg2020_set_repeat_time( double time )
 {
-	if ( dg2020.is_repeat_time && dg2020.repeat_time != double2ticks( time ) )
+	if ( dg2020.is_repeat_time &&
+		 dg2020.repeat_time != dg2020_double2ticks( time ) )
 	{
 		eprint( FATAL, "%s:%ld: DG2020: A different repeat time/frequency of "
 				"%s / %g Hz has already been set.\n", Fname, Lc,
-				pticks( dg2020.repeat_time ),
-				1.0 / ticks2double( dg2020.repeat_time ) );
+				dg2020_pticks( dg2020.repeat_time ),
+				1.0 / dg2020_ticks2double( dg2020.repeat_time ) );
 		THROW( EXCEPTION );
 	}
 
@@ -382,12 +391,12 @@ bool set_repeat_time( double time )
 	if ( time <= 0 )
 	{
 		eprint( FATAL, "%s:%ld: DG2020: Invalid repeat time %s.\n",
-				Fname, Lc, ptime( time ) );
+				Fname, Lc, dg2020_ptime( time ) );
 		THROW( EXCEPTION );
 	}
 
 
-	dg2020.repeat_time = double2ticks( time );
+	dg2020.repeat_time = dg2020_double2ticks( time );
 	dg2020.is_repeat_time = SET;
 
 	return OK;
@@ -397,7 +406,7 @@ bool set_repeat_time( double time )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-bool set_phase_reference( int phase, int function )
+bool dg2020_set_phase_reference( int phase, int function )
 {
 	FUNCTION *p, *f;
 
@@ -432,7 +441,7 @@ bool set_phase_reference( int phase, int function )
 /*-----------------------------------------------------------------*/
 /*-----------------------------------------------------------------*/
 
-bool setup_phase( int func, PHS phs )
+bool dg2020_setup_phase( int func, PHS phs )
 {
 	assert( func == PULSER_CHANNEL_PHASE_1 || func == PULSER_CHANNEL_PHASE_2 );
 
@@ -445,6 +454,50 @@ bool setup_phase( int func, PHS phs )
 
 	memcpy( &dg2020.function[ func].phs, &phs, sizeof( PHS ) );
 	dg2020.function[ func ].is_phs = SET;
+
+	return OK;
+}
+
+
+/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*/
+
+bool set_phase_switch_delay( int func, double time )
+{
+	assert( func == PULSER_CHANNEL_PHASE_1 || func == PULSER_CHANNEL_PHASE_2 );
+
+	if ( time < 0 )
+	{
+		eprint( FATAL, "%s:%ld: DG2020: Unreasonable (negative) value for "
+				"phase switch delay: %s.\n", Fname, Lc, ptime( time ) );
+		THROW( EXCEPTION );
+	}
+
+	if ( dg2020.function[ func ].is_pds )
+	{
+		eprint( FATAL, "%s:%ld: DG2020: Phase switch delay for phase function "
+				"`%s' has already been set.\n", Fname, Lc,
+				Function_Names[ func ] );
+		THROW( EXCEPTION );
+	}
+
+	if ( ! dg2020.is_timebase )
+	{
+		eprint( FATAL, "%s:%ld: DG2020: Can't set phase switch delay because "
+				"no pulser time base has been set.\n",Fname, Lc );
+		THROW( EXCEPTION );
+	}
+
+	dg2020.function[ func ].is_pds = SET;
+	dg2020.function[ func ].pds = ( Ticks ) ceil( time / dg2020.timebase );
+
+	/* If the delay is set for PHASE_1 and no value has been set for PHASE2
+	   yet, preliminary use the value also for PHASE_2 */
+
+	if ( func == PULSER_CHANNEL_PHASE_1 &&
+		 ! dg2020.function[ PULSER_CHANNEL_PHASE_2 ].is_pds )
+		dg2020.function[ PULSER_CHANNEL_PHASE_2 ].pds =
+			( Ticks ) ceil( time / dg2020.timebase );
 
 	return OK;
 }

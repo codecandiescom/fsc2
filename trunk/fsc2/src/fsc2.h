@@ -58,7 +58,6 @@
 #include "func.h"                 /* load before "devices.h" */
 #include "devices.h"              /* load before "loader.h"  */
 #include "loader.h"
-#include "assign.h"
 #include "phases.h"
 #include "pulser.h"
 #include "exp.h"
