@@ -127,7 +127,7 @@ int er035m_exp_hook( void )
 	if ( gpib_init_device( nmr.name, &nmr.device ) == FAILURE )
 	{
 		nmr.device = -1;
-		eprint( FATAL, "ER035M: Can't access the NMR gaussmeter." );
+		eprint( FATAL, "%s: Can't access the NMR gaussmeter.", nmr.name );
 		THROW( EXCEPTION );
 	}
 	usleep( ER035M_WAIT );
@@ -146,7 +146,7 @@ try_again:
 
 	if ( gpib_write( nmr.device, "PS", 2 ) == FAILURE )
 	{
-		eprint( FATAL, "ER035M: Can't access the NMR gaussmeter." );
+		eprint( FATAL, "%s: Can't access the NMR gaussmeter.", nmr.name );
 		THROW( EXCEPTION );
 	}
 	usleep( ER035M_WAIT );
@@ -154,7 +154,7 @@ try_again:
 	length = 20;
 	if ( gpib_read( nmr.device, buffer, &length ) == FAILURE )
 	{
-		eprint( FATAL, "ER035M: Can't access the NMR gaussmeter." );
+		eprint( FATAL, "%s: Can't access the NMR gaussmeter.", nmr.name );
 		THROW( EXCEPTION );
 	}
 
@@ -172,45 +172,45 @@ try_again:
 			case '0' :      /* Probe F0 is connected -> OK for S-band */
 				if ( exist_device( "s_band" ) )
 					break;
-				eprint( FATAL, "ER035M: Wrong field probe (F0) connected to "
-						"the NMR gaussmeter." );
+				eprint( FATAL, "%s: Wrong field probe (F0) connected to the "
+						"NMR gaussmeter.", nmr.name );
 				THROW( EXCEPTION );
 				
 
 			case '1' :      /* Probe F1 is connected -> OK for X-band*/
 				if ( exist_device( "aeg_x_band" ) )
 					break;
-				eprint( FATAL, "ER035M: Wrong field probe (F1) connected to "
-						"the NMR gaussmeter." );
+				eprint( FATAL, "%s: Wrong field probe (F1) connected to the "
+						"NMR gaussmeter.", nmr.name );
 				THROW( EXCEPTION );
 
 			case '2' :      /* No probe connected -> error */
-				eprint( FATAL, "ER035M: No field probe connected to the "
-						"NMR gaussmeter." );
+				eprint( FATAL, "%s: No field probe connected to the NMR "
+						"gaussmeter.", nmr.name );
 				THROW( EXCEPTION );
 
 			case '3' :      /* Error temperature -> error */
-				eprint( FATAL, "ER035M: Temperature error from NMR "
-						"gaussmeter." );
+				eprint( FATAL, "%s: Temperature error from NMR "
+						"gaussmeter.", nmr.name );
 				THROW( EXCEPTION );
 
 			case '4' :      /* TRANS L-H -> test again */
 				if ( try_count++ < 10 )
 					goto try_again;
-				eprint( FATAL, "ER035M: NMR gaussmeter can't find the "
-						"actual field." );
+				eprint( FATAL, "%s: NMR gaussmeter can't find the actual "
+						"field.", nmr.name );
 				THROW( EXCEPTION );
 
 			case '5' :      /* TRANS L-H -> test again */
 				if ( try_count++ < 10 )
 					goto try_again;
-				eprint( FATAL, "ER035M: NMR gaussmeter can't find the "
-						"actual field." );
+				eprint( FATAL, "%s: NMR gaussmeter can't find the actual "
+						"field.", nmr.name );
 				THROW( EXCEPTION );
 
 			case '6' :      /* MOD OFF -> error (should never happen */
-				eprint( FATAL, "ER035M: Modulation of NMR gaussmeter "
-						"is switched off." );
+				eprint( FATAL, "%s: Modulation of NMR gaussmeter is switched "
+						"off.", nmr.name );
 				THROW( EXCEPTION );
 
 			case '7' :      /* MOD POS -> OK (default state) */
@@ -224,8 +224,8 @@ try_again:
 				break;
 
 			case 'A' :      /* FIELD ? -> error (doesn't seem to work) */
-				eprint( FATAL, "ER035M: NMR gaussmeter has an "
-						"unidentifiable problem." );
+				eprint( FATAL, "%s: NMR gaussmeter has an unidentifiable "
+						"problem.", nmr.name );
 				THROW( EXCEPTION );
 
 			case 'B' :      /* SU active -> OK */
@@ -256,7 +256,7 @@ try_again:
 
 	if ( gpib_write( nmr.device, "ED", 2 ) == FAILURE )
 	{
-		eprint( FATAL, "ER035M: Can't access the NMR gaussmeter." );
+		eprint( FATAL, "%s: Can't access the NMR gaussmeter.", nmr.name );
 		THROW( EXCEPTION );
 	}
 	usleep( ER035M_WAIT );
@@ -265,7 +265,7 @@ try_again:
 
 	if ( gpib_write( nmr.device, "RS", 2 ) == FAILURE )
 	{
-		eprint( FATAL, "ER035M: Can't access the NMR gaussmeter." );
+		eprint( FATAL, "%s: Can't access the NMR gaussmeter.", nmr.name );
 		THROW( EXCEPTION );
 	}
 	usleep( ER035M_WAIT );
@@ -273,7 +273,7 @@ try_again:
 	length = 20;
 	if ( gpib_read( nmr.device, buffer, &length ) == FAILURE )
 	{
-		eprint( FATAL, "ER035M: Can't access the NMR gaussmeter." );
+		eprint( FATAL, "%s: Can't access the NMR gaussmeter.", nmr.name );
 		THROW( EXCEPTION );
 	}
 
@@ -282,7 +282,8 @@ try_again:
 		case '1' :                    /* set resolution to 2 digits */
 			if ( gpib_write( nmr.device, "RS2", 3 ) == FAILURE )
 			{
-				eprint( FATAL, "ER035M: Can't access the NMR gaussmeter." );
+				eprint( FATAL, "%s: Can't access the NMR gaussmeter.",
+						nmr.name );
 				THROW( EXCEPTION );
 			}
 			usleep( ER035M_WAIT );
@@ -298,8 +299,8 @@ try_again:
 
 		default :                     /* should never happen... */
 		{
-			eprint( FATAL, "ER035M: Undocumented data received from the NMR "
-					"gaussmeter." );
+			eprint( FATAL, "%s: Undocumented data received from the NMR "
+					"gaussmeter.", nmr.name );
 			THROW( EXCEPTION );
 		}
 	}
@@ -372,7 +373,7 @@ Var *find_field( Var *v )
 		   nmr.state == ER035M_UNKNOWN ) &&
 		 gpib_write( nmr.device, "SD", 2 ) == FAILURE )
 	{
-		eprint( FATAL, "ER035M: Can't access the NMR gaussmeter." );
+		eprint( FATAL, "%s: Can't access the NMR gaussmeter.", nmr.name );
 		THROW( EXCEPTION );
 	}
 	usleep( ER035M_WAIT );
@@ -385,7 +386,7 @@ Var *find_field( Var *v )
 
 		if ( gpib_write( nmr.device, "PS", 2 ) == FAILURE )
 		{
-			eprint( FATAL, "ER035M: Can't access the NMR gaussmeter." );
+			eprint( FATAL, "%s: Can't access the NMR gaussmeter.", nmr.name );
 			THROW( EXCEPTION );
 		}
 		usleep( ER035M_WAIT );
@@ -393,7 +394,7 @@ Var *find_field( Var *v )
 		length = 20;
 		if ( gpib_read( nmr.device, buffer, &length ) == FAILURE )
 		{
-			eprint( FATAL, "ER035M: Can't access the NMR gaussmeter." );
+			eprint( FATAL, "%s: Can't access the NMR gaussmeter.", nmr.name );
 			THROW( EXCEPTION );
 		}
 
@@ -428,14 +429,14 @@ Var *find_field( Var *v )
 
 				case 'D' :      /* OU active -> error (should never happen) */
 					nmr.state = ER035M_OU_ACTIVE;
-					eprint( FATAL, "ER035M: NMR gaussmeter has an "
-							"unidentifiable problem." );
+					eprint( FATAL, "%s: NMR gaussmeter has an unidentifiable "
+							"problem.", nmr.name );
 					THROW( EXCEPTION );
 
 				case 'E' :      /* OD active -> error (should never happen) */
 					nmr.state = ER035M_OD_ACTIVE;
-					eprint( FATAL, "ER035M: NMR gaussmeter has an "
-							"unidentifiable problem." );
+					eprint( FATAL, "%s: NMR gaussmeter has an unidentifiable "
+							"problem.", nmr.name );
 					THROW( EXCEPTION );
 
 				case 'F' :      /* Search active but at a search limit -> OK*/
@@ -508,7 +509,7 @@ double er035m_get_field( void )
 
 		if ( gpib_write( nmr.device, "PF", 2 ) == FAILURE )
 		{
-			eprint( FATAL, "ER035M: Can't access the NMR gaussmeter." );
+			eprint( FATAL, "%s: Can't access the NMR gaussmeter.", nmr.name );
 			THROW( EXCEPTION );
 		}
 		usleep( ER035M_WAIT );
@@ -516,7 +517,7 @@ double er035m_get_field( void )
 		length = 20;
 		if ( gpib_read( nmr.device, buffer, &length ) == FAILURE )
 		{
-			eprint( FATAL, "ER035M: Can't access the NMR gaussmeter." );
+			eprint( FATAL, "%s: Can't access the NMR gaussmeter.", nmr.name );
 			THROW( EXCEPTION );
 		}
 
@@ -528,8 +529,8 @@ double er035m_get_field( void )
 
 		if ( *state_flag >= '3' )
 		{
-			eprint( FATAL, "ER035M: NMR gaussmeter can't lock on the "
-					"current field." );
+			eprint( FATAL, "%s: NMR gaussmeter can't lock on the current "
+					"field.", nmr.name );
 			THROW( EXCEPTION );
 		}
 
