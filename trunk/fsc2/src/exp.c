@@ -244,7 +244,12 @@ static void loop_setup( void )
 	{
 		switch( prg_token[ i ].token )
 		{
-			case WHILE_TOK : case REPEAT_TOK : case FOR_TOK :
+			case FOREVER_TOK :
+				prg_token[ i ].counter = 1;
+				/* fall through */
+
+			case WHILE_TOK : case REPEAT_TOK :
+			case FOR_TOK : 
 				cur_pos = i;
 				setup_while_or_repeat( prg_token[ i ].token, &i );
 				if ( cur_pos < On_Stop_Pos && i > On_Stop_Pos )
@@ -261,7 +266,7 @@ static void loop_setup( void )
 				if ( cur_pos < On_Stop_Pos && i > On_Stop_Pos )
 				{
 					eprint( FATAL, "ON_QUIT label is located within an "
-							"if-else construct.\n" );
+							"IF-ELSE construct.\n" );
 					THROW( EXCEPTION );
 				}
 				break;
@@ -294,9 +299,17 @@ static void setup_while_or_repeat( int type, long *pos )
 				prg_token[ i - 1 ].Lc );
 		THROW( EXCEPTION );
 	}
-	if ( prg_token[ i ].token == '{' )
+
+	if ( type != FOREVER_TOK && prg_token[ i ].token == '{' )
 	{
 		eprint( FATAL, "%s:%ld: Missing loop condition.\n",
+				prg_token[ i ].Fname, prg_token[ i ].Lc );
+		THROW( EXCEPTION );
+	}
+
+	if ( type == FOREVER_TOK && prg_token[ i ].token != '{' )
+	{
+		eprint( FATAL, "%s:%ld: No condition can be used for FOREVER loop.\n",
 				prg_token[ i ].Fname, prg_token[ i ].Lc );
 		THROW( EXCEPTION );
 	}
@@ -311,7 +324,8 @@ static void setup_while_or_repeat( int type, long *pos )
 	{
 		switch( prg_token[ i ].token )
 		{
-			case WHILE_TOK : case REPEAT_TOK : case FOR_TOK :
+			case WHILE_TOK : case REPEAT_TOK :
+			case FOR_TOK : case FOREVER_TOK :
 				setup_while_or_repeat( prg_token[ i ].token, &i );
 				break;
 
@@ -357,6 +371,8 @@ static void setup_while_or_repeat( int type, long *pos )
 		t = "REPEAT";
 	if ( type == FOR_TOK )
 		t = "FOR";
+	if ( type == FOREVER_TOK )
+		t = "FOREVER";
 	
 	if ( t == NULL)
 		eprint( FATAL, "Internal error at %s:%d.\n", __FILE__, __LINE__ );
@@ -393,6 +409,7 @@ static void setup_if_else( long *pos, Prg_Token *cur_wr )
 				prg_token[ i - 1 ].Lc );
 		THROW( EXCEPTION );
 	}
+
 	if ( prg_token[ i ].token == '{' )
 	{
 		eprint( FATAL, "%s:%ld: Missing condition after IF.\n",
@@ -405,7 +422,8 @@ static void setup_if_else( long *pos, Prg_Token *cur_wr )
 	{
 		switch( prg_token[ i ].token )
 		{
-			case WHILE_TOK : case REPEAT_TOK : case FOR_TOK :
+			case WHILE_TOK : case REPEAT_TOK :
+			case FOR_TOK : case FOREVER_TOK :
 				setup_while_or_repeat( prg_token[ i ].token, &i );
 				break;
 
@@ -613,6 +631,20 @@ void exp_test_run( void )
 					}
 					break;
 
+				case FOREVER_TOK :
+					cur = cur_prg_token;          /* just test once ! */
+					if ( cur->counter )
+					{
+						cur->counter--;
+						cur_prg_token = cur->start;
+					}
+					else
+					{
+						cur->counter = 0;
+						cur_prg_token = cur->end;
+					}
+					break;
+
 				case BREAK_TOK :
 					cur_prg_token = cur_prg_token->start->end;
 					break;
@@ -689,7 +721,8 @@ int exp_runlex( void )
 		switch( cur_prg_token->token )
 		{
 			case WHILE_TOK : case REPEAT_TOK : case BREAK_TOK :
-			case CONT_TOK : case FOR_TOK   : case IF_TOK : case ELSE_TOK :
+			case CONT_TOK : case FOR_TOK : case FOREVER_TOK :
+			case IF_TOK : case ELSE_TOK :
 				return 0;
 
 			case '}' :

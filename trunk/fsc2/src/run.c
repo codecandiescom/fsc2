@@ -653,6 +653,10 @@ static void do_measurement( void )
 					}
 					break;
 
+				case FOREVER_TOK :
+					cur_prg_token = cur_prg_token->start;
+					break;
+
 				case BREAK_TOK :
 					cur_prg_token = cur_prg_token->start->end;
 					break;
