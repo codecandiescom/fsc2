@@ -300,15 +300,13 @@ Acquisition_Sequence ASeq[ 2 ] = { { UNSET, NULL, 0 }, { UNSET, NULL, 0 } };
 long Cur_Pulser = -1;
 
 const char *Channel_Names[ NUM_CHANNEL_NAMES ] =
-			{ "CH1", "CH2", "CH3", "CH4",
-              "MATH1", "MATH2", "MATH3",
-			  "REF1", "REF2", "REF3", "REF4",
-              "AUX", "AUX1", "AUX2", "LINE",
-			  "MEM_C", "MEM_D", "FUNC_E", "FUNC_F", 
-              "EXT", "EXT10",
-			  "CH0", "CH5", "CH6", "CH7", "CH8",
-			  "CH9", "CH10", "CH11", "CH12", "CH13",
-			  "CH14", "CH15" };
+	{ "CH1", "CH2", "CH3", "CH4", "MATH1", "MATH2", "MATH3",
+	  "REF1", "REF2", "REF3", "REF4", "AUX", "AUX1", "AUX2", "LINE",
+	  "MEM_C", "MEM_D", "FUNC_E", "FUNC_F", "EXT", "EXT10",
+	  "CH0", "CH5", "CH6", "CH7", "CH8", "CH9", "CH10", "CH11",
+	  "CH12", "CH13", "CH14", "CH15",
+	  "DEFAULT_SOURCE", "SOURCE_0", "SOURCE_1", "SOURCE_2", "SOURCE_3",
+	  "NEXT_GATE", "TIMEBASE_1", "TIMEBASE_2" };
 
 const char *Function_Names[ PULSER_CHANNEL_NUM_FUNC ] =
 			{ "MW",
