@@ -957,9 +957,7 @@ void clean_up( void )
 	int i;
 
 
-	G.is_init = UNSET;
-
-	/* clear up the compilation structure */
+	/* Clear up the compilation structure */
 
 	for ( i = 0; i < 3; ++i )
 		compilation.error[ 3 ] = 0;
@@ -970,26 +968,26 @@ void clean_up( void )
 
 	Fname = T_free( Fname );
 
-	/* run exit hook functions and unlink modules */
+	/* Run exit hook functions and unlink modules */
 
 	delete_devices( );
 	need_GPIB = UNSET;
 	for ( i = 0; i < NUM_SERIAL_PORTS; i++ )
 		need_Serial_Port[ i ] = UNSET;
 
-	/* delete function list */
+	/* Delete function list */
 
 	functions_exit( );
 
-	/* delete device list */
+	/* Delete device list */
 
 	delete_device_name_list( );
 
-	/* (re)initialize the structure for the pulser modules */
+	/* (Re)initialize the structure for the pulser modules */
 
 	pulser_struct_init( );
 
-	/* clear up structures for phases */
+	/* Clear up structures for phases */
 
 	phases_clear( );
 
@@ -997,7 +995,7 @@ void clean_up( void )
 
 	tools_clear( );
 
-	/* delete variables and get rid of variable stack */
+	/* Delete variables and get rid of variable stack */
 
 	vars_clean_up( );
 
@@ -1005,7 +1003,7 @@ void clean_up( void )
 
 	forget_prg( );
 
-	/* unset used flags for all serial ports */
+	/* Unset used flags for all serial ports */
 
 	for ( i = 0; i < NUM_SERIAL_PORTS; i++ )
 		need_Serial_Port[ i ] = UNSET;

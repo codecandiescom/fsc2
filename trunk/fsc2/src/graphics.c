@@ -298,8 +298,8 @@ void start_graphics( void )
 
 	fl_set_button( run_form->full_scale_button, 1 );
 
-	/* Load a font hopefully available on all machines (we try at least three,
-	 in principal this should be made user configurable) */
+	/* Load a font hopefully available on all machines (beside the optionally
+	   userdefined font we try at three more before giving up */
 
 	if ( G.is_init )
 	{
