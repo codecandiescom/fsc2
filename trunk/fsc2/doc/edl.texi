@@ -35,9 +35,9 @@ also some differences. The most noticeable is the overall structure of
 an @b{EDL} program.
 
 Each @b{EDL} program is divided into a set of sections that are somewhat
-related to the way a real-life experiment is done. Due to the different
-purposes of the sections there are differences in the syntax to be used
-in the various sections. These are explained in the next sections.
+related to the way an experiment is done. Due to the different purposes
+of the sections there are differences in the syntax to be used in the
+various sections. These are explained in the next sections.
 
 
 
@@ -57,15 +57,14 @@ EXPERIMENT
 @end example
 
 
-In an experiment you will first decide which devices you need. This
+In an experiment you will first decide which devices to use. This
 is reflected in the @code{DEVICES} section of an @b{EDL} file where you
 simply list all the devices to be used in the experiment (at least the
-ones to be controlled by the computer).
+ones that are going to be controlled by the computer).
 
-The next section, the @code{VARIABLES} section, unfortunately doesn't
-have a real-world equivalent -- here you have to declare all variables
-and arrays you will use in the rest of the program and, optionally,
-initialise them.
+The next section, @code{VARIABLES}, unfortunately hasn't a real-world
+equivalent -- here you have to declare all variables and arrays you will
+use in the rest of the program and, optionally, initialize them.
 
 Next, in a pulsed experiment, you will probably set up the pulser. This
 is partly done in the @code{ASSIGNMENTS} section.
