@@ -938,7 +938,7 @@ static void ep385_commit( bool flag )
 	{
 		ep385_set_channels( );
 
-		if ( ep385.trig_in_mode == INTERNAL )
+		if ( ep385.trig_in_mode == INTERNAL && ep385.is_repeat_time )
 		{
 			f = ep385.function + PULSER_CHANNEL_TWT;
 			if ( f->is_used && f->num_channels > 0 &&

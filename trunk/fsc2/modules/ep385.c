@@ -272,7 +272,7 @@ int ep385_end_of_test_hook( void )
 	/* Check that TWT duty cycle isn't exceeded due to excessive length of
 	   TWT and TWT_GATE pulses */
 
-	if ( ep385.trig_in_mode == INTERNAL )
+	if ( ep385.trig_in_mode == INTERNAL && ep385.is_repeat_time )
 	{
 		f = ep385.function + PULSER_CHANNEL_TWT;
 		if ( f->is_used && f->num_channels > 0 &&
