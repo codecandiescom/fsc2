@@ -297,7 +297,8 @@ bool dg2020_set_timebase( double timebase )
 	char cmd[ 30 ] = "SOUR:OSC:INT:FREQ ";
 
 
-	if ( timebase < 4.999e-9 || timebase > 10.001 )
+	if ( timebase < MIN_TIMEBASE * 0.99999 ||
+		 timebase > MAX_TIMEBASE * 1.00001 )
 		return FAIL;
 
 	gcvt( 1.0 / timebase, 4, cmd + strlen( cmd ) );
