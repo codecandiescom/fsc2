@@ -1044,12 +1044,13 @@ bool magnet_do( int command )
 			memcpy( &magnet.new_tio, &magnet.old_tio,
 					sizeof( struct termios ) );
 
-			/* Switch off parity checking and use of 2 stop bits and clear
-			   character size mask, then set character size mask to CS8,
+			/* Switch off parity checking (8N1) and use of 2 stop bits and
+			   clear character size mask, then set character size mask to CS8,
 			   allow flow control and finally set the baud rate */
 
 			magnet.new_tio.c_cflag &= ~ ( PARENB | CSTOPB | CSIZE );
 			magnet.new_tio.c_cflag |= CS8 | CRTSCTS;
+			cfsetispeed( &magnet.new_tio, SERIAL_BAUDRATE );
 			cfsetospeed( &magnet.new_tio, SERIAL_BAUDRATE );
 
 			tcflush( magnet.fd, TCIFLUSH );

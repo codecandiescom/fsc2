@@ -803,16 +803,16 @@ static bool er035m_s_comm( int type, ... )
 			tcgetattr( nmr.fd, &nmr.old_tio );
 			memcpy( &nmr.new_tio, &nmr.old_tio, sizeof( struct termios ) );
 
-			/* Switch off parity checking and use of 2 stop bits and clear
-			   character size mask, set character size mask to CS8 and the
-			   flag for ignoring modem lines, enable reading and, finally,
+			/* Switch off parity checking (8N1) and use of 2 stop bits and
+			   clear character size mask, set character size mask to CS8 and
+			   the flag for ignoring modem lines, enable reading and, finally,
 			   set the baud rate. */
 
 			nmr.new_tio.c_cflag &= ~ ( PARENB | CSTOPB | CSIZE );
-
 			nmr.new_tio.c_cflag |= CS8 | CLOCAL | CREAD;
+			cfsetispeed( &nmr.new_tio, SERIAL_BAUDRATE );
 			cfsetospeed( &nmr.new_tio, SERIAL_BAUDRATE );
-			cfsetispeed( &nmr.new_tio, 0 );
+//			cfsetispeed( &nmr.new_tio, 0 );
 
 			nmr.new_tio.c_iflag = IGNBRK;
 			nmr.new_tio.c_oflag = 0;
