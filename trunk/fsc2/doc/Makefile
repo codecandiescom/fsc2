@@ -130,14 +130,14 @@ uninstall:
 	-$(RM) $(RMFLAGS) $(docdir)/fsc2.pdf
 	-install-info --delete fsc2 $(infodir)/dir
 	-$(RM) $(RMFLAGS) $(infodir)/fsc2.info*.gz
-	if [ -z "`ls -a $(docdir)`" ]; then   \
-		rmdir $(docdir);                  \
+	-if [ -z "`ls -a $(docdir)`" ]; then   \
+		rmdir $(docdir);                   \
 	fi
-	if [ -z "`ls -a $(infodir)`" ]; then  \
-		rmdir $(infodir);                 \
+	-if [ -z "`ls -a $(infodir)`" ]; then  \
+		rmdir $(infodir);                  \
 	fi
-	if [ -z "`ls -a $(mandir)`" ]; then   \
-		rmdir $(mandir);                  \
+	-if [ -z "`ls -a $(mandir)`" ]; then   \
+		rmdir $(mandir);                   \
 	fi
 
 

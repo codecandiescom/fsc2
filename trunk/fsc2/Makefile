@@ -346,22 +346,22 @@ install:
 uninstall:
 	-$(RM) $(RMFLAGS) $(libdir)/Functions
 	-$(RM) $(RMFLAGS) $(libdir)/Devices
-	-for file in `basename $(adir)/*.xpm`; do  \
-		$(RM) $(RMFLAGS) $(auxdir)/$$file;     \
+	-for file in $(adir)/*.xpm; do                     \
+		$(RM) $(RMFLAGS) $(auxdir)/`basename $$file`;  \
 	done
 	$(MAKE) -C src uninstall
 	$(MAKE) -C modules uninstall
 	$(MAKE) -C utils uninstall
 	$(MAKE) -C scripts uninstall
 	$(MAKE) -C doc uninstall
-	if [ -z "`ls -a $(bindir)`" ]; then  \
-		rmdir $(bindir);                 \
+	-if [ -z "`ls -A $(bindir)`" ]; then  \
+		rmdir $(bindir);                  \
 	fi
-	if [ -z "`ls -a $(auxdir)`" ]; then  \
-		rmdir $(auxdir);                 \
+	-if [ -z "`ls -A $(auxdir)`" ]; then  \
+		rmdir $(auxdir);                  \
 	fi
-	if [ -z "`ls -a $(libdir)`" ]; then  \
-		rmdir $(libdir);                 \
+	-if [ -z "`ls -A $(libdir)`" ]; then  \
+		rmdir $(libdir);                  \
 	fi
 
 # `clean' deletes all the files remaining from the compilation while
