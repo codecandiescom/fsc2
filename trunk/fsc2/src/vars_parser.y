@@ -44,7 +44,7 @@ static Var *CV;
 %token NS_TOKEN US_TOKEN MS_TOKEN S_TOKEN
 %token NT_TOKEN UT_TOKEN MT_TOKEN T_TOKEN
 %token NU_TOKEN UU_TOKEN MU_TOKEN KU_TOKEN MEG_TOKEN
-%type <vptr> expr line arrass list1 list2 list3 unit
+%type <vptr> expr arrass list1 list2 list3 unit
 
 %left EQ LT LE GT GE
 %left '+' '-'
@@ -58,26 +58,31 @@ static Var *CV;
 
 input:   /* empty */
        | input ';'
-       | input line ';'            { assert( Var_Stack == NULL ); }
-       | input line line           { THROW( MISSING_SEMICOLON_EXCEPTION ); }
-       | input line SECTION_LABEL  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
-       | input SECTION_LABEL       { YYACCEPT; }
-;
+       | input line ';'           { assert( Var_Stack == NULL ); }
+       | input line SECTION_LABEL { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | input SECTION_LABEL      { YYACCEPT; }
+;								  
+								  
+line:    linet					  
+       | line ',' linet			  
+       | line linet               { THROW( MISSING_SEMICOLON_EXCEPTION ); }
 
-line:    VAR_TOKEN                 /* no assignment to be done */
-       | VAR_TOKEN '=' expr        { vars_assign( $3, $1 ); }
-       | VAR_TOKEN '['             { vars_arr_start( $1 ); }
-         list1 ']'                 { vars_arr_lhs( $4 ); }
-         arhs
-       | FUNC_TOKEN '(' list4 ')'  { vars_pop( func_call( $1 ) ); }
-       | FUNC_TOKEN '['            { eprint( FATAL, "%s:%ld: `%s' is a "
-											 "function and not an array.\n",
-											 Fname, Lc, $1->name );
-	                                 THROW( EXCEPTION ); }
-       | VAR_TOKEN '('             { eprint( FATAL, "%s:%ld: `%s' is an "
-											 "array and not a function.\n",
-											 Fname, Lc, $1->name );
-	                                 THROW( EXCEPTION ); }
+;								  
+								  
+linet:   VAR_TOKEN                { } /* no assignment to be done */
+       | VAR_TOKEN '=' expr       { vars_assign( $3, $1 ); }
+       | VAR_TOKEN '['            { vars_arr_start( $1 ); }
+         list1 ']'                { vars_arr_lhs( $4 ); }
+         arhs					  
+       | FUNC_TOKEN '(' list4 ')' { vars_pop( func_call( $1 ) ); }
+       | FUNC_TOKEN '['           { eprint( FATAL, "%s:%ld: `%s' is a "
+								  			 "function and not an array.\n",
+								  			 Fname, Lc, $1->name );
+	                                THROW( EXCEPTION ); }
+       | VAR_TOKEN '('            { eprint( FATAL, "%s:%ld: `%s' is an "
+								  			 "array and not a function.\n",
+								  			 Fname, Lc, $1->name );
+	                                THROW( EXCEPTION ); }
 ;
 
 expr:    INT_TOKEN unit           { if ( $2 == NULL )
