@@ -41,30 +41,29 @@ This chapter tries to describe how to write new modules for use with
 @section What modules are good for
 
 
-Modules allow extending the set of commands to be used in an @code{EDL}
-file. This is especially important if a new device needs to be
+Modules allow to extend the set of commands to be used in an @code{EDL}
+script. This is especially important if a new device needs to be
 integrated into @code{fsc2}. You don't have to change @code{fsc2} itself
-but write a new module for the new devices without having to understand
-completely how the @code{fsc2} works. It's only necessary to be able to
-write functions in C for the communication with the new device. The only
-exception is some basic knowledge about @code{fsc2}'s variables. They
-are explained in one of the following sections. But modules may also be
-used for other purposes beside handling devices - one might also write
+but just write a new module for the new devices. For this you don't have
+to understand completely how the @code{fsc2} works. You only must be
+able to write functions in C for the communication with the new device
+and understand a few basics about @code{fsc2}'s variables. They are
+explained in one of the following sections. But modules may also be used
+for other purposes beside handling devices - one might also write
 modules that supply new mathematical functions or other useful
-functionalities. But the following the discussion will mainly
-concentrate on modules for new devices, writing other modules is even
-simpler.
+functionalities. But the following discussion will concentrate on
+modules for new devices, writing other kinds of modules is even simpler.
 
 Let's start with a short summary of the things a module for a device has
-to do. Usually, a module contains just a few functions that talk to the
+to do. Usually, a module contains a few functions that talk to the
 device via an hardware interface, e.g.@: the GPIB bus or a serial port
 (or whatever else there might be). As an example for the following a
 lock-in amplifier will be used. Probably the most basic operation is to
 get data from the amplifier. So one will have to create a function
-called for example @code{lockin_get_data()}. This name will be used in
+called, for example, @code{lockin_get_data()}. This name will be used in
 the module written in C as well as in the @code{EDL} file.
 
-Before starting to write a new module you have to decide about the name
+Before starting to write a new module one has to decide about the name
 for the device, which will also be the name of the module. E.g.@: for the
 @i{Stanford Research 510} lock-in amplifier I picked the name SR510
 because that's what's written on the front panel.
@@ -74,7 +73,7 @@ A new device has to be included into the device name data base called
 @cindex @code{Devices} file
 , which is a simple ASCII file consisting of the names of all the
 supported devices. It can be found in the @file{config} subdirectory of
-the source tree and usually gets installed in
+the source tree and usually gets installed in the directory
 @file{/usr/local/lib/fsc2}. The entries in this file are
 case-insensitive, so you might add `SR510', `sr510' or `Sr510'
 etc. Within the file C and C++ style comments can be used. By adding the
@@ -93,13 +92,13 @@ sr830         // Stanford Research lock-in amplifier, model 830
 er023m        // Bruker Signal Channel, model ER 023 M
 @end example
 
-The next thing is to append the function(s) exported (in the sense that
-they can be used from @code{EDL} programs) by the module to the
-function data base file called @file{Functions}
+The next thing is to append the function(s) exported by the module (in
+the sense that they can be used from @code{EDL} scripts) to the function
+data base file called @file{Functions}
 @cindex @code{Functions} file
 . Also this file is located in the @file{config} subdirectory of the
-source tree and will usually be installed in
-@file{/usr/local/lib/fsc2}. Here one would add lines consisting of two
+source tree and also will usually be installed under
+@file{/usr/local/lib/fsc2}. Here one adds lines consisting of two
 or three entries, separated by commas and ending with a
 semicolon. Please note that you can't use function names that contain a
 @code{#} character.
@@ -121,17 +120,17 @@ semicolon. Please note that you can't use function names that contain a
       the use of the function to the @code{PREPARATION} section of the
       @code{EDL} file.
 @end enumerate
-As in the device data base, C and C++ style comments can be used. Here
-are a few lines from a valid @file{Functions} file with the entries for
-lock-in amplifier functions:
+As in the file with the device list, C and C++ style comments can be
+used. Here are a few lines from a valid @file{Functions} file with the
+entries for lock-in amplifier functions:
 @example
 /* Functions exported by the lock-in amplifier modules
    (SR510, SR530, SR810, SR830) */
 
 lockin_name,           0, ALL;  // return the device name
-lockin_get_data,      -6, EXP;  // return the lock-in voltage 
+lockin_get_data,      -1, EXP;  // return the lock-in voltage 
 lockin_get_adc_data,   1, EXP;  // return a ADC voltage
-lockin_dac_voltage,   -2, ALL;  // get/set DAC voltage
+lockin_dac_voltage,   -1, ALL;  // get/set DAC voltage
 lockin_sensitivity,   -1, ALL;  // get/set the sensitivity
 lockin_time_constant, -1, ALL;  // get/set the time constant
 lockin_phase,         -1, ALL;  // get/set the phase
@@ -145,15 +144,14 @@ For example, @code{lockin_get_adc_data} (a function that allows you to
 read the voltage at one of the lock-ins ADCs) expects 1 argument (the
 number of the ADC) and can only be used in the @code{EXPERIMENT}
 section. In contrast, @code{lockin_sensitivity} can be called with a
-variable number of arguments with an upper limit of 1 argument (if
-called without an argument it returns the sensitivity setting of the
-lock-in, if called with an argument the function treats this as the new
-sensitivity to be set). This function can be used in all parts of the
-@code{EDL} program - but because querying the lock-in for its
-sensitivity won't work as long as the program can't talk with the
-lock-in, i.e.@: while not in the @code{EXPERIMENT} section the function
-must test for this case and emit an appropriate error message all by
-itself.
+variable number of arguments (if called without an argument it returns
+the sensitivity setting of the lock-in, if called with an argument the
+function treats this as the new sensitivity to be set). This function
+can be used in all parts of the @code{EDL} program - but because
+querying the lock-in for its sensitivity won't work as long as the
+program can't talk with the lock-in, i.e.@: while not in the
+@code{EXPERIMENT} section the function must test for this case and emit
+an appropriate error message all by itself.
 
 
 Writing the C file(s) with these functions, compiling it to create a
@@ -179,7 +177,6 @@ file get their input parameters in form of this kind of variables and
 Now let's have a look at the way @code{fsc2} internally stores
 variables. Here is the (actually somewhat simplified) @code{typedef} of the
 structure for variables:
-
 @example
 typedef struct Var_
 @{
@@ -196,9 +193,8 @@ typedef struct Var_
     struct Var_ *next;       /* next variable on stack */
 @} Var;
 @end example
-@noindent
-There are only four types of variables you have to know about:
 
+There are only four types of variables you have to know about:
 @multitable {FLOAT_ARR} {a one-dimensional array of floating point values}
 @item @code{INT_VAR} @tab a variable for integer values
 @item @code{FLOAT_VAR} @tab a variable for floating point values
@@ -206,6 +202,8 @@ There are only four types of variables you have to know about:
 @item @code{FLOAT_ARR} @tab a one-dimensional array of floating
 point values
 @end multitable
+@noindent
+(There are a few others, but they are only used by @code{fsc2} internally.)
 
 To give you a better idea what these variables are good for let's assume
 that you want to write a function that returns the curve between the two
@@ -217,11 +215,7 @@ bars. Let's call this function
 get_curve_between_cursors( cursor_1, cursor_2 )
 @end example
 @noindent
-This hypothetical function expects two values, the positions of two
-cursors, and is expected to return the data between these two cursors it
-fetched from the digitizer. Now, a typical C declaration for this
-function is
-
+A typical C declaration for this function is
 @example
 Var *get_curve_between_cursors( Var *var );
 @end example
@@ -232,7 +226,7 @@ array of data?
 Actually, it's not too complicated. The pointer to the variable
 structure @code{var} points to the first of the two parameters. And if
 you look back at the typedef for @code{fsc2}'s variables, there is a
-@code{next} pointer. This is the key to access the next parameter --
+@code{next} pointer. This is the key to accessing the next parameter --
 @code{var->next} points to next of the input parameters. If the function
 expects even more arguments, @code{var->next->next} etc.@: let's you get
 them, i.e.@: the input variables are organized as a linked list:
@@ -255,7 +249,7 @@ them, i.e.@: the input variables are organized as a linked list:
 @noindent
 If you declared your function in the function data base file
 @file{Functions} to accept exactly two input parameters the function will
-always get exactly two. The @code{next}-pointer of the very last
+always get exactly two arguments. The @code{next}-pointer of the very last
 parameter will always be @code{NULL}. If the function gets called in the
 @code{EDL} file with more variables than you declared it to have a
 warning will be printed, the superfluous variables discarded
@@ -356,25 +350,25 @@ to get the address of the start of a string variable.
 
 @subsection Utility functions to determine variables values
 
-There are some functions that make it even easier for you to evaluate
-the parameters your function receives. The first one is for the case
-that you expect an integer variable but would also be prepared to deal
-with a floating number after it has been rounded to the nearest
+There are some utility functions that make it even easier for you to
+evaluate the parameters your function receives. The first one is for the
+case that you expect an integer variable but would also be prepared to
+deal with a floating number after it has been rounded to the nearest
 integer. This is the function @code{get_long()}, defined as
 @example
 long get_long( Var *var, const char *snippet )
 @end example
 @noindent
 The first argument is a pointer to the variable you want to
-evaluate. The second parameter is used to setup a warning message when
+evaluate. The second parameter is used to create a warning message when
 the variable isn't an integer variable but a float value. This message
 always starts with the name of the currently interpreted @code{EDL}
 file, followed by the line number and the device name. The second
 parameter is a string that gets embedded into the message. For example
-if the currently interpreted @code{EDL} file is @file{foo.edl}, the
-line where your function is called is line 17 and the device name is
-@code{XYZ}, your function (that expects an integer but got a floating
-point number) is @code{abc()} and the string you pass to the function
+if the currently interpreted @code{EDL} file is @file{foo.edl}, the line
+where your function is called is line 17 and the device name is
+@code{LECRONIX}, your function (that expects an integer but got a floating
+point number) is named @code{abc()} and the string you pass to the function
 @code{get_long()} as the second argument is @code{"bar"}, i.e.
 @example
 get_long( var, "baz" );
@@ -382,7 +376,7 @@ get_long( var, "baz" );
 @noindent
 the following warning message will be printed:
 @example
-foo.edl:17: XYZ: Floating point number used as baz in abc().
+foo.edl:17: LECRONIX: abc(): Floating point number used as baz.
 @end example
 
 If, on the other hand, you expect a floating point number but would also
@@ -397,7 +391,7 @@ previous function and the only difference is that it will return a
 integer variable instead of the expected floating point variable. The
 warning message is
 @example
-foo.edl:17: XYZ: Integer number used as baz in abc().
+foo.edl:17: LECRONIX: abc(): Integer number used as baz.
 @end example
 @noindent
 assuming that everything else is identical to the above example.
@@ -435,8 +429,8 @@ variable with a value of @code{0} or a string with the text @code{"OFF"}
 If the variable passed to the function is a floating point variable
 normally an error message like
 @example
-foo.edl:17: XYZ: Floating point number found where boolean
-                 value was expected in abc().
+foo.edl:17: LECRONIX: abc(): Floating point number found where
+                             boolean value was expected.
 @end example
 @noindent
 is printed and an exception is thrown. Only when @code{fsc2} is
@@ -449,7 +443,7 @@ Finally, if the function receives a string variable that is neither
 @code{"ON"} nor @code{"OFF"} (including variations of the case of the
 characters) an error message is printed:
 @example
-foo.edl:17: XYZ: Invalid boolean argument ("bla") in abc().
+foo.edl:17: LECRONIX: abc(): Invalid boolean argument ("bla").
 @end example
 @noindent
 (assuming that the string was @code{"bla"}) and an exception is thrown
@@ -971,7 +965,7 @@ with their replacements:
 @end table
 
 The only functions that are different to their normal counterparts are
-@code{fsc2_serial_open()} and @code{fsc2_serial_close()}.
+@code{fsc2_serial_open()} and @code{fsc2_serial_close()}:
 
 @code{fsc2_serial_open()} is defined as
 @example
@@ -1014,16 +1008,15 @@ descriptor. If the function gets passed an invalid serial port number
 @findex exit_hook()
 
 
-As you will already know the interpretation of an @code{EDL} file
-consists of several steps. When the file is tested and a @code{DEVICES}
-section is found all modules for the devices listed are loaded. When in
-the test the @code{EXPERIMENT} section is found the test run is started
-in which the program is tested as far as possible. When the test was
-successful the experiment may be run repeatedly. To allow initialization
-of the modules internal parameters, initialization of the devices
-etc.@: for each of these stages hook functions can be defined in the
-modules that will be executed automatically at appropriate times (if
-they exist).
+As you already know the interpretation of an @code{EDL} file consists of
+several steps. When the file is tested and a @code{DEVICES} section is
+found all modules for the devices listed are loaded. When in the test
+the @code{EXPERIMENT} section is found the test run is started in which
+the program is tested as far as possible. When the test was successful
+the experiment may be run repeatedly. To allow initialization of the
+modules internal parameters, initialization of the devices etc.@: for
+each of these stages hook functions can be defined in the modules that
+will be executed automatically at appropriate times (if they exist).
 
 Thus, each module may contain up to six pre-defined hook functions that
 don't have to be declared in the function data base file,
@@ -1099,22 +1092,22 @@ started.
 @subsection Caveats for the test run
 
 There is one rather nasty problem with the test run. In the test run the
-program is checked extensively and as far as possible everything is done
-as it will be done later in the real experiment. But this leads the
+@code{EDL} script is checked extensively and, as far as possible,
+everything is done as in the real experiment. But this leads to the
 problem that the functions in the module must return data even though
 they can't talk to the devices yet. If the program asks for the measured
-value from a device reasonable, valid values most be returned.  This can
-be quite tricky, because, while writing the module it is less than clear
-what will be reasonable, valid values in all imaginable situations.
+value from a device reasonable data most be returned.  This can be quite
+tricky, because it sometimes may be not completely clear what will be
+reasonable data in all imaginable situations.
 
-I don't have a failsafe method to select values to return during the
-test run and I also fear that there isn't one. But after some
-experimenting the values now used in the modules didn't lead to too many
-problems. To make them stand out they are always defined as macros at
-some prominent place at the start of the module. If necessary the users
-must be made aware of possible problems, i.e.@: if they test values
-returned from the @code{EDL} file they must be prepared to write the
-@code{EDL} program to accept some unexpected values.
+I don't have a failsafe method to select data to return during the test
+run and I also fear that there isn't one. But after some experimenting
+the values now used in the modules didn't lead to too many problems. To
+make them stand out they are always defined as macros at some prominent
+place at the start of the module. If necessary the users must be made
+aware of possible problems, i.e.@: if they test values returned from
+within the @code{EDL} file they must be prepared to write the @code{EDL}
+program to accept some unexpected values.
 
 
 @subsection How to compile a module
