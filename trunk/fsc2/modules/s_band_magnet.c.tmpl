@@ -76,7 +76,6 @@ typedef struct
 
 	double field;           /* used internally */
 	int DAC_value;
-	int DAC_step;
 
 	bool is_opened;
     struct termios *tio;    /* serial port terminal interface structures */
@@ -123,7 +122,6 @@ int s_band_magnet_tmpl_init_hook( void )
 	magnet.is_end_field   = UNSET;
 
 	magnet.DAC_value      = 0;
-	magnet.DAC_step       = 0;
 
 	magnet.resolution     = (   S_BAND_MAGNET_TMPL_MAX_FIELD
 							  - S_BAND_MAGNET_TMPL_MIN_FIELD ) / DAC_MAX_VAL;
@@ -285,7 +283,6 @@ Var *magnet_setup( Var *v )
 
 	magnet.start_field = start_field;
 	magnet.field_step = field_step;
-	magnet.DAC_step = step;
 	magnet.is_start_field = magnet.is_field_step = SET;
 
 	return vars_push( INT_VAR, 1 );
