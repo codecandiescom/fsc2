@@ -77,32 +77,32 @@ DET         DET(ECTION)?:?
 DET_GATE    DET(ECTION)?_?G(ATE)?:?
 RF          R(ADIO)?_?F(REQUENCY)?:?
 RF_GATE     R(ADIO)?_?F(REQUENCY)?_?G(ATE)?:?
-PX1          PH(ASE)?_?X?1:?
-PX2          PH(ASE)?_?X?2:?
-PY1          PH(ASE)?_?Y1:?
-PY2          PH(ASE)?_?Y2:?
+PX1         PH(ASE)?_?X?1:?
+PX2         PH(ASE)?_?X?2:?
+PY1         PH(ASE)?_?Y1:?
+PY2         PH(ASE)?_?Y2:?
 OI          O(THER)?(_?1)?:?
 OII         O(THER)?_?2:?
 OIII        O(THER)?_?3:?
 OIV         O(THER)?_?4:?
 
-DEL         ((D)|(DEL)|(DELAY)):?
+DEL         ((DEL)|(DELAY)):?
 POD         P(OD)?
-CH          C(H(ANNEL)?)?
-INV         I(NV(ERT(ED)?)?)?
+CH          CH(ANNEL)?
+INV         INV(ERT(ED)?)?
 VH          V_?H(IGH)?
 VL          V_?L(OW)?
 
 TB          T(IME)?_?B(ASE)?:?
 TM          T(RIG(GER)?)?_?M(ODE)?:?
 
-MODE        M(ODE)?
-INTERN      I(NT(ERN(AL)?)?)?
-EXTERN      E(XT(ERN(AL)?)?)?
-SL          S(L(OPE)?)?
-NEG         N(EG(ATIVE)?)?
-POS         P(OS(ITIVE)?)?
-THRESH      L(EV(EL)?)?
+MODE        MODE
+INTERN      INT(ERN(AL)?)?
+EXTERN      EXT(ERN(AL)?)?
+SL          SL(OPE)?
+NEG         NEG(ATIVE)?
+POS         POS(ITIVE)?
+THRESH      LEV(EL)?
 REPT        REP(EAT)?_?T(IME)?
 REPF        REP(EAT)?_?F(REQ(UENCY)?)?
 

@@ -53,7 +53,7 @@ PREP        ^[ \t]*PREP(ARATION)?S?:
 EXP         ^[ \t]*EXP(ERIMENT)?:
 
 PS          ^[ \t]*P(HASE)?_?S(EQ(UENCE)?)?_?[0-9]{0,2}
-AS          ^[ \t]*A(CQ(UISITION)?)?_?S(EQ(UENCE)?)?_?[XY]?
+AS          ^[ \t]*A(CQ(UISITION)?)?_?S(EQ(UENCE)?)?(_?[XY])?
 
 PX          "+"?[xX]
 MX          "-"[xX]
