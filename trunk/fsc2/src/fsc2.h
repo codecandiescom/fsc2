@@ -31,10 +31,6 @@
 #define HI_RES  1
 #define LOW_RES 0
 
-#if ! defined SIZE
-#define SIZE HI_RES
-#endif
-
 
 /* inclusion system header files */
 
@@ -61,12 +57,7 @@
 
 /* inclusion of programs own header files */
 
-#if ( SIZE == HI_RES )
-#include "fsc2_rsc_hr.h"
-#else
-#include "fsc2_rsc_lr.h"
-#endif
-
+#include "fsc2_rsc.h"
 #include "global.h"               /* must be the very first to be included ! */
 #include "comm.h"
 #include "ipc.h"

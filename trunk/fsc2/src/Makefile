@@ -4,54 +4,37 @@ c_sources      = fsc2.c pulser.c util.c exceptions.c variables.c vars_util.c \
 				 func.c func_basic.c func_util.c func_intact.c T.c phases.c  \
 				 exp.c devices.c run.c gpib_if.c comm.c chld_func.c          \
 				 graphics.c accept.c graph_handler_1d.c graph_handler_2d.c   \
-				 graph_cut.c loader.c bugs.c print.c conn.c ipc.c
-
-# On moebi a version with low-resolution is needed - add the appropriate
-# graphics files to the c files and set the SIZE flag correctly
-
-ifeq ($(shell hostname -f),moebi.physik.fu-berlin.de)
-	c_sources += fsc2_rsc_lr.c
-	CFLAGS    += -DSIZE=0
-else
-	c_sources += fsc2_rsc_hr.c
-	CFLAGS    += -DSIZE=1
-endif
-
-
-# On door we need the parser and lexer for the GPIB configuration file
-
-ifeq ($(shell hostname -f),door.physik.fu-berlin.de)
-	c_source  += gpib_lexer.c gpib_parser.c
-endif
-
-
-bison_sources  = $(wildcard *_parser.y)
-flex_sources   = $(wildcard *_lexer.l)
-sources        = $(bison_sources:.y=.c) $(flex_sources:.l=.c) \
-				 ${c_sources}
+				 graph_cut.c loader.c bugs.c print.c conn.c ipc.c fsc2_rsc.c
+bison_sources  = $(filter-out gpib_parser.y,$(wildcard *_parser.y))
+flex_sources   = $(filter-out gpib_lexer.l,$(wildcard *_lexer.l))
+sources        = $(bison_sources:.y=.c) $(flex_sources:.l=.c) ${c_sources}
 objects        = $(sources:.c=.o)
 headers        = ${c_sources:.c=.h} global.h
 
 
-ifeq ($(shell hostname -f),door.physik.fu-berlin.de)
-	objects += /usr/local/lib/libgpib.a
+# On door we need the parser and lexer for the GPIB configuration file
+
+ifeq ($(whom_for),door.physik.fu-berlin.de)
+	bison_sources += gpib_parser.y
+	flex_sources  += gpib_lexer.l
+	c_source      += gpib_lexer.c gpib_parser.c
 endif
 
 
-export headers
+export headers     # export headers to the modules Makefile
 
 
 .SUFFIXES:
-.PHONY: all clean distclean pion door
+.PHONY: all clean distclean \
+		pion.anorg.chemie.uni-frankfurt.de \
+		moebi.physik.fu-berlin.de \
+		door.physik.fu-berlin.de \
+		crowley.physik.fu-berlin.de \
+		crowley.none
 
 
 all:
-	if [ `hostname -f` = "pion.anorg.chemie.uni-frankfurt.de" ]; then \
-		$(MAKE) pion; \
-	fi
-	if [ `hostname -f` = "door.physik.fu-berlin.de" ]; then \
-		$(MAKE) door; \
-	fi
+	$(MAKE) $(whom_for)
 	$(MAKE) fsc2 fsc2_clean fsc2_connect modules
 
 
@@ -93,33 +76,63 @@ fsc2_connect.o: fsc2_connect.c
 
 
 clean:
-	$(RM) $(RMFLAGS) *.o *.output *_parser.c *_parser.h *_lexer.c \
-					 fsc2_clean.c fsc2 fsc2_clean fsc2_connect mem *~
+	$(RM) $(RMFLAGS) *.o *.output *_parser.[ch[ *_lexer.c fsc2_clean.c \
+					 fsc2 fsc2_clean fsc2_connect mem gpib_if.[ch] \
+					 fsc2_rsc.[ch] *~
 
 
-# Unfortunately, for the and door a different GPIB interface is needed...
+# Unfortunately, different GPIB interfaces and resource files for the
+# graphical interface are needed on different machines...
 
-pion:
-	if [ ! -e gpib_if_new.c -a ! -e gpib_if_new.h ]; then \
-		mv gpib_if.c gpib_if_new.c; \
-		mv gpib_if.h gpib_if_new.h; \
-		mv gpib_if_old.c gpib_if.c; \
-		mv gpib_if_old.h gpib_if.h; \
-	fi
+pion.anorg.chemie.uni-frankfurt.de:
+	$(RM) $(RMFLAGS) fsc2_rsc_[hl]r.[ch];
+	fdesign -convert fsc2_rsc_hr.fd;
+	cp fsc2_rsc_hr.c fsc2_rsc.c;
+	cp fsc2_rsc_hr.h fsc2_rsc.h;
+	echo "#define SIZE HI_RES" >> fsc2_rsc.h
+	$(RM) $(RMFLAGS) gpib_if.[ch];
+	cp gpib_if_old.c gpib_if.c;
+	cp gpib_if_old.h gpib_if.h;
 
-door:
-	if [ ! -e gpib_if_new.c -a ! -e gpib_if_new.h ]; then \
-		mv gpib_if.c gpib_if_new.c; \
-		mv gpib_if.h gpib_if_new.h; \
-		mv gpib_if_ni.c gpib_if.c;  \
-		mv gpib_if_ni.h gpib_if.h;  \
-	fi
-	if [ ! -e gpib_parser.y ]; then      \
-		cp gpib_parser.yy gpib_parser.y; \
-	fi
-	if [ ! -e gpib_lexer.l ]; then       \
-		cp gpib_lexer.ll gpib_lexer.l; \
-	fi
+moebi.physik.fu-berlin.de:
+	$(RM) $(RMFLAGS) fsc2_rsc_[hl]r.[ch];
+	fdesign -convert fsc2_rsc_lr.fd;
+	cp fsc2_rsc_lr.c fsc2_rsc.c;
+	cp fsc2_rsc_lr.h fsc2_rsc.h;
+	echo "#define SIZE LOW_RES" >> fsc2_rsc.h
+	$(RM) $(RMFLAGS) gpib_if.[ch];
+	cp gpib_if_jtt.c gpib_if.c;
+	cp gpib_if_jtt.h gpib_if.h;
+
+crowley.physik.fu-berlin.de:
+	$(RM) $(RMFLAGS) fsc2_rsc_[hl]r.[ch];
+	fdesign -convert fsc2_rsc_hr.fd;
+	cp fsc2_rsc_hr.c fsc2_rsc.c;
+	cp fsc2_rsc_hr.h fsc2_rsc.h;
+	echo "#define SIZE HI_RES" >> fsc2_rsc.h
+	$(RM) $(RMFLAGS) gpib_if.[ch];
+	cp gpib_if_jtt.c gpib_if.c;
+	cp gpib_if_jtt.h gpib_if.h;
+
+door.physik.fu-berlin.de:
+	$(RM) $(RMFLAGS) fsc2_rsc_[hl]r.[ch];
+	fdesign -convert fsc2_rsc_hr.fd;
+	cp fsc2_rsc_hr.c fsc2_rsc.c;
+	cp fsc2_rsc_hr.h fsc2_rsc.h;
+	echo "#define SIZE HI_RES" >> fsc2_rsc.h;
+	$(RM) $(RMFLAGS) gpib_if.[ch];
+	cp gpib_if_ni.c gpib_if.c;
+	cp gpib_if_ni.h gpib_if.h;
+
+crowley.none:
+	$(RM) $(RMFLAGS) fsc2_rsc_[hl]r.[ch];
+	fdesign -convert fsc2_rsc_hr.fd;
+	cp fsc2_rsc_hr.c fsc2_rsc.c;
+	cp fsc2_rsc_hr.h fsc2_rsc.h;
+	echo "#define SIZE HI_RES" >> fsc2_rsc.h;
+	$(RM) $(RMFLAGS) gpib_if.[ch];
+	cp gpib_if_jtt.c gpib_if.c;
+	cp gpib_if_jtt.h gpib_if.h;
 
 
 # don't automatically delete intermediate files created by bison and flex

@@ -46,16 +46,19 @@ EXEC_INSTALL   = install             # command for installing executables
 ########### (unless you really know what you're doing ...) #################
 ############################################################################
 
+# Set up a make variable with the machines full hostname
 
-# Last time I checked still used the old libc...
+whom_for       = $(shell hostname -f)
 
-ifeq ($(shell hostname -f),pion.anorg.chemie.uni-frankfurt.de)
+# Last time I checked the pion still had the old libc...
+
+ifeq ($(whom_for),pion.anorg.chemie.uni-frankfurt.de)
 	CFLAGS    += -DIS_STILL_LIBC1
 endif
 
 # Pass GPIB_LOG and GPIB_CONF via macros to the source files
 # Don't forget to escape all double quotes (`"') with backslashes.
-# For directories we make sure they end with a `/'.
+# For directories make sure they end with a `/'.
 
 ifdef GPIB_LOG
     CFLAGS += -DGPIB_LOG=\"$(GPIB_LOG)\"
@@ -148,8 +151,8 @@ install:
 	$(INSTALL) -m 644 -o fsc2 -g fsc2 aux/*.xpm $(auxdir)
 
 	$(MAKE) -C utils install
-	if `grep install-$(shell hostname -f) ./Makefile > /dev/null`; then \
-		$(MAKE) install-$(shell hostname -f); \
+	if `grep install-$(whom_for) ./Makefile > /dev/null`; then \
+		$(MAKE) install-$(whom_for); \
 	fi
 	$(MAKE) -C scripts install
 	$(MAKE) -C doc install
@@ -195,7 +198,7 @@ install-moebi.physik.fu-berlin.de:
 	ln -s $(libdir)/er035m_s.so $(libdir)/gaussmeter.so
 	chown fsc2.fsc2 $(libdir)/gaussmeter.so
 
-install-wband.physik.fu-berlin.de:
+install-door.physik.fu-berlin.de:
 	$(RM) $(RMFLAGS) $(libdir)/hfs9003.so $(libdir)/w_band.so
 	ln -s $(libdir)/hfs9000.so $(libdir)/hfs9003.so
 	ln -s $(libdir)/keithley228a.so $(libdir)/w_band.so
