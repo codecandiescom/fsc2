@@ -143,7 +143,6 @@
 /* locally used functions */
 
 static Var *vars_setup_new_array( Var *v, int dim );
-static void vars_arr_create( Var *a, Var *v, int dim );
 static Var *vars_init_elements( Var *a, Var *v );
 static void vars_do_init( Var *src, Var *dest );
 static Var *vars_lhs_pointer( Var *v, int dim );
@@ -304,7 +303,7 @@ static Var* vars_setup_new_array( Var *v, int dim )
 	a->type = VAR_TYPE( a->name ) == INT_VAR ? INT_REF : FLOAT_REF;
 	a->flags &= ~ NEW_VARIABLE;
 
-	vars_arr_create( a, v->next, dim );
+	vars_arr_create( a, v->next, dim, UNSET );
 
 	/* Get rid of variables that are not needed anymore */
 
@@ -320,7 +319,7 @@ static Var* vars_setup_new_array( Var *v, int dim )
 /*----------------------------------------------------------------------*/
 /*----------------------------------------------------------------------*/
 
-static void vars_arr_create( Var *a, Var *v, int dim )
+void vars_arr_create( Var *a, Var *v, int dim, bool is_temp )
 {
 	Var *c;
 	ssize_t i;
@@ -404,7 +403,10 @@ static void vars_arr_create( Var *a, Var *v, int dim )
 	{
 		a->val.vptr[ i ] = vars_new( NULL );
 		a->val.vptr[ i ]->type = a->type;
-		vars_arr_create( a->val.vptr[ i ], v->next, dim - 1 );
+		a->val.vptr[ i ]->from = a;
+		if ( is_temp )
+			a->val.vptr[ i ]->flags |= IS_TEMP;
+		vars_arr_create( a->val.vptr[ i ], v->next, dim - 1, is_temp );
 	}
 }
 
@@ -516,8 +518,8 @@ Var *vars_init_list( Var *v, ssize_t level )
 	}
 
 	/* Otherwise create an array of a dimension one higher than the current
-	   level, set flag for variable to avoid that the popping of the variable
-	   also deletes the sub-arrays it's pointing to */
+	   level, set flag of variable to avoid that popping the variable also
+	   deletes the sub-arrays it's pointing to */
 
 	nv = vars_push( FLOAT_REF, NULL );
 	nv->flags |= DONT_RECURSE | INIT_ONLY;
@@ -662,6 +664,7 @@ static void vars_do_init( Var *src, Var *dest )
 				if ( dest->val.vptr[ i ] == NULL )
 				{
 					dest->val.vptr[ i ] = vars_new( NULL );
+					dest->val.vptr[ i ]->from = dest;
 					if ( dest->flags & IS_DYNAMIC )
 						dest->val.vptr[ i ]->flags |= IS_DYNAMIC;
 					dest->val.vptr[ i ]->dim = dest->dim - 1;
@@ -693,6 +696,7 @@ static void vars_do_init( Var *src, Var *dest )
 				if ( dest->val.vptr[ i ] == NULL )
 				{
 					dest->val.vptr[ i ] = vars_new( NULL );
+					dest->val.vptr[ i ]->from = dest;
 					if ( dest->flags & IS_DYNAMIC )
 						dest->val.vptr[ i ]->flags |= IS_DYNAMIC;
 					dest->val.vptr[ i ]->dim = dest->dim - 1;
@@ -759,14 +763,14 @@ static Var *vars_init_elements( Var *a, Var *v )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/* Function pushes a variable with a pointer to an array element on the  */
-/* the left hand side of an EDL statement onto the stack. Depending on   */
-/* what the left hand side evaluates to this is either a variable of     */
-/* INT_PTR or FLOAT_PTR type (when a singe element of an array or matrix */
-/* is addressed) or of type REF_PTR (if the LHS resolves to an array or  */
-/* (sub-) matrix).                                                       */
-/*-----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*/
+/* Function pushes a variable with a pointer to an array element on the */
+/* left hand side of an EDL statement onto the stack. Depending on what */
+/* the left hand side evaluates to this is either a variable of INT_PTR */
+/* or FLOAT_PTR type (when a singe element of an array or matrix is     */
+/* addressed) or of type REF_PTR (if the LHS resolves to an array or    */
+/* (sub-) matrix).                                                      */
+/*----------------------------------------------------------------------*/
 
 static Var *vars_lhs_pointer( Var *v, int dim )
 {
@@ -852,6 +856,7 @@ static Var *vars_lhs_pointer( Var *v, int dim )
 			for ( i = cv->len; i <= ind; i++ )
 			{
 				cv->val.vptr[ i ] = vars_new( NULL );
+				cv->val.vptr[ i ]->from = cv;
 				if ( cur_dim > 1 )
 					cv->val.vptr[ i ]->type = cv->type;
 				else
@@ -1447,6 +1452,7 @@ static void vars_arr_assign( Var *src, Var *dest )
 				for ( i = dest->len; i < src->len; i++ )
 				{
 					dest->val.vptr[ i ] = vars_new( NULL );
+					dest->val.vptr[ i ]->from = dest;
 					dest->val.vptr[ i ]->len = 0;
 					dest->val.vptr[ i ]->dim = dest->dim - 1;
 					dest->val.vptr[ i ]->flags |= IS_DYNAMIC;
@@ -1577,6 +1583,9 @@ Var *vars_push_copy( Var *v )
 {
 	if ( v->flags & ON_STACK )
 		return v;
+
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
+				   INT_REF | FLOAT_REF );
 
 	switch ( v->type )
 	{
@@ -1945,6 +1954,7 @@ static void vars_ref_copy_create( Var *nsv, Var *src, bool exact_copy )
 		}
 
 		vd = nsv->val.vptr[ i ] = vars_new( NULL );
+		vd->from = nsv;
 		vd->flags &= ~ NEW_VARIABLE;
 		if ( ! exact_copy )
 			vd->flags |= IS_DYNAMIC | IS_TEMP;

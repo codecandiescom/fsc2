@@ -466,10 +466,7 @@ static void f_bdelete_parent( Var *v )
 
 	io = find_object_from_ID( get_strict_long( v, "button ID" ) );
 
-	if ( io == NULL ||
-		 ( io->type != NORMAL_BUTTON &&
-		   io->type != PUSH_BUTTON   &&
-		   io->type != RADIO_BUTTON ) )
+	if ( io == NULL || ! IS_BUTTON( io ) )
 	{
 		print( FATAL, "Invalid button identifier.\n" );
 		THROW( EXCEPTION );
@@ -569,10 +566,7 @@ Var *f_bstate( Var *v )
 
 	io = find_object_from_ID( get_strict_long( v, "button ID" ) );
 
-	if ( io == NULL ||
-		 ( io->type != NORMAL_BUTTON &&
-		   io->type != PUSH_BUTTON   &&
-		   io->type != RADIO_BUTTON ) )
+	if ( io == NULL || ! IS_BUTTON( io ) )
 	{
 		print( FATAL, "Invalid button identifier.\n" );
 		THROW( EXCEPTION );
@@ -758,10 +752,7 @@ Var *f_bchanged( Var *v )
 
 	io = find_object_from_ID( get_strict_long( v, "button ID" ) );
 
-	if ( io == NULL ||
-		 ( io->type != NORMAL_BUTTON &&
-		   io->type != PUSH_BUTTON   &&
-		   io->type != RADIO_BUTTON ) )
+	if ( io == NULL || ! IS_BUTTON( io ) )
 	{
 		print( FATAL, "Invalid button identifier.\n" );
 		THROW( EXCEPTION );

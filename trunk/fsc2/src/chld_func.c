@@ -871,7 +871,7 @@ long *exp_schanged( char *buffer, ptrdiff_t len )
 			/* Get variable with address of function to determine state
 			   changes */
 
-			Func_ptr = func_get( "slider_value", &acc );
+			Func_ptr = func_get( "slider_changed", &acc );
 
 			/* Unpack parameter and push them onto the stack */
 

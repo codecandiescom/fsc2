@@ -32,6 +32,7 @@ extern bool Dont_Save;
 
 
 static int get_save_file( Var **v );
+static long arr_save( long file_num, Var *v );
 static void f_format_check( Var *v );
 static void ff_format_check( Var *v );
 static long do_printf( long file_num, Var *v );
@@ -39,34 +40,14 @@ static long print_browser( int browser, int fid, const char* comment );
 static long T_fprintf( long fn, const char *fmt, ... );
 
 
-/*--------------------------------------------------------------------*/
-/* Function to check if a number passed to it is a valid file handle. */
-/* This requires that the number is an integer variable. It returns 1 */
-/* if there's an already opened file associated with this number and  */
-/* 0 if there isn't.                                                  */
-/*--------------------------------------------------------------------*/
+/*----------------------------------------------------------------*/
+/* Using this function is deprecated (and not necessary anymore), */
+/* so just return value indicating success.                       */
+/*----------------------------------------------------------------*/
 
 Var *f_is_file( Var *v )
 {
-	if ( v == NULL )
-	{
-		print( FATAL, "Missing argument.\n" );
-		THROW( EXCEPTION );
-	}
-
-	if ( v->type != INT_VAR )
-	{
-		print( FATAL, "Argument isn't a file handle.\n" );
-		THROW( EXCEPTION );
-	}
-
-    if ( ( v->val.lval != FILE_NUMBER_NOT_OPEN &&
-		   ( v->val.lval < FILE_NUMBER_OFFSET ||
-			 v->val.lval >= EDL.File_List_Len + FILE_NUMBER_OFFSET ) ) ||
-		 ( Internals.mode != TEST &&
-		   EDL.File_List[ v->val.lval ].fp == NULL ) )
-		return vars_push( INT_VAR, 0 );
-
+	UNUSED_ARGUMENT( v );
 	return vars_push( INT_VAR, 1 );
 }
 
@@ -674,12 +655,8 @@ void close_all_files( void )
 
 Var *f_save( Var *v )
 {
-	static ssize_t i;
 	long file_num;
-	static long count;
-	static Var *tmp;
-	Var *nv1;
-	static Var *nv2;
+	long count = 0;
 
 
 	/* Determine the file identifier */
@@ -693,23 +670,8 @@ Var *f_save( Var *v )
 		return vars_push( INT_VAR, 0 );
 	}
 
-	count = 0;
-	tmp = NULL;
-	nv2 = NULL;
-
 	do
 	{
-		/* This is a bit of a dirty hack for being able to call the function
-		   recursively when printing whole matrices, in principle variables
-		   of type REF_PTR should only appear on the left hand side of an
-		   assignment... */
-
-		if ( v->type == REF_PTR )
-		{
-			tmp = v;
-			v = v->from;
-		}
-
 		switch( v->type )
 		{
 			case INT_VAR :
@@ -725,60 +687,49 @@ Var *f_save( Var *v )
 									handle_escape( v->val.sptr ) );
 				break;
 
-			case INT_ARR :
-				for ( i = 0; i < v->len; i++ )
-					count += T_fprintf( file_num, "%ld\n", v->val.lpnt[ i ] );
-				break;
 
-			case FLOAT_ARR :
-				for ( i = 0; i < v->len; i++ )
-					count += T_fprintf( file_num, "%#.9g\n",
-										v->val.dpnt[ i ] );
-				break;
-
-			case INT_REF : case FLOAT_REF :
-				nv1 = vars_push( INT_VAR, file_num );
-				for ( i = 0; i < v->len; i++ )
-				{
-					if ( v->val.vptr[ i ] == NULL )
-						continue;
-
-					TRY
-					{
-						vars_push( REF_PTR, v->val.vptr[ i ] );
-						nv2 = f_save( nv1 );
-						TRY_SUCCESS;
-					}
-					OTHERWISE
-					{
-						if ( tmp != NULL )
-							 vars_pop( tmp );
-						vars_pop( nv2 );
-						vars_pop( nv1 );
-						RETHROW( );
-					}
-					count += nv2->val.lval;
-					vars_pop( nv2 );
-				}
-
-				vars_pop( nv1 );
+			case INT_ARR : case FLOAT_ARR : case INT_REF : case FLOAT_REF :
+				count += arr_save( file_num, v );
 				break;
 
 			default :
 				fsc2_assert( 1 == 0 );
 		}
-
-		/* Switch back to the REF_PTR, don't pop what it's pointing to */
-
-		if ( tmp != NULL )
-		{
-			v = tmp;
-			tmp = NULL;
-		}
-
-	} while ( ( v = vars_pop( v ) ) );
+	} while ( ( v = vars_pop( v ) ) != NULL );
 
 	return vars_push( INT_VAR, count );
+}
+
+
+/*--------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------*/
+
+static long arr_save( long file_num, Var *v )
+{
+	ssize_t i;
+	long count = 0;
+
+
+	switch ( v->type )
+	{
+		case INT_ARR :
+			for ( i = 0; i < v->len; i++ )
+				count = T_fprintf( file_num, "%ld\n", v->val.lpnt[ i ] );
+			break;
+
+		case FLOAT_ARR :
+			for ( i = 0; i < v->len; i++ )
+				count = T_fprintf( file_num, "%#.9g\n", v->val.dpnt[ i ] );
+			break;
+
+		case INT_REF : case FLOAT_REF :
+			for ( i = 0; i < v->len; i++ )
+				if ( v->val.vptr[ i ] != NULL )
+					count += arr_save( file_num, v->val.vptr[ i ] );
+			break;
+	}
+
+	return count;
 }
 
 

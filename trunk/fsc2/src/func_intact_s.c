@@ -462,9 +462,7 @@ static void f_sdelete_parent( Var *v )
 
 	io = find_object_from_ID( get_strict_long( v, "slider ID" ) );
 
-	if ( io == NULL ||
-		 ( io->type != NORMAL_SLIDER && io->type != VALUE_SLIDER &&
-		   io->type != SLOW_NORMAL_SLIDER && io->type != SLOW_VALUE_SLIDER ) )
+	if ( io == NULL || ! IS_SLIDER( io ) )
 	{
 		print( FATAL, "Invalid slider identifier.\n" );
 		THROW( EXCEPTION );
@@ -541,9 +539,7 @@ Var *f_svalue( Var *v )
 
 	io = find_object_from_ID( get_strict_long( v, "slider ID" ) );
 
-	if ( io == NULL ||
-		 ( io->type != NORMAL_SLIDER && io->type != VALUE_SLIDER &&
-		   io->type != SLOW_NORMAL_SLIDER && io->type != SLOW_VALUE_SLIDER ) )
+	if ( io == NULL || ! IS_SLIDER( io ) )
 	{
 		print( FATAL, "Invalid slider identifier.\n" );
 		THROW( EXCEPTION );
@@ -693,7 +689,7 @@ Var *f_schanged( Var *v )
 	}
 
 	/* Again, the child has to pass the arguments to the parent and ask it
-	   to set or return the slider value */
+	   if the slider value did change */
 
 	if ( Internals.I_am == CHILD )
 		return f_schanged_child( v );
@@ -710,9 +706,7 @@ Var *f_schanged( Var *v )
 
 	io = find_object_from_ID( get_strict_long( v, "slider ID" ) );
 
-	if ( io == NULL ||
-		 ( io->type != NORMAL_SLIDER && io->type != VALUE_SLIDER &&
-		   io->type != SLOW_NORMAL_SLIDER && io->type != SLOW_VALUE_SLIDER ) )
+	if ( io == NULL || ! IS_SLIDER( io ) )
 	{
 		print( FATAL, "Invalid slider identifier.\n" );
 		THROW( EXCEPTION );
