@@ -1779,9 +1779,7 @@ static void repaint_cut_canvas( Canvas *c )
 
 	if ( c == &G.cut_canvas )
 	{
-		if ( G.button_state == 3 &&
-			 c->ppos[ X ] >= 0 && c->ppos[ X ] < ( int ) c->w &&
-			 c->ppos[ Y ] >= 0 && c->ppos[ Y ] < ( int ) c->h )
+		if ( G.button_state == 3 )
 		{
 			r_coord = CG.cut_dir == X ? Y : X;
 
@@ -1809,20 +1807,15 @@ static void repaint_cut_canvas( Canvas *c )
 		{
 			r_coord = CG.cut_dir == X ? Y : X;
 
-			if ( c->ppos[ X ] >= 0 && c->ppos[ X ] < ( int ) c->w &&
-				 c->ppos[ Y ] >= 0 && c->ppos[ Y ] < ( int ) c->h )
-			{
-				x_pos = scv->rwc_delta[ r_coord ]
-					    * ( c->ppos[ X ] - G.start[ X ] ) / cv->s2d[ X ];
-				y_pos = scv->rwc_delta[ r_coord ]
-					    * ( G.start[ Y ] - c->ppos[ Y ] ) / cv->s2d[ Y ];
+			x_pos = scv->rwc_delta[ r_coord ]
+				    * ( c->ppos[ X ] - G.start[ X ] ) / cv->s2d[ X ];
+			y_pos = scv->rwc_delta[ r_coord ]
+					* ( G.start[ Y ] - c->ppos[ Y ] ) / cv->s2d[ Y ];
 
-				sprintf( buf, " %#g   %#g ", x_pos, y_pos );
-				if ( G.font != NULL )
-					XDrawImageString( G.d, pm, cv->font_gc, 5,
-									  G.font_asc + 5,
-									  buf, strlen( buf ) );
-			}
+			sprintf( buf, " %#g   %#g ", x_pos, y_pos );
+			if ( G.font != NULL )
+				XDrawImageString( G.d, pm, cv->font_gc, 5,
+								  G.font_asc + 5, buf, strlen( buf ) );
 
 			XSetForeground( G.d, G.cut_curve.gc, fl_get_pixel( FL_RED ) );
 			XDrawArc( G.d, pm, G.cut_curve.gc,

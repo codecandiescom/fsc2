@@ -1309,11 +1309,8 @@ void repaint_canvas_2d( Canvas *c )
 
 	if ( c == &G.canvas )
 	{
-		if ( G.button_state == 3 &&
-			 G.active_curve != -1 &&
-			 G.curve_2d[ G.active_curve ]->is_scale_set &&
-			 c->ppos[ X ] >= 0 && c->ppos[ X ] < ( int ) c->w &&
-			 c->ppos[ Y ] >= 0 && c->ppos[ Y ] < ( int ) c->h )
+		if ( G.button_state == 3 && G.active_curve != -1 &&
+			 G.curve_2d[ G.active_curve ]->is_scale_set )
 		{
 			cv = G.curve_2d[ G.active_curve ];
 
@@ -1368,9 +1365,7 @@ void repaint_canvas_2d( Canvas *c )
 		if ( G.button_state == 5 )
 		{
 			if ( G.active_curve != -1 &&
-				 G.curve_2d[ G.active_curve ]->is_scale_set &&
-				 c->ppos[ X ] >= 0 && c->ppos[ X ] < ( int ) c->w &&
-				 c->ppos[ Y ] >= 0 && c->ppos[ Y ] < ( int ) c->h )
+				 G.curve_2d[ G.active_curve ]->is_scale_set )
 			{
 				cv = G.curve_2d[ G.active_curve ];
 
