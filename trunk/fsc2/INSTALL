@@ -62,13 +62,13 @@ After installing the required tools and libraries and extracting the
 archive go into the newly created directory fsc2. Edit the Makefile in
 this directory.
 
-Normally, the fsc2 and all auxiliary files needed will be installed below
+Normally, fsc2 and all auxiliary files needed will be installed below
 /usr/local (i.e. in /usr/local/bin, /usr/local/lib/fsc2, /usr/local/info
 and /usr/local/share/doc). To change this location edit the first lines
 of the Makefile.
 
-The next make file variable, RESOLUTION, tells fsc2 if the program is going
-to be run on a machine with a high or a low resolution display. Monitors
+The next make file variable, RESOLUTION, tells fsc2 if it's is going to
+be run on a machine with a high or a low resolution display. Monitors
 with less than 17" inch can be considered low resolution. Set the variable
 either to LOW or HIGH accordingly.
 
@@ -77,38 +77,39 @@ You may set the first variable, GPIB_LIBRARY either to LLP for the old
 (Linux Lab Project) library, to NI when using the National Instruments
 library or to JTT if you're using the library I wrote. If you don't want
 GPIB support you also may set this variable to NONE. In this case fsc2
-won't run experiments which need devices that are connected via the GPIB
-bus (but you still can test such EDL programs). Use this option only if
-you either want to built a test version or if all your devices are
-controlled via the serial ports.
+won't be able to run experiments which need devices that are connected
+via the GPIB bus (but you still can test such EDL programs). Use this
+option only if you either want to built a test version or if all your
+devices are controlled via the serial ports.
 
-If you use the National Instruments GPIB driver you can set the place
-where fsc2 expects the GPIB configuration file, gpib.conf. But usually
+If you use the National Instruments GPIB driver you can set the location
+where fsc2 will expect the GPIB configuration file, gpib.conf. But usually
 there is no reason to change the default value.
 
 While running fsc2 may write out information about the activity on the
-GPIB bus into a log file. You may change the default, /tmp/gpib.log, to
-something appropriate for you (or even to /dev/null). You can also set
-the verbosity of the logs by changing the variable GPIB_LOG_LEVEL to
+GPIB bus into a log file. You can change the default log file /tmp/gpib.log
+to something appropriate for your setup (or even to /dev/null). You can also
+set the verbosity of the logs by changing the variable GPIB_LOG_LEVEL to
 either HIGH, MEDIUM, LOW or OFF.
 
-The next two variables must be set to the owner of the all files that will
-be installed as well as its group. I would strongly recommend to create a
-special account and a special group for fsc2. fsc2 needs to be setuid'ed,
-so for security reasons this special user should have as low privileges as
-possible and should not be able to log in to the system (set it's shell in
-/etc/passwd to /bin/false). Most of the time fsc2 runs with the real users
-ID and group but at a few places (e.g. when writing to shared log files,
-creates lock files, or accesses shared memory) it switches back to the EUID
-and EGID of fsc2.
+The next two variables OWNER and GROUP must be set to the owner of all
+the files that will be installed as well as its group. I would strongly
+recommend to create a special account and a special group for fsc2. fsc2
+needs to be installed setuid'ed, so for security reasons this special user
+should have as low privileges as possible and should not be able to log into
+the system (set it's shell in /etc/passwd to /bin/false). Most of the time
+fsc2 runs with the real users ID and group but at a few places (e.g. when
+writing to shared log files, creates lock files, or accesses shared memory)
+it switches back to the EUID and EGID of fsc2.
 
 Finally, a variable named IS_I386 can be set. Please comment out this line
 or simply delete it if you want to compile the program for a machine that
 does not use an i386 type of processor (e.g. on a PPC). Some routines used
-only for debugging need a bit of assembler, so they wont work on a processor
-with a completely different architecture. If the line defining the variable
-IS_I386 is removed these parts are left out of the program, but in every
-other respect fsc2 should work as on an i386 machine.
+for debugging purposes only employ a bit of assembler, so they wont work on
+a processor with a completely different architecture. If the line defining
+the variable IS_I386 is removed these parts are left out of the program,
+but in every other respect except debugging capabilities fsc2 should work
+as on an i386 machine.
 
 
 C) Compiling and Installing
@@ -117,9 +118,9 @@ C) Compiling and Installing
 Go into the main directory of the package and type 'make'. This may take
 some time to finish. Usually no warnings should show up during the
 compilation (at least on systems with a newer libc and if my GPIB library
-is used), but errors can happen when the documentation is created and some
+is used), but warnings may occur when the documentation is created and some
 of the required tools are not available. It can even happen that make stops
-with an error message in this case (i.e. during making the documenntation).
+with an error message at this stage (i.e. during making the documenntation).
 This does *not* mean that the program didn't compile succesfully!
 
 Please don't start 'make' from one of the subdirectories, this is bound to
