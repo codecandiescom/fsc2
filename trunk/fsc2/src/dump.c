@@ -1,7 +1,7 @@
 /*
   $Id$
 
-  Copyright (C) 2001 Jens Thoms Toerring
+  Copyright (C) 1999-2002 Jens Thoms Toerring
 
   This file is part of fsc2.
 
@@ -78,7 +78,7 @@ void DumpStack( void )
 
 	/* Don't do anything on a machine with a non-Intel processor */
 
-	if ( ! is_i386 )
+	if ( ! Internals.is_i386 )
 		return;
 
 	/* Childs death signal isn't needed */

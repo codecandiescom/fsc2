@@ -1,7 +1,7 @@
 /*
   $Id$
 
-  Copyright (C) 2001 Jens Thoms Toerring
+  Copyright (C) 1999-2002 Jens Thoms Toerring
 
   This file is part of fsc2.
 
@@ -168,7 +168,7 @@ int sr530_init_hook( void )
 
 int sr530_test_hook( void )
 {
-	memcpy( &sr530_stored, &sr530, sizeof( SR530 ) );
+	sr530_stored = sr530;
 	return 1;
 }
 
@@ -181,7 +181,7 @@ int sr530_exp_hook( void )
 {
 	/* Reset the device structure to the state it had before the test run */
 
-	memcpy( &sr530, &sr530_stored, sizeof( SR530 ) );
+	sr530 = sr530_stored;
 
 	/* Initialize the lock-in */
 

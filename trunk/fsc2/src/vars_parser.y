@@ -1,7 +1,7 @@
 /*
   $Id$
 
-  Copyright (C) 2001 Jens Thoms Toerring
+  Copyright (C) 1999-2002 Jens Thoms Toerring
 
   This file is part of fsc2.
 
@@ -77,7 +77,7 @@ extern char *varstext;
 
 input:   /* empty */
        | input ';'
-       | input line ';'            { fsc2_assert( Var_Stack == NULL ); }
+       | input line ';'            { fsc2_assert( EDL.Var_Stack == NULL ); }
        | input line SECTION_LABEL  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | input SECTION_LABEL       { YYACCEPT; }
 ;								  

@@ -1,7 +1,7 @@
 /*
   $Id$
 
-  Copyright (C) 2001 Jens Thoms Toerring
+  Copyright (C) 1999-2002 Jens Thoms Toerring
 
   This file is part of fsc2.
 
@@ -34,6 +34,7 @@ extern Func Def_Fncts[ ];   /* structures for list of built-in functions */
 
 
 static size_t num_func;
+static int Max_Devices_of_a_Kind;
 
 static void resolve_hook_functions( Device *dev, const char *dev_name );
 static void load_functions( Device *dev );
@@ -66,10 +67,10 @@ void load_all_drivers( void )
 	   function list */
 
 	Max_Devices_of_a_Kind = 1;
-	Num_Pulsers = 0;
+	EDL.Num_Pulsers = 0;
 
 	num_func = Num_Func;
-	for ( cd = Device_List; cd != NULL; cd = cd->next )
+	for ( cd = EDL.Device_List; cd != NULL; cd = cd->next )
 		load_functions( cd );
 
 	/* Because some multiply defined functions may have been added resort
@@ -89,11 +90,11 @@ void load_all_drivers( void )
 	   before each init_hook() function is called and is restored to its
 	   previous values if necessary. */
 
-	IN_HOOK = SET;
+	Internals.in_hook = SET;
 
 	TRY
 	{
-		for ( cd = Device_List; cd != NULL; cd = cd->next )
+		for ( cd = EDL.Device_List; cd != NULL; cd = cd->next )
 		{
 			saved_need_GPIB = need_GPIB;
 
@@ -119,11 +120,11 @@ void load_all_drivers( void )
 	OTHERWISE
 	{
 		call_pop( );
-		IN_HOOK = UNSET;
-		PASSTHROUGH( );
+		Internals.in_hook = UNSET;
+		RETHROW( );
 	}
 
-	IN_HOOK = UNSET;
+	Internals.in_hook = UNSET;
 }
 
 
@@ -146,7 +147,7 @@ bool exists_device( const char *name )
 {
 	Device *cd;
 
-	for ( cd = Device_List; cd != NULL; cd = cd->next )
+	for ( cd = EDL.Device_List; cd != NULL; cd = cd->next )
 		if ( cd->is_loaded &&
 			 ! strcasecmp( strip_path( cd->name ), name ) )
 			return OK;
@@ -328,7 +329,7 @@ static void resolve_hook_functions( Device *dev, const char *dev_name )
 
 	T_free( hook_func_name );
 
-	exit_hooks_are_run = UNSET;
+	Internals.exit_hooks_are_run = UNSET;
 }
 
 
@@ -464,7 +465,7 @@ static void resolve_generic_type( Device *dev )
 		return;
 	}
 
-	for ( cd = Device_List; cd != dev; cd = cd->next )
+	for ( cd = EDL.Device_List; cd != dev; cd = cd->next )
 		if ( cd->generic_type != NULL &&
 			 ! strcmp( cd->generic_type, dev->generic_type ) )
 			dev->count++;
@@ -473,7 +474,7 @@ static void resolve_generic_type( Device *dev )
 
 	if ( dev->generic_type &&
 		 ! strcmp( dev->generic_type, PULSER_GENERIC_TYPE ) )
-		Num_Pulsers++;
+		EDL.Num_Pulsers++;
 }
 
 
@@ -487,11 +488,11 @@ void run_test_hooks( void )
 
 
 	Cur_Pulser = -1;
-	IN_HOOK = SET;
+	Internals.in_hook = SET;
 
 	TRY
 	{
-		for ( cd = Device_List; cd != NULL; cd = cd->next )
+		for ( cd = EDL.Device_List; cd != NULL; cd = cd->next )
 			if ( cd->is_loaded && cd->driver.is_test_hook )
 			{
 				if ( cd->generic_type != NULL &&
@@ -510,11 +511,11 @@ void run_test_hooks( void )
 	OTHERWISE
 	{
 		call_pop( );
-		IN_HOOK = UNSET;
-		PASSTHROUGH( );
+		Internals.in_hook = UNSET;
+		RETHROW( );
 	}
 
-	IN_HOOK = UNSET;
+	Internals.in_hook = UNSET;
 }
 
 
@@ -528,11 +529,11 @@ void run_end_of_test_hooks( void )
 
 
 	Cur_Pulser = -1;
-	IN_HOOK = SET;
+	Internals.in_hook = SET;
 
 	TRY
 	{
-		for ( cd = Device_List; cd != NULL; cd = cd->next )
+		for ( cd = EDL.Device_List; cd != NULL; cd = cd->next )
 			if ( cd->is_loaded && cd->driver.is_end_of_test_hook )
 			{
 				if ( cd->generic_type != NULL &&
@@ -551,11 +552,11 @@ void run_end_of_test_hooks( void )
 	OTHERWISE
 	{
 		call_pop( );
-		IN_HOOK = UNSET;
-		PASSTHROUGH( );
+		Internals.in_hook = UNSET;
+		RETHROW( );
 	}
 
-	IN_HOOK = UNSET;
+	Internals.in_hook = UNSET;
 }
 
 
@@ -569,11 +570,11 @@ void run_exp_hooks( void )
 
 
 	Cur_Pulser = -1;
-	IN_HOOK = SET;
+	Internals.in_hook = SET;
 
 	TRY
 	{
-		for ( cd = Device_List; cd != NULL; cd = cd->next )
+		for ( cd = EDL.Device_List; cd != NULL; cd = cd->next )
 		{
 			if ( cd->is_loaded && cd->driver.is_exp_hook )
 			{
@@ -596,7 +597,7 @@ void run_exp_hooks( void )
 			/* Give user a chance to stop while running the experiment hooks */
 
 			fl_check_only_forms( );
-			if ( do_quit && react_to_do_quit )
+			if ( EDL.do_quit && EDL.react_to_do_quit )
 				THROW( USER_BREAK_EXCEPTION );
 		}
 
@@ -605,11 +606,11 @@ void run_exp_hooks( void )
 	OTHERWISE
 	{
 		call_pop( );
-		IN_HOOK = UNSET;
-		PASSTHROUGH( );
+		Internals.in_hook = UNSET;
+		RETHROW( );
 	}
 
-	IN_HOOK = UNSET;
+	Internals.in_hook = UNSET;
 }
 
 
@@ -629,9 +630,9 @@ void run_end_of_exp_hooks( void )
 	   failed. */
 
 	Cur_Pulser = -1;
-	IN_HOOK = SET;
+	Internals.in_hook = SET;
 
-	for ( cd = Device_List; cd != NULL; cd = cd->next )
+	for ( cd = EDL.Device_List; cd != NULL; cd = cd->next )
 	{
 		if ( cd->generic_type != NULL &&
 			 ! strcmp( cd->generic_type, PULSER_GENERIC_TYPE ) )
@@ -658,7 +659,7 @@ void run_end_of_exp_hooks( void )
 		}
 	}
 
-	IN_HOOK = UNSET;
+	Internals.in_hook = UNSET;
 }
 
 
@@ -671,18 +672,18 @@ void run_exit_hooks( void )
 	static Device *cd;
 
 
-	if ( Device_List == NULL )
+	if ( EDL.Device_List == NULL )
 		return;
 
 	/* Run all exit hooks starting with the last device and ending with the
 	   very first one in the list. Also make sure that all exit hooks are run
 	   even if some of them fail with an exception. */
 
-	for( cd = Device_List; cd->next != NULL; cd = cd->next )
+	for( cd = EDL.Device_List; cd->next != NULL; cd = cd->next )
 		;
 
-	Cur_Pulser = Num_Pulsers;
-	IN_HOOK = SET;
+	Cur_Pulser = EDL.Num_Pulsers;
+	Internals.in_hook = SET;
 
 	for ( ; cd != NULL; cd = cd->prev )
 	{
@@ -705,11 +706,11 @@ void run_exit_hooks( void )
 			call_pop( );
 	}
 
-	IN_HOOK = UNSET;
+	Internals.in_hook = UNSET;
 
 	/* Set global variable to show that exit hooks already have been run */
 
-	exit_hooks_are_run = SET;
+	Internals.exit_hooks_are_run = SET;
 }
 
 
@@ -739,7 +740,7 @@ int get_lib_symbol( const char *from, const char *symbol, void **symbol_ptr )
 
 	/* Try to find the library fitting the name */
 
-	for ( cd = Device_List; cd != 0; cd = cd->next )
+	for ( cd = EDL.Device_List; cd != 0; cd = cd->next )
 		if ( cd->is_loaded &&
 			 ! strcasecmp( strip_path( cd->name ), from ) )
 			break;
@@ -777,7 +778,7 @@ int get_lib_number( const char *name )
 	int num;
 
 
-	for ( cd = Device_List; cd != 0; cd = cd->next )
+	for ( cd = EDL.Device_List; cd != 0; cd = cd->next )
 		if ( cd->is_loaded && cd->generic_type != NULL &&
 			 ! strcasecmp( strip_path( cd->name ), name ) )
 		{
@@ -788,7 +789,7 @@ int get_lib_number( const char *name )
 	if ( cd == NULL || sd == NULL )
 		return 0;
 
-	for ( num = 1, cd = Device_List; cd != 0; cd = cd->next )
+	for ( num = 1, cd = EDL.Device_List; cd != 0; cd = cd->next )
 	{
 		if ( ! cd->is_loaded )
 			continue;
@@ -814,7 +815,7 @@ int get_lib_number( const char *name )
 void unload_device( Device *dev )
 {
 	if ( dev->driver.handle &&
-		 ! exit_hooks_are_run && dev->driver.is_exit_hook )
+		 ! Internals.exit_hooks_are_run && dev->driver.is_exit_hook )
 	{
 		TRY                             /* catch exceptions from the exit   */
 		{                               /* hooks, we've got to run them all */

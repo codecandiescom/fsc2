@@ -1,7 +1,7 @@
 /*
   $Id$
 
-  Copyright (C) 2001 Jens Thoms Toerring
+  Copyright (C) 1999-2002 Jens Thoms Toerring
 
   This file is part of fsc2.
 
@@ -97,7 +97,7 @@ int pt2025_init_hook( void )
 
 int pt2025_test_hook( void )
 {
-	memcpy( &pt2025_stored, &pt2025, sizeof( PT2025 ) );
+	pt2025_stored = pt2025;
 	return 1;
 }
 
@@ -107,7 +107,7 @@ int pt2025_test_hook( void )
 
 int pt2025_exp_hook( void )
 {
-	memcpy( &pt2025, &pt2025_stored, sizeof( PT2025 ) );
+	pt2025 = pt2025_stored;
 
 	if ( ! pt2025_init( DEVICE_NAME ) )
 	{

@@ -1,7 +1,7 @@
 /*
   $Id$
 
-  Copyright (C) 2001 Jens Thoms Toerring
+  Copyright (C) 1999-2002 Jens Thoms Toerring
 
   This file is part of fsc2.
 
@@ -44,12 +44,12 @@ void pulser_struct_init( void )
 	long i;
 
 
-	if ( Num_Pulsers == 0 )
+	if ( EDL.Num_Pulsers == 0 )
 		return;
 
-	pulser_struct = T_malloc( Num_Pulsers * sizeof( Pulser_Struct ) );
+	pulser_struct = T_malloc( EDL.Num_Pulsers * sizeof( Pulser_Struct ) );
 
-	for ( i = 0; i < Num_Pulsers; i++ )
+	for ( i = 0; i < EDL.Num_Pulsers; i++ )
 	{
 		pulser_struct[ i ].needs_phase_pulses         = UNSET;
 
@@ -136,14 +136,14 @@ long p_num( char *txt )
 
 void is_pulser_driver( void )
 {
-	if ( Num_Pulsers == 0 )
+	if ( EDL.Num_Pulsers == 0 )
 	{
 		eprint( FATAL, SET, "No pulser module has been loaded - can't use "
 				"pulser-specific functions.\n" );
 		THROW( EXCEPTION );
 	}
 
-	fsc2_assert( Cur_Pulser >= 0 && Cur_Pulser < Num_Pulsers );
+	fsc2_assert( Cur_Pulser >= 0 && Cur_Pulser < EDL.Num_Pulsers );
 
 	if ( pulser_struct[ Cur_Pulser ].name == NULL )
 	{
@@ -172,7 +172,7 @@ void is_pulser_func( void *func, const char *text )
 
 	if ( func == NULL )
 	{
-		if ( TEST_RUN || I_am == CHILD )
+		if ( Internals.mode == PREPARATION )
 			eprint( FATAL, SET, "%s: Function for %s doesn't exist or can't "
 					"be used during the experiment.\n",
 					pulser_struct[ Cur_Pulser ].name, text );
@@ -259,7 +259,7 @@ void p_assign_pod( long func, Var *v )
 	OTHERWISE
 	{
 		call_pop( );
-		PASSTHROUGH( );
+		RETHROW( );
 	}
 
 	call_pop( );
@@ -321,7 +321,7 @@ void p_assign_channel( long func, Var *v )
 	OTHERWISE
 	{
 		call_pop( );
-		PASSTHROUGH( );
+		RETHROW( );
 	}
 
 	call_pop( );
@@ -363,7 +363,7 @@ void p_set_delay( long func, Var *v )
 	OTHERWISE
 	{
 		call_pop( );
-		PASSTHROUGH( );
+		RETHROW( );
 	}
 
 	call_pop( );
@@ -392,7 +392,7 @@ void p_inv( long func )
 	OTHERWISE
 	{
 		call_pop( );
-		PASSTHROUGH( );
+		RETHROW( );
 	}
 
 	call_pop( );
@@ -433,7 +433,7 @@ void p_set_v_high( long func, Var *v )
 	OTHERWISE
 	{
 		call_pop( );
-		PASSTHROUGH( );
+		RETHROW( );
 	}
 
 	call_pop( );
@@ -474,7 +474,7 @@ void p_set_v_low( long func, Var *v )
 	OTHERWISE
 	{
 		call_pop( );
-		PASSTHROUGH( );
+		RETHROW( );
 	}
 
 	call_pop( );
@@ -514,7 +514,7 @@ void p_set_timebase( Var *v )
 	OTHERWISE
 	{
 		call_pop( );
-		PASSTHROUGH( );
+		RETHROW( );
 	}
 
 	call_pop( );
@@ -566,7 +566,7 @@ void p_set_trigger_mode( Var *v )
 	OTHERWISE
 	{
 		call_pop( );
-		PASSTHROUGH( );
+		RETHROW( );
 	}
 
 	call_pop( );
@@ -617,7 +617,7 @@ void p_set_trigger_slope( Var *v )
 	OTHERWISE
 	{
 		call_pop( );
-		PASSTHROUGH( );
+		RETHROW( );
 	}
 
 	call_pop( );
@@ -655,7 +655,7 @@ void p_set_trigger_level( Var *v )
 	OTHERWISE
 	{
 		call_pop( );
-		PASSTHROUGH( );
+		RETHROW( );
 	}
 
 	call_pop( );
@@ -693,7 +693,7 @@ void p_set_trigger_impedance( Var *v )
 	OTHERWISE
 	{
 		call_pop( );
-		PASSTHROUGH( );
+		RETHROW( );
 	}
 
 	call_pop( );
@@ -740,7 +740,7 @@ void p_set_rep_time( Var *v )
 	OTHERWISE
 	{
 		call_pop( );
-		PASSTHROUGH( );
+		RETHROW( );
 	}
 
 	call_pop( );
@@ -789,7 +789,7 @@ void p_set_rep_freq( Var *v )
 	OTHERWISE
 	{
 		call_pop( );
-		PASSTHROUGH( );
+		RETHROW( );
 	}
 
 	call_pop( );
@@ -832,7 +832,7 @@ void p_set_max_seq_len( Var *v )
 	OTHERWISE
 	{
 		call_pop( );
-		PASSTHROUGH( );
+		RETHROW( );
 	}
 
 	call_pop( );
@@ -858,7 +858,7 @@ void p_phase_ref( int func, int ref )
 		{
 			if ( func < 0 || func >= PULSER_CHANNEL_NUM_FUNC )
 			{
-				eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
+				eprint( FATAL, UNSET, "Internal error detected at %s:%u.\n",
 						__FILE__, __LINE__ );
 				THROW( EXCEPTION );
 			}
@@ -903,7 +903,7 @@ void p_phase_ref( int func, int ref )
 	OTHERWISE
 	{
 		call_pop( );
-		PASSTHROUGH( );
+		RETHROW( );
 	}
 
 	call_pop( );
@@ -950,7 +950,7 @@ long p_new( long pnum )
 	OTHERWISE
 	{
 		call_pop( );
-		PASSTHROUGH( );
+		RETHROW( );
 	}
 
 	call_pop( );
@@ -1048,7 +1048,7 @@ void p_set( long pnum, int type, Var *v )
 	OTHERWISE
 	{
 		call_pop( );
-		PASSTHROUGH( );
+		RETHROW( );
 	}
 
 	call_pop( );
@@ -1157,7 +1157,7 @@ Var *p_get_by_num( long pnum, int type )
 	OTHERWISE
 	{
 		call_pop( );
-		PASSTHROUGH( );
+		RETHROW( );
 	}
 
 	call_pop( );
@@ -1201,7 +1201,7 @@ void p_phs_setup( int func, int type, int pod, long val )
 	OTHERWISE
 	{
 		call_pop( );
-		PASSTHROUGH( );
+		RETHROW( );
 	}
 
 	call_pop( );
@@ -1227,7 +1227,7 @@ void p_phs_end( int func )
 	OTHERWISE
 	{
 		call_pop( );
-		PASSTHROUGH( );
+		RETHROW( );
 	}
 
 	call_pop( );
@@ -1259,7 +1259,7 @@ void p_set_psd( int func, Var *v )
 	OTHERWISE
 	{
 		call_pop( );
-		PASSTHROUGH( );
+		RETHROW( );
 	}
 
 	call_pop( );
@@ -1288,7 +1288,7 @@ void p_set_gp( Var *v )
 	OTHERWISE
 	{
 		call_pop( );
-		PASSTHROUGH( );
+		RETHROW( );
 	}
 
 	call_pop( );
@@ -1317,7 +1317,7 @@ void keep_all_pulses( void )
 	OTHERWISE
 	{
 		call_pop( );
-		PASSTHROUGH( );
+		RETHROW( );
 	}
 
 	call_pop( );

@@ -1,7 +1,7 @@
 /*
   $Id$
 
-  Copyright (C) 2001 Jens Thoms Toerring
+  Copyright (C) 1999-2002 Jens Thoms Toerring
 
   This file is part of fsc2.
 
@@ -43,6 +43,8 @@ static void check_for_further_errors( Compilation *c_old, Compilation *c_all );
 static void quitting_handler( int signo	);
 static void run_sigchld_handler( int signo );
 static void set_buttons_for_run( int active );
+
+
 
 
 /* Routines of the child process doing the measurement */
@@ -88,13 +90,13 @@ bool run( void )
 
 	/* We can't run more than one experiment - so quit if child_pid != 0 */
 
-	if ( child_pid != 0 )
+	if ( Internals.child_pid != 0 )
 		return FAIL;
 
 	/* If there's no EXPERIMENT section at all (indicated by 'prg_length'
 	   being negative) we're already done */
 
-	if ( prg_length < 0 )
+	if ( EDL.prg_length < 0 )
 		return 0;
 
 	/* Start the GPIB bus (and do some changes to the graphics) */
@@ -105,7 +107,7 @@ bool run( void )
 	/* If there are no commands but an EXPERIMENT section label we just run
 	   all the init hooks, then the exit hooks and are already done. */
 
-	if ( prg_token == NULL )
+	if ( EDL.prg_token == NULL )
 		return no_prog_to_run( );
 
 	/* Initialize devices and graphics */
@@ -119,23 +121,23 @@ bool run( void )
 
 	setup_signal_handlers( );
 
-	fl_set_cursor( FL_ObjWin( main_form->run ), XC_left_ptr );
+	fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_left_ptr );
 
 	/* Here the experiment starts - the child process is forked */
 
-	if ( ( child_pid = fork( ) ) == 0 )
+	if ( ( Internals.child_pid = fork( ) ) == 0 )
 		run_child( );
 
 	stored_errno = errno;            /* for later dissemination... */
 	close_all_files( );              /* only child is going to write to them */
 
-	close( pd[ READ ] );             /* close unused ends of pipes */
-	close( pd[ 3 ] );
-	pd[ READ ] = pd[ 2 ];
+	close( Comm.pd[ READ ] );        /* close unused ends of pipes */
+	close( Comm.pd[ 3 ] );
+	Comm.pd[ READ ] = Comm.pd[ 2 ];
 
-	if ( child_pid != -1 )           /* if fork() succeeded */
+	if ( Internals.child_pid != -1 )           /* if fork() succeeded */
 	{
-		FSC2_MODE = PREPARATION;
+		Internals.mode = PREPARATION;
 		return OK;
 	}
 
@@ -156,7 +158,7 @@ static bool start_gpib( void )
 	/* Disable some buttons and show a watch cusor */
 
 	set_buttons_for_run( 0 );
-	fl_set_cursor( FL_ObjWin( main_form->run ), XC_watch );
+	fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_watch );
 	XFlush( fl_get_display( ) );
 
 	/* If there are devices that need the GPIB bus initialize it now */
@@ -166,7 +168,7 @@ static bool start_gpib( void )
 		eprint( FATAL, UNSET, "Can't initialize GPIB bus: %s\n",
 				gpib_error_msg );
 		set_buttons_for_run( 1 );
-		fl_set_cursor( FL_ObjWin( main_form->run ), XC_left_ptr );
+		fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_left_ptr );
 		return FAIL;
 	}
 
@@ -208,7 +210,7 @@ static bool no_prog_to_run( void )
 	fsc2_serial_cleanup( );
 
 	set_buttons_for_run( 1 );
-	fl_set_cursor( FL_ObjWin( main_form->run ), XC_left_ptr );
+	fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_left_ptr );
 
 	return ret;
 } 
@@ -228,30 +230,30 @@ static bool init_devs_and_graphics( void )
 
 	/* Make a copy of the errors found while compiling the program */
 
-	memcpy( &compile_test, &compilation, sizeof( Compilation ) );
+	memcpy( &compile_test, &EDL.compilation, sizeof( Compilation ) );
 
 	TRY
 	{
 		vars_pop( f_dtime( NULL ) );
 
-		do_quit = UNSET;
-		react_to_do_quit = SET;
-		fl_set_object_callback( main_form->run, stop_while_exp_hook, 0 );
+		EDL.do_quit = UNSET;
+		EDL.react_to_do_quit = SET;
+		fl_set_object_callback( GUI.main_form->run, stop_while_exp_hook, 0 );
 
-		fl_set_object_label( main_form->run, "Stop" );
+		fl_set_object_label( GUI.main_form->run, "Stop" );
 
-		FSC2_MODE = EXPERIMENT;
+		Internals.mode = EXPERIMENT;
 		run_exp_hooks( );
 
-		react_to_do_quit = UNSET;
+		EDL.react_to_do_quit = UNSET;
 
-		fl_set_object_callback( main_form->run, run_file, 0 );
-		fl_deactivate_object( main_form->run );
-		fl_set_object_label( main_form->run, "Start" );
-		fl_set_object_lcol( main_form->run, FL_INACTIVE_COL );
+		fl_set_object_callback( GUI.main_form->run, run_file, 0 );
+		fl_deactivate_object( GUI.main_form->run );
+		fl_set_object_label( GUI.main_form->run, "Start" );
+		fl_set_object_lcol( GUI.main_form->run, FL_INACTIVE_COL );
 		XFlush( fl_get_display( ) );
 
-		check_for_further_errors( &compile_test, &compilation );
+		check_for_further_errors( &compile_test, &EDL.compilation );
 
 		start_graphics( );
 		setup_comm( );
@@ -259,9 +261,9 @@ static bool init_devs_and_graphics( void )
 	}
 	OTHERWISE
 	{
-		do_quit = react_to_do_quit = UNSET;
-		fl_set_object_label( main_form->run, "Start" );
-		fl_set_object_callback( main_form->run, run_file, 0 );
+		EDL.do_quit = EDL.react_to_do_quit = UNSET;
+		fl_set_object_label( GUI.main_form->run, "Start" );
+		fl_set_object_callback( GUI.main_form->run, run_file, 0 );
 
 		run_end_of_exp_hooks( );
 		vars_del_stack( );             /* some stack variables might be left
@@ -270,15 +272,15 @@ static bool init_devs_and_graphics( void )
 			gpib_shutdown( );
 		fsc2_serial_cleanup( );
 
-		FSC2_MODE = PREPARATION;
+		Internals.mode = PREPARATION;
 
 		set_buttons_for_run( 1 );
 		stop_graphics( );
-		fl_set_cursor( FL_ObjWin( main_form->run ), XC_left_ptr );
+		fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_left_ptr );
 		return FAIL;
 	}
 
-	fl_set_object_callback( main_form->run, run_file, 0 );
+	fl_set_object_callback( GUI.main_form->run, run_file, 0 );
 	child_is_quitting = UNSET;
 
 	return OK;
@@ -320,7 +322,7 @@ static void stop_while_exp_hook( FL_OBJECT *a, long b )
 	a = a;
 	b = b;
 
-	do_quit = react_to_do_quit = SET;
+	EDL.do_quit = EDL.react_to_do_quit = SET;
 }
 
 
@@ -361,14 +363,14 @@ static void fork_failure( int stored_errno )
 			break;
 	}
 
-	child_pid = 0;
+	Internals.child_pid = 0;
 	end_comm( );
 
 	run_end_of_exp_hooks( );
 	if ( need_GPIB )
 		gpib_shutdown( );
 	fsc2_serial_cleanup( );
-	FSC2_MODE = PREPARATION;
+	Internals.mode = PREPARATION;
 
 	stop_measurement( NULL, 1 );
 }
@@ -438,11 +440,11 @@ static void quitting_handler( int signo )
 	errno_saved = errno;
 	child_is_quitting = SET;
 
-	if ( kill( child_pid, DO_QUIT ) < 0 )
+	if ( kill( Internals.child_pid, DO_QUIT ) < 0 )
 	{
-		child_pid = 0;                                   /* child is dead... */
+		Internals.child_pid = 0;                         /* child is dead... */
 		sigaction( SIGCHLD, &sigchld_oact, NULL );
-		fl_trigger_object( run_form->sigchld );
+		fl_trigger_object( GUI.run_form->sigchld );
 		stop_measurement( NULL, 1 );
 	}
 
@@ -472,9 +474,9 @@ static void run_sigchld_handler( int signo )
 	errno_saved = errno;
 
 #if ! defined ( DEBUG )
-	if ( wait( &return_status ) != child_pid )
+	if ( wait( &return_status ) != Internals.child_pid )
 #else
-	if ( ( pid = wait( &return_status ) ) != child_pid )
+	if ( ( pid = wait( &return_status ) ) != Internals.child_pid )
 #endif
 	{
 		errno_saved = errno;
@@ -490,11 +492,11 @@ static void run_sigchld_handler( int signo )
 	}
 #endif
 
-	child_pid = 0;                                       /* child is dead... */
+	Internals.child_pid = 0;                             /* child is dead... */
 	sigaction( SIGCHLD, &sigchld_oact, NULL );
 
-	run_form->sigchld->u_ldata = ( long ) return_status;
-	fl_trigger_object( run_form->sigchld );
+	GUI.run_form->sigchld->u_ldata = ( long ) return_status;
+	fl_trigger_object( GUI.run_form->sigchld );
 
 	errno = errno_saved;
 }
@@ -539,21 +541,21 @@ void stop_measurement( FL_OBJECT *a, long b )
 	int bn;
 	
 
-	if ( b == 0 )                        /* callback from stop button ? */
+	if ( b == 0 )                           /* callback from stop button ? */
 	{
-		if ( child_pid != 0 )            /* child is still running */
+		if ( Internals.child_pid != 0 )          /* child is still running */
 		{
 			/* Only send DO_QUIT signal if the mouse button has been used
 			   the user told us he/she would use... */
 
-			if ( stop_button_mask != 0 )
+			if ( GUI.stop_button_mask != 0 )
 			{
 				bn = fl_get_button_numb( a );
-				if ( bn != FL_SHORTCUT + 'S' && bn != stop_button_mask )
+				if ( bn != FL_SHORTCUT + 'S' && bn != GUI.stop_button_mask )
 					return;
 			}
 
-			kill( child_pid, DO_QUIT );
+			kill( Internals.child_pid, DO_QUIT );
 		}
 		else                             /* child already exited */
 		{
@@ -581,12 +583,12 @@ void stop_measurement( FL_OBJECT *a, long b )
 		gpib_shutdown( );
 	fsc2_serial_cleanup( );
 
-	fl_freeze_form( run_form->run );
-	fl_set_object_label( run_form->stop, "Close" );
-	fl_set_button_shortcut( run_form->stop, "C", 1 );
-	if ( ! ( cmdline_flags & NO_BALLOON ) )
-		fl_set_object_helper( run_form->stop, "Remove this window" );
-	fl_unfreeze_form( run_form->run );
+	fl_freeze_form( GUI.run_form->run );
+	fl_set_object_label( GUI.run_form->stop, "Close" );
+	fl_set_button_shortcut( GUI.run_form->stop, "C", 1 );
+	if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
+		fl_set_object_helper( GUI.run_form->stop, "Remove this window" );
+	fl_unfreeze_form( GUI.run_form->run );
 }
 
 
@@ -599,43 +601,43 @@ void stop_measurement( FL_OBJECT *a, long b )
 
 static void set_buttons_for_run( int active )
 {
-	fl_freeze_form( main_form->fsc2 );
+	fl_freeze_form( GUI.main_form->fsc2 );
 
 	if ( active == 0 )
 	{
-		fl_deactivate_object( main_form->Load );
-		fl_set_object_lcol( main_form->Load, FL_INACTIVE_COL );
+		fl_deactivate_object( GUI.main_form->Load );
+		fl_set_object_lcol( GUI.main_form->Load, FL_INACTIVE_COL );
 
-		fl_deactivate_object( main_form->reload );
-		fl_set_object_lcol( main_form->reload, FL_INACTIVE_COL );
+		fl_deactivate_object( GUI.main_form->reload );
+		fl_set_object_lcol( GUI.main_form->reload, FL_INACTIVE_COL );
 
-		fl_deactivate_object( main_form->quit );
-		fl_set_object_lcol( main_form->quit, FL_INACTIVE_COL );
+		fl_deactivate_object( GUI.main_form->quit );
+		fl_set_object_lcol( GUI.main_form->quit, FL_INACTIVE_COL );
 
-		fl_deactivate_object( main_form->bug_report );
-		fl_set_object_lcol( main_form->bug_report, FL_INACTIVE_COL );
+		fl_deactivate_object( GUI.main_form->bug_report );
+		fl_set_object_lcol( GUI.main_form->bug_report, FL_INACTIVE_COL );
 	}
 	else
 	{
-		fl_activate_object( main_form->Load );
-		fl_set_object_lcol( main_form->Load, FL_BLACK );
+		fl_activate_object( GUI.main_form->Load );
+		fl_set_object_lcol( GUI.main_form->Load, FL_BLACK );
 
-		fl_activate_object( main_form->reload );
-		fl_set_object_lcol( main_form->reload, FL_BLACK );
+		fl_activate_object( GUI.main_form->reload );
+		fl_set_object_lcol( GUI.main_form->reload, FL_BLACK );
 
-		fl_activate_object( main_form->run );
-		fl_set_object_lcol( main_form->run, FL_BLACK );
+		fl_activate_object( GUI.main_form->run );
+		fl_set_object_lcol( GUI.main_form->run, FL_BLACK );
 
-		fl_activate_object( main_form->quit );
-		fl_set_object_lcol( main_form->quit, FL_BLACK );
+		fl_activate_object( GUI.main_form->quit );
+		fl_set_object_lcol( GUI.main_form->quit, FL_BLACK );
 
-		fl_activate_object( main_form->bug_report );
-		fl_set_object_lcol( main_form->bug_report, FL_BLACK );
+		fl_activate_object( GUI.main_form->bug_report );
+		fl_set_object_lcol( GUI.main_form->bug_report, FL_BLACK );
 
 		notify_conn( UNBUSY_SIGNAL );
 	}
 
-	fl_unfreeze_form( main_form->fsc2 );
+	fl_unfreeze_form( GUI.main_form->fsc2 );
 }
 
 
@@ -666,19 +668,19 @@ static void run_child( void )
 #endif
 
 
-	I_am = CHILD;
+	Internals.I_am = CHILD;
 
     /* Set up pipes for communication with parent process */
 
-	close( pd[ WRITE ] );
-	close( pd[ 2 ] );
-	pd[ WRITE ] = pd[ 3 ];
+	close( Comm.pd[ WRITE ] );
+	close( Comm.pd[ 2 ] );
+	Comm.pd[ WRITE ] = Comm.pd[ 3 ];
 
 	/* Set up pointers, global variables and signal handlers */
 
 	child_return_status = OK;
-	cur_prg_token = prg_token;
-	do_quit = UNSET;
+	EDL.cur_prg_token = EDL.prg_token;
+	EDL.do_quit = UNSET;
 	setup_child_signals( );
 
 #ifndef NDEBUG
@@ -706,8 +708,8 @@ static void run_child( void )
 	OTHERWISE                            /* catch all exceptions */
 		child_return_status = FAIL;
 
-	close( pd[ READ ] );                 /* close read end of pipe */
-	close( pd[ WRITE ] );                /* close also write end of pipe */
+	close( Comm.pd[ READ ] );            /* close read end of pipe */
+	close( Comm.pd[ WRITE ] );           /* close also write end of pipe */
 
 	wait_for_confirmation( );            /* wait for license to die... */
 }
@@ -778,9 +780,9 @@ static void child_sig_handler( int signo )
 	switch ( signo )
 	{
 		case DO_QUIT :                             /* aka SIGUSR2 */
-			if ( ! react_to_do_quit )
+			if ( ! EDL.react_to_do_quit )
 				break;
-			do_quit = SET;
+			EDL.do_quit = SET;
 			/* fall through ! */
 
 		case SIGALRM :
@@ -806,7 +808,7 @@ static void child_sig_handler( int signo )
 		/* All remaining signals are deadly... */
 
 		default :
-			if ( ! ( cmdline_flags & NO_MAIL ) )
+			if ( ! ( Internals.cmdline_flags & NO_MAIL ) )
 			{
 				DumpStack( );
 				death_mail( signo );
@@ -819,11 +821,11 @@ static void child_sig_handler( int signo )
 			if ( kill( getppid( ), 0 ) == -1 && errno == ESRCH )
 			{
 				delete_all_shm( );
-				sema_destroy( data_semaphore );
-				sema_destroy( request_semaphore );
+				sema_destroy( Comm.data_semaphore );
+				sema_destroy( Comm.request_semaphore );
 			}
 
-			do_quit = SET;
+			EDL.do_quit = SET;
 			_exit( -1 );
 	}
 }
@@ -882,39 +884,32 @@ static void child_confirmation_handler( int signo )
 
 static void do_measurement( void )
 {
-	react_to_do_quit = SET;
-	TEST_RUN = UNSET;
+	EDL.react_to_do_quit = SET;
 
-	while ( cur_prg_token != NULL &&
-			cur_prg_token < prg_token + prg_length )
+	while ( EDL.cur_prg_token != NULL &&
+			EDL.cur_prg_token < EDL.prg_token + EDL.prg_length )
 	{
 		TRY
 		{
-			if ( do_quit && react_to_do_quit )
+			/* Check if the 'do_quit' flag got set in the mean time, i.e. the
+			   user pressed the STOP button. If there's an ON_STOP label jump
+			   to it, otherwise quit immediately. */
+
+			if ( EDL.do_quit && EDL.react_to_do_quit )
 			{
-				/* Don't react to 'do_quit' flag while we're handling the
-				   ON_STOP part of he program */
+				if ( EDL.On_Stop_Pos < 0 )            /* no ON_STOP part ? */
+					return;
 
-				react_to_do_quit = UNSET;
-
-				if ( On_Stop_Pos < 0 )                /* no ON_STOP part ? */
-					cur_prg_token = NULL;             /* -> stop immediately */
-				else                                  /* goto ON_STOP part */
-					cur_prg_token = prg_token + On_Stop_Pos;
-
-				do_quit = UNSET;
-
+				EDL.cur_prg_token = EDL.prg_token + EDL.On_Stop_Pos;
+				EDL.do_quit = EDL.react_to_do_quit = UNSET;
 				continue;
 			}
 
-			/* Don't react to Stop button after ON_STOP label has been
+			/* Don't react to STOP button anymore after ON_STOP label has been
 			   reached */
 
-			if ( cur_prg_token == prg_token + On_Stop_Pos )
-			{
-				react_to_do_quit = UNSET;
-				do_quit = UNSET;
-			}
+			if ( EDL.cur_prg_token == EDL.prg_token + EDL.On_Stop_Pos )
+				EDL.react_to_do_quit = EDL.do_quit = UNSET;
 
 			/* Do whatever is necessary to do for the program token */
 
@@ -925,12 +920,21 @@ static void do_measurement( void )
 		CATCH( USER_BREAK_EXCEPTION )
 		{
 			TRY_SUCCESS;
-			vars_del_stack( );          /* variable stack could be messed up */
-			if ( ! react_to_do_quit )
+
+			/* Clean up the variable stack, it may have become messed up */
+
+			vars_del_stack( );
+
+			/* If the exception arrives while we're already dealing with the
+			   ON_STOP part this probably is a sign that there is some
+			   severe hardware problem and we better stop even though the
+			   ON_STOP part isn't been finished yet. */
+
+			if ( ! EDL.react_to_do_quit )
 				THROW( EXCEPTION );
 		}
 		OTHERWISE
-			PASSTHROUGH( );
+			RETHROW( );
 	}
 }
 
@@ -938,6 +942,9 @@ static void do_measurement( void )
 /*-----------------------------------------------------------------------*/
 /* The following is just a lengthy switch to deal with tokens that can't */
 /* be handled by the parser directly, i.e. tokens for flow control.      */
+/* Control is transfered back to this function whenever the parser finds */
+/* the end-of-line delimiter (a colon), a closing curly brace or one of  */
+/*  flow control tokens.                                                 */
 /*-----------------------------------------------------------------------*/
 
 static void deal_with_program_tokens( void )
@@ -945,96 +952,96 @@ static void deal_with_program_tokens( void )
 	Prg_Token *cur;
 
 
-	switch ( cur_prg_token->token )
+	switch ( EDL.cur_prg_token->token )
 	{
 		case '}' :
-			cur_prg_token = cur_prg_token->end;
+			EDL.cur_prg_token = EDL.cur_prg_token->end;
 			break;
 
 		case WHILE_TOK :
-			cur = cur_prg_token;
+			cur = EDL.cur_prg_token;
 			if ( test_condition( cur ) )
 			{
 				cur->counter = 1;
-				cur_prg_token = cur->start;
+				EDL.cur_prg_token = cur->start;
 			}
 			else
 			{
 				cur->counter = 0;
-				cur_prg_token = cur->end;
+				EDL.cur_prg_token = cur->end;
 			}
 			break;
 
 		case UNTIL_TOK :
-			cur = cur_prg_token;
+			cur = EDL.cur_prg_token;
 			if ( ! test_condition( cur ) )
 			{
 				cur->counter = 1;
-				cur_prg_token = cur->start;
+				EDL.cur_prg_token = cur->start;
 			}
 			else
 			{
 				cur->counter = 0;
-				cur_prg_token = cur->end;
+				EDL.cur_prg_token = cur->end;
 			}
 			break;
 
 		case REPEAT_TOK :
-			cur = cur_prg_token;
+			cur = EDL.cur_prg_token;
 			if ( cur->counter == 0 )
 				get_max_repeat_count( cur );
 			if ( ++cur->count.repl.act <= cur->count.repl.max )
 			{
 				cur->counter++;
-				cur_prg_token = cur->start;
+				EDL.cur_prg_token = cur->start;
 			}
 			else
 			{
 				cur->counter = 0;
-				cur_prg_token = cur->end;
+				EDL.cur_prg_token = cur->end;
 			}
 			break;
 
 		case FOR_TOK :
-			cur = cur_prg_token;
+			cur = EDL.cur_prg_token;
 			if ( cur->counter == 0 )
 				get_for_cond( cur );
 
 			if ( test_for_cond( cur ) )
 			{
 				cur->counter = 1;
-				cur_prg_token = cur->start;
+				EDL.cur_prg_token = cur->start;
 			}
 			else
 			{
 				cur->counter = 0;
-				cur_prg_token = cur->end;
+				EDL.cur_prg_token = cur->end;
 			}
 			break;
 
 		case FOREVER_TOK :
-			cur_prg_token = cur_prg_token->start;
+			EDL.cur_prg_token = EDL.cur_prg_token->start;
 			break;
 
 		case BREAK_TOK :
-			cur_prg_token->start->counter = 0;
-			cur_prg_token = cur_prg_token->start->end;
+			EDL.cur_prg_token->start->counter = 0;
+			EDL.cur_prg_token = EDL.cur_prg_token->start->end;
 			break;
 
 		case NEXT_TOK :
-			cur_prg_token = cur_prg_token->start;
+			EDL.cur_prg_token = EDL.cur_prg_token->start;
 			break;
 
 		case IF_TOK : case UNLESS_TOK :
-			cur = cur_prg_token;
-			cur_prg_token = test_condition( cur ) ? cur->start : cur->end;
+			cur = EDL.cur_prg_token;
+			EDL.cur_prg_token = test_condition( cur ) ? cur->start : cur->end;
 			break;
 
 		case ELSE_TOK :
-			if ( ( cur_prg_token + 1 )->token == '{' )
-				cur_prg_token += 2;
+			if ( ( EDL.cur_prg_token + 1 )->token == '{' )
+				EDL.cur_prg_token += 2;
 			else
-				cur_prg_token++;
+				EDL.cur_prg_token++;
 			break;
 
 		default :

@@ -1,7 +1,7 @@
 /*
   $Id$
 
-  Copyright (C) 2001 Jens Thoms Toerring
+  Copyright (C) 1999-2002 Jens Thoms Toerring
 
   This file is part of fsc2.
 
@@ -293,7 +293,7 @@ static void exp_testerror( const char *s )
 
 	if ( in_cond )
 	{
-		if ( ( cur_prg_token - 1 )->token == '=' )
+		if ( ( EDL.cur_prg_token - 1 )->token == '=' )
 			eprint( FATAL, SET, "Assignment '=' used in loop or IF/UNLESS "
 					"condition instead of comparison '=='.\n" );
 		else

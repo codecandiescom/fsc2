@@ -1,7 +1,7 @@
 /*
   $Id$
 
-  Copyright (C) 2001 Jens Thoms Toerring
+  Copyright (C) 1999-2002 Jens Thoms Toerring
 
   This file is part of fsc2.
 
@@ -48,12 +48,19 @@
 #include <pwd.h>
 #include <sys/types.h>
 
+typedef enum
+{
+	false = 0,
+	true  = 1
+} bool;
+
+
+#define UNSET   false
+#define SET     true
+
 #include "exceptions.h"
 
-typedef unsigned char bool;
-
-#define UNSET ( ( bool ) 0 )
-#define SET   ( ( bool ) 1 )
+char *prog_name;
 
 
 #if defined MDEBUG
@@ -400,6 +407,8 @@ int main( int argc, char *argv[ ] )
 #if defined MDEBUG
 	mcheck( NULL );
 #endif
+
+	prog_name = argv[ 0 ];
 
 	lower_permissions( );
 

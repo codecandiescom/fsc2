@@ -1,7 +1,7 @@
 /*
   $Id$
 
-  Copyright (C) 2001 Jens Thoms Toerring
+  Copyright (C) 1999-2002 Jens Thoms Toerring
 
   This file is part of fsc2.
 
@@ -84,10 +84,10 @@ void bug_report_callback( FL_OBJECT *a, long b )
 		     "***********************************************************\n" );
 	
 	fprintf( tmp, "Content of program browser:\n\n" );
-	lines = fl_get_browser_maxline( main_form->browser );
+	lines = fl_get_browser_maxline( GUI.main_form->browser );
 	for ( i = 1; i <= lines; i++ )
 	{
-		strcpy( cur_line, fl_get_browser_line( main_form->browser, i ) );
+		strcpy( cur_line, fl_get_browser_line( GUI.main_form->browser, i ) );
 		clp = cur_line;
 		if ( *clp == '@' )
 		{
@@ -102,10 +102,10 @@ void bug_report_callback( FL_OBJECT *a, long b )
 	fprintf( tmp, "\n--------------------------------------------------\n\n" );
 
 	fprintf( tmp, "Content of output browser:\n\n" );
-	lines = fl_get_browser_maxline( main_form->error_browser );
+	lines = fl_get_browser_maxline( GUI.main_form->error_browser );
 	for ( i = 1; i <= lines; i++ )
 		fprintf( tmp, "%s\n",
-				 fl_get_browser_line( main_form->error_browser, i ) );
+				 fl_get_browser_line( GUI.main_form->error_browser, i ) );
 	fprintf( tmp, "--------------------------------------------------\n\n" );
 
 	/* Append other informations, i.e the user name and his current directory
@@ -234,10 +234,11 @@ void death_mail( int signo )
 
 #if defined _GNU_SOURCE
 	fprintf( mail, "fsc2 (%d, %s) killed by %s signal.\n\n", getpid( ),
-			 I_am == CHILD ? "CHILD" : "PARENT", strsignal( signo ) );
+			 Internals.I_am == CHILD ? "CHILD" : "PARENT",
+			 strsignal( signo ) );
 #else
 	fprintf( mail, "fsc2 (%d, %s) killed by signal %d.\n\n", getpid( ),
-			 I_am == CHILD ? "CHILD" : "PARENT", signo );
+			 Internals.I_am == CHILD ? "CHILD" : "PARENT", signo );
 #endif
 
 #ifndef NDEBUG
@@ -255,16 +256,17 @@ void death_mail( int signo )
 		close( fail_mess_fd );
 	}
 
-	if ( Fname != NULL )
-		fprintf( mail, "In EDL program %s at line = %ld\n\n", Fname, Lc );
+	if ( EDL.Fname != NULL )
+		fprintf( mail, "In EDL program %s at line = %ld\n\n",
+				 EDL.Fname, EDL.Lc );
 
 	fputs( "Content of program browser:\n\n"
 		   "--------------------------------------------------\n\n", mail );
 
-	lines = fl_get_browser_maxline( main_form->browser );
+	lines = fl_get_browser_maxline( GUI.main_form->browser );
 	for ( i = 0; i < lines; )
 	{
-		strcpy( cur_line, fl_get_browser_line( main_form->browser, ++i ) );
+		strcpy( cur_line, fl_get_browser_line( GUI.main_form->browser, ++i ) );
 		clp = cur_line;
 		if ( *clp == '@' )
 		{
@@ -281,10 +283,11 @@ void death_mail( int signo )
 		   "Content of output browser:\n"
 		   "--------------------------------------------------\n", mail );
 
-	lines = fl_get_browser_maxline( main_form->error_browser );
+	lines = fl_get_browser_maxline( GUI.main_form->error_browser );
 	for ( i = 0; i < lines; )
 	{
-		fputs( fl_get_browser_line( main_form->error_browser, ++i ), mail );
+		fputs( fl_get_browser_line( GUI.main_form->error_browser, ++i ),
+               mail );
 		fputc( ( int ) '\n', mail );
 	}
 

@@ -1,7 +1,7 @@
-/*
+/* -*-C-*-
   $Id$
 
-  Copyright (C) 2001 Jens Thoms Toerring
+  Copyright (C) 1999-2002 Jens Thoms Toerring
 
   This file is part of fsc2.
 
@@ -73,14 +73,14 @@ EXP         ^[\t ]*EXP(ERIMENT)?:
 			/* handling of file name lines */
 {FILE}      {
 				*( splittext + splitleng - 1 ) = '\0';
-				T_free( Fname );
-				Fname = T_strdup( splittext + 2 );
+				T_free( EDL.Fname );
+				EDL.Fname = T_strdup( splittext + 2 );
 			}
 
 			/* handling of line number lines */
 {LNUM}		{
 				*( splittext + splitleng - 1 ) = '\0';
-				Lc = atol( splittext + 2 );
+				EDL.Lc = atol( splittext + 2 );
 			}
 
 			/* handling of error messages from the cleaner */
@@ -174,7 +174,7 @@ bool scan_main( char *file )
 	/* Setting the program length to -1 means that no EXPERIMENT section has
 	   been found yet. */
 
-	prg_length = -1;
+	EDL.prg_length = -1;
 
 	sact.sa_handler = ( void ( * )( int ) ) SIG_IGN;
 	sigaction( SIGCHLD, &sact, &oact );

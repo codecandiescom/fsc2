@@ -1,7 +1,7 @@
 /*
   $Id$
 
-  Copyright (C) 2001 Jens Thoms Toerring
+  Copyright (C) 1999-2002 Jens Thoms Toerring
 
   This file is part of fsc2.
 
@@ -34,7 +34,7 @@ static const char *handle_input( const char *content, const char *label );
 
 void show_message( const char *str )
 {
-	if ( I_am == PARENT )
+	if ( Internals.I_am == PARENT )
 	{
 		switch_off_special_cursors( );
 		fl_show_messages( str );
@@ -54,7 +54,7 @@ void show_alert( const char *str )
 	char *strc, *strs[ 3 ];
 	
 
-	if ( I_am == PARENT )
+	if ( Internals.I_am == PARENT )
 	{
 		switch_off_special_cursors( );
 
@@ -94,7 +94,7 @@ int show_choices( const char *text, int numb, const char *b1, const char *b2,
 {
 	int ret;
 
-	if ( I_am == PARENT )
+	if ( Internals.I_am == PARENT )
 	{
 		switch_off_special_cursors( );
 		return fl_show_choices( text, numb, b1, b2, b3, def );
@@ -125,7 +125,7 @@ const char *show_fselector( const char *message, const char *directory,
 	const char *ret = NULL;
 
 
-	if ( I_am == PARENT )
+	if ( Internals.I_am == PARENT )
 	{
 		switch_off_special_cursors( );
 		return fl_show_fselector( message, directory, pattern, def );
@@ -146,7 +146,7 @@ const char *show_input( const char *content, const char *label )
 {
 	char *ret = NULL;
 
-	if ( I_am == PARENT )
+	if ( Internals.I_am == PARENT )
 	{
 		switch_off_special_cursors( );
 		return handle_input( content, label );
@@ -166,23 +166,24 @@ const char *show_input( const char *content, const char *label )
 static const char *handle_input( const char *content, const char *label )
 {
 	if ( label != NULL && label != '\0' )
-		fl_set_object_label( input_form->comm_input, label );
+		fl_set_object_label( GUI.input_form->comm_input, label );
 	else
-		fl_set_object_label( input_form->comm_input, "Enter your comment:" );
+		fl_set_object_label( GUI.input_form->comm_input,
+                             "Enter your comment:" );
 
-	fl_set_input( input_form->comm_input, content );
+	fl_set_input( GUI.input_form->comm_input, content );
 
-	fl_show_form( input_form->input_form,
+	fl_show_form( GUI.input_form->input_form,
 				  FL_PLACE_MOUSE | FL_FREE_SIZE, FL_FULLBORDER,
 				  "fsc2: Comment editor" );
 
-	while ( fl_do_forms( ) != input_form->comm_done )
+	while ( fl_do_forms( ) != GUI.input_form->comm_done )
 		;
 
-	if ( fl_form_is_visible( input_form->input_form ) )
-		fl_hide_form( input_form->input_form );
+	if ( fl_form_is_visible( GUI.input_form->input_form ) )
+		fl_hide_form( GUI.input_form->input_form );
 
-	return fl_get_input( input_form->comm_input );
+	return fl_get_input( GUI.input_form->comm_input );
 }
 
 
@@ -193,7 +194,7 @@ static const char *handle_input( const char *content, const char *label )
 
 bool exp_layout( char *buffer, ptrdiff_t len )
 {
-	if ( I_am == CHILD )
+	if ( Internals.I_am == CHILD )
 	{
 		writer( C_LAYOUT, len, buffer );
 		T_free( buffer );
@@ -201,8 +202,8 @@ bool exp_layout( char *buffer, ptrdiff_t len )
 	}
 	else
 	{
-		char *old_Fname = Fname;
-		long old_Lc = Lc;
+		char *old_Fname = EDL.Fname;
+		long old_Lc = EDL.Lc;
 		Var *Func_ptr;
 		int acc;
 		char *pos;
@@ -215,13 +216,13 @@ bool exp_layout( char *buffer, ptrdiff_t len )
 		/* Unpack parameter and push them onto the stack */
 
 		pos = buffer;
-		memcpy( &Lc, pos, sizeof( long ) );    /* get current line number */
+		memcpy( &EDL.Lc, pos, sizeof( long ) );   /* get current line number */
 		pos += sizeof( long );
 
-		vars_push( INT_VAR, * ( ( long * ) pos ) );  /* get layout type */
+		vars_push( INT_VAR, * ( ( long * ) pos ) ); /* get layout type */
 		pos += sizeof( long );
 
-		Fname = pos;                           /* get current file name */
+		EDL.Fname = pos;                            /* get current file name */
 
 		/* Call the function */
 
@@ -234,8 +235,8 @@ bool exp_layout( char *buffer, ptrdiff_t len )
 		OTHERWISE
 			writer( C_LAYOUT_REPLY, 0L );
 
-		Fname = old_Fname;
-		Lc = old_Lc;
+		EDL.Fname = old_Fname;
+		EDL.Lc = old_Lc;
 		return SET;
 	}
 }
@@ -248,7 +249,7 @@ bool exp_layout( char *buffer, ptrdiff_t len )
 
 long *exp_bcreate( char *buffer, ptrdiff_t len )
 {
-	if ( I_am == CHILD )
+	if ( Internals.I_am == CHILD )
 	{
 		long *result;
 
@@ -261,8 +262,8 @@ long *exp_bcreate( char *buffer, ptrdiff_t len )
 	}
 	else
 	{
-		char *old_Fname = Fname;
-		long old_Lc = Lc;
+		char *old_Fname = EDL.Fname;
+		long old_Lc = EDL.Lc;
 		Var *Func_ptr;
 		Var *ret = NULL;
 		long val;
@@ -278,7 +279,7 @@ long *exp_bcreate( char *buffer, ptrdiff_t len )
 		/* Unpack parameter and push them onto the stack */
 
 		pos = buffer;
-		memcpy( &Lc, pos, sizeof( long ) );      /* get current line number */
+		memcpy( &EDL.Lc, pos, sizeof( long ) );  /* get current line number */
 		pos += sizeof( long );
 
 		vars_push( INT_VAR, * ( ( long * ) pos ) );
@@ -289,7 +290,7 @@ long *exp_bcreate( char *buffer, ptrdiff_t len )
 			vars_push( INT_VAR, val );
 		pos += sizeof( long );
 
-		Fname = pos;                             /* get current file name */
+		EDL.Fname = pos;                         /* get current file name */
 		pos += strlen( pos ) + 1;
 
 		vars_push( STR_VAR, pos );               /* get label string */
@@ -311,8 +312,8 @@ long *exp_bcreate( char *buffer, ptrdiff_t len )
 		OTHERWISE
 			result[ 0 ] = 0;
 
-		Fname = old_Fname;
-		Lc = old_Lc;
+		EDL.Fname = old_Fname;
+		EDL.Lc = old_Lc;
 		writer( C_BCREATE_REPLY, 2 * sizeof( long ), result );
 
 		return NULL;
@@ -327,7 +328,7 @@ long *exp_bcreate( char *buffer, ptrdiff_t len )
 
 bool exp_bdelete( char *buffer, ptrdiff_t len )
 {
-	if ( I_am == CHILD )
+	if ( Internals.I_am == CHILD )
 	{
 		writer( C_BDELETE, len, buffer );
 		T_free( buffer );
@@ -335,8 +336,8 @@ bool exp_bdelete( char *buffer, ptrdiff_t len )
 	}
 	else
 	{
-		char *old_Fname = Fname;
-		long old_Lc = Lc;
+		char *old_Fname = EDL.Fname;
+		long old_Lc = EDL.Lc;
 		Var *Func_ptr;
 		int acc;
 		char *pos;
@@ -349,13 +350,13 @@ bool exp_bdelete( char *buffer, ptrdiff_t len )
 		/* Unpack parameter and push them onto the stack */
 
 		pos = buffer;
-		memcpy( &Lc, pos, sizeof( long ) );    /* get current line number */
+		memcpy( &EDL.Lc, pos, sizeof( long ) ); /* get current line number */
 		pos += sizeof( long );
 
 		vars_push( INT_VAR, * ( ( long * ) pos ) );
 		pos += sizeof( long );
 
-		Fname = pos;                           /* get current file name */
+		EDL.Fname = pos;                        /* get current file name */
 
 		/* Call the function */
 
@@ -368,8 +369,8 @@ bool exp_bdelete( char *buffer, ptrdiff_t len )
 		OTHERWISE
 			writer( C_BDELETE_REPLY, 0L );
 
-		Fname = old_Fname;
-		Lc = old_Lc;
+		EDL.Fname = old_Fname;
+		EDL.Lc = old_Lc;
 		return SET;
 	}
 }
@@ -382,7 +383,7 @@ bool exp_bdelete( char *buffer, ptrdiff_t len )
 
 long exp_bstate( char *buffer, ptrdiff_t len )
 {
-	if ( I_am == CHILD )
+	if ( Internals.I_am == CHILD )
 	{
 		writer( C_BSTATE, len, buffer );
 		T_free( buffer );
@@ -390,8 +391,8 @@ long exp_bstate( char *buffer, ptrdiff_t len )
 	}
 	else
 	{
-		char *old_Fname = Fname;
-		long old_Lc = Lc;
+		char *old_Fname = EDL.Fname;
+		long old_Lc = EDL.Lc;
 		long val;
 		Var *Func_ptr;
 		Var *ret = NULL;
@@ -405,18 +406,18 @@ long exp_bstate( char *buffer, ptrdiff_t len )
 		/* Unpack parameter and push them onto the stack */
 
 		pos = buffer;
-		memcpy( &Lc, pos, sizeof( long ) );    /* get current line number */
+		memcpy( &EDL.Lc, pos, sizeof( long ) );  /* get current line number */
 		pos += sizeof( long );
 
 		vars_push( INT_VAR, * ( ( long * ) pos ) );
 		pos += sizeof( long );
 
-		memcpy( &val, pos, sizeof( long ) );   /* get state to be set */
+		memcpy( &val, pos, sizeof( long ) );     /* get state to be set */
 		if ( val >= 0 )
 			vars_push( INT_VAR, val );
 		pos += sizeof( long );
 
-		Fname = pos;                           /* get current file name */
+		EDL.Fname = pos;                         /* get current file name */
 
 		/* Call the function */
 
@@ -430,8 +431,8 @@ long exp_bstate( char *buffer, ptrdiff_t len )
 		OTHERWISE
 			writer( C_BSTATE_REPLY, -1L );
 
-		Fname = old_Fname;
-		Lc = old_Lc;
+		EDL.Fname = old_Fname;
+		EDL.Lc = old_Lc;
 		return 0;
 	}
 }
@@ -444,7 +445,7 @@ long exp_bstate( char *buffer, ptrdiff_t len )
 
 long *exp_screate( char *buffer, ptrdiff_t len )
 {
-	if ( I_am == CHILD )
+	if ( Internals.I_am == CHILD )
 	{
 		long *result;
 
@@ -457,8 +458,8 @@ long *exp_screate( char *buffer, ptrdiff_t len )
 	}
 	else
 	{
-		char *old_Fname = Fname;
-		long old_Lc = Lc;
+		char *old_Fname = EDL.Fname;
+		long old_Lc = EDL.Lc;
 		Var *Func_ptr;
 		Var *ret = NULL;
 		int acc;
@@ -473,7 +474,7 @@ long *exp_screate( char *buffer, ptrdiff_t len )
 		/* Unpack parameter and push them onto the stack */
 
 		pos = buffer;
-		memcpy( &Lc, pos, sizeof( long ) );      /* get current line number */
+		memcpy( &EDL.Lc, pos, sizeof( long ) );   /* get current line number */
 		pos += sizeof( long );
 
 		vars_push( INT_VAR, *( ( long * ) pos ) );
@@ -488,7 +489,7 @@ long *exp_screate( char *buffer, ptrdiff_t len )
 		vars_push( FLOAT_VAR, *( ( double * ) pos ) );
 		pos += sizeof( double );
 
-		Fname = pos;                             /* get current file name */
+		EDL.Fname = pos;                          /* get current file name */
 		pos += strlen( pos ) + 1;
 
 		vars_push( STR_VAR, pos );               /* get label string */
@@ -510,8 +511,8 @@ long *exp_screate( char *buffer, ptrdiff_t len )
 		OTHERWISE
 			result[ 0 ] = 0;
 
-		Fname = old_Fname;
-		Lc = old_Lc;
+		EDL.Fname = old_Fname;
+		EDL.Lc = old_Lc;
 		writer( C_SCREATE_REPLY, 2 * sizeof( long ), result );
 
 		return NULL;
@@ -526,7 +527,7 @@ long *exp_screate( char *buffer, ptrdiff_t len )
 
 bool exp_sdelete( char *buffer, ptrdiff_t len )
 {
-	if ( I_am == CHILD )
+	if ( Internals.I_am == CHILD )
 	{
 		writer( C_SDELETE, len, buffer );
 		T_free( buffer );
@@ -534,8 +535,8 @@ bool exp_sdelete( char *buffer, ptrdiff_t len )
 	}
 	else
 	{
-		char *old_Fname = Fname;
-		long old_Lc = Lc;
+		char *old_Fname = EDL.Fname;
+		long old_Lc = EDL.Lc;
 		Var *Func_ptr;
 		int acc;
 		char *pos;
@@ -548,13 +549,13 @@ bool exp_sdelete( char *buffer, ptrdiff_t len )
 		/* Unpack parameter and push them onto the stack */
 
 		pos = buffer;
-		memcpy( &Lc, pos, sizeof( long ) );    /* get current line number */
+		memcpy( &EDL.Lc, pos, sizeof( long ) );   /* get current line number */
 		pos += sizeof( long );
 
 		vars_push( INT_VAR, *( ( long * ) pos ) );
 		pos += sizeof( long );
 
-		Fname = pos;                           /* get current file name */
+		EDL.Fname = pos;                          /* get current file name */
 
 		/* Call the function */
 
@@ -570,8 +571,8 @@ bool exp_sdelete( char *buffer, ptrdiff_t len )
 			writer( C_SDELETE_REPLY, 0L );
 		}
 
-		Fname = old_Fname;
-		Lc = old_Lc;
+		EDL.Fname = old_Fname;
+		EDL.Lc = old_Lc;
 		return SET;
 	}
 }
@@ -584,7 +585,7 @@ bool exp_sdelete( char *buffer, ptrdiff_t len )
 
 double *exp_sstate( char *buffer, ptrdiff_t len )
 {
-	if ( I_am == CHILD )
+	if ( Internals.I_am == CHILD )
 	{
 		double *result;
 
@@ -597,8 +598,8 @@ double *exp_sstate( char *buffer, ptrdiff_t len )
 	}
 	else
 	{
-		char *old_Fname = Fname;
-		long old_Lc = Lc;
+		char *old_Fname = EDL.Fname;
+		long old_Lc = EDL.Lc;
 		long val;
 		Var *Func_ptr;
 		Var *ret = NULL;
@@ -614,7 +615,7 @@ double *exp_sstate( char *buffer, ptrdiff_t len )
 		/* Unpack parameter and push them onto the stack */
 
 		pos = buffer;
-		memcpy( &Lc, pos, sizeof( long ) );    /* get current line number */
+		memcpy( &EDL.Lc, pos, sizeof( long ) );   /* get current line number */
 		pos += sizeof( long );
 
 		vars_push( INT_VAR, *( ( long * ) pos ) );
@@ -626,7 +627,7 @@ double *exp_sstate( char *buffer, ptrdiff_t len )
 			vars_push( FLOAT_VAR, * ( ( double * ) pos ) );
 		pos += sizeof( double );
 
-		Fname = pos;                           /* get current file name */
+		EDL.Fname = pos;                          /* get current file name */
 
 		/* Call the function */
 
@@ -641,8 +642,8 @@ double *exp_sstate( char *buffer, ptrdiff_t len )
 		OTHERWISE
 			res[ 0 ] = -10.0;
 
-		Fname = old_Fname;
-		Lc = old_Lc;
+		EDL.Fname = old_Fname;
+		EDL.Lc = old_Lc;
 		writer( C_SSTATE_REPLY, 2 * sizeof( double ), res );
 		return NULL;
 	}
@@ -656,7 +657,7 @@ double *exp_sstate( char *buffer, ptrdiff_t len )
 
 long *exp_icreate( char *buffer, ptrdiff_t len )
 {
-	if ( I_am == CHILD )
+	if ( Internals.I_am == CHILD )
 	{
 		long *result;
 
@@ -669,8 +670,8 @@ long *exp_icreate( char *buffer, ptrdiff_t len )
 	}
 	else
 	{
-		char *old_Fname = Fname;
-		long old_Lc = Lc;
+		char *old_Fname = EDL.Fname;
+		long old_Lc = EDL.Lc;
 		Var *Func_ptr;
 		Var *ret = NULL;
 		int acc;
@@ -686,11 +687,11 @@ long *exp_icreate( char *buffer, ptrdiff_t len )
 		/* Unpack parameter and push them onto the stack */
 
 		pos = buffer;
-		memcpy( &Lc, pos, sizeof( long ) );      /* get current line number */
+		memcpy( &EDL.Lc, pos, sizeof( long ) );   /* get current line number */
 		pos += sizeof( long );
 
 		type = * ( ( long * ) pos );
-		vars_push( INT_VAR, type );              /* type of input object */
+		vars_push( INT_VAR, type );               /* type of input object */
 		pos += sizeof( long );
 
 		if ( type == INT_INPUT || type == INT_OUTPUT )
@@ -704,7 +705,7 @@ long *exp_icreate( char *buffer, ptrdiff_t len )
 			pos += sizeof( double );
 		}
 
-		Fname = pos;                             /* get current file name */
+		EDL.Fname = pos;                         /* get current file name */
 		pos += strlen( pos ) + 1;
 
 		vars_push( STR_VAR, pos );               /* get label string */
@@ -742,8 +743,8 @@ long *exp_icreate( char *buffer, ptrdiff_t len )
 		OTHERWISE
 			result[ 0 ] = 0;
 
-		Fname = old_Fname;
-		Lc = old_Lc;
+		EDL.Fname = old_Fname;
+		EDL.Lc = old_Lc;
 		writer( C_ICREATE_REPLY, 2 * sizeof( long ), result );
 
 		return NULL;
@@ -758,7 +759,7 @@ long *exp_icreate( char *buffer, ptrdiff_t len )
 
 bool exp_idelete( char *buffer, ptrdiff_t len )
 {
-	if ( I_am == CHILD )
+	if ( Internals.I_am == CHILD )
 	{
 		writer( C_IDELETE, len, buffer );
 		T_free( buffer );
@@ -766,8 +767,8 @@ bool exp_idelete( char *buffer, ptrdiff_t len )
 	}
 	else
 	{
-		char *old_Fname = Fname;
-		long old_Lc = Lc;
+		char *old_Fname = EDL.Fname;
+		long old_Lc = EDL.Lc;
 		Var *Func_ptr;
 		int acc;
 		char *pos;
@@ -780,13 +781,13 @@ bool exp_idelete( char *buffer, ptrdiff_t len )
 		/* Unpack parameter and push them onto the stack */
 
 		pos = buffer;
-		memcpy( &Lc, pos, sizeof( long ) );    /* get current line number */
+		memcpy( &EDL.Lc, pos, sizeof( long ) );   /* get current line number */
 		pos += sizeof( long );
 
 		vars_push( INT_VAR, * ( ( long * ) pos ) );
 		pos += sizeof( long );
 
-		Fname = pos;                           /* get current file name */
+		EDL.Fname = pos;                          /* get current file name */
 
 		/* Call the function */
 
@@ -799,8 +800,8 @@ bool exp_idelete( char *buffer, ptrdiff_t len )
 		OTHERWISE
 			writer( C_IDELETE_REPLY, 0L );
 
-		Fname = old_Fname;
-		Lc = old_Lc;
+		EDL.Fname = old_Fname;
+		EDL.Lc = old_Lc;
 		return SET;
 	}
 }
@@ -813,7 +814,7 @@ bool exp_idelete( char *buffer, ptrdiff_t len )
 
 INPUT_RES *exp_istate( char *buffer, ptrdiff_t len )
 {
-	if ( I_am == CHILD )
+	if ( Internals.I_am == CHILD )
 	{
 		INPUT_RES *input_res;
 
@@ -826,8 +827,8 @@ INPUT_RES *exp_istate( char *buffer, ptrdiff_t len )
 	}
 	else
 	{
-		char *old_Fname = Fname;
-		long old_Lc = Lc;
+		char *old_Fname = EDL.Fname;
+		long old_Lc = EDL.Lc;
 		long type;
 		Var *Func_ptr;
 		Var *ret = NULL;
@@ -843,7 +844,7 @@ INPUT_RES *exp_istate( char *buffer, ptrdiff_t len )
 		/* Unpack parameter and push them onto the stack */
 
 		pos = buffer;
-		memcpy( &Lc, pos, sizeof( long ) );    /* get current line number */
+		memcpy( &EDL.Lc, pos, sizeof( long ) );   /* get current line number */
 		pos += sizeof( long );
 
 		vars_push( INT_VAR, *( ( long * ) pos ) );  /* objects ID */
@@ -863,7 +864,7 @@ INPUT_RES *exp_istate( char *buffer, ptrdiff_t len )
 			pos += sizeof( double );
 		}
 
-		Fname = pos;                                /* get current file name */
+		EDL.Fname = pos;                            /* get current file name */
 
 		/* Call the function */
 
@@ -886,8 +887,8 @@ INPUT_RES *exp_istate( char *buffer, ptrdiff_t len )
 		OTHERWISE
 			input_res.res = -1;
 
-		Fname = old_Fname;
-		Lc = old_Lc;
+		EDL.Fname = old_Fname;
+		EDL.Lc = old_Lc;
 		writer( C_ISTATE_REPLY, sizeof( INPUT_RES ), &input_res );
 		return NULL;
 	}
@@ -901,7 +902,7 @@ INPUT_RES *exp_istate( char *buffer, ptrdiff_t len )
 
 bool exp_objdel( char *buffer, ptrdiff_t len )
 {
-	if ( I_am == CHILD )
+	if ( Internals.I_am == CHILD )
 	{
 		writer( C_ODELETE, len, buffer );
 		T_free( buffer );
@@ -909,8 +910,8 @@ bool exp_objdel( char *buffer, ptrdiff_t len )
 	}
 	else
 	{
-		char *old_Fname = Fname;
-		long old_Lc = Lc;
+		char *old_Fname = EDL.Fname;
+		long old_Lc = EDL.Lc;
 		Var *Func_ptr;
 		int acc;
 		char *pos;
@@ -923,13 +924,13 @@ bool exp_objdel( char *buffer, ptrdiff_t len )
 		/* Unpack parameter and push them onto the stack */
 
 		pos = buffer;
-		memcpy( &Lc, pos, sizeof( long ) );    /* get current line number */
+		memcpy( &EDL.Lc, pos, sizeof( long ) );   /* get current line number */
 		pos += sizeof( long );
 
 		vars_push( INT_VAR, * ( ( long * ) pos ) );
 		pos += sizeof( long );
 
-		Fname = pos;                           /* get current file name */
+		EDL.Fname = pos;                          /* get current file name */
 
 		/* Call the function */
 
@@ -942,8 +943,8 @@ bool exp_objdel( char *buffer, ptrdiff_t len )
 		OTHERWISE
 			writer( C_ODELETE_REPLY, 0L );
 
-		Fname = old_Fname;
-		Lc = old_Lc;
+		EDL.Fname = old_Fname;
+		EDL.Lc = old_Lc;
 		return SET;
 	}
 }

@@ -1,7 +1,7 @@
 /*
   $Id$
 
-  Copyright (C) 2001 Jens Thoms Toerring
+  Copyright (C) 1999-2002 Jens Thoms Toerring
 
   This file is part of fsc2.
 
@@ -105,7 +105,7 @@ int hp8647a_test_hook( void )
 	/* Save the current state of the device structure which always has to be
 	   reset to this state at the start of the experiment */
 
-	memcpy( &hp8647a_backup, &hp8647a, sizeof( HP8647A ) );
+	hp8647a_backup = hp8647a;
 
 	return 1;
 }
@@ -119,7 +119,7 @@ int hp8647a_exp_hook( void )
 {
 	/* Restore device structure to the state at the start of the test run */
 
-	memcpy( &hp8647a, &hp8647a_backup, sizeof( HP8647A ) );
+	hp8647a = hp8647a_backup;
 
 	if ( ! hp8647a_init( DEVICE_NAME ) )
 	{
@@ -141,7 +141,7 @@ int hp8647a_end_of_exp_hook( void )
 	HP8647A_INIT = UNSET;
 	hp8647a_finished( );
 
-	memcpy( &hp8647a, &hp8647a_backup, sizeof( HP8647A ) );
+	hp8647a = hp8647a_backup;
 
 	return 1;
 }
@@ -616,7 +616,7 @@ Var *synthesizer_use_table( Var *v )
 		CATCH( EXCEPTION )
 		{
 			T_free( tfname );
-			PASSTHROUGH( );
+			RETHROW( );
 		}
 	}
 
@@ -631,7 +631,7 @@ Var *synthesizer_use_table( Var *v )
 	{
 		fclose( tfp );
 		hp8647a.table_file = T_free( hp8647a.table_file );
-		PASSTHROUGH( );
+		RETHROW( );
 	}
 
 	fclose( tfp );

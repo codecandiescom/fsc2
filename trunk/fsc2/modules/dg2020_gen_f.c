@@ -1,7 +1,7 @@
 /*
   $Id$
 
-  Copyright (C) 2001 Jens Thoms Toerring
+  Copyright (C) 1999-2002 Jens Thoms Toerring
 
   This file is part of fsc2.
 
@@ -728,7 +728,7 @@ bool dg2020_phase_setup_finalize( int func, PHS p_phs )
 		return FAIL;
 	}
 
-	memcpy( &dg2020.function[ func].phs, &p_phs, sizeof( PHS ) );
+	dg2020.function[ func].phs = p_phs;
 	dg2020.function[ func ].is_phs = SET;
 
 	return OK;

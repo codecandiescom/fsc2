@@ -1,7 +1,7 @@
-/*
+/* -*-C-*-
   $Id$
 
-  Copyright (C) 2001 Jens Thoms Toerring
+  Copyright (C) 1999-2002 Jens Thoms Toerring
 
   This file is part of fsc2.
 
@@ -126,14 +126,14 @@ FUNC        {IDENT}"#"[0-9]+
 			/* Handling of file name lines */
 {FILE}      {
 				*( prepstext + prepsleng - 1 ) = '\0';
-				T_free( Fname );
-				Fname = T_strdup( prepstext + 2 );
+				T_free( EDL.Fname );
+				EDL.Fname = T_strdup( prepstext + 2 );
 			}
 
 			/* Handling of line number lines */
 {LNUM}		{
 				*( prepstext + prepsleng - 1 ) = '\0';
-				Lc = atol( prepstext + 2 );
+				EDL.Lc = atol( prepstext + 2 );
 			}
 
 			/* Handling of error messages from the cleaner */
@@ -243,7 +243,8 @@ FUNC        {IDENT}"#"[0-9]+
 				Cur_Pulser = 0;
 				if ( ( t = strrchr( prepstext, '#' ) ) != NULL )
 				{
-					if ( ( Cur_Pulser = T_atol( t + 1 ) - 1 ) >= Num_Pulsers )
+					if ( ( Cur_Pulser = T_atol( t + 1 ) - 1 ) >=
+                         EDL.Num_Pulsers )
 					{
 						eprint( FATAL, SET, "There is no pulser #%ld\n",
 								Cur_Pulser + 1 );
@@ -253,7 +254,7 @@ FUNC        {IDENT}"#"[0-9]+
 					*t = '\0';
 				}
 
-			    Cur_Pulse = p_new( p_num( prepstext ) );
+			    EDL.Cur_Pulse = p_new( p_num( prepstext ) );
 				return P_TOK;
 			}
 
@@ -481,15 +482,15 @@ int preparations_parser( FILE *in )
 	static bool is_restart = UNSET;
 
 
-	if ( compilation.sections[ PREPARATIONS_SECTION ] )
+	if ( EDL.compilation.sections[ PREPARATIONS_SECTION ] )
 	{
 		eprint( FATAL, SET, "Multiple instances of PREPARATIONS section "
 		        "label.\n" );
 		THROW( EXCEPTION );
 	}
-	compilation.sections[ PREPARATIONS_SECTION ] = SET;
+	EDL.compilation.sections[ PREPARATIONS_SECTION ] = SET;
 
-	Cur_Pulse = -1;
+	EDL.Cur_Pulse = -1;
 	prepsin = in;
 
 	/* Keep the lexer happy... */

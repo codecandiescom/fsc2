@@ -1,7 +1,7 @@
 /*
   $Id$
 
-  Copyright (C) 2001 Jens Thoms Toerring
+  Copyright (C) 1999-2002 Jens Thoms Toerring
 
   This file is part of fsc2.
 
@@ -107,7 +107,7 @@ int er023m_init_hook( void )
 
 int er023m_test_hook( void )
 {
-	memcpy( &er023m_store, &er023m, sizeof( ER023M ) );
+	er023m_store = er023m;
 	return 1;
 }
 
@@ -120,7 +120,7 @@ int er023m_exp_hook( void )
 {
 	/* Store the current state and initialize the lock-in */
 
-	memcpy( &er023m_store, &er023m, sizeof( ER023M ) );
+	er023m_store = er023m;
 
 	if ( ! er023m_init( DEVICE_NAME ) )
 	{
@@ -144,7 +144,7 @@ int er023m_end_of_exp_hook( void )
 	if ( er023m.device >= 0 )
 		gpib_local( er023m.device );
 
-	memcpy( &er023m, &er023m_store, sizeof( ER023M ) );
+	er023m = er023m_store;
 	er023m.device = -1;
 
 	return 1;
@@ -386,10 +386,7 @@ Var *lockin_phase( Var *v )
 
 	if ( er023m.mf_index == UNDEF_MF_INDEX ||
 		 ! er023m.calib[ er023m.mf_index ].is_ph )
-	{
-		print( WARN, "Phase is not calibrated.\n" );
-		compilation.error[ WARN ] -= 1;
-	}
+		print( NO_ERROR, "Phase is not calibrated.\n" );
 
 	if ( v == NULL )
 		switch ( FSC2_MODE )

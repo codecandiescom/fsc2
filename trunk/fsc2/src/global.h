@@ -1,7 +1,7 @@
 /*
   $Id$
 
-  Copyright (C) 2001 Jens Thoms Toerring
+  Copyright (C) 1999-2002 Jens Thoms Toerring
 
   This file is part of fsc2.
 
@@ -198,19 +198,6 @@ enum {
 };
 
 
-#if defined ( FSC2_MAIN )
-
-const char *Digitizer_Channel_Names[ NUM_DIGITIZER_CHANNEL_NAMES ] =
-			{ "CH1", "CH2", "CH3", "CH4", "MATH1", "MATH2", "MATH3",
-			  "REF1", "REF2", "REF3", "REF4", "AUX", "AUX1", "AUX2", "LINE",
-			  "MEM_C", "MEM_D", "FUNC_E", "FUNC_F", "EXT", "EXT10" };
-#else
-
-extern const char *Digitizer_Channel_Names[ NUM_DIGITIZER_CHANNEL_NAMES ];
-
-#endif
-
-
 /* Define the generic type name for pulsers */
 
 #define PULSER_GENERIC_TYPE "pulser"
@@ -241,21 +228,6 @@ enum {
 };
 
 
-#if defined ( FSC2_MAIN )
-
-const char *Function_Names[ PULSER_CHANNEL_NUM_FUNC ] = 
-			{ "MW", "TWT", "TWT_GATE", "DETECTION",
-			  "DETECTION_GATE", "DEFENSE", "RF", "RF_GATE",
-			  "PULSE_SHAPE", "PHASE_1", "PHASE_2",
-			  "OTHER_1", "OTHER_2", "OTHER_3", "OTHER_4" };
-
-#else
-
-extern const char *Function_Names[ PULSER_CHANNEL_NUM_FUNC ];
-
-#endif
-
-
 /* Define access types for functions in certain sections */
 
 enum {
@@ -277,17 +249,6 @@ enum {
 	PHASE_CW,
 	PHASE_TYPES_MAX
 };
-
-
-#if defined ( FSC2_MAIN )
-
-const char *Phase_Types[ PHASE_TYPES_MAX ] = { "+X", "-X", "+Y", "-Y", "CW" };
-
-#else
-
-extern const char *Phase_Types[ PHASE_TYPES_MAX ];
-
-#endif
 
 
 /* Define the acquisition types used in phase cycling */

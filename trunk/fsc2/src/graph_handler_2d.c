@@ -1,7 +1,7 @@
 /*
   $Id$
 
-  Copyright (C) 2001 Jens Thoms Toerring
+  Copyright (C) 1999-2002 Jens Thoms Toerring
 
   This file is part of fsc2.
 
@@ -124,13 +124,13 @@ static void press_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev,
 	/* Find out which window gets the mouse events (all following mouse events
 	   go to this window until all buttons are released) */
 
-	if ( obj == run_form->x_axis )        /* in x-axis window */
+	if ( obj == GUI.run_form->x_axis )        /* in x-axis window */
 		G.drag_canvas = 1;
-	if ( obj == run_form->y_axis )        /* in y-axis window */
+	if ( obj == GUI.run_form->y_axis )        /* in y-axis window */
 		G.drag_canvas = 2;
-	if ( obj == run_form->z_axis )        /* in z-axis window */
+	if ( obj == GUI.run_form->z_axis )        /* in z-axis window */
 		G.drag_canvas = 4;
-	if ( obj == run_form->canvas )        /* in canvas window */
+	if ( obj == GUI.run_form->canvas )        /* in canvas window */
 		G.drag_canvas = 7;
 
 	fl_get_win_mouse( window, &c->ppos[ X ], &c->ppos[ Y ], &keymask );
@@ -376,9 +376,9 @@ static void release_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev,
 		if ( G.curve_2d[ G.active_curve ]->is_fs )
 		{
 			G.curve_2d[ G.active_curve ]->is_fs = UNSET;
-			fl_set_button( run_form->full_scale_button, 0 );
-			if ( ! ( cmdline_flags & NO_BALLOON ) )
-				fl_set_object_helper( run_form->full_scale_button,
+			fl_set_button( GUI.run_form->full_scale_button, 0 );
+			if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
+				fl_set_object_helper( GUI.run_form->full_scale_button,
 									  "Rescale curves to fit into the window\n"
 									  "and switch on automatic rescaling" );
 		}
@@ -493,9 +493,9 @@ static void motion_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev,
 			if ( G.curve_2d[ G.active_curve ]->is_fs && scale_changed )
 			{
 				G.curve_2d[ G.active_curve ]->is_fs = UNSET;
-				fl_set_button( run_form->full_scale_button, 0 );
-				if ( ! ( cmdline_flags & NO_BALLOON ) )
-					fl_set_object_helper( run_form->full_scale_button,
+				fl_set_button( GUI.run_form->full_scale_button, 0 );
+				if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
+					fl_set_object_helper( GUI.run_form->full_scale_button,
 									  "Rescale curves to fit into the window\n"
 									  "and switch on automatic rescaling" );
 			}

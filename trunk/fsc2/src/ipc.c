@@ -1,7 +1,7 @@
 /*
   $Id$
 
-  Copyright (C) 2001 Jens Thoms Toerring
+  Copyright (C) 1999-2002 Jens Thoms Toerring
 
   This file is part of fsc2.
 
@@ -60,7 +60,7 @@ void *get_shm( int *shm_id, long len )
 		else                                      /* non-recoverable failure */
 		{
 #if defined  ( DEBUG )
-			eprint( FATAL, UNSET, "Internal error at %s:%d, shmget() failed "
+			eprint( FATAL, UNSET, "Internal error at %s:%u, shmget() failed "
 					"with error number %d.\n*** PLEASE SEND A BUG REPORT "
 					"CITING THESE LINES *** Thank you.\n",
 					__FILE__, __LINE__, errno );
@@ -105,7 +105,7 @@ void *attach_shm( int key )
 	if ( ( buf = shmat( key, NULL, SHM_RDONLY ) ) == ( void * ) - 1 )
 	{
 #if defined ( DEBUG )
-		eprint( FATAL, UNSET, "Internal error at %s:%d, shmat() with "
+		eprint( FATAL, UNSET, "Internal error at %s:%u, shmat() with "
 				"SHM_RDONLY failed for key %d with error number %d.\n"
 				"*** PLEASE SEND A BUG REPORT CITING THESE LINES *** "
 				"Thank you.\n", __FILE__, __LINE__, key, errno );
@@ -155,7 +155,7 @@ void delete_all_shm( void )
 	int i;
 
 
-	if ( MQ_ID < 0 )
+	if ( Comm.MQ_ID < 0 )
 		return;
 
 	raise_permissions( );
@@ -164,14 +164,14 @@ void delete_all_shm( void )
 	   are deleted */
 
 	for ( i = 0; i < QUEUE_SIZE; i++ )
-		if ( MQ->slot[ i ].shm_id >= 0 )
-			shmctl( MQ->slot[ i ].shm_id, IPC_RMID, NULL );
+		if ( Comm.MQ->slot[ i ].shm_id >= 0 )
+			shmctl( Comm.MQ->slot[ i ].shm_id, IPC_RMID, NULL );
 
 	/* Finally delete the master key (if its ID is valid, i.e. non-negative) */
 
-	detach_shm( MQ, &MQ_ID );
-	shmctl( MQ_ID, IPC_RMID, NULL );
-	MQ_ID = -1;
+	detach_shm( Comm.MQ, &Comm.MQ_ID );
+	shmctl( Comm.MQ_ID, IPC_RMID, NULL );
+	Comm.MQ_ID = -1;
 
 	lower_permissions( );
 }
@@ -223,7 +223,9 @@ void delete_stale_shms( void )
         if ( shm_id  < 0 ) 
             continue;
 
-		if ( shm_seg.shm_perm.uid == EUID )     /* segment belongs to fsc2 ? */
+		/* segment belongs to fsc2 ? */
+
+		if ( shm_seg.shm_perm.uid == Internals.EUID )
 		{
 			if ( ( buf = shmat( shm_id, NULL, 0 ) ) == ( void * ) - 1 )
 				continue;                          /* can't attach... */

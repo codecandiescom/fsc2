@@ -1,7 +1,7 @@
 /*
   $Id$
 
-  Copyright (C) 2001 Jens Thoms Toerring
+  Copyright (C) 1999-2002 Jens Thoms Toerring
 
   This file is part of fsc2.
 
@@ -90,7 +90,7 @@ static bool cut_has_been_shown = UNSET;
 
 void cut_init( void )
 {
-	if ( G_Funcs.size == LOW )
+	if ( GUI.G_Funcs.size == LOW )
 	{
 		GC_sizes.WIN_MIN_WIDTH   = 350;
 		GC_sizes.WIN_MIN_HEIGHT  = 250;
@@ -133,7 +133,7 @@ void cut_show( int dir, long u_index )
 
 	if ( ! CG.is_shown )
 	{
-		fl_set_object_shortcutkey( cut_form->change_button, XK_space );
+		fl_set_object_shortcutkey( GUI.cut_form->change_button, XK_space );
 
 		if ( ! cut_has_been_shown &&
 			 * ( ( char * ) xresources[ CUTGEOMETRY ].var ) != '\0' )
@@ -148,49 +148,50 @@ void cut_show( int dir, long u_index )
 				if ( cut_h < GC_sizes.WIN_MIN_HEIGHT )
 					cut_h = GC_sizes.WIN_MIN_HEIGHT;
 
-				fl_set_form_size( cut_form->cut, cut_w, cut_h );
+				fl_set_form_size( GUI.cut_form->cut, cut_w, cut_h );
 			}
 
 			if ( XValue & flags && YValue & flags )
 			{
-				cut_x += border_offset_x - 1;
-				cut_y += border_offset_y - 1;
+				cut_x += GUI.border_offset_x - 1;
+				cut_y += GUI.border_offset_y - 1;
 
-				fl_set_form_position( cut_form->cut, cut_x, cut_y );
+				fl_set_form_position( GUI.cut_form->cut, cut_x, cut_y );
 				needs_pos = SET;
 			}
 		}
 
 		if ( cut_has_been_shown )
 		{
-			fl_set_form_geometry( cut_form->cut, cut_x, cut_y, cut_w, cut_h );
+			fl_set_form_geometry( GUI.cut_form->cut, cut_x, cut_y,
+                                  cut_w, cut_h );
 			needs_pos = SET;
 		}
 
-		fl_show_form( cut_form->cut, needs_pos ?
+		fl_show_form( GUI.cut_form->cut, needs_pos ?
 					  FL_PLACE_POSITION : FL_PLACE_MOUSE | FL_FREE_SIZE,
 					  FL_FULLBORDER, "fsc2: Cross section" );
 		cut_has_been_shown = SET;
 
-		fl_winminsize( cut_form->cut->window,
+		fl_winminsize( GUI.cut_form->cut->window,
 					   GC_sizes.WIN_MIN_WIDTH, GC_sizes.WIN_MIN_HEIGHT );
-		fl_set_form_atclose( cut_form->cut, cut_form_close_handler, NULL );
+		fl_set_form_atclose( GUI.cut_form->cut, cut_form_close_handler, NULL );
 
-		cut_setup_canvas( &G.cut_x_axis, cut_form->cut_x_axis );
-		cut_setup_canvas( &G.cut_y_axis, cut_form->cut_y_axis );
-		cut_setup_canvas( &G.cut_z_axis, cut_form->cut_z_axis );
-		cut_setup_canvas( &G.cut_canvas, cut_form->cut_canvas );
+		cut_setup_canvas( &G.cut_x_axis, GUI.cut_form->cut_x_axis );
+		cut_setup_canvas( &G.cut_y_axis, GUI.cut_form->cut_y_axis );
+		cut_setup_canvas( &G.cut_z_axis, GUI.cut_form->cut_z_axis );
+		cut_setup_canvas( &G.cut_canvas, GUI.cut_form->cut_canvas );
 
 		G_init_cut_curve( );
 
 	}
 	else if ( ! is_mapped )
 	{
-		XMapWindow( G.d, cut_form->cut->window );
-		XMoveWindow( G.d, cut_form->cut->window, cut_x + 1, cut_y + 1 );
+		XMapWindow( G.d, GUI.cut_form->cut->window );
+		XMoveWindow( G.d, GUI.cut_form->cut->window, cut_x + 1, cut_y + 1 );
 	}
 
-	fl_raise_form( cut_form->cut );
+	fl_raise_form( GUI.cut_form->cut );
 
 	/* Set up the labels if the cut window does't not exist yet or the cut
 	   direction changed */
@@ -229,7 +230,8 @@ void cut_show( int dir, long u_index )
 			}
 		}
 
-		fl_set_object_callback( cut_form->cut_print_button, print_1d, - dir );
+		fl_set_object_callback( GUI.cut_form->cut_print_button,
+                                print_1d, - dir );
 	}
 
 	/* Calculate all the points of the cross section curve */
@@ -460,8 +462,8 @@ void G_init_cut_curve( void )
 
 	CG.nx = 0;
 
-	fl_set_object_shortcutkey( cut_form->top_button, XK_Page_Up );
-	fl_set_object_shortcutkey( cut_form->bottom_button, XK_Page_Down );
+	fl_set_object_shortcutkey( GUI.cut_form->top_button, XK_Page_Up );
+	fl_set_object_shortcutkey( GUI.cut_form->bottom_button, XK_Page_Down );
 
 	/* The cut windows y-axis is always the same as the promary windows
 	   z-axis, so we can re-use the label */
@@ -483,7 +485,7 @@ static int cut_form_close_handler( FL_FORM *a, void *b )
 	a = a;
 	b = b;
 
-	cut_close_callback( cut_form->cut_close_button, 0 );
+	cut_close_callback( GUI.cut_form->cut_close_button, 0 );
 	return FL_IGNORE;
 }
 
@@ -503,10 +505,10 @@ void cut_form_close( void )
 	/* Get rid of canvas related stuff (needs to be done *before*
 	   hiding the form) */
 
-	cut_canvas_off( &G.cut_x_axis, cut_form->cut_x_axis );
-	cut_canvas_off( &G.cut_y_axis, cut_form->cut_y_axis );
-	cut_canvas_off( &G.cut_z_axis, cut_form->cut_z_axis );
-	cut_canvas_off( &G.cut_canvas, cut_form->cut_canvas );
+	cut_canvas_off( &G.cut_x_axis, GUI.cut_form->cut_x_axis );
+	cut_canvas_off( &G.cut_y_axis, GUI.cut_form->cut_y_axis );
+	cut_canvas_off( &G.cut_z_axis, GUI.cut_form->cut_z_axis );
+	cut_canvas_off( &G.cut_canvas, GUI.cut_form->cut_canvas );
 
 	/* Deallocate the pixmaps for the out-of-range arrows */
 
@@ -529,14 +531,14 @@ void cut_form_close( void )
 	cv->points  = T_free( cv->points );
 	cv->xpoints = T_free( cv->xpoints );
 
-	cut_x = cut_form->cut->x;
-	cut_y = cut_form->cut->y;
-	cut_w = cut_form->cut->w;
-	cut_h = cut_form->cut->h;
+	cut_x = GUI.cut_form->cut->x;
+	cut_y = GUI.cut_form->cut->y;
+	cut_w = GUI.cut_form->cut->w;
+	cut_h = GUI.cut_form->cut->h;
 
-	fl_hide_form( cut_form->cut );
+	fl_hide_form( GUI.cut_form->cut );
 
-	fl_free_form( cut_form->cut );
+	fl_free_form( GUI.cut_form->cut );
 
 	CG.is_shown = is_mapped = UNSET;
 }
@@ -558,12 +560,12 @@ void cut_close_callback( FL_OBJECT *a, long b )
 
 	G.is_cut = is_mapped = UNSET;
 
-	cut_x = cut_form->cut->x - 1;
-	cut_y = cut_form->cut->y - 1;
-	cut_w = cut_form->cut->w;
-	cut_h = cut_form->cut->h;
+	cut_x = GUI.cut_form->cut->x - 1;
+	cut_y = GUI.cut_form->cut->y - 1;
+	cut_w = GUI.cut_form->cut->w;
+	cut_h = GUI.cut_form->cut->h;
 
-	XUnmapWindow( G.d, cut_form->cut->window );
+	XUnmapWindow( G.d, GUI.cut_form->cut->window );
 
 	for ( i = 0; i < MAX_CURVES; i++ )
 		CG.has_been_shown[ i ] = UNSET;
@@ -609,9 +611,9 @@ static void cut_calc_curve( int dir, long p_index, bool has_been_shown )
 				                       = cv->shift[ X ] = cv->shift[ Y ] = 0.0;
 
 			CG.is_fs[ G.active_curve ] = SET;
-			fl_set_button( cut_form->cut_full_scale_button, 1 );
-			if ( ! ( cmdline_flags & NO_BALLOON ) )
-				fl_set_object_helper( cut_form->cut_full_scale_button,
+			fl_set_button( GUI.cut_form->cut_full_scale_button, 1 );
+			if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
+				fl_set_object_helper( GUI.cut_form->cut_full_scale_button,
 									  "Switch off automatic rescaling" );
 		}
 		else
@@ -639,9 +641,9 @@ static void cut_calc_curve( int dir, long p_index, bool has_been_shown )
 			}
 
 			CG.is_fs[ G.active_curve ] = UNSET;
-			fl_set_button( cut_form->cut_full_scale_button, 0 );
-			if ( ! ( cmdline_flags & NO_BALLOON ) )
-				fl_set_object_helper( cut_form->cut_full_scale_button,
+			fl_set_button( GUI.cut_form->cut_full_scale_button, 0 );
+			if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
+				fl_set_object_helper( GUI.cut_form->cut_full_scale_button,
 									  "Rescale curves to fit into the window\n"
 									  "and switch on automatic rescaling" );
 		}
@@ -778,9 +780,9 @@ void cut_new_curve_handler( void )
 
 		if ( CG.is_fs[ G.active_curve ] )
 		{
-			fl_set_button( cut_form->cut_full_scale_button, 1 );
-			if ( ! ( cmdline_flags & NO_BALLOON ) )
-				fl_set_object_helper( cut_form->cut_full_scale_button,
+			fl_set_button( GUI.cut_form->cut_full_scale_button, 1 );
+			if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
+				fl_set_object_helper( GUI.cut_form->cut_full_scale_button,
 									  "Switch off automatic rescaling" );
 		}
 		else
@@ -798,9 +800,9 @@ void cut_new_curve_handler( void )
 				}
 			}
 
-			fl_set_button( cut_form->cut_full_scale_button, 0 );
-			if ( ! ( cmdline_flags & NO_BALLOON ) )
-				fl_set_object_helper( cut_form->cut_full_scale_button,
+			fl_set_button( GUI.cut_form->cut_full_scale_button, 0 );
+			if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
+				fl_set_object_helper( GUI.cut_form->cut_full_scale_button,
 									  "Rescale curve to fit into the window\n"
 									  "and switch on automatic rescaling" );
 		}
@@ -996,21 +998,6 @@ bool cut_new_points( long curve, long x_index, long y_index, long len )
 			return FAIL;
 
 		sp = G.curve_2d[ curve ]->points + y_index * G.nx + CG.index;
-
-#ifndef NDEBUG
-		/* There were crashes from the cut_integrate_point() call which I
-		   couldn't find the reason for yet. Here I just try to avoid the
-		   problem in order to keep experiments from crashing. */
-
-		if ( sp == NULL )
-		{
-			eprint( SEVERE, UNSET, "Internal error detected at %s:%d.\n"
-					"Please send a bug report immediately, including this "
-					"error message!\n", __FILE__, __LINE__ );
-			return FAIL;
-		}
-#endif
-
 		cut_integrate_point( y_index, sp->v );
 	}
 	else
@@ -1021,21 +1008,6 @@ bool cut_new_points( long curve, long x_index, long y_index, long len )
 		/* All new points are on the cut */
 
 		sp = G.curve_2d[ curve ]->points + y_index * G.nx + x_index;
-
-#ifndef NDEBUG
-		/* There were crashes in the cut_integrate_point() call which I
-		   couldn't find the reason for yet. Here I just try to avoid the
-		   problem in order to keep experiments from crashing. */
-
-		if ( sp == NULL )
-		{
-			eprint( SEVERE, UNSET, "Internal error detected at %s:%d.\n"
-					"Please send a bug report immediately, including this "
-					"error message!\n", __FILE__, __LINE__ );
-			return FAIL;
-		}
-#endif
-
 		for ( p_index = x_index; p_index < x_index + len; sp++, p_index++ )
 			cut_integrate_point( p_index, sp->v );
 	}
@@ -1344,13 +1316,13 @@ static void cut_press_handler( FL_OBJECT *obj, Window window,
 	/* Find out which window gets the mouse events (all following mouse events
 	   go to this window until all buttons are released) */
 
-	if ( obj == cut_form->cut_x_axis )        /* in x-axis window */
+	if ( obj == GUI.cut_form->cut_x_axis )        /* in x-axis window */
 		G.drag_canvas = 1;
-	if ( obj == cut_form->cut_y_axis )        /* in y-axis window */
+	if ( obj == GUI.cut_form->cut_y_axis )        /* in y-axis window */
 		G.drag_canvas = 2;
-	if ( obj == cut_form->cut_z_axis )        /* in z-axis window */
+	if ( obj == GUI.cut_form->cut_z_axis )        /* in z-axis window */
 		G.drag_canvas = 4;
-	if ( obj == cut_form->cut_canvas )        /* in canvas window */
+	if ( obj == GUI.cut_form->cut_canvas )        /* in canvas window */
 		G.drag_canvas = 7;
 
 	fl_get_win_mouse( window, &c->ppos[ X ], &c->ppos[ Y ], &keymask );
@@ -1567,9 +1539,9 @@ static void cut_release_handler( FL_OBJECT *obj, Window window,
 		if ( CG.is_fs[ G.active_curve ] )
 		{
 			CG.is_fs[ G.active_curve ] = UNSET;
-			fl_set_button( cut_form->cut_full_scale_button, 0 );
-			if ( ! ( cmdline_flags & NO_BALLOON ) )
-				fl_set_object_helper( cut_form->cut_full_scale_button,
+			fl_set_button( GUI.cut_form->cut_full_scale_button, 0 );
+			if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
+				fl_set_object_helper( GUI.cut_form->cut_full_scale_button,
 									  "Rescale curve to fit into the window\n"
 									  "and switch on automatic rescaling" );
 		}
@@ -1677,9 +1649,9 @@ static void cut_motion_handler( FL_OBJECT *obj, Window window,
 			if ( CG.is_fs[ G.active_curve ] && scale_changed )
 			{
 				CG.is_fs[ G.active_curve ] = UNSET;
-				fl_set_button( cut_form->cut_full_scale_button, 0 );
-				if ( ! ( cmdline_flags & NO_BALLOON ) )
-					fl_set_object_helper( cut_form->cut_full_scale_button,
+				fl_set_button( GUI.cut_form->cut_full_scale_button, 0 );
+				if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
+					fl_set_object_helper( GUI.cut_form->cut_full_scale_button,
 									   "Rescale curve to fit into the window\n"
 									   "and switch on automatic rescaling" );
 			}
@@ -1733,9 +1705,9 @@ void cut_undo_button_callback( FL_OBJECT *a, long b )
 	if ( CG.is_fs[ G.active_curve ] )
 	{
 		CG.is_fs[ G.active_curve ] = UNSET;
-		fl_set_button( cut_form->cut_full_scale_button, 0 );
-		if ( ! ( cmdline_flags & NO_BALLOON ) )
-			fl_set_object_helper( cut_form->cut_full_scale_button,
+		fl_set_button( GUI.cut_form->cut_full_scale_button, 0 );
+		if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
+			fl_set_object_helper( GUI.cut_form->cut_full_scale_button,
 								  "Rescale curve to fit into the window\n"
 								  "and switch on automatic rescaling" );
 	}
@@ -1763,21 +1735,21 @@ void cut_fs_button_callback( FL_OBJECT *a, long b )
 
 	/* Get new state of button */
 
-	state = fl_get_button( cut_form->cut_full_scale_button );
+	state = fl_get_button( GUI.cut_form->cut_full_scale_button );
 
 	CG.is_fs[ CG.curve ] = state;
 
 	if ( state )
 	{
-		if ( ! ( cmdline_flags & NO_BALLOON ) )
-			fl_set_object_helper( cut_form->cut_full_scale_button,
+		if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
+			fl_set_object_helper( GUI.cut_form->cut_full_scale_button,
 								  "Switch off automatic rescaling" );
 		
 		cut_calc_curve( -1, -1, SET );
 		redraw_all_cut_canvases( );
 	}
-	else if ( ! ( cmdline_flags & NO_BALLOON ) )
-		fl_set_object_helper( cut_form->cut_full_scale_button,
+	else if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
+		fl_set_object_helper( GUI.cut_form->cut_full_scale_button,
 							  "Rescale curve to fit into the window\n"
 							  "and switch on automatic rescaling" );
 }
@@ -2732,10 +2704,10 @@ void cut_change_dir( FL_OBJECT *a, long b )
 	if ( G.raw_button_state != 3 )
 		return;
 
-	fl_get_win_mouse( cut_form->cut->window, &px, &py, &keymask );
-	px -= cut_form->cut_canvas->x;
+	fl_get_win_mouse( GUI.cut_form->cut->window, &px, &py, &keymask );
+	px -= GUI.cut_form->cut_canvas->x;
 
-	if ( px < 0 || px > cut_form->cut_canvas->w )
+	if ( px < 0 || px > GUI.cut_form->cut_canvas->w )
 		return;
 
 	p_index = lrnd( px / cv->s2d[ X ] - cv->shift[ X ] );

@@ -1,7 +1,7 @@
 /*
   $Id$
 
-  Copyright (C) 2001 Jens Thoms Toerring
+  Copyright (C) 1999-2002 Jens Thoms Toerring
 
   This file is part of fsc2.
 
@@ -117,12 +117,12 @@ void setup_comm( void )
 	   two pipes, one for the parent process to write to the child process and
 	   another one for the other way round.*/
 
-    if ( ( pr = pipe( pd ) ) < 0 || pipe( pd + 2 ) < 0 )      /* open pipes */
+    if ( ( pr = pipe( Comm.pd ) ) < 0 || pipe( Comm.pd + 2 ) < 0 )
 	{
 		if ( pr == 0 )                    /* if first open did succeed */
 		{
-			close( pd[ 0 ] );
-			close( pd[ 1 ] );
+			close( Comm.pd[ 0 ] );
+			close( Comm.pd[ 1 ] );
 		}
 
 		eprint( FATAL, UNSET, "Can't set up internal communication "
@@ -130,45 +130,46 @@ void setup_comm( void )
 		THROW( EXCEPTION );
 	}
 
-	if ( ( MQ = ( MESSAGE_QUEUE * ) get_shm( &MQ_ID, sizeof *MQ ) )
+	if ( ( Comm.MQ = ( MESSAGE_QUEUE * ) get_shm( &Comm.MQ_ID,
+                                                  sizeof *Comm.MQ ) )
 		 == ( MESSAGE_QUEUE * ) -1 )
 	{
-		MQ_ID = -1;
+		Comm.MQ_ID = -1;
 		for ( i = 0; i < 4; i++ )
-			close( pd[ i ] );
+			close( Comm.pd[ i ] );
 
 		eprint( FATAL, UNSET, "Can't set up internal communication "
 				"channels.\n" );
 		THROW( EXCEPTION );
 	}
 
-	MQ->low = MQ->high = 0;
+	Comm.MQ->low = Comm.MQ->high = 0;
 	for ( i = 0; i < QUEUE_SIZE; i++ )
-		MQ->slot[ i ].shm_id = -1;
+		Comm.MQ->slot[ i ].shm_id = -1;
 
 	/* Beside the pipes we need a semaphore which allows the parent to control
 	   when the child is allowed to send data and messages. Its size has to be
 	   identcal to the message queue size to avoid having the child send more
 	   messages than queue can hold. */
 
-	if ( ( data_semaphore = sema_create( QUEUE_SIZE ) ) < 0 )
+	if ( ( Comm.data_semaphore = sema_create( QUEUE_SIZE ) ) < 0 )
 	{
 		delete_all_shm( );
 		for ( i = 0; i < 4; i++ )
-			close( pd[ i ] );
+			close( Comm.pd[ i ] );
 
 		eprint( FATAL, UNSET, "Can't set up internal communication "
 				"channels.\n" );
 		THROW( EXCEPTION );
 	}
 
-	if ( ( request_semaphore = sema_create( 0 ) ) < 0 )
+	if ( ( Comm.request_semaphore = sema_create( 0 ) ) < 0 )
 	{
-		sema_destroy( data_semaphore );
-		data_semaphore = -1;
+		sema_destroy( Comm.data_semaphore );
+		Comm.data_semaphore = -1;
 		delete_all_shm( );
 		for ( i = 0; i < 4; i++ )
-			close( pd[ i ] );
+			close( Comm.pd[ i ] );
 
 		eprint( FATAL, UNSET, "Can't set up internal communication "
 				"channels.\n" );
@@ -186,7 +187,7 @@ void end_comm( void )
 {
 	/* Handle remaining messages */
 
-	if ( MQ->low != MQ->high )
+	if ( Comm.MQ->low != Comm.MQ->high )
 		new_data_callback( NULL, 0 );
 
 	/* Get rid of all the shared memory segments */
@@ -195,15 +196,15 @@ void end_comm( void )
 
 	/* Delete the semaphores */
 
-	sema_destroy( request_semaphore );
-	request_semaphore = -1;
-	sema_destroy( data_semaphore );
-	data_semaphore = -1;
+	sema_destroy( Comm.request_semaphore );
+	Comm.request_semaphore = -1;
+	sema_destroy( Comm.data_semaphore );
+	Comm.data_semaphore = -1;
 
 	/* Close parents side of read and write pipe */
 
-	close( pd[ READ ] );
-	close( pd[ WRITE ] );
+	close( Comm.pd[ READ ] );
+	close( Comm.pd[ WRITE ] );
 }
 
 
@@ -229,35 +230,35 @@ int new_data_callback( XEvent *a, void *b )
 	a = a;
 	b = b;
 
-	TRY
-	{
-		while ( MQ->low != MQ->high )
-			if ( MQ->slot[ MQ->low ].type == REQUEST )
+	while ( Comm.MQ->low != Comm.MQ->high )
+		TRY
+		{
+			if ( Comm.MQ->slot[ Comm.MQ->low ].type == REQUEST )
 			{
-				MQ->low = ( MQ->low + 1 ) % QUEUE_SIZE;
-				sema_post( data_semaphore );
-				sema_post( request_semaphore );
+				Comm.MQ->low = ( Comm.MQ->low + 1 ) % QUEUE_SIZE;
+				sema_post( Comm.data_semaphore );
+				sema_post( Comm.request_semaphore );
 				reader( NULL );
 			}
 			else
 				accept_new_data( );
 
-		TRY_SUCCESS;
-	}
-	OTHERWISE
-	{
-		/* Before killing the child test that its pid hasn't already been set
-		   to 0 (in which case we would commit suicide) and that it's still
-		   alive. The death of the child and all the necessary cleaning up is
-		   dealt with by the SIGCHLD handlers in run.c, so no need to worry
-		   about it here. */
+			TRY_SUCCESS;
+		}
+		OTHERWISE
+		{
+			/* Before killing the child test that its pid hasn't already been
+			   set to 0 (in which case we would commit suicide) and that it's
+			   still alive. The death of the child and all the necessary
+			   cleaning up is dealt with by the SIGCHLD handlers in run.c, so
+			   no need to worry about it here. */
 
-		if ( child_pid > 0 && ! kill( child_pid, 0 ) )
-			kill( child_pid, SIGTERM );
+			if ( Internals.child_pid > 0 && ! kill( Internals.child_pid, 0 ) )
+				kill( Internals.child_pid, SIGTERM );
 
-		fl_set_idle_callback( 0, NULL );
-		MQ->low = MQ->high;
-	}
+			fl_set_idle_callback( 0, NULL );
+			Comm.MQ->low = Comm.MQ->high;
+		}
 
 	return 0;
 }
@@ -293,10 +294,11 @@ long reader( void *ret )
 
 	/* Get the header - failure indicates that the child is dead */
 
-	if ( ! pipe_read( pd[ READ ], ( char * ) &header, sizeof( CommStruct ) ) )
+	if ( ! pipe_read( Comm.pd[ READ ], ( char * ) &header,
+                      sizeof( CommStruct ) ) )
 		return 0;
 
-	return I_am == PARENT ?
+	return Internals.I_am == PARENT ?
 		   parent_reader( &header ) : child_reader( ret, &header );
 }
 
@@ -321,7 +323,7 @@ static long parent_reader( CommStruct *header )
 			{
 				str[ 0 ] = T_malloc( ( size_t ) header->data.str_len[ 0 ]
 									 + 1 );
-				pipe_read( pd[ READ ], str[ 0 ],
+				pipe_read( Comm.pd[ READ ], str[ 0 ],
 						   ( size_t ) header->data.str_len[ 0 ] );
 				str[ 0 ][ header->data.str_len[ 0 ] ] = '\0';
 			}
@@ -345,7 +347,7 @@ static long parent_reader( CommStruct *header )
 			{
 				str[ 0 ] = T_malloc( ( size_t ) header->data.str_len[ 0 ]
 									 + 1 );
-				pipe_read( pd[ READ ], str[ 0 ],
+				pipe_read( Comm.pd[ READ ], str[ 0 ],
 						   ( size_t ) header->data.str_len[ 0 ] );
 				str[ 0 ][ header->data.str_len[ 0 ] ] = '\0';
 			}
@@ -363,7 +365,7 @@ static long parent_reader( CommStruct *header )
 			/* Send back just one character as indicator that the message has
 			   been read by the user */
 
-			write( pd[ WRITE ], "X", 1 );
+			write( Comm.pd[ WRITE ], "X", 1 );
 			break;
 
 		case C_SHOW_ALERT :
@@ -371,7 +373,7 @@ static long parent_reader( CommStruct *header )
 			{
 				str[ 0 ] = T_malloc( ( size_t ) header->data.str_len[ 0 ]
 									 + 1 );
-				pipe_read( pd[ READ ], str[ 0 ],
+				pipe_read( Comm.pd[ READ ], str[ 0 ],
 						   ( size_t ) header->data.str_len[ 0 ] );
 				str[ 0 ][ header->data.str_len[ 0 ] ] = '\0';
 			}
@@ -387,14 +389,14 @@ static long parent_reader( CommStruct *header )
 			/* Send back just one character as indicator that the alert has
 			   been acknowledged by the user */
 
-			write( pd[ WRITE ], "X", 1 );
+			write( Comm.pd[ WRITE ], "X", 1 );
 			break;
 
 		case C_SHOW_CHOICES :
 			/* Get number of buttons and number of default button */
 
-			pipe_read( pd[ READ ], ( char * ) &n1, sizeof( int ) );
-			pipe_read( pd[ READ ], ( char * ) &n2, sizeof( int ) );
+			pipe_read( Comm.pd[ READ ], ( char * ) &n1, sizeof( int ) );
+			pipe_read( Comm.pd[ READ ], ( char * ) &n2, sizeof( int ) );
 
 			/* Get message text and button labels */
 
@@ -404,7 +406,7 @@ static long parent_reader( CommStruct *header )
 				{
 					str[ i ] =
 						  T_malloc( ( size_t ) header->data.str_len[ i ] + 1 );
-					pipe_read( pd[ READ ], str[ i ],
+					pipe_read( Comm.pd[ READ ], str[ i ],
 							   ( size_t ) header->data.str_len[ i ] );
 					str[ i ][ header->data.str_len[ i ] ] = '\0';
 				}
@@ -435,7 +437,7 @@ static long parent_reader( CommStruct *header )
 				{
 					str[ i ] =
 						  T_malloc( ( size_t ) header->data.str_len[ i ] + 1 );
-					pipe_read( pd[ READ ], str[ i ],
+					pipe_read( Comm.pd[ READ ], str[ i ],
 							   ( size_t ) header->data.str_len[ i ] );
 					str[ i ][ header->data.str_len[ i ] ] = '\0';
 				}
@@ -459,7 +461,8 @@ static long parent_reader( CommStruct *header )
 
 		case C_PROG : case C_OUTPUT :
 			send_browser( header->type == C_PROG ?
-						  main_form->browser : main_form->error_browser );
+						  GUI.main_form->browser :
+                          GUI.main_form->error_browser );
 			break;
 
 		case C_INPUT :
@@ -471,7 +474,7 @@ static long parent_reader( CommStruct *header )
 				{
 					str[ i ] =
 						  T_malloc( ( size_t ) header->data.str_len[ i ] + 1 );
-					pipe_read( pd[ READ ], str[ i ],
+					pipe_read( Comm.pd[ READ ], str[ i ],
 							   ( size_t ) header->data.str_len[ i ] );
 					str[ i ][ header->data.str_len[ i ] ] = '\0';
 				}
@@ -487,77 +490,77 @@ static long parent_reader( CommStruct *header )
 
 		case C_LAYOUT :
 			data = T_malloc( ( size_t ) header->data.len );
-			pipe_read( pd[ READ ], data, ( size_t ) header->data.len );
+			pipe_read( Comm.pd[ READ ], data, ( size_t ) header->data.len );
 			exp_layout( data, header->data.len );
 			T_free( data );
 			break;
 
 		case C_BCREATE :
 			data = T_malloc( ( size_t ) header->data.len );
-			pipe_read( pd[ READ ], data, ( size_t ) header->data.len );
+			pipe_read( Comm.pd[ READ ], data, ( size_t ) header->data.len );
 			exp_bcreate( data, header->data.len );
 			T_free( data );
 			break;
 
 		case C_BDELETE :
 			data = T_malloc( ( size_t ) header->data.len );
-			pipe_read( pd[ READ ], data, ( size_t ) header->data.len );
+			pipe_read( Comm.pd[ READ ], data, ( size_t ) header->data.len );
 			exp_bdelete( data, header->data.len );
 			T_free( data );
 			break;
 
 		case C_BSTATE :
 			data = T_malloc( ( size_t ) header->data.len );
-			pipe_read( pd[ READ ], data, ( size_t ) header->data.len );
+			pipe_read( Comm.pd[ READ ], data, ( size_t ) header->data.len );
 			exp_bstate( data, header->data.len );
 			T_free( data );
 			break;
 
 		case C_SCREATE :
 			data = T_malloc( ( size_t ) header->data.len );
-			pipe_read( pd[ READ ], data, ( size_t ) header->data.len );
+			pipe_read( Comm.pd[ READ ], data, ( size_t ) header->data.len );
 			exp_screate( data, header->data.len );
 			T_free( data );
 			break;
 
 		case C_SDELETE :
 			data = T_malloc( ( size_t ) header->data.len );
-			pipe_read( pd[ READ ], data, ( size_t ) header->data.len );
+			pipe_read( Comm.pd[ READ ], data, ( size_t ) header->data.len );
 			exp_sdelete( data, header->data.len );
 			T_free( data );
 			break;
 
 		case C_SSTATE :
 			data = T_malloc( ( size_t ) header->data.len );
-			pipe_read( pd[ READ ], data, ( size_t ) header->data.len );
+			pipe_read( Comm.pd[ READ ], data, ( size_t ) header->data.len );
 			exp_sstate( data, header->data.len );
 			T_free( data );
 			break;
 
 		case C_ICREATE :
 			data = T_malloc( ( size_t ) header->data.len );
-			pipe_read( pd[ READ ], data, ( size_t ) header->data.len );
+			pipe_read( Comm.pd[ READ ], data, ( size_t ) header->data.len );
 			exp_icreate( data, header->data.len );
 			T_free( data );
 			break;
 
 		case C_IDELETE :
 			data = T_malloc( ( size_t ) header->data.len );
-			pipe_read( pd[ READ ], data, ( size_t ) header->data.len );
+			pipe_read( Comm.pd[ READ ], data, ( size_t ) header->data.len );
 			exp_idelete( data, header->data.len );
 			T_free( data );
 			break;
 
 		case C_ISTATE :
 			data = T_malloc( ( size_t ) header->data.len );
-			pipe_read( pd[ READ ], data, ( size_t ) header->data.len );
+			pipe_read( Comm.pd[ READ ], data, ( size_t ) header->data.len );
 			exp_istate( data, header->data.len );
 			T_free( data );
 			break;
 
 		case C_ODELETE :
 			data = T_malloc( ( size_t ) header->data.len );
-			pipe_read( pd[ READ ], data, ( size_t ) header->data.len );
+			pipe_read( Comm.pd[ READ ], data, ( size_t ) header->data.len );
 			exp_objdel( data, header->data.len );
 			T_free( data );
 			break;
@@ -597,7 +600,8 @@ static long child_reader( void *ret, CommStruct *header )
 			retstr = T_malloc( ( size_t ) header->data.len + 1 );
             if ( header->data.len > 0 )
 			{
-				pipe_read( pd[ READ ], retstr, ( size_t ) header->data.len );
+				pipe_read( Comm.pd[ READ ], retstr,
+                           ( size_t ) header->data.len );
 				retstr[ header->data.len ] = '\0';
 			}
 			else
@@ -630,7 +634,7 @@ static long child_reader( void *ret, CommStruct *header )
 		case C_BCREATE_REPLY :
 		case C_SCREATE_REPLY : case C_SSTATE_REPLY :
 		case C_ICREATE_REPLY : case C_ISTATE_REPLY :
-			pipe_read( pd[ READ ], ret, ( size_t ) header->data.len );
+			pipe_read( Comm.pd[ READ ], ret, ( size_t ) header->data.len );
 			return 0;
 
 		case C_LAYOUT_REPLY : case C_BDELETE_REPLY : case C_BSTATE_REPLY :
@@ -670,7 +674,7 @@ static bool pipe_read( int fd, char *buf, size_t bytes_to_read )
 	   it right in both cases. */
 
 	sigemptyset( &new_mask );
-	if ( I_am == CHILD )
+	if ( Internals.I_am == CHILD )
 		sigaddset( &new_mask, DO_QUIT );
 	else
 		sigaddset( &new_mask, QUITTING );
@@ -683,7 +687,7 @@ static bool pipe_read( int fd, char *buf, size_t bytes_to_read )
 
 		/* If child received a deadly signal... */
 
-		if ( I_am == CHILD && do_quit )
+		if ( Internals.I_am == CHILD && EDL.do_quit )
 			break;
 
 		/* Non-deadly signal has been received */
@@ -748,7 +752,7 @@ void writer( int type, ... )
 	   necessary since the child process is only reading when it actually
 	   waits for data. */
 
-	if ( I_am == CHILD )
+	if ( Internals.I_am == CHILD )
 		send_data( REQUEST, -1 );
 
 	header.type = type;
@@ -757,7 +761,7 @@ void writer( int type, ... )
 	switch ( type )
 	{
 		case C_EPRINT :          
-			fsc2_assert( I_am == CHILD );
+			fsc2_assert( Internals.I_am == CHILD );
 
 			str[ 0 ] = va_arg( ap, char * );
 			if ( str[ 0 ] == NULL )
@@ -767,13 +771,14 @@ void writer( int type, ... )
 			else
 				header.data.str_len[ 0 ] = strlen( str[ 0 ] );
 
-			write( pd[ WRITE ], &header, sizeof( CommStruct ) );
+			write( Comm.pd[ WRITE ], &header, sizeof( CommStruct ) );
 			if ( header.data.str_len[ 0 ] > 0 )
-				write( pd[ WRITE ], str[ 0 ], ( size_t ) header.data.len );
+				write( Comm.pd[ WRITE ], str[ 0 ],
+                       ( size_t ) header.data.len );
 			break;
 
 		case C_SHOW_MESSAGE :
-			fsc2_assert( I_am == CHILD );
+			fsc2_assert( Internals.I_am == CHILD );
 
 			str[ 0 ] = va_arg( ap, char * );
 			if ( str[ 0 ] == NULL )
@@ -783,17 +788,18 @@ void writer( int type, ... )
 			else
 				header.data.str_len[ 0 ] = strlen( str[ 0 ] );
 
-			write( pd[ WRITE ], &header, sizeof( CommStruct ) );
+			write( Comm.pd[ WRITE ], &header, sizeof( CommStruct ) );
 			if ( header.data.str_len[ 0 ] > 0 )
-				write( pd[ WRITE ], str[ 0 ], ( size_t ) header.data.len );
+				write( Comm.pd[ WRITE ], str[ 0 ],
+                       ( size_t ) header.data.len );
 
 			/* wait for random character to be sent back as acknowledgement */
 
-			read( pd[ READ ], &ack, 1 );
+			read( Comm.pd[ READ ], &ack, 1 );
 			break;
 
 		case C_SHOW_ALERT :
-			fsc2_assert( I_am == CHILD );
+			fsc2_assert( Internals.I_am == CHILD );
 
 			str[ 0 ] = va_arg( ap, char * );
 			if ( str[ 0 ] == NULL )
@@ -803,17 +809,18 @@ void writer( int type, ... )
 			else
 				header.data.str_len[ 0 ] = strlen( str[ 0 ] );
 
-			write( pd[ WRITE ], &header, sizeof( CommStruct ) );
+			write( Comm.pd[ WRITE ], &header, sizeof( CommStruct ) );
 			if ( header.data.str_len[ 0 ] > 0 )
-				write( pd[ WRITE ], str[ 0 ], ( size_t ) header.data.len );
+				write( Comm.pd[ WRITE ], str[ 0 ],
+                       ( size_t ) header.data.len );
 
 			/* Wait for a random character to be sent back as acknowledgment */
 
-			pipe_read( pd[ READ ], &ack, 1 );
+			pipe_read( Comm.pd[ READ ], &ack, 1 );
 			break;
 
 		case C_SHOW_CHOICES :
-			fsc2_assert( I_am == CHILD );
+			fsc2_assert( Internals.I_am == CHILD );
 
 			str[ 0 ] = va_arg( ap, char * );
 			if ( str[ 0 ] == NULL )
@@ -838,18 +845,18 @@ void writer( int type, ... )
 
 			n2 = va_arg( ap, int );
 
-			write( pd[ WRITE ], &header, sizeof( CommStruct ) );
-			write( pd[ WRITE ], &n1, sizeof( int ) );
-			write( pd[ WRITE ], &n2, sizeof( int ) );
+			write( Comm.pd[ WRITE ], &header, sizeof( CommStruct ) );
+			write( Comm.pd[ WRITE ], &n1, sizeof( int ) );
+			write( Comm.pd[ WRITE ], &n2, sizeof( int ) );
 
 			for ( i = 0; i < 4; i++ )
 				if ( header.data.str_len[ i ] > 0 )
-					write( pd[ WRITE ], str[ i ],
+					write( Comm.pd[ WRITE ], str[ i ],
 						   ( size_t ) header.data.str_len[ i ] );
 			break;
 
 		case C_SHOW_FSELECTOR :
-			fsc2_assert( I_am == CHILD );
+			fsc2_assert( Internals.I_am == CHILD );
 
 			/* Set up header and write it */
 
@@ -864,26 +871,26 @@ void writer( int type, ... )
 					header.data.str_len[ i ] = strlen( str[ i ] );
 			}
 
-			write( pd[ WRITE ], &header, sizeof( CommStruct ) );
+			write( Comm.pd[ WRITE ], &header, sizeof( CommStruct ) );
 
 			/* write out all four strings */
 
 			for ( i = 0; i < 4; i++ )
 			{
 				if ( header.data.str_len[ i ] > 0 )
-					write( pd[ WRITE ], str[ i ],
+					write( Comm.pd[ WRITE ], str[ i ],
 						   ( size_t ) header.data.str_len[ i ] );
 			}
 
 			break;
 
 		case C_PROG : case C_OUTPUT :
-			fsc2_assert( I_am == CHILD );
-			write( pd[ WRITE ], &header, sizeof( CommStruct ) );
+			fsc2_assert( Internals.I_am == CHILD );
+			write( Comm.pd[ WRITE ], &header, sizeof( CommStruct ) );
 			break;
 
 		case C_INPUT :
-			fsc2_assert( I_am == CHILD );
+			fsc2_assert( Internals.I_am == CHILD );
 
 			/* Set up the two argument strings */
 
@@ -900,10 +907,10 @@ void writer( int type, ... )
 
 			/* Send header and the two strings */
 
-			write( pd[ WRITE ], &header, sizeof( CommStruct ) );
+			write( Comm.pd[ WRITE ], &header, sizeof( CommStruct ) );
 			for ( i = 0; i < 2; i++ )
 				if ( header.data.str_len[ i ] > 0 )
-					write( pd[ WRITE ], str[ i ],
+					write( Comm.pd[ WRITE ], str[ i ],
 						   ( size_t ) header.data.str_len[ i ] );
 			break;
 
@@ -912,51 +919,51 @@ void writer( int type, ... )
 		case C_SCREATE : case C_SDELETE : case C_SSTATE :
 		case C_ICREATE : case C_IDELETE : case C_ISTATE :
 		case C_ODELETE :
-			fsc2_assert( I_am == CHILD );
+			fsc2_assert( Internals.I_am == CHILD );
 
 			header.data.len = va_arg( ap, ptrdiff_t );
-			write( pd[ WRITE ], &header, sizeof( CommStruct ) );
+			write( Comm.pd[ WRITE ], &header, sizeof( CommStruct ) );
 			data = va_arg( ap, void * );
-			write( pd[ WRITE ], data, ( size_t ) header.data.len );
+			write( Comm.pd[ WRITE ], data, ( size_t ) header.data.len );
 			break;
 
 		case C_FREEZE :
-			fsc2_assert( I_am == CHILD );
+			fsc2_assert( Internals.I_am == CHILD );
 
 			header.data.int_data = va_arg( ap, int );
-			write( pd[ WRITE ], &header, sizeof( CommStruct ) );
+			write( Comm.pd[ WRITE ], &header, sizeof( CommStruct ) );
 			break;
 
 		case C_BCREATE_REPLY :
 		case C_SCREATE_REPLY : case C_SSTATE_REPLY :
 		case C_ICREATE_REPLY : case C_ISTATE_REPLY :
-			fsc2_assert( I_am == PARENT );
+			fsc2_assert( Internals.I_am == PARENT );
 
 			header.data.len = va_arg( ap, ptrdiff_t );
 
 			/* Don't try to continue writing on EPIPE (SIGPIPE is ignored) */
 
-			if ( write( pd[ WRITE ], &header, sizeof( CommStruct ) ) < 0 &&
-				 errno == EPIPE )
+			if ( write( Comm.pd[ WRITE ], &header,
+                        sizeof( CommStruct ) ) < 0 && errno == EPIPE )
 			{
 				va_end( ap );
 				return;
 			}
 			data = va_arg( ap, void * );
-			write( pd[ WRITE ], data, ( size_t ) header.data.len );
+			write( Comm.pd[ WRITE ], data, ( size_t ) header.data.len );
 			break;
 
 		case C_LAYOUT_REPLY : case C_BDELETE_REPLY :
 		case C_BSTATE_REPLY : case C_SDELETE_REPLY :
 		case C_IDELETE_REPLY :
 		case C_ODELETE_REPLY :
-			fsc2_assert( I_am == PARENT );
+			fsc2_assert( Internals.I_am == PARENT );
 			header.data.long_data = va_arg( ap, long );
-			write( pd[ WRITE ], &header, sizeof( CommStruct ) );
+			write( Comm.pd[ WRITE ], &header, sizeof( CommStruct ) );
 			break;
 
 		case C_STR :
-			fsc2_assert( I_am == PARENT );
+			fsc2_assert( Internals.I_am == PARENT );
 
 			str[ 0 ] = va_arg( ap, char * );
 			if ( str[ 0 ] == NULL )
@@ -968,39 +975,40 @@ void writer( int type, ... )
 
 			/* Don't try to continue writing on EPIPE (SIGPIPE is ignored) */
 
-			if ( write( pd[ WRITE ], &header, sizeof( CommStruct ) ) < 0 &&
-				 errno == EPIPE )
+			if ( write( Comm.pd[ WRITE ], &header,
+                        sizeof( CommStruct ) ) < 0 && errno == EPIPE )
 			{
 				va_end( ap );
 				return;
 			}
 
 			if ( header.data.len > 0 )
-				write( pd[ WRITE ], str[ 0 ], ( size_t ) header.data.len );
+				write( Comm.pd[ WRITE ], str[ 0 ],
+                       ( size_t ) header.data.len );
 			break;
 
 		case C_INT :
-			fsc2_assert( I_am == PARENT );
+			fsc2_assert( Internals.I_am == PARENT );
 			header.data.int_data = va_arg( ap, int );
-			write( pd[ WRITE ], &header, sizeof( CommStruct ) );
+			write( Comm.pd[ WRITE ], &header, sizeof( CommStruct ) );
 			break;
 
 		case C_LONG :
-			fsc2_assert( I_am == PARENT );
+			fsc2_assert( Internals.I_am == PARENT );
 			header.data.long_data = va_arg( ap, long );
-			write( pd[ WRITE ], &header, sizeof( CommStruct ) );
+			write( Comm.pd[ WRITE ], &header, sizeof( CommStruct ) );
 			break;
 
 		case C_FLOAT :
-			fsc2_assert( I_am == PARENT );
+			fsc2_assert( Internals.I_am == PARENT );
 			header.data.float_data = va_arg( ap, float );
-			write( pd[ WRITE ], &header, sizeof( CommStruct ) );
+			write( Comm.pd[ WRITE ], &header, sizeof( CommStruct ) );
 			break;
 
 		case C_DOUBLE :
-			fsc2_assert( I_am == PARENT );
+			fsc2_assert( Internals.I_am == PARENT );
 			header.data.double_data = va_arg( ap, double );
-			write( pd[ WRITE ], &header, sizeof( CommStruct ) );
+			write( Comm.pd[ WRITE ], &header, sizeof( CommStruct ) );
 			break;
 
 		default :                     /* this should never be reached... */
@@ -1035,26 +1043,26 @@ void send_data( int type, int shm_id )
 {
 	/* Wait until parent can accept more data */
 
-	sema_wait( data_semaphore );
+	sema_wait( Comm.data_semaphore );
 
 	/* Put type of data (DATA or REQUEST) into type field of next free slot */
 
-	MQ->slot[ MQ->high ].type = type;
+	Comm.MQ->slot[ Comm.MQ->high ].type = type;
 
 	/* For DATA pass parent the ID of shared memory segment with the data */
 
 	if ( type == DATA )
-		MQ->slot[ MQ->high ].shm_id = shm_id;
+		Comm.MQ->slot[ Comm.MQ->high ].shm_id = shm_id;
 
 	/* Increment the high mark pointer (wraps around) */
 
-	MQ->high = ( MQ->high + 1 ) % QUEUE_SIZE;
+	Comm.MQ->high = ( Comm.MQ->high + 1 ) % QUEUE_SIZE;
 
 	/* For REQUESTS also wait for the request semaphore (no more than one
 	   REQUEST at a time!) */
 
 	if ( type == REQUEST )
-		sema_wait( request_semaphore );
+		sema_wait( Comm.request_semaphore );
 }
 
 

@@ -1,7 +1,7 @@
 /*
   $Id$
 
-  Copyright (C) 2001 Jens Thoms Toerring
+  Copyright (C) 1999-2002 Jens Thoms Toerring
 
   This file is part of fsc2.
 
@@ -100,178 +100,208 @@
 
 void clean_up( void );
 bool scan_main( char *file );
-int devices_parser( FILE *in );
-int assignments_parser( FILE *in );
-int variables_parser( FILE *in );
-int phases_parser( FILE *in );
-int preparations_parser( FILE *in );
-int experiment_parser( FILE *in );
+int  devices_parser( FILE *in );
+int  assignments_parser( FILE *in );
+int  variables_parser( FILE *in );
+int  phases_parser( FILE *in );
+int  preparations_parser( FILE *in );
+int  experiment_parser( FILE *in );
 void main_sig_handler( int signo );
 void notify_conn( int signo );
 void usage( int result_status );
+
+
+/* Most global variables used in the program belong to one of the following
+   structures. The only exceptions are variables that must be visible within
+   the modules and to make it easier for module writers we keep them as simple
+   variables (they are also declared as extern in fsc2_module.h, the header
+   file the modules have to include) */
+
+typedef struct {
+
+	uid_t EUID;                  /* User and group ID the program was */
+	gid_t EGID;				     /* started with */
+
+	pid_t child_pid;             /* pid of child process doing the
+                                    measurement */
+	bool is_i386;                /* Set if running on an i386 processor */
+
+	int cmdline_flags;           /* Stores command line options */
+
+	int I_am;                    /* Indicates if we're running the parent
+									or the child process (it's either set to
+									PARENT or to CHILD) */
+	int mode;                    /* The mode fsc2 is currently running in,
+									either PREPARATION, TEST or EXPERIMENT */
+	bool in_hook;                /* Set while module hook functions are run */
+
+	bool just_testing;           /* Set if only syntax check is to be done */
+
+	bool exit_hooks_are_run;     /* Set if modules exit hooks have all already
+									been run */
+} INTERNALS;
+
+
+typedef struct {
+
+	long Lc;                     /* Line number in currently parsed EDL file */
+	char *Fname;                 /* Name of currently parsed EDL file */
+
+	CALL_STACK *Call_Stack;      /* Stack for storing some kind of frame
+									information during nested EDL function
+									calls */
+	Compilation compilation;     /* Structure with infos about compilation
+									states and errors (see also global.h) */
+	Prg_Token *prg_token;        /* Array of predigested program tokens */
+
+	long prg_length;             /* Number of array elements in predigested
+									program (negative value indicates that
+									there is no EXPERIMENT section, not even
+									an EXPERIMENT label) */
+	Prg_Token *cur_prg_token;    /* Pointer to the currently handled element in
+									the array of predigested program tokens */
+	long On_Stop_Pos;            /* Index of the ON_STOP command in the array
+									of predigested program tokens (negative
+									value indicates that there is no ON_STOP
+									label) */
+	Var *Var_List;               /* List of all user declared EDL variables */
+	Var *Var_Stack;              /* Stack of variables used in the evaluation
+									of expressions and function calls */
+	volatile bool do_quit;       /* Becomes set when a running EDL program has
+									to be stopped (because STOP button has
+									been pressed) */
+	bool react_to_do_quit;       /* Is set when program should not react to
+									the STOP button anymore (after the ON_STOP
+									label has been processed) */
+	FILE_LIST *File_List;        /* List of all files the user opened */
+	int File_List_Len;           /* Length of this file list */
+
+    Device *Device_List;
+    Device_Name *Device_Name_List;
+
+    long Num_Pulsers;
+
+	long Cur_Pulse;              /* Number of the current pulse during the
+									setup of a pulse in the PREPARATIONS
+									section */
+} EDL_Stuff;
+
+
+typedef struct {
+
+	int pd[ 4 ];                 /* pipe descriptors for measurement child */
+	int conn_pd[ 2 ];            /* pipe for communication child */
+
+	int data_semaphore;          /* Semaphore for DATA messages */
+	int request_semaphore;       /* Semaphore for REQUEST mesages */
+
+	MESSAGE_QUEUE *MQ;           /* The message queue for data send from the
+									child to the parent process */
+	int MQ_ID;                   /* shared memory segment ID of the message
+									queue */
+} COMMUNICATION;
+
+
+typedef struct {
+
+	G_FUNCS G_Funcs;
+
+	FD_fsc2 *main_form;
+	FD_run *run_form;
+	FD_input_form *input_form;
+	FD_cut *cut_form;
+	FD_print_comment *print_comment;
+
+	int border_offset_x;         /* Width and height of window left and */
+	int border_offset_y;         /* top border */
+
+	int stop_button_mask;        /* Which mouse buttons to use for STOP
+									button */
+} GUI_Stuff;
 
 
 /* Global variables */
 
 #if defined ( FSC2_MAIN )
 
-uid_t EUID;                  /* user and group ID the program was called */
-gid_t EGID;                  /* with (should both translate to fsc2) */
+INTERNALS Internals;
+EDL_Stuff EDL;
+COMMUNICATION Comm;
+GUI_Stuff GUI;
+Graphics G;
 
-bool is_i386 = UNSET;
 
-int cmdline_flags;
+char *prog_name;                 /* Name the program was started with */
+bool need_GPIB = UNSET;          /* Flag, set if GPIB bus is needed */
 
-/* used in compiling and executing the user supplied program */
-
-long Lc = 0;                 /* line number in currently parsed file */
-char *Fname = NULL;          /* name of currently parsed file */
-CALL_STACK *Call_Stack = NULL;
-Compilation compilation;     /* structure with infos about compilation state */
-Prg_Token *prg_token = NULL; /* array with predigested program */
-long prg_length = -1;        /* number of array elements in predigested
-								program (negative value indicates that there's
-								no EXPERIMENT section) */
-Prg_Token *cur_prg_token;    /* index of currently handled element in
-								predigested program */
-long On_Stop_Pos = -1;       /* index of the ON_STOP command in the array with
-								the predigested program */
-
-Var *Var_List = NULL;        /* list of all variables used in the program */
-Var *Var_Stack = NULL;       /* list for stack of variables used in evaluation
-								of expressions and function calls */
-
-Device *Device_List = NULL;
-Device_Name *Device_Name_List = NULL;
-int Max_Devices_of_a_Kind;
-
-long Cur_Pulser = -1;
-long Num_Pulsers = 0;
 Pulser_Struct *pulser_struct = NULL;
-
 Phase_Sequence *PSeq = NULL;
 Acquisition_Sequence ASeq[ 2 ] = { { UNSET, NULL, 0 }, { UNSET, NULL, 0 } };
+long Cur_Pulser = -1;
 
-long Cur_Pulse = -1;
+const char *Digitizer_Channel_Names[ NUM_DIGITIZER_CHANNEL_NAMES ] =
+			{ "CH1",
+              "CH2",
+              "CH3",
+              "CH4",
+              "MATH1",
+              "MATH2",
+              "MATH3",
+			  "REF1",
+              "REF2",
+              "REF3",
+              "REF4",
+              "AUX",
+              "AUX1",
+              "AUX2",
+              "LINE",
+			  "MEM_C",
+              "MEM_D",
+              "FUNC_E",
+              "FUNC_F",
+              "EXT",
+              "EXT10" };
 
-bool TEST_RUN = UNSET;       /* flag, set while EXPERIMENT section is tested */
-bool need_GPIB = UNSET;      /* flag, set if GPIB bus is needed */
+const char *Function_Names[ PULSER_CHANNEL_NUM_FUNC ] = 
+			{ "MW",
+              "TWT",
+              "TWT_GATE",
+              "DETECTION",
+			  "DETECTION_GATE",
+              "DEFENSE",
+              "RF",
+              "RF_GATE",
+			  "PULSE_SHAPE",
+              "PHASE_1",
+              "PHASE_2",
+			  "OTHER_1",
+              "OTHER_2",
+              "OTHER_3",
+              "OTHER_4" };
 
-bool just_testing = UNSET;
-
-G_FUNCS G_Funcs;
-
-FD_fsc2 *main_form;
-FD_run *run_form;
-FD_input_form *input_form;
-FD_cut *cut_form;
-FD_print_comment *print_comment;
-
-int I_am = PARENT;
-int FSC2_MODE = PREPARATION;
-bool IN_HOOK = UNSET;
-
-int pd[ 4 ];                    /* pipe descriptors for measurement child */
-int conn_pd[ 2 ];               /* pipe for communication child */
-pid_t child_pid = 0;            /* pid of measurement child */
-pid_t conn_pid = -1;            /* pid of communication child */
-int data_semaphore = -1;
-int request_semaphore = -1;
-volatile bool do_quit = UNSET;
-volatile bool conn_child_replied = UNSET;
-bool react_to_do_quit = SET;
-bool exit_hooks_are_run = UNSET;
-
-int border_offset_x;
-int border_offset_y;
-
-int stop_button_mask = 0;
-
-Graphics G;
-MESSAGE_QUEUE *MQ = NULL;
-int MQ_ID = -1;
-
-FILE_LIST *File_List = NULL;
-int File_List_Len = 0;
-
-TOOL_BOX *Tool_Box = NULL;
+const char *Phase_Types[ PHASE_TYPES_MAX ] = { "+X", "-X", "+Y", "-Y", "CW" };
 
 
 #else   /*  ! FSC2_MAIN */
 
-extern uid_t EUID;
-extern gid_t EGID;
+extern INTERNALS Internals;
+extern EDL_Stuff EDL;
+extern COMMUNICATION Comm;
+extern GUI_Stuff GUI;
+extern Graphics G;
 
-extern bool is_i386;
 
-extern int cmdline_flags;
+extern bool need_GPIB;
+extern char *prog_name;
 
-extern long Lc;
-extern char *Fname;
-extern CALL_STACK *Call_Stack;
-extern Compilation compilation;
-extern Prg_Token *prg_token;
-extern long prg_length;
-extern Prg_Token *cur_prg_token;
-extern long On_Stop_Pos;
-
-extern Device *Device_List;
-extern Device_Name *Device_Name_List;
-extern int Max_Devices_of_a_Kind;
-
-extern Var *Var_List;
-extern Var *Var_Stack;
-
-extern long Cur_Pulser;
-extern long Num_Pulsers;
 extern Pulser_Struct *pulser_struct;
-
 extern Phase_Sequence *PSeq;
 extern Acquisition_Sequence ASeq[ 2 ];
+extern long Cur_Pulser;
 
-extern long Cur_Pulse;
-
-extern bool TEST_RUN;
-extern bool need_GPIB;
-
-extern bool just_testing;
-
-extern G_FUNCS G_Funcs;
-
-extern FD_fsc2 *main_form;
-extern FD_run *run_form;
-extern FD_input_form *input_form;
-extern FD_cut *cut_form;
-extern FD_print_comment *print_comment;
-
-extern int I_am;
-extern int FSC2_MODE;
-extern bool IN_HOOK;
-
-extern int pd[ 4 ];                /* pipe descriptors for measurement child */
-extern int conn_pd[ 2 ];           /* pipe for connection child */
-extern pid_t child_pid;            /* pid of measurement child */
-extern pid_t conn_pid;             /* pid of connection child */
-extern int data_semaphore;
-extern int request_semaphore;
-extern volatile bool do_quit;
-extern bool react_to_do_quit;
-extern bool exit_hooks_are_run;
-
-extern int border_offset_x;
-extern int border_offset_y;
-
-extern int stop_button_mask;
-
-extern Graphics G;
-extern MESSAGE_QUEUE *MQ;
-extern int MQ_ID;
-extern volatile bool conn_child_replied;
-
-extern FILE_LIST *File_List;
-extern int File_List_Len;
-
-extern TOOL_BOX *Tool_Box;
+extern const char *Digitizer_Channel_Names[ NUM_DIGITIZER_CHANNEL_NAMES ];
+extern const char *Function_Names[ PULSER_CHANNEL_NUM_FUNC ];
+extern const char *Phase_Types[ PHASE_TYPES_MAX ];
 
 
 #endif

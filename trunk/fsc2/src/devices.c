@@ -1,7 +1,7 @@
 /*
   $Id$
 
-  Copyright (C) 2001 Jens Thoms Toerring
+  Copyright (C) 1999-2002 Jens Thoms Toerring
 
   This file is part of fsc2.
 
@@ -92,7 +92,7 @@ void device_add( const char *name )
 					pathmax = PATH_MAX_GUESS;
 				else
 				{
-					eprint( FATAL, UNSET, "%s:%d: This operating system "
+					eprint( FATAL, UNSET, "%s:%u: This operating system "
 							"sucks!\n", __FILE__, __LINE__ );
 					T_free( lib_name );
 					T_free( dev_name );
@@ -138,7 +138,7 @@ void device_add( const char *name )
 
 	search_name = real_name != NULL ? strip_path( real_name ) : NULL;
 
-	for ( dl = Device_Name_List; dl != NULL; dl = dl->next )
+	for ( dl = EDL.Device_Name_List; dl != NULL; dl = dl->next )
 		if ( ! strcmp( dl->name, dev_name ) ||
 			 ( search_name != NULL && ! strcmp( dl->name, search_name ) ) )
 			break;
@@ -154,7 +154,7 @@ void device_add( const char *name )
 
 	/* Make sure the device isn't already loaded */
 
-	for ( cd = Device_List; cd != NULL; cd = cd->next )
+	for ( cd = EDL.Device_List; cd != NULL; cd = cd->next )
 		if ( ! strcmp( cd->name, dev_name ) ||
 			 ( real_name != NULL && ! strcmp( cd->name, real_name ) ) )
 		{
@@ -176,7 +176,7 @@ void device_add( const char *name )
 	{
 		T_free( real_name );
 		T_free( dev_name );
-		PASSTHROUGH( );
+		RETHROW( );
 	}
 
 	T_free( real_name );
@@ -196,9 +196,9 @@ void device_append_to_list( const char *dev_name )
 
 	/* Append a new new Device structure to the list of devices */
 
-	if ( Device_List != NULL )
+	if ( EDL.Device_List != NULL )
 	{
-		for ( cd = Device_List; cd->next != NULL; cd = cd->next )
+		for ( cd = EDL.Device_List; cd->next != NULL; cd = cd->next )
 			;
 
 		cd->next = T_malloc( sizeof( Device ) );
@@ -207,7 +207,7 @@ void device_append_to_list( const char *dev_name )
 	}
 	else
 	{
-		Device_List = cd = T_malloc( sizeof( Device ) );
+		EDL.Device_List = cd = T_malloc( sizeof( Device ) );
 		cd->prev = NULL;
 	}
 
@@ -228,12 +228,12 @@ void delete_devices( void )
 	Device *cd, *cdp;
 
 
-	if ( Device_List == NULL )           /* list is empty or does not exist */
+	if ( EDL.Device_List == NULL )  /* list is empty or does not exist */
 		return;
 
 	/* Get last element of list - always delete last entry first */
 
-	for( cd = Device_List; cd->next != NULL; cd = cd->next )
+	for( cd = EDL.Device_List; cd->next != NULL; cd = cd->next )
 		;
 
 	for ( ; cd != NULL; cd = cdp )
@@ -245,7 +245,7 @@ void delete_devices( void )
 		T_free( cd );
 	}
 
-	Device_List = NULL;
+    EDL.Device_List = NULL;
 }
 
 
@@ -258,14 +258,14 @@ void delete_device_name_list( void )
 {
 	Device_Name *cd, *cdn;
 
-	for ( cd = Device_Name_List; cd != NULL; cd = cdn )
+	for ( cd = EDL.Device_Name_List; cd != NULL; cd = cdn )
 	{
 		T_free( cd->name );
 		cdn = cd->next;
 		T_free( cd );
 	}
 
-	Device_Name_List = NULL;
+	EDL.Device_Name_List = NULL;
 }
 
 

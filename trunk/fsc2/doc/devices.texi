@@ -1,6 +1,6 @@
 @c $Id$
 @c
-@c Copyright (C) 2001 Jens Thoms Toerring
+@c Copyright (C) 1999-2002 Jens Thoms Toerring
 @c
 @c This file is part of fsc2.
 @c
@@ -523,17 +523,18 @@ that the @code{SR810} can only sample only one data type in this mode
 (because it only has one displayable channel) while the @code{SR830} can
 sample two data types simultaneously.
 
-This function must be used to setup the auto-acquisition (if not called
-auto-acquisition can't be started). The first parameter passed to the
-function is the sample time, i.e.@: the time interval at which data are
-sampled. Sample times can range between @w{1.953125 ms} (@w{512 Hz}) and
-@w{16 s}. Allowed values are powers of 2, multiplied by the shortest
-sample time. As an alternative an @strong{interger} value of @code{0} or
-@code{-1} can be passed to the function. If it is @code{0} a sample time
-equal or larger than the lock-in's time constant is used. If @code{-1}
-is passed to the function it is assumed that an external trigger,
-applied to the rear trigger input, is going to be used - the user has to
-take care that the trigger input rate is not larger than @w{512 Hz}.
+@code{lockin_auto_setup()} must be used to setup the auto-acquisition
+(if not called auto-acquisition can't be started). The first parameter
+passed to the function is the sample time, i.e.@: the time interval at
+which data are sampled. Sample times can range between @w{1.953125 ms}
+(@w{512 Hz}) and @w{16 s}. Allowed values are powers of 2, multiplied by
+the shortest sample time. As an alternative an @strong{interger} value
+of @code{0} or @code{-1} can be passed to the function. If it is
+@code{0} a sample time equal or larger than the lock-in's time constant
+is used. If @code{-1} is passed to the function it is assumed that an
+external trigger, applied to the rear trigger input, is going to be used
+- the user has to take care that the trigger input rate is not larger
+than @w{512 Hz}.
 
 The next one or two parameter define which data type should be sampled
 in auto-acqusition mode (the @code{SR810} only accepts one data type
@@ -587,8 +588,8 @@ measured in the 'normal' way.
 @strong{Important}: The sizes of the internal buffers of the lock-in
 amplifiers are restricted: while the @code{SR830} can store up to 16383
 data points for each of the two channel, the @code{SR810} can only store
-a maximum of 8191 samples. If the program detects, when fetching new
-data, that the maximum number of data have allready been fetched from
+a maximum of 8191 samples. If the program detects when fetching new
+data that the maximum number of data have already been fetched from
 the lock-in the internal buffer is cleared. In this case data which
 should have been acquired between the time the lock-in's internal buffer
 got filled up and the moment the program noticed that the buffers are

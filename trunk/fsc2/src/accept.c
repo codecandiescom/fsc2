@@ -1,7 +1,7 @@
 /*
   $Id$
 
-  Copyright (C) 2001 Jens Thoms Toerring
+  Copyright (C) 1999-2002 Jens Thoms Toerring
 
   This file is part of fsc2.
 
@@ -59,18 +59,18 @@ void accept_new_data( void )
 		   fail it sometimes does (2.0 kernels only?) so we better have
 		   a bit more of error output until this is sorted out. */
 
-		if ( ( buf = attach_shm( MQ->slot[ MQ->low ].shm_id ) )
+		if ( ( buf = attach_shm( Comm.MQ->slot[ Comm.MQ->low ].shm_id ) )
 			 == ( void * ) - 1 )
 		{
 #ifndef NDEBUG
-			eprint( FATAL, UNSET, "Internal communication error at %s:%d, "
+			eprint( FATAL, UNSET, "Internal communication error at %s:%u, "
 					"message_queue_low = %d, shm_id = %d.\n"
 					"*** PLEASE SEND A BUG REPORT CITING THESE LINES *** "
 					"Thank you.\n",
-					__FILE__, __LINE__, MQ->low,
-					MQ->slot[ MQ->low ].shm_id );
+					__FILE__, __LINE__, Comm.MQ->low,
+					Comm.MQ->slot[ Comm.MQ->low ].shm_id );
 #else
-			eprint( FATAL, UNSET, "Internal communication error at %s:%d.\n",
+			eprint( FATAL, UNSET, "Internal communication error at %s:%u.\n",
 					__FILE__, __LINE__ );
 #endif
 			THROW( EXCEPTION );
@@ -86,29 +86,29 @@ void accept_new_data( void )
 		}
 		OTHERWISE
 		{
-			detach_shm( buf, &MQ->slot[ MQ->low ].shm_id );
-			PASSTHROUGH( );
+			detach_shm( buf, &Comm.MQ->slot[ Comm.MQ->low ].shm_id );
+			RETHROW( );
 		}
 
 		/* Detach from shared memory segment and remove it */
 
-		detach_shm( buf, &MQ->slot[ MQ->low ].shm_id );
-		MQ->slot[ MQ->low ].shm_id = -1;
+		detach_shm( buf, &Comm.MQ->slot[ Comm.MQ->low ].shm_id );
+		Comm.MQ->slot[ Comm.MQ->low ].shm_id = -1;
 
 		/* Increment the low queue pointer and post the data semaphore to
 		   tell the child that there's again room in the message queue. */
 
-		MQ->low = ( MQ->low + 1 ) % QUEUE_SIZE;
-		sema_post( data_semaphore );
+		Comm.MQ->low = ( Comm.MQ->low + 1 ) % QUEUE_SIZE;
+		sema_post( Comm.data_semaphore );
 
 		/* Return if all entries in the message queue are used up */
 
-		if ( MQ->low == MQ->high )
+		if ( Comm.MQ->low == Comm.MQ->high )
 			break;
 
 		/* Accept next data set if next slot in message queue contains DATA */
 
-		if ( MQ->slot[ MQ->low ].type == DATA )
+		if ( Comm.MQ->slot[ Comm.MQ->low ].type == DATA )
 			continue;
 
 		/* Otherwise the next slot is occupied by a REQUEST. If this is the
@@ -116,14 +116,14 @@ void accept_new_data( void )
 		   it). Otherwise there are more DATA that we handle first by
 		   exchanging them with the current REQUEST entry. */
 
-  		if ( ( mq_next = ( MQ->low + 1 ) % QUEUE_SIZE ) == MQ->high )
+  		if ( ( mq_next = ( Comm.MQ->low + 1 ) % QUEUE_SIZE ) == Comm.MQ->high )
   			break;
 
-  		MQ->slot[ MQ->low ].shm_id = MQ->slot[ mq_next ].shm_id;
-  		MQ->slot[ MQ->low ].type = DATA;
+  		Comm.MQ->slot[ Comm.MQ->low ].shm_id = Comm.MQ->slot[ mq_next ].shm_id;
+  		Comm.MQ->slot[ Comm.MQ->low ].type = DATA;
 
-  		MQ->slot[ mq_next ].shm_id = -1;
-  		MQ->slot[ mq_next ].type = REQUEST;
+  		Comm.MQ->slot[ mq_next ].shm_id = -1;
+  		Comm.MQ->slot[ mq_next ].type = REQUEST;
   	}
 
 	/* Finally display the new data by redrawing the canvas */
@@ -204,7 +204,7 @@ static void unpack_and_accept( char *ptr )
 
 			default :
 				eprint( FATAL, UNSET, "Internal communication error at "
-						"%s:%d.\n", __FILE__, __LINE__ );
+						"%s:%u.\n", __FILE__, __LINE__ );
 				THROW( EXCEPTION );
 		}
 
@@ -269,7 +269,7 @@ static void other_data_request( int type, char *ptr )
 			break;
 
 		default :                             /* unknown command */
-			eprint( FATAL, UNSET, "Internal communication error at %s:%d.\n",
+			eprint( FATAL, UNSET, "Internal communication error at %s:%u.\n",
 					__FILE__, __LINE__ );
 			THROW( EXCEPTION );
 	}
@@ -300,7 +300,7 @@ static void accept_1d_data( long x_index, long curve, int type, char *ptr )
 #ifndef NDEBUG
 	if ( curve >= G.nc )
 	{
-		eprint( FATAL, SET, "Internal error detected at %s:%d, there is no "
+		eprint( FATAL, SET, "Internal error detected at %s:%u, there is no "
 				"curve %ld.\n", __FILE__, __LINE__, curve + 1 );
 		THROW( EXCEPTION );
 	}
@@ -469,7 +469,7 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 #ifndef NDEBUG
 	if ( curve >= G.nc )
 	{
-		eprint( FATAL, SET, "Internal error detected at %s:%d, there is no "
+		eprint( FATAL, SET, "Internal error detected at %s:%u, there is no "
 				"curve %ld.\n", __FILE__, __LINE__, curve + 1 );
 		THROW( EXCEPTION );
 	}
@@ -646,7 +646,7 @@ static long get_number_of_new_points( char **ptr, int type )
 			break;
 
 		default :
-			eprint( FATAL, UNSET, "Internal communication error at %s:%d.\n",
+			eprint( FATAL, UNSET, "Internal communication error at %s:%u.\n",
 					__FILE__, __LINE__ );
 			THROW( EXCEPTION );
 	}
@@ -654,7 +654,7 @@ static long get_number_of_new_points( char **ptr, int type )
 #ifndef NDEBUG
 	if ( len <= 0 )
 	{
-		eprint( FATAL, SET, "Internal error detected at %s:%d, number of "
+		eprint( FATAL, SET, "Internal error detected at %s:%u, number of "
 				"points to be drawn: %ld.\n", __FILE__, __LINE__, len );
 		THROW( EXCEPTION );
 	}

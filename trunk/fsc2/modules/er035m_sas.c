@@ -1,7 +1,7 @@
 /*
   $Id$
 
-  Copyright (C) 2001 Jens Thoms Toerring
+  Copyright (C) 1999-2002 Jens Thoms Toerring
 
   This file is part of fsc2.
 
@@ -164,7 +164,7 @@ int er035m_sas_init_hook( void )
 
 int er035m_sas_test_hook( void )
 {
-	memcpy( &nmr_stored, &nmr, sizeof( NMR ) );
+	nmr_stored = nmr;
 	return 1;
 }
 
@@ -182,7 +182,7 @@ int er035m_sas_exp_hook( void )
 	int cur_res;
 
 
-	memcpy( &nmr, &nmr_stored, sizeof( NMR ) );
+	nmr = nmr_stored;
 
 	if ( ! nmr.is_needed )
 		return 1;
@@ -941,7 +941,7 @@ static bool er035m_sas_comm( int type, ... )
 			break;
 
 		default :
-			print( FATAL, "INTERNAL ERROR detected at %s:%d.\n",
+			print( FATAL, "INTERNAL ERROR detected at %s:%u.\n",
 				   __FILE__, __LINE__ );
 			THROW( EXCEPTION );
 	}

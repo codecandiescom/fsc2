@@ -1,6 +1,6 @@
 @c $Id$
 @c
-@c Copyright (C) 2001 Jens Thoms Toerring
+@c Copyright (C) 1999-2002 Jens Thoms Toerring
 @c
 @c This file is part of fsc2.
 @c
@@ -210,7 +210,7 @@ also have to write a semicolon after each of the device names.
 The @code{VARIABLES} section for declaring and initializing variables
 has also already been discussed in the example.
 
-Because pulses play such an important r@^ole in modern EPR experiments
+Because pulses play such an important role in modern EPR experiments
 lots of elements for handling pulses and the pulser, that creates them,
 are built into @acronym{fsc2}. There are even two sections,
 @code{ASSIGNMENTS} and @code{PHASES} exclusively devoted to the pulser

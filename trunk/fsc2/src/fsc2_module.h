@@ -1,7 +1,7 @@
 /*
   $Id$
 
-  Copyright (C) 2001 Jens Thoms Toerring
+  Copyright (C) 1999-2002 Jens Thoms Toerring
 
   This file is part of fsc2.
 
@@ -83,13 +83,17 @@ extern const char *show_input( const char *content, const char *label );
 
 /* Global variables */
 
-extern Compilation compilation;
 extern Pulser_Struct *pulser_struct;
 extern Phase_Sequence *PSeq;
 extern Acquisition_Sequence ASeq[ ];
 extern long Cur_Pulser;
 
 extern bool need_GPIB;
+
+
+extern const char *Digitizer_Channel_Names[ NUM_DIGITIZER_CHANNEL_NAMES ];
+extern const char *Function_Names[ PULSER_CHANNEL_NUM_FUNC ];
+extern const char *Phase_Types[ PHASE_TYPES_MAX ];
 
 
 /* The following must be defined after the declaration of pulser_struct ! */

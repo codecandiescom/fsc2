@@ -1,7 +1,7 @@
 /*
   $Id$
 
-  Copyright (C) 2001 Jens Thoms Toerring
+  Copyright (C) 1999-2002 Jens Thoms Toerring
 
   This file is part of fsc2.
 
@@ -123,10 +123,10 @@ input:   /* empty */
        | input line eol
 ;
 
-eol:     ';'                       { fsc2_assert( Var_Stack == NULL );
-                                     if ( do_quit ) 
+eol:     ';'                       { fsc2_assert( EDL.Var_Stack == NULL );
+                                     if ( EDL.do_quit ) 
                                          YYACCEPT; }
-       | '}'                       { fsc2_assert( Var_Stack == NULL );
+       | '}'                       { fsc2_assert( EDL.Var_Stack == NULL );
 	                                 YYACCEPT; }
 ;
 
@@ -140,7 +140,7 @@ line:    E_VAR_TOKEN '=' expr      { vars_assign( $3, $1 ); }
 
        | E_VAR_TOKEN '['           { vars_arr_start( $1 ); }
          list1 ']'                 { vars_arr_lhs( $4 ) }
-         ass                       { fsc2_assert( Var_Stack == NULL ); }
+         ass                       { fsc2_assert( EDL.Var_Stack == NULL ); }
        | E_FUNC_TOKEN '(' list2 ')'{ vars_pop( func_call( $1 ) ); }
        | E_FUNC_TOKEN '['          { eprint( FATAL, SET, "`%s' is a predefined"
 											 " function.\n", $1->name );

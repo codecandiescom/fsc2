@@ -1,7 +1,7 @@
-/*
+/* -*-C-*-
   $Id$
 
-  Copyright (C) 2001 Jens Thoms Toerring
+  Copyright (C) 1999-2002 Jens Thoms Toerring
 
   This file is part of fsc2.
 
@@ -167,14 +167,14 @@ WS          [\n=: ]+
 			/* handling of file name lines */
 {FILE}      {
 				*( assigntext + assignleng - 1 ) = '\0';
-				T_free( Fname );
-				Fname = T_strdup( assigntext + 2 );
+				T_free( EDL.Fname );
+				EDL.Fname = T_strdup( assigntext + 2 );
 			}
 
 			/* handling of line number lines */
 {LNUM}		{
 				*( assigntext + assignleng - 1 ) = '\0';
-				Lc = atol( assigntext + 2 );
+				EDL.Lc = atol( assigntext + 2 );
 			}
 
 			/* handling of error messages from the cleaner */
@@ -564,13 +564,13 @@ int assignments_parser( FILE *in )
 	static bool is_restart = UNSET;
 
 
-	if ( compilation.sections[ ASSIGNMENTS_SECTION ] )
+	if ( EDL.compilation.sections[ ASSIGNMENTS_SECTION ] )
 	{
 		eprint( FATAL, SET, "Multiple instances of ASSIGNMENTS section "
 		        "label.\n" );
 		THROW( EXCEPTION );
 	}
-	compilation.sections[ ASSIGNMENTS_SECTION ] = SET;
+	EDL.compilation.sections[ ASSIGNMENTS_SECTION ] = SET;
 
 	assignin = in;
 
@@ -602,7 +602,7 @@ static void set_cur_pulser( void )
 	if ( ( t = strrchr( assigntext, '#' ) ) == NULL )
 		return;
 
-	if ( ( Cur_Pulser = T_atol( t + 1 ) - 1 ) >= Num_Pulsers )
+	if ( ( Cur_Pulser = T_atol( t + 1 ) - 1 ) >= EDL.Num_Pulsers )
 	{
 		eprint( FATAL, SET, "There is no pulser #%ld\n", Cur_Pulser + 1 );
 		THROW( EXCEPTION );

@@ -1,7 +1,7 @@
 /*
   $Id$
 
-  Copyright (C) 2001 Jens Thoms Toerring
+  Copyright (C) 1999-2002 Jens Thoms Toerring
 
   This file is part of fsc2.
 
@@ -86,7 +86,7 @@ void start_graphics( void )
 	int i;
 
 
-	if ( G_Funcs.size == LOW )
+	if ( GUI.G_Funcs.size == LOW )
 	{
 		GI_sizes.WIN_MIN_1D_WIDTH   = 300;
 		GI_sizes.WIN_MIN_2D_WIDTH   = 350;
@@ -157,7 +157,7 @@ void start_graphics( void )
 
 	/* Create the forms for running experiments */
 
-	run_form = G_Funcs.create_form_run( );
+	GUI.run_form = GUI.G_Funcs.create_form_run( );
 
 	G.font = NULL;
 
@@ -166,18 +166,18 @@ void start_graphics( void )
 	CG.index = 0;
 
 	if ( G.dim == 2 )
-		cut_form = G_Funcs.create_form_cut( );
+		GUI.cut_form = GUI.G_Funcs.create_form_cut( );
 
 	if ( ! G.is_init )
 	{
-		fl_hide_object( run_form->curve_1_button );
-		fl_hide_object( run_form->curve_2_button );
-		fl_hide_object( run_form->curve_3_button );
-		fl_hide_object( run_form->curve_4_button );
+		fl_hide_object( GUI.run_form->curve_1_button );
+		fl_hide_object( GUI.run_form->curve_2_button );
+		fl_hide_object( GUI.run_form->curve_3_button );
+		fl_hide_object( GUI.run_form->curve_4_button );
 
-		fl_hide_object( run_form->undo_button );
-		fl_hide_object( run_form->print_button );
-		fl_hide_object( run_form->full_scale_button );
+		fl_hide_object( GUI.run_form->undo_button );
+		fl_hide_object( GUI.run_form->print_button );
+		fl_hide_object( GUI.run_form->full_scale_button );
 	}
 	else
 	{
@@ -185,21 +185,21 @@ void start_graphics( void )
 
 		if ( access( pixmap_file, R_OK ) == 0 )
 		{
-			fl_set_pixmapbutton_file( run_form->undo_button, pixmap_file );
-			fl_set_object_lsize( run_form->undo_button,
+			fl_set_pixmapbutton_file( GUI.run_form->undo_button, pixmap_file );
+			fl_set_object_lsize( GUI.run_form->undo_button,
 								 GI_sizes.SMALL_FONT_SIZE );
-			if ( ! ( cmdline_flags & NO_BALLOON ) )
-				 fl_set_object_helper( run_form->undo_button,
+			if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
+				 fl_set_object_helper( GUI.run_form->undo_button,
 									   "Undo last rescaling operation" );
 
 			if ( G.dim == 2 )
 			{
-				fl_set_pixmapbutton_file( cut_form->cut_undo_button,
+				fl_set_pixmapbutton_file( GUI.cut_form->cut_undo_button,
 										  pixmap_file );
-				fl_set_object_lsize( cut_form->cut_undo_button,
+				fl_set_object_lsize( GUI.cut_form->cut_undo_button,
 									 GI_sizes.SMALL_FONT_SIZE );
-				if ( ! ( cmdline_flags & NO_BALLOON ) )
-					fl_set_object_helper( cut_form->cut_undo_button,
+				if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
+					fl_set_object_helper( GUI.cut_form->cut_undo_button,
 										  "Undo last rescaling operation" );
 			}
 		}
@@ -209,50 +209,52 @@ void start_graphics( void )
 
 		if ( access( pixmap_file, R_OK ) == 0 )
 		{
-			fl_set_pixmapbutton_file( run_form->print_button, pixmap_file );
-			fl_set_object_lsize( run_form->print_button,
+			fl_set_pixmapbutton_file( GUI.run_form->print_button,
+                                      pixmap_file );
+			fl_set_object_lsize( GUI.run_form->print_button,
 								 GI_sizes.SMALL_FONT_SIZE );
-			if ( ! ( cmdline_flags & NO_BALLOON ) )
-				fl_set_object_helper( run_form->print_button, "Print window" );
+			if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
+				fl_set_object_helper( GUI.run_form->print_button,
+                                      "Print window" );
 
 			if ( G.dim == 2 )
 			{
-				fl_set_pixmapbutton_file( cut_form->cut_print_button,
+				fl_set_pixmapbutton_file( GUI.cut_form->cut_print_button,
 										  pixmap_file );
-				fl_set_object_lsize( cut_form->cut_print_button,
+				fl_set_object_lsize( GUI.cut_form->cut_print_button,
 									 GI_sizes.SMALL_FONT_SIZE );
-				if ( ! ( cmdline_flags & NO_BALLOON ) )
-					fl_set_object_helper( cut_form->cut_print_button,
+				if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
+					fl_set_object_helper( GUI.cut_form->cut_print_button,
 										  "Print window" );
 			}
 		}
 		T_free( pixmap_file );
 
-		if ( ! ( cmdline_flags & NO_BALLOON ) )
-			fl_set_object_helper( run_form->full_scale_button,
+		if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
+			fl_set_object_helper( GUI.run_form->full_scale_button,
 								  "Switch off automatic rescaling" );
 	}
 
-	if ( ! ( cmdline_flags & NO_BALLOON ) )
+	if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
 	{
-		if ( stop_button_mask == 0 )
-			fl_set_object_helper( run_form->stop, "Stop the experiment" );
-		else if ( stop_button_mask == FL_LEFT_MOUSE )
-			fl_set_object_helper( run_form->stop, "Stop the experiment\n"
-								                  "Use left mouse button" );
-		else if ( stop_button_mask == FL_MIDDLE_MOUSE )
-			fl_set_object_helper( run_form->stop, "Stop the experiment\n"
-			                                      "Use middle mouse button" );
-		else if ( stop_button_mask == FL_RIGHT_MOUSE )
-			fl_set_object_helper( run_form->stop, "Stop the experiment\n"
-			                                      "Use right mouse button" );
+		if ( GUI.stop_button_mask == 0 )
+			fl_set_object_helper( GUI.run_form->stop, "Stop the experiment" );
+		else if ( GUI.stop_button_mask == FL_LEFT_MOUSE )
+			fl_set_object_helper( GUI.run_form->stop, "Stop the experiment\n"
+                                  "Use left mouse button" );
+		else if ( GUI.stop_button_mask == FL_MIDDLE_MOUSE )
+			fl_set_object_helper( GUI.run_form->stop, "Stop the experiment\n"
+                                  "Use middle mouse button" );
+		else if ( GUI.stop_button_mask == FL_RIGHT_MOUSE )
+			fl_set_object_helper( GUI.run_form->stop, "Stop the experiment\n"
+                                  "Use right mouse button" );
 	}
 
-	if ( G.dim == 2 && ! ( cmdline_flags & NO_BALLOON ) )
+	if ( G.dim == 2 && ! ( Internals.cmdline_flags & NO_BALLOON ) )
 	{
-		fl_set_object_helper( cut_form->cut_close_button,
+		fl_set_object_helper( GUI.cut_form->cut_close_button,
 							  "Close the window" );
-		fl_set_object_helper( cut_form->cut_full_scale_button,
+		fl_set_object_helper( GUI.cut_form->cut_full_scale_button,
 							  "Switch off automatic rescaling" );
 	}
 
@@ -263,55 +265,59 @@ void start_graphics( void )
 
 	if ( G.dim == 1 )
 	{
-		if ( ! ( cmdline_flags & NO_BALLOON ) )
+		if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
 		{
-			fl_set_object_helper( run_form->curve_1_button, 
+			fl_set_object_helper( GUI.run_form->curve_1_button, 
 								 "Exempt curve 1 from\nrescaling operations" );
-			fl_set_object_helper( run_form->curve_2_button, 
+			fl_set_object_helper( GUI.run_form->curve_2_button, 
 								 "Exempt curve 2 from\nrescaling operations" );
-			fl_set_object_helper( run_form->curve_3_button, 
+			fl_set_object_helper( GUI.run_form->curve_3_button, 
 								 "Exempt curve 3 from\nrescaling operations" );
-			fl_set_object_helper( run_form->curve_4_button, 
+			fl_set_object_helper( GUI.run_form->curve_4_button, 
 								 "Exempt curve 4 from\nrescaling operations" );
 		}
 
-		fl_set_object_callback( run_form->print_button, print_1d, 1 );
+		fl_set_object_callback( GUI.run_form->print_button, print_1d, 1 );
 	}
 	else if ( G.dim == 2 )
 	{
-		if ( ! ( cmdline_flags & NO_BALLOON ) )
+		if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
 		{
-			fl_set_object_helper( run_form->curve_1_button, "Hide curve 1" );
-			fl_set_object_helper( run_form->curve_2_button, "Show curve 2" );
-			fl_set_object_helper( run_form->curve_3_button, "Show curve 3" );
-			fl_set_object_helper( run_form->curve_4_button, "Show curve 4" );
+			fl_set_object_helper( GUI.run_form->curve_1_button,
+                                  "Hide curve 1" );
+			fl_set_object_helper( GUI.run_form->curve_2_button,
+                                  "Show curve 2" );
+			fl_set_object_helper( GUI.run_form->curve_3_button,
+                                  "Show curve 3" );
+			fl_set_object_helper( GUI.run_form->curve_4_button,
+                                  "Show curve 4" );
 		}
 
-		fl_set_button( run_form->curve_1_button, 1 );
-		fl_set_button( run_form->curve_2_button, 0 );
-		fl_set_button( run_form->curve_3_button, 0 );
-		fl_set_button( run_form->curve_4_button, 0 );
+		fl_set_button( GUI.run_form->curve_1_button, 1 );
+		fl_set_button( GUI.run_form->curve_2_button, 0 );
+		fl_set_button( GUI.run_form->curve_3_button, 0 );
+		fl_set_button( GUI.run_form->curve_4_button, 0 );
 
-		fl_set_object_callback( run_form->print_button, print_2d, 0 );
+		fl_set_object_callback( GUI.run_form->print_button, print_2d, 0 );
 
 		G.active_curve = 0;
 	}
 
 	/* fdesign is unable to set the box type attributes for canvases... */
 
-	fl_set_canvas_decoration( run_form->x_axis, FL_FRAME_BOX );
-	fl_set_canvas_decoration( run_form->y_axis, FL_FRAME_BOX );
-	fl_set_canvas_decoration( run_form->canvas, FL_NO_FRAME );
+	fl_set_canvas_decoration( GUI.run_form->x_axis, FL_FRAME_BOX );
+	fl_set_canvas_decoration( GUI.run_form->y_axis, FL_FRAME_BOX );
+	fl_set_canvas_decoration( GUI.run_form->canvas, FL_NO_FRAME );
 
 	if ( G.dim == 1 || ! G.is_init )
-		fl_delete_object( run_form->z_axis );
+		fl_delete_object( GUI.run_form->z_axis );
 	else
 	{
-		fl_set_canvas_decoration( run_form->z_axis, FL_FRAME_BOX );
-		fl_set_canvas_decoration( cut_form->cut_x_axis, FL_FRAME_BOX );
-		fl_set_canvas_decoration( cut_form->cut_y_axis, FL_FRAME_BOX );
-		fl_set_canvas_decoration( cut_form->cut_z_axis, FL_FRAME_BOX );
-		fl_set_canvas_decoration( cut_form->cut_canvas, FL_NO_FRAME );
+		fl_set_canvas_decoration( GUI.run_form->z_axis, FL_FRAME_BOX );
+		fl_set_canvas_decoration( GUI.cut_form->cut_x_axis, FL_FRAME_BOX );
+		fl_set_canvas_decoration( GUI.cut_form->cut_y_axis, FL_FRAME_BOX );
+		fl_set_canvas_decoration( GUI.cut_form->cut_z_axis, FL_FRAME_BOX );
+		fl_set_canvas_decoration( GUI.cut_form->cut_canvas, FL_NO_FRAME );
 	}
 
 	/* Show only buttons really needed */
@@ -319,23 +325,23 @@ void start_graphics( void )
 	if ( G.is_init )
 	{
 		if ( G.nc < 4 )
-			fl_hide_object( run_form->curve_4_button );
+			fl_hide_object( GUI.run_form->curve_4_button );
 		if ( G.nc < 3 )
-			fl_hide_object( run_form->curve_3_button );
+			fl_hide_object( GUI.run_form->curve_3_button );
 		if ( G.nc < 2 )
 		{
-			fl_hide_object( run_form->curve_2_button );
-			fl_hide_object( run_form->curve_1_button );
+			fl_hide_object( GUI.run_form->curve_2_button );
+			fl_hide_object( GUI.run_form->curve_1_button );
 		}
 
 		if ( G.dim == 2 )
 		{
-			fl_set_object_size( run_form->canvas, run_form->canvas->w
-								- run_form->z_axis->w - 5,
-								run_form->canvas->h );
-			fl_set_object_size( run_form->x_axis, run_form->x_axis->w
-								- run_form->z_axis->w - 5,
-								run_form->x_axis->h );
+			fl_set_object_size( GUI.run_form->canvas, GUI.run_form->canvas->w
+								- GUI.run_form->z_axis->w - 5,
+								GUI.run_form->canvas->h );
+			fl_set_object_size( GUI.run_form->x_axis, GUI.run_form->x_axis->w
+								- GUI.run_form->z_axis->w - 5,
+								GUI.run_form->x_axis->h );
 		}
 	}
 
@@ -363,15 +369,15 @@ void start_graphics( void )
 			if ( display_h < GI_sizes.WIN_MIN_HEIGHT )
 				display_h = GI_sizes.WIN_MIN_HEIGHT;
 
-			fl_set_form_size( run_form->run, display_w, display_h );
+			fl_set_form_size( GUI.run_form->run, display_w, display_h );
 		}
 
 		if ( XValue & flags && YValue & flags )
 		{
-			display_x += border_offset_x - 1;
-			display_y += border_offset_y - 1;
+			display_x += GUI.border_offset_x - 1;
+			display_y += GUI.border_offset_y - 1;
 
-			fl_set_form_position( run_form->run, display_x, display_y );
+			fl_set_form_position( GUI.run_form->run, display_x, display_y );
 			needs_pos = SET;
 		}
 	}
@@ -384,28 +390,28 @@ void start_graphics( void )
 				display_w = GI_sizes.WIN_MIN_2D_WIDTH;
 		}
 
-		fl_set_form_geometry( run_form->run, display_x, display_y,
+		fl_set_form_geometry( GUI.run_form->run, display_x, display_y,
 							  display_w, display_h );
 		needs_pos = SET;
 	}
 
-	fl_show_form( run_form->run, needs_pos ?
+	fl_show_form( GUI.run_form->run, needs_pos ?
 				  FL_PLACE_POSITION : FL_PLACE_MOUSE | FL_FREE_SIZE, 
 				  FL_FULLBORDER, "fsc2: Display" );
 	display_has_been_shown = SET;
 
-	G.d = FL_FormDisplay( run_form->run );
+	G.d = FL_FormDisplay( GUI.run_form->run );
 
 	/* Set minimum size for display window and switch on full scale button */
 
 	if ( G.dim == 1 || ! G.is_init )
-		fl_winminsize( run_form->run->window,
+		fl_winminsize( GUI.run_form->run->window,
 					   GI_sizes.WIN_MIN_1D_WIDTH, GI_sizes.WIN_MIN_HEIGHT );
 	else
-		fl_winminsize( run_form->run->window,
+		fl_winminsize( GUI.run_form->run->window,
 					   GI_sizes.WIN_MIN_2D_WIDTH, GI_sizes.WIN_MIN_HEIGHT );
 
-	fl_set_button( run_form->full_scale_button, 1 );
+	fl_set_button( GUI.run_form->full_scale_button, 1 );
 
 	/* Load a font hopefully available on all machines (beside the optionally
 	   userdefined font we try at three more before giving up */
@@ -433,25 +439,25 @@ void start_graphics( void )
 
 	/* Create the canvas axes */
 		
-	setup_canvas( &G.x_axis, run_form->x_axis );
-	setup_canvas( &G.y_axis, run_form->y_axis );
+	setup_canvas( &G.x_axis, GUI.run_form->x_axis );
+	setup_canvas( &G.y_axis, GUI.run_form->y_axis );
 	if ( G.dim == 2 )
-		setup_canvas( &G.z_axis, run_form->z_axis );
+		setup_canvas( &G.z_axis, GUI.run_form->z_axis );
 
 	/* Create the canvas itself */
 
-	setup_canvas( &G.canvas, run_form->canvas );
+	setup_canvas( &G.canvas, GUI.run_form->canvas );
 
 	if ( G.is_init )
 	{
-		fl_set_form_atclose( run_form->run, run_form_close_handler, NULL );
+		fl_set_form_atclose( GUI.run_form->run, run_form_close_handler, NULL );
 		G_struct_init( );
 	}
 
 	if ( G.dim == 1 || ! G.is_init )
 		redraw_all_1d( );
 
-	fl_raise_form( run_form->run );
+	fl_raise_form( GUI.run_form->run );
 }
 
 
@@ -463,8 +469,8 @@ int run_form_close_handler( FL_FORM *a, void *b )
 	a = a;
 	b = b;
 
-	if ( child_pid == 0 )          /* if child has already exited */
-		stop_measurement( run_form->stop, 0 );
+	if ( Internals.child_pid == 0 )          /* if child has already exited */
+		stop_measurement( GUI.run_form->stop, 0 );
 	return FL_IGNORE;
 }
 
@@ -858,21 +864,21 @@ void stop_graphics( void )
 		if ( G.font )
 			XFreeFont( G.d, G.font );
 
-		if ( run_form )
+		if ( GUI.run_form )
 		{
 			if ( G.x_axis.obj )
 			{
-				canvas_off( &G.x_axis, run_form->x_axis );
+				canvas_off( &G.x_axis, GUI.run_form->x_axis );
 				G.x_axis.obj = NULL;
 			}
 			if ( G.y_axis.obj )
 			{
-				canvas_off( &G.y_axis, run_form->y_axis );
+				canvas_off( &G.y_axis, GUI.run_form->y_axis );
 				G.y_axis.obj = NULL;
 			}
 			if ( G.canvas.obj )
 			{
-				canvas_off( &G.canvas, run_form->canvas );
+				canvas_off( &G.canvas, GUI.run_form->canvas );
 				G.canvas.obj = NULL;
 			}
 		}
@@ -880,30 +886,30 @@ void stop_graphics( void )
 		if ( G.dim == 2 )
 		{
 			cut_form_close( );
-			if ( run_form && G.z_axis.obj )
+			if ( GUI.run_form && G.z_axis.obj )
 			{
-				canvas_off( &G.z_axis, run_form->z_axis );
+				canvas_off( &G.z_axis, GUI.run_form->z_axis );
 				G.z_axis.obj = NULL;
 			}
 		}
 	}
 
-	if ( run_form && fl_form_is_visible( run_form->run ) )
+	if ( GUI.run_form && fl_form_is_visible( GUI.run_form->run ) )
 	{
-		display_x = run_form->run->x;
-		display_y = run_form->run->y;
-		display_w = run_form->run->w;
-		display_h = run_form->run->h;
+		display_x = GUI.run_form->run->x;
+		display_y = GUI.run_form->run->y;
+		display_w = GUI.run_form->run->w;
+		display_h = GUI.run_form->run->h;
 
-		fl_hide_form( run_form->run );
+		fl_hide_form( GUI.run_form->run );
 	}
 	else
 		display_has_been_shown = UNSET;
 
-	if ( run_form )
+	if ( GUI.run_form )
 	{
-		fl_free_form( run_form->run );
-		run_form = NULL;
+		fl_free_form( GUI.run_form->run );
+		GUI.run_form = NULL;
 	}
 
 	if ( G_stored )
@@ -1340,9 +1346,9 @@ void undo_button_callback( FL_OBJECT *a, long b )
 		if ( is_undo && G.is_fs )
 		{
 			G.is_fs = UNSET;
-			fl_set_button( run_form->full_scale_button, 0 );
-			if ( ! ( cmdline_flags & NO_BALLOON ) )
-				fl_set_object_helper( run_form->full_scale_button,
+			fl_set_button( GUI.run_form->full_scale_button, 0 );
+			if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
+				fl_set_object_helper( GUI.run_form->full_scale_button,
 									  "Rescale curves to fit into the window\n"
 									  "and switch on automatic rescaling" );
 		}
@@ -1379,9 +1385,9 @@ void undo_button_callback( FL_OBJECT *a, long b )
 		if ( cv2->is_fs )
 		{
 			cv2->is_fs = UNSET;
-			fl_set_button( run_form->full_scale_button, 0 );
-			if ( ! ( cmdline_flags & NO_BALLOON ) )
-				fl_set_object_helper( run_form->full_scale_button,
+			fl_set_button( GUI.run_form->full_scale_button, 0 );
+			if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
+				fl_set_object_helper( GUI.run_form->full_scale_button,
 									  "Rescale curves to fit into the window\n"
 									  "and switch on automatic rescaling" );
 		}
@@ -1411,7 +1417,7 @@ void fs_button_callback( FL_OBJECT *a, long b )
 
 	/* Get new state of button */
 
-	state = fl_get_button( run_form->full_scale_button );
+	state = fl_get_button( GUI.run_form->full_scale_button );
 
 	if ( G.dim == 1 )            /* for 1D display */
 	{
@@ -1428,15 +1434,15 @@ void fs_button_callback( FL_OBJECT *a, long b )
 
 			fs_rescale_1d( );
 			redraw_all_1d( );
-			if ( ! ( cmdline_flags & NO_BALLOON ) )
-				fl_set_object_helper( run_form->full_scale_button,
+			if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
+				fl_set_object_helper( GUI.run_form->full_scale_button,
 									  "Switch off automatic rescaling" );
 		}
 		else        /* full scale got switched off */
 		{
 			G.is_fs = UNSET;
-			if ( ! ( cmdline_flags & NO_BALLOON ) )
-				fl_set_object_helper( run_form->full_scale_button,
+			if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
+				fl_set_object_helper( GUI.run_form->full_scale_button,
 									  "Rescale curves to fit into the window\n"
 									  "and switch on automatic rescaling" );
 		}
@@ -1446,8 +1452,8 @@ void fs_button_callback( FL_OBJECT *a, long b )
 	{
 		if ( state == 1 )        /* full scale got switched on */
 		{
-			if ( ! ( cmdline_flags & NO_BALLOON ) )
-				fl_set_object_helper( run_form->full_scale_button,
+			if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
+				fl_set_object_helper( GUI.run_form->full_scale_button,
 									  "Switch off automatic rescaling" );
 
 			if ( G.active_curve != -1 )
@@ -1460,8 +1466,8 @@ void fs_button_callback( FL_OBJECT *a, long b )
 		}
 		else                     /* full scale got switched off */
 		{	
-			if ( ! ( cmdline_flags & NO_BALLOON ) )
-				fl_set_object_helper( run_form->full_scale_button,
+			if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
+				fl_set_object_helper( GUI.run_form->full_scale_button,
 									  "Rescale curves to fit into the window\n"
 									  "and switch on automatic rescaling" );
 			if ( G.active_curve != -1 )
@@ -1494,7 +1500,7 @@ void curve_button_callback( FL_OBJECT *obj, long data )
 			sprintf( hstr, "Include curve %ld into\nrescaling operations",
 					 data );
 
-		if ( ! ( cmdline_flags & NO_BALLOON ) )
+		if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
 			fl_set_object_helper( obj, hstr );
 
 		/* Redraw both axis to make sure the axis for the first active button
@@ -1519,22 +1525,22 @@ void curve_button_callback( FL_OBJECT *obj, long data )
 			switch( data )
 			{
 				case 1:
-					fl_set_button( run_form->curve_1_button,
+					fl_set_button( GUI.run_form->curve_1_button,
 								   G.active_curve == 0 ? 0 : 1 );
 					break;
 
 				case 2:
-					fl_set_button( run_form->curve_2_button,
+					fl_set_button( GUI.run_form->curve_2_button,
 								   G.active_curve == 1 ? 0 : 1 );
 					break;
 
 				case 3:
-					fl_set_button( run_form->curve_3_button,
+					fl_set_button( GUI.run_form->curve_3_button,
 								   G.active_curve == 2 ? 0 : 1 );
 					break;
 
 				case 4:
-					fl_set_button( run_form->curve_4_button,
+					fl_set_button( GUI.run_form->curve_4_button,
 								   G.active_curve == 3 ? 0 : 1 );
 					break;
 			}
@@ -1550,41 +1556,41 @@ void curve_button_callback( FL_OBJECT *obj, long data )
 			switch ( G.active_curve )
 			{
 				case 0 :
-					fl_set_button( run_form->curve_1_button, 0 );
-					if ( ! ( cmdline_flags & NO_BALLOON ) )
-						fl_set_object_helper( run_form->curve_1_button,
+					fl_set_button( GUI.run_form->curve_1_button, 0 );
+					if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
+						fl_set_object_helper( GUI.run_form->curve_1_button,
 											  "Show curve 1" );
 					break;
 
 				case 1 :
-					fl_set_button( run_form->curve_2_button, 0 );
-					if ( ! ( cmdline_flags & NO_BALLOON ) )
-						fl_set_object_helper( run_form->curve_2_button,
+					fl_set_button( GUI.run_form->curve_2_button, 0 );
+					if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
+						fl_set_object_helper( GUI.run_form->curve_2_button,
 											  "Show curve 2" );
 					break;
 
 				case 2 :
-					fl_set_button( run_form->curve_3_button, 0 );
-					if ( ! ( cmdline_flags & NO_BALLOON ) )
-						fl_set_object_helper( run_form->curve_3_button,
+					fl_set_button( GUI.run_form->curve_3_button, 0 );
+					if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
+						fl_set_object_helper( GUI.run_form->curve_3_button,
 											  "Show curve 3" );
 					break;
 
 				case 3 :
-					fl_set_button( run_form->curve_4_button, 0 );
-					if ( ! ( cmdline_flags & NO_BALLOON ) )
-						fl_set_object_helper( run_form->curve_4_button,
+					fl_set_button( GUI.run_form->curve_4_button, 0 );
+					if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
+						fl_set_object_helper( GUI.run_form->curve_4_button,
 											  "Show curve 4" );
 					break;
 			}
 
 			sprintf( hstr, "Hide curve %ld", data );
-			if ( ! ( cmdline_flags & NO_BALLOON ) )
+			if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
 				fl_set_object_helper( obj, hstr );
 
 			G.active_curve = data - 1;
 
-			fl_set_button( run_form->full_scale_button,
+			fl_set_button( GUI.run_form->full_scale_button,
 						   G.curve_2d[ G.active_curve ]->is_fs );
 		}
 

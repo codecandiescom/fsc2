@@ -1,7 +1,7 @@
 /*
   $Id$
 
-  Copyright (C) 2001 Jens Thoms Toerring
+  Copyright (C) 1999-2002 Jens Thoms Toerring
 
   This file is part of fsc2.
 
@@ -235,9 +235,9 @@ void functions_exit( void )
 	/* Clean up the call stack */
 
 #ifndef NDEBUG
-	if ( Call_Stack != NULL )
+	if ( EDL.Call_Stack != NULL )
 	{
-		eprint( SEVERE, UNSET, "Internal error detected at %s:%d.\n",
+		eprint( SEVERE, UNSET, "Internal error detected at %s:%u.\n",
 				__FILE__, __LINE__ );
 		while ( call_pop( ) )
 			;
@@ -359,7 +359,7 @@ Var *func_call( Var *f )
 
 	if ( f->type != FUNC )
 	{
-		eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
+		eprint( FATAL, UNSET, "Internal error detected at %s:%u.\n",
 				__FILE__, __LINE__ );
 		THROW( EXCEPTION );
 	}
@@ -370,7 +370,7 @@ Var *func_call( Var *f )
 	
 	if ( i >= Num_Func )
 	{
-		eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
+		eprint( FATAL, UNSET, "Internal error detected at %s:%u.\n",
 				__FILE__, __LINE__ );
 		THROW( EXCEPTION );
 	}
@@ -436,22 +436,23 @@ Var *func_call( Var *f )
 #ifndef NDEBUG
 		if ( ! vars_exist( f ) )
 		{
-			if ( Call_Stack->f != NULL && ! Call_Stack->f->to_be_loaded )
-				eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
+			if ( EDL.Call_Stack->f != NULL &&
+				 ! EDL.Call_Stack->f->to_be_loaded )
+				eprint( FATAL, UNSET, "Internal error detected at %s:%u.\n",
 						__FILE__, __LINE__ );
 			else
 				eprint( FATAL, SET, "Function %s() from module %s.so messed "
-						"up the variable stack at %s:%d.\n",
-						Call_Stack->f->name, Call_Stack->f->device->name,
-						__FILE__, __LINE__ );
+						"up the variable stack at %s:%u.\n",
+						EDL.Call_Stack->f->name,
+						EDL.Call_Stack->f->device->name, __FILE__, __LINE__ );
 			call_pop( );
-			PASSTHROUGH( );
+			RETHROW( );
 		}
 #endif
 		call_pop( );
 		for ( ap = f; ap != NULL; ap = vars_pop( ap ) )
 			;
-		PASSTHROUGH( );
+		RETHROW( );
 	}
 
 #ifndef NDEBUG
@@ -461,13 +462,13 @@ Var *func_call( Var *f )
 
 	if ( ! vars_exist( f ) )
 	{
-		if ( Call_Stack->f != NULL && ! Call_Stack->f->to_be_loaded )
-			eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
+		if ( EDL.Call_Stack->f != NULL && ! EDL.Call_Stack->f->to_be_loaded )
+			eprint( FATAL, UNSET, "Internal error detected at %s:%u.\n",
 					__FILE__, __LINE__ );
 		else
 			eprint( FATAL, SET, "Function %s() from module %s.so messed "
-					"up the variable stack at %s:%d.\n",
-					Call_Stack->f->name, Call_Stack->f->device->name,
+					"up the variable stack at %s:%u.\n",
+					EDL.Call_Stack->f->name, EDL.Call_Stack->f->device->name,
 					__FILE__, __LINE__ );
 		THROW( EXCEPTION );
 	}
@@ -502,7 +503,7 @@ CALL_STACK *call_push( Func *f, const char *device_name )
 
 
 	cs = T_malloc( sizeof *cs );
-	cs->prev = Call_Stack;
+	cs->prev = EDL.Call_Stack;
 	cs->f = f;
 	cs->dev_name = device_name;
 
@@ -515,7 +516,7 @@ CALL_STACK *call_push( Func *f, const char *device_name )
 	else
 		cs->Cur_Pulser = -1;
 
-	return Call_Stack = cs;
+	return EDL.Call_Stack = cs;
 }
 
 
@@ -527,17 +528,17 @@ CALL_STACK *call_pop( void )
 	CALL_STACK *cs;
 
 
-	if ( Call_Stack == NULL )
+	if ( EDL.Call_Stack == NULL )
 		return NULL;
 
-	cs = Call_Stack;
-	Call_Stack = cs->prev;
+	cs = EDL.Call_Stack;
+	EDL.Call_Stack = cs->prev;
 	T_free( cs );
 
-	if ( Call_Stack != NULL && Call_Stack->Cur_Pulser != -1 )
+	if ( EDL.Call_Stack != NULL && EDL.Call_Stack->Cur_Pulser != -1 )
 		Cur_Pulser = cs->prev->Cur_Pulser;
 
-	return Call_Stack;
+	return EDL.Call_Stack;
 }
 
 

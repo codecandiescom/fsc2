@@ -2,8 +2,9 @@ Most of the files in this directory are configuration files for the
 supported devices. They are included as header files by the modules
 an thus have to be in valid C syntax.
 
+
 Most of these files define just two macro. The first is DEVICE_NAME,
-e.g.
+for example
 
 #define DEVICE_NAME     "SR510" 
 
@@ -12,6 +13,7 @@ quotes. This device name is used in error messages from the device driver
 and, if the device is accessed via the GPIB bus, has to be identical to
 the name used in the GPIB configuration file, usually /etc/gpib.conf.
 
+
 All device configuration files should also define the macro DEVICE_TYPE,
 for the SR510 lock-in amplifier it is defined as 
 
@@ -19,22 +21,37 @@ for the SR510 lock-in amplifier it is defined as
 
 Also this macro is a string, so it must be included in double quotes.
 
+
 The DEVICE_TYPE macro gives the program some idea about the function of
 the device. It should be identical to the device type macro for devices
-with the same function. If you include a new device please check for the
-device type macros of similar devices and, if applicable, use the same
-definition. If you create a module for a completely new kind of device
-pick a descriptive name. 
+with the same or very similar function. If you include a new device
+please check for the device type macros of similar devices and, if
+applicable, use the same definition. If you create a module for a
+completely new kind of device pick a descriptive name.
+
+Currently the following device type names are used:
+
+-  "boxcar"
+-  "digitizer"
+-  "gaussmeter"
+-  "lock-in amplifier"
+-  "magnet power supply"
+-  "pulser"
+-  "RF synthesizer"
+-  "temperature_controller"
+-  "voltmeter"
+
 
 You may define as many other macros as you need for a new device. Usually
-you should only include stuff into the configuration file that you feel
-should be rather simple to find, to be echanged by the users of your module
-and that you don't want to hide deep down somewhere in the module. As an
-example take the serial port a device is connected to: If this gets changed
-later it should be simple to find the place where to apply changes for
-someone that didn't write the module, so it probably should be defined in
-the configuration file instead somewhere in the innards of the module
+you should only include things into the configuration file that you feel
+should be rather simple to find and to be changed by the users of your
+moduleand that you don't want to hide deep down somewhere in the module.
+As an example take the serial port a device is connected to: If this gets
+changed later it should be simple to find the place where to apply changes
+for someone that didn't write the module, so it probably should be defined
+in the configuration file instead somewhere in the innards of the module
 itself.
+
 
 Please note: Changes to the configuration file of a device only take effect
 after recompiling the module.

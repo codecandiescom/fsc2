@@ -1,7 +1,7 @@
 /*
   $Id$
 
-  Copyright (C) 2001 Jens Thoms Toerring
+  Copyright (C) 1999-2002 Jens Thoms Toerring
 
   This file is part of fsc2.
 
@@ -229,18 +229,6 @@ typedef struct {
 	bool is_cut;            /* set when cross section window is shown */
 	int cut_select;
 
-#define SCALE_TICK_DIST   6     /* mean minimum distance between ticks */
-#define SHORT_TICK_LEN    5     /* length of short ticks */
-#define MEDIUM_TICK_LEN  10     /* length of medium ticks */
-#define LONG_TICK_LEN    14     /* length of long ticks */
-#define LABEL_DIST        7     /* distance between label and scale line */
-#define X_SCALE_OFFSET   20     /* x distance between scale line and window */
-#define Y_SCALE_OFFSET   21     /* y distance between scale line and window */
-#define Z_SCALE_OFFSET   46     /* z distance between scale line and window */
-#define Z_LINE_OFFSET    10     /* distance bewteen colour scale and window */
-#define Z_LINE_WIDTH     14     /* width of colour scale */
-#define ENLARGE_BOX_WIDTH 5     /* width of enlarge box */
-
     int scale_tick_dist;    /* mean minimum distance between ticks */
 	int short_tick_len;     /* length of short ticks */
 	int medium_tick_len;    /* length of medium ticks */
@@ -256,6 +244,18 @@ typedef struct {
 
 } Graphics;
 
+
+#define SCALE_TICK_DIST   6     /* mean minimum distance between ticks */
+#define SHORT_TICK_LEN    5     /* length of short ticks */
+#define MEDIUM_TICK_LEN  10     /* length of medium ticks */
+#define LONG_TICK_LEN    14     /* length of long ticks */
+#define LABEL_DIST        7     /* distance between label and scale line */
+#define X_SCALE_OFFSET   20     /* x distance between scale line and window */
+#define Y_SCALE_OFFSET   21     /* y distance between scale line and window */
+#define Z_SCALE_OFFSET   46     /* z distance between scale line and window */
+#define Z_LINE_OFFSET    10     /* distance bewteen colour scale and window */
+#define Z_LINE_WIDTH     14     /* width of colour scale */
+#define ENLARGE_BOX_WIDTH 5     /* width of enlarge box */
 
 
 #include "fsc2.h"

@@ -1,6 +1,6 @@
 @c $Id$
 @c
-@c Copyright (C) 2001 Jens Thoms Toerring
+@c Copyright (C) 1999-2002 Jens Thoms Toerring
 @c
 @c This file is part of fsc2.
 @c
@@ -25,7 +25,7 @@
 
 
 
-@multitable { @code{MAXIMUM_PATTERN_LENGTH}} { Starts the @code{PREPARATIONS} section and lots more of text... }
+@multitable { @code{MAXIMUM_PATTERN_LENGTH} } { Starts the @code{PREPARATIONS} section and lots more of text... }
 @item @code{#EXIT}            @tab Miscellaneous (@pxref{#EXIT statement})
 @item @code{#INCLUDE}         @tab Miscellaneous (@pxref{#INCLUDE statement})
 @item @code{#QUIT}            @tab Miscellaneous (@pxref{#QUIT statement})
@@ -44,6 +44,9 @@
 @item @code{AUX2}             @tab Digitizer channel name
 @item                         @tab
 @item @code{BREAK}            @tab Loop control statement (@pxref{BREAK statement})
+@item @code{button_create}    @tab Built-in function (@pxref{button_create})
+@item @code{button_delete}    @tab Built-in function (@pxref{button_delete})
+@item @code{button_state}     @tab Built-in function (@pxref{button_state})
 @item                         @tab
 @item @code{ceil}             @tab Built-in function (@pxref{ceil})
 @item @code{CH}               @tab
@@ -53,6 +56,7 @@
 @item @code{CH4}              @tab Digitizer channel name
 @item @code{CHANNEL}          @tab
 @item @code{clear_curve}      @tab Built-in function (@pxref{clear_curve})
+@item @code{clone_file}       @tab Built-in function (@pxref{clone_file})
 @item @code{cos}              @tab Built-in function (@pxref{cos})
 @item @code{cosh}             @tab Built-in function (@pxref{cosh})
 @item                         @tab
@@ -110,6 +114,7 @@
 @item @code{FOR}              @tab Keyword for @code{FOR} loops (@pxref{FOR loops})
 @item @code{FOREVER}          @tab Keyword for @code{FOREVER} loops (@pxref{FOREVER loops})
 @item @code{fsave}            @tab Built-in function (@pxref{fsave})
+@item @code{ffsave}           @tab Built-in function (@pxref{ffsave})
 @item @code{FUNC}             @tab
 @item @code{FUNC_E}           @tab Digitizer channel name
 @item @code{FUNC_F}           @tab Digitizer channel name
@@ -121,12 +126,16 @@
 @item @code{get_file}         @tab Built-in function (@pxref{get_file})
 @item                         @tab
 @item @code{H}                @tab @code{HIGH} keyword
+@item @code{hide_toolbox}     @tab Built-in function (@pxref{hide_toolbox})
 @item @code{HIGH}             @tab @code{HIGH} keyword
 @item @code{Hz}               @tab Unit, Hertz
 @item                         @tab
 @item @code{IF}               @tab Part of @code{IF-ELSE} constructs (@pxref{IF-ELSE constructs})
 @item @code{init_1d}          @tab Built-in function (@pxref{init_1d})
 @item @code{init_2d}          @tab Built-in function (@pxref{init_2d})
+@item @code{input_create}     @tab Built-in function (@pxref{input_create})
+@item @code{input_delete}     @tab Built-in function (@pxref{input_delete})
+@item @code{input_value}      @tab Built-in function (@pxref{input_value})
 @item @code{int}              @tab Built-in function (@pxref{int})
 @item @code{INT}              @tab @code{INTERNAL} keyword
 @item @code{INTERN}           @tab @code{INTERNAL} keyword
@@ -147,6 +156,7 @@
 @item @code{kV}               @tab Unit, Kilo-Volt
 @item                         @tab
 @item @code{L}                @tab @code{LOW} keyword / Pulse @code{LENGTH} keyword
+@item @code{layout}           @tab Built-in function (@pxref{layout})
 @item @code{LEN}              @tab Pulse @code{LENGTH} keyword
 @item @code{LENGTH}           @tab Pulse @code{LENGTH} keyword
 @item @code{LEV}              @tab Pulser channel @code{LEVEL} keyword
@@ -192,7 +202,11 @@
 @item @code{nT}               @tab Unit, Nano-Tesla
 @item @code{nV}               @tab Unit, Nano-Volt
 @item                         @tab
+@item @code{object_delete}    @tab Built-in function (@pxref{object_delete})
 @item @code{ON_STOP:}         @tab Label in @code{EXPERIMENT} section
+@item @code{output_create}    @tab Built-in function (@pxref{output_create})
+@item @code{output_delete}    @tab Built-in function (@pxref{output_delete})
+@item @code{output_value}     @tab Built-in function (@pxref{output_value})
 @item                         @tab
 @item @code{P}                @tab
 @item @code{P@i{[0-9]+}}      @tab
@@ -254,6 +268,9 @@
 @item @code{sizes}            @tab Built-in function (@pxref{sizes})
 @item @code{SL}               @tab
 @item @code{slice}            @tab Built-in function (@pxref{slice})
+@item @code{slider_create}    @tab Built-in function (@pxref{slider_create})
+@item @code{slider_delete}    @tab Built-in function (@pxref{slider_delete})
+@item @code{slider_value}     @tab Built-in function (@pxref{slider_value})
 @item @code{SLOPE}            @tab Pulser @code{SLOPE} keyword
 @item @code{sqrt}             @tab Built-in function (@pxref{sqrt})
 @item @code{START}            @tab

@@ -1,6 +1,6 @@
 @c $Id$
 @c
-@c Copyright (C) 2001 Jens Thoms Toerring
+@c Copyright (C) 1999-2002 Jens Thoms Toerring
 @c
 @c This file is part of fsc2.
 @c
@@ -40,6 +40,7 @@
 * er035m_sas::    Bruker NMR Gaussmeter ER 035 M (Serial, Stand-Alone)
 * hfs9000::       Tektronix Stimulus System HFS9000 (Berlin W-Band)
 * hp8647a::       HP RF Synthesizer HP8647A
+* ips20_4::       Oxford Magnet Sweep Power Supply
 * keithley228a::  Magnet Power Supply Keithley 228A (Berlin W-Band)
 * kontron4060::   Kontron 4060 Voltmeter
 * lakeshore330::  Lake Shore 330 Temperature Controller
@@ -511,7 +512,7 @@ can range from @w{-4.7 V} to @w{4.7 V}.
 @end table
 
 
-@node hp8647a, keithley228a, hfs9000, Device Reference
+@node hp8647a, ips20_4, hfs9000, Device Reference
 @iftex
 @subheading HP RF Synthesizer HP8647A
 @end iftex
@@ -553,7 +554,33 @@ allowed -- change the configuration file to allow higher output levels.
 @end table
 
 
-@node keithley228a, kontron4060, hp8647a, Device Reference
+@node ips20_4, keithley228a, hp8647a, Device Reference
+@iftex
+@subheading Oxford Magnet Sweep Power Supply IPS20-4
+@end iftex
+@ifnottex
+@section Oxford Magnet Sweep Power Supply IPS20-4
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{ips20_4}
+
+@paragraphindent 0
+@strong{Description}: Sweep power supply for the Oxford superconducting
+magnet used for Berlin @w{360 GHz} spektrometer.
+
+@paragraphindent 0
+@strong{Controlled via}: GPIB bus (IEEE) via the Oxford ITC 503
+temperature controller transfering data between GPIB and Oxford ISOBUS.
+
+@paragraphindent 0
+@strong{Supported functions}:
+@table @samp
+@item magnet_name()
+@end table
+
+
+@node keithley228a, kontron4060, ips20_4, Device Reference
 @iftex
 @subheading Magnet Power Supply Keithley 228A (Berlin W-Band)
 @end iftex
@@ -798,7 +825,7 @@ channels, no internal modulation, 4 ADC and 2 DAC ports.
 
 @paragraphindent 0
 @strong{Description}: Stanford Research lock-in amplifier SR810, two
-channels, internal modulation, 4 ADC and 4 DAC ports.
+channels, auto acquisition, internal modulation, 4 ADC and 4 DAC ports.
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE).
@@ -807,6 +834,8 @@ channels, internal modulation, 4 ADC and 4 DAC ports.
 @strong{Supported functions}:
 @table @samp
 @item lockin_name( )
+@item lockin_auto_setup()
+@item lockin_auto_acquisition()
 @item lockin_get_data( )
 @item lockin_get_adc_data( )
 @item lockin_dac_voltage( )
@@ -834,7 +863,7 @@ channels, internal modulation, 4 ADC and 4 DAC ports.
 
 @paragraphindent 0
 @strong{Description}: Stanford Research lock-in amplifier SR830, two
-channels, internal modulation, 4 ADC and 4 DAC ports.
+channels, auto acquisition, internal modulation, 4 ADC and 4 DAC ports.
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE).
@@ -843,6 +872,8 @@ channels, internal modulation, 4 ADC and 4 DAC ports.
 @strong{Supported functions}:
 @table @samp
 @item lockin_name( )
+@item lockin_auto_setup()
+@item lockin_auto_acquisition()
 @item lockin_get_data( )
 @item lockin_get_adc_data( )
 @item lockin_dac_voltage( )

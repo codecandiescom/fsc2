@@ -1,7 +1,7 @@
 /*
   $Id$
 
-  Copyright (C) 2001 Jens Thoms Toerring
+  Copyright (C) 1999-2002 Jens Thoms Toerring
 
   This file is part of fsc2.
 
@@ -199,7 +199,7 @@ Var *f_print( Var *v )
 	{
 		if ( cv != NULL )      /* skip printing if there are not enough data */
 		{
-			if ( ! TEST_RUN || print_anyway )
+			if ( Internals.mode != TEST || print_anyway )
 				switch ( cv->type )
 				{
 					case INT_VAR :
@@ -228,7 +228,7 @@ Var *f_print( Var *v )
 		cp = ep + 4;
 	}
 
-	if ( ! TEST_RUN || print_anyway ) 
+	if ( Internals.mode != TEST || print_anyway ) 
 		eprint( NO_ERROR, UNSET, cp );
 
 	/* Finally free the copy of the format string and return number of
@@ -284,7 +284,7 @@ Var *f_showm( Var *v )
 		memmove( mp + 1, mp + 2, strlen( mp ) - 1 );
 	}
 
-	if ( FSC2_MODE == EXPERIMENT )
+	if ( Internals.mode == EXPERIMENT )
 		show_message( mess );
 
 	T_free( mess );
@@ -314,9 +314,9 @@ Var *f_wait( Var *v )
 	if ( how_long < 0.0 )
 	{
 		print( WARN, "Negative time value.\n" );
-		if ( TEST_RUN )
+		if ( Internals.mode == TEST )
 			return vars_push( INT_VAR, 1 );
-		return vars_push( INT_VAR, do_quit ? 0 : 1 );
+		return vars_push( INT_VAR, EDL.do_quit ? 0 : 1 );
 	}
 
 	if ( how_long > ( double ) LONG_MAX )
@@ -331,7 +331,7 @@ Var *f_wait( Var *v )
 		return 0;
 	}
 
-	if ( TEST_RUN )
+	if ( Internals.mode == TEST )
 		return vars_push( INT_VAR, 1 );
 
 	/* Set everything up for sleeping */
@@ -347,7 +347,7 @@ Var *f_wait( Var *v )
 	   to zero and then do
 
 	   setitimer( ITIMER_REAL, &sleepy, NULL );
-	   while( ! is_alarm && ! do_quit )
+	   while( ! is_alarm && ! EDL.do_quit )
 	       pause( );
 
 	   Unfortunately, there is a nasty race condition: If one of the signal
@@ -385,19 +385,19 @@ Var *f_wait( Var *v )
 			pause( );
 	}
 
-	/* Return 1 if end of sleeping time was reached, 0 if 'do_quit' was set.
-	   In case the wait ended due to a DO_QUIT signal we have to switch off
-	   the timer because after receipt of a 'do_quit' signal the timer may
-	   still be running and the finally arriving signal could kill the child
-	   prematurely. */
+	/* Return 1 if end of sleeping time was reached, 0 if 'EDL.do_quit' was
+	   set. In case the wait ended due to a DO_QUIT signal we have to switch
+	   off the timer because after receipt of a 'EDL.do_quit' signal the timer
+	   may still be running and the finally arriving signal could kill the
+	   child prematurely. */
 
-	if ( do_quit )
+	if ( EDL.do_quit )
 	{
 		sleepy.it_value.tv_usec = 0;
 		sleepy.it_value.tv_sec  = 0;
 	}
 
-	return vars_push( INT_VAR, do_quit ? 0 : 1 );
+	return vars_push( INT_VAR, EDL.do_quit ? 0 : 1 );
 }
 
 
@@ -790,12 +790,12 @@ Var *f_cscale( Var *v )
 
 	/* In a test run we're already done */
 
-	if ( TEST_RUN )
+	if ( Internals.mode == TEST )
 		return vars_push( INT_VAR, 1 );
 
 	/* Function can only be used in experiment section */
 
-	fsc2_assert( I_am == CHILD );
+	fsc2_assert( Internals.I_am == CHILD );
 
 	len =   sizeof( long )                /* length field itself */
 		  + 2 * sizeof( int )             /* type field and flags */
@@ -805,7 +805,7 @@ Var *f_cscale( Var *v )
 
 	if ( ( buf = get_shm( &shm_id, len ) ) == ( void * ) - 1 )
 	{
-		eprint( FATAL, UNSET, "Internal communication problem at %s:%d.\n",
+		eprint( FATAL, UNSET, "Internal communication problem at %s:%u.\n",
 				__FILE__, __LINE__ );
 		THROW( EXCEPTION );
 	}
@@ -909,12 +909,12 @@ Var *f_clabel( Var *v )
 			
 	/* In a test run we're already done */
 
-	if ( TEST_RUN )
+	if ( Internals.mode == TEST )
 		return vars_push( INT_VAR, 1 );
 
 	/* Function can only be used in experiment section */
 
-	fsc2_assert( I_am == CHILD );
+	fsc2_assert( Internals.I_am == CHILD );
 
 	len =   4 * sizeof( long )            /* length field and label lengths */
 		  + sizeof( int );                /* type field */
@@ -925,7 +925,7 @@ Var *f_clabel( Var *v )
 
 	if ( ( buf = get_shm( &shm_id, len ) ) == ( void * ) - 1 )
 	{
-		eprint( FATAL, UNSET, "Internal communication problem at %s:%d.\n",
+		eprint( FATAL, UNSET, "Internal communication problem at %s:%u.\n",
 				__FILE__, __LINE__ );
 		T_free( l[ Z ] );
 		T_free( l[ Y ] );
@@ -1049,12 +1049,12 @@ Var *f_rescale( Var *v )
 
 	/* In a test run we're already done */
 
-	if ( TEST_RUN )
+	if ( Internals.mode == TEST )
 		return vars_push( INT_VAR, 1 );
 
 	/* Function can only be used in experiment section */
 
-	fsc2_assert( I_am == CHILD );
+	fsc2_assert( Internals.I_am == CHILD );
 
 	len =   3 * sizeof( long )          /* length field and number of points */
 		  + sizeof( int );              /* type field */
@@ -1063,7 +1063,7 @@ Var *f_rescale( Var *v )
 
 	if ( ( buf = get_shm( &shm_id, len ) ) == ( void * ) - 1 )
 	{
-		eprint( FATAL, UNSET, "Internal communication problem at %s:%d.\n",
+		eprint( FATAL, UNSET, "Internal communication problem at %s:%u.\n",
 				__FILE__, __LINE__ );
 		THROW( EXCEPTION );
 	}
@@ -1129,13 +1129,13 @@ Var *f_display( Var *v )
 
 	dp = eval_display_args( v, &nsets );
 
-	if ( TEST_RUN )
+	if ( Internals.mode == TEST )
 	{
 		T_free( dp );
 		return vars_push( INT_VAR, 1 );
 	}
 
-	fsc2_assert( I_am == CHILD );
+	fsc2_assert( Internals.I_am == CHILD );
 
 	/* Determine the needed amount of shared memory */
 
@@ -1196,7 +1196,7 @@ Var *f_display( Var *v )
 			default :                   /* this better never happens... */
 				T_free( dp );
 				eprint( FATAL, UNSET, "Internal communication error at "
-						"%s:%d.\n", __FILE__, __LINE__ );
+						"%s:%u.\n", __FILE__, __LINE__ );
 				THROW( EXCEPTION );
 		}
 	}
@@ -1206,7 +1206,7 @@ Var *f_display( Var *v )
 	if ( ( buf = get_shm( &shm_id, len ) ) == ( void * ) - 1 )
 	{
 		T_free( dp );
-		eprint( FATAL, UNSET, "Internal communication problem at %s:%d.\n",
+		eprint( FATAL, UNSET, "Internal communication problem at %s:%u.\n",
 				__FILE__, __LINE__ );
 		THROW( EXCEPTION );
 	}
@@ -1320,7 +1320,7 @@ Var *f_display( Var *v )
 			default :                   /* this better never happens... */
 				T_free( dp );
 				eprint( FATAL, UNSET, "Internal communication error at "
-						"%s:%d.\n", __FILE__, __LINE__ );
+						"%s:%u.\n", __FILE__, __LINE__ );
 				THROW( EXCEPTION );
 		}
 	}
@@ -1484,7 +1484,7 @@ Var *f_clearcv( Var *v )
 
 	if ( ! G.is_init )
 	{
-		if ( TEST_RUN )
+		if ( Internals.mode == TEST )
 			print( WARN, "Can't clear curve, missing graphics "
 				   "initialisation.\n" );
 		return vars_push( INT_VAR, 0 );
@@ -1494,7 +1494,7 @@ Var *f_clearcv( Var *v )
 
 	if ( v == NULL )
 	{
-		if ( TEST_RUN )
+		if ( Internals.mode == TEST )
 			return vars_push( INT_VAR, 1 );
 
 		ca = T_malloc( sizeof *ca );
@@ -1516,7 +1516,7 @@ Var *f_clearcv( Var *v )
 				curve = v->val.lval;
 			else
 			{
-				if ( TEST_RUN )
+				if ( Internals.mode == TEST )
 					print( WARN, "Floating point value used as curve "
 						   "number.\n" );
 				curve = lrnd( v->val.dval );
@@ -1526,7 +1526,7 @@ Var *f_clearcv( Var *v )
 
 			if ( curve < 0 || curve > G.nc )
 			{
-				if ( TEST_RUN )
+				if ( Internals.mode == TEST )
 					print( SEVERE, "Can't clear curve %ld, curve "
 						   "does not exist.\n", curve );
 				continue;
@@ -1547,7 +1547,7 @@ Var *f_clearcv( Var *v )
 
 	/* In a test run this all there is to be done */
 
-	if ( TEST_RUN )
+	if ( Internals.mode == TEST )
 	{
 		T_free( ca );
 		return vars_push( INT_VAR, 1 );
@@ -1556,7 +1556,7 @@ Var *f_clearcv( Var *v )
 	/* Now starts the code only to be executed by the child, i.e. while the
 	   measurement is running. */
 
-	fsc2_assert( I_am == CHILD );
+	fsc2_assert( Internals.I_am == CHILD );
 
 	/* Now try to get a shared memory segment */
 
@@ -1565,7 +1565,7 @@ Var *f_clearcv( Var *v )
 	if ( ( buf = get_shm( &shm_id, len ) ) == ( void * ) - 1 )
 	{
 		T_free( ca );
-		eprint( FATAL, UNSET, "Internal communication problem at %s:%d.\n",
+		eprint( FATAL, UNSET, "Internal communication problem at %s:%u.\n",
 				__FILE__, __LINE__ );
 		THROW( EXCEPTION );
 	}

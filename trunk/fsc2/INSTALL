@@ -48,9 +48,8 @@ The XFORMS library is available from e.g. (some links may be outdated)
 
 The GPIB library consists of a library and a module to interface GPIB
 cards. You can either use the one I've written (works, as ar as I know,
-for fsc2 with 2.2 and 2.4 kernels and should also work with 2.0 kernels
-but I really didn't test it), the older LLP (Linux Lab Project) library
-to be found at
+for fsc2 with 2.0, 2.2 and 2.4 kernels), the older LLP (Linux Lab Project)
+library to be found at
 
   http://www.llp.fu-berlin.de
 
@@ -140,9 +139,9 @@ serial ports can be used.
 
 SERIAL_LOCK_DIR must be a string with the name of the directory where UUCP
 type lock files for the serial ports are created (there is a convention that
-programs opening a serial port create such a lock file that contain the
+programs opening a serial port create such a lock file that contains the
 process ID (PID) of the program as a decimal ASCII number, so that other
-programs can check if the port is already in use and by whom). Accordingto
+programs can check if the port is already in use and by whom). According to
 version 2.2 of the Filesystem Hierachy Standard this directory should be
 '/var/lock', but on old systems also '/usr/spool/locks' and '/usr/spool/uucp'
 where commonly used, so this can be adjusted via this variable. If you don't
@@ -154,10 +153,10 @@ not try to remove stale lock files and instead print an error message to the
 terminal and the lock file has to be removed manually.
 
 The final variable to be set is the email address of the person that will
-receive bug reports and notifications if fsc2 should crash. Usually, you
-should not change this variable except when you apply changes to the program.
-In this case sending these kind of mails to me obviously doesn't make too
-much sense...
+receive bug reports and notifications if fsc2 crashes. Usually, you should
+not change this variable except when you apply changes to the program. In
+this case sending these kind of mails to me obviously doesn't make too much
+sense...
 
 
 D) Compiling and Installing
@@ -174,10 +173,11 @@ This does *not* mean that the program didn't compile succesfully!
 Please don't start 'make' from one of the subdirectories, this is bound to
 fail in most cases.
 
-If you get more than a few warnings (except from header files not from fsc2)
-during the compilation stage of the program (or the make process fails
-completely please send me an email with the output of make. You can save the
-output of make to a file, e.g. makelog, by running make with the command
+If you get more than a few warnings (about problems with fsc2, not header
+files included by fsc2) during the compilation stage of the program (or
+the make process fails completely please send me an email with the output
+of make. You can save the output of make to a file, e.g. makelog, by
+running make with the command
 
     make > makelog 2>&1
 
@@ -224,7 +224,7 @@ Just start by typing 'fsc2 a.edl' or 'fsc2 z.edl' and click onto the "Start"
 button to get an idea about how fsc2 displays 1-dimensional and 2-dimensional
 data sets.
 
-             22-10-2001             Have fun, Jens
+             22-12-2001             Have fun, Jens
 
 -----------------------------------------------------------------------------
        _  _____  _____

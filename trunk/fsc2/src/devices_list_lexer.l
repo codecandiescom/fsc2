@@ -1,7 +1,7 @@
-/*
+/* -*-C-*-
   $Id$
 
-  Copyright (C) 2001 Jens Thoms Toerring
+  Copyright (C) 1999-2002 Jens Thoms Toerring
 
   This file is part of fsc2.
 
@@ -62,14 +62,14 @@ IDENT    [A-Za-z0-9][A-Za-z_0-9]*
 
 
             /* handling of C++ style comment spanning a whole line */
-{REM1}		Lc++;
+{REM1}		EDL.Lc++;
 
 			/* handling of C++ style comment not spanning a whole line */
-{REM2}		Lc++;
+{REM2}		EDL.Lc++;
 
 			/* handling of C style comment */
 {REM3}		{
-				Comm_Lc = Lc;
+				Comm_Lc = EDL.Lc;
 				yy_push_state( comm );
 			}
 
@@ -79,13 +79,13 @@ IDENT    [A-Za-z0-9][A-Za-z_0-9]*
 {REM5}      /* skipping all '*'s not followed by '/'s */
 
 			/* end of line character in a comment */
-\n			Lc++;
+\n			EDL.Lc++;
 
 			/* handling of EOF within a comment -> fatal error */
 <<EOF>>     {
 				eprint( FATAL, UNSET, "%s: End of device data base `%s' in "
 							   "comment starting at line %ld.\n",
-							   Fname, Comm_Lc );
+							   EDL.Fname, Comm_Lc );
 				THROW( EXCEPTION );
 			}
 
@@ -94,29 +94,29 @@ IDENT    [A-Za-z0-9][A-Za-z_0-9]*
 
 			/* end of comment and end of line */
 {EREM2}     {
-				Lc++;
+				EDL.Lc++;
 				yy_pop_state( );
 			}
 } /* end of <comm> */
 
 {EREM1}     {  /* End of comment without start */
 				eprint( FATAL, UNSET, "End of comment found at line %ld in "
-							   "device data base `%s'.\n", Lc, Fname );
+							   "device data base `%s'.\n", EDL.Lc, EDL.Fname );
 				THROW( EXCEPTION );
 			}
 
 			/* dump empty line (i.e. just containing tabs and spaces) */
-{WLWS}      Lc++;
+{WLWS}      EDL.Lc++;
 
 {LWS}       /* dumps of leading white space */
 
 			/* dumps trailing white space */
-{TWS}       Lc++;
+{TWS}       EDL.Lc++;
 
 {WS}        /* dum (other) white space */
 
 			/* writes out EOL character */
-\n			Lc++;
+\n			EDL.Lc++;
 
 ,           /* skip commas */
 ;           /* skip semicolon */
@@ -125,7 +125,7 @@ IDENT    [A-Za-z0-9][A-Za-z_0-9]*
 
 .           {
 				eprint( FATAL, UNSET, "Syntax error in devices data base `%s' "
-							   "at line %ld.\n", Fname, Lc );
+							   "at line %ld.\n", EDL.Fname, EDL.Lc );
 				THROW( EXCEPTION );
 			}
 
@@ -144,12 +144,13 @@ bool device_list_parse( void )
 	Device_Name *new_device_name;
 
 
-	T_free( Fname );
-	Fname = get_string( "%s%sDevices", libdir, slash( libdir ) );
+	T_free( EDL.Fname );
+	EDL.Fname = get_string( "%s%sDevices", libdir, slash( libdir ) );
 
-	if ( ( devices_listin = fopen( Fname, "r" ) ) == NULL )
+	if ( ( devices_listin = fopen( EDL.Fname, "r" ) ) == NULL )
 	{
-		eprint( FATAL, UNSET, "Can't open device data base `%s'.\n", Fname );
+		eprint( FATAL, UNSET, "Can't open device data base `%s'.\n",
+					   EDL.Fname );
 		return FAIL;
 	}
 
@@ -160,7 +161,7 @@ bool device_list_parse( void )
 	else
 		 is_restart = SET;
 
-	Lc = 1;
+	EDL.Lc = 1;
 
 	TRY
 	{
@@ -169,15 +170,15 @@ bool device_list_parse( void )
 			new_device_name = T_malloc( sizeof( Device_Name ) );
 			new_device_name->name = T_strdup( devices_listtext );
 			string_to_lower( new_device_name->name );
-			new_device_name->next = Device_Name_List;
-			Device_Name_List = new_device_name;
+			new_device_name->next = EDL.Device_Name_List;
+			EDL.Device_Name_List = new_device_name;
 		}
    		TRY_SUCCESS;
 	}
 	OTHERWISE
 	{
 		fclose( devices_listin );
-		PASSTHROUGH( );
+		RETHROW( );
 	}
 
 	fclose( devices_listin );

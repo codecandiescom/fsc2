@@ -1,7 +1,7 @@
 /*
   $Id$
 
-  Copyright (C) 2001 Jens Thoms Toerring
+  Copyright (C) 1999-2002 Jens Thoms Toerring
 
   This file is part of fsc2.
 
@@ -88,14 +88,14 @@ static void prepserror( const char *s );
 
 
 input:   /* empty */
-       | input ';'                 { Cur_Pulse = -1; }
-       | input line ';'            { Cur_Pulse = -1;
-	                                 fsc2_assert( Var_Stack == NULL ); }
+       | input ';'                 { EDL.Cur_Pulse = -1; }
+       | input line ';'            { EDL.Cur_Pulse = -1;
+	                                 fsc2_assert( EDL.Var_Stack == NULL ); }
        | input error ';'           { THROW( SYNTAX_ERROR_EXCEPTION ); }
        | input line P_TOK          { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | input line SECTION_LABEL  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
-       | input SECTION_LABEL       { Cur_Pulse = -1;
-	                                 fsc2_assert( Var_Stack == NULL );
+       | input SECTION_LABEL       { EDL.Cur_Pulse = -1;
+	                                 fsc2_assert( EDL.Var_Stack == NULL );
 	                                 YYACCEPT; }
 ;
 
@@ -108,7 +108,7 @@ line:    P_TOK prop
        | VAR_TOKEN MODA expr       { vars_assign( vars_mod( $1, $3 ), $1 ); }
        | VAR_TOKEN '['             { vars_arr_start( $1 ); }
          list1 ']'                 { vars_arr_lhs( $4 ); }
-         ass                       { fsc2_assert( Var_Stack == NULL ); }
+         ass                       { fsc2_assert( EDL.Var_Stack == NULL ); }
        | FUNC_TOKEN '(' list2 ')'  { vars_pop( func_call( $1 ) ); }
        | FUNC_TOKEN '['            { eprint( FATAL, SET, "`%s' is a predefined"
                                              " function.\n", $1->name );
@@ -137,13 +137,13 @@ ass:     '=' expr                  { vars_assign( $2, $2->prev ); }
 ;                                     
 
 prop:   /* empty */
-       | prop F_TOK sep1 expr sep2  { p_set( Cur_Pulse, P_FUNC, $4 ); }
-       | prop S_TOK sep1 expr sep2  { p_set( Cur_Pulse, P_POS, $4 ); }
-       | prop L_TOK sep1 expr sep2  { p_set( Cur_Pulse, P_LEN,$4 ); }
-       | prop DS_TOK sep1 expr sep2 { p_set( Cur_Pulse, P_DPOS, $4 ); }
-       | prop DL_TOK sep1 expr sep2 { p_set( Cur_Pulse, P_DLEN, $4 ); }
+       | prop F_TOK sep1 expr sep2  { p_set( EDL.Cur_Pulse, P_FUNC, $4 ); }
+       | prop S_TOK sep1 expr sep2  { p_set( EDL.Cur_Pulse, P_POS, $4 ); }
+       | prop L_TOK sep1 expr sep2  { p_set( EDL.Cur_Pulse, P_LEN,$4 ); }
+       | prop DS_TOK sep1 expr sep2 { p_set( EDL.Cur_Pulse, P_DPOS, $4 ); }
+       | prop DL_TOK sep1 expr sep2 { p_set( EDL.Cur_Pulse, P_DLEN, $4 ); }
        | prop PC_TOK sep1 VAR_REF
-         sep2                       { p_set( Cur_Pulse, P_PHASE, $4 ); }
+         sep2                       { p_set( EDL.Cur_Pulse, P_PHASE, $4 ); }
 ;
 
 /* separator between keyword and value */

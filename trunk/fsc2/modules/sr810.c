@@ -1,7 +1,7 @@
 /*
   $Id$
 
-  Copyright (C) 2001 Jens Thoms Toerring
+  Copyright (C) 1999-2002 Jens Thoms Toerring
 
   This file is part of fsc2.
 
@@ -287,7 +287,7 @@ int sr810_init_hook( void )
 
 int sr810_test_hook( void )
 {
-	memcpy( &sr810_stored, &sr810, sizeof( SR810 ) );
+	sr810_stored = sr810;
 	return 1;
 }
 
@@ -300,7 +300,7 @@ int sr810_exp_hook( void )
 {
 	/* Reset the device structure to the state it had before the test run */
 
-	memcpy( &sr810, &sr810_stored, sizeof( SR810 ) );
+	sr810 = sr810_stored;
 
 	if ( ! sr810_init( DEVICE_NAME ) )
 	{
@@ -1932,7 +1932,7 @@ static void sr810_set_display_channel( long type )
 	{
 		if ( dsp_ch_list[ i ] == DSP_CH_UNDEF )
 		{
-			eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
+			eprint( FATAL, UNSET, "Internal error detected at %s:%u.\n",
 					__FILE__, __LINE__ );
 			THROW( EXCEPTION );
 		}
@@ -2058,7 +2058,7 @@ static double sr810_get_auto_data( int type )
 #ifndef NDEBUG
 	if ( sr810.dsp_ch != type )
 	{
-		eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
+		eprint( FATAL, UNSET, "Internal error detected at %s:%u.\n",
 				__FILE__, __LINE__ );
 		THROW( EXCEPTION );
 	}

@@ -1,7 +1,7 @@
 /*
   $Id$
 
-  Copyright (C) 2001 Jens Thoms Toerring
+  Copyright (C) 1999-2002 Jens Thoms Toerring
 
   This file is part of fsc2.
 
@@ -128,10 +128,7 @@ Var *lockin_ma( Var *v )
 
 	if ( er023m.mf_index == UNDEF_MF_INDEX ||
 		 ! er023m.calib[ er023m.mf_index ].is_ma )
-	{
-		print( WARN, "MA is not calibrated.\n" );
-		compilation.error[ WARN ] -= 1;
-	}
+		print( NO_ERROR, "MA is not calibrated.\n" );
 
 	if ( v == NULL )
 		switch ( FSC2_MODE )

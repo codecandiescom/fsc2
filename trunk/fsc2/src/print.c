@@ -1,7 +1,7 @@
 /*
   $Id$
 
-  Copyright (C) 2001 Jens Thoms Toerring
+  Copyright (C) 1999-2002 Jens Thoms Toerring
 
   This file is part of fsc2.
 
@@ -267,7 +267,7 @@ static int get_print_file( FILE **fp, char **name )
 
 	/* Create the form for print setup */
 
-	print_form = G_Funcs.create_form_print( );
+	print_form = GUI.G_Funcs.create_form_print( );
 
 	/* If a printer command has already been set put it into the input object,
 	   otherwise set default command */
@@ -565,25 +565,25 @@ static void get_print_comm( void )
 		return;
 	
 	if ( pc_string != NULL )
-		fl_set_input( print_comment->pc_input, pc_string );
+		fl_set_input( GUI.print_comment->pc_input, pc_string );
 
 	pc_string = T_free( ( char * ) pc_string );
 
-	fl_show_form( print_comment->print_comment, FL_PLACE_MOUSE, FL_TRANSIENT,
-				  "fsc2: Print Text" );
+	fl_show_form( GUI.print_comment->print_comment, FL_PLACE_MOUSE,
+                  FL_TRANSIENT, "fsc2: Print Text" );
 
-	while ( ( obj = fl_do_forms( ) ) != print_comment->pc_done )
+	while ( ( obj = fl_do_forms( ) ) != GUI.print_comment->pc_done )
 	{
-		if ( obj == print_comment->pc_clear )
-			fl_set_input( print_comment->pc_input, NULL );
+		if ( obj == GUI.print_comment->pc_clear )
+			fl_set_input( GUI.print_comment->pc_input, NULL );
 	}
 
-	res = fl_get_input( print_comment->pc_input );
+	res = fl_get_input( GUI.print_comment->pc_input );
 	if ( res != NULL && *res != '\0' )
 		pc_string = T_strdup( res );
 
-	if ( fl_form_is_visible( print_comment->print_comment ) )
-		fl_hide_form( print_comment->print_comment );
+	if ( fl_form_is_visible( GUI.print_comment->print_comment ) )
+		fl_hide_form( GUI.print_comment->print_comment );
 }
 
 
@@ -1480,7 +1480,7 @@ static char **split_into_lines( int *num_lines )
 			OTHERWISE
 			{
 				T_free( lines[ i ] );
-				PASSTHROUGH( );
+				RETHROW( );
 			}
 
 			T_free( lines[ i ] );

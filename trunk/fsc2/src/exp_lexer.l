@@ -1,7 +1,7 @@
-/*
+/* -*-C-*-
   $Id$
 
-  Copyright (C) 2001 Jens Thoms Toerring
+  Copyright (C) 1999-2002 Jens Thoms Toerring
 
   This file is part of fsc2.
 
@@ -108,14 +108,14 @@ FUNC        {IDENT}"#"[0-9]+
 			/* Handling of file name lines */
 {FILE}      {
 				*( exptext + expleng - 1 ) = '\0';
-				T_free( Fname );
-				Fname = T_strdup( exptext + 2 );
+				T_free( EDL.Fname );
+				EDL.Fname = T_strdup( exptext + 2 );
 			}
 
 			/* Handling of line number lines */
 {LNUM}		{
 				*( exptext + expleng - 1 ) = '\0';
-				Lc = atol( exptext + 2 );
+				EDL.Lc = atol( exptext + 2 );
 			}
 
 			/* Handling of error messages from the cleaner */
@@ -253,7 +253,7 @@ FUNC        {IDENT}"#"[0-9]+
 						THROW( EXCEPTION );
 					}
 
-					if ( ! strcmp( exptext, "end" ) && On_Stop_Pos >= 0 )
+					if ( ! strcmp( exptext, "end" ) && EDL.On_Stop_Pos >= 0 )
 					{
 						eprint( FATAL, SET, "Function %s() can not be called "
 								"after the ON_STOP label.\n", exptext );
@@ -283,7 +283,7 @@ FUNC        {IDENT}"#"[0-9]+
 						THROW( EXCEPTION );
 					}
 
-					if ( ! strcmp( exptext, "end" ) && On_Stop_Pos >= 0 )
+					if ( ! strcmp( exptext, "end" ) && EDL.On_Stop_Pos >= 0 )
 					{
 						eprint( FATAL, SET, "Function %s() can not be called "
 								"after the ON_STOP label.\n", exptext );
@@ -376,15 +376,15 @@ FUNC        {IDENT}"#"[0-9]+
 
 int experiment_parser( FILE *in )
 {
-	if ( compilation.sections[ EXPERIMENT_SECTION ] )
+	if ( EDL.compilation.sections[ EXPERIMENT_SECTION ] )
 	{
 		eprint( FATAL, SET, "Multiple instances of EXPERIMENT section "
 		        "label.\n" );
 		THROW( EXCEPTION );
 	}
-	compilation.sections[ EXPERIMENT_SECTION ] = SET;
+	EDL.compilation.sections[ EXPERIMENT_SECTION ] = SET;
 
-	prg_length = 0;
+	EDL.prg_length = 0;
 	store_exp( in );
 	exp_test_run( );
 

@@ -1,7 +1,7 @@
 /*
   $Id$
 
-  Copyright (C) 2001 Jens Thoms Toerring
+  Copyright (C) 1999-2002 Jens Thoms Toerring
 
   This file is part of fsc2.
 
@@ -45,10 +45,12 @@ static time_t in_file_mod = 0;
 static char *title = NULL;
 static bool delete_file = UNSET;
 static bool delete_old_file = UNSET;
-
+static pid_t conn_pid;               /* pid of child process for handling
+                                        communication with scripts */
 static volatile int fsc2_death = 0;
 
-extern FL_resource xresources[ ];             /* from xinit.c */
+extern FL_resource xresources[ ];    /* from xinit.c */
+volatile bool conn_child_replied;
 
 
 /* Locally used functions */
@@ -71,7 +73,6 @@ int main( int argc, char *argv[ ] )
 {
 	char *fname;
 
-
 #if defined MDEBUG
 	if ( mcheck( NULL ) != 0 )
 	{
@@ -85,8 +86,38 @@ int main( int argc, char *argv[ ] )
 	   and GID, only switching back when creating or attaching to shared
 	   memory segments or accessing lock and log files. */
 
-	EUID = geteuid( );
-	EGID = getegid( );
+	Internals.EUID = geteuid( );
+	Internals.EGID = getegid( );
+
+    Internals.child_pid = 0;
+
+	Internals.mode = PREPARATION;
+	Internals.in_hook = UNSET;
+	Internals.I_am = PARENT;
+	Internals.just_testing = UNSET;
+	Internals.exit_hooks_are_run = UNSET;
+
+	prog_name = argv[ 0 ];
+
+	EDL.Lc = 0;
+	EDL.Fname = NULL;
+	EDL.Call_Stack = NULL;
+	EDL.prg_token = NULL;
+	EDL.On_Stop_Pos = -1;
+	EDL.Var_List = NULL;
+	EDL.Var_Stack = NULL;
+	EDL.do_quit = UNSET;
+	EDL.react_to_do_quit = SET;
+	EDL.File_List = NULL;
+	EDL.File_List_Len = 0;
+    EDL.Device_List = NULL;
+    EDL.Device_Name_List = NULL;
+    EDL.Num_Pulsers = 0;
+
+	Comm.data_semaphore = -1;
+	Comm.request_semaphore = -1;
+	Comm.MQ = NULL;
+	Comm.MQ_ID = -1;
 
 	lower_permissions( );
 
@@ -96,7 +127,7 @@ int main( int argc, char *argv[ ] )
 
 	/* Run a first test of the command line arguments */
 
-	cmdline_flags = scan_args( &argc, argv, &fname );
+	Internals.cmdline_flags = scan_args( &argc, argv, &fname );
 
 	/* Check via the lock file if there is already a process holding a lock,
 	   otherwise create one. This has to done after parsing the command line
@@ -125,19 +156,19 @@ int main( int argc, char *argv[ ] )
 
 	if ( argc > 1 )
 	{
-		cmdline_flags |= DO_LOAD;
+		Internals.cmdline_flags |= DO_LOAD;
 		fname = argv[ 1 ];
 	}
 
 	/* If '--delete' was given on the command line store flags that the input
 	   files needs to be deleted */
 
-	if ( fname != NULL && cmdline_flags & DO_DELETE )
+	if ( fname != NULL && Internals.cmdline_flags & DO_DELETE )
 		delete_file = delete_old_file = SET;
 
 	/* If there is a file argument try to load it */
 
-	if ( cmdline_flags & DO_LOAD )
+	if ( Internals.cmdline_flags & DO_LOAD )
 	{
 		TRY
 		{
@@ -147,7 +178,7 @@ int main( int argc, char *argv[ ] )
 		OTHERWISE
 			return EXIT_FAILURE;
 
-		load_file( main_form->browser, 1 );
+		load_file( GUI.main_form->browser, 1 );
 	}
 
 	/* Set handler for signal that's going to be send by the process that
@@ -159,31 +190,31 @@ int main( int argc, char *argv[ ] )
 	/* Only if starting the server for external connections succeeds really
 	   start the main loop */
 
-	if ( ( conn_pid = spawn_conn( cmdline_flags & ( DO_TEST | DO_START )
+	if ( ( conn_pid = spawn_conn( Internals.cmdline_flags &
+								  ( DO_TEST | DO_START )
 								  && is_loaded ) ) != -1 )
 	{
 		/* Trigger test or start of current EDL program if the appropriate
 		   flags were passed to the program on the command line */
 
-		if ( cmdline_flags & DO_TEST && is_loaded )
-			fl_trigger_object( main_form->test_file );
-		if ( cmdline_flags & DO_START && is_loaded )
-			fl_trigger_object( main_form->run );
+		if ( Internals.cmdline_flags & DO_TEST && is_loaded )
+			fl_trigger_object( GUI.main_form->test_file );
+		if ( Internals.cmdline_flags & DO_START && is_loaded )
+			fl_trigger_object( GUI.main_form->run );
 
 		/* If required send signal to invoking process */
 
-		if ( cmdline_flags & DO_SIGNAL )
+		if ( Internals.cmdline_flags & DO_SIGNAL )
 			kill( getppid( ), SIGUSR1 );
 
 		/* And, finally, here's the main loop of the program... */
 
-		while ( fl_do_forms( ) != main_form->quit )
+		while ( fl_do_forms( ) != GUI.main_form->quit )
 			;
 	}
 	else
 		fprintf( stderr, "fsc2: Internal failure on startup.\n" );
 
-	T_free( in_file );
 	T_free( title );
 	clean_up( );
 	xforms_close( );
@@ -208,16 +239,18 @@ static void test_machine_type( void )
 		 utsbuf.machine[ 0 ] == 'i' &&
 		 utsbuf.machine[ 1 ] >= '3' && utsbuf.machine[ 1 ] <= '6' &&
 		 ! strncmp( utsbuf.machine + 2, "86", 2 ) )
-		is_i386 = SET;
+		Internals.is_i386 = SET;
+	else
+		Internals.is_i386 = SET;
 }
 
 
-/*---------------------------------------------------------*/  
-/* Does a preliminary check of the command line arguments. */
-/* The main handling of arguments is only done after the   */
-/* graphics initialisation, but some have to be handled    */
-/* earlier.                                                */
-/*---------------------------------------------------------*/  
+/*-------------------------------------------------------*/  
+/* Do a preliminary check of the command line arguments. */
+/* The main handling of arguments is only done after the */
+/* graphics initialisation, but some arguments have to   */
+/* be dealt with earlier.                                */
+/*-------------------------------------------------------*/  
 
 static int scan_args( int *argc, char *argv[ ], char **fname )
 {
@@ -241,7 +274,7 @@ static int scan_args( int *argc, char *argv[ ], char **fname )
 				exit( EXIT_FAILURE );
 			}
 
-			just_testing = SET;      /* set "just_testing"-mode flag */
+			Internals.just_testing = SET;    /* set "just_testing"-mode flag */
 
 			seteuid( getuid( ) );
 			setegid( getgid( ) );
@@ -377,8 +410,8 @@ static void final_exit_handler( void )
 	if ( conn_pid > 0 )
 		kill( conn_pid, SIGTERM );
 
-	if ( child_pid > 0 )
-		kill( child_pid, SIGTERM );
+	if ( Internals.child_pid > 0 )
+		kill( Internals.child_pid, SIGTERM );
 
 	/* Do everything necessary to end the program */
 
@@ -386,17 +419,19 @@ static void final_exit_handler( void )
 		unlink( in_file );
 	unlink( FSC2_SOCKET );
 
+	T_free( in_file );
+
 	/* Delete all shared memory and also semaphore (if it still exists) */
 
 	delete_all_shm( );
-	if ( data_semaphore >= 0 )
-		sema_destroy( data_semaphore );
-	if ( request_semaphore >= 0 )
-		sema_destroy( request_semaphore );
+	if ( Comm.data_semaphore >= 0 )
+		sema_destroy( Comm.data_semaphore );
+	if ( Comm.request_semaphore >= 0 )
+		sema_destroy( Comm.request_semaphore );
 
 	/* Delete the lock file */
 
-	setuid( EUID );
+	setuid( Internals.EUID );
 	unlink( FSC2_LOCKFILE );
 
 	/* If program was killed by a signal indicating an unrecoverable error
@@ -406,16 +441,15 @@ static void final_exit_handler( void )
 	if ( fsc2_death != 0 && fsc2_death != SIGTERM )
 	{
 		if ( * ( ( int * ) xresources[ NOCRASHMAIL ].var ) == 0 &&
-			  ! ( cmdline_flags & NO_MAIL ) )
+			  ! ( Internals.cmdline_flags & NO_MAIL ) )
+		{
 			death_mail( fsc2_death );
+			fprintf( stderr, "A crash report has been sent to %s\n",
+					 MAIL_ADDRESS );
+		}
 
 		fprintf( stderr, "fsc2 (%d) killed by %s signal.\n", getpid( ),
 				 strsignal( fsc2_death ) );
-
-		if ( * ( ( int * ) xresources[ NOCRASHMAIL ].var ) == 0 &&
-			  ! ( cmdline_flags & NO_MAIL ) )
-			fprintf( stderr, "A crash report has been sent to %s\n",
-					 MAIL_ADDRESS );
 	}
 }
 
@@ -444,8 +478,8 @@ void load_file( FL_OBJECT *a, long reload )
 
 	if ( ! reload )
 	{
-		if ( main_form->Load->u_ldata == 0 &&
-			 main_form->Load->u_cdata == NULL )
+		if ( GUI.main_form->Load->u_ldata == 0 &&
+			 GUI.main_form->Load->u_cdata == NULL )
 		{
 			fn = fl_show_fselector( "Select input file:", NULL, "*.edl",
 									NULL );
@@ -473,8 +507,8 @@ void load_file( FL_OBJECT *a, long reload )
 		{
 			old_in_file = in_file;
 
-			in_file = main_form->Load->u_cdata;
-			main_form->Load->u_cdata = NULL;
+			in_file = GUI.main_form->Load->u_cdata;
+			GUI.main_form->Load->u_cdata = NULL;
 		}
 	}
 	else                              /* call via reload buton */
@@ -539,7 +573,7 @@ void load_file( FL_OBJECT *a, long reload )
 
 	T_free( title );
 	title = get_string( "fsc2: %s", in_file );
-	fl_set_form_title( main_form->fsc2, title );
+	fl_set_form_title( GUI.main_form->fsc2, title );
 
 	/* Read in and display the new file */
 
@@ -547,37 +581,37 @@ void load_file( FL_OBJECT *a, long reload )
 	state = FAIL;
 	is_tested = UNSET;
 
-	fl_activate_object( main_form->reload );
-	fl_set_object_lcol( main_form->reload, FL_BLACK );
-	fl_activate_object( main_form->Edit );
-	fl_set_object_lcol( main_form->Edit, FL_BLACK );
-	fl_activate_object( main_form->test_file );
-	fl_set_object_lcol( main_form->test_file, FL_BLACK );
-	fl_activate_object( main_form->run );
-	fl_set_object_lcol( main_form->run, FL_BLACK );
+	fl_activate_object( GUI.main_form->reload );
+	fl_set_object_lcol( GUI.main_form->reload, FL_BLACK );
+	fl_activate_object( GUI.main_form->Edit );
+	fl_set_object_lcol( GUI.main_form->Edit, FL_BLACK );
+	fl_activate_object( GUI.main_form->test_file );
+	fl_set_object_lcol( GUI.main_form->test_file, FL_BLACK );
+	fl_activate_object( GUI.main_form->run );
+	fl_set_object_lcol( GUI.main_form->run, FL_BLACK );
 
 	/* Run all the exit hooks and reset number of compilation errors */
 
-	if ( ! exit_hooks_are_run )
+	if ( ! Internals.exit_hooks_are_run )
 		run_exit_hooks( );
 
-	compilation.error[ FATAL ] = 
-		compilation.error[ SEVERE ] =
-		    compilation.error[ WARN ] = 0;
+	EDL.compilation.error[ FATAL ] = 
+		EDL.compilation.error[ SEVERE ] =
+		    EDL.compilation.error[ WARN ] = 0;
 
 	fclose( fp );
 
-	if ( main_form->Load->u_ldata != 0 )
+	if ( GUI.main_form->Load->u_ldata != 0 )
 	{
-		if ( main_form->Load->u_ldata == ( long ) 'S' )
-			fl_trigger_object( main_form->run );
-		if ( main_form->Load->u_ldata == ( long ) 'T' )
-			fl_trigger_object( main_form->test_file );
-		main_form->Load->u_ldata = 0;
+		if ( GUI.main_form->Load->u_ldata == ( long ) 'S' )
+			fl_trigger_object( GUI.main_form->run );
+		if ( GUI.main_form->Load->u_ldata == ( long ) 'T' )
+			fl_trigger_object( GUI.main_form->test_file );
+		GUI.main_form->Load->u_ldata = 0;
 	}
 
-	fl_activate_object( main_form->test_file );
-	fl_set_object_lcol( main_form->test_file, FL_BLACK );
+	fl_activate_object( GUI.main_form->test_file );
+	fl_set_object_lcol( GUI.main_form->test_file, FL_BLACK );
 
 	notify_conn( UNBUSY_SIGNAL );
 }
@@ -733,7 +767,7 @@ void test_file( FL_OBJECT *a, long b )
 
 	if ( running_test )
 	{
-		fl_set_cursor( FL_ObjWin( main_form->run ), XC_left_ptr );
+		fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_left_ptr );
 		user_break = SET;
 		delete_devices( );                       /* run the exit hooks ! */
 		eprint( FATAL, UNSET, 
@@ -788,7 +822,7 @@ void test_file( FL_OBJECT *a, long b )
 			return;
 		}
 
-		load_file( main_form->browser, 1 );
+		load_file( GUI.main_form->browser, 1 );
 		if ( ! is_loaded )
 		{
 			in_test = UNSET;
@@ -801,55 +835,55 @@ void test_file( FL_OBJECT *a, long b )
 	   which serves as a stop button for the test - so all the others got to
 	   be deactivated while the test is run */
 
-	fl_clear_browser( main_form->error_browser );
+	fl_clear_browser( GUI.main_form->error_browser );
 
-	fl_deactivate_object( main_form->Load );
-	fl_set_object_lcol( main_form->Load, FL_INACTIVE_COL );
-	fl_deactivate_object( main_form->reload );
-	fl_set_object_lcol( main_form->reload, FL_INACTIVE_COL );
-	fl_deactivate_object( main_form->Edit );
-	fl_set_object_lcol( main_form->Edit, FL_INACTIVE_COL );
-	fl_deactivate_object( main_form->run );
-	fl_set_object_lcol( main_form->run, FL_INACTIVE_COL );
-	fl_deactivate_object( main_form->quit );
-	fl_set_object_lcol( main_form->quit, FL_INACTIVE_COL );
-	fl_set_object_label( main_form->test_file, "Stop Test" );
-	fl_set_button_shortcut( main_form->test_file, "T", 1 );
+	fl_deactivate_object( GUI.main_form->Load );
+	fl_set_object_lcol( GUI.main_form->Load, FL_INACTIVE_COL );
+	fl_deactivate_object( GUI.main_form->reload );
+	fl_set_object_lcol( GUI.main_form->reload, FL_INACTIVE_COL );
+	fl_deactivate_object( GUI.main_form->Edit );
+	fl_set_object_lcol( GUI.main_form->Edit, FL_INACTIVE_COL );
+	fl_deactivate_object( GUI.main_form->run );
+	fl_set_object_lcol( GUI.main_form->run, FL_INACTIVE_COL );
+	fl_deactivate_object( GUI.main_form->quit );
+	fl_set_object_lcol( GUI.main_form->quit, FL_INACTIVE_COL );
+	fl_set_object_label( GUI.main_form->test_file, "Stop Test" );
+	fl_set_button_shortcut( GUI.main_form->test_file, "T", 1 );
 
 	user_break = UNSET;
 	running_test = SET;
-	fl_set_cursor( FL_ObjWin( main_form->run ), XC_watch );
+	fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_watch );
 	state = scan_main( in_file );
-	fl_set_cursor( FL_ObjWin( main_form->run ), XC_left_ptr );
+	fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_left_ptr );
 	running_test = UNSET;
 
 	if ( ! user_break )
 	{
 		is_tested = SET;                  /* show that file has been tested */
 		a->u_ldata = 0;
-		fl_deactivate_object( main_form->test_file );
-		fl_set_object_lcol( main_form->test_file, FL_INACTIVE );
+		fl_deactivate_object( GUI.main_form->test_file );
+		fl_set_object_lcol( GUI.main_form->test_file, FL_INACTIVE );
 	}
 	else
 	{
 		a->u_ldata = 1;
 		user_break = UNSET;
-		fl_activate_object( main_form->test_file );
-		fl_set_object_lcol( main_form->test_file, FL_BLACK );
+		fl_activate_object( GUI.main_form->test_file );
+		fl_set_object_lcol( GUI.main_form->test_file, FL_BLACK );
 	}
 
-	fl_set_object_label( main_form->test_file, "Test" );
-	fl_set_button_shortcut( main_form->test_file, "T", 1 );
-	fl_activate_object( main_form->Load );
-	fl_set_object_lcol( main_form->Load, FL_BLACK );
-	fl_activate_object( main_form->reload );
-	fl_set_object_lcol( main_form->reload, FL_BLACK );
-	fl_activate_object( main_form->Edit );
-	fl_set_object_lcol( main_form->Edit, FL_BLACK );
-	fl_activate_object( main_form->run );
-	fl_set_object_lcol( main_form->run, FL_BLACK );
-	fl_activate_object( main_form->quit );
-	fl_set_object_lcol( main_form->quit, FL_BLACK );
+	fl_set_object_label( GUI.main_form->test_file, "Test" );
+	fl_set_button_shortcut( GUI.main_form->test_file, "T", 1 );
+	fl_activate_object( GUI.main_form->Load );
+	fl_set_object_lcol( GUI.main_form->Load, FL_BLACK );
+	fl_activate_object( GUI.main_form->reload );
+	fl_set_object_lcol( GUI.main_form->reload, FL_BLACK );
+	fl_activate_object( GUI.main_form->Edit );
+	fl_set_object_lcol( GUI.main_form->Edit, FL_BLACK );
+	fl_activate_object( GUI.main_form->run );
+	fl_set_object_lcol( GUI.main_form->run, FL_BLACK );
+	fl_activate_object( GUI.main_form->quit );
+	fl_set_object_lcol( GUI.main_form->quit, FL_BLACK );
 
 	notify_conn( UNBUSY_SIGNAL );
 	in_test = UNSET;
@@ -882,8 +916,8 @@ void run_file( FL_OBJECT *a, long b )
 
 	if ( ! is_tested )              /* test file if not already done */
 	{
-		test_file( main_form->test_file, 1 );
-		if ( main_form->test_file->u_ldata == 1 )  /* user break ? */
+		test_file( GUI.main_form->test_file, 1 );
+		if ( GUI.main_form->test_file->u_ldata == 1 )  /* user break ? */
 			return;
 		notify_conn( BUSY_SIGNAL );
 	}
@@ -897,12 +931,12 @@ void run_file( FL_OBJECT *a, long b )
 									  "",
 									  2, "No", "Yes", "", 1 ) )
 			{
-				load_file( main_form->browser, 1 );
+				load_file( GUI.main_form->browser, 1 );
 				if ( ! is_loaded )
 					return;
 				is_tested = UNSET;
-				test_file( main_form->test_file, 1 );
-				if ( main_form->test_file->u_ldata == 1 )  /* user break ? */
+				test_file( GUI.main_form->test_file, 1 );
+				if ( GUI.main_form->test_file->u_ldata == 1 )/* user break ? */
 					return;
 				notify_conn( BUSY_SIGNAL );
 			}
@@ -918,27 +952,29 @@ void run_file( FL_OBJECT *a, long b )
 
 	/* If there were non-fatal errors ask user if he wants to continue */
 
-	if ( compilation.error[ SEVERE ] != 0 || compilation.error[ WARN ] != 0 )
+	if ( EDL.compilation.error[ SEVERE ] != 0 ||
+		 EDL.compilation.error[ WARN ] != 0 )
 	{
-		if ( compilation.error[ SEVERE ] != 0 )
+		if ( EDL.compilation.error[ SEVERE ] != 0 )
 		{
-			if ( compilation.error[ WARN ] != 0 )
+			if ( EDL.compilation.error[ WARN ] != 0 )
 			{
 				sprintf( str1, "There where %d severe warnings",
-						 compilation.error[ SEVERE ] );
-				sprintf( str2, "and %d warnings.", compilation.error[ WARN ] );
+						 EDL.compilation.error[ SEVERE ] );
+				sprintf( str2, "and %d warnings.",
+						 EDL.compilation.error[ WARN ] );
 			}
 			else
 			{
 				sprintf( str1, "There where %d severe warnings.",
-						 compilation.error[ SEVERE ] );
+						 EDL.compilation.error[ SEVERE ] );
 				str2[ 0 ] = '\0';
 			}
 		}
 		else
 		{
 			sprintf( str1, "There where %d warnings.",
-					 compilation.error[ WARN ] );
+					 EDL.compilation.error[ WARN ] );
 			str2[ 0 ] = '\0';
 		}
 
@@ -1004,9 +1040,9 @@ static bool display_file( char *name, FILE *fp )
 	/* Freeze browser, read consecutive lines, prepend line numbers (after
 	   expanding tab chars) and send lines to browser */
 
-	fl_clear_browser( main_form->browser );
-	fl_clear_browser( main_form->error_browser );
-	fl_freeze_form( main_form->browser->form );
+	fl_clear_browser( GUI.main_form->browser );
+	fl_clear_browser( GUI.main_form->error_browser );
+	fl_freeze_form( GUI.main_form->browser->form );
 
 	for ( i = 1; i <= lc; ++i )
 	{
@@ -1077,12 +1113,12 @@ static bool display_file( char *name, FILE *fp )
 			line[ 4 ] = 'f';
 		}
 
-		fl_add_browser_line( main_form->browser, line );
+		fl_add_browser_line( GUI.main_form->browser, line );
 	}
 
 	/* Unfreeze and thus redisplay the browser */
 
-	fl_unfreeze_form( main_form->browser->form );
+	fl_unfreeze_form( GUI.main_form->browser->form );
 	return OK;
 }
 
@@ -1108,13 +1144,13 @@ void clean_up( void )
 	/* Clear up the compilation structure */
 
 	for ( i = 0; i < 3; ++i )
-		compilation.error[ i ] = 0;
+		EDL.compilation.error[ i ] = 0;
 	for ( i = DEVICES_SECTION; i <= EXPERIMENT_SECTION; ++i )
-		compilation.sections[ i ] = UNSET;
+		EDL.compilation.sections[ i ] = UNSET;
 
 	/* Deallocate memory used for file names */
 
-	Fname = T_free( Fname );
+	EDL.Fname = T_free( EDL.Fname );
 
 	/* Run exit hook functions and unlink modules */
 
@@ -1172,7 +1208,7 @@ void run_help( FL_OBJECT *a, long b )
 	if ( bn != FL_SHORTCUT + 'S' && bn == FL_RIGHT_MOUSE )
 	{
 		eprint( NO_ERROR, UNSET,
-				( G_Funcs.size == LOW ) ? 
+				( GUI.G_Funcs.size == LOW ) ? 
 				"@n-------------------------------------------\n" :
 				"@n-----------------------------------------------\n" );
 		eprint( NO_ERROR, UNSET,
@@ -1184,7 +1220,7 @@ void run_help( FL_OBJECT *a, long b )
 				"@n<Shift> LMB: Show cross section (2D only)\n"
 				"@nLMB + MMB + <Space>: Switch between x/y cross section\n" );
 		eprint( NO_ERROR, UNSET,
-				( G_Funcs.size == LOW ) ? 
+				( GUI.G_Funcs.size == LOW ) ? 
 				"@n-------------------------------------------\n" :
 				"@n-----------------------------------------------\n" );
 		return;
@@ -1229,14 +1265,14 @@ static void start_help_browser( void )
 	{
 		av[ 0 ] = T_strdup( "opera" );
 		av[ 1 ] = T_strdup( "-newbrowser" );
-		av[ 2 ] = get_string( "file:%s%s%sfsc2.html",
+		av[ 2 ] = get_string( "file:%s%s%shtml/fsc2.html",
 							  docdir[ 0 ] != '/' ? "/" : "", docdir,
 							  slash( docdir ) );
 	}
 	else if ( browser && ! strcasecmp( browser, "konqueror" ) )
 	{
 		av[ 0 ] = T_strdup( "konqueror" );
-		av[ 1 ] = get_string( "file:%s%s%sfsc2.html",
+		av[ 1 ] = get_string( "file:%s%s%shtml/fsc2.html",
 							  docdir[ 0 ] != '/' ? "/" : "", docdir,
 							  slash( docdir ) );
 	}
@@ -1246,12 +1282,12 @@ static void start_help_browser( void )
 		av[ 0 ] = T_strdup( "xterm" );
 		av[ 1 ] = T_strdup( "-e" );
 		av[ 2 ] = T_strdup( browser );
-		av[ 3 ] = get_string( "%s%sfsc2.html", docdir, slash( docdir ) );
+		av[ 3 ] = get_string( "%s%shtml/fsc2.html", docdir, slash( docdir ) );
 	}
 	else if ( browser && strcasecmp( browser, "netscape" ) )
 	{
 		av[ 0 ] = T_strdup( browser );
-		av[ 1 ] = get_string( "file:%s%s%sfsc2.html",
+		av[ 1 ] = get_string( "file:%s%s%shtml/fsc2.html",
 							  docdir[ 0 ] != '/' ? "/" : "", docdir,
 							  slash( docdir ) );
 	}
@@ -1263,20 +1299,47 @@ static void start_help_browser( void )
 		av[ 0 ] = T_strdup( "netscape" );
 
 		if ( system( "xwininfo -name Netscape >/dev/null 2>&1" ) )
-			av[ 1 ] = get_string( "file:%s%s%sfsc2.html",
+			av[ 1 ] = get_string( "file:%s%s%shtml/fsc2.html",
 								  docdir[ 0 ] != '/' ? "/" : "", docdir,
 								  slash( docdir ) );
 		else
 		{
 			av[ 1 ] = T_strdup( "-remote" );
-			av[ 2 ] = get_string( "openURL(file:%s%s%sfsc2.html,new-window)",
-								  docdir[ 0 ] != '/' ? "/" : "", docdir,
-								  slash( docdir ) );
+			av[ 2 ] = 
+				   get_string( "openURL(file:%s%s%shtml/fsc2.html,new-window)",
+							   docdir[ 0 ] != '/' ? "/" : "", docdir,
+							   slash( docdir ) );
 		}
 	}
 
 	execvp( av[ 0 ], av );
 	_exit( EXIT_FAILURE );
+}
+
+
+/*-------------------------------------------------------------*/
+/* Callback function for an invisible button that is triggered */
+/* when the connection child sends a new file name.            */
+/*-------------------------------------------------------------*/
+
+void conn_callback( FL_OBJECT *a, long b )
+{
+	char line[ MAXLINE ];
+	int count;
+
+
+	a = a;
+	b = b;
+
+	while ( ( count = read( Comm.conn_pd[ READ ], line, MAXLINE ) ) == -1 &&
+			errno == EINTR )
+		;
+	line[ count - 1 ] = '\0';
+	GUI.main_form->Load->u_ldata = ( long ) line[ 0 ];
+	if ( line[ 1 ] == 'd' )
+		delete_file = SET;
+	GUI.main_form->Load->u_cdata = T_strdup( line + 2 );
+	fl_trigger_object( GUI.main_form->Load );
 }
 
 
@@ -1317,8 +1380,6 @@ static void set_main_signals( void )
 
 void main_sig_handler( int signo )
 {
-	char line[ MAXLINE ];
-	int count;
 	int errno_saved;
 
 
@@ -1330,22 +1391,12 @@ void main_sig_handler( int signo )
 			errno = errno_saved;
 			return;
 
-		case SIGUSR2 :
-			conn_child_replied = SET;
+		case SIGUSR1 :
+			fl_trigger_object( GUI.main_form->conn_button );
 			return;
 
-		case SIGUSR1 :
-			errno_saved = errno;
-			while ( ( count = read( conn_pd[ READ ], line, MAXLINE ) ) == -1 &&
-					errno == EINTR )
-				;
-			line[ count - 1 ] = '\0';
-			main_form->Load->u_ldata = ( long ) line[ 0 ];
-			if ( line[ 1 ] == 'd' )
-				delete_file = SET;
-			main_form->Load->u_cdata = T_strdup( line + 2 );
-			fl_trigger_object( main_form->Load );
-			errno = errno_saved;
+		case SIGUSR2 :
+			conn_child_replied = SET;
 			return;
 
 		/* Ignored signals : */
@@ -1360,13 +1411,13 @@ void main_sig_handler( int signo )
 		case SIGPIPE :
 			return;
 
-		/* All the remaining signals are deadly... We set fsc2_death to the
-		   signal number so final_exit_handler() can do appropriate things. */
+		/* All the remaining signals are deadly - set fsc2_death to the signal
+		   number so final_exit_handler() can do the appropriate things. */
 
 		default :
 			fsc2_death = signo;
 
-			if ( ! ( cmdline_flags & NO_MAIL ) )
+			if ( ! ( Internals.cmdline_flags & NO_MAIL ) )
 				DumpStack( );
 
 			exit( EXIT_FAILURE );
@@ -1388,7 +1439,7 @@ void notify_conn( int signo )
        experiment is running - in this case fsc2 is busy anyway and the
        connection process has already been informed about this. */
 
-	if ( conn_pid <= 0 || child_pid > 0 )
+	if ( conn_pid <= 0 || Internals.child_pid > 0 )
 		return;
 
 	kill( conn_pid, signo );

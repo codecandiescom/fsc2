@@ -1,7 +1,7 @@
 /*
   $Id$
 
-  Copyright (C) 2001 Jens Thoms Toerring
+  Copyright (C) 1999-2002 Jens Thoms Toerring
 
   This file is part of fsc2.
 
@@ -247,7 +247,8 @@ Var *vars_add_to_int_arr( Var *v1, Var *v2 )
 
 	if ( v1_len != elems )
 	{
-		if ( ! ( TEST_RUN && ( ( v1->flags | v2->flags ) & IS_DYNAMIC ) ) )
+		if ( ! ( Internals.mode == TEST &&
+				 ( ( v1->flags | v2->flags ) & IS_DYNAMIC ) ) )
 		{
 			 eprint( FATAL, SET, "Sizes of array slices to be added "
 					 "differ.\n" );
@@ -334,7 +335,8 @@ Var *vars_add_to_float_arr( Var *v1, Var *v2 )
 
 	if ( v1_len != elems )
 	{
-		if ( ! ( TEST_RUN && ( ( v1->flags | v2->flags ) & IS_DYNAMIC ) ) )
+		if ( ! ( Internals.mode == TEST &&
+				 ( ( v1->flags | v2->flags ) & IS_DYNAMIC ) ) )
 		{
 			eprint( FATAL, SET, "Sizes of array slices to be added "
 					"differ.\n" );
@@ -500,7 +502,8 @@ Var *vars_sub_from_int_arr( Var *v1, Var *v2 )
 
 	if ( v1_len != elems )
 	{
-		if ( ! ( TEST_RUN && ( ( v1->flags | v2->flags ) & IS_DYNAMIC ) ) )
+		if ( ! ( Internals.mode == TEST &&
+				 ( ( v1->flags | v2->flags ) & IS_DYNAMIC ) ) )
 		{
 			eprint( FATAL, SET, "Sizes of array slices to be subtracted "
 					"differ.\n" );
@@ -586,7 +589,8 @@ Var *vars_sub_from_float_arr( Var *v1, Var *v2 )
 
 	if ( v1_len != elems )
 	{
-		if ( ! ( TEST_RUN && ( ( v1->flags | v2->flags ) & IS_DYNAMIC ) ) )
+		if ( ! ( Internals.mode == TEST &&
+				 ( ( v1->flags | v2->flags ) & IS_DYNAMIC ) ) )
 		{
 			eprint( FATAL, SET, "Sizes of array slices to be subtracted "
 					"differ.\n" );
@@ -750,7 +754,8 @@ Var *vars_mult_by_int_arr( Var *v1, Var *v2 )
 
 	if ( v1_len != elems )
 	{
-		if ( ! ( TEST_RUN && ( ( v1->flags | v2->flags ) & IS_DYNAMIC ) ) )
+		if ( ! ( Internals.mode == TEST &&
+				 ( ( v1->flags | v2->flags ) & IS_DYNAMIC ) ) )
 		{
 			eprint( FATAL, SET, "Sizes of array slices to be multiplied "
 					"differ.\n" );
@@ -836,7 +841,8 @@ Var *vars_mult_by_float_arr( Var *v1, Var *v2 )
 
 	if ( v1_len != elems )
 	{
-		if ( ! ( TEST_RUN && ( ( v1->flags | v2->flags ) & IS_DYNAMIC ) ) )
+		if ( ! ( Internals.mode == TEST &&
+				 ( ( v1->flags | v2->flags ) & IS_DYNAMIC ) ) )
 		{
 			eprint( FATAL, SET, "Sizes of array slices to be multiplied "
 					"differ.\n" );
@@ -1035,7 +1041,8 @@ Var *vars_div_of_int_arr( Var *v1, Var *v2 )
 
 	if ( v1_len != elems )
 	{
-		if ( ! ( TEST_RUN && ( ( v1->flags | v2->flags ) & IS_DYNAMIC ) ) )
+		if ( ! ( Internals.mode == TEST &&
+				 ( ( v1->flags | v2->flags ) & IS_DYNAMIC ) ) )
 		{
 			eprint( FATAL, SET, "Sizes of array slices to be divided "
 					"differ.\n" );
@@ -1127,7 +1134,8 @@ Var *vars_div_of_float_arr( Var *v1, Var *v2 )
 
 	if ( v1_len != elems )
 	{
-		if ( ! ( TEST_RUN && ( ( v1->flags | v2->flags ) & IS_DYNAMIC ) ) )
+		if ( ! ( Internals.mode == TEST &&
+				 ( ( v1->flags | v2->flags ) & IS_DYNAMIC ) ) )
 		{
 			eprint( FATAL, SET, "Sizes of array slices to be divided "
 					"differ.\n" );
@@ -1343,7 +1351,8 @@ Var *vars_mod_of_int_arr( Var *v1, Var *v2 )
 
 	if ( v1_len != elems )
 	{
-		if ( ! ( TEST_RUN && ( ( v1->flags | v2->flags ) & IS_DYNAMIC ) ) )
+		if ( ! ( Internals.mode == TEST &&
+				 ( ( v1->flags | v2->flags ) & IS_DYNAMIC ) ) )
 		{
 			eprint( FATAL, SET, "Sizes of array slices modulo is to be "
 					"calculated from differ.\n" );
@@ -1435,7 +1444,8 @@ Var *vars_mod_of_float_arr( Var *v1, Var *v2 )
 
 	if ( v1_len != elems )
 	{
-		if ( ! ( TEST_RUN && ( ( v1->flags | v2->flags ) & IS_DYNAMIC ) ) )
+		if ( ! ( Internals.mode == TEST &&
+				 ( ( v1->flags | v2->flags ) & IS_DYNAMIC ) ) )
 		{
 			eprint( FATAL, SET, "Sizes of array slices modulo is to be "
 					"calculated from differ.\n" );
@@ -1718,7 +1728,8 @@ Var *vars_pow_of_int_arr( Var *v1, Var *v2 )
 
 	if ( v1_len != elems )
 	{
-		if ( ! ( TEST_RUN && ( ( v1->flags | v2->flags ) & IS_DYNAMIC ) ) )
+		if ( ! ( Internals.mode == TEST &&
+				 ( ( v1->flags | v2->flags ) & IS_DYNAMIC ) ) )
 		{
 			eprint( FATAL, SET, "Sizes of array slices used in "
 					"exponentiation differ.\n" );
@@ -1842,7 +1853,8 @@ Var *vars_pow_of_float_arr( Var *v1, Var *v2 )
 
 	if ( v1_len != elems )
 	{
-		if ( ! ( TEST_RUN && ( ( v1->flags | v2->flags ) & IS_DYNAMIC ) ) )
+		if ( ! ( Internals.mode == TEST &&
+				 ( ( v1->flags | v2->flags ) & IS_DYNAMIC ) ) )
 		{
 			eprint( FATAL, SET, "Sizes of array slices used in "
 					"exponentiation differ.\n" );

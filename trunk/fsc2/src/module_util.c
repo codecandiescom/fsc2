@@ -1,7 +1,7 @@
 /*
   $Id$
 
-  Copyright (C) 2001 Jens Thoms Toerring
+  Copyright (C) 1999-2002 Jens Thoms Toerring
 
   This file is part of fsc2.
 
@@ -25,14 +25,14 @@
 #include "fsc2.h"
 
 
-/*----------------------------------------------------------------------*/
-/* This function is called by modules to determine the current state of */
-/* the global variable FSC2_MODE without them being able to change it.  */
-/*----------------------------------------------------------------------*/
+/*-----------------------------------------------------*/
+/* This function is called by modules to determine the */
+/* current mode without them being able to change it.  */
+/*-----------------------------------------------------*/
 
 inline int get_mode( void )
 {
-	return FSC2_MODE;
+	return Internals.mode;
 }
 
 
@@ -43,9 +43,9 @@ inline int get_mode( void )
 
 inline void stop_on_user_request( void )
 {
-	if ( I_am == PARENT )
+	if ( Internals.I_am == PARENT )
 		fl_check_only_forms( );
-	if ( do_quit && react_to_do_quit )
+	if ( EDL.do_quit && EDL.react_to_do_quit )
 		THROW( USER_BREAK_EXCEPTION );
 }
 
@@ -123,7 +123,7 @@ inline long get_strict_long( Var *v, const char *snippet )
 {
 	if ( v->type == FLOAT_VAR )
 	{
-		if ( FSC2_MODE == EXPERIMENT )
+		if ( Internals.mode == EXPERIMENT )
 		{
 			if ( snippet != NULL )
 				print( SEVERE, "Floating point number used as %s, "
@@ -163,7 +163,7 @@ inline bool get_boolean( Var *v )
 
 	if ( v->type == FLOAT_VAR )
 	{
-		if ( FSC2_MODE != EXPERIMENT )
+		if ( Internals.mode != EXPERIMENT )
 		{
 			print( FATAL, "Floating point number found where boolean value "
 				   "was expected.\n" );

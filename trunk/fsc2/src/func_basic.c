@@ -1,7 +1,7 @@
 /*
   $Id$
 
-  Copyright (C) 2001 Jens Thoms Toerring
+  Copyright (C) 1999-2002 Jens Thoms Toerring
 
   This file is part of fsc2.
 
@@ -44,10 +44,10 @@ Var *f_abort( Var *v )
 
 	eprint( NO_ERROR, SET, "Exit due to call of abort().\n" );
 
-	if ( ! TEST_RUN )
+	if ( Internals.mode != TEST )
 	{
 		str = get_string( "Exit due to call of abort() in\n"
-						  "%s at line %ld.", Fname, Lc );
+						  "%s at line %ld.", EDL.Fname, EDL.Lc );
 		show_message( str );
 		T_free( str );
 		THROW( ABORT_EXCEPTION );
@@ -64,7 +64,7 @@ Var *f_abort( Var *v )
 Var *f_stopsim( Var *v )
 {
 	v = v;
-	do_quit = SET;
+	EDL.do_quit = SET;
 	return NULL;
 }
 
@@ -1503,7 +1503,7 @@ Var *f_mean( Var *v )
 			/* Test that the slice is within the arrays range */
 
 			if ( slice_len != 1 && a_index + slice_len > len ) {
-				if ( TEST_RUN && ( v->flags & IS_DYNAMIC ) )
+				if ( Internals.mode == TEST && ( v->flags & IS_DYNAMIC ) )
 					slice_len = len - a_index;
 				else
 				{
@@ -1625,7 +1625,7 @@ Var *f_slice( Var *v )
 
 	if ( a_index + slice_len > len )
 	{
-		if ( TEST_RUN && ( v->flags & IS_DYNAMIC ) )
+		if ( Internals.mode == TEST && ( v->flags & IS_DYNAMIC ) )
 			slice_len = len - a_index;
 		else
 		{

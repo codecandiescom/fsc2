@@ -1,7 +1,7 @@
-/*
+/* -*-C-*-
   $Id$
 
-  Copyright (C) 2001 Jens Thoms Toerring
+  Copyright (C) 1999-2002 Jens Thoms Toerring
 
   This file is part of fsc2.
 
@@ -109,14 +109,14 @@ WS          [\n \t]+
 			/* Handling of file name lines */
 {FILE}      {
 				*( varstext + varsleng - 1 ) = '\0';
-				T_free( Fname );
-				Fname = T_strdup( varstext + 2 );
+				T_free( EDL.Fname );
+				EDL.Fname = T_strdup( varstext + 2 );
 			}
 
 			/* Handling of line number lines */
 {LNUM}		{
 				*( varstext + varsleng - 1 ) = '\0';
-				Lc = atol( varstext + 2 );
+				EDL.Lc = atol( varstext + 2 );
 			}
 
 			/* Handling of error messages from the cleaner */
@@ -366,13 +366,13 @@ int variables_parser( FILE *in )
 
 	/* Don't allow more than one VARIABLES section */
 
-	if ( compilation.sections[ VARIABLES_SECTION ] )
+	if ( EDL.compilation.sections[ VARIABLES_SECTION ] )
 	{
 		eprint( FATAL, SET, "Multiple instances of VARIABLES section "
 				"label.\n" );
 		THROW( EXCEPTION );
 	}
-	compilation.sections[ VARIABLES_SECTION ] = SET;
+	EDL.compilation.sections[ VARIABLES_SECTION ] = SET;
 
 	varsin = in;
 

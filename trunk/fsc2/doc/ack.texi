@@ -11,16 +11,15 @@ allow me to spend quite large amounts of time on getting it to the state
 it is in now.
 
 All the people using the program sofar have from time to time been
-mis-used as alpha-testers. The first one accepting this unpleasant
-r@^ole has been Axel Weber in Frankfurt, who already dealt with the bugs
-and shortcomings of the very first version. Then, in Berlin, Stefan
-Weber, Chris W.@: M.@: Kay, Gerriet Eilers, Andreas Kuppig, Heike
-M@"ogling, Michael Fuhs, Anton Savitsky, Alexander Schnegg and Radek
-Kowalczyk took over. Finally, also Iwo Gatlik and Tomasz Motylewski
-(Basel University) got some share of the fun. I would like to thank them
-not only for the constant stream of bug reports and proposals for
-improvements or new features (and I sometimes needed quite a lot of
-convincing eventhough they where right) but, especially, for their
-enduring patience. Much too often, when they had to do an important
-experiment, things didn't work and they had to wait until I got it
-fixed. So many thanks to all of you.
+mis-used as alpha-testers. The first one accepting this unpleasant role
+has been Axel Weber in Frankfurt, who already dealt with the bugs and
+shortcomings of the very first version. Then, in Berlin, Stefan Weber,
+Chris W.@: M.@: Kay, Gerriet Eilers, Andreas Kuppig, Heike M@"ogling,
+Michael Fuhs, Anton Savitsky, Alexander Schnegg and Radek Kowalczyk took
+over. Finally, also Iwo Gatlik and Tomasz Motylewski (University Basel)
+got some share of the fun. I would like to thank them not only for the
+constant stream of bug reports and proposals for improvements or new
+features (and I sometimes needed quite a lot of convincing eventhough
+they where right) but, especially, for their enduring patience. Much too
+often, when they had to do an important experiment, things didn't work
+and they had to wait until I got it fixed. So many thanks to all of you.

@@ -1,7 +1,7 @@
 /*
   $Id$
 
-  Copyright (C) 2001 Jens Thoms Toerring
+  Copyright (C) 1999-2002 Jens Thoms Toerring
 
   This file is part of fsc2.
 
@@ -676,7 +676,7 @@ void lecroy9400_get_curve( int ch, WINDOW *w, double **array, long *length,
 	{
 		is_acquiring = UNSET;
 		T_free( data );
-		PASSTHROUGH( );
+		RETHROW( );
 	}
 
 	gain_fac = sset[ ( int ) lecroy9400.wv_desc[ ch ][ 4 ] - 22 ];

@@ -1,7 +1,7 @@
 /*
   $Id$
 
-  Copyright (C) 2001 Jens Thoms Toerring
+  Copyright (C) 1999-2002 Jens Thoms Toerring
 
   This file is part of fsc2.
 
@@ -43,6 +43,8 @@ static int tool_x, tool_y;
 static bool tool_has_been_shown = UNSET;
 static bool is_frozen = UNSET;
 static bool needs_pos = SET;
+static TOOL_BOX *Tool_Box = NULL;
+
 
 
 static struct {
@@ -79,7 +81,7 @@ static struct {
 
 static void func_intact_init( void )
 {
-	if ( G_Funcs.size == LOW )
+	if ( GUI.G_Funcs.size == LOW )
 	{
 		FI_sizes.WIN_MIN_WIDTH       = 30;
 		FI_sizes.WIN_MIN_HEIGHT      = 30;
@@ -144,7 +146,7 @@ Var *f_freeze( Var *v )
 
 	is_now_frozen = get_boolean( v );
 
-	if ( I_am == CHILD )
+	if ( Internals.I_am == CHILD )
 		writer( C_FREEZE, ( int ) is_now_frozen );
 
 	return vars_push( INT_VAR, ( long ) is_now_frozen );
@@ -208,14 +210,14 @@ void parent_freeze( int freeze )
 
 Var *f_layout( Var *v )
 {
-	int layout;
+	long layout;
 	const char *str[ ] = { "VERT", "VERTICAL", "HORI", "HORIZONTAL" };
 
 
 	if ( ! FI_sizes.is_init )
 		func_intact_init( );
 
-	if ( I_am == PARENT && Tool_Box != NULL )
+	if ( Internals.I_am == PARENT && Tool_Box != NULL )
 	{
 		print( FATAL, "Layout of tool box must be set before any buttons or "
 			   "sliders are created.\n" );
@@ -253,29 +255,29 @@ Var *f_layout( Var *v )
 	/* The child has no control over the graphical stuff, it has to pass all
 	   requests to the parent... */
 
-	if ( I_am == CHILD )
+	if ( Internals.I_am == CHILD )
 	{
 		char *buffer, *pos;
 		size_t len;
 
 		len = 2 * sizeof( long );
-		if ( Fname )
-			len += strlen( Fname ) + 1;
+		if ( EDL.Fname )
+			len += strlen( EDL.Fname ) + 1;
 		else
 			len++;
 
 		pos = buffer = T_malloc( len );
 
-		memcpy( pos, &Lc, sizeof( long ) );       /* current line number */
+		memcpy( pos, &EDL.Lc, sizeof( long ) );   /* current line number */
 		pos += sizeof( long );
 
-		* ( ( long * ) pos ) = ( long ) layout;   /* type of layout */
+		memcpy( pos, &layout, sizeof( long ) );   /* type of layout */
 		pos += sizeof( long );
 
-		if ( Fname )
+		if ( EDL.Fname )
 		{
-			strcpy( pos, Fname );                 /* current file name */
-			pos += strlen( Fname ) + 1;
+			strcpy( pos, EDL.Fname );             /* current file name */
+			pos += strlen( EDL.Fname ) + 1;
 		}
 		else
 			*pos++ = '\0';
@@ -385,7 +387,7 @@ Var *f_bcreate( Var *v )
 			/* Checking that the referenced group leader button exists
 			   and is also a RADIO_BUTTON can only be done by the parent */
 
-			if ( I_am == PARENT )
+			if ( Internals.I_am == PARENT )
 			{
 				/* Check that other group member exists at all */
 
@@ -445,7 +447,7 @@ Var *f_bcreate( Var *v )
 	   parameter into a buffer, pass it to the parent process and ask the
 	   parent to create the button */
 
-	if ( I_am == CHILD )
+	if ( Internals.I_am == CHILD )
 	{
 		char *buffer, *pos;
 		long new_ID;
@@ -456,8 +458,8 @@ Var *f_bcreate( Var *v )
 		/* Calculate length of buffer needed */
 
 		len = 3 * sizeof( long );
-		if ( Fname )
-			len += strlen( Fname ) + 1;
+		if ( EDL.Fname )
+			len += strlen( EDL.Fname ) + 1;
 		else
 			len++;
 		if ( label )
@@ -471,7 +473,7 @@ Var *f_bcreate( Var *v )
 
 		pos = buffer = T_malloc( len );
 
-		memcpy( pos, &Lc, sizeof( long ) );     /* current line number */
+		memcpy( pos, &EDL.Lc, sizeof( long ) ); /* current line number */
 		pos += sizeof( long );
 
 		memcpy( pos, &type, sizeof( long ) );   /* button type */
@@ -480,10 +482,10 @@ Var *f_bcreate( Var *v )
 		memcpy( pos, &coll, sizeof( long ) );   /* group leaders ID */
 		pos += sizeof( long );
 
-		if ( Fname )
+		if ( EDL.Fname )
 		{
-			strcpy( pos, Fname );               /* current file name */
-			pos += strlen( Fname ) + 1;
+			strcpy( pos, EDL.Fname );           /* current file name */
+			pos += strlen( EDL.Fname ) + 1;
 		}
 		else
 			*pos++ = '\0';
@@ -566,7 +568,7 @@ Var *f_bcreate( Var *v )
 
 	/* If this isn't just a test run really draw the new button */
 
-	if ( ! TEST_RUN )
+	if ( Internals.mode != TEST )
 		recreate_Tool_Box( );
 
 	return vars_push( INT_VAR, new_io->ID );
@@ -604,7 +606,7 @@ Var *f_bdelete( Var *v )
 		   gets passed to the parent in a buffer and the parent is asked to
 		   delete the button */
 
-		if ( I_am == CHILD )
+		if ( Internals.I_am == CHILD )
 		{
 			char *buffer, *pos;
 			size_t len;
@@ -621,21 +623,21 @@ Var *f_bdelete( Var *v )
 			/* Get a long enough buffer and write data */
 
 			len = 2 * sizeof( long );
-			if ( Fname )
-				len += strlen( Fname ) + 1;
+			if ( EDL.Fname )
+				len += strlen( EDL.Fname ) + 1;
 			else
 				len++;
 
 			pos = buffer = T_malloc( len );
 
-			memcpy( pos, &Lc, sizeof( long ) );       /* current line number */
+			memcpy( pos, &EDL.Lc, sizeof( long ) );   /* current line number */
 			pos += sizeof( long );
 			memcpy( pos, &v->val.lval, sizeof( long ) );  /* button ID */
 			pos += sizeof( long );
-			if ( Fname )
+			if ( EDL.Fname )
 			{
-				strcpy( pos, Fname );                 /* current file name */
-				pos += strlen( Fname ) + 1;
+				strcpy( pos, EDL.Fname );             /* current file name */
+				pos += strlen( EDL.Fname ) + 1;
 			}
 			else
 				*pos++ = '\0';
@@ -681,7 +683,7 @@ Var *f_bdelete( Var *v )
 
 		/* Delete the button (it's not drawn in a test run!) */
 
-		if ( ! TEST_RUN )
+		if ( Internals.mode != TEST )
 		{
 			fl_delete_object( io->self );
 			fl_free_object( io->self );
@@ -714,7 +716,7 @@ Var *f_bdelete( Var *v )
 
 		if ( Tool_Box->objs == NULL )
 		{
-			if ( ! TEST_RUN )
+			if ( Internals.mode != TEST )
 			{
 				if ( Tool_Box->Tools )
 				{
@@ -746,7 +748,7 @@ Var *f_bdelete( Var *v )
 
 	/* The child process is already done here, and also a test run */
 
-	if ( I_am == CHILD || TEST_RUN || ! Tool_Box )
+	if ( Internals.I_am == CHILD || Internals.mode == TEST || ! Tool_Box )
 		return vars_push( INT_VAR, 1 );
 
 	/* Redraw the form without the deleted buttons */
@@ -781,7 +783,7 @@ Var *f_bstate( Var *v )
 	/* Again, the child doesn't know about the button, so it got to ask the
 	   parent process */
 
-	if ( I_am == CHILD )
+	if ( Internals.I_am == CHILD )
 	{
 		long ID;
 		long chld_state = -1;
@@ -816,14 +818,14 @@ Var *f_bstate( Var *v )
 		/* Make up buffer to send to parent process */
 
 		len = 3 * sizeof( long );
-		if ( Fname )
-			len += strlen( Fname ) + 1;
+		if ( EDL.Fname )
+			len += strlen( EDL.Fname ) + 1;
 		else
 			len++;
 
 		pos = buffer = T_malloc( len );
 
-		memcpy( pos, &Lc, sizeof( long ) );     /* current line number */
+		memcpy( pos, &EDL.Lc, sizeof( long ) ); /* current line number */
 		pos += sizeof( long );
 
 		memcpy( pos, &ID, sizeof( long ) );     /* buttons ID */
@@ -833,10 +835,10 @@ Var *f_bstate( Var *v )
 		                                        /* state to be set (negative */
 		pos += sizeof( long );                  /* if not to be set)         */
 
-		if ( Fname )
+		if ( EDL.Fname )
 		{
-			strcpy( pos, Fname );               /* current file name */
-			pos += strlen( Fname ) + 1;
+			strcpy( pos, EDL.Fname );           /* current file name */
+			pos += strlen( EDL.Fname ) + 1;
 		}
 		else
 			*pos++ = '\0';
@@ -911,7 +913,7 @@ Var *f_bstate( Var *v )
 
 	/* If this isn't a test run set the button state */
 
-	if ( ! TEST_RUN )
+	if ( Internals.mode != TEST )
 		fl_set_button( io->self, io->state );
 
 	/* If one of the radio buttons is set all the other buttons belonging
@@ -926,7 +928,7 @@ Var *f_bstate( Var *v )
 				continue;
 
 			oio->state = 0;
-			if ( ! TEST_RUN )
+			if ( Internals.mode != TEST )
 				fl_set_button( oio->self, oio->state );
 		}
 	}
@@ -1079,7 +1081,7 @@ Var *f_screate( Var *v )
 	/* Again, the child process has to pass the parameter to the parent and
 	   ask it to create the slider */
 
-	if ( I_am == CHILD )
+	if ( Internals.I_am == CHILD )
 	{
 		char *buffer, *pos;
 		long new_ID;
@@ -1088,8 +1090,8 @@ Var *f_screate( Var *v )
 
 
 		len = 2 * sizeof( long ) + 3 * sizeof( double );
-		if ( Fname )
-			len += strlen( Fname ) + 1;
+		if ( EDL.Fname )
+			len += strlen( EDL.Fname ) + 1;
 		else
 			len++;
 		if ( label )
@@ -1103,7 +1105,7 @@ Var *f_screate( Var *v )
 
 		pos = buffer = T_malloc( len );
 
-		memcpy( pos, &Lc, sizeof( long ) );     /* store current line number */
+		memcpy( pos, &EDL.Lc, sizeof( long ) ); /* store current line number */
 		pos += sizeof( long );
 
 		memcpy( pos, &type, sizeof( long ) );   /* store slider type */
@@ -1118,10 +1120,10 @@ Var *f_screate( Var *v )
 		memcpy( pos, &step, sizeof( double ) );
 		pos += sizeof( double );
 
-		if ( Fname )
+		if ( EDL.Fname )
 		{
-			strcpy( pos, Fname );               /* store current file name */
-			pos += strlen( Fname ) + 1;
+			strcpy( pos, EDL.Fname );           /* store current file name */
+			pos += strlen( EDL.Fname ) + 1;
 		}
 		else
 			*pos++ = '\0';
@@ -1205,7 +1207,7 @@ Var *f_screate( Var *v )
 	
 	/* If this isn't a test run the slider must also be drawn */
 
-	if ( ! TEST_RUN )
+	if ( Internals.mode != TEST )
 		recreate_Tool_Box( );
 
 	return vars_push( INT_VAR, new_io->ID );
@@ -1239,7 +1241,7 @@ Var *f_sdelete( Var *v )
 		/* Child has no control over the sliders, it has to ask the parent
 		   process to delete the button */
 
-		if ( I_am == CHILD )
+		if ( Internals.I_am == CHILD )
 		{
 			char *buffer, *pos;
 			size_t len;
@@ -1254,23 +1256,23 @@ Var *f_sdelete( Var *v )
 			}
 
 			len = 2 * sizeof( long );
-			if ( Fname )
-				len += strlen( Fname ) + 1;
+			if ( EDL.Fname )
+				len += strlen( EDL.Fname ) + 1;
 			else
 				len++;
 
 			pos = buffer = T_malloc( len );
 
-			memcpy( pos, &Lc, sizeof( long ) );  /* current line number */
+			memcpy( pos, &EDL.Lc, sizeof( long ) );  /* current line number */
 			pos += sizeof( long );
 
 			memcpy( pos, &v->val.lval, sizeof( long ) );
 			pos += sizeof( long );               /* slider ID */
 
-			if ( Fname )
+			if ( EDL.Fname )
 			{
-				strcpy( pos, Fname );            /* current file name */
-				pos += strlen( Fname ) + 1;
+				strcpy( pos, EDL.Fname );        /* current file name */
+				pos += strlen( EDL.Fname ) + 1;
 			}
 			else
 				*pos++ = '\0';
@@ -1315,7 +1317,7 @@ Var *f_sdelete( Var *v )
 
 		/* Delete the slider object if its drawn */
 
-		if ( ! TEST_RUN && io->self )
+		if ( Internals.mode != TEST && io->self )
 		{
 			fl_delete_object( io->self );
 			fl_free_object( io->self );
@@ -1329,7 +1331,7 @@ Var *f_sdelete( Var *v )
 
 		if ( Tool_Box->objs == NULL )
 		{
-			if ( ! TEST_RUN )
+			if ( Internals.mode != TEST )
 			{
 				if ( Tool_Box->Tools )
 				{
@@ -1360,7 +1362,7 @@ Var *f_sdelete( Var *v )
 		v = vars_pop( v );
 	}	
 
-	if ( I_am == CHILD || TEST_RUN || ! Tool_Box )
+	if ( Internals.I_am == CHILD || Internals.mode == TEST || ! Tool_Box )
 		return vars_push( INT_VAR, 1 );
 
 	/* Redraw the tool box without the slider */
@@ -1394,7 +1396,7 @@ Var *f_svalue( Var *v )
 	/* Again, the child has to pass the arguments to the parent and ask it
 	   to set or return the slider value */
 
-	if ( I_am == CHILD )
+	if ( Internals.I_am == CHILD )
 	{
 		long ID;
 		long state = 0;
@@ -1431,29 +1433,29 @@ Var *f_svalue( Var *v )
 		}
 
 		len = 3 * sizeof( long ) + sizeof( double );
-		if ( Fname )
-			len += strlen( Fname ) + 1;
+		if ( EDL.Fname )
+			len += strlen( EDL.Fname ) + 1;
 		else
 			len++;
 
 		pos = buffer = T_malloc( len );
 
-		memcpy( pos, &Lc, sizeof( long ) );     /* current line number */
+		memcpy( pos, &EDL.Lc, sizeof( long ) );    /* current line number */
 		pos += sizeof( long );
 
-		memcpy( pos, &ID, sizeof( long ) );     /* sliders ID */
+		memcpy( pos, &ID, sizeof( long ) );        /* sliders ID */
 		pos += sizeof( long );
 
-		memcpy( pos, &state, sizeof( long ) );  /* needs slider setting ? */
+		memcpy( pos, &state, sizeof( long ) );     /* needs slider setting ? */
 		pos += sizeof( long );
 
-		memcpy( pos, &val, sizeof( double ) );  /* new slider value */
+		memcpy( pos, &val, sizeof( double ) );     /* new slider value */
 		pos += sizeof( double );
 
-		if ( Fname )
+		if ( EDL.Fname )
 		{
-			strcpy( pos, Fname );               /* current file name */
-			pos += strlen( Fname ) + 1;
+			strcpy( pos, EDL.Fname );              /* current file name */
+			pos += strlen( EDL.Fname ) + 1;
 		}
 		else
 			*pos++ = '\0';
@@ -1528,7 +1530,7 @@ Var *f_svalue( Var *v )
 		io->value = lrnd( ( io->value - io->start_val ) / io->step )
 			        * io->step + io->start_val;
 
-	if ( ! TEST_RUN )
+	if ( Internals.mode != TEST )
 		fl_set_slider_value( io->self, io->value );
 
 	if ( ( v = vars_pop( v ) ) != NULL )
@@ -1690,7 +1692,7 @@ Var *f_icreate( Var *v )
 	   parameter into a buffer, pass it to the parent process and ask the
 	   parent to create the button */
 
-	if ( I_am == CHILD )
+	if ( Internals.I_am == CHILD )
 	{
 		char *buffer, *pos;
 		long new_ID;
@@ -1703,8 +1705,8 @@ Var *f_icreate( Var *v )
 		len = 2 * sizeof( long )
 			  + ( ( type == INT_INPUT || type == INT_OUTPUT ) ?
 				  sizeof( long ) : sizeof( double ) );
-		if ( Fname )
-			len += strlen( Fname ) + 1;
+		if ( EDL.Fname )
+			len += strlen( EDL.Fname ) + 1;
 		else
 			len++;
 		if ( label )
@@ -1722,10 +1724,10 @@ Var *f_icreate( Var *v )
 
 		pos = buffer = T_malloc( len );
 
-		memcpy( pos, &Lc, sizeof( long ) );     /* current line number */
+		memcpy( pos, &EDL.Lc, sizeof( long ) );     /* current line number */
 		pos += sizeof( long );
 
-		memcpy( pos, &type, sizeof( long ) );   /* object type */
+		memcpy( pos, &type, sizeof( long ) );       /* object type */
 		pos += sizeof( long );
 
 		if ( type == INT_INPUT || type == INT_OUTPUT )
@@ -1739,10 +1741,10 @@ Var *f_icreate( Var *v )
 			pos += sizeof( double );
 		}
 
-		if ( Fname )
+		if ( EDL.Fname )
 		{
-			strcpy( pos, Fname );               /* current file name */
-			pos += strlen( Fname ) + 1;
+			strcpy( pos, EDL.Fname );           /* current file name */
+			pos += strlen( EDL.Fname ) + 1;
 		}
 		else
 			*pos++ = '\0';
@@ -1853,7 +1855,7 @@ Var *f_icreate( Var *v )
 
 	/* If this isn't just a test run really draw the new object */
 
-	if ( ! TEST_RUN )
+	if ( Internals.mode != TEST )
 		recreate_Tool_Box( );
 
 	return vars_push( INT_VAR, new_io->ID );
@@ -1890,7 +1892,7 @@ Var *f_idelete( Var *v )
 		   gets passed to te parent in a buffer and the parent is asked to
 		   delete the object */
 
-		if ( I_am == CHILD )
+		if ( Internals.I_am == CHILD )
 		{
 			char *buffer, *pos;
 			size_t len;
@@ -1906,21 +1908,21 @@ Var *f_idelete( Var *v )
 			/* Get a bufer long enough and write data */
 
 			len = 2 * sizeof( long );
-			if ( Fname )
-				len += strlen( Fname ) + 1;
+			if ( EDL.Fname )
+				len += strlen( EDL.Fname ) + 1;
 			else
 				len++;
 
 			pos = buffer = T_malloc( len );
 
-			memcpy( pos, &Lc, sizeof( long ) );       /* current line number */
+			memcpy( pos, &EDL.Lc, sizeof( long ) );   /* current line number */
 			pos += sizeof( long );
 			memcpy( pos, &v->val.lval, sizeof( long ) );  /* object ID */
 			pos += sizeof( long );
-			if ( Fname )
+			if ( EDL.Fname )
 			{
-				strcpy( pos, Fname );                 /* current file name */
-				pos += strlen( Fname ) + 1;
+				strcpy( pos, EDL.Fname );             /* current file name */
+				pos += strlen( EDL.Fname ) + 1;
 			}
 			else
 				*pos++ = '\0';
@@ -1966,7 +1968,7 @@ Var *f_idelete( Var *v )
 
 		/* Delete the object (its not drawn in a test run!) */
 
-		if ( ! TEST_RUN )
+		if ( Internals.mode != TEST )
 		{
 			fl_delete_object( io->self );
 			fl_free_object( io->self );
@@ -1979,7 +1981,7 @@ Var *f_idelete( Var *v )
 
 		if ( Tool_Box->objs == NULL )
 		{
-			if ( ! TEST_RUN )
+			if ( Internals.mode != TEST )
 			{
 				if ( Tool_Box->Tools )
 				{
@@ -2011,7 +2013,7 @@ Var *f_idelete( Var *v )
 
 	/* The child process is already done here, and in a test run we're also */
 
-	if ( I_am == CHILD || TEST_RUN || ! Tool_Box )
+	if ( Internals.I_am == CHILD || Internals.mode == TEST || ! Tool_Box )
 		return vars_push( INT_VAR, 1 );
 
 	/* Redraw the form without the deleted objects */
@@ -2046,7 +2048,7 @@ Var *f_ivalue( Var *v )
 	/* Again, the child has to pass the arguments to the parent and ask it
 	   to set or return the objects value */
 
-	if ( I_am == CHILD )
+	if ( Internals.I_am == CHILD )
 	{
 		long ID;
 		long state = 0;
@@ -2094,14 +2096,14 @@ Var *f_ivalue( Var *v )
 
 		len = 3 * sizeof( long );
 		len += state > 1 ? sizeof( double ) : sizeof( long );
-		if ( Fname )
-			len += strlen( Fname ) + 1;
+		if ( EDL.Fname )
+			len += strlen( EDL.Fname ) + 1;
 		else
 			len++;
 
 		pos = buffer = T_malloc( len );
 
-		memcpy( pos, &Lc, sizeof( long ) );     /* current line number */
+		memcpy( pos, &EDL.Lc, sizeof( long ) ); /* current line number */
 		pos += sizeof( long );
 
 		memcpy( pos, &ID, sizeof( long ) );     /* sliders ID */
@@ -2121,10 +2123,10 @@ Var *f_ivalue( Var *v )
 			pos += sizeof( double );
 		}
 
-		if ( Fname )
+		if ( EDL.Fname )
 		{
-			strcpy( pos, Fname );               /* current file name */
-			pos += strlen( Fname ) + 1;
+			strcpy( pos, EDL.Fname );           /* current file name */
+			pos += strlen( EDL.Fname ) + 1;
 		}
 		else
 			*pos++ = '\0';
@@ -2206,7 +2208,7 @@ Var *f_ivalue( Var *v )
 			io->val.dval = VALUE( v );
 	}
 
-	if ( ! TEST_RUN )
+	if ( Internals.mode != TEST )
 	{
 		if ( io->type == INT_INPUT || io->type == INT_OUTPUT )
 		{
@@ -2317,7 +2319,7 @@ static void recreate_Tool_Box( void )
 	unsigned int tool_w, tool_h;
 
 
-	if ( TEST_RUN )        /* just to make sure... */
+	if ( Internals.mode == TEST )        /* just to make sure... */
 		return;
 
 	/* If the tool box already exists we've got to find out its position
@@ -2361,8 +2363,8 @@ static void recreate_Tool_Box( void )
 
 			if ( XValue & flags && YValue & flags )
 			{
-				tool_x += border_offset_x;
-				tool_y += border_offset_y;
+				tool_x += GUI.border_offset_x;
+				tool_y += GUI.border_offset_y;
 				needs_pos = SET;
 			}
 		}
@@ -2928,7 +2930,7 @@ Var *f_objdel( Var *v )
 		   gets passed to the parent in a buffer and the parent is asked to
 		   delete the object */
 
-		if ( I_am == CHILD )
+		if ( Internals.I_am == CHILD )
 		{
 			char *buffer, *pos;
 			size_t len;
@@ -2944,21 +2946,21 @@ Var *f_objdel( Var *v )
 			/* Get a bufer long enough and write data */
 
 			len = 2 * sizeof( long );
-			if ( Fname )
-				len += strlen( Fname ) + 1;
+			if ( EDL.Fname )
+				len += strlen( EDL.Fname ) + 1;
 			else
 				len++;
 
 			pos = buffer = T_malloc( len );
 
-			memcpy( pos, &Lc, sizeof( long ) );       /* current line number */
+			memcpy( pos, &EDL.Lc, sizeof( long ) );   /* current line number */
 			pos += sizeof( long );
 			memcpy( pos, &v->val.lval, sizeof( long ) );        /* object ID */
 			pos += sizeof( long );
-			if ( Fname )
+			if ( EDL.Fname )
 			{
-				strcpy( pos, Fname );                 /* current file name */
-				pos += strlen( Fname ) + 1;
+				strcpy( pos, EDL.Fname );             /* current file name */
+				pos += strlen( EDL.Fname ) + 1;
 			}
 			else
 				*pos++ = '\0';
@@ -3015,7 +3017,7 @@ Var *f_objdel( Var *v )
 					break;
 
 				default :
-					eprint( FATAL, UNSET, "Internal error at %s:%d.\n",
+					eprint( FATAL, UNSET, "Internal error at %s:%u.\n",
 							__FILE__, __LINE__ );
 					THROW( EXCEPTION );
 			}

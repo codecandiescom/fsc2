@@ -1,7 +1,7 @@
 /*
   $Id$
 
-  Copyright (C) 2001 Jens Thoms Toerring
+  Copyright (C) 1999-2002 Jens Thoms Toerring
 
   This file is part of fsc2.
 
@@ -64,6 +64,7 @@ aeg_s_band    // S-band AEG magnet power supply (Frankfurt)
 aeg_x_band    // X-band AEG magnet power supply (Berlin)
 keithley228a  // W-band magnet power supply (Berlin)
 er032m        // Bruker ER 032 M field controller
+ips20_4       // Oxford sweep power supply
 
 
 // Field meter

@@ -1,7 +1,7 @@
 /*
   $Id$
 
-  Copyright (C) 2001 Jens Thoms Toerring
+  Copyright (C) 1999-2002 Jens Thoms Toerring
 
   This file is part of fsc2.
 
@@ -408,12 +408,12 @@ Var *boxcar_get_curve( Var *v )
 		if ( old_timo > 0 )
 			gpib_timeout( egg4402.device, old_timo );
 		T_free( buffer );
-		PASSTHROUGH( );
+		RETHROW( );
 	}
 	CATCH( EXCEPTION )
 	{
 		T_free( buffer );
-		PASSTHROUGH( );
+		RETHROW( );
 	}
 
 	/* Get a buffer for the data in binary form and convert the ASCII data */

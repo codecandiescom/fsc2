@@ -1,7 +1,7 @@
 /*
   $Id$
 
-  Copyright (C) 2001 Jens Thoms Toerring
+  Copyright (C) 1999-2002 Jens Thoms Toerring
 
   This file is part of fsc2.
 
@@ -143,11 +143,11 @@ input:   /* empty */
 	                                 Cur_PHS = -1;
 	                                 Cur_PHST = -1;
 									 Func_is_set = UNSET;
-                                     fsc2_assert( Var_Stack == NULL ); }
+                                     fsc2_assert( EDL.Var_Stack == NULL ); }
        | input SECTION_LABEL       { Channel_Type = PULSER_CHANNEL_NO_TYPE;
 	                                 Cur_PHS = -1;
 	                                 Cur_PHST = -1;
-	                                 fsc2_assert( Var_Stack == NULL );
+	                                 fsc2_assert( EDL.Var_Stack == NULL );
 									 Func_is_set = UNSET;
 									 YYACCEPT; }
        | input error ';'           { Channel_Type = PULSER_CHANNEL_NO_TYPE;
@@ -159,7 +159,7 @@ input:   /* empty */
 	                                 Cur_PHS = -1;
 	                                 Cur_PHST = -1;
 									 Func_is_set = UNSET;
-                                     fsc2_assert( Var_Stack == NULL ); }
+                                     fsc2_assert( EDL.Var_Stack == NULL ); }
 ;
 
 
@@ -566,7 +566,7 @@ static void ass_func( int function )
 	else
 	{
 		fprintf( stderr, "%s:%ld: Cur_Pulser = %ld, Cur_PHS = %d\n",
-				 Fname, Lc, Cur_Pulser, Cur_PHS );
+				 EDL.Fname, EDL.Lc, Cur_Pulser, Cur_PHS );
 		eprint( FATAL, SET, "Syntax error near `%s' when using pulser %s.\n",
 				assigntext, pulser_struct[ Cur_Pulser ].name );
 		THROW( EXCEPTION );

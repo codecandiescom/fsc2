@@ -1,7 +1,7 @@
 /* 
    $Id$
 
-  Copyright (C) 2001 Jens Thoms Toerring
+  Copyright (C) 1999-2002 Jens Thoms Toerring
 
   This file is part of fsc2.
 
@@ -249,10 +249,10 @@ Var *vars_get( char *name )
 	/* Try to find the variable with the name passed to the function */
 
 	if ( is_sorted )
-		return bsearch( name, Var_List, num_vars, sizeof *Var_List,
+		return bsearch( name, EDL.Var_List, num_vars, sizeof *EDL.Var_List,
 						comp_vars_2 );
 	else
-		for ( ptr = Var_List; ptr != NULL; ptr = ptr->next )
+		for ( ptr = EDL.Var_List; ptr != NULL; ptr = ptr->next )
 			if ( ! strcmp( ptr->name, name ) )
 				return ptr;
 
@@ -278,7 +278,7 @@ void vars_sort( void )
 
 	/* Find out how many variables exist */
 
-	for ( num_vars = 0, ptr = Var_List; ptr != NULL;
+	for ( num_vars = 0, ptr = EDL.Var_List; ptr != NULL;
 		  ptr = ptr->next, num_vars++ )
 		;
 
@@ -286,26 +286,26 @@ void vars_sort( void )
 	   to the variable names */
 
 	new_var_list = T_malloc( num_vars * sizeof *new_var_list );
-	for ( i = 0, ptr = Var_List; i < num_vars; i++, ptr = next_ptr )
+	for ( i = 0, ptr = EDL.Var_List; i < num_vars; i++, ptr = next_ptr )
 	{
 		memcpy( new_var_list + i, ptr, sizeof *new_var_list );
 		next_ptr = ptr->next;
 		T_free( ptr );
 	}
 
-	Var_List = new_var_list;
+	EDL.Var_List = new_var_list;
 
-	qsort( Var_List, num_vars, sizeof *Var_List, comp_vars_1 );
+	qsort( EDL.Var_List, num_vars, sizeof *EDL.Var_List, comp_vars_1 );
 
 	/* Reset the next and prev pointers */
 
-	for ( i = 0, ptr = Var_List; i < num_vars; ptr++, i++ )
+	for ( i = 0, ptr = EDL.Var_List; i < num_vars; ptr++, i++ )
 	{
 		ptr->next = ptr + 1;
 		ptr->prev = ptr - 1;
 	}
 
-	Var_List->prev = NULL;
+	EDL.Var_List->prev = NULL;
 	( --ptr )->next = NULL;
 
 	/* Set a flag that indicates that the list has been sorted */
@@ -360,15 +360,15 @@ Var *vars_new( char *name )
 	/* Set relevant entries in the new structure and make it the very first
 	   element in the list of variables */
 
-	vp->flags = NEW_VARIABLE;    /* set flag to indicate it's new */
-	vp->type = UNDEF_VAR;        /* set type to still undefined */
+	vp->flags = NEW_VARIABLE;        /* set flag to indicate it's new */
+	vp->type = UNDEF_VAR;            /* set type to still undefined */
 
-	vp->next = Var_List;         /* set pointer to it's successor */
-	if ( Var_List != NULL )      /* set previous pointer in successor */
-		Var_List->prev = vp;     /* (if this isn't the very first) */ 
-    Var_List = vp;               /* make it the head of the list */
+	vp->next = EDL.Var_List;         /* set pointer to it's successor */
+	if ( EDL.Var_List != NULL )      /* set previous pointer in successor */
+		EDL.Var_List->prev = vp;     /* (if this isn't the very first) */ 
+    EDL.Var_List = vp;               /* make it the head of the list */
 
-	return vp;                   /* return pointer to the structure */
+	return vp;                       /* return pointer to the structure */
 }
 
 
@@ -1218,9 +1218,9 @@ Var *vars_push( int type, ... )
 	
 	/* Finally append the new variable to the stack */
 
-	if ( ( stack = Var_Stack ) == NULL )
+	if ( ( stack = EDL.Var_Stack ) == NULL )
 	{
-		Var_Stack = new_stack_var;
+		EDL.Var_Stack = new_stack_var;
 		new_stack_var->prev = NULL;
 	}
 	else
@@ -1264,12 +1264,12 @@ Var *vars_pop( Var *v )
 	/* Figure out if 'v' is really on the stack - otherwise we have found
 	   a new bug */
 
-	for ( stack = Var_Stack; stack && stack != v; stack = stack->next )
+	for ( stack = EDL.Var_Stack; stack && stack != v; stack = stack->next )
 		prev = stack;
 
 	if ( stack == NULL )
 	{
-		eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
+		eprint( FATAL, UNSET, "Internal error detected at %s:%u.\n",
 				__FILE__, __LINE__ );
 		THROW( EXCEPTION );
 	}
@@ -1287,7 +1287,7 @@ Var *vars_pop( Var *v )
 	}
 	else
 	{
-		Var_Stack = v->next;
+		EDL.Var_Stack = v->next;
 		if ( v->next != NULL )
 			v->next->prev = NULL;
 	}
@@ -1322,7 +1322,7 @@ Var *vars_pop( Var *v )
 
 void vars_del_stack( void )
 {
-	while ( vars_pop( Var_Stack ) )
+	while ( vars_pop( EDL.Var_Stack ) )
 		;
 }
 
@@ -1350,7 +1350,7 @@ static void free_vars( void )
 	Var *ptr;
 
 
-	for ( ptr = Var_List; ptr != NULL; ptr = ptr->next )
+	for ( ptr = EDL.Var_List; ptr != NULL; ptr = ptr->next )
 	{
 		if ( ptr->name != NULL )
 			T_free( ptr->name );
@@ -1378,7 +1378,7 @@ static void free_vars( void )
 		}
 	}
 
-	Var_List = T_free( Var_List );
+	EDL.Var_List = T_free( EDL.Var_List );
 }
 
 
@@ -1409,7 +1409,7 @@ void vars_check( Var *v, int type )
 
 	if ( v == NULL )
 	{
-		eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
+		eprint( FATAL, UNSET, "Internal error detected at %s:%u.\n",
 				__FILE__, __LINE__ );
 		THROW( EXCEPTION );
 	}
@@ -1475,15 +1475,15 @@ bool vars_exist( Var *v )
 
 
 	if ( v->is_on_stack )
-		for ( lp = Var_Stack; lp != NULL && lp != v; lp = lp->next )
+		for ( lp = EDL.Var_Stack; lp != NULL && lp != v; lp = lp->next )
 			;
 	else
 	{
 		if ( is_sorted )
-			lp = bsearch( v->name, Var_List, num_vars, sizeof *Var_List,
-						  comp_vars_2 );
+			lp = bsearch( v->name, EDL.Var_List, num_vars,
+						  sizeof *EDL.Var_List, comp_vars_2 );
 		else
-			for ( lp = Var_List; lp != NULL && lp != v; lp = lp->next )
+			for ( lp = EDL.Var_List; lp != NULL && lp != v; lp = lp->next )
 				;
 	}
 
@@ -1723,7 +1723,7 @@ static long vars_calc_index( Var *a, Var *v )
 
 		if ( cur >= ( int ) a->sizes[ i ] )
 		{
-			if ( ! ( ( a->flags & IS_DYNAMIC ) && TEST_RUN )
+			if ( ! ( ( a->flags & IS_DYNAMIC ) && Internals.mode == TEST )
 				 || v->next != NULL || i != a->dim - 1 )
 			{
 				eprint( FATAL, SET, "Invalid array index #%d (value=%d) "

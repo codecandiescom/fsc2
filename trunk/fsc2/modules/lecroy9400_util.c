@@ -1,7 +1,7 @@
 /*
   $Id$
 
-  Copyright (C) 2001 Jens Thoms Toerring
+  Copyright (C) 1999-2002 Jens Thoms Toerring
 
   This file is part of fsc2.
 
@@ -412,7 +412,7 @@ long lecroy9400_translate_channel( int dir, long channel )
 				return DIGITIZER_CHANNEL_EXT10;
 
 			default :
-				print( FATAL, "Internal error detected at %s:%d.\n",
+				print( FATAL, "Internal error detected at %s:%u.\n",
 						__FILE__, __LINE__ );
 				THROW( EXCEPTION );
 		}
@@ -439,7 +439,7 @@ void lecroy9400_store_state( LECROY9400 *dest, LECROY9400 *src )
 		T_free( w );
 	}
 
-	memcpy( dest, src, sizeof( LECROY9400 ) );
+	*dest = *src;
 
 	if ( src->num_windows == 0 )
 	{
@@ -450,7 +450,7 @@ void lecroy9400_store_state( LECROY9400 *dest, LECROY9400 *src )
 	dest->w = T_malloc( src->num_windows * sizeof( WINDOW ) );
 	for ( i = 0, w = src->w; w != NULL; i++, w = w->next )
 	{
-		memcpy( dest->w + i, w, sizeof( WINDOW ) );
+		*( dest->w + i ) = *w;
 		if ( i != 0 )
 			dest->w->prev = dest->w - 1;
 		if ( w->next != NULL )

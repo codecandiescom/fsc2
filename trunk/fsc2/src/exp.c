@@ -1,7 +1,7 @@
 /*
   $Id$
 
-  Copyright (C) 2001 Jens Thoms Toerring
+  Copyright (C) 1999-2002 Jens Thoms Toerring
 
   This file is part of fsc2.
 
@@ -123,7 +123,7 @@ void store_exp( FILE *in )
 	else
 		is_restart = SET;
 
-	prg_token = NULL;
+	EDL.prg_token = NULL;
 
 	/* Get and store all tokens */
 
@@ -151,17 +151,18 @@ void store_exp( FILE *in )
 				THROW( EXCEPTION );
 			}
 
-			On_Stop_Pos = prg_length;
+			EDL.On_Stop_Pos = EDL.prg_length;
 			continue;
 		}
 
 		/* Get or extend memory for storing the tokens if necessary */
 
-		if ( prg_length % PRG_CHUNK_SIZE == 0 )
-			prg_token = T_realloc( prg_token, ( prg_length + PRG_CHUNK_SIZE )
-								              * sizeof( Prg_Token ) );
+		if ( EDL.prg_length % PRG_CHUNK_SIZE == 0 )
+			EDL.prg_token = T_realloc( EDL.prg_token,
+									   ( EDL.prg_length + PRG_CHUNK_SIZE )
+									   * sizeof( Prg_Token ) );
 
-		prg_token[ prg_length ].token = ret;   /* store token */
+		EDL.prg_token[ EDL.prg_length ].token = ret;   /* store token */
 
 		/* If the file name changed get a copy of the new file name. Then set
 		   the pointer in the program token structure to the file name and
@@ -170,20 +171,21 @@ void store_exp( FILE *in )
 		   point to the string, and it may only be free()ed when the program
 		   token structures get free()ed. */
 
-		if ( cur_Fname == NULL || strcmp( Fname, cur_Fname ) )
+		if ( cur_Fname == NULL || strcmp( EDL.Fname, cur_Fname ) )
 		{
 			cur_Fname = NULL;
-			cur_Fname = T_strdup( Fname );
+			cur_Fname = T_strdup( EDL.Fname );
 		}
 
-		prg_token[ prg_length ].Fname = cur_Fname;
-		prg_token[ prg_length ].Lc = Lc;
+		EDL.prg_token[ EDL.prg_length ].Fname = cur_Fname;
+		EDL.prg_token[ EDL.prg_length ].Lc = EDL.Lc;
 
 		/* Initialize pointers needed for flow control and the data entries
 		   used in repeat loops */
 
-		prg_token[ prg_length ].start = prg_token[ prg_length ].end = NULL;
-		prg_token[ prg_length ].counter = 0;
+		EDL.prg_token[ EDL.prg_length ].start =
+			EDL.prg_token[ EDL.prg_length ].end = NULL;
+		EDL.prg_token[ EDL.prg_length ].counter = 0;
 
 		/* In most cases it's enough just to copy the union with the value.
 		   But there are a few exceptions: for strings we need also a copy of
@@ -226,7 +228,7 @@ void store_exp( FILE *in )
 					THROW( EXCEPTION );
 				}
 
-				push_curly_brace( cur_Fname, Lc );
+				push_curly_brace( cur_Fname, EDL.Lc );
 				if ( in_loop )
 					curly_brace_in_loop_count++;
 				break;
@@ -270,27 +272,30 @@ void store_exp( FILE *in )
 				break;
 
 			case E_STR_TOKEN :
-				prg_token[ prg_length ].tv.sptr = NULL;
-				prg_token[ prg_length ].tv.sptr = T_strdup( exp_val.sptr );
+				EDL.prg_token[ EDL.prg_length ].tv.sptr = NULL;
+				EDL.prg_token[ EDL.prg_length ].tv.sptr =
+													  T_strdup( exp_val.sptr );
 				break;
 
 			case E_FUNC_TOKEN :
-				prg_token[ prg_length ].tv.vptr = NULL;
-				prg_token[ prg_length ].tv.vptr = T_malloc( sizeof( Var ) );
-				memcpy( prg_token[ prg_length ].tv.vptr, Var_Stack,
+				EDL.prg_token[ EDL.prg_length ].tv.vptr = NULL;
+				EDL.prg_token[ EDL.prg_length ].tv.vptr =
+													 T_malloc( sizeof( Var ) );
+				memcpy( EDL.prg_token[ EDL.prg_length ].tv.vptr, EDL.Var_Stack,
 						sizeof( Var ) );
-				prg_token[ prg_length ].tv.vptr->name = NULL;
-				prg_token[ prg_length ].tv.vptr->name =
-					                               T_strdup( Var_Stack->name );
-				vars_pop( Var_Stack );
+				EDL.prg_token[ EDL.prg_length ].tv.vptr->name = NULL;
+				EDL.prg_token[ EDL.prg_length ].tv.vptr->name =
+					                           T_strdup( EDL.Var_Stack->name );
+				vars_pop( EDL.Var_Stack );
 				break;
 
 			case E_VAR_REF :
-				prg_token[ prg_length ].tv.vptr = NULL;
-				prg_token[ prg_length ].tv.vptr = T_malloc( sizeof( Var ) );
-				memcpy( prg_token[ prg_length ].tv.vptr, Var_Stack,
+				EDL.prg_token[ EDL.prg_length ].tv.vptr = NULL;
+				EDL.prg_token[ EDL.prg_length ].tv.vptr =
+													 T_malloc( sizeof( Var ) );
+				memcpy( EDL.prg_token[ EDL.prg_length ].tv.vptr, EDL.Var_Stack,
 						sizeof( Var ) );
-				vars_pop( Var_Stack );
+				vars_pop( EDL.Var_Stack );
 				break;
 
 			case ';' :
@@ -319,11 +324,11 @@ void store_exp( FILE *in )
 				break;
 
 			default :
-				memcpy( &prg_token[ prg_length ].tv, &exp_val,
+				memcpy( &EDL.prg_token[ EDL.prg_length ].tv, &exp_val,
 						sizeof( Token_Val ) );
 		}
 
-		prg_length++;
+		EDL.prg_length++;
 	}
 
 	/* Check that all parentheses and braces are balanced */
@@ -418,13 +423,13 @@ void forget_prg( void )
 	long i;
 
 
-	On_Stop_Pos = -1;
+	EDL.On_Stop_Pos = -1;
 
 	/* Check if anything has to be done at all */
 
-	if ( prg_token == NULL )
+	if ( EDL.prg_token == NULL )
 	{
-		prg_length = 0;
+		EDL.prg_length = 0;
 		return;
 	}
 
@@ -432,38 +437,37 @@ void forget_prg( void )
 	   free the string, then free memory allocated in the program token
 	   structures. */
 
-	cur_Fname = prg_token[ 0 ].Fname;
+	cur_Fname = EDL.prg_token[ 0 ].Fname;
 	T_free( cur_Fname );
 
-	for ( i = 0; i < prg_length; ++i )
+	for ( i = 0; i < EDL.prg_length; ++i )
 	{
-		switch( prg_token[ i ].token )
+		switch( EDL.prg_token[ i ].token )
 		{
 			case E_STR_TOKEN :
-				T_free( prg_token[ i ].tv.sptr );
+				T_free( EDL.prg_token[ i ].tv.sptr );
 				break;
 			
 			case E_FUNC_TOKEN :       /* get rid of string for function name */
-				T_free( prg_token[ i ].tv.vptr->name );
+				T_free( EDL.prg_token[ i ].tv.vptr->name );
 				/* fall through */
 
 			case E_VAR_REF :          /* get rid of copy of stack variable */
-				T_free( prg_token[ i ].tv.vptr );
+				T_free( EDL.prg_token[ i ].tv.vptr );
 				break;
 		}
 
 		/* If the file name changed we store the pointer to the new name and
            free the string */
 
-		if ( prg_token[ i ].Fname != cur_Fname )
-			T_free( cur_Fname = prg_token[ i ].Fname );
+		if ( EDL.prg_token[ i ].Fname != cur_Fname )
+			T_free( cur_Fname = EDL.prg_token[ i ].Fname );
 	}
 
 	/* Get rid of the memory used for storing the tokens */
 
-	T_free( prg_token );
-	prg_token = NULL;
-	prg_length = 0;
+	EDL.prg_token = T_free( EDL.prg_token );
+	EDL.prg_length = 0;
 
 	/* Get rid of structures for curly braces that may have been survived
 	   when an exception got thrown */
@@ -485,25 +489,27 @@ static void loop_setup( void )
 	long cur_pos;
 
 
-	for ( i = 0; i < prg_length; ++i )
+	for ( i = 0; i < EDL.prg_length; ++i )
 	{
-		switch( prg_token[ i ].token )
+		switch( EDL.prg_token[ i ].token )
 		{
 			case FOREVER_TOK :
-				prg_token[ i ].counter = 1;
+				EDL.prg_token[ i ].counter = 1;
 				/* fall through */
 
 			case WHILE_TOK : case REPEAT_TOK :
 			case FOR_TOK   : case UNTIL_TOK :
 				cur_pos = i;
-				setup_while_or_repeat( prg_token[ i ].token, &i );
-				fsc2_assert( ! ( cur_pos < On_Stop_Pos && i > On_Stop_Pos ) );
+				setup_while_or_repeat( EDL.prg_token[ i ].token, &i );
+				fsc2_assert( ! ( cur_pos < EDL.On_Stop_Pos &&
+								 i > EDL.On_Stop_Pos ) );
 				break;
 
 			case IF_TOK : case UNLESS_TOK :
 				cur_pos = i;
 				setup_if_else( &i, NULL );
-				fsc2_assert( ! ( cur_pos < On_Stop_Pos && i > On_Stop_Pos ) );
+				fsc2_assert( ! ( cur_pos < EDL.On_Stop_Pos &&
+								 i > EDL.On_Stop_Pos ) );
 				break;
 		}
 	}
@@ -520,31 +526,31 @@ static void loop_setup( void )
 
 static void setup_while_or_repeat( int type, long *pos )
 {
-	Prg_Token *cur = prg_token + *pos;
+	Prg_Token *cur = EDL.prg_token + *pos;
 	long i = *pos + 1;
 
 
 	/* Start of with some sanity checks */
 
-	if ( i == prg_length )
+	if ( i == EDL.prg_length )
 	{
 		eprint( FATAL, UNSET, "%s:%ld: Unexpected end of file in EXPERIMENT "
-				"section.\n", prg_token[ i - 1 ].Fname,
-				prg_token[ i - 1 ].Lc );
+				"section.\n", EDL.prg_token[ i - 1 ].Fname,
+				EDL.prg_token[ i - 1 ].Lc );
 		THROW( EXCEPTION );
 	}
 
-	if ( type != FOREVER_TOK && prg_token[ i ].token == '{' )
+	if ( type != FOREVER_TOK && EDL.prg_token[ i ].token == '{' )
 	{
 		eprint( FATAL, UNSET, "%s:%ld: Missing loop condition.\n",
-				prg_token[ i ].Fname, prg_token[ i ].Lc );
+				EDL.prg_token[ i ].Fname, EDL.prg_token[ i ].Lc );
 		THROW( EXCEPTION );
 	}
 
-	if ( type == FOREVER_TOK && prg_token[ i ].token != '{' )
+	if ( type == FOREVER_TOK && EDL.prg_token[ i ].token != '{' )
 	{
 		eprint( FATAL, UNSET, "%s:%ld: No condition can be used for a FOREVER "
-				"loop.\n", prg_token[ i ].Fname, prg_token[ i ].Lc );
+				"loop.\n", EDL.prg_token[ i ].Fname, EDL.prg_token[ i ].Lc );
 		THROW( EXCEPTION );
 	}
 
@@ -555,22 +561,22 @@ static void setup_while_or_repeat( int type, long *pos )
 	   in `start' a pointer to the block header, i.e. the WHILE, UNTIL, REPEAT,
 	   FOR or FOREVER token. */
 
-	for ( ; i < prg_length; i++ )
+	for ( ; i < EDL.prg_length; i++ )
 	{
-		switch( prg_token[ i ].token )
+		switch( EDL.prg_token[ i ].token )
 		{
 			case WHILE_TOK : case REPEAT_TOK :
 			case FOR_TOK : case FOREVER_TOK :
 			case UNTIL_TOK :
-				setup_while_or_repeat( prg_token[ i ].token, &i );
+				setup_while_or_repeat( EDL.prg_token[ i ].token, &i );
 				break;
 
 			case NEXT_TOK :
-				prg_token[ i ].start = cur;
+				EDL.prg_token[ i ].start = cur;
 				break;
 
 			case BREAK_TOK :
-				prg_token[ i ].start = cur;
+				EDL.prg_token[ i ].start = cur;
 				break;
 
 			case IF_TOK : case UNLESS_TOK :
@@ -579,24 +585,24 @@ static void setup_while_or_repeat( int type, long *pos )
 
 			case ELSE_TOK :
 				eprint( FATAL, UNSET, "%s:%ld: ELSE without IF/UNLESS in "
-						"current block.\n", prg_token[ i ].Fname,
-						prg_token[ i ].Lc );
+						"current block.\n", EDL.prg_token[ i ].Fname,
+						EDL.prg_token[ i ].Lc );
 				THROW( EXCEPTION );
 
 			case '{' :
-				if ( i + 1 == prg_length )
+				if ( i + 1 == EDL.prg_length )
 				{
 					eprint( FATAL, UNSET, "%s:%ld: Unexpected end of file in "
-							"EXPERIMENT section.\n", prg_token[ i ].Fname,
-							prg_token[ i ].Lc );
+							"EXPERIMENT section.\n", EDL.prg_token[ i ].Fname,
+							EDL.prg_token[ i ].Lc );
 					THROW( EXCEPTION );
 				}
-				cur->start = &prg_token[ i + 1 ];
+				cur->start = EDL.prg_token + i + 1;
 				break;
 
 			case '}' :
-				cur->end = &prg_token[ i + 1 ];
-				prg_token[ i ].end = cur;
+				cur->end = EDL.prg_token + i + 1;
+				EDL.prg_token[ i ].end = cur;
 				*pos = i;
 				return;
 		}
@@ -619,7 +625,7 @@ static void setup_while_or_repeat( int type, long *pos )
 
 static void setup_if_else( long *pos, Prg_Token *cur_wr )
 {
-	Prg_Token *cur = prg_token + *pos;
+	Prg_Token *cur = EDL.prg_token + *pos;
 	long i = *pos + 1;
 	bool in_if = SET;
 	bool dont_need_close_parens = UNSET;           /* set for IF-ELSE and 
@@ -628,42 +634,42 @@ static void setup_if_else( long *pos, Prg_Token *cur_wr )
 
 	/* Start with some sanity checks */
 
-	if ( i == prg_length )
+	if ( i == EDL.prg_length )
 	{
 		eprint( FATAL, UNSET, "%s:%ld: Unexpected end of file in EXPERIMENT "
-				"section.\n", prg_token[ i - 1 ].Fname,
-				prg_token[ i - 1 ].Lc );
+				"section.\n", EDL.prg_token[ i - 1 ].Fname,
+				EDL.prg_token[ i - 1 ].Lc );
 		THROW( EXCEPTION );
 	}
 
-	if ( prg_token[ i ].token == '{' )
+	if ( EDL.prg_token[ i ].token == '{' )
 	{
 		eprint( FATAL, UNSET, "%s:%ld: Missing condition after IF/UNLESS.\n",
-				prg_token[ i ].Fname, prg_token[ i ].Lc );
+				EDL.prg_token[ i ].Fname, EDL.prg_token[ i ].Lc );
 	}
 
 	/* Now let's get things done... */
 
-	for ( ; i < prg_length; i++ )
+	for ( ; i < EDL.prg_length; i++ )
 	{
-		switch( prg_token[ i ].token )
+		switch( EDL.prg_token[ i ].token )
 		{
 			case WHILE_TOK : case REPEAT_TOK :
 			case FOR_TOK : case FOREVER_TOK :
 			case UNTIL_TOK :
-				setup_while_or_repeat( prg_token[ i ].token, &i );
+				setup_while_or_repeat( EDL.prg_token[ i ].token, &i );
 				break;
 
 			case NEXT_TOK : case BREAK_TOK :
 				if ( cur_wr == NULL )
 				{
 					eprint( FATAL, UNSET, "%s:%ld: %s statement not within "
-							"a loop.\n", prg_token[ i ].token == NEXT_TOK ?
+							"a loop.\n", EDL.prg_token[ i ].token == NEXT_TOK ?
 							"NEXT" : "BREAK",
-							prg_token[ i ].Fname, prg_token[ i ].Lc );
+							EDL.prg_token[ i ].Fname, EDL.prg_token[ i ].Lc );
 					THROW( EXCEPTION );
 				}
-				prg_token[ i ].start = cur_wr;
+				EDL.prg_token[ i ].start = cur_wr;
 				break;
 
 			case IF_TOK : case UNLESS_TOK :
@@ -672,10 +678,10 @@ static void setup_if_else( long *pos, Prg_Token *cur_wr )
 				if ( dont_need_close_parens )
 				{
 					if ( cur->end != NULL )
-						( cur->end - 1 )->end = &prg_token[ i + 1 ];
+						( cur->end - 1 )->end = EDL.prg_token + i + 1;
 					else
-						cur->end = &prg_token[ i + 1 ];
-					prg_token[ i ].end = &prg_token[ i + 1 ];
+						cur->end = EDL.prg_token + i + 1;
+					EDL.prg_token[ i ].end = EDL.prg_token + i + 1;
 					*pos = i;
 					return;
 				}
@@ -683,19 +689,19 @@ static void setup_if_else( long *pos, Prg_Token *cur_wr )
 				break;
 
 			case ELSE_TOK :
-				if ( i + 1 == prg_length )
+				if ( i + 1 == EDL.prg_length )
 				{
 					eprint( FATAL, UNSET, "%s:%ld: Unexpected end of file in "
 							"EXPERIMENT section.\n",
-							prg_token[ i ].Fname, prg_token[ i ].Lc );
+							EDL.prg_token[ i ].Fname, EDL.prg_token[ i ].Lc );
 					THROW( EXCEPTION );
 				}
-				if ( prg_token[ i + 1 ].token != '{' &&
-					 prg_token[ i + 1 ].token != IF_TOK &&
-					 prg_token[ i + 1 ].token != UNLESS_TOK )
+				if ( EDL.prg_token[ i + 1 ].token != '{' &&
+					 EDL.prg_token[ i + 1 ].token != IF_TOK &&
+					 EDL.prg_token[ i + 1 ].token != UNLESS_TOK )
 				{
 					eprint( FATAL, UNSET, "%s:%ld: Missing '{' after ELSE.\n",
-							prg_token[ i ].Fname, prg_token[ i ].Lc );
+							EDL.prg_token[ i ].Fname, EDL.prg_token[ i ].Lc );
 					THROW( EXCEPTION );
 				}
 
@@ -707,43 +713,43 @@ static void setup_if_else( long *pos, Prg_Token *cur_wr )
 					THROW( EXCEPTION );
 				}
 
-				if (  prg_token[ i + 1 ].token == IF_TOK ||
-					  prg_token[ i + 1 ].token == UNLESS_TOK )
+				if (  EDL.prg_token[ i + 1 ].token == IF_TOK ||
+					  EDL.prg_token[ i + 1 ].token == UNLESS_TOK )
 				{
-					cur->end = &prg_token[ i ];
+					cur->end = EDL.prg_token + i;
 					dont_need_close_parens = SET;
 				}
 
 				break;
 
 			case '{' :
-				if ( i + 1 == prg_length )
+				if ( i + 1 == EDL.prg_length )
 				{
 					eprint( FATAL, UNSET, "%s:%ld: Unexpected end of file in "
 							"EXPERIMENT section.\n",
-							prg_token[ i ].Fname, prg_token[ i ].Lc );
+							EDL.prg_token[ i ].Fname, EDL.prg_token[ i ].Lc );
 					THROW( EXCEPTION );
 				}
 				if ( in_if )
-					cur->start = &prg_token[ i + 1 ];
+					cur->start = EDL.prg_token + i + 1;
 				else
-					cur->end = &prg_token[ i - 1 ];
+					cur->end = EDL.prg_token + i - 1;
 				break;
 
 			case '}' :
 				if ( in_if )
 				{
 					in_if = UNSET;
-					if ( i + 1 < prg_length &&
-						 prg_token[ i + 1 ].token == ELSE_TOK )
+					if ( i + 1 < EDL.prg_length &&
+						 EDL.prg_token[ i + 1 ].token == ELSE_TOK )
 						break;
 				}
 
 				if ( cur->end != NULL )
-					( cur->end - 1 )->end = &prg_token[ i + 1 ];
+					( cur->end - 1 )->end = EDL.prg_token + i + 1;
 				else
-					cur->end = &prg_token[ i + 1 ];
-				prg_token[ i ].end = &prg_token[ i + 1 ];
+					cur->end = EDL.prg_token + i + 1;
+				EDL.prg_token[ i ].end = EDL.prg_token + i + 1;
 				*pos = i;
 				return;
 		}
@@ -765,24 +771,24 @@ static void setup_if_else( long *pos, Prg_Token *cur_wr )
 
 static void exp_syntax_check( void )
 {
-	if ( prg_token == NULL )
+	if ( EDL.prg_token == NULL )
 		return;
 
-	Fname = T_free( Fname );
+	EDL.Fname = T_free( EDL.Fname );
 
 	TRY
 	{
-		cur_prg_token = prg_token;
+		EDL.cur_prg_token = EDL.prg_token;
 		exp_testparse( );
 		TRY_SUCCESS;
 	}
 	OTHERWISE
 	{
-		Fname = NULL;
-		PASSTHROUGH( );
+		EDL.Fname = NULL;
+		RETHROW( );
 	}
 
-	Fname = NULL;
+	EDL.Fname = NULL;
 }
 
 
@@ -795,13 +801,14 @@ static void exp_syntax_check( void )
 
 int exp_testlex( void )
 {
-	if ( cur_prg_token != NULL && cur_prg_token < prg_token + prg_length )
+	if ( EDL.cur_prg_token != NULL &&
+		 EDL.cur_prg_token < EDL.prg_token + EDL.prg_length )
 	{
-		Fname = cur_prg_token->Fname;
-		Lc = cur_prg_token->Lc;
-		memcpy( &exp_testlval, &cur_prg_token->tv,
+		EDL.Fname = EDL.cur_prg_token->Fname;
+		EDL.Lc = EDL.cur_prg_token->Lc;
+		memcpy( &exp_testlval, &EDL.cur_prg_token->tv,
 				sizeof( Token_Val ) );
-		return cur_prg_token++->token;
+		return EDL.cur_prg_token++->token;
 	}
 
 	return 0;
@@ -820,10 +827,10 @@ int exp_testlex( void )
 void exp_test_run( void )
 {
 	Prg_Token *cur;
-	long old_FLL = File_List_Len;
+	long old_FLL = EDL.File_List_Len;
 
 
-	Fname = T_free( Fname );
+	EDL.Fname = T_free( EDL.Fname );
 
 	TRY
 	{
@@ -837,23 +844,22 @@ void exp_test_run( void )
 		      if there are e.g. infinite loops.
 		*/
 
-		TEST_RUN = SET;
-		FSC2_MODE = TEST;
+		Internals.mode = TEST;
 		save_restore_variables( SET );
 		vars_pop( f_dtime( NULL ) );
 		run_test_hooks( );
 
-		cur_prg_token = prg_token;
+		EDL.cur_prg_token = EDL.prg_token;
 		token_count = 0;
 
-		while ( cur_prg_token != NULL &&
-				cur_prg_token < prg_token + prg_length )
+		while ( EDL.cur_prg_token != NULL &&
+				EDL.cur_prg_token < EDL.prg_token + EDL.prg_length )
 		{
 			token_count++;
 
 			/* Give the `Stop Test' button a chance to get tested... */
 
-			if ( ! just_testing && token_count >= CHECK_FORMS_AFTER )
+			if ( ! Internals.just_testing && token_count >= CHECK_FORMS_AFTER )
 			{
 				fl_check_only_forms( );
 				token_count %= CHECK_FORMS_AFTER;
@@ -862,119 +868,119 @@ void exp_test_run( void )
 			/* This will be set by the end() function which simulates
 			   pressing the "Stop" button in the display window */
 
-			if ( do_quit )
+			if ( EDL.do_quit )
 			{
-				if ( On_Stop_Pos < 0 )                /* no ON_STOP part ? */
+				if ( EDL.On_Stop_Pos < 0 )            /* no ON_STOP part ? */
 				{
-					cur_prg_token = NULL;             /* -> stop immediately */
+					EDL.cur_prg_token = NULL;         /* -> stop immediately */
 					break;
 				}
 				else                                  /* goto ON_STOP part */
-					cur_prg_token = prg_token + On_Stop_Pos;
+					EDL.cur_prg_token = EDL.prg_token + EDL.On_Stop_Pos;
 
-				do_quit = UNSET;
+				EDL.do_quit = UNSET;
 			}
 
-			switch ( cur_prg_token->token )
+			switch ( EDL.cur_prg_token->token )
 			{
 				case '}' :
-					cur_prg_token = cur_prg_token->end;
+					EDL.cur_prg_token = EDL.cur_prg_token->end;
 					break;
 
 				case WHILE_TOK :
-					cur = cur_prg_token;
+					cur = EDL.cur_prg_token;
 					if ( test_condition( cur ) )
 					{
 						cur->counter = 1;
-						cur_prg_token = cur->start;
+						EDL.cur_prg_token = cur->start;
 					}
 					else
 					{
 						cur->counter = 0;
-						cur_prg_token = cur->end;
+						EDL.cur_prg_token = cur->end;
 					}
 					break;
 
 				case UNTIL_TOK :
-					cur = cur_prg_token;
+					cur = EDL.cur_prg_token;
 					if ( ! test_condition( cur ) )
 					{
 						cur->counter = 1;
-						cur_prg_token = cur->start;
+						EDL.cur_prg_token = cur->start;
 					}
 					else
 					{
 						cur->counter = 0;
-						cur_prg_token = cur->end;
+						EDL.cur_prg_token = cur->end;
 					}
 					break;
 
 				case REPEAT_TOK :
-					cur = cur_prg_token;
+					cur = EDL.cur_prg_token;
 					if ( cur->counter == 0 )
 						get_max_repeat_count( cur );
 					if ( ++cur->count.repl.act <= cur->count.repl.max )
 					{
 						cur->counter++;
-						cur_prg_token = cur->start;
+						EDL.cur_prg_token = cur->start;
 					}
 					else
 					{
 						cur->counter = 0;
-						cur_prg_token = cur->end;
+						EDL.cur_prg_token = cur->end;
 					}
 					break;
 
 				case FOR_TOK :
-					cur = cur_prg_token;
+					cur = EDL.cur_prg_token;
 					if ( cur->counter == 0 )
 						get_for_cond( cur );
 					if ( test_for_cond( cur ) )
 					{
 						cur->counter = 1;
-						cur_prg_token = cur->start;
+						EDL.cur_prg_token = cur->start;
 					}
 					else
 					{
 						cur->counter = 0;
-						cur_prg_token = cur->end;
+						EDL.cur_prg_token = cur->end;
 					}
 					break;
 
 				case FOREVER_TOK :
-					cur = cur_prg_token;          /* just test once ! */
+					cur = EDL.cur_prg_token;          /* just test once ! */
 					if ( cur->counter )
 					{
 						cur->counter = 0;
-						cur_prg_token = cur->start;
+						EDL.cur_prg_token = cur->start;
 					}
 					else
 					{
 						cur->counter = 0;
-						cur_prg_token = cur->end;
+						EDL.cur_prg_token = cur->end;
 					}
 					break;
 
 				case BREAK_TOK :
-					cur_prg_token->start->counter = 0;
-					cur_prg_token = cur_prg_token->start->end;
+					EDL.cur_prg_token->start->counter = 0;
+					EDL.cur_prg_token = EDL.cur_prg_token->start->end;
 					break;
 
 				case NEXT_TOK :
-					cur_prg_token = cur_prg_token->start;
+					EDL.cur_prg_token = EDL.cur_prg_token->start;
 					break;
 
 				case IF_TOK : case UNLESS_TOK :
-					cur = cur_prg_token;
-					cur_prg_token
+					cur = EDL.cur_prg_token;
+					EDL.cur_prg_token
 						       = test_condition( cur ) ? cur->start : cur->end;
 					break;
 
 				case ELSE_TOK :
-					if ( ( cur_prg_token + 1 )->token == '{' )
-						cur_prg_token += 2;
+					if ( ( EDL.cur_prg_token + 1 )->token == '{' )
+						EDL.cur_prg_token += 2;
 					else
-						cur_prg_token++;
+						EDL.cur_prg_token++;
 					break;
 
 				default :
@@ -991,21 +997,20 @@ void exp_test_run( void )
 	{
 		tools_clear( );
 
-		Fname = NULL;
+		EDL.Fname = NULL;
 		save_restore_variables( UNSET );
 		
-		File_List_Len = old_FLL;
+		EDL.File_List_Len = old_FLL;
 		close_all_files( );
 			
-		TEST_RUN = UNSET;
-		FSC2_MODE = PREPARATION;
-		PASSTHROUGH( );
+		Internals.mode = PREPARATION;
+		RETHROW( );
 	}
 
-	Fname = NULL;
+	EDL.Fname = NULL;
 	save_restore_variables( UNSET );
-	File_List_Len = old_FLL;
-	TEST_RUN = UNSET;
+	EDL.File_List_Len = old_FLL;
+	Internals.mode = PREPARATION;
 }
 
 
@@ -1023,25 +1028,27 @@ int exp_runlex( void )
 	Var *ret, *from, *next, *prev;
 
 
-	if ( cur_prg_token != NULL && cur_prg_token < prg_token + prg_length )
+	if ( EDL.cur_prg_token != NULL &&
+		 EDL.cur_prg_token < EDL.prg_token + EDL.prg_length )
 	{
 		token_count++;
 
-		Fname = cur_prg_token->Fname;
-		Lc = cur_prg_token->Lc;
+		EDL.Fname = EDL.cur_prg_token->Fname;
+		EDL.Lc    = EDL.cur_prg_token->Lc;
 
-		switch( cur_prg_token->token )
+		switch( EDL.cur_prg_token->token )
 		{
-			case WHILE_TOK : case REPEAT_TOK : case BREAK_TOK :
-			case NEXT_TOK : case FOR_TOK : case FOREVER_TOK :
-			case UNTIL_TOK : case IF_TOK : case UNLESS_TOK : case ELSE_TOK :
+			case WHILE_TOK : case REPEAT_TOK : case BREAK_TOK   :
+			case NEXT_TOK  : case FOR_TOK    : case FOREVER_TOK :
+			case UNTIL_TOK : case IF_TOK     : case UNLESS_TOK  :
+			case ELSE_TOK  :
 				return 0;
 
 			case '}' :
 				return '}';
 
 			case E_STR_TOKEN :
-				exp_runlval.sptr = cur_prg_token->tv.sptr;
+				exp_runlval.sptr = EDL.cur_prg_token->tv.sptr;
 				break;
 
 			case E_FUNC_TOKEN :
@@ -1049,7 +1056,7 @@ int exp_runlex( void )
 				from = ret->from;
 				next = ret->next;
 				prev = ret->prev;
-				memcpy( ret, cur_prg_token->tv.vptr, sizeof( Var ) );
+				memcpy( ret, EDL.cur_prg_token->tv.vptr, sizeof( Var ) );
 				ret->name = T_strdup( ret->name );
 				ret->from = from;
 				ret->next = next;
@@ -1062,7 +1069,7 @@ int exp_runlex( void )
 				from = ret->from;
 				next = ret->next;
 				prev = ret->prev;
-				memcpy( ret, cur_prg_token->tv.vptr, sizeof( Var ) );
+				memcpy( ret, EDL.cur_prg_token->tv.vptr, sizeof( Var ) );
 				ret->from = from;
 				ret->next = next;
 				ret->prev = prev;
@@ -1070,12 +1077,12 @@ int exp_runlex( void )
 				break;
 
 			default :
-				memcpy( &exp_runlval, &cur_prg_token->tv,
+				memcpy( &exp_runlval, &EDL.cur_prg_token->tv,
 						sizeof( Token_Val ) );
 				break;
 		}
 
-		return cur_prg_token++->token;
+		return EDL.cur_prg_token++->token;
 	}
 	
 	return 0;
@@ -1093,14 +1100,15 @@ int conditionlex( void )
 	Var *ret, *from, *next, *prev;
 
 
-	if ( cur_prg_token != NULL && cur_prg_token < prg_token + prg_length )
+	if ( EDL.cur_prg_token != NULL &&
+		 EDL.cur_prg_token < EDL.prg_token + EDL.prg_length )
 	{
 		token_count++;
 
-		Fname = cur_prg_token->Fname;
-		Lc = cur_prg_token->Lc;
+		EDL.Fname = EDL.cur_prg_token->Fname;
+		EDL.Lc    = EDL.cur_prg_token->Lc;
 
-		switch( cur_prg_token->token )
+		switch( EDL.cur_prg_token->token )
 		{
 			case '{' :                 /* always signifies end of condition */
 				return 0;
@@ -1113,8 +1121,8 @@ int conditionlex( void )
 				THROW( EXCEPTION );
 
 			case E_STR_TOKEN :
-				conditionlval.sptr = cur_prg_token->tv.sptr;
-				cur_prg_token++;
+				conditionlval.sptr = EDL.cur_prg_token->tv.sptr;
+				EDL.cur_prg_token++;
 				return E_STR_TOKEN;
 
 			case E_FUNC_TOKEN :
@@ -1122,13 +1130,13 @@ int conditionlex( void )
 				from = ret->from;
 				next = ret->next;
 				prev = ret->prev;
-				memcpy( ret, cur_prg_token->tv.vptr, sizeof( Var ) );
+				memcpy( ret, EDL.cur_prg_token->tv.vptr, sizeof( Var ) );
 				ret->name = T_strdup( ret->name );
 				ret->from = from;
 				ret->next = next;
 				ret->prev = prev;
 				conditionlval.vptr = ret;
-				cur_prg_token++;
+				EDL.cur_prg_token++;
 				return E_FUNC_TOKEN;
 
 			case E_VAR_REF :
@@ -1136,24 +1144,24 @@ int conditionlex( void )
 				from = ret->from;
 				next = ret->next;
 				prev = ret->prev;
-				memcpy( ret, cur_prg_token->tv.vptr, sizeof( Var ) );
+				memcpy( ret, EDL.cur_prg_token->tv.vptr, sizeof( Var ) );
 				ret->from = from;
 				ret->next = next;
 				ret->prev = prev;
 				conditionlval.vptr = ret;
-				cur_prg_token++;
+				EDL.cur_prg_token++;
 				return E_VAR_REF;
 
 			case '=' :
-				eprint( FATAL, SET, "For comparisons `==' must be used "
-						"(`=' is for assignments only).\n", Fname, Lc );
+				eprint( FATAL, SET, "For comparisons `==' must be used ('=' "
+						"is for assignments only).\n", EDL.Fname, EDL.Lc );
 				THROW( EXCEPTION );
 
 			default :
-				memcpy( &conditionlval, &cur_prg_token->tv,
+				memcpy( &conditionlval, &EDL.cur_prg_token->tv,
 						sizeof( Token_Val ) );
-				token = cur_prg_token->token;
-				cur_prg_token++;
+				token = EDL.cur_prg_token->token;
+				EDL.cur_prg_token++;
 				return token;
 		}
 	}
@@ -1172,14 +1180,14 @@ bool test_condition( Prg_Token *cur )
 	bool condition;
 
 
-	cur_prg_token++;                          /* skip the WHILE or IF etc. */
-	conditionparse( );                        /* get the value */
-	fsc2_assert( Var_Stack->next == NULL );   /* Paranoia as usual... */
-	fsc2_assert( cur_prg_token->token == '{' );
+	EDL.cur_prg_token++;                        /* skip the WHILE or IF etc. */
+	conditionparse( );                          /* get the value */
+	fsc2_assert( EDL.Var_Stack->next == NULL );/* Paranoia as usual... */
+	fsc2_assert( EDL.cur_prg_token->token == '{' );
 
 	/* Make sure returned value is either integer or float */
 
-    if ( ! ( Var_Stack->type & ( INT_VAR | FLOAT_VAR ) ) )
+    if ( ! ( EDL.Var_Stack->type & ( INT_VAR | FLOAT_VAR ) ) )
     {
 		eprint( FATAL, UNSET, "%s:%ld: Invalid condition for %s.\n",
 				cur->Fname, cur->Lc,
@@ -1189,12 +1197,12 @@ bool test_condition( Prg_Token *cur )
 
 	/* Test the result - everything nonzero returns OK */
 
-	if ( Var_Stack->type == INT_VAR )
-		condition = Var_Stack->val.lval ? OK : FAIL;
+	if ( EDL.Var_Stack->type == INT_VAR )
+		condition = EDL.Var_Stack->val.lval ? OK : FAIL;
 	else
-		condition = Var_Stack->val.dval ? OK : FAIL;
+		condition = EDL.Var_Stack->val.dval ? OK : FAIL;
 
-	vars_pop( Var_Stack );
+	vars_pop( EDL.Var_Stack );
 	return ( cur->token != UNLESS_TOK ) ? condition : ! condition;
 }
 
@@ -1205,13 +1213,13 @@ bool test_condition( Prg_Token *cur )
 
 void get_max_repeat_count( Prg_Token *cur )
 {
-	cur_prg_token++;                         /* skip the REPEAT token */
-	conditionparse( );                       /* get the value */
-	fsc2_assert( Var_Stack->next == NULL );  /* Paranoia as usual... */
+	EDL.cur_prg_token++;                         /* skip the REPEAT token */
+	conditionparse( );                           /* get the value */
+	fsc2_assert( EDL.Var_Stack->next == NULL );  /* Paranoia as usual... */
 
 	/* Make sure the repeat count is either int or float */
 
-	if ( ! ( Var_Stack->type & ( INT_VAR | FLOAT_VAR ) ) )
+	if ( ! ( EDL.Var_Stack->type & ( INT_VAR | FLOAT_VAR ) ) )
 	{
 		cur++;
 		eprint( FATAL, UNSET, "%s:%ld: Invalid counter for REPEAT loop.\n",
@@ -1221,19 +1229,19 @@ void get_max_repeat_count( Prg_Token *cur )
 
 	/* Set the repeat count - warn if value is float an convert to integer */
 
-	if ( Var_Stack->type == INT_VAR )
-		cur->count.repl.max = Var_Stack->val.lval;
+	if ( EDL.Var_Stack->type == INT_VAR )
+		cur->count.repl.max = EDL.Var_Stack->val.lval;
 	else
 	{
 		eprint( WARN, UNSET, "%s:%ld: WARNING: Floating point value used as "
 				"maximum count in REPEAT loop.\n",
 				( cur + 1 )->Fname, ( cur + 1 )->Lc );
-		cur->count.repl.max = ( long ) Var_Stack->val.dval;
+		cur->count.repl.max = ( long ) EDL.Var_Stack->val.dval;
 	}
 
-	vars_pop( Var_Stack );
+	vars_pop( EDL.Var_Stack );
 	cur->count.repl.act = 0;
-	cur_prg_token++;                   /* skip the `{' */
+	EDL.cur_prg_token++;                   /* skip the `{' */
 	return;
 }
 
@@ -1249,12 +1257,12 @@ void get_for_cond( Prg_Token *cur )
 {
 	/* First of all get the loop variable */
 
-	cur_prg_token++;             /* skip the FOR keyword */
+	EDL.cur_prg_token++;             /* skip the FOR keyword */
 
 	/* Make sure token is a variable and next token is `=' */
 
-	if ( cur_prg_token->token != E_VAR_TOKEN ||
-		 ( cur_prg_token + 1 )->token != '=' )
+	if ( EDL.cur_prg_token->token != E_VAR_TOKEN ||
+		 ( EDL.cur_prg_token + 1 )->token != '=' )
 	{
 		cur++;
 		eprint( FATAL, UNSET, "%s:%ld: Syntax error in condition of FOR "
@@ -1264,16 +1272,16 @@ void get_for_cond( Prg_Token *cur )
 
 	/* If loop variable is new set its type */
 
-	if ( cur_prg_token->tv.vptr->type == UNDEF_VAR )
+	if ( EDL.cur_prg_token->tv.vptr->type == UNDEF_VAR )
 	{
-		cur_prg_token->tv.vptr->type =
-			IF_FUNC( cur_prg_token->tv.vptr->name ) ? INT_VAR : FLOAT_VAR;
-		cur_prg_token->tv.vptr->flags &= ~ NEW_VARIABLE;
+		EDL.cur_prg_token->tv.vptr->type =
+			IF_FUNC( EDL.cur_prg_token->tv.vptr->name ) ? INT_VAR : FLOAT_VAR;
+		EDL.cur_prg_token->tv.vptr->flags &= ~ NEW_VARIABLE;
 	}
 
 	/* Make sure the loop variable is either an integer or a float */
 
-	if ( ! ( cur_prg_token->tv.vptr->type & ( INT_VAR | FLOAT_VAR ) ) )
+	if ( ! ( EDL.cur_prg_token->tv.vptr->type & ( INT_VAR | FLOAT_VAR ) ) )
 	{
 		cur++;
 		eprint( FATAL, UNSET, "%s:%ld: FOR loop variable must be integer or "
@@ -1283,18 +1291,18 @@ void get_for_cond( Prg_Token *cur )
 
 	/* Store pointer to loop variable */
 
-	cur->count.forl.act = cur_prg_token->tv.vptr;
+	cur->count.forl.act = EDL.cur_prg_token->tv.vptr;
 
 	/* Now get start value to be assigned to loop variable */
 
-	cur_prg_token +=2;                        /* skip variable and `=' token */
+	EDL.cur_prg_token +=2;                    /* skip variable and `=' token */
 	in_for_lex = SET;                         /* allow `:' as separator */
 	conditionparse( );                        /* get start value */
-	fsc2_assert( Var_Stack->next == NULL );   /* Paranoia as usual... */
+	fsc2_assert( EDL.Var_Stack->next == NULL );   /* Paranoia as usual... */
 
 	/* Make sure there is at least one more token, i.e. the loops end value */
 
-	if ( cur_prg_token->token != ':' )
+	if ( EDL.cur_prg_token->token != ':' )
 	{
 		cur++;
 		in_for_lex = UNSET;
@@ -1305,7 +1313,7 @@ void get_for_cond( Prg_Token *cur )
 
 	/* Make sure the returned value is either integer or float */
 
-	if ( ! ( Var_Stack->type & ( INT_VAR | FLOAT_VAR ) ) )
+	if ( ! ( EDL.Var_Stack->type & ( INT_VAR | FLOAT_VAR ) ) )
 	{
 		cur++;
 		in_for_lex = UNSET;
@@ -1316,12 +1324,12 @@ void get_for_cond( Prg_Token *cur )
 
 	/* Set start value of loop variable */
 
-	if ( Var_Stack->type == INT_VAR )
+	if ( EDL.Var_Stack->type == INT_VAR )
 	{
 		if ( cur->count.forl.act->type == INT_VAR )
-			cur->count.forl.act->val.lval = Var_Stack->val.lval;
+			cur->count.forl.act->val.lval = EDL.Var_Stack->val.lval;
 		else
-			cur->count.forl.act->val.dval = ( double ) Var_Stack->val.lval;
+			cur->count.forl.act->val.dval = ( double ) EDL.Var_Stack->val.lval;
 	}
 	else
 	{
@@ -1331,23 +1339,23 @@ void get_for_cond( Prg_Token *cur )
 					"assignment to integer FOR loop variable %s.\n",
 					( cur + 1 )->Fname,
 					( cur + 1 )->Lc, cur->count.forl.act->name );
-			cur->count.forl.act->val.lval = ( long ) Var_Stack->val.dval;
+			cur->count.forl.act->val.lval = ( long ) EDL.Var_Stack->val.dval;
 		}
 		else
-			cur->count.forl.act->val.dval = Var_Stack->val.dval;
+			cur->count.forl.act->val.dval = EDL.Var_Stack->val.dval;
 	}
 
-	vars_pop( Var_Stack );
+	vars_pop( EDL.Var_Stack );
 
 	/* Get FOR loop end value */
 
-	cur_prg_token++;                           /* skip the `:' */
-	conditionparse( );                         /* get end value */
-	fsc2_assert( Var_Stack->next == NULL );    /* Paranoia as usual... */
+	EDL.cur_prg_token++;                           /* skip the `:' */
+	conditionparse( );                             /* get end value */
+	fsc2_assert( EDL.Var_Stack->next == NULL );    /* Paranoia as usual... */
 
 	/* Make sure end value is either integer or float */
 
-	if ( ! ( Var_Stack->type & ( INT_VAR | FLOAT_VAR ) ) )
+	if ( ! ( EDL.Var_Stack->type & ( INT_VAR | FLOAT_VAR ) ) )
 	{
 		cur++;
 		in_for_lex = UNSET;
@@ -1358,7 +1366,8 @@ void get_for_cond( Prg_Token *cur )
 
 	/* If loop variable is integer `end' must also be integer */
 
-	if ( cur->count.forl.act->type == INT_VAR && Var_Stack->type == FLOAT_VAR )
+	if ( cur->count.forl.act->type == INT_VAR &&
+		 EDL.Var_Stack->type == FLOAT_VAR )
 	{
 		cur++;
 		in_for_lex = UNSET;
@@ -1370,17 +1379,17 @@ void get_for_cond( Prg_Token *cur )
 
 	/* Set end value of loop */
 
-	cur->count.forl.end.type = Var_Stack->type;
-	if ( Var_Stack->type == INT_VAR )
-		cur->count.forl.end.lval = Var_Stack->val.lval;
+	cur->count.forl.end.type = EDL.Var_Stack->type;
+	if ( EDL.Var_Stack->type == INT_VAR )
+		cur->count.forl.end.lval = EDL.Var_Stack->val.lval;
 	else
-		cur->count.forl.end.dval = Var_Stack->val.dval;
+		cur->count.forl.end.dval = EDL.Var_Stack->val.dval;
 
-	vars_pop( Var_Stack );
+	vars_pop( EDL.Var_Stack );
 
 	/* Set the increment */
 
-	if ( cur_prg_token->token != ':' )   /* no increment given, default to 1 */
+	if ( EDL.cur_prg_token->token != ':' )      /* no increment given, use 1 */
 	{
 		if ( cur->count.forl.act->type == INT_VAR )
 		{
@@ -1396,14 +1405,14 @@ void get_for_cond( Prg_Token *cur )
 	}
 	else                                        /* get for loop increment */
 	{	
-		cur_prg_token++;                        /* skip the `:' */
+		EDL.cur_prg_token++;                    /* skip the `:' */
 		conditionparse( );                      /* get end value */
 		in_for_lex = UNSET;
-		fsc2_assert( Var_Stack->next == NULL ); /* Paranoia as usual... */
+		fsc2_assert( EDL.Var_Stack->next == NULL ); /* Paranoia as usual... */
 
 		/* Make sure the increment is either an integer or a float */
 
-		if ( ! ( Var_Stack->type & ( INT_VAR | FLOAT_VAR ) ) )
+		if ( ! ( EDL.Var_Stack->type & ( INT_VAR | FLOAT_VAR ) ) )
 		{
 			cur++;
 			eprint( FATAL, UNSET, "%s:%ld: Invalid increment for FOR loop.\n",
@@ -1414,7 +1423,7 @@ void get_for_cond( Prg_Token *cur )
 		/* If loop variable is an integer, `incr' must also be integer */
 
 		if ( cur->count.forl.act->type == INT_VAR &&
-			 Var_Stack->type == FLOAT_VAR )
+			 EDL.Var_Stack->type == FLOAT_VAR )
 		{
 			cur++;
 			in_for_lex = UNSET;
@@ -1424,38 +1433,38 @@ void get_for_cond( Prg_Token *cur )
 			THROW( EXCEPTION );
 		}
 
-		cur->count.forl.incr.type = Var_Stack->type;
+		cur->count.forl.incr.type = EDL.Var_Stack->type;
 
 		/* Check that increment isn't zero */
 
-		if ( Var_Stack->type == INT_VAR )
+		if ( EDL.Var_Stack->type == INT_VAR )
 		{
-			if ( Var_Stack->val.lval == 0 )
+			if ( EDL.Var_Stack->val.lval == 0 )
 			{
 				cur++;
 				eprint( FATAL, UNSET, "%s:%ld: Zero increment in FOR loop.\n",
 						cur->Fname, cur->Lc );
 				THROW( EXCEPTION );
 			}
-			cur->count.forl.incr.lval = Var_Stack->val.lval;
+			cur->count.forl.incr.lval = EDL.Var_Stack->val.lval;
 		}
 		else
 		{
-			if ( Var_Stack->val.dval == 0 )
+			if ( EDL.Var_Stack->val.dval == 0 )
 			{
 				cur++;
 				eprint( FATAL, UNSET, "%s:%ld: Zero increment for FOR loop.\n",
 						cur->Fname, cur->Lc );
 				THROW( EXCEPTION );
 			}
-			cur->count.forl.incr.dval = Var_Stack->val.dval;
+			cur->count.forl.incr.dval = EDL.Var_Stack->val.dval;
 		}
 
-		vars_pop( Var_Stack );
+		vars_pop( EDL.Var_Stack );
 	}
 
 	in_for_lex = UNSET;
-	cur_prg_token++;                /* skip the `{' */
+	EDL.cur_prg_token++;                /* skip the `{' */
 	return;
 
 }
@@ -1515,7 +1524,7 @@ bool test_for_cond( Prg_Token *cur )
 
 	/* We can't end up here... */
 
-	eprint( FATAL, UNSET, "Internal error at %s:%d.\n", __FILE__, __LINE__ );
+	eprint( FATAL, UNSET, "Internal error at %s:%u.\n", __FILE__, __LINE__ );
 	THROW( EXCEPTION );
 
 	return FAIL;
@@ -1547,7 +1556,7 @@ static void save_restore_variables( bool flag )
 	{
 		fsc2_assert( ! exists_copy );      /* don't save twice ! */
 
-		if ( Var_List == NULL )
+		if ( EDL.Var_List == NULL )
 		{
 			old_var_list = var_list_copy = NULL;
 			exists_copy = SET;
@@ -1556,7 +1565,7 @@ static void save_restore_variables( bool flag )
 
 		/* Count the number of variables and get memory for storing them */
 
-		for ( var_count = 0, src = Var_List; src != NULL;
+		for ( var_count = 0, src = EDL.Var_List; src != NULL;
 			  var_count++, src = src->next )
 			;
 
@@ -1564,7 +1573,7 @@ static void save_restore_variables( bool flag )
 
 		/* Copy all of them into the backup region */
 
-		for ( src = Var_List, cpy = var_list_copy; src != NULL;
+		for ( src = EDL.Var_List, cpy = var_list_copy; src != NULL;
 			  cpy++, src = src->next )
 		{
 			memcpy( cpy, src, sizeof( Var ) );
@@ -1591,13 +1600,13 @@ static void save_restore_variables( bool flag )
 			}
 		}
 
-		old_var_list = Var_List;
+		old_var_list = EDL.Var_List;
 		exists_copy = SET;
 	}
 	else
 	{
 		fsc2_assert( exists_copy );             /* no restore without save ! */
-		fsc2_assert( Var_List == old_var_list );   /* just a bit paranoid... */
+		fsc2_assert( EDL.Var_List == old_var_list );   /* a bit paranoid... */
 
 		if ( var_list_copy == NULL )
 		{
@@ -1608,7 +1617,7 @@ static void save_restore_variables( bool flag )
 		/* Get rid of memory for arrays that might have been changed during
 		   the test */
 
-		for ( cpy = Var_List; cpy != NULL; cpy = cpy->next )
+		for ( cpy = EDL.Var_List; cpy != NULL; cpy = cpy->next )
 		{
 			if ( cpy->type == INT_CONT_ARR && ! ( cpy->flags & NEED_ALLOC ) &&
 				 cpy->val.lpnt != NULL )
@@ -1622,7 +1631,7 @@ static void save_restore_variables( bool flag )
 				T_free( cpy->sizes );
 		}
 
-		for ( src = var_list_copy, cpy = Var_List; cpy != NULL;
+		for ( src = var_list_copy, cpy = EDL.Var_List; cpy != NULL;
 			  cpy = src->next, src++  )
 			memcpy( cpy, src, sizeof( Var ) );
 
@@ -1663,7 +1672,7 @@ static const char *get_construct_name( int type )
 			return "UNLESS construct";
 
 		default :
-			eprint( FATAL, UNSET, "Internal error at %s:%d.\n",
+			eprint( FATAL, UNSET, "Internal error at %s:%u.\n",
 					__FILE__, __LINE__ );
 			THROW( EXCEPTION );
 	}

@@ -1,6 +1,6 @@
 @c $Id$
 @c
-@c Copyright (C) 2001 Jens Thoms Toerring
+@c Copyright (C) 1999-2002 Jens Thoms Toerring
 @c
 @c This file is part of fsc2.
 @c
@@ -132,7 +132,7 @@ modules are already exist (at the time of writing this there are 29
 different modules to choose from).
 
 Experiments with pulsed microwave or RF excitation play an ever
-increasing r@^ole in modern EPR and @acronym{fsc2} has an extensive set
+increasing role in modern EPR and @acronym{fsc2} has an extensive set
 of commands and functions for dealing with pulses and pulse generators.
 These are explained in the chapter following the functions for other
 devices (@pxref{Using Pulsers}).

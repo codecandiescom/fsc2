@@ -1,6 +1,6 @@
 # $Id$
 #
-# Copyright (C) 2001 Jens Thoms Toerring
+# Copyright (C) 1999-2002 Jens Thoms Toerring
 #
 # This file is part of fsc2.
 #
@@ -113,12 +113,13 @@ endif
 
 install:
 	$(INSTALL) -d $(docdir)
+	$(INSTALL) -d $(docdir)/html
 	$(INSTALL) -d $(infodir)
 	$(INSTALL) -d $(mandir)/man1
 	$(INSTALL) -m 444 fsc2.1.gz $(mandir)/man1
-	$(INSTALL) -m 444 -o $(OWNER) -g $(GROUP) fsc2*.html $(docdir)
-	$(INSTALL) -m 444 -o $(OWNER) -g $(GROUP) fsc2.css $(docdir)
-	$(INSTALL) -m 444 -o $(OWNER) -g $(GROUP) $(wildcard *.png) $(docdir)
+	$(INSTALL) -m 444 -o $(OWNER) -g $(GROUP) fsc2*.html $(docdir)/html
+	$(INSTALL) -m 444 -o $(OWNER) -g $(GROUP) fsc2.css $(docdir)/html
+	$(INSTALL) -m 444 -o $(OWNER) -g $(GROUP) $(wildcard *.png) $(docdir)/html
 	if [ -f fsc2.ps ]; then \
 		$(INSTALL) -m 444 -o $(OWNER) -g $(GROUP) fsc2.ps $(docdir); \
 	fi

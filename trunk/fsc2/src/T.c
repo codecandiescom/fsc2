@@ -1,7 +1,7 @@
 /*
   $Id$
 
-  Copyright (C) 2001 Jens Thoms Toerring
+  Copyright (C) 1999-2002 Jens Thoms Toerring
 
   This file is part of fsc2.
 
@@ -44,7 +44,7 @@ void *T_malloc( size_t size )
 	if ( size == 0 )
 	{
 		eprint( FATAL, UNSET,
-				"Internal error detected at %s:%d (malloc with size 0).\n",
+				"Internal error detected at %s:%u (malloc with size 0).\n",
 				__FILE__, __LINE__ );
 		THROW( EXCEPTION );
 	}
@@ -54,19 +54,21 @@ void *T_malloc( size_t size )
 
 	if ( mem == NULL )
 	{
-		eprint( FATAL, FSC2_MODE != TEST, "Running out of memory.\n" );
+		eprint( FATAL, Internals.mode != TEST, "Running out of memory.\n" );
 		THROW( OUT_OF_MEMORY_EXCEPTION );
 	}
 
 #if defined MDEBUG
-	if ( is_i386 )
+	if ( Internals.is_i386 )
 	{
 		asm( "mov %%ebp, %0" : "=g" ( EBP ) );
 		fprintf( stderr, "(%d) malloc:  %p (%u) from %p\n",
-				 I_am == CHILD, mem, size, ( void * ) * ( EBP + 1 ) );
+				 Internals.I_am == CHILD, mem, size,
+				 ( void * ) * ( EBP + 1 ) );
 	}
 	else
-		fprintf( stderr, "(%d) malloc:  %p (%u)\n", I_am == CHILD, mem, size );
+		fprintf( stderr, "(%d) malloc:  %p (%u)\n",
+				 Internals.I_am == CHILD, mem, size );
 
 	fflush( stderr );
 #endif
@@ -90,7 +92,7 @@ void *T_calloc( size_t nmemb, size_t size )
 	if ( size == 0 )
 	{
 		eprint( FATAL, UNSET,
-				"Internal error detected at %s:%d (calloc with size 0).\n",
+				"Internal error detected at %s:%u (calloc with size 0).\n",
 				__FILE__, __LINE__ );
 		THROW( EXCEPTION );
 	}
@@ -100,20 +102,21 @@ void *T_calloc( size_t nmemb, size_t size )
 
 	if ( mem == NULL )
 	{
-		eprint( FATAL, FSC2_MODE != TEST, "Running out of memory.\n" );
+		eprint( FATAL, Internals.mode != TEST, "Running out of memory.\n" );
 		THROW( OUT_OF_MEMORY_EXCEPTION );
 	}
 
 #if defined MDEBUG
-	if ( is_i386 )
+	if ( Internals.is_i386 )
 	{
 		asm( "mov %%ebp, %0" : "=g" ( EBP ) );
 		fprintf( stderr, "(%d) calloc:  %p (%u) from %p\n",
-				 I_am == CHILD, mem, nmemb * size, ( void * ) * ( EBP + 1 ) );
+				 Internals.I_am == CHILD, mem, nmemb * size,
+				 ( void * ) * ( EBP + 1 ) );
 	}
 	else
 		fprintf( stderr, "(%d) calloc:  %p (%u)\n",
-				 I_am == CHILD, mem, nmemb * size );
+				 Internals.I_am == CHILD, mem, nmemb * size );
 
 	fflush( stderr );
 #endif
@@ -137,7 +140,7 @@ void *T_realloc( void *ptr, size_t size )
 	if ( size == 0 )
 	{
 		eprint( FATAL, UNSET,
-				"Internal error detected at %s:%d (realloc with size 0).\n",
+				"Internal error detected at %s:%u (realloc with size 0).\n",
 				__FILE__, __LINE__ );
 		THROW( EXCEPTION );
 	}
@@ -147,20 +150,21 @@ void *T_realloc( void *ptr, size_t size )
 
 	if ( new_ptr == NULL )
 	{
-		eprint( FATAL, FSC2_MODE != TEST, "Running out of memory.\n" );
+		eprint( FATAL, Internals.mode != TEST, "Running out of memory.\n" );
 		THROW( OUT_OF_MEMORY_EXCEPTION );
 	}
 
 #if defined MDEBUG
-	if ( is_i386 )
+	if ( Internals.is_i386 )
 	{
 		asm( "mov %%ebp, %0" : "=g" ( EBP ) );
 		fprintf( stderr, "(%d) realloc: %p -> %p (%u) from %p\n",
-				 I_am == CHILD, ptr, new_ptr, size, ( void * ) * ( EBP + 1 ) );
+				 Internals.I_am == CHILD, ptr, new_ptr, size,
+				 ( void * ) * ( EBP + 1 ) );
 	}
 	else
 		fprintf( stderr, "(%d) realloc: %p -> %p (%u)\n",
-				 I_am == CHILD, ptr, new_ptr, size );
+				 Internals.I_am == CHILD, ptr, new_ptr, size );
 
 	fflush( stderr );
 #endif
@@ -182,14 +186,14 @@ void *T_free( void *ptr )
 		return NULL;
 
 #if defined MDEBUG
-	if ( is_i386 )
+	if ( Internals.is_i386 )
 	{
 		asm( "mov %%ebp, %0" : "=g" ( EBP ) );
 		fprintf( stderr, "(%d) free:    %p from %p\n",
-				 I_am == CHILD, ptr, ( void * ) * ( EBP + 1 ) );
+				 Internals.I_am == CHILD, ptr, ( void * ) * ( EBP + 1 ) );
 	}
 	else
-		fprintf( stderr, "(%d) free:    %p\n", I_am == CHILD, ptr );
+		fprintf( stderr, "(%d) free:    %p\n", Internals.I_am == CHILD, ptr );
 
 	fflush( stderr );
 	fsc2_assert( mprobe( ptr ) == MCHECK_OK );
@@ -216,21 +220,22 @@ char *T_strdup( const char *str )
 
 	if ( ( new_str = strdup( str ) ) == NULL )
 	{
-		eprint( FATAL, FSC2_MODE != TEST, "Running out of memory.\n" );
+		eprint( FATAL, Internals.mode != TEST, "Running out of memory.\n" );
 		THROW( OUT_OF_MEMORY_EXCEPTION );
 	}
 
 #if defined MDEBUG
-	if ( is_i386 )
+	if ( Internals.is_i386 )
 	{
 		asm( "mov %%ebp, %0" : "=g" ( EBP ) );
 		fprintf( stderr, "(%d) strdup:  %p (%u) from %p\n",
-				 I_am == CHILD, ( void * ) new_str, strlen( str ) + 1,
+				 Internals.I_am == CHILD,
+				 ( void * ) new_str, strlen( str ) + 1,
 				 ( void * ) * ( EBP + 1 ) );
 	}
 	else
 		fprintf( stderr, "(%d) strdup:  %p (%u)\n",
-			 I_am == CHILD, ( void * ) new_str, strlen( str ) + 1 );
+			 Internals.I_am == CHILD, ( void * ) new_str, strlen( str ) + 1 );
 
 	fflush( stderr );
 #endif
@@ -250,7 +255,7 @@ long T_atol( const char *txt )
 
 	if ( txt == NULL || *txt == '\0' )
 	{
-		eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
+		eprint( FATAL, UNSET, "Internal error detected at %s:%u.\n",
 				__FILE__, __LINE__ );
 		THROW( EXCEPTION );
 	}
@@ -259,14 +264,14 @@ long T_atol( const char *txt )
 
 	if ( errno == ERANGE )
 	{
-		eprint( FATAL, FSC2_MODE != TEST,
+		eprint( FATAL, Internals.mode != TEST,
 				"Long integer number out of range: %s.\n", txt );
 		THROW( EXCEPTION );
 	}
 
 	if ( end_p == ( char * ) txt )
 	{
-		eprint( FATAL, FSC2_MODE != TEST,
+		eprint( FATAL, Internals.mode != TEST,
 				"Not an integer number: %s.\n", txt );
 		THROW( EXCEPTION );
 	}
@@ -286,7 +291,7 @@ int T_atoi( const char *txt )
 
 	if ( txt == NULL || *txt == '\0' )
 	{
-		eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
+		eprint( FATAL, UNSET, "Internal error detected at %s:%u.\n",
 				__FILE__, __LINE__ );
 		THROW( EXCEPTION );
 	}
@@ -295,14 +300,14 @@ int T_atoi( const char *txt )
 
 	if ( errno == ERANGE || ret > INT_MAX || ret < INT_MIN )
 	{
-		eprint( FATAL, FSC2_MODE != TEST,
+		eprint( FATAL, Internals.mode != TEST,
 				"Integer number out of range: %s.\n", txt );
 		THROW( EXCEPTION );
 	}
 
 	if ( end_p == ( char * ) txt )
 	{
-		eprint( FATAL, FSC2_MODE != TEST,
+		eprint( FATAL, Internals.mode != TEST,
 				"Not an integer number: %s.\n", txt );
 		THROW( EXCEPTION );
 	}
@@ -322,7 +327,7 @@ double T_atod( const char *txt )
 
 	if ( txt == NULL || *txt == '\0' )
 	{
-		eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
+		eprint( FATAL, UNSET, "Internal error detected at %s:%u.\n",
 				__FILE__, __LINE__ );
 		THROW( EXCEPTION );
 	}
@@ -331,14 +336,14 @@ double T_atod( const char *txt )
 
 	if ( errno == ERANGE )
 	{
-		eprint( FATAL, FSC2_MODE != TEST, 
+		eprint( FATAL, Internals.mode != TEST, 
 				"Floating point number out of range: %s.\n", txt );
 		THROW( EXCEPTION );
 	}
 
 	if ( end_p == ( char * ) txt )
 	{
-		eprint( FATAL, FSC2_MODE != TEST,
+		eprint( FATAL, Internals.mode != TEST,
 				"Not a floating point number: %s.\n", txt );
 		THROW( EXCEPTION );
 	}

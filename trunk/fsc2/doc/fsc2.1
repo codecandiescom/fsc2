@@ -4,7 +4,7 @@
 fsc2 \- program for remote control of EPR spectrometers
 .SH SYNOPSIS
 .B fsc2
-[\fIOPTION\fR] [\fIFILE\fR]
+[\fIOPTIONS\fR] [\fIFILE\fR]
 .SH DESCRIPTION
 .B Fsc2
 is a program for the remote control of EPR spectro\%meters. It interprets
@@ -36,13 +36,13 @@ needing further user input.
 Starts \fBfsc2\fR in graphics mode and loads FILE (or also tests and/or starts
 the program when used in conjunction with the \fB\-T\fR or \fB\-S\fR
 flags). The input file will be \fBautomatically deleted\fR when \fBfsc2\fR is
-done with it, i.e. when either \fBfsc2\fR exits or a new file is loaded. This
-flag is only useful for cases where the input file is a temporary file that
-needs to be deleted when it isn't needed anymore, so better be
-\fBreal careful\fR.
+done with it, i.e. when either \fBfsc2\fR exits or a new file is loaded, so
+better be \fBreal careful\fR . This flag is only useful for cases where the
+input file is a temporary file that needs to be deleted when it isn't needed
+anymore.
 .TP
 \fB\-h\fR, \fB\-\-help\fR
-Displays a very short help text and exits.
+Displays a short help text and exits.
 .TP
 \fB\-size\fR \fIsize\fP
 This option specifies the sizes of the window to be used etc. Use either
@@ -95,11 +95,13 @@ Specifies the mouse button that must be used to activate the stop button while
 the experiment is running. Use the string "left" or the number 1 for the left
 mouse button, "middle" or 2 for the middle and "right" or 3 for the right
 mouse button. Per default each of the three buttons can be used.
-\fB\-noCrashMail\R
-Normally, fsc2 automatically sends the author an email with information about
-the EDL program that was run whenever it crashes. When this option is used no
-email is send.
-\fB\-noBalloons\R
+.TP
+\fB\-noCrashMail\fR
+Normally, \fBfsc2\fR automatically sends the author an email whenever it
+crashes with information about the EDL program that was run. When this option
+is used no email is send.
+.TP
+\fB\-noBalloons\fR
 Switches off display of help message balloons.
 .SH RESOURCES
 The program understands the following X resource names:
@@ -145,9 +147,11 @@ This option sets the font to be used in the axes in the display window.
 \fBstopMouseButton\fR
 Specifies the mouse button that must be used to activate the stop button while
 the experiment is running.
+.TP
 \fBnoCrashMail\fR
-This boolean option tells fsc2 not to send an email to the author whenever
-it crashes.
+This boolean option tells \fBfsc2\fR not to send an email to the author
+whenever it crashes.
+.TP
 \fBnoBalloons\fR
 Switches off display of help message balloons.
 .SH SEE ALSO

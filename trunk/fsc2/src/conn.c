@@ -1,7 +1,7 @@
 /*
   $Id$
 
-  Copyright (C) 2001 Jens Thoms Toerring
+  Copyright (C) 1999-2002 Jens Thoms Toerring
 
   This file is part of fsc2.
 
@@ -37,8 +37,10 @@ static void conn_sig_handler( int signo );
 
 static volatile bool is_busy;
 
+extern volatile bool conn_child_replied;
 
-/* pion specific stuff */
+
+/* Stuff needed if we're still running an old libc */
 
 #if defined IS_STILL_LIBC1
 
@@ -66,7 +68,7 @@ pid_t spawn_conn( bool start_state )
 
 	/* Open pipe for communication with child that's going to be spawned */
 
-	if ( pipe( conn_pd ) < 0 )
+	if ( pipe( Comm.conn_pd ) < 0 )
 		return -1;
 
 	/* Create UNIX domain socket */
@@ -108,7 +110,7 @@ pid_t spawn_conn( bool start_state )
 
 	if ( new_pid >= 0 )
 	{
-		close( conn_pd[ WRITE ] );
+		close( Comm.conn_pd[ WRITE ] );
 		while ( ! conn_child_replied )
 			usleep( 50000 );
 		conn_child_replied = UNSET;
@@ -136,7 +138,7 @@ static void connect_handler( int listen_fd )
 
 
 	set_conn_signals( );
-	close( conn_pd[ READ ] );
+	close( Comm.conn_pd[ READ ] );
 
 	/* Signal parent that child is up and running and can accept signals */
 
@@ -261,7 +263,7 @@ static void connect_handler( int listen_fd )
 		if ( ! is_busy )
 		{
 			kill( getppid( ), SIGUSR1 );
-			if ( write( conn_pd[ WRITE ], line, strlen( line ) )
+			if ( write( Comm.conn_pd[ WRITE ], line, strlen( line ) )
 				 != ( ssize_t ) strlen( line ) )
 				writen( conn_fd, "FAIL\n", 5 );
 			else

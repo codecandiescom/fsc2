@@ -1,6 +1,6 @@
 @c $Id$
 @c
-@c Copyright (C) 2001 Jens Thoms Toerring
+@c Copyright (C) 1999-2002 Jens Thoms Toerring
 @c
 @c This file is part of fsc2.
 @c
@@ -1905,12 +1905,12 @@ values should ever get changed you should use these predefined values.
 
 
 @item bool set_repeat_time( double rep_time )
-The function gets called to set a repetition time or a repetition
-frequency to do an pulsed experiment, i.e.@: when either the
-@w{@code{REPETITION_TIME}} or @w{@code{REPETITION_FREQUENCY}} keyword is
-found in the trigger mode description in the @code{ASSIGNMENTS} section.
-Obviously, to be able to set a repetition time or frequency the trigger
-mode must be internal and the module has to check that this is the case.
+The function gets called for setting the repetition time or frequency of
+an pulsed experiment, i.e.@: when either the @w{@code{REPETITION_TIME}}
+or @w{@code{REPETITION_FREQUENCY}} keyword is found in the trigger mode
+description in the @code{ASSIGNMENTS} section.  Obviously, to be able to
+set a repetition time or frequency the trigger mode must be internal and
+the module has to check that this is the case.
 
 
 @item bool set_trig_in_level( double voltage )

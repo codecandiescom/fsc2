@@ -1,7 +1,7 @@
 /*
   $Id$
 
-  Copyright (C) 2001 Jens Thoms Toerring
+  Copyright (C) 1999-2002 Jens Thoms Toerring
 
   This file is part of fsc2.
 
@@ -463,7 +463,7 @@ static bool get_serial_lock( int sn )
     }
 
 	umask( mask );
-    chown( Serial_Port[ sn ].lock_file, EUID, EGID );
+    chown( Serial_Port[ sn ].lock_file, Internals.EUID, Internals.EGID );
     snprintf( buf, sizeof( buf ), "%10d\n", ( int ) getpid( ) );
     write( fd, buf, strlen( buf ) );
     close( fd );

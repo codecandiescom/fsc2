@@ -1,7 +1,7 @@
-/*
+/* -*-C-*-
   $Id$
 
-  Copyright (C) 2001 Jens Thoms Toerring
+  Copyright (C) 1999-2002 Jens Thoms Toerring
 
   This file is part of fsc2.
 
@@ -618,7 +618,7 @@ int gpib_trigger( int device )
 //	  if ( ll > LL_ERR )
 //	  {
 //		  gpib_log_function_start( "gpib_wait", dev_name );
-//		  seteuid( EUID );
+//		  seteuid( Internals.EUID );
 //		  fprintf( gpib_log, "wait mask = 0x0%X\n", mask );
 //		  if ( mask & ~( GPIB_TIMO | GPIB_END | GPIB_RQS | GPIB_CMPL ) )
 //			  fprintf( gpib_log, "=> Setting mask to 0x%X <=\n",
@@ -639,7 +639,7 @@ int gpib_trigger( int device )
 //
 //	  if ( ll > LL_ERR )
 //	  {
-//		  seteuid( EUID );
+//		  seteuid( Internals.EUID );
 //		  fprintf( gpib_log, "wait return status = 0x0%X\n", gpib_status );
 //		  seteuid( getuid( ) );
 //	  }

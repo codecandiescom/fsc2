@@ -1,7 +1,7 @@
 /*
   $Id$
 
-  Copyright (C) 2001 Jens Thoms Toerring
+  Copyright (C) 1999-2002 Jens Thoms Toerring
 
   This file is part of fsc2.
 
@@ -262,9 +262,9 @@ void eprint( int severity, bool print_fl, const char *fmt, ... )
 
 
 	if ( severity != NO_ERROR )
-		compilation.error[ severity ] += 1;
+		EDL.compilation.error[ severity ] += 1;
 
-	if ( ! just_testing )
+	if ( ! Internals.just_testing )
 	{
 		if ( severity == FATAL )
 		{
@@ -287,10 +287,10 @@ void eprint( int severity, bool print_fl, const char *fmt, ... )
 			space_left -= 5;
 		}
 
-		if ( print_fl && Fname )
+		if ( print_fl && EDL.Fname )
 		{
 			count = snprintf( cp, ( size_t ) space_left, "%s:%ld: ",
-							  Fname, Lc );
+							  EDL.Fname, EDL.Lc );
 			space_left -= count;
 			cp += count;
 		}
@@ -299,16 +299,17 @@ void eprint( int severity, bool print_fl, const char *fmt, ... )
 		vsnprintf( cp, ( size_t ) space_left, fmt, ap );
 		va_end( ap );
 
-		if ( I_am == PARENT )
+		if ( Internals.I_am == PARENT )
 		{
-			fl_freeze_form( main_form->error_browser->form );
-			fl_addto_browser_chars( main_form->error_browser, buffer );
+			fl_freeze_form( GUI.main_form->error_browser->form );
+			fl_addto_browser_chars( GUI.main_form->error_browser, buffer );
 
-			fl_set_browser_topline( main_form->error_browser,
-				  fl_get_browser_maxline( main_form->error_browser )
-				- fl_get_browser_screenlines( main_form->error_browser ) + 1 );
+			fl_set_browser_topline( GUI.main_form->error_browser,
+				  fl_get_browser_maxline( GUI.main_form->error_browser )
+				- fl_get_browser_screenlines( GUI.main_form->error_browser )
+                + 1 );
 
-			fl_unfreeze_form( main_form->error_browser->form );
+			fl_unfreeze_form( GUI.main_form->error_browser->form );
 		}
 		else
 			writer( C_EPRINT, buffer );
@@ -318,8 +319,8 @@ void eprint( int severity, bool print_fl, const char *fmt, ... )
 		if ( severity != NO_ERROR )
 			fprintf( stdout, "%c ", severity[ "FSW" ] );      /* Hehe... */
 
-		if ( print_fl && Fname )
-			fprintf( stdout, "%s:%ld: ", Fname, Lc );
+		if ( print_fl && EDL.Fname )
+			fprintf( stdout, "%s:%ld: ", EDL.Fname, EDL.Lc );
 
 		va_start( ap, fmt );
 		vfprintf( stdout, fmt, ap );
@@ -347,9 +348,9 @@ void print( int severity, const char *fmt, ... )
 
 
 	if ( severity != NO_ERROR )
-		compilation.error[ severity ] += 1;
+		EDL.compilation.error[ severity ] += 1;
 
-	if ( ! just_testing )
+	if ( ! Internals.just_testing )
 	{
 		if ( severity == FATAL )
 		{
@@ -372,40 +373,40 @@ void print( int severity, const char *fmt, ... )
 			space_left -= 5;
 		}
 
-		if ( ! IN_HOOK && Fname )
+		if ( ! Internals.in_hook && EDL.Fname )
 		{
 			count = snprintf( cp, ( size_t ) space_left, "%s:%ld: ",
-							  Fname, Lc );
+							  EDL.Fname, EDL.Lc );
 			space_left -= count;
 			cp += count;
 		}
 
-		if ( Call_Stack != NULL )
+		if ( EDL.Call_Stack != NULL )
 		{
-			if ( Call_Stack->f == NULL )
+			if ( EDL.Call_Stack->f == NULL )
 			{
-				if ( Call_Stack->dev_name != NULL )
+				if ( EDL.Call_Stack->dev_name != NULL )
 				{
 					count = snprintf( cp, ( size_t ) space_left, "%s: ",
-									  Call_Stack->dev_name );
+									  EDL.Call_Stack->dev_name );
 					space_left -= count;
 					cp += count;
 				}
 			}
 			else
 			{
-				if ( Call_Stack->f->device != NULL )
+				if ( EDL.Call_Stack->f->device != NULL )
 				{
 					count = snprintf( cp, ( size_t ) space_left, "%s: ",
-									  Call_Stack->f->device->name );
+									  EDL.Call_Stack->f->device->name );
 					space_left -= count;
 					cp += count;
 				}
 
-				if ( Call_Stack->f->name != NULL )
+				if ( EDL.Call_Stack->f->name != NULL )
 				{
 					count = snprintf( cp, ( size_t ) space_left, "%s(): ",
-									  Call_Stack->f->name );
+									  EDL.Call_Stack->f->name );
 					space_left -= count;
 					cp += count;
 				}
@@ -416,16 +417,17 @@ void print( int severity, const char *fmt, ... )
 		vsnprintf( cp, ( size_t ) space_left, fmt, ap );
 		va_end( ap );
 
-		if ( I_am == PARENT )
+		if ( Internals.I_am == PARENT )
 		{
-			fl_freeze_form( main_form->error_browser->form );
-			fl_addto_browser_chars( main_form->error_browser, buffer );
+			fl_freeze_form( GUI.main_form->error_browser->form );
+			fl_addto_browser_chars( GUI.main_form->error_browser, buffer );
 
-			fl_set_browser_topline( main_form->error_browser,
-				  fl_get_browser_maxline( main_form->error_browser )
-				- fl_get_browser_screenlines( main_form->error_browser ) + 1 );
+			fl_set_browser_topline( GUI.main_form->error_browser,
+				  fl_get_browser_maxline( GUI.main_form->error_browser )
+				- fl_get_browser_screenlines( GUI.main_form->error_browser )
+                + 1 );
 
-			fl_unfreeze_form( main_form->error_browser->form );
+			fl_unfreeze_form( GUI.main_form->error_browser->form );
 		}
 		else
 			writer( C_EPRINT, buffer );
@@ -435,23 +437,23 @@ void print( int severity, const char *fmt, ... )
 		if ( severity != NO_ERROR )
 			fprintf( stdout, "%c ", severity[ "FSW" ] );      /* Hehe... */
 
-		if ( ! IN_HOOK && Fname )
-			fprintf( stdout, "%s:%ld: ", Fname, Lc );
+		if ( ! Internals.in_hook && EDL.Fname )
+			fprintf( stdout, "%s:%ld: ", EDL.Fname, EDL.Lc );
 
-		if ( Call_Stack != NULL )
+		if ( EDL.Call_Stack != NULL )
 		{
-			if ( Call_Stack->f == NULL )
+			if ( EDL.Call_Stack->f == NULL )
 			{
-				if ( Call_Stack->dev_name != NULL )
-					fprintf( stdout, "%s: ", Call_Stack->dev_name );
+				if ( EDL.Call_Stack->dev_name != NULL )
+					fprintf( stdout, "%s: ", EDL.Call_Stack->dev_name );
 			}
 			else
 			{
-				if ( Call_Stack->f->device != NULL )
-					fprintf( stdout, "%s: ", Call_Stack->f->device->name );
+				if ( EDL.Call_Stack->f->device != NULL )
+					fprintf( stdout, "%s: ", EDL.Call_Stack->f->device->name );
 
-				if ( Call_Stack->f->name != NULL )
-					fprintf( stdout, "%s(): ", Call_Stack->f->name );
+				if ( EDL.Call_Stack->f->name != NULL )
+					fprintf( stdout, "%s(): ", EDL.Call_Stack->f->name );
 			}
 		}
 
@@ -714,7 +716,7 @@ Var *get_digitizer_channel_number( const char *channel_name )
 #ifndef NDEBUG
 	if ( channel == NUM_DIGITIZER_CHANNEL_NAMES )
 	{
-		eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
+		eprint( FATAL, UNSET, "Internal error detected at %s:%u.\n",
 				__FILE__, __LINE__ );
 		THROW( EXCEPTION );
 	}
@@ -740,8 +742,8 @@ Var *get_digitizer_channel_number( const char *channel_name )
 
 inline void raise_permissions( void )
 {
-	seteuid( EUID );
-	setegid( EGID );
+	seteuid( Internals.EUID );
+	setegid( Internals.EGID );
 }
 
 

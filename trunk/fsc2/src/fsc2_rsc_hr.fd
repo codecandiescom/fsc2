@@ -11,7 +11,7 @@ SnapGrid: 5
 Name: fsc2
 Width: 1050
 Height: 800
-Number of Objects: 12
+Number of Objects: 13
 
 --------------------
 class: FL_BOX
@@ -230,6 +230,24 @@ resize: FL_RESIZE_NONE
 gravity: FL_West FL_West
 name: help
 callback: run_help
+argument: 0
+
+--------------------
+class: FL_BUTTON
+type: HIDDEN_BUTTON
+box: 190 15 1 1
+boxtype: FL_NO_BOX
+colors: FL_COL1 FL_COL1
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_BLACK
+label: 
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NorthWest FL_East
+name: conn_button
+callback: conn_callback
 argument: 0
 
 =============== FORM ===============

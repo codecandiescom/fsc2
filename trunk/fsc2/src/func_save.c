@@ -1,7 +1,7 @@
 /*
   $Id$
 
-  Copyright (C) 2001 Jens Thoms Toerring
+  Copyright (C) 1999-2002 Jens Thoms Toerring
 
   This file is part of fsc2.
 
@@ -63,8 +63,9 @@ Var *f_is_file( Var *v )
 		THROW( EXCEPTION );
 	}
 
-    if ( v->val.lval < 0 || v->val.lval >= File_List_Len ||
-		 ( ! TEST_RUN && File_List[ v->val.lval ].fp == NULL ) )
+    if ( v->val.lval < 0 || v->val.lval >= EDL.File_List_Len ||
+		 ( Internals.mode != TEST &&
+		   EDL.File_List[ v->val.lval ].fp == NULL ) )
 		return vars_push( INT_VAR, 0 );
 
 	return vars_push( INT_VAR, 1 );
@@ -124,8 +125,8 @@ Var *f_getf( Var *var )
 
 	/* While test is running just return a dummy value */
 
-	if ( TEST_RUN )
-		return vars_push( INT_VAR, File_List_Len++ );
+	if ( Internals.mode == TEST )
+		return vars_push( INT_VAR, EDL.File_List_Len++ );
 
 	/* Check the arguments and supply default values if necessary */
 
@@ -267,40 +268,40 @@ getfile_retry:
 	for ( i = 0; i < 4; i++ )
 		T_free( s[ i ] );
 
-	/* The reallocation for the File_List may fail but we still need to close
-	   all files and get rid of memory for the file names, thus we save the
-	   current File_List before we try to reallocate */
+	/* The reallocation for the EDL.File_List may fail but we still need to
+	   close all files and get rid of memory for the file names, thus we save
+	   the current EDL.File_List before we try to reallocate */
 
-	if ( File_List )
+	if ( EDL.File_List )
 	{
-		old_File_List = T_malloc( File_List_Len * sizeof( FILE_LIST ) );
-		memcpy( old_File_List, File_List,
-				File_List_Len * sizeof( FILE_LIST ) );
+		old_File_List = T_malloc( EDL.File_List_Len * sizeof( FILE_LIST ) );
+		memcpy( old_File_List, EDL.File_List,
+				EDL.File_List_Len * sizeof( FILE_LIST ) );
 	}
 
 	TRY
 	{
-		File_List = T_realloc( File_List, 
-							   ( File_List_Len + 1 ) * sizeof( FILE_LIST ) );
+		EDL.File_List = T_realloc( EDL.File_List, 
+							 ( EDL.File_List_Len + 1 ) * sizeof( FILE_LIST ) );
 		if ( old_File_List != NULL )
 			T_free( old_File_List );
 		TRY_SUCCESS;
 	}
 	CATCH( OUT_OF_MEMORY_EXCEPTION )
 	{
-		File_List = old_File_List;
+		EDL.File_List = old_File_List;
 		THROW( EXCEPTION );
 	}
 
-	File_List[ File_List_Len ].fp = fp;
-	File_List[ File_List_Len ].name = r;
+	EDL.File_List[ EDL.File_List_Len ].fp = fp;
+	EDL.File_List[ EDL.File_List_Len ].name = r;
 
 	/* Switch buffering off so we're sure everything gets written to disk
 	   immediately */
 
-	setbuf( File_List[ File_List_Len ].fp, NULL );
+	setbuf( EDL.File_List[ EDL.File_List_Len ].fp, NULL );
 
-	return vars_push( INT_VAR, File_List_Len++ );
+	return vars_push( INT_VAR, EDL.File_List_Len++ );
 }
 
 
@@ -324,7 +325,7 @@ Var *f_clonef( Var *v )
 	/* Check all the parameter */
 
 	if ( v->type != INT_VAR ||
-		 v->val.lval < 0 || v->val.lval >= File_List_Len )
+		 v->val.lval < 0 || v->val.lval >= EDL.File_List_Len )
 	{
 		 print( FATAL, "First argument isn't a vaild file handle.\n" );
 		 THROW( EXCEPTION );
@@ -337,13 +338,13 @@ Var *f_clonef( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	if ( TEST_RUN )
-		return vars_push( INT_VAR, File_List_Len++ );
+	if ( Internals.mode == TEST )
+		return vars_push( INT_VAR, EDL.File_List_Len++ );
 
-	fn = T_malloc(   strlen( File_List[ v->val.lval ].name )
+	fn = T_malloc(   strlen( EDL.File_List[ v->val.lval ].name )
 				   + strlen( v->next->next->val.sptr ) + 3 );
 	strcpy( fn, "\\" );
-	strcat( fn, File_List[ v->val.lval ].name );
+	strcat( fn, EDL.File_List[ v->val.lval ].name );
 
 	n = fn + strlen( fn ) - strlen( v->next->val.sptr );
 	if ( n > fn + 1 && *( n - 1 ) == '.' && 
@@ -394,7 +395,7 @@ static int get_save_file( Var **v )
 	   (i.e. also expect that no file identifier is given in later calls),
 	   otherwise the first variable has to be the file identifier */
 
-	if ( File_List_Len == 0 )
+	if ( EDL.File_List_Len == 0 )
 	{
 		if ( Dont_Save )
 			return -1;
@@ -448,7 +449,7 @@ static int get_save_file( Var **v )
 		return -1;
 	}
 
-	if ( file_num >= File_List_Len )
+	if ( file_num >= EDL.File_List_Len )
 	{
 		print( FATAL, "Invalid file handle.\n" );
 		THROW( EXCEPTION );
@@ -466,23 +467,22 @@ void close_all_files( void )
 {
 	int i;
 
-	if ( File_List == NULL )
+	if ( EDL.File_List == NULL )
 	{
-		File_List_Len = 0;
+		EDL.File_List_Len = 0;
 		return;
 	}
 
-	for ( i = 0; i < File_List_Len; i++ )
+	for ( i = 0; i < EDL.File_List_Len; i++ )
 	{
-		if ( File_List[ i ].name )
-			T_free( File_List[ i ].name );
-		if ( File_List[ i ].fp )
-			fclose( File_List[ i ].fp );
+		if ( EDL.File_List[ i ].name )
+			T_free( EDL.File_List[ i ].name );
+		if ( EDL.File_List[ i ].fp )
+			fclose( EDL.File_List[ i ].fp );
 	}
 
-	T_free( File_List );
-	File_List = NULL;
-	File_List_Len = 0;
+	EDL.File_List = T_free( EDL.File_List );
+	EDL.File_List_Len = 0;
 }
 
 
@@ -1319,7 +1319,7 @@ static long do_printf( int file_num, Var *v )
 	OTHERWISE
 	{
 		T_free( fmt_start );
-		PASSTHROUGH( );
+		RETHROW( );
 	}
 
 	T_free( fmt_start );
@@ -1350,7 +1350,7 @@ Var *f_save_p( Var *v )
 	if ( v != NULL )
 		vars_check( v, STR_VAR );
 
-	if ( TEST_RUN )
+	if ( Internals.mode == TEST )
 		return vars_push( INT_VAR, 1 );
 
 	if ( ! print_browser( 0, file_num, v != NULL ? v->val.sptr : "" ) )
@@ -1382,7 +1382,7 @@ Var *f_save_o( Var *v )
 	if ( v != NULL )
 		vars_check( v, STR_VAR );
 
-	if ( TEST_RUN )
+	if ( Internals.mode == TEST )
 		return vars_push( INT_VAR, 1 );
 
 	if ( ! print_browser( 1, file_num, v != NULL ? v->val.sptr : "" ) )
@@ -1463,7 +1463,7 @@ Var *f_save_c( Var *v )
 	if ( ( file_num = get_save_file( &v ) ) == -1 )
 		return vars_push( INT_VAR, 0 );
 
-	if ( TEST_RUN )
+	if ( Internals.mode == TEST )
 		return vars_push( INT_VAR, 1 );
 
 	/* Try to get the comment chars to prepend to each line */
@@ -1559,15 +1559,15 @@ static int T_fprintf( int file_num, const char *fmt, ... )
 	/* If the file has been closed because of insufficient place and no
        replacement file has been given just don't print */
 
-	if ( ! TEST_RUN )
+	if ( Internals.mode != TEST )
 	{
-		if ( file_num < 0 || file_num >= File_List_Len )
+		if ( file_num < 0 || file_num >= EDL.File_List_Len )
 		{
 			print( FATAL, "Invalid file handle.\n" );
 			THROW( EXCEPTION );
 		}
 
-		if ( File_List[ file_num ].fp == NULL )
+		if ( EDL.File_List[ file_num ].fp == NULL )
 			return 0;
 	}
 
@@ -1614,11 +1614,11 @@ static int T_fprintf( int file_num, const char *fmt, ... )
 		OTHERWISE
 		{
 			T_free( p );
-			PASSTHROUGH( );
+			RETHROW( );
 		}
     }
 
-	if ( TEST_RUN )
+	if ( Internals.mode == TEST )
 	{
 		T_free( p );
 		return n;
@@ -1626,7 +1626,7 @@ static int T_fprintf( int file_num, const char *fmt, ... )
 
     /* Now we try to write the string to the file */
 
-    if ( ( count = fprintf( File_List[ file_num ].fp, "%s", p ) ) == n )
+    if ( ( count = fprintf( EDL.File_List[ file_num ].fp, "%s", p ) ) == n )
     {
         T_free( p );
         return n;
@@ -1636,7 +1636,7 @@ static int T_fprintf( int file_num, const char *fmt, ... )
 
 	mess = get_string( "Disk full while writing to file\n%s\n"
 					   "Please choose a new file.",
-					   File_List[ file_num ].name );
+					   EDL.File_List[ file_num ].name );
     show_message( mess );
 	T_free( mess );
 
@@ -1664,14 +1664,14 @@ get_repl_retry:
 	{
 		if ( new_name != NULL )
 			T_free( new_name );
-		T_free( File_List[ file_num ].name );
-		File_List[ file_num ].name = NULL;
-		fclose( File_List[ file_num ].fp );
-		File_List[ file_num ].fp = NULL;
+		T_free( EDL.File_List[ file_num ].name );
+		EDL.File_List[ file_num ].name = NULL;
+		fclose( EDL.File_List[ file_num ].fp );
+		EDL.File_List[ file_num ].fp = NULL;
 		return count;
 	}
 
-	stat( File_List[ file_num ].name, &old_stat );
+	stat( EDL.File_List[ file_num ].name, &old_stat );
 	if ( 0 == stat( new_name, &new_stat ) &&
 		 ( old_stat.st_dev != new_stat.st_dev ||
 		   old_stat.st_ino != new_stat.st_ino ) &&
@@ -1730,13 +1730,13 @@ get_repl_retry:
 		T_free( new_name );
 	else
 	{
-		fseek( File_List[ file_num ].fp, 0, SEEK_SET );
+		fseek( EDL.File_List[ file_num ].fp, 0, SEEK_SET );
 		while( 1 )
 		{
-			clearerr( File_List[ file_num ].fp );
+			clearerr( EDL.File_List[ file_num ].fp );
 			clearerr( new_fp );
 
-			rw = fread( buffer, 1, 1024, File_List[ file_num ].fp );
+			rw = fread( buffer, 1, 1024, EDL.File_List[ file_num ].fp );
 
 			if ( rw != 0 )
 				fwrite( buffer, 1, rw, new_fp );
@@ -1754,20 +1754,20 @@ get_repl_retry:
 				goto get_repl_retry;
 			}
 
-			if ( feof( File_List[ file_num ].fp ) )
+			if ( feof( EDL.File_List[ file_num ].fp ) )
 				break;
 		}
 
-		fclose( File_List[ file_num ].fp );
-		unlink( File_List[ file_num ].name );
-		T_free( File_List[ file_num ].name );
-		File_List[ file_num ].name = new_name;
-		File_List[ file_num ].fp = new_fp;
+		fclose( EDL.File_List[ file_num ].fp );
+		unlink( EDL.File_List[ file_num ].name );
+		T_free( EDL.File_List[ file_num ].name );
+		EDL.File_List[ file_num ].name = new_name;
+		EDL.File_List[ file_num ].fp = new_fp;
 	}
 
 	/* Finally also write the string that failed to be written */
 
-	if ( fprintf( File_List[ file_num ].fp, "%s", p ) == n )
+	if ( fprintf( EDL.File_List[ file_num ].fp, "%s", p ) == n )
 	{
 		T_free( p );
 		return n;
@@ -1777,7 +1777,7 @@ get_repl_retry:
 
 	mess = get_string( "Can't write to (replacement) file\n%s\n"
 					   "Please choose a different file.",
-					   File_List[ file_num ].name );
+					   EDL.File_List[ file_num ].name );
 	show_message( mess );
 	T_free( mess );
 	goto get_repl_retry;

@@ -1,7 +1,7 @@
-/*
+/* -*-C-*-
   $Id$
 
-  Copyright (C) 2001 Jens Thoms Toerring
+  Copyright (C) 1999-2002 Jens Thoms Toerring
 
   This file is part of fsc2.
 
@@ -98,14 +98,14 @@ WS          [\n=,:. ]+
 			/* handling of file name lines */
 {FILE}      {
 				*( phasestext + phasesleng - 1 ) = '\0';
-				T_free( Fname );
-				Fname = T_strdup( phasestext + 2 );
+				T_free( EDL.Fname );
+				EDL.Fname = T_strdup( phasestext + 2 );
 			}
 
 			/* handling of line number lines */
 {LNUM}		{
 				*( phasestext + phasesleng - 1 ) = '\0';
-				Lc = atol( phasestext + 2 );
+				EDL.Lc = atol( phasestext + 2 );
 			}
 
 			/* handling of error messages from the cleaner */
@@ -257,12 +257,12 @@ int phases_parser( FILE *in )
 	static bool is_restart = UNSET;
 
 
-	if ( compilation.sections[ PHASES_SECTION ] )
+	if ( EDL.compilation.sections[ PHASES_SECTION ] )
 	{
 		eprint( FATAL, SET, "Multiple instances of PHASES section label.\n" );
 		THROW( EXCEPTION );
 	}
-	compilation.sections[ PHASES_SECTION ] = SET;
+	EDL.compilation.sections[ PHASES_SECTION ] = SET;
 
 	phasesin = in;
 
@@ -286,7 +286,7 @@ int phases_parser( FILE *in )
 		THROW( EXCEPTION );
 	}
 	OTHERWISE
-		PASSTHROUGH( );
+		RETHROW( );
 
 	return Phases_Next_Section;
 }

@@ -1,7 +1,7 @@
 /*
   $Id$
 
-  Copyright (C) 2001 Jens Thoms Toerring
+  Copyright (C) 1999-2002 Jens Thoms Toerring
 
   This file is part of fsc2.
 
@@ -21,102 +21,75 @@
   Boston, MA 02111-1307, USA.
 */
 
-/***************************************************************************/
-/*                                                                         */
-/*      The following code is taken from an article by Peter Simons        */
-/*            in the iX magazine No. 5, 1998, pp. 160-162.                 */
-/*                                                                         */
-/*  In order to avoid exception stack overflows (e.g. after 256 successful */
-/*  calls with TRY) I found it is necessary to decrement the stack pointer */
-/*  `exception_env_stack_pos' after each successful TRY, as defined by the */
-/*  macro `TRY_SUCCESS'. A typical sequence is thus:                       */
-/*                                                                         */
-/*  TRY {                                                                  */
-/*      statement;                                                         */
-/*		TRY_SUCCESS;                                                       */
-/*  }                                                                      */
-/*  CATCH( exception ) {                                                   */
-/*      ...                                                                */
-/*  }                                                                      */
-/*                                                                         */
-/*  Further changes are checks to avoid overflow of the exception stack    */
-/*  and, for added security, switching to the users privileges whenever    */
-/*  an exception is thrown.                                                */
-/***************************************************************************/
+
+/********************************************************************/
+/* The basic ideas for the following code came from an article by   */
+/* Peter Simons in the iX magazine No. 5, 1998, pp. 160-162. It has */
+/* been changed a lot thanks to the very constructive criticism by  */
+/* Chris Torek <nospam@elf.eng.bsdi.com> on comp.lang.c.            */
+/*                                                                  */
+/* In order to avoid overflows of the fixed size exception frame    */
+/* stack (i.e. after MAX_NESTED_EXCEPTIONS successful TRY's) it is  */
+/* necessary manually remove an exception frame (in contrast to C++ */
+/* where this is handled automatically) by calling TRY_SUCCESS if   */
+/* the code of the TRY block finished successfully. A typical TRY   */
+/* block sequence is thus:                                          */
+/*                                                                  */
+/* TRY {                                                            */
+/*     statement;                                                   */
+/*     TRY_SUCCESS;                                                 */
+/* }                                                                */
+/* CATCH( exception ) {                                             */
+/*     ...                                                          */
+/* }                                                                */
+/*                                                                  */
+/* Don't use this exception mechanism from within signal handlers   */
+/* or other code invoked asynchronously, it easily could trigger a  */
+/* race condition.                                                  */
+/********************************************************************/
 
 
 #ifndef EXCEPTIONS_HEADER
 #define EXCEPTIONS_HEADER
 
-#include <unistd.h>
 #include <setjmp.h>
-#include <syslog.h>
 
 
-#ifndef MAX_NESTED_EXCEPTION
-#define MAX_NESTED_EXCEPTION 256
-#endif
-
-#ifndef EXCEPTIONS_SOURCE_COMPILE
-
-extern jmp_buf exception_env_stack[ ];
-extern unsigned int exception_env_stack_pos;
-extern int exception_id;
-extern void longjmperror( void );
-
-#endif  /* ! EXCEPTIONS_SOURCE_COMPILE */
-
-
-enum {
-	NO_EXCEPTION                = 0,               /* must be 0 ! */
-	EXCEPTION                   = ( 1 <<  0 ),
-	OUT_OF_MEMORY_EXCEPTION     = ( 1 <<  1 ),
-	TOO_DEEPLY_NESTED_EXCEPTION = ( 1 <<  2 ),
-	EOF_IN_COMMENT_EXCEPTION    = ( 1 <<  3 ),
-	EOF_IN_STRING_EXCEPTION     = ( 1 <<  4 ),
-	DANGLING_END_OF_COMMENT     = ( 1 <<  5 ),
-	MISPLACED_SHEBANG           = ( 1 <<  6 ),
-	SYNTAX_ERROR_EXCEPTION      = ( 1 <<  7 ),
-	MISSING_SEMICOLON_EXCEPTION = ( 1 <<  8 ),
-	INVALID_INPUT_EXCEPTION     = ( 1 <<  9 ),
-	USER_BREAK_EXCEPTION        = ( 1 << 10 ),
-	ABORT_EXCEPTION             = ( 1 << 11 )
-};
+typedef enum {
+	EXCEPTION,
+	OUT_OF_MEMORY_EXCEPTION,
+	TOO_DEEPLY_NESTED_EXCEPTION,
+	EOF_IN_COMMENT_EXCEPTION,
+	EOF_IN_STRING_EXCEPTION,
+	DANGLING_END_OF_COMMENT,
+	MISPLACED_SHEBANG,
+	SYNTAX_ERROR_EXCEPTION,
+	MISSING_SEMICOLON_EXCEPTION,
+	INVALID_INPUT_EXCEPTION,
+	USER_BREAK_EXCEPTION,
+	ABORT_EXCEPTION
+} Exception_Types;
 
 
+jmp_buf *push_exception_frame( const char *file, unsigned int line );
+void pop_exception_frame( const char *file, unsigned int line );
+jmp_buf *throw_exception( Exception_Types exception_type );
+Exception_Types get_exception_type( const char *file, int unsigned line );
 
-#define TRY \
-    if ( exception_env_stack_pos >= MAX_NESTED_EXCEPTION ) \
-	{ \
-	    syslog( LOG_ERR, "Internal error: Too many exceptions at %s:%d.\n", \
-				__FILE__, __LINE__ ); \
-		exit( -1 ); \
-	} \
-    exception_id = setjmp( exception_env_stack[ exception_env_stack_pos++ ] );\
-    if ( exception_id == NO_EXCEPTION )
 
-#define TRY_SUCCESS  \
-    --exception_env_stack_pos
+#define TRY         \
+			if ( setjmp( *push_exception_frame( __FILE__, __LINE__ ) ) == 0 )
 
-#define CATCH( e ) \
-    else if ( exception_id & ( e ) )
+#define TRY_SUCCESS  pop_exception_frame( __FILE__, __LINE__ )
 
-#define OTHERWISE \
-    else
+#define THROW( e )   longjmp( *throw_exception( e ), 1 )
 
-#define PASSTHROUGH( ) \
-    THROW( exception_id )
+#define RETHROW( )   THROW( get_exception_type( __FILE__, __LINE__ ) )
 
-#define THROW( e ) \
-    do \
-    { \
-		lower_permissions( ); \
-        exception_id = e; \
-        if ( exception_env_stack_pos == 0 ) \
-		    longjmperror( ); \
-        longjmp( exception_env_stack[ --exception_env_stack_pos ], e ); \
-    } while ( 0 )
+#define CATCH( e )     \
+			else if ( get_exception_type( __FILE__, __LINE__ ) == ( e ) )
 
+#define OTHERWISE      else
 
 
 #endif  /* ! EXCEPTIONS_HEADER */

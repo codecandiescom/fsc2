@@ -1,7 +1,7 @@
 /*
   $Id$
 
-  Copyright (C) 2001 Jens Thoms Toerring
+  Copyright (C) 1999-2002 Jens Thoms Toerring
 
   This file is part of fsc2.
 
@@ -151,21 +151,21 @@ bool xforms_init( int *argc, char *argv[ ] )
 	/* Find out the resolution we're going to run in */
 
 	if ( fl_scrh >= 870 && fl_scrw >= 1152 )
-		G_Funcs.size = ( bool ) HIGH;
+		GUI.G_Funcs.size = ( bool ) HIGH;
 	else
-		G_Funcs.size = ( bool ) LOW;
+		GUI.G_Funcs.size = ( bool ) LOW;
 
 	if ( * ( ( char * ) xresources[ RESOLUTION ].var ) != '\0' )
 	{
 		if ( ! strcasecmp( ( char * ) xresources[ RESOLUTION ].var, "s" ) ||
 			 ! strcasecmp( ( char * ) xresources[ RESOLUTION ].var, "small" ) )
-			G_Funcs.size = ( bool ) LOW;
+			GUI.G_Funcs.size = ( bool ) LOW;
 		if ( ! strcasecmp( ( char * ) xresources[ RESOLUTION ].var, "l" ) ||
 			 ! strcasecmp( ( char * ) xresources[ RESOLUTION ].var, "large" ) )
-			G_Funcs.size = ( bool ) HIGH;
+			GUI.G_Funcs.size = ( bool ) HIGH;
 	}
 
-	if ( G_Funcs.size == LOW )
+	if ( GUI.G_Funcs.size == LOW )
 	{
 		XI_sizes.WIN_MIN_WIDTH    = 200;
 		XI_sizes.WIN_MIN_HEIGHT   = 320;
@@ -216,22 +216,23 @@ bool xforms_init( int *argc, char *argv[ ] )
 
 	/* Set the stop mouse button */
 
+	GUI.stop_button_mask = 0;
 	if ( * ( char * ) xresources[ STOPMOUSEBUTTON ].var != '\0' )
 	{
 		if ( ! strcmp( ( char * ) xresources[ STOPMOUSEBUTTON ].var, "1" )
 			 || ! strcasecmp( ( char * ) xresources[ STOPMOUSEBUTTON ].var,
 							  "left" ) )
-			stop_button_mask = FL_LEFT_MOUSE;
+			GUI.stop_button_mask = FL_LEFT_MOUSE;
 		else if ( ! strcmp( ( char * ) xresources[ STOPMOUSEBUTTON ].var,
 							"2" ) ||
 				  ! strcasecmp( ( char * ) xresources[ STOPMOUSEBUTTON ].var,
 								"middle" ) )
-			stop_button_mask = FL_MIDDLE_MOUSE;
+			GUI.stop_button_mask = FL_MIDDLE_MOUSE;
 		else if ( ! strcmp( ( char * ) xresources[ STOPMOUSEBUTTON ].var,
 							"3" ) ||
 				  ! strcasecmp( ( char * ) xresources[ STOPMOUSEBUTTON ].var,
 								"right" ) )
-			stop_button_mask = FL_RIGHT_MOUSE;
+			GUI.stop_button_mask = FL_RIGHT_MOUSE;
 	}
 
 	/* Set the default font size for browsers */
@@ -279,32 +280,33 @@ bool xforms_init( int *argc, char *argv[ ] )
 
 	/* Create and display the main form */
 
-	main_form = G_Funcs.create_form_fsc2( );
+	GUI.main_form = GUI.G_Funcs.create_form_fsc2( );
 
-	if ( ! ( cmdline_flags & NO_BALLOON ) )
+	if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
 	{
-		fl_set_object_helper( main_form->Load, "Load new EDL program" );
-		fl_set_object_helper( main_form->Edit, "Edit loaded EDL program" );
-		fl_set_object_helper( main_form->reload, "Reload EDL program" );
-		fl_set_object_helper( main_form->test_file, "Start syntax and "
+		fl_set_object_helper( GUI.main_form->Load, "Load new EDL program" );
+		fl_set_object_helper( GUI.main_form->Edit, "Edit loaded EDL program" );
+		fl_set_object_helper( GUI.main_form->reload, "Reload EDL program" );
+		fl_set_object_helper( GUI.main_form->test_file, "Start syntax and "
 							  "plausibility check" );
-		fl_set_object_helper( main_form->run, "Start loaded EDL program" );
-		fl_set_object_helper( main_form->quit, "Quit fsc2" );
-		fl_set_object_helper( main_form->help, "Show documentation" );
-		fl_set_object_helper( main_form->bug_report, "Mail a bug report" );
+		fl_set_object_helper( GUI.main_form->run, "Start loaded EDL program" );
+		fl_set_object_helper( GUI.main_form->quit, "Quit fsc2" );
+		fl_set_object_helper( GUI.main_form->help, "Show documentation" );
+		fl_set_object_helper( GUI.main_form->bug_report, "Mail a bug report" );
 	}
 
-	fl_set_browser_fontstyle( main_form->browser, FL_FIXED_STYLE );
-	fl_set_browser_fontstyle( main_form->error_browser, FL_FIXED_STYLE );
+	fl_set_browser_fontstyle( GUI.main_form->browser, FL_FIXED_STYLE );
+	fl_set_browser_fontstyle( GUI.main_form->error_browser, FL_FIXED_STYLE );
 
-	fl_get_object_geometry( main_form->browser, &cx1, &cy1, &cw1, &ch1 );
-	fl_get_object_geometry( main_form->error_browser, &cx2, &cy2, &cw2, &ch2 );
+	fl_get_object_geometry( GUI.main_form->browser, &cx1, &cy1, &cw1, &ch1 );
+	fl_get_object_geometry( GUI.main_form->error_browser,
+                            &cx2, &cy2, &cw2, &ch2 );
 
 	h = cy2 - cy1 - ch1;
 	H = ch1 + ch2 + h;
 
-	fl_set_slider_size( main_form->win_slider, XI_sizes.SLIDER_SIZE );
-	fl_set_slider_value( main_form->win_slider,
+	fl_set_slider_size( GUI.main_form->win_slider, XI_sizes.SLIDER_SIZE );
+	fl_set_slider_value( GUI.main_form->win_slider,
 						 ( double ) ( ch1 + h / 2
 									  - 0.5 * H * XI_sizes.SLIDER_SIZE )
 						 / ( ( 1.0 - XI_sizes.SLIDER_SIZE ) * H ) );
@@ -313,7 +315,7 @@ bool xforms_init( int *argc, char *argv[ ] )
 	   or no mail program has been set */
 
 #if ! defined( MAIL_ADDRESS ) || ! defined( MAIL_PROGRAM )
-	fl_hide_object( main_form->bug_report );
+	fl_hide_object( GUI.main_form->bug_report );
 #endif
 
 	/* Now show the form, taking user wishes about the geometry into account */
@@ -329,7 +331,7 @@ bool xforms_init( int *argc, char *argv[ ] )
 			if ( wh < XI_sizes.WIN_MIN_HEIGHT )
 				wh = XI_sizes.WIN_MIN_HEIGHT;
 
-			fl_set_form_size( main_form->fsc2, ww, wh );
+			fl_set_form_size( GUI.main_form->fsc2, ww, wh );
 		}
 
 		if ( XValue & flags && YValue & flags )
@@ -338,32 +340,32 @@ bool xforms_init( int *argc, char *argv[ ] )
 
 	if ( needs_pos )
 	{
-		fl_set_form_position( main_form->fsc2, wx, wy );
-		fl_show_form( main_form->fsc2, FL_PLACE_POSITION,
+		fl_set_form_position( GUI.main_form->fsc2, wx, wy );
+		fl_show_form( GUI.main_form->fsc2, FL_PLACE_POSITION,
 					  FL_FULLBORDER, "fsc2" );
 	}
 	else
-		fl_show_form( main_form->fsc2, FL_PLACE_MOUSE | FL_FREE_SIZE,
+		fl_show_form( GUI.main_form->fsc2, FL_PLACE_MOUSE | FL_FREE_SIZE,
 					  FL_FULLBORDER, "fsc2" );
 	
-	fl_deactivate_object( main_form->reload );
-	fl_set_object_lcol( main_form->reload, FL_INACTIVE_COL );
-	fl_deactivate_object( main_form->Edit );
-	fl_set_object_lcol( main_form->Edit, FL_INACTIVE_COL );
-	fl_deactivate_object( main_form->test_file );
-	fl_set_object_lcol( main_form->test_file, FL_INACTIVE_COL );
-	fl_deactivate_object( main_form->run );
-	fl_set_object_lcol( main_form->run, FL_INACTIVE_COL );
+	fl_deactivate_object( GUI.main_form->reload );
+	fl_set_object_lcol( GUI.main_form->reload, FL_INACTIVE_COL );
+	fl_deactivate_object( GUI.main_form->Edit );
+	fl_set_object_lcol( GUI.main_form->Edit, FL_INACTIVE_COL );
+	fl_deactivate_object( GUI.main_form->test_file );
+	fl_set_object_lcol( GUI.main_form->test_file, FL_INACTIVE_COL );
+	fl_deactivate_object( GUI.main_form->run );
+	fl_set_object_lcol( GUI.main_form->run, FL_INACTIVE_COL );
 
-	XQueryTree( fl_display, main_form->fsc2->window, &root,
+	XQueryTree( fl_display, GUI.main_form->fsc2->window, &root,
 				&parent, &children, &nchilds );
 	XQueryTree( fl_display, parent, &root,
 				&parent, &children, &nchilds );
 	XGetWindowAttributes( fl_display, parent, &attr );
-	border_offset_x = main_form->fsc2->x - attr.x;
-	border_offset_y = main_form->fsc2->y - attr.y;
+	GUI.border_offset_x = GUI.main_form->fsc2->x - attr.x;
+	GUI.border_offset_y = GUI.main_form->fsc2->y - attr.y;
 
-	fl_winminsize( main_form->fsc2->window,
+	fl_winminsize( GUI.main_form->fsc2->window,
 				   XI_sizes.WIN_MIN_WIDTH, XI_sizes.WIN_MIN_HEIGHT );
 
 	/* Check if axis font exists (if the user set a font) */
@@ -381,18 +383,19 @@ bool xforms_init( int *argc, char *argv[ ] )
 
 	/* Set close handler for main form */
 
-	fl_set_form_atclose( main_form->fsc2, main_form_close_handler, NULL );
+	fl_set_form_atclose( GUI.main_form->fsc2, main_form_close_handler,
+                         NULL );
 
 	/* Set c_cdata and u_cdata elements of load button structure */
 
-	main_form->Load->u_ldata = 0;
-	main_form->Load->u_cdata = NULL;
+	GUI.main_form->Load->u_ldata = 0;
+	GUI.main_form->Load->u_cdata = NULL;
 
 	/* Create the forms for writing a comment (both for storing with the
 	   data and for printing) */
 
-	input_form = G_Funcs.create_form_input_form( );
-	print_comment = G_Funcs.create_pc_form( );
+	GUI.input_form = GUI.G_Funcs.create_form_input_form( );
+	GUI.print_comment = GUI.G_Funcs.create_pc_form( );
 
 	return OK;
 }
@@ -500,7 +503,7 @@ bool dl_fsc2_rsc( void )
 	   where the name contains a relative path */
 
 	lib_name = get_string( "%s%sfsc2_rsc_%cr.so", libdir, slash( libdir ),
-						   G_Funcs.size == LOW ? 'l' : 'h' );
+						   GUI.G_Funcs.size == LOW ? 'l' : 'h' );
 
 	/* Try to open the library. If it can't be found in the place defined at
 	   compilation time give it another chance by trying the paths defined
@@ -519,7 +522,7 @@ bool dl_fsc2_rsc( void )
 	}
 
 	dlerror( );           /* make sure it's NULL before we continue */
-	G_Funcs.create_form_fsc2 =
+	GUI.G_Funcs.create_form_fsc2 =
 		       ( FD_fsc2 * ( * )( void ) ) dlsym( handle, "create_form_fsc2" );
 	if ( dlerror( ) != NULL )
 	{
@@ -529,7 +532,7 @@ bool dl_fsc2_rsc( void )
 	}
 
 	dlerror( );           /* make sure it's NULL before we continue */
-	G_Funcs.create_form_run =
+	GUI.G_Funcs.create_form_run =
 		         ( FD_run * ( * )( void ) ) dlsym( handle, "create_form_run" );
 	if ( dlerror( ) != NULL )
 	{
@@ -539,7 +542,7 @@ bool dl_fsc2_rsc( void )
 	}
 
 	dlerror( );           /* make sure it's NULL before we continue */
-	G_Funcs.create_form_input_form = ( FD_input_form * ( * )( void ) )
+	GUI.G_Funcs.create_form_input_form = ( FD_input_form * ( * )( void ) )
 		                             dlsym( handle, "create_form_input_form" );
 	if ( dlerror( ) != NULL )
 	{
@@ -549,7 +552,7 @@ bool dl_fsc2_rsc( void )
 	}
 
 	dlerror( );           /* make sure it's NULL before we continue */
-	G_Funcs.create_form_print =
+	GUI.G_Funcs.create_form_print =
 		     ( FD_print * ( * )( void ) ) dlsym( handle, "create_form_print" );
 	if ( dlerror( ) != NULL )
 	{
@@ -559,7 +562,7 @@ bool dl_fsc2_rsc( void )
 	}
 
 	dlerror( );           /* make sure it's NULL before we continue */
-	G_Funcs.create_form_cut =
+	GUI.G_Funcs.create_form_cut =
 		         ( FD_cut * ( * )( void ) ) dlsym( handle, "create_form_cut" );
 	if ( dlerror( ) != NULL )
 	{
@@ -569,7 +572,7 @@ bool dl_fsc2_rsc( void )
 	}
 
 	dlerror( );           /* make sure it's NULL before we continue */
-	G_Funcs.create_pc_form =
+	GUI.G_Funcs.create_pc_form =
 		         ( FD_print_comment * ( * )( void ) ) dlsym( handle, 
 											     "create_form_print_comment" );
 	if ( dlerror( ) != NULL )
@@ -593,7 +596,7 @@ static int main_form_close_handler( FL_FORM *a, void *b )
 	a = a;
 	b = b;
 
-	if ( main_form->quit->active != 1 )
+	if ( GUI.main_form->quit->active != 1 )
 		return FL_IGNORE;
 
 	clean_up( );
@@ -611,9 +614,9 @@ static int main_form_close_handler( FL_FORM *a, void *b )
 
 void xforms_close( void )
 {
-	if ( fl_form_is_visible( main_form->fsc2 ) )
-		fl_hide_form( main_form->fsc2 );
-	fl_free_form( main_form->fsc2 );
+	if ( fl_form_is_visible( GUI.main_form->fsc2 ) )
+		fl_hide_form( GUI.main_form->fsc2 );
+	fl_free_form( GUI.main_form->fsc2 );
 }
 
 
@@ -631,10 +634,11 @@ void win_slider_callback( FL_OBJECT *a, long b )
 
 	b = b;
 
-	fl_freeze_form( main_form->fsc2 );
+	fl_freeze_form( GUI.main_form->fsc2 );
 
-	fl_get_object_geometry( main_form->browser, &cx1, &cy1, &cw1, &ch1 );
-	fl_get_object_geometry( main_form->error_browser, &cx2, &cy2, &cw2, &ch2 );
+	fl_get_object_geometry( GUI.main_form->browser, &cx1, &cy1, &cw1, &ch1 );
+	fl_get_object_geometry( GUI.main_form->error_browser,
+                            &cx2, &cy2, &cw2, &ch2 );
 
 	h = cy2 - cy1 - ch1;
 	H = cy2 - cy1 + ch2;
@@ -643,10 +647,10 @@ void win_slider_callback( FL_OBJECT *a, long b )
 							* fl_get_slider_value( a )
 							+ 0.5 * H * XI_sizes.SLIDER_SIZE - h / 2 );
 
-	fl_set_object_size( main_form->browser, cw1, new_h1 );
-	fl_set_object_geometry( main_form->error_browser, cx2, cy1 + new_h1 + h,
-							cw2, H - ( new_h1 + h ) );
-	fl_unfreeze_form( main_form->fsc2 );
+	fl_set_object_size( GUI.main_form->browser, cw1, new_h1 );
+	fl_set_object_geometry( GUI.main_form->error_browser, cx2,
+                            cy1 + new_h1 + h, cw2, H - ( new_h1 + h ) );
+	fl_unfreeze_form( GUI.main_form->fsc2 );
 }
 
 #if 0

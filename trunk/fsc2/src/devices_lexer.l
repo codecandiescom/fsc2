@@ -1,7 +1,7 @@
-/*
+/* -*-C-*-
   $Id$
 
-  Copyright (C) 2001 Jens Thoms Toerring
+  Copyright (C) 1999-2002 Jens Thoms Toerring
 
   This file is part of fsc2.
 
@@ -88,14 +88,14 @@ WS          [\n\t ]+
 			/* handling of file name lines */
 {FILE}      {
 				*( devicestext + devicesleng - 1 ) = '\0';
-				T_free( Fname );
-				Fname = T_strdup( devicestext + 2 );
+				T_free( EDL.Fname );
+				EDL.Fname = T_strdup( devicestext + 2 );
 			}
 
 			/* handling of line number lines */
 {LNUM}		{
 				*( devicestext + devicesleng - 1 ) = '\0';
-				Lc = atol( devicestext + 2 );
+				EDL.Lc = atol( devicestext + 2 );
 			}
 
 			/* handling of error messages from the cleaner */
@@ -181,7 +181,7 @@ int devices_parser( FILE *in )
 	/* Make sure there is only one DEVICES section and that it is the very
 	   first section */
 
-	if ( compilation.sections[ DEVICES_SECTION ] )
+	if ( EDL.compilation.sections[ DEVICES_SECTION ] )
 	{
 		eprint( FATAL, SET, "Multiple instances of DEVICES section label.\n" );
 		THROW( EXCEPTION );
@@ -189,7 +189,7 @@ int devices_parser( FILE *in )
 
 	for ( i = ASSIGNMENTS_SECTION; i <= EXPERIMENT_SECTION; i++ )
 	{
-		if ( compilation.sections[ i ] == UNSET)
+		if ( EDL.compilation.sections[ i ] == UNSET )
 		    continue;
 
 		eprint( FATAL, SET, "Sorry, the DEVICES section has to be the very "
@@ -197,7 +197,7 @@ int devices_parser( FILE *in )
 		THROW( EXCEPTION );
 	}
 
-	compilation.sections[ DEVICES_SECTION ] = SET;
+	EDL.compilation.sections[ DEVICES_SECTION ] = SET;
 
 	devicesin = in;
 

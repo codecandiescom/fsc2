@@ -193,7 +193,7 @@ static Var *get_phase_cycled_area_1( Var *v )
 	OTHERWISE
 	{
 		T_free( win_list );
-		PASSTHROUGH( );
+		RETHROW( );
 	}
 
 	for ( i = 0; i < num_windows; i++ )
@@ -264,7 +264,7 @@ static Var *get_phase_cycled_area_1( Var *v )
 	{
 		T_free( data );
 		T_free( win_list );
-		PASSTHROUGH( );
+		RETHROW( );
 	}
 
 	T_free( data );
@@ -416,7 +416,7 @@ static Var *get_phase_cycled_area_2( Var *v )
 	OTHERWISE
 	{
 		T_free( win_list );
-		PASSTHROUGH( );
+		RETHROW( );
 	}
 
 	for ( i = 0; i < 2 * num_windows; i++ )
@@ -546,7 +546,7 @@ static Var *get_phase_cycled_area_2( Var *v )
 	{
 		T_free( data );
 		T_free( win_list );
-		PASSTHROUGH( );
+		RETHROW( );
 	}
 
 	T_free( data );

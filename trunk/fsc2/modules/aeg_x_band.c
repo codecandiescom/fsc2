@@ -1,7 +1,7 @@
 /*
   $Id$
 
-  Copyright (C) 2001 Jens Thoms Toerring
+  Copyright (C) 1999-2002 Jens Thoms Toerring
 
   This file is part of fsc2.
 
@@ -145,7 +145,7 @@ int aeg_x_band_init_hook( void )
 
 	if ( ret == LIB_ERR_NO_SYM )
 	{
-		print( FATAL, "INTERNAL ERROR detected at %s:%d.\n",
+		print( FATAL, "INTERNAL ERROR detected at %s:%u.\n",
 			   __FILE__, __LINE__ );
 		THROW( EXCEPTION );
 	}
@@ -1048,7 +1048,7 @@ bool magnet_do( int command )
 			break;
 
 		default :
-			print( FATAL, "INTERNAL ERROR detected at %s:%d.\n",
+			print( FATAL, "INTERNAL ERROR detected at %s:%u.\n",
 				   __FILE__, __LINE__ );
 			THROW( EXCEPTION );
 	}
