@@ -71,9 +71,9 @@ bool No_File_Numbers;
 bool Dont_Save;
 
 
-/* Take care: The number of maximum parameters havde to be changed for
+/* Take care: The number of maximum parameters have to be changed for
               display() and clear_curve() if the maximum number of curves
-			  (defined as MAX_CURVES in graphics.h) should be changed. */
+			  (defined as MAX_CURVES in graphics.h) should ever be changed. */
 
 Func Def_Fncts[ ] =              /* List of built-in functions */
 {
@@ -242,7 +242,7 @@ void functions_exit( void )
 
 /*-------------------------------------------------------------------*/
 /* This function is thought for modules that just need to check if a */
-/* fnction exists.                                                   */
+/* function exists.                                                  */
 /*-------------------------------------------------------------------*/
 
 int func_exists( const char *name )
@@ -281,7 +281,6 @@ Var *func_get_long( const char *name, int *acc, bool flag )
 {
 	Func *f;
 	Var *ret;
-
 
 
 	/* Try to find the function by its name and if found create a variable on
