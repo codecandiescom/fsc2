@@ -792,7 +792,7 @@ static void eps_make_scale( FILE *fp, void *cv, int coord, int dim )
 
 				make_label_string( lstr, rwc_coarse, ( int ) mag );
 				fprintf( fp, "%f %f (%s) ch 0.5 mul "
-						 "sub m (%s) show\n", x + 0.5, y, lstr, lstr );
+						 "sub m (%s) show\n", x + 1, y, lstr, lstr );
 			}
 			else if ( medium % medium_factor == 0 )    /* medium line */
 				fprintf( fp, "%f %f m\n-2.5 0 rl s\n", x - 0.5, y );
