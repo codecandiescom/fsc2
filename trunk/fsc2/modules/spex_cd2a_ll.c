@@ -1149,13 +1149,13 @@ bool spex_cd2a_read_state( void )
 			print( FATAL, "Invalid state file '%s'.\n", fn );
 			T_free( fn );
 			THROW( EXCEPTION );
-		}	
+		}
 		spex_cd2a.laser_wavenumber = val[ 2 ];
 	}
 	else
 	{
-		spex_cd2a.offset = 1.0e-9 * val[ 0 ];
-		spex_cd2a.pixel_diff = val[ 1 ];
+		spex_cd2a.offset     = 1.0e-9 * val[ 0 ];
+		spex_cd2a.pixel_diff = 1.0e-9 * val[ 1 ];
 	}
 
 	T_free( fn );
