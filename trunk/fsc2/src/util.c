@@ -252,8 +252,8 @@ inline short shrt( double a )
 {
 	long b = rnd( a );
 
-	return ( b > SHORT_MAX ? SHORT_MAX : ( short ) b ) < SHORT_MIN ?
-		   SHORT_MIN : b;
+	return ( b > SHRT_MAX ? SHRT_MAX : ( short ) b ) < SHRT_MIN ?
+		   SHRT_MIN : b;
 }
 
 inline int    i_max( int    a, int    b ) { return a > b ? a : b ; }
