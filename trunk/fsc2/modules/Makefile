@@ -44,7 +44,7 @@ endif
 
 comp_modules    := dg2020_f dg2020_b hfs9000 ep385 rs690 er023m lecroy9400  \
 				   hp8672a $(hp864_list) $(tds_list) spectrapro_300i        \
-				   hjs_attenuator hjs_sfc
+				   hjs_attenuator hjs_sfc lecroy9400_s
 
 ifdef WITH_SPEC10
 comp_modules    += rs_spec10
@@ -71,6 +71,7 @@ hp8648b         := hp8648b.c hp8648b_util.c hp8648b_gpib.c hp8648b_lexer.c
 hp8672a         := hp8672a.c hp8672a_util.c hp8672a_gpib.c hp8672a_lexer.c
 er023m          := er023m.c  er023m_addon.c er023m_gpib.c
 lecroy9400      := lecroy9400.c lecroy9400_gpib.c  lecroy9400_util.c
+lecroy9400_s    := lecroy9400_s.c lecroy9400_serial.c  lecroy9400_util.c
 rs_spec10       := rs_spec10.c rs_spec10_int.c rs_spec10_util.c
 spectrapro_300i := spectrapro_300i.c spectrapro_300i_ll.c  \
 				   spectrapro_300i_lexer.c
