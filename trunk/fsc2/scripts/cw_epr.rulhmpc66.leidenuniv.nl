@@ -274,7 +274,7 @@ $f11_q->pack( %wp, 'padx' => '5m', '-pady' => '3m' );
 
 &get_defs;
 tpp_set( );
-evaluate( ) if check_eval( $start_field, $end_field, $num_points);
+evaluate( ) if check_eval( $start_field, $end_field, $num_points );
 
 MainLoop;
 

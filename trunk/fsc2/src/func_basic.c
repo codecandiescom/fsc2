@@ -2292,13 +2292,18 @@ Var *f_rms( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
-				   INT_REF | FLOAT_REF );
+	vars_check( v, INT_ARR | FLOAT_ARR | INT_REF | FLOAT_REF );
 
 	start = 0;
 	len = v->len;
 
-	if ( ! ( v->type & ( INT_VAR | FLOAT_VAR ) ) && v->next != NULL )
+	if ( len == 0 )
+	{
+		print( FATAL, "Length of array isn't know yet.\n" );
+		THROW( EXCEPTION );
+	}
+
+	if ( v->next != NULL )
 	{
 		start = get_strict_long( v->next, "start index in array" )
 				- ARRAY_OFFSET;
@@ -2333,44 +2338,18 @@ Var *f_rms( Var *v )
 
 	switch ( v->type )
 	{
-		case INT_VAR :
-			print( WARN, "Argument is a number.\n" );
-			return vars_push( INT_VAR, labs( v->val.lval ) );
-
-		case FLOAT_VAR :
-			print( WARN, "Argument is a number.\n" );
-			return vars_push( FLOAT_VAR, fabs( v->val.dval ) );
-
 		case INT_ARR :
-			if ( v->len == 0 )
-			{
-				count = 0;
-				break;
-			}
-
 			for ( count = 0, i = start; i < start + len; count++, i++ )
 				sum +=
 					 ( double ) v->val.lpnt[ i ] * ( double ) v->val.lpnt[ i ];
 			break;
 
 		case FLOAT_ARR :
-			if ( v->len == 0 )
-			{
-				count = 0;
-				break;
-			}
-
 			for ( count = 0, i = start; i < start + len; count++, i++ )
 				sum += v->val.dpnt[ i ] * v->val.dpnt[ i ];
 			break;
 
 		case INT_REF :
-			if ( v->len == 0 )
-			{
-				count = 0;
-				break;
-			}
-
 			if ( start == 0 && len == v->len )
 			{
 				count = 0;
@@ -2390,12 +2369,6 @@ Var *f_rms( Var *v )
 			break;
 			
 		case FLOAT_REF :
-			if ( v->len == 0 )
-			{
-				count = 0;
-				break;
-			}
-
 			if ( start == 0 && len == v->len )
 			{
 				count = 0;
@@ -2416,12 +2389,6 @@ Var *f_rms( Var *v )
 
 		default :
 			fsc2_assert( 1 == 0 );
-	}
-
-	if ( count == 0 )
-	{
-		print( FATAL, "Number of array or matrix elements is 0.\n" );
-		THROW( EXCEPTION );
 	}
 
 	return vars_push( FLOAT_VAR, sqrt( sum ) / ( double ) count );
@@ -2446,6 +2413,12 @@ Var *f_slice( Var *v )
 
 	start = 0;
 	len = v->len;
+
+	if ( len == 0 )
+	{
+		print( FATAL, "Length of array isn't know yet.\n" );
+		THROW( EXCEPTION );
+	}
 
 	if ( v->next != NULL )
 	{
