@@ -39,9 +39,10 @@
 #########################################################################
 
 
-# Please note: When in the following there is some talk about "commenting
+# Please note: When in the following it is said that you have to "comment
 # out a variable" this simply means that you have to put a hash character
-# ('#') at the beginning of the line where the variable is set.
+# ('#') at the start of the line where the variable is set, effectively
+# making that line invisible for the progam reading this file.
 
 # The following variable determines under which directory the program and
 # its auxiliary files will be installed (defaults to /usr/local)
@@ -62,7 +63,7 @@ GROUP              := uucp
 
 # Now set the system wide path for files to be included by EDL files when
 # after the '#INCLUDE' directive a file name enclosed in '<' and '>' is
-# found. This is for the case wherer a system wide set of EDL files has been
+# found. This is for the case where a system wide set of EDL files has been
 # set up from which users may use include files without going to the hassle
 # of always having to write out the full path. If no such repository exists
 # it's save to leave this variable undefined.
@@ -152,31 +153,33 @@ SERIAL_LOG_LEVEL   := HIGH
 
 
 # Define the default editor to use for editing when the "Edit" button gets
-# pressed or for writing a bug report
+# pressed or for writing a bug report  (but a user can still override this
+# by setting an environment variable named 'EDITOR')
 
 EDITOR             := vi
 
 
 # Define the default browser to use when the "Help" button gets pressed and
 # the manual is to be shown, currently supported are netscape, mozilla,
-# opera, konqueror, galeon, lnyx and w3m.
+# opera, konqueror, galeon, lnyx and w3m (but a user can still override this
+# setting an environment variable named 'BROWSER').
 
 BROWSER            := netscape
 
 
-# The next two lines must be uncommented if you want support for the National
-# Instruments 6601 GPCT card. If the library for the card isn't in a place
-# where the linker will find it automatically (e.g. '/usr/lib' and
-# '/usr/local/lib') you need to specify the full absolute path for the
-# library (e.g. '/usr/xxx/yyy/libni6601.so'). You must make sure that the
-# library for the card is already properly installed if you want to build
-# fsc2 with support for the card.
+# Both the next two lines must be uncommented if you want support for the
+# National Instruments 6601 GPCT card. If the library for the card isn't in a
+# place where the linker will find it automatically (e.g. '/usr/lib' and
+# '/usr/local/lib') you need to specify the full absolute path for the library
+# (e.g. '/usr/xxx/yyy/libni6601.so'). You must make sure that the library for
+# the card is already properly installed if you want to build fsc2 with
+# support for the card.
 
 # WITH_NI6601        := yes
 # ni6601_libs        := libni6601.so
 
 
-# Uncommented the next two lines if you want support for the Meilhaus
+# Uncommented both the next two lines if you want support for the Meilhaus
 # Electronics 6000 or 6100 DAC card. If the library for the card isn't in a
 # place where the linker will find it automatically (e.g. '/usr/lib' and
 # '/usr/local/lib') you need to specify the full absolute path for the
@@ -188,57 +191,59 @@ BROWSER            := netscape
 # me6000_libs        := libme6x00.so
 
 
-# The next two lines must be uncommented if you want support for the Wasco
-# WITIO-48 DIO card. If the library for the card isn't in a place where the
-# linker will find it automatically (e.g. '/usr/lib' and '/usr/local/lib')
+# Both the next two lines must be uncommented if you want support for the
+# Wasco WITIO-48 DIO card. If the library for the card isn't in a place where
+# the linker will find it automatically (e.g. '/usr/lib' and '/usr/local/lib')
 # you need to specify the full absolute path for the library (e.g.
-# '/usr/xxx/yyy/libwitio_48.so'). You must make sure that the library for
-# the card is already properly installed if you want to build fsc2 with
-# support for the card.
+# '/usr/xxx/yyy/libwitio_48.so'). You must make sure that the library for the
+# card is already properly installed if you want to build fsc2 with support
+# for the Wasco WITIO-48 DIO card.
 
 # WITH_WITIO_48      := yes
 # witio_48_libs      := libwitio_48.so
 
 
-# The following three lines must be uncommented when you want support for the
-# Roper Scientific Spec-10 CCD camera. Depending on where you installed the
-# header files required by the PVCAM library (which is needed to access the
-# camera) you may have to change the 'rs_spec10_incl' variable to the name
-# of the installation directory. The third variable, 'rs_spec10_libs', must
-# be changed if the library isn't in a place where the linker will find it
-# automatically(e.g. '/usr/lib' and '/usr/local/lib'). In this case it must
-# be the full absolute path to of the library (for example
-# '/usr/lib/pvcam/libpvcam.so'). You must make sure that the header files
-# and the library for the camera are already properly installed if you want
-# to build fsc2 with support for the camera.
+# All of the following three lines must be uncommented when you want support
+# for the Roper Scientific Spec-10 CCD camera. Depending on where the header
+# files required by the PVCAM library are installed (which is to compile the
+# module for the the camera) you may have to change the 'rs_spec10_incl'
+# variable to the name of the installation directory. The third variable,
+# 'rs_spec10_libs', must be changed if the library isn't in a place where the
+# linker will find it automatically (e.g. '/usr/lib' and '/usr/local/lib'). In
+# this case it must be the full absolute path of the library (for example
+# '/usr/lib/pvcam/libpvcam.so'). You must make sure that the header files and
+# the library for the camera are already properly installed before you build
+# fsc2 with support for the camera.
 
 # WITH_RS_SPEC10     := yes
 # rs_spec10_incl     := /usr/local/include/pvcam
 # rs_spec10_libs     := libpvcam.so
 
 
-# The next two lines must be uncommented if you want support for the National
-# Instruments PCI-MIO-16E-1 card. If the library for the card isn't in a place
-# where the linker will find it automatically (e.g. '/usr/lib' and
-# '/usr/local/lib') you need to specify the full absolute path for the
-# library (e.g. '/usr/xxx/yyy/libni_daq.so'). You must make sure that the
-# library for the card is already properly installed if you want to build
-# fsc2 with support for the card.
+# Both the next two lines must be uncommented if you want support for the
+# National Instruments PCI-MIO-16E-1 card. If the library for the card isn't
+# in a place where the linker will find it automatically (e.g. '/usr/lib' and
+# '/usr/local/lib') you need to specify the full absolute path for the library
+# (e.g. '/usr/xxx/yyy/libni_daq.so'). You must make sure that the library for
+# the card is already properly installed if you want to build fsc2 with
+# support for the card.
 
 # WITH_PCI_MIO_16E_1 := yes
 # pci_mio_16e_1_libs := libni_daq.so
 
 
-# The next two lines must be uncommented if you want support for the RULBUS
+# The next line must be uncommented if you want support for the RULBUS
 # (Rijksuniversiteit Leiden BUS) and the devices connected to it. If the
 # include file for the library isn't in one of the standard places (i.e.
-# '/usr/include' or '/usr/local/include') you have to specify the complete
-# path to the place where it installed (e.g. '/usr/xxx/yyy). If the library
-# for the card isn't in a place where the linker will find it automatically
-# (e.g. '/usr/lib' and '/usr/local/lib') you need to also specify the full
-# absolute path for the library. You must make sure that the library for the
-# Rulbus interface is already properly installed if you want to build fsc2
-# with support for it.
+# '/usr/include' or '/usr/local/include') you must also uncomment the line
+# starting with 'rulbus_incl_path and specify the complete path to the place
+# where it installed (e.g. '/usr/xxx/yyy). If the library for the card isn't
+# in a place where the linker will find it automatically (e.g. '/usr/lib' and
+# '/usr/local/lib') you need also to specify the full absolute path for the
+# library by uncommenting the line starting with 'rulbus_lib_path and change
+# the what it gets set to . You must make sure that the library for the Rulbus
+# interface is already properly installed if you want to build fsc2 with
+# support for it.
 
 # WITH_RULBUS        := yes
 # rulbus_incl_path   := /usr/lib/include
