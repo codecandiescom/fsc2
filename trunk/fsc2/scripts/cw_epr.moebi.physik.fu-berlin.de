@@ -295,7 +295,8 @@ $sweep_method = $ne;
 
 goto done_reading unless defined( $ne = <F> ) and is_numeric( $ne );
 chomp $ne;
-$field_error = $ne;
+$hidden_field_error = $ne;
+$field_error = $ne if $sweep_method =~ /set_field/;
 
 goto done_reading unless defined( $ne = <F> ) and $ne =~ /^\d+$/;
 chomp $ne;
@@ -337,7 +338,7 @@ sub store_defs {
 	print F "# Do not edit - created automatically!\n";
 
 	print F "$bridge\n$start_field\n$end_field\n$field_step\n$sweep_method\n" .
-	    "$field_error\n$num_runs\n$lockin\n$tc\n$sens\n";
+	        "$hidden_field_error\n$num_runs\n$lockin\n$tc\n$sens\n";
 
 	close F;
 }
