@@ -316,12 +316,25 @@ Var *pulser_state( Var *v )
 	if ( v == NULL )
 		return vars_push( INT_VAR, ( long ) dg2020.is_running );
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
+	vars_check( v, INT_VAR | FLOAT_VAR | STR_VAR );
 
 	if ( v->type == INT_VAR )
 		state = v->val.lval != 0 ? SET : UNSET;
-	else
+	else if ( v->type == FLOAT_VAR )
 		state = v->val.dval != 0.0 ? SET : UNSET;
+	else
+	{
+		if ( ! strcasecmp( v->val.sptr, "OFF" ) )
+			 state = UNSET;
+		else if ( ! strcasecmp( v->val.sptr, "ON" ) )
+			state = SET;
+		else
+		{
+			eprint( FATAL, "%s:%d: %s: Invalid argument in call of "
+					"`pulser_state'.\n", Fname, Lc, DEVICE_NAME );
+			THROW( EXCEPTION );
+		}
+	}
 
 	if ( I_am == PARENT || TEST_RUN )
 		return vars_push( INT_VAR, ( long ) ( dg2020.is_running = state ) );

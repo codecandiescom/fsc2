@@ -110,7 +110,9 @@ Instead of @code{TRIGGER_MODE} also @code{TM:}, @code{T_M:},
 
 When using the internal trigger it is useful to be able to set the rate
 or the frequency the experiment is repeated. For this type of triggering
-an additional keyword can be specified, either @code{REPEAT_TIME} or
+on the Sony/Tektronix DG2020 (unfortunately, this can't be done with the
+Tektronix HFS9000, so an external trigger must be used) an additional
+keyword can be specified, either @code{REPEAT_TIME} or
 @code{REPEAT_FREQUENCY}, i.e.@ one may use
 @example
 TRIGGER_MODE: INTERNAL, REPEAT_TIME = 10 ms;
@@ -215,4 +217,46 @@ HFS9003. The Tektronix HFS9003 is quite simple in that it has just a
 number of output channels and that's it. In contrast, the Sony/Tektronix
 DG2020 has 36 internal channels that can be mapped to what is called the
 POD, that in both cases (Frankfurt S-band and Berlin X-band
-spectrometer) has 12 output channels. 
+spectrometer) has 12 output channels. So, while for the Tektronix
+HFS9003 simply a channel is associated with a function by statements like
+@example
+MICROWAVE: CHANNEL = 1;
+RF:        CHANNEL = 2;
+RF_GATE:   CH = 3;
+DETECTION: CHANNEL = TRIGGER_OUT;
+@end example
+Please note, that usually the output channels are numbered as printed on
+the device, the only exception for the Tektronix HFS9003 is the trigger
+out channel, that is called @code{TRIGGER_OUT}, and has some special
+properties, e.g. allowing only one pulse of a fixed length.
+
+For the Sony/Tektronix DG2020 the function gets associated with one (or
+more pods, see below, why sometimes more than one is needed):
+@example
+MICROWAVE: POD = 1, 2, 3, 4;
+RF:        POD = 6;
+RF_GATE:   POD = 7;
+DETECTION: POD = 11;
+@end example
+Optionally, for the Sony/Tektronix DG2020 you can also set which of the
+internal channels are going to be used. If you don't, the program will
+automatically grab as many as it needs (using always the ones with the
+lowest numbers). You do this by
+@example
+MICROWAVE: POD = 1, 2, 3, 4  CHANNEL = 31, 32, 33, 34;
+RF:        POD = 6           CHANNEL = 35;
+RF_GATE:   POD = 7           CHANNEL = 17;
+DETECTION: POD = 11;    // leave it to program to select a channel
+@end example
+
+
+Beside defining where the output for a function will apear at the output
+connectors you can also set other properties for the pulses. As far as
+the hardware allows you may set the high and the low voltage for pulses
+using the keywords @code{V_HIGH} and @code{V_LOW}:
+@example
+MICROWAVE: POD = 1, 2, 3, 4  V_HIGH = 4.3 V, V_LOW = -0.5 V;
+RF:        POD = 6           V_HIGH = 2.6 Vv V_LOW = 0 V;
+RF_GATE:   POD = 7           V_HIGH = 5 V,   V_LOW = 0 V;
+@end example
+

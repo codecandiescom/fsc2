@@ -1,45 +1,96 @@
 DEVICES:
 
-hfs9000;
+hfs9003;    // pulser
+tds540;     // digitizer
+hp8647a;    // rf synthesizer
 
 
 VARIABLES:
 
-I;
+I, J;
 
 
-ASSIGNMENTS:
+ASSIGNMENTS:    // setup of pulser !
 
 TIMEBASE:     5 ns;
 TRIGGER_MODE: INTERNAL;
-MW:           CH = 1, DELAY = 0 ns;
-DETECTION:    CH = TRIGGER_OUT;//, DELAY = -20 ns;
+
 //TRIGGER_MODE: EXTERNAL, SLOPE = POS, LEVEL = 1.2 V;
+
+MICROWAVE:    CHANNEL = 1, V_H = 2 V, V_L = 0 V, DELAY = 0 ns;
+RF:           CH = 2;
+RF_GATE:      CH = 3;
+DETECTION:    CH = TRIGGER_OUT;
 
 
 PREPARATIONS:
 
-P0: FUNC   = DETECTION,
+P0: FUNC   = MW,
 	START  = 0 ns,
-	DSTART = 40 ns;
+	LENGTH = 40 ns;
 
 P1: FUNC   = MW,
-	START  = 100 ns,
+	START  = P0.START + P0.LEN + 10 ns,
 	LENGTH = 10 ns,
-	DSTART = 50 ns;
+	DSTART = 10 ns,
+	DLEN   = 5 ns;
+	
 
 P2: FUNC   = MW,
-	START  = 200 ns,
+	START  = 80 ns,
 	LENGTH = 20 ns,
-	DSTART = 50ns,
-	DLEN   = 20 ns;
+	DSTART = 20 ns,
+	DLEN   = 10 ns;
+
+P21: FUNC  = MW;
+P22: FUNC  = MW;
+
+
+P4: FUNC   = DETECTION,
+	START  = 0 ns;
+
+init_1d( 2, 0, 0, 1, "Time [ ns ]", "Voltage [ V ]" );
+
+digitizer_trigger_position( 0.01 );
+digitizer_record_length( 500 );
+digitizer_num_averages( 10 );
+
 
 EXPERIMENT:
 
-FOR I = 1 : 10 {
+pulser_state( "on" );
+change_scale( 0, digitizer_timebase( ) / 50 * 1e9 );
 
-//	wait( 1 );
-	pulser_shift( );
-	pulser_increment( );
-	pulser_update( );
+FOR J = 1 : 100 {
+
+	FOR I = 1 : 16 {
+
+		digitizer_start_acquisition();
+		display( 1, digitizer_get_curve( CH3 ), 1,
+				 1, digitizer_get_curve( CH4 ), 2 );
+		pulser_shift( );
+//		pulser_increment( );
+
+		IF I % 2 {
+			P2.LEN = P2.LEN + 20 ns;
+		} ELSE {
+			P2.LEN -= 20 ns;
+		}
+
+//		  IF P2.LEN >= 100 ns {      // split PULSE_2 if too long
+//				P21.S   = P2.S;
+//				P21.LEN = 40 ns;
+//				P21.DS  = P2.DS;
+//				P22.S   = P2.S + P21.LEN + 20 ns;
+//				P22.LEN = 40 ns;
+//				P22.DS  = P2.DS;
+//				P22.DL  = P2.DL;
+//				P2.L    = 0 ns;        // switch off PULSE_2
+//		  }
+		pulser_update( );
+	}
+
+	pulser_pulse_reset( );
 }
+
+pulser_state( "OFF" );

@@ -11,7 +11,8 @@ extern int exp_runparse( void );              /* from exp_run_parser.y */
 
 /* Routines of the main process exclusively used in this file */
 
-void check_for_further_errors( Compilation *c_old, Compilation *c_all );
+static bool no_prog_to_be_run( void );
+static void check_for_further_errors( Compilation *c_old, Compilation *c_all );
 static void new_data_handler( int signo	);
 static void quitting_handler( int signo	);
 static void run_sigchld_handler( int signo );
@@ -55,10 +56,11 @@ bool run( void )
 	struct sigaction sact;
 
 
-	/* If there are no commands we're already done */
+	/* If there are no commands we just run all the init hooks, then
+	   the exit hooks and then are already done */
 
 	if ( prg_token == NULL || prg_length == 0 )
-		return OK;
+		return no_prog_to_be_run( );
 
 	/* There can't be more than one experiment - so quit if child_pid != 0 */
 
@@ -191,13 +193,53 @@ bool run( void )
 }
 
 
+/*------------------------------------------------------------------*/
+/* This all to be done when the experiment section does not has any */
+/* commands: We just initialize all devices to get and then return. */
+/*------------------------------------------------------------------*/
+
+static bool no_prog_to_be_run( void )
+{
+	bool ret = OK;
+
+
+	fl_set_cursor( FL_ObjWin( main_form->run ), XC_watch );
+	set_buttons_for_run( 0 );
+
+	if ( need_GPIB && gpib_init( NULL, LL_ALL ) == FAILURE )
+	{
+		eprint( FATAL, "Can't initialize GPIB bus: %s\n", gpib_error_msg );
+		set_buttons_for_run( 1 );
+		fl_set_cursor( FL_ObjWin( main_form->run ), XC_left_ptr );
+		return FAIL;
+	}
+
+	TRY
+	{
+		vars_pop( f_dtime( NULL ) );
+		run_exp_hooks( );
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+		ret = FAIL;
+
+	run_end_of_exp_hooks( );
+	if ( need_GPIB )
+		gpib_shutdown( );
+
+	set_buttons_for_run( 1 );
+	fl_set_cursor( FL_ObjWin( main_form->run ), XC_left_ptr );
+
+	return ret;
+} 
+
 /*-------------------------------------------------------------------*/
 /* Checks if new errors etc. were found while running the exp_hooks. */
 /* If so ask the user if she wants to continue - unless an exception */
 /* is thrown.                                                        */
 /*-------------------------------------------------------------------*/
 
-void check_for_further_errors( Compilation *c_old, Compilation *c_all )
+static void check_for_further_errors( Compilation *c_old, Compilation *c_all )
 {
 	Compilation diff;
 	char str1[ 128 ],

@@ -289,7 +289,6 @@ static PULSE *hfs9000_delete_pulse( PULSE *p )
 	pp = p->next;
 	if ( p->prev != NULL )
 		p->prev->next = p->next;
-	T_free( p->channel );
 	T_free( p );
 
 	return pp;
