@@ -134,20 +134,13 @@ Var *vars_pop( Var *v );
 void vars_del_stack( void );
 void vars_clean_up( void );
 void vars_check( Var *v, int type );
-void vars_warn_new( Var *v );
 bool vars_exist( Var *v );
 Var *vars_arr_start( Var *v );
 Var *vars_arr_lhs( Var *v );
-Var *vars_get_lhs_pointer( Var *v, int dim );
-long vars_calc_index( Var *a, Var *v );
-Var *vars_setup_new_array( Var *v, int dim );
 Var *vars_arr_rhs( Var *v );
 void vars_assign( Var *src, Var *dest );
-void vars_ass_from_var( Var *src, Var *dest );
-void vars_ass_from_ptr( Var *src, Var *dest );
-void vars_ass_from_trans_ptr( Var *src, Var *dest );
 void vars_arr_init( Var *dest );
-Var * apply_unit( Var *var, Var *unit );
+Var *apply_unit( Var *var, Var *unit );
 Var *vars_val( Var *v );
 
 

@@ -33,6 +33,26 @@ typedef Var *VarretFnct( Var * );
 typedef VarretFnct *FnctPtr;
 
 
+/* local variables */
+
+static bool is_sorted = UNSET;
+static long num_vars = 0;
+
+
+/* locally used functions */
+
+static int comp_vars_1( const void *a, const void *b );
+static int comp_vars_2( const void *a, const void *b );
+static void free_vars( void );
+static void vars_warn_new( Var *v );
+static Var *vars_get_lhs_pointer( Var *v, int dim );
+static long vars_calc_index( Var *a, Var *v );
+static Var *vars_setup_new_array( Var *v, int dim );
+static void vars_ass_from_var( Var *src, Var *dest );
+static void vars_ass_from_ptr( Var *src, Var *dest );
+static void vars_ass_from_trans_ptr( Var *src, Var *dest );
+
+
 /*
   Variables and arrays (and also functions) are described by a structure
 
@@ -233,11 +253,85 @@ Var *vars_get( char *name )
 
 	/* Try to find the variable with the name passed to the function */
 
-	for ( ptr = var_list; ptr != NULL; ptr = ptr->next )
-		if ( ! strcmp( ptr->name, name ) )
-			return ptr;
+	if ( is_sorted )
+		return bsearch( name, var_list, num_vars, sizeof( Var ), comp_vars_2 );
+	else
+		for ( ptr = var_list; ptr != NULL; ptr = ptr->next )
+			if ( ! strcmp( ptr->name, name ) )
+				return ptr;
 
 	return NULL;
+}
+
+
+/*----------------------------------------------------------------*/
+/* Function is called after the VARIABLES section has been parsed */
+/* to sort the list of variables defined there so that a variable */
+/* can be found using a binary search instead of running through  */
+/* the whole linked list each time.                               */
+/*----------------------------------------------------------------*/
+
+void vars_sort( void )
+{
+	Var *ptr,
+		*next_ptr,
+		*new_var_list;
+	long i;
+
+
+	/* Find out how many variables exist */
+
+	for ( num_vars = 0, ptr = var_list; ptr != NULL;
+		  ptr = ptr->next, num_vars++ )
+		;
+
+	/* Get the variables into a continous block, then sort them according 
+	   to the variable names */
+
+	new_var_list = T_malloc( num_vars * sizeof( Var ) );
+	for ( i = 0, ptr = var_list; i < num_vars; i++, ptr = next_ptr )
+	{
+		memcpy( new_var_list + i, ptr, sizeof( Var ) );
+		next_ptr = ptr->next;
+		T_free( ptr );
+	}
+
+	var_list = new_var_list;
+
+	qsort( var_list, num_vars, sizeof( Var ), comp_vars_1 );
+
+	/* Reset the next and prev pointers */
+
+	for ( i = 0, ptr = var_list; i < num_vars; ptr++, i++ )
+	{
+		ptr->next = ptr + 1;
+		ptr->prev = ptr - 1;
+	}
+
+	var_list->prev = NULL;
+	( --ptr )->next = NULL;
+
+	/* Set a flag that indicates that the list has been sorted */
+
+	is_sorted = SET;
+}
+
+
+/*----------------------------------------------------------*/
+/*----------------------------------------------------------*/
+
+static int comp_vars_1( const void *a, const void *b )
+{
+	return strcmp( ( ( Func * ) a )->name, ( ( Func * ) b )->name );
+}
+
+
+/*----------------------------------------------------------*/
+/*----------------------------------------------------------*/
+
+static int comp_vars_2( const void *a, const void *b )
+{
+	return strcmp( ( char * ) a , ( ( Func * ) b )->name );
 }
 
 
@@ -1223,6 +1317,8 @@ void vars_del_stack( void )
 
 void vars_clean_up( void )
 {
+	is_sorted = UNSET;
+	num_vars = 0;
 	vars_del_stack( );
 	free_vars( );
 }
@@ -1232,44 +1328,40 @@ void vars_clean_up( void )
 /* free_vars() removes all variables from the list of variables. */
 /*---------------------------------------------------------------*/
 
-void free_vars( void )
+static void free_vars( void )
 {
-	Var *vp;
+	Var *ptr;
 
 
-	while ( var_list != NULL )
+	for ( ptr = var_list; ptr != NULL; ptr = ptr->next )
 	{
-		if ( var_list->name != NULL )
-			T_free( var_list->name );
+		if ( ptr->name != NULL )
+			T_free( ptr->name );
 
-		switch( var_list->type )
+		switch( ptr->type )
 		{
 			case INT_ARR :
-				if ( var_list->sizes != NULL )
-					T_free( var_list->sizes );
-				if ( ! ( var_list->flags & NEED_ALLOC ) &&
-					 var_list->val.lpnt != NULL )
-					T_free( var_list->val.lpnt );
+				if ( ptr->sizes != NULL )
+					T_free( ptr->sizes );
+				if ( ! ( ptr->flags & NEED_ALLOC ) && ptr->val.lpnt != NULL )
+					T_free( ptr->val.lpnt );
 				break;
 
 			case FLOAT_ARR :
-				if ( var_list->sizes != NULL )
-					T_free( var_list->sizes );
-				if ( ! ( var_list->flags & NEED_ALLOC ) &&
-					 var_list->val.dpnt != NULL )
-					T_free( var_list->val.dpnt );
+				if ( ptr->sizes != NULL )
+					T_free( ptr->sizes );
+				if ( ! ( ptr->flags & NEED_ALLOC ) && ptr->val.dpnt != NULL )
+					T_free( ptr->val.dpnt );
 				break;
 
 			case STR_VAR :
-				if ( var_list->val.sptr != NULL )
-					T_free( var_list->val.sptr );
+				if ( ptr->val.sptr != NULL )
+					T_free( ptr->val.sptr );
 				break;
 		}
-
-		vp = var_list->next;
-		T_free( var_list );
-		var_list = vp;
 	}
+
+	var_list = T_free( var_list );
 }
 
 
@@ -1331,7 +1423,7 @@ void vars_check( Var *v, int type )
 /* assigned a value                                                  */
 /*-------------------------------------------------------------------*/
 
-void vars_warn_new( Var *v )
+static void vars_warn_new( Var *v )
 {
  	if ( v->flags & NEW_VARIABLE )
 	{
@@ -1453,7 +1545,7 @@ Var *vars_arr_lhs( Var *v )
 /*    2. Number of indices on the stack                                 */
 /*----------------------------------------------------------------------*/
 
-Var *vars_get_lhs_pointer( Var *v, int n )
+static Var *vars_get_lhs_pointer( Var *v, int n )
 {
 	Var *ret;
 	Var *a = v->from;
@@ -1537,7 +1629,7 @@ Var *vars_get_lhs_pointer( Var *v, int n )
 /* array 'a' from a list of indices on the stack, starting at 'v'.      */
 /*----------------------------------------------------------------------*/
 
-long vars_calc_index( Var *a, Var *v )
+static long vars_calc_index( Var *a, Var *v )
 {
 	int  i, cur;
 	long index;
@@ -1643,7 +1735,7 @@ long vars_calc_index( Var *a, Var *v )
 /* is created.                                                             */
 /*-------------------------------------------------------------------------*/
 
-Var *vars_setup_new_array( Var *v, int dim )
+static Var *vars_setup_new_array( Var *v, int dim )
 {
 	int i,
 		cur;
@@ -1871,7 +1963,7 @@ void vars_assign( Var *src, Var *dest )
 /* must be of type INT_VAR or FLOAT_VAR.                                  */
 /*------------------------------------------------------------------------*/
 
-void vars_ass_from_var( Var *src, Var *dest )
+static void vars_ass_from_var( Var *src, Var *dest )
 {
 	long i;
 	long lval;
@@ -2011,7 +2103,7 @@ void vars_ass_from_var( Var *src, Var *dest )
 /* array slice).                                                          */
 /*------------------------------------------------------------------------*/
 
-void vars_ass_from_ptr( Var *src, Var *dest )
+static void vars_ass_from_ptr( Var *src, Var *dest )
 {
 	Var *d,
 		*s;
@@ -2166,7 +2258,7 @@ void vars_ass_from_ptr( Var *src, Var *dest )
 /* an ARR_PTR.                                                          */
 /*----------------------------------------------------------------------*/
 
-void vars_ass_from_trans_ptr( Var *src, Var *dest )
+static void vars_ass_from_trans_ptr( Var *src, Var *dest )
 {
 	Var *d;
 	int i;
