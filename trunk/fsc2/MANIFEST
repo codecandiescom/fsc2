@@ -333,6 +333,7 @@ modules/User_Functions.c
 modules/witio_48.c
 
 scripts/2_pulse_epr.rulhmpc66.leidenuniv.nl
+scripts/3_pulse_EM.rulhmpc66.leidenuniv.nl
 scripts/3_pulse_endor.rulhmpc66.leidenuniv.nl
 scripts/3_pulse_epr.rulhmpc66.leidenuniv.nl
 scripts/3_pulse_T1.rulhmpc66.leidenuniv.nl

@@ -468,6 +468,9 @@ static void fsc2_save_conf( void )
 
 	T_free( fname );
 
+	fprintf( gp, "# Don't edit this file - it gets overwritten "
+			 "automatically\n\n" );
+
 	if ( Internals.use_def_directory && Internals.def_directory != NULL )
 		fprintf( fp, "DEFAULT_DIRECTORY: %s\n", Internals.def_directory );
 	else
