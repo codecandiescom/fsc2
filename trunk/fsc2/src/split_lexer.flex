@@ -144,10 +144,10 @@ bool split( char *file )
 		return FAIL;
 	}
 
-	/* filter file through "fsc_clean" */
+	/* filter file through "fsc2_clean" */
 
-	cmd = get_string( strlen( "fsc_clean " ) + strlen( file ) );
-	strcpy( cmd, "fsc_clean " );
+	cmd = get_string( strlen( "fsc2_clean " ) + strlen( file ) );
+	strcpy( cmd, "fsc2_clean " );
 	strcat( cmd, file );
 
 	splitin = popen( cmd, "r" );

@@ -14,7 +14,7 @@
 /* if not defined set default directory for include files */
 
 #if ! defined DEF_INCL_DIR
-#define DEF_INCL_DIR "/usr/local/lib/fsc"
+#define DEF_INCL_DIR "/usr/local/lib/fsc2"
 #endif
 
 
