@@ -282,8 +282,8 @@ pack:
 	cd ..; tar -c fsc2 | gzip -c -9 > fsc2.tgz
 
 ZIP:
-	if ( ! `grep ZIP /etc/mtab > /dev/null` ); then
-		mount /ZIP;
+	if ! `grep ZIP /etc/mtab > /dev/null`; then \
+		mount /ZIP; \
 	fi
 	cp ../fsc2.tgz /ZIP
 	umount /ZIP
