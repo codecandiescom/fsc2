@@ -157,7 +157,7 @@ int main( int argc, char *argv[ ] )
 			return EXIT_FAILURE;
 		}
 
-		EDL.in_file = T_free( EDL.in_file );
+		EDL.in_file = CHAR_P T_free( EDL.in_file );
 		fname = argv[ 1 ];
 
 		if ( ! get_edl_file( fname ) )
@@ -231,7 +231,7 @@ int main( int argc, char *argv[ ] )
 			{
 				int i;
 
-				EDL.in_file = T_free( EDL.in_file );
+				EDL.in_file = CHAR_P T_free( EDL.in_file );
 				fname = argv[ 1 ];
 
 				if ( ! get_edl_file( fname ) )
@@ -1157,9 +1157,15 @@ static void start_editor( void )
 
 
 	/* Try to find content of environment variable "EDITOR" - if it doesn't
-	   exist use vi as the default editor */
+	   exist try to use the one compiled into the program, and as a final
+	   option use vi as the default editor */
 
 	ed = getenv( "EDITOR" );
+
+#if defined EDITOR
+	if ( ed == NULL )
+		ed = ( char * ) EDITOR;
+#endif
 
 	if ( ed == NULL || *ed == '\0' )
 	{
@@ -1771,14 +1777,30 @@ void run_help( FL_OBJECT *a, long b )
 static void start_help_browser( void )
 {
 	char *browser;
+	char *bn;
 	char *av[ 5 ] = { NULL, NULL, NULL, NULL, NULL };
 
 
-	/* Try to figure out which browser to use... */
+	/* Try to figure out which browser to use, first look for user preference
+	   by checking the BROWSER environment variable, then, if the user hasn't
+	   set a preference, check if there's a default browser compiled into the
+	   program */
 
 	browser = getenv( "BROWSER" );
 
-	if ( browser && ! strcasecmp( browser, "opera" ) )
+#if defined BROWSER
+	if ( ! browser )
+		browser = ( char * ) BROWSER;
+#endif
+
+	if ( browser ) {
+		if ( ( bn = strrchr( browser, '/' ) ) != NULL )
+			bn += 1;
+		else
+			bn = browser;
+	}
+
+	if ( browser && ! strcasecmp( bn, "opera" ) )
 	{
 		av[ 0 ] = T_strdup( "opera" );
 		av[ 1 ] = T_strdup( "-newbrowser" );
@@ -1786,14 +1808,14 @@ static void start_help_browser( void )
 							  docdir[ 0 ] != '/' ? "/" : "", docdir,
 							  slash( docdir ) );
 	}
-	else if ( browser && ! strcasecmp( browser, "konqueror" ) )
+	else if ( browser && ! strcasecmp( bn, "konqueror" ) )
 	{
 		av[ 0 ] = T_strdup( "konqueror" );
 		av[ 1 ] = get_string( "file:%s%s%shtml/fsc2.html",
 							  docdir[ 0 ] != '/' ? "/" : "", docdir,
 							  slash( docdir ) );
 	}
-	else if ( browser && ! strcasecmp( browser, "galeon" ) )
+	else if ( browser && ! strcasecmp( bn, "galeon" ) )
 	{
 		av[ 0 ] = T_strdup( "galeon" );
 		av[ 1 ] = T_strdup( "--new-window" );
@@ -1801,16 +1823,16 @@ static void start_help_browser( void )
 							  docdir[ 0 ] != '/' ? "/" : "", docdir,
 							  slash( docdir ) );
 	}
-	else if ( browser && ( ! strcasecmp( browser, "lynx" ) ||
-						   ! strcasecmp( browser, "w3m" ) ) )
+	else if ( browser && ( ! strcasecmp( bn, "lynx" ) ||
+						   ! strcasecmp( bn, "w3m" ) ) )
 	{
 		av[ 0 ] = T_strdup( "xterm" );
 		av[ 1 ] = T_strdup( "-e" );
 		av[ 2 ] = T_strdup( browser );
 		av[ 3 ] = get_string( "%s%shtml/fsc2.html", docdir, slash( docdir ) );
 	}
-	else if ( browser && ( strncasecmp( browser, "netscape", 8 ) ||
-						   strcasecmp( browser, "mozilla" ) ) )
+	else if ( browser && ( strcasecmp( bn, "mozilla" ) ||
+						   strcasecmp( bn, "MozillaFirebird" ) ) )
 	{
 		av[ 0 ] = T_strdup( browser );
 		av[ 1 ] = get_string( "file:%s%s%shtml/fsc2.html",
@@ -1822,7 +1844,7 @@ static void start_help_browser( void )
 		/* If netscape isn't running start it, otherwise ask it to just open
 		   a new window */
 
-		av[ 0 ] = T_strdup( "netscape" );
+		av[ 0 ] = browser ? T_strdup( browser ) : T_strdup( "netscape" );
 
 		if ( system( "xwininfo -name Netscape >/dev/null 2>&1" ) )
 			av[ 1 ] = get_string( "file:%s%s%shtml/fsc2.html",

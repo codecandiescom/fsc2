@@ -703,8 +703,8 @@ static void vars_do_init( Var *src, Var *dest )
 		case INT_REF :
 			if ( dest->flags & IS_DYNAMIC )
 			{
-				dest->val.dpnt = VAR_PP T_malloc(   src->len
-												  * sizeof *dest->val.vptr );
+				dest->val.dpnt = DOUBLE_P T_malloc( src->len
+													* sizeof *dest->val.vptr );
 				for ( ; dest->len < src->len; dest->len++ )
 					dest->val.vptr[ dest->len ] = NULL;
 			}
@@ -734,8 +734,8 @@ static void vars_do_init( Var *src, Var *dest )
 		case FLOAT_REF :
 			if ( dest->flags & IS_DYNAMIC )
 			{
-				dest->val.dpnt = VAR_PP T_malloc(   src->len
-												  * sizeof *dest->val.vptr );
+				dest->val.dpnt = DOUBLE_P T_malloc( src->len
+													* sizeof *dest->val.vptr );
 				for ( ; dest->len < src->len; dest->len++ )
 					dest->val.vptr[ dest->len ] = NULL;
 			}
@@ -1723,7 +1723,7 @@ Var *vars_push_matrix( int type, int dim, ... )
 
 	TRY
 	{
-		nv->val.vptr = T_malloc( sizes[ 0 ] * sizeof *nv->val.vptr );
+		nv->val.vptr = VAR_P T_malloc( sizes[ 0 ] * sizeof *nv->val.vptr );
 		TRY_SUCCESS;
 	}
 	OTHERWISE
@@ -1778,12 +1778,12 @@ static Var *vars_push_submatrix( Var *from, int type, int dim, ssize_t *sizes )
 		if ( type == INT_REF )
 		{
 			nv->type = type = INT_ARR;
-			nv->val.lpnt = T_calloc( nv->len, sizeof *nv->val.lpnt );
+			nv->val.lpnt = LONG_P T_calloc( nv->len, sizeof *nv->val.lpnt );
 		}
 		else
 		{
 			nv->type = FLOAT_ARR;
-			nv->val.dpnt = T_malloc( nv->len * sizeof *nv->val.dpnt );
+			nv->val.dpnt = DOUBLE_P T_malloc( nv->len * sizeof *nv->val.dpnt );
 			for ( i = 0; i < sizes[ 0 ]; i++ )
 				nv->val.dpnt[ i ] = 0.0;
 		}
@@ -1792,7 +1792,7 @@ static Var *vars_push_submatrix( Var *from, int type, int dim, ssize_t *sizes )
 	}
 
 	nv->type = type;
-	nv->val.vptr = T_malloc( nv->len * sizeof *nv->val.vptr );
+	nv->val.vptr = VAR_P T_malloc( nv->len * sizeof *nv->val.vptr );
 
 	for ( i = 0; i < nv->len; i++ )
 		nv->val.vptr[ i ] = NULL;
@@ -2388,7 +2388,7 @@ void *vars_iter( Var *v )
 
 	if ( iter == NULL )
 	{
-		iter = T_calloc( v->dim, sizeof *iter );
+		iter = SSIZE_T_P T_calloc( v->dim, sizeof *iter );
 		iter[ v->dim - 1 ] = -1;
 	}
 
@@ -2509,7 +2509,7 @@ void vars_save_restore( bool flag )
 					if ( src->len == 0 )
 						break;
 					cpy->val.dpnt = NULL;
-					cpy->val.dpnt = LONG_P get_memcpy( src->val.dpnt,
+					cpy->val.dpnt = DOUBLE_P get_memcpy( src->val.dpnt,
 											src->len * sizeof *src->val.dpnt );
 					break;
 

@@ -1054,7 +1054,7 @@ double fsc2_simplex( size_t n, double *x, double *dx, void *par,
     /* Get enough memory for the corners of the simplex, center points and
 	   function values at the (n + 1) corners */
 
-	p = T_malloc( ( n * ( n + 5 ) + 1 ) * sizeof *p );
+	p = DOUBLE_P T_malloc( ( n * ( n + 5 ) + 1 ) * sizeof *p );
 	p_centroid = p + n * ( n + 1 );
     p_1st_try = p_centroid + n;
     p_2nd_try = p_1st_try + n;
