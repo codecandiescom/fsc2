@@ -1680,8 +1680,8 @@ getfile_retry:
 		return vars_push( INT_VAR, -1 );
 	}
 
-	/* If given append default extension to file name (but only if the user
-	   didn't added it already) */
+	/* If given append default extension to the file name (but only if the
+	   user didn't specified it already) */
 
 	if ( s[ 4 ] != NULL &&
 		 ( strrchr( r, '.' ) == NULL ||
