@@ -505,7 +505,7 @@ void prim_exp_run( void )
 		      if there are e.g. infinite loops.
 		*/
 
-		TEST_RUN = 1;
+		TEST_RUN = SET;
 		save_restore_variables( SET );
 		save_restore_pulses( SET );
 		set_stop_signal_handler( SET );
@@ -605,7 +605,7 @@ void prim_exp_run( void )
 	{
 		set_stop_signal_handler( UNSET );
 		Fname = NULL;
-		TEST_RUN = 0;
+		TEST_RUN = UNSET;
 		PASSTHROU( );
 	}
 
@@ -613,7 +613,7 @@ void prim_exp_run( void )
 	Fname = NULL;
 	save_restore_pulses( UNSET );
 	save_restore_variables( UNSET );
-	TEST_RUN = 0;
+	TEST_RUN = UNSET;
 }
 
 
