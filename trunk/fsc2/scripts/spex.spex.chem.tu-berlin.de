@@ -97,8 +97,8 @@ sub calib {
 /*    counted).                                              */
 /* 4. Make sure the slit of the monochromator isn't too wide */
 /*    open, otherwise you could destroy the PMT!             */
-/* 5. Press the "Start a scan" button and wait for the end   */
-/*    of the scan over the laser line.                       */
+/* 5. Press the "Start scan" button and wait for the end of  */
+/*    the scan over the laser line.                          */
 /* 6. Either enter the position where the laser line did     */
 /*    appear during the scan (you can determine the position */
 /*    by pressing both the left and the right mouse button   */
@@ -170,7 +170,7 @@ B_ewn  = input_create( "FLOAT_INPUT", end_wn, "Scan end [cm^-1]", "", "%.4f" );
 B_stsz = input_create( "FLOAT_INPUT", step_size, "Scan step size [cm^-1]",
 					   "", "%.4f" );
 B_mt   = input_create( "FLOAT_INPUT", mtime, "Sampling time [s]" );
-B_scan = button_create( "NORMAL_BUTTON", "Start a scan" );
+B_scan = button_create( "NORMAL_BUTTON", "Start scan" );
 IF P_count < 2 {
 	object_enable( B_scan, "OFF" );
 }
@@ -397,6 +397,29 @@ sub monit {
 		or die "Can't find utility fsc2_start" . ".\n";
 
 	print F <<EOF;
+/*-----------------------------------------------------------*/
+/* EDL script for mitor mode:                                */
+/* 1. "Scan start" allows to set a new spectral position for */
+/*    the start of a scan.                                   */
+/* 2. Press the button "Go to scan start position" to set    */
+/*    monochromator to the scan start position (instead of   */
+/*    defering the action until a scan is started). Can be   */
+/*    used while sampling but not while scan is in progress. */
+/* 3. Use the "Scan step size" and "Sampling time" fields    */
+/*    to set up the wavenumber decrement used in a scan and  */
+/*    the time photons are counted at spectral positions.    */
+/* 4. Use the "Start scan" button to start a scan and the    */
+/*    "Start sampling" button to start sampling (but without */
+/*    changing the spectral position).                       */
+/* 5. Use the "Stop scan/sampling" to abort a scan or stop   */
+/*    sampling mode.                                         */
+/* 6. The "Relative units" and "Absolute units" allow you    */
+/*    to switch between display of wavenumber units relative */
+/*    to the laser line position and absolute wavenumbers.   */
+/* 7. Use the "Clear screen" button to remove all displayed  */
+/*    data.                                                  */
+/*-----------------------------------------------------------*/
+
 DEVICES:
 
 ni6601;
@@ -416,11 +439,13 @@ ll;
 new;
 data;
 Doing_Scan = 0;
+Doing_Sampling = 0;
 I = 1;
 I_start = 1;
 Mode = 0;
 
-B_swn, B_goto, B_stsz, B_mt, B_scan, B_cwn, B_stop, B_rel, B_abs, B_clr;
+B_swn, B_goto, B_stsz, B_mt, B_scan, B_samp,
+B_cwn, B_stop, B_rel, B_abs, B_clr;
 
 
 PREPARATIONS:
@@ -433,14 +458,15 @@ EXPERIMENT:
 hide_toolbox( "ON" );
 B_swn =  input_create( "FLOAT_INPUT", start_wn, "Scan start [cm^-1 rel.]",
 					   "", "%.4f" );
-B_goto = button_create( "NORMAL_BUTTON", "Go to start wavenumber" );
+B_goto = button_create( "NORMAL_BUTTON", "Go to scan start position" );
 B_stsz = input_create( "FLOAT_INPUT", step_size, "Scan step size [cm^-1 rel.]",
 					   "", "%.4f" );
 B_mt   = input_create( "FLOAT_INPUT", mtime, "Sampling time [s]" );
-B_scan = button_create( "NORMAL_BUTTON", "Start a scan" );
+B_scan = button_create( "NORMAL_BUTTON", "Start scan" );
+B_samp = button_create( "NORMAL_BUTTON", "Start sampling" );
 B_cwn  = output_create( "FLOAT_OUTPUT", cwn, "Current position [cm^-1 rel]",
 						"", "%.4f" );
-B_stop = button_create( "NORMAL_BUTTON", "Stop the scan" );
+B_stop = button_create( "NORMAL_BUTTON", "Stop scan/sampling" );
 object_enable( B_stop, "OFF" );
 B_rel  = button_create( "RADIO_BUTTON", "Relative units" );
 B_abs  = button_create( "RADIO_BUTTON", B_rel, "Absolute units" );
@@ -511,7 +537,6 @@ FOREVER {
 		}
 
 		IF input_changed( B_stsz ) {
-
 			new = input_value( B_stsz );
 
 			IF new <= 0.0 | new > 10.0 {
@@ -523,7 +548,6 @@ FOREVER {
 		}
 
 		IF input_changed( B_mt ) {
-
 			new = input_value( B_mt );
 
 			IF new < 0.001 | new > 100.0 {
@@ -548,9 +572,9 @@ FOREVER {
 		}
 
 		IF button_state( B_scan ) {
-
 			object_enable( B_goto, "OFF" );
 			object_enable( B_scan, "OFF" );
+			object_enable( B_samp, "OFF" );
 			object_enable( B_stop, "ON" );
 
 			cwn = start_wn;
@@ -562,6 +586,7 @@ FOREVER {
 				change_scale( ll - start_wn + ( I - 1 ) * step_size,
 							  - step_size );
 			}
+
 			I_start = I;
 			old_start_wn = start_wn;
 			old_step_size = step_size;
@@ -570,12 +595,22 @@ FOREVER {
 			Doing_Scan = 1;
 		}
 
+		IF button_state( B_samp ) {
+			object_enable( B_scan, "OFF" );
+			object_enable( B_samp, "OFF" );
+			object_enable( B_stop, "ON" );
+			Doing_Sampling = 1;
+
+		}
+
 		IF button_state( B_stop ) {
 			draw_marker( I );
 			object_enable( B_scan, "ON" );
+			object_enable( B_samp, "ON" );
 			object_enable( B_stop, "OFF" );
 			object_enable( B_goto, "ON" );
 			Doing_Scan = 0;
+			Doing_Sampling = 0;
 		}
 
 	} ELSE IF Doing_Scan {
@@ -586,12 +621,17 @@ FOREVER {
 		IF ll - cwn > 46000.0 / 3.0 + step_size {
 	        cwn = monochromator_scan_step( );
 			output_value( B_cwn, Mode == 0 ? cwn : ll - cwn );
+
 		} ELSE {
 			draw_marker( I - 1 );
 			object_enable( B_stop, "ON" );
 			object_enable( B_stop, "OFF" );
 			Doing_Scan = 0;
 		}
+	} ELSE IF Doing_Sampling {
+		data = 2.0 * counter_timed_count( CH0, mtime ) / mtime;
+		display( I, data );
+		I += 1;
 	} ELSE {
 		wait( 0.2 s )
 	}
