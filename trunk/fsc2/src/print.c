@@ -540,6 +540,7 @@ static FILE *spawn_print_prog( const char *command )
 	args[ 3 ] = NULL;
 
 	dup2( tmp_fd, STDIN_FILENO );
+	close( tmp_fd );
 
 	execv( "/bin/sh", args );
 	_exit( EXIT_FAILURE );
