@@ -412,7 +412,7 @@ Integer data
 @item
 Floating point data
 @item
-Strings (with no interpretation of escape sequences, see also @code{fsave()})
+Strings (with interpretation of escape sequences, see @code{fsave()})
 @item
 One-dimensional arrays (or slices of arrays) of integer or floating point
 type
@@ -449,15 +449,17 @@ the file.
 @anchor{fsave}
 @item fsave()
 @findex fsave()
-This function may be used to write data in a formated way into a
-file. As in the case of the @code{save()} function the first argument
-may be a file identifier. The next argument must be a @i{format string}
-with a syntax similar to the one for the @code{C} @code{print()} function,
-i.e.@: there must be one @code{#} character for each data item. In
-contrast to the @code{save()} function this function can not be used to
-print array slices or complete arrays, but only simple data types. On
-the other hand, printing of complete arrays can be done using loops,
-i.e.@: as in the following example:
+This function (the name stands for 'formated save') can be used to write
+data to a file in a formated way. As in the case of the @code{save()}
+function the first argument may be a file identifier. The next argument
+must be a @i{format string} with a syntax remotely similar to the one
+for the @code{C} @code{print()} function. The format string can contain
+arbitrary text and conversion specifiers, a @code{#} character for each
+data item from the remaining argument list. In contrast to the
+@code{save()} function this function can not be used to print array
+slices or complete arrays, but only simple data types. On the other
+hand, printing of complete arrays can be done using loops, i.e.@: as in
+the following example:
 
 @example
 VARIABLES:
@@ -488,12 +490,33 @@ X[ 3, 1 ] = 5
 X[ 3, 2 ] = 6
 @end example
 
+Within the format string and the argument strings escape sequences, all
+starting with a backslash character @code{\}, can be used to print
+otherwise unprintable characters. These are
+@itemize
+@item @code{\#} prints a @code{#} (the is a special escape sequence for
+@code{fsave()} exclusively)
+@item @code{\a} prints an alert (bell) character (0x07)
+@item @code{\b} prints a backspace character (0x08)
+@item @code{\f} prints a formfeed character (0x0C)
+@item @code{\n} prints a newline character (0x0A)
+@item @code{\r} prints a carriage return character (0x0D)
+@item @code{\t} prints a horizontal tab character (0x09)
+@item @code{\v} prints a vertical tab character (0x0B)
+@item @code{\\} prints a backslash, @code{\}
+@item @code{\?} prints a question mark, @code{?}
+@item @code{\'} prints a single quote, @code{\'}
+@item @code{\"} prints a double quote, @code{"}
+@item @code{\}@i{ooo} prints an octal number
+@item @code{\x}@i{hh} prints an octal number
+@end itemize
+
 The function returns the total number of characters that have been written to
 the file.
 
-@anchor{printf}
-@item printf()
-@findex printf()
+@anchor{ffsave}
+@item ffsave()
+@findex ffsave()
 This function can also be used to write data into a file using a format
 string. In comparison to the @code{fsave()} function it gives you even
 more control over the format that is used by accepting a format string
@@ -523,7 +546,7 @@ modifies the specification:
       will not be removed.
 @end itemize
 
-Following the flags the minimum field width as well as the precision may
+Following the flags the minimum field width as well as the precision can
 be specified. If the (optional) flags are followed by a number it is
 taken as the minimum field width. The converted argument will be printed
 in a field at least this wide, and wider if necessary. If the converted
@@ -533,15 +556,58 @@ make up for the field with. The padding character os normally space,
 butis @code{0} if the zero padding flag is present.
 
 The next character can be a period, which separates the field width from
-the precision.
+the precision, followed by another number, the precision, that specifies
+the maximum number of characters to be printed from a string, or the
+number of digits to be printed after the decimal point for @code{e},
+@code{E}, or @code{f} conversion, or the number of significant digits
+for @code{g} or @code{G} conversion, or the minimum nmber of digits to
+be printed for an integer (leading @code{0}s will be added to make up
+the necessary width).
+
+Width or precision or both may be specified as @code{*}, in which case
+the value is computed by converting the next arguments(s), which must be
+an integer values.
+
+In contrast to the @code{printf()} format string no length modifier can
+be used - @acronym{fsc2} has no different short, long or long long
+variable types.
+
+The following table lists all conversion charatcers. If the character
+found in the format string is nopt a valid conversion specifier the
+function will abort and print an error message.
+@table @samp
+@item d, i
+Integer value, if the argument is not an integer but a floating point
+number its value is rounded to the next integer.
+@item f
+floating point value, if the argment is an integer it is converted to a
+floating point value; decimal notation of the form @i{[-]mmm.ddd}, where
+the number of @i{d}'s is specified by the precision. The default
+precision is 6; a precision of @code{0} suppresses the decimal point
+@item e, E
+floating point value, if the argment is an integer it is converted to a
+floating point value; decimal notation in either the form
+@w{@i{[-]mmm.dddddd}@code{e}@i{[+-]xx}} or
+@w{@i{[-]mmm.dddddd}@code{E}@i{[+-]xx}}, where the number of @i{d}'s is
+specified by the precision. The default precision is 6, a precision of
+@code{0} suppresses the decimal point.
+@item g, G
+floating point value, if the argment is an integer it is converted to a
+floating point value; @code{%e} or @code{%E} is used if the exponent is
+less than -4 or greater than or equal to the precision, otherwise
+@code{%f} is used. Trailing zeros and a trailing decimal point are not
+printed.
+@item %
+no argument is converted, prints a @code{%}
+@end table
+
+The format string as well as argument strings may contain escape
+sequences, starting with a backslash @code{\}, see @code{fsave()} for
+the complete list.
 
 
-
-
-
-
-
-
+The function returns the total number of characters that have been written to
+the file.
 
 @anchor{save_program}
 @item save_program()
