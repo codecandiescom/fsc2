@@ -67,7 +67,7 @@ spectrapro_300i := spectrapro_300i.c spectrapro_300i_ll.c  \
 hjs_attenuator  := hjs_attenuator.c hjs_attenuator_lexer.c
 hjs_sfc         := hjs_sfc.c hjs_sfc_lexer.c
 hjs_fc          := hjs_fc.c hjs_fc_lexer.c
-spex_cd2a       := spex_cd2a.c spex_cd2a_ll.c
+spex_cd2a       := spex_cd2a.c spex_cd2a_ll.c spex_cd2a_util.c
 pci_mio_16e_1   := pci_mio_16e_1.c pci_mio_16e_1_ai.c pci_mio_16e_1_ao.c \
 				   pci_mio_16e_1_dio.c pci_mio_16e_1_gpct.c \
 				   pci_mio_16e_1_msc.c pci_mio_16e_1_util.c
