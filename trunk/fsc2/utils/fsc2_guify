@@ -63,7 +63,7 @@ if ( $ARGV[ 0 ] ) {
 
 while ( <$if> ) {
 
-    # Just store lines with normal EDL code
+    # Just store lines with normal EDL code (plus the line number)
 
     unless ( /$guify_entry/o ) {
         push @lines, { line => $_, lino => $. };
@@ -145,9 +145,12 @@ while ( <$if> ) {
 close $if;
 
 die "Unbalanced if-endif construct(s)\n" if $if_level > 0;
-die "No variables found in input\n" if @vars == 0;
+print STDERR "No variables found in input\n" if @vars == 0;
 
-# Set values for variables that don't have been assigned a default value
+# Set values for variables that don't have been assigned a default value.
+# For ints and floats use the mean of maximum and minimum value are given,
+# the limit when only one is given or 0 when none is set. For menus use
+# the first entry and switch off buttons by default.
 
 for ( @vars ) {
     if ( exists $$_{ value } and defined $$_{ value } ) {
@@ -189,10 +192,9 @@ if ( $ARGV[ 1 ] ) {
 }
 
 select $of;
-
 write_script( );
 
-# Finally make the new script executable (unless we wrote to STDOUT)
+# Finally make the new script executable (unless we're writing to STDOUT)
 
 chmod( 0755, $ARGV[ 1 ] ) if $ARGV[ 1 ];
 
@@ -252,7 +254,6 @@ sub get_float_limits {
     my ( $min, $max );
     my $float_rep = '[+-]?((\d+(\.(\d+)?)?)|(\.\d+))([eE][+-]?\d+)?';
 
-
     if ($str !~ /^\s*\[/o ) {
         $hr->{ max } = $hr->{ min } = undef;
         return $str;
@@ -294,7 +295,6 @@ sub get_int_limits {
     my ( $hr, $str ) = @_;
     my ( $min, $max );
     my $int_rep = '[+-]?\d+';
-
 
     if ($str !~ /^\s*\[/o ) {
         $hr->{ max } = $hr->{ min } = undef;
@@ -362,13 +362,10 @@ sub get_menu_entries {
 # for integer or float variables
 
 sub get_default_value {
-
     my ( $str, $hr ) = @_;
     my $val;
 
-
     return ( undef, undef ) unless defined $str;
-
     return ( undef, $str ) unless
         $str =~ /^\s*\[\s*([^\]\t ]+)\s*\](\s*(.*)?)?$/o;
 
@@ -439,8 +436,8 @@ sub get_string {
 # If the eval() fails we know that there must be some Perl syntax error.
 
 sub cond_check {
-
     my $defs = "";
+
 	for ( @vars ) {
 		if ( $$_{ type } =~ /^int|float$/o ) {
 			$defs .= "my \$$$_{ name } = $$_{ value };\n" ;
@@ -472,7 +469,6 @@ sub cond_check {
 # real tricky part and unfortunately also looks that way...
 
 sub write_script {
-
     # Write out the start of the script
 
     print '#!/usr/bin/perl
@@ -694,6 +690,7 @@ sub float_check {
 
 sub write_out {
     my \$fh;
+
     open( \$fh, \"|fsc2_\" . lc \$fsc2_how_to_run )
         or die \"Can't find utility fsc2_\" . lc \$fsc2_how_to_run . \".\\n";
 
@@ -808,7 +805,6 @@ sub show_message {
 ################################################################
 
 sub store_defs {
-
     my $fh;
     my $name = $0;
 
@@ -1070,6 +1066,7 @@ sub show {
 sub new_selection {
     my ( $d, $l, $y ) = @_;
     my $sel = $l->get( $l->nearest( $y ) );
+
     if ( $sel =~ /^d (.*)$/o ) {
         my $dir = $1;
         $cur_file = "";
