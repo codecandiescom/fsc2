@@ -23,7 +23,9 @@
 
 body {}
 
-code { color : #0000FF; }
+code { color : #0000FF;
+	   font-family : monospace;
+	 }
 
 samp { color       : #AA0000;
        font-family : monospace;
