@@ -202,10 +202,9 @@ void load_functions( const char *name )
 
 	/* Put together name of library to be loaded */
 
-	library = get_string( strlen( name ) + 14 );
-	strcpy( library, "lib_fsc2_" );
-	strcat( library, name );
-	strcat( library, ".so.0" );
+	library = get_string( strlen( name ) + 4 );
+	strcpy( library, name );
+	strcat( library, ".so" );
 
 	/* Increase memory allocated for library handles and try to open
 	   dynamically loaded library */
@@ -216,7 +215,7 @@ void load_functions( const char *name )
 	free( library );
 	if ( Libs[ Num_Libs - 1 ].handle == NULL )
 	{
-		eprint( FATAL, "Can't open library for `%s', %s.\n",
+		eprint( FATAL, "Can't open library `%s.so', %s.\n",
 				name, dlerror( ) );
 		THROW( LIBRARY_EXCEPTION );
 	}
@@ -269,14 +268,22 @@ void load_functions( const char *name )
 		if ( dlerror( ) != NULL )     /* function not found in library ? */
 			continue;
 
+		/* Utter strong warning and don't load if function would overload
+		   an already loaded (i.e. non-built-in) function */
+
 		if ( num >= num_def_func && fncts[ num ].fnct != NULL )
 		{
-			eprint( FATAL, " Redefinition of function `%s()'.\n",
+			eprint( SEVERE, " Function `%s() has already been loaded'.\n",
 					fncts[ num ].name );
-			THROW( LIBRARY_EXCEPTION );
+			continue;
 		}
 
-		eprint( NO_ERROR, "  Loading function `%s()'.\n", fncts[ num ].name );
+		if ( num < num_def_func && fncts[ num ].fnct != NULL )
+			eprint( NO_ERROR, "  Overloading built-in function `%s()'.\n",
+					fncts[ num ].name );
+		else
+			eprint( NO_ERROR, "  Loading function `%s()'.\n",
+					fncts[ num ].name );
 		fncts[ num ].fnct = cur;
 	}
 }

@@ -52,7 +52,6 @@ IDENT    [A-Za-z_0-9]+
 
 			/* handling of C++ style comment not spanning a whole line */
 {REM2}		{
-		 		printf( "\n" );
 				Lc++;
 				Eol = SET;
 			}
