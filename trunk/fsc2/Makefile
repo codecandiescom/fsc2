@@ -346,7 +346,6 @@ CONFFLAGS += -Dsdir=\"$(sdir:/=)/\"
 CONFFLAGS += -Dbindir=\"$(bindir:/=)/\"
 CONFFLAGS += -Dlibdir=\"$(libdir:/=)/\"
 CONFFLAGS += -Dauxdir=\"$(auxdir:/=)/\"
-CONFFLAGS += -Dudir=\"$(udir:/=)/\"
 CONFFLAGS += -Ddocdir=\"$(docdir:/=)/\"
 
 
