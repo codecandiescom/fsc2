@@ -107,6 +107,8 @@ static struct HJS_FC {
 #define DAC_MIN_VOLTAGE      0.0
 #define DAC_RESOLUTION      ( ( DAC_MAX_VOLTAGE - DAC_MIN_VOLTAGE ) / 4095.0 )
 
+#define DEFAULT_B0            3595.00
+#define DEFAULT_SLOPE          -34.80
 
 /* Field value that will be returned during a test run */
 
@@ -147,6 +149,9 @@ int hjs_fc_init_hook( void )
 
 	hjs_fc.is_field = UNSET;
 	hjs_fc.is_field_step = UNSET;
+
+	hjs_fc.B0V   = DEFAULT_B0;
+	hjs_fc.slope = DEFAULT_SLOPE;
 
 	hjs_fc.dac_func = NULL;
 	hjs_fc.gm_gf_func = NULL;
@@ -508,11 +513,7 @@ Var *reset_field( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	if ( FSC2_MODE == TEST )
-		hjs_fc.act_field = hjs_fc.field;
-	else
-		hjs_fc.act_field = hjs_fc_set_field( hjs_fc.field, 0.0 );
-
+	hjs_fc.act_field = hjs_fc_set_field( hjs_fc.field, 0.0 );
 	hjs_fc.target_field = hjs_fc.field;	
 
 	return vars_push( FLOAT_VAR, hjs_fc.act_field );
@@ -662,9 +663,6 @@ static double hjs_fc_set_field( double field, double error_margin )
 	double cur_field = hjs_fc.B0V;
 
 
-	if ( FSC2_MODE == TEST )
-		return hjs_fc.act_field;
-
 	/* If the constants for the field at a DAC voltage of 0 V and for
 	   the change of the field with the DAC voltage as measured during
 	   intitalization are correct we should arrive at the target field
@@ -699,6 +697,12 @@ static double hjs_fc_set_field( double field, double error_margin )
 		vars_pop( v );
 
 		cur_field = hjs_fc_get_field( );
+
+		if ( FSC2_MODE == TEST )
+		{
+			cur_field = field;
+			break;
+		}
 
 	} while ( lrnd( 10.0 * labs( cur_field - field ) ) >
 			  lrnd( 10.0 * error_margin ) );

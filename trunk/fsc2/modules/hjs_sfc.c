@@ -569,30 +569,29 @@ static double hjs_sfc_set_field( double field )
 
 	v_step = ( field - hjs_sfc.B0V ) / hjs_sfc.slope;
 
-	if ( FSC2_MODE == EXPERIMENT )
+	if ( ( Func_ptr = func_get( hjs_sfc.dac_func, &acc ) ) == NULL )
 	{
-		if ( ( Func_ptr = func_get( hjs_sfc.dac_func, &acc ) ) == NULL )
-		{
-			print( FATAL, "Internal error detected at %s:%d.\n",
-				   __FILE__, __LINE__ );
-			THROW( EXCEPTION );
-		}
-
-		vars_push( STR_VAR, DEVICE_NAME );         /* push the pass-phrase */
-		vars_push( FLOAT_VAR, v_step );
-
-		if ( ( v = func_call( Func_ptr ) ) == NULL )
-		{
-			print( FATAL, "Internal error detected at %s:%d.\n",
-				   __FILE__, __LINE__ );
-			THROW( EXCEPTION );
-		}
-
-		vars_pop( v );
-
-		/* We probably will have to wait here a bit for the new field to
-		   be reached */
+		print( FATAL, "Internal error detected at %s:%d.\n",
+			   __FILE__, __LINE__ );
+		THROW( EXCEPTION );
 	}
+
+	vars_push( STR_VAR, DEVICE_NAME );         /* push the pass-phrase */
+	vars_push( FLOAT_VAR, v_step );
+
+	if ( ( v = func_call( Func_ptr ) ) == NULL )
+	{
+		print( FATAL, "Internal error detected at %s:%d.\n",
+			   __FILE__, __LINE__ );
+		THROW( EXCEPTION );
+	}
+
+	vars_pop( v );
+
+	/* We probably will have to wait here a bit for the new field to
+	   be reached */
+
+	/* .... */
 
 	return hjs_sfc.B0V + v_step * hjs_sfc.slope;
 }

@@ -395,7 +395,7 @@ Var *daq_maximum_output_voltage( Var *v )
 	{
 		if ( FSC2_MODE == EXPERIMENT )
 		{
-			print( SEVERE, "Maximum output voltage of %f too %s, must be "
+			print( SEVERE, "Maximum output voltage of %f V too %s, must be "
 				   "between %.2f V and %.2f V. Keeping current maximum output "
 				   "voltage of %.2f V.\n", volts, volts < MIN_OUT_VOLTS ?
 				   "low" : "high", MIN_OUT_VOLTS, MAX_OUT_VOLTS,
@@ -404,7 +404,7 @@ Var *daq_maximum_output_voltage( Var *v )
 		}
 		else
 		{
-			print( FATAL, "Maximim output voltage of %f too %s, must be "
+			print( FATAL, "Maximim output voltage of %f V too %s, must be "
 				   "between %.2f V and %.2f V.\n", volts,
 				   volts < MIN_OUT_VOLTS ? "low" : "high", MIN_OUT_VOLTS,
 				   MAX_OUT_VOLTS );
@@ -484,7 +484,7 @@ Var *daq_set_voltage( Var *v )
 	{
 		if ( FSC2_MODE == EXPERIMENT )
 		{
-			print( SEVERE, "Output voltage of %f too %s, must be between "
+			print( SEVERE, "Output voltage of %f V too %s, must be between "
 				   "%.2f V and %.2f V. Keeping current voltage of %.2f V.\n",
 				   volts, volts < MIN_OUT_VOLTS ? "low" : "high",
 				   MIN_OUT_VOLTS, hjs_daadc.max_volts, hjs_daadc.volts_out );
@@ -492,7 +492,7 @@ Var *daq_set_voltage( Var *v )
 		}
 		else
 		{
-			print( FATAL, "Output voltage of %f too %s, must be between "
+			print( FATAL, "Output voltage of %f V too %s, must be between "
 				   "%.2f V and %.2f V.\n", volts, volts < MIN_OUT_VOLTS ?
 				   "low" : "high", MIN_OUT_VOLTS, hjs_daadc.max_volts );
 			THROW( EXCEPTION );
