@@ -150,8 +150,8 @@ int keithley228a_init_hook( void )
 
 	if ( keithley228a.lockin_name == NULL )
 	{
-		eprint( FATAL, UNSET, "%s: Can't find a driver for a lock-in "
-				"amplifier with a DAC.\n", DEVICE_NAME );
+		print( FATAL, "Can't find a driver for a lock-in amplifier with a "
+			   "DAC.\n" );
 		THROW( EXCEPTION );
 	}
 #else
@@ -163,16 +163,15 @@ int keithley228a_init_hook( void )
 
 	if ( lockins[ i ] == NULL )
 	{
-		eprint( FATAL, SET, "%s: Unknown lock-in amplifier '%s' specified for "
-				"use with power supply.\n", DEVICE_NAME, LOCKIN_NAME );
+		print( FATAL, "Unknown lock-in amplifier '%s' specified for use with "
+			   "power supply.\n", LOCKIN_NAME );
 		THROW( EXCEPTION );
 	}
 
 	if ( ! exists_device( keithley228a.lockin_name ) )
 	{
-		eprint( FATAL, SET, "%s: Module for lock-in amplifier '%s' needed by "
-				"the magnet power supply isn't loaded.\n", DEVICE_NAME,
-				keithley228a.lockin_name );
+		print( FATAL, "Module for lock-in amplifier '%s' needed by the magnet "
+			   "power supply isn't loaded.\n", keithley228a.lockin_name );
 		
 		THROW( EXCEPTION );
 	}
@@ -203,18 +202,16 @@ int keithley228a_init_hook( void )
 		 get_lib_symbol( keithley228a.lockin_name, "last_DAC_port",
 						 ( void ** ) &last_DAC_port ) != LIB_OK )
 	{
-		eprint( FATAL, SET, "%s: Can't find necessary symbols in library "
-				"for lock-in amplifier '%s'.\n",
-				DEVICE_NAME, keithley228a.lockin_name );
+		print( FATAL, "Can't find necessary symbols in library for lock-in "
+			   "amplifier '%s'.\n", keithley228a.lockin_name );
 		THROW( EXCEPTION );
 	}
 
 	if ( keithley228a.lockin_dac_port < *first_DAC_port ||
 		 keithley228a.lockin_dac_port > *last_DAC_port )
 	{
-		eprint( FATAL, SET, "%s: Invalid DAC port number %d, valid range "
-				"for lock-in '%s' is %d to %d\n", DEVICE_NAME,
-				keithley228a.lockin_dac_port,
+		print( FATAL, "Invalid DAC port number %d, valid range for lock-in "
+			   "'%s' is %d to %d\n", keithley228a.lockin_dac_port,
 				keithley228a.lockin_name, *first_DAC_port, *last_DAC_port );
 		THROW( EXCEPTION );
 	}
@@ -224,8 +221,8 @@ int keithley228a_init_hook( void )
 	fn = get_string( "lockin_dac_voltage%s", keithley228a.lockin_append );
 	if ( ( func_ptr = func_get( fn, &acc ) ) == NULL )
 	{
-		eprint( FATAL, SET, "%s: No lock-in amplifier module loaded "
-				"supplying a function for setting a DAC.\n", DEVICE_NAME );
+		print( FATAL, "No lock-in amplifier module loaded supplying a "
+			   "function for setting a DAC.\n" );
 		T_free( fn );
 		THROW( EXCEPTION );
 	}
@@ -308,8 +305,7 @@ Var *magnet_setup( Var *v )
 
 	if ( v->next == NULL )
 	{
-		eprint( FATAL, SET, "%s: Missing parameter in call of function "
-				"%s().\n", DEVICE_NAME, Cur_Func );
+		print( FATAL, "Missing arguments.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -317,8 +313,7 @@ Var *magnet_setup( Var *v )
 
 	if ( ( v = vars_pop( v ) ) == NULL )
 	{
-		eprint( FATAL, SET, "%s: Missing magnet current step size in call "
-				"of %s().\n", DEVICE_NAME, Cur_Func );
+		print( FATAL, "Missing magnet current step size.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -365,17 +360,16 @@ Var *magnet_use_dac_port( Var *v )
 		 get_lib_symbol( keithley228a.lockin_name, "last_DAC_port",
 						 ( void ** ) &last_DAC_port ) != LIB_OK )
 	{
-		eprint( FATAL, SET, "%s: Can't find necessary symbols in library "
-				"for lock-in amplifier '%s' in function %s().\n",
-				DEVICE_NAME, keithley228a.lockin_name, Cur_Func );
+		print( FATAL, "Can't find necessary symbols in library for lock-in "
+			   "amplifier '%s'.\n", keithley228a.lockin_name );
 		THROW( EXCEPTION );
 	}
 
 	if ( port < *first_DAC_port || port > *last_DAC_port )
 	{
-		eprint( FATAL, SET, "%s: Invalid DAC port number %d, valid range "
-				"for lock-in '%s' is %d to %d\n", DEVICE_NAME, port,
-				keithley228a.lockin_name, *first_DAC_port, *last_DAC_port );
+		print( FATAL, "Invalid DAC port number %d, valid range for lock-in "
+			   "'%s' is %d to %d\n", port, keithley228a.lockin_name,
+			   *first_DAC_port, *last_DAC_port );
 		THROW( EXCEPTION );
 	}
 
@@ -395,8 +389,7 @@ Var *set_field( Var *v )
 
 	if ( v == NULL )
 	{
-		eprint( FATAL, SET, "%s: Missing parameter in function %s().\n",
-				DEVICE_NAME, Cur_Func );
+		print( FATAL, "Missing arguments.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -436,8 +429,7 @@ Var *sweep_up( Var *v )
 
 	if ( ! keithley228a.is_current_step )
 	{
-		eprint( FATAL, SET, "%s: Current step size has not been defined in "
-				"%s().\n", DEVICE_NAME, Cur_Func );
+		print( FATAL, "Current step size has not been defined.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -463,8 +455,7 @@ Var *sweep_down( Var *v )
 
 	if ( ! keithley228a.is_current_step )
 	{
-		eprint( FATAL, SET, "%s: Current step size has not been defined in "
-				"%s().\n", DEVICE_NAME, Cur_Func );
+		print( FATAL, "Current step size has not been defined.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -487,8 +478,7 @@ Var *reset_field( Var *v )
 
 	if ( ! keithley228a.is_req_current )
 	{
-		eprint( FATAL, SET, "Start current has not been defined in "
-				"%s().\n", DEVICE_NAME, Cur_Func );
+		print( FATAL, "Start current has not been defined.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -740,8 +730,7 @@ static double keithley228a_goto_current( double new_current )
 
 		if ( max_tries < 0 )
 		{
-			eprint( FATAL, UNSET, "%s: Can't set requested current in %s().\n",
-					DEVICE_NAME, Cur_Func );
+			print( FATAL, "Can't set requested current.\n" );
 			THROW( EXCEPTION );
 		}
 	}
@@ -841,8 +830,7 @@ static double keithley228a_set_current( double new_current )
 
 static void keithley228a_gpib_failure( void )
 {
-	eprint( FATAL, UNSET, "%s: Communication with device failed.\n",
-			DEVICE_NAME );
+	print( FATAL, "Communication with device failed.\n" );
 	THROW( EXCEPTION );
 }
 
@@ -855,15 +843,11 @@ static double keithley228a_current_check( double current )
 
 	if ( fabs( current ) > KEITHLEY228A_MAX_CURRENT )
 	{
-		if ( FSC2_MODE == TEST )
-		{
-			eprint( FATAL, UNSET, "%s: Magnet current of %.2f A out of range "
-					"in %s().\n", DEVICE_NAME, current, Cur_Func );
-			THROW( EXCEPTION );
-		}
+		print( FATAL, "Magnet current of %.2f A out of range.\n", current );
 
-		eprint( FATAL, SET, "%s: Magnet current of %.2f A out of range "
-				"in %s().\n", DEVICE_NAME, current, Cur_Func );
+		if ( FSC2_MODE == TEST )
+			THROW( EXCEPTION );
+
 		return current > 0.0 ? 10.0 : -10.0;
 	}
 

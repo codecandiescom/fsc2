@@ -1344,6 +1344,9 @@ There are four levels:
       now throw an exception (see next subsection) to make the program stop.
 @end itemize
 
+To the output the @acronym{EDL} file name andline number (if
+appropriate) as well as the device and function name is prepended.
+
 The full @code{C} declaration of this function is:
 @example
 void eprint( int severity, const char *fmt, ... )
