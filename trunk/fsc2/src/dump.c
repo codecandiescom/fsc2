@@ -74,6 +74,8 @@ void DumpStack( void )
 	struct sigaction sact;
 
 
+	/* Don't do anything on a machine with a non-Intel processor */
+
 	if ( ! is_i386 )
 		return;
 

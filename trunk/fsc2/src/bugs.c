@@ -52,10 +52,7 @@ void bug_report_callback( FL_OBJECT *a, long b )
 	struct sigaction sact, oact;
 
 
-
-	a = a;
 	b = b;
-
 	notify_conn( BUSY_SIGNAL );
 
 	/* Create a temporary file for the mail */
@@ -235,6 +232,9 @@ void bug_report_callback( FL_OBJECT *a, long b )
 	unlink( filename );                /* delete the temporary file */
 	sigaction( SIGCHLD, &oact, NULL );
 	notify_conn( UNBUSY_SIGNAL );
+#else
+	a = a;
+	b = b;
 #endif
 }
 
@@ -325,5 +325,7 @@ void death_mail( int signo )
 	}
 
 	pclose( mail );
+#else
+	signo = signo;              /* keeps the compiler happy :-) */
 #endif
 }
