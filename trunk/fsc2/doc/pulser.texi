@@ -985,7 +985,7 @@ P2:  FUNCTION    = MW,                        // 3rd microwave pulse
      LENGTH      = pi_half_pulse_length,
      DELTA_START = delta_t;
 
-P3:  FUNCTION    = DETECTION,                 // digitzer trigger pulse
+P3:  FUNCTION    = DETECTION,                 // digitizer trigger pulse
      START       = P2.START + P2.LENGTH,
      LENGTH      = 10 ns,
      DELTA_START = delta_t;
