@@ -46,7 +46,7 @@ void device_add( const char *name )
 	static char *dev_name;
 	static char *real_name;         /* static because otherwise possibly
 									   clobbered by TRY (longjmp) */
-	char *search_name = NULL;
+	const char *search_name;
 	char *lib_name;
 	struct stat buf;
 	int length;

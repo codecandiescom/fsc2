@@ -158,9 +158,7 @@ void start_graphics( void )
 	}
 	else
 	{
-		pixmap_file = get_string( "%s%sundo.xpm", auxdir,
-								  auxdir[ strlen( auxdir ) - 1 ] != '/' ?
-								  "/" : "" );
+		pixmap_file = get_string( "%s%sundo.xpm", auxdir, slash( auxdir ) );
 
 		if ( access( pixmap_file, R_OK ) == 0 )
 		{
@@ -184,9 +182,7 @@ void start_graphics( void )
 		}
 		T_free( pixmap_file );
 
-		pixmap_file = get_string( "%s%sprinter.xpm", auxdir,
-								  auxdir[ strlen( auxdir ) - 1 ] != '/' ?
-								  "/" : "" );
+		pixmap_file = get_string( "%s%sprinter.xpm", auxdir, slash( auxdir ) );
 
 		if ( access( pixmap_file, R_OK ) == 0 )
 		{

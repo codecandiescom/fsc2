@@ -633,7 +633,7 @@ int get_lib_number( const char *name )
 
 	for ( cd = Device_List; cd != 0; cd = cd->next )
 		if ( cd->is_loaded && cd->generic_type != NULL &&
-			 ! strcasecmp( strip_path( cd->name ), name ) || 
+			 ! strcasecmp( strip_path( cd->name ), name ) )
 		{
 			sd = cd;
 			break;

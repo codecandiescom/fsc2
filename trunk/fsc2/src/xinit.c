@@ -472,8 +472,7 @@ bool dl_fsc2_rsc( void )
 	/* Assemble name of library to be loaded - this will also work for cases
 	   where the name contains a relative path */
 
-	lib_name = get_string( "%s%sfsc2_rsc_%cr.so", libdir,
-						   libdir[ strlen( libdir ) - 1 ] != '/' ? "/" : "",
+	lib_name = get_string( "%s%sfsc2_rsc_%cr.so", libdir, slash( libdir ),
 						   G_Funcs.size == LOW ? 'l' : 'h' );
 
 	/* Try to open the library. If it can't be found in the place defined at
