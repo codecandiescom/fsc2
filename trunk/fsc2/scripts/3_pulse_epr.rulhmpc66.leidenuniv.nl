@@ -501,7 +501,7 @@ field = set_field( start_field );
 File = get_file( );
 
 pulser_state( \"ON\" );
-daq_gain( 8 );
+daq_gain( 4 );
 
 FOR I = 1 : N_Points {
 	wait( 1.1 * repeat_time * N_Avg );

@@ -451,7 +451,7 @@ set_field( field );
 File = get_file( );
 I = 1;
 pulser_state( \"ON\" );
-daq_gain( 8 );
+daq_gain( 4 );
 
 FOREVER {
 	wait( 1.1 * repeat_time * N_Avg );

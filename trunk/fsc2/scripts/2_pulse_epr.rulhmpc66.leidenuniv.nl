@@ -410,6 +410,7 @@ field = set_field( start_field );
 File = get_file( );
 
 pulser_state( \"ON\" );
+daq_gain( 4 );
 
 /* Now start the acquisition */
 
