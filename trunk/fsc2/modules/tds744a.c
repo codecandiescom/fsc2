@@ -916,7 +916,7 @@ static Var *get_curve( Var *v, bool use_cursor )
 		return nv;
 	}
 
-	length = 123;
+	length = 500;
 	array = T_malloc( length * sizeof( double ) );
 	for ( i = 0; i < length; i++ )
 		array[ i ] = 1.0e-7 * sin( M_PI * i / 122.0 );
