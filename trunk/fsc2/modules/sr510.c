@@ -695,7 +695,6 @@ Var *lockin_command( Var *v )
 }
 
 
-
 /******************************************************/
 /* The following functions are only used internally ! */
 /******************************************************/
