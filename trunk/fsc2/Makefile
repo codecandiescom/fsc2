@@ -186,14 +186,15 @@ distclean:
 
 pack:
 	$(MAKE) distclean
-	cd ..; tar -c fsc2 | gzip -c -9 > fsc2.tgz
+	cd ..; tar -c fsc2a | gzip -c -9 > fsc2a.tgz
 
 ZIP:
+	$(MAKE) pack
 	if ! `grep ZIP /etc/mtab > /dev/null`; then \
 	    sleep 1; \
 		mount /ZIP; \
 	fi
-	cp ../fsc2.tgz /ZIP
+	cp ../fsc2a.tgz /ZIP
 	umount /ZIP
 
 # don't automatically delete intermediate files created by bison and flex
