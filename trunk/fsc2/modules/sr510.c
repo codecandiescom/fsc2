@@ -29,6 +29,7 @@ Var *lockin_get_adc_data( Var *v );
 Var *lockin_sensitivity( Var *v );
 Var *lockin_time_constant( Var *v );
 Var *lockin_phase( Var *v );
+Var *lockin_ref_freq( Var *v );
 Var *lockin_dac_voltage( Var *v );
 
 
@@ -75,6 +76,7 @@ static double sr510_get_tc( void );
 static void sr510_set_tc( int TC );
 static double sr510_get_phase( void );
 static double sr510_set_phase( double phase );
+static double sr510_get_ref_freq( void );
 static double sr510_set_dac_voltage( long channel, double voltage );
 
 
@@ -510,6 +512,36 @@ Var *lockin_phase( Var *v )
 }
 
 
+/*------------------------------------------------------------*/
+/* Function returns the reference frequency, can only be used */
+/* for queries.                                               */
+/*------------------------------------------------------------*/
+
+Var *lockin_ref_freq( Var *v )
+{
+	if ( v != NULL )
+	{
+		eprint( FATAL, "%s:%ld: %s: Reference frequency cannot be set for "
+				"this model.\n", Fname, Lc, DEVICE_NAME );
+		THROW( EXCEPTION );
+	}
+
+	if ( TEST_RUN )
+		return vars_push( FLOAT_VAR, 0.0 );
+	else
+	{
+		if ( I_am == PARENT )
+		{
+			eprint( FATAL, "%s:%ld: %s: Function `lockin_ref_freq' "
+					"can only be used in the EXPERIMENT section.\n",
+					Fname, Lc, DEVICE_NAME );
+			THROW( EXCEPTION );
+		}
+		return vars_push( FLOAT_VAR, sr510_get_ref_freq( ) );
+	}
+}
+
+
 /*-----------------------------------------------------------*/
 /* Function sets or returns the voltage at one of the 2 DAC  */
 /* ports on the backside of the lock-in amplifier. The first */
@@ -911,6 +943,28 @@ double sr510_set_phase( double phase )
 	}
 
 	return phase;
+}
+
+
+/*------------------------------------------*/
+/* Function returns the reference frequency */
+/*------------------------------------------*/
+
+static double sr510_get_ref_freq( void )
+{
+	char buffer[ 50 ];
+	long len = 50;
+
+	if ( gpib_write( sr510.device, "F\n" ) == FAILURE ||
+		 gpib_read( sr510.device, buffer, &len ) == FAILURE )
+	{
+		eprint( FATAL, "%s: Can't access the lock-in amplifier.\n",
+				DEVICE_NAME );
+		THROW( EXCEPTION );
+	}
+
+	buffer[ length - 2 ] = '\0';
+	return T_atof( buffer );
 }
 
 
