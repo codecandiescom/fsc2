@@ -2,10 +2,11 @@ I. Introduction
 ===============
 
 This package is a driver (module) and a library for the Wasco WITIO-48
-DIO card. It was mainly written to allow support for this type of cards
-for a program for spectrometer control, fsc2, I have written. It currently
-only allows to use the board for simple DIO, the timer/counter chips
-also on the board are not supported.
+DIO ISA card by Messcomp Datentechnik GmbH. It was mainly written to
+allow support for this type of cards for a program for spectrometer
+control, fsc2, I have written. It currently only allows to use the
+board for simple DIO, the timer/counter chips also on the board are
+not supported.
 
 
 II. Preparation for installation
