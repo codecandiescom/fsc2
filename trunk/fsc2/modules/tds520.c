@@ -301,13 +301,6 @@ Var *digitizer_timebase( Var *v )
 								  tds520.timebase = tds520.timebase );
 		}
 
-	if ( FSC2_MODE != PREPARATION )
-	{
-		eprint( FATAL, SET, "%s: Digitizer time base can only be set before "
-				"the EXPERIMENT section starts.\n", DEVICE_NAME );
-		THROW( EXCEPTION )
-	}
-
 	if ( tds520.is_timebase )
 	{
 		eprint( FATAL, SET, "%s: Digitizer time base has already been "
@@ -367,6 +360,9 @@ Var *digitizer_timebase( Var *v )
 
 	tds520.timebase = tb[ TB ];
 	tds520.is_timebase = SET;
+
+	if ( FSC2_MODE == EXPERIMENT )
+		tds520_set_timebase( tds520.timebase );
 
 	return vars_push( FLOAT_VAR, tds520.timebase );
 }
