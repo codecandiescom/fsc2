@@ -100,12 +100,11 @@ void hp8647a_read_table( FILE *fp );
 
 /* functions defined in "hp8647a_gpib.c" */
 
-static bool hp8647a_init( const char *name );
-static void hp8647a_finished( void );
-static bool hp8647a_set_output_state( bool state );
-static bool hp8647a_get_output_state( void );
-static double hp8647a_set_frequency( double freq );
-static double hp8647a_get_frequency( void );
-static double hp8647a_set_attenuation( double att );
-static double hp8647a_get_attenuation( void );
-static void hp8647a_comm_failure( void );
+bool hp8647a_init( const char *name );
+void hp8647a_finished( void );
+bool hp8647a_set_output_state( bool state );
+bool hp8647a_get_output_state( void );
+double hp8647a_set_frequency( double freq );
+double hp8647a_get_frequency( void );
+double hp8647a_set_attenuation( double att );
+double hp8647a_get_attenuation( void );

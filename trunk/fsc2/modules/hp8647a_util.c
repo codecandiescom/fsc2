@@ -43,23 +43,23 @@ FILE *hp8647a_find_table( char *name )
 
 	/* If the file name contains a slash we give up after freeing memory */
 
-   if ( strchr( name, '/' ) != NULL )
-   {
-	   eprint( FATAL, "%s:%ld: %s: Table file `%s' not found.\n",
-			   Fname, Lc, name );
-	   T_free( name );
-	   THROW( EXCEPTION );
-   }
+	if ( strchr( name, '/' ) != NULL )
+	{
+		eprint( FATAL, "%s:%ld: %s: Table file `%s' not found.\n",
+				Fname, Lc, name );
+		T_free( name );
+		THROW( EXCEPTION );
+	}
 
-   /* Last chance: The table file is in the library directory... */
+	/* Last chance: The table file is in the library directory... */
 
-   new_name = get_string( strlen( libdir ) + strlen( name ) );
-   strcpy( new_name, libdir );
-   if ( libdir[ strlen( libdir ) - 1 ] != '/' )
-	   strcat( new_name, "/" );
-   strcat( new_name, name );
-   T_free( name );
-   name = new_name;
+	new_name = get_string( strlen( libdir ) + strlen( name ) );
+	strcpy( new_name, libdir );
+	if ( libdir[ strlen( libdir ) - 1 ] != '/' )
+		strcat( new_name, "/" );
+	strcat( new_name, name );
+	T_free( name );
+	name = new_name;
 
 	if ( ( tfp = hp8647a_open_table( name ) ) == NULL )
 	{
@@ -134,7 +134,7 @@ double hp8647a_get_att_from_table( double freq )
 		return hp8647a.att_table[ 0 ].att;
 	}
 
-	if ( freq < hp8647a.min_table_freq )
+	if ( freq > hp8647a.max_table_freq )
 	{
 		eprint( WARN, "%s:%ld: %s: Frequency of %f MHz not covered by table, "
 				"interpolating.\n", Fname, Lc, DEVICE_NAME, freq * 1.0e-6 );

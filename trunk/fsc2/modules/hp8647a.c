@@ -12,15 +12,6 @@
 static HP8647A hp8647a_backup;
 
 
-static bool hp8647a_init( const char *name );
-static void hp8647a_finished( void );
-static bool hp8647a_set_output_state( bool state );
-static bool hp8647a_get_output_state( void );
-static double hp8647a_set_frequency( double freq );
-static double hp8647a_get_frequency( void );
-static double hp8647a_set_attenuation( double att );
-static double hp8647a_get_attenuation( void );
-static void hp8647a_comm_failure( void );
 
 
 /*******************************************/
@@ -477,7 +468,6 @@ Var *synthesizer_step_frequency( Var *v )
 
 Var *synthesizer_sweep_up( Var *v )
 {
-	double freq;
 	double att;
 
 
@@ -490,9 +480,11 @@ Var *synthesizer_sweep_up( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	freq = hp8647a.freq + hp8647a.step_freq;
+	hp8647a.freq += hp8647a.step_freq;
 
-	if ( freq < MIN_FREQ )
+	/* Check that frequency stays within the synthesizers range */
+
+	if ( hp8647a.freq < MIN_FREQ )
 	{
 		eprint( FATAL, "%s:%ld: %s: RF frequency is dropping below lower "
 				"limit of %f kHz.\n", Fname, Lc, DEVICE_NAME,
@@ -500,7 +492,7 @@ Var *synthesizer_sweep_up( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	if ( freq > MAX_FREQ )
+	if ( hp8647a.freq > MAX_FREQ )
 	{
 		eprint( FATAL, "%s:%ld: %s: RF frequency is increased above upper "
 				"limit of %f MHz.\n", Fname, Lc, DEVICE_NAME,
@@ -510,16 +502,17 @@ Var *synthesizer_sweep_up( Var *v )
 
 	if ( TEST_RUN )
 	{
-		hp8647a.freq = freq;
-
 		if ( hp8647a.use_table )
 		{
-			att =   hp8647a.attenuation - hp8647a_get_att_from_table( freq )
+			att =   hp8647a.attenuation
+				  - hp8647a_get_att_from_table( hp8647a.freq )
 				  + hp8647a.att_at_ref_freq;
+
 			if ( att < MAX_ATTEN )
 				eprint( SEVERE, "%s:%ld: %s: Attenuation dynamic range is  "
 						"insufficient, using %f dB instead of %f dB.\n",
 						Fname, Lc, DEVICE_NAME, MAX_ATTEN, att );
+
 			if ( att > MIN_ATTEN )
 				eprint( SEVERE, "%s:%ld: %s: Attenuation dynamic range is  "
 						"insufficient, using %f dB instead of %f dB.\n",
@@ -530,7 +523,8 @@ Var *synthesizer_sweep_up( Var *v )
 	{
 		if ( hp8647a.use_table )
 		{
-			att = hp8647a.attenuation - hp8647a_get_att_from_table( freq )
+			att =   hp8647a.attenuation
+				  - hp8647a_get_att_from_table( hp8647a.freq )
 				  + hp8647a.att_at_ref_freq;
 			if ( att < MAX_ATTEN )
 			{
@@ -539,6 +533,7 @@ Var *synthesizer_sweep_up( Var *v )
 						Fname, Lc, DEVICE_NAME, MAX_ATTEN, att );
 				att = MAX_ATTEN;
 			}
+
 			if ( att > MIN_ATTEN )
 			{
 				eprint( SEVERE, "%s:%ld: %s: Attenuation dynamic range is  "
@@ -550,7 +545,7 @@ Var *synthesizer_sweep_up( Var *v )
 			hp8647a_set_attenuation( att );
 		}
 
-		hp8647a.freq = hp8647a_set_frequency( freq );
+		hp8647a_set_frequency( hp8647a.freq );
 	}
 
 	return vars_push( FLOAT_VAR, hp8647a.freq );
@@ -749,182 +744,3 @@ Var *synthesizer_att_ref_freq( Var *v )
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
 
-/*-------------------------------------------------------------*/
-/*-------------------------------------------------------------*/
-
-static bool hp8647a_init( const char *name )
-{
-	double att;
-
-
-	if ( gpib_init_device( name, &hp8647a.device ) == FAILURE )
-        return FAIL;
-
-	/* If frequency and attenuation need to be set do it now, otherwise get
-	   frequency and attenuation set at the synthesizer and store it */
-
-	if ( hp8647a.freq_is_set )
-		hp8647a_set_frequency( hp8647a.freq );
-	else
-		hp8647a.freq = hp8647a_get_frequency( );
-
-	if ( hp8647a.attenuation_is_set )
-	{
-		if ( hp8647a.use_table )
-		{
-			att =   hp8647a.attenuation
-				  - hp8647a_get_att_from_table( hp8647a.freq )
-				  + hp8647a.att_at_ref_freq;
-			if ( att < MAX_ATTEN )
-			{
-				eprint( SEVERE, "%s:%ld: %s: Attenuation dynamic range is  "
-						"insufficient, using %f dB instead of %f dB.\n",
-						Fname, Lc, DEVICE_NAME, MAX_ATTEN, att );
-				att = MAX_ATTEN;
-			}
-			if ( att > MIN_ATTEN )
-			{
-				eprint( SEVERE, "%s:%ld: %s: Attenuation dynamic range is  "
-						"insufficient, using %f dB instead of %f dB.\n",
-						Fname, Lc, DEVICE_NAME, MIN_ATTEN, att );
-				att = MIN_ATTEN;
-			}
-		}
-		else
-			att = hp8647a.attenuation;
-
-		hp8647a_set_attenuation( att );
-	}
-	else
-		hp8647a.attenuation = hp8647a_get_attenuation( );
-
-	hp8647a_set_output_state( hp8647a.state );
-
-	return OK;
-}
-
-
-/*-------------------------------------------------------------*/
-/*-------------------------------------------------------------*/
-
-static void hp8647a_finished( void )
-{
-	gpib_local( hp8647a.device );
-	if ( hp8647a.att_table != NULL )
-	{
-		T_free( hp8647a.att_table );
-		hp8647a.att_table = NULL;
-	}
-}
-
-
-/*-------------------------------------------------------------*/
-/*-------------------------------------------------------------*/
-
-static bool hp8647a_set_output_state( bool state )
-{
-	char cmd[ 100 ];
-
-
-	sprintf( cmd, "OUTP:STAT %s", state ? "ON" : "OFF" );
-	if ( gpib_write( hp8647a.device, cmd, strlen( cmd ) ) == FAILURE )
-		hp8647a_comm_failure( );
-
-	return state;
-}
-
-
-/*-------------------------------------------------------------*/
-/*-------------------------------------------------------------*/
-
-static bool hp8647a_get_output_state( void )
-{
-	char buffer[ 10 ];
-	long length = 10;
-
-
-	if ( gpib_write( hp8647a.device, "OUTP:STAT?", 10 ) == FAILURE ||
-		 gpib_read( hp8647a.device, buffer, &length ) == FAILURE )
-		hp8647a_comm_failure( );
-
-	return buffer[ 0 ] == '1';
-}
-
-
-/*-------------------------------------------------------------*/
-/*-------------------------------------------------------------*/
-
-static double hp8647a_set_frequency( double freq )
-{
-	char cmd[ 100 ];
-
-
-	assert( freq >= MIN_FREQ && freq <= MAX_FREQ );
-
-	sprintf( cmd, "FREQ:CW %f", freq );
-	if ( gpib_write( hp8647a.device, cmd, strlen( cmd ) ) == FAILURE )
-		hp8647a_comm_failure( );
-
-	return freq;
-}
-
-
-/*-------------------------------------------------------------*/
-/*-------------------------------------------------------------*/
-
-static double hp8647a_get_frequency( void )
-{
-	char buffer[ 100 ];
-	long length = 100;
-
-
-	if ( gpib_write( hp8647a.device, "FREQ:CW?", 8 ) == FAILURE ||
-		 gpib_read( hp8647a.device, buffer, &length ) == FAILURE )
-		hp8647a_comm_failure( );
-
-	return T_atof( buffer );
-}
-
-
-/*-------------------------------------------------------------*/
-/*-------------------------------------------------------------*/
-
-static double hp8647a_set_attenuation( double att )
-{
-	char cmd[ 100 ];
-
-
-	assert( att >= MAX_ATTEN && att <= MIN_ATTEN );
-
-	sprintf( cmd, "POW:AMPL %6.1f", att );
-	if ( gpib_write( hp8647a.device, cmd, strlen( cmd ) ) == FAILURE )
-		hp8647a_comm_failure( );
-
-	return att;
-}
-
-
-/*-------------------------------------------------------------*/
-/*-------------------------------------------------------------*/
-
-static double hp8647a_get_attenuation( void )
-{
-	char buffer[ 100 ];
-	long length = 100;
-
-	if ( gpib_write( hp8647a.device, "POW:AMPL?", 9 ) == FAILURE ||
-		 gpib_read( hp8647a.device, buffer, &length ) == FAILURE )
-		hp8647a_comm_failure( );
-
-	return T_atof( buffer );
-}
-
-
-/*-------------------------------------------------------------*/
-/*-------------------------------------------------------------*/
-
-static void hp8647a_comm_failure( void )
-{
-	eprint( FATAL, "%s: Communication with device failed.\n", DEVICE_NAME );
-	THROW( EXCEPTION );
-}
