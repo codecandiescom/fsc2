@@ -2049,7 +2049,7 @@ Returns a string with the name of the frequency counter being used.
 @item freq_counter_measure()
 @findex freq_counter_measure()
 Returns a floating point value with the measured frequency. The function
-does not accept any parameters and can only bne used in the
+does not accept any parameters and can only by used in the
 @code{EXPERIMENT} section.
 
 
