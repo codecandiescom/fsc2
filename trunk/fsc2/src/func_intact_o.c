@@ -274,6 +274,7 @@ Var *f_ocreate( Var *var )
 	new_io->help_text = help_text;
 	new_io->is_changed = UNSET;
 	new_io->report_change = UNSET;
+	new_io->enabled = SET;
 
 	/* Draw the new object */
 

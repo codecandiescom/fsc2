@@ -54,6 +54,7 @@ struct IOBJECT {
 	char **menu_items;        /* list of menu items */
     int num_items;            /* number of entries of a menu */
 
+	bool enabled;
 	volatile int state;       /* state (on/off) of press count (buttons)
 								 or currently seletced menu item */
 	volatile bool is_changed; /* set when objects state changed but state 

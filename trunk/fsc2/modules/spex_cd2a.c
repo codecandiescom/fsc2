@@ -81,7 +81,7 @@ int spex_cd2a_init_hook( void )
 		THROW( EXCEPTION );
 	}
 
-	if ( spex_cd2a.mode == WN && spex_cd2a.laser_wavenumber != 0.0 )
+	if ( spex_cd2a.mode & WN_MODES && spex_cd2a.laser_wavenumber != 0.0 )
 		spex_cd2a.mode = WND;
 
 	/* If it's wavelength driven find out the units the controller expects
@@ -282,6 +282,18 @@ int spex_cd2a_exp_hook( void )
 {
 	spex_cd2a = spex_cd2a_stored;
 
+	/* Read in the file where the state of the monochromator gets stored,
+	   it might have been canged during a previous experiment */
+
+	spex_cd2a_read_state( );
+
+	if ( fabs( spex_cd2a.offset ) > MAX_OFFSET )
+	{
+		print( FATAL, "Offset setting in calibration file '%s' is "
+			   "unrealistically high.\n" );
+		THROW( EXCEPTION );
+	}
+
 	/* Open the serial port for the device */
 
 	spex_cd2a_open( );
@@ -457,20 +469,25 @@ Var *monochromator_scan_setup( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	step = step;
-
-	if ( step < spex_cd2a.mini_step )
+	if ( spex_cd2a.mode & WN_MODES &&
+		 lrnd( 1.0e4 * step ) < lrnd( 1.0e4 * spex_cd2a.mini_step ) )
 	{
-		if ( spex_cd2a.mode & WN_MODES )
-			print( FATAL, "Absolute value of step size of %.4f cm^-1 is "
-				   "smaller than the minimum possible step size of %.4f "
-				   "cm^-1.\n", step, spex_cd2a.mini_step );
-		else
-			print( FATAL, "Step size of %.5f nm is smaller than the "
-				   "minimum possible step size of %.5f.\n",
-				   10e9 * step, 10e9 * spex_cd2a.mini_step );
+		print( FATAL, "Step size of %.4f cm^-1 is smaller than the "
+			   "minimum possible step size of %.4f cm^-1.\n",
+			   step, spex_cd2a.mini_step );
+	}
+
+	if ( spex_cd2a.mode == WL &&
+		 lrnd( 1.0e5 * step ) < lrnd( 1.0e5 * spex_cd2a.mini_step ) )
+	{
+		print( FATAL, "Step size of %.5f nm is smaller than the "
+			   "minimum possible step size of %.5f.\n",
+			   10e9 * step, 10e9 * spex_cd2a.mini_step );
 		THROW( EXCEPTION );
 	}
+
+	if ( step < spex_cd2a.mini_step )
+		step = spex_cd2a.mini_step;
 
 	/* Finally make sure the step size is an integer multiple of the minimum
 	   step size */
@@ -788,7 +805,7 @@ Var *monochromator_laser_line( Var *v )
 	}
 
 	if ( v == NULL )
-		return vars_push( FLOAT_VAR,spex_cd2a.laser_wavenumber == 0 ? 0.0 :
+		return vars_push( FLOAT_VAR,spex_cd2a.laser_wavenumber == 0.0 ? 0.0 :
 						  spex_cd2a_cwn( spex_cd2a.laser_wavenumber ) );
 
 	wn = get_double( v, "wavenumber of laser line" );
@@ -819,12 +836,12 @@ Var *monochromator_laser_line( Var *v )
 			THROW( EXCEPTION );
 		}
 
-		spex_cd2a.laser_wavenumber = spex_cd2a_wl2wn( wn );
+		spex_cd2a.laser_wavenumber = spex_cd2a_wl2wn( wl );
 	}
 
 	spex_cd2a_set_laser_line( );
 
-	return vars_push( FLOAT_VAR,spex_cd2a.laser_wavenumber == 0 ? 0.0 :
+	return vars_push( FLOAT_VAR,spex_cd2a.laser_wavenumber == 0.0 ? 0.0 :
 					  spex_cd2a_cwn( spex_cd2a.laser_wavenumber ) );
 }
 

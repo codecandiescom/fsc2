@@ -521,6 +521,7 @@ int fsc2_fputc( int c, FILE *stream )
 
 	raise_permissions( );
 	num = fputc( c, stream );
+	fflush( stream );
 	lower_permissions( );
 	return num;
 }
@@ -538,6 +539,7 @@ int fsc2_fputs( const char *s, FILE *stream )
 
 	raise_permissions( );
 	num = fputs( s, stream );
+	fflush( stream );
 	lower_permissions( );
 	return num;
 }
@@ -555,6 +557,7 @@ int fsc2_putc( int c, FILE *stream )
 
 	raise_permissions( );
 	num = putc( c, stream );
+	fflush( stream );
 	lower_permissions( );
 	return num;
 }

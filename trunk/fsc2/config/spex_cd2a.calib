@@ -1,0 +1,11 @@
+# --- Do *not* edit this file, it gets created automatically ---
+
+# In this file calibration items for the spex_cd2a driver are stored:
+# 1. An offset of the monochromator, i.e. a number that always has to be
+#    added to wavenumbers -or lengths reported by the monochromator and
+#    subtracted from wavenumbers or -lengths send to the device.
+# 2. For wavenumber driven monochromators only: the current setting of
+#    the position of the laser line (as set at the SPEX CD2A).
+
+0.0000 cm^-1
+24000.0000 cm^-1

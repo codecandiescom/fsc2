@@ -198,6 +198,9 @@ Var *f_freeze( Var *v )
 
 void parent_freeze( int freeze )
 {
+	IOBJECT *io = NULL;
+
+
 	if ( Toolbox == NULL ||  Toolbox->Tools == NULL )
 	{
 		is_frozen = freeze ? SET : UNSET;
@@ -226,6 +229,24 @@ void parent_freeze( int freeze )
 		fl_set_form_atclose( Toolbox->Tools, toolbox_close_handler, NULL );
 
 		Toolbox->has_been_shown = SET;
+
+		/* The following shouldn't be necessary, but there seems to be
+		   some bug that keeps some of the objects from getting disabled
+		   when it's done while the toolbox is hidden */
+
+		for ( io = Toolbox->objs; io != NULL; io = io->next )
+			if ( io->enabled )
+			{
+				if ( io->type != FLOAT_OUTPUT && io->type != INT_OUTPUT )
+					fl_activate_object( io->self );
+				fl_set_object_lcol( io->self, FL_BLACK );
+			}
+			else
+			{
+				if ( io->type != FLOAT_OUTPUT && io->type != INT_OUTPUT )
+					fl_deactivate_object( io->self );
+				fl_set_object_lcol( io->self, FL_INACTIVE_COL );
+			}
 	}
 	else if ( ! is_frozen && freeze )    /* freeze the toolbox */
 	{
@@ -687,15 +708,17 @@ Var *f_obj_xable( Var *v )
 
 	if ( state )
 	{
-		if ( io->type != FLOAT_INPUT && io->type != INT_OUTPUT )
+		if ( io->type != FLOAT_OUTPUT && io->type != INT_OUTPUT )
 			fl_activate_object( io->self );
 		fl_set_object_lcol( io->self, FL_BLACK );
+		io->enabled = SET;
 	}
 	else
 	{
-		if ( io->type != FLOAT_INPUT && io->type != INT_OUTPUT )
+		if ( io->type != FLOAT_OUTPUT && io->type != INT_OUTPUT )
 			fl_deactivate_object( io->self );
 		fl_set_object_lcol( io->self, FL_INACTIVE_COL );
+		io->enabled = UNSET;
 	}
 
 	return vars_push( INT_VAR, state ? 1L : 0L );

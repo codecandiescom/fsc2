@@ -238,6 +238,7 @@ Var *f_bcreate( Var *var )
 	new_io->partner = coll;
 	new_io->is_changed = UNSET;
 	new_io->report_change = UNSET;
+	new_io->enabled = SET;
 
 	/* Draw the new button */
 

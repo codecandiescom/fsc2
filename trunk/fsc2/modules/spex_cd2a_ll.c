@@ -25,14 +25,6 @@
 #include "spex_cd2a.h"
 
 
-/* Define the following for test runs where no real communication with the
-   monochromator happens */
-
-/*
-#define SPEX_CD2A_TEST
-*/
-
-
 #define PARAMETER  0
 #define COMMAND    1
 
@@ -1065,7 +1057,7 @@ bool spex_cd2a_read_state( void )
 				if ( in_comment )
 					break;
 
-				fsc2_ungetc( c, fp );
+				fsc2_fseek( fp, -1, SEEK_CUR );
 				if ( ( i == 0 &&
 					   ( ( spex_cd2a.mode & WN_MODES &&
 						   fsc2_fscanf( fp, "%lf cm^-1", val + i++ ) != 1 )
@@ -1088,9 +1080,13 @@ bool spex_cd2a_read_state( void )
 	T_free( fn );
 	fsc2_fclose( fp );
 
-	spex_cd2a.offset = 1.0e-9 * val[ 0 ];
 	if ( spex_cd2a.mode & WN_MODES )
+	{
+		spex_cd2a.offset = val[ 0 ];
 		spex_cd2a.laser_wavenumber = val[ 1 ];
+	}
+	else
+		spex_cd2a.offset = 1.0e-9 * val[ 0 ];
 
 	return OK;
 }
@@ -1142,6 +1138,9 @@ bool spex_cd2a_store_state( void )
 }
 
 
+/*-----------------------------------------------------------*/
+/*-----------------------------------------------------------*/
+
 double spex_cd2a_cwl( double wl )
 {
 	if ( spex_cd2a.mode & WN_MODES )
@@ -1153,6 +1152,9 @@ double spex_cd2a_cwl( double wl )
 }
 
 
+/*-----------------------------------------------------------*/
+/*-----------------------------------------------------------*/
+
 double spex_cd2a_cwn( double wn )
 {
 	if ( spex_cd2a.mode & WN_MODES )
@@ -1162,6 +1164,9 @@ double spex_cd2a_cwn( double wn )
 	return wn;
 }
 
+
+/*-----------------------------------------------------------*/
+/*-----------------------------------------------------------*/
 
 double spex_cd2a_cwnm( double wn )
 {

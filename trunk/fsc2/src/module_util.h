@@ -51,7 +51,11 @@ char *fsc2_fgets( char *s, int size, FILE *stream );
 int fsc2_ungetc( int c, FILE *stream );
 int fsc2_fseek( FILE *stream, long offset, int whence );
 long fsc2_ftell( FILE *stream );
+int fsc2_fputc( int c, FILE *stream );
+int fsc2_fputs( const char *s, FILE *stream );
+int fsc2_putc( int c, FILE *stream );
 int fsc2_fclose( FILE *stream );
+const char *fsc2_config_dir( void );
 
 
 #define MODULE_CALL_ESTIMATE   0.02   /* 20 ms per module function call -
