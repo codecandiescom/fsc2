@@ -70,4 +70,4 @@ clean:
 	   fsc_clean.c fsc_clean.o TAGS
 
 tags:
-	etags -T $(cstuff) $(header) *.y *.h
+	etags -T $(cstuff) $(headers) *.y *.h
