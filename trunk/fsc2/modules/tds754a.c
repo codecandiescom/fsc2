@@ -31,9 +31,10 @@ static double tb[ 32 ] = {                     500.0e-12,
 						    10.0 };
 
 /* Maximum and minimum sensitivity settings (in V) for the measurement
-   channels */
-/* !!! Still needs checking - might have the same dependence as on the TDS754A
-   where the minimum sensitivity is 1V for 1 M ohm and 10 V for 50 ohm */
+   channels.
+   Take care: The minimum sensitivity of 10 V only works with 1 M Ohm input
+   impedance, while for 50 Ohm the minimum sensitivity is only 1V.
+   Unfortunately, this can only be tested after the digitizer is online. */
 
 static double max_sens = 1e-3,
               min_sens = 10.0;

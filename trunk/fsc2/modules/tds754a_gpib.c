@@ -641,8 +641,6 @@ double tds754a_get_sens( int channel )
 
 
 /*-------------------------------------------------------------------*/
-/* !!! Still need to find out if checking for the input impedance is */
-/*     really necessary with this digitizer...                       */
 /*-------------------------------------------------------------------*/
 
 bool tds754a_set_sens( int channel, double sens )
