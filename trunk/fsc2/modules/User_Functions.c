@@ -13,7 +13,6 @@ int User_Functions_end_of_exp_hook( void );
 void User_Functions_exit_hook( void );
 
 
-Var *bla( Var *v );
 Var *square( Var *v );
 Var *int_slice( Var *v );
 Var *float_slice( Var *v );
@@ -28,60 +27,10 @@ static void pc_basic_check( const char *func_name, const char *func_1,
 
 
 
-/* Here examples for init and exit hook functions - the init hook function
-   will be called directly after all libraries are loaded while the exit
-   hook function is called immediately before the library is unloaded.
-*/
-
-int User_Functions_init_hook( void )
-{
-	return 1;
-}
-
-int User_Functions_test_hook( void )
-{
-	return 1;
-}
-
-int User_Functions_end_of_test_hook( void )
-{
-	return 1;
-}
-
-int User_Functions_exp_hook( void )
-{
-	return 1;
-}
-
-int User_Functions_end_of_exp_hook( void )
-{
-	return 1;
-}
-
-void User_Functions_exit_hook( void )
-{
-}
-
-
-
 /****************************************************************/
 /* Enter the definition of all needed functions below this line */
 /****************************************************************/
 
-
-Var *bla( Var *v )
-{
-	v = v;
-
-	if ( ! TEST_RUN )
-		while ( 1 )
-		{
-			if ( DO_STOP )
-				THROW( USER_BREAK_EXCEPTION );
-		}
-
-	return vars_push( INT_VAR, 1 );
-}
 
 /*------------------------------------------------------------*/
 /*------------------------------------------------------------*/
@@ -117,11 +66,6 @@ Var *int_slice( Var *v )
 	array = T_calloc( size, sizeof( long ) );
 	ret = vars_push( INT_TRANS_ARR, array, size );
 	T_free( array );
-
-	if ( ! TEST_RUN )
-		usleep( 10000 );
-	if ( DO_STOP )
-		THROW( USER_BREAK_EXCEPTION );
 
 	return ret;
 }
