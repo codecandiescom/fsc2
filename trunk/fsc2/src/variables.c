@@ -690,9 +690,8 @@ Var *vars_negate( Var *v )
 	long len;
 	long *rlp;
 	double *rdp;
-	long *ilp;
-	double *idp;
-	int type;
+	long *ilp = NULL;
+	double *idp = NULL;
 
 
 	/* Make sure that `v' exists, has integer or float type or is an array
@@ -718,7 +717,6 @@ Var *vars_negate( Var *v )
 						"on array slices.\n", Fname, Lc );
 				THROW( EXCEPTION );
 			}
-			type = INT_ARR;
 			len = v->len;
 			ilp = v->val.lpnt;
 			break;
@@ -730,7 +728,6 @@ Var *vars_negate( Var *v )
 						"on array slices.\n", Fname, Lc );
 				THROW( EXCEPTION );
 			}
-			type = FLOAT_ARR;
 			len = v->len;
 			idp = v->val.dpnt;
 			break;
@@ -738,15 +735,9 @@ Var *vars_negate( Var *v )
 		case ARR_PTR :
 			len = v->from->sizes[ v->from->dim - 1 ];
 			if ( v->from->type == INT_ARR )
-			{
-				type = INT_ARR;
 				ilp = ( long * ) v->val.gptr;
-			}
 			else
-			{
-				type = FLOAT_ARR;
 				idp = ( double * ) v->val.gptr;
-			}
 			break;
 
 		case ARR_REF :
@@ -760,19 +751,12 @@ Var *vars_negate( Var *v )
 
 			len = v->from->sizes[ 0 ];
 			if ( v->from->type == INT_ARR )
-			{
-				type = INT_ARR;
 				ilp = v->from->val.lpnt;
-			}
 			else
-			{
-				type = FLOAT_ARR;
 				idp = v->from->val.dpnt;
-			}
 			break;
 
 		case INT_TRANS_ARR :
-			type = INT_ARR;
 			len = v->len;
 			ilp = v->val.lpnt;
 			break;
@@ -786,7 +770,7 @@ Var *vars_negate( Var *v )
 			assert( 1 == 0 );
 	}
 
-	if ( type == INT_ARR )
+	if ( ilp != NULL )
 	{
 		rlp = T_malloc( len * sizeof( long ) );
 		for ( i = 0; i < len; ilp++, i++ )
