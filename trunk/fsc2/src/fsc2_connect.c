@@ -19,9 +19,8 @@
   along with fsc2; see the file COPYING.  If not, write to
   the Free Software Foundation, 59 Temple Place - Suite 330,
   Boston, MA 02111-1307, USA.
-*/
 
-/* 
+
    This program expects an EDL program on standard input. It will then read it
    in and write it into a temporary file and try to connect to fsc2 via a
    socket on which fsc2 is supposed to listen. If this succeeds it sends fsc2
