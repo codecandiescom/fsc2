@@ -1425,12 +1425,17 @@ calls where it is often not clear on which level the error handling is
 done best.
 
 In order to alleviate this problem in @code{fsc2} there is a mechanism
-called exceptions. An exception can be seen as a kind of flag that can
-be raised at any instance in the program and leads to the flow of
-control being changed to a place were the error can be handled.
+called exceptions@footnote{The basic ideas for the exceptions code came
+from an article by Peter Simons in the iX magazine
+(@uref{http://www.heise.de/ix/}), No. 5, 1998, pp. 160-162. It has been
+changed a lot thanks to the very constructive criticism by Chris Torek
+(@email{nospam@@elf.eng.bsdi.com}) on @uref{news:comp.lang.c}.}. An
+exception can be seen as a kind of flag that can be raised at any
+instance in the program and leads to the flow of control being changed
+to a place were the error can be handled.
 
 As far as raising exceptions in a module is concerned it's very
-simple. If you run into an error that can't be handled within the module
+simple. If you run into an error that you can't handle within the module
 just use
 @example
 if ( non_recoverable_error )
@@ -1446,12 +1451,13 @@ nearly all cases that have to be dealt with in modules.
 
 @subsubsection More on programming with exceptions
 
-Of course, to allow the `throwing' of exceptions there must be a place
-that will `catch' the exception, otherwise the exception will simply
-kill the program. Lets assume that you have a function @code{foo()},
-that in turn calls a lot of other functions, each of which might lead to
-non-recoverable errors and that can't be handled within the functions
-themselves. The way to handle this problem with exceptions is
+Of course, when an exception is 'thrown', there must be a place where it
+gets 'caught', otherwise the exception will simply kill the program. You
+don't have to care about catching exceptions, @code{fsc2} will do this
+for you. But in some situations you might prefer to do it yourself. So
+lets assume that you have a function @code{foo()} that might run into a
+non-recoverable errors that can't be handled within @code{foo()}
+itself. How to catch the exception in the calling function is
 demonstrated by the following example:
 @example
 TRY
@@ -1501,20 +1507,6 @@ OTHERWISE
 @}
 @end example
 
-There is a caveat when using exceptions: The values of non-static
-automatic variables may differ from the values they were set to after an
-exception got thrown. This could become a problem in cases where you do
-error handling in a @code{CATCH()} or @code{OTHERWISE} block as in the
-above example and rely on the values of such variables. You can avoid
-this problem if you declare these variables as @code{static}. If you
-need to find out more about this problem, have a look at the code in
-@file{exceptions.h} and @file{exceptions.c} and read the documentation
-for the standard C functions @code{setjmp()}
-@findex setjmp()
-and @code{longjmp()}
-@findex longjmp()
-which are used to implement exceptions.
-
 
 There are three types of exceptions that may be relevant when writing
 a module:
@@ -1525,28 +1517,31 @@ USER_BREAK_EXCEPTION
 @end example
 @noindent
 @code{EXCEPTION} stands for all kinds of exceptions not covered by one
-of the following two types. @code{OUT_OF_MEMORY_EXCEPTION} will only be
-thrown by @code{fsc2}s special functions for memory allocation (see
-next section), so don't throw it yourself without a very good reason. A
-@code{USER_BREAK_EXCEPTION} should be thrown from within a module when
-the module is doing something rather time consuming (e.g.@: waiting for
-a device to become ready or doing some calibration) and the user has
-pressed the @code{STOP} button. For this purpose there is a function
+of the other two types. @code{OUT_OF_MEMORY_EXCEPTION} will only be
+thrown by @code{fsc2}s special functions for memory allocation (see next
+section), so don't throw it yourself without a very good reason. A
+@code{USER_BREAK_EXCEPTION} can be thrown from within a module when the
+module is doing something rather time consuming (e.g.@: waiting for a
+device to become ready or doing some calibration) and the user has
+pressed the @code{STOP} button. Actually, you probably shouldn't throw
+it directly but use the function
 @example
 void stop_on_user_request( void )
 @end example
-that should be called. It will automatically determine if the user has
-pressed the @code{STOP} button and, if she did, will throw an
-@code{USER_BREAK_EXCEPTION}. This will work from all parts of the module
-except when running the @code{end_of_exp_hook} and @code{exit_hook}
-functions because these need to run without the user intervening.
-Thus you must make sure that these clean-up functions don't call other
-functions that may rely on user intervention.
-
+@noindent
+It will detect if the user has pressed the @code{STOP} button and, if
+she did, will throw an @code{USER_BREAK_EXCEPTION}. This works from
+all parts of the module except when running the @code{end_of_exp_hook}
+and @code{exit_hook} functions because these need to run without the
+user intervening.  Thus you must make sure that these clean-up functions
+don't call other functions that may rely on user intervention.
 
 Here's some code taken from the module for a digitizer. It waits
 indefinitely in a loop for the digitizer to become finished with a
-measurement. To allow the user to break from it within this loop:
+measurement. To allow the user to get out of this loop (when, for
+example, he realizes that he forgot to connect the trigger input and the
+digitizer) within the loop @code{stop_on_user_request()} is called each
+time:
 @example
 while ( 1 )                   /* loop forever */
 @{
@@ -1565,11 +1560,75 @@ while ( 1 )                   /* loop forever */
 @end example
 
 
-The basic ideas for the exceptions code came from an article by Peter
-Simons in the iX magazine (@uref{http://www.heise.de/ix/}), No. 5, 1998,
-pp. 160-162. It has been changed a lot thanks to the very constructive
-criticism by Chris Torek (@email{nospam@@elf.eng.bsdi.com}) on
-@uref{news://comp.lang.c}.
+@subsubsection Problems with using exceptions
+
+There is a caveat when using exceptions. The exception mechanism is
+using the standard C functions @code{setjmp()} and @code{longjmp()} to
+realize @code{TRY} and @code{CATCH}. But these functions have some
+problems: when an exception is thrown the data stored in CPU registers
+are not necessarily saved. But an optimizing compiler usually stores the
+values of often used variables in CPU registers, i.e.@: the value of a
+variable in memory is not necessarily identical to its 'real' value (or
+variables might even not exist in memory, they may have gotten optimized
+away.). When the program now reaches the @code{CATCH()} part the values
+of these variables can be completely bogus and if you would try to use
+their values nearly impossible to find errors might happen.
+
+Fortunately, when the compiler gets invoked with its warning level set
+to a suitable level it will recognize such potential problems and utter
+a warning message message like the following (this example is taken from
+@code{gcc}):
+@example
+module.c:123: warning: variable `i' might be clobbered by
+                       `longjmp' or `vfork'
+@end example
+
+You might get this warning for code like this:
+@example
+long **foo( size_t count, size_t len )
+@{
+    long **buffer;
+    size_t i;
+
+
+    TRY
+    @{
+    	for ( i = 0; i < count; i++ )
+            buffer[ i ] = T_malloc( len * sizeof **buffer );
+        buffer[ 0 ] = 123;
+        TRY_SUCCESS;
+    @}
+    CATCH( OUT_OF_MEMORY_EXECPTION )
+    @{
+    	for ( i -= 1; i >= 0; i-- )
+            T_free( i )
+        RETHROW( );
+    @}
+
+    return buffer;
+@}
+@end example
+@noindent
+Chances are high that the compiler will use a register for the variable
+@code{i} to speed up execution. But when an exception happens the value
+of @code{i} might have gotten discarded in the process, even though it
+is still needed.
+
+But there's a way to get rid of this problem. All you need is to add an
+additional statement before @code{TRY} is invoked:
+@example
+CLOBBER_PROTECT( i );
+@end example
+@noindent
+Just insert this line after the definitions of the variables and you're
+save from all these problems. So better be careful when the compiler
+emits warnings like the one above and add a @code{CLOBBER_PROTECT()}
+call for such variables.
+
+If you want to find out more about this problem, have a look at the code
+in @file{exceptions.h} and @file{exceptions.c} and read the
+documentation for the standard C functions @code{setjmp()} and
+@code{longjmp()}.
 
 
 @subsection Functions for memory allocation
