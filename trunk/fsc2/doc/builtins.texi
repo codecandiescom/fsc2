@@ -544,7 +544,7 @@ The function deletes on or more sliders. It expects one or more slider
 identifiers as returned by the function @code{slider_create()}.
 
 
-@item slider_create()
+@item slider_value()
 @anchor{slider_value}
 @findex slider_value()
 This function returns or sets the value of a slider. The first argument
