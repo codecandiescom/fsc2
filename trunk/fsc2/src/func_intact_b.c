@@ -45,7 +45,7 @@ Var *f_bcreate( Var *var )
 {
 	Var *v = var;
 	long type;
-	long coll = 1;
+	long coll = -1;
 	char *label = NULL;
 	char *help_text = NULL;
 	IOBJECT *new_io = NULL;
