@@ -168,12 +168,12 @@ static struct
 } magnet;
 
 
-#define DEVIATION( f )                                                      \
-	do {                                                                    \
-		double d = fabs( ( f ) - magnet.cf                                  \
-						 - ( magnet.swa - CENTER_SWA ) * magnet.swa_step ); \
-		if ( d > magnet.max_field_dev )                                     \
-			magnet.max_field_dev = d;                                       \
+#define DEVIATION( f )                                                 \
+	do {                                                               \
+		double d = fabs( ( f ) - magnet.cf                             \
+				   - ( magnet.swa - CENTER_SWA ) * magnet.swa_step );  \
+		if ( d > magnet.max_field_dev )                                \
+			magnet.max_field_dev = d;                                  \
 	} while ( 0 )
 
 
