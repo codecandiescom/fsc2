@@ -74,9 +74,9 @@ typedef struct {
 
 
 #if defined ( __GPIB__ )
-	#define GPIB_VARIABLE
+#define GPIB_VARIABLE
 #else
-	#define GPIB_VARIABLE extern
+#define GPIB_VARIABLE extern
 #endif
 
 
@@ -87,7 +87,7 @@ typedef struct {
 #endif
 
 
-GPIB_VARIABLE int gpib_init( char *log_file_name, int log_level );
+GPIB_VARIABLE int gpib_init( const char *log_file_name, int log_level );
 GPIB_VARIABLE int gpib_shutdown( void );
 GPIB_VARIABLE int gpib_init_device( const char *device_name, int *dev );
 GPIB_VARIABLE int gpib_local( int device );
