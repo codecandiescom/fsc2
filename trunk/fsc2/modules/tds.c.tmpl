@@ -678,6 +678,8 @@ Var *digitizer_timebase( Var *v )
 	if ( FSC2_MODE == EXPERIMENT )
 		tds_tmpl_set_timebase( tb[ TB ] );
 
+	tds_tmpl.timebase = tb[ TB ];
+
 	tds_tmpl_state_check( tb[ TB ], tds_tmpl.rec_len, tds_tmpl.trig_pos );
 
 	return vars_push( FLOAT_VAR, tds_tmpl.timebase );
