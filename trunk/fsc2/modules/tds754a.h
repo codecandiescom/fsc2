@@ -31,15 +31,17 @@
 
 
 
+/* Structure for description of a `window' on the digitizer, made up from the
+   area between the pair of cursors */
 
 typedef struct _W {
-	long num;
-	bool is_used;
-	double start;
-	double width;
-	bool is_width;
-	long num_points;
-	struct _W * next;
+	long num;                   // number of window
+	bool is_used;               // flag, set when window has been used
+	double start;               // start of window (in time units)
+	double width;               // width of window (in time units)
+	bool is_width;              // flag, set if width of window has been set
+	long num_points;            // number of data points between the cursors
+	struct _W * next;           // pointer to next window structure
 } WINDOW;
 
 
@@ -53,7 +55,7 @@ typedef struct
 	double num_avg;
 	bool is_num_avg;
 
-	WINDOW *w;
+	WINDOW *w;                // start element of list of windows
 	int num_windows;
 	bool is_equal_width;      // all windows have equal width -> tracking
 	                          // cursors can be used without further checking
@@ -73,6 +75,7 @@ typedef struct
 
 	bool channels_in_use[ MAX_CHANNELS ];
 	double channel_sens[ MAX_CHANNELS ];
+
 } TDS754A;
 
 
@@ -154,4 +157,3 @@ enum {
 	SAMPLE,
 	AVERAGE
 };
-
