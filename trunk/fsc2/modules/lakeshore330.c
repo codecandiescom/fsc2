@@ -186,7 +186,7 @@ Var *temp_contr_sample_channel( Var *v )
 
 	if ( v->type & ( INT_VAR || FLOAT_VAR ) )
 	{
-		channel = get_long( v, "channel number", DEVICE_NAME ) - 1;
+		channel = get_long( v, "channel number" ) - 1;
 
 		if ( channel != SAMPLE_CHANNEL_A && channel != SAMPLE_CHANNEL_B )
 		{
@@ -298,8 +298,7 @@ Var *temp_contr_lock_keyboard( Var *v )
 		lock = LOCK_STATE_REMOTE_LLO;
 	else
 	{
-		lock = get_boolean( v, DEVICE_NAME ) ?
-			                   LOCK_STATE_REMOTE_LLO : LOCK_STATE_REMOTE;
+		lock = get_boolean( v ) ? LOCK_STATE_REMOTE_LLO : LOCK_STATE_REMOTE;
 		too_many_arguments( v );
 	}
 

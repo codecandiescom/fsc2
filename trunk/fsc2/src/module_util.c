@@ -80,7 +80,7 @@ inline long get_long( Var *v, const char *snippet )
 	vars_check( v, INT_VAR | FLOAT_VAR );
 
 	if ( v->type == FLOAT_VAR && snippet != NULL &&
-		 Cur_Dev->device_name,!= NULL )
+		 Cur_Dev->device_name != NULL )
 		eprint( WARN, SET, "%s: Floating point number used as %s in %s().\n",
 				Cur_Dev->device_name, snippet, Cur_Func );
 
@@ -126,7 +126,7 @@ inline long get_strict_long( Var *v, const char *snippet )
 			return lrnd( v->val.dval );
 		}
 
-		if ( snippet != NULL  && device != NULL )
+		if ( snippet != NULL  && Cur_Dev->device_name != NULL )
 			eprint( FATAL, SET, "%s: Floating point number can't be used as "
 					"%s in %s().\n",
 					Cur_Dev->device_name, snippet, Cur_Func );

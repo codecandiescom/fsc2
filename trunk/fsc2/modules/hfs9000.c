@@ -325,7 +325,7 @@ Var *pulser_state( Var *v )
 	if ( v == NULL )
 		return vars_push( INT_VAR, ( long ) hfs9000.is_running );
 
-	state = get_boolean( v, DEVICE_NAME );
+	state = get_boolean( v );
 
 	if ( FSC2_MODE != EXPERIMENT )
 		return vars_push( INT_VAR, ( long ) ( hfs9000.is_running = state ) );
@@ -353,7 +353,7 @@ Var *pulser_channel_state( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	channel = get_strict_long( v, "pulser channel", DEVICE_NAME );
+	channel = get_strict_long( v, "pulser channel" );
 
 	if ( channel < MIN_CHANNEL || channel > MAX_CHANNEL )
 	{
@@ -443,8 +443,7 @@ Var *pulser_shift( Var *v )
 
 	for ( ; v != NULL; v = vars_pop( v ) )
 	{
-		p = hfs9000_get_pulse( get_strict_long( v, "pulse number",
-												DEVICE_NAME ) );
+		p = hfs9000_get_pulse( get_strict_long( v, "pulse number" );
 
 		if ( ! p->is_pos )
 		{
@@ -518,8 +517,7 @@ Var *pulser_increment( Var *v )
 
 	for ( ; v != NULL; v = vars_pop( v ) )
 	{
-		p = hfs9000_get_pulse( get_strict_long( v, "pulse number",
-												DEVICE_NAME ) );
+		p = hfs9000_get_pulse( get_strict_long( v, "pulse number" );
 
 		if ( ! p->is_len )
 		{
@@ -600,8 +598,7 @@ Var *pulser_pulse_reset( Var *v )
 
 	for ( ; v != NULL; v = vars_pop( v ) )
 	{
-		p = hfs9000_get_pulse( get_strict_long( v, "pulse number",
-												DEVICE_NAME ) );
+		p = hfs9000_get_pulse( get_strict_long( v, "pulse number" );
 
 		/* Reset all changeable properties back to their initial values */
 
@@ -661,8 +658,8 @@ Var *pulser_lock_keyboard( Var *v )
 
 Var *pulser_stop_on_update( Var *v )
 {
-	hfs9000.stop_on_update = get_strict_long( v, "boolean value",
-											  DEVICE_NAME ) == 0 ? UNSET : SET;
+	hfs9000.stop_on_update = get_strict_long( v, "boolean value" ) == 0 ?
+		                     UNSET : SET;
 
 	return vars_push( INT_VAR, ( long ) hfs9000.stop_on_update );
 }

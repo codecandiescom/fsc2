@@ -356,7 +356,7 @@ Var *pulser_state( Var *v )
 	if ( v == NULL )
 		return vars_push( INT_VAR, ( long ) dg2020.is_running );
 
-	state = get_boolean( v, DEVICE_NAME );
+	state = get_boolean( v );
 
 	if ( FSC2_MODE != EXPERIMENT )
 		return vars_push( INT_VAR, ( long ) ( dg2020.is_running = state ) );
@@ -502,8 +502,7 @@ Var *pulser_shift( Var *v )
 
 	for ( ; v != NULL; v = vars_pop( v ) )
 	{
-		p = dg2020_get_pulse( get_strict_long( v, "pulse number",
-											   DEVICE_NAME ) );
+		p = dg2020_get_pulse( get_strict_long( v, "pulse number" ) );
 
 		if ( ! p->is_pos )
 		{
@@ -590,8 +589,7 @@ Var *pulser_increment( Var *v )
 
 	for ( ; v != NULL; v = vars_pop( v ) )
 	{
-		p = dg2020_get_pulse( get_strict_long( v, "pulse number",
-											   DEVICE_NAME ) );
+		p = dg2020_get_pulse( get_strict_long( v, "pulse number" ) );
 
 		if ( ! p->is_len )
 		{
@@ -681,7 +679,7 @@ Var *pulser_next_phase( Var *v )
 
 	for ( ; v != NULL; v = vars_pop( v ) )
 	{
-		phase_number = get_strict_long( v, "phase number", DEVICE_NAME );
+		phase_number = get_strict_long( v, "phase number" );
 
 		if ( phase_number != 1 && phase_number != 2 )
 		{
@@ -761,7 +759,7 @@ Var *pulser_phase_reset( Var *v )
 
 	for ( ; v != NULL; v = vars_pop( v ) )
 	{
-		phase_number = get_strict_long( v, "phase number", DEVICE_NAME );
+		phase_number = get_strict_long( v, "phase number" );
 
 		if ( phase_number != 1 && phase_number != 2 )
 		{
@@ -839,8 +837,7 @@ Var *pulser_pulse_reset( Var *v )
 
 	for ( ; v != NULL; v = vars_pop( v ) )
 	{
-		p = dg2020_get_pulse( get_strict_long( v, "pulse number",
-											   DEVICE_NAME ) );
+		p = dg2020_get_pulse( get_strict_long( v, "pulse number" ) );
 
 		/* Reset all changeable properties back to their initial values */
 

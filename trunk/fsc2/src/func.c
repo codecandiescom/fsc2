@@ -417,7 +417,7 @@ Var *func_call( Var *f )
 
 	if ( in_call++ == 0 )
 	{
-		Cur_Dev  = f->device;
+		Cur_Dev  = f->val.fnct->device;
 		Cur_Func = f->name;
 	}
 
@@ -454,7 +454,7 @@ Var *func_call( Var *f )
 
 	if ( --in_call == 0 )
 	{
-		Cur_Dev  = f->device;
+		Cur_Dev  = NULL;
 		Cur_Func = NULL;
 	}
 
