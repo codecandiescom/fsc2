@@ -423,14 +423,14 @@ a pair of pipes between the processes.
 @section Reading the sources
 
 
-The following is supposed to give you an introduction on where to look
-when you are searching for something in the source code of
-@code{fsc2}. Of course, the program has gotten too complex to be
-described easily (and with less space then required for the program
-itself). Thus all I can try is showing you the red line through the
-jungle of code along what's about to happen when @code{fsc2} is started,
-an @code{EDL} script gets loaded, tested and finally executed. This is
-yet far from complete but work in progress at best.
+The following is supposed to give you an introduction to where to look
+when you are searching for something in the source code of @code{fsc2}.
+Of course, the program has gotten too complex to be described easily
+(and with less space then required for the program itself). Thus all I
+can try is showing you the red line through the jungle of code along
+what's about to happen when @code{fsc2} is started, an @code{EDL} script
+gets loaded, tested and finally executed. This is yet far from complete
+but work in progress at best.
 
 
 Lets start with what to do when you want to debug @code{fsc2}. It's
