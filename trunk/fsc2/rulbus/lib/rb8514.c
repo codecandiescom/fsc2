@@ -74,8 +74,8 @@ static inline long lrnd( double x );
 
 /*------------------------------------------------------------------*
  * Function for initializing the delay card subsystem (gets invoked
- * automatically by the rulbus_open() function, so it's not to be
- * called by the user directly)
+ * automatically by the rulbus_open() function, so it's not supposed
+ * to be called by a user directly)
  *------------------------------------------------------------------*/
 
 int rulbus_rb8514_delay_init( void )
@@ -107,8 +107,8 @@ void rulbus_rb8514_delay_exit( void )
 
 /*---------------------------------------------------------------------*
  * Function for initializing a single card (gets invoked automatically
- * by the rulbus_card_open() function, so it's not to be called by the
- * user directly)
+ * by the rulbus_card_open() function, so it's not supposed to be
+ * called by a user directly).
  *---------------------------------------------------------------------*/
 
 int rulbus_rb8514_delay_card_init( int handle )
@@ -133,9 +133,9 @@ int rulbus_rb8514_delay_card_init( int handle )
 	tmp->clock_time = -1.0;
 	tmp->ctrl = START_PULSE_POSITIVE | END_PULSE_POSITIVE;
 
-	/* Set a few defaults: output neither start nor end pulses, dsiable
-	   interrupts, triggger of rasing edge and output polarity of start
-	   and end pulses is positive, then set the delay to 0. */
+	/* Set a few defaults: output neither start nor end pulses, disable
+	   interrupts, trigger on rasing edge, output polarity of start and
+	   end pulses is positive, finally set the delay to 0. */
 
 	if ( ( retval = rulbus_write( handle, CONTROL_ADDR, &tmp->ctrl, 1 ) )
 																 != RULBUS_OK )
@@ -153,7 +153,7 @@ int rulbus_rb8514_delay_card_init( int handle )
 /*---------------------------------------------------------------*
  * Function for deactivation a card (gets invoked automatically
  * by the rulbus_card_close() function, so it's not to be called
- * by the user directly)
+ * by the user directly).
  *---------------------------------------------------------------*/
 
 int rulbus_rb8514_delay_card_exit( int handle )
@@ -556,6 +556,7 @@ static RULBUS_RB8514_DELAY_CARD *rulbus_rb8514_delay_card_find( int handle )
 
 
 /*---------------------------------------------------
+ * Utility function for rounding double values.
  *---------------------------------------------------*/
 
 static inline long lrnd( double x )
