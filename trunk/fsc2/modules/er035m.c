@@ -420,9 +420,9 @@ Var *find_field( Var *v )
 
 
 	v = v;
-	if ( TEST_RUN )
-		return vars_push( FLOAT_VAR, ER035M_TEST_FIELD );
 
+	if ( FSC2_MODE == TEST )
+		return vars_push( FLOAT_VAR, ER035M_TEST_FIELD );
 
 	/* If gaussmeter is in oscillator up/down state or the state is unknown
 	   (i.e. it's standing somewhere but not searching) search for field.
@@ -513,10 +513,11 @@ Var *find_field( Var *v )
 Var *gaussmeter_resolution( Var *v )
 {
 	v = v;
-	if ( ! TEST_RUN )
-		return vars_push( FLOAT_VAR, nmr.resolution == LOW ? 0.01 : 0.001 );
-	else
+
+	if ( FSC2_MODE == TEST )
 		return vars_push( FLOAT_VAR, ER035M_TEST_RES );
+
+	return vars_push( FLOAT_VAR, nmr.resolution == LOW ? 0.01 : 0.001 );
 }
 
 
@@ -527,7 +528,7 @@ Var *gaussmeter_wait( Var *v )
 {
 	v = v;
 
-	if ( ! TEST_RUN && nmr.is_needed )
+	if ( FSC2_MODE == EXPERIMENT && nmr.is_needed )
 		usleep( ( nmr.resolution == LOW ? 10 : 20 ) * E2_US );
 	return vars_push( INT_VAR, 1 );
 }

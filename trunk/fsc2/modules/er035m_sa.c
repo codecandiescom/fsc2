@@ -400,7 +400,8 @@ Var *measure_field( Var *v )
 
 
 	v = v;
-	if ( TEST_RUN )
+
+	if ( FSC2_MODE == TEST )
 		return vars_push( FLOAT_VAR, ER035M_TEST_FIELD );
 
 	/* If gaussmeter is in oscillator up/down state or the state is unknown

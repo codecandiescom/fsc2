@@ -289,7 +289,7 @@ Var *sweep_up( Var *v )
 
 	er032m_field_check( magnet.act_field + magnet.field_step );
 
-	if ( ! TEST_RUN )
+	if ( FSC2_MODE == EXPERIMENT )
 	{
 		/* If the new field is still within the sweep range set the new field
 		   by changing the SWA, otherwise shift the center field up by a
@@ -340,7 +340,7 @@ Var *sweep_down( Var *v )
 
 	er032m_field_check( magnet.act_field + magnet.field_step );
 
-	if ( ! TEST_RUN )
+	if ( FSC2_MODE == EXPERIMENT )
 	{
 		/* If the new field is still within the sweep range set the new field
 		   by changing the SWA, otherwise shift the center field down by a
@@ -386,8 +386,10 @@ Var *reset_field( Var *v )
 		THROW( EXCEPTION )
 	}
 
-	if ( ! TEST_RUN )
+	if ( FSC2_MODE == EXPERIMENT )
 		er032m_start_field( );
+	else
+		magnet.act_field = magnet.start_field;
 
 	return vars_push( FLOAT_VAR, magnet.act_field );
 }
@@ -400,7 +402,7 @@ Var *get_field( Var *v )
 {
 	v = v;
 
-	if ( TEST_RUN )
+	if ( FSC2_MODE == TEST )
 		return vars_push( FLOAT_VAR, magnet.act_field );
 	return vars_push( FLOAT_VAR, er032m_get_field( ) );
 }
@@ -443,7 +445,7 @@ Var *set_field( Var *v )
 
 	er032m_field_check( field );
 
-	if ( TEST_RUN )
+	if ( FSC2_MODE == TEST )
 	{
 		magnet.act_field = field;
 		return vars_push( FLOAT_VAR, magnet.act_field );

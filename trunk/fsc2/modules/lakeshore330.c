@@ -162,10 +162,10 @@ Var *temp_contr_temperature( Var *v )
 {
 	v = v;
 
-	if ( TEST_RUN )
+	if ( FSC2_MODE == TEST )
 		return vars_push( FLOAT_VAR, 123.45 );
-	else
-		return vars_push( FLOAT_VAR, lakeshore330_sens_data( ) );
+
+	return vars_push( FLOAT_VAR, lakeshore330_sens_data( ) );
 }
 
 
@@ -214,7 +214,7 @@ Var *temp_contr_sample_channel( Var *v )
 		channel = ( long ) ( *v->val.sptr - 'A' );
 	}
 
-	if ( TEST_RUN )
+	if ( FSC2_MODE == TEST )
 	{
 		lakeshore330.sample_channel = channel;
 		return vars_push( INT_VAR, channel + 1 );
@@ -236,8 +236,9 @@ Var *temp_contr_sensor_unit( Var *v )
 
 	if ( v == NULL )
 	{
-		if ( TEST_RUN )
+		if ( FSC2_MODE == TEST )
 			return vars_push( INT_VAR, lakeshore330.unit );
+
 		return vars_push( INT_VAR, lakeshore330_get_unit( ) );
 	}
 
@@ -289,7 +290,7 @@ Var *temp_contr_sensor_unit( Var *v )
 	}
 
 	
-	if ( TEST_RUN )
+	if ( FSC2_MODE == TEST )
 		return vars_push( INT_VAR, lakeshore330.unit = unit );
 
 	lakeshore330_set_unit( unit );
@@ -334,8 +335,9 @@ Var *temp_contr_lock_keyboard( Var *v )
 		}
 	}
 
-	if ( ! TEST_RUN )
+	if ( FSC2_MODE == EXPERIMENT )
 		lakeshore330_lock( lock - 1 );
+
 	return vars_push( INT_VAR, lock == LOCK_STATE_REMOTE_LLO ? 1 : 0 );
 }
 

@@ -625,7 +625,7 @@ static bool keithley228a_set_state( bool new_state )
 	double dummy;
 
 
-	if ( TEST_RUN )
+	if ( FSC2_MODE == TEST )
 		return new_state;
 
 	/* If the state is already the required state do nothing except getting
@@ -724,7 +724,7 @@ static double keithley228a_goto_current( double new_current )
 
 	/* Nothing really to be done in a test run */
 
-	if ( TEST_RUN )
+	if ( FSC2_MODE == TEST )
 		return keithley228a.current = new_current;
 
 	do_test =
@@ -886,16 +886,16 @@ static double keithley228a_current_check( double current )
 
 	if ( fabs( current ) > KEITHLEY228A_MAX_CURRENT )
 	{
-		if ( ! TEST_RUN )
+		if ( FSC2_MODE == TEST )
 		{
-			eprint( FATAL, SET, "%s: Magnet current of %.2f A out of range "
+			eprint( FATAL, UNSET, "%s: Magnet current of %.2f A out of range "
 					"in %s().\n", DEVICE_NAME, current, Cur_Func );
-			return current > 0.0 ? 10.0 : -10.0;
+			THROW( EXCEPTION )
 		}
 
-		eprint( FATAL, UNSET, "%s: Magnet current of %.2f A out of range "
+		eprint( FATAL, SET, "%s: Magnet current of %.2f A out of range "
 				"in %s().\n", DEVICE_NAME, current, Cur_Func );
-		THROW( EXCEPTION )
+		return current > 0.0 ? 10.0 : -10.0;
 	}
 
 	return current;

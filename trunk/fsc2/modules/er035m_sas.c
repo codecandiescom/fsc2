@@ -405,9 +405,9 @@ Var *measure_field( Var *v )
 
 
 	v = v;
-	if ( TEST_RUN )
-		return vars_push( FLOAT_VAR, ER035M_TEST_FIELD );
 
+	if ( FSC2_MODE == TEST )
+		return vars_push( FLOAT_VAR, ER035M_TEST_FIELD );
 
 	/* If gaussmeter is in oscillator up/down state or the state is unknown
 	   (i.e. it's standing somewhere and not searching at all) search for the

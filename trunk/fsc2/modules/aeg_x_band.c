@@ -402,7 +402,7 @@ Var *set_field( Var *v )
 			;
 	}
 
-	if ( TEST_RUN )
+	if ( FSC2_MODE == TEST )
 		return vars_push( FLOAT_VAR, field );
 
 	if ( ! magnet_goto_field( field, error ) )
@@ -457,7 +457,7 @@ Var *sweep_up( Var *v )
 	if ( err_flag )
 		return vars_push( FLOAT_VAR, magnet.act_field );
 
-	if ( TEST_RUN )
+	if ( FSC2_MODE == TEST )
 	{
 		magnet.target_field += magnet.field_step;
 		return vars_push( FLOAT_VAR, magnet.target_field );
@@ -491,7 +491,7 @@ Var *sweep_down( Var *v )
 	if ( err_flag )
 		return vars_push( FLOAT_VAR, magnet.act_field );
 
-	if ( TEST_RUN )
+	if ( FSC2_MODE == TEST )
 	{
 		magnet.target_field -= magnet.field_step;
 		return vars_push( FLOAT_VAR, magnet.target_field );
@@ -516,7 +516,7 @@ Var *reset_field( Var *v )
 		THROW( EXCEPTION )
 	}
 
-	if ( TEST_RUN )
+	if ( FSC2_MODE == TEST )
 	{
 		magnet.target_field = magnet.field;
 		return vars_push( FLOAT_VAR, magnet.target_field );
@@ -544,7 +544,7 @@ static double aeg_x_band_field_check( double field, bool *err_flag )
 					"Bruker ER035M gaussmeter in %s(), minimum is %d G.\n",
 					DEVICE_NAME, field, Cur_Func,
 					( int ) AEG_X_BAND_WITH_ER035M_MIN_FIELD );
-			if ( ! TEST_RUN )
+			if ( FSC2_MODE == EXPERIMENT )
 			{
 				*err_flag = SET;
 				return AEG_X_BAND_WITH_ER035M_MIN_FIELD;
@@ -559,7 +559,7 @@ static double aeg_x_band_field_check( double field, bool *err_flag )
 					"Bruker ER035M gaussmeter in %s(), maximum is %d G.\n",
 					DEVICE_NAME, field, Cur_Func,
 					( int ) AEG_X_BAND_WITH_ER035M_MAX_FIELD );
-			if ( ! TEST_RUN )
+			if ( FSC2_MODE == EXPERIMENT )
 			{
 				*err_flag = SET;
 				return AEG_X_BAND_WITH_ER035M_MAX_FIELD;
@@ -577,7 +577,7 @@ static double aeg_x_band_field_check( double field, bool *err_flag )
 					"Bruker BH15 field controller in %s(), minimum is %d G.\n",
 					DEVICE_NAME, field, Cur_Func,
 					( int ) AEG_X_BAND_WITH_BH15_MIN_FIELD );
-			if ( ! TEST_RUN )
+			if ( FSC2_MODE == EXPERIMENT )
 			{
 				*err_flag = SET;
 				return AEG_X_BAND_WITH_BH15_MIN_FIELD;
@@ -592,7 +592,7 @@ static double aeg_x_band_field_check( double field, bool *err_flag )
 					"Bruker BH15 field controller in %s(), maximum is %d G.\n",
 					DEVICE_NAME, field, Cur_Func,
 					( int ) AEG_X_BAND_WITH_BH15_MAX_FIELD );
-			if ( ! TEST_RUN )
+			if ( FSC2_MODE == EXPERIMENT )
 			{
 				*err_flag = SET;
 				return AEG_X_BAND_WITH_BH15_MAX_FIELD;
@@ -714,9 +714,7 @@ try_again:
 
 	for ( i = 0; i < test_steps; ++i )
 	{
-		if ( I_am == PARENT )
-			fl_check_only_forms( );
-
+		fl_check_only_forms( );
 		if ( DO_STOP )
 			THROW( USER_BREAK_EXCEPTION )
 
@@ -744,9 +742,7 @@ try_again:
 
 	for ( i = 0; i < test_steps; ++i )
 	{
-		if ( I_am == PARENT )
-			fl_check_only_forms( );
-
+		fl_check_only_forms( );
 		if ( DO_STOP )
 			THROW( USER_BREAK_EXCEPTION )
 

@@ -53,6 +53,7 @@ static void kontron4060_failure( void );
 
 #define MEAS_TYPE_AC 0
 #define MEAS_TYPE_DC 0
+#define TEST_VOLTAGE -0.123
 
 
 typedef struct
@@ -61,8 +62,8 @@ typedef struct
 	int meas_type;
 } KONTRON4060;
 
-
 static KONTRON4060 kontron4060;
+
 
 
 /*------------------------------------*/
@@ -91,9 +92,6 @@ int kontron4060_init_hook( void )
 int kontron4060_exp_hook( void )
 {
 	/* Nothing to be done yet in a test run */
-
-	if ( TEST_RUN )
-		return 1;
 
 	/* Initialize the voltmeter */
 
@@ -143,9 +141,9 @@ Var *voltmeter_ac_measurement( Var *v )
 {
 	v = v;
 
-	if ( ! TEST_RUN )
-		if ( gpib_write( kontron4060.device, "M1\n", 3 ) == FAILURE )
-			kontron4060_failure( );
+	if ( FSC2_MODE == EXPERIMENT &&
+		 gpib_write( kontron4060.device, "M1\n", 3 ) == FAILURE )
+		kontron4060_failure( );
 
 	kontron4060.meas_type = MEAS_TYPE_AC;
 	return vars_push( INT_VAR, 1  );
@@ -160,9 +158,9 @@ Var *voltmeter_dc_measurement( Var *v )
 {
 	v = v;
 
-	if ( ! TEST_RUN )
-		if ( gpib_write( kontron4060.device, "M0\n", 3 ) == FAILURE )
-			kontron4060_failure( );
+	if ( FSC2_MODE == EXPERIMENT &&
+		 gpib_write( kontron4060.device, "M0\n", 3 ) == FAILURE )
+		kontron4060_failure( );
 
 	kontron4060.meas_type = MEAS_TYPE_DC;
 	return vars_push( INT_VAR, 1  );
@@ -183,8 +181,8 @@ Var *voltmeter_get_data( Var *v )
 
 	v = v;
 
-	if ( TEST_RUN )
-		return vars_push( FLOAT_VAR, -0.123 );
+	if ( FSC2_MODE == TEST )
+		return vars_push( FLOAT_VAR, TEST_VOLTAGE );
 
 	if ( gpib_write( kontron4060.device, "G\n", 2 ) == FAILURE ||
 		 gpib_read( kontron4060.device, reply, &length ) == FAILURE )

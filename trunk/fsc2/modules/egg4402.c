@@ -90,11 +90,6 @@ int egg4402_init_hook( void )
 
 int egg4402_exp_hook( void )
 {
-	/* Nothing to be done yet in a test run */
-
-	if ( TEST_RUN )
-		return 1;
-
 	/* Initialize the box-car */
 
 	egg4402.fatal_error = UNSET;
@@ -116,7 +111,7 @@ int egg4402_exp_hook( void )
 
 int egg4402_end_of_exp_hook( void )
 {
-	/* Switch lock-in back to local mode */
+	/* Switch boxcar back to local mode */
 
 	if ( egg4402.device >= 0 && ! egg4402.fatal_error )
 		gpib_local( egg4402.device );
@@ -162,19 +157,12 @@ Var *boxcar_curve_length( Var *v )
 		return vars_push( INT_VAR, T_atol( buffer ) );
 	}
 
-	if ( ! TEST_RUN && I_am == PARENT )
-	{
-		eprint( FATAL, SET, "%s: Number of points can only be set in "
-				"EXPERIMENT section.\n", DEVICE_NAME );
-		THROW( EXCEPTION )
-	}
-
 	vars_check( v, INT_VAR | FLOAT_VAR );
 	if ( v->type == INT_VAR )
 		num_points = v->val.lval;
 	else
 	{
-		eprint( WARN, SET, "%s: Floating point number used as numer of "
+		eprint( WARN, SET, "%s: Floating point number used as number of "
 				"points in function %s().\n", DEVICE_NAME, Cur_Func );
 		num_points = lrnd( v->val.dval );
 	}
@@ -206,7 +194,7 @@ Var *boxcar_curve_length( Var *v )
 		}
 	}
 
-	if ( TEST_RUN )
+	if ( FSC2_MODE == TEST )
 		return vars_push( INT_VAR, num_points );
 
 	sprintf( buffer, "CL %ld\n", num_points );
@@ -242,13 +230,6 @@ Var *boxcar_get_curve( Var *v )
 
 
 	old_timo = -1;
-
-	if ( ! TEST_RUN && I_am == PARENT )
-	{
-		eprint( FATAL, SET, "%s: Curves can only be fetched in the "
-				"EXPERIMENT section.\n", DEVICE_NAME );
-		THROW( EXCEPTION )
-	}
 
 	vars_check( v, INT_VAR | FLOAT_VAR | STR_VAR );
 
@@ -415,9 +396,8 @@ Var *boxcar_get_curve( Var *v )
 
 	num_points = last - first + 1;
 
-	if ( TEST_RUN )
+	if ( FSC2_MODE == TEST )
 	{
-		
 		buffer = T_calloc( num_points, sizeof( double ) );
 		cl = vars_push( FLOAT_ARR, buffer, last - first + 1 );
 		if ( size_dynamic )
@@ -427,7 +407,6 @@ Var *boxcar_get_curve( Var *v )
 	}
 
 	/* Get a buffer large enough to hold all data */
-	/* !!!!!! Is the size we need for the buffer correct ? */
 
 	length = num_points * 15 + 1;
 	buffer = T_malloc( length );

@@ -395,7 +395,7 @@ Var *set_field( Var *v )
 			;
 	}
 
-	if ( TEST_RUN )
+	if ( FSC2_MODE == TEST )
 		return vars_push( FLOAT_VAR, field );
 
 	if ( ! magnet_goto_field( field, error ) )
@@ -450,7 +450,7 @@ Var *sweep_up( Var *v )
 	if ( err_flag )
 		return vars_push( FLOAT_VAR, magnet.act_field );
 
-	if ( ! TEST_RUN )
+	if ( FSC2_MODE == EXPERIMENT )
 	{
 		magnet_sweep( 1 );
 		return vars_push( FLOAT_VAR, magnet.act_field );
@@ -484,7 +484,7 @@ Var *sweep_down( Var *v )
 	if ( err_flag )
 		return vars_push( FLOAT_VAR, magnet.act_field );
 
-	if ( ! TEST_RUN )
+	if ( FSC2_MODE == EXPERIMENT )
 	{
 		magnet_sweep( -1 );
 		return vars_push( FLOAT_VAR, magnet.act_field );
@@ -509,17 +509,14 @@ Var *reset_field( Var *v )
 		THROW( EXCEPTION )
 	}
 
-	if ( ! TEST_RUN )
-	{
-		magnet_goto_field( magnet.field, 0.0 );
-		return vars_push( FLOAT_VAR, magnet.act_field );
-	}
-	else
+	if ( FSC2_MODE != EXPERIMENT )
 	{
 		magnet.target_field = magnet.field;
 		return vars_push( FLOAT_VAR, magnet.target_field );
 	}
 
+	magnet_goto_field( magnet.field, 0.0 );
+	return vars_push( FLOAT_VAR, magnet.act_field );
 }
 
 
@@ -540,7 +537,7 @@ static double aeg_s_band_field_check( double field, bool *err_flag )
 					"ER035M gaussmeter in %s(), minimum is %d G.\n",
 					DEVICE_NAME, field, Cur_Func,
 					( int ) AEG_S_BAND_WITH_ER035M_MIN_FIELD );
-			if ( ! TEST_RUN )
+			if ( FSC2_MODE == EXPERIMENT )
 			{
 				*err_flag = SET;
 				return AEG_S_BAND_WITH_ER035M_MIN_FIELD;
@@ -555,7 +552,7 @@ static double aeg_s_band_field_check( double field, bool *err_flag )
 					"gaussmeter in %s(), maximum is %d G.\n", DEVICE_NAME,
 					field, Cur_Func,
 					( int ) AEG_S_BAND_WITH_ER035M_MAX_FIELD );
-			if ( ! TEST_RUN )
+			if ( FSC2_MODE == EXPERIMENT )
 			{
 				*err_flag = SET;
 				return AEG_S_BAND_WITH_ER035M_MAX_FIELD;
@@ -573,7 +570,7 @@ static double aeg_s_band_field_check( double field, bool *err_flag )
 					"BH15 field controller in %s(), minimum is %d G.\n",
 					DEVICE_NAME, field, Cur_Func,
 					( int ) AEG_S_BAND_WITH_BH15_MIN_FIELD );
-			if ( ! TEST_RUN )
+			if ( FSC2_MODE == EXPERIMENT )
 			{
 				*err_flag = SET;
 				return AEG_S_BAND_WITH_BH15_MIN_FIELD;
@@ -588,7 +585,7 @@ static double aeg_s_band_field_check( double field, bool *err_flag )
 					"BH15 field controller in %s(), maximum is %d G.\n",
 					DEVICE_NAME, field, Cur_Func,
 					( int ) AEG_S_BAND_WITH_BH15_MAX_FIELD );
-			if ( ! TEST_RUN )
+			if ( FSC2_MODE == EXPERIMENT )
 			{
 				*err_flag = SET;
 				return AEG_S_BAND_WITH_BH15_MAX_FIELD;
@@ -666,7 +663,7 @@ static double aeg_s_band_field_check( double field, bool *err_flag )
 /* figure out what's the current minimal step size is for the magnet - this */
 /* is necessary for every new sweep since the user can adjust the step size */
 /* by setting the sweep rate on the magnets front panel (s/he also might    */
-/* change the time steps but lets hope he doesn't since there's no way to   */
+/* change the time steps but lets hope s/he doesn't since there's no way to */
 /* find out about it...). We also have to make sure that the setting at the */
 /* front panel is the maximum setting of 6666 Oe/min. Finally we try to go  */
 /* to the start field.                                                      */
@@ -709,9 +706,7 @@ try_again:
 
 	for ( i = 0; i < test_steps; ++i )
 	{
-		if ( I_am == PARENT )
-			fl_check_only_forms( );
-
+		fl_check_only_forms( );
 		if ( DO_STOP )
 			THROW( USER_BREAK_EXCEPTION )
 
@@ -739,9 +734,7 @@ try_again:
 
 	for ( i = 0; i < test_steps; ++i )
 	{
-		if ( I_am == PARENT )
-			fl_check_only_forms( );
-
+		fl_check_only_forms( );
 		if ( DO_STOP )
 			THROW( USER_BREAK_EXCEPTION )
 

@@ -310,7 +310,7 @@ static double bh15_get_field( void )
 	char *endptr;
 
 
-	if ( TEST_RUN )
+	if ( FSC2_MODE == TEST )
 		return BH15_TEST_FIELD;
 
 	do
