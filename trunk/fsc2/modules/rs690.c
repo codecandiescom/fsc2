@@ -1459,7 +1459,7 @@ Var *pulser_next_phase( Var *v )
 	}
 
 	rs690.needs_update = SET;
-	pulser_update( );
+	pulser_update( NULL );
 	return vars_push( INT_VAR, 1 );
 }
 
@@ -1524,7 +1524,7 @@ Var *pulser_phase_reset( Var *v )
 
 	rs690.needs_update = SET;
 	if ( ! in_reset )
-		pulser_update( );
+		pulser_update( NULL );
 	return vars_push( INT_VAR, 1 );
 }
 

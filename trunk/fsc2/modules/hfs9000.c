@@ -755,7 +755,7 @@ Var *pulser_reset( Var *v )
 	v = v;
 
 	vars_pop( pulser_pulse_reset( NULL ) );
-	return vars_push( INT_VAR, 1 );
+	return pulser_update( NULL );
 }
 
 
@@ -821,7 +821,6 @@ Var *pulser_pulse_reset( Var *v )
 			hfs9000.needs_update = SET;
 	}
 
-	pulser_update( NULL );
 	return vars_push( INT_VAR, 1 );
 }
 
