@@ -727,7 +727,6 @@ static void eps_make_scale( FILE *fp, void *cv, int coord, long dim )
 	char *label;
 
 
-
 	if ( dim == 1 )
 	{
 		s2d[ X ] = w * ( ( Curve_1d * ) cv )->s2d[ X ] / G.canvas.w;
