@@ -21,7 +21,12 @@ int_slice, 1, ALL;            // creates an integer array slice
 float_slice, 1, ALL;          // creates an float array slice
 
 
-// Functions exported for field meters
+// Functions exported by the S-band magnet power supply driver
 
-find_field, 0, EXP;
-field_meter_wait, 0, EXP;
+magnet_setup, 2, ALL;         // set start field and sweep step size
+
+
+// Functions exported by the field meter drivers
+
+find_field, 0, EXP;           // return current field value
+field_meter_wait, 0, EXP;     // wait a bit for field to stabilize
