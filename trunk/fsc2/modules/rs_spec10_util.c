@@ -29,6 +29,278 @@
 #define C2K_OFFSET   273.16         /* offset between Celsius and Kelvin */
 
 
+/*------------------------------------------------------------------*/
+/* Function for reading in the last stored state of the CCD camera. */
+/*------------------------------------------------------------------*/
+
+bool rs_spec10_read_state( void )
+{
+	char *fn;
+	const char *dn;
+	FILE *fp;
+	int c;
+	int i = 0;
+	bool in_comment = UNSET;
+	bool found_end = UNSET;
+	unsigned long val;
+	int line = 1;
+
+
+	dn = fsc2_config_dir( );
+	fn = get_string( "%s%s%s", dn, slash( dn ), RS_SPEC10_STATE_FILE );
+
+	if ( ( fp = fsc2_fopen( fn, "r" ) ) == NULL )
+	{
+		print( FATAL, "Can't open state file '%s'.\n", fn );
+		T_free( fn );
+		THROW( EXCEPTION );
+	}
+
+	do
+	{
+		while ( ( c = fsc2_fgetc( fp ) ) != EOF && c != '\n' && isspace( c ) )
+			/* empty */ ;
+
+		switch ( c )
+		{
+			case EOF :
+				found_end = SET;
+				break;
+
+			case '#' :
+				in_comment = SET;
+				break;
+
+			case '\n' :
+				line++;
+				in_comment = UNSET;
+				break;
+
+			default :
+				if ( in_comment )
+					break;
+
+				if ( ! isdigit( c ) )
+				{
+					print( FATAL, "Invalid line %d in state file '%s'.\n",
+						   line, fn );
+					T_free( fn );
+					fsc2_fclose( fp );
+					THROW( EXCEPTION );
+				}
+
+				fsc2_fseek( fp, -1, SEEK_CUR );
+
+				if ( i > 7 || fsc2_fscanf( fp, "%lu", &val ) != 1 )
+				{
+					print( FATAL, "Invalid line %d in state file '%s'.\n",
+						   line, fn );
+					T_free( fn );
+					fsc2_fclose( fp );
+					THROW( EXCEPTION );
+				}
+
+				switch ( i )
+				{
+					case 0 :
+						if ( val >= CCD_PIXEL_WIDTH )
+						{
+							print( FATAL, "Invalid line %d in state file "
+								   "'%s'.\n", line, fn );
+							T_free( fn );
+							fsc2_fclose( fp );
+							THROW( EXCEPTION );
+						}
+						if ( ! rs_spec10->ccd.roi_is_set )
+							rs_spec10->ccd.roi[ X ] = val;
+						break;
+
+					case 1 :
+						if ( val >= CCD_PIXEL_HEIGHT )
+						{
+							print( FATAL, "Invalid line %d in state file "
+								   "'%s'.\n", line, fn );
+							T_free( fn );
+							fsc2_fclose( fp );
+							THROW( EXCEPTION );
+						}
+						if ( ! rs_spec10->ccd.roi_is_set )
+							rs_spec10->ccd.roi[ Y ] = val;
+						break;
+
+					case 2 :
+						if ( val < rs_spec10->ccd.roi[ X ] ||
+							 val >= CCD_PIXEL_WIDTH )
+						{
+							print( FATAL, "Invalid line %d in state file "
+								   "'%s'.\n", line, fn );
+							T_free( fn );
+							fsc2_fclose( fp );
+							THROW( EXCEPTION );
+						}
+						if ( ! rs_spec10->ccd.roi_is_set )
+							rs_spec10->ccd.roi[ X + 2 ] = val;
+						break;
+
+					case 3 :
+						if ( val < rs_spec10->ccd.roi[ Y ] ||
+							 val >= CCD_PIXEL_HEIGHT )
+						{
+							print( FATAL, "Invalid line %d in state file "
+								   "'%s'.\n", line, fn );
+							T_free( fn );
+							fsc2_fclose( fp );
+							THROW( EXCEPTION );
+						}
+						if ( ! rs_spec10->ccd.roi_is_set )
+							rs_spec10->ccd.roi[ Y + 2 ] = val;
+						break;
+
+					case 4 :
+						if ( val < 1 ||
+							 ( rs_spec10->ccd.roi[ X + 2 ]
+							   - rs_spec10->ccd.roi[ X ] + 1 ) % val != 0 )
+						{
+							print( FATAL, "Invalid line %d in state file "
+								   "'%s'.\n", line, fn );
+							T_free( fn );
+							fsc2_fclose( fp );
+							THROW( EXCEPTION );
+						}
+						if ( ! rs_spec10->ccd.bin_is_set )
+							rs_spec10->ccd.bin[ X ] = val;
+						break;
+
+					case 5 :
+						if ( val < 1 ||
+							 ( rs_spec10->ccd.roi[ Y + 2 ]
+							   - rs_spec10->ccd.roi[ Y ] + 1 ) % val != 0 )
+						{
+							print( FATAL, "Invalid line %d in state file "
+								   "'%s'.\n", line, fn );
+							T_free( fn );
+							fsc2_fclose( fp );
+							THROW( EXCEPTION );
+						}
+						if ( ! rs_spec10->ccd.bin_is_set )
+							rs_spec10->ccd.bin[ Y ] = val;
+						break;
+
+					case 6 :
+						if ( val != HARDWARE_BINNING &&
+							 val != SOFTWARE_BINNING )
+						{
+							print( FATAL, "Invalid line %d in state file "
+								   "'%s'.\n", line, fn );
+							T_free( fn );
+							fsc2_fclose( fp );
+							THROW( EXCEPTION );
+						}
+						if ( ! rs_spec10->ccd.bin_mode_is_set )
+							rs_spec10->ccd.bin_mode = val;
+						break;
+
+					case 7 :
+						if ( val < CCD_MIN_CLEAR_CYCLES ||
+							 val > CCD_MAX_CLEAR_CYCLES )
+						{
+							print( FATAL, "Invalid line %d in state file "
+								   "'%s'.\n", line, fn );
+							T_free( fn );
+							fsc2_fclose( fp );
+							THROW( EXCEPTION );
+						}
+						rs_spec10->ccd.clear_cycles = val;
+						break;
+				}
+				i++;
+				break;
+		}
+
+	} while ( ! found_end );
+
+	fsc2_fclose( fp );
+	T_free( fn );
+
+	return OK;
+}
+
+
+/*------------------------------------------------------------*/
+/* Function for writing the state of the CCD camera to a file */
+/*------------------------------------------------------------*/
+
+bool rs_spec10_store_state( void )
+{
+	char *fn;
+	const char *dn;
+	uns16 bin[ 2 ];
+	uns16 urc[ 2 ];
+	long width, height;
+	FILE *fp;
+
+
+	dn = fsc2_config_dir( );
+	fn = get_string( "%s%s%s", dn, slash( dn ), RS_SPEC10_STATE_FILE );
+
+	if ( ( fp = fsc2_fopen( fn, "w" ) ) == NULL )
+	{
+		print( SEVERE, "Can't store state data in '%s'.\n", fn );
+		return FAIL;
+	}
+
+	bin[ X ] = rs_spec10->ccd.bin[ X ];
+	bin[ Y ] = rs_spec10->ccd.bin[ Y ];
+	urc[ X ] = rs_spec10->ccd.roi[ X + 2 ];
+	urc[ Y ] = rs_spec10->ccd.roi[ Y + 2 ];
+
+	/* Calculate how many points the picture will have after binning */
+
+	width  = ( urc[ X ] - rs_spec10->ccd.roi[ X ] + 1 ) / bin[ X ];
+	height = ( urc[ Y ] - rs_spec10->ccd.roi[ Y ] + 1 ) / bin[ Y ];
+
+	/* If the binning area is larger than the ROI reduce the binning sizes
+	   to fit the the ROI sizes (the binning sizes are reset to their original
+	   values before returning from the function) */
+
+	if ( width == 0 )
+	{
+		rs_spec10->ccd.bin[ X ] = urc[ X ] - rs_spec10->ccd.roi[ X ] + 1;
+		width = 1;
+	}
+
+	if ( height == 0 )
+	{
+		rs_spec10->ccd.bin[ Y ] = urc[ Y ] - rs_spec10->ccd.roi[ Y ] + 1;
+		height = 1;
+	}
+
+	/* Reduce the ROI to the area we really need (in case the ROI sizes aren't
+	   integer multiples of the binning sizes) by moving the upper right hand
+	   corner nearer to the lower left hand corner in order to speed up
+	   fetching the picture a bit */
+
+	urc[ X ] = rs_spec10->ccd.roi[ X ] + width * rs_spec10->ccd.bin[ X ] - 1;
+	urc[ Y ] = rs_spec10->ccd.roi[ Y ] + height * rs_spec10->ccd.bin[ Y ] - 1;
+
+	fsc2_fprintf( fp, "# --- Do *not* edit this file, it gets created "
+				  "automatically ---\n\n"
+				  "# In this file state information for the rs_spec10 "
+				  "driver is stored:\n"
+				  "# 1. ROI (LLX, LLY, URX, URY)\n"
+				  "# 2. Binning factors\n"
+				  "# 3. Binning mode (hardware = 0, software = 1)\n"
+				  "# 4. Number of pre-exposure clear cycles\n\n"
+				  "%u %u %u %u\n%u %u\n%u\n%u\n",
+				  rs_spec10->ccd.roi[ X ], rs_spec10->ccd.roi[ Y ],
+				  urc[ X ], urc[ Y ], bin[ X ], bin[ Y ],
+				  rs_spec10->ccd.bin_mode, rs_spec10->ccd.clear_cycles );
+
+	fsc2_fclose( fp );
+	return OK;
+}
+
+
 /*---------------------------------------------------------------------*/
 /* Function for converting a temperature from Kelvin to degree Celsius */
 /*---------------------------------------------------------------------*/
