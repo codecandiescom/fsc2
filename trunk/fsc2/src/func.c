@@ -114,7 +114,7 @@ Func_T Def_Fncts[ ] =              /* List of built-in functions */
 	{ "index_of_min",        f_index_of_min, 	 1, ACCESS_ALL,  NULL, UNSET },
 	{ "print",               f_print,	   INT_MIN, ACCESS_ALL,  NULL, UNSET },
 	{ "sprint",              f_sprint,	   INT_MIN, ACCESS_ALL,  NULL, UNSET },
-	{ "wait",                f_wait,     	     1, ACCESS_ALL,  NULL, UNSET },
+	{ "wait",                f_wait,     	     1, ACCESS_EXP,  NULL, UNSET },
 	{ "init_1d",             f_init_1d,  	    -6, ACCESS_PREP, NULL, UNSET },
 	{ "init_2d",             f_init_2d,  	   -10, ACCESS_PREP, NULL, UNSET },
 	{ "change_scale",        f_cscale,   	    -4, ACCESS_EXP,  NULL, UNSET },
