@@ -103,7 +103,7 @@ enum {
 
 /*----------------------------------------------------------------*/
 /* Here we check if also a driver for a field meter is loaded and */
-/* test if this driver will be loaded before the S-band driver.   */
+/* test if this driver will be loaded before the X-band driver.   */
 /*----------------------------------------------------------------*/
 
 int aeg_x_band_init_hook( void )
@@ -122,7 +122,7 @@ int aeg_x_band_init_hook( void )
 		THROW( EXCEPTION );
 	}
 
-	/* We need the field meter driver called *before* the S-band driver since
+	/* We need the field meter driver called *before* the X-band driver since
 	   the field meter is needed in the initialisation of the magnet.
 	   Probably we should implement a solution that brings the devices into
 	   the correct sequence instead of this hack, but that's not as simple as
@@ -150,7 +150,7 @@ int aeg_x_band_init_hook( void )
 	if ( ! *is_gaussmeter )
 	{
 		eprint( FATAL, "AEG_X_BAND: Problem in DEVICES section - driver for "
-				"field meter must be listed before S-band driver." );
+				"field meter must be listed before X-band driver." );
 		THROW( EXCEPTION );
 	}
 
@@ -234,7 +234,7 @@ int aeg_x_band_exp_hook( void )
 
 	if ( ! magnet_init( ) )
 	{
-		eprint( FATAL, "AEG_X_BAND: Can't access the S-band magnet power "
+		eprint( FATAL, "AEG_X_BAND: Can't access the X-band magnet power "
 				"supply." );
 		THROW( EXCEPTION );
 	}
@@ -525,7 +525,7 @@ Var *reset_field( Var *v )
 
 
 #define MAGNET_TEST_STEPS      16     /* number of steps to do in test */
-#define MAGNET_FAST_TEST_STEPS 4      /* number of steps to do in test */
+#define MAGNET_FAST_TEST_STEPS 4      /* number of steps to do in fast test */
 #define MAGNET_TEST_WIDTH      0x400  /* sweep speed setting for test */
 #define MAGNET_MAX_TRIES       3      /* number of retries after failure of 
 										 magnet field convergence to target
@@ -580,7 +580,7 @@ Var *reset_field( Var *v )
 /* by setting the sweep rate on the magnets front panel (s/he also might    */
 /* change the time steps but lets hope he doesn't since there's no way to   */
 /* find out about it...). We also have to make sure that the setting at the */
-/* front panel is the maximum setting of 6666 Oe/min. Finally we try to go  */
+/* front panel is the maximum setting of 5000 Oe/min. Finally we try to go  */
 /* to the start field.                                                      */
 /*--------------------------------------------------------------------------*/
 
@@ -660,13 +660,13 @@ try_again:
 	magnet.mini_step *= 0.5;
 
 	/* Check that the sweep speed selector on the magnets front panel is set
-	   to the maximum, i.e. 6666 Oe/min - otherwise ask user to change the
+	   to the maximum, i.e. 5000 Oe/min - otherwise ask user to change the
 	   setting and try again */
 
-	if ( magnet.mini_step < 0.00074 )
+	if ( magnet.mini_step < 0.00060 )
 	{
 		if ( 1 != show_choices( "Please set sweep speed on magnet front\n"
-								"panel to maximum value of 6666 Oe/min\n."
+								"panel to maximum value of 5000 Oe/min\n."
 								"Also make sure remote control is enabled!",
 								2, "Abort", "Done", "", 3 ) )
 			goto try_again;
