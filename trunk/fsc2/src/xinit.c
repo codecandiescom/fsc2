@@ -580,7 +580,7 @@ bool dl_fsc2_rsc( void )
 		{
 			lib_name = get_string( "%s%sfsc2_rsc_%cr.so", ldc, slash( ldc ),
 								   GUI.G_Funcs.size == LOW ? 'l' : 'h' );
-			if ( ( handle = dlopen( lib_name, RTLD_NOW ) ) != NULL )
+			if ( ( handle = dlopen( lib_name, RTLD_LAZY ) ) != NULL )
 				break;
 			lib_name = T_free( lib_name );
 		}

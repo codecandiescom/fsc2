@@ -207,7 +207,7 @@ static void load_functions( Device *dev )
 		for ( ldc = strtok( ld, ":" ); ldc != NULL; ldc = strtok( NULL, ":" ) )
 		{
 			lib_name = get_string( "%s%s%s.so", ldc, slash( ldc ), dev->name );
-			if ( ( dev->driver.handle = dlopen( lib_name, RTLD_NOW ) )
+			if ( ( dev->driver.handle = dlopen( lib_name, RTLD_LAZY ) )
 				 != NULL )
 				break;
 			lib_name = T_free( lib_name );
@@ -231,7 +231,7 @@ static void load_functions( Device *dev )
 		else
 			lib_name = get_string( "%s.so", dev->name );
 
-		dev->driver.handle = dlopen( lib_name, RTLD_NOW );
+		dev->driver.handle = dlopen( lib_name, RTLD_LAZY );
 		T_free( lib_name );
 	}
 
