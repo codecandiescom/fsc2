@@ -608,10 +608,11 @@ to return the measured frequency can be used.
 @strong{Module name}: @code{hp8647a}
 
 @paragraphindent 0
-@strong{Description}: Hewlett-Packard RF synthesizer HP8647A with
-support for output level normalization via frequency/amplitude table
-files. For safety reasons only output attenuations below @w{-5 db} are
-allowed -- change the configuration file to allow higher output levels.
+@strong{Description}: Hewlett-Packard RF synthesizer HP8647A (but also
+works with HP8648B) with support for output level normalization via
+frequency/amplitude table files. For safety reasons only output
+attenuations below @w{-5 db} are allowed -- change the configuration
+file to allow higher output levels.
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).
