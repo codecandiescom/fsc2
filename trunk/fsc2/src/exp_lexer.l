@@ -404,11 +404,11 @@ int experiment_parser( FILE *in )
 static Var *exp_get_channel_name( void )
 {
 	Var *func, *v;
-	int access;
+	int acc;
 
 
 	if ( ( func = func_get_long( "digitizer_get_channel_number",
-								 &access, UNSET ) ) != NULL )
+								 &acc, UNSET ) ) != NULL )
 	{
 		if ( ! strcmp( exptext, "LIN" ) )
 			vars_push( STR_VAR, "LINE" );
