@@ -593,7 +593,7 @@ Var *pulser_phase_reset( Var *v )
 		f->next_phase = 2;
 	}
 
-	return vars_push( INT_VAR, 1 );;
+	return vars_push( INT_VAR, 1 );
 }
 
 
