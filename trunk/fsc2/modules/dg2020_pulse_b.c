@@ -163,8 +163,8 @@ bool dg2020_set_pulse_length( long pnum, double time )
 	if ( time < 0.0 )
 	{
 		eprint( FATAL, "%s:%ld: %s: Invalid negative length set for "
-				"pulse %ld: %s.\n",
-				Fname, Lc, pulser_struct.name, pnum, dg2020_ptime( time ) );
+				"pulse %ld: %s.\n", Fname, Lc, pulser_struct.name, pnum,
+				dg2020_ptime( time ) );
 		THROW( EXCEPTION );
 	}
 
