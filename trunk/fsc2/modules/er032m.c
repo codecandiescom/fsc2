@@ -297,9 +297,8 @@ int er032m_end_of_exp_hook( void )
 /*-------------------------------------------------------------------*/
 /*-------------------------------------------------------------------*/
 
-Var *magnet_name( Var *v )
+Var *magnet_name( UNUSED_ARG Var *v )
 {
-	UNUSED_ARGUMENT( v );
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
 
@@ -385,15 +384,13 @@ Var *magnet_setup( Var *v )
 /*-------------------------------------------------------------------*/
 /*-------------------------------------------------------------------*/
 
-Var *sweep_up( Var *v )
+Var *sweep_up( UNUSED_ARG Var *v )
 {
 	int steps;
 	int new_swa;
 	double new_cf;
 	double diff;
 
-
-	UNUSED_ARGUMENT( v );
 
 	if ( ! magnet.is_init )
 	{
@@ -466,15 +463,13 @@ Var *sweep_up( Var *v )
 /*-------------------------------------------------------------------*/
 /*-------------------------------------------------------------------*/
 
-Var *sweep_down( Var *v )
+Var *sweep_down( UNUSED_ARG Var *v )
 {
 	int steps;
 	int new_swa;
 	double new_cf;
 	double diff;
 
-
-	UNUSED_ARGUMENT( v );
 
 	if ( ! magnet.is_init )
 	{
@@ -543,10 +538,8 @@ Var *sweep_down( Var *v )
 /*-------------------------------------------------------------------*/
 /*-------------------------------------------------------------------*/
 
-Var *reset_field( Var *v )
+Var *reset_field( UNUSED_ARG Var *v )
 {
-	UNUSED_ARGUMENT( v );
-
 	if ( ! magnet.is_init )
 	{
 		print( FATAL, "Start field has not been defined  - you must call "
@@ -563,10 +556,8 @@ Var *reset_field( Var *v )
 /*-------------------------------------------------------------------*/
 /*-------------------------------------------------------------------*/
 
-Var *get_field( Var *v )
+Var *get_field( UNUSED_ARG Var *v )
 {
-	UNUSED_ARGUMENT( v );
-
 	return vars_push( FLOAT_VAR, er032m_get_field( ) );
 }
 

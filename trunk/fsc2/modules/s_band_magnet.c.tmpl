@@ -208,9 +208,8 @@ int s_band_magnet_tmpl_end_of_exp_hook( void )
 /*-------------------------------------------------------------------*/
 /*-------------------------------------------------------------------*/
 
-Var *magnet_name( Var *v )
+Var *magnet_name( UNUSED_ARG Var *v )
 {
-	UNUSED_ARGUMENT( v );
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
 
@@ -316,9 +315,8 @@ Var *set_field( Var *v )
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
-Var *get_field( Var *v )
+Var *get_field( UNUSED_ARG Var *v )
 {
-	UNUSED_ARGUMENT( v );
 	return vars_push( FLOAT_VAR, magnet.field );
 }
 
@@ -326,12 +324,10 @@ Var *get_field( Var *v )
 /*-----------------------------------------------------*/
 /*-----------------------------------------------------*/
 
-Var *sweep_up( Var *v )
+Var *sweep_up( UNUSED_ARG Var *v )
 {
 	bool err_flag = UNSET;
 
-
-	UNUSED_ARGUMENT( v );
 
 	if ( ! magnet.is_field_step )
 	{
@@ -359,12 +355,10 @@ Var *sweep_up( Var *v )
 /*-----------------------------------------------------*/
 /*-----------------------------------------------------*/
 
-Var *sweep_down( Var *v )
+Var *sweep_down( UNUSED_ARG Var *v )
 {
 	bool err_flag = UNSET;
 
-
-	UNUSED_ARGUMENT( v );
 
 	if ( ! magnet.is_field_step )
 	{
@@ -392,10 +386,8 @@ Var *sweep_down( Var *v )
 /*-----------------------------------------------------*/
 /*-----------------------------------------------------*/
 
-Var *reset_field( Var *v )
+Var *reset_field( UNUSED_ARG Var *v )
 {
-	UNUSED_ARGUMENT( v );
-
 	if ( ! magnet.is_start_field )
 	{
 		print( FATAL, "Start field has not been defined.\n" );

@@ -424,9 +424,8 @@ char *rs690_num_2_channel( int num )
 /* because some other pulsers also have it.      */
 /*-----------------------------------------------*/
 
-bool rs690_set_max_seq_len( double seq_len )
+bool rs690_set_max_seq_len( UNUSED_ARG double seq_len )
 {
-	UNUSED_ARGUMENT( seq_len );
 	print( WARN, "Pulser doesn't allow setting a maximum pattern length.\n" );
 	return OK;
 }

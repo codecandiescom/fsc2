@@ -229,9 +229,8 @@ void lecroy9400_exit_hook( void )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *digitizer_name( Var *v )
+Var *digitizer_name( UNUSED_ARG Var *v )
 {
-	UNUSED_ARGUMENT( v );
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
 
@@ -418,9 +417,8 @@ Var *digitizer_timebase( Var *v )
 /*-----------------------------------------------------------------*/
 /*-----------------------------------------------------------------*/
 
-Var *digitizer_time_per_point( Var *v )
+Var *digitizer_time_per_point( UNUSED_ARG Var *v )
 {
-	UNUSED_ARGUMENT( v );
 	return vars_push( FLOAT_VAR, tpp[ lecroy9400.tb_index ] );
 }
 
@@ -913,10 +911,8 @@ Var *digitizer_trigger_channel( Var *v )
 /*-------------------------------------------------------------------*/
 /*-------------------------------------------------------------------*/
 
-Var *digitizer_start_acquisition( Var *v )
+Var *digitizer_start_acquisition( UNUSED_ARG Var *v )
 {
-	UNUSED_ARGUMENT( v );
-
 	if ( FSC2_MODE == EXPERIMENT )
 		lecroy9400_start_acquisition( );
 
@@ -1040,10 +1036,8 @@ static Var *get_curve( Var *v, bool use_cursor )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *digitizer_run( Var *v )
+Var *digitizer_run( UNUSED_ARG Var *v )
 {
-	UNUSED_ARGUMENT( v );
-
 	if ( FSC2_MODE == EXPERIMENT )
 		lecroy9400_free_running( );
 

@@ -247,9 +247,8 @@ void bnm12_exit_hook( void )
 /* Function returns a string variable with the name of the device */
 /*----------------------------------------------------------------*/
 
-Var *gaussmeter_name( Var *v )
+Var *gaussmeter_name( UNUSED_ARG Var *v )
 {
-	UNUSED_ARGUMENT( v );
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
 
@@ -258,9 +257,8 @@ Var *gaussmeter_name( Var *v )
 /* Measure a new field value and return it to the caller */
 /*-------------------------------------------------------*/
 
-Var *gaussmeter_field( Var *v )
+Var *gaussmeter_field( UNUSED_ARG Var *v )
 {
-	UNUSED_ARGUMENT( v );
 	return vars_push( FLOAT_VAR, bnm12_get_field( ) );
 }
 

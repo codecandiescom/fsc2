@@ -342,9 +342,8 @@ void hfs9000_exit_hook( void )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_name( Var *v )
+Var *pulser_name( UNUSED_ARG Var *v )
 {
-	UNUSED_ARGUMENT( v );
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
 
@@ -352,13 +351,11 @@ Var *pulser_name( Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_show_pulses( Var *v )
+Var *pulser_show_pulses( UNUSED_ARG Var *v )
 {
 	int pd[ 2 ];
 	pid_t pid;
 
-
-	UNUSED_ARGUMENT( v );
 
 	if ( FSC2_IS_CHECK_RUN || FSC2_IS_BATCH_MODE )
 		return vars_push( INT_VAR, 1L );
@@ -426,14 +423,12 @@ Var *pulser_show_pulses( Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_dump_pulses( Var *v )
+Var *pulser_dump_pulses( UNUSED_ARG Var *v )
 {
 	char *name;
 	char *m;
 	struct stat stat_buf;
 
-
-	UNUSED_ARGUMENT( v );
 
 	if ( FSC2_IS_CHECK_RUN || FSC2_IS_BATCH_MODE )
 		return vars_push( INT_VAR, 1L );
@@ -508,9 +503,8 @@ Var *pulser_dump_pulses( Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_keep_all_pulses( Var *v )
+Var *pulser_keep_all_pulses( UNUSED_ARG Var *v )
 {
-	UNUSED_ARGUMENT( v );
 	hfs9000_keep_all( );
 	return vars_push( INT_VAR, 1L );
 }
@@ -611,10 +605,8 @@ Var *pulser_channel_state( Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_update( Var *v )
+Var *pulser_update( UNUSED_ARG Var *v )
 {
-	UNUSED_ARGUMENT( v );
-
 	if ( ! hfs9000_is_needed )
 		return vars_push( INT_VAR, 1L );
 
@@ -783,9 +775,8 @@ Var *pulser_increment( Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_reset( Var *v )
+Var *pulser_reset( UNUSED_ARG Var *v )
 {
-	UNUSED_ARGUMENT( v );
 	vars_pop( pulser_pulse_reset( NULL ) );
 	return pulser_update( NULL );
 }
@@ -860,9 +851,8 @@ Var *pulser_pulse_reset( Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_lock_keyboard( Var *v )
+Var *pulser_lock_keyboard( UNUSED_ARG Var *v )
 {
-	UNUSED_ARGUMENT( v );
 	print( SEVERE, "Function can't be used for this device.\n" );
 	return vars_push( INT_VAR, 1L );
 }

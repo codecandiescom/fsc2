@@ -141,9 +141,8 @@ int itc503_end_of_exp_hook( void )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *temp_contr_name( Var *v )
+Var *temp_contr_name( UNUSED_ARG Var *v )
 {
-	UNUSED_ARGUMENT( v );
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
 
@@ -153,10 +152,8 @@ Var *temp_contr_name( Var *v )
 /* (in the currently selected units)           */
 /*---------------------------------------------*/
 
-Var *temp_contr_temperature( Var *v )
+Var *temp_contr_temperature( UNUSED_ARG Var *v )
 {
-	UNUSED_ARGUMENT( v );
-
 	if ( FSC2_MODE == TEST )
 		return vars_push( FLOAT_VAR,
 						  itc503.unit == UNIT_KELVIN ? 123.45 : -149.71 );

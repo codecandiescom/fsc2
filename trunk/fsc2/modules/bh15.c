@@ -38,7 +38,6 @@ const char generic_type[ ] = DEVICE_TYPE;
 int bh15_init_hook( void );
 int bh15_exp_hook( void );
 int bh15_end_of_exp_hook( void );
-void bh15_exit_hook( void );
 
 Var *gaussmeter_name( Var *v );
 Var *gaussmeter_field( Var *v );
@@ -174,15 +173,6 @@ int bh15_end_of_exp_hook( void )
 }
 
 
-/*--------------------------------------------------------*/
-/*--------------------------------------------------------*/
-
-void bh15_exit_hook( void )
-{
-	bh15_end_of_exp_hook( );
-}
-
-
 /*****************************************************************************/
 /*                                                                           */
 /*              exported functions                                           */
@@ -193,9 +183,8 @@ void bh15_exit_hook( void )
 /*--------------------------------------------------------*/
 /*--------------------------------------------------------*/
 
-Var *gaussmeter_name( Var *v )
+Var *gaussmeter_name( UNUSED_ARG Var *v )
 {
-	UNUSED_ARGUMENT( v );
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
 
@@ -203,9 +192,8 @@ Var *gaussmeter_name( Var *v )
 /*----------------------------------------------------------------*/
 /*----------------------------------------------------------------*/
 
-Var *gaussmeter_field( Var *v )
+Var *gaussmeter_field( UNUSED_ARG Var *v )
 {
-	UNUSED_ARGUMENT( v );
 	return vars_push( FLOAT_VAR, bh15_get_field( ) );
 }
 
@@ -213,9 +201,8 @@ Var *gaussmeter_field( Var *v )
 /*--------------------------------------------------------*/
 /*--------------------------------------------------------*/
 
-Var *find_field( Var *v )
+Var *find_field( UNUSED_ARG Var *v )
 {
-	UNUSED_ARGUMENT( v );
 	return vars_push( FLOAT_VAR, bh15_get_field( ) );
 }
 
@@ -223,9 +210,8 @@ Var *find_field( Var *v )
 /*--------------------------------------------------------*/
 /*--------------------------------------------------------*/
 
-Var *gaussmeter_resolution( Var *v )
+Var *gaussmeter_resolution( UNUSED_ARG Var *v )
 {
-	UNUSED_ARGUMENT( v );
 	return vars_push( FLOAT_VAR, bh15.resolution );
 }
 
@@ -265,9 +251,8 @@ Var *gaussmeter_command( Var *v )
 /*--------------------------------------------------------*/
 /*--------------------------------------------------------*/
 
-Var *gaussmeter_wait( Var *v )
+Var *gaussmeter_wait( UNUSED_ARG Var *v )
 {
-	UNUSED_ARGUMENT( v );
 	fsc2_usleep( 100000, UNSET );
 	return vars_push( INT_VAR, 1L );
 }

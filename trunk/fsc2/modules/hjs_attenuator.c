@@ -156,9 +156,8 @@ void hjs_attenuator_child_exit_hook( void )
 /* Function returns a string variable with the name of the device */
 /*----------------------------------------------------------------*/
 
-Var *mw_attenuator_name( Var *v )
+Var *mw_attenuator_name( UNUSED_ARG Var *v )
 {
-	UNUSED_ARGUMENT( v );
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
 

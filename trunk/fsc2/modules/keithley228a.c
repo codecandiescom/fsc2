@@ -286,9 +286,8 @@ void keithley228a_exit_hook( void )
 /*-------------------------------------------------------------------*/
 /*-------------------------------------------------------------------*/
 
-Var *magnet_name( Var *v )
+Var *magnet_name( UNUSED_ARG Var *v )
 {
-	UNUSED_ARGUMENT( v );
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
 
@@ -424,9 +423,8 @@ Var *set_field( Var *v )
 /* Convenience function: just returns the current */
 /*------------------------------------------------*/
 
-Var *get_field( Var *v )
+Var *get_field( UNUSED_ARG Var *v )
 {
-	UNUSED_ARGUMENT( v );
 	return vars_push( FLOAT_VAR, keithley228a.current );
 }
 
@@ -434,12 +432,10 @@ Var *get_field( Var *v )
 /*-----------------------------------------------------*/
 /*-----------------------------------------------------*/
 
-Var *sweep_up( Var *v )
+Var *sweep_up( UNUSED_ARG Var *v )
 {
 	double new_current;
 
-
-	UNUSED_ARGUMENT( v );
 
 	if ( ! keithley228a.is_current_step )
 	{
@@ -460,12 +456,10 @@ Var *sweep_up( Var *v )
 /*-----------------------------------------------------*/
 /*-----------------------------------------------------*/
 
-Var *sweep_down( Var *v )
+Var *sweep_down( UNUSED_ARG Var *v )
 {
 	double new_current;
 
-
-	UNUSED_ARGUMENT( v );
 
 	if ( ! keithley228a.is_current_step )
 	{
@@ -486,10 +480,8 @@ Var *sweep_down( Var *v )
 /*--------------------------------------------------------------*/
 /*--------------------------------------------------------------*/
 
-Var *reset_field( Var *v )
+Var *reset_field( UNUSED_ARG Var *v )
 {
-	UNUSED_ARGUMENT( v );
-
 	if ( ! keithley228a.is_req_current )
 	{
 		print( FATAL, "Start current has not been defined.\n" );

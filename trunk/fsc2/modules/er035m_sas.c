@@ -375,9 +375,8 @@ int er035m_sas_end_of_exp_hook( void )
 /*--------------------------------------------------------*/
 /*--------------------------------------------------------*/
 
-Var *gaussmeter_name( Var *v )
+Var *gaussmeter_name( UNUSED_ARG Var *v )
 {
-	UNUSED_ARGUMENT( v );
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
 
@@ -396,15 +395,13 @@ Var *gaussmeter_field( Var *v )
 /* and returns the current field value in a variable.             */
 /*----------------------------------------------------------------*/
 
-Var *measure_field( Var *v )
+Var *measure_field( UNUSED_ARG Var *v )
 {
 	char buffer[ 21 ];
 	char *bp;
 	size_t length;
 	long retries;
 
-
-	UNUSED_ARGUMENT( v );
 
 	if ( FSC2_MODE == TEST )
 		return vars_push( FLOAT_VAR, ER035M_TEST_FIELD );

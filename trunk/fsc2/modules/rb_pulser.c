@@ -382,9 +382,8 @@ void rb_pulser_exit_hook( void )
  * EDL function that returns the device name
  *-------------------------------------------*/
 
-Var *pulser_name( Var *v )
+Var *pulser_name( UNUSED_ARG Var *v )
 {
-	UNUSED_ARGUMENT( v );
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
 
@@ -394,10 +393,8 @@ Var *pulser_name( Var *v )
  * of all pulses used during the experiment displayed
  *----------------------------------------------------*/
 
-Var *pulser_show_pulses( Var *v )
+Var *pulser_show_pulses( UNUSED_ARG Var *v )
 {
-	UNUSED_ARGUMENT( v );
-
 	if ( ! FSC2_IS_CHECK_RUN && ! FSC2_IS_BATCH_MODE )
 		rb_pulser.do_show_pulses = SET;
 
@@ -410,10 +407,8 @@ Var *pulser_show_pulses( Var *v )
  * of all pulses during the experiment gets written to a file
  *------------------------------------------------------------*/
 
-Var *pulser_dump_pulses( Var *v )
+Var *pulser_dump_pulses( UNUSED_ARG Var *v )
 {
-	UNUSED_ARGUMENT( v );
-
 	if ( ! FSC2_IS_CHECK_RUN && ! FSC2_IS_BATCH_MODE )
 		rb_pulser.do_dump_pulses = SET;
 
@@ -450,10 +445,8 @@ Var *pulser_state( Var *v )
  * not the state of the "real" pulser
  *---------------------------------------------------------*/
 
-Var *pulser_update( Var *v )
+Var *pulser_update( UNUSED_ARG Var *v )
 {
-	UNUSED_ARGUMENT( v );
-
 	if ( ! rb_pulser.is_needed )
 		return vars_push( INT_VAR, 1L );
 
@@ -581,10 +574,8 @@ Var *pulser_increment( Var *v )
  * Function for resetting the pulser back to its initial state
  *-------------------------------------------------------------*/
 
-Var *pulser_reset( Var *v )
+Var *pulser_reset( UNUSED_ARG Var *v )
 {
-	UNUSED_ARGUMENT( v );
-
 	if ( ! rb_pulser.is_needed )
 		return vars_push( INT_VAR, 1L );
 

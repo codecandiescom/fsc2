@@ -383,9 +383,8 @@ void hjs_fc_child_exit_hook( void )
 /* Function returns a string variable with the name of the device */
 /*----------------------------------------------------------------*/
 
-Var *magnet_name( Var *v )
+Var *magnet_name( UNUSED_ARG Var *v )
 {
-	UNUSED_ARGUMENT( v );
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
 
@@ -517,10 +516,8 @@ Var *set_field( Var *v )
 /* Function asks the used gaussmeter for the current field */
 /*---------------------------------------------------------*/
 
-Var *get_field( Var *v )
+Var *get_field( UNUSED_ARG Var *v )
 {
-	UNUSED_ARGUMENT( v );
-
 	if ( FSC2_MODE != TEST )
 		hjs_fc.act_field = hjs_fc_get_field( );
 
@@ -531,10 +528,8 @@ Var *get_field( Var *v )
 /*--------------------------------------------------------------------*/
 /*--------------------------------------------------------------------*/
 
-Var *sweep_up( Var *v )
+Var *sweep_up( UNUSED_ARG Var *v )
 {
-	UNUSED_ARGUMENT( v );
-
 	if ( ! hjs_fc.is_field_step )
 	{
 		print( FATAL, "Sweep step size has not been defined.\n" );
@@ -552,10 +547,8 @@ Var *sweep_up( Var *v )
 /*--------------------------------------------------------------------*/
 /*--------------------------------------------------------------------*/
 
-Var *sweep_down( Var *v )
+Var *sweep_down( UNUSED_ARG Var *v )
 {
-	UNUSED_ARGUMENT( v );
-
 	if ( ! hjs_fc.is_field_step )
 	{
 		print( FATAL, "Sweep step size has not been defined.\n" );
@@ -573,10 +566,8 @@ Var *sweep_down( Var *v )
 /*--------------------------------------------------------------------*/
 /*--------------------------------------------------------------------*/
 
-Var *reset_field( Var *v )
+Var *reset_field( UNUSED_ARG Var *v )
 {
-	UNUSED_ARGUMENT( v );
-
 	if ( ! hjs_fc.is_field )
 	{
 		print( FATAL, "Start field has not been defined.\n" );

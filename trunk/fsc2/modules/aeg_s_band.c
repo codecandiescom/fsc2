@@ -326,9 +326,8 @@ Var *magnet_setup( Var *v )
 /* magnet sweep but unfortunately also reducing the accuracy.         */
 /*--------------------------------------------------------------------*/
 
-Var *magnet_fast_init( Var *v )
+Var *magnet_fast_init( UNUSED_ARG Var *v )
 {
-	UNUSED_ARGUMENT( v );
 	magnet.fast_init = SET;
 	return vars_push( INT_VAR, 1L );
 }
@@ -392,13 +391,11 @@ Var *set_field( Var *v )
 /* Convenience function: just asks the used gaussmeter for the current field */
 /*---------------------------------------------------------------------------*/
 
-Var *get_field( Var *v )
+Var *get_field( UNUSED_ARG Var *v )
 {
 	Var *new_var;
 	int acc;
 
-
-	UNUSED_ARGUMENT( v );
 
 	new_var = func_call( func_get( "find_field", &acc ) );
 	magnet.meas_field = new_var->val.dval;
@@ -409,12 +406,10 @@ Var *get_field( Var *v )
 /*-----------------------------------------------------*/
 /*-----------------------------------------------------*/
 
-Var *sweep_up( Var *v )
+Var *sweep_up( UNUSED_ARG Var *v )
 {
 	bool err_flag = UNSET;
 
-
-	UNUSED_ARGUMENT( v );
 
 	if ( ! magnet.is_field_step )
 	{
@@ -442,12 +437,10 @@ Var *sweep_up( Var *v )
 /*-----------------------------------------------------*/
 /*-----------------------------------------------------*/
 
-Var *sweep_down( Var *v )
+Var *sweep_down( UNUSED_ARG Var *v )
 {
 	bool err_flag = UNSET;
 
-
-	UNUSED_ARGUMENT( v );
 
 	if ( ! magnet.is_field_step )
 	{
@@ -475,10 +468,8 @@ Var *sweep_down( Var *v )
 /*-----------------------------------------------------*/
 /*-----------------------------------------------------*/
 
-Var *reset_field( Var *v )
+Var *reset_field( UNUSED_ARG Var *v )
 {
-	UNUSED_ARGUMENT( v );
-
 	if ( ! magnet.is_field )
 	{
 		print( FATAL, "Start field has not been defined.\n" );

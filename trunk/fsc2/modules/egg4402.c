@@ -124,9 +124,8 @@ int egg4402_end_of_exp_hook( void )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *boxcar_name( Var *v )
+Var *boxcar_name( UNUSED_ARG Var *v )
 {
-	UNUSED_ARGUMENT( v );
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
 
@@ -417,10 +416,8 @@ Var *boxcar_get_curve( Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *boxcar_start_acquisition( Var *v )
+Var *boxcar_start_acquisition( UNUSED_ARG Var *v )
 {
-	UNUSED_ARGUMENT( v );
-
 	if ( FSC2_MODE == EXPERIMENT )
 		egg4402_command( "START\n" );
 
@@ -431,10 +428,8 @@ Var *boxcar_start_acquisition( Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *boxcar_stop_acquisition( Var *v )
+Var *boxcar_stop_acquisition( UNUSED_ARG Var *v )
 {
-	UNUSED_ARGUMENT( v );
-
 	if ( FSC2_MODE == EXPERIMENT )
 		egg4402_command( "STOP\n" );
 

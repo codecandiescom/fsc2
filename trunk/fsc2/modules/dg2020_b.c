@@ -582,9 +582,8 @@ void dg2020_b_exit_hook( void )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_name( Var *v )
+Var *pulser_name( UNUSED_ARG Var *v )
 {
-	UNUSED_ARGUMENT( v );
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
 
@@ -830,10 +829,8 @@ Var *pulser_automatic_twt_pulses( Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_show_pulses( Var *v )
+Var *pulser_show_pulses( UNUSED_ARG Var *v )
 {
-	UNUSED_ARGUMENT( v );
-
 	if ( ! FSC2_IS_CHECK_RUN && ! FSC2_IS_BATCH_MODE )
 		dg2020.do_show_pulses = SET;
 
@@ -844,10 +841,8 @@ Var *pulser_show_pulses( Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_dump_pulses( Var *v )
+Var *pulser_dump_pulses( UNUSED_ARG Var *v )
 {
-	UNUSED_ARGUMENT( v );
-
 	if ( ! FSC2_IS_CHECK_RUN && ! FSC2_IS_BATCH_MODE )
 		dg2020.do_dump_pulses = SET;
 
@@ -978,9 +973,8 @@ Var *pulser_minimum_twt_pulse_distance( Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_keep_all_pulses( Var *v )
+Var *pulser_keep_all_pulses( UNUSED_ARG Var *v )
 {
-	UNUSED_ARGUMENT( v );
 	dg2020_keep_all( );
 	return vars_push( INT_VAR, 1L );
 }
@@ -1024,9 +1018,8 @@ Var *pulser_state( Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_channel_state( Var *v )
+Var *pulser_channel_state( UNUSED_ARG Var *v )
 {
-	UNUSED_ARGUMENT( v );
 	print( SEVERE, "Individual pod channels can't be switched on or off with "
 		   "this device.\n" );
 	return vars_push( INT_VAR, 0L );
@@ -1036,12 +1029,10 @@ Var *pulser_channel_state( Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_update( Var *v )
+Var *pulser_update( UNUSED_ARG Var *v )
 {
 	bool state = OK;
 
-
-	UNUSED_ARGUMENT( v );
 
 	if ( ! dg2020_is_needed )
 		return vars_push( INT_VAR, 1L );
@@ -1336,10 +1327,8 @@ Var *pulser_next_phase( Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_reset( Var *v )
+Var *pulser_reset( UNUSED_ARG Var *v )
 {
-	UNUSED_ARGUMENT( v );
-
 	if ( ! dg2020_is_needed )
 		return vars_push( INT_VAR, 1L );
 

@@ -250,9 +250,8 @@ int ips120_10_end_of_exp_hook( void )
 /* Function returns the name the device is known as. */
 /*---------------------------------------------------*/
 
-Var *magnet_name( Var *v )
+Var *magnet_name( UNUSED_ARG Var *v )
 {
-	UNUSED_ARGUMENT( v );
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
 
@@ -301,10 +300,8 @@ Var *magnet_setup( Var *v )
 /* time spent since the last call for determining the field.             */
 /*-----------------------------------------------------------------------*/
 
-Var *get_field( Var *v )
+Var *get_field( UNUSED_ARG Var *v )
 {
-	UNUSED_ARGUMENT( v );
-
 	if ( FSC2_MODE == TEST )
 	{
 		/* During the test run we need to return some not completely bogus
@@ -604,9 +601,8 @@ Var *magnet_sweep_rate( Var *v )
 /* i.e. at the very start of the experiment               */
 /*--------------------------------------------------------*/
 
-Var *reset_field( Var *v )
+Var *reset_field( UNUSED_ARG Var *v )
 {
-	UNUSED_ARGUMENT( v );
 	return set_field( vars_push( FLOAT_VAR,
 								 ips120_10.start_current * F2C_RATIO) );
 }

@@ -235,9 +235,8 @@ void rs_sml01_exit_hook( void )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *synthesizer_name( Var *v )
+Var *synthesizer_name( UNUSED_ARG Var *v )
 {
-	UNUSED_ARGUMENT( v );
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
 
@@ -553,12 +552,10 @@ Var *synthesizer_step_frequency( Var *v )
 /* Function increments the frequency by a single sweep-step-sized step */
 /*---------------------------------------------------------------------*/
 
-Var *synthesizer_sweep_up( Var *v )
+Var *synthesizer_sweep_up( UNUSED_ARG Var *v )
 {
 	double att;
 
-
-	UNUSED_ARGUMENT( v );
 
 	if ( ! rs_sml01.step_freq_is_set )
 	{
@@ -617,12 +614,11 @@ Var *synthesizer_sweep_up( Var *v )
 /* Function decrements the frequency by a single sweep-step-sized step */
 /*---------------------------------------------------------------------*/
 
-Var *synthesizer_sweep_down( Var *v )
+Var *synthesizer_sweep_down( UNUSED_ARG Var *v )
 {
 	Var *nv;
 
 
-	UNUSED_ARGUMENT( v );
 	rs_sml01.step_freq *= -1.0;
 	nv = synthesizer_sweep_up( NULL );
 	rs_sml01.step_freq *= -1.0;
@@ -634,10 +630,8 @@ Var *synthesizer_sweep_down( Var *v )
 /* Function resets the frequency to the initial value */
 /*----------------------------------------------------*/
 
-Var *synthesizer_reset_frequency( Var *v )
+Var *synthesizer_reset_frequency( UNUSED_ARG Var *v )
 {
-	UNUSED_ARGUMENT( v );
-
 	if ( ! rs_sml01.start_freq_is_set )
 	{
 		print( FATAL, "No RF frequency has been set yet, so can't do a "

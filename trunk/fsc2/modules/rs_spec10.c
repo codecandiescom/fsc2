@@ -167,9 +167,8 @@ void rs_spec10_exit_hook( void )
 /* Function returns the name of the device */
 /*-----------------------------------------*/
 
-Var *ccd_camera_name( Var *v )
+Var *ccd_camera_name( UNUSED_ARG Var *v )
 {
-	UNUSED_ARGUMENT( v );
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
 
@@ -503,7 +502,7 @@ Var *ccd_camera_clear_cycles( Var *v )
 /* Function for getting an image from the camera */
 /*-----------------------------------------------*/
 
-Var *ccd_camera_get_image( Var *v )
+Var *ccd_camera_get_image( UNUSED_ARG Var *v )
 {
 	uns16 *frame = NULL;
 	long width, height;
@@ -516,8 +515,6 @@ Var *ccd_camera_get_image( Var *v )
 	uns16 urc[ 2 ];
 	uns32 size;
 
-
-	UNUSED_ARGUMENT( v );
 
 	CLOBBER_PROTECT( frame );
 	CLOBBER_PROTECT( width );
@@ -705,7 +702,7 @@ Var *ccd_camera_get_image( Var *v )
 /* Function for getting a spectrum from the camera */
 /*-------------------------------------------------*/
 
-Var *ccd_camera_get_spectrum( Var *v )
+Var *ccd_camera_get_spectrum( UNUSED_ARG Var *v )
 {
 	uns16 *frame = NULL;
 	long width;
@@ -718,8 +715,6 @@ Var *ccd_camera_get_spectrum( Var *v )
 	uns16 urc[ 2 ];
 	uns32 size;
 
-
-	UNUSED_ARGUMENT( v );
 
 	CLOBBER_PROTECT( frame );
 	CLOBBER_PROTECT( width );
@@ -926,10 +921,8 @@ Var *ccd_camera_temperature( Var *v )
 /* Function returns the size of a pixel (in meters) */
 /*--------------------------------------------------*/
 
-Var *ccd_camera_pixel_size( Var *v )
+Var *ccd_camera_pixel_size( UNUSED_ARG Var *v )
 {
-	UNUSED_ARGUMENT( v );
-
 	return vars_push( FLOAT_VAR, RS_SPEC10_PIXEL_SIZE );
 }
 
@@ -939,12 +932,10 @@ Var *ccd_camera_pixel_size( Var *v )
 /* height of the CCD chip as its elements       */
 /*----------------------------------------------*/
 
-Var *ccd_camera_pixel_area( Var *v )
+Var *ccd_camera_pixel_area( UNUSED_ARG Var *v )
 {
 	Var *cv;
 
-
-	UNUSED_ARGUMENT( v );
 
 	cv = vars_push( INT_ARR, NULL, 2 );
 	cv->val.lpnt[ 0 ] = CCD_PIXEL_WIDTH;

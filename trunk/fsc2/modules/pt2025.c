@@ -144,9 +144,8 @@ int pt2025_end_of_exp_hook( void )
 /*--------------------------------------------------------*/
 /*--------------------------------------------------------*/
 
-Var *gaussmeter_name( Var *v )
+Var *gaussmeter_name( UNUSED_ARG Var *v )
 {
-	UNUSED_ARGUMENT( v );
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
 
@@ -163,10 +162,8 @@ Var *gaussmeter_field( Var *v )
 /*--------------------------------------------------------*/
 /*--------------------------------------------------------*/
 
-Var *measure_field( Var *v )
+Var *measure_field( UNUSED_ARG Var *v )
 {
-	UNUSED_ARGUMENT( v );
-
 	if ( FSC2_MODE == TEST )
 		return vars_push( FLOAT_VAR, 34089.3 );
 

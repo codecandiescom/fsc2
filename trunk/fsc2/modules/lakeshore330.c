@@ -139,9 +139,8 @@ int lakeshore330_end_of_exp_hook( void )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *temp_contr_name( Var *v )
+Var *temp_contr_name( UNUSED_ARG Var *v )
 {
-	UNUSED_ARGUMENT( v );
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
 
@@ -150,10 +149,8 @@ Var *temp_contr_name( Var *v )
 /* Returns temperature reading from controller */
 /*---------------------------------------------*/
 
-Var *temp_contr_temperature( Var *v )
+Var *temp_contr_temperature( UNUSED_ARG Var *v )
 {
-	UNUSED_ARGUMENT( v );
-
 	if ( FSC2_MODE == TEST )
 		return vars_push( FLOAT_VAR, 123.45 );
 

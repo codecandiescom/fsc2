@@ -162,9 +162,8 @@ int er023m_end_of_exp_hook( void )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *lockin_name( Var *v )
+Var *lockin_name( UNUSED_ARG Var *v )
 {
-	UNUSED_ARGUMENT( v );
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
 
@@ -825,12 +824,10 @@ Var *lockin_resonator( Var *v )
 /* last data fetched from the device an overload occurred, otherwise 0.  */
 /*-----------------------------------------------------------------------*/
 
-Var *lockin_is_overload( Var *v )
+Var *lockin_is_overload( UNUSED_ARG Var *v )
 {
 	long res;
 
-
-	UNUSED_ARGUMENT( v );
 
 	if ( FSC2_MODE == TEST )
 		return vars_push( INT_VAR, 0L );

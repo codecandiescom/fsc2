@@ -521,9 +521,8 @@ void rs690_exit_hook( void )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_name( Var *v )
+Var *pulser_name( UNUSED_ARG Var *v )
 {
-	UNUSED_ARGUMENT( v );
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
 
@@ -769,10 +768,8 @@ Var *pulser_automatic_twt_pulses( Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_show_pulses( Var *v )
+Var *pulser_show_pulses( UNUSED_ARG Var *v )
 {
-	UNUSED_ARGUMENT( v );
-
 	if ( ! FSC2_IS_CHECK_RUN && ! FSC2_IS_BATCH_MODE )
 		rs690.do_show_pulses = SET;
 
@@ -783,10 +780,8 @@ Var *pulser_show_pulses( Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_dump_pulses( Var *v )
+Var *pulser_dump_pulses( UNUSED_ARG Var *v )
 {
-	UNUSED_ARGUMENT( v );
-
 	if ( ! FSC2_IS_CHECK_RUN && ! FSC2_IS_BATCH_MODE )
 		rs690.do_dump_pulses = SET;
 
@@ -924,9 +919,8 @@ Var *pulser_state( Var *v )
 /*------------------------------------------------------------*/
 /*------------------------------------------------------------*/
 
-Var *pulser_channel_state( Var *v )
+Var *pulser_channel_state( UNUSED_ARG Var *v )
 {
-	UNUSED_ARGUMENT( v );
 	print( SEVERE, "Individual channels can't be switched on or off for "
 		   "this device.\n" );
 	return vars_push( INT_VAR, 0L );
@@ -936,10 +930,8 @@ Var *pulser_channel_state( Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_update( Var *v )
+Var *pulser_update( UNUSED_ARG Var *v )
 {
-	UNUSED_ARGUMENT( v );
-
 	if ( ! rs690_is_needed )
 		return vars_push( INT_VAR, 1L );
 
@@ -1145,10 +1137,8 @@ Var *pulser_increment( Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_reset( Var *v )
+Var *pulser_reset( UNUSED_ARG Var *v )
 {
-	UNUSED_ARGUMENT( v );
-
 	if ( ! rs690_is_needed )
 		return vars_push( INT_VAR, 1L );
 
@@ -1448,9 +1438,8 @@ Var *pulser_command( Var *v )
 /* largest representable number.                  */
 /*------------------------------------------------*/
 
-Var *pulser_maximum_pattern_length( Var *v )
+Var *pulser_maximum_pattern_length( UNUSED_ARG Var *v )
 {
-	UNUSED_ARGUMENT( v );
 	print( WARN, "Pulser doesn't allow setting a maximum pattern length.\n" );
 	if ( ! rs690.is_timebase )
 	{

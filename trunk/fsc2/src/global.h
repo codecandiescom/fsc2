@@ -622,13 +622,20 @@ enum {
 };
 
 
-/* Having a line like "UNUSED_ADRGUMENT( a );" for arguments of a function
-   that aren't needed will shut up the compiler complaining about unused
-   arguments and make it easier to see that the argument isn't used on
-   purpose. */
+/* Having "UNUSED_ARG" in front of an argument of a function that's never
+   needed will keep the gcc compiler from complaining about it and make it
+   easier to see that the argument isn't used on purpose. "UNUSED_ARGUMENT"
+   has the same function (but needs to be put into the body of the function)
+   and is mostly used in legacy code or some places where it would be much
+   harder to use the other method. */
+
+#if defined __GNUC__
+#define UNUSED_ARG __attribute__ ((unused))
+#else
+#define UNUSED_ARG
+#endif
 
 #define UNUSED_ARGUMENT( a )   ( ( void ) ( a ) )
-
 
 #endif /* ! FSC2_GLOBAL */
 

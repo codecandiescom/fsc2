@@ -559,12 +559,10 @@ Var *daq_ai_acq_setup( Var *v )
 /*---------------------------------------------------------------------*
  *---------------------------------------------------------------------*/
 
-Var *daq_ai_start_acquisition( Var *v )
+Var *daq_ai_start_acquisition( UNUSED_ARG Var *v )
 {
 	int ret;
 
-
-	UNUSED_ARGUMENT( v );
 
 	if ( ! pci_mio_16e_1.ai_state.is_channel_setup )
 	{
@@ -618,7 +616,7 @@ Var *daq_ai_start_acquisition( Var *v )
 /*---------------------------------------------------------------------*
  *---------------------------------------------------------------------*/
 
-Var *daq_ai_get_curve( Var * v )
+Var *daq_ai_get_curve( UNUSED_ARG Var * v )
 {
 	size_t i, j;
 	Var *nv = NULL;
@@ -627,7 +625,6 @@ Var *daq_ai_get_curve( Var * v )
 	size_t to_be_fetched = 0;
 
 
-	UNUSED_ARGUMENT( v );
 	CLOBBER_PROTECT( volts );
 	CLOBBER_PROTECT( nv );
 	CLOBBER_PROTECT( to_be_fetched );

@@ -345,7 +345,7 @@ void dg2020_f_exit_hook( void )
 	if ( ! dg2020_is_needed )
 		return;
 
-	/* free all the memory allocated within the module */
+	/* Free all the memory allocated within the module */
 
 	for ( p = dg2020_Pulses; p != NULL; np = p->next, T_free( p ), p = np )
 		/* empty */ ;
@@ -363,9 +363,8 @@ void dg2020_f_exit_hook( void )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_name( Var *v )
+Var *pulser_name( UNUSED_ARG Var *v )
 {
-	UNUSED_ARGUMENT( v );
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
 
@@ -373,13 +372,11 @@ Var *pulser_name( Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_show_pulses( Var *v )
+Var *pulser_show_pulses( UNUSED_ARG Var *v )
 {
 	int pd[ 2 ];
 	pid_t pid;
 
-
-	UNUSED_ARGUMENT( v );
 
 	if ( FSC2_IS_CHECK_RUN || FSC2_IS_BATCH_MODE )
 		return vars_push( INT_VAR, 1L );
@@ -447,14 +444,12 @@ Var *pulser_show_pulses( Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_dump_pulses( Var *v )
+Var *pulser_dump_pulses( UNUSED_ARG Var *v )
 {
 	char *name;
 	char *m;
 	struct stat stat_buf;
 
-
-	UNUSED_ARGUMENT( v );
 
 	if ( FSC2_IS_CHECK_RUN || FSC2_IS_BATCH_MODE )
 		return vars_push( INT_VAR, 1L );
@@ -571,9 +566,8 @@ Var *pulser_grace_period( Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_keep_all_pulses( Var *v )
+Var *pulser_keep_all_pulses( UNUSED_ARG Var *v )
 {
-	UNUSED_ARGUMENT( v );
 	dg2020_keep_all( );
 	return vars_push( INT_VAR, 1L );
 }
@@ -617,9 +611,8 @@ Var *pulser_state( Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_channel_state( Var *v )
+Var *pulser_channel_state( UNUSED_ARG Var *v )
 {
-	UNUSED_ARGUMENT( v );
 	print( SEVERE, "Individual pod channels can't be switched on or off for "
 		   "this device.\n" );
 	return vars_push( INT_VAR, 0L );
@@ -629,12 +622,10 @@ Var *pulser_channel_state( Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_update( Var *v )
+Var *pulser_update( UNUSED_ARG Var *v )
 {
 	bool state = OK;
 
-
-	UNUSED_ARGUMENT( v );
 
 	if ( ! dg2020_is_needed )
 		return vars_push( INT_VAR, 1L );
@@ -865,10 +856,8 @@ Var *pulser_next_phase( Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_reset( Var *v )
+Var *pulser_reset( UNUSED_ARG Var *v )
 {
-	UNUSED_ARGUMENT( v );
-
 	if ( ! dg2020_is_needed )
 		return vars_push( INT_VAR, 1L );
 

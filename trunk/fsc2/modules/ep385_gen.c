@@ -389,11 +389,11 @@ bool ep385_set_phase_reference( int phs, int function )
 /* association in a PHASE_SETUP commmand.                      */
 /*-------------------------------------------------------------*/
 
-bool ep385_phase_setup_prep( int phs, int type, int dummy, long channel )
+bool ep385_phase_setup_prep( int phs, int type, UNUSED_ARG int dummy,
+							 long channel )
 {
 	fsc2_assert ( Cur_PHS != - 1 ? ( Cur_PHS == phs ) : 1 );
 	fsc2_assert ( phs == 0 || phs == 1 );
-	UNUSED_ARGUMENT( dummy );
 
 	Cur_PHS = phs;
 

@@ -230,9 +230,8 @@ void hjs_sfc_exit_hook( void )
 /* Function returns a string variable with the name of the device */
 /*----------------------------------------------------------------*/
 
-Var *magnet_name( Var *v )
+Var *magnet_name( UNUSED_ARG Var *v )
 {
-	UNUSED_ARGUMENT( v );
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
 
@@ -312,10 +311,8 @@ Var *set_field( Var *v )
 /*-------------------------------------------------------------------*/
 /*-------------------------------------------------------------------*/
 
-Var *get_field( Var *v )
+Var *get_field( UNUSED_ARG Var *v )
 {
-	UNUSED_ARGUMENT( v );
-
 	if ( ! hjs_sfc.is_act_field )
 	{
 		print( FATAL, "Field hasn't been set yet, can't determine current "
@@ -330,12 +327,10 @@ Var *get_field( Var *v )
 /*-------------------------------------------------------------------*/
 /*-------------------------------------------------------------------*/
 
-Var *sweep_up( Var *v )
+Var *sweep_up( UNUSED_ARG Var *v )
 {
 	double field;
 
-
-	UNUSED_ARGUMENT( v );
 
 	if ( ! hjs_sfc.is_field_step )
 	{
@@ -356,12 +351,10 @@ Var *sweep_up( Var *v )
 /*-------------------------------------------------------------------*/
 /*-------------------------------------------------------------------*/
 
-Var *sweep_down( Var *v )
+Var *sweep_down( UNUSED_ARG Var *v )
 {
 	double field;
 
-
-	UNUSED_ARGUMENT( v );
 
 	if ( ! hjs_sfc.is_field_step )
 	{
@@ -382,10 +375,8 @@ Var *sweep_down( Var *v )
 /*-------------------------------------------------------------------*/
 /*-------------------------------------------------------------------*/
 
-Var *reset_field( Var *v )
+Var *reset_field( UNUSED_ARG Var *v )
 {
-	UNUSED_ARGUMENT( v );
-
 	if ( ! hjs_sfc.is_field )
 	{
 		print( FATAL, "Start field has not been defined.\n" );
