@@ -180,6 +180,7 @@
 @item @code{KEEP_ALL_PULSES}  @tab Deprecated keyword
 @item @code{kG}               @tab Unit, Kilo-Gauss
 @item @code{kHz}              @tab Unit, Kilo-Hertz
+@item @code{km}               @tab Unit, Kilo-Meter
 @item @code{ks}               @tab Unit, Kilo-Seconds
 @item @code{kV}               @tab Unit, Kilo-Volt
 @item                         @tab
@@ -193,6 +194,7 @@
 @item @code{LINE}             @tab Digitizer trigger channel name
 @item @code{LOW}              @tab @code{LOW} keyword
 @item                         @tab
+@item @code{m}                @tab Unit, Meter
 @item @code{MA}               @tab Unit, Mega-Ampere
 @item @code{MdB}              @tab Unit, Mega-Dezibel
 @item @code{Mdb}              @tab Unit, Mega-Dezibel
@@ -207,6 +209,7 @@
 @item @code{MEMD}             @tab Digitizer channel name
 @item @code{MG}               @tab Unit, Mega-Gauss
 @item @code{MHz}              @tab Unit, Mega-Hertz
+@item @code{Mm}               @tab Unit, Mega-Meter
 @item @code{Ms}               @tab Unit, Mega-Seconds
 @item @code{MV}               @tab Unit, Mega-Volt
 @item @code{mA}               @tab Unit, Milli-Ampere
@@ -214,6 +217,7 @@
 @item @code{mdb}              @tab Unit, Milli-Dezibel
 @item @code{mG}               @tab Unit, Milli-Gauss
 @item @code{mHz}              @tab Unit, Milli-Hertz
+@item @code{mm}               @tab Unit, Milli-Meter
 @item @code{MODE}             @tab
 @item @code{ms}               @tab Unit, Milli-Seconds
 @item @code{mT}               @tab Unit, Milli-Tesla
@@ -228,6 +232,7 @@
 @item @code{NEXT_GATE}        @tab Channel Name
 @item @code{nG}               @tab Unit, Nano-Gauss
 @item @code{nHz}              @tab Unit, Nano-Hertz
+@item @code{nm}               @tab Unit, Nano-Meter
 @item @code{ns}               @tab Unit, Nano-Seconds
 @item @code{nT}               @tab Unit, Nano-Tesla
 @item @code{nV}               @tab Unit, Nano-Volt
@@ -334,6 +339,7 @@
 @item @code{udb}              @tab Unit, Micro-Dezibel
 @item @code{uG}               @tab Unit, Micro-Gauss
 @item @code{uHz}              @tab Unit, Micro-Hertz
+@item @code{um}               @tab Unit, Micro-Meter
 @item @code{us}               @tab Unit, Micro-Seconds
 @item @code{UNTIL}            @tab Keyword for @code{UNTIL} loops (@ref{UNTIL loops})
 @item @code{uT}               @tab Unit, Micro-Tesla
