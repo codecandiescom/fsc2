@@ -23,37 +23,47 @@ This chapter describes the @b{EDL}language (@b{E}xperiment
 
 
 
-EDL is in many respects quite similar to other computer languages like
-C, FORTRAN or BASIC etc. You can use variables to do computations, you
-have flow control structures like if-else-constructs and for- and
+@b{EDL} is in many respects quite similar to other computer languages
+like C, FORTRAN or BASIC etc. You can use variables to do computations,
+you have flow control structures like if-else-constructs and for- and
 while-loops and there is a set of built-in functions. On the other hand,
-since the purpose of EDL is to describe an EPR experiment, there are
-also some differences. The most noticeable is the overall structure
-of an EDL program.
+since the purpose of @b{EDL} is to describe an EPR experiment, there are
+also some differences. The most noticeable is the overall structure of
+an @b{EDL} program.
 
-Each EDL program is divided into a set of sections that are somewhat
+Each @b{EDL} program is divided into a set of sections that are somewhat
 related to the way a real-life experiment is done. In such an experiment
 you will first decide which devices you need. This is reflected in the
-DEVICES section of an EDL file where you simply list all the devices to
-be used in the experiment (at least the ones to be controlled by the
-computer). The next section, the VARIABLES section, unfortunately
-doesn't have a real-world equivalent -- here you have to declare all
-variables and arrays you will use in the rest of the program and,
-optionally, initialise them. Next, in a pulsed experiment, you will
-probably set the pulser. This is partly done in the ASSIGNMENTS
-section. For a pulsed experiment you may also want to decide about the
-kind of phase-cycling to use in the experiment -- this goes into the
-PHASES section. Now follows the PREPARATIONS section: here all the
-devices are set up. For example, here you define all pulses, i.e.@:
-their positions and lengths as well as the way they should be changed in
-the experiment. Or you tell the program the start value of the magnetic
+@code{DEVICES} section of an @b{EDL} file where you simply list all the
+devices to be used in the experiment (at least the ones to be controlled
+by the computer).
+
+The next section, the @code{VARIABLES} section, unfortunately doesn't
+have a real-world equivalent -- here you have to declare all variables
+and arrays you will use in the rest of the program and, optionally,
+initialise them.
+
+Next, in a pulsed experiment, you will probably set up the pulser. This
+is partly done in the @code{ASSIGNMENTS} section.
+
+For a pulsed experiment you may also want to decide about the kind of
+phase-cycling to use in the experiment -- this goes into the
+@code{PHASES} section.
+
+Now follows the @code{PREPARATIONS} section: here all the devices are
+set up. For example, here you define all pulses, i.e.@: their positions
+and lengths as well as the way they should be changed in the
+experiment. Or you tell the program the start value of the magnetic
 field and the amount the field has to be increased (or decreased)
-between data points. And when you're done with setting up the devices
-you will finally start the experiment: this coincides with the start of
-the EXPERIMENT section.
+between data points.
+
+And when you're done with setting up the devices you will finally start
+the experiment: this coincides with the start of the @code{EXPERIMENT}
+section.
 
 Due to the different purposes of the sections there are differences in
-the syntax to be used in the various sections.
+the syntax to be used in the various sections. These are explained in
+the next section.
 
 
 
@@ -62,17 +72,42 @@ the syntax to be used in the various sections.
 @cindex section
 
 
-Each @b{EDL} file consists of at least one of 6 different types of
-sections.
+Each @b{EDL} file consists of up to 6 different types of sections. These
+are:
+@table @samp
+@item DEVICES
+@item VARIABLES
+@item ASSIGNMENTS
+@item PHASES
+@item PREPARATIONS
+@item EXPERIMENT
+@end table
 
+While the sections of the @b{EDL} file don't have to appear in this
+sequence it is probably best not to experiment to much with this. In any
+case, if it exists the @code{EXPERIMENT} section must always be the
+last.
 
-@node Variables, Control structures, Sections, EDL
+Each section label must be immediately followed by a colon `@code{:}'.
 
+All the section labels can be abbreviated, here's the complete list of
+accepted keywords:
+
+@itemize @bullet
+@item @code{DEVICES}, @code{DEV}, @code{DEVS}, @code{DEVICE}
+@item @code{ASSIGNMENTS}, @code{ASS}, @code{ASSS}, @code{ASSIGNMENT}
+@item @code{VARIABLES}, @code{VAR}, @code{VARS}, @code{VARIABLE}
+@item @code{PHASES}, @code{PHAS}, @code{PHASS}, @code{PHASE}
+@item @code{PREPARATIONS}, @code{PREP}, @code{PREPS}, @code{PREPARATION}
+@item @code{EXPERIMENT}, @code{EXP}
+@end itemize
+
+@node Devices, Variables, Basics, EDL
 @section Devices
 @cindex devices
 
 
-The DEVICES section has a very simple syntax, after a line with just
+The @code{DEVICES} section has a very simple syntax, after a line with just
 @example
 DEVICES:
 @end example
@@ -83,15 +118,17 @@ write the device names with lower or upper case letters, they will
 automatically be converted to all lower case.
 
 
+@node Variables, Control structures, Sections, EDL
 @section Variables
 @cindex variables
 @cindex arrays
 
 
-Within the VARAIBLES, ASSIGNMENTS, PREPARATIONS and EXPERIMENT section
-variables may be used. Each variable to be used has to be declared,
-i.e.@: it has to be listed in the VARIABLES section before it may be
-used. The start of te VARIABLES section is declared by a line stating
+Within the @code{VARAIBLES}, @code{ASSIGNMENTS}, @code{PREPARATIONS} and
+@code{EXPERIMENT} section variables may be used. Each variable to be
+used has to be declared, i.e.@: it has to be listed in the
+@code{VARIABLES} section before it may be used. The start of the
+@code{VARIABLES} section is declared by a line stating
 @example
 VARIABLES:
 @end example
@@ -251,9 +288,10 @@ As usual, non-integer exponents can only be used with non-negative bases!
 
 
 
-Within the EXPERIMENT section flow control structures can be used. These
-are FOR, WHILE and REPEAT loops and IF-ELSE constructs. (Please note:
-all of these keywords have to be spelt in capital letters!).
+Within the @code{EXPERIMENT} section flow control structures can be
+used. These are @code{FOR}, @code{WHILE} and @code{REPEAT} loops and
+@code{IF}-@code{ELSE} constructs. (Please note: all of these keywords
+have to be spelt in capital letters!).
 
 
 Most flow control construct keywords are followed by a condition and all
@@ -262,11 +300,12 @@ has to be enclosed in curly braces and may contain as many statements as
 needed (or still fit into the memory).
 
 
-The most simple construct is the REPEAT loop. What is needed following
-the keyword REPEAT is a number and a block with commands. The number
-should be an integer number (or an expression resulting in an integer).
-The following block of statements will now be repeated as many times as
-specified by the number (or expression). Here's an example:
+The most simple construct is the @code{REPEAT} loop. What is needed
+following the keyword @code{REPEAT} is a number and a block with
+commands. The number should be an integer number (or an expression
+resulting in an integer).  The following block of statements will now be
+repeated as many times as specified by the number (or
+expression). Here's an example:
 
 @example
     I = 0;
@@ -280,16 +319,16 @@ specified by the number (or expression). Here's an example:
 
 This snippet will calculate the sum of all integers between 1 and 100
 (of course, there are more elegant ways to do this, but it's just an
-example). After the initialization of the two variables `I' and `SUM'
-the REPEAT loop starts with 100 as the number of repetitions. Now, in
-curly braces, i.e.@: between `@{' and `@}', follow the statements to be
-executed in the loop.
+example). After the initialization of the two variables `@code{I}' and
+`@code{SUM}' the @code{REPEAT} loop starts with 100 as the number of
+repetitions. Now, in curly braces, i.e.@: between `@code{@{}' and
+`@code{@}}', follow the statements to be executed in the loop.
 
-Nearly as simple a construct is the WHILE loop: following the keyword a
-condition is needed first. Usually, this will be a comparison between two
-numbers, but also a simple number will suffice -- if its value is non-zero
-it will be interpreted as TRUE. Of course, the keyword and the condition
-have to be followed by a block of statements.
+Nearly as simple a construct is the @code{WHILE} loop: following the
+keyword a condition is needed first. Usually, this will be a comparison
+between two numbers, but also a simple number will suffice -- if its
+value is non-zero it will be interpreted as TRUE. Of course, the keyword
+and the condition have to be followed by a block of statements.
 
 Again, an example:
 
@@ -303,25 +342,33 @@ Again, an example:
     @}
 @end example
 
-This program snippet (that could also have been written using a REPEAT
-loop) calculates the factorial of 6. After initializing `I' and `Fact'
-it is tested in the loop condition if `I' is still not larger that 6. If
-this is true, the following block of statements is executed.
+This program snippet (that could also have been written using a
+@code{REPEAT} loop) calculates the factorial of 6. After initializing
+the variables `@code{I}' and `@code{Fact}' it is tested in the loop
+condition if `@code{I}' is still not larger that 6. If this is true, the
+following block of statements is executed.
 
 Here is a complete list of the comparison operators between to numbers:
 
-@multitable{==} {compare for equality (don't confuse with the single `=' that is used in assignments)}
-@item @code{==} @tab compare for equality (don't confuse with the single `=' that is used in assignments)
-@item @code{!=} @tab TRUE if the numbers are unequal
-@item @code{<} @tab TRUE if the left side number is smaller than the
+@table @samp
+@item @code{==}
+compare for equality (don't confuse with the single `@code{=}' that is
+used in assignments)
+@item @code{!=}
+TRUE if the numbers are unequal
+@item @code{<}
+TRUE if the left side number is smaller than the
 right side number
-@item @code{>} @tab TRUE if the left side number is smaller or equal to the
+@item @code{>}
+TRUE if the left side number is smaller or equal to the
 right side number
-@item @code{<} @tab TRUE if the left side number is larger than the
+@item @code{<}
+TRUE if the left side number is larger than the
 right side number
-@item @code{>=} @tab TRUE if the left side number is larger or equal to the
+@item @code{>=}
+TRUE if the left side number is larger or equal to the
 right side number
-@end multitable
+@end table
 
 And here is also an example for using simple numbers in a condition,
 using that a non-zero value is always interpreted as TRUE:
@@ -338,17 +385,18 @@ using that a non-zero value is always interpreted as TRUE:
 
 This example does exactly the same as the previous one, i.e.@: it
 calculates the factorial of 6. But the difference is that we start with
-`I' set to 6 and than decrement it succesively. Thus we can use `I' in
-the loops condition by simply checking if it still is non-zero and thus
-the condition still TRUE and repeating the loop as long as it is.
+`I' set to 6 and than decrement it succesively. Thus we can use
+`@code{I}' in the loops condition by simply checking if it still is
+non-zero and thus the condition still TRUE and repeating the loop as
+long as it is.
 
 Sometimes, you may want to check not for the truth but for the falsehood
 of an expression. In this case you have to prepend the expression with a
 exclamation mark, `!', to reverse the meaning of a test.
 
 If you want to check for combinations of expressions you can use the
-logical AND, OR or XOR (exclusive or) operators. Here is a list of these
-operators and their meaning:
+logical @code{AND}, @code{OR} or @code{XOR} (exclusive or)
+operators. Here is a list of these operators and their meaning:
 
 @multitable{~} {TRUE if left or right hand side expressions are TRUE but not both}
 @item @code{!} @tab Negate truth of an expression
@@ -358,13 +406,13 @@ operators and their meaning:
 @end multitable
 
 
-Before the WIHLE loop on often has to initialize the loop variables and
-within the statement block the loop variable has to been updated. In
-many cases (for example in both the preceeding examples) it is simpler
-to use a FOR loop instead, because setting the loop variable as well as
-updating it is auomatically done in the condition part. Here's an
-example that does exactly the same as the first of the two preceeding
-examples:
+Before the @code{WIHLE} loop on often has to initialize the loop
+variables and within the statement block the loop variable has to been
+updated. In many cases (for example in both the preceeding examples) it
+is simpler to use a @code{FOR} loop instead, because setting the loop
+variable as well as updating it is auomatically done in the condition
+part. Here's an example that does exactly the same as the first of the
+two preceeding examples:
 
 @example
     Fact = 1;
@@ -373,15 +421,16 @@ examples:
     @}
 @end example
 
-At the very start of the FOR loop the loop variable `I' is set to 1 and
-the block is run using this value. When it is done, `I' is automatically
-incremented by 1 and tested if it is still not larger than 6. If this is
-TRUE the loop is repeated with the new value of `I'. Take care: You can
-change `I' also within the loop, but you only should do this if you
-really mean it and know what you're doing!
+At the very start of the @code{FOR} loop the loop variable `@code{I}' is
+set to 1 and the block is run using this value. When it is done,
+`@code{I}' is automatically incremented by 1 and tested if it is still
+not larger than 6. If this is TRUE the loop is repeated with the new
+value of `@code{I}'. Take care: You can change `@code{I}' also within
+the loop, but you only should do this if you really mean it and know
+what you're doing!
 
 But we also can reproduce the second version of the factorial
-calculation using a FOR loop. Here it is:
+calculation using a @code{FOR} loop. Here it is:
 
 @example
     Fact = 1;
@@ -390,13 +439,14 @@ calculation using a FOR loop. Here it is:
     @}
 @end example
 
-Now `I' starts of with the value 6 and the third value in the FOR loop
-condition part is the value to be used for incrementing `I'. In our case
-it is -1, so `I' actually will be decremented until it is smaller than 1
-(the second value in the FOR loop condition). As you see, FOR loop
-variables can not only be incremented by 1 but by any value (integer
-or floating point ones). And, of course, the loop variable don't have to
-be an integer variable!
+Now `@code{I}' starts of with the value 6 and the third value in the
+@code{FOR} loop condition part is the value to be used for incrementing
+`@code{I}'. In our case it is -1, so `@code{I}' actually will be
+decremented until it is smaller than 1 (the second value in the
+@code{FOR} loop condition). As you see, @code{FOR} loop variables can
+not only be incremented by 1 but by any value (integer or floating point
+ones). And, of course, the loop variable don't have to be an integer
+variable!
 
 
-Finally there's the IF-ELSE construct.
+Finally there's the @code{IF}-@code{ELSE} construct.
