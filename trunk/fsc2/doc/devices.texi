@@ -248,7 +248,7 @@ section.
 @cindex Gaussmeter Functions
 
 
-Currently, two types of gaussmeters are implemented, the Bruker ER035M
+Currently, two types of gauss-meters are implemented, the Bruker ER035M
 NMR gaussmeter and the Bruker BH15 hall probe field controller. The
 range of fields that can be measured with the Bruker ER035M NMR
 gaussmeter depends on the probe being used. With the F0 probe (S-band)
@@ -275,7 +275,7 @@ the field. If the program is correctly installed the appropriate module
 is loaded by specifying `@code{gaussmeter}' instead of one of the listed
 module names.
 
-The gaussmeters are mainly used together with the magnet power supply
+The gauss-meters are mainly used together with the magnet power supply
 and have to be specified in the @code{DEVICES} section @b{before} the
 magnet module.
 
@@ -518,7 +518,7 @@ these are @code{100 kHz}, @code{50 kHz}, @code{25 kHz}, @code{12.5 kHz},
 specified that does not fit one of these values the nearest valid
 frequency is used.
 
-In the @code{PREPARTATIONS} section this function can't be called in
+In the @code{PREPARATIONS} section this function can't be called in
 query mode, i.e.@: without an argument.
 
 
@@ -584,7 +584,7 @@ an argument, i.e.@: as a query.
 @findex lockin_is_overload()
 This function exists for the @strong{Bruker ER023M} signal channel only
 and can only be used as a query, i.e.@: it does not allows arguments. It
-can be caaled before a new data value is fetched from the lock-in to
+can be called before a new data value is fetched from the lock-in to
 find out if an overload has occurred while the data value was measured
 (where a return value of @code{1} indicates that an overload happened,
 otherwise @code{0} is returned). Calling this function (or fetching the

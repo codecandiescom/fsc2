@@ -711,7 +711,7 @@ switch ( FSC2_MODE )
 @end example
 
 
-The second improtant global variable, @code{need_GPIB}, is of type
+The second important global variable, @code{need_GPIB}, is of type
 @code{bool} and has to be set in the init hook function if the device is
 controlled via the GPIB bus. Thus, if the GPIB bus is needed, include a
 line in the init hook function similar to

@@ -168,15 +168,14 @@ inline bool get_boolean( Var *v, const char *device )
 	{
 		if ( ! strcasecmp( v->val.sptr, "OFF" ) )
 			return UNSET;
-		else if ( ! strcasecmp( v->val.sptr, "ON" ) )
+
+		if ( ! strcasecmp( v->val.sptr, "ON" ) )
 			return SET;
 
-		else if ( device != NULL )
-		{
+		if ( device != NULL )
 			eprint( FATAL, SET, "%s: Invalid boolean argument (\"%s\") in "
 					"%s().\n", device, v->val.sptr, Cur_Func );
-			THROW( EXCEPTION )
-		}
+		THROW( EXCEPTION )
 	}
 
 	return v->val.lval != 0;
