@@ -212,7 +212,7 @@ void delete_stale_shms( void )
 
 	/* Get the current maximum shared memory segment id */
 
-    max_id = shmctl( 0, SHM_INFO, ( struct shmid_ds * ) &shm_seg );
+    max_id = shmctl( 0, SHM_INFO, &shm_seg );
 
 	/* Run through all of the possible IDs. If they belong to fsc2 and start
 	   with the magic 'fsc2' they are deleted. */
