@@ -122,8 +122,7 @@ ASSIGNMENTS assignment[ PULSER_CHANNEL_PHASE_Y + 1 ];
 Phase_Sequence PSeq[ MAX_PHASE_SEQ_LEN ];
 Acquisition_Sequence ASeq[ 2 ];
 
-Pulse *Plist = NULL;
-Pulse *Cur_Pulse = NULL;
+long Cur_Pulse = -1;
 
 bool TEST_RUN = UNSET;       /* flag, set while EXPERIMENT section is tested */
 bool need_GPIB = UNSET;      /* flag, set if GPIB bus is needed */
@@ -176,8 +175,7 @@ extern ASSIGNMENTS assignment[ ];
 extern Phase_Sequence PSeq[ ];
 extern Acquisition_Sequence ASeq[ ];
 
-extern Pulse *Plist;
-extern Pulse *Cur_Pulse;
+extern long Cur_Pulse;
 
 extern bool TEST_RUN;
 extern bool need_GPIB;
