@@ -72,7 +72,6 @@ static int cur_1,
 void cut_show( int dir, int pos )
 {
 	long index;
-	Curve_1d *cv = &G.cut_curve;
 	Curve_2d *scv = G.curve_2d[ G.active_curve ];
 
 
@@ -112,7 +111,6 @@ void cut_show( int dir, int pos )
 	{
 		XMapWindow( G.d, cut_form->cut->window );
 		XMapSubwindows( G.d, cut_form->cut->window );
-		is_mapped = SET;
 	}
 
 	fl_raise_form( cut_form->cut );
@@ -125,8 +123,8 @@ void cut_show( int dir, int pos )
 		index = lround( ( double ) ( G.canvas.h - 1 - pos ) / scv->s2d[ Y ]
 						- scv->shift[ Y ] );
 
-	/* Set up the labels and calculate the scaling factors if the cut window
-	   didn't exist or the cut direction changed */
+	/* Set up the labels if the cut window does't not exist yet or the cut
+	   direction changed */
 
 	if ( ! is_shown || CG.cut_dir != dir )
 	{
@@ -161,45 +159,15 @@ void cut_show( int dir, int pos )
 				G.label_h[ Z + 3 ] = G.label_h[ Y ];
 			}
 		}
-
-		if ( scv->is_fs )
-		{
-			cv->s2d[ X ] = ( double ) ( G.cut_canvas.w - 1 ) /
-						   ( double ) ( CG.nx - 1 );
-			cv->s2d[ Y ] = ( double ) ( G.cut_canvas.h - 1 );
-			cv->shift[ X ] = 0.0;
-			cv->shift[ Y ] = 0.0;
-
-			CG.is_fs = SET;
-			fl_set_button( cut_form->cut_full_scale_button, 1 );
-			fl_set_object_helper( cut_form->cut_full_scale_button,
-								  "Switch off automatic rescaling" );
-		}
-		else
-		{
-			cv->s2d[ Y ] = scv->s2d[ Z ] / ( double ) ( G.z_axis.h - 1 )
-			               * ( double ) ( G.cut_canvas.h - 1 );
-			cv->shift[ Y ] = scv->shift[ Z ];
-
-			cv->s2d[ X ] = ( double ) ( G.cut_canvas.w - 1 ) /
-			               ( double ) ( CG.nx - 1 );
-			cv->shift[ X ] = 0.0;
-
-			CG.is_fs = UNSET;
-			fl_set_button( cut_form->cut_full_scale_button, 0 );
-			fl_set_object_helper( cut_form->cut_full_scale_button,
-								  "Rescale curves to fit into the window\n"
-								  "and switch on automatic rescaling" );
-		}
-	} else if ( index == CG.index )
-		return;
+	}
 
 	/* Calculate all the points of the cross section curve */
 
+	cut_calc_curve( dir, index );
+
+	is_mapped = SET;
 	G.is_cut = SET;
 	is_shown = SET;
-
-	cut_calc_curve( dir, index );
 
 	/* Draw the curve and the axes */
 
@@ -230,19 +198,47 @@ static void cut_calc_curve( int dir, long index )
 	   scale factor if the number changed of points changed and we're in
 	   full scale mode */
 
-	if ( CG.cut_dir == X )
+	CG.nx = dir == X ? G.ny : G.nx;
+
+	if ( ! is_shown || ! is_mapped )
 	{
-		if ( CG.nx != G.ny && CG.is_fs )
+		if ( scv->is_fs )
+		{
 			cv->s2d[ X ] = ( double ) ( G.cut_canvas.w - 1 ) /
-				           ( double ) ( G.ny - 1 );
-		CG.nx = G.ny;
-	}
-	else
-	{
-		if ( CG.nx != G.nx && CG.is_fs )
-			cv->s2d[ X ] = ( double ) ( G.cut_canvas.w - 1 ) /
-				           ( double ) ( G.nx - 1 );
-		CG.nx = G.nx;
+				           ( double ) ( CG.nx - 1 );
+			cv->s2d[ Y ] = ( double ) ( G.cut_canvas.h - 1 );
+			cv->shift[ X ] = cv->shift[ Y ] = 0.0;
+
+			CG.is_fs = SET;
+			fl_set_button( cut_form->cut_full_scale_button, 1 );
+			fl_set_object_helper( cut_form->cut_full_scale_button,
+								  "Switch off automatic rescaling" );
+		}
+		else
+		{
+			cv->s2d[ Y ] = scv->s2d[ Z ] / ( double ) ( G.z_axis.h - 1 )
+			               * ( double ) ( G.cut_canvas.h - 1 );
+			cv->shift[ Y ] = scv->shift[ Z ];
+
+			if ( dir == X )
+			{
+				cv->s2d[ X ] = scv->s2d[ Y ] / ( double ) ( G.canvas.h - 1 )
+					           * ( double ) ( G.cut_canvas.w - 1 );
+				cv->shift[ X ] = scv->shift[ Y ];
+			}
+			else
+			{
+				cv->s2d[ X ] = scv->s2d[ X ] / ( double ) ( G.canvas.w - 1 )
+							   * ( double ) ( G.cut_canvas.w - 1 );
+				cv->shift[ X ] = scv->shift[ X ];
+			}
+
+			CG.is_fs = UNSET;
+			fl_set_button( cut_form->cut_full_scale_button, 0 );
+			fl_set_object_helper( cut_form->cut_full_scale_button,
+								  "Rescale curves to fit into the window\n"
+								  "and switch on automatic rescaling" );
+		}
 	}
 
 	/* If the index is resonable store it (if called with index smaller than
@@ -1093,7 +1089,8 @@ static void redraw_cut_axis( int coord )
 
 static void cut_make_scale( Canvas *c, int coord )
 {
-	Curve_2d *cv = G.curve_2d[ G.active_curve ];
+	Curve_1d *cv  = &G.cut_curve;
+	Curve_2d *cv2 = G.curve_2d[ G.active_curve ];
 	double rwc_delta,          /* distance between small ticks (in rwc) */
 		   order,              /* and its order of magnitude */
 		   mag;
@@ -1125,43 +1122,30 @@ static void cut_make_scale( Canvas *c, int coord )
 
 	if ( coord == X )
 	{
-		if ( CG.cut_dir == X )
-		{
-			r_coord = Y;
-			r_scale = ( double ) c->w / ( double ) G.y_axis.h
-				      * cv->s2d[ r_coord ];
-		}
-		else
-		{
-			r_coord = X;
-			r_scale = ( double ) c->w / ( double ) G.x_axis.w
-				      * cv->s2d[ r_coord ];
-		}
+		r_coord = CG.cut_dir == X ? Y : X;
+		r_scale = cv->s2d[ X ];
 	}
 	else if ( coord == Y )
 	{
 		r_coord = Z;
-		r_scale = ( double ) c->h / ( double ) G.z_axis.h
-			      * cv->s2d[ r_coord ];
+		r_scale = cv->s2d[ Y ];
 	}
 	else
 	{
 		if ( CG.cut_dir == X )
 		{
 			r_coord = X;
-			r_scale = ( double ) c->h / ( double ) G.x_axis.w
-				     * ( double ) ( G.canvas.w - 1 ) / ( double ) ( G.nx - 1 );
+			r_scale = ( double ) c->h / ( double ) ( G.nx - 1 );
 		}
 		else
 		{
 			r_coord = Y;
-			r_scale = ( double ) c->h / ( double ) G.y_axis.h
-				     * ( double ) ( G.canvas.h - 1 ) / ( double ) ( G.ny - 1 );
+			r_scale = ( double ) c->h / ( double ) ( G.ny - 1 );
 		}
 	}
 
-	rwc_delta = ( double ) SCALE_TICK_DIST * fabs( cv->rwc_delta[ r_coord ] ) /
-		                                                               r_scale;
+	rwc_delta = ( double ) SCALE_TICK_DIST
+		        * fabs( cv2->rwc_delta[ r_coord ] ) / r_scale;
 
 	/* Now scale this distance to the interval [ 1, 10 [ */
 
@@ -1199,7 +1183,7 @@ static void cut_make_scale( Canvas *c, int coord )
 
 	/* Calculate the final distance between the small ticks in points */
 
-	d_delta_fine = r_scale * rwc_delta / fabs( cv->rwc_delta[ r_coord ] );
+	d_delta_fine = r_scale * rwc_delta / fabs( cv2->rwc_delta[ r_coord ] );
 
 	/* `rwc_start' is the first value in the display (i.e. the smallest x or y
 	   value still shown in the canvas), `rwc_start_fine' the position of the
@@ -1207,19 +1191,19 @@ static void cut_make_scale( Canvas *c, int coord )
 	   `d_start_fine' is the same position but in points */
 
 	if ( coord != Z )
-		rwc_start = cv->rwc_start[ r_coord ]
-			        - cv->shift[ r_coord ] * cv->rwc_delta[ r_coord ];
+		rwc_start = cv2->rwc_start[ r_coord ]
+			        - cv->shift[ coord ] * cv2->rwc_delta[ r_coord ];
 	else                           /* z-axis always shows the complete range */
-		rwc_start = cv->rwc_start[ r_coord ];
+		rwc_start = cv2->rwc_start[ r_coord ];
 
-	if ( cv->rwc_delta[ r_coord ] < 0 )
+	if ( cv2->rwc_delta[ r_coord ] < 0 )
 		rwc_delta *= -1.0;
 
 	modf( rwc_start / rwc_delta, &rwc_start_fine );
 	rwc_start_fine *= rwc_delta;
 
-	d_start_fine = r_scale
-		           * ( rwc_start_fine - rwc_start ) / cv->rwc_delta[ r_coord ];
+	d_start_fine = r_scale * ( rwc_start_fine - rwc_start )
+		                   / cv2->rwc_delta[ r_coord ];
 	if ( lround( d_start_fine ) < 0 )
 		d_start_fine += d_delta_fine;
 
@@ -1228,8 +1212,8 @@ static void cut_make_scale( Canvas *c, int coord )
 	modf( rwc_start / ( medium_factor * rwc_delta ), &rwc_start_medium );
 	rwc_start_medium *= medium_factor * rwc_delta;
 
-	d_start_medium = r_scale * ( rwc_start_medium - rwc_start ) /
-			                                          cv->rwc_delta[ r_coord ];
+	d_start_medium = r_scale * ( rwc_start_medium - rwc_start )
+			                 / cv2->rwc_delta[ r_coord ];
 	if ( lround( d_start_medium ) < 0 )
 		d_start_medium += medium_factor * d_delta_fine;
 
@@ -1240,8 +1224,8 @@ static void cut_make_scale( Canvas *c, int coord )
 	modf( rwc_start / ( coarse_factor * rwc_delta ), &rwc_start_coarse );
 	rwc_start_coarse *= coarse_factor * rwc_delta;
 
-	d_start_coarse = r_scale * ( rwc_start_coarse - rwc_start ) /
-			                                          cv->rwc_delta[ r_coord ];
+	d_start_coarse = r_scale * ( rwc_start_coarse - rwc_start )
+			                 / cv2->rwc_delta[ r_coord ];
 	if ( lround( d_start_coarse ) < 0 )
 	{
 		d_start_coarse += coarse_factor * d_delta_fine;
@@ -1259,8 +1243,6 @@ static void cut_make_scale( Canvas *c, int coord )
 		/* Draw coloured line of scale */
 
 		y = X_SCALE_OFFSET;
-		XSetForeground( G.d, cv->gc,
-						fl_get_pixel( G.colors[ G.active_curve ] ) );
 		XFillRectangle( G.d, c->pm, cv->gc, 0, y - 2, c->w, 3 );
 
 		/* Draw all the ticks and numbers */
@@ -1301,8 +1283,6 @@ static void cut_make_scale( Canvas *c, int coord )
 		/* Draw coloured line of scale */
 
 		x = c->w - Y_SCALE_OFFSET;
-		XSetForeground( G.d, cv->gc,
-						fl_get_pixel( G.colors[ G.active_curve ] ) );
 		XFillRectangle( G.d, c->pm, cv->gc, x, 0, 3, c->h );
 
 		/* Draw all the ticks and numbers */
@@ -1339,8 +1319,6 @@ static void cut_make_scale( Canvas *c, int coord )
 		/* Draw coloured line of scale */
 
 		x = Z_SCALE_OFFSET;
-		XSetForeground( G.d, cv->gc,
-						fl_get_pixel( G.colors[ G.active_curve ] ) );
 		XFillRectangle( G.d, c->pm, cv->gc, x - 2, 0, 3, c->h );
 
 		/* Draw all the ticks and numbers */
