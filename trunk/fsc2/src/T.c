@@ -66,8 +66,6 @@ void *T_calloc( size_t nmemb, size_t size )
 
 
 /*--------------------------------------------------------------------*/
-/* In contrast to the normal realloc function this function frees the */
-/* previously used memory if the reallocation fails!                  */
 /*--------------------------------------------------------------------*/
 
 void *T_realloc( void *ptr, size_t size )
@@ -136,7 +134,7 @@ char *T_strdup( const char *str )
 
 #if defined MDEBUG
 	fprintf( stderr, "(%d) strdup:  %p (%u)\n",
-			 I_am == CHILD, new_str, strlen( str ) );
+			 I_am == CHILD, new_str, strlen( str ) + 1 );
 	fflush( stderr );
 #endif
 
