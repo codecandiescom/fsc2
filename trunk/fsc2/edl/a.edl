@@ -20,6 +20,8 @@ X[ 3, 3, 3 ] = { 9,8,7,6,5,4,3,2,1,
 				 19,18,17,16,15,14,13,12,11,
 				 29,28,27,26,25,24,23,22,21 };
 
+dt1, dt2;
+
 FILE;
 x = 0.5;
 
@@ -60,17 +62,22 @@ EXP:
 // save( 3,2,1 );
 
 
+
 FOR K = 1 : 5 {
 	print( "Run \##\n", K );
 	clear_curve( 4 );
+	dt1 = 700 us;
+	dt2 = 150 ms;
 	delta_time( );
 	FOR I = 1 : N  {
 		J = ( I / 10  )^2;
-		display( I, delta_time(), 1,// J + K * N, 1,
-				 I, 10 * I + K * N, 2,
-				 I, ( 0.1 * I )^2 * sin( 0.06 * I ) + K * N, 3,
-				 N + 1 - I, 20 * I + K * N, 4 );
+		display( I, dt2, 1,  // J + K * N, 1,
+				 I, dt1, 2,  //I, 10 * I + K * N, 2,
+				 I, 1e-4 * ( ( 0.1 * I )^2 * sin( 0.06 * I ) + K * N ) , 3,
+				 N + 1 - I, 1e-4 * ( 20 * I + K * N ) , 4 );
+		dt1 = delta_time();		
 		wait( 150 ms );
+		dt2 = delta_time();
 	}
 }
 

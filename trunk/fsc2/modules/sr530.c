@@ -146,16 +146,7 @@ int sr530_exp_hook( void )
 
 int sr530_end_of_exp_hook( void )
 {
-	/* Switch lock-in back to local mode */
-
-	if ( sr530.device >= 0 )
-	{
-		gpib_write( sr530.device, "I0\n", 3 );
-		gpib_local( sr530.device );
-	}
-
 	sr530.device = -1;
-
 	return 1;
 }
 
