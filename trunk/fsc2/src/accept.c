@@ -142,7 +142,7 @@ void accept_new_data( bool empty_queue )
 		   tell the child that there's again room in the message queue. */
 
 		Comm.MQ->low = ( Comm.MQ->low + 1 ) % QUEUE_SIZE;
-		sema_post( Comm.data_semaphore );
+		sema_post( Comm.mq_semaphore );
 
 		/* Return if all entries in the message queue are used up or there's
 		   a REQUEST (which is always the last entry because the child has to

@@ -159,24 +159,8 @@ void setup_comm( void )
 	   message queue size to avoid having the child send more messages than
 	   message queue can hold. */
 
-	if ( ( Comm.data_semaphore = sema_create( QUEUE_SIZE - 1 ) ) < 0 )
+	if ( ( Comm.mq_semaphore = sema_create( QUEUE_SIZE - 1 ) ) < 0 )
 	{
-		delete_all_shm( );
-		for ( i = 0; i < 4; i++ )
-			close( Comm.pd[ i ] );
-
-		eprint( FATAL, UNSET, "Can't set up internal communication "
-				"channels.\n" );
-		THROW( EXCEPTION );
-	}
-
-	/* Finally we need another semaphore which is used by the parent to
-	   keep the child from sending more than one REQUEST type message. */
-
-	if ( ( Comm.request_semaphore = sema_create( 0 ) ) < 0 )
-	{
-		sema_destroy( Comm.data_semaphore );
-		Comm.data_semaphore = -1;
 		delete_all_shm( );
 		for ( i = 0; i < 4; i++ )
 			close( Comm.pd[ i ] );
@@ -211,12 +195,10 @@ void end_comm( void )
 
 	delete_all_shm( );
 
-	/* Delete the semaphores */
+	/* Delete the semaphore */
 
-	sema_destroy( Comm.request_semaphore );
-	Comm.request_semaphore = -1;
-	sema_destroy( Comm.data_semaphore );
-	Comm.data_semaphore = -1;
+	sema_destroy( Comm.mq_semaphore );
+	Comm.mq_semaphore = -1;
 
 	/* Close parents side of read and write pipe */
 
@@ -284,8 +266,7 @@ int new_data_callback( XEvent *a, void *b )
 				 Comm.MQ->slot[ Comm.MQ->low ].type == REQUEST )
 			{
 				Comm.MQ->low = ( Comm.MQ->low + 1 ) % QUEUE_SIZE;
-				sema_post( Comm.data_semaphore );
-				sema_post( Comm.request_semaphore );
+				sema_post( Comm.mq_semaphore );
 				if ( ! reader( NULL ) )
 					THROW( EXCEPTION );
 			}
@@ -340,7 +321,7 @@ void send_data( int type, int shm_id )
 {
 	/* Wait until parent can accept more data */
 
-	sema_wait( Comm.data_semaphore );
+	sema_wait( Comm.mq_semaphore );
 
 	/* Put the type of the data (DATA_1D, DATA_2D or REQUEST) into the type
 	   field of the next free slot */
@@ -355,12 +336,6 @@ void send_data( int type, int shm_id )
 	/* Increment the high mark pointer (wraps around) */
 
 	Comm.MQ->high = ( Comm.MQ->high + 1 ) % QUEUE_SIZE;
-
-	/* For REQUESTS also wait for the request semaphore (no more than one
-	   REQUEST at a time!) */
-
-	if ( type == REQUEST )
-		sema_wait( Comm.request_semaphore );
 }
 
 

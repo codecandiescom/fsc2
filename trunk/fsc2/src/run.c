@@ -1027,8 +1027,7 @@ static void child_sig_handler( int signo )
 				if ( Internals.conn_pid > 0 )
 					kill( Internals.conn_pid, SIGTERM );
 				delete_all_shm( );
-				sema_destroy( Comm.data_semaphore );
-				sema_destroy( Comm.request_semaphore );
+				sema_destroy( Comm.mq_semaphore );
 			}
 
 			EDL.do_quit = SET;

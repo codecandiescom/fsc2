@@ -334,8 +334,7 @@ static void globals_init( const char *pname )
     EDL.Device_Name_List = NULL;
     EDL.Num_Pulsers = 0;
 
-	Comm.data_semaphore = -1;
-	Comm.request_semaphore = -1;
+	Comm.mq_semaphore = -1;
 	Comm.MQ = NULL;
 	Comm.MQ_ID = -1;
 
@@ -835,13 +834,11 @@ static void final_exit_handler( void )
 
 	T_free( G.color_hash );
 
-	/* Delete all shared memory and also semaphore (if it still exists) */
+	/* Delete all shared memory and the semaphore (if it still exists) */
 
 	delete_all_shm( );
-	if ( Comm.data_semaphore >= 0 )
-		sema_destroy( Comm.data_semaphore );
-	if ( Comm.request_semaphore >= 0 )
-		sema_destroy( Comm.request_semaphore );
+	if ( Comm.mq_semaphore >= 0 )
+		sema_destroy( Comm.mq_semaphore );
 
 	/* If the program was killed by a signal indicating an unrecoverable
 	   error print out a message and (if this feature isn't switched off) 
