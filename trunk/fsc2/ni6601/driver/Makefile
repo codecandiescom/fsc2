@@ -62,10 +62,16 @@ $(MODULE): $(SOURCES:.c=.o)
 
 install:
 ifeq ($(NI6601_KERNEL_SOURCE),)
-	if [ -d /lib/modules/`uname -r` ]; then         \
-		cp $(MODULE) /lib/modules/`uname -r`/misc;  \
-	else                                            \
-		cp $(MODULE) /lib/modules/misc;             \
+	if [ -d /lib/modules/`uname -r` ]; then                     \
+		if [ ! -d /lib/modules/`uname -r`/misc ]; then          \
+			install -d 755 -d /lib/modules/`uname -r`/misc;     \
+		fi;                                                     \
+		install -m 644 $(MODULE) /lib/modules/`uname -r`/misc;  \
+	else                                                        \
+		if [ ! -d /lib/modules/misc ]; then                     \
+			install -d 755 /lib/modules/misc;                   \
+		fi;                                                     \
+		cp $(MODULE) /lib/modules/misc;                         \
 	fi
 endif
 	install -d $(incl_dir)

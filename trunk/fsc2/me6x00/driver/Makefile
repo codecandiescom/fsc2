@@ -34,6 +34,7 @@ else
 						 fi )
 endif
 
+MODULE   = me6x00.o
 SOURCES  = me6x00.c
 HEADERS  = pci-compat.h sysdep.h me6x00_drv.h autoconf.h
 INCLUDES = -I$(KERNEL_INC)/include -I.
@@ -56,10 +57,16 @@ all:
 
 install:
 ifeq ($(ME6X00_KERNEL_SOURCE),)
-	if [ -d /lib/modules/`uname -r` ]; then        \
-		cp me6x00.o /lib/modules/`uname -r`/misc;  \
-	else                                           \
-		cp me6x00.o /lib/modules/misc;             \
+	if [ -d /lib/modules/`uname -r` ]; then                     \
+		if [ ! -d /lib/modules/`uname -r`/misc ]; then          \
+			install -d 755 -d /lib/modules/`uname -r`/misc;     \
+		fi;                                                     \
+		install -m 644 $(MODULE) /lib/modules/`uname -r`/misc;  \
+	else                                                        \
+		if [ ! -d /lib/modules/misc ]; then                     \
+			install -d 755 /lib/modules/misc;                   \
+		fi;                                                     \
+		cp $(MODULE) /lib/modules/misc;                         \
 	fi
 endif
 	install -d $(incl_dir)

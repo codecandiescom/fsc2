@@ -350,7 +350,7 @@ Var *ccd_camera_exposure_time( Var *v )
 /*-----------------------------------------------*/
 /*-----------------------------------------------*/
 
-Var *ccd_camera_get_pic( Var *v )
+Var *ccd_camera_get_picture( Var *v )
 {
 	uns16 *frame;
 	long width, height;

@@ -500,17 +500,17 @@ export            # export all variables to sub-makes
 # Switch off all implicit rules
 
 .SUFFIXES:
-.PHONY: all install-strip install uninstall  \
-		built version test clean distclean   \
-		mostlyclean tags pack MANIFEST ZIP   \
-		pion.anorg.chemie.uni-frankfurt.de   \
-		crowley.physik.fu-berlin.de          \
-		door.physik.fu-berlin.de             \
-		isaak.physik.fu-berlin.de            \
-		moebpc3.physik.fu-berlin.de          \
-		tresr.physik.fu-berlin.de            \
-		sunone.chemie.unibas.ch              \
-		crowley.none                         \
+.PHONY: all install-strip install uninstall built docs  \
+		http_server version test clean distclean        \
+		mostlyclean tags pack MANIFEST ZIP              \
+		pion.anorg.chemie.uni-frankfurt.de              \
+		crowley.physik.fu-berlin.de                     \
+		door.physik.fu-berlin.de                        \
+		isaak.physik.fu-berlin.de                       \
+		moebpc3.physik.fu-berlin.de                     \
+		tresr.physik.fu-berlin.de                       \
+		sunone.chemie.unibas.ch                         \
+		crowley.none                                    \
 		dorimare.nowhere
 
 
@@ -531,17 +531,9 @@ all: config.h
 	$(MAKE) built
 	$(MAKE) tags
 	$(MAKE) -C $(sdir) all
-ifdef WITH_HTTP_SERVER
-	@if [ ! -e $(ldir)/Makefile                                \
-		  -o $(ldir)/Makefile.PL -nt $(ldir)/Makefile ]; then  \
-		cd $(ldir) &&                                          \
-		perl Makefile.PL;                                      \
-		cd $(fdir);                                            \
-	fi
-	$(MAKE) -C $(ldir)
-endif
+	$(MAKE) http_server
 	$(MAKE) -C $(udir) all
-	$(MAKE) -C $(ddir) all
+	$(MAKE) docs
 
 
 # Create a header file with configuration information from the contents of
@@ -570,6 +562,27 @@ built:
 	sed -e 's/^.*$$Id\: \(.*,v [0-9]\{1,\}\.[0-9]\{1,\} [0-9]\{4\}\/[0-9]\{2\}\/[0-9]\{2\} [\0-9]\{2\}:[0-9]\{2\}:[0-9]\{2\}\).*/\1/g' >> version
 	-@gzip -c -9 version | uuencode - > version.ugz
 	-@$(RM) $(RMFLAGS) version
+
+
+# Creates everything that allows the web server to be run (on condition that
+# the use of the web server insn't switched off)
+
+http_server:
+ifdef WITH_HTTP_SERVER
+	@if [ ! -e $(ldir)/Makefile                                \
+		  -o $(ldir)/Makefile.PL -nt $(ldir)/Makefile ]; then  \
+		cd $(ldir) &&                                          \
+		perl Makefile.PL;                                      \
+		cd $(fdir);                                            \
+	fi
+	$(MAKE) -C $(ldir)
+endif
+
+
+# Creates the complete documentation
+
+docs:
+	$(MAKE) -C $(ddir) all
 
 
 # Install the program and everything else

@@ -587,6 +587,10 @@ FOR I = 1 : N_runs
 	K = I;
 	synthesizer_frequency( start_freq );
     output_value( OO2, start_freq * 1.0e-6 );
+
+    IF I < N_runs - 1 {
+        wait( 10 * tc );
+    }
 }
 
 

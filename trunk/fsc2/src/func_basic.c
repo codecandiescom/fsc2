@@ -1995,7 +1995,7 @@ Var *f_mean( Var *v )
 	}
 
 	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
-				   INT_REF | FLOAT_PTR );
+				   INT_REF | FLOAT_REF );
 
 	start = 0;
 	len = v->len;
@@ -2149,7 +2149,7 @@ Var *f_rms( Var *v )
 	}
 
 	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
-				   INT_REF | FLOAT_PTR );
+				   INT_REF | FLOAT_REF );
 
 	start = 0;
 	len = v->len;

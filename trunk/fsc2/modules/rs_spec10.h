@@ -114,7 +114,6 @@ Var *ccd_camera_exposure_time( Var *v );
 Var *ccd_camera_get_pic( Var *v );
 Var *ccd_camera_temperature( Var *v );
 
-
 /* Functions from rs_spec10_int.c */
 
 void rs_spec10_init_camera( void );
@@ -129,7 +128,7 @@ double rs_spec10_k2c( double tk );
 double rs_spec10_c2k( double tc );
 int16 rs_spec10_k2ic( double tk );
 double rs_spec10_ic2k( int16 tci );
-
+bool rs_spec10_param_access( uns32 param, uns16 *access );
 
 
 #endif /* ! RS_SPEC10_HEADER */

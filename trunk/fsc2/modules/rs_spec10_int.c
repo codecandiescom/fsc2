@@ -86,25 +86,18 @@ void rs_spec10_init_camera( void )
 
 static void rs_spec10_ccd_init( void )
 {
-	uns16 ret_uns16;
 	uns32 set_uns32;
+	flt64 ret_flt64;
+
+	uns16 access;
+	uns16 num_pix;
+	uns32 clear_mode;
 
 
-	if ( ! pl_get_param( rs_spec10->handle, PARAM_SER_SIZE, ATTR_ACCESS,
-						 ( void_ptr ) &ret_uns16 ) )
-		rs_spec10_error_handling( );
-
-	if ( ret_uns16 != ACC_READ_ONLY && ret_uns16 != ACC_READ_WRITE )
-	{
-		print( FATAL, "Can't determine number of pixels of CCD\n" );
-		THROW( EXCEPTION );
-	}
-
-	if ( ! pl_get_param( rs_spec10->handle, PARAM_PAR_SIZE, ATTR_ACCESS,
-						 ( void_ptr ) &ret_uns16 ) )
-		rs_spec10_error_handling( );
-
-	if ( ret_uns16 != ACC_READ_ONLY && ret_uns16 != ACC_READ_WRITE )
+	if ( ! rs_spec10_param_access( PARAM_SER_SIZE, &access ) ||
+		 ( access != ACC_READ_ONLY && access != ACC_READ_WRITE ) ||
+		 ! rs_spec10_param_access( PARAM_PAR_SIZE, &access ) ||
+		 ( access != ACC_READ_ONLY && access != ACC_READ_WRITE ) ||
 	{
 		print( FATAL, "Can't determine number of pixels of CCD\n" );
 		THROW( EXCEPTION );
@@ -112,20 +105,20 @@ static void rs_spec10_ccd_init( void )
 
 	/* Get the the number of pixels in x- and y-direction */
 
-	if ( ! pl_get_param( rs_spec10->handle, PARAM_SER_SIZE, ATTR_MAX,
-						 ( void_ptr ) &ret_uns16 ) )
+	if ( ! pl_get_param( rs_spec10->handle, PARAM_SER_SIZE, ATTR_DEFAULT,
+						 ( void_ptr ) &num_pix ) )
 		rs_spec10_error_handling( );
-	rs_spec10->ccd.max_size[ X ] = ret_uns16;
+	rs_spec10->ccd.max_size[ X ] = num_pix;
 
-	if ( ! pl_get_param( rs_spec10->handle, PARAM_PAR_SIZE, ATTR_MAX,
-						 ( void_ptr ) &ret_uns16 ) )
+	if ( ! pl_get_param( rs_spec10->handle, PARAM_PAR_SIZE, ATTR_DEFAULT,
+						 ( void_ptr ) &num_pix ) )
 		rs_spec10_error_handling( );
-	rs_spec10->ccd.max_size[ Y ] = ret_uns16;
+	rs_spec10->ccd.max_size[ Y ] = num_pix;
 
 	/* Make sure the sizes are identical to what the configuration file
 	   claims */
 
-	if ( rs_spec10->ccd.max_size[ X ] == CCD_PIXEL_WIDTH ||
+	if ( rs_spec10->ccd.max_size[ X ] != CCD_PIXEL_WIDTH ||
 		 rs_spec10->ccd.max_size[ Y ] != CCD_PIXEL_HEIGHT )
 	{
 		print( FATAL, "Configuration file for camera has invalid CCD "
@@ -135,22 +128,57 @@ static void rs_spec10_ccd_init( void )
 		THROW( EXCEPTION );
 	}
 
-	/* Set CLEAR_PRE_EXPOSURE mode (since we don't have a shutter and time
-	   between exposures is probably rather long this seems to be the most
-	   reasonable mode) */
+	/* If the clear mode can be set use CLEAR_PRE_EXPOSURE mode if (since we
+	   don't have a shutter and time between exposures is probably rather long
+	   this seems to be the most reasonable mode) */
 
-	set_uns32 = CLEAR_PRE_EXPOSURE;
-	if ( ! pl_set_param( rs_spec10->handle, PARAM_CLEAR_MODE,
-						 ( void_ptr ) &set_uns32 ) )
-		rs_spec10_error_handling( );
+	if ( rs_spec10_param_access( PARAM_CLEAR_MODE, &access ) &&
+		 ( access == ACC_READ_WRITE || access == ACC_WRITE_ONLY ) )
+	{
+		clear_mode = CLEAR_PRE_EXPOSURE;
+		if ( ! pl_set_param( rs_spec10->handle, PARAM_CLEAR_MODE, 
+							 ( void_ptr ) &clear_mode ) )
+			rs_spec10_error_handling( );
+	}
 
-	/* Set the time resolution for the exposure time to 1 us. The number
-	   passed to pl_exp_setup_seq() must thus be in units of 1 us. */
+	/* Set the time resolution for the exposure time to 1 us. The exposure
+	   time argument of pl_exp_setup_seq() must thus be in units of 1 us. */
 
-	set_uns32 = EXP_RES_ONE_MICROSEC;
-	if ( ! pl_set_param( rs_spec10->handle, PARAM_EXP_RES,
-						 ( void_ptr ) &set_uns32 ) )
-		rs_spec10_error_handling( );
+	if ( ! rs_spec10_param_access( PARAM_EXP_RES, &access ) )
+	{
+		print( FATAL, "Can't determine exposure time resolution.\n" );
+		THROW( EXCEPTION );
+	}
+
+	if ( access == ACC_READ_WRITE || access == ACC_WRITE_ONLY )
+	{
+		set_uns32 = EXP_RES_ONE_MICROSEC;
+		if ( ! pl_set_param( rs_spec10->handle, PARAM_EXP_RES,
+							 ( void_ptr ) &set_uns32 ) )
+			rs_spec10_error_handling( );
+	}
+	else if ( access == ACC_READ_ONLY )
+	{
+		if ( ! pl_get_param( rs_spec10->handle, PARAM_EXP_RES, ATTR_DEFAULT,
+							 ( void_ptr ) &set_uns32 ) )
+			rs_spec10_error_handling( );
+
+		fprintf( stderr, "EXP_RES = %ld\n", ( long ) set_uns32 );
+	}
+
+//	  if ( ! pl_get_param( rs_spec10->handle, PARAM_EXP_MIN_TIME, ATTR_ACCESS,
+//						   ( void_ptr ) &ret_uns16 ) )
+//		  rs_spec10_error_handling( );
+//
+//	  if ( ret_uns16 == ACC_READ_WRITE || ret_uns16 == ACC_READ_ONLY )
+//	  {
+//		  if ( ! pl_get_param( rs_spec10->handle, PARAM_EXP_MIN_TIME,
+//							   ATTR_DEFAULT, ( void_ptr ) &ret_flt64 ) )
+//			  rs_spec10_error_handling( );
+//
+//		  fprintf( stderr, "EXP_MIN_TIME = %f\n", ( double ) ret_flt64 );
+//	  }
+
 
 	/* We might also need to set the shutter mode to OPEN_NO_CHANGE,
 	   set the number of clears (with PARAM_CLEAR_CYCLES).
@@ -165,16 +193,17 @@ static void rs_spec10_ccd_init( void )
 
 static void rs_spec10_temperature_init( void )
 {
-	uns16 ret_uns16;
-	int16 ret_int16;
+	uns16 access;
+	int16 temp;
 
 
-	/* Determine accessibility of temperature setpoint */
+	if ( ! rs_spec10_param_access( PARAM_TEMP_SETPOINT, &access ) )
+	{
+		print( FATAL, "Can't set a temperature setpoint.\n" );
+		THROW( EXCEPTION );
+	}
 
-	if ( ! pl_get_param( rs_spec10->handle, PARAM_TEMP_SETPOINT, ATTR_ACCESS,
-						 ( void_ptr ) &ret_uns16 ) )
-		 rs_spec10_error_handling( );
-	rs_spec10->temp.acc_setpoint = ret_uns16;
+	rs_spec10->temp.acc_setpoint = access;
 
 	/* Get maximum and minimum temperature that can be set and determine
 	   the current temperature (since the device returns all temperatures
@@ -185,14 +214,14 @@ static void rs_spec10_temperature_init( void )
 		 rs_spec10->temp.acc_setpoint == ACC_READ_WRITE )
 	{
 		if ( ! pl_get_param( rs_spec10->handle, PARAM_TEMP_SETPOINT, ATTR_MAX,
-							 ( void_ptr ) &ret_int16 ) )
+							 ( void_ptr ) &temp ) )
 			rs_spec10_error_handling( );
-		rs_spec10->temp.max = rs_spec10_ic2k( ret_int16 );
+		rs_spec10->temp.max = rs_spec10_ic2k( temp );
 		 
 		if ( ! pl_get_param( rs_spec10->handle, PARAM_TEMP_SETPOINT, ATTR_MIN,
-							 ( void_ptr ) &ret_int16 ) )
+							 ( void_ptr ) &temp ) )
 			rs_spec10_error_handling( );
-		rs_spec10->temp.min = rs_spec10_ic2k( ret_int16 );
+		rs_spec10->temp.min = rs_spec10_ic2k( temp );
 	}
 
 	/* Check if during the test run the temperature was set to a value that
@@ -201,7 +230,7 @@ static void rs_spec10_temperature_init( void )
 	if ( rs_spec10_test.temp.test_min_setpoint != HUGE_VAL ||
 		 rs_spec10_test.temp.test_max_setpoint != -HUGE_VAL )
 	{
-		if ( rs_spec10->temp.acc_setpoint != ACC_READ_ONLY &&
+		if ( rs_spec10->temp.acc_setpoint != ACC_WRITE_ONLY &&
 			 rs_spec10->temp.acc_setpoint != ACC_READ_WRITE )
 		{
 			print( FATAL, "During the test run a temperature setpoint was "
@@ -236,19 +265,19 @@ static void rs_spec10_temperature_init( void )
 
 	/* Check if we can read the current temperature and if yes get it */
 
-	if ( ! pl_get_param( rs_spec10->handle, PARAM_TEMP, ATTR_ACCESS,
-						 ( void_ptr ) &ret_uns16 ) )
-		 rs_spec10_error_handling( );
-	rs_spec10->temp.acc_temp = ret_uns16;
-
-	if ( rs_spec10->temp.acc_temp == ACC_READ_ONLY ||
-		 rs_spec10->temp.acc_temp == ACC_READ_WRITE )
+	if ( ! rs_spec10_param_access( PARAM_TEMP, &access ) ||
+		 ! ( rs_spec10->temp.acc_temp == ACC_READ_ONLY ||
+			 rs_spec10->temp.acc_temp == ACC_READ_WRITE ) )
 	{
-		if ( ! pl_get_param( rs_spec10->handle, PARAM_TEMP, ATTR_CURRENT,
-							 ( void_ptr ) &ret_int16 ) )
-			rs_spec10_error_handling( );
-		rs_spec10_get_temperature( );
+		print( FATAL, "Can't determine the current temperature.\n" );
+		THROW( EXCEPTION );
 	}
+
+	if ( ! pl_get_param( rs_spec10->handle, PARAM_TEMP, ATTR_CURRENT,
+						 ( void_ptr ) &temp ) )
+		rs_spec10_error_handling( );
+
+	rs_spec10_get_temperature( );
 
 	/* Set a target temperature if this was requested in the PREPARATIONS
 	   section */
@@ -297,8 +326,8 @@ uns16 *rs_spec10_get_pic( void )
 
 
 	region.s1   = rs_spec10->ccd.roi[ 0 ];
-	region.s2   = rs_spec10->ccd.roi[ 1 ];
-	region.p1   = rs_spec10->ccd.roi[ 2 ];
+	region.p1   = rs_spec10->ccd.roi[ 1 ];
+	region.s2   = rs_spec10->ccd.roi[ 2 ];
 	region.p2   = rs_spec10->ccd.roi[ 3 ];
 
 	if ( rs_spec10->ccd.bin_mode == HARDWARE_BINNING )
@@ -322,6 +351,17 @@ uns16 *rs_spec10_get_pic( void )
 		rs_spec10_error_handling( );
 	}
 
+#ifndef NDEBUG
+	if ( size == 0 )
+	{
+		print( FATAL, "Internal error detected at %s:%d.\n",
+			   __FILE__, __LINE__ );
+		pl_exp_abort( rs_spec10->handle, CCS_HALT );
+		pl_exp_uninit_seq( );
+		THROW( EXCEPTION );
+	}
+#endif
+
 	/* Now we need memory for storing the new picture. The manual requires
 	   this memory to be protected against swapping, thus we must mlock()
 	   it. */
@@ -329,7 +369,7 @@ uns16 *rs_spec10_get_pic( void )
 	TRY
 	{
 		frame = T_malloc( size );
-		if ( mlock( frame, size ) == 1 )
+		if ( mlock( frame, size ) != 0 )
 		{
 			print( FATAL, "Failure to obtain properly protected memory.\n" );
 			THROW( EXCEPTION );
