@@ -382,6 +382,110 @@ button.
 @cindex 2D-Display
 
 @ifnotinfo
+When doing an 2D-experiment where you record time traces (e.g.@: after a
+laser flash) at different magnetic field positions the display probably
+will look similar to this:
+
 @image{fsc2fig4,11cm,}
-@image{fsc2fig5,11cm,}
+
 @end ifnotinfo
+
+Because it would take too long to do a real 3-dimensional display the
+data values are displayed using a color code, where blue stands for the
+lowest and red for the highest values. To find out about which color
+stands a certain value on the right and side is another axis area for
+the z-axis. The color bar in this axis area indicates the exact scaling.
+
+In 2D-display mode only one curve can be displayed at once. Thus the
+buttons for the different curves have a different meaning from the one
+in 1D-displays. Here they are used for switching between the different
+curves, i.e.@: only one of the buttons can be active at any time and
+will indicate which curve is currently shown. Each of the curves has each
+own scaling.
+
+As long as there are no data for some of the points these points will be
+drawn in a dark gray.
+
+In 2D-display mode the same combinations of mouse buttons can be used to
+determine the values of data points and differences between points as in
+1D-display mode with the only exception that now triples of numbers are
+shown for the x-, y- and z-value.
+
+When the surface with the data set is moved out of the area of the
+display arrows will be shown at the sides of the display area where you
+have to look for the data set.
+
+
+@subsubsection Rescaling and moving
+
+All the methods for rescaling and moving are the same as in 1D-display
+mode. Additionally, you also can change the z-scaling. This will result
+in a change of the colors used for displaying the data. When changing
+the z-scaling it may happen that some of the data points can't be
+displayed with the avaliable colors anymore. In this case data values
+larger than the maximum value of the z-axis will be drawn in white, and
+data that are too small are shown in black.
+
+@ifnotinfo
+Here is an example of how the display may look like after z-rescaling. A
+lot of the values are too small to be drawn using the values shown on
+the z-scale and are thus drawn in black, and the maximum values at the
+top of the high-field signal are to large and drawn in white.
+
+@image{fsc2fig5,11cm,}
+
+@end ifnotinfo
+
+@subsection Getting cross sections
+
+Quite often one would like to see a cross section through the data
+set. This can be down by holding down the @code{Shift} key and clicking
+with the left mouse button into the x- or y-axis area at the place you
+want the cross section. When you release the left mouse button a new
+window opens up showing the cross section (please keep the @code{Shift}
+key pressed down until the window is shown. While the left mouse button
+is pressed down ther cursor is changed to an
+@ifnotinfo
+arrow, either @image{cursor6,5mm,} or @image{cursor7,5mm,}
+.
+@end ifnotinfo
+@ifnothtml
+@ifnottex
+arrow pointing either to the right or up.
+@end ifnottex
+@end ifnothtml
+
+Eventhough the new window with the cross section through the data set
+only shows a 1D-curve it also has a z-axis. On this axis a red indicator
+shows for which value in either x- or y-direction the cross section was
+taken.
+@ifnotinfo
+@image{fsc2fig6,11cm,}
+
+@end ifnotinfo
+This axis area can also be used to choose a different cross
+section. When you press the left mouse button in that area
+the cursor changes to an arrow pointing to te left
+@ifnotinfo
+, @image{cursor8,5mm,},
+@end ifnotinfo
+and if you move the mouse (while keeping the button pressed down) new
+cross sections are displayed and the indicator gets redrawn at which
+position the current cross section was taken. If you want to run through
+all cross sections sequentially you can also use the up- and down-cursor
+keys on the keyboard. To get to the first cross section (i.e.@: the one
+at the lower end of the z-scale) press the @code{Page down} key, to get
+to the last press the @code{Page up} key.
+
+
+Of course, getting data values and differences between data as well as
+zooming and moving the curve around on the screen works in the same way
+as for normal 1D-displays.
+
+
+Finally, occasionally you might want to switch from a cross section
+through the data set in x-direction to one in y-direction or vice
+versa. To do so start of as you would do when determining data values,
+i.e.@: by pressing both the left and the middle mouse button. Move the
+mouse to the x-position where you want the cross section. Now hit the
+@code{Space} bar and the cross section in the other direction is drawn.
