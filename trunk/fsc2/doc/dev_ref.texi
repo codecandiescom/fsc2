@@ -40,6 +40,7 @@
 * er035m_sa::     Bruker NMR Gaussmeter ER 035 M (GPIB, Stand-Alone)
 * er035m_sas::    Bruker NMR Gaussmeter ER 035 M (Serial, Stand-Alone)
 * hfs9000::       Tektronix Stimulus System HFS9000 (Berlin W-Band)
+* rs690::         Interface Technology RS690 Word Generator (Berlin 369 GHz)
 * hp5340a::       HP Frequency Counter HP5340A
 * hp8647a::       HP RF Synthesizer HP8647A
 * hp8672a::       HP RF Synthesizer HP8672A
@@ -525,7 +526,8 @@ the range is @w{1460 G} to @w{19900 G}.
 @item @code{gaussmeter_probe_orientation()}  @tab @ref{gaussmeter_probe_orientation}
 @end multitable
 
-@node hfs9000, hp5340a, er035m_sas, Device Reference
+
+@node hfs9000, rs690, er035m_sas, Device Reference
 @iftex
 @subheading Tektronix Stimulus System HFS9000 (Berlin W-Band)
 @end iftex
@@ -568,7 +570,47 @@ can range from @w{-4.7 V} to @w{4.7 V}.
 @end multitable
 
 
-@node hp5340a, hp8647a, hfs9000, Device Reference
+@node rs690, hp5340a, hfs9000, Device Reference
+@iftex
+@subheading Interface Technology RS690 Word Generator (Berlin 360 GHz)
+@end iftex
+@ifnottex
+@section Interface Technology RS690 Word Generator (Berlin 360 GHz)
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{rs690}
+
+@paragraphindent 0
+@strong{Description}: Interface Technology RS690 Word Generator, used as pulser
+for the Berlin 360 GHz spectrometer.
+
+@paragraphindent 0
+Timebases: @w{4 ns}, @w{8 ns} and @w{16 ns} with internal clock, @w{4
+ns} and longer with external clock (either @code{TTL} or @code{ECL} input). 
+Trigger-in either via @code{TTL} or @code{ECL} input connector.
+
+
+@paragraphindent 0
+@strong{Controlled via}: GPIB bus (IEEE 488).
+
+@paragraphindent 0
+@strong{Supported functions}:
+@multitable @columnfractions .45 .45
+@item @code{pulser_name()}            @tab @ref{pulser_name}
+@item @code{pulser_state()}           @tab @ref{pulser_state}
+@item @code{pulser_channel_state()}   @tab @ref{pulser_channel_state}
+@item @code{pulser_update()}          @tab @ref{pulser_update}
+@item @code{pulser_shift()}           @tab @ref{pulser_shift}
+@item @code{pulser_increment()}       @tab @ref{pulser_increment}
+@item @code{pulser_pulse_reset()}     @tab @ref{pulser_pulse_reset}
+@item @code{pulser_lock_keyboard()}   @tab @ref{pulser_lock_keyboard}
+@item @code{pulser_show_pulses()}     @tab @ref{pulser_show_pulses}
+@item @code{pulser_dump_pulses()}     @tab @ref{pulser_dump_pulses}
+@end multitable
+
+
+@node hp5340a, hp8647a, rs690, Device Reference
 @iftex
 @subheading HP Frequency Counter HP5340A
 @end iftex
