@@ -39,6 +39,12 @@ static bool	incr_y( long y_index );
 static bool	incr_x_and_y( long x_index, long len, long y_index );
 
 
+static bool scale_1d_changed[ 2 ];
+static bool scale_2d_changed[ 3 ];
+static bool need_2d_redraw;
+static bool need_cut_redraw;
+
+
 /*---------------------------------------------------------------------------*/
 /* This is the function that takes the new data from the message queue and   */
 /* displays them. On a call of this function all data sets in the queue will */
@@ -53,12 +59,18 @@ void accept_new_data( void )
 	int mq_next;
 	int type;
 	int dim = 0;
-	struct timeval start_time, cur_time;
+	struct timeval time_struct;
+	double start_time;
 
 
 	CLOBBER_PROTECT( dim );
 
-	gettimeofday( &start_time, NULL );
+	gettimeofday( &time_struct, NULL );
+	start_time = time_struct.tv_sec + 1.0e-6 * time_struct.tv_sec;
+
+	memset( scale_1d_changed, 0, 2 * sizeof *scale_1d_changed );
+	memset( scale_2d_changed, 0, 2 * sizeof *scale_2d_changed );
+	need_2d_redraw = need_cut_redraw = UNSET;
 
 	while ( 1 )
 	{
@@ -117,16 +129,12 @@ void accept_new_data( void )
 		if ( Comm.MQ->low == Comm.MQ->high )
 			break;
 
-		/* Do a redraw at least about every second */
+		/* Do a redraw at least about every fifth of a second */
 
-		gettimeofday( &cur_time, NULL );
-
-		if ( cur_time.tv_sec > start_time.tv_sec &&
-			 cur_time.tv_usec >= start_time.tv_usec )
-		{
-			fprintf( stderr, "hit timeout\n" );
+		gettimeofday( &time_struct, NULL );
+		if ( time_struct.tv_sec + 1.0e-6 * time_struct.tv_sec
+			 - start_time >= 0.2 )
 			break;
-		}
 
 		/* Accept next data set if next slot in message queue contains DATA */
 
@@ -149,12 +157,31 @@ void accept_new_data( void )
   		Comm.MQ->slot[ mq_next ].type = REQUEST;
   	}
 
-	/* Finally display the new data by redrawing the canvas */
+	/* Finally display the new data by redrawing the canvases that need
+	   redrawing */
 
 	if ( dim & 1 )
-		redraw_all_1d( );
+	{
+		redraw_canvas_1d( &G1.canvas );
+		if ( scale_1d_changed[ X ] )
+			redraw_canvas_1d( &G1.x_axis );
+		if ( scale_1d_changed[ Y ] )
+			redraw_canvas_1d( &G1.y_axis );
+	}
+
 	if ( dim & 2 )
-		redraw_all_2d( );
+	{
+		if ( need_2d_redraw )
+			redraw_canvas_2d( &G2.canvas );
+		if ( scale_2d_changed[ X ] )
+			redraw_canvas_2d( &G2.x_axis );
+		if ( scale_2d_changed[ Y ] )
+			redraw_canvas_2d( &G2.y_axis );
+		if ( scale_2d_changed[ Z ] )
+			redraw_canvas_2d( &G2.z_axis );
+		if ( need_cut_redraw )
+			redraw_all_cut_canvases( );
+	}
 }
 
 
@@ -438,7 +465,7 @@ static void accept_1d_data( long x_index, long curve, int type, char *ptr )
 							   ( double ) ( x_index + len - 1 );
 		}
 
-		G1.scale_changed = G1.is_fs;
+		scale_1d_changed[ X ] |= G1.is_fs;
 	}
 
 	/* Find maximum and minimum of old and new data and, if the minimum or
@@ -490,9 +517,10 @@ static void accept_1d_data( long x_index, long curve, int type, char *ptr )
 					}
 
 			G1.is_scale_set = SET;
+			scale_1d_changed[ X ] = SET;
 		}
 
-		G1.scale_changed = SET;
+		scale_1d_changed[ Y ] = SET;
 		G1.rwc_delta[ Y ] = new_rwc_delta_y;
 	}
 
@@ -543,15 +571,12 @@ static void accept_1d_data( long x_index, long curve, int type, char *ptr )
 	/* If the scale did not change redraw only the current curve, otherwise all
 	   curves */
 
-	if ( ! G1.scale_changed )
+	if ( ! ( scale_1d_changed[ X ] || scale_1d_changed[ Y ] ) )
 		recalc_XPoints_of_curve_1d( G1.curve[ curve ] );
 	else
 		for ( i = 0; i < G1.nc; i++ )
 			recalc_XPoints_of_curve_1d( G1.curve[ i ] );
-
-	G1.scale_changed = UNSET;
 }
-
 
 
 /*---------------------------------------------------------------------*/
@@ -621,10 +646,12 @@ static void accept_1d_data_sliding( long curve, int type, char *ptr )
 					  sp++, count-- )
 					sp->v = fac * sp->v + off;
 
+			scale_1d_changed[ X ] = SET;
 			G1.is_scale_set = SET;
 		}
 
-		G1.scale_changed = SET;
+
+		scale_1d_changed[ Y ] = SET;
 		G1.rwc_delta[ Y ] = new_rwc_delta_y;
 	}
 
@@ -690,8 +717,6 @@ static void accept_1d_data_sliding( long curve, int type, char *ptr )
 				m = m->next;
 			}
 		}
-
-		G1.scale_changed = SET;
 	}
 
 	/* Now append the new data */
@@ -732,13 +757,11 @@ static void accept_1d_data_sliding( long curve, int type, char *ptr )
 	/* If the scale did not change redraw only the current curve, otherwise all
 	   curves */
 
-	if ( ! G1.scale_changed )
+	if ( ! ( scale_1d_changed[ X ] || scale_1d_changed[ Y ] ) )
 		recalc_XPoints_of_curve_1d( G1.curve[ curve ] );
 	else
 		for ( i = 0; i < G1.nc; i++ )
 			recalc_XPoints_of_curve_1d( G1.curve[ i ] );
-
-	G1.scale_changed = UNSET;
 }
 
 
@@ -761,8 +784,6 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 	Curve_2d *cv;
 	long i, j;
 	Scaled_Point *sp;
-	bool need_cut_redraw = UNSET;
-	bool xy_scale_changed = UNSET;
 
 
 	/* Test if the curve number is OK */
@@ -793,16 +814,24 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 
 	if ( x_index + x_len > G2.nx )
 	{
-		xy_scale_changed = SET;
 		if ( y_index + y_len >= G2.ny )
+		{
 			need_cut_redraw |= incr_x_and_y( x_index, x_len, y_index + y_len);
+			if ( cv->is_fs && cv->active )
+				scale_2d_changed[ X ] = scale_2d_changed[ Y ] = SET;
+		}
 		else
+		{
 			need_cut_redraw |= incr_x( x_index, x_len );
+			if ( cv->is_fs && cv->active )
+				scale_2d_changed[ X ] = SET;
+		}
 	}
 	else if ( y_index + y_len >= G2.ny )
 	{
-		xy_scale_changed = SET;
 		need_cut_redraw |= incr_y( y_index + y_len );
+		if ( cv->is_fs && cv->active )
+			scale_2d_changed[ Y ] = SET;
 	}
 
 	/* Find maximum and minimum of old and new data and, if the minimum or
@@ -810,8 +839,7 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 
 	old_rw_min = cv->rw_min;
 
-	if ( ( cv->scale_changed =
-		   get_new_extrema( &cv->rw_max, &cv->rw_min, ptr, x_len, type ) ) )
+	if ( get_new_extrema( &cv->rw_max, &cv->rw_min, ptr, x_len, type ) )
 	{
 		new_rwc_delta_z = cv->rw_max - cv->rw_min;
 
@@ -835,8 +863,9 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 			}
 		}
 
-		/* If data have not been scaled yet to interval [0,1] and maximum
-		   value has become different from minimum value do scaling now */
+		/* If data have not been scaled yet to the interval [0,1] and maximum
+		   value isn't identical zto the minimum value anymore do calculate the
+		   scaling */
 
 		if ( ! cv->is_scale_set && cv->rw_max != cv->rw_min )
 		{
@@ -851,8 +880,12 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 				}
 
 			cv->is_scale_set = SET;
+			if ( cv->active )
+				scale_2d_changed[ X ] = scale_2d_changed[ Y ] = SET;
 		}
 
+		if ( cv->is_fs && cv->active )
+			scale_2d_changed[ Z ] = SET;
 		need_cut_redraw |= cut_data_rescaled( curve, cv->rw_min, cv->rw_max );
 		cv->rwc_delta[ Z ] = new_rwc_delta_z;
 	}
@@ -970,15 +1003,13 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 		if ( ! cv->is_scale_set )
 			continue;
 
-		if ( xy_scale_changed || i == curve )
-			 recalc_XPoints_of_curve_2d( cv );
-		cv->scale_changed = UNSET;
+		if ( scale_2d_changed[ X ] || scale_2d_changed[ Y ] ||
+			 scale_2d_changed[ Z ] || i == curve )
+			cv->needs_recalc = SET;
+
+		if ( i == curve )
+			need_2d_redraw = SET;
 	}
-
-	/* Finally update the cut window if necessary */
-
-	if ( need_cut_redraw )
-		redraw_all_cut_canvases( );
 }
 
 
@@ -1050,7 +1081,7 @@ static long get_number_of_new_points( char **ptr, int type )
 
 /*----------------------------------------------------------*/
 /* Determines the new maximum and minimum value of the data */
-/* set and returns if the maximum or minimum changes.       */
+/* set and returns if the maximum or minimum changed.       */
 /*----------------------------------------------------------*/
 
 static bool get_new_extrema( double *max, double *min, char *ptr,
@@ -1165,7 +1196,6 @@ static bool incr_x( long x_index, long len )
 		if ( cv->is_fs )
 			cv->s2d[ X ] = ( double ) ( G2.canvas.w - 1 ) /
 						   ( double ) ( new_Gnx - 1 );
-		cv->scale_changed = SET;
 	}
 
 	/* Also tell the routines for drawing cuts about the changes and return
@@ -1209,7 +1239,6 @@ static bool incr_y( long y_index )
 		if ( cv->is_fs )
 			cv->s2d[ Y ] = ( double ) ( G2.canvas.h - 1 ) /
 						   ( double ) ( new_Gny - 1 );
-		cv->scale_changed = SET;
 	}
 
 	/* Also tell the routines for drawing cuts about the changes and return
@@ -1276,8 +1305,6 @@ static bool incr_x_and_y( long x_index, long len, long y_index )
 			cv->s2d[ Y ] = ( double ) ( G2.canvas.h - 1 ) /
 						   ( double ) ( new_Gny - 1 );
 		}
-
-		cv->scale_changed = SET;
 	}
 
 	/* Also tell the routines for drawing cuts about the changes and return

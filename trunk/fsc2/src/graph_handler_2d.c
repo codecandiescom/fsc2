@@ -41,9 +41,10 @@ static bool zoom_z_2d( Canvas *c );
 static bool shift_XPoints_of_curve_2d( Canvas *c, Curve_2d *cv );
 static void reconfigure_window_2d( Canvas *c, int w, int h );
 static void recalc_XPoints_2d( void );
-static void make_color_scale( Canvas *c, Curve_2d *cv );
-static inline unsigned long d2color( double a );
+static void draw_2d_points( Canvas *c, Curve_2d *cv );
+static void make_color_scale( Canvas *c );
 static void delete_marker_2d( long x_pos, long y_pos, long curve );
+static inline long d2ci( double a );
 
 
 /*-----------------------------------------------------------*/
@@ -683,7 +684,7 @@ static bool change_x_range_2d( Canvas *c )
 	cv->s2d[ X ] = ( G2.canvas.w - 1 ) / fabs( x1 - x2 );
 	cv->shift[ X ] = - d_min( x1, x2 );
 
-	recalc_XPoints_of_curve_2d( cv );
+	cv->needs_recalc = SET;
 
 	return SET;
 }
@@ -721,7 +722,7 @@ static bool change_y_range_2d( Canvas *c )
 	cv->s2d[ Y ] = new_s2d_y;
 	cv->shift[ Y ] = - d_min( cy1, cy2 );
 
-	recalc_XPoints_of_curve_2d( cv );
+	cv->needs_recalc = SET;
 
 	return SET;
 }
@@ -774,8 +775,7 @@ static bool change_xy_range_2d( Canvas *c )
 		scale_changed = SET;
 	}
 
-	if ( scale_changed )
-		recalc_XPoints_of_curve_2d( cv );
+	cv->needs_recalc |= scale_changed;
 
 	return scale_changed;
 }
@@ -845,7 +845,7 @@ static bool zoom_x_2d( Canvas *c )
 
 	cv->shift[ X ] = G.start[ X ] / cv->s2d[ X ] - px;
 
-	recalc_XPoints_of_curve_2d( cv );
+	cv->needs_recalc = SET;
 
 	return SET;
 }
@@ -890,7 +890,7 @@ static bool zoom_y_2d( Canvas *c )
 
 	cv->shift[ Y ] = ( G2.canvas.h - 1.0 - G.start[ Y ] ) / cv->s2d[ Y ] - py;
 
-	recalc_XPoints_of_curve_2d( cv );
+	cv->needs_recalc = SET;
 
 	return SET;
 }
@@ -957,8 +957,7 @@ static bool zoom_xy_2d( Canvas *c )
 		scale_changed = SET;
 	}
 
-	if ( scale_changed )
-		recalc_XPoints_of_curve_2d( cv );
+	cv->needs_recalc |= scale_changed;
 
 	return scale_changed;
 }
@@ -1122,6 +1121,8 @@ static void reconfigure_window_2d( Canvas *c, int w, int h )
 				cv->old_s2d[ X ] *= ( w - 1.0 ) / ( old_w - 1 );
 				cv->old_s2d[ Y ] *= ( h - 1.0 ) / ( old_h - 1 );
 			}
+
+			cv->needs_recalc = SET;
 		}
 
 		/* Recalculate data for drawing (has to be done after setting of
@@ -1270,6 +1271,8 @@ void recalc_XPoints_of_curve_2d( Curve_2d *cv )
 				cv->up    &= ( xps->y + cv->h <= 0 );
 				cv->down  &= ( xps->y >= ( int ) G2.canvas.h );
 			}
+
+	cv->needs_recalc = UNSET;
 }
 
 
@@ -1292,10 +1295,7 @@ void redraw_all_2d( void )
 
 void redraw_canvas_2d( Canvas *c )
 {
-	long i, count;
 	Curve_2d *cv;
-	Scaled_Point *sp;
-	XPoint *xps;
 	Marker_2D *m;
 	XPoint points[ 5 ];
 	short int dw, dh;
@@ -1322,29 +1322,7 @@ void redraw_canvas_2d( Canvas *c )
 		{
 			cv = G2.curve_2d[ G2.active_curve ];
 
-			for ( sp = cv->points, xps = cv->xpoints_s, count = cv->count,
-				  i = 0; i < G2.nx * G2.ny && count != 0; sp++, xps++, i++ )
-			{
-				if ( ! sp->exist )
-					continue;
-
-				count--;
-
-				/* Don't draw if the rectangle isn't at least partially within
-				   the canvas (this seems to be faster than X setting the
-				   color and only then doing the clipping). */
-
-				if ( xps->x > ( short int ) c->w ||
-					 xps->y > ( short int ) c->h ||
-					 - xps->x - 1 > cv->w || - xps->y - 1 > cv->h )
-					continue;
-
-				XSetForeground( G.d, cv->gc,
-								d2color( cv->z_factor
-										 * ( sp->v + cv->shift[ Z ] ) ) );
-				XFillRectangle( G.d, c->pm, cv->gc,
-								xps->x, xps->y, cv->w, cv->h );
-			}
+			draw_2d_points( c, cv );
 
 			/* Draw markers of the current curve */
 
@@ -1429,6 +1407,99 @@ void redraw_canvas_2d( Canvas *c )
 	/* Finally copy the pixmap onto the screen */
 
 	repaint_canvas_2d( c );
+}
+
+
+/*------------------------------------------------------------------*/
+/* Function for drawing the measured points in the canvas. First we */
+/* check if the points need to be recalculated (which was deferred  */
+/* umtil the last moment to save time), then we draw. The speed     */
+/* things up we try to use the fastest method, i.e. when the point  */
+/* size is only 1 pixel we just draw points, when one of the sizes  */
+/* is 1 we draw lines and only when both sizes are larger than 1 we */
+/* draw rectangles. We also dont draw if the points isn't within    */
+/* the canvas, explicitely checking and avoiding to draw if it's    */
+/* not really necessary seems to be quite a bit faster than letting */
+/* the X clipping mechanism take care of this.                      */
+/*------------------------------------------------------------------*/
+
+static void draw_2d_points( Canvas *c, Curve_2d *cv )
+
+{
+	long i, count;
+	Scaled_Point *sp;
+	XPoint *xps;
+	XPoint p[ 2 ];
+
+
+	if ( cv->needs_recalc )
+		recalc_XPoints_of_curve_2d( cv );
+
+	if ( cv->w == 1 && cv->h == 1 )
+		for ( sp = cv->points, xps = cv->xpoints_s, count = cv->count,
+				  i = 0; i < G2.nx * G2.ny && count != 0; sp++, xps++, i++ )
+		{
+			if ( ! sp->exist )
+				continue;
+
+			count--;
+
+			if ( xps->x > ( short int ) c->w ||
+				 xps->y > ( short int ) c->h ||
+				 - xps->x - 1 > 1 || - xps->y - 1 > 1 )
+				continue;
+
+			XDrawPoint( G.d, c->pm,
+						G2.gcs[ d2ci( cv->z_factor
+									  * ( sp->v + cv->shift[ Z ] ) ) ],
+						xps->x, xps->y );
+		}
+	else if ( cv->w == 1 || cv->h == 1 )
+	{
+		p[ 1 ].x = cv->w - 1;
+		p[ 1 ].y = cv->h - 1;
+
+		for ( sp = cv->points, xps = cv->xpoints_s, count = cv->count,
+				  i = 0; i < G2.nx * G2.ny && count != 0; sp++, xps++, i++ )
+		{
+			if ( ! sp->exist )
+				continue;
+
+			count--;
+
+			if ( xps->x > ( short int ) c->w ||
+				 xps->y > ( short int ) c->h ||
+				 - xps->x - 1 > 1 || - xps->y - 1 > 1 )
+				continue;
+
+			p[ 0 ].x = xps->x;
+			p[ 0 ].y = xps->y;
+
+			XDrawLines( G.d, c->pm,
+						G2.gcs[ d2ci( cv->z_factor
+									  * ( sp->v + cv->shift[ Z ] ) ) ],
+						p, 2,  CoordModePrevious);
+		}
+	}
+	else
+		for ( sp = cv->points, xps = cv->xpoints_s, count = cv->count,
+				  i = 0; i < G2.nx * G2.ny && count != 0; sp++, xps++, i++ )
+		{
+			if ( ! sp->exist )
+				continue;
+
+			count--;
+
+			if ( xps->x > ( short int ) c->w ||
+				 xps->y > ( short int ) c->h ||
+				 - xps->x - 1 > cv->w || - xps->y - 1 > cv->h )
+				continue;
+
+			XFillRectangle( G.d, c->pm,
+							G2.gcs[ d2ci( cv->z_factor
+										  * ( sp->v + cv->shift[ Z ] ) ) ],
+							xps->x, xps->y, cv->w, cv->h );
+		}
 }
 
 
@@ -1726,7 +1797,7 @@ void fs_rescale_2d( Curve_2d *cv )
 			sp->v = ( cv->rwc_delta[ Z ] * sp->v + cv->rw_min - rw_min )
 					/ new_rwc_delta_z;
 
-	recalc_XPoints_of_curve_2d( cv );
+	cv->needs_recalc = SET;
 
 	/* Store new minimum and maximum and the new scale factor */
 
@@ -1766,7 +1837,7 @@ void make_scale_2d( Curve_2d *cv, Canvas *c, int coord )
 
 
 	if ( coord == Z )
-		make_color_scale( c, cv );
+		make_color_scale( c );
 
 	/* The distance between the smallest ticks should be 'G.scale_tick_dist'
 	   points - calculate the corresponding delta in real word units */
@@ -1986,12 +2057,13 @@ void make_scale_2d( Curve_2d *cv, Canvas *c, int coord )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-static void make_color_scale( Canvas *c, Curve_2d *cv )
+static void make_color_scale( Canvas *c )
 {
 	int i;
 	unsigned int h;
-	double col_inc;
+	double hp;
 	double h_inc;
+	XPoint p[ 2 ];
 
 
 	h = d2ushrt( ceil( ( double ) c->h / NUM_COLORS ) );
@@ -2002,39 +2074,40 @@ static void make_color_scale( Canvas *c, Curve_2d *cv )
 	XDrawLine( G.d, c->pm, c->font_gc, G.z_line_offset + G.z_line_width + 1,
 			   0, G.z_line_offset + G.z_line_width + 1, c->h - 1 );
 
-	col_inc = 1.0 / ( NUM_COLORS - 1 );
-
-	for ( i = 0; i < NUM_COLORS; i++ )
-	{
-		XSetForeground( G.d, cv->gc, d2color( i * col_inc ) );
-		XFillRectangle( G.d, c->pm, cv->gc, G.z_line_offset + 1,
+	if ( h_inc > 1.0 )
+		for ( i = 0; i < NUM_COLORS; i++ )
+			XFillRectangle( G.d, c->pm, G2.gcs[ i ], G.z_line_offset + 1,
 						d2shrt( c->h - ( i + 1 ) * h_inc ),
 						G.z_line_width, h );
+	else
+	{
+		p[ 0 ].x = G.z_line_offset + 1;
+		p[ 1 ].x = G.z_line_width;
+		p[ 1 ].y = 0;
+		hp = c->h - h_inc;
+
+		for ( i = 0; i < NUM_COLORS; i++ )
+		{
+			hp += h_inc;
+			p[ 0 ].y = d2shrt( hp );
+			XDrawLines( G.d, c->pm, G2.gcs[ i ], p, 2, CoordModePrevious );
+		}
 	}
 }
 
 
-/*--------------------------------------------------------------------------*/
-/* Returns the pixel value of an entry in XFORMs internal colour map from   */
-/* the colours set in create_colors(). For values slightly above 1 as well  */
-/* as for values just below 0 only one colour pixel value is returned while */
-/* for intermediate values one of NUM_COLORS (as defined in global.h) is    */
-/* returned, depending on the value.                                        */
-/*--------------------------------------------------------------------------*/
+/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*/
 
-static inline unsigned long d2color( double a )
+static inline long d2ci( double a )
 {
-	long c_index;
-
-
-	c_index = lrnd( a * ( NUM_COLORS - 1 ) );
+	long c_index = lrnd( a * ( NUM_COLORS - 1 ) );
 
 	if ( c_index < 0 )
-		return G2.color_list[ NUM_COLORS ];
-	else if ( c_index < NUM_COLORS )
-		return G2.color_list[ c_index ];
-	else
-		return G2.color_list[ NUM_COLORS + 1 ];
+		return NUM_COLORS;
+	if ( c_index >= NUM_COLORS )
+		return NUM_COLORS + 1;
+	return c_index;
 }
 
 

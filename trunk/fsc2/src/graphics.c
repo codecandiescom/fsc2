@@ -909,7 +909,6 @@ static void G_struct_init( void )
 											 cursor7_x_hot, cursor7_y_hot );
 
 		create_colors( );
-		memcpy( G_2d_stored->color_list, G2.color_list, sizeof G2.color_list );
 
 #if defined WITH_HTTP_SERVER
 		create_color_hash( );
@@ -925,10 +924,7 @@ static void G_struct_init( void )
 		}
 
 	G1.is_fs = SET;
-	G1.scale_changed = UNSET;
-
 	G2.is_fs = SET;
-	G2.scale_changed = UNSET;
 
 	G1.rw_min = HUGE_VAL;
 	G1.rw_max = - HUGE_VAL;
@@ -1076,6 +1072,12 @@ static void G_init_curves_2d( void )
 
 	depth = fl_get_canvas_depth( G2.canvas.obj );
 
+	for ( i = 0; i < NUM_COLORS + 2; i++ )
+	{
+		G2.gcs[ i ] = XCreateGC( G.d, G2.canvas.pm, 0, 0 );
+		 XSetForeground( G.d, G2.gcs[ i ], fl_get_pixel( FL_FREE_COL1 + i ) );
+	}
+
 	for ( i = 0; i < 7; i++ )
 		fl_set_cursor_color( G2.cursor[ i ], FL_BLACK, FL_WHITE );
 
@@ -1091,6 +1093,9 @@ static void G_init_curves_2d( void )
 
 		cv->marker_2d  = NULL;
 		cv->cut_marker = NULL;
+
+		cv->needs_recalc = UNSET;
+		cv->w = cv->h = 0;
 
 		/* Create a GC for drawing the curve and set its colour */
 
@@ -1164,7 +1169,6 @@ static void G_init_curves_2d( void )
 		cv->can_undo = UNSET;
 
 		cv->is_fs = SET;
-		cv->scale_changed = UNSET;
 
 		cv->rw_min = HUGE_VAL;
 		cv->rw_max = - HUGE_VAL;
@@ -1451,6 +1455,10 @@ void graphics_free( void )
 		}
 
 	if ( G.dim & 2 )
+	{
+		for ( i = 0; i < NUM_COLORS + 2; i++ )
+			XFreeGC( G.d, G2.gcs[ i ] );
+
 		for ( i = 0; i < G2.nc; i++ )
 		{
 			if ( ( cv2 = G2.curve_2d[ i ] ) == NULL )
@@ -1475,6 +1483,7 @@ void graphics_free( void )
 			T_free( cv2->xpoints_s );
 			cv2 = CURVE_2D_P T_free( cv2 );
 		}
+	}
 
 	if ( G.font )
 	{
