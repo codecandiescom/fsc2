@@ -193,7 +193,7 @@ static void other_data_request( int type, void * ptr )
 
 	switch( type )
 	{
-		case D_CLEAR_CURVE :
+		case D_CLEAR_CURVE :                  /* clear curve command */
 			count = * ( ( long * ) ptr );     /* length of list of curves */
 			ptr += sizeof( long );
 			ca = ( long * ) ptr;              /* list of curve numbers */
@@ -206,13 +206,13 @@ static void other_data_request( int type, void * ptr )
 
 			break;
 
-		case D_CHANGE_SCALE :
-			is_set = *( ( int * ) ptr );
+		case D_CHANGE_SCALE :                 /* change scale command */
+			is_set = *( ( int * ) ptr );      /* flags */
 			ptr += sizeof( int );
 			change_scale( is_set, ( double * ) ptr );
 			break;
 
-		default :
+		default :                             /* unknown command */
 			eprint( FATAL, "Internal communication error at %s:%d.\n",
 					__FILE__, __LINE__ );
 			THROW( EXCEPTION );
