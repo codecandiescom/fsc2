@@ -73,7 +73,7 @@ static void vars_ass_from_trans_ptr( Var *src, Var *dest );
 	} val;
 	int    dim;              // dimension of array
 	int    *sizes;           // array of sizes of dimensions
-	long   len;              // total len of array
+	size_t len;              // total len of array
 	long   flags;
 	struct Var_ *from;
 	struct Var_ *next;       // next variable in list or stack
@@ -854,8 +854,8 @@ Var *vars_pow( Var *v1, Var *v2 )
 Var *vars_negate( Var *v )
 {
 	Var *new_var;
-	long i;
-	long len = 0;
+	size_t i;
+	size_t len = 0;
 	long *rlp;
 	double *rdp;
 	long *ilp = NULL;
@@ -1188,7 +1188,7 @@ Var *vars_push( int type, ... )
 
 		case INT_ARR :
 			new_stack_var->val.lpnt = va_arg( ap, long * );
-			new_stack_var->len = va_arg( ap, long );
+			new_stack_var->len = va_arg( ap, size_t );
 			if ( new_stack_var->val.lpnt != NULL )
 				new_stack_var->val.lpnt =
 					         get_memcpy( new_stack_var->val.lpnt,
@@ -1200,7 +1200,7 @@ Var *vars_push( int type, ... )
 
 		case FLOAT_ARR :
 			new_stack_var->val.dpnt = va_arg( ap, double * );
-			new_stack_var->len = va_arg( ap, long );
+			new_stack_var->len = va_arg( ap, size_t );
 			if ( new_stack_var->val.dpnt != NULL )
 				new_stack_var->val.dpnt =
 					get_memcpy( new_stack_var->val.dpnt,
@@ -2007,7 +2007,7 @@ void vars_assign( Var *src, Var *dest )
 
 static void vars_ass_from_var( Var *src, Var *dest )
 {
-	long i;
+	size_t i;
 	long lval;
 	double dval;
 	long *lp;
@@ -2441,7 +2441,7 @@ static void vars_ass_from_trans_ptr( Var *src, Var *dest )
 
 void vars_arr_init( Var *v )
 {
-	long ni;
+	size_t ni;
 	Var  *p1,
 		 *p2,
 		 *a;

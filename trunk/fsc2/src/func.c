@@ -42,7 +42,7 @@
    these functions a negative number of arguments is specified and to
    distingish between them (and to switch off checking the number of arguments
    for the maximum number) for functions without an upper limit of arguments
-   the number of arguments is set to 'LONG_MIN'.
+   the number of arguments is set to 'INT_MIN'.
 
    As the next step the function is called. The function gets passed a pointer
    to the first argument on the stack. It has to check by itself that the
@@ -77,75 +77,75 @@ bool Dont_Save;
 
 Func Def_Fncts[ ] =              /* List of built-in functions */
 {
-	{ "int",           f_int,      		 1, ACCESS_ALL,  NULL, UNSET },
-	{ "float",         f_float,    		 1, ACCESS_ALL,  NULL, UNSET },
-	{ "round",         f_round,    		 1, ACCESS_ALL,  NULL, UNSET },
-	{ "floor",         f_floor,    		 1, ACCESS_ALL,  NULL, UNSET },
-	{ "ceil",          f_ceil,     		 1, ACCESS_ALL,  NULL, UNSET },
-	{ "abs",           f_abs,      		 1, ACCESS_ALL,  NULL, UNSET },
-	{ "sin",           f_sin,      		 1, ACCESS_ALL,  NULL, UNSET },
-	{ "cos",           f_cos,      		 1, ACCESS_ALL,  NULL, UNSET },
-	{ "tan",           f_tan,      		 1, ACCESS_ALL,  NULL, UNSET },
-	{ "asin",          f_asin,     		 1, ACCESS_ALL,  NULL, UNSET },
-	{ "acos",          f_acos,     		 1, ACCESS_ALL,  NULL, UNSET },
-	{ "atan",          f_atan,     		 1, ACCESS_ALL,  NULL, UNSET },
-	{ "sinh",          f_sinh,     		 1, ACCESS_ALL,  NULL, UNSET },
-	{ "cosh",          f_cosh,     		 1, ACCESS_ALL,  NULL, UNSET },
-	{ "tanh",          f_tanh,     		 1, ACCESS_ALL,  NULL, UNSET },
-	{ "exp",           f_exp,      		 1, ACCESS_ALL,  NULL, UNSET },
-	{ "ln",            f_ln,       		 1, ACCESS_ALL,  NULL, UNSET },
-	{ "log",           f_log,      		 1, ACCESS_ALL,  NULL, UNSET },
-	{ "sqrt",          f_sqrt,     		 1, ACCESS_ALL,  NULL, UNSET },
-	{ "random",        f_random,   		 0, ACCESS_ALL,  NULL, UNSET },
-	{ "grandom",       f_grand,    		 0, ACCESS_ALL,  NULL, UNSET },
-	{ "set_seed",      f_setseed,  		-1, ACCESS_ALL,  NULL, UNSET },
-	{ "time",          f_time,     		 0, ACCESS_ALL,  NULL, UNSET },
-	{ "date",          f_date,     		 0, ACCESS_ALL,  NULL, UNSET },
-	{ "delta_time",    f_dtime,    		 0, ACCESS_EXP,  NULL, UNSET },
-	{ "print",         f_print,   LONG_MIN, ACCESS_ALL,  NULL, UNSET },
-	{ "wait",          f_wait,     		 1, ACCESS_ALL,  NULL, UNSET },
-	{ "init_1d",       f_init_1d,  		-6, ACCESS_PREP, NULL, UNSET },
-	{ "init_2d",       f_init_2d,  	   -10, ACCESS_PREP, NULL, UNSET },
-	{ "change_scale",  f_cscale,   		-4, ACCESS_EXP,  NULL, UNSET },
-	{ "change_label",  f_clabel,   		-3, ACCESS_EXP,  NULL, UNSET },
-	{ "rescale",       f_rescale,  		-2, ACCESS_EXP,  NULL, UNSET },
-	{ "display",       f_display,  	   -16, ACCESS_EXP,  NULL, UNSET },
-	{ "clear_curve",   f_clearcv,  		-4, ACCESS_EXP,  NULL, UNSET },
-	{ "dim",           f_dim,      		 1, ACCESS_ALL,  NULL, UNSET },
-	{ "size",          f_size,     		 2, ACCESS_ALL,  NULL, UNSET },
-	{ "sizes",         f_sizes,    		 1, ACCESS_ALL,  NULL, UNSET },
-	{ "mean",          f_mean,     		-3, ACCESS_ALL,  NULL, UNSET },
-	{ "rms",           f_rms,      		 1, ACCESS_ALL,  NULL, UNSET },
-	{ "slice",         f_slice,    		-3, ACCESS_ALL,  NULL, UNSET },
-	{ "square",        f_square,   		 1, ACCESS_ALL,  NULL, UNSET },
-	{ "int_slice",     f_islice,   		 1, ACCESS_ALL,  NULL, UNSET },
-	{ "float_slice",   f_fslice,   		 1, ACCESS_ALL,  NULL, UNSET },
-	{ "get_file",      f_getf,     		-5, ACCESS_EXP,  NULL, UNSET },
-	{ "clone_file",    f_clonef,   		 3, ACCESS_EXP,  NULL, UNSET },
-	{ "save",          f_save,    LONG_MIN, ACCESS_EXP,  NULL, UNSET },
-	{ "fsave",         f_fsave,   LONG_MIN, ACCESS_EXP,  NULL, UNSET },
-    { "ffsave",        f_ffsave,  LONG_MIN, ACCESS_EXP,  NULL, UNSET },
-	{ "save_program",  f_save_p,   		-2, ACCESS_EXP,  NULL, UNSET },
-	{ "save_output",   f_save_o,   		-2, ACCESS_EXP,  NULL, UNSET },
-	{ "save_comment",  f_save_c,   		-4, ACCESS_EXP,  NULL, UNSET },
-	{ "is_file",       f_is_file,  		 1, ACCESS_ALL,  NULL, UNSET },
-	{ "layout",        f_layout,   		 1, ACCESS_EXP,  NULL, UNSET },
-	{ "button_create", f_bcreate,  		-4, ACCESS_EXP,  NULL, UNSET },
-	{ "button_delete", f_bdelete, LONG_MIN, ACCESS_EXP,  NULL, UNSET },
-	{ "button_state",  f_bstate,   		-2, ACCESS_EXP,  NULL, UNSET },
-	{ "slider_create", f_screate,  		-6, ACCESS_EXP,  NULL, UNSET },
-	{ "slider_delete", f_sdelete, LONG_MIN, ACCESS_EXP,  NULL, UNSET },
-	{ "slider_value",  f_svalue,   		-2, ACCESS_EXP,  NULL, UNSET },
-	{ "input_create",  f_icreate,  		-5, ACCESS_EXP,  NULL, UNSET },
-	{ "input_delete",  f_idelete, LONG_MIN, ACCESS_EXP,  NULL, UNSET },
-	{ "input_value",   f_ivalue,   		-2, ACCESS_EXP,  NULL, UNSET },
-	{ "output_create", f_icreate,  		-5, ACCESS_EXP,  NULL, UNSET },
-	{ "output_delete", f_idelete, LONG_MIN, ACCESS_EXP,  NULL, UNSET },
-	{ "output_value",  f_ivalue,   		-2, ACCESS_EXP,  NULL, UNSET },
-	{ "object_delete", f_objdel,  LONG_MIN, ACCESS_EXP,  NULL, UNSET },
-	{ "end",           f_stopsim,  		 0, ACCESS_EXP,  NULL, UNSET },
-	{ "abort",         f_abort,    		 0, ACCESS_EXP,  NULL, UNSET },
-	{ NULL,            NULL,       		 0, 0,           NULL, UNSET }
+	{ "int",           f_int,      		1, ACCESS_ALL,  NULL, UNSET },
+	{ "float",         f_float,    		1, ACCESS_ALL,  NULL, UNSET },
+	{ "round",         f_round,    		1, ACCESS_ALL,  NULL, UNSET },
+	{ "floor",         f_floor,    		1, ACCESS_ALL,  NULL, UNSET },
+	{ "ceil",          f_ceil,     		1, ACCESS_ALL,  NULL, UNSET },
+	{ "abs",           f_abs,      		1, ACCESS_ALL,  NULL, UNSET },
+	{ "sin",           f_sin,      		1, ACCESS_ALL,  NULL, UNSET },
+	{ "cos",           f_cos,      		1, ACCESS_ALL,  NULL, UNSET },
+	{ "tan",           f_tan,      		1, ACCESS_ALL,  NULL, UNSET },
+	{ "asin",          f_asin,     		1, ACCESS_ALL,  NULL, UNSET },
+	{ "acos",          f_acos,     		1, ACCESS_ALL,  NULL, UNSET },
+	{ "atan",          f_atan,     		1, ACCESS_ALL,  NULL, UNSET },
+	{ "sinh",          f_sinh,     		1, ACCESS_ALL,  NULL, UNSET },
+	{ "cosh",          f_cosh,     		1, ACCESS_ALL,  NULL, UNSET },
+	{ "tanh",          f_tanh,     		1, ACCESS_ALL,  NULL, UNSET },
+	{ "exp",           f_exp,      		1, ACCESS_ALL,  NULL, UNSET },
+	{ "ln",            f_ln,       		1, ACCESS_ALL,  NULL, UNSET },
+	{ "log",           f_log,      		1, ACCESS_ALL,  NULL, UNSET },
+	{ "sqrt",          f_sqrt,     		1, ACCESS_ALL,  NULL, UNSET },
+	{ "random",        f_random,   		0, ACCESS_ALL,  NULL, UNSET },
+	{ "grandom",       f_grand,    		0, ACCESS_ALL,  NULL, UNSET },
+	{ "set_seed",      f_setseed,  		1, ACCESS_ALL,  NULL, UNSET },
+	{ "time",          f_time,     		0, ACCESS_ALL,  NULL, UNSET },
+	{ "date",          f_date,     		0, ACCESS_ALL,  NULL, UNSET },
+	{ "delta_time",    f_dtime,    		0, ACCESS_EXP,  NULL, UNSET },
+	{ "print",         f_print,   INT_MIN, ACCESS_ALL,  NULL, UNSET },
+	{ "wait",          f_wait,     	    1, ACCESS_ALL,  NULL, UNSET },
+	{ "init_1d",       f_init_1d,  	   -6, ACCESS_PREP, NULL, UNSET },
+	{ "init_2d",       f_init_2d,  	  -10, ACCESS_PREP, NULL, UNSET },
+	{ "change_scale",  f_cscale,   	   -4, ACCESS_EXP,  NULL, UNSET },
+	{ "change_label",  f_clabel,   	   -3, ACCESS_EXP,  NULL, UNSET },
+	{ "rescale",       f_rescale,  	   -2, ACCESS_EXP,  NULL, UNSET },
+	{ "display",       f_display,  	  -16, ACCESS_EXP,  NULL, UNSET },
+	{ "clear_curve",   f_clearcv,  	   -4, ACCESS_EXP,  NULL, UNSET },
+	{ "dim",           f_dim,      	    1, ACCESS_ALL,  NULL, UNSET },
+	{ "size",          f_size,     	    2, ACCESS_ALL,  NULL, UNSET },
+	{ "sizes",         f_sizes,    	    1, ACCESS_ALL,  NULL, UNSET },
+	{ "mean",          f_mean,     	   -3, ACCESS_ALL,  NULL, UNSET },
+	{ "rms",           f_rms,      	    1, ACCESS_ALL,  NULL, UNSET },
+	{ "slice",         f_slice,    	   -3, ACCESS_ALL,  NULL, UNSET },
+	{ "square",        f_square,   	    1, ACCESS_ALL,  NULL, UNSET },
+	{ "int_slice",     f_islice,   	    1, ACCESS_ALL,  NULL, UNSET },
+	{ "float_slice",   f_fslice,   	    1, ACCESS_ALL,  NULL, UNSET },
+	{ "get_file",      f_getf,     	   -5, ACCESS_EXP,  NULL, UNSET },
+	{ "clone_file",    f_clonef,   	    3, ACCESS_EXP,  NULL, UNSET },
+	{ "save",          f_save,    INT_MIN, ACCESS_EXP,  NULL, UNSET },
+	{ "fsave",         f_fsave,   INT_MIN, ACCESS_EXP,  NULL, UNSET },
+    { "ffsave",        f_ffsave,  INT_MIN, ACCESS_EXP,  NULL, UNSET },
+	{ "save_program",  f_save_p,   	   -2, ACCESS_EXP,  NULL, UNSET },
+	{ "save_output",   f_save_o,   	   -2, ACCESS_EXP,  NULL, UNSET },
+	{ "save_comment",  f_save_c,   	   -4, ACCESS_EXP,  NULL, UNSET },
+	{ "is_file",       f_is_file,  	    1, ACCESS_ALL,  NULL, UNSET },
+	{ "layout",        f_layout,   	    1, ACCESS_EXP,  NULL, UNSET },
+	{ "button_create", f_bcreate,  	   -4, ACCESS_EXP,  NULL, UNSET },
+	{ "button_delete", f_bdelete, INT_MIN, ACCESS_EXP,  NULL, UNSET },
+	{ "button_state",  f_bstate,   	   -2, ACCESS_EXP,  NULL, UNSET },
+	{ "slider_create", f_screate,  	   -6, ACCESS_EXP,  NULL, UNSET },
+	{ "slider_delete", f_sdelete, INT_MIN, ACCESS_EXP,  NULL, UNSET },
+	{ "slider_value",  f_svalue,   	   -2, ACCESS_EXP,  NULL, UNSET },
+	{ "input_create",  f_icreate,  	   -5, ACCESS_EXP,  NULL, UNSET },
+	{ "input_delete",  f_idelete, INT_MIN, ACCESS_EXP,  NULL, UNSET },
+	{ "input_value",   f_ivalue,   	   -2, ACCESS_EXP,  NULL, UNSET },
+	{ "output_create", f_icreate,  	   -5, ACCESS_EXP,  NULL, UNSET },
+	{ "output_delete", f_idelete, INT_MIN, ACCESS_EXP,  NULL, UNSET },
+	{ "output_value",  f_ivalue,   	   -2, ACCESS_EXP,  NULL, UNSET },
+	{ "object_delete", f_objdel,  INT_MIN, ACCESS_EXP,  NULL, UNSET },
+	{ "end",           f_stopsim,  	    0, ACCESS_EXP,  NULL, UNSET },
+	{ "abort",         f_abort,    	    0, ACCESS_EXP,  NULL, UNSET },
+	{ NULL,            NULL,       	    0, 0,           NULL, UNSET }
 	                   /* last set marks the very last entry, don't remove ! */
 };
 
@@ -307,7 +307,7 @@ Var *func_get_long( const char *name, int *acc, bool flag )
 	
 	ret = vars_push( FUNC, f->fnct );
 	ret->name = T_strdup( name );
-	ret->len = f->nargs;
+	ret->dim = f->nargs;
 	if ( acc != NULL )
 		*acc = f->access_flag;
 
@@ -367,13 +367,13 @@ Var *func_call( Var *f )
 	cur_func = Fncts + i ;
 #endif
 
-	/* If the number of function arguments isn't LONG_MIN (indicating a
+	/* If the number of function arguments isn't INT_MIN (indicating a
 	   variable number of arguments without an upper limit) count the number
 	   of variables on the stack */
 
-	if ( f->len != LONG_MIN )
+	if ( f->dim > INT_MIN )
 	{
-		abs_len = f->len > 0 ? f->len : - f->len;
+		abs_len = f->dim > 0 ? f->dim : - f->dim;
 
 		/* Count number of arguments on the stack */
 
@@ -382,7 +382,7 @@ Var *func_call( Var *f )
 
 		/* If there are too many arguments utter a warning and remove the
 		   superfluous ones (distinuguish between functions with a fixed
-		   and a variable number of arguments - in the first case f->len
+		   and a variable number of arguments - in the first case f->dim
 		   is positive, in the second negative) */
 
 		if ( ac > abs_len )
@@ -401,11 +401,11 @@ Var *func_call( Var *f )
 		   structure) less arguments than needed by the function is a fatal
 		   error. */
 
-		if ( f->len >= 0 && ac < f->len )
+		if ( f->dim >= 0 && ac < f->dim )
 		{
 			eprint( FATAL, SET, "Function `%s' expects %d argument%s but only "
-					"%d where found.\n", f->name, f->len,
-					f->len == 1 ? "" : "s", ac );
+					"%d where found.\n", f->name, f->dim,
+					f->dim == 1 ? "" : "s", ac );
 			THROW( EXCEPTION )
 		}
 	}

@@ -505,7 +505,7 @@ void close_all_files( void )
 
 Var *f_save( Var *v )
 {
-	long i;
+	size_t i;
 	long start;
 	int file_num;
 	int count = 0;

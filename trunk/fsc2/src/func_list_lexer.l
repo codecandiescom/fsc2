@@ -389,7 +389,7 @@ static void fll_get_functions( Func *fncts, int num_predef_func )
 
 				if ( ! strcmp( func_listtext, "-" ) ||
 					 ( fncts[ act ].nargs = atol( func_listtext ) ) < 0 )
-					fncts[ act ].nargs = LONG_MIN;
+					fncts[ act ].nargs = INT_MIN;
 
 				state = 2;
 				break;

@@ -281,21 +281,21 @@ bool hfs9000_keep_all( void );
 
 bool hfs9000_new_pulse( long pnum );
 bool hfs9000_set_pulse_function( long pnum, int function );
-bool hfs9000_set_pulse_position( long pnum, double time );
-bool hfs9000_set_pulse_length( long pnum, double time );
-bool hfs9000_set_pulse_position_change( long pnum, double time );
-bool hfs9000_set_pulse_length_change( long pnum, double time );
+bool hfs9000_set_pulse_position( long pnum, double p_time );
+bool hfs9000_set_pulse_length( long pnum, double p_time );
+bool hfs9000_set_pulse_position_change( long pnum, double p_time );
+bool hfs9000_set_pulse_length_change( long pnum, double p_time );
 
 bool hfs9000_get_pulse_function( long pnum, int *function );
-bool hfs9000_get_pulse_position( long pnum, double *time );
-bool hfs9000_get_pulse_length( long pnum, double *time );
-bool hfs9000_get_pulse_position_change( long pnum, double *time );
-bool hfs9000_get_pulse_length_change( long pnum, double *time );
+bool hfs9000_get_pulse_position( long pnum, double *p_time );
+bool hfs9000_get_pulse_length( long pnum, double *p_time );
+bool hfs9000_get_pulse_position_change( long pnum, double *p_time );
+bool hfs9000_get_pulse_length_change( long pnum, double *p_time );
 
-bool hfs9000_change_pulse_position( long pnum, double time );
-bool hfs9000_change_pulse_length( long pnum, double time );
-bool hfs9000_change_pulse_position_change( long pnum, double time );
-bool hfs9000_change_pulse_length_change( long pnum, double time );
+bool hfs9000_change_pulse_position( long pnum, double p_time );
+bool hfs9000_change_pulse_length( long pnum, double tp_ime );
+bool hfs9000_change_pulse_position_change( long pnum, double p_time );
+bool hfs9000_change_pulse_length_change( long pnum, double p_time );
 
 
 /* Functions from hfs9000_init.c */
@@ -306,11 +306,11 @@ void hfs9000_set_pulses( FUNCTION *f );
 
 /* Functions from hfs9000_util.c */
 
-Ticks hfs9000_double2ticks( double time );
+Ticks hfs9000_double2ticks( double p_time );
 double hfs9000_ticks2double( Ticks ticks );
 void hfs9000_check_pod_level_diff( double high, double low );
 PULSE *hfs9000_get_pulse( long pnum );
-const char *hfs9000_ptime( double time );
+const char *hfs9000_ptime( double p_time );
 const char *hfs9000_pticks( Ticks ticks );
 int hfs9000_start_compare( const void *A, const void *B );
 Ticks hfs9000_get_max_seq_len( void );

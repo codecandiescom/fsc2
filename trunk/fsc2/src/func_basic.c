@@ -25,7 +25,7 @@
 #include "fsc2.h"
 
 
-static void get_array_params( Var *v, long *len, long **ilp, double **idp );
+static void get_array_params( Var *v, size_t *len, long **ilp, double **idp );
 
 static bool grand_is_old = UNSET;
 
@@ -70,7 +70,7 @@ Var *f_stopsim( Var *v )
 /*----------------------------------------------------------------*/
 /*----------------------------------------------------------------*/
 
-static void get_array_params( Var *v, long *len, long **ilp, double **idp )
+static void get_array_params( Var *v, size_t *len, long **ilp, double **idp )
 {
 	*ilp = NULL;
 	*idp = NULL;
@@ -156,8 +156,8 @@ static void get_array_params( Var *v, long *len, long **ilp, double **idp )
 Var *f_int( Var *v )
 {
 	Var *new_var;
-	long i;
-	long len;
+	size_t i;
+	size_t len;
 	long *rlp = NULL;
 	long *ilp;
 	double *idp;
@@ -212,8 +212,8 @@ Var *f_int( Var *v )
 Var *f_float( Var *v )
 {
 	Var *new_var;
-	long i;
-	long len;
+	size_t i;
+	size_t len;
 	double *rdp = NULL;
 	long *ilp;
 	double *idp;
@@ -258,8 +258,8 @@ Var *f_float( Var *v )
 Var *f_round( Var *v )
 {
 	Var *new_var;
-	long i;
-	long len;
+	size_t i;
+	size_t len;
 	long *rlp = NULL;
 	long *ilp;
 	double *idp;
@@ -314,8 +314,8 @@ Var *f_round( Var *v )
 Var *f_floor( Var *v )
 {
 	Var *new_var;
-	long i;
-	long len;
+	size_t i;
+	size_t len;
 	long *rlp = NULL;
 	long *ilp;
 	double *idp;
@@ -368,8 +368,8 @@ Var *f_floor( Var *v )
 Var *f_ceil( Var *v )
 {
 	Var *new_var;
-	long i;
-	long len;
+	size_t i;
+	size_t len;
 	long *rlp = NULL;
 	long *ilp;
 	double *idp;
@@ -423,8 +423,8 @@ Var *f_ceil( Var *v )
 Var *f_abs( Var *v )
 {
 	Var *new_var;
-	long i;
-	long len;
+	size_t i;
+	size_t len;
 	long *rlp;
 	double *rdp;
 	long *ilp;
@@ -483,8 +483,8 @@ Var *f_abs( Var *v )
 Var *f_sin( Var *v )
 {
 	Var *new_var;
-	long i;
-	long len;
+	size_t i;
+	size_t len;
 	double *rdp;
 	long *ilp;
 	double *idp;
@@ -522,8 +522,8 @@ Var *f_sin( Var *v )
 Var *f_cos( Var *v )
 {
 	Var *new_var;
-	long i;
-	long len;
+	size_t i;
+	size_t len;
 	double *rdp;
 	long *ilp;
 	double *idp;
@@ -562,8 +562,8 @@ Var *f_tan( Var *v )
 {
 	double res;
 	Var *new_var;
-	long i;
-	long len;
+	size_t i;
+	size_t len;
 	double *rdp;
 	long *ilp;
 	double *idp;
@@ -611,8 +611,8 @@ Var *f_asin( Var *v )
 {
 	double arg;
 	Var *new_var;
-	long i;
-	long len;
+	size_t i;
+	size_t len;
 	double *rdp;
 	long *ilp;
 	double *idp;
@@ -668,8 +668,8 @@ Var *f_acos( Var *v )
 {
 	double arg;
 	Var *new_var;
-	long i;
-	long len;
+	size_t i;
+	size_t len;
 	double *rdp;
 	long *ilp;
 	double *idp;
@@ -724,8 +724,8 @@ Var *f_acos( Var *v )
 Var *f_atan( Var *v )
 {
 	Var *new_var;
-	long i;
-	long len;
+	size_t i;
+	size_t len;
 	double *rdp;
 	long *ilp;
 	double *idp;
@@ -764,8 +764,8 @@ Var *f_sinh( Var *v )
 {
 	double res;
 	Var *new_var;
-	long i;
-	long len;
+	size_t i;
+	size_t len;
 	double *rdp;
 	long *ilp;
 	double *idp;
@@ -813,8 +813,8 @@ Var *f_cosh( Var *v )
 {
 	double res;
 	Var *new_var;
-	long i;
-	long len;
+	size_t i;
+	size_t len;
 	double *rdp;
 	long *ilp;
 	double *idp;
@@ -861,8 +861,8 @@ Var *f_cosh( Var *v )
 Var *f_tanh( Var *v )
 {
 	Var *new_var;
-	long i;
-	long len;
+	size_t i;
+	size_t len;
 	double *rdp;
 	long *ilp;
 	double *idp;
@@ -901,8 +901,8 @@ Var *f_exp( Var *v )
 {
 	Var *new_var;
 	double res;
-	long i;
-	long len;
+	size_t i;
+	size_t len;
 	double *rdp;
 	long *ilp;
 	double *idp;
@@ -957,8 +957,8 @@ Var *f_ln( Var *v )
 {
 	double arg, res;
 	Var *new_var;
-	long i;
-	long len;
+	size_t i;
+	size_t len;
 	double *rdp;
 	long *ilp;
 	double *idp;
@@ -1024,8 +1024,8 @@ Var *f_log( Var *v )
 {
 	double arg, res;
 	Var *new_var;
-	long i;
-	long len;
+	size_t i;
+	size_t len;
 	double *rdp;
 	long *ilp;
 	double *idp;
@@ -1091,8 +1091,8 @@ Var *f_sqrt( Var *v )
 {
 	double arg;
 	Var *new_var;
-	long i;
-	long len;
+	size_t i;
+	size_t len;
 	double *rdp;
 	long *ilp;
 	double *idp;
@@ -1387,13 +1387,13 @@ Var *f_sizes( Var *v )
 
 Var *f_mean( Var *v )
 {
-	long i;
-	long len;
+	size_t i;
+	size_t len;
 	long *ilp = NULL;
 	double *idp = NULL;
 	double val = 0.0;
 	long a_index;
-	long slice_len;
+	size_t slice_len;
 
 
 	if ( v == NULL )
@@ -1490,8 +1490,8 @@ Var *f_mean( Var *v )
 
 Var *f_rms( Var *v )
 {
-	long i;
-	long len;
+	size_t i;
+	size_t len;
 	long *ilp;
 	double *idp;
 	double val = 0.0;
@@ -1523,11 +1523,11 @@ Var *f_rms( Var *v )
 
 Var *f_slice( Var *v )
 {
-	long len;
+	size_t len;
 	long *ilp;
 	double *idp;
 	long a_index;
-	long slice_len;
+	size_t slice_len;
 
 
 	if ( v == NULL || v->next == NULL )
@@ -1610,8 +1610,8 @@ Var *f_slice( Var *v )
 Var *f_square( Var *v )
 {
 	Var *new_var;
-	long i;
-	long len;
+	size_t i;
+	size_t len;
 	long *rlp;
 	double *rdp;
 	long *ilp;
@@ -1696,7 +1696,7 @@ Var *f_islice( Var *v )
 	}
 
 	array = T_calloc( size, sizeof( long ) );
-	ret = vars_push( INT_ARR, array, size );
+	ret = vars_push( INT_ARR, array, ( size_t ) size );
 	T_free( array );
 
 	return ret;
@@ -1739,7 +1739,7 @@ Var *f_fslice( Var *v )
 	array = T_malloc( size * sizeof( double ) );
 	for( i = 0; i < size; i++ )
 		*( array + i ) = 0.0;
-	ret = vars_push( FLOAT_ARR, array, size );
+	ret = vars_push( FLOAT_ARR, array, ( size_t ) size );
 	T_free( array );
 
 	return ret;

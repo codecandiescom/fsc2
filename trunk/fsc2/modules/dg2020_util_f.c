@@ -45,7 +45,7 @@ Ticks dg2020_double2ticks( double p_time )
 
 	ticks = p_time / dg2020.timebase;
 
-	if ( fabs( ticks - lround( ticks ) ) > 1.0e-2 )
+	if ( fabs( ticks - lrnd( ticks ) ) > 1.0e-2 )
 	{
 		char *t = T_strdup( dg2020_ptime( p_time ) );
 		eprint( FATAL, SET, "%s: Specified time of %s is not an integer "
@@ -55,7 +55,7 @@ Ticks dg2020_double2ticks( double p_time )
 		THROW( EXCEPTION )
 	}
 
-	return ( Ticks ) lround( ticks );
+	return ( Ticks ) lrnd( ticks );
 }
 
 

@@ -568,7 +568,7 @@ bool dg2020_set_constant( int channel, Ticks address, Ticks length, int state )
 	/* Assemble rest of command string */
 
 	cptr = cmd + strlen( cmd );
-	memset( cptr, state ? '1' : '0', length );
+	memset( ( void * ) cptr, state ? '1' : '0', length );
 	strcpy( cptr + length, "\n" );
 
 	/* Send the command string to the pulser */

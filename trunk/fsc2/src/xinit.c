@@ -204,16 +204,21 @@ bool xforms_init( int *argc, char *argv[ ] )
 
 	/* Set the stop mouse button */
 
-	if ( * ( ( char * ) xresources[ STOPMOUSEBUTTON ].var ) != '\0' )
+	if ( * ( char * ) xresources[ STOPMOUSEBUTTON ].var != '\0' )
 	{
-		if ( ! strcmp( xresources[ STOPMOUSEBUTTON ].var, "1" ) ||
-			 ! strcasecmp( xresources[ STOPMOUSEBUTTON ].var, "left" ) )
+		if ( ! strcmp( ( char * ) xresources[ STOPMOUSEBUTTON ].var, "1" )
+			 || ! strcasecmp( ( char * ) xresources[ STOPMOUSEBUTTON ].var,
+							  "left" ) )
 			stop_button_mask = FL_LEFT_MOUSE;
-		else if ( ! strcmp( xresources[ STOPMOUSEBUTTON ].var, "2" ) ||
-				  ! strcasecmp( xresources[ STOPMOUSEBUTTON ].var, "middle" ) )
+		else if ( ! strcmp( ( char * ) xresources[ STOPMOUSEBUTTON ].var,
+							"2" ) ||
+				  ! strcasecmp( ( char * ) xresources[ STOPMOUSEBUTTON ].var,
+								"middle" ) )
 			stop_button_mask = FL_MIDDLE_MOUSE;
-		else if ( ! strcmp( xresources[ STOPMOUSEBUTTON ].var, "3" ) ||
-				  ! strcasecmp( xresources[ STOPMOUSEBUTTON ].var, "right" ) )
+		else if ( ! strcmp( ( char * ) xresources[ STOPMOUSEBUTTON ].var,
+							"3" ) ||
+				  ! strcasecmp( ( char * ) xresources[ STOPMOUSEBUTTON ].var,
+								"right" ) )
 			stop_button_mask = FL_RIGHT_MOUSE;
 	}
 

@@ -145,7 +145,7 @@ Var *f_print( Var *v )
 			if ( on_stack-- )
 			{
 				memmove( cp + 3, cp, strlen( cp ) + 1 );
-				memset( cp, '\x01', 4 );
+				memset( cp, 0x01, 4 );
 				cp += 3;
 				n++;
 			}
@@ -1080,7 +1080,7 @@ Var *f_display( Var *v )
 {
 	DPoint *dp;
 	int shm_id;
-	long len = 0;                    /* total length of message to send */
+	size_t len = 0;                    /* total length of message to send */
 	void *buf;
 	char *ptr;
 	int nsets;

@@ -25,7 +25,7 @@
 #include "fsc2.h"
 
 
-static void vars_params( Var *v, long *elems, long **lpnt, double **dpnt );
+static void vars_params( Var *v, size_t *elems, long **lpnt, double **dpnt );
 static void vars_div_check( double val );
 static void vars_mod_check( double val );
 static Var *vars_int_pow( long v1, long v2 );
@@ -39,7 +39,7 @@ static void vars_pow_check( double v1, double v2 );
 /* pointer is always set to NULL).                                    */
 /*--------------------------------------------------------------------*/
 
-static void vars_params( Var *v, long *elems, long **lpnt, double **dpnt )
+static void vars_params( Var *v, size_t *elems, long **lpnt, double **dpnt )
 {
 	*lpnt = NULL;
 	*dpnt = NULL;
@@ -111,8 +111,8 @@ static void vars_params( Var *v, long *elems, long **lpnt, double **dpnt )
 Var *vars_add_to_int_var( Var *v1, Var *v2 )
 {
 	Var *new_var;
-	long i;
-	long elems;
+	size_t i;
+	size_t elems;
 	long *lp;
 	long *v2_lpnt;
 	double *dp;
@@ -157,8 +157,8 @@ Var *vars_add_to_int_var( Var *v1, Var *v2 )
 Var *vars_add_to_float_var( Var *v1, Var *v2 )
 {
 	Var *new_var;
-	long i;
-	long elems;
+	size_t i;
+	size_t elems;
 	long *v2_lpnt;
 	double *dp;
 	double *v2_dpnt;
@@ -189,14 +189,14 @@ Var *vars_add_to_float_var( Var *v1, Var *v2 )
 Var *vars_add_to_int_arr( Var *v1, Var *v2 )
 {
 	Var *new_var;
-	long i;
-	long elems;
+	size_t i;
+	size_t elems;
 	long *lp;
 	long *v2_lpnt;
 	double *dp;
 	double *v2_dpnt;
 	long *v1_lpnt;
-	long v1_len;
+	size_t v1_len;
 
 
 	fsc2_assert( v1->type & ( INT_CONT_ARR | INT_ARR ) ||
@@ -286,13 +286,13 @@ Var *vars_add_to_int_arr( Var *v1, Var *v2 )
 Var *vars_add_to_float_arr( Var *v1, Var *v2 )
 {
 	Var *new_var;
-	long i;
-	long elems;
+	size_t i;
+	size_t elems;
 	long *v2_lpnt;
 	double *dp;
 	double *v2_dpnt;
 	double *v1_dpnt;
-	long v1_len;
+	size_t v1_len;
 
 
 	fsc2_assert( v1->type & ( FLOAT_CONT_ARR | FLOAT_ARR ) ||
@@ -364,8 +364,8 @@ Var *vars_add_to_float_arr( Var *v1, Var *v2 )
 Var *vars_sub_from_int_var( Var *v1, Var *v2 )
 {
 	Var *new_var;
-	long i;
-	long elems;
+	size_t i;
+	size_t elems;
 	long *lp;
 	long *v2_lpnt;
 	double *dp;
@@ -410,8 +410,8 @@ Var *vars_sub_from_int_var( Var *v1, Var *v2 )
 Var *vars_sub_from_float_var( Var *v1, Var *v2 )
 {
 	Var *new_var;
-	long i;
-	long elems;
+	size_t i;
+	size_t elems;
 	long *v2_lpnt;
 	double *dp;
 	double *v2_dpnt;
@@ -441,14 +441,14 @@ Var *vars_sub_from_float_var( Var *v1, Var *v2 )
 Var *vars_sub_from_int_arr( Var *v1, Var *v2 )
 {
 	Var *new_var;
-	long i;
-	long elems;
+	size_t i;
+	size_t elems;
 	long *lp;
 	long *v2_lpnt;
 	double *dp;
 	double *v2_dpnt;
 	long *v1_lpnt;
-	long v1_len;
+	size_t v1_len;
 
 
 	fsc2_assert( v1->type & ( INT_CONT_ARR | INT_ARR ) ||
@@ -538,13 +538,13 @@ Var *vars_sub_from_int_arr( Var *v1, Var *v2 )
 Var *vars_sub_from_float_arr( Var *v1, Var *v2 )
 {
 	Var *new_var;
-	long i;
-	long elems;
+	size_t i;
+	size_t elems;
 	long *v2_lpnt;
 	double *dp;
 	double *v2_dpnt;
 	double *v1_dpnt;
-	long v1_len;
+	size_t v1_len;
 
 
 	fsc2_assert( v1->type & ( FLOAT_CONT_ARR | FLOAT_ARR ) ||
@@ -615,8 +615,8 @@ Var *vars_sub_from_float_arr( Var *v1, Var *v2 )
 Var *vars_mult_by_int_var( Var *v1, Var *v2 )
 {
 	Var *new_var;
-	long i;
-	long elems;
+	size_t i;
+	size_t elems;
 	long *lp;
 	long *v2_lpnt;
 	double *dp;
@@ -661,8 +661,8 @@ Var *vars_mult_by_int_var( Var *v1, Var *v2 )
 Var *vars_mult_by_float_var( Var *v1, Var *v2 )
 {
 	Var *new_var;
-	long i;
-	long elems;
+	size_t i;
+	size_t elems;
 	long *v2_lpnt;
 	double *dp;
 	double *v2_dpnt;
@@ -692,14 +692,14 @@ Var *vars_mult_by_float_var( Var *v1, Var *v2 )
 Var *vars_mult_by_int_arr( Var *v1, Var *v2 )
 {
 	Var *new_var;
-	long i;
-	long elems;
+	size_t i;
+	size_t elems;
 	long *lp;
 	long *v2_lpnt;
 	double *dp;
 	double *v2_dpnt;
 	long *v1_lpnt;
-	long v1_len;
+	size_t v1_len;
 
 
 	fsc2_assert( v1->type & ( INT_CONT_ARR | INT_ARR ) ||
@@ -788,13 +788,13 @@ Var *vars_mult_by_int_arr( Var *v1, Var *v2 )
 Var *vars_mult_by_float_arr( Var *v1, Var *v2 )
 {
 	Var *new_var;
-	long i;
-	long elems;
+	size_t i;
+	size_t elems;
 	long *v2_lpnt;
 	double *dp;
 	double *v2_dpnt;
 	double *v1_dpnt;
-	long v1_len;
+	size_t v1_len;
 
 
 	fsc2_assert( v1->type & ( FLOAT_CONT_ARR | FLOAT_ARR ) ||
@@ -865,8 +865,8 @@ Var *vars_mult_by_float_arr( Var *v1, Var *v2 )
 Var *vars_div_of_int_var( Var *v1, Var *v2 )
 {
 	Var *new_var;
-	long i;
-	long elems;
+	size_t i;
+	size_t elems;
 	long *lp;
 	long *v2_lpnt;
 	long *dp;
@@ -923,8 +923,8 @@ Var *vars_div_of_int_var( Var *v1, Var *v2 )
 Var *vars_div_of_float_var( Var *v1, Var *v2 )
 {
 	Var *new_var;
-	long i;
-	long elems;
+	size_t i;
+	size_t elems;
 	long *v2_lpnt;
 	double *dp;
 	double *v2_dpnt;
@@ -975,14 +975,14 @@ Var *vars_div_of_float_var( Var *v1, Var *v2 )
 Var *vars_div_of_int_arr( Var *v1, Var *v2 )
 {
 	Var *new_var;
-	long i;
-	long elems;
+	size_t i;
+	size_t elems;
 	long *lp;
 	long *v2_lpnt;
 	double *dp;
 	double *v2_dpnt;
 	long *v1_lpnt;
-	long v1_len;
+	size_t v1_len;
 
 
 	fsc2_assert( v1->type & ( INT_CONT_ARR | INT_ARR ) ||
@@ -1079,13 +1079,13 @@ Var *vars_div_of_int_arr( Var *v1, Var *v2 )
 Var *vars_div_of_float_arr( Var *v1, Var *v2 )
 {
 	Var *new_var;
-	long i;
-	long elems;
+	size_t i;
+	size_t elems;
 	long *v2_lpnt;
 	double *dp;
 	double *v2_dpnt;
 	double *v1_dpnt;
-	long v1_len;
+	size_t v1_len;
 
 
 	fsc2_assert( v1->type & ( FLOAT_CONT_ARR | FLOAT_ARR ) ||
@@ -1171,8 +1171,8 @@ static void vars_div_check( double val )
 Var *vars_mod_of_int_var( Var *v1, Var *v2 )
 {
 	Var *new_var;
-	long i;
-	long elems;
+	size_t i;
+	size_t elems;
 	long *lp;
 	long *v2_lpnt;
 	long *dp;
@@ -1230,8 +1230,8 @@ Var *vars_mod_of_int_var( Var *v1, Var *v2 )
 Var *vars_mod_of_float_var( Var *v1, Var *v2 )
 {
 	Var *new_var;
-	long i;
-	long elems;
+	size_t i;
+	size_t elems;
 	long *v2_lpnt;
 	double *dp;
 	double *v2_dpnt;
@@ -1283,14 +1283,14 @@ Var *vars_mod_of_float_var( Var *v1, Var *v2 )
 Var *vars_mod_of_int_arr( Var *v1, Var *v2 )
 {
 	Var *new_var;
-	long i;
-	long elems;
+	size_t i;
+	size_t elems;
 	long *lp;
 	long *v2_lpnt;
 	double *dp;
 	double *v2_dpnt;
 	long *v1_lpnt;
-	long v1_len;
+	size_t v1_len;
 
 
 	fsc2_assert( v1->type & ( INT_CONT_ARR | INT_ARR ) ||
@@ -1387,13 +1387,13 @@ Var *vars_mod_of_int_arr( Var *v1, Var *v2 )
 Var *vars_mod_of_float_arr( Var *v1, Var *v2 )
 {
 	Var *new_var;
-	long i;
-	long elems;
+	size_t i;
+	size_t elems;
 	long *v2_lpnt;
 	double *dp;
 	double *v2_dpnt;
 	double *v1_dpnt;
-	long v1_len;
+	size_t v1_len;
 
 
 	fsc2_assert( v1->type & ( FLOAT_CONT_ARR | FLOAT_ARR ) ||
@@ -1502,8 +1502,8 @@ static Var *vars_int_pow( long v1, long v2 )
 Var *vars_pow_of_int_var( Var *v1, Var *v2 )
 {
 	Var *new_var;
-	long i, j;
-	long elems;
+	size_t i, j;
+	size_t elems;
 	long *lp = NULL;
 	long *v2_lpnt;
 	double *dp = NULL;
@@ -1585,8 +1585,8 @@ Var *vars_pow_of_int_var( Var *v1, Var *v2 )
 Var *vars_pow_of_float_var( Var *v1, Var *v2 )
 {
 	Var *new_var;
-	long i;
-	long elems;
+	size_t i;
+	size_t elems;
 	long *v2_lpnt;
 	double *dp;
 	double *v2_dpnt;
@@ -1627,14 +1627,14 @@ Var *vars_pow_of_float_var( Var *v1, Var *v2 )
 Var *vars_pow_of_int_arr( Var *v1, Var *v2 )
 {
 	Var *new_var;
-	long i, j;
-	long elems;
+	size_t i, j;
+	size_t elems;
 	long *lp = NULL;
 	long *v2_lpnt;
 	double *dp = NULL;
 	double *v2_dpnt;
 	long *v1_lpnt;
-	long v1_len;
+	size_t v1_len;
 
 
 	fsc2_assert( v1->type & ( INT_CONT_ARR | INT_ARR ) ||
@@ -1791,13 +1791,13 @@ Var *vars_pow_of_int_arr( Var *v1, Var *v2 )
 Var *vars_pow_of_float_arr( Var *v1, Var *v2 )
 {
 	Var *new_var;
-	long i;
-	long elems;
+	size_t i;
+	size_t elems;
 	long *v2_lpnt;
 	double *dp;
 	double *v2_dpnt;
 	double *v1_dpnt;
-	long v1_len;
+	size_t v1_len;
 
 
 	fsc2_assert( v1->type & ( FLOAT_CONT_ARR | FLOAT_ARR ) ||
