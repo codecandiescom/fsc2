@@ -227,9 +227,10 @@ void hfs9000_full_reset( void )
 	while ( p != NULL )
 	{
 		/* First we check if the pulse has been used at all, send a warning
-           and delete it if it hasn't */
+           and delete it if it hasn't (unless we haven't ben told to keep
+		   all pulses, even unused ones) */
 
-		if ( ! p->has_been_active )
+		if ( ! p->has_been_active && ! hfs9000.keep_all )
 		{
 			eprint( WARN, UNSET, "%s: Pulse %ld is never used.\n",
 					pulser_struct.name, p->num );

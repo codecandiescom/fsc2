@@ -437,3 +437,15 @@ bool hfs9000_set_max_seq_len( double seq_len )
 
 	return OK;
 }
+
+
+/*----------------------------------------------*/
+/* Function that gets called to tell the pulser */
+/* driver to keep all pulses, even unused ones. */
+/*----------------------------------------------*/
+
+bool hfs9000_keep_all( void )
+{
+	hfs9000.keep_all = SET;
+	return OK;
+}

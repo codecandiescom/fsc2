@@ -141,6 +141,8 @@ typedef struct {
 	int trig_in_slope;       //	only in EXTERNAL mode
 	double trig_in_level;    //	only in EXTERNAL mode
 
+	bool keep_all;           // keep even unused pulses ?
+
 	bool is_trig_in_mode;
 	bool is_trig_in_slope;
 	bool is_trig_in_level;
