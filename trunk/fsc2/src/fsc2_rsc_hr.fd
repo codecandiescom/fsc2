@@ -3,7 +3,7 @@ Magic: 13000
 Internal Form Definition File
     (do not change)
 
-Number of forms: 4
+Number of forms: 5
 Unit of measure: FL_COORD_PIXEL
 SnapGrid: 5
 
@@ -313,7 +313,7 @@ argument: 0
 --------------------
 class: FL_CANVAS
 type: NORMAL_CANVAS
-box: 100 10 150 715
+box: 95 10 150 715
 boxtype: FL_FRAME_BOX
 colors: FL_COL1 FL_COL1
 alignment: FL_ALIGN_CENTER
@@ -331,7 +331,7 @@ argument:
 --------------------
 class: FL_BUTTON
 type: PUSH_BUTTON
-box: 180 740 45 45
+box: 175 740 45 45
 boxtype: FL_UP_BOX
 colors: FL_TOP_BCOL FL_GREEN
 alignment: FL_ALIGN_CENTER
@@ -444,7 +444,7 @@ argument: 0
 --------------------
 class: FL_CANVAS
 type: NORMAL_CANVAS
-box: 250 10 770 715
+box: 245 10 775 715
 boxtype: FL_NO_BOX
 colors: FL_BLACK FL_BLACK
 alignment: FL_ALIGN_CENTER
@@ -462,7 +462,7 @@ argument:
 --------------------
 class: FL_CANVAS
 type: NORMAL_CANVAS
-box: 250 725 770 65
+box: 245 725 775 60
 boxtype: FL_FRAME_BOX
 colors: FL_NoColor FL_COL1
 alignment: FL_ALIGN_CENTER
@@ -1029,6 +1029,175 @@ shortcut:
 resize: FL_RESIZE_ALL
 gravity: FL_NoGravity FL_NoGravity
 name: 
+callback: 
+argument: 
+
+=============== FORM ===============
+Name: cut
+Width: 1030
+Height: 800
+Number of Objects: 9
+
+--------------------
+class: FL_BOX
+type: UP_BOX
+box: 0 0 1030 800
+boxtype: FL_UP_BOX
+colors: FL_COL1 FL_COL1
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_BLACK
+label: 
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: 
+callback: 
+argument: 
+
+--------------------
+class: FL_CANVAS
+type: NORMAL_CANVAS
+box: 95 10 150 715
+boxtype: FL_FRAME_BOX
+colors: FL_COL1 FL_COL1
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_BLACK
+label: 
+shortcut: 
+resize: FL_RESIZE_Y
+gravity: FL_NorthWest FL_SouthWest
+name: cut_y_axis
+callback: 
+argument: 
+
+--------------------
+class: FL_PIXMAPBUTTON
+type: NORMAL_BUTTON
+box: 15 200 60 70
+boxtype: FL_UP_BOX
+colors: FL_COL1 FL_BLACK
+alignment: FL_ALIGN_BOTTOM|FL_ALIGN_INSIDE
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_BLACK
+label: Undo
+shortcut: U
+resize: FL_RESIZE_NONE
+gravity: FL_NorthWest FL_NorthWest
+name: cut_undo_button
+callback: cut_undo_button_callback
+argument: 0
+
+--------------------
+class: FL_CANVAS
+type: NORMAL_CANVAS
+box: 245 10 610 715
+boxtype: FL_NO_BOX
+colors: FL_BLACK FL_BLACK
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_BLACK
+label: 
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NorthWest FL_SouthEast
+name: cut_canvas
+callback: 
+argument: 
+
+--------------------
+class: FL_PIXMAPBUTTON
+type: NORMAL_BUTTON
+box: 15 300 60 70
+boxtype: FL_UP_BOX
+colors: FL_COL1 FL_BLACK
+alignment: FL_ALIGN_BOTTOM|FL_ALIGN_INSIDE
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_BLACK
+label: Print
+shortcut: P
+resize: FL_RESIZE_NONE
+gravity: FL_NorthWest FL_NorthWest
+name: cut_print_button
+callback: 
+argument: 
+
+--------------------
+class: FL_BUTTON
+type: NORMAL_BUTTON
+box: 15 740 115 45
+boxtype: FL_UP_BOX
+colors: FL_MCOL FL_GREEN
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_LARGE_SIZE
+lcol: FL_BLACK
+label: Close
+shortcut: C
+resize: FL_RESIZE_NONE
+gravity: FL_SouthWest FL_SouthWest
+name: 
+callback: cut_close_callback
+argument: 0
+
+--------------------
+class: FL_CANVAS
+type: NORMAL_CANVAS
+box: 245 725 610 65
+boxtype: FL_FRAME_BOX
+colors: FL_NoColor FL_COL1
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_BLACK
+label: 
+shortcut: 
+resize: FL_RESIZE_X
+gravity: FL_SouthWest FL_SouthEast
+name: cut_x_axis
+callback: 
+argument: 
+
+--------------------
+class: FL_BUTTON
+type: PUSH_BUTTON
+box: 175 740 45 45
+boxtype: FL_UP_BOX
+colors: FL_TOP_BCOL FL_GREEN
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_LARGE_SIZE
+lcol: FL_BLACK
+label: FS
+shortcut: F
+resize: FL_RESIZE_NONE
+gravity: FL_SouthWest FL_SouthWest
+name: cut_full_scale_button
+callback: cut_fs_button_callback
+argument: 0
+	value: 1
+
+--------------------
+class: FL_CANVAS
+type: NORMAL_CANVAS
+box: 860 10 160 780
+boxtype: FL_FRAME_BOX
+colors: FL_COL1 FL_COL1
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_BLACK
+label: 
+shortcut: 
+resize: FL_RESIZE_Y
+gravity: FL_NorthEast FL_SouthEast
+name: cut_z_axis
 callback: 
 argument: 
 

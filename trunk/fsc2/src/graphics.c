@@ -48,13 +48,13 @@ void start_graphics( void )
 	char *pixmap_file;
 
 
-	/* Create the form for running experiments */
+	/* Create the forms for running experiments */
 
 	run_form = create_form_run( );
 	if ( G.dim == 2 )
 		cut_form = create_form_cut( );
 
-	/* It still need some modifications... */
+	/* They still need some modifications... */
 
 	pixmap_file = get_string( strlen( auxdir ) + strlen( "/undo.xpm" ) );
 	strcpy( pixmap_file, auxdir );

@@ -1,4 +1,4 @@
-/** Header file generated with fdesign on Tue Aug  8 11:32:04 2000.**/
+/** Header file generated with fdesign on Fri Oct 27 21:44:15 2000.**/
 
 #ifndef FD_fsc2_h_
 #define FD_fsc2_h_
@@ -20,6 +20,10 @@ extern void undo_button_callback(FL_OBJECT *, long);
 
 
 extern void print_callback(FL_OBJECT *, long);
+
+extern void cut_undo_button_callback(FL_OBJECT *, long);
+extern void cut_close_callback(FL_OBJECT *, long);
+extern void cut_fs_button_callback(FL_OBJECT *, long);
 
 
 /**** Forms and Objects ****/
@@ -98,5 +102,20 @@ typedef struct {
 } FD_print;
 
 extern FD_print * create_form_print(void);
+typedef struct {
+	FL_FORM *cut;
+	void *vdata;
+	char *cdata;
+	long  ldata;
+	FL_OBJECT *cut_canvas;
+	FL_OBJECT *cut_y_axis;
+	FL_OBJECT *cut_undo_button;
+	FL_OBJECT *cut_print_button;
+	FL_OBJECT *cut_full_scale_button;
+	FL_OBJECT *cut_x_axis;
+	FL_OBJECT *cut_z_axis;
+} FD_cut;
+
+extern FD_cut * create_form_cut(void);
 
 #endif /* FD_fsc2_h_ */
