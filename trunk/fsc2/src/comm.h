@@ -90,7 +90,6 @@ enum {
 
 bool setup_comm( void );
 void end_comm( void );
-void *get_shm( int *shm_id, long len );
 int new_data_callback( XEvent *a, void *b );
 long reader( void *ret );
 void writer( int type, ... );
