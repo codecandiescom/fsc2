@@ -4,8 +4,8 @@
 @chapter EDL
 @cindex EDL
 
-This chapter describes the @b{EDL}language (@b{E}xperiment
-@b{D}escription @b{L}anguage)).
+This chapter describes the @b{EDL} language (@b{E}xperiment
+@b{D}escription @b{L}anguage).
 
 @ifinfo
 @menu
@@ -32,11 +32,32 @@ also some differences. The most noticeable is the overall structure of
 an @b{EDL} program.
 
 Each @b{EDL} program is divided into a set of sections that are somewhat
-related to the way a real-life experiment is done. In such an experiment
-you will first decide which devices you need. This is reflected in the
-@code{DEVICES} section of an @b{EDL} file where you simply list all the
-devices to be used in the experiment (at least the ones to be controlled
-by the computer).
+related to the way a real-life experiment is done. Due to the different
+purposes of the sections there are differences in the syntax to be used
+in the various sections. These are explained in the next sections.
+
+
+
+@node Sections, Variables, Basics, EDL
+@section Sections
+@cindex section
+
+
+Each @b{EDL} file consists of up to 6 different sections. These are:
+@table @samp
+@item DEVICES
+@item VARIABLES
+@item ASSIGNMENTS
+@item PHASES
+@item PREPARATIONS
+@item EXPERIMENT
+@end table
+
+
+In an experiment you will first decide which devices you need. This
+is reflected in the @code{DEVICES} section of an @b{EDL} file where you
+simply list all the devices to be used in the experiment (at least the
+ones to be controlled by the computer).
 
 The next section, the @code{VARIABLES} section, unfortunately doesn't
 have a real-world equivalent -- here you have to declare all variables
@@ -61,46 +82,26 @@ And when you're done with setting up the devices you will finally start
 the experiment: this coincides with the start of the @code{EXPERIMENT}
 section.
 
-Due to the different purposes of the sections there are differences in
-the syntax to be used in the various sections. These are explained in
-the next section.
-
-
-
-@node Sections, Variables, Basics, EDL
-@section Sections
-@cindex section
-
-
-Each @b{EDL} file consists of up to 6 different types of sections. These
-are:
-@table @samp
-@item DEVICES
-@item VARIABLES
-@item ASSIGNMENTS
-@item PHASES
-@item PREPARATIONS
-@item EXPERIMENT
-@end table
 
 While the sections of the @b{EDL} file don't have to appear in this
 sequence it is probably best not to experiment to much with this. In any
 case, if it exists the @code{EXPERIMENT} section must always be the
 last.
 
-Each section label must be immediately followed by a colon `@code{:}'.
+Please note that each section label must be immediately followed by a colon `@code{:}'.
 
 All the section labels can be abbreviated, here's the complete list of
-accepted keywords:
+accepted section keywords:
 
 @itemize @bullet
 @item @code{DEVICES}, @code{DEV}, @code{DEVS}, @code{DEVICE}
-@item @code{ASSIGNMENTS}, @code{ASS}, @code{ASSS}, @code{ASSIGNMENT}
+@item @code{ASSIGNMENTS}, @code{ASS}, @code{ASS}, @code{ASSIGNMENT}
 @item @code{VARIABLES}, @code{VAR}, @code{VARS}, @code{VARIABLE}
-@item @code{PHASES}, @code{PHAS}, @code{PHASS}, @code{PHASE}
+@item @code{PHASES}, @code{PHA}, @code{PHAS}, @code{PHASE}
 @item @code{PREPARATIONS}, @code{PREP}, @code{PREPS}, @code{PREPARATION}
 @item @code{EXPERIMENT}, @code{EXP}
 @end itemize
+
 
 @node Devices, Variables, Basics, EDL
 @section Devices
@@ -124,7 +125,7 @@ automatically be converted to all lower case.
 @cindex arrays
 
 
-Within the @code{VARAIBLES}, @code{ASSIGNMENTS}, @code{PREPARATIONS} and
+Within the @code{VARIABLES}, @code{ASSIGNMENTS}, @code{PREPARATIONS} and
 @code{EXPERIMENT} section variables may be used. Each variable to be
 used has to be declared, i.e.@: it has to be listed in the
 @code{VARIABLES} section before it may be used. The start of the
@@ -137,13 +138,14 @@ VARIABLES:
 
 @subsection Variable names
 
-Names of variables always must start with a character, i.e.@: A-Z and
+Names of variables must always start with a character, i.e.@: A-Z and
 a-z. The remaining part of the variable name can consist of characters,
-numbers and the underscore character, '_' (or in short, if you prefer
-regular expressions: @code{[A-Za-z][A-Za-z_0-9]*}). Thus, 'AbC_12x' and
-'aBc_12X' are legal variable names, while '12xy' or '_Yx2'
-aren't. Please take note that the variable names are case sensitive,
-i.e.@: 'XY', 'Xy', 'xY' and 'xy' are four different variable names!
+numbers and the underscore character, '@code{_}' (or shorter, if you
+like regular expressions: @code{[A-Za-z][A-Za-z_0-9]*}). Thus,
+'@code{AbC_12x}' and '@code{aBc_12X}' are legal variable names, while
+'@code{12xy}' or '@code{_Yx2}' aren't. Please take note that the
+variable names are case sensitive, i.e.@: '@code{XY}', '@code{Xy}',
+'@code{xY}' and '@code{xy}' are four different variable names!
 
 
 There are a few exceptions to the valid variable names because a few
@@ -181,7 +183,7 @@ values and variables for storing floating point values.
 Integer variables can hold data from the interval @w{[-2^31, 2^31 - 1]},
 i.e. they run from -2147483648 all the way up to +2147483647. In
 contrast, floating point variables can have much larger values (up to ca.@:
-10^300), the exact limits depending on the machine fsc2 is running on.
+10^300), the exact limits depending on the machine @b{fsc2} is running on.
 
 
 To distinguish between integer and floating point variables the
@@ -192,10 +194,11 @@ lower case character, i.e.@: a-z.}
 
 
 
-@subsection Arithmetic
+@node Arithmetic, , Control structures, EDL
+@section Arithmetic
 @cindex arithmetic
 
-There are the usual arithmetic operations built into fsc2, i.e.@:
+There are the usual arithmetic operations built into @b{fsc2}, i.e.@:
 addition, subtraction, multiplication and division. They can be applied
 to simple integer and floating point values and variables only. If one
 of the values is a floating point value the result is also a floating
@@ -268,8 +271,8 @@ is used and the result is the remainder of the division, e.g.@:
 
 
 For the exponentiation the caret character @code{^} is to be used, e.g.@:
-@findex ^ @r{(exponentation)}
-@cindex exponentation
+@findex ^ @r{(exponentiation)}
+@cindex exponentiation
 
 @example
 3^2 = 9           6.5 ^ 1.5 = 16.5718134219...
@@ -319,7 +322,7 @@ expression). Here's an example:
 
 This snippet will calculate the sum of all integers between 1 and 100
 (of course, there are more elegant ways to do this, but it's just an
-example). After the initialization of the two variables `@code{I}' and
+example). After the initialisation of the two variables `@code{I}' and
 `@code{SUM}' the @code{REPEAT} loop starts with 100 as the number of
 repetitions. Now, in curly braces, i.e.@: between `@code{@{}' and
 `@code{@}}', follow the statements to be executed in the loop.
@@ -343,7 +346,7 @@ Again, an example:
 @end example
 
 This program snippet (that could also have been written using a
-@code{REPEAT} loop) calculates the factorial of 6. After initializing
+@code{REPEAT} loop) calculates the factorial of 6. After initialising
 the variables `@code{I}' and `@code{Fact}' it is tested in the loop
 condition if `@code{I}' is still not larger that 6. If this is true, the
 following block of statements is executed.
@@ -385,7 +388,7 @@ using that a non-zero value is always interpreted as TRUE:
 
 This example does exactly the same as the previous one, i.e.@: it
 calculates the factorial of 6. But the difference is that we start with
-`I' set to 6 and than decrement it succesively. Thus we can use
+`I' set to 6 and than decrement it successively. Thus we can use
 `@code{I}' in the loops condition by simply checking if it still is
 non-zero and thus the condition still TRUE and repeating the loop as
 long as it is.
@@ -406,11 +409,11 @@ operators. Here is a list of these operators and their meaning:
 @end multitable
 
 
-Before the @code{WIHLE} loop on often has to initialize the loop
+Before the @code{WHILE} loop on often has to initialise the loop
 variables and within the statement block the loop variable has to been
 updated. In many cases (for example in both the preceeding examples) it
 is simpler to use a @code{FOR} loop instead, because setting the loop
-variable as well as updating it is auomatically done in the condition
+variable as well as updating it is aromatically done in the condition
 part. Here's an example that does exactly the same as the first of the
 two preceeding examples:
 
