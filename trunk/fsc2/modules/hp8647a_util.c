@@ -232,7 +232,7 @@ double hp8647a_get_att( double freq )
 
 
 
-int hp8647a_set_mod_param( Var *v )
+int hp8647a_set_mod_param( Var *v, double *dres, int *ires )
 {
 	const char *type[ ] =   { "FM", "AM", "PHASE" },
 		       *source[ ] = { "EXT AC", "AC", "EXT DC", "DC",
@@ -246,7 +246,10 @@ int hp8647a_set_mod_param( Var *v )
 
 	if ( v->type & ( INT_VAR | FLOAT_VAR ) )
 	{
-		vars_pop( synthesizer_mod_ampl( v ) );
+		if ( v->type == INT_VAR )
+			eprint( WARN, "%s:%ld: %s: Integer vale used as modulation "
+					"amplitude.\n", Fname, Lc, DEVICE_NAME );
+		*dres = VALUE( v );
 		return 1;
 	}
 
@@ -257,38 +260,34 @@ int hp8647a_set_mod_param( Var *v )
 	switch ( is_in( v->val.sptr, type, 3 ) )
 	{
 		case 0 :
-			vars_pop( synthesizer_mod_type( vars_push( STR_VAR, "FM" ) ) );
+			*ires = MOD_TYPE_FM;
 			return 2;
 
 		case 1 :
-			vars_pop(  synthesizer_mod_type( vars_push( STR_VAR, "AM" ) ) );
+			*ires = MOD_TYPE_AM;
 			return 2;
 
 		case 3 :
-			vars_pop( synthesizer_mod_type( vars_push( STR_VAR, "PHASE" ) ) );
+			*ires = MOD_TYPE_PHASE;
 			return 2;
 	}
 
 	switch ( is_in( v->val.sptr, source, 16 ) )
 	{
-
 		case 0 : case 1 :
-			vars_pop( synthesizer_mod_source( vars_push( STR_VAR,
-														 "EXT_AC" ) ) );
+			*ires = MOD_SOURCE_AC;
 			return 3;
 
 		case 2 : case 3 :
-			vars_pop( synthesizer_mod_type( vars_push( STR_VAR, "EXT_DC" ) ) );
+			*ires = MOD_SOURCE_DC;
 			return 3;
 
 		case 4 : case 5 : case 6 : case 7 : case 8 : case 9 :
-			vars_pop( synthesizer_mod_type( vars_push( STR_VAR,
-													   "INT 1kHz" ) ) );
+			*ires = MOD_SOURCE_1k;
 			return 3;
 
 		case 10 : case 11 : case 12 : case 13 : case 14 : case 15 :
-			vars_pop( synthesizer_mod_type( vars_push( STR_VAR,
-													   "INT 400 Hz" ) ) );
+			*ires = MOD_SOURCE_400;
 			return 3;
 	}
 

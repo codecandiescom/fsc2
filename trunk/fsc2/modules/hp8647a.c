@@ -733,7 +733,11 @@ Var *synthesizer_modulation( Var *v )
 {
 	int res;
 	int set = 0;
-	const char *str[ ] = { "amplitude", "type", "input" };
+	const char *str[ ] = { "amplitude", "type", "source" };
+	double ampl = -1.0;
+	int what;
+	int type = UNDEFINED, source = UNDEFINED;
+	
 
 
 	if ( v == NULL )
@@ -746,12 +750,77 @@ Var *synthesizer_modulation( Var *v )
 
 	while ( v )
 	{
-		if ( ( 1 << ( res = hp8647a_set_mod_param( v ) - 1 ) ) & set )
+		if ( ( 1 << ( res = hp8647a_set_mod_param( v, &ampl, &what ) - 1 ) )
+			 & set )
 			eprint( SEVERE, "%s:%ld: %s: Parameter for modulation %s set more "
 					"than once in call of `synthesizer_modulation'.\n",
 					Fname, Lc, DEVICE_NAME, str[ res ] );
+		else
+		{
+			switch ( res )
+			{
+				case 1 :
+					break;
+
+				case 2 :
+					type = what;
+					break;
+
+				case 3 :
+					source = what;
+					break;
+
+				default :                 /* this definitely can't happen... */
+					assert( 1 == 0 );
+			}
+		}
 		set |= ( 1 << ( res - 1 ) );
 		v = vars_pop( v );
+	}
+
+	if ( type != UNDEFINED || hp8647a.mod_type_is_set ==  SET )
+	{
+		if ( type != UNDEFINED )
+		{
+			if ( I_am == CHILD )
+				synthesizer_set_mod_stat( type, SET );
+			hp8647a.mod_type = type;
+			hp8647a.mod_type_is_set = SET;
+		}
+
+		if ( source != UNDEFINED )
+		{
+			if ( I_am == CHILD )
+				synthesizer_set_mod_source( hp8647a.mod_type, source );
+			hp8647a.mod_source[ hp8647a.mod_type ] = source;
+			hp8647a.mod_source_is_set[ hp8647a.mod_type ] = SET;
+		}
+
+		if ( ampl >= 0.0 )
+		{
+			if ( I_am == CHILD )
+				synthesizer_set_mod_ampl( hp8647a.mod_type, ampl );
+			hp8647a.mod_ampl[ hp8647a.mod_type ] = ampl;
+			hp8647a.mod_ampl_is_set[ hp8647a.mod_type ] = SET;
+		}
+	}
+	else
+	{
+		if ( source != UNDEFINED )
+		{
+			eprint( FATAL, "%s:%ld: %s: Can't set modulation source as long "
+					"as modulation type hasn't been set.\n",
+					Fname, Lc, DEVICE_NAME );
+			THROW( EXCEPTION );
+		}
+
+		if ( source != UNDEFINED )
+		{
+			eprint( FATAL, "%s:%ld: %s: Can't set modulation amplitude as "
+					"long as modulation type hasn't been set.\n",
+					Fname, Lc, DEVICE_NAME );
+			THROW( EXCEPTION );
+		}
 	}
 
 	return vars_push( INT_VAR, 1 );
@@ -802,7 +871,7 @@ Var *synthesizer_mod_type( Var *v )
 
 	if ( v == 0 )
 	{
-		if ( ! hp8647a.mod_type_is_set && I_am == PARENT && ! TEST_RUN )
+		if ( ! hp8647a.mod_type_is_set && ! TEST_RUN )
 		{
 			eprint( FATAL, "%s:%ld: %s: Modulation type hasn't been set and "
 					"can't determined before the experiment is started.\n",
@@ -810,17 +879,25 @@ Var *synthesizer_mod_type( Var *v )
 			THROW( EXCEPTION );
 		}
 
-		if ( I_am == PARENT )
+		/* In the test run return FM as default if the type hasn't been set */
+
+		if ( TEST_RUN )
 		{
-			if ( ! hp8647a.mod_type_is_set )
-				return vars_push( STR_VAR, "FM" );
-			else return vars_push( STR_VAR, mod_types[ hp8647a.mod_type ] );
+			return vars_push( STR_VAR, hp8647a.mod_type_is_set ?
+							  mod_types[ hp8647a.mod_type ] : "FM" );
 		}
 
-		if ( ( res = hp8647a_get_mod_state( ) ) != UNDEFINED )
+		hp8647a.mod_type = hp8647a_get_mod_states( );
+		if ( hp8647a.mod_type != UNDEFINED )
+		{
+			hp8647a.mod_type_is_set = SET;
 			return vars_push( STR_VAR, mod_types[ res ] );
+		}
 		else
+		{
+			hp8647a.mod_type_is_set = UNSET;
 			return vars_push( STR_VAR, "NONE" );
+		}
 	}
 
 	vars_check( v, STR_VAR );
@@ -835,7 +912,10 @@ Var *synthesizer_mod_type( Var *v )
 		eprint( WARN, "%s:%ld: %s: Superfluous arguments in call of "
 				"`synthesizer_mod_type'.\n", Fname, Lc, DEVICE_NAME );
 
-	hp8647a_set_mod_state( res, SET );
+	/* If called in exp_hook or in the test run send data to device */
+
+	if ( I_am == CHILD || ! TEST_RUN )
+		hp8647a_set_mod_state( res, SET );
 
 	hp8647a.mod_type = res;
 	hp8647a.mod_type_is_set = SET;
