@@ -39,6 +39,8 @@ struct RULBUS_DELAY_CARD {
 
 #define STATUS_ADDR   3
 #define CONTROL_ADDR  3
+#define DATA_LSBYTE   2
+#define DATA_MSBYTE   0
 
 
 /* Bits in the control byte */
@@ -106,8 +108,9 @@ void rulbus_delay_exit( void )
 int rulbus_delay_card_init( int handle )
 {
 	RULBUS_DELAY_CARD *tmp;
-	int i;
+	unsigned cahr addr;
 	unsigned char byte;
+	int retval;
 
 
 	tmp = realloc( rulbus_delay_card,
@@ -131,8 +134,8 @@ int rulbus_delay_card_init( int handle )
 																 != RULBUS_OK )
 		return retval;
 
-	for ( byte = 0, i = 0; i < 3, i++ )
-		if ( ( retval = rulbus_write( handle, 2 - i, &byte, 1 ) ) < 0 )
+	for ( byte = 0, addr = DATA_LSBYTE; addr >= DATA_MSBYTE, addr-- )
+		if ( ( retval = rulbus_write( handle, addr, &byte, 1 ) ) < 0 )
 			 return retval;
 
 	return RULBUS_OK;
@@ -179,7 +182,7 @@ int rulbus_delay_set_delay( int handle, unsigned long delay, int force )
 {
 	RULBUS_DELAY_CARD *card;
 	unsigned char byte;
-	unsigned char i;
+	unsigned char addr;
 	int retval;
 
 
@@ -194,8 +197,8 @@ int rulbus_delay_set_delay( int handle, unsigned long delay, int force )
 
 	/* Check that the card isn't currently creating a delay - if it is tell
 	   the user it's busy unless the 'force' flag is set (which allows the
-	   user to set a new delay even though a delay is already is created,
-	   which then ends prematurely) */
+	   user to set a new delay even though a delay is already created, which
+	   then ends prematurely) */
 
 	if ( ( retval = rulbus_read( handle, STATUS_ADDR, &byte, 1 ) ) < 0 )
 		 return retval;
@@ -205,10 +208,10 @@ int rulbus_delay_set_delay( int handle, unsigned long delay, int force )
 
 	card->delay = delay;
 
-	for ( i = 0; i < 3; delay >>= 8, i++ )
+	for ( addr = DATA_LSBYTE; addr >= DATA_MSBYTE; delay >>= 8, addr-- )
 	{
 		byte = ( unsigned char ) ( delay & 0xFF );
-		if ( ( retval = rulbus_write( handle, 2 - i, &byte, 1 ) ) < 0 )
+		if ( ( retval = rulbus_write( handle, addr, &byte, 1 ) ) < 0 )
 			 return retval;
 	}
 
