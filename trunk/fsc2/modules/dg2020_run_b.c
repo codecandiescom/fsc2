@@ -357,15 +357,18 @@ PULSE *dg2020_delete_pulse( PULSE *p )
 	if ( i != p->function->num_pulses - 1 )
 		p->function->pulses[ i ] = 
 			p->function->pulses[ p->function->num_pulses - 1 ];
-	p->function->pulses = T_realloc( p->function->pulses,
-									--p->function->num_pulses
-									* sizeof( PULSE * ) );
 
-	/* If the deleted pulse was the last pulse of its function send a warning
-	   and mark the function as useless */
+	/* Now delete the pulse - if the deleted pulse was the last pulse of
+	   its function send a warning and mark the function as useless */
 
-	if ( p->function->num_pulses == 0 )
+	if ( p->function->num_pulses-- > 1 )
+		p->function->pulses =
+					  T_realloc( p->function->pulses,
+								 p->function->num_pulses * sizeof( PULSE * ) );
+	else
 	{
+		p->function->pulses = T_free( p->function->pulses );
+
 		eprint( SEVERE, UNSET, "%s: Function `%s' isn't used at all because "
 				"all its pulses are unused.\n", pulser_struct.name,
 				Function_Names[ p->function->self ] );
@@ -380,7 +383,13 @@ PULSE *dg2020_delete_pulse( PULSE *p )
 	if ( p->prev != NULL )
 		p->prev->next = p->next;
 	T_free( p->channel );
-	T_free( p );
+
+	/* Special care has to be taken if this is the very last pulse... */
+
+	if ( p == dg2020_Pulses && p->next == NULL )
+		dg2020_Pulses = T_free( dg2020_Pulses );
+	else
+		T_free( p );
 
 	return pp;
 }
