@@ -381,16 +381,25 @@ void rb_pulser_delay_card_delay( int handle, unsigned long delay )
 }
 
 
-/*-----------------------------------------------------------*
- *-----------------------------------------------------------*/
+/*---------------------------------------------------------*
+ * FUnction gets called when communication with the device
+ * fails. It stops the running experiment.
+ *---------------------------------------------------------*/
 
 static void rb_pulser_failure( bool rb_flag, const char *mess )
 {
+	static int calls = 0;
+
+	if ( calls != 0 )
+		return;
+
+	calls++;
 	if ( rb_flag )
 		print( FATAL, "%s: %s.\n", mess, rulbus_strerror( ) );
 	else
 		print( FATAL, "%s.\n", mess );
 	rb_pulser_exit( );
+	calls--;
 	THROW( EXCEPTION );
 }
 
