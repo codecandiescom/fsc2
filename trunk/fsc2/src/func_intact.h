@@ -130,7 +130,6 @@ void recreate_Toolbox( void );
 void convert_escapes( char *str );
 void check_label( char *str );
 bool check_format_string( char *buf );
-void store_geometry( void );
 void parent_freeze( int freeze );
 void tools_clear( void );
 Var *f_tb_changed( Var *v );

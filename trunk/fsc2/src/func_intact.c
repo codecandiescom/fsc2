@@ -56,8 +56,8 @@ struct {
 extern FL_resource xresources[ ];
 extern FL_IOPT xcntl;
 static int tool_x, tool_y;
-static bool is_frozen = UNSET;
-static bool needs_pos = SET;
+static bool has_pos = UNSET,
+			is_frozen = UNSET;
 
 
 static Var *f_layout_child( long layout );
@@ -78,6 +78,7 @@ static void int_output_setup( IOBJECT *io );
 static void float_output_setup( IOBJECT *io );
 static void menu_setup( IOBJECT *io );
 static void tools_callback( FL_OBJECT *ob, long data );
+static void store_toolbox_position( void );
 static Var *f_tb_changed_child( Var *v );
 static Var *f_tb_wait_child( Var *v );
 
@@ -161,7 +162,7 @@ void toolbox_delete( void )
 	{
 		if ( fl_form_is_visible( Toolbox->Tools ) )
 		{
-			store_geometry( );
+			store_toolbox_position( );
 			fl_hide_form( Toolbox->Tools );
 		}
 
@@ -201,7 +202,7 @@ void parent_freeze( int freeze )
 	IOBJECT *io = NULL;
 
 
-	if ( Toolbox == NULL ||  Toolbox->Tools == NULL )
+	if ( Toolbox == NULL || Toolbox->Tools == NULL )
 	{
 		is_frozen = freeze ? SET : UNSET;
 		return;
@@ -209,10 +210,10 @@ void parent_freeze( int freeze )
 
 	if ( is_frozen && ! freeze )       /* unfreeze the toolbox */
 	{
-		if ( needs_pos )
+		if ( has_pos )
 		{
 			fl_set_form_position( Toolbox->Tools, tool_x, tool_y );
-			fl_show_form( Toolbox->Tools, FL_PLACE_SIZE, FL_FULLBORDER,
+			fl_show_form( Toolbox->Tools, FL_PLACE_GEOMETRY, FL_FULLBORDER,
 						  "fsc2: Tools" );
 		}
 		else
@@ -221,6 +222,7 @@ void parent_freeze( int freeze )
 						  "fsc2: Tools" );
 			tool_x = Toolbox->Tools->x;
 			tool_y = Toolbox->Tools->y;
+			has_pos = SET;
 		}
 
 		/* Set a close handler that avoids that the tool box window can be
@@ -252,11 +254,11 @@ void parent_freeze( int freeze )
 	{
 		if ( fl_form_is_visible( Toolbox->Tools ) )
 		{
-			store_geometry( );
+			store_toolbox_position( );
 			fl_hide_form( Toolbox->Tools );
 		}
 
-		needs_pos = SET;
+		has_pos = SET;
 	}
 
 	is_frozen = freeze ? SET : UNSET;
@@ -811,7 +813,7 @@ void tools_clear( void )
 
 
 	is_frozen = UNSET;
-	needs_pos = SET;
+	has_pos = UNSET;
 
 	if ( Toolbox == NULL )
 		return;
@@ -820,7 +822,7 @@ void tools_clear( void )
 	{
 		if ( fl_form_is_visible( Toolbox->Tools ) )
 		{
-			store_geometry( );
+			store_toolbox_position( );
 			fl_hide_form( Toolbox->Tools );
 		}
 	}
@@ -866,7 +868,7 @@ void recreate_Toolbox( void )
 {
 	IOBJECT *io, *last_io = NULL;
 	int flags;
-	unsigned int tool_w, tool_h;
+	int dummy;
 
 
 	if ( Internals.mode == TEST )        /* no drawing in test mode */
@@ -879,7 +881,7 @@ void recreate_Toolbox( void )
 	{
 		if ( fl_form_is_visible( Toolbox->Tools ) )
 		{
-			store_geometry( );
+			store_toolbox_position( );
 			fl_hide_form( Toolbox->Tools );
 		}
 
@@ -896,32 +898,26 @@ void recreate_Toolbox( void )
 		}
 
 		fl_free_form( Toolbox->Tools );
-
-		needs_pos = SET && ! is_frozen;
 		Toolbox->Tools = fl_bgn_form( FL_UP_BOX, 1, 1 );
 	}
 	else
 	{
-		needs_pos = UNSET;
 		Toolbox->Tools = fl_bgn_form( FL_UP_BOX, 1, 1 );
 
 		if ( ! Toolbox->has_been_shown &&
 			 * ( char * ) xresources[ TOOLGEOMETRY ].var != '\0' )
 		{
 			flags = XParseGeometry( ( char * ) xresources[ TOOLGEOMETRY ].var,
-									&tool_x, &tool_y, &tool_w, &tool_h );
+									&tool_x, &tool_y, &dummy, &dummy );
 
 			if ( XValue & flags && YValue & flags )
 			{
 				tool_x += GUI.border_offset_x;
 				tool_y += GUI.border_offset_y;
-				needs_pos = SET;
+				has_pos = SET;
 			}
 		}
 	}
-
-	if ( Toolbox->has_been_shown )
-		needs_pos = SET;
 
 	Toolbox->w = 2 * FI_sizes.VERT_OFFSET;
 	Toolbox->h = 2 * FI_sizes.HORI_OFFSET;
@@ -938,10 +934,10 @@ void recreate_Toolbox( void )
 
 	if ( ! is_frozen )
 	{
-		if ( needs_pos )
+		if ( has_pos )
 		{
 			fl_set_form_position( Toolbox->Tools, tool_x, tool_y );
-			fl_show_form( Toolbox->Tools, FL_PLACE_SIZE, FL_FULLBORDER,
+			fl_show_form( Toolbox->Tools, FL_PLACE_GEOMETRY, FL_FULLBORDER,
 						  "fsc2: Tools" );
 		}
 		else
@@ -950,6 +946,7 @@ void recreate_Toolbox( void )
 						  "fsc2: Tools" );
 			tool_x = Toolbox->Tools->x;
 			tool_y = Toolbox->Tools->y;
+			has_pos = SET;
 		}
 
 		/* Set a close handler that avoids that the tool box window can be
@@ -1348,7 +1345,7 @@ static void val_slider_setup( IOBJECT *io )
 /* and sets some properties                             */
 /*------------------------------------------------------*/
 
-static  void int_input_setup( IOBJECT *io )
+static void int_input_setup( IOBJECT *io )
 {
 	char buf[ MAX_INPUT_CHARS + 1 ];
 
@@ -1392,7 +1389,7 @@ static  void int_input_setup( IOBJECT *io )
 /* size and sets some properties                         */
 /*-------------------------------------------------------*/
 
-static  void float_input_setup( IOBJECT *io )
+static void float_input_setup( IOBJECT *io )
 {
 	char buf[ MAX_INPUT_CHARS + 1 ];
 
@@ -1436,7 +1433,7 @@ static  void float_input_setup( IOBJECT *io )
 /* and sets some properties                              */
 /*-------------------------------------------------------*/
 
-static  void int_output_setup( IOBJECT *io )
+static void int_output_setup( IOBJECT *io )
 {
 	char buf[ MAX_INPUT_CHARS + 1 ];
 
@@ -1484,7 +1481,7 @@ static  void int_output_setup( IOBJECT *io )
 /* size and sets some properties                          */
 /*--------------------------------------------------------*/
 
-static  void float_output_setup( IOBJECT *io )
+static void float_output_setup( IOBJECT *io )
 {
 	char buf[ MAX_INPUT_CHARS + 1 ];
 
@@ -1925,9 +1922,9 @@ void check_label( char *str )
 /* Another function for dealing with a XForms bug... */
 /*---------------------------------------------------*/
 
-void store_geometry( void )
+static void store_toolbox_position( void )
 {
-	if ( tool_x != Toolbox->Tools->x - 1 &&
+	if ( tool_x != Toolbox->Tools->x - 1 ||
 		 tool_y != Toolbox->Tools->y - 1 )
 	{
 		tool_x = Toolbox->Tools->x;
