@@ -20,7 +20,7 @@
 @item print()
 @findex print()
 This function prints text into the output browser in the main form of
-@b{fsc2}.  It needs a @i{format string}
+@acronym{fsc2}.  It needs a @i{format string}
 @cindex format string
 as its very first argument. The @i{format string} can contain any text
 as well as a special character, @code{#},
@@ -80,10 +80,10 @@ string}.
 Prints a @code{#}, thus switching off the special meaning of the
 @code{#} character as a placeholder for variables to be printed.
 @item \T
-While normally nothing is printed while a test of the
-@code{EXPERIMENT} experiment section of an @b{EDL} file is run, if the
-@i{format string} starts with this escape sequence the @code{print()}
-function will produce output even in the test run.
+While normally nothing is printed while a test of the @code{EXPERIMENT}
+experiment section of an @acronym{EDL} file is run, if the @i{format
+string} starts with this escape sequence the @code{print()} function
+will produce output even in the test run.
 @end table
 
 @item init_1d()
@@ -103,8 +103,8 @@ specified value turns out to be too small it is adjusted automatically
 in the experiment so that all data fit into the display.
 @item
 Start value of x-axis. If missing (or undefined, see next point) point
-numbers are printed, starting with 1 (if FORTRAN style array offsets are
-used, for C style arrays the starting value is 0).
+numbers are printed, starting with 1 (if acronym{FORTRAN} style array
+offsets are used, for C style arrays the starting value is 0).
 @item
 Increment for data along the x-axis (thus restricting the display to equally
 spaced data). Setting it to zero implies that the start value and the
@@ -251,12 +251,12 @@ never at all!
 @findex save()
 Writes one or more data or complete arrays to a file. But some care has
 to be used: If @w{@code{get_file()}} has been called before the first
-argument has to be the file number returned by the call to tell @b{fsc2}
-which file to use. If, on the other hand, @code{get_file()} hasn't been
-called before, the user is asked to select a file now and all further
-calls of functions of the @w{@code{save_xxx()}} type will use this one
-file and the first argument will be assumed to be a value to be written
-to this file!
+argument has to be the file number returned by the call to tell
+@acronym{fsc2} which file to use. If, on the other hand,
+@code{get_file()} hasn't been called before, the user is asked to select
+a file now and all further calls of functions of the
+@w{@code{save_xxx()}} type will use this one file and the first argument
+will be assumed to be a value to be written to this file!
 
 All arguments (following the file identifier if there's one) are
 data. The types of these data may be
@@ -341,12 +341,12 @@ X[ 3, 2 ] = 6
 
 @item save_program()
 @findex save_program()
-This functions writes the currently run @b{EDL} program into a file. As
-usual, the first argument may be a file identifier - the same rules
-apply as for @code{save()} and @code{fsave()}. The second argument can
-be a string that is prepended to each line of the program, i.e.@: a
-comment character to make other programs like @code{MATHLAB} or
-@code{octave} skip these lines.
+This functions writes the currently run @acronym{EDL} program into a
+file. As usual, the first argument may be a file identifier - the same
+rules apply as for @code{save()} and @code{fsave()}. The second argument
+can be a string that is prepended to each line of the program, i.e.@: a
+comment character to make other programs like @acronym{MATHLAB} or
+@acronym{octave} skip these lines.
 
 
 @item save_output()

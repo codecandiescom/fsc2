@@ -5,11 +5,11 @@
 @cindex overview
 
 
-@b{fsc2} is a program for remote control of cw- and pulsed EPR
+@acronym{fsc2} is a program for remote control of cw- and pulsed EPR
 spectrometers. It is basically an interpreter that executes a program
 written by the experimentator to describe the experiment (in the
-following called an @b{EDL}
-@cindex EDL
+following called an @acronym{EDL}
+@cindex @acronym{EDL}
 file (@b{E}xperiment @b{D}escription @b{L}anguage)).
 
 This approach is a bit different from the one usually used for remote
@@ -19,12 +19,15 @@ parameters to be used in the experiment and than start the experiment.
 The disadvantage of the traditional kind of programs is that they
 usually have to be rewritten or at least severely changed if either a
 new kind of experiment is to be done or the hardware devices used in the
-experiments are changed. In contrast, with @b{fsc2} doing a completely
-new type of experiment is quite straight forward - one just writes a new
-EDL program and can start doing the experiment. Also changing or adding
-new devices is relatively simple, all that need to be done is to write a
-new module
+experiments are changed. In contrast, with @acronym{fsc2} doing a
+completely new type of experiment is straight forward - all that's
+needed is to write a new acronym{EDL} program and one immediately can
+start doing the new experiment. Also changing or adding new devices is
+relatively simple, all that needs to be done is to write a new module
 @cindex modules
-. This module defines a set of functions that control the device. Modules
+. A module defines a set of functions that control the device. Modules
 are usually written in C. Thus, integrating a new device into the
 experiment doesn't necessitate changes in the main control program.
+
+In the following chapters I will first explain the syntax of the
+@acronym{EDL} language that is used to describe an experiment.

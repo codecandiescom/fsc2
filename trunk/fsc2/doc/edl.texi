@@ -1,10 +1,10 @@
 @c $Id$
 
-@node EDL, Functions, Overview, Top
-@chapter EDL
-@cindex EDL
+@node @acronym{EDL}, Functions, Overview, Top
+@chapter @acronym{EDL}
+@cindex @acronym{EDL}
 
-This chapter describes the @b{EDL} language (@b{E}xperiment
+This chapter describes the @acronym{EDL} language (@b{E}xperiment
 @b{D}escription @b{L}anguage).
 
 @ifinfo
@@ -22,22 +22,23 @@ This chapter describes the @b{EDL} language (@b{E}xperiment
 
 @node Basics, Sections, EDL, EDL
 @section Basics
-@cindex basic EDL structure 
+@cindex basic @acronym{EDL} structure 
 
 
 
-@b{EDL} is in many respects quite similar to other computer languages
-like C, FORTRAN or BASIC etc. You can use variables to do computations,
-you have flow control structures like if-else-constructs and for- and
-while-loops and there is a set of built-in functions. On the other hand,
-since the purpose of @b{EDL} is to describe an EPR experiment, there are
-also some differences. The most noticeable is the overall structure of
-an @b{EDL} program.
+@acronym{EDL} is in many respects quite similar to other computer
+languages like C, @acronym{FORTRAN} or @acronym{BASIC} etc. You can use
+variables to do computations, you have flow control structures like
+if-else-constructs and for- and while-loops and there is a set of
+built-in functions. On the other hand, since the purpose of
+@acronym{EDL} is to describe an @acronym{EPR} experiment, there are also
+some differences. The most noticeable is the overall structure of an
+@acronym{EDL} program.
 
-Each @b{EDL} program is divided into a set of sections that are somewhat
-related to the way an experiment is done. Due to the different purposes
-of the sections there are differences in the syntax to be used in the
-various sections. These are explained in the next sections.
+Each @acronym{EDL} program is divided into a set of sections that are
+somewhat related to the way an experiment is done. Due to the different
+purposes of the sections there are differences in the syntax to be used
+in the various sections. These are explained in the next sections.
 
 
 
@@ -46,7 +47,7 @@ various sections. These are explained in the next sections.
 @cindex section
 
 
-Each @b{EDL} file consists of up to 6 different sections. These are:
+Each @acronym{EDL} file consists of up to 6 different sections. These are:
 @example
 DEVICES
 VARIABLES
@@ -57,10 +58,10 @@ EXPERIMENT
 @end example
 
 
-In an experiment you will first decide which devices to use. This
-is reflected in the @code{DEVICES} section of an @b{EDL} file where you
-simply list all the devices to be used in the experiment (at least the
-ones that are going to be controlled by the computer).
+In an experiment you will first decide which devices to use. This is
+reflected in the @code{DEVICES} section of an @acronym{EDL} file where
+you simply list all the devices to be used in the experiment (at least
+the ones that are going to be controlled by the computer).
 
 The next section, @code{VARIABLES}, unfortunately hasn't a real-world
 equivalent -- here you have to declare all variables and arrays you will
@@ -85,7 +86,7 @@ the experiment: this coincides with the start of the @code{EXPERIMENT}
 section.
 
 
-While the sections of the @b{EDL} file don't have to appear in this
+While the sections of the @acronym{EDL} file don't have to appear in this
 sequence it is probably best not to experiment to much with this. In any
 case, if it exists the @code{EXPERIMENT} section must always be the
 last.
@@ -180,8 +181,9 @@ values and variables for storing floating point values.
 
 Integer variables can hold data from the interval @w{[-2^31, 2^31 - 1]},
 i.e. they run from -2147483648 all the way up to +2147483647. In
-contrast, floating point variables can have much larger values (up to ca.@:
-10^300), the exact limits depending on the machine @b{fsc2} is running on.
+contrast, floating point variables can have much larger values (up to
+ca.@: 10^300), the exact limits depending on the machine @acronym{fsc2}
+is running on.
 
 To distinguish between integer and floating point variables the
 following convention is used: The names of all integer variables start
@@ -194,10 +196,10 @@ variables start with a lower case character, i.e.@: a-z.
 @section Arithmetic
 @cindex Arithmetic
 
-There are the usual arithmetic operations built into @b{fsc2}, i.e.@:
-addition, subtraction, multiplication and division, not too surprisingly
-represented by the characters `@code{+}', `@code{-}', `@code{*}' and
-`@code{/}'.
+There are the usual arithmetic operations built into @acronym{fsc2},
+i.e.@: addition, subtraction, multiplication and division, not too
+surprisingly represented by the characters `@code{+}', `@code{-}',
+`@code{*}' and `@code{/}'.
 @cindex + (addition operator)
 @cindex - (subtraction operator)
 @cindex * (multiplication operator)
@@ -332,10 +334,9 @@ the logical negation operator, `@code{!}'. The evaluation of an
 expression with more than one of these operators is from the right to
 the left, i.e.@:
 @example
- ! - x    @r{will be treated as if written as}    ! ( - x )
+ !-x    @r{will be treated as if written as}    ! ( - x )
 @end example
-(This is not a very useful example but just here for sake of
-completeness.)
+(This is not a very useful example but here for sake of completeness.)
 
 The exponentiation operator, `@code{^}', has the next highest
 precedence, i.e.@: it `binds' more thightly than any other binary

@@ -43,13 +43,13 @@
 @node Top, , (dir), (dir)
 @top Top
 
-This text describes fsc2, a program to control cw- and pulsed EPR
-spectrometer. Basically, fsc2 is an interpreter to run a program that
-describes how the experiment is to be done. After an overview the syntax
-to be used is explained. This is followed by a section about the
-built-in functions that may be used in the program. Finally, it is
-explained who one can write modules for new devices to be used in the
-experiment.
+This text describes @acronym{fsc2}, a program to control cw- and pulsed
+EPR spectrometer. Basically, @acronym{fsc2} is an interpreter to run a
+program that describes how the experiment is to be done. After an
+overview the syntax to be used is explained. This is followed by a
+section about the built-in functions that may be used in the
+program. Finally, it is explained who one can write modules for new
+devices to be used in the experiment.
 
 
 @menu

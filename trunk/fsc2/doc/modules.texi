@@ -4,7 +4,8 @@
 @chapter Modules
 @cindex modules
 
-This chapter describes how to write new modules for use with @b{fsc2}.
+This chapter describes how to write new modules for use with
+@acronym{fsc2}.
 
 @ifinfo
 @menu
@@ -18,12 +19,13 @@ This chapter describes how to write new modules for use with @b{fsc2}.
 @section What modules are good for
 
 
-Modules allow to extend the set of commands that can be used in an EDL
-file. Thus, drivers for new devices can be written without having to
-understand completely how the program fsc2 works. It's only necessary is
-to be able to write functions in C for the communication with the new
-device. The only exception is some basic knowledge about fsc2's
-variables. They are explained in one of the following sections.
+Modules allow to extend the set of commands that can be used in an
+@acronym{EDL} file. Thus, drivers for new devices can be written without
+having to understand completely how the program @acronym{fsc2}
+works. It's only necessary is to be able to write functions in C for the
+communication with the new device. The only exception is some basic
+knowledge about @acronym{fsc2}'s variables. They are explained in one of
+the following sections.
 
 But let's start with a short summary of the things a module has to do.
 Usually, a module contains just a few functions that talk to the
@@ -32,7 +34,7 @@ whatever else there might be). As an example for the following I will
 use a lock-in amplifier. Probably the most basic operation is to get
 data from the amplifier. So one will have to create a function called
 @code{lockin_get_data()}. This name will be used in the module written
-in C as well as in the @b{EDL} file.
+in C as well as in the @acronym{EDL} file.
 
 Before starting to write a new module one has to decide about the name
 of the device, which will also be the name of the module. If the lock-in
@@ -43,11 +45,11 @@ called @file{Devices}, which is a simple ASCII file consisting of the
 names of all the supported devices. The entries are case-insensitive, so
 one might add `SR510', `sr510' or `Sr510' etc. Within the file C and C++
 style comments can be used.  By adding the device name to this file you
-tell fsc2 that there is now a module called `sr510' (take care - all
-modules are spelled with @strong{lower} case characters!). Actually, the file
-compiled from the C file defining the functions has to be
-@file{sr510.so} - that means it's a shareable library file, how to
-create it from the C file is described later.
+tell @acronym{fsc2} that there is now a module called `sr510' (take care
+- all modules are spelled with @strong{lower} case
+characters!). Actually, the file compiled from the C file defining the
+functions has to be @file{sr510.so} - that means it's a shareable
+library file, how to create it from the C file is described later.
 
 The next thing is to append the function(s) exported by the module to
 the function data base called @file{Functions}. Here one would add a
@@ -61,46 +63,47 @@ number of arguments). Optionally, you can add the keywords @code{ALL},
 or @code{PREP},
 @cindex @code{PREP}
 where @code{ALL} means that the function can be used in any part of the
-@b{EDL} file, while @code{EXP} tells @b{fsc2} to use this functions only
-during an experiment and, finally, @code{PREP} restricts the use of the
-function to the @code{PREPARATION} section of the @b{EDL} file.  Each
-line has to be ended with a semicolon and the entries in the line must be
-separated by commas.  As in the device data base, C and C++ style
-comments can be used.
+@acronym{EDL} file, while @code{EXP} tells @acronym{fsc2} to use this
+functions only during an experiment and, finally, @code{PREP} restricts
+the use of the function to the @code{PREPARATION} section of the
+@acronym{EDL} file.  Each line has to be ended with a semicolon and the
+entries in the line must be separated by commas.  As in the device data
+base, C and C++ style comments can be used.
 
 
 Writing the C file with the functions, compiling it to create a
 shareable library file from it and extending the device and function
 data base is all there is to be done. If in the devices sections of the
-@b{EDL} file the new device is found (and it's also listed in
-@file{Devices}) the new module will be loaded by @b{fsc2} and the
-functions defined in the module can be used in the @b{EDL} file.
+@acronym{EDL} file the new device is found (and it's also listed in
+@file{Devices}) the new module will be loaded by @acronym{fsc2} and the
+functions defined in the module can be used in the @acronym{EDL} file.
 
 
 What about having different lock-in amplifiers with modules defining
 functions with the same names, say @code{lockin_get_data()}? As long as
 only the module for one of the lock-in amplifiers is loaded (i.e. only
-one of them is mentioned in the devices section of the @b{EDL} file)
-there is no poblem at all. Only in the rather unusual case that more
-than one lock-in amplifier is to be used for an experiment (and thus be
-listed in the devices section) one would be in trouble and would have to
-change the names of the functions in the modules if they clash. Having
-modules exporting the functions with identical names will result in a
-severe warning while testing the @b{EDL} file and only the function
-defined in the first module will be usable.
+one of them is mentioned in the devices section of the @acronym{EDL}
+file) there is no poblem at all. Only in the rather unusual case that
+more than one lock-in amplifier is to be used for an experiment (and
+thus be listed in the devices section) one would be in trouble and would
+have to change the names of the functions in the modules if they
+clash. Having modules exporting the functions with identical names will
+result in a severe warning while testing the @acronym{EDL} file and only
+the function defined in the first module will be usable.
 
 
 
 @node fsc2s variables, New modules, Module overview, Modules
-@section How fsc2's variables work and how to use them
+@section How @acronym{fsc2}'s variables work and how to use them
 
 
-Of course, the first question is: Why do I have to know about them at all?
-The answer is that all functions to be used in an @b{EDL} file get their
-input parameters in form of this kind of variables and @b{fsc2} expects
-that you return values also in the form of @b{fsc2}'s variables.
+Of course, the first question is: Why do I have to know about them at
+all?  The answer is that all functions to be used in an @acronym{EDL}
+file get their input parameters in form of this kind of variables and
+@acronym{fsc2} expects that you return values also in the form of
+@acronym{fsc2}'s variables.
 
-Now let's have a look at the way @b{fsc2} internally stores
+Now let's have a look at the way @acronym{fsc2} internally stores
 variables. Here is the (actually somewhat simplified) @code{typedef} of the
 structure for variables:
 
@@ -152,11 +155,12 @@ array of data?
 
 Actually, it's not too complicated. The pointer to the variable
 structure @code{var} points to the first of the two parameters. And if
-you have a look back at the typedef for @b{fsc2}'s variables, there is
-this @code{next} pointer. That's the key to access the next parameter -
-@code{var->next} points to next of the input parameters. If the function
-expects even more arguments, @code{var->next->next} etc. would get you
-to them - that means the input variables are organized as a linked list:
+you have a look back at the typedef for @acronym{fsc2}'s variables,
+there is this @code{next} pointer. That's the key to access the next
+parameter - @code{var->next} points to next of the input parameters. If
+the function expects even more arguments, @code{var->next->next}
+etc. would get you to them - that means the input variables are
+organized as a linked list:
 
 @example
     var                               pointer passed to the function
@@ -178,19 +182,19 @@ to them - that means the input variables are organized as a linked list:
 If you declared your function to expect two input parameters the
 function will always get exactly two. The @code{next}-pointer of the
 very last parameter will always be @code{NULL}. If the function is
-called in the @b{EDL} file with more variables than you declared it to
-have this will result in a warning and the superfluous variables will
-simply be discarded. But if there are not enough parameter the program
-will just print an error message and than stop (and not call your
-function). Having the parameters organized as a linked list also makes
-it easy to handle variable numbers of variables: as long as the
+called in the @acronym{EDL} file with more variables than you declared
+it to have this will result in a warning and the superfluous variables
+will simply be discarded. But if there are not enough parameter the
+program will just print an error message and than stop (and not call
+your function). Having the parameters organized as a linked list also
+makes it easy to handle variable numbers of variables: as long as the
 @code{next}-pointer of a function argument isn't @code{NULL} there is
 still another one.
 
 @strong{One word of warning:} Never ever mess around with the @code{next}
 pointers!
 
-What @b{fsc2} can't do is check if the arguments it passes to your
+What @acronym{fsc2} can't do is check if the arguments it passes to your
 function have the type you expect. Lets assume that you expect two
 integer values. What you should do first is check if the parameters you
 got are really integers.  There is a function that can do it for you,
@@ -243,8 +247,8 @@ see above in the typedef for variables the value is stored in the union
     @code{var->INT}@ @ @ @ (which is a macro standing for @code{var->val.lval})
 @end quotation
 @noindent
-and what you get is a value of type @code{long int} --- @b{fsc2} is
-using long integers internally. On the other hand, if the type of the
+and what you get is a value of type @code{long int} --- @acronym{fsc2}
+is using long integers internally. On the other hand, if the type of the
 variable is @code{FLOAT_VAR} you get at the data with
 @quotation
     @code{var->FLOAT}@ @ @ @ (i.e. a macro for @code{var->val.dval})
@@ -260,7 +264,7 @@ in which case you get a value of type @code{double}.
 @findex T_realloc()
 @findex T_free()
 
-By the way, there's a special function made for @b{fsc2} for allocating
+By the way, there's a special function made for @acronym{fsc2} for allocating
 memory.  This functions does not only allocates memory but also checks
 that the allocation really returns as much memory as you asked for
 (i.e. if it fails it will stop the program and print an appropriate
@@ -285,7 +289,7 @@ some code to help detecting memory leaks etc. --- but that's a completely
 different topic...
 
 
-@subsection Returning data from an @b{EDL} function
+@subsection Returning data from an @acronym{EDL} function
 
 So, let's get back to our main theme. If your function just want's to return
 an integer or a float, things are easy, just push the value as
@@ -393,9 +397,9 @@ is call the function @code{vars_push()} as
 @noindent
 Actually, at some point of your function you may have allocated memory
 for storing the data. It is your responsibility to free this memory
-before you return from your function, fsc2 just uses a copy of the data
-you pass to it with @code{vars_push()}. As you probably already have
-guessed, if you want to return a float array, you will have to use
+before you return from your function, @acronym{fsc2} just uses a copy of
+the data you pass to it with @code{vars_push()}. As you probably already
+have guessed, if you want to return a float array, you will have to use
 @code{FLOAT_TRANS_ARR} instead of @code{INT_TRANS_ARR} in the call to
 @code{vars_push()}.
 
@@ -431,11 +435,11 @@ Var *my_function( Var *var )
 @end example
 
 
-An alternative (e.g. if the type of the variables you need to return differs)
-is two write two functions where the first one does the calculations needed
-and stores the second value in a global variable. All the second function has
-to do is just to return the value of the global variable. This way, the EDL
-file might look like
+An alternative (e.g. if the type of the variables you need to return
+differs) is two write two functions where the first one does the
+calculations needed and stores the second value in a global
+variable. All the second function has to do is just to return the value
+of the global variable. This way, the @acronym{EDL} file might look like
 
 @example
 V1 = my_function_1( );
@@ -506,7 +510,7 @@ correct sequence, so it's not completely foolproof.
 @subsection Files to be included
 
 Each module has to include the header file @file{fsc2.h} --- otherwise it
-will not be able to use @b{fsc2}'s variables.
+will not be able to use @acronym{fsc2}'s variables.
 
 
 @subsection Hook functions
@@ -532,8 +536,9 @@ parameters):
     void abc123_exit_hook( void )
 @end example
 @noindent
-The loader will test if these functions exist and if they do they will be
-called automatically at certain points in the interpretation of the EDL file.
+The loader will test if these functions exist and if they do they will
+be called automatically at certain points in the interpretation of the
+@acronym{EDL} file.
 
 If it exists, the first function, i.e. @code{abc123_init_hook()} is called
 immediately after the functions defined in all modules are loaded. Its main
@@ -545,14 +550,14 @@ the module unusable it may return a zero value --- in this case a warning
 message will be printed. If the initialization fails in a non-recoverable way,
 the function should throw an exception.
 
-The second function, @code{abc123_test_hook()}, is called at the start of
-the test run of the @code{EXPERIMENT} section of the @b{EDL} input
-file. Again, it can be used for initializations. But it should be noted
-that changes to the variables defined in the @b{EDL} file will remain only
-visible for the test run, after the test is completed they will revert
-to their former values, i.e the ones they had before the test run
-started! The return code of the function is the same as for the init
-hook function (i.e. always return a non-zero value on success).
+The second function, @code{abc123_test_hook()}, is called at the start
+of the test run of the @code{EXPERIMENT} section of the @acronym{EDL}
+input file. Again, it can be used for initializations. But it should be
+noted that changes to the variables defined in the @acronym{EDL} file
+will remain only visible for the test run, after the test is completed
+they will revert to their former values, i.e the ones they had before
+the test run started! The return code of the function is the same as for
+the init hook function (i.e. always return a non-zero value on success).
 
 The third function, @code{abc123_exp_hook()}, is run when the actual
 experiment is done. Initialization of devices should be done
@@ -561,16 +566,16 @@ functions.
 
 Finally, the fourth function, @code{abc123_exit_hook()}, is run after
 the experiment has been completed.  Actually, the function is called
-always at the end of the interpretation of the @b{EDL} input file, even
-if exceptions made the interpreter stop reading in the input file. That
-means, that @w{@code{abc123_exit_hook()}} will be executed even if none
-of the other hook functions have been run!  The most important thing to
-be done in this function is probably resetting the devices. But since
-the function is even called even if @code{abc_init_hook()} has not been
-executed at all (because another module further to the top of the list
-of modules threw an exception) one probably should use an initialized
-static global variable indicating if the device has been initialized at
-all.
+always at the end of the interpretation of the @acronym{EDL} input file,
+even if exceptions made the interpreter stop reading in the input
+file. That means, that @w{@code{abc123_exit_hook()}} will be executed
+even if none of the other hook functions have been run!  The most
+important thing to be done in this function is probably resetting the
+devices. But since the function is even called even if
+@code{abc_init_hook()} has not been executed at all (because another
+module further to the top of the list of modules threw an exception) one
+probably should use an initialized static global variable indicating if
+the device has been initialized at all.
 
 
 @subsection Global variables
@@ -625,10 +630,10 @@ serial port you're going to use is smaller than this number.
 
 
 
-@subsection How to call an EDL function from a module
+@subsection How to call an @acronym{EDL} function from a module
 
-Calling an EDL function (built-in as well as EDL functions defined in other
-modules) consists of three steps:
+Calling an @acronym{EDL} function (built-in as well as @acronym{EDL}
+functions defined in other modules) consists of three steps:
 
 @enumerate
 @item
@@ -640,7 +645,7 @@ the function does not exist or isn't loaded.
 @item
 Now call @code{vars_push()} for each of the arguments of the function -
 see the description of @code{vars_push()} in the section about
-@b{fsc2}'s built in variable types.
+@acronym{fsc2}'s built in variable types.
 
 @item
 Finally, call @code{func_call()} with the pointer returned by the call
@@ -650,7 +655,7 @@ as the argument. This will return a pointer to the
 variable with the result.
 @end enumerate
 
-As an example let's assume there is an @b{EDL} function named
+As an example let's assume there is an @acronym{EDL} function named
 @code{foo()} you want to call from your module, that takes two
 arguments, an integer and a floating point value. Then a typical piece
 of C code to call the function would be
@@ -686,7 +691,7 @@ you will have to go through the complete procedure, since the value
 stored in @code{func_ptr} after the call to @code{func_call()} is
 completely useless and even dangerous to use for any purpose whatsoever!
 @item
-If you just want to test if an @b{EDL} function exists at all just do
+If you just want to test if an @acronym{EDL} function exists at all just do
 only step 1 but after checking the pointer @strong{never} forget to call
 @code{vars_pop()} on the returned variable! I.e. do
 
@@ -727,10 +732,10 @@ handling code.  This is especially tedious within deeply nested function
 calls where it is often not clear on which level the error andling is
 done best.
 
-In ordr to alleviate ths problem in @b{fsc2} there is a mechanism called
-exceptions. An exception can be seens as a kind of flag that can be
-raised at any instance in the program and leads to the flow of control
-being changed to a place were the error can be handled.
+In ordr to alleviate ths problem in @acronym{fsc2} there is a mechanism
+called exceptions. An exception can be seens as a kind of flag that can
+be raised at any instance in the program and leads to the flow of
+control being changed to a place were the error can be handled.
 
 As far as raising exceptions in a module is
 concerned it's very simple. If you run into an error that can't be handled by
@@ -742,7 +747,7 @@ if ( non_recoverable_error )
 @findex THROW()
 @findex EXCEPTION
 @noindent
-and @b{fsc2} will ake care of all error handling. That's all you need to
+and @acronym{fsc2} will ake care of all error handling. That's all you need to
 know about exceptions for nearly all cases that have to be handled within
 modules.
 
@@ -789,7 +794,7 @@ and
 which are used to implement exceptions.
 
 
-The idea and most of the code used for exceptions in @b{fsc2} is taken
+The idea and most of the code used for exceptions in @acronym{fsc2} is taken
 from an article by Peter Simons in the the iX magzine
 (@uref{http://www.heise.de/ix/}), No. 5, 1998, pp. 160-162.
 
