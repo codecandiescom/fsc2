@@ -38,6 +38,7 @@ int sr810_init_hook( void );
 int sr810_exp_hook( void );
 int sr810_end_of_exp_hook( void );
 void sr810_exit_hook( void );
+void sr810_lock_state( bool lock );
 
 Var *lockin_get_data( Var *v );
 Var *lockin_get_adc_data( Var *v );
@@ -48,6 +49,7 @@ Var *lockin_phase( Var *v );
 Var *lockin_ref_freq( Var *v );
 Var *lockin_ref_mode( Var *v );
 Var *lockin_ref_level( Var *v );
+Var *lockin_lock_keyboard( Var *v );
 
 
 /* typedefs and global variables used only in this file */
@@ -824,6 +826,34 @@ Var *lockin_ref_level( Var *v )
 }
 
 
+/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+
+Var *lockin_lock_keyboard( Var *v )
+{
+	bool lock;
+
+
+	if ( TEST_RUN )
+		return vars_push( INT_VAR, 1 );
+
+
+	if ( v == NULL )
+		lock = ON;
+	else
+	{
+		vars_check( v, INT_VAR | FLOAT_VAR );
+
+		if ( v->type == INT_VAR )
+			lock = v->val.lval == 0 ? UNSET : UNSET;
+		else
+			lock = v->val.dval == 0.0 ? UNSET : UNSET;
+	}
+
+	sr810_lock_state( lock );
+	return vars_push( INT_VAR, 1 );
+}
+
 
 /******************************************************/
 /* The following functions are only used internally ! */
@@ -1364,4 +1394,22 @@ static double sr810_set_ref_level( double level )
 	}
 
 	return level;
+}
+
+
+/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+
+void sr810_lock_state( bool lock )
+{
+	cmd[ 100 ];
+
+
+	sprintf( cmd, "OVRM %c\n", lock ? '0' : '1' );
+	if ( gpib_write( sr810.device, cmd ) == FAILURE )
+	{
+		eprint( FATAL, "%s: Can't access the lock-in amplifier.\n",
+				DEVICE_NAME );
+		THROW( EXCEPTION );
+	}
 }
