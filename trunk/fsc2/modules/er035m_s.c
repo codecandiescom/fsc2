@@ -59,6 +59,7 @@ typedef struct
     int fd;                 /* file descriptor for serial port */
     struct termios old_tio, /* serial port terminal interface structures */
                    new_tio;
+	char prompt;
 } NMR;
 
 
@@ -170,6 +171,7 @@ int er035m_s_init_hook( void )
 	nmr.is_needed = SET;
 	nmr.name = DEVICE_NAME;
 	nmr.state = ER035M_S_UNKNOWN;
+	nmr.prompt = '\0';
 
 	return 1;
 }
@@ -210,6 +212,16 @@ int er035m_s_exp_hook( void )
 		eprint( FATAL, "%s: Can't access the NMR gaussmeter.", nmr.name );
 		THROW( EXCEPTION );
 	}
+	usleep( ER035M_S_WAIT );
+
+	/* Switch the display on */
+
+	if ( er035m_s_write( "ED", 2 ) == FAIL )
+	{
+		eprint( FATAL, "%s: Can't access the NMR gaussmeter.", nmr.name );
+		THROW( EXCEPTION );
+	}
+	usleep( ER035M_S_WAIT );
 
 	/* Ask gaussmeter to send status byte and test if it does */
 
@@ -332,15 +344,6 @@ try_again:
 		}
 
 	} while ( *bp++ ); 
-
-	/* Switch the display on */
-
-	if ( er035m_s_write( "ED", 2 ) == FAIL )
-	{
-		eprint( FATAL, "%s: Can't access the NMR gaussmeter.", nmr.name );
-		THROW( EXCEPTION );
-	}
-	usleep( ER035M_S_WAIT );
 
 	/* Find out the resolution and set it to at least 2 digits */
 
@@ -703,8 +706,12 @@ static bool er035m_s_write( const char *buf, long len )
 	else
 		res = er035m_s_comm( SERIAL_WRITE, buf, len );
 
-	if ( ! res )
+	/* If write failed and the string to send isn't the LOC command try to
+	   switch device back to local */
+
+	if ( ! res && strncmp( buf, "LOC", 3 ) )
 		er035m_s_close( );
+
 	return res;
 }
 
@@ -726,12 +733,17 @@ static bool er035m_s_read( char *buf, long *len )
 		return FAIL;
 	}
 
-	/* Make buffer end with zero and remove trailing `*'s (they're always
-	   send at the start of a reply) */
+	/* If the prompt charcter send by the device with each reply isn't known
+	   yet take it to be the very first byte read */
+
+	if ( ! nmr.prompt )
+		nmr.prompt = buf[ 0 ];
+
+	/* Make buffer end with zero and remove leading prompt characters */
 
 	*( strchr( buf, '\r' ) ) = '\0';
 	*len = strlen( buf );
-	for ( ptr = buf; *ptr == '*'; ptr++ )
+	for ( ptr = buf; *ptr == nmr.prompt; ptr++ )
 		;
 	*len -= ( long ) ( ptr - buf );
 	memmove( buf, ptr, *len + 1 );
@@ -749,6 +761,7 @@ static bool er035m_s_comm( int type, ... )
 	char *buf;
 	long len;
 	long *lptr;
+	long read_retries = 10;
 
 
 	va_start( ap, type );
@@ -780,6 +793,7 @@ static bool er035m_s_comm( int type, ... )
 			len = va_arg( ap, long );
 			if ( write( nmr.fd, buf, len ) != len )
 			{
+				perror( "Shit happend in WRITE" );
 				va_end( ap );
 				return FAIL;
 			}
@@ -788,19 +802,30 @@ static bool er035m_s_comm( int type, ... )
 		case SERIAL_READ :
 			buf = va_arg( ap, char * );
 			lptr = va_arg( ap, long * );
-			*lptr = read( nmr.fd, buf, *lptr );
-			if ( *lptr < 0 )
+			len = 1;
+			do
 			{
+				if ( len < 0 )
+					usleep( ER035M_S_WAIT );
+				len = read( nmr.fd, buf, *lptr );
+			}
+			while ( len < 0 && errno == EAGAIN && read_retries-- > 0 );
+				
+			if ( len < 0 )
+			{
+				printf( "%ld, errno = %d\n", read_retries, errno );
+				perror( "Shit happend in READ" );
 				*lptr = 0;
 				va_end( ap );
 				return FAIL;
 			}
 
-			/* The most significant bit of the bytes send by the gaussmeter is
-			   more or less random, so let's get rid of it... */
+			/* The two most significant bits of each bytes the gaussmeter
+			   sends seem to be random, so let's get rid of them... */
 
+			*lptr = len;
 			for ( len = 0; len < *lptr; len++ )
-				buf[ len ] &= 0x7f;
+				buf[ len ] &= 0x3f;
 
 			break;
 
