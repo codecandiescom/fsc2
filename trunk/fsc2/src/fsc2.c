@@ -85,7 +85,7 @@ int main( int argc, char *argv[ ] )
 #if defined MDEBUG
 	if ( mcheck( NULL ) != 0 )
 	{
-		printf( "Can't start mcheck() !\n" );
+		fprintf( stderr, "Can't start mcheck() !\n" );
 		return EXIT_FAILURE;
 	}
 #endif
