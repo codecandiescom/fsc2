@@ -610,7 +610,10 @@ try_again:
 			return FAIL;
 		else
 */
-			goto try_again;
+		show_message( "Please set sweep speed on magnet front\n"
+					  "panel to maximum value of 6666 Oe/min.\n"
+					  "Also make sure remote control is enabled !" );
+		goto try_again;
 	}
 
 	/* Finally using this ratio we go to the start field */

@@ -10,6 +10,7 @@ long reader( void *ret )
 {
 	CS header;
 	char *str;
+	char *strs[ 3 ];
 
 
 	read( pd[ READ ], &header, sizeof( CS ) );
@@ -21,6 +22,37 @@ long reader( void *ret )
 			read( pd[ READ ], str, header.data.len );
 			str[ header.data.len ] = '\0';
 			eprint( NO_ERROR, "%s", str );
+			T_free( str );
+			if ( ret != NULL )
+				*( ( char ** ) ret ) = NULL;
+			return 0;
+
+		case C_SHOW_MESSAGE :
+			str = T_malloc( header.data.len + 1 );
+			read( pd[ READ ], str, header.data.len );
+			str[ header.data.len ] = '\0';
+			fl_show_messages( str );
+			T_free( str );
+			if ( ret != NULL )
+				*( ( char ** ) ret ) = NULL;
+			return 0;
+
+		case C_SHOW_ALERT :
+			str = T_malloc( header.data.len + 1 );
+			read( pd[ READ ], str, header.data.len );
+			str[ header.data.len ] = '\0';
+			strs[ 0 ] = str;
+			if ( ( strs[ 1 ] = strchr( strs[ 0 ], '\n' ) ) != NULL )
+			{
+				*strs[ 1 ]++ = '\0';
+				if ( ( strs[ 2 ] = strchr( strs[ 1 ], '\n' ) ) != NULL )
+					*strs[ 2 ]++ = '\0';
+				else
+					strs[ 2 ] = NULL;
+			}
+			else
+				strs[ 1 ] = strs[ 2 ] = NULL;
+			fl_show_alert( strs[ 0 ], strs[ 1 ], strs[ 2 ], 1 );
 			T_free( str );
 			if ( ret != NULL )
 				*( ( char ** ) ret ) = NULL;
@@ -71,7 +103,21 @@ void writer( int type, ... )
 			str = va_arg( ap, char * );
 			header.data.len = strlen( str );
 			write( pd[ WRITE ], &header, sizeof( CS ) );
-			write( pd[ WRITE ], str, strlen( str ) );
+			write( pd[ WRITE ], str, header.data.len );
+			break;
+
+		case C_SHOW_MESSAGE :
+			str = va_arg( ap, char * );
+			header.data.len = strlen( str );
+			write( pd[ WRITE ], &header, sizeof( CS ) );
+			write( pd[ WRITE ], str, header.data.len );
+			break;
+
+		case C_SHOW_ALERT :
+			str = va_arg( ap, char * );
+			header.data.len = strlen( str );
+			write( pd[ WRITE ], &header, sizeof( CS ) );
+			write( pd[ WRITE ], str, header.data.len );
 			break;
 
 		case C_INT :

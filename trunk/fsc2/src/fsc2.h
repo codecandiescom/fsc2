@@ -56,6 +56,7 @@
 #include "ppcheck.h"
 #include "prim_exp.h"
 #include "run.h"
+#include "chld_func.h"
 
 
 /* The diverse lexers */

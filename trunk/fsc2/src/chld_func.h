@@ -12,8 +12,7 @@
 
 
 void show_message( const char *str );
-void hide_message( void );
-
+void show_alert( const char *str );
 
 
 #endif  /* ! CHLD_FUNC_HEADER */

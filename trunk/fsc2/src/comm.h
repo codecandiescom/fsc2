@@ -10,6 +10,8 @@
 
 enum {
 	C_EPRINT = 0,
+	C_SHOW_MESSAGE,
+	C_SHOW_ALERT,
 	C_INT,
 	C_LONG,
 	C_FLOAT,
