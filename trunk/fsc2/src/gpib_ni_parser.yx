@@ -31,6 +31,7 @@
 
 extern int gpiblex( void );
 extern int gpiblineno;
+extern char *gpibtext;
 
 static void gpiberror( const char *s );
 
@@ -115,9 +116,6 @@ sep2:   /* empty */
 
 static void gpiberror( const char *s )
 {
-	extern char *gpibtext;
-
-
 	printf( "%s at token '%s' on line %d.\n", s, gpibtext, gpiblineno );
 	ibsta |= IBERR;
 }

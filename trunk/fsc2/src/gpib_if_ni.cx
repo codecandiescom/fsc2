@@ -127,7 +127,6 @@ int gpib_init( const char *log_file_name, int log_level )
 		ll = LL_ALL;
 
     gpib_init_log( log_file_name );             /* initialize logging */
-	gpib_error_setup( gpib_error_buffer, GPIB_ERROR_BUFFER_LENGTH );
 
 	num_devices = 0;
 	for ( i = 0; i < GPIB_MAX_DEV; i++ )
@@ -1070,22 +1069,18 @@ int gpib_dev_setup( GPIB_Device *temp_dev )
     if ( *temp_dev->name == '\0' ) {
         fprintf( stderr, "Name of device missing near line %d in "
 				 "\"%s\".\n", gpiblineno, GPIB_CONF_FILE );
-        if ( gpib_error_buffer != NULL &&
-             gpib_error_buffer_length > 0 )
-            snprintf( gpib_error_buffer, gpib_error_buffer_length,
-					  "Name of device missing near line %d in "
-					  "\"%s\".", gpiblineno, GPIB_CONF_FILE );
+		snprintf( gpib_error_buffer, GPIB_ERROR_BUFFER_LENGTH,
+				  "Name of device missing near line %d in "
+				  "\"%s\".", gpiblineno, GPIB_CONF_FILE );
         return -1;
     }
 
     if ( temp_dev->pad < 0 || temp_dev->pad > 0x1e ) {
         fprintf( stderr, "Invalid primary GPIB address %d for device "
 				 "\"%s\".\n", temp_dev->pad, temp_dev->name );
-        if ( gpib_error_buffer != NULL &&
-             gpib_error_buffer_length > 0 )
-            snprintf( gpib_error_buffer, gpib_error_buffer_length,
-					  "Invalid primary GPIB address %d for device "
-					  "\"%s\".", temp_dev->pad, temp_dev->name );
+		snprintf( gpib_error_buffer, GPIB_ERROR_BUFFER_LENGTH,
+				  "Invalid primary GPIB address %d for device "
+				  "\"%s\".", temp_dev->pad, temp_dev->name );
         return -1;
     }
 
@@ -1093,23 +1088,18 @@ int gpib_dev_setup( GPIB_Device *temp_dev )
          ( temp_dev->sad < 0x60 || temp_dev->sad > 0x7e ) ) {
         fprintf( stderr, "Invalid secondary GPIB address %d for "
 				 "device \"%s\".\n", temp_dev->sad, temp_dev->name );
-        if ( gpib_error_buffer != NULL &&
-             gpib_error_buffer_length > 0 )
-            snprintf( gpib_error_buffer, gpib_error_buffer_length,
-					  "Invalid secondary GPIB address %d for "
-					  "device \"%s\".",
-					  temp_dev->sad, temp_dev->name );
+		snprintf( gpib_error_buffer, GPIB_ERROR_BUFFER_LENGTH,
+				  "Invalid secondary GPIB address %d for "
+				  "device \"%s\".", temp_dev->sad, temp_dev->name );
         return -1;
     }
 
     if ( temp_dev->timo < TNONE || temp_dev->timo > T1000s ) {
         fprintf( stderr, "Invalid timeout setting for device "
 				 "\"%s\".\n", temp_dev->name );
-        if ( gpib_error_buffer != NULL &&
-             gpib_error_buffer_length > 0 )
-            snprintf( gpib_error_buffer, gpib_error_buffer_length,
-					  "Invalid timeout setting for device \"%s\".",
-					  temp_dev->name );
+		snprintf( gpib_error_buffer, GPIB_ERROR_BUFFER_LENGTH,
+				  "Invalid timeout setting for device \"%s\".",
+				  temp_dev->name );
         return -1;
     }
 
@@ -1121,14 +1111,10 @@ int gpib_dev_setup( GPIB_Device *temp_dev )
             fprintf( stderr, "Device \"%s\" found more than once "
 					 "in configuration file \"%s\".\n",
 					 temp_dev->name, GPIB_CONF_FILE );
-            if ( gpib_error_buffer != NULL &&
-                 gpib_error_buffer_length > 0 )
-                snprintf( gpib_error_buffer,
-						  gpib_error_buffer_length,
-						  "Device \"%s\" found more than once "
-						  "in configuration file \"%s\".",
-						  temp_dev->name,
-						  GPIB_CONF_FILE );
+			snprintf( gpib_error_buffer, GPIB_ERROR_BUFFER_LENGTH,
+					  "Device \"%s\" found more than once "
+					  "in configuration file \"%s\".",
+					  temp_dev->name, GPIB_CONF_FILE );
             return -1;
         }
 
@@ -1137,19 +1123,6 @@ int gpib_dev_setup( GPIB_Device *temp_dev )
     memcpy( devices + num_devices++, temp_dev, sizeof( Device ) );
 
     return 0;
-}
-
-
-/*------------------------------------------------------------------*/
-/* This function allows the calling program to define a buffer to   */
-/* which error messages are written. The maximum length of an error */
-/* message is set by the second parameter.                          */
-/*------------------------------------------------------------------*/
-
-void gpib_error_setup( char *buffer, size_t buffer_length )
-{
-    gpib_error_buffer = buffer;
-    gpib_error_buffer_length = buffer_length;
 }
 
 
@@ -1210,6 +1183,9 @@ static int *get_fd_list( void )
 	return fd_list;
 }
 
+
+/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*/
 
 static void close_on_exec_hack( int *fd_list )
 {

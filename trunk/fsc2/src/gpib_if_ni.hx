@@ -68,9 +68,10 @@ typedef struct {
    the following line is needed... */
 
 #if ! defined( IBERR )
-#warning "**************************************************"
-#warning "* Using ERR will conflict with post-2.2 kernels! *"
-#warning "**************************************************"
+#warning "***************************"
+#warning "* Using ERR will conflict *"
+#warning "* with post-2.2 kernels!  *"
+#warning "***************************"
 #define IBERR ERR
 #endif
 
@@ -100,7 +101,6 @@ GPIB_VARIABLE int gpib_read( int device, char *buffer, long *length );
 GPIB_VARIABLE int gpib_serial_poll( int device, unsigned char *stb );
 GPIB_VARIABLE void gpib_log_message( const char *fmt, ... );
 GPIB_VARIABLE int gpib_dev_setup( GPIB_Device *temp_dev );
-GPIB_VARIABLE void gpib_error_setup( char *buffer, size_t buffer_length );
 
 
 GPIB_VARIABLE char gpib_error_msg[ 1024 ]; /* global for GPIB error messages */

@@ -41,9 +41,10 @@
    following line will tell the user about this potential problem... */
 
 #if ! defined( IBERR )
-#warning "**************************************************"
-#warning "* Using ERR will conflict with post-2.2 kernels! *"
-#warning "**************************************************"
+#warning "***************************"
+#warning "* Using ERR will conflict *"
+#warning "* with post-2.2 kernels!  *"
+#warning "***************************"
 #define IBERR ERR
 #endif
 
