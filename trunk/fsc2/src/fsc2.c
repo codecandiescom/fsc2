@@ -124,6 +124,8 @@ int main( int argc, char *argv[ ] )
 	Comm.MQ = NULL;
 	Comm.MQ_ID = -1;
 
+	GUI.is_init = UNSET;
+
 	G.color_hash = NULL;
 
 	/* Figure out if the machine has an INTEL type processor */

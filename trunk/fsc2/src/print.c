@@ -473,6 +473,9 @@ static void start_printing( FILE *fp, char *name, long what )
 	if ( pid > 0 )
 		return;
 
+	if ( GUI.is_init )
+		close( ConnectionNumber( GUI.d ) );
+
 	/* Some programs only work when the input is a seekable stream, so we
 	   first create a temporary file (that gets unlink()'ed immediately,
 	   so that its automatically gone when the process exits) */

@@ -226,6 +226,9 @@ typedef struct {
 
 typedef struct {
 
+	bool is_init;
+	Display *d;
+
 	G_FUNCS G_Funcs;
 
 	FD_fsc2 *main_form;

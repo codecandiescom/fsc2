@@ -108,6 +108,8 @@ pid_t spawn_conn( bool start_state, FILE *in_file_fp )
 	{
 		if ( in_file_fp )
 			fclose( in_file_fp );
+		if ( GUI.is_init )
+			close( ConnectionNumber( GUI.d ) );
 		connect_handler( listen_fd );
 	}
 

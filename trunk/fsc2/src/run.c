@@ -139,6 +139,8 @@ bool run( void )
 
 	if ( ( Internals.child_pid = fork( ) ) == 0 )
 	{
+		if ( GUI.is_init )
+			close( ConnectionNumber( GUI.d ) );
 		sigprocmask( SIG_SETMASK, &old_mask, NULL );
 		run_child( );
 	}

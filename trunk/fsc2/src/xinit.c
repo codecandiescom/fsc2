@@ -125,6 +125,12 @@ bool xforms_init( int *argc, char *argv[ ] )
 		 == NULL )
 		return FAIL;
 
+	GUI.is_init = SET;
+	GUI.d = display;
+
+	if ( ( flags = fcntl( ConnectionNumber( display ), F_GETFD, 0 ) ) >= 0 )
+		fcntl( ConnectionNumber( display ), F_SETFD, flags | FD_CLOEXEC );
+
 	/* xforms sets the locale to the one set in the environment variables. But
 	   we need at least the "normal" formatting of numeric values, otherwise
 	   functions like strtod() work not as expected. */
