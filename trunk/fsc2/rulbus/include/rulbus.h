@@ -94,20 +94,55 @@ struct RULBUS_CARD_LIST {
 	unsigned char rack;
 	unsigned char addr;
 	unsigned char width;
+	struct RULBUS_CARD_HANDLER *handler;
 	bool in_use;
 };
 
 
 extern int rulbus_errno;
 
+
+/* Definitions for the delay card module (RB8514) */
+
+#define RULBUS_DELAY_FALLING_EDGE      1
+#define RULBUS_DELAY_RAISING_EDGE      0
+
+#define RULBUS_DELAY_CARD_MAX          ( ( 1 << 24 ) - 1 )
+
+#define RULBUS_DELAY_OUTPUT_1          1
+#define RULBUS_DELAY_OUTPUT_2          2
+#define RULBUS_DELAY_OUTPUT_BOTH       3
+
+#define RULBUS_DELAY_START_PULSE       1
+#define RULBUS_DELAY_END_PULSE         2
+#define RULBUS_DELAY_PULSE_BOTH        3
+
+#define RULBUS_DELAY_POLARITY_NEGATIVE 0
+#define RULBUS_DELAY_POLARITY_POSITIVE 1
+
+
+
 int rulbus_open( void );
-int rulbus_close( void );
+void rulbus_close( void );
 int rulbus_perror( const char *s );
 const char *rulbus_strerror( void );
 int rulbus_card_open( const char *name );
-int rulbus_card_close( int handle );
-int rulbus_write( int handle, unsigned char offset, unsigned char data );
-int rulbus_read( int handle, unsigned char offset, unsigned char *data );
+void rulbus_card_close( int handle );
+int rulbus_write( int handle, unsigned char offset, unsigned char *data,
+				  size_t len );
+int rulbus_read( int handle, unsigned char offset, unsigned char *data,
+				 size_t len );
+
+
+int rulbus_delay_init( void );
+void rulbus_delay_exit( void );
+int rulbus_delay_card_init( int handle );
+void rulbus_delay_card_exit( int handle );
+int rulbus_delay_set_delay( int handle, unsigned long delay );
+int rulbus_delay_set_trigger( int handle, int edge );
+int rulbus_delay_set_output_pulse( int handle, int output, int type );
+int rulbus_delay_set_output_pulse_polarity( int handle, int type, int pol );
+int rulbus_delay_software_start( int handle );
 
 
 #define RULBUS_OK         0
@@ -129,11 +164,13 @@ int rulbus_read( int handle, unsigned char offset, unsigned char *data );
 #define RULBUS_CRD_NAM  -16
 #define RULBUS_INV_TYP  -17
 #define RULBUS_ADD_CFL  -18
-#define RULBUS_NO_INIT  -19
-#define RULBUS_INV_ARG  -20
-#define RULBUS_INV_CRD  -21
-#define RULBUS_INV_HND  -22
-#define RULBUS_CRD_NOP  -23
-#define RULBUS_INV_OFF  -24
-#define RULBUS_WRT_ERR  -25
-#define RULBUS_RD_ERR   -26
+#define RULBUS_TYP_HND  -19
+#define RULBUS_NO_INIT  -20
+#define RULBUS_INV_ARG  -21
+#define RULBUS_INV_CRD  -22
+#define RULBUS_INV_HND  -23
+#define RULBUS_CRD_NOP  -24
+#define RULBUS_INV_OFF  -25
+#define RULBUS_WRT_ERR  -26
+#define RULBUS_RD_ERR   -27
+#define RULBUS_CRD_BSY  -28
