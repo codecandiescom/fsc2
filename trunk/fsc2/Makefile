@@ -19,30 +19,32 @@
 # the Free Software Foundation, 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.
 
+
 ########################################################################
 #                                                                      #
-#  In the first section several variables can be set to configure      #
+#  In this first section several variables can be set to configure     #
 #  fsc2. Please read the comments carefully and change the variables   #
 #  if necessary. Please take care, most settings are case-sensitive!   #
 #                                                                      #
 ########################################################################
+
 
 # Please note: When there is some talk about "commenting out a variable"
 # in the following this simply means that you have to put a hash character
 # ('#') at the start of the line where the variable is set.
 
 # The following variable determines under which directory the program and
-# its auxiliary files will be installed
+# its auxiliary files will be installed (defaults to /usr/local)
 
 prefix            := /usr/local
 
 
-# Next the owner and the group of the program and all files that will be
-# installed have to be set. I would recommended to create a special account
-# for the program, with 'fsc2' being the natural choice (which is also the
-# default). The group that owns the files, escpecially the executable fsc2
-# should be one that allows access to the device files. See the longer
-# discussion in section B of the INSTALL file.
+# Next the owner and the group of fsc2 all files that will be installed has
+# to be set. I would recommended to create a special account for the program,
+# with 'fsc2' being the natural choice (which is also the default). The group
+# that owns the files, escpecially the executable fsc2 should be one that
+# allows access to the device files. See the longer discussion in section B
+# of the INSTALL file.
 
 OWNER             := fsc2
 GROUP             := uucp
@@ -52,9 +54,17 @@ GROUP             := uucp
 # 'LLP' for the LLP library, 'NI' for the National Instruments library or
 # 'JTT' for the library written by me. Alternatively, if no GPIB support is
 # needed, define GPIB_LIBRARY as 'NONE' (which is also the default if not set).
-# Then the location of the GPIB configuration file is set (this is only needed
-# with the National Instruments GPIB library, if not set GPIB_CONF_FILE
-# defaults to /etc/gpib.conf).
+
+GPIB_LIBRARY      := JTT
+
+
+# Then the location of the GPIB configuration file is set (this usually is
+# needed for the National Instruments GPIB library only, if not set
+# GPIB_CONF_FILE defaults to /etc/gpib.conf).
+
+GPIB_CONF_FILE    := /etc/gpib.conf
+
+
 # Next set the file for writing logs about the activity on the GPIB bus.
 # Make sure that fsc2 or its users have write access to the directory the
 # log file will be created in. Don't use a partition on which you don't have
@@ -62,21 +72,24 @@ GROUP             := uucp
 # do the file can become rather long. But the file will not grow indefintely,
 # if you start a new experiment the previous contents get overwritten. If no
 # file is specified logs will be written to stderr.
+
+GPIB_LOG_FILE     := /tmp/gpib.log
+
+
 # The next variable, GPIB_LOG_LEVEL, sets the verbosity level for the GPIB
 # logs, use either 'HIGH', 'MEDIUM', 'LOW' or 'OFF'. When set to 'HIGH' all
 # GPIB function calls together wih all data send to or recoved from devices
 # are stored. When set to 'MEDIUM' only GPIB function calls are logged. When
 # set to 'LOW' only errors will be wriiten to the file. If not set it defaults
 # to 'LOW'.
+
+GPIB_LOG_LEVEL    := HIGH
+
+
 # Finally, if the header files for the GPIB library aren't in either
 # /usr/include or /usr/local/include (for example if they are in
-# /usr/include/gpib) set the last variable GPIB_HEADER_DIR to the absolute
+# /usr/include/gpib) set the variable GPIB_HEADER_DIR to the absolute
 # path of the directory where the header file(s) for the library reside.
-
-GPIB_LIBRARY      := JTT
-GPIB_CONF_FILE    := /etc/gpib.conf
-GPIB_LOG_FILE     := /tmp/gpib.log
-GPIB_LOG_LEVEL    := HIGH
 
 # GPIB_HEADER_DIR  := /usr/include/gpib
 
@@ -84,13 +97,16 @@ GPIB_LOG_LEVEL    := HIGH
 # NUM_SERIAL_PORTS defines the number of serial ports that are available on
 # the computer and defaults to 0 if not set (in which case no serial ports
 # can be used).
+
+NUM_SERIAL_PORTS  := 2
+
+
 # The second variable, SERIAL_LOCK_DIR, is the directory where UUCP style
 # lock files for the serial ports are created. This should be '/var/lock'
 # according to version 2.2 of the Filesystem Hierachy Standard. Either fsc2
 # itself or all its users must have read and write permissions for this
 # directory. Also see the longer discussion in section C of the INSTALL file.
 
-NUM_SERIAL_PORTS  := 2
 SERIAL_LOCK_DIR   := /var/lock
 
 
@@ -104,17 +120,16 @@ DEFAULT_HTTP_PORT := 8080
 
 
 # Uncomment the following line if you don't want the program to send an
-# emails with a bug report on crashes.
+# email with a bug report when it crashes.
 
 # NO_MAIL = yes
 
 
-# This last variable controls to whom mail with bug reports and crash messages
-# will be send - if not set no "Bug report" button will be shown. Please
-# change this only if you change the program yourself (in which case sending
-# bug reports or mails about crashes to me wouldn't make too much sense).
-# If you want to keep fsc2 from sending out crash reports at all commenting
-# out this variable is one way to do it.
+# This last variable controls to whom mail with bug reports and about crashes
+# will be send - if it's commented out no "Bug report" button will be shown.
+# Please change this if you change the program yourself (in which case
+# sending bug reports or mails about crashes to me wouldn't make too much
+# sense).
 
 MAIL_ADDRESS      := Jens.Toerring@physik.fu-berlin.de
 
@@ -127,6 +142,7 @@ MAIL_ADDRESS      := Jens.Toerring@physik.fu-berlin.de
 # Don't use '-fomit-frame-pointer' in CFLAGS on Intel processors (unless
 # you want to keep me from getting meaningful messages about crashes).
 ##############################################################################
+
 
 ifndef prefix
 	prefix := /usr/local
@@ -333,11 +349,13 @@ CONFFLAGS += -Dauxdir=\"$(auxdir:/=)/\"
 CONFFLAGS += -Dudir=\"$(udir:/=)/\"
 CONFFLAGS += -Ddocdir=\"$(docdir:/=)/\"
 
+
 ifdef GPIB_LOG_FILE
 	CONFFLAGS += -DGPIB_LOG_FILE=\"$(GPIB_LOG_FILE)\"
 else
 	CONFFLAGS += -DGPIB_LOG_FILE=\"/tmp/gpib.log\"
 endif
+
 
 ifdef WITH_HTTP_SERVER
 ifdef DEFAULT_HTTP_PORT
@@ -346,6 +364,7 @@ else
 	CONFFLAGS += -DWITH_HTTP_SERVER -DDEFAULT_HTTP_PORT=8080
 endif
 endif
+
 
 ifeq ($(GPIB_LOG_LEVEL),HIGH)
 	CONFFLAGS += -DGPIB_LOG_LEVEL=LL_ALL
@@ -361,6 +380,7 @@ else
 	endif
 endif
 
+
 ifdef GPIB_HEADER_DIR
 	CFLAGS += -I$(GPIB_HEADER_DIR)
 endif
@@ -369,19 +389,23 @@ ifdef MAIL_ADDRESS
 	CONFFLAGS += -DMAIL_ADDRESS=\"$(MAIL_ADDRESS)\"
 endif
 
+
 ifndef OWNER
 	OWNER = fsc2
 endif
 
+
 ifndef GROUP
 	GROUP = uucp
 endif
+
 
 ifdef NUM_SERIAL_PORTS
 	CONFFLAGS += -DNUM_SERIAL_PORTS=$(NUM_SERIAL_PORTS)
 else
 	CONFFLAGS += -DNUM_SERIAL_PORTS=0
 endif
+
 
 ifdef SERIAL_LOCK_DIR
 	CONFFLAGS += -DSERIAL_LOCK_DIR=\"$(SERIAL_LOCK_DIR)\"
@@ -397,6 +421,7 @@ MAIL_PROGRAM  := $(shell which mail)
 ifneq ($(word 1,$(MAIL_PROGRAM)),which:)
 	CONFFLAGS += -DMAIL_PROGRAM=\"$(MAIL_PROGRAM)\"
 endif
+
 
 ifndef NO_MAIL
 	ADDR2LINE     := $(shell which addr2line)
@@ -417,6 +442,7 @@ ifneq ($(GPIB_LIBRARY),NONE)
 	LIBS                 += -lgpib
 endif
 
+
 ifeq ($(GPIB_LIBRARY),LLP)
 	GPIB_LIBRARY         := llp
 	CFLAGS               += -I/usr/local/include/gpib
@@ -433,10 +459,6 @@ else
 	endif
 endif
 
-define STR
-$(FOO)
-$(BAR)
-endef
 
 export            # export all variables to sub-makes
 
