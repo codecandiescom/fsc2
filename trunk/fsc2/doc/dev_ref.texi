@@ -61,7 +61,8 @@
 * pt2025::          Metrolab NMR Teslameter PT2025
 * rs_sml01::        Rohde & Schwarz SML01 Signal Generator
 * rs_spec10::       Roper Scientific Spec-10 CCD Camera
-* rb8509::          Rulbus 12-bit ADC card
+* rb8509::          Rulbus 12-bit ADC Card
+* rb_pulser::       Rulbus Pulser
 * rs690::           Interface Technology RS690 Word Generator (Berlin 360 GHz)
 * s_band_magnet_broad::   S-band Magnet Power Supply (broad range)
 * s_band_magnet_narrow::  S-band Magnet Power Supply (narrow range)
@@ -1579,13 +1580,12 @@ from Roper Scientific.
 @c #############################################################
 
 
-* rb8509::          Rulbus 12-bit ADC card
-@node rb8509, rs690, rs_spec10, Device Reference
+@node rb8509, rb_pulser, rs_spec10, Device Reference
 @iftex
-@subheading Rulbus 12-bit ADC card
+@subheading Rulbus 12-bit ADC Card
 @end iftex
 @ifnottex
-@section Rulbus 12-bit ADC card
+@section Rulbus 12-bit ADC Card
 @end ifnottex
 
 @paragraphindent 0
@@ -1593,7 +1593,7 @@ from Roper Scientific.
 
 @paragraphindent 0
 @strong{Description}: 12-bit ADC card for Rulbus (Rijksuniversiteit
-Leiden BUS) - required Linux device driver and library are part of
+Leiden BUS) - requires Linux device driver and library are part of
 the @code{fsc2} package)
 
 @paragraphindent 0
@@ -1610,11 +1610,62 @@ the @code{fsc2} package)
 @end multitable
 
 
+@c #############################################################
+
+
+@node rb_pulser, rs690, rb8509, Device Reference
+@iftex
+@subheading Rulbus Pulser
+@end iftex
+@ifnottex
+@section Rulbus Pulser
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{rb_pulser}
+
+@paragraphindent 0
+@strong{Description}: Pseudo-pulser using Rulbus (Rijksuniversiteit
+Leiden BUS) - requires Linux device driver and library are part of the
+@code{fsc2} package). This pulser isn't a stand-alone device but
+consists of a combination of (currently) 10 Rulbus delay cards and 2
+clock cards (one fixed frequency 100 MHz card and a card with adjustable
+frequency) as well as requiring the @strong{Rhode & Schwarz SML01}
+synthesizer (with SML-B3 option) in order to be able to create RF
+pulses.
+
+The time base of this pulser is fixed to @w{10 ns}. Its number of
+functions is restricted to @code{MICROWAVE}, @code{RADIO_FREQUENCY} and
+@code{DETECTION}. Moreover, only a maximum of three active microwave
+pulses is possible and only a single active RF and detection pulse.
+To be able to create an RF pulse the @strong{R&S SML01} synthesizer
+mentioned above is required. RF and detection pulse can only start after
+the first microwave pulse and the length of pulses and the distance
+between them is limited to about @w{167 ms} (and that's also the maximum
+delay between the start of the pulse sequence and the start of the first
+pulse of a function).
+
+@paragraphindent 0
+@strong{Controlled via}: Rulbus
+@paragraphindent 0
+@strong{Supported functions}:
+@multitable @columnfractions .45 .45
+@item @code{pulser_name()}            @tab @ref{pulser_name}
+@item @code{pulser_state()}           @tab @ref{pulser_state}
+@item @code{pulser_update()}          @tab @ref{pulser_update}
+@item @code{pulser_shift()}           @tab @ref{pulser_shift}
+@item @code{pulser_increment()}       @tab @ref{pulser_increment}
+@item @code{pulser_reset()}           @tab @ref{pulser_reset}
+@item @code{pulser_pulse_reset()}     @tab @ref{pulser_pulse_reset}
+@item @code{pulser_show_pulses()}     @tab @ref{pulser_show_pulses}
+@item @code{pulser_dump_pulses()}     @tab @ref{pulser_dump_pulses}
+@end multitable
+
 
 @c #############################################################
 
 
-@node rs690, s_band_magnet_broad, rs_spec10, Device Reference
+@node rs690, s_band_magnet_broad, rb_pulser, Device Reference
 @iftex
 @subheading Interface Technology RS690 Word Generator (Berlin 360 GHz)
 @end iftex

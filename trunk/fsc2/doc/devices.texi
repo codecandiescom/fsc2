@@ -1813,6 +1813,7 @@ Currently, there are three pulser/spectrometer combinations implemented:
 @item Tektronix HFS9003 (W-band spectrometer, Berlin)
 @item Bruker EP385 Pulse Programmer (X-band spectrometer, Berlin)
 @item Interface Technology RS690 (360 GHz spectrometer, Berlin)
+@item Rulbus Pulser (275 GHz spectrometer, Leiden)
 @end itemize
 To load the functions for one of these pulsers use in the @code{DEVICES}
 section one of the lines
@@ -1822,6 +1823,7 @@ dg2020_b;
 hfs9003;
 ep385;
 rs690;
+rb_pulser;
 @end example
 
 Pulsers are rather special and even the @code{EDL} syntax for dealing
@@ -1892,13 +1894,14 @@ the channel can be switched on or off.
 @anchor{pulser_lock_keyboard}
 @item pulser_lock_keyboard()
 @findex pulser_lock_keyboard()
-Usually, during an experiment the keyboard of the pulser is locked. But
-for situations where it would be useful to be able to control the pulser
-also via its keyboard it can be unlocked (and also re-locked) from within
-the script. To unlock the keyboard call this function with an argument
-of @code{0} or @code{"OFF"}, to re-lock the keyboard call it again with
-a non-zero argument, @code{"ON"} or no argument at all. This command is
-only available for the @strong{Sony/Tektronix DG2020}.
+Usually, during an experiment the keyboard of the pulser (if it has one)
+is locked. But for situations where it would be useful to be able to
+control the pulser also via its keyboard it can be unlocked (and also
+re-locked) from within the script. To unlock the keyboard call this
+function with an argument of @code{0} or @code{"OFF"}, to re-lock the
+keyboard call it again with a non-zero argument, @code{"ON"} or no
+argument at all. This command is only available for the
+@strong{Sony/Tektronix DG2020}.
 
 
 @anchor{pulser_update}
@@ -2983,6 +2986,7 @@ The modules for these devices are loaded by specifying
 pci_mio_16e_1
 me6000
 hjs_daadc
+rb8509
 @end example
 @noindent
 in the @code{DEVICES} section. 
@@ -3612,6 +3616,8 @@ can only be used with a pass-phrase. This will mainly be used by modules
 for other devices that require a DAC to keep an @code{EDL} script from
 accdentally changing the output of the DAC.
 
+This function is not implemented for the Rulbus RB8905 ADC card.
+
 For the ME-6000 and ME-6100 card the function expects an output port as
 the first argument specified by one of the symbolic values between
 @code{CH0} and @code{CH15} (don't try to use simple numbers instead!).
@@ -3650,6 +3656,7 @@ values between @code{CH0} and and @code{CH1} for the PCI-MIO-16E-1 card
 and between @code{CH1} and @code{CH15} for the ME-6000 and ME-6100 cards
 (don't try to use simple numbers instead!). For the home-built AD and DA
 converter this argument can't be specified since it has only a single output.
+This function can not be used with the Rulbus RB8905 ADC card.
 
 If the PCI-MIO-16E-1 card he channel is in biploar mode and uses the
 internal voltage reference the second argument, the voltage to be
@@ -3753,9 +3760,21 @@ operation failed.
 @anchor{daq_get_voltage}
 @item daq_get_voltage()
 @findex daq_get_voltage()
-This function is only available for the home-built AD and DA converter.
-It accepts no arguments and returns the current voltage at the input of
-the AD converter, a value between @w{-10 V} and @w{+10 V}.
+This function is only available for the home-built AD and DA converter
+and the Rulbus RB8509 ADC card. For the home-built AD and DA converter
+it accepts no arguments and returns the current voltage at the input of
+the AD converter, a value between @w{-10 V} and @w{+10 V}. For the
+Rulbus RB8509 card it expects a single argument, the input channel. This
+must be a symbolic name, starting from @code{CH0} up to @code{CHx},
+where the @code{x} stands for one less than the number of channels the
+card has.The voltage value returned depends on the type of the RB8509
+card (there are several versions with different voltage ranges and some
+allowing only unipolar input while others can convert biplor voltages)
+and the gain setting for the card, see function @code{daq_gain()} below.
+
+The function can be used in the @code{EXPERIMENT} section only.
+
+The following remarks apply to the home-built AD and DA converter only:
 
 @strong{Please note}: If this function is called without a previous call
 of the function @code{daq_set_voltage()} (see above) the voltage at the
@@ -3767,8 +3786,6 @@ should call @code{daq_set_voltage()} always before
 the function @code{daq_reserve_adc()} the pass-phrase specified in that
 call has to be passed to the function as the very first argument if you
 want to be able to read in the voltage at the ADC.
-
-The function can be used in the @code{EXPERIMENT} section only.
 
 
 @anchor{daq_dac_parameter}
@@ -3783,6 +3800,29 @@ voltage and the third is the voltage resolution. If the device has more
 than one DAC channel, the function expects a channel as the only
 argument (which can be omitted if settings for alll channels must be
 identical).
+
+
+@anchor{daq_trigger_mode}
+@item daq_trigger_mode()
+@findex daq_trigger_mode()
+Some of the Rulbus RB8509 ADC cards allow to trigger a conversion on
+receipt of an external trigger. When in internal trigger mode a
+conversion is triggered automatically by calling the function
+@code{daq_get_voltage()}. In external trigger mode the conversion is
+triggered by an external event and the @code{daq_get_voltage()} function
+only returns after such a trigger as been received. The function expects
+a string argument, either @code{"INT"} or @code{"INTERNAL"} to select
+internal trigger mode, or @code{"EXT"} or @code{"EXTERNAL"} to switch to
+external trigger mode.
+
+
+@anchor{daq_gain}
+@item daq_gain()
+@findex daq_gain()
+The Rulbus RB8509 ADC cards have an pre-amplifier with a gain factor
+that can be set to either @code{1}, @code{2}, @code{4} or @code{8} using
+this function. Trying to set it to any other values will result in an
+error message an the running experiment is immediately stopped.
 
 
 @end table

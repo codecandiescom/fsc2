@@ -252,7 +252,6 @@ void rb_pulser_exit_hook( void );
 Var *pulser_name( Var *v );
 Var *pulser_show_pulses( Var *v );
 Var *pulser_dump_pulses( Var *v );
-Var *pulser_dump_pulses( Var *v );
 Var *pulser_state( Var *v );
 Var *pulser_update( Var *v );
 Var *pulser_shift( Var *v );
