@@ -123,7 +123,6 @@ void tds520_gpib_failure( void );
 bool tds520_clear_SESR( void );
 void tds520_finished( void );
 bool tds520_set_cursor( int cur_num, double pos );
-bool tds520_set_track_cursors( bool flag );
 bool tds520_set_gated_meas( bool flag );
 bool tds520_set_snap( bool flag );
 bool tds520_display_channel( int channel );
