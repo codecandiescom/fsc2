@@ -64,8 +64,8 @@ Using this module file locking via fcntl(2) can be done (obviously, this
 restricts the use of the module to systems that have a fcntl(2) system
 call). Before a file (or parts of a file) can be locked, an object simulating
 a flock structure must be created and its properties set. Afterwards, by
-calling the function B<fcntl_lock()> a lock can be set or determined which
-process currently holds the lock.
+calling the function B<fcntl_lock()> a lock can be set or it can be determined
+ which process currently holds the lock.
 
 =cut
 
