@@ -74,7 +74,7 @@ FL_resource xresources[ N_APP_OPT ] = {
 	{ "stopMouseButton", "*.stopMouseButton", FL_STRING, &xsmb, "", 64 },
 	{ "noCrashMail", "*.noCrashMail", FL_BOOL, &xnocm, "0", sizeof( int ) },
 	{ "size", "*.size", FL_STRING, xsizeStr, "", 64 },
-    { "http_port", "*.http_port", FL_INT, &xport, "0", sizeof( int ) }
+    { "httpPort", "*.httpPort", FL_INT, &xport, "0", sizeof( int ) }
 };
 
 
@@ -537,8 +537,8 @@ static void setup_app_options( FL_CMD_OPT app_opt[ ] )
 	app_opt[ RESOLUTION	].argKind         = XrmoptionSepArg;
 	app_opt[ RESOLUTION	].value           = ( caddr_t ) NULL;
 
-	app_opt[ HTTPPORT ].option            = T_strdup( "-http_port" );
-	app_opt[ HTTPPORT ].specifier         = T_strdup( "*.http_port" );
+	app_opt[ HTTPPORT ].option            = T_strdup( "-httpPort" );
+	app_opt[ HTTPPORT ].specifier         = T_strdup( "*.httpPort" );
 	app_opt[ HTTPPORT ].argKind           = XrmoptionSepArg;
 	app_opt[ HTTPPORT ].value             = ( caddr_t ) "0";
 }
