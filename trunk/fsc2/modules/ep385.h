@@ -338,6 +338,7 @@ void ep385_cw_setup( void );
 /* Functions from ep385_gpib.c */
 
 bool ep385_init( const char *name );
+bool ep385_run( bool state );
 bool ep385_set_channels( void );
 bool ep385_set_channel_state( int channel, bool flag );
 
