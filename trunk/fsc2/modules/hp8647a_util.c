@@ -74,8 +74,8 @@ FILE *hp8647a_find_table( char **name )
 
 	if ( ( tfp = hp8647a_open_table( *name ) ) == NULL )
 	{
-		print( FATAL, "Table file '%s' not found, neither in the current "
-			   "directory nor in '%s'.\n", strip_path( *name ), libdir );
+		print( FATAL, "Table file '%s' not found in either the current "
+			   "directory or in '%s'.\n", strip_path( *name ), libdir );
 		THROW( EXCEPTION );
 	}
 
