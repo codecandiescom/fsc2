@@ -117,6 +117,8 @@ int ep385_init_hook( void )
 	ep385.defense_2_shape_too_near = UNSET;
 	ep385.is_confirmation = UNSET;
 
+	ep385.dump_file = NULL;
+
 	for ( i = 0; i < MAX_CHANNELS; i++ )
 	{
 		ep385.channel[ i ].self = i;
@@ -202,6 +204,12 @@ int ep385_test_hook( void )
 
 int ep385_end_of_test_hook( void )
 {
+	if ( ep385.dump_file != NULL )
+	{
+		fclose( ep385.dump_file );
+		ep385.dump_file = NULL;
+	}
+
 	if ( ! ep385_is_needed || ep385.is_cw_mode )
 		return 1;
 
@@ -352,6 +360,12 @@ void ep385_exit_hook( void )
 	int i, j;
 
 
+	if ( ep385.dump_file != NULL )
+	{
+		fclose( ep385.dump_file );
+		ep385.dump_file = NULL;
+	}
+
 	if ( ! ep385_is_needed )
 		return;
 
@@ -400,6 +414,88 @@ Var *pulser_name( Var *v )
 {
 	v = v;
 	return vars_push( STR_VAR, DEVICE_NAME );
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+Var *pulser_dump_pulses( Var *v )
+{
+	char *name;
+	char *m;
+	struct stat stat_buf;
+
+
+	v = v;
+
+	if ( FSC2_IS_CHECK_RUN )
+		return vars_push( INT_VAR, 1 );
+
+	if ( ep385.dump_file != NULL )
+	{
+		print( WARN, "Pulse dumping is already switched on.\n" );
+		return vars_push( INT_VAR, 1 );
+	}
+
+	do
+	{
+		name = T_strdup( fl_show_fselector( "File for dumping pulses:", "./",
+											"*.pls", NULL ) );
+		if ( name == NULL || *name == '\0' )
+		{
+			T_free( name );
+			vars_push( INT_VAR, 0 );
+		}
+
+		if  ( 0 == stat( name, &stat_buf ) )
+		{
+			m = get_string( "The selected file does already exist:\n%s\n"
+							"\nDo you really want to overwrite it?", name );
+			if ( 1 != show_choices( m, 2, "Yes", "No", NULL, 2 ) )
+			{
+				T_free( m );
+				name = CHAR_P T_free( name );
+				continue;
+			}
+			T_free( m );
+		}
+
+		if ( ( ep385.dump_file = fopen( name, "w+" ) ) == NULL )
+		{
+			switch( errno )
+			{
+				case EMFILE :
+					show_message( "Sorry, you have too many open files!\n"
+								  "Please close at least one and retry." );
+					break;
+
+				case ENFILE :
+					show_message( "Sorry, system limit for open files "
+								  "exceeded!\n Please try to close some "
+								  "files and retry." );
+				break;
+
+				case ENOSPC :
+					show_message( "Sorry, no space left on device for more "
+								  "file!\n    Please delete some files and "
+								  "retry." );
+					break;
+
+				default :
+					show_message( "Sorry, can't open selected file for "
+								  "writing!\n       Please select a "
+								  "different file." );
+			}
+
+			name = CHAR_P T_free( name );
+			continue;
+		}
+	} while ( ep385.dump_file == NULL );
+
+	T_free( name );
+
+	return vars_push( INT_VAR, 1 );
 }
 
 
