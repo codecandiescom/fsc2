@@ -2173,7 +2173,7 @@ void remove_markers_2d( void )
 			repaint_canvas_2d( &G2.canvas );
 	}
 
-	if ( G2.is_cut && curve == CG.curve )
+	if ( G2.is_cut )
 		delete_all_cut_markers( );
 }
 
