@@ -24,7 +24,7 @@ void acq_seq_start( long acq_num, long acq_type )
 	if ( ASeq[ acq_num ].defined )
 	{
 		eprint( FATAL, "%s:%ld: Acquisition sequence %c has already been "
-				"defined.\n", Fname, Lc, ( char ) ( acq_num + 'X' ) );
+				"defined.", Fname, Lc, ( char ) ( acq_num + 'X' ) );
 		THROW( EXCEPTION );
 	}
 
@@ -80,7 +80,7 @@ Phase_Sequence *phase_seq_start( long phase_seq_num )
 		if ( cp->num == ( int ) phase_seq_num )
 		{
 			eprint( FATAL, "%s:%ld: Phase sequence %ld has already been "
-					"defined\n", Fname, Lc, cp->num );
+					"defined.", Fname, Lc, cp->num );
 			THROW( EXCEPTION );
 		}
 		cp = cp->next;
@@ -136,7 +136,7 @@ void phases_add_phase( Phase_Sequence *p, int phase_type )
 
 void acq_miss_list( void )
 {
-	eprint( FATAL, "%s:%ld: Missing acquisition type list.\n",
+	eprint( FATAL, "%s:%ld: Missing acquisition type list.",
 			Fname, Lc );
 	THROW( EXCEPTION );
 }
@@ -149,7 +149,7 @@ void acq_miss_list( void )
 
 void phase_miss_list( Phase_Sequence *p )
 {
-	eprint( FATAL, "%s:%ld: Missing list of phases for phase sequence %d.\n",
+	eprint( FATAL, "%s:%ld: Missing list of phases for phase sequence %d.",
 			Fname, Lc, p->num );
 	THROW( EXCEPTION );
 }
@@ -200,7 +200,7 @@ void phases_end( void )
 	if ( PSeq != NULL && ! ASeq[ 0 ].defined && ! ASeq[ 1 ].defined )
 	{
 		eprint( FATAL, "Phase sequences but no acquisition sequence "
-				"defined in PHASES section.\n" );
+				"defined in PHASES section." );
 		THROW( EXCEPTION );
 	}
 
@@ -210,7 +210,7 @@ void phases_end( void )
 	if ( ( ASeq[ 0 ].defined || ASeq[ 1 ].defined ) && PSeq == NULL )
 	{
 		eprint( FATAL, "Aquisition sequences but no phase sequences defined "
-				"in PHASES section.\n" );
+				"in PHASES section." );
 		THROW( EXCEPTION );
 	}
 
@@ -221,7 +221,7 @@ void phases_end( void )
 		 ASeq[ 0 ].len != ASeq[ 1 ].len )
 	{
 		eprint( FATAL, "The lengths of both acqusition sequences are "
-				"different.\n" );
+				"different." );
 		THROW( EXCEPTION );
 	}
 
@@ -232,7 +232,7 @@ void phases_end( void )
 		if ( ASeq[ 0 ].len != p->len )
 		{
 			eprint( FATAL, "Lengths of phase sequence %d (%d) and the "
-					"acquisition sequence(s) (%d) are different.\n",
+					"acquisition sequence(s) (%d) are different.",
 					p->num, p->len, ASeq[0].len );
 			THROW( EXCEPTION );
 		}

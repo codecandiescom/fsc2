@@ -72,7 +72,7 @@ IDENT    [A-Za-z0-9][A-Za-z_0-9]*
 			/* handling of EOF within a comment -> fatal error */
 <<EOF>>     {
 				eprint( FATAL, "%s: End of device data base `%s' in comment "
-						"starting at line %ld\n.", Fname, Comm_Lc );
+						"starting at line %ld.", Fname, Comm_Lc );
 				THROW( EXCEPTION );
 			}
 
@@ -89,7 +89,7 @@ IDENT    [A-Za-z0-9][A-Za-z_0-9]*
 
 {EREM1}     {  /* End of comment without start */
 				eprint( FATAL, "End of comment found at line %ld in device "
-						"data base `%s'\n.", Lc, Fname );
+						"data base `%s'.", Lc, Fname );
 				THROW( EXCEPTION );
 			}
 

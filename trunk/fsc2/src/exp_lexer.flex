@@ -222,7 +222,7 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 					if ( acc == ACCESS_PREP )
 					{
 						eprint( FATAL, "%s:%ld: Function `%s' can't be used "
-								"in the EXPERIMENT section.\n",
+								"in the EXPERIMENT section.",
 								Fname, Lc, exptext );
 						THROW( EXCEPTION );
 					}
@@ -233,7 +233,7 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 				if ( exp_val.vptr == NULL )
 				{
 					eprint( FATAL, "%s:%ld: Variable `%s' has not been "
-							"declared.\n", Fname, Lc, exptext );
+							"declared.", Fname, Lc, exptext );
 					 THROW( EXCEPTION );
 				}
 
@@ -282,7 +282,7 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 			/* handling of invalid input */
 .           {
 				eprint( FATAL, "%s:%ld: Invalid input in EXPERIMENT section: "
-						"`%s'\n", Fname, Lc, exptext );
+						"`%s'.", Fname, Lc, exptext );
 				THROW( EXCEPTION );
 			}
 
@@ -302,7 +302,7 @@ int experiment_parser( FILE *in )
 	if ( compilation.sections[ EXPERIMENT_SECTION ] )
 	{
 		eprint( FATAL, "%s:%ld: Multiple instances of EXPERIMENTS section "
-		        "label.\n", Fname, Lc );
+		        "label.", Fname, Lc );
 		THROW( EXCEPTION );
 	}
 	compilation.sections[ EXPERIMENT_SECTION ] = SET;
@@ -313,7 +313,7 @@ int experiment_parser( FILE *in )
 	if ( Exp_Next_Section != NO_SECTION )
 	{
 		eprint( FATAL, "%s:%ld: EXPERIMENT section has to be the very last "
-				"section.\n", Fname, Lc );
+				"section.", Fname, Lc );
 		THROW( EXCEPTION );
 	}
 
@@ -337,7 +337,7 @@ static int exp_get_channel_name( void )
 	}
 
 	eprint( FATAL, "%s:%ld: Token `%s' can't be used, no digitizer module "
-			"loaded or module does not know how to interpret the token.\n",
+			"loaded or module does not know how to interpret the token.",
 			Fname, Lc, exptext );
 	THROW( EXCEPTION );
 }

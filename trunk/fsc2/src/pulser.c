@@ -87,7 +87,7 @@ void is_pulser_driver( void )
 	if ( pulser_struct.name == NULL )
 	{
 		eprint( FATAL, "%s:%ld: No pulser driver has been loaded - can't use "
-				"pulser-specific functions.\n", Fname, Lc );
+				"pulser-specific functions.", Fname, Lc );
 		THROW( EXCEPTION );
 	}
 }
@@ -109,7 +109,7 @@ void is_pulser_func( void *func, const char *text )
 	if ( func == NULL )
 	{
 		eprint( FATAL, "%s:%ld: Function for %s is missing in driver "
-				"for pulser %s.\n", Fname, Lc, text, pulser_struct.name );
+				"for pulser %s.", Fname, Lc, text, pulser_struct.name );
 		THROW( EXCEPTION );
 	}
 }
@@ -127,7 +127,7 @@ double is_mult_ns( double val, const char * text )
 	val *= 1.e9;
 	if ( fabs( val - lround( val ) ) > 1.e-2 )
 	{
-		eprint( FATAL, "%s:%ld: %s has to be an integer multiple of 1 ns\n",
+		eprint( FATAL, "%s:%ld: %s has to be an integer multiple of 1 ns.",
 				Fname, Lc, text );
 		THROW( EXCEPTION );
 	}
@@ -157,7 +157,7 @@ void p_assign_pod( long func, Var *v )
 
 	if ( pulser_struct.assign_channel_to_function == NULL )
 	{
-		eprint( FATAL, "%s:%ld: Sorry, pulser %s has no pods.\n",
+		eprint( FATAL, "%s:%ld: Sorry, pulser %s has no pods.",
 				Fname, Lc, pulser_struct.name );
 		THROW( EXCEPTION );
 	}
@@ -170,7 +170,7 @@ void p_assign_pod( long func, Var *v )
 		pod = v->val.lval;
 	else
 	{
-		eprint( WARN, "%s:%ld: Float variable used as pod number.\n",
+		eprint( WARN, "%s:%ld: Float variable used as pod number.",
 				Fname, Lc );
 		pod = ( long ) v->val.dval;
 	}
@@ -209,7 +209,7 @@ void p_assign_channel( long func, Var *v )
 		channel = v->val.lval;
 	else
 	{
-		eprint( WARN, "%s:%ld: Float variable used as channel number.\n",
+		eprint( WARN, "%s:%ld: Float variable used as channel number.",
 				Fname, Lc );
 		channel = ( long ) v->val.dval;
 	}
@@ -367,7 +367,7 @@ void p_set_trigger_mode( Var *v )
 	    mode = ( int ) v->val.lval;
 	else
 	{
-		eprint( WARN, "%s:%ld: Float variable used as trigger mode.\n",
+		eprint( WARN, "%s:%ld: Float variable used as trigger mode.",
 				Fname, Lc );
 		mode = ( int ) v->val.dval;
 	}
@@ -376,7 +376,7 @@ void p_set_trigger_mode( Var *v )
 
 	if ( mode != INTERNAL && mode != EXTERNAL )
 	{
-		eprint( FATAL, "%s:%ld: Invalid trigger mode specification.\n",
+		eprint( FATAL, "%s:%ld: Invalid trigger mode specification.",
 				Fname, Lc );
 		THROW( EXCEPTION );
 	}
@@ -404,7 +404,7 @@ void p_set_trigger_slope( Var *v )
 	    slope = ( int ) v->val.lval;
 	else
 	{
-		eprint( WARN, "%s:%ld: Float variable used as trigger slope.\n",
+		eprint( WARN, "%s:%ld: Float variable used as trigger slope.",
 				Fname, Lc );
 		slope = ( int ) v->val.dval;
 	}
@@ -413,7 +413,7 @@ void p_set_trigger_slope( Var *v )
 
 	if ( slope != POSITIVE && slope != NEGATIVE )
 	{
-		eprint( FATAL, "%s:%ld: Invalid trigger slope specification.\n", 
+		eprint( FATAL, "%s:%ld: Invalid trigger slope specification.", 
 				Fname, Lc );
 		THROW( EXCEPTION );
 	}
@@ -489,7 +489,7 @@ void p_set_rep_time( Var *v )
 
 	if ( time < 9.9e-10 )
 	{
-		eprint( FATAL, "%s:%ld: Invalid repeat time: %g s\n",
+		eprint( FATAL, "%s:%ld: Invalid repeat time: %g s.",
 				Fname, Lc, time );
 		THROW( EXCEPTION );
 	}
@@ -520,7 +520,7 @@ void p_set_rep_freq( Var *v )
 
 	if ( freq > 1.01e9 || freq <= 0.0 )
 	{
-		eprint( FATAL, "%s:%ld: Invalid repeat frequency: %g s\n",
+		eprint( FATAL, "%s:%ld: Invalid repeat frequency: %g s.",
 				Fname, Lc, freq );
 		THROW( EXCEPTION );
 	}
@@ -550,13 +550,13 @@ void p_phase_ref( long func, int ref )
 	if ( func != PULSER_CHANNEL_PHASE_1 && func != PULSER_CHANNEL_PHASE_2 )
 	{
 		eprint( FATAL, "%s:%ld: A reference function can only be set for the "
-				"PHASE functions.\n", Fname, Lc );
+				"PHASE functions.", Fname, Lc );
 		THROW( EXCEPTION );
 	}
 
 	if ( ref == PULSER_CHANNEL_PHASE_1 || ref == PULSER_CHANNEL_PHASE_2 )
 	{
-		eprint( FATAL, "%s:%ld: A PHASE function can't be phase cycled.\n",
+		eprint( FATAL, "%s:%ld: A PHASE function can't be phase cycled.",
 				Fname, Lc );
 		THROW( EXCEPTION );
 	}
@@ -594,7 +594,7 @@ void p_set( long pnum, int type, Var *v )
 				 v->val.lval < PULSER_CHANNEL_FUNC_MIN ||
 				 v->val.lval > PULSER_CHANNEL_FUNC_MAX )
 			{
-				eprint( FATAL, "%s:%ld: Invalid function.\n", Fname, Lc );
+				eprint( FATAL, "%s:%ld: Invalid function.", Fname, Lc );
 				THROW( EXCEPTION );
 			}
 			is_pulser_func( pulser_struct.set_pulse_function,
@@ -749,11 +749,11 @@ void p_phs_setup( int func, int type, int pod, long val )
 		{
 			if ( func == 2 )
 				eprint( FATAL, "%s:%ld: Both output states for phase %s of "
-						"phase functions already have been defined.\n", Fname, 
+						"phase functions already have been defined.", Fname, 
 						Lc, Phase_Types[ type ] );
 			else
 				eprint( FATAL, "%s:%ld: Both output states for phase %s of "
-						"function `%s' already have been defined.\n", Fname,
+						"function `%s' already have been defined.", Fname,
 						Lc, Phase_Types[ type ], func == 0 ?
 						Function_Names[ PULSER_CHANNEL_PHASE_1 ] :
 						Function_Names[ PULSER_CHANNEL_PHASE_2 ] );
@@ -765,11 +765,11 @@ void p_phs_setup( int func, int type, int pod, long val )
 	{
 		if ( func == 2 )
 			eprint( FATAL, "%s:%ld: Output state of %d. pod for phase %s of "
-					"phase functions already has been defined.\n", Fname, Lc,
+					"phase functions already has been defined.", Fname, Lc,
 					pod + 1, Phase_Types[ type ] );
 		else
 			eprint( FATAL, "%s:%ld: Output state of %d. pod for phase %s of "
-					"function `%s' already has been defined.\n", Fname, Lc,
+					"function `%s' already has been defined.", Fname, Lc,
 					pod + 1, Phase_Types[ type ], func == 0 ?
 					Function_Names[ PULSER_CHANNEL_PHASE_1 ] :
 					Function_Names[ PULSER_CHANNEL_PHASE_2 ] );
@@ -808,10 +808,10 @@ void p_phs_end( int func )
 			{
 				if ( func == 2 )
 					eprint( FATAL, "%s:%ld: Incomplete data for phase setup "
-							"of phase functions.\n", Fname, Lc );
+							"of phase functions.", Fname, Lc );
 				else
 					eprint( FATAL, "%s:%ld: Incomplete data for phase setup "
-							"of function `%s'.\n", Fname, Lc, func == 0 ?
+							"of function `%s'.", Fname, Lc, func == 0 ?
 							Function_Names[ PULSER_CHANNEL_PHASE_1 ] :
 							Function_Names[ PULSER_CHANNEL_PHASE_2 ] );
 				THROW( EXCEPTION );
@@ -830,10 +830,10 @@ void p_phs_end( int func )
 		{
 			if ( func == 2 )
 				eprint( FATAL, "%s:%ld: Inconsistent data for phase setup of "
-						"phase functions.\n", Fname, Lc );
+						"phase functions.", Fname, Lc );
 			else
 				eprint( FATAL, "%s:%ld: Inconsistent data for phase setup of "
-						"function `%s'.\n", Fname, Lc, func == 0 ?
+						"function `%s'.", Fname, Lc, func == 0 ?
 						Function_Names[ PULSER_CHANNEL_PHASE_1 ] :
 						Function_Names[ PULSER_CHANNEL_PHASE_2 ] );
 			THROW( EXCEPTION );

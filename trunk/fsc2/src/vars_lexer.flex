@@ -214,7 +214,7 @@ WS          [\n \t]+
 					if ( acc == ACCESS_EXP )
 					{
 						eprint( FATAL, "%s:%ld: Function `%s' can only be "
-								"used in the EXPERIMENT section.\n",
+								"used in the EXPERIMENT section.",
 								 Fname, Lc, varstext );
 						THROW( EXCEPTION );
 					}
@@ -274,7 +274,7 @@ WS          [\n \t]+
 			/* handling of invalid input */
 .           {
 				eprint( FATAL, "%s:%ld: Invalid input in VARIABLES section: "
-						"`%s'\n", Fname, Lc, varstext );
+						"`%s'.", Fname, Lc, varstext );
 				THROW( EXCEPTION );
 			}
 
@@ -312,7 +312,7 @@ int variables_parser( FILE *in )
 	if ( compilation.sections[ VARIABLES_SECTION ] )
 	{
 		eprint( FATAL, "%s:%ld: Multiple instances of VARIABLES section "
-		        "label.\n", Fname, Lc );
+		        "label.", Fname, Lc );
 		THROW( EXCEPTION );
 	}
 	compilation.sections[ VARIABLES_SECTION ] = SET;
@@ -400,7 +400,7 @@ static int vars_get_channel_name( void )
 	}
 
 	eprint( FATAL, "%s:%ld: Token `%s' can't be used, no digitizer module "
-			"loaded or module does not know how to interpret the token.\n",
+			"loaded or module does not know how to interpret the token.",
 			Fname, Lc, varstext );
 	THROW( EXCEPTION );
 }

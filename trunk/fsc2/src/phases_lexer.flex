@@ -225,7 +225,7 @@ int phases_parser( FILE *in )
 
 	if ( compilation.sections[ PHASES_SECTION ] )
 	{
-		eprint( FATAL, "%s:%ld: Multiple instances of PHASES section label.\n",
+		eprint( FATAL, "%s:%ld: Multiple instances of PHASES section label.",
 				Fname, Lc );
 		THROW( EXCEPTION );
 	}
@@ -248,7 +248,7 @@ int phases_parser( FILE *in )
 	}
 	CATCH( INVALID_INPUT_EXCEPTION )
 	{
-		eprint( FATAL, "%s:%ld: Invalid input in PHASES section: `%s'\n",
+		eprint( FATAL, "%s:%ld: Invalid input in PHASES section: `%s'.",
 				Fname, Lc, phasestext );
 		THROW( EXCEPTION );
 	}

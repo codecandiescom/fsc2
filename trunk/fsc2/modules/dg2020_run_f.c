@@ -156,7 +156,7 @@ void dg2020_do_checks( FUNCTION *f )
 			{
 				eprint( FATAL, "%s:%ld: Pulse sequence for function `%s' does "
 						"not fit into the pulsers memory. Maybe, you could "
-						"try a longer pulser time base.\n", Fname, Lc,
+						"try a longer pulser time base.", Fname, Lc,
 						Function_Names[ f->self ] );
 				THROW( EXCEPTION );
 			}
@@ -168,11 +168,11 @@ void dg2020_do_checks( FUNCTION *f )
 			 p->pos + p->len > f->pulses[ i + 1 ]->pos )
 		{
 			if ( dg2020_IN_SETUP )
-				eprint( FATAL, "DG2020: Pulses %ld and %ld overlap.\n",
+				eprint( FATAL, "DG2020: Pulses %ld and %ld overlap.",
 						p->num, f->pulses[ i + 1 ]->num );
 			else
 				eprint( FATAL, "%s:%ld: DG2020: Pulses %ld and %ld begin to "
-						"overlap.\n", Fname, Lc, p->num,
+						"overlap.", Fname, Lc, p->num,
 						f->pulses[ i + 1 ]->num );
 			THROW( EXCEPTION );
 		}
@@ -291,7 +291,7 @@ void dg2020_recalc_phase_pulse( FUNCTION *f, PULSE *phase_p,
 		if ( p->pos - f->delay < f->psd )
 		{
 			eprint( FATAL, "%s:%ld: DG2020: Pulse %ld now starts too "
-					"early to allow setting of a phase pulse.\n",
+					"early to allow setting of a phase pulse.",
 					Fname, Lc, p->num );
 			THROW( EXCEPTION );
 		}
@@ -333,7 +333,7 @@ void dg2020_recalc_phase_pulse( FUNCTION *f, PULSE *phase_p,
 		{
 			eprint( FATAL, "%s:%ld: DG2020: Distance between pulses %ld and "
 					"%ld becomes too small to allow setting of phase "
-					"pulses.\n", Fname, Lc, p->num, pp->num );
+					"pulses.", Fname, Lc, p->num, pp->num );
 			THROW( EXCEPTION );
 		}
 
@@ -368,7 +368,7 @@ void dg2020_recalc_phase_pulse( FUNCTION *f, PULSE *phase_p,
 			{
 				eprint( SEVERE, "%s:%ld: DG2020: Pulses %ld and %ld become so "
 						"close that problems with phase switching may "
-						"result.\n", Fname, Lc, pp->num, p->num );
+						"result.", Fname, Lc, pp->num, p->num );
 				for_pulse = p;
 			}
 		}
@@ -468,7 +468,7 @@ void dg2020_full_reset( void )
 		if ( ! p->has_been_active )
 		{
 			if ( p->num >=0 )
-				eprint( WARN, "DG2020: Pulse %ld is never used.\n", p->num );
+				eprint( WARN, "DG2020: Pulse %ld is never used.", p->num );
 			p = dg2020_delete_pulse( p );
 			continue;
 		}
@@ -545,7 +545,7 @@ PULSE *dg2020_delete_pulse( PULSE *p )
 	if ( p->function->num_pulses == 0 )
 	{
 		eprint( SEVERE, "DG2020: Function `%s' isn't used at all because all "
-				"its pulses are never used.\n",
+				"its pulses are never used.",
 				Function_Names[ p->function->self ] );
 		p->function->is_used = UNSET;
 	}
