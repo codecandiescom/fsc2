@@ -52,6 +52,8 @@ typedef struct
 {
 	int device;
 
+	bool is_reacting;
+
 	double timebase;
 	bool is_timebase;
 

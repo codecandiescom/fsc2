@@ -63,6 +63,8 @@ void start_graphics( void )
 		strcat( pixmap_file, "/" );
 	strcat( pixmap_file, "undo.xpm" );
 
+	G.font = NULL;
+
 	if ( access( pixmap_file, R_OK ) == 0 )
 	{
 		fl_set_pixmapbutton_file( run_form->undo_button, pixmap_file );
@@ -670,26 +672,35 @@ void stop_graphics( void )
 	{
 		graphics_free( );
 
-		XFreeFont( G.d, G.font );
+		if ( G.font )
+			XFreeFont( G.d, G.font );
 
-		canvas_off( &G.x_axis, run_form->x_axis );
-		canvas_off( &G.y_axis, run_form->y_axis );
-		canvas_off( &G.canvas, run_form->canvas );
+		if ( run_form )
+		{
+			canvas_off( &G.x_axis, run_form->x_axis );
+			canvas_off( &G.y_axis, run_form->y_axis );
+			canvas_off( &G.canvas, run_form->canvas );
+		}
 
 		if ( G.dim == 2 )
 		{
 			cut_form_close( );
-			canvas_off( &G.z_axis, run_form->z_axis );
+			if ( run_form )
+				canvas_off( &G.z_axis, run_form->z_axis );
 		}
 	}
 
-	if ( fl_form_is_visible( run_form->run ) )
+	if ( run_form && fl_form_is_visible( run_form->run ) )
 			fl_hide_form( run_form->run );
 
-	fl_free_form( run_form->run );
+	if ( run_form )
+		fl_free_form( run_form->run );
 
-	memcpy( &G, G_stored, sizeof( Graphics ) );
-	T_free( G_stored );
+	if ( G_stored )
+	{
+		memcpy( &G, G_stored, sizeof( Graphics ) );
+		T_free( G_stored );
+	}
 }
 
 

@@ -35,6 +35,7 @@ int tds744a_init_hook( void )
 
 	/* Initialize some variables in the digitizers structure */
 
+	tds744a.is_reacting = UNSET;
 	tds744a.w = NULL;
 	tds744a.is_timebase = UNSET;
 	tds744a.is_num_avg = UNSET;

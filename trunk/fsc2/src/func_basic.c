@@ -1315,7 +1315,7 @@ Var *f_slice( Var *v )
 	vars_check( v, INT_ARR | FLOAT_ARR | ARR_REF | ARR_PTR |
 				   INT_TRANS_ARR | FLOAT_TRANS_ARR );
 
-	get_array_params( v, "mean", &len, &ilp, &idp );
+	get_array_params( v, "slice", &len, &ilp, &idp );
 
 	vars_check( v->next, INT_VAR | FLOAT_VAR );
 
@@ -1352,7 +1352,6 @@ Var *f_slice( Var *v )
 				"function `slice'.\n", Fname, Lc );
 		THROW( EXCEPTION );
 	}
-
 
 	/* Test that the slice is within the arrays range */
 

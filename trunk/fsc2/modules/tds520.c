@@ -35,6 +35,7 @@ int tds520_init_hook( void )
 
 	/* Initialize some variables in the digitizers structure */
 
+	tds520.is_reacting = UNSET;
 	tds520.w = NULL;
 	tds520.is_timebase = UNSET;
 	tds520.is_num_avg = UNSET;

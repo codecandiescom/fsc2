@@ -19,6 +19,8 @@ bool tds520a_init( const char *name )
 {
 	int ch;
 	double cp1, cp2;
+	char buffer[ 100 ];
+	long len = 100;
 
 
 	tds520a.meas_source = -1;
@@ -28,11 +30,15 @@ bool tds520a_init( const char *name )
 
     /* Set digitizer to short form of replies */
 
-    if ( gpib_write( tds520a.device, "VERB OFF;:HEAD OFF\n", 19 ) == FAILURE )
+    if ( gpib_write( tds520a.device, "VERB OFF;:HEAD OFF\n", 19 ) == FAILURE ||
+		 gpib_write( tds520a.device, "*STB?\n", 6 ) == FAILURE ||
+		 gpib_read( tds520a.device, buffer, &len ) == FAILURE )
 	{
 		gpib_local( tds520a.device );
         return FAIL;
 	}
+
+	tds520a.is_reacting = SET;
 
     /* Get record length and trigger position */
 
@@ -476,10 +482,13 @@ void tds520a_finished( void )
 {
 	const char *cmd = "ACQ:STATE STOP;*SRE 0;:ACQ:STOPA RUNST;STATE RUN\n";
 
+	if ( ! tds520a.is_reacting )
+		return;
 
     tds520a_clear_SESR( );
     gpib_write( tds520a.device, cmd, strlen( cmd ) );
 	gpib_local( tds520a.device );
+	tds520a.is_reacting = UNSET;
 }
 
 

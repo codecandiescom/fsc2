@@ -21,6 +21,8 @@ bool tds744a_init( const char *name )
 {
 	int ch;
 	double cp1, cp2;
+	char buffer[ 100 ];
+	long len = 100;
 
 
 	tds744a.meas_source = -1;
@@ -31,11 +33,15 @@ bool tds744a_init( const char *name )
     /* Set digitizer to short form of replies */
 
     if ( gpib_write( tds744a.device, "*CLS;:VERB OFF;:HEAD OFF\n", 25 )
-		 == FAILURE )
+		 == FAILURE ||
+		 gpib_write( tds744a.device, "*STB?\n", 6 ) == FAILURE ||
+		 gpib_read( tds744a.device, buffer, &len ) == FAILURE )
 	{
 		gpib_local( tds744a.device );
         return FAIL;
 	}
+
+	tds744a.is_reacting = SET;
 
     /* Get record length and trigger position */
 
@@ -479,9 +485,13 @@ void tds744a_finished( void )
 	const char *cmd = "ACQ:STATE STOP;*SRE 0;:ACQ:STOPA RUNST;STATE RUN\n";
 
 
+	if ( ! tds744a.is_reacting )
+		return;
+
     tds744a_clear_SESR( );
     gpib_write( tds744a.device, cmd, strlen( cmd ) );
 	gpib_local( tds744a.device );
+	tds744a.is_reacting = UNSET;
 }
 
 
