@@ -53,7 +53,7 @@ PREP        ^[ \t]*PREP(ARATION)?S?:
 EXP         ^[ \t]*EXP(ERIMENT)?:
 
 PS          ^[ \t]*PH(ASE)?_?S(EQ(UENCE)?)?(_?[0-9]+)?
-AS          ^[ \t]*A(CQ(UISITION)?)?_?S(EQ(UENCE)?)?(_?[XY])?
+AS          ^[ \t]*A(CQ(UISITION)?)?_?S(EQ(UENCE)?)?(_?[AB])?
 
 PX          "+"?[xX]
 MX          "-"[xX]
@@ -61,10 +61,12 @@ PY          "+"?[yY]
 MY          "-"[yY]
 CW          [cC][wW]
 
-PA          ("+"[aA]?)|[aA]
-MA          "-"[aA]?
+PA          "+"?[aA]
+MA          "-"[aA]
 PB			"+"?[bB]
 MB			"-"[bB]
+PU          "+"
+MU          "-"
 
 WS          [\n=,:. ]+
 
@@ -153,10 +155,10 @@ WS          [\n=,:. ]+
 				if ( *cp == '_' )
 				    THROW( INVALID_INPUT_EXCEPTION );
 
-				/* determine type of acquisition sequence (X or Y) */
+				/* determine type of acquisition sequence (A or B) */
 
 				phaseslval.lval = 0;
-				if ( tolower( *cp ) == 'Y')
+				if ( *cp == 'B')
 					phaseslval.lval = 1;
 
 				return AS_TOKEN;
@@ -204,6 +206,14 @@ WS          [\n=,:. ]+
 				return A_TOKEN;
 		   }
 
+{PU}       {
+				phaseslval.lval = ACQ_PLUS_U;
+				return A_TOKEN;
+		   }
+{MU}       {
+				phaseslval.lval = ACQ_MINUS_U;
+				return A_TOKEN;
+		   }
 
 {WS}        /* skip prettifying characters */
 

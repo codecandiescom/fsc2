@@ -49,9 +49,18 @@ void acq_seq_cont( long acq_type )
 
 	/* Make real sure the acquisition type is reasonable */
 
-	assert( acq_type >= ACQ_PLUS_A && acq_type <= ACQ_MINUS_B );
+	assert( acq_type >= ACQ_PLUS_U && acq_type <= ACQ_MINUS_B );
 
 	/* add the new acquisition type */
+
+	if ( acq_type == ACQ_PLUS_U && cur_aseq == 0 )
+		acq_type = ACQ_PLUS_A;
+	if ( acq_type == ACQ_MINUS_U && cur_aseq == 0 )
+		acq_type = ACQ_MINUS_A;
+	if ( acq_type == ACQ_PLUS_U && cur_aseq == 1 )
+		acq_type = ACQ_PLUS_B;
+	if ( acq_type == ACQ_MINUS_U && cur_aseq == 1 )
+		acq_type = ACQ_MINUS_B;
 
 	len = ++ASeq[ cur_aseq ].len;
 	ASeq[ cur_aseq ].sequence = T_realloc( ASeq[ cur_aseq ].sequence,
