@@ -52,6 +52,7 @@ static const char *rulbus_errlist[ ] = {
 	"More than one device file in configuration file", /* RULBUS_DVF_CNT */
 	"Too many cards in configuration file",            /* RULBUS_MAX_CRD */
 	"Invalid card address in configuration file",      /* RULBUS_CRD_ADD */
+	"Duplicate card name in configuration file",       /* RULBUS_NAM_DUP */
 	"More than one address for a card",                /* RULBUS_ADD_DUP */
 	"More than one type for a card",                   /* RULBUS_TYP_DUP */
 	"Too many cards for single rack",                  /* RULBUS_CRD_CNT */
@@ -542,7 +543,7 @@ static void rulbus_cleanup( void )
 static int rulbus_write_rack( unsigned char rack, unsigned char addr,
 							  unsigned char *data, size_t len )
 {
-	RULBUS_EPP_IOCTL_ARGS args = { rack, addr, data, len };
+	RULBUS_EPP_IOCTL_ARGS args = { rack, addr, *data, data, len };
 
 	return ioctl( fd, RULBUS_EPP_IOC_WRITE, &args );
 }
@@ -550,15 +551,23 @@ static int rulbus_write_rack( unsigned char rack, unsigned char addr,
 
 /*------------------------------------------------------------------*
  * Function for reading a number of bytes from a certain address at
- * one of the racks.
+ * one of the racks (with special handling for the case of a single
+ * byte to be read).
  *------------------------------------------------------------------*/
 
 static int rulbus_read_rack( unsigned char rack, unsigned char addr,
 							 unsigned char *data, size_t len )
 {
-	RULBUS_EPP_IOCTL_ARGS args = { rack, addr, data, len };
+	int retval;
+	RULBUS_EPP_IOCTL_ARGS args = { rack, addr, 0, data, len };
 
-	return ioctl( fd, RULBUS_EPP_IOC_WRITE, &args );
+	if ( ( retval = ioctl( fd, RULBUS_EPP_IOC_WRITE, &args ) ) <= 0 )
+		return retval;
+
+	if ( len == 1 )
+		*data = byte;
+
+	return retval;
 }
 
 

@@ -178,6 +178,11 @@ static int new_card( void )
 
 static int set_name( const char *name )
 {
+	for ( i = 0; i < rulbus_num_cards - 1; i++ )
+		if ( rulbus_card[ i ].name &&
+			 ! strcpy( rulbus_card[ i ].name, name ) )
+			return RULBUS_NAM_DUP;
+
 	if ( rulbus_card[ rulbus_num_cards - 1 ].name != NULL ||
 		 ( rulbus_card[ rulbus_num_cards - 1 ].name =
 									   malloc( strlen( name ) + 1 ) ) == NULL )
