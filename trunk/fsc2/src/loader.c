@@ -260,9 +260,9 @@ static void load_functions( Device *dev )
 
 	if ( dev->driver.handle == NULL )
 	{
-		eprint( FATAL, UNSET, "Can't open module for device '%s'.\n",
+		eprint( FATAL, UNSET, "Can't open module for device '%s': %s.\n",
 				dev->name[ 0 ] != '/' ?
-				dev->name : strrchr( dev->name, '/' ) + 1 );
+				dev->name : strrchr( dev->name, '/' ) + 1, dlerror( ) );
 		THROW( EXCEPTION );
 	}
 
