@@ -277,13 +277,7 @@ Var *synthesizer_frequency( Var *v )
 		return vars_push( FLOAT_VAR, hp8647a.freq );
 	}
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
-
-	if ( v->type == INT_VAR )
-		eprint( WARN, SET, "%s: Integer value used as RF frequency.\n",
-				DEVICE_NAME );
-
-	freq = VALUE( v );
+	freq = get_double( v, "RF frequency", DEVICE_NAME );
 
 	if ( freq < 0 )
 	{
@@ -396,13 +390,7 @@ Var *synthesizer_attenuation( Var *v )
 		return vars_push( FLOAT_VAR, hp8647a.attenuation );
 	}
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
-
-	if ( v->type == INT_VAR )
-		eprint( WARN, SET, "%s: Integer variable used as RF attenuation.\n",
-				DEVICE_NAME );
-
-	att = VALUE( v );
+	att = get_double( v, "RF attenuation", DEVICE_NAME );
 
 	too_many_arguments( v, DEVICE_NAME );
 
@@ -463,13 +451,7 @@ Var *synthesizer_minimum_attenuation( Var *v )
 		return vars_push( FLOAT_VAR, hp8647a.min_attenuation );
 
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
-
-	if ( v->type == INT_VAR )
-		eprint( WARN, SET, "%s: Integer variable used as minumum RF "
-				"attenuation.\n", DEVICE_NAME );
-
-	min_atten = VALUE( v );
+	min_atten = get_double( v, "minimum RF attenuation", DEVICE_NAME );
 
 	too_many_arguments( v, DEVICE_NAME );
 
@@ -501,8 +483,6 @@ Var *synthesizer_step_frequency( Var *v )
 {
 	if ( v != NULL )
 	{
-		vars_check( v, INT_VAR | FLOAT_VAR );
-
 		/* Allow setting of the step frequency in the PREPARATIONS section
 		   only once */
 
@@ -514,15 +494,10 @@ Var *synthesizer_step_frequency( Var *v )
 			return vars_push( FLOAT_VAR, hp8647a.step_freq );
 		}
 
-		if ( v->type == INT_VAR )
-			eprint( WARN, SET, "%s: Integer variable used as RF step "
-					"frequency.\n", DEVICE_NAME );
-
-		hp8647a.step_freq = VALUE( v );
+		hp8647a.step_freq = get_double( v, "RF step frequency", DEVICE_NAME );
+		hp8647a.step_freq_is_set = SET;
 
 		too_many_arguments( v, DEVICE_NAME );
-
-		hp8647a.step_freq_is_set = SET;
 	}
 	else if ( ! hp8647a.step_freq_is_set )
 	{
@@ -723,12 +698,7 @@ Var *synthesizer_att_ref_freq( Var *v )
 
 	/* Otherwise check the supplied variable */
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
-	if ( v->type == INT_VAR )
-		eprint( WARN, SET, "%s: Integer variable used as RF frequency.\n",
-				DEVICE_NAME );
-
-	freq = VALUE( v );
+	freq = get_double( v, "RF attenuation reference frequency", DEVICE_NAME );
 
 	/* Get rid of the variables */
 
@@ -1074,13 +1044,7 @@ Var *synthesizer_mod_ampl( Var *v )
 		THROW( EXCEPTION )
 	}
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
-
-	if ( v->type == INT_VAR )
-		eprint( WARN, SET, "%s: Integer value used as modulation "
-				"amplitude.\n", DEVICE_NAME );
-
-	ampl = VALUE( v );
+	ampl = get_double( v, "modulation amplitude", DEVICE_NAME );
 
 	too_many_arguments( v, DEVICE_NAME );
 

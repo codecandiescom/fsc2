@@ -216,6 +216,10 @@ Var *magnet_name( Var *v )
 
 Var *magnet_setup( Var *v )
 {
+	double start_field;
+	double field_step;
+
+
 	/* Check that both the variables are reasonable */
 
 	if ( v == NULL )
@@ -225,13 +229,9 @@ Var *magnet_setup( Var *v )
 		THROW( EXCEPTION )
 	}
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
-	if ( v->type == INT_VAR )
-		eprint( WARN, SET, "%s: Integer value used for start field in "
-				"%s().\n", DEVICE_NAME, Cur_Func );
+	start_field = get_double( v, "start field", DEVICE_NAME );
 
-	magnet.start_field = VALUE( v );
-	er032m_field_check( magnet.start_field );
+	er032m_field_check( start_field );
 
 	if ( ( v = vars_pop( v ) ) == NULL )
 	{
@@ -240,12 +240,9 @@ Var *magnet_setup( Var *v )
 		THROW( EXCEPTION )
 	}
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
-	if ( v->type == INT_VAR )
-		eprint( WARN, SET, "%s: Integer value used for field step width "
-				"in %s().\n", DEVICE_NAME, Cur_Func );
+	field_step = get_double( v, "field step width", DEVICE_NAME );
 
-	if ( fabs( VALUE( v ) ) < ER032M_MIN_FIELD_STEP )
+	if ( fabs( field_step ) < ER032M_MIN_FIELD_STEP )
 	{
 		eprint( FATAL, SET, "%s: Field sweep step size (%lf G) too small in "
 				"%s(), minimum is %f G.\n", DEVICE_NAME, VALUE( v ), Cur_Func,
@@ -253,11 +250,12 @@ Var *magnet_setup( Var *v )
 		THROW( EXCEPTION )
 	}
 		
-	magnet.field_step = fabs( VALUE( v ) );
-
 	too_many_arguments( v, DEVICE_NAME );
 
+	start_field = start_field;
+	magnet.field_step = field_step;
 	magnet.is_init = SET;
+
 	return vars_push( INT_VAR, 1 );
 }
 
@@ -416,13 +414,7 @@ Var *set_field( Var *v )
 		THROW( EXCEPTION )
 	}
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
-
-	if ( v->type & INT_VAR )
-		eprint( WARN, SET, "%s: Integer value used for magnetic field in "
-				"%s().\n", DEVICE_NAME, Cur_Func );
-
-	field = VALUE( v );
+	field = get_double( v, "magnetic field", DEVICE_NAME );
 
 	if ( ( v = vars_pop( v ) ) != NULL )
 		eprint( SEVERE, SET, "%s: Can't use a maximum field error in %s().\n",

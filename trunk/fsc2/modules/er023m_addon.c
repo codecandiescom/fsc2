@@ -30,7 +30,7 @@
 
 Var *lockin_rg( Var *v )
 {
-	int rg_index;
+	long rg_index;
 
 
 	if ( v == NULL )
@@ -48,23 +48,23 @@ Var *lockin_rg( Var *v )
 				return vars_push( INT_VAR, ( long ) er023m_get_rg( ) );
 		}
 
-	rg_index = ( int ) get_long( v, "receiver gain index", DEVICE_NAME );
+	rg_index = get_long( v, "receiver gain index", DEVICE_NAME );
 
 	too_many_arguments( v, DEVICE_NAME );
 
 	if ( rg_index < 0 || rg_index > RG_MAX_INDEX )
 	{
-		eprint( FATAL, SET, "%s: Invalid receiver gain index %d in %s(), "
+		eprint( FATAL, SET, "%s: Invalid receiver gain index %ld in %s(), "
 				"valid range is 0-%d.\n",
 				DEVICE_NAME, rg_index, RG_MAX_INDEX );
 		THROW( EXCEPTION )
 	}
 
-	er023m.rg_index = rg_index;
+	er023m.rg_index = ( int ) rg_index;
 	if ( FSC2_MODE == EXPERIMENT )
-		er023m_set_rg( rg_index );
+		er023m_set_rg( er023m.rg_index );
 	
-	return vars_push( INT_VAR, ( long ) rg_index );
+	return vars_push( INT_VAR, rg_index );
 }
 
 
@@ -73,7 +73,7 @@ Var *lockin_rg( Var *v )
 
 Var *lockin_tc( Var *v )
 {
-	int tc_index;
+	long tc_index;
 
 
 	if ( v == NULL )
@@ -90,19 +90,19 @@ Var *lockin_tc( Var *v )
 				return vars_push( INT_VAR, er023m_get_tc( ) );
 		}
 
-	tc_index = ( int ) get_long( v, "time constant index", DEVICE_NAME );
+	tc_index = get_long( v, "time constant index", DEVICE_NAME );
 
 	if ( tc_index > 0 && tc_index < TC_MIN_INDEX )
 	{
 		eprint( SEVERE, SET, "%s: Minimum usuable time constant index is %d, "
-				"using this value instead of %d.\n", DEVICE_NAME, TC_MIN_INDEX,
-				tc_index );
+				"using this value instead of %ld.\n", DEVICE_NAME,
+				TC_MIN_INDEX, tc_index );
 		tc_index = TC_MIN_INDEX;
 	}
 
 	if ( tc_index < 0 || tc_index > TC_MAX_INDEX )
 	{
-		eprint( FATAL, SET, "%s: Invalid time constant index %d in %s(), "
+		eprint( FATAL, SET, "%s: Invalid time constant index %ld in %s(), "
 				"valid range is %d-%d.\n",
 				DEVICE_NAME, tc_index, TC_MIN_INDEX, TC_MAX_INDEX );
 		THROW( EXCEPTION )
@@ -110,11 +110,11 @@ Var *lockin_tc( Var *v )
 
 	too_many_arguments( v, DEVICE_NAME );
 	
-	er023m.tc_index = tc_index;
+	er023m.tc_index = ( int ) tc_index;
 	if ( FSC2_MODE == EXPERIMENT )
-			er023m_set_tc( tc_index );
+		er023m_set_tc( er023m.tc_index );
 	
-	return vars_push( INT_VAR, ( long ) tc_index );
+	return vars_push( INT_VAR, tc_index );
 }
 
 
@@ -126,7 +126,7 @@ Var *lockin_tc( Var *v )
 
 Var *lockin_ma( Var *v )
 {
-	int ma;
+	long ma;
 
 
 	if ( er023m.mf_index == UNDEF_MF_INDEX ||
@@ -151,11 +151,11 @@ Var *lockin_ma( Var *v )
 				return vars_push( INT_VAR, ( long ) er023m_get_ma( ) );
 		}
 
-	ma = ( int ) get_long( v, "modulation attenuation index", DEVICE_NAME );
+	ma = get_long( v, "modulation attenuation index", DEVICE_NAME );
 
 	if ( ma > MAX_MA_INDEX || ma < MIN_MA_INDEX )
 	{
-		eprint( FATAL, SET, "%s: Value %d for modulation attenuation is too "
+		eprint( FATAL, SET, "%s: Modulation attenuation index %ld is too "
 				"%s, must be in range %d-%d.\n",
 				DEVICE_NAME, ma, ma > MAX_MA_INDEX ? "large" : "low",
 				MIN_MA_INDEX, MAX_MA_INDEX );
@@ -163,12 +163,12 @@ Var *lockin_ma( Var *v )
 	}
 
 	too_many_arguments( v, DEVICE_NAME );
-	
-	er023m.ma_index = ma;
-	if ( FSC2_MODE == EXPERIMENT )
-		er023m_set_ma( ma );
 
-	return vars_push( INT_VAR, ( long ) ma );
+	er023m.ma_index = ( int ) ma;
+	if ( FSC2_MODE == EXPERIMENT )
+		er023m_set_ma( er023m.ma_index );
+
+	return vars_push( INT_VAR, ma );
 }
 
 
@@ -177,7 +177,7 @@ Var *lockin_ma( Var *v )
 
 Var *lockin_ct( Var *v )
 {
-	int ct_mult;
+	long ct_mult;
 
 
 	if ( v == NULL )
@@ -195,8 +195,7 @@ Var *lockin_ct( Var *v )
 				return vars_push( INT_VAR, ( long ) er023m_get_ct( ) );
 		}
 
-	ct_mult = ( int ) get_long( v, "conversion time multiplicator",
-								DEVICE_NAME );
+	ct_mult = get_long( v, "conversion time multiplicator", DEVICE_NAME );
 	if ( ct_mult < 0 )
 	{
 		eprint( FATAL, SET, "%s: Invalid negative conversion time multiplier "
@@ -207,14 +206,14 @@ Var *lockin_ct( Var *v )
 	if ( ct_mult < MIN_CT_MULT )
 	{
 		eprint( SEVERE, SET, "%s: Minimum usuable conversion time multiplier "
-				"is %d, using this value instead of %d.\n", DEVICE_NAME,
+				"is %d, using this value instead of %ld.\n", DEVICE_NAME,
 				MIN_CT_MULT, ct_mult );
 		ct_mult = MIN_CT_MULT;
 	}
 
 	if ( ct_mult > MAX_CT_MULT )
 	{
-		eprint( FATAL, SET, "%s: Invalid conversion time multiplier %d in "
+		eprint( FATAL, SET, "%s: Invalid conversion time multiplier %ld in "
 				"%s(), valid range is %d-%ld.\n", DEVICE_NAME, ct_mult,
 				Cur_Func, MIN_CT_MULT, MAX_CT_MULT );
 		THROW( EXCEPTION )
@@ -222,11 +221,11 @@ Var *lockin_ct( Var *v )
 
 	too_many_arguments( v, DEVICE_NAME );
 	
-	er023m.ct_mult = ct_mult;
+	er023m.ct_mult = ( int ) ct_mult;
 	if ( FSC2_MODE == EXPERIMENT )
-		er023m_set_ct( ct_mult );
+		er023m_set_ct( er023m.ct_mult );
 	
-	return vars_push( INT_VAR, ( long ) ct_mult );
+	return vars_push( INT_VAR, ct_mult );
 }
 
 
@@ -235,7 +234,7 @@ Var *lockin_ct( Var *v )
 
 Var *lockin_mf( Var *v )
 {
-	int mf_index;
+	long mf_index;
 	int old_mf_index;
 
 
@@ -256,19 +255,18 @@ Var *lockin_mf( Var *v )
 
 	old_mf_index = er023m.mf_index;
 
-	mf_index = ( int ) get_long( v, "modulation frequency index",
-								 DEVICE_NAME );
+	mf_index = get_long( v, "modulation frequency index", DEVICE_NAME );
 
 	if ( mf_index < 0 )
 	{
 		eprint( FATAL, SET, "%s: Invalid negative modulation frequency index "
-				"in %s().\n", DEVICE_NAME, Cur_Func );
+				"%ld in %s().\n", DEVICE_NAME, mf_index, Cur_Func );
 		THROW( EXCEPTION )
 	}
 
 	if ( mf_index > MAX_MF_INDEX )
 	{
-		eprint( FATAL, SET, "%s: Invalid modulation frequency index %d in "
+		eprint( FATAL, SET, "%s: Invalid modulation frequency index %ld in "
 				"%s(), valid range is 0-%ld.\n", DEVICE_NAME, mf_index,
 				Cur_Func, MAX_MF_INDEX );
 		THROW( EXCEPTION )
@@ -276,15 +274,15 @@ Var *lockin_mf( Var *v )
 
 	too_many_arguments( v, DEVICE_NAME );
 	
-	er023m.mf_index = mf_index;
+	er023m.mf_index = ( int ) mf_index;
 	if ( FSC2_MODE == EXPERIMENT )
-		er023m_set_mf( mf_index );
+		er023m_set_mf( er023m.mf_index );
 	
 	/* Warn the user if for the new modulation frequency there's no phase
 	   or attenuation calibration while we had one for the old frequency */
 
 	if ( old_mf_index != UNDEF_MF_INDEX &&
-		 old_mf_index != mf_index )
+		 old_mf_index != ( int ) mf_index )
 	{
 		if ( er023m.ha != UNDEF_HARMONIC &&
 			 er023m.calib[ old_mf_index ].is_ph[ er023m.ha ] &&
@@ -297,7 +295,7 @@ Var *lockin_mf( Var *v )
 					"modulation amplitude uncalibrated.\n", DEVICE_NAME );
 	}
 
-	return vars_push( INT_VAR, ( long ) mf_index );
+	return vars_push( INT_VAR, mf_index );
 }
 
 
