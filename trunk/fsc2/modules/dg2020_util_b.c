@@ -453,7 +453,7 @@ int dg2020_diff( bool *old, bool *new, Ticks *start, Ticks *length )
 	}
 
 	/* store the start position (including the offset and the necessary one
-	   due to the pulsers firmware bug) and store if we wave to reset (-1)
+	   due to the pulsers firmware bug) and remember if we have to reset (-1)
 	   or to set (1) */
 
 	*start = where;
