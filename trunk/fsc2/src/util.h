@@ -7,6 +7,8 @@
 
 char *get_string_copy( const char *str );
 char *get_string( size_t len );
+char *string_to_lower( char *str );
+void *get_memcpy( const void *array, size_t size );
 void eprint( int severity, const char *fmt, ... );
 
 inline long   rnd( double x );

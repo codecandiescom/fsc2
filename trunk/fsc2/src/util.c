@@ -21,6 +21,29 @@ char *get_string( size_t len )
 }
 
 
+char *string_to_lower( char *str )
+{
+	char *ptr;
+
+
+	for ( ptr = str; *ptr; ptr++ )
+		if ( isupper( *ptr ) )
+			*ptr = tolower( *ptr );
+
+	return( str );
+}
+
+
+void *get_memcpy( const void *array, size_t size )
+{
+	void *new;
+
+	new = T_malloc( size );
+	memcpy( new, array, size );
+	return( new );
+}
+
+
 void eprint( int severity, const char *fmt, ... )
 {
 	va_list ap;

@@ -7,7 +7,7 @@ sources        = $(bison_sources:.y=.c) $(flex_sources:.flex=.c) \
 objects        = $(sources:.c=.o)
 CFLAGS         = -ggdb -Wall -Wwrite-strings -Wstrict-prototypes \
 			     -Wmissing-prototypes -Wmissing-declarations -W -DDEBUG
-modules        = User_Functions.c
+modules        = User_Functions.c dg2020.c tds754a.c sr510.c
 header         = ${c_sources:.c=.h} global.h
 
 
@@ -27,6 +27,9 @@ devices_parser.c devices_parser.h: devices_parser.y
 
 devices_lexer.c: devices_lexer.flex $(header)
 	flex -B -Pdevices -odevices_lexer.c devices_lexer.flex
+
+devices_list_lexer.c: devices_list_lexer.flex $(header)
+	flex -B -Pdevices_list -odevices_list_lexer.c devices_list_lexer.flex
 
 assign_parser.c assign_parser.h: assign_parser.y
 	bison -d -v -t -p assign -o assign_parser.c assign_parser.y
@@ -75,8 +78,7 @@ fsc_clean.c: fsc_clean.flex $(header)
 
 
 
-
-mods: lib_fsc2_$(modules:.c=.la)
+mods: $(patsubst %,lib_fsc2_%, $(modules:.c=.la))
 	export LD_LIBRARY_PATH=`pwd`/.libs
 
 lib_fsc2_%.la: %.c $(header)

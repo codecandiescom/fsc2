@@ -218,7 +218,7 @@ WS          [\n \t]+
 						eprint( FATAL, "%s:%ld: Function `%s' can't be used "
 								 "in VARIABLES section.\n",
 								 Fname, Lc, variablestext );
-						THROW( SYNTAX_ERROR_EXCEPTION );
+						THROW( FUNCTION_EXCEPTION );
 					}
 					return FUNC_TOKEN;
 				}
@@ -323,6 +323,8 @@ int variables_parser( FILE *in )
 		eprint( FATAL, "%s", variablestext + 2 );
 		return FAIL;
 	}
+	CATCH( FUNCTION_EXCEPTION )
+		return FAIL;
 
 #ifdef DEBUG
 	print_all_vars( );

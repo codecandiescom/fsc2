@@ -134,9 +134,13 @@ bool functions_init( void )
 		memcpy( fncts, def_fncts, ( num_def_func + 1 ) * sizeof( Func ) );
 		func_list_parse( &fncts, num_def_func, &num_func );
 		load_functions( "User_Functions" );
-	}
-	if ( exception_id == NO_EXCEPTION )    /* everything worked out fine */
    		TRY_SUCCESS;
+	}
+	CATCH( LIBRARY_EXCEPTION )
+	{
+		functions_exit( );
+		return FAIL;
+	}
 	CATCH( OUT_OF_MEMORY_EXCEPTION )
 	{
 		functions_exit( );
@@ -171,9 +175,12 @@ void functions_exit( void )
 
 	for ( i = 0; i < Num_Libs; ++i )
 	{
-		if ( Libs[ i ].is_exit_hook )
-			Libs[ i ].lib_exit( );
-		dlclose( Libs[ i ].handle );
+		if ( Libs[ i ].handle != NULL )
+		{
+			if ( Libs[ i ].is_exit_hook )
+				Libs[ i ].lib_exit( );
+			dlclose( Libs[ i ].handle );
+		}
 	}
 
 	free( Libs );
@@ -203,14 +210,15 @@ void load_functions( const char *name )
 	/* Increase memory allocated for library handles and try to open
 	   dynamically loaded library */
 
-	Libs = T_realloc( Libs, ( Num_Libs + 1 ) * sizeof( void ) );
-	Libs[ Num_Libs ].handle = dlopen( library, RTLD_LAZY );
+	Libs = T_realloc( Libs, ++Num_Libs * sizeof( Lib_Struct ) );
+	Libs[ Num_Libs - 1 ].handle = dlopen( library, RTLD_LAZY );
+	Libs[ Num_Libs - 1 ].is_exit_hook = UNSET;
 	free( library );
-	if ( Libs[ Num_Libs ].handle == NULL )
+	if ( Libs[ Num_Libs - 1 ].handle == NULL )
 	{
 		eprint( FATAL, "Can't open library for `%s', %s.\n",
 				name, dlerror( ) );
-		THROW( FUNCTION_EXCEPTION );
+		THROW( LIBRARY_EXCEPTION );
 	}
 
 	/* If there is a function with the name of the library file and the
@@ -221,11 +229,11 @@ void load_functions( const char *name )
 	strcpy( init_func, name );
 	strcat( init_func, "_init_hook" );	
 
-	lib_init = dlsym( Libs[ Num_Libs ].handle, init_func );
+	lib_init = dlsym( Libs[ Num_Libs - 1 ].handle, init_func );
 	free( init_func );
 	if ( dlerror( ) == NULL && lib_init( ) == 0 )
 	{
-		eprint( NO_ERROR, "Initialization of library for `%s' failed.\n",
+		eprint( WARN, "Initialization of library for `%s' failed.\n",
 				name );
 		return;
 	}
@@ -236,11 +244,10 @@ void load_functions( const char *name )
 	strcpy( exit_func, name );
 	strcat( exit_func, "_exit_hook" );	
 
-	Libs[ Num_Libs ].lib_exit = dlsym( Libs[ Num_Libs ].handle, init_func );
+	Libs[ Num_Libs - 1 ].lib_exit =
+		                       dlsym( Libs[ Num_Libs - 1 ].handle, init_func );
 	if ( dlerror( ) == NULL )
-		Libs[ Num_Libs ].is_exit_hook = SET;
-	else
-		Libs[ Num_Libs ].is_exit_hook = UNSET;
+		Libs[ Num_Libs - 1 ].is_exit_hook = SET;
 	free( exit_func );
 
 	eprint( NO_ERROR, "Loading functions from file `%s'.\n", name );
@@ -257,7 +264,7 @@ void load_functions( const char *name )
 		if ( ! fncts[ num ].to_be_loaded )
 			continue;
 
-		cur = dlsym( Libs[ Num_Libs ].handle, fncts[ num ].name );
+		cur = dlsym( Libs[ Num_Libs - 1 ].handle, fncts[ num ].name );
 
 		if ( dlerror( ) != NULL )     /* function not found in library ? */
 			continue;
@@ -266,14 +273,12 @@ void load_functions( const char *name )
 		{
 			eprint( FATAL, " Redefinition of function `%s()'.\n",
 					fncts[ num ].name );
-			THROW( FUNCTION_EXCEPTION );
+			THROW( LIBRARY_EXCEPTION );
 		}
 
 		eprint( NO_ERROR, "  Loading function `%s()'.\n", fncts[ num ].name );
 		fncts[ num ].fnct = cur;
 	}
-
-	Num_Libs++;
 }
 
 

@@ -5,11 +5,29 @@
 
 #include "fsc2.h"
 
+int User_Functions_init_hook( void );
+void User_Functions_exit_hook( void );
 
-Var *square( Var *v );
-Var *int_slice( Var *v );
-Var *float_slice( Var *v );
 
+Var *square( Var *var );
+Var *int_slice( Var *var );
+Var *float_slice( Var *var );
+
+
+
+/* Here examples for init and exit hok functions - the init hook function will
+   be called directly after the library is loaded while the exit hook function
+   is called immediately before the library is unloaded. */
+
+int User_Functions_init_hook( void )
+{
+	printf( "This is User_Functions_init_hook()\n" );
+	return( 1 );
+}
+void User_Functions_exit_hook( void )
+{
+	printf( "This is User_Functions_exit_hook()\n" );
+}
 
 
 
@@ -19,48 +37,56 @@ Var *float_slice( Var *v );
 
 
 				 
-Var *square( Var *v )
+Var *square( Var *var )
 {
-	vars_check( v, INT_VAR | FLOAT_VAR );
+	vars_check( var, INT_VAR | FLOAT_VAR );
 
-	if ( v->type == INT_VAR )
-		return vars_push( INT_VAR, v->val.lval * v->val.lval );
+	if ( var->type == INT_VAR )
+		return vars_push( INT_VAR, var->INT * var->INT );
 	else
-		return vars_push( FLOAT_VAR, v->val.dval * v->val.dval );
+		return vars_push( FLOAT_VAR, var->FLOAT * var->FLOAT );
 }
 
 
-Var *int_slice( Var *v )
+Var *int_slice( Var *var )
 {
-	long *x;
+	long *array;
 	long size;
+	Var *ret;
 
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
+	vars_check( var, INT_VAR | FLOAT_VAR );
 
-	if ( v->type == INT_VAR )
-		size = v->val.lval;
+	if ( var->type == INT_VAR )
+		size = var->INT;
 	else
-		size = ( long ) v->val.dval;
+		size = ( long ) var->FLOAT;
 
-	x = T_calloc( size, sizeof( long ) );
-	return vars_push( INT_TRANS_ARR, x, size );
+	array = T_calloc( size, sizeof( long ) );
+	ret = vars_push( INT_TRANS_ARR, array, size );
+	free( array );
+
+	return ret;
 }
 
 
-Var *float_slice( Var *v )
+Var *float_slice( Var *var )
 {
-	long *x;
+	long *array;
 	long size;
+	Var *ret;
 
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
+	vars_check( var, INT_VAR | FLOAT_VAR );
 
-	if ( v->type == INT_VAR )
-		size = v->val.lval;
+	if ( var->type == INT_VAR )
+		size = var->INT;
 	else
-		size = ( long ) v->val.dval;
+		size = ( long ) var->FLOAT;
 
-	x = T_calloc( size, sizeof( double ) );
-	return vars_push( FLOAT_TRANS_ARR, x, size );
+	array = T_calloc( size, sizeof( double ) );
+	ret = vars_push( FLOAT_TRANS_ARR, array, size );
+	free( array );
+
+	return ret;
 }

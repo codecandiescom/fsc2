@@ -5,13 +5,13 @@
 /*                                                                  */
 /*               name, # args [ , access ] ;                        */
 /*                                                                  */
-/* where `name' is the name of the function to be used in the EDL   */
-/* file and `#args' is the number of arguments - use a negative     */
-/* number for functions with a variable number of arguments. The    */
-/* optional parameter `access' is the access flag, where ALL means  */
-/* that it can be used in all sections of an EDL file while EXP     */
-/* says that the function can  be used only in the EXPERIMENTS      */
-/* section, i.e. it's probably a function that accesses a device.   */
+/* where `name' is the name of the function and `#args' is the      */
+/* number of arguments - use a negative number for functions with   */
+/* variable number of arguments. The optional parameter `access'    */
+/* is the access flag, where ALL means that it can be used in all   */
+/* sections of an EDL file while EXP says that the function can     */
+/* be used only in the EXPERIMENTS section, i.e. it's probably a    */
+/* function that accesses a device. The default is EXP.             */
 /*                                                                  */
 /********************************************************************/
 

@@ -151,5 +151,13 @@ typedef struct
 
 
 
+/* convinience macros for accessing the value of simple variables */
+
+
+#define fatal_error  THROW( FUNCTIONS_EXCEPTION );
+#define INT   val.lval
+#define FLOAT val.dval
+
+
 
 #endif FSC2_GLOBAL

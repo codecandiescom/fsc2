@@ -766,11 +766,17 @@ Var *vars_push( int type, ... )
 		case INT_TRANS_ARR :
 			new_stack_var->val.lpnt = va_arg( ap, long * );
 			new_stack_var->len = va_arg( ap, long );
+			new_stack_var->val.lpnt =
+				get_memcpy( new_stack_var->val.lpnt,
+							new_stack_var->len * sizeof( long ) );
 			break;
 
 		case FLOAT_TRANS_ARR :
 			new_stack_var->val.dpnt = va_arg( ap, double * );
 			new_stack_var->len = va_arg( ap, long );
+			new_stack_var->val.dpnt =
+				get_memcpy( new_stack_var->val.dpnt,
+							new_stack_var->len * sizeof( double ) );
 			break;
 
 		default :
@@ -848,14 +854,24 @@ void vars_pop( Var *v )
 				stack->next->prev = NULL;
 		}
 
-		if ( stack->type == STR_VAR )
-			free( stack->val.sptr );
-		if ( stack->type == FUNC )
-			free( stack->name );
-		if ( stack->type & ( INT_TRANS_ARR ) )
-			free( stack->val.lpnt );
-		if ( stack->type & ( FLOAT_TRANS_ARR ) )
-			free( stack->val.dpnt );
+		switch( stack->type )
+		{
+			case STR_VAR :
+				free( stack->val.sptr );
+				break;
+
+			case FUNC :
+				free( stack->name );
+				break;
+
+			case INT_TRANS_ARR :
+				free( stack->val.lpnt );
+				break;
+
+			case FLOAT_TRANS_ARR :
+				free( stack->val.dpnt );
+				break;
+		}
 
 		free( stack );
 	}

@@ -258,7 +258,7 @@ WS          [\n=: ]+
 						eprint( FATAL, "%s:%ld: Function `%s' can't be used "
 								 "in ASSIGN section.\n",
 								 Fname, Lc, assigntext );
-						THROW( SYNTAX_ERROR_EXCEPTION );
+						THROW( FUNCTION_EXCEPTION );
 					}
 					return FUNC_TOKEN;
 				}
@@ -332,6 +332,8 @@ int assignments_parser( FILE *in )
 		assign_end( );
 	}
 	CATCH( ASSIGNMENTS_EXCEPTION )
+		return FAIL;
+	CATCH( FUNCTION_EXCEPTION )
 		return FAIL;
 	CATCH( INVALID_INPUT_EXCEPTION )
 	{
