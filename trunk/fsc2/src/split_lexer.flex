@@ -248,7 +248,7 @@ bool section_parser( int section )
 	CATCH( MISSING_SEMICOLON_EXCEPTION )
 	{		
 		eprint( FATAL, "%s:%ld: Missing semicolon before (or on) this line.",
-		Fname, Lc );
+				Fname, Lc );
 		return FAIL;
 	}
 	OTHERWISE

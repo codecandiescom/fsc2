@@ -202,9 +202,9 @@ install:
 	install -d $(auxdir)
 	install -m 755 -o fsc2 -g fsc2 -s fsc2_clean $(libdir)
 	install -m 644 -o fsc2 -g fsc2 Functions $(libdir)
-	if [ `hostname` = "pion" ]; then \
-		ls -s $libdir/dg2020_f.so $libdir/dg2020.so; \
-		ls -s $libdir/aeg_s_band.so $libdir/s_band.so; \
+	if [ `hostname --fqdn` = "pion.anorg.chemie.uni-frankfurt.de" ]; then \
+		ln -s $libdir/dg2020_f.so $libdir/dg2020.so; \
+		ln -s $libdir/aeg_s_band.so $libdir/s_band.so; \
 	fi
 	install -m 644 -o fsc2 -g fsc2 Devices $(libdir)
 	install -m 644 -o fsc2 -g fsc2 -s *.so $(libdir)

@@ -232,8 +232,8 @@ static void xforms_close( void )
 
 void load_file( FL_OBJECT *a, long reload )
 {
-	const char *fn;
-	char *old_in_file;
+	static const char *fn;
+	static char *old_in_file;
 	FILE *fp;
 	struct stat file_stat;
 

@@ -13,7 +13,6 @@
 
 
 dg2020_f      // Sony/Tektronix data generator (Frankfurt version)
-dg2020        // alternate name for Frankfurt version (for compatibility)
 dg2020_b      // Sony/Tektronix data generator (Berlin version)
 
 tds754a       // Tektronix digitizing oscilloscope
@@ -24,7 +23,6 @@ sr530         // Stanford Research lock-in amplifier
 sr810         // Stanford Research lock-in amplifier
 
 aeg_s_band    // S-band AEG magnet power supply (Frankfurt)
-s_band        // alternate name for Frankfurt version (for compatibility)
 aeg_x_band    // X-band AEG magnet power supply (Berlin)
 
 er035m        // Bruker NMR gaussmeter (connected to IEEE bus)

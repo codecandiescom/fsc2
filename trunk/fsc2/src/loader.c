@@ -80,7 +80,9 @@ bool exist_device( const char *name )
 	Device *cd;
 
 	for ( cd = Device_List; cd != NULL; cd = cd->next )
-		if ( cd->is_loaded && ! strcmp( cd->name, name ) )
+		if ( cd->is_loaded &&
+			 ! strcmp( strchr( cd->name, '/' ) == NULL ?
+					   cd->name : strrchr( cd->name, '/' ) + 1, name ) )
 			return OK;
 
 	return FAIL;
@@ -117,10 +119,12 @@ void load_functions( Device *dev )
 	int num;
 	char *lib_name;
 	char *hook_func_name;
+	char *dev_name;
 	void *cur;
 
 
-	/* Assemble name of library to be loaded */
+	/* Assemble name of library to be loaded - this will also work for cases
+	   where the device name contains a relative path */
 
 	lib_name = get_string( strlen( libdir ) + strlen( dev->name ) + 4 );
 	strcpy( lib_name, libdir );
@@ -129,17 +133,29 @@ void load_functions( Device *dev )
 	strcat( lib_name, dev->name );
 	strcat( lib_name, ".so" );
 
-	/* Try to open the library - if it can't be found in the usual place or
-       it's already the complete name (i.e. including the path) give it
-       another chance, including the places defined by LD_LIBRARY_PATH */
+	/* Try to open the library. If it can't be found in the place defined at
+	   compilation time give it another chance by checking the paths defined
+	   by LD_LIBRARY_PATH - but only if the device name doesn't contain a
+	   path. The last possibility is that the device name already contains a
+	   absolute path, probably because it's set via a link. */
 
 	dev->driver.handle = dlopen( lib_name, RTLD_LAZY );
+
 	if ( dev->driver.handle == NULL )
 		dev->driver.handle = dlopen( strrchr( lib_name, '/' ) + 1, RTLD_LAZY );
 
+	if ( dev->driver.handle == NULL && strchr( dev->name, '/' ) == NULL )
+	{
+		strcpy( lib_name, dev->name );
+		strcat( lib_name, ".so" );
+		dev->driver.handle = dlopen( lib_name, RTLD_LAZY );
+	}
+
 	if ( dev->driver.handle == NULL )
 	{
-		eprint( FATAL, "Can't open module `%s'.", lib_name );
+		eprint( FATAL, "Can't open module for device `%s'.", 
+				strchr( dev->name, '/' ) == NULL ?
+				dev->name : strrchr( dev->name, '/' ) + 1 );
 		T_free( lib_name );
 		THROW( EXCEPTION );
 	}
@@ -150,13 +166,21 @@ void load_functions( Device *dev )
 		dev->driver.is_end_of_test_hook = dev->driver.is_exp_hook =
 		dev->driver.is_end_of_exp_hook = dev->driver.is_exit_hook = UNSET;
 
+	/* The device name used as prefix in the hook functions may not contain
+	   a path */
+
+	if ( strchr( dev->name, '/' ) != NULL )
+		dev_name = strrchr( dev->name, '/' ) + 1;
+	else
+		dev_name = dev->name;
+
 	/* If there is function with the name of the library file and the
 	   appended string "_init_hook" store it and set corresponding flag
 	   (the string will be reused for the other hook functions, so make
 	   it long enough that the longest name will fit into it) */
 
-	hook_func_name = get_string( strlen( dev->name ) + 18 );
-	strcpy( hook_func_name, dev->name );
+	hook_func_name = get_string( strlen( dev_name ) + 18 );
+	strcpy( hook_func_name, dev_name );
 	strcat( hook_func_name, "_init_hook" );	
 
 	dev->driver.init_hook = dlsym( dev->driver.handle, hook_func_name );
@@ -165,7 +189,7 @@ void load_functions( Device *dev )
 
 	/* Get test hook function if available */
 	
-	strcpy( hook_func_name, dev->name );
+	strcpy( hook_func_name, dev_name );
 	strcat( hook_func_name, "_test_hook" );	
 
 	dev->driver.test_hook = dlsym( dev->driver.handle, hook_func_name );
@@ -174,7 +198,7 @@ void load_functions( Device *dev )
 
 	/* Get end-of-test hook function if available */
 	
-	strcpy( hook_func_name, dev->name );
+	strcpy( hook_func_name, dev_name );
 	strcat( hook_func_name, "_end_of_test_hook" );	
 
 	dev->driver.end_of_test_hook = dlsym( dev->driver.handle, hook_func_name );
@@ -183,7 +207,7 @@ void load_functions( Device *dev )
 
 	/* Get pre-experiment hook function if available */
 	
-	strcpy( hook_func_name, dev->name );
+	strcpy( hook_func_name, dev_name );
 	strcat( hook_func_name, "_exp_hook" );	
 
 	dev->driver.exp_hook = dlsym( dev->driver.handle, hook_func_name );
@@ -192,7 +216,7 @@ void load_functions( Device *dev )
 
 	/* Get end-of-experiment hook function if available */
 
-	strcpy( hook_func_name, dev->name );
+	strcpy( hook_func_name, dev_name );
 	strcat( hook_func_name, "_end_of_exp_hook" );	
 
 	dev->driver.end_of_exp_hook = dlsym( dev->driver.handle, hook_func_name );
@@ -201,7 +225,7 @@ void load_functions( Device *dev )
 
 	/* Finally check if there's also an exit hook function */
 
-	strcpy( hook_func_name, dev->name );
+	strcpy( hook_func_name, dev_name );
 	strcat( hook_func_name, "_exit_hook" );	
 
 	dev->driver.exit_hook = dlsym( dev->driver.handle, hook_func_name );
