@@ -68,7 +68,7 @@ may contain. Actually, there are some extra ones, @file{split_lexer.l}
 is a central switch for the first stage that calls the individual
 tokenizers in turn on finding the section labels and deals with errors
 conditions they can't handle. Two extra tokenizers,
-@file{devices_list_lexer.l} and @code{func_list_lexer.l} are for
+@file{devices_list_lexer.l} and @file{func_list_lexer.l} are for
 analyzing the files with the list of device modules,
 @file{conf/Devices}, and the list of functions, @file{conf/Functions}
 (they also contain some additional @code{C} code for interpreting the
@@ -171,11 +171,11 @@ is later used to test and execute the @code{EXPERIMENT} section.
 Writers of modules should know that the modules already get loaded when
 the @code{DEVICES} section (which always must be the first one) is dealt
 with. A module may contain a special function, called a hook function,
-that automatically gets called automatically when the module has just
-been loaded.  This allows for example to set the internal variables of
-the module to a well-defined state. This function may not call any
-functions accessing the device because neither the GPIB bus nor the
-serials ports are configured at this moment.
+that automatically gets called when the module has just been loaded.
+This allows for example to set the internal variables of the module to a
+well-defined state. This function may not call any functions accessing
+the device because neither the GPIB bus nor the serials ports are
+configured at this moment.
 
 
 While handling the part of the @code{EDL} program up to the start of
@@ -193,9 +193,9 @@ function in the module for the lock-in amplifier with a floating point
 number of @code{0.0001} as the argument (the module does not have to
 take care of dealing with units, they are already translated by
 @code{fsc2}).  The module function for setting the lock-in amplifiers
-sensitivity should now check the argument it got passed (there my or may
+sensitivity should now check the argument it got passed (there may or may
 not be a sensitivity setting of @code{0.0001} and only the module knows
-about this). If the argument is reasonable the module should store the
+about it). If the argument is reasonable the module should store the
 value to be set when the lock-in amplifier gets initialized at the start
 of the experiment.
 
