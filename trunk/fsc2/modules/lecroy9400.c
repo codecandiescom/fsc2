@@ -64,7 +64,7 @@ double tpp[ 21 ] = {                      10.0e-9,
 					   4.0e-6,   8.0e-6,  20.0e-6,
 					  40.0e-6,  80.0e-6 };
 
-/* List of the corresponding sample rates, i.e. the time/point */
+/* List of the corresponding sample rates, i.e. the time (in s) per point */
 
 double sr[ 21 ] = {						 10.0e-9,
 					 10.0e-9,  10.0e-9,  10.0e-9,
