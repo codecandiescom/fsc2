@@ -5,6 +5,7 @@
 #if ! defined UTIL_HEADER
 #define UTIL_HEADER
 
+
 char *get_string_copy( const char *str );
 char *get_string( size_t len );
 char *string_to_lower( char *str );
@@ -35,7 +36,7 @@ inline double d_min( double a, double b );
 
 /* Needed for glib versions below 2.0 (or 2.1 ?) */
 
-// inline long lround( double x );
+inline long lround( double x );
 
 
 #endif  /* ! UTIL_HEADER */

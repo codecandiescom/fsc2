@@ -4,6 +4,16 @@
 
 #include "fsc2.h"
 
+/* This seems to be needed for older Linux versions, i.e. 2.0.36 */
+
+#if ! defined SHM_STAT
+#define SHM_STAT 13
+#endif
+
+#if ! defined SHM_INFO
+#define SHM_INFO 14
+#endif
+
 
 /*-------------------------------------*/
 /* Function returns a copy of a string */
@@ -273,8 +283,8 @@ void eprint( int severity, const char *fmt, ... )
 /* when fsc2 exits (it may also delete the lock file).                    */
 /* To make this work correctly for more then one user the lock file must  */
 /* belong to a special user (e.g. a user named `fsc2' belonging to a      */
-/* also named `fsc2') and the program belong to this user and have the    */
-/* setuid and the setgid bit set, i.e. installed it with                  */
+/* group also named `fsc2') and the program belong to this user and have  */
+/* the setuid and the setgid bit set, i.e. install it with                */
 /*                                                                        */
 /*            chown fsc2.fsc2 fsc2                                        */
 /*            chmod 6755 fsc2                                             */
@@ -554,7 +564,7 @@ inline short i2shrt( int a )
 
 /* This function is needed for glib versions below 2.0 (or 2.1 ?) */
 
-// inline long lround( double x ) { return ( long ) ( 2 * x ) - ( long ) x ); }
+inline long lround( double x ) { return ( long ) ( 2 * x ) - ( long ) x; }
 
 
 inline int    i_max( int    a, int    b ) { return a > b ? a : b ; }

@@ -102,7 +102,7 @@ mods: $(modules:.c=.so)
 
 
 fsc2_clean: fsc2_clean.o exceptions.o
-	$(CC) $(CFLAGS) -O2 -lm -o $@ $^ $(LIBS)
+	$(CC) -o $@ $^ -lfl -lm
 
 fsc2_clean.c: fsc2_clean.flex $(header)
 	$(FLEX) -B -o$@ $<
