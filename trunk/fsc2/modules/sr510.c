@@ -660,6 +660,37 @@ Var *lockin_lock_keyboard( Var *v )
 }
 
 
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+Var *lockin_command( Var *v )
+{
+	static char *cmd;
+
+
+	cmd = NULL;
+	vars_check( v, STR_VAR );
+	
+	if ( FSC2_MODE == EXPERIMENT )
+	{
+		TRY
+		{
+			cmd = translate_escape_sequences( T_strdup( v->val.sptr ) );
+			sr510_command( cmd );
+			T_free( cmd );
+			TRY_SUCCESS;
+		}
+		OTHERWISE
+		{
+			T_free( cmd );
+			RETHROW( );
+		}
+	}
+
+	return vars_push( INT_VAR, 1 );
+}
+
+
 
 /******************************************************/
 /* The following functions are only used internally ! */
@@ -999,6 +1030,17 @@ static void sr510_lock_state( bool lock )
 	sprintf( cmd, "I%c\n", lock ? '2' : '0' );
 	if ( gpib_write( sr510.device, cmd, strlen( cmd ) ) == FAILURE )
 		sr510_failure( );
+}
+
+
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+
+bool sr510_command( const char *cmd )
+{
+	if ( gpib_write( sr510.device, cmd, strlen( cmd ) ) == FAILURE )
+		sr510_gpib_failure( );
+	return OK;
 }
 
 

@@ -1327,6 +1327,37 @@ Var *lockin_lock_keyboard( Var *v )
 }
 
 
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+Var *lockin_command( Var *v )
+{
+	static char *cmd;
+
+
+	cmd = NULL;
+	vars_check( v, STR_VAR );
+	
+	if ( FSC2_MODE == EXPERIMENT )
+	{
+		TRY
+		{
+			cmd = translate_escape_sequences( T_strdup( v->val.sptr ) );
+			sr830_command( cmd );
+			T_free( cmd );
+			TRY_SUCCESS;
+		}
+		OTHERWISE
+		{
+			T_free( cmd );
+			RETHROW( );
+		}
+	}
+
+	return vars_push( INT_VAR, 1 );
+}
+
+
 
 /******************************************************/
 /* The following functions are only used internally ! */
@@ -2257,6 +2288,17 @@ static void sr830_lock_state( bool lock )
 	sprintf( cmd, "OVRM %c\n", lock ? '0' : '1' );
 	if ( gpib_write( sr830.device, cmd, strlen( cmd ) ) == FAILURE )
 		sr830_failure( );
+}
+
+
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+
+bool sr830_command( const char *cmd )
+{
+	if ( gpib_write( sr830.device, cmd, strlen( cmd ) ) == FAILURE )
+		sr830_gpib_failure( );
+	return OK;
 }
 
 
