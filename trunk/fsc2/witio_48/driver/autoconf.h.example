@@ -1,0 +1,6 @@
+/* Automatically created - change carefully */
+
+#define WITIO_48_BASE     0x300
+#define WITIO_48_MAJOR    0
+#define WITIO_48_DEBUG
+#define WITIO_48_PREFIX   "/usr/local"
