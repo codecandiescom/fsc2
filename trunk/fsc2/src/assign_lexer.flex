@@ -90,7 +90,7 @@ PX			"+"?[xX]:?
 PY			"+"?[yY]:?
 PMX			"-"[yX]:?
 PMY			"-"[yY]:?
-CW          [cC][wW]
+PCW         [cC][wW]
 POD1        P(OD)?_?1
 POD2        P(OD)?_?2
 ON          ON
@@ -222,7 +222,7 @@ WS          [\n=: ]+
 				assignlval.lval = PHASE_MINUS_Y;
 				return PXY_TOK;
 			}
-{CW}        {
+{PCW}       {
 				assignlval.lval = PHASE_CW;
 				return PXY_TOK;
 			}
