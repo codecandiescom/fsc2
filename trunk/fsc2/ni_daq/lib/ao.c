@@ -191,9 +191,9 @@ int ni_daq_ao( int board, int num_channels, int *channels, double *values )
 }
 
 
-/*---------------------------------------------------------------*/
-/* Function for intializing the AO channels to the default state */
-/*---------------------------------------------------------------*/
+/*----------------------------------------------------------------*/
+/* Function for initializing the AO channels to the default state */
+/*----------------------------------------------------------------*/
 
 int ni_daq_ao_init( int board )
 {

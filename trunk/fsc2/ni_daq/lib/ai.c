@@ -40,7 +40,7 @@ static int ni_daq_get_ai_timings2( int board, NI_DAQ_INPUT *ss, double sd,
 
 
 /*---------------------------------------------------------------------*
- * Function for switching the AI_IN_TIMEBASE1 (i.e. the fast timebase)
+ * Function for switching the AI_IN_TIMEBASE1 (i.e. the fast time base)
  * between 20 MHz and 10 MHz
  *---------------------------------------------------------------------*/
 
@@ -72,7 +72,7 @@ int ni_daq_ai_set_speed( int board, NI_DAQ_CLOCK_SPEED_VALUE speed )
 
 
 /*-------------------------------------------------------------------*
- * Function to determine if AI_IN_TIMEBASE1 (i.e. the fast timebase)
+ * Function to determine if AI_IN_TIMEBASE1 (i.e. the fast time base)
  * is running at 20 MHz or at 10 MHz
  *-------------------------------------------------------------------*/
 
@@ -257,8 +257,8 @@ int ni_daq_ai_channel_configuration( int board, int num_channels,
  * The 'start_polarity' is only relevant if 'start' isn't NI_DAQ_INTERNAL
  * or NI_DAQ_NOW and then selects the polarity of the trigger:
  *
- *   1. NI_DAQ_NORMAL:   trigger start of acqusition on raising edge
- *   2. NI_DAQ_INVERTED: trigger start of acqusition on falling edge
+ *   1. NI_DAQ_NORMAL:   trigger start of acquisition on raising edge
+ *   2. NI_DAQ_INVERTED: trigger start of acquisition on falling edge
  * 
  * The 'scan_start' argument determines how scans are started. It can be
  *
@@ -271,7 +271,7 @@ int ni_daq_ai_channel_configuration( int board, int num_channels,
  *   5. NI_DAQ_GOUT_0:   scans are started by a trigger from the output of
  *                       counter 0
  *
- * The 'scan_polarity' is only relevant if 'scna_start' isn't NI_DAQ_INTERNAL
+ * The 'scan_polarity' is only relevant if 'scan_start' isn't NI_DAQ_INTERNAL
  * and then selects the polarity of the trigger:
  *
  *   1. NI_DAQ_NORMAL:   trigger new scans on raising edge
@@ -284,7 +284,7 @@ int ni_daq_ai_channel_configuration( int board, int num_channels,
  * is sampled, the product of the number of channels and the minimum time
  * resolution of the board.
  *
- * The 'conv_start' argument determines how convertions are started. It can be
+ * The 'conv_start' argument determines how conversions are started. It can be
  *
  *   1. NI_DAQ_INTERNAL: Scans are conversion automatically with the time
  *                       between conversion given by the 'conv_duration'
@@ -842,7 +842,7 @@ static int ni_daq_get_ai_timings2( int board, NI_DAQ_INPUT *ss, double sd,
 		return 0;
 	}
 
-	/* Check if we can ue the fast clock for both after changing its speed */
+	/* Check if we can use the fast clock for both after changing its speed */
 
 	if ( ( cfc && poss_clock_s & poss_clock_c & 1 ) ||
 		 ( ! cfc && poss_clock_s & poss_clock_c & 2 ) )

@@ -86,5 +86,3 @@ int ni_daq_dio_read( int board, unsigned char *value, unsigned char mask )
 
     return ni_daq_errno = NI_DAQ_OK;
 }
-
-

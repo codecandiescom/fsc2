@@ -53,7 +53,7 @@ static const char *ni_daq_errlist[ ] = {
     "Source argument invalid",                       /* NI_DAQ_ERR_IVS */
     "Board not open",                                /* NI_DAQ_ERR_BNO */
     "No driver loaded for board",                    /* NI_DAQ_ERR_NDV */
-    "Neighbouring counter is busy",                  /* NI_DAQ_ERR_NCB */
+    "Neighboring counter is busy",                   /* NI_DAQ_ERR_NCB */
     "Interrupted by signal",                         /* NI_DAQ_ERR_ITR */
     "No permissions to open device file",            /* NI_DAQ_ERR_ACS */
     "Device file does not exist",                    /* NI_DAQ_ERR_DFM */

@@ -234,7 +234,7 @@ int pci_dma_buf_setup( Board *board, NI_DAQ_SUBSYSTEM sys,
 	}
 
 	/* If the streaming mapping failed all mapped buffers must be unmapped
-	   and then all memory realeased */
+	   and then all memory released */
 
 	if ( mdc != board->mite_chain[ sys ] + num_links )
 	{
@@ -378,7 +378,7 @@ int pci_dma_buf_get( Board *board, NI_DAQ_SUBSYSTEM sys, void *dest,
 	*size = total;
 
 	/* If all data points that can be expected have been fetched disable
-	   DMA, release the buffers and return 1 to indice this fact */
+	   DMA, release the buffers and return 1 to indicate this */
 
 	if ( sys_data[ sys ].max_size <= sys_data[ sys ].transfered )
 	{
@@ -393,7 +393,7 @@ int pci_dma_buf_get( Board *board, NI_DAQ_SUBSYSTEM sys, void *dest,
 /*-------------------------------------------------------------------------*/
 /* For the AI subsystem the function returns the number of scans for which */
 /* data have been written to memory. For all other subsystems (where the   */
-/* function is not used yet) it returns the number of bytes thahave been   */
+/* function is not used yet) it returns the number of bytes that have been */
 /* written to memory or read by the board since the function was called    */
 /* the last time.                                                          */
 /*-------------------------------------------------------------------------*/
@@ -545,7 +545,7 @@ int pci_dma_setup( Board *board, NI_DAQ_SUBSYSTEM sys )
 
 
 /*-----------------------------------------------------*/
-/* Disables DMA ad releases DMA momory for a subsystem */
+/* Disables DMA ad releases DMA memory for a subsystem */
 /*-----------------------------------------------------*/
 
 int pci_dma_shutdown( Board *board, NI_DAQ_SUBSYSTEM sys )
@@ -586,7 +586,7 @@ static void pci_dma_stop( Board *board, NI_DAQ_SUBSYSTEM sys )
 
 /*--------------------------------------------------------------------*/
 /* Function for printing out all accessible registers of a channel of */
-/* the MITE - only available when compiling with debuuging support.   */
+/* the MITE - only available when compiling with debugging support.   */
 /*--------------------------------------------------------------------*/
 
 #if defined NI_DAQ_DEBUG

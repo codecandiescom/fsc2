@@ -67,7 +67,7 @@ static u8 eeprom_read( Board *board, u16 addr )
 
 	/* Please check with the timing diagram, figure 5-1, of the calibration
 	   chapter in the PCI E Series Register Programming Manual to
-	   understand why the bitstring is set up in this way. */
+	   understand why the bit-string is set up in this way. */
 
 	bitstring = 0x300 | ( ( addr & 0x100 ) << 3 ) | ( addr & 0xff );
 
@@ -403,7 +403,7 @@ static void calib_5( Board *board )
 
 static void calib_6( Board *board )
 {
-	/* Tha manual claims that this board uses two MB88341 chips, but
+	/* The manual claims that this board uses two MB88341 chips, but
 	   this can't be correct because the MB88341 has only 12 DACs
 	   and the manual also tells to set 15 DACs. */
 }

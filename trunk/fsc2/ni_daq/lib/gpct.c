@@ -37,10 +37,10 @@ static int ni_daq_gpct_time_to_ticks( int board, int counter,
 
 
 
-/*--------------------------------------------------------------------*/
-/* Function for switching the G_IN_TIMEBASE1 (i.e. the fast timebase) */
-/* between 20 MHz and 10 MHz                                          */
-/*--------------------------------------------------------------------*/
+/*-------------------------------------------------*/
+/* Function for switching the G_IN_TIMEBASE1 (i.e. */
+/* the fast time base) between 20 MHz and 10 MHz   */
+/*-------------------------------------------------*/
 
 int ni_daq_gpct_set_speed( int board, NI_DAQ_CLOCK_SPEED_VALUE speed )
 {
@@ -69,10 +69,10 @@ int ni_daq_gpct_set_speed( int board, NI_DAQ_CLOCK_SPEED_VALUE speed )
 }
 
 
-/*------------------------------------------------------------------*/
-/* Function to determine if G_IN_TIMEBASE1 (i.e. the fast timebase) */
-/* is running at 20 MHz or at 10 MHz                                */
-/*------------------------------------------------------------------*/
+/*---------------------------------------------------*/
+/* Function to determine if G_IN_TIMEBASE1 (i.e. the */
+/* fast time base) is running at 20 MHz or at 10 MHz */
+/*---------------------------------------------------*/
 
 int ni_daq_gpct_get_speed( int board, NI_DAQ_CLOCK_SPEED_VALUE *speed )
 {
@@ -509,7 +509,7 @@ int ni_daq_gpct_continuous_pulses( int board, int counter,
 	if ( counter < 0 || counter > 1 )
 		return ni_daq_errno = NI_DAQ_ERR_IVA;
 
-	/* To figure out if the different timings can be reaslized we have to
+	/* To figure out if the different timings can be realized we have to
 	   try with all possible permutations... */
 
 	if ( *delay <= 0.0 )
