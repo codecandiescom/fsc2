@@ -242,7 +242,7 @@ bool tds540_set_trigger_pos( double pos )
     char cmd[ 100 ];
 
 
-	sprintf( cmd, "HOR:TRIG:POS %f\n", pos );
+	sprintf( cmd, "HOR:TRIG:POS %f\n", 100.0 * pos );
     if ( gpib_write( tds540.device, cmd, strlen( cmd ) ) == FAILURE )
 		return FAIL;
 
