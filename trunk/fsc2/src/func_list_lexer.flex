@@ -14,7 +14,7 @@
 #include "fsc2.h"
 
 int func_listlex( void );
-int fll_count_functions( void );
+int fll_count_functions( Func *fncts, int num_def_func );
 void fll_get_functions( Func *fncts, int num_def_func );
 
 static long Comm_Lc;
@@ -147,9 +147,10 @@ PREP        return PREP_TOKEN;
 		/*----------------------*/
 
 
-void func_list_parse( Func **fncts, int num_def_func, int *num_func )
+void func_list_parse( Func **fncts, int *num_func )
 {
 	static bool is_restart = UNSET;
+	int num_def_func = *num_func;
 	int num;
 	int cur;
 
@@ -180,7 +181,8 @@ void func_list_parse( Func **fncts, int num_def_func, int *num_func )
 
 	TRY
 	{
-		num = fll_count_functions( );
+		num = fll_count_functions( *fncts, num_def_func );
+		assert( num >= 0 );
 		TRY_SUCCESS;
 	}
 	OTHERWISE
@@ -189,15 +191,14 @@ void func_list_parse( Func **fncts, int num_def_func, int *num_func )
 		PASSTHROU( );
 	}
 
-	if ( num == 0 )                  /* none found in input file ? */
-	    return;
-
-	/* rewind input file, allocate memory for the additional functions (the
-	   built-in functions are already set up ) and set defaults */
+	/* Rewind input file, allocate memory for the additional functions and
+	   set defaults values */
 
 	rewind( func_listin );
 	*num_func = num + num_def_func;
-	*fncts = T_realloc( *fncts, ( *num_func + 1 ) * sizeof( Func ) );
+
+	if ( num != 0 )
+		*fncts = T_realloc( *fncts, ( *num_func + 1 ) * sizeof( Func ) );
 
 	for ( cur = num_def_func; cur <= *num_func; cur++ )
 	{
@@ -205,8 +206,10 @@ void func_list_parse( Func **fncts, int num_def_func, int *num_func )
 		( *fncts )[ cur ].fnct = NULL;
 		( *fncts )[ cur ].nargs = 0;
 		( *fncts )[ cur ].access_flag = ACCESS_EXP;
-		( *fncts )[ cur ].to_be_loaded = UNSET;
+		( *fncts )[ cur ].to_be_loaded = SET;
 	}
+
+	( *fncts )[ *num_func ].to_be_loaded = UNSET;
 
 	/* Now parse file again */
 
@@ -230,11 +233,12 @@ void func_list_parse( Func **fncts, int num_def_func, int *num_func )
 /* file and counts the number of defined functions   */
 /*---------------------------------------------------*/
 
-int fll_count_functions( void )
+int fll_count_functions( Func *fncts, int num_def_func )
 {
 	int ret_token;
 	int last_token = 0;
 	int num = 0;
+	int i;
 
 
 	Lc = 1;
@@ -242,7 +246,34 @@ int fll_count_functions( void )
 
 	while ( ( ret_token = func_listlex( ) ) != 0 )
 	{
-		if ( ret_token == ';' && last_token != ';' )
+		/* If the name of a loadable function conflicts with the name of a
+		   built-in function the loadable function will replace the built-in
+		   function completely (even if it doesn't get loaded!) */
+
+		if ( ret_token == IDENT_TOKEN )
+		{
+			for ( i = 0; i < num_def_func; i++ )
+				if ( ! strcmp( fncts[ i ].name, func_listtext ) )
+				{
+					eprint( WARN, "Loadable function `%s()' hides "
+							"built-in function (line %ld in function data "
+							"base `%s').\n", func_listtext, Lc, Fname );
+
+					fncts[ i ].name = get_string_copy( func_listtext );
+					fncts[ i ].fnct = NULL;
+					fncts[ i ].nargs = 0;
+					fncts[ i ].access_flag = ACCESS_EXP;
+					fncts[ i ].to_be_loaded = SET;
+
+					break;
+				}
+		}
+
+		/* Increment number of functions only after a semicolon (but not if
+		   the previous token was also a semicolon) and if the new function
+		   didn't overload a built-in function */
+
+		if ( ret_token == ';' && last_token != ';' && i == num_def_func )
 		   num++;
 		last_token = ret_token;
 	}
@@ -289,32 +320,27 @@ void fll_get_functions( Func *fncts, int num_def_func )
 					THROW( EXCEPTION );
 				}
 
-				/* Allow overloading of buit-in functions (but warn)... */
+				/* Allow overloading of buit-in functions but don't allow
+				   multiple overloading */
 
-				for ( i = 0; i < num_def_func; i++ )
+				for ( i = 0; i < cur; i++ )
 					if ( ! strcmp( fncts[ i ].name, func_listtext ) )
 					{
-						eprint( WARN, "User-defined function `%s()' will hide "
-								"built-in function (line %ld in function data "
-								"base `%s'.\n", func_listtext, Lc, Fname );
-						act = i;
+						if ( i < num_def_func )
+							act = i;
+						else
+						{
+							eprint( FATAL, "Function `%s()' is declared more "
+									"than once in function data base `%s'.\n",
+									func_listtext, Fname );
+							THROW( EXCEPTION );
+						}
+						break;
 					}
-
-				/* ... but don't allow multiple user definitions */
-
-				for ( ; i < cur; i++ )
-					if ( ! strcmp( fncts[ i ].name, func_listtext ) )
-					{
-						eprint( FATAL, "Function `%s()' is declared more than "
-								"once in function data base `%s'.\n",
-								func_listtext, Fname );
-						THROW( EXCEPTION );
-					}
-
 
 				if ( act >= num_def_func )
 				    fncts[ act ].name = get_string_copy( func_listtext );
-				fncts[ act ].to_be_loaded = SET;
+
 				state = 1;
 				break;
 
@@ -365,11 +391,14 @@ void fll_get_functions( Func *fncts, int num_def_func )
 					THROW( EXCEPTION );
 				}
 				state = 0;
-				act = ++cur;
+				if ( act == cur )   /* "new" function ? */
+					act = ++cur;
+				else                /* built-in function has been overloaded */
+					act = cur;
 				break;
 
 			default:
-				assert( 1 == 0 );
+				assert( 1 == 0 );              /* this can never happen... */
 		}
 	}
 }
