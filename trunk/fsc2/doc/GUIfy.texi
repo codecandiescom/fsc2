@@ -52,7 +52,7 @@ rather simple to create a script from this @code{EDL} program that
 allows to set the relevant parameters using a graphical user interface
 and which then automatically creates the modified @code{EDL} program and
 sends it to @code{fsc2} for execution. That's what the @code{fsc2_guify}
-conversion tool is good for that comes with @code{fsc2}.
+conversion tool that comes with @code{fsc2} is good for.
 
 Let's go back to the relatively simple @code{EDL} script for a cw EPR
 experiment from the start of the chapter about the the @code{EDL}
