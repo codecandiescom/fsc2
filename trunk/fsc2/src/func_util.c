@@ -2024,16 +2024,20 @@ static bool print_browser( int browser, int fid, const char* comment )
 	while ( 1 )
 	{
 		reader( &line );
+		lp = line;
 		if ( line != NULL )
 		{
-			if ( *line == '@' )
+			if ( browser == 0 )
+				while ( *lp++ != ':' )
+					;
+			else if ( *line == '@' )
 			{
-				lp = line + 1;
-				while ( *lp++ != 'f' );
-				T_fprintf( fid, "%s%s\n", comment, lp );
+				lp++;
+				while ( *lp++ != 'f' )
+					;
 			}
-			else
-				T_fprintf( fid, "%s%s\n", comment, line );
+
+			T_fprintf( fid, "%s%s\n", comment, lp );
 		}
 		else
 			break;
