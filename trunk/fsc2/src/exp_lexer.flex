@@ -28,12 +28,9 @@
 }
 
 #include "fsc2.h"
-/* #include "prim_exp.h" */
-#include "prim_exp_parser.h"
 
 
 int prim_explex( void );
-extern void prim_expparse( void );
 
 extern Token_Val prim_exp_val;
 
@@ -59,6 +56,8 @@ VAR         ^[ \t]*VAR(IABLE)?S?:
 PHAS        ^[ \t]*PHA(SE)?S?:
 PREP        ^[ \t]*PREP(ARATION)?S?:
 EXP         ^[ \t]*EXP(ERIMENT)?:
+
+CONT        CONT(INUE)?
 
 INT         [0-9]+
 EXPO        [EDed][+-]?{INT}
@@ -103,6 +102,10 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 
 			/* handling of error messages from the cleaner */
 {ERR}		THROW( CLEANER_EXCEPTION );
+{ESTR}		{
+				prim_exptext = strchr( prim_exptext, '\x03' );
+				THROW( CLEANER_EXCEPTION );
+			}
 
 			/* handling of ASSIGNMENTS: labels */
 {ASS}		{
@@ -140,52 +143,67 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 				return 0;
 			}
 
+"WHILE"     return WHILE_TOK;
+"BREAK"     return BREAK_TOK;
+{CONT}      return CONT_TOK;
+"IF"        return IF_TOK;
+"ELSE"      return ELSE_TOK;
+"REPEAT"    return REPEAT_TOK;
+"{"         return '{';          /* block start delimiter */
+"}"         return '}';          /* block end delimiter */
+
 {INT}       {
 				prim_exp_val.lval = atol( prim_exptext );
-                return INT_TOKEN;
+                return E_INT_TOKEN;
             }
 
 {FLOAT}     {
                 prim_exp_val.dval = atof( prim_exptext );
-                return FLOAT_TOKEN;
+                return E_FLOAT_TOKEN;
             }
+
+{STR}       {
+				prim_exptext[ prim_expleng - 1 ] = '\0';
+				prim_exp_val.sptr = prim_exptext + 1;
+				return E_STR_TOKEN;
+			}
 
 			/* combinations of pulse and property, e.g. `P3.LEN' */
 
 {P}?"."{F}  {
 				prim_exp_val.vptr = pulse_get_by_addr( n2p( prim_exptext ),
 													   P_FUNC );
-				return VAR_REF;
+				return E_VAR_REF;
             }
 
 {P}?"."{S}  {
 				prim_exp_val.vptr = pulse_get_by_addr( n2p( prim_exptext ),
 													   P_POS );
-				return VAR_REF;
+				return E_VAR_REF;
             }
 
 {P}?"."{L}  {
 				prim_exp_val.vptr = pulse_get_by_addr( n2p( prim_exptext ),
 													   P_LEN );
-				return VAR_REF;
+				return E_VAR_REF;
             }
 
 {P}?"."{DS} {
 				prim_exp_val.vptr = pulse_get_by_addr( n2p( prim_exptext ),
 													   P_DPOS );
-				return VAR_REF;
+				return E_VAR_REF;
             }
 
 {P}?"."{DL} {
 				prim_exp_val.vptr = pulse_get_by_addr( n2p( prim_exptext ),
 													   P_DLEN );
-				return VAR_REF;
+				return E_VAR_REF;
             }
 
 {P}?"."{ML} {
 				prim_exp_val.vptr = pulse_get_by_addr( n2p( prim_exptext ),
 													   P_MAXLEN );
-				return VAR_REF;
+				return E_VAR_REF;
             }
 
 {IDENT}     {
@@ -201,31 +219,33 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 								Fname, Lc, prim_exptext );
 						THROW( SYNTAX_ERROR_EXCEPTION );
 					}
-					return FUNC_TOKEN;
+					return E_FUNC_TOKEN;
 				}
 
 				if ( ( prim_exp_val.vptr = vars_get( prim_exptext ) )
 				     == NULL )
 					 THROW( ACCESS_NONEXISTING_VARIABLE );
 
-				return VAR_TOKEN;
+				return E_VAR_TOKEN;
 			}
 
-"="         return '=';
-"["         return '[';
-"]"         return ']';
-","         return ',';
-"("         return '(';
-")"         return ')';
-"+"         return '+';
-"-"         return '-';
-"*"         return '*';
-"/"         return '/';
-"%"         return '%';
-"^"         return '^';
-
-"{"         return '{';
-"}"         return '}';
+"=="        return E_EQ;      /* equal */
+"<"         return E_LT;      /* less than */              
+"<="        return E_LE;      /* less than or equal */     
+">"         return E_GT;      /* greater than */           
+">="        return E_GE;      /* greater than or equal */  
+"="         return '=';       /* assignment operator */    
+"["         return '[';       /* start of array indices */ 
+"]"         return ']';       /* end of array indices */   
+","         return ',';       /* list separator */         
+"("         return '(';       /* start of function argument list */
+")"         return ')';       /* end of function argument list */
+"+"         return '+';       /* addition operator */      
+"-"         return '-';       /* subtraction operator or unary minus */
+"*"         return '*';       /* multiplication operator */
+"/"         return '/';       /* division operator */      
+"%"         return '%';       /* modulo operator */        
+"^"         return '^';       /* exponentiation operator */
 
 			/* handling of end of statement character */
 ";"			return ';';
@@ -277,6 +297,8 @@ int primary_experiment_parser( FILE *in )
 				Fname, Lc, prim_exptext );
 		return FAIL;
 	}
+	CATCH( EXPERIMENT_EXCEPTION )
+		return FAIL;
 
 	if ( Prim_Exp_Next_Section != NO_SECTION )
 	{

@@ -38,28 +38,6 @@
 #include "prim_exp.h"
 
 
-/* this typedef MUST be identical to the YYSTYPE union defined in
-   `prim_exp_parser.h' which in turn results from `prim_exp_parser.y' !!!! */
-
-typedef union {
-		long   lval;
-		double dval;
-		char   *sptr;
-		Var    *vptr;
-} Token_Val;
-
-
-typedef struct PT_ {
-	int token;              /* type of current token */
-	Token_Val tv;           /* token's value as needed by the parser */
-	struct PT_ *gto;        /* used in branches */
-	char *Fname;            /* name of file the token comes from */
-	long Lc;                /* number of line the token comes from */
-} Prg_Token;
-
-
-
-
 /* The diverse lexers */
 
 bool split( char *file );

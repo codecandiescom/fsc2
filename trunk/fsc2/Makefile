@@ -44,11 +44,14 @@ preps_parser.c preps_parser.h: preps_parser.y fsc2.h
 preps_lexer.c: preps_lexer.flex fsc2.h
 	flex -Ppreps -opreps_lexer.c preps_lexer.flex
 
-prim_exp_parser.c prim_exp_parser.h: prim_exp_parser.y fsc2.h
-	bison -d -v -t -p prim_exp -o prim_exp_parser.c prim_exp_parser.y
+prim_exp_parser.c: prim_exp_parser.y fsc2.h
+	bison -v -t -p prim_exp -o prim_exp_parser.c prim_exp_parser.y
 
 prim_exp_lexer.c: prim_exp_lexer.flex fsc2.h
 	flex -Pprim_exp -oprim_exp_lexer.c prim_exp_lexer.flex
+
+condition_parser.c: condition_parser.y fsc2.h
+	bison -v -t -p condition -o condition_parser.c condition_parser.y
 
 %.o: %.c
 	gcc $(CFLAGS) -c -o $@ $<
