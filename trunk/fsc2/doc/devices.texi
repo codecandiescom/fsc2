@@ -659,12 +659,12 @@ depend on the model of the oscilloscope:
 @table @samp
 @item TDS520
 @itemx TDS520A
-@code{CH1} or @code{CH2} or, alternatively @code{0} or @code{1}
+@itemx LECROY9400
+@code{CH1} or @code{CH2}
 @item TDS540
 @itemx TDS744A
 @itemx TDS754A
-@code{CH1}, @code{CH2}, @code{CH3} or @code{CH4} or, alternatively
-@code{0}, @code{1}, @code{2} or @code{3}
+@code{CH1}, @code{CH2}, @code{CH3} or @code{CH4}
 @end table
 
 If a second argument is given this is taken to be the new sensitivity
@@ -717,6 +717,12 @@ numeric!):
 @itemize @bullet
 @item @code{CH1}, @code{CH2}, @code{CH3} or @code{CH4}
 @item @code{AUX} or @code{LINE} (@code{LINE} can be abbreviated to @code{LIN})
+@end itemize
+@item LECROY9400
+@itemize @bullet
+@item @code{CH1} or @code{CH2}
+@item @code{LINE}, @code{EXT} or @code{EXT10} (@code{LINE} can be
+abbreviated to @code{LIN})
 @end itemize
 @end table
 The function can be called in query mode (i.e.@: without an argument)
@@ -810,7 +816,7 @@ the digitizer:
 @itemize @bullet
 @item @code{CH1} or @code{CH2}
 @item @code{MATH1}, @code{MATH2} or @code{MATH3}
-@item @code{REF1}, @code{REF2}, @code{REF3}, @code{REF4}
+@item @code{REF1}, @code{REF2}, @code{REF3} or @code{REF4}
 @end itemize
 @item TDS540
 @itemx TDS744A
@@ -818,7 +824,7 @@ the digitizer:
 @itemize @bullet
 @item @code{CH1}, @code{CH2}, @code{CH3} or @code{CH4}
 @item @code{MATH1}, @code{MATH2} or @code{MATH3}
-@item @code{REF1}, @code{REF2}, @code{REF3}, @code{REF4} 
+@item @code{REF1}, @code{REF2}, @code{REF3} or @code{REF4} 
 @end itemize
 @end table
 Except for the model @code{TDS520}, this function positions the cursors
@@ -864,7 +870,7 @@ of the digitizer:
 @itemize @bullet
 @item @code{CH1} or @code{CH2}
 @item @code{MATH1}, @code{MATH2} or @code{MATH3}
-@item @code{REF1}, @code{REF2}, @code{REF3}, @code{REF4}
+@item @code{REF1}, @code{REF2}, @code{REF3} or @code{REF4}
 @end itemize
 @item TDS540
 @itemx TDS744A
@@ -872,7 +878,7 @@ of the digitizer:
 @itemize @bullet
 @item @code{CH1}, @code{CH2}, @code{CH3} or @code{CH4}
 @item @code{MATH1}, @code{MATH2} or @code{MATH3}
-@item @code{REF1}, @code{REF2}, @code{REF3}, @code{REF4}
+@item @code{REF1}, @code{REF2}, @code{REF3} or @code{REF4}
 @end itemize
 @end table
 
@@ -910,7 +916,7 @@ of the digitizer:
 @itemize @bullet
 @item @code{CH1} or @code{CH2}
 @item @code{MATH1}, @code{MATH2} or @code{MATH3}
-@item @code{REF1}, @code{REF2}, @code{REF3}, @code{REF4}
+@item @code{REF1}, @code{REF2}, @code{REF3} or @code{REF4}
 @end itemize
 @item TDS540
 @itemx TDS744A
@@ -918,7 +924,7 @@ of the digitizer:
 @itemize @bullet
 @item @code{CH1}, @code{CH2}, @code{CH3} or @code{CH4}
 @item @code{MATH1}, @code{MATH2} or @code{MATH3}
-@item @code{REF1}, @code{REF2}, @code{REF3}, @code{REF4}
+@item @code{REF1}, @code{REF2}, @code{REF3} or @code{REF4}
 @end itemize
 @end table
 Except for the model @code{TDS520}, this function positions the cursors
