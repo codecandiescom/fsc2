@@ -168,9 +168,11 @@ int bh15_end_of_exp_hook( void )
 	if ( ! bh15.is_needed )
 		return;
 
-	bh15_get_field( );
 	if ( bh15.device >= 0 )
+	{
+		bh15_get_field( );
 		gpib_local( bh15.device );
+	}
 
 	return 1;
 }

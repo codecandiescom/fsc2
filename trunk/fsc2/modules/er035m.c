@@ -15,6 +15,7 @@
 int er035m_init_hook( void );
 int er035m_test_hook( void );
 int er035m_exp_hook( void );
+int er035m_end_of_exp_hook( void );
 void er035m_exit_hook( void );
 
 Var *find_field( Var *v );
@@ -323,13 +324,22 @@ try_again:
 }
 
 
-void er035m_exit_hook( void )
+int er035m_end_of_exp_hook( void )
 {
 	if ( ! nmr.is_needed )
 		return;
 
 	if ( nmr.device >= 0 )
 		gpib_local( nmr.device );
+
+	nmr.device = -1;
+
+	return 1;
+}
+
+void er035m_exit_hook( void )
+{
+	er035m_end_of_exp_hook( );
 }
 
 
