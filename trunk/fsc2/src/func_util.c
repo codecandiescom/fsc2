@@ -1136,64 +1136,6 @@ Var *f_clearcv( Var *v )
 }
 
 
-/*---------------------------------------------*/
-/* Function returns the dimension of an array. */
-/*---------------------------------------------*/
-
-Var *f_dim( Var *v )
-{
-	vars_check( v, ARR_REF );
-	return vars_push( INT_VAR, ( long ) v->from->dim );
-}
-
-
-/*---------------------------------------------------------------------*/
-/* Function returns the size of the dimension passed to the function,  */
-/* i.e. the function takes two arguments, first the array and then the */
-/* the dimension the size is needed for.                               */
-/*---------------------------------------------------------------------*/
-
-Var *f_size( Var *v )
-{
-	int size;
-
-
-	vars_check( v, ARR_REF );
-	vars_check( v->next, INT_VAR | FLOAT_VAR );
-
-	if ( v->next->type == FLOAT_VAR )
-	{
-		eprint( WARN, "%s:%ld: WARNING: Float value used as index for array "
-				"`%s' in function `size'.\n", Fname, Lc, v->from->name );
-		size = ( int ) v->next->val.dval - ARRAY_OFFSET;
-	}
-	else
-		size = ( int ) v->next->val.lval - ARRAY_OFFSET;
-
-	if ( size >= v->from->dim )
-	{
-		eprint( FATAL, "%s:%ld: Array `%s' has only %d dimensions, can't "
-				"return size of %d. dimension.\n", Fname, Lc, v->from->name,
-				v->from->dim, size );
-		THROW( EXCEPTION );
-	}
-
-	return vars_push( INT_VAR, ( long ) v->from->sizes[ size ] );
-}
-
-
-/*--------------------------------------------------------*/
-/* Function returns the sizes of the different dimension  */
-/* of an array as an 1-dimensional array.                 */
-/*--------------------------------------------------------*/
-
-Var *f_sizes( Var *v )
-{
-	vars_check( v, ARR_REF );
-	return vars_push( INT_TRANS_ARR, v->from->sizes, ( long ) v->from->dim );
-}
-
-
 /*---------------------------------------------------------------------------*/
 /* Function allows the user to select a file using the file selector. If the */
 /* already file exists confirmation by the user is required. Then the file   */
