@@ -34,6 +34,12 @@ Var *lockin_dac_voltage( Var *v );
 Var *lockin_lock_keyboard( Var *v );
 
 
+/* exported symbols (use by W-band power supply driver) */
+
+int first_DAC_port = 5;
+int last_DAC_prot = 6;
+
+
 /* typedefs and global variables used only in this file */
 
 typedef struct
@@ -629,17 +635,19 @@ Var *lockin_dac_voltage( Var *v )
 	channel = v->type == INT_VAR ? v->val.lval : ( long ) v->val.dval;
 	v = vars_pop( v );
 
-	if ( channel != 5 && channel != 6 )
+	if ( channel < first_DAC_port && channel > last_DAC_port )
 	{
 		eprint( FATAL, "%s:%ld: %s: Invalid lock-in DAC channel number %ld, "
-				"valid are 5 or 6.\n", Fname, Lc, DEVICE_NAME, channel );
+				"valid channels are in the range from %d to %d.\n", Fname, Lc,
+				DEVICE_NAME, channel, first_DAC_port, last_C_port );
 		THROW( EXCEPTION );
 	}
 
 	/* If no second argument is specified return the current DAC setting */
 
 	if ( v == NULL )
-		return vars_push( FLOAT_VAR, sr530.dac_voltage[ channel - 5 ] );
+		return vars_push( FLOAT_VAR,
+						  sr530.dac_voltage[ channel - first_DAC_port ] );
 
 	/* Second argument must be a voltage between -10.24 V and +10.24 V */
 
@@ -665,7 +673,7 @@ Var *lockin_dac_voltage( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	sr530.dac_voltage[ channel - 5 ] = voltage;
+	sr530.dac_voltage[ channel - first_DAC_port ] = voltage;
 
 	if ( TEST_RUN || I_am == PARENT)
 		return vars_push( FLOAT_VAR, voltage );
@@ -1063,7 +1071,7 @@ static double sr530_set_dac_voltage( long channel, double voltage )
 	/* Just some more sanity checks, should already been done by calling
        function... */
 
-	assert( channel == 5 || channel == 6 );
+	assert( channel >= first_DAC_port || channel <= last_DAC_port );
 	if ( fabs( voltage ) >= 10.24 )
 	{
 		if ( voltage > 0.0 )
