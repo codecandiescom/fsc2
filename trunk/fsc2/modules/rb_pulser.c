@@ -178,7 +178,7 @@ int rb_pulser_test_hook( void )
 
 	TRY
 	{
-		is_running_at_start = rb.pulser.is_running;
+		is_running_at_start = rb_pulser.is_running;
 		if ( rb_pulser.do_show_pulses )
 			rb_pulser_show_pulses( );
 		if ( rb_pulser.do_dump_pulses )
@@ -257,8 +257,8 @@ int rb_pulser_exp_hook( void )
 	if ( ! rb_pulser.is_needed )
 		return 1;
 
-	rb.pulser.is_running = is_running_at_start;
 	rb_pulser_full_reset( );
+	rb_pulser.is_running = is_running_at_start;
 
 	/* Initialize the device */
 
