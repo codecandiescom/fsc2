@@ -22,14 +22,6 @@ bool tds754a_init( const char *name )
 	if ( gpib_init_device( name, &tds754a.device ) == FAILURE )
         return FAIL;
 
-	/* Set digitzer into local lockout state */
-
-    if ( gpib_write( tds754a.device, "LOC ALL\n" ) == FAILURE )
-	{
-		gpib_local( tds754a.device );
-        return FAIL;
-	}
-
     /* Set digitizer to short form of replies */
 
     if ( gpib_write( tds754a.device, "VERB OFF\n" ) == FAILURE ||
@@ -416,7 +408,6 @@ void tds754a_finished( void )
     gpib_write( tds754a.device, "*SRE 0\n" );
     gpib_write( tds754a.device, "ACQ:STOPA RUNST\n" );
     gpib_write( tds754a.device, "ACQ:STATE RUN\n" );
-    gpib_write( tds754a.device, "LOC NON\n" ); 
 
 	gpib_local( tds754a.device );
 }
@@ -690,10 +681,11 @@ bool tds754a_get_curve( int channel, WINDOW *w, double **data, long *length )
 	*length = len / 2;
 
 	*data = T_malloc( *length * sizeof( double ) );
-	buffer = T_malloc( len );
+	buffer = T_malloc( len + 1 );
 
 	/* Now get all the data bytes... */
 
+	len = len + 1;
 	if ( gpib_read( tds754a.device, buffer, &len ) == FAILURE )
 	{
 		T_free( buffer );

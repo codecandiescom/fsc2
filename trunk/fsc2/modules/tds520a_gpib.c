@@ -570,8 +570,8 @@ bool tds520a_start_aquisition( void )
 	   3. set stop after sequence */
 
     if ( ! tds520a_clear_SESR( ) ||
-         gpib_write( tds520a.device, "ACQ:STATE RUN\n" ) == FAILURE ||
-		 gpib_write( tds520a.device, "ACQ:STOPA SEQ\n" ) == FAILURE )
+		 gpib_write( tds520a.device, "ACQ:STOPA SEQ\n" ) == FAILURE ||
+         gpib_write( tds520a.device, "ACQ:STATE RUN\n" ) == FAILURE )
 		tds520a_gpib_failure( );
 
 
@@ -659,7 +659,8 @@ bool tds520a_get_curve( int channel, WINDOW *w, double **data, long *length )
 
 	/* Ask digitizer to send the curve */
 
-	if ( gpib_write( tds520a.device, "*WAI;:CURV?\n" ) == FAILURE )
+	if ( gpib_write( tds520a.device, "*WAI\n" ) == FAILURE ||
+		 gpib_write( tds520a.device, "CURV?\n" ) == FAILURE )
 		tds520a_gpib_failure( );
 
 	/* Read just the first two bytes, these are a '#' character plus the

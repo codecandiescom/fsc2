@@ -4,15 +4,15 @@
 # by 'make install' as well as the name of the GPIB configuration and log file
 # together with its ownerships
 
-#prefix         = /usr/local
-#bindir         = $(prefix)/bin
-#libdir         = $(prefix)/lib/fsc2
-#auxdir         = $(libdir)/aux
+prefix         = /usr/local
+bindir         = $(prefix)/bin
+libdir         = $(prefix)/lib/fsc2
+auxdir         = $(libdir)/aux
 
-prefix         = $(shell pwd)
-bindir         = $(prefix)
-libdir         = $(prefix)
-auxdir         = $(prefix)/aux
+#prefix         = $(shell pwd)
+#bindir         = $(prefix)
+#libdir         = $(prefix)
+#auxdir         = $(prefix)/aux
 
 GPIB_CONF      = /etc/gpib.conf
 GPIB_LOG       = /tmp/gpib.log
@@ -20,7 +20,7 @@ GPIB_LOG       = /tmp/gpib.log
 # here one defines if the program is for a high or a low resolution screen
 # (set SIZE to either `HI_RES' or `LOW_RES')
 
-SIZE           = HI_RES
+SIZE           = LOW_RES
 
 
 # The name of the awk tool is passed to the programs via a macro
