@@ -16,7 +16,7 @@ static Var *get_amplitude( Var *v, bool use_cursor );
 /* This array must be set to the possible record lengths of the digitizer
    and must always end with a 0 */
 
-static long record_lengths[ ] = [ 500, 1000, 2000, 5000, 15000, 0 ];
+static long record_lengths[ ] = { 500, 1000, 2000, 5000, 15000, 0 };
 
 
 /*******************************************/
@@ -38,6 +38,8 @@ int tds520_init_hook( void )
 	tds520.w = NULL;
 	tds520.is_timebase = UNSET;
 	tds520.is_num_avg = UNSET;
+	tds520.is_rec_len = UNSET;
+	tds520.is_trig_pos = UNSET;
 	tds520.num_windows = 0;
 	tds520.data_source = TDS520_UNDEF;
 	tds520.meas_source = TDS520_UNDEF;
@@ -329,7 +331,7 @@ Var *digitizer_get_channel_number( Var *v )
 /*----------------------------------------------------------------------*/
 /*----------------------------------------------------------------------*/
 
-Var *digitizer_record_length( Var * )
+Var *digitizer_record_length( Var *v )
 {
 	long rec_len;
 	int i;
@@ -388,7 +390,7 @@ Var *digitizer_record_length( Var * )
 		{
 			eprint( SEVERE, "%s:%ld: %s: Can't set record length to %ld, "
 					"using next larger allowed value of %ld instead.\n",
-					Fname, Lc, DEVICE_NAME, rec_length, record_lengths[ i ] );
+					Fname, Lc, DEVICE_NAME, rec_len, record_lengths[ i ] );
 			break;
 		}
 
@@ -408,7 +410,7 @@ Var *digitizer_record_length( Var * )
 /*----------------------------------------------------------------------*/
 /*----------------------------------------------------------------------*/
 
-Var *digitizer_trigger_position( Var * )
+Var *digitizer_trigger_position( Var *v )
 {
 	double trig_pos;
 

@@ -39,6 +39,8 @@ int tds520a_init_hook( void )
 	tds520a.w = NULL;
 	tds520a.is_timebase = UNSET;
 	tds520a.is_num_avg = UNSET;
+	tds520a.is_rec_len = UNSET;
+	tds520a.is_trig_pos = UNSET;
 	tds520a.num_windows = 0;
 	tds520a.data_source = TDS520A_UNDEF;
 	tds520a.meas_source = TDS520A_UNDEF;

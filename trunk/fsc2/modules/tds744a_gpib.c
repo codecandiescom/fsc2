@@ -39,11 +39,42 @@ bool tds744a_init( const char *name )
 
     /* Get record length and trigger position */
 
-    if ( ! tds744a_get_record_length( &tds744a.rec_len ) ||
-		 ! tds744a_get_trigger_pos( &tds744a.trig_pos ) )
+	if ( tds744a.is_rec_len )
 	{
-		gpib_local( tds744a.device );
-        return FAIL;
+		if ( ! tds744a_set_record_length( tds744a.rec_len ) )
+		{
+			gpib_local( tds744a.device );
+			return FAIL;
+		}		
+	}
+	else
+	{
+		if ( ! tds744a_get_record_length( &tds744a.rec_len ) )
+		{
+			gpib_local( tds744a.device );
+			return FAIL;
+		}
+
+		tds744a.is_rec_len = SET;
+	}
+
+	if ( tds744a.is_trig_pos )
+	{
+		if ( ! tds744a_set_trigger_pos( tds744a.trig_pos ) )
+		{
+			gpib_local( tds744a.device );
+			return FAIL;
+		}
+	}
+	else
+	{
+		if ( ! tds744a_get_trigger_pos( &tds744a.trig_pos ) )
+		{
+			gpib_local( tds744a.device );
+			return FAIL;
+		}
+
+		tds744a.is_trig_pos = SET;
 	}
 
     /* Set format of data transfer (binary, INTEL format) */
@@ -152,6 +183,23 @@ bool tds744a_set_timebase( double timebase )
 }
 
 
+/*-----------------------------------------------------*/
+/* tds744a_set_record_length() sets the record length. */
+/*-----------------------------------------------------*/
+
+bool tds744a_set_record_length( long num_points )
+{
+    char cmd[ 100 ];
+
+
+	sprintf( cmd, "HOR:RECO %ld\n", num_points );
+    if ( gpib_write( tds744a.device, cmd, strlen( cmd ) ) == FAILURE )
+        return FAIL;
+
+    return OK;
+}
+
+
 /*----------------------------------------------------------------*/
 /* tds744a_get_record_length() returns the current record length. */
 /*----------------------------------------------------------------*/
@@ -173,6 +221,24 @@ bool tds744a_get_record_length( long *ret )
     *ret = T_atol( r );
     return OK;
 }
+
+
+/*------------------------------------------------------*/
+/* tds744a_set_trigger_pos() sets the trigger position. */
+/*------------------------------------------------------*/
+
+bool tds744a_set_trigger_pos( double pos )
+{
+    char cmd[ 100 ];
+
+
+	sprintf( cmd, "HOR:TRIG:POS %f\n", pos );
+    if ( gpib_write( tds744a.device, cmd, strlen( cmd ) ) == FAILURE )
+		return FAIL;
+
+    return OK;
+}
+
 
 /*-----------------------------------------------------------------*/
 /* tds744a_get_trigger_pos() returns the current trigger position. */

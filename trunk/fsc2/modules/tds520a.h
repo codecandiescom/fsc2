@@ -66,7 +66,10 @@ typedef struct
 	bool is_trigger_channel;
 
 	long rec_len;
+	bool is_rec_len;
+
 	double trig_pos;
+	bool is_trig_pos;
 
 	double cursor_pos;     /* current position of cursor 1                   */
 

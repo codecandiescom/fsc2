@@ -69,7 +69,10 @@ typedef struct
 	bool is_trigger_channel;
 
 	long rec_len;
+	bool is_rec_len;
+
 	double trig_pos;
+	bool is_trig_pos;
 
 	double cursor_pos;        // current position of cursor 1
 
@@ -95,6 +98,8 @@ Var *digitizer_define_window( Var *v );
 Var *digitizer_timebase( Var *v );
 Var *digitizer_num_averages( Var *v );
 Var *digitizer_get_channel_number( Var *v );
+Var *digitizer_record_length( Var *v );
+Var *digitizer_trigger_position( Var *v );
 Var *digitizer_meas_channel_ok( Var *v );
 Var *digitizer_trigger_channel( Var *v );
 Var *digitizer_start_acquisition( Var *v );
@@ -119,7 +124,9 @@ void tds744a_set_window( WINDOW *w );
 bool tds744a_init( const char *name );
 double tds744a_get_timebase( void );
 bool tds744a_set_timebase( double timebase);
+bool tds744a_set_record_length( long num_points );
 bool tds744a_get_record_length( long *ret );
+bool tds744a_set_trigger_pos( double pos );
 bool tds744a_get_trigger_pos( double *ret );
 long tds744a_get_num_avg( void );
 bool tds744a_set_num_avg( long num_avg );
