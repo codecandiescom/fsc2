@@ -32,9 +32,9 @@ char *get_string( size_t len )
 }
 
 
-/*---------------------------------------------------------------------------*/
-/* Routine converts all upper cas characters in a string to lower case ones. */
-/*---------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*/
+/* Converts all upper case characters in a string to lower case ones. */
+/*--------------------------------------------------------------------*/
 
 char *string_to_lower( char *str )
 {
@@ -51,9 +51,9 @@ char *string_to_lower( char *str )
 }
 
 
-/*----------------------------------------------------*/
-/* This routuine returns a copy of a piece of memory. */
-/*----------------------------------------------------*/
+/*---------------------------------------------------*/
+/* This routine returns a copy of a piece of memory. */
+/*---------------------------------------------------*/
 
 void *get_memcpy( const void *array, size_t size )
 {
@@ -66,7 +66,7 @@ void *get_memcpy( const void *array, size_t size )
 
 
 /*----------------------------------------------------------------------*/
-/* Function replaces all occurences iof the character combination "\n"  */
+/* Function replaces all occurrences of the character combination "\n"  */
 /* in a string by the line break character '\n'. This is done in place, */
 /* i.e. the string passed to the function is changed, not a copy. So,   */
 /* never call it with a char array defined as const.                    */
@@ -198,7 +198,7 @@ void eprint( int severity, const char *fmt, ... )
 			}
 		}
 
-		/* Avoid writting more than BROWSER_MAXLINE chars */
+		/* Avoid writing more than BROWSER_MAXLINE chars */
 
 		if ( space_left > 0 )
 		{
@@ -436,9 +436,9 @@ void delete_stale_shms( void )
 /* Function converts intensities into rgb values (between 0 and 255). For */
 /* values below 0 a dark kind of violet is returned, for values above 1 a */
 /* creamy shade of white. The interval [ 0, 1 ] itself is subdivided into */
-/* 6 subintervals at the points defined by the array `p' and rgb colors   */
+/* 6 subintervals at the points defined by the array `p' and rgb colours  */
 /* ranging from blue via cyan, green and yellow to red are calculated     */
-/* with `v' defining the intensities of the three primary colors at the   */
+/* with `v' defining the intensities of the three primary colours at the  */
 /* endpoints of the intervals and using linear interpolation in between.  */
 /*------------------------------------------------------------------------*/
 
@@ -476,10 +476,10 @@ void i2rgb( double h, int *rgb )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/* Function creates a set of colors in XFORMs internal color map for use */
-/* in 2D graphics (NUM_COLORS is defined in global.h).                   */
-/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------*/
+/* Function creates a set of colours in XFORMs internal colour map */
+/* for use in 2D graphics (NUM_COLORS is defined in global.h).     */
+/*-----------------------------------------------------------------*/
 
 void create_colors( void )
 {
@@ -487,7 +487,7 @@ void create_colors( void )
 	int rgb[ 3 ];
 
 
-	/* Create the colors between blue and red */
+	/* Create the colours between blue and red */
 
 	for ( i = 0; i < NUM_COLORS; i++ )
 	{
@@ -496,7 +496,7 @@ void create_colors( void )
 					 rgb[ RED ], rgb[ GREEN ], rgb[ BLUE ] );
 	}
 
-	/* Finally create colors for values too small or too large */
+	/* Finally create colours for values too small or too large */
 
 	i2rgb( -1.0, rgb );
 	fl_mapcolor( NUM_COLORS + FL_FREE_COL1 + 1,
@@ -512,13 +512,13 @@ void create_colors( void )
 /* be a good idea...                                                   */
 /***********************************************************************/
 
-/*-------------------------------------------------------------------------*/
-/* Returns the pixel value of an entry in XFORMs internal color map from   */
-/* the colors set in crfeate_colors(). For values slightly above 1 as well */
-/* as for values just below 0 only one color pixel value is returned while */
-/* for intermediate values one of NUM_COLORS (as defined in global.h) is   */
-/* returned, depending on the value.                                       */
-/*-------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------*/
+/* Returns the pixel value of an entry in XFORMs internal colour map from   */
+/* the colours set in create_colors(). For values slightly above 1 as well  */
+/* as for values just below 0 only one colour pixel value is returned while */
+/* for intermediate values one of NUM_COLORS (as defined in global.h) is    */
+/* returned, depending on the value.                                        */
+/*--------------------------------------------------------------------------*/
 
 inline unsigned long d2color( double a )
 {
