@@ -107,6 +107,7 @@ void *get_memcpy( const void *array, size_t size )
 {
 	void *new;
 
+
 	new = T_malloc( size );
 	memcpy( new, array, size );
 	return new;
@@ -124,6 +125,7 @@ char *correct_line_breaks( char *str )
 {
 	char *p1 = str,
 		 *p2;
+
 
 	while ( ( p1 = strstr( p1, "\\n" ) ) != NULL )
 	{
@@ -146,6 +148,7 @@ const char *strip_path( const char *path )
 {
     char *cp;
     
+
     if ( ( cp = strrchr( path, '/' ) ) == NULL )
         return path;
     else

@@ -733,6 +733,7 @@ void p_set( long pnum, int type, Var *v )
 
 		default:
 			fsc2_assert( 1 == 0 );
+			break;
 	}
 }
 

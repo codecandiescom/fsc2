@@ -434,6 +434,7 @@ static void fll_get_functions( Func *fncts, int num_predef_func )
 
 			default:                             /* this can never happen... */
 				fsc2_assert( 1 == 0 );
+				break;
 		}
 	}
 }

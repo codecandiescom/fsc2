@@ -131,6 +131,7 @@ static void get_array_params( Var *v, long *len, long **ilp, double **idp )
 
 		default :
 			fsc2_assert( 1 == 0 );
+			break;
 	}
 
 	fsc2_assert( ( *ilp != NULL ) ^ ( *idp != NULL ) );

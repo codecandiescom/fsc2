@@ -100,6 +100,7 @@ static void vars_params( Var *v, long *elems, long **lpnt, double **dpnt )
 
 		default :
 			fsc2_assert( 1 == 0 );
+			break;
 	}
 }
 
@@ -1955,6 +1956,7 @@ Var *vars_array_check( Var *v1, Var *v2 )
 
 		default :
 			fsc2_assert( 1 == 0 );
+			break;
 	}
 
 	switch ( v1->type )
@@ -1976,6 +1978,7 @@ Var *vars_array_check( Var *v1, Var *v2 )
 
 		default :
 			fsc2_assert( 1 == 0 );
+			break;
 	}
 
 	v->flags |= v1->flags & v2->flags & IS_DYNAMIC;
