@@ -6,11 +6,12 @@ Library for the Rulbus (Rijksuniversiteit Leiden BUS) with support
 Contents:
 
     I   Rulbus Configuration File
-	II  General Functions
+    II  General Functions
     III RB8509 (12-bit ADC) Functions
-	IV  RB8510 (12-bit DAC) Functions
-	V   RB8514 (Delay Card) Functions
-	VI  RB8515 (Clock Card) Functions
+    IV  RB8510 (12-bit DAC) Functions
+    V   RB8514 (Delay Card) Functions
+    VI  RB8515 (Clock Card) Functions
+    VII Example Programs
 
 ======================================================================
 
@@ -43,32 +44,32 @@ rack {
 
    addr = 3;
 
-	card {
-		name  = "DELAY_0";
-		type  = RB8514;
-		addr  = 0x64;
-	}
+    card {
+        name  = "DELAY_0";
+        type  = RB8514;
+        addr  = 0x64;
+    }
 
-	card {
-		name  = "CLOCK";
-		type  = RB8515;
-		addr  = 0x12;
-	}
+    card {
+        name  = "CLOCK";
+        type  = RB8515;
+        addr  = 0x12;
+    }
 
-	card {
-		name  = "ADC12";
-		type  = RB8509;
-		addr  = 0x68;
-		nchan = 8;
-	}
+    card {
+        name  = "ADC12";
+        type  = RB8509;
+        addr  = 0x68;
+        nchan = 8;
+    }
 
-	card {
-		name  = "DAC12_0";
-		type  = RB8510;
-		addr  = 0x45;
-		range = 10;
-		polar = "bipolar";
-	}
+    card {
+        name  = "DAC12_0";
+        type  = RB8510;
+        addr  = 0x45;
+        range = 10;
+        polar = "bipolar";
+    }
 }
 
 Within the set of instructions for a rack at least a line starting with
@@ -77,9 +78,9 @@ rack number can be given as a decimal number as well as a hexadecimal
 number (if it starts with '0x') or as a octal number (if it starts with
 a '0').
 
-Further, there may be as many entries as there are cards
-in the rack, each starting with the keyword 'card' and followed by
-a set of instructions for the card, enclosed in curly braces.
+Further entries (as many as there are cards in the rack) are for the cards
+in the rack. Each starts with the keyword 'card', followed by a set of
+card specific instructions, enclosed in curly braces.
 
 For each card a unique name must be given (a string enclosed in either
 single or double quotes), following the 'name' keyword. Using this name
@@ -131,50 +132,50 @@ the operation was successful or failed. On success RULBUS_OK (which
 is 0) is returned while on failure a negative value gets returned.
 Here is the complete list of error codes with a short explanation:
 
-	RULBUS_CFG_ACC   Not permission to open configurarion file
-	RULBUS_INV_CFG   Invalid name for configuration file
+    RULBUS_CFG_ACC   Not permission to open configurarion file
+    RULBUS_INV_CFG   Invalid name for configuration file
     RULBUS_OPN_CFG   Can't open configuration file
-	RULBUS_DVF_ACC   No permission to open device file
-	RULBUS_DVF_CFG   Invalid name for device file
-	RULBUS_DVF_OPN   Can't open device file
-	RULBUS_STX_ERR   Syntax error in configuration file
-	RULBUS_NO_MEM    Running out of memory
-	RULBUS_RCK_CNT   Too many racks listed in configuration file
-	RULBUS_RCK_DUP   Duplicate rack address in configuration file
-	RULBUS_NO_RCK    Missing rack address in configuration file
-	RULBUS_INV_RCK   Invalid rack address in configuration file
-	RULBUS_DVF_CNT   More than one device file in configuration file
-	RULBUS_MAX_CRD   Too many cards in configuration file
-	RULBUS_CRD_ADD   Invalid card address in configuration file
-	RULBUS_NAM_DUP   Duplicate card name in configuration file
-	RULBUS_DUP_NAM   More than one name for a card
-	RULBUS_ADD_DUP   More than one address for a card
-	RULBUS_TYP_DUP   More than one type for a card
-	RULBUS_CHN_DUP   More than one number of channel setting
-	RULBUS_CHN_INV   Invalid number of channels for ADC12 card
+    RULBUS_DVF_ACC   No permission to open device file
+    RULBUS_DVF_CFG   Invalid name for device file
+    RULBUS_DVF_OPN   Can't open device file
+    RULBUS_STX_ERR   Syntax error in configuration file
+    RULBUS_NO_MEM    Running out of memory
+    RULBUS_RCK_CNT   Too many racks listed in configuration file
+    RULBUS_RCK_DUP   Duplicate rack address in configuration file
+    RULBUS_NO_RCK    Missing rack address in configuration file
+    RULBUS_INV_RCK   Invalid rack address in configuration file
+    RULBUS_DVF_CNT   More than one device file in configuration file
+    RULBUS_MAX_CRD   Too many cards in configuration file
+    RULBUS_CRD_ADD   Invalid card address in configuration file
+    RULBUS_NAM_DUP   Duplicate card name in configuration file
+    RULBUS_DUP_NAM   More than one name for a card
+    RULBUS_ADD_DUP   More than one address for a card
+    RULBUS_TYP_DUP   More than one type for a card
+    RULBUS_CHN_DUP   More than one number of channel setting
+    RULBUS_CHN_INV   Invalid number of channels for ADC12 card
     RULBUS_MIS_CHN   Missing number of channels for ADC12 card
-	RULBUS_RNG_DUP   More than one range for card
-	RULBUS_POL_DUP   More than one polarity for card
-	RULBUS_INV_POL   Invalid polarity setting
-	RULBUS_NO_RNG    Missing range setting for DAC12 card
+    RULBUS_RNG_DUP   More than one range for card
+    RULBUS_POL_DUP   More than one polarity for card
+    RULBUS_INV_POL   Invalid polarity setting
+    RULBUS_NO_RNG    Missing range setting for DAC12 card
     RULBUS_INV_RNG   Invalid range setting for DAC12 card
-	RULBUS_NO_POL    Missing polarity setting for DAC12 card
-	RULBUS_CRD_CNT   Too many cards for single rack
-	RULBUS_NO_CRD    No cards found in configuration file
-	RULBUS_CRD_NAM   Missing card name in configuration file
-	RULBUS_INV_TYP   Invalid card type in configuration file
-	RULBUS_ADD_CFL   Address conflict between two cards in the same rack
-	RULBUS_TYP_HND   Missing modules for card
-	RULBUS_NO_INIT   Missing intialization of Rulbus library
-	RULBUS_INV_ARG   Invalid function argument
-	RULBUS_INV_CRD   No such card
-	RULBUS_INV_HND   Invalid card handle
-	RULBUS_CRD_NOP   Card has not been opened
-	RULBUS_INV_OFF   Invalid card address offset
-	RULBUS_WRT_ERR   Write error
-	RULBUS_RD_ERR    Read error
-	RULBUS_CRD_BSY   Card is busy
-	RULBUS_INV_VLT   Voltage out of range
+    RULBUS_NO_POL    Missing polarity setting for DAC12 card
+    RULBUS_CRD_CNT   Too many cards for single rack
+    RULBUS_NO_CRD    No cards found in configuration file
+    RULBUS_CRD_NAM   Missing card name in configuration file
+    RULBUS_INV_TYP   Invalid card type in configuration file
+    RULBUS_ADD_CFL   Address conflict between two cards in the same rack
+    RULBUS_TYP_HND   Missing modules for card
+    RULBUS_NO_INIT   Missing intialization of Rulbus library
+    RULBUS_INV_ARG   Invalid function argument
+    RULBUS_INV_CRD   No such card
+    RULBUS_INV_HND   Invalid card handle
+    RULBUS_CRD_NOP   Card has not been opened
+    RULBUS_INV_OFF   Invalid card address offset
+    RULBUS_WRT_ERR   Write error
+    RULBUS_RD_ERR    Read error
+    RULBUS_CRD_BSY   Card is busy
+    RULBUS_INV_VLT   Voltage out of range
 
 
 ----------------------------------------------------------------------
@@ -290,10 +291,10 @@ int rulbus_adc12_set_gain( int handle, int gain )
 This function allows to set the gain of the card. The 'gain' argument
 can be one of the following constants
 
-	RULBUS_ADC12_GAIN_1
-	RULBUS_ADC12_GAIN_2
-	RULBUS_ADC12_GAIN_4
-	RULBUS_ADC12_GAIN_8
+    RULBUS_ADC12_GAIN_1
+    RULBUS_ADC12_GAIN_2
+    RULBUS_ADC12_GAIN_4
+    RULBUS_ADC12_GAIN_8
 
 to set the gain factor to either 1, 2, 4, or 8.
 
@@ -418,9 +419,9 @@ This function lets you select the polarity of the start and/or end pulses.
 The 'type' argument are the same as for the previous function, i.e. it
 can be either 
 
-	RULBUS_DELAY_START_PULSE
-	RULBUS_DELAY_END_PULSE
-	RULBUS_DELAY_PULSE_BOTH
+    RULBUS_DELAY_START_PULSE
+    RULBUS_DELAY_END_PULSE
+    RULBUS_DELAY_PULSE_BOTH
 
 obviously indicating for which of the pulses the 'pol' argument is to be
 applied to. The 'pol' argument determines the polarity of the selected
@@ -478,3 +479,69 @@ with hopefully obvious meanings.
 
 On success the function returns RULBUS_OK, otherwise a negative value
 indicating the reason for the failure.
+
+
+======================================================================
+
+
+VII Example Programs
+--------------------
+
+The following program demonstrates how to obtain a converted voltage
+from the 12-bit ADC (RB8509).
+
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <rulbus.h>
+
+int main( void )
+{
+    int handle;
+    double volts;
+
+
+    /* Initialize the library */
+
+    if ( rulbus_open( ) != RULBUS_OK )
+        return EXIT_FAILURE;
+
+    /* Get a handle for the 12-bit ADC card, using the name from the
+       configuration file */
+
+    if ( ( handle = rulbus_card_open( "ADC12" ) != RULBUS_OK )
+        return EXIT_FAILURE;
+
+    /* Set up card to use input channel 1 */
+
+    if ( rulbus_adc12_set_channel( handle, 1 ) != RULBUS_OK )
+        return EXIT_FAILURE;
+
+    /* Switch on gain factor of 4 */
+
+    if ( rulbus_adc12_set_gain( handle, RULBUS_ADC12_GAIN_4 ) != RULBUS_OK )
+        return EXIT_FAILURE;
+
+    /* Set internal trigger mode */
+
+    if ( rulbus_adc12_set_trigger_mode( handle, RULBUS_ADC12_INT_TRIG )
+                                                                 != RULBUS_OK )
+        return EXIT_FAILURE;
+
+    /* Start a conversion and print out measured voltage */
+
+    if ( rulbus_adc12_convert( handle, &volts ) != RULBUS_OK )
+        return EXIT_FAILURE;
+
+    printf( "V = %f\n", volts );
+
+    /* Close the connection to the ADC card */
+
+    rulbus_close_card( handle );
+
+    /* Close connection to the Rulbus */
+
+    rulbus_close( );
+
+    return EXIT_SUCCESS;
+}
