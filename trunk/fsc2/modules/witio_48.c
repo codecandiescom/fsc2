@@ -60,6 +60,7 @@ static void check_ret( int ret_val );
 
 
 typedef struct {
+	bool is_open;
 	WITIO_48_MODE mode[ 2 ];
 	char *reserved_by[ 2 ];
 } WITIO_48;
@@ -75,6 +76,8 @@ int witio_48_init_hook( void )
 {
 	int i;
 
+
+	witio_48.is_open = SET;
 
 	for ( i = 0; i < 2; i++ )
 	{
@@ -116,17 +119,34 @@ int witio_48_exp_hook( void )
 	int i;
 
 
-	for ( i = 0; i < 2; i++ )
+	TRY
 	{
-		check_ret( witio_48_set_mode( ( WITIO_48_DIO ) i,
-									  witio_48.mode[ i ] ) );
+		for ( i = 0; i < 2; i++ )
+		{
+			check_ret( witio_48_set_mode( ( WITIO_48_DIO ) i,
+										  witio_48.mode[ i ] ) );
 
-		if ( witio_48.reserved_by[ i ] )
-			witio_48.reserved_by[ i ] =
+			if ( i == 0 )
+				witio_48.is_open = SET;
+
+			if ( witio_48.reserved_by[ i ] )
+				witio_48.reserved_by[ i ] =
 									CHAR_P T_free( witio_48.reserved_by[ i ] );
-		if ( witio_48_saved.reserved_by[ i ] )
-			witio_48.reserved_by[ i ] =
+			if ( witio_48_saved.reserved_by[ i ] )
+				witio_48.reserved_by[ i ] =
 								   T_strdup( witio_48_saved.reserved_by[ i ] );
+		}
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+	{
+		if ( witio_48.is_open )
+		{
+			witio_48_close( );
+			witio_48.is_open = UNSET;
+		}
+
+		RETHROW( );
 	}
 
 	return 1;
@@ -139,7 +159,11 @@ int witio_48_exp_hook( void )
 
 int witio_48_end_of_exp_hook( void )
 {
-	witio_48_close( );
+	if ( witio_48.is_open )
+	{
+		witio_48_close( );
+		witio_48.is_open = UNSET;
+	}
 	return 1;
 }
 
@@ -166,7 +190,11 @@ void witio_48_exit_hook( void )
 	/* This shouldn't be necessary, I just want to make 100% sure that
 	   the device file for the board is really closed */
 
-	witio_48_close( );
+	if ( witio_48.is_open )
+	{
+		witio_48_close( );
+		witio_48.is_open = UNSET;
+	}
 }
 
 
@@ -545,6 +573,7 @@ static void check_ret( int ret_val )
 		return;
 
 	print( FATAL, "%s.\n", witio_48_error_message( ) );
+	witio_48_close( );
 	THROW( EXCEPTION );
 }
 

@@ -65,6 +65,7 @@ int witio_48_close( void )
 {
     error_message = "";
 
+
     if ( dev_info.fd < 0 )
     {
         error_message = WITIO_48_ERR_BNO_MESS;
@@ -72,9 +73,9 @@ int witio_48_close( void )
     }
 
 	while ( close( dev_info.fd ) == -1 && errno == EINTR )
-		/* empty */
+		/* empty */ ;
 
-    dev_info.fd -= 1;
+    dev_info.fd = -1;
 
     return WITIO_48_OK;
 }
@@ -347,7 +348,7 @@ static int check_board( void )
 
 
     if ( dev_info.fd >= 0 )
-    return WITIO_48_OK;
+		return WITIO_48_OK;
 
 	/* Check if the device file exists and can be accessed */
 
@@ -395,7 +396,6 @@ static int check_board( void )
 	   normal operation of the program that did open the device file. */
 
 	fcntl( dev_info.fd, F_SETFD, FD_CLOEXEC );
-
 
 	/* Finally get the I/O mode for both DIOs */
 

@@ -654,7 +654,7 @@ static int witio_48_dio_in( WITIO_48_DATA *data )
 	/* Check if the channel number isn't too large for the mode of
 	   the selected DIO */
 
-	if ( ( board.states[ dio ].mode == WITIO_48_MODE_3x8 &&
+	if ( ( board.states[ dio ].mode == WITIO_48_MODE_1x24 &&
 	       ch > WITIO_48_CHANNEL_0 ) ||
 	     ( ( board.states[ dio ].mode == WITIO_48_MODE_2x12 ||
 		 board.states[ dio ].mode == WITIO_48_MODE_16_8 ) &&
@@ -861,7 +861,7 @@ static void witio_48_set_crtl( int dio )
 
 static void witio_48_board_out( unsigned char *addr, unsigned char byte )
 {
-	outb( byte, ( PORT ) addr );
+	outb_p( byte, ( PORT ) addr );
 }
 
 
@@ -871,7 +871,7 @@ static void witio_48_board_out( unsigned char *addr, unsigned char byte )
 
 static unsigned char witio_48_board_in( unsigned char *addr )
 {
-	return inb( ( PORT ) addr );
+	return inb_p( ( PORT ) addr );
 }
 
 
