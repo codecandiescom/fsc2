@@ -398,7 +398,7 @@ int gpib_timeout( int device, int period )
 
 	if ( ( dev_name = gpib_get_dev_name( device ) ) == NULL )
 	{
-		sprintf( gpib_error_msg, "CALL of gpib_timeout for unknown device "
+		sprintf( gpib_error_msg, "Call of gpib_timeout for unknown device "
 				 "(device number %d)\n", device );
 		return FAILURE;
 	}
@@ -412,7 +412,7 @@ int gpib_timeout( int device, int period )
     {
         gpib_log_date( );
 		seteuid( EUID );
-        fprintf( gpib_log, "CALL of gpib_timeout for device %s, ", dev_name );
+        fprintf( gpib_log, "Call of gpib_timeout for device %s, ", dev_name );
         fprintf( gpib_log, "-> timeout is set to %s\n", tc[ period ] );
         fflush( gpib_log );
 		seteuid( getuid( ) );
@@ -461,7 +461,7 @@ int gpib_clear_device( int device )
 
 	if ( ( dev_name = gpib_get_dev_name( device ) ) == NULL )
 	{
-		sprintf( gpib_error_msg, "CALL of gpib_clear_device for unknown "
+		sprintf( gpib_error_msg, "Call of gpib_clear_device for unknown "
 				 "device (device number %d)\n", device );
 		return FAILURE;
 	}
@@ -503,7 +503,7 @@ int gpib_local( int device )
 
 	if ( ( dev_name = gpib_get_dev_name( device ) ) == NULL )
 	{
-		sprintf( gpib_error_msg, "CALL of gpib_local for unknown "
+		sprintf( gpib_error_msg, "Call of gpib_local for unknown "
 				 "device (device number %d)\n", device );
 		return FAILURE;
 	}
@@ -545,7 +545,7 @@ int gpib_trigger( int device )
 
 	if ( ( dev_name = gpib_get_dev_name( device ) ) == NULL )
 	{
-		sprintf( gpib_error_msg, "CALL of gpib_trigger for unknown device "
+		sprintf( gpib_error_msg, "Call of gpib_trigger for unknown device "
 				 "(device number %d)\n", device );
 		return FAILURE;
 	}
@@ -598,7 +598,7 @@ int gpib_trigger( int device )
 //
 //	  if ( ( dev_name = gpib_get_dev_name( device ) ) == NULL )
 //	  {
-//		  sprintf( gpib_error_msg, "CALL of gpib_wait for unknown device "
+//		  sprintf( gpib_error_msg, "Call of gpib_wait for unknown device "
 //				   "(device number %d)\n", device );
 //		  return FAILURE;
 //	  }
@@ -668,7 +668,7 @@ int gpib_write( int device, const char *buffer, long length )
 
 	if ( ( dev_name = gpib_get_dev_name( device ) ) == NULL )
 	{
-		sprintf( gpib_error_msg, "CALL of gpib_write for unknown device "
+		sprintf( gpib_error_msg, "Call of gpib_write for unknown device "
 				 "(device number %d)\n", device );
 		return FAILURE;
 	}
@@ -758,7 +758,7 @@ int gpib_read( int device, char *buffer, long *length )
 
 	if ( ( dev_name = gpib_get_dev_name( device ) ) == NULL )
 	{
-		sprintf( gpib_error_msg, "CALL of gpib_read for unknown device "
+		sprintf( gpib_error_msg, "Call of gpib_read for unknown device "
 				 "(device number %d)\n", device );
 		return FAILURE;
 	}
@@ -849,7 +849,7 @@ int gpib_serial_poll( int device, unsigned char *stb )
 
 	if ( ( dev_name = gpib_get_dev_name( device ) ) == NULL )
 	{
-		sprintf( gpib_error_msg, "CALL of gpib_serial_poll for unknown device "
+		sprintf( gpib_error_msg, "Call of gpib_serial_poll for unknown device "
 				 "(device number %d)\n", device );
 		return FAILURE;
 	}
@@ -978,7 +978,7 @@ static void gpib_log_function_start( const char *function,
 {
     gpib_log_date( );
 	seteuid( EUID );
-    fprintf( gpib_log, "CALL of %s, dev = %s\n", function, dev_name );
+    fprintf( gpib_log, "Call of %s, dev = %s\n", function, dev_name );
     fflush( gpib_log );
 	seteuid( getuid( ) );
 }
