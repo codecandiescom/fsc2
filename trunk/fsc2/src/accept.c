@@ -23,7 +23,7 @@ static bool	incr_x_and_y( long x_index, long len, long y_index );
 /* because REQUESTS need a reply) it will be moved to the end of the queue.  */
 /*---------------------------------------------------------------------------*/
 
-void accept_new_data( void )
+bool accept_new_data( void )
 {
 	void *buf;
 	int mq_next;
@@ -60,7 +60,7 @@ void accept_new_data( void )
 				eprint( FATAL, "Experiment stopped due to unknown "
 						"reasons.\n" );
 			printf( "shit shit shit!\n" );
-			return;
+			return FAIL;
 		}
 
 		/* Detach from shared memory segment and remove it */
@@ -108,6 +108,8 @@ void accept_new_data( void )
 		redraw_all_1d( );
 	else
 		redraw_all_2d( );
+
+	return OK;
 }
 
 
