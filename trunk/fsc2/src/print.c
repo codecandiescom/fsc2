@@ -756,8 +756,8 @@ static void print_header( FILE *fp, char *name )
 			     "        -0.025 0.025 rm } for\n"
 			     "        1 setgray (fsc2) show gr } b\n" );
 
-	/* End of dictonary, open it for all the following (must be closed at end
-	   of file !) */
+	/* End of dictonary, now open it for all of the following (don't forget
+	   to closed it at the end of the file !) */
 
 	fprintf( fp, "end readonly def %% fsc2Dict\n"
 			 	 "%%%%EndResource\n"
