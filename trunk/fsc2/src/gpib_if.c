@@ -42,7 +42,7 @@
 
 
 static int   gpib_init_controller( void );
-static void  gpib_init_log( char **log_file_name );
+static void  gpib_init_log( char *log_file_name );
 static void  gpib_read_end( const char *dev_name, char *buffer, long received,
 							long expected );
 static void  gpib_log_date( void );
@@ -83,9 +83,7 @@ GPIB_DEV *gpib_dev_list = NULL; /* list of symbolic names of devices etc. */
 /* ->                                                                      */
 /*  * Pointer to the name of log file - if the pointer is NULL or does not */
 /*    point to a non-empty string the default log file name defined by     */
-/*    GPIB_LOG_FILE will be used. If the pointer is not NULL but points to */
-/*    NULL or to an empty string it will, on return, point to the name of  */
-/*    the log file or, if the log file could not be opened, to NULL.       */
+/*    GPIB_LOG_FILE will be used.                                          */
 /*  * log level, either LL_NONE, LL_ERR, LL_CE or LL_ALL                   */
 /*    (if log level is LL_NONE 'log_file_name' is not used at all)         */
 /* <-                                                                      */
@@ -93,7 +91,7 @@ GPIB_DEV *gpib_dev_list = NULL; /* list of symbolic names of devices etc. */
 /*  * FAILURE: error, GPIB bus can't be used                               */
 /*-------------------------------------------------------------------------*/
 
-int gpib_init( char **log_file_name, int log_level )
+int gpib_init( char *log_file_name, int log_level )
 {
 	GPIB_DEV *cur_dev;
 
@@ -231,43 +229,52 @@ int gpib_shutdown( void )
 /* ->                                                                      */
 /*  * Pointer to the name of log file - if the pointer is NULL or does not */
 /*    point to a non-empty string the default log file name defined by     */
-/*    GPIB_LOG_FILE will be used. If the pointer is not NULL but points to */
-/*    NULL or to an empty string it will point to the name of the log file */
-/*    or, if the log file cannot be opened, to NULL on return.             */
+/*    GPIB_LOG_FILE will be used.                                          */
 /*-------------------------------------------------------------------------*/
 
 static void gpib_init_log( char **log_file_name )
 {
-    static char name[ FILENAME_MAX ];
+    char *name;
+	struct stat file_stat;
+	bool access_ok = UNSET;
+	bool set_perms = UNSET;
 
 
     if ( ll == LL_NONE )
         return;
 
-    if ( log_file_name != NULL && *log_file_name != NULL
-                               && **log_file_name != '\0' )
-        strcpy( name, *log_file_name );
+    if ( log_file_name != NULL && *log_file_name != '\0' )
+        name = get_string_copy( log_file_name );
     else
-    {
-        strcpy( name, GPIB_LOG_FILE );
-        if ( log_file_name != NULL )
-            *log_file_name = name;
-    }
+        name = get_string_copy( GPIB_LOG_FILE );
 
-    if ( ( gpib_log = fopen( name, "a+" ) ) == NULL )
+	seteuid( EUID );
+
+	access_ok = access( name, W_OK ) == 0 ? SET : UNSET;
+
+	if ( ! access_ok && errno == ENOENT )        /* file doesn't exist yet ? */
+		set_perms = SET;
+
+    if ( gpib_log = fopen( name, "a+" ) == NULL )            /* open fails ? */
     {
         gpib_log = stderr;
-        if ( log_file_name != NULL )
-            *log_file_name = NULL;
         fprintf( stderr, "Can't open log file %s - using stderr instead.\n",
                  name );
     }
+	else if ( set_perms )      /* if file is new set its permissions to 0666 */
+		chmod( name,
+			   S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH );
+
+	seteuid( getuid( ) );
 
     gpib_log_date( );
+
 	seteuid( EUID );
     fprintf( gpib_log, "GPIB bus is being initialised.\n" );
     fflush( gpib_log );
 	seteuid( getuid( ) );
+
+	T_free( name );
 }
 
 
