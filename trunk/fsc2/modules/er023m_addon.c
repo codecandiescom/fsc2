@@ -34,23 +34,22 @@ Var *lockin_rg( Var *v )
 
 
 	if ( v == NULL )
-	{
-		if ( TEST_RUN )
-			return vars_push( INT_VAR, ( long ) 
-							  ( er023m.rg_index == UNDEF_RG_INDEX ?
-								ER023M_TEST_RG_INDEX : er023m.rg_index ) );
-		else
+		switch ( FSC2_MODE )
 		{
-			if ( I_am == PARENT )
-			{
+			case PREPARATION :
 				eprint( FATAL, SET, "%s: Function %s() with no argument can "
 						"only be used in the EXPERIMENT section.\n",
 						DEVICE_NAME, Cur_Func );
 				THROW( EXCEPTION )
-			}
-			return vars_push( INT_VAR, ( long ) er023m_get_rg( ) );
+
+			case TEST :
+				return vars_push( INT_VAR, ( long ) 
+								  ( er023m.rg_index == UNDEF_RG_INDEX ?
+									ER023M_TEST_RG_INDEX : er023m.rg_index ) );
+
+			case EXPERIMENT :
+				return vars_push( INT_VAR, ( long ) er023m_get_rg( ) );
 		}
-	}
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
 	if ( v->type == FLOAT_VAR )
@@ -79,12 +78,9 @@ Var *lockin_rg( Var *v )
 		THROW( EXCEPTION )
 	}
 
-	if ( ! TEST_RUN )
-	{
-		er023m.rg_index = rg_index;
-		if ( I_am == CHILD )         /* if called in EXPERIMENT section */
-			er023m_set_rg( rg_index );
-	}
+	er023m.rg_index = rg_index;
+	if ( FSC2_MODE == EXPERIMENT )
+		er023m_set_rg( rg_index );
 	
 	return vars_push( INT_VAR, ( long ) rg_index );
 }
@@ -99,23 +95,21 @@ Var *lockin_tc( Var *v )
 
 
 	if ( v == NULL )
-	{
-		if ( TEST_RUN )
-			return vars_push( INT_VAR, ( long ) 
-							  ( er023m.tc_index == UNDEF_TC_INDEX ?
-								ER023M_TEST_TC_INDEX : er023m.tc_index ) );
-		else
+		switch ( FSC2_MODE )
 		{
-			if ( I_am == PARENT )
-			{
+			case PREPARATION :
 				eprint( FATAL, SET, "%s: Function %s() with no argument can "
 						"only be used in the EXPERIMENT section.\n",
 						DEVICE_NAME, Cur_Func );
 				THROW( EXCEPTION )
-			}
-			return vars_push( INT_VAR, er023m_get_tc( ) );
+
+			case TEST :
+				return vars_push( INT_VAR, ( long ) 
+								  ( er023m.tc_index == UNDEF_TC_INDEX ?
+									ER023M_TEST_TC_INDEX : er023m.tc_index ) );
+			case EXPERIMENT :
+				return vars_push( INT_VAR, er023m_get_tc( ) );
 		}
-	}
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
 	if ( v->type == FLOAT_VAR )
@@ -153,12 +147,9 @@ Var *lockin_tc( Var *v )
 		THROW( EXCEPTION )
 	}
 
-	if ( ! TEST_RUN )
-	{
-		er023m.tc_index = tc_index;
-		if ( I_am == CHILD )         /* if called in EXPERIMENT section */
+	er023m.tc_index = tc_index;
+	if ( FSC2_MODE == EXPERIMENT )
 			er023m_set_tc( tc_index );
-	}
 	
 	return vars_push( INT_VAR, ( long ) tc_index );
 }
@@ -183,23 +174,22 @@ Var *lockin_ma( Var *v )
 	}
 
 	if ( v == NULL )
-	{
-		if ( TEST_RUN )
-			return vars_push( INT_VAR, ( long )
-							  ( er023m.ma_index == UNDEF_MA_INDEX ?
-								ER023M_TEST_MA_INDEX : er023m.ma_index ) );
-		else
+		switch ( FSC2_MODE )
 		{
-			if ( I_am == PARENT )
-			{
+			case PREPARATION :
 				eprint( FATAL, SET, "%s: Function %s() with no argument can "
 						"only be used in the EXPERIMENT section.\n",
 						DEVICE_NAME, Cur_Func );
 				THROW( EXCEPTION )
-			}
-			return vars_push( INT_VAR, ( long ) er023m_get_ma( ) );
+
+			case TEST :
+				return vars_push( INT_VAR, ( long )
+								  ( er023m.ma_index == UNDEF_MA_INDEX ?
+									ER023M_TEST_MA_INDEX : er023m.ma_index ) );
+
+			case EXPERIMENT :
+				return vars_push( INT_VAR, ( long ) er023m_get_ma( ) );
 		}
-	}
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
 	if ( v->type == FLOAT_VAR )
@@ -229,13 +219,10 @@ Var *lockin_ma( Var *v )
 		THROW( EXCEPTION )
 	}
 
-	if ( ! TEST_RUN )
-	{
-		er023m.ma_index = ma;
-		if ( I_am == CHILD )         /* if called in EXPERIMENT section */
-			er023m_set_ma( ma );			
-	}
-	
+	er023m.ma_index = ma;
+	if ( FSC2_MODE == EXPERIMENT )
+		er023m_set_ma( ma );
+
 	return vars_push( INT_VAR, ( long ) ma );
 }
 
@@ -249,23 +236,22 @@ Var *lockin_ct( Var *v )
 
 
 	if ( v == NULL )
-	{
-		if ( TEST_RUN )
-			return vars_push( INT_VAR, ( long )
-							  ( er023m.ct_mult == UNDEF_CT_MULT ?
-								ER023M_TEST_CT_MULT : er023m.ct_mult ) );
-		else
+		switch ( FSC2_MODE )
 		{
-			if ( I_am == PARENT )
-			{
+			case PREPARATION :
 				eprint( FATAL, SET, "%s: Function %s() with no argument can "
 						"only be used in the EXPERIMENT section.\n",
 						DEVICE_NAME, Cur_Func );
 				THROW( EXCEPTION )
-			}
-			return vars_push( INT_VAR, ( long ) er023m_get_ct( ) );
+
+			case TEST :
+				return vars_push( INT_VAR, ( long )
+								  ( er023m.ct_mult == UNDEF_CT_MULT ?
+									ER023M_TEST_CT_MULT : er023m.ct_mult ) );
+
+			case EXPERIMENT :
+				return vars_push( INT_VAR, ( long ) er023m_get_ct( ) );
 		}
-	}
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
 	if ( v->type == FLOAT_VAR )
@@ -310,12 +296,9 @@ Var *lockin_ct( Var *v )
 		THROW( EXCEPTION )
 	}
 
-	if ( ! TEST_RUN )
-	{
-		er023m.ct_mult = ct_mult;
-		if ( I_am == CHILD )         /* if called in EXPERIMENT section */
-			er023m_set_ct( ct_mult );
-	}
+	er023m.ct_mult = ct_mult;
+	if ( FSC2_MODE == EXPERIMENT )
+		er023m_set_ct( ct_mult );
 	
 	return vars_push( INT_VAR, ( long ) ct_mult );
 }
@@ -331,23 +314,22 @@ Var *lockin_mf( Var *v )
 
 
 	if ( v == NULL )
-	{
-		if ( TEST_RUN )
-			return vars_push( INT_VAR, ( long )
-							  ( er023m.mf_index == UNDEF_MF_INDEX?
-								ER023M_TEST_MF_INDEX : er023m.mf_index ) );
-		else
+		switch ( FSC2_MODE )
 		{
-			if ( I_am == PARENT )
-			{
+			case PREPARATION :
 				eprint( FATAL, SET, "%s: Function %s() with no argument can "
 						"only be used in the EXPERIMENT section.\n",
 						DEVICE_NAME, Cur_Func );
 				THROW( EXCEPTION )
-			}
-			return vars_push( INT_VAR, ( long ) er023m_get_mf( ) );
+
+			case TEST :
+				return vars_push( INT_VAR, ( long )
+								  ( er023m.mf_index == UNDEF_MF_INDEX?
+									ER023M_TEST_MF_INDEX : er023m.mf_index ) );
+
+			case EXPERIMENT :
+				return vars_push( INT_VAR, ( long ) er023m_get_mf( ) );
 		}
-	}
 
 	old_mf_index = er023m.mf_index;
 
@@ -386,12 +368,9 @@ Var *lockin_mf( Var *v )
 		THROW( EXCEPTION )
 	}
 
-	if ( ! TEST_RUN )
-	{
-		er023m.mf_index = mf_index;
-		if ( I_am == CHILD )              /* if called in EXPERIMENT section */
-			er023m_set_mf( mf_index );
-	}
+	er023m.mf_index = mf_index;
+	if ( FSC2_MODE == EXPERIMENT )
+		er023m_set_mf( mf_index );
 	
 	/* Warn the user if for the new modulation frequency there's no phase
 	   or attenuation calibration while we had one for the old frequency */

@@ -200,6 +200,7 @@ extern ER023M er023m;
 /* Declaration of exported functions */
 
 int er023m_init_hook( void );
+int er023m_test_hook( void );
 int er023m_exp_hook( void );
 int er023m_end_of_exp_hook( void );
 void er023m_exit_hook( void );
