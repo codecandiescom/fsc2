@@ -56,6 +56,7 @@ int er035m_end_of_exp_hook( void );
 void er035m_exit_hook( void );
 
 Var *gaussmeter_name( Var *v );
+Var *gaussmeter_field( Var *v );
 Var *find_field( Var *v );
 Var *gaussmeter_resolution( Var *v );
 Var *gaussmeter_probe_orientation( Var *v );
@@ -382,6 +383,15 @@ Var *gaussmeter_name( Var *v )
 {
 	UNUSED_ARGUMENT( v );
 	return vars_push( STR_VAR, DEVICE_NAME );
+}
+
+
+/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*/
+
+Var *gaussmeter_field( Var *v )
+{
+	return find_field( v );
 }
 
 

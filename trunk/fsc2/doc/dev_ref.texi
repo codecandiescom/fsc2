@@ -166,6 +166,7 @@ measured is from @w{-50 G} to @w{23000 G}.
 @strong{Supported functions}:
 @multitable @columnfractions .45 .45
 @item @code{gaussmeter_name()}        @tab @ref{gaussmeter_name}
+@item @code{gaussmeter_field()}       @tab @ref{gaussmeter_field}
 @item @code{find_field()}             @tab @ref{find_field}
 @item @code{gaussmeter_resolution()}  @tab @ref{gaussmeter_resolution}
 @item @code{gaussmeter_wait()}
@@ -466,6 +467,7 @@ range is @w{1460 G} to @w{19900 G}.
 @strong{Supported functions}:
 @multitable @columnfractions .45 .45
 @item @code{gaussmeter_name()}               @tab @ref{gaussmeter_name}
+@item @code{gaussmeter_field()}              @tab @ref{gaussmeter_field}
 @item @code{find_field()}                    @tab @ref{find_field}
 @item @code{gaussmeter_resolution()}         @tab @ref{gaussmeter_resolution}
 @item @code{gaussmeter_probe_orientation()}  @tab @ref{gaussmeter_probe_orientation}
@@ -498,6 +500,7 @@ range is @w{1460 G} to @w{19900 G}.
 @strong{Supported functions}:
 @multitable @columnfractions .45 .45
 @item @code{gaussmeter_name()}               @tab @ref{gaussmeter_name}
+@item @code{gaussmeter_field()}              @tab @ref{gaussmeter_field}
 @item @code{find_field()}                    @tab @ref{find_field}
 @item @code{gaussmeter_resolution()}         @tab @ref{gaussmeter_resolution}
 @item @code{gaussmeter_probe_orientation()}  @tab @ref{gaussmeter_probe_orientation}
@@ -529,6 +532,7 @@ the range is @w{1460 G} to @w{19900 G}.
 @strong{Supported functions}:
 @multitable @columnfractions .45 .45
 @item @code{gaussmeter_name()}               @tab @ref{gaussmeter_name}
+@item @code{gaussmeter_field()}              @tab @ref{gaussmeter_field}
 @item @code{measure_field()}                 @tab @ref{measure_field}
 @item @code{gaussmeter_resolution()}         @tab @ref{gaussmeter_resolution}
 @item @code{gaussmeter_probe_orientation()}  @tab @ref{gaussmeter_probe_orientation}
@@ -557,6 +561,7 @@ the range is @w{1460 G} to @w{19900 G}.
 @strong{Supported functions}:
 @multitable @columnfractions .45 .45
 @item @code{gaussmeter_name()}               @tab @ref{gaussmeter_name}
+@item @code{gaussmeter_field()}              @tab @ref{gaussmeter_field}
 @item @code{measure_field()}                 @tab @ref{measure_field}
 @item @code{gaussmeter_resolution()}         @tab @ref{gaussmeter_resolution}
 @item @code{gaussmeter_probe_orientation()}  @tab @ref{gaussmeter_probe_orientation}
@@ -1043,6 +1048,7 @@ T. Measured fields are returned in Gauss, not Tesla!
 @strong{Supported functions}:
 @multitable @columnfractions .45 .45
 @item @code{gaussmeter_name()}               @tab @ref{gaussmeter_name}
+@item @code{gaussmeter_field()}              @tab @ref{gaussmeter_field}
 @item @code{measure_field()}                 @tab @ref{measure_field}
 @item @code{gaussmeter_resolution()}         @tab @ref{gaussmeter_resolution}
 @item @code{gaussmeter_probe_orientation()}  @tab @ref{gaussmeter_probe_orientation}

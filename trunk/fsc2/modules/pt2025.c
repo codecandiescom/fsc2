@@ -43,6 +43,7 @@ int  pt2025_end_of_exp_hook( void );
 
 
 Var *gaussmeter_name( Var *v );
+Var *gaussmeter_field( Var *v );
 Var *measure_field( Var *v );
 Var *gaussmeter_resolution( Var *v );
 Var *gaussmeter_probe_orientation( Var *v );
@@ -147,6 +148,15 @@ Var *gaussmeter_name( Var *v )
 {
 	UNUSED_ARGUMENT( v );
 	return vars_push( STR_VAR, DEVICE_NAME );
+}
+
+
+/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*/
+
+Var *gaussmeter_field( Var *v )
+{
+	return measure_field( v );
 }
 
 

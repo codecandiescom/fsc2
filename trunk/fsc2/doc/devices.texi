@@ -499,13 +499,31 @@ measurements but not for direct field control.
 Returns a string with the name of the gaussmeter being used.
 
 
+@anchor{gaussmeter_field}
+@item gaussmeter_field()
+@findex gaussmeter_field()
+The function returns the current field in Gauss. It takes no arguments
+and can only be used in the @code{EXPERIMENT} section.
+
+
 @anchor{find_field}
 @item find_field()
 @findex find_field()
-This function is defined in the device modules @code{er035m} and
+Use of this function is deprecated, use @code{gaussmeter_field()}
+instead. It is defined in the device modules @code{er035m} and
 @code{er035m_s}. It returns the current value of the magnetic field in
 Gauss.  The function can only be called in the @code{EXPERIMENT}
 section.
+
+
+@anchor{measure_field}
+@item measure_field()
+@findex measure_field()
+Use of this function is deprecated, use @code{gaussmeter_field()}
+instead. It is defined in the device drivers @code{er035m_sa},
+@code{er035m_sas} and @code{pt2025}. It measures the current field and
+returns the value in Gauss. The function can only be called in the
+@code{EXPERIMENT} section.
 
 
 @anchor{gaussmeter_resolution}
@@ -527,15 +545,6 @@ increased automatically from @code{0.1 G} to @code{0.01 G} at the
 initialization (i.e.@: at the very start of the experiment) unless 
 the low resolution has been set explicitely during the
 @code{PREPARATIONS} section.
-
-
-@anchor{measure_field}
-@item measure_field()
-@findex measure_field()
-This function is defined in the device drivers @code{er035m_sa},
-@code{er035m_sas} and @code{pt2025}. It measures the current field and
-returns the value in Gauss. The function can only be called in the
-@code{EXPERIMENT} section.
 
 
 @anchor{gaussmeter_probe_orientation}

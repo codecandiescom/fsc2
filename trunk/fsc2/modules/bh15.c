@@ -41,6 +41,7 @@ int bh15_end_of_exp_hook( void );
 void bh15_exit_hook( void );
 
 Var *gaussmeter_name( Var *v );
+Var *gaussmeter_field( Var *v );
 Var *find_field( Var *v );
 Var *gaussmeter_resolution( Var *v );
 Var *gaussmeter_wait( Var *v );
@@ -199,6 +200,16 @@ Var *gaussmeter_name( Var *v )
 {
 	UNUSED_ARGUMENT( v );
 	return vars_push( STR_VAR, DEVICE_NAME );
+}
+
+
+/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*/
+
+Var *gaussmeter_field( Var *v )
+{
+	UNUSED_ARGUMENT( v );
+	return vars_push( FLOAT_VAR, bh15_get_field( ) );
 }
 
 

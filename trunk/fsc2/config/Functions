@@ -85,9 +85,10 @@ magnet_goto_field_on_end, 1, ALL;   // keep sweeping after end of experiment
 magnet_command, 1, EXP;
 
 
-/* Functions exported by the field meter drivers (BH15, ER035Mm ) */
+/* Functions exported by the field meter drivers (BH15, ER035M, PT2025 ) */
 
 gaussmeter_name, 0, ALL;        // returns the device name
+gaussmeter_field, 0, EXP;       // returns current field
 find_field, 0, EXP;             // return current field value
 gaussmeter_resolution, -1, ALL; // returns resolution of field meter
 gaussmeter_wait, 0, EXP;        // wait for field to stabilize
