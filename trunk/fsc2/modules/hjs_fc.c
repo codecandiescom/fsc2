@@ -81,6 +81,7 @@ static struct HJS_FC {
 	char *gm_res_func;
 
 	double act_field;		/* used internally */
+	double target_field;
 } hjs_fc;
 
 
@@ -91,12 +92,12 @@ static struct HJS_FC {
 
 
 /* Number of identical readings from the gaussmeter that we take to indicate
-   that the the field is stable at the value we got from the gaussmeter */
+   that the the field is stable */
 
 #define MIN_NUM_IDENTICAL_READINGS      5
 
 
-/* Time (in micro-seconds) that we'll wait between fetching new values
+/* Time (in microseconds) that we'll wait between fetching new values
    from the gaussmeter when trying to get a consistent reading */
 
 #define WAIT_LENGTH         10000UL    /* 10 ms */
@@ -118,8 +119,15 @@ static struct HJS_FC {
 /*                                           */
 /*-------------------------------------------*/
 
-/*---------------------------------------------------------------------*/
-/*---------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*/
+/* Function that gets called when the module is loaded. Since this   */
+/* module does not control a real device but relies on the existence */
+/* of both the BNM12 gaussmeter and the home-built DA/AD converter   */
+/* the main purpose of this function is to check that the modules    */
+/* for these devices are already loaded and then to get a lock on    */
+/* the DA-channel of the DA/AD converter. Of course, also some       */
+/* internally used data are initialized by the function.             */
+/*-------------------------------------------------------------------*/
 
 int hjs_fc_init_hook( void )
 {
@@ -253,26 +261,34 @@ int hjs_fc_init_hook( void )
 
 
 /*----------------------------------------------------------*/
-/* Just store the current settings in case they get changed */
-/* during the test run.                                     */
 /*----------------------------------------------------------*/
 
 int hjs_fc_test_hook( void )
 {
 	if ( hjs_fc.is_field )
-		hjs_fc.act_field = hjs_fc.field;
+		hjs_fc.target_field = hjs_fc.act_field = hjs_fc.field;
 	else
-		hjs_fc.act_field = HJS_TEST_FIELD;
+		hjs_fc.target_field = hjs_fc.act_field = HJS_TEST_FIELD;
 
 	return 1;
 }
 
 
-/*-------------------------------------------------------------*/
-/* Restore the settings back to what they were after executing */
-/* the preparations section and then set the start field (if   */
-/* one had been set.                                           */
-/*-------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+/* Function gets called when the experiment is started. First of */
+/* all we need to do some initialization. This mainly includes   */
+/* setting the field to some positions, covering the whole range */
+/* of possible values, to figure out the maximum field range and */
+/* the relationship between the DAC output voltage and the       */
+/* resulting field. We also try to get an estimate on how long   */
+/* it takes to reach a field value in the process. When we then  */
+/* know the field range we have to check that during the test    */
+/* run the field never was set to a value that can't be reached. */
+/* If the function magnet_setup() had been called during the     */
+/* PREPARATIONS section we also have to make sure that the sweep */
+/* step size isn't smaller than the minimum field step we can    */
+/* set with the DAC resolution.                                  */
+/*---------------------------------------------------------------*/
 
 int hjs_fc_exp_hook( void )
 {
@@ -322,7 +338,10 @@ int hjs_fc_exp_hook( void )
 	   it now. */
 
 	if ( hjs_fc.is_field )
+	{
 		hjs_fc.act_field = hjs_fc_set_field( hjs_fc.field, 0.0 );
+		hjs_fc.target_field = hjs_fc.field;
+	}
 
 	return 1;
 }
@@ -409,12 +428,13 @@ Var *set_field( Var *v )
 				   "value.\n" );
 	}
 
-	field = hjs_fc_field_check( field );
+	hjs_fc.target_field = hjs_fc_field_check( field );
 
 	if ( FSC2_MODE == TEST )
-		hjs_fc.act_field = field;
+		hjs_fc.act_field = hjs_fc.target_field;
 	else
-		hjs_fc.act_field = hjs_fc_set_field( field, error_margin );
+		hjs_fc.act_field = hjs_fc_set_field( hjs_fc.target_field,
+											 error_margin );
 
 	return vars_push( FLOAT_VAR, hjs_fc.act_field );
 }
@@ -448,7 +468,8 @@ Var *sweep_up( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	hjs_fc.act_field = hjs_fc_sweep_to( hjs_fc.act_field + hjs_fc.field_step );
+	hjs_fc.target_field += hjs_fc.field_step;
+	hjs_fc.act_field = hjs_fc_sweep_to( hjs_fc.target_field );
 
 	return vars_push( FLOAT_VAR, hjs_fc.act_field );
 }
@@ -467,7 +488,8 @@ Var *sweep_down( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	hjs_fc.act_field = hjs_fc_sweep_to( hjs_fc.act_field - hjs_fc.field_step );
+	hjs_fc.target_field -= hjs_fc.field_step;
+	hjs_fc.act_field = hjs_fc_sweep_to( hjs_fc.target_field );
 
 	return vars_push( FLOAT_VAR, hjs_fc.act_field );
 }
@@ -490,6 +512,8 @@ Var *reset_field( Var *v )
 		hjs_fc.act_field = hjs_fc.field;
 	else
 		hjs_fc.act_field = hjs_fc_set_field( hjs_fc.field, 0.0 );
+
+	hjs_fc.target_field = hjs_fc.field;	
 
 	return vars_push( FLOAT_VAR, hjs_fc.act_field );
 }
@@ -724,7 +748,7 @@ static double hjs_fc_sweep_to( double new_field )
 
 	vars_pop( v );
 
-	/* Wait for long enough for the field to settle at the new field (the
+	/* Wait long enough for the field to settle at the new field (the
 	   time is just a guess derived from what we observed during the
 	   initialization phase) */
 
