@@ -780,6 +780,9 @@ Var *vars_negate( Var *v )
 /* the first one is less than the second or if the first is less or equal   */
 /* than the second variable (tests for greater or greater or equal can be   */
 /* done simply by switching the arguments).                                 */
+/* In comparisons between floating point numbers not only the numbers are   */
+/* compared but, in order to reduce problems due to rounding errors, also   */
+/* the numbers when the last significant bit is changed.                    */
 /* ->                                                                       */
 /*    * type of comparison (COMP_EQUAL, COMP_UNEQUAL, COMP_LESS or          */
 /*      COMP_LESS_EQUAL)                                                    */
