@@ -189,20 +189,32 @@ static bool other_data_request( int type, void * ptr )
 	long i;
 	long count;
 	long *ca;
+	int is_set;
 
-	/* Currently there is only one allowed type... */
 
-	if ( type != D_CLEAR_CURVE )
-		return FAIL;
-
-	count = * ( ( long * ) ptr );       /* length of list of curves to clear */
-	ptr += sizeof( long );
-	ca = ( long * ) ptr;                /* list of curve numbers */
-
-	for ( i = 0; i < count; i++ )
+	switch( type )
 	{
-		clear_curve( ca[ i ] );
-		cut_clear_curve( ca[ i ] );
+		case D_CLEAR_CURVE :
+			count = * ( ( long * ) ptr );     /* length of list of curves */
+			ptr += sizeof( long );
+			ca = ( long * ) ptr;              /* list of curve numbers */
+
+			for ( i = 0; i < count; i++ )
+			{
+				clear_curve( ca[ i ] );
+				cut_clear_curve( ca[ i ] );
+			}
+
+			break;
+
+		case D_CHANGE_SCALE :
+			is_set = *( ( int * ) ptr );
+			ptr += sizeof( int );
+			change_scale( is_set, ( double * ) ptr );
+			break;
+
+		default :
+			return FAIL;
 	}
 
 	return OK;
