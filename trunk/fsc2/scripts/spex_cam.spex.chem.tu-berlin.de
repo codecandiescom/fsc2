@@ -2621,11 +2621,12 @@ cwn_offset = 0.5 * calib[ 2 ]
 // using the minimum overlap. From this calculate the overlap to use plus
 // the endpoint of the spectrum - we must arrange things so that the points
 // of the single spectra fit onto each other in the overlap region, so the
-// endpoint may have to be changed a tiny bit (making the spectrum a bit
+// end point may have to be changed a tiny bit (making the spectrum a bit
 // broader than requested).
 
 N_specs = 1;
-ccd_width = ( CCD_Points - 1 ) * Bin[ 1 ] * calib[ 2 ];
+
+ccd_width = CCD_Points * Bin[ 1 ] * calib[ 2 ];
 cur_width = spec_width - ccd_width + overlap;
 
 WHILE ( 1 ) {
@@ -2638,19 +2639,17 @@ WHILE ( 1 ) {
 }
 
 overlap = ccd_width - ( spec_width - ccd_width ) / ( N_specs - 1 );
-overlap = floor( overlap / step_wn ) * step_wn;
-Overlap_Points = round( overlap / step_wn );
+overlap = ceil( overlap / step_wn ) * step_wn;
+Overlap_Points = round( overlap / step_wn ) - 1;
 
 IF laser_line != 0.0 {
-	end_wn = start_wn + ( N_specs - 1 ) * ( ccd_width - overlap )
-             + ccd_width - step_wn;
-	wn_increment = ccd_width - overlap;
-	start_cwn = start_wn + 0.5 * ccd_width + cwn_offset;
+	end_wn = start_wn + ( N_specs - 1 ) * ( ccd_width - overlap ) + ccd_width;
+	wn_increment = ccd_width - overlap + step_wn;
+	start_cwn = start_wn + 0.5 * ( ccd_width - step_wn ) + cwn_offset;
 } ELSE {
-	end_wn = start_wn - ( N_specs - 1 ) * ( ccd_width - overlap )
-             - ccd_width + step_wn;
-	wn_increment = overlap - ccd_width;
-	start_cwn = start_wn - 0.5 * ccd_width - cwn_offset;
+	end_wn = start_wn - ( N_specs - 1 ) * ( ccd_width - overlap ) - ccd_width;
+	wn_increment = overlap - ccd_width - step_wn;
+	start_cwn = start_wn - 0.5 * ( ccd_width - step_wn ) - cwn_offset;
 }
 
 N_Points = ( N_specs - 1 ) * ( CCD_Points - Overlap_Points ) + CCD_Points;
@@ -2696,15 +2695,15 @@ FOR I = 1 : N_scans {
 		// Write raw spectral data to file
 
 		IF laser_line != 0.0 {
-			fsave( F_cur, "\\#. scan, spectrum from # cm^-1 to # "
-                          "cm^-1\\n\\n", I,
-                          cur_wn + ( CCD_Points - 1 ) * step_wn );
+			fsave( F_cur, "\\# #. scan, spectrum from # cm^-1 to "
+                          "# cm^-1\\n\\n",
+                          I, cur_wn, cur_wn + ( CCD_Points - 1 ) * step_wn );
 			wn = lin_space( cur_wn, cur_wn + ( CCD_Points - 1 ) * step_wn,
 							CCD_Points );
 		} ELSE {
-			fsave( F_cur, "\\#. scan, spectrum from # cm^-1 to # "
-                          "cm^-1\\n\\n", I,
-                          cur_wn - ( CCD_Points - 1 ) * step_wn );
+			fsave( F_cur, "\\# #. scan, spectrum from # cm^-1 to "
+                          "# cm^-1\\n\\n",
+                          I, cur_wn - ( CCD_Points - 1 ) * step_wn );
 			wn = lin_space( cur_wn, cur_wn - ( CCD_Points - 1 ) * step_wn,
 							CCD_Points );
 		}
