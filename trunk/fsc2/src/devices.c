@@ -56,7 +56,7 @@ void device_add( char *dev_name )
 	if ( lstat( lib_name, &buf ) < 0 &&
 		 lstat( strrchr( lib_name, '/' ) + 1, &buf ) < 0 )
 	{
-		eprint( FATAL, "Can't access module for device `%s'.", dev_name );
+		eprint( FATAL, "Can't find or access module `%s.so'.", dev_name );
 		T_free( lib_name );
 		T_free( dev_name );
 		THROW( EXCEPTION );
@@ -103,8 +103,8 @@ void device_add( char *dev_name )
 
 		if ( strstr( real_name, ".so" ) == NULL )
 		{
-			eprint( FATAL, "Module `%s' used for device `%s' hasn't the "
-					"extension \".so\".", real_name, dev_name );
+			eprint( FATAL, "Module `%s' used for device `%s' hasn't extension "
+					"\".so\".", real_name, dev_name );
 			T_free( lib_name );
 			T_free( dev_name );
 			T_free( real_name );
