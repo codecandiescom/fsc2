@@ -1386,6 +1386,8 @@ Var *pulser_next_phase( Var *v )
 		if ( ++f->next_phase >= f->pc_len )
 			f->next_phase = 0;
 
+		dg2020.needs_update = SET;
+
 		if ( FSC2_MODE == EXPERIMENT )
 			for ( j = 0; j < NUM_PHASE_TYPES; j++ )
 				if ( f->phase_setup->is_set[ j ] &&
@@ -1412,7 +1414,7 @@ Var *pulser_reset( Var *v )
 	vars_pop( pulser_pulse_reset( NULL ) );
 	if ( dg2020_phs[ 0 ].function != NULL ||
 		 dg2020_phs[ 1 ].function != NULL )
-		vars_pop( pulser_pulse_reset( NULL ) );
+		vars_pop( pulser_phase_reset( NULL ) );
 
 	return pulser_update( NULL );
 }
@@ -1469,6 +1471,7 @@ Var *pulser_phase_reset( Var *v )
 		}
 
 		f->next_phase = 0;
+		dg2020.needs_update = SET;
 
 		if ( FSC2_MODE == EXPERIMENT )
 			for ( j = 0; j < NUM_PHASE_TYPES; j++ )

@@ -1248,7 +1248,7 @@ Var *pulser_reset( Var *v )
 
 	if ( ep385_phs[ 0 ].function != NULL ||
 		 ep385_phs[ 1 ].function != NULL )
-		vars_pop( pulser_pulse_reset( NULL ) );
+		vars_pop( pulser_phase_reset( NULL ) );
 	vars_pop( pulser_pulse_reset( NULL ) );
 
 	in_reset = UNSET;

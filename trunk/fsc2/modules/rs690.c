@@ -1208,7 +1208,7 @@ Var *pulser_reset( Var *v )
 	vars_pop( pulser_pulse_reset( NULL ) );
 	if ( rs690_phs[ 0 ].function != NULL ||
 		 rs690_phs[ 1 ].function != NULL )
-		vars_pop( pulser_pulse_reset( NULL ) );
+		vars_pop( pulser_phase_reset( NULL ) );
 
 	in_reset = UNSET;
 
