@@ -548,7 +548,7 @@ fsc2_config.h: Makefile
 	else                                     \
 		echo "Creating fsc2_config.h...";    \
 	fi
-	@echo "/*--- Created automatically, dont' change ---*/" > fsc2_config.h
+	@echo "/*--- Created automatically, don't change ---*/" > fsc2_config.h
 	@echo -e $(patsubst -D%,\\n#define %,$(subst =, ,$(CONFFLAGS))) | \
 		sort | uniq >> fsc2_config.h
 
