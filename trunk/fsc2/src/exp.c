@@ -280,7 +280,7 @@ void store_exp( FILE *in )
 						sizeof( Var ) );
 				prg_token[ prg_length ].tv.vptr->name = NULL;
 				prg_token[ prg_length ].tv.vptr->name =
-					                            T_strdup( Var_Stack->name );
+					                               T_strdup( Var_Stack->name );
 				vars_pop( Var_Stack );
 				break;
 
