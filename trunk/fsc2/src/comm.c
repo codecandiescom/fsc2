@@ -300,11 +300,11 @@ int new_data_callback( XEvent *a, void *b )
 	OTHERWISE
 	{
 		/* Before we kill the child test that the pid isn't already set to 0
-		   (in which case we'ld commit suicide) and that it's still alive.
+		   (in which case we'd commit suicide) and that it's still alive.
 		   The death of the child and all the necessary cleaning up is handled
 		   by the SIGCHLD handlers in run.c, so no need to worry here */
 
-		if ( child_pid > 0 && kill( child_pid, -1 ) )
+		if ( child_pid > 0 && ! kill( child_pid, 0 ) )
 			kill( child_pid, SIGTERM );
 
 		fl_set_idle_callback( 0, NULL );
@@ -780,10 +780,10 @@ static bool pipe_read( int fd, void *buf, size_t bytes_to_read )
 	/* From man 2 read(): POSIX allows a read that is interrupted after
 	   reading some data to return -1 (with errno set to EINTR) or to return
 	   the number of bytes already read.
-	   The latter happens on Linux system with kernel 2.0.36 while on a newer
-	   system, e.g. 2.2.12, -1 is returned when the read is interrupted.
-	   Blocking all expected signals while reading and using this rather
-	   lengthy loop tries to get it right in both cases. */
+	   The latter happens on newer Linux system with e.g. kernel 2.2.12 while
+	   on a older system, e.g. 2.0.36, -1 is returned when the read is
+	   interrupted. Blocking all expected signals while reading and using
+	   this rather lengthy loop tries to get it right in both cases. */
 
 	sigemptyset( &new_mask );
 	if ( I_am == CHILD )
@@ -799,8 +799,17 @@ static bool pipe_read( int fd, void *buf, size_t bytes_to_read )
 	{
 		bytes_read = read( fd, buf + already_read, bytes_to_read );
 
+		/* If child received a deadly signal... */
+
+		if ( I_am == CHILD && do_quit )
+			break;
+
+		/* Non-deadly signal has been received */
+
 		if ( bytes_read == -1 && errno == EINTR )
 			continue;
+
+		/* Real error while reading, not a signal */
 
 		if ( bytes_read <= 0 )
 			break;
