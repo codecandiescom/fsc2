@@ -24,7 +24,7 @@ int main( void )
 		 return EXIT_FAILURE;
 
 	fprintf( fp, "/* Please don't change - created automatically during "
-			     "installation. */\n\n" );
+			     "installation. */\n\n#include <fcntl.h>\n" );
 
 	if ( sizeof( f.l_type ) == sizeof( char ) )
 		fprintf( fp, "#define LTYPE_TYPE      char\n" );
