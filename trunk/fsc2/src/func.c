@@ -561,6 +561,28 @@ Var *func_call( Var *f )
 
 
 /*------------------------------------------------------------------------*/
+/* The following functions are for maintaining a stack of EDL (and other */
+/* module) functions calls, which is actually implemented as a linked    */
+/* list. The stack pointer, i.e. the pointer to the head of the linked   */
+/* list, is the 'Call_Stack' member of the global 'EDL' structure. The   */
+/* topmost element of the stack (i.e. the head of the linked list)       */
+/* always refers to the currently running (EDL) function.                */
+/* For the main program the functions only get called when an EDL        */
+/* function is invoked. In contrast, for modules they also are called    */
+/* for hook-function calls and, for pulser modules, also for calls of    */
+/* the functions declared in the pulser structure (i.e. functions, that  */
+/* the pulser module must export to allow the setting of the pulsers     */
+/* properties and the creation of pulses). The information stored in the */
+/* call stack elements is a pointer to the EDL function structure (if    */
+/* applicable, i.e. for EDL function calls), a pointer to the module     */
+/* structure (for calsl from modules) and the name of the device         */
+/* controlled by the module (i.e. not the module name, but the name as   */
+/* it should appear in error messages for the device), and the
+ */
+/* more than one devices of the same generic type 
+
+/* The call stack elements store some information about the EDL function, 
+
 /* Before a function gets called a few data items have to be stored for   */
 /* utility functions like print() and for handling pulsers. print() needs */
 /* the name of the function and, for functions from modules, the name of  */
@@ -568,7 +590,6 @@ Var *func_call( Var *f )
 /* function must be stored as well as the global variable 'Cur_Pulser'    */
 /* must be set, and on return from the called function reset to the       */
 /* previous value.                                                        */
-/* A return value of NULL means we're running out of memory.              */
 /*------------------------------------------------------------------------*/
 
 CALL_STACK *call_push( Func *f, Device *device, const char *device_name,
@@ -584,7 +605,10 @@ CALL_STACK *call_push( Func *f, Device *device, const char *device_name,
 	if ( f != NULL )
 		cs->device = f->device;
 	else
+	{
+		fsc2_assert( device != NULL );
 		cs->device = device;
+	}
 	cs->dev_name = device_name;
 	cs->dev_count = dev_count;
 
@@ -598,7 +622,7 @@ CALL_STACK *call_push( Func *f, Device *device, const char *device_name,
 			Cur_Pulser = cs->Cur_Pulser = T_atol( t + 1 ) - 1;
 	}
 	else
-		cs->Cur_Pulser = -1;
+		cs->Cur_Pulser = Cur_Pulser;
 
 	/* If this is call of function within one of the modules during the test
 	   run add an extremely rough estimate for the mean time spend in the
@@ -627,8 +651,10 @@ CALL_STACK *call_pop( void )
 	EDL.Call_Stack = cs->prev;
 	T_free( cs );
 
-	if ( EDL.Call_Stack != NULL && EDL.Call_Stack->Cur_Pulser != -1 )
-		Cur_Pulser = cs->prev->Cur_Pulser;
+	if ( cs != NULL )
+		Cur_Pulser = cs->Cur_Pulser;
+	else
+		Cur_Pulser = -1;
 
 	return EDL.Call_Stack;
 }
