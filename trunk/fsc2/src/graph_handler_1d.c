@@ -50,8 +50,6 @@ int canvas_handler_1d( FL_OBJECT *obj, Window window, int w, int h, XEvent *ev,
 					   void *udata )
 {
 	Canvas *c = ( Canvas * ) udata;
-	long i;
-	bool active = UNSET;
 
 
 	switch ( ev->type )
@@ -68,24 +66,15 @@ int canvas_handler_1d( FL_OBJECT *obj, Window window, int w, int h, XEvent *ev,
             break;
 
 		case ButtonPress :
-			for ( i = 0; i < G.nc; i++ )
-				active |= G.curve[ i ]->active;
-			if ( active )
-				press_handler_1d( obj, window, ev, c );
+			press_handler_1d( obj, window, ev, c );
 			break;
 
 		case ButtonRelease :
-			for ( i = 0; i < G.nc; i++ )
-				active |= G.curve[ i ]->active;
-			if ( active )
-				release_handler_1d( obj, window, ev, c );
+			release_handler_1d( obj, window, ev, c );
 			break;
 
 		case MotionNotify :
-			for ( i = 0; i < G.nc; i++ )
-				active |= G.curve[ i ]->active;
-			if ( active )
-				motion_handler_1d( obj, window, ev, c );
+			motion_handler_1d( obj, window, ev, c );
 			break;
 	}
 
@@ -103,6 +92,7 @@ static void press_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
 	Curve_1d *cv;
 	int old_button_state = G.button_state;
 	unsigned int keymask;
+	bool active = UNSET;
 
 
 	/* In the axis areas two buttons pressed simultaneously doesn't has a
@@ -138,9 +128,15 @@ static void press_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
 
 	fl_get_win_mouse( window, &c->ppos[ X ], &c->ppos[ Y ], &keymask );
 
+	for ( i = 0; i < G.nc; i++ )
+		active |= G.curve[ i ]->active;
+
 	switch ( G.button_state )
 	{
 		case 1 :                               /* left button */
+			if ( ! active )
+				break;
+
 			fl_set_cursor( window, G.cursor[ ZOOM_BOX_CURSOR ] );
 
 			G.start[ X ] = c->ppos[ X ];
@@ -179,6 +175,9 @@ static void press_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
 			break;
 
 		case 2 :                               /* middle button */
+			if ( ! active )
+				break;
+
 			fl_set_cursor( window, G.cursor[ MOVE_HAND_CURSOR ] );
 
 			G.start[ X ] = c->ppos[ X ];
@@ -207,6 +206,9 @@ static void press_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
 			break;
 
 		case 4 :                               /* right button */
+			if ( ! active )
+				break;
+
 			fl_set_cursor( window, G.cursor[ ZOOM_LENS_CURSOR ] );
 
 			G.start[ X ] = c->ppos[ X ];
@@ -228,6 +230,9 @@ static void press_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
 			break;
 
 		case 8 : case 16 :                               /* button 4/5/wheel */
+			if ( ! active )
+				break;
+
 			if ( G.drag_canvas != 1 && G.drag_canvas != 2 )
 				break;
 
@@ -262,6 +267,7 @@ static void release_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
 	bool scale_changed = UNSET;
 	int i;
 	Curve_1d *cv;
+	bool active = UNSET;
 
 
 	obj = obj;
@@ -289,9 +295,15 @@ static void release_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
 	if ( c->ppos[ Y ] >= ( int ) G.canvas.h )
 		c->ppos[ Y ] = G.canvas.h - 1;
 
+	for ( i = 0; i < G.nc; i++ )
+		active |= G.curve[ i ]->active;
+
 	switch ( G.button_state )
 	{
 		case 1 :                               /* left mouse button */
+			if ( ! active )
+				break;
+
 			switch ( G.drag_canvas )
 			{
 				case 1 :                       /* x-axis window */
@@ -310,6 +322,9 @@ static void release_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
 			break;
 
 		case 2 :                               /* middle mouse button */
+			if ( ! active )
+				break;
+
 			if ( G.drag_canvas & 1 )
 				redraw_canvas_1d( &G.x_axis );
 			if ( G.drag_canvas & 2 )
@@ -317,6 +332,9 @@ static void release_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
 			break;
 
 		case 4 :                               /* right mouse button */
+			if ( ! active )
+				break;
+
 			switch ( G.drag_canvas )
 			{
 				case 1 :                       /* in x-axis window */
@@ -334,6 +352,9 @@ static void release_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
 			break;
 
 		case 8 :                               /* button 4/wheel up */
+			if ( ! active )
+				break;
+
 			if ( G.drag_canvas == 1 )
 			{
 				G.x_axis.ppos[ X ] = G.start[ X ] - G.x_axis.w / 10;
@@ -402,6 +423,9 @@ static void release_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
 			break;
 
 		case 16 :                              /* button 5/wheel down */
+			if ( ! active )
+				break;
+
 			if ( G.drag_canvas == 1 )
 			{
 				G.x_axis.ppos[ X ] = G.start[ X ] + G.x_axis.w / 10;
@@ -482,6 +506,7 @@ static void motion_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
 	long i;
 	unsigned int keymask;
 	bool scale_changed = UNSET;
+	bool active = UNSET;
 
 
 	obj = obj;
@@ -506,9 +531,15 @@ static void motion_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
 
 	fl_get_win_mouse( window, &c->ppos[ X ], &c->ppos[ Y ], &keymask );
 
+	for ( i = 0; i < G.nc; i++ )
+		active |= G.curve[ i ]->active;
+
 	switch ( G.button_state )
 	{
 		case 1 :                               /* left mouse button */
+			if ( ! active )
+				break;
+
 			if ( G.drag_canvas & 1 )           /* x-axis or canvas window */
 			{
 				c->box_w = c->ppos[ X ] - G.start[ X ];
@@ -535,6 +566,9 @@ static void motion_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
 			break;
 
 		case 2 :                               /* middle button */
+			if ( ! active )
+				break;
+
 			for ( i = 0; i < G.nc; i++ )
 			{
 				cv = G.curve[ i ];

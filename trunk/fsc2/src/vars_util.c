@@ -1915,8 +1915,8 @@ Var *vars_array_check( Var *v1, Var *v2 )
 	{
 		if ( v1->type == ARR_REF && v1->from->dim != 1 )
 		{
-			eprint( FATAL, SET, "Arithmetic can be only done "
-					"on array slices.\n" );
+			eprint( FATAL, SET, "Arithmetic can be only done on array slices, "
+					"not on multi-dimensional arrays.\n" );
 			THROW( EXCEPTION );
 		}
 
@@ -1925,20 +1925,38 @@ Var *vars_array_check( Var *v1, Var *v2 )
 	}
 	else
 	{
+		if ( v1->type & ( INT_CONT_ARR | FLOAT_CONT_ARR ) && v1->dim != 1 )
+		{
+			eprint( FATAL, SET, "Arithmetic can be only done on array slices, "
+					"not on multi-dimensional arrays.\n" );
+			THROW( EXCEPTION );
+		}
+
 		if ( ! ( v1->flags & NEED_ALLOC ) )
 			return v1;
 	}
 
 	/* Make sure the right hand side is an array with a defined size */
 
-	if ( ! ( v2->type &
-			 ( ARR_REF | ARR_PTR | INT_ARR | FLOAT_ARR ) )
-		 || ( v2->type & ( INT_ARR | FLOAT_ARR ) &&
-			  v2->flags & NEED_ALLOC )
-		 || ( v2->type & ( ARR_REF | ARR_PTR ) &&
-			  v2->from->flags & NEED_ALLOC ) )
+	if ( ! ( v2->type & ( ARR_REF | ARR_PTR | INT_ARR | FLOAT_ARR ) ) )
 	{
-		eprint( FATAL, SET, "Size of array can't be determined.\n" );
+		eprint( FATAL, SET, "Size of variable sized array '%s' hasn't been "
+				"set yet.\n", v1->type == ARR_REF || v1->type == ARR_PTR ?
+				v1->from->name : v1->name );
+		THROW( EXCEPTION );
+	}
+
+	if ( v2->type & ( INT_ARR | FLOAT_ARR ) && v2->flags & NEED_ALLOC )
+	{
+		eprint( FATAL, SET, "Size of array '%s' has not been set yet.\n",
+				v->name );
+		THROW( EXCEPTION );
+	}
+
+	if ( v2->type & ( ARR_REF | ARR_PTR ) && v2->from->flags & NEED_ALLOC )
+	{
+		eprint( FATAL, SET, "Size of array '%s' has not been set yet.\n",
+				v->from->name );
 		THROW( EXCEPTION );
 	}
 

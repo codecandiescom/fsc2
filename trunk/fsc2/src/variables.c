@@ -1782,7 +1782,7 @@ static long vars_calc_index( Var *a, Var *v )
 		/* Here we must be careful: If the array is dynamically sized and
 		   we're still in the test phase, the array slice size might be a
 		   dummy value that get's corrected in the real measurement. In this
-		   case (i.e. test phase and array is dynamically sized and its the
+		   case (i.e. test phase and array is dynamically sized and it's the
 		   last index into the array) we accept even an index that's too large
 		   and readjust it to the currenty possible maximum value hoping that
 		   everthing will work out well in the experiment. */
@@ -1899,7 +1899,6 @@ static Var *vars_setup_new_array( Var *v, int dim )
 
 			vars_pop( v );
 
-			a->flags |= IS_DYNAMIC;
 			a->sizes[ i ] = 0;
 			a->flags |= NEED_ALLOC;
 			ret = vars_push( ARR_PTR, NULL, a );
@@ -2051,7 +2050,7 @@ void vars_assign( Var *src, Var *dest )
 			break;
 	}
 
-	dest->flags &= ~NEED_INIT;
+	dest->flags &= ~ NEED_INIT;
 
 	if ( ! ( dest->type & ( INT_CONT_ARR | FLOAT_CONT_ARR ) ) )
 		vars_pop( dest );
@@ -2271,7 +2270,7 @@ static void vars_ass_from_ptr( Var *src, Var *dest )
 					             + dest->len * d->sizes[ d->dim - 1 ];
 			}
 
-			d->flags &= ~NEED_ALLOC;
+			d->flags &= ~ NEED_ALLOC;
 		}
 		else
 		{
@@ -2434,7 +2433,7 @@ static void vars_ass_from_trans_ptr( Var *src, Var *dest )
 			dest->val.dpnt = d->val.dpnt + dest->len * d->sizes[ d->dim - 1 ];
 		}
 
-		d->flags &= ~NEED_ALLOC;
+		d->flags &= ~ NEED_ALLOC;
 	}
 	else
 	{
@@ -2503,7 +2502,7 @@ static void vars_ass_from_trans_ptr( Var *src, Var *dest )
 
 void vars_arr_init( Var *v )
 {
-	size_t ni;
+	size_t num_init;
 	Var  *p1,
 		 *p2,
 		 *a;
@@ -2514,7 +2513,7 @@ void vars_arr_init( Var *v )
 
 	if ( v->type == UNDEF_VAR )
 	{
-		v->prev->from->flags &= ~NEED_INIT;
+		v->prev->from->flags &= ~ NEED_INIT;
 		vars_pop( v->prev );
 		vars_pop( v );
 		return;
@@ -2523,14 +2522,14 @@ void vars_arr_init( Var *v )
 	/* The variable pointer this function gets passed is a pointer to the very
        last initialization data on the variable stack. Now we've got to work
        our way up the variable stack until we find the first non-data variable
-       which must be of ARR_PTR type. While doing so, we also count the number
-       of initializers, 'ni', on the stack. */
+       which must be of ARR_PTR type. While doing so, we count the number
+       of initializers 'num_init' on the stack. */
 
-	ni = 0;
+	num_init = 0;
 	while ( v->type != ARR_PTR )
 	{
 		v = v->prev;
-		ni++;
+		num_init++;
 	}
 	a = v->from;
 	vars_check( a, INT_CONT_ARR | FLOAT_CONT_ARR );
@@ -2557,14 +2556,14 @@ void vars_arr_init( Var *v )
 			THROW( EXCEPTION );
 		}
 
-		if ( ni < 2 )
+		if ( num_init < 2 )
 		{
-			eprint( FATAL, SET, "Ony got one value as initializer for "
-					"1-dimensional variable sized array '%s'.\n", a->name );
+			eprint( FATAL, SET, "Got only one value as initializer for "
+					"1-dimensional, variable sized array '%s'.\n", a->name );
 			THROW( EXCEPTION );
 		}
 
-		a->len = a->sizes[ 0 ] = ni;
+		a->len = a->sizes[ 0 ] = num_init;
 
 		if ( a->type == INT_CONT_ARR )
 			a->val.lpnt = T_malloc( a->len * sizeof *a->val.lpnt );
@@ -2577,11 +2576,11 @@ void vars_arr_init( Var *v )
 	/* Check that the number of initializers fits the number of elements of
        the array */
 
-	if ( ni < a->len )
+	if ( num_init < a->len )
 		eprint( WARN, SET, "Less initializers for array '%s' than it has "
 				"elements.\n", a->name );
 
-	if ( ni > a->len )
+	if ( num_init > a->len )
 	{
 		eprint( FATAL, SET, "Too many initializers for array '%s'.\n",
 				a->name );
@@ -2623,7 +2622,7 @@ void vars_arr_init( Var *v )
 		vars_pop( p1 );
 	}
 
-	a->flags &= ~NEED_INIT;
+	a->flags &= ~ NEED_INIT;
 	vars_pop( v );
 }
 

@@ -1361,8 +1361,17 @@ Var *f_size( Var *v )
 
 	vars_check( v, ARR_REF );
 
-	if ( v->next == NULL && v->from->dim == 1 )
-		return vars_push( INT_VAR, ( long ) v->from->len );
+	/* Only for 1-dimensional arrays a missing second argument is allowed */
+
+	if ( v->next == NULL )
+	{
+		if ( v->from->dim == 1 )
+			return vars_push( INT_VAR, ( long ) v->from->len );
+
+		print( FATAL, "Missing dimension argument (array '%s' is "
+			   "%d-dimensional).\n", v->from->name, v->from->dim );
+		THROW( EXCEPTION );
+	}
 
 	vars_check( v->next, INT_VAR | FLOAT_VAR );
 
@@ -1382,6 +1391,13 @@ Var *f_size( Var *v )
 		THROW( EXCEPTION );
 	}
 
+	if ( size == v->from->dim - 1 && v->from->flags & NEED_ALLOC )
+	{
+		print( FATAL, "Array '%s' is variable sized and size of %d. dimension "
+			   "is still unknown.\n", v->from->name, v->from->dim );
+		THROW( EXCEPTION );
+	}
+
 	return vars_push( INT_VAR, ( long ) v->from->sizes[ size ] );
 }
 
@@ -1394,6 +1410,14 @@ Var *f_size( Var *v )
 Var *f_sizes( Var *v )
 {
 	vars_check( v, ARR_REF );
+
+	if ( v->from->flags & NEED_ALLOC )
+	{
+		print( FATAL, "Array '%s' is variable sized and size of last "
+			   "dimension is still unknown.\n", v->from->name );
+		THROW( EXCEPTION );
+	}
+
 	return vars_push( INT_ARR, v->from->sizes, ( long ) v->from->dim );
 }
 
