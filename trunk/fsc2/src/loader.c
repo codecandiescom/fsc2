@@ -622,10 +622,6 @@ int get_lib_symbol( const char *from, const char *symbol, void **symbol_ptr )
 
 void unload_device( Device *dev )
 {
-
-	if ( ! dev->is_loaded )
-		return;
-
 	if ( ! exit_hooks_are_run && dev->driver.is_exit_hook )
 	{
 		TRY                             /* catch exceptions from the exit   */

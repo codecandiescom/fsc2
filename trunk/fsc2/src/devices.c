@@ -227,7 +227,8 @@ void delete_devices( void )
 
 	for ( ; cd != NULL; cd = cdp )
 	{
-		unload_device( cd );           /* run exit hooks and unload module */
+		if ( cd->is_loaded )
+			unload_device( cd );         /* run exit hooks and unload module */
 		T_free( cd->name );
 		cdp = cd->prev;
 		T_free( cd );
