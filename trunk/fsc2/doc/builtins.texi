@@ -233,7 +233,7 @@ This function can only be used in the @code{PREPARATIONS} section of an
 
 
 @anchor{display_1d}
-@item display_1d( )
+@item display_1d()
 @findex display_1d()
 This function is used called to draw data in the window for 1D-data. It
 takes the following arguments:
@@ -272,7 +272,7 @@ This function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{display_2d}
-@item display_2d( )
+@item display_2d()
 @findex display_2d()
 This function is used called to draw data in the window for 2D-data.
 experiments. It takes the following arguments:
@@ -308,7 +308,7 @@ This function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{display}
-@item display( )
+@item display()
 @findex display()
 This function can be used instead of either @code{display_1d()} or
 @code{display_2d()} if either @code{init_1d()} or @code{init_2d()} (but
@@ -342,7 +342,7 @@ This function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{ display_mode}
-@item display_mode( )
+@item display_mode()
 @findex display_mode()
 Beside the normal display mode, where data get rescaled automatically to
 fit onto the 1D display window (at least as long as the @code{FS} button
@@ -740,6 +740,8 @@ will produce output already in the test run (the @code{T} is never
 printed).
 @end table
 
+@end table
+
 
 @node File handling functions, Interaction functions, Output functions, Built-in Functions
 @section File handling functions
@@ -753,8 +755,10 @@ script as long as you only are going to use a single output file --
 write data to a file in this case.
 
 
+@table @samp
+
 @anchor{get_file}
-@item get_file( )
+@item get_file()
 @findex get_file()
 Opens a new file and returns a unique identifier for the file that can
 be stored in an integer variable and is to be used in calls to functions
@@ -791,7 +795,7 @@ This function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{open_file}
-@item open_file( )
+@item open_file()
 @findex open_file()
 This function is similar to the previous one with the main difference
 that one may specify an hard-coded file name in the program. The
@@ -808,7 +812,7 @@ This function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{clone_file}
-@item clone_file( )
+@item clone_file()
 @findex clone_file()
 Sometimes two output files are needed that should only differ in their
 extension but not in the filename. In this case the function
@@ -1137,7 +1141,8 @@ This function can only be used in the @code{EXPERIMENT} section of an
 
 @end table
 
-@node Interaction functions, Mathematical functions, Output functions, Built-in Functions
+
+@node Interaction functions, Mathematical functions, File handling functions, Built-in Functions
 @section Interaction functions
 @cindex interaction functions
 
