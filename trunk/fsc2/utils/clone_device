@@ -169,7 +169,8 @@ print "Everything worked out well. Now you simply have to re-make fsc2\n" .
 	  "address to the one of the new device.\n\n" .
 	  "If the device is accessed via the serial port you will have to\n" .
 	  "edit its configuration file ($dev.conf the \'config\'\n" .
-	  "directory) in order to set the serial port it\'s attached to.\n\n";
+	  "directory) to set the serial port it\'s attached to *before* you\n" .
+	  "compile and install the new module.\n\n";
 
 #
 # That's all...
