@@ -434,9 +434,9 @@ static int open_mail_socket( const char *remote, const char *local )
 
 	/* Otherwise we can't simply connect to the remote domain but must first
 	   figure out which is the machine that takes care of mail for the domain
-	   and then try to connect to this machine (there can be several, so we
-	   repeat trying until we connected successfully or there are no more
-	   machines prepared that would accept mail for the domain). */
+	   and then try to connect to this machine (or machines, there can be
+	   several, so we repeat trying until we connected successfully or there
+	   are no more machines prepared that would accept mail for the domain). */
 
 	for ( host = get_mail_server( remote, local ); host != NULL;
 		  host = get_mail_server( NULL, local ) )
