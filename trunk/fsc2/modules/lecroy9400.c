@@ -528,7 +528,7 @@ Var *digitizer_averaging( Var *v )
 	}
 	
 	/* Get the number of averages to use - adjust value if necessary to one
-	   of the possible number of averages as given by the array 'na' */
+	   of the possible numbers of averages as given by the array 'na' */
 
 	if ( ( v = vars_pop( v ) ) == NULL )
 	{
@@ -572,7 +572,8 @@ Var *digitizer_averaging( Var *v )
 	}
 
 	/* If there is a further argument this has to be the overflow rejection
-	   setting */
+	   setting, otherwise overflow rejection is switched off and the record
+	   length is set the to the default value. */
 
 	reject = UNSET;
 	rec_len = UNDEFINED_REC_LEN;
@@ -599,15 +600,11 @@ Var *digitizer_averaging( Var *v )
 			}
 		}
 
-		v = vars_pop( v );
-
 		/* Last (optional) value is the number of points to use in averaging */
 
-		if ( v != NULL )
+		if ( ( v = vars_pop( v ) ) != NULL )
 		{
-			vars_check( v, INT_VAR );
-
-			rec_len = v->val.lval;
+			rec_len = get_long( v, "record length", DEVICE_NAME );
 
 			if ( rec_len <= 0 )
 			{
@@ -631,17 +628,15 @@ Var *digitizer_averaging( Var *v )
 
 				if ( rec_len < cl[ i ] )
 				{
-					eprint( SEVERE, SET, "%s: Can't set record length to %ld, "
-							"using next larger allowed value of %ld "
-							"instead.\n", DEVICE_NAME, rec_len, cl[ i ] );
+					eprint( SEVERE, SET, "%s: Can't set record length to %ld "
+							"in %s(), using %ld instead.\n", DEVICE_NAME,
+							rec_len, Cur_Func, cl[ i ] );
 					rec_len = cl[ i ];
 					break;
 				}
 
 				i++;
 			}
-
-			v = vars_pop( v );
 		}
 
 		too_many_arguments( v, DEVICE_NAME );

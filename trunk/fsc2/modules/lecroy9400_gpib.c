@@ -37,7 +37,6 @@ bool lecroy9400_init( const char *name )
 	char buffer[ 100 ];
 	long len = 100;
 	int i;
-	unsigned int j;
 
 
 	is_acquiring = UNSET;
@@ -103,25 +102,11 @@ bool lecroy9400_init( const char *name )
 	/* Set up averaging for function channels */
 
 	for ( i = LECROY9400_FUNC_E; i <= LECROY9400_FUNC_F; i++ )
-	{
-		/* If the record length hasn't been set use one that is as least as
-		   long as the number of points we can fetch for an averaged curve
-		   (which is just the number of points displayed on the screen) */
-
-		if ( lecroy9400.rec_len[ i ] == UNDEFINED_REC_LEN )
-		{
-			for ( j = 0; j < CL_ENTRIES; j++ )
-				if ( cl[ j ] >= ml[ lecroy9400.tb_index ] )
-					break;
-			lecroy9400.rec_len[ i ] = cl[ j ];
-		}
-
 		if ( lecroy9400.is_num_avg[ i ] )
 			lecroy9400_set_up_averaging( i, lecroy9400.source_ch[ i ],
 										 lecroy9400.num_avg[ i ],
 										 lecroy9400.is_reject[ i ],
 										 lecroy9400.rec_len[ i ] );
-	}
 
 	return OK;
 }
@@ -535,6 +520,7 @@ void lecroy9400_set_up_averaging( long channel, long source, long num_avg,
 								  bool reject, long rec_len )
 {
 	char cmd[ 100 ];
+	unsigned int i;
 
 
 	fsc2_assert( channel >= LECROY9400_FUNC_E &&
@@ -549,14 +535,23 @@ void lecroy9400_set_up_averaging( long channel, long source, long num_avg,
 	lecroy9400.rec_len[ channel ] = rec_len;
 	lecroy9400.is_reject[ channel ] = reject;
 
+	/* If the record length hasn't been set use one that is as least as
+	   long as the number of points we can fetch for an averaged curve
+	   (which is just the number of points displayed on the screen) */
+
+	if ( rec_len == UNDEFINED_REC_LEN )
+	{
+		for ( i = 0; j < CL_ENTRIES; j++ )
+			if ( cl[ i ] >= ml[ lecroy9400.tb_index ] )
+				break;
+		rec_len = lecroy9400.rec_len[ channel ] = cl[ i ];
+	}
+
 	if ( FSC2_MODE != EXPERIMENT )
 		return;
 
-	snprintf( cmd, 100, "SEL,%s", channel == LECROY9400_FUNC_E ? "FE" : "FF" );
-	if ( gpib_write( lecroy9400.device, cmd, 6 ) == FAILURE )
-		lecroy9400_gpib_failure( );
-
-	snprintf( cmd, 100, "RDF,AVG,SUMMED,%ld,%s,%ld,%s,0", rec_len,
+	snprintf( cmd, 100, "SEL,%s;RDF,AVG,SUMMED,%ld,%s,%ld,%s,0",
+			  channel == LECROY9400_FUNC_E ? "FE" : "FF", rec_len,
 			  source == LECROY9400_CH1 ? "C1" : "C2", num_avg,
 			  reject ? "ON" : "OFF" );
 	if ( gpib_write( lecroy9400.device, cmd, strlen( cmd ) ) == FAILURE )
@@ -570,6 +565,8 @@ void lecroy9400_set_up_averaging( long channel, long source, long num_avg,
 
 void lecroy9400_finished( void )
 {
+	gpib_local( lecroy9400.device );
+	is_acquiring = UNSET;
 }
 
 
@@ -632,6 +629,9 @@ void lecroy9400_get_curve( int ch, WINDOW *w, double **array, long *length,
 				DEVICE_NAME );
 		THROW( EXCEPTION )
 	}
+
+	/* Poll the device until the averaging is finished, i.e. get the channel
+	   description and check if there are as many averages as we need */
 
 	while ( 1 )
 	{
