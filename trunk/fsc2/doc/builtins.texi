@@ -1960,6 +1960,11 @@ array is returned. This function is meant to speed up calculations in
 cases where a repeated signal, that has been sampled several times and
 is stored in a flat array, is to be averaged.
 
+Calling the function with a chunk size of @code{1} is equivalent to
+invoking the @code{mean()} function while calling it with a subpartition
+size equal to the length of the array itself is equivalent to calling
+the @code{float()} function on the array.
+
 
 @anchor{min_of}
 @item min_of()

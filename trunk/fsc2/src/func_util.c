@@ -3572,23 +3572,10 @@ Var *f_mean_part_array( Var *v )
 	}
 
 	if ( size == 1 )
-	{
-		if ( v->type == INT_ARR )
-		{
-			m = T_malloc( v->len * sizeof *m );
-			lfrom = v->val.lpnt;
-			for ( i = 0; i < v->len; i++ )
-				m[ i ] = *lfrom++;
-			nv = vars_push( FLOAT_ARR, m, v->len );
-			T_free( m );
-			return nv;
-		}
-		else
-			return vars_push( FLOAT_ARR, v->val.dpnt, v->len );
-	}
+		return f_mean( v );
 
 	if ( size == v->len )
-		return f_mean( v );
+		return f_float( v );
 
 	m = T_calloc( size, sizeof *m );
 	par = v->len / size;
