@@ -6,12 +6,12 @@
 #include "fsc2.h"
 
 
-/* When in the input an identifier is found it is always tried first if the
-   identifier is a function by a call to func_get(). If it is a function, a
-   pointer to a temporary variable on the stack of type FUNC is returned.
-   The variable's structure contains beside a pointer to the function a copy
-   of the name of the function and the number of arguments and the access flag
-   (the access flag tells in which sections the function may be used).
+/* When in the input an identifier is found it is always tried first if it's a
+   function by a calling func_get(). If it is a function, a pointer to a
+   temporary variable on the stack of type FUNC is returned.  The variable's
+   structure contains beside a pointer to the function a copy of the name of
+   the function and the number of arguments and the access flag (the access
+   flag tells in which sections the function may be used).
 
    The following input results in as may variables on the stack as there are
    function arguments. When the argument list ends, func_call() is called.
