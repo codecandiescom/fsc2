@@ -1167,10 +1167,6 @@ Var *vars_push( int type, ... )
 			break;
 
 		case FUNC :
-
-			/* Understanding a function pointer is too complicated for
-			   va_arg() thus `FnctPtr' is a typedef (see start of file) */
-
 			new_stack_var->val.fnct = va_arg( ap, FUNC * );
 			break;
 
