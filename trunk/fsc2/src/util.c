@@ -376,7 +376,7 @@ bool fsc2_locking( void )
 /* works with 2.0 and 2.2 kernels)                                        */
 /*------------------------------------------------------------------------*/
 
-/* These defines seem to be needed for older Linux versions, i.e. 2.0.36 */
+/* These defines seems to be needed for older Linux versions, i.e. 2.0.36 */
 
 #if ( ! defined ( SHM_STAT ) )
 #define SHM_STAT 13
