@@ -313,12 +313,6 @@ else
 	CFLAGS += -Dbindir=\"$(fdir)/bin/\"
 endif
 
-ifdef udir
-	CFLAGS += -Dudir=\"$(udir:/=)/\"
-else
-	CFLAGS += -Dudir=\"$(fdir)/utils/\"
-endif
-
 ifdef libdir
 	CFLAGS += -Dlibdir=\"$(libdir:/=)/\"
 else
@@ -329,6 +323,12 @@ ifdef auxdir
 	CFLAGS += -Dauxdir=\"$(auxdir:/=)/\" -I$(adir)
 else
 	CFLAGS += -Dauxdir=\"$(fdir)/lib/fsc2/aux/\" -I$(adir)
+endif
+
+ifdef udir
+	CFLAGS += -Dudir=\"$(udir:/=)/\"
+else
+	CFLAGS += -Dudir=\"$(fdir)/utils/\"
 endif
 
 ifdef docdir
