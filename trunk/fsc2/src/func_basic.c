@@ -1559,7 +1559,7 @@ Var *f_square( Var *v )
 	{
 		rdp = T_malloc( len * sizeof( double ) );
 		for ( i = 0; i < len; idp++, i++ )
-			rdp[ i ] = *idp * idp;
+			rdp[ i ] = *idp * *idp;
 		new_var = vars_push( FLOAT_TRANS_ARR, rdp, len );
 		T_free( rdp );
 	}
@@ -1606,7 +1606,7 @@ Var *f_fslice( Var *v )
 	double *array;
 	long size;
 	Var *ret;
-	ling i;
+	long i;
 
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
