@@ -49,7 +49,7 @@
 @sp 1
 @center @email{Jens.Toerring@@physik.fu-berlin.de}
 @sp 16
-@center Copyright @copyright{} 1999--2004 Jens Thoms T@"orring
+@center Copyright @copyright{} 1999--2005 Jens Thoms T@"orring
 Permission is granted to make and distribute verbatim
 copies of this manual provided the copyright notice and
 this permission notice are preserved on all copies.
