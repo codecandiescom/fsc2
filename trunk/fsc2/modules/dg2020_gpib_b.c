@@ -333,13 +333,13 @@ static bool dg2020_set_timebase( double timebase )
 
 static bool dg2020_set_memory_size( long mem_size )
 {
-	char cmd[ 20 ] = ":DATA:MSIZ ";
+	char cmd[ 50 ];
 
 
 	if ( mem_size < 64 || mem_size > MAX_PULSER_BITS )
 		return FAIL;
 
-	sprintf( cmd + strlen( cmd ), "%ld", mem_size );
+	sprintf( cmd, ":DATA:MSIZ %ld", mem_size );
 	if ( gpib_write( dg2020.device, cmd, strlen( cmd ) ) == FAILURE )
 		dg2020_gpib_failure( );
 
@@ -359,16 +359,14 @@ static bool dg2020_set_memory_size( long mem_size )
 
 bool dg2020_channel_assign( int channel, int pod )
 {
-	char cmd[ 30 ] = "OUTP:PODA:CH";
+	char cmd[ 50 ];
 
 
 	if ( channel < 0 || channel >= MAX_CHANNELS ||
 		 pod < 0 || pod >= MAX_PODS )
 		return FAIL;
 
-	sprintf( cmd + strlen( cmd ), "%d:ASSIGN ", pod );
-	sprintf( cmd + strlen( cmd ), "%d", channel );
-
+	sprintf( cmd, "OUTP:PODA:CH%d:ASSIGN %d", pod, channel );
 	if ( gpib_write( dg2020.device, cmd, strlen( cmd ) ) == FAILURE )
 		dg2020_gpib_failure( );
 
@@ -418,8 +416,7 @@ static bool dg2020_make_blocks( int num_blocks, BLOCK *block )
 	l = strlen( dummy );
 	sprintf( dummy, "%ld", l );
 	l = strlen( dummy );
-	sprintf( cmd, ":DATA:BLOC:DEF #%ld%s", l, dummy );
-	sprintf( cmd + strlen( cmd ), "%ld,%s",
+	sprintf( cmd, ":DATA:BLOC:DEF #%ld%s%ld,%s", l, dummy,
 			 block[ 0 ].start, block[ 0 ].blk_name );
 
 	if ( gpib_write( dg2020.device, cmd, strlen( cmd ) ) == FAILURE )

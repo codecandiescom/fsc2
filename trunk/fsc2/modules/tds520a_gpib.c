@@ -432,14 +432,14 @@ void tds520a_finished( void )
 
 bool tds520a_set_cursor( int cur_num, double pos )
 {
-    char cmd[ 60 ] = "CURS:VBA:POSITION";
+    char cmd[ 60 ];
 
 
 	assert( cur_num == 1 || cur_num == 2 );
 
     /* set cursors to specified positions */
 
-	sprintf( cmd + strlen( cmd ), "%d ", cur_num );
+	sprintf( cmd, "CURS:VBA:POSITION%d ", cur_num );
     gcvt( pos, 9, cmd + strlen( cmd ) );
     if ( gpib_write( tds520a.device, cmd, strlen( cmd ) ) == FAILURE )
 		tds520a_gpib_failure( );
@@ -496,8 +496,7 @@ bool tds520a_set_snap( bool flag )
 		strcpy( cmd, "DAT STAR 1" );
 		if ( gpib_write( tds520a.device, cmd, strlen( cmd ) ) == FAILURE )
 			tds520a_gpib_failure( );
-		strcpy( cmd, "DAT STOP " );
-		sprintf( cmd + strlen( cmd ), "%ld", tds520a.rec_len );
+		sprintf( cmd, "DAT STOP %ld", tds520a.rec_len );
 		if ( gpib_write( tds520a.device, cmd, strlen( cmd ) ) == FAILURE )
 			tds520a_gpib_failure( );
 	}		

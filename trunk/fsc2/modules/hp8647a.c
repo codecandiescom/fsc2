@@ -77,6 +77,7 @@ static double hp8647a_get_attenuation( void );
 static bool hp8647a_read_table( FILE *fp );
 FILE *hp8647a_find_table( char *name );
 FILE *hp8647a_open_table( char *name );
+static void hp8647_comm_failure( void );
 
 
 /*******************************************/
@@ -502,6 +503,8 @@ Var *synthesizer_reset_frequency( Var *v )
 }
 
 
+/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*/
 
 Var *synthesizer_use_table( Var *v )
 {
@@ -560,6 +563,9 @@ Var *synthesizer_use_table( Var *v )
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
 
+/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*/
+
 static bool hp8647a_init( const char *name )
 {
 	if ( gpib_init_device( name, &hp8647a.device ) == FAILURE )
@@ -582,6 +588,9 @@ static bool hp8647a_init( const char *name )
 }
 
 
+/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*/
+
 static void hp8647a_finished( void )
 {
 	gpib_local( hp8647a.device );
@@ -593,57 +602,82 @@ static void hp8647a_finished( void )
 }
 
 
+/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*/
+
 static double hp8647a_set_frequency( double freq )
 {
-	char cmd[ 100 ] = "FREQ:CW ";
+	char cmd[ 100 ];
 
 
 	assert( freq >= MIN_FREQ && freq <= MAX_FREQ );
 
-	sprintf( cmd + strlen( cmd ), "%f", freq );
+	sprintf( cmd, "FREQ:CW %.2f KHZ", 1.0e-3 * freq );
 	if ( gpib_write( hp8647a.device, cmd, strlen( cmd ) ) == FAILURE )
-	{
-		eprint( FATAL, "%s: Can't access the synthesizer.", DEVICE_NAME );
-		THROW( EXCEPTION );
-	}
+		hp8647_comm_failure( );
 
 	return freq;
 }
 
 
+/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*/
+
 static double hp8647a_get_frequency( void )
 {
 	char buffer[ 100 ];
 	long length = 100;
+	double freq;
+	char *cp;
+
 
 	if ( gpib_write( hp8647a.device, "FREQ:CW?", 8 ) == FAILURE ||
 		 gpib_read( hp8647a.device, buffer, &length ) == FAILURE )
+		hp8647_comm_failure( );
+
+	if ( ( cp = strchr( buffer, ' ' ) ) != NULL )
 	{
-		eprint( FATAL, "%s: Can't access the synthesizer.", DEVICE_NAME );
-		THROW( EXCEPTION );
+		*cp++ = '\0';
+		freq = T_atof( buffer );
+		switch ( *cp )
+		{
+			case 'M' :
+				return freq * 1.0e6;
+
+			case 'K' :
+				return freq * 1.0e3;
+
+			case 'H' :
+				return freq;
+		}
 	}
 
-	return T_atof( buffer );
+	eprint( FATAL, "%s: Unexpected data received from synthesizer.",
+			DEVICE_NAME );
+	THROW( EXCEPTION );
 }
 
 
+/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*/
+
 static double hp8647a_set_attenuation( double att )
 {
-	char cmd[ 100 ] = "POW:AMPL ";
+	char cmd[ 100 ];
 
 
 	assert( att >= MAX_ATTEN && att <= MIN_ATTEN );
 
-	sprintf( cmd + strlen( cmd ), "%4f DB", att );
+	sprintf( cmd, "POW:AMPL %6.1f DB", att );
 	if ( gpib_write( hp8647a.device, cmd, strlen( cmd ) ) == FAILURE )
-	{
-		eprint( FATAL, "%s: Can't access the synthesizer.", DEVICE_NAME );
-		THROW( EXCEPTION );
-	}
+		hp8647_comm_failure( );
 
 	return att;
 }
 
+
+/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*/
 
 static double hp8647a_get_attenuation( void )
 {
@@ -652,10 +686,7 @@ static double hp8647a_get_attenuation( void )
 
 	if ( gpib_write( hp8647a.device, "POW:AMPL?", 9 ) == FAILURE ||
 		 gpib_read( hp8647a.device, buffer, &length ) == FAILURE )
-	{
-		eprint( FATAL, "%s: Can't access the synthesizer.", DEVICE_NAME );
-		THROW( EXCEPTION );
-	}
+		hp8647_comm_failure( );
 
 	return T_atof( buffer );
 }
@@ -767,10 +798,23 @@ FILE *hp8647a_open_table( char *name )
 }
 
 
+/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*/
+
 static bool hp8647a_read_table( FILE *fp )
 {
 	/* Lots of stuff to come... */
 
 	fclose( fp );
 	return OK;
+}
+
+
+/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*/
+
+static void hp8647_comm_failure( void )
+{
+	eprint( FATAL, "%s: Can't access the synthesizer.", DEVICE_NAME );
+	THROW( EXCEPTION );
 }
