@@ -56,7 +56,10 @@ struct RULBUS_DELAY_CARD {
 
 
 static RULBUS_DELAY_CARD *rulbus_delay_card;
-statuc int rulbus_num_delay_cards;
+static int rulbus_num_delay_cards;
+
+
+static RULBUS_DELAY_CARD *rulbus_delay_card_find( int handle );
 
 
 /*------------------------------------------------------------------*
