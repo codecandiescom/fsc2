@@ -1332,11 +1332,12 @@ Var *pulser_phase_reset( Var *v )
 
 	for ( ; v != NULL; v = vars_pop( v ) )
 	{
-		phase_number = get_strict_long( v, "phase number" );
+		phase_number = get_strict_long( v, "phase setup number" );
 
 		if ( phase_number != 1 && phase_number != 2 )
 		{
-			print( FATAL, "Invalid phase number: %ld.\n", phase_number );
+			print( FATAL, "Invalid phase setup number: %ld, only 1 or 2 can "
+				   "be used.\n", phase_number );
 			THROW( EXCEPTION );
 		}
 

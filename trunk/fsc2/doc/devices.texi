@@ -1680,14 +1680,21 @@ by calling @code{pulser_update()}.
 @item pulser_phase_reset()
 @findex pulser_phase_reset()
 This function can be called with either no argument or with a list of
-(comma separated) pulse identifiers (pulse numbers will also do). If no
-argument is given the phases of all pulses are reset to their initial
-phase, i.e.@: the first phase of the phase sequence (defined in the
-@code{PHASE} section) associated with the pulses. If one or more pulses
-are passed to the function the phases of only these pulses are reset.
+@code{PULSE_SETUP}s numbers. A @code{PHASE_SETUP} (see also @ref{Phase
+channel setup}) defines on which output connectors of the pulser the
+pulses of a function with a certain phase will appear. I.e.@: if the
+pulses of the @code{MICROWAVE} function are to be phase-cycled one has
+to specify which of the connectors is to be used to output microwave
+pulses with an @i{x}-phase, which one is to be used for microwave pulses
+pulses with an @i{y}-phase etc. Pulses of not more than two functions
+can be phase-cycled, so there's a maximum of two @code{PULSE_SETUP}s,
+@code{PULSE_SETUP_1} and @code{PULSE_SETUP_2}. By specifying the number
+@code{1} or @code{2} on can restrict resetting the phases of the pulses
+of the function associated with either @code{PULSE_SETUP_1} or
+@code{PULSE_SETUP_2}.
+
 This function also immediately updates the pulse sequence, as it is done
 by calling @code{pulser_update()}.
-
 
 @anchor{pulser_reset}
 @item pulser_reset()
