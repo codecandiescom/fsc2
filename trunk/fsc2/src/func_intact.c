@@ -2394,14 +2394,14 @@ static void tools_callback( FL_OBJECT *obj, long data )
 #if defined( isfinite )
 			if ( ! isfinite( dval ) )
 			{
-				snprintf( obuf, MAX_INPUT_CHARS + 1, "%f", io->val.dval );
+				snprintf( obuf, MAX_INPUT_CHARS + 1, "%g", io->val.dval );
 				fl_set_input( io->self, obuf );
 				break;
 			}
 #elif defined( finite )
 			if ( ! finite( dval ) )
 			{
-				snprintf( obuf, MAX_INPUT_CHARS + 1, "%f", io->val.dval );
+				snprintf( obuf, MAX_INPUT_CHARS + 1, "%g", io->val.dval );
 				fl_set_input( io->self, obuf );
 				break;
 			}
