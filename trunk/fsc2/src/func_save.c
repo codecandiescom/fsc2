@@ -437,7 +437,7 @@ getfile_retry:
 
  got_file:
 
-	for ( i = 0; i < 4; i++ )
+	for ( i = 0; i < 5; i++ )
 		T_free( s[ i ] );
 
 	/* The reallocation for the EDL.File_List may fail but we still need to
@@ -472,7 +472,7 @@ getfile_retry:
 		EDL.File_List[ EDL.File_List_Len ].fp = fp;
 	EDL.File_List[ EDL.File_List_Len ].name = r;
 
-	/* Switch buffering off so we're sure everything gets written to disk
+	/* Switch off buffering so we're sure everything gets written to disk
 	   immediately */
 
 	setbuf( EDL.File_List[ EDL.File_List_Len ].fp, NULL );
