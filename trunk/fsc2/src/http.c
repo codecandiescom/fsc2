@@ -26,8 +26,10 @@
 
 #define MAX_LINES_TO_SEND 30
 
+
 static void spawn_server( void );
 static void http_send_error_browser( int pd );
+static void http_send_picture( int pd, int type, const char *ext );
 
 
 enum {
@@ -159,26 +161,79 @@ void http_check( void )
 {
 	struct timeval tv;
 	fd_set rfds;
-	char query;
 
+
+	if ( Internals.http_pid <= 0 )
+		return;
 
 	tv.tv_sec = tv.tv_usec = 0;
 	FD_ZERO( &rfds );
 	FD_SET( Comm.http_pd[ HTTP_PARENT_READ ], &rfds );
 
 	while ( select( Comm.http_pd[ HTTP_PARENT_READ ] + 1, &rfds,
-				 NULL, NULL, &tv ) > 0 )
+					NULL, NULL, &tv ) > 0 )
 	{
+		char reply[ 2 ];
+		char query;
+
 		read( Comm.http_pd[ HTTP_PARENT_READ ], &query, 1 );
 
-		if ( query == 'S' )
-		{
-			char state[ 2 ] = { ( char ) Internals.state + '0', '\n' };
+		reply[ 1 ] = '\n';
 
-			write( Comm.http_pd[ HTTP_PARENT_WRITE ], state, 2 );
+		switch ( query )
+		{
+			case 'S' :
+				printf( "fsc2: Got S\n" );
+				reply[ 0 ]  = ( char ) Internals.state + '0';
+				write( Comm.http_pd[ HTTP_PARENT_WRITE ], reply, 2 );
+				break;
+
+			case 'W' :
+				printf( "fsc2: Got W\n" );
+				if ( ! G.is_init )
+					reply[ 0 ] = '0';
+				else
+				{
+					if ( G.dim == 1 )
+						reply[ 0 ] = '1';
+					else
+						reply[ 0 ] = ( G.is_cut ? '3' : '2' );
+				}
+				write( Comm.http_pd[ HTTP_PARENT_WRITE ], reply, 2 );
+				break;
+
+			case 'E' :
+				printf( "fsc2: Got E\n" );
+				http_send_error_browser( Comm.http_pd[ HTTP_PARENT_WRITE ] );
+				break;
+
+			case 'A' :
+				printf( "fsc2: Got A\n" );
+				http_send_picture( Comm.http_pd[ HTTP_PARENT_WRITE ],
+								   1, "png" );
+				break;
+
+			case 'a' :
+				printf( "fsc2: Got a\n" );
+				http_send_picture( Comm.http_pd[ HTTP_PARENT_WRITE ],
+								   1, "gif" );
+				break;
+
+			case 'B' :
+				printf( "fsc2: Got B\n" );
+				http_send_picture( Comm.http_pd[ HTTP_PARENT_WRITE ],
+								   2, "png" );
+				break;
+
+			case 'b' :
+				printf( "fsc2: Got b\n" );
+				http_send_picture( Comm.http_pd[ HTTP_PARENT_WRITE ],
+								   2, "gif" );
+				break;
+
+			default :
+				return;
 		}
-		else if ( query == 'E' )
-			http_send_error_browser( Comm.http_pd[ HTTP_PARENT_WRITE ] );
 	}
 }
 
@@ -196,18 +251,22 @@ static void http_send_error_browser( int pd )
 
 	while ( ( l = fl_get_browser_line( b, ++i ) ) != NULL )
 	{
-		if ( *l == '@' )
-		{
-			l++;
-			while ( *l++ != 'f' )
-				/* empty */ ;
-		}
-
 		write( pd, l, strlen( l ) );
 		write( pd, &newline, 1 );
 	}
 
 	write( pd, &newline, 1 );
+}
+
+
+static void http_send_picture( int pd, int type, const char *ext )
+{
+	char reply[ 2 ];
+
+
+	reply[ 0 ] = '0';
+	reply[ 1 ] = '\n';
+	write( pd, reply, 2 );
 }
 
 

@@ -93,6 +93,7 @@
 #include "func_intact_o.h"
 #include "func_intact_m.h"
 #include "conn.h"
+#include "http.h"
 #include "module_util.h"
 
 
@@ -114,6 +115,7 @@ int  experiment_parser( FILE *in );
 void main_sig_handler( int signo );
 void notify_conn( int signo );
 void usage( int result_status );
+int idle_handler( XEvent *a, void *b );
 
 
 /* Most global variables used in the program belong to one of the following
@@ -129,8 +131,12 @@ typedef struct {
 
 	pid_t child_pid;             /* pid of child process doing the
                                     measurement */
-	pid_t conn_pid;               /* pid of child process for handling
-									 communication with scripts */
+	pid_t conn_pid;              /* pid of child process for handling
+									communication with scripts */
+	volatile pid_t http_pid;     /* pid of child process that is a http server
+									to allow viewing fsc2's state */
+	int http_port;               /* port the http server is running on */
+
 	bool is_i386;                /* Set if running on an i386 processor */
 
 	int cmdline_flags;           /* Stores command line options */
@@ -141,6 +147,7 @@ typedef struct {
 	int I_am;                    /* Indicates if we're running the parent
 									or the child process (it's either set to
 									PARENT or to CHILD) */
+	int state;
 	int mode;                    /* The mode fsc2 is currently running in,
 									either PREPARATION, TEST or EXPERIMENT */
 	bool in_hook;                /* Set while module hook functions are run */
@@ -202,6 +209,7 @@ typedef struct {
 
 	int pd[ 4 ];                 /* pipe descriptors for measurement child */
 	int conn_pd[ 2 ];            /* pipe for communication child */
+	int http_pd[ 4 ];            /* pipes for HTTP server */
 
 	int data_semaphore;          /* Semaphore for DATA messages */
 	int request_semaphore;       /* Semaphore for REQUEST mesages */
