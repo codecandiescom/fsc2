@@ -518,7 +518,7 @@ double tds520_get_sens( int channel )
 
 bool tds520_start_aquisition( void )
 {
-	char *cmd = "ACQ:STOPA SEQ;STATE RUN\n";
+	const char *cmd = "ACQ:STOPA SEQ;STATE RUN\n";
 
 
     /* Start an acquisition:

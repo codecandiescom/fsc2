@@ -1404,7 +1404,7 @@ static void sr810_lock_state( bool lock )
 
 
 	sprintf( cmd, "OVRM %c\n", lock ? '0' : '1' );
-	if ( gpib_write( sr810.device, cmd, strlen( buffer ) ) == FAILURE )
+	if ( gpib_write( sr810.device, cmd, strlen( cmd ) ) == FAILURE )
 	{
 		eprint( FATAL, "%s: Can't access the lock-in amplifier.\n",
 				DEVICE_NAME );

@@ -483,7 +483,7 @@ bool tds520a_set_snap( bool flag )
 
 	if ( flag )
 	{
-		if ( gpib_write( tds520a.device, "DAT SNA\n", 8== FAILURE )
+		if ( gpib_write( tds520a.device, "DAT SNA\n", 8 ) == FAILURE )
 			tds520a_gpib_failure( );
 	}
 	else
