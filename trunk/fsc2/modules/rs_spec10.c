@@ -197,7 +197,7 @@ Var *ccd_camera_roi( Var *v )
 
 	vars_check( v, INT_ARR | FLOAT_ARR | STR_VAR );
 
-	if ( v->type == STRING_VAR )
+	if ( v->type == STR_VAR )
 	{
 		if ( ! strcasecmp( v->val.sptr, "ALL" ) )
 		{
