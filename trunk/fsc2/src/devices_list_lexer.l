@@ -159,8 +159,7 @@ bool device_list_parse( void )
 
 
 	T_free( Fname );
-	Fname = get_string( "%s%sDevices", libdir,
-						libdir[ strlen( libdir ) - 1 ] != '/' ? "/" : "" );
+	Fname = get_string( "%s%sDevices", libdir, slash( libdir );
 
 	if ( ( devices_listin = fopen( Fname, "r" ) ) == NULL )
 	{

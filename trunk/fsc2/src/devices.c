@@ -62,9 +62,7 @@ void device_add( const char *name )
 	   locally adjustable names for the devices. Therefor, we assemble the
 	   name of the modules corresponding to the device name */
 
-	lib_name = get_string( "%s%s%s.so", libdir,
-						   libdir[ strlen( libdir ) - 1 ] != '/' ? "/" : "",
-						   dev_name );
+	lib_name = get_string( "%s%s%s.so", libdir, slash( libdir ), dev_name );
 
 	/* Try to access the module (also allow the name to be defined via
 	   LD_LIBRARY_PATH) - don't follow links yet */

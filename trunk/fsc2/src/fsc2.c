@@ -1195,16 +1195,14 @@ static void start_help_browser( void )
 		av[ 1 ] = T_strdup( "-newbrowser" );
 		av[ 2 ] = get_string( "file:%s%s%sfsc2.html",
 							  docdir[ 0 ] != '/' ? "/" : "", docdir,
-							  docdir[ strlen( docdir ) - 1 ] != '/' ?
-							  "/" : "" );
+							  slash( docdir ) );
 	}
 	else if ( browser && ! strcasecmp( browser, "konqueror" ) )
 	{
 		av[ 0 ] = T_strdup( "konqueror" );
 		av[ 1 ] = get_string( "file:%s%s%sfsc2.html",
 							  docdir[ 0 ] != '/' ? "/" : "", docdir,
-							  docdir[ strlen( docdir ) - 1 ] != '/' ?
-							  "/" : "" );
+							  slash( docdir ) );
 	}
 	else if ( browser && ( ! strcasecmp( browser, "lynx" ) ||
 						   ! strcasecmp( browser, "w3m" ) ) )
@@ -1212,17 +1210,14 @@ static void start_help_browser( void )
 		av[ 0 ] = T_strdup( "xterm" );
 		av[ 1 ] = T_strdup( "-e" );
 		av[ 2 ] = T_strdup( browser );
-		av[ 3 ] = get_string( "%s%sfsc2.html", docdir,
-							  docdir[ strlen( docdir ) - 1 ] != '/' ?
-							  "/" : "" );
+		av[ 3 ] = get_string( "%s%sfsc2.html", docdir, slash( docdir ) );
 	}
 	else if ( browser && strcasecmp( browser, "netscape" ) )
 	{
 		av[ 0 ] = T_strdup( browser );
 		av[ 1 ] = get_string( "file:%s%s%sfsc2.html",
 							  docdir[ 0 ] != '/' ? "/" : "", docdir,
-							  docdir[ strlen( docdir ) - 1 ] != '/' ?
-							  "/" : "" );
+							  slash( docdir ) );
 	}
 	else
 	{
@@ -1234,15 +1229,13 @@ static void start_help_browser( void )
 		if ( system( "xwininfo -name Netscape >/dev/null 2>&1" ) )
 			av[ 1 ] = get_string( "file:%s%s%sfsc2.html",
 								  docdir[ 0 ] != '/' ? "/" : "", docdir,
-								  docdir[ strlen( docdir ) - 1 ] != '/' ?
-								  "/" : "" );
+								  slash( docdir ) );
 		else
 		{
 			av[ 1 ] = T_strdup( "-remote" );
 			av[ 2 ] = get_string( "openURL(file:%s%s%sfsc2.html,new-window)",
 								  docdir[ 0 ] != '/' ? "/" : "", docdir,
-								  docdir[ strlen( docdir ) - 1 ] != '/' ?
-								  "/" : "" );
+								  slash( docdir ) );
 		}
 	}
 
@@ -1367,11 +1360,6 @@ void notify_conn( int signo )
 
 void usage( void )
 {
-	char *dd;
-
-	dd = T_strdup( docdir );
-	if ( dd[ strlen( dd ) - 1 ] == '/' )
-		dd[ strlen( dd ) - 1 ] = '\0';
 	fprintf( stderr, "Usage: fsc2 [OPTIONS]... [FILE]\n"
 			 "A program for remote control of EPR spectrometers\n"
 			 "OPTIONS:\n"
@@ -1417,9 +1405,9 @@ void usage( void )
 			 "             don't send email when fsc2 crashes\n"
 			 "  -h, --help\n"
 			 "             display this help text and exit\n\n"
-			 "For a complete documentation see either %s/fsc2.ps,\n"
-			 "%s/fsc2.pdf or %s/fsc2.html\n"
-             "or type \"info fsc2\".\n", dd, dd, dd );
-	T_free( dd );
+			 "For a complete documentation see either %s%sfsc2.ps,\n"
+			 "%s%sfsc2.pdf or %s%sfsc2.html\n"
+             "or type \"info fsc2\".\n", docdir, slash( docdir ),
+			 docdir, slash( docdir ), docdir, slash( docdir ) );
 	exit( EXIT_SUCCESS );
 }

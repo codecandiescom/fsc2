@@ -139,8 +139,7 @@ void bug_report_callback( FL_OBJECT *a, long b )
 	system( cmd );
 	T_free( cmd );
 
-	cmd = get_string( "cat %s%sversion.ugz >> %s", libdir,
-					  libdir[ strlen( libdir ) - 1 ] != '/' ? "/" : "",
+	cmd = get_string( "cat %s%sversion.ugz >> %s", libdir, slash( libdir ),
 					  filename);
 	system( cmd );
 	T_free( cmd );
@@ -284,10 +283,7 @@ void death_mail( int signo )
 		fputc( ( int ) '\n', mail );
 	}
 
-	strcpy( vfn, libdir );
-	if ( libdir[ strlen( libdir ) - 1 ] != '/' )
-		strcat( vfn, "/" );
-	strcat( vfn, "version" );
+	snprintf( vfn, PATH_MAX + 20, "%s%sversion.ugz", libdir, slash( libdir ) );
 
 	if ( ( vfp = fopen( vfn, "r" ) ) != NULL )
 	{

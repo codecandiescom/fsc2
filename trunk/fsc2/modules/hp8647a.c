@@ -689,9 +689,8 @@ Var *synthesizer_use_table( Var *v )
 		if ( DEFAULT_TABLE_FILE[ 0 ] ==  '/' )
 			hp8647a.table_file = T_strdup( DEFAULT_TABLE_FILE );
 		else
-			hp8647a.table_file = get_string( "%s%s%s", libdir,
-							  libdir[ strlen( libdir ) - 1 ] != '/' ? "/" : "",
-							  DEFAULT_TABLE_FILE );
+			hp8647a.table_file = get_string( "%s%s%s", libdir, slash( libdir ),
+											 DEFAULT_TABLE_FILE );
 
 		if ( ( tfp = hp8647a_open_table( hp8647a.table_file ) ) == NULL )
 		{
