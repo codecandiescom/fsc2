@@ -190,21 +190,22 @@ Var *synthesizer_state( Var *v )
 
 
 	if ( v == NULL )              /* i.e. return the current state */
-	{
-		if ( TEST_RUN )
-			return vars_push( INT_VAR, ( long ) hp8647a.state );
-		else if ( I_am == PARENT )
+		switch( FSC2_MODE )
 		{
+			case PREPARATION :
 			eprint( FATAL, SET, "%s: Function `synthesizer_state' with no "
 					"argument can only be used in the EXPERIMENT section.\n",
 					DEVICE_NAME );
 			THROW( EXCEPTION )
+
+			case TEST :
+				return vars_push( INT_VAR, ( long ) hp8647a.state );
+
+			case EXPERIMENT :
+				return vars_push( INT_VAR,
+								  ( long ) ( hp8647a.state =
+											 hp8647a_get_output_state( ) ) );
 		}
-		else
-			return vars_push( INT_VAR,
-							  ( long ) ( hp8647a.state =
-										 hp8647a_get_output_state( ) ) );
-	}
 
 	vars_check( v, INT_VAR | FLOAT_VAR | STR_VAR );
 
@@ -239,7 +240,7 @@ Var *synthesizer_state( Var *v )
 
 	hp8647a.state = state;
 
-	if ( TEST_RUN || I_am == PARENT )
+	if ( FSC2_MODE != EXPERIMENT )
 		return vars_push( INT_VAR, ( long ) state );
 
 	return vars_push( INT_VAR, ( long ) hp8647a_set_output_state( state ) );
@@ -264,7 +265,7 @@ Var *synthesizer_frequency( Var *v )
 
 	if ( v == NULL )              /* i.e. return the current frequency */
 	{
-		if ( TEST_RUN || I_am == PARENT )
+		if ( FSC2_MODE != EXPERIMENT )
 		{
 			if ( ! hp8647a.freq_is_set )
 			{
@@ -275,11 +276,9 @@ Var *synthesizer_frequency( Var *v )
 			else
 				return vars_push( FLOAT_VAR, hp8647a.freq );
 		}
-		else
-		{
-			hp8647a.freq = hp8647a_get_frequency( );
-			return vars_push( FLOAT_VAR, hp8647a.freq );
-		}
+
+		hp8647a.freq = hp8647a_get_frequency( );
+		return vars_push( FLOAT_VAR, hp8647a.freq );
 	}
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
@@ -294,7 +293,10 @@ Var *synthesizer_frequency( Var *v )
 	{
 		eprint( FATAL, SET, "%s: Invalid negative RF frequency.\n",
 				DEVICE_NAME );
-		THROW( EXCEPTION )
+		if ( FSC2_MODE == EXPERIMENT )
+			return vars_push( FLOAT_VAR, hp8647a.freq );
+		else
+			THROW( EXCEPTION )
 	}
 
 	if ( ( v = vars_pop( v ) ) != NULL )
@@ -314,55 +316,58 @@ Var *synthesizer_frequency( Var *v )
 				"synthesizers range (%f kHz - %g Mhz).\n",
 				DEVICE_NAME, 1.0e-6 * freq, 1.0e-3 * MIN_FREQ,
 				1.0e-6 * MAX_FREQ );
-		if ( ! TEST_RUN && I_am == CHILD )
+		if ( FSC2_MOD == EXPERIMENT )
 			return vars_push( FLOAT_VAR, hp8647a.freq );
 		else
 			THROW( EXCEPTION )
 	}
 
-	if ( TEST_RUN )                      /* In test run of experiment */
+	switch ( FSC2_MODE )
 	{
-		hp8647a.freq = freq;
-		hp8647a.freq_is_set = SET;
-		if ( ! hp8647a.start_freq_is_set )
-		{
-			hp8647a.start_freq = freq;
+		case PREPARATION :
+			hp8647a.freq = hp8647a.start_freq = freq;
+			hp8647a.freq_is_set = SET;
 			hp8647a.start_freq_is_set = SET;
-		}
+			break;
 
-		/* Calculate the attenuation needed to level out the non-flatness of
-		   the RF field in the resonator if a table has been set - in the test
-		   run we only do this to check that we stay within all the limits */
+		case TEST :
+			hp8647a.freq = freq;
+			hp8647a.freq_is_set = SET;
+			if ( ! hp8647a.start_freq_is_set )
+			{
+				hp8647a.start_freq = freq;
+				hp8647a.start_freq_is_set = SET;
+			}
 
-		hp8647a.real_attenuation = hp8647a_get_att( freq );
-	}
-	else if ( I_am == PARENT )           /* in PREPARATIONS section */
-	{
-		hp8647a.freq = hp8647a.start_freq = freq;
-		hp8647a.freq_is_set = SET;
-		hp8647a.start_freq_is_set = SET;
-	}
-	else                                 /* in the real experiment */
-	{
-		if ( ! hp8647a.start_freq_is_set )
-		{
-			hp8647a.start_freq = freq;
-			hp8647a.start_freq_is_set = SET;
-		}
+			/* Calculate the attenuation needed to level out the non-flatness
+			   of the RF field in the resonator if a table has been set - in
+			   the test run we only do this to check that we stay within all
+			   the limits */
 
-		/* Take care of setting the correct attenuation to level out the non-
-		   flatness of the RF field in the resonator if a table has been set */
+			hp8647a.real_attenuation = hp8647a_get_att( freq );
+			break;
 
-		att = hp8647a_get_att( freq );
-		if ( att != hp8647a.real_attenuation )
-		{
-			hp8647a_set_attenuation( att );
-			hp8647a.real_attenuation = att;
-		}
+		case EXPERIMENT :
+			if ( ! hp8647a.start_freq_is_set )
+			{
+				hp8647a.start_freq = freq;
+				hp8647a.start_freq_is_set = SET;
+			}
 
-		/* Finally set the frequency */
+			/* Take care of setting the correct attenuation to level out the
+			   non- flatness of the RF field in the resonator if a table has
+			   been set */
 
-		hp8647a.freq = hp8647a_set_frequency( freq );
+			att = hp8647a_get_att( freq );
+			if ( att != hp8647a.real_attenuation )
+			{
+				hp8647a_set_attenuation( att );
+				hp8647a.real_attenuation = att;
+			}
+
+			/* Finally set the frequency */
+
+			hp8647a.freq = hp8647a_set_frequency( freq );
 	}
 
 	return vars_push( FLOAT_VAR, freq );
@@ -385,7 +390,7 @@ Var *synthesizer_attenuation( Var *v )
 
 	if ( v == NULL )              /* i.e. return the current attenuation */
 	{
-		if ( TEST_RUN || I_am == PARENT )
+		if ( FSC2_MODE != EXPERIMENT )
 		{
 			if ( ! hp8647a.attenuation_is_set )
 			{
@@ -396,11 +401,9 @@ Var *synthesizer_attenuation( Var *v )
 			else
 				return vars_push( FLOAT_VAR, hp8647a.attenuation );
 		}
-		else
-		{
-			hp8647a.attenuation = MAX_ATTEN -100.0;
-			return vars_push( FLOAT_VAR, hp8647a.attenuation );
-		}
+
+		hp8647a.attenuation = MAX_ATTEN -100.0;
+		return vars_push( FLOAT_VAR, hp8647a.attenuation );
 	}
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
@@ -427,33 +430,37 @@ Var *synthesizer_attenuation( Var *v )
 		eprint( FATAL, SET, "%s: RF attenuation (%g db) not within valid "
 				"range (%g db to %g db).\n", DEVICE_NAME, att,
 				MAX_ATTEN, hp8647a.min_attenuation );
-		if ( ! TEST_RUN && I_am == CHILD )
+		if ( FSC2_MODE == EXPERIMENT )
 			return vars_push( FLOAT_VAR, hp8647a.attenuation );
 		else
 			THROW( EXCEPTION )
 	}
 
-	if ( TEST_RUN )                      /* In test run of experiment */
+	switch ( FSC2_MODE )
 	{
-		hp8647a.attenuation = hp8647a.real_attenuation = att;
-		hp8647a.attenuation_is_set = SET;
-	}
-	else if ( I_am == PARENT )           /* in PREPARATIONS section */
-	{
-		if ( hp8647a.attenuation_is_set )
-		{
-			eprint( SEVERE, SET, "%s: RF attenuation has already been set "
-					"in the PREPARATIONS section to %g db, keeping old "
-					"value.\n", DEVICE_NAME, hp8647a.attenuation );
-			return vars_push( FLOAT_VAR, hp8647a.attenuation );
-		}
+		case PREPARATION :
+			if ( hp8647a.attenuation_is_set )
+			{
+				eprint( SEVERE, SET, "%s: RF attenuation has already been set "
+						"in the PREPARATIONS section to %g db, keeping old "
+						"value.\n", DEVICE_NAME, hp8647a.attenuation );
+				return vars_push( FLOAT_VAR, hp8647a.attenuation );
+			}
 
-		hp8647a.attenuation = att;
-		hp8647a.attenuation_is_set = SET;
+			hp8647a.attenuation = att;
+			hp8647a.attenuation_is_set = SET;
+			break;
+
+		case TEST :
+			hp8647a.attenuation = hp8647a.real_attenuation = att;
+			hp8647a.attenuation_is_set = SET;
+			break;
+
+		case EXPERIMENT :
+			hp8647a.attenuation = hp8647a.real_attenuation =
+				                                hp8647a_set_attenuation( att );
+			break;
 	}
-	else
-		hp8647a.attenuation = hp8647a.real_attenuation =
-			                                    hp8647a_set_attenuation( att );
 
 	return vars_push( FLOAT_VAR, att );
 }
@@ -522,7 +529,7 @@ Var *synthesizer_step_frequency( Var *v )
 		/* Allow setting of the step frequency in the PREPARATIONS section
 		   only once */
 
-		if ( ! TEST_RUN && I_am == PARENT && hp8647a.step_freq_is_set )
+		if ( FSC2_MODE == PREPARATION && hp8647a.step_freq_is_set )
 		{
 			eprint( SEVERE, SET, "%s: RF step frequency has already been "
 					"set in the PREPARATIONS section to %f MHz, keeping old "
@@ -585,7 +592,7 @@ Var *synthesizer_sweep_up( Var *v )
 	{
 		eprint( FATAL, SET, "%s: RF frequency is dropping below lower "
 				"limit of %f kHz.\n", DEVICE_NAME, 1.0e-3 * MIN_FREQ );
-		if ( ! TEST_RUN && I_am == CHILD )
+		if ( FSC2_MODE == EXPERIMENT )
 			return vars_push( FLOAT_VAR, hp8647a.freq );
 		else
 			THROW( EXCEPTION )
@@ -595,13 +602,13 @@ Var *synthesizer_sweep_up( Var *v )
 	{
 		eprint( FATAL, SET, "%s: RF frequency is increased above upper "
 				"limit of %f MHz.\n", DEVICE_NAME, 1.0e-6 * MAX_FREQ );
-		if ( ! TEST_RUN && I_am == CHILD )
+		if ( FSC2_MODE == EXPERIMENT )
 			return vars_push( FLOAT_VAR, hp8647a.freq );
 		else
 			THROW( EXCEPTION )
 	}
 
-	if ( TEST_RUN )
+	if ( FSC2_MODE == TEST )
 		hp8647a.real_attenuation = hp8647a_get_att( hp8647a.freq );
 	else
 	{
@@ -651,7 +658,7 @@ Var *synthesizer_reset_frequency( Var *v )
 		THROW( EXCEPTION )
 	}
 
-	if ( TEST_RUN )
+	if ( FSC2_MODE == TEST )
 		hp8647a.freq = hp8647a.start_freq;
 	else
 		hp8647a.freq = hp8647a_set_frequency( hp8647a.start_freq );
@@ -778,7 +785,7 @@ Var *synthesizer_att_ref_freq( Var *v )
 				"settings of %g MHz is out of synthesizer range (%f kHz - "
 				"%f MHz).\n", DEVICE_NAME, hp8647a.att_ref_freq * 1.0e-6,
 				MIN_FREQ * 1.0e-3, MAX_FREQ * 1.0e-6 );
-		if ( ! TEST_RUN && I_am == CHILD )
+		if ( FSC2_MODE == EXPERIMENT )
 			return vars_push( FLOAT_VAR, hp8647a.freq );
 		else
 			THROW( EXCEPTION )
@@ -919,7 +926,7 @@ Var *synthesizer_mod_type( Var *v )
 		if ( ! hp8647a.mod_type_is_set )
 			return vars_push( INT_VAR, -1 );
 
-		if ( ! TEST_RUN )
+		if ( FSC2_MODE == EXPERIMENT )
 			hp8647a.mod_type = hp8647a_get_mod_type( );
 
 		if ( hp8647a.mod_type != UNDEFINED )
@@ -1000,7 +1007,7 @@ Var *synthesizer_mod_source( Var *v )
 			THROW( EXCEPTION )
 		}
 
-		if ( ! TEST_RUN )
+		if ( FSC2_MODE == EXPERIMENT )
 			hp8647a.mod_source[ hp8647a.mod_type ] =
 			                        hp8647a_get_mod_source( hp8647a.mod_type );
 
