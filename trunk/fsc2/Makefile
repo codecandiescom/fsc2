@@ -52,7 +52,7 @@ sources        = $(bison_sources:.y=.c) $(flex_sources:.flex=.c) \
 				 ${c_sources}
 objects        = $(sources:.c=.o)
 modules        = User_Functions.c tds754a.c sr510.c sr810.c s_band.c \
-				 er035m.c bh15.c
+				 er035m.c bh15.c hp8647a.c
 dg2020         = dg2020.c dg2020_gen.c dg2020_pulse.c dg2020_init.c \
 				 dg2020_run.c dg2020_util.c dg2020_gpib.c
 tds754a        = tds754a.c tds754a_gpib.c tds754a_util.c
