@@ -243,6 +243,213 @@ Var *f_print( Var *v )
 }
 
 
+/*------------------------------------------------------------------------
+   Prints variable number of arguments using a format string supplied as
+   the first argument. Types of arguments to be printed are integer and
+   float data and strings. To get a value printed the format string has
+   to contain the character '#'. The escape character is the backslash,
+   with a double backslash for printing one backslash. Beside the '\#'
+   combination to print a '#' some of the escape sequences from printf()
+   ('\n', '\t', and '\"') do work. If the text should even be printed while
+   the test is running the string has to start with "\T".
+
+   The function returns the number of variables it printed, not counting
+   the format string.
+--------------------------------------------------------------------------*/
+
+Var *f_sprint( Var *v )
+{
+	char *fmt;
+	char *cp;
+	char *ep;
+	Var *cv;
+	char *sptr;
+	int in_format,            /* number of wild cards characters */
+		on_stack,             /* number of arguments (beside format string ) */
+		percs,                /* number of '%' characters */
+		n = 0;                /* number of variables printed */
+	char *is = NULL;
+	char *fs;
+
+
+	/* A call to print() without any argument prints nothing */
+
+	if ( v == NULL )
+	{
+		print( FATAL, "Missing arguments.\n" );
+		THROW( EXCEPTION );
+	}
+
+	/* Make sure the first argument is a string */
+
+	vars_check( v, STR_VAR );
+	sptr = cp = v->val.sptr;
+
+	/* Count the number of specifiers '#' in the format string but don't count
+	   escaped '#' (i.e "\#"). Also count number of '%' - since this is a
+	   format string we need to replace each '%' by a '%%' since printf() and
+	   friends use it in the conversion specification. */
+
+	percs = *sptr == '%' ? 1 : 0;
+	in_format = *sptr == '#' ? 1 : 0;
+
+	for ( cp = sptr + 1; *cp != '\0'; cp++ )
+	{
+		if ( *cp == '#' && *( cp - 1 ) != '\\' )
+			in_format++;
+		if ( *cp == '%' )
+			percs++;
+	}
+
+	/* Check and count number of variables on the stack following the format
+	   string */
+
+	for  ( cv = v->next, on_stack = 0; cv != NULL; ++on_stack, cv = cv->next )
+		vars_check( cv, INT_VAR | FLOAT_VAR | STR_VAR );
+
+	/* Check that there are at least as many variables are on the stack
+	   as there specifiers in the format string */
+
+	if ( on_stack < in_format )
+		print( SEVERE, "Less data than format descriptors format string.\n" );
+
+	/* Utter a warning if there are more data than format descriptors */
+
+	if ( on_stack > in_format )
+		print( SEVERE, "More data than format descriptors format string.\n" );
+
+	/* Get string long enough to replace each '#' by a 3 char sequence
+	   plus a '\0' character */
+
+	fmt = CHAR_P T_malloc( strlen( sptr ) + 3 * in_format + percs + 5 );
+	strcpy( fmt, "%s" );
+	strcat( fmt, sptr );
+
+	for ( cp = fmt; *cp != '\0'; cp++ )
+	{
+		/* Skip normal characters */
+
+		if ( *cp != '\\' && *cp != '#' && *cp != '%' )
+			continue;
+
+		/* Convert format descriptor (un-escaped '#') to 4 \x01 (as long as
+           there are still variables to be printed) */
+
+		if ( *cp == '#' )
+		{
+			if ( on_stack-- )
+			{
+				memmove( cp + 3, cp, strlen( cp ) + 1 );
+				memset( cp, 0x01, 4 );
+				cp += 3;
+				n++;
+			}
+			continue;
+		}
+
+		/* Double all '%'s */
+
+		if ( *cp == '%' )
+		{
+			memmove( cp + 1, cp, strlen( cp ) + 1 );
+			cp++;
+			continue;
+		}
+
+		/* Replace escape sequences */
+
+		switch ( *( cp + 1 ) )
+		{
+			case '#' :
+				*cp = '#';
+				break;
+
+			case 'n' :
+				*cp = '\n';
+				break;
+
+			case 't' :
+				*cp = '\t';
+				break;
+
+			case '\\' :
+				*cp = '\\';
+				break;
+
+			case '\"' :
+				*cp = '"';
+				break;
+
+			default :
+				print( WARN, "Unknown escape sequence \\%c in format "
+					   "string.\n", *( cp + 1 ) );
+				*cp = *( cp + 1 );
+				break;
+		}
+
+		memmove( cp + 1, cp + 2, strlen( cp ) - 1 );
+	}
+
+	/* Now lets start printing... */
+
+	cp = fmt + 1;
+	cv = v->next;
+	fs = get_string( "" );
+	while ( ( ep = strstr( cp, "\x01\x01\x01\x01" ) ) != NULL )
+	{
+		if ( cv != NULL )      /* skip printing if there are not enough data */
+		{
+			switch ( cv->type )
+			{
+				case INT_VAR :
+					strcpy( ep, "%ld" );
+					is = fs;
+					fs = get_string( cp, is, cv->val.lval );
+					T_free( is );
+					break;
+
+				case FLOAT_VAR :
+					strcpy( ep, "%#g" );
+					is = fs;
+					fs = get_string( cp, is, cv->val.dval );
+					T_free( is );
+					break;
+
+				case STR_VAR :
+					strcpy( ep, "%s" );
+					is = fs;
+					fs = get_string( cp, is, cv->val.sptr );
+					T_free( is );
+					break;
+
+				default :
+					fsc2_assert( 1 == 0 );
+					break;
+			}
+
+			cv = cv->next;
+		}
+
+		cp = ep + 2;
+		*cp = '%';
+		*( cp + 1 ) = 's';
+	}
+
+	is = fs;
+	fs = get_string( cp, is );
+	T_free( is );
+
+	/* Finally free the copy of the format string and return number of
+	   printed variables */
+
+	T_free( fmt );
+
+	cv = vars_push( STR_VAR, NULL );
+	cv->val.sptr = fs;
+	return cv;
+}
+
+
 /*-----------------------------------------------*/
 /* Called for the EDF function "show_message()". */
 /*-----------------------------------------------*/
@@ -3096,7 +3303,7 @@ Var *f_clearmark_2d( Var *v )
 
 	return vars_push( INT_VAR, 1L );
 }
-	
+
 
 /*
  * Local variables:

@@ -1065,7 +1065,7 @@ Var *vars_arr_rhs( Var *v )
 		
 		ind -= ARRAY_OFFSET;
 
-		if ( ind >= cv->len )
+		if ( ind < 0 || ind >= cv->len )
 		{
 			print( FATAL, "Invalid index for array '%s'.\n", a->name );
 			THROW( EXCEPTION );
@@ -1097,7 +1097,7 @@ Var *vars_arr_rhs( Var *v )
 		
 	ind -= ARRAY_OFFSET;
 
-	if ( ind >= cv->len )
+	if ( ind < 0 || ind >= cv->len )
 	{
 		print( FATAL, "Invalid index for array '%s'.\n", a->name );
 		THROW( EXCEPTION );
@@ -1815,6 +1815,7 @@ Var *vars_push( int type, ... )
 	Var *nsv, *stack, *src;
 	va_list ap;
 	ssize_t i;
+	const char *str;
 
 
 	/* Get memory for the new variable to be appended to the stack, set its
@@ -1847,7 +1848,11 @@ Var *vars_push( int type, ... )
 			break;
 
 		case STR_VAR :
-			nsv->val.sptr = T_strdup( va_arg( ap, char * ) );
+			str = va_arg( ap, const char * );
+			if ( str != NULL )
+				nsv->val.sptr = T_strdup( str );
+			else
+				nsv->val.sptr = NULL;
 			break;
 
 		case INT_ARR :
