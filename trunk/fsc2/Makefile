@@ -24,7 +24,7 @@ AWK            = /usr/bin/awk
 # tools to use together with the respective options
 
 SHELL          = /bin/sh
-CC             = gcc
+CC             = /usr/bin/gcc
 CFLAGS         = -ggdb -Wall -Wwrite-strings -Wstrict-prototypes \
 			     -Wmissing-prototypes -Wmissing-declarations -W \
 				 -DDEBUG \
