@@ -262,10 +262,11 @@ fi
 # find out if user wants to update the modules dependency file
 
 if [ -z "$NI6601_KERNEL_SOURCE" ]; then
-    make install
+    make install >> makelog 2>&1
 
     if [ $? -ne 0 ]; then
-	    dialog --msgbox "Sorry, installation failed.\n" 5 30
+		dialog --msgbox \
+"  Sorry, instalation failed.\nSee \"makelog\" for the reasons.\n" 7 35;
 	    exit 1
     fi
 

@@ -1,4 +1,4 @@
-/*
+t/*
   $Id$
  
   Kernel (2.4 series) module for Wasco WITIO-48 DIO ISA cards
