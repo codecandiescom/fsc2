@@ -845,13 +845,13 @@ no extension). Next you have to create a second variable that has the
 same name as your module (again without extension, i.e.@: identical to
 what you just appended to @code{comp_modules}) and which has to be set
 to the list of the all the names of your @code{C} source files. As an
-example lets have a look at the definition of the variable @code{tds754a}:
+example have a look at the definition of the variable @code{tds754a}:
 @example
 tds754a       := tds754a.c tds754a_gpib.c tds754a_util.c
 @end example
-The module @code{tds754a} obviously consists of four @code{C} source
-files that are listed here. After you have created this additional
-variable according to this pattern you're done and can re-compile to
+The module @code{tds754a} consists of the four @code{C} source files
+listed here. You have to create a similar entry for your own
+module. After you've down so you're done and can now re-compile to
 create the new module.
 
 When you want to compile a module 'by hand' you'll have to make sure
