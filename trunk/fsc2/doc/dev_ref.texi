@@ -323,6 +323,7 @@ currently supported.
 @item @code{boxcar_get_curve()}          @tab @ref{boxcar_get_curve}
 @item @code{boxcar_start_acquisition()}  @tab @ref{boxcar_start_acquisition}
 @item @code{boxcar_stop_acquisition()}   @tab @ref{boxcar_stop_acquisition}
+@item @code{boxcar_single_shot()}        @tab @ref{boxcar_single_shot}
 @end multitable
 
 
