@@ -233,7 +233,6 @@ static bool no_prog_to_run( void )
 	}
 
 	EDL.do_quit = EDL.react_to_do_quit = UNSET;
-	fl_set_object_callback( GUI.main_form->run, NULL, 0 );
 
 	run_end_of_exp_hooks( );
 
@@ -416,6 +415,7 @@ static void fork_failure( int stored_errno )
 	}
 
 	Internals.child_pid = 0;
+	EDL.do_quit = EDL.react_to_do_quit = UNSET;
 
 	end_comm( );
 
@@ -590,9 +590,9 @@ static void run_sigchld_handler( int signo )
 		Internals.child_pid = 0;                         /* child is dead... */
 		sigaction( SIGCHLD, &sigchld_old_act, NULL );
 
-		/* Disable the 'Stop' button */
+		/* Disable use of the 'Stop' button */
 
-		fl_set_object_callback( GUI.run_form->stop, NULL, 0 );
+		EDL.do_quit = EDL.react_to_do_quit = UNSET;
 
 		GUI.run_form->sigchld->u_ldata = ( long ) return_status;
 		fl_trigger_object( GUI.run_form->sigchld );

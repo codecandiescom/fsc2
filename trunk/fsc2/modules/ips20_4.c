@@ -37,6 +37,11 @@ const char generic_type[ ] = DEVICE_TYPE;
 #define TEST_SWEEP_RATE    ( 0.02 / 60.0 )
 
 
+/* How many time we retry when an error happens during communication with
+   the device */
+
+#define MAX_RETRIES        10
+
 /* Declaration of exported functions */
 
 int ips20_4_init_hook( void );
@@ -1357,6 +1362,7 @@ static int ips20_4_set_activity( int activity )
 static long ips20_4_talk( const char *message, char *reply, long length )
 {
 	long len = length;
+	int retries = MAX_RETRIES;
 
 
  start:
@@ -1384,20 +1390,31 @@ static long ips20_4_talk( const char *message, char *reply, long length )
 
 	stop_on_user_request( );
 
+	len = length;
 	if ( gpib_read( ips20_4.device, reply, &len ) == FAILURE )
 		ips20_4_comm_failure( );
 
 	/* If device mis-understood the command send it again */
 
 	if ( reply[ 0 ] == '?' )
-		goto start;
+	{
+		if ( retries-- )
+			goto start;
+		else
+			THROW( EXCEPTION );
+	}
 
 	/* If the first character of the reply isn't equal to the third character
 	   of the message we probably read the reply for a previous command and
 	   try to read again... */
 
 	if ( reply[ 0 ] != message[ 2 ] )
-		goto reread;
+	{
+		if ( retries-- )
+			goto reread;
+		else
+			THROW( EXCEPTION );
+	}
 
 	return len;
 }
