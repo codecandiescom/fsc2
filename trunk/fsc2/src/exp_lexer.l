@@ -185,12 +185,12 @@ FUNC        {IDENT}"#"[0-9]+
 "{"         return '{';          /* block start delimiter */
 "}"         return '}';          /* block end delimiter */
 
-{INT}       {
+{INT}/[^_a-zA-Z] {
 				exp_val.lval = T_atol( exptext );
                 return E_INT_TOKEN;
             }
 
-{FLOAT}     {
+{FLOAT}/[^_a-zA-Z] {
                 exp_val.dval = T_atod( exptext );
                 return E_FLOAT_TOKEN;
             }
@@ -345,8 +345,8 @@ FUNC        {IDENT}"#"[0-9]+
 
 			/* Handling of invalid input */
 .           {
-				print( FATAL, "Invalid input in EXPERIMENT section: '%s'.\n",
-					   exptext );
+				print( FATAL, "Invalid input in EXPERIMENT section near "
+					   "'%s'.\n", exptext );
 				THROW( EXCEPTION );
 			}
 

@@ -446,12 +446,12 @@ WS          [\n=: ]+
 				return PSD_TOKEN;
 			}
 
-{INT}       {
+{INT}/[^_a-zA-Z] {
             	assignlval.lval = T_atol( assigntext );
                 return INT_TOKEN;
             }
 
-{FLOAT}     {
+{FLOAT}/[^_a-zA-Z] {
             	assignlval.dval = T_atod( assigntext );
                 return FLOAT_TOKEN;
             }
@@ -544,7 +544,7 @@ WS          [\n=: ]+
 
 			/* handling of invalid input (i.e. everything else) */
 .           {
-				print( FATAL, "Invalid input in ASSIGNMENTS section: '%s'.\n",
+				print( FATAL, "Invalid input in ASSIGNMENTS near '%s'.\n",
 					   assigntext );
 				THROW( EXCEPTION );
 			}

@@ -202,12 +202,12 @@ WS          [\n \t]+
             }
 
 			/* Handling of integer and floating point numbers */
-{INT}       {
+{INT}/[^_a-zA-Z] {
 				varslval.lval = T_atol( varstext );
                 return INT_TOKEN;
             }
 
-{FLOAT}     {
+{FLOAT}/[^_a-zA-Z] {
                 varslval.dval = T_atod( varstext );
                 return FLOAT_TOKEN;
             }
@@ -318,8 +318,8 @@ WS          [\n \t]+
 
 			/* Handling of invalid input */
 .           {
-				print( FATAL, "Invalid input in VARIABLES section: '%s'.\n",
-					   varstext );
+				print( FATAL, "Invalid input in VARIABLES section near "
+					   "'%s'.\n", varstext );
 				THROW( EXCEPTION );
 			}
 

@@ -182,12 +182,12 @@ FUNC        {IDENT}"#"[0-9]+
 				return SECTION_LABEL;
 			}
 
-{INT}       {
+{INT}/[^_a-zA-Z] {
 				prepslval.lval = T_atol( prepstext );
                 return INT_TOKEN;
             }
 
-{FLOAT}     {
+{FLOAT}/[^_a-zA-Z] {
                 prepslval.dval = T_atod( prepstext );
                 return FLOAT_TOKEN;
             }
@@ -445,8 +445,8 @@ FUNC        {IDENT}"#"[0-9]+
 
 			/* Handling of invalid input */
 .           {
-				print( FATAL, "Invalid input in PREPARATIONS section: '%s'.\n",
-					   prepstext );
+				print( FATAL, "Invalid input in PREPARATIONS section near "
+					   "'%s'.\n", prepstext );
 				THROW( EXCEPTION );
 			}
 

@@ -821,7 +821,7 @@ static void lower_permissions( void )
 
 /*---------------------------------------------------------------------------*/
 /* Most of the time the program will write to a pipe and not to a real file. */
-/* To avoid writting only parts of the text when the pipe should get full we */
+/* To avoid writing only parts of the text when the pipe should get full we  */
 /* loop over a write() call until all bytes got written.                     */
 /*---------------------------------------------------------------------------*/
 
