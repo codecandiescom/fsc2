@@ -892,10 +892,10 @@ have a maximum of three active pulses at a moment while both the
 active pulse. Moreover the @code{RADIO_FREQUENCY} and @code{DETECTION}
 can't start before the first @code{MICROWAVE} pulse. Pulses can have a
 maximum length of about @w{167 ms} and also delays between pulses (and
-before the start of a pulse) are restricted to this value. Finally,
-a @code{RADIO_FREQUENCY} pulse can only be created if the pusler is
-connected to the @strong{Rhode & Schwarz SML01} synthesizer, which can
-has a built-in pulse unit.
+before the start of a pulse) are restricted to this value. Finally, a
+@code{RADIO_FREQUENCY} pulse can only be created if the pusler is
+connected to the @strong{Rhode & Schwarz SML01} synthesizer (with SML-B3
+option), which has a built-in pulse unit.
 
 
 
