@@ -27,8 +27,6 @@
 
 #if defined USE_FSC2_MTA
 
-#define MAIL_PORT      25
-#define PROTOCOL_TCP   6
 #define QDCOUNT        0
 #define ANCOUNT        1
 #define NSCOUNT        2
@@ -39,14 +37,8 @@
 #include <sys/un.h>
 #include <netinet/in.h>
 #include <arpa/nameser.h>
+#include <arpa/inet.h>
 #include <resolv.h>
-
-
-#ifdef USE_IPv6
-#define AF_INET_X  AF_INET_6
-#else
-#define AF_INET_X  AF_INET
-#endif
 
 
 /* Define the maximum length of data we're prepared to get on a DNS query
@@ -150,6 +142,18 @@ int send_mail( const char *subject, const char *from, const char* cc_to,
 	char *rec_host;
 	char local_host[ NS_MAXDNAME ];
 
+
+	/* Initialize the resolver */
+
+	if ( res_init( ) != 0 )
+		return -1;
+
+	/* For IPv6 suport set the RES_USE_INET6 flag, so the gethostbyname()
+	   always returns IPv6 addresses */
+
+#if USE_IPv6
+		_res.options |= RES_USE_INET6;
+#endif
 
 	if ( gethostname( local_host, sizeof local_host ) != 0 )
 		return -1;
@@ -314,13 +318,9 @@ static int do_send( const char *rec_host, const char *to,
 
 	while ( fgets( line, MAX_LINE_LENGTH, fp ) != NULL )
 	{
-		/* Send an additional dot before the line if the line consists of
-		   nothing more than a dot */
+		/* Send an additional dot before lines starting with a dot */
 
-		if ( line[ 0 ] == '.' &&
-			 ( line[ 1 ] == '\0' || line[ 1 ] == '\n' || 
-			   ( line[ 1 ] == '\r' && line[ 2 ] == '\n' ) ) &&
-			 writen( mfd, ".", 1 ) < 1 )
+		if ( line[ 0 ] == '.' && writen( mfd, ".", 1 ) < 1 )
 		{
 			close( mfd );
 			return -1;
@@ -378,14 +378,29 @@ static int do_send( const char *rec_host, const char *to,
 static int open_mail_socket( const char *remote, const char *local )
 {
 	int sock_fd;
+#ifdef USE_IPv6
+	struct sockaddr_in6 serv_addr;
+#else
 	struct sockaddr_in serv_addr;
+#endif
 	struct hostent *hp;
 	const char *host;
+	struct servent *se;
 
+
+	/* Get the number (in network order) of the SMTP port (should usually
+	   be 25) */
+
+	if ( ( se = getservbyname( "smtp", "tcp" ) ) == NULL )
+		return -1;
 
 	/* Try to open a socket */
 
-	if ( ( sock_fd = socket( AF_INET_X, SOCK_STREAM, 0 ) ) == -1 )
+#ifdef USE_IPv6
+	if ( ( sock_fd = socket( AF_INET6, SOCK_STREAM, 0 ) ) == -1 )
+#else
+	if ( ( sock_fd = socket( AF_INET, SOCK_STREAM, 0 ) ) == -1 )
+#endif
 		return -1;
 
 	/* If this is a local message (i.e. the domain to which th maile is to
@@ -395,17 +410,21 @@ static int open_mail_socket( const char *remote, const char *local )
 
 	if ( ! strcasecmp( remote, local ) )
 	{
-		memset( &serv_addr, 0, sizeof( serv_addr ) );
-		serv_addr.sin_family = AF_INET_X;
-		serv_addr.sin_port = htons( MAIL_PORT );
-
 		if ( ( hp = gethostbyname( remote ) ) != NULL &&
 			 hp->h_addr_list != NULL )
 		{
-			memcpy( &serv_addr.sin_addr, *
-					( struct in_addr ** ) hp->h_addr_list,
-					sizeof( serv_addr.sin_addr ) );
-		
+			memset( &serv_addr, 0, sizeof( serv_addr ) );
+#ifdef USE_IPv6
+			serv_addr.sin6_family = AF_INET6;
+			serv_addr.sin6_port = se->s_port;
+			memcpy( &serv_addr.sin6_addr.s6_addr, *hp->h_addr_list,
+					sizeof serv_addr.sin6_addr.s6_addr );
+#else
+			serv_addr.sin_family = AF_INET;
+			serv_addr.sin_port = se->s_port;
+			memcpy( &serv_addr.sin_addr.s_addr, *hp->h_addr_list,
+					sizeof serv_addr.sin_addr.s_addr );
+#endif
 			if ( connect( sock_fd, ( struct sockaddr * ) &serv_addr,
 						  sizeof( serv_addr ) ) == 0 )
 				return sock_fd;
@@ -415,23 +434,29 @@ static int open_mail_socket( const char *remote, const char *local )
 	/* Otherwise we can't simply connect to the remote domain but must first
 	   figure out which is the machine that takes care of mail for the domain
 	   and then try to connect to this machine (there can be several, so we
-	   repeat until we connected successfully or until there are no more
-	   machines prepared to accept mail for the domain). */
+	   repeat trying until we connected successfully or there are no more
+	   machines prepared that would accept mail for the domain). */
 
 	for ( host = get_mail_server( remote, local ); host != NULL;
 		  host = get_mail_server( NULL, local ) )
 	{
-		memset( &serv_addr, 0, sizeof( serv_addr ) );
-		serv_addr.sin_family = AF_INET_X;
-		serv_addr.sin_port = htons( MAIL_PORT );
-
 		if ( ( hp = gethostbyname( host ) ) == NULL ||
 			 hp->h_addr_list == NULL )
 			continue;
 
-		memcpy( &serv_addr.sin_addr, * ( struct in_addr ** ) hp->h_addr_list,
-				sizeof( serv_addr.sin_addr ) );
-		
+		memset( &serv_addr, 0, sizeof( serv_addr ) );
+#ifdef USE_IPv6
+		serv_addr.sin6_family = AF_INET6;
+		serv_addr.sin6_port = se->s_port;
+		memcpy( &serv_addr.sin6_addr.s6_addr, *hp->h_addr_list,
+				sizeof serv_addr.sin6_addr.s6_addr );
+#else
+		serv_addr.sin_family = AF_INET;
+		serv_addr.sin_port = se->s_port;
+		memcpy( &serv_addr.sin_addr.s_addr, *hp->h_addr_list,
+				sizeof serv_addr.sin_addr.s_addr );
+#endif
+
 		if ( connect( sock_fd, ( struct sockaddr * ) &serv_addr,
 					  sizeof( serv_addr ) ) == 0 )
 			return sock_fd;
@@ -480,29 +505,16 @@ static const char *get_mail_server( const char *remote, const char *local )
 	if ( remote != NULL )
 	{
 		rrs_left = 0;
-
-		/* The DNS server hasn't been queried for the MX records yet. So we
-		   do so now and check the headers and the qestion section of the
-		   reply. If necessary also find the canoncial name of the host
-		   we're looking for. */
-
 		strcpy( host, remote );
 
 	reget_mx_rr:
 
-		if ( res_init( ) != 0 )
-			return NULL;
-
-		/* Ask the DNS server for the MX RRs for the remote machine */
+		/* Ask the DNS server for the MX RRs for the remote machine, check
+		   the header and skip the question section of the reply. */
 
 		if ( ( len = res_query( host, ns_c_in, ns_t_mx,
-								buf, sizeof buf ) ) == -1 )
-			return NULL;
-
-		/* Check the header of the reply, the return value is (normally) a
-		   pointer to the start of the answer section. */
-
-		if ( ( ans_sec = analyze_dns_reply_header( buf, len, sec_entries,
+								buf, sizeof buf ) ) == -1 ||
+			 ( ans_sec = analyze_dns_reply_header( buf, len, sec_entries,
 												   host, ns_t_mx ) ) == NULL )
 			return NULL;
 
