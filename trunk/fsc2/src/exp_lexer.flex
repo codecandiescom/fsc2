@@ -176,6 +176,11 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 				return E_STR_TOKEN;
 			}
 
+{P}			{
+				exp_val.vptr = p_num( exptext );
+				return E_INT_TOKEN;
+			}
+
 			/* combinations of pulse and property, e.g. `P3.LEN' */
 
 {P}"."{F}   {
