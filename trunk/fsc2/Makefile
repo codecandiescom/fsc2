@@ -4,7 +4,6 @@
 # by 'make install' as well as the name of the GPIB configuration and log file
 # together with its ownerships
 
-
 #prefix         = /usr/local
 #bindir         = $(prefix)/bin
 #libdir         = $(prefix)/lib/fsc2
