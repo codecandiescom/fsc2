@@ -141,7 +141,7 @@ int main( int argc, char *argv[ ] )
 				continue;
 			}
 
-			if ( ! strcmp( argv[ cur_arg ], "-delete" ) )
+			if ( ! strcmp( argv[ cur_arg ], "--delete" ) )
 			{
 				do_delete = SET;
 				cur_arg++;
