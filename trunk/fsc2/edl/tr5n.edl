@@ -99,21 +99,3 @@ FOR J = 1 : N_runs {
         set_field( field, 0.3 G );
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

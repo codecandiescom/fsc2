@@ -14,6 +14,23 @@ static void get_array_params( Var *v, const char *name, long *len,
 /*----------------------------------------------------------------*/
 /*----------------------------------------------------------------*/
 
+Var *f_abort( Var *v )
+{
+	v = v;                       /* keeps the compiler happy */
+
+
+	eprint( NO_ERROR, "%s:%ld: Exit due to abort().\n", Fname, Lc );
+
+	if ( ! TEST_RUN )
+		THROW( ABORT_EXCEPTION );
+
+	return NULL;
+}
+
+
+/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*/
+
 static void get_array_params( Var *v, const char *name, long *len,
 							  long **ilp, double **idp )
 {
@@ -1360,7 +1377,7 @@ Var *f_mean( Var *v )
 
 			/* Test that the slice is within the arrays range */
 
-			if ( index + slice_len > len &&
+			if ( slice_len != 1 && index + slice_len > len &&
 				 ! ( TEST_RUN && ( v->flags & IS_DYNAMIC ) ) )
 			{
 				eprint( FATAL, "%s:%ld: Sum of index and slice length "
