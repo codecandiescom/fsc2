@@ -973,9 +973,12 @@ static void eps_make_scale( FILE *fp, void *cv, int coord, long dim )
 			else
 				label = paren_replace( G.label[ dim < 0 ? X : Y ] );
 
-			fprintf( fp, "(%s) dup cw %.2f exch sub %.2f m show\n",
-					 label, x_0 + w, margin );
-			T_free( label );
+			if ( label != NULL )
+			{
+				fprintf( fp, "(%s) dup cw %.2f exch sub %.2f m show\n",
+						 label, x_0 + w, margin );
+				T_free( label );
+			}
 			TRY_SUCCESS;
 		}
 		CATCH( OUT_OF_MEMORY_EXCEPTION ) { }
@@ -1068,11 +1071,13 @@ static void eps_make_scale( FILE *fp, void *cv, int coord, long dim )
 			{
 				label = paren_replace( G.label[ Z ] );
 
-				fprintf( fp, "gs (%s) dup dup ch %.2f exch sub exch cw %.2f "
-						 	 "exch sub t 90 r 0 0 m show gr\n",
-						 label, x + 28.0, paper_width - margin );
-
-				T_free( label );
+				if ( label != NULL )
+				{
+					fprintf( fp, "gs (%s) dup dup ch %.2f exch sub exch cw "
+							 "%.2f exch sub t 90 r 0 0 m show gr\n",
+							 label, x + 28.0, paper_width - margin );
+					T_free( label );
+				}
 				TRY_SUCCESS;
 			}
 			CATCH( OUT_OF_MEMORY_EXCEPTION ) { }
