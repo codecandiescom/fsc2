@@ -21,6 +21,7 @@
   Boston, MA 02111-1307, USA.
 */
 
+
 /************************************************************/
 /* This is the lexer for the DEVICES section of an EDL file */
 /************************************************************/
@@ -36,8 +37,7 @@
 
 /* We declare our own input routine to make the lexer read the input byte
    by byte instead of larger chunks - since the lexer might be called by
-   another lexer we thus avoid reading stuff which is to be handled by
-   the calling lexer. */
+   another lexer we thus avoid reading stuff which is to be handled here. */
 
 #define YY_INPUT( buf, result, max_size )                  \
 {                                                          \

@@ -160,10 +160,8 @@ bool device_list_parse( void )
 
 	T_free( Fname );
 	Fname = get_string( strlen( libdir ) + strlen( "Devices" ) + 1 );
-	strcpy( Fname, libdir );
-	if ( libdir[ strlen( libdir ) - 1 ] != '/' )
-		strcat( Fname, "/" );
-	strcat( Fname, "Devices" );
+	sprintf( Fname, "%s%sDevices", libdir,
+			 libdir[ strlen( libdir ) - 1 ] != '/' ? "/" : "" );
 
 	if ( ( devices_listin = fopen( Fname, "r" ) ) == NULL )
 	{

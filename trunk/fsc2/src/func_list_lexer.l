@@ -92,7 +92,7 @@ IDENT    [A-Za-z][A-Za-z_0-9]*
 <comm>{
 
 {REM4}		/* skipping anything that's not a '*' */
-{REM5}      /* skipping all '*'s not followed by '/'s */
+{REM5}      /* skipping all '*'s not followed by a '/' */
 
 			/* end of line character in a comment */
 \n			{
@@ -356,9 +356,9 @@ static void fll_get_functions( Func *fncts, int num_predef_func )
 				}
 
 				/* Allow overloading of built-in functions but don't allow
-				   multiple overloading (please note that this got nothing to
-				   do with several modules defining the same function, here
-				   we only care about the declarations in 'Functions') */
+				   multiple overloading (this got nothing to do with several
+				   modules defining the same function, because here we only
+				   care about the declarations in 'Functions') */
 
 				for ( i = 0; i < cur; i++ )
 					if ( ! strcmp( fncts[ i ].name, func_listtext ) )
