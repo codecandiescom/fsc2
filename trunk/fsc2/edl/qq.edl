@@ -3,9 +3,9 @@ DEVICES:
 VARIABLES:
 
 f, df = 0.1, sf = 3400, ef = 3500;
-I;
+I, J = 1;
 N = int ( ( ef - sf ) / df ) + 1;
-r1, r2;
+d1[ N ], d2[ N ];
 
 PREPARATIONS:
 
@@ -13,12 +13,17 @@ init_1d( 2, N, sf, df, "Field [ G ]", "Signal [uV]" );
 
 EXPERIMENT:
 
-
-FOR I = 1 : N {
-	r1 = grandom( ) - 23.0 *
-	     ( I - N / 2 ) * exp( - ( I - N / 2 )^2 / 55.0^2 ) / 55.0;
-	r2 = grandom( ) + 3.0 *
-	     ( I - N / 2 ) * exp( - ( I - N / 2 )^2 / 55.0^2 ) / 55.0;;
-	display( I, r1, 1, I, r2, 2 );
-	wait( 0.05 );
+FOREVER {
+	print( "Starting #. run\n", J );
+	FOR I = 1 : N {
+		d1[ N ] = d1[ N ] * float( J - 1 ) / float( J )
+				  + ( grandom( ) - 23.0 * ( I - N / 2 ) *
+				  exp( - ( I - N / 2 )^2 / 55.0^2 ) / 55.0 ) / J;
+		d2[ N ] = d2[ N ] * float( J - 1 ) / float( J )
+				  + ( grandom( ) + 3.0 * ( I - N / 2 ) *
+					  exp( - ( I - N / 2 )^2 / 55.0^2 ) / 55.0 ) / J;
+		display( I, d1[ N ], 1, I, d2[ N ], 2 );
+		wait( 0.05 );
+	}
+	J += 1;
 }
