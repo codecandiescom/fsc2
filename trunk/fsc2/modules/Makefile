@@ -58,12 +58,14 @@ endef
 		install-moebi.physik.fu-berlin.de               \
 		install-door.physik.fu-berlin.de                \
 		install-isaak.physik.fu-berlin.de               \
+		install-sunone.chemie.unibas.ch                 \
 		install-crowley.none                            \
         uninstall-pion.anorg.chemie.uni-frankfurt.de    \
 		uninstall-crowley.physik.fu-berlin.de           \
 		uninstall-moebi.physik.fu-berlin.de             \
 		uninstall-door.physik.fu-berlin.de              \
 		uninstall-isaak.physik.fu-berlin.de             \
+		uninstall-sunone.chemie.unibas.ch               \
 		uninstall-crowley.none
 
 
@@ -196,6 +198,8 @@ install-isaak.physik.fu-berlin.de:
 	-$(LN) $(LNFLAGS) $(libdir)/er035m_s.so $(libdir)/gaussmeter.so
 	-chown $(OWNER).$(GROUP) $(libdir)/gaussmeter.so
 
+install-sunone.chemie.unibas.ch:
+
 install-crowley.none:
 	$(MAKE) $(UNINSTALL_MACHINE)
 
@@ -237,6 +241,8 @@ uninstall-isaak.physik.fu-berlin.de:
 	-$(RM) $(RMFLAGS) $(libdir)/pulser.so
 	-$(RM) $(RMFLAGS) $(libdir)/magnet.so
 	-$(RM) $(RMFLAGS) $(libdir)/gaussmeter.so
+
+uninstall-sunone.chemie.unibas.ch:
 
 uninstall-crowley.none:
 

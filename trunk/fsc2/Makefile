@@ -254,6 +254,12 @@ ifeq ($(machine_name),isaak.physik.fu-berlin.de)
 	UNINSTALL_MACHINE  := uninstall-$(machine_name)
 endif
 
+ifeq ($(machine_name),sunone.chemie.unibas.ch)
+	 GPIB_LIBRARY       := NI
+	 INSTALL_MACHINE    := install-$(machine_name)
+	 UNINSTALL_MACHINE  := uninstall-$(machine_name)
+endif
+
 ifeq ($(machine_name),crowley.none)
 	 GPIB_LIBRARY       := JTT
 	 INSTALL_MACHINE    := install-$(machine_name)
