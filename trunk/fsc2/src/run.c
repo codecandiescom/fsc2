@@ -355,14 +355,14 @@ void run_sigchld_callback( FL_OBJECT *a, long b )
 }
 
 
-/*----------------------------------------------------------------------*/
-/* stop_measurement() has two functions - if called with a parameter    */
-/* b == 0 it serves as the callback for the stop button and just sends  */
-/* a DO_QUIT signal to the child telling it to exit. This in turn will  */
-/* cause another call of the function, this time with b == 1 by         */
-/* run_sigchld_handler(), catching the SIGCHLD from the child, in order */
-/* to get the post-measurement clean-up done.                           */
-/*----------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*/
+/* stop_measurement() has two functions - if called with a parameter   */
+/* b == 0 it serves as the callback for the stop button and just sends */
+/* a DO_QUIT signal to the child telling it to exit. This in turn will */
+/* cause another call of the function, this time with b == 1 by        */
+/* run_sigchld_handler(), catching the SIGCHLD from the child in order */
+/* to get the post-measurement clean-up done.                          */
+/*---------------------------------------------------------------------*/
 
 void stop_measurement( FL_OBJECT *a, long b )
 {
@@ -371,10 +371,7 @@ void stop_measurement( FL_OBJECT *a, long b )
 	if ( b == 0 )                        /* callback from stop button ? */
 	{
 		if ( child_pid != 0 )            /* child is still kicking... */
-		{
-			fl_set_cursor( FL_ObjWin( run_form->stop ), XC_watch );
 			kill( child_pid, DO_QUIT );
-		}
 		else                             /* child has already exited */
 		{
 			stop_graphics( );
@@ -404,7 +401,6 @@ void stop_measurement( FL_OBJECT *a, long b )
 	fl_set_object_label( run_form->stop, "Close" );
 	fl_set_button_shortcut( run_form->stop, "C", 1 );
 	fl_set_object_helper( run_form->stop, "Remove this window" );
-	fl_set_cursor( FL_ObjWin( run_form->stop ), XC_left_ptr );
 	fl_unfreeze_form( run_form->run );
 	fl_redraw_form( run_form->run );
 }
