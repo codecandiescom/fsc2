@@ -49,12 +49,16 @@ while ( <F> ) {
 
 close( F );
 
-print "Remaing memory from parent:\n";
-foreach $key ( keys %h1 ) {
-	print "$h1{ $key }\n";
+if ( ( keys %h1 ) ) {
+	print "Remaing memory from parent:\n";
+	foreach $key ( keys %h1 ) {
+		print "$h1{ $key }\n";
+	}
 }
 
-print "\nRemaing memory from child:\n";
-foreach $key ( keys %h2 ) {
-	print "$h2{ $key }\n";
+if ( ( keys %h1 ) ) {
+	print "Remaing memory from child:\n";
+	foreach $key ( keys %h2 ) {
+		print "$h2{ $key }\n";
+	}
 }

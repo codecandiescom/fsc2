@@ -218,7 +218,7 @@ static void other_data_request( int type, void * ptr )
 			{
 				lengths[ i ] = * ( long * ) ptr;
 				ptr += sizeof( long );
-				label[ i ] = T_strdup( ( char * ) ptr );
+				label[ i ] = ( char * ) ptr;
 				ptr += lengths[ i ];
 			}
 			change_label( label );
