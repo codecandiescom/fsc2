@@ -63,14 +63,18 @@ static void child_confirmation_handler( int signo );
 static void deal_with_program_tokens( void );
 
 
+/* Global variables */
+
+sigjmp_buf Alrm_Env;
+volatile sig_atomic_t Can_Jmp_Alrm = 0;
+
+
 /* Locally used global variables used in parent, child and signal handlers */
 
-sigjmp_buf alrm_env;
-volatile sig_atomic_t can_jmp_alrm = 0;
-static struct sigaction sigchld_old_act,
-	                    quitting_old_act;
-static volatile sig_atomic_t child_return_status;
-static bool graphics_have_been_started = UNSET;
+static struct sigaction Sigchld_old_act,
+	                    Quitting_old_act;
+static volatile sig_atomic_t Child_return_status;
+static bool Graphics_have_been_started = UNSET;
 
 
 /*------------------------------------------------------------------*/
@@ -199,8 +203,8 @@ bool run( void )
 
 /*----------------------------------------------------------*/
 /* Called when the program was started with the main window */
-/* being iconified and an error happens, in which case the  */
-/* message of the main window must become visible.          */
+/* being iconified and an error happened, in which case the */
+/* the main window must be de-iconified.                    */
 /*----------------------------------------------------------*/
 
 static void error_while_iconified( void )
@@ -229,7 +233,7 @@ static bool start_gpib_and_rulbus( void )
 
 	/* If there are devices that need the GPIB bus initialize it now */
 
-	if ( need_GPIB && gpib_init( GPIB_LOG_FILE, GPIB_LOG_LEVEL ) == FAILURE )
+	if ( Need_GPIB && gpib_init( GPIB_LOG_FILE, GPIB_LOG_LEVEL ) == FAILURE )
 	{
 		eprint( FATAL, UNSET, "Can't initialize GPIB bus: %s\n",
 				gpib_error_msg );
@@ -248,12 +252,12 @@ static bool start_gpib_and_rulbus( void )
 #if defined WITH_RULBUS
 	/* If there are devices that are controlled via the RULBUS initialize it */
 
-	if ( need_RULBUS && ( retval = rulbus_open( ) ) < 0 )
+	if ( Need_RULBUS && ( retval = rulbus_open( ) ) < 0 )
 	{
 		eprint( FATAL, UNSET, "Failed to initialize RULBUS: %s.\n",
 				rulbus_strerror( ) );
 
-		if ( need_GPIB )
+		if ( Need_GPIB )
 			gpib_shutdown( );
 
 		if ( ! ( Internals.cmdline_flags & NO_GUI_RUN ) )
@@ -319,11 +323,11 @@ static bool no_prog_to_run( void )
 	run_end_of_exp_hooks( );
 
 #if defined WITH_RULBUS
-	if ( need_RULBUS )
+	if ( Need_RULBUS )
 		 rulbus_close( );
 #endif
 
-	if ( need_GPIB )
+	if ( Need_GPIB )
 		gpib_shutdown( );
 
 	fsc2_serial_cleanup( );
@@ -360,7 +364,7 @@ static bool init_devs_and_graphics( void )
 	/* Make a copy of the errors found while compiling the program */
 
 	compile_test = EDL.compilation;
-	graphics_have_been_started = UNSET;
+	Graphics_have_been_started = UNSET;
 
 	TRY
 	{
@@ -399,7 +403,7 @@ static bool init_devs_and_graphics( void )
 		if ( ! ( Internals.cmdline_flags & NO_GUI_RUN ) )
 		{
 			start_graphics( );
-			graphics_have_been_started = SET;
+			Graphics_have_been_started = SET;
 
 			if ( G.dim & 1 || ! G.is_init )
 				fl_set_object_callback( GUI.run_form_1d->stop_1d,
@@ -423,11 +427,11 @@ static bool init_devs_and_graphics( void )
 		vars_del_stack( );
 
 #if defined WITH_RULBUS
-		if ( need_RULBUS )
+		if ( Need_RULBUS )
 			 rulbus_close( );
 #endif
 
-		if ( need_GPIB )
+		if ( Need_GPIB )
 			gpib_shutdown( );
 
 		fsc2_serial_cleanup( );
@@ -473,12 +477,12 @@ static void setup_signal_handlers( void )
 	sact.sa_handler = quitting_handler;
 	sigemptyset( &sact.sa_mask );
 	sact.sa_flags = 0;
-	sigaction( QUITTING, &sact, &quitting_old_act );
+	sigaction( QUITTING, &sact, &Quitting_old_act );
 
 	sact.sa_handler = run_sigchld_handler;
 	sigemptyset( &sact.sa_mask );
 	sact.sa_flags = 0;
-	sigaction( SIGCHLD, &sact, &sigchld_old_act );
+	sigaction( SIGCHLD, &sact, &Sigchld_old_act );
 }
 
 
@@ -500,8 +504,8 @@ static void stop_while_exp_hook( UNUSED_ARG FL_OBJECT *a, UNUSED_ARG long b )
 
 static void fork_failure( int stored_errno )
 {
-	sigaction( SIGCHLD,  &sigchld_old_act,  NULL );
-	sigaction( QUITTING, &quitting_old_act, NULL );
+	sigaction( SIGCHLD,  &Sigchld_old_act,  NULL );
+	sigaction( QUITTING, &Quitting_old_act, NULL );
 
 	if ( Internals.cmdline_flags & ICONIFIED_RUN )
 		error_while_iconified( );
@@ -544,11 +548,11 @@ static void fork_failure( int stored_errno )
 	run_end_of_exp_hooks( );
 
 #if defined WITH_RULBUS
-	if ( need_RULBUS )
+	if ( Need_RULBUS )
 		 rulbus_close( );
 #endif
 
-	if ( need_GPIB )
+	if ( Need_GPIB )
 		gpib_shutdown( );
 
 	fsc2_serial_cleanup( );
@@ -721,7 +725,7 @@ static void run_sigchld_handler( int signo )
 #endif
 
 		Internals.child_pid = 0;                         /* child is dead... */
-		sigaction( SIGCHLD, &sigchld_old_act, NULL );
+		sigaction( SIGCHLD, &Sigchld_old_act, NULL );
 
 		/* Disable use of the 'Stop' button */
 
@@ -811,7 +815,7 @@ void run_sigchld_callback( FL_OBJECT *a, long b )
 
 	/* Reset the handler for the QUITTING signal */
 
-	sigaction( QUITTING, &quitting_old_act, NULL );
+	sigaction( QUITTING, &Quitting_old_act, NULL );
 
 	/* Remove the tool box */
 
@@ -823,11 +827,11 @@ void run_sigchld_callback( FL_OBJECT *a, long b )
 	run_end_of_exp_hooks( );
 
 #if defined WITH_RULBUS
-	if ( need_RULBUS )
+	if ( Need_RULBUS )
 		 rulbus_close( );
 #endif
 
-	if ( need_GPIB )
+	if ( Need_GPIB )
 		gpib_shutdown( );
 
 	fsc2_serial_cleanup( );
@@ -903,10 +907,10 @@ void run_sigchld_callback( FL_OBJECT *a, long b )
 
 void run_close_button_callback( UNUSED_ARG FL_OBJECT *a, UNUSED_ARG long b )
 {
-	if ( graphics_have_been_started )
+	if ( Graphics_have_been_started )
 	{
 		stop_graphics( );
-		graphics_have_been_started = UNSET;
+		Graphics_have_been_started = UNSET;
 	}
 
 	set_buttons_for_run( 0 );
@@ -1023,7 +1027,7 @@ static void run_child( void )
 
 	/* Set up pointers, global variables and signal handlers */
 
-	child_return_status = OK;
+	Child_return_status = OK;
 	EDL.cur_prg_token = EDL.prg_token;
 	EDL.do_quit = UNSET;
 	setup_child_signals( );
@@ -1040,7 +1044,7 @@ static void run_child( void )
 	if ( ( fcd = getenv( "FSC2_CHILD_DEBUG" ) ) != NULL && *fcd != '\0' )
 	{
 		fprintf( stderr, "Child process pid = %d\n", getpid( ) );
-		sleep( 36000 );
+		pause( );
 	}
 	else
 	{
@@ -1058,11 +1062,11 @@ static void run_child( void )
 	TRY
 	{
 		do_measurement( );               /* run the experiment */
-		child_return_status = OK;
+		Child_return_status = OK;
 		TRY_SUCCESS;
 	}
 	OTHERWISE                            /* catch all exceptions */
-		child_return_status = FAIL;
+		Child_return_status = FAIL;
 
 	run_child_exit_hooks( );
 
@@ -1149,10 +1153,10 @@ static void child_sig_handler( int signo )
 			/* fall through ! */
 
 		case SIGALRM :
-			if ( can_jmp_alrm )
+			if ( Can_Jmp_Alrm )
 			{
-				can_jmp_alrm = 0;
-				siglongjmp( alrm_env, 1 );
+				Can_Jmp_Alrm = 0;
+				siglongjmp( Alrm_Env, 1 );
 			}
 			return;
 
@@ -1230,7 +1234,7 @@ static void wait_for_confirmation( void )
 	   we can't send the signal to the parent stop the child. */
 
     if ( getppid( ) == 1 || kill( getppid( ), QUITTING ) == -1 )
-		_exit( child_return_status );           /* commit controlled suicide */
+		_exit( Child_return_status );           /* commit controlled suicide */
 
 	/* This seemingly infinite loop looks worse than it is, the child really
 	   exits in the signal handler for DO_QUIT. */
@@ -1247,7 +1251,7 @@ static void wait_for_confirmation( void )
 static void child_confirmation_handler( int signo )
 {
 	if ( signo == DO_QUIT )
-		_exit( child_return_status );                /* ...and that's it ! */
+		_exit( Child_return_status );                /* ...and that's it ! */
 }
 
 
@@ -1323,7 +1327,7 @@ static void do_measurement( void )
 
 static void deal_with_program_tokens( void )
 {
-	Prg_Token *cur;
+	Prg_Token_T *cur;
 
 
 	switch ( EDL.cur_prg_token->token )
