@@ -246,7 +246,7 @@ static int func_cmp2( const void *a, const void *b )
 Var *func_call( Var *f )
 {
 	Var *ap;
-	Var *ret;
+	Var *ret = NULL;
 	int ac;
 	int i;
 	
@@ -310,18 +310,11 @@ Var *func_call( Var *f )
 
 	/* Now call the function */
 
-	TRY
-	{
-		if ( ac != 0 )
-			ret = ( *f->val.fnct )( f->next );
-		else
-			ret = ( *f->val.fnct )( NULL );
-		TRY_SUCCESS;
-	}
-	CATCH( USER_BREAK_EXCEPTION )
-	{
-		TRY_SUCCESS;
-	}
+	if ( ac != 0 )
+		ret = ( *f->val.fnct )( f->next );
+	else
+		ret = ( *f->val.fnct )( NULL );
+	TRY_SUCCESS;
 
 	/* Finally do a clean up, i.e. remove the variable with the function and
 	   all parameters - just keep the return value. Before starting to delete
