@@ -25,7 +25,7 @@ TRIGGER_MODE: INTERNAL, REP_FREQ = 200 Hz;
 MICROWAVE:      POD = 1, 2, 3, V_HIGH = 5 V, V_LOW = 0 V, INV;
 DETECTION:      POD = 5,       V_HIGH = 5 V, V_LOW = 0 V;
 
-PHASE_1_SETUP:	MW,
+PHASE_SETUP_1:	MW,
 				 X: POD = 1,
 				-X: POD = 2;
 

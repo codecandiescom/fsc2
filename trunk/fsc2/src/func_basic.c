@@ -1254,9 +1254,6 @@ Var *f_setseed( Var *v )
 				   "maximum is %ld. Using 1 instead\n", RAND_MAX );
 			arg = 1;
 		}
-
-		if ( v->next != NULL )
-			print( WARN, "Superfluous argument found.\n" );
 	}
 	else
 	{

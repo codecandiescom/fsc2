@@ -6,6 +6,8 @@ a[ 2, * ];
 b[ * ];
 
 
+PREPARATIONS:
+
 init_1d( );
 
 EXPERIMENT:

@@ -458,7 +458,7 @@ void start_graphics( void )
 
 	/* Make sure the window gets drawn correctly immediately */
 
-	if ( G.dim == 1 )
+	if ( G.dim < 2 )
 		redraw_all_1d( );
 	else
 		redraw_all_2d( );

@@ -321,12 +321,13 @@ int sr810_exp_hook( void )
 
 int sr810_end_of_exp_hook( void )
 {
-	sr810_auto( 0 );
-
 	/* Switch lock-in back to local mode */
 
 	if ( sr810.device >= 0 )
+	{
+		sr810_auto( 0 );
 		gpib_local( sr810.device );
+	}
 
 	sr810.data_fetched = 0;
 	sr810.stored_data = 0;

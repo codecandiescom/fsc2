@@ -150,10 +150,10 @@ void setup_comm( void )
 
 	/* Beside the pipes we need a semaphore which allows the parent to control
 	   when the child is allowed to send data and messages. Its size has to be
-	   identcal to the message queue size to avoid having the child send more
-	   messages than queue can hold. */
+	   at least by one element smaller than the message queue size to avoid
+	   having the child send more messages than message queue can hold. */
 
-	if ( ( Comm.data_semaphore = sema_create( QUEUE_SIZE ) ) < 0 )
+	if ( ( Comm.data_semaphore = sema_create( QUEUE_SIZE - 1 ) ) < 0 )
 	{
 		delete_all_shm( );
 		for ( i = 0; i < 4; i++ )

@@ -2,7 +2,7 @@ VARIABLES:
 
 I;
 g;
-MAX = 1000;
+MAX = 2000;
 g[ MAX ], r[ MAX ];
 
 PREPARATIONS:

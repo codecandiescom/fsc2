@@ -1716,6 +1716,9 @@ static void cut_motion_handler( FL_OBJECT *obj, Window window,
 			break;
 
 		case 2 :                               /* middle button */
+			if ( G.drag_canvas == 4 )
+				break;
+
 			shift_XPoints_of_cut_curve( c );
 			scale_changed = SET;
 
@@ -1742,6 +1745,8 @@ static void cut_motion_handler( FL_OBJECT *obj, Window window,
 			break;
 
 		case 3 : case 5 :               /* left and (middle or right) button */
+			if ( G.drag_canvas == 4 )
+				break;
 			repaint_cut_canvas( &G.cut_canvas );
 			break;
 	}

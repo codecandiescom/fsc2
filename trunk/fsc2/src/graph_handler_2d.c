@@ -1298,7 +1298,10 @@ void redraw_canvas_2d( Canvas *c )
 	XFillRectangle( G.d, c->pm, c->gc, 0, 0, c->w, c->h );
 
 	if ( ! G.is_init )
+	{
 		repaint_canvas_2d( c );
+		return;
+	}
 
 	if ( c == &G.canvas )
 	{

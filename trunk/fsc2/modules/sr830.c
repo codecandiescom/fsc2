@@ -340,13 +340,15 @@ int sr830_end_of_exp_hook( void )
 	int i;
 
 
-	if ( sr830.is_auto_setup )
-		sr830_auto( 0 );
-
 	/* Switch lock-in back to local mode */
 
 	if ( sr830.device >= 0 )
+	{
+		if ( sr830.is_auto_setup )
+			sr830_auto( 0 );
+
 		gpib_local( sr830.device );
+	}
 
 	for ( i = 0; i < DISPLAY_CHANNELS; i++ )
 		sr830.data_fetched[ i ] = 0;

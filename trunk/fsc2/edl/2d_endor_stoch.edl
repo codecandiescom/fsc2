@@ -187,7 +187,7 @@ FOR I = 1 : N_steps {
 }
 
 IF is_file( F1 ) {
-	fsave( F1, "# List of frequencies in a run (in MHz)\n\n" );
+	fsave( F1, "\# List of frequencies in a run (in MHz)\n\n" );
 	save( F1, Stoch * 1.0e-6 );
 	fsave( F1, "\n" );
 }

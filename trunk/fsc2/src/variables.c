@@ -283,6 +283,14 @@ void vars_sort( void )
 		  ptr = ptr->next, num_vars++ )
 		/* empty */ ;
 
+	/* Nothing to sort if there are less than two variables */
+
+	if ( num_vars < 2 )
+	{
+		is_sorted = SET;
+		return;
+	}
+
 	/* Get the variables into a continous block, then sort them according
 	   to the variable names */
 

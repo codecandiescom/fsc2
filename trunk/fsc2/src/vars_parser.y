@@ -93,7 +93,9 @@ linet:   VAR_TOKEN                 { } /* no assignment to be done */
        | VAR_TOKEN '['             { vars_arr_start( $1 ); }
          list1 ']'                 { vars_arr_lhs( $4 ); }
          arhs
-       | FUNC_TOKEN '(' list4 ')'  { vars_pop( func_call( $1 ) ); }
+	   | FUNC_TOKEN '('            { eprint( FATAL, SET, "Not a variable "
+											   "definition.\n" );
+	                                 THROW( EXCEPTION ); }
        | FUNC_TOKEN '['            { eprint( FATAL, SET, "`%s' is a function "
 											 "and not an array.\n", $1->name );
 	                                 THROW( EXCEPTION ); }
