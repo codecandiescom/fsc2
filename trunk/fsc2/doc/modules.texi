@@ -1732,13 +1732,7 @@ struct @{
     bool ( *set_trig_in_slope )( int slope );
     bool ( *set_trig_in_impedance )( int state );
 
-    bool ( *set_max_seq_len )( double seq_len );
-    bool ( *keep_all_pulses )( void );
-
     bool ( *set_phase_reference )( int phase, int function );
-
-    bool ( *set_phase_switch_delay )( int function, double del_time );
-    bool ( *set_grace_period )( double gp_time );
 
     bool ( *phase_setup_prep )( int func, int type, int pod, long val );
     bool ( *phase_setup )( int func );
@@ -1758,6 +1752,13 @@ struct @{
     bool ( *get_pulse_length_change )( long pulse_number, double *ptime );
     bool ( *get_pulse_phase_cycle )( long pulse_number, long *cycle );
 
+    /* The following entries are deprecated and exist for backward
+       compatibility only */
+
+    bool ( *set_max_seq_len )( double seq_len );
+    bool ( *keep_all_pulses )( void );
+    bool ( *set_phase_switch_delay )( int function, double del_time );
+    bool ( *set_grace_period )( double gp_time );
 @} pulser_struct;
 @end example
 @noindent
@@ -2043,70 +2044,6 @@ trigger input impedance doesn't make sense in the case that the user
 specified internal trigger mode.
 
 
-@item bool set_max_seq_len( double seq_len )
-This function is called when the @code{MAXIMUM_SEQUENCE_LENGTH} is found
-in the  @code{ASSIGNMENTS} section, i.e.@:
-@example
-ASSIGNMENTS:
-  MAXIMUM_SEQUENCE_LENGTH: 10 us;
-@end example
-@noindent
-If you determine the maximum length of the pulser pattern in your module
-during the test run the value you get can be plain wrong if the
-@code{EDL} program contains e.g.@: @code{FOREVER} loops,
-@code{IF}/@code{ELSE} constructs etc.@: because it is not possible to
-determine during the test run which branches of the @code{EDL}
-program will be run in the real experiment. The
-@code{MAXIMUM_SEQUENCE_LENGTH} command should allow the user to correct
-the possible wrong value when necessary.
-
-The obvious question is why bother at all to determine the maximum
-length of the pulse pattern and not use instead the maximum pattern
-length all the time? The reason is that clearing the whole pattern at
-the start of the experiment for some pulsers can take a rather long
-time. E.g.@: for the @strong{Sony/Tektronix DG2020} for each of the
-internal channels that are going to be used more than @w{64 kB} of data
-would have to be send to the pulser, probably taking several minutes,
-while in most experiments only a small fraction of the maximum pattern
-length is really needed.
-
-@quotation
-@cartouche
-The use of the keyword @code{MAXIMUM_SEQUENCE_LENGTH} is deprecated.
-Instead, the pulser module should supply, if necessary, a function
-@code{pulser_maximum_sequence_length()} that can be used in the
-@code{PREPARATIONS} section and has the same effect. Assigning anything
-else then @code{NULL} to the @code{set_max_seq_len} member of the pulser
-structure is only for backward compatibility.
-@end cartouche
-@end quotation
-
-
-@item bool bool keep_all_pulses( void )
-This function is called when the @w{@code{KEEP_ALL_PULSES}} keyword is
-found in the @code{ASSIGNMENTS} section. If this function is called your
-module may not delete pulses that it found during the test run never to
-be used.
-
-The question, of course, is why delete pulses at all that are never used
-and not keep them? The reason is that when doing phase cycling it can
-happen that for each additional pulse lots of channels in the digitizer
-are needed, even to the point that the number of channels is exceeded.
-Therefor, as a default, pulses that are found to be never used during
-the test run are removed (after printing out a message to the user).
-
-@quotation
-@cartouche
-The use of the keyword @code{KEEP_ALL_PULSES} is deprecated.  Instead,
-the pulser module should supply, if necessary, a function
-@code{pulser_keep_all_pulses()} that can be used in the
-@code{PREPARATIONS} section and has the same effect. Assigning anything
-else then @code{NULL} to the @code{keep_all_pulses} member of the pulser
-structure is only for backward compatibility.
-@end cartouche
-@end quotation
-
-
 @item bool set_phase_reference( int phase, int function )
 This again a function that gets called under somewhat different
 circumstances, depending on how the pulser module is supposed to work.
@@ -2146,65 +2083,6 @@ argument is either @code{0} or @code{1}, depending on if the this for the
 first phase cycled function (i.e.@: when the command in @code{EDL}
 program starts with either @code{PHASE_SETUP} or @code{PASE_SETUP_1}) or
 for the second phase cycled function (i.e.@: for @code{PHASE_SETUP_2}).
-
-
-@item bool set_phase_switch_delay( int function, double del_time )
-This function is called when in the @code{ASSIGNMENTS} section a line like
-@example
-  PHASE_SWITCH_DELAY: 40 ns;
-@end example
-@noindent
-is found. The module must use the value of the second argument
-@code{del_time} as the time that pulses of the phase function indicated
-by the first argument (which currently can be only either @code{1} or
-@code{2}) start before the 'real' pulses of the pulse function the phase
-function is associated with. Of course, if the module is not prepared to
-create phase pulses at all, this function does not need to exist and the
-corresponding entry in the pulsers structure should be left a @code{NULL}
-pointer. If no phase switch delay is set for a phase-cycled function it
-should (but that's not a necessity but just a recommendation) use a
-default value of @w{20 ns}.
-
-
-@quotation
-@cartouche
-The use of the keyword @code{PHASE_SWITCH_DELAY} is deprecated.
-Instead, the pulser module should supply, if necessary, a function
-@code{pulser_phase_switch_delay()} that can be used in the
-@code{PREPARATIONS} section and has the same effect. Assigning anything
-else then @code{NULL} to the @code{set_phase_switch_delay} member of the
-pulser structure is only for backward compatibility.
-@end cartouche
-@end quotation
-
-
-@item bool set_grace_period( double gp_time )
-This function is called when in the @code{ASSIGNMENTS} section a line like
-@example
-  GRACE_PERIOD: 20 ns;
-@end example
-@noindent
-is found. The module must use the value of the second argument
-@code{gp_time} as the time that pulses of the phase function indicated
-by the first argument remain switched on after the 'real' pulses of the
-pulse function the phase function is associated with already ended. If
-these 'real' pulses get to near to each other to allow having both a
-phase switch delay as well as the 'grace period' the later may be
-reduced below the value set by the user. If the module is not prepared
-to create phase pulses at all, this function does not need to exist and
-the corresponding function pointer entry in the pulsers structure should
-remain a @code{NULL} pointer.
-
-@quotation
-@cartouche
-The use of the keyword @code{GRACE_PERIOD} is deprecated.  Instead, the
-pulser module should supply, if necessary, a function
-@code{pulser_grace_period()} that can be used in the @code{PREPARATIONS}
-section and has the same effect. Assigning anything else then
-@code{NULL} to the @code{set_grace_period} member of the pulser
-structure is only for backward compatibility.
-@end cartouche
-@end quotation
 
 
 @item bool phase_setup_prep( int func, int type, int pod, long val )
@@ -2496,6 +2374,128 @@ sequence has been set for the pulse the number has to be written into
 the variable pointed to by @code{cycle}, otherwise (or if no pulse with
 the number of the first argument exists) an error message has to be
 printed out and an exception should be thrown.
+
+
+@item bool set_max_seq_len( double seq_len )
+This function is called when the @code{MAXIMUM_SEQUENCE_LENGTH} is found
+in the  @code{ASSIGNMENTS} section, i.e.@:
+@example
+ASSIGNMENTS:
+  MAXIMUM_SEQUENCE_LENGTH: 10 us;
+@end example
+@noindent
+If you determine the maximum length of the pulser pattern in your module
+during the test run the value you get can be plain wrong if the
+@code{EDL} program contains e.g.@: @code{FOREVER} loops,
+@code{IF}/@code{ELSE} constructs etc.@: because it is not possible to
+determine during the test run which branches of the @code{EDL}
+program will be run in the real experiment. The
+@code{MAXIMUM_SEQUENCE_LENGTH} command should allow the user to correct
+the possible wrong value when necessary.
+
+The obvious question is why bother at all to determine the maximum
+length of the pulse pattern and not use instead the maximum pattern
+length all the time? The reason is that clearing the whole pattern at
+the start of the experiment for some pulsers can take a rather long
+time. E.g.@: for the @strong{Sony/Tektronix DG2020} for each of the
+internal channels that are going to be used more than @w{64 kB} of data
+would have to be send to the pulser, probably taking several minutes,
+while in most experiments only a small fraction of the maximum pattern
+length is really needed.
+
+@quotation
+@cartouche
+The use of the keyword @code{MAXIMUM_SEQUENCE_LENGTH} is deprecated.
+Instead, the pulser module should supply, if necessary, a function
+@code{pulser_maximum_sequence_length()} that can be used in the
+@code{PREPARATIONS} section and has the same effect. Assigning anything
+else then @code{NULL} to the @code{set_max_seq_len} member of the pulser
+structure is only for backward compatibility.
+@end cartouche
+@end quotation
+
+
+@item bool bool keep_all_pulses( void )
+This function is called when the @w{@code{KEEP_ALL_PULSES}} keyword is
+found in the @code{ASSIGNMENTS} section. If this function is called your
+module may not delete pulses that it found during the test run never to
+be used.
+
+The question, of course, is why delete pulses at all that are never used
+and not keep them? The reason is that when doing phase cycling it can
+happen that for each additional pulse lots of channels in the digitizer
+are needed, even to the point that the number of channels is exceeded.
+Therefor, as a default, pulses that are found to be never used during
+the test run are removed (after printing out a message to the user).
+
+@quotation
+@cartouche
+The use of the keyword @code{KEEP_ALL_PULSES} is deprecated.  Instead,
+the pulser module should supply, if necessary, a function
+@code{pulser_keep_all_pulses()} that can be used in the
+@code{PREPARATIONS} section and has the same effect. Assigning anything
+else then @code{NULL} to the @code{keep_all_pulses} member of the pulser
+structure is only for backward compatibility.
+@end cartouche
+@end quotation
+
+
+@item bool set_phase_switch_delay( int function, double del_time )
+This function is called when in the @code{ASSIGNMENTS} section a line like
+@example
+  PHASE_SWITCH_DELAY: 40 ns;
+@end example
+@noindent
+is found. The module must use the value of the second argument
+@code{del_time} as the time that pulses of the phase function indicated
+by the first argument (which currently can be only either @code{1} or
+@code{2}) start before the 'real' pulses of the pulse function the phase
+function is associated with. Of course, if the module is not prepared to
+create phase pulses at all, this function does not need to exist and the
+corresponding entry in the pulsers structure should be left a @code{NULL}
+pointer. If no phase switch delay is set for a phase-cycled function it
+should (but that's not a necessity but just a recommendation) use a
+default value of @w{20 ns}.
+
+@quotation
+@cartouche
+The use of the keyword @code{PHASE_SWITCH_DELAY} is deprecated.
+Instead, the pulser module should supply, if necessary, a function
+@code{pulser_phase_switch_delay()} that can be used in the
+@code{PREPARATIONS} section and has the same effect. Assigning anything
+else then @code{NULL} to the @code{set_phase_switch_delay} member of the
+pulser structure is only for backward compatibility.
+@end cartouche
+@end quotation
+
+
+@item bool set_grace_period( double gp_time )
+This function is called when in the @code{ASSIGNMENTS} section a line like
+@example
+  GRACE_PERIOD: 20 ns;
+@end example
+@noindent
+is found. The module must use the value of the second argument
+@code{gp_time} as the time that pulses of the phase function indicated
+by the first argument remain switched on after the 'real' pulses of the
+pulse function the phase function is associated with already ended. If
+these 'real' pulses get to near to each other to allow having both a
+phase switch delay as well as the 'grace period' the later may be
+reduced below the value set by the user. If the module is not prepared
+to create phase pulses at all, this function does not need to exist and
+the corresponding function pointer entry in the pulsers structure should
+remain a @code{NULL} pointer.
+
+@quotation
+@cartouche
+The use of the keyword @code{GRACE_PERIOD} is deprecated.  Instead, the
+pulser module should supply, if necessary, a function
+@code{pulser_grace_period()} that can be used in the @code{PREPARATIONS}
+section and has the same effect. Assigning anything else then
+@code{NULL} to the @code{set_grace_period} member of the pulser
+structure is only for backward compatibility.
+@end cartouche
+@end quotation
 
 
 @end table
