@@ -154,9 +154,9 @@ line:    func                      { Func_is_set = SET; }
 ;								   
 
 
-/* all the next entries are there to catch missing semicolon errors */
+/* all the next entries are just for catching missing semicolon errors */
 
-af:    /* empty */ 
+af:      /* empty */ 
 	   | SECTION_LABEL             { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | TB_TOKEN                  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | TM_TOKEN                  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
@@ -166,7 +166,7 @@ af:    /* empty */
 ;
 
 
-atb:   /* empty */
+atb:     /* empty */
        | func                      { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | TM_TOKEN                  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | PHS_TOK                   { THROW( MISSING_SEMICOLON_EXCEPTION ); }
@@ -176,7 +176,7 @@ atb:   /* empty */
 ;
 
 
-atm:   /* empty */
+atm:     /* empty */
        | func                      { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | TB_TOKEN                  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | PHS_TOK                   { THROW( MISSING_SEMICOLON_EXCEPTION ); }
@@ -186,7 +186,7 @@ atm:   /* empty */
 ;
 
 
-aphs:  /* empty */
+aphs:    /* empty */
        | TB_TOKEN                  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | TM_TOKEN                  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | PSD_TOKEN                 { THROW( MISSING_SEMICOLON_EXCEPTION ); }
@@ -195,7 +195,7 @@ aphs:  /* empty */
 ;
 								   
 
-apsd:  /* empty */
+apsd:    /* empty */
        | func                      { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | TB_TOKEN                  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | TM_TOKEN                  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
@@ -205,7 +205,7 @@ apsd:  /* empty */
 ;
 
 
-agp:   /* empty */
+agp:     /* empty */
        | gp	func                   { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | gp	TB_TOKEN               { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | gp	TM_TOKEN               { THROW( MISSING_SEMICOLON_EXCEPTION ); }
@@ -254,8 +254,7 @@ pcd:    /* empty */
         func sep2
 ;
 
-pod:    POD_TOKEN sep1
-        pm
+pod:    POD_TOKEN sep1 pm
 ;
 
 pm:     INT_TOKEN sep2             { p_assign_pod( Channel_Type,
@@ -431,7 +430,7 @@ phsl:     /* empty */
           phsp
 ;
 
-phsp:    /* empty */
+phsp:     /* empty */
 		| phsp phsv  sep2          { p_phs_setup( Cur_PHS, Cur_PHST, -1, $2,
 												  Cur_PROT ); }
         | phsp POD1_TOK sep1
@@ -471,7 +470,7 @@ gp:       GP_TOKEN expr            { set_protocol( PHASE_FFM_PROT );
 
 int assignerror ( const char *s )
 {
-	s = s;                    /* stupid but avoids compiler warning */
+	s = s;                                 /* avoid compiler warning */
 
 	if ( *assigntext == '\0' )
 		eprint( FATAL, "%s:%ld: Unexpected end of file in ASSIGNMENTS "
@@ -507,15 +506,15 @@ void ass_func( int function )
 
 	switch ( Cur_PROT )
 	{
-		case PHASE_FFM_PROT :
+		case PHASE_FFM_PROT :             /* Frankfurt driver syntax */
 			p_phase_ref( Cur_PROT, Channel_Type, function );
 			break;
 
-		case PHASE_BLN_PROT :
+		case PHASE_BLN_PROT :             /* Berlin driver syntax */
 			p_phase_ref( Cur_PROT, Cur_PHS, function );
 			break;
 
-		default :
+		default :                         /* this better never happens... */
 			eprint( FATAL, "Internal error detected at %s:%d.\n",
 					__FILE__, __LINE__ );
 			THROW( EXCEPTION );
