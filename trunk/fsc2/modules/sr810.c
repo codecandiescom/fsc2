@@ -843,7 +843,6 @@ Var *lockin_harmonic( Var *v )
 {
 	long harm;
 	double freq;
-	Var *mod;
 
 
 	/* Without an argument just return current phase settting */
