@@ -821,6 +821,7 @@ defaults to "Please enter a comment:".
 This function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} program.
 
+@end table
 
 @node Interaction functions, Mathematical functions, Output functions, Built-in Functions
 @section Interaction functions
