@@ -132,16 +132,17 @@ unit:    /* empty */               { $$ = NULL; }
        | US_TOKEN                  { $$ = vars_push( INT_VAR, 1000L ); }
        | MS_TOKEN                  { $$ = vars_push( INT_VAR, 1000000L ); }
        | S_TOKEN                   { $$ = vars_push( INT_VAR, 1000000000L ); }
-       | NV_TOKEN                  { $$ = vars_push( FLOAT_VAR, 1.0e-9 ); }
-       | UV_TOKEN                  { $$ = vars_push( FLOAT_VAR, 1.0e-6 ); }
-       | MV_TOKEN                  { $$ = vars_push( FLOAT_VAR, 1.0e-3 ); }
-       | V_TOKEN                   { $$ = vars_push( INT_VAR, 1 ); }
-       | MG_TOKEN                  { $$ = vars_push( FLOAT_VAR, 1.0e-3 ); }
-       | G_TOKEN                   { $$ = vars_push( INT_VAR, 1 ); }
-       | MHZ_TOKEN                 { $$ = vars_push( FLOAT_VAR, 1.0e6 ); }
-       | KHZ_TOKEN                 { $$ = vars_push( FLOAT_VAR, 1.0e3 ); }
-       | HZ_TOKEN                  { $$ = vars_push( INT_VAR, 1 ); }
+       | NT_TOKEN                  { $$ = vars_push( FLOAT_VAR, 1.0e-5 ); }
+       | UT_TOKEN                  { $$ = vars_push( FLOAT_VAR, 1.0e-2 ); }
+       | MT_TOKEN                  { $$ = vars_push( FLOAT_VAR, 10.0 ); }
+       | T_TOKEN                   { $$ = vars_push( INT_VAR, 1.0e4 ); }
+       | NU_TOKEN                  { $$ = vars_push( FLOAT_VAR, 1.0e-9 ); }
+       | UU_TOKEN                  { $$ = vars_push( INT_VAR, 1.0e-6 ); }
+       | MU_TOKEN                  { $$ = vars_push( FLOAT_VAR, 1.0e-3 ); }
+       | KU_TOKEN                  { $$ = vars_push( FLOAT_VAR, 1.0e3 ); }
+       | MEG_TOKEN                 { $$ = vars_push( INT_VAR, 1.0e6 ); }
 ;
+
 
 arhs:    /* empty */               { vars_arr_init( vars_push( UNDEF_VAR ) ); }
        | '=' arrass                { vars_arr_init( $2 ); }
