@@ -53,7 +53,7 @@ PREP        ^[ \t]*PREP(ARATION)?S?:
 EXP         ^[ \t]*EXP(ERIMENT)?:
 
 PS          ^[ \t]*PH(ASE)?_?S(EQ(UENCE)?)?(_?[0-9]+)?
-AS          ^[ \t]*A(CQ(UISITION)?)?_?S(EQ(UENCE)?)?(_?[AB])?
+AS          ^[ \t]*A(CQ(UISITION)?)?_?S(EQ(UENCE)?)?(_?[12])?
 
 PX          "+"?[xX]
 MX          "-"[xX]
@@ -158,7 +158,7 @@ WS          [\n=,:. ]+
 				/* determine type of acquisition sequence (A or B) */
 
 				phaseslval.lval = 0;
-				if ( *cp == 'B')
+				if ( *cp == '2')
 					phaseslval.lval = 1;
 
 				return AS_TOKEN;
