@@ -111,7 +111,7 @@ GPIB_DEV *gpib_dev_list = NULL; /* list of symbolic names of devices etc. */
 /*  * FAILURE: error, GPIB bus can't be used                               */
 /*-------------------------------------------------------------------------*/
 
-int gpib_init( char *log_file_name, int log_level )
+int gpib_init( const char *log_file_name, int log_level )
 {
 	GPIB_DEV *cur_dev;
 

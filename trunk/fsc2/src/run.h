@@ -32,11 +32,11 @@
 
 #if ! defined ( GPIB_LOG_FILE )
 #define GPIB_LOG_FILE NULL
-#end
+#endif
 
 #if ! defined ( GPIB_LOG_LEVEL )
 #define GPIB_LOG_LEVEL LL_ERR
-#end
+#endif
 
 /* Signals sent by the parent and accepted by the child */
 

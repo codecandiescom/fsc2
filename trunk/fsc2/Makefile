@@ -38,7 +38,7 @@ infodir        = $(prefix)/info
 # Also set the file for writing logs about the activity on the GPIB bus.
 # If not given logs will be written to stderr.
 # Finally, set the verbosity level of the GPIB logs, use HIGH, MEDIUM, LOW
-# or OFF. If not set it defaults to OFF.
+# or OFF. If not set it defaults to LOW, i.e. only errors will reported.
 # All of these settings are compiled into the program.
 
 GPIB_CONF_FILE = /etc/gpib.conf
