@@ -2885,20 +2885,19 @@ does not accept any parameters and can only by used in the
 @node DAQ Functions, DIO Functions, Frequency Counter Functions, Device Functions
 @section DAQ Functions
 @cindex DAQ Functions
-Currently, there's support for digital-to-analog converter cards, the
-@strong{Meilhaus Electronic GmbH} cards ME-6000 and ME-6100, and a
+Currently, the supported data acquisition (DAQ) devices are the National
+Instruments PCI-MIO-16E-1 card, the @strong{Meilhaus Electronic GmbH}
+digital-to-analog converter cards ME-6000 and ME-6100, and a
 home-built DA and AD converter from the group of H.-J.@: Steinhoff at
 the University of Osnabrueck.
 
-The ME-6000 and ME-6100 cards have, depending on the model, either 4, 8
-or 16 output ports.Use of these cards requires that a kernel module and
-an additional library (both coming with @code{fsc2}) have been
-successfully installed.
+Both the National Instruments PCI-MIO-16E-1 card and the ME-6000 and
+ME-6100 cards require that a kernel module and an additional library
+(both coming with @code{fsc2}) have been successfully installed.
 
-The home-built AD and DA converter has a single DA and a single AD input.
-
-The module for these devices is loaded by specifying
+The modules for these devices are loaded by specifying
 @example
+pci_mio_16e_1
 me6000
 hjs_daadc
 @end example
@@ -2912,6 +2911,345 @@ in the @code{DEVICES} section.
 @item daq_name()
 @findex daq_name()
 Returns a string with the name of the DAC being used.
+
+
+@anchor{daq_ai_channel_setup}
+@item daq_ai_channel_setup()
+@findex daq_ai_channel_setup()
+This function is only available for the PCI-MIO-16E-1 card. It is
+required that this function is called before analog input (AI) can be
+done using the card to setup the properties of the input channels.
+
+The function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} script.
+
+
+@anchor{daq_ai_acq_setup}
+@item daq_ai_acq_setup()
+@findex daq_ai_acq_setup()
+This function is only available for the PCI-MIO-16E-1 card. It is
+required that this function is called before analog input (AI) can be
+done using the card to setup the trigger mode, trigger sources and
+timings for the analog data acquisition.
+
+The function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} script.
+
+
+@anchor{daq_ai_start_acquisition}
+@item daq_ai_start_acquisition()
+@findex daq_ai_start_acquisition()
+This function is only available for the PCI-MIO-16E-1 card. It is to be
+used to start an analog input acquisition according to the paramter set
+by previous calls of the functions @code{daq_ai_channel_setup()} and
+@code{daq_ai_acq_setup()}. It expects no arguments.
+
+The function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} script.
+
+
+@anchor{daq_ai_get_curve}
+@item daq_ai_get_curve()
+@findex daq_ai_get_curve()
+This function is only available for the PCI-MIO-16E-1 card.
+
+The function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} script.
+
+
+@anchor{daq_trigger_setup}
+@item daq_trigger_setup()
+@findex daq_trigger_setup()
+This function is only available for the PCI-MIO-16E-1 card.
+
+The function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} script.
+
+
+@anchor{daq_start_continuous_counter}
+@item daq_start_continuous_counter()
+@findex daq_start_continuous_counter()
+This function is only available for the PCI-MIO-16E-1 card. It starts
+one of the two counters of the card. The counter will count until it is
+stopped by a call of the @code{EDL} function @code{daq_stop_counter()}.
+The first required argument is the counter to be used, which needs to be
+specified by one of the symbolic names @code{CH0} and @code{CH1} (please
+@strong{don't} use numbers directly, the mapping between the symbolic
+values and channel numbers is non-trivial). If the requested counter is
+already running the function will fail.
+
+As the second argument the source of events to be counted must be
+specified by one of the following symbolic names: @code{PFI0} to
+@code{PFI9}, indicating one of the 10 PFI input lines of the card.,
+@code{TIMEBASE_1} or @code{TIMEBASE_2}, specifying the slow or
+fast timebase of the card.
+
+The function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} script.
+
+
+@anchor{daq_start_timed_counter}
+@item daq_start_timed_counter()
+@findex daq_start_timed_counter()
+This function is only available for the PCI-MIO-16E-1 card and starts
+one of the counters of the card. The counter will count for a specified
+time and then stops automatically. It requires at least two arguments,
+the counter to be used, specified by a symbolic name, @code{CH0} or
+@code{CH1}. If the requested counter is already running the function
+will fail. The second required argument is the length of time the
+counter is supposed to count. This time must be at least @w{100 ns} and
+an integer multiple of @w{50 ns}.
+
+@strong{Please note}: This function requires not only one counter
+channel, i.e.@: the one passed to the function as the first argument,
+but also the second counter. If @code{CH0} is specified as the
+counter channel also @code{CH1} will be needed and vice versa. If
+the adjacent counter is already in use for some other purpose the
+function fails.
+
+As the third argument the source of events to be counted must be
+specified by one of the following symbolic names: @code{PFI0} to
+@code{PFI9}, indicating one of the 10 PFI input lines of the card.,
+@code{TIMEBASE_1} or @code{TIMEBASE_2}, specifying the slow or
+fast timebase of the card.
+
+The function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} script.
+
+
+@anchor{daq_timed_count}
+@item daq_timed_count()
+@findex daq_timed_count()
+This function is only available for the PCI-MIO-16E-1 card is and very
+similar to the previous function, @code{daq_start_timed_counter()},
+i.e.@: it runs a counter for a specified of time, but in contrast it
+waits for the requested duration of time and only then returns with the
+masured count. In every other respect, e.g.@: the required arguments
+etc.@: it is identical to the previous function.
+
+The largest value that can be returned is @w{16777215}, i.e.@: @w{2^24
+- 1}.
+
+
+@anchor{daq_intermediate_count}
+@item daq_intermediate_count()
+@findex daq_intermediate_count()
+This function is only available for the PCI-MIO-16E-1 card and returns
+the current value of a counter. The counter may still be running, in
+which case each call of the function will return an updated value
+according to the number of events that happened between invocations of
+the function. The function requires one argument, the counter for which
+the current value is to be returned. It must be specified by one of the
+symbolic names @code{CH0} and @code{CH1} (please @strong{don't} use
+numbers directly, the mapping between the symbolic values and channel
+numbers is non-trivial).
+
+The largest value that can be returned for a counter is @w{16777215},
+i.e.@: @w{2^24 - 1}.
+
+The function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} script.
+
+
+@anchor{daq_final_count}
+@item daq_final_count()
+@findex daq_final_count()
+This function is only available for the PCI-MIO-16E-1 card and waits for
+an counter to stop and only then returns the final value of the
+counter. Trying to call this function on a counter that has been started
+by the function @code{daq_start_continuous_counter()} and hasn't already
+been stopped will fail, because such a counter will never stop by
+itself.
+
+The function requires one argument, the counter for which the current
+value is to be returned. It must be specified by one of the symbolic
+names @code{CH0} and @code{CH1} (please @strong{don't} use numbers
+directly, the mapping between the symbolic values and channel numbers is
+non-trivial).
+
+The largest value that can be returned for a counter is @w{16777215},
+i.e.@: @w{2^24 - 1}.
+
+The function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} script.
+
+
+@anchor{daq_stop_counter}
+@item daq_stop_counter()
+@findex daq_stop_counter()
+This function is only available for the PCI-MIO-16E-1 card and can be
+used to stop a counter independently of the purpose (i.e.@: counting or
+pulse train creation, see below) it was started for. It requires one
+argument, the counter to be stopped. It must be specified by one of the
+symbolic values @code{CH0} and @code{CH1} (please @strong{don't} use
+numbers directly, the mapping between the symbolic values and channel
+numbers is non-trivial).
+
+The function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} script.
+
+
+@anchor{daq_single_pulse}
+@item daq_single_pulse()
+@findex daq_single_pulse()
+This function is only available for the PCI-MIO-16E-1 card.  Beside
+being used as event counters the counters can also be used to create
+pulses on its default output port. This function can be used to create a
+single pulse on the output port. It requires two arguments, the first
+being the counter to be used, specified by a symbolic value @code{CH0}
+and @code{CH1}. If the requested counter is already running the function
+will fail. The second argument is the length of the pulse, which must be
+at least @w{100 ns} and an integer multiple of @w{50 ns}.
+
+The function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} script.
+
+
+@anchor{daq_continuous_pulses}
+@item daq_continuous_pulses()
+@findex daq_continuous_pulses()
+This function is only available for the PCI-MIO-16E-1 card.  It allows
+to create a continuous train of pulses. It requires at least two
+arguments, the first being the counter to be used, specified by a
+symbolic value @code{CH0} and @code{CH1}. If the requested counter is
+already running the function will fail. The second argument is the
+length of the pulse, which must be at least @w{100 ns} and an integer
+multiple of @w{50 ns}.
+
+If no third argument is specified the distance between pulses will be
+identical to the pulse length (resulting in a pulse frequncey of twice
+the value of the second argument). By specifying a third argument (with
+the same restrictions as for the second argument) the distance between
+pulses can be set.
+
+To stop creation of pulses (and to free the counter for other uses) the
+function @code{daq_stop_counter()} must be called.
+
+The function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} script.
+
+
+@anchor{daq_dio_read}
+@item daq_dio_read()
+@findex daq_dio_read()
+This function is only available for the PCI-MIO-16E-1 card. Beside
+counters the card also can do digital input and output. There are 8
+lines that can be monitored or set. Using this function the current
+state of any subset of these 8 lines can be determined. If the function
+is called without an argument the state of all lines is returned, with
+the lowest bit of the number returned being the state of the lowest
+numbered DIO line, the seond-lowest bit of the number standing for the
+second-lowest numbered DIO line etc. If all lines are set the returned
+value is thus @code{255}.
+
+If an integer argument gets passed to the function it is taken as a
+mask, determining which of the DIO lines are to be treated as input
+lines. The lowest bit of the mask stands for the lowest numbered DIO
+line, the second-lowest bit of the mask for the second-lowest DIO line
+etc. Thus, by specifying a mask of value of @code{1} the state of only
+the DIO line numbered @code{0} would be returned, for a mask of value of
+@code{2} the state of DIO line @code{1}, for @code{4} DIO line @code{2}
+etc. By adding values for different DIO lines a subset of the DIO lines
+can be specified. Simple arithmetics show that the value of the mask
+must be between @code{0} (no DIO lines selected) and @code{255} (all DIO
+lines selected, which is the default). All bits in the resulting return
+value for which bits in the mask ae not set will be returned as being
+set to @code{0}.
+
+The function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} script.
+
+
+@anchor{daq_dio_write}
+@item daq_dio_write()
+@findex daq_dio_write()
+This function is only available for the PCI-MIO-16E-1 card. The 8 DIO
+lines of the card can not only be monitored (see the previous function,
+@code{counter_dio_read()}) but also set, which this function is to be
+used for. The function requires at least one integer argument, defining
+the states of the DIO lines to be set to. To output a high voltage at
+one of the DIO lines the corresponding bit of the value must be set.
+The lowest bit of the value corresponds to the lowest numbered DIO line,
+the second-lowest bit to the second-lowest numbered DIO line etc. To
+only set the lowest numbered DIO line the value passed to the function
+would have to be @code{1}, to set only the second-lowest numbered DIO
+line the value would be @code{2}, to set only the third-lowest numbered
+DIO line a value of @code{4} would be used. By combining these values
+for the different DIO lines a certain output pattern can be set for all
+DIO lines. Obviously, the allowed values are restricted to the range
+between @code{0} (all DIO lines in low state) to @code{255} (all DIO
+lines in high state).
+
+Without a second argument all 8 DIO lines are switched to output mode
+and the states of the lines set according to the value of the first
+argument.  But by passing the function a mask value as the second
+argument only a certain subset of the DIO lines will be set to output
+mode, thus allowing to have some of the DIO lines for output, while the
+can be used as input lines. Each set bit in the mask will switch the
+corresponding lines to output state while not changing mode for the
+lines for which no bit is set in the mask. Bits in the first argument
+for which no bit is set in the second argument will be not used, i.e.@:
+don't influence the state of the DIO lines.
+
+The function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} script.
+
+
+@anchor{daq_ao_channel_setup}
+@item daq_ao_channel_setup()
+@findex daq_ao_channel_setup()
+This function is only available for the PCI-MIO-16E-1 card. It allows to
+configure individulaly the analog outputs (AO) of the card. Both output
+channels can be used to do biplor or unipolar output. While in bipolar
+mode voltages between @w{-10 V} and @w{+10 V} with a resolution of ca.@:
+@{5 mV} can be produced, in unipolar mode voltages between only @w{0 V}
+and @w{+10 V} but with an increased resolution of about @w{2.5 mV} can
+be produced.
+
+The channels can also be used to either output a voltage derived from an
+internal reference voltage (in which case voltages between @w{-10 V} and
+@w{-10 V} or @w{0 V} and @w{+10 V} can be produced), the output voltages
+can also be derived from an external voltage (between @w{-11 V} and
+@w{+11 V} maximum) can be produced. Using the function one can switch
+between internal and external reference.
+
+The function expects at least two argument. The first one is the AO
+channel to configure, either @code{CH0} or @code{CH1}. The second (or,
+optionally, the third) is the polarity, either the string @code{"BIPOLAR"}
+or @code{"UNIPOLAR"}. Alternatively, the second or third argument selects
+the reference voltage to use, specified by the strings
+@code{"INTERNAL_REFERENCE"} or @code{"EXTERNAL_REFERENCE"}. If no
+argument for the polarity or reference are given this property of the
+channels is not changed. Both channels are per default in bipolar mode
+and use the internal reference voltage.
+
+
+@anchor{daq_freq_out}
+@item daq_freq_out()
+@findex daq_freq_out()
+This function is only available for the PCI-MIO-16E-1 card. The card has
+an @code{FREQ_OUT} in and this function can be used to determine or set
+the frequency output at this pin (or switch output off). If called with
+no argument it returns the currently output frequency (or @code{0.0} if
+the ouutput is switched off.
+
+When called with an argument this must be the frequency to output (or
+@code{0.0} to switch output off). The allowed frequencies are either
+@w{20 MHz}, @w{10 MHz}, @w{200 kHz} or @w{100 KHz} or any frequency
+that can be derived from these frequencies by a division by an integer
+number between 2 and 16. If the frequency doesn't fit these requirements
+a frequency as near as possible to the allowed values is output.
+
+@strong{Please note:} Under certain circumstances it is possible that
+changing the output frequency between a value that can only be derived
+from @w{200 Khz} to one only derivable from @w{100 kHz} and vive versa
+can also change the timing of both a currently runing analog input data
+acquisition as well as that of counters or pulsers. Thus this function
+should only be used while the analog input (AI) subsystem as well as the
+counter and pulser subsystem of the card isn't active.
+
+The function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} script.
 
 
 @anchor{daq_reserve_dac}
@@ -2954,14 +3292,23 @@ operation failed.
 @item daq_set_voltage()
 @findex daq_set_voltage()
 This function has to be used to output a voltage at (one of) the output
-ports. For the ME-6000 and ME-6100 cards the first argument has to be
-the output port, specified by one of the symbolic values between
-@code{CH0} and @code{CH15} (don't try to use simple numbers instead!).
-For the home-built AD and DA converter this argument can't be specified
-since it has only a single output.
+ports. For the PCI-MIO-16E-1 and ME-6000 and ME-6100 cards the first
+argument has to be the output port, specified by one of the symbolic
+values between @code{CH0} and and @code{CH1} for the PCI-MIO-16E-1 card
+and between @code{CH1} and @code{CH15} for the ME-6000 and ME-6100 cards
+(don't try to use simple numbers instead!). For the home-built AD and DA
+converter this argument can't be specified since it has only a single output.
 
-For the ME-6000 and ME-6100 the second argument is the output voltage in
-the range between @w{-10 V} and @w{+10 V}) to be output.
+If the PCI-MIO-16E-1 card he channel is in biploar mode and uses the
+internal voltage reference the second argument, the voltage to be
+output, must be between @w{-10 V} and @w{+10 V}). If it is set to
+unipolar mode it must be between @w{0 V} and @w{+10 V}). If the channel
+is setup to use an external refeference voltage the argument must be
+be either between @w{-1} and @w{+1} or @w{0} and @w{1}, standing for
+the fraction of the external reference voltage to be output.
+
+For the ME-6000 and ME-6100 cards the second argument is the output
+voltage to be output in the range between @w{-10 V} and @w{+10 V}.
 
 In contrast, for the home-built AD and DA converter card, the only
 argument is the output voltage. It must be between @w{0 V} and the
@@ -3075,13 +3422,15 @@ The function can be used in the @code{EXPERIMENT} section only.
 @anchor{daq_dac_parameter}
 @item daq_dac_parameter()
 @findex daq_dac_parameter()
-The function can be used to determine the current parameter of a DAC
-(channel). It returns an array of three floating point values. The first
-element of the array is the minimum voltage that can be output by the
-DAC, the second is the maximum output voltage and the third is the
-voltage resolution. If the device has more than one DAC channel, the
-function expects a channel as the only argument (which can be omitted
-if settings for alll channels must be identical).
+This function is available only for the ME-6000 and ME-6100 cards and
+the home-built AD and DA converter. It can be used to determine the
+current parameter of a DAC (channel). It returns an array of three
+floating point values. The first element of the array is the minimum
+voltage that can be output by the DAC, the second is the maximum output
+voltage and the third is the voltage resolution. If the device has more
+than one DAC channel, the function expects a channel as the only
+argument (which can be omitted if settings for alll channels must be
+identical).
 
 
 @end table
@@ -3318,7 +3667,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @anchor{counter_start_timed_counter}
 @item counter_start_timed_counter()
 @findex counter_start_timed_counter()
-This function starts on of the counters of the card. The counter will
+This function starts one of the counters of the card. The counter will
 count for a specified time and then stops automatically. It requires at
 least two arguments, the counter to be used, specified by a symbolic
 name between @code{CH0} and @code{CH3}. If the requested counter is

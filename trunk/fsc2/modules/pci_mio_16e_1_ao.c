@@ -212,6 +212,12 @@ Var *daq_ao_channel_setup( Var *v )
 		}
 	}
 
+	if ( pol == -1 && er == -1 )
+	{
+		print( FATAL, "Missing arguments.\n" );
+		THROW( EXCEPTION );
+	}
+
 	if ( pol == -1 )
 		pol = pci_mio_16e_1.ao_state.polarity[ dac ];
 	if ( er == -1 )
