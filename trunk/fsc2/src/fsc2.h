@@ -142,10 +142,10 @@ int  phases_parser( FILE *in );
 int  preparations_parser( FILE *in );
 int  experiment_parser( FILE *in );
 void main_sig_handler( int signo );
+void conn_request_handler( void );
 void notify_conn( int signo );
 void usage( int result_status );
 int idle_handler( XEvent *a, void *b );
-
 
 /* Most global variables used in the program belong to one of the following
    structures. The only exceptions are variables that must be visible within
