@@ -238,8 +238,7 @@ void delete_stale_shms( void )
 				   has different types in different Linux versions, in older
 				   ones it is an unsigned short, nowadays an unsigned long.
 				   To get it right for all versions we simply cast is to the
-				   larger type (this better should be handled by a configure
-				   script, but that's still on the TODO list...). */
+				   largest type... */
 
 				if ( shm_seg.shm_nattch != 0 )          /* attach count != 0 */
 					fprintf( stderr, "Stale shared memory segment has attach "
