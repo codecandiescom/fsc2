@@ -639,7 +639,7 @@ void run_file( FL_OBJECT *a, long b )
 			str2[ 0 ] = '\0';
 		}
 
-		if ( 1 == fl_show_choice( str1, str2, "Continue running the program?",
+		if ( 1 == fl_show_choice( str1, str2, "Continue to run the program?",
 								  2, "No", "Yes", "", 1 ) )
 			return;
 	}		

@@ -36,7 +36,7 @@
 #define LOW_RES 0
 
 #if ! defined SIZE
-#define SIZE "HI_RES"
+#define SIZE HI_RES
 #endif
 
 
