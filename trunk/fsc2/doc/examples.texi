@@ -1217,8 +1217,8 @@ the @code{get_file()} function the start and end field and the the field
 step width, the number of averages, the time resolution, the trigger
 position and the length of the traces get written into the file as well
 as the text of the @code{EDL} script itself. Calling
-@code{save_comment()} allows the user to enter some further comments,
-like the name of the sample, the temerature etc.@: into the file.
+@code{save_comment()} allows the user to enter some further text,
+like the name of the sample, the temperature etc.@: into the file.
 
 And now the experiment starts for real. Everything is done in a loop
 over all field points. At each field point we ask the digitizer to start
