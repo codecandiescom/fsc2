@@ -3,7 +3,7 @@ Magic: 13000
 Internal Form Definition File
     (do not change)
 
-Number of forms: 5
+Number of forms: 6
 Unit of measure: FL_COORD_PIXEL
 SnapGrid: 5
 
@@ -558,13 +558,13 @@ argument:
 =============== FORM ===============
 Name: print
 Width: 440
-Height: 340
-Number of Objects: 28
+Height: 370
+Number of Objects: 29
 
 --------------------
 class: FL_BOX
 type: UP_BOX
-box: 0 0 440 340
+box: 0 0 440 370
 boxtype: FL_UP_BOX
 colors: FL_COL1 FL_COL1
 alignment: FL_ALIGN_CENTER
@@ -636,7 +636,7 @@ argument: 0
 --------------------
 class: FL_TEXT
 type: NORMAL_TEXT
-box: 15 210 90 30
+box: 15 240 90 30
 boxtype: FL_FLAT_BOX
 colors: FL_COL1 FL_MCOL
 alignment: FL_ALIGN_LEFT|FL_ALIGN_INSIDE
@@ -654,7 +654,7 @@ argument:
 --------------------
 class: FL_BUTTON
 type: NORMAL_BUTTON
-box: 95 295 85 30
+box: 95 325 85 30
 boxtype: FL_UP_BOX
 colors: FL_COL1 FL_COL1
 alignment: FL_ALIGN_CENTER
@@ -672,7 +672,7 @@ argument:
 --------------------
 class: FL_BUTTON
 type: NORMAL_BUTTON
-box: 245 295 80 30
+box: 245 325 80 30
 boxtype: FL_UP_BOX
 colors: FL_COL1 FL_COL1
 alignment: FL_ALIGN_CENTER
@@ -835,7 +835,7 @@ argument:
 --------------------
 class: FL_TEXT
 type: NORMAL_TEXT
-box: 15 260 85 30
+box: 15 290 85 30
 boxtype: FL_FLAT_BOX
 colors: FL_COL1 FL_MCOL
 alignment: FL_ALIGN_LEFT|FL_ALIGN_INSIDE
@@ -871,7 +871,7 @@ argument:
 --------------------
 class: FL_CHECKBUTTON
 type: RADIO_BUTTON
-box: 125 260 35 35
+box: 125 290 35 35
 boxtype: FL_NO_BOX
 colors: FL_COL1 FL_GREEN
 alignment: FL_ALIGN_CENTER
@@ -889,7 +889,7 @@ argument: 0
 --------------------
 class: FL_CHECKBUTTON
 type: RADIO_BUTTON
-box: 260 260 35 35
+box: 260 290 35 35
 boxtype: FL_NO_BOX
 colors: FL_COL1 FL_GREEN
 alignment: FL_ALIGN_CENTER
@@ -944,7 +944,7 @@ argument:
 --------------------
 class: FL_CHECKBUTTON
 type: RADIO_BUTTON
-box: 190 210 35 35
+box: 190 240 35 35
 boxtype: FL_NO_BOX
 colors: FL_COL1 FL_GREEN
 alignment: FL_ALIGN_CENTER
@@ -962,7 +962,7 @@ argument: 0
 --------------------
 class: FL_CHECKBUTTON
 type: RADIO_BUTTON
-box: 190 235 35 35
+box: 190 265 35 35
 boxtype: FL_NO_BOX
 colors: FL_COL1 FL_GREEN
 alignment: FL_ALIGN_CENTER
@@ -980,7 +980,7 @@ argument: 0
 --------------------
 class: FL_CHECKBUTTON
 type: RADIO_BUTTON
-box: 260 235 35 35
+box: 260 265 35 35
 boxtype: FL_NO_BOX
 colors: FL_COL1 FL_GREEN
 alignment: FL_ALIGN_CENTER
@@ -998,7 +998,7 @@ argument: 0
 --------------------
 class: FL_CHECKBUTTON
 type: RADIO_BUTTON
-box: 125 210 35 35
+box: 125 240 35 35
 boxtype: FL_NO_BOX
 colors: FL_COL1 FL_GREEN
 alignment: FL_ALIGN_CENTER
@@ -1017,7 +1017,7 @@ value: 1
 --------------------
 class: FL_CHECKBUTTON
 type: RADIO_BUTTON
-box: 260 210 35 35
+box: 260 240 35 35
 boxtype: FL_NO_BOX
 colors: FL_COL1 FL_GREEN
 alignment: FL_ALIGN_CENTER
@@ -1035,7 +1035,7 @@ argument: 0
 --------------------
 class: FL_CHECKBUTTON
 type: RADIO_BUTTON
-box: 125 235 35 35
+box: 125 265 35 35
 boxtype: FL_NO_BOX
 colors: FL_COL1 FL_GREEN
 alignment: FL_ALIGN_CENTER
@@ -1067,6 +1067,25 @@ gravity: FL_NoGravity FL_NoGravity
 name: 
 callback: 
 argument: 
+
+--------------------
+class: FL_CHECKBUTTON
+type: RADIO_BUTTON
+box: 15 210 35 35
+boxtype: FL_NO_BOX
+colors: FL_COL1 FL_GREEN
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_SMALL_SIZE
+lcol: FL_BLACK
+label:  Print additional comment box
+shortcut: 
+resize: FL_RESIZE_NONE
+gravity: FL_NoGravity FL_NoGravity
+name: add_comment
+callback: print_callback
+argument: 0
+value: 0
 
 =============== FORM ===============
 Name: cut
@@ -1396,6 +1415,84 @@ shortcut:
 resize: FL_RESIZE_Y
 gravity: FL_NorthWest FL_SouthWest
 name: cut_y_axis
+callback: 
+argument: 
+
+=============== FORM ===============
+Name: print_comment
+Width: 365
+Height: 140
+Number of Objects: 4
+
+--------------------
+class: FL_BOX
+type: UP_BOX
+box: 0 0 365 140
+boxtype: FL_UP_BOX
+colors: FL_COL1 FL_COL1
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_BLACK
+label: 
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: 
+callback: 
+argument: 
+
+--------------------
+class: FL_INPUT
+type: MULTILINE_INPUT
+box: 10 30 345 75
+boxtype: FL_DOWN_BOX
+colors: FL_COL1 FL_MCOL
+alignment: FL_ALIGN_TOP_LEFT
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_BLACK
+label: Enter a short comment to be printed:
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NorthWest FL_SouthEast
+name: pc_input
+callback: 
+argument: 0
+
+--------------------
+class: FL_BUTTON
+type: NORMAL_BUTTON
+box: 60 110 95 25
+boxtype: FL_UP_BOX
+colors: FL_TOP_BCOL FL_GREEN
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_BLACK
+label: Clear
+shortcut: 
+resize: FL_RESIZE_NONE
+gravity: FL_South FL_South
+name: pc_clear
+callback: 
+argument: 
+
+--------------------
+class: FL_BUTTON
+type: NORMAL_BUTTON
+box: 200 110 95 25
+boxtype: FL_UP_BOX
+colors: FL_TOP_BCOL FL_GREEN
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_BLACK
+label: Done
+shortcut: 
+resize: FL_RESIZE_NONE
+gravity: FL_South FL_South
+name: pc_done
 callback: 
 argument: 
 

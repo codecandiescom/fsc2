@@ -38,6 +38,7 @@
 
 
 static FD_print *print_form;
+static FD_print_comment *print_comment;
 
 static char *cmd = NULL;             /* for storing the last print command */
 static int print_type = S2P;         /* the way to print: S2P or P2F */
@@ -47,12 +48,14 @@ static double paper_width;
 static double paper_height;
 
 static bool print_with_color = UNSET;
+static bool print_with_comment = UNSET;
 
 static double x_0, y_0, w, h;        /* position and size of print area */
 static double margin = 25.0;         /* margin (in mm) to leave on all sides */
 
 
 static int get_print_file( FILE **fp, char **name );
+static void get_print_comment( void );
 static void print_header( FILE *fp, char *name );
 static void eps_make_scale( FILE *fp, void *cv, int coord, long dim );
 static void eps_color_scale( FILE *fp );
@@ -93,6 +96,8 @@ void print_1d( FL_OBJECT *obj, long data )
 		fl_activate_object( obj );
 		return;
 	}
+
+	get_print_comment( );
 
 	print_header( fp, name );
 
@@ -519,6 +524,26 @@ void print_callback( FL_OBJECT *obj, long data )
 
 	if ( obj == print_form->col_button )
 		print_with_color = SET;
+
+	if ( obj == print_form->add_comment )
+		print_with_comment =
+						fl_get_button( print_form->add_comment ) ? SET : UNSET;
+}
+
+
+static void get_print_comment( void )
+{
+	FL_OBJECT *obj;
+
+
+	if ( ! print_with_comment )
+		return;
+	
+	while ( ( obj = fl_do_forms( ) ) != print_comment->pc_done )
+	{
+		if ( obj == print_comment->pc_clear )
+			fl_set_input( print_comment->pc_input, NULL );
+	}
 }
 
 

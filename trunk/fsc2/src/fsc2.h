@@ -156,14 +156,11 @@ bool need_GPIB = UNSET;      /* flag, set if GPIB bus is needed */
 bool just_testing = UNSET;
 
 G_FUNCS G_Funcs;
+
 FD_fsc2 *main_form;
-FL_FORM *fsc2_main_form;
 FD_run *run_form;
-FL_FORM *run_main_form;
 FD_input_form *input_form;
-FL_FORM *input_main_form;
 FD_cut *cut_form;
-FL_FORM *cut_main_form;
 
 int I_am = PARENT;
 int FSC2_MODE = PREPARATION;
@@ -234,6 +231,7 @@ extern bool need_GPIB;
 extern bool just_testing;
 
 extern G_FUNCS G_Funcs;
+
 extern FD_fsc2 *main_form;
 extern FD_run *run_form;
 extern FD_input_form *input_form;
