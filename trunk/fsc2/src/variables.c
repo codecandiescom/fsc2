@@ -1871,7 +1871,8 @@ void vars_ass_from_trans_ptr( Var *src, Var *dest )
 
 	/* Now copy the transient array as slice to the destination */
 
-	if ( src->type == d->type )
+	if ( ( src->type == INT_TRANS_ARR && d->type == INT_ARRAY ) ||
+		 ( src->type == FLOAT_TRANS_ARR && d->type == FLOAT_ARRAY ) )
 	{
 		if ( src->type == INT_TRANS_ARR )
 			memcpy( dest->val.lpnt, src->val.lpnt,
