@@ -596,6 +596,7 @@ synthesizer_state( \"OFF\" );
 
 IF I > 0
 {
+	fsave( File_2, \"%\\n% Number of completed runs: #\\n\\n\", I );
 	FOR J = 1 : N_points {
 		fsave( File_2, \"# #\\n\",
 			   start_freq + ( J - 1 ) * step_freq, mean_data[ J ] / K );
