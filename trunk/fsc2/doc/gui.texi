@@ -193,8 +193,8 @@ experiment but two or more.
 @cindex 1D-Display
 
 @ifnotinfo
-Here's a typical example of the kind of display you get while doing an
-experiment:
+Here's a typical example of the kind of display you will get while doing
+an experiment:
 
 @image{fsc2fig3,11cm,}
 
@@ -259,15 +259,15 @@ cursor
 @end ifnothtml
 and in the upper left hand corner pairs of values with the exact
 coordinates (in the units of the axis scales) of the current mouse
-position are shown. Because different curves can have a different scaling
-(see below), if you have more than one curve displayed the coordinates
-in the scaling system of each of the curves are shown (in the color of
-the curve they belong to).
+position are shown. Because different curves can have a different
+scaling (see below) the coordinates in the current scaling system of
+each of the curves are shown (in the color of the curve they belong to)
+if more than one curve is displayed.
 
 Beside finding out the exact values of your measured data you also may
-determine differences between different data points. If you press both
-the left and the right mouse button simultaneously the cursor changes to
-an encircled crosshair
+determine differences between data points, e.g.@: to be able to measure
+line widths. If you press both the left and the right mouse button
+simultaneously the cursor changes to an encircled crosshair
 @ifnotinfo
 cursor, @image{cursor5,5mm,},
 @end ifnotinfo
@@ -300,16 +300,15 @@ symbol, @image{cursor1,5mm,},
 symbol
 @end ifnottex
 @end ifnothtml
-indicating
-that you're in zoom mode. If you now move the mouse while keeping the
-left moused button pressed down a dashed rectangular box is drawn from
-the position where the mouse button was pressed first to the current
-mouse position. When the left mouse button is released the display will
-be rescaled so that the area of this box is magnified to fill the whole
-display area. You can also use this method in the areas of the
-axis. Here also a small box is shown, indicating the section that will
-be magnified. If done in the area of the x-axis only the x-scaling is
-changed, while when used in the y-axis area only a magnification in
+indicating that you're in zoom mode. If you now move the mouse while
+keeping the left mouse button pressed down a dashed rectangular box is
+drawn from the position where the mouse button was first pressed to the
+current mouse position. When the left mouse button is released the
+display will be rescaled so that the area of this box is magnified to
+fill the whole display area. You can also use this method in the areas
+of the axis. Here also a small box is shown, indicating the section that
+will be magnified. If done in the area of the x-axis only the x-scaling
+is changed, while when used in the y-axis area only a magnification in
 y-direction happens.
 
 You can also move the curves around on the screen. When you press the
@@ -325,7 +324,7 @@ hand.
 As long as you keep the middle mouse button pressed down the displayed
 curves will move around following the mouse. As in the case of zooming
 you can restrict movements to either the x- or y-direction by pressing
-the middle mousebutton in the area of the x-axis or the y-axis.
+the middle mouse button in the area of either the x- or the y-axis.
 
 Finally, there's a third method to change the scaling. Whenever you
 press the right mouse button in either the display area or the axis
@@ -355,7 +354,7 @@ of 4.
 
 You don't have to change the scaling or the position for all curves at
 once - this is what the buttons with the numbers in the colors of the
-curves are meant for. Rescaling or moving will only apply to curves for
+curves are used for. Rescaling or moving will only apply to curves for
 which the corresponding button is active, i.e.@: pressed down (if not
 activated they are drawn with a grey background instead of the color of
 the curve they are associated with). By de-activating one or more of the
@@ -364,17 +363,17 @@ the color as the button has in active state) from being rescaled or
 moved around.
 
 Of course, this leads to a problem: If you de-activate some of the
-buttons and rescale, the question is for which curve the axis scales are
-valid now. That's the reason why the horizontal line of the x-axis and
-the vertical line of the y-axis is not black but colored: When the lines
-are red, you can be sure that the displayed axis scales are valid for
-(at least) the red curve, if they are green they are valid for (at
-least) the green curve, etc. As a rule, the axis scale is always valid
-for the lowest numbered curve for which its button is activated. That's
-also the reason why, when examining data (using either the middle or
-right button together with the left button), not just one pair of values
-is displayed but as many pairs as there are curves -- the scaling for
-each of the curves could be different
+buttons and rescale, the question is for which of the curves the axis
+scales are valid now. That's the reason why the horizontal line of the
+x-axis and the vertical line of the y-axis is not black but colored:
+When these lines are red the displayed axis scales are valid for (at
+least) the red curve, if they are green they are valid for (at least)
+the green curve, etc. As a rule the axis scale is always valid for the
+lowest numbered curve for which its button is activated. That's also the
+reason why, when examining data (using either the middle or right button
+together with the left button), not just one pair of values is displayed
+but as many pairs as there are curves -- the scaling for each of the
+curves could be different
 
 Finally, when you zoom into the display parts of a curve or even
 complete curves will not fit into the display area anymore. To indicate
@@ -385,10 +384,10 @@ which non-displayable data of the curve can be found.
 Whenever you rescale curves or move them around the "Full Scale" button,
 labeled @code{FS}, will become in-active (its color changes from green
 to gray). When you want to get back to the full scale display you simply
-have to click onto it and all curves (even the ones that usually extempt
-from rescaling because their buttons are in-active) get rescaled so that
-all data will fit again into the display. A side effect of having the
-@code{FS} button active is that the display will be rescaled
+have to click onto it and all curves (even the ones that usually are
+extempt from rescaling because their buttons is in-active) get rescaled
+so that all data will fit again into the display. A side effect of
+having the @code{FS} button active is that the display will be rescaled
 automatically when new data are measured that wouldn't fit into the
 display area. To switch this behaviour off simply deactivate the
 @code{FS} button.

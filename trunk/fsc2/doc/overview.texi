@@ -51,9 +51,10 @@ becomes useless and has to be rewritten from scratch.
 with a certain set of experiments in mind but is intended to make it as
 easy as possible to do all kinds of experiments, even such that weren't
 conceived when it was written. Thus, it has been successfully used to
-control spectrometers in S-, X- and W-band and for all kinds of
-experiments, ranging from cw-EPR, ENDOR, EPR on transient signals to
-experiments with pulsed microwave excitation with phase cycling.
+control spectrometers in S-, X- and W-band with rather different
+hardware and for all kinds of experiments, ranging from cw-EPR, ENDOR,
+EPR on transient signals to experiments with pulsed microwave excitation
+and phase cycling.
 
 Of course, this comes with a small price: one has to specify clearly how
 the experiment is to be done. This is done by writing a usually rather

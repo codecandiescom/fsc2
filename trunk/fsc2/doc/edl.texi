@@ -40,7 +40,6 @@
 @node Basics, Sections, EDL, EDL
 @section Basics
 
-
 To do an experiment using @acronym{fsc2} you have to write a program
 describing the experiment. While this may seem like a daunting task if
 you have no programming experience at all it has the advantage that you
