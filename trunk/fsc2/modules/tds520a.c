@@ -14,6 +14,11 @@ static Var *get_area( Var *v, bool use_cursor );
 static Var *get_curve( Var *v, bool use_cursor );
 static Var *get_amplitude( Var *v, bool use_cursor );
 
+/* This array must be set to the possible record lengths of the digitizer
+   and must always end with a 0 */
+
+static long record_lengths[ ] = { 500, 1000, 2000, 5000, 15000, 0 };
+
 
 /*******************************************/
 /*   We start with the hook functions...   */
@@ -321,6 +326,139 @@ Var *digitizer_get_channel_number( Var *v )
 			return vars_push( INT_VAR, i );
 
 	return NULL;
+}
+
+
+/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*/
+
+Var *digitizer_record_length( Var *v )
+{
+	long rec_len;
+	int i;
+
+
+	if ( v == NULL )
+	{
+		if ( TEST_RUN )
+		{
+			if ( tds520a.is_rec_len )
+				return vars_push( INT_VAR, tds520a.rec_len );
+			else
+				return vars_push( INT_VAR, 500 );
+		}
+		else if ( I_am == PARENT )
+		{
+			eprint( FATAL, "%s:%ld: %s: Function `digitizer_record_length' "
+					"with no argument can only be used in the EXPERIMENT "
+					"section.\n", Fname, Lc, DEVICE_NAME );
+			THROW( EXCEPTION );
+		}
+
+		if ( ! tds520a_get_record_length( &rec_len ) )
+			tds520a_gpib_failure( );
+
+		tds520a.rec_len = rec_len;
+		tds520a.is_rec_len = SET;
+		return vars_push( INT_VAR, tds520a.rec_len );
+	}
+
+	vars_check( v, INT_VAR | FLOAT_VAR );
+
+	if ( v->type == FLOAT_VAR )
+	{
+		eprint( WARN, "%s:%ld: %s: Floating point value used as record "
+				"length.\n", Fname, Lc, DEVICE_NAME );
+		rec_len = lround( v->val.dval );
+	}
+	else
+		rec_len = v->val.lval;
+
+	i = 0;
+	while ( 1 )
+	{
+		if ( record_lengths[ i ] == 0 )
+		{
+			eprint( FATAL, "%s:%ld: %s: Record length %ld too long.\n",
+					Fname, Lc, DEVICE_NAME, rec_len );
+			THROW( EXCEPTION );
+		}
+
+		if ( rec_len == record_lengths[ i ] )
+			break;
+
+		if ( rec_len < record_lengths[ i ] )
+		{
+			eprint( SEVERE, "%s:%ld: %s: Can't set record length to %ld, "
+					"using next larger allowed value of %ld instead.\n",
+					Fname, Lc, DEVICE_NAME, rec_len, record_lengths[ i ] );
+			break;
+		}
+
+		i++;
+	}
+
+	tds520a.rec_len = record_lengths[ i ];
+	tds520a.is_rec_len = SET;
+
+	if ( I_am == CHILD && ! tds520a_set_record_length( tds520a.rec_len ) )
+		tds520a_gpib_failure( );
+
+	return vars_push( INT_VAR, tds520a.rec_len );
+}
+
+
+/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*/
+
+Var *digitizer_trigger_position( Var *v )
+{
+	double trig_pos;
+
+
+	if ( v == NULL )
+	{
+		if ( TEST_RUN )
+		{
+			if ( tds520a.is_trig_pos )
+				return vars_push( FLOAT_VAR, tds520a.trig_pos );
+			else
+				return vars_push( FLOAT_VAR, 0.1 );
+		}
+		else if ( I_am == PARENT )
+		{
+			eprint( FATAL, "%s:%ld: %s: Function `digitizer_trigger_position' "
+					"with no argument can only be used in the EXPERIMENT "
+					"section.\n", Fname, Lc, DEVICE_NAME );
+			THROW( EXCEPTION );
+		}
+
+		if ( ! tds520a_get_trigger_pos( &trig_pos ) )
+			tds520a_gpib_failure( );
+
+		tds520a.trig_pos = trig_pos;
+		tds520a.is_trig_pos = SET;
+		return vars_push( FLOAT_VAR, tds520a.trig_pos );
+	}
+
+	vars_check( v, INT_VAR | FLOAT_VAR );
+	trig_pos = VALUE( v );
+	vars_pop( v );
+
+	if ( trig_pos < 0.0 || trig_pos > 1.0 )
+	{
+		eprint( FATAL, "%s:%ld: %s: Invalid trigger position: %f, must be in "
+				"interval [0,1].\n", Fname, Lc, DEVICE_NAME, trig_pos );
+		THROW( EXCEPTION );
+	}
+
+	tds520a.trig_pos = trig_pos;
+	tds520a.is_trig_pos = SET;
+
+	if ( I_am == CHILD && ! tds520a_set_trigger_pos( tds520a.trig_pos ) )
+		tds520a_gpib_failure( );
+
+	return vars_push( FLOAT_VAR, tds520a.trig_pos );
 }
 
 
