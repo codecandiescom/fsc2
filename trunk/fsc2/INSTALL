@@ -9,20 +9,20 @@ The following tools and libraries are needed to compile, install and run fsc2:
  4) bison
  5) install
  6) sed
- 7) awk
- 8) XFORMS library (version 0.89 or higher)
- 9) GPIB library (will also compile and run without, see below)
+ 7) XFORMS library (version 0.89 or higher)
+ 8) GPIB library (will also compile and run without, see below)
 
 Optionally, you should have
 
-10) mail
-11) addr2line
+ 9) mail
+10) addr2line
 
 but if it is missing the basic functionality is still there.
 
 To create the complete documentation you also need
 
-12) makeinfo
+11) makeinfo
+12) install-info (GNU texinfo version)
 13) tex (if missing no Postscript and PDF documentation is created)
 14) convert and identify from the ImageMagick package (or no PostScript
 	and PDF documentation will be created)
