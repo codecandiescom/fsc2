@@ -1534,6 +1534,10 @@ to @w{13 dB} in @w{0.1 dB} steps.
 @item @code{synthesizer_mod_type()}             @tab @ref{synthesizer_mod_type}
 @item @code{synthesizer_mod_source()}           @tab @ref{synthesizer_mod_source}
 @item @code{synthesizer_mod_freq()}             @tab @ref{synthesizer_mod_freq}
+@item @code{synthesizer_pulse_state()}          @tab @ref{synthesizer_pulse_state}
+@item @code{synthesizer_pulse_trigger_slope()}  @tab @ref{synthesizer_pulse_trigger_slope}
+@item @code{synthesizer_pulse_width()}          @tab @ref{synthesizer_pulse_width}
+@item @code{synthesizer_pulse_delay()}          @tab @ref{synthesizer_pulse_delay}
 @end multitable
 
 
