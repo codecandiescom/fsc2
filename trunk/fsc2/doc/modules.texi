@@ -1,6 +1,6 @@
 @c $Id$
 
-@node Modules, , Device Functions, Top
+@node Modules, Reserved Words, Device Functions, Top
 @chapter Modules
 @cindex modules
 

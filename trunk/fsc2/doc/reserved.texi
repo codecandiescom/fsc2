@@ -15,8 +15,15 @@
 @item @code{ASS:}          @tab Starts the @code{ASSIGNMENTS} section
 @item @code{ASSIGNMENT:}   @tab Starts the @code{ASSIGNMENTS} section
 @item @code{ASSIGNMENTS:}  @tab Starts the @code{ASSIGNMENTS} section
+@item @code{AUX}           @tab Digitizer channel name
+@item @code{AUX1}          @tab Digitizer channel name
+@item @code{AUX2}          @tab Digitizer channel name
 @item                      @tab
 @item @code{ceil}          @tab Built-in function (@pxref{ceil})
+@item @code{CH1}           @tab Digitizer channel name
+@item @code{CH2}           @tab Digitizer channel name
+@item @code{CH3}           @tab Digitizer channel name
+@item @code{CH4}           @tab Digitizer channel name
 @item @code{clear_curve}   @tab Built-in function (@pxref{clear_curve})
 @item @code{cos}           @tab Built-in function (@pxref{cos})
 @item @code{cosh}          @tab Built-in function (@pxref{cosh})
@@ -54,7 +61,12 @@
 @item @code{ks}            @tab Unit, Kilo-Seconds
 @item @code{kV}            @tab Unit, Kilo-Volt
 @item                      @tab
+@item @code{LIN}           @tab Digitizer channel name
+@item                      @tab
 @item @code{MA}            @tab Unit, Mega-Ampere
+@item @code{MATH1}         @tab Digitizer channel name
+@item @code{MATH2}         @tab Digitizer channel name
+@item @code{MATH3}         @tab Digitizer channel name
 @item @code{MG}            @tab Unit, Mega-Gauss
 @item @code{MHz}           @tab Unit, Mega-Hertz
 @item @code{Ms}            @tab Unit, Mega-Seconds
@@ -87,6 +99,10 @@
 @item                      @tab
 @item @code{REPEAT}        @tab Keyword for @code{REPEAT} loops
 @item @code{random}        @tab Built-in function (@pxref{random})
+@item @code{REF1}          @tab Digitizer channel name
+@item @code{REF2}          @tab Digitizer channel name
+@item @code{REF3}          @tab Digitizer channel name
+@item @code{REF4}          @tab Digitizer channel name
 @item @code{round}         @tab Built-in function (@pxref{round})
 @item                      @tab
 @item @code{s}             @tab Unit, Seconds

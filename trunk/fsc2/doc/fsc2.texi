@@ -55,9 +55,10 @@ devices to be used in the experiment.
 @menu
 * Overview::                Basic concepts of fsc2.
 * EDL::                     Description of EDL the language.
-* Functions::               Built-in functions.
+* Built-in Functions::      Built-in functions.
 * Device Functions::        Functions for accessing devices.
 * Modules::                 How to create new modules.
+* Reserved Words::          List of all reserved words.
 * Index::                   List of all indexed words.
 @end menu
 
@@ -70,6 +71,7 @@ devices to be used in the experiment.
 @include builtins.texi
 @include devices.texi
 @include modules.texi
+@include reserved.texi
 
 @node Index, , , Top
 @unnumbered Index

@@ -10,6 +10,9 @@ all:
 	$(MAKE) pdf
 
 
+info: $(docs)
+	makeinfo fsc2.texi
+
 html: $(docs)
 	./texi2html -frames -split=chapter -menu -number -sec_nav fsc2.texi
 

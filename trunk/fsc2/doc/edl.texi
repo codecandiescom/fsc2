@@ -1,6 +1,6 @@
 @c $Id$
 
-@node EDL, Functions, Overview, Top
+@node EDL, Built-in Functions, Overview, Top
 @chapter @acronym{EDL}
 @cindex @acronym{EDL}
 
@@ -11,7 +11,7 @@ This chapter describes the @acronym{EDL} language (@b{E}xperiment
 @menu
 * Basics::                  Basic principles.
 * Sections::                The sections of an EDL program.
-* Devices::
+* Devices::                 The layout of the @code{DEVICES} section
 * Variables::               Using variables and arrays.
 * Arithmetic::              Doing calculations with variables.
 * Control structures::      Flow control in an EDL program.
@@ -120,6 +120,16 @@ devices to be used in the experiment follows. It doesn't matter if you
 write the device names with lower or upper case letters, they will
 automatically be converted to all lower case.
 
+Here's an example for a typical @code{DEVICES} section (the double
+slash, `@code{//}', starts a comment):
+@example
+DEVICES:
+
+er035m_s;           // gaussmeter
+aeg_x_band;         // magnet
+dg2020;             // pulser
+tds520a;            // digitizer
+@end example
 
 @node Variables, Arithmetic, Devices, EDL
 @section Variables
@@ -168,7 +178,7 @@ Here's the complete list:
 @item @code{V}  @tab Volt (and @code{nV, uV, mV, kV} and @code{MV})
 @item @code{A}  @tab Ampere (and @code{nA, uA, mA, kA} and @code{MA})
 @item @code{Hz} @tab Hertz (and @code{nHz, uHz, mHz, kHz} and @code{MHz})
-@item @code{dB} @tab dB (deci-Bell)
+@item @code{dB} @tab dB (decibel)
 @end multitable
 @end quotation
 
