@@ -9,14 +9,16 @@ typedef struct Pulse_ {
 	int num;                  /* number of pulse */
 
 	int func;                 /* function of pulse */
-
 	long pos;                 /* position of pulse in ns */
 	long len;                 /* length of pulse in ns */
 	long dpos;                /* position increment in ns */
 	long dlen;                /* length increment in ns */
 	long maxlen;              /* maximum length in ns */
 
+	int set_flags;
+
 	Phase_Sequence *phase;    /* phase sequence for pulse */
+
 
 	struct Pulse_ * rp;       /* list of replacement pulses */
 	int n_rp;                 /* number of replacement pulses */
@@ -27,11 +29,24 @@ typedef struct Pulse_ {
 } Pulse;
 
 
+enum {
+	P_FUNC    = ( 1 << 0 ),
+	P_POS     = ( 1 << 1 ),
+	P_LEN     = ( 1 << 2 ),
+	P_DPOS    = ( 1 << 3 ),
+	P_DLEN    = ( 1 << 4 ),
+	P_MAXLEN  = ( 1 << 5 )
+};
+
 
 Pulse *pulse_new( int num );
 Pulse *pulse_find( int num );
-void pulse_set_func( Pulse *p, long func );
-void pulse_set_start( Pulse *p, Var *v );
+void pulse_set( Pulse *p, int type, Var *v );
+long pulse_get_by_addr( Pulse *p, int type );
+long pulse_get_by_num( int pnum, int type );
+bool pulse_exist( Pulse *p );
+void pulse_set_func( Pulse *p, Var *v );
+void pulse_set_pos( Pulse *p, Var *v );
 void pulse_set_len( Pulse *p, Var *v );
 void pulse_set_dpos( Pulse *p, Var *v );
 void pulse_set_dlen( Pulse *p, Var *v );
