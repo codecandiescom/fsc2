@@ -234,8 +234,6 @@ Var *daq_reserve_dac( Var *v )
 		lock_state = get_boolean( v->next );
 		too_many_arguments( v->next );
 	}
-	else
-		too_many_arguments( v );
 
 	if ( hjs_daadc.dac_reserved_by )
 	{

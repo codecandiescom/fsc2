@@ -232,8 +232,6 @@ Var *dio_reserve_dio( Var *v )
 		lock_state = get_boolean( v->next );
 		too_many_arguments( v->next );
 	}
-	else
-		too_many_arguments( v );
 
 	if ( witio_48.reserved_by[ dio ] )
 	{

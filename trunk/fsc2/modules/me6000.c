@@ -299,8 +299,6 @@ Var *daq_reserve_dac( Var *v )
 		lock_state = get_boolean( v->next );
 		too_many_arguments( v->next );
 	}
-	else
-		too_many_arguments( v );
 
 	if ( me6000.dac[ dac ].reserved_by )
 	{
