@@ -245,18 +245,18 @@ To manualy remove the installed package you have to delete the following
 files and directories (assuming you've used the default locations, i.e.
 /usr/local):
 
-/usr/local/bin/fsc2               (file)
-/usr/local/bin/fsc2_connect       (file)
-/usr/local/bin/fsc2_guify         (file)
-/usr/local/bin/fsc2_clean         (file)
-/usr/local/bin/fsc2_test          (symbolic link)
-/usr/local/bin/fsc2_load          (symbolic link)
-/usr/local/bin/fsc2_start         (symbolic link)
-/usr/local/lib/fsc2/              (directory)
-/usr/local/share/doc/fsc2/        (directory)
-/usr/local/man/man1/fsc2.1.gz     (file)
-/usr/local/info/fsc2.info.gz      (file)
-/usr/local/info/fsc2-*.info.gz    (file, with * being the numbers from 1 to 10)
+/usr/local/bin/fsc2             (file)
+/usr/local/bin/fsc2_connect     (file)
+/usr/local/bin/fsc2_guify       (file)
+/usr/local/bin/fsc2_clean       (file)
+/usr/local/bin/fsc2_test        (symbolic link)
+/usr/local/bin/fsc2_load        (symbolic link)
+/usr/local/bin/fsc2_start       (symbolic link)
+/usr/local/lib/fsc2/            (directory)
+/usr/local/share/doc/fsc2/      (directory)
+/usr/local/man/man1/fsc2.1.gz   (file)
+/usr/local/info/fsc2.info.gz    (file)
+/usr/local/info/fsc2-*.info.gz  (file, with * being a numbers between 1 and 10)
 
 
 E) Getting started
