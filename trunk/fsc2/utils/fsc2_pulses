@@ -44,6 +44,15 @@ MainLoop;
 
 #---------------------------------------------------------
 
+sub usage{
+
+	print "Usage: fsc2_pulse [ file ]\n" .
+		"A program to display the pulse settings of an EDL program.\n";
+	exit 0;
+}
+
+#---------------------------------------------------------
+
 sub read_input {
 
 	my @Function_Names = qw( MW PULSE_SHAPE PHASE_1 PHASE_2 TWT TWT_GATE
@@ -122,25 +131,50 @@ sub new {
 			     'step' => 0,
 				 'mag' => 2,
 				 'hstep' => 80,
-				 'delay' => 1 };
+				 'delay' => 0 };
 	bless $self, $class;
 
-	$self->{ 'early' } = $Channels->earliest_pulse;
+	# Find the start of the first pulse (including function delays)
 
-	my $w = $self->{ 'mag' } * ( $Channels->longest_sequence +
-								 $Delay - $self->{ 'early' } );
+	my $off = $Channels->first_pulse;
+	if ( $Delay == 0 and $off < 0 ) {
+		$self->{ 'offset' } = - $off;
+	} else {
+		$self->{ 'offset' } = 0;
+	}
+
+	# Calculate width of window to display *all* data
+
+	my $h = $Channels->num_channels * $self->{ 'hstep' } + 80;
+	my $w = $self->{ 'mag' } * ( $Channels->longest_sequence + $Delay
+								 + $self->{ 'offset' } );
+
+	# Blow up magnification if the pulse sequence is very short, if it's
+	# very long we have to reduce the magnification factor (maximum width
+	# is halve of a short int, i.e. about 32000, from the look of it)
+
 	while ( $w < 400 ) {
 		$w *= 2;
 		$self->{ 'mag' } *= 2;
 	}
-	my $h = $Channels->num_channels * $self->{ 'hstep' } + 80;
+	while ( $w > 32000 ) {
+		$w *= 0.5;
+		$self->{ 'mag' } *= 0.5;
+	}
+
 	$self->{ 'len' } = $w;
 
-	$self->{ 'frame1' } = $self->{ 'top' }->Frame;
+	# Reduce window size to something reasonable if necessary
+
 	my $width = $w + 170;
 	my @maxsize = $self->{ 'top' }->maxsize;
 	$width = 0.75 * $maxsize[ 0 ] if $width > 0.75 * $maxsize[ 0 ];
 
+	# Create a frame and with an embedded canvas (either a normal one or,
+	# if the the place needed to display all data is larger than the window
+	# size, a scrolled canvas)
+
+	$self->{ 'frame1' } = $self->{ 'top' }->Frame;
 	if ( $width >= $w + 170 ) {
 		$self->{ 'canvas' } =
 			$self->{ 'frame1' }->Canvas( '-relief' => 'sunken',
@@ -169,6 +203,12 @@ sub new {
 	$self->{ 'frame1' }->pack( '-fill' => 'x' );
 	$self->{ 'canvas' }->pack( '-side' => 'top', '-fill' => 'x' );
 
+	# Draw the canvas in the initial state
+
+	$self->primary_draw;
+
+	# Create a second frame with the buttons etc.
+
 	$self->{ 'frame2' } = $self->{ 'top' }->Frame;
 	$self->{ 'delay_button' } =
 		$self->{ 'frame2' }->Checkbutton( '-state' => 'active',
@@ -184,41 +224,32 @@ sub new {
 		$self->{ 'frame3' }->Button( '-text' => '<<',
 									 '-width' => '1',
 									 '-command' => sub {
-										 $self->{ 'step' } = 0;
-										 $self->redraw } );
+										 $self->pshift( -1, 1 ) } );
 	$self->{ 'step_fb' } =
 		$self->{ 'frame3' }->Button( '-text' => '<',
 									 '-width' => '1',
 									 '-command' => sub {
-										 if ( $self->{ 'step' } > 0 ) {
-											 $self->{ 'step' }--;
-											 $self->redraw } } );
+										 $self->pshift( -1 ) } );
 	$self->{ 'step_entry' } =
 		$self->{ 'frame3' }->Entry( '-textvariable' => \$self->{ 'step' },
 									'-width' => 6,
 									'-validate' => 'key',
 									'-validatecommand' =>
-										sub { my $n = shift;
-											  return 1 if $n eq "";
-											  return 0 unless $n =~ /^\d+$/;
-											  return ( $n >= 0 and
-												 $n <= $Channels->num_steps ) }
-									);
+									 sub { my $n = shift;
+										   return 1 if $n eq "";
+										   return 0 unless $n =~ /^\d+$/;
+										   return ( $n >= 0 and
+										      $n <= $Channels->num_steps ) } );
 	$self->{ 'step_fw' } =
 		$self->{ 'frame3' }->Button( '-text' => '>',
 									 '-width' => '1',
 									 '-command' => sub {
-										 if ( $self->{ 'step' } < 
-											  $Channels->num_steps ) {
-											 $self->{ 'step' }++;
-											 $self->redraw } } );
+										 $self->pshift( 1 ) } );
 	$self->{ 'step_ffw' } =
 		$self->{ 'frame3' }->Button( '-text' => '>>',
 									 '-width' => '1',
 									 '-command' => sub {
-										 $self->{ 'step' } =
-											 $Channels->num_steps;
-										 $self->redraw } );
+										 $self->pshift( 1, 1 ) } );
 	$self->{ 'close_button' } =
 		$self->{ 'frame2' }->Button( '-text' => 'Close',
 									 'command' =>
@@ -243,78 +274,36 @@ sub new {
 									 'padx' => '4m',
 									 'pady' => '2m' );
 
-	$self->primary_draw;
+	# Lots of key bindings...
 
     $self->{ 'canvas' }->CanvasBind( '<Button-2>' => sub {
-						 return if $self->{ 'step' } eq "";
-						 if ( $self->{ 'step' } < $Channels->num_steps ) {
-							 $self->{ 'step' }++;
-							 $self->redraw; } } );
+										 $self->pshift( 1 ); } );
     $self->{ 'canvas' }->CanvasBind( '<Button-4>' => sub {
-						 return if $self->{ 'step' } eq "";
-						 if ( $self->{ 'step' } < $Channels->num_steps ) {
-							 $self->{ 'step' }++;
-							 $self->redraw; } } );
+										 $self->pshift( 1 ); } );
     $self->{ 'top' }->bind( '<Up>' => sub {
-						 return if $self->{ 'step' } eq "";
-						 if ( $self->{ 'step' } < $Channels->num_steps ) {
-							 $self->{ 'step' }++;
-							 $self->redraw; } } );
+										 $self->pshift( 1 ); } );
     $self->{ 'top' }->bind( '<Shift-Up>' => sub {
-						 return if $self->{ 'step' } eq "";
-						 if ( $self->{ 'step' } < $Channels->num_steps - 9 ) {
-							 $self->{ 'step' } += 10;
-						 } else {
-							 $self->{ 'step' } = $Channels->num_steps;
-						 }
-						 $self->redraw; } );
-
+										 $self->pshift( 10 ); } );
     $self->{ 'canvas' }->CanvasBind( '<Button-3>' => sub {
-										 return if $self->{ 'step' } eq "";
-										 if ( $self->{ 'step' } > 0 ) {
-											 $self->{ 'step' }--;
-											 $self->redraw; } } );
+										 $self->pshift( -1 ); } );
     $self->{ 'canvas' }->CanvasBind( '<Button-5>' => sub {
-										 return if $self->{ 'step' } eq "";
-										 if ( $self->{ 'step' } > 0 ) {
-											 $self->{ 'step' }--;
-											 $self->redraw; } } );
+										 $self->pshift( -1 ); } );
     $self->{ 'top' }->bind( '<Down>' => sub {
-										 return if $self->{ 'step' } eq "";
-										 if ( $self->{ 'step' } > 0 ) {
-											 $self->{ 'step' }--;
-											 $self->redraw; } } );
+										 $self->pshift( -1 ); } );
     $self->{ 'top' }->bind( '<Shift-Down>' => sub {
-										 return if $self->{ 'step' } eq "";
-										 if ( $self->{ 'step' } >= 10 ) {
-											 $self->{ 'step' } -= 10;
-										 } else {
-											 $self->{ 'step' } = 0;
-										 }
-										 $self->redraw; } );
+										 $self->pshift( -10 ); } );
 	$self->{ 'top' }->bind( '<End>' => sub {
-										 $self->{ 'step' } = 0;
-										 $self->redraw; } );
+										 $self->pshift( -1, 1 ); } );
 	$self->{ 'top' }->bind( '<Home>' => sub {
-										 $self->{ 'step' } =
-											 $Channels->num_steps;
-										 $self->redraw; } );
+										 $self->pshift( 1, 1 ); } );
 	$self->{ 'top' }->bind( '<Prior>' => sub {
-										 return if $self->{ 'step' } eq "";
-										 $self->{ 'step' } +=
-											 int( 0.1 * $Channels->num_steps );
-										 $self->{ 'step' } =
-											 $Channels->num_steps
-												 if $self->{ 'step' } >
-													 $Channels->num_steps;
-										 $self->redraw; } );
+										 $self->pshift(
+									       int( 0.1 * $Channels->num_steps ) );
+									     } );
 	$self->{ 'top' }->bind( '<Next>' => sub {
-										 return if $self->{ 'step' } eq "";
-										 $self->{ 'step' } -=
-											 int( 0.1 * $Channels->num_steps );
-										 $self->{ 'step' } = 0
-												 if $self->{ 'step' } < 0;
-										 $self->redraw; } );
+										 $self->pshift(
+									     - int( 0.1 * $Channels->num_steps ) );
+									     } );
 	$self->{ 'top' }->bind( '<Control-d>' => sub {
 								              $self->{ 'delay' } ^= 1;
 											  $self->draw_scale;
@@ -328,6 +317,26 @@ sub new {
 									   $self->redraw; } );
 
 	return $self;
+}
+
+#---------------------------------------------------------
+
+sub pshift {
+
+	my ( $self, $delta, $special ) = @_;
+
+	if ( ! defined $special ) {
+		return if $self->{ 'step' } eq "";
+		$self->{ 'step' } += $delta;
+		$self->{ 'step' } = 0 if $self->{ 'step' } + $delta < 0;
+		$self->{ 'step' } = $Channels->num_steps
+			if $self->{ 'step' } + $delta > $Channels->num_steps;
+   } else {
+	   $self->{ 'step' } = 0 if $delta < 0;
+	   $self->{ 'step' } = $Channels->num_steps if $delta > 0;
+   }
+
+	$self->redraw;
 }
 
 #---------------------------------------------------------
@@ -389,36 +398,50 @@ sub draw_scale {
 	if ( $self->{ 'delay' } ) {
 		$delay = $Delay;
 	} else {
-		$delay = -$self->{ 'early' };
+		$delay = $self->{ 'offset' };
+	}
+
+	my $del = 10;
+	if ( $self->{ 'mag' } * $del < 50 ) {
+		$del = 25;
+	}
+	while( $self->{ 'mag' } * $del < 50 ) {
+		$del *= 2;
 	}
 
 	my $cx = 0;
 	my $x = 150 + $self->{ 'mag' } * $delay;
-	while ( $x < $x2 ) {
+	while ( $x <= $x2 - 10 ) {
 		$c->create( 'line', $x, $y1, $x, $y2, '-fill' => 'yellow',
 					'-tags' => 'scale');
 		$c->create( 'text', $x, $y1 + 10,
 					'-text' => $cx * $time_base * $factor . $unit,
 					'-fill' => 'green', '-tags' => 'scale' );
-		$x += $self->{ 'mag' } * 25;
-		$cx += 25;
+		$x += $self->{ 'mag' } * $del;
+		$cx += $del;
 	}
 
-	$cx = -25;
-	$x = 150 + $self->{ 'mag' } * ( $delay - 25 );
-	while ( $x > $x1 ) {
+	$cx = - $del;
+	$x = 150 + $self->{ 'mag' } * ( $delay - $del );
+	while ( $x > $x2 - 10 ) {
+		$x -= $self->{ 'mag' } * $del;
+		$cx -= $del;
+	}
+	while ( $x >= $x1 ) {
 		$c->create( 'line', $x, $y1, $x, $y2, '-fill' => 'yellow',
 					'-tags' => 'scale' );
 		$c->create( 'text', $x, $y1 + 10,
 					'-text' => $cx * $time_base * $factor . $unit,
 					'-fill' => 'green', '-tags' => 'scale' );
-		$x -= $self->{ 'mag' } * 25;
-		$cx -= 25;
+		$x -= $self->{ 'mag' } * $del;
+		$cx -= $del;
 	}
 
 }
 
 #---------------------------------------------------------
+# Function redraws all pulses (after deleting the existing ones)
+# for the current value of 'step'.
 
 sub redraw {
 
@@ -439,9 +462,9 @@ sub redraw {
 		my $yt = 10 + ( $i + 0.75 ) * $self->{ 'hstep' };
 
 		for my $cp ( @$pl ) {
-			my $x1 = $cp->start - $self->{ 'early' }
-				- ( $self->{ delay } ? 0 : $ch->{ 'delay' } );
-			my $x2 = $cp->start + $cp->len - $self->{ 'early' }
+			my $x1 = $cp->start + $self->{ 'offset' } -
+				( $self->{ delay } ? 0 : $ch->{ 'delay' } );
+			my $x2 = $cp->start + $cp->len + $self->{ 'offset' }
 				- ( $self->{ delay } ? 0 : $ch->{ 'delay' } );
 			$x1 = 150 + $self->{ mag } * $x1;
 			$x2 = 150 + $self->{ mag } * $x2;
@@ -548,17 +571,17 @@ sub longest_sequence {
 
 #---------------------------------------------------------
 
-sub earliest_pulse {
+sub first_pulse {
 
-	my $self = shift;
-	my $earliest = 0;
+    my $self = shift;
+    my $first;
 
-	for ( @{ $self->{ channels } } ) {
-		my $e = $_->earliest_pulse - $_->delay;
-		$earliest = $e if $earliest > $e;
-	}
+    for ( @{ $self->{ channels } } ) {
+        my $e = $_->first_pulse;
+        $first = $e if ! defined $first or $first > $e;
+    }
 
-	return $earliest;
+    return $first;
 }
 
 1;
@@ -632,17 +655,19 @@ sub longest_sequence {
 
 #---------------------------------------------------------
 
-sub earliest_pulse {
+sub first_pulse {
 
-	my $self = shift;
-	my $earliest = 0;
+    my $self = shift;
+    my $first;
 
-	for ( keys %{ $self->{ 'plist' } } ) {
-		my $e = $self->{ 'plist' }{ $_ }->start;
-		$earliest = $e if $earliest > $e;
-	}
+    for ( keys %{ $self->{ 'plist' } } ) {
+        my $e = $self->{ 'plist' }{ $_ }->start;
+		next unless defined $e;
+		$e -= $self->{ 'delay' };
+		$first = $e if ! defined $first or $first > $e;
+    }
 
-	return $earliest;
+    return $first;
 }
 
 1;
@@ -679,15 +704,15 @@ sub len {
 
 sub start {
 
-	my $self = shift;
-	my $start = 0;
+    my $self = shift;
+    my $start;
 
-	for ( @$self ) {
-		my $s = $_->start;
-		$start = $s if $start > $s;
-	}
+    for ( @$self ) {
+        my $s = $_->start;
+        $start = $s if ! defined $start or $start > $s;
+    }
 
-	return $start;
+    return $start;
 }
 
 1;
