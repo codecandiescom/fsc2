@@ -38,7 +38,7 @@ detail. These functions are available even when no device modules have
 been specified in the @code{DEVICES} section (or this section is
 missing). Many functions can be used in the @code{VARIABLES},
 @code{PREPARATIONS} as well as the @code{EXPERIMENT} section of an
-@code{EDL} program, but there are some that can be used only either
+@code{EDL} script, but there are some that can be used only either
 before the @code{EXPERIMENT} section starts or within the
 @code{EXPERIMENT} section.
 
@@ -46,7 +46,7 @@ The built-in functions can be roughly divided into four classes. The
 first class of functions are functions for drawing the measured data
 onto the screen, i.e.@: the main area of the display window (including
 functions for changing the axis scaling and labels etc.@:), functions
-for dealing with the output of the program, either by writing text to
+for dealing with the output of the script, either by writing text to
 the browser in the lower half of the main window or by writing data
 etc.@: into files (including functions for specifying the files to be
 used).
@@ -181,7 +181,7 @@ displayed at the @i{x}-axis are (in contrast to the point numbers)
 referred to as `real world coordinates'.
 
 This function can only be used in the @code{PREPARATIONS} section of an
-@code{EDL} program.
+@code{EDL} script.
 
 
 @anchor{init_2d}
@@ -233,7 +233,7 @@ init_2d( [ n_data_sets [ , n_x_points [ , n_y_points,
 @end example
 
 This function can only be used in the @code{PREPARATIONS} section of an
-@code{EDL} program.
+@code{EDL} script.
 
 
 @anchor{display_1d}
@@ -272,7 +272,7 @@ display( n_x_point, data [ , n_curve [ , ... ] ] )
 @end example
 
 This function can only be used in the @code{EXPERIMENT} section of an
-@code{EDL} program.
+@code{EDL} script.
 
 
 @anchor{display_2d}
@@ -314,7 +314,7 @@ display( n_x_point, n_y_point, data [ , n_curve [ , ... ] ] )
 @end example
 
 This function can only be used in the @code{EXPERIMENT} section of an
-@code{EDL} program.
+@code{EDL} script.
 
 
 @anchor{display}
@@ -348,7 +348,7 @@ displayed simultaneously (but in this case all of the arguments must be
 specified!).
 
 This function can only be used in the @code{EXPERIMENT} section of an
-@code{EDL} program.
+@code{EDL} script.
 
 
 @anchor{ display_mode}
@@ -380,7 +380,7 @@ cleared from the screen as well as all markers possibly shown. The
 scaling in @i{y}-directions remains unchanged.
 
 This fucntion can be used in both the @code{PREPARATIONS} as well as the
-@code{EXPERIMENT} section of an @code{EDL} program.
+@code{EXPERIMENT} section of an @code{EDL} script.
 
 
 @anchor{change_scale_1d}
@@ -394,7 +394,7 @@ of these values should remain unchanged a string (e.g.@ @code{"keep"})
 instead of a value can be passed as the argument.
 
 This function can only be used in the @code{EXPERIMENT} section of an
-@code{EDL} program.
+@code{EDL} script.
 
 
 @anchor{change_scale_2d}
@@ -409,7 +409,7 @@ values should remain unchanged a string (e.g.@ @code{"keep"}) instead of
 a value can be passed as the argument.
 
 This function can only be used in the @code{EXPERIMENT} section of an
-@code{EDL} program.
+@code{EDL} script.
 
 
 @anchor{change_scale}
@@ -426,21 +426,21 @@ also accepts a new start value for the @i{y}-axis as well as the
 (e.g.@ @code{"keep"}) instead of a value can be passed as the argument.
 
 This function can only be used in the @code{EXPERIMENT} section of an
-@code{EDL} program.
+@code{EDL} script.
 
 
 @anchor{change_label_1d}
 @item change_label_1d()
 @findex change_label_1d()
 Using this function the labels at the axis of the 1D-display window can
-be changed from within as @code{EDL} program. It accepts up to two
+be changed from within as @code{EDL} script. It accepts up to two
 strings for the @i{x}- and @i{y}-axis labels. To leave a label unchanged
 pass the function an empty string, i.e.@ @code{""}. If no label should
 be drawn pass it a string that just contains one (or more) space
 characters, i.e.@: @code{" "}.
 
 This function can only be used in the @code{EXPERIMENT} section of an
-@code{EDL} program.
+@code{EDL} script.
 
 
 @anchor{change_label_2d}
@@ -448,14 +448,14 @@ This function can only be used in the @code{EXPERIMENT} section of an
 @findex change_label_2d()
 Using this function the labels at the axis of the 2D-display window
 (and, if shown, of the cross section window) can be changed from within
-as @code{EDL} program. It accepts up to three strings for the @i{x}-,
+as @code{EDL} script. It accepts up to three strings for the @i{x}-,
 @i{y}-axis and @i{z}-axis label. To leave a label unchanged pass the
 function an empty string, i.e.@ @code{""}. If no label should be drawn
 pass it a string that just contains one (or more) space characters,
 i.e.@: @code{" "}.
 
 This function can only be used in the @code{EXPERIMENT} section of an
-@code{EDL} program.
+@code{EDL} script.
 
 
 @anchor{change_label}
@@ -463,7 +463,7 @@ This function can only be used in the @code{EXPERIMENT} section of an
 @findex change_label()
 Using this function the labels at the axis of the display window (and,
 if shown, of the cross section window) can be changed from within as
-@code{EDL} program when only either the 1D- or the 2D-display window is
+@code{EDL} script when only either the 1D- or the 2D-display window is
 used (but not both). For 1D-display it accepts up to two strings for the
 @i{x}- and @i{y}-axis labels, for 2D-display up to three, the third for
 the @i{z}-axis label. To leave a label unchanged pass the function an
@@ -472,7 +472,7 @@ string that just contains one (or more) space characters, i.e.@: @code{"
 "}.
 
 This function can only be used in the @code{EXPERIMENT} section of an
-@code{EDL} program.
+@code{EDL} script.
 
 
 @anchor{rescale_1d}
@@ -481,7 +481,7 @@ This function can only be used in the @code{EXPERIMENT} section of an
 In the function @code{init_1d()} the number of points in @i{x}-direction
 can be set. If, during the experiment more points are displayed then set
 in the initialization, the scaling of the axis will be changed automatically. Using the function @code{rescale()} one
-can change the number of points from within the @code{EDL} program. The
+can change the number of points from within the @code{EDL} script. The
 function accepts one argument, the new number of points
 in @i{x}-direction. If this value is @code{0} the number of points is
 adjusted to the number of points currently displayed. Exceptions are
@@ -492,7 +492,7 @@ number of points. Passing the function a value of @code{-1} means that
 the number of points should remain unchanged.
 
 This function can only be used in the @code{EXPERIMENT} section of an
-@code{EDL} program.
+@code{EDL} script.
 
 
 @anchor{rescale_2d}
@@ -503,14 +503,14 @@ In the function @code{init_2d()} the number of points in @i{x}- and
 displayed then set in the initialization, the scaling of the axes in the
 2D-case) will be changed automatically. Using the function
 @code{rescale()} one can change the number of points from within the
-@code{EDL} program. The function accepts two arguments, the first being
+@code{EDL} script. The function accepts two arguments, the first being
 the number of points to be displayed in @i{x}-direction and the second
 the number of points in @i{y}-direction. A value of @code{-1} means not
 to do any changes to the axis and @code{0} sets the number of points to
 the number of points currently displayed along this axis.
 
 This function can only be used in the @code{EXPERIMENT} section of an
-@code{EDL} program.
+@code{EDL} script.
 
 
 @anchor{rescale}
@@ -535,7 +535,7 @@ do any changes to the axis and @code{0} sets the number of points to the
 number of points currently displayed along this axis.
 
 This function can only be used in the @code{EXPERIMENT} section of an
-@code{EDL} program.
+@code{EDL} script.
 
 
 @anchor{clear_curve_1d}
@@ -547,7 +547,7 @@ arguments. No arguments at all implies the first curve only. Invalid
 arguments are discarded and an error message is printed.
 
 This function can only be used in the @code{EXPERIMENT} section of an
-@code{EDL} program.
+@code{EDL} script.
 
 
 @anchor{clear_curve_2d}
@@ -559,7 +559,7 @@ the first curve only. Invalid arguments are discarded and an error message is
 printed.
 
 This function can only be used in the @code{EXPERIMENT} section of an
-@code{EDL} program.
+@code{EDL} script.
 
 
 @anchor{clear_curve}
@@ -569,7 +569,7 @@ If there is only either a 1D- or 2D-display window this function can be
 used instead of @code{clear_curve_1d()} or @code{clear_curve_2d()}.
 
 This function can only be used in the @code{EXPERIMENT} section of an
-@code{EDL} program.
+@code{EDL} script.
 
 
 @anchor{draw_marker_1d}
@@ -602,7 +602,7 @@ marker is not used at all (but must be given and must be larger than
 first displayed curve. Thus also can't delete markers in this mode.
 
 This function can only be used in the @code{EXPERIMENT} section of an
-@code{EDL} program.
+@code{EDL} script.
 
 
 @anchor{draw_marker_2d}
@@ -632,7 +632,7 @@ one marker has been set for that position only the first, older one will
 be deleted).
 
 This function can only be used in the @code{EXPERIMENT} section of an
-@code{EDL} program.
+@code{EDL} script.
 
 
 @anchor{draw_marker}
@@ -643,7 +643,7 @@ This function can be called instead of @code{draw_marker_1d()} or
 (but not both at once).
 
 This function can only be used in the @code{EXPERIMENT} section of an
-@code{EDL} program.
+@code{EDL} script.
 
 
 @anchor{clear_marker_1d}
@@ -652,7 +652,7 @@ This function can only be used in the @code{EXPERIMENT} section of an
 This function deletes all previously set 1D markers. It accepts no arguments.
 
 This function can only be used in the @code{EXPERIMENT} section of an
-@code{EDL} program.
+@code{EDL} script.
 
 
 @anchor{clear_marker_2d}
@@ -663,7 +663,7 @@ previously set 2D markers on all curves. Otherwise it expects a list
 of curve numbers and deletes only all markers on these curves.
 
 This function can only be used in the @code{EXPERIMENT} section of an
-@code{EDL} program.
+@code{EDL} script.
 
 
 @anchor{clear_marker}
@@ -674,7 +674,7 @@ This function can be called instead of @code{clear_marker_1d()} or
 (but not both at once).
 
 This function can only be used in the @code{EXPERIMENT} section of an
-@code{EDL} program.
+@code{EDL} script.
 
 
 @anchor{print}
@@ -693,7 +693,7 @@ a first simple example: You want to print the value of a variable called
 print( "The value of I is #.\n", I );
 @end example
 @noindent
-will print, when the program is interpreted,
+will print, when the script is interpreted,
 @example
 The value of I is 3.
 @end example
@@ -744,7 +744,7 @@ Prints a @code{#}, thus switching off the special meaning of the
 @code{#} character as a placeholder for variables to be printed.
 @item \T
 While normally nothing is printed during the test run of the
-@code{EXPERIMENT} section of an @code{EDL} program, if the @i{format
+@code{EXPERIMENT} section of an @code{EDL} script, if the @i{format
 string} starts with this escape sequence the @code{print()} function
 will produce output already in the test run (the @code{T} is never
 printed).
@@ -801,14 +801,14 @@ after the default file has already been opened is not allowed, call it
 either before the first save-operation or never at all!
 
 This function can only be used in the @code{EXPERIMENT} section of an
-@code{EDL} program.
+@code{EDL} script.
 
 
 @anchor{open_file}
 @item open_file()
 @findex open_file()
 This function is similar to the previous one with the main difference
-that one may specify an hard-coded file name in the program. The
+that one may specify an hard-coded file name in the script. The
 function will use its first argument as a file name and try to open this
 file. If the file already exists (or can't be opened)  a warning will be
 shown and,on user request will show up a file selector to allow
@@ -818,7 +818,7 @@ arguments that the function accepts are identical to the ones of
 additional argument with a string for the file name.
 
 This function can only be used in the @code{EXPERIMENT} section of an
-@code{EDL} program.
+@code{EDL} script.
 
 
 @anchor{clone_file}
@@ -858,7 +858,7 @@ select different file. The program enforces that the extension of the
 new file is identical to the one passed to it as the third argument.
 
 This function can only be used in the @code{EXPERIMENT} section of an
-@code{EDL} program.
+@code{EDL} script.
 
 
 @anchor{save}
@@ -914,7 +914,7 @@ will be printed as
 
 The function returns the total number of characters that have been
 written to the file and can only be used in the @code{EXPERIMENT}
-section of an @code{EDL} program.
+section of an @code{EDL} script.
 
 
 @anchor{fsave}
@@ -1004,7 +1004,7 @@ The function returns the total number of characters that have been written to
 the file.
 
 This function can only be used in the @code{EXPERIMENT} section of an
-@code{EDL} program.
+@code{EDL} script.
 
 
 @anchor{ffsave}
@@ -1103,16 +1103,16 @@ The function returns the total number of characters that have been written to
 the file.
 
 This function can only be used in the @code{EXPERIMENT} section of an
-@code{EDL} program.
+@code{EDL} script.
 
 
 @anchor{save_program}
 @item save_program()
 @findex save_program()
-This functions writes the currently run @code{EDL} program into a
+This functions writes the currently run @code{EDL} script into a
 file. As usual, the first argument may be a file identifier -- the same
 rules apply as for @code{save()} and @code{fsave()}. The second argument
-can be a string that is prepended to each line of the program, i.e.@: a
+can be a string that is prepended to each line of the script, i.e.@: a
 comment character to make other programs like @acronym{MATHLAB} or
 @acronym{octave} skip these lines.
 
@@ -1121,7 +1121,7 @@ the included files get saved into the output file, embedded into the
 text of the script.
 
 This function can only be used in the @code{EXPERIMENT} section of an
-@code{EDL} program.
+@code{EDL} script.
 
 
 @anchor{save_output}
@@ -1132,7 +1132,7 @@ the content of the output window (i.e.@: the bottom browser window in
 the main form) into the file.
 
 This function can only be used in the @code{EXPERIMENT} section of an
-@code{EDL} program.
+@code{EDL} script.
 
 
 @anchor{save_comment}
@@ -1151,7 +1151,7 @@ last argument is the label string to be shown on top of the editor -- it
 defaults to "Please enter a comment:".
 
 This function can only be used in the @code{EXPERIMENT} section of an
-@code{EDL} program.
+@code{EDL} script.
 
 @end table
 
@@ -1169,7 +1169,7 @@ experiment when it is already running. The toolbox window will vanish
 automatically when all objects have been deleted. The toolbox with its
 objects can only be used during the experiment, i.e.@: the functions for
 creating, handling and deleting of objects can only be used within the
-@code{EXPERIMENT} section of the program.
+@code{EXPERIMENT} section of the script.
 
 Please note that when the objects in the toolbox are used it usually
 isn't possible anymore to check the complete experiment before it is run
@@ -1180,7 +1180,7 @@ only be used where it is really necessary, e.g.@: when you're trying to
 find the optimum parameters for an experiment but not in the final
 experiment.
 
-When the program is tested before the experiment is started it is
+When the script is tested before the experiment is started it is
 assumed that all buttons are not pressed and switched off (unless their
 state has been set explicitly by the function @code{button_state()}, all
 sliders are assumed to be in the middle position unless a different
@@ -1275,7 +1275,7 @@ pixels smaller than the default size use the label string
 @subsection List of Interaction Functions
 
 All the following functions can only be used in the @code{EXPERIMENT}
-section of an @code{EDL} program.
+section of an @code{EDL} script.
 
 @table @samp
 @anchor{layout}
@@ -1308,7 +1308,7 @@ objects in the toolbox) that has been changed. If none have been changed
 
 Please note: the function will @strong{not} report changes due to
 function calls that change the state of an object, e.g.@: when setting a
-new slider position from within the @code{EDL} program. The function
+new slider position from within the @code{EDL} script. The function
 also will report a change until the new state of the object has been
 determined by an appropriate function call. I.e.@: it will repeatedly
 report e.g.@: a new slider value until you have called
@@ -1437,6 +1437,13 @@ off, i.e.@: only for the button that has become active from a group of
 radio buttons.
 
 
+@anchor{button_change_label}
+@item button_change_label()
+@findex button_change_label()
+The function allows to change the label of a button. It takes two
+arguments, the ID of the button and a string with the new label.
+
+
 @anchor{slider_create}
 @item slider_create()
 @findex slider_create()
@@ -1508,6 +1515,13 @@ change of the sliders value until you have determined the new value by
 calling @code{slider_value()} for the slider.
 
 
+@anchor{slider_change_label}
+@item slider_change_label()
+@findex slider_change_label()
+The function allows to change the label of a slider. It takes two
+arguments, the ID of the slider and a string with the new label.
+
+
 @anchor{input_create}
 @item input_create()
 @findex input_create()
@@ -1569,6 +1583,13 @@ report a change of the input fields value until you have determined the
 new value by calling @code{input_value()}.
 
 
+@anchor{input_change_label}
+@item input_change_label()
+@findex input_change_label()
+The function allows to change the label of an input field. It takes two
+arguments, the ID of the input field and a string with the new label.
+
+
 @anchor{output_create}
 @item output_create()
 @findex output_create()
@@ -1621,6 +1642,13 @@ second value the output field is set to this value. Obviously, the value
 must be number.
 
 
+@anchor{output_change_label}
+@item output_change_label()
+@findex output_change_label()
+The function allows to change the label of an output field. It takes two
+arguments, the ID of the output field and a string with the new label.
+
+
 @anchor{menu_create}
 @item menu_create()
 @findex menu_create()
@@ -1670,6 +1698,13 @@ the selected menu item until you have determined the new item by calling
 @code{menu_choice()} for the menu object.
 
 
+@anchor{menu_change_label}
+@item menu_change_label()
+@findex menu_change_label()
+The function allows to change the label of a menu. It takes two
+arguments, the ID of the menu and a string with the new label.
+
+
 @anchor{object_delete}
 @item object_delete()
 @findex object_delete()
@@ -1677,6 +1712,13 @@ The function deletes one or more objects from the toolbox. It expects one
 or a comma separated list of object identifiers as returned by the
 functions @code{button_create()}, @code{slider_create()} and
 @code{input_create()}.
+
+
+@anchor{object_change_label}
+@item object_change_label()
+@findex object_change_label()
+The function allows to change the label of an object. It takes two
+arguments, the ID of the object and a string with the new label.
 
 
 @anchor{hide_toolbox}
@@ -1700,7 +1742,7 @@ boolean argument (either @code{1} or @code{"ON"} to hide the toolbox or
 @cindex mathematical functions
 
 The following mathematical function can be used in all section of an
-@code{EDL} program that allow the use of functions.
+@code{EDL} script that allow the use of functions.
 
 @table @samp
 @anchor{int}
@@ -1958,7 +2000,7 @@ used in the @code{EXPERIMENT} section only and not after the
 @anchor{abort}
 @item abort()
 @findex abort()
-The function will abort the currently running program immediately
+The function will abort the currently running script immediately
 without even running the code following the @code{ON_STOP} label, so it
 is a kind of an emergency exit when nothing better will do. When called it
 displays a message box on the screen to inform the user. This function
@@ -1981,7 +2023,7 @@ Returns a string with the current time in the form @code{hh:mm:ss}.
 @item delta_time()
 @findex delta_time()
 This function (that can only be used in the @code{EXPERIMENT} section of
-the program) returns the time (in seconds) since the last call of the
+the script) returns the time (in seconds) since the last call of the
 functions as a floating point value. When called for the very first time
 it returns the time since the start of the experiment (i.e.@: the time
 the start of the @code{EXPERIMENT} section was processed). The time
@@ -1999,7 +2041,7 @@ error message and return immediately. The maximum time the function
 accepts is more than 2.1 billion seconds (or about 68 years).
 
 This function can only be used in the @code{EXPERIMENT} section of an
-@code{EDL} program.
+@code{EDL} script.
 
 
 @anchor{T_to_G}
