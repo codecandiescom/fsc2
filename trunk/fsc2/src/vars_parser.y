@@ -92,17 +92,23 @@ expr:    INT_TOKEN unit           { $$ = vars_mult( vars_push( INT_VAR, $1 ),
 			                            $$ = vars_mult( CV, $7 );
 		                            else
 									{
-										vars_pop( $7 );
-									    $$ = CV;
-									} }
+										eprint( FATAL, "%s:%ld: Can't apply "
+												 "a unit to a non-number.\n",
+												Fname, Lc );
+										THROW( EXCEPTION );
+									}
+                                  }
        | FUNC_TOKEN '(' list4 ')' { CV = func_call( $1 ); }
          unit                     { if ( CV->type & ( INT_VAR | FLOAT_VAR ) )
 			                            $$ = vars_mult( CV, $6 );
 		                            else
 									{
-										vars_pop( $6 );
-									    $$ = CV;
-									} }
+										eprint( FATAL, "%s:%ld: Can't apply "
+												 "a unit to a non-number.\n",
+												Fname, Lc );
+										THROW( EXCEPTION );
+									}
+                                  }
        | VAR_REF                  { $$ = $1; }
        | VAR_TOKEN '('            { eprint( FATAL, "%s:%ld: `%s' isn't a "
 											"function.\n", Fname, Lc,
