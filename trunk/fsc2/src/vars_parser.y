@@ -32,7 +32,7 @@ extern int varslex( void );
 /* locally used functions */
 
 int varsparse( void );
-void varserror( const char *s );
+static void varserror( const char *s );
 
 extern char *varstext;
 
@@ -113,7 +113,7 @@ expr:    INT_TOKEN unit            { $$ = apply_unit( vars_push( INT_VAR, $1 ),
          unit                      { $$ = apply_unit( $<vptr>6, $7 ); }
        | FUNC_TOKEN '(' list4 ')'  { $$ = func_call( $1 ); }
          unit                      { $$ = apply_unit( $<vptr>5, $6 ); }
-       | VAR_REF                   { $$ = $1; }
+       | VAR_REF
        | VAR_TOKEN '('             { eprint( FATAL, SET, "`%s' isn't a "
 											 "function.\n", $1->name );
 	                                 THROW( EXCEPTION ); }
@@ -167,10 +167,10 @@ arhs:    /* empty */               { vars_arr_init( vars_push( UNDEF_VAR ) ); }
 /* list of sizes of newly declared array */
 
 list1:   /* empty */               { $$ = vars_push( UNDEF_VAR ); }
-       | expr                      { $$ = $1; }
+       | expr
        | '*'                       { ( $$ = vars_push( INT_VAR, 0 ) )->flags
 										                   |= VARIABLE_SIZED; }
-       | list1 ',' expr            { $$ = $1; }
+       | list1 ',' expr
        | list1 ',' '*'             { ( $$ = vars_push( INT_VAR, 0 ) )->flags
 										 |= VARIABLE_SIZED; }
 ;
@@ -181,14 +181,14 @@ arrass:   '{' '}'                  { $$ = vars_push( UNDEF_VAR ); }
         | '{' list2 '}'            { $$ = $2; }
 ;
 
-list2:   expr                      { $$ = $1; }
+list2:   expr
        | list2 ',' expr            { $$ = $3; }
 ;
 
 /* list of indices for access of an array element */
 
 list3:   /* empty */               { $$ = vars_push( UNDEF_VAR ); }
-	   | expr                      { $$ = $1; }
+	   | expr
        | list3 ',' expr            { $$ = $3; }
 ;
 
@@ -206,7 +206,7 @@ exprs:   expr                      { }
 %%
 
 
-void varserror ( const char *s )
+static void varserror ( const char *s )
 {
 	s = s;                    /* stupid but avoids compiler warning */
 

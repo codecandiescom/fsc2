@@ -170,7 +170,7 @@ expr:    INT_TOKEN unit           { $$ = apply_unit( vars_push( INT_VAR, $1 ),
          unit                     { $$ = apply_unit( $<vptr>6, $7 ); }
        | FUNC_TOKEN '(' list2 ')' { $$ = func_call( $1 ); }
          unit                     { $$ = apply_unit( $<vptr>5, $6 ); }
-       | VAR_REF                  { $$ = $1; }
+       | VAR_REF
        | VAR_TOKEN '('            { eprint( FATAL, SET, "`%s' isn't a "
 											"function.\n", $1->name );
 	                                 THROW( EXCEPTION ); }
@@ -217,7 +217,7 @@ unit:    /* empty */              { $$ = NULL; }
 /* list of indices for access of an array element */
 
 list1:   /* empty */              { $$ = vars_push( UNDEF_VAR ); }
-	   | expr                     { $$ = $1; }
+	   | expr
        | list1 ',' expr           { $$ = $3; }
 ;
 

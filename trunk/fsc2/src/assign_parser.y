@@ -332,7 +332,7 @@ expr:    INT_TOKEN unit            { $$ = apply_unit( vars_push( INT_VAR, $1 ),
          unit                      { $$ = apply_unit( $<vptr>6, $7 ); }
        | FUNC_TOKEN '(' list2 ')'  { $$ = func_call( $1 ); }
          unit                      { $$ = apply_unit( $<vptr>5, $6 ); }
-       | VAR_REF                   { $$ = $1; }
+       | VAR_REF
        | VAR_TOKEN '('             { eprint( FATAL, SET, "`%s' isn't a "
 											 "function.\n", $1->name );
 	                                 THROW( EXCEPTION ); }
@@ -382,7 +382,7 @@ unit:    /* empty */               { $$ = NULL; }
 
 
 list1:   /* empty */               { $$ = vars_push( UNDEF_VAR ); }
-	   | expr                      { $$ = $1; }
+	   | expr
        | list1 ',' expr            { $$ = $3; }
 ;								   
 								   
@@ -488,7 +488,7 @@ phsp:     /* empty */
 												  Cur_PROT ); }
 ;
 
-phsv:     INT_TOKEN                { $$ = $1; }
+phsv:     INT_TOKEN
         | ON_TOK                   { set_protocol( PHASE_FFM_PROT );
 		                             $$ = 1;}
         | OFF_TOK                  { set_protocol( PHASE_FFM_PROT );
