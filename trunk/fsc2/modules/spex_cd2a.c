@@ -70,16 +70,24 @@ int spex_cd2a_init_hook( void )
 			THROW( EXCEPTION );
 	}
 
-	/* Read in the file where the state of the monochromator gets stored */
+	/* Read in the file where the state of the monochromator gets stored
+	   to find out about the offset between the values displayed at the
+	   CD2A and the "true" wavelengths or -numbers and, for wavnumber-
+	   driven monochromators the setting of the laser line position as
+	   used in the previous invocation of the program. (The file has also
+	   to be read each time at the start of an experiment since it's
+	   contents are rewritten at the end of each exepriment.) */
 
 	spex_cd2a_read_state( );
 
-	if ( fabs( spex_cd2a.offset ) > MAX_OFFSET )
+#if defined SPEX_CD2A_MAX_OFFSET
+	if ( fabs( spex_cd2a.offset ) > SPEX_CD2A_MAX_OFFSET )
 	{
 		print( FATAL, "Offset setting in calibration file '%s' is "
 			   "unrealistically high.\n" );
 		THROW( EXCEPTION );
 	}
+#endif
 
 	if ( spex_cd2a.mode & WN_MODES && spex_cd2a.laser_wavenumber != 0.0 )
 		spex_cd2a.mode = WND;
@@ -287,12 +295,14 @@ int spex_cd2a_exp_hook( void )
 
 	spex_cd2a_read_state( );
 
-	if ( fabs( spex_cd2a.offset ) > MAX_OFFSET )
+#if defined SPEX_CD2A_MAX_OFFSET
+	if ( fabs( spex_cd2a.offset ) > SPEX_CD2A_MAX_OFFSET )
 	{
 		print( FATAL, "Offset setting in calibration file '%s' is "
 			   "unrealistically high.\n" );
 		THROW( EXCEPTION );
 	}
+#endif
 
 	/* Open the serial port for the device */
 
@@ -880,22 +890,25 @@ Var *monochromator_offset( Var *v )
 	else
 		offset = spex_cd2a.offset + new_offset;
 
-	if ( spex_cd2a.mode & WN_MODES && offset > MAX_OFFSET )
+#if defined SPEX_CD2A_MAX_OFFSET
+	if ( spex_cd2a.mode & WN_MODES && offset > SPEX_CD2A_MAX_OFFSET )
 	{
 		print( FATAL, "Offset of %.4f cm^-^ is unrealistically high. If this "
-			   "is isn't an error change the \"MAX_OFFSET\" setting in the "
+			   "isn't an error change the \"MAX_OFFSET\" setting in the "
 			   "device configuration file and recompile.\n", new_offset );
 		THROW( EXCEPTION );
 	}
 
-	if ( spex_cd2a.mode == WL && fabs( 1.0e9 * offset ) > MAX_OFFSET )
+	if ( spex_cd2a.mode == WL && fabs( 1.0e9 * offset )
+		 											   > SPEX_CD2A_MAX_OFFSET )
 	{
-		print( FATAL, "Offset of %.5f nm is unrealistically high. If this is "
+		print( FATAL, "Offset of %.5f nm is unrealistically high. If this "
 			   "isn't an error change the \"MAX_OFFSET\" setting in the "
 			   "device configuration file and recompile.\n",
 			   1.0e9 * new_offset );
 		THROW( EXCEPTION );
 	}
+#endif
 
 	spex_cd2a.offset = offset;
 

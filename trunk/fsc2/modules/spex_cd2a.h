@@ -31,10 +31,9 @@
 /* Define the following for test runs where no real communication with the
    monochromator happens */
 
-//
+/*
 #define SPEX_CD2A_TEST
-//
-
+*/
 
 /* Defines for the parity used by the device */
 

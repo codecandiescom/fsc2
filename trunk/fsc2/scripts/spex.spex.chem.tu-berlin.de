@@ -433,10 +433,11 @@ EXPERIMENT:
 hide_toolbox( "ON" );
 B_swn =  input_create( "FLOAT_INPUT", start_wn, "Scan start [cm^-1 rel.]",
 					   "", "%.4f" );
+B_goto = button_create( "NORMAL_BUTTON", "Go to start wavenumber" );
 B_stsz = input_create( "FLOAT_INPUT", step_size, "Scan step size [cm^-1 rel.]",
 					   "", "%.4f" );
 B_mt   = input_create( "FLOAT_INPUT", mtime, "Sampling time [s]" );
-B_scan = button_create( "NORMAL_BUTTON", "Start new scan" );
+B_scan = button_create( "NORMAL_BUTTON", "Start a scan" );
 B_cwn  = output_create( "FLOAT_OUTPUT", cwn, "Current position [cm^-1 rel]",
 						"", "%.4f" );
 B_stop = button_create( "NORMAL_BUTTON", "Stop the scan" );
@@ -477,7 +478,6 @@ FOREVER {
 		}
 
 		IF input_changed( B_swn ) {
-
 			new = input_value( B_swn );
 
 			IF ( Mode == 0 &
@@ -497,6 +497,16 @@ FOREVER {
 			} ELSE {
 				change_scale( ll - start_wn - ( I - 1 ) * step_size,
 							  step_size );
+			}
+		}
+
+		IF button_changed( B_goto ) {
+			button_state( B_goto );
+			IF cwn != start_wn {
+				cwn = start_cwn;
+				output_value( B_cwn, Mode == 0 ? cwn : ll - cwn );
+				monochromator_wavenumber( Mode == 0 ? start_wn :
+										  ll - start_wn );
 			}
 		}
 
@@ -539,6 +549,7 @@ FOREVER {
 
 		IF button_state( B_scan ) {
 
+			object_enable( B_goto, "OFF" );
 			object_enable( B_scan, "OFF" );
 			object_enable( B_stop, "ON" );
 
@@ -563,6 +574,7 @@ FOREVER {
 			draw_marker( I );
 			object_enable( B_scan, "ON" );
 			object_enable( B_stop, "OFF" );
+			object_enable( B_goto, "ON" );
 			Doing_Scan = 0;
 		}
 
