@@ -385,7 +385,7 @@ static void ep385_defense_shape_check( FUNCTION *shape )
 					THROW( EXCEPTION );
 				}
 
-				if ( dg2020_IN_SETUP )
+				if ( ep385_IN_SETUP )
 					print( SEVERE, "Distance between PULSE_SHAPE pulse %s#%ld "
 						   "and DEFENSE pulse #%ld is shorter than %s.\n",
 						   shape_p->sp ? "for pulse " : "",
@@ -418,7 +418,7 @@ static void ep385_defense_shape_check( FUNCTION *shape )
 					THROW( EXCEPTION );
 				}
 
-				if ( dg2020_IN_SETUP )
+				if ( ep385_IN_SETUP )
 					print( SEVERE, "Distance between DEFENSE pulse #%ld and "
 						   "PULSE_SHAPE pulse %s#%ld is shorter than %s.\n",
 						   defense_p->num,

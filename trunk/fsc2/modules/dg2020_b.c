@@ -218,6 +218,7 @@ int dg2020_b_test_hook( void )
 	}
 	OTHERWISE
 	{
+		dg2020_IN_SETUP = UNSET;
 		if ( dg2020.dump_file )
 		{
 			fclose( dg2020.dump_file );
