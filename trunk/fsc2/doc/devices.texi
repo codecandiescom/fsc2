@@ -713,7 +713,7 @@ argument or no argument at all.
 The only implemented synthesizer so far is the HP8647A. Its module is
 loaded by specifying
 @example
-hp8647a
+hp8647a;
 @end example
 @noindent
 in the @code{DEVICES} section.
@@ -842,7 +842,6 @@ to use the attenuation has been set e.g.@: by
 @code{synthesizer_attenuation()}. To set this reference frequency the
 function @code{synthesizer_att_ref_freq()} can be used. If the function
 isn't called a frequency of @w{14 MHz} is used.
-
 
 
 @item synthesizer_modulation()
