@@ -1006,7 +1006,7 @@ bool cut_new_points( long curve, long x_index, long y_index, long len )
 
 #ifndef NDEBUG
 	/* There was a crash, probably from the sp->v in the cut_integrate_point()
-	   call, that I didn't find the reason for yet. Here I just try to avoid
+	   call, which I didn't find the reason for yet. Here I just try to avoid
 	   the problem in order to keep experiments from crashing. */
 
 	if ( G.curve_2d[ curve ]->points == NULL )
