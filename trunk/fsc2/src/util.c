@@ -242,10 +242,19 @@ void eprint( int severity, const char *fmt, ... )
 }
 
 
+
 /* Here some more utility functions - they are that short that declaring
    them inline seems to be a good idea... */
 
 inline long rnd( double x ) { return ( long ) ( 2 * x ) - ( long ) x; }
+
+inline short shrt( double a )
+{
+	long b = rnd( a );
+
+	return ( b > SHORT_MAX ? SHORT_MAX : ( short ) b ) < SHORT_MIN ?
+		   SHORT_MIN : b;
+}
 
 inline int    i_max( int    a, int    b ) { return a > b ? a : b ; }
 inline int    i_min( int    a, int    b ) { return a < b ? a : b ; }
