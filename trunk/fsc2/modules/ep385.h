@@ -92,7 +92,7 @@ Var *pulser_lock_keyboard( Var *v );
 #define MAX_PULSES_PER_CHANNEL   59
 
 /* The repetition time can only be set in multiples of 102.4 us for this
-   pulser and the shortest repetition time is times this value while the
+   pulser and the shortest repetition time is 10 times this value while the
    longest possible one is the 65535 times it. The repetition time set this
    way is the time from the end of the pulse sequence until the start of the
    next sequence. To calculate the correct repetition rate you will have to
