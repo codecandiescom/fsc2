@@ -174,8 +174,6 @@ int gpib_init( const char *log_file_name, int log_level )
 
 static int gpib_init_controller( void )
 {
-	raise_permissions( );
-
     if ( gpib_init_device( CONTROLLER, &controller ) != SUCCESS )
 	{
 		lower_permissions( );
@@ -190,12 +188,8 @@ static int gpib_init_controller( void )
 
     if  ( ( ibonl( controller, ON ) | ibsic( controller ) |
             ibsre( controller, ON ) ) & IBERR )
-	{
-		lower_permissions( );
 		return FAILURE;
-	}
 
-	lower_permissions( );
     return SUCCESS;
 }
 
@@ -275,8 +269,6 @@ static void gpib_init_log( const char *log_file_name )
     if ( ll == LL_NONE )
         return;
 
-	raise_permissions( );
-
     if ( log_file_name == NULL || *log_file_name == '\0' )
 	{
 		gpib_log = stderr;
@@ -307,7 +299,6 @@ static void gpib_init_log( const char *log_file_name )
 
     fprintf( gpib_log, "GPIB bus is being initialized.\n" );
     fflush( gpib_log );
-	lower_permissions( );
 }
 
 
@@ -875,27 +866,6 @@ int gpib_serial_poll( int device, unsigned char *stb )
 }
 
 
-/*----------------------------------------------------------------*/
-/* Prints the date and a user supplied message into the log file. */
-/* The user can call this function in exactely the same way as    */
-/* the standard printf() function.                                */
-/*----------------------------------------------------------------*/
-
-
-void gpib_log_message( const char *fmt, ... )
-{
-	va_list ap;
-
-
-	raise_permissions( );
-	gpib_log_date( );
-	va_start( ap, fmt );
-	vfprintf( gpib_log, fmt, ap );
-	va_end( ap );
-	lower_permissions( );
-}
-
-
 /*--------------------------------------------------*/
 /* gpib_log_date() writes the date to the log file. */
 /*--------------------------------------------------*/
@@ -913,9 +883,7 @@ static void gpib_log_date( void )
 	tc[ 19 ] = '\0';
     tc[ 24 ] = '\0';
 	ftime( &mt );
-	raise_permissions( );
     fprintf( gpib_log, "[%s %s %s.%03d] ", tc, tc + 20, tc + 11, mt.millitm );
-	lower_permissions( );
 }
 
 
@@ -945,7 +913,6 @@ static void gpib_log_error( const char *type )
                                   "ENSD", "ENWE", "ENTF", "EMEM" };
 
 
-	raise_permissions( );
     gpib_log_date( );
     fprintf( gpib_log, "ERROR in function %s: <", type );
     for ( i = 15; i >= 0; i-- )
@@ -955,7 +922,6 @@ static void gpib_log_error( const char *type )
     }
     fprintf( gpib_log, " > -> %s\n", ie[ iberr ] );
     fflush( gpib_log );
-	lower_permissions( );
 }
 
 
@@ -970,11 +936,9 @@ static void gpib_log_error( const char *type )
 static void gpib_log_function_start( const char *function,
 									 const char *dev_name )
 {
-	raise_permissions( );
     gpib_log_date( );
     fprintf( gpib_log, "CALL of %s, dev = %s\n", function, dev_name );
     fflush( gpib_log );
-	lower_permissions( );
 }
 
 
@@ -989,7 +953,6 @@ static void gpib_log_function_start( const char *function,
 static void gpib_log_function_end( const char *function,
 								   const char *dev_name )
 {
-	raise_permissions( );
     if ( ibsta & IBERR )
         gpib_log_error( function );
     else
@@ -1002,7 +965,6 @@ static void gpib_log_function_end( const char *function,
     }
 
     fflush( gpib_log );
-	lower_permissions( );
 }
 
 

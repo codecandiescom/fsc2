@@ -88,7 +88,6 @@ typedef struct {
 
 
 GPIB_VARIABLE int gpib_init( char *log_file_name, int log_level );
-GPIB_VARIABLE int gpib_dev_setup( GPIB_Device *temp_dev );
 GPIB_VARIABLE int gpib_shutdown( void );
 GPIB_VARIABLE int gpib_init_device( const char *device_name, int *dev );
 GPIB_VARIABLE int gpib_local( int device );
@@ -99,7 +98,6 @@ GPIB_VARIABLE int gpib_wait( int device, int mask, int *status );
 GPIB_VARIABLE int gpib_write( int device, const char *buffer, long length );
 GPIB_VARIABLE int gpib_read( int device, char *buffer, long *length );
 GPIB_VARIABLE int gpib_serial_poll( int device, unsigned char *stb );
-GPIB_VARIABLE void gpib_log_message( const char *fmt, ... );
 
 
 GPIB_VARIABLE char gpib_error_msg[ 1024 ]; /* global for GPIB error messages */
