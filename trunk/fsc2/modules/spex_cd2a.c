@@ -976,15 +976,14 @@ Var *monochromator_shutter_limits( Var *v )
  * 2. (optionally) the width of a single pixel on the CCD camera
  *
  * The function is to be called at least with the difference between
- * the expected position and the position where the line really
- * appears according to scales derived from the values reported by
- * the driver. If, for example a sweep is done from 400 nm to 404 nm,
- * with the laser line appearing at 401 nm while it is expected to be
- * at 402 nm the function should be called with a value of +1 nm to
- * to correct for this offset. Since the wavelengths or wavenumbers
- * the user is dealing with are already offset-corrected the argument
- * isn't taken to be the offset itself but is subtracted from the
- * existing value of the offset.
+ * the expected position and the position where the line really appears
+ * according the values reported by the driver. If, for example a sweep
+ * is done from 400 nm to 404 nm, with the laser line appearing at 401 nm
+ * while it is expected to be at 402 nm the function has to be called
+ * with a value of +1 nm to to correct for this offset. Since the wave-
+ * lengths or wavenumbers the user is dealing with are already offset-
+ * corrected the argument isn't taken to be the offset itself but is
+ * subtracted from the existing value of the offset.
  * For wavelength driven monochromators the offset must be given in
  * wavelength units, while for wavenumber driven monochromators in
  * wavenumber units (i.e. cm^-1).
