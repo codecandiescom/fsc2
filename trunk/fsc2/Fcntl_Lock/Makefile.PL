@@ -29,5 +29,6 @@ WriteMakefile(
     'DEFINE'	=> '',
     'INC'		=> '',
 	'PERL_MALLOC_OK' => 1,
+	'C'              => [ qw( Fcntl_Lock.c ) ],
 	clean => { FILES => "Fcntl_Lock.h" }
 );
