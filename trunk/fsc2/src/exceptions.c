@@ -30,7 +30,7 @@
 /*                                                                  */
 /* In order to avoid overflows of the fixed size exception frame    */
 /* stack (i.e. after MAX_NESTED_EXCEPTIONS successful TRY's) it is  */
-/* necessary too manually remove an exception frame (in contrast to */
+/* necessary to manually remove an exception frame (in contrast to  */
 /* C++ where this is handled automatically) by calling TRY_SUCCESS  */
 /* if the code of the TRY block finished successfully. A typical    */
 /* TRY block sequence is thus:                                      */
@@ -77,7 +77,17 @@ static int exception_stack_pos = -1;
 /* jmp_buf object needed by setjmp() to store the current environment. The  */
 /* function fails if already all slots in the array of Exception structures */
 /* are used up (i.e. there are more than MAX_NESTED_EXCEPTION) in which     */
-/* case the pogram is stopped immediatedly.                                 */
+/* case the pogram throwing the exception is stopped immediatedly.          */
+/* Actually, there are two arrays of exceptions. The second array is        */
+/* necessary for being able to rethrow a caught exception even when in the  */
+/* code dealing with the exception another TRY block is used. This new TRY  */
+/* block would overwrite the array element for the thrown exception and     */
+/* thus would make it impossible to rethrow it. So whenever a TRY block is  */
+/* started (by calling this function) the state of the array element to be  */
+/* overwritten is saved in the second array (and restored when this TRY     */
+/* block succeded and thus the corresponding element gets removed from the  */
+/* array), so that we're back in the state we were in before the TRY block  */
+/* within the exception handler was started.                                */
 /*--------------------------------------------------------------------------*/
 
 jmp_buf *push_exception_frame( const char *file, int line )
@@ -132,12 +142,12 @@ void pop_exception_frame( const char *file, int line )
 
 
 /*------------------------------------------------------------------------*/
-/* Function gets called when an exception is to be thrown. It stores the  */
-/* exception type in the current exception frame and returns the address  */
-/* of the jmp_buf object that is needed by longjmp() to restore the state */
-/* at the time of the corresponding call of setjmp(). If the exception    */
-/* stack is already empty (i.e. the exception can't be caught because     */
-/* setjmp() was never called) the program is stopped immediately.         */
+/* This function gets called when an exception is to be thrown. It stores */
+/* the exception type in the current exception frame and returns the      */
+/* address of the jmp_buf object that is needed by longjmp() to restore   */
+/* the state at the time of the corresponding call of setjmp(). If the    */
+/* exception stack is already empty (i.e. the exception can't be caught   */
+/* because setjmp() was never called) the program is stopped immediately. */
 /*------------------------------------------------------------------------*/
 
 jmp_buf *throw_exception( Exception_Types exception_type )
