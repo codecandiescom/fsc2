@@ -364,7 +364,7 @@ Var *f_init_1d( Var *v )
 	G.dim = 1;
 	G.is_init = SET;
 	G.nc = 1;
-	G.nx = DEFAULT_X_POINTS;
+	G.nx = DEFAULT_1D_X_POINTS;
 	G.rwc_start[ X ] = ( double ) ARRAY_OFFSET;
 	G.rwc_delta[ X ] = 1.0;
 	G.label[ X ] = G.label[ Z ] = G.label[ Z ] = NULL;
@@ -412,7 +412,7 @@ Var *f_init_1d( Var *v )
 	}
 
 	if ( G.nx <= 0 )
-		G.nx = DEFAULT_X_POINTS;
+		G.nx = DEFAULT_1D__X_POINTS;
 
 	if ( ( v = v->next ) == NULL )
 		return vars_push( INT_VAR, 1 );
@@ -474,8 +474,8 @@ Var *f_init_2d( Var *v )
 	G.dim = 2;
 	G.is_init = SET;
 	G.nc = 1;
-	G.nx = DEFAULT_X_POINTS;
-	G.ny = DEFAULT_Y_POINTS;
+	G.nx = DEFAULT_2D_X_POINTS;
+	G.ny = DEFAULT_2D_Y_POINTS;
 	G.rwc_start[ X ] = G.rwc_start[ Y ] = ( double ) ARRAY_OFFSET;
 	G.rwc_delta[ X ] = G.rwc_delta[ Y ] = 1.0; 
 	G.label[ X ] = G.label[ Z ] = G.label[ Z ] = NULL;
@@ -523,7 +523,7 @@ Var *f_init_2d( Var *v )
 	}
 
 	if ( G.nx <= 0 )
-		G.nx = DEFAULT_X_POINTS;
+		G.nx = DEFAULT_2D_X_POINTS;
 
 	if ( ( v = v->next ) == NULL )
 		return vars_push( INT_VAR, 1 );
@@ -543,7 +543,7 @@ Var *f_init_2d( Var *v )
 	}
 
 	if ( G.ny <= 0 )
-		G.ny = DEFAULT_Y_POINTS;
+		G.ny = DEFAULT_2D_Y_POINTS;
 
 	if ( ( v = v->next ) == NULL )
 		return vars_push( INT_VAR, 1 );
