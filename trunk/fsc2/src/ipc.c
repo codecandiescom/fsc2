@@ -28,7 +28,7 @@
 
 
 /* SUSv3 does not require that the semun union is defined and newer
-   Linux versions don't do so, but some older versions defined it... */
+   Linux versions don't so, but some older versions did... */
 
 #if defined ( _SEM_SEMUN_UNDEFINED )
 union semun {

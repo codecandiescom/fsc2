@@ -346,12 +346,9 @@ pased to it as the argument, a colon, a blank and a short descriptive
 text of the error encountered in the last invocation of one of the
 Rulbus functions (or "Success" if the last call was successful),
 followed by a new-line. If the argument is NULL or an empty string
-only the error message is printed.
-
-The function returns the number of characters printed to stderr or
-the negative value RULBUS_NO_INITIALIZATION if the RULBUS isn't open
-(i.e. rulbus_open() has never been called or rulbus_close() has been
-called before this function).
+only the error message is printed. Also if the Rulbus isn't open (i.e.
+rulbus_open() has never been called or rulbus_close() has been called
+before this function) an appropriate string is printed.
 
 
 ----------------------------------------------------------------------

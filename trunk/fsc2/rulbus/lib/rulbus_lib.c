@@ -378,13 +378,12 @@ int rulbus_perror( const char *s )
 {
 	extern int rulbus_lineno;
 	extern int rulbus_column;
-	char *p;
+	const char *p;
 	int count = 0;
 
-	if ( ! rulbus_in_use )
-		return rulbus_errno = RULBUS_NO_INITIALIZATION;
 
-	p = ( char * ) rulbus_errlist[ - rulbus_errno ];
+	p = rulbus_errlist[ rulbus_in_use ? - rulbus_errno :
+						                - RULBUS_NO_INITIALIZATION ];
 
     if ( s != NULL && *s != '\0' )
 		count += fprintf( stderr, "%s: ", s );
