@@ -115,6 +115,8 @@ void notify_conn( int signo );
 #define AXISFONT         8
 #define CHOICEFONTSIZE   9
 #define SLIDERFONTSIZE  10
+#define FILESELFONTSIZE 11
+#define HELPFONTSIZE    12
 
 
 /* Global variables */

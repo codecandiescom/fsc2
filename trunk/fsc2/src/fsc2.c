@@ -28,6 +28,7 @@ static bool delete_old_file = UNSET;
 static int main_form_close_handler( FL_FORM *a, void *b );
 static void final_exit_handler( void );
 static bool xforms_init( int *argc, char *argv[ ] );
+static void set_up_app_options( FL_CMD_OPT app_opt[ ] );
 static void xforms_close( void );
 static bool display_file( char *name, FILE *fp );
 static void start_editor( void );
@@ -55,15 +56,15 @@ static int fsc2_xio_error_handler( Display *d );
 
 /* Some variables needed for the X resources */
 
-#define N_APP_OPT 11
+#define N_APP_OPT 13
 FL_IOPT xcntl;
-FL_CMD_OPT app_opt[ N_APP_OPT ];
 
 char xGeoStr[ 64 ], xdisplayGeoStr[ 64 ],
 	 xcutGeoStr[ 64 ], xtoolGeoStr[ 64 ],
 	 xaxisFont[ 256 ];
 
-int xbrowserfs, xbuttonfs, xinputfs, xlabelfs, xchoicefs, xsliderfs;
+int xbrowserfs, xbuttonfs, xinputfs, xlabelfs, xchoicefs, xsliderfs,
+	xfileselectorfs, xhelpfs;
 
 FL_resource xresources[ N_APP_OPT ] = {
 	{ "geometry", "*.geometry", FL_STRING, xGeoStr, "", 64 },
@@ -84,6 +85,9 @@ FL_resource xresources[ N_APP_OPT ] = {
 	  "0", sizeof( int ) },
     { "sliderFontSize", "*.sliderFontSize", FL_INT, &xsliderfs,
 	  "0", sizeof( int ) },
+    { "filselectorFontSize", "*.fileselectorFontSize", FL_INT,
+	  &xfileselectorfs, "0", sizeof( int ) },
+    { "helpFontSize", "*.helpFontSize", FL_INT, &xhelpfs, "0", sizeof( int ) },
 };
 
 
@@ -361,62 +365,10 @@ static bool xforms_init( int *argc, char *argv[] )
 	int i;
 	int flags, wx, wy, ww, wh;
 	XFontStruct *font;
+	FL_CMD_OPT app_opt[ N_APP_OPT ];
 
 
-	app_opt[ GEOMETRY ].option            = T_strdup( "-geometry" );
-	app_opt[ GEOMETRY ].specifier         = T_strdup( "*.geometry" );
-	app_opt[ GEOMETRY ].argKind           = XrmoptionSepArg;
-	app_opt[ GEOMETRY ].value             = ( caddr_t ) NULL;
-
-	app_opt[ BROWSERFONTSIZE ].option     =  T_strdup( "-browserFontSize" );
-	app_opt[ BROWSERFONTSIZE ].specifier  = T_strdup( "*.browserFontSize" );
-	app_opt[ BROWSERFONTSIZE ].argKind    = XrmoptionSepArg;
-	app_opt[ BROWSERFONTSIZE ].value      = ( caddr_t ) "0";
-
-	app_opt[ BUTTONFONTSIZE	].option      = T_strdup( "-buttonFontSize" );
-	app_opt[ BUTTONFONTSIZE	].specifier   = T_strdup( "*.buttonFontSize" );
-	app_opt[ BUTTONFONTSIZE	].argKind     = XrmoptionSepArg;
-	app_opt[ BUTTONFONTSIZE	].value       = ( caddr_t ) "0";
-
-	app_opt[ INPUTFONTSIZE ].option       = T_strdup( "-inputFontSize" );
-	app_opt[ INPUTFONTSIZE ].specifier    = T_strdup( "*.inputFontSize" );
-	app_opt[ INPUTFONTSIZE ].argKind      = XrmoptionSepArg;
-	app_opt[ INPUTFONTSIZE ].value        = ( caddr_t ) "0";
-
-	app_opt[ LABELFONTSIZE ].option       = T_strdup( "-labelFontSize" );
-	app_opt[ LABELFONTSIZE ].specifier    = T_strdup( "*.labelFontSize" );
-	app_opt[ LABELFONTSIZE ].argKind      = XrmoptionSepArg;
-	app_opt[ LABELFONTSIZE ].value        = ( caddr_t ) "0";
-
-	app_opt[ DISPLAYGEOMETRY ].option     = T_strdup( "-displayGeometry" );
-	app_opt[ DISPLAYGEOMETRY ].specifier  = T_strdup( "*.displayGeometry" );
-	app_opt[ DISPLAYGEOMETRY ].argKind    = XrmoptionSepArg;
-	app_opt[ DISPLAYGEOMETRY ].value      = ( caddr_t ) NULL;
-
-	app_opt[ CUTGEOMETRY ].option         = T_strdup( "-cutGeometry" );
-	app_opt[ CUTGEOMETRY ].specifier      = T_strdup( "*.cutGeometry" );
-	app_opt[ CUTGEOMETRY ].argKind        = XrmoptionSepArg;
-	app_opt[ CUTGEOMETRY ].value          = ( caddr_t ) NULL;
-
-	app_opt[ TOOLGEOMETRY ].option        = T_strdup( "-toolGeometry" );
-	app_opt[ TOOLGEOMETRY ].specifier     = T_strdup( "*.toolGeometry" );
-	app_opt[ TOOLGEOMETRY ].argKind       = XrmoptionSepArg;
-	app_opt[ TOOLGEOMETRY ].value         = ( caddr_t ) NULL;
-
-	app_opt[ AXISFONT ].option            = T_strdup( "-axisFont" );
-	app_opt[ AXISFONT ].specifier         = T_strdup( "*.axisFont" );
-	app_opt[ AXISFONT ].argKind           = XrmoptionSepArg;
-	app_opt[ AXISFONT ].value             = ( caddr_t ) NULL;
-
-	app_opt[ CHOICEFONTSIZE ].option      = T_strdup( "-choiceFontSize" );
-	app_opt[ CHOICEFONTSIZE ].specifier   = T_strdup( "*.choiceFontSize" );
-	app_opt[ CHOICEFONTSIZE ].argKind     = XrmoptionSepArg;
-	app_opt[ CHOICEFONTSIZE ].value       = ( caddr_t ) "0";
-
-	app_opt[ SLIDERFONTSIZE ].option      = T_strdup( "-sliderFontSize" );
-	app_opt[ SLIDERFONTSIZE ].specifier   = T_strdup( "*.sliderFontSize" );
-	app_opt[ SLIDERFONTSIZE ].argKind     = XrmoptionSepArg;
-	app_opt[ SLIDERFONTSIZE ].value       = ( caddr_t ) "0";
+	set_up_app_options( app_opt );
 
 	if ( ( display = fl_initialize( argc, argv, "Fsc2", app_opt, N_APP_OPT ) )
 		 == NULL )
@@ -435,14 +387,25 @@ static bool xforms_init( int *argc, char *argv[] )
 
 	/* Set some properties of goodies */
 
-	fl_set_tooltip_font( FL_NORMAL_STYLE, SMALL_FONT_SIZE );
-	fl_set_fselector_fontsize( NORMAL_FONT_SIZE );
 	fl_set_goodies_font( FL_NORMAL_STYLE, NORMAL_FONT_SIZE );
 	fl_set_oneliner_font( FL_NORMAL_STYLE, NORMAL_FONT_SIZE );
 
+	if ( * ( ( int * ) xresources[ HELPFONTSIZE ].var ) != 0 )
+		fl_set_tooltip_font( FL_NORMAL_STYLE, 
+							 * ( ( int * ) xresources[ HELPFONTSIZE ].var ) );
+	else
+		fl_set_tooltip_font( FL_NORMAL_STYLE, SMALL_FONT_SIZE );
+
+	if ( * ( ( int * ) xresources[ FILESELFONTSIZE ].var ) != 0 )
+		fl_set_fselector_fontsize( * ( ( int * )
+									   xresources[ FILESELFONTSIZE ].var )  );
+	else
+		fl_set_fselector_fontsize( NORMAL_FONT_SIZE );
+	fl_set_tooltip_color( FL_BLACK, FL_YELLOW );
+
 	fl_disable_fselector_cache( 1 );
-	fl_set_fselector_placement( FL_PLACE_MOUSE | FL_FREE_SIZE );
-	fl_set_fselector_border( FL_FULLBORDER );
+//	fl_set_fselector_placement( FL_PLACE_MOUSE | FL_FREE_SIZE );
+	fl_set_fselector_border( FL_TRANSIENT );
 
 	/* Set default font sizes */
 
@@ -552,7 +515,7 @@ static bool xforms_init( int *argc, char *argv[] )
 
 	fl_winminsize( main_form->fsc2->window, WIN_MIN_WIDTH, WIN_MIN_HEIGHT );
 
-	/* Check if axis font exists */
+	/* Check if axis font exists (if the user set a font) */
 
 	if ( * ( ( char * ) xresources[ AXISFONT ].var ) != '\0' )
 	{
@@ -579,6 +542,80 @@ static bool xforms_init( int *argc, char *argv[] )
 	input_form = create_form_input_form( );
 
 	return OK;
+}
+
+
+/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*/
+
+static void set_up_app_options( FL_CMD_OPT app_opt[ ] )
+{
+	app_opt[ GEOMETRY ].option            = T_strdup( "-geometry" );
+	app_opt[ GEOMETRY ].specifier         = T_strdup( "*.geometry" );
+	app_opt[ GEOMETRY ].argKind           = XrmoptionSepArg;
+	app_opt[ GEOMETRY ].value             = ( caddr_t ) NULL;
+
+	app_opt[ BROWSERFONTSIZE ].option     =  T_strdup( "-browserFontSize" );
+	app_opt[ BROWSERFONTSIZE ].specifier  = T_strdup( "*.browserFontSize" );
+	app_opt[ BROWSERFONTSIZE ].argKind    = XrmoptionSepArg;
+	app_opt[ BROWSERFONTSIZE ].value      = ( caddr_t ) "0";
+
+	app_opt[ BUTTONFONTSIZE	].option      = T_strdup( "-buttonFontSize" );
+	app_opt[ BUTTONFONTSIZE	].specifier   = T_strdup( "*.buttonFontSize" );
+	app_opt[ BUTTONFONTSIZE	].argKind     = XrmoptionSepArg;
+	app_opt[ BUTTONFONTSIZE	].value       = ( caddr_t ) "0";
+
+	app_opt[ INPUTFONTSIZE ].option       = T_strdup( "-inputFontSize" );
+	app_opt[ INPUTFONTSIZE ].specifier    = T_strdup( "*.inputFontSize" );
+	app_opt[ INPUTFONTSIZE ].argKind      = XrmoptionSepArg;
+	app_opt[ INPUTFONTSIZE ].value        = ( caddr_t ) "0";
+
+	app_opt[ LABELFONTSIZE ].option       = T_strdup( "-labelFontSize" );
+	app_opt[ LABELFONTSIZE ].specifier    = T_strdup( "*.labelFontSize" );
+	app_opt[ LABELFONTSIZE ].argKind      = XrmoptionSepArg;
+	app_opt[ LABELFONTSIZE ].value        = ( caddr_t ) "0";
+
+	app_opt[ DISPLAYGEOMETRY ].option     = T_strdup( "-displayGeometry" );
+	app_opt[ DISPLAYGEOMETRY ].specifier  = T_strdup( "*.displayGeometry" );
+	app_opt[ DISPLAYGEOMETRY ].argKind    = XrmoptionSepArg;
+	app_opt[ DISPLAYGEOMETRY ].value      = ( caddr_t ) NULL;
+
+	app_opt[ CUTGEOMETRY ].option         = T_strdup( "-cutGeometry" );
+	app_opt[ CUTGEOMETRY ].specifier      = T_strdup( "*.cutGeometry" );
+	app_opt[ CUTGEOMETRY ].argKind        = XrmoptionSepArg;
+	app_opt[ CUTGEOMETRY ].value          = ( caddr_t ) NULL;
+
+	app_opt[ TOOLGEOMETRY ].option        = T_strdup( "-toolGeometry" );
+	app_opt[ TOOLGEOMETRY ].specifier     = T_strdup( "*.toolGeometry" );
+	app_opt[ TOOLGEOMETRY ].argKind       = XrmoptionSepArg;
+	app_opt[ TOOLGEOMETRY ].value         = ( caddr_t ) NULL;
+
+	app_opt[ AXISFONT ].option            = T_strdup( "-axisFont" );
+	app_opt[ AXISFONT ].specifier         = T_strdup( "*.axisFont" );
+	app_opt[ AXISFONT ].argKind           = XrmoptionSepArg;
+	app_opt[ AXISFONT ].value             = ( caddr_t ) NULL;
+
+	app_opt[ CHOICEFONTSIZE ].option      = T_strdup( "-choiceFontSize" );
+	app_opt[ CHOICEFONTSIZE ].specifier   = T_strdup( "*.choiceFontSize" );
+	app_opt[ CHOICEFONTSIZE ].argKind     = XrmoptionSepArg;
+	app_opt[ CHOICEFONTSIZE ].value       = ( caddr_t ) "0";
+
+	app_opt[ SLIDERFONTSIZE ].option      = T_strdup( "-sliderFontSize" );
+	app_opt[ SLIDERFONTSIZE ].specifier   = T_strdup( "*.sliderFontSize" );
+	app_opt[ SLIDERFONTSIZE ].argKind     = XrmoptionSepArg;
+	app_opt[ SLIDERFONTSIZE ].value       = ( caddr_t ) "0";
+
+	app_opt[ FILESELFONTSIZE ].option     =
+		                                   T_strdup( "-fileselectorFontSize" );
+	app_opt[ FILESELFONTSIZE ].specifier  =
+		                                  T_strdup( "*.fileselectorFontSize" );
+	app_opt[ FILESELFONTSIZE ].argKind    = XrmoptionSepArg;
+	app_opt[ FILESELFONTSIZE ].value      = ( caddr_t ) "0";
+
+	app_opt[ HELPFONTSIZE ].option        = T_strdup( "-helpFontSize" );
+	app_opt[ HELPFONTSIZE ].specifier     = T_strdup( "*.helpFontSize" );
+	app_opt[ HELPFONTSIZE ].argKind       = XrmoptionSepArg;
+	app_opt[ HELPFONTSIZE ].value         = ( caddr_t ) "0";
 }
 
 
