@@ -32,5 +32,12 @@ install:
 	$(INSTALL) -m 644 edl-mod.el $(emacs_dir)
 	$(INSTALL) -m 444 edl-mod.elc $(emacs_dir)
 
+uninstall:
+	-$(RM) $(RMFLAGS) $(emacs_dir)/edl-mod.el
+	-$(RM) $(RMFLAGS) $(emacs_dir)/edl-mod.elc
+	if [ -z "`ls -a $(emacs_dir)`" ]; then  \
+		rmdir $(emacs_dir);                 \
+	fi
+
 distclean:
 	-$(RM) $(RMFLAGS) edl-mod.elc
