@@ -1038,8 +1038,8 @@ channels, 2 function channels (needed for averaging).
 output ports, depending on model of card.
 
 @paragraphindent 0
-@strong{Controlled via}: PCI card (requires module and library coming
-with @code{fsc2} to be installed)
+@strong{Controlled via}: PCI card (required Linux device driver and
+library are part of the @code{fsc2} package)
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -1065,8 +1065,8 @@ with @code{fsc2} to be installed)
 channels, used for event counting and pulse creation.
 
 @paragraphindent 0
-@strong{Controlled via}: PCI card (requires module and library coming
-with @code{fsc2} to be installed)
+@strong{Controlled via}: PCI card (required Linux device driver and
+library are part of the @code{fsc2} package)
 
 @paragraphindent 0
 @strong{Supported functions}:
