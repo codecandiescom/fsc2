@@ -13,6 +13,11 @@
 #define DEFAULT_X_POINTS  64
 #define DEFAULT_Y_POINTS  32
 
+#define NO_CUT_SELECT     0
+#define CUT_SELECT_X      1
+#define CUT_SELECT_Y      2
+#define CUT_SELECT_BREAK -1
+
 
 #if ( SIZE == HI_RES )
 #define SCALE_TICK_DIST   6     /* mean minimum distance between ticks */
@@ -182,7 +187,9 @@ typedef struct {
 	    cur_2,
 	    cur_3,
 	    cur_4,
-	    cur_5;
+	    cur_5,
+		cur_6,
+		cur_7;
 
 	XFontStruct *font;      /* font used for drawing texts */
 	int font_asc, font_desc;
@@ -206,6 +213,8 @@ typedef struct {
 		         right_arrow_h;
 
 	int active_curve;       /* curve shown in 2d display (or -1 if none) */
+
+	int cut_select;
 } Graphics;
 
 
