@@ -5,6 +5,7 @@
 
 
 #include "fsc2.h"
+#include "gpib_if.h"
 
 
 

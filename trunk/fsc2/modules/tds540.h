@@ -5,7 +5,7 @@
 
 
 #include "fsc2.h"
-
+#include "gpib_if.h"
 
 
 #define DEVICE_NAME "TDS540"      /* compare entry in /etc/gpib.conf ! */

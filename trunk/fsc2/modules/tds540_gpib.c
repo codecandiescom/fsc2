@@ -5,7 +5,6 @@
 
 
 #include "tds540.h"
-#include "gpib_if.h"
 
 
 static double tds540_get_amplitude_wo_cursor( int channel, WINDOW *w );

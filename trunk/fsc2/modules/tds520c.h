@@ -4,6 +4,7 @@
 
 
 #include "fsc2.h"
+#include "gpib_if.h"
 
 
 #define DEVICE_NAME "TDS520C"    /* compare entry in /etc/gpib.conf ! */

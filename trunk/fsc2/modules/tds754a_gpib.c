@@ -5,7 +5,6 @@
 
 
 #include "tds754a.h"
-#include "gpib_if.h"
 
 
 static double tds754a_get_area_wo_cursor( int channel, WINDOW *w );

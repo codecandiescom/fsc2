@@ -5,7 +5,6 @@
 
 
 #include "tds520c.h"
-#include "gpib_if.h"
 
 
 static double tds520c_get_area_wo_cursor( int channel, WINDOW *w );
