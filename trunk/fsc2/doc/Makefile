@@ -56,7 +56,8 @@ fsc2.html: $(docs) $(figures)
 	mv fsc2_frame.x fsc2_frame.html
 
 %.png: $(adir)/%.xbm
-	convert -page `identify -format "%wx%h" $<` $< $@
+	convert -page `identify $< 2>/dev/null | awk '{print $$2}'` $< $@ \
+    2>/dev/null
 
 ps: fsc2.ps
 
@@ -95,9 +96,11 @@ fsc2.pdf: $(docs) $(pdf_pics)
 
 ifneq ($(word 1,$(shell which convert)),which:)
 %.pdf: $(adir)/%.xbm
-	convert -compress Zip -page `identify -format "%wx%h" $<` $< $@
+	convert -compress Zip \
+		-page `identify $< 2>/dev/null | awk '{print $$2}'` $< $@ 2>/dev/null
 %.pdf: %.png
-	convert -compress Zip -page `identify -format "%wx%h" $<` $< $@
+	convert -compress Zip \
+		-page `identify $< 2>/dev/null | awk '{print $$2}'` $< $@ 2>/dev/null
 else
 %.pdf: $(figures)
 	@echo "Can't make PDF documentation, program 'convert' not found."; \
