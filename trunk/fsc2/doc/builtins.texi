@@ -340,8 +340,8 @@ This function allows to change the scale settings of the 1D-data window
 (originally set in the call of @w{@code{init_1d()}}) after an experiment
 has been started. The function can be passed a maximum of two arguments,
 the new start value of the @i{x}-axis and the new @i{x}-increment.If one
-of these values should remain unchanged instead of a value a string
-(e.g.@ @code{"keep"}) can be passed as the argument.
+of these values should remain unchanged a string (e.g.@ @code{"keep"})
+instead of a value can be passed as the argument.
 
 This function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} program.
@@ -355,8 +355,8 @@ This function allows to change the scale settings of the 2D-data window
 has been started. The function accepts up to four arguments, the new
 start value of the @i{x}-axis, the new @i{x}-increment, a new start
 value for the @i{y}-axis as well as the @i{y}-increment. If one of these
-values should remain unchanged instead of a value a string (e.g.@
-@code{"keep"}) can be passed as the argument.
+values should remain unchanged a string (e.g.@ @code{"keep"}) instead of
+a value can be passed as the argument.
 
 This function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} program.
@@ -372,8 +372,8 @@ has been started. With a one-dimensional display the function can be
 passed a maximum of two arguments, the new start value of the @i{x}-axis
 and the new @i{x}-increment. For two-dimensional display the function
 also accepts a new start value for the @i{y}-axis as well as the
-@i{y}-increment. If one of these values should remain unchanged instead
-of a value a string (e.g.@ @code{"keep"}) can be passed as the argument.
+@i{y}-increment. If one of these values should remain unchanged a string
+(e.g.@ @code{"keep"}) instead of a value can be passed as the argument.
 
 This function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} program.
