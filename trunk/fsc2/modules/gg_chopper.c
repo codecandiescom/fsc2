@@ -56,11 +56,11 @@ static void gg_chopper_set_freq_out( double freq );
 
 
 
-/*---------------------------------------------------------------------*
- * Function that gets called when the module is loaded. It checks that
- * the required functions of the PCI-MIO-16E-1 card are avaialable and
+/*-----------------------------------------------------------------*
+ * Function that gets called when the module is loaded. It checks
+ * that the required functions of the DAQ device are available and
  * initializes a few data.
- *---------------------------------------------------------------------*/
+ *-----------------------------------------------------------------*/
 
 int gg_chopper_init_hook( void )
 {
@@ -71,14 +71,14 @@ int gg_chopper_init_hook( void )
 	int acc;
 
 
-	if ( ( dev_num = exists_device( "pci_mio_16e_1" ) ) == 0 )
+	if ( ( dev_num = exists_device( DAQ_MODULE ) ) == 0 )
 	{
-		print( FATAL, "Can't find the module for the PCI-MIO-16E-1 DAQ card "
-			   "(pci_mio_16e_1) - it must be listed before this module.\n" );
+		print( FATAL, "Can't find the module '%s' - it must be listed before "
+			   "this module.\n", DAQ_MODULE );
 		THROW( EXCEPTION );
 	}
 
-	/* Get a lock on the DIO of the PCI-MIO-16E-1 card */
+	/* Get a lock on the DIO of the DAQ device used to control the chopper */
 
 	if ( dev_num )
 		func = T_strdup( "daq_reserve_dio" );
@@ -89,8 +89,8 @@ int gg_chopper_init_hook( void )
 		 ( Func_ptr = func_get( func, &acc ) ) == NULL )
 	{
 		T_free( func );
-		print( FATAL, "Function for reserving the DIO of the PCI-MIO-16E-1 "
-			   "card is missing.\n" );
+		print( FATAL, "Function for reserving the DIO is missing from "
+			   "module '%s'.\n", DAQ_MODULE );
 		THROW( EXCEPTION );
 	}
 
@@ -101,13 +101,15 @@ int gg_chopper_init_hook( void )
 
 	if ( v->val.lval != 1 )
 	{
-		print( FATAL, "Can't reserve the DIO of the PCI-MIO-16E-1 card.\n" );
+		print( FATAL, "Can't reserve the DIO using module '%s'.\n",
+			   DAQ_MODULE );
 		THROW( EXCEPTION );
 	}
 
 	vars_pop( v );
 
-	/* Get a lock on the FREQ_OUT pin of the PCI-MIO-16E-1 card */
+	/* Get a lock on the FREQ_OUT pin of the DAQ device to be used to control
+	   the chopper */
 
 	if ( dev_num )
 		func = T_strdup( "daq_reserve_freq_out" );
@@ -118,8 +120,8 @@ int gg_chopper_init_hook( void )
 		 ( Func_ptr = func_get( func, &acc ) ) == NULL )
 	{
 		T_free( func );
-		print( FATAL, "Function for reserving the FREQ_OUT pin of the "
-			   "PCI-MIO-16E-1 card is missing.\n" );
+		print( FATAL, "Function for reserving the FREQ_OUT pin is missing "
+			   "from module '%s'.\n", DAQ_MODULE );
 		THROW( EXCEPTION );
 	}
 
@@ -130,8 +132,8 @@ int gg_chopper_init_hook( void )
 
 	if ( v->val.lval != 1 )
 	{
-		print( FATAL, "Can't reserve the FREQ_OUT pin of the PCI-MIO-16E-1 "
-			   "card.\n" );
+		print( FATAL, "Can't reserve the FREQ_OUT pin using module '%s'.\n",
+			   DAQ_MODULE );
 		THROW( EXCEPTION );
 	}
 
@@ -148,8 +150,8 @@ int gg_chopper_init_hook( void )
 	if ( ! func_exists( gg_chopper.dio_func ) )
 	{
 		gg_chopper.dio_func = CHAR_P T_free( gg_chopper.dio_func );
-		print( FATAL, "Function for setting the DIO of the PCI-MIO-16E-1 "
-			   "card is missing.\n" );
+		print( FATAL, "Function for setting the DIO is missing from module "
+			   "'%s'.\n", DAQ_MODULE ); 
 		THROW( EXCEPTION );
 	}
 
@@ -167,7 +169,7 @@ int gg_chopper_init_hook( void )
 		gg_chopper.dio_func = CHAR_P T_free( gg_chopper.dio_func );
 		gg_chopper.freq_out_func = CHAR_P T_free( gg_chopper.freq_out_func );
 		print( FATAL, "Function for setting the frequency of the FREQ_OUT "
-			   "pin of the PCI-MIO-16E-1 card is missing.\n" );
+			   "pin is missing from module '%s'.\n", DAQ_MODULE );
 		THROW( EXCEPTION );
 	}
 
@@ -190,7 +192,7 @@ int gg_chopper_test_hook( void )
 
 /*------------------------------------------------------------------*
  * Function gets called at the start of the experiment. It sets the
- * frequency of the FREQ_OUT pin of the PCI-MIO-16E-1 card to 10 MHz
+ * frequency of the FREQ_OUT pin of the DAQ device card to 10 MHz
  * and then sets the chopper rotation frequency (if this was requested
  * during the PREPARATIONS section).
  *------------------------------------------------------------------*/
@@ -204,13 +206,12 @@ int gg_copper_exp_hook( void )
 
 	gg_chopper_set_dio( 0 );
 
-	/* Set the frequency of the FREQ_OUT pin of the PCI-MIO-16E card to
-	   10 MHz */
+	/* Set the frequency of the FREQ_OUT pin of the DAQ device to 10 MHz */
 
 	gg_chopper_set_freq_out( 1.0e7 );
 
 	/* If a choppper frequency had been set during the PREPARATIONS section
-	   set it now by outputting a value at the  DIO of the PCI-MIO-16E card */
+	   set it now by outputting a value at the  DIO of the DAQ device */
 
 	if ( gg_chopper.dio_value != 0 )
 		gg_chopper_set_dio( gg_chopper.dio_value );
@@ -305,7 +306,7 @@ Var *chopper_rotation_frequency( Var *v )
 	}
 
 	/* Set the rotational speed of the chopper by outputting a value at
-	   the DIO of the PCI-MIO-16E card */
+	   the DIO of the DAQ device card */
 
 	if ( FSC2_MODE == EXPERIMENT )
 		gg_chopper_set_dio( dio_value );
@@ -318,7 +319,7 @@ Var *chopper_rotation_frequency( Var *v )
 
 /*---------------------------------------------------------------*
  * Internally used function to output a value at the DIO of the
- * PCI-MIO-16E-1 card.
+ * DAQ device.
  *--------------------------------------------------------------*/
 
 static void gg_chopper_set_dio( long val )
@@ -341,7 +342,7 @@ static void gg_chopper_set_dio( long val )
 
 /*--------------------------------------------------------------*
  * Internally used function to set the output frequency of the
- * FREQ_OUT pin of the PCI-MIO-16E-1 card.
+ * FREQ_OUT pin of the DAQ device.
  *--------------------------------------------------------------*/
 
 static void gg_chopper_set_freq_out( double freq )

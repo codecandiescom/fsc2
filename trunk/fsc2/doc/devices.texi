@@ -5000,7 +5000,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @end table
 
 
-@node Microwave Attenuator Functions, Multi-Device Functions, Power Supply Functions, Device Functions
+@node Microwave Attenuator Functions, Light Chopper Functions, Power Supply Functions, Device Functions
 @section Microwave Attenuator Functions
 @cindex Microwave Attenuator Functions
 
@@ -5112,9 +5112,9 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @cindex Light Chopper Functions
 Currently there's just a single supported light chopper. It is a chopper
 used in the group of G.@: Gescheidt (University Graz, Austria), that,
-via some homebuild electronics\footnote{see Ph.D.@: thesis by Torsten
+via some homebuild electronics@footnote{see Ph.D.@: thesis by Torsten
 Zytowski, Z@"urich 1998} is indirectly controlled by a data acquisition
-device, currently the National Instruments @{PCI-MIO-16E-1} DAQ
+device, currently the National Instruments @w{PCI-MIO-16E-1} DAQ
 card. The module for the device is loaded by specifying
 @example
 gg_chopper
@@ -5144,7 +5144,7 @@ Returns a string with the name of the chopper being used.
 This function allows to either query or set the rotation speed of the
 chopper. When called without an argument the function returns the
 current rotation frequency (@w{0 Hz} if the chopper is stopped).
-If called with an argument between @w{39.2 Hz} and @{200 Hz} the chopper
+If called with an argument between @w{39.2 Hz} and @w{200 Hz} the chopper
 rotation frequency gets set to this value (if it is not possible to set
 the frequency with an accuracy of at least @w{1%} a warning is output,
 informing the user about the real rotation frequency). If the function

@@ -84,11 +84,11 @@ Features
 
 * Writing new device modules (or adapting existing ones for a new device)
   shouldn't be too difficult for anyone having some experience with
-  writing programs in C. Modules for about 40 differnt devices are already
+  writing programs in C. Modules for about 50 different devices are already
   part of the package and can be used as a starting point for developing
   drivers for new devices.
 
-* fsc2 is well-documented, an more than 200 page documentation in HTML,
+* fsc2 is well-documented, an more than 250 page documentation in HTML,
   info, PostScript and PDF format is part of the package, covering all
   aspects of fsc2, i.e the graphical interface, the EDL language, device
   functions and the writing of new device modules.
@@ -135,6 +135,7 @@ Suported devices
   * Bruker Field controller ER032M
   * Keithley 228A (used as W-band superconducting magnet power supply)
   * Oxford Magnet Sweep Power Supply IPS20-4
+  * Oxford Magnet Power Supply IPS120-10
   * AEG Magnet Power Supply (home-build computer control, S-, X-Band)
   * Simple field control via a DA converter (Steinhoff group, Osnabrueck;
 	requires home-build DA converter HJS_DAADC)
@@ -176,6 +177,8 @@ Suported devices
 
   * Meilhaus Electronic GmbH ME-6000 and ME-6100 (Linux device driver
     comes with the package)
+  * National Instruments PCI-MIO-16E1 card (Linux device driver comes
+    with the package)
   * Home-built AD and DA converter (H.-J. Steinhoff, University Onsabrueck)
 
  Event counter cards:
@@ -192,6 +195,11 @@ Suported devices
  Monochromators:
 
   * Acton Research SpectraPro-300i Monochromator
+  * SPEX Monochromators with CD2A Compudrive
+
+ Microwave Attenuators
+
+  * Home-built microwave attenuator (H.-J. Steinhoff, University Onsabrueck)
 
  Power supplies:
 

@@ -655,7 +655,7 @@ the range is @w{1460 G} to @w{19900 G}.
 @c #############################################################
 
 
-@node er035m_sas, hfs9000, er035m_sa, Device Reference
+@node er035m_sas, gg_chopper, er035m_sa, Device Reference
 @iftex
 @subheading Bruker NMR Gaussmeter ER 035 M (Serial, Stand-Alone)
 @end iftex
