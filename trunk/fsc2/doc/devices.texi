@@ -867,14 +867,13 @@ first parameter passed to the function is the sample time, i.e.@: the
 time interval at which data are sampled. Sample times can range between
 @w{1.953125 ms} (@w{512 Hz}) and @w{16 s}. Allowed values are powers of
 2, multiplied by the shortest sample time (i.e.@: only sample rates of
-@w{512 Hz}, @w{256 Hz}, @code{128 Hz} etc.@: can be used). As an
-alternative an @strong{integer} value of @code{0} or @code{-1} can be
-passed to the function. If the vakue is @code{0} the nearest allowed
-sample time equal to or larger than the lock-in's time constant is
-used. If @code{-1} is passed to the function it is assumed that an
-external trigger, applied to the rear trigger input, is going to be used
--- the user has to take care that the trigger input rate is not larger
-than @w{512 Hz}.
+@w{512 Hz}, @w{256 Hz}, @code{128 Hz} etc.@: can be used). Instead also
+an @strong{integer} value of @code{0} or @code{-1} can be passed to the
+function. For@code{0} the nearest allowed sample time equal to or larger
+than the lock-in's time constant is used while for @code{-1} it is
+assumed that an external trigger, applied to the rear trigger input, is
+going to be used -- the user has to take care that the trigger input
+rate is not larger than @w{512 Hz}.
 
 The next one or two parameter define which data type should be sampled
 in auto-acquisition mode (the @code{SR810} only accepts one data type
