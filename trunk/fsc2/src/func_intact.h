@@ -119,6 +119,8 @@ void tool_box_delete( void );
 Var *f_layout(  Var *v );
 Var *f_objdel(  Var *v );
 Var *f_freeze(  Var *v );
+Var *f_obj_clabel( Var * );
+Var *f_obj_xable( Var *v );
 IOBJECT *find_object_from_ID( long ID );
 void recreate_Tool_Box( void );
 void convert_escapes( char *str );

@@ -64,6 +64,7 @@ static Var *f_layout_child( long layout );
 static void f_objdel_child( Var *v );
 static void f_objdel_parent( Var *v );
 static Var *f_obj_clabel_child( long ID, char *label );
+static Var *f_obj_xable_child( long ID, long state );
 static int tool_box_close_handler( FL_FORM *a, void *b );
 static FL_OBJECT *append_object_to_form( IOBJECT *io );
 static void tools_callback( FL_OBJECT *ob, long data );
@@ -454,23 +455,17 @@ static void f_objdel_parent( Var *v )
 
 	switch ( io->type )
 	{
-		case NORMAL_BUTTON :
-		case PUSH_BUTTON :
-		case RADIO_BUTTON :
+		case NORMAL_BUTTON : case PUSH_BUTTON : case RADIO_BUTTON :
 			vars_pop( f_bdelete( vars_push( INT_VAR, v->val.lval ) ) );
 			break;
 
-		case NORMAL_SLIDER :
-		case VALUE_SLIDER :
-		case SLOW_NORMAL_SLIDER :
-		case SLOW_VALUE_SLIDER :
+		case NORMAL_SLIDER : case VALUE_SLIDER :
+		case SLOW_NORMAL_SLIDER : case SLOW_VALUE_SLIDER :
 			vars_pop( f_sdelete( vars_push( INT_VAR, v->val.lval ) ) );
 			break;
 
-		case INT_INPUT :
-		case FLOAT_INPUT :
-		case INT_OUTPUT :
-		case FLOAT_OUTPUT :
+		case INT_INPUT  : case FLOAT_INPUT :
+		case INT_OUTPUT : case FLOAT_OUTPUT :
 			vars_pop( f_odelete( vars_push( INT_VAR, v->val.lval ) ) );
 			break;
 
@@ -501,7 +496,7 @@ Var *f_obj_clabel( Var *v )
 	CLOBBER_PROTECT( v );
 	CLOBBER_PROTECT( label );
 
-	/* We need at least the ID of the button */
+	/* We first need the ID of the button */
 
 	ID = get_strict_long( v, "object ID" );
 
@@ -608,6 +603,116 @@ static Var *f_obj_clabel_child( long ID, char *label )
 		THROW( EXCEPTION );
 
 	return vars_push( INT_VAR, 1 );
+}
+
+
+/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*/
+
+Var *f_obj_xable( Var *v )
+{
+	IOBJECT *io;
+	long ID;
+	bool state;
+
+	/* We first need the ID of the button */
+
+	ID = get_strict_long( v, "object ID" );
+
+	if ( ID < ID_OFFSET )
+	{
+		print( FATAL, "Invalid object identifier.\n" );
+		THROW( EXCEPTION );
+	}
+
+	v = vars_pop( v );
+
+	state = get_boolean( v );
+
+	/* The child has to get parent to change the state */
+
+	if ( Internals.I_am == CHILD )
+		return f_obj_xable_child( ID, state ? 1L : 0L );
+
+	/* No tool box -> no objects -> no object state change possible... */
+
+	if ( Tool_Box == NULL || Tool_Box->objs == NULL )
+	{
+		print( FATAL, "No objects have been defined yet.\n" );
+		THROW( EXCEPTION );
+	}
+
+	/* Check the ID parameter */
+
+	io = find_object_from_ID( ID );
+
+	if ( io == NULL )
+	{
+		print( FATAL, "Invalid object identifier.\n" );
+		THROW( EXCEPTION );
+	}
+
+	if ( state )
+	{
+		if ( io->type != FLOAT_INPUT && io->type != INT_OUTPUT )
+			fl_activate_object( io->self );
+		fl_set_object_lcol( io->self, FL_BLACK );
+	}
+	else
+	{
+		if ( io->type != FLOAT_INPUT && io->type != INT_OUTPUT )
+			fl_deactivate_object( io->self );
+		fl_set_object_lcol( io->self, FL_INACTIVE_COL );
+	}
+
+	return vars_push( INT_VAR, state ? 1L : 0L );
+}
+
+
+/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*/
+
+static Var *f_obj_xable_child( long ID, long state )
+{
+	char *buffer, *pos;
+	size_t len;
+	bool result;
+
+
+	len = sizeof EDL.Lc + sizeof ID + sizeof state;
+
+	if ( EDL.Fname )
+		len += strlen( EDL.Fname ) + 1;
+	else
+		len++;
+
+	pos = buffer = CHAR_P T_malloc( len );
+
+	memcpy( pos, &EDL.Lc, sizeof EDL.Lc );   /* current line number */
+	pos += sizeof EDL.Lc;
+
+	memcpy( pos, &ID, sizeof ID );           /* button ID */
+	pos += sizeof ID;
+
+	if ( EDL.Fname )
+	{
+		strcpy( pos, EDL.Fname );             /* current file name */
+		pos += strlen( EDL.Fname ) + 1;
+	}
+	else
+		*pos++ = '\0';
+
+	memcpy( pos, &state, sizeof state );      /* button ID */
+	pos += sizeof ID;
+
+	/* Ask the parent to change the label */
+
+	result = exp_xable( buffer, pos - buffer );
+
+	if ( result == FAIL )      /* failure -> bomb out */
+		THROW( EXCEPTION );
+
+	return vars_push( INT_VAR, state ? 1L : 0L );
 }
 
 
@@ -998,6 +1103,7 @@ static FL_OBJECT *append_object_to_form( IOBJECT *io )
 			fl_set_input_maxchars( io->self, MAX_INPUT_CHARS );
 			fl_set_object_color( io->self, FL_COL1, FL_COL1 );
 			fl_set_input_color( io->self, FL_BLACK, FL_COL1 );
+			fl_deactivate_object( io->self );
 			snprintf( buf, MAX_INPUT_CHARS + 1, "%ld", io->val.lval );
 			fl_set_input( io->self, buf );
 			break;
@@ -1013,6 +1119,7 @@ static FL_OBJECT *append_object_to_form( IOBJECT *io )
 			fl_set_input_maxchars( io->self, MAX_INPUT_CHARS );
 			fl_set_object_color( io->self, FL_COL1, FL_COL1 );
 			fl_set_input_color( io->self, FL_BLACK, FL_COL1 );
+			fl_deactivate_object( io->self );
 			snprintf( buf, MAX_INPUT_CHARS, io->form_str, io->val.dval );
 			fl_set_input( io->self, buf );
 			break;

@@ -1828,6 +1828,72 @@ bool exp_clabel( char *buffer, ptrdiff_t len )
 }
 
 
+/*--------------------------------------------------------------*/
+/* Child and parent side function for passing the arguments and */
+/* the return value of the object_enable() function.            */
+/*--------------------------------------------------------------*/
+
+bool exp_xable( char *buffer, ptrdiff_t len )
+{
+	if ( Internals.I_am == CHILD )
+	{
+		if ( ! writer( C_XABLE, len, buffer ) )
+		{
+			T_free( buffer );
+			return FAIL;
+		}
+		T_free( buffer );
+		return reader( NULL );
+	}
+	else
+	{
+		char *old_Fname = EDL.Fname;
+		long old_Lc = EDL.Lc;
+		Var *Func_ptr;
+		int acc;
+		char *pos;
+		long ID;
+		long state;
+
+
+		TRY
+		{
+			/* Get function to delete an input object */
+
+			Func_ptr = func_get( "object_enable", &acc );
+
+			/* Unpack parameter and push them onto the stack */
+
+			pos = buffer;
+			memcpy( &EDL.Lc, pos, sizeof EDL.Lc );    /* current line number */
+			pos += sizeof EDL.Lc;
+
+			memcpy( &ID, pos, sizeof ID );            /* get object ID */
+			vars_push( INT_VAR, ID );
+			pos += sizeof ID;
+
+			EDL.Fname = pos;                          /* current file name */
+			pos += strlen( pos ) + 1;
+
+			memcpy( &state , pos, sizeof state );
+			vars_push( INT_VAR, state );
+
+			/* Call the function */
+
+			vars_pop( func_call( Func_ptr ) );
+			writer( C_XABLE_REPLY, 1L );
+			TRY_SUCCESS;
+		}
+		OTHERWISE
+			writer( C_XABLE_REPLY, 0L );
+
+		EDL.Fname = old_Fname;
+		EDL.Lc = old_Lc;
+		return SET;
+	}
+}
+
+
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
