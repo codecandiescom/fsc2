@@ -69,10 +69,10 @@ typedef struct Var_
 		struct Var_ *vptr;                          /* for array references */
 		void   *gptr;                               /* generic pointer */
 	} val;
-	int    dim;              /* dimension of array */
-	int    *sizes;           /* array of sizes of dimensions */
-	size_t   len;            /* total len of array */
-	long   flags;
+	int dim;                       /* dimension of array */
+	unsigned int *sizes;           /* array of sizes of dimensions */
+	size_t len;                    /* total len of array */
+	unsignd long  flags;
 
 	struct Var_ *from;
 	struct Var_ *next;       /* next variable in list or stack */

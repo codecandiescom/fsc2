@@ -1894,7 +1894,7 @@ static void vars_pow_check( double v1, double v2 )
 Var *vars_array_check( Var *v1, Var *v2 )
 {
 	Var *v = NULL;
-	long length = 0;
+	size_t length = 0;
 
 
 	/* If the left hand side has a defined size nothing needs to be done */
