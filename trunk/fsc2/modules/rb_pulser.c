@@ -323,10 +323,8 @@ int rb_pulser_end_of_exp_hook( void )
 {
 	rb_pulser_cleanup( );
 
-	if ( ! rb_pulser.is_needed )
-		return 1;
-
-	rb_pulser_exit( );
+	if ( rb_pulser.is_needed )
+		rb_pulser_exit( );
 
 	return 1;
 }
@@ -349,12 +347,10 @@ void rb_pulser_exit_hook( void )
 
 	/* Free all memory allocated within the module */
 
-	p = rb_pulser.pulses;
-	while ( p != NULL )
+	for ( p = rb_pulser.pulses; p != NULL; p = pn )
 	{
 		pn = p->next;
 		T_free( p );
-		p = pn;
 	}
 
 	if ( rb_pulser.synth_state )
