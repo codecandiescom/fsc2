@@ -132,7 +132,8 @@ void DumpStack( void *crash_address )
 		close( pipe_fd[ DUMP_CHILD_WRITE ] );
 
 		if ( Internals.cmdline_flags & DO_CHECK )
-			execl( ADDR2LINE, ADDR2LINE, "-C", "-f", "-e", sdir "fsc2", NULL );
+			execl( ADDR2LINE, ADDR2LINE, "-C", "-f", "-e", srcdir "fsc2",
+				   NULL );
 		else
 			execl( ADDR2LINE, ADDR2LINE, "-C", "-f", "-e", bindir "fsc2",
 				   NULL );
