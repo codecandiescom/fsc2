@@ -337,15 +337,15 @@ expr:    INT_TOKEN unit            { $$ = apply_unit( vars_push( INT_VAR, $1 ),
        | FLOAT_TOKEN unit          { $$ = apply_unit(
 		                                    vars_push( FLOAT_VAR, $1 ), $2 ); }
        | VAR_TOKEN unit            { $$ = apply_unit( $1, $2 ); }
+       | VAR_TOKEN '('             { print( FATAL, "'%s' isn't a function.\n",
+											$1->name );
+									 THROW( EXCEPTION ); }
        | VAR_TOKEN '['             { vars_arr_start( $1 ); }
          list1 ']'                 { $$ = vars_arr_rhs( $4 ); }
          unit                      { $$ = apply_unit( $<vptr>6, $7 ); }
        | FUNC_TOKEN '(' list2 ')'  { $$ = func_call( $1 ); }
          unit                      { $$ = apply_unit( $<vptr>5, $6 ); }
        | VAR_REF
-       | VAR_TOKEN '('             { print( FATAL, "'%s' isn't a function.\n",
-											$1->name );
-									 THROW( EXCEPTION ); }
        | FUNC_TOKEN '['            { print( FATAL, "'%s' is a predefined "
                                              "function.\n", $1->name );
 	                                 THROW( EXCEPTION ); }
@@ -361,17 +361,16 @@ expr:    INT_TOKEN unit            { $$ = apply_unit( vars_push( INT_VAR, $1 ),
 													 $1, $3 ); }
        | expr GE expr              { $$ = vars_comp( COMP_LESS_EQUAL,
 													 $3, $1 ); }
+       | '+' expr %prec NEG        { $$ = $2; }
+       | '-' expr %prec NEG        { $$ = vars_negate( $2 ); }
        | expr '+' expr             { $$ = vars_add( $1, $3 ); }
        | expr '-' expr             { $$ = vars_sub( $1, $3 ); }
        | expr '*' expr             { $$ = vars_mult( $1, $3 ); }
        | expr '/' expr             { $$ = vars_div( $1, $3 ); }
        | expr '%' expr             { $$ = vars_mod( $1, $3 ); }
        | expr '^' expr             { $$ = vars_pow( $1, $3 ); }
-       | '+' expr %prec NEG        { $$ = $2; }
-       | '-' expr %prec NEG        { $$ = vars_negate( $2 ); }
        | '(' expr ')' unit         { $$ = apply_unit( $2, $4 ); }
 ;
-
 
 unit:    /* empty */               { $$ = NULL; }
        | NT_TOKEN  				   { $$ = vars_push( FLOAT_VAR, 1.0e-5 ); }
@@ -422,16 +421,16 @@ sep2:    /* empty */
 
 /* handling of TIME_BASE commands */
 
-tb:      TB_TOKEN tb1
+tb:      TB_TOKEN expr sep2 tb1    { p_set_timebase( $2 ); }
+       | TB_TOKEN tb2 expr         { p_set_timebase( $3 ); }
 ;
 
-tb1:      expr                     { p_set_timebase( $1 ); }
-		  sep2 tb2
-        | tb2 expr                 { p_set_timebase( $2 ); }
+tb1:     /* empty */
+       | tb2
 ;
 
-tb2:      TTL_TOKEN sep2           { p_set_timebase_level( TTL_LEVEL ); }
-        | ECL_TOKEN sep2           { p_set_timebase_level( ECL_LEVEL ); }
+tb2:     TTL_TOKEN sep2  	       { p_set_timebase_level( TTL_LEVEL ); }
+	   | ECL_TOKEN sep2		       { p_set_timebase_level( ECL_LEVEL ); }
 ;
 
 /* handling of TRIGGER_MODE lines */
