@@ -35,27 +35,27 @@ infodir          := $(prefix)/info
 # Here the owner of the program of all files that will be installed as well
 # as the group the owner belongs to has to be set. It is highly recommended
 # to create a special account and group for the program, with 'fsc2' being
-# the natural choice (and which is also the default). For a local install,
-# i.e. if the program will be used by one person only and everything is
-# installed in his/her home directory this persons account and group can be
-# used. The owner and group ID will be used when accessing lock and log files
-# and shared memory segments. 
+# the natural choice (which is also the default). For a local install, i.e.
+# if the program will be used by one person only and everything is installed
+# in his/her home directory this persons account and group can be used. The
+# owner and group ID will be used when accessing lock and log files and
+# shared memory segments. 
 
 OWNER            := fsc2
 GROUP            := fsc2
 
 
 # The next variable sets the GPIB library to use, it must be set to either
-# LLP for the LLP library, NI for the National Instruments library or JTT
-# for the library written by me. Alternatively, if no GPIB support is needed
-# define GPIB_LIBRARY as NONE (which is also the default if not set).
+# "LLP" for the LLP library, "NI" for the National Instruments library or
+# "JTT" for the library written by me. Alternatively, if no GPIB support is
+# needed define GPIB_LIBRARY as "NONE" (which is also the default if not set).
 # Then the location of the GPIB configuration file is set (this is only needed
 # with the National Instruments GPIB library, if not set GPIB_CONF_FILE
 # defaults to /etc/gpib.conf).
 # Next set the file for writing logs about the activity on the GPIB bus.
 # If not given logs will be written to stderr.
 # Finally, set the verbosity level of the GPIB logs, use HIGH, MEDIUM, LOW
-# or OFF. If not set it defaults to LOW, i.e. only errors will be logged.
+# or OFF. If not set it defaults to LOW and only errors will be logged.
 
 GPIB_LIBRARY     := JTT
 GPIB_CONF_FILE   := /etc/gpib.conf
@@ -64,7 +64,7 @@ GPIB_LOG_LEVEL   := HIGH
 
 
 # This variable defines the number of serial ports that are available on
-# the computer.
+# the computer (defaults to 0 if not set)
 
 NUM_SERIAL_PORTS := 2
 
@@ -91,7 +91,7 @@ CFLAGS           := -ggdb -I/usr/X11R6/include/X11 -Wall -Wwrite-strings \
 					-Wstrict-prototypes -Wmissing-declarations -W
 				    # -DMDEBUG # for malloc debugging
 				    # -DDEBUG
-				    # -DMAX_DEBUG # for debugging of digitizer
+				    # -DMAX_DEBUG # for debugging of the digitizer modules
 LD				 := ld
 LIBS             := -L/usr/X11R6/lib -L/usr/local/lib -lforms -lX11 -lm -ldl
 				    # -lmcheck   # for malloc debugging
@@ -110,7 +110,7 @@ EXEC_INSTALL     := install
 
 ############################################################################
 ###########     Don't change anything below this line      #################
-########### (unless you really know what you're doing ...) #################
+###########  unless you really know what you're doing ...  #################
 ############################################################################
 
 # These variables are used internally in the make process
@@ -135,7 +135,7 @@ ifneq ($(shell ls /lib/libc.so.6 2>/dev/null),/lib/libc.so.6)
 endif
 
 
-# Pass variables via macros to the source files
+# Pass lots of variables to the source files...
 # For directories make sure they end with a `/'.
 
 ifdef bindir
@@ -202,8 +202,8 @@ endif
 
 
 # Define variables with full paths for the 'mail' and 'addr2line' programs
-# and make sure the mail program and addr2line got found by 'which', otherwise
-# don't set the variables
+# and make sure the mail program and addr2line got found by 'which',
+# otherwise don't set the variables
 
 MAIL_PROGRAM  := $(shell which mail)
 ADDR2LINE     := $(shell which addr2line)
@@ -254,14 +254,14 @@ ifeq ($(machine_name),isaak.physik.fu-berlin.de)
 	UNINSTALL_MACHINE  := uninstall-$(machine_name)
 endif
 
-#ifeq ($(machine_name),crowley.none)
-#	 GPIB_LIBRARY       := JTT
-#	 INSTALL_MACHINE    := install-$(machine_name)
-#	 UNINSTALL_MACHINE  := uninstall-$(machine_name)
-#endif
+ifeq ($(machine_name),crowley.none)
+	 GPIB_LIBRARY       := JTT
+	 INSTALL_MACHINE    := install-$(machine_name)
+	 UNINSTALL_MACHINE  := uninstall-$(machine_name)
+endif
 
 
-# Finally the definition of further needed variables
+# Finally the definition of further variables needed
 
 ifeq ($(GPIB_LIBRARY),LLP)
 	GPIB_LIBRARY         := old
@@ -306,9 +306,9 @@ all:
 	-@grep '$$Id\: ' Makefile $(sdir)/Makefile $(sdir)/*.[chly]          \
 				     $(mdir)/Makefile $(mdir)/*.[chl]                    \
 					 $(cdir)/Functions $(cdir)/Devices $(cdir)/*.conf |  \
-	grep -v 'sed\|grep' |                                                \
-	sed -e 's/^.*$$Id\: \(.*\) jens Exp $$.*/\1/g' |                     \
-	gzip -c -9 | uuencode -m - > version.ugz
+		grep -v 'sed\|grep' |                                            \
+			sed -e 's/^.*$$Id\: \(.*\) jens Exp $$.*/\1/g' |             \
+				gzip -c -9 | uuencode -m - > version.ugz
 	$(MAKE) -C src all
 	$(MAKE) -C utils all
 	$(MAKE) -C doc all
@@ -337,7 +337,8 @@ install:
 
 
 
-# How to get rid of everything that got installed
+# How to get rid of everything that got installed - requires that the Makefile
+# hasn't been changed significantly since the installation!
 
 uninstall:
 	-$(RM) $(RMFLAGS) $(libdir)/hp8647a.table
@@ -370,8 +371,9 @@ version:
 		uudecode version.ugz | gunzip -c -q;  \
 	fi
 
-# `clean' deletes all the files remaining from the compilation and needed for
-# an installation while `distclean' also removes all executables, shared
+
+# `clean' deletes all the files remaining from the compilation and not needed
+# for an installation while `distclean' also removes all executables, shared
 # libraries and documentation
 
 clean:
