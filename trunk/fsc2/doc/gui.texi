@@ -257,9 +257,9 @@ cursor, @image{cursor4,5mm,},
 cursor
 @end ifnottex
 @end ifnothtml
-and in the upper left hand corner a pair of values with the exact
+and in the upper left hand corner pairs of values with the exact
 coordinates (in the units of the axis scales) of the current mouse
-position is shown. Because different curves can have a different scaling
+position are shown. Because different curves can have a different scaling
 (see below), if you have more than one curve displayed the coordinates
 in the scaling system of each of the curves are shown (in the color of
 the curve they belong to).
@@ -278,12 +278,12 @@ cursor
 @end ifnothtml
 and a circle is drawn at the position where you pressed the mouse
 button.  When you move the mouse (while keeping both middle and right
-mouse buttons pressed down) a vertical and a horizontal dashed line from
-the starting point to the current mouse position is drawn and in the
-left upper corner of the display area pairs of x- and y-differences (in
-units of the axis scales) between the two points are shown (and updated
-whenever you move the mouse). Again, for each curve a pair of values is
-displayed in the color of the curve they belong to.
+mouse buttons pressed down) a vertical and a horizontal dashed line
+connecting the starting point to the current mouse position is drawn and
+in the left upper corner of the display area pairs of x- and
+y-differences (in units of the axis scales) between the two points are
+shown (and updated whenever you move the mouse). Again, for each curve a
+pair of values is displayed in the color of the curve they belong to.
 
 
 @subsubsection Rescaling and moving
@@ -312,7 +312,7 @@ be magnified. If done in the area of the x-axis only the x-scaling is
 changed, while when used in the y-axis area only a magnification in
 y-direction happens.
 
-You can also move the curves around on the screen. When you pres the
+You can also move the curves around on the screen. When you press the
 middle mouse button somewhere in the display are the cursor changes to a
 @ifnotinfo
 hand, @image{cursor2,5mm,}.
@@ -338,17 +338,17 @@ glass, @image{cursor3,5mm,}.
 glass.
 @end ifnottex
 @end ifnothtml
-When you move the mouse at first nothing will happen, but if you release
+When you move the mouse at first nothing will happen but if you release
 the mouse button the display scaling will either get magnified or
-de-magnified. This follows the some simple rules: The point where you
+de-magnified. This follows some simple rules: The point where you
 first pressed the right mouse button will stay at exactly the same
 position. If you move the mouse up, the display will be de-magnified in
 y-direction only, if you move the mouse down, the y-scale factor becomes
 larger, i.e.@: you do a zoom in y-direction. By moving the mouse to the
-right you can reduce the x-scale, by moving to the left you increase it.
+right you can reduce the x-scale, by moving it to the left you increase it.
 If you do this operation in the areas of either the x- or y-axis only
 the corresponding scaling gets changed. The factor by which the scale
-gets changed depends on how far away from the starting point you moved
+gets changed depends on how far away from the starting point you move
 the mouse before releasing the left button. If you move the mouse along
 the whole length of the display area the scaling is changed by a factor
 of 4.
@@ -380,18 +380,18 @@ Finally, when you zoom into the display parts of a curve or even
 complete curves will not fit into the display area anymore. To indicate
 into which direction you have to look for the missing parts of the curve
 an arrow in the color of the curve will be shown for each direction in
-which non-displayable data the curve can be found.
+which non-displayable data of the curve can be found.
 
 Whenever you rescale curves or move them around the "Full Scale" button,
 labeled @code{FS}, will become in-active (its color changes from green
-to grey). When you want to get back to the full scale display you simply
+to gray). When you want to get back to the full scale display you simply
 have to click onto it and all curves (even the ones that usually extempt
-from rescaling because their button is in-active) get rescaled so that
-all data will fit into the display. A side effect of having the
+from rescaling because their buttons are in-active) get rescaled so that
+all data will fit again into the display. A side effect of having the
 @code{FS} button active is that the display will be rescaled
-automatically when new data arrive that wouldn't fit into the display
-area. To switch this behaviour off simply deactivate the @code{FS}
-button.
+automatically when new data are measured that wouldn't fit into the
+display area. To switch this behaviour off simply deactivate the
+@code{FS} button.
 
 
 @anchor{2D-Display}
