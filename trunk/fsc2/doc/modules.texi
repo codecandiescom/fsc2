@@ -1129,7 +1129,8 @@ uninitialized. If the initialization completes successfully, the
 function must return a non-zero value. If there are problems that don't
 make the module unusable it may return a zero value -- in this case a
 warning message will be printed. If the initialization fails in a
-non-recoverable way the function should throw an exception.
+non-recoverable way the function should throw an exception -- in this
+case also the @code{exit_hook()} won't get run.
 
 The second function, @code{sr510_test_hook()}, is called at the start
 of the test run of the @code{EXPERIMENT} section of the @code{EDL}
