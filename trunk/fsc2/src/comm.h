@@ -40,7 +40,7 @@ enum {
 	C_INT,
 	C_LONG,
 	C_FLOAT,
-	C_DOUBLE
+	C_DOUBLE,
 	C_BCREATE,
 	C_BCREATE_REPLY,
 };
