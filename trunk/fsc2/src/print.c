@@ -242,7 +242,7 @@ void print_2d( FL_OBJECT *obj, long data )
 
 static int get_print_file( FILE **fp, char **name )
 {
-	FL_OBJECT *obj;
+	static FL_OBJECT *obj;
 	char filename[ ] = P_tmpdir "/fsc2.eps.XXXXXX";
 	struct stat stat_buf;
 
@@ -1248,11 +1248,14 @@ static void eps_draw_contour( FILE *fp, int cn )
 static void do_print( char *name, const char *command )
 {
 	char *cptr;
-	char *cmd_line = NULL;
-	char **argv = NULL;
+	static char *cmd_line;
+	static char **argv;
 	int argc;
 	pid_t new_pid;
 	
+
+	cmd_line = NULL;
+	argv = NULL;
 
 	/* Do a minimal sanity check of the print command */
 

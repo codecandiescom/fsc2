@@ -427,13 +427,13 @@ static void final_exit_handler( void )
 void load_file( FL_OBJECT *a, long reload )
 {
 	const char *fn;
-	char *old_in_file = NULL;
+	static char *old_in_file;
 	FILE *fp;
 	struct stat file_stat;
 
 
 	notify_conn( BUSY_SIGNAL );
-
+	old_in_file= NULL;
 	a = a;
 
 	/* If new file is to be loaded get its name and store it, otherwise use

@@ -227,43 +227,47 @@ bool scan_main( char *file )
 
 bool section_parser( int section )
 {
+	static int s;
+
+
+	s = section;
 	TRY 
 	{
 		do
 		{
 			/* First run the appropriate lexer/parser combination */
 
-			switch ( section )
+			switch ( s )
 			{
 				case DEVICES_SECTION :
-					section = devices_parser( splitin );
+					s = devices_parser( splitin );
 					break;
 	
 				case ASSIGNMENTS_SECTION :
-					section = assignments_parser( splitin );
+					s = assignments_parser( splitin );
 					break;
 	
 				case VARIABLES_SECTION :
-					section = variables_parser( splitin );
+					s = variables_parser( splitin );
 					break;
 	
 				case PHASES_SECTION :
-					section = phases_parser( splitin );
+					s = phases_parser( splitin );
 					break;
 	
 				case PREPARATIONS_SECTION :
-					section = preparations_parser( splitin );
+					s = preparations_parser( splitin );
 					break;
 	
 				case EXPERIMENT_SECTION :
-					section = experiment_parser( splitin );
+					s = experiment_parser( splitin );
 					break;
 	
 				default :              /* this should never happen, but ... */
 					fsc2_assert( 1 == 0 );
 			}
 	
-		} while ( section != NO_SECTION );
+		} while ( s != NO_SECTION );
 
 		/* Finally, we have to do all the checks that only can be done
 		   after the EDL file has been completely parsed */

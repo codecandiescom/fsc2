@@ -170,11 +170,13 @@ PREP        return PREP_TOKEN;
 int func_list_parse( Func **fncts, int num_func )
 {
 	static bool is_restart = UNSET;
+	static nf;
 	int num_predef_func = num_func;
 	int num;
 	int cur;
 
 
+	nf = num_func;
 	T_free( Fname );
 	Fname = get_string( strlen( libdir ) + strlen( "Functions" ) + 1 );
 	strcpy( Fname, libdir );
@@ -221,12 +223,12 @@ int func_list_parse( Func **fncts, int num_func )
 	   set defaults values */
 
 	rewind( func_listin );
-	num_func = num + num_predef_func;
+	nf = num + num_predef_func;
 
 	if ( num != 0 )
-		*fncts = T_realloc( *fncts, num_func * sizeof( Func ) );
+		*fncts = T_realloc( *fncts, nf * sizeof( Func ) );
 
-	for ( cur = num_predef_func; cur < num_func; cur++ )
+	for ( cur = num_predef_func; cur < nf; cur++ )
 	{
 		( *fncts )[ cur ].name = NULL;
 		( *fncts )[ cur ].fnct = NULL;
@@ -250,7 +252,7 @@ int func_list_parse( Func **fncts, int num_func )
 	}
 
 	fclose( func_listin );
-	return num_func;
+	return nf;
 }
 
 

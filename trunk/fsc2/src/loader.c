@@ -539,7 +539,7 @@ void run_exp_hooks( void )
 
 void run_end_of_exp_hooks( void )
 {
-	Device *cd;
+	static Device *cd;
 
 
 	/* Each of the end-of-experiment hooks must be run to get all instruments
@@ -573,15 +573,15 @@ void run_end_of_exp_hooks( void )
 
 void run_exit_hooks( void )
 {
-	Device *cd;
+	static Device *cd;
 
 
 	if ( Device_List == NULL )
 		return;
 
-	/* Run all exit hooks but starting with the last device and ending with
-	   the very first one in the list. Also make sure that all exit hooks are
-	   run even if some of them fail with an exception. */
+	/* Run all exit hooks starting with the last device and ending with the
+	   very first one in the list. Also make sure that all exit hooks are run
+	   even if some of them fail with an exception. */
 
 	for( cd = Device_List; cd->next != NULL; cd = cd->next )
 		;
