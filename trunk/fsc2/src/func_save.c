@@ -230,7 +230,6 @@ Var *f_getf( Var *var )
 	int i;
 	char *s[ 5 ] = { NULL, NULL, NULL, NULL, NULL };
 	FILE *fp;
-	size_t len;
 	struct stat stat_buf;
 	char *r = NULL;
 	char *new_r, *m;
@@ -296,32 +295,15 @@ Var *f_getf( Var *var )
 	else
 		s[ 1 ] = T_strdup( s[ 1 ] );
 
-	/* Third string is the default directory - if unset use the one the file
-	   selector would choose anyway (but expand '.' to the full name of the
-	   current directory). */
+	/* Third string is the default directory */
 
-	if ( s[ 2 ] == NULL || s[ 2 ][ 1 ] == '\0' )
+	if ( s[ 2 ] != NULL )
 	{
-		if ( ! strcmp( fl_get_directory( ), "." ) )
-		{
+		if ( s[ 2 ][ 0 ] == '\0' )
 			s[ 2 ] = NULL;
-			len = 0;
-
-			do
-			{
-				len += PATH_MAX;
-				s[ 2 ] = CHAR_P T_realloc( s[ 2 ], len );
-				getcwd( s[ 2 ], len );
-			} while ( s[ 2 ] == NULL && errno == ERANGE );
-
-			if ( s[ 2 ] == NULL )
-				s[ 2 ] = T_strdup( "" );
-		}
 		else
-			s[ 2 ] = T_strdup( fl_get_directory( ) );
+			s[ 2 ] = T_strdup( s[ 2 ] );
 	}
-	else
-		s[ 2 ] = T_strdup( s[ 2 ] );
 
 	if ( s[ 3 ] == NULL )
 		s[ 3 ] = T_strdup( "" );

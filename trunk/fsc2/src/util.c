@@ -1381,6 +1381,7 @@ const char *fsc2_show_fselector( const char *message, const char *dir,
 	{
 		dir = Internals.def_directory;
 		Internals.use_def_directory = UNSET;
+
 	}
 
 	ret = fl_show_fselector( message, dir, pattern, def_name );
