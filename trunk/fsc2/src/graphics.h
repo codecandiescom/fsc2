@@ -124,7 +124,7 @@ typedef struct {
 	bool is_fs;             /* state of full scale button */
 
 	long dim;               /* dimensionality of display */
-	long nc;                /* number of curves (in 1D experiments) */
+	long nc;                /* number of curves */
 	long nx;                /* points in x-direction */
 	long ny;                /* points in y-direction */
 	double rwc_start[ 3 ];  /* real world coordinate start values */
