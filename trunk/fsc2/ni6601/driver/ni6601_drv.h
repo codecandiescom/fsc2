@@ -413,8 +413,8 @@ int ni6601_input_source( int source, u16 *bits );
 #if defined NI6601_DEBUG
 #define PDEBUG( fmt, args... ) \
 	do { \
-		printk( KERN_DEBUG NI6601_NAME ": " __FUNCTION__ \
-			"(): " fmt, ## args ); \
+        	printk( KERN_DEBUG " " NI6601_NAME ": " \
+			__FUNCTION__ "(): " fmt, ## args ); \
 	} while( 0 )
 #else
 #define PDEBUG( ftm, args... )

@@ -160,7 +160,7 @@ int ni6601_start_gated_counter( int board, int counter, double gate_length,
 	if ( counter < NI6601_COUNTER_0 || counter > NI6601_COUNTER_3 )
 		return ni6601_errno = NI6601_ERR_NSC;
 
-	pulser = counter & 1 ? counter - 1 : counter + 1;
+	pulser = counter + ( counter & 1 ? - 1 : 1 );
 
 	/* Check that the gate length is reasonable and convert it to ticks */
 
@@ -205,7 +205,7 @@ int ni6601_start_gated_counter( int board, int counter, double gate_length,
 
 	p.counter = pulser;
 	p.continuous = 0;
-	p.low_ticks = 1;
+	p.low_ticks = 2;
 	p.high_ticks = len;
 	p.source = NI6601_TIMEBASE_1;
 	p.gate = NI6601_NONE;
@@ -255,7 +255,7 @@ int ni6601_stop_counter( int board, int counter )
 
 	if ( dev_info[ board ].state[ counter ] == NI6601_COUNTER_RUNNING )
 	{
-		pulser = counter & 1 ? counter - 1 : counter + 1;
+		pulser = counter + ( counter & 1 ? -1 : 1 );
 		if ( dev_info[ board ].state[ pulser ] == NI6601_PULSER_RUNNING )
 			ni6601_stop_pulses( board, pulser );
 	}
@@ -296,19 +296,20 @@ int ni6601_get_count( int board, int counter, int wait_for_end,
 		return ret;
 
 	v.counter = counter;
+
 	v.wait_for_end = wait_for_end ? 1 : 0;
 
 	if ( ioctl( dev_info[ board ].fd, NI6601_IOC_COUNT, &v ) < 0 )
 		return ni6601_errno =
-						   ( errno == EINTR ) ? NI6601_ERR_ITR :NI6601_ERR_INT;
+						  ( errno == EINTR ) ? NI6601_ERR_ITR : NI6601_ERR_INT;
 
 	*count = v.count;
 
 	if ( wait_for_end )
 	{
 		dev_info[ board ].state[ counter ] = NI6601_IDLE;		
-		dev_info[ board ].state[ counter & 1 ? counter - 1 : counter + 1 ]
-			= NI6601_IDLE;
+		dev_info[ board ].state[ counter + ( counter & 1 ? -1 : 1 ) ]
+																 = NI6601_IDLE;
 	}
 
 	return ni6601_errno = NI6601_OK;
@@ -346,7 +347,7 @@ int ni6601_generate_single_pulse( int board, int counter, double duration )
 
 	p.counter = counter;
 	p.continuous = 1;
-	p.low_ticks = 1;
+	p.low_ticks = 2;
 	p.high_ticks = len;
 	p.source = NI6601_TIMEBASE_1;
 	p.gate = NI6601_NONE;
@@ -642,9 +643,9 @@ static int ni6601_time_to_ticks( double time, unsigned long *ticks )
 		return ni6601_errno = NI6601_ERR_IVA;
 
 	if ( ( t = ( unsigned long )
-						  floor( time / NI6601_TIME_RESOLUTION - 0.5 ) ) == 0 )
+						  floor( time / NI6601_TIME_RESOLUTION + 0.5 ) ) == 0 )
 		return ni6601_errno = NI6601_ERR_IVA;
-	
+
 	*ticks = t;
 
 	return ni6601_errno = NI6601_OK;
