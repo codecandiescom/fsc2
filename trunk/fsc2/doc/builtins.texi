@@ -464,7 +464,7 @@ be in the interval @w{[-1, 1]}, the result an element of the interval
 @item atan()
 @findex atan()
 Returns the inverse of the tangent function of the argument (simple
-number or elements of an array)as an angle in radian, the result an
+number or elements of an array) as an angle in radian, the result an
 element of the interval @w{[-pi, pi]}.
 
 @item sinh()
