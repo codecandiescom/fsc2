@@ -86,27 +86,18 @@ static void keithley228a_get_corrected_current( double c, double *psc,
 
 
 typedef struct {
-
 	int device;               /* GPIB number of the device */
-
 	bool state;               /* STANDBY or OPERATE */
-
 	const char *lockin_name;  /* name of the lock-in to use */
 	int lockin_dac_port;      /* number of the DAC port of the lock-in the
 								 modulation input is connected to */
-
 	double current;           /* actual current output by the power supply */
-
 	double req_current;       /* the start current given by the user */
 	double current_step;      /* the current steps to be used */
-
 	bool is_req_current;      /* flag, set if start current is defined */
 	bool is_current_step;     /* flag, set if current step size is defined */
-
 	bool use_correction;      /* flag, set if corrections are to be applied */
-
 	char *lockin_append;      /* string to append to lockin function names */
-
 } Keithley228a;
 
 

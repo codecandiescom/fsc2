@@ -136,8 +136,8 @@ SHEBANG ^#!.*$
 INCL    ^[ \t]*#INCLUDE[\t ]*
 IFN     \"[^"\n]*\"[\t ]*\n?|<[^>\n]*>[\t ]*\n?
 IFNE    [^"<\t \n]*\n?
-EXIT    ^[ \t]*#EXIT
-QUIT    ^[ \t]*#QUIT
+EXIT    ^[ \t]*#((EXIT)|(exit))
+QUIT    ^[ \t]*#((QUIT)|(quit))
 
 
 THROU   [+-][A-Za-z]+

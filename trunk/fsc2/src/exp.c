@@ -781,6 +781,9 @@ static void setup_if_else( long *pos, Prg_Token *cur_wr )
 
 static void exp_syntax_check( void )
 {
+	if ( prg_token == NULL )
+		return;
+
 	Fname = T_free( Fname );
 
 	TRY

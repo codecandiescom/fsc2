@@ -97,9 +97,8 @@ init_1d( 1, 1024, tau * 1e9, dtau * 1e9, "tau [ ns ]",
 
 EXPERIMENT:
 
-
 pulser_update( );
-/*
+
 f=find_field( );
 print("Magnetfeld = # [G]\n", f );
 save_program( "% " );
@@ -148,4 +147,4 @@ FOR I = 1 : 1024 {
         set_field( f );
 	}
 }
-*/
+
