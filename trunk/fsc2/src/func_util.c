@@ -3381,7 +3381,7 @@ Var *f_find_peak( Var *v )
 	vars_check( v, INT_ARR | FLOAT_ARR );
 
 	len = v->len;
-	arr = T_malloc( len * sizeof *arr );
+	arr = DOUBLE_P T_malloc( len * sizeof *arr );
 
 	/* We start by calculating numerically the derivative of the curve.
 	   While doing so we add up the values of all points of the derivative
@@ -3577,7 +3577,7 @@ Var *f_mean_part_array( Var *v )
 	if ( size == v->len )
 		return f_float( v );
 
-	m = T_calloc( size, sizeof *m );
+	m = DOUBLE_P T_calloc( size, sizeof *m );
 	par = v->len / size;
 
 	if ( v->type == INT_ARR )

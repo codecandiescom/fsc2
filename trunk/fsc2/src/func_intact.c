@@ -860,7 +860,7 @@ void recreate_Toolbox( void )
 {
 	IOBJECT *io, *last_io = NULL;
 	int flags;
-	int dummy;
+	int unsigned dummy;
 
 
 	if ( Internals.mode == TEST )        /* no drawing in test mode */

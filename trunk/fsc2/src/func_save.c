@@ -579,7 +579,7 @@ static Var *batch_mode_file_open( char *name )
 			if ( cn % 10 == 0 )
 			{
 				if ( new_name != NULL )
-					new_name = T_free( new_name );
+					new_name = CHAR_P T_free( new_name );
 				new_name = get_string( "%s.batch_output.%lu",
 									   strrchr( EDL.in_file, '/' ) + 1, cn++ );
 			}
@@ -596,7 +596,7 @@ static Var *batch_mode_file_open( char *name )
 				if ( cn % 10 == 0 )
 				{
 					if ( new_name != NULL )
-						new_name = T_free( new_name );
+						new_name = CHAR_P T_free( new_name );
 					new_name = get_string( "%s.batch_output.%lu", name, cn++ );
 				}
 				else

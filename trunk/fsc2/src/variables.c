@@ -1723,7 +1723,7 @@ Var *vars_push_matrix( int type, int dim, ... )
 
 	TRY
 	{
-		nv->val.vptr = VAR_P T_malloc( sizes[ 0 ] * sizeof *nv->val.vptr );
+		nv->val.vptr = VAR_PP T_malloc( sizes[ 0 ] * sizeof *nv->val.vptr );
 		TRY_SUCCESS;
 	}
 	OTHERWISE
@@ -1792,7 +1792,7 @@ static Var *vars_push_submatrix( Var *from, int type, int dim, ssize_t *sizes )
 	}
 
 	nv->type = type;
-	nv->val.vptr = VAR_P T_malloc( nv->len * sizeof *nv->val.vptr );
+	nv->val.vptr = VAR_PP T_malloc( nv->len * sizeof *nv->val.vptr );
 
 	for ( i = 0; i < nv->len; i++ )
 		nv->val.vptr[ i ] = NULL;

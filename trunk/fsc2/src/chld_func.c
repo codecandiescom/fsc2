@@ -1914,7 +1914,7 @@ double *exp_getpos( char *buffer, ptrdiff_t len )
 		}
 
 		T_free( buffer );
-		result = LONG_P T_malloc( ( 2 * MAX_CURVES + 2 ) * sizeof *result );
+		result = DOUBLE_P T_malloc( ( 2 * MAX_CURVES + 2 ) * sizeof *result );
 
 		if ( ! reader( ( void * ) result ) )
 		{
