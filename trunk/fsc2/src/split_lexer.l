@@ -156,6 +156,8 @@ bool scan_main( char *file )
 	struct sigaction oact;
 
 
+	fsc2_assert( file != NULL && *file != '\0' );
+
 	/* Forget everything about previous tests */
 
 	clean_up( );
@@ -165,28 +167,15 @@ bool scan_main( char *file )
 	if ( ! functions_init( ) || ! device_list_parse( ) )
 		return FAIL;
 
-	/* Check that the file name is reasonable */
-
-	if ( file == NULL || *file == '\0' )
-	{
-		printf( "Missing input file.\n" );
-		return FAIL;
-	}
-
-	/* Filter input through "fsc2_clean" (must be located in `bindir') */
+	/* Filter input through "fsc2_clean" (expected to be in `bindir') */
 
 	cmd = get_string( strlen( bindir ) + strlen( "/fsc2_clean " )
 	                  + strlen( file ) );
-	strcpy( cmd, bindir );
-	if ( bindir[ strlen( bindir ) - 1 ] != '/' )
-		strcat( cmd, "/" );
-	strcat( cmd, "fsc2_clean " );
-	strcat( cmd, file );
+	sprintf( cmd, "%s%sfsc2_clean %s", bindir,
+			 bindir[ strlen( bindir ) - 1 ] != '/' ? "/" : "", file );
 
-	/* Setting the program length (i.e. the length of the pre-digested
-	   EXPERIMENT section to -1 means that no EXPERIMENT section has been
-	   found yet.
-	*/
+	/* Setting the program length to -1 means that no EXPERIMENT section has
+	   been found yet. */
 
 	prg_length = -1;
 
@@ -195,30 +184,27 @@ bool scan_main( char *file )
 
 	splitin = popen( cmd, "r" );
 
-	/* Now try to parse the cleaned up contents */
+	/* Parse the predigested EDL file, i.e. what we get back from fsc2_clean */
 
 	split_error = splitlex( );
 
 	pclose( splitin );
-
 	sigaction( SIGCHLD, &oact, NULL );
-
 	T_free( cmd );
-
 	return split_error;
 }
 
 
 /*--------------------------------------------------------------------*/
-/* This routine is the central distributor for starting the different */
+/* This routine is the central distributor that starts the different  */
 /* parsers for all of the sections in the EDL file. It is called once */
 /* from splitlex(), which just finds the very first section label and */
-/* passes it to this routine. Here the appropriate lexer is called,   */
-/* which returns the next label if it finishes successfully. The new  */
-/* label is used to call the next lexer. On failure, several common   */
+/* passes it to this routine. Here the appropriate lexers are called, */
+/* which return the next label if they finish successfully. This new  */
+/* label is used to call the next lexer. On failure several common    */
 /* errors are caught (if the lexer didn't do it by itself) and the    */
 /* failure is signaled back to splitlex(). On success we only return  */
-/* to splitlex() on end of the input file(s).                         */
+/* to splitlex() end of the input file(s).                            */
 /* ->                                                                 */
 /*    * number (label) of first section found by splitlex()           */
 /* <-                                                                 */
@@ -231,7 +217,8 @@ bool section_parser( int section )
 
 
 	s = section;
-	TRY 
+
+	TRY
 	{
 		do
 		{
