@@ -208,8 +208,8 @@ install:
 # How to uninstall the modules
 
 uninstall:
-	-for f in *.so; do                     \
-		$(RM) $(RMFLAGS) $(libdir)/$$f;    \
+	-for f in *.so; do                                 \
+		$(RM) $(RMFLAGS) $(libdir)/$$f;                \
 	done
 	if [ -r $(mchdir)/$(machine_name)-install ]; then  \
 		$(MAKE) uninstall-$(machine_name);             \
