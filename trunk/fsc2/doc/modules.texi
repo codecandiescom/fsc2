@@ -1964,6 +1964,8 @@ struct @{
     bool ( *get_pulse_length_change )( long pulse_number, double *ptime );
     bool ( *get_pulse_phase_cycle )( long pulse_number, long *cycle );
 
+    long ( *ch_to_num )( long channel );
+
     /* The following entries are deprecated and exist for backward
        compatibility only */
 
@@ -2586,6 +2588,20 @@ sequence has been set for the pulse the number has to be written into
 the variable pointed to by @code{cycle}, otherwise (or if no pulse with
 the number of the first argument exists) an error message has to be
 printed out and an exception should be thrown.
+
+
+@item long ch_to_num(long channel)
+Different pulser modules have different internal numbering schemes for
+their channels. On the other hand, @code{fsc2} does only know about all
+the possible names of channels (as defined in @file{global.h} and
+@file{global.c}). So for @code{fsc2} being able to pass channel numbers
+to the pulser module with the channel numbers the module expects the
+pulser module must support this function. It gets a channel number in
+the "global" numbering system according to the definitions in
+@file{global.h} and @file{global.c} and has to translate this number
+into the internally used channel number. If no translation is possible
+the module should throw an exception and print out an error message,
+stating that it has no channel of the name @code{Channel_Names[channel]}.
 
 
 @item bool set_max_seq_len(double seq_len)
