@@ -6,46 +6,46 @@
 
 
 
-@multitable { @code{PREPARATIONS:} } { Starts the @code{PREPARATIONS} section }
+@multitable { @code{PREPARATIONS:} } { Starts the @code{PREPARATIONS} section and lots more of tex... }
 @item @code{A}             @tab Unit, Ampere
-@item @code{abs}           @tab Built-in function
-@item @code{acos}          @tab Built-in function
-@item @code{asin}          @tab Built-in function
-@item @code{atan}          @tab Built-in function
+@item @code{abs}           @tab Built-in function (@pxref{abs})
+@item @code{acos}          @tab Built-in function (@pxref{acos})
+@item @code{asin}          @tab Built-in function (@pxref{asin})
+@item @code{atan}          @tab Built-in function (@pxref{atan})
 @item @code{ASS:}          @tab Starts the @code{ASSIGNMENTS} section
 @item @code{ASSIGNMENT:}   @tab Starts the @code{ASSIGNMENTS} section
 @item @code{ASSIGNMENTS:}  @tab Starts the @code{ASSIGNMENTS} section
 @item                      @tab
-@item @code{ceil}          @tab Built-in function
-@item @code{clear_curve}   @tab Built-in function
-@item @code{cos}           @tab Built-in function
-@item @code{cosh}          @tab Built-in function
+@item @code{ceil}          @tab Built-in function (@pxref{ceil})
+@item @code{clear_curve}   @tab Built-in function (@pxref{clear_curve})
+@item @code{cos}           @tab Built-in function (@pxref{cos})
+@item @code{cosh}          @tab Built-in function (@pxref{cosh})
 @item                      @tab
-@item @code{date}          @tab Built-in function
+@item @code{date}          @tab Built-in function (@pxref{date})
 @item @code{dB}            @tab Unit, Decibel
 @item @code{DEV:}          @tab Starts the @code{DEVICES} section
 @item @code{DEVS:}         @tab Starts the @code{DEVICES} section
 @item @code{DEVICE:}       @tab Starts the @code{DEVICES} section
 @item @code{DEVICES:}      @tab Starts the @code{DEVICES} section
-@item @code{dim}           @tab Built-in function
-@item @code{display}       @tab Built-in function
+@item @code{dim}           @tab Built-in function (@pxref{dim})
+@item @code{display}       @tab Built-in function (@pxref{display})
 @item                      @tab
 @item @code{EXP:}          @tab Starts the @code{EXPERIMENT} section
 @item @code{EXPERIMENT:}   @tab Starts the @code{EXPERIMENT} section
 @item                      @tab
-@item @code{float}         @tab Built-in function
-@item @code{floor}         @tab Built-in function
+@item @code{float}         @tab Built-in function (@pxref{float})
+@item @code{floor}         @tab Built-in function (@pxref{floor})
 @item @code{FOR}           @tab Keyword for @code{FOR} loops
-@item @code{fsave}         @tab Built-in function
+@item @code{fsave}         @tab Built-in function (@pxref{fsave})
 @item                      @tab
 @item @code{G}             @tab Unit, Gauss
-@item @code{get_file}      @tab Built-in function
+@item @code{get_file}      @tab Built-in function (@pxref{get_file})
 @item                      @tab
 @item @code{Hz}            @tab Unit, Hertz
 @item                      @tab
-@item @code{init_1d}       @tab Built-in function
-@item @code{init_2d}       @tab Built-in function
-@item @code{int}           @tab Built-in function
+@item @code{init_1d}       @tab Built-in function (@pxref{init_1d})
+@item @code{init_2d}       @tab Built-in function (@pxref{init_2d})
+@item @code{int}           @tab Built-in function (@pxref{int})
 @item                      @tab
 @item @code{kA}            @tab Unit, Kilo-Ampere
 @item @code{kA}            @tab Unit, Kilo-Ampere
@@ -83,28 +83,28 @@
 @item @code{PREPS:}        @tab Starts the @code{PREPARATIONS} section
 @item @code{PREPARATION:}  @tab Starts the @code{PREPARATIONS} section
 @item @code{PREPARATIONS:} @tab Starts the @code{PREPARATIONS} section
-@item @code{print}         @tab Built-in function
+@item @code{print}         @tab Built-in function (@pxref{print})
 @item                      @tab
 @item @code{REPEAT}        @tab Keyword for @code{REPEAT} loops
-@item @code{random}        @tab Built-in function
-@item @code{round}         @tab Built-in function
+@item @code{random}        @tab Built-in function (@pxref{random})
+@item @code{round}         @tab Built-in function (@pxref{round})
 @item                      @tab
 @item @code{s}             @tab Unit, Seconds
-@item @code{save}          @tab Built-in function
-@item @code{save_comment}  @tab Built-in function
-@item @code{save_output}   @tab Built-in function
-@item @code{save_program}  @tab Built-in function
-@item @code{set_seed}      @tab Built-in function
-@item @code{sin}           @tab Built-in function
-@item @code{sinh}          @tab Built-in function
-@item @code{size}          @tab Built-in function
-@item @code{sizes}         @tab Built-in function
-@item @code{sqrt}          @tab Built-in function
+@item @code{save}          @tab Built-in function (@pxref{save})
+@item @code{save_comment}  @tab Built-in function (@pxref{save_comment})
+@item @code{save_output}   @tab Built-in function (@pxref{save_output})
+@item @code{save_program}  @tab Built-in function (@pxref{save_program})
+@item @code{set_seed}      @tab Built-in function (@pxref{set_seed})
+@item @code{sin}           @tab Built-in function (@pxref{sin})
+@item @code{sinh}          @tab Built-in function (@pxref{sinh})
+@item @code{size}          @tab Built-in function (@pxref{size})
+@item @code{sizes}         @tab Built-in function (@pxref{sizes})
+@item @code{sqrt}          @tab Built-in function (@pxref{sqrt})
 @item                      @tab
 @item @code{T}             @tab Unit, Tesla
-@item @code{tan}           @tab Built-in function
-@item @code{tanh}          @tab Built-in function
-@item @code{time}          @tab Built-in function
+@item @code{tan}           @tab Built-in function (@pxref{tan})
+@item @code{tanh}          @tab Built-in function (@pxref{tanh})
+@item @code{time}          @tab Built-in function (@pxref{time})
 @item                      @tab
 @item @code{uA}            @tab Unit, Micro-Ampere
 @item @code{uG}            @tab Unit, Micro-Gauss
@@ -119,6 +119,6 @@
 @item @code{VARIABLE:}     @tab Starts the @code{VARIABLES} section
 @item @code{VARIABLES:}    @tab Starts the @code{VARIABLES} section
 @item                      @tab
-@item @code{wait}          @tab Built-in function
+@item @code{wait}          @tab Built-in function (@pxref{wait})
 @item @code{WHILE}         @tab Keyword for @code{WHILE} loops
 @end multitable

@@ -18,6 +18,7 @@
 
 @table @samp
 @item print()
+@anchor{print}
 @findex print()
 This function prints text into the output browser in the main form of
 @acronym{fsc2}.  It needs a @i{format string}
@@ -30,7 +31,7 @@ Here's a first simple example: You want to print the value of a variable
 called @code{I}, that has been assigned a value of 3. Now,
 
 @example
-print( "The value of I is #.", I );
+print( "The value of I is #.\n", I );
 @end example
 @noindent
 will print, when the program is interpreted,
@@ -50,11 +51,10 @@ You may use @code{print()} to print integer or floating point values
 somewhat contrived example:
 
 @example
-print( "The # of # is: #", "sine", x, sin( x ) );
+print( "The # of # is: #\n", "sine", x, sin( x ) );
 @end example
 @noindent
 This will print (assuming @code{x} equals 0.5):
-
 @example
 The sine of 0.500000 is: 0.479426
 @end example
@@ -87,6 +87,7 @@ will produce output even in the test run.
 @end table
 
 @item init_1d()
+@anchor{init_1d}
 @findex init_1d()
 Initialises the display for one-dimensional experiments - without a call to
 this function no data will be displayed. The function takes up to six
@@ -144,6 +145,7 @@ the x-axis are (in contrast to the point numbers) referred to as `real world
 coordinates'.
 
 @item init_2d()
+@anchor{init_2d}
 @findex init_2d()
 Initialises the display for two-dimensional experiments - without a call to
 this function no data will be displayed. The function takes up to nine
@@ -190,6 +192,7 @@ init_2d( [ n_data_sets [ , n_x_points [ , n_y_points,
 
 
 @item display( )
+@anchor{display}
 @findex display()
 This function has to be called to display data in 1-dimensional as well as
 2-dimensional experiments. It takes the following arguments:
@@ -226,11 +229,13 @@ display( n_x_point, n_y_point, data [ , n_curve ] [ , ... ] )
 @end example
 
 @item clear_curve( )
+@anchor{clear_curve}
 @findex clear_curve()
 Removes one or more curves from the display. Use a list of curve numbers
 as arguments, no argument at all defaults to the first curve.
 
 @item get_file( )
+@anchor{get_file}
 @findex get_file()
 Opens a new file and returns a unique identifier for the file that can
 be stored in an integer variable and is to be used in calls to functions
@@ -248,6 +253,7 @@ I.e.@: either @code{get_file()} is called before any save-operation or
 never at all!
 
 @item save()
+@anchor{save}
 @findex save()
 Writes one or more data or complete arrays to a file. But some care has
 to be used: If @w{@code{get_file()}} has been called before the first
@@ -298,6 +304,7 @@ will be printed as
 @end example
 
 @item fsave()
+@anchor{fsave}
 @findex fsave()
 This function may be used to write data in a formated way into a
 file. As in the case of the @code{save()} function the first argument
@@ -340,6 +347,7 @@ X[ 3, 2 ] = 6
 
 
 @item save_program()
+@anchor{save_program}
 @findex save_program()
 This functions writes the currently run @acronym{EDL} program into a
 file. As usual, the first argument may be a file identifier - the same
@@ -350,6 +358,7 @@ comment character to make other programs like @acronym{MATHLAB} or
 
 
 @item save_output()
+@anchor{save_output}
 @findex save_output()
 This function has the same arguments as @code{save_program()} but prints
 the content of the output window (i.e.@: the bottom browser window in
@@ -357,6 +366,7 @@ the main form) into the file.
 
 
 @item save_comment()
+@anchor{save_comment}
 @findex save_comment()
 This function is used to print comments into the file. When it is called a
 small editor is shown and the user may enter comments. These will be then
@@ -378,15 +388,18 @@ defaults to "Please enter a comment:".
 
 @table @samp
 @item int()
+@anchor{int}
 @findex int()
 Converts a number (or the elements of an array) to integer type by
 truncating all digits following the decimal point.
 
 @item float()
+@anchor{float}
 @findex float()
 Converts a number (or the elements of an array) to floating point type.
 
 @item round()
+@anchor{round}
 @findex round()
 Converts a floating point number (or the elements of an array) to the
 nearest integer, i.e.@:
@@ -396,6 +409,7 @@ round( 8.5 ) = 9    round( 8.49 ) = 8    round( -1.75 ) = -2
 @end example
 
 @item floor()
+@anchor{floor}
 @findex floor()
 Converts a floating point number (or the elements of an array) to the
 largest integer that is not larger than the argument, i.e.@:
@@ -405,6 +419,7 @@ floor( 8.6 ) = 8    floor( -8.6 ) = -9
 @end example
 
 @item ceil()
+@anchor{ceil}
 @findex ceil()
 Converts a floating point number (or the elements of an array) to the
 smallest integer that is not less than the argument, i.e.@:
@@ -414,40 +429,48 @@ round( 8.6 ) = 9     round( -8.6 ) = -8
 @end example
 
 @item abs()
+@anchor{abs}
 @findex abs()
 Returns the absolute value of an integer or floating point number (or
 the elements of an array) .
 
 @item sqrt()
+@anchor{sqrt}
 @findex sqrt()
 Returns the square root of an integer or floating point number (or the
 elements of an array). The argument must be a positive number.
 
 @item random()
+@anchor{random}
 @findex random()
 Returns a pseudo-random number in the interval @w{[0, 1]}.
 
 @item set_seed()
+@anchor{set_seed}
 @findex set_seed()
 Sets a seed for the random number generator used in the function
 @code{random()} function. The argument has to be a positive integer.
 
 @item sin()
+@anchor{sin}
 @findex sin()
 Returns the sine of the argument (simple number or elements of an
 array), with the argument interpreted as the angle in radian.
 
 @item cos()
+@anchor{cos}
 @findex cos()
 Returns the cosine of the argument (simple number or elements of an
 array), with the argument interpreted as the angle in radian.
 
 @item tan()
+@anchor{tan}
 @findex tan()
 Returns the tangent of the argument (simple number or elements of an
 array), with the argument interpreted as the angle in radian.
 
 @item asin()
+@anchor{asin}
 @findex asin()
 Returns the inverse of the sine function of the argument (simple number
 or elements of an array) as an angle in radian. The argument must be in
@@ -455,6 +478,7 @@ the interval @w{[-1, 1]}, the result an element of the interval
 @w{[-pi/2, pi/2]}.
 
 @item acos()
+@anchor{acos}
 @findex acos()
 Returns the inverse of the cosine function of the argument (simple
 number or elements of an array) as an angle in radian. The argument must
@@ -462,22 +486,26 @@ be in the interval @w{[-1, 1]}, the result an element of the interval
 @w{[0, pi]}.
 
 @item atan()
+@anchor{atan}
 @findex atan()
 Returns the inverse of the tangent function of the argument (simple
 number or elements of an array) as an angle in radian, the result an
 element of the interval @w{[-pi, pi]}.
 
 @item sinh()
+@anchor{sinh}
 @findex sinh()
 Returns the hyperbolic sine of the argument (simple number or elements
 of an array).
 
 @item cosh()
+@anchor{cosh}
 @findex cosh()
 Returns the hyperbolic cosine of the argument (simple number or elements
 of an array).
 
 @item tanh()
+@anchor{tanh}
 @findex tanh()
 Returns the hyperbolic tangent of the argument (simple number or
 elements of an array).
@@ -492,14 +520,17 @@ elements of an array).
 
 @table @samp
 @item time()
+@anchor{time}
 @findex time()
 Returns a string with the current time in the form @code{hh:mm:ss}.
 
 @item date()
+@anchor{date}
 @findex date()
 Returns a string with the current date in a form like @code{Sun Jun 17, 2000}.
 
 @item wait()
+@anchor{wait}
 @findex wait()
 Waits for the specified time. Times are always to be given in seconds or
 alternatively with a unit, e.g.@: @w{100 ms}. Unfortunately, the time
@@ -507,6 +538,7 @@ resolution of @code{wait()} is in the @w{10 ms} range and may even be
 less precise.
 
 @item dim()
+@anchor{dim}
 @findex dim()
 The function returns the dimension of the array passed to it as
 argument. I.e.@: for the array
@@ -518,12 +550,14 @@ X[ 4, 2, 5 ]
 it will return 3.
 
 @item size()
+@anchor{size}
 @findex size()
 The function takes two arguments, an array and one of the dimensions of the
 array, and returns the size of this dimension. I.e.@: for an array defined as
 @code{X[ 4, 2, 5 ]} @code{size( X, 3 )} will return 5.
 
 @item sizes()
+@anchor{sizes}
 @findex sizes()
 This function is similar to @code{size()} but only takes an array as
 argument an returns a new one-dimensional array with the sizes of the
