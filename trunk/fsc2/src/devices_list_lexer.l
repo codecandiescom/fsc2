@@ -66,10 +66,7 @@ IDENT    [A-Za-z0-9][A-Za-z_0-9]*
 {REM1}		Lc++;
 
 			/* handling of C++ style comment not spanning a whole line */
-{REM2}		{
-				Lc++;
-				Eol = SET;
-			}
+{REM2}		Lc++;
 
 			/* handling of C style comment */
 {REM3}		{
@@ -83,10 +80,7 @@ IDENT    [A-Za-z0-9][A-Za-z_0-9]*
 {REM5}      /* skipping all '*'s not followed by '/'s */
 
 			/* end of line character in a comment */
-\n			{
-				Lc++;
-				Eol = SET;
-			}
+\n			Lc++;
 
 			/* handling of EOF within a comment -> fatal error */
 <<EOF>>     {
@@ -101,7 +95,6 @@ IDENT    [A-Za-z0-9][A-Za-z_0-9]*
 
 			/* end of comment and end of line */
 {EREM2}     {
-				Eol = SET;
 				Lc++;
 				yy_pop_state( );
 			}
@@ -119,18 +112,12 @@ IDENT    [A-Za-z0-9][A-Za-z_0-9]*
 {LWS}       /* dumps of leading white space */
 
 			/* dumps trailing white space */
-{TWS}       {
-				Lc++;
-				Eol = SET;
-			}
+{TWS}       Lc++;
 
 {WS}        /* dum (other) white space */
 
 			/* writes out EOL character */
-\n			{
-				Lc++;
-				Eol = SET;
-			}
+\n			Lc++;
 
 ,           /* skip commas */
 ;           /* skip semicolon */
@@ -175,7 +162,6 @@ bool device_list_parse( void )
 		 is_restart = SET;
 
 	Lc = 1;
-	Eol = SET;
 
 	TRY
 	{
